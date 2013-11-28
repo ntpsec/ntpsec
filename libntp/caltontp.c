@@ -32,13 +32,13 @@
  * than 68 years off from the current time...
  */
 
-u_int32
+uint32_t
 caltontp(
 	const struct calendar *jt
 	)
 {
-	int32  eraday;	/* CE Rata Die number	*/
-	vint64 ntptime;	/* resulting NTP time	*/
+	int32_t eraday;	/* CE Rata Die number	*/
+	vint64  ntptime;/* resulting NTP time	*/
 
 	NTP_INSIST(jt != NULL);
 

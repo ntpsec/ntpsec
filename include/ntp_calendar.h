@@ -12,28 +12,28 @@
 struct calendar {
 	uint16_t year;		/* year (A.D.) */
 	uint16_t yearday;	/* day of year, 1 = January 1 */
-	uint8_t month;		/* month, 1 = January */
-	uint8_t monthday;	/* day of month */
-	uint8_t hour;		/* hour of day, midnight = 0 */
-	uint8_t minute;		/* minute of hour */
-	uint8_t second;		/* second of minute */
-	uint8_t weekday;	/* 0..7, 0=Sunday */
+	uint8_t  month;		/* month, 1 = January */
+	uint8_t  monthday;	/* day of month */
+	uint8_t  hour;		/* hour of day, midnight = 0 */
+	uint8_t  minute;	/* minute of hour */
+	uint8_t  second;	/* second of minute */
+	uint8_t  weekday;	/* 0..7, 0=Sunday */
 };
 
 /* ISO week calendar date */
 struct isodate {
-	uint16_t	year;	/* year (A.D.) */
-	uint8_t	week;		/* 1..53, week in year */
-	uint8_t	weekday;	/* 1..7, 1=Monday */
-	uint8_t	hour;		/* hour of day, midnight = 0 */
-	uint8_t	minute;		/* minute of hour */
-	uint8_t	second;		/* second of minute */
+	uint16_t year;		/* year (A.D.) */
+	uint8_t	 week;		/* 1..53, week in year */
+	uint8_t	 weekday;	/* 1..7, 1=Monday */
+	uint8_t	 hour;		/* hour of day, midnight = 0 */
+	uint8_t	 minute;	/* minute of hour */
+	uint8_t	 second;	/* second of minute */
 };
 
 /* general split representation */
 typedef struct {
-	int32 hi;
-	int32 lo;
+	int32_t hi;
+	int32_t lo;
 } ntpcal_split;
 
 typedef time_t (*systime_func_ptr)(time_t*);
@@ -106,8 +106,8 @@ extern systime_func_ptr ntpcal_set_timefunc(systime_func_ptr);
 extern	const char * const months[12];
 extern	const char * const daynames[7];
 
-extern	void	caljulian	(u_int32, struct calendar *);
-extern	u_int32	caltontp	(const struct calendar *);
+extern	void	 caljulian	(uint32_t, struct calendar *);
+extern	uint32_t caltontp	(const struct calendar *);
 
 /*
  * Convert between 'time_t' and 'vint64'
@@ -130,7 +130,7 @@ ntpcal_get_build_date(struct calendar * jd);
  * current system time.
  */
 extern vint64
-ntpcal_ntp_to_time(u_int32 ntp, const time_t *pivot);
+ntpcal_ntp_to_time(uint32_t ntp, const time_t *pivot);
 
 /*
  * Convert a timestamp in NTP scale to a 64bit seconds value in the NTP
@@ -139,7 +139,7 @@ ntpcal_ntp_to_time(u_int32 ntp, const time_t *pivot);
  * Note: The pivot must be given in UN*X time scale!
  */
 extern vint64
-ntpcal_ntp_to_ntp(u_int32 ntp, const time_t *pivot);
+ntpcal_ntp_to_ntp(uint32_t ntp, const time_t *pivot);
 
 /*
  * Split a time stamp in seconds into elapsed days and elapsed seconds
@@ -153,13 +153,13 @@ ntpcal_daysplit(const vint64*);
  * expressed in 64 bits to avoid overflow.
  */
 extern vint64
-ntpcal_dayjoin(int32 days, int32 seconds);
+ntpcal_dayjoin(int32_t days, int32_t seconds);
 
 /*
  * Convert elapsed years in Era into elapsed days in Era.
  */
-extern int32
-ntpcal_days_in_years(int32 years);
+extern int32_t
+ntpcal_days_in_years(int32_t years);
 
 /*
  * Convert a number of elapsed month in a year into elapsed days
@@ -172,20 +172,20 @@ ntpcal_days_in_years(int32 years);
  * excess! But then, we need no leap year flag, either...)
  */
 extern ntpcal_split
-ntpcal_days_in_months(int32 mons);
+ntpcal_days_in_months(int32_t months);
 
 /*
  * Convert ELAPSED years/months/days of gregorian calendar to elapsed
  * days in Gregorian epoch. No range checks done here!
  */
-extern int32
-ntpcal_edate_to_eradays(int32 years, int32 mons, int32 mdays);
+extern int32_t
+ntpcal_edate_to_eradays(int32_t years, int32_t months, int32_t mdays);
 
 /*
  * Convert a time spec to seconds. No range checks done here!
  */
-extern int32
-ntpcal_etime_to_seconds(int32 hours, int32 minutes, int32 seconds);
+extern int32_t
+ntpcal_etime_to_seconds(int32_t hours, int32_t minutes, int32_t seconds);
 
 /*
  * Convert ELAPSED years/months/days of gregorian calendar to elapsed
@@ -194,21 +194,21 @@ ntpcal_etime_to_seconds(int32 hours, int32 minutes, int32 seconds);
  * Note: This will give the true difference to the start of the given year,
  * even if months & days are off-scale.
  */
-extern int32
-ntpcal_edate_to_yeardays(int32 years, int32 mons, int32 mdays);
+extern int32_t
+ntpcal_edate_to_yeardays(int32_t years, int32_t months, int32_t mdays);
 
 /*
  * Convert the date part of a 'struct tm' (that is, year, month,
  * day-of-month) into the RataDie of that day.
  */
-extern int32
+extern int32_t
 ntpcal_tm_to_rd(const struct tm *utm);
 
 /*
  * Convert the date part of a 'struct calendar' (that is, year, month,
  * day-of-month) into the RataDie of that day.
  */
-extern int32
+extern int32_t
 ntpcal_date_to_rd(const struct calendar *jt);
 
 /*
@@ -220,7 +220,7 @@ ntpcal_date_to_rd(const struct calendar *jt);
  * for regular years and a non-zero value for leap years.
  */
 extern ntpcal_split
-ntpcal_split_eradays(int32 days, int *isleapyear);
+ntpcal_split_eradays(int32_t days, int/*BOOL*/ *isleapyear);
 
 /*
  * Given a number of elapsed days in a year and a leap year indicator,
@@ -229,86 +229,86 @@ ntpcal_split_eradays(int32 days, int *isleapyear);
  * 'res.rem'.
  */
 extern ntpcal_split
-ntpcal_split_yeardays(int32 eyd, int isleapyear);
+ntpcal_split_yeardays(int32_t eyd, int/*BOOL*/ isleapyear);
 
 /*
  * Convert a RataDie number into the date part of a 'struct
  * calendar'. Return 0 if the year is regular year, !0 if the year is
  * a leap year.
  */
-extern int
-ntpcal_rd_to_date(struct calendar *jt, int32 rd);
+extern int/*BOOL*/
+ntpcal_rd_to_date(struct calendar *jt, int32_t rd);
 
 /*
  * Convert a RataDie number into the date part of a 'struct
  * tm'. Return 0 if the year is regular year, !0 if the year is a leap
  * year.
  */
-extern int
-ntpcal_rd_to_tm(struct tm *utm, int32 rd);
+extern int/*BOOL*/
+ntpcal_rd_to_tm(struct tm *utm, int32_t rd);
 
 /*
  * Take a value of seconds since midnight and split it into hhmmss in
  * a 'struct calendar'. Return excessive days.
  */
-extern int32
-ntpcal_daysec_to_date(struct calendar *jt, int32 secs);
+extern int32_t
+ntpcal_daysec_to_date(struct calendar *jt, int32_t secs);
 
 /*
  * Take the time part of a 'struct calendar' and return the seconds
  * since midnight.
  */
-extern int32
+extern int32_t
 ntpcal_date_to_daysec(const struct calendar*);
 
 /*
  * Take a value of seconds since midnight and split it into hhmmss in
  * a 'struct tm'. Return excessive days.
  */
-extern int32
-ntpcal_daysec_to_tm(struct tm *utm, int32 secs);
+extern int32_t
+ntpcal_daysec_to_tm(struct tm *utm, int32_t secs);
 
-extern int32
+extern int32_t
 ntpcal_tm_to_daysec(const struct tm *utm);
 
 /*
  * convert a year number to rata die of year start
  */
-extern int32
-ntpcal_year_to_ystart(int32 year);
+extern int32_t
+ntpcal_year_to_ystart(int32_t year);
 
 /*
  * For a given RataDie, get the RataDie of the associated year start,
  * that is, the RataDie of the last January,1st on or before that day.
  */
-extern int32
-ntpcal_rd_to_ystart(int32 rd);
+extern int32_t
+ntpcal_rd_to_ystart(int32_t rd);
 
 /*
  * convert a RataDie to the RataDie of start of the calendar month.
  */
-extern int32
-ntpcal_rd_to_mstart(int32 year);
+extern int32_t
+ntpcal_rd_to_mstart(int32_t year);
 
 
 extern int
 ntpcal_daysplit_to_date(struct calendar *jt, const ntpcal_split *ds,
-			int32 dof);
+			int32_t dof);
 
 extern int
 ntpcal_daysplit_to_tm(struct tm *utm, const ntpcal_split *ds,
-		      int32 dof);
+		      int32_t dof);
 
 extern int
 ntpcal_time_to_date(struct calendar *jd, const vint64 *ts);
 
-extern int32
-ntpcal_periodic_extend(int32 pivot, int32 value, int32 cycle);
+extern int32_t
+ntpcal_periodic_extend(int32_t pivot, int32_t value, int32_t cycle);
 
 extern int
-ntpcal_ntp_to_date(struct calendar *jd,	u_int32 ntp, const time_t *pivot);
+ntpcal_ntp_to_date(struct calendar *jd,	uint32_t ntp, const time_t *pivot);
 
-extern u_int32
+extern uint32_t
 ntpcal_date_to_ntp(const struct calendar *jd);
 
 extern time_t
@@ -317,16 +317,16 @@ ntpcal_date_to_time(const struct calendar *jd);
 /*
  * ISO week-calendar conversions
  */
-extern int32
-isocal_weeks_in_years(int32 years);
+extern int32_t
+isocal_weeks_in_years(int32_t years);
 
 extern ntpcal_split
-isocal_split_eraweeks(int32 weeks);
+isocal_split_eraweeks(int32_t weeks);
 
 extern int
-isocal_ntp_to_date(struct isodate *id, u_int32 ntp, const time_t *pivot);
+isocal_ntp_to_date(struct isodate *id, uint32_t ntp, const time_t *pivot);
 
-extern u_int32
+extern uint32_t
 isocal_date_to_ntp(const struct isodate *id);
 
 
@@ -337,20 +337,20 @@ isocal_date_to_ntp(const struct isodate *id);
  * greater-or equal, closest, less-or-equal or less-than the given RDN
  * and denotes the given day-of-week
  */
-extern int32
-ntpcal_weekday_gt(int32 rdn, int32 dow);
+extern int32_t
+ntpcal_weekday_gt(int32_t rdn, int32_t dow);
 
-extern int32
-ntpcal_weekday_ge(int32 rdn, int32 dow);
+extern int32_t
+ntpcal_weekday_ge(int32_t rdn, int32_t dow);
 
-extern int32
-ntpcal_weekday_close(int32 rdn, int32 dow);
+extern int32_t
+ntpcal_weekday_close(int32_t rdn, int32_t dow);
 
-extern int32
-ntpcal_weekday_le(int32 rdn, int32 dow);
+extern int32_t
+ntpcal_weekday_le(int32_t rdn, int32_t dow);
 
-extern int32
-ntpcal_weekday_lt(int32 rdn, int32 dow);
+extern int32_t
+ntpcal_weekday_lt(int32_t rdn, int32_t dow);
 
 /*
  * Additional support stuff for Ed Rheingold's calendrical calculations
