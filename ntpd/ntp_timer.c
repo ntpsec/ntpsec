@@ -8,6 +8,7 @@
 #include "ntp_machine.h"
 #include "ntpd.h"
 #include "ntp_stdlib.h"
+#include "ntp_calendar.h"
 #include "ntp_leapsec.h"
 
 #if defined(HAVE_IO_COMPLETION_PORT)
@@ -189,7 +190,7 @@ init_timer(void)
 	alarm_flag = FALSE;
 	alarm_overflow = 0;
 	adjust_timer = 1;
-	stats_timer = HOUR;
+	stats_timer = SECSPERHR;
 	check_leapfile = 0;
 	huffpuff_timer = 0;
 	interface_timer = 0;
@@ -424,7 +425,7 @@ timer(void)
 	 * and daily leapfile checks.
 	 */
 	if (stats_timer <= current_time) {
-		stats_timer += HOUR;
+		stats_timer += SECSPERHR;
 		write_stats();
 		if (sys_tai != 0 && leapsec_expired(now.l_ui, &tnow)) {
 			int clf = check_leap_file();
@@ -437,7 +438,7 @@ timer(void)
 			** We only want to log stuff once/day.
 			*/
 			if (check_leapfile < current_time) {
-				check_leapfile += DAY;
+				check_leapfile += SECSPERDAY;
 				if (-1 == clf) {
 					/* nothing to do */
 				} else if (0 == clf) {

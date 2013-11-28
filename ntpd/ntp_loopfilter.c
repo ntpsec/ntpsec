@@ -39,8 +39,6 @@
 #define CLOCK_FLL	.25	/* FLL loop gain */
 #define	CLOCK_FLOOR	.0005	/* startup offset floor (s) */
 #define	CLOCK_ALLAN	11	/* Allan intercept (log2 s) */
-#define CLOCK_DAY	86400.	/* one day in seconds (s) */
-#define CLOCK_JUNE	(CLOCK_DAY * 30) /* June in seconds (s) */
 #define CLOCK_LIMIT	30	/* poll-adjust threshold */
 #define CLOCK_PGATE	4.	/* poll-adjust gate */
 #define PPS_MAXAGE	120	/* kernel pps signal timeout (s) */

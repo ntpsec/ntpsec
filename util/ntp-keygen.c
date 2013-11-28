@@ -113,7 +113,6 @@
  */
 #define	MD5KEYS		10	/* number of keys generated of each type */
 #define	MD5SIZE		20	/* maximum key size */
-#define	YEAR		((long)365) /* one year in days */
 #ifdef AUTOKEY
 #define	PLEN		512	/* default prime modulus size (bits) */
 #define	ILEN		256	/* default identity modulus size (bits) */
@@ -155,7 +154,7 @@ u_long	asn2ntp		(ASN1_TIME *);
  */
 extern char *optarg;		/* command line argument */
 char	*progname;
-u_int	lifetime = YEAR;	/* certificate lifetime (days) */
+u_int	lifetime = DAYSPERYEAR;	/* certificate lifetime (days) */
 int	nkeys;			/* MV keys */
 time_t	epoch;			/* Unix epoch (seconds) since 1970 */
 u_int	fstamp;			/* NTP filestamp */
@@ -1946,7 +1945,7 @@ x509	(
 	X509_set_serialNumber(cert, serial);
 	ASN1_INTEGER_free(serial);
 	X509_time_adj(X509_get_notBefore(cert), 0L, &epoch);
-	X509_time_adj(X509_get_notAfter(cert), lifetime * DAY, &epoch);
+	X509_time_adj(X509_get_notAfter(cert), lifetime * SECSPERDAY, &epoch);
 	subj = X509_get_subject_name(cert);
 	X509_NAME_add_entry_by_txt(subj, "commonName", MBSTRING_ASC,
 	    (u_char *)name, strlen(name), -1, 0);

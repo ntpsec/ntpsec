@@ -102,16 +102,6 @@
 // These define the base date/time of the system clock.  The system time will
 // be tracked as the number of seconds from this date/time.
 #define TSYNC_TIME_BASE_YEAR        (1970) // earliest acceptable year
-#define TSYNC_SECS_PER_MIN          (60)
-#define TSYNC_MINS_PER_HR           (60)
-#define TSYNC_HRS_PER_DAY           (24)
-#define TSYNC_DAYS_PER_YR           (365)
-#define TSYNC_DAYS_PER_LYR          (366)
-#define TSYNC_SECS_PER_HR           (TSYNC_MINS_PER_HR  * TSYNC_SECS_PER_MIN)
-#define TSYNC_SECS_PER_DAY          (TSYNC_HRS_PER_DAY  * TSYNC_SECS_PER_HR)
-#define TSYNC_SECS_PER_YR           (TSYNC_DAYS_PER_YR  * TSYNC_SECS_PER_DAY)
-#define TSYNC_SECS_PER_LYR          (TSYNC_DAYS_PER_LYR * TSYNC_SECS_PER_DAY)
-
 
 #define TSYNC_LCL_STRATUM           (0)
 
@@ -828,13 +818,13 @@ void SecTimeFromDoyTime(SecTimeObj* pSt, DoyTimeObj* pDt)
     lyrs          = (yrs + 1) / 4;
 
     // Convert leap years and years
-    pSt->seconds += lyrs           * TSYNC_SECS_PER_LYR;
-    pSt->seconds += (yrs - lyrs)   * TSYNC_SECS_PER_YR;
+    pSt->seconds += lyrs           * SECSPERLEAPYEAR;
+    pSt->seconds += (yrs - lyrs)   * SECSPERYEAR;
 
     // Convert days, hours, minutes and seconds
-    pSt->seconds += (pDt->doy - 1) * TSYNC_SECS_PER_DAY;
-    pSt->seconds += pDt->hour      * TSYNC_SECS_PER_HR;
-    pSt->seconds += pDt->minute    * TSYNC_SECS_PER_MIN;
+    pSt->seconds += (pDt->doy - 1) * SECSPERDAY;
+    pSt->seconds += pDt->hour      * SECSPERHR;
+    pSt->seconds += pDt->minute    * SECSPERMIN;
     pSt->seconds += pDt->second;
 
     // Copy the subseconds count
@@ -867,45 +857,45 @@ void DoyTimeFromSecTime(DoyTimeObj* pDt, SecTimeObj* pSt)
 
     // Calculate the number of 4 year chunks
     yrs   = (unsigned int)((secs /
-                           ((TSYNC_SECS_PER_YR * 3) + TSYNC_SECS_PER_LYR)) * 4);
-    secs %= ((TSYNC_SECS_PER_YR * 3) + TSYNC_SECS_PER_LYR);
+                           ((SECSPERYEAR * 3) + SECSPERLEAPYEAR)) * 4);
+    secs %= ((SECSPERYEAR * 3) + SECSPERLEAPYEAR);
 
     // If there is at least a normal year worth of time left
-    if (secs >= TSYNC_SECS_PER_YR)
+    if (secs >= SECSPERYEAR)
     {
         // Increment the number of years and subtract a normal year of time
         yrs++;
-        secs -= TSYNC_SECS_PER_YR;
+        secs -= SECSPERYEAR;
     }
 
     // If there is still at least a normal year worth of time left
-    if (secs >= TSYNC_SECS_PER_YR)
+    if (secs >= SECSPERYEAR)
     {
         // Increment the number of years and subtract a normal year of time
         yrs++;
-        secs -= TSYNC_SECS_PER_YR;
+        secs -= SECSPERYEAR;
     }
 
     // If there is still at least a leap year worth of time left
-    if (secs >= TSYNC_SECS_PER_LYR)
+    if (secs >= SECSPERLEAPYEAR)
     {
         // Increment the number of years and subtract a leap year of time
         yrs++;
-        secs -= TSYNC_SECS_PER_LYR;
+        secs -= SECSPERLEAPYEAR;
     }
 
     // Calculate the day of year as the number of days left, then add 1
     // because months start on the 1st.
-    doys  = (unsigned int)((secs / TSYNC_SECS_PER_DAY) + 1);
-    secs %= TSYNC_SECS_PER_DAY;
+    doys  = (unsigned int)((secs / SECSPERDAY) + 1);
+    secs %= SECSPERDAY;
 
     // Calculate the hour
-    hrs   = (unsigned int)(secs / TSYNC_SECS_PER_HR);
-    secs %= TSYNC_SECS_PER_HR;
+    hrs   = (unsigned int)(secs / SECSPERHR);
+    secs %= SECSPERHR;
 
     // Calculate the minute
-    mins  = (unsigned int)(secs / TSYNC_SECS_PER_MIN);
-    secs %= TSYNC_SECS_PER_MIN;
+    mins  = (unsigned int)(secs / SECSPERMIN);
+    secs %= SECSPERMIN;
 
     // Fill in the doytime structure
     pDt->year   = yrs + TSYNC_TIME_BASE_YEAR;
