@@ -113,7 +113,7 @@ $(srcdir)/invoke-ntpdc.menu: $(srcdir)/invoke-ntpdc.texi
 	
 $(srcdir)/invoke-ntpdc.texi: $(srcdir)/ntpdc-opts.def $(std_def_list)
 	$(run_ag) -Tagtexi-cmd.tpl -DLEVEL=section ntpdc-opts.def
-	$(top_srcdir)/scripts/check--help $@
+	$(top_srcdir)/scripts/build/check--help $@
 
 $(srcdir)/ntpdc.html: $(srcdir)/invoke-ntpdc.menu $(srcdir)/invoke-ntpdc.texi $(srcdir)/ntpdc.texi $(top_srcdir)/sntp/include/version.texi
 	cd $(srcdir) && ( makeinfo --force --html --no-split -I ../sntp -o ntpdc.html ntpdc.texi || true )
@@ -134,7 +134,7 @@ $(top_srcdir)/sntp/scm-rev:
 	cd ../sntp && $(MAKE) $(AM_MAKEFLAGS) check-scm-rev
 
 version.c: $(ntpdc_OBJECTS) ../libntp/libntp.a Makefile $(top_srcdir)/sntp/scm-rev
-	env CSET=`cat $(top_srcdir)/sntp/scm-rev` $(top_builddir)/scripts/mkver ntpdc
+	env CSET=`cat $(top_srcdir)/sntp/scm-rev` $(top_builddir)/scripts/build/mkver ntpdc
 	
 version.o: version.c
 	env CCACHE_DISABLE=1 $(COMPILE) -c version.c -o version.o

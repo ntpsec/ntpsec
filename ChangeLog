@@ -1,3 +1,4 @@
+* Incorporate Oliver Kindernay's GSoC 2013 scripts/ cleanup.
 (4.2.7p390) 2013/09/26 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 2482] Cleanup of droproot and jail support for Solaris.
 (4.2.7p389) 2013/09/24 Released by Harlan Stenn <stenn@ntp.org>

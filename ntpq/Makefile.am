@@ -106,7 +106,7 @@ $(srcdir)/invoke-ntpq.menu: $(srcdir)/invoke-ntpq.texi
 	
 $(srcdir)/invoke-ntpq.texi: $(srcdir)/ntpq-opts.def $(std_def_list)
 	$(run_ag) -Tagtexi-cmd.tpl -DLEVEL=section ntpq-opts.def
-	$(top_srcdir)/scripts/check--help $@
+	$(top_srcdir)/scripts/build/check--help $@
 
 $(srcdir)/ntpq.html: $(srcdir)/ntpq.texi $(top_srcdir)/sntp/include/version.texi
 	cd $(srcdir) && ( makeinfo --force --html --no-split -o ntpq.html ntpq.texi || true )
@@ -119,7 +119,7 @@ $(top_srcdir)/sntp/scm-rev:
 	cd ../sntp && $(MAKE) $(AM_MAKEFLAGS) check-scm-rev
 
 version.c: $(ntpq_OBJECTS) ../libntp/libntp.a Makefile $(top_srcdir)/sntp/scm-rev
-	env CSET=`cat $(top_srcdir)/sntp/scm-rev` $(top_builddir)/scripts/mkver ntpq
+	env CSET=`cat $(top_srcdir)/sntp/scm-rev` $(top_builddir)/scripts/build/mkver ntpq
 	
 version.o: version.c
 	env CCACHE_DISABLE=1 $(COMPILE) -c version.c -o version.o

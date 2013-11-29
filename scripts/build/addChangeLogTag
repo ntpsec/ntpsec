@@ -2,7 +2,7 @@
 
 set -e
 
-clt=`./scripts/genChangeLogTag`
+clt=`./scripts/build/genChangeLogTag`
 first=`line < ChangeLog`
 
 case "$first" in

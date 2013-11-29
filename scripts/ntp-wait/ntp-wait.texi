@@ -2,7 +2,7 @@
 @c %**start of header
 @setfilename ntp-wait.info
 @settitle Ntp-wait User's Manual
-@include ../sntp/include/version.texi
+@include ../../sntp/include/version.texi
 @paragraphindent 2
 @c %**end of header
 
@@ -28,7 +28,6 @@ synchronize and stabilize the time on the current host.
 @c @vskip 0pt plus 1filll
 
 @node Top, ntp-wait Description, (dir), (dir)
-@top Simple Network Time Protocol User Manual
 
 This document describes the use of the NTP Project's @code{ntp-wait} program.
 
@@ -49,13 +48,5 @@ This document applies to version @value{VERSION} of @code{ntp-wait}.
 * ntp-wait Description::            Description
 * ntp-wait Invocation::		Invoking ntp-wait
 @end menu
-
-@node ntp-wait Description
-@comment  node-name,  next,  previous,  up
-@section Description
-
-The @code{ntp-wait} program blocks until @code{ntpd} is in synchronized state.
-This can be useful at boot time, to delay the boot sequence until after
-@code{ntpd -g} has set the time.
 
 @include invoke-ntp-wait.texi

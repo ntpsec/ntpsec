@@ -29,7 +29,8 @@
 
 set -e
 
-(cd sntp  && ../scripts/genver) || { echo scripts/genver failed ; exit 1; }
+(cd sntp  && ../scripts/build/genver) || { 
+    echo scripts/build/genver failed ; exit 1; }
 
 # autoreconf says:
 # The environment variables AUTOCONF, AUTOHEADER, AUTOMAKE, ACLOCAL,
