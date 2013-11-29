@@ -12,6 +12,7 @@
 
 /*
  * Known predifined MS compiler version codes:
+ *  1800: MSVC++ 11.0 (Visual Studio 2013)
  *  1700: MSVC++ 11.0 (Visual Studio 2012)
  *  1600: MSVC++ 10.0 (Visual Studio 2010)
  *  1500: MSVC++ 9.0  (Visual Studio 2008)
@@ -447,13 +448,16 @@ typedef unsigned long uintptr_t;
 
 
 /* C99 exact size integer support. */
-#if defined(_MSC_VER)
+#if defined(_MSC_VER) && _MSC_VER<1800
 # define MISSING_INTTYPES_H         1  /* not provided by VS2012 and earlier */
 # define MISSING_STDBOOL_H          1  /* not provided by VS2012 and earlier */
 #else
 /* add defines for non-MS compilers here, if required */
 #endif
 
+#if !defined (MISSING_STDBOOL_H)
+# define HAVE_STDBOOL_H
+#endif
 #if !defined(MISSING_INTTYPES_H)
 # define HAVE_INTTYPES_H            1
 #elif !defined(MISSING_STDINT_H)
