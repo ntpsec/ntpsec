@@ -29,7 +29,7 @@ $(top_srcdir)/sntp/scm-rev:
 	cd ../sntp && $(MAKE) $(AM_MAKEFLAGS) check-scm-rev
 
 version.c: $(ntpdate_OBJECTS) ../libntp/libntp.a Makefile $(top_srcdir)/sntp/scm-rev
-	env CSET=`cat $(top_srcdir)/sntp/scm-rev` $(top_builddir)/scripts/mkver ntpdate
+	env CSET=`cat $(top_srcdir)/sntp/scm-rev` $(top_builddir)/scripts/build/mkver ntpdate
 	
 version.o: version.c
 	env CCACHE_DISABLE=1 $(COMPILE) -c version.c -o version.o

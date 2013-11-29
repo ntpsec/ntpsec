@@ -4245,21 +4245,40 @@ AC_CONFIG_FILES([ntpq/Makefile])
 AC_CONFIG_FILES([ntpsnmpd/Makefile])
 AC_CONFIG_FILES([parseutil/Makefile])
 AC_CONFIG_FILES([scripts/Makefile])
-AC_CONFIG_FILES([scripts/calc_tickadj],	[chmod +x scripts/calc_tickadj])
-AC_CONFIG_FILES([scripts/checktime],	[chmod +x scripts/checktime])
-AC_CONFIG_FILES([scripts/freq_adj],	[chmod +x scripts/freq_adj])
-AC_CONFIG_FILES([scripts/html2man],	[chmod +x scripts/html2man])
-AC_CONFIG_FILES([scripts/mkver],	[chmod +x scripts/mkver])
-AC_CONFIG_FILES([scripts/ntp-wait],	[chmod +x scripts/ntp-wait])
-AC_CONFIG_FILES([scripts/ntpsweep],	[chmod +x scripts/ntpsweep])
-AC_CONFIG_FILES([scripts/ntptrace],	[chmod +x scripts/ntptrace])
+AC_CONFIG_FILES([scripts/lib/Makefile])
+AC_CONFIG_FILES([scripts/calc_tickadj/calc_tickadj], [chmod +x scripts/calc_tickadj/calc_tickadj])
+AC_CONFIG_FILES([scripts/calc_tickadj/Makefile])
+AC_CONFIG_FILES([scripts/build/mkver],	[chmod +x scripts/build/mkver])
+AC_CONFIG_FILES([scripts/ntp-wait/ntp-wait],	[chmod +x scripts/ntp-wait/ntp-wait])
+AC_CONFIG_FILES([scripts/ntp-wait/Makefile])
+AC_CONFIG_FILES([scripts/ntpsweep/ntpsweep],	[chmod +x scripts/ntpsweep/ntpsweep])
+AC_CONFIG_FILES([scripts/ntpsweep/Makefile])
+AC_CONFIG_FILES([scripts/ntptrace/ntptrace],	[chmod +x scripts/ntptrace/ntptrace])
+AC_CONFIG_FILES([scripts/ntptrace/Makefile])
 AC_CONFIG_FILES([scripts/ntpver],	[chmod +x scripts/ntpver])
 AC_CONFIG_FILES([scripts/plot_summary],	[chmod +x scripts/plot_summary])
 AC_CONFIG_FILES([scripts/summary],	[chmod +x scripts/summary])
+AC_CONFIG_FILES([scripts/build/Makefile])
 AC_CONFIG_FILES([tests/Makefile])
 AC_CONFIG_FILES([tests/libntp/Makefile])
 AC_CONFIG_FILES([tests/ntpd/Makefile])
 AC_CONFIG_FILES([util/Makefile])
+
+perllibdir="${datadir}/ntp/lib"
+AC_DEFINE_DIR([PERLLIBDIR], [perllibdir], [data dir])
+
+calc_tickadj_opts="scripts/calc_tickadj/calc_tickadj-opts"
+AC_SUBST_FILE([calc_tickadj_opts])
+ntp_wait_opts="scripts/ntp-wait/ntp-wait-opts"
+AC_SUBST_FILE([ntp_wait_opts])
+ntpsweep_opts="scripts/ntpsweep/ntpsweep-opts"
+AC_SUBST_FILE([ntpsweep_opts])
+ntptrace_opts="scripts/ntptrace/ntptrace-opts"
+AC_SUBST_FILE([ntptrace_opts])
+summary_opts="scripts/summary-opts"
+AC_SUBST_FILE([summary_opts])
+plot_summary_opts="scripts/plot_summary-opts"
+AC_SUBST_FILE([plot_summary_opts])
 
 AC_CONFIG_SUBDIRS([sntp])
 

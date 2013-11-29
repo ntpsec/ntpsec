@@ -404,7 +404,7 @@ $(srcdir)/invoke-ntpd.menu: $(srcdir)/invoke-ntpd.texi
 
 $(srcdir)/invoke-ntpd.texi: $(srcdir)/ntpd-opts.def $(srcdir)/ntpdbase-opts.def $(std_def_list)
 	$(run_ag) -Tagtexi-cmd.tpl -DLEVEL=section ntpd-opts.def
-	$(top_srcdir)/scripts/check--help $@
+	$(top_srcdir)/scripts/build/check--help $@
 
 $(PROGRAMS): $(LDADD)
 
@@ -425,7 +425,7 @@ $(top_srcdir)/sntp/scm-rev:
 	cd ../sntp && $(MAKE) $(AM_MAKEFLAGS) check-scm-rev
 
 version.c: $(ntpd_OBJECTS) ../libntp/libntp.a @LIBPARSE@ Makefile $(top_srcdir)/sntp/scm-rev
-	env CSET=`cat $(top_srcdir)/sntp/scm-rev` $(top_builddir)/scripts/mkver ntpd
+	env CSET=`cat $(top_srcdir)/sntp/scm-rev` $(top_builddir)/scripts/build/mkver ntpd
 
 version.o: version.c
 	env CCACHE_DISABLE=1 $(COMPILE) -c version.c -o version.o

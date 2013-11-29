@@ -80,9 +80,9 @@ COPYRIGHT-please: $(srcdir)/COPYRIGHT
 	   Rather than determine our $(srcdir) from sntp/Makefile.am \
 	   COPYRIGHT-please serves as a fixed target.
 
-$(srcdir)/.checkChangeLog: $(srcdir)/ChangeLog $(srcdir)/scripts/checkChangeLog
+$(srcdir)/.checkChangeLog: $(srcdir)/ChangeLog $(srcdir)/scripts/build/checkChangeLog
 	cd $(srcdir) && \
-	./scripts/checkChangeLog
+	./scripts/build/checkChangeLog
 
 sntp/built-sources-only: FRC.sntp
 	@cd sntp && $(MAKE) $(AM_MAKEFLAGS) built-sources-only
@@ -113,7 +113,7 @@ CommitLog: FRC.CommitLog
 	cd $(srcdir)					\
 	&& $(PATH_TEST) -e CommitLog			\
 		-a SCCS/s.ChangeSet -ot CommitLog	\
-	|| scripts/genCommitLog
+	|| scripts/build/genCommitLog
 
 libtool: $(LIBTOOL_DEPS)
 	./config.status --recheck

@@ -176,7 +176,7 @@ $(PROGRAMS): version.o
 ## non-file "-levent_core".
 
 version.c: $(sntp_OBJECTS) ../libntp/libntp.a Makefile $(srcdir)/scm-rev
-	env CSET=`cat $(srcdir)/scm-rev` $(top_builddir)/../scripts/mkver sntp
+	env CSET=`cat $(srcdir)/scm-rev` $(top_builddir)/../scripts/build/mkver sntp
 
 version.o: version.c
 	env CCACHE_DISABLE=1 $(COMPILE) -c version.c -o version.o
@@ -212,15 +212,15 @@ $(srcdir)/scm-rev:
 
 $(srcdir)/m4/version.m4: $(srcdir)/../packageinfo.sh
 	TEMPDIR=`pwd` && export TEMPDIR && cd $(srcdir) && \
-	../scripts/genver m4/version.m4
+	../scripts/build/genver m4/version.m4
 
 $(srcdir)/include/version.def: $(srcdir)/../packageinfo.sh
 	TEMPDIR=`pwd` && export TEMPDIR && cd $(srcdir) && \
-	../scripts/genver include/version.def
+	../scripts/build/genver include/version.def
 
 $(srcdir)/include/version.texi: $(srcdir)/../packageinfo.sh
 	TEMPDIR=`pwd` && export TEMPDIR && cd $(srcdir) && \
-	../scripts/genver include/version.texi
+	../scripts/build/genver include/version.texi
 
 $(srcdir)/../COPYRIGHT:
 	cd .. && $(MAKE) $(AM_MAKEFLAGS) COPYRIGHT-please
@@ -276,7 +276,7 @@ $(srcdir)/invoke-sntp.menu: $(srcdir)/invoke-sntp.texi
 
 $(srcdir)/invoke-sntp.texi: $(srcdir)/sntp-opts.def $(std_def_list)
 	$(run_ag) -Tagtexi-cmd.tpl -DLEVEL=section sntp-opts.def
-	$(top_srcdir)/../scripts/check--help $@
+	$(top_srcdir)/../scripts/build/check--help $@
 
 $(srcdir)/sntp.html: $(srcdir)/invoke-sntp.menu $(srcdir)/invoke-sntp.texi $(srcdir)/sntp.texi $(srcdir)/include/version.texi
 	cd $(srcdir) && ( makeinfo --force --html --no-split -o sntp.html sntp.texi || true )

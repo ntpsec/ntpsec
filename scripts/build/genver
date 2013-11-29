@@ -35,7 +35,7 @@ set -e
 
 . ../packageinfo.sh
 
-dversion=`../scripts/VersionName -p ../packageinfo.sh`
+dversion=`../scripts/build/VersionName -p ../packageinfo.sh`
 
 set +e
 

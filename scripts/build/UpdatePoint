@@ -306,7 +306,7 @@ case "$newrcpoint" in
 esac
 
 printf "Previous version: "
-scripts/VersionName
+scripts/build/VersionName
 
 # apply packageinfo.sh changes
 
@@ -321,11 +321,11 @@ case "$test" in
  0)
     mv packageinfo.sh+ packageinfo.sh
     printf "Updated version: "
-    scripts/VersionName
+    scripts/build/VersionName
     ;;
  *)
     printf "Next version would be: "
-    scripts/VersionName -p ./packageinfo.sh+
+    scripts/build/VersionName -p ./packageinfo.sh+
     rm packageinfo.sh+
     ;;
 esac
