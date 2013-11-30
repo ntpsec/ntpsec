@@ -12,7 +12,7 @@
 
 /*
  * Known predifined MS compiler version codes:
- *  1800: MSVC++ 11.0 (Visual Studio 2013)
+ *  1800: MSVC++ 12.0 (Visual Studio 2013)
  *  1700: MSVC++ 11.0 (Visual Studio 2012)
  *  1600: MSVC++ 10.0 (Visual Studio 2010)
  *  1500: MSVC++ 9.0  (Visual Studio 2008)
@@ -371,7 +371,8 @@ typedef int ssize_t;		/* ssize is an int */
 
 #define HAVE_LONG_LONG_INT		1
 #define HAVE_UNSIGNED_LONG_LONG_INT	1
-#define HAVE_PTRDIFF_T			1
+#define HAVE_SIZE_T             1     
+#define HAVE_PTRDIFF_T  		1
 
 # define SIZEOF_SIGNED_CHAR	1
 # define SIZEOF_SHORT		2
@@ -452,7 +453,15 @@ typedef unsigned long uintptr_t;
 # define MISSING_INTTYPES_H         1  /* not provided by VS2012 and earlier */
 # define MISSING_STDBOOL_H          1  /* not provided by VS2012 and earlier */
 #else
-/* add defines for non-MS compilers here, if required */
+#if defined(_MSC_VER) && _MSC_VER>=1800
+/* VS2013 and above support C99 types */
+# define HAVE_INT8_T                1
+# define HAVE_UINT8_T               1
+# define HAVE_INT16_T               1
+# define HAVE_UINT16_T              1
+# define HAVE_INT32_T               1
+# define HAVE_UINT32_T              1
+#endif
 #endif
 
 #if !defined (MISSING_STDBOOL_H)

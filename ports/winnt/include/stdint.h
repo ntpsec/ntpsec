@@ -13,8 +13,8 @@
 #ifndef __STDINT_INCLUDED
 #define __STDINT_INCLUDED
 
-#if !defined(_MSC_VER) || _MSC_VER >= 1600
-# error Use only with MSVC6 - MSVC9
+#if !defined(_MSC_VER) || _MSC_VER >= 1800
+# error Use only with MSVC6 - MSVC11(VS2012)
 #endif
 
 #include <crtdefs.h>
