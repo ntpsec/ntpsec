@@ -1,4 +1,8 @@
 * Incorporate Oliver Kindernay's GSoC 2013 scripts/ cleanup.
+(4.2.7p401) 2013/11/30 Released by Harlan Stenn <stenn@ntp.org>
+* [Bug 2491] VS20xx compile fixes.
+(4.2.7p400) 2013/11/29 Released by Harlan Stenn <stenn@ntp.org>
+* [Bug 2491] VS2013 project files.
 (4.2.7p399) 2013/11/28 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 2326] More leapsecond file notification cleanup.
 * [Bug 2506] make sure routing updates are always tracked
