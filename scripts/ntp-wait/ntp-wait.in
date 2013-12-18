@@ -1,9 +1,11 @@
 #! @PATH_PERL@
+
 package ntp_wait;
 use 5.006_000;
 use strict;
 use warnings;
 use lib "@PERLLIBDIR@";
+use lib "@abs_top_srcdir@/scripts/lib";
 use NTP::Util qw(ntp_read_vars);
 
 exit run(@ARGV) unless caller;

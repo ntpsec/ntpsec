@@ -4267,17 +4267,17 @@ AC_CONFIG_FILES([util/Makefile])
 perllibdir="${datadir}/ntp/lib"
 AC_DEFINE_DIR([PERLLIBDIR], [perllibdir], [data dir])
 
-calc_tickadj_opts="scripts/calc_tickadj/calc_tickadj-opts"
+calc_tickadj_opts="$srcdir/scripts/calc_tickadj/calc_tickadj-opts"
 AC_SUBST_FILE([calc_tickadj_opts])
-ntp_wait_opts="scripts/ntp-wait/ntp-wait-opts"
+ntp_wait_opts="$srcdir/scripts/ntp-wait/ntp-wait-opts"
 AC_SUBST_FILE([ntp_wait_opts])
-ntpsweep_opts="scripts/ntpsweep/ntpsweep-opts"
+ntpsweep_opts="$srcdir/scripts/ntpsweep/ntpsweep-opts"
 AC_SUBST_FILE([ntpsweep_opts])
-ntptrace_opts="scripts/ntptrace/ntptrace-opts"
+ntptrace_opts="$srcdir/scripts/ntptrace/ntptrace-opts"
 AC_SUBST_FILE([ntptrace_opts])
-summary_opts="scripts/summary-opts"
+summary_opts="$srcdir/scripts/summary-opts"
 AC_SUBST_FILE([summary_opts])
-plot_summary_opts="scripts/plot_summary-opts"
+plot_summary_opts="$srcdir/scripts/plot_summary-opts"
 AC_SUBST_FILE([plot_summary_opts])
 
 AC_CONFIG_SUBDIRS([sntp])

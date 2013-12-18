@@ -1,5 +1,5 @@
 .Dd November 29 2013
-.Dt NTPTRACE @NTPTRACE_MS@ User Commands
+.Dt NTPTRACE 1ntptracemdoc User Commands
 .Os FreeBSD 6.4-STABLE
 .\"  EDIT THIS FILE WITH CAUTION  (ntptrace-opts.mdoc)
 .\"

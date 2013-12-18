@@ -1,6 +1,6 @@
 #! @PATH_PERL@ -w
 #
-# $Id: ntpsweep.in 1.6 2013/11/29 06:11:41+00:00 stenn@psp-fb1.ntp.org $
+# $Id: ntpsweep.in 1.7 2013/12/18 11:08:29+00:00 stenn@psp-fb1.ntp.org $
 #
 # DISCLAIMER
 # 
@@ -17,10 +17,12 @@
 # products derived from this software without prior written permission.
 #
 # Hans Lambermont <ntpsweep@lambermont.dyndns.org>
+
 package ntpsweep;
 use 5.006_000;
 use strict;
 use lib "@PERLLIBDIR@";
+use lib "@abs_top_srcdir@/scripts/lib";
 use NTP::Util qw(do_dns ntp_read_vars ntp_peers ntp_sntp_line);
 
 (my $program = $0) =~ s%.*/(.+?)(.pl)?$%$1%;
