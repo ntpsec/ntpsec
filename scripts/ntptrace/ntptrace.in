@@ -5,7 +5,6 @@ package ntptrace;
 use 5.006_000;
 use strict;
 use lib "@PERLLIBDIR@";
-use lib "@abs_top_srcdir@/scripts/lib";
 use NTP::Util qw(ntp_read_vars do_dns);
 
 exit run(@ARGV) unless caller;

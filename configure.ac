@@ -3684,6 +3684,10 @@ case "$ntp_cv_make_tickadj" in
     MAKE_TICKADJ=tickadj
     ;;
  *)
+    CALC_TICKADJ_DB=
+    CALC_TICKADJ_DL=
+    CALC_TICKADJ_DS=
+    CALC_TICKADJ_MS=
     TICKADJ_DB=
     TICKADJ_DL=
     TICKADJ_DS=

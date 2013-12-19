@@ -1,5 +1,6 @@
 # Legacy installations and man page suffixes
 MAN
+calc_tickadj,bin,1
 ntp-keygen,bin,1
 ntp-wait,bin,1
 ntpd,bin,1

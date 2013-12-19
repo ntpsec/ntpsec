@@ -1,6 +1,12 @@
-SUBDIRS = build calc_tickadj ntp-wait ntpsweep ntptrace lib
-
 NULL=
+SUBDIRS=		\
+	build		\
+	calc_tickadj	\
+	ntp-wait	\
+	ntpsweep	\
+	ntptrace	\
+	lib		\
+	$(NULL)
 
 man1_MANS=
 man8_MANS=

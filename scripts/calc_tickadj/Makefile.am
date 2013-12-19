@@ -2,20 +2,21 @@ run_ag=		cd $(srcdir) &&	env PATH="$(abs_builddir):$(PATH)"	\
 		autogen -L ../../sntp/include -L ../../sntp/ag-tpl \
 		--writable
 
+bin_SCRIPTS=	$(CALC_TICKADJ_DB)
+libexec_SCRIPTS=	$(CALC_TICKADJ_DL)
+sbin_SCRIPTS=	$(CALC_TICKADJ_DS)
+EXTRA_SCRIPTS=	calc_tickadj
+
 EXTRA_DIST = 	\
 	$(srcdir)/calc_tickadj.in \
-	$(srcdir)/calc_tickadj 	\
 	$(srcdir)/calc_tickadj.1calc_tickadjman	\
 	$(srcdir)/calc_tickadj.1calc_tickadjmdoc	\
 	$(srcdir)/calc_tickadj.texi	\
 	$(srcdir)/calc_tickadj.html	\
-	$(srcdir)/calc_tickadj.1		\
 	$(srcdir)/calc_tickadj-opts.def	\
 	$(srcdir)/calc_tickadj-opts	\
 	$(srcdir)/invoke-calc_tickadj.texi	\
 	$(srcdir)/invoke-calc_tickadj.menu
-
-noinst_SCRIPTS = calc_tickadj
 
 noinst_DATA = \
 	$(srcdir)/calc_tickadj.in \
@@ -60,9 +61,9 @@ $(srcdir)/calc_tickadj.mdoc.in: $(srcdir)/calc_tickadj.1calc_tickadjmdoc $(top_s
 
 ### Manpage
 
-$(srcdir)/calc_tickadj.1: $(srcdir)/calc_tickadj.$(MANTAGFMT).in $(top_builddir)/config.status
-	$(top_builddir)/config.status --file=calc_tickadj.1+:$(srcdir)/calc_tickadj.$(MANTAGFMT).in
-	mv calc_tickadj.1+ calc_tickadj.1
+calc_tickadj.$(CALC_TICKADJ_MS): $(srcdir)/calc_tickadj.$(MANTAGFMT).in $(top_builddir)/config.status
+	$(top_builddir)/config.status --file=calc_tickadj.$(CALC_TICKADJ_MS)+:$(srcdir)/calc_tickadj.$(MANTAGFMT).in
+	mv calc_tickadj.$(CALC_TICKADJ_MS)+ calc_tickadj.$(CALC_TICKADJ_MS)
 
 ### Texinfo
 

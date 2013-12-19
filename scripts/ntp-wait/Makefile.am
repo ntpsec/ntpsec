@@ -1,41 +1,42 @@
-man_MANS=	ntp-wait.$(NTP_WAIT_MS)
+NULL=
 
 bin_SCRIPTS =	$(NTP_WAIT_DB)
 libexec_SCRIPTS =	$(NTP_WAIT_DL)
 sbin_SCRIPTS =	$(NTP_WAIT_DS)
 
-run_ag=		cd $(srcdir) &&	env PATH="$(abs_builddir):$(PATH)"	\
+man_MANS=	ntp-wait.$(NTP_WAIT_MS)
+
+run_ag=		cd $(srcdir) &&	env PATH="$(abs_builddir):$(PATH)" PERL5LIB="$(abs_top_srcdir)/scripts/lib"	\
 		autogen -L ../../sntp/include -L ../../sntp/ag-tpl \
 		--writable
 
 EXTRA_SCRIPTS = ntp-wait
 
-EXTRA_DIST = 	\
-	$(srcdir)/ntp-wait.in \
-	$(srcdir)/ntp-wait 	\
-	$(srcdir)/ntp-wait.1ntp-waitman	\
+EXTRA_DIST =					\
+	$(srcdir)/ntp-wait.in			\
+	$(srcdir)/ntp-wait.1ntp-waitman		\
 	$(srcdir)/ntp-wait.1ntp-waitmdoc	\
-	$(srcdir)/ntp-wait.texi	\
-	$(srcdir)/ntp-wait.html	\
-	$(srcdir)/ntp-wait.1		\
-	$(srcdir)/ntp-wait-opts.def	\
-	$(srcdir)/ntp-wait-opts	\
-	$(srcdir)/invoke-ntp-wait.texi	\
-	$(srcdir)/invoke-ntp-wait.menu
+	$(srcdir)/ntp-wait.texi			\
+	$(srcdir)/ntp-wait.html			\
+	$(srcdir)/ntp-wait-opts.def		\
+	$(srcdir)/ntp-wait-opts			\
+	$(srcdir)/invoke-ntp-wait.texi		\
+	$(srcdir)/invoke-ntp-wait.menu		\
+	$(NULL)
 
 html_DATA = $(srcdir)/ntp-wait.html
 
-noinst_DATA = \
-	$(srcdir)/ntp-wait.in \
-	$(srcdir)/ntp-wait.1ntp-waitman	\
+noinst_DATA =					\
+	$(srcdir)/ntp-wait.in 			\
+	$(srcdir)/ntp-wait.1ntp-waitman		\
 	$(srcdir)/ntp-wait.1ntp-waitmdoc	\
-	$(srcdir)/ntp-wait.texi	\
-	$(srcdir)/ntp-wait.html	\
-	$(srcdir)/ntp-wait.1		\
-	$(srcdir)/ntp-wait-opts.def	\
-	$(srcdir)/ntp-wait-opts	\
-	$(srcdir)/invoke-ntp-wait.texi	\
-	$(srcdir)/invoke-ntp-wait.menu
+	$(srcdir)/ntp-wait.texi			\
+	$(srcdir)/ntp-wait.html			\
+	$(srcdir)/ntp-wait-opts.def		\
+	$(srcdir)/ntp-wait-opts			\
+	$(srcdir)/invoke-ntp-wait.texi		\
+	$(srcdir)/invoke-ntp-wait.menu		\
+	$(NULL)
 
 ntp-wait: $(srcdir)/ntp-wait-opts
 
@@ -68,9 +69,9 @@ $(srcdir)/ntp-wait.mdoc.in: $(srcdir)/ntp-wait.1ntp-waitmdoc $(top_srcdir)/sntp/
 
 ### Manpage
 
-$(srcdir)/ntp-wait.1: $(srcdir)/ntp-wait.$(MANTAGFMT).in $(top_builddir)/config.status
-	$(top_builddir)/config.status --file=ntp-wait.1+:$(srcdir)/ntp-wait.$(MANTAGFMT).in
-	mv ntp-wait.1+ ntp-wait.1
+ntp-wait.$(NTP_WAIT_MS): $(srcdir)/ntp-wait.$(MANTAGFMT).in $(top_builddir)/config.status
+	$(top_builddir)/config.status --file=ntp-wait.$(NTP_WAIT_MS)+:$(srcdir)/ntp-wait.$(MANTAGFMT).in
+	mv ntp-wait.$(NTP_WAIT_MS)+ ntp-wait.$(NTP_WAIT_MS)
 
 ### Texinfo
 

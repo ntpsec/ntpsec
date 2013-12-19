@@ -1,5 +1,6 @@
 # Debian installations and man page suffixes
 MDOC
+calc_tickadj,sbin,8
 ntp-keygen,sbin,8
 ntp-wait,sbin,8
 ntpd,sbin,8

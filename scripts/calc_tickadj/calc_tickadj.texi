@@ -2,7 +2,7 @@
 @c %**start of header
 @setfilename calc_tickadj.info
 @settitle calc_tickadj User's Manual
-@include ../..//sntp/include/version.texi
+@include ../../sntp/include/version.texi
 @paragraphindent 2
 @c %**end of header
 

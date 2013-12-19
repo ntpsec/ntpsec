@@ -1,34 +1,35 @@
-run_ag=		cd $(srcdir) &&	env PATH="$(abs_builddir):$(PATH)"	\
+NULL=
+run_ag=		cd $(srcdir) &&	env PATH="$(abs_builddir):$(PATH)" PERL5LIB="$(abs_top_srcdir)/scripts/lib"	\
 		autogen -L ../../sntp/include -L ../../sntp/ag-tpl \
 		--writable
 
 noinst_SCRIPTS = ntpsweep
 
-EXTRA_DIST = 	\
-	$(srcdir)/ntpsweep.in \
-	$(srcdir)/ntpsweep.1ntpsweepman	\
+EXTRA_DIST =					\
+	$(srcdir)/ntpsweep.in			\
+	$(srcdir)/ntpsweep.1ntpsweepman		\
 	$(srcdir)/ntpsweep.1ntpsweepmdoc	\
-	$(srcdir)/ntpsweep.texi	\
-	$(srcdir)/ntpsweep.html	\
-	$(srcdir)/ntpsweep.1		\
-	$(srcdir)/ntpsweep-opts.def	\
-	$(srcdir)/ntpsweep-opts	\
-	$(srcdir)/invoke-ntpsweep.texi	\
-	$(srcdir)/invoke-ntpsweep.menu
+	$(srcdir)/ntpsweep.texi			\
+	$(srcdir)/ntpsweep.html			\
+	$(srcdir)/ntpsweep-opts.def		\
+	$(srcdir)/ntpsweep-opts			\
+	$(srcdir)/invoke-ntpsweep.texi		\
+	$(srcdir)/invoke-ntpsweep.menu		\
+	$(NULL)
 
 html_DATA = $(srcdir)/ntpsweep.html
 
-noinst_DATA = \
-	$(srcdir)/ntpsweep.in \
-	$(srcdir)/ntpsweep.1ntpsweepman	\
+noinst_DATA =					\
+	$(srcdir)/ntpsweep.in			\
+	$(srcdir)/ntpsweep.1ntpsweepman		\
 	$(srcdir)/ntpsweep.1ntpsweepmdoc	\
-	$(srcdir)/ntpsweep.texi	\
-	$(srcdir)/ntpsweep.html	\
-	$(srcdir)/ntpsweep.1		\
-	$(srcdir)/ntpsweep-opts.def	\
-	$(srcdir)/ntpsweep-opts	\
-	$(srcdir)/invoke-ntpsweep.texi	\
-	$(srcdir)/invoke-ntpsweep.menu
+	$(srcdir)/ntpsweep.texi			\
+	$(srcdir)/ntpsweep.html			\
+	$(srcdir)/ntpsweep-opts.def		\
+	$(srcdir)/ntpsweep-opts			\
+	$(srcdir)/invoke-ntpsweep.texi		\
+	$(srcdir)/invoke-ntpsweep.menu		\
+	$(NULL)
 
 ntpsweep: $(srcdir)/ntpsweep-opts
 
@@ -61,7 +62,7 @@ $(srcdir)/ntpsweep.mdoc.in: $(srcdir)/ntpsweep.1ntpsweepmdoc $(top_srcdir)/sntp/
 
 ### Manpage
 
-$(srcdir)/ntpsweep.1: $(srcdir)/ntpsweep.$(MANTAGFMT).in $(top_builddir)/config.status
+ntpsweep.1: $(srcdir)/ntpsweep.$(MANTAGFMT).in $(top_builddir)/config.status
 	$(top_builddir)/config.status --file=ntpsweep.1+:$(srcdir)/ntpsweep.$(MANTAGFMT).in
 	mv ntpsweep.1+ ntpsweep.1
 

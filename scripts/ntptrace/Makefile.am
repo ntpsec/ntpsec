@@ -4,7 +4,7 @@ bin_SCRIPTS =	$(NTPTRACE_DB)
 libexec_SCRIPTS =	$(NTPTRACE_DL)
 sbin_SCRIPTS =	$(NTPTRACE_DS)
 
-run_ag=		cd $(srcdir) &&	env PATH="$(abs_builddir):$(PATH)"	\
+run_ag=		cd $(srcdir) &&	env PATH="$(abs_builddir):$(PATH)" PERL5LIB="$(abs_top_srcdir)/scripts/lib"	\
 		autogen -L ../../sntp/include -L ../../sntp/ag-tpl \
 		--writable
 
@@ -16,7 +16,6 @@ EXTRA_DIST = 	\
 	$(srcdir)/ntptrace.1ntptracemdoc	\
 	$(srcdir)/ntptrace.texi	\
 	$(srcdir)/ntptrace.html	\
-	$(srcdir)/ntptrace.1		\
 	$(srcdir)/ntptrace-opts.def	\
 	$(srcdir)/ntptrace-opts	\
 	$(srcdir)/invoke-ntptrace.texi	\
@@ -30,7 +29,6 @@ noinst_DATA = \
 	$(srcdir)/ntptrace.1ntptracemdoc	\
 	$(srcdir)/ntptrace.texi	\
 	$(srcdir)/ntptrace.html	\
-	$(srcdir)/ntptrace.1		\
 	$(srcdir)/ntptrace-opts.def	\
 	$(srcdir)/ntptrace-opts	\
 	$(srcdir)/invoke-ntptrace.texi	\
@@ -65,11 +63,11 @@ $(srcdir)/ntptrace.mdoc.in: $(srcdir)/ntptrace.1ntptracemdoc $(top_srcdir)/sntp/
 	sed -f $(top_srcdir)/sntp/scripts/mansec2subst.sed $(srcdir)/ntptrace.1ntptracemdoc > $(srcdir)/ntptrace.mdoc.in+
 	mv $(srcdir)/ntptrace.mdoc.in+ $(srcdir)/ntptrace.mdoc.in
 
-### Manpage
+### Manpage (local)
 
-$(srcdir)/ntptrace.1: $(srcdir)/ntptrace.$(MANTAGFMT).in $(top_builddir)/config.status
-	$(top_builddir)/config.status --file=ntptrace.1+:$(srcdir)/ntptrace.$(MANTAGFMT).in
-	mv ntptrace.1+ ntptrace.1
+ntptrace.$(NTPTRACE_MS): $(srcdir)/ntptrace.$(MANTAGFMT).in $(top_builddir)/config.status
+	$(top_builddir)/config.status --file=ntptrace.$(NTPTRCE_MS)+:$(srcdir)/ntptrace.$(MANTAGFMT).in
+	mv ntptrace.$(NTPTRCE_MS)+ ntptrace.$(NTPTRCE_MS)
 
 ### Texinfo
 

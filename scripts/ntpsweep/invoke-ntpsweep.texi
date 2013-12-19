@@ -6,7 +6,7 @@
 #
 # EDIT THIS FILE WITH CAUTION  (invoke-ntpsweep.texi)
 #
-# It has been AutoGen-ed  December 18, 2013 at 10:51:05 AM by AutoGen 5.18.3pre7
+# It has been AutoGen-ed  December 19, 2013 at 07:48:51 AM by AutoGen 5.18.3pre7
 # From the definitions    ntpsweep-opts.def
 # and the template file   agtexi-cmd.tpl
 @end ignore
