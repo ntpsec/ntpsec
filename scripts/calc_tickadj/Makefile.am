@@ -1,3 +1,4 @@
+NULL=
 run_ag=		cd $(srcdir) &&	env PATH="$(abs_builddir):$(PATH)"	\
 		autogen -L ../../sntp/include -L ../../sntp/ag-tpl \
 		--writable
@@ -7,28 +8,32 @@ libexec_SCRIPTS=	$(CALC_TICKADJ_DL)
 sbin_SCRIPTS=	$(CALC_TICKADJ_DS)
 EXTRA_SCRIPTS=	calc_tickadj
 
-EXTRA_DIST = 	\
-	$(srcdir)/calc_tickadj.in \
-	$(srcdir)/calc_tickadj.1calc_tickadjman	\
-	$(srcdir)/calc_tickadj.1calc_tickadjmdoc	\
-	$(srcdir)/calc_tickadj.texi	\
-	$(srcdir)/calc_tickadj.html	\
-	$(srcdir)/calc_tickadj-opts.def	\
-	$(srcdir)/calc_tickadj-opts	\
-	$(srcdir)/invoke-calc_tickadj.texi	\
-	$(srcdir)/invoke-calc_tickadj.menu
+# HMS: we only want the following if we're installing calc_tickadj
+man_MANS=	calc_tickadj.$(CALC_TICKADJ_MS)
 
-noinst_DATA = \
-	$(srcdir)/calc_tickadj.in \
-	$(srcdir)/calc_tickadj.1calc_tickadjman	\
-	$(srcdir)/calc_tickadj.1calc_tickadjmdoc	\
-	$(srcdir)/calc_tickadj.texi	\
-	$(srcdir)/calc_tickadj.html	\
-	$(srcdir)/calc_tickadj.1		\
-	$(srcdir)/calc_tickadj-opts.def	\
-	$(srcdir)/calc_tickadj-opts	\
-	$(srcdir)/invoke-calc_tickadj.texi	\
-	$(srcdir)/invoke-calc_tickadj.menu
+EXTRA_DIST =				\
+	calc_tickadj.in 		\
+	calc_tickadj.1calc_tickadjman	\
+	calc_tickadj.1calc_tickadjmdoc	\
+	calc_tickadj.texi		\
+	calc_tickadj.html		\
+	calc_tickadj-opts.def		\
+	calc_tickadj-opts		\
+	invoke-calc_tickadj.texi	\
+	invoke-calc_tickadj.menu	\
+	$(NULL)
+
+noinst_DATA = 				\
+	calc_tickadj.in 		\
+	calc_tickadj.1calc_tickadjman	\
+	calc_tickadj.1calc_tickadjmdoc	\
+	calc_tickadj.texi		\
+	calc_tickadj.html		\
+	calc_tickadj-opts.def		\
+	calc_tickadj-opts		\
+	invoke-calc_tickadj.texi	\
+	invoke-calc_tickadj.menu	\
+	$(NULL)
 
 calc_tickadj: $(srcdir)/calc_tickadj-opts
 
