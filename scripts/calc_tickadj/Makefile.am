@@ -8,8 +8,9 @@ libexec_SCRIPTS=	$(CALC_TICKADJ_DL)
 sbin_SCRIPTS=	$(CALC_TICKADJ_DS)
 EXTRA_SCRIPTS=	calc_tickadj
 
-# HMS: we only want the following if we're installing calc_tickadj
+if WANT_CALC_TICKADJ_MS
 man_MANS=	calc_tickadj.$(CALC_TICKADJ_MS)
+endif
 
 EXTRA_DIST =				\
 	calc_tickadj.in 		\
