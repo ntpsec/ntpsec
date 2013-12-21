@@ -8,14 +8,23 @@ libexec_SCRIPTS=	$(CALC_TICKADJ_DL)
 sbin_SCRIPTS=	$(CALC_TICKADJ_DS)
 EXTRA_SCRIPTS=	calc_tickadj
 
+manpage_HACK=
 if WANT_CALC_TICKADJ_MS
 man_MANS=	calc_tickadj.$(CALC_TICKADJ_MS)
+else
+manpage_HACK+=	calc_tickadj.
+# Note that if we don't WANT_CALC_TICKADJ then CALC_TICKADJ_MS will
+# be empty.  But we still need the .texi and other files to be built, as
+# they are general prerequisites.
+# The manpage_HACK is listed in noinst_DATA so that takes care of these.
 endif
 
 EXTRA_DIST =				\
 	calc_tickadj.in 		\
 	calc_tickadj.1calc_tickadjman	\
 	calc_tickadj.1calc_tickadjmdoc	\
+	calc_tickadj.man.in		\
+	calc_tickadj.mdoc.in		\
 	calc_tickadj.texi		\
 	calc_tickadj.html		\
 	calc_tickadj-opts.def		\
@@ -25,7 +34,6 @@ EXTRA_DIST =				\
 	$(NULL)
 
 noinst_DATA = 				\
-	calc_tickadj.in 		\
 	calc_tickadj.1calc_tickadjman	\
 	calc_tickadj.1calc_tickadjmdoc	\
 	calc_tickadj.texi		\
@@ -34,18 +42,13 @@ noinst_DATA = 				\
 	calc_tickadj-opts		\
 	invoke-calc_tickadj.texi	\
 	invoke-calc_tickadj.menu	\
+	$(manpage_HACK)			\
 	$(NULL)
 
 calc_tickadj: $(srcdir)/calc_tickadj-opts
 
 $(srcdir)/calc_tickadj-opts: $(srcdir)/calc_tickadj-opts.def $(srcdir)/../../sntp/ag-tpl/perlopt.tpl
 	$(run_ag) calc_tickadj-opts.def
-
-clean-local: extra-clean
-
-extra-clean:
-	rm calc_tickadj
-	rm *.html *man *mdoc *.1 invoke-calc_tickadj.* calc_tickadj.*.in
 
 ### Nroff
 
@@ -76,7 +79,7 @@ calc_tickadj.$(CALC_TICKADJ_MS): $(srcdir)/calc_tickadj.$(MANTAGFMT).in $(top_bu
 $(srcdir)/invoke-calc_tickadj.menu: $(srcdir)/invoke-calc_tickadj.texi
 	@: do-nothing action to avoid default SCCS get, .menu built with .texi
 
-$(srcdir)/invoke-calc_tickadj.texi: calc_tickadj $(srcdir)/calc_tickadj-opts.def $(std_def_list)
+$(srcdir)/invoke-calc_tickadj.texi: $(srcdir)/calc_tickadj-opts $(srcdir)/calc_tickadj-opts.def $(std_def_list)
 	$(run_ag) -Tagtexi-cmd.tpl -DLEVEL=section calc_tickadj-opts.def
 	$(top_srcdir)/scripts/build/check--help $@
 

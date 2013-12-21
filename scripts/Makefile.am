@@ -35,7 +35,11 @@ install-data-local: install-html
 EXTRA_DIST =			\
 	deprecated		\
 	monitoring		\
+	plot_summary-opts	\
+	plot_summary-opts.def	\
 	rc			\
+	summary-opts		\
+	summary-opts.def	\
 	stats			\
 	$(NULL)
 

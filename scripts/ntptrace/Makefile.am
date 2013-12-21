@@ -1,3 +1,4 @@
+NULL=
 man_MANS=	ntptrace.$(NTPTRACE_MS)
 
 bin_SCRIPTS =	$(NTPTRACE_DB)
@@ -10,40 +11,38 @@ run_ag=		cd $(srcdir) &&	env PATH="$(abs_builddir):$(PATH)" PERL5LIB="$(abs_top_
 
 EXTRA_SCRIPTS = ntptrace
 
-EXTRA_DIST = 	\
-	$(srcdir)/ntptrace.in \
-	$(srcdir)/ntptrace.1ntptraceman	\
-	$(srcdir)/ntptrace.1ntptracemdoc	\
-	$(srcdir)/ntptrace.texi	\
-	$(srcdir)/ntptrace.html	\
-	$(srcdir)/ntptrace-opts.def	\
-	$(srcdir)/ntptrace-opts	\
-	$(srcdir)/invoke-ntptrace.texi	\
-	$(srcdir)/invoke-ntptrace.menu
+EXTRA_DIST =			\
+	ntptrace.1ntptraceman	\
+	ntptrace.1ntptracemdoc	\
+	ntptrace.mdoc.in	\
+	ntptrace.man.in		\
+	ntptrace.texi		\
+	ntptrace.html		\
+	ntptrace-opts.def	\
+	ntptrace-opts		\
+	invoke-ntptrace.texi	\
+	invoke-ntptrace.menu	\
+	$(NULL)
 
 html_DATA = $(srcdir)/ntptrace.html
 
-noinst_DATA = \
-	$(srcdir)/ntptrace.in \
-	$(srcdir)/ntptrace.1ntptraceman	\
-	$(srcdir)/ntptrace.1ntptracemdoc	\
-	$(srcdir)/ntptrace.texi	\
-	$(srcdir)/ntptrace.html	\
-	$(srcdir)/ntptrace-opts.def	\
-	$(srcdir)/ntptrace-opts	\
-	$(srcdir)/invoke-ntptrace.texi	\
-	$(srcdir)/invoke-ntptrace.menu
+noinst_DATA =			\
+	ntptrace.1ntptraceman	\
+	ntptrace.1ntptracemdoc	\
+	ntptrace.mdoc.in	\
+	ntptrace.man.in		\
+	ntptrace.texi		\
+	ntptrace.html		\
+	ntptrace-opts.def	\
+	ntptrace-opts		\
+	invoke-ntptrace.texi	\
+	invoke-ntptrace.menu	\
+	$(NULL)
 
 ntptrace: $(srcdir)/ntptrace-opts
 
 $(srcdir)/ntptrace-opts: $(srcdir)/ntptrace-opts.def ../../sntp/ag-tpl/perlopt.tpl
 	$(run_ag) ntptrace-opts.def
-
-clean-local: extra-clean
-
-extra-clean:
-	rm ntptrace
-	rm *.html *man *mdoc *.1 invoke-ntptrace.* ntptrace.man.in
 
 ### Nroff
 
@@ -74,7 +73,7 @@ ntptrace.$(NTPTRACE_MS): $(srcdir)/ntptrace.$(MANTAGFMT).in $(top_builddir)/conf
 $(srcdir)/invoke-ntptrace.menu: $(srcdir)/invoke-ntptrace.texi
 	@: do-nothing action to avoid default SCCS get, .menu built with .texi
 
-$(srcdir)/invoke-ntptrace.texi: ntptrace $(srcdir)/ntptrace-opts.def $(std_def_list)
+$(srcdir)/invoke-ntptrace.texi: ntptrace-opts $(srcdir)/ntptrace-opts.def $(std_def_list)
 	$(run_ag) -Tagtexi-cmd.tpl -DLEVEL=section ntptrace-opts.def
 	$(top_srcdir)/scripts/build/check--help $@
 

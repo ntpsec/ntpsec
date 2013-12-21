@@ -12,42 +12,39 @@ run_ag=		cd $(srcdir) &&	env PATH="$(abs_builddir):$(PATH)" PERL5LIB="$(abs_top_
 
 EXTRA_SCRIPTS = ntp-wait
 
-EXTRA_DIST =					\
-	$(srcdir)/ntp-wait.in			\
-	$(srcdir)/ntp-wait.1ntp-waitman		\
-	$(srcdir)/ntp-wait.1ntp-waitmdoc	\
-	$(srcdir)/ntp-wait.texi			\
-	$(srcdir)/ntp-wait.html			\
-	$(srcdir)/ntp-wait-opts.def		\
-	$(srcdir)/ntp-wait-opts			\
-	$(srcdir)/invoke-ntp-wait.texi		\
-	$(srcdir)/invoke-ntp-wait.menu		\
+EXTRA_DIST =			\
+	ntp-wait.in		\
+	ntp-wait.1ntp-waitman	\
+	ntp-wait.1ntp-waitmdoc	\
+	ntp-wait.man.in		\
+	ntp-wait.mdoc.in	\
+	ntp-wait.texi		\
+	ntp-wait.html		\
+	ntp-wait-opts.def	\
+	ntp-wait-opts		\
+	invoke-ntp-wait.texi	\
+	invoke-ntp-wait.menu	\
 	$(NULL)
 
 html_DATA = $(srcdir)/ntp-wait.html
 
-noinst_DATA =					\
-	$(srcdir)/ntp-wait.in 			\
-	$(srcdir)/ntp-wait.1ntp-waitman		\
-	$(srcdir)/ntp-wait.1ntp-waitmdoc	\
-	$(srcdir)/ntp-wait.texi			\
-	$(srcdir)/ntp-wait.html			\
-	$(srcdir)/ntp-wait-opts.def		\
-	$(srcdir)/ntp-wait-opts			\
-	$(srcdir)/invoke-ntp-wait.texi		\
-	$(srcdir)/invoke-ntp-wait.menu		\
+noinst_DATA =			\
+	ntp-wait.1ntp-waitman	\
+	ntp-wait.1ntp-waitmdoc	\
+	ntp-wait.man.in		\
+	ntp-wait.mdoc.in	\
+	ntp-wait.texi		\
+	ntp-wait.html		\
+	ntp-wait-opts.def	\
+	ntp-wait-opts		\
+	invoke-ntp-wait.texi	\
+	invoke-ntp-wait.menu	\
 	$(NULL)
 
 ntp-wait: $(srcdir)/ntp-wait-opts
 
 $(srcdir)/ntp-wait-opts: $(srcdir)/ntp-wait-opts.def ../../sntp/ag-tpl/perlopt.tpl
 	$(run_ag) ntp-wait-opts.def
-
-clean-local: extra-clean
-
-extra-clean:
-	rm ntp-wait
-	rm *.html *man *mdoc *.1 invoke-ntp-wait.* ntp-wait.man.in
 
 ### Nroff
 
@@ -78,7 +75,7 @@ ntp-wait.$(NTP_WAIT_MS): $(srcdir)/ntp-wait.$(MANTAGFMT).in $(top_builddir)/conf
 $(srcdir)/invoke-ntp-wait.menu: $(srcdir)/invoke-ntp-wait.texi
 	@: do-nothing action to avoid default SCCS get, .menu built with .texi
 
-$(srcdir)/invoke-ntp-wait.texi: ntp-wait $(srcdir)/ntp-wait-opts.def $(std_def_list)
+$(srcdir)/invoke-ntp-wait.texi: ntp-wait-opts $(srcdir)/ntp-wait-opts.def $(std_def_list)
 	$(run_ag) -Tagtexi-cmd.tpl -DLEVEL=section ntp-wait-opts.def
 	$(top_srcdir)/scripts/build/check--help $@
 
