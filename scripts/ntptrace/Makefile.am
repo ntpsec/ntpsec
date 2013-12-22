@@ -65,8 +65,8 @@ $(srcdir)/ntptrace.mdoc.in: $(srcdir)/ntptrace.1ntptracemdoc $(top_srcdir)/sntp/
 ### Manpage (local)
 
 ntptrace.$(NTPTRACE_MS): $(srcdir)/ntptrace.$(MANTAGFMT).in $(top_builddir)/config.status
-	$(top_builddir)/config.status --file=ntptrace.$(NTPTRCE_MS)+:$(srcdir)/ntptrace.$(MANTAGFMT).in
-	mv ntptrace.$(NTPTRCE_MS)+ ntptrace.$(NTPTRCE_MS)
+	$(top_builddir)/config.status --file=ntptrace.$(NTPTRACE_MS)+:$(srcdir)/ntptrace.$(MANTAGFMT).in
+	mv ntptrace.$(NTPTRACE_MS)+ ntptrace.$(NTPTRACE_MS)
 
 ### Texinfo
 
