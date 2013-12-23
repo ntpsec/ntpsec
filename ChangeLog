@@ -1,4 +1,5 @@
 * [Bug 2516] Enable clock_gettime() support for AIX 5+.
+* [Bug 2517] Fix peer status errors in decode.html.
 (4.2.7p402) 2013/12/23 Released by Harlan Stenn <stenn@ntp.org>
 * Incorporate Oliver Kindernay's GSoC 2013 scripts/ cleanup.
 (4.2.7p401) 2013/11/30 Released by Harlan Stenn <stenn@ntp.org>
