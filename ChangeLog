@@ -1,3 +1,4 @@
+(4.2.7p403) 2013/12/23 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 2513] Remove any PIDFILE in finish().
 * [Bug 2516] Enable clock_gettime() support for AIX 5+.
 * [Bug 2517] Fix peer status errors in decode.html.

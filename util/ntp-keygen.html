@@ -70,7 +70,7 @@ All other files are in PEM-encoded
 printable ASCII format so they can be embedded as MIME attachments in
 mail to other sites.
 
-  <p>This document applies to version 4.2.7p402 of <code>ntp-keygen</code>.
+  <p>This document applies to version 4.2.7p403 of <code>ntp-keygen</code>.
 
 <div class="node">
 <p><hr>
@@ -260,7 +260,7 @@ option specifies the password for local encrypted files and the
 <code>-q</code>
 option the password for encrypted files sent to remote sites. 
 If no password is specified, the host name returned by the Unix
-<code>gethostname</code>()
+<code>gethostname()</code>
 function, normally the DNS name of the host is used.
 
   <p>The
@@ -305,14 +305,9 @@ string
 and include the file type, generating host and filestamp,
 as described in the
 Cryptographic Data Files
-section below. 
-<div class="node">
-<p><hr>
-<a name="Running-the-Program"></a>
-<br>
-</div>
+section below.
 
-<h3 class="section">Running the Program</h3>
+<h5 class="subsubsection">Running the Program</h5>
 
 <p>To test and gain experience with Autokey concepts, log in as root and
 change to the keys directory, usually
@@ -444,14 +439,9 @@ The
 <code>ntp-keygen</code>
 program uses the same timestamp extension for all files generated
 at one time, so each generation is distinct and can be readily
-recognized in monitoring data. 
-<div class="node">
-<p><hr>
-<a name="Running-the-program"></a>
-<br>
-</div>
+recognized in monitoring data.
 
-<h3 class="section">Running the program</h3>
+<h5 class="subsubsection">Running the program</h5>
 
 <p>The safest way to run the
 <code>ntp-keygen</code>
@@ -569,14 +559,9 @@ The
 <code>ntp-keygen</code>
 program uses the same timestamp extension for all files generated
 at one time, so each generation is distinct and can be readily
-recognized in monitoring data. 
-<div class="node">
-<p><hr>
-<a name="Running-the-program"></a>
-<br>
-</div>
+recognized in monitoring data.
 
-<h3 class="section">Running the program</h3>
+<h5 class="subsubsection">Running the program</h5>
 
 <p>The safest way to run the
 <code>ntp-keygen</code>
@@ -701,7 +686,7 @@ throughout the subnet, but setting up the environment is completely automatic.
 scheme than the default, run
 <code>ntp-keygen</code>
 with the
-<code>-S</code> <kbd>-type</kbd>
+<code>-S</code> <kbd>type</kbd>
 option, where
 <kbd>type</kbd>
 is either
@@ -713,7 +698,7 @@ If it is necessary to use a different certificate scheme than the default,
 run
 <code>ntp-keygen</code>
 with the
-<code>-c</code> <kbd>-scheme</kbd>
+<code>-c</code> <kbd>scheme</kbd>
 option and selected
 <kbd>scheme</kbd>
 as needed. 
@@ -735,14 +720,9 @@ When
 <code>ntpd(1ntpdmdoc)</code>
 is restarted, it loads any new files and restarts the protocol. 
 Other dependent hosts will continue as usual until signatures are refreshed,
-at which time the protocol is restarted. 
-<div class="node">
-<p><hr>
-<a name="Identity-Schemes"></a>
-<br>
-</div>
+at which time the protocol is restarted.
 
-<h3 class="section">Identity Schemes</h3>
+<h5 class="subsubsection">Identity Schemes</h5>
 
 <p>As mentioned on the Autonomous Authentication page,
 the default TC identity scheme is vulnerable to a middleman attack. 
@@ -774,7 +754,7 @@ only as clients have key files that contain only client keys.
 On trusted host alice run
 <code>ntp-keygen</code>
 <code>-P</code>
-<code>-p</code> <kbd>-password</kbd>
+<code>-p</code> <kbd>password</kbd>
 to generate the host key file
 <span class="file">ntpkey_RSAkey_</span><kbd>alice.filestamp</kbd>
 and trusted private certificate file
@@ -799,7 +779,7 @@ On trusted host alice run
 <code>ntp-keygen</code>
 <code>-T</code>
 <code>-I</code>
-<code>-p</code> <kbd>-password</kbd>
+<code>-p</code> <kbd>password</kbd>
 to produce her parameter file
 <span class="file">ntpkey_IFFpar_</span><kbd>alice.filestamp</kbd>,
 which includes both server and client keys. 
@@ -834,7 +814,7 @@ On trusted host alice run
 <code>ntp-keygen</code>
 <code>-T</code>
 <code>-G</code>
-<code>-p</code> <kbd>-password</kbd>
+<code>-p</code> <kbd>password</kbd>
 to produce her parameter file
 <span class="file">ntpkey_GQpar_</span><kbd>alice.filestamp</kbd>,
 which includes both server and client keys. 
@@ -855,8 +835,8 @@ For illustration assume trish is the TA, alice one of several trusted hosts
 and bob one of her clients. 
 On TA trish run
 <code>ntp-keygen</code>
-<code>-V</code> <kbd>-n</kbd>
-<code>-p</code> <kbd>-password</kbd>,
+<code>-V</code> <kbd>n</kbd>
+<code>-p</code> <kbd>password</kbd>,
 where
 <kbd>n</kbd>
 is the number of revokable keys (typically 5) to produce
@@ -866,9 +846,9 @@ and client key files
 <span class="file">ntpkeys_MVkeyd_</span><kbd>trish.filestamp</kbd>
 where
 <kbd>d</kbd>
-is the key number (0 \&amp;&lt;
+is the key number (0 &lt;
 <kbd>d</kbd>
-\&amp;&lt;
+&lt;
 <kbd>n</kbd>). 
 Copy the parameter file to alice and install a soft link
 from the generic
@@ -883,22 +863,17 @@ On client bob install a soft link from generic
 <span class="file">ntpkey_mvkey_</span><kbd>bob</kbd>
 to the client key file. 
 As the MV scheme is independent of keys and certificates,
-these files can be refreshed as needed. 
-<div class="node">
-<p><hr>
-<a name="Command-Line-Options"></a>
-<br>
-</div>
+these files can be refreshed as needed.
 
-<h3 class="section">Command Line Options</h3>
+<h5 class="subsubsection">Command Line Options</h5>
 
      <dl>
-<dt><code>-c</code> <kbd>-scheme</kbd><dd>Select certificate message digest/signature encryption scheme. 
+<dt><code>-c</code> <kbd>scheme</kbd><dd>Select certificate message digest/signature encryption scheme. 
 The
 <kbd>scheme</kbd>
 can be one of the following:
-
-     <p>or
+. Cm RSA-MD2 , RSA-MD5 , RSA-SHA , RSA-SHA1 , RSA-MDC2 , RSA-RIPEMD160 , DSA-SHA ,
+or
 <code>DSA-SHA1</code>. 
 Note that RSA schemes must be used with a RSA sign key and DSA
 schemes must be used with a DSA sign key. 
@@ -916,35 +891,30 @@ If the GQ parameters do not yet exist, create them first.
 <br><dt><code>-H</code><dd>Generate new host keys, obsoleting any that may exist. 
 <br><dt><code>-I</code><dd>Generate parameters for the IFF identification scheme,
 obsoleting any that may exist. 
-<br><dt><code>-i</code> <kbd>-name</kbd><dd>Set the suject name to
+<br><dt><code>-i</code> <kbd>name</kbd><dd>Set the suject name to
 <kbd>name</kbd>. 
 This is used as the subject field in certificates
 and in the file name for host and sign keys. 
 <br><dt><code>-M</code><dd>Generate MD5 keys, obsoleting any that may exist. 
 <br><dt><code>-P</code><dd>Generate a private certificate. 
 By default, the program generates public certificates. 
-<br><dt><code>-p</code> <kbd>-password</kbd><dd>Encrypt generated files containing private data with
+<br><dt><code>-p</code> <kbd>password</kbd><dd>Encrypt generated files containing private data with
 <kbd>password</kbd>
 and the DES-CBC algorithm. 
 <br><dt><code>-q</code><dd>Set the password for reading files to password. 
-<br><dt><code>-S</code> <code>-Oo</code> <code>-Cm</code> <code>-RSA</code> <code>-</code> | <code>-DSA</code> <code>-Oc</code><dd>Generate a new sign key of the designated type,
+<br><dt><code>-S</code> <code>[RSA | DSA]</code><dd>Generate a new sign key of the designated type,
 obsoleting any that may exist. 
 By default, the program uses the host key as the sign key. 
-<br><dt><code>-s</code> <kbd>-name</kbd><dd>Set the issuer name to
+<br><dt><code>-s</code> <kbd>name</kbd><dd>Set the issuer name to
 <kbd>name</kbd>. 
 This is used for the issuer field in certificates
 and in the file name for identity files. 
 <br><dt><code>-T</code><dd>Generate a trusted certificate. 
 By default, the program generates a non-trusted certificate. 
-<br><dt><code>-V</code> <kbd>-nkeys</kbd><dd>Generate parameters and keys for the Mu-Varadharajan (MV) identification scheme. 
+<br><dt><code>-V</code> <kbd>nkeys</kbd><dd>Generate parameters and keys for the Mu-Varadharajan (MV) identification scheme. 
 </dl>
-<div class="node">
-<p><hr>
-<a name="Random-Seed-File"></a>
-<br>
-</div>
 
-<h3 class="section">Random Seed File</h3>
+<h5 class="subsubsection">Random Seed File</h5>
 
 <p>All cryptographically sound key generation schemes must have means
 to randomize the entropy seed used to initialize
@@ -983,25 +953,20 @@ If not specified in this way, or when starting the
 program,
 the OpenSSL library will look for the file using the path specified
 by the
-Ev RANDFILE
+.Ev RANDFILE
 environment variable in the user home directory,
 whether root or some other user. 
 If the
-Ev RANDFILE
+.Ev RANDFILE
 environment variable is not present,
 the library will look for the
 <code>.rnd</code>
 file in the user home directory. 
 If the file is not available or cannot be written,
 the daemon exits with a message to the system log and the program
-exits with a suitable error message. 
-<div class="node">
-<p><hr>
-<a name="Cryptographic-Data-Files"></a>
-<br>
-</div>
+exits with a suitable error message.
 
-<h3 class="section">Cryptographic Data Files</h3>
+<h5 class="subsubsection">Cryptographic Data Files</h5>
 
 <p>All other file formats begin with two lines. 
 The first contains the file name, including the generated host name
@@ -1103,7 +1068,7 @@ This software is released under the NTP license, &lt;http://ntp.org/license&gt;.
 <div class="node">
 <p><hr>
 <a name="ntp_002dkeygen-usage"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#ntp_002dkeygen-imbits">ntp-keygen imbits</a>,
-Up:&nbsp;<a rel="up" accesskey="u" href="#Cryptographic-Data-Files">Cryptographic Data Files</a>
+Up:&nbsp;<a rel="up" accesskey="u" href="#ntp_002dkeygen-Invocation">ntp-keygen Invocation</a>
 <br>
 </div>
 
@@ -1120,7 +1085,7 @@ the usage text by passing it through a pager program.
 used to select the program, defaulting to <span class="file">more</span>.  Both will exit
 with a status code of 0.
 
-<pre class="example">ntp-keygen (ntp) - Create a NTP host key - Ver. 4.2.7p401
+<pre class="example">ntp-keygen (ntp) - Create a NTP host key - Ver. 4.2.7p402
 Usage:  ntp-keygen [ -&lt;flag&gt; [&lt;val&gt;] | --&lt;name&gt;[{=| }&lt;val&gt;] ]...
   Flg Arg Option-Name    Description
    -b Num imbits         identity modulus bits
@@ -1175,7 +1140,7 @@ exit 0
 <p><hr>
 <a name="ntp_002dkeygen-imbits"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#ntp_002dkeygen-certificate">ntp-keygen certificate</a>,
 Previous:&nbsp;<a rel="previous" accesskey="p" href="#ntp_002dkeygen-usage">ntp-keygen usage</a>,
-Up:&nbsp;<a rel="up" accesskey="u" href="#Cryptographic-Data-Files">Cryptographic Data Files</a>
+Up:&nbsp;<a rel="up" accesskey="u" href="#ntp_002dkeygen-Invocation">ntp-keygen Invocation</a>
 <br>
 </div>
 
@@ -1195,7 +1160,7 @@ This option takes a number argument <span class="file">imbits</span>.
 <p><hr>
 <a name="ntp_002dkeygen-certificate"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#ntp_002dkeygen-cipher">ntp-keygen cipher</a>,
 Previous:&nbsp;<a rel="previous" accesskey="p" href="#ntp_002dkeygen-imbits">ntp-keygen imbits</a>,
-Up:&nbsp;<a rel="up" accesskey="u" href="#Cryptographic-Data-Files">Cryptographic Data Files</a>
+Up:&nbsp;<a rel="up" accesskey="u" href="#ntp_002dkeygen-Invocation">ntp-keygen Invocation</a>
 <br>
 </div>
 
@@ -1222,7 +1187,7 @@ this option is RSA-MD5.
 <p><hr>
 <a name="ntp_002dkeygen-cipher"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#ntp_002dkeygen-id_002dkey">ntp-keygen id-key</a>,
 Previous:&nbsp;<a rel="previous" accesskey="p" href="#ntp_002dkeygen-certificate">ntp-keygen certificate</a>,
-Up:&nbsp;<a rel="up" accesskey="u" href="#Cryptographic-Data-Files">Cryptographic Data Files</a>
+Up:&nbsp;<a rel="up" accesskey="u" href="#ntp_002dkeygen-Invocation">ntp-keygen Invocation</a>
 <br>
 </div>
 
@@ -1245,7 +1210,7 @@ available in "openssl -h" output.
 <p><hr>
 <a name="ntp_002dkeygen-id_002dkey"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#ntp_002dkeygen-gq_002dparams">ntp-keygen gq-params</a>,
 Previous:&nbsp;<a rel="previous" accesskey="p" href="#ntp_002dkeygen-cipher">ntp-keygen cipher</a>,
-Up:&nbsp;<a rel="up" accesskey="u" href="#Cryptographic-Data-Files">Cryptographic Data Files</a>
+Up:&nbsp;<a rel="up" accesskey="u" href="#ntp_002dkeygen-Invocation">ntp-keygen Invocation</a>
 <br>
 </div>
 
@@ -1265,7 +1230,7 @@ intended for automatic key distribution by mail.
 <p><hr>
 <a name="ntp_002dkeygen-gq_002dparams"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#ntp_002dkeygen-host_002dkey">ntp-keygen host-key</a>,
 Previous:&nbsp;<a rel="previous" accesskey="p" href="#ntp_002dkeygen-id_002dkey">ntp-keygen id-key</a>,
-Up:&nbsp;<a rel="up" accesskey="u" href="#Cryptographic-Data-Files">Cryptographic Data Files</a>
+Up:&nbsp;<a rel="up" accesskey="u" href="#ntp_002dkeygen-Invocation">ntp-keygen Invocation</a>
 <br>
 </div>
 
@@ -1285,7 +1250,7 @@ obsoleting any that may exist.
 <p><hr>
 <a name="ntp_002dkeygen-host_002dkey"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#ntp_002dkeygen-iffkey">ntp-keygen iffkey</a>,
 Previous:&nbsp;<a rel="previous" accesskey="p" href="#ntp_002dkeygen-gq_002dparams">ntp-keygen gq-params</a>,
-Up:&nbsp;<a rel="up" accesskey="u" href="#Cryptographic-Data-Files">Cryptographic Data Files</a>
+Up:&nbsp;<a rel="up" accesskey="u" href="#ntp_002dkeygen-Invocation">ntp-keygen Invocation</a>
 <br>
 </div>
 
@@ -1304,7 +1269,7 @@ This is the &ldquo;generate rsa host key&rdquo; option.
 <p><hr>
 <a name="ntp_002dkeygen-iffkey"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#ntp_002dkeygen-ident">ntp-keygen ident</a>,
 Previous:&nbsp;<a rel="previous" accesskey="p" href="#ntp_002dkeygen-host_002dkey">ntp-keygen host-key</a>,
-Up:&nbsp;<a rel="up" accesskey="u" href="#Cryptographic-Data-Files">Cryptographic Data Files</a>
+Up:&nbsp;<a rel="up" accesskey="u" href="#ntp_002dkeygen-Invocation">ntp-keygen Invocation</a>
 <br>
 </div>
 
@@ -1324,7 +1289,7 @@ any that may exist.
 <p><hr>
 <a name="ntp_002dkeygen-ident"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#ntp_002dkeygen-lifetime">ntp-keygen lifetime</a>,
 Previous:&nbsp;<a rel="previous" accesskey="p" href="#ntp_002dkeygen-iffkey">ntp-keygen iffkey</a>,
-Up:&nbsp;<a rel="up" accesskey="u" href="#Cryptographic-Data-Files">Cryptographic Data Files</a>
+Up:&nbsp;<a rel="up" accesskey="u" href="#ntp_002dkeygen-Invocation">ntp-keygen Invocation</a>
 <br>
 </div>
 
@@ -1352,7 +1317,7 @@ ntpd's configuration file.
 <p><hr>
 <a name="ntp_002dkeygen-lifetime"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#ntp_002dkeygen-md5key">ntp-keygen md5key</a>,
 Previous:&nbsp;<a rel="previous" accesskey="p" href="#ntp_002dkeygen-ident">ntp-keygen ident</a>,
-Up:&nbsp;<a rel="up" accesskey="u" href="#Cryptographic-Data-Files">Cryptographic Data Files</a>
+Up:&nbsp;<a rel="up" accesskey="u" href="#ntp_002dkeygen-Invocation">ntp-keygen Invocation</a>
 <br>
 </div>
 
@@ -1372,7 +1337,7 @@ This option takes a number argument <span class="file">lifetime</span>.
 <p><hr>
 <a name="ntp_002dkeygen-md5key"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#ntp_002dkeygen-modulus">ntp-keygen modulus</a>,
 Previous:&nbsp;<a rel="previous" accesskey="p" href="#ntp_002dkeygen-lifetime">ntp-keygen lifetime</a>,
-Up:&nbsp;<a rel="up" accesskey="u" href="#Cryptographic-Data-Files">Cryptographic Data Files</a>
+Up:&nbsp;<a rel="up" accesskey="u" href="#ntp_002dkeygen-Invocation">ntp-keygen Invocation</a>
 <br>
 </div>
 
@@ -1385,7 +1350,7 @@ Generate MD5 keys, obsoleting any that may exist.
 <p><hr>
 <a name="ntp_002dkeygen-modulus"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#ntp_002dkeygen-pvt_002dcert">ntp-keygen pvt-cert</a>,
 Previous:&nbsp;<a rel="previous" accesskey="p" href="#ntp_002dkeygen-md5key">ntp-keygen md5key</a>,
-Up:&nbsp;<a rel="up" accesskey="u" href="#Cryptographic-Data-Files">Cryptographic Data Files</a>
+Up:&nbsp;<a rel="up" accesskey="u" href="#ntp_002dkeygen-Invocation">ntp-keygen Invocation</a>
 <br>
 </div>
 
@@ -1405,7 +1370,7 @@ This option takes a number argument <span class="file">modulus</span>.
 <p><hr>
 <a name="ntp_002dkeygen-pvt_002dcert"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#ntp_002dkeygen-pvt_002dpasswd">ntp-keygen pvt-passwd</a>,
 Previous:&nbsp;<a rel="previous" accesskey="p" href="#ntp_002dkeygen-modulus">ntp-keygen modulus</a>,
-Up:&nbsp;<a rel="up" accesskey="u" href="#Cryptographic-Data-Files">Cryptographic Data Files</a>
+Up:&nbsp;<a rel="up" accesskey="u" href="#ntp_002dkeygen-Invocation">ntp-keygen Invocation</a>
 <br>
 </div>
 
@@ -1425,7 +1390,7 @@ public certificates.
 <p><hr>
 <a name="ntp_002dkeygen-pvt_002dpasswd"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#ntp_002dkeygen-get_002dpvt_002dpasswd">ntp-keygen get-pvt-passwd</a>,
 Previous:&nbsp;<a rel="previous" accesskey="p" href="#ntp_002dkeygen-pvt_002dcert">ntp-keygen pvt-cert</a>,
-Up:&nbsp;<a rel="up" accesskey="u" href="#Cryptographic-Data-Files">Cryptographic Data Files</a>
+Up:&nbsp;<a rel="up" accesskey="u" href="#ntp_002dkeygen-Invocation">ntp-keygen Invocation</a>
 <br>
 </div>
 
@@ -1446,7 +1411,7 @@ password and the cipher selected with <code>-C/--cipher</code>.
 <p><hr>
 <a name="ntp_002dkeygen-get_002dpvt_002dpasswd"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#ntp_002dkeygen-sign_002dkey">ntp-keygen sign-key</a>,
 Previous:&nbsp;<a rel="previous" accesskey="p" href="#ntp_002dkeygen-pvt_002dpasswd">ntp-keygen pvt-passwd</a>,
-Up:&nbsp;<a rel="up" accesskey="u" href="#Cryptographic-Data-Files">Cryptographic Data Files</a>
+Up:&nbsp;<a rel="up" accesskey="u" href="#ntp_002dkeygen-Invocation">ntp-keygen Invocation</a>
 <br>
 </div>
 
@@ -1466,7 +1431,7 @@ This option takes a string argument <span class="file">passwd</span>.
 <p><hr>
 <a name="ntp_002dkeygen-sign_002dkey"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#ntp_002dkeygen-subject_002dname">ntp-keygen subject-name</a>,
 Previous:&nbsp;<a rel="previous" accesskey="p" href="#ntp_002dkeygen-get_002dpvt_002dpasswd">ntp-keygen get-pvt-passwd</a>,
-Up:&nbsp;<a rel="up" accesskey="u" href="#Cryptographic-Data-Files">Cryptographic Data Files</a>
+Up:&nbsp;<a rel="up" accesskey="u" href="#ntp_002dkeygen-Invocation">ntp-keygen Invocation</a>
 <br>
 </div>
 
@@ -1488,7 +1453,7 @@ sign key.
 <p><hr>
 <a name="ntp_002dkeygen-subject_002dname"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#ntp_002dkeygen-trusted_002dcert">ntp-keygen trusted-cert</a>,
 Previous:&nbsp;<a rel="previous" accesskey="p" href="#ntp_002dkeygen-sign_002dkey">ntp-keygen sign-key</a>,
-Up:&nbsp;<a rel="up" accesskey="u" href="#Cryptographic-Data-Files">Cryptographic Data Files</a>
+Up:&nbsp;<a rel="up" accesskey="u" href="#ntp_002dkeygen-Invocation">ntp-keygen Invocation</a>
 <br>
 </div>
 
@@ -1517,7 +1482,7 @@ of IFF, GQ, and MV client parameter files.
 <p><hr>
 <a name="ntp_002dkeygen-trusted_002dcert"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#ntp_002dkeygen-mv_002dparams">ntp-keygen mv-params</a>,
 Previous:&nbsp;<a rel="previous" accesskey="p" href="#ntp_002dkeygen-subject_002dname">ntp-keygen subject-name</a>,
-Up:&nbsp;<a rel="up" accesskey="u" href="#Cryptographic-Data-Files">Cryptographic Data Files</a>
+Up:&nbsp;<a rel="up" accesskey="u" href="#ntp_002dkeygen-Invocation">ntp-keygen Invocation</a>
 <br>
 </div>
 
@@ -1537,7 +1502,7 @@ a non-trusted certificate.
 <p><hr>
 <a name="ntp_002dkeygen-mv_002dparams"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#ntp_002dkeygen-mv_002dkeys">ntp-keygen mv-keys</a>,
 Previous:&nbsp;<a rel="previous" accesskey="p" href="#ntp_002dkeygen-trusted_002dcert">ntp-keygen trusted-cert</a>,
-Up:&nbsp;<a rel="up" accesskey="u" href="#Cryptographic-Data-Files">Cryptographic Data Files</a>
+Up:&nbsp;<a rel="up" accesskey="u" href="#ntp_002dkeygen-Invocation">ntp-keygen Invocation</a>
 <br>
 </div>
 
@@ -1558,7 +1523,7 @@ identification scheme.
 <p><hr>
 <a name="ntp_002dkeygen-mv_002dkeys"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#ntp_002dkeygen-config">ntp-keygen config</a>,
 Previous:&nbsp;<a rel="previous" accesskey="p" href="#ntp_002dkeygen-mv_002dparams">ntp-keygen mv-params</a>,
-Up:&nbsp;<a rel="up" accesskey="u" href="#Cryptographic-Data-Files">Cryptographic Data Files</a>
+Up:&nbsp;<a rel="up" accesskey="u" href="#ntp_002dkeygen-Invocation">ntp-keygen Invocation</a>
 <br>
 </div>
 
@@ -1579,7 +1544,7 @@ This option takes a number argument <span class="file">num</span>.
 <p><hr>
 <a name="ntp_002dkeygen-config"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#ntp_002dkeygen-exit-status">ntp-keygen exit status</a>,
 Previous:&nbsp;<a rel="previous" accesskey="p" href="#ntp_002dkeygen-mv_002dkeys">ntp-keygen mv-keys</a>,
-Up:&nbsp;<a rel="up" accesskey="u" href="#Cryptographic-Data-Files">Cryptographic Data Files</a>
+Up:&nbsp;<a rel="up" accesskey="u" href="#ntp_002dkeygen-Invocation">ntp-keygen Invocation</a>
 <br>
 </div>
 
@@ -1651,7 +1616,7 @@ Only the first letter of the argument is examined:
 <p><hr>
 <a name="ntp_002dkeygen-exit-status"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#ntp_002dkeygen-Usage">ntp-keygen Usage</a>,
 Previous:&nbsp;<a rel="previous" accesskey="p" href="#ntp_002dkeygen-config">ntp-keygen config</a>,
-Up:&nbsp;<a rel="up" accesskey="u" href="#Cryptographic-Data-Files">Cryptographic Data Files</a>
+Up:&nbsp;<a rel="up" accesskey="u" href="#ntp_002dkeygen-Invocation">ntp-keygen Invocation</a>
 <br>
 </div>
 
@@ -1669,7 +1634,7 @@ it to autogen-users@lists.sourceforge.net.  Thank you.
 <p><hr>
 <a name="ntp_002dkeygen-Usage"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#ntp_002dkeygen-Notes">ntp-keygen Notes</a>,
 Previous:&nbsp;<a rel="previous" accesskey="p" href="#ntp_002dkeygen-exit-status">ntp-keygen exit status</a>,
-Up:&nbsp;<a rel="up" accesskey="u" href="#Cryptographic-Data-Files">Cryptographic Data Files</a>
+Up:&nbsp;<a rel="up" accesskey="u" href="#ntp_002dkeygen-Invocation">ntp-keygen Invocation</a>
 <br>
 </div>
 
@@ -1679,7 +1644,7 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#Cryptographic-Data-Files">Cryptographi
 <p><hr>
 <a name="ntp_002dkeygen-Notes"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#ntp_002dkeygen-Bugs">ntp-keygen Bugs</a>,
 Previous:&nbsp;<a rel="previous" accesskey="p" href="#ntp_002dkeygen-Usage">ntp-keygen Usage</a>,
-Up:&nbsp;<a rel="up" accesskey="u" href="#Cryptographic-Data-Files">Cryptographic Data Files</a>
+Up:&nbsp;<a rel="up" accesskey="u" href="#ntp_002dkeygen-Invocation">ntp-keygen Invocation</a>
 <br>
 </div>
 
@@ -1688,7 +1653,7 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#Cryptographic-Data-Files">Cryptographi
 <div class="node">
 <p><hr>
 <a name="ntp_002dkeygen-Bugs"></a>Previous:&nbsp;<a rel="previous" accesskey="p" href="#ntp_002dkeygen-Notes">ntp-keygen Notes</a>,
-Up:&nbsp;<a rel="up" accesskey="u" href="#Cryptographic-Data-Files">Cryptographic Data Files</a>
+Up:&nbsp;<a rel="up" accesskey="u" href="#ntp_002dkeygen-Invocation">ntp-keygen Invocation</a>
 <br>
 </div>
 

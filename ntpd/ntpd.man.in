@@ -10,11 +10,11 @@
 .ds B-Font B
 .ds I-Font I
 .ds R-Font R
-.TH ntpd @NTPD_MS@ "22 Dec 2013" "4.2.7p402" "User Commands"
+.TH ntpd @NTPD_MS@ "23 Dec 2013" "4.2.7p403" "User Commands"
 .\"
-.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-IraWmM/ag-VraWlM)
+.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-QIaOe2/ag-2IaOd2)
 .\"
-.\" It has been AutoGen-ed December 22, 2013 at 11:07:08 PM by AutoGen 5.18.3pre5
+.\" It has been AutoGen-ed December 23, 2013 at 11:37:08 AM by AutoGen 5.18.3pre5
 .\" From the definitions ntpd-opts.def
 .\" and the template file agman-cmd.tpl
 .SH NAME
@@ -434,11 +434,11 @@ by loading values from environment variables named:
   \fBNTPD_<option-name>\fP or \fBNTPD\fP
 .fi
 .ad
-.TH ntpd @NTPD_MS@ "22 Dec 2013" "4.2.7p402" "User Commands"
+.TH ntpd @NTPD_MS@ "23 Dec 2013" "4.2.7p403" "User Commands"
 .\"
-.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-IraWmM/ag-VraWlM)
+.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-QIaOe2/ag-2IaOd2)
 .\"
-.\" It has been AutoGen-ed December 22, 2013 at 11:07:08 PM by AutoGen 5.18.3pre5
+.\" It has been AutoGen-ed December 23, 2013 at 11:37:08 AM by AutoGen 5.18.3pre5
 .\" From the definitions ntpd-opts.def
 .\" and the template file agman-cmd.tpl
 .SH NAME
@@ -999,7 +999,7 @@ mind.
 
 Please send bug reports to: http://bugs.ntp.org, bugs@ntp.org
 .SH NOTES
-This document corresponds to version 4.2.7p402 of NTP.
+This document corresponds to version 4.2.7p403 of NTP.
 Portions of this document came from FreeBSD.
 .sp \n(Ppu
 .ne 2

@@ -44,7 +44,7 @@ monitor the operational status
 and determine the performance of
 <code>ntpd</code>, the NTP daemon.
 
-  <p>This document applies to version 4.2.7p402 of <code>ntpq</code>.
+  <p>This document applies to version 4.2.7p403 of <code>ntpq</code>.
 
 <ul class="menu">
 <li><a accesskey="1" href="#ntpq-Description">ntpq Description</a>
@@ -158,14 +158,9 @@ host(s) immediately.
 Otherwise,
 <code>ntpq</code>
 will attempt to read
-interactive format commands from the standard input. 
-<div class="node">
-<p><hr>
-<a name="Internal-Commands"></a>
-<br>
-</div>
+interactive format commands from the standard input.
 
-<h3 class="section">Internal Commands</h3>
+<h5 class="subsubsection">Internal Commands</h5>
 
 <p>Interactive format commands consist of a keyword followed by zero
 to four arguments. 
@@ -180,11 +175,11 @@ utility itself and do not result in NTP mode 6
 requests being sent to a server. 
 These are described following.
      <dl>
-<dt>? [<kbd>command_keyword</kbd>]<br><dt><code>help</code> [<kbd>command_keyword</kbd>]<dd>A
+<dt><code>?</code> <code>[</code><kbd>command_keyword</kbd><code>]</code><br><dt><code>help</code> <code>[</code><kbd>command_keyword</kbd><code>]</code><dd>A
 ? 
 by itself will print a list of all the command
 keywords known to this incarnation of
-<code>ntpq</code>. 
+<code>ntpq</code>
 A
 ? 
 followed by a command keyword will print function and usage
@@ -194,11 +189,7 @@ source of information about
 <code>ntpq</code>
 than this manual
 page. 
-<br><dt><code>addvars</code> <kbd>variable_name</kbd>[<code>=value</code>]<dd><code>...</code>
-
-     <p>rmvars<kbd>variable_name</kbd><code>...</code>
-clearvars
-The data carried by NTP mode 6 messages consists of a list of
+<br><dt><code>addvars</code> <kbd>variable_name</kbd> <code>[=value]</code> <code>...</code><br><dt><code>rmvars</code> <kbd>variable_name</kbd> <code>...</code><br><dt><code>clearvars</code><dd>The data carried by NTP mode 6 messages consists of a list of
 items of the form
 variable_name=value,
 where the
@@ -226,13 +217,12 @@ while the
 <code>clearlist</code>
 command removes all variables from the
 list. 
-authenticate[yes]|no
-Normally
+<br><dt><code>authenticate</code> <code>[yes | no]</code><dd>Normally
 <code>ntpq</code>
 does not authenticate requests unless
 they are write requests. 
 The command
-authenticateyes
+authenticate yes
 causes
 <code>ntpq</code>
 to send authentication with all requests it
@@ -249,8 +239,7 @@ causes
 to display whether or not
 <code>ntpq</code>
 is currently autheinticating requests. 
-cooked
-Causes output from query commands to be "cooked", so that
+<br><dt><code>cooked</code><dd>Causes output from query commands to be "cooked", so that
 variables which are recognized by
 <code>ntpq</code>
 will have their
@@ -260,11 +249,9 @@ Variables which
 thinks should have a decodable value but didn't are
 marked with a trailing
 ?. 
-debugOo<code>more</code>|<code>less</code>|<code>off</code>Oc
-With no argument, displays the current debug level. 
+<br><dt><code>debug</code> <code>[more | less | off]</code><dd>With no argument, displays the current debug level. 
 Otherwise, the debug level is changed to the indicated level. 
-delay<kbd>milliseconds</kbd>
-Specify a time interval to be added to timestamps included in
+<br><dt><code>delay</code> <kbd>milliseconds</kbd><dd>Specify a time interval to be added to timestamps included in
 requests which require authentication. 
 This is used to enable
 (unreliable) server reconfiguration over long delay network paths
@@ -272,12 +259,10 @@ or between machines whose clocks are unsynchronized.
 Actually the
 server does not now require timestamps in authenticated requests,
 so this command may be obsolete. 
-host<kbd>hostname</kbd>
-Set the host to which future queries will be sent. 
+<br><dt><code>host</code> <kbd>hostname</kbd><dd>Set the host to which future queries will be sent. 
 <kbd>hostname</kbd>
 may be either a host name or a numeric address. 
-hostnames[<code>yes</code>|<code>Cm</code><code>no</code>]
-If
+<br><dt><code>hostnames</code> <code>[yes | no]</code><dd>If
 <code>yes</code>
 is specified, host names are printed in
 information displays. 
@@ -291,20 +276,12 @@ unless
 modified using the command line
 <code>-n</code>
 switch. 
-keyid<kbd>keyid</kbd>
-This command allows the specification of a key number to be
+<br><dt><code>keyid</code> <kbd>keyid</kbd><dd>This command allows the specification of a key number to be
 used to authenticate configuration requests. 
 This must correspond
 to a key number the server has been configured to use for this
 purpose. 
-ntpversion<code>Oo</code>
-<code>1</code>|
-<code>2</code>|
-<code>3</code>|
-<code>4</code>
-Oc
-
-     <p>Sets the NTP version number which
+<br><dt><code>ntpversion</code> <code>[1 | 2 | 3 | 4]</code><dd>Sets the NTP version number which
 <code>ntpq</code>
 claims in
 packets. 
@@ -314,24 +291,20 @@ There appear
 to be no servers left which demand version 1. 
 With no argument, displays the current NTP version that will be used
 when communicating with servers. 
-quit
-Exit
+<br><dt><code>quit</code><dd>Exit
 <code>ntpq</code>
-passwd
-This command prompts you to type in a password (which will not
+<br><dt><code>passwd</code><dd>This command prompts you to type in a password (which will not
 be echoed) which will be used to authenticate configuration
 requests. 
 The password must correspond to the key configured for
 use by the NTP server for this purpose if such requests are to be
 successful. 
-raw
-Causes all output from query commands is printed as received
+<br><dt><code>raw</code><dd>Causes all output from query commands is printed as received
 from the remote server. 
 The only formating/interpretation done on
 the data is to transform nonascii data into a printable (but barely
 understandable) form. 
-timeout<kbd>milliseconds</kbd>
-Specify a timeout period for responses to server queries. 
+<br><dt><code>timeout</code> <kbd>milliseconds</kbd><dd>Specify a timeout period for responses to server queries. 
 The
 default is about 5000 milliseconds. 
 Note that since
@@ -360,7 +333,7 @@ This software is released under the NTP license, &lt;http://ntp.org/license&gt;.
 <div class="node">
 <p><hr>
 <a name="ntpq-usage"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#ntpq-ipv4">ntpq ipv4</a>,
-Up:&nbsp;<a rel="up" accesskey="u" href="#Internal-Commands">Internal Commands</a>
+Up:&nbsp;<a rel="up" accesskey="u" href="#ntpq-Invocation">ntpq Invocation</a>
 <br>
 </div>
 
@@ -377,7 +350,7 @@ the usage text by passing it through a pager program.
 used to select the program, defaulting to <span class="file">more</span>.  Both will exit
 with a status code of 0.
 
-<pre class="example">ntpq - standard NTP query program - Ver. 4.2.7p401
+<pre class="example">ntpq - standard NTP query program - Ver. 4.2.7p402
 Usage:  ntpq [ -&lt;flag&gt; [&lt;val&gt;] | --&lt;name&gt;[{=| }&lt;val&gt;] ]... [ host ...]
   Flg Arg Option-Name    Description
    -4 no  ipv4           Force IPv4 DNS name resolution
@@ -422,7 +395,7 @@ exit 0
 <p><hr>
 <a name="ntpq-ipv4"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#ntpq-ipv6">ntpq ipv6</a>,
 Previous:&nbsp;<a rel="previous" accesskey="p" href="#ntpq-usage">ntpq usage</a>,
-Up:&nbsp;<a rel="up" accesskey="u" href="#Internal-Commands">Internal Commands</a>
+Up:&nbsp;<a rel="up" accesskey="u" href="#ntpq-Invocation">ntpq Invocation</a>
 <br>
 </div>
 
@@ -443,7 +416,7 @@ to the IPv4 namespace.
 <p><hr>
 <a name="ntpq-ipv6"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#ntpq-command">ntpq command</a>,
 Previous:&nbsp;<a rel="previous" accesskey="p" href="#ntpq-ipv4">ntpq ipv4</a>,
-Up:&nbsp;<a rel="up" accesskey="u" href="#Internal-Commands">Internal Commands</a>
+Up:&nbsp;<a rel="up" accesskey="u" href="#ntpq-Invocation">ntpq Invocation</a>
 <br>
 </div>
 
@@ -464,7 +437,7 @@ to the IPv6 namespace.
 <p><hr>
 <a name="ntpq-command"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#ntpq-peers">ntpq peers</a>,
 Previous:&nbsp;<a rel="previous" accesskey="p" href="#ntpq-ipv6">ntpq ipv6</a>,
-Up:&nbsp;<a rel="up" accesskey="u" href="#Internal-Commands">Internal Commands</a>
+Up:&nbsp;<a rel="up" accesskey="u" href="#ntpq-Invocation">ntpq Invocation</a>
 <br>
 </div>
 
@@ -486,7 +459,7 @@ host(s).
 <p><hr>
 <a name="ntpq-peers"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#ntpq-interactive">ntpq interactive</a>,
 Previous:&nbsp;<a rel="previous" accesskey="p" href="#ntpq-command">ntpq command</a>,
-Up:&nbsp;<a rel="up" accesskey="u" href="#Internal-Commands">Internal Commands</a>
+Up:&nbsp;<a rel="up" accesskey="u" href="#ntpq-Invocation">ntpq Invocation</a>
 <br>
 </div>
 
@@ -507,7 +480,7 @@ of their state. This is equivalent to the 'peers' interactive command.
 <p><hr>
 <a name="ntpq-interactive"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#ntpq-numeric">ntpq numeric</a>,
 Previous:&nbsp;<a rel="previous" accesskey="p" href="#ntpq-peers">ntpq peers</a>,
-Up:&nbsp;<a rel="up" accesskey="u" href="#Internal-Commands">Internal Commands</a>
+Up:&nbsp;<a rel="up" accesskey="u" href="#ntpq-Invocation">ntpq Invocation</a>
 <br>
 </div>
 
@@ -529,7 +502,7 @@ commands read from the standard input.
 <p><hr>
 <a name="ntpq-numeric"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#ntpq-old_002drv">ntpq old-rv</a>,
 Previous:&nbsp;<a rel="previous" accesskey="p" href="#ntpq-interactive">ntpq interactive</a>,
-Up:&nbsp;<a rel="up" accesskey="u" href="#Internal-Commands">Internal Commands</a>
+Up:&nbsp;<a rel="up" accesskey="u" href="#ntpq-Invocation">ntpq Invocation</a>
 <br>
 </div>
 
@@ -543,7 +516,7 @@ converting to the canonical host names.
 <p><hr>
 <a name="ntpq-old_002drv"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#ntpq-config">ntpq config</a>,
 Previous:&nbsp;<a rel="previous" accesskey="p" href="#ntpq-numeric">ntpq numeric</a>,
-Up:&nbsp;<a rel="up" accesskey="u" href="#Internal-Commands">Internal Commands</a>
+Up:&nbsp;<a rel="up" accesskey="u" href="#ntpq-Invocation">ntpq Invocation</a>
 <br>
 </div>
 
@@ -565,7 +538,7 @@ newer <code>ntpq</code> to behave identically in this regard.
 <p><hr>
 <a name="ntpq-config"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#ntpq-exit-status">ntpq exit status</a>,
 Previous:&nbsp;<a rel="previous" accesskey="p" href="#ntpq-old_002drv">ntpq old-rv</a>,
-Up:&nbsp;<a rel="up" accesskey="u" href="#Internal-Commands">Internal Commands</a>
+Up:&nbsp;<a rel="up" accesskey="u" href="#ntpq-Invocation">ntpq Invocation</a>
 <br>
 </div>
 
@@ -636,7 +609,7 @@ Only the first letter of the argument is examined:
 <div class="node">
 <p><hr>
 <a name="ntpq-exit-status"></a>Previous:&nbsp;<a rel="previous" accesskey="p" href="#ntpq-config">ntpq config</a>,
-Up:&nbsp;<a rel="up" accesskey="u" href="#Internal-Commands">Internal Commands</a>
+Up:&nbsp;<a rel="up" accesskey="u" href="#ntpq-Invocation">ntpq Invocation</a>
 <br>
 </div>
 

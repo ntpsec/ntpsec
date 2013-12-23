@@ -10,11 +10,11 @@
 .ds B-Font B
 .ds I-Font I
 .ds R-Font R
-.TH ntpsnmpd @NTPSNMPD_MS@ "22 Dec 2013" "4.2.7p402" "User Commands"
+.TH ntpsnmpd @NTPSNMPD_MS@ "23 Dec 2013" "4.2.7p403" "User Commands"
 .\"
-.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-LhaGNQ/ag-YhaGMQ)
+.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-XCayB6/ag-9CayA6)
 .\"
-.\" It has been AutoGen-ed December 22, 2013 at 11:08:38 PM by AutoGen 5.18.3pre5
+.\" It has been AutoGen-ed December 23, 2013 at 11:38:09 AM by AutoGen 5.18.3pre5
 .\" From the definitions ntpsnmpd-opts.def
 .\" and the template file agman-cmd.tpl
 .SH NAME
@@ -95,6 +95,16 @@ the configuration files.
 The \fIhomerc\fP files are "\fI$HOME\fP", and "\fI.\fP".
 If any of these are directories, then the file \fI.ntprc\fP
 is searched for within those directories.
+.TH ntpsnmpd @NTPSNMPD_MS@ "23 Dec 2013" "4.2.7p403" "User Commands"
+.\"
+.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-XCayB6/ag-9CayA6)
+.\"
+.\" It has been AutoGen-ed December 23, 2013 at 11:38:09 AM by AutoGen 5.18.3pre5
+.\" From the definitions ntpsnmpd-opts.def
+.\" and the template file agman-cmd.tpl
+.SH NAME
+\f\*[B-Font]ntpsnmpd\fP ntpsnmpd
+\- NTP SNMP MIB agent
 cvt_prog='/usr/local/gnu/share/autogen/texi2man'
 cvt_prog=`cd \`dirname "$cvt_prog"\` >/dev/null && pwd
          `/`basename "$cvt_prog"`
@@ -114,16 +124,6 @@ test \-x "$cvt_prog" || die "'$cvt_prog' is not executable"
     rm \-f $list
 } 1>.doc 2>/dev/null
 sed \-f .cmds .doc | /usr/local/gnu/bin/grep \-E \-v '^[ 	]*$' | $cvt_prog
-.TH ntpsnmpd @NTPSNMPD_MS@ "22 Dec 2013" "4.2.7p402" "User Commands"
-.\"
-.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-LhaGNQ/ag-YhaGMQ)
-.\"
-.\" It has been AutoGen-ed December 22, 2013 at 11:08:38 PM by AutoGen 5.18.3pre5
-.\" From the definitions ntpsnmpd-opts.def
-.\" and the template file agman-cmd.tpl
-.SH NAME
-\f\*[B-Font]ntpsnmpd\fP ntpsnmpd
-\- NTP SNMP MIB agent
 .SH USAGE
 \f\*[B-Font]ntpsnmpd\fP
 currently uses a private MIB OID,
@@ -228,7 +228,7 @@ please fill me in...
 .sp \n(Ppu
 .ne 2
 
-This document corresponds to version 4.2.7p402 of NTP.
+This document corresponds to version 4.2.7p403 of NTP.
 .sp \n(Ppu
 .ne 2
 
