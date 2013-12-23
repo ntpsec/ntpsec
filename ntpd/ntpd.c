@@ -1143,6 +1143,10 @@ finish(
 		sig_desc = "";
 	msyslog(LOG_NOTICE, "%s exiting on signal %d (%s)", progname,
 		sig, sig_desc);
+	if (HAVE_OPT( PIDFILE ))
+		if (-1 == unlink(OPT_ARG( PIDFILE )))
+			msyslog(LOG_NOTICE, "unlink(\"%s\") failed: %m",
+				OPT_ARG( PIDFILE ));
 # ifdef HAVE_DNSREGISTRATION
 	if (mdns != NULL)
 		DNSServiceRefDeallocate(mdns);
