@@ -6,7 +6,7 @@
 #
 # EDIT THIS FILE WITH CAUTION  (invoke-ntp-keygen.texi)
 #
-# It has been AutoGen-ed  November 30, 2013 at 11:33:28 AM by AutoGen 5.18.3pre5
+# It has been AutoGen-ed  December 22, 2013 at 11:09:05 PM by AutoGen 5.18.3pre5
 # From the definitions    ntp-keygen-opts.def
 # and the template file   agtexi-cmd.tpl
 @end ignore
@@ -58,7 +58,7 @@ option specifies the password for local encrypted files and the
 @code{-q}
 option the password for encrypted files sent to remote sites.
 If no password is specified, the host name returned by the Unix
-@code{gethostname}()
+@code{gethostname()}
 function, normally the DNS name of the host is used.
 
 The
@@ -104,10 +104,7 @@ and include the file type, generating host and filestamp,
 as described in the
 @quotedblleft{}Cryptographic Data Files@quotedblright{}
 section below.
-@node Running the Program
-@section Running the Program
-
-
+@subsubsection Running the Program
 To test and gain experience with Autokey concepts, log in as root and
 change to the keys directory, usually
 @file{/usr/local/etc}
@@ -242,10 +239,7 @@ The
 program uses the same timestamp extension for all files generated
 at one time, so each generation is distinct and can be readily
 recognized in monitoring data.
-@node Running the program
-@section Running the program
-
-
+@subsubsection Running the program
 The safest way to run the
 @code{ntp-keygen}
 program is logged in directly as root.
@@ -364,10 +358,7 @@ The
 program uses the same timestamp extension for all files generated
 at one time, so each generation is distinct and can be readily
 recognized in monitoring data.
-@node Running the program
-@section Running the program
-
-
+@subsubsection Running the program
 The safest way to run the
 @code{ntp-keygen}
 program is logged in directly as root.
@@ -491,7 +482,7 @@ If it is necessary to use a different sign key or different digest/signature
 scheme than the default, run
 @code{ntp-keygen}
 with the
-@code{-S} @kbd{-type}
+@code{-S} @kbd{type}
 option, where
 @kbd{type}
 is either
@@ -503,7 +494,7 @@ If it is necessary to use a different certificate scheme than the default,
 run
 @code{ntp-keygen}
 with the
-@code{-c} @kbd{-scheme}
+@code{-c} @kbd{scheme}
 option and selected
 @kbd{scheme}
 as needed.
@@ -526,10 +517,7 @@ When
 is restarted, it loads any new files and restarts the protocol.
 Other dependent hosts will continue as usual until signatures are refreshed,
 at which time the protocol is restarted.
-@node Identity Schemes
-@section Identity Schemes
-
-
+@subsubsection Identity Schemes
 As mentioned on the Autonomous Authentication page,
 the default TC identity scheme is vulnerable to a middleman attack.
 However, there are more secure identity schemes available,
@@ -560,7 +548,7 @@ The PC scheme supports only one trusted host in the group.
 On trusted host alice run
 @code{ntp-keygen}
 @code{-P}
-@code{-p} @kbd{-password}
+@code{-p} @kbd{password}
 to generate the host key file
 @file{ntpkey_RSAkey_}@kbd{alice.filestamp}
 and trusted private certificate file
@@ -585,7 +573,7 @@ On trusted host alice run
 @code{ntp-keygen}
 @code{-T}
 @code{-I}
-@code{-p} @kbd{-password}
+@code{-p} @kbd{password}
 to produce her parameter file
 @file{ntpkey_IFFpar_}@kbd{alice.filestamp},
 which includes both server and client keys.
@@ -620,7 +608,7 @@ On trusted host alice run
 @code{ntp-keygen}
 @code{-T}
 @code{-G}
-@code{-p} @kbd{-password}
+@code{-p} @kbd{password}
 to produce her parameter file
 @file{ntpkey_GQpar_}@kbd{alice.filestamp},
 which includes both server and client keys.
@@ -641,8 +629,8 @@ For illustration assume trish is the TA, alice one of several trusted hosts
 and bob one of her clients.
 On TA trish run
 @code{ntp-keygen}
-@code{-V} @kbd{-n}
-@code{-p} @kbd{-password},
+@code{-V} @kbd{n}
+@code{-p} @kbd{password},
 where
 @kbd{n}
 is the number of revokable keys (typically 5) to produce
@@ -652,9 +640,9 @@ and client key files
 @file{ntpkeys_MVkeyd_}@kbd{trish.filestamp}
 where
 @kbd{d}
-is the key number (0 \&<
+is the key number (0 <
 @kbd{d}
-\&<
+<
 @kbd{n}).
 Copy the parameter file to alice and install a soft link
 from the generic
@@ -670,18 +658,14 @@ On client bob install a soft link from generic
 to the client key file.
 As the MV scheme is independent of keys and certificates,
 these files can be refreshed as needed.
-@node Command Line Options
-@section Command Line Options
-
-
+@subsubsection Command Line Options
 @table @asis
-
-@item @code{-c} @kbd{-scheme}
+@item @code{-c} @kbd{scheme}
 Select certificate message digest/signature encryption scheme.
 The
 @kbd{scheme}
 can be one of the following:
-
+. Cm RSA-MD2 , RSA-MD5 , RSA-SHA , RSA-SHA1 , RSA-MDC2 , RSA-RIPEMD160 , DSA-SHA ,
 or
 @code{DSA-SHA1}.
 Note that RSA schemes must be used with a RSA sign key and DSA
@@ -706,7 +690,7 @@ Generate new host keys, obsoleting any that may exist.
 @item @code{-I}
 Generate parameters for the IFF identification scheme,
 obsoleting any that may exist.
-@item @code{-i} @kbd{-name}
+@item @code{-i} @kbd{name}
 Set the suject name to
 @kbd{name}.
 This is used as the subject field in certificates
@@ -716,17 +700,17 @@ Generate MD5 keys, obsoleting any that may exist.
 @item @code{-P}
 Generate a private certificate.
 By default, the program generates public certificates.
-@item @code{-p} @kbd{-password}
+@item @code{-p} @kbd{password}
 Encrypt generated files containing private data with
 @kbd{password}
 and the DES-CBC algorithm.
 @item @code{-q}
 Set the password for reading files to password.
-@item @code{-S} @code{-Oo} @code{-Cm} @code{-RSA} @code{-} | @code{-DSA} @code{-Oc}
+@item @code{-S} @code{[@code{RSA} | @code{DSA}]}
 Generate a new sign key of the designated type,
 obsoleting any that may exist.
 By default, the program uses the host key as the sign key.
-@item @code{-s} @kbd{-name}
+@item @code{-s} @kbd{name}
 Set the issuer name to
 @kbd{name}.
 This is used for the issuer field in certificates
@@ -734,13 +718,10 @@ and in the file name for identity files.
 @item @code{-T}
 Generate a trusted certificate.
 By default, the program generates a non-trusted certificate.
-@item @code{-V} @kbd{-nkeys}
+@item @code{-V} @kbd{nkeys}
 Generate parameters and keys for the Mu-Varadharajan (MV) identification scheme.
 @end table
-@node Random Seed File
-@section Random Seed File
-
-
+@subsubsection Random Seed File
 All cryptographically sound key generation schemes must have means
 to randomize the entropy seed used to initialize
 the internal pseudo-random number generator used
@@ -778,11 +759,11 @@ If not specified in this way, or when starting the
 program,
 the OpenSSL library will look for the file using the path specified
 by the
-Ev RANDFILE
+.Ev RANDFILE
 environment variable in the user home directory,
 whether root or some other user.
 If the
-Ev RANDFILE
+.Ev RANDFILE
 environment variable is not present,
 the library will look for the
 @code{.rnd}
@@ -790,10 +771,7 @@ file in the user home directory.
 If the file is not available or cannot be written,
 the daemon exits with a message to the system log and the program
 exits with a suitable error message.
-@node Cryptographic Data Files
-@section Cryptographic Data Files
-
-
+@subsubsection Cryptographic Data Files
 All other file formats begin with two lines.
 The first contains the file name, including the generated host name
 and filestamp.
@@ -908,7 +886,7 @@ with a status code of 0.
 
 @exampleindent 0
 @example
-ntp-keygen (ntp) - Create a NTP host key - Ver. 4.2.7p401
+ntp-keygen (ntp) - Create a NTP host key - Ver. 4.2.7p402
 Usage:  ntp-keygen [ -<flag> [<val>] | --<name>[@{=| @}<val>] ]...
   Flg Arg Option-Name    Description
    -b Num imbits         identity modulus bits

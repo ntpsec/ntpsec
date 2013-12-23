@@ -21,6 +21,9 @@ EXTRA_DIST =			\
 
 html_DATA = ntpsweep.html
 
+CLEANFILES = ntpsweep.1
+DISTCLEANFILES = config.log
+
 noinst_DATA =			\
 	ntpsweep.1		\
 	ntpsweep.1ntpsweepman	\

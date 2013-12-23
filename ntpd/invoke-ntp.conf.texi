@@ -6,7 +6,7 @@
 #
 # EDIT THIS FILE WITH CAUTION  (invoke-ntp.conf.texi)
 #
-# It has been AutoGen-ed  November 30, 2013 at 11:31:06 AM by AutoGen 5.18.3pre5
+# It has been AutoGen-ed  December 22, 2013 at 11:07:13 PM by AutoGen 5.18.3pre5
 # From the definitions    ntp.conf.def
 # and the template file   agtexi-file.tpl
 @end ignore
@@ -28,7 +28,7 @@ but could be installed elsewhere
 command line option).
 
 The file format is similar to other
-@sc{UNIX}
+@sc{unix}
 configuration files.
 Comments begin with a
 @quoteleft{}#@quoteright{}
@@ -56,18 +56,17 @@ In addition to the discussion of general
 there are sections describing the following supported functionality
 and the options used to control it:
 @itemize @bullet
-
-@item
+@item 
 @ref{Authentication Support}
-@item
+@item 
 @ref{Monitoring Support}
-@item
+@item 
 @ref{Access Control Support}
-@item
+@item 
 @ref{Automatic NTP Configuration Options}
-@item
+@item 
 @ref{Reference Clock Support}
-@item
+@item 
 @ref{Miscellaneous Options}
 @end itemize
 
@@ -83,9 +82,7 @@ or
 @code{manycastclient}
 commands.
 @node Configuration Support
-@section Configuration Support
-
-
+@subsection Configuration Support
 Following is a description of the configuration commands in
 NTPv4.
 These commands have the same basic functions as in NTPv3 and
@@ -95,10 +92,7 @@ classes of commands, configuration commands that configure a
 persistent association with a remote server or peer or reference
 clock, and auxiliary commands that specify environmental variables
 that control various related operations.
-@node Configuration Commands
-@section Configuration Commands
-
-
+@subsubsection Configuration Commands
 The various modes are determined by the command keyword and the
 type of the required IP address.
 Addresses are classed by type as
@@ -134,12 +128,11 @@ qualifier forces DNS resolution to the IPv6 namespace.
 See IPv6 references for the
 equivalent classes for that address family.
 @table @asis
-
-@item @code{pool} @kbd{address}[@code{burst}][@code{iburst}][@code{version} @kbd{version}][@code{prefer}][@code{minpoll} @kbd{minpoll}][@code{maxpoll} @kbd{maxpoll}]
-@item @code{server} @kbd{address}[@code{key} @kbd{key} @kbd{|} @kbd{Cm} @kbd{autokey}][@code{burst}][@code{iburst}][@code{version} @kbd{version}][@code{prefer}][@code{minpoll} @kbd{minpoll}][@code{maxpoll} @kbd{maxpoll}]
-@item @code{peer} @kbd{address}[@code{key} @kbd{key} @kbd{|} @kbd{Cm} @kbd{autokey}][@code{version} @kbd{version}][@code{prefer}][@code{minpoll} @kbd{minpoll}][@code{maxpoll} @kbd{maxpoll}]
-@item @code{broadcast} @kbd{address}[@code{key} @kbd{key} @kbd{|} @kbd{Cm} @kbd{autokey}][@code{version} @kbd{version}][@code{prefer}][@code{minpoll} @kbd{minpoll}][@code{ttl} @kbd{ttl}]
-@item @code{manycastclient} @kbd{address}[@code{key} @kbd{key} @kbd{|} @kbd{Cm} @kbd{autokey}][@code{version} @kbd{version}][@code{prefer}][@code{minpoll} @kbd{minpoll}][@code{maxpoll} @kbd{maxpoll}][@code{ttl} @kbd{ttl}]
+@item @code{pool} @kbd{address} @code{[@code{burst}]} @code{[@code{iburst}]} @code{[@code{version} @kbd{version}]} @code{[@code{prefer}]} @code{[@code{minpoll} @kbd{minpoll}]} @code{[@code{maxpoll} @kbd{maxpoll}]}
+@item @code{server} @kbd{address} @code{[@code{key} @kbd{key} @kbd{|} @code{autokey}]} @code{[@code{burst}]} @code{[@code{iburst}]} @code{[@code{version} @kbd{version}]} @code{[@code{prefer}]} @code{[@code{minpoll} @kbd{minpoll}]} @code{[@code{maxpoll} @kbd{maxpoll}]}
+@item @code{peer} @kbd{address} @code{[@code{key} @kbd{key} @kbd{|} @code{autokey}]} @code{[@code{version} @kbd{version}]} @code{[@code{prefer}]} @code{[@code{minpoll} @kbd{minpoll}]} @code{[@code{maxpoll} @kbd{maxpoll}]}
+@item @code{broadcast} @kbd{address} @code{[@code{key} @kbd{key} @kbd{|} @code{autokey}]} @code{[@code{version} @kbd{version}]} @code{[@code{prefer}]} @code{[@code{minpoll} @kbd{minpoll}]} @code{[@code{ttl} @kbd{ttl}]}
+@item @code{manycastclient} @kbd{address} @code{[@code{key} @kbd{key} @kbd{|} @code{autokey}]} @code{[@code{version} @kbd{version}]} @code{[@code{prefer}]} @code{[@code{minpoll} @kbd{minpoll}]} @code{[@code{maxpoll} @kbd{maxpoll}]} @code{[@code{ttl} @kbd{ttl}]}
 @end table
 
 These five commands specify the time server name or address to
@@ -155,7 +148,6 @@ page
 provided in
 @file{/usr/share/doc/ntp}).
 @table @asis
-
 @item @code{pool}
 For type s addresses, this command mobilizes a persistent
 client mode association with a number of remote servers.
@@ -170,7 +162,7 @@ In this mode the local clock can synchronized to the
 remote server, but the remote server can never be synchronized to
 the local clock.
 This command should
-@emph{ not}
+@emph{not}
 be used for type
 b or m addresses.
 @item @code{peer}
@@ -247,7 +239,6 @@ heard.
 
 Options:
 @table @asis
-
 @item @code{autokey}
 All packets sent to and received from the server or peer are to
 include authentication fields encrypted using the autokey scheme
@@ -333,12 +324,8 @@ packets.
 Versions 1-4 are the choices, with version 4 the
 default.
 @end table
-@node Auxiliary Commands
-@section Auxiliary Commands
-
-
+@subsubsection Auxiliary Commands
 @table @asis
-
 @item @code{broadcastclient}
 This command enables reception of broadcast server messages to
 any local interface (type b) address.
@@ -380,9 +367,7 @@ public-key authentication as described in
 @ref{Authentication Options}.
 @end table
 @node Authentication Support
-@section Authentication Support
-
-
+@subsection Authentication Support
 Authentication support allows the NTP client to verify that the
 server is in fact known and trusted and not an intruder intending
 accidentally or on purpose to masquerade as that server.
@@ -516,10 +501,7 @@ cryptography are summarized below;
 further details are in the briefings, papers
 and reports at the NTP project page linked from
 @code{http://www.ntp.org/}.
-@node Symmetric-Key Cryptography
-@section Symmetric-Key Cryptography
-
-
+@subsubsection Symmetric-Key Cryptography
 The original RFC-1305 specification allows any one of possibly
 65,534 keys, each distinguished by a 32-bit key identifier, to
 authenticate an association.
@@ -567,10 +549,7 @@ utility, while the
 command selects the key used as the password for the
 @code{ntpq(1ntpqmdoc)}
 utility.
-@node Public Key Cryptography
-@section Public Key Cryptography
-
-
+@subsubsection Public Key Cryptography
 NTPv4 supports the original NTPv3 symmetric key scheme
 described in RFC-1305 and in addition the Autokey protocol,
 which is based on public key cryptography.
@@ -631,10 +610,7 @@ This requires the configuration file in all hosts to be
 engineered so that, even under anticipated failure conditions,
 the NTP subnet will form such that every group host can find
 a trail to at least one trusted host.
-@node Naming and Addressing
-@section Naming and Addressing
-
-
+@subsubsection Naming and Addressing
 It is important to note that Autokey does not use DNS to
 resolve addresses, since DNS can't be completely trusted
 until the name servers have synchronized clocks.
@@ -666,10 +642,7 @@ For this reason operation
 with network address translation schemes is not possible.
 This reflects the intended robust security model where government
 and corporate NTP servers are operated outside firewall perimeters.
-@node Operation
-@section Operation
-
-
+@subsubsection Operation
 A specific combination of authentication scheme (none,
 symmetric key, public key) and identity scheme is called
 a cryptotype, although not all combinations are compatible.
@@ -758,10 +731,7 @@ servers (or the same server, although that might not be useful).
 But, wise security policy might preclude some cryptotype
 combinations; for instance, running an identity scheme
 with one server and no authentication with another might not be wise.
-@node Key Management
-@section Key Management
-
-
+@subsubsection Key Management
 The cryptographic values used by the Autokey protocol are
 incorporated as a set of files generated by the
 @code{ntp-keygen(1ntpkeygenmdoc)}
@@ -796,13 +766,9 @@ however, an extended key usage field for a trusted host must
 contain the value
 @code{trustRoot};.
 Other extension fields are ignored.
-@node Authentication Commands
-@section Authentication Commands
-
-
+@subsubsection Authentication Commands
 @table @asis
-
-@item @code{autokey} [@kbd{logsec}]
+@item @code{autokey} @code{[@kbd{logsec}]}
 Specifies the interval between regenerations of the session key
 list used with the Autokey protocol.
 Note that the size of the key
@@ -822,7 +788,7 @@ The
 argument is
 the key identifier for a trusted key, where the value can be in the
 range 1 to 65,534, inclusive.
-@item @code{crypto}[@code{cert} @kbd{file}][@code{leap} @kbd{file}][@code{randfile} @kbd{file}][@code{host} @kbd{file}][@code{sign} @kbd{file}][@code{gq} @kbd{file}][@code{gqpar} @kbd{file}][@code{iffpar} @kbd{file}][@code{mvpar} @kbd{file}][@code{pw} @kbd{password}]
+@item @code{crypto} @code{[@code{cert} @kbd{file}]} @code{[@code{leap} @kbd{file}]} @code{[@code{randfile} @kbd{file}]} @code{[@code{host} @kbd{file}]} @code{[@code{sign} @kbd{file}]} @code{[@code{gq} @kbd{file}]} @code{[@code{gqpar} @kbd{file}]} @code{[@code{iffpar} @kbd{file}]} @code{[@code{mvpar} @kbd{file}]} @code{[@code{pw} @kbd{password}]}
 This command requires the OpenSSL library.
 It activates public key
 cryptography, selects the message digest and signature
@@ -838,7 +804,6 @@ command or default
 @file{/usr/local/etc}.
 Following are the subcommands:
 @table @asis
-
 @item @code{cert} @kbd{file}
 Specifies the location of the required host public certificate file.
 This overrides the link
@@ -945,14 +910,10 @@ The
 arguments are 32-bit unsigned
 integers with values from 1 to 65,534.
 @end table
-@node Error Codes
-@section Error Codes
-
-
+@subsubsection Error Codes
 The following error codes are reported via the NTP control
 and monitoring protocol trap mechanism.
 @table @asis
-
 @item 101
 (bad field format or length)
 The packet has invalid version, length or format.
@@ -1002,9 +963,7 @@ The certificate is missing, corrupted or bogus.
 The identity key is missing, corrupt or bogus.
 @end table
 @node Monitoring Support
-@section Monitoring Support
-
-
+@subsection Monitoring Support
 @code{ntpd(1ntpdmdoc)}
 includes a comprehensive monitoring facility suitable
 for continuous, long term recording of server and client
@@ -1020,23 +979,18 @@ and scripts in the
 directory of this distribution.
 Using
 these facilities and
-@sc{UNIX}
+@sc{unix}
 @code{cron(8)}
 jobs, the data can be
 automatically summarized and archived for retrospective analysis.
-@node Monitoring Commands
-@section Monitoring Commands
-
-
+@subsubsection Monitoring Commands
 @table @asis
-
 @item @code{statistics} @kbd{name} @kbd{...}
 Enables writing of statistics records.
 Currently, four kinds of
 @kbd{name}
 statistics are supported.
 @table @asis
-
 @item @code{clockstats}
 Enables recording of clock driver statistics information.
 Each update
@@ -1154,7 +1108,6 @@ The remaining ten fields show
 the statistics counter values accumulated since the last generated
 line.
 @table @asis
-
 @item Time since restart @code{36000}
 Time in hours since the system was last rebooted.
 @item Packets received @code{81965}
@@ -1184,12 +1137,7 @@ the (otherwise constant)
 @code{filegen}
 filename prefix to be modified for file generation sets, which
 is useful for handling statistics logs.
-@item @code{filegen} @kbd{name}
-[@code{file}@kbd{filename}]
-[@code{type}@kbd{typename}]
-[@code{link}|@code{nolink}]
-[@code{enable}|@code{disable}]
-
+@item @code{filegen} @kbd{name} @code{[@code{file} @kbd{filename}]} @code{[@code{type} @kbd{typename}]} @code{[@code{link} | @code{nolink}]} @code{[@code{enable} | @code{disable}]}
 Configures setting of generation file set name.
 Generation
 file sets provide a means for handling files that are
@@ -1211,22 +1159,20 @@ Note that this command can be sent from the
 @code{ntpdc(1ntpdcmdoc)}
 program running at a remote location.
 @table @asis
-
-@item@code{name}
+@item @code{name}
 This is the type of the statistics records, as shown in the
 @code{statistics}
 command.
-@item@code{file}@kbd{filename}
+@item @code{file} @kbd{filename}
 This is the file name for the statistics records.
 Filenames of set
 members are built from three concatenated elements
-@kbd{Cm}@kbd{prefix},
-@kbd{Cm}@kbd{filename}
+@code{prefix},
+@code{filename}
 and
-@kbd{Cm}@kbd{suffix}:
+@code{suffix}:
 @table @asis
-
-@item@code{prefix}
+@item @code{prefix}
 This is a constant filename path.
 It is not subject to
 modifications via the
@@ -1244,10 +1190,10 @@ and
 generation can be configured using the
 @kbd{statsdir}
 option explained above.
-@item@code{filename}
+@item @code{filename}
 This string is directly concatenated to the prefix mentioned
 above (no intervening
-@quoteleft{}/).@quoteright{}
+@quoteleft{}/@quoteright{}).
 This can be modified using
 the file argument to the
 @kbd{filegen}
@@ -1258,20 +1204,19 @@ elements are
 allowed in this component to prevent filenames referring to
 parts outside the filesystem hierarchy denoted by
 @kbd{prefix}.
-@item@code{suffix}
+@item @code{suffix}
 This part is reflects individual elements of a file set.
 It is
 generated according to the type of a file set.
 @end table
-@item@code{type}@kbd{typename}
+@item @code{type} @kbd{typename}
 A file generation set is characterized by its type.
 The following
 types are supported:
 @table @asis
-
-@item@code{none}
+@item @code{none}
 The file set is actually a single plain file.
-@item@code{pid}
+@item @code{pid}
 One element of file set is used per incarnation of a ntpd
 server.
 This type does not perform any changes to file set
@@ -1289,7 +1234,7 @@ strings, and
 appending the decimal representation of the process ID of the
 @code{ntpd(1ntpdmdoc)}
 server process.
-@item@code{day}
+@item @code{day}
 One file generation set element is created per day.
 A day is
 defined as the period between 00:00 and 24:00 UTC.
@@ -1308,8 +1253,8 @@ is a two digit day number.
 Thus, all information written at 10 December 1992 would end up
 in a file named
 @kbd{prefix}
-@kbd{filename}@kbd{Ns}@kbd{.19921210}.
-@item@code{week}
+@kbd{filename}.19921210.
+@item @code{week}
 Any file set member contains data related to a certain week of
 a year.
 The term week is defined by computing day-of-year
@@ -1321,17 +1266,17 @@ filename base: A dot, a 4-digit year number, the letter
 and a 2-digit week number.
 For example, information from January,
 10th 1992 would end up in a file with suffix
-No.@kbd{1992W1}.
-@item@code{month}
+.No . Ns Ar 1992W1 .
+@item @code{month}
 One generation file set element is generated per month.
 The
 file name suffix consists of a dot, a 4-digit year number, and
 a 2-digit month.
-@item@code{year}
+@item @code{year}
 One generation file element is generated per year.
 The filename
 suffix consists of a dot and a 4 digit year number.
-@item@code{age}
+@item @code{age}
 This type of file generation sets changes to a new element of
 the file set every 24 hours of server operation.
 The filename
@@ -1345,7 +1290,7 @@ Information is only written to a file generation by specifying
 output is prevented by specifying
 @code{disable}.
 @end table
-@item@code{link}|@code{nolink}
+@item @code{link} | @code{nolink}
 It is convenient to be able to access the current element of a file
 generation set by a fixed name.
 This feature is enabled by
@@ -1365,15 +1310,13 @@ When the
 number of links is greater than one, the file is unlinked.
 This
 allows the current file to be accessed by a constant name.
-@item@code{enable}@code{|}@code{Cm}@code{disable}
+@item @code{enable} @code{|} @code{disable}
 Enables or disables the recording function.
 @end table
 @end table
 @end table
 @node Access Control Support
-@section Access Control Support
-
-
+@subsection Access Control Support
 The
 @code{ntpd(1ntpdmdoc)}
 daemon implements a general purpose address/mask based restriction
@@ -1387,7 +1330,7 @@ The list is searched in order with the
 last match found defining the restriction flags associated
 with the entry.
 Additional information and examples can be found in the
-"NotesonConfiguringNTPandSettingupaNTPSubnet"
+"Notes on Configuring NTP and Setting up a NTP Subnet"
 page
 (available as part of the HTML documentation
 provided in
@@ -1420,10 +1363,7 @@ an indefinate period.
 When a client or network is denied access
 for an indefinate period, the only way at present to remove
 the restrictions is by restarting the server.
-@node The Kiss-of-Death Packet
-@section The Kiss-of-Death Packet
-
-
+@subsubsection The Kiss-of-Death Packet
 Ordinarily, packets denied service are simply dropped with no
 further action except incrementing statistics counters.
 Sometimes a
@@ -1458,13 +1398,9 @@ to restart the protocol at both the client and server.
 This
 happens automatically at the client when the association times out.
 It will happen at the server only if the server operator cooperates.
-@node Access Control Commands
-@section Access Control Commands
-
-
+@subsubsection Access Control Commands
 @table @asis
-
-@item@code{discard}[@code{average}@kbd{avg}][@code{minimum}@kbd{min}][@code{monitor}@kbd{prob}]
+@item @code{discard} @code{[@code{average} @kbd{avg}]} @code{[@code{minimum} @kbd{min}]} @code{[@code{monitor} @kbd{prob}]}
 Set the parameters of the
 @code{limited}
 facility which protects the server from
@@ -1481,7 +1417,7 @@ The default
 minimum average and minimum are 5 and 2, respectively.
 The monitor subcommand specifies the probability of discard
 for packets that overflow the rate-control window.
-@item@code{restrict}@code{address}[@code{mask}@kbd{mask}][@kbd{flag}@kbd{...}]
+@item @code{restrict} @code{address} @code{[@code{mask} @kbd{mask}]} @code{[@kbd{flag} @kbd{...}]}
 The
 @kbd{address}
 argument expressed in
@@ -1520,21 +1456,20 @@ reconfiguration of the server.
 One or more of the following flags
 may be specified:
 @table @asis
-
-@item@code{ignore}
+@item @code{ignore}
 Deny packets of all kinds, including
 @code{ntpq(1ntpqmdoc)}
 and
 @code{ntpdc(1ntpdcmdoc)}
 queries.
-@item@code{kod}
+@item @code{kod}
 If this flag is set when an access violation occurs, a kiss-o'-death
 (KoD) packet is sent.
 KoD packets are rate limited to no more than one
 per second.
 If another KoD packet occurs within one second after the
 last one, the packet is dropped.
-@item@code{limited}
+@item @code{limited}
 Deny service if the packet spacing violates the lower limits specified
 in the discard command.
 A history of clients is kept using the
@@ -1544,7 +1479,7 @@ Thus, monitoring is always active as
 long as there is a restriction entry with the
 @code{limited}
 flag.
-@item@code{lowpriotrap}
+@item @code{lowpriotrap}
 Declare traps set by matching hosts to be low priority.
 The
 number of traps a server can maintain is limited (the current limit
@@ -1554,7 +1489,7 @@ basis, with later trap requestors being denied service.
 This flag
 modifies the assignment algorithm by allowing low priority traps to
 be overridden by later requests for normal priority traps.
-@item@code{nomodify}
+@item @code{nomodify}
 Deny
 @code{ntpq(1ntpqmdoc)}
 and
@@ -1563,32 +1498,32 @@ queries which attempt to modify the state of the
 server (i.e., run time reconfiguration).
 Queries which return
 information are permitted.
-@item@code{noquery}
+@item @code{noquery}
 Deny
 @code{ntpq(1ntpqmdoc)}
 and
 @code{ntpdc(1ntpdcmdoc)}
 queries.
 Time service is not affected.
-@item@code{nopeer}
+@item @code{nopeer}
 Deny packets which would result in mobilizing a new association.
 This
 includes broadcast and symmetric active packets when a configured
 association does not exist.
-@item@code{noserve}
+@item @code{noserve}
 Deny all packets except
 @code{ntpq(1ntpqmdoc)}
 and
 @code{ntpdc(1ntpdcmdoc)}
 queries.
-@item@code{notrap}
+@item @code{notrap}
 Decline to provide mode 6 control message trap service to matching
 hosts.
 The trap service is a subsystem of the ntpdq control message
 protocol which is intended for use by remote event logging programs.
-@item@code{notrust}
+@item @code{notrust}
 Deny service unless the packet is cryptographically authenticated.
-@item@code{ntpport}
+@item @code{ntpport}
 This is actually a match algorithm modifier, rather than a
 restriction flag.
 Its presence causes the restriction entry to be
@@ -1604,7 +1539,7 @@ The
 @code{ntpport}
 is considered more specific and
 is sorted later in the list.
-@item@code{version}
+@item @code{version}
 Deny packets that do not match the current NTP version.
 @end table
 
@@ -1618,13 +1553,8 @@ with the default entry (i.e., everything besides your own
 NTP server is unrestricted).
 @end table
 @node Automatic NTP Configuration Options
-@section Automatic NTP Configuration Options
-
-
-@node Manycasting
-@section Manycasting
-
-
+@subsection Automatic NTP Configuration Options
+@subsubsection Manycasting
 Manycasting is a automatic discovery and configuration paradigm
 new to NTPv4.
 It is intended as a means for a multicast client
@@ -1899,10 +1829,7 @@ the rascals, sets the clock and then departs.
 Servers do not have to be configured in advance and
 all clients throughout the network can have the same
 configuration file.
-@node Manycast Interactions with Autokey
-@section Manycast Interactions with Autokey
-
-
+@subsubsection Manycast Interactions with Autokey
 Each time a manycast client sends a client mode packet
 to a multicast group address, all manycast servers
 in scope generate a reply including the host name
@@ -1932,13 +1859,9 @@ At the same time, the manycast
 scheme starts all over from the beginning and
 the expanding ring shrinks to the minimum and increments
 from there while collecting all servers in scope.
-@node Manycast Options
-@section Manycast Options
-
-
+@subsubsection Manycast Options
 @table @asis
-
-@item@code{tos}Oo@code{ceiling}@kbd{ceiling}|@code{cohort}{@code{0}|@code{1}}|@code{floor}@kbd{floor}|@code{minclock}@kbd{minclock}|@code{minsane}@kbd{minsane}Oc
+@item @code{tos} @code{[@code{ceiling} @kbd{ceiling} | @code{cohort} @code{@{} @code{0} | @code{1} @code{@}} | @code{floor} @kbd{floor} | @code{minclock} @kbd{minclock} | @code{minsane} @kbd{minsane}]}
 This command affects the clock selection and clustering
 algorithms.
 It can be used to select the quality and
@@ -1947,8 +1870,7 @@ and is most useful in manycast mode.
 The variables operate
 as follows:
 @table @asis
-
-@item@code{ceiling}@kbd{ceiling}
+@item @code{ceiling} @kbd{ceiling}
 Peers with strata above
 @code{ceiling}
 will be discarded if there are at least
@@ -1956,7 +1878,7 @@ will be discarded if there are at least
 peers remaining.
 This value defaults to 15, but can be changed
 to any number from 1 to 15.
-@item@code{cohort}@code{Bro}@code{0}|@code{1}@code{Brc}
+@item @code{cohort} @code{@{0 | 1@}}
 This is a binary flag which enables (0) or disables (1)
 manycast server replies to manycast clients with the same
 stratum level.
@@ -1964,7 +1886,7 @@ This is useful to reduce implosions where
 large numbers of clients with the same stratum level
 are present.
 The default is to enable these replies.
-@item@code{floor}@kbd{floor}
+@item @code{floor} @kbd{floor}
 Peers with strata below
 @code{floor}
 will be discarded if there are at least
@@ -1972,7 +1894,7 @@ will be discarded if there are at least
 peers remaining.
 This value defaults to 1, but can be changed
 to any number from 1 to 15.
-@item@code{minclock}@kbd{minclock}
+@item @code{minclock} @kbd{minclock}
 The clustering algorithm repeatedly casts out outlyer
 associations until no more than
 @code{minclock}
@@ -1980,7 +1902,7 @@ associations remain.
 This value defaults to 3,
 but can be changed to any number from 1 to the number of
 configured sources.
-@item@code{minsane}@kbd{minsane}
+@item @code{minsane} @kbd{minsane}
 This is the minimum number of candidates available
 to the clock selection algorithm in order to produce
 one or more truechimers for the clustering algorithm.
@@ -1994,7 +1916,7 @@ Byzantine agreement,
 should be at least 4 in order to detect and discard
 a single falseticker.
 @end table
-@item@code{ttl}@kbd{hop}@kbd{...}
+@item @code{ttl} @kbd{hop} @kbd{...}
 This command specifies a list of TTL values in increasing
 order, up to 8 values can be specified.
 In manycast mode these values are used in turn
@@ -2003,31 +1925,29 @@ The default is eight
 multiples of 32 starting at 31.
 @end table
 @node Reference Clock Support
-@section Reference Clock Support
-
-
+@subsection Reference Clock Support
 The NTP Version 4 daemon supports some three dozen different radio,
 satellite and modem reference clocks plus a special pseudo-clock
 used for backup or when no other clock source is available.
 Detailed descriptions of individual device drivers and options can
 be found in the
-"ReferenceClockDrivers"
+"Reference Clock Drivers"
 page
 (available as part of the HTML documentation
 provided in
 @file{/usr/share/doc/ntp}).
 Additional information can be found in the pages linked
 there, including the
-"DebuggingHintsforReferenceClockDrivers"
+"Debugging Hints for Reference Clock Drivers"
 and
-"HowToWriteaReferenceClockDriver"
+"How To Write a Reference Clock Driver"
 pages
 (available as part of the HTML documentation
 provided in
 @file{/usr/share/doc/ntp}).
 In addition, support for a PPS
 signal is available as described in the
-"Pulse-per-second(PPS)SignalInterfacing"
+"Pulse-per-second (PPS) Signal Interfacing"
 page
 (available as part of the HTML documentation
 provided in
@@ -2037,7 +1957,7 @@ drivers support special line discipline/streams modules which can
 significantly improve the accuracy using the driver.
 These are
 described in the
-"LineDisciplinesandStreamsDrivers"
+"Line Disciplines and Streams Drivers"
 page
 (available as part of the HTML documentation
 provided in
@@ -2068,9 +1988,7 @@ Reference clocks are identified by a syntactically
 correct but invalid IP address, in order to distinguish them from
 normal NTP peers.
 Reference clock addresses are of the form
-
 @code{127.127.}@kbd{t}.@kbd{u},
-
 where
 @kbd{t}
 is an integer
@@ -2162,18 +2080,13 @@ The
 option is used for this purpose.
 Except where noted,
 these options apply to all clock drivers.
-@node Reference Clock Commands
-@section Reference Clock Commands
-
-
+@subsubsection Reference Clock Commands
 @table @asis
-
-@item @code{server}@code{127.127.}@kbd{t}.@kbd{u}[@code{prefer}][@code{mode} @kbd{int}][@code{minpoll} @kbd{int}][@code{maxpoll} @kbd{int}]
+@item @code{server} @code{127.127.}@kbd{t}.@kbd{u} @code{[@code{prefer}]} @code{[@code{mode} @kbd{int}]} @code{[@code{minpoll} @kbd{int}]} @code{[@code{maxpoll} @kbd{int}]}
 This command can be used to configure reference clocks in
 special ways.
 The options are interpreted as follows:
 @table @asis
-
 @item @code{prefer}
 Marks the reference clock as preferred.
 All other things being
@@ -2210,7 +2123,7 @@ defaults to 10 (17.1 m) and
 defaults to 14 (4.5 h).
 The allowable range is 4 (16 s) to 17 (36.4 h) inclusive.
 @end table
-@item @code{fudge}@code{127.127.}@kbd{t}.@kbd{u}[@code{time1} @kbd{sec}][@code{time2} @kbd{sec}][@code{stratum} @kbd{int}][@code{refid} @kbd{string}][@code{mode} @kbd{int}][@code{flag1} @code{Cm} @code{0} @code{|} @code{Cm} @code{1}][@code{flag2} @code{Cm} @code{0} @code{|} @code{Cm} @code{1}][@code{flag3} @code{Cm} @code{0} @code{|} @code{Cm} @code{1}][@code{flag4} @code{Cm} @code{0} @code{|} @code{Cm} @code{1}]
+@item @code{fudge} @code{127.127.}@kbd{t}.@kbd{u} @code{[@code{time1} @kbd{sec}]} @code{[@code{time2} @kbd{sec}]} @code{[@code{stratum} @kbd{int}]} @code{[@code{refid} @kbd{string}]} @code{[@code{mode} @kbd{int}]} @code{[@code{flag1} @code{0} @code{|} @code{1}]} @code{[@code{flag2} @code{0} @code{|} @code{1}]} @code{[@code{flag3} @code{0} @code{|} @code{1}]} @code{[@code{flag4} @code{0} @code{|} @code{1}]}
 This command can be used to configure reference clocks in
 special ways.
 It must immediately follow the
@@ -2223,7 +2136,6 @@ program.
 The options are interpreted as
 follows:
 @table @asis
-
 @item @code{time1} @kbd{sec}
 Specifies a constant to be added to the time offset produced by
 the driver, a fixed-point decimal number in seconds.
@@ -2281,10 +2193,10 @@ For instance, it selects a dialing
 protocol in the ACTS driver and a device subtype in the
 parse
 drivers.
-@item @code{flag1} @code{Cm} @code{0} @code{|} @code{Cm} @code{1}
-@item @code{flag2} @code{Cm} @code{0} @code{|} @code{Cm} @code{1}
-@item @code{flag3} @code{Cm} @code{0} @code{|} @code{Cm} @code{1}
-@item @code{flag4} @code{Cm} @code{0} @code{|} @code{Cm} @code{1}
+@item @code{flag1} @code{0} @code{|} @code{1}
+@item @code{flag2} @code{0} @code{|} @code{1}
+@item @code{flag3} @code{0} @code{|} @code{1}
+@item @code{flag4} @code{0} @code{|} @code{1}
 These four flags are used for customizing the clock driver.
 The
 interpretation of these values, and whether they are used at all,
@@ -2305,11 +2217,8 @@ command can be found in
 @end table
 @end table
 @node Miscellaneous Options
-@section Miscellaneous Options
-
-
+@subsection Miscellaneous Options
 @table @asis
-
 @item @code{broadcastdelay} @kbd{seconds}
 The broadcast and multicast modes require a special calibration
 to determine the network delay between the local and remote
@@ -2356,8 +2265,8 @@ This implies that
 must have write permission for the directory the
 drift file is located in, and that file system links, symbolic or
 otherwise, should be avoided.
-@item @code{enable}Oo@code{auth} | @code{Cm} @code{bclient} |@code{calibrate} | @code{Cm} @code{kernel} |@code{monitor} | @code{Cm} @code{ntp} |@code{pps} | @code{Cm} @code{stats}Oc
-@item @code{disable}Oo@code{auth} | @code{Cm} @code{bclient} |@code{calibrate} | @code{Cm} @code{kernel} |@code{monitor} | @code{Cm} @code{ntp} |@code{pps} | @code{Cm} @code{stats}Oc
+@item @code{enable} @code{[@code{auth} | @code{bclient} | @code{calibrate} | @code{kernel} | @code{monitor} | @code{ntp} | @code{pps} | @code{stats}]}
+@item @code{disable} @code{[@code{auth} | @code{bclient} | @code{calibrate} | @code{kernel} | @code{monitor} | @code{ntp} | @code{pps} | @code{stats}]}
 Provides a way to enable or disable various server options.
 Flags not mentioned are unaffected.
 Note that all of these flags
@@ -2365,7 +2274,6 @@ can be controlled remotely using the
 @code{ntpdc(1ntpdcmdoc)}
 utility program.
 @table @asis
-
 @item @code{auth}
 Enables the server to synchronize with unconfigured peers only if the
 peer has been correctly authenticated using either public key or
@@ -2451,10 +2359,10 @@ By default, all output is turned on.
 All
 @kbd{configkeyword}
 keywords can be prefixed with
-@quoteleft{}=,@quoteright{}
+@quoteleft{}=@quoteright{},
 @quoteleft{}+@quoteright{}
 and
-@quoteleft{}-,@quoteright{}
+@quoteleft{}-@quoteright{},
 where
 @quoteleft{}=@quoteright{}
 sets the
@@ -2468,31 +2376,17 @@ messages.
 @code{syslog(3)}
 messages can be controlled in four
 classes
-Po
-@code{clock},
-@code{peer},
-@code{sys}
-and
-@code{sync}
-Pc.
+(@code{clock}, @code{peer}, @code{sys} and @code{sync}).
 Within these classes four types of messages can be
 controlled: informational messages
-Po
-@code{info}
-Pc,
+(@code{info}),
 event messages
-Po
-@code{events}
-Pc,
+(@code{events}),
 statistics messages
-Po
-@code{statistics}
-Pc
+(@code{statistics})
 and
 status messages
-Po
-@code{status}
-Pc.
+(@code{status}).
 
 Configuration keywords are formed by concatenating the message class with
 the event class.
@@ -2528,24 +2422,18 @@ be used instead of the default system
 @code{syslog(3)}
 facility.
 This is the same operation as the -l command line option.
-@item @code{setvar} @kbd{variable} [@code{default}]
+@item @code{setvar} @kbd{variable} @code{[@code{default}]}
 This command adds an additional system variable.
 These
 variables can be used to distribute additional information such as
 the access policy.
 If the variable of the form
-
-Vaname=@kbd{value}
-
+@code{name}@code{=}@kbd{value}
 is followed by the
 @code{default}
 keyword, the
 variable will be listed as part of the default system variables
-Po
-@code{ntpq(1ntpqmdoc)}
-@code{rv}
-command
-Pc).
+(@code{rv} command)).
 These additional variables serve
 informational purposes only.
 They are not related to the protocol
@@ -2557,16 +2445,16 @@ mechanism.
 There are three special variables that contain the names
 of all variable of the same group.
 The
-Va sys_var_list
+@code{sys_var_list}
 holds
 the names of all system variables.
 The
-Va peer_var_list
+@code{peer_var_list}
 holds
 the names of all peer variables and the
-Va clock_var_list
+@code{clock_var_list}
 holds the names of the reference clock variables.
-@item @code{tinker}Oo@code{allan} @kbd{allan} |@code{dispersion} @kbd{dispersion} |@code{freq} @kbd{freq} |@code{huffpuff} @kbd{huffpuff} |@code{panic} @kbd{panic} |@code{step} @kbd{srep} |@code{stepout} @kbd{stepout}Oc
+@item @code{tinker} @code{[@code{allan} @kbd{allan} | @code{dispersion} @kbd{dispersion} | @code{freq} @kbd{freq} | @code{huffpuff} @kbd{huffpuff} | @code{panic} @kbd{panic} | @code{step} @kbd{srep} | @code{stepout} @kbd{stepout}]}
 This command can be used to alter several system variables in
 very exceptional circumstances.
 It should occur in the
@@ -2586,7 +2474,6 @@ no help from the support group.
 
 The variables operate as follows:
 @table @asis
-
 @item @code{allan} @kbd{allan}
 The argument becomes the new value for the minimum Allan
 intercept, which is a parameter of the PLL/FLL clock discipline
@@ -2631,9 +2518,8 @@ be set to any positive number in seconds.
 If set to zero, the stepout
 pulses will not be suppressed.
 @end table
-@item @code{rlimit}Oo@code{memlock} @kbd{Nmegabytes} |@code{stacksize} @kbd{N4kPages}@code{filenum} @kbd{Nfiledescriptors}Oc
+@item @code{rlimit} @code{[@code{memlock} @kbd{Nmegabytes} | @code{stacksize} @kbd{N4kPages} @code{filenum} @kbd{Nfiledescriptors}]}
 @table @asis
-
 @item @code{memlock} @kbd{Nmegabytes}
 Specify the number of megabytes of memory that can be allocated.
 Probably only available under Linux, this option is useful
@@ -2645,11 +2531,11 @@ The default is 32 megabytes. Setting this to zero will prevent any attemp to loc
 Specifies the maximum size of the process stack on systems with the
 @item @code{filenum} @kbd{Nfiledescriptors}
 Specifies the maximum number of file descriptors ntpd may have open at once. Defaults to the system default.
-@code{mlockall}()
+@code{mlockall()}
 function.
 Defaults to 50 4k pages (200 4k pages in OpenBSD).
 @end table
-@item @code{trap} @kbd{host_address}[@code{port} @kbd{port_number}][@code{interface} @kbd{interface_address}]
+@item @code{trap} @kbd{host_address} @code{[@code{port} @kbd{port_number}]} @code{[@code{interface} @kbd{interface_address}]}
 This command configures a trap receiver at the given host
 address and port number for sending messages with the specified
 local interface address.
@@ -2690,7 +2576,6 @@ This software is released under the NTP license, <http://ntp.org/license>.
 @node ntp.conf Files
 @subsection ntp.conf Files
 @table @asis
-
 @item @file{/etc/ntp.conf}
 the default name of the configuration file
 @item @file{ntp.keys}
@@ -2715,7 +2600,9 @@ at
 A snapshot of this documentation is available in HTML format in
 @file{/usr/share/doc/ntp}.
 @*
- David L. Mills, @emph{Network Time Protocol (Version 4)},  RFC5905.
+
+@*
+David L. Mills, @emph{Network Time Protocol (Version 4)}, RFC5905
 @node ntp.conf Bugs
 @subsection ntp.conf Bugs
 The syntax checking is not picky; some combinations of

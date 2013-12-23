@@ -3,7 +3,7 @@
 <title>Plot_summary User's Manual</title>
 <meta http-equiv="Content-Type" content="text/html">
 <meta name="description" content="Plot_summary User's Manual">
-<meta name="generator" content="makeinfo 4.13">
+<meta name="generator" content="makeinfo 4.7">
 <link title="Top" rel="top" href="#Top">
 <link href="http://www.gnu.org/software/texinfo/" rel="generator-home" title="Texinfo Homepage">
 <meta http-equiv="Content-Style-Type" content="text/css">
@@ -14,26 +14,24 @@
   pre.smallformat  { font-family:inherit; font-size:smaller }
   pre.smallexample { font-size:smaller }
   pre.smalllisp    { font-size:smaller }
-  span.sc    { font-variant:small-caps }
-  span.roman { font-family:serif; font-weight:normal; } 
-  span.sansserif { font-family:sans-serif; font-weight:normal; } 
+  span.sc { font-variant:small-caps }
+  span.roman { font-family: serif; font-weight: normal; } 
 --></style>
 </head>
 <body>
 <h1 class="settitle">Plot_summary User's Manual</h1>
 <div class="node">
-<a name="Top"></a>
 <p><hr>
-Next:&nbsp;<a rel="next" accesskey="n" href="#plot_005fsummary-Description">plot_summary Description</a>,
+<a name="Top"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#plot_005fsummary-Description">plot_summary Description</a>,
 Previous:&nbsp;<a rel="previous" accesskey="p" href="#dir">(dir)</a>,
 Up:&nbsp;<a rel="up" accesskey="u" href="#dir">(dir)</a>
-
+<br>
 </div>
 
 <h2 class="unnumbered">Plot_summary User Manual</h2>
 
 <p>This document describes the use of the NTP Project's <code>plot_summary</code> program. 
-This document applies to version 4.2.7p401 of <code>plot_summary</code>.
+This document applies to version 4.2.7p402 of <code>plot_summary</code>.
 
   <div class="shortcontents">
 <h2>Short Contents</h2>
@@ -48,12 +46,10 @@ This document applies to version 4.2.7p401 of <code>plot_summary</code>.
 </ul>
 
 <div class="node">
-<a name="plot_summary-Invocation"></a>
-<a name="plot_005fsummary-Invocation"></a>
 <p><hr>
-Previous:&nbsp;<a rel="previous" accesskey="p" href="#plot_005fsummary-Description">plot_summary Description</a>,
+<a name="plot_005fsummary-Invocation"></a>Previous:&nbsp;<a rel="previous" accesskey="p" href="#plot_005fsummary-Description">plot_summary Description</a>,
 Up:&nbsp;<a rel="up" accesskey="u" href="#Top">Top</a>
-
+<br>
 </div>
 
 <h3 class="section">Invoking plot_summary</h3>
@@ -64,7 +60,7 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#Top">Top</a>
 using the <code>agtexi-cmd</code> template and the option descriptions for the <code>plot_summary</code> program.
 
 <ul class="menu">
-<li><a accesskey="1" href="#plot_005fsummary-usage">plot_summary usage</a>:                   plot_summary help/usage (<samp><span class="option">--help</span></samp>)
+<li><a accesskey="1" href="#plot_005fsummary-usage">plot_summary usage</a>:                   plot_summary help/usage (<span class="option">--help</span>)
 <li><a accesskey="2" href="#plot_005fsummary-directory">plot_summary directory</a>:               directory option
 <li><a accesskey="3" href="#plot_005fsummary-identifier">plot_summary identifier</a>:              identifier option
 <li><a accesskey="4" href="#plot_005fsummary-peer">plot_summary peer</a>:                    peer option
@@ -74,25 +70,23 @@ using the <code>agtexi-cmd</code> template and the option descriptions for the <
 </ul>
 
 <div class="node">
-<a name="plot_summary-usage"></a>
-<a name="plot_005fsummary-usage"></a>
 <p><hr>
-Next:&nbsp;<a rel="next" accesskey="n" href="#plot_005fsummary-directory">plot_summary directory</a>,
+<a name="plot_005fsummary-usage"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#plot_005fsummary-directory">plot_summary directory</a>,
 Up:&nbsp;<a rel="up" accesskey="u" href="#plot_005fsummary-Invocation">plot_summary Invocation</a>
-
+<br>
 </div>
 
-<h4 class="subsection">plot_summary help/usage (<samp><span class="option">--help</span></samp>)</h4>
+<h4 class="subsection">plot_summary help/usage (<span class="option">--help</span>)</h4>
 
 <p><a name="index-plot_005fsummary-help-3"></a>
 This is the automatically generated usage text for plot_summary.
 
   <p>The text printed is the same whether selected with the <code>help</code> option
-(<samp><span class="option">--help</span></samp>) or the <code>more-help</code> option (<samp><span class="option">--more-help</span></samp>).  <code>more-help</code> will print
+(<span class="option">--help</span>) or the <code>more-help</code> option (<span class="option">--more-help</span>).  <code>more-help</code> will print
 the usage text by passing it through a pager program. 
 <code>more-help</code> is disabled on platforms without a working
 <code>fork(2)</code> function.  The <code>PAGER</code> environment variable is
-used to select the program, defaulting to <samp><span class="file">more</span></samp>.  Both will exit
+used to select the program, defaulting to <span class="file">more</span>.  Both will exit
 with a status code of 0.
 
 <pre class="example">plot_summary - plot statistics generated by summary script
@@ -113,13 +107,11 @@ Options are specified by doubled hyphens and their name or by a single
 hyphen and the flag character.
 </pre>
   <div class="node">
-<a name="plot_summary-directory"></a>
-<a name="plot_005fsummary-directory"></a>
 <p><hr>
-Next:&nbsp;<a rel="next" accesskey="n" href="#plot_005fsummary-identifier">plot_summary identifier</a>,
+<a name="plot_005fsummary-directory"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#plot_005fsummary-identifier">plot_summary identifier</a>,
 Previous:&nbsp;<a rel="previous" accesskey="p" href="#plot_005fsummary-usage">plot_summary usage</a>,
 Up:&nbsp;<a rel="up" accesskey="u" href="#plot_005fsummary-Invocation">plot_summary Invocation</a>
-
+<br>
 </div>
 
 <h4 class="subsection">directory option</h4>
@@ -130,13 +122,11 @@ This option takes a string argument.
         The directory where the <code>plot_summary</code> will search for the
         *_summary files generated by <code>summary</code> script. 
 <div class="node">
-<a name="plot_summary-identifier"></a>
-<a name="plot_005fsummary-identifier"></a>
 <p><hr>
-Next:&nbsp;<a rel="next" accesskey="n" href="#plot_005fsummary-peer">plot_summary peer</a>,
+<a name="plot_005fsummary-identifier"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#plot_005fsummary-peer">plot_summary peer</a>,
 Previous:&nbsp;<a rel="previous" accesskey="p" href="#plot_005fsummary-directory">plot_summary directory</a>,
 Up:&nbsp;<a rel="up" accesskey="u" href="#plot_005fsummary-Invocation">plot_summary Invocation</a>
-
+<br>
 </div>
 
 <h4 class="subsection">identifier option</h4>
@@ -147,13 +137,11 @@ This option takes a string argument.
         Where does the plotted data come from, default to string "host" plus
         current hostname
 <div class="node">
-<a name="plot_summary-peer"></a>
-<a name="plot_005fsummary-peer"></a>
 <p><hr>
-Next:&nbsp;<a rel="next" accesskey="n" href="#plot_005fsummary-plot_002dterm">plot_summary plot-term</a>,
+<a name="plot_005fsummary-peer"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#plot_005fsummary-plot_002dterm">plot_summary plot-term</a>,
 Previous:&nbsp;<a rel="previous" accesskey="p" href="#plot_005fsummary-identifier">plot_summary identifier</a>,
 Up:&nbsp;<a rel="up" accesskey="u" href="#plot_005fsummary-Invocation">plot_summary Invocation</a>
-
+<br>
 </div>
 
 <h4 class="subsection">peer option</h4>
@@ -170,13 +158,11 @@ This option takes a string argument.
   <p>By default the peer_summary plots are not generated. Use this option to
         specify list of peers if you want to generate plots for them. 
 <div class="node">
-<a name="plot_summary-plot-term"></a>
-<a name="plot_005fsummary-plot_002dterm"></a>
 <p><hr>
-Next:&nbsp;<a rel="next" accesskey="n" href="#plot_005fsummary-output_002dfile">plot_summary output-file</a>,
+<a name="plot_005fsummary-plot_002dterm"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#plot_005fsummary-output_002dfile">plot_summary output-file</a>,
 Previous:&nbsp;<a rel="previous" accesskey="p" href="#plot_005fsummary-peer">plot_summary peer</a>,
 Up:&nbsp;<a rel="up" accesskey="u" href="#plot_005fsummary-Invocation">plot_summary Invocation</a>
-
+<br>
 </div>
 
 <h4 class="subsection">plot-term option</h4>
@@ -189,13 +175,11 @@ This option takes a string argument.
         <code>dumb</code> is it's not'. See output from  -e "set
         terminal") for the list of avalaible options. 
 <div class="node">
-<a name="plot_summary-output-file"></a>
-<a name="plot_005fsummary-output_002dfile"></a>
 <p><hr>
-Next:&nbsp;<a rel="next" accesskey="n" href="#plot_005fsummary-exit-status">plot_summary exit status</a>,
+<a name="plot_005fsummary-output_002dfile"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#plot_005fsummary-exit-status">plot_summary exit status</a>,
 Previous:&nbsp;<a rel="previous" accesskey="p" href="#plot_005fsummary-plot_002dterm">plot_summary plot-term</a>,
 Up:&nbsp;<a rel="up" accesskey="u" href="#plot_005fsummary-Invocation">plot_summary Invocation</a>
-
+<br>
 </div>
 
 <h4 class="subsection">output-file option</h4>
@@ -205,20 +189,18 @@ This is the &ldquo;output file&rdquo; option.
 This option takes a str argument. 
         Output file for <code>gnuplot</code>, default to stdout. 
 <div class="node">
-<a name="plot_summary-exit-status"></a>
-<a name="plot_005fsummary-exit-status"></a>
 <p><hr>
-Previous:&nbsp;<a rel="previous" accesskey="p" href="#plot_005fsummary-output_002dfile">plot_summary output-file</a>,
+<a name="plot_005fsummary-exit-status"></a>Previous:&nbsp;<a rel="previous" accesskey="p" href="#plot_005fsummary-output_002dfile">plot_summary output-file</a>,
 Up:&nbsp;<a rel="up" accesskey="u" href="#plot_005fsummary-Invocation">plot_summary Invocation</a>
-
+<br>
 </div>
 
 <h4 class="subsection">plot_summary exit status</h4>
 
 <p>One of the following exit values will be returned:
      <dl>
-<dt>&lsquo;<samp><span class="samp">0 (EXIT_SUCCESS)</span></samp>&rsquo;<dd>Successful program execution. 
-<br><dt>&lsquo;<samp><span class="samp">1 (EXIT_FAILURE)</span></samp>&rsquo;<dd>The operation failed or the command syntax was not valid. 
+<dt><span class="samp">0 (EXIT_SUCCESS)</span><dd>Successful program execution. 
+<br><dt><span class="samp">1 (EXIT_FAILURE)</span><dd>The operation failed or the command syntax was not valid. 
 </dl>
 
 </body></html>

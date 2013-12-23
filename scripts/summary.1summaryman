@@ -12,9 +12,9 @@
 .ds R-Font R
 .TH summary 1summaryman "22 Dec 2013" "" "User Commands"
 .\"
-.\" EDIT THIS FILE WITH CAUTION (in-mem file)
+.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-lLaO3G/ag-yLa42G)
 .\"
-.\" It has been AutoGen-ed December 22, 2013 at 10:13:06 AM by AutoGen 5.18.3pre7
+.\" It has been AutoGen-ed December 22, 2013 at 11:03:04 PM by AutoGen 5.18.3pre5
 .\" From the definitions summary-opts.def
 .\" and the template file agman-cmd.tpl
 .SH NAME
@@ -100,6 +100,35 @@ Display usage information and exit.
 .NOP \f\*[B-Font]\-\-more-help\f[]
 Pass the extended usage information through a pager.
 .PP
+.TH summary 1summaryman "22 Dec 2013" "" "User Commands"
+.\"
+.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-lLaO3G/ag-yLa42G)
+.\"
+.\" It has been AutoGen-ed December 22, 2013 at 11:03:04 PM by AutoGen 5.18.3pre5
+.\" From the definitions summary-opts.def
+.\" and the template file agman-cmd.tpl
+.SH NAME
+\f\*[B-Font]summary\fP summary
+\- compute various stastics from NTP stat files
+cvt_prog='/usr/local/gnu/share/autogen/texi2man'
+cvt_prog=`cd \`dirname "$cvt_prog"\` >/dev/null && pwd
+         `/`basename "$cvt_prog"`
+cd $tmp_dir
+test \-x "$cvt_prog" || die "'$cvt_prog' is not executable"
+{
+    list='synopsis description options option-presets'
+    for f in $list ; do cat $f ; echo ; done
+    rm \-f $list name
+    list='implementation-notes environment files examples exit-status errors
+        compatibility see-also conforming-to history authors copyright bugs
+        notes'
+    for f in $list ; do cat $f ; echo ; done > .end-doc
+    rm \-f $list
+    list=`ls \-1 *`' .end-doc'
+    for f in $list ; do cat $f ; echo ; done
+    rm \-f $list
+} 1>.doc 2>/dev/null
+/usr/local/gnu/bin/grep \-E \-v '^[ 	]*$' .doc | $cvt_prog
 .SH "EXIT STATUS"
 One of the following exit values will be returned:
 .TP

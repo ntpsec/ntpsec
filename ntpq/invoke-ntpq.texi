@@ -6,7 +6,7 @@
 #
 # EDIT THIS FILE WITH CAUTION  (invoke-ntpq.texi)
 #
-# It has been AutoGen-ed  November 30, 2013 at 11:32:07 AM by AutoGen 5.18.3pre5
+# It has been AutoGen-ed  December 22, 2013 at 11:08:25 PM by AutoGen 5.18.3pre5
 # From the definitions    ntpq-opts.def
 # and the template file   agtexi-cmd.tpl
 @end ignore
@@ -76,10 +76,7 @@ Otherwise,
 @code{ntpq}
 will attempt to read
 interactive format commands from the standard input.
-@node Internal Commands
-@section Internal Commands
-
-
+@subsubsection Internal Commands
 Interactive format commands consist of a keyword followed by zero
 to four arguments.
 Only enough characters of the full keyword to
@@ -93,14 +90,13 @@ utility itself and do not result in NTP mode 6
 requests being sent to a server.
 These are described following.
 @table @asis
-
-@item ? [@kbd{command_keyword}]
-@item @code{help} [@kbd{command_keyword}]
+@item @code{?} @code{[@kbd{command_keyword}]}
+@item @code{help} @code{[@kbd{command_keyword}]}
 A
 @quoteleft{}?@quoteright{}
 by itself will print a list of all the command
 keywords known to this incarnation of
-@code{ntpq}.
+@code{ntpq}
 A
 @quoteleft{}?@quoteright{}
 followed by a command keyword will print function and usage
@@ -110,14 +106,12 @@ source of information about
 @code{ntpq}
 than this manual
 page.
-@item @code{addvars} @kbd{variable_name}[@code{=value}]
-@code{...}
-
-@item@code{rmvars}@kbd{variable_name}@code{...}
-@item@code{clearvars}
+@item @code{addvars} @kbd{variable_name} @code{[@code{=value}]} @code{...}
+@item @code{rmvars} @kbd{variable_name} @code{...}
+@item @code{clearvars}
 The data carried by NTP mode 6 messages consists of a list of
 items of the form
-@quoteleft{}variable_name=value,@quoteright{}
+@quoteleft{}variable_name=value@quoteright{},
 where the
 @quoteleft{}=value@quoteright{}
 is ignored, and can be omitted,
@@ -143,13 +137,13 @@ while the
 @code{clearlist}
 command removes all variables from the
 list.
-@item@code{authenticate}[yes]|no
+@item @code{authenticate} @code{[yes | no]}
 Normally
 @code{ntpq}
 does not authenticate requests unless
 they are write requests.
 The command
-@quoteleft{}authenticateyes@quoteright{}
+@quoteleft{}authenticate yes@quoteright{}
 causes
 @code{ntpq}
 to send authentication with all requests it
@@ -166,7 +160,7 @@ causes
 to display whether or not
 @code{ntpq}
 is currently autheinticating requests.
-@item@code{cooked}
+@item @code{cooked}
 Causes output from query commands to be "cooked", so that
 variables which are recognized by
 @code{ntpq}
@@ -176,11 +170,11 @@ Variables which
 @code{ntpq}
 thinks should have a decodable value but didn't are
 marked with a trailing
-@quoteleft{}?.@quoteright{}
-@item@code{debug}Oo@code{more}|@code{less}|@code{off}Oc
+@quoteleft{}?@quoteright{}.
+@item @code{debug} @code{[@code{more} | @code{less} | @code{off}]}
 With no argument, displays the current debug level.
 Otherwise, the debug level is changed to the indicated level.
-@item@code{delay}@kbd{milliseconds}
+@item @code{delay} @kbd{milliseconds}
 Specify a time interval to be added to timestamps included in
 requests which require authentication.
 This is used to enable
@@ -189,11 +183,11 @@ or between machines whose clocks are unsynchronized.
 Actually the
 server does not now require timestamps in authenticated requests,
 so this command may be obsolete.
-@item@code{host}@kbd{hostname}
+@item @code{host} @kbd{hostname}
 Set the host to which future queries will be sent.
 @kbd{hostname}
 may be either a host name or a numeric address.
-@item@code{hostnames}[@code{yes}|@code{Cm}@code{no}]
+@item @code{hostnames} @code{[@code{yes} | @code{no}]}
 If
 @code{yes}
 is specified, host names are printed in
@@ -208,19 +202,13 @@ unless
 modified using the command line
 @code{-n}
 switch.
-@item@code{keyid}@kbd{keyid}
+@item @code{keyid} @kbd{keyid}
 This command allows the specification of a key number to be
 used to authenticate configuration requests.
 This must correspond
 to a key number the server has been configured to use for this
 purpose.
-@item@code{ntpversion}@code{Oo}
-@code{1}|
-@code{2}|
-@code{3}|
-@code{4}
-Oc
-
+@item @code{ntpversion} @code{[@code{1} | @code{2} | @code{3} | @code{4}]}
 Sets the NTP version number which
 @code{ntpq}
 claims in
@@ -231,23 +219,23 @@ There appear
 to be no servers left which demand version 1.
 With no argument, displays the current NTP version that will be used
 when communicating with servers.
-@item@code{quit}
+@item @code{quit}
 Exit
 @code{ntpq}
-@item@code{passwd}
+@item @code{passwd}
 This command prompts you to type in a password (which will not
 be echoed) which will be used to authenticate configuration
 requests.
 The password must correspond to the key configured for
 use by the NTP server for this purpose if such requests are to be
 successful.
-@item@code{raw}
+@item @code{raw}
 Causes all output from query commands is printed as received
 from the remote server.
 The only formating/interpretation done on
 the data is to transform nonascii data into a printable (but barely
 understandable) form.
-@item@code{timeout}@kbd{milliseconds}
+@item @code{timeout} @kbd{milliseconds}
 Specify a timeout period for responses to server queries.
 The
 default is about 5000 milliseconds.
@@ -290,7 +278,7 @@ with a status code of 0.
 
 @exampleindent 0
 @example
-ntpq - standard NTP query program - Ver. 4.2.7p401
+ntpq - standard NTP query program - Ver. 4.2.7p402
 Usage:  ntpq [ -<flag> [<val>] | --<name>[@{=| @}<val>] ]... [ host ...]
   Flg Arg Option-Name    Description
    -4 no  ipv4           Force IPv4 DNS name resolution

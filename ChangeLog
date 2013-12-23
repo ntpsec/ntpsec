@@ -1,3 +1,4 @@
+(4.2.7p402) 2013/12/23 Released by Harlan Stenn <stenn@ntp.org>
 * Incorporate Oliver Kindernay's GSoC 2013 scripts/ cleanup.
 (4.2.7p401) 2013/11/30 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 2491] VS20xx compile fixes.
