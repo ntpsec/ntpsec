@@ -55,8 +55,13 @@ case "$ac_busted_vpath_in_make$srcdir" in
 esac
 
 case "$host" in
- *-*-aix[[4-9]]*)
-	# XXX only verified thru AIX6
+ *-*-aix4*)
+	# Bug 2516:
+	# Was *-*-aix[[4-9]]*
+	# XXX only verified thru AIX6.  But...
+	# Ken Link says this is fine for AIX 5.3 and 7.1, and sees no reason
+	# that this support would be in 5.3, removed in 6, and added back.
+	#
 	# (prr) aix 4.1 doesn't have clock_settime, but in aix 4.3 it's a stub
 	# (returning ENOSYS).  I didn't check 4.2.  If, in the future,
 	# IBM pulls its thumbs out long enough to implement clock_settime,
