@@ -10,11 +10,11 @@
 .ds B-Font B
 .ds I-Font I
 .ds R-Font R
-.TH ntpsnmpd @NTPSNMPD_MS@ "23 Dec 2013" "4.2.7p403" "User Commands"
+.TH ntpsnmpd @NTPSNMPD_MS@ "24 Dec 2013" "4.2.7p404" "User Commands"
 .\"
-.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-XCayB6/ag-9CayA6)
+.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-ZRaGEU/ag-_RaGDU)
 .\"
-.\" It has been AutoGen-ed December 23, 2013 at 11:38:09 AM by AutoGen 5.18.3pre5
+.\" It has been AutoGen-ed December 24, 2013 at 11:39:13 AM by AutoGen 5.18.3pre5
 .\" From the definitions ntpsnmpd-opts.def
 .\" and the template file agman-cmd.tpl
 .SH NAME
@@ -95,11 +95,11 @@ the configuration files.
 The \fIhomerc\fP files are "\fI$HOME\fP", and "\fI.\fP".
 If any of these are directories, then the file \fI.ntprc\fP
 is searched for within those directories.
-.TH ntpsnmpd @NTPSNMPD_MS@ "23 Dec 2013" "4.2.7p403" "User Commands"
+.TH ntpsnmpd @NTPSNMPD_MS@ "24 Dec 2013" "4.2.7p404" "User Commands"
 .\"
-.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-XCayB6/ag-9CayA6)
+.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-ZRaGEU/ag-_RaGDU)
 .\"
-.\" It has been AutoGen-ed December 23, 2013 at 11:38:09 AM by AutoGen 5.18.3pre5
+.\" It has been AutoGen-ed December 24, 2013 at 11:39:13 AM by AutoGen 5.18.3pre5
 .\" From the definitions ntpsnmpd-opts.def
 .\" and the template file agman-cmd.tpl
 .SH NAME
@@ -228,7 +228,7 @@ please fill me in...
 .sp \n(Ppu
 .ne 2
 
-This document corresponds to version 4.2.7p403 of NTP.
+This document corresponds to version 4.2.7p404 of NTP.
 .sp \n(Ppu
 .ne 2
 

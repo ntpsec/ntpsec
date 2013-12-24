@@ -10,11 +10,11 @@
 .ds B-Font B
 .ds I-Font I
 .ds R-Font R
-.TH summary 1summaryman "23 Dec 2013" "" "User Commands"
+.TH summary 1summaryman "24 Dec 2013" "" "User Commands"
 .\"
-.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-B5aORX/ag-N5a4QX)
+.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-41aGTL/ag-e2aWSL)
 .\"
-.\" It has been AutoGen-ed December 23, 2013 at 11:35:23 AM by AutoGen 5.18.3pre5
+.\" It has been AutoGen-ed December 24, 2013 at 11:36:05 AM by AutoGen 5.18.3pre5
 .\" From the definitions summary-opts.def
 .\" and the template file agman-cmd.tpl
 .SH NAME
@@ -100,11 +100,11 @@ Display usage information and exit.
 .NOP \f\*[B-Font]\-\-more-help\f[]
 Pass the extended usage information through a pager.
 .PP
-.TH summary 1summaryman "23 Dec 2013" "" "User Commands"
+.TH summary 1summaryman "24 Dec 2013" "" "User Commands"
 .\"
-.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-B5aORX/ag-N5a4QX)
+.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-41aGTL/ag-e2aWSL)
 .\"
-.\" It has been AutoGen-ed December 23, 2013 at 11:35:23 AM by AutoGen 5.18.3pre5
+.\" It has been AutoGen-ed December 24, 2013 at 11:36:05 AM by AutoGen 5.18.3pre5
 .\" From the definitions summary-opts.def
 .\" and the template file agman-cmd.tpl
 .SH NAME

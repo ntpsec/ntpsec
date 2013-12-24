@@ -10,11 +10,11 @@
 .ds B-Font B
 .ds I-Font I
 .ds R-Font R
-.TH ntpdc @NTPDC_MS@ "23 Dec 2013" "4.2.7p403" "User Commands"
+.TH ntpdc @NTPDC_MS@ "24 Dec 2013" "4.2.7p404" "User Commands"
 .\"
-.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-Y4aaa4/ag-_4aa_3)
+.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-W0aqdS/ag-80aqcS)
 .\"
-.\" It has been AutoGen-ed December 23, 2013 at 11:37:38 AM by AutoGen 5.18.3pre5
+.\" It has been AutoGen-ed December 24, 2013 at 11:38:40 AM by AutoGen 5.18.3pre5
 .\" From the definitions ntpdc-opts.def
 .\" and the template file agman-cmd.tpl
 .SH NAME
@@ -158,16 +158,6 @@ the configuration files.
 The \fIhomerc\fP files are "\fI$HOME\fP", and "\fI.\fP".
 If any of these are directories, then the file \fI.ntprc\fP
 is searched for within those directories.
-.TH ntpdc @NTPDC_MS@ "23 Dec 2013" "4.2.7p403" "User Commands"
-.\"
-.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-Y4aaa4/ag-_4aa_3)
-.\"
-.\" It has been AutoGen-ed December 23, 2013 at 11:37:38 AM by AutoGen 5.18.3pre5
-.\" From the definitions ntpdc-opts.def
-.\" and the template file agman-cmd.tpl
-.SH NAME
-\f\*[B-Font]ntpdc\fP ntpdc
-\- vendor-specific NTPD control program
 cvt_prog='/usr/local/gnu/share/autogen/texi2man'
 cvt_prog=`cd \`dirname "$cvt_prog"\` >/dev/null && pwd
          `/`basename "$cvt_prog"`
@@ -187,6 +177,16 @@ test \-x "$cvt_prog" || die "'$cvt_prog' is not executable"
     rm \-f $list
 } 1>.doc 2>/dev/null
 sed \-f .cmds .doc | /usr/local/gnu/bin/grep \-E \-v '^[ 	]*$' | $cvt_prog
+.TH ntpdc @NTPDC_MS@ "24 Dec 2013" "4.2.7p404" "User Commands"
+.\"
+.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-W0aqdS/ag-80aqcS)
+.\"
+.\" It has been AutoGen-ed December 24, 2013 at 11:38:40 AM by AutoGen 5.18.3pre5
+.\" From the definitions ntpdc-opts.def
+.\" and the template file agman-cmd.tpl
+.SH NAME
+\f\*[B-Font]ntpdc\fP ntpdc
+\- vendor-specific NTPD control program
 .SH USAGE
 If one or more request options are included on the command line
 when
