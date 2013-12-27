@@ -93,7 +93,7 @@ do
     for i in `ls -1 $f* $dfi`
     do
 	case "$i" in
-	 *.c|*.h|*.[1-9]*man|*.[1-9]*mdoc|*.man.in|*.mdoc.in|*.texi|*.menu)
+	 *.c|*.h|*.[1-9]*man|*.[1-9]*mdoc|*.man.in|*.mdoc.in|*-opts|*.texi|*.menu)
 	    l="$l $i"
 	    ;;
 	 *.html)

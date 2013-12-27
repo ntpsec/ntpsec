@@ -1,3 +1,4 @@
+* [Bug 2521] bootstrap script needs a tweak for perl -opts files.
 * [Bug 2524] Add ntpsweep to sntp/loc/* files.
 * [Bug 2526] Add "noinst" support to the sntp/loc/ framework.
 (4.2.7p404) 2013/12/24 Released by Harlan Stenn <stenn@ntp.org>
