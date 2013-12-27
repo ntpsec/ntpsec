@@ -1,4 +1,5 @@
-If you look at the files here you should understand what is being done.
+If you look at the files here you should be able to figure out what is
+being done.
 
 ../scripts/genLocInfo handles the parsing of these files.
 

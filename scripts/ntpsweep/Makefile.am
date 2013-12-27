@@ -3,7 +3,17 @@ run_ag=		cd $(srcdir) &&	env PATH="$(abs_builddir):$(PATH)" PERL5LIB="$(abs_top_
 		autogen -L ../../sntp/include -L ../../sntp/ag-tpl \
 		--writable
 
-noinst_SCRIPTS = ntpsweep
+bin_SCRIPTS=		$(NTPSWEEP_DB)
+sbin_SCRIPTS=		$(NTPSWEEP_DS)
+libexec_SCRIPTS=	$(NTPSWEEP_DL)
+noinst_SCRIPTS=		$(NTPSWEEP_NI)
+EXTRA_SCRIPTS=		ntpsweep
+
+if INSTALL_NTPSWEEP
+man_MANS=	ntpsweep.$(NTPSWEEP_MS)
+else
+noinst_MANS=	ntpsweep.$(NTPSWEEP_MS)
+endif
 
 EXTRA_DIST =			\
 	ntpsweep.in		\
@@ -22,7 +32,7 @@ EXTRA_DIST =			\
 html_DATA = ntpsweep.html
 
 CLEANFILES = ntpsweep.1
-DISTCLEANFILES = config.log
+DISTCLEANFILES = config.log $(man_MANS) $(noinst_MANS)
 
 noinst_DATA =			\
 	ntpsweep.1		\

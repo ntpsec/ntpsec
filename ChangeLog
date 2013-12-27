@@ -1,3 +1,5 @@
+* [Bug 2524] Add ntpsweep to sntp/loc/* files.
+* [Bug 2526] Add "noinst" support to the sntp/loc/ framework.
 (4.2.7p404) 2013/12/24 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 135] AIX5: "Address already in use" for IPv6 wildcard.
 (4.2.7p403) 2013/12/23 Released by Harlan Stenn <stenn@ntp.org>
