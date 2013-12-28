@@ -10,11 +10,11 @@
 .ds B-Font B
 .ds I-Font I
 .ds R-Font R
-.TH plot_summary 1plot_summaryman "24 Dec 2013" "" "User Commands"
+.TH plot_summary 1plot_summaryman "27 Dec 2013" "" "User Commands"
 .\"
-.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-7zaWCL/ag-iAaaCL)
+.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-vSaqsz/ag-ISaGrz)
 .\"
-.\" It has been AutoGen-ed December 24, 2013 at 11:35:59 AM by AutoGen 5.18.3pre5
+.\" It has been AutoGen-ed December 27, 2013 at 11:35:02 AM by AutoGen 5.18.3pre5
 .\" From the definitions plot_summary-opts.def
 .\" and the template file agman-cmd.tpl
 .SH NAME
@@ -91,11 +91,11 @@ Display usage information and exit.
 .NOP \f\*[B-Font]\-\-more-help\f[]
 Pass the extended usage information through a pager.
 .PP
-.TH plot_summary 1plot_summaryman "24 Dec 2013" "" "User Commands"
+.TH plot_summary 1plot_summaryman "27 Dec 2013" "" "User Commands"
 .\"
-.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-7zaWCL/ag-iAaaCL)
+.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-vSaqsz/ag-ISaGrz)
 .\"
-.\" It has been AutoGen-ed December 24, 2013 at 11:35:59 AM by AutoGen 5.18.3pre5
+.\" It has been AutoGen-ed December 27, 2013 at 11:35:02 AM by AutoGen 5.18.3pre5
 .\" From the definitions plot_summary-opts.def
 .\" and the template file agman-cmd.tpl
 .SH NAME

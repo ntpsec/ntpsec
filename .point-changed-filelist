@@ -46,8 +46,11 @@ ntpsnmpd/ntpsnmpd.mdoc.in
 packageinfo.sh
 scripts/invoke-plot_summary.texi
 scripts/invoke-summary.texi
+scripts/ntp-wait/invoke-ntp-wait.texi
 scripts/ntp-wait/ntp-wait.html
+scripts/ntpsweep/invoke-ntpsweep.texi
 scripts/ntpsweep/ntpsweep.html
+scripts/ntptrace/invoke-ntptrace.texi
 scripts/ntptrace/ntptrace.html
 scripts/plot_summary.1plot_summaryman
 scripts/plot_summary.1plot_summarymdoc
