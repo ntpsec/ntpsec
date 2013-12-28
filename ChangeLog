@@ -1,3 +1,4 @@
+* [Bug 2521] VPATH tweaks for perl -opts files.
 (4.2.7p405) 2013/12/27 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 2521] bootstrap script needs a tweak for perl -opts files.
 * [Bug 2524] Add ntpsweep to sntp/loc/* files.

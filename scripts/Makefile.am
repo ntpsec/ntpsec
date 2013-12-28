@@ -82,9 +82,9 @@ OPTTPL = ../sntp/ag-tpl/perlopt.tpl
 
 ##
 
-plot_summary: plot_summary-opts
+plot_summary: $(srcdir)/plot_summary-opts
 
-plot_summary-opts: plot_summary-opts.def $(OPTTPL)
+$(srcdir)/plot_summary-opts: plot_summary-opts.def $(OPTTPL)
 	$(run_ag) plot_summary-opts.def 
 
 ### Nroff
@@ -128,9 +128,9 @@ $(srcdir)/plot_summary.html: $(srcdir)/invoke-plot_summary.menu $(srcdir)/invoke
 
 ##
 
-summary: summary-opts
+summary: $(srcdir)/summary-opts
 
-summary-opts: summary-opts.def $(OPTTPL)
+$(srcdir)/summary-opts: summary-opts.def $(OPTTPL)
 	$(run_ag) summary-opts.def
 
 ### Nroff
