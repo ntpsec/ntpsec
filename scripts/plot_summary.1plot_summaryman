@@ -12,9 +12,9 @@
 .ds R-Font R
 .TH plot_summary 1plot_summaryman "29 Dec 2013" "" "User Commands"
 .\"
-.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-1Ya4Id/ag-bZaiId)
+.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-EiaGDb/ag-QiaWCb)
 .\"
-.\" It has been AutoGen-ed December 29, 2013 at 11:35:41 AM by AutoGen 5.18.3pre5
+.\" It has been AutoGen-ed December 29, 2013 at 12:57:42 PM by AutoGen 5.18.3pre5
 .\" From the definitions plot_summary-opts.def
 .\" and the template file agman-cmd.tpl
 .SH NAME
@@ -93,9 +93,9 @@ Pass the extended usage information through a pager.
 .PP
 .TH plot_summary 1plot_summaryman "29 Dec 2013" "" "User Commands"
 .\"
-.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-1Ya4Id/ag-bZaiId)
+.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-EiaGDb/ag-QiaWCb)
 .\"
-.\" It has been AutoGen-ed December 29, 2013 at 11:35:41 AM by AutoGen 5.18.3pre5
+.\" It has been AutoGen-ed December 29, 2013 at 12:57:42 PM by AutoGen 5.18.3pre5
 .\" From the definitions plot_summary-opts.def
 .\" and the template file agman-cmd.tpl
 .SH NAME

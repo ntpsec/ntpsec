@@ -3,7 +3,7 @@
 .Os SunOS 5.10
 .\"  EDIT THIS FILE WITH CAUTION  (ntpsnmpd-opts.mdoc)
 .\"
-.\"  It has been AutoGen-ed  December 29, 2013 at 11:40:09 AM by AutoGen 5.18.3pre5
+.\"  It has been AutoGen-ed  December 29, 2013 at 01:00:57 PM by AutoGen 5.18.3pre5
 .\"  From the definitions    ntpsnmpd-opts.def
 .\"  and the template file   agmdoc-cmd.tpl
 .Sh NAME
@@ -159,7 +159,7 @@ please fill me in...
 please fill me in...
 .El
 .Pp
-This document corresponds to version 4.2.7p407 of NTP.
+This document corresponds to version 4.2.7p408 of NTP.
 .Pp
 This manual page was \fIAutoGen\fP\-erated from the \fBntpsnmpd\fP
 option definitions.

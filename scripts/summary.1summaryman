@@ -12,9 +12,9 @@
 .ds R-Font R
 .TH summary 1summaryman "29 Dec 2013" "" "User Commands"
 .\"
-.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-araOZd/ag-nra4Yd)
+.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-XFayWb/ag-.FaOVb)
 .\"
-.\" It has been AutoGen-ed December 29, 2013 at 11:35:47 AM by AutoGen 5.18.3pre5
+.\" It has been AutoGen-ed December 29, 2013 at 12:57:47 PM by AutoGen 5.18.3pre5
 .\" From the definitions summary-opts.def
 .\" and the template file agman-cmd.tpl
 .SH NAME
@@ -102,9 +102,9 @@ Pass the extended usage information through a pager.
 .PP
 .TH summary 1summaryman "29 Dec 2013" "" "User Commands"
 .\"
-.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-araOZd/ag-nra4Yd)
+.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-XFayWb/ag-.FaOVb)
 .\"
-.\" It has been AutoGen-ed December 29, 2013 at 11:35:47 AM by AutoGen 5.18.3pre5
+.\" It has been AutoGen-ed December 29, 2013 at 12:57:47 PM by AutoGen 5.18.3pre5
 .\" From the definitions summary-opts.def
 .\" and the template file agman-cmd.tpl
 .SH NAME

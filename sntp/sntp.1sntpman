@@ -10,11 +10,11 @@
 .ds B-Font B
 .ds I-Font I
 .ds R-Font R
-.TH sntp 1sntpman "29 Dec 2013" "4.2.7p407" "User Commands"
+.TH sntp 1sntpman "29 Dec 2013" "4.2.7p408" "User Commands"
 .\"
-.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-5Dai_p/ag-gEai.p)
+.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-CMay9n/ag-OMay8n)
 .\"
-.\" It has been AutoGen-ed December 29, 2013 at 11:40:43 AM by AutoGen 5.18.3pre5
+.\" It has been AutoGen-ed December 29, 2013 at 01:01:33 PM by AutoGen 5.18.3pre5
 .\" From the definitions sntp-opts.def
 .\" and the template file agman-cmd.tpl
 .SH NAME
@@ -281,11 +281,11 @@ the configuration files.
 The \fIhomerc\fP files are "\fI$HOME\fP", and "\fI.\fP".
 If any of these are directories, then the file \fI.ntprc\fP
 is searched for within those directories.
-.TH sntp 1sntpman "29 Dec 2013" "4.2.7p407" "User Commands"
+.TH sntp 1sntpman "29 Dec 2013" "4.2.7p408" "User Commands"
 .\"
-.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-5Dai_p/ag-gEai.p)
+.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-CMay9n/ag-OMay8n)
 .\"
-.\" It has been AutoGen-ed December 29, 2013 at 11:40:43 AM by AutoGen 5.18.3pre5
+.\" It has been AutoGen-ed December 29, 2013 at 01:01:33 PM by AutoGen 5.18.3pre5
 .\" From the definitions sntp-opts.def
 .\" and the template file agman-cmd.tpl
 .SH NAME
@@ -364,7 +364,7 @@ This program is released under the terms of the NTP license, <http://ntp.org/lic
 .SH "BUGS"
 Please send bug reports to: http://bugs.ntp.org, bugs@ntp.org
 .SH NOTES
-This document corresponds to version 4.2.7p407 of
+This document corresponds to version 4.2.7p408 of
 \f\*[B-Font]sntp\fP.
 .sp \n(Ppu
 .ne 2
