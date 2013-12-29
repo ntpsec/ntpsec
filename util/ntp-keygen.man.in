@@ -10,11 +10,11 @@
 .ds B-Font B
 .ds I-Font I
 .ds R-Font R
-.TH ntp-keygen @NTP_KEYGEN_MS@ "28 Dec 2013" "ntp (4.2.7p406)" "User Commands"
+.TH ntp-keygen @NTP_KEYGEN_MS@ "29 Dec 2013" "ntp (4.2.7p407)" "User Commands"
 .\"
-.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-VhaW0y/ag-7haWZy)
+.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-IeaOco/ag-UeaObo)
 .\"
-.\" It has been AutoGen-ed December 28, 2013 at 12:08:32 PM by AutoGen 5.18.3pre5
+.\" It has been AutoGen-ed December 29, 2013 at 11:40:21 AM by AutoGen 5.18.3pre5
 .\" From the definitions ntp-keygen-opts.def
 .\" and the template file agman-cmd.tpl
 .SH NAME
@@ -1154,11 +1154,11 @@ the configuration files.
 The \fIhomerc\fP files are "\fI$HOME\fP", and "\fI.\fP".
 If any of these are directories, then the file \fI.ntprc\fP
 is searched for within those directories.
-.TH ntp-keygen @NTP_KEYGEN_MS@ "28 Dec 2013" "ntp (4.2.7p406)" "User Commands"
+.TH ntp-keygen @NTP_KEYGEN_MS@ "29 Dec 2013" "ntp (4.2.7p407)" "User Commands"
 .\"
-.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-VhaW0y/ag-7haWZy)
+.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-IeaOco/ag-UeaObo)
 .\"
-.\" It has been AutoGen-ed December 28, 2013 at 12:08:32 PM by AutoGen 5.18.3pre5
+.\" It has been AutoGen-ed December 29, 2013 at 11:40:21 AM by AutoGen 5.18.3pre5
 .\" From the definitions ntp-keygen-opts.def
 .\" and the template file agman-cmd.tpl
 .SH NAME
@@ -1235,7 +1235,7 @@ Please report bugs to http://bugs.ntp.org .
 
 Please send bug reports to: http://bugs.ntp.org, bugs@ntp.org
 .SH NOTES
-This document corresponds to version 4.2.7p406 of NTP.
+This document corresponds to version 4.2.7p407 of NTP.
 Portions of this document came from FreeBSD.
 .sp \n(Ppu
 .ne 2
