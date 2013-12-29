@@ -47,13 +47,23 @@
 # repotype must be stable or dev
 repotype=dev
 
+# post-4.2.8:
+# version=Major.Minor
+# 4.2.8 and before:
 # version=Protocol.Major.Minor
 # odd minor numbers are for -dev, even minor numbers are for -stable
 # UpdatePoint will fail if repotype is inconsistent with minor.
 proto=4
 major=2
 minor=7
-version=${proto}.${major}.${minor}
+
+case "${proto}.${major}" in
+ 4.[012])
+    version=${proto}.${major}.${minor}
+    ;;
+ *) version=${major}.${minor}
+    ;;
+esac
 
 # Special.  Normally unused.  A suffix.
 #special=ag
@@ -65,6 +75,9 @@ prerelease=
 # ChangeLog starting tag (see also CommitLog-4.1.0)
 CLTAG=NTP_4_2_0
 
+### post-4.2.8:
+### Point number, after "major.minor.", normally modified by script.
+### 4.2.8 and before:
 ### Point number, after "p", normally modified by script.
 # 3 cases:
 # - Numeric values increment

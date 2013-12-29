@@ -1,3 +1,4 @@
+* [Bug 2187] Update version number generation scripts.
 * [Bug 2519] mktime.c does not compile on 64-bit Solaris but we do not
   need timegm() and the Solaris provides mktime().
 * [Bug 2522] Revert Bug 2513 fix - it breaks backward compatibility.
