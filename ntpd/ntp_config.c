@@ -2455,6 +2455,14 @@ config_access(
 			msyslog(LOG_WARNING, "%s", signd_warning);
 		}
 
+		/* It would be swell if we could identify the line number */
+		if ((RES_KOD & flags) && !(RES_LIMITED & flags)) {
+			char *kod_warn = "KOD does nothing without LIMITED.";
+
+			fprintf(stderr, "%s\n", kod_warn);
+			msyslog(LOG_WARNING, "%s", kod_warn);
+		}
+
 		ZERO_SOCK(&addr);
 		ai_list = NULL;
 		pai = NULL;
@@ -4892,7 +4900,7 @@ ntp_rlimit(
 	    case RLIMIT_NOFILE:
 		/*
 		 * For large systems the default file descriptor limit may
-		 * not be enough.  
+		 * not be enough. 
 		 */
 		DPRINTF(2, ("ntp_rlimit: NOFILE: %d %s\n",
 			(int)(rl_value / rl_scale), rl_sstr));

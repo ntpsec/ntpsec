@@ -1,3 +1,4 @@
+* [Bug 2060] Warn about restrictions with "kod" but not "limited".
 (4.2.7p408) 2013/12/29 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 2187] Update version number generation scripts.
 (4.2.7p407) 2013/12/29 Released by Harlan Stenn <stenn@ntp.org>
