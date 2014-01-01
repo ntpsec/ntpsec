@@ -2457,10 +2457,15 @@ config_access(
 
 		/* It would be swell if we could identify the line number */
 		if ((RES_KOD & flags) && !(RES_LIMITED & flags)) {
+			char *kod_where = (my_node->addr)
+					  ? my_node->addr->address
+					  : (mflags & RESM_SOURCE)
+					    ? "source"
+					    : "default";
 			char *kod_warn = "KOD does nothing without LIMITED.";
 
-			fprintf(stderr, "%s\n", kod_warn);
-			msyslog(LOG_WARNING, "%s", kod_warn);
+			fprintf(stderr, "restrict %s: %s\n", kod_where, kod_warn);
+			msyslog(LOG_WARNING, "restrict %s: %s", kod_where, kod_warn);
 		}
 
 		ZERO_SOCK(&addr);
