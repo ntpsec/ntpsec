@@ -19,6 +19,8 @@ LIBS=
 dnl The contents of NTP_PROG_CC used to be here...
 
 AC_PROG_INSTALL
+# [Bug 2332] because we need to know if we are using GNU ld...
+LT_PATH_LD
 
 NTP_DIR_SEP
 NTP_LINEEDITLIBS
@@ -338,13 +340,13 @@ case "$enable_thread_support" in
 	 yes)
 	    PTHREAD_LIBS="$LTHREAD_LIBS"
 	    have_pthreads=yes
-	    # bug 2332: With GCC we need to force a reference to libgcc_s, or the
+	    # Bug 2332: With GCC we need to force a reference to libgcc_s, or the
 	    # combination threads + setuid + mlockall does not work on linux
 	    # because thread cancellation fails to load libgcc_s with dlopen().
 	    # We have to pass this all as linker options to avoid argument
 	    # reordering by libtool.
-	    case "$GCC" in
-	    yes)
+	    case "$GCC$with_gnu_ld" in
+	    yesyes)
 		PTHREAD_LIBS="$LTHREAD_LIBS -Wl,--no-as-needed,-lgcc_s,--as-needed"
 		;;
 	    esac
