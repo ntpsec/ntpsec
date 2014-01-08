@@ -10,11 +10,11 @@
 .ds B-Font B
 .ds I-Font I
 .ds R-Font R
-.TH ntp.conf 5man "29 Dec 2013" "4.2.7p408" "File Formats"
+.TH ntp.conf 5man "04 Jan 2014" "4.2.7p409" "File Formats"
 .\"
-.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-nJay1e/ag-JJay0e)
+.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-H2aWvy/ag-.5aWuy)
 .\"
-.\" It has been AutoGen-ed December 29, 2013 at 12:59:34 PM by AutoGen 5.18.3pre5
+.\" It has been AutoGen-ed January 4, 2014 at 11:15:35 AM by AutoGen 5.18.3pre5
 .\" From the definitions ntp.conf.def
 .\" and the template file agman-cmd.tpl
 .SH NAME
@@ -2900,11 +2900,11 @@ by loading values from environment variables named:
   \fBNTP_CONF_<option-name>\fP or \fBNTP_CONF\fP
 .fi
 .ad
-.TH ntp.conf 5man "29 Dec 2013" "4.2.7p408" "File Formats"
+.TH ntp.conf 5man "04 Jan 2014" "4.2.7p409" "File Formats"
 .\"
-.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-nJay1e/ag-JJay0e)
+.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-H2aWvy/ag-.5aWuy)
 .\"
-.\" It has been AutoGen-ed December 29, 2013 at 12:59:34 PM by AutoGen 5.18.3pre5
+.\" It has been AutoGen-ed January 4, 2014 at 11:15:35 AM by AutoGen 5.18.3pre5
 .\" From the definitions ntp.conf.def
 .\" and the template file agman-cmd.tpl
 .SH NAME
@@ -3010,7 +3010,7 @@ services when they become universally available.
 
 Please send bug reports to: http://bugs.ntp.org, bugs@ntp.org
 .SH NOTES
-This document corresponds to version 4.2.7p408 of NTP.
+This document corresponds to version 4.2.7p409 of NTP.
 This document was derived from FreeBSD.
 .sp \n(Ppu
 .ne 2

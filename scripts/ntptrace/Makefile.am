@@ -24,6 +24,8 @@ EXTRA_DIST =			\
 	invoke-ntptrace.menu	\
 	$(NULL)
 
+DISTCLEANFILES =	config.log $(man_MANS)
+
 html_DATA = $(srcdir)/ntptrace.html
 
 noinst_DATA =			\

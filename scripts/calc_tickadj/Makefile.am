@@ -19,6 +19,8 @@ manpage_HACK+=	calc_tickadj.
 # The manpage_HACK is listed in noinst_DATA so that takes care of these.
 endif
 
+DISTCLEANFILES =	config.log $(man_MANS) calc_tickadj.
+
 EXTRA_DIST =				\
 	calc_tickadj.in 		\
 	calc_tickadj.1calc_tickadjman	\

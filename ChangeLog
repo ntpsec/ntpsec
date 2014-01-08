@@ -1,5 +1,7 @@
 * [Bug 2332] Force reference to 'libgcc_s' when using GCC, because
   threading+restricted user+locked memory otherwise fails on Linux.
+* Cleanup to the new scripts/*/Makefile.am files.
+(4.2.7p409) 2014/01/04 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 2060] Warn about restrictions with "kod" but not "limited".
 (4.2.7p408) 2013/12/29 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 2187] Update version number generation scripts.
