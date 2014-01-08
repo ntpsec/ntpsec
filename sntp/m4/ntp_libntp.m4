@@ -338,6 +338,16 @@ case "$enable_thread_support" in
 	 yes)
 	    PTHREAD_LIBS="$LTHREAD_LIBS"
 	    have_pthreads=yes
+	    # bug 2332: With GCC we need to force a reference to libgcc_s, or the
+	    # combination threads + setuid + mlockall does not work on linux
+	    # because thread cancellation fails to load libgcc_s with dlopen().
+	    # We have to pass this all as linker options to avoid argument
+	    # reordering by libtool.
+	    case "$GCC" in
+	    yes)
+		PTHREAD_LIBS="$LTHREAD_LIBS -Wl,--no-as-needed,-lgcc_s,--as-needed"
+		;;
+	    esac
 	esac
     esac
 esac

@@ -1,9 +1,9 @@
-.Dd December 29 2013
+.Dd January 3 2014
 .Dt PLOT_SUMMARY 1plot_summarymdoc User Commands
 .Os SunOS 5.10
 .\"  EDIT THIS FILE WITH CAUTION  (plot_summary-opts.mdoc)
 .\"
-.\"  It has been AutoGen-ed  December 29, 2013 at 12:57:44 PM by AutoGen 5.18.3pre5
+.\"  It has been AutoGen-ed  January  3, 2014 at 11:04:33 AM by AutoGen 5.18.3pre5
 .\"  From the definitions    plot_summary-opts.def
 .\"  and the template file   agmdoc-cmd.tpl
 .Sh NAME
