@@ -12,6 +12,7 @@ run_ag=		cd $(srcdir) &&	env PATH="$(abs_builddir):$(PATH)" PERL5LIB="$(abs_top_
 
 EXTRA_SCRIPTS = ntp-wait
 
+DISTCLEANFILES =	config.log $(man_MANS)
 EXTRA_DIST =			\
 	ntp-wait.in		\
 	ntp-wait.1ntp-waitman	\
