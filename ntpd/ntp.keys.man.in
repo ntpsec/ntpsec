@@ -1,8 +1,8 @@
-.TH ntp.keys 5 "04 Jan 2014" "4.2.7p409" "File Formats"
+.TH ntp.keys 5 "08 Jan 2014" "4.2.7p410" "File Formats"
 .\"
 .\"  EDIT THIS FILE WITH CAUTION  (ntp.man)
 .\"
-.\"  It has been AutoGen-ed  January  4, 2014 at 11:15:48 AM by AutoGen 5.18.3pre5
+.\"  It has been AutoGen-ed  January  8, 2014 at 11:43:09 AM by AutoGen 5.18.3pre11
 .\"  From the definitions    ntp.keys.def
 .\"  and the template file   agman-file.tpl
 .Sh NAME
@@ -157,7 +157,7 @@ test \-x "$cvt_prog" || die "'$cvt_prog' is not executable"
     for f in $list ; do cat $f ; echo ; done
     rm \-f $list
 } 1>.doc 2>/dev/null
-sed \-f .cmds .doc | /usr/local/gnu/bin/grep \-E \-v '^[ 	]*$' | $cvt_prog
+sed \-f .cmds .doc | /opt/csw/bin/ggrep \-E \-v '^[ 	]*$' | $cvt_prog
 .SH FILES
 .TP 14
 .NOP \fI/etc/ntp.keys\f[]
@@ -177,7 +177,7 @@ This program is released under the terms of the NTP license, <http://ntp.org/lic
 .SH "BUGS"
 Please send bug reports to: http://bugs.ntp.org, bugs@ntp.org
 .SH NOTES
-This document corresponds to version 4.2.7p409 of NTP.
+This document corresponds to version 4.2.7p410 of NTP.
 This document was derived from FreeBSD.
 .sp \n(Ppu
 .ne 2

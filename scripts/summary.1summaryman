@@ -10,11 +10,11 @@
 .ds B-Font B
 .ds I-Font I
 .ds R-Font R
-.TH summary 1summaryman "04 Jan 2014" "" "User Commands"
+.TH summary 1summaryman "08 Jan 2014" "" "User Commands"
 .\"
-.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-fUaquu/ag-sUaGtu)
+.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-sqa4tD/ag-IqaitD)
 .\"
-.\" It has been AutoGen-ed January 4, 2014 at 11:01:31 AM by AutoGen 5.18.3pre5
+.\" It has been AutoGen-ed January 8, 2014 at 11:33:54 AM by AutoGen 5.18.3pre11
 .\" From the definitions summary-opts.def
 .\" and the template file agman-cmd.tpl
 .SH NAME
@@ -100,11 +100,11 @@ Display usage information and exit.
 .NOP \f\*[B-Font]\-\-more-help\f[]
 Pass the extended usage information through a pager.
 .PP
-.TH summary 1summaryman "04 Jan 2014" "" "User Commands"
+.TH summary 1summaryman "08 Jan 2014" "" "User Commands"
 .\"
-.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-fUaquu/ag-sUaGtu)
+.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-sqa4tD/ag-IqaitD)
 .\"
-.\" It has been AutoGen-ed January 4, 2014 at 11:01:31 AM by AutoGen 5.18.3pre5
+.\" It has been AutoGen-ed January 8, 2014 at 11:33:54 AM by AutoGen 5.18.3pre11
 .\" From the definitions summary-opts.def
 .\" and the template file agman-cmd.tpl
 .SH NAME
@@ -128,7 +128,7 @@ test \-x "$cvt_prog" || die "'$cvt_prog' is not executable"
     for f in $list ; do cat $f ; echo ; done
     rm \-f $list
 } 1>.doc 2>/dev/null
-/usr/local/gnu/bin/grep \-E \-v '^[ 	]*$' .doc | $cvt_prog
+/opt/csw/bin/ggrep \-E \-v '^[ 	]*$' .doc | $cvt_prog
 .SH "EXIT STATUS"
 One of the following exit values will be returned:
 .TP

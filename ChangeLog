@@ -1,3 +1,4 @@
+(4.2.7p410) 2014/01/08 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 2332] Force reference to 'libgcc_s' when using GCC, because
   threading+restricted user+locked memory otherwise fails on Linux.
 * [Bug 2530] Fix documentation for enable/disable mode7 and pps.

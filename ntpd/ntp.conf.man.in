@@ -10,11 +10,11 @@
 .ds B-Font B
 .ds I-Font I
 .ds R-Font R
-.TH ntp.conf 5 "04 Jan 2014" "4.2.7p409" "File Formats"
+.TH ntp.conf 5 "08 Jan 2014" "4.2.7p410" "File Formats"
 .\"
-.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-H2aWvy/ag-.5aWuy)
+.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-nHaaYF/ag-AHaaXF)
 .\"
-.\" It has been AutoGen-ed January 4, 2014 at 11:15:35 AM by AutoGen 5.18.3pre5
+.\" It has been AutoGen-ed January 8, 2014 at 11:43:04 AM by AutoGen 5.18.3pre11
 .\" From the definitions ntp.conf.def
 .\" and the template file agman-cmd.tpl
 .SH NAME
@@ -2541,9 +2541,9 @@ must have write permission for the directory the
 drift file is located in, and that file system links, symbolic or
 otherwise, should be avoided.
 .TP 7
-.NOP \f\*[B-Font]enable\f[] [\f\*[B-Font]auth\f[] | \f\*[B-Font]bclient\f[] | \f\*[B-Font]calibrate\f[] | \f\*[B-Font]kernel\f[] | \f\*[B-Font]monitor\f[] | \f\*[B-Font]ntp\f[] | \f\*[B-Font]pps\f[] | \f\*[B-Font]stats\f[]]
+.NOP \f\*[B-Font]enable\f[] [\f\*[B-Font]auth\f[] | \f\*[B-Font]bclient\f[] | \f\*[B-Font]calibrate\f[] | \f\*[B-Font]kernel\f[] | \f\*[B-Font]mode7\f[] | \f\*[B-Font]monitor\f[] | \f\*[B-Font]ntp\f[] | \f\*[B-Font]stats\f[]]
 .TP 7
-.NOP \f\*[B-Font]disable\f[] [\f\*[B-Font]auth\f[] | \f\*[B-Font]bclient\f[] | \f\*[B-Font]calibrate\f[] | \f\*[B-Font]kernel\f[] | \f\*[B-Font]monitor\f[] | \f\*[B-Font]ntp\f[] | \f\*[B-Font]pps\f[] | \f\*[B-Font]stats\f[]]
+.NOP \f\*[B-Font]disable\f[] [\f\*[B-Font]auth\f[] | \f\*[B-Font]bclient\f[] | \f\*[B-Font]calibrate\f[] | \f\*[B-Font]kernel\f[] | \f\*[B-Font]mode7\f[] | \f\*[B-Font]monitor\f[] | \f\*[B-Font]ntp\f[] | \f\*[B-Font]stats\f[]]
 Provides a way to enable or disable various server options.
 Flags not mentioned are unaffected.
 Note that all of these flags
@@ -2582,6 +2582,20 @@ flag is
 if support is available, otherwise
 \f\*[B-Font]disable\f[].
 .TP 7
+.NOP \f\*[B-Font]mode7\f[]
+Enables processing of NTP mode 7 implementation-specific requests
+which are used by the deprecated
+\fCntpdc\fR(@NTPDC_MS@)\f[]
+program.
+The default for this flag is disable.
+This flag is excluded from runtime configuration using
+\fCntpq\fR(@NTPQ_MS@)\f[].
+The
+\fCntpq\fR(@NTPQ_MS@)\f[]
+program provides the same capabilities as
+\fCntpdc\fR(@NTPDC_MS@)\f[]
+using standard mode 6 requests.
+.TP 7
 .NOP \f\*[B-Font]monitor\f[]
 Enables the monitoring facility.
 See the
@@ -2601,18 +2615,6 @@ closes the feedback loop, which is useful for testing.
 The default for
 this flag is
 \f\*[B-Font]enable\f[].
-.TP 7
-.NOP \f\*[B-Font]pps\f[]
-Enables the pulse-per-second (PPS) signal when frequency and time is
-disciplined by the precision time kernel modifications.
-See the
-"A Kernel Model for Precision Timekeeping"
-(available as part of the HTML documentation
-provided in
-\fI/usr/share/doc/ntp\f[])
-page for further information.
-The default for this flag is
-\f\*[B-Font]disable\f[].
 .TP 7
 .NOP \f\*[B-Font]stats\f[]
 Enables the statistics facility.
@@ -2900,11 +2902,11 @@ by loading values from environment variables named:
   \fBNTP_CONF_<option-name>\fP or \fBNTP_CONF\fP
 .fi
 .ad
-.TH ntp.conf 5 "04 Jan 2014" "4.2.7p409" "File Formats"
+.TH ntp.conf 5 "08 Jan 2014" "4.2.7p410" "File Formats"
 .\"
-.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-H2aWvy/ag-.5aWuy)
+.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-nHaaYF/ag-AHaaXF)
 .\"
-.\" It has been AutoGen-ed January 4, 2014 at 11:15:35 AM by AutoGen 5.18.3pre5
+.\" It has been AutoGen-ed January 8, 2014 at 11:43:04 AM by AutoGen 5.18.3pre11
 .\" From the definitions ntp.conf.def
 .\" and the template file agman-cmd.tpl
 .SH NAME
@@ -2928,7 +2930,7 @@ test \-x "$cvt_prog" || die "'$cvt_prog' is not executable"
     for f in $list ; do cat $f ; echo ; done
     rm \-f $list
 } 1>.doc 2>/dev/null
-sed \-f .cmds .doc | /usr/local/gnu/bin/grep \-E \-v '^[ 	]*$' | $cvt_prog
+sed \-f .cmds .doc | /opt/csw/bin/ggrep \-E \-v '^[ 	]*$' | $cvt_prog
 .SH "ENVIRONMENT"
 See \fBOPTION PRESETS\fP for configuration environment variables.
 .SH FILES
@@ -3010,7 +3012,7 @@ services when they become universally available.
 
 Please send bug reports to: http://bugs.ntp.org, bugs@ntp.org
 .SH NOTES
-This document corresponds to version 4.2.7p409 of NTP.
+This document corresponds to version 4.2.7p410 of NTP.
 This document was derived from FreeBSD.
 .sp \n(Ppu
 .ne 2
