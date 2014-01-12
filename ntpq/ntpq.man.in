@@ -10,11 +10,11 @@
 .ds B-Font B
 .ds I-Font I
 .ds R-Font R
-.TH ntpq @NTPQ_MS@ "08 Jan 2014" "4.2.7p410" "User Commands"
+.TH ntpq @NTPQ_MS@ "11 Jan 2014" "4.2.7p411" "User Commands"
 .\"
-.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-cOa4nK/ag-oOa4mK)
+.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-aPaGnl/ag-oPaGml)
 .\"
-.\" It has been AutoGen-ed January 8, 2014 at 11:44:31 AM by AutoGen 5.18.3pre11
+.\" It has been AutoGen-ed January 11, 2014 at 10:03:52 AM by AutoGen 5.18.3pre11
 .\" From the definitions ntpq-opts.def
 .\" and the template file agman-cmd.tpl
 .SH NAME
@@ -415,11 +415,11 @@ the configuration files.
 The \fIhomerc\fP files are "\fI$HOME\fP", and "\fI.\fP".
 If any of these are directories, then the file \fI.ntprc\fP
 is searched for within those directories.
-.TH ntpq @NTPQ_MS@ "08 Jan 2014" "4.2.7p410" "User Commands"
+.TH ntpq @NTPQ_MS@ "11 Jan 2014" "4.2.7p411" "User Commands"
 .\"
-.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-cOa4nK/ag-oOa4mK)
+.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-aPaGnl/ag-oPaGml)
 .\"
-.\" It has been AutoGen-ed January 8, 2014 at 11:44:31 AM by AutoGen 5.18.3pre11
+.\" It has been AutoGen-ed January 11, 2014 at 10:03:52 AM by AutoGen 5.18.3pre11
 .\" From the definitions ntpq-opts.def
 .\" and the template file agman-cmd.tpl
 .SH NAME
