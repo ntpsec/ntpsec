@@ -7,9 +7,10 @@
 # DO NOT EDIT THE FOLLOWING
 #
 # It's auto generated option handling code [=
-(if (not (and (exist? "prog-name") (exist? "prog-title")))
+(if (not (and (exist? "prog-name") (exist? "prog-title") (exist? "version")))
     (error "prog-name and prog-title are required"))
 (define prog-name (get "prog-name"))
+
 (if (> (string-length prog-name) 16)
     (error (sprintf "prog-name limited to 16 characters:  %s"
            prog-name)) ) 
@@ -146,7 +147,7 @@ sub processOptions {
         'help|?', 'more-help'));
 
     $usage = <<'USAGE';
-[= prog-name =] - [= prog-title =]
+[= prog-name =] - [= prog-title =] - Ver. [= version =]
 USAGE: [= prog-name =] [ -<flag> [<val>] | --<name>[{=| }<val>] ]... [= argument =]
 [= (emit perl_usage ) =]
     -?, --help                   Display usage information and exit
