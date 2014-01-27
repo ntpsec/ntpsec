@@ -6,7 +6,7 @@
 #
 # EDIT THIS FILE WITH CAUTION  (invoke-summary.texi)
 #
-# It has been AutoGen-ed  January 10, 2014 at 10:58:01 AM by AutoGen 5.18.3pre11
+# It has been AutoGen-ed  January 20, 2014 at 11:11:23 AM by AutoGen 5.18.3pre11
 # From the definitions    summary-opts.def
 # and the template file   agtexi-cmd.tpl
 @end ignore

@@ -10,11 +10,11 @@
 .ds B-Font B
 .ds I-Font I
 .ds R-Font R
-.TH ntpsnmpd 1ntpsnmpdman "11 Jan 2014" "4.2.7p411" "User Commands"
+.TH ntpsnmpd 1ntpsnmpdman "20 Jan 2014" "4.2.7p412" "User Commands"
 .\"
-.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-MnaGym/ag-YnaGxm)
+.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-m.aGbz/ag-z.aGaz)
 .\"
-.\" It has been AutoGen-ed January 11, 2014 at 10:04:44 AM by AutoGen 5.18.3pre11
+.\" It has been AutoGen-ed January 20, 2014 at 11:31:22 AM by AutoGen 5.18.3pre11
 .\" From the definitions ntpsnmpd-opts.def
 .\" and the template file agman-cmd.tpl
 .SH NAME
@@ -114,11 +114,11 @@ test \-x "$cvt_prog" || die "'$cvt_prog' is not executable"
     rm \-f $list
 } 1>.doc 2>/dev/null
 sed \-f .cmds .doc | /opt/csw/bin/ggrep \-E \-v '^[ 	]*$' | $cvt_prog
-.TH ntpsnmpd 1ntpsnmpdman "11 Jan 2014" "4.2.7p411" "User Commands"
+.TH ntpsnmpd 1ntpsnmpdman "20 Jan 2014" "4.2.7p412" "User Commands"
 .\"
-.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-MnaGym/ag-YnaGxm)
+.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-m.aGbz/ag-z.aGaz)
 .\"
-.\" It has been AutoGen-ed January 11, 2014 at 10:04:44 AM by AutoGen 5.18.3pre11
+.\" It has been AutoGen-ed January 20, 2014 at 11:31:22 AM by AutoGen 5.18.3pre11
 .\" From the definitions ntpsnmpd-opts.def
 .\" and the template file agman-cmd.tpl
 .SH NAME
@@ -228,7 +228,7 @@ please fill me in...
 .sp \n(Ppu
 .ne 2
 
-This document corresponds to version 4.2.7p411 of NTP.
+This document corresponds to version 4.2.7p412 of NTP.
 .sp \n(Ppu
 .ne 2
 

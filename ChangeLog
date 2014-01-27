@@ -1,3 +1,4 @@
+(4.2.7p412) 2014/01/20 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 2540] bootstrap script needs to 'touch' files in finer-grained groups.
 (4.2.7p411) 2014/01/12 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 2532] Note in ntpdc docs that "enable pps" only works on older ntpd.
