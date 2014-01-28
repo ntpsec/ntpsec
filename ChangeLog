@@ -1,3 +1,4 @@
+(4.2.7p413) 2014/01/27 Released by Harlan Stenn <stenn@ntp.org>
 * Require a version string for perl scripts that use autogen.
 * html/ cleanup.
 (4.2.7p412) 2014/01/20 Released by Harlan Stenn <stenn@ntp.org>
