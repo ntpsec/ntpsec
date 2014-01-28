@@ -1,3 +1,4 @@
+* [Bug 792] TrueTime TL-3 WWV refclock support.
 (4.2.7p413) 2014/01/27 Released by Harlan Stenn <stenn@ntp.org>
 * Require a version string for perl scripts that use autogen.
 * html/ cleanup.
