@@ -1,3 +1,4 @@
+(4.2.7p414) 2014/01/28 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 792] TrueTime TL-3 WWV refclock support.
 * [Bug 898] Documentation fixes.
 * [Bug 930] ntpdc docs refer to 'clockinfo', but mean 'clockstat'.

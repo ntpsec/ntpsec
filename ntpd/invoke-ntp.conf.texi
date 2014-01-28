@@ -6,7 +6,7 @@
 #
 # EDIT THIS FILE WITH CAUTION  (invoke-ntp.conf.texi)
 #
-# It has been AutoGen-ed  January 27, 2014 at 11:37:17 AM by AutoGen 5.18.3pre11
+# It has been AutoGen-ed  January 28, 2014 at 11:07:59 AM by AutoGen 5.18.3pre11
 # From the definitions    ntp.conf.def
 # and the template file   agtexi-file.tpl
 @end ignore
@@ -987,7 +987,7 @@ automatically summarized and archived for retrospective analysis.
 @table @asis
 @item @code{statistics} @kbd{name} @kbd{...}
 Enables writing of statistics records.
-Currently, four kinds of
+Currently, eight kinds of
 @kbd{name}
 statistics are supported.
 @table @asis

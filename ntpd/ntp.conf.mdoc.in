@@ -1,9 +1,9 @@
-.Dd January 27 2014
+.Dd January 28 2014
 .Dt NTP_CONF 5 File Formats
 .Os SunOS 5.10
 .\"  EDIT THIS FILE WITH CAUTION  (ntp.mdoc)
 .\"
-.\"  It has been AutoGen-ed  January 27, 2014 at 11:37:24 AM by AutoGen 5.18.3pre11
+.\"  It has been AutoGen-ed  January 28, 2014 at 11:08:10 AM by AutoGen 5.18.3pre11
 .\"  From the definitions    ntp.conf.def
 .\"  and the template file   agmdoc-cmd.tpl
 .Sh NAME
@@ -1043,7 +1043,7 @@ automatically summarized and archived for retrospective analysis.
 .Bl -tag -width indent
 .It Ic statistics Ar name ...
 Enables writing of statistics records.
-Currently, four kinds of
+Currently, eight kinds of
 .Ar name
 statistics are supported.
 .Bl -tag -width indent
@@ -2809,7 +2809,7 @@ services when they become universally available.
 .Pp
 Please send bug reports to: http://bugs.ntp.org, bugs@ntp.org
 .Sh NOTES
-This document corresponds to version 4.2.7p413 of NTP.
+This document corresponds to version 4.2.7p414 of NTP.
 This document was derived from FreeBSD.
 .Pp
 This manual page was \fIAutoGen\fP\-erated from the \fBntp.conf\fP

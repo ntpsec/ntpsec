@@ -10,11 +10,11 @@
 .ds B-Font B
 .ds I-Font I
 .ds R-Font R
-.TH ntp-keygen 1ntp-keygenman "27 Jan 2014" "ntp (4.2.7p413)" "User Commands"
+.TH ntp-keygen 1ntp-keygenman "28 Jan 2014" "ntp (4.2.7p414)" "User Commands"
 .\"
-.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-EWaa8J/ag-QWaa7J)
+.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-1BaGEM/ag-lCaGDM)
 .\"
-.\" It has been AutoGen-ed January 27, 2014 at 11:39:11 AM by AutoGen 5.18.3pre11
+.\" It has been AutoGen-ed January 28, 2014 at 06:16:59 AM by AutoGen 5.18.3pre11
 .\" From the definitions ntp-keygen-opts.def
 .\" and the template file agman-cmd.tpl
 .SH NAME
@@ -1068,16 +1068,23 @@ generate PC private certificate.
 Generate a private certificate.  By default, the program generates
 public certificates.
 .TP
-.NOP \f\*[B-Font]\-p\f[] \f\*[I-Font]passwd\f[], \f\*[B-Font]\-\-pvt\-passwd\f[]=\f\*[I-Font]passwd\f[]
-output private password.
+.NOP \f\*[B-Font]\-p\f[] \f\*[I-Font]passwd\f[], \f\*[B-Font]\-\-password\f[]=\f\*[I-Font]passwd\f[]
+local private password.
 .sp
-Encrypt generated files containing private data with the specified
-password and the cipher selected with \fB-C/--cipher\fP.
+Local files containing private data are encrypted with the
+DES-CBC algorithm and the specified password.  The same password
+must be specified to the local ntpd via the "crypto pw password"
+configuration command.  The default password is the local
+hostname.
 .TP
-.NOP \f\*[B-Font]\-q\f[] \f\*[I-Font]passwd\f[], \f\*[B-Font]\-\-get\-pvt\-passwd\f[]=\f\*[I-Font]passwd\f[]
-input private password.
+.NOP \f\*[B-Font]\-q\f[] \f\*[I-Font]passwd\f[], \f\*[B-Font]\-\-export\-passwd\f[]=\f\*[I-Font]passwd\f[]
+export IFF or GQ group keys with password.
 .sp
-Set the password for reading files to the specified password.
+Export IFF or GQ identity group keys to the standard output,
+encrypted with the DES-CBC algorithm and the specified password.
+The same password must be specified to the remote ntpd via the
+"crypto pw password" configuration command.  See also the option
+--id-key (-e) for unencrypted exports.
 .TP
 .NOP \f\*[B-Font]\-S\f[] \f\*[I-Font]sign\f[], \f\*[B-Font]\-\-sign\-key\f[]=\f\*[I-Font]sign\f[]
 generate sign key (RSA or DSA).
@@ -1154,11 +1161,11 @@ the configuration files.
 The \fIhomerc\fP files are "\fI$HOME\fP", and "\fI.\fP".
 If any of these are directories, then the file \fI.ntprc\fP
 is searched for within those directories.
-.TH ntp-keygen 1ntp-keygenman "27 Jan 2014" "ntp (4.2.7p413)" "User Commands"
+.TH ntp-keygen 1ntp-keygenman "28 Jan 2014" "ntp (4.2.7p414)" "User Commands"
 .\"
-.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-EWaa8J/ag-QWaa7J)
+.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-1BaGEM/ag-lCaGDM)
 .\"
-.\" It has been AutoGen-ed January 27, 2014 at 11:39:11 AM by AutoGen 5.18.3pre11
+.\" It has been AutoGen-ed January 28, 2014 at 06:16:59 AM by AutoGen 5.18.3pre11
 .\" From the definitions ntp-keygen-opts.def
 .\" and the template file agman-cmd.tpl
 .SH NAME
@@ -1235,7 +1242,7 @@ Please report bugs to http://bugs.ntp.org .
 
 Please send bug reports to: http://bugs.ntp.org, bugs@ntp.org
 .SH NOTES
-This document corresponds to version 4.2.7p413 of NTP.
+This document corresponds to version 4.2.7p414 of NTP.
 Portions of this document came from FreeBSD.
 .sp \n(Ppu
 .ne 2

@@ -1,7 +1,7 @@
 /*
  *  EDIT THIS FILE WITH CAUTION  (ntp-keygen-opts.h)
  *
- *  It has been AutoGen-ed  January 27, 2014 at 11:38:58 AM by AutoGen 5.18.3pre11
+ *  It has been AutoGen-ed  January 28, 2014 at 11:11:18 AM by AutoGen 5.18.3pre11
  *  From the definitions    ntp-keygen-opts.def
  *  and the template file   options
  *
@@ -78,8 +78,8 @@ typedef enum {
     INDEX_OPT_MD5KEY           = 11,
     INDEX_OPT_MODULUS          = 12,
     INDEX_OPT_PVT_CERT         = 13,
-    INDEX_OPT_PVT_PASSWD       = 14,
-    INDEX_OPT_GET_PVT_PASSWD   = 15,
+    INDEX_OPT_PASSWORD         = 14,
+    INDEX_OPT_EXPORT_PASSWD    = 15,
     INDEX_OPT_SIGN_KEY         = 16,
     INDEX_OPT_SUBJECT_NAME     = 17,
     INDEX_OPT_TRUSTED_CERT     = 18,
@@ -94,9 +94,9 @@ typedef enum {
 /** count of all options for ntp-keygen */
 #define OPTION_CT    26
 /** ntp-keygen version */
-#define NTP_KEYGEN_VERSION       "4.2.7p413"
+#define NTP_KEYGEN_VERSION       "4.2.7p414"
 /** Full ntp-keygen version text */
-#define NTP_KEYGEN_FULL_VERSION  "ntp-keygen (ntp) 4.2.7p413"
+#define NTP_KEYGEN_FULL_VERSION  "ntp-keygen (ntp) 4.2.7p414"
 
 /**
  *  Interface defines for all options.  Replace "n" with the UPPER_CASED
@@ -205,13 +205,13 @@ typedef enum {
 #  warning undefining PVT_CERT due to option name conflict
 #  undef   PVT_CERT
 # endif
-# ifdef    PVT_PASSWD
-#  warning undefining PVT_PASSWD due to option name conflict
-#  undef   PVT_PASSWD
+# ifdef    PASSWORD
+#  warning undefining PASSWORD due to option name conflict
+#  undef   PASSWORD
 # endif
-# ifdef    GET_PVT_PASSWD
-#  warning undefining GET_PVT_PASSWD due to option name conflict
-#  undef   GET_PVT_PASSWD
+# ifdef    EXPORT_PASSWD
+#  warning undefining EXPORT_PASSWD due to option name conflict
+#  undef   EXPORT_PASSWD
 # endif
 # ifdef    SIGN_KEY
 #  warning undefining SIGN_KEY due to option name conflict
@@ -248,8 +248,8 @@ typedef enum {
 # undef MD5KEY
 # undef MODULUS
 # undef PVT_CERT
-# undef PVT_PASSWD
-# undef GET_PVT_PASSWD
+# undef PASSWORD
+# undef EXPORT_PASSWD
 # undef SIGN_KEY
 # undef SUBJECT_NAME
 # undef TRUSTED_CERT
@@ -286,8 +286,8 @@ typedef enum {
 #define OPT_VALUE_MODULUS        (DESC(MODULUS).optArg.argInt)
 #endif /* AUTOKEY */
 #define VALUE_OPT_PVT_CERT       'P'
-#define VALUE_OPT_PVT_PASSWD     'p'
-#define VALUE_OPT_GET_PVT_PASSWD 'q'
+#define VALUE_OPT_PASSWORD       'p'
+#define VALUE_OPT_EXPORT_PASSWD  'q'
 #define VALUE_OPT_SIGN_KEY       'S'
 #define VALUE_OPT_SUBJECT_NAME   's'
 #define VALUE_OPT_TRUSTED_CERT   'T'

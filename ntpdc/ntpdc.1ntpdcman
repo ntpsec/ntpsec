@@ -10,11 +10,11 @@
 .ds B-Font B
 .ds I-Font I
 .ds R-Font R
-.TH ntpdc 1ntpdcman "27 Jan 2014" "4.2.7p413" "User Commands"
+.TH ntpdc 1ntpdcman "28 Jan 2014" "4.2.7p414" "User Commands"
 .\"
-.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-UBaGiG/ag-7BaGhG)
+.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-KUaGLI/ag-XUaGKI)
 .\"
-.\" It has been AutoGen-ed January 27, 2014 at 11:37:56 AM by AutoGen 5.18.3pre11
+.\" It has been AutoGen-ed January 28, 2014 at 11:09:14 AM by AutoGen 5.18.3pre11
 .\" From the definitions ntpdc-opts.def
 .\" and the template file agman-cmd.tpl
 .SH NAME
@@ -158,11 +158,11 @@ the configuration files.
 The \fIhomerc\fP files are "\fI$HOME\fP", and "\fI.\fP".
 If any of these are directories, then the file \fI.ntprc\fP
 is searched for within those directories.
-.TH ntpdc 1ntpdcman "27 Jan 2014" "4.2.7p413" "User Commands"
+.TH ntpdc 1ntpdcman "28 Jan 2014" "4.2.7p414" "User Commands"
 .\"
-.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-UBaGiG/ag-7BaGhG)
+.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-KUaGLI/ag-XUaGKI)
 .\"
-.\" It has been AutoGen-ed January 27, 2014 at 11:37:56 AM by AutoGen 5.18.3pre11
+.\" It has been AutoGen-ed January 28, 2014 at 11:09:14 AM by AutoGen 5.18.3pre11
 .\" From the definitions ntpdc-opts.def
 .\" and the template file agman-cmd.tpl
 .SH NAME
@@ -448,7 +448,7 @@ Version 2 specification.
 Show per-peer statistic counters associated with the specified
 peer(s).
 .TP 7
-.NOP \f\*[B-Font]clockinfo\f[] \f\*[I-Font]clock_peer_address\f[] [\f\*[I-Font]...\f[]]
+.NOP \f\*[B-Font]clockstat\f[] \f\*[I-Font]clock_peer_address\f[] [\f\*[I-Font]...\f[]]
 Obtain and print information concerning a peer clock.
 The
 values obtained provide information on the setting of fudge factors
