@@ -374,7 +374,7 @@ Version 2 specification.
 .It Ic pstats Ar peer_address Oo Ar ... Oc
 Show per-peer statistic counters associated with the specified
 peer(s).
-.It Ic clockinfo Ar clock_peer_address Oo Ar ... Oc
+.It Ic clockstat Ar clock_peer_address Oo Ar ... Oc
 Obtain and print information concerning a peer clock.
 The
 values obtained provide information on the setting of fudge factors

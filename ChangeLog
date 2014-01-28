@@ -1,5 +1,6 @@
 * [Bug 792] TrueTime TL-3 WWV refclock support.
 * [Bug 898] Documentation fixes.
+* [Bug 930] ntpdc docs refer to 'clockinfo', but mean 'clockstat'.
 * [Bug 2545] Cleanup of scripts/monitoring/ntptrap.
 (4.2.7p413) 2014/01/27 Released by Harlan Stenn <stenn@ntp.org>
 * Require a version string for perl scripts that use autogen.
