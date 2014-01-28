@@ -18,9 +18,9 @@
 <script type="text/javascript" language="javascript" src="scripts/manual.txt"></script>
 <hr>
 <h4>Synopsis</h4>
-<tt>ntpdc [ -ilnps ] [ -c <i>command</i> ] [ <i>host</i> ] [ ... ]</tt>
+<tt>ntpdc [ -46dilnps ] [ -c <i>command</i> ] [ <i>host</i> ] [ ... ]</tt>
 <h4>Description</h4>
-<tt>ntpdc</tt> is used to query the <tt>ntpd</tt> daemon about its current state and to request changes in that state. The program may be run either in interactive mode or controlled using command line arguments. Extensive state and statistics information is available through the <tt>ntpdc</tt> interface. In addition, nearly all the configuration options which can be specified at startup using ntpd's configuration file may also be specified at run time using <tt>ntpdc</tt>.
+<p><tt>ntpdc</tt> is used to query the <tt>ntpd</tt> daemon about its current state and to request changes in that state. The program may be run either in interactive mode or controlled using command line arguments. Extensive state and statistics information is available through the <tt>ntpdc</tt> interface. In addition, nearly all the configuration options which can be specified at startup using ntpd's configuration file may also be specified at run time using <tt>ntpdc</tt>.</p>
 <p>If one or more request options are included on the command line when <tt>ntpdc</tt> is executed, each of the requests will be sent to the NTP servers running on each of the hosts given as command line arguments, or on localhost by default. If no request options are given, <tt>ntpdc</tt> will attempt to read commands from the standard input and execute these on the NTP server running on the first host given on the command line, again defaulting to localhost when no other host is specified. <tt>ntpdc</tt> will prompt for commands if the standard input is a terminal device.</p>
 <p><tt>ntpdc</tt> uses NTP mode 7 packets to communicate with the NTP server, and hence can be used to query any compatible server on the network which permits it. Note that since NTP is a UDP protocol this communication will be somewhat unreliable, especially over large distances in terms of network topology. <tt>ntpdc</tt> makes no attempt to retransmit requests, and will time requests out if the remote host is not heard from within a suitable timeout time.</p>
 <p>The operation of <tt>ntpdc</tt> are specific to the particular implementation of the <tt>ntpd</tt> daemon and can be expected to work only with this and maybe some previous versions of the daemon. Requests from a remote <tt>ntpdc</tt> program which affect the state of the local server must be authenticated, which requires both the remote program and local server share a common key and key identifier.</p>
@@ -34,6 +34,8 @@
   <dd>Force DNS resolution of following host names on the command line to the IPv6 namespace.</dd>
   <dt><tt>-c <i>command</i></tt></dt>
   <dd>The following argument is interpreted as an interactive format command and is added to the list of commands to be executed on the specified host(s). Multiple -c options may be given.</dd>
+  <dt><tt>-d</tt>
+  <dd>Turn on debugging mode.
   <dt><tt>-i</tt></dt>
   <dd>Force <tt>ntpdc</tt> to operate in interactive mode. Prompts will be written to the standard output and commands read from the standard input.</dd>
   <dt><tt>-l</tt></dt>
