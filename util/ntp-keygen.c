@@ -370,11 +370,11 @@ main(
 	if (HAVE_OPT( MD5KEY ))
 		md5key++;
 #ifdef AUTOKEY
-	if (HAVE_OPT( PVT_PASSWD ))
-		passwd1 = estrdup(OPT_ARG( PVT_PASSWD ));
+	if (HAVE_OPT( PASSWORD ))
+		passwd1 = estrdup(OPT_ARG( PASSWORD ));
 
-	if (HAVE_OPT( GET_PVT_PASSWD ))
-		passwd2 = estrdup(OPT_ARG( GET_PVT_PASSWD ));
+	if (HAVE_OPT( EXPORT_PASSWD ))
+		passwd2 = estrdup(OPT_ARG( EXPORT_PASSWD ));
 
 	if (HAVE_OPT( HOST_KEY ))
 		hostkey++;
