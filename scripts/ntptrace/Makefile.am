@@ -8,6 +8,14 @@ sbin_SCRIPTS =	$(NTPTRACE_DS)
 run_ag=		cd $(srcdir) &&	env PATH="$(abs_builddir):$(PATH)" PERL5LIB="$(abs_top_srcdir)/scripts/lib"	\
 		autogen -L ../../sntp/include -L ../../sntp/ag-tpl \
 		--writable
+std_def_list =							\
+	$(top_srcdir)/sntp/include/debug-opt.def		\
+	$(top_srcdir)/sntp/include/autogen-version.def 		\
+	$(top_srcdir)/sntp/include/copyright.def 		\
+	$(top_srcdir)/sntp/include/homerc.def 			\
+	$(top_srcdir)/sntp/include/ntp.lic 			\
+	$(top_srcdir)/sntp/include/version.def			\
+	$(NULL)
 
 EXTRA_SCRIPTS = ntptrace
 
