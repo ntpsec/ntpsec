@@ -38,7 +38,7 @@
   <dt><tt>-b</tt></dt>
   <dd>Force the time to be stepped using the settimeofday() system call, rather than slewed (default) using the adjtime() system call. This option should be used when called from a startup file at boot time.</dd>
   <dt><tt>-d</tt></dt>
-  <dd>Enable the debugging mode, in which <tt>ntpdate</tt> will go through all the steps, but not adjust the local clock. Information useful for general debugging will also be printed.</dd>
+  <dd>Enable the debugging mode, in which <tt>ntpdate</tt> will go through all the steps, but not adjust the local clock and using an unprivileged port. Information useful for general debugging will also be printed.</dd>
   <dt><tt>-e <i>authdelay</i></tt></dt>
   <dd>Specify the processing delay to perform an authentication function as the value <i>authdelay</i>, in seconds and fraction (see <tt>ntpd</tt> for details). This number is usually small enough to be negligible for most purposes, though specifying a value may improve timekeeping on very slow CPU's.</dd>
   <dt><tt>-k <i>keyfile</i></tt></dt>
