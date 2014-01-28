@@ -4,6 +4,8 @@ bin_SCRIPTS =	$(NTP_WAIT_DB)
 libexec_SCRIPTS =	$(NTP_WAIT_DL)
 sbin_SCRIPTS =	$(NTP_WAIT_DS)
 
+man1_MANS=
+man8_MANS=
 man_MANS=	ntp-wait.$(NTP_WAIT_MS)
 
 run_ag=		cd $(srcdir) &&	env PATH="$(abs_builddir):$(PATH)" PERL5LIB="$(abs_top_srcdir)/scripts/lib"	\

@@ -17,6 +17,8 @@ libexec_SCRIPTS=	$(NTPSWEEP_DL)
 noinst_SCRIPTS=		$(NTPSWEEP_NI)
 EXTRA_SCRIPTS=		ntpsweep
 
+man1_MANS=
+man8_MANS=
 if INSTALL_NTPSWEEP
 man_MANS=	ntpsweep.$(NTPSWEEP_MS)
 else

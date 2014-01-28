@@ -8,6 +8,8 @@ libexec_SCRIPTS=	$(CALC_TICKADJ_DL)
 sbin_SCRIPTS=	$(CALC_TICKADJ_DS)
 EXTRA_SCRIPTS=	calc_tickadj
 
+man1_MANS=
+man8_MANS=
 manpage_HACK=
 if WANT_CALC_TICKADJ_MS
 man_MANS=	calc_tickadj.$(CALC_TICKADJ_MS)

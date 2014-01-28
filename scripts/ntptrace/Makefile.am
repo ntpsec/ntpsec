@@ -1,4 +1,6 @@
 NULL=
+man1_MANS=
+man8_MANS=
 man_MANS=	ntptrace.$(NTPTRACE_MS)
 
 bin_SCRIPTS =	$(NTPTRACE_DB)
