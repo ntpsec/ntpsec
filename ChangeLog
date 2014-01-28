@@ -12,6 +12,7 @@
   In html/comdex.html, remove duplicate footer.
 * [Bug 1734] Include man page for ntp.conf (fixed in 4.2.7p297).
 * [Bug 2049] Clarify ntpdate's -d option behavior.
+* [Bug 2366] ntpdc.html: burst/iburst only work on servers.
 * [Bug 2545] Cleanup of scripts/monitoring/ntptrap.
 (4.2.7p413) 2014/01/27 Released by Harlan Stenn <stenn@ntp.org>
 * Require a version string for perl scripts that use autogen.
