@@ -1045,7 +1045,7 @@ automatically summarized and archived for retrospective analysis.
 .Bl -tag -width indent
 .It Ic statistics Ar name ...
 Enables writing of statistics records.
-Currently, four kinds of
+Currently, eight kinds of
 .Ar name
 statistics are supported.
 .Bl -tag -width indent

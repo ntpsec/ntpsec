@@ -5,7 +5,7 @@ nonvolatile 1e-7
 ident "udent"
 logconfig =allall -allinfo -allevents -allstatistics -allstatus +allall -clockinfo -clockevents -clockstatistics -clockstatus +clockall -syncinfo -syncevents -syncstatistics -syncstatus +syncall -sysinfo -sysevents -sysstatistics -sysstatus +sysall
 statsdir "/etc/ntp/stats"
-statistics loopstats peerstats
+statistics clockstats cryptostats loopstats peerstats protostats rawstats sysstats timingstats
 filegen clockstats file clockstats type none enable
 filegen cryptostats file cryptostats type pid link disable
 filegen loopstats file loopstats type day nolink enable
