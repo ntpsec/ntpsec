@@ -87,7 +87,7 @@
 #define NMEA_BAUDRATE_SHIFT	4
 
 #define NMEA_DELAYMEAS_MASK	0x80
-#define NMEA_EXTLOG_MASK	0x01000000U
+#define NMEA_EXTLOG_MASK	0x010000U
 
 #define NMEA_PROTO_IDLEN	5	/* tag name must be at least 5 chars */
 #define NMEA_PROTO_MINLEN	6	/* min chars in sentence, excluding CS */
@@ -233,9 +233,10 @@ typedef struct {
 	struct
 	{
 		u_int total;
-		u_int good;
-		u_int bad;
-		u_int filtered;
+		u_int accepted;
+		u_int rejected;   /* GPS said not enough signal */
+		u_int malformed;  /* Bad checksum, invalid date or time */
+		u_int filtered;   /* mode bits, not GPZDG, same second */
 		u_int pps_used;
 	}	
 		tally;
@@ -847,7 +848,7 @@ nmea_receive(
 		DPRINTF(1, ("%s checksum missing: '%s'\n",
 			refnumtoa(&peer->srcadr), rd_lastcode));
 		refclock_report(peer, CEVNT_BADREPLY);
-		up->tally.bad++;
+		up->tally.malformed++;
 		return;
 	}
 
@@ -934,21 +935,26 @@ nmea_receive(
 	}
 
 	/* Check sanity of time-of-day. */
-	if (rc_time == 0)	/* no time or conversion error? */
+	if (rc_time == 0) {	/* no time or conversion error? */
 		checkres = CEVNT_BADTIME;
+		up->tally.malformed++;
+	}
 	/* Check sanity of date. */
-	else if (rc_date == 0)	/* no date or conversion error? */
+	else if (rc_date == 0) {/* no date or conversion error? */
 		checkres = CEVNT_BADDATE;
+		up->tally.malformed++;
+	}
 	/* check clock sanity; [bug 2143] */
-	else if (pp->leap == LEAP_NOTINSYNC)	/* no good status? */
+	else if (pp->leap == LEAP_NOTINSYNC) { /* no good status? */
 		checkres = CEVNT_BADREPLY;
+		up->tally.rejected++;
+	}
 	else
 		checkres = -1;
 
 	if (checkres != -1) {
 		save_ltc(pp, rd_lastcode, rd_lencode);
 		refclock_report(peer, checkres);
-		up->tally.bad++;
 		return;
 	}
 
@@ -984,7 +990,7 @@ nmea_receive(
 		    refnumtoa(&peer->srcadr), rd_lastcode));
 
 	/* Data will be accepted. Update stats & log data. */
-	up->tally.good++;
+	up->tally.accepted++;
 	save_ltc(pp, rd_lastcode, rd_lencode);
 	pp->lastrec = rd_timestamp;
 
@@ -1087,10 +1093,13 @@ nmea_poll(
 	*/
 	if (peer->ttl & NMEA_EXTLOG_MASK) {
 		/* Log & reset counters with extended logging */
+		char *nmea = pp->a_lastcode;
+		if (*nmea == '\0') nmea = "(none)";
 		mprintf_clock_stats(
-		  &peer->srcadr, "%s  %u %u %u %u %u",
-		  pp->a_lastcode,
-		  up->tally.total, up->tally.good, up->tally.bad,
+		  &peer->srcadr, "%s  %u %u %u %u %u %u",
+		  nmea,
+		  up->tally.total, up->tally.accepted,
+		  up->tally.rejected, up->tally.malformed,
 		  up->tally.filtered, up->tally.pps_used);
 	} else {
 		record_clock_stats(&peer->srcadr, pp->a_lastcode);
