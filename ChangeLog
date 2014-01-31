@@ -1,3 +1,4 @@
+(4.2.7p416) 2014/01/31 Released by Harlan Stenn <stenn@ntp.org>
 * Tweak the 'Modified' line on appropriate html pages.
 * Note in the deprecation of ntpdc in its documentation.
 * [Bug 2332] Be more careful about when we use 'libgcc_s'.
