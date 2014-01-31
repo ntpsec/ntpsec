@@ -115,6 +115,13 @@ doc-section	= {
   ds-format	= 'mdoc';
   ds-text	= <<-  _END_PROG_MDOC_DESCRIP
 .Nm
+is deprecated.
+Please use
+.Xr ntpq 1ntpqmdoc instead - it can do everything
+.Nm
+used to do, and it does so using a much more sane interface.
+.Pp
+.Nm
 is a utility program used to query
 .Xr ntpd 1ntpdmdoc
 about its
