@@ -10,11 +10,11 @@
 .ds B-Font B
 .ds I-Font I
 .ds R-Font R
-.TH ntpdc 1ntpdcman "28 Jan 2014" "4.2.7p415" "User Commands"
+.TH ntpdc 1ntpdcman "31 Jan 2014" "4.2.7p416" "User Commands"
 .\"
-.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-suaGQx/ag-FuaGPx)
+.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-alaW0Q/ag-mlaWZQ)
 .\"
-.\" It has been AutoGen-ed January 28, 2014 at 12:16:26 PM by AutoGen 5.18.3pre11
+.\" It has been AutoGen-ed January 31, 2014 at 12:11:59 PM by AutoGen 5.18.3pre11
 .\" From the definitions ntpdc-opts.def
 .\" and the template file agman-cmd.tpl
 .SH NAME
@@ -31,6 +31,15 @@
 .ne 2
 
 .SH DESCRIPTION
+\f\*[B-Font]ntpdc\fP
+is deprecated.
+Please use
+\fCntpq\fR(1ntpqmdoc)\f[] instead \- it can do everything
+\f\*[B-Font]ntpdc\fP
+used to do, and it does so using a much more sane interface.
+.sp \n(Ppu
+.ne 2
+
 \f\*[B-Font]ntpdc\fP
 is a utility program used to query
 \fCntpd\fR(1ntpdmdoc)\f[]
@@ -158,11 +167,11 @@ the configuration files.
 The \fIhomerc\fP files are "\fI$HOME\fP", and "\fI.\fP".
 If any of these are directories, then the file \fI.ntprc\fP
 is searched for within those directories.
-.TH ntpdc 1ntpdcman "28 Jan 2014" "4.2.7p415" "User Commands"
+.TH ntpdc 1ntpdcman "31 Jan 2014" "4.2.7p416" "User Commands"
 .\"
-.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-suaGQx/ag-FuaGPx)
+.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-alaW0Q/ag-mlaWZQ)
 .\"
-.\" It has been AutoGen-ed January 28, 2014 at 12:16:26 PM by AutoGen 5.18.3pre11
+.\" It has been AutoGen-ed January 31, 2014 at 12:11:59 PM by AutoGen 5.18.3pre11
 .\" From the definitions ntpdc-opts.def
 .\" and the template file agman-cmd.tpl
 .SH NAME

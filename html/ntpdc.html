@@ -4,15 +4,16 @@
 <meta http-equiv="content-type" content="text/html;charset=iso-8859-1">
 <meta name="generator" content="HTML Tidy, see www.w3.org">
 <title>ntpdc - special NTP query program</title>
+<!-- Changed by: Harlan &, 31-Jan-2014 -->
 <link href="scripts/style.css" type="text/css" rel="stylesheet">
 </head>
 <body>
 <h3><tt>ntpdc</tt> - special NTP query program</h3>
 <img src="pic/alice31.gif" alt="gif" align="left"><a href="http://www.eecis.udel.edu/~mills/pictures.html">from <i>Alice's Adventures in Wonderland</i>, Lewis Carroll</a>
-<p>This program is a big puppy.</p>
-<p>Last update
-  <!-- #BeginDate format:En2m -->04-Sep-2010  14:15<!-- #EndDate -->
-  UTC</p>
+<p>This program is a big, deprecated puppy.</p>
+<p>
+<EM>Modified: 31-Jan-2014</EM>
+</p>
 <br clear="left">
 <h4>More Help</h4>
 <script type="text/javascript" language="javascript" src="scripts/manual.txt"></script>
@@ -20,6 +21,7 @@
 <h4>Synopsis</h4>
 <tt>ntpdc [ -46dilnps ] [ -c <i>command</i> ] [ <i>host</i> ] [ ... ]</tt>
 <h4>Description</h4>
+<p><tt>ntpdc</tt> is deprecated - please use <tt>ntpq</tt> now, as it uses a more sane interface and can provide all of the information that <tt>ntpdc</tt> used to provide.</p>
 <p><tt>ntpdc</tt> is used to query the <tt>ntpd</tt> daemon about its current state and to request changes in that state. The program may be run either in interactive mode or controlled using command line arguments. Extensive state and statistics information is available through the <tt>ntpdc</tt> interface. In addition, nearly all the configuration options which can be specified at startup using ntpd's configuration file may also be specified at run time using <tt>ntpdc</tt>.</p>
 <p>If one or more request options are included on the command line when <tt>ntpdc</tt> is executed, each of the requests will be sent to the NTP servers running on each of the hosts given as command line arguments, or on localhost by default. If no request options are given, <tt>ntpdc</tt> will attempt to read commands from the standard input and execute these on the NTP server running on the first host given on the command line, again defaulting to localhost when no other host is specified. <tt>ntpdc</tt> will prompt for commands if the standard input is a terminal device.</p>
 <p><tt>ntpdc</tt> uses NTP mode 7 packets to communicate with the NTP server, and hence can be used to query any compatible server on the network which permits it. Note that since NTP is a UDP protocol this communication will be somewhat unreliable, especially over large distances in terms of network topology. <tt>ntpdc</tt> makes no attempt to retransmit requests, and will time requests out if the remote host is not heard from within a suitable timeout time.</p>

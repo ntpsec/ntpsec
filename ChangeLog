@@ -1,6 +1,10 @@
 * Bug 2539: doc and code tweaks for NMEA driver
 * Add check for enable stats to ntpd/complete.conf.in
 * Fix typo in html/confopt.html
+(4.2.7p416) 2014/01/31 Released by Harlan Stenn <stenn@ntp.org>
+* Tweak the 'Modified' line on appropriate html pages.
+* Note in the deprecation of ntpdc in its documentation.
+* [Bug 2332] Be more careful about when we use 'libgcc_s'.
 (4.2.7p415) 2014/01/28 Released by Harlan Stenn <stenn@ntp.org>
 * Fix the man page installation for the scripts/ files.
 (4.2.7p414) 2014/01/28 Released by Harlan Stenn <stenn@ntp.org>

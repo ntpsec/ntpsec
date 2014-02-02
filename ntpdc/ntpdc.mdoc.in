@@ -1,9 +1,9 @@
-.Dd January 28 2014
+.Dd January 31 2014
 .Dt NTPDC @NTPDC_MS@ User Commands
 .Os SunOS 5.10
 .\"  EDIT THIS FILE WITH CAUTION  (ntpdc-opts.mdoc)
 .\"
-.\"  It has been AutoGen-ed  January 28, 2014 at 12:16:33 PM by AutoGen 5.18.3pre11
+.\"  It has been AutoGen-ed  January 31, 2014 at 12:12:05 PM by AutoGen 5.18.3pre11
 .\"  From the definitions    ntpdc-opts.def
 .\"  and the template file   agmdoc-cmd.tpl
 .Sh NAME
@@ -18,6 +18,13 @@
 [ host ...]
 .Pp
 .Sh DESCRIPTION
+.Nm
+is deprecated.
+Please use
+.Xr ntpq @NTPQ_MS@ instead \- it can do everything
+.Nm
+used to do, and it does so using a much more sane interface.
+.Pp
 .Nm
 is a utility program used to query
 .Xr ntpd @NTPD_MS@
