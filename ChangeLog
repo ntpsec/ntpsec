@@ -1,3 +1,4 @@
+* [Bug 2551] --disable-local-libevent breaks the build.
 (4.2.7p417) 2014/02/02 Released by Harlan Stenn <stenn@ntp.org>
 * Bug 2539: doc and code tweaks for NMEA driver
 * Add check for enable stats to ntpd/complete.conf.in

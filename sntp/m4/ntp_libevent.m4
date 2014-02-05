@@ -49,12 +49,10 @@ AC_SUBST([LDADD_LIBEVENT])
 case "$ntp_use_local_libevent" in
  yes)
     ;;
- no)
-    ;;
  *) # If we have (a good enough) pkg-config, see if it can find libevent
     case "$PKG_CONFIG" in
      /*)
-	AC_MSG_CHECKING([if libevent 2.0.9 or later is installed])
+	AC_MSG_CHECKING([if libevent $ntp_libevent_min_version or later is installed])
 	if $PKG_CONFIG --atleast-version=$ntp_libevent_min_version libevent
 	then
 	    ntp_use_local_libevent=no
