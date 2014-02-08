@@ -10,11 +10,11 @@
 .ds B-Font B
 .ds I-Font I
 .ds R-Font R
-.TH ntpd @NTPD_MS@ "05 Feb 2014" "4.2.7p418" "User Commands"
+.TH ntpd @NTPD_MS@ "08 Feb 2014" "4.2.7p419" "User Commands"
 .\"
-.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-XcaWQe/ag-9caWPe)
+.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-zwayNy/ag-MwayMy)
 .\"
-.\" It has been AutoGen-ed February 5, 2014 at 11:59:38 AM by AutoGen 5.18.3pre11
+.\" It has been AutoGen-ed February 8, 2014 at 11:25:01 AM by AutoGen 5.18.3pre11
 .\" From the definitions ntpd-opts.def
 .\" and the template file agman-cmd.tpl
 .SH NAME
@@ -434,6 +434,16 @@ by loading values from environment variables named:
   \fBNTPD_<option-name>\fP or \fBNTPD\fP
 .fi
 .ad
+.TH ntpd @NTPD_MS@ "08 Feb 2014" "4.2.7p419" "User Commands"
+.\"
+.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-zwayNy/ag-MwayMy)
+.\"
+.\" It has been AutoGen-ed February 8, 2014 at 11:25:01 AM by AutoGen 5.18.3pre11
+.\" From the definitions ntpd-opts.def
+.\" and the template file agman-cmd.tpl
+.SH NAME
+\f\*[B-Font]ntpd\fP ntpd
+\- NTP daemon program
 cvt_prog='/usr/local/gnu/share/autogen/texi2man'
 cvt_prog=`cd \`dirname "$cvt_prog"\` >/dev/null && pwd
          `/`basename "$cvt_prog"`
@@ -453,16 +463,6 @@ test \-x "$cvt_prog" || die "'$cvt_prog' is not executable"
     rm \-f $list
 } 1>.doc 2>/dev/null
 sed \-f .cmds .doc | /opt/csw/bin/ggrep \-E \-v '^[ 	]*$' | $cvt_prog
-.TH ntpd @NTPD_MS@ "05 Feb 2014" "4.2.7p418" "User Commands"
-.\"
-.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-XcaWQe/ag-9caWPe)
-.\"
-.\" It has been AutoGen-ed February 5, 2014 at 11:59:38 AM by AutoGen 5.18.3pre11
-.\" From the definitions ntpd-opts.def
-.\" and the template file agman-cmd.tpl
-.SH NAME
-\f\*[B-Font]ntpd\fP ntpd
-\- NTP daemon program
 .SH USAGE
 .SS "How NTP Operates"
 The
@@ -999,7 +999,7 @@ mind.
 
 Please send bug reports to: http://bugs.ntp.org, bugs@ntp.org
 .SH NOTES
-This document corresponds to version 4.2.7p418 of NTP.
+This document corresponds to version 4.2.7p419 of NTP.
 Portions of this document came from FreeBSD.
 .sp \n(Ppu
 .ne 2

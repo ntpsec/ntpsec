@@ -1,9 +1,9 @@
-.Dd February 5 2014
+.Dd February 8 2014
 .Dt NTPD 1ntpdmdoc User Commands
 .Os SunOS 5.10
 .\"  EDIT THIS FILE WITH CAUTION  (ntpd-opts.mdoc)
 .\"
-.\"  It has been AutoGen-ed  February  5, 2014 at 11:59:55 AM by AutoGen 5.18.3pre11
+.\"  It has been AutoGen-ed  February  8, 2014 at 11:25:26 AM by AutoGen 5.18.3pre11
 .\"  From the definitions    ntpd-opts.def
 .\"  and the template file   agmdoc-cmd.tpl
 .Sh NAME
@@ -895,7 +895,7 @@ mind.
 .Pp
 Please send bug reports to: http://bugs.ntp.org, bugs@ntp.org
 .Sh NOTES
-This document corresponds to version 4.2.7p418 of NTP.
+This document corresponds to version 4.2.7p419 of NTP.
 Portions of this document came from FreeBSD.
 .Pp
 This manual page was \fIAutoGen\fP\-erated from the \fBntpd\fP
