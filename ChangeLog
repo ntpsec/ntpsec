@@ -1,3 +1,4 @@
+* [Bug 2466] Wrap NMEA timestamps in 1024 week cycles
 (4.2.7p418) 2014/02/05 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 2551] --disable-local-libevent breaks the build.
 (4.2.7p417) 2014/02/02 Released by Harlan Stenn <stenn@ntp.org>
