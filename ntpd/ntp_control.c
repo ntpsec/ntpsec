@@ -3335,7 +3335,8 @@ static u_int32 derive_nonce(
 	u_int32		ts_f
 	)
 {
-	static u_int32	salt[2];
+	static u_int32	salt[4];
+	static u_long	last_salt_update;
 	union d_tag {
 		u_char	digest[EVP_MAX_MD_SIZE];
 		u_int32 extract;
@@ -3343,9 +3344,13 @@ static u_int32 derive_nonce(
 	EVP_MD_CTX	ctx;
 	u_int		len;
 
-	while (!salt[0])
+	while (!salt[0] || current_time - last_salt_update >= 3600) {
 		salt[0] = ntp_random();
-	salt[1] = conf_file_sum;
+		salt[1] = ntp_random();
+		salt[2] = ntp_random();
+		salt[3] = ntp_random();
+		last_salt_update = current_time;
+	}
 
 	EVP_DigestInit(&ctx, EVP_get_digestbynid(NID_md5));
 	EVP_DigestUpdate(&ctx, salt, sizeof(salt));
