@@ -709,6 +709,9 @@ is_ip_address(
 {
 	struct in_addr in4;
 	struct in6_addr in6;
+	struct addrinfo hints;
+	struct addrinfo *result;
+	struct sockaddr_in6 *resaddr6;
 	char tmpbuf[128];
 	char *pch;
 
@@ -744,14 +747,16 @@ is_ip_address(
 			} else {
 				strlcpy(tmpbuf, host, sizeof(tmpbuf));
 			}
-			pch = strchr(tmpbuf, '%');
-			if (pch != NULL)
-				*pch = '\0';
-
-			if (inet_pton(AF_INET6, tmpbuf, &in6) == 1) {
+			ZERO(hints);
+			hints.ai_family = AF_INET6;
+			hints.ai_flags |= AI_NUMERICHOST;
+			if (getaddrinfo(tmpbuf, NULL, &hints, &result) == 0) {
 				AF(addr) = AF_INET6;
-				SET_ADDR6N(addr, in6);
+				resaddr6 = (struct sockaddr_in6 *)result->ai_addr;
+				SET_ADDR6N(addr, resaddr6->sin6_addr);
+				SET_SCOPE(addr, resaddr6->sin6_scope_id);
 
+				freeaddrinfo(result);
 				return TRUE;
 			}
 		}

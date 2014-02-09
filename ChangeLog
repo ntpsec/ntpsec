@@ -1,9 +1,10 @@
+* [Bug 1186] ntpd fails with link local IPv6 addresses.
 (4.2.7p419) 2014/02/08 Released by Harlan Stenn <stenn@ntp.org>
-* [Bug 2466] Wrap NMEA timestamps in 1024 week cycles
+* [Bug 2466] Wrap NMEA timestamps in 1024 week cycles.
 (4.2.7p418) 2014/02/05 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 2551] --disable-local-libevent breaks the build.
 (4.2.7p417) 2014/02/02 Released by Harlan Stenn <stenn@ntp.org>
-* Bug 2539: doc and code tweaks for NMEA driver
+* [Bug 2539] doc and code tweaks for NMEA driver.
 * Add check for enable stats to ntpd/complete.conf.in
 * Fix typo in html/confopt.html
 (4.2.7p416) 2014/01/31 Released by Harlan Stenn <stenn@ntp.org>
