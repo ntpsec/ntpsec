@@ -15,7 +15,17 @@
 </p>
 <br clear="left">
 <hr>
-<p>Disclaimer: The functionality of this program is now available in the <tt>ntpd</tt> program. See the <tt>-q</tt> command line option in the <a href="ntpd.html"><tt>ntpd</tt> - Network Time Protocol (NTP) daemon</a> page. After a suitable period of mourning, the <tt>ntpdate</tt> program is to be retired from this distribution</p>
+<p>Disclaimer: This program has known bugs and deficiencies and nobody
+has volunteered to fix them in a long time.  The good news is the
+functionality originally intended for this program is available in the <tt>ntpd</tt> and
+<tt>sntp</tt> programs. See the <a
+href="http://support.ntp.org/Dev/DeprecatingNtpdate">Deprecating
+<tt>ntpdate</tt> topic</a> in the NTP Support wiki
+for a thorough discussion and analysis of the issues.
+See the <tt>-q</tt> command line option in the <a
+href="ntpd.html"><tt>ntpd</tt> - Network Time Protocol (NTP) daemon</a>
+page and/or the <a href="sntp.html"><tt>sntp</tt> - Simple Network Time
+Protocol (SNTP) Client</a> page.  After a suitable period of mourning, the <tt>ntpdate</tt> program will be retired from this distribution.</p>
 <h4>Synopsis</h4>
 <tt>ntpdate [ -46bBdqsuv ] [ -a <i>key</i> ] [ -e <i>authdelay</i> ] [ -k <i>keyfile</i> ] [ -o <i>version</i> ] [ -p <i>samples</i> ] [ -t <i>timeout</i> ] <i>server</i> [ ... ]</tt>
 <h4>Description</h4>
