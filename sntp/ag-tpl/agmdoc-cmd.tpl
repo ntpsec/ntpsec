@@ -33,7 +33,7 @@
 (define head-line (lambda() (string-append
    ".Dd "   (shell "date '+%B %e %Y' | sed 's/  */ /g'")
    "\n.Dt " UP-PROG-NAME " " man-sect " " section-name
-   "\n.Os " (shell "uname -sr") "\n") ))
+   "\n.Os\n") ))
 
 (define man-page #f)                        :+][+:
 
