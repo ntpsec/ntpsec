@@ -1,3 +1,4 @@
+* [Bug 898] More documentation fixes.
 (4.2.7p420) 2014/02/09 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 492] Clearly document ntpdate's pending deprecation.
 * [Bug 1186] ntpd fails with link local IPv6 addresses.

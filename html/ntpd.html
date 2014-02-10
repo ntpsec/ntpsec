@@ -4,6 +4,7 @@
 <meta http-equiv="content-type" content="text/html;charset=iso-8859-1">
 <meta name="generator" content="HTML Tidy, see www.w3.org">
 <title>ntpd - Network Time Protocol (NTP) daemon</title>
+<!-- Changed by: Harlan &, 10-Feb-2014 -->
 <link href="scripts/style.css" type="text/css" rel="stylesheet">
 </head>
 <body>
@@ -26,7 +27,7 @@
 </ul>
 <hr>
 <h4 id="synop">Synopsis</h4>
-<tt>ntpd [ -46aAbdDgLmnNqx ] [ -c <i>conffile</i> ] [ -f <i>driftfile</i> ] [ -i <i>jaildir</i> ] [ -k <i>keyfile</i> ] [ -l <i>logfile</i> ] [ -p <i>pidfile</i> ] [ -P <i>priority</i> ] [ -r <i>broadcastdelay</i> ] [ -s <i>statsdir</i> ] [ -t <i>key</i> ] [ -u <i>user</i>[:<i>group</i>] ] [ -U <i>interface_update_interval</i> ] [ -v <i>variable</i> ] [ -V <i>variable</i> ]</tt>
+<tt>ntpd [ -46aAbdDgLmnNqx ] [ -c <i>conffile</i> ] [ -f <i>driftfile</i> ] [ -i <i>jaildir</i> ] [ -I <i>InterfaceOrAddress</i> ] [ -k <i>keyfile</i> ] [ -l <i>logfile</i> ] [ -p <i>pidfile</i> ] [ -P <i>priority</i> ] [ -r <i>broadcastdelay</i> ] [ -s <i>statsdir</i> ] [ -t <i>key</i> ] [ -u <i>user</i>[:<i>group</i>] ] [ -U <i>interface_update_interval</i> ] [ -v <i>variable</i> ] [ -V <i>variable</i> ]</tt>
 <h4 id="descr">Description</h4>
 <p>The <tt>ntpd</tt> program is an operating system daemon that synchronizes the system clock to remote NTP time servers or local reference clocks. It is a complete implementation of  NTP version 4 defined by RFC-5905, but also retains compatible with version 3 defined by RFC-1305 and versions 1 and 2,  defined by RFC-1059 and RFC-1119, respectively. The program can operate in any of several modes, including client/server, symmetric and broadcast modes, and with both symmetric-key and public key-cryptography</p>
 <p>The <tt>ntpd</tt> program ordinarily requires a configuration file described on this page. It contains configuration commands described on the pages listed above. However a client can discover remote servers and configure them automatically. This makes it possible to deploy a fleet of workstations without specifying configuration details specific to the local environment. Further details are on the </p>
@@ -58,7 +59,7 @@
   <dt id="--interface"><tt>-I [<i>address</i> | <i>interface name</i>]</tt></dt>
   <dd>Open the network address given, or all the addresses associated with the given interface name. This option may appear multiple times. This option also implies not opening other addresses, except wildcard and localhost. This option is deprecated. Please consider using the configuration file <a href="miscopt.html#interface">interface</a> command, which is more versatile.</dd>
   <dt><tt>-k <i>keyfile</i></tt></dt>
-  <dd>Specify the name and path of the symmetric key file, default <tt>/etc/ntp.keys</tt>. This is the same operation as the <tt>keys <i>keyfile</i></tt> command.</dd>
+  <dd>Specify the name and path of the symmetric key file. This is the same operation as the <tt>keys <i>keyfile</i></tt> command.</dd>
   <dt><tt>-l <i>logfile</i></tt></dt>
   <dd>Specify the name and path of the log file. The default is the system log file. This is the same operation as the <tt>logfile <i>logfile</i></tt> command.</dd>
   <dt id="--mdns"><tt>-m</tt></dt>
@@ -165,7 +166,7 @@
   <tr>
     <td width="30%">keys path</td>
     <td width="30%"><tt>/usr/local/etc</tt></td>
-    <td width="20%"><tt>-k</tt></td>
+    <td width="20%">none</td>
     <td width="20%"><tt>keysdir</tt></td>
   </tr>
 </table>
