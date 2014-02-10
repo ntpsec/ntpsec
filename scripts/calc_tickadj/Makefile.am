@@ -2,6 +2,15 @@ NULL=
 run_ag=		cd $(srcdir) &&	env PATH="$(abs_builddir):$(PATH)"	\
 		autogen -L ../../sntp/include -L ../../sntp/ag-tpl \
 		--writable
+std_def_list =							\
+	$(top_srcdir)/sntp/include/debug-opt.def		\
+	$(top_srcdir)/sntp/include/autogen-version.def 		\
+	$(top_srcdir)/sntp/include/copyright.def 		\
+	$(top_srcdir)/sntp/include/homerc.def 			\
+	$(top_srcdir)/sntp/include/ntp.lic 			\
+	$(top_srcdir)/sntp/include/version.def			\
+	$(NULL)
+
 
 bin_SCRIPTS=	$(CALC_TICKADJ_DB)
 libexec_SCRIPTS=	$(CALC_TICKADJ_DL)
@@ -40,6 +49,8 @@ EXTRA_DIST =				\
 noinst_DATA = 				\
 	calc_tickadj.1calc_tickadjman	\
 	calc_tickadj.1calc_tickadjmdoc	\
+	calc_tickadj.man.in		\
+	calc_tickadj.mdoc.in		\
 	calc_tickadj.texi		\
 	calc_tickadj.html		\
 	calc_tickadj-opts.def		\
