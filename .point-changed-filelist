@@ -44,6 +44,12 @@ ntpsnmpd/ntpsnmpd.html
 ntpsnmpd/ntpsnmpd.man.in
 ntpsnmpd/ntpsnmpd.mdoc.in
 packageinfo.sh
+scripts/calc_tickadj/calc_tickadj.1calc_tickadjman
+scripts/calc_tickadj/calc_tickadj.1calc_tickadjmdoc
+scripts/calc_tickadj/calc_tickadj.html
+scripts/calc_tickadj/calc_tickadj.man.in
+scripts/calc_tickadj/calc_tickadj.mdoc.in
+scripts/calc_tickadj/invoke-calc_tickadj.texi
 scripts/invoke-plot_summary.texi
 scripts/invoke-summary.texi
 scripts/ntp-wait/invoke-ntp-wait.texi
