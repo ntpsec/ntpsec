@@ -244,6 +244,7 @@ libntpd_a_SOURCES =		\
 	refclock_datum.c	\
 	refclock_dumbclock.c	\
 	refclock_fg.c		\
+	refclock_gpsdjson.c	\
 	refclock_gpsvme.c	\
 	refclock_heath.c	\
 	refclock_hopfser.c	\

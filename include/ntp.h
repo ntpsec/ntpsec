@@ -517,8 +517,9 @@ struct peer {
 #define REFCLK_ZYFER		42	/* Zyfer GPStarplus receiver  */
 #define REFCLK_RIPENCC		43	/* RIPE NCC Trimble driver */
 #define REFCLK_NEOCLOCK4X	44	/* NeoClock4X DCF77 or TDF receiver */
-#define REFCLK_TSYNCPCI	45	/* Spectracom TSYNC PCI timing board */
-#define REFCLK_MAX		45	/* Spectracom TSYNC PCI timing board */
+#define REFCLK_TSYNCPCI		45	/* Spectracom TSYNC PCI timing board */
+#define REFCLK_GPSDJSON		46
+#define REFCLK_MAX		46
 
 
 /*

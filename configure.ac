@@ -2286,6 +2286,24 @@ case "$ntp_ok" in
 esac
 AC_MSG_RESULT([$ntp_ok])
 
+AC_MSG_CHECKING([for GPSD JSON receiver])
+AC_ARG_ENABLE(
+    [GPSD],
+    [AS_HELP_STRING(
+	[--enable-GPSD],
+	[+ GPSD JSON receiver]
+    )],
+    [ntp_ok=$enableval],
+    [ntp_ok=$ntp_eac]
+)
+case "$ntp_ok" in
+ yes)
+    ntp_refclock=yes
+    AC_DEFINE([CLOCK_GPSDJSON], [1], [GPSD JSON receiver])
+    ;;
+esac
+AC_MSG_RESULT([$ntp_ok])
+
 AC_MSG_CHECKING([for ONCORE Motorola VP/UT Oncore GPS])
 AC_ARG_ENABLE(
     [ONCORE],
