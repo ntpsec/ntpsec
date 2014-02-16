@@ -26,15 +26,18 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <string.h>
-#include <poll.h>
-
-//#include <stdlib.h>
 
 #include <sys/types.h>
 #include <sys/socket.h>
-//#include <sys/epoll.h>
 #include <sys/stat.h>
 
+#if defined(HAVE_SYS_POLL_H)
+# include <sys/poll.h>
+#elif defined(HAVE_SYS_SLECET_H)
+# include <sys/select.h>
+#else
+# error need poll() or select()
+#endif
 
 #include "ntpd.h"
 #include "ntp_io.h"
@@ -113,7 +116,7 @@ struct gpsd_unit {
 	int fl_ver : 1;	/* have protocol version */
 
 	/* admin stuff for sockets and device selection */
-	struct pollfd     pfd;		/* for non-blocking connect */
+	int               fdt;		/* current connecting socket */
 	struct addrinfo * addr;		/* next address to try */
 	int               tickover;	/* timeout countdown */
 	char            * device;	/* device name of unit */
@@ -124,55 +127,21 @@ struct gpsd_unit {
 };
 
 /* =====================================================================
- * our local parser context
- */
-#define JSMN_MAXTOK	100
-
-struct json_ctx {
-	char        * buf;
-	int           ntok;
-	jsmntok_t     tok[JSMN_MAXTOK];
-};
-
-typedef struct json_ctx json_ctx;
-typedef int tok_ref;
-#define INVALID_TOKEN (-1)
-
-static BOOL json_parse_record(json_ctx * ctx, char * buf);
-static int  json_object_lookup(const json_ctx *ctx, tok_ref tok, const char * key);
-
-/* =====================================================================
  * static local helpers forward decls
  */
-static void gpsd_init_socket(struct refclockproc * const pp,
-			     struct gpsd_unit    * const up);
-static void gpsd_test_socket(struct refclockproc * const pp,
-			     struct gpsd_unit    * const up);
-static void gpsd_stop_socket(struct refclockproc * const pp,
-			     struct gpsd_unit    * const up);
+static void gpsd_init_socket(struct peer * const peer);
+static void gpsd_test_socket(struct peer * const peer);
+static void gpsd_stop_socket(struct peer * const peer);
+
 static void gpsd_parse(struct peer * const peer,
 		       const l_fp  * const rtime);
 static BOOL convert_time(l_fp * fp, const char * gps_time);
 static void save_ltc(struct refclockproc * const pp, const char * const tc);
 
-
-/* =====================================================================
- * JSON parsing utils
- */
-static tok_ref json_token_skip(const json_ctx * ctx, tok_ref tid);
-static tok_ref json_object_lookup(const json_ctx * ctx,	tok_ref tid,
-				  const char * key);
-static const char* json_object_lookup_string(const json_ctx * ctx,
-					     tok_ref tid, const char * key);
-#ifdef HAVE_LONG_LONG
-static long long json_object_lookup_int(const json_ctx * ctx,
-					tok_ref tid, const char * key);
-#else
-# error Blooper! we need some 64-bit integer...
-#endif
-static double json_object_lookup_float(const json_ctx * ctx,
-				       tok_ref tid, const char * key);
-static BOOL json_parse_record(json_ctx * ctx, char * buf);
+static inline double square(double x)
+{
+	return x*x;
+}
 
 /* =====================================================================
  * local / static stuff
@@ -203,9 +172,7 @@ gpsd_init(void)
 	struct addrinfo hints;
 	
 	memset(&hints, 0, sizeof(hints));
-
-	//hints.ai_family   = AF_UNSPEC;
-	hints.ai_family   = AF_INET;
+	hints.ai_family   = AF_UNSPEC;
 	hints.ai_protocol = IPPROTO_TCP;
 	hints.ai_socktype = SOCK_STREAM;
 
@@ -230,8 +197,7 @@ gpsd_start(
 
 	UNUSED_ARG(unit);
 
-	up->pfd.fd     = -1;
-	up->pfd.events = POLLIN;
+	up->fdt       = -1;
 	up->addr       = s_gpsd_addr;
 
 	/* Allocate and initialize unit structure */
@@ -255,18 +221,18 @@ gpsd_start(
 	 */
 	if (-1 == asprintf(&up->device, "%s%u", s_dev_stem, unit)) {
 	    up->device = NULL; /* undefined if asprintf fails... */
-	    /*TODO: logging*/
+	    msyslog(LOG_ERR, "%s clock device name too long",
+		    refnumtoa(&peer->srcadr));
 	    goto dev_fail;
 	}
-	if (-1 == stat(up->device, &sb)) {
-	    /*TODO: logging */
-	    goto dev_fail;
-	}
-	if (!S_ISCHR(sb.st_mode)) {
-	    /*TODO: logging */
+	if (-1 == stat(up->device, &sb) || !S_ISCHR(sb.st_mode)) {
+		msyslog(LOG_ERR, "%s: '%s' is not a character device",
+			refnumtoa(&peer->srcadr), up->device);
 	    goto dev_fail;
 	}
 
+	LOGIF(CLOCKINFO, (LOG_NOTICE, "%s: startup, device is '%s'",
+			  refnumtoa(&peer->srcadr), up->device));
 	return TRUE;
 
 dev_fail:
@@ -299,6 +265,8 @@ gpsd_shutdown(
 	if (-1 != pp->io.fd)
 		io_closeclock(&pp->io);
 	pp->io.fd = -1;
+	LOGIF(CLOCKINFO, (LOG_NOTICE, "%s: shutdown",
+			  refnumtoa(&peer->srcadr)));
 }
 
 /* ------------------------------------------------------------------ */
@@ -360,11 +328,16 @@ gpsd_poll(
 	/* If the median filter is empty, claim a timeout; otherwise
 	 * process the input data and keep the stats going.
 	 */
-	if (pp->coderecv == pp->codeproc) {
+	if (-1 == pp->io.fd) {
+		/* not connected to GPSD: clearly not working! */
+		refclock_report(peer, CEVNT_FAULT);
+	} else if (pp->coderecv == pp->codeproc) {
+		/* no data, but connected: timeout */
 		peer->flags    &= ~FLAG_PPS;
 		peer->precision = PRECISION;
 		refclock_report(peer, CEVNT_TIMEOUT);
 	} else {
+		/* yup, go ahead */
 		pp->polls++;
 		pp->lastref = pp->lastrec;
 		refclock_receive(peer);
@@ -395,7 +368,7 @@ gpsd_timer(
 	struct gpsd_unit    * const up = (struct gpsd_unit *)pp->unitptr;
 	
 	/* This is used for timeout handling. Nothing that needs
-	 * sub-second precison appens here, so receive/connec/retry
+	 * sub-second precison happens here, so receive/connec/retry
 	 * timeouts are simply handled by a count down, and then we
 	 * decide what to do by the socket values.
 	 *
@@ -407,13 +380,245 @@ gpsd_timer(
 
 	if (0 == up->tickover) {
 		if (-1 != pp->io.fd)
-			gpsd_stop_socket(pp, up);
-		else if (-1 != up->pfd.fd)
-			gpsd_test_socket(pp, up);
+			gpsd_stop_socket(peer);
+		else if (-1 != up->fdt)
+			gpsd_test_socket(peer);
 		else if (NULL != s_gpsd_addr)
-			gpsd_init_socket(pp, up);
+			gpsd_init_socket(peer);
 	}
 }
+
+/* =====================================================================
+ * JSON parsing stuff
+ */
+
+/* =====================================================================
+ * JSON parsing utils
+ */
+
+#define JSMN_MAXTOK	100
+#define INVALID_TOKEN (-1)
+
+typedef struct json_ctx {
+	char        * buf;
+	int           ntok;
+	jsmntok_t     tok[JSMN_MAXTOK];
+} json_ctx;
+typedef int tok_ref;
+
+#ifdef HAVE_LONG_LONG
+typedef long long json_int;
+ #define JSON_STRING_TO_INT strtoll
+#else
+typedef long json_int;
+ #define JSON_STRING_TO_INT strtol
+#endif
+
+/* ------------------------------------------------------------------ */
+
+static tok_ref
+json_token_skip(
+	const json_ctx * ctx,
+	tok_ref          tid)
+{
+	int len;
+	len = ctx->tok[tid].size;
+	for (++tid; len; --len)
+		if (tid < ctx->ntok)
+			tid = json_token_skip(ctx, tid);
+		else
+			break;
+	if (tid > ctx->ntok)
+		tid = ctx->ntok;
+	return tid;
+}
+	
+/* ------------------------------------------------------------------ */
+
+static int
+json_object_lookup(
+	const json_ctx * ctx,
+	tok_ref          tid,
+	const char     * key)
+{
+	int len;
+
+	if (tid >= ctx->ntok || ctx->tok[tid].type != JSMN_OBJECT)
+		return INVALID_TOKEN;
+	len = ctx->ntok - tid - 1;
+	if (len > ctx->tok[tid].size)
+		len = ctx->tok[tid].size;
+	for (tid += 1; len > 1; len-=2) {
+		if (ctx->tok[tid].type != JSMN_STRING)
+			continue; /* hmmm... that's an error, strictly speaking */
+		if (!strcmp(key, ctx->buf + ctx->tok[tid].start))
+			return tid + 1;
+		tid = json_token_skip(ctx, tid + 1);
+	}
+	return INVALID_TOKEN;
+}
+
+/* ------------------------------------------------------------------ */
+
+#if 0 /* currently unused */
+static const char*
+json_object_lookup_string(
+	const json_ctx * ctx,
+	tok_ref          tid,
+	const char     * key)
+{
+	tok_ref val_ref;
+	val_ref = json_object_lookup(ctx, tid, key);
+	if (INVALID_TOKEN == val_ref               ||
+	    JSMN_STRING   != ctx->tok[val_ref].type )
+		goto cvt_error;
+	return ctx->buf + ctx->tok[val_ref].start;
+
+  cvt_error:
+	errno = EINVAL;
+	return NULL;
+}
+#endif
+
+static const char*
+json_object_lookup_string_default(
+	const json_ctx * ctx,
+	tok_ref          tid,
+	const char     * key,
+	const char     * def)
+{
+	tok_ref val_ref;
+	val_ref = json_object_lookup(ctx, tid, key);
+	if (INVALID_TOKEN == val_ref               ||
+	    JSMN_STRING   != ctx->tok[val_ref].type )
+		return def;
+	return ctx->buf + ctx->tok[val_ref].start;
+}
+
+/* ------------------------------------------------------------------ */
+
+static json_int
+json_object_lookup_int(
+	const json_ctx * ctx,
+	tok_ref          tid,
+	const char     * key)
+{
+	json_int  ret;
+	tok_ref   val_ref;
+	char    * ep;
+
+	val_ref = json_object_lookup(ctx, tid, key);
+	if (INVALID_TOKEN  == val_ref               ||
+	    JSMN_PRIMITIVE != ctx->tok[val_ref].type )
+		goto cvt_error;
+	ret = JSON_STRING_TO_INT(
+		ctx->buf + ctx->tok[val_ref].start, &ep, 10);
+	if (*ep)
+		goto cvt_error;
+	return ret;
+
+  cvt_error:
+	errno = EINVAL;
+	return 0;
+}
+
+static json_int
+json_object_lookup_int_default(
+	const json_ctx * ctx,
+	tok_ref          tid,
+	const char     * key,
+	json_int         def)
+{
+	json_int  retv;
+	int       esave;
+	
+	esave = errno;
+	errno = 0;
+	retv  = json_object_lookup_int(ctx, tid, key);
+	if (0 != errno)
+		retv = def;
+	errno = esave;
+	return retv;
+}
+
+/* ------------------------------------------------------------------ */
+
+static double
+json_object_lookup_float(
+	const json_ctx * ctx,
+	tok_ref          tid,
+	const char     * key)
+{
+	double    ret;
+	tok_ref   val_ref;
+	char    * ep;
+
+	val_ref = json_object_lookup(ctx, tid, key);
+	if (INVALID_TOKEN  == val_ref               ||
+	    JSMN_PRIMITIVE != ctx->tok[val_ref].type )
+		goto cvt_error;
+	ret = strtod(ctx->buf + ctx->tok[val_ref].start, &ep);
+	if (*ep)
+		goto cvt_error;
+	return ret;
+
+  cvt_error:
+	errno = EINVAL;
+	return 0.0;
+}
+
+static double
+json_object_lookup_float_default(
+	const json_ctx * ctx,
+	tok_ref          tid,
+	const char     * key,
+	double           def)
+{
+	double    retv;
+	int       esave;
+	
+	esave = errno;
+	errno = 0;
+	retv  = json_object_lookup_float(ctx, tid, key);
+	if (0 != errno)
+		retv = def;
+	errno = esave;
+	return retv;
+}
+
+/* ------------------------------------------------------------------ */
+
+static BOOL
+json_parse_record(
+	json_ctx * ctx,
+	char     * buf)
+{
+	jsmn_parser jsm;
+	int         idx, rc;
+
+	jsmn_init(&jsm);
+	rc = jsmn_parse(&jsm, buf, ctx->tok, JSMN_MAXTOK);
+	ctx->buf  = buf;
+	ctx->ntok = jsm.toknext;
+
+	/* Make all tokens NUL terminated by overwriting the
+	 * terminator symbol
+	 */
+	for (idx = 0; idx < jsm.toknext; ++idx)
+		if (ctx->tok[idx].end > ctx->tok[idx].start)
+			ctx->buf[ctx->tok[idx].end] = '\0';
+
+	if (JSMN_ERROR_PART  != rc &&
+	    JSMN_ERROR_NOMEM != rc &&
+	    JSMN_SUCCESS     != rc  )
+		return FALSE; /* not parseable - bail out */
+
+	if (0 >= jsm.toknext || JSMN_OBJECT != ctx->tok[0].type)
+		return FALSE; /* not object or no data!?! */
+
+	return TRUE;
+}
+
 
 /* =====================================================================
  * static local helpers
@@ -439,8 +644,9 @@ process_version(
 		jctx, 0, "proto_minor");
 	if (0 == errno) {
 		up->fl_ver = -1;
-		printf("\n\nprotocol version = %u.%u\n\n\n",
-		       up->proto_major, up->proto_minor);
+		msyslog(LOG_INFO, "%s: GPSD protocol version %u.%u",
+			refnumtoa(&peer->srcadr),
+			up->proto_major, up->proto_minor);
 	}
 	/*TODO: validate protocol version! */
 	
@@ -457,11 +663,12 @@ process_version(
 	buf = up->buffer;
 	len = strlen(buf);
 	if (len != write(pp->io.fd, buf, len)) {
-		/*TODO: log request error! */
 		/*Note: if the server fails to read our request, the
 		 * resulting data timeout will take care of the
 		 * connection!
 		 */
+		msyslog(LOG_ERR, "%s: failed to write watch request (%m)",
+			refnumtoa(&peer->srcadr));
 	}
 }
 
@@ -477,32 +684,85 @@ process_tpv(
 	struct gpsd_unit    * const up = (struct gpsd_unit *)pp->unitptr;
 
 	const char * gps_time;
-	uint8_t      gps_mode;
+	int          gps_mode;
+	double       gps_ept, gps_epp;
+	int          log2;
 	
-	errno = 0;
-	gps_mode = (uint8_t)json_object_lookup_int(
-		jctx, 0, "mode");
-	gps_time = json_object_lookup_string(
-		jctx, 0, "time");
-	switch (errno) {
-	case 0:
-		save_ltc(pp, gps_time);
-		if (convert_time(&up->tpv_stamp, gps_time)) {
-			printf(" tpv, stamp='%s', recvt='%s' mode=%u\n",
-			       gmprettydate(&up->tpv_stamp),
-			       gmprettydate(&up->tpv_recvt),
-			       gps_mode);
-			
-			up->tpv_recvt = *rtime;
-			up->fl_tpv = -1;
-		} else {
-			refclock_report(peer, CEVNT_BADTIME);
-		}
-		break;
+	gps_mode = (int)json_object_lookup_int_default(
+		jctx, 0, "mode", 0);
+
+	gps_time = json_object_lookup_string_default(
+		jctx, 0, "time", NULL);
+
+	if (gps_mode < 1 || NULL == gps_time) {
+		/* receiver has no fix; tell about and avoid stale data */
+		refclock_report(peer, CEVNT_FAULT);
+		/*TODO: ?better refclock_report(peer, CEVNT_BADREPLY); */
+		up->fl_tpv = 0;
+		up->fl_pps = 0;
+		return;
+	}
+
+	/* save last time code to clock data */
+	save_ltc(pp, gps_time);
+
+	/* convert clock and set resulting ref time */
+	if (convert_time(&up->tpv_stamp, gps_time)) {
+		DPRINTF(1, (" tpv, stamp='%s', recvt='%s' mode=%u\n",
+			    gmprettydate(&up->tpv_stamp),
+			    gmprettydate(&up->tpv_recvt),
+			    gps_mode));
 		
-	default:
+		up->tpv_recvt = *rtime;
+		up->fl_tpv = -1;
+	} else {
 		refclock_report(peer, CEVNT_BADREPLY);
-		break;
+	}
+		
+	/* Set the precision from the GPSD data
+	 *
+	 * Since EPT has some issues, we use EPT and a home-brewed error
+	 * estimation base on a sphere derived from EPX/Y/V and the
+	 * speed of light. Use the better one of those two.
+	 */
+
+	gps_ept = json_object_lookup_float_default(jctx, 0, "ept", 1.0);
+
+	if (1 == gps_mode) {
+		/* 2d-fix; extend bounding circle to sphere */
+		gps_epp = 1.224744871391589 * sqrt(
+			square(json_object_lookup_float_default(
+				       jctx, 0, "epx", 1000.0)) + 
+			square(json_object_lookup_float_default(
+				       jctx, 0, "epy", 1000)));
+	} else {
+		/* 3d-fix get enclosing sphere of bounding box */
+		gps_epp = sqrt(
+			square(json_object_lookup_float_default(
+				       jctx, 0, "epx", 1000.0)) + 
+			square(json_object_lookup_float_default(
+				       jctx, 0, "epy", 1000.0)) +
+			square(json_object_lookup_float_default(
+				       jctx, 0, "epy", 1000.0)));
+	}
+	
+	/* divide spatial error by speed of light to get time error
+	 * estimate. Add another 100 meters as optimistic lower
+	 * bound. Then use the better one of the two estimations.
+	 */
+	gps_epp = (gps_epp + 100.0) / 299792458.0;
+	if (gps_epp < gps_ept)
+		gps_ept = gps_epp;	
+	gps_ept = frexp(gps_ept, &log2);
+	if (isfinite(gps_ept) && fabs(gps_ept) > 0.25) {
+		if (log2 < -25)
+			log2 = -25;
+		else if (log2 > 0)
+			log2 = 0;
+		peer->precision = log2;
+		
+	} else {
+		peer->precision = PRECISION;
 	}
 }
 
@@ -527,30 +787,34 @@ process_pps(
 		jctx, 0, "real_musec");
 	switch (errno) {
 	case 0:
-		frac *= 1.0e-6;
-		M_DTOLFP(frac, up->pps_stamp.l_ui, up->pps_stamp.l_uf);
-		up->pps_stamp.l_ui += secs;
-		up->pps_stamp.l_ui += JAN_1970;
-		printf(" pps, stamp='%s', recvt='%s'\n", 
-		       gmprettydate(&up->pps_stamp),
-		       gmprettydate(&up->pps_recvt));
-		
-		up->pps_recvt = *rtime;
-		/* When we have a time pulse, clear the TPV flag: the
-		 * PPS is only valid for the >NEXT< TPV value!
-		 */
-		up->fl_pps = -1;
-		up->fl_tpv =  0;
 		break;
 		
 	case ERANGE:
 		refclock_report(peer, CEVNT_BADREPLY);
-		break;
+		return;
 		
 	default:
 		refclock_report(peer, CEVNT_BADTIME);
-		break;
+		return;
 	}
+
+	frac *= 1.0e-6;
+	M_DTOLFP(frac, up->pps_stamp.l_ui, up->pps_stamp.l_uf);
+	up->pps_stamp.l_ui += secs;
+	up->pps_stamp.l_ui += JAN_1970;
+
+	DPRINTF(1, (" pps, stamp='%s', recvt='%s'\n", 
+		    gmprettydate(&up->pps_stamp),
+		    gmprettydate(&up->pps_recvt)));
+	
+	up->pps_recvt = *rtime;
+	pp->lastrec   = up->pps_stamp;
+
+	/* When we have a time pulse, clear the TPV flag: the
+	 * PPS is only valid for the >NEXT< TPV value!
+	 */
+	up->fl_pps = -1;
+	up->fl_tpv =  0;
 }
 
 /* ------------------------------------------------------------------ */
@@ -574,10 +838,9 @@ gpsd_parse(
 		return;
 
 	/* Now dispatch over the objects we know */
-	clsid = json_object_lookup_string(&jctx, 0, "class");
-	if (NULL == clsid)
-		return;
-	/*printf("--> class='%s'\n", clsid);*/
+	clsid = json_object_lookup_string_default(
+		&jctx, 0, "class", "-bad-repy-");
+
 	if (!strcmp("VERSION", clsid))
 		process_version(peer, &jctx, rtime);
 	else if (!strcmp("TPV", clsid))
@@ -585,7 +848,7 @@ gpsd_parse(
 	else if (!strcmp("PPS", clsid))
 		process_pps(peer, &jctx, rtime);
 	else
-		return; /* nothin we know about... */
+		return; /* nothing we know about... */
 
 	/* Bail out unless we have a pulse and a time stamp */
 	if (!(up->fl_pps && up->fl_tpv))
@@ -597,12 +860,13 @@ gpsd_parse(
 	 */
 	L_SUB(&up->tpv_recvt, &up->pps_recvt);
 	if (0 == up->tpv_recvt.l_ui) {
-		/*TODO: set precision based on TDOP */
-		peer->flags    |= FLAG_PPS;
-		peer->precision = PPS_PRECISION;
-		/*TODO: logging, fudge processing */
+		peer->flags |= FLAG_PPS;
+		/*TODO: fudge processing */
 		refclock_process_offset(pp, up->tpv_stamp, up->pps_stamp,
 					pp->fudgetime1);
+	} else {
+		msyslog(LOG_WARNING, "%s: discarded data due to delay",
+			refnumtoa(&peer->srcadr));
 	}
 
 	/* mark pulse and time as consumed */
@@ -614,13 +878,16 @@ gpsd_parse(
 
 static void
 gpsd_stop_socket(
-	struct refclockproc * const pp,
-	struct gpsd_unit    * const up)
+	struct peer * const peer)
 {
+	struct refclockproc * const pp = peer->procptr;
+	struct gpsd_unit    * const up = (struct gpsd_unit *)pp->unitptr;
+
 	if (-1 != pp->io.fd)
 		io_closeclock(&pp->io);
 	pp->io.fd = -1;
-	printf("\n\n\n CLOSED!\n\n\n");
+	msyslog(LOG_INFO, "%s: closing socket to GPSD",
+		refnumtoa(&peer->srcadr));
 	up->tickover = TICKOVER_MAX;
 }
 
@@ -628,9 +895,10 @@ gpsd_stop_socket(
 
 static void
 gpsd_init_socket(
-	struct refclockproc * const pp,
-	struct gpsd_unit    * const up)
+	struct peer * const peer)
 {
+	struct refclockproc * const pp = peer->procptr;
+	struct gpsd_unit    * const up = (struct gpsd_unit *)pp->unitptr;
 	struct addrinfo     * ai;
 	int rc;
 
@@ -641,66 +909,106 @@ gpsd_init_socket(
 	up->addr = ai->ai_next;
 
 	/* try to create a matching socket */
-	up->pfd.fd = socket(ai->ai_family  ,
-			    ai->ai_socktype,
-			    ai->ai_protocol);
-	if (-1 == up->pfd.fd)
+	up->fdt = socket(
+		ai->ai_family, ai->ai_socktype, ai->ai_protocol);
+	if (-1 == up->fdt) {
+		msyslog(LOG_ERR, "%s: cannot create GPSD socket: %m",
+			refnumtoa(&peer->srcadr));
 		goto no_socket;
+	}
 	
 	/* make sure the socket is non-blocking */
-	rc = fcntl(up->pfd.fd, F_SETFL, O_NONBLOCK, 1);
-	if (-1 == rc)
+	rc = fcntl(up->fdt, F_SETFL, O_NONBLOCK, 1);
+	if (-1 == rc) {
+		msyslog(LOG_ERR, "%s: cannot set GPSD socket to non-blocking: %m",
+			refnumtoa(&peer->srcadr));
 		goto no_socket;
-	
+	}
 	/* start a non-blocking connect */
-	rc = connect(up->pfd.fd    ,
-		     ai->ai_addr   ,
-		     ai->ai_addrlen);
-	if (-1 == rc && errno != EINPROGRESS)
+	rc = connect(up->fdt, ai->ai_addr, ai->ai_addrlen);
+	if (-1 == rc && errno != EINPROGRESS) {
+		msyslog(LOG_ERR, "%s: cannot connect GPSD socket: %m",
+			refnumtoa(&peer->srcadr));
 		goto no_socket;
+	}
 
 	return;
   
   no_socket:
-	if (-1 != up->pfd.fd)
-		close(up->pfd.fd);
-	up->pfd.fd = -1;
+	if (-1 != up->fdt)
+		close(up->fdt);
+	up->fdt = -1;
 }
 
 /* ------------------------------------------------------------------ */
 
 static void
 gpsd_test_socket(
-	struct refclockproc * const pp,
-	struct gpsd_unit    * const up)
+	struct peer * const peer)
 {
-	/* check if the socket becomes writeable */
-	if (1 != poll(&up->pfd, 1, 0))
-		return;
+	struct refclockproc * const pp = peer->procptr;
+	struct gpsd_unit    * const up = (struct gpsd_unit *)pp->unitptr;
+
+	int       error;
+	int       rc;
+	socklen_t erlen;
+
+	/* Check if the non-blocking connect was finished by testing the
+	 * socket for writeability. Use the 'poll()' API if available
+	 * and 'select()' otherwise.
+	 */
+#if defined(HAVE_SYS_POLL_H)
+	{
+		struct pollfd pfd;
+
+		pfd.events = POLLIN;
+		pfd.fd     = up->fdt;
+		if (1 != poll(&pfd, 1, 0))
+			return;
+	}
+#elif defined(HAVE_SYS_SELECT_H)
+	{
+		struct timeval tout;
+		fd_set         fset;
+
+		memset(&tout, 0, sizeof(tout));
+		FD_ZERO(&fset);
+		FD_SET(up->fdt, &fset);
+		if (1 != select(up->fdt+1, NULL, &fset, NULL, &tout))
+			return;
+	}
+#else
+# error BLooper! That should have been found earlier!
+#endif
 
 	/* next timeout is a full one... */
 	up->tickover = TICKOVER_MAX;
 
 	/* check for socket error */
-	int       error = 0;
-	socklen_t erlen = sizeof(error);
-	getsockopt(up->pfd.fd, SOL_SOCKET, SO_ERROR, &error, &erlen);
-	if (0 != error)
+	error = 0;
+	erlen = sizeof(error);
+	rc    = getsockopt(up->fdt, SOL_SOCKET, SO_ERROR, &error, &erlen);
+	if (0 != rc || 0 != error) {
+		msyslog(LOG_ERR, "%s: cannot connect GPSD socket: %m",
+			refnumtoa(&peer->srcadr));
 		goto no_socket;
-
+	}	
 	/* swap socket FDs, and make sure the clock was added */
-	pp->io.fd = up->pfd.fd;
-	up->pfd.fd = -1;
-	if (0 == io_addclock(&pp->io))
+	pp->io.fd = up->fdt;
+	up->fdt   = -1;
+	if (0 == io_addclock(&pp->io)) {
+		msyslog(LOG_ERR, "%s: failed to register with I/O engine",
+			refnumtoa(&peer->srcadr));
 		goto no_socket;
-	up->tickover = TICKOVER_MAX;
+	}
 
+	up->tickover = TICKOVER_MAX;
 	return;
 	
   no_socket:
-	if (-1 != up->pfd.fd)
-		close(up->pfd.fd);
-	up->pfd.fd = -1;
+	if (-1 != up->fdt)
+		close(up->fdt);
+	up->fdt = -1;
 }
 
 /* =====================================================================
@@ -762,159 +1070,6 @@ save_ltc(
 }
 
 
-/* =====================================================================
- * JSON parsing stuff
- */
-
-static tok_ref
-json_token_skip(
-	const json_ctx * ctx,
-	tok_ref          tid)
-{
-	int len;
-	len = ctx->tok[tid].size;
-	for (++tid; len; --len)
-		if (tid < ctx->ntok)
-			tid = json_token_skip(ctx, tid);
-		else
-			break;
-	if (tid > ctx->ntok)
-		tid = ctx->ntok;
-	return tid;
-}
-	
-/* ------------------------------------------------------------------ */
-
-static int
-json_object_lookup(
-	const json_ctx * ctx,
-	tok_ref          tid,
-	const char     * key)
-{
-	int len;
-
-	if (tid >= ctx->ntok || ctx->tok[tid].type != JSMN_OBJECT)
-		return INVALID_TOKEN;
-	len = ctx->ntok - tid - 1;
-	if (len > ctx->tok[tid].size)
-		len = ctx->tok[tid].size;
-	for (tid += 1; len > 1; len-=2) {
-		if (ctx->tok[tid].type != JSMN_STRING)
-			continue; /* hmmm... that's an error, strictly speaking */
-		if (!strcmp(key, ctx->buf + ctx->tok[tid].start))
-			return tid + 1;
-		tid = json_token_skip(ctx, tid + 1);
-	}
-	return INVALID_TOKEN;
-}
-
-/* ------------------------------------------------------------------ */
-
-static const char*
-json_object_lookup_string(
-	const json_ctx * ctx,
-	tok_ref          tid,
-	const char     * key)
-{
-	tok_ref val_ref;
-	val_ref = json_object_lookup(ctx, tid, key);
-	if (INVALID_TOKEN == val_ref               ||
-	    JSMN_STRING   != ctx->tok[val_ref].type )
-		goto cvt_error;
-	return ctx->buf + ctx->tok[val_ref].start;
-
-  cvt_error:
-	errno = EINVAL;
-	return NULL;
-}
-
-/* ------------------------------------------------------------------ */
-
-#ifdef HAVE_LONG_LONG
-static long long
-json_object_lookup_int(
-	const json_ctx * ctx,
-	tok_ref          tid,
-	const char     * key)
-{
-	long long ret;
-	tok_ref   val_ref;
-	char    * ep;
-
-	val_ref = json_object_lookup(ctx, tid, key);
-	if (INVALID_TOKEN  == val_ref               ||
-	    JSMN_PRIMITIVE != ctx->tok[val_ref].type )
-		goto cvt_error;
-	ret = strtoll(ctx->buf + ctx->tok[val_ref].start, &ep, 10);
-	if (*ep)
-		goto cvt_error;
-	return ret;
-
-  cvt_error:
-	errno = EINVAL;
-	return 0;
-}
-#else
-#endif
-
-/* ------------------------------------------------------------------ */
-
-static double
-json_object_lookup_float(
-	const json_ctx * ctx,
-	tok_ref          tid,
-	const char     * key)
-{
-	double    ret;
-	tok_ref   val_ref;
-	char    * ep;
-
-	val_ref = json_object_lookup(ctx, tid, key);
-	if (INVALID_TOKEN  == val_ref               ||
-	    JSMN_PRIMITIVE != ctx->tok[val_ref].type )
-		goto cvt_error;
-	ret = strtod(ctx->buf + ctx->tok[val_ref].start, &ep);
-	if (*ep)
-		goto cvt_error;
-	return ret;
-
-  cvt_error:
-	errno = EINVAL;
-	return 0.0;
-}
-
-/* ------------------------------------------------------------------ */
-
-static BOOL
-json_parse_record(
-	json_ctx * ctx,
-	char     * buf)
-{
-	jsmn_parser jsm;
-	int         idx, rc;
-
-	jsmn_init(&jsm);
-	rc = jsmn_parse(&jsm, buf, ctx->tok, JSMN_MAXTOK);
-	ctx->buf  = buf;
-	ctx->ntok = jsm.toknext;
-
-	/* Make all tokens NUL terminated by overwriting the
-	 * terminator symbol
-	 */
-	for (idx = 0; idx < jsm.toknext; ++idx)
-		if (ctx->tok[idx].end > ctx->tok[idx].start)
-			ctx->buf[ctx->tok[idx].end] = '\0';
-
-	if (JSMN_ERROR_PART  != rc &&
-	    JSMN_ERROR_NOMEM != rc &&
-	    JSMN_SUCCESS     != rc  )
-		return FALSE; /* not parseable - bail out */
-
-	if (0 >= jsm.toknext || JSMN_OBJECT != ctx->tok[0].type)
-		return FALSE; /* not object or no data!?! */
-
-	return TRUE;
-}
 
 #else
 NONEMPTY_TRANSLATION_UNIT
