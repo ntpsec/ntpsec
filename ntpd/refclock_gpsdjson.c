@@ -65,6 +65,14 @@
 # define FALSE 0
 #endif
 
+/* some local typedefs : The NTPD formatting style cries for short type
+ * names, and we provide them locally. Note:the suffix '_t' is reserved
+ * for the standard; I use a capital T instead.
+ */
+typedef struct peer         peerT;
+typedef struct refclockproc clockprocT;
+typedef struct addrinfo     addrInfoT;
+
 /* =====================================================================
  * We use the same device name scheme as does the NMEA driver; since
  * GPSD supports the same links, we can select devices by a fixed name.
@@ -76,13 +84,13 @@ static const char * s_dev_stem = "/dev/gps";
  */
 
 static	void	gpsd_init	(void);
-static	int	gpsd_start	(int, struct peer *);
-static	void	gpsd_shutdown	(int, struct peer *);
+static	int	gpsd_start	(int, peerT *);
+static	void	gpsd_shutdown	(int, peerT *);
 static	void	gpsd_receive	(struct recvbuf *);
-static	void	gpsd_poll	(int, struct peer *);
+static	void	gpsd_poll	(int, peerT *);
 static	void	gpsd_control	(int, const struct refclockstat *,
-				 struct refclockstat *, struct peer *);
-static	void	gpsd_timer	(int, struct peer *);
+				 struct refclockstat *, peerT *);
+static	void	gpsd_timer	(int, peerT *);
 
 struct refclock refclock_gpsdjson = {
 	gpsd_start,		/* start up driver */
@@ -97,7 +105,7 @@ struct refclock refclock_gpsdjson = {
 /* =====================================================================
  * our local clock unit and data
  */
-struct gpsd_unit {
+typedef struct gpsd_unit {
 	/* current line protocol version */
 	uint16_t proto_major;
 	uint16_t proto_minor;
@@ -116,32 +124,27 @@ struct gpsd_unit {
 	int fl_ver : 1;	/* have protocol version */
 
 	/* admin stuff for sockets and device selection */
-	int               fdt;		/* current connecting socket */
-	struct addrinfo * addr;		/* next address to try */
-	int               tickover;	/* timeout countdown */
-	char            * device;	/* device name of unit */
+	int         fdt;	/* current connecting socket */
+	addrInfoT * addr;	/* next address to try */
+	int         tickover;	/* timeout countdown */
+	char      * device;	/* device name of unit */
 
 	/* record assemby buffer and saved length */
 	int  buflen;
 	char buffer[MAX_PDU_LEN];
-};
+} gpsdUnitT;
 
 /* =====================================================================
  * static local helpers forward decls
  */
-static void gpsd_init_socket(struct peer * const peer);
-static void gpsd_test_socket(struct peer * const peer);
-static void gpsd_stop_socket(struct peer * const peer);
+static void gpsd_init_socket(peerT * const peer);
+static void gpsd_test_socket(peerT * const peer);
+static void gpsd_stop_socket(peerT * const peer);
 
-static void gpsd_parse(struct peer * const peer,
+static void gpsd_parse(peerT * const peer,
 		       const l_fp  * const rtime);
 static BOOL convert_time(l_fp * fp, const char * gps_time);
-static void save_ltc(struct refclockproc * const pp, const char * const tc);
-
-static inline double square(double x)
-{
-	return x*x;
-}
+static void save_ltc(clockprocT * const pp, const char * const tc);
 
 /* =====================================================================
  * local / static stuff
@@ -157,7 +160,7 @@ static const char * s_logon =
 /* We keep a static list of network addresses for 'localhost:gpsd', and
  * we try to connect to them in round-robin fashion.
  */
-static struct addrinfo * s_gpsd_addr;
+static addrInfoT * s_gpsd_addr;
 
 /* =====================================================================
  * the clock functions
@@ -169,7 +172,7 @@ static struct addrinfo * s_gpsd_addr;
 static void
 gpsd_init(void)
 {
-	struct addrinfo hints;
+	addrInfoT hints;
 	
 	memset(&hints, 0, sizeof(hints));
 	hints.ai_family   = AF_UNSPEC;
@@ -187,25 +190,23 @@ gpsd_init(void)
 
 static int
 gpsd_start(
-	int           unit,
-	struct peer * peer)
+	int     unit,
+	peerT * peer)
 {
-	struct refclockproc * const pp = peer->procptr;
-	struct gpsd_unit * const    up = emalloc_zero(sizeof(*up));
+	clockprocT * const pp = peer->procptr;
+	gpsdUnitT  * const up = emalloc_zero(sizeof(*up));
 
 	struct stat sb;
 
-	UNUSED_ARG(unit);
-
-	up->fdt       = -1;
-	up->addr       = s_gpsd_addr;
+	up->fdt     = -1;
+	up->addr    = s_gpsd_addr;
 
 	/* Allocate and initialize unit structure */
 	pp->unitptr = (caddr_t)up;
-	pp->io.fd = -1;
+	pp->io.fd   = -1;
 	pp->io.clock_recv = gpsd_receive;
-	pp->io.srcclock = peer;
-	pp->io.datalen = 0;
+	pp->io.srcclock   = peer;
+	pp->io.datalen    = 0;
 	pp->a_lastcode[0] = '\0';
 
 	/* Initialize miscellaneous variables */
@@ -231,8 +232,9 @@ gpsd_start(
 	    goto dev_fail;
 	}
 
-	LOGIF(CLOCKINFO, (LOG_NOTICE, "%s: startup, device is '%s'",
-			  refnumtoa(&peer->srcadr), up->device));
+	LOGIF(CLOCKINFO,
+	      (LOG_NOTICE, "%s: startup, device is '%s'",
+	       refnumtoa(&peer->srcadr), up->device));
 	return TRUE;
 
 dev_fail:
@@ -249,11 +251,11 @@ dev_fail:
 
 static void
 gpsd_shutdown(
-	int           unit,
-	struct peer * peer)
+	int     unit,
+	peerT * peer)
 {
-	struct refclockproc * const pp = peer->procptr;
-	struct gpsd_unit    * const up = (struct gpsd_unit *)pp->unitptr;
+	clockprocT * const pp = peer->procptr;
+	gpsdUnitT  * const up = (gpsdUnitT *)pp->unitptr;
 
 	UNUSED_ARG(unit);
 
@@ -265,8 +267,8 @@ gpsd_shutdown(
 	if (-1 != pp->io.fd)
 		io_closeclock(&pp->io);
 	pp->io.fd = -1;
-	LOGIF(CLOCKINFO, (LOG_NOTICE, "%s: shutdown",
-			  refnumtoa(&peer->srcadr)));
+	LOGIF(CLOCKINFO,
+	      (LOG_NOTICE, "%s: shutdown", refnumtoa(&peer->srcadr)));
 }
 
 /* ------------------------------------------------------------------ */
@@ -276,10 +278,10 @@ gpsd_receive(
 	struct recvbuf * rbufp)
 {
 	/* declare & init control structure ptrs */
-	struct peer	    * const peer = rbufp->recv_peer;
-	struct refclockproc * const pp = peer->procptr;
-	struct gpsd_unit    * const up = (struct gpsd_unit*)pp->unitptr;
-	
+	peerT	   * const peer = rbufp->recv_peer;
+	clockprocT * const pp   = peer->procptr;
+	gpsdUnitT  * const up   = (gpsdUnitT*)pp->unitptr;	
+
 	const char *psrc, *esrc;
 	char       *pdst, *edst, ch;
 
@@ -320,10 +322,10 @@ gpsd_receive(
 
 static void
 gpsd_poll(
-	int           unit,
-	struct peer * peer)
+	int     unit,
+	peerT * peer)
 {
-	struct refclockproc * const pp = peer->procptr;
+	clockprocT * const pp = peer->procptr;
 
 	/* If the median filter is empty, claim a timeout; otherwise
 	 * process the input data and keep the stats going.
@@ -337,7 +339,7 @@ gpsd_poll(
 		peer->precision = PRECISION;
 		refclock_report(peer, CEVNT_TIMEOUT);
 	} else {
-		/* yup, go ahead */
+		/* all is fine, go ahead */
 		pp->polls++;
 		pp->lastref = pp->lastrec;
 		refclock_receive(peer);
@@ -352,7 +354,7 @@ gpsd_control(
 	int                         unit,
 	const struct refclockstat * in_st,
 	struct refclockstat       * out_st,
-	struct peer               * peer  )
+	peerT                     * peer  )
 {
 	/* Not yet implemented -- do we need it? */
 }
@@ -361,14 +363,14 @@ gpsd_control(
 
 static void
 gpsd_timer(
-	int           unit,
-	struct peer * peer)
+	int     unit,
+	peerT * peer)
 {
-	struct refclockproc * const pp = peer->procptr;
-	struct gpsd_unit    * const up = (struct gpsd_unit *)pp->unitptr;
+	clockprocT * const pp = peer->procptr;
+	gpsdUnitT  * const up = (gpsdUnitT *)pp->unitptr;
 	
 	/* This is used for timeout handling. Nothing that needs
-	 * sub-second precison happens here, so receive/connec/retry
+	 * sub-second precison happens here, so receive/connect/retry
 	 * timeouts are simply handled by a count down, and then we
 	 * decide what to do by the socket values.
 	 *
@@ -392,10 +394,6 @@ gpsd_timer(
  * JSON parsing stuff
  */
 
-/* =====================================================================
- * JSON parsing utils
- */
-
 #define JSMN_MAXTOK	100
 #define INVALID_TOKEN (-1)
 
@@ -404,6 +402,7 @@ typedef struct json_ctx {
 	int           ntok;
 	jsmntok_t     tok[JSMN_MAXTOK];
 } json_ctx;
+
 typedef int tok_ref;
 
 #ifdef HAVE_LONG_LONG
@@ -626,12 +625,12 @@ json_parse_record(
 
 static void
 process_version(
-	struct peer * const peer ,
-	json_ctx    * const jctx ,
-	const l_fp  * const rtime)
+	peerT      * const peer ,
+	json_ctx   * const jctx ,
+	const l_fp * const rtime)
 {
-	struct refclockproc * const pp = peer->procptr;
-	struct gpsd_unit    * const up = (struct gpsd_unit *)pp->unitptr;
+	clockprocT * const pp = peer->procptr;
+	gpsdUnitT  * const up = (gpsdUnitT *)pp->unitptr;
 
 	int    len;
 	char * buf;
@@ -676,16 +675,16 @@ process_version(
 
 static void
 process_tpv(
-	struct peer * const peer ,
-	json_ctx    * const jctx ,
-	const l_fp  * const rtime)
+	peerT      * const peer ,
+	json_ctx   * const jctx ,
+	const l_fp * const rtime)
 {
-	struct refclockproc * const pp = peer->procptr;
-	struct gpsd_unit    * const up = (struct gpsd_unit *)pp->unitptr;
+	clockprocT * const pp = peer->procptr;
+	gpsdUnitT  * const up = (gpsdUnitT *)pp->unitptr;
 
 	const char * gps_time;
 	int          gps_mode;
-	double       gps_ept, gps_epp;
+	double       ept, epp, epx, epy, epv;
 	int          log2;
 	
 	gps_mode = (int)json_object_lookup_int_default(
@@ -697,7 +696,7 @@ process_tpv(
 	if (gps_mode < 1 || NULL == gps_time) {
 		/* receiver has no fix; tell about and avoid stale data */
 		refclock_report(peer, CEVNT_FAULT);
-		/*TODO: ?better refclock_report(peer, CEVNT_BADREPLY); */
+		/*TODO: ?better? refclock_report(peer, CEVNT_BADREPLY); */
 		up->fl_tpv = 0;
 		up->fl_pps = 0;
 		return;
@@ -725,36 +724,31 @@ process_tpv(
 	 * estimation base on a sphere derived from EPX/Y/V and the
 	 * speed of light. Use the better one of those two.
 	 */
+	ept = json_object_lookup_float_default(jctx, 0, "ept", 1.0);
 
-	gps_ept = json_object_lookup_float_default(jctx, 0, "ept", 1.0);
-
+	epx = json_object_lookup_float_default(jctx, 0, "epx", 1000.0);
+	epy = json_object_lookup_float_default(jctx, 0, "epy", 1000.0);
 	if (1 == gps_mode) {
-		/* 2d-fix; extend bounding circle to sphere */
-		gps_epp = 1.224744871391589 * sqrt(
-			square(json_object_lookup_float_default(
-				       jctx, 0, "epx", 1000.0)) + 
-			square(json_object_lookup_float_default(
-				       jctx, 0, "epy", 1000)));
+		/* 2d-fix: extend bounding rectangle to cuboid */
+		epv = max(epx, epy);
 	} else {
-		/* 3d-fix get enclosing sphere of bounding box */
-		gps_epp = sqrt(
-			square(json_object_lookup_float_default(
-				       jctx, 0, "epx", 1000.0)) + 
-			square(json_object_lookup_float_default(
-				       jctx, 0, "epy", 1000.0)) +
-			square(json_object_lookup_float_default(
-				       jctx, 0, "epy", 1000.0)));
+		/* 3d-fix: get bounding cuboid */
+		epv = json_object_lookup_float_default(
+				jctx, 0, "epv", 1000.0);
 	}
-	
-	/* divide spatial error by speed of light to get time error
-	 * estimate. Add another 100 meters as optimistic lower
-	 * bound. Then use the better one of the two estimations.
+
+	/* get diameter of enclosing sphere of bounding cuboid as spatial
+	 * error, then divide spatial error by speed of light to get
+	 * another time error estimate. Add extra 100 meters as
+	 * optimistic lower bound. Then use the better one of the two
+	 * estimations.
 	 */
-	gps_epp = (gps_epp + 100.0) / 299792458.0;
-	if (gps_epp < gps_ept)
-		gps_ept = gps_epp;	
-	gps_ept = frexp(gps_ept, &log2);
-	if (isfinite(gps_ept) && fabs(gps_ept) > 0.25) {
+	epp = 2.0 * sqrt(epx*epx + epy*epy + epv*epv);
+	epp = (epp + 100.0) / 299792458.0;
+	if (epp < ept)
+		ept = epp;	
+	ept = frexp(ept, &log2);
+	if (isfinite(ept) && fabs(ept) > 0.25) {
 		if (log2 < -25)
 			log2 = -25;
 		else if (log2 > 0)
@@ -770,35 +764,25 @@ process_tpv(
 
 static void
 process_pps(
-	struct peer * const peer ,
-	json_ctx    * const jctx ,
-	const l_fp  * const rtime)
+	peerT      * const peer ,
+	json_ctx   * const jctx ,
+	const l_fp * const rtime)
 {
-	struct refclockproc * const pp = peer->procptr;
-	struct gpsd_unit    * const up = (struct gpsd_unit *)pp->unitptr;
+	clockprocT * const pp = peer->procptr;
+	gpsdUnitT  * const up = (gpsdUnitT *)pp->unitptr;
 
 	uint32_t secs;
 	double   frac;
 		
 	errno = 0;
-	secs = (uint32_t)json_object_lookup_int(
-		jctx, 0, "real_sec");
-	frac = json_object_lookup_float(
-		jctx, 0, "real_musec");
-	switch (errno) {
-	case 0:
-		break;
-		
-	case ERANGE:
-		refclock_report(peer, CEVNT_BADREPLY);
-		return;
-		
-	default:
+	secs = (uint32_t)json_object_lookup_int(jctx, 0, "real_sec");
+	frac = json_object_lookup_float(jctx, 0, "real_musec");
+	if (0 != errno) {
 		refclock_report(peer, CEVNT_BADTIME);
 		return;
 	}
 
-	frac *= 1.0e-6;
+	frac *= 1.0e-6; /* covert usec to seconds */
 	M_DTOLFP(frac, up->pps_stamp.l_ui, up->pps_stamp.l_uf);
 	up->pps_stamp.l_ui += secs;
 	up->pps_stamp.l_ui += JAN_1970;
@@ -821,11 +805,11 @@ process_pps(
 
 static void
 gpsd_parse(
-	struct peer * const peer,
-	const l_fp  * const rtime)
+	peerT      * const peer,
+	const l_fp * const rtime)
 {
-	struct refclockproc * const pp = peer->procptr;
-	struct gpsd_unit    * const up = (struct gpsd_unit *)pp->unitptr;
+	clockprocT * const pp = peer->procptr;
+	gpsdUnitT  * const up = (gpsdUnitT *)pp->unitptr;
 
 	json_ctx     jctx;
 	const char * clsid;
@@ -854,7 +838,7 @@ gpsd_parse(
 	if (!(up->fl_pps && up->fl_tpv))
 		return;
 
-	/* Check if the pulse and he time came close enough to be
+	/* Check if the pulse and the time came close enough to be
 	 * correlated. Ignore this pair if the difference is more than a
 	 * second.
 	 */
@@ -865,8 +849,9 @@ gpsd_parse(
 		refclock_process_offset(pp, up->tpv_stamp, up->pps_stamp,
 					pp->fudgetime1);
 	} else {
-		msyslog(LOG_WARNING, "%s: discarded data due to delay",
-			refnumtoa(&peer->srcadr));
+		LOGIF(CLOCKINFO,
+		      (LOG_WARNING, "%s: disaarded data due to delay",
+		       refnumtoa(&peer->srcadr)));
 	}
 
 	/* mark pulse and time as consumed */
@@ -878,10 +863,10 @@ gpsd_parse(
 
 static void
 gpsd_stop_socket(
-	struct peer * const peer)
+	peerT * const peer)
 {
-	struct refclockproc * const pp = peer->procptr;
-	struct gpsd_unit    * const up = (struct gpsd_unit *)pp->unitptr;
+	clockprocT * const pp = peer->procptr;
+	gpsdUnitT  * const up = (gpsdUnitT *)pp->unitptr;
 
 	if (-1 != pp->io.fd)
 		io_closeclock(&pp->io);
@@ -895,12 +880,12 @@ gpsd_stop_socket(
 
 static void
 gpsd_init_socket(
-	struct peer * const peer)
+	peerT * const peer)
 {
-	struct refclockproc * const pp = peer->procptr;
-	struct gpsd_unit    * const up = (struct gpsd_unit *)pp->unitptr;
-	struct addrinfo     * ai;
-	int rc;
+	clockprocT * const pp = peer->procptr;
+	gpsdUnitT  * const up = (gpsdUnitT *)pp->unitptr;
+	addrInfoT  * ai;
+	int          rc;
 
 	/* draw next address to try */
 	if (NULL == up->addr)
@@ -944,10 +929,10 @@ gpsd_init_socket(
 
 static void
 gpsd_test_socket(
-	struct peer * const peer)
+	peerT * const peer)
 {
-	struct refclockproc * const pp = peer->procptr;
-	struct gpsd_unit    * const up = (struct gpsd_unit *)pp->unitptr;
+	clockprocT * const pp = peer->procptr;
+	gpsdUnitT  * const up = (gpsdUnitT *)pp->unitptr;
 
 	int       error;
 	int       rc;
@@ -978,7 +963,7 @@ gpsd_test_socket(
 			return;
 	}
 #else
-# error BLooper! That should have been found earlier!
+# error Blooper! That should have been found earlier!
 #endif
 
 	/* next timeout is a full one... */
@@ -1056,8 +1041,8 @@ convert_time(
  */
 static void
 save_ltc(
-	struct refclockproc * const pp,
-	const char * const          tc)
+	clockprocT * const pp,
+	const char * const tc)
 {
 	size_t len;
 
