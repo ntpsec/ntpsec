@@ -113,19 +113,25 @@
 #endif /* HAVE_PRIV_H */
 #endif /* HAVE_DROPROOT */
 
+#if defined (LIBSECCOMP)
+/* # include <sys/types.h> */
+# include <sys/resource.h>
+# include <seccomp.h>
+#endif /* LIBSECCOMP */
+
 #ifdef HAVE_DNSREGISTRATION
-#include <dns_sd.h>
+# include <dns_sd.h>
 DNSServiceRef mdns;
 #endif
 
 #ifdef HAVE_SETPGRP_0
-#define ntp_setpgrp(x, y)	setpgrp()
+# define ntp_setpgrp(x, y)	setpgrp()
 #else
-#define ntp_setpgrp(x, y)	setpgrp(x, y)
+# define ntp_setpgrp(x, y)	setpgrp(x, y)
 #endif
 
 #ifdef HAVE_SOLARIS_PRIVS
-#define LOWPRIVS "basic,sys_time,net_privaddr,proc_setid,!proc_info,!proc_session,!proc_exec"
+# define LOWPRIVS "basic,sys_time,net_privaddr,proc_setid,!proc_info,!proc_session,!proc_exec"
 static priv_set_t *lowprivs = NULL;
 static priv_set_t *highprivs = NULL;
 #endif /* HAVE_SOLARIS_PRIVS */
@@ -998,6 +1004,102 @@ getgroup:
 		fork_deferred_worker();
 	}	/* if (droproot) */
 # endif	/* HAVE_DROPROOT */
+
+/* libssecomp sandboxing */
+#if defined (LIBSECCOMP)
+	scmp_filter_ctx ctx;
+	if ((ctx = seccomp_init(SCMP_ACT_KILL)) < 0)
+		msyslog(LOG_ERR, "%s:libseccomp activation failed", __func__);
+
+#ifdef __x86_64__
+int scmp_sc[] = {
+	SCMP_SYS(open),
+	SCMP_SYS(clock_gettime),
+	SCMP_SYS(time),
+	SCMP_SYS(read),
+	SCMP_SYS(write),
+	SCMP_SYS(close),
+	SCMP_SYS(brk),
+	SCMP_SYS(poll),
+	SCMP_SYS(select),
+	SCMP_SYS(madvise),
+	SCMP_SYS(mmap),
+	SCMP_SYS(munmap),
+	SCMP_SYS(exit_group),
+	SCMP_SYS(rt_sigprocmask),
+	SCMP_SYS(ioctl),
+	SCMP_SYS(getsockname),
+	SCMP_SYS(lseek),
+	SCMP_SYS(fstat),
+	SCMP_SYS(recvmsg),
+	SCMP_SYS(sendto),
+	SCMP_SYS(connect),
+	SCMP_SYS(rt_sigaction),
+	SCMP_SYS(socket),
+	SCMP_SYS(fsync),
+	SCMP_SYS(rt_sigreturn),
+	SCMP_SYS(setsid),
+	SCMP_SYS(chdir),
+	SCMP_SYS(futex),
+	SCMP_SYS(stat),
+	SCMP_SYS(clock_settime),
+	SCMP_SYS(getitimer),
+	SCMP_SYS(adjtimex),
+	SCMP_SYS(setitimer),
+	SCMP_SYS(rename)
+};
+#endif
+#ifdef __i386__
+int scmp_sc[] = {
+	SCMP_SYS(open),
+	SCMP_SYS(clock_gettime),
+	SCMP_SYS(time),
+	SCMP_SYS(read),
+	SCMP_SYS(write),
+	SCMP_SYS(close),
+	SCMP_SYS(brk),
+	SCMP_SYS(poll),
+	SCMP_SYS(_newselect),
+	SCMP_SYS(select),
+	SCMP_SYS(madvise),
+	SCMP_SYS(mmap2),
+	SCMP_SYS(mmap),
+	SCMP_SYS(munmap),
+	SCMP_SYS(exit_group),
+	SCMP_SYS(rt_sigprocmask),
+	SCMP_SYS(sigprocmask),
+	SCMP_SYS(rt_sigaction),
+	SCMP_SYS(socketcall),
+	SCMP_SYS(fsync),
+	SCMP_SYS(sigreturn),
+	SCMP_SYS(setsid),
+	SCMP_SYS(chdir),
+	SCMP_SYS(futex),
+	SCMP_SYS(stat64),
+	SCMP_SYS(clock_settime),
+	SCMP_SYS(getitimer),
+	SCMP_SYS(adjtimex),
+	SCMP_SYS(setitimer),
+	SCMP_SYS(rename)
+};
+#endif
+	{
+		int i;
+
+		for (i = 0; i < COUNTOF(scmp_sc); i++) {
+			if (seccomp_rule_add(ctx,
+			    SCMP_ACT_ALLOW, scmp_sc[i], 0) < 0) {
+				msyslog(LOG_ERR,
+				    "%s:libseccomp rule failed: %m",
+				    __func__);
+			}
+		}
+	}
+
+	if (seccomp_load(ctx) < 0)
+		msyslog(LOG_ERR, "%s:libseccomp unable to load filter: %m",
+		    __func__);	
+#endif /* LIBSECCOMP */
 
 # ifdef HAVE_IO_COMPLETION_PORT
 

@@ -189,6 +189,30 @@ esac
 AC_SEARCH_LIBS([openlog], [gen syslog])
 # XXX library list will be in ac_cv_search_openlog
 
+# LIBSECCOMP is off by default -- needs testing with all the features
+# Please send bug reports to loganaden@gmail.com
+AC_MSG_CHECKING([if we want to use libseccomp sandboxing (EXPERIMENTAL)])
+AC_ARG_ENABLE(
+    [libseccomp],
+    [AS_HELP_STRING(
+	[--enable-libseccomp],
+	[EXPERIMENTAL: enable support for libseccomp sandboxing (default is no) ]
+    )],
+    [ntp_ok=$enableval],
+    [ntp_ok=no]
+)
+AC_MSG_RESULT([$ntp_ok])
+case "$ntp_ok" in
+ yes)
+    AC_SEARCH_LIBS(
+	[seccomp_init],
+	[seccomp],
+	[AC_DEFINE([LIBSECCOMP], [1],
+	    [Define to any value to include libseccomp sandboxing.])]
+    )
+    ;;
+esac
+
 NTP_FACILITYNAMES
 
 dnl Digital UNIX V4.0 and Solaris 7 have POSIX.1c functions in -lrt
