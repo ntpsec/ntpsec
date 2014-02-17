@@ -258,7 +258,7 @@ extern struct refclock refclock_tsyncpci;
 #define refclock_tsyncpci refclock_none
 #endif
 
-#ifdef CLOCK_GPSDJSON
+#if defined(CLOCK_GPSDJSON) && !defined(SYS_WINNT) 
 extern struct refclock refclock_gpsdjson;
 #else
 #define refclock_gpsdjson refclock_none

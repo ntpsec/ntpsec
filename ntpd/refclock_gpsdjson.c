@@ -2,14 +2,28 @@
  * refclock_gpsdjson.c - clock driver as GPSD JSON client
  *	Juergen Perlinger (perlinger@ntp.org) Feb 11, 2014
  *	inspired by refclock_nmea.c
+ *
+ * Note: This will currently NOT work with Windows due to some
+ * limitations:
+ *
+ *  - There is no GPSD for Windows. (There is an unofficial port to
+ *    cygwin, but Windows is not officially supported.)
+ *
+ *  - To work properly, this driver needs PPS and TPV sentences from
+ *    GPSD. I don't see how the cygwin port should deal with that.
+ *
+ *  - The device name matching must be done in a different way for
+ *    Windows. (Can be done with COMxx matching, as done for NMEA.)
+ *
+ * Apart from those minor hickups, once GPSD has been fully ported to
+ * Windows, there's no reason why this should not work there ;-)
  */
 
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
 
-#if defined(REFCLOCK) && defined(CLOCK_GPSDJSON)
-
+#if defined(REFCLOCK) && defined(CLOCK_GPSDJSON) && !defined(SYS_WINNT) 
 
 /* =====================================================================
  * get the little JSMN library directly into our guts
@@ -19,9 +33,7 @@
 /* =====================================================================
  * header stuff we need
  */
-#include "ntp_types.h"
-#include <stdio.h>
-//#include <ctype.h>
+
 #include <netdb.h>
 #include <unistd.h>
 #include <fcntl.h>
@@ -39,13 +51,13 @@
 # error need poll() or select()
 #endif
 
+#include "ntp_types.h"
 #include "ntpd.h"
 #include "ntp_io.h"
 #include "ntp_unixtime.h"
 #include "ntp_refclock.h"
 #include "ntp_stdlib.h"
 #include "ntp_calendar.h"
-#include "timespecops.h"
 
 #define	PRECISION	(-9)	/* precision assumed (about 2 ms) */
 #define	PPS_PRECISION	(-20)	/* precision assumed (about 1 us) */
@@ -71,7 +83,7 @@
  */
 typedef struct peer         peerT;
 typedef struct refclockproc clockprocT;
-typedef struct addrinfo     addrInfoT;
+typedef struct addrinfo     addrinfoT;
 
 /* =====================================================================
  * We use the same device name scheme as does the NMEA driver; since
@@ -110,13 +122,13 @@ typedef struct gpsd_unit {
 	uint16_t proto_major;
 	uint16_t proto_minor;
 
-	/* PULSE time stamps */
+	/* PPS time stamps */
 	l_fp pps_stamp;	/* effective PPS time stamp */
 	l_fp pps_recvt;	/* when we received the PPS message */
 
-	/* TPV (GPS) time stamps */
+	/* TPV (GPS data) time stamps */
 	l_fp tpv_stamp;	/* effective GPS time stamp */
-	l_fp tpv_recvt;	/* whn we received the TPV message */
+	l_fp tpv_recvt;	/* when we received the TPV message */
 
 	/* Flags to indicate available data */
 	int fl_tpv : 1;	/* valid TPV seen (have time) */
@@ -125,14 +137,14 @@ typedef struct gpsd_unit {
 
 	/* admin stuff for sockets and device selection */
 	int         fdt;	/* current connecting socket */
-	addrInfoT * addr;	/* next address to try */
+	addrinfoT * addr;	/* next address to try */
 	int         tickover;	/* timeout countdown */
 	char      * device;	/* device name of unit */
 
 	/* record assemby buffer and saved length */
 	int  buflen;
 	char buffer[MAX_PDU_LEN];
-} gpsdUnitT;
+} gpsd_unitT;
 
 /* =====================================================================
  * static local helpers forward decls
@@ -160,7 +172,7 @@ static const char * s_logon =
 /* We keep a static list of network addresses for 'localhost:gpsd', and
  * we try to connect to them in round-robin fashion.
  */
-static addrInfoT * s_gpsd_addr;
+static addrinfoT * s_gpsd_addr;
 
 /* =====================================================================
  * the clock functions
@@ -172,7 +184,7 @@ static addrInfoT * s_gpsd_addr;
 static void
 gpsd_init(void)
 {
-	addrInfoT hints;
+	addrinfoT hints;
 	
 	memset(&hints, 0, sizeof(hints));
 	hints.ai_family   = AF_UNSPEC;
@@ -194,7 +206,7 @@ gpsd_start(
 	peerT * peer)
 {
 	clockprocT * const pp = peer->procptr;
-	gpsdUnitT  * const up = emalloc_zero(sizeof(*up));
+	gpsd_unitT * const up = emalloc_zero(sizeof(*up));
 
 	struct stat sb;
 
@@ -255,7 +267,7 @@ gpsd_shutdown(
 	peerT * peer)
 {
 	clockprocT * const pp = peer->procptr;
-	gpsdUnitT  * const up = (gpsdUnitT *)pp->unitptr;
+	gpsd_unitT * const up = (gpsd_unitT *)pp->unitptr;
 
 	UNUSED_ARG(unit);
 
@@ -280,7 +292,7 @@ gpsd_receive(
 	/* declare & init control structure ptrs */
 	peerT	   * const peer = rbufp->recv_peer;
 	clockprocT * const pp   = peer->procptr;
-	gpsdUnitT  * const up   = (gpsdUnitT*)pp->unitptr;	
+	gpsd_unitT * const up   = (gpsd_unitT *)pp->unitptr;	
 
 	const char *psrc, *esrc;
 	char       *pdst, *edst, ch;
@@ -367,7 +379,7 @@ gpsd_timer(
 	peerT * peer)
 {
 	clockprocT * const pp = peer->procptr;
-	gpsdUnitT  * const up = (gpsdUnitT *)pp->unitptr;
+	gpsd_unitT * const up = (gpsd_unitT *)pp->unitptr;
 	
 	/* This is used for timeout handling. Nothing that needs
 	 * sub-second precison happens here, so receive/connect/retry
@@ -630,7 +642,7 @@ process_version(
 	const l_fp * const rtime)
 {
 	clockprocT * const pp = peer->procptr;
-	gpsdUnitT  * const up = (gpsdUnitT *)pp->unitptr;
+	gpsd_unitT * const up = (gpsd_unitT *)pp->unitptr;
 
 	int    len;
 	char * buf;
@@ -680,7 +692,7 @@ process_tpv(
 	const l_fp * const rtime)
 {
 	clockprocT * const pp = peer->procptr;
-	gpsdUnitT  * const up = (gpsdUnitT *)pp->unitptr;
+	gpsd_unitT * const up = (gpsd_unitT *)pp->unitptr;
 
 	const char * gps_time;
 	int          gps_mode;
@@ -769,7 +781,7 @@ process_pps(
 	const l_fp * const rtime)
 {
 	clockprocT * const pp = peer->procptr;
-	gpsdUnitT  * const up = (gpsdUnitT *)pp->unitptr;
+	gpsd_unitT * const up = (gpsd_unitT *)pp->unitptr;
 
 	uint32_t secs;
 	double   frac;
@@ -782,7 +794,7 @@ process_pps(
 		return;
 	}
 
-	frac *= 1.0e-6; /* covert usec to seconds */
+	frac *= 1.0e-6; /* convert usec to seconds */
 	M_DTOLFP(frac, up->pps_stamp.l_ui, up->pps_stamp.l_uf);
 	up->pps_stamp.l_ui += secs;
 	up->pps_stamp.l_ui += JAN_1970;
@@ -809,7 +821,7 @@ gpsd_parse(
 	const l_fp * const rtime)
 {
 	clockprocT * const pp = peer->procptr;
-	gpsdUnitT  * const up = (gpsdUnitT *)pp->unitptr;
+	gpsd_unitT * const up = (gpsd_unitT *)pp->unitptr;
 
 	json_ctx     jctx;
 	const char * clsid;
@@ -817,7 +829,7 @@ gpsd_parse(
         DPRINTF(2, ("gpsd_parse: time %s '%s'\n",
                     ulfptoa(rtime, 6), up->buffer));
 
-	/* See if we can ab anything potentially useful */
+	/* See if we can grab anything potentially useful */
 	if (!json_parse_record(&jctx, up->buffer))
 		return;
 
@@ -866,7 +878,7 @@ gpsd_stop_socket(
 	peerT * const peer)
 {
 	clockprocT * const pp = peer->procptr;
-	gpsdUnitT  * const up = (gpsdUnitT *)pp->unitptr;
+	gpsd_unitT * const up = (gpsd_unitT *)pp->unitptr;
 
 	if (-1 != pp->io.fd)
 		io_closeclock(&pp->io);
@@ -883,8 +895,8 @@ gpsd_init_socket(
 	peerT * const peer)
 {
 	clockprocT * const pp = peer->procptr;
-	gpsdUnitT  * const up = (gpsdUnitT *)pp->unitptr;
-	addrInfoT  * ai;
+	gpsd_unitT * const up = (gpsd_unitT *)pp->unitptr;
+	addrinfoT  * ai;
 	int          rc;
 
 	/* draw next address to try */
@@ -932,7 +944,7 @@ gpsd_test_socket(
 	peerT * const peer)
 {
 	clockprocT * const pp = peer->procptr;
-	gpsdUnitT  * const up = (gpsdUnitT *)pp->unitptr;
+	gpsd_unitT * const up = (gpsd_unitT *)pp->unitptr;
 
 	int       error;
 	int       rc;
@@ -1053,8 +1065,6 @@ save_ltc(
 	memcpy(pp->a_lastcode, tc, len);
 	pp->a_lastcode[len] = '\0';
 }
-
-
 
 #else
 NONEMPTY_TRANSLATION_UNIT
