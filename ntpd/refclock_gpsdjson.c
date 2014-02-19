@@ -1,7 +1,10 @@
 /*
  * refclock_gpsdjson.c - clock driver as GPSD JSON client
- *	Juergen Perlinger (perlinger@ntp.org) Feb 11, 2014
- *	inspired by refclock_nmea.c
+ *	Juergen Perlinger (perlinger@ntp.org)
+ *	Feb 11, 2014 for the NTP project.
+ *      The contents of 'html/copyright.html' apply.
+ *
+ *	Heavily inspired by refclock_nmea.c
  *
  * Note: This will currently NOT work with Windows due to some
  * limitations:
@@ -135,6 +138,10 @@ typedef struct gpsd_unit {
 	int fl_pps : 1;	/* valid pulse seen */
 	int fl_ver : 1;	/* have protocol version */
 
+	/* clock status reporting */
+	int last_event;
+	int next_event;
+
 	/* admin stuff for sockets and device selection */
 	int         fdt;	/* current connecting socket */
 	addrinfoT * addr;	/* next address to try */
@@ -212,8 +219,10 @@ gpsd_start(
 
 	up->fdt     = -1;
 	up->addr    = s_gpsd_addr;
+	up->last_event = CEVNT_NOMINAL;
+	up->next_event = CEVNT_TIMEOUT;
 
-	/* Allocate and initialize unit structure */
+	/* connect &initialize the unit structure */
 	pp->unitptr = (caddr_t)up;
 	pp->io.fd   = -1;
 	pp->io.clock_recv = gpsd_receive;
@@ -338,20 +347,38 @@ gpsd_poll(
 	peerT * peer)
 {
 	clockprocT * const pp = peer->procptr;
+	gpsd_unitT * const up = (gpsd_unitT *)pp->unitptr;
 
-	/* If the median filter is empty, claim a timeout; otherwise
-	 * process the input data and keep the stats going.
-	 */
+	/* Check what state we have to report to the core */
 	if (-1 == pp->io.fd) {
 		/* not connected to GPSD: clearly not working! */
-		refclock_report(peer, CEVNT_FAULT);
+		up->next_event = CEVNT_FAULT;
 	} else if (pp->coderecv == pp->codeproc) {
-		/* no data, but connected: timeout */
+		/* no data: this is a least a timeout. */
+		if (CEVNT_NOMINAL == up->next_event)
+			up->next_event = CEVNT_NOMINAL;
+	} else {
+		/* presume all-thumbs-up if we have data */
+		up->next_event = CEVNT_NOMINAL;
+	}
+
+	/* In case we're not good, remove the PPS flag and get us to our
+	 * low default precision.
+	*/
+	if (CEVNT_NOMINAL != up->next_event) {
 		peer->flags    &= ~FLAG_PPS;
 		peer->precision = PRECISION;
-		refclock_report(peer, CEVNT_TIMEOUT);
-	} else {
-		/* all is fine, go ahead */
+	}
+
+	/* eventually update the clock state. */
+	if (up->last_event != up->next_event)
+		refclock_report(peer, up->next_event);
+	up->last_event = up->next_event;
+
+	/* If there is data, feed it to the core and keep the stats
+	 * going...
+	 */
+	if (pp->coderecv != pp->codeproc) {
 		pp->polls++;
 		pp->lastref = pp->lastrec;
 		refclock_receive(peer);
@@ -707,8 +734,8 @@ process_tpv(
 
 	if (gps_mode < 1 || NULL == gps_time) {
 		/* receiver has no fix; tell about and avoid stale data */
-		refclock_report(peer, CEVNT_FAULT);
-		/*TODO: ?better? refclock_report(peer, CEVNT_BADREPLY); */
+		up->next_event = CEVNT_FAULT;
+		/*TODO: ?better? up->next_event = CEVNT_BADREPLY; */
 		up->fl_tpv = 0;
 		up->fl_pps = 0;
 		return;
@@ -727,7 +754,7 @@ process_tpv(
 		up->tpv_recvt = *rtime;
 		up->fl_tpv = -1;
 	} else {
-		refclock_report(peer, CEVNT_BADREPLY);
+		up->next_event = CEVNT_BADREPLY;
 	}
 		
 	/* Set the precision from the GPSD data
@@ -790,7 +817,7 @@ process_pps(
 	secs = (uint32_t)json_object_lookup_int(jctx, 0, "real_sec");
 	frac = json_object_lookup_float(jctx, 0, "real_musec");
 	if (0 != errno) {
-		refclock_report(peer, CEVNT_BADTIME);
+		up->next_event = CEVNT_BADTIME;
 		return;
 	}
 
