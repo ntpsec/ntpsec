@@ -217,23 +217,25 @@ gpsd_start(
 
 	struct stat sb;
 
+	/* initialize the unit structure */
 	up->fdt     = -1;
 	up->addr    = s_gpsd_addr;
 	up->last_event = CEVNT_NOMINAL;
 	up->next_event = CEVNT_TIMEOUT;
 
-	/* connect &initialize the unit structure */
+	/* setup refclock processing */
 	pp->unitptr = (caddr_t)up;
 	pp->io.fd   = -1;
 	pp->io.clock_recv = gpsd_receive;
 	pp->io.srcclock   = peer;
 	pp->io.datalen    = 0;
 	pp->a_lastcode[0] = '\0';
+	pp->lencode       = 0;
+	pp->clockdesc     = DESCRIPTION;
+	memcpy(&pp->refid, REFID, 4);
 
 	/* Initialize miscellaneous variables */
 	peer->precision = PRECISION;
-	pp->clockdesc   = DESCRIPTION;
-	memcpy(&pp->refid, REFID, 4);
 
 	/* Create the device name and check for a Character Device. It's
 	 * assumed that GPSD was started with the same link, so the
