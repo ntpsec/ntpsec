@@ -1,3 +1,4 @@
+* [Bug 2565] Handle EINTR on getifaddrs().
 (4.2.7p422) 2014/02/17 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 2536] ntpd sandboxing support (libseccomp2).
 (4.2.7p421) 2014/02/10 Released by Harlan Stenn <stenn@ntp.org>
