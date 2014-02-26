@@ -10,11 +10,11 @@
 .ds B-Font B
 .ds I-Font I
 .ds R-Font R
-.TH sntp 1sntpman "24 Feb 2014" "4.2.7p424" "User Commands"
+.TH sntp 1sntpman "26 Feb 2014" "4.2.7p425" "User Commands"
 .\"
-.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-_UaqcE/ag-lVaqbE)
+.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-aIaWMS/ag-rIaWLS)
 .\"
-.\" It has been AutoGen-ed February 24, 2014 at 05:58:32 AM by AutoGen 5.18.3pre11
+.\" It has been AutoGen-ed February 26, 2014 at 10:05:08 AM by AutoGen 5.18.3pre11
 .\" From the definitions sntp-opts.def
 .\" and the template file agman-cmd.tpl
 .SH NAME
@@ -281,11 +281,11 @@ the configuration files.
 The \fIhomerc\fP files are "\fI$HOME\fP", and "\fI.\fP".
 If any of these are directories, then the file \fI.ntprc\fP
 is searched for within those directories.
-.TH sntp 1sntpman "24 Feb 2014" "4.2.7p424" "User Commands"
+.TH sntp 1sntpman "26 Feb 2014" "4.2.7p425" "User Commands"
 .\"
-.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-_UaqcE/ag-lVaqbE)
+.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-aIaWMS/ag-rIaWLS)
 .\"
-.\" It has been AutoGen-ed February 24, 2014 at 05:58:32 AM by AutoGen 5.18.3pre11
+.\" It has been AutoGen-ed February 26, 2014 at 10:05:08 AM by AutoGen 5.18.3pre11
 .\" From the definitions sntp-opts.def
 .\" and the template file agman-cmd.tpl
 .SH NAME
@@ -364,7 +364,7 @@ This program is released under the terms of the NTP license, <http://ntp.org/lic
 .SH "BUGS"
 Please send bug reports to: http://bugs.ntp.org, bugs@ntp.org
 .SH NOTES
-This document corresponds to version 4.2.7p424 of
+This document corresponds to version 4.2.7p425 of
 \f\*[B-Font]sntp\fP.
 .sp \n(Ppu
 .ne 2

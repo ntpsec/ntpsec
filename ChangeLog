@@ -1,3 +1,4 @@
+(4.2.7p425) 2014/02/26 Released by Harlan Stenn <stenn@ntp.org>
 * Copyright file update.
 (4.2.7p424) 2014/02/24 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 2541] ntpd terminates itself with SIGHUP unexpectedly.
