@@ -10,11 +10,11 @@
 .ds B-Font B
 .ds I-Font I
 .ds R-Font R
-.TH ntp.conf 5 "25 Feb 2014" "4.2.7p425" "File Formats"
+.TH ntp.conf 5 "28 Feb 2014" "4.2.7p426" "File Formats"
 .\"
-.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-AvaGkx/ag-gwaGjx)
+.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-MCa4Al/ag-ZCa4zl)
 .\"
-.\" It has been AutoGen-ed February 25, 2014 at 10:52:54 AM by AutoGen 5.18.3pre11
+.\" It has been AutoGen-ed February 28, 2014 at 11:43:07 AM by AutoGen 5.18.3pre11
 .\" From the definitions ntp.conf.def
 .\" and the template file agman-cmd.tpl
 .SH NAME
@@ -2902,16 +2902,6 @@ by loading values from environment variables named:
   \fBNTP_CONF_<option-name>\fP or \fBNTP_CONF\fP
 .fi
 .ad
-.TH ntp.conf 5 "25 Feb 2014" "4.2.7p425" "File Formats"
-.\"
-.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-AvaGkx/ag-gwaGjx)
-.\"
-.\" It has been AutoGen-ed February 25, 2014 at 10:52:54 AM by AutoGen 5.18.3pre11
-.\" From the definitions ntp.conf.def
-.\" and the template file agman-cmd.tpl
-.SH NAME
-\f\*[B-Font]ntp.conf\fP ntp.conf
-\- Network Time Protocol (NTP) daemon configuration file format
 cvt_prog='/usr/local/gnu/share/autogen/texi2man'
 cvt_prog=`cd \`dirname "$cvt_prog"\` >/dev/null && pwd
          `/`basename "$cvt_prog"`
@@ -2931,6 +2921,16 @@ test \-x "$cvt_prog" || die "'$cvt_prog' is not executable"
     rm \-f $list
 } 1>.doc 2>/dev/null
 sed \-f .cmds .doc | /opt/csw/bin/ggrep \-E \-v '^[ 	]*$' | $cvt_prog
+.TH ntp.conf 5 "28 Feb 2014" "4.2.7p426" "File Formats"
+.\"
+.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-MCa4Al/ag-ZCa4zl)
+.\"
+.\" It has been AutoGen-ed February 28, 2014 at 11:43:07 AM by AutoGen 5.18.3pre11
+.\" From the definitions ntp.conf.def
+.\" and the template file agman-cmd.tpl
+.SH NAME
+\f\*[B-Font]ntp.conf\fP ntp.conf
+\- Network Time Protocol (NTP) daemon configuration file format
 .SH "ENVIRONMENT"
 See \fBOPTION PRESETS\fP for configuration environment variables.
 .SH FILES
@@ -3012,7 +3012,7 @@ services when they become universally available.
 
 Please send bug reports to: http://bugs.ntp.org, bugs@ntp.org
 .SH NOTES
-This document corresponds to version 4.2.7p425 of NTP.
+This document corresponds to version 4.2.7p426 of NTP.
 This document was derived from FreeBSD.
 .sp \n(Ppu
 .ne 2
