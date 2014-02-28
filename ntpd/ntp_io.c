@@ -9,6 +9,9 @@
 
 #include <stdio.h>
 #include <signal.h>
+#ifdef HAVE_FNMATCH_H
+# include <fnmatch.h>
+#endif
 #ifdef HAVE_SYS_PARAM_H
 # include <sys/param.h>
 #endif
@@ -1356,7 +1359,12 @@ interface_action(
 
 		case MATCH_IFNAME:
 			if (if_name != NULL
-			    && !strcasecmp(if_name, rule->if_name)) {
+#ifdef HAVE_FNMATCH
+			    && !fnmatch(rule->if_name, if_name, FNM_CASEFOLD)
+#else
+			    && !strcasecmp(if_name, rule->if_name)
+#endif
+			    ) {
 
 				DPRINTF(4, ("interface name match - %s\n",
 				    action_text(rule->action)));
