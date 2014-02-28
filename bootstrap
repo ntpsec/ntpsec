@@ -141,6 +141,9 @@ cp depsver.mf sntp/
 
 ${AUTORECONF} -i -v "$@"
 
+test aclocal.m4 -nt config.h.in && touch config.h.in
+test sntp/aclocal.m4 -nt sntp/config.h.in && touch sntp/config.h.in
+
 # DH: 20110118: Due to our workaround for the AM_COND_IF bug that was
 # triggering the buggy recursive autoreconf, we can once again use a
 # single autoreconf invocation.  See

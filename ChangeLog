@@ -1,5 +1,7 @@
 * [Bug 2113] Warn about ignored extra args in ntpq.
+* [Bug 2540] bootstrap script needs to 'touch' files in finer-grained groups.
 * [Bug 2561] Allow wildcards in the target of the "interface" command.
+* [Bug 2572] cross-compiling fails for --with-yielding_select.
 (4.2.7p425) 2014/02/26 Released by Harlan Stenn <stenn@ntp.org>
 * Copyright file update.
 (4.2.7p424) 2014/02/24 Released by Harlan Stenn <stenn@ntp.org>
