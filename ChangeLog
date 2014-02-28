@@ -1,3 +1,4 @@
+* [Bug 2113] Warn about ignored extra args in ntpq.
 * [Bug 2561] Allow wildcards in the target of the "interface" command.
 (4.2.7p425) 2014/02/26 Released by Harlan Stenn <stenn@ntp.org>
 * Copyright file update.

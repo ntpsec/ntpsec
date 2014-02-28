@@ -210,7 +210,7 @@ struct xcmd opcmds[] = {
  * Variable list data space
  */
 #define MAXLINE		512	/* maximum length of a line */
-#define MAXLIST		64	/* maximum variables in list */
+#define MAXLIST		128	/* maximum variables in list */
 #define LENHOSTNAME	256	/* host name limit */
 
 #define MRU_GOT_COUNT	0x1
@@ -536,8 +536,12 @@ makequerydata(
 		else
 			valuelen = strlen(vl->value);
 		totallen = namelen + valuelen + (valuelen != 0) + (cp != data);
-		if (cp + totallen > cpend)
-			break;
+		if (cp + totallen > cpend) {
+		    fprintf(stderr, 
+			    "***Ignoring variables starting with `%s'\n",
+			    vl->name);
+		    break;
+		}
 
 		if (cp != data)
 			*cp++ = ',';
