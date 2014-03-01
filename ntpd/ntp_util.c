@@ -471,6 +471,10 @@ stats_config(
 
 	/*
 	 * Read leapseconds file.
+	 *
+	 * Note: Currently a leap file without SHA1 signature is
+	 * accepted, but if there is a signature line, the signature
+	 * must be valid or the file is rejected.
 	 */
 	case STATS_LEAP_FILE:
 		if (!value || (len = strlen(value)) == 0)
@@ -489,7 +493,7 @@ stats_config(
 			msyslog(LOG_ERR,
 			    "leapseconds: stat(%s) failed: %m",
 			    leapseconds_file);
-		} else if (!leapsec_load_file(fp, TRUE, TRUE)) {
+		} else if (!leapsec_load_file(fp, TRUE, FALSE)) {
 			msyslog(LOG_ERR,
 				"format error leapseconds file %s",
 				leapseconds_file);
@@ -866,6 +870,10 @@ record_timing_stats(
  *	-1 if there was a problem,
  *	 0 if the leapfile has expired or less than 24hrs remaining TTL
  *	>0 # of full days until the leapfile expires
+ *
+ * Note: This loads a new leapfile on the fly. Currently a leap file
+ * without SHA1 signature is accepted, but if there is a signature line,
+ * the signature must be valid or the file is rejected.
  */
 int
 check_leap_file(
@@ -894,7 +902,7 @@ check_leap_file(
 		} else if (  (sp1->st_mtime != sp2->st_mtime)
 			  || (sp1->st_ctime != sp2->st_ctime)) {
 			leapseconds_file_sb1 = leapseconds_file_sb2;
-			if (!leapsec_load_file(fp, TRUE, TRUE)) {
+			if (!leapsec_load_file(fp, TRUE, FALSE)) {
 				msyslog(LOG_ERR,
 					"format error leapseconds file %s",
 					leapseconds_file);
