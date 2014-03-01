@@ -19,6 +19,8 @@
 #include "ntp_leapsec.h"
 #include "ntp.h"
 
+#include "isc/sha1.h"
+
 /* ---------------------------------------------------------------------
  * GCC is rather sticky with its 'const' attribute. We have to do it more
  * explicit than with a cast if we want to get rid of a CONST qualifier.
@@ -614,13 +616,49 @@ leapsec_reset_frame(void)
 }
 
 /* ------------------------------------------------------------------ */
+/* load a file from a FILE pointer. Note: If hcheck is true, load
+ * only after successful signature check. The stream must be seekable
+ * or this will fail.
+ */
 int/*BOOL*/
 leapsec_load_file(
 	FILE * ifp   ,
-	int    blimit)
+	int    blimit,
+	int    hcheck)
 {
 	leap_table_t * pt;
+	int            rcheck;
 
+	hcheck = (hcheck != 0);
+	rcheck = leapsec_validate((leapsec_reader)getc, ifp);
+	switch (rcheck)
+	{
+	case LSVALID_GOODHASH:
+		msyslog(LOG_NOTICE, "%s",
+			"leapsecond file: good hash signature");
+		break;
+
+	case LSVALID_NOHASH:
+		msyslog(LOG_INFO, "%s",
+			"leapsecond file: no hash signature");
+		break;
+	case LSVALID_BADHASH:
+		msyslog(LOG_ERR, "%s",
+			"leapsecond file: signature mismatch");
+		break;
+	case LSVALID_BADFORMAT:
+		msyslog(LOG_ERR, "%s",
+			"leapsecond file: malformed hash signature");
+		break;
+	default:
+		msyslog(LOG_ERR, "leapsecond file: unknown error code %d",
+			rcheck);
+		break;
+	}
+	if (rcheck < hcheck)
+		return 0;
+
+	rewind(ifp);
 	pt = leapsec_get_table(TRUE);
 	return leapsec_load(pt, (leapsec_reader)getc, ifp, blimit)
 	    && leapsec_set_table(pt);
@@ -996,6 +1034,108 @@ betweenu32(
 	else
 		rc = (lo <= x) || (x < hi);
 	return rc;
+}
+
+/* =====================================================================
+ * validation stuff
+ */
+
+typedef struct {
+	unsigned char hv[ISC_SHA1_DIGESTLENGTH];
+} sha1_digest;
+
+/* [internal] parse a digest line to get the hash signature
+ * I would have preferred the CTYPE 'isblank()' function, but alas,
+ * it's not in MSVC bevore Studio2013; it also seems to be added
+ * with the C99 standard (not being sure about that) and not all
+ * target compilers implement this. Using a direct character
+ * compare is the way out; the NIST leapsec file is 7bit ASCII
+ * and the locale should not matter much here.
+ */
+static int/*BOOL*/
+do_leap_hash(
+	sha1_digest * mac,
+	char const  * cp )
+{
+	int idx, dv;
+
+	memset(mac, 0, sizeof(*mac));
+	for (idx = 0;  *cp && idx < 2*sizeof(*mac);  ++cp) {
+		if (isdigit(*cp))
+			dv = *cp - '0';
+		else if (isxdigit(*cp))
+			dv = (toupper(*cp) - 'A' + 10);
+		else if ('\t' == *cp || ' ' == *cp) /*isblank(*cp))*/
+			continue;
+		else
+			break;
+
+		mac->hv[idx/2] = (unsigned char)(
+			(mac->hv[idx/2] * 16) + dv);
+		++idx;
+	}
+	return (idx == 2*sizeof(*mac));
+}
+
+/* [internal] add the digits of a data line to the hash, stopping at the
+ * next hash ('#') character.
+ */
+static void
+do_hash_data(
+	isc_sha1_t * mdctx,
+	char const * cp   )
+{
+	unsigned char  text[32]; // must be power of two!
+	unsigned int   tlen =  0;
+	unsigned char  ch;
+
+	while ('\0' != (ch = *cp++) && '#' != ch)
+		if (isdigit(ch)) {
+			text[tlen++] = ch;
+			tlen &= (sizeof(text)-1);
+			if (0 == tlen)
+				isc_sha1_update(
+					mdctx, text, sizeof(text));
+		}
+	
+	if (0 < tlen)
+		isc_sha1_update(mdctx, text, tlen);
+}
+
+/* given a reader and a reader arg, calculate and validate the the hash
+ * signature of a NIST leap second file.
+ */
+int
+leapsec_validate(
+	leapsec_reader func,
+	void *         farg)
+{
+	isc_sha1_t     mdctx;
+	sha1_digest    rdig, ldig; /* remote / local digests */
+	char           line[50];
+	int            hlseen = -1;
+
+	isc_sha1_init(&mdctx);
+	while (get_line(func, farg, line, sizeof(line))) {
+		if (!strncmp(line, "#h", 2))
+			hlseen = do_leap_hash(&rdig, line+2);
+		else if (!strncmp(line, "#@", 2))
+			do_hash_data(&mdctx, line+2);
+		else if (!strncmp(line, "#$", 2))
+			do_hash_data(&mdctx, line+2);
+		else if (isdigit(line[0]))
+			do_hash_data(&mdctx, line);
+	}
+	isc_sha1_final(&mdctx, ldig.hv);
+	isc_sha1_invalidate(&mdctx);
+
+	if (0 > hlseen)
+		return LSVALID_NOHASH;
+	if (0 == hlseen)
+		return LSVALID_BADFORMAT;
+	if (0 != memcmp(&rdig, &ldig, sizeof(sha1_digest)))
+		return LSVALID_BADHASH;
+	return LSVALID_GOODHASH;
 }
 
 /* -*- that's all folks! -*- */

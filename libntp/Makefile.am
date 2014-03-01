@@ -34,6 +34,7 @@ libisc_SRCS =								\
 	$(srcdir)/../lib/isc/task.c					\
 	$(srcdir)/../lib/isc/$(LIBISC_PTHREADS_NOTHREADS)/thread.c	\
 	$(srcdir)/../lib/isc/unix/time.c				\
+	$(srcdir)/../lib/isc/sha1.c					\
 	$(srcdir)/../lib/isc/sockaddr.c					\
 	$(NULL)
 

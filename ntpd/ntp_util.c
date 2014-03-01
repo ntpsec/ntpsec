@@ -489,7 +489,7 @@ stats_config(
 			msyslog(LOG_ERR,
 			    "leapseconds: stat(%s) failed: %m",
 			    leapseconds_file);
-		} else if (!leapsec_load_file(fp, TRUE)) {
+		} else if (!leapsec_load_file(fp, TRUE, TRUE)) {
 			msyslog(LOG_ERR,
 				"format error leapseconds file %s",
 				leapseconds_file);
@@ -894,7 +894,7 @@ check_leap_file(
 		} else if (  (sp1->st_mtime != sp2->st_mtime)
 			  || (sp1->st_ctime != sp2->st_ctime)) {
 			leapseconds_file_sb1 = leapseconds_file_sb2;
-			if (!leapsec_load_file(fp, TRUE)) {
+			if (!leapsec_load_file(fp, TRUE, TRUE)) {
 				msyslog(LOG_ERR,
 					"format error leapseconds file %s",
 					leapseconds_file);
