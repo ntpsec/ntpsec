@@ -102,6 +102,65 @@ static const char leap3 [] =
     "3550089600	33	# 1 Jul 2012\n"
     "#\n";
 
+// short table with good hash
+static const char leap_ghash [] =
+    "#\n"
+    "#@ 	3610569600\n"
+    "#$ 	3610566000\n"
+    "#\n"
+    "2272060800 10	# 1 Jan 1972\n"
+    "2287785600	11	# 1 Jul 1972\n"
+    "2303683200	12	# 1 Jan 1973\n"
+    "2335219200	13	# 1 Jan 1974\n"
+    "2366755200	14	# 1 Jan 1975\n"
+    "2398291200	15	# 1 Jan 1976\n"
+    "2429913600	16	# 1 Jan 1977\n"
+    "2461449600	17	# 1 Jan 1978\n"
+    "2492985600	18	# 1 Jan 1979\n"
+    "2524521600	19	# 1 Jan 1980\n"
+    "#\n"
+    "#h 4b304e10 95642b3f c10b91f9 90791725 25f280d0\n"
+    "#\n";
+
+// short table with bad hash
+static const char leap_bhash [] =
+    "#\n"
+    "#@ 	3610569600\n"
+    "#$ 	3610566000\n"
+    "#\n"
+    "2272060800 10	# 1 Jan 1972\n"
+    "2287785600	11	# 1 Jul 1972\n"
+    "2303683200	12	# 1 Jan 1973\n"
+    "2335219200	13	# 1 Jan 1974\n"
+    "2366755200	14	# 1 Jan 1975\n"
+    "2398291200	15	# 1 Jan 1976\n"
+    "2429913600	16	# 1 Jan 1977\n"
+    "2461449600	17	# 1 Jan 1978\n"
+    "2492985600	18	# 1 Jan 1979\n"
+    "2524521600	19	# 1 Jan 1980\n"
+    "#\n"
+    "#h	dc2e6b0b 5aade95d a0587abd 4e0dacb4 e4d5049e\n"
+    "#\n";
+
+// short table with malformed hash
+static const char leap_mhash [] =
+    "#\n"
+    "#@ 	3610569600\n"
+    "#$ 	3610566000\n"
+    "#\n"
+    "2272060800 10	# 1 Jan 1972\n"
+    "2287785600	11	# 1 Jul 1972\n"
+    "2303683200	12	# 1 Jan 1973\n"
+    "2335219200	13	# 1 Jan 1974\n"
+    "2366755200	14	# 1 Jan 1975\n"
+    "2398291200	15	# 1 Jan 1976\n"
+    "2429913600	16	# 1 Jan 1977\n"
+    "2461449600	17	# 1 Jan 1978\n"
+    "2492985600	18	# 1 Jan 1979\n"
+    "2524521600	19	# 1 Jan 1980\n"
+    "#\n"
+    "#h f2349a02 788b9534 a8f2e141 f2029Q6d 4064a7ee\n"
+    "#\n";
 
 static uint32_t lsec2009 = 3439756800u; // 1 Jan 2009, 00:00:00 utc
 static uint32_t lsec2012 = 3550089600u; // 1 Jul 2012, 00:00:00 utc
@@ -194,6 +253,43 @@ void leapsecTest::TearDown()
     ntpcal_set_timefunc(NULL);
 }
 
+// =====================================================================
+// VALIDATION TESTS
+// =====================================================================
+
+// ----------------------------------------------------------------------
+TEST_F(leapsecTest, ValidateGood) {
+	const char *cp = leap_ghash;
+	int         rc = leapsec_validate(stringreader, &cp);
+	EXPECT_EQ(LSVALID_GOODHASH, rc);
+}
+
+// ----------------------------------------------------------------------
+TEST_F(leapsecTest, ValidateNoHash) {
+	const char *cp = leap2;
+	int         rc = leapsec_validate(stringreader, &cp);
+	EXPECT_EQ(LSVALID_NOHASH, rc);
+}
+
+// ----------------------------------------------------------------------
+TEST_F(leapsecTest, ValidateBad) {
+	const char *cp = leap_bhash;
+	int         rc = leapsec_validate(stringreader, &cp);
+	EXPECT_EQ(LSVALID_BADHASH, rc);
+}
+
+// ----------------------------------------------------------------------
+TEST_F(leapsecTest, ValidateMalformed) {
+	const char *cp = leap_mhash;
+	int         rc = leapsec_validate(stringreader, &cp);
+	EXPECT_EQ(LSVALID_BADFORMAT, rc);
+}
+
+// =====================================================================
+// BASIC FUNCTIONS
+// =====================================================================
+
+// ----------------------------------------------------------------------
 // test number parser
 TEST_F(leapsecTest, ParseVUI64) {
 	vint64 act, exp;
@@ -222,6 +318,7 @@ TEST_F(leapsecTest, ParseVUI64) {
 	EXPECT_EQ(*ep, '\0');
 }
 
+// ----------------------------------------------------------------------
 // test table selection
 TEST_F(leapsecTest, tableSelect) {
 	leap_table_t *pt1, *pt2, *pt3, *pt4;
@@ -256,6 +353,7 @@ TEST_F(leapsecTest, tableSelect) {
 	EXPECT_NE(pt2, pt3);
 }
 
+// ----------------------------------------------------------------------
 // load file & check expiration
 TEST_F(leapsecTest, loadFileExpire) {
 	const char *cp = leap1;
@@ -271,6 +369,7 @@ TEST_F(leapsecTest, loadFileExpire) {
 	EXPECT_EQ(1, rc);
 }
 
+// ----------------------------------------------------------------------
 // load file & check time-to-live
 TEST_F(leapsecTest, loadFileTTL) {
 	const char *cp = leap1;
@@ -298,6 +397,7 @@ TEST_F(leapsecTest, loadFileTTL) {
 	EXPECT_EQ(-1, rc);	
 }
 
+// ----------------------------------------------------------------------
 // ad-hoc jump: leap second at 2009.01.01 -60days
 TEST_F(leapsecTest, ls2009faraway) {
 	int            rc;
@@ -314,6 +414,7 @@ TEST_F(leapsecTest, ls2009faraway) {
 	EXPECT_EQ(LSPROX_NOWARN, qr.proximity);
 }
 
+// ----------------------------------------------------------------------
 // ad-hoc jump: leap second at 2009.01.01 -1week
 TEST_F(leapsecTest, ls2009weekaway) {
 	int            rc;
@@ -330,6 +431,7 @@ TEST_F(leapsecTest, ls2009weekaway) {
 	EXPECT_EQ(LSPROX_SCHEDULE, qr.proximity);
 }
 
+// ----------------------------------------------------------------------
 // ad-hoc jump: leap second at 2009.01.01 -1hr
 TEST_F(leapsecTest, ls2009houraway) {
 	int            rc;
@@ -346,6 +448,7 @@ TEST_F(leapsecTest, ls2009houraway) {
 	EXPECT_EQ(LSPROX_ANNOUNCE, qr.proximity);
 }
 
+// ----------------------------------------------------------------------
 // ad-hoc jump: leap second at 2009.01.01 -1sec
 TEST_F(leapsecTest, ls2009secaway) {
 	int            rc;
@@ -362,6 +465,7 @@ TEST_F(leapsecTest, ls2009secaway) {
 	EXPECT_EQ(LSPROX_ALERT, qr.proximity);
 }
 
+// ----------------------------------------------------------------------
 // ad-hoc jump to leap second at 2009.01.01
 TEST_F(leapsecTest, ls2009onspot) {
 	int            rc;
@@ -378,6 +482,7 @@ TEST_F(leapsecTest, ls2009onspot) {
 	EXPECT_EQ(LSPROX_NOWARN, qr.proximity);
 }
 
+// ----------------------------------------------------------------------
 // test handling of the leap second at 2009.01.01 without table
 TEST_F(leapsecTest, ls2009nodata) {
 	int            rc;
@@ -394,6 +499,7 @@ TEST_F(leapsecTest, ls2009nodata) {
 	EXPECT_EQ(LSPROX_NOWARN, qr.proximity);
 }
 
+// ----------------------------------------------------------------------
 // test handling of the leap second at 2009.01.01 with culled data
 TEST_F(leapsecTest, ls2009limdata) {
 	int            rc;
@@ -410,6 +516,7 @@ TEST_F(leapsecTest, ls2009limdata) {
 	EXPECT_EQ(LSPROX_NOWARN, qr.proximity);
 }
 
+// ----------------------------------------------------------------------
 // add dynamic leap second (like from peer/clock)
 TEST_F(leapsecTest, addDynamic) {
 	int            rc;
@@ -440,6 +547,7 @@ TEST_F(leapsecTest, addDynamic) {
 	//leapsec_dump(pt, (leapsec_dumper)fprintf, stdout);
 }
 
+// ----------------------------------------------------------------------
 // add fixed leap seconds (like from network packet)
 TEST_F(leapsecTest, addFixed) {
 	int            rc;
@@ -492,6 +600,7 @@ TEST_F(leapsecTest, addFixed) {
 // SEQUENCE TESTS
 // =====================================================================
 
+// ----------------------------------------------------------------------
 // leap second insert at 2009.01.01, electric mode
 TEST_F(leapsecTest, ls2009seqInsElectric) {
 	int            rc;
@@ -533,6 +642,7 @@ TEST_F(leapsecTest, ls2009seqInsElectric) {
 	EXPECT_EQ(LSPROX_NOWARN, qr.proximity);
 }
 
+// ----------------------------------------------------------------------
 // leap second insert at 2009.01.01, dumb mode
 TEST_F(leapsecTest, ls2009seqInsDumb) {
 	int            rc;
@@ -580,6 +690,7 @@ TEST_F(leapsecTest, ls2009seqInsDumb) {
 }
 
 
+// ----------------------------------------------------------------------
 // fake leap second remove at 2009.01.01, electric mode
 TEST_F(leapsecTest, ls2009seqDelElectric) {
 	int            rc;
@@ -621,6 +732,7 @@ TEST_F(leapsecTest, ls2009seqDelElectric) {
 	EXPECT_EQ(LSPROX_NOWARN, qr.proximity);
 }
 
+// ----------------------------------------------------------------------
 // fake leap second remove at 2009.01.01. dumb mode
 TEST_F(leapsecTest, ls2009seqDelDumb) {
 	int            rc;
@@ -662,6 +774,7 @@ TEST_F(leapsecTest, ls2009seqDelDumb) {
 	EXPECT_EQ(LSPROX_NOWARN, qr.proximity);
 }
 
+// ----------------------------------------------------------------------
 // leap second insert at 2012.07.01, electric mode
 TEST_F(leapsecTest, ls2012seqInsElectric) {
 	int            rc;
@@ -702,6 +815,7 @@ TEST_F(leapsecTest, ls2012seqInsElectric) {
 	EXPECT_EQ(LSPROX_NOWARN, qr.proximity);
 }
 
+// ----------------------------------------------------------------------
 // leap second insert at 2012.07.01, dumb mode
 TEST_F(leapsecTest, ls2012seqInsDumb) {
 	int            rc;
@@ -752,5 +866,4 @@ TEST_F(leapsecTest, ls2012seqInsDumb) {
 	EXPECT_EQ(0,             qr.warped   );
 	EXPECT_EQ(LSPROX_NOWARN, qr.proximity);
 }
-
 

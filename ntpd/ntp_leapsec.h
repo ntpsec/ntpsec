@@ -26,6 +26,19 @@ typedef int  (*leapsec_reader)(void*);
 struct leap_table;
 typedef struct leap_table leap_table_t;
 
+/* Validate a stream containing a leap second file in the NIST / NTPD
+ * format that can also be loaded via 'leapsec_load()'. This uses
+ * the SHA1 hash and preprocessing as described in the NIST leapsecond
+ * file.
+ */
+#define LSVALID_GOODHASH	1	/* valid signature         */
+#define LSVALID_NOHASH		0	/* no signature in file    */
+#define LSVALID_BADHASH	       -1	/* signature mismatch      */
+#define LSVALID_BADFORMAT      -2	/* signature not parseable */
+
+extern int leapsec_validate(leapsec_reader, void*);
+
+
 /* Set/get electric mode
  * Electric mode is defined as the operation mode where the system clock
  * automagically manages the leap second, so we don't have to care about
@@ -123,7 +136,7 @@ extern void leapsec_dump(const leap_table_t*, leapsec_dumper func, void *farg);
 /* Read a leap second file. This is a convenience wrapper around the
  * generic load function, 'leapsec_load()'.
  */
-extern int/*BOOL*/ leapsec_load_file(FILE * fp, int blimit);
+extern int/*BOOL*/ leapsec_load_file(FILE * fp, int blimit, int checked);
 
 /* Get the current leap data signature. This consists of the last
  * ransition, the table expiration, and the total TAI difference at the

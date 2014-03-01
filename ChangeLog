@@ -1,3 +1,4 @@
+* [Bug 2570] refuse to load leapsec file with bad/missing SHA1 hash
 * [Bug 2562] first release of the GPSD client clock (type 46)
 (4.2.7p426) 2014/02/28 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 2113] Warn about ignored extra args in ntpq.
