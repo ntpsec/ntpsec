@@ -247,7 +247,7 @@ AC_CHECK_HEADER(
 	    [Use Rendezvous/DNS-SD registration])]
     )]
 )
-AC_CHECK_HEADERS([fcntl.h ieeefp.h inttypes.h kvm.h math.h])
+AC_CHECK_HEADERS([fcntl.h fnmatch.h ieeefp.h inttypes.h kvm.h math.h])
 
 AC_CHECK_HEADERS([memory.h netdb.h poll.h])
 AC_CHECK_HEADERS([sgtty.h stdlib.h string.h termio.h])
@@ -772,7 +772,7 @@ AC_CHECK_FUNCS(
     )]
 )
 
-AC_CHECK_FUNCS([getbootfile getuid getrusage nanosleep strsignal])
+AC_CHECK_FUNCS([fnmatch getbootfile getuid getrusage nanosleep strsignal])
 
 # kvm_open() is only used by tickadj.  Also see above.
 case "$ac_cv_header_kvm_h" in
