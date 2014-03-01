@@ -141,6 +141,14 @@ cp depsver.mf sntp/
 
 ${AUTORECONF} -i -v "$@"
 
+# Because some systems do not support 'test a -nt b'
+case `ls -1tr config.h.in aclocal.m4 | tail -1` in
+ aclocal.m4) touch config.h.in ;;
+esac
+case `ls -1tr sntp/config.h.in sntp/aclocal.m4 | tail -1` in
+ sntp/aclocal.m4) touch sntp/config.h.in ;;
+esac
+
 # DH: 20110118: Due to our workaround for the AM_COND_IF bug that was
 # triggering the buggy recursive autoreconf, we can once again use a
 # single autoreconf invocation.  See
