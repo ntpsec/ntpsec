@@ -1,3 +1,4 @@
+(4.2.7p427) 2014/03/02 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 2562] GPSD_JSON: fix solaris issues (asprintf(), isfinite())
 * [Bug 2562] first release of the GPSD client clock (type 46)
 (4.2.7p426) 2014/02/28 Released by Harlan Stenn <stenn@ntp.org>

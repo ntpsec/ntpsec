@@ -10,11 +10,11 @@
 .ds B-Font B
 .ds I-Font I
 .ds R-Font R
-.TH sntp 1sntpman "28 Feb 2014" "4.2.7p426" "User Commands"
+.TH sntp 1sntpman "02 Mar 2014" "4.2.7p427" "User Commands"
 .\"
-.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-pCaiXu/ag-BCaiWu)
+.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-C8aykD/ag-Z8ayjD)
 .\"
-.\" It has been AutoGen-ed February 28, 2014 at 11:45:55 AM by AutoGen 5.18.3pre11
+.\" It has been AutoGen-ed March 2, 2014 at 04:10:41 AM by AutoGen 5.18.3pre11
 .\" From the definitions sntp-opts.def
 .\" and the template file agman-cmd.tpl
 .SH NAME
@@ -281,16 +281,6 @@ the configuration files.
 The \fIhomerc\fP files are "\fI$HOME\fP", and "\fI.\fP".
 If any of these are directories, then the file \fI.ntprc\fP
 is searched for within those directories.
-.TH sntp 1sntpman "28 Feb 2014" "4.2.7p426" "User Commands"
-.\"
-.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-pCaiXu/ag-BCaiWu)
-.\"
-.\" It has been AutoGen-ed February 28, 2014 at 11:45:55 AM by AutoGen 5.18.3pre11
-.\" From the definitions sntp-opts.def
-.\" and the template file agman-cmd.tpl
-.SH NAME
-\f\*[B-Font]sntp\fP sntp
-\- standard Simple Network Time Protocol client program
 cvt_prog='/usr/local/gnu/share/autogen/texi2man'
 cvt_prog=`cd \`dirname "$cvt_prog"\` >/dev/null && pwd
          `/`basename "$cvt_prog"`
@@ -310,6 +300,16 @@ test \-x "$cvt_prog" || die "'$cvt_prog' is not executable"
     rm \-f $list
 } 1>.doc 2>/dev/null
 sed \-f .cmds .doc | /opt/csw/bin/ggrep \-E \-v '^[ 	]*$' | $cvt_prog
+.TH sntp 1sntpman "02 Mar 2014" "4.2.7p427" "User Commands"
+.\"
+.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-C8aykD/ag-Z8ayjD)
+.\"
+.\" It has been AutoGen-ed March 2, 2014 at 04:10:41 AM by AutoGen 5.18.3pre11
+.\" From the definitions sntp-opts.def
+.\" and the template file agman-cmd.tpl
+.SH NAME
+\f\*[B-Font]sntp\fP sntp
+\- standard Simple Network Time Protocol client program
 .SH USAGE
 .TP 7
 .NOP \f[C]sntp ntpserver.somewhere\f[]
@@ -364,7 +364,7 @@ This program is released under the terms of the NTP license, <http://ntp.org/lic
 .SH "BUGS"
 Please send bug reports to: http://bugs.ntp.org, bugs@ntp.org
 .SH NOTES
-This document corresponds to version 4.2.7p426 of
+This document corresponds to version 4.2.7p427 of
 \f\*[B-Font]sntp\fP.
 .sp \n(Ppu
 .ne 2
