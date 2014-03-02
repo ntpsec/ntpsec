@@ -107,6 +107,8 @@ static	void	gpsd_control	(int, const struct refclockstat *,
 				 struct refclockstat *, peerT *);
 static	void	gpsd_timer	(int, peerT *);
 
+static  int     myasprintf(char**, char const*, ...);
+
 struct refclock refclock_gpsdjson = {
 	gpsd_start,		/* start up driver */
 	gpsd_shutdown,		/* shut down driver */
@@ -243,8 +245,7 @@ gpsd_start(
 	 * read the symlink, if any, so we can get the true device
 	 * file.)
 	 */
-	if (-1 == asprintf(&up->device, "%s%u", s_dev_stem, unit)) {
-	    up->device = NULL; /* undefined if asprintf fails... */
+	if (-1 == myasprintf(&up->device, "%s%u", s_dev_stem, unit)) {
 	    msyslog(LOG_ERR, "%s clock device name too long",
 		    refnumtoa(&peer->srcadr));
 	    goto dev_fail;
@@ -786,19 +787,13 @@ process_tpv(
 	 */
 	epp = 2.0 * sqrt(epx*epx + epy*epy + epv*epv);
 	epp = (epp + 100.0) / 299792458.0;
-	if (epp < ept)
-		ept = epp;	
+
+	ept = min(ept, epp  );
+	ept = min(ept, 0.5  );
+	ept = max(ept, 1.0-9);
 	ept = frexp(ept, &log2);
-	if (isfinite(ept) && fabs(ept) > 0.25) {
-		if (log2 < -25)
-			log2 = -25;
-		else if (log2 > 0)
-			log2 = 0;
-		peer->precision = log2;
-		
-	} else {
-		peer->precision = PRECISION;
-	}
+
+	peer->precision = log2;
 }
 
 /* ------------------------------------------------------------------ */
@@ -1093,6 +1088,37 @@ save_ltc(
 	pp->lencode = (u_short)len;
 	memcpy(pp->a_lastcode, tc, len);
 	pp->a_lastcode[len] = '\0';
+}
+
+/*
+ * -------------------------------------------------------------------
+ * asprintf replacement... it's not available everywhere...
+ */
+static int
+myasprintf(
+	char      ** spp,
+	char const * fmt,
+	...             )
+{
+	size_t alen, plen;
+
+	alen = 32;
+	*spp = NULL;
+	do {
+		va_list va;
+
+		alen += alen;
+		free(*spp);
+		*spp = (char*)malloc(alen);
+		if (NULL == *spp)
+			return -1;
+
+		va_start(va, fmt);
+		plen = (size_t)vsnprintf(*spp, alen, fmt, va);
+		va_end(va);
+	} while (plen >= alen);
+
+	return (int)plen;
 }
 
 #else
