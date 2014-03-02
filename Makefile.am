@@ -49,6 +49,7 @@ EXTRA_DIST =			\
 	conf			\
 	html			\
 	lib/isc			\
+	libjsmn			\
 	ports			\
 	\
 	deps-ver		\
