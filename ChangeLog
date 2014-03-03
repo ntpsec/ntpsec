@@ -1,6 +1,7 @@
 * CID 1165098: Remove logically dead code from refclock_true.c.
 * CID 1189401: Use INSIST() instead of a belt-and-suspenders pointer check.
 * In ntp_dir_sep.m4, we care about $host_os, not $target_os.
+* [Bug 2170] Use AC_PREPROC_IFELSE instead of AC_EGREP_CPP.
 * [Bug 2540] bootstrap script needs to 'touch' files in finer-grained groups.
 * [Bug 2570] refuse to load leapsec file with bad/missing SHA1 hash
   -- change reading the hash line code: NIST omits leading zeros.
