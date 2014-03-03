@@ -871,13 +871,12 @@ AC_CHECK_FUNCS([MD5Init sysconf getdtablesize sigaction sigset sigvec])
 AC_CACHE_CHECK(
     [for SIGIO],
     [ntp_cv_hdr_def_sigio],
-    [AC_EGREP_CPP(
-	[yes],
+    [AC_PREPROC_IFELSE(
 	[
 	    #include <signal.h>
 
-	    #ifdef SIGIO
-		yes
+	    #ifndef SIGIO
+	    # error
 	    #endif
 	],
 	[ntp_cv_hdr_def_sigio=yes],
@@ -941,13 +940,12 @@ AC_MSG_RESULT([$ans])
 AC_CACHE_CHECK(
     [for SIGPOLL],
     [ntp_cv_hdr_def_sigpoll],
-    [AC_EGREP_CPP(
-	[yes],
+    [AC_PREPROC_IFELSE(
 	[
 	    #include <signal.h>
 	    
-	    #ifdef SIGPOLL
-		yes
+	    #ifndef SIGPOLL
+	    # error
 	    #endif
 	],
 	[ntp_cv_hdr_def_sigpoll=yes],

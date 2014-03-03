@@ -162,6 +162,66 @@ static const char leap_mhash [] =
     "#h f2349a02 788b9534 a8f2e141 f2029Q6d 4064a7ee\n"
     "#\n";
 
+// short table with only 4 hash groups
+static const char leap_shash [] =
+    "#\n"
+    "#@ 	3610569600\n"
+    "#$ 	3610566000\n"
+    "#\n"
+    "2272060800 10	# 1 Jan 1972\n"
+    "2287785600	11	# 1 Jul 1972\n"
+    "2303683200	12	# 1 Jan 1973\n"
+    "2335219200	13	# 1 Jan 1974\n"
+    "2366755200	14	# 1 Jan 1975\n"
+    "2398291200	15	# 1 Jan 1976\n"
+    "2429913600	16	# 1 Jan 1977\n"
+    "2461449600	17	# 1 Jan 1978\n"
+    "2492985600	18	# 1 Jan 1979\n"
+    "2524521600	19	# 1 Jan 1980\n"
+    "#\n"
+    "#h f2349a02 788b9534 a8f2e141 f2029Q6d\n"
+    "#\n";
+
+// table with good hash and truncated/missing leading zeros
+static const char leap_gthash [] = {
+    "#\n"
+    "#$	 3535228800\n"
+    "#\n"
+    "#	Updated through IERS Bulletin C46\n"
+    "#	File expires on:  28 June 2014\n"
+    "#\n"
+    "#@	3612902400\n"
+    "#\n"
+    "2272060800	10	# 1 Jan 1972\n"
+    "2287785600	11	# 1 Jul 1972\n"
+    "2303683200	12	# 1 Jan 1973\n"
+    "2335219200	13	# 1 Jan 1974\n"
+    "2366755200	14	# 1 Jan 1975\n"
+    "2398291200	15	# 1 Jan 1976\n"
+    "2429913600	16	# 1 Jan 1977\n"
+    "2461449600	17	# 1 Jan 1978\n"
+    "2492985600	18	# 1 Jan 1979\n"
+    "2524521600	19	# 1 Jan 1980\n"
+    "2571782400	20	# 1 Jul 1981\n"
+    "2603318400	21	# 1 Jul 1982\n"
+    "2634854400	22	# 1 Jul 1983\n"
+    "2698012800	23	# 1 Jul 1985\n"
+    "2776982400	24	# 1 Jan 1988\n"
+    "2840140800	25	# 1 Jan 1990\n"
+    "2871676800	26	# 1 Jan 1991\n"
+    "2918937600	27	# 1 Jul 1992\n"
+    "2950473600	28	# 1 Jul 1993\n"
+    "2982009600	29	# 1 Jul 1994\n"
+    "3029443200	30	# 1 Jan 1996\n"
+    "3076704000	31	# 1 Jul 1997\n"
+    "3124137600	32	# 1 Jan 1999\n"
+    "3345062400	33	# 1 Jan 2006\n"
+    "3439756800	34	# 1 Jan 2009\n"
+    "3550089600	35	# 1 Jul 2012\n"
+    "#\n"
+    "#h	1151a8f e85a5069 9000fcdb 3d5e5365 1d505b37"
+};
+
 static uint32_t lsec2009 = 3439756800u; // 1 Jan 2009, 00:00:00 utc
 static uint32_t lsec2012 = 3550089600u; // 1 Jul 2012, 00:00:00 utc
 
@@ -283,6 +343,20 @@ TEST_F(leapsecTest, ValidateMalformed) {
 	const char *cp = leap_mhash;
 	int         rc = leapsec_validate(stringreader, &cp);
 	EXPECT_EQ(LSVALID_BADFORMAT, rc);
+}
+
+// ----------------------------------------------------------------------
+TEST_F(leapsecTest, ValidateMalformedShort) {
+	const char *cp = leap_shash;
+	int         rc = leapsec_validate(stringreader, &cp);
+	EXPECT_EQ(LSVALID_BADFORMAT, rc);
+}
+
+// ----------------------------------------------------------------------
+TEST_F(leapsecTest, ValidateNoLeadZero) {
+	const char *cp = leap_gthash;
+	int         rc = leapsec_validate(stringreader, &cp);
+	EXPECT_EQ(LSVALID_GOODHASH, rc);
 }
 
 // =====================================================================

@@ -1045,36 +1045,38 @@ typedef struct {
 } sha1_digest;
 
 /* [internal] parse a digest line to get the hash signature
- * I would have preferred the CTYPE 'isblank()' function, but alas,
- * it's not in MSVC bevore Studio2013; it also seems to be added
- * with the C99 standard (not being sure about that) and not all
- * target compilers implement this. Using a direct character
- * compare is the way out; the NIST leapsec file is 7bit ASCII
- * and the locale should not matter much here.
+ * The NIST code creating the hash writes them out as 5 hex integers
+ * without leading zeros. This makes reading them back as hex-encoded
+ * BLOB impossible, because there might be less than 40 hex digits.
+ *
+ * The solution is to read the values back as integers, and then do the
+ * byte twiddle necessary to get it into an array of 20 chars. The
+ * drawback is that it permits any acceptable number syntax provided by
+ * 'scanf()' and 'strtoul()', including optional signs and '0x'
+ * prefixes.
  */
 static int/*BOOL*/
 do_leap_hash(
 	sha1_digest * mac,
 	char const  * cp )
 {
-	int idx, dv;
+	int wi, di, num, len;
+	unsigned long tmp[5];
 
 	memset(mac, 0, sizeof(*mac));
-	for (idx = 0;  *cp && idx < 2*sizeof(*mac);  ++cp) {
-		if (isdigit(*cp))
-			dv = *cp - '0';
-		else if (isxdigit(*cp))
-			dv = (toupper(*cp) - 'A' + 10);
-		else if ('\t' == *cp || ' ' == *cp) /*isblank(*cp))*/
-			continue;
-		else
-			break;
+	num = sscanf(cp, " %lx %lx %lx %lx %lx%n",
+		     &tmp[0], &tmp[1], &tmp[2], &tmp[3], &tmp[4],
+		     &len);
+	if (num != 5 || cp[len] > ' ')
+		return FALSE;
 
-		mac->hv[idx/2] = (unsigned char)(
-			(mac->hv[idx/2] * 16) + dv);
-		++idx;
-	}
-	return (idx == 2*sizeof(*mac));
+	/* now do the byte twiddle */
+	for (wi=0; wi < 5; ++wi)
+		for (di=3; di >= 0; --di) {
+			mac->hv[wi*4 + di] = (unsigned char)tmp[wi];
+			tmp[wi] >>= 8;
+		}
+	return TRUE;
 }
 
 /* [internal] add the digits of a data line to the hash, stopping at the
