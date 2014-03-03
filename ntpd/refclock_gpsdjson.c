@@ -26,6 +26,8 @@
 #include <config.h>
 #endif
 
+#include "ntp_types.h"
+
 #if defined(REFCLOCK) && defined(CLOCK_GPSDJSON) && !defined(SYS_WINNT) 
 
 /* =====================================================================
@@ -54,7 +56,6 @@
 # error need poll() or select()
 #endif
 
-#include "ntp_types.h"
 #include "ntpd.h"
 #include "ntp_io.h"
 #include "ntp_unixtime.h"
