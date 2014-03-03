@@ -1,4 +1,5 @@
 * CID 1165098: Remove logically dead code from refclock_true.c.
+* CID 1189401: Use INSIST() instead of a belt-and-suspenders pointer check.
 * In ntp_dir_sep.m4, we care about $host_os, not $target_os.
 * [Bug 2540] bootstrap script needs to 'touch' files in finer-grained groups.
 * [Bug 2576] refclock_gpsdjson.c doesn't compile if CLOCK_GPSDJSON is

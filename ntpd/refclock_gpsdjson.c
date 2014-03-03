@@ -264,10 +264,11 @@ gpsd_start(
 
 dev_fail:
 	/* On failure, remove all UNIT ressources and declare defeat. */
-	if (up) {
-	    free(up->device);
-	    free(up);
-	}
+
+	INSIST (up);
+	free(up->device);
+	free(up);
+
 	pp->unitptr = (caddr_t)NULL;
 	return FALSE;
 }
