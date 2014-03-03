@@ -827,11 +827,9 @@ true_doevent(
                                  up->type = t_tl3;    /* Already sending data */
                                  up->state = s_Auto;
                                  break;
-                            case e_Poll:
-                                break;
-			default:
+			    default:
                                 msyslog(LOG_INFO, 
-                                        "TRUE: TL3 init fellthrough!");
+                                        "TRUE: TL3 init fellthrough! (%d)", event);
                                 break; 
 			}
 			break;
