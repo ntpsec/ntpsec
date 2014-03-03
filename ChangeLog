@@ -1,3 +1,4 @@
+(4.2.7p428) 2014/03/03 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 2570] refuse to load leapsec file with bad/missing SHA1 hash
 * [Bug 2562] Distribute the code in libjsmn/ .
 (4.2.7p427) 2014/03/02 Released by Harlan Stenn <stenn@ntp.org>
