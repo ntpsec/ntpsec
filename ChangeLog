@@ -1,8 +1,8 @@
-* [Bug 2570] refuse to load leapsec file with bad/missing SHA1 hash
-  -- change reading the hash line code: NIST omits leading zeros.
 * CID 1165098: Remove logically dead code from refclock_true.c.
 * In ntp_dir_sep.m4, we care about $host_os, not $target_os.
 * [Bug 2540] bootstrap script needs to 'touch' files in finer-grained groups.
+* [Bug 2570] refuse to load leapsec file with bad/missing SHA1 hash
+  -- change reading the hash line code: NIST omits leading zeros.
 * [Bug 2576] refclock_gpsdjson.c doesn't compile if CLOCK_GPSDJSON is
   not enabled at configure time.
 (4.2.7p428) 2014/03/03 Released by Harlan Stenn <stenn@ntp.org>
