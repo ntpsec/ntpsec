@@ -1,3 +1,4 @@
+* In ntp_dir_sep.m4, we care about $host_os, not $target_os.
 * [Bug 2540] bootstrap script needs to 'touch' files in finer-grained groups.
 (4.2.7p428) 2014/03/03 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 2570] refuse to load leapsec file with bad/missing SHA1 hash
