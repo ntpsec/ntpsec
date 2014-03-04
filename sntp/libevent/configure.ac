@@ -722,17 +722,23 @@ AC_TRY_COMPILE([],
 # check if we can compile with pthreads
 have_pthreads=no
 if test x$bwin32 != xtrue && test "$enable_thread_support" != "no"; then
-  ACX_PTHREAD([
-	AC_DEFINE(HAVE_PTHREADS, 1,
-		[Define if we have pthreads on this system])
-	have_pthreads=yes])
-  CFLAGS="$CFLAGS $PTHREAD_CFLAGS"
-  AC_CHECK_SIZEOF(pthread_t, ,
-     [AC_INCLUDES_DEFAULT()
-      #include <pthread.h> ]
-  )
+    OL_THREAD_CHECK([
+	have_pthreads=yes
+	PTHREAD_LIBS="$LTHREAD_LIBS"
+	CFLAGS="$CFLAGS $PTHREAD_CFLAGS"
+	AC_CHECK_SIZEOF(
+	    [pthread_t],
+	    [],
+	    [
+		AC_INCLUDES_DEFAULT()
+		#include <pthread.h>
+	    ]
+	)
+    ])
 fi
-AM_CONDITIONAL(PTHREADS, [test "$have_pthreads" != "no" && test "$enable_thread_support" != "no"])
+AC_SUBST([PTHREAD_LIBS])
+AC_SUBST([PTHREAD_CFLAGS])
+AM_CONDITIONAL([PTHREADS], [test "$have_pthreads" != "no" && test "$enable_thread_support" != "no"])
 
 # check if we should compile locking into the library
 if test x$enable_thread_support = xno; then
