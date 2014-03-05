@@ -126,8 +126,8 @@ int min_heap_adjust_(min_heap_t *s, struct event *e)
 			min_heap_shift_up_unconditional_(s, e->ev_timeout_pos.min_heap_idx, e);
 		else
 			min_heap_shift_down_(s, e->ev_timeout_pos.min_heap_idx, e);
+		return 0;
 	}
-	return 0;
 }
 
 int min_heap_reserve_(min_heap_t* s, unsigned n)

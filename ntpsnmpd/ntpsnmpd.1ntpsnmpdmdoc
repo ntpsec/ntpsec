@@ -1,9 +1,9 @@
-.Dd March 3 2014
+.Dd March 4 2014
 .Dt NTPSNMPD 1ntpsnmpdmdoc User Commands
 .Os
 .\"  EDIT THIS FILE WITH CAUTION  (ntpsnmpd-opts.mdoc)
 .\"
-.\"  It has been AutoGen-ed  March  3, 2014 at 11:10:26 AM by AutoGen 5.18.3pre11
+.\"  It has been AutoGen-ed  March  4, 2014 at 11:51:29 AM by AutoGen 5.18.3pre11
 .\"  From the definitions    ntpsnmpd-opts.def
 .\"  and the template file   agmdoc-cmd.tpl
 .Sh NAME
@@ -159,7 +159,7 @@ please fill me in...
 please fill me in...
 .El
 .Pp
-This document corresponds to version 4.2.7p429 of NTP.
+This document corresponds to version 4.2.7p430 of NTP.
 .Pp
 This manual page was \fIAutoGen\fP\-erated from the \fBntpsnmpd\fP
 option definitions.

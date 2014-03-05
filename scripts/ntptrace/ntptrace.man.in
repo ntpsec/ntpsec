@@ -10,11 +10,11 @@
 .ds B-Font B
 .ds I-Font I
 .ds R-Font R
-.TH ntptrace @NTPTRACE_MS@ "03 Mar 2014" "ntp (4.2.7p429)" "User Commands"
+.TH ntptrace @NTPTRACE_MS@ "04 Mar 2014" "ntp (4.2.7p430)" "User Commands"
 .\"
-.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-lFaGFh/ag-CFaWEh)
+.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-mlaOTF/ag-zla4SF)
 .\"
-.\" It has been AutoGen-ed March 3, 2014 at 10:45:09 AM by AutoGen 5.18.3pre11
+.\" It has been AutoGen-ed March 4, 2014 at 11:45:50 AM by AutoGen 5.18.3pre11
 .\" From the definitions ntptrace-opts.def
 .\" and the template file agman-cmd.tpl
 .SH NAME
@@ -96,16 +96,6 @@ Output version of program and exit.  The default mode is `v', a simple
 version.  The `c' mode will print copyright information and `n' will
 print the full copyright notice.
 .PP
-.TH ntptrace @NTPTRACE_MS@ "03 Mar 2014" "ntp (4.2.7p429)" "User Commands"
-.\"
-.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-lFaGFh/ag-CFaWEh)
-.\"
-.\" It has been AutoGen-ed March 3, 2014 at 10:45:09 AM by AutoGen 5.18.3pre11
-.\" From the definitions ntptrace-opts.def
-.\" and the template file agman-cmd.tpl
-.SH NAME
-\f\*[B-Font]ntptrace\fP ntptrace
-\- Trace peers of an NTP server
 cvt_prog='/usr/local/gnu/share/autogen/texi2man'
 cvt_prog=`cd \`dirname "$cvt_prog"\` >/dev/null && pwd
          `/`basename "$cvt_prog"`
@@ -125,6 +115,16 @@ test \-x "$cvt_prog" || die "'$cvt_prog' is not executable"
     rm \-f $list
 } 1>.doc 2>/dev/null
 /opt/csw/bin/ggrep \-E \-v '^[ 	]*$' .doc | $cvt_prog
+.TH ntptrace @NTPTRACE_MS@ "04 Mar 2014" "ntp (4.2.7p430)" "User Commands"
+.\"
+.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-mlaOTF/ag-zla4SF)
+.\"
+.\" It has been AutoGen-ed March 4, 2014 at 11:45:50 AM by AutoGen 5.18.3pre11
+.\" From the definitions ntptrace-opts.def
+.\" and the template file agman-cmd.tpl
+.SH NAME
+\f\*[B-Font]ntptrace\fP ntptrace
+\- Trace peers of an NTP server
 .SH "EXIT STATUS"
 One of the following exit values will be returned:
 .TP

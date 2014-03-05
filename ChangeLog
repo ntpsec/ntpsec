@@ -1,3 +1,6 @@
+(4.2.7p430) 2014/03/04 Released by Harlan Stenn <stenn@ntp.org>
+* Upgrade to libevent-2.1.3-alpha-dev.
+* [Bug 2572] cross-compiling fails for --with-yielding-select.
 (4.2.7p429) 2014/03/03 Released by Harlan Stenn <stenn@ntp.org>
 * CID 1165098: Remove logically dead code from refclock_true.c.
 * CID 1189401: Use INSIST() instead of a belt-and-suspenders pointer check.
