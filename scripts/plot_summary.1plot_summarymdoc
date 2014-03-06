@@ -1,9 +1,9 @@
-.Dd March 4 2014
+.Dd March 5 2014
 .Dt PLOT_SUMMARY 1plot_summarymdoc User Commands
 .Os
 .\"  EDIT THIS FILE WITH CAUTION  (plot_summary-opts.mdoc)
 .\"
-.\"  It has been AutoGen-ed  March  4, 2014 at 11:46:01 AM by AutoGen 5.18.3pre11
+.\"  It has been AutoGen-ed  March  5, 2014 at 10:46:42 AM by AutoGen 5.18.3pre11
 .\"  From the definitions    plot_summary-opts.def
 .\"  and the template file   agmdoc-cmd.tpl
 .Sh NAME
@@ -72,6 +72,7 @@ Output version of program and exit.  The default mode is `v', a simple
 version.  The `c' mode will print copyright information and `n' will
 print the full copyright notice.
 .El
+There is no description for this command.
 cvt_prog='/usr/local/gnu/share/autogen/texi2mdoc'
 cvt_prog=`cd \`dirname "$cvt_prog"\` >/dev/null && pwd
          `/`basename "$cvt_prog"`
@@ -91,7 +92,6 @@ test \-x "$cvt_prog" || die "'$cvt_prog' is not executable"
     rm \-f $list
 } 1>.doc 2>/dev/null
 /opt/csw/bin/ggrep \-E \-v '^[ 	]*$' .doc | $cvt_prog
-There is no description for this command.
 .Sh "EXIT STATUS"
 One of the following exit values will be returned:
 .Bl -tag

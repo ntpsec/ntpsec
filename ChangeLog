@@ -1,4 +1,6 @@
+(4.2.7p431) 2014/03/05 Released by Harlan Stenn <stenn@ntp.org>
 * CID 711669: Do a non-NULL pointer assertion check a bit earlier.
+* [Bug 2572] cross-compiling fails for --with-yielding-select.
 (4.2.7p430) 2014/03/04 Released by Harlan Stenn <stenn@ntp.org>
 * Upgrade to libevent-2.1.3-alpha-dev.
 * [Bug 2572] cross-compiling fails for --with-yielding-select.

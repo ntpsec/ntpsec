@@ -77,7 +77,7 @@ dnl ----------------------------------------------------------------
 dnl Threads?
 ol_link_threads=no
 dnl ol_with_yielding_select=${ol_with_yielding_select:-auto}
-OL_ARG_WITH(yielding-select,[  --with-yielding-select  with yielding select],
+OL_ARG_WITH(yielding_select,[  --with-yielding-select  with yielding select],
 	auto, [auto yes no manual] )
 
 case $ol_with_threads in auto | yes | nt)

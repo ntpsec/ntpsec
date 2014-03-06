@@ -10,11 +10,11 @@
 .ds B-Font B
 .ds I-Font I
 .ds R-Font R
-.TH summary 1summaryman "04 Mar 2014" "ntp (4.2.7p430)" "User Commands"
+.TH summary 1summaryman "05 Mar 2014" "ntp (4.2.7p431)" "User Commands"
 .\"
-.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-Q2aa6G/ag-42aq5G)
+.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-e3aOyH/ag-I3a4xH)
 .\"
-.\" It has been AutoGen-ed March 4, 2014 at 11:46:05 AM by AutoGen 5.18.3pre11
+.\" It has been AutoGen-ed March 5, 2014 at 10:46:47 AM by AutoGen 5.18.3pre11
 .\" From the definitions summary-opts.def
 .\" and the template file agman-cmd.tpl
 .SH NAME
@@ -105,11 +105,11 @@ Output version of program and exit.  The default mode is `v', a simple
 version.  The `c' mode will print copyright information and `n' will
 print the full copyright notice.
 .PP
-.TH summary 1summaryman "04 Mar 2014" "ntp (4.2.7p430)" "User Commands"
+.TH summary 1summaryman "05 Mar 2014" "ntp (4.2.7p431)" "User Commands"
 .\"
-.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-Q2aa6G/ag-42aq5G)
+.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-e3aOyH/ag-I3a4xH)
 .\"
-.\" It has been AutoGen-ed March 4, 2014 at 11:46:05 AM by AutoGen 5.18.3pre11
+.\" It has been AutoGen-ed March 5, 2014 at 10:46:47 AM by AutoGen 5.18.3pre11
 .\" From the definitions summary-opts.def
 .\" and the template file agman-cmd.tpl
 .SH NAME

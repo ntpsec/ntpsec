@@ -10,11 +10,11 @@
 .ds B-Font B
 .ds I-Font I
 .ds R-Font R
-.TH calc_tickadj 1calc_tickadjman "04 Mar 2014" "ntp (4.2.7p430)" "User Commands"
+.TH calc_tickadj 1calc_tickadjman "05 Mar 2014" "ntp (4.2.7p431)" "User Commands"
 .\"
-.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-VzaqkD/ag-9zaGjD)
+.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-UnaWND/ag-9naaND)
 .\"
-.\" It has been AutoGen-ed March 4, 2014 at 11:45:26 AM by AutoGen 5.18.3pre11
+.\" It has been AutoGen-ed March 5, 2014 at 10:45:51 AM by AutoGen 5.18.3pre11
 .\" From the definitions calc_tickadj-opts.def
 .\" and the template file agman-cmd.tpl
 .SH NAME
@@ -109,11 +109,11 @@ test \-x "$cvt_prog" || die "'$cvt_prog' is not executable"
     rm \-f $list
 } 1>.doc 2>/dev/null
 /opt/csw/bin/ggrep \-E \-v '^[ 	]*$' .doc | $cvt_prog
-.TH calc_tickadj 1calc_tickadjman "04 Mar 2014" "ntp (4.2.7p430)" "User Commands"
+.TH calc_tickadj 1calc_tickadjman "05 Mar 2014" "ntp (4.2.7p431)" "User Commands"
 .\"
-.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-VzaqkD/ag-9zaGjD)
+.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-UnaWND/ag-9naaND)
 .\"
-.\" It has been AutoGen-ed March 4, 2014 at 11:45:26 AM by AutoGen 5.18.3pre11
+.\" It has been AutoGen-ed March 5, 2014 at 10:45:51 AM by AutoGen 5.18.3pre11
 .\" From the definitions calc_tickadj-opts.def
 .\" and the template file agman-cmd.tpl
 .SH NAME
