@@ -1,9 +1,9 @@
-.Dd March 10 2014
+.Dd March 21 2014
 .Dt NTP_CONF 5mdoc File Formats
 .Os
 .\"  EDIT THIS FILE WITH CAUTION  (ntp.mdoc)
 .\"
-.\"  It has been AutoGen-ed  March 10, 2014 at 11:15:18 AM by AutoGen 5.18.3pre11
+.\"  It has been AutoGen-ed  March 21, 2014 at 05:59:38 AM by AutoGen 5.18.3pre11
 .\"  From the definitions    ntp.conf.def
 .\"  and the template file   agmdoc-cmd.tpl
 .Sh NAME
@@ -2809,7 +2809,7 @@ services when they become universally available.
 .Pp
 Please send bug reports to: http://bugs.ntp.org, bugs@ntp.org
 .Sh NOTES
-This document corresponds to version 4.2.7p433 of NTP.
+This document corresponds to version 4.2.7p434 of NTP.
 This document was derived from FreeBSD.
 .Pp
 This manual page was \fIAutoGen\fP\-erated from the \fBntp.conf\fP

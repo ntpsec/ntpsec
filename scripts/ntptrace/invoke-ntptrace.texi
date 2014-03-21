@@ -6,7 +6,7 @@
 #
 # EDIT THIS FILE WITH CAUTION  (invoke-ntptrace.texi)
 #
-# It has been AutoGen-ed  March 10, 2014 at 10:54:09 AM by AutoGen 5.18.3pre11
+# It has been AutoGen-ed  March 21, 2014 at 05:55:19 AM by AutoGen 5.18.3pre11
 # From the definitions    ntptrace-opts.def
 # and the template file   agtexi-cmd.tpl
 @end ignore

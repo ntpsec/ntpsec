@@ -1,9 +1,9 @@
-.Dd March 10 2014
+.Dd March 21 2014
 .Dt NTPDC 1ntpdcmdoc User Commands
 .Os
 .\"  EDIT THIS FILE WITH CAUTION  (ntpdc-opts.mdoc)
 .\"
-.\"  It has been AutoGen-ed  March 10, 2014 at 11:17:24 AM by AutoGen 5.18.3pre11
+.\"  It has been AutoGen-ed  March 21, 2014 at 06:00:15 AM by AutoGen 5.18.3pre11
 .\"  From the definitions    ntpdc-opts.def
 .\"  and the template file   agmdoc-cmd.tpl
 .Sh NAME
