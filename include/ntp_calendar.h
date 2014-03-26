@@ -306,7 +306,13 @@ extern int32_t
 ntpcal_periodic_extend(int32_t pivot, int32_t value, int32_t cycle);
 
 extern int
+ntpcal_ntp64_to_date(struct calendar *jd, const vint64 *ntp);
+
+extern int
 ntpcal_ntp_to_date(struct calendar *jd,	uint32_t ntp, const time_t *pivot);
+
+extern vint64
+ntpcal_date_to_ntp64(const struct calendar *jd);
 
 extern uint32_t
 ntpcal_date_to_ntp(const struct calendar *jd);
@@ -324,7 +330,13 @@ extern ntpcal_split
 isocal_split_eraweeks(int32_t weeks);
 
 extern int
+isocal_ntp64_to_date(struct isodate *id, const vint64 *ntp);
+
+extern int
 isocal_ntp_to_date(struct isodate *id, uint32_t ntp, const time_t *pivot);
+
+extern vint64
+isocal_date_to_ntp64(const struct isodate *id);
 
 extern uint32_t
 isocal_date_to_ntp(const struct isodate *id);

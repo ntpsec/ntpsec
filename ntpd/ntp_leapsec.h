@@ -11,11 +11,6 @@
 #ifndef NTP_LEAPSEC_H
 #define NTP_LEAPSEC_H
 
-/* these should probably go to libntp... */
-extern vint64 strtouv64(const char * src, char ** endp, int base);
-extern int    icmpv64(const vint64 * lhs, const vint64 * rhs);
-extern int    ucmpv64(const vint64 * lhs, const vint64 * rhs);
-
 /* function pointer types. Note that 'fprintf' and 'getc' can be casted
  * to the dumper resp. reader type, provided the auxiliary argument is a
  * valid FILE pointer in hat case.
@@ -136,7 +131,7 @@ extern void leapsec_dump(const leap_table_t*, leapsec_dumper func, void *farg);
 /* Read a leap second file. This is a convenience wrapper around the
  * generic load function, 'leapsec_load()'.
  */
-extern int/*BOOL*/ leapsec_load_file(FILE * fp, int blimit, int checked);
+extern int/*BOOL*/ leapsec_load_file(FILE * fp, const char * fname);
 
 /* Get the current leap data signature. This consists of the last
  * ransition, the table expiration, and the total TAI difference at the
