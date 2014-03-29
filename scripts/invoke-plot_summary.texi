@@ -6,7 +6,7 @@
 #
 # EDIT THIS FILE WITH CAUTION  (invoke-plot_summary.texi)
 #
-# It has been AutoGen-ed  March 21, 2014 at 05:55:23 AM by AutoGen 5.18.3pre11
+# It has been AutoGen-ed  March 29, 2014 at 11:24:54 AM by AutoGen 5.18.3pre11
 # From the definitions    plot_summary-opts.def
 # and the template file   agtexi-cmd.tpl
 @end ignore
