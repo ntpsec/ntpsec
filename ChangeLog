@@ -1,3 +1,4 @@
+* Update to libopts-40.2.15.
 (4.2.7p435) 2014/03/29 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 2570] cleanup: reduced logging noise, moved some functions
   into libntp.
