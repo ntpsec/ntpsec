@@ -10,11 +10,11 @@
 .ds B-Font B
 .ds I-Font I
 .ds R-Font R
-.TH calc_tickadj 1calc_tickadjman "31 Mar 2014" "ntp (4.2.7p435)" "User Commands"
+.TH calc_tickadj 1calc_tickadjman "31 Mar 2014" "ntp (4.2.7p436)" "User Commands"
 .\"
-.\" EDIT THIS FILE WITH CAUTION (in-mem file)
+.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-Isa4Ne/ag-UsaiNe)
 .\"
-.\" It has been AutoGen-ed March 31, 2014 at 02:35:20 AM by AutoGen 5.18.3pre18
+.\" It has been AutoGen-ed March 31, 2014 at 05:44:09 AM by AutoGen 5.18.3pre18
 .\" From the definitions calc_tickadj-opts.def
 .\" and the template file agman-cmd.tpl
 .SH NAME
@@ -90,6 +90,35 @@ Output version of program and exit.  The default mode is `v', a simple
 version.  The `c' mode will print copyright information and `n' will
 print the full copyright notice.
 .PP
+.TH calc_tickadj 1calc_tickadjman "31 Mar 2014" "ntp (4.2.7p436)" "User Commands"
+.\"
+.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-Isa4Ne/ag-UsaiNe)
+.\"
+.\" It has been AutoGen-ed March 31, 2014 at 05:44:09 AM by AutoGen 5.18.3pre18
+.\" From the definitions calc_tickadj-opts.def
+.\" and the template file agman-cmd.tpl
+.SH NAME
+\f\*[B-Font]calc_tickadj\fP calc_tickadj
+\- Calculates optimal value for tick given ntp drift file.
+cvt_prog='/usr/local/gnu/share/autogen/texi2man'
+cvt_prog=`cd \`dirname "$cvt_prog"\` >/dev/null && pwd
+         `/`basename "$cvt_prog"`
+cd $tmp_dir
+test \-x "$cvt_prog" || die "'$cvt_prog' is not executable"
+{
+    list='synopsis description options option-presets'
+    for f in $list ; do cat $f ; echo ; done
+    rm \-f $list name
+    list='implementation-notes environment files examples exit-status errors
+        compatibility see-also conforming-to history authors copyright bugs
+        notes'
+    for f in $list ; do cat $f ; echo ; done > .end-doc
+    rm \-f $list
+    list=`ls \-1 *`' .end-doc'
+    for f in $list ; do cat $f ; echo ; done
+    rm \-f $list
+} 1>.doc 2>/dev/null
+/opt/csw/bin/ggrep \-E \-v '^[ 	]*$' .doc | $cvt_prog
 .SH "EXIT STATUS"
 One of the following exit values will be returned:
 .TP

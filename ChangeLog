@@ -1,3 +1,4 @@
+(4.2.7p436) 2014/03/31 Released by Harlan Stenn <stenn@ntp.org>
 * Update to libopts-40.2.15, and autogen-5.18.3pre18.
 * [Bug 2311] Add more tags to mdoc2xxx.
 * [Bug 2502] Assorted text replacement errors in 4.2.7p345
