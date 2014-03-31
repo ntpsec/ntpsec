@@ -1,4 +1,5 @@
 * Clean up last-update timestamps of html/*.html files.
+* [Bug 2546] Documentation updates.
 (4.2.7p432) 2014/03/09 Released by Harlan Stenn <stenn@ntp.org>
 * CID 711660: Do a non-NULL pointer assertion check a bit earlier.
 (4.2.7p431) 2014/03/05 Released by Harlan Stenn <stenn@ntp.org>
