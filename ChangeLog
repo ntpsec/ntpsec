@@ -1,4 +1,7 @@
-* Update to libopts-40.2.15.
+* Update to libopts-40.2.15, and autogen-5.18.3pre18.
+* [Bug 2311] Add more tags to mdoc2xxx.
+* [Bug 2502] Assorted text replacement errors in 4.2.7p345
+* [Bug 2538] ntp programs print exit code as part of the "usage" text.
 (4.2.7p435) 2014/03/29 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 2570] cleanup: reduced logging noise, moved some functions
   into libntp.

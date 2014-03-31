@@ -6,7 +6,7 @@
 #
 # EDIT THIS FILE WITH CAUTION  (invoke-ntpd.texi)
 #
-# It has been AutoGen-ed  March 29, 2014 at 11:38:27 AM by AutoGen 5.18.3pre11
+# It has been AutoGen-ed  March 31, 2014 at 03:12:30 AM by AutoGen 5.18.3pre18
 # From the definitions    ntpd-opts.def
 # and the template file   agtexi-cmd.tpl
 @end ignore
@@ -162,7 +162,7 @@ Usage:  ntpd [ -<flag> [<val>] | --<name>[@{=| @}<val>] ]... \
    -f Str driftfile      frequency drift file name
    -g no  panicgate      Allow the first adjustment to be Big
                                 - may appear multiple times
-   -i Str jaildir        Jail directory
+   -i --- jaildir        built without --enable-clockctl or --enable-linuxcaps or --enable-solarisprivs
    -I Str interface      Listen on an interface name or address
                                 - may appear multiple times
    -k Str keyfile        path to symmetric keys
@@ -185,7 +185,7 @@ Usage:  ntpd [ -<flag> [<val>] | --<name>[@{=| @}<val>] ]... \
    -s Str statsdir       Statistics file location
    -t Str trustedkey     Trusted key number
                                 - may appear multiple times
-   -u Str user           Run as userid (or userid:groupid)
+   -u --- user           built without --enable-clockctl or --enable-linuxcaps or --enable-solarisprivs
    -U Num updateinterval interval in seconds between scans for new or dropped interfaces
       Str var            make ARG an ntp variable (RW)
                                 - may appear multiple times

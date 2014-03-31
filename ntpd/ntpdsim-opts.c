@@ -1,11 +1,11 @@
 /*
  *  EDIT THIS FILE WITH CAUTION  (ntpdsim-opts.c)
  *
- *  It has been AutoGen-ed  August  1, 2013 at 02:05:43 AM by AutoGen 5.18.1pre3
+ *  It has been AutoGen-ed  March 30, 2014 at 01:32:59 AM by AutoGen 5.18.3pre18
  *  From the definitions    ntpdsim-opts.def
  *  and the template file   options
  *
- * Generated from AutoOpts 40:1:15 templates.
+ * Generated from AutoOpts 40:2:15 templates.
  *
  *  AutoOpts is a copyrighted work.  This source file is not encumbered
  *  by AutoOpts licensing, but is provided under the licensing terms chosen
@@ -74,8 +74,8 @@ extern FILE * option_usage_fp;
 /**
  *  static const strings for ntpdsim options
  */
-static char const ntpdsim_opt_strs[3099] =
-/*     0 */ "ntpdsim 4.2.7p377\n"
+static char const ntpdsim_opt_strs[3124] =
+/*     0 */ "ntpdsim 4.2.7p435\n"
             "Copyright (C) 1970-2013 The University of Delaware, all rights reserved.\n"
             "This is free software. It is licensed for use, modification and\n"
             "redistribution under the terms of the NTP License, copies of which\n"
@@ -124,97 +124,97 @@ static char const ntpdsim_opt_strs[3099] =
 /*  1466 */ "Jail directory\0"
 /*  1481 */ "JAILDIR\0"
 /*  1489 */ "jaildir\0"
-/*  1497 */ "built without --enable-clockctl or --enable-linuxcaps\0"
-/*  1551 */ "Listen on an interface name or address\0"
-/*  1590 */ "INTERFACE\0"
-/*  1600 */ "interface\0"
-/*  1610 */ "path to symmetric keys\0"
-/*  1633 */ "KEYFILE\0"
-/*  1641 */ "keyfile\0"
-/*  1649 */ "path to the log file\0"
-/*  1670 */ "LOGFILE\0"
-/*  1678 */ "logfile\0"
-/*  1686 */ "Do not listen to virtual interfaces\0"
-/*  1722 */ "NOVIRTUALIPS\0"
-/*  1735 */ "novirtualips\0"
-/*  1748 */ "Modify Multimedia Timer (Windows only)\0"
-/*  1787 */ "MODIFYMMTIMER\0"
-/*  1801 */ "modifymmtimer\0"
-/*  1815 */ "Do not fork\0"
-/*  1827 */ "NOFORK\0"
-/*  1834 */ "nofork\0"
-/*  1841 */ "Run at high priority\0"
-/*  1862 */ "NICE\0"
-/*  1867 */ "nice\0"
-/*  1872 */ "path to the PID file\0"
-/*  1893 */ "PIDFILE\0"
-/*  1901 */ "pidfile\0"
-/*  1909 */ "Process priority\0"
-/*  1926 */ "PRIORITY\0"
-/*  1935 */ "priority\0"
-/*  1944 */ "Set the time and quit\0"
-/*  1966 */ "QUIT\0"
-/*  1971 */ "quit\0"
-/*  1976 */ "Broadcast/propagation delay\0"
-/*  2004 */ "PROPAGATIONDELAY\0"
-/*  2021 */ "propagationdelay\0"
-/*  2038 */ "Save parsed configuration and quit\0"
-/*  2073 */ "SAVECONFIGQUIT\0"
-/*  2088 */ "saveconfigquit\0"
-/*  2103 */ "Statistics file location\0"
-/*  2128 */ "STATSDIR\0"
-/*  2137 */ "statsdir\0"
-/*  2146 */ "Trusted key number\0"
-/*  2165 */ "TRUSTEDKEY\0"
-/*  2176 */ "trustedkey\0"
-/*  2187 */ "Run as userid (or userid:groupid)\0"
-/*  2221 */ "USER\0"
-/*  2226 */ "user\0"
-/*  2231 */ "interval in seconds between scans for new or dropped interfaces\0"
-/*  2295 */ "UPDATEINTERVAL\0"
-/*  2310 */ "updateinterval\0"
-/*  2325 */ "make ARG an ntp variable (RW)\0"
-/*  2355 */ "VAR\0"
-/*  2359 */ "var\0"
-/*  2363 */ "make ARG an ntp variable (RW|DEF)\0"
-/*  2397 */ "DVAR\0"
-/*  2402 */ "dvar\0"
-/*  2407 */ "Seconds to wait for first clock sync\0"
-/*  2444 */ "WAIT_SYNC\0"
-/*  2454 */ "wait-sync\0"
-/*  2464 */ "Slew up to 600 seconds\0"
-/*  2487 */ "SLEW\0"
-/*  2492 */ "slew\0"
-/*  2497 */ "Use CPU cycle counter (Windows only)\0"
-/*  2534 */ "USEPCC\0"
-/*  2541 */ "usepcc\0"
-/*  2548 */ "Force CPU cycle counter use (Windows only)\0"
-/*  2591 */ "PCCFREQ\0"
-/*  2599 */ "pccfreq\0"
-/*  2607 */ "Register with mDNS as a NTP server\0"
-/*  2642 */ "MDNS\0"
-/*  2647 */ "mdns\0"
-/*  2652 */ "display extended usage information and exit\0"
-/*  2696 */ "help\0"
-/*  2701 */ "extended usage information passed thru pager\0"
-/*  2746 */ "more-help\0"
-/*  2756 */ "output version information and exit\0"
-/*  2792 */ "version\0"
-/*  2800 */ "save the option state to a config file\0"
-/*  2839 */ "save-opts\0"
-/*  2849 */ "load options from a config file\0"
-/*  2881 */ "LOAD_OPTS\0"
-/*  2891 */ "no-load-opts\0"
-/*  2904 */ "no\0"
-/*  2907 */ "NTPDSIM\0"
-/*  2915 */ "ntpdsim - NTP daemon simulation program - Ver. 4.2.7p377\n"
+/*  1497 */ "built without --enable-clockctl or --enable-linuxcaps or --enable-solarisprivs\0"
+/*  1576 */ "Listen on an interface name or address\0"
+/*  1615 */ "INTERFACE\0"
+/*  1625 */ "interface\0"
+/*  1635 */ "path to symmetric keys\0"
+/*  1658 */ "KEYFILE\0"
+/*  1666 */ "keyfile\0"
+/*  1674 */ "path to the log file\0"
+/*  1695 */ "LOGFILE\0"
+/*  1703 */ "logfile\0"
+/*  1711 */ "Do not listen to virtual interfaces\0"
+/*  1747 */ "NOVIRTUALIPS\0"
+/*  1760 */ "novirtualips\0"
+/*  1773 */ "Modify Multimedia Timer (Windows only)\0"
+/*  1812 */ "MODIFYMMTIMER\0"
+/*  1826 */ "modifymmtimer\0"
+/*  1840 */ "Do not fork\0"
+/*  1852 */ "NOFORK\0"
+/*  1859 */ "nofork\0"
+/*  1866 */ "Run at high priority\0"
+/*  1887 */ "NICE\0"
+/*  1892 */ "nice\0"
+/*  1897 */ "path to the PID file\0"
+/*  1918 */ "PIDFILE\0"
+/*  1926 */ "pidfile\0"
+/*  1934 */ "Process priority\0"
+/*  1951 */ "PRIORITY\0"
+/*  1960 */ "priority\0"
+/*  1969 */ "Set the time and quit\0"
+/*  1991 */ "QUIT\0"
+/*  1996 */ "quit\0"
+/*  2001 */ "Broadcast/propagation delay\0"
+/*  2029 */ "PROPAGATIONDELAY\0"
+/*  2046 */ "propagationdelay\0"
+/*  2063 */ "Save parsed configuration and quit\0"
+/*  2098 */ "SAVECONFIGQUIT\0"
+/*  2113 */ "saveconfigquit\0"
+/*  2128 */ "Statistics file location\0"
+/*  2153 */ "STATSDIR\0"
+/*  2162 */ "statsdir\0"
+/*  2171 */ "Trusted key number\0"
+/*  2190 */ "TRUSTEDKEY\0"
+/*  2201 */ "trustedkey\0"
+/*  2212 */ "Run as userid (or userid:groupid)\0"
+/*  2246 */ "USER\0"
+/*  2251 */ "user\0"
+/*  2256 */ "interval in seconds between scans for new or dropped interfaces\0"
+/*  2320 */ "UPDATEINTERVAL\0"
+/*  2335 */ "updateinterval\0"
+/*  2350 */ "make ARG an ntp variable (RW)\0"
+/*  2380 */ "VAR\0"
+/*  2384 */ "var\0"
+/*  2388 */ "make ARG an ntp variable (RW|DEF)\0"
+/*  2422 */ "DVAR\0"
+/*  2427 */ "dvar\0"
+/*  2432 */ "Seconds to wait for first clock sync\0"
+/*  2469 */ "WAIT_SYNC\0"
+/*  2479 */ "wait-sync\0"
+/*  2489 */ "Slew up to 600 seconds\0"
+/*  2512 */ "SLEW\0"
+/*  2517 */ "slew\0"
+/*  2522 */ "Use CPU cycle counter (Windows only)\0"
+/*  2559 */ "USEPCC\0"
+/*  2566 */ "usepcc\0"
+/*  2573 */ "Force CPU cycle counter use (Windows only)\0"
+/*  2616 */ "PCCFREQ\0"
+/*  2624 */ "pccfreq\0"
+/*  2632 */ "Register with mDNS as a NTP server\0"
+/*  2667 */ "MDNS\0"
+/*  2672 */ "mdns\0"
+/*  2677 */ "display extended usage information and exit\0"
+/*  2721 */ "help\0"
+/*  2726 */ "extended usage information passed thru pager\0"
+/*  2771 */ "more-help\0"
+/*  2781 */ "output version information and exit\0"
+/*  2817 */ "version\0"
+/*  2825 */ "save the option state to a config file\0"
+/*  2864 */ "save-opts\0"
+/*  2874 */ "load options from a config file\0"
+/*  2906 */ "LOAD_OPTS\0"
+/*  2916 */ "no-load-opts\0"
+/*  2929 */ "no\0"
+/*  2932 */ "NTPDSIM\0"
+/*  2940 */ "ntpdsim - NTP daemon simulation program - Ver. 4.2.7p435\n"
             "Usage:  %s [ -<flag> [<val>] | --<name>[{=| }<val>] ]...\n\0"
-/*  3030 */ "$HOME\0"
-/*  3036 */ ".\0"
-/*  3038 */ ".ntprc\0"
-/*  3045 */ "http://bugs.ntp.org, bugs@ntp.org\0"
-/*  3079 */ "\n\0"
-/*  3081 */ "ntpdsim 4.2.7p377";
+/*  3055 */ "$HOME\0"
+/*  3061 */ ".\0"
+/*  3063 */ ".ntprc\0"
+/*  3070 */ "http://bugs.ntp.org, bugs@ntp.org\0"
+/*  3104 */ "\n\0"
+/*  3106 */ "ntpdsim 4.2.7p435";
 
 /**
  *  ipv4 option description with
@@ -381,11 +381,11 @@ static int const aAuthnoreqCantList[] = {
  *  interface option description:
  */
 /** Descriptive text for the interface option */
-#define INTERFACE_DESC      (ntpdsim_opt_strs+1551)
+#define INTERFACE_DESC      (ntpdsim_opt_strs+1576)
 /** Upper-cased name for the interface option */
-#define INTERFACE_NAME      (ntpdsim_opt_strs+1590)
+#define INTERFACE_NAME      (ntpdsim_opt_strs+1615)
 /** Name string for the interface option */
-#define INTERFACE_name      (ntpdsim_opt_strs+1600)
+#define INTERFACE_name      (ntpdsim_opt_strs+1625)
 /** Compiled in flag settings for the interface option */
 #define INTERFACE_FLAGS     (OPTST_DISABLED | OPTST_STACKED \
         | OPTST_SET_ARGTYPE(OPARG_TYPE_STRING))
@@ -394,11 +394,11 @@ static int const aAuthnoreqCantList[] = {
  *  keyfile option description:
  */
 /** Descriptive text for the keyfile option */
-#define KEYFILE_DESC      (ntpdsim_opt_strs+1610)
+#define KEYFILE_DESC      (ntpdsim_opt_strs+1635)
 /** Upper-cased name for the keyfile option */
-#define KEYFILE_NAME      (ntpdsim_opt_strs+1633)
+#define KEYFILE_NAME      (ntpdsim_opt_strs+1658)
 /** Name string for the keyfile option */
-#define KEYFILE_name      (ntpdsim_opt_strs+1641)
+#define KEYFILE_name      (ntpdsim_opt_strs+1666)
 /** Compiled in flag settings for the keyfile option */
 #define KEYFILE_FLAGS     (OPTST_DISABLED \
         | OPTST_SET_ARGTYPE(OPARG_TYPE_STRING))
@@ -407,11 +407,11 @@ static int const aAuthnoreqCantList[] = {
  *  logfile option description:
  */
 /** Descriptive text for the logfile option */
-#define LOGFILE_DESC      (ntpdsim_opt_strs+1649)
+#define LOGFILE_DESC      (ntpdsim_opt_strs+1674)
 /** Upper-cased name for the logfile option */
-#define LOGFILE_NAME      (ntpdsim_opt_strs+1670)
+#define LOGFILE_NAME      (ntpdsim_opt_strs+1695)
 /** Name string for the logfile option */
-#define LOGFILE_name      (ntpdsim_opt_strs+1678)
+#define LOGFILE_name      (ntpdsim_opt_strs+1703)
 /** Compiled in flag settings for the logfile option */
 #define LOGFILE_FLAGS     (OPTST_DISABLED \
         | OPTST_SET_ARGTYPE(OPARG_TYPE_STRING))
@@ -420,11 +420,11 @@ static int const aAuthnoreqCantList[] = {
  *  novirtualips option description:
  */
 /** Descriptive text for the novirtualips option */
-#define NOVIRTUALIPS_DESC      (ntpdsim_opt_strs+1686)
+#define NOVIRTUALIPS_DESC      (ntpdsim_opt_strs+1711)
 /** Upper-cased name for the novirtualips option */
-#define NOVIRTUALIPS_NAME      (ntpdsim_opt_strs+1722)
+#define NOVIRTUALIPS_NAME      (ntpdsim_opt_strs+1747)
 /** Name string for the novirtualips option */
-#define NOVIRTUALIPS_name      (ntpdsim_opt_strs+1735)
+#define NOVIRTUALIPS_name      (ntpdsim_opt_strs+1760)
 /** Compiled in flag settings for the novirtualips option */
 #define NOVIRTUALIPS_FLAGS     (OPTST_DISABLED)
 
@@ -433,11 +433,11 @@ static int const aAuthnoreqCantList[] = {
  */
 #ifdef SYS_WINNT
 /** Descriptive text for the modifymmtimer option */
-#define MODIFYMMTIMER_DESC      (ntpdsim_opt_strs+1748)
+#define MODIFYMMTIMER_DESC      (ntpdsim_opt_strs+1773)
 /** Upper-cased name for the modifymmtimer option */
-#define MODIFYMMTIMER_NAME      (ntpdsim_opt_strs+1787)
+#define MODIFYMMTIMER_NAME      (ntpdsim_opt_strs+1812)
 /** Name string for the modifymmtimer option */
-#define MODIFYMMTIMER_name      (ntpdsim_opt_strs+1801)
+#define MODIFYMMTIMER_name      (ntpdsim_opt_strs+1826)
 /** Compiled in flag settings for the modifymmtimer option */
 #define MODIFYMMTIMER_FLAGS     (OPTST_DISABLED)
 
@@ -453,11 +453,11 @@ static int const aAuthnoreqCantList[] = {
  *  "Must also have options" and "Incompatible options":
  */
 /** Descriptive text for the nofork option */
-#define NOFORK_DESC      (ntpdsim_opt_strs+1815)
+#define NOFORK_DESC      (ntpdsim_opt_strs+1840)
 /** Upper-cased name for the nofork option */
-#define NOFORK_NAME      (ntpdsim_opt_strs+1827)
+#define NOFORK_NAME      (ntpdsim_opt_strs+1852)
 /** Name string for the nofork option */
-#define NOFORK_name      (ntpdsim_opt_strs+1834)
+#define NOFORK_name      (ntpdsim_opt_strs+1859)
 /** Other options that appear in conjunction with the nofork option */
 static int const aNoforkCantList[] = {
     INDEX_OPT_WAIT_SYNC, NO_EQUIVALENT };
@@ -468,11 +468,11 @@ static int const aNoforkCantList[] = {
  *  nice option description:
  */
 /** Descriptive text for the nice option */
-#define NICE_DESC      (ntpdsim_opt_strs+1841)
+#define NICE_DESC      (ntpdsim_opt_strs+1866)
 /** Upper-cased name for the nice option */
-#define NICE_NAME      (ntpdsim_opt_strs+1862)
+#define NICE_NAME      (ntpdsim_opt_strs+1887)
 /** Name string for the nice option */
-#define NICE_name      (ntpdsim_opt_strs+1867)
+#define NICE_name      (ntpdsim_opt_strs+1892)
 /** Compiled in flag settings for the nice option */
 #define NICE_FLAGS     (OPTST_DISABLED)
 
@@ -480,11 +480,11 @@ static int const aNoforkCantList[] = {
  *  pidfile option description:
  */
 /** Descriptive text for the pidfile option */
-#define PIDFILE_DESC      (ntpdsim_opt_strs+1872)
+#define PIDFILE_DESC      (ntpdsim_opt_strs+1897)
 /** Upper-cased name for the pidfile option */
-#define PIDFILE_NAME      (ntpdsim_opt_strs+1893)
+#define PIDFILE_NAME      (ntpdsim_opt_strs+1918)
 /** Name string for the pidfile option */
-#define PIDFILE_name      (ntpdsim_opt_strs+1901)
+#define PIDFILE_name      (ntpdsim_opt_strs+1926)
 /** Compiled in flag settings for the pidfile option */
 #define PIDFILE_FLAGS     (OPTST_DISABLED \
         | OPTST_SET_ARGTYPE(OPARG_TYPE_STRING))
@@ -493,11 +493,11 @@ static int const aNoforkCantList[] = {
  *  priority option description:
  */
 /** Descriptive text for the priority option */
-#define PRIORITY_DESC      (ntpdsim_opt_strs+1909)
+#define PRIORITY_DESC      (ntpdsim_opt_strs+1934)
 /** Upper-cased name for the priority option */
-#define PRIORITY_NAME      (ntpdsim_opt_strs+1926)
+#define PRIORITY_NAME      (ntpdsim_opt_strs+1951)
 /** Name string for the priority option */
-#define PRIORITY_name      (ntpdsim_opt_strs+1935)
+#define PRIORITY_name      (ntpdsim_opt_strs+1960)
 /** Compiled in flag settings for the priority option */
 #define PRIORITY_FLAGS     (OPTST_DISABLED \
         | OPTST_SET_ARGTYPE(OPARG_TYPE_NUMERIC))
@@ -507,11 +507,11 @@ static int const aNoforkCantList[] = {
  *  "Must also have options" and "Incompatible options":
  */
 /** Descriptive text for the quit option */
-#define QUIT_DESC      (ntpdsim_opt_strs+1944)
+#define QUIT_DESC      (ntpdsim_opt_strs+1969)
 /** Upper-cased name for the quit option */
-#define QUIT_NAME      (ntpdsim_opt_strs+1966)
+#define QUIT_NAME      (ntpdsim_opt_strs+1991)
 /** Name string for the quit option */
-#define QUIT_name      (ntpdsim_opt_strs+1971)
+#define QUIT_name      (ntpdsim_opt_strs+1996)
 /** Other options that appear in conjunction with the quit option */
 static int const aQuitCantList[] = {
     INDEX_OPT_SAVECONFIGQUIT,
@@ -523,11 +523,11 @@ static int const aQuitCantList[] = {
  *  propagationdelay option description:
  */
 /** Descriptive text for the propagationdelay option */
-#define PROPAGATIONDELAY_DESC      (ntpdsim_opt_strs+1976)
+#define PROPAGATIONDELAY_DESC      (ntpdsim_opt_strs+2001)
 /** Upper-cased name for the propagationdelay option */
-#define PROPAGATIONDELAY_NAME      (ntpdsim_opt_strs+2004)
+#define PROPAGATIONDELAY_NAME      (ntpdsim_opt_strs+2029)
 /** Name string for the propagationdelay option */
-#define PROPAGATIONDELAY_name      (ntpdsim_opt_strs+2021)
+#define PROPAGATIONDELAY_name      (ntpdsim_opt_strs+2046)
 /** Compiled in flag settings for the propagationdelay option */
 #define PROPAGATIONDELAY_FLAGS     (OPTST_DISABLED \
         | OPTST_SET_ARGTYPE(OPARG_TYPE_STRING))
@@ -538,11 +538,11 @@ static int const aQuitCantList[] = {
  */
 #ifdef SAVECONFIG
 /** Descriptive text for the saveconfigquit option */
-#define SAVECONFIGQUIT_DESC      (ntpdsim_opt_strs+2038)
+#define SAVECONFIGQUIT_DESC      (ntpdsim_opt_strs+2063)
 /** Upper-cased name for the saveconfigquit option */
-#define SAVECONFIGQUIT_NAME      (ntpdsim_opt_strs+2073)
+#define SAVECONFIGQUIT_NAME      (ntpdsim_opt_strs+2098)
 /** Name string for the saveconfigquit option */
-#define SAVECONFIGQUIT_name      (ntpdsim_opt_strs+2088)
+#define SAVECONFIGQUIT_name      (ntpdsim_opt_strs+2113)
 /** Other options that appear in conjunction with the saveconfigquit option */
 static int const aSaveconfigquitCantList[] = {
     INDEX_OPT_QUIT,
@@ -563,11 +563,11 @@ static int const aSaveconfigquitCantList[] = {
  *  statsdir option description:
  */
 /** Descriptive text for the statsdir option */
-#define STATSDIR_DESC      (ntpdsim_opt_strs+2103)
+#define STATSDIR_DESC      (ntpdsim_opt_strs+2128)
 /** Upper-cased name for the statsdir option */
-#define STATSDIR_NAME      (ntpdsim_opt_strs+2128)
+#define STATSDIR_NAME      (ntpdsim_opt_strs+2153)
 /** Name string for the statsdir option */
-#define STATSDIR_name      (ntpdsim_opt_strs+2137)
+#define STATSDIR_name      (ntpdsim_opt_strs+2162)
 /** Compiled in flag settings for the statsdir option */
 #define STATSDIR_FLAGS     (OPTST_DISABLED \
         | OPTST_SET_ARGTYPE(OPARG_TYPE_STRING))
@@ -576,11 +576,11 @@ static int const aSaveconfigquitCantList[] = {
  *  trustedkey option description:
  */
 /** Descriptive text for the trustedkey option */
-#define TRUSTEDKEY_DESC      (ntpdsim_opt_strs+2146)
+#define TRUSTEDKEY_DESC      (ntpdsim_opt_strs+2171)
 /** Upper-cased name for the trustedkey option */
-#define TRUSTEDKEY_NAME      (ntpdsim_opt_strs+2165)
+#define TRUSTEDKEY_NAME      (ntpdsim_opt_strs+2190)
 /** Name string for the trustedkey option */
-#define TRUSTEDKEY_name      (ntpdsim_opt_strs+2176)
+#define TRUSTEDKEY_name      (ntpdsim_opt_strs+2201)
 /** Compiled in flag settings for the trustedkey option */
 #define TRUSTEDKEY_FLAGS     (OPTST_DISABLED | OPTST_STACKED \
         | OPTST_SET_ARGTYPE(OPARG_TYPE_STRING))
@@ -590,11 +590,11 @@ static int const aSaveconfigquitCantList[] = {
  */
 #ifdef HAVE_DROPROOT
 /** Descriptive text for the user option */
-#define USER_DESC      (ntpdsim_opt_strs+2187)
+#define USER_DESC      (ntpdsim_opt_strs+2212)
 /** Upper-cased name for the user option */
-#define USER_NAME      (ntpdsim_opt_strs+2221)
+#define USER_NAME      (ntpdsim_opt_strs+2246)
 /** Name string for the user option */
-#define USER_name      (ntpdsim_opt_strs+2226)
+#define USER_name      (ntpdsim_opt_strs+2251)
 /** Compiled in flag settings for the user option */
 #define USER_FLAGS     (OPTST_DISABLED \
         | OPTST_SET_ARGTYPE(OPARG_TYPE_STRING))
@@ -604,18 +604,18 @@ static int const aSaveconfigquitCantList[] = {
 #define USER_NAME      NULL
 /** Descriptive text for the user option */
 #define USER_DESC      (ntpdsim_opt_strs+1497)
-#define USER_name      (ntpdsim_opt_strs+2226)
+#define USER_name      (ntpdsim_opt_strs+2251)
 #endif  /* HAVE_DROPROOT */
 
 /**
  *  updateinterval option description:
  */
 /** Descriptive text for the updateinterval option */
-#define UPDATEINTERVAL_DESC      (ntpdsim_opt_strs+2231)
+#define UPDATEINTERVAL_DESC      (ntpdsim_opt_strs+2256)
 /** Upper-cased name for the updateinterval option */
-#define UPDATEINTERVAL_NAME      (ntpdsim_opt_strs+2295)
+#define UPDATEINTERVAL_NAME      (ntpdsim_opt_strs+2320)
 /** Name string for the updateinterval option */
-#define UPDATEINTERVAL_name      (ntpdsim_opt_strs+2310)
+#define UPDATEINTERVAL_name      (ntpdsim_opt_strs+2335)
 /** Compiled in flag settings for the updateinterval option */
 #define UPDATEINTERVAL_FLAGS     (OPTST_DISABLED \
         | OPTST_SET_ARGTYPE(OPARG_TYPE_NUMERIC))
@@ -624,11 +624,11 @@ static int const aSaveconfigquitCantList[] = {
  *  var option description:
  */
 /** Descriptive text for the var option */
-#define VAR_DESC      (ntpdsim_opt_strs+2325)
+#define VAR_DESC      (ntpdsim_opt_strs+2350)
 /** Upper-cased name for the var option */
-#define VAR_NAME      (ntpdsim_opt_strs+2355)
+#define VAR_NAME      (ntpdsim_opt_strs+2380)
 /** Name string for the var option */
-#define VAR_name      (ntpdsim_opt_strs+2359)
+#define VAR_name      (ntpdsim_opt_strs+2384)
 /** Compiled in flag settings for the var option */
 #define VAR_FLAGS     (OPTST_DISABLED | OPTST_STACKED \
         | OPTST_SET_ARGTYPE(OPARG_TYPE_STRING))
@@ -637,11 +637,11 @@ static int const aSaveconfigquitCantList[] = {
  *  dvar option description:
  */
 /** Descriptive text for the dvar option */
-#define DVAR_DESC      (ntpdsim_opt_strs+2363)
+#define DVAR_DESC      (ntpdsim_opt_strs+2388)
 /** Upper-cased name for the dvar option */
-#define DVAR_NAME      (ntpdsim_opt_strs+2397)
+#define DVAR_NAME      (ntpdsim_opt_strs+2422)
 /** Name string for the dvar option */
-#define DVAR_name      (ntpdsim_opt_strs+2402)
+#define DVAR_name      (ntpdsim_opt_strs+2427)
 /** Compiled in flag settings for the dvar option */
 #define DVAR_FLAGS     (OPTST_DISABLED | OPTST_STACKED \
         | OPTST_SET_ARGTYPE(OPARG_TYPE_STRING))
@@ -652,11 +652,11 @@ static int const aSaveconfigquitCantList[] = {
  */
 #ifdef HAVE_WORKING_FORK
 /** Descriptive text for the wait-sync option */
-#define WAIT_SYNC_DESC      (ntpdsim_opt_strs+2407)
+#define WAIT_SYNC_DESC      (ntpdsim_opt_strs+2432)
 /** Upper-cased name for the wait-sync option */
-#define WAIT_SYNC_NAME      (ntpdsim_opt_strs+2444)
+#define WAIT_SYNC_NAME      (ntpdsim_opt_strs+2469)
 /** Name string for the wait-sync option */
-#define WAIT_SYNC_name      (ntpdsim_opt_strs+2454)
+#define WAIT_SYNC_name      (ntpdsim_opt_strs+2479)
 /** Other options that appear in conjunction with the wait-sync option */
 static int const aWait_SyncCantList[] = {
     INDEX_OPT_NOFORK,
@@ -678,11 +678,11 @@ static int const aWait_SyncCantList[] = {
  *  slew option description:
  */
 /** Descriptive text for the slew option */
-#define SLEW_DESC      (ntpdsim_opt_strs+2464)
+#define SLEW_DESC      (ntpdsim_opt_strs+2489)
 /** Upper-cased name for the slew option */
-#define SLEW_NAME      (ntpdsim_opt_strs+2487)
+#define SLEW_NAME      (ntpdsim_opt_strs+2512)
 /** Name string for the slew option */
-#define SLEW_name      (ntpdsim_opt_strs+2492)
+#define SLEW_name      (ntpdsim_opt_strs+2517)
 /** Compiled in flag settings for the slew option */
 #define SLEW_FLAGS     (OPTST_DISABLED)
 
@@ -691,11 +691,11 @@ static int const aWait_SyncCantList[] = {
  */
 #ifdef SYS_WINNT
 /** Descriptive text for the usepcc option */
-#define USEPCC_DESC      (ntpdsim_opt_strs+2497)
+#define USEPCC_DESC      (ntpdsim_opt_strs+2522)
 /** Upper-cased name for the usepcc option */
-#define USEPCC_NAME      (ntpdsim_opt_strs+2534)
+#define USEPCC_NAME      (ntpdsim_opt_strs+2559)
 /** Name string for the usepcc option */
-#define USEPCC_name      (ntpdsim_opt_strs+2541)
+#define USEPCC_name      (ntpdsim_opt_strs+2566)
 /** Compiled in flag settings for the usepcc option */
 #define USEPCC_FLAGS     (OPTST_DISABLED)
 
@@ -711,11 +711,11 @@ static int const aWait_SyncCantList[] = {
  */
 #ifdef SYS_WINNT
 /** Descriptive text for the pccfreq option */
-#define PCCFREQ_DESC      (ntpdsim_opt_strs+2548)
+#define PCCFREQ_DESC      (ntpdsim_opt_strs+2573)
 /** Upper-cased name for the pccfreq option */
-#define PCCFREQ_NAME      (ntpdsim_opt_strs+2591)
+#define PCCFREQ_NAME      (ntpdsim_opt_strs+2616)
 /** Name string for the pccfreq option */
-#define PCCFREQ_name      (ntpdsim_opt_strs+2599)
+#define PCCFREQ_name      (ntpdsim_opt_strs+2624)
 /** Compiled in flag settings for the pccfreq option */
 #define PCCFREQ_FLAGS     (OPTST_DISABLED \
         | OPTST_SET_ARGTYPE(OPARG_TYPE_STRING))
@@ -732,11 +732,11 @@ static int const aWait_SyncCantList[] = {
  */
 #ifdef HAVE_DNSREGISTRATION
 /** Descriptive text for the mdns option */
-#define MDNS_DESC      (ntpdsim_opt_strs+2607)
+#define MDNS_DESC      (ntpdsim_opt_strs+2632)
 /** Upper-cased name for the mdns option */
-#define MDNS_NAME      (ntpdsim_opt_strs+2642)
+#define MDNS_NAME      (ntpdsim_opt_strs+2667)
 /** Name string for the mdns option */
-#define MDNS_name      (ntpdsim_opt_strs+2647)
+#define MDNS_name      (ntpdsim_opt_strs+2672)
 /** Compiled in flag settings for the mdns option */
 #define MDNS_FLAGS     (OPTST_DISABLED)
 
@@ -750,11 +750,11 @@ static int const aWait_SyncCantList[] = {
 /*
  *  Help/More_Help/Version option descriptions:
  */
-#define HELP_DESC       (ntpdsim_opt_strs+2652)
-#define HELP_name       (ntpdsim_opt_strs+2696)
+#define HELP_DESC       (ntpdsim_opt_strs+2677)
+#define HELP_name       (ntpdsim_opt_strs+2721)
 #ifdef HAVE_WORKING_FORK
-#define MORE_HELP_DESC  (ntpdsim_opt_strs+2701)
-#define MORE_HELP_name  (ntpdsim_opt_strs+2746)
+#define MORE_HELP_DESC  (ntpdsim_opt_strs+2726)
+#define MORE_HELP_name  (ntpdsim_opt_strs+2771)
 #define MORE_HELP_FLAGS (OPTST_IMM | OPTST_NO_INIT)
 #else
 #define MORE_HELP_DESC  HELP_DESC
@@ -767,19 +767,19 @@ static int const aWait_SyncCantList[] = {
 #  define VER_FLAGS     (OPTST_SET_ARGTYPE(OPARG_TYPE_STRING) | \
                          OPTST_ARG_OPTIONAL | OPTST_IMM | OPTST_NO_INIT)
 #endif
-#define VER_DESC        (ntpdsim_opt_strs+2756)
-#define VER_name        (ntpdsim_opt_strs+2792)
-#define SAVE_OPTS_DESC  (ntpdsim_opt_strs+2800)
-#define SAVE_OPTS_name  (ntpdsim_opt_strs+2839)
-#define LOAD_OPTS_DESC     (ntpdsim_opt_strs+2849)
-#define LOAD_OPTS_NAME     (ntpdsim_opt_strs+2881)
-#define NO_LOAD_OPTS_name  (ntpdsim_opt_strs+2891)
-#define LOAD_OPTS_pfx      (ntpdsim_opt_strs+2904)
+#define VER_DESC        (ntpdsim_opt_strs+2781)
+#define VER_name        (ntpdsim_opt_strs+2817)
+#define SAVE_OPTS_DESC  (ntpdsim_opt_strs+2825)
+#define SAVE_OPTS_name  (ntpdsim_opt_strs+2864)
+#define LOAD_OPTS_DESC     (ntpdsim_opt_strs+2874)
+#define LOAD_OPTS_NAME     (ntpdsim_opt_strs+2906)
+#define NO_LOAD_OPTS_name  (ntpdsim_opt_strs+2916)
+#define LOAD_OPTS_pfx      (ntpdsim_opt_strs+2929)
 #define LOAD_OPTS_name     (NO_LOAD_OPTS_name + 3)
 /**
  *  Declare option callback procedures
  */
-/* extracted from optmain.tlib near line 745 */
+/* extracted from optmain.tlib near line 723 */
 
 #if defined(TEST_NTPDSIM_OPTS)
 /*
@@ -1298,24 +1298,24 @@ static tOptDesc optDesc[OPTION_CT] = {
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 /** Reference to the upper cased version of ntpdsim. */
-#define zPROGNAME       (ntpdsim_opt_strs+2907)
+#define zPROGNAME       (ntpdsim_opt_strs+2932)
 /** Reference to the title line for ntpdsim usage. */
-#define zUsageTitle     (ntpdsim_opt_strs+2915)
+#define zUsageTitle     (ntpdsim_opt_strs+2940)
 /** ntpdsim configuration file name. */
-#define zRcName         (ntpdsim_opt_strs+3038)
+#define zRcName         (ntpdsim_opt_strs+3063)
 /** Directories to search for ntpdsim config files. */
 static char const * const apzHomeList[3] = {
-    ntpdsim_opt_strs+3030,
-    ntpdsim_opt_strs+3036,
+    ntpdsim_opt_strs+3055,
+    ntpdsim_opt_strs+3061,
     NULL };
 /** The ntpdsim program bug email address. */
-#define zBugsAddr       (ntpdsim_opt_strs+3045)
+#define zBugsAddr       (ntpdsim_opt_strs+3070)
 /** Clarification/explanation of what ntpdsim does. */
 #define zExplain        (NULL)
 /** Extra detail explaining what ntpdsim does. */
-#define zDetail         (ntpdsim_opt_strs+3079)
+#define zDetail         (ntpdsim_opt_strs+3104)
 /** The full version string for ntpdsim. */
-#define zFullVersion    (ntpdsim_opt_strs+3081)
+#define zFullVersion    (ntpdsim_opt_strs+3106)
 /* extracted from optcode.tlib near line 364 */
 
 #if defined(ENABLE_NLS)
@@ -1348,6 +1348,7 @@ doUsageOpt(tOptions * opts, tOptDesc * od)
     ex_code = NTPDSIM_EXIT_SUCCESS;
     optionUsage(&ntpdsimOptions, ex_code);
     /* NOTREACHED */
+    exit(1);
     (void)opts;
     (void)od;
 }
@@ -1402,7 +1403,7 @@ main(int argc, char ** argv)
     return res;
 }
 #endif  /* TEST_NTPDSIM_OPTS END-TEST-MAIN-PROCEDURE */
-/* extracted from optmain.tlib near line 1266 */
+/* extracted from optmain.tlib near line 1245 */
 
 /**
  * The directory containing the data associated with ntpdsim.
@@ -1602,7 +1603,7 @@ static void bogus_function(void) {
      translate option names.
    */
   /* referenced via ntpdsimOptions.pzCopyright */
-  puts(_("ntpdsim 4.2.7p377\n\
+  puts(_("ntpdsim 4.2.7p435\n\
 Copyright (C) 1970-2013 The University of Delaware, all rights reserved.\n\
 This is free software. It is licensed for use, modification and\n\
 redistribution under the terms of the NTP License, copies of which\n\
@@ -1655,7 +1656,7 @@ provided \"as is\" without express or implied warranty.\n"));
   puts(_("Jail directory"));
 
   /* referenced via ntpdsimOptions.pOptDesc->pzText */
-  puts(_("built without --enable-clockctl or --enable-linuxcaps"));
+  puts(_("built without --enable-clockctl or --enable-linuxcaps or --enable-solarisprivs"));
 
   /* referenced via ntpdsimOptions.pOptDesc->pzText */
   puts(_("Listen on an interface name or address"));
@@ -1703,7 +1704,7 @@ provided \"as is\" without express or implied warranty.\n"));
   puts(_("Run as userid (or userid:groupid)"));
 
   /* referenced via ntpdsimOptions.pOptDesc->pzText */
-  puts(_("built without --enable-clockctl or --enable-linuxcaps"));
+  puts(_("built without --enable-clockctl or --enable-linuxcaps or --enable-solarisprivs"));
 
   /* referenced via ntpdsimOptions.pOptDesc->pzText */
   puts(_("interval in seconds between scans for new or dropped interfaces"));
@@ -1745,14 +1746,14 @@ provided \"as is\" without express or implied warranty.\n"));
   puts(_("load options from a config file"));
 
   /* referenced via ntpdsimOptions.pzUsageTitle */
-  puts(_("ntpdsim - NTP daemon simulation program - Ver. 4.2.7p377\n\
+  puts(_("ntpdsim - NTP daemon simulation program - Ver. 4.2.7p435\n\
 Usage:  %s [ -<flag> [<val>] | --<name>[{=| }<val>] ]...\n"));
 
   /* referenced via ntpdsimOptions.pzDetail */
   puts(_("\n"));
 
   /* referenced via ntpdsimOptions.pzFullVersion */
-  puts(_("ntpdsim 4.2.7p377"));
+  puts(_("ntpdsim 4.2.7p435"));
 
   /* referenced via ntpdsimOptions.pzFullUsage */
   puts(_("<<<NOT-FOUND>>>"));
@@ -1777,7 +1778,7 @@ Usage:  %s [ -<flag> [<val>] | --<name>[{=| }<val>] ]...\n"));
   puts(_("\tThis is less than the minimum library version:  "));
 #line 121 "../version.c"
   puts(_("Automated Options version %s\n"
-       "\tCopyright (C) 1999-2013 by Bruce Korb - all rights reserved\n"));
+       "\tCopyright (C) 1999-2014 by Bruce Korb - all rights reserved\n"));
 #line 82 "../makeshell.c"
   puts(_("(AutoOpts bug):  %s.\n"));
 #line 90 "../reset.c"
@@ -1866,15 +1867,15 @@ Usage:  %s [ -<flag> [<val>] | --<name>[{=| }<val>] ]...\n"));
   puts(_("%s error: no saved option state\n"));
 #line 231 "../autoopts.c"
   puts(_("'%s' is not a command line option.\n"));
-#line 114 "../time.c"
+#line 111 "../time.c"
   puts(_("%s error:  '%s' is not a recognizable date/time.\n"));
 #line 132 "../save.c"
   puts(_("'%s' not defined\n"));
-#line 53 "../time.c"
+#line 50 "../time.c"
   puts(_("%s error:  '%s' is not a recognizable time duration.\n"));
 #line 92 "../check.c"
   puts(_("%s error:  The %s option must appear %d times.\n"));
-#line 157 "../numeric.c"
+#line 164 "../numeric.c"
   puts(_("%s error:  '%s' is not a recognizable number.\n"));
 #line 200 "../enum.c"
   puts(_("%s error:  %s exceeds %s keyword count\n"));
