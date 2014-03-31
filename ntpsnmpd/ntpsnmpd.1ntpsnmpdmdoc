@@ -3,7 +3,7 @@
 .Os
 .\"  EDIT THIS FILE WITH CAUTION  (ntpsnmpd-opts.mdoc)
 .\"
-.\"  It has been AutoGen-ed  March 31, 2014 at 02:46:33 AM by AutoGen 5.18.3pre18
+.\"  It has been AutoGen-ed  March 31, 2014 at 10:49:22 AM by AutoGen 5.18.3pre18
 .\"  From the definitions    ntpsnmpd-opts.def
 .\"  and the template file   agmdoc-cmd.tpl
 .Sh NAME
