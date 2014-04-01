@@ -1,3 +1,4 @@
+(4.2.7p438) 2014/04/01 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 2546] Windows build documentation updates.
 (4.2.7p437) 2014/03/31 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 2537] ntpd truncates symmetric keys to 20 bytes.
