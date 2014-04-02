@@ -561,6 +561,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\..\..\libntp\vint64ops.c"
+				>
+			</File>
+			<File
 				RelativePath="..\..\libntp\win32_io.c"
 				>
 			</File>
@@ -870,11 +874,11 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\..\lib\isc\win32\include\isc\time.h"
+				RelativePath="..\..\include\sys\time.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\include\sys\time.h"
+				RelativePath="..\..\..\..\lib\isc\win32\include\isc\time.h"
 				>
 			</File>
 			<File
@@ -887,6 +891,10 @@
 			</File>
 			<File
 				RelativePath="..\..\..\..\include\timevalops.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\..\include\vint64ops.h"
 				>
 			</File>
 			<File
