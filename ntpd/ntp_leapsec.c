@@ -427,7 +427,7 @@ leapsec_load_file(
 		}
 		return FALSE;
 	}
-	msyslog(LOG_NOTICE, "%s '%s' loaded", logPrefix, fname);	
+	msyslog(LOG_NOTICE, "%s ('%s'): loaded", logPrefix, fname);	
 	return leapsec_set_table(pt);
 }
 
