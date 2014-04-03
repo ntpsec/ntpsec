@@ -10,11 +10,11 @@
 .ds B-Font B
 .ds I-Font I
 .ds R-Font R
-.TH ntptrace @NTPTRACE_MS@ "01 Apr 2014" "ntp (4.2.7p438)" "User Commands"
+.TH ntptrace @NTPTRACE_MS@ "02 Apr 2014" "ntp (4.2.7p439)" "User Commands"
 .\"
-.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-mkaak0/ag-_kaqj0)
+.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-4FaOQV/ag-gGa4PV)
 .\"
-.\" It has been AutoGen-ed April 1, 2014 at 10:37:05 AM by AutoGen 5.18.3pre18
+.\" It has been AutoGen-ed April 2, 2014 at 10:40:04 AM by AutoGen 5.18.3pre18
 .\" From the definitions ntptrace-opts.def
 .\" and the template file agman-cmd.tpl
 .SH NAME
@@ -96,11 +96,11 @@ Output version of program and exit.  The default mode is `v', a simple
 version.  The `c' mode will print copyright information and `n' will
 print the full copyright notice.
 .PP
-.TH ntptrace @NTPTRACE_MS@ "01 Apr 2014" "ntp (4.2.7p438)" "User Commands"
+.TH ntptrace @NTPTRACE_MS@ "02 Apr 2014" "ntp (4.2.7p439)" "User Commands"
 .\"
-.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-mkaak0/ag-_kaqj0)
+.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-4FaOQV/ag-gGa4PV)
 .\"
-.\" It has been AutoGen-ed April 1, 2014 at 10:37:05 AM by AutoGen 5.18.3pre18
+.\" It has been AutoGen-ed April 2, 2014 at 10:40:04 AM by AutoGen 5.18.3pre18
 .\" From the definitions ntptrace-opts.def
 .\" and the template file agman-cmd.tpl
 .SH NAME
