@@ -1,3 +1,4 @@
+* [Bug 2536] ntpd sandboxing support (libseccomp2) cleanup.
 (4.2.7p439) 2014/04/03 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 2589] fix VS2009 compile problem.
 (4.2.7p438) 2014/04/01 Released by Harlan Stenn <stenn@ntp.org>
