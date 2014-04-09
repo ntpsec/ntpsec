@@ -10,11 +10,11 @@
 .ds B-Font B
 .ds I-Font I
 .ds R-Font R
-.TH ntp-wait @NTP_WAIT_MS@ "02 Apr 2014" "ntp (4.2.7p439)" "User Commands"
+.TH ntp-wait @NTP_WAIT_MS@ "08 Apr 2014" "ntp (4.2.7p440)" "User Commands"
 .\"
-.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-3ja4_T/ag-ekai_T)
+.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-ugaylL/ag-HgaOkL)
 .\"
-.\" It has been AutoGen-ed April 2, 2014 at 10:39:42 AM by AutoGen 5.18.3pre18
+.\" It has been AutoGen-ed April 8, 2014 at 11:25:28 AM by AutoGen 5.18.3pre18
 .\" From the definitions ntp-wait-opts.def
 .\" and the template file agman-cmd.tpl
 .SH NAME
@@ -97,11 +97,11 @@ Output version of program and exit.  The default mode is `v', a simple
 version.  The `c' mode will print copyright information and `n' will
 print the full copyright notice.
 .PP
-.TH ntp-wait @NTP_WAIT_MS@ "02 Apr 2014" "ntp (4.2.7p439)" "User Commands"
+.TH ntp-wait @NTP_WAIT_MS@ "08 Apr 2014" "ntp (4.2.7p440)" "User Commands"
 .\"
-.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-3ja4_T/ag-ekai_T)
+.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-ugaylL/ag-HgaOkL)
 .\"
-.\" It has been AutoGen-ed April 2, 2014 at 10:39:42 AM by AutoGen 5.18.3pre18
+.\" It has been AutoGen-ed April 8, 2014 at 11:25:28 AM by AutoGen 5.18.3pre18
 .\" From the definitions ntp-wait-opts.def
 .\" and the template file agman-cmd.tpl
 .SH NAME
