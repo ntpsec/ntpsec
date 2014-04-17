@@ -493,11 +493,7 @@ stats_config(
 			msyslog(LOG_ERR,
 			    "leapseconds: stat(%s) failed: %m",
 			    leapseconds_file);
-		} else if (!leapsec_load_file(fp, TRUE, FALSE)) {
-			msyslog(LOG_ERR,
-				"format error leapseconds file %s",
-				leapseconds_file);
-		} else {
+		} else if (leapsec_load_file(fp, leapseconds_file)) {
 			leap_signature_t lsig;
 
 			leapsec_getsig(&lsig);
@@ -902,12 +898,8 @@ check_leap_file(
 		} else if (  (sp1->st_mtime != sp2->st_mtime)
 			  || (sp1->st_ctime != sp2->st_ctime)) {
 			leapseconds_file_sb1 = leapseconds_file_sb2;
-			if (!leapsec_load_file(fp, TRUE, FALSE)) {
-				msyslog(LOG_ERR,
-					"format error leapseconds file %s",
-					leapseconds_file);
+			if (!leapsec_load_file(fp, leapseconds_file))
 				rc = -1;
-			}
 		}
 		if (rc >= 0) {
 			rc = leapsec_daystolive(now.l_ui, NULL);

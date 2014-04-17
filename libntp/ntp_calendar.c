@@ -1269,25 +1269,48 @@ ntpcal_date_to_time(
  * ==================================================================
  */
 int
+ntpcal_ntp64_to_date(
+	struct calendar *jd,
+	const vint64    *ntp
+	)
+{
+	ntpcal_split ds;
+	
+	ds = ntpcal_daysplit(ntp);
+	ds.hi += ntpcal_daysec_to_date(jd, ds.lo);
+
+	return ntpcal_rd_to_date(jd, ds.hi + DAY_NTP_STARTS);
+}
+
+int
 ntpcal_ntp_to_date(
 	struct calendar *jd,
 	uint32_t	 ntp,
 	const time_t	*piv
 	)
 {
-	vint64	     vl;
-	ntpcal_split ds;
+	vint64	ntp64;
 	
 	/*
 	 * Unfold ntp time around current time into NTP domain. Split
 	 * into days and seconds, shift days into CE domain and
 	 * process the parts.
 	 */
-	vl = ntpcal_ntp_to_ntp(ntp, piv);
-	ds = ntpcal_daysplit(&vl);
-	ds.hi += ntpcal_daysec_to_date(jd, ds.lo);
+	ntp64 = ntpcal_ntp_to_ntp(ntp, piv);
+	return ntpcal_ntp64_to_date(jd, &ntp64);
+}
 
-	return ntpcal_rd_to_date(jd, ds.hi + DAY_NTP_STARTS);
+
+vint64
+ntpcal_date_to_ntp64(
+	const struct calendar *jd
+	)
+{
+	/*
+	 * Convert date to NTP. Ignore yearday, use d/m/y only.
+	 */
+	return ntpcal_dayjoin(ntpcal_date_to_rd(jd) - DAY_NTP_STARTS,
+			      ntpcal_date_to_daysec(jd));
 }
 
 
@@ -1297,11 +1320,12 @@ ntpcal_date_to_ntp(
 	)
 {
 	/*
-	 * Convert date to NTP. Ignore yearday, use d/m/y only.
+	 * Get lower half of 64-bit NTP timestamp from date/time.
 	 */
-	return ntpcal_dayjoin(ntpcal_date_to_rd(jd) - DAY_NTP_STARTS,
-			      ntpcal_date_to_daysec(jd)).d_s.lo;
+	return ntpcal_date_to_ntp64(jd).d_s.lo;
 }
+
+
 
 /*
  * ==================================================================
@@ -1503,23 +1527,19 @@ isocal_split_eraweeks(
  * stamp.
  */
 int
-isocal_ntp_to_date(
+isocal_ntp64_to_date(
 	struct isodate *id,
-	uint32_t		ntp,
-	const time_t   *piv
+	const vint64   *ntp
 	)
 {
-	vint64	     vl;
 	ntpcal_split ds;
 	int32_t      ts[3];
 	
 	/*
-	 * Unfold ntp time around current time into NTP domain. Split
-	 * into days and seconds, shift days into CE domain and
-	 * process the parts.
+	 * Split NTP time into days and seconds, shift days into CE
+	 * domain and process the parts.
 	 */
-	vl = ntpcal_ntp_to_ntp(ntp, piv);
-	ds = ntpcal_daysplit(&vl);
+	ds = ntpcal_daysplit(ntp);
 
 	/* split time part */
 	ds.hi += priv_timesplit(ts, ds.lo);
@@ -1544,12 +1564,29 @@ isocal_ntp_to_date(
 	return (ds.hi >= 0 && ds.hi < 0xFFFFU);
 }
 
+int
+isocal_ntp_to_date(
+	struct isodate *id,
+	uint32_t	ntp,
+	const time_t   *piv
+	)
+{
+	vint64	ntp64;
+	
+	/*
+	 * Unfold ntp time around current time into NTP domain, then
+	 * convert the full time stamp.
+	 */
+	ntp64 = ntpcal_ntp_to_ntp(ntp, piv);
+	return isocal_ntp64_to_date(id, &ntp64);
+}
+
 /*
  * Convert a ISO date spec into a second in the NTP time scale,
  * properly truncated to 32 bit.
  */
-uint32_t
-isocal_date_to_ntp(
+vint64
+isocal_date_to_ntp64(
 	const struct isodate *id
 	)
 {
@@ -1561,7 +1598,18 @@ isocal_date_to_ntp(
 	/* days is RDN of ISO date now */
 	secs = ntpcal_etime_to_seconds(id->hour, id->minute, id->second);
 
-	return ntpcal_dayjoin(days - DAY_NTP_STARTS, secs).d_s.lo;
+	return ntpcal_dayjoin(days - DAY_NTP_STARTS, secs);
+}
+
+uint32_t
+isocal_date_to_ntp(
+	const struct isodate *id
+	)
+{
+	/*
+	 * Get lower half of 64-bit NTP timestamp from date/time.
+	 */
+	return isocal_date_to_ntp64(id).d_s.lo;
 }
 
 /* -*-EOF-*- */

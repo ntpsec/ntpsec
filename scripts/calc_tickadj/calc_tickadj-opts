@@ -38,7 +38,7 @@ sub processOptions {
         'help|?', 'more-help'));
 
     $usage = <<'USAGE';
-calc_tickadj - Calculates "optimal" value for tick given ntp drift file. 4.2.7p411
+calc_tickadj - Calculates "optimal" value for tick given ntp drift file. - Ver. 4.2.7p435
 USAGE: calc_tickadj [ -<flag> [<val>] | --<name>[{=| }<val>] ]... 
 
     -d, --drift-file=str         Ntp drift file to use

@@ -1,11 +1,11 @@
 /*
  *  EDIT THIS FILE WITH CAUTION  (ntp-keygen-opts.c)
  *
- *  It has been AutoGen-ed  March  9, 2014 at 11:45:06 AM by AutoGen 5.18.3pre11
+ *  It has been AutoGen-ed  April  9, 2014 at 10:07:17 AM by AutoGen 5.18.3pre18
  *  From the definitions    ntp-keygen-opts.def
  *  and the template file   options
  *
- * Generated from AutoOpts 40:1:15 templates.
+ * Generated from AutoOpts 40:2:15 templates.
  *
  *  AutoOpts is a copyrighted work.  This source file is not encumbered
  *  by AutoOpts licensing, but is provided under the licensing terms chosen
@@ -72,7 +72,7 @@ extern FILE * option_usage_fp;
  *  static const strings for ntp-keygen options
  */
 static char const ntp_keygen_opt_strs[2369] =
-/*     0 */ "ntp-keygen (ntp) 4.2.7p432\n"
+/*     0 */ "ntp-keygen (ntp) 4.2.7p440\n"
             "Copyright (C) 1970-2013 The University of Delaware, all rights reserved.\n"
             "This is free software. It is licensed for use, modification and\n"
             "redistribution under the terms of the NTP License, copies of which\n"
@@ -163,14 +163,14 @@ static char const ntp_keygen_opt_strs[2369] =
 /*  2148 */ "no-load-opts\0"
 /*  2161 */ "no\0"
 /*  2164 */ "NTP_KEYGEN\0"
-/*  2175 */ "ntp-keygen (ntp) - Create a NTP host key - Ver. 4.2.7p432\n"
+/*  2175 */ "ntp-keygen (ntp) - Create a NTP host key - Ver. 4.2.7p440\n"
             "Usage:  %s [ -<flag> [<val>] | --<name>[{=| }<val>] ]...\n\0"
 /*  2291 */ "$HOME\0"
 /*  2297 */ ".\0"
 /*  2299 */ ".ntprc\0"
 /*  2306 */ "http://bugs.ntp.org, bugs@ntp.org\0"
 /*  2340 */ "\n\0"
-/*  2342 */ "ntp-keygen (ntp) 4.2.7p432";
+/*  2342 */ "ntp-keygen (ntp) 4.2.7p440";
 
 /**
  *  imbits option description:
@@ -1365,7 +1365,7 @@ static void bogus_function(void) {
      translate option names.
    */
   /* referenced via ntp_keygenOptions.pzCopyright */
-  puts(_("ntp-keygen (ntp) 4.2.7p432\n\
+  puts(_("ntp-keygen (ntp) 4.2.7p440\n\
 Copyright (C) 1970-2013 The University of Delaware, all rights reserved.\n\
 This is free software. It is licensed for use, modification and\n\
 redistribution under the terms of the NTP License, copies of which\n\
@@ -1463,14 +1463,14 @@ provided \"as is\" without express or implied warranty.\n"));
   puts(_("load options from a config file"));
 
   /* referenced via ntp_keygenOptions.pzUsageTitle */
-  puts(_("ntp-keygen (ntp) - Create a NTP host key - Ver. 4.2.7p432\n\
+  puts(_("ntp-keygen (ntp) - Create a NTP host key - Ver. 4.2.7p440\n\
 Usage:  %s [ -<flag> [<val>] | --<name>[{=| }<val>] ]...\n"));
 
   /* referenced via ntp_keygenOptions.pzExplain */
   puts(_("\n"));
 
   /* referenced via ntp_keygenOptions.pzFullVersion */
-  puts(_("ntp-keygen (ntp) 4.2.7p432"));
+  puts(_("ntp-keygen (ntp) 4.2.7p440"));
 
   /* referenced via ntp_keygenOptions.pzFullUsage */
   puts(_("<<<NOT-FOUND>>>"));
@@ -1495,7 +1495,7 @@ Usage:  %s [ -<flag> [<val>] | --<name>[{=| }<val>] ]...\n"));
   puts(_("\tThis is less than the minimum library version:  "));
 #line 121 "../version.c"
   puts(_("Automated Options version %s\n"
-       "\tCopyright (C) 1999-2013 by Bruce Korb - all rights reserved\n"));
+       "\tCopyright (C) 1999-2014 by Bruce Korb - all rights reserved\n"));
 #line 82 "../makeshell.c"
   puts(_("(AutoOpts bug):  %s.\n"));
 #line 90 "../reset.c"
@@ -1584,15 +1584,15 @@ Usage:  %s [ -<flag> [<val>] | --<name>[{=| }<val>] ]...\n"));
   puts(_("%s error: no saved option state\n"));
 #line 231 "../autoopts.c"
   puts(_("'%s' is not a command line option.\n"));
-#line 114 "../time.c"
+#line 111 "../time.c"
   puts(_("%s error:  '%s' is not a recognizable date/time.\n"));
 #line 132 "../save.c"
   puts(_("'%s' not defined\n"));
-#line 53 "../time.c"
+#line 50 "../time.c"
   puts(_("%s error:  '%s' is not a recognizable time duration.\n"));
 #line 92 "../check.c"
   puts(_("%s error:  The %s option must appear %d times.\n"));
-#line 157 "../numeric.c"
+#line 164 "../numeric.c"
   puts(_("%s error:  '%s' is not a recognizable number.\n"));
 #line 200 "../enum.c"
   puts(_("%s error:  %s exceeds %s keyword count\n"));

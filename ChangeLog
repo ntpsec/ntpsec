@@ -1,4 +1,26 @@
+(4.2.7p440) 2014/04/09 Released by Harlan Stenn <stenn@ntp.org>
+* [Bug 2536] ntpd sandboxing support (libseccomp2) cleanup.
+* [Bug 2570] cleanup: fix log format for successful leapfile load
+(4.2.7p439) 2014/04/03 Released by Harlan Stenn <stenn@ntp.org>
+* [Bug 2589] fix VS2009 compile problem.
+(4.2.7p438) 2014/04/01 Released by Harlan Stenn <stenn@ntp.org>
+* [Bug 2546] Windows build documentation updates.
+(4.2.7p437) 2014/03/31 Released by Harlan Stenn <stenn@ntp.org>
+* [Bug 2537] ntpd truncates symmetric keys to 20 bytes.
+* [Bug 2546] Documentation updates.
+(4.2.7p436) 2014/03/31 Released by Harlan Stenn <stenn@ntp.org>
+* Update to libopts-40.2.15, and autogen-5.18.3pre18.
+* [Bug 2311] Add more tags to mdoc2xxx.
+* [Bug 2502] Assorted text replacement errors in 4.2.7p345
+* [Bug 2538] ntp programs print exit code as part of the "usage" text.
+(4.2.7p435) 2014/03/29 Released by Harlan Stenn <stenn@ntp.org>
+* [Bug 2570] cleanup: reduced logging noise, moved some functions
+  into libntp.
+(4.2.7p434) 2014/03/21 Released by Harlan Stenn <stenn@ntp.org>
+* [Bug 2577] Update VS2013 solution and project files.
+(4.2.7p433) 2014/03/10 Released by Harlan Stenn <stenn@ntp.org>
 * Clean up last-update timestamps of html/*.html files.
+* [Bug 2546] Documentation updates.
 (4.2.7p432) 2014/03/09 Released by Harlan Stenn <stenn@ntp.org>
 * CID 711660: Do a non-NULL pointer assertion check a bit earlier.
 (4.2.7p431) 2014/03/05 Released by Harlan Stenn <stenn@ntp.org>

@@ -10,11 +10,11 @@
 .ds B-Font B
 .ds I-Font I
 .ds R-Font R
-.TH ntp-keygen @NTP_KEYGEN_MS@ "09 Mar 2014" "ntp (4.2.7p432)" "User Commands"
+.TH ntp-keygen @NTP_KEYGEN_MS@ "09 Apr 2014" "ntp (4.2.7p440)" "User Commands"
 .\"
-.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-Peaa7x/ag-4eaa6x)
+.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-cfainn/ag-vfaimn)
 .\"
-.\" It has been AutoGen-ed March 9, 2014 at 11:45:22 AM by AutoGen 5.18.3pre11
+.\" It has been AutoGen-ed April 9, 2014 at 10:07:39 AM by AutoGen 5.18.3pre18
 .\" From the definitions ntp-keygen-opts.def
 .\" and the template file agman-cmd.tpl
 .SH NAME
@@ -1161,11 +1161,11 @@ the configuration files.
 The \fIhomerc\fP files are "\fI$HOME\fP", and "\fI.\fP".
 If any of these are directories, then the file \fI.ntprc\fP
 is searched for within those directories.
-.TH ntp-keygen @NTP_KEYGEN_MS@ "09 Mar 2014" "ntp (4.2.7p432)" "User Commands"
+.TH ntp-keygen @NTP_KEYGEN_MS@ "09 Apr 2014" "ntp (4.2.7p440)" "User Commands"
 .\"
-.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-Peaa7x/ag-4eaa6x)
+.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-cfainn/ag-vfaimn)
 .\"
-.\" It has been AutoGen-ed March 9, 2014 at 11:45:22 AM by AutoGen 5.18.3pre11
+.\" It has been AutoGen-ed April 9, 2014 at 10:07:39 AM by AutoGen 5.18.3pre18
 .\" From the definitions ntp-keygen-opts.def
 .\" and the template file agman-cmd.tpl
 .SH NAME
@@ -1189,7 +1189,7 @@ test \-x "$cvt_prog" || die "'$cvt_prog' is not executable"
     for f in $list ; do cat $f ; echo ; done
     rm \-f $list
 } 1>.doc 2>/dev/null
-sed \-f .cmds .doc | /opt/csw/bin/ggrep \-E \-v '^[ 	]*$' | $cvt_prog
+/opt/csw/bin/ggrep \-E \-v '^[ 	]*$' .doc | $cvt_prog
 .SH USAGE
 The
 \f\*[B-Font]\-p\f[] \f\*[I-Font]password\f[]
@@ -1242,7 +1242,6 @@ Please report bugs to http://bugs.ntp.org .
 
 Please send bug reports to: http://bugs.ntp.org, bugs@ntp.org
 .SH NOTES
-This document corresponds to version 4.2.7p432 of NTP.
 Portions of this document came from FreeBSD.
 .sp \n(Ppu
 .ne 2

@@ -311,6 +311,9 @@
     <ClCompile Include="..\..\..\..\libntp\ymd2yd.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\lib\isc\sha1.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\..\sntp\libopts\ag-char-map.h">
@@ -546,6 +549,9 @@
     </ClInclude>
     <ClInclude Include="..\..\libntp\messages.h">
       <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\lib\isc\include\isc\sha1.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

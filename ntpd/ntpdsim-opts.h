@@ -1,11 +1,11 @@
 /*
  *  EDIT THIS FILE WITH CAUTION  (ntpdsim-opts.h)
  *
- *  It has been AutoGen-ed  August  1, 2013 at 02:05:43 AM by AutoGen 5.18.1pre3
+ *  It has been AutoGen-ed  March 30, 2014 at 01:32:59 AM by AutoGen 5.18.3pre18
  *  From the definitions    ntpdsim-opts.def
  *  and the template file   options
  *
- * Generated from AutoOpts 40:1:15 templates.
+ * Generated from AutoOpts 40:2:15 templates.
  *
  *  AutoOpts is a copyrighted work.  This header file is not encumbered
  *  by AutoOpts licensing, but is provided under the licensing terms chosen
@@ -53,7 +53,7 @@
  *  tolerable version is at least as old as what was current when the header
  *  template was released.
  */
-#define AO_TEMPLATE_VERSION 163841
+#define AO_TEMPLATE_VERSION 163842
 #if (AO_TEMPLATE_VERSION < OPTIONS_MINIMUM_VERSION) \
  || (AO_TEMPLATE_VERSION > OPTIONS_STRUCT_VERSION)
 # error option template version mismatches autoopts/options.h header
@@ -107,9 +107,9 @@ typedef enum {
 /** count of all options for ntpdsim */
 #define OPTION_CT    39
 /** ntpdsim version */
-#define NTPDSIM_VERSION       "4.2.7p377"
+#define NTPDSIM_VERSION       "4.2.7p435"
 /** Full ntpdsim version text */
-#define NTPDSIM_FULL_VERSION  "ntpdsim 4.2.7p377"
+#define NTPDSIM_FULL_VERSION  "ntpdsim 4.2.7p435"
 
 /**
  *  Interface defines for all options.  Replace "n" with the UPPER_CASED
@@ -365,29 +365,29 @@ typedef enum {
 #define OPT_VALUE_PRIORITY       (DESC(PRIORITY).optArg.argInt)
 #define VALUE_OPT_QUIT           'q'
 #define VALUE_OPT_PROPAGATIONDELAY 'r'
-#define VALUE_OPT_SAVECONFIGQUIT 22
+#define VALUE_OPT_SAVECONFIGQUIT 0x1001
 #define VALUE_OPT_STATSDIR       's'
 #define VALUE_OPT_TRUSTEDKEY     't'
 #define VALUE_OPT_USER           'u'
 #define VALUE_OPT_UPDATEINTERVAL 'U'
 
 #define OPT_VALUE_UPDATEINTERVAL (DESC(UPDATEINTERVAL).optArg.argInt)
-#define VALUE_OPT_VAR            27
-#define VALUE_OPT_DVAR           28
+#define VALUE_OPT_VAR            0x1002
+#define VALUE_OPT_DVAR           0x1003
 #define VALUE_OPT_WAIT_SYNC      'w'
 #ifdef HAVE_WORKING_FORK
 #define OPT_VALUE_WAIT_SYNC      (DESC(WAIT_SYNC).optArg.argInt)
 #endif /* HAVE_WORKING_FORK */
 #define VALUE_OPT_SLEW           'x'
-#define VALUE_OPT_USEPCC         31
-#define VALUE_OPT_PCCFREQ        32
+#define VALUE_OPT_USEPCC         0x1004
+#define VALUE_OPT_PCCFREQ        0x1005
 #define VALUE_OPT_MDNS           'm'
 /** option flag (value) for " (get "val-name") " option */
 #define VALUE_OPT_HELP          '?'
 /** option flag (value) for " (get "val-name") " option */
 #define VALUE_OPT_MORE_HELP     '!'
 /** option flag (value) for " (get "val-name") " option */
-#define VALUE_OPT_VERSION       INDEX_OPT_VERSION
+#define VALUE_OPT_VERSION       0x1006
 /** option flag (value) for " (get "val-name") " option */
 #define VALUE_OPT_SAVE_OPTS     '>'
 /** option flag (value) for " (get "val-name") " option */
@@ -427,6 +427,11 @@ extern tOptions ntpdsimOptions;
 #     include <libintl.h>
 #   endif
 
+# ifndef __attribute__
+#   define __attribute__(_a)
+# endif
+
+static inline char* aoGetsText(char const* pz) __attribute__ ((format_arg(1)));
 static inline char* aoGetsText(char const* pz) {
     if (pz == NULL) return NULL;
     return (char*)gettext(pz);

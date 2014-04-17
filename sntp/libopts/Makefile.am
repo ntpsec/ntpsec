@@ -7,7 +7,7 @@ noinst_LTLIBRARIES      = libopts.la
 endif
 libopts_la_SOURCES      = libopts.c
 libopts_la_CPPFLAGS     = -I$(top_srcdir)
-libopts_la_LDFLAGS      = -version-info  40:1:15
+libopts_la_LDFLAGS      = -version-info  40:2:15
 EXTRA_DIST              = \
     COPYING.gplv3           COPYING.lgplv3          COPYING.mbsd  \
     MakeDefs.inc            README                  ag-char-map.h  \

@@ -1,11 +1,11 @@
 /*
  *  EDIT THIS FILE WITH CAUTION  (ntpdc-opts.h)
  *
- *  It has been AutoGen-ed  March  9, 2014 at 11:41:52 AM by AutoGen 5.18.3pre11
+ *  It has been AutoGen-ed  April  9, 2014 at 10:04:57 AM by AutoGen 5.18.3pre18
  *  From the definitions    ntpdc-opts.def
  *  and the template file   options
  *
- * Generated from AutoOpts 40:1:15 templates.
+ * Generated from AutoOpts 40:2:15 templates.
  *
  *  AutoOpts is a copyrighted work.  This header file is not encumbered
  *  by AutoOpts licensing, but is provided under the licensing terms chosen
@@ -53,7 +53,7 @@
  *  tolerable version is at least as old as what was current when the header
  *  template was released.
  */
-#define AO_TEMPLATE_VERSION 163841
+#define AO_TEMPLATE_VERSION 163842
 #if (AO_TEMPLATE_VERSION < OPTIONS_MINIMUM_VERSION) \
  || (AO_TEMPLATE_VERSION > OPTIONS_STRUCT_VERSION)
 # error option template version mismatches autoopts/options.h header
@@ -83,9 +83,9 @@ typedef enum {
 /** count of all options for ntpdc */
 #define OPTION_CT    15
 /** ntpdc version */
-#define NTPDC_VERSION       "4.2.7p432"
+#define NTPDC_VERSION       "4.2.7p440"
 /** Full ntpdc version text */
-#define NTPDC_FULL_VERSION  "ntpdc 4.2.7p432"
+#define NTPDC_FULL_VERSION  "ntpdc 4.2.7p440"
 
 /**
  *  Interface defines for all options.  Replace "n" with the UPPER_CASED
@@ -252,6 +252,11 @@ extern tOptions ntpdcOptions;
 #     include <libintl.h>
 #   endif
 
+# ifndef __attribute__
+#   define __attribute__(_a)
+# endif
+
+static inline char* aoGetsText(char const* pz) __attribute__ ((format_arg(1)));
 static inline char* aoGetsText(char const* pz) {
     if (pz == NULL) return NULL;
     return (char*)gettext(pz);

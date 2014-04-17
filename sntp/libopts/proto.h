@@ -1,7 +1,7 @@
 /* -*- buffer-read-only: t -*- vi: set ro:
  *
  * Prototypes for autoopts
- * Generated Sun Nov 10 13:00:49 PST 2013
+ * Generated Sat Mar 29 11:01:18 PDT 2014
  */
 #ifndef AUTOOPTS_PROTO_H_GUARD
 #define AUTOOPTS_PROTO_H_GUARD 1
@@ -135,7 +135,7 @@ optionSort(tOptions * opts);
  *  Extracted from stack.c
  */
 static void
-addArgListEntry(void** ppAL, void* entry);
+addArgListEntry(void ** ppAL, void * entry);
 
 /*
  *  Extracted from usage.c
