@@ -10,6 +10,7 @@
 
 #include <config.h>
 #include <sys/types.h>
+#include <sys/stat.h>
 #include <ctype.h>
 
 #include "ntp_types.h"
@@ -19,8 +20,11 @@
 #include "ntp_leapsec.h"
 #include "ntp.h"
 #include "vint64ops.h"
+#include "lib_strbuf.h"
 
 #include "isc/sha1.h"
+
+static const char * const logPrefix = "leapsecond file";
 
 /* ---------------------------------------------------------------------
  * GCC is rather sticky with its 'const' attribute. We have to do it more
@@ -89,6 +93,7 @@ static int    betweenu32(uint32_t, uint32_t, uint32_t);
 static void   reset_times(leap_table_t*);
 static int    leapsec_add(leap_table_t*, const vint64*, int);
 static int    leapsec_raw(leap_table_t*, const vint64 *, int, int);
+static char * lstostr(const vint64 * ts);
 
 /* =====================================================================
  * Get & Set the current leap table
@@ -368,14 +373,12 @@ leapsec_reset_frame(void)
  * or this will fail.
  */
 int/*BOOL*/
-leapsec_load_file(
+leapsec_load_stream(
 	FILE       * ifp  ,
 	const char * fname)
 {
-	static const char * const logPrefix = "leapsecond file";
-
-	leap_table_t * pt;
-	int            rcheck;
+	leap_table_t *pt;
+	int           rcheck;
 
 	if (NULL == fname)
 		fname = "<unknown>";
@@ -389,7 +392,7 @@ leapsec_load_file(
 		break;
 
 	case LSVALID_NOHASH:
-		msyslog(LOG_INFO, "%s ('%s'): no hash signature",
+		msyslog(LOG_NOTICE, "%s ('%s'): no hash signature",
 			logPrefix, fname);
 		break;
 	case LSVALID_BADHASH:
@@ -427,8 +430,62 @@ leapsec_load_file(
 		}
 		return FALSE;
 	}
-	msyslog(LOG_NOTICE, "%s ('%s'): loaded", logPrefix, fname);	
+
+	if (pt->head.size)
+		msyslog(LOG_NOTICE, "%s ('%s'): loaded, expire=%s last=%s ofs=%d",
+			logPrefix, fname, lstostr(&pt->head.expire),
+			lstostr(&pt->info[0].ttime), pt->info[0].taiof);
+	else
+		msyslog(LOG_NOTICE,
+			"%s ('%s'): loaded, expire=%s ofs=%d (no entries after build date)",
+			logPrefix, fname, lstostr(&pt->head.expire),
+			pt->head.base_tai);
+	
 	return leapsec_set_table(pt);
+}
+
+/* ------------------------------------------------------------------ */
+int/*BOOL*/
+leapsec_load_file(
+	const char  * fname,
+	struct stat * sb_old,
+	int/*BOOL*/   force)
+{
+	FILE       * fp;
+	struct stat  sb_new;
+	int          rc;
+
+	/* just do nothing if there is no leap file */
+	if ( ! (fname && *fname))
+		return FALSE;
+	
+	/* try to stat the leapfile */
+	if (0 != stat(fname, &sb_new)) {
+		msyslog(LOG_ERR, "%s ('%s'): stat failed: %m",
+			logPrefix, fname);
+		return FALSE;
+	}
+
+	/* silently skip to postcheck if no new file found */
+	if (NULL != sb_old) {
+		if (!force                              &&
+		    sb_old->st_mtime == sb_new.st_mtime &&
+		    sb_old->st_ctime == sb_new.st_ctime  )
+			return FALSE;
+		*sb_old = sb_new;
+	}
+
+	/* try to open the leap file, complain if that fails */
+	if ((fp = fopen(fname, "r")) == NULL) {
+		msyslog(LOG_ERR,
+			"%s ('%s'): open failed: %m",
+			logPrefix, fname);
+		return FALSE;
+	}
+
+	rc = leapsec_load_stream(fp, fname);
+	fclose(fp);
+	return rc;
 }
 
 /* ------------------------------------------------------------------ */
@@ -906,5 +963,24 @@ leapsec_validate(
 		return LSVALID_BADHASH;
 	return LSVALID_GOODHASH;
 }
+
+/*
+ * lstostr - prettyprint NTP seconds
+ */
+static char * lstostr(
+	const vint64 * ts)
+{
+	char *		buf;
+	struct calendar tm;
+
+	LIB_GETBUF(buf);
+	ntpcal_ntp64_to_date(&tm, ts);
+	snprintf(buf, LIB_BUFLENGTH, "%04d-%02d-%02dT%02d:%02dZ",
+			 tm.year, tm.month, tm.monthday,
+			 tm.hour, tm.minute);
+	return buf;
+}
+
+
 
 /* -*- that's all folks! -*- */

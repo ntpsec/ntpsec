@@ -55,9 +55,9 @@
  * File names
  */
 static	char *key_file_name;		/* keys file name */
-char	*leapseconds_file;		/* leapseconds file name */
-struct stat leapseconds_file_sb1;	/* leapseconds file stat() buffer */
-struct stat leapseconds_file_sb2;	/* leapseconds file stat() buffer */
+static char	  *leapfile_name;		/* leapseconds file name */
+static struct stat leapfile_stat;	/* leapseconds file stat() buffer */
+static int /*BOOL*/have_leapfile = FALSE;
 char	*stats_drift_file;		/* frequency file name */
 static	char *stats_temp_file;		/* temp frequency file name */
 static double wander_resid;		/* last frequency update */
@@ -466,7 +466,7 @@ stats_config(
 			break;
 		}
 		fprintf(fp, "%d", (int)getpid());
-		fclose(fp);;
+		fclose(fp);
 		break;
 
 	/*
@@ -480,20 +480,10 @@ stats_config(
 		if (!value || (len = strlen(value)) == 0)
 			break;
 
-		leapseconds_file = erealloc(leapseconds_file, len + 1);
-		memcpy(leapseconds_file, value, len + 1);
+		leapfile_name = erealloc(leapfile_name, len + 1);
+		memcpy(leapfile_name, value, len + 1);
 
-		if ((fp = fopen(leapseconds_file, "r")) == NULL) {
-			msyslog(LOG_ERR, "leapseconds file %s: %m",
-			    leapseconds_file);
-			break;
-		}
-
-		if (-1 == fstat(fileno(fp), &leapseconds_file_sb1)) {
-			msyslog(LOG_ERR,
-			    "leapseconds: stat(%s) failed: %m",
-			    leapseconds_file);
-		} else if (leapsec_load_file(fp, leapseconds_file)) {
+		if (leapsec_load_file(leapfile_name, &leapfile_stat, TRUE)) {
 			leap_signature_t lsig;
 
 			leapsec_getsig(&lsig);
@@ -506,8 +496,8 @@ stats_config(
 					  ? "expired"
 					  : "expires",
 				      fstostr(lsig.etime));
+			have_leapfile = TRUE;
 		}
-		fclose(fp);
 		break;
 
 	default:
@@ -871,46 +861,46 @@ record_timing_stats(
  * without SHA1 signature is accepted, but if there is a signature line,
  * the signature must be valid or the file is rejected.
  */
-int
+void
 check_leap_file(
-	void
+	int           is_daily_check,
+	uint32_t      ntptime       ,
+	const time_t *systime
 	)
 {
-	FILE *fp;
-	struct stat *sp1 = &leapseconds_file_sb1;
-	struct stat *sp2 = &leapseconds_file_sb2;
-	int          rc  = INT_MAX; /* assume not expired for long a time */
-	l_fp         now;
+	static const char * const logPrefix = "leapsecond file";
+	int  rc;
 
+	/* just do nothing if there is no leap file */
+	if ( ! (leapfile_name && *leapfile_name))
+		return;
+	
+	/* try to load leapfile, force it if no leapfile loaded yet */
+	if (leapsec_load_file(
+		    leapfile_name, &leapfile_stat, !have_leapfile))
+		have_leapfile = TRUE;
+	else if (!have_leapfile)
+		return;
 
-	if (leapseconds_file) {
-		get_systime(&now);
-		if ((fp = fopen(leapseconds_file, "r")) == NULL) {
+	/* test the expiration of the leap data and log with proper
+	 * level and frequency (once/hour or once/day, depending on the
+	 * state.
+	 */
+	rc = leapsec_daystolive(ntptime, systime);	
+	if (rc == 0) {
+		msyslog(LOG_WARNING,
+			"%s ('%s'): will expire in less than one day",
+			logPrefix, leapfile_name);
+	} else if (is_daily_check && rc < 28) {
+		if (rc < 0)
 			msyslog(LOG_ERR,
-				"check_leap_file: fopen(%s): %m",
-				leapseconds_file);
-			rc = -1;
-		} else if (fstat(fileno(fp), &leapseconds_file_sb2)) {
-			msyslog(LOG_ERR,
-				"check_leap_file: stat(%s): %m",
-				leapseconds_file);
-			rc = -1;
-		} else if (  (sp1->st_mtime != sp2->st_mtime)
-			  || (sp1->st_ctime != sp2->st_ctime)) {
-			leapseconds_file_sb1 = leapseconds_file_sb2;
-			if (!leapsec_load_file(fp, leapseconds_file))
-				rc = -1;
-		}
-		if (rc >= 0) {
-			rc = leapsec_daystolive(now.l_ui, NULL);
-			if (rc < 0)
-				rc = 0;
-		}
-		if (fp != NULL)
-			fclose(fp);
+				"%s ('%s'): expired (%d days)",
+				logPrefix, leapfile_name, -rc);
+		else
+			msyslog(LOG_WARNING,
+				"%s ('%s'): will expire in less than %d days",
+				logPrefix, leapfile_name, 1+rc);
 	}
-
-	return rc;
 }
 
 
