@@ -1,3 +1,4 @@
+(4.2.7p441) 2014/05/04 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 2597] leap file processing -- loose ends
   log daily warning when leap info less than 28 days to expiration or
   already expired; nag hourly on last day before expiration; log when
