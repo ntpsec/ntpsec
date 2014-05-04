@@ -456,7 +456,7 @@ leapsec_load_file(
 	int          rc;
 
 	/* just do nothing if there is no leap file */
-	if ( ! (fname && *fname))
+	if ( !(fname && *fname) )
 		return FALSE;
 	
 	/* try to stat the leapfile */
@@ -468,9 +468,10 @@ leapsec_load_file(
 
 	/* silently skip to postcheck if no new file found */
 	if (NULL != sb_old) {
-		if (!force                              &&
-		    sb_old->st_mtime == sb_new.st_mtime &&
-		    sb_old->st_ctime == sb_new.st_ctime  )
+		if (!force
+		 && sb_old->st_mtime == sb_new.st_mtime
+		 && sb_old->st_ctime == sb_new.st_ctime
+		   )
 			return FALSE;
 		*sb_old = sb_new;
 	}
@@ -574,8 +575,8 @@ leapsec_add_dyn(
 
 	pt = leapsec_get_table(TRUE);
 	now64 = ntpcal_ntp_to_ntp(ntpnow, pivot);
-	return leapsec_add(pt, &now64, (insert != 0))
-	    && leapsec_set_table(pt);
+	return (   leapsec_add(pt, &now64, (insert != 0))
+		&& leapsec_set_table(pt));
 }
 
 /* =====================================================================
@@ -774,7 +775,7 @@ leapsec_add(
 	 * the extend the table beyond the expiration!
 	 */
 	if (   ucmpv64(now64, &pt->head.expire) < 0
-	   || (pt->head.size && ucmpv64(now64, &pt->info[0].ttime) <= 0)) {
+	    || (pt->head.size && ucmpv64(now64, &pt->info[0].ttime) <= 0)) {
 		errno = ERANGE;
 		return FALSE;
 	}
@@ -853,6 +854,7 @@ betweenu32(
 	uint32_t hi)
 {
 	int rc;
+
 	if (lo <= hi)
 		rc = (lo <= x) && (x < hi);
 	else

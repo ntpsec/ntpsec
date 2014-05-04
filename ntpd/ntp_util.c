@@ -898,8 +898,8 @@ check_leap_file(
 				logPrefix, leapfile_name, -rc);
 		else
 			msyslog(LOG_WARNING,
-				"%s ('%s'): will expire in less than %d days",
-				logPrefix, leapfile_name, 1+rc);
+				"%s ('%s'): will expire in less than %d day%s",
+				logPrefix, leapfile_name, 1+rc, (rc) ? "s" : "");
 	}
 }
 
