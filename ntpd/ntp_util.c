@@ -894,12 +894,12 @@ check_leap_file(
 	} else if (is_daily_check && rc < 28) {
 		if (rc < 0)
 			msyslog(LOG_ERR,
-				"%s ('%s'): expired (%d days)",
-				logPrefix, leapfile_name, -rc);
+				"%s ('%s'): expired since less than %d day%s",
+				logPrefix, leapfile_name, -rc, (rc == -1 ? "" : "s"));
 		else
 			msyslog(LOG_WARNING,
-				"%s ('%s'): will expire in less than %d day%s",
-				logPrefix, leapfile_name, 1+rc, (rc) ? "s" : "");
+				"%s ('%s'): will expire in less than %d days",
+				logPrefix, leapfile_name, 1+rc);
 	}
 }
 
