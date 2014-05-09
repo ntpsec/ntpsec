@@ -10,11 +10,11 @@
 .ds B-Font B
 .ds I-Font I
 .ds R-Font R
-.TH ntpd 1ntpdman "04 May 2014" "4.2.7p441" "User Commands"
+.TH ntpd 1ntpdman "09 May 2014" "4.2.7p442" "User Commands"
 .\"
-.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-nVaWgx/ag-zVaWfx)
+.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-fNayA2/ag-rNayz2)
 .\"
-.\" It has been AutoGen-ed May 4, 2014 at 06:06:44 AM by AutoGen 5.18.3pre18
+.\" It has been AutoGen-ed May 9, 2014 at 09:30:52 AM by AutoGen 5.18.3pre18
 .\" From the definitions ntpd-opts.def
 .\" and the template file agman-cmd.tpl
 .SH NAME
@@ -434,6 +434,16 @@ by loading values from environment variables named:
   \fBNTPD_<option-name>\fP or \fBNTPD\fP
 .fi
 .ad
+.TH ntpd 1ntpdman "09 May 2014" "4.2.7p442" "User Commands"
+.\"
+.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-fNayA2/ag-rNayz2)
+.\"
+.\" It has been AutoGen-ed May 9, 2014 at 09:30:52 AM by AutoGen 5.18.3pre18
+.\" From the definitions ntpd-opts.def
+.\" and the template file agman-cmd.tpl
+.SH NAME
+\f\*[B-Font]ntpd\fP ntpd
+\- NTP daemon program
 cvt_prog='/usr/local/gnu/share/autogen/texi2man'
 cvt_prog=`cd \`dirname "$cvt_prog"\` >/dev/null && pwd
          `/`basename "$cvt_prog"`
@@ -453,16 +463,6 @@ test \-x "$cvt_prog" || die "'$cvt_prog' is not executable"
     rm \-f $list
 } 1>.doc 2>/dev/null
 /opt/csw/bin/ggrep \-E \-v '^[ 	]*$' .doc | $cvt_prog
-.TH ntpd 1ntpdman "04 May 2014" "4.2.7p441" "User Commands"
-.\"
-.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-nVaWgx/ag-zVaWfx)
-.\"
-.\" It has been AutoGen-ed May 4, 2014 at 06:06:44 AM by AutoGen 5.18.3pre18
-.\" From the definitions ntpd-opts.def
-.\" and the template file agman-cmd.tpl
-.SH NAME
-\f\*[B-Font]ntpd\fP ntpd
-\- NTP daemon program
 .SH USAGE
 .SS "How NTP Operates"
 The
