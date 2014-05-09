@@ -314,6 +314,9 @@
     <ClCompile Include="..\..\..\..\lib\isc\sha1.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\libntp\vint64ops.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\..\sntp\libopts\ag-char-map.h">
@@ -551,6 +554,9 @@
       <Filter>Generated Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\lib\isc\include\isc\sha1.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\vint64ops.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

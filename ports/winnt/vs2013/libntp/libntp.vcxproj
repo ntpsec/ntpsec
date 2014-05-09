@@ -517,6 +517,7 @@
   <ItemGroup>
     <ClCompile Include="..\..\..\..\libntp\a_md5encrypt.c" />
     <ClCompile Include="..\..\..\..\libntp\adjtime.c" />
+    <ClCompile Include="..\..\..\..\libntp\vint64ops.c" />
     <ClCompile Include="..\..\..\..\lib\isc\assertions.c" />
     <ClCompile Include="..\..\..\..\libntp\atoint.c" />
     <ClCompile Include="..\..\..\..\libntp\atolfp.c" />
@@ -616,6 +617,7 @@
     <ClCompile Include="..\..\..\..\libntp\ymd2yd.c" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\..\..\include\vint64ops.h" />
     <ClInclude Include="..\..\..\..\lib\isc\include\isc\sha1.h" />
     <ClInclude Include="..\..\..\..\sntp\libopts\ag-char-map.h" />
     <ClInclude Include="..\..\..\..\include\binio.h" />
