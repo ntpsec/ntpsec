@@ -1,9 +1,9 @@
-.Dd April 8 2014
+.Dd May 4 2014
 .Dt NTP_WAIT 1ntp-waitmdoc User Commands
 .Os
 .\"  EDIT THIS FILE WITH CAUTION  (ntp-wait-opts.mdoc)
 .\"
-.\"  It has been AutoGen-ed  April  8, 2014 at 11:25:42 AM by AutoGen 5.18.3pre18
+.\"  It has been AutoGen-ed  May  4, 2014 at 06:02:04 AM by AutoGen 5.18.3pre18
 .\"  From the definitions    ntp-wait-opts.def
 .\"  and the template file   agmdoc-cmd.tpl
 .Sh NAME

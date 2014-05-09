@@ -11,6 +11,9 @@
 #ifndef NTP_LEAPSEC_H
 #define NTP_LEAPSEC_H
 
+struct stat;
+
+
 /* function pointer types. Note that 'fprintf' and 'getc' can be casted
  * to the dumper resp. reader type, provided the auxiliary argument is a
  * valid FILE pointer in hat case.
@@ -128,10 +131,20 @@ extern int/*BOOL*/ leapsec_load(leap_table_t*, leapsec_reader,
  */
 extern void leapsec_dump(const leap_table_t*, leapsec_dumper func, void *farg);
 
-/* Read a leap second file. This is a convenience wrapper around the
- * generic load function, 'leapsec_load()'.
+/* Read a leap second file from stream. This is a convenience wrapper
+ * around the generic load function, 'leapsec_load()'.
  */
-extern int/*BOOL*/ leapsec_load_file(FILE * fp, const char * fname);
+extern int/*BOOL*/ leapsec_load_stream(FILE * fp, const char * fname);
+
+/* Read a leap second file from file. It checks that the file exists and
+ * (if 'force' is not applied) the ctime/mtime has changed since the
+ * last load. If the file has to be loaded, either due to 'force' or
+ * changed time stamps, the 'stat()' results of the file are stored in
+ * '*sb' for the next cycle. Returns TRUE on successful load, FALSE
+ * otherwise. Uses 'leapsec_load_stream()' internally.
+ */
+extern int/*BOOL*/ leapsec_load_file(const char * fname, struct stat * sb,
+				     int/*BOOL*/force);
 
 /* Get the current leap data signature. This consists of the last
  * ransition, the table expiration, and the total TAI difference at the

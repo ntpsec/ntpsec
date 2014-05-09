@@ -41,8 +41,6 @@
 #define	TC_ERR	(-1)
 #endif
 
-extern char *leapseconds_file;	/* name of the leapseconds file */
-
 static void check_leapsec(u_int32, const time_t*, int/*BOOL*/);
 
 /*
@@ -427,30 +425,11 @@ timer(void)
 	if (stats_timer <= current_time) {
 		stats_timer += SECSPERHR;
 		write_stats();
-		if (sys_tai != 0 && leapsec_expired(now.l_ui, &tnow)) {
-			int clf = check_leap_file();
-
-			/*
-			** check_leap_file() returns -1 on a problem,
-			** 0 on an expired leapsecond file, or the number
-			** of days until the leapsecond file expires.
-			**
-			** We only want to log stuff once/day.
-			*/
-			if (check_leapfile < current_time) {
-				check_leapfile += SECSPERDAY;
-				if (-1 == clf) {
-					/* nothing to do */
-				} else if (0 == clf) {
-					report_event(EVNT_LEAPVAL, NULL, NULL);
-					msyslog(LOG_WARNING,
-						"timer: leapseconds data file <%s> has expired!",
-						leapseconds_file);
-				} else if (clf < 31) {
-					msyslog(LOG_WARNING,
-						"timer: leapseconds data file <%s> will expire in less than %d days' time.", leapseconds_file, clf);
-				}
-			}
+		if (check_leapfile < current_time) {
+			check_leapfile += SECSPERDAY;
+			check_leap_file(TRUE, now.l_ui, &tnow);
+		} else {
+			check_leap_file(FALSE, now.l_ui, &tnow);
 		}
 	}
 }
