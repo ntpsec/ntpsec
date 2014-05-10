@@ -1,3 +1,4 @@
+(4.2.7p442) 2014/05/09 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 2589] Update VS2013 project files for libntp.
 * [Bug 2594] Update the year in sntp/include/copyright.def.
 * [Bug 2600] Fix "Undisicplined Local Clock" driver1.html page.
