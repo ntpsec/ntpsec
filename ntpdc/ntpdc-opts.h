@@ -1,7 +1,7 @@
 /*
  *  EDIT THIS FILE WITH CAUTION  (ntpdc-opts.h)
  *
- *  It has been AutoGen-ed  May  9, 2014 at 09:31:24 AM by AutoGen 5.18.3pre18
+ *  It has been AutoGen-ed  May 10, 2014 at 09:30:43 AM by AutoGen 5.18.3pre18
  *  From the definitions    ntpdc-opts.def
  *  and the template file   options
  *
@@ -18,7 +18,7 @@
  * The ntpdc program is copyrighted and licensed
  * under the following terms:
  *
- *  Copyright (C) 1970-2013 The University of Delaware, all rights reserved.
+ *  Copyright (C) 1970-2014 The University of Delaware, all rights reserved.
  *  This is free software. It is licensed for use, modification and
  *  redistribution under the terms of the NTP License, copies of which
  *  can be seen at:
@@ -83,9 +83,9 @@ typedef enum {
 /** count of all options for ntpdc */
 #define OPTION_CT    15
 /** ntpdc version */
-#define NTPDC_VERSION       "4.2.7p442"
+#define NTPDC_VERSION       "4.2.7p443"
 /** Full ntpdc version text */
-#define NTPDC_FULL_VERSION  "ntpdc 4.2.7p442"
+#define NTPDC_FULL_VERSION  "ntpdc 4.2.7p443"
 
 /**
  *  Interface defines for all options.  Replace "n" with the UPPER_CASED

@@ -10,11 +10,11 @@
 .ds B-Font B
 .ds I-Font I
 .ds R-Font R
-.TH ntpdc @NTPDC_MS@ "09 May 2014" "4.2.7p442" "User Commands"
+.TH ntpdc @NTPDC_MS@ "10 May 2014" "4.2.7p443" "User Commands"
 .\"
-.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-N7a4r4/ag-Z7a4q4)
+.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-LvaWtg/ag-XvaWsg)
 .\"
-.\" It has been AutoGen-ed May 9, 2014 at 09:31:38 AM by AutoGen 5.18.3pre18
+.\" It has been AutoGen-ed May 10, 2014 at 09:30:56 AM by AutoGen 5.18.3pre18
 .\" From the definitions ntpdc-opts.def
 .\" and the template file agman-cmd.tpl
 .SH NAME
@@ -167,6 +167,16 @@ the configuration files.
 The \fIhomerc\fP files are "\fI$HOME\fP", and "\fI.\fP".
 If any of these are directories, then the file \fI.ntprc\fP
 is searched for within those directories.
+.TH ntpdc @NTPDC_MS@ "10 May 2014" "4.2.7p443" "User Commands"
+.\"
+.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-LvaWtg/ag-XvaWsg)
+.\"
+.\" It has been AutoGen-ed May 10, 2014 at 09:30:56 AM by AutoGen 5.18.3pre18
+.\" From the definitions ntpdc-opts.def
+.\" and the template file agman-cmd.tpl
+.SH NAME
+\f\*[B-Font]ntpdc\fP ntpdc
+\- vendor-specific NTPD control program
 cvt_prog='/usr/local/gnu/share/autogen/texi2man'
 cvt_prog=`cd \`dirname "$cvt_prog"\` >/dev/null && pwd
          `/`basename "$cvt_prog"`
@@ -186,16 +196,6 @@ test \-x "$cvt_prog" || die "'$cvt_prog' is not executable"
     rm \-f $list
 } 1>.doc 2>/dev/null
 /opt/csw/bin/ggrep \-E \-v '^[ 	]*$' .doc | $cvt_prog
-.TH ntpdc @NTPDC_MS@ "09 May 2014" "4.2.7p442" "User Commands"
-.\"
-.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-N7a4r4/ag-Z7a4q4)
-.\"
-.\" It has been AutoGen-ed May 9, 2014 at 09:31:38 AM by AutoGen 5.18.3pre18
-.\" From the definitions ntpdc-opts.def
-.\" and the template file agman-cmd.tpl
-.SH NAME
-\f\*[B-Font]ntpdc\fP ntpdc
-\- vendor-specific NTPD control program
 .SH USAGE
 If one or more request options are included on the command line
 when
@@ -877,7 +877,7 @@ RFC1305
 .SH AUTHORS
 The formatting directives in this document came from FreeBSD.
 .SH "COPYRIGHT"
-Copyright (C) 1970-2013 The University of Delaware all rights reserved.
+Copyright (C) 1970-2014 The University of Delaware all rights reserved.
 This program is released under the terms of the NTP license, <http://ntp.org/license>.
 .SH BUGS
 The

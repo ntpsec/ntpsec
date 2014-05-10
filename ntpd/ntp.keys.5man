@@ -1,8 +1,8 @@
-.TH ntp.keys 5man "09 May 2014" "4.2.7p442" "File Formats"
+.TH ntp.keys 5man "10 May 2014" "4.2.7p443" "File Formats"
 .\"
 .\"  EDIT THIS FILE WITH CAUTION  (ntp.man)
 .\"
-.\"  It has been AutoGen-ed  May  9, 2014 at 09:30:48 AM by AutoGen 5.18.3pre18
+.\"  It has been AutoGen-ed  May 10, 2014 at 09:30:11 AM by AutoGen 5.18.3pre18
 .\"  From the definitions    ntp.keys.def
 .\"  and the template file   agman-file.tpl
 .Sh NAME
@@ -172,7 +172,7 @@ the default name of the configuration file
 .SH "AUTHORS"
 The University of Delaware
 .SH "COPYRIGHT"
-Copyright (C) 1970-2013 The University of Delaware all rights reserved.
+Copyright (C) 1970-2014 The University of Delaware all rights reserved.
 This program is released under the terms of the NTP license, <http://ntp.org/license>.
 .SH "BUGS"
 Please send bug reports to: http://bugs.ntp.org, bugs@ntp.org

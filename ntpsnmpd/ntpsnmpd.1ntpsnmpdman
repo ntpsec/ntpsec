@@ -10,11 +10,11 @@
 .ds B-Font B
 .ds I-Font I
 .ds R-Font R
-.TH ntpsnmpd 1ntpsnmpdman "09 May 2014" "4.2.7p442" "User Commands"
+.TH ntpsnmpd 1ntpsnmpdman "10 May 2014" "4.2.7p443" "User Commands"
 .\"
-.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-0Raqda/ag-aSaqca)
+.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-I1ayQi/ag-U1ayPi)
 .\"
-.\" It has been AutoGen-ed May 9, 2014 at 09:32:30 AM by AutoGen 5.18.3pre18
+.\" It has been AutoGen-ed May 10, 2014 at 09:31:47 AM by AutoGen 5.18.3pre18
 .\" From the definitions ntpsnmpd-opts.def
 .\" and the template file agman-cmd.tpl
 .SH NAME
@@ -95,11 +95,11 @@ the configuration files.
 The \fIhomerc\fP files are "\fI$HOME\fP", and "\fI.\fP".
 If any of these are directories, then the file \fI.ntprc\fP
 is searched for within those directories.
-.TH ntpsnmpd 1ntpsnmpdman "09 May 2014" "4.2.7p442" "User Commands"
+.TH ntpsnmpd 1ntpsnmpdman "10 May 2014" "4.2.7p443" "User Commands"
 .\"
-.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-0Raqda/ag-aSaqca)
+.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-I1ayQi/ag-U1ayPi)
 .\"
-.\" It has been AutoGen-ed May 9, 2014 at 09:32:30 AM by AutoGen 5.18.3pre18
+.\" It has been AutoGen-ed May 10, 2014 at 09:31:47 AM by AutoGen 5.18.3pre18
 .\" From the definitions ntpsnmpd-opts.def
 .\" and the template file agman-cmd.tpl
 .SH NAME
@@ -167,7 +167,7 @@ it to autogen-users@lists.sourceforge.net.  Thank you.
 .NOP  "Heiko Gerstung" 
 .br
 .SH "COPYRIGHT"
-Copyright (C) 1970-2013 The University of Delaware all rights reserved.
+Copyright (C) 1970-2014 The University of Delaware all rights reserved.
 This program is released under the terms of the NTP license, <http://ntp.org/license>.
 .SH "BUGS"
 Please send bug reports to: http://bugs.ntp.org, bugs@ntp.org

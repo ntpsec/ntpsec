@@ -10,11 +10,11 @@
 .ds B-Font B
 .ds I-Font I
 .ds R-Font R
-.TH ntp.conf 5man "09 May 2014" "4.2.7p442" "File Formats"
+.TH ntp.conf 5man "10 May 2014" "4.2.7p443" "File Formats"
 .\"
-.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-Qzaaf1/ag-dAaae1)
+.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-hlaqed/ag-ulaqdd)
 .\"
-.\" It has been AutoGen-ed May 9, 2014 at 09:30:43 AM by AutoGen 5.18.3pre18
+.\" It has been AutoGen-ed May 10, 2014 at 09:30:06 AM by AutoGen 5.18.3pre18
 .\" From the definitions ntp.conf.def
 .\" and the template file agman-cmd.tpl
 .SH NAME
@@ -2902,11 +2902,11 @@ by loading values from environment variables named:
   \fBNTP_CONF_<option-name>\fP or \fBNTP_CONF\fP
 .fi
 .ad
-.TH ntp.conf 5man "09 May 2014" "4.2.7p442" "File Formats"
+.TH ntp.conf 5man "10 May 2014" "4.2.7p443" "File Formats"
 .\"
-.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-Qzaaf1/ag-dAaae1)
+.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-hlaqed/ag-ulaqdd)
 .\"
-.\" It has been AutoGen-ed May 9, 2014 at 09:30:43 AM by AutoGen 5.18.3pre18
+.\" It has been AutoGen-ed May 10, 2014 at 09:30:06 AM by AutoGen 5.18.3pre18
 .\" From the definitions ntp.conf.def
 .\" and the template file agman-cmd.tpl
 .SH NAME
@@ -2992,7 +2992,7 @@ RFC5905
 .SH "AUTHORS"
 The University of Delaware
 .SH "COPYRIGHT"
-Copyright (C) 1970-2013 The University of Delaware all rights reserved.
+Copyright (C) 1970-2014 The University of Delaware all rights reserved.
 This program is released under the terms of the NTP license, <http://ntp.org/license>.
 .SH BUGS
 The syntax checking is not picky; some combinations of

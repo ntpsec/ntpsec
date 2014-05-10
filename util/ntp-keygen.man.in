@@ -10,11 +10,11 @@
 .ds B-Font B
 .ds I-Font I
 .ds R-Font R
-.TH ntp-keygen @NTP_KEYGEN_MS@ "09 May 2014" "ntp (4.2.7p442)" "User Commands"
+.TH ntp-keygen @NTP_KEYGEN_MS@ "10 May 2014" "ntp (4.2.7p443)" "User Commands"
 .\"
-.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-SDaqJb/ag-4DaqIb)
+.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-aVa4fk/ag-mVa4ek)
 .\"
-.\" It has been AutoGen-ed May 9, 2014 at 09:32:54 AM by AutoGen 5.18.3pre18
+.\" It has been AutoGen-ed May 10, 2014 at 09:32:11 AM by AutoGen 5.18.3pre18
 .\" From the definitions ntp-keygen-opts.def
 .\" and the template file agman-cmd.tpl
 .SH NAME
@@ -1161,11 +1161,11 @@ the configuration files.
 The \fIhomerc\fP files are "\fI$HOME\fP", and "\fI.\fP".
 If any of these are directories, then the file \fI.ntprc\fP
 is searched for within those directories.
-.TH ntp-keygen @NTP_KEYGEN_MS@ "09 May 2014" "ntp (4.2.7p442)" "User Commands"
+.TH ntp-keygen @NTP_KEYGEN_MS@ "10 May 2014" "ntp (4.2.7p443)" "User Commands"
 .\"
-.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-SDaqJb/ag-4DaqIb)
+.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-aVa4fk/ag-mVa4ek)
 .\"
-.\" It has been AutoGen-ed May 9, 2014 at 09:32:54 AM by AutoGen 5.18.3pre18
+.\" It has been AutoGen-ed May 10, 2014 at 09:32:11 AM by AutoGen 5.18.3pre18
 .\" From the definitions ntp-keygen-opts.def
 .\" and the template file agman-cmd.tpl
 .SH NAME
@@ -1226,7 +1226,7 @@ it to autogen-users@lists.sourceforge.net.  Thank you.
 .SH "AUTHORS"
 The University of Delaware
 .SH "COPYRIGHT"
-Copyright (C) 1970-2013 The University of Delaware all rights reserved.
+Copyright (C) 1970-2014 The University of Delaware all rights reserved.
 This program is released under the terms of the NTP license, <http://ntp.org/license>.
 .SH BUGS
 It can take quite a while to generate some cryptographic values,
