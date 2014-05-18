@@ -476,7 +476,23 @@ leapsec_load_file(
 		*sb_old = sb_new;
 	}
 
-	/* try to open the leap file, complain if that fails */
+	/* try to open the leap file, complain if that fails
+	 *
+	 * [perlinger@ntp.org]
+	 * coverity raises a TOCTOU (time-of-check/time-of-use) issue
+	 * here, which is not entirely helpful: While there is indeed a
+	 * possible race condition between the 'stat()' call above and
+	 * the 'fopen)' call below, I intentionally want to omit the
+	 * overhead of opening the file and calling 'fstat()', because
+	 * in most cases the file would have be to closed anyway without
+	 * reading the contents.  I chose to disable the coverity
+	 * warning instead.
+	 *
+	 * So unless someone comes up with a reasonable argument why
+	 * this could be a real issue, I'll just try to silence coverity
+	 * on that topic.
+	 */
+	/* coverity[toctou] */
 	if ((fp = fopen(fname, "r")) == NULL) {
 		msyslog(LOG_ERR,
 			"%s ('%s'): open failed: %m",
