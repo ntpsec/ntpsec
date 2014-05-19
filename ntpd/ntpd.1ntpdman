@@ -10,11 +10,11 @@
 .ds B-Font B
 .ds I-Font I
 .ds R-Font R
-.TH ntpd 1ntpdman "10 May 2014" "4.2.7p443" "User Commands"
+.TH ntpd 1ntpdman "19 May 2014" "4.2.7p444" "User Commands"
 .\"
-.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-sDayCe/ag-EDayBe)
+.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-TSai1e/ag-5Sai0e)
 .\"
-.\" It has been AutoGen-ed May 10, 2014 at 09:30:15 AM by AutoGen 5.18.3pre18
+.\" It has been AutoGen-ed May 19, 2014 at 09:31:31 AM by AutoGen 5.18.3pre18
 .\" From the definitions ntpd-opts.def
 .\" and the template file agman-cmd.tpl
 .SH NAME
@@ -434,11 +434,11 @@ by loading values from environment variables named:
   \fBNTPD_<option-name>\fP or \fBNTPD\fP
 .fi
 .ad
-.TH ntpd 1ntpdman "10 May 2014" "4.2.7p443" "User Commands"
+.TH ntpd 1ntpdman "19 May 2014" "4.2.7p444" "User Commands"
 .\"
-.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-sDayCe/ag-EDayBe)
+.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-TSai1e/ag-5Sai0e)
 .\"
-.\" It has been AutoGen-ed May 10, 2014 at 09:30:15 AM by AutoGen 5.18.3pre18
+.\" It has been AutoGen-ed May 19, 2014 at 09:31:31 AM by AutoGen 5.18.3pre18
 .\" From the definitions ntpd-opts.def
 .\" and the template file agman-cmd.tpl
 .SH NAME

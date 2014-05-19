@@ -10,11 +10,11 @@
 .ds B-Font B
 .ds I-Font I
 .ds R-Font R
-.TH ntpq 1ntpqman "10 May 2014" "4.2.7p443" "User Commands"
+.TH ntpq 1ntpqman "19 May 2014" "4.2.7p444" "User Commands"
 .\"
-.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-L4aWGh/ag-W4aWFh)
+.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-XZaO5h/ag-9ZaO4h)
 .\"
-.\" It has been AutoGen-ed May 10, 2014 at 09:31:31 AM by AutoGen 5.18.3pre18
+.\" It has been AutoGen-ed May 19, 2014 at 09:32:49 AM by AutoGen 5.18.3pre18
 .\" From the definitions ntpq-opts.def
 .\" and the template file agman-cmd.tpl
 .SH NAME
@@ -415,16 +415,6 @@ the configuration files.
 The \fIhomerc\fP files are "\fI$HOME\fP", and "\fI.\fP".
 If any of these are directories, then the file \fI.ntprc\fP
 is searched for within those directories.
-.TH ntpq 1ntpqman "10 May 2014" "4.2.7p443" "User Commands"
-.\"
-.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-L4aWGh/ag-W4aWFh)
-.\"
-.\" It has been AutoGen-ed May 10, 2014 at 09:31:31 AM by AutoGen 5.18.3pre18
-.\" From the definitions ntpq-opts.def
-.\" and the template file agman-cmd.tpl
-.SH NAME
-\f\*[B-Font]ntpq\fP ntpq
-\- standard NTP query program
 cvt_prog='/usr/local/gnu/share/autogen/texi2man'
 cvt_prog=`cd \`dirname "$cvt_prog"\` >/dev/null && pwd
          `/`basename "$cvt_prog"`
@@ -444,6 +434,16 @@ test \-x "$cvt_prog" || die "'$cvt_prog' is not executable"
     rm \-f $list
 } 1>.doc 2>/dev/null
 /opt/csw/bin/ggrep \-E \-v '^[ 	]*$' .doc | $cvt_prog
+.TH ntpq 1ntpqman "19 May 2014" "4.2.7p444" "User Commands"
+.\"
+.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-XZaO5h/ag-9ZaO4h)
+.\"
+.\" It has been AutoGen-ed May 19, 2014 at 09:32:49 AM by AutoGen 5.18.3pre18
+.\" From the definitions ntpq-opts.def
+.\" and the template file agman-cmd.tpl
+.SH NAME
+\f\*[B-Font]ntpq\fP ntpq
+\- standard NTP query program
 .SH "ENVIRONMENT"
 See \fBOPTION PRESETS\fP for configuration environment variables.
 .SH "FILES"
