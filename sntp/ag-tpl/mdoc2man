@@ -1,4 +1,11 @@
 #!/usr/bin/perl
+
+### ToDo
+# Properly implement -columns in the "my %lists" definition...
+#
+# .Xr requires at least 1 arg, the code here expects at least 2
+###
+
 package mdoc2man;
 use strict;
 use warnings;
@@ -70,6 +77,10 @@ Mdoc::def_macro( '.Pa', sub { mapwords {"\\fI$_\\f[]"} @_; } );
 
 my %lists = (
     bullet => sub {
+        Mdoc::def_macro('.It', sub { '.IP \fB\(bu\fP 2' });
+    },
+
+    column => sub {
         Mdoc::def_macro('.It', sub { '.IP \fB\(bu\fP 2' });
     },
 
@@ -149,7 +160,8 @@ for (qw(Xr Em Ar Fl Ic Cm Qq Op Nm Pa Sq Li Va Brq Pq Fx Ux)) {
 }
 
 sub print_line {
-    print shift."\n";
+    print shift;
+    print "\n";
 }
 
 sub run {

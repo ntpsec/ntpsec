@@ -222,7 +222,7 @@ def_macro('Ns',  sub {ns, @_});
 }
 
 def_macro('.Bl', sub { die '.Bl - no list callback set' });
-def_macro('.It', sub { die '.It called outside of list context' });
+def_macro('.It', sub { die ".It called outside of list context - maybe near line $." });
 def_macro('.El', sub { die '.El requires .Bl first' });
 
 

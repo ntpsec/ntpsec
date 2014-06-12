@@ -1,4 +1,15 @@
 #! /usr/bin/perl
+
+### To Do:
+
+# the Bl -column command needs work:
+# - support for "-offset" 
+# - support for the header widths
+
+# 
+
+###
+
 package mdoc2texi;
 use strict;
 use warnings;
@@ -107,6 +118,7 @@ Mdoc::def_macro('.Ed', sub { die '.Ed used but .Bd was not seen' });
 my %lists = (
     bullet => [ '@itemize @bullet', '@end itemize' ],
     tag    => [ '@table @asis', '@end table' ],
+    column => [ '@table @asis', '@end table' ],
 );
 
 Mdoc::set_Bl_callback(sub {
