@@ -6,7 +6,7 @@
 #
 # EDIT THIS FILE WITH CAUTION  (invoke-ntpq.texi)
 #
-# It has been AutoGen-ed  June 12, 2014 at 08:17:08 AM by AutoGen 5.18.3pre18
+# It has been AutoGen-ed  June 12, 2014 at 09:32:53 AM by AutoGen 5.18.3pre18
 # From the definitions    ntpq-opts.def
 # and the template file   agtexi-cmd.tpl
 @end ignore
@@ -294,7 +294,7 @@ Display kernel loop and PPS statistics. As with other ntpq output, times are in 
 Perform the same function as the associations command, except display mobilized and unmobilized associations.
 @item @code{monstats}
 Display monitor facility statistics.
-@item @code{mrulist} @code{[limited | kod | mincount=@kbd{count} | @kbd{laddr}=@kbd{localaddr} | @kbd{sort}=Ns @kbd{sortorder} | @kbd{resany}=@kbd{hexmask} | @kbd{resall}=@kbd{hexmask}]}
+@item @code{mrulist} @code{[limited | kod | mincount=@kbd{count} | @kbd{laddr}=@kbd{localaddr} | @kbd{sort}=@kbd{sortorder} | @kbd{resany}=@kbd{hexmask} | @kbd{resall}=@kbd{hexmask}]}
 Obtain and print traffic counts collected and maintained by the monitor facility.
 With the exception of
 @code{sort}=@kbd{sortorder},
@@ -768,7 +768,7 @@ with a status code of 0.
 
 @exampleindent 0
 @example
-ntpq - standard NTP query program - Ver. 4.2.7p444
+ntpq - standard NTP query program - Ver. 4.2.7p445
 Usage:  ntpq [ -<flag> [<val>] | --<name>[@{=| @}<val>] ]... [ host ...]
   Flg Arg Option-Name    Description
    -4 no  ipv4           Force IPv4 DNS name resolution
