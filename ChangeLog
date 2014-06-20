@@ -1,3 +1,5 @@
+* [Bug 2614] use 'unsigned long' consistently in ntp_random.c
+  to avoid possibly undefined behaviour in signed int overflow
 (4.2.7p445) 2014/06/12 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 2556] mrulist isn't mentioned in the ntpq man page.
 (4.2.7p444) 2014/05/19 Released by Harlan Stenn <stenn@ntp.org>
