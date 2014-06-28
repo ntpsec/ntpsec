@@ -1,4 +1,6 @@
 * [Bug 2597] leap file processing -- loose ends.
+* [Bug 2619] Save a signed int copy of the return value of i2d_DSA_SIG().
+  Provide missing msyslog() message in crypto_alice().
 * Fix a variable lifetime issue.
 (4.2.7p445) 2014/06/12 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 2556] mrulist isn't mentioned in the ntpq man page.
