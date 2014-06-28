@@ -10,11 +10,11 @@
 .ds B-Font B
 .ds I-Font I
 .ds R-Font R
-.TH ntp.conf 5man "12 Jun 2014" "4.2.7p445" "File Formats"
+.TH ntp.conf 5man "28 Jun 2014" "4.2.7p446" "File Formats"
 .\"
-.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-vCaG4X/ag-RCaG3X)
+.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-tjaqUx/ag-FjaqTx)
 .\"
-.\" It has been AutoGen-ed June 12, 2014 at 09:31:22 AM by AutoGen 5.18.3pre18
+.\" It has been AutoGen-ed June 28, 2014 at 09:30:52 AM by AutoGen 5.18.3pre18
 .\" From the definitions ntp.conf.def
 .\" and the template file agman-cmd.tpl
 .SH NAME
@@ -2902,11 +2902,11 @@ by loading values from environment variables named:
   \fBNTP_CONF_<option-name>\fP or \fBNTP_CONF\fP
 .fi
 .ad
-.TH ntp.conf 5man "12 Jun 2014" "4.2.7p445" "File Formats"
+.TH ntp.conf 5man "28 Jun 2014" "4.2.7p446" "File Formats"
 .\"
-.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-vCaG4X/ag-RCaG3X)
+.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-tjaqUx/ag-FjaqTx)
 .\"
-.\" It has been AutoGen-ed June 12, 2014 at 09:31:22 AM by AutoGen 5.18.3pre18
+.\" It has been AutoGen-ed June 28, 2014 at 09:30:52 AM by AutoGen 5.18.3pre18
 .\" From the definitions ntp.conf.def
 .\" and the template file agman-cmd.tpl
 .SH NAME

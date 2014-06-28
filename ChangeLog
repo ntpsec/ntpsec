@@ -1,3 +1,4 @@
+(4.2.7p446) 2014/06/28 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 2597] leap file processing -- loose ends.
 * [Bug 2614] use 'unsigned long' consistently in ntp_random.c
   to avoid possibly undefined behaviour in signed int overflow

@@ -6,7 +6,7 @@
 #
 # EDIT THIS FILE WITH CAUTION  (invoke-ntp-wait.texi)
 #
-# It has been AutoGen-ed  June 12, 2014 at 09:27:12 AM by AutoGen 5.18.3pre18
+# It has been AutoGen-ed  June 28, 2014 at 09:26:53 AM by AutoGen 5.18.3pre18
 # From the definitions    ntp-wait-opts.def
 # and the template file   agtexi-cmd.tpl
 @end ignore
