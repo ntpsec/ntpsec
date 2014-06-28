@@ -2038,8 +2038,10 @@ crypto_alice(
 	/*
 	 * The identity parameters must have correct format and content.
 	 */
-	if (peer->ident_pkey == NULL)
+	if (peer->ident_pkey == NULL) {
+		msyslog(LOG_NOTICE, "crypto_alice: scheme unavailable");
 		return (XEVNT_ID);
+	}
 
 	if ((dsa = peer->ident_pkey->pkey->pkey.dsa) == NULL) {
 		msyslog(LOG_NOTICE, "crypto_alice: defective key");
@@ -2405,6 +2407,7 @@ crypto_bob2(
 	BIGNUM	*r, *k, *g, *y;
 	u_char	*ptr;
 	u_int	len;
+	int	s_len;
 
 	/*
 	 * If the GQ parameters are not valid, something awful
@@ -2451,8 +2454,8 @@ crypto_bob2(
 	 * Encode the values in ASN.1 and sign. The filestamp is from
 	 * the local file.
 	 */
-	len = i2d_DSA_SIG(sdsa, NULL);
-	if (len <= 0) {
+	len = s_len = i2d_DSA_SIG(sdsa, NULL);
+	if (s_len <= 0) {
 		msyslog(LOG_ERR, "crypto_bob2: %s",
 		    ERR_error_string(ERR_get_error(), NULL));
 		DSA_SIG_free(sdsa);
@@ -3721,7 +3724,7 @@ crypto_setup(void)
 	if (host_filename != NULL)
 		strlcpy(hostname, host_filename, sizeof(hostname));
 	if (passwd == NULL)
-		passwd = hostname;
+		passwd = estrdup(hostname);
 	memset(&hostval, 0, sizeof(hostval));
 	memset(&pubkey, 0, sizeof(pubkey));
 	memset(&tai_leap, 0, sizeof(tai_leap));
