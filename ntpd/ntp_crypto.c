@@ -3721,7 +3721,7 @@ crypto_setup(void)
 	if (host_filename != NULL)
 		strlcpy(hostname, host_filename, sizeof(hostname));
 	if (passwd == NULL)
-		passwd = hostname;
+		passwd = estrdup(hostname);
 	memset(&hostval, 0, sizeof(hostval));
 	memset(&pubkey, 0, sizeof(pubkey));
 	memset(&tai_leap, 0, sizeof(tai_leap));
