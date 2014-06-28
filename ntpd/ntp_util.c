@@ -894,7 +894,7 @@ check_leap_file(
 	} else if (is_daily_check && rc < 28) {
 		if (rc < 0)
 			msyslog(LOG_ERR,
-				"%s ('%s'): expired since less than %d day%s",
+				"%s ('%s'): expired less than %d day%s ago",
 				logPrefix, leapfile_name, -rc, (rc == -1 ? "" : "s"));
 		else
 			msyslog(LOG_WARNING,
