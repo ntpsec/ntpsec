@@ -47,27 +47,86 @@ public:
 	LFP  abs() const;
 	int  signum() const;
 
+	bool l_isgt (const LFP &rhs) const
+		{ return L_ISGT(&_v, &rhs._v); }
+	bool l_isgtu(const LFP &rhs) const
+		{ return L_ISGTU(&_v, &rhs._v); }
+	bool l_ishis(const LFP &rhs) const
+		{ return L_ISHIS(&_v, &rhs._v); }
+	bool l_isgeq(const LFP &rhs) const
+		{ return L_ISGEQ(&_v, &rhs._v); }
+	bool l_isequ(const LFP &rhs) const
+		{ return L_ISEQU(&_v, &rhs._v); }
+
+	int  ucmp(const LFP & rhs) const;
+	int  scmp(const LFP & rhs) const;
+	
 	std::string   toString() const;
 	std::ostream& toStream(std::ostream &oo) const;
-
+	
 	operator double() const;
 	explicit LFP(double);
-
+	
 protected:
 	LFP(const l_fp &rhs);
 
+	static int cmp_work(u_int32 a[3], u_int32 b[3]);
+	
 	l_fp _v;
 };
-
-std::ostream& operator<<(std::ostream &oo, const LFP& rhs)
+	
+static std::ostream& operator<<(std::ostream &oo, const LFP& rhs)
 {
 	return rhs.toStream(oo);
 }
 
-//::testing::AssertionResult& operator<<(testing::AssertionResult &oo, const LFP &rhs)
-//{
-//	return rhs.toResult(oo);
-//}
+//----------------------------------------------------------------------
+// reference comparision
+// This is implementad as a full signed MP-subtract in 3 limbs, where
+// the operands are zero or sign extended before the subtraction is
+// executed.
+//----------------------------------------------------------------------
+int  LFP::scmp(const LFP & rhs) const
+{
+	u_int32 a[3], b[3];
+	const l_fp &op1(_v), &op2(rhs._v);
+	
+	a[0] = op1.l_uf; a[1] = op1.l_ui; a[2] = 0;
+	b[0] = op2.l_uf; b[1] = op2.l_ui; b[2] = 0;
+
+	a[2] -= (op1.l_i < 0);
+	b[2] -= (op2.l_i < 0);
+
+	return cmp_work(a,b);
+}
+
+int  LFP::ucmp(const LFP & rhs) const
+{
+	u_int32 a[3], b[3];
+	const l_fp &op1(_v), &op2(rhs._v);
+	
+	a[0] = op1.l_uf; a[1] = op1.l_ui; a[2] = 0;
+	b[0] = op2.l_uf; b[1] = op2.l_ui; b[2] = 0;
+
+	return cmp_work(a,b);
+}
+
+int LFP::cmp_work(u_int32 a[3], u_int32 b[3])
+{
+	u_int32 cy, idx, tmp;
+	for (cy = idx = 0; idx < 3; ++idx) {
+		tmp = a[idx]; cy  = (a[idx] -=   cy  ) > tmp;
+		tmp = a[idx]; cy |= (a[idx] -= b[idx]) > tmp;
+	}
+	if (a[2])
+		return -1;
+	return a[0] || a[1];
+}
+
+//----------------------------------------------------------------------
+// imlementation of the LFP stuff
+// This should be easy enough...
+//----------------------------------------------------------------------
 
 LFP::~LFP()
 {
@@ -153,12 +212,9 @@ LFP::abs() const
 int
 LFP::signum() const
 {
-	int res;
-
-	res = (_v.l_i > 0) - (_v.l_i < 0);
-	if (!res)
-		res = _v.l_uf != 0;
-	return res;
+	if (_v.l_ui & 0x80000000u)
+		return -1;
+	return (_v.l_ui || _v.l_uf);
 }
 
 std::string
@@ -170,9 +226,9 @@ LFP::toString() const
 }
 
 std::ostream&
-LFP::toStream(std::ostream &oo) const
+LFP::toStream(std::ostream &os) const
 {
-	return oo
+	return os
 	    << mfptoa(_v.l_ui, _v.l_uf, 9)
 	    << " [$" << std::setw(8) << std::setfill('0') << std::hex << _v.l_ui
 	    <<  ':'  << std::setw(8) << std::setfill('0') << std::hex << _v.l_uf
@@ -197,8 +253,70 @@ LFP::LFP(double rhs)
 	DTOLFP(rhs, &_v);
 }
 
+
 //----------------------------------------------------------------------
-// test support functions
+// testing the relational macros works better with proper predicate
+// formatting functions; it slows down the tests a bit, but makes for
+// readable failure messages.
+//----------------------------------------------------------------------
+
+testing::AssertionResult isgt_p(
+	const LFP &op1, const LFP &op2)
+{
+	if (op1.l_isgt(op2))
+		return testing::AssertionSuccess()
+		    << "L_ISGT(" << op1 << "," << op2 << ") is true";
+	else
+		return testing::AssertionFailure()
+		    << "L_ISGT(" << op1 << "," << op2 << ") is false";
+}
+
+testing::AssertionResult isgeq_p(
+	const LFP &op1, const LFP &op2)
+{
+	if (op1.l_isgeq(op2))
+		return testing::AssertionSuccess()
+		    << "L_ISGEQ(" << op1 << "," << op2 << ") is true";
+	else
+		return testing::AssertionFailure()
+		    << "L_ISGEQ(" << op1 << "," << op2 << ") is false";
+}
+
+testing::AssertionResult isgtu_p(
+	const LFP &op1, const LFP &op2)
+{
+	if (op1.l_isgtu(op2))
+		return testing::AssertionSuccess()
+		    << "L_ISGTU(" << op1 << "," << op2 << ") is true";
+	else
+		return testing::AssertionFailure()
+		    << "L_ISGTU(" << op1 << "," << op2 << ") is false";
+}
+
+testing::AssertionResult ishis_p(
+	const LFP &op1, const LFP &op2)
+{
+	if (op1.l_ishis(op2))
+		return testing::AssertionSuccess()
+		    << "L_ISHIS(" << op1 << "," << op2 << ") is true";
+	else
+		return testing::AssertionFailure()
+		    << "L_ISHIS(" << op1 << "," << op2 << ") is false";
+}
+
+testing::AssertionResult isequ_p(
+	const LFP &op1, const LFP &op2)
+{
+	if (op1.l_isequ(op2))
+		return testing::AssertionSuccess()
+		    << "L_ISEQU(" << op1 << "," << op2 << ") is true";
+	else
+		return testing::AssertionFailure()
+		    << "L_ISEQU(" << op1 << "," << op2 << ") is false";
+}
+
+//----------------------------------------------------------------------
+// test data table for add/sub and compare
 //----------------------------------------------------------------------
 
 static const lfp_hl addsub_tab[][3] = {
@@ -211,12 +329,15 @@ static const lfp_hl addsub_tab[][3] = {
 	// with carry from fraction:
 	{{ 1,0xC0000000}, { 1,0xC0000000}, { 3,0x80000000}},
 	// with carry from fraction and sign change:
-	{{0x7FFFFFFF, 0x7FFFFFFF}, {0x7FFFFFFF, 0x7FFFFFFF}, {0xFFFFFFFE,0xFFFFFFFE}},
+	{{0x7FFFFFFF, 0x7FFFFFFF}, {0x7FFFFFFF,0x7FFFFFFF}, {0xFFFFFFFE,0xFFFFFFFE}},
 	// two tests w/o carry (used for l_fp<-->double):
-	{{0x55555555, 0xAAAAAAAA}, {0x11111111, 0x11111111}, {0x66666666,0xBBBBBBBB}},
-	{{0x55555555, 0x55555555}, {0x11111111, 0x11111111}, {0x66666666,0x66666666}}
+	{{0x55555555,0xAAAAAAAA}, {0x11111111,0x11111111}, {0x66666666,0xBBBBBBBB}},
+	{{0x55555555,0x55555555}, {0x11111111,0x11111111}, {0x66666666,0x66666666}},
+	// wide-range test, triggers compare trouble
+	{{0x80000000,0x00000001}, {0xFFFFFFFF,0xFFFFFFFE}, {0x7FFFFFFF,0xFFFFFFFF}}
 };
 static const size_t addsub_cnt(sizeof(addsub_tab)/sizeof(addsub_tab[0]));
+static const size_t addsub_tot(sizeof(addsub_tab)/sizeof(addsub_tab[0][0]));
 
 
 //----------------------------------------------------------------------
@@ -237,7 +358,7 @@ static const size_t addsub_cnt(sizeof(addsub_tab)/sizeof(addsub_tab[0]));
 // the 'double' type.
 double eps(double d)
 {
-	return std::max<double>(4.656612873077393e-10, ldexp(fabs(d), -53));
+	return std::max<double>(ldexp(1.0, -31), ldexp(fabs(d), -53));
 }
 
 //----------------------------------------------------------------------
@@ -318,7 +439,15 @@ TEST_F(lfpTest, Absolute) {
 		else
 			op1 += op2;
 		ASSERT_EQ(LFP(0,0), op1);
-	}	
+	}
+
+	// There is one special case we have to check: the minimum
+	// value cannot be negated, or, to be more precise, the
+	// negation reproduces the original pattern.
+	LFP minVal(0x80000000, 0x00000000);
+	LFP minAbs(minVal.abs());
+	ASSERT_EQ(-1, minVal.signum());
+	ASSERT_EQ(minVal, minAbs);
 }
 
 //----------------------------------------------------------------------
@@ -341,11 +470,78 @@ TEST_F(lfpTest, FDF_RoundTrip) {
 	}	
 }
 
-
 //----------------------------------------------------------------------
-// dummy test
-//----------------------------------------------------------------------
+// test the compare stuff
+//
+// This uses the local compare and checks if the operations using the
+// macros in 'ntp_fp.h' produce mathing results.
+// ----------------------------------------------------------------------
+TEST_F(lfpTest, SignedRelOps) {
+	const lfp_hl * tv(&addsub_tab[0][0]);
+	for (size_t lc=addsub_tot-1; lc; --lc,++tv) {
+		LFP op1(tv[0].h,tv[0].l);
+		LFP op2(tv[1].h,tv[1].l);
+		int cmp(op1.scmp(op2));
 
-TEST_F(lfpTest, dummy) {
-	ASSERT_EQ(1,1);
+		switch (cmp) {
+		case -1:
+			std::swap(op1, op2);
+		case 1:
+			EXPECT_TRUE (isgt_p(op1,op2));
+			EXPECT_FALSE(isgt_p(op2,op1));
+
+			EXPECT_TRUE (isgeq_p(op1,op2));
+			EXPECT_FALSE(isgeq_p(op2,op1));
+
+			EXPECT_FALSE(isequ_p(op1,op2));
+			EXPECT_FALSE(isequ_p(op2,op1));
+			break;
+		case 0:
+			EXPECT_FALSE(isgt_p(op1,op2));
+			EXPECT_FALSE(isgt_p(op2,op1));
+
+			EXPECT_TRUE (isgeq_p(op1,op2));
+			EXPECT_TRUE (isgeq_p(op2,op1));
+
+			EXPECT_TRUE (isequ_p(op1,op2));
+			EXPECT_TRUE (isequ_p(op2,op1));
+			break;
+		default:
+			FAIL() << "unexpected SCMP result: " << cmp;
+		}
+	}
 }
+
+TEST_F(lfpTest, UnsignedRelOps) {
+	const lfp_hl * tv(&addsub_tab[0][0]);
+	for (size_t lc=addsub_tot-1; lc; --lc,++tv) {
+		LFP op1(tv[0].h,tv[0].l);
+		LFP op2(tv[1].h,tv[1].l);
+		int cmp(op1.ucmp(op2));
+
+		switch (cmp) {
+		case -1:
+			std::swap(op1, op2);
+		case 1:
+			EXPECT_TRUE (isgtu_p(op1,op2));
+			EXPECT_FALSE(isgtu_p(op2,op1));
+
+			EXPECT_TRUE (ishis_p(op1,op2));
+			EXPECT_FALSE(ishis_p(op2,op1));
+			break;
+		case 0:
+			EXPECT_FALSE(isgtu_p(op1,op2));
+			EXPECT_FALSE(isgtu_p(op2,op1));
+
+			EXPECT_TRUE (ishis_p(op1,op2));
+			EXPECT_TRUE (ishis_p(op2,op1));
+			break;
+		default:
+			FAIL() << "unexpected UCMP result: " << cmp;
+		}
+	}
+}
+
+//----------------------------------------------------------------------
+// that's all folks... but feel free to add things!
+//----------------------------------------------------------------------
