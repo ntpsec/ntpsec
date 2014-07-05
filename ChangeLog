@@ -1,5 +1,5 @@
-* [Bug 2618] (side work) Added unit tests to ensure working of 'l_fp'
 * [Bug 2620] Use version.pm for checking version numbers in NTP::Util.
+* [Bug 2624] Fix signed compare on 'l_fp'.
 (4.2.7p446) 2014/06/28 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 2597] leap file processing -- loose ends.
 * [Bug 2614] use 'unsigned long' consistently in ntp_random.c
