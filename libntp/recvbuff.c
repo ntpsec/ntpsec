@@ -133,17 +133,19 @@ uninit_recvbuff(void)
 {
 	recvbuf_t *rbunlinked;
 
-	do {
+	for (;;) {
 		UNLINK_FIFO(rbunlinked, full_recv_fifo, link);
-		if (rbunlinked != NULL)
-			free(rbunlinked);
-	} while (rbunlinked != NULL);
+		if (rbunlinked == NULL)
+			break;
+		free(rbunlinked);
+	}
 
-	do {
+	for (;;) {
 		UNLINK_HEAD_SLIST(rbunlinked, free_recv_list, link);
-		if (rbunlinked != NULL)
-			free(rbunlinked);
-	} while (rbunlinked != NULL);
+		if (rbunlinked == NULL)
+			break;
+		free(rbunlinked);
+	}
 }
 #endif	/* DEBUG */
 

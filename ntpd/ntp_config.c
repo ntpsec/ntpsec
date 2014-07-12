@@ -1016,7 +1016,7 @@ concat_gen_fifos(
 	pf2 = second;
 	if (NULL == pf1)
 		return pf2;
-	else if (NULL == pf2)
+	if (NULL == pf2)
 		return pf1;
 
 	CONCAT_FIFO(*pf1, *pf2, link);
@@ -1403,11 +1403,12 @@ destroy_int_fifo(
 	int_node *	i_n;
 
 	if (fifo != NULL) {
-		do {
+		for (;;) {
 			UNLINK_FIFO(i_n, *fifo, link);
-			if (i_n != NULL)
-				free(i_n);
-		} while (i_n != NULL);
+			if (i_n == NULL)
+				break;
+			free(i_n);
+		}
 		free(fifo);
 	}
 }
@@ -1421,14 +1422,13 @@ destroy_string_fifo(
 	string_node *	sn;
 
 	if (fifo != NULL) {
-		do {
+		for (;;) {
 			UNLINK_FIFO(sn, *fifo, link);
-			if (sn != NULL) {
-				if (sn->s != NULL)
-					free(sn->s);
-				free(sn);
-			}
-		} while (sn != NULL);
+			if (sn == NULL)
+				break;
+			free(sn->s);
+			free(sn);
+		}
 		free(fifo);
 	}
 }
@@ -1442,14 +1442,14 @@ destroy_attr_val_fifo(
 	attr_val *	av;
 
 	if (av_fifo != NULL) {
-		do {
+		for (;;) {
 			UNLINK_FIFO(av, *av_fifo, link);
-			if (av != NULL) {
-				if (T_String == av->type)
-					free(av->value.s);
-				free(av);
-			}
-		} while (av != NULL);
+			if (av == NULL)
+				break;
+			if (T_String == av->type)
+				free(av->value.s);
+			free(av);
+		}
 		free(av_fifo);
 	}
 }
@@ -1463,13 +1463,13 @@ destroy_filegen_fifo(
 	filegen_node *	fg;
 
 	if (fifo != NULL) {
-		do {
+		for (;;) {
 			UNLINK_FIFO(fg, *fifo, link);
-			if (fg != NULL) {
-				destroy_attr_val_fifo(fg->options);
-				free(fg);
-			}
-		} while (fg != NULL);
+			if (fg == NULL)
+				break;
+			destroy_attr_val_fifo(fg->options);
+			free(fg);
+		}
 		free(fifo);
 	}
 }
@@ -1483,11 +1483,12 @@ destroy_restrict_fifo(
 	restrict_node *	rn;
 
 	if (fifo != NULL) {
-		do {
+		for (;;) {
 			UNLINK_FIFO(rn, *fifo, link);
-			if (rn != NULL)
-				destroy_restrict_node(rn);
-		} while (rn != NULL);
+			if (rn == NULL)
+				break;
+			destroy_restrict_node(rn);
+		}
 		free(fifo);
 	}
 }
@@ -1501,14 +1502,14 @@ destroy_setvar_fifo(
 	setvar_node *	sv;
 
 	if (fifo != NULL) {
-		do {
+		for (;;) {
 			UNLINK_FIFO(sv, *fifo, link);
-			if (sv != NULL) {
-				free(sv->var);
-				free(sv->val);
-				free(sv);
-			}
-		} while (sv != NULL);
+			if (sv == NULL)
+				break;
+			free(sv->var);
+			free(sv->val);
+			free(sv);
+		}
 		free(fifo);
 	}
 }
@@ -1522,14 +1523,14 @@ destroy_addr_opts_fifo(
 	addr_opts_node *	aon;
 
 	if (fifo != NULL) {
-		do {
+		for (;;) {
 			UNLINK_FIFO(aon, *fifo, link);
-			if (aon != NULL) {
-				destroy_address_node(aon->addr);
-				destroy_attr_val_fifo(aon->options);
-				free(aon);
-			}
-		} while (aon != NULL);
+			if (aon == NULL)
+				break;
+			destroy_address_node(aon->addr);
+			destroy_attr_val_fifo(aon->options);
+			free(aon);
+		}
 		free(fifo);
 	}
 }
@@ -1793,11 +1794,12 @@ destroy_address_fifo(
 	address_node *	addr_node;
 
 	if (pfifo != NULL) {
-		do {
+		for (;;) {
 			UNLINK_FIFO(addr_node, *pfifo, link);
-			if (addr_node != NULL)
-				destroy_address_node(addr_node);
-		} while (addr_node != NULL);
+			if (addr_node == NULL)
+				break;
+			destroy_address_node(addr_node);
+		}
 		free(pfifo);
 	}
 }
@@ -2873,12 +2875,11 @@ free_config_nic_rules(
 	nic_rule_node *curr_node;
 
 	if (ptree->nic_rules != NULL) {
-		while (1) {
+		for (;;) {
 			UNLINK_FIFO(curr_node, *ptree->nic_rules, link);
 			if (NULL == curr_node)
 				break;
-			if (curr_node->if_name != NULL)
-				free(curr_node->if_name);
+			free(curr_node->if_name);
 			free(curr_node);
 		}
 		free(ptree->nic_rules);
@@ -3908,7 +3909,7 @@ free_config_peers(
 	peer_node *curr_peer;
 
 	if (ptree->peers != NULL) {
-		while (1) {
+		for (;;) {
 			UNLINK_FIFO(curr_peer, *ptree->peers, link);
 			if (NULL == curr_peer)
 				break;
@@ -4068,7 +4069,7 @@ free_config_unpeers(
 	unpeer_node *curr_unpeer;
 
 	if (ptree->unpeers != NULL) {
-		while (1) {
+		for (;;) {
 			UNLINK_FIFO(curr_unpeer, *ptree->unpeers, link);
 			if (NULL == curr_unpeer)
 				break;
@@ -4234,21 +4235,21 @@ free_config_sim(
 		return;
 
 	FREE_ATTR_VAL_FIFO(sim_n->init_opts);
-	while (1) {
+	for (;;) {
 		UNLINK_FIFO(serv_n, *sim_n->servers, link);
 		if (NULL == serv_n)
 			break;
-		script_n = serv_n->curr_script;
-		while (script_n != NULL) {
-			free(script_n);
-			if (serv_n->script != NULL)
+		free(serv_n->curr_script);
+		if (serv_n->script != NULL) {
+			for (;;) {
 				UNLINK_FIFO(script_n, *serv_n->script,
 					    link);
-			else
-				break;
-		}
-		if (serv_n->script != NULL)
+				if (script_n == NULL)
+					break;
+				free(script_n);
+			}
 			free(serv_n->script);
+		}
 		free(serv_n);
 	}
 	free(sim_n);

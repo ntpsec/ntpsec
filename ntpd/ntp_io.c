@@ -4425,18 +4425,18 @@ delete_interface_from_list(
 {
 	remaddr_t *unlinked;
 
-	do {
+	for (;;) {
 		UNLINK_EXPR_SLIST(unlinked, remoteaddr_list, iface ==
 		    UNLINK_EXPR_SLIST_CURRENT()->ep, link,
 		    remaddr_t);
 
-		if (unlinked != NULL) {
-			DPRINTF(4, ("Deleted addr %s for interface #%d %s from list of addresses\n",
-				stoa(&unlinked->addr), iface->ifnum,
-				iface->name));
-			free(unlinked);
-		}
-	} while (unlinked != NULL);
+		if (unlinked == NULL)
+			break;
+		DPRINTF(4, ("Deleted addr %s for interface #%d %s from list of addresses\n",
+			    stoa(&unlinked->addr), iface->ifnum,
+			    iface->name));
+		free(unlinked);
+	}
 }
 
 

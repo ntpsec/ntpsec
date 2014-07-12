@@ -1,3 +1,5 @@
+* [Bug 2621] Avoid use of indeterminate address after 'free()'
+  (minor C standard conformance issue)
 (4.2.7p447) 2014/07/05 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 2620] Use version.pm for checking version numbers in NTP::Util.
 * [Bug 2624] Fix signed compare on 'l_fp'.
