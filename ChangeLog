@@ -1,3 +1,4 @@
+(4.2.7p448) 2014/07/15 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 2621] Avoid use of indeterminate address after 'free()'
   (minor C standard conformance issue)
 * Quiet warnings from ntp_calendar.h: avoid using argument names.

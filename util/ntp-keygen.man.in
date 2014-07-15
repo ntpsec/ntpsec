@@ -10,11 +10,11 @@
 .ds B-Font B
 .ds I-Font I
 .ds R-Font R
-.TH ntp-keygen @NTP_KEYGEN_MS@ "05 Jul 2014" "ntp (4.2.7p447)" "User Commands"
+.TH ntp-keygen @NTP_KEYGEN_MS@ "15 Jul 2014" "ntp (4.2.7p448)" "User Commands"
 .\"
-.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-Y7aOPK/ag-b8aOOK)
+.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-.gaqPs/ag-khaqOs)
 .\"
-.\" It has been AutoGen-ed July 5, 2014 at 07:00:40 AM by AutoGen 5.18.3pre18
+.\" It has been AutoGen-ed July 15, 2014 at 09:33:00 AM by AutoGen 5.18.3pre18
 .\" From the definitions ntp-keygen-opts.def
 .\" and the template file agman-cmd.tpl
 .SH NAME
@@ -1161,11 +1161,11 @@ the configuration files.
 The \fIhomerc\fP files are "\fI$HOME\fP", and "\fI.\fP".
 If any of these are directories, then the file \fI.ntprc\fP
 is searched for within those directories.
-.TH ntp-keygen @NTP_KEYGEN_MS@ "05 Jul 2014" "ntp (4.2.7p447)" "User Commands"
+.TH ntp-keygen @NTP_KEYGEN_MS@ "15 Jul 2014" "ntp (4.2.7p448)" "User Commands"
 .\"
-.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-Y7aOPK/ag-b8aOOK)
+.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-.gaqPs/ag-khaqOs)
 .\"
-.\" It has been AutoGen-ed July 5, 2014 at 07:00:40 AM by AutoGen 5.18.3pre18
+.\" It has been AutoGen-ed July 15, 2014 at 09:33:00 AM by AutoGen 5.18.3pre18
 .\" From the definitions ntp-keygen-opts.def
 .\" and the template file agman-cmd.tpl
 .SH NAME

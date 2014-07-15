@@ -10,11 +10,11 @@
 .ds B-Font B
 .ds I-Font I
 .ds R-Font R
-.TH plot_summary 1plot_summaryman "05 Jul 2014" "ntp (4.2.7p447)" "User Commands"
+.TH plot_summary 1plot_summaryman "15 Jul 2014" "ntp (4.2.7p448)" "User Commands"
 .\"
-.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-2PaiaB/ag-cQay_A)
+.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-vaa47i/ag-Haai7i)
 .\"
-.\" It has been AutoGen-ed July 5, 2014 at 06:48:51 AM by AutoGen 5.18.3pre18
+.\" It has been AutoGen-ed July 15, 2014 at 09:27:11 AM by AutoGen 5.18.3pre18
 .\" From the definitions plot_summary-opts.def
 .\" and the template file agman-cmd.tpl
 .SH NAME
@@ -96,11 +96,11 @@ Output version of program and exit.  The default mode is `v', a simple
 version.  The `c' mode will print copyright information and `n' will
 print the full copyright notice.
 .PP
-.TH plot_summary 1plot_summaryman "05 Jul 2014" "ntp (4.2.7p447)" "User Commands"
+.TH plot_summary 1plot_summaryman "15 Jul 2014" "ntp (4.2.7p448)" "User Commands"
 .\"
-.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-2PaiaB/ag-cQay_A)
+.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-vaa47i/ag-Haai7i)
 .\"
-.\" It has been AutoGen-ed July 5, 2014 at 06:48:51 AM by AutoGen 5.18.3pre18
+.\" It has been AutoGen-ed July 15, 2014 at 09:27:11 AM by AutoGen 5.18.3pre18
 .\" From the definitions plot_summary-opts.def
 .\" and the template file agman-cmd.tpl
 .SH NAME

@@ -6,7 +6,7 @@
 #
 # EDIT THIS FILE WITH CAUTION  (invoke-calc_tickadj.texi)
 #
-# It has been AutoGen-ed  July  5, 2014 at 09:25:52 AM by AutoGen 5.18.3pre18
+# It has been AutoGen-ed  July 15, 2014 at 09:26:45 AM by AutoGen 5.18.3pre18
 # From the definitions    calc_tickadj-opts.def
 # and the template file   agtexi-cmd.tpl
 @end ignore
