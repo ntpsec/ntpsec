@@ -122,7 +122,7 @@ extern time_t vint64_to_time(const vint64 *);
  * standard.
  */
 extern int
-ntpcal_get_build_date(struct calendar * jd);
+ntpcal_get_build_date(struct calendar * /* jd */);
 
 /*
  * Convert a timestamp in NTP scale to a time_t value in the UN*X
@@ -130,7 +130,7 @@ ntpcal_get_build_date(struct calendar * jd);
  * current system time.
  */
 extern vint64
-ntpcal_ntp_to_time(uint32_t ntp, const time_t *pivot);
+ntpcal_ntp_to_time(uint32_t /* ntp */, const time_t * /* pivot */);
 
 /*
  * Convert a timestamp in NTP scale to a 64bit seconds value in the NTP
@@ -139,27 +139,27 @@ ntpcal_ntp_to_time(uint32_t ntp, const time_t *pivot);
  * Note: The pivot must be given in UN*X time scale!
  */
 extern vint64
-ntpcal_ntp_to_ntp(uint32_t ntp, const time_t *pivot);
+ntpcal_ntp_to_ntp(uint32_t /* ntp */, const time_t * /* pivot */);
 
 /*
  * Split a time stamp in seconds into elapsed days and elapsed seconds
  * since midnight.
  */
 extern ntpcal_split
-ntpcal_daysplit(const vint64*);
+ntpcal_daysplit(const vint64 *);
 
 /*
  * Merge a number of days and a number of seconds into seconds,
  * expressed in 64 bits to avoid overflow.
  */
 extern vint64
-ntpcal_dayjoin(int32_t days, int32_t seconds);
+ntpcal_dayjoin(int32_t /* days */, int32_t /* seconds */);
 
 /*
  * Convert elapsed years in Era into elapsed days in Era.
  */
 extern int32_t
-ntpcal_days_in_years(int32_t years);
+ntpcal_days_in_years(int32_t /* years */);
 
 /*
  * Convert a number of elapsed month in a year into elapsed days
@@ -172,14 +172,14 @@ ntpcal_days_in_years(int32_t years);
  * excess! But then, we need no leap year flag, either...)
  */
 extern ntpcal_split
-ntpcal_days_in_months(int32_t months);
+ntpcal_days_in_months(int32_t /* months */);
 
 /*
  * Convert ELAPSED years/months/days of gregorian calendar to elapsed
  * days in Gregorian epoch. No range checks done here!
  */
 extern int32_t
-ntpcal_edate_to_eradays(int32_t years, int32_t months, int32_t mdays);
+ntpcal_edate_to_eradays(int32_t /* years */, int32_t /* months */, int32_t /* mdays */);
 
 /*
  * Convert a time spec to seconds. No range checks done here!
