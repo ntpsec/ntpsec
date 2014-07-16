@@ -1,3 +1,4 @@
+(4.2.7p449) 2014/07/16 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 2547] Automate update of "Last Update" datestamps in .html files.
 * [Bug 2623] Missing {} in refclock_oncore.c.
 * Quiet warnings from ntp_calendar.h: avoid using argument names.
