@@ -10,11 +10,11 @@
 .ds B-Font B
 .ds I-Font I
 .ds R-Font R
-.TH sntp 1sntpman "16 Jul 2014" "4.2.7p449" "User Commands"
+.TH sntp 1sntpman "16 Jul 2014" "4.2.7p450" "User Commands"
 .\"
-.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-gTaWBE/ag-sTaWAE)
+.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-UgaG3o/ag-6gay2o)
 .\"
-.\" It has been AutoGen-ed July 16, 2014 at 09:33:03 AM by AutoGen 5.18.3pre18
+.\" It has been AutoGen-ed July 16, 2014 at 09:57:15 PM by AutoGen 5.18.3pre18
 .\" From the definitions sntp-opts.def
 .\" and the template file agman-cmd.tpl
 .SH NAME
@@ -281,11 +281,11 @@ the configuration files.
 The \fIhomerc\fP files are "\fI$HOME\fP", and "\fI.\fP".
 If any of these are directories, then the file \fI.ntprc\fP
 is searched for within those directories.
-.TH sntp 1sntpman "16 Jul 2014" "4.2.7p449" "User Commands"
+.TH sntp 1sntpman "16 Jul 2014" "4.2.7p450" "User Commands"
 .\"
-.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-gTaWBE/ag-sTaWAE)
+.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-UgaG3o/ag-6gay2o)
 .\"
-.\" It has been AutoGen-ed July 16, 2014 at 09:33:03 AM by AutoGen 5.18.3pre18
+.\" It has been AutoGen-ed July 16, 2014 at 09:57:15 PM by AutoGen 5.18.3pre18
 .\" From the definitions sntp-opts.def
 .\" and the template file agman-cmd.tpl
 .SH NAME

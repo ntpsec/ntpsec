@@ -1,3 +1,4 @@
+(4.2.7p450) 2014/07/16 Released by Harlan Stenn <stenn@ntp.org>
 * Distribute the scripts needed for the fix for Bug 2547.
 (4.2.7p449) 2014/07/16 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 2547] Automate update of "Last Update" datestamps in .html files.
