@@ -1,3 +1,7 @@
+* [Bug 2597] leap file loose ends (follow-up)
+  - uniform expiration check messages for config and timer triggered
+    leap file loads
+  - timer triggered loads log messages only once per day
 (4.2.7p449) 2014/07/16 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 2547] Automate update of "Last Update" datestamps in .html files.
 * [Bug 2623] Missing {} in refclock_oncore.c.

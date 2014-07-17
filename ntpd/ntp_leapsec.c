@@ -375,7 +375,8 @@ leapsec_reset_frame(void)
 int/*BOOL*/
 leapsec_load_stream(
 	FILE       * ifp  ,
-	const char * fname)
+	const char * fname,
+	int/*BOOL*/  logall)
 {
 	leap_table_t *pt;
 	int           rcheck;
@@ -384,30 +385,31 @@ leapsec_load_stream(
 		fname = "<unknown>";
 
 	rcheck = leapsec_validate((leapsec_reader)getc, ifp);
-	switch (rcheck)
-	{
-	case LSVALID_GOODHASH:
-		msyslog(LOG_NOTICE, "%s ('%s'): good hash signature",
-			logPrefix, fname);
-		break;
-
-	case LSVALID_NOHASH:
-		msyslog(LOG_NOTICE, "%s ('%s'): no hash signature",
-			logPrefix, fname);
-		break;
-	case LSVALID_BADHASH:
-		msyslog(LOG_ERR, "%s ('%s'): signature mismatch",
-			logPrefix, fname);
-		break;
-	case LSVALID_BADFORMAT:
-		msyslog(LOG_ERR, "%s ('%s'): malformed hash signature",
-			logPrefix, fname);
-		break;
-	default:
-		msyslog(LOG_ERR, "%s ('%s'): unknown error code %d",
-			logPrefix, fname, rcheck);
-		break;
-	}
+	if (logall)
+		switch (rcheck)
+		{
+		case LSVALID_GOODHASH:
+			msyslog(LOG_NOTICE, "%s ('%s'): good hash signature",
+				logPrefix, fname);
+			break;
+			
+		case LSVALID_NOHASH:
+			msyslog(LOG_ERR, "%s ('%s'): no hash signature",
+				logPrefix, fname);
+			break;
+		case LSVALID_BADHASH:
+			msyslog(LOG_ERR, "%s ('%s'): signature mismatch",
+				logPrefix, fname);
+			break;
+		case LSVALID_BADFORMAT:
+			msyslog(LOG_ERR, "%s ('%s'): malformed hash signature",
+				logPrefix, fname);
+			break;
+		default:
+			msyslog(LOG_ERR, "%s ('%s'): unknown error code %d",
+				logPrefix, fname, rcheck);
+			break;
+		}
 	if (rcheck < 0)
 		return FALSE;
 
@@ -449,7 +451,8 @@ int/*BOOL*/
 leapsec_load_file(
 	const char  * fname,
 	struct stat * sb_old,
-	int/*BOOL*/   force)
+	int/*BOOL*/   force,
+	int/*BOOL*/   logall)
 {
 	FILE       * fp;
 	struct stat  sb_new;
@@ -461,8 +464,9 @@ leapsec_load_file(
 	
 	/* try to stat the leapfile */
 	if (0 != stat(fname, &sb_new)) {
-		msyslog(LOG_ERR, "%s ('%s'): stat failed: %m",
-			logPrefix, fname);
+		if (logall)
+			msyslog(LOG_ERR, "%s ('%s'): stat failed: %m",
+				logPrefix, fname);
 		return FALSE;
 	}
 
@@ -494,13 +498,14 @@ leapsec_load_file(
 	 */
 	/* coverity[toctou] */
 	if ((fp = fopen(fname, "r")) == NULL) {
-		msyslog(LOG_ERR,
-			"%s ('%s'): open failed: %m",
-			logPrefix, fname);
+		if (logall)
+			msyslog(LOG_ERR,
+				"%s ('%s'): open failed: %m",
+				logPrefix, fname);
 		return FALSE;
 	}
 
-	rc = leapsec_load_stream(fp, fname);
+	rc = leapsec_load_stream(fp, fname, logall);
 	fclose(fp);
 	return rc;
 }
