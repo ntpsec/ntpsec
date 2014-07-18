@@ -1,3 +1,4 @@
+* Make all of the html/ .html files use the same format for "Last update".
 (4.2.7p451) 2014/07/17 Released by Harlan Stenn <stenn@ntp.org>
 * Fix the "Last update" entries in the html/ subtree.
 (4.2.7p450) 2014/07/16 Released by Harlan Stenn <stenn@ntp.org>
