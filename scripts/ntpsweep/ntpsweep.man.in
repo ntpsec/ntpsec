@@ -10,11 +10,11 @@
 .ds B-Font B
 .ds I-Font I
 .ds R-Font R
-.TH ntpsweep 1ntpsweepman "17 Jul 2014" "ntp (4.2.7p451)" "User Commands"
+.TH ntpsweep 1ntpsweepman "18 Jul 2014" "ntp (4.2.7p452)" "User Commands"
 .\"
-.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-B9aWSj/ag-N9aaSj)
+.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-9zayDw/ag-jAaOCw)
 .\"
-.\" It has been AutoGen-ed July 17, 2014 at 09:26:16 AM by AutoGen 5.18.3pre18
+.\" It has been AutoGen-ed July 18, 2014 at 09:26:31 AM by AutoGen 5.18.3pre18
 .\" From the definitions ntpsweep-opts.def
 .\" and the template file agman-cmd.tpl
 .SH NAME
@@ -79,11 +79,11 @@ Output version of program and exit.  The default mode is `v', a simple
 version.  The `c' mode will print copyright information and `n' will
 print the full copyright notice.
 .PP
-.TH ntpsweep 1ntpsweepman "17 Jul 2014" "ntp (4.2.7p451)" "User Commands"
+.TH ntpsweep 1ntpsweepman "18 Jul 2014" "ntp (4.2.7p452)" "User Commands"
 .\"
-.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-B9aWSj/ag-N9aaSj)
+.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-9zayDw/ag-jAaOCw)
 .\"
-.\" It has been AutoGen-ed July 17, 2014 at 09:26:16 AM by AutoGen 5.18.3pre18
+.\" It has been AutoGen-ed July 18, 2014 at 09:26:31 AM by AutoGen 5.18.3pre18
 .\" From the definitions ntpsweep-opts.def
 .\" and the template file agman-cmd.tpl
 .SH NAME
