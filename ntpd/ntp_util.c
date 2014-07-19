@@ -101,6 +101,7 @@ static double prev_drift_comp;		/* last frequency update */
  */
 static	void	record_sys_stats(void);
 	void	ntpd_time_stepped(void);
+static  void	check_leap_expiration(int, uint32_t, const time_t*);
 
 /* 
  * Prototypes
@@ -108,7 +109,6 @@ static	void	record_sys_stats(void);
 #ifdef DEBUG
 void	uninit_util(void);
 #endif
-
 
 /*
  * uninit_util - free memory allocated by init_util
@@ -337,6 +337,7 @@ stats_config(
 	int	len;
 	double	old_drift;
 	l_fp	now;
+	time_t  ttnow;
 #ifndef VMS
 	const char temp_ext[] = ".TEMP";
 #else
@@ -483,11 +484,14 @@ stats_config(
 		leapfile_name = erealloc(leapfile_name, len + 1);
 		memcpy(leapfile_name, value, len + 1);
 
-		if (leapsec_load_file(leapfile_name, &leapfile_stat, TRUE)) {
+		if (leapsec_load_file(
+			    leapfile_name, &leapfile_stat, TRUE, TRUE))
+		{
 			leap_signature_t lsig;
 
-			leapsec_getsig(&lsig);
 			get_systime(&now);
+			time(&ttnow);
+			leapsec_getsig(&lsig);
 			mprintf_event(EVNT_TAI, NULL,
 				      "%d leap %s %s %s",
 				      lsig.taiof,
@@ -496,7 +500,13 @@ stats_config(
 					  ? "expired"
 					  : "expires",
 				      fstostr(lsig.etime));
+
 			have_leapfile = TRUE;
+
+			/* force an immediate daily expiration check of
+			 * the leap seconds table
+			 */
+			check_leap_expiration(TRUE, now.l_ui, &ttnow);
 		}
 		break;
 
@@ -852,10 +862,7 @@ record_timing_stats(
 /*
  * check_leap_file - See if the leapseconds file has been updated.
  *
- * Returns:
- *	-1 if there was a problem,
- *	 0 if the leapfile has expired or less than 24hrs remaining TTL
- *	>0 # of full days until the leapfile expires
+ * Returns: n/a
  *
  * Note: This loads a new leapfile on the fly. Currently a leap file
  * without SHA1 signature is accepted, but if there is a signature line,
@@ -868,19 +875,33 @@ check_leap_file(
 	const time_t *systime
 	)
 {
-	static const char * const logPrefix = "leapsecond file";
-	int  rc;
-
 	/* just do nothing if there is no leap file */
 	if ( ! (leapfile_name && *leapfile_name))
 		return;
 	
 	/* try to load leapfile, force it if no leapfile loaded yet */
 	if (leapsec_load_file(
-		    leapfile_name, &leapfile_stat, !have_leapfile))
+		    leapfile_name, &leapfile_stat,
+		    !have_leapfile, is_daily_check))
 		have_leapfile = TRUE;
 	else if (!have_leapfile)
 		return;
+
+	check_leap_expiration(is_daily_check, ntptime, systime);
+}
+
+/*
+ * check expiration of a loaded leap table
+ */
+static void
+check_leap_expiration(
+	int           is_daily_check,
+	uint32_t      ntptime       ,
+	const time_t *systime
+	)
+{
+	static const char * const logPrefix = "leapsecond file";
+	int  rc;
 
 	/* test the expiration of the leap data and log with proper
 	 * level and frequency (once/hour or once/day, depending on the

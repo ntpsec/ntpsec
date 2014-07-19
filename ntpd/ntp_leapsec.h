@@ -134,7 +134,8 @@ extern void leapsec_dump(const leap_table_t*, leapsec_dumper func, void *farg);
 /* Read a leap second file from stream. This is a convenience wrapper
  * around the generic load function, 'leapsec_load()'.
  */
-extern int/*BOOL*/ leapsec_load_stream(FILE * fp, const char * fname);
+extern int/*BOOL*/ leapsec_load_stream(FILE * fp, const char * fname,
+				       int/*BOOL*/logall);
 
 /* Read a leap second file from file. It checks that the file exists and
  * (if 'force' is not applied) the ctime/mtime has changed since the
@@ -144,7 +145,7 @@ extern int/*BOOL*/ leapsec_load_stream(FILE * fp, const char * fname);
  * otherwise. Uses 'leapsec_load_stream()' internally.
  */
 extern int/*BOOL*/ leapsec_load_file(const char * fname, struct stat * sb,
-				     int/*BOOL*/force);
+				     int/*BOOL*/force, int/*BOOL*/logall);
 
 /* Get the current leap data signature. This consists of the last
  * ransition, the table expiration, and the total TAI difference at the

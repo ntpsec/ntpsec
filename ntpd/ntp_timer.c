@@ -66,7 +66,7 @@ volatile int alarm_flag;
 static  u_long interface_timer;	/* interface update timer */
 static	u_long adjust_timer;	/* second timer */
 static	u_long stats_timer;	/* stats timer */
-static	u_long check_leapfile;	/* Report leapfile problems once/day */
+static	u_long leapf_timer;	/* Report leapfile problems once/day */
 static	u_long huffpuff_timer;	/* huff-n'-puff timer */
 static	u_long worker_idle_timer;/* next check for idle intres */
 u_long	leapsec;	        /* seconds to next leap (proximity class) */
@@ -189,7 +189,7 @@ init_timer(void)
 	alarm_overflow = 0;
 	adjust_timer = 1;
 	stats_timer = SECSPERHR;
-	check_leapfile = 0;
+	leapf_timer = SECSPERDAY;
 	huffpuff_timer = 0;
 	interface_timer = 0;
 	current_time = 0;
@@ -425,8 +425,8 @@ timer(void)
 	if (stats_timer <= current_time) {
 		stats_timer += SECSPERHR;
 		write_stats();
-		if (check_leapfile < current_time) {
-			check_leapfile += SECSPERDAY;
+		if (leapf_timer <= current_time) {
+			leapf_timer += SECSPERDAY;
 			check_leap_file(TRUE, now.l_ui, &tnow);
 		} else {
 			check_leap_file(FALSE, now.l_ui, &tnow);

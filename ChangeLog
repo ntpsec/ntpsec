@@ -1,3 +1,7 @@
+* [Bug 2597] leap file loose ends (follow-up)
+  - uniform expiration check messages for config and timer triggered
+    leap file loads
+  - timer triggered loads log messages only once per day
 (4.2.7p452) 2014/07/18 Released by Harlan Stenn <stenn@ntp.org>
 * Make all of the html/ .html files use the same format for "Last update".
 (4.2.7p451) 2014/07/17 Released by Harlan Stenn <stenn@ntp.org>
