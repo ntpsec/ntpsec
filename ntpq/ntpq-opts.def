@@ -486,7 +486,7 @@ Perform the same function as the
 except that it uses previously stored data rather than making a new query.
 .It Ic peers
 Display a list of peers in the form:
-.Ic [tally]remote refid st t when pool reach delay offset jitter
+.Dl [tally]remote refid st t when pool reach delay offset jitter
 .Bl -tag -width "something" -compact -offset indent
 .It Variable
 Description
