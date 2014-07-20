@@ -1,11 +1,11 @@
 /*
  *  EDIT THIS FILE WITH CAUTION  (ntpdsim-opts.h)
  *
- *  It has been AutoGen-ed  March 30, 2014 at 01:32:59 AM by AutoGen 5.18.3pre18
+ *  It has been AutoGen-ed  July 20, 2014 at 08:20:33 AM by AutoGen 5.18.4pre9
  *  From the definitions    ntpdsim-opts.def
  *  and the template file   options
  *
- * Generated from AutoOpts 40:2:15 templates.
+ * Generated from AutoOpts 41:0:16 templates.
  *
  *  AutoOpts is a copyrighted work.  This header file is not encumbered
  *  by AutoOpts licensing, but is provided under the licensing terms chosen
@@ -18,7 +18,7 @@
  * The ntpdsim program is copyrighted and licensed
  * under the following terms:
  *
- *  Copyright (C) 1970-2013 The University of Delaware, all rights reserved.
+ *  Copyright (C) 1970-2014 The University of Delaware, all rights reserved.
  *  This is free software. It is licensed for use, modification and
  *  redistribution under the terms of the NTP License, copies of which
  *  can be seen at:
@@ -53,7 +53,7 @@
  *  tolerable version is at least as old as what was current when the header
  *  template was released.
  */
-#define AO_TEMPLATE_VERSION 163842
+#define AO_TEMPLATE_VERSION 167936
 #if (AO_TEMPLATE_VERSION < OPTIONS_MINIMUM_VERSION) \
  || (AO_TEMPLATE_VERSION > OPTIONS_STRUCT_VERSION)
 # error option template version mismatches autoopts/options.h header
@@ -107,9 +107,9 @@ typedef enum {
 /** count of all options for ntpdsim */
 #define OPTION_CT    39
 /** ntpdsim version */
-#define NTPDSIM_VERSION       "4.2.7p435"
+#define NTPDSIM_VERSION       "4.2.7p453"
 /** Full ntpdsim version text */
-#define NTPDSIM_FULL_VERSION  "ntpdsim 4.2.7p435"
+#define NTPDSIM_FULL_VERSION  "ntpdsim 4.2.7p453"
 
 /**
  *  Interface defines for all options.  Replace "n" with the UPPER_CASED
@@ -382,15 +382,15 @@ typedef enum {
 #define VALUE_OPT_USEPCC         0x1004
 #define VALUE_OPT_PCCFREQ        0x1005
 #define VALUE_OPT_MDNS           'm'
-/** option flag (value) for " (get "val-name") " option */
+/** option flag (value) for help-value option */
 #define VALUE_OPT_HELP          '?'
-/** option flag (value) for " (get "val-name") " option */
+/** option flag (value) for more-help-value option */
 #define VALUE_OPT_MORE_HELP     '!'
-/** option flag (value) for " (get "val-name") " option */
+/** option flag (value) for version-value option */
 #define VALUE_OPT_VERSION       0x1006
-/** option flag (value) for " (get "val-name") " option */
+/** option flag (value) for save-opts-value option */
 #define VALUE_OPT_SAVE_OPTS     '>'
-/** option flag (value) for " (get "val-name") " option */
+/** option flag (value) for load-opts-value option */
 #define VALUE_OPT_LOAD_OPTS     '<'
 #define SET_OPT_SAVE_OPTS(a)   STMTS( \
         DESC(SAVE_OPTS).fOptState &= OPTST_PERSISTENT_MASK; \
@@ -427,11 +427,11 @@ extern tOptions ntpdsimOptions;
 #     include <libintl.h>
 #   endif
 
-# ifndef __attribute__
-#   define __attribute__(_a)
+# ifndef ATTRIBUTE_FORMAT_ARG
+#   define ATTRIBUTE_FORMAT_ARG(_a)
 # endif
 
-static inline char* aoGetsText(char const* pz) __attribute__ ((format_arg(1)));
+static inline char* aoGetsText(char const* pz) ATTRIBUTE_FORMAT_ARG(1);
 static inline char* aoGetsText(char const* pz) {
     if (pz == NULL) return NULL;
     return (char*)gettext(pz);

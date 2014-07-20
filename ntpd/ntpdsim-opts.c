@@ -1,11 +1,11 @@
 /*
  *  EDIT THIS FILE WITH CAUTION  (ntpdsim-opts.c)
  *
- *  It has been AutoGen-ed  March 30, 2014 at 01:32:59 AM by AutoGen 5.18.3pre18
+ *  It has been AutoGen-ed  July 20, 2014 at 08:20:33 AM by AutoGen 5.18.4pre9
  *  From the definitions    ntpdsim-opts.def
  *  and the template file   options
  *
- * Generated from AutoOpts 40:2:15 templates.
+ * Generated from AutoOpts 41:0:16 templates.
  *
  *  AutoOpts is a copyrighted work.  This source file is not encumbered
  *  by AutoOpts licensing, but is provided under the licensing terms chosen
@@ -18,7 +18,7 @@
  * The ntpdsim program is copyrighted and licensed
  * under the following terms:
  *
- *  Copyright (C) 1970-2013 The University of Delaware, all rights reserved.
+ *  Copyright (C) 1970-2014 The University of Delaware, all rights reserved.
  *  This is free software. It is licensed for use, modification and
  *  redistribution under the terms of the NTP License, copies of which
  *  can be seen at:
@@ -75,8 +75,8 @@ extern FILE * option_usage_fp;
  *  static const strings for ntpdsim options
  */
 static char const ntpdsim_opt_strs[3124] =
-/*     0 */ "ntpdsim 4.2.7p435\n"
-            "Copyright (C) 1970-2013 The University of Delaware, all rights reserved.\n"
+/*     0 */ "ntpdsim 4.2.7p453\n"
+            "Copyright (C) 1970-2014 The University of Delaware, all rights reserved.\n"
             "This is free software. It is licensed for use, modification and\n"
             "redistribution under the terms of the NTP License, copies of which\n"
             "can be seen at:\n"
@@ -207,14 +207,14 @@ static char const ntpdsim_opt_strs[3124] =
 /*  2916 */ "no-load-opts\0"
 /*  2929 */ "no\0"
 /*  2932 */ "NTPDSIM\0"
-/*  2940 */ "ntpdsim - NTP daemon simulation program - Ver. 4.2.7p435\n"
+/*  2940 */ "ntpdsim - NTP daemon simulation program - Ver. 4.2.7p453\n"
             "Usage:  %s [ -<flag> [<val>] | --<name>[{=| }<val>] ]...\n\0"
 /*  3055 */ "$HOME\0"
 /*  3061 */ ".\0"
 /*  3063 */ ".ntprc\0"
 /*  3070 */ "http://bugs.ntp.org, bugs@ntp.org\0"
 /*  3104 */ "\n\0"
-/*  3106 */ "ntpdsim 4.2.7p435";
+/*  3106 */ "ntpdsim 4.2.7p453";
 
 /**
  *  ipv4 option description with
@@ -1603,8 +1603,8 @@ static void bogus_function(void) {
      translate option names.
    */
   /* referenced via ntpdsimOptions.pzCopyright */
-  puts(_("ntpdsim 4.2.7p435\n\
-Copyright (C) 1970-2013 The University of Delaware, all rights reserved.\n\
+  puts(_("ntpdsim 4.2.7p453\n\
+Copyright (C) 1970-2014 The University of Delaware, all rights reserved.\n\
 This is free software. It is licensed for use, modification and\n\
 redistribution under the terms of the NTP License, copies of which\n\
 can be seen at:\n"));
@@ -1746,14 +1746,14 @@ provided \"as is\" without express or implied warranty.\n"));
   puts(_("load options from a config file"));
 
   /* referenced via ntpdsimOptions.pzUsageTitle */
-  puts(_("ntpdsim - NTP daemon simulation program - Ver. 4.2.7p435\n\
+  puts(_("ntpdsim - NTP daemon simulation program - Ver. 4.2.7p453\n\
 Usage:  %s [ -<flag> [<val>] | --<name>[{=| }<val>] ]...\n"));
 
   /* referenced via ntpdsimOptions.pzDetail */
   puts(_("\n"));
 
   /* referenced via ntpdsimOptions.pzFullVersion */
-  puts(_("ntpdsim 4.2.7p435"));
+  puts(_("ntpdsim 4.2.7p453"));
 
   /* referenced via ntpdsimOptions.pzFullUsage */
   puts(_("<<<NOT-FOUND>>>"));
