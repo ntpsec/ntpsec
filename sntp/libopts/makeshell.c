@@ -68,7 +68,7 @@ static void
 open_out(char const * fname, char const * pname);
 /* = = = END-STATIC-FORWARD = = = */
 
-LOCAL void
+LOCAL noreturn void
 option_exits(int exit_code)
 {
     if (print_exit)
@@ -76,7 +76,7 @@ option_exits(int exit_code)
     exit(exit_code);
 }
 
-LOCAL void
+LOCAL noreturn void
 ao_bug(char const * msg)
 {
     fprintf(stderr, zao_bug_msg, msg);
@@ -90,7 +90,7 @@ fserr_warn(char const * prog, char const * op, char const * fname)
             op, fname);
 }
 
-LOCAL void
+LOCAL noreturn void
 fserr_exit(char const * prog, char const * op, char const * fname)
 {
     fserr_warn(prog, op, fname);

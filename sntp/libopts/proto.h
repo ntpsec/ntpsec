@@ -1,7 +1,7 @@
 /* -*- buffer-read-only: t -*- vi: set ro:
  *
  * Prototypes for autoopts
- * Generated Sat Mar 29 11:01:18 PDT 2014
+ * Generated Sun Jul  6 14:01:42 PDT 2014
  */
 #ifndef AUTOOPTS_PROTO_H_GUARD
 #define AUTOOPTS_PROTO_H_GUARD 1
@@ -98,16 +98,16 @@ load_opt_line(tOptions * opts, tOptState * opt_state, char * line,
 /*
  *  Extracted from makeshell.c
  */
-static void
+static noreturn void
 option_exits(int exit_code);
 
-static void
+static noreturn void
 ao_bug(char const * msg);
 
 static void
 fserr_warn(char const * prog, char const * op, char const * fname);
 
-static void
+static noreturn void
 fserr_exit(char const * prog, char const * op, char const * fname);
 
 /*
