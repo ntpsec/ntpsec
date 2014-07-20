@@ -1,4 +1,4 @@
-* Fix  a nit in the ntpq man page.
+* Fix nits in the ntpq man page.
 * autogen-5.18.4pre9
 (4.2.7p453) 2014/07/19 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 2597] leap file loose ends (follow-up)
