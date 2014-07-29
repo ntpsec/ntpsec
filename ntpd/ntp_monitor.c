@@ -176,19 +176,20 @@ static void
 mon_getmoremem(void)
 {
 	mon_entry *chunk;
-	mon_entry *mon;
 	u_int entries;
 
 	entries = (0 == mon_mem_increments)
 		      ? mru_initalloc
 		      : mru_incalloc;
 
-	chunk = emalloc(entries * sizeof(*chunk));
-	for (mon = chunk + entries - 1; mon >= chunk; mon--)
-		mon_free_entry(mon);
+	if (entries) {
+		chunk = emalloc(entries * sizeof(*chunk));
+		mru_alloc += entries;
+		for (chunk += entries; entries; entries--)
+			mon_free_entry(--chunk);
 
-	mru_alloc += entries;
-	mon_mem_increments++;
+		mon_mem_increments++;
+	}
 }
 
 
