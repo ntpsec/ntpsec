@@ -40,7 +40,7 @@
 # define thread_exit(c)	_endthreadex(c)
 # define tickle_sem	SetEvent
 #else
-# define thread_exit(c)	pthread_exit((void *)(c))
+# define thread_exit(c)	pthread_exit((void*)(size_t)(c))
 # define tickle_sem	sem_post
 #endif
 
