@@ -10,11 +10,11 @@
 .ds B-Font B
 .ds I-Font I
 .ds R-Font R
-.TH calc_tickadj 1calc_tickadjman "30 Jul 2014" "ntp (4.2.7p454)" "User Commands"
+.TH calc_tickadj 1calc_tickadjman "03 Aug 2014" "ntp (4.2.7p455)" "User Commands"
 .\"
-.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-1JaWgb/ag-cKaagb)
+.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-RUaWqH/ag-4Ua4pH)
 .\"
-.\" It has been AutoGen-ed July 30, 2014 at 09:26:56 AM by AutoGen 5.18.3pre18
+.\" It has been AutoGen-ed August 3, 2014 at 09:26:53 AM by AutoGen 5.18.3pre18
 .\" From the definitions calc_tickadj-opts.def
 .\" and the template file agman-cmd.tpl
 .SH NAME
@@ -90,11 +90,11 @@ Output version of program and exit.  The default mode is `v', a simple
 version.  The `c' mode will print copyright information and `n' will
 print the full copyright notice.
 .PP
-.TH calc_tickadj 1calc_tickadjman "30 Jul 2014" "ntp (4.2.7p454)" "User Commands"
+.TH calc_tickadj 1calc_tickadjman "03 Aug 2014" "ntp (4.2.7p455)" "User Commands"
 .\"
-.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-1JaWgb/ag-cKaagb)
+.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-RUaWqH/ag-4Ua4pH)
 .\"
-.\" It has been AutoGen-ed July 30, 2014 at 09:26:56 AM by AutoGen 5.18.3pre18
+.\" It has been AutoGen-ed August 3, 2014 at 09:26:53 AM by AutoGen 5.18.3pre18
 .\" From the definitions calc_tickadj-opts.def
 .\" and the template file agman-cmd.tpl
 .SH NAME
