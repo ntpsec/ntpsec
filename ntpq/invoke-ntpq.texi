@@ -6,7 +6,7 @@
 #
 # EDIT THIS FILE WITH CAUTION  (invoke-ntpq.texi)
 #
-# It has been AutoGen-ed  July 20, 2014 at 09:28:57 AM by AutoGen 5.18.4pre9
+# It has been AutoGen-ed  July 30, 2014 at 09:32:51 AM by AutoGen 5.18.3pre18
 # From the definitions    ntpq-opts.def
 # and the template file   agtexi-cmd.tpl
 @end ignore
@@ -219,6 +219,9 @@ There appear
 to be no servers left which demand version 1.
 With no argument, displays the current NTP version that will be used
 when communicating with servers.
+@item @code{quit}
+Exit
+@code{ntpq}
 @item @code{passwd}
 This command prompts you to type in a password (which will not
 be echoed) which will be used to authenticate configuration
@@ -226,9 +229,6 @@ requests.
 The password must correspond to the key configured for
 use by the NTP server for this purpose if such requests are to be
 successful.
-@item @code{quit}
-Exit
-@code{ntpq}
 @item @code{raw}
 Causes all output from query commands is printed as received
 from the remote server.
@@ -270,7 +270,7 @@ ind assid status conf reach auth condition last_event cnt
 @item @code{status} @code{Ta} @code{peer} @code{status} @code{word}
 @item @code{conf} @code{Ta} @code{yes}: @code{persistent,} @code{no}: @code{ephemeral}
 @item @code{reach} @code{Ta} @code{yes}: @code{reachable,} @code{no}: @code{unreachable}
-@item @code{auth} @code{Ta} @code{ok}, @code{yes}, @code{bad} @code{and} @code{none}
+@item @code{auth} @code{Ta} @code{ok}, @code{Liyes}, @code{bad} @code{and} @code{none}
 @item @code{condition} @code{Ta} @code{selection} @code{status} @code{(see} @code{the} @code{select} @code{field} @code{of} @code{the} @code{peer} @code{status} @code{word)}
 @item @code{last_event} @code{Ta} @code{event} @code{report} @code{(see} @code{the} @code{event} @code{field} @code{of} @code{the} @code{peer} @code{status} @code{word)}
 @item @code{cnt} @code{Ta} @code{event} @code{count} @code{(see} @code{the} @code{count} @code{field} @code{of} @code{the} @code{peer} @code{status} @code{word)}
@@ -379,9 +379,7 @@ Perform the same function as the
 except that it uses previously stored data rather than making a new query.
 @item @code{peers}
 Display a list of peers in the form:
-@example
-[tally]remote refid st t when pool reach delay offset jitter
-@end example
+@code{[tally]remote} @code{refid} @code{st} @code{t} @code{when} @code{pool} @code{reach} @code{delay} @code{offset} @code{jitter}
 @table @asis
 @item Variable
 Description
@@ -389,12 +387,12 @@ Description
 single-character code indicating current value of the
 @code{select}
 field of the
-.Lk decode.html#peer "peer status word"
+<a href="decode.html#peer">peer status word</a>
 @item @code{remote}
 host name (or IP number) of peer
 @item @code{refid}
 association ID or
-.Lk decode.html#kiss "'kiss code"
+<a href="decode.html#kiss">kiss code</a>
 @item @code{st}
 stratum
 @item @code{t}
@@ -431,9 +429,9 @@ Display the specified variables.
 If
 @kbd{assocID}
 is zero, the variables are from the
-@ref{System Variables}
+<a href="#system">system variables</a>
 name space, otherwise they are from the
-@ref{Peer Variables}
+<a href="#peer">peer variables</a>
 name space.
 The
 @kbd{assocID}
@@ -463,7 +461,7 @@ or
 to the ntpd host's file
 @kbd{filename}.
 This command will be rejected by the server unless
-.Lk miscopt.html#saveconfigdir "saveconfigdir"
+<a href="miscopt.html#saveconfigdir">saveconfigdir</a>
 appears in the
 @code{ntpd}
 configuration file.
@@ -480,9 +478,9 @@ Write the specified variables.
 If the
 @kbd{assocID}
 is zero, the variables are from the
-@ref{System Variables}
+<a href="#system">system variables</a>
 name space, otherwise they are from the
-@ref{Peer Variables}
+<a href="#peer">peer variables</a>
 name space.
 The
 @kbd{assocID}
@@ -493,7 +491,7 @@ Display operational summary.
 Print statistics counters maintained in the protocol module.
 @end table
 
-@subsubsection Status Words and Kiss Codes
+.SS Status Words and Kiss Codes
 
 The current state of the operating program is shown in a set of status words maintained by the system and each association separately.
 These words are displayed in the
@@ -502,14 +500,13 @@ and
 @code{as}
 commands both in hexadecimal and decoded short tip strings.
 The codes, tips and short explanations are on the
-.Lk decode.html "Event Messages and Status Words"
-page.
+<a href="decode.html">Event Messages and Status Words</a> page.
 The page also includes a list of system and peer messages,
 the code for the latest of which is included in the status word.
 
 Information resulting from protocol machine state transitions
 is displayed using an informal set of ASCII strings called
-.Lk decode.html#kiss "kiss codes" .
+<a href="decode.html#kiss">kiss codes</a>.
 The original purpose was for kiss-o'-death (KoD) packets
 sent by the server to advise the client of an unusual condition.
 They are now displayed, when appropriate,
@@ -524,7 +521,8 @@ Not all variables are displayed in some configurations.
 @item Variable
 Description
 @item @code{status}
-.Lk decode.html#sys "system status word"
+<a href="decode.html#sys">
+system status word
 @item @code{version}
 NTP software version and build time
 @item @code{processor}
@@ -551,7 +549,7 @@ minimum time constant (log2 s) (3-10)
 date and time of day
 @item @code{refid}
 reference ID or
-.Lk decode.html#kiss "kiss code"
+<a href="decode.html#kiss">kiss code
 @item @code{reftime}
 reference time
 @item @code{offset}
@@ -612,7 +610,7 @@ Description
 @item @code{associd}
 association ID
 @item @code{status}
-.Lk decode.html#peer "peer status word"
+<a href="decode.html#peer">peer status word
 @item @code{srcadr}
 source (remote) IP address
 @item @code{srcport}
@@ -633,7 +631,7 @@ total roundtrip delay to the primary reference clock
 total root dispersion to the primary reference clock
 @item @code{refid}
 reference ID or
-.Lk decode.html#kiss "kiss code"
+<a href="decode.html#kiss">kiss code
 @item @code{reftime}
 reference time
 @item @code{reach}
@@ -650,9 +648,9 @@ host poll exponent (log2 s) (3-17)
 peer poll exponent (log2 s) (3-17)
 @item @code{headway}
 headway (see
-.Lk rate.html "Rate Management and the Kiss-o'-Death Packet" )
+<a href="rate.html">Rate Management and the Kiss-o'-Death Packet )
 @item @code{flash}
-.Lk decode.html#flash "flash status word"
+<a href="decode.html#flash">flash status word
 @item @code{offset}
 filter offset
 @item @code{delay}
@@ -667,7 +665,7 @@ Autokey group name for this association
 unicast/broadcast bias
 @item @code{xleave}
 interleave delay (see
-.Lk xleave.html "NTP Interleaved Modes" )
+<a href="xleave.html">NTP Interleaved Modes</a> )
 @end table
 The
 @code{bias}
@@ -712,7 +710,7 @@ Description
 @item @code{associd}
 association ID
 @item @code{status}
-.Lk decode.html#clock "clock status word"
+<a href="decode.html#clock">clock status word
 @item @code{device}
 device description
 @item @code{timecode}
@@ -770,7 +768,7 @@ with a status code of 0.
 
 @exampleindent 0
 @example
-ntpq - standard NTP query program - Ver. 4.2.7p453
+ntpq - standard NTP query program - Ver. 4.2.7p454
 Usage:  ntpq [ -<flag> [<val>] | --<name>[@{=| @}<val>] ]... [ host ...]
   Flg Arg Option-Name    Description
    -4 no  ipv4           Force IPv4 DNS name resolution

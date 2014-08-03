@@ -1,5 +1,9 @@
 * Fix nits in the ntpq man page.
 * autogen-5.18.4pre9
+* [Bug 2565] ntpd sometimes logs unexpected getifaddrs() errors.
+* CID 739722: Clean up the definition of the exten field of struct pkt.
+(4.2.7p454) 2014/07/30 Released by Harlan Stenn <stenn@ntp.org>
+* [Bug 2628] 'mon_getmoremem()' relies on undefined behaviour
 (4.2.7p453) 2014/07/19 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 2597] leap file loose ends (follow-up)
   - uniform expiration check messages for config and timer triggered

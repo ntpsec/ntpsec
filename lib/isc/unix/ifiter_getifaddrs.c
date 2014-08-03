@@ -55,7 +55,7 @@ isc_interfaceiter_create(isc_mem_t *mctx, isc_interfaceiter_t **iterp) {
 	isc_interfaceiter_t *iter;
 	isc_result_t result;
 	char strbuf[ISC_STRERRORSIZE];
-	int trys;
+	int trys, ret;
 
 	REQUIRE(mctx != NULL);
 	REQUIRE(iterp != NULL);
@@ -87,23 +87,20 @@ isc_interfaceiter_create(isc_mem_t *mctx, isc_interfaceiter_t **iterp) {
 	iter->valid = ISC_R_FAILURE;
 #endif
 
+	/* If interrupted, try again */
 	for (trys = 0; trys < 3; trys++) {
-		if (getifaddrs(&iter->ifaddrs) < 0) {
-			if (errno == EINTR)
-				continue;
-
-			isc__strerror(errno, strbuf, sizeof(strbuf));
-			UNEXPECTED_ERROR(__FILE__, __LINE__,
-					 isc_msgcat_get(isc_msgcat,
-							ISC_MSGSET_IFITERGETIFADDRS,
-							ISC_MSG_GETIFADDRS,
-							"getting interface "
-							"addresses: getifaddrs: %s"),
-					 strbuf);
-			result = ISC_R_UNEXPECTED;
-			goto failure;
-		}
-		break;
+		if ((ret = getifaddrs(&iter->ifaddrs)) >= 0)
+			break;
+		if (errno != EINTR)
+			break;
+	}
+	if (ret < 0) {
+		isc__strerror(errno, strbuf, sizeof(strbuf));
+		UNEXPECTED_ERROR(__FILE__, __LINE__, isc_msgcat_get(isc_msgcat,
+		    ISC_MSGSET_IFITERGETIFADDRS, ISC_MSG_GETIFADDRS,
+		    "getting interface addresses: getifaddrs: %s"), strbuf);
+		result = ISC_R_UNEXPECTED;
+		goto failure;
 	}
 
 	/*
