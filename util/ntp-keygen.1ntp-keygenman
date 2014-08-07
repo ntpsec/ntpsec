@@ -10,11 +10,11 @@
 .ds B-Font B
 .ds I-Font I
 .ds R-Font R
-.TH ntp-keygen 1ntp-keygenman "03 Aug 2014" "ntp (4.2.7p455)" "User Commands"
+.TH ntp-keygen 1ntp-keygenman "07 Aug 2014" "ntp (4.2.7p456)" "User Commands"
 .\"
-.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-n3aqEU/ag-z3aqDU)
+.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-45ayis/ag-e6ayhs)
 .\"
-.\" It has been AutoGen-ed August 3, 2014 at 09:33:18 AM by AutoGen 5.18.3pre18
+.\" It has been AutoGen-ed August 7, 2014 at 09:32:58 AM by AutoGen 5.18.3pre18
 .\" From the definitions ntp-keygen-opts.def
 .\" and the template file agman-cmd.tpl
 .SH NAME
@@ -1161,6 +1161,16 @@ the configuration files.
 The \fIhomerc\fP files are "\fI$HOME\fP", and "\fI.\fP".
 If any of these are directories, then the file \fI.ntprc\fP
 is searched for within those directories.
+.TH ntp-keygen 1ntp-keygenman "07 Aug 2014" "ntp (4.2.7p456)" "User Commands"
+.\"
+.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-45ayis/ag-e6ayhs)
+.\"
+.\" It has been AutoGen-ed August 7, 2014 at 09:32:58 AM by AutoGen 5.18.3pre18
+.\" From the definitions ntp-keygen-opts.def
+.\" and the template file agman-cmd.tpl
+.SH NAME
+\f\*[B-Font]ntp-keygen\fP ntp-keygen
+\- Create a NTP host key
 cvt_prog='/usr/local/gnu/share/autogen/texi2man'
 cvt_prog=`cd \`dirname "$cvt_prog"\` >/dev/null && pwd
          `/`basename "$cvt_prog"`
@@ -1180,16 +1190,6 @@ test \-x "$cvt_prog" || die "'$cvt_prog' is not executable"
     rm \-f $list
 } 1>.doc 2>/dev/null
 /opt/csw/bin/ggrep \-E \-v '^[ 	]*$' .doc | $cvt_prog
-.TH ntp-keygen 1ntp-keygenman "03 Aug 2014" "ntp (4.2.7p455)" "User Commands"
-.\"
-.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-n3aqEU/ag-z3aqDU)
-.\"
-.\" It has been AutoGen-ed August 3, 2014 at 09:33:18 AM by AutoGen 5.18.3pre18
-.\" From the definitions ntp-keygen-opts.def
-.\" and the template file agman-cmd.tpl
-.SH NAME
-\f\*[B-Font]ntp-keygen\fP ntp-keygen
-\- Create a NTP host key
 .SH USAGE
 The
 \f\*[B-Font]\-p\f[] \f\*[I-Font]password\f[]
