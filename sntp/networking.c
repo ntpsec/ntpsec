@@ -65,7 +65,7 @@ recvdata(
 /* Parsing from a short 'struct pkt' directly is bound to create
  * coverity warnings. These are hard to avoid, as the formal declaration
  * does not reflect the true layout in the presence of autokey extension
- * fields. Parsing and skipping the extension fields od a received paket
+ * fields. Parsing and skipping the extension fields of a received packet
  * until there's only the MAC left is better done in this separate
  * function.
  */
@@ -109,7 +109,7 @@ process_pkt (
 	int		mac_size;
 	u_int		exten_len;
 	u_int32 *       exten_end;
-	u_int32 *       paket_end;
+	u_int32 *       packet_end;
 	l_fp		sent_xmt;
 	l_fp		resp_org;
 
@@ -136,13 +136,13 @@ unusable:
 			func_name, pkt_len);
 		return PACKET_UNUSEABLE;
 	}
-	/* Note: pkt_len is a multiple of 4 at this point! */
-	paket_end = (u_int32*)((char*)rpkt + pkt_len);
-	exten_end = skip_efields(rpkt->exten, paket_end);
+	/* Note: pkt_len must be a multiple of 4 at this point! */
+	packet_end = (u_int32*)((char*)rpkt + pkt_len);
+	exten_end = skip_efields(rpkt->exten, packet_end);
 	if (NULL == exten_end)
 		goto unusable;
 	/* get size of MAC in cells; can be zero */
-	exten_len = (u_int)(paket_end - exten_end);
+	exten_len = (u_int)(packet_end - exten_end);
 
 	/* deduce action required from remaining length */
 	switch (exten_len) {
