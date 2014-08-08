@@ -8,6 +8,9 @@
  * Copyright (c) 2006
  */
 
+%parse-param {struct FILE_INFO *ip_file}
+%lex-param {struct FILE_INFO *ip_file}
+
 %{
   #ifdef HAVE_CONFIG_H
   # include <config.h>
@@ -29,15 +32,11 @@
 				   for both the simulator and the daemon
 				*/
 
-
-  struct FILE_INFO *ip_file;	/* configuration file stream */
-
   #define YYMALLOC	emalloc
   #define YYFREE	free
   #define YYERROR_VERBOSE
   #define YYMAXDEPTH	1000	/* stop the madness sooner */
-  void yyerror(const char *msg);
-  extern int input_from_file;	/* else from ntpq :config */
+  void yyerror(struct FILE_INFO *ip_file, const char *msg);
 %}
 
 /* 
@@ -659,7 +658,7 @@ monitoring_command
 				cfgt.stats_dir = $2;
 			} else {
 				YYFREE($2);
-				yyerror("statsdir remote configuration ignored");
+				yyerror(ip_file, "statsdir remote configuration ignored");
 			}
 		}
 	|	T_Filegen stat filegen_option_list
@@ -713,7 +712,7 @@ filegen_option
 			} else {
 				$$ = NULL;
 				YYFREE($2);
-				yyerror("filegen file remote config ignored");
+				yyerror(ip_file, "filegen file remote config ignored");
 			}
 		}
 	|	T_Type filegen_type
@@ -722,7 +721,7 @@ filegen_option
 				$$ = create_attr_ival($1, $2);
 			} else {
 				$$ = NULL;
-				yyerror("filegen type remote config ignored");
+				yyerror(ip_file, "filegen type remote config ignored");
 			}
 		}
 	|	link_nolink
@@ -737,7 +736,7 @@ filegen_option
 					err = "filegen link remote config ignored";
 				else
 					err = "filegen nolink remote config ignored";
-				yyerror(err);
+				yyerror(ip_file, err);
 			}
 		}
 	|	enable_disable
@@ -1048,7 +1047,7 @@ system_option
 				snprintf(err_str, sizeof(err_str),
 					 "enable/disable %s remote configuration ignored",
 					 keyword($1));
-				yyerror(err_str);
+				yyerror(ip_file, err_str);
 			}
 		}
 	;
@@ -1140,13 +1139,13 @@ miscellaneous_command
 				snprintf(error_text, sizeof(error_text),
 					 "%s remote config ignored",
 					 keyword($1));
-				yyerror(error_text);
+				yyerror(ip_file, error_text);
 			}
 		}
 	|	T_Includefile T_String command
 		{
 			if (!input_from_file) {
-				yyerror("remote includefile ignored");
+				yyerror(ip_file, "remote includefile ignored");
 				break;
 			}
 			if (curr_include_level >= MAXINCLUDELEVEL) {
@@ -1434,7 +1433,7 @@ boolean
 	:	T_Integer
 		{
 			if ($1 != 0 && $1 != 1) {
-				yyerror("Integer value is not boolean (0 or 1). Assuming 1");
+				yyerror(ip_file, "Integer value is not boolean (0 or 1). Assuming 1");
 				$$ = 1;
 			} else {
 				$$ = $1;
@@ -1575,6 +1574,7 @@ sim_act_keyword
 
 void 
 yyerror(
+	struct FILE_INFO *ip_file,
 	const char *msg
 	)
 {

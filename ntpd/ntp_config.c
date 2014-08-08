@@ -128,7 +128,6 @@ typedef struct peer_resolved_ctx_tag {
 /*
  * Definitions of things either imported from or exported to outside
  */
-extern int yyparse(void);
 extern int yydebug;			/* ntp_parser.c (.y) */
 int curr_include_level;			/* The current include level */
 struct FILE_INFO *fp[MAXINCLUDELEVEL+1];
@@ -4347,11 +4346,10 @@ config_remotely(
 	remote_cuckoo.fname = origin;
 	remote_cuckoo.line_no = 1;
 	remote_cuckoo.col_no = 1;
-	ip_file = &remote_cuckoo;
 	input_from_file = 0;
 
 	init_syntax_tree(&cfgt);
-	yyparse();
+	yyparse(&remote_cuckoo);
 	cfgt.source.attr = CONF_SOURCE_NTPQ;
 	cfgt.timestamp = time(NULL);
 	cfgt.source.value.s = estrdup(stoa(remote_addr));
@@ -4449,8 +4447,7 @@ getconfig(
 #ifdef DEBUG
 	yydebug = !!(debug >= 5);
 #endif
-	ip_file = fp[curr_include_level];
-	yyparse();
+	yyparse(fp[curr_include_level]);
 
 	DPRINTF(1, ("Finished Parsing!!\n"));
 

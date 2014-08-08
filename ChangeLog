@@ -1,3 +1,5 @@
+* Pass the configration source into the parser as argument rathern
+  than through a global variable.
 (4.2.7p456) 2014/08/07 Released by Harlan Stenn <stenn@ntp.org>
 * CID 739722: Change the way the extention and MAC fields are processed.
 (4.2.7p455) 2014/08/03 Released by Harlan Stenn <stenn@ntp.org>
