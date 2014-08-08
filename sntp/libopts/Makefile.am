@@ -9,23 +9,18 @@ libopts_la_SOURCES      = libopts.c
 libopts_la_CPPFLAGS     = -I$(srcdir)
 libopts_la_LDFLAGS      = -version-info  41:0:16
 
-# Because this Makefile snippet defines a variable used by other
-# gnulib Makefile snippets, it must be present in all Makefile.am that
-# need it. This is ensured by the applicability 'all' defined above.
+libopts.c:		$(BUILT_SOURCES)
+	@: do-nothing rule to avoid default SCCS get
 
+EXTRA_DIST		=
+BUILT_SOURCES		=
+MOSTLYCLEANFILES	=
+
+# Makefile fragment from gnulib-s stdnoreturn module:
+#
 _NORETURN_H=$(srcdir)/compat/_Noreturn.h
-
-EXTRA_DIST=
-BUILT_SOURCES=
-MOSTLYCLEANFILES=
-
 EXTRA_DIST += $(srcdir)/compat/_Noreturn.h
-
-
 BUILT_SOURCES += $(STDNORETURN_H)
-
-# We need the following in order to create <stdnoreturn.h> when the system
-# doesn't have one that works.
 if GL_GENERATE_STDNORETURN_H
 stdnoreturn.h: stdnoreturn.in.h $(top_builddir)/config.status $(_NORETURN_H)
 	$(AM_V_GEN)rm -f $@-t $@ && \
@@ -39,10 +34,9 @@ stdnoreturn.h: $(top_builddir)/config.status
 	rm -f $@
 endif
 MOSTLYCLEANFILES += stdnoreturn.h stdnoreturn.h-t
-
 EXTRA_DIST += stdnoreturn.in.h
 
-EXTRA_DIST              += \
+EXTRA_DIST += \
     COPYING.gplv3           COPYING.lgplv3          COPYING.mbsd  \
     MakeDefs.inc            README                  ag-char-map.h  \
     alias.c                 ao-strs.c               ao-strs.h  \
@@ -54,14 +48,13 @@ EXTRA_DIST              += \
     cook.c                  enum.c                  env.c  \
     file.c                  find.c                  genshell.c  \
     genshell.h              gettext.h               init.c  \
-    intprops.h \
-    load.c                  m4/stdnoreturn.m4       m4/liboptschk.m4  \
-    m4/libopts.m4           makeshell.c             nested.c  \
-    numeric.c               option-value-type.c     option-value-type.h  \
-    option-xat-attribute.c  option-xat-attribute.h  parse-duration.c  \
-    parse-duration.h        pgusage.c               proto.h  \
-    putshell.c              reset.c                 restore.c  \
-    save.c                  sort.c                  stack.c  \
-    stdnoreturn.in.h        streqvcmp.c             text_mmap.c  \
-    time.c                  tokenize.c              usage.c  \
-    version.c
+    intprops.h              load.c                  m4/stdnoreturn.m4  \
+    m4/liboptschk.m4        m4/libopts.m4           makeshell.c  \
+    nested.c                numeric.c               option-value-type.c  \
+    option-value-type.h     option-xat-attribute.c  option-xat-attribute.h  \
+    parse-duration.c        parse-duration.h        pgusage.c  \
+    proto.h                 putshell.c              reset.c  \
+    restore.c               save.c                  sort.c  \
+    stack.c                 stdnoreturn.in.h        streqvcmp.c  \
+    text_mmap.c             time.c                  tokenize.c  \
+    usage.c                 version.c

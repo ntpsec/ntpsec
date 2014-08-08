@@ -179,7 +179,6 @@ print_ver(tOptions * opts, tOptDesc * od, FILE * fp, bool call_exit)
 }
 
 /*=export_func  optionPrintVersion
- * private:
  *
  * what:  Print the program version
  * arg:   + tOptions* + opts + program options descriptor +
@@ -195,7 +194,6 @@ optionPrintVersion(tOptions * opts, tOptDesc * od)
 }
 
 /*=export_func  optionPrintVersionAndReturn
- * private:
  *
  * what:  Print the program version
  * arg:   + tOptions* + opts + program options descriptor +
