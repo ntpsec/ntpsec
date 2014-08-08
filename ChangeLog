@@ -1,3 +1,6 @@
+* [Bug 2622] Synchronisation problem using SHM when time difference is
+  more than four hours: Change SHM driver so TOY restricted API is not
+  used any more. (Plus some minor cleanup in logic and flow control)
 (4.2.7p456) 2014/08/07 Released by Harlan Stenn <stenn@ntp.org>
 * CID 739722: Change the way the extention and MAC fields are processed.
 (4.2.7p455) 2014/08/03 Released by Harlan Stenn <stenn@ntp.org>
