@@ -1,7 +1,7 @@
 /*
  *  EDIT THIS FILE WITH CAUTION  (ntpdc-opts.h)
  *
- *  It has been AutoGen-ed  July 30, 2014 at 09:31:57 AM by AutoGen 5.18.3pre18
+ *  It has been AutoGen-ed  August  7, 2014 at 09:31:30 AM by AutoGen 5.18.3pre18
  *  From the definitions    ntpdc-opts.def
  *  and the template file   options
  *
@@ -83,9 +83,9 @@ typedef enum {
 /** count of all options for ntpdc */
 #define OPTION_CT    15
 /** ntpdc version */
-#define NTPDC_VERSION       "4.2.7p454"
+#define NTPDC_VERSION       "4.2.7p456"
 /** Full ntpdc version text */
-#define NTPDC_FULL_VERSION  "ntpdc 4.2.7p454"
+#define NTPDC_FULL_VERSION  "ntpdc 4.2.7p456"
 
 /**
  *  Interface defines for all options.  Replace "n" with the UPPER_CASED
