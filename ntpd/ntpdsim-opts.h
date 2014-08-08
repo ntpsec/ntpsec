@@ -1,7 +1,7 @@
 /*
  *  EDIT THIS FILE WITH CAUTION  (ntpdsim-opts.h)
  *
- *  It has been AutoGen-ed  July 20, 2014 at 08:20:33 AM by AutoGen 5.18.4pre9
+ *  It has been AutoGen-ed  August  8, 2014 at 09:04:31 AM by AutoGen 5.18.4pre12
  *  From the definitions    ntpdsim-opts.def
  *  and the template file   options
  *
@@ -107,9 +107,9 @@ typedef enum {
 /** count of all options for ntpdsim */
 #define OPTION_CT    39
 /** ntpdsim version */
-#define NTPDSIM_VERSION       "4.2.7p453"
+#define NTPDSIM_VERSION       "4.2.7p454"
 /** Full ntpdsim version text */
-#define NTPDSIM_FULL_VERSION  "ntpdsim 4.2.7p453"
+#define NTPDSIM_FULL_VERSION  "ntpdsim 4.2.7p454"
 
 /**
  *  Interface defines for all options.  Replace "n" with the UPPER_CASED

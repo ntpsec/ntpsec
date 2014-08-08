@@ -1,11 +1,11 @@
 /*
  *  EDIT THIS FILE WITH CAUTION  (ntpdc-opts.h)
  *
- *  It has been AutoGen-ed  August  7, 2014 at 09:31:30 AM by AutoGen 5.18.3pre18
+ *  It has been AutoGen-ed  August  8, 2014 at 09:04:35 AM by AutoGen 5.18.4pre12
  *  From the definitions    ntpdc-opts.def
  *  and the template file   options
  *
- * Generated from AutoOpts 40:2:15 templates.
+ * Generated from AutoOpts 41:0:16 templates.
  *
  *  AutoOpts is a copyrighted work.  This header file is not encumbered
  *  by AutoOpts licensing, but is provided under the licensing terms chosen
@@ -53,7 +53,7 @@
  *  tolerable version is at least as old as what was current when the header
  *  template was released.
  */
-#define AO_TEMPLATE_VERSION 163842
+#define AO_TEMPLATE_VERSION 167936
 #if (AO_TEMPLATE_VERSION < OPTIONS_MINIMUM_VERSION) \
  || (AO_TEMPLATE_VERSION > OPTIONS_STRUCT_VERSION)
 # error option template version mismatches autoopts/options.h header
@@ -83,9 +83,9 @@ typedef enum {
 /** count of all options for ntpdc */
 #define OPTION_CT    15
 /** ntpdc version */
-#define NTPDC_VERSION       "4.2.7p456"
+#define NTPDC_VERSION       "4.2.7p454"
 /** Full ntpdc version text */
-#define NTPDC_FULL_VERSION  "ntpdc 4.2.7p456"
+#define NTPDC_FULL_VERSION  "ntpdc 4.2.7p454"
 
 /**
  *  Interface defines for all options.  Replace "n" with the UPPER_CASED
@@ -207,15 +207,15 @@ typedef enum {
 #define VALUE_OPT_NUMERIC        'n'
 #define VALUE_OPT_PEERS          'p'
 #define VALUE_OPT_SHOWPEERS      's'
-/** option flag (value) for " (get "val-name") " option */
+/** option flag (value) for help-value option */
 #define VALUE_OPT_HELP          '?'
-/** option flag (value) for " (get "val-name") " option */
+/** option flag (value) for more-help-value option */
 #define VALUE_OPT_MORE_HELP     '!'
-/** option flag (value) for " (get "val-name") " option */
+/** option flag (value) for version-value option */
 #define VALUE_OPT_VERSION       0x1001
-/** option flag (value) for " (get "val-name") " option */
+/** option flag (value) for save-opts-value option */
 #define VALUE_OPT_SAVE_OPTS     '>'
-/** option flag (value) for " (get "val-name") " option */
+/** option flag (value) for load-opts-value option */
 #define VALUE_OPT_LOAD_OPTS     '<'
 #define SET_OPT_SAVE_OPTS(a)   STMTS( \
         DESC(SAVE_OPTS).fOptState &= OPTST_PERSISTENT_MASK; \
@@ -252,11 +252,11 @@ extern tOptions ntpdcOptions;
 #     include <libintl.h>
 #   endif
 
-# ifndef __attribute__
-#   define __attribute__(_a)
+# ifndef ATTRIBUTE_FORMAT_ARG
+#   define ATTRIBUTE_FORMAT_ARG(_a)
 # endif
 
-static inline char* aoGetsText(char const* pz) __attribute__ ((format_arg(1)));
+static inline char* aoGetsText(char const* pz) ATTRIBUTE_FORMAT_ARG(1);
 static inline char* aoGetsText(char const* pz) {
     if (pz == NULL) return NULL;
     return (char*)gettext(pz);
