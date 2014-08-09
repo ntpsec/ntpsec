@@ -1,3 +1,4 @@
+(4.2.7p457) 2014/08/09 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 2622] Synchronisation problem using SHM when time difference is
   more than four hours: Change SHM driver so TOY restricted API is not
   used any more. (Plus some minor cleanup in logic and flow control)

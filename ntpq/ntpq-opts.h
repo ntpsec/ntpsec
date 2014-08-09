@@ -82,9 +82,9 @@ typedef enum {
 /** count of all options for ntpq */
 #define OPTION_CT    14
 /** ntpq version */
-#define NTPQ_VERSION       "4.2.7p456"
+#define NTPQ_VERSION       "4.2.7p457"
 /** Full ntpq version text */
-#define NTPQ_FULL_VERSION  "ntpq 4.2.7p456"
+#define NTPQ_FULL_VERSION  "ntpq 4.2.7p457"
 
 /**
  *  Interface defines for all options.  Replace "n" with the UPPER_CASED

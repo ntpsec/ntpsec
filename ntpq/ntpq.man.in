@@ -10,11 +10,11 @@
 .ds B-Font B
 .ds I-Font I
 .ds R-Font R
-.TH ntpq @NTPQ_MS@ "07 Aug 2014" "4.2.7p456" "User Commands"
+.TH ntpq @NTPQ_MS@ "09 Aug 2014" "4.2.7p457" "User Commands"
 .\"
-.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-TxaqJp/ag-5xaqIp)
+.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-LvaW7b/ag-pwaW6b)
 .\"
-.\" It has been AutoGen-ed August 7, 2014 at 09:32:19 AM by AutoGen 5.18.3pre18
+.\" It has been AutoGen-ed
 .\" From the definitions ntpq-opts.def
 .\" and the template file agman-cmd.tpl
 .SH NAME
@@ -273,12 +273,6 @@ when communicating with servers.
 .br
 .ns
 .TP 20
-.NOP \f\*[B-Font]quit\f[]
-Exit
-\f\*[B-Font]ntpq\fP
-.br
-.ns
-.TP 20
 .NOP \f\*[B-Font]passwd\f[]
 This command prompts you to type in a password (which will not
 be echoed) which will be used to authenticate configuration
@@ -286,6 +280,12 @@ requests.
 The password must correspond to the key configured for
 use by the NTP server for this purpose if such requests are to be
 successful.
+.br
+.ns
+.TP 20
+.NOP \f\*[B-Font]quit\f[]
+Exit
+\f\*[B-Font]ntpq\fP
 .br
 .ns
 .TP 20
@@ -330,7 +330,7 @@ Display a list of mobilized associations in the form:
 .IP \fB\(bu\fP 2 \f[C]status\f[] \f[C]Ta\f[] \f[C]peer\f[] \f[C]status\f[] \f[C]word\f[]
 .IP \fB\(bu\fP 2 \f[C]conf\f[] \f[C]Ta\f[] \f[C]yes\f[]: \f[C]persistent,\f[] \f[C]no\f[]: \f[C]ephemeral\f[]
 .IP \fB\(bu\fP 2 \f[C]reach\f[] \f[C]Ta\f[] \f[C]yes\f[]: \f[C]reachable,\f[] \f[C]no\f[]: \f[C]unreachable\f[]
-.IP \fB\(bu\fP 2 \f[C]auth\f[] \f[C]Ta\f[] \f[C]ok\f[], \f[C]Liyes\f[], \f[C]bad\f[] \f[C]and\f[] \f[C]none\f[]
+.IP \fB\(bu\fP 2 \f[C]auth\f[] \f[C]Ta\f[] \f[C]ok\f[], \f[C]yes\f[], \f[C]bad\f[] \f[C]and\f[] \f[C]none\f[]
 .IP \fB\(bu\fP 2 \f[C]condition\f[] \f[C]Ta\f[] \f[C]selection\f[] \f[C]status\f[] \f[C](see\f[] \f[C]the\f[] \f[C]select\f[] \f[C]field\f[] \f[C]of\f[] \f[C]the\f[] \f[C]peer\f[] \f[C]status\f[] \f[C]word)\f[]
 .IP \fB\(bu\fP 2 \f[C]last_event\f[] \f[C]Ta\f[] \f[C]event\f[] \f[C]report\f[] \f[C](see\f[] \f[C]the\f[] \f[C]event\f[] \f[C]field\f[] \f[C]of\f[] \f[C]the\f[] \f[C]peer\f[] \f[C]status\f[] \f[C]word)\f[]
 .IP \fB\(bu\fP 2 \f[C]cnt\f[] \f[C]Ta\f[] \f[C]event\f[] \f[C]count\f[] \f[C](see\f[] \f[C]the\f[] \f[C]count\f[] \f[C]field\f[] \f[C]of\f[] \f[C]the\f[] \f[C]peer\f[] \f[C]status\f[] \f[C]word)\f[]
@@ -347,12 +347,12 @@ Display a list of clock variables for those associations supporting a reference 
 .br
 .ns
 .TP 10
-.NOP \f[C]:config\f[] [...]
+.NOP \f\*[B-Font]:config\f[] [...]
 Send the remainder of the command line, including whitespace, to the server as a run-time configuration command in the same format as a line in the configuration file. This command is experimental until further notice and clarification. Authentication is of course required.
 .br
 .ns
 .TP 10
-.NOP \f[C]config-from-file\f[] \f\*[I-Font]filename\f[]
+.NOP \f\*[B-Font]config-from-file\f[] \f\*[I-Font]filename\f[]
 Send the each line of
 \f\*[I-Font]filename\f[]
 to the server as run-time configuration commands in the same format as a line in the configuration file. This command is experimental until further notice and clarification. Authentication is required.
@@ -509,7 +509,7 @@ except that it uses previously stored data rather than making a new query.
 .TP 10
 .NOP \f\*[B-Font]peers\f[]
 Display a list of peers in the form:
-\f\*[B-Font][tally]remote\f[] \f\*[B-Font]refid\f[] \f\*[B-Font]st\f[] \f\*[B-Font]t\f[] \f\*[B-Font]when\f[] \f\*[B-Font]pool\f[] \f\*[B-Font]reach\f[] \f\*[B-Font]delay\f[] \f\*[B-Font]offset\f[] \f\*[B-Font]jitter\f[]
+.Dl [tally]remote refid st t when pool reach delay offset jitter
 .RS
 .TP 10
 .NOP Variable
@@ -521,7 +521,7 @@ Description
 single-character code indicating current value of the
 \f\*[B-Font]select\f[]
 field of the
-<a href="decode.html#peer">peer status word</a>
+.Lk decode.html#peer "peer status word"
 .br
 .ns
 .TP 10
@@ -532,7 +532,7 @@ host name (or IP number) of peer
 .TP 10
 .NOP \f\*[B-Font]refid\f[]
 association ID or
-<a href="decode.html#kiss">kiss code</a>
+.Lk decode.html#kiss "'kiss code"
 .br
 .ns
 .TP 10
@@ -599,9 +599,9 @@ Display the specified variables.
 If
 \f\*[I-Font]assocID\f[]
 is zero, the variables are from the
-<a href="#system">system variables</a>
+\fISystem\f[] \fIVariables\f[]
 name space, otherwise they are from the
-<a href="#peer">peer variables</a>
+\fIPeer\f[] \fIVariables\f[]
 name space.
 The
 \f\*[I-Font]assocID\f[]
@@ -633,7 +633,7 @@ or
 to the ntpd host's file
 \f\*[I-Font]filename\f[].
 This command will be rejected by the server unless
-<a href="miscopt.html#saveconfigdir">saveconfigdir</a>
+.Lk miscopt.html#saveconfigdir "saveconfigdir"
 appears in the
 \f\*[B-Font]ntpd\f[]
 configuration file.
@@ -653,9 +653,9 @@ Write the specified variables.
 If the
 \f\*[I-Font]assocID\f[]
 is zero, the variables are from the
-<a href="#system">system variables</a>
+\fISystem\f[] \fIVariables\f[]
 name space, otherwise they are from the
-<a href="#peer">peer variables</a>
+\fIPeer\f[] \fIVariables\f[]
 name space.
 The
 \f\*[I-Font]assocID\f[]
@@ -679,12 +679,16 @@ and
 \f\*[B-Font]as\f[]
 commands both in hexadecimal and decoded short tip strings.
 The codes, tips and short explanations are on the
-<a href="decode.html">Event Messages and Status Words</a> page.
+.Lk decode.html "Event Messages and Status Words"
+page.
 The page also includes a list of system and peer messages,
 the code for the latest of which is included in the status word.
+.sp \n(Ppu
+.ne 2
+
 Information resulting from protocol machine state transitions
 is displayed using an informal set of ASCII strings called
-<a href="decode.html#kiss">kiss codes</a>.
+.Lk decode.html#kiss "kiss codes" .
 The original purpose was for kiss-o'-death (KoD) packets
 sent by the server to advise the client of an unusual condition.
 They are now displayed, when appropriate,
@@ -701,8 +705,7 @@ Description
 .ns
 .TP 10
 .NOP \f\*[B-Font]status\f[]
-<a href="decode.html#sys">
-system status word
+.Lk decode.html#sys "system status word"
 .br
 .ns
 .TP 10
@@ -768,7 +771,7 @@ date and time of day
 .TP 10
 .NOP \f\*[B-Font]refid\f[]
 reference ID or
-<a href="decode.html#kiss">kiss code
+.Lk decode.html#kiss "kiss code"
 .br
 .ns
 .TP 10
@@ -818,6 +821,9 @@ NTP seconds when the NIST leapseconds file expires
 The jitter and wander statistics are exponentially-weighted RMS averages.
 The system jitter is defined in the NTPv4 specification;
 the clock jitter statistic is computed by the clock discipline module.
+.sp \n(Ppu
+.ne 2
+
 When the NTPv4 daemon is compiled with the OpenSSL software library,
 additional system variables are displayed,
 including some or all of the following,
@@ -883,7 +889,7 @@ association ID
 .ns
 .TP 10
 .NOP \f\*[B-Font]status\f[]
-<a href="decode.html#peer">peer status word
+.Lk decode.html#peer "peer status word"
 .br
 .ns
 .TP 10
@@ -934,7 +940,7 @@ total root dispersion to the primary reference clock
 .TP 10
 .NOP \f\*[B-Font]refid\f[]
 reference ID or
-<a href="decode.html#kiss">kiss code
+.Lk decode.html#kiss "kiss code"
 .br
 .ns
 .TP 10
@@ -975,12 +981,12 @@ peer poll exponent (log2 s) (3-17)
 .TP 10
 .NOP \f\*[B-Font]headway\f[]
 headway (see
-<a href="rate.html">Rate Management and the Kiss-o'-Death Packet )
+.Lk rate.html "Rate Management and the Kiss-o'-Death Packet" )
 .br
 .ns
 .TP 10
 .NOP \f\*[B-Font]flash\f[]
-<a href="decode.html#flash">flash status word
+.Lk decode.html#flash "flash status word"
 .br
 .ns
 .TP 10
@@ -1016,7 +1022,7 @@ unicast/broadcast bias
 .TP 10
 .NOP \f\*[B-Font]xleave\f[]
 interleave delay (see
-<a href="xleave.html">NTP Interleaved Modes</a> )
+.Lk xleave.html "NTP Interleaved Modes" )
 .PP
 The
 \f\*[B-Font]bias\f[]
@@ -1028,6 +1034,9 @@ The
 variable appears only for the interleaved symmetric and interleaved modes.
 It represents the internal queuing, buffering and transmission delays
 for the preceding packet.
+.sp \n(Ppu
+.ne 2
+
 When the NTPv4 daemon is compiled with the OpenSSL software library,
 additional peer variables are displayed, including the following:
 .TP 10
@@ -1086,7 +1095,7 @@ association ID
 .ns
 .TP 10
 .NOP \f\*[B-Font]status\f[]
-<a href="decode.html#clock">clock status word
+.Lk decode.html#clock "clock status word"
 .br
 .ns
 .TP 10
@@ -1251,11 +1260,11 @@ the configuration files.
 The \fIhomerc\fP files are "\fI$HOME\fP", and "\fI.\fP".
 If any of these are directories, then the file \fI.ntprc\fP
 is searched for within those directories.
-.TH ntpq @NTPQ_MS@ "07 Aug 2014" "4.2.7p456" "User Commands"
+.TH ntpq @NTPQ_MS@ "09 Aug 2014" "4.2.7p457" "User Commands"
 .\"
-.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-TxaqJp/ag-5xaqIp)
+.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-LvaW7b/ag-pwaW6b)
 .\"
-.\" It has been AutoGen-ed August 7, 2014 at 09:32:19 AM by AutoGen 5.18.3pre18
+.\" It has been AutoGen-ed
 .\" From the definitions ntpq-opts.def
 .\" and the template file agman-cmd.tpl
 .SH NAME

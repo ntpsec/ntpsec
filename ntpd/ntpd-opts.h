@@ -105,9 +105,9 @@ typedef enum {
 /** count of all options for ntpd */
 #define OPTION_CT    37
 /** ntpd version */
-#define NTPD_VERSION       "4.2.7p456"
+#define NTPD_VERSION       "4.2.7p457"
 /** Full ntpd version text */
-#define NTPD_FULL_VERSION  "ntpd 4.2.7p456"
+#define NTPD_FULL_VERSION  "ntpd 4.2.7p457"
 
 /**
  *  Interface defines for all options.  Replace "n" with the UPPER_CASED

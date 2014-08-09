@@ -63,7 +63,7 @@ with a status code of 0.
 
 @exampleindent 0
 @example
-calc_tickadj - Calculates "optimal" value for tick given ntp drift file. - Ver. 4.2.7p454
+calc_tickadj - Calculates "optimal" value for tick given ntp drift file. - Ver. 4.2.7p456
 USAGE: calc_tickadj [ -<flag> [<val>] | --<name>[@{=| @}<val>] ]... 
 
     -d, --drift-file=str         Ntp drift file to use

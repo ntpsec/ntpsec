@@ -1,9 +1,9 @@
-.Dd August 7 2014
+.Dd August 9 2014
 .Dt NTPQ 1ntpqmdoc User Commands
 .Os
 .\"  EDIT THIS FILE WITH CAUTION  (ntpq-opts.mdoc)
 .\"
-.\"  It has been AutoGen-ed  August  7, 2014 at 09:32:25 AM by AutoGen 5.18.3pre18
+.\"  It has been AutoGen-ed
 .\"  From the definitions    ntpq-opts.def
 .\"  and the template file   agmdoc-cmd.tpl
 .Sh NAME
@@ -236,9 +236,6 @@ There appear
 to be no servers left which demand version 1.
 With no argument, displays the current NTP version that will be used
 when communicating with servers.
-.It Ic quit
-Exit
-.Nm
 .It Ic passwd
 This command prompts you to type in a password (which will not
 be echoed) which will be used to authenticate configuration
@@ -246,6 +243,9 @@ requests.
 The password must correspond to the key configured for
 use by the NTP server for this purpose if such requests are to be
 successful.
+.It Ic quit
+Exit
+.Nm
 .It Ic raw
 Causes all output from query commands is printed as received
 from the remote server.
@@ -284,7 +284,7 @@ Display a list of mobilized associations in the form:
 .It Li status Ta peer status word
 .It Li conf Ta Li yes : persistent, Li no : ephemeral
 .It Li reach Ta Li yes : reachable, Li no : unreachable
-.It Li auth Ta Li ok , Liyes , Li bad and Li none
+.It Li auth Ta Li ok , Li yes , Li bad and Li none
 .It Li condition Ta selection status (see the Li select field of the peer status word)
 .It Li last_event Ta event report (see the Li event field of the peer status word)
 .It Li cnt Ta event count (see the Li count field of the peer status word)
@@ -292,9 +292,9 @@ Display a list of mobilized associations in the form:
 .It Cm clockvar Ar assocID Oo Ar name Oo Cm = Ar value Op ... Oc Oc Op ...
 .It Cm cv Ar assocID Oo Ar name Oo Cm = Ar value Op ... Oc Oc Op ...
 Display a list of clock variables for those associations supporting a reference clock.
-.It Li :config Op ...
+.It Cm :config Op ...
 Send the remainder of the command line, including whitespace, to the server as a run\-time configuration command in the same format as a line in the configuration file. This command is experimental until further notice and clarification. Authentication is of course required.
-.It Li config\-from\-file Ar filename
+.It Cm config\-from\-file Ar filename
 Send the each line of
 .Ar filename
 to the server as run\-time configuration commands in the same format as a line in the configuration file. This command is experimental until further notice and clarification. Authentication is required.
@@ -393,7 +393,7 @@ Perform the same function as the
 except that it uses previously stored data rather than making a new query.
 .It Ic peers
 Display a list of peers in the form:
-.Ic [tally]remote refid st t when pool reach delay offset jitter
+.Dl [tally]remote refid st t when pool reach delay offset jitter
 .Bl -tag -width "something" -compact -offset indent
 .It Variable
 Description
@@ -401,12 +401,12 @@ Description
 single\-character code indicating current value of the
 .Ic select
 field of the
-<a href="decode.html#peer">peer status word</a>
+.Lk decode.html#peer "peer status word"
 .It Ic remote
 host name (or IP number) of peer
 .It Ic refid
 association ID or
-<a href="decode.html#kiss">kiss code</a>
+.Lk decode.html#kiss "'kiss code"
 .It Ic st
 stratum
 .It Ic t
@@ -443,9 +443,9 @@ Display the specified variables.
 If
 .Ar assocID
 is zero, the variables are from the
-<a href="#system">system variables</a>
+.Sx System Variables
 name space, otherwise they are from the
-<a href="#peer">peer variables</a>
+.Sx Peer Variables
 name space.
 The
 .Ar assocID
@@ -474,7 +474,7 @@ or
 to the ntpd host's file
 .Ar filename .
 This command will be rejected by the server unless
-<a href="miscopt.html#saveconfigdir">saveconfigdir</a>
+.Lk miscopt.html#saveconfigdir "saveconfigdir"
 appears in the
 .Ic ntpd
 configuration file.
@@ -491,9 +491,9 @@ Write the specified variables.
 If the
 .Ar assocID
 is zero, the variables are from the
-<a href="#system">system variables</a>
+.Sx System Variables
 name space, otherwise they are from the
-<a href="#peer">peer variables</a>
+.Sx Peer Variables
 name space.
 The
 .Ar assocID
@@ -503,7 +503,7 @@ Display operational summary.
 .It Ic sysstats
 Print statistics counters maintained in the protocol module.
 .El
-.SS Status Words and Kiss Codes
+.Ss Status Words and Kiss Codes
 The current state of the operating program is shown in a set of status words maintained by the system and each association separately.
 These words are displayed in the
 .Ic rv
@@ -511,12 +511,14 @@ and
 .Ic as
 commands both in hexadecimal and decoded short tip strings.
 The codes, tips and short explanations are on the
-<a href="decode.html">Event Messages and Status Words</a> page.
+.Lk decode.html "Event Messages and Status Words"
+page.
 The page also includes a list of system and peer messages,
 the code for the latest of which is included in the status word.
+.Pp
 Information resulting from protocol machine state transitions
 is displayed using an informal set of ASCII strings called
-<a href="decode.html#kiss">kiss codes</a>.
+.Lk decode.html#kiss "kiss codes" .
 The original purpose was for kiss\-o'\-death (KoD) packets
 sent by the server to advise the client of an unusual condition.
 They are now displayed, when appropriate,
@@ -530,8 +532,7 @@ Not all variables are displayed in some configurations.
 .It Variable
 Description
 .It Ic status
-<a href="decode.html#sys">
-system status word
+.Lk decode.html#sys "system status word"
 .It Ic version
 NTP software version and build time
 .It Ic processor
@@ -558,7 +559,7 @@ minimum time constant (log2 s) (3\-10)
 date and time of day
 .It Ic refid
 reference ID or
-<a href="decode.html#kiss">kiss code
+.Lk decode.html#kiss "kiss code"
 .It Ic reftime
 reference time
 .It Ic offset
@@ -581,6 +582,7 @@ NTP seconds when the NIST leapseconds file expires
 The jitter and wander statistics are exponentially\-weighted RMS averages.
 The system jitter is defined in the NTPv4 specification;
 the clock jitter statistic is computed by the clock discipline module.
+.Pp
 When the NTPv4 daemon is compiled with the OpenSSL software library,
 additional system variables are displayed,
 including some or all of the following,
@@ -616,7 +618,7 @@ Description
 .It Ic associd
 association ID
 .It Ic status
-<a href="decode.html#peer">peer status word
+.Lk decode.html#peer "peer status word"
 .It Ic srcadr
 source (remote) IP address
 .It Ic srcport
@@ -637,7 +639,7 @@ total roundtrip delay to the primary reference clock
 total root dispersion to the primary reference clock
 .It Ic refid
 reference ID or
-<a href="decode.html#kiss">kiss code
+.Lk decode.html#kiss "kiss code"
 .It Ic reftime
 reference time
 .It Ic reach
@@ -654,9 +656,9 @@ host poll exponent (log2 s) (3\-17)
 peer poll exponent (log2 s) (3\-17)
 .It Ic headway
 headway (see
-<a href="rate.html">Rate Management and the Kiss\-o'\-Death Packet )
+.Lk rate.html "Rate Management and the Kiss\-o'\-Death Packet" )
 .It Ic flash
-<a href="decode.html#flash">flash status word
+.Lk decode.html#flash "flash status word"
 .It Ic offset
 filter offset
 .It Ic delay
@@ -671,7 +673,7 @@ Autokey group name for this association
 unicast/broadcast bias
 .It Ic xleave
 interleave delay (see
-<a href="xleave.html">NTP Interleaved Modes</a> )
+.Lk xleave.html "NTP Interleaved Modes" )
 .El
 The
 .Ic bias
@@ -683,6 +685,7 @@ The
 variable appears only for the interleaved symmetric and interleaved modes.
 It represents the internal queuing, buffering and transmission delays
 for the preceding packet.
+.Pp
 When the NTPv4 daemon is compiled with the OpenSSL software library,
 additional peer variables are displayed, including the following:
 .Bl -tag -width "something" -compact -offset indent
@@ -714,7 +717,7 @@ Description
 .It Ic associd
 association ID
 .It Ic status
-<a href="decode.html#clock">clock status word
+.Lk decode.html#clock "clock status word"
 .It Ic device
 device description
 .It Ic timecode
