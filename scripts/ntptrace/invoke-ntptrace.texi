@@ -6,7 +6,7 @@
 #
 # EDIT THIS FILE WITH CAUTION  (invoke-ntptrace.texi)
 #
-# It has been AutoGen-ed  August  7, 2014 at 09:27:03 AM by AutoGen 5.18.3pre18
+# It has been AutoGen-ed
 # From the definitions    ntptrace-opts.def
 # and the template file   agtexi-cmd.tpl
 @end ignore
@@ -62,14 +62,14 @@ with a status code of 0.
 
 @exampleindent 0
 @example
-ntptrace - Trace peers of an NTP server - Ver. 4.2.7p435
+ntptrace - Trace peers of an NTP server - Ver. 4.2.7p456
 USAGE: ntptrace [ -<flag> [<val>] | --<name>[@{=| @}<val>] ]... [host]
 
     -n, --numeric                Print IP addresses instead of hostnames
     -m, --max-hosts=num          Maximum number of peers to trace
     -r, --host=str               Single remote host
     -?, --help                   Display usage information and exit
-      , --more-help              Pass the extended usage information through a pager
+        --more-help              Pass the extended usage information through a pager
 
 Options are specified by doubled hyphens and their name or by a single
 hyphen and the flag character.
