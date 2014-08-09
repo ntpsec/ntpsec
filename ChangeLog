@@ -1,3 +1,6 @@
+* [Bug 2622] Synchronisation problem using SHM when time difference is
+  more than four hours: Change SHM driver so TOY restricted API is not
+  used any more. (Plus some minor cleanup in logic and flow control)
 * Pass the configration source into the parser as argument rather
   than through a global variable.
 * Fix nits in the ntpq man page.
