@@ -1,3 +1,5 @@
+* Pass the configration source into the parser as argument rather
+  than through a global variable.
 * Fix nits in the ntpq man page.
 * autogen-5.18.4pre14
 (4.2.7p456) 2014/08/07 Released by Harlan Stenn <stenn@ntp.org>

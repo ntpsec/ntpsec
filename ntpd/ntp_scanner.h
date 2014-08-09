@@ -108,8 +108,6 @@ struct FILE_INFO {
 extern config_tree cfgt;	  /* Parser output stored here */
 extern int curr_include_level;    /* The current include level */
 
-extern struct FILE_INFO *ip_file; /* Pointer to the configuration file stream */
-
 /* VARIOUS EXTERNAL DECLARATIONS
  * -----------------------------
  */
@@ -122,13 +120,11 @@ extern struct FILE_INFO *fp[];
  */
 extern const char *keyword(int token);
 extern char *quote_if_needed(char *str);
-int yylex(void);
+int yylex(struct FILE_INFO *);
 
 struct FILE_INFO *F_OPEN(const char *path, const char *mode);
 int FGETC(struct FILE_INFO *stream);
 int UNGETC(int ch, struct FILE_INFO *stream);
 int FCLOSE(struct FILE_INFO *stream);
-
-void push_back_char(int ch);
 
 #endif	/* NTP_SCANNER_H */

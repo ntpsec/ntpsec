@@ -37,7 +37,6 @@
 #define MAX_LEXEME (1024 + 1)	/* The maximum size of a lexeme */
 char yytext[MAX_LEXEME];	/* Buffer for storing the input text/lexeme */
 u_int32 conf_file_sum;		/* Simple sum of characters read */
-extern int input_from_file;
 
 
 
@@ -57,9 +56,7 @@ const char special_chars[] = "{}(),;|=";
  * ---------
  */
 
-int get_next_char(void);
 static int is_keyword(char *lexeme, follby *pfollowedby);
-
 
 
 /*
@@ -190,9 +187,9 @@ FCLOSE(
  * input_from_file flag.
  */
 
-int
+static int
 get_next_char(
-	void
+	struct FILE_INFO *ip_file
 	)
 {
 	char ch;
@@ -215,8 +212,9 @@ get_next_char(
 	}
 }
 
-void
+static void
 push_back_char(
+	struct FILE_INFO *ip_file,
 	int ch
 	)
 {
@@ -479,7 +477,7 @@ create_string_token(
  */
 int
 yylex(
-	void
+	struct FILE_INFO *ip_file
 	)
 {
 	static follby	followedby = FOLLBY_TOKEN;
@@ -495,7 +493,7 @@ yylex(
 
 	do {
 		/* Ignore whitespace at the beginning */
-		while (EOF != (ch = get_next_char()) &&
+		while (EOF != (ch = get_next_char(ip_file)) &&
 		       isspace(ch) &&
 		       !is_EOC(ch))
 			; /* Null Statement */
@@ -531,7 +529,7 @@ yylex(
 			yytext[1] = '\0';
 			goto normal_return;
 		} else
-			push_back_char(ch);
+			push_back_char(ip_file, ch);
 
 		/* save the position of start of the token */
 		ip_file->prev_token_line_no = ip_file->line_no;
@@ -539,7 +537,7 @@ yylex(
 
 		/* Read in the lexeme */
 		i = 0;
-		while (EOF != (ch = get_next_char())) {
+		while (EOF != (ch = get_next_char(ip_file))) {
 
 			yytext[i] = (char)ch;
 
@@ -553,7 +551,7 @@ yylex(
 			/* Read the rest of the line on reading a start
 			   of comment character */
 			if ('#' == ch) {
-				while (EOF != (ch = get_next_char())
+				while (EOF != (ch = get_next_char(ip_file))
 				       && '\n' != ch)
 					; /* Null Statement */
 				break;
@@ -571,7 +569,7 @@ yylex(
 		 */
 		if ('"' == ch) {
 			instring = TRUE;
-			while (EOF != (ch = get_next_char()) &&
+			while (EOF != (ch = get_next_char(ip_file)) &&
 			       ch != '"' && ch != '\n') {
 				yytext[i++] = (char)ch;
 				if (i >= COUNTOF(yytext))
@@ -583,7 +581,7 @@ yylex(
 			 * not be pushed back, so we read another char.
 			 */
 			if ('"' == ch)
-				ch = get_next_char();
+				ch = get_next_char(ip_file);
 		}
 		/* Pushback the last character read that is not a part
 		 * of this lexeme.
@@ -592,9 +590,9 @@ yylex(
 		 * when there is no newline at the end of a file.
 		 */
 		if (EOF == ch)
-			push_back_char('\n');
+			push_back_char(ip_file, '\n');
 		else
-			push_back_char(ch); 
+			push_back_char(ip_file, ch); 
 		yytext[i] = '\0';
 	} while (i == 0);
 
