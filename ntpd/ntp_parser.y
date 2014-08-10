@@ -37,6 +37,12 @@
   #define YYERROR_VERBOSE
   #define YYMAXDEPTH	1000	/* stop the madness sooner */
   void yyerror(struct FILE_INFO *ip_file, const char *msg);
+
+  #ifdef SIM
+  #  define ONLY_SIM(a)	(a)
+  #else
+  #  define ONLY_SIM(a)	NULL
+  #endif
 %}
 
 /* 
@@ -1513,7 +1519,7 @@ sim_server_list
 
 sim_server
 	:	sim_server_name '{' sim_server_offset sim_act_list '}'
-			{ $$ = create_sim_server($1, $3, $4); }
+			{ $$ = ONLY_SIM(create_sim_server($1, $3, $4)); }
 	;
 
 sim_server_offset
@@ -1541,7 +1547,7 @@ sim_act_list
 
 sim_act
 	:	T_Duration '=' number '{' sim_act_stmt_list '}'
-			{ $$ = create_sim_script_info($3, $5); }
+			{ $$ = ONLY_SIM(create_sim_script_info($3, $5)); }
 	;
 
 sim_act_stmt_list

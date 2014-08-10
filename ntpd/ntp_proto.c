@@ -2125,7 +2125,7 @@ peer_clear(
 	/*
 	 * Clear all values, including the optional crypto values above.
 	 */
-	memset(CLEAR_TO_ZERO(peer), 0, LEN_CLEAR_TO_ZERO);
+	memset(CLEAR_TO_ZERO(peer), 0, LEN_CLEAR_TO_ZERO(peer));
 	peer->ppoll = peer->maxpoll;
 	peer->hpoll = peer->minpoll;
 	peer->disp = MAXDISPERSE;

@@ -421,7 +421,7 @@ typedef union YYSTYPE
 {
 
 /* Line 2068 of yacc.c  */
-#line 48 "ntp_parser.y"
+#line 54 "ntp_parser.y"
 
 	char *			String;
 	double			Double;

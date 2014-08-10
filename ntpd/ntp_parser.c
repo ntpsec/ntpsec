@@ -94,9 +94,15 @@
   #define YYMAXDEPTH	1000	/* stop the madness sooner */
   void yyerror(struct FILE_INFO *ip_file, const char *msg);
 
+  #ifdef SIM
+  #  define ONLY_SIM(a)	(a)
+  #else
+  #  define ONLY_SIM(a)	NULL
+  #endif
+
 
 /* Line 268 of yacc.c  */
-#line 100 "ntp_parser.c"
+#line 106 "ntp_parser.c"
 
 /* Enabling traces.  */
 #ifndef YYDEBUG
@@ -507,7 +513,7 @@ typedef union YYSTYPE
 {
 
 /* Line 293 of yacc.c  */
-#line 48 "ntp_parser.y"
+#line 54 "ntp_parser.y"
 
 	char *			String;
 	double			Double;
@@ -529,7 +535,7 @@ typedef union YYSTYPE
 
 
 /* Line 293 of yacc.c  */
-#line 533 "ntp_parser.c"
+#line 539 "ntp_parser.c"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
@@ -541,7 +547,7 @@ typedef union YYSTYPE
 
 
 /* Line 343 of yacc.c  */
-#line 545 "ntp_parser.c"
+#line 551 "ntp_parser.c"
 
 #ifdef short
 # undef short
@@ -949,37 +955,37 @@ static const yytype_int16 yyrhs[] =
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
 static const yytype_uint16 yyrline[] =
 {
-       0,   357,   357,   361,   362,   363,   377,   378,   379,   380,
-     381,   382,   383,   384,   385,   386,   387,   388,   389,   390,
-     398,   408,   409,   410,   411,   412,   416,   417,   422,   427,
-     429,   435,   436,   444,   445,   446,   450,   455,   456,   457,
-     458,   459,   460,   461,   462,   466,   468,   473,   474,   475,
-     476,   477,   478,   482,   487,   496,   506,   507,   517,   519,
-     521,   532,   539,   541,   546,   548,   550,   552,   554,   563,
-     569,   570,   578,   580,   592,   593,   594,   595,   596,   605,
-     610,   615,   623,   625,   627,   632,   633,   634,   635,   636,
-     637,   641,   642,   643,   644,   653,   655,   664,   674,   679,
-     687,   688,   689,   690,   691,   692,   693,   694,   699,   700,
-     708,   718,   727,   742,   747,   748,   752,   753,   757,   758,
-     759,   760,   761,   762,   763,   772,   776,   780,   788,   796,
-     804,   819,   834,   847,   848,   856,   857,   858,   859,   860,
-     861,   862,   863,   864,   865,   866,   867,   868,   869,   870,
-     874,   879,   887,   892,   893,   894,   898,   903,   911,   916,
-     917,   918,   919,   920,   921,   922,   923,   931,   941,   946,
-     954,   956,   958,   960,   962,   967,   968,   972,   973,   974,
-     975,   983,   988,   993,  1001,  1006,  1007,  1008,  1017,  1019,
-    1024,  1029,  1037,  1039,  1056,  1057,  1058,  1059,  1060,  1061,
-    1065,  1066,  1074,  1079,  1084,  1092,  1097,  1098,  1099,  1100,
-    1101,  1102,  1103,  1104,  1113,  1114,  1115,  1122,  1129,  1145,
-    1164,  1169,  1171,  1173,  1175,  1177,  1184,  1189,  1190,  1191,
-    1195,  1196,  1197,  1201,  1202,  1206,  1213,  1223,  1232,  1237,
-    1239,  1244,  1245,  1253,  1255,  1263,  1268,  1276,  1301,  1308,
-    1318,  1319,  1323,  1324,  1325,  1326,  1330,  1331,  1332,  1336,
-    1341,  1346,  1354,  1355,  1356,  1357,  1358,  1359,  1360,  1370,
-    1375,  1383,  1388,  1396,  1398,  1402,  1407,  1412,  1420,  1425,
-    1433,  1442,  1443,  1447,  1448,  1457,  1475,  1479,  1484,  1492,
-    1497,  1498,  1502,  1507,  1515,  1520,  1525,  1530,  1535,  1543,
-    1548,  1553,  1561,  1566,  1567,  1568,  1569,  1570
+       0,   363,   363,   367,   368,   369,   383,   384,   385,   386,
+     387,   388,   389,   390,   391,   392,   393,   394,   395,   396,
+     404,   414,   415,   416,   417,   418,   422,   423,   428,   433,
+     435,   441,   442,   450,   451,   452,   456,   461,   462,   463,
+     464,   465,   466,   467,   468,   472,   474,   479,   480,   481,
+     482,   483,   484,   488,   493,   502,   512,   513,   523,   525,
+     527,   538,   545,   547,   552,   554,   556,   558,   560,   569,
+     575,   576,   584,   586,   598,   599,   600,   601,   602,   611,
+     616,   621,   629,   631,   633,   638,   639,   640,   641,   642,
+     643,   647,   648,   649,   650,   659,   661,   670,   680,   685,
+     693,   694,   695,   696,   697,   698,   699,   700,   705,   706,
+     714,   724,   733,   748,   753,   754,   758,   759,   763,   764,
+     765,   766,   767,   768,   769,   778,   782,   786,   794,   802,
+     810,   825,   840,   853,   854,   862,   863,   864,   865,   866,
+     867,   868,   869,   870,   871,   872,   873,   874,   875,   876,
+     880,   885,   893,   898,   899,   900,   904,   909,   917,   922,
+     923,   924,   925,   926,   927,   928,   929,   937,   947,   952,
+     960,   962,   964,   966,   968,   973,   974,   978,   979,   980,
+     981,   989,   994,   999,  1007,  1012,  1013,  1014,  1023,  1025,
+    1030,  1035,  1043,  1045,  1062,  1063,  1064,  1065,  1066,  1067,
+    1071,  1072,  1080,  1085,  1090,  1098,  1103,  1104,  1105,  1106,
+    1107,  1108,  1109,  1110,  1119,  1120,  1121,  1128,  1135,  1151,
+    1170,  1175,  1177,  1179,  1181,  1183,  1190,  1195,  1196,  1197,
+    1201,  1202,  1203,  1207,  1208,  1212,  1219,  1229,  1238,  1243,
+    1245,  1250,  1251,  1259,  1261,  1269,  1274,  1282,  1307,  1314,
+    1324,  1325,  1329,  1330,  1331,  1332,  1336,  1337,  1338,  1342,
+    1347,  1352,  1360,  1361,  1362,  1363,  1364,  1365,  1366,  1376,
+    1381,  1389,  1394,  1402,  1404,  1408,  1413,  1418,  1426,  1431,
+    1439,  1448,  1449,  1453,  1454,  1463,  1481,  1485,  1490,  1498,
+    1503,  1504,  1508,  1513,  1521,  1526,  1531,  1536,  1541,  1549,
+    1554,  1559,  1567,  1572,  1573,  1574,  1575,  1576
 };
 #endif
 
@@ -2326,7 +2332,7 @@ yyreduce:
         case 5:
 
 /* Line 1806 of yacc.c  */
-#line 364 "ntp_parser.y"
+#line 370 "ntp_parser.y"
     {
 			/* I will need to incorporate much more fine grained
 			 * error messages. The following should suffice for
@@ -2343,7 +2349,7 @@ yyreduce:
   case 20:
 
 /* Line 1806 of yacc.c  */
-#line 399 "ntp_parser.y"
+#line 405 "ntp_parser.y"
     {
 			peer_node *my_node;
 
@@ -2355,42 +2361,42 @@ yyreduce:
   case 27:
 
 /* Line 1806 of yacc.c  */
-#line 418 "ntp_parser.y"
+#line 424 "ntp_parser.y"
     { (yyval.Address_node) = create_address_node((yyvsp[(2) - (2)].String), (yyvsp[(1) - (2)].Integer)); }
     break;
 
   case 28:
 
 /* Line 1806 of yacc.c  */
-#line 423 "ntp_parser.y"
+#line 429 "ntp_parser.y"
     { (yyval.Address_node) = create_address_node((yyvsp[(1) - (1)].String), AF_UNSPEC); }
     break;
 
   case 29:
 
 /* Line 1806 of yacc.c  */
-#line 428 "ntp_parser.y"
+#line 434 "ntp_parser.y"
     { (yyval.Integer) = AF_INET; }
     break;
 
   case 30:
 
 /* Line 1806 of yacc.c  */
-#line 430 "ntp_parser.y"
+#line 436 "ntp_parser.y"
     { (yyval.Integer) = AF_INET6; }
     break;
 
   case 31:
 
 /* Line 1806 of yacc.c  */
-#line 435 "ntp_parser.y"
+#line 441 "ntp_parser.y"
     { (yyval.Attr_val_fifo) = NULL; }
     break;
 
   case 32:
 
 /* Line 1806 of yacc.c  */
-#line 437 "ntp_parser.y"
+#line 443 "ntp_parser.y"
     {
 			(yyval.Attr_val_fifo) = (yyvsp[(1) - (2)].Attr_val_fifo);
 			APPEND_G_FIFO((yyval.Attr_val_fifo), (yyvsp[(2) - (2)].Attr_val));
@@ -2400,35 +2406,35 @@ yyreduce:
   case 36:
 
 /* Line 1806 of yacc.c  */
-#line 451 "ntp_parser.y"
+#line 457 "ntp_parser.y"
     { (yyval.Attr_val) = create_attr_ival(T_Flag, (yyvsp[(1) - (1)].Integer)); }
     break;
 
   case 45:
 
 /* Line 1806 of yacc.c  */
-#line 467 "ntp_parser.y"
+#line 473 "ntp_parser.y"
     { (yyval.Attr_val) = create_attr_ival((yyvsp[(1) - (2)].Integer), (yyvsp[(2) - (2)].Integer)); }
     break;
 
   case 46:
 
 /* Line 1806 of yacc.c  */
-#line 469 "ntp_parser.y"
+#line 475 "ntp_parser.y"
     { (yyval.Attr_val) = create_attr_uval((yyvsp[(1) - (2)].Integer), (yyvsp[(2) - (2)].Integer)); }
     break;
 
   case 53:
 
 /* Line 1806 of yacc.c  */
-#line 483 "ntp_parser.y"
+#line 489 "ntp_parser.y"
     { (yyval.Attr_val) = create_attr_sval((yyvsp[(1) - (2)].Integer), (yyvsp[(2) - (2)].String)); }
     break;
 
   case 55:
 
 /* Line 1806 of yacc.c  */
-#line 497 "ntp_parser.y"
+#line 503 "ntp_parser.y"
     {
 			unpeer_node *my_node;
 			
@@ -2441,28 +2447,28 @@ yyreduce:
   case 58:
 
 /* Line 1806 of yacc.c  */
-#line 518 "ntp_parser.y"
+#line 524 "ntp_parser.y"
     { cfgt.broadcastclient = 1; }
     break;
 
   case 59:
 
 /* Line 1806 of yacc.c  */
-#line 520 "ntp_parser.y"
+#line 526 "ntp_parser.y"
     { CONCAT_G_FIFOS(cfgt.manycastserver, (yyvsp[(2) - (2)].Address_fifo)); }
     break;
 
   case 60:
 
 /* Line 1806 of yacc.c  */
-#line 522 "ntp_parser.y"
+#line 528 "ntp_parser.y"
     { CONCAT_G_FIFOS(cfgt.multicastclient, (yyvsp[(2) - (2)].Address_fifo)); }
     break;
 
   case 61:
 
 /* Line 1806 of yacc.c  */
-#line 533 "ntp_parser.y"
+#line 539 "ntp_parser.y"
     {
 			attr_val *atrv;
 			
@@ -2474,14 +2480,14 @@ yyreduce:
   case 62:
 
 /* Line 1806 of yacc.c  */
-#line 540 "ntp_parser.y"
+#line 546 "ntp_parser.y"
     { cfgt.auth.control_key = (yyvsp[(2) - (2)].Integer); }
     break;
 
   case 63:
 
 /* Line 1806 of yacc.c  */
-#line 542 "ntp_parser.y"
+#line 548 "ntp_parser.y"
     { 
 			cfgt.auth.cryptosw++;
 			CONCAT_G_FIFOS(cfgt.auth.crypto_cmd_list, (yyvsp[(2) - (2)].Attr_val_fifo));
@@ -2491,35 +2497,35 @@ yyreduce:
   case 64:
 
 /* Line 1806 of yacc.c  */
-#line 547 "ntp_parser.y"
+#line 553 "ntp_parser.y"
     { cfgt.auth.keys = (yyvsp[(2) - (2)].String); }
     break;
 
   case 65:
 
 /* Line 1806 of yacc.c  */
-#line 549 "ntp_parser.y"
+#line 555 "ntp_parser.y"
     { cfgt.auth.keysdir = (yyvsp[(2) - (2)].String); }
     break;
 
   case 66:
 
 /* Line 1806 of yacc.c  */
-#line 551 "ntp_parser.y"
+#line 557 "ntp_parser.y"
     { cfgt.auth.request_key = (yyvsp[(2) - (2)].Integer); }
     break;
 
   case 67:
 
 /* Line 1806 of yacc.c  */
-#line 553 "ntp_parser.y"
+#line 559 "ntp_parser.y"
     { cfgt.auth.revoke = (yyvsp[(2) - (2)].Integer); }
     break;
 
   case 68:
 
 /* Line 1806 of yacc.c  */
-#line 555 "ntp_parser.y"
+#line 561 "ntp_parser.y"
     {
 			cfgt.auth.trusted_key_list = (yyvsp[(2) - (2)].Attr_val_fifo);
 
@@ -2533,21 +2539,21 @@ yyreduce:
   case 69:
 
 /* Line 1806 of yacc.c  */
-#line 564 "ntp_parser.y"
+#line 570 "ntp_parser.y"
     { cfgt.auth.ntp_signd_socket = (yyvsp[(2) - (2)].String); }
     break;
 
   case 70:
 
 /* Line 1806 of yacc.c  */
-#line 569 "ntp_parser.y"
+#line 575 "ntp_parser.y"
     { (yyval.Attr_val_fifo) = NULL; }
     break;
 
   case 71:
 
 /* Line 1806 of yacc.c  */
-#line 571 "ntp_parser.y"
+#line 577 "ntp_parser.y"
     {
 			(yyval.Attr_val_fifo) = (yyvsp[(1) - (2)].Attr_val_fifo);
 			APPEND_G_FIFO((yyval.Attr_val_fifo), (yyvsp[(2) - (2)].Attr_val));
@@ -2557,14 +2563,14 @@ yyreduce:
   case 72:
 
 /* Line 1806 of yacc.c  */
-#line 579 "ntp_parser.y"
+#line 585 "ntp_parser.y"
     { (yyval.Attr_val) = create_attr_sval((yyvsp[(1) - (2)].Integer), (yyvsp[(2) - (2)].String)); }
     break;
 
   case 73:
 
 /* Line 1806 of yacc.c  */
-#line 581 "ntp_parser.y"
+#line 587 "ntp_parser.y"
     {
 			(yyval.Attr_val) = NULL;
 			cfgt.auth.revoke = (yyvsp[(2) - (2)].Integer);
@@ -2578,14 +2584,14 @@ yyreduce:
   case 79:
 
 /* Line 1806 of yacc.c  */
-#line 606 "ntp_parser.y"
+#line 612 "ntp_parser.y"
     { CONCAT_G_FIFOS(cfgt.orphan_cmds, (yyvsp[(2) - (2)].Attr_val_fifo)); }
     break;
 
   case 80:
 
 /* Line 1806 of yacc.c  */
-#line 611 "ntp_parser.y"
+#line 617 "ntp_parser.y"
     {
 			(yyval.Attr_val_fifo) = (yyvsp[(1) - (2)].Attr_val_fifo);
 			APPEND_G_FIFO((yyval.Attr_val_fifo), (yyvsp[(2) - (2)].Attr_val));
@@ -2595,7 +2601,7 @@ yyreduce:
   case 81:
 
 /* Line 1806 of yacc.c  */
-#line 616 "ntp_parser.y"
+#line 622 "ntp_parser.y"
     {	
 			(yyval.Attr_val_fifo) = NULL;
 			APPEND_G_FIFO((yyval.Attr_val_fifo), (yyvsp[(1) - (1)].Attr_val));
@@ -2605,35 +2611,35 @@ yyreduce:
   case 82:
 
 /* Line 1806 of yacc.c  */
-#line 624 "ntp_parser.y"
+#line 630 "ntp_parser.y"
     { (yyval.Attr_val) = create_attr_dval((yyvsp[(1) - (2)].Integer), (double)(yyvsp[(2) - (2)].Integer)); }
     break;
 
   case 83:
 
 /* Line 1806 of yacc.c  */
-#line 626 "ntp_parser.y"
+#line 632 "ntp_parser.y"
     { (yyval.Attr_val) = create_attr_dval((yyvsp[(1) - (2)].Integer), (yyvsp[(2) - (2)].Double)); }
     break;
 
   case 84:
 
 /* Line 1806 of yacc.c  */
-#line 628 "ntp_parser.y"
+#line 634 "ntp_parser.y"
     { (yyval.Attr_val) = create_attr_dval((yyvsp[(1) - (2)].Integer), (double)(yyvsp[(2) - (2)].Integer)); }
     break;
 
   case 95:
 
 /* Line 1806 of yacc.c  */
-#line 654 "ntp_parser.y"
+#line 660 "ntp_parser.y"
     { CONCAT_G_FIFOS(cfgt.stats_list, (yyvsp[(2) - (2)].Int_fifo)); }
     break;
 
   case 96:
 
 /* Line 1806 of yacc.c  */
-#line 656 "ntp_parser.y"
+#line 662 "ntp_parser.y"
     {
 			if (input_from_file) {
 				cfgt.stats_dir = (yyvsp[(2) - (2)].String);
@@ -2647,7 +2653,7 @@ yyreduce:
   case 97:
 
 /* Line 1806 of yacc.c  */
-#line 665 "ntp_parser.y"
+#line 671 "ntp_parser.y"
     {
 			filegen_node *fgn;
 			
@@ -2659,7 +2665,7 @@ yyreduce:
   case 98:
 
 /* Line 1806 of yacc.c  */
-#line 675 "ntp_parser.y"
+#line 681 "ntp_parser.y"
     {
 			(yyval.Int_fifo) = (yyvsp[(1) - (2)].Int_fifo);
 			APPEND_G_FIFO((yyval.Int_fifo), create_int_node((yyvsp[(2) - (2)].Integer)));
@@ -2669,7 +2675,7 @@ yyreduce:
   case 99:
 
 /* Line 1806 of yacc.c  */
-#line 680 "ntp_parser.y"
+#line 686 "ntp_parser.y"
     {
 			(yyval.Int_fifo) = NULL;
 			APPEND_G_FIFO((yyval.Int_fifo), create_int_node((yyvsp[(1) - (1)].Integer)));
@@ -2679,14 +2685,14 @@ yyreduce:
   case 108:
 
 /* Line 1806 of yacc.c  */
-#line 699 "ntp_parser.y"
+#line 705 "ntp_parser.y"
     { (yyval.Attr_val_fifo) = NULL; }
     break;
 
   case 109:
 
 /* Line 1806 of yacc.c  */
-#line 701 "ntp_parser.y"
+#line 707 "ntp_parser.y"
     {
 			(yyval.Attr_val_fifo) = (yyvsp[(1) - (2)].Attr_val_fifo);
 			APPEND_G_FIFO((yyval.Attr_val_fifo), (yyvsp[(2) - (2)].Attr_val));
@@ -2696,7 +2702,7 @@ yyreduce:
   case 110:
 
 /* Line 1806 of yacc.c  */
-#line 709 "ntp_parser.y"
+#line 715 "ntp_parser.y"
     {
 			if (input_from_file) {
 				(yyval.Attr_val) = create_attr_sval((yyvsp[(1) - (2)].Integer), (yyvsp[(2) - (2)].String));
@@ -2711,7 +2717,7 @@ yyreduce:
   case 111:
 
 /* Line 1806 of yacc.c  */
-#line 719 "ntp_parser.y"
+#line 725 "ntp_parser.y"
     {
 			if (input_from_file) {
 				(yyval.Attr_val) = create_attr_ival((yyvsp[(1) - (2)].Integer), (yyvsp[(2) - (2)].Integer));
@@ -2725,7 +2731,7 @@ yyreduce:
   case 112:
 
 /* Line 1806 of yacc.c  */
-#line 728 "ntp_parser.y"
+#line 734 "ntp_parser.y"
     {
 			const char *err;
 			
@@ -2745,14 +2751,14 @@ yyreduce:
   case 113:
 
 /* Line 1806 of yacc.c  */
-#line 743 "ntp_parser.y"
+#line 749 "ntp_parser.y"
     { (yyval.Attr_val) = create_attr_ival(T_Flag, (yyvsp[(1) - (1)].Integer)); }
     break;
 
   case 125:
 
 /* Line 1806 of yacc.c  */
-#line 773 "ntp_parser.y"
+#line 779 "ntp_parser.y"
     {
 			CONCAT_G_FIFOS(cfgt.discard_opts, (yyvsp[(2) - (2)].Attr_val_fifo));
 		}
@@ -2761,7 +2767,7 @@ yyreduce:
   case 126:
 
 /* Line 1806 of yacc.c  */
-#line 777 "ntp_parser.y"
+#line 783 "ntp_parser.y"
     {
 			CONCAT_G_FIFOS(cfgt.mru_opts, (yyvsp[(2) - (2)].Attr_val_fifo));
 		}
@@ -2770,7 +2776,7 @@ yyreduce:
   case 127:
 
 /* Line 1806 of yacc.c  */
-#line 781 "ntp_parser.y"
+#line 787 "ntp_parser.y"
     {
 			restrict_node *rn;
 
@@ -2783,7 +2789,7 @@ yyreduce:
   case 128:
 
 /* Line 1806 of yacc.c  */
-#line 789 "ntp_parser.y"
+#line 795 "ntp_parser.y"
     {
 			restrict_node *rn;
 
@@ -2796,7 +2802,7 @@ yyreduce:
   case 129:
 
 /* Line 1806 of yacc.c  */
-#line 797 "ntp_parser.y"
+#line 803 "ntp_parser.y"
     {
 			restrict_node *rn;
 
@@ -2809,7 +2815,7 @@ yyreduce:
   case 130:
 
 /* Line 1806 of yacc.c  */
-#line 805 "ntp_parser.y"
+#line 811 "ntp_parser.y"
     {
 			restrict_node *rn;
 
@@ -2829,7 +2835,7 @@ yyreduce:
   case 131:
 
 /* Line 1806 of yacc.c  */
-#line 820 "ntp_parser.y"
+#line 826 "ntp_parser.y"
     {
 			restrict_node *rn;
 			
@@ -2849,7 +2855,7 @@ yyreduce:
   case 132:
 
 /* Line 1806 of yacc.c  */
-#line 835 "ntp_parser.y"
+#line 841 "ntp_parser.y"
     {
 			restrict_node *	rn;
 
@@ -2863,14 +2869,14 @@ yyreduce:
   case 133:
 
 /* Line 1806 of yacc.c  */
-#line 847 "ntp_parser.y"
+#line 853 "ntp_parser.y"
     { (yyval.Int_fifo) = NULL; }
     break;
 
   case 134:
 
 /* Line 1806 of yacc.c  */
-#line 849 "ntp_parser.y"
+#line 855 "ntp_parser.y"
     {
 			(yyval.Int_fifo) = (yyvsp[(1) - (2)].Int_fifo);
 			APPEND_G_FIFO((yyval.Int_fifo), create_int_node((yyvsp[(2) - (2)].Integer)));
@@ -2880,7 +2886,7 @@ yyreduce:
   case 150:
 
 /* Line 1806 of yacc.c  */
-#line 875 "ntp_parser.y"
+#line 881 "ntp_parser.y"
     {
 			(yyval.Attr_val_fifo) = (yyvsp[(1) - (2)].Attr_val_fifo);
 			APPEND_G_FIFO((yyval.Attr_val_fifo), (yyvsp[(2) - (2)].Attr_val));
@@ -2890,7 +2896,7 @@ yyreduce:
   case 151:
 
 /* Line 1806 of yacc.c  */
-#line 880 "ntp_parser.y"
+#line 886 "ntp_parser.y"
     {
 			(yyval.Attr_val_fifo) = NULL;
 			APPEND_G_FIFO((yyval.Attr_val_fifo), (yyvsp[(1) - (1)].Attr_val));
@@ -2900,14 +2906,14 @@ yyreduce:
   case 152:
 
 /* Line 1806 of yacc.c  */
-#line 888 "ntp_parser.y"
+#line 894 "ntp_parser.y"
     { (yyval.Attr_val) = create_attr_ival((yyvsp[(1) - (2)].Integer), (yyvsp[(2) - (2)].Integer)); }
     break;
 
   case 156:
 
 /* Line 1806 of yacc.c  */
-#line 899 "ntp_parser.y"
+#line 905 "ntp_parser.y"
     {
 			(yyval.Attr_val_fifo) = (yyvsp[(1) - (2)].Attr_val_fifo);
 			APPEND_G_FIFO((yyval.Attr_val_fifo), (yyvsp[(2) - (2)].Attr_val));
@@ -2917,7 +2923,7 @@ yyreduce:
   case 157:
 
 /* Line 1806 of yacc.c  */
-#line 904 "ntp_parser.y"
+#line 910 "ntp_parser.y"
     {
 			(yyval.Attr_val_fifo) = NULL;
 			APPEND_G_FIFO((yyval.Attr_val_fifo), (yyvsp[(1) - (1)].Attr_val));
@@ -2927,14 +2933,14 @@ yyreduce:
   case 158:
 
 /* Line 1806 of yacc.c  */
-#line 912 "ntp_parser.y"
+#line 918 "ntp_parser.y"
     { (yyval.Attr_val) = create_attr_ival((yyvsp[(1) - (2)].Integer), (yyvsp[(2) - (2)].Integer)); }
     break;
 
   case 167:
 
 /* Line 1806 of yacc.c  */
-#line 932 "ntp_parser.y"
+#line 938 "ntp_parser.y"
     {
 			addr_opts_node *aon;
 			
@@ -2946,7 +2952,7 @@ yyreduce:
   case 168:
 
 /* Line 1806 of yacc.c  */
-#line 942 "ntp_parser.y"
+#line 948 "ntp_parser.y"
     {
 			(yyval.Attr_val_fifo) = (yyvsp[(1) - (2)].Attr_val_fifo);
 			APPEND_G_FIFO((yyval.Attr_val_fifo), (yyvsp[(2) - (2)].Attr_val));
@@ -2956,7 +2962,7 @@ yyreduce:
   case 169:
 
 /* Line 1806 of yacc.c  */
-#line 947 "ntp_parser.y"
+#line 953 "ntp_parser.y"
     {
 			(yyval.Attr_val_fifo) = NULL;
 			APPEND_G_FIFO((yyval.Attr_val_fifo), (yyvsp[(1) - (1)].Attr_val));
@@ -2966,49 +2972,49 @@ yyreduce:
   case 170:
 
 /* Line 1806 of yacc.c  */
-#line 955 "ntp_parser.y"
+#line 961 "ntp_parser.y"
     { (yyval.Attr_val) = create_attr_dval((yyvsp[(1) - (2)].Integer), (yyvsp[(2) - (2)].Double)); }
     break;
 
   case 171:
 
 /* Line 1806 of yacc.c  */
-#line 957 "ntp_parser.y"
+#line 963 "ntp_parser.y"
     { (yyval.Attr_val) = create_attr_ival((yyvsp[(1) - (2)].Integer), (yyvsp[(2) - (2)].Integer)); }
     break;
 
   case 172:
 
 /* Line 1806 of yacc.c  */
-#line 959 "ntp_parser.y"
+#line 965 "ntp_parser.y"
     { (yyval.Attr_val) = create_attr_ival((yyvsp[(1) - (2)].Integer), (yyvsp[(2) - (2)].Integer)); }
     break;
 
   case 173:
 
 /* Line 1806 of yacc.c  */
-#line 961 "ntp_parser.y"
+#line 967 "ntp_parser.y"
     { (yyval.Attr_val) = create_attr_sval((yyvsp[(1) - (2)].Integer), (yyvsp[(2) - (2)].String)); }
     break;
 
   case 174:
 
 /* Line 1806 of yacc.c  */
-#line 963 "ntp_parser.y"
+#line 969 "ntp_parser.y"
     { (yyval.Attr_val) = create_attr_sval((yyvsp[(1) - (2)].Integer), (yyvsp[(2) - (2)].String)); }
     break;
 
   case 181:
 
 /* Line 1806 of yacc.c  */
-#line 984 "ntp_parser.y"
+#line 990 "ntp_parser.y"
     { CONCAT_G_FIFOS(cfgt.rlimit, (yyvsp[(2) - (2)].Attr_val_fifo)); }
     break;
 
   case 182:
 
 /* Line 1806 of yacc.c  */
-#line 989 "ntp_parser.y"
+#line 995 "ntp_parser.y"
     {
 			(yyval.Attr_val_fifo) = (yyvsp[(1) - (2)].Attr_val_fifo);
 			APPEND_G_FIFO((yyval.Attr_val_fifo), (yyvsp[(2) - (2)].Attr_val));
@@ -3018,7 +3024,7 @@ yyreduce:
   case 183:
 
 /* Line 1806 of yacc.c  */
-#line 994 "ntp_parser.y"
+#line 1000 "ntp_parser.y"
     {
 			(yyval.Attr_val_fifo) = NULL;
 			APPEND_G_FIFO((yyval.Attr_val_fifo), (yyvsp[(1) - (1)].Attr_val));
@@ -3028,28 +3034,28 @@ yyreduce:
   case 184:
 
 /* Line 1806 of yacc.c  */
-#line 1002 "ntp_parser.y"
+#line 1008 "ntp_parser.y"
     { (yyval.Attr_val) = create_attr_ival((yyvsp[(1) - (2)].Integer), (yyvsp[(2) - (2)].Integer)); }
     break;
 
   case 188:
 
 /* Line 1806 of yacc.c  */
-#line 1018 "ntp_parser.y"
+#line 1024 "ntp_parser.y"
     { CONCAT_G_FIFOS(cfgt.enable_opts, (yyvsp[(2) - (2)].Attr_val_fifo)); }
     break;
 
   case 189:
 
 /* Line 1806 of yacc.c  */
-#line 1020 "ntp_parser.y"
+#line 1026 "ntp_parser.y"
     { CONCAT_G_FIFOS(cfgt.disable_opts, (yyvsp[(2) - (2)].Attr_val_fifo)); }
     break;
 
   case 190:
 
 /* Line 1806 of yacc.c  */
-#line 1025 "ntp_parser.y"
+#line 1031 "ntp_parser.y"
     {
 			(yyval.Attr_val_fifo) = (yyvsp[(1) - (2)].Attr_val_fifo);
 			APPEND_G_FIFO((yyval.Attr_val_fifo), (yyvsp[(2) - (2)].Attr_val));
@@ -3059,7 +3065,7 @@ yyreduce:
   case 191:
 
 /* Line 1806 of yacc.c  */
-#line 1030 "ntp_parser.y"
+#line 1036 "ntp_parser.y"
     {
 			(yyval.Attr_val_fifo) = NULL;
 			APPEND_G_FIFO((yyval.Attr_val_fifo), (yyvsp[(1) - (1)].Attr_val));
@@ -3069,14 +3075,14 @@ yyreduce:
   case 192:
 
 /* Line 1806 of yacc.c  */
-#line 1038 "ntp_parser.y"
+#line 1044 "ntp_parser.y"
     { (yyval.Attr_val) = create_attr_ival(T_Flag, (yyvsp[(1) - (1)].Integer)); }
     break;
 
   case 193:
 
 /* Line 1806 of yacc.c  */
-#line 1040 "ntp_parser.y"
+#line 1046 "ntp_parser.y"
     { 
 			if (input_from_file) {
 				(yyval.Attr_val) = create_attr_ival(T_Flag, (yyvsp[(1) - (1)].Integer));
@@ -3095,14 +3101,14 @@ yyreduce:
   case 202:
 
 /* Line 1806 of yacc.c  */
-#line 1075 "ntp_parser.y"
+#line 1081 "ntp_parser.y"
     { CONCAT_G_FIFOS(cfgt.tinker, (yyvsp[(2) - (2)].Attr_val_fifo)); }
     break;
 
   case 203:
 
 /* Line 1806 of yacc.c  */
-#line 1080 "ntp_parser.y"
+#line 1086 "ntp_parser.y"
     {
 			(yyval.Attr_val_fifo) = (yyvsp[(1) - (2)].Attr_val_fifo);
 			APPEND_G_FIFO((yyval.Attr_val_fifo), (yyvsp[(2) - (2)].Attr_val));
@@ -3112,7 +3118,7 @@ yyreduce:
   case 204:
 
 /* Line 1806 of yacc.c  */
-#line 1085 "ntp_parser.y"
+#line 1091 "ntp_parser.y"
     {
 			(yyval.Attr_val_fifo) = NULL;
 			APPEND_G_FIFO((yyval.Attr_val_fifo), (yyvsp[(1) - (1)].Attr_val));
@@ -3122,14 +3128,14 @@ yyreduce:
   case 205:
 
 /* Line 1806 of yacc.c  */
-#line 1093 "ntp_parser.y"
+#line 1099 "ntp_parser.y"
     { (yyval.Attr_val) = create_attr_dval((yyvsp[(1) - (2)].Integer), (yyvsp[(2) - (2)].Double)); }
     break;
 
   case 216:
 
 /* Line 1806 of yacc.c  */
-#line 1116 "ntp_parser.y"
+#line 1122 "ntp_parser.y"
     {
 			attr_val *av;
 			
@@ -3141,7 +3147,7 @@ yyreduce:
   case 217:
 
 /* Line 1806 of yacc.c  */
-#line 1123 "ntp_parser.y"
+#line 1129 "ntp_parser.y"
     {
 			attr_val *av;
 			
@@ -3153,7 +3159,7 @@ yyreduce:
   case 218:
 
 /* Line 1806 of yacc.c  */
-#line 1130 "ntp_parser.y"
+#line 1136 "ntp_parser.y"
     {
 			char error_text[64];
 			attr_val *av;
@@ -3174,7 +3180,7 @@ yyreduce:
   case 219:
 
 /* Line 1806 of yacc.c  */
-#line 1146 "ntp_parser.y"
+#line 1152 "ntp_parser.y"
     {
 			if (!input_from_file) {
 				yyerror(ip_file, "remote includefile ignored");
@@ -3198,7 +3204,7 @@ yyreduce:
   case 220:
 
 /* Line 1806 of yacc.c  */
-#line 1165 "ntp_parser.y"
+#line 1171 "ntp_parser.y"
     {
 			while (curr_include_level != -1)
 				FCLOSE(fp[curr_include_level--]);
@@ -3208,35 +3214,35 @@ yyreduce:
   case 221:
 
 /* Line 1806 of yacc.c  */
-#line 1170 "ntp_parser.y"
+#line 1176 "ntp_parser.y"
     { /* see drift_parm below for actions */ }
     break;
 
   case 222:
 
 /* Line 1806 of yacc.c  */
-#line 1172 "ntp_parser.y"
+#line 1178 "ntp_parser.y"
     { CONCAT_G_FIFOS(cfgt.logconfig, (yyvsp[(2) - (2)].Attr_val_fifo)); }
     break;
 
   case 223:
 
 /* Line 1806 of yacc.c  */
-#line 1174 "ntp_parser.y"
+#line 1180 "ntp_parser.y"
     { CONCAT_G_FIFOS(cfgt.phone, (yyvsp[(2) - (2)].String_fifo)); }
     break;
 
   case 224:
 
 /* Line 1806 of yacc.c  */
-#line 1176 "ntp_parser.y"
+#line 1182 "ntp_parser.y"
     { APPEND_G_FIFO(cfgt.setvar, (yyvsp[(2) - (2)].Set_var)); }
     break;
 
   case 225:
 
 /* Line 1806 of yacc.c  */
-#line 1178 "ntp_parser.y"
+#line 1184 "ntp_parser.y"
     {
 			addr_opts_node *aon;
 			
@@ -3248,14 +3254,14 @@ yyreduce:
   case 226:
 
 /* Line 1806 of yacc.c  */
-#line 1185 "ntp_parser.y"
+#line 1191 "ntp_parser.y"
     { CONCAT_G_FIFOS(cfgt.ttl, (yyvsp[(2) - (2)].Attr_val_fifo)); }
     break;
 
   case 235:
 
 /* Line 1806 of yacc.c  */
-#line 1207 "ntp_parser.y"
+#line 1213 "ntp_parser.y"
     {
 			attr_val *av;
 			
@@ -3267,7 +3273,7 @@ yyreduce:
   case 236:
 
 /* Line 1806 of yacc.c  */
-#line 1214 "ntp_parser.y"
+#line 1220 "ntp_parser.y"
     {
 			attr_val *av;
 			
@@ -3281,7 +3287,7 @@ yyreduce:
   case 237:
 
 /* Line 1806 of yacc.c  */
-#line 1223 "ntp_parser.y"
+#line 1229 "ntp_parser.y"
     {
 			attr_val *av;
 			
@@ -3293,28 +3299,28 @@ yyreduce:
   case 238:
 
 /* Line 1806 of yacc.c  */
-#line 1233 "ntp_parser.y"
+#line 1239 "ntp_parser.y"
     { (yyval.Set_var) = create_setvar_node((yyvsp[(1) - (4)].String), (yyvsp[(3) - (4)].String), (yyvsp[(4) - (4)].Integer)); }
     break;
 
   case 240:
 
 /* Line 1806 of yacc.c  */
-#line 1239 "ntp_parser.y"
+#line 1245 "ntp_parser.y"
     { (yyval.Integer) = 0; }
     break;
 
   case 241:
 
 /* Line 1806 of yacc.c  */
-#line 1244 "ntp_parser.y"
+#line 1250 "ntp_parser.y"
     { (yyval.Attr_val_fifo) = NULL; }
     break;
 
   case 242:
 
 /* Line 1806 of yacc.c  */
-#line 1246 "ntp_parser.y"
+#line 1252 "ntp_parser.y"
     {
 			(yyval.Attr_val_fifo) = (yyvsp[(1) - (2)].Attr_val_fifo);
 			APPEND_G_FIFO((yyval.Attr_val_fifo), (yyvsp[(2) - (2)].Attr_val));
@@ -3324,14 +3330,14 @@ yyreduce:
   case 243:
 
 /* Line 1806 of yacc.c  */
-#line 1254 "ntp_parser.y"
+#line 1260 "ntp_parser.y"
     { (yyval.Attr_val) = create_attr_ival((yyvsp[(1) - (2)].Integer), (yyvsp[(2) - (2)].Integer)); }
     break;
 
   case 244:
 
 /* Line 1806 of yacc.c  */
-#line 1256 "ntp_parser.y"
+#line 1262 "ntp_parser.y"
     {
 			(yyval.Attr_val) = create_attr_sval((yyvsp[(1) - (2)].Integer), estrdup((yyvsp[(2) - (2)].Address_node)->address));
 			destroy_address_node((yyvsp[(2) - (2)].Address_node));
@@ -3341,7 +3347,7 @@ yyreduce:
   case 245:
 
 /* Line 1806 of yacc.c  */
-#line 1264 "ntp_parser.y"
+#line 1270 "ntp_parser.y"
     {
 			(yyval.Attr_val_fifo) = (yyvsp[(1) - (2)].Attr_val_fifo);
 			APPEND_G_FIFO((yyval.Attr_val_fifo), (yyvsp[(2) - (2)].Attr_val));
@@ -3351,7 +3357,7 @@ yyreduce:
   case 246:
 
 /* Line 1806 of yacc.c  */
-#line 1269 "ntp_parser.y"
+#line 1275 "ntp_parser.y"
     {
 			(yyval.Attr_val_fifo) = NULL;
 			APPEND_G_FIFO((yyval.Attr_val_fifo), (yyvsp[(1) - (1)].Attr_val));
@@ -3361,7 +3367,7 @@ yyreduce:
   case 247:
 
 /* Line 1806 of yacc.c  */
-#line 1277 "ntp_parser.y"
+#line 1283 "ntp_parser.y"
     {
 			char	prefix;
 			char *	type;
@@ -3388,7 +3394,7 @@ yyreduce:
   case 248:
 
 /* Line 1806 of yacc.c  */
-#line 1302 "ntp_parser.y"
+#line 1308 "ntp_parser.y"
     {
 			nic_rule_node *nrn;
 			
@@ -3400,7 +3406,7 @@ yyreduce:
   case 249:
 
 /* Line 1806 of yacc.c  */
-#line 1309 "ntp_parser.y"
+#line 1315 "ntp_parser.y"
     {
 			nic_rule_node *nrn;
 			
@@ -3412,14 +3418,14 @@ yyreduce:
   case 259:
 
 /* Line 1806 of yacc.c  */
-#line 1337 "ntp_parser.y"
+#line 1343 "ntp_parser.y"
     { CONCAT_G_FIFOS(cfgt.reset_counters, (yyvsp[(2) - (2)].Int_fifo)); }
     break;
 
   case 260:
 
 /* Line 1806 of yacc.c  */
-#line 1342 "ntp_parser.y"
+#line 1348 "ntp_parser.y"
     {
 			(yyval.Int_fifo) = (yyvsp[(1) - (2)].Int_fifo);
 			APPEND_G_FIFO((yyval.Int_fifo), create_int_node((yyvsp[(2) - (2)].Integer)));
@@ -3429,7 +3435,7 @@ yyreduce:
   case 261:
 
 /* Line 1806 of yacc.c  */
-#line 1347 "ntp_parser.y"
+#line 1353 "ntp_parser.y"
     {
 			(yyval.Int_fifo) = NULL;
 			APPEND_G_FIFO((yyval.Int_fifo), create_int_node((yyvsp[(1) - (1)].Integer)));
@@ -3439,7 +3445,7 @@ yyreduce:
   case 269:
 
 /* Line 1806 of yacc.c  */
-#line 1371 "ntp_parser.y"
+#line 1377 "ntp_parser.y"
     {
 			(yyval.Attr_val_fifo) = (yyvsp[(1) - (2)].Attr_val_fifo);
 			APPEND_G_FIFO((yyval.Attr_val_fifo), create_int_node((yyvsp[(2) - (2)].Integer)));
@@ -3449,7 +3455,7 @@ yyreduce:
   case 270:
 
 /* Line 1806 of yacc.c  */
-#line 1376 "ntp_parser.y"
+#line 1382 "ntp_parser.y"
     {
 			(yyval.Attr_val_fifo) = NULL;
 			APPEND_G_FIFO((yyval.Attr_val_fifo), create_int_node((yyvsp[(1) - (1)].Integer)));
@@ -3459,7 +3465,7 @@ yyreduce:
   case 271:
 
 /* Line 1806 of yacc.c  */
-#line 1384 "ntp_parser.y"
+#line 1390 "ntp_parser.y"
     {
 			(yyval.Attr_val_fifo) = (yyvsp[(1) - (2)].Attr_val_fifo);
 			APPEND_G_FIFO((yyval.Attr_val_fifo), (yyvsp[(2) - (2)].Attr_val));
@@ -3469,7 +3475,7 @@ yyreduce:
   case 272:
 
 /* Line 1806 of yacc.c  */
-#line 1389 "ntp_parser.y"
+#line 1395 "ntp_parser.y"
     {
 			(yyval.Attr_val_fifo) = NULL;
 			APPEND_G_FIFO((yyval.Attr_val_fifo), (yyvsp[(1) - (1)].Attr_val));
@@ -3479,21 +3485,21 @@ yyreduce:
   case 273:
 
 /* Line 1806 of yacc.c  */
-#line 1397 "ntp_parser.y"
+#line 1403 "ntp_parser.y"
     { (yyval.Attr_val) = create_attr_ival('i', (yyvsp[(1) - (1)].Integer)); }
     break;
 
   case 275:
 
 /* Line 1806 of yacc.c  */
-#line 1403 "ntp_parser.y"
+#line 1409 "ntp_parser.y"
     { (yyval.Attr_val) = create_attr_rangeval('-', (yyvsp[(2) - (5)].Integer), (yyvsp[(4) - (5)].Integer)); }
     break;
 
   case 276:
 
 /* Line 1806 of yacc.c  */
-#line 1408 "ntp_parser.y"
+#line 1414 "ntp_parser.y"
     {
 			(yyval.String_fifo) = (yyvsp[(1) - (2)].String_fifo);
 			APPEND_G_FIFO((yyval.String_fifo), create_string_node((yyvsp[(2) - (2)].String)));
@@ -3503,7 +3509,7 @@ yyreduce:
   case 277:
 
 /* Line 1806 of yacc.c  */
-#line 1413 "ntp_parser.y"
+#line 1419 "ntp_parser.y"
     {
 			(yyval.String_fifo) = NULL;
 			APPEND_G_FIFO((yyval.String_fifo), create_string_node((yyvsp[(1) - (1)].String)));
@@ -3513,7 +3519,7 @@ yyreduce:
   case 278:
 
 /* Line 1806 of yacc.c  */
-#line 1421 "ntp_parser.y"
+#line 1427 "ntp_parser.y"
     {
 			(yyval.Address_fifo) = (yyvsp[(1) - (2)].Address_fifo);
 			APPEND_G_FIFO((yyval.Address_fifo), (yyvsp[(2) - (2)].Address_node));
@@ -3523,7 +3529,7 @@ yyreduce:
   case 279:
 
 /* Line 1806 of yacc.c  */
-#line 1426 "ntp_parser.y"
+#line 1432 "ntp_parser.y"
     {
 			(yyval.Address_fifo) = NULL;
 			APPEND_G_FIFO((yyval.Address_fifo), (yyvsp[(1) - (1)].Address_node));
@@ -3533,7 +3539,7 @@ yyreduce:
   case 280:
 
 /* Line 1806 of yacc.c  */
-#line 1434 "ntp_parser.y"
+#line 1440 "ntp_parser.y"
     {
 			if ((yyvsp[(1) - (1)].Integer) != 0 && (yyvsp[(1) - (1)].Integer) != 1) {
 				yyerror(ip_file, "Integer value is not boolean (0 or 1). Assuming 1");
@@ -3547,28 +3553,28 @@ yyreduce:
   case 281:
 
 /* Line 1806 of yacc.c  */
-#line 1442 "ntp_parser.y"
+#line 1448 "ntp_parser.y"
     { (yyval.Integer) = 1; }
     break;
 
   case 282:
 
 /* Line 1806 of yacc.c  */
-#line 1443 "ntp_parser.y"
+#line 1449 "ntp_parser.y"
     { (yyval.Integer) = 0; }
     break;
 
   case 283:
 
 /* Line 1806 of yacc.c  */
-#line 1447 "ntp_parser.y"
+#line 1453 "ntp_parser.y"
     { (yyval.Double) = (double)(yyvsp[(1) - (1)].Integer); }
     break;
 
   case 285:
 
 /* Line 1806 of yacc.c  */
-#line 1458 "ntp_parser.y"
+#line 1464 "ntp_parser.y"
     {
 			sim_node *sn;
 			
@@ -3583,14 +3589,14 @@ yyreduce:
   case 286:
 
 /* Line 1806 of yacc.c  */
-#line 1475 "ntp_parser.y"
+#line 1481 "ntp_parser.y"
     { old_config_style = 0; }
     break;
 
   case 287:
 
 /* Line 1806 of yacc.c  */
-#line 1480 "ntp_parser.y"
+#line 1486 "ntp_parser.y"
     {
 			(yyval.Attr_val_fifo) = (yyvsp[(1) - (3)].Attr_val_fifo);
 			APPEND_G_FIFO((yyval.Attr_val_fifo), (yyvsp[(2) - (3)].Attr_val));
@@ -3600,7 +3606,7 @@ yyreduce:
   case 288:
 
 /* Line 1806 of yacc.c  */
-#line 1485 "ntp_parser.y"
+#line 1491 "ntp_parser.y"
     {
 			(yyval.Attr_val_fifo) = NULL;
 			APPEND_G_FIFO((yyval.Attr_val_fifo), (yyvsp[(1) - (2)].Attr_val));
@@ -3610,14 +3616,14 @@ yyreduce:
   case 289:
 
 /* Line 1806 of yacc.c  */
-#line 1493 "ntp_parser.y"
+#line 1499 "ntp_parser.y"
     { (yyval.Attr_val) = create_attr_dval((yyvsp[(1) - (3)].Integer), (yyvsp[(3) - (3)].Double)); }
     break;
 
   case 292:
 
 /* Line 1806 of yacc.c  */
-#line 1503 "ntp_parser.y"
+#line 1509 "ntp_parser.y"
     {
 			(yyval.Sim_server_fifo) = (yyvsp[(1) - (2)].Sim_server_fifo);
 			APPEND_G_FIFO((yyval.Sim_server_fifo), (yyvsp[(2) - (2)].Sim_server));
@@ -3627,7 +3633,7 @@ yyreduce:
   case 293:
 
 /* Line 1806 of yacc.c  */
-#line 1508 "ntp_parser.y"
+#line 1514 "ntp_parser.y"
     {
 			(yyval.Sim_server_fifo) = NULL;
 			APPEND_G_FIFO((yyval.Sim_server_fifo), (yyvsp[(1) - (1)].Sim_server));
@@ -3637,28 +3643,28 @@ yyreduce:
   case 294:
 
 /* Line 1806 of yacc.c  */
-#line 1516 "ntp_parser.y"
-    { (yyval.Sim_server) = create_sim_server((yyvsp[(1) - (5)].Address_node), (yyvsp[(3) - (5)].Double), (yyvsp[(4) - (5)].Sim_script_fifo)); }
+#line 1522 "ntp_parser.y"
+    { (yyval.Sim_server) = ONLY_SIM(create_sim_server((yyvsp[(1) - (5)].Address_node), (yyvsp[(3) - (5)].Double), (yyvsp[(4) - (5)].Sim_script_fifo))); }
     break;
 
   case 295:
 
 /* Line 1806 of yacc.c  */
-#line 1521 "ntp_parser.y"
+#line 1527 "ntp_parser.y"
     { (yyval.Double) = (yyvsp[(3) - (4)].Double); }
     break;
 
   case 296:
 
 /* Line 1806 of yacc.c  */
-#line 1526 "ntp_parser.y"
+#line 1532 "ntp_parser.y"
     { (yyval.Address_node) = (yyvsp[(3) - (3)].Address_node); }
     break;
 
   case 297:
 
 /* Line 1806 of yacc.c  */
-#line 1531 "ntp_parser.y"
+#line 1537 "ntp_parser.y"
     {
 			(yyval.Sim_script_fifo) = (yyvsp[(1) - (2)].Sim_script_fifo);
 			APPEND_G_FIFO((yyval.Sim_script_fifo), (yyvsp[(2) - (2)].Sim_script));
@@ -3668,7 +3674,7 @@ yyreduce:
   case 298:
 
 /* Line 1806 of yacc.c  */
-#line 1536 "ntp_parser.y"
+#line 1542 "ntp_parser.y"
     {
 			(yyval.Sim_script_fifo) = NULL;
 			APPEND_G_FIFO((yyval.Sim_script_fifo), (yyvsp[(1) - (1)].Sim_script));
@@ -3678,14 +3684,14 @@ yyreduce:
   case 299:
 
 /* Line 1806 of yacc.c  */
-#line 1544 "ntp_parser.y"
-    { (yyval.Sim_script) = create_sim_script_info((yyvsp[(3) - (6)].Double), (yyvsp[(5) - (6)].Attr_val_fifo)); }
+#line 1550 "ntp_parser.y"
+    { (yyval.Sim_script) = ONLY_SIM(create_sim_script_info((yyvsp[(3) - (6)].Double), (yyvsp[(5) - (6)].Attr_val_fifo))); }
     break;
 
   case 300:
 
 /* Line 1806 of yacc.c  */
-#line 1549 "ntp_parser.y"
+#line 1555 "ntp_parser.y"
     {
 			(yyval.Attr_val_fifo) = (yyvsp[(1) - (3)].Attr_val_fifo);
 			APPEND_G_FIFO((yyval.Attr_val_fifo), (yyvsp[(2) - (3)].Attr_val));
@@ -3695,7 +3701,7 @@ yyreduce:
   case 301:
 
 /* Line 1806 of yacc.c  */
-#line 1554 "ntp_parser.y"
+#line 1560 "ntp_parser.y"
     {
 			(yyval.Attr_val_fifo) = NULL;
 			APPEND_G_FIFO((yyval.Attr_val_fifo), (yyvsp[(1) - (2)].Attr_val));
@@ -3705,14 +3711,14 @@ yyreduce:
   case 302:
 
 /* Line 1806 of yacc.c  */
-#line 1562 "ntp_parser.y"
+#line 1568 "ntp_parser.y"
     { (yyval.Attr_val) = create_attr_dval((yyvsp[(1) - (3)].Integer), (yyvsp[(3) - (3)].Double)); }
     break;
 
 
 
 /* Line 1806 of yacc.c  */
-#line 3716 "ntp_parser.c"
+#line 3722 "ntp_parser.c"
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires
@@ -3943,7 +3949,7 @@ yyreturn:
 
 
 /* Line 2067 of yacc.c  */
-#line 1573 "ntp_parser.y"
+#line 1579 "ntp_parser.y"
 
 
 void 
