@@ -59,6 +59,8 @@ static  void    shm_poll        (int unit, struct peer *peer);
 static  void    shm_timer       (int unit, struct peer *peer);
 static	void	shm_peek	(int unit, struct peer *peer);
 static	void	shm_clockstats  (int unit, struct peer *peer);
+static	void	shm_control	(int unit, const struct refclockstat * in_st,
+				 struct refclockstat * out_st, struct peer *peer);
 
 /*
  * Transfer vector
@@ -67,7 +69,7 @@ struct  refclock refclock_shm = {
 	shm_start,              /* start up driver */
 	shm_shutdown,           /* shut down driver */
 	shm_poll,		/* transmit poll message */
-	noentry,		/* not used: control */
+	shm_control,		/* control settings */
 	noentry,		/* not used: init */
 	noentry,		/* not used: buginfo */
 	shm_timer,              /* once per second */
@@ -214,20 +216,47 @@ shm_start(
 		up->shm->valid = 0;
 		up->shm->nsamples = NSAMPLES;
 		pp->clockdesc = DESCRIPTION;
-
+		/* items to be changed later in 'shm_control()': */
 		up->max_delay = 5;
-		if (pp->sloppyclockflag & CLK_FLAG1)
-			up->max_delta = 0;
-		else if (pp->fudgetime2 < 1. || pp->fudgetime2 > 86400.)
-			up->max_delta = 4*3600;
-		else
-			up->max_delta = (time_t)floor(pp->fudgetime2 + 0.5);
-		
+		up->max_delta = 4*3600;
 		return 1;
 	} else {
 		free(up);
+		pp->unitptr = NULL;
 		return 0;
 	}
+}
+
+
+/*
+ * shm_control - configure flag1/time2 params
+ *
+ * These are not yet available during 'shm_start', so we have to do any
+ * pre-computations we want to avoid during regular poll/timer callbacks
+ * in this callback.
+ */
+static void
+shm_control(
+	int                         unit,
+	const struct refclockstat * in_st,
+	struct refclockstat       * out_st,
+	struct peer               * peer
+	)
+{
+	struct refclockproc *pp;
+	struct shmunit *up;
+
+	pp = peer->procptr;
+	up = pp->unitptr;
+
+	if (NULL == up)
+		return;
+	if (pp->sloppyclockflag & CLK_FLAG1)
+		up->max_delta = 0;
+	else if (pp->fudgetime2 < 1. || pp->fudgetime2 > 86400.)
+		up->max_delta = 4*3600;
+	else
+		up->max_delta = (time_t)floor(pp->fudgetime2 + 0.5);
 }
 
 

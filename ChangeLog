@@ -1,3 +1,5 @@
+* [Bug 2622] Synchronisation problem using SHM [...]
+  Add 'control' function -- fudge values not available during start.
 * [Bug 2630] Limit the ntpq command buffer to 512 bytes.
 * FlexeLint cleanups.
 * Try bison-3.0.2 instead of bison-2.5.
