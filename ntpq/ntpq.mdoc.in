@@ -1,4 +1,4 @@
-.Dd August 9 2014
+.Dd August 11 2014
 .Dt NTPQ @NTPQ_MS@ User Commands
 .Os
 .\"  EDIT THIS FILE WITH CAUTION  (ntpq-opts.mdoc)

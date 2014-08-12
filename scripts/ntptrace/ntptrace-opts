@@ -40,7 +40,7 @@ sub processOptions {
         'help|?', 'more-help'));
 
     $usage = <<'USAGE';
-ntptrace - Trace peers of an NTP server - Ver. 4.2.7p457
+ntptrace - Trace peers of an NTP server - Ver. 4.2.7p458
 USAGE: ntptrace [ -<flag> [<val>] | --<name>[{=| }<val>] ]... [host]
 
     -n, --numeric                Print IP addresses instead of hostnames

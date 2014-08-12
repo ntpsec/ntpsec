@@ -10,9 +10,9 @@
 .ds B-Font B
 .ds I-Font I
 .ds R-Font R
-.TH ntpq 1ntpqman "09 Aug 2014" "4.2.7p457" "User Commands"
+.TH ntpq 1ntpqman "11 Aug 2014" "4.2.7p458" "User Commands"
 .\"
-.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-LvaW7b/ag-pwaW6b)
+.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-KLaq8Y/ag-WLaq7Y)
 .\"
 .\" It has been AutoGen-ed
 .\" From the definitions ntpq-opts.def
@@ -1260,9 +1260,9 @@ the configuration files.
 The \fIhomerc\fP files are "\fI$HOME\fP", and "\fI.\fP".
 If any of these are directories, then the file \fI.ntprc\fP
 is searched for within those directories.
-.TH ntpq 1ntpqman "09 Aug 2014" "4.2.7p457" "User Commands"
+.TH ntpq 1ntpqman "11 Aug 2014" "4.2.7p458" "User Commands"
 .\"
-.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-LvaW7b/ag-pwaW6b)
+.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-KLaq8Y/ag-WLaq7Y)
 .\"
 .\" It has been AutoGen-ed
 .\" From the definitions ntpq-opts.def
