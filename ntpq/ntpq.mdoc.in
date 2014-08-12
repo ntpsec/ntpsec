@@ -1,4 +1,4 @@
-.Dd August 11 2014
+.Dd August 12 2014
 .Dt NTPQ @NTPQ_MS@ User Commands
 .Os
 .\"  EDIT THIS FILE WITH CAUTION  (ntpq-opts.mdoc)
@@ -759,7 +759,7 @@ Force DNS resolution of following host names on the command line
 to the IPv6 namespace.
 .It  Fl c Ar cmd , Fl \-command Ns = Ns Ar cmd 
 run a command and exit.
-This option may appear an unlimited number of times.
+This option may appear up to 512 times.
 .sp
 The following argument is interpreted as an interactive format command
 and is added to the list of commands to be executed on the specified

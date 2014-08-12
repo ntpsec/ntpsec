@@ -10,9 +10,9 @@
 .ds B-Font B
 .ds I-Font I
 .ds R-Font R
-.TH ntpq @NTPQ_MS@ "11 Aug 2014" "4.2.7p458" "User Commands"
+.TH ntpq @NTPQ_MS@ "12 Aug 2014" "4.2.7p458" "User Commands"
 .\"
-.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-KLaq8Y/ag-WLaq7Y)
+.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-eqaqdV/ag-qqaqcV)
 .\"
 .\" It has been AutoGen-ed
 .\" From the definitions ntpq-opts.def
@@ -1172,7 +1172,7 @@ to the IPv6 namespace.
 .TP
 .NOP \f\*[B-Font]\-c\f[] \f\*[I-Font]cmd\f[], \f\*[B-Font]\-\-command\f[]=\f\*[I-Font]cmd\f[]
 run a command and exit.
-This option may appear an unlimited number of times.
+This option may appear up to 512 times.
 .sp
 The following argument is interpreted as an interactive format command
 and is added to the list of commands to be executed on the specified
@@ -1260,9 +1260,9 @@ the configuration files.
 The \fIhomerc\fP files are "\fI$HOME\fP", and "\fI.\fP".
 If any of these are directories, then the file \fI.ntprc\fP
 is searched for within those directories.
-.TH ntpq @NTPQ_MS@ "11 Aug 2014" "4.2.7p458" "User Commands"
+.TH ntpq @NTPQ_MS@ "12 Aug 2014" "4.2.7p458" "User Commands"
 .\"
-.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-KLaq8Y/ag-WLaq7Y)
+.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-eqaqdV/ag-qqaqcV)
 .\"
 .\" It has been AutoGen-ed
 .\" From the definitions ntpq-opts.def

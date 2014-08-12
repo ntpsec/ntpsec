@@ -1,3 +1,4 @@
+* [Bug 2630] Limit the ntpq command buffer to 512 bytes.
 * FlexeLint cleanups.
 (4.2.7p458) 2014/08/11 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 2633] Provide stdnoreturn.h for windows port.

@@ -6,7 +6,7 @@
 #
 # EDIT THIS FILE WITH CAUTION  (invoke-ntpq.texi)
 #
-# It has been AutoGen-ed
+# It has been AutoGen-ed  August 12, 2014 at 12:01:59 AM by AutoGen 5.18.4pre14
 # From the definitions    ntpq-opts.def
 # and the template file   agtexi-cmd.tpl
 @end ignore
@@ -778,7 +778,7 @@ Usage:  ntpq [ -<flag> [<val>] | --<name>[@{=| @}<val>] ]... [ host ...]
    -6 no  ipv6           Force IPv6 DNS name resolution
                                 - prohibits the option 'ipv4'
    -c Str command        run a command and exit
-                                - may appear multiple times
+                                - may appear up to 512 times
    -d no  debug-level    Increase debug verbosity level
                                 - may appear multiple times
    -D Num set-debug-level Set the debug verbosity level
@@ -856,7 +856,7 @@ This option takes a string argument @file{cmd}.
 This option has some usage constraints.  It:
 @itemize @bullet
 @item
-may appear an unlimited number of times.
+may appear up to 512 times.
 @end itemize
 
 The following argument is interpreted as an interactive format command

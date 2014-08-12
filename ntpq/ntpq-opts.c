@@ -369,7 +369,7 @@ static tOptDesc optDesc[OPTION_CT] = {
   {  /* entry idx, value */ 2, VALUE_OPT_COMMAND,
      /* equiv idx, value */ 2, VALUE_OPT_COMMAND,
      /* equivalenced to  */ NO_EQUIVALENT,
-     /* min, max, act ct */ 0, NOLIMIT, 0,
+     /* min, max, act ct */ 0, 512, 0,
      /* opt state flags  */ COMMAND_FLAGS, 0,
      /* last opt argumnt */ { NULL }, /* --command */
      /* arg list/cookie  */ NULL,
