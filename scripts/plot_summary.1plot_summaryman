@@ -10,9 +10,9 @@
 .ds B-Font B
 .ds I-Font I
 .ds R-Font R
-.TH plot_summary 1plot_summaryman "09 Aug 2014" "ntp (4.2.7p457)" "User Commands"
+.TH plot_summary 1plot_summaryman "11 Aug 2014" "ntp (4.2.7p458)" "User Commands"
 .\"
-.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-kMaGs2/ag-xMaWr2)
+.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-IQa4YR/ag-VQaiYR)
 .\"
 .\" It has been AutoGen-ed
 .\" From the definitions plot_summary-opts.def
@@ -96,9 +96,9 @@ Output version of program and exit.  The default mode is `v', a simple
 version.  The `c' mode will print copyright information and `n' will
 print the full copyright notice.
 .PP
-.TH plot_summary 1plot_summaryman "09 Aug 2014" "ntp (4.2.7p457)" "User Commands"
+.TH plot_summary 1plot_summaryman "11 Aug 2014" "ntp (4.2.7p458)" "User Commands"
 .\"
-.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-kMaGs2/ag-xMaWr2)
+.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-IQa4YR/ag-VQaiYR)
 .\"
 .\" It has been AutoGen-ed
 .\" From the definitions plot_summary-opts.def

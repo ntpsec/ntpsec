@@ -44,7 +44,7 @@ monitor the operational status
 and determine the performance of
 <code>ntpd</code>, the NTP daemon.
 
-  <p>This document applies to version 4.2.7p457 of <code>ntpq</code>.
+  <p>This document applies to version 4.2.7p458 of <code>ntpq</code>.
 
 <ul class="menu">
 <li><a accesskey="1" href="#ntpq-Description">ntpq Description</a>
@@ -291,14 +291,14 @@ There appear
 to be no servers left which demand version 1. 
 With no argument, displays the current NTP version that will be used
 when communicating with servers. 
-<br><dt><code>quit</code><dd>Exit
-<code>ntpq</code>
 <br><dt><code>passwd</code><dd>This command prompts you to type in a password (which will not
 be echoed) which will be used to authenticate configuration
 requests. 
 The password must correspond to the key configured for
 use by the NTP server for this purpose if such requests are to be
 successful. 
+<br><dt><code>quit</code><dd>Exit
+<code>ntpq</code>
 <br><dt><code>raw</code><dd>Causes all output from query commands is printed as received
 from the remote server. 
 The only formating/interpretation done on
@@ -331,7 +331,7 @@ commands, which iterate over a range of associations.
      <pre class="example">          ind assid status conf reach auth condition last_event cnt
      </pre>
           <dl>
-<dt>Sy String Ta Sy Description<br><dt><code>ind</code> <code>Ta</code> <code>index</code> <code>on</code> <code>this</code> <code>list</code><br><dt><code>assid</code> <code>Ta</code> <code>association</code> <code>ID</code><br><dt><code>status</code> <code>Ta</code> <code>peer</code> <code>status</code> <code>word</code><br><dt><code>conf</code> <code>Ta</code> <code>yes</code>: <code>persistent,</code> <code>no</code>: <code>ephemeral</code><br><dt><code>reach</code> <code>Ta</code> <code>yes</code>: <code>reachable,</code> <code>no</code>: <code>unreachable</code><br><dt><code>auth</code> <code>Ta</code> <code>ok</code>, <code>Liyes</code>, <code>bad</code> <code>and</code> <code>none</code><br><dt><code>condition</code> <code>Ta</code> <code>selection</code> <code>status</code> <code>(see</code> <code>the</code> <code>select</code> <code>field</code> <code>of</code> <code>the</code> <code>peer</code> <code>status</code> <code>word)</code><br><dt><code>last_event</code> <code>Ta</code> <code>event</code> <code>report</code> <code>(see</code> <code>the</code> <code>event</code> <code>field</code> <code>of</code> <code>the</code> <code>peer</code> <code>status</code> <code>word)</code><br><dt><code>cnt</code> <code>Ta</code> <code>event</code> <code>count</code> <code>(see</code> <code>the</code> <code>count</code> <code>field</code> <code>of</code> <code>the</code> <code>peer</code> <code>status</code> <code>word)</code><dd></dl>
+<dt>Sy String Ta Sy Description<br><dt><code>ind</code> <code>Ta</code> <code>index</code> <code>on</code> <code>this</code> <code>list</code><br><dt><code>assid</code> <code>Ta</code> <code>association</code> <code>ID</code><br><dt><code>status</code> <code>Ta</code> <code>peer</code> <code>status</code> <code>word</code><br><dt><code>conf</code> <code>Ta</code> <code>yes</code>: <code>persistent,</code> <code>no</code>: <code>ephemeral</code><br><dt><code>reach</code> <code>Ta</code> <code>yes</code>: <code>reachable,</code> <code>no</code>: <code>unreachable</code><br><dt><code>auth</code> <code>Ta</code> <code>ok</code>, <code>yes</code>, <code>bad</code> <code>and</code> <code>none</code><br><dt><code>condition</code> <code>Ta</code> <code>selection</code> <code>status</code> <code>(see</code> <code>the</code> <code>select</code> <code>field</code> <code>of</code> <code>the</code> <code>peer</code> <code>status</code> <code>word)</code><br><dt><code>last_event</code> <code>Ta</code> <code>event</code> <code>report</code> <code>(see</code> <code>the</code> <code>event</code> <code>field</code> <code>of</code> <code>the</code> <code>peer</code> <code>status</code> <code>word)</code><br><dt><code>cnt</code> <code>Ta</code> <code>event</code> <code>count</code> <code>(see</code> <code>the</code> <code>count</code> <code>field</code> <code>of</code> <code>the</code> <code>peer</code> <code>status</code> <code>word)</code><dd></dl>
      <br><dt><code>clockvar</code> <kbd>assocID</kbd> <code>[</code><kbd>name</kbd><code> [= </code><kbd>value</kbd><code> [...]] [...]]</code><br><dt><code>cv</code> <kbd>assocID</kbd> <code>[</code><kbd>name</kbd><code> [= </code><kbd>value</kbd><code> [...]] [...]]</code><dd>Display a list of clock variables for those associations supporting a reference clock. 
 <br><dt><code>:config</code> <code>[...]</code><dd>Send the remainder of the command line, including whitespace, to the server as a run-time configuration command in the same format as a line in the configuration file. This command is experimental until further notice and clarification. Authentication is of course required. 
 <br><dt><code>config-from-file</code> <kbd>filename</kbd><dd>Send the each line of
@@ -412,16 +412,17 @@ command.
 <code>associations</code> <code>command</code>,
 except that it uses previously stored data rather than making a new query. 
 <br><dt><code>peers</code><dd>Display a list of peers in the form:
-<code>[tally]remote</code> <code>refid</code> <code>st</code> <code>t</code> <code>when</code> <code>pool</code> <code>reach</code> <code>delay</code> <code>offset</code> <code>jitter</code>
+     <pre class="example">          [tally]remote refid st t when pool reach delay offset jitter
+     </pre>
           <dl>
 <dt>Variable<dd>Description
 <br><dt><code>[tally]</code><dd>single-character code indicating current value of the
 <code>select</code>
 field of the
-&lt;a href="decode.html#peer"&gt;peer status word&lt;/a&gt;
+.Lk decode.html#peer "peer status word"
 <br><dt><code>remote</code><dd>host name (or IP number) of peer
 <br><dt><code>refid</code><dd>association ID or
-&lt;a href="decode.html#kiss"&gt;kiss code&lt;/a&gt;
+.Lk decode.html#kiss "'kiss code"
 <br><dt><code>st</code><dd>stratum
 <br><dt><code>t</code><dd><code>u</code>:
 unicast or manycast client,
@@ -448,9 +449,9 @@ multicast server
 If
 <kbd>assocID</kbd>
 is zero, the variables are from the
-&lt;a href="#system"&gt;system variables&lt;/a&gt;
+<a href="#System-Variables">System Variables</a>
 name space, otherwise they are from the
-&lt;a href="#peer"&gt;peer variables&lt;/a&gt;
+<a href="#Peer-Variables">Peer Variables</a>
 name space. 
 The
 <kbd>assocID</kbd>
@@ -479,7 +480,7 @@ or
 to the ntpd host's file
 <kbd>filename</kbd>. 
 This command will be rejected by the server unless
-&lt;a href="miscopt.html#saveconfigdir"&gt;saveconfigdir&lt;/a&gt;
+.Lk miscopt.html#saveconfigdir "saveconfigdir"
 appears in the
 <code>ntpd</code>
 configuration file. 
@@ -495,9 +496,9 @@ Authentication is required.
 If the
 <kbd>assocID</kbd>
 is zero, the variables are from the
-&lt;a href="#system"&gt;system variables&lt;/a&gt;
+<a href="#System-Variables">System Variables</a>
 name space, otherwise they are from the
-&lt;a href="#peer"&gt;peer variables&lt;/a&gt;
+<a href="#Peer-Variables">Peer Variables</a>
 name space. 
 The
 <kbd>assocID</kbd>
@@ -506,22 +507,23 @@ is required, as the same name can occur in both spaces.
 <br><dt><code>sysstats</code><dd>Print statistics counters maintained in the protocol module. 
 </dl>
 
-  <p>.SS Status Words and Kiss Codes
+<h5 class="subsubsection">Status Words and Kiss Codes</h5>
 
-  <p>The current state of the operating program is shown in a set of status words maintained by the system and each association separately. 
+<p>The current state of the operating program is shown in a set of status words maintained by the system and each association separately. 
 These words are displayed in the
 <code>rv</code>
 and
 <code>as</code>
 commands both in hexadecimal and decoded short tip strings. 
 The codes, tips and short explanations are on the
-&lt;a href="decode.html"&gt;Event Messages and Status Words&lt;/a&gt; page. 
+.Lk decode.html "Event Messages and Status Words"
+page. 
 The page also includes a list of system and peer messages,
 the code for the latest of which is included in the status word.
 
   <p>Information resulting from protocol machine state transitions
 is displayed using an informal set of ASCII strings called
-&lt;a href="decode.html#kiss"&gt;kiss codes&lt;/a&gt;. 
+.Lk decode.html#kiss "kiss codes" . 
 The original purpose was for kiss-o'-death (KoD) packets
 sent by the server to advise the client of an unusual condition. 
 They are now displayed, when appropriate,
@@ -535,8 +537,7 @@ billboard.
 Not all variables are displayed in some configurations.
      <dl>
 <dt>Variable<dd>Description
-<br><dt><code>status</code><dd>&lt;a href="decode.html#sys"&gt;
-system status word
+<br><dt><code>status</code><dd>.Lk decode.html#sys "system status word"
 <br><dt><code>version</code><dd>NTP software version and build time
 <br><dt><code>processor</code><dd>hardware platform and version
 <br><dt><code>system</code><dd>operating system and version
@@ -550,7 +551,7 @@ system status word
 <br><dt><code>mintc</code><dd>minimum time constant (log2 s) (3-10)
 <br><dt><code>clock</code><dd>date and time of day
 <br><dt><code>refid</code><dd>reference ID or
-&lt;a href="decode.html#kiss"&gt;kiss code
+.Lk decode.html#kiss "kiss code"
 <br><dt><code>reftime</code><dd>reference time
 <br><dt><code>offset</code><dd>combined  offset of server relative to this host
 <br><dt><code>sys_jitter</code><dd>combined system jitter
@@ -592,7 +593,7 @@ Not all variables are displayed in some configurations.
      <dl>
 <dt>Variable<dd>Description
 <br><dt><code>associd</code><dd>association ID
-<br><dt><code>status</code><dd>&lt;a href="decode.html#peer"&gt;peer status word
+<br><dt><code>status</code><dd>.Lk decode.html#peer "peer status word"
 <br><dt><code>srcadr</code><dd>source (remote) IP address
 <br><dt><code>srcport</code><dd>source (remote) port
 <br><dt><code>dstadr</code><dd>destination (local) IP address
@@ -603,7 +604,7 @@ Not all variables are displayed in some configurations.
 <br><dt><code>rootdelay</code><dd>total roundtrip delay to the primary reference clock
 <br><dt><code>rootdisp</code><dd>total root dispersion to the primary reference clock
 <br><dt><code>refid</code><dd>reference ID or
-&lt;a href="decode.html#kiss"&gt;kiss code
+.Lk decode.html#kiss "kiss code"
 <br><dt><code>reftime</code><dd>reference time
 <br><dt><code>reach</code><dd>reach register (octal)
 <br><dt><code>unreach</code><dd>unreach counter
@@ -612,8 +613,8 @@ Not all variables are displayed in some configurations.
 <br><dt><code>hpoll</code><dd>host poll exponent (log2 s) (3-17)
 <br><dt><code>ppoll</code><dd>peer poll exponent (log2 s) (3-17)
 <br><dt><code>headway</code><dd>headway (see
-&lt;a href="rate.html"&gt;Rate Management and the Kiss-o'-Death Packet )
-<br><dt><code>flash</code><dd>&lt;a href="decode.html#flash"&gt;flash status word
+.Lk rate.html "Rate Management and the Kiss-o'-Death Packet" )
+<br><dt><code>flash</code><dd>.Lk decode.html#flash "flash status word"
 <br><dt><code>offset</code><dd>filter offset
 <br><dt><code>delay</code><dd>filter delay
 <br><dt><code>dispersion</code><dd>filter dispersion
@@ -621,7 +622,7 @@ Not all variables are displayed in some configurations.
 <br><dt><code>ident</code><dd>Autokey group name for this association
 <br><dt><code>bias</code><dd>unicast/broadcast bias
 <br><dt><code>xleave</code><dd>interleave delay (see
-&lt;a href="xleave.html"&gt;NTP Interleaved Modes&lt;/a&gt; )
+.Lk xleave.html "NTP Interleaved Modes" )
 </dl>
   The
 <code>bias</code>
@@ -656,7 +657,7 @@ Not all variables are displayed in some configurations.
      <dl>
 <dt>Variable<dd>Description
 <br><dt><code>associd</code><dd>association ID
-<br><dt><code>status</code><dd>&lt;a href="decode.html#clock"&gt;clock status word
+<br><dt><code>status</code><dd>.Lk decode.html#clock "clock status word"
 <br><dt><code>device</code><dd>device description
 <br><dt><code>timecode</code><dd>ASCII time code string (specific to device)
 <br><dt><code>poll</code><dd>poll messages sent
@@ -707,7 +708,7 @@ the usage text by passing it through a pager program.
 used to select the program, defaulting to <span class="file">more</span>.  Both will exit
 with a status code of 0.
 
-<pre class="example">ntpq - standard NTP query program - Ver. 4.2.7p456
+<pre class="example">ntpq - standard NTP query program - Ver. 4.2.7p457
 Usage:  ntpq [ -&lt;flag&gt; [&lt;val&gt;] | --&lt;name&gt;[{=| }&lt;val&gt;] ]... [ host ...]
   Flg Arg Option-Name    Description
    -4 no  ipv4           Force IPv4 DNS name resolution

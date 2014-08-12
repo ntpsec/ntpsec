@@ -10,9 +10,9 @@
 .ds B-Font B
 .ds I-Font I
 .ds R-Font R
-.TH ntpd 1ntpdman "09 Aug 2014" "4.2.7p457" "User Commands"
+.TH ntpd 1ntpdman "11 Aug 2014" "4.2.7p458" "User Commands"
 .\"
-.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-Szaiu5/ag-5zait5)
+.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-FVai4V/ag-RVai3V)
 .\"
 .\" It has been AutoGen-ed
 .\" From the definitions ntpd-opts.def
@@ -434,9 +434,9 @@ by loading values from environment variables named:
   \fBNTPD_<option-name>\fP or \fBNTPD\fP
 .fi
 .ad
-.TH ntpd 1ntpdman "09 Aug 2014" "4.2.7p457" "User Commands"
+.TH ntpd 1ntpdman "11 Aug 2014" "4.2.7p458" "User Commands"
 .\"
-.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-Szaiu5/ag-5zait5)
+.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-FVai4V/ag-RVai3V)
 .\"
 .\" It has been AutoGen-ed
 .\" From the definitions ntpd-opts.def
