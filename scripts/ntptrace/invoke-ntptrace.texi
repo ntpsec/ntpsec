@@ -6,7 +6,7 @@
 #
 # EDIT THIS FILE WITH CAUTION  (invoke-ntptrace.texi)
 #
-# It has been AutoGen-ed  August 13, 2014 at 04:37:11 AM by AutoGen 5.18.4pre14
+# It has been AutoGen-ed  August 13, 2014 at 10:25:04 AM by AutoGen 5.18.4pre14
 # From the definitions    ntptrace-opts.def
 # and the template file   agtexi-cmd.tpl
 @end ignore
@@ -69,7 +69,7 @@ USAGE: ntptrace [ -<flag> [<val>] | --<name>[@{=| @}<val>] ]... [host]
     -m, --max-hosts=num          Maximum number of peers to trace
     -r, --host=str               Single remote host
     -?, --help                   Display usage information and exit
-        --more-help              Pass the extended usage information through a pager
+        --more-help              Pass the extended usage text through a pager
 
 Options are specified by doubled hyphens and their name or by a single
 hyphen and the flag character.

@@ -53,7 +53,7 @@ noinst_DATA =			\
 
 ntptrace: $(srcdir)/ntptrace-opts
 
-$(srcdir)/ntptrace-opts: $(srcdir)/ntptrace-opts.def ../../sntp/ag-tpl/perlopt.tpl
+$(srcdir)/ntptrace-opts: $(srcdir)/ntptrace-opts.def
 	$(run_ag) ntptrace-opts.def
 
 ### Nroff

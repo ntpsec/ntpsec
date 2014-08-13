@@ -1,3 +1,4 @@
+* More autogen-5.18.4pre14 cleanup.
 (4.2.7p459) 2014/08/12 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 2630] Limit the ntpq command buffer to 512 bytes.
 * FlexeLint cleanups.

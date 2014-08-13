@@ -1,6 +1,6 @@
 # EDIT THIS FILE WITH CAUTION  (ntp-wait-opts)
 #
-# It has been AutoGen-ed
+# It has been AutoGen-ed  August 13, 2014 at 10:09:13 AM by AutoGen 5.18.4pre14
 # From the definitions    ntp-wait-opts.def
 # and the template file   perlopt
 
@@ -47,7 +47,7 @@ USAGE: ntp-wait [ -<flag> [<val>] | --<name>[{=| }<val>] ]...
     -s, --sleep=num              How long to sleep between tries
     -v, --verbose                Be verbose
     -?, --help                   Display usage information and exit
-        --more-help              Pass the extended usage information through a pager
+        --more-help              Pass the extended usage text through a pager
 
 Options are specified by doubled hyphens and their name or by a single
 hyphen and the flag character.
