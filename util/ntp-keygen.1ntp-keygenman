@@ -10,9 +10,9 @@
 .ds B-Font B
 .ds I-Font I
 .ds R-Font R
-.TH ntp-keygen 1ntp-keygenman "11 Aug 2014" "ntp (4.2.7p458)" "User Commands"
+.TH ntp-keygen 1ntp-keygenman "12 Aug 2014" "ntp (4.2.7p459)" "User Commands"
 .\"
-.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-PjaiH1/ag-1jaiG1)
+.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-rLaO5m/ag-DLaO4m)
 .\"
 .\" It has been AutoGen-ed
 .\" From the definitions ntp-keygen-opts.def
@@ -1161,9 +1161,9 @@ the configuration files.
 The \fIhomerc\fP files are "\fI$HOME\fP", and "\fI.\fP".
 If any of these are directories, then the file \fI.ntprc\fP
 is searched for within those directories.
-.TH ntp-keygen 1ntp-keygenman "11 Aug 2014" "ntp (4.2.7p458)" "User Commands"
+.TH ntp-keygen 1ntp-keygenman "12 Aug 2014" "ntp (4.2.7p459)" "User Commands"
 .\"
-.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-PjaiH1/ag-1jaiG1)
+.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-rLaO5m/ag-DLaO4m)
 .\"
 .\" It has been AutoGen-ed
 .\" From the definitions ntp-keygen-opts.def

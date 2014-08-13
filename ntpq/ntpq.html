@@ -44,7 +44,7 @@ monitor the operational status
 and determine the performance of
 <code>ntpd</code>, the NTP daemon.
 
-  <p>This document applies to version 4.2.7p458 of <code>ntpq</code>.
+  <p>This document applies to version 4.2.7p459 of <code>ntpq</code>.
 
 <ul class="menu">
 <li><a accesskey="1" href="#ntpq-Description">ntpq Description</a>
@@ -708,7 +708,7 @@ the usage text by passing it through a pager program.
 used to select the program, defaulting to <span class="file">more</span>.  Both will exit
 with a status code of 0.
 
-<pre class="example">ntpq - standard NTP query program - Ver. 4.2.7p457
+<pre class="example">ntpq - standard NTP query program - Ver. 4.2.7p458
 Usage:  ntpq [ -&lt;flag&gt; [&lt;val&gt;] | --&lt;name&gt;[{=| }&lt;val&gt;] ]... [ host ...]
   Flg Arg Option-Name    Description
    -4 no  ipv4           Force IPv4 DNS name resolution
@@ -716,7 +716,7 @@ Usage:  ntpq [ -&lt;flag&gt; [&lt;val&gt;] | --&lt;name&gt;[{=| }&lt;val&gt;] ].
    -6 no  ipv6           Force IPv6 DNS name resolution
                                 - prohibits the option 'ipv4'
    -c Str command        run a command and exit
-                                - may appear multiple times
+                                - may appear up to 512 times
    -d no  debug-level    Increase debug verbosity level
                                 - may appear multiple times
    -D Num set-debug-level Set the debug verbosity level
@@ -807,7 +807,7 @@ This option takes a string argument <span class="file">cmd</span>.
 
 <p class="noindent">This option has some usage constraints.  It:
      <ul>
-<li>may appear an unlimited number of times. 
+<li>may appear up to 512 times. 
 </ul>
 
   <p>The following argument is interpreted as an interactive format command

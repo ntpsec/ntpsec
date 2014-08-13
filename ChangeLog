@@ -1,3 +1,4 @@
+(4.2.7p459) 2014/08/12 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 2630] Limit the ntpq command buffer to 512 bytes.
 * FlexeLint cleanups.
 * Try bison-3.0.2 instead of bison-2.5.
