@@ -1,4 +1,4 @@
-.TH ntp.keys 5 "12 Aug 2014" "4.2.7p459" "File Formats"
+.TH ntp.keys 5 "13 Aug 2014" "4.2.7p460" "File Formats"
 .\"
 .\"  EDIT THIS FILE WITH CAUTION  (ntp.man)
 .\"
@@ -25,9 +25,16 @@ ntp.keys \- NTP symmetric key file format configuration file
 .ds I-Font I
 .ds R-Font R
 .SH SYNOPSIS
-.B /etc/ntp.keys
-.PP 
-.PP
+\f\*[B-Font]\fP
+[\f\*[B-Font]\-\-option-name\f[]]
+[\f\*[B-Font]\-\-option-name\f[] \f\*[I-Font]value\f[]]
+.sp \n(Ppu
+.ne 2
+
+All arguments must be options.
+.sp \n(Ppu
+.ne 2
+
 .SH DESCRIPTION
 This document describes the format of an NTP symmetric key file.
 For a description of the use of this type of file, see the

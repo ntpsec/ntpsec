@@ -1,4 +1,4 @@
-.Dd August 12 2014
+.Dd August 13 2014
 .Dt NTP_KEYS 5 File Formats
 .Os SunOS 5.10
 .\"  EDIT THIS FILE WITH CAUTION  (ntp.mdoc)
@@ -14,8 +14,12 @@
 .Nm ntp.keys
 .Nd NTP symmetric key file format
 .Sh SYNOPSIS
-.Sy /etc/ntp.keys
-.Pp 
+.Nm
+.Op Fl \-option\-name
+.Op Fl \-option\-name Ar value
+.Pp
+All arguments must be options.
+.Pp
 .Sh DESCRIPTION
 This document describes the format of an NTP symmetric key file.
 For a description of the use of this type of file, see the

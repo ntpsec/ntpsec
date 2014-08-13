@@ -10,9 +10,9 @@
 .ds B-Font B
 .ds I-Font I
 .ds R-Font R
-.TH ntpsweep 1ntpsweepman "12 Aug 2014" "ntp (4.2.7p459)" "User Commands"
+.TH ntpsweep 1ntpsweepman "13 Aug 2014" "ntp (4.2.7p460)" "User Commands"
 .\"
-.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-Czayyb/ag-PzaOxb)
+.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-jIaiyB/ag-zIayxB)
 .\"
 .\" It has been AutoGen-ed
 .\" From the definitions ntpsweep-opts.def
@@ -79,16 +79,6 @@ Output version of program and exit.  The default mode is `v', a simple
 version.  The `c' mode will print copyright information and `n' will
 print the full copyright notice.
 .PP
-.TH ntpsweep 1ntpsweepman "12 Aug 2014" "ntp (4.2.7p459)" "User Commands"
-.\"
-.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-Czayyb/ag-PzaOxb)
-.\"
-.\" It has been AutoGen-ed
-.\" From the definitions ntpsweep-opts.def
-.\" and the template file agman-cmd.tpl
-.SH NAME
-\f\*[B-Font]ntpsweep\fP ntpsweep
-\- Print various informations about given ntp servers
 cvt_prog='/usr/local/gnu/share/autogen/texi2man'
 cvt_prog=`cd \`dirname "$cvt_prog"\` >/dev/null && pwd
          `/`basename "$cvt_prog"`
@@ -108,6 +98,16 @@ test \-x "$cvt_prog" || die "'$cvt_prog' is not executable"
     rm \-f $list
 } 1>.doc 2>/dev/null
 /opt/csw/bin/ggrep \-E \-v '^[ 	]*$' .doc | $cvt_prog
+.TH ntpsweep 1ntpsweepman "13 Aug 2014" "ntp (4.2.7p460)" "User Commands"
+.\"
+.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-jIaiyB/ag-zIayxB)
+.\"
+.\" It has been AutoGen-ed
+.\" From the definitions ntpsweep-opts.def
+.\" and the template file agman-cmd.tpl
+.SH NAME
+\f\*[B-Font]ntpsweep\fP ntpsweep
+\- Print various informations about given ntp servers
 .SH "EXIT STATUS"
 One of the following exit values will be returned:
 .TP

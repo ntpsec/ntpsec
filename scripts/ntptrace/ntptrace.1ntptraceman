@@ -10,9 +10,9 @@
 .ds B-Font B
 .ds I-Font I
 .ds R-Font R
-.TH ntptrace 1ntptraceman "12 Aug 2014" "ntp (4.2.7p459)" "User Commands"
+.TH ntptrace 1ntptraceman "13 Aug 2014" "ntp (4.2.7p460)" "User Commands"
 .\"
-.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-VRaync/ag-8RaOmc)
+.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-o_aOjC/ag-C_a4iC)
 .\"
 .\" It has been AutoGen-ed
 .\" From the definitions ntptrace-opts.def
@@ -96,9 +96,9 @@ Output version of program and exit.  The default mode is `v', a simple
 version.  The `c' mode will print copyright information and `n' will
 print the full copyright notice.
 .PP
-.TH ntptrace 1ntptraceman "12 Aug 2014" "ntp (4.2.7p459)" "User Commands"
+.TH ntptrace 1ntptraceman "13 Aug 2014" "ntp (4.2.7p460)" "User Commands"
 .\"
-.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-VRaync/ag-8RaOmc)
+.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-o_aOjC/ag-C_a4iC)
 .\"
 .\" It has been AutoGen-ed
 .\" From the definitions ntptrace-opts.def

@@ -10,9 +10,9 @@
 .ds B-Font B
 .ds I-Font I
 .ds R-Font R
-.TH sntp 1sntpman "12 Aug 2014" "4.2.7p459" "User Commands"
+.TH sntp 1sntpman "13 Aug 2014" "4.2.7p460" "User Commands"
 .\"
-.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-pQa4Xo/ag-CQa4Wo)
+.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-Diay0O/ag-QiayZO)
 .\"
 .\" It has been AutoGen-ed
 .\" From the definitions sntp-opts.def
@@ -281,9 +281,9 @@ the configuration files.
 The \fIhomerc\fP files are "\fI$HOME\fP", and "\fI.\fP".
 If any of these are directories, then the file \fI.ntprc\fP
 is searched for within those directories.
-.TH sntp 1sntpman "12 Aug 2014" "4.2.7p459" "User Commands"
+.TH sntp 1sntpman "13 Aug 2014" "4.2.7p460" "User Commands"
 .\"
-.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-pQa4Xo/ag-CQa4Wo)
+.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-Diay0O/ag-QiayZO)
 .\"
 .\" It has been AutoGen-ed
 .\" From the definitions sntp-opts.def

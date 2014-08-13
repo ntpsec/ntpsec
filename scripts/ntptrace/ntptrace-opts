@@ -1,6 +1,6 @@
 # EDIT THIS FILE WITH CAUTION  (ntptrace-opts)
 #
-# It has been AutoGen-ed  August 13, 2014 at 10:09:13 AM by AutoGen 5.18.4pre14
+# It has been AutoGen-ed  August 13, 2014 at 07:40:45 AM by AutoGen 5.18.4pre14
 # From the definitions    ntptrace-opts.def
 # and the template file   perlopt
 
@@ -40,7 +40,7 @@ sub processOptions {
         'help|?', 'more-help'));
 
     $usage = <<'USAGE';
-ntptrace - Trace peers of an NTP server - Ver. 4.2.7p459
+ntptrace - Trace peers of an NTP server - Ver. 4.2.7p460
 USAGE: ntptrace [ -<flag> [<val>] | --<name>[{=| }<val>] ]... [host]
 
     -n, --numeric                Print IP addresses instead of hostnames

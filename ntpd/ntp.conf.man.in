@@ -10,9 +10,9 @@
 .ds B-Font B
 .ds I-Font I
 .ds R-Font R
-.TH ntp.conf 5 "12 Aug 2014" "4.2.7p459" "File Formats"
+.TH ntp.conf 5 "13 Aug 2014" "4.2.7p460" "File Formats"
 .\"
-.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-2Baq7f/ag-dCaq6f)
+.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-cCaaZF/ag-qCaaYF)
 .\"
 .\" It has been AutoGen-ed
 .\" From the definitions ntp.conf.def
@@ -2902,9 +2902,9 @@ by loading values from environment variables named:
   \fBNTP_CONF_<option-name>\fP or \fBNTP_CONF\fP
 .fi
 .ad
-.TH ntp.conf 5 "12 Aug 2014" "4.2.7p459" "File Formats"
+.TH ntp.conf 5 "13 Aug 2014" "4.2.7p460" "File Formats"
 .\"
-.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-2Baq7f/ag-dCaq6f)
+.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-cCaaZF/ag-qCaaYF)
 .\"
 .\" It has been AutoGen-ed
 .\" From the definitions ntp.conf.def

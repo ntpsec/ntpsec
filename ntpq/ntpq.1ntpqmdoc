@@ -3,7 +3,7 @@
 .Os
 .\"  EDIT THIS FILE WITH CAUTION  (ntpq-opts.mdoc)
 .\"
-.\"  It has been AutoGen-ed
+.\"  It has been AutoGen-ed  August 13, 2014 at 07:49:10 AM by AutoGen 5.18.4pre14
 .\"  From the definitions    ntpq-opts.def
 .\"  and the template file   agmdoc-cmd.tpl
 .Sh NAME
