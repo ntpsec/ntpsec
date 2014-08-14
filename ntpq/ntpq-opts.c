@@ -68,7 +68,7 @@ extern FILE * option_usage_fp;
 /**
  *  static const strings for ntpq options
  */
-static char const ntpq_opt_strs[1833] =
+static char const ntpq_opt_strs[1875] =
 /*     0 */ "ntpq 4.2.7p460\n"
             "Copyright (C) 1970-2014 The University of Delaware, all rights reserved.\n"
             "This is free software. It is licensed for use, modification and\n"
@@ -100,38 +100,41 @@ static char const ntpq_opt_strs[1833] =
 /*  1130 */ "Set the debug verbosity level\0"
 /*  1160 */ "SET_DEBUG_LEVEL\0"
 /*  1176 */ "set-debug-level\0"
-/*  1192 */ "Print a list of the peers\0"
-/*  1218 */ "PEERS\0"
-/*  1224 */ "peers\0"
-/*  1230 */ "Force ntpq to operate in interactive mode\0"
-/*  1272 */ "INTERACTIVE\0"
-/*  1284 */ "interactive\0"
-/*  1296 */ "numeric host addresses\0"
-/*  1319 */ "NUMERIC\0"
-/*  1327 */ "numeric\0"
-/*  1335 */ "Always output status line with readvar\0"
-/*  1374 */ "OLD_RV\0"
-/*  1381 */ "old-rv\0"
-/*  1388 */ "display extended usage information and exit\0"
-/*  1432 */ "help\0"
-/*  1437 */ "extended usage information passed thru pager\0"
-/*  1482 */ "more-help\0"
-/*  1492 */ "output version information and exit\0"
-/*  1528 */ "version\0"
-/*  1536 */ "save the option state to a config file\0"
-/*  1575 */ "save-opts\0"
-/*  1585 */ "load options from a config file\0"
-/*  1617 */ "LOAD_OPTS\0"
-/*  1627 */ "no-load-opts\0"
-/*  1640 */ "no\0"
-/*  1643 */ "NTPQ\0"
-/*  1648 */ "ntpq - standard NTP query program - Ver. 4.2.7p460\n"
+/*  1192 */ "Force ntpq to operate in interactive mode\0"
+/*  1234 */ "INTERACTIVE\0"
+/*  1246 */ "interactive\0"
+/*  1258 */ "numeric host addresses\0"
+/*  1281 */ "NUMERIC\0"
+/*  1289 */ "numeric\0"
+/*  1297 */ "Always output status line with readvar\0"
+/*  1336 */ "OLD_RV\0"
+/*  1343 */ "old-rv\0"
+/*  1350 */ "Print a list of the peers\0"
+/*  1376 */ "PEERS\0"
+/*  1382 */ "peers\0"
+/*  1388 */ "Display the full 'remote' value\0"
+/*  1420 */ "WIDE\0"
+/*  1425 */ "wide\0"
+/*  1430 */ "display extended usage information and exit\0"
+/*  1474 */ "help\0"
+/*  1479 */ "extended usage information passed thru pager\0"
+/*  1524 */ "more-help\0"
+/*  1534 */ "output version information and exit\0"
+/*  1570 */ "version\0"
+/*  1578 */ "save the option state to a config file\0"
+/*  1617 */ "save-opts\0"
+/*  1627 */ "load options from a config file\0"
+/*  1659 */ "LOAD_OPTS\0"
+/*  1669 */ "no-load-opts\0"
+/*  1682 */ "no\0"
+/*  1685 */ "NTPQ\0"
+/*  1690 */ "ntpq - standard NTP query program - Ver. 4.2.7p460\n"
             "Usage:  %s [ -<flag> [<val>] | --<name>[{=| }<val>] ]... [ host ...]\n\0"
-/*  1769 */ "$HOME\0"
-/*  1775 */ ".\0"
-/*  1777 */ ".ntprc\0"
-/*  1784 */ "http://bugs.ntp.org, bugs@ntp.org\0"
-/*  1818 */ "ntpq 4.2.7p460";
+/*  1811 */ "$HOME\0"
+/*  1817 */ ".\0"
+/*  1819 */ ".ntprc\0"
+/*  1826 */ "http://bugs.ntp.org, bugs@ntp.org\0"
+/*  1860 */ "ntpq 4.2.7p460";
 
 /**
  *  ipv4 option description with
@@ -204,31 +207,15 @@ static int const aIpv6CantList[] = {
         | OPTST_SET_ARGTYPE(OPARG_TYPE_NUMERIC))
 
 /**
- *  peers option description with
- *  "Must also have options" and "Incompatible options":
- */
-/** Descriptive text for the peers option */
-#define PEERS_DESC      (ntpq_opt_strs+1192)
-/** Upper-cased name for the peers option */
-#define PEERS_NAME      (ntpq_opt_strs+1218)
-/** Name string for the peers option */
-#define PEERS_name      (ntpq_opt_strs+1224)
-/** Other options that appear in conjunction with the peers option */
-static int const aPeersCantList[] = {
-    INDEX_OPT_INTERACTIVE, NO_EQUIVALENT };
-/** Compiled in flag settings for the peers option */
-#define PEERS_FLAGS     (OPTST_DISABLED)
-
-/**
  *  interactive option description with
  *  "Must also have options" and "Incompatible options":
  */
 /** Descriptive text for the interactive option */
-#define INTERACTIVE_DESC      (ntpq_opt_strs+1230)
+#define INTERACTIVE_DESC      (ntpq_opt_strs+1192)
 /** Upper-cased name for the interactive option */
-#define INTERACTIVE_NAME      (ntpq_opt_strs+1272)
+#define INTERACTIVE_NAME      (ntpq_opt_strs+1234)
 /** Name string for the interactive option */
-#define INTERACTIVE_name      (ntpq_opt_strs+1284)
+#define INTERACTIVE_name      (ntpq_opt_strs+1246)
 /** Other options that appear in conjunction with the interactive option */
 static int const aInteractiveCantList[] = {
     INDEX_OPT_COMMAND,
@@ -240,11 +227,11 @@ static int const aInteractiveCantList[] = {
  *  numeric option description:
  */
 /** Descriptive text for the numeric option */
-#define NUMERIC_DESC      (ntpq_opt_strs+1296)
+#define NUMERIC_DESC      (ntpq_opt_strs+1258)
 /** Upper-cased name for the numeric option */
-#define NUMERIC_NAME      (ntpq_opt_strs+1319)
+#define NUMERIC_NAME      (ntpq_opt_strs+1281)
 /** Name string for the numeric option */
-#define NUMERIC_name      (ntpq_opt_strs+1327)
+#define NUMERIC_name      (ntpq_opt_strs+1289)
 /** Compiled in flag settings for the numeric option */
 #define NUMERIC_FLAGS     (OPTST_DISABLED)
 
@@ -252,22 +239,50 @@ static int const aInteractiveCantList[] = {
  *  old-rv option description:
  */
 /** Descriptive text for the old-rv option */
-#define OLD_RV_DESC      (ntpq_opt_strs+1335)
+#define OLD_RV_DESC      (ntpq_opt_strs+1297)
 /** Upper-cased name for the old-rv option */
-#define OLD_RV_NAME      (ntpq_opt_strs+1374)
+#define OLD_RV_NAME      (ntpq_opt_strs+1336)
 /** Name string for the old-rv option */
-#define OLD_RV_name      (ntpq_opt_strs+1381)
+#define OLD_RV_name      (ntpq_opt_strs+1343)
 /** Compiled in flag settings for the old-rv option */
 #define OLD_RV_FLAGS     (OPTST_DISABLED)
+
+/**
+ *  peers option description with
+ *  "Must also have options" and "Incompatible options":
+ */
+/** Descriptive text for the peers option */
+#define PEERS_DESC      (ntpq_opt_strs+1350)
+/** Upper-cased name for the peers option */
+#define PEERS_NAME      (ntpq_opt_strs+1376)
+/** Name string for the peers option */
+#define PEERS_name      (ntpq_opt_strs+1382)
+/** Other options that appear in conjunction with the peers option */
+static int const aPeersCantList[] = {
+    INDEX_OPT_INTERACTIVE, NO_EQUIVALENT };
+/** Compiled in flag settings for the peers option */
+#define PEERS_FLAGS     (OPTST_DISABLED)
+
+/**
+ *  wide option description:
+ */
+/** Descriptive text for the wide option */
+#define WIDE_DESC      (ntpq_opt_strs+1388)
+/** Upper-cased name for the wide option */
+#define WIDE_NAME      (ntpq_opt_strs+1420)
+/** Name string for the wide option */
+#define WIDE_name      (ntpq_opt_strs+1425)
+/** Compiled in flag settings for the wide option */
+#define WIDE_FLAGS     (OPTST_DISABLED)
 
 /*
  *  Help/More_Help/Version option descriptions:
  */
-#define HELP_DESC       (ntpq_opt_strs+1388)
-#define HELP_name       (ntpq_opt_strs+1432)
+#define HELP_DESC       (ntpq_opt_strs+1430)
+#define HELP_name       (ntpq_opt_strs+1474)
 #ifdef HAVE_WORKING_FORK
-#define MORE_HELP_DESC  (ntpq_opt_strs+1437)
-#define MORE_HELP_name  (ntpq_opt_strs+1482)
+#define MORE_HELP_DESC  (ntpq_opt_strs+1479)
+#define MORE_HELP_name  (ntpq_opt_strs+1524)
 #define MORE_HELP_FLAGS (OPTST_IMM | OPTST_NO_INIT)
 #else
 #define MORE_HELP_DESC  HELP_DESC
@@ -280,14 +295,14 @@ static int const aInteractiveCantList[] = {
 #  define VER_FLAGS     (OPTST_SET_ARGTYPE(OPARG_TYPE_STRING) | \
                          OPTST_ARG_OPTIONAL | OPTST_IMM | OPTST_NO_INIT)
 #endif
-#define VER_DESC        (ntpq_opt_strs+1492)
-#define VER_name        (ntpq_opt_strs+1528)
-#define SAVE_OPTS_DESC  (ntpq_opt_strs+1536)
-#define SAVE_OPTS_name  (ntpq_opt_strs+1575)
-#define LOAD_OPTS_DESC     (ntpq_opt_strs+1585)
-#define LOAD_OPTS_NAME     (ntpq_opt_strs+1617)
-#define NO_LOAD_OPTS_name  (ntpq_opt_strs+1627)
-#define LOAD_OPTS_pfx      (ntpq_opt_strs+1640)
+#define VER_DESC        (ntpq_opt_strs+1534)
+#define VER_name        (ntpq_opt_strs+1570)
+#define SAVE_OPTS_DESC  (ntpq_opt_strs+1578)
+#define SAVE_OPTS_name  (ntpq_opt_strs+1617)
+#define LOAD_OPTS_DESC     (ntpq_opt_strs+1627)
+#define LOAD_OPTS_NAME     (ntpq_opt_strs+1659)
+#define NO_LOAD_OPTS_name  (ntpq_opt_strs+1669)
+#define LOAD_OPTS_pfx      (ntpq_opt_strs+1682)
 #define LOAD_OPTS_name     (NO_LOAD_OPTS_name + 3)
 /**
  *  Declare option callback procedures
@@ -369,7 +384,7 @@ static tOptDesc optDesc[OPTION_CT] = {
   {  /* entry idx, value */ 2, VALUE_OPT_COMMAND,
      /* equiv idx, value */ 2, VALUE_OPT_COMMAND,
      /* equivalenced to  */ NO_EQUIVALENT,
-     /* min, max, act ct */ 0, 512, 0,
+     /* min, max, act ct */ 0, NOLIMIT, 0,
      /* opt state flags  */ COMMAND_FLAGS, 0,
      /* last opt argumnt */ { NULL }, /* --command */
      /* arg list/cookie  */ NULL,
@@ -402,20 +417,8 @@ static tOptDesc optDesc[OPTION_CT] = {
      /* desc, NAME, name */ SET_DEBUG_LEVEL_DESC, SET_DEBUG_LEVEL_NAME, SET_DEBUG_LEVEL_name,
      /* disablement strs */ NULL, NULL },
 
-  {  /* entry idx, value */ 5, VALUE_OPT_PEERS,
-     /* equiv idx, value */ 5, VALUE_OPT_PEERS,
-     /* equivalenced to  */ NO_EQUIVALENT,
-     /* min, max, act ct */ 0, 1, 0,
-     /* opt state flags  */ PEERS_FLAGS, 0,
-     /* last opt argumnt */ { NULL }, /* --peers */
-     /* arg list/cookie  */ NULL,
-     /* must/cannot opts */ NULL, aPeersCantList,
-     /* option proc      */ PEERS_OPT_PROC,
-     /* desc, NAME, name */ PEERS_DESC, PEERS_NAME, PEERS_name,
-     /* disablement strs */ NULL, NULL },
-
-  {  /* entry idx, value */ 6, VALUE_OPT_INTERACTIVE,
-     /* equiv idx, value */ 6, VALUE_OPT_INTERACTIVE,
+  {  /* entry idx, value */ 5, VALUE_OPT_INTERACTIVE,
+     /* equiv idx, value */ 5, VALUE_OPT_INTERACTIVE,
      /* equivalenced to  */ NO_EQUIVALENT,
      /* min, max, act ct */ 0, 1, 0,
      /* opt state flags  */ INTERACTIVE_FLAGS, 0,
@@ -426,8 +429,8 @@ static tOptDesc optDesc[OPTION_CT] = {
      /* desc, NAME, name */ INTERACTIVE_DESC, INTERACTIVE_NAME, INTERACTIVE_name,
      /* disablement strs */ NULL, NULL },
 
-  {  /* entry idx, value */ 7, VALUE_OPT_NUMERIC,
-     /* equiv idx, value */ 7, VALUE_OPT_NUMERIC,
+  {  /* entry idx, value */ 6, VALUE_OPT_NUMERIC,
+     /* equiv idx, value */ 6, VALUE_OPT_NUMERIC,
      /* equivalenced to  */ NO_EQUIVALENT,
      /* min, max, act ct */ 0, 1, 0,
      /* opt state flags  */ NUMERIC_FLAGS, 0,
@@ -438,8 +441,8 @@ static tOptDesc optDesc[OPTION_CT] = {
      /* desc, NAME, name */ NUMERIC_DESC, NUMERIC_NAME, NUMERIC_name,
      /* disablement strs */ NULL, NULL },
 
-  {  /* entry idx, value */ 8, VALUE_OPT_OLD_RV,
-     /* equiv idx, value */ 8, VALUE_OPT_OLD_RV,
+  {  /* entry idx, value */ 7, VALUE_OPT_OLD_RV,
+     /* equiv idx, value */ 7, VALUE_OPT_OLD_RV,
      /* equivalenced to  */ NO_EQUIVALENT,
      /* min, max, act ct */ 0, 1, 0,
      /* opt state flags  */ OLD_RV_FLAGS, 0,
@@ -448,6 +451,30 @@ static tOptDesc optDesc[OPTION_CT] = {
      /* must/cannot opts */ NULL, NULL,
      /* option proc      */ NULL,
      /* desc, NAME, name */ OLD_RV_DESC, OLD_RV_NAME, OLD_RV_name,
+     /* disablement strs */ NULL, NULL },
+
+  {  /* entry idx, value */ 8, VALUE_OPT_PEERS,
+     /* equiv idx, value */ 8, VALUE_OPT_PEERS,
+     /* equivalenced to  */ NO_EQUIVALENT,
+     /* min, max, act ct */ 0, 1, 0,
+     /* opt state flags  */ PEERS_FLAGS, 0,
+     /* last opt argumnt */ { NULL }, /* --peers */
+     /* arg list/cookie  */ NULL,
+     /* must/cannot opts */ NULL, aPeersCantList,
+     /* option proc      */ PEERS_OPT_PROC,
+     /* desc, NAME, name */ PEERS_DESC, PEERS_NAME, PEERS_name,
+     /* disablement strs */ NULL, NULL },
+
+  {  /* entry idx, value */ 9, VALUE_OPT_WIDE,
+     /* equiv idx, value */ 9, VALUE_OPT_WIDE,
+     /* equivalenced to  */ NO_EQUIVALENT,
+     /* min, max, act ct */ 0, 1, 0,
+     /* opt state flags  */ WIDE_FLAGS, 0,
+     /* last opt argumnt */ { NULL }, /* --wide */
+     /* arg list/cookie  */ NULL,
+     /* must/cannot opts */ NULL, NULL,
+     /* option proc      */ NULL,
+     /* desc, NAME, name */ WIDE_DESC, WIDE_NAME, WIDE_name,
      /* disablement strs */ NULL, NULL },
 
   {  /* entry idx, value */ INDEX_OPT_VERSION, VALUE_OPT_VERSION,
@@ -518,24 +545,24 @@ static tOptDesc optDesc[OPTION_CT] = {
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 /** Reference to the upper cased version of ntpq. */
-#define zPROGNAME       (ntpq_opt_strs+1643)
+#define zPROGNAME       (ntpq_opt_strs+1685)
 /** Reference to the title line for ntpq usage. */
-#define zUsageTitle     (ntpq_opt_strs+1648)
+#define zUsageTitle     (ntpq_opt_strs+1690)
 /** ntpq configuration file name. */
-#define zRcName         (ntpq_opt_strs+1777)
+#define zRcName         (ntpq_opt_strs+1819)
 /** Directories to search for ntpq config files. */
 static char const * const apzHomeList[3] = {
-    ntpq_opt_strs+1769,
-    ntpq_opt_strs+1775,
+    ntpq_opt_strs+1811,
+    ntpq_opt_strs+1817,
     NULL };
 /** The ntpq program bug email address. */
-#define zBugsAddr       (ntpq_opt_strs+1784)
+#define zBugsAddr       (ntpq_opt_strs+1826)
 /** Clarification/explanation of what ntpq does. */
 #define zExplain        (NULL)
 /** Extra detail explaining what ntpq does. */
 #define zDetail         (NULL)
 /** The full version string for ntpq. */
-#define zFullVersion    (ntpq_opt_strs+1818)
+#define zFullVersion    (ntpq_opt_strs+1860)
 /* extracted from optcode.tlib near line 364 */
 
 #if defined(ENABLE_NLS)
@@ -687,7 +714,7 @@ tOptions ntpqOptions = {
       NO_EQUIVALENT, /* '-#' option index */
       NO_EQUIVALENT /* index of default opt */
     },
-    14 /* full option count */, 9 /* user option count */,
+    15 /* full option count */, 10 /* user option count */,
     ntpq_full_usage, ntpq_short_usage,
     NULL, NULL,
     PKGDATADIR, ntpq_packager_info
@@ -857,9 +884,6 @@ provided \"as is\" without express or implied warranty.\n"));
   puts(_("Set the debug verbosity level"));
 
   /* referenced via ntpqOptions.pOptDesc->pzText */
-  puts(_("Print a list of the peers"));
-
-  /* referenced via ntpqOptions.pOptDesc->pzText */
   puts(_("Force ntpq to operate in interactive mode"));
 
   /* referenced via ntpqOptions.pOptDesc->pzText */
@@ -867,6 +891,12 @@ provided \"as is\" without express or implied warranty.\n"));
 
   /* referenced via ntpqOptions.pOptDesc->pzText */
   puts(_("Always output status line with readvar"));
+
+  /* referenced via ntpqOptions.pOptDesc->pzText */
+  puts(_("Print a list of the peers"));
+
+  /* referenced via ntpqOptions.pOptDesc->pzText */
+  puts(_("Display the full 'remote' value"));
 
   /* referenced via ntpqOptions.pOptDesc->pzText */
   puts(_("display extended usage information and exit"));

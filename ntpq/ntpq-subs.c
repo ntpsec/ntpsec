@@ -277,6 +277,7 @@ struct varlist {
  * Imported from ntpq.c
  */
 extern int showhostnames;
+extern int wideremote;
 extern int rawmode;
 extern struct servent *server_entry;
 extern struct association *assoc_cache;
@@ -1768,7 +1769,10 @@ doprintpeers(
 		if (!have_srchost)
 			strlcpy(clock_name, nntohost(&srcadr),
 				sizeof(clock_name));
-		fprintf(fp, "%c%-15.15s ", c, clock_name);
+		if (wideremote && 15 < strlen(clock_name))
+			fprintf(fp, "%c%s\n                 ", c, clock_name);
+		else
+			fprintf(fp, "%c%-15.15s ", c, clock_name);
 		if (!have_da_rid) {
 			drlen = 0;
 		} else {

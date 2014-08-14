@@ -10,9 +10,9 @@
 .ds B-Font B
 .ds I-Font I
 .ds R-Font R
-.TH ntpq 1ntpqman "13 Aug 2014" "4.2.7p460" "User Commands"
+.TH ntpq 1ntpqman "14 Aug 2014" "4.2.7p460" "User Commands"
 .\"
-.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-7SaOpK/ag-iTaOoK)
+.\" EDIT THIS FILE WITH CAUTION (in-mem file)
 .\"
 .\" It has been AutoGen-ed
 .\" From the definitions ntpq-opts.def
@@ -526,7 +526,12 @@ field of the
 .ns
 .TP 10
 .NOP \f\*[B-Font]remote\f[]
-host name (or IP number) of peer
+host name (or IP number) of peer.
+The value displayed will be truncated to 15 characters  unless the
+\f\*[B-Font]\-w\f[]
+flag is given, in which case the full value will be displayed
+on the first line,
+and the remaining data is displayed on the next line.
 .br
 .ns
 .TP 10
@@ -1172,7 +1177,7 @@ to the IPv6 namespace.
 .TP
 .NOP \f\*[B-Font]\-c\f[] \f\*[I-Font]cmd\f[], \f\*[B-Font]\-\-command\f[]=\f\*[I-Font]cmd\f[]
 run a command and exit.
-This option may appear up to 512 times.
+This option may appear an unlimited number of times.
 .sp
 The following argument is interpreted as an interactive format command
 and is added to the list of commands to be executed on the specified
@@ -1188,14 +1193,6 @@ Set the debug verbosity level.
 This option may appear an unlimited number of times.
 This option takes an integer number as its argument.
 .sp
-.TP
-.NOP \f\*[B-Font]\-p\f[], \f\*[B-Font]\-\-peers\f[]
-Print a list of the peers.
-This option must not appear in combination with any of the following options:
-interactive.
-.sp
-Print a list of the peers known to the server as well as a summary
-of their state. This is equivalent to the 'peers' interactive command.
 .TP
 .NOP \f\*[B-Font]\-i\f[], \f\*[B-Font]\-\-interactive\f[]
 Force ntpq to operate in interactive mode.
@@ -1224,6 +1221,21 @@ for a single-variable \fBreadvar\fP.
 Using an environment variable to
 preset this option in a script will enable both older and
 newer \fBntpq\fP to behave identically in this regard.
+.TP
+.NOP \f\*[B-Font]\-p\f[], \f\*[B-Font]\-\-peers\f[]
+Print a list of the peers.
+This option must not appear in combination with any of the following options:
+interactive.
+.sp
+Print a list of the peers known to the server as well as a summary
+of their state. This is equivalent to the 'peers' interactive command.
+.TP
+.NOP \f\*[B-Font]\-w\f[], \f\*[B-Font]\-\-wide\f[]
+Display the full 'remote' value.
+.sp
+Display the full value of the 'remote' value.  If this requires
+more than 15 characters, display the full value, emit a newline,
+and continue the data display properly indented on the next line.
 .TP
 .NOP \f\*[B-Font]\-\&?\f[], \f\*[B-Font]\-\-help\f[]
 Display usage information and exit.
@@ -1260,35 +1272,6 @@ the configuration files.
 The \fIhomerc\fP files are "\fI$HOME\fP", and "\fI.\fP".
 If any of these are directories, then the file \fI.ntprc\fP
 is searched for within those directories.
-.TH ntpq 1ntpqman "13 Aug 2014" "4.2.7p460" "User Commands"
-.\"
-.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-7SaOpK/ag-iTaOoK)
-.\"
-.\" It has been AutoGen-ed
-.\" From the definitions ntpq-opts.def
-.\" and the template file agman-cmd.tpl
-.SH NAME
-\f\*[B-Font]ntpq\fP ntpq
-\- standard NTP query program
-cvt_prog='/usr/local/gnu/share/autogen/texi2man'
-cvt_prog=`cd \`dirname "$cvt_prog"\` >/dev/null && pwd
-         `/`basename "$cvt_prog"`
-cd $tmp_dir
-test \-x "$cvt_prog" || die "'$cvt_prog' is not executable"
-{
-    list='synopsis description options option-presets'
-    for f in $list ; do cat $f ; echo ; done
-    rm \-f $list name
-    list='implementation-notes environment files examples exit-status errors
-        compatibility see-also conforming-to history authors copyright bugs
-        notes'
-    for f in $list ; do cat $f ; echo ; done > .end-doc
-    rm \-f $list
-    list=`ls \-1 *`' .end-doc'
-    for f in $list ; do cat $f ; echo ; done
-    rm \-f $list
-} 1>.doc 2>/dev/null
-/opt/csw/bin/ggrep \-E \-v '^[ 	]*$' .doc | $cvt_prog
 .SH "ENVIRONMENT"
 See \fBOPTION PRESETS\fP for configuration environment variables.
 .SH "FILES"

@@ -69,18 +69,19 @@ typedef enum {
     INDEX_OPT_COMMAND          =  2,
     INDEX_OPT_DEBUG_LEVEL      =  3,
     INDEX_OPT_SET_DEBUG_LEVEL  =  4,
-    INDEX_OPT_PEERS            =  5,
-    INDEX_OPT_INTERACTIVE      =  6,
-    INDEX_OPT_NUMERIC          =  7,
-    INDEX_OPT_OLD_RV           =  8,
-    INDEX_OPT_VERSION          =  9,
-    INDEX_OPT_HELP             = 10,
-    INDEX_OPT_MORE_HELP        = 11,
-    INDEX_OPT_SAVE_OPTS        = 12,
-    INDEX_OPT_LOAD_OPTS        = 13
+    INDEX_OPT_INTERACTIVE      =  5,
+    INDEX_OPT_NUMERIC          =  6,
+    INDEX_OPT_OLD_RV           =  7,
+    INDEX_OPT_PEERS            =  8,
+    INDEX_OPT_WIDE             =  9,
+    INDEX_OPT_VERSION          = 10,
+    INDEX_OPT_HELP             = 11,
+    INDEX_OPT_MORE_HELP        = 12,
+    INDEX_OPT_SAVE_OPTS        = 13,
+    INDEX_OPT_LOAD_OPTS        = 14
 } teOptIndex;
 /** count of all options for ntpq */
-#define OPTION_CT    14
+#define OPTION_CT    15
 /** ntpq version */
 #define NTPQ_VERSION       "4.2.7p460"
 /** Full ntpq version text */
@@ -157,10 +158,6 @@ typedef enum {
 #  warning undefining SET_DEBUG_LEVEL due to option name conflict
 #  undef   SET_DEBUG_LEVEL
 # endif
-# ifdef    PEERS
-#  warning undefining PEERS due to option name conflict
-#  undef   PEERS
-# endif
 # ifdef    INTERACTIVE
 #  warning undefining INTERACTIVE due to option name conflict
 #  undef   INTERACTIVE
@@ -173,16 +170,25 @@ typedef enum {
 #  warning undefining OLD_RV due to option name conflict
 #  undef   OLD_RV
 # endif
+# ifdef    PEERS
+#  warning undefining PEERS due to option name conflict
+#  undef   PEERS
+# endif
+# ifdef    WIDE
+#  warning undefining WIDE due to option name conflict
+#  undef   WIDE
+# endif
 #else  /* NO_OPTION_NAME_WARNINGS */
 # undef IPV4
 # undef IPV6
 # undef COMMAND
 # undef DEBUG_LEVEL
 # undef SET_DEBUG_LEVEL
-# undef PEERS
 # undef INTERACTIVE
 # undef NUMERIC
 # undef OLD_RV
+# undef PEERS
+# undef WIDE
 #endif  /*  NO_OPTION_NAME_WARNINGS */
 
 /**
@@ -196,10 +202,11 @@ typedef enum {
 #define VALUE_OPT_SET_DEBUG_LEVEL 'D'
 
 #define OPT_VALUE_SET_DEBUG_LEVEL (DESC(SET_DEBUG_LEVEL).optArg.argInt)
-#define VALUE_OPT_PEERS          'p'
 #define VALUE_OPT_INTERACTIVE    'i'
 #define VALUE_OPT_NUMERIC        'n'
 #define VALUE_OPT_OLD_RV         0x1001
+#define VALUE_OPT_PEERS          'p'
+#define VALUE_OPT_WIDE           'w'
 /** option flag (value) for help-value option */
 #define VALUE_OPT_HELP          '?'
 /** option flag (value) for more-help-value option */
