@@ -79,6 +79,7 @@ noinst_DATA =				\
 	$(NULL)
 
 #OPTTPL = ../sntp/ag-tpl/perlopt.tpl
+OPTTPL = $(std_def_list)
 
 ##
 

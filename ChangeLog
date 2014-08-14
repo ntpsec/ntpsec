@@ -1,4 +1,6 @@
+(4.2.7p461) 2014/08/14 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1128] ntpq truncates "remote" host information.
+* More autogen-5.18.4pre14 cleanup.
 (4.2.7p460) 2014/08/13 Released by Harlan Stenn <stenn@ntp.org>
 * More autogen-5.18.4pre14 cleanup.
 (4.2.7p459) 2014/08/12 Released by Harlan Stenn <stenn@ntp.org>

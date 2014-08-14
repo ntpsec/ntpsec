@@ -3,7 +3,7 @@
 .Os
 .\"  EDIT THIS FILE WITH CAUTION  (ntpq-opts.mdoc)
 .\"
-.\"  It has been AutoGen-ed
+.\"  It has been AutoGen-ed  August 14, 2014 at 08:56:53 AM by AutoGen 5.18.4pre14
 .\"  From the definitions    ntpq-opts.def
 .\"  and the template file   agmdoc-cmd.tpl
 .Sh NAME
@@ -847,6 +847,25 @@ the configuration files.
 The \fIhomerc\fP files are "\fI$HOME\fP", and "\fI.\fP".
 If any of these are directories, then the file \fI.ntprc\fP
 is searched for within those directories.
+cvt_prog='/usr/local/gnu/share/autogen/texi2mdoc'
+cvt_prog=`cd \`dirname "$cvt_prog"\` >/dev/null && pwd
+         `/`basename "$cvt_prog"`
+cd $tmp_dir
+test \-x "$cvt_prog" || die "'$cvt_prog' is not executable"
+{
+    list='synopsis description options option\-presets'
+    for f in $list ; do cat $f ; echo ; done
+    rm \-f $list name
+    list='implementation\-notes environment files examples exit\-status errors
+        compatibility see\-also conforming\-to history authors copyright bugs
+        notes'
+    for f in $list ; do cat $f ; echo ; done > .end\-doc
+    rm \-f $list
+    list=`ls \-1 *`' .end\-doc'
+    for f in $list ; do cat $f ; echo ; done
+    rm \-f $list
+} 1>.doc 2>/dev/null
+/opt/csw/bin/ggrep \-E \-v '^[ 	]*$' .doc | $cvt_prog
 .Sh "ENVIRONMENT"
 See \fBOPTION PRESETS\fP for configuration environment variables.
 .Sh "FILES"

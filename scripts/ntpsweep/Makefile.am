@@ -60,7 +60,7 @@ noinst_DATA =			\
 
 ntpsweep: $(srcdir)/ntpsweep-opts
 
-$(srcdir)/ntpsweep-opts: ntpsweep-opts.def
+$(srcdir)/ntpsweep-opts: ntpsweep-opts.def $(std_def_list)
 	$(run_ag) ntpsweep-opts.def
 
 ### Nroff

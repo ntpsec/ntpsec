@@ -53,7 +53,7 @@ noinst_DATA =			\
 
 ntptrace: $(srcdir)/ntptrace-opts
 
-$(srcdir)/ntptrace-opts: $(srcdir)/ntptrace-opts.def
+$(srcdir)/ntptrace-opts: $(srcdir)/ntptrace-opts.def $(std_def_list)
 	$(run_ag) ntptrace-opts.def
 
 ### Nroff

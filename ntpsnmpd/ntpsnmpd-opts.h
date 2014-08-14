@@ -76,9 +76,9 @@ typedef enum {
 /** count of all options for ntpsnmpd */
 #define OPTION_CT    8
 /** ntpsnmpd version */
-#define NTPSNMPD_VERSION       "4.2.7p460"
+#define NTPSNMPD_VERSION       "4.2.7p461"
 /** Full ntpsnmpd version text */
-#define NTPSNMPD_FULL_VERSION  "ntpsnmpd 4.2.7p460"
+#define NTPSNMPD_FULL_VERSION  "ntpsnmpd 4.2.7p461"
 
 /**
  *  Interface defines for all options.  Replace "n" with the UPPER_CASED
