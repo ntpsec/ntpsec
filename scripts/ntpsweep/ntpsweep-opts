@@ -1,6 +1,6 @@
 # EDIT THIS FILE WITH CAUTION  (ntpsweep-opts)
 #
-# It has been AutoGen-ed
+# It has been AutoGen-ed  August 14, 2014 at 05:19:41 AM by AutoGen 5.18.4pre14
 # From the definitions    ntpsweep-opts.def
 # and the template file   perlopt
 
@@ -43,7 +43,7 @@ sub processOptions {
         'help|?', 'more-help'));
 
     $usage = <<'USAGE';
-ntpsweep - Print various informations about given ntp servers - Ver. 4.2.7p458
+ntpsweep - Print various informations about given ntp servers - Ver. 4.2.7p461
 USAGE: ntpsweep [ -<flag> [<val>] | --<name>[{=| }<val>] ]... [hostfile]
 
     -l, --host-list=str          Host to execute actions on
@@ -52,7 +52,7 @@ USAGE: ntpsweep [ -<flag> [<val>] | --<name>[{=| }<val>] ]... [hostfile]
     -m, --maxlevel=num           Traverse peers up to this level (4 is a reasonable number)
     -s, --strip=str              Strip this string from hostnames
     -?, --help                   Display usage information and exit
-        --more-help              Pass the extended usage information through a pager
+        --more-help              Pass the extended usage text through a pager
 
 Options are specified by doubled hyphens and their name or by a single
 hyphen and the flag character.

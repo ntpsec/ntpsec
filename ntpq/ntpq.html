@@ -44,7 +44,7 @@ monitor the operational status
 and determine the performance of
 <code>ntpd</code>, the NTP daemon.
 
-  <p>This document applies to version 4.2.7p458 of <code>ntpq</code>.
+  <p>This document applies to version 4.2.7p461 of <code>ntpq</code>.
 
 <ul class="menu">
 <li><a accesskey="1" href="#ntpq-Description">ntpq Description</a>
@@ -420,7 +420,12 @@ except that it uses previously stored data rather than making a new query.
 <code>select</code>
 field of the
 .Lk decode.html#peer "peer status word"
-<br><dt><code>remote</code><dd>host name (or IP number) of peer
+<br><dt><code>remote</code><dd>host name (or IP number) of peer. 
+The value displayed will be truncated to 15 characters  unless the
+<code>-w</code>
+flag is given, in which case the full value will be displayed
+on the first line,
+and the remaining data is displayed on the next line. 
 <br><dt><code>refid</code><dd>association ID or
 .Lk decode.html#kiss "'kiss code"
 <br><dt><code>st</code><dd>stratum
@@ -680,11 +685,12 @@ This software is released under the NTP license, &lt;http://ntp.org/license&gt;.
 <li><a accesskey="2" href="#ntpq-ipv4">ntpq ipv4</a>:                    ipv4 option (-4)
 <li><a accesskey="3" href="#ntpq-ipv6">ntpq ipv6</a>:                    ipv6 option (-6)
 <li><a accesskey="4" href="#ntpq-command">ntpq command</a>:                 command option (-c)
-<li><a accesskey="5" href="#ntpq-peers">ntpq peers</a>:                   peers option (-p)
-<li><a accesskey="6" href="#ntpq-interactive">ntpq interactive</a>:             interactive option (-i)
-<li><a accesskey="7" href="#ntpq-numeric">ntpq numeric</a>:                 numeric option (-n)
-<li><a accesskey="8" href="#ntpq-old_002drv">ntpq old-rv</a>:                  old-rv option
-<li><a accesskey="9" href="#ntpq-config">ntpq config</a>:                  presetting/configuring ntpq
+<li><a accesskey="5" href="#ntpq-interactive">ntpq interactive</a>:             interactive option (-i)
+<li><a accesskey="6" href="#ntpq-numeric">ntpq numeric</a>:                 numeric option (-n)
+<li><a accesskey="7" href="#ntpq-old_002drv">ntpq old-rv</a>:                  old-rv option
+<li><a accesskey="8" href="#ntpq-peers">ntpq peers</a>:                   peers option (-p)
+<li><a accesskey="9" href="#ntpq-wide">ntpq wide</a>:                    wide option (-w)
+<li><a href="#ntpq-config">ntpq config</a>:                  presetting/configuring ntpq
 <li><a href="#ntpq-exit-status">ntpq exit status</a>:             exit status
 </ul>
 
@@ -708,7 +714,7 @@ the usage text by passing it through a pager program.
 used to select the program, defaulting to <span class="file">more</span>.  Both will exit
 with a status code of 0.
 
-<pre class="example">ntpq - standard NTP query program - Ver. 4.2.7p457
+<pre class="example">ntpq - standard NTP query program - Ver. 4.2.7p460
 Usage:  ntpq [ -&lt;flag&gt; [&lt;val&gt;] | --&lt;name&gt;[{=| }&lt;val&gt;] ]... [ host ...]
   Flg Arg Option-Name    Description
    -4 no  ipv4           Force IPv4 DNS name resolution
@@ -721,14 +727,15 @@ Usage:  ntpq [ -&lt;flag&gt; [&lt;val&gt;] | --&lt;name&gt;[{=| }&lt;val&gt;] ].
                                 - may appear multiple times
    -D Num set-debug-level Set the debug verbosity level
                                 - may appear multiple times
-   -p no  peers          Print a list of the peers
-                                - prohibits the option 'interactive'
    -i no  interactive    Force ntpq to operate in interactive mode
                                 - prohibits these options:
                                 command
                                 peers
    -n no  numeric        numeric host addresses
       no  old-rv         Always output status line with readvar
+   -p no  peers          Print a list of the peers
+                                - prohibits the option 'interactive'
+   -w no  wide           Display the full 'remote' value
       opt version        output version information and exit
    -? no  help           display extended usage information and exit
    -! no  more-help      extended usage information passed thru pager
@@ -793,7 +800,7 @@ ipv4.
 to the IPv6 namespace. 
 <div class="node">
 <p><hr>
-<a name="ntpq-command"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#ntpq-peers">ntpq peers</a>,
+<a name="ntpq-command"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#ntpq-interactive">ntpq interactive</a>,
 Previous:&nbsp;<a rel="previous" accesskey="p" href="#ntpq-ipv6">ntpq ipv6</a>,
 Up:&nbsp;<a rel="up" accesskey="u" href="#ntpq-Invocation">ntpq Invocation</a>
 <br>
@@ -815,36 +822,15 @@ and is added to the list of commands to be executed on the specified
 host(s). 
 <div class="node">
 <p><hr>
-<a name="ntpq-peers"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#ntpq-interactive">ntpq interactive</a>,
-Previous:&nbsp;<a rel="previous" accesskey="p" href="#ntpq-command">ntpq command</a>,
-Up:&nbsp;<a rel="up" accesskey="u" href="#ntpq-Invocation">ntpq Invocation</a>
-<br>
-</div>
-
-<h4 class="subsection">peers option (-p)</h4>
-
-<p><a name="index-ntpq_002dpeers-7"></a>
-This is the &ldquo;print a list of the peers&rdquo; option.
-
-<p class="noindent">This option has some usage constraints.  It:
-     <ul>
-<li>must not appear in combination with any of the following options:
-interactive. 
-</ul>
-
-  <p>Print a list of the peers known to the server as well as a summary
-of their state. This is equivalent to the 'peers' interactive command. 
-<div class="node">
-<p><hr>
 <a name="ntpq-interactive"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#ntpq-numeric">ntpq numeric</a>,
-Previous:&nbsp;<a rel="previous" accesskey="p" href="#ntpq-peers">ntpq peers</a>,
+Previous:&nbsp;<a rel="previous" accesskey="p" href="#ntpq-command">ntpq command</a>,
 Up:&nbsp;<a rel="up" accesskey="u" href="#ntpq-Invocation">ntpq Invocation</a>
 <br>
 </div>
 
 <h4 class="subsection">interactive option (-i)</h4>
 
-<p><a name="index-ntpq_002dinteractive-8"></a>
+<p><a name="index-ntpq_002dinteractive-7"></a>
 This is the &ldquo;force ntpq to operate in interactive mode&rdquo; option.
 
 <p class="noindent">This option has some usage constraints.  It:
@@ -866,13 +852,13 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#ntpq-Invocation">ntpq Invocation</a>
 
 <h4 class="subsection">numeric option (-n)</h4>
 
-<p><a name="index-ntpq_002dnumeric-9"></a>
+<p><a name="index-ntpq_002dnumeric-8"></a>
 This is the &ldquo;numeric host addresses&rdquo; option. 
 Output all host addresses in dotted-quad numeric format rather than
 converting to the canonical host names. 
 <div class="node">
 <p><hr>
-<a name="ntpq-old_002drv"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#ntpq-config">ntpq config</a>,
+<a name="ntpq-old_002drv"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#ntpq-peers">ntpq peers</a>,
 Previous:&nbsp;<a rel="previous" accesskey="p" href="#ntpq-numeric">ntpq numeric</a>,
 Up:&nbsp;<a rel="up" accesskey="u" href="#ntpq-Invocation">ntpq Invocation</a>
 <br>
@@ -880,7 +866,7 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#ntpq-Invocation">ntpq Invocation</a>
 
 <h4 class="subsection">old-rv option</h4>
 
-<p><a name="index-ntpq_002dold_002drv-10"></a>
+<p><a name="index-ntpq_002dold_002drv-9"></a>
 This is the &ldquo;always output status line with readvar&rdquo; option. 
 By default, <code>ntpq</code> now suppresses the <code>associd=...</code>
 line that precedes the output of <code>readvar</code>
@@ -890,12 +876,48 @@ This option causes <code>ntpq</code> to include both lines of output
 for a single-variable <code>readvar</code>. 
 Using an environment variable to
 preset this option in a script will enable both older and
-newer <code>ntpq</code> to behave identically in this regard.
+newer <code>ntpq</code> to behave identically in this regard. 
+<div class="node">
+<p><hr>
+<a name="ntpq-peers"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#ntpq-wide">ntpq wide</a>,
+Previous:&nbsp;<a rel="previous" accesskey="p" href="#ntpq-old_002drv">ntpq old-rv</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="#ntpq-Invocation">ntpq Invocation</a>
+<br>
+</div>
+
+<h4 class="subsection">peers option (-p)</h4>
+
+<p><a name="index-ntpq_002dpeers-10"></a>
+This is the &ldquo;print a list of the peers&rdquo; option.
+
+<p class="noindent">This option has some usage constraints.  It:
+     <ul>
+<li>must not appear in combination with any of the following options:
+interactive. 
+</ul>
+
+  <p>Print a list of the peers known to the server as well as a summary
+of their state. This is equivalent to the 'peers' interactive command. 
+<div class="node">
+<p><hr>
+<a name="ntpq-wide"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#ntpq-config">ntpq config</a>,
+Previous:&nbsp;<a rel="previous" accesskey="p" href="#ntpq-peers">ntpq peers</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="#ntpq-Invocation">ntpq Invocation</a>
+<br>
+</div>
+
+<h4 class="subsection">wide option (-w)</h4>
+
+<p><a name="index-ntpq_002dwide-11"></a>
+This is the &ldquo;display the full 'remote' value&rdquo; option. 
+Display the full value of the 'remote' value.  If this requires
+more than 15 characters, display the full value, emit a newline,
+and continue the data display properly indented on the next line.
 
 <div class="node">
 <p><hr>
 <a name="ntpq-config"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#ntpq-exit-status">ntpq exit status</a>,
-Previous:&nbsp;<a rel="previous" accesskey="p" href="#ntpq-old_002drv">ntpq old-rv</a>,
+Previous:&nbsp;<a rel="previous" accesskey="p" href="#ntpq-wide">ntpq wide</a>,
 Up:&nbsp;<a rel="up" accesskey="u" href="#ntpq-Invocation">ntpq Invocation</a>
 <br>
 </div>

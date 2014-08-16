@@ -39,7 +39,7 @@ flag = {
     value     = c;
     arg-type  = string;
     descrip   = "run a command and exit";
-    max       = 512;
+    max       = NOLIMIT;
     arg-name  = cmd;
     call-proc = ntpq_custom_opt_handler;
     doc = <<-  _EndOfDoc_
@@ -50,18 +50,6 @@ flag = {
 };
 
 #include debug-opt.def
-
-flag = {
-    name      = peers;
-    value     = p;
-    descrip   = "Print a list of the peers";
-    flags-cant = interactive;
-    call-proc = ntpq_custom_opt_handler;
-    doc = <<-  _EndOfDoc_
-	Print a list of the peers known to the server as well as a summary
-	of their state. This is equivalent to the 'peers' interactive command.
-	_EndOfDoc_;
-};
 
 flag = {
     name      = interactive;
@@ -98,6 +86,29 @@ flag = {
 	Using an environment variable to
 	preset this option in a script will enable both older and
 	newer @code{ntpq} to behave identically in this regard.
+	_EndOfDoc_;
+};
+
+flag = {
+    name      = peers;
+    value     = p;
+    descrip   = "Print a list of the peers";
+    flags-cant = interactive;
+    call-proc = ntpq_custom_opt_handler;
+    doc = <<-  _EndOfDoc_
+	Print a list of the peers known to the server as well as a summary
+	of their state. This is equivalent to the 'peers' interactive command.
+	_EndOfDoc_;
+};
+
+flag = {
+    name      = wide;
+    value     = w;
+    descrip   = "Display the full 'remote' value";
+    doc = <<-  _EndOfDoc_
+	Display the full value of the 'remote' value.  If this requires
+	more than 15 characters, display the full value, emit a newline,
+	and continue the data display properly indented on the next line.
 	_EndOfDoc_;
 };
 
@@ -496,7 +507,12 @@ single-character code indicating current value of the
 field of the
 .Lk decode.html#peer "peer status word"
 .It Ic remote
-host name (or IP number) of peer
+host name (or IP number) of peer.
+The value displayed will be truncated to 15 characters  unless the
+.Fl w
+flag is given, in which case the full value will be displayed
+on the first line,
+and the remaining data is displayed on the next line.
 .It Ic refid
 association ID or
 .Lk decode.html#kiss "'kiss code"

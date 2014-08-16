@@ -6,7 +6,7 @@
 #
 # EDIT THIS FILE WITH CAUTION  (invoke-ntpq.texi)
 #
-# It has been AutoGen-ed  August 12, 2014 at 12:01:59 AM by AutoGen 5.18.4pre14
+# It has been AutoGen-ed  August 14, 2014 at 08:56:51 AM by AutoGen 5.18.4pre14
 # From the definitions    ntpq-opts.def
 # and the template file   agtexi-cmd.tpl
 @end ignore
@@ -391,7 +391,12 @@ single-character code indicating current value of the
 field of the
 .Lk decode.html#peer "peer status word"
 @item @code{remote}
-host name (or IP number) of peer
+host name (or IP number) of peer.
+The value displayed will be truncated to 15 characters  unless the
+@code{-w}
+flag is given, in which case the full value will be displayed
+on the first line,
+and the remaining data is displayed on the next line.
 @item @code{refid}
 association ID or
 .Lk decode.html#kiss "'kiss code"
@@ -746,10 +751,11 @@ This software is released under the NTP license, <http://ntp.org/license>.
 * ntpq ipv4::                   ipv4 option (-4)
 * ntpq ipv6::                   ipv6 option (-6)
 * ntpq command::                command option (-c)
-* ntpq peers::                  peers option (-p)
 * ntpq interactive::            interactive option (-i)
 * ntpq numeric::                numeric option (-n)
 * ntpq old-rv::                 old-rv option
+* ntpq peers::                  peers option (-p)
+* ntpq wide::                   wide option (-w)
 * ntpq config::                 presetting/configuring ntpq
 * ntpq exit status::            exit status
 @end menu
@@ -770,7 +776,7 @@ with a status code of 0.
 
 @exampleindent 0
 @example
-ntpq - standard NTP query program - Ver. 4.2.7p458
+ntpq - standard NTP query program - Ver. 4.2.7p461
 Usage:  ntpq [ -<flag> [<val>] | --<name>[@{=| @}<val>] ]... [ host ...]
   Flg Arg Option-Name    Description
    -4 no  ipv4           Force IPv4 DNS name resolution
@@ -778,19 +784,20 @@ Usage:  ntpq [ -<flag> [<val>] | --<name>[@{=| @}<val>] ]... [ host ...]
    -6 no  ipv6           Force IPv6 DNS name resolution
                                 - prohibits the option 'ipv4'
    -c Str command        run a command and exit
-                                - may appear up to 512 times
+                                - may appear multiple times
    -d no  debug-level    Increase debug verbosity level
                                 - may appear multiple times
    -D Num set-debug-level Set the debug verbosity level
                                 - may appear multiple times
-   -p no  peers          Print a list of the peers
-                                - prohibits the option 'interactive'
    -i no  interactive    Force ntpq to operate in interactive mode
                                 - prohibits these options:
                                 command
                                 peers
    -n no  numeric        numeric host addresses
       no  old-rv         Always output status line with readvar
+   -p no  peers          Print a list of the peers
+                                - prohibits the option 'interactive'
+   -w no  wide           Display the full 'remote' value
       opt version        output version information and exit
    -? no  help           display extended usage information and exit
    -! no  more-help      extended usage information passed thru pager
@@ -856,28 +863,12 @@ This option takes a string argument @file{cmd}.
 This option has some usage constraints.  It:
 @itemize @bullet
 @item
-may appear up to 512 times.
+may appear an unlimited number of times.
 @end itemize
 
 The following argument is interpreted as an interactive format command
 and is added to the list of commands to be executed on the specified
 host(s).
-@node ntpq peers
-@subsection peers option (-p)
-@cindex ntpq-peers
-
-This is the ``print a list of the peers'' option.
-
-@noindent
-This option has some usage constraints.  It:
-@itemize @bullet
-@item
-must not appear in combination with any of the following options:
-interactive.
-@end itemize
-
-Print a list of the peers known to the server as well as a summary
-of their state. This is equivalent to the 'peers' interactive command.
 @node ntpq interactive
 @subsection interactive option (-i)
 @cindex ntpq-interactive
@@ -916,6 +907,30 @@ for a single-variable @code{readvar}.
 Using an environment variable to
 preset this option in a script will enable both older and
 newer @code{ntpq} to behave identically in this regard.
+@node ntpq peers
+@subsection peers option (-p)
+@cindex ntpq-peers
+
+This is the ``print a list of the peers'' option.
+
+@noindent
+This option has some usage constraints.  It:
+@itemize @bullet
+@item
+must not appear in combination with any of the following options:
+interactive.
+@end itemize
+
+Print a list of the peers known to the server as well as a summary
+of their state. This is equivalent to the 'peers' interactive command.
+@node ntpq wide
+@subsection wide option (-w)
+@cindex ntpq-wide
+
+This is the ``display the full 'remote' value'' option.
+Display the full value of the 'remote' value.  If this requires
+more than 15 characters, display the full value, emit a newline,
+and continue the data display properly indented on the next line.
 
 
 @node ntpq config

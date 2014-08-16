@@ -83,9 +83,9 @@ typedef enum {
 /** count of all options for ntpdc */
 #define OPTION_CT    15
 /** ntpdc version */
-#define NTPDC_VERSION       "4.2.7p458"
+#define NTPDC_VERSION       "4.2.7p461"
 /** Full ntpdc version text */
-#define NTPDC_FULL_VERSION  "ntpdc 4.2.7p458"
+#define NTPDC_FULL_VERSION  "ntpdc 4.2.7p461"
 
 /**
  *  Interface defines for all options.  Replace "n" with the UPPER_CASED

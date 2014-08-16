@@ -75,7 +75,7 @@ extern FILE * option_usage_fp;
  *  static const strings for ntpdsim options
  */
 static char const ntpdsim_opt_strs[3124] =
-/*     0 */ "ntpdsim 4.2.7p456\n"
+/*     0 */ "ntpdsim 4.2.7p459\n"
             "Copyright (C) 1970-2014 The University of Delaware, all rights reserved.\n"
             "This is free software. It is licensed for use, modification and\n"
             "redistribution under the terms of the NTP License, copies of which\n"
@@ -207,14 +207,14 @@ static char const ntpdsim_opt_strs[3124] =
 /*  2916 */ "no-load-opts\0"
 /*  2929 */ "no\0"
 /*  2932 */ "NTPDSIM\0"
-/*  2940 */ "ntpdsim - NTP daemon simulation program - Ver. 4.2.7p456\n"
+/*  2940 */ "ntpdsim - NTP daemon simulation program - Ver. 4.2.7p459\n"
             "Usage:  %s [ -<flag> [<val>] | --<name>[{=| }<val>] ]...\n\0"
 /*  3055 */ "$HOME\0"
 /*  3061 */ ".\0"
 /*  3063 */ ".ntprc\0"
 /*  3070 */ "http://bugs.ntp.org, bugs@ntp.org\0"
 /*  3104 */ "\n\0"
-/*  3106 */ "ntpdsim 4.2.7p456";
+/*  3106 */ "ntpdsim 4.2.7p459";
 
 /**
  *  ipv4 option description with
@@ -1603,7 +1603,7 @@ static void bogus_function(void) {
      translate option names.
    */
   /* referenced via ntpdsimOptions.pzCopyright */
-  puts(_("ntpdsim 4.2.7p456\n\
+  puts(_("ntpdsim 4.2.7p459\n\
 Copyright (C) 1970-2014 The University of Delaware, all rights reserved.\n\
 This is free software. It is licensed for use, modification and\n\
 redistribution under the terms of the NTP License, copies of which\n\
@@ -1746,14 +1746,14 @@ provided \"as is\" without express or implied warranty.\n"));
   puts(_("load options from a config file"));
 
   /* referenced via ntpdsimOptions.pzUsageTitle */
-  puts(_("ntpdsim - NTP daemon simulation program - Ver. 4.2.7p456\n\
+  puts(_("ntpdsim - NTP daemon simulation program - Ver. 4.2.7p459\n\
 Usage:  %s [ -<flag> [<val>] | --<name>[{=| }<val>] ]...\n"));
 
   /* referenced via ntpdsimOptions.pzDetail */
   puts(_("\n"));
 
   /* referenced via ntpdsimOptions.pzFullVersion */
-  puts(_("ntpdsim 4.2.7p456"));
+  puts(_("ntpdsim 4.2.7p459"));
 
   /* referenced via ntpdsimOptions.pzFullUsage */
   puts(_("<<<NOT-FOUND>>>"));

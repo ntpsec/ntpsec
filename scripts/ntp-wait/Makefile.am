@@ -54,7 +54,7 @@ noinst_DATA =			\
 
 ntp-wait: $(srcdir)/ntp-wait-opts
 
-$(srcdir)/ntp-wait-opts: $(srcdir)/ntp-wait-opts.def ../../sntp/ag-tpl/perlopt.tpl
+$(srcdir)/ntp-wait-opts: $(srcdir)/ntp-wait-opts.def $(std_def_list)
 	$(run_ag) ntp-wait-opts.def
 
 ### Nroff

@@ -62,7 +62,7 @@ noinst_DATA = 				\
 
 calc_tickadj: $(srcdir)/calc_tickadj-opts
 
-$(srcdir)/calc_tickadj-opts: $(srcdir)/calc_tickadj-opts.def $(srcdir)/../../sntp/ag-tpl/perlopt.tpl
+$(srcdir)/calc_tickadj-opts: $(srcdir)/calc_tickadj-opts.def
 	$(run_ag) calc_tickadj-opts.def
 
 ### Nroff

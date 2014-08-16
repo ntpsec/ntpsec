@@ -78,7 +78,8 @@ noinst_DATA =				\
 	summary.html			\
 	$(NULL)
 
-OPTTPL = ../sntp/ag-tpl/perlopt.tpl
+#OPTTPL = ../sntp/ag-tpl/perlopt.tpl
+OPTTPL = $(std_def_list)
 
 ##
 

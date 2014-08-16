@@ -317,6 +317,7 @@ char currenthost[LENHOSTNAME];			/* current host name */
 int currenthostisnum;				/* is prior text from IP? */
 struct sockaddr_in hostaddr = { 0 };		/* host address */
 int showhostnames = 1;				/* show host names by default */
+int wideremote = 0;				/* show wide remote names? */
 
 int ai_fam_templ;				/* address family */
 int ai_fam_default;				/* default address family */
@@ -482,6 +483,9 @@ ntpqmain(
 
 	if (HAVE_OPT(NUMERIC))
 		showhostnames = 0;
+
+	if (HAVE_OPT(WIDE))
+		wideremote = 1;
 
 	old_rv = HAVE_OPT(OLD_RV);
 
