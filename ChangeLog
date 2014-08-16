@@ -1,3 +1,4 @@
+(4.2.7p462) 2014/08/16 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 2622] Synchronisation problem using SHM [...]
   Add 'control' function -- fudge values not available during start.
 (4.2.7p461) 2014/08/14 Released by Harlan Stenn <stenn@ntp.org>
