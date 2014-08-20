@@ -43,6 +43,7 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <string.h>
+#include <ctype.h>
 
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -62,6 +63,7 @@
 #include "ntp_refclock.h"
 #include "ntp_stdlib.h"
 #include "ntp_calendar.h"
+#include "timespecops.h"
 
 #define	PRECISION	(-9)	/* precision assumed (about 2 ms) */
 #define	PPS_PRECISION	(-20)	/* precision assumed (about 1 us) */
@@ -69,7 +71,9 @@
 #define	DESCRIPTION	"GPSD JSON client clock" /* who we are */
 
 #define MAX_PDU_LEN	1600
-#define TICKOVER_MAX	10
+#define TICKOVER_LOW	10
+#define TICKOVER_HIGH	640
+#define LOGTHROTTLE	3600
 
 #ifndef BOOL
 # define BOOL int
@@ -107,6 +111,7 @@ static	void	gpsd_poll	(int, peerT *);
 static	void	gpsd_control	(int, const struct refclockstat *,
 				 struct refclockstat *, peerT *);
 static	void	gpsd_timer	(int, peerT *);
+static  void    gpsd_clockstats (int, peerT *);
 
 static  int     myasprintf(char**, char const*, ...);
 
@@ -137,21 +142,34 @@ typedef struct gpsd_unit {
 	l_fp tpv_recvt;	/* when we received the TPV message */
 
 	/* Flags to indicate available data */
-	int fl_tpv : 1;	/* valid TPV seen (have time) */
-	int fl_pps : 1;	/* valid pulse seen */
-	int fl_ver : 1;	/* have protocol version */
+	int fl_tpv   : 1;	/* valid TPV seen (have time) */
+	int fl_pps   : 1;	/* valid pulse seen */
+	int fl_vers  : 1;	/* have protocol version */
+	int fl_watch : 1;	/* watch reply seen */
+	int fl_nsec  : 1;	/* have nanosec PPS info */
 
 	/* clock status reporting */
-	int last_event;
-	int next_event;
+	//int last_event;
+	//int next_event;
 
 	/* admin stuff for sockets and device selection */
 	int         fdt;	/* current connecting socket */
 	addrinfoT * addr;	/* next address to try */
-	int         tickover;	/* timeout countdown */
+	u_int       tickover;	/* timeout countdown */
+	u_int       tickpres;	/* timeout preset */
 	char      * device;	/* device name of unit */
 
-	/* record assemby buffer and saved length */
+	/* tallies for the various events */
+	u_int       tc_good;	/* good samples received */
+	u_int	    tc_btime;	/* bad time stamps */
+	u_int       tc_bdate;	/* bad date strings */
+	u_int       tc_breply;	/* bad replies */
+	u_int       tc_recv;	/* received known records */
+
+	/* log bloat throttle */
+	u_int       logthrottle;/* seconds to next log slot */
+
+	/* record assemby buffer and saved length */	
 	int  buflen;
 	char buffer[MAX_PDU_LEN];
 } gpsd_unitT;
@@ -165,8 +183,9 @@ static void gpsd_stop_socket(peerT * const peer);
 
 static void gpsd_parse(peerT * const peer,
 		       const l_fp  * const rtime);
-static BOOL convert_time(l_fp * fp, const char * gps_time);
+static BOOL convert_ascii_time(l_fp * fp, const char * gps_time);
 static void save_ltc(clockprocT * const pp, const char * const tc);
+static int  syslogok(clockprocT * const pp, gpsd_unitT * const up, int);
 
 /* =====================================================================
  * local / static stuff
@@ -183,6 +202,23 @@ static const char * s_logon =
  * we try to connect to them in round-robin fashion.
  */
 static addrinfoT * s_gpsd_addr;
+
+/* =====================================================================
+ * log throttling
+ */
+static int/*BOOL*/
+syslogok(
+	clockprocT * const pp,
+	gpsd_unitT * const up,
+	int/*BOOL*/ activate )
+{
+	int res = (pp->sloppyclockflag & CLK_FLAG3)
+	       || (0           == up->logthrottle )
+	       || (LOGTHROTTLE == up->logthrottle );
+	if (res && activate)
+		up->logthrottle = LOGTHROTTLE;
+	return res;
+}
 
 /* =====================================================================
  * the clock functions
@@ -223,8 +259,8 @@ gpsd_start(
 	/* initialize the unit structure */
 	up->fdt     = -1;
 	up->addr    = s_gpsd_addr;
-	up->last_event = CEVNT_NOMINAL;
-	up->next_event = CEVNT_TIMEOUT;
+	//up->last_event = CEVNT_NOMINAL;
+	//up->next_event = CEVNT_TIMEOUT;
 
 	/* setup refclock processing */
 	pp->unitptr = (caddr_t)up;
@@ -256,7 +292,6 @@ gpsd_start(
 			refnumtoa(&peer->srcadr), up->device);
 	    goto dev_fail;
 	}
-
 	LOGIF(CLOCKINFO,
 	      (LOG_NOTICE, "%s: startup, device is '%s'",
 	       refnumtoa(&peer->srcadr), up->device));
@@ -341,7 +376,7 @@ gpsd_receive(
 		}
 	}
 	up->buflen   = pdst - up->buffer;
-	up->tickover = TICKOVER_MAX;
+	up->tickover = TICKOVER_LOW;
 }
 
 /* ------------------------------------------------------------------ */
@@ -353,42 +388,43 @@ gpsd_poll(
 {
 	clockprocT * const pp = peer->procptr;
 	gpsd_unitT * const up = (gpsd_unitT *)pp->unitptr;
+	u_int   tc_max;
 
-	/* Check what state we have to report to the core */
-	if (-1 == pp->io.fd) {
-		/* not connected to GPSD: clearly not working! */
-		up->next_event = CEVNT_FAULT;
-	} else if (pp->coderecv == pp->codeproc) {
-		/* no data: this is a least a timeout. */
-		if (CEVNT_NOMINAL == up->next_event)
-			up->next_event = CEVNT_NOMINAL;
-	} else {
-		/* presume all-thumbs-up if we have data */
-		up->next_event = CEVNT_NOMINAL;
-	}
+	++pp->polls;
 
-	/* In case we're not good, remove the PPS flag and get us to our
-	 * low default precision.
-	*/
-	if (CEVNT_NOMINAL != up->next_event) {
-		peer->flags    &= ~FLAG_PPS;
-		peer->precision = PRECISION;
-	}
+	/* find the dominant error */
+	tc_max = max(up->tc_btime, up->tc_bdate);
+	tc_max = max(tc_max, up->tc_breply);
 
-	/* eventually update the clock state. */
-	if (up->last_event != up->next_event)
-		refclock_report(peer, up->next_event);
-	up->last_event = up->next_event;
-
-	/* If there is data, feed it to the core and keep the stats
-	 * going...
-	 */
 	if (pp->coderecv != pp->codeproc) {
-		pp->polls++;
+		/* all is well */
 		pp->lastref = pp->lastrec;
 		refclock_receive(peer);
+	} else {
+		/* not working properly, admit to it */
+		peer->flags    &= ~FLAG_PPS;
+		peer->precision = PRECISION;
+
+		if (-1 == pp->io.fd) {
+			/* not connected to GPSD: clearly not working! */
+			refclock_report(peer, CEVNT_FAULT);
+		} else if (tc_max == up->tc_breply) {
+			refclock_report(peer, CEVNT_BADREPLY);
+		} else if (tc_max == up->tc_btime) {
+			refclock_report(peer, CEVNT_BADTIME);
+		} else if (tc_max == up->tc_bdate) {
+			refclock_report(peer, CEVNT_BADDATE);
+		} else {
+			refclock_report(peer, CEVNT_TIMEOUT);
+		}
 	}
-	record_clock_stats(&peer->srcadr, pp->a_lastcode);
+
+	if (pp->sloppyclockflag & CLK_FLAG4)
+		gpsd_clockstats(unit, peer);
+
+	/* clear tallies for next round */
+	up->tc_good = up->tc_btime = up->tc_bdate =
+	    up->tc_breply = up->tc_recv = 0;
 }
 
 /* ------------------------------------------------------------------ */
@@ -410,9 +446,12 @@ gpsd_timer(
 	int     unit,
 	peerT * peer)
 {
+	static const char query[] = "?VERSION;";
+
 	clockprocT * const pp = peer->procptr;
 	gpsd_unitT * const up = (gpsd_unitT *)pp->unitptr;
-	
+	int                rc;
+
 	/* This is used for timeout handling. Nothing that needs
 	 * sub-second precison happens here, so receive/connect/retry
 	 * timeouts are simply handled by a count down, and then we
@@ -421,10 +460,26 @@ gpsd_timer(
 	 * Note that the timer stays at zero here, unless some of the
 	 * functions set it to another value.
 	 */
+	if (up->logthrottle)
+		--up->logthrottle;
 	if (up->tickover)
 		--up->tickover;
+	switch (up->tickover) {
+	case 4:
+		/* try to get a live signal
+		 * If the device is not yet present, we will most likely
+		 * get an error. We put out a new version request,
+		 * because the reply will initiate a new watch request
+		 * cycle.
+		 */
+		if (-1 != pp->io.fd && !up->fl_watch) {
+			DPRINTF(1, ("gpsd_timer: livecheck: >> '%s'\n", query));
+			rc = write(pp->io.fd, query, sizeof(query));
+			(void)rc;
+		}
+		break;
 
-	if (0 == up->tickover) {
+	case 0:
 		if (-1 != pp->io.fd)
 			gpsd_stop_socket(peer);
 		else if (-1 != up->fdt)
@@ -667,6 +722,26 @@ json_parse_record(
  * static local helpers
  */
 
+/* ------------------------------------------------------------------ */
+/* Process a WATCH record
+ *
+ * Currently this is only used to recognise that the device is present
+ * and that we're listed subscribers.
+ */
+static void
+process_watch(
+	peerT      * const peer ,
+	json_ctx   * const jctx ,
+	const l_fp * const rtime)
+{
+	clockprocT * const pp = peer->procptr;
+	gpsd_unitT * const up = (gpsd_unitT *)pp->unitptr;
+
+	up->fl_watch = -1;
+}
+
+/* ------------------------------------------------------------------ */
+
 static void
 process_version(
 	peerT      * const peer ,
@@ -686,11 +761,23 @@ process_version(
 	up->proto_minor = (uint16_t)json_object_lookup_int(
 		jctx, 0, "proto_minor");
 	if (0 == errno) {
-		up->fl_ver = -1;
-		msyslog(LOG_INFO, "%s: GPSD protocol version %u.%u",
-			refnumtoa(&peer->srcadr),
-			up->proto_major, up->proto_minor);
+		up->fl_vers = -1;
+		if (syslogok(pp, up, FALSE))
+			msyslog(LOG_INFO,
+				"%s: GPSD protocol version %u.%u",
+				refnumtoa(&peer->srcadr),
+				up->proto_major, up->proto_minor);
 	}
+
+	/* With the 3.9 GPSD protocol, '*_musec' vanished and was
+	 * replace by '*_nsec'. Dispatch properly.
+	 */
+	if ( up->proto_major >  3 ||
+	    (up->proto_major == 3 && up->proto_minor >= 9))
+		up->fl_nsec = -1;
+	else
+		up->fl_nsec = 0;
+
 	/*TODO: validate protocol version! */
 	
 	/* request watch for our GPS device
@@ -699,7 +786,7 @@ process_version(
 	 * request in one sweep into the socket; since we do not do
 	 * output otherwise, this should always work.  (Unless the
 	 * TCP/IP window size gets lower than the length of the
-	 * request. We handle that whe it happens.)
+	 * request. We handle that when it happens.)
 	 */
 	snprintf(up->buffer, sizeof(up->buffer),
 		 s_logon, up->device);
@@ -710,8 +797,10 @@ process_version(
 		 * resulting data timeout will take care of the
 		 * connection!
 		 */
-		msyslog(LOG_ERR, "%s: failed to write watch request (%m)",
-			refnumtoa(&peer->srcadr));
+		if (syslogok(pp, up, TRUE))
+			msyslog(LOG_ERR,
+				"%s: failed to write watch request (%m)",
+				refnumtoa(&peer->srcadr));
 	}
 }
 
@@ -730,7 +819,7 @@ process_tpv(
 	int          gps_mode;
 	double       ept, epp, epx, epy, epv;
 	int          log2;
-	
+
 	gps_mode = (int)json_object_lookup_int_default(
 		jctx, 0, "mode", 0);
 
@@ -739,10 +828,9 @@ process_tpv(
 
 	if (gps_mode < 1 || NULL == gps_time) {
 		/* receiver has no fix; tell about and avoid stale data */
-		up->next_event = CEVNT_FAULT;
-		/*TODO: ?better? up->next_event = CEVNT_BADREPLY; */
-		up->fl_tpv = 0;
-		up->fl_pps = 0;
+		up->tc_breply += 1;
+		up->fl_tpv     = 0;
+		up->fl_pps     = 0;
 		return;
 	}
 
@@ -750,8 +838,8 @@ process_tpv(
 	save_ltc(pp, gps_time);
 
 	/* convert clock and set resulting ref time */
-	if (convert_time(&up->tpv_stamp, gps_time)) {
-		DPRINTF(1, (" tpv, stamp='%s', recvt='%s' mode=%u\n",
+	if (convert_ascii_time(&up->tpv_stamp, gps_time)) {
+		DPRINTF(1, ("gpsd: process_tpv, stamp='%s', recvt='%s' mode=%u\n",
 			    gmprettydate(&up->tpv_stamp),
 			    gmprettydate(&up->tpv_recvt),
 			    gps_mode));
@@ -759,7 +847,8 @@ process_tpv(
 		up->tpv_recvt = *rtime;
 		up->fl_tpv = -1;
 	} else {
-		up->next_event = CEVNT_BADREPLY;
+		up->tc_btime += 1;
+		up->fl_tpv    = 0;
 	}
 		
 	/* Set the precision from the GPSD data
@@ -769,7 +858,6 @@ process_tpv(
 	 * speed of light. Use the better one of those two.
 	 */
 	ept = json_object_lookup_float_default(jctx, 0, "ept", 1.0);
-
 	epx = json_object_lookup_float_default(jctx, 0, "epx", 1000.0);
 	epy = json_object_lookup_float_default(jctx, 0, "epy", 1000.0);
 	if (1 == gps_mode) {
@@ -809,34 +897,42 @@ process_pps(
 	clockprocT * const pp = peer->procptr;
 	gpsd_unitT * const up = (gpsd_unitT *)pp->unitptr;
 
-	uint32_t secs;
-	double   frac;
+	struct timespec ts;
 		
 	errno = 0;
-	secs = (uint32_t)json_object_lookup_int(jctx, 0, "real_sec");
-	frac = json_object_lookup_float(jctx, 0, "real_musec");
-	if (0 != errno) {
-		up->next_event = CEVNT_BADTIME;
-		return;
-	}
+	ts.tv_sec = (time_t)json_object_lookup_int(
+		jctx, 0, "clock_sec");
+	if (up->fl_nsec)
+		ts.tv_nsec = json_object_lookup_int(
+			jctx, 0, "clock_nsec");
+	else
+		ts.tv_nsec = json_object_lookup_int(
+			jctx, 0, "clock_musec") * 1000;
 
-	frac *= 1.0e-6; /* convert usec to seconds */
-	M_DTOLFP(frac, up->pps_stamp.l_ui, up->pps_stamp.l_uf);
-	up->pps_stamp.l_ui += secs;
-	up->pps_stamp.l_ui += JAN_1970;
+	if (0 != errno)
+		goto fail;
 
-	DPRINTF(1, (" pps, stamp='%s', recvt='%s'\n", 
-		    gmprettydate(&up->pps_stamp),
-		    gmprettydate(&up->pps_recvt)));
-	
+	up->pps_stamp = tspec_stamp_to_lfp(ts);
 	up->pps_recvt = *rtime;
 	pp->lastrec   = up->pps_stamp;
 
+	DPRINTF(1, ("gpsd: process_pps, stamp='%s', recvt='%s'\n", 
+		    gmprettydate(&up->pps_stamp),
+		    gmprettydate(&up->pps_recvt)));
+	
 	/* When we have a time pulse, clear the TPV flag: the
 	 * PPS is only valid for the >NEXT< TPV value!
 	 */
 	up->fl_pps = -1;
 	up->fl_tpv =  0;
+	return;
+
+  fail:
+	DPRINTF(1, ("gpsd: process_pps FAILED, nsec=%d stamp='%s', recvt='%s'\n", 
+		    up->fl_nsec,
+		    gmprettydate(&up->pps_stamp),
+		    gmprettydate(&up->pps_recvt)));
+	up->tc_breply += 1;
 }
 
 /* ------------------------------------------------------------------ */
@@ -851,6 +947,7 @@ gpsd_parse(
 
 	json_ctx     jctx;
 	const char * clsid;
+	l_fp         tmpfp;
 
         DPRINTF(2, ("gpsd_parse: time %s '%s'\n",
                     ulfptoa(rtime, 6), up->buffer));
@@ -863,12 +960,15 @@ gpsd_parse(
 	clsid = json_object_lookup_string_default(
 		&jctx, 0, "class", "-bad-repy-");
 
+	up->tc_recv += 1;
 	if (!strcmp("VERSION", clsid))
 		process_version(peer, &jctx, rtime);
 	else if (!strcmp("TPV", clsid))
 		process_tpv(peer, &jctx, rtime);
 	else if (!strcmp("PPS", clsid))
 		process_pps(peer, &jctx, rtime);
+	else if (!strcmp("WATCH", clsid))
+		process_watch(peer, &jctx, rtime);
 	else
 		return; /* nothing we know about... */
 
@@ -880,15 +980,18 @@ gpsd_parse(
 	 * correlated. Ignore this pair if the difference is more than a
 	 * second.
 	 */
-	L_SUB(&up->tpv_recvt, &up->pps_recvt);
-	if (0 == up->tpv_recvt.l_ui) {
+	tmpfp = up->tpv_recvt;
+	L_SUB(&tmpfp, &up->pps_recvt);
+	if (0 == tmpfp.l_ui) {
 		peer->flags |= FLAG_PPS;
 		/*TODO: fudge processing */
 		refclock_process_offset(pp, up->tpv_stamp, up->pps_stamp,
 					pp->fudgetime1);
+		/* now we are working, reset the retry timout */
+		up->tickpres = TICKOVER_LOW;
 	} else {
 		LOGIF(CLOCKINFO,
-		      (LOG_WARNING, "%s: disaarded data due to delay",
+		      (LOG_WARNING, "%s: discarded data due to delay",
 		       refnumtoa(&peer->srcadr)));
 	}
 
@@ -909,9 +1012,16 @@ gpsd_stop_socket(
 	if (-1 != pp->io.fd)
 		io_closeclock(&pp->io);
 	pp->io.fd = -1;
-	msyslog(LOG_INFO, "%s: closing socket to GPSD",
-		refnumtoa(&peer->srcadr));
-	up->tickover = TICKOVER_MAX;
+	if (syslogok(pp, up, TRUE))
+		msyslog(LOG_INFO,
+			"%s: closing socket to GPSD",
+			refnumtoa(&peer->srcadr));
+	up->tickover = up->tickpres;
+	up->tickpres = min((up->tickpres << 1), TICKOVER_HIGH);
+	up->fl_vers  = 0;
+	up->fl_tpv   = 0;
+	up->fl_pps   = 0;
+	up->fl_watch = 0;
 }
 
 /* ------------------------------------------------------------------ */
@@ -935,23 +1045,29 @@ gpsd_init_socket(
 	up->fdt = socket(
 		ai->ai_family, ai->ai_socktype, ai->ai_protocol);
 	if (-1 == up->fdt) {
-		msyslog(LOG_ERR, "%s: cannot create GPSD socket: %m",
-			refnumtoa(&peer->srcadr));
+		if (syslogok(pp, up, TRUE))
+			msyslog(LOG_ERR,
+				"%s: cannot create GPSD socket: %m",
+				refnumtoa(&peer->srcadr));
 		goto no_socket;
 	}
 	
 	/* make sure the socket is non-blocking */
 	rc = fcntl(up->fdt, F_SETFL, O_NONBLOCK, 1);
 	if (-1 == rc) {
-		msyslog(LOG_ERR, "%s: cannot set GPSD socket to non-blocking: %m",
-			refnumtoa(&peer->srcadr));
+		if (syslogok(pp, up, TRUE))
+			msyslog(LOG_ERR,
+				"%s: cannot set GPSD socket to non-blocking: %m",
+				refnumtoa(&peer->srcadr));
 		goto no_socket;
 	}
 	/* start a non-blocking connect */
 	rc = connect(up->fdt, ai->ai_addr, ai->ai_addrlen);
 	if (-1 == rc && errno != EINPROGRESS) {
-		msyslog(LOG_ERR, "%s: cannot connect GPSD socket: %m",
-			refnumtoa(&peer->srcadr));
+		if (syslogok(pp, up, TRUE))
+			msyslog(LOG_ERR,
+				"%s: cannot connect GPSD socket: %m",
+				refnumtoa(&peer->srcadr));
 		goto no_socket;
 	}
 
@@ -961,6 +1077,8 @@ gpsd_init_socket(
 	if (-1 != up->fdt)
 		close(up->fdt);
 	up->fdt = -1;
+	up->tickover = up->tickpres;
+	up->tickpres = min((up->tickpres << 1), TICKOVER_HIGH);
 }
 
 /* ------------------------------------------------------------------ */
@@ -1005,75 +1123,107 @@ gpsd_test_socket(
 #endif
 
 	/* next timeout is a full one... */
-	up->tickover = TICKOVER_MAX;
+	up->tickover = up->tickpres;
 
 	/* check for socket error */
 	error = 0;
 	erlen = sizeof(error);
 	rc    = getsockopt(up->fdt, SOL_SOCKET, SO_ERROR, &error, &erlen);
 	if (0 != rc || 0 != error) {
-		msyslog(LOG_ERR, "%s: cannot connect GPSD socket: %m",
-			refnumtoa(&peer->srcadr));
+		if (syslogok(pp, up, TRUE))
+			msyslog(LOG_ERR,
+				"%s: cannot connect GPSD socket: %m",
+				refnumtoa(&peer->srcadr));
 		goto no_socket;
 	}	
 	/* swap socket FDs, and make sure the clock was added */
 	pp->io.fd = up->fdt;
 	up->fdt   = -1;
 	if (0 == io_addclock(&pp->io)) {
-		msyslog(LOG_ERR, "%s: failed to register with I/O engine",
-			refnumtoa(&peer->srcadr));
+		if (syslogok(pp, up, TRUE))
+			msyslog(LOG_ERR,
+				"%s: failed to register with I/O engine",
+				refnumtoa(&peer->srcadr));
 		goto no_socket;
 	}
-
-	up->tickover = TICKOVER_MAX;
 	return;
 	
   no_socket:
 	if (-1 != up->fdt)
 		close(up->fdt);
 	up->fdt = -1;
+	up->tickpres = min((up->tickpres << 1), TICKOVER_HIGH);
 }
 
 /* =====================================================================
  * helper stuff
  */
+
+/*
+ * shm_clockstats - dump and reset counters
+ */
+static void
+gpsd_clockstats(
+	int unit,
+	struct peer *peer
+	)
+{
+	clockprocT * const pp = peer->procptr;
+	gpsd_unitT * const up = (gpsd_unitT *)pp->unitptr;
+
+	char logbuf[128];
+	unsigned int llen;
+
+	/* if snprintf() returns a negative values on errors (some older
+	* ones do) make sure we are NUL terminated. Using an unsigned
+	* result does the trick.
+	*/
+	llen = snprintf(logbuf, sizeof(logbuf),
+			"good=%-3u badtime=%-3u baddate=%-3u badreply=%-3u recv=%-3u",
+			up->tc_good, up->tc_btime, up->tc_bdate,
+			up->tc_breply, up->tc_recv);
+	logbuf[min(llen, sizeof(logbuf)-1)] = '\0';
+	record_clock_stats(&peer->srcadr, logbuf);
+}
+
+/* -------------------------------------------------------------------
+ * Convert a GPSD timestam (ISO8601 Format) to an l_fp
+ */
 static BOOL
-convert_time(
+convert_ascii_time(
 	l_fp       * fp      ,
 	const char * gps_time)
 {
-	char     *ep, *sp;
-	struct tm gd;
-	double    frac;
+	char           *ep;
+	struct tm       gd;
+	struct timespec ts;
+	long            dw;
 
-	/* Use 'strptime' to take the brunt of the work, then use 'strtoul'
-	 * to read in any fractional part.
+	/* Use 'strptime' to take the brunt of the work, then parse
+	 * the fractional part manually, starting with a digit weight of
+	 * 10^8 nanoseconds.
 	 */
+	ts.tv_nsec = 0;
 	ep = strptime(gps_time, "%Y-%m-%dT%H:%M:%S", &gd);
 	if (*ep == '.') {
-		errno = 0;
-		frac = strtoul((sp = ep + 1), &ep, 10);
-		if (errno && ep != sp)
-			return FALSE;
-		for (/*NOP*/; sp != ep; ++sp)
-			frac *= 0.1;
-	} else {
-		frac = 0.0;
+		dw = 100000000;
+		while (isdigit(*++ep)) {
+			ts.tv_nsec += (*ep - '0') * dw;
+			dw /= 10;
+		}
 	}
 	if (ep[0] != 'Z' || ep[1] != '\0')
 		return FALSE;
 
 	/* now convert the whole thing into a 'l_fp' */
-	/*TODO: refactor the calendar stuff into 'ntp_calendar.c' */
-	M_DTOLFP(frac, fp->l_ui, fp->l_uf);
-	fp->l_ui += (ntpcal_tm_to_rd(&gd) - DAY_NTP_STARTS) * SECSPERDAY;
-	fp->l_ui +=  ntpcal_tm_to_daysec(&gd);
+	ts.tv_sec = (ntpcal_tm_to_rd(&gd) - DAY_NTP_STARTS) * SECSPERDAY
+	          + ntpcal_tm_to_daysec(&gd);
+	*fp = tspec_intv_to_lfp(ts);
 
 	return TRUE;
 }
 
-/*
- * -------------------------------------------------------------------
+/* -------------------------------------------------------------------
  * Save the last timecode string, making sure it's properly truncated
  * if necessary and NUL terminated in any case.
  */
