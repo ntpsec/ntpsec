@@ -1,3 +1,7 @@
+* [Bug 2636] Clutter in syslog if gpsd not running
+   - make driver work with PSD protocol versio 3.9
+   - use exponential back-off for connection problems
+   - implement rate-limit for syslog entries
 (4.2.7p462) 2014/08/16 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 2622] Synchronisation problem using SHM [...]
   Add 'control' function -- fudge values not available during start.

@@ -48,6 +48,7 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/stat.h>
+#include <netinet/tcp.h>
 
 #if defined(HAVE_SYS_POLL_H)
 # include <sys/poll.h>
@@ -72,8 +73,12 @@
 
 #define MAX_PDU_LEN	1600
 #define TICKOVER_LOW	10
-#define TICKOVER_HIGH	640
+#define TICKOVER_HIGH	120
 #define LOGTHROTTLE	3600
+
+#define PPS_MAXCOUNT	30
+#define PPS_HIWAT       20
+#define PPS_LOWAT       10
 
 #ifndef BOOL
 # define BOOL int
@@ -129,17 +134,24 @@ struct refclock refclock_gpsdjson = {
  * our local clock unit and data
  */
 typedef struct gpsd_unit {
+	int	 unit;
 	/* current line protocol version */
 	uint16_t proto_major;
 	uint16_t proto_minor;
 
 	/* PPS time stamps */
-	l_fp pps_stamp;	/* effective PPS time stamp */
-	l_fp pps_recvt;	/* when we received the PPS message */
+	l_fp pps_local;	/* when we received the PPS message */
+	l_fp pps_stamp;	/* related reference time */
+	l_fp pps_recvt;	/* when GPSD detected the pulse */
 
 	/* TPV (GPS data) time stamps */
+	l_fp tpv_local;	/* when we received the TPV message */
 	l_fp tpv_stamp;	/* effective GPS time stamp */
-	l_fp tpv_recvt;	/* when we received the TPV message */
+	l_fp tpv_recvt;	/* when GPSD got the fix */
+
+	/* fudge values for correction, mirrored as 'l_fp' */
+	l_fp pps_fudge;
+	l_fp tpv_fudge;
 
 	/* Flags to indicate available data */
 	int fl_tpv   : 1;	/* valid TPV seen (have time) */
@@ -148,15 +160,12 @@ typedef struct gpsd_unit {
 	int fl_watch : 1;	/* watch reply seen */
 	int fl_nsec  : 1;	/* have nanosec PPS info */
 
-	/* clock status reporting */
-	//int last_event;
-	//int next_event;
-
 	/* admin stuff for sockets and device selection */
 	int         fdt;	/* current connecting socket */
 	addrinfoT * addr;	/* next address to try */
 	u_int       tickover;	/* timeout countdown */
 	u_int       tickpres;	/* timeout preset */
+	u_int       ppscount;	/* PPS mode up/down count */
 	char      * device;	/* device name of unit */
 
 	/* tallies for the various events */
@@ -212,7 +221,7 @@ syslogok(
 	gpsd_unitT * const up,
 	int/*BOOL*/ activate )
 {
-	int res = (pp->sloppyclockflag & CLK_FLAG3)
+	int res = (0 != (pp->sloppyclockflag & CLK_FLAG3))
 	       || (0           == up->logthrottle )
 	       || (LOGTHROTTLE == up->logthrottle );
 	if (res && activate)
@@ -257,12 +266,12 @@ gpsd_start(
 	struct stat sb;
 
 	/* initialize the unit structure */
-	up->fdt     = -1;
-	up->addr    = s_gpsd_addr;
-	//up->last_event = CEVNT_NOMINAL;
-	//up->next_event = CEVNT_TIMEOUT;
+	up->fdt      = -1;
+	up->addr     = s_gpsd_addr;
+	up->tickpres = TICKOVER_LOW;
 
 	/* setup refclock processing */
+	up->unit    = unit;
 	pp->unitptr = (caddr_t)up;
 	pp->io.fd   = -1;
 	pp->io.clock_recv = gpsd_receive;
@@ -436,7 +445,12 @@ gpsd_control(
 	struct refclockstat       * out_st,
 	peerT                     * peer  )
 {
-	/* Not yet implemented -- do we need it? */
+	clockprocT * const pp = peer->procptr;
+	gpsd_unitT * const up = (gpsd_unitT *)pp->unitptr;
+
+	/* save preprocessed fudge times */
+	DTOLFP(pp->fudgetime1, &up->pps_fudge);
+	DTOLFP(pp->fudgetime2, &up->tpv_fudge);
 }
 
 /* ------------------------------------------------------------------ */
@@ -473,7 +487,8 @@ gpsd_timer(
 		 * cycle.
 		 */
 		if (-1 != pp->io.fd && !up->fl_watch) {
-			DPRINTF(1, ("gpsd_timer: livecheck: >> '%s'\n", query));
+			DPRINTF(2, ("GPSD_JSON(%d): timer livecheck: '%s'\n",
+				    up->unit, query));
 			rc = write(pp->io.fd, query, sizeof(query));
 			(void)rc;
 		}
@@ -486,7 +501,16 @@ gpsd_timer(
 			gpsd_test_socket(peer);
 		else if (NULL != s_gpsd_addr)
 			gpsd_init_socket(peer);
+
+	default:
+		if (-1 == pp->io.fd && -1 != up->fdt)
+			gpsd_test_socket(peer);
 	}
+
+	if (up->ppscount > PPS_HIWAT && !(peer->flags & FLAG_PPS))
+		peer->flags |= FLAG_PPS;
+	if (up->ppscount < PPS_LOWAT &&  (peer->flags & FLAG_PPS))
+		peer->flags &= ~FLAG_PPS;
 }
 
 /* =====================================================================
@@ -839,12 +863,15 @@ process_tpv(
 
 	/* convert clock and set resulting ref time */
 	if (convert_ascii_time(&up->tpv_stamp, gps_time)) {
-		DPRINTF(1, ("gpsd: process_tpv, stamp='%s', recvt='%s' mode=%u\n",
+		DPRINTF(2, ("GPSD_JSON(%d): process_tpv, stamp='%s', recvt='%s' mode=%u\n",
+			    up->unit,
 			    gmprettydate(&up->tpv_stamp),
 			    gmprettydate(&up->tpv_recvt),
 			    gps_mode));
 		
-		up->tpv_recvt = *rtime;
+		up->tpv_local = *rtime;
+		up->tpv_recvt = *rtime;/*TODO: hack until we get it remote from GPSD */
+		L_SUB(&up->tpv_recvt, &up->tpv_fudge);
 		up->fl_tpv = -1;
 	} else {
 		up->tc_btime += 1;
@@ -912,11 +939,20 @@ process_pps(
 	if (0 != errno)
 		goto fail;
 
-	up->pps_stamp = tspec_stamp_to_lfp(ts);
-	up->pps_recvt = *rtime;
-	pp->lastrec   = up->pps_stamp;
+	up->pps_local = *rtime;
+	/* get fudged receive time */
+	up->pps_recvt = tspec_stamp_to_lfp(ts);
+	L_SUB(&up->pps_recvt, &up->pps_fudge);
 
-	DPRINTF(1, ("gpsd: process_pps, stamp='%s', recvt='%s'\n", 
+	/* map to next full second as reference time stamp */
+	up->pps_stamp = up->pps_recvt;
+	L_ADDUF(&up->pps_stamp, 0x80000000u);
+	up->pps_stamp.l_uf = 0;
+	
+	pp->lastrec = up->pps_stamp;
+
+	DPRINTF(2, ("GPSD_JSON(%d): process_pps, stamp='%s', recvt='%s'\n", 
+		    up->unit,
 		    gmprettydate(&up->pps_stamp),
 		    gmprettydate(&up->pps_recvt)));
 	
@@ -928,8 +964,8 @@ process_pps(
 	return;
 
   fail:
-	DPRINTF(1, ("gpsd: process_pps FAILED, nsec=%d stamp='%s', recvt='%s'\n", 
-		    up->fl_nsec,
+	DPRINTF(2, ("GPSD_JSON(%d): process_pps FAILED, nsec=%d stamp='%s', recvt='%s'\n",
+		    up->unit, up->fl_nsec,
 		    gmprettydate(&up->pps_stamp),
 		    gmprettydate(&up->pps_recvt)));
 	up->tc_breply += 1;
@@ -939,7 +975,7 @@ process_pps(
 
 static void
 gpsd_parse(
-	peerT      * const peer,
+	peerT      * const peer ,
 	const l_fp * const rtime)
 {
 	clockprocT * const pp = peer->procptr;
@@ -949,8 +985,8 @@ gpsd_parse(
 	const char * clsid;
 	l_fp         tmpfp;
 
-        DPRINTF(2, ("gpsd_parse: time %s '%s'\n",
-                    ulfptoa(rtime, 6), up->buffer));
+        DPRINTF(2, ("GPSD_JSON(%d): gpsd_parse: time %s '%s'\n",
+                    up->unit, ulfptoa(rtime, 6), up->buffer));
 
 	/* See if we can grab anything potentially useful */
 	if (!json_parse_record(&jctx, up->buffer))
@@ -972,32 +1008,27 @@ gpsd_parse(
 	else
 		return; /* nothing we know about... */
 
-	/* Bail out unless we have a pulse and a time stamp */
-	if (!(up->fl_pps && up->fl_tpv))
-		return;
+	/* now aggregate TPV and PPS -- no PPS? just use TPV...*/
+	if (up->fl_tpv) {
+		/* TODO: also check remote receive time stamps */
+		tmpfp = up->tpv_local;
+		L_SUB(&tmpfp, &up->pps_local);
 
-	/* Check if the pulse and the time came close enough to be
-	 * correlated. Ignore this pair if the difference is more than a
-	 * second.
-	 */
-	tmpfp = up->tpv_recvt;
-	L_SUB(&tmpfp, &up->pps_recvt);
-	if (0 == tmpfp.l_ui) {
-		peer->flags |= FLAG_PPS;
-		/*TODO: fudge processing */
-		refclock_process_offset(pp, up->tpv_stamp, up->pps_stamp,
-					pp->fudgetime1);
-		/* now we are working, reset the retry timout */
-		up->tickpres = TICKOVER_LOW;
-	} else {
-		LOGIF(CLOCKINFO,
-		      (LOG_WARNING, "%s: discarded data due to delay",
-		       refnumtoa(&peer->srcadr)));
+		if (up->fl_pps && 0 == tmpfp.l_ui) {
+			refclock_process_offset(
+				pp, up->tpv_stamp, up->pps_recvt, 0.0);
+			if (up->ppscount < PPS_MAXCOUNT)
+				up->ppscount += 1;
+		} else {
+			refclock_process_offset(
+				pp, up->tpv_stamp, up->tpv_recvt, 0.0);
+			if (up->ppscount > 0)
+				up->ppscount -= 1;
+		}
+		up->fl_pps   = 0;
+		up->fl_tpv   = 0;
+		up->tc_good += 1;
 	}
-
-	/* mark pulse and time as consumed */
-	up->fl_pps = 0;
-	up->fl_tpv = 0;
 }
 
 /* ------------------------------------------------------------------ */
@@ -1017,7 +1048,7 @@ gpsd_stop_socket(
 			"%s: closing socket to GPSD",
 			refnumtoa(&peer->srcadr));
 	up->tickover = up->tickpres;
-	up->tickpres = min((up->tickpres << 1), TICKOVER_HIGH);
+	up->tickpres = min(up->tickpres + 5, TICKOVER_HIGH);
 	up->fl_vers  = 0;
 	up->fl_tpv   = 0;
 	up->fl_pps   = 0;
@@ -1034,6 +1065,7 @@ gpsd_init_socket(
 	gpsd_unitT * const up = (gpsd_unitT *)pp->unitptr;
 	addrinfoT  * ai;
 	int          rc;
+	int          ov;
 
 	/* draw next address to try */
 	if (NULL == up->addr)
@@ -1061,6 +1093,17 @@ gpsd_init_socket(
 				refnumtoa(&peer->srcadr));
 		goto no_socket;
 	}
+	/* disable nagling */
+	ov = 1;
+	rc = setsockopt(up->fdt, IPPROTO_TCP, TCP_NODELAY,
+			(char*)&ov, sizeof(ov));
+	if (-1 == rc) {
+		if (syslogok(pp, up, TRUE))
+			msyslog(LOG_INFO,
+				"%s: cannot disable TCP nagle: %m",
+				refnumtoa(&peer->srcadr));
+	}
+
 	/* start a non-blocking connect */
 	rc = connect(up->fdt, ai->ai_addr, ai->ai_addrlen);
 	if (-1 == rc && errno != EINPROGRESS) {
@@ -1076,9 +1119,9 @@ gpsd_init_socket(
   no_socket:
 	if (-1 != up->fdt)
 		close(up->fdt);
-	up->fdt = -1;
+	up->fdt      = -1;
 	up->tickover = up->tickpres;
-	up->tickpres = min((up->tickpres << 1), TICKOVER_HIGH);
+	up->tickpres = min(up->tickpres + 5, TICKOVER_HIGH);
 }
 
 /* ------------------------------------------------------------------ */
@@ -1090,32 +1133,36 @@ gpsd_test_socket(
 	clockprocT * const pp = peer->procptr;
 	gpsd_unitT * const up = (gpsd_unitT *)pp->unitptr;
 
-	int       error;
-	int       rc;
-	socklen_t erlen;
+	int       ec, rc;
+	socklen_t lc;
 
 	/* Check if the non-blocking connect was finished by testing the
 	 * socket for writeability. Use the 'poll()' API if available
 	 * and 'select()' otherwise.
 	 */
+	DPRINTF(2, ("GPSD_JSON(%d): check connect, fd=%d\n",
+		    up->unit, up->fdt));
+
 #if defined(HAVE_SYS_POLL_H)
 	{
 		struct pollfd pfd;
 
-		pfd.events = POLLIN;
+		pfd.events = POLLOUT;
 		pfd.fd     = up->fdt;
-		if (1 != poll(&pfd, 1, 0))
+		rc = poll(&pfd, 1, 0);
+		if (1 != rc || !(pfd.revents & POLLOUT))
 			return;
 	}
 #elif defined(HAVE_SYS_SELECT_H)
 	{
 		struct timeval tout;
-		fd_set         fset;
+		fd_set         wset;
 
 		memset(&tout, 0, sizeof(tout));
-		FD_ZERO(&fset);
-		FD_SET(up->fdt, &fset);
-		if (1 != select(up->fdt+1, NULL, &fset, NULL, &tout))
+		FD_ZERO(&wset);
+		FD_SET(up->fdt, &wset);
+		rc = select(up->fdt+1, NULL, &wset, NULL, &tout);
+		if (0 == rc || !(FD_ISSET(up->fdt, &wset)))
 			return;
 	}
 #else
@@ -1123,16 +1170,19 @@ gpsd_test_socket(
 #endif
 
 	/* next timeout is a full one... */
-	up->tickover = up->tickpres;
+	up->tickover = TICKOVER_LOW;
 
 	/* check for socket error */
-	error = 0;
-	erlen = sizeof(error);
-	rc    = getsockopt(up->fdt, SOL_SOCKET, SO_ERROR, &error, &erlen);
-	if (0 != rc || 0 != error) {
+	ec = 0;
+	lc = sizeof(ec);
+	rc = getsockopt(up->fdt, SOL_SOCKET, SO_ERROR, &ec, &lc);
+	DPRINTF(1, ("GPSD_JSON(%d): connect finshed, fd=%d, ec=%d(%s)\n",
+		    up->unit, up->fdt, ec, strerror(ec)));
+	if (-1 == rc || 0 != ec) {
+		errno = ec;
 		if (syslogok(pp, up, TRUE))
 			msyslog(LOG_ERR,
-				"%s: cannot connect GPSD socket: %m",
+				"%s: (async)cannot connect GPSD socket: %m",
 				refnumtoa(&peer->srcadr));
 		goto no_socket;
 	}	
@@ -1151,8 +1201,9 @@ gpsd_test_socket(
   no_socket:
 	if (-1 != up->fdt)
 		close(up->fdt);
-	up->fdt = -1;
-	up->tickpres = min((up->tickpres << 1), TICKOVER_HIGH);
+	up->fdt      = -1;
+	up->tickover = up->tickpres;
+	up->tickpres = min(up->tickpres + 5, TICKOVER_HIGH);
 }
 
 /* =====================================================================
@@ -1164,8 +1215,8 @@ gpsd_test_socket(
  */
 static void
 gpsd_clockstats(
-	int unit,
-	struct peer *peer
+	int           unit,
+	peerT * const peer
 	)
 {
 	clockprocT * const pp = peer->procptr;
