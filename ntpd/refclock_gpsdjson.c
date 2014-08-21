@@ -486,11 +486,16 @@ gpsd_timer(
 		 * because the reply will initiate a new watch request
 		 * cycle.
 		 */
-		if (-1 != pp->io.fd && !up->fl_watch) {
-			DPRINTF(2, ("GPSD_JSON(%d): timer livecheck: '%s'\n",
-				    up->unit, query));
-			rc = write(pp->io.fd, query, sizeof(query));
-			(void)rc;
+		if (-1 != pp->io.fd) {
+			if ( ! up->fl_watch) {
+				DPRINTF(2, ("GPSD_JSON(%d): timer livecheck: '%s'\n",
+					    up->unit, query));
+				rc = write(pp->io.fd,
+					   query, sizeof(query));
+				(void)rc;
+			}
+		} else if (-1 != up->fdt) {
+			gpsd_test_socket(peer);
 		}
 		break;
 
@@ -501,6 +506,7 @@ gpsd_timer(
 			gpsd_test_socket(peer);
 		else if (NULL != s_gpsd_addr)
 			gpsd_init_socket(peer);
+		break;
 
 	default:
 		if (-1 == pp->io.fd && -1 != up->fdt)
