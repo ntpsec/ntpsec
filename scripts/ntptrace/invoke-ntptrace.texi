@@ -6,7 +6,7 @@
 #
 # EDIT THIS FILE WITH CAUTION  (invoke-ntptrace.texi)
 #
-# It has been AutoGen-ed  August 16, 2014 at 06:21:33 AM by AutoGen 5.18.4pre14
+# It has been AutoGen-ed  August 21, 2014 at 08:51:53 AM by AutoGen 5.18.4pre14
 # From the definitions    ntptrace-opts.def
 # and the template file   agtexi-cmd.tpl
 @end ignore
@@ -62,7 +62,7 @@ with a status code of 0.
 
 @exampleindent 0
 @example
-ntptrace - Trace peers of an NTP server - Ver. 4.2.7p462
+ntptrace - Trace peers of an NTP server - Ver. 4.2.7p463
 USAGE: ntptrace [ -<flag> [<val>] | --<name>[@{=| @}<val>] ]... [host]
 
     -n, --numeric                Print IP addresses instead of hostnames
