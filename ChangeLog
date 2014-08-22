@@ -1,3 +1,4 @@
+(4.2.7p464) 2014/08/22 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 2636] Fix coverity warning from previous patch.
 (4.2.7p463) 2014/08/21 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 2636] Clutter in syslog if gpsd not running
