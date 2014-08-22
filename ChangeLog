@@ -1,7 +1,7 @@
 * [Bug 2636] Fix coverity warning from previous patch.
 (4.2.7p463) 2014/08/21 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 2636] Clutter in syslog if gpsd not running
-   - make driver work with PSD protocol versio 3.9
+   - make driver work with GPSD protocol version 3.9
    - use exponential back-off for connection problems
    - implement rate-limit for syslog entries
 (4.2.7p462) 2014/08/16 Released by Harlan Stenn <stenn@ntp.org>
