@@ -194,7 +194,7 @@ static void gpsd_parse(peerT * const peer,
 		       const l_fp  * const rtime);
 static BOOL convert_ascii_time(l_fp * fp, const char * gps_time);
 static void save_ltc(clockprocT * const pp, const char * const tc);
-static int  syslogok(clockprocT * const pp, gpsd_unitT * const up, int);
+static int  syslogok(clockprocT * const pp, gpsd_unitT * const up);
 
 /* =====================================================================
  * local / static stuff
@@ -218,13 +218,12 @@ static addrinfoT * s_gpsd_addr;
 static int/*BOOL*/
 syslogok(
 	clockprocT * const pp,
-	gpsd_unitT * const up,
-	int/*BOOL*/ activate )
+	gpsd_unitT * const up)
 {
 	int res = (0 != (pp->sloppyclockflag & CLK_FLAG3))
 	       || (0           == up->logthrottle )
 	       || (LOGTHROTTLE == up->logthrottle );
-	if (res && activate)
+	if (res)
 		up->logthrottle = LOGTHROTTLE;
 	return res;
 }
@@ -792,7 +791,7 @@ process_version(
 		jctx, 0, "proto_minor");
 	if (0 == errno) {
 		up->fl_vers = -1;
-		if (syslogok(pp, up, FALSE))
+		if (syslogok(pp, up))
 			msyslog(LOG_INFO,
 				"%s: GPSD protocol version %u.%u",
 				refnumtoa(&peer->srcadr),
@@ -827,7 +826,7 @@ process_version(
 		 * resulting data timeout will take care of the
 		 * connection!
 		 */
-		if (syslogok(pp, up, TRUE))
+		if (syslogok(pp, up))
 			msyslog(LOG_ERR,
 				"%s: failed to write watch request (%m)",
 				refnumtoa(&peer->srcadr));
@@ -1049,7 +1048,7 @@ gpsd_stop_socket(
 	if (-1 != pp->io.fd)
 		io_closeclock(&pp->io);
 	pp->io.fd = -1;
-	if (syslogok(pp, up, TRUE))
+	if (syslogok(pp, up))
 		msyslog(LOG_INFO,
 			"%s: closing socket to GPSD",
 			refnumtoa(&peer->srcadr));
@@ -1083,7 +1082,7 @@ gpsd_init_socket(
 	up->fdt = socket(
 		ai->ai_family, ai->ai_socktype, ai->ai_protocol);
 	if (-1 == up->fdt) {
-		if (syslogok(pp, up, TRUE))
+		if (syslogok(pp, up))
 			msyslog(LOG_ERR,
 				"%s: cannot create GPSD socket: %m",
 				refnumtoa(&peer->srcadr));
@@ -1093,7 +1092,7 @@ gpsd_init_socket(
 	/* make sure the socket is non-blocking */
 	rc = fcntl(up->fdt, F_SETFL, O_NONBLOCK, 1);
 	if (-1 == rc) {
-		if (syslogok(pp, up, TRUE))
+		if (syslogok(pp, up))
 			msyslog(LOG_ERR,
 				"%s: cannot set GPSD socket to non-blocking: %m",
 				refnumtoa(&peer->srcadr));
@@ -1104,7 +1103,7 @@ gpsd_init_socket(
 	rc = setsockopt(up->fdt, IPPROTO_TCP, TCP_NODELAY,
 			(char*)&ov, sizeof(ov));
 	if (-1 == rc) {
-		if (syslogok(pp, up, TRUE))
+		if (syslogok(pp, up))
 			msyslog(LOG_INFO,
 				"%s: cannot disable TCP nagle: %m",
 				refnumtoa(&peer->srcadr));
@@ -1113,7 +1112,7 @@ gpsd_init_socket(
 	/* start a non-blocking connect */
 	rc = connect(up->fdt, ai->ai_addr, ai->ai_addrlen);
 	if (-1 == rc && errno != EINPROGRESS) {
-		if (syslogok(pp, up, TRUE))
+		if (syslogok(pp, up))
 			msyslog(LOG_ERR,
 				"%s: cannot connect GPSD socket: %m",
 				refnumtoa(&peer->srcadr));
@@ -1186,7 +1185,7 @@ gpsd_test_socket(
 		    up->unit, up->fdt, ec, strerror(ec)));
 	if (-1 == rc || 0 != ec) {
 		errno = ec;
-		if (syslogok(pp, up, TRUE))
+		if (syslogok(pp, up))
 			msyslog(LOG_ERR,
 				"%s: (async)cannot connect GPSD socket: %m",
 				refnumtoa(&peer->srcadr));
@@ -1196,7 +1195,7 @@ gpsd_test_socket(
 	pp->io.fd = up->fdt;
 	up->fdt   = -1;
 	if (0 == io_addclock(&pp->io)) {
-		if (syslogok(pp, up, TRUE))
+		if (syslogok(pp, up))
 			msyslog(LOG_ERR,
 				"%s: failed to register with I/O engine",
 				refnumtoa(&peer->srcadr));
