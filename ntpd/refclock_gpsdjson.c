@@ -782,8 +782,14 @@ process_version(
 
 	int    len;
 	char * buf;
+	const char *revision;
+	const char *release;
 
 	/* get protocol version number */
+	revision = json_object_lookup_string_default(
+	    jctx, 0, "rev", "(unknown)");
+	release  = json_object_lookup_string_default(
+	    jctx, 0, "release", "(unknown)");
 	errno = 0;
 	up->proto_major = (uint16_t)json_object_lookup_int(
 		jctx, 0, "proto_major");
@@ -793,8 +799,9 @@ process_version(
 		up->fl_vers = -1;
 		if (syslogok(pp, up))
 			msyslog(LOG_INFO,
-				"%s: GPSD protocol version %u.%u",
+				"%s: GPSD revision=%s release=%s protocol=%u.%u",
 				refnumtoa(&peer->srcadr),
+				revision, release,
 				up->proto_major, up->proto_minor);
 	}
 
