@@ -1,4 +1,5 @@
 * [Bug 2538] NTP programs print exit code in help/usage text.
+* [Bug 2613] www.ntp.org/bugs.html tells folks to email doc bugs to DLM.
 * [Bug 2636] Clutter in syslog if gpsd not running
    - found (hopefully) last cause for clutter in protocol version
    - log GPSD revision and release numbers with protocol version
