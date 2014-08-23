@@ -9,8 +9,6 @@ autogen definitions options;
 prog-name      = "ntpsnmpd";
 prog-title     = "NTP SNMP MIB agent";
 
-test-main;
-
 flag = {
     name      = nofork;
     value     = n;

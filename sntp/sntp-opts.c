@@ -443,42 +443,14 @@ static int const aIpv6CantList[] = {
 /**
  *  Declare option callback procedures
  */
-/* extracted from optmain.tlib near line 723 */
-
-#if defined(TEST_SNTP_OPTS)
-/*
- *  Under test, omit argument processing, or call optionStackArg,
- *  if multiple copies are allowed.
- */
-static tOptProc
-    doOptKeyfile,    doOptKod,        doOptLogfile,    doOptNtpversion,
-    doOptSteplimit,  doUsageOpt;
-
-/*
- *  #define map the "normal" callout procs to the test ones...
- */
-#define DEBUG_LEVEL_OPT_PROC optionStackArg
-
-
-#else /* NOT defined TEST_SNTP_OPTS */
-/*
- *  When not under test, there are different procs to use
- */
 extern tOptProc
     ntpOptionPrintVersion, optionBooleanVal,      optionNestedVal,
     optionNumericVal,      optionPagedUsage,      optionResetOpt,
     optionStackArg,        optionTimeDate,        optionTimeVal,
-    optionUnstackArg,      optionVendorOption,    optionVersionStderr;
+    optionUnstackArg,      optionVendorOption;
 static tOptProc
     doOptDebug_Level, doOptKeyfile,     doOptKod,         doOptLogfile,
     doOptNtpversion,  doOptSteplimit,   doUsageOpt;
-
-/**
- *  #define map the "normal" callout procs
- */
-#define DEBUG_LEVEL_OPT_PROC doOptDebug_Level
-
-#endif /* TEST_SNTP_OPTS */
 #define VER_PROC        ntpOptionPrintVersion
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -556,7 +528,7 @@ static tOptDesc optDesc[OPTION_CT] = {
      /* last opt argumnt */ { NULL }, /* --debug-level */
      /* arg list/cookie  */ NULL,
      /* must/cannot opts */ NULL, NULL,
-     /* option proc      */ DEBUG_LEVEL_OPT_PROC,
+     /* option proc      */ doOptDebug_Level,
      /* desc, NAME, name */ DEBUG_LEVEL_DESC, DEBUG_LEVEL_NAME, DEBUG_LEVEL_name,
      /* disablement strs */ NULL, NULL },
 
@@ -827,8 +799,6 @@ doUsageOpt(tOptions * opts, tOptDesc * od)
     (void)od;
 }
 
-#if ! defined(TEST_SNTP_OPTS)
-
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 /**
  * Code to handle the debug-level option.
@@ -850,7 +820,6 @@ OPT_VALUE_SET_DEBUG_LEVEL++;
     (void)pOptDesc;
     (void)pOptions;
 }
-#endif /* defined(TEST_SNTP_OPTS) */
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 /**
@@ -1001,32 +970,6 @@ doOptNtpversion(tOptions* pOptions, tOptDesc* pOptDesc)
  emit_ranges:
     optionShowRange(pOptions, pOptDesc, (void *)rng, 1);
 }
-/* extracted from optmain.tlib near line 46 */
-
-#if defined(TEST_SNTP_OPTS) /* TEST-MAIN-PROCEDURE: */
-
-extern void optionPutShell(tOptions*);
-
-/**
- * Generated main procedure.  This will emit text that a Bourne shell can
- * process to handle its command line arguments.
- *
- * @param[in] argc argument count
- * @param[in] argv argument vector
- * @returns program exit code
- */
-int
-main(int argc, char ** argv)
-{
-    int res = SNTP_EXIT_SUCCESS;
-    (void)optionProcess(&sntpOptions, argc, argv);
-    optionPutShell(&sntpOptions);
-    res = ferror(stdout);
-    if (res != 0)
-        fputs("output error writing to stdout\n", stderr);
-    return res;
-}
-#endif  /* TEST_SNTP_OPTS END-TEST-MAIN-PROCEDURE */
 /* extracted from optmain.tlib near line 1245 */
 
 /**
@@ -1073,8 +1016,7 @@ tOptions sntpOptions = {
     + OPTPROC_NO_REQ_OPT
     + OPTPROC_NEGATIONS
     + OPTPROC_ENVIRON
-    + OPTPROC_MISUSE
-    + OPTPROC_SHELL_OUTPUT ),
+    + OPTPROC_MISUSE ),
     0, NULL,                    /* current option index, current option */
     NULL,         NULL,         zPROGNAME,
     zRcName,      zCopyright,   zLicenseDescrip,

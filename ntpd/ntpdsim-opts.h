@@ -107,9 +107,9 @@ typedef enum {
 /** count of all options for ntpdsim */
 #define OPTION_CT    39
 /** ntpdsim version */
-#define NTPDSIM_VERSION       "4.2.7p459"
+#define NTPDSIM_VERSION       "4.2.7p464"
 /** Full ntpdsim version text */
-#define NTPDSIM_FULL_VERSION  "ntpdsim 4.2.7p459"
+#define NTPDSIM_FULL_VERSION  "ntpdsim 4.2.7p464"
 
 /**
  *  Interface defines for all options.  Replace "n" with the UPPER_CASED

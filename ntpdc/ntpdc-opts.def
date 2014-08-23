@@ -11,8 +11,6 @@ argument       = '[ host ...]';
 
 #include homerc.def
 
-test-main;
-
 flag = {
     name      = ipv4;
     value     = 4;

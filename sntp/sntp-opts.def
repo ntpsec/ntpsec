@@ -19,8 +19,6 @@ environrc;
 
 #include version.def
 
-test-main;
-
 flag = {
   name		= ipv4;
   value		= 4;

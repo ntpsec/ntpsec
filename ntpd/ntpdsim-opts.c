@@ -75,7 +75,7 @@ extern FILE * option_usage_fp;
  *  static const strings for ntpdsim options
  */
 static char const ntpdsim_opt_strs[3124] =
-/*     0 */ "ntpdsim 4.2.7p459\n"
+/*     0 */ "ntpdsim 4.2.7p464\n"
             "Copyright (C) 1970-2014 The University of Delaware, all rights reserved.\n"
             "This is free software. It is licensed for use, modification and\n"
             "redistribution under the terms of the NTP License, copies of which\n"
@@ -207,14 +207,14 @@ static char const ntpdsim_opt_strs[3124] =
 /*  2916 */ "no-load-opts\0"
 /*  2929 */ "no\0"
 /*  2932 */ "NTPDSIM\0"
-/*  2940 */ "ntpdsim - NTP daemon simulation program - Ver. 4.2.7p459\n"
+/*  2940 */ "ntpdsim - NTP daemon simulation program - Ver. 4.2.7p464\n"
             "Usage:  %s [ -<flag> [<val>] | --<name>[{=| }<val>] ]...\n\0"
 /*  3055 */ "$HOME\0"
 /*  3061 */ ".\0"
 /*  3063 */ ".ntprc\0"
 /*  3070 */ "http://bugs.ntp.org, bugs@ntp.org\0"
 /*  3104 */ "\n\0"
-/*  3106 */ "ntpdsim 4.2.7p459";
+/*  3106 */ "ntpdsim 4.2.7p464";
 
 /**
  *  ipv4 option description with
@@ -779,40 +779,13 @@ static int const aWait_SyncCantList[] = {
 /**
  *  Declare option callback procedures
  */
-/* extracted from optmain.tlib near line 723 */
-
-#if defined(TEST_NTPDSIM_OPTS)
-/*
- *  Under test, omit argument processing, or call optionStackArg,
- *  if multiple copies are allowed.
- */
-static tOptProc
-    doUsageOpt;
-
-/*
- *  #define map the "normal" callout procs to the test ones...
- */
-#define DEBUG_LEVEL_OPT_PROC optionStackArg
-
-
-#else /* NOT defined TEST_NTPDSIM_OPTS */
-/*
- *  When not under test, there are different procs to use
- */
 extern tOptProc
     ntpOptionPrintVersion, optionBooleanVal,      optionNestedVal,
     optionNumericVal,      optionPagedUsage,      optionResetOpt,
     optionStackArg,        optionTimeDate,        optionTimeVal,
-    optionUnstackArg,      optionVendorOption,    optionVersionStderr;
+    optionUnstackArg,      optionVendorOption;
 static tOptProc
     doOptDebug_Level, doUsageOpt;
-
-/**
- *  #define map the "normal" callout procs
- */
-#define DEBUG_LEVEL_OPT_PROC doOptDebug_Level
-
-#endif /* TEST_NTPDSIM_OPTS */
 #define VER_PROC        ntpOptionPrintVersion
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -902,7 +875,7 @@ static tOptDesc optDesc[OPTION_CT] = {
      /* last opt argumnt */ { NULL }, /* --debug-level */
      /* arg list/cookie  */ NULL,
      /* must/cannot opts */ NULL, NULL,
-     /* option proc      */ DEBUG_LEVEL_OPT_PROC,
+     /* option proc      */ doOptDebug_Level,
      /* desc, NAME, name */ DEBUG_LEVEL_DESC, DEBUG_LEVEL_NAME, DEBUG_LEVEL_name,
      /* disablement strs */ NULL, NULL },
 
@@ -1353,8 +1326,6 @@ doUsageOpt(tOptions * opts, tOptDesc * od)
     (void)od;
 }
 
-#if ! defined(TEST_NTPDSIM_OPTS)
-
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 /**
  * Code to handle the debug-level option.
@@ -1376,33 +1347,6 @@ OPT_VALUE_SET_DEBUG_LEVEL++;
     (void)pOptDesc;
     (void)pOptions;
 }
-#endif /* defined(TEST_NTPDSIM_OPTS) */
-/* extracted from optmain.tlib near line 46 */
-
-#if defined(TEST_NTPDSIM_OPTS) /* TEST-MAIN-PROCEDURE: */
-
-extern void optionPutShell(tOptions*);
-
-/**
- * Generated main procedure.  This will emit text that a Bourne shell can
- * process to handle its command line arguments.
- *
- * @param[in] argc argument count
- * @param[in] argv argument vector
- * @returns program exit code
- */
-int
-main(int argc, char ** argv)
-{
-    int res = NTPDSIM_EXIT_SUCCESS;
-    (void)optionProcess(&ntpdsimOptions, argc, argv);
-    optionPutShell(&ntpdsimOptions);
-    res = ferror(stdout);
-    if (res != 0)
-        fputs("output error writing to stdout\n", stderr);
-    return res;
-}
-#endif  /* TEST_NTPDSIM_OPTS END-TEST-MAIN-PROCEDURE */
 /* extracted from optmain.tlib near line 1245 */
 
 /**
@@ -1449,8 +1393,7 @@ tOptions ntpdsimOptions = {
     + OPTPROC_NO_REQ_OPT
     + OPTPROC_ENVIRON
     + OPTPROC_NO_ARGS
-    + OPTPROC_MISUSE
-    + OPTPROC_SHELL_OUTPUT ),
+    + OPTPROC_MISUSE ),
     0, NULL,                    /* current option index, current option */
     NULL,         NULL,         zPROGNAME,
     zRcName,      zCopyright,   zLicenseDescrip,
@@ -1603,7 +1546,7 @@ static void bogus_function(void) {
      translate option names.
    */
   /* referenced via ntpdsimOptions.pzCopyright */
-  puts(_("ntpdsim 4.2.7p459\n\
+  puts(_("ntpdsim 4.2.7p464\n\
 Copyright (C) 1970-2014 The University of Delaware, all rights reserved.\n\
 This is free software. It is licensed for use, modification and\n\
 redistribution under the terms of the NTP License, copies of which\n\
@@ -1746,14 +1689,14 @@ provided \"as is\" without express or implied warranty.\n"));
   puts(_("load options from a config file"));
 
   /* referenced via ntpdsimOptions.pzUsageTitle */
-  puts(_("ntpdsim - NTP daemon simulation program - Ver. 4.2.7p459\n\
+  puts(_("ntpdsim - NTP daemon simulation program - Ver. 4.2.7p464\n\
 Usage:  %s [ -<flag> [<val>] | --<name>[{=| }<val>] ]...\n"));
 
   /* referenced via ntpdsimOptions.pzDetail */
   puts(_("\n"));
 
   /* referenced via ntpdsimOptions.pzFullVersion */
-  puts(_("ntpdsim 4.2.7p459"));
+  puts(_("ntpdsim 4.2.7p464"));
 
   /* referenced via ntpdsimOptions.pzFullUsage */
   puts(_("<<<NOT-FOUND>>>"));

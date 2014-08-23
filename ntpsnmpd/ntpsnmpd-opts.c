@@ -180,28 +180,13 @@ static char const ntpsnmpd_opt_strs[1560] =
 /**
  *  Declare option callback procedures
  */
-/* extracted from optmain.tlib near line 723 */
-
-#if defined(TEST_NTPSNMPD_OPTS)
-/*
- *  Under test, omit argument processing, or call optionStackArg,
- *  if multiple copies are allowed.
- */
-static tOptProc
-    doUsageOpt;
-
-#else /* NOT defined TEST_NTPSNMPD_OPTS */
-/*
- *  When not under test, there are different procs to use
- */
 extern tOptProc
     ntpOptionPrintVersion, optionBooleanVal,      optionNestedVal,
     optionNumericVal,      optionPagedUsage,      optionResetOpt,
     optionStackArg,        optionTimeDate,        optionTimeVal,
-    optionUnstackArg,      optionVendorOption,    optionVersionStderr;
+    optionUnstackArg,      optionVendorOption;
 static tOptProc
     doUsageOpt;
-#endif /* TEST_NTPSNMPD_OPTS */
 #define VER_PROC        ntpOptionPrintVersion
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -369,32 +354,6 @@ doUsageOpt(tOptions * opts, tOptDesc * od)
     (void)opts;
     (void)od;
 }
-/* extracted from optmain.tlib near line 46 */
-
-#if defined(TEST_NTPSNMPD_OPTS) /* TEST-MAIN-PROCEDURE: */
-
-extern void optionPutShell(tOptions*);
-
-/**
- * Generated main procedure.  This will emit text that a Bourne shell can
- * process to handle its command line arguments.
- *
- * @param[in] argc argument count
- * @param[in] argv argument vector
- * @returns program exit code
- */
-int
-main(int argc, char ** argv)
-{
-    int res = NTPSNMPD_EXIT_SUCCESS;
-    (void)optionProcess(&ntpsnmpdOptions, argc, argv);
-    optionPutShell(&ntpsnmpdOptions);
-    res = ferror(stdout);
-    if (res != 0)
-        fputs("output error writing to stdout\n", stderr);
-    return res;
-}
-#endif  /* TEST_NTPSNMPD_OPTS END-TEST-MAIN-PROCEDURE */
 /* extracted from optmain.tlib near line 1245 */
 
 /**
@@ -441,8 +400,7 @@ tOptions ntpsnmpdOptions = {
     + OPTPROC_NO_REQ_OPT
     + OPTPROC_ENVIRON
     + OPTPROC_NO_ARGS
-    + OPTPROC_MISUSE
-    + OPTPROC_SHELL_OUTPUT ),
+    + OPTPROC_MISUSE ),
     0, NULL,                    /* current option index, current option */
     NULL,         NULL,         zPROGNAME,
     zRcName,      zCopyright,   zLicenseDescrip,

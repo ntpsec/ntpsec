@@ -7,7 +7,7 @@ bin_SCRIPTS =	$(NTPTRACE_DB)
 libexec_SCRIPTS =	$(NTPTRACE_DL)
 sbin_SCRIPTS =	$(NTPTRACE_DS)
 
-run_ag=		cd $(srcdir) &&	env PATH="$(abs_builddir):$(PATH)" PERL5LIB="$(abs_top_srcdir)/scripts/lib"	\
+run_ag=		cd $(srcdir) &&	env PATH="$(abs_builddir):$(PATH)" PERL5LIB="$(abs_top_srcdir)/scripts/lib" AUTOGEN_DNE_DATE=-D	\
 		autogen -L ../../sntp/include -L ../../sntp/ag-tpl \
 		--writable
 std_def_list =							\

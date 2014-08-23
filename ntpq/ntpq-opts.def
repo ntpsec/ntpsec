@@ -10,8 +10,6 @@ prog-name      = "ntpq";
 prog-title     = "standard NTP query program";
 argument       = '[ host ...]';
 
-test-main;
-
 flag = {
     name      = ipv4;
     flags-cant = ipv6;

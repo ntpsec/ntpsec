@@ -11,8 +11,6 @@ package		= ntp;
 long-opts;
 gnu-usage;
 
-test-main;
-
 flag = {
     name        = tries;
     value       = n;
