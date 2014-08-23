@@ -44,7 +44,7 @@ sub processOptions {
         'help|?', 'more-help'));
 
     $usage = <<'USAGE';
-summary - compute various stastics from NTP stat files - Ver. 4.2.7p464
+summary - compute various stastics from NTP stat files - Ver. 4.2.7p465
 USAGE: summary [ -<flag> [<val>] | --<name>[{=| }<val>] ]... 
 
         --directory=str          Directory containing stat files

@@ -10,11 +10,11 @@
 .ds B-Font B
 .ds I-Font I
 .ds R-Font R
-.TH ntpd 1ntpdman "22 Aug 2014" "4.2.7p464" "User Commands"
+.TH ntpd 1ntpdman "23 Aug 2014" "4.2.7p465" "User Commands"
 .\"
-.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-Vcaihq/ag-7caigq)
+.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-QnaGTq/ag-3naGSq)
 .\"
-.\" It has been AutoGen-ed August 22, 2014 at 08:55:41 AM by AutoGen 5.18.4pre14
+.\" It has been AutoGen-ed August 23, 2014 at 08:55:59 AM by AutoGen 5.18.4pre24
 .\" From the definitions ntpd-opts.def
 .\" and the template file agman-cmd.tpl
 .SH NAME
@@ -434,11 +434,11 @@ by loading values from environment variables named:
   \fBNTPD_<option-name>\fP or \fBNTPD\fP
 .fi
 .ad
-.TH ntpd 1ntpdman "22 Aug 2014" "4.2.7p464" "User Commands"
+.TH ntpd 1ntpdman "23 Aug 2014" "4.2.7p465" "User Commands"
 .\"
-.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-Vcaihq/ag-7caigq)
+.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-QnaGTq/ag-3naGSq)
 .\"
-.\" It has been AutoGen-ed August 22, 2014 at 08:55:41 AM by AutoGen 5.18.4pre14
+.\" It has been AutoGen-ed August 23, 2014 at 08:55:59 AM by AutoGen 5.18.4pre24
 .\" From the definitions ntpd-opts.def
 .\" and the template file agman-cmd.tpl
 .SH NAME
@@ -620,6 +620,13 @@ in the past many startup scripts would run
 to get the system clock close to correct before starting
 \fCntpd\fR(1ntpdmdoc)\f[],
 but this was never more than a mediocre hack and is no longer needed.
+If you are following the instructions in
+\fIStarting NTP (Best Current Practice)\f[]
+and you still need to set the system time before starting
+\f\*[B-Font]ntpd\fP,
+please open a bug report and document what is going on,
+and then look at using
+\fCsntp\fR(1sntpmdoc)\f[].
 .sp \n(Ppu
 .ne 2
 
@@ -755,16 +762,17 @@ to 1024s in order to reduce network overhead.
 
 In some cases it may not be practical for
 \f\*[B-Font]ntpd\fP
-to run
-continuously.
+to run continuously.
 A common workaround has been to run the
 \fCntpdate\fR(1ntpdatemdoc)\f[]
-program from a
+or
+\fCsntp\fR(1sntpmdoc)\f[]
+programs from a
 \fCcron\fR(8)\f[]
 job at designated
 times.
-However, this program does not have the crafted signal
-processing, error checking and mitigation algorithms of
+However, these programs do not have the crafted signal
+processing, error checking or mitigation algorithms of
 \f\*[B-Font]ntpd\fP.
 The
 \f\*[B-Font]\-q\f[]
@@ -788,7 +796,7 @@ couple of minutes, the daemon times out and exits.
 After a suitable
 period of mourning, the
 \fCntpdate\fR(1ntpdatemdoc)\f[]
-program may be
+program will be
 retired.
 .sp \n(Ppu
 .ne 2
@@ -933,7 +941,8 @@ it to autogen-users@lists.sourceforge.net.  Thank you.
 \fCntp.conf\fR(5)\f[],
 \fCntpdate\fR(1ntpdatemdoc)\f[],
 \fCntpdc\fR(1ntpdcmdoc)\f[],
-\fCntpq\fR(1ntpqmdoc)\f[]
+\fCntpq\fR(1ntpqmdoc)\f[],
+\fCsntp\fR(1sntpmdoc)\f[]
 .sp \n(Ppu
 .ne 2
 

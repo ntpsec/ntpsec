@@ -1,3 +1,4 @@
+(4.2.7p465) 2014/08/23 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 2538] NTP programs print exit code in help/usage text.
 * [Bug 2595] Man page quirks: ntpdate references in ntpd.
 * [Bug 2613] www.ntp.org/bugs.html tells folks to email doc bugs to DLM.
