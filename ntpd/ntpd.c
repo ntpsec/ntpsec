@@ -1008,8 +1008,12 @@ getgroup:
 /* libssecomp sandboxing */
 #if defined (LIBSECCOMP)
 	scmp_filter_ctx ctx;
+
 	if ((ctx = seccomp_init(SCMP_ACT_KILL)) < 0)
-		msyslog(LOG_ERR, "%s:libseccomp activation failed", __func__);
+		msyslog(LOG_ERR, "%s: seccomp_init(SCMP_ACT_KILL) failed: %m", __func__);
+	else {
+		DPRINTF(1, ("%s: seccomp_init(SCMP_ACT_KILL) succeeded\n", __func__));
+	}
 
 #ifdef __x86_64__
 int scmp_sc[] = {
@@ -1091,15 +1095,18 @@ int scmp_sc[] = {
 			if (seccomp_rule_add(ctx,
 			    SCMP_ACT_ALLOW, scmp_sc[i], 0) < 0) {
 				msyslog(LOG_ERR,
-				    "%s:libseccomp rule failed: %m",
+				    "%s: seccomp_rule_add() failed: %m",
 				    __func__);
 			}
 		}
 	}
 
 	if (seccomp_load(ctx) < 0)
-		msyslog(LOG_ERR, "%s:libseccomp unable to load filter: %m",
+		msyslog(LOG_ERR, "%s: seccomp_load() failed: %m",
 		    __func__);	
+	else {
+		DPRINTF(1, ("%s: libseccomp filter loaded.\n", __func__));
+	}
 #endif /* LIBSECCOMP */
 
 # ifdef HAVE_IO_COMPLETION_PORT

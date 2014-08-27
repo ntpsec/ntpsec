@@ -1,3 +1,4 @@
+* [Bug 2536] ntpd sandboxing support (libseccomp2) cleanup.
 (4.2.7p465) 2014/08/23 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 2538] NTP programs print exit code in help/usage text.
 * [Bug 2595] Man page quirks: ntpdate references in ntpd.
