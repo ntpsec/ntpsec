@@ -10,9 +10,9 @@
 .ds B-Font B
 .ds I-Font I
 .ds R-Font R
-.TH summary 1summaryman "23 Aug 2014" "ntp (4.2.7p465)" "User Commands"
+.TH summary 1summaryman "27 Aug 2014" "ntp (4.2.7p466)" "User Commands"
 .\"
-.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-nyaa9m/ag-Ayaq8m)
+.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-jVai7S/ag-wVay6S)
 .\"
 .\" It has been AutoGen-ed
 .\" From the definitions summary-opts.def
@@ -105,9 +105,9 @@ Output version of program and exit.  The default mode is `v', a simple
 version.  The `c' mode will print copyright information and `n' will
 print the full copyright notice.
 .PP
-.TH summary 1summaryman "23 Aug 2014" "ntp (4.2.7p465)" "User Commands"
+.TH summary 1summaryman "27 Aug 2014" "ntp (4.2.7p466)" "User Commands"
 .\"
-.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-nyaa9m/ag-Ayaq8m)
+.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-jVai7S/ag-wVay6S)
 .\"
 .\" It has been AutoGen-ed
 .\" From the definitions summary-opts.def
