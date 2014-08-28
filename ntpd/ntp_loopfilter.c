@@ -527,6 +527,9 @@ local_clock(
 			    dtemp);
 			ntv.constant = sys_poll - 4;
 #endif /* STA_NANO */
+			if (ntv.constant < 0)
+				ntv.constant = 0;
+
 			ntv.esterror = (u_int32)(clock_jitter * 1e6);
 			ntv.maxerror = (u_int32)((sys_rootdelay / 2 +
 			    sys_rootdisp) * 1e6);
