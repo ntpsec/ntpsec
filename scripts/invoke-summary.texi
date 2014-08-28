@@ -42,7 +42,7 @@ with a status code of 0.
 
 @exampleindent 0
 @example
-summary - compute various stastics from NTP stat files - Ver. 4.2.7p466
+summary - compute various stastics from NTP stat files - Ver. 4.2.7p467
 USAGE: summary [ -<flag> [<val>] | --<name>[@{=| @}<val>] ]... 
 
         --directory=str          Directory containing stat files
