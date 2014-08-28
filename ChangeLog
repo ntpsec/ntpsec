@@ -1,3 +1,4 @@
+* [Bug 2639] Check return value of ntp_adjtime().
 (4.2.7p466) 2014/08/27 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 2536] ntpd sandboxing support (libseccomp2) cleanup.
 (4.2.7p465) 2014/08/23 Released by Harlan Stenn <stenn@ntp.org>

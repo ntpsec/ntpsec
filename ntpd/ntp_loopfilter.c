@@ -557,6 +557,8 @@ local_clock(
 		 * Pass the stuff to the kernel. If it squeals, turn off
 		 * the pps. In any case, fetch the kernel offset,
 		 * frequency and jitter.
+		 *
+		 * XXX: HMS: What if ntp_adjtime() returns -1?
 		 */
 		if (ntp_adjtime(&ntv) == TIME_ERROR) {
 			if (pps_enable && !(ntv.status & STA_PPSSIGNAL))
@@ -589,10 +591,14 @@ local_clock(
 		 * If the TAI changes, update the kernel TAI.
 		 */
 		if (loop_tai != sys_tai) {
-			loop_tai = sys_tai;
+			loop_tai = sys_tai; /* XXX: HMS: what if ntp_adjtime fails? */
 			ntv.modes = MOD_TAI;
 			ntv.constant = sys_tai;
-			ntp_adjtime(&ntv);
+			if (ntp_adjtime(&ntv) == -1) {
+				msyslog(LOG_ERR,
+				    "%s: ntp_adjtime(TAI) failed: %m",
+				    __func__);
+			}
 		}
 #endif /* STA_NANO */
 	}
@@ -826,7 +832,10 @@ set_freq(
 			loop_desc = "kernel";
 			ntv.freq = DTOFREQ(drift_comp);
 		}
-		ntp_adjtime(&ntv);
+		if (ntp_adjtime(&ntv) == -1)
+			msyslog(LOG_ERR,
+			    "%s: ntp_adjtime() failed: %m",
+			    __func__);
 	}
 #endif /* KERNEL_PLL */
 	mprintf_event(EVNT_FSET, NULL, "%s %.3f PPM", loop_desc,
@@ -859,8 +868,13 @@ start_kern_loop(void)
 		msyslog(LOG_ERR, "sigaction() trap SIGSYS: %m");
 		pll_control = FALSE;
 	} else {
-		if (sigsetjmp(env, 1) == 0)
-			ntp_adjtime(&ntv);
+		if (sigsetjmp(env, 1) == 0) {
+			if (ntp_adjtime(&ntv) == -1) {
+				msyslog(LOG_ERR,
+				    "%s: ntp_adjtime() failed: %m",
+				    __func__);
+			}
+		}
 		if (sigaction(SIGSYS, &sigsys, NULL)) {
 			msyslog(LOG_ERR,
 			    "sigaction() restore SIGSYS: %m");
@@ -868,7 +882,11 @@ start_kern_loop(void)
 		}
 	}
 #else /* SIGSYS */
-	ntp_adjtime(&ntv);
+	if (ntp_adjtime(&ntv) == -1) {
+		msyslog(LOG_ERR,
+		    "%s: ntp_adjtime(TAI) failed: %m",
+		    __func__);
+	}
 #endif /* SIGSYS */
 
 	/*
