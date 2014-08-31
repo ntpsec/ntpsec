@@ -44,7 +44,7 @@ monitor the operational status
 and determine the performance of
 <code>ntpd</code>, the NTP daemon.
 
-  <p>This document applies to version 4.2.7p467 of <code>ntpq</code>.
+  <p>This document applies to version 4.2.7p468 of <code>ntpq</code>.
 
 <ul class="menu">
 <li><a accesskey="1" href="#ntpq-Description">ntpq Description</a>
@@ -342,7 +342,7 @@ to the server as run-time configuration commands in the same format as a line in
 <br><dt><code>kerninfo</code><dd>Display kernel loop and PPS statistics. As with other ntpq output, times are in milliseconds. The precision value displayed is in milliseconds as well, unlike the precision system variable. 
 <br><dt><code>lassociations</code><dd>Perform the same function as the associations command, except display mobilized and unmobilized associations. 
 <br><dt><code>monstats</code><dd>Display monitor facility statistics. 
-<br><dt><code>mrulist</code> <code>[limited | kod | mincount=</code><kbd>count</kbd><code> | </code><kbd>laddr</kbd><code>=</code><kbd>localaddr</kbd><code> | </code><kbd>sort</kbd><code>=</code><kbd>sortorder</kbd><code> | </code><kbd>resany</kbd><code>=</code><kbd>hexmask</kbd><code> | </code><kbd>resall</kbd><code>=</code><kbd>hexmask</kbd><code>]</code><dd>Obtain and print traffic counts collected and maintained by the monitor facility. 
+<br><dt><code>mrulist</code> <code>[limited | kod | mincount=</code><kbd>count</kbd><code> | laddr=</code><kbd>localaddr</kbd><code> | sort=</code><kbd>sortorder</kbd><code> | resany=</code><kbd>hexmask</kbd><code> | resall=</code><kbd>hexmask</kbd><code>]</code><dd>Obtain and print traffic counts collected and maintained by the monitor facility. 
 With the exception of
 <code>sort</code>=<kbd>sortorder</kbd>,
 the options filter the list returned by
@@ -714,7 +714,7 @@ the usage text by passing it through a pager program.
 used to select the program, defaulting to <span class="file">more</span>.  Both will exit
 with a status code of 0.
 
-<pre class="example">ntpq - standard NTP query program - Ver. 4.2.7p466
+<pre class="example">ntpq - standard NTP query program - Ver. 4.2.7p467
 Usage:  ntpq [ -&lt;flag&gt; [&lt;val&gt;] | --&lt;name&gt;[{=| }&lt;val&gt;] ]... [ host ...]
   Flg Arg Option-Name    Description
    -4 no  ipv4           Force IPv4 DNS name resolution

@@ -10,11 +10,11 @@
 .ds B-Font B
 .ds I-Font I
 .ds R-Font R
-.TH ntpq @NTPQ_MS@ "31 Aug 2014" "4.2.7p467" "User Commands"
+.TH ntpq @NTPQ_MS@ "31 Aug 2014" "4.2.7p468" "User Commands"
 .\"
-.\" EDIT THIS FILE WITH CAUTION (in-mem file)
+.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-2eaOfS/ag-cfaGeS)
 .\"
-.\" It has been AutoGen-ed August 31, 2014 at 04:55:11 AM by AutoGen 5.18.4
+.\" It has been AutoGen-ed August 31, 2014 at 08:58:22 AM by AutoGen 5.18.4
 .\" From the definitions ntpq-opts.def
 .\" and the template file agman-cmd.tpl
 .SH NAME
@@ -1272,6 +1272,47 @@ the configuration files.
 The \fIhomerc\fP files are "\fI$HOME\fP", and "\fI.\fP".
 If any of these are directories, then the file \fI.ntprc\fP
 is searched for within those directories.
+.TH ntpq @NTPQ_MS@ "31 Aug 2014" "4.2.7p468" "User Commands"
+.\"
+.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-2eaOfS/ag-cfaGeS)
+.\"
+.\" It has been AutoGen-ed August 31, 2014 at 08:58:22 AM by AutoGen 5.18.4
+.\" From the definitions ntpq-opts.def
+.\" and the template file agman-cmd.tpl
+.SH NAME
+\f\*[B-Font]ntpq\fP ntpq
+\- standard NTP query program
+{
+    cvt_prog='/usr/local/gnu/share/autogen/texi2man'
+    cvt_prog=`cd \`dirname "$cvt_prog"\` >/dev/null && pwd
+         `/`basename "$cvt_prog"`
+    cd $tmp_dir
+    test \-x "$cvt_prog" || die "'$cvt_prog' is not executable"
+    list='synopsis description options option-presets'
+    for f in $list
+    do  test \-f $f && {
+            cat $f ; echo
+        }
+    done > .doc
+    rm \-f $list name
+    list='implementation-notes environment files examples exit-status errors
+        compatibility see-also conforming-to history authors copyright bugs
+        notes'
+    for f in $list
+    do  test \-f $f && {
+            cat $f ; echo
+        }
+    done > .end-doc
+    rm \-f $list
+    list=`ls \-1 *`' .end-doc'
+    for f in $list
+    do  test \-f $f && {
+            cat $f ; echo
+        }
+    done >> .doc
+    rm \-f $list
+} 2>/dev/null
+/opt/csw/bin/ggrep \-E \-v '^[ 	]*$' .doc | $cvt_prog > .final-doc
 .SH "ENVIRONMENT"
 See \fBOPTION PRESETS\fP for configuration environment variables.
 .SH "FILES"
