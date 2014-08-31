@@ -410,7 +410,7 @@ Display kernel loop and PPS statistics. As with other ntpq output, times are in 
 Perform the same function as the associations command, except display mobilized and unmobilized associations.
 .It Ic monstats
 Display monitor facility statistics.
-.It Ic mrulist Oo limited | kod | mincount Ns = Ns Ar count | laddr Ns = Ns Ar localaddr | sort Ns = Ns Ar sortorder | resany Ns = Ns Ar hexmask | resall Ns = Ns Ar hexmask Oc
+.It Ic mrulist Oo Ic limited | Ic kod | Ic mincount Ns = Ns Ar count | Ic laddr Ns = Ns Ar localaddr | Ic sort Ns = Ns Ar sortorder | Ic resany Ns = Ns Ar hexmask | Ic resall Ns = Ns Ar hexmask Oc
 Obtain and print traffic counts collected and maintained by the monitor facility.
 With the exception of
 .Cm sort Ns = Ns Ar sortorder ,
