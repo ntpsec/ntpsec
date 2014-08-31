@@ -1,4 +1,5 @@
 * [Bug 2556] ntpq man page cleanup.
+* autogen-5.18.4
 (4.2.7p467) 2014/08/28 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 2639] Check return value of ntp_adjtime().
 * [Bug 2640] STA_NANO can result in invalid ntv.constant.

@@ -10,11 +10,11 @@
 .ds B-Font B
 .ds I-Font I
 .ds R-Font R
-.TH ntp-wait 1ntp-waitman "28 Aug 2014" "ntp (4.2.7p467)" "User Commands"
+.TH ntp-wait 1ntp-waitman "31 Aug 2014" "ntp (4.2.7p467)" "User Commands"
 .\"
-.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-G2aqn3/ag-T2aGm3)
+.\" EDIT THIS FILE WITH CAUTION (in-mem file)
 .\"
-.\" It has been AutoGen-ed August 28, 2014 at 08:51:12 AM by AutoGen 5.18.4pre24
+.\" It has been AutoGen-ed August 31, 2014 at 04:53:02 AM by AutoGen 5.18.4
 .\" From the definitions ntp-wait-opts.def
 .\" and the template file agman-cmd.tpl
 .SH NAME
@@ -97,35 +97,6 @@ Output version of program and exit.  The default mode is `v', a simple
 version.  The `c' mode will print copyright information and `n' will
 print the full copyright notice.
 .PP
-.TH ntp-wait 1ntp-waitman "28 Aug 2014" "ntp (4.2.7p467)" "User Commands"
-.\"
-.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-G2aqn3/ag-T2aGm3)
-.\"
-.\" It has been AutoGen-ed August 28, 2014 at 08:51:12 AM by AutoGen 5.18.4pre24
-.\" From the definitions ntp-wait-opts.def
-.\" and the template file agman-cmd.tpl
-.SH NAME
-\f\*[B-Font]ntp-wait\fP ntp-wait
-\- Wait for ntpd to stabilize the system clock
-cvt_prog='/usr/local/gnu/share/autogen/texi2man'
-cvt_prog=`cd \`dirname "$cvt_prog"\` >/dev/null && pwd
-         `/`basename "$cvt_prog"`
-cd $tmp_dir
-test \-x "$cvt_prog" || die "'$cvt_prog' is not executable"
-{
-    list='synopsis description options option-presets'
-    for f in $list ; do cat $f ; echo ; done
-    rm \-f $list name
-    list='implementation-notes environment files examples exit-status errors
-        compatibility see-also conforming-to history authors copyright bugs
-        notes'
-    for f in $list ; do cat $f ; echo ; done > .end-doc
-    rm \-f $list
-    list=`ls \-1 *`' .end-doc'
-    for f in $list ; do cat $f ; echo ; done
-    rm \-f $list
-} 1>.doc 2>/dev/null
-/opt/csw/bin/ggrep \-E \-v '^[ 	]*$' .doc | $cvt_prog
 .SH "EXIT STATUS"
 One of the following exit values will be returned:
 .TP

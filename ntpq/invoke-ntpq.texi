@@ -6,7 +6,7 @@
 #
 # EDIT THIS FILE WITH CAUTION  (invoke-ntpq.texi)
 #
-# It has been AutoGen-ed  August 28, 2014 at 08:56:54 AM by AutoGen 5.18.4pre24
+# It has been AutoGen-ed  August 31, 2014 at 04:55:09 AM by AutoGen 5.18.4
 # From the definitions    ntpq-opts.def
 # and the template file   agtexi-cmd.tpl
 @end ignore
@@ -294,7 +294,7 @@ Display kernel loop and PPS statistics. As with other ntpq output, times are in 
 Perform the same function as the associations command, except display mobilized and unmobilized associations.
 @item @code{monstats}
 Display monitor facility statistics.
-@item @code{mrulist} @code{[limited | kod | mincount=@kbd{count} | @kbd{laddr}=@kbd{localaddr} | @kbd{sort}=@kbd{sortorder} | @kbd{resany}=@kbd{hexmask} | @kbd{resall}=@kbd{hexmask}]}
+@item @code{mrulist} @code{[@code{limited} | @code{kod} | @code{mincount}=@kbd{count} | @code{laddr}=@kbd{localaddr} | @code{sort}=@kbd{sortorder} | @code{resany}=@kbd{hexmask} | @code{resall}=@kbd{hexmask}]}
 Obtain and print traffic counts collected and maintained by the monitor facility.
 With the exception of
 @code{sort}=@kbd{sortorder},
