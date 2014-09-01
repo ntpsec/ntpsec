@@ -1012,7 +1012,7 @@ getgroup:
 	if ((ctx = seccomp_init(SCMP_ACT_KILL)) < 0)
 		msyslog(LOG_ERR, "%s: seccomp_init(SCMP_ACT_KILL) failed: %m", __func__);
 	else {
-		DPRINTF(1, ("%s: seccomp_init(SCMP_ACT_KILL) succeeded\n", __func__));
+		msyslog(LOG_DEBUG, "%s: seccomp_init(SCMP_ACT_KILL) succeeded", __func__);
 	}
 
 #ifdef __x86_64__
@@ -1105,7 +1105,7 @@ int scmp_sc[] = {
 		msyslog(LOG_ERR, "%s: seccomp_load() failed: %m",
 		    __func__);	
 	else {
-		DPRINTF(1, ("%s: libseccomp filter loaded.\n", __func__));
+		msyslog(LOG_DEBUG, "%s: seccomp_load() succeeded", __func__);
 	}
 #endif /* LIBSECCOMP */
 
