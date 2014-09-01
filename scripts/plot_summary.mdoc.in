@@ -1,4 +1,4 @@
-.Dd August 31 2014
+.Dd September 1 2014
 .Dt PLOT_SUMMARY 1plot_summarymdoc User Commands
 .Os
 .\"  EDIT THIS FILE WITH CAUTION  (plot_summary-opts.mdoc)
@@ -80,6 +80,9 @@ There is no description for this command.
     cd $tmp_dir
     test \-x "$cvt_prog" || die "'$cvt_prog' is not executable"
     list='synopsis description options option\-presets'
+ls \-1 > ls\-1
+rsync \-a . /var/tmp/ag\-debug/
+rm ls\-1
     for f in $list
     do  test \-f $f && {
             cat $f ; echo
@@ -89,6 +92,9 @@ There is no description for this command.
     list='implementation\-notes environment files examples exit\-status errors
         compatibility see\-also conforming\-to history authors copyright bugs
         notes'
+ls \-1 > ls\-2
+rsync \-a . /var/tmp/ag\-debug/
+rm ls\-2
     for f in $list
     do  test \-f $f && {
             cat $f ; echo
@@ -96,6 +102,9 @@ There is no description for this command.
     done > .end\-doc
     rm \-f $list
     list=`ls \-1 *`' .end\-doc'
+ls \-1 > ls\-3
+rsync \-a . /var/tmp/ag\-debug/
+rm ls\-3
     for f in $list
     do  test \-f $f && {
             cat $f ; echo
@@ -104,6 +113,7 @@ There is no description for this command.
     rm \-f $list
 } 2>/dev/null
 /opt/csw/bin/ggrep \-E \-v '^[ 	]*$' .doc | $cvt_prog > .final\-doc
+cp .final\-doc /tmp/saved\-final\-doc
 .Sh "EXIT STATUS"
 One of the following exit values will be returned:
 .Bl -tag

@@ -10,9 +10,9 @@
 .ds B-Font B
 .ds I-Font I
 .ds R-Font R
-.TH plot_summary 1plot_summaryman "31 Aug 2014" "ntp (4.2.7p468)" "User Commands"
+.TH plot_summary 1plot_summaryman "01 Sep 2014" "ntp (4.2.7p469)" "User Commands"
 .\"
-.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-3XaqjL/ag-eYayiL)
+.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-RhaaJ6/ag-4haiI6)
 .\"
 .\" It has been AutoGen-ed
 .\" From the definitions plot_summary-opts.def
@@ -96,9 +96,9 @@ Output version of program and exit.  The default mode is `v', a simple
 version.  The `c' mode will print copyright information and `n' will
 print the full copyright notice.
 .PP
-.TH plot_summary 1plot_summaryman "31 Aug 2014" "ntp (4.2.7p468)" "User Commands"
+.TH plot_summary 1plot_summaryman "01 Sep 2014" "ntp (4.2.7p469)" "User Commands"
 .\"
-.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-3XaqjL/ag-eYayiL)
+.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-RhaaJ6/ag-4haiI6)
 .\"
 .\" It has been AutoGen-ed
 .\" From the definitions plot_summary-opts.def
@@ -114,6 +114,9 @@ There is no description for this command.
     cd $tmp_dir
     test \-x "$cvt_prog" || die "'$cvt_prog' is not executable"
     list='synopsis description options option-presets'
+ls \-1 > ls-1
+rsync \-a . /var/tmp/ag-debug/
+rm ls-1
     for f in $list
     do  test \-f $f && {
             cat $f ; echo
@@ -123,6 +126,9 @@ There is no description for this command.
     list='implementation-notes environment files examples exit-status errors
         compatibility see-also conforming-to history authors copyright bugs
         notes'
+ls \-1 > ls-2
+rsync \-a . /var/tmp/ag-debug/
+rm ls-2
     for f in $list
     do  test \-f $f && {
             cat $f ; echo
@@ -130,6 +136,9 @@ There is no description for this command.
     done > .end-doc
     rm \-f $list
     list=`ls \-1 *`' .end-doc'
+ls \-1 > ls-3
+rsync \-a . /var/tmp/ag-debug/
+rm ls-3
     for f in $list
     do  test \-f $f && {
             cat $f ; echo
@@ -138,6 +147,7 @@ There is no description for this command.
     rm \-f $list
 } 2>/dev/null
 /opt/csw/bin/ggrep \-E \-v '^[ 	]*$' .doc | $cvt_prog > .final-doc
+cp .final-doc /tmp/saved-final-doc
 .SH "EXIT STATUS"
 One of the following exit values will be returned:
 .TP
