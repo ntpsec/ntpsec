@@ -1,5 +1,6 @@
 * [Bug 2502] Autogen text replacement errors.
 * autogen-5.18.5pre1
+* html/ cleanups from Hal Murray.
 (4.2.7p469) 2014/09/01 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 2536] ntpd sandboxing support (libseccomp2) cleanup.
 (4.2.7p468) 2014/08/31 Released by Harlan Stenn <stenn@ntp.org>
