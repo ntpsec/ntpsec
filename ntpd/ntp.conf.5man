@@ -10,11 +10,11 @@
 .ds B-Font B
 .ds I-Font I
 .ds R-Font R
-.TH ntp.conf 5man "01 Sep 2014" "4.2.7p469" "File Formats"
+.TH ntp.conf 5man "02 Sep 2014" "4.2.7p470" "File Formats"
 .\"
-.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-YUai0c/ag-.UaaZc)
+.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-TQaaTK/ag-5Qa4RK)
 .\"
-.\" It has been AutoGen-ed September 1, 2014 at 08:55:38 AM by AutoGen 5.18.4
+.\" It has been AutoGen-ed September 2, 2014 at 08:55:34 AM by AutoGen 5.18.5pre1
 .\" From the definitions ntp.conf.def
 .\" and the template file agman-cmd.tpl
 .SH NAME
@@ -2902,57 +2902,6 @@ by loading values from environment variables named:
   \fBNTP_CONF_<option-name>\fP or \fBNTP_CONF\fP
 .fi
 .ad
-.TH ntp.conf 5man "01 Sep 2014" "4.2.7p469" "File Formats"
-.\"
-.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-YUai0c/ag-.UaaZc)
-.\"
-.\" It has been AutoGen-ed September 1, 2014 at 08:55:38 AM by AutoGen 5.18.4
-.\" From the definitions ntp.conf.def
-.\" and the template file agman-cmd.tpl
-.SH NAME
-\f\*[B-Font]ntp.conf\fP ntp.conf
-\- Network Time Protocol (NTP) daemon configuration file format
-{
-    cvt_prog='/usr/local/gnu/share/autogen/texi2man'
-    cvt_prog=`cd \`dirname "$cvt_prog"\` >/dev/null && pwd
-         `/`basename "$cvt_prog"`
-    cd $tmp_dir
-    test \-x "$cvt_prog" || die "'$cvt_prog' is not executable"
-    list='synopsis description options option-presets'
-ls \-1 > ls-1
-rsync \-a . /var/tmp/ag-debug/
-rm ls-1
-    for f in $list
-    do  test \-f $f && {
-            cat $f ; echo
-        }
-    done > .doc
-    rm \-f $list name
-    list='implementation-notes environment files examples exit-status errors
-        compatibility see-also conforming-to history authors copyright bugs
-        notes'
-ls \-1 > ls-2
-rsync \-a . /var/tmp/ag-debug/
-rm ls-2
-    for f in $list
-    do  test \-f $f && {
-            cat $f ; echo
-        }
-    done > .end-doc
-    rm \-f $list
-    list=`ls \-1 *`' .end-doc'
-ls \-1 > ls-3
-rsync \-a . /var/tmp/ag-debug/
-rm ls-3
-    for f in $list
-    do  test \-f $f && {
-            cat $f ; echo
-        }
-    done >> .doc
-    rm \-f $list
-} 2>/dev/null
-/opt/csw/bin/ggrep \-E \-v '^[ 	]*$' .doc | $cvt_prog > .final-doc
-cp .final-doc /tmp/saved-final-doc
 .SH "ENVIRONMENT"
 See \fBOPTION PRESETS\fP for configuration environment variables.
 .SH FILES

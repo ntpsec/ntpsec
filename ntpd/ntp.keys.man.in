@@ -1,8 +1,8 @@
-.TH ntp.keys 5 "01 Sep 2014" "4.2.7p469" "File Formats"
+.TH ntp.keys 5 "02 Sep 2014" "4.2.7p470" "File Formats"
 .\"
 .\"  EDIT THIS FILE WITH CAUTION  (ntp.man)
 .\"
-.\"  It has been AutoGen-ed  September  1, 2014 at 08:55:43 AM by AutoGen 5.18.4
+.\"  It has been AutoGen-ed  September  2, 2014 at 08:55:39 AM by AutoGen 5.18.5pre1
 .\"  From the definitions    ntp.keys.def
 .\"  and the template file   agman-file.tpl
 .Sh NAME
@@ -146,47 +146,6 @@ and
 programs are checked against passwords
 requested by the programs and entered by hand,
 so it is generally appropriate to specify these keys in ASCII format.
-{
-    cvt_prog='/usr/local/gnu/share/autogen/texi2man'
-    cvt_prog=`cd \`dirname "$cvt_prog"\` >/dev/null && pwd
-         `/`basename "$cvt_prog"`
-    cd $tmp_dir
-    test \-x "$cvt_prog" || die "'$cvt_prog' is not executable"
-    list='synopsis description options option-presets'
-ls \-1 > ls-1
-rsync \-a . /var/tmp/ag-debug/
-rm ls-1
-    for f in $list
-    do  test \-f $f && {
-            cat $f ; echo
-        }
-    done > .doc
-    rm \-f $list name
-    list='implementation-notes environment files examples exit-status errors
-        compatibility see-also conforming-to history authors copyright bugs
-        notes'
-ls \-1 > ls-2
-rsync \-a . /var/tmp/ag-debug/
-rm ls-2
-    for f in $list
-    do  test \-f $f && {
-            cat $f ; echo
-        }
-    done > .end-doc
-    rm \-f $list
-    list=`ls \-1 *`' .end-doc'
-ls \-1 > ls-3
-rsync \-a . /var/tmp/ag-debug/
-rm ls-3
-    for f in $list
-    do  test \-f $f && {
-            cat $f ; echo
-        }
-    done >> .doc
-    rm \-f $list
-} 2>/dev/null
-/opt/csw/bin/ggrep \-E \-v '^[ 	]*$' .doc | $cvt_prog > .final-doc
-cp .final-doc /tmp/saved-final-doc
 .SH FILES
 .TP 14
 .NOP \fI/etc/ntp.keys\f[]
