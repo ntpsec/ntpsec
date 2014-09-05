@@ -1,3 +1,4 @@
+* [Bug 2649] "make install" leaves wrong owner for files in html/.
 * [Bug 2652] Windows hates directory names that contain a :.
 (4.2.7p470) 2014/09/02 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 2502] Autogen text replacement errors.
