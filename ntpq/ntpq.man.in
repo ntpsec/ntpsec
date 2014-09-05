@@ -10,11 +10,11 @@
 .ds B-Font B
 .ds I-Font I
 .ds R-Font R
-.TH ntpq @NTPQ_MS@ "02 Sep 2014" "4.2.7p470" "User Commands"
+.TH ntpq @NTPQ_MS@ "05 Sep 2014" "4.2.7p471" "User Commands"
 .\"
-.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-cHaqaP/ag-oHai_O)
+.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-GsaaVi/ag-Tsa4Ti)
 .\"
-.\" It has been AutoGen-ed September 2, 2014 at 08:57:00 AM by AutoGen 5.18.5pre1
+.\" It has been AutoGen-ed September 5, 2014 at 08:56:50 AM by AutoGen 5.18.5pre1
 .\" From the definitions ntpq-opts.def
 .\" and the template file agman-cmd.tpl
 .SH NAME
