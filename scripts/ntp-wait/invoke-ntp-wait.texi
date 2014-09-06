@@ -6,7 +6,7 @@
 #
 # EDIT THIS FILE WITH CAUTION  (invoke-ntp-wait.texi)
 #
-# It has been AutoGen-ed  September  5, 2014 at 08:51:16 AM by AutoGen 5.18.5pre1
+# It has been AutoGen-ed  September  6, 2014 at 08:51:17 AM by AutoGen 5.18.5pre1
 # From the definitions    ntp-wait-opts.def
 # and the template file   agtexi-cmd.tpl
 @end ignore
@@ -61,7 +61,7 @@ with a status code of 0.
 
 @exampleindent 0
 @example
-ntp-wait - Wait for ntpd to stabilize the system clock - Ver. 4.2.7p471
+ntp-wait - Wait for ntpd to stabilize the system clock - Ver. 4.2.7p472
 USAGE: ntp-wait [ -<flag> [<val>] | --<name>[@{=| @}<val>] ]... 
 
     -n, --tries=num              Number of times to check ntpd

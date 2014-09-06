@@ -10,11 +10,11 @@
 .ds B-Font B
 .ds I-Font I
 .ds R-Font R
-.TH ntpq @NTPQ_MS@ "05 Sep 2014" "4.2.7p471" "User Commands"
+.TH ntpq @NTPQ_MS@ "06 Sep 2014" "4.2.7p472" "User Commands"
 .\"
-.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-GsaaVi/ag-Tsa4Ti)
+.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-Wkaqix/ag-8kaihx)
 .\"
-.\" It has been AutoGen-ed September 5, 2014 at 08:56:50 AM by AutoGen 5.18.5pre1
+.\" It has been AutoGen-ed September 6, 2014 at 08:56:50 AM by AutoGen 5.18.5pre1
 .\" From the definitions ntpq-opts.def
 .\" and the template file agman-cmd.tpl
 .SH NAME
@@ -127,7 +127,7 @@ page.
 .br
 .ns
 .TP 20
-.NOP \f\*[B-Font]addvars\f[] \f\*[I-Font]variable_name\f[] [\f\*[B-Font]=value\f[]] \f\*[B-Font]...\f[]
+.NOP \f\*[B-Font]addvars\f[] \f\*[I-Font]variable_name\f[][\f\*[B-Font]=value\f[]] \f\*[B-Font]...\f[]
 .br
 .ns
 .TP 20
@@ -136,6 +136,10 @@ page.
 .ns
 .TP 20
 .NOP \f\*[B-Font]clearvars\f[]
+.br
+.ns
+.TP 20
+.NOP \f\*[B-Font]showvars\f[]
 The data carried by NTP mode 6 messages consists of a list of
 items of the form
 \[oq]variable_name=value\[cq],
@@ -164,6 +168,9 @@ while the
 \f\*[B-Font]clearlist\f[]
 command removes all variables from the
 list.
+The
+\f\*[B-Font]showvars\f[]
+command displays the current list of optional variables.
 .br
 .ns
 .TP 20
@@ -225,6 +232,12 @@ so this command may be obsolete.
 .br
 .ns
 .TP 20
+.NOP \f\*[B-Font]exit\f[]
+Exit
+\f\*[B-Font]ntpq\fP.
+.br
+.ns
+.TP 20
 .NOP \f\*[B-Font]host\f[] \f\*[I-Font]hostname\f[]
 Set the host to which future queries will be sent.
 \f\*[I-Font]hostname\f[]
@@ -259,6 +272,20 @@ purpose.
 .br
 .ns
 .TP 20
+.NOP \f\*[B-Font]keytype\f[] [\f\*[B-Font]md5\f[] | \f\*[B-Font]OpenSSLDigestType\f[]]
+Specify the type of key to use for authenticating requests.
+\f\*[B-Font]md5\f[]
+is alway supported.
+If
+\f\*[B-Font]ntpq\fP
+was built with OpenSSL support,
+any digest type supported by OpenSSL can also be provided.
+If no argument is given, the current
+\f\*[B-Font]keytype\f[]
+is displayed.
+.br
+.ns
+.TP 20
 .NOP \f\*[B-Font]ntpversion\f[] [\f\*[B-Font]1\f[] | \f\*[B-Font]2\f[] | \f\*[B-Font]3\f[] | \f\*[B-Font]4\f[]]
 Sets the NTP version number which
 \f\*[B-Font]ntpq\fP
@@ -280,12 +307,19 @@ requests.
 The password must correspond to the key configured for
 use by the NTP server for this purpose if such requests are to be
 successful.
+.\" Not yet implemented.
+.\" .It Ic poll
+.\" .Op Ar n
+.\" .Op Ic verbose
+.\" Poll an NTP server in client mode
+.\" .Ar n
+.\" times.
 .br
 .ns
 .TP 20
 .NOP \f\*[B-Font]quit\f[]
 Exit
-\f\*[B-Font]ntpq\fP
+\f\*[B-Font]ntpq\fP.
 .br
 .ns
 .TP 20
@@ -306,6 +340,13 @@ Note that since
 \f\*[B-Font]ntpq\fP
 retries each query once after a timeout, the total waiting time for
 a timeout will be twice the timeout value set.
+.br
+.ns
+.TP 20
+.NOP \f\*[B-Font]version\f[]
+Print the version of the
+\f\*[B-Font]ntpq\fP
+program.
 .PP
 .SS "Control Message Commands"
 Association IDs are used to identify system, peer and clock variables.
@@ -338,11 +379,16 @@ Display a list of mobilized associations in the form:
 .br
 .ns
 .TP 10
-.NOP \f\*[B-Font]clockvar\f[] \f\*[I-Font]assocID\f[] [\f\*[I-Font]name\f[] [\f\*[B-Font]=\f[] \f\*[I-Font]value\f[] [...] [] ...]]
+.NOP \f\*[B-Font]authinfo\f[]
+Display the authentication statistics.
 .br
 .ns
 .TP 10
-.NOP \f\*[B-Font]cv\f[] \f\*[I-Font]assocID\f[] [\f\*[I-Font]name\f[] [\f\*[B-Font]=\f[] \f\*[I-Font]value\f[] [...] [] ...]]
+.NOP \f\*[B-Font]clockvar\f[] \f\*[I-Font]assocID\f[] [\f\*[I-Font]name\f[][\f\*[B-Font]=\f[]\f\*[I-Font]value\f[]] [] ...]
+.br
+.ns
+.TP 10
+.NOP \f\*[B-Font]cv\f[] \f\*[I-Font]assocID\f[] [\f\*[I-Font]name\f[][\f\*[B-Font]=\f[]\f\*[I-Font]value\f[]] [] ...]
 Display a list of clock variables for those associations supporting a reference clock.
 .br
 .ns
@@ -376,6 +422,20 @@ Display kernel loop and PPS statistics. As with other ntpq output, times are in 
 .TP 10
 .NOP \f\*[B-Font]lassociations\f[]
 Perform the same function as the associations command, except display mobilized and unmobilized associations.
+.br
+.ns
+.TP 10
+.NOP \f\*[B-Font]lopeers\f[] [\f\*[B-Font]\-4\f[] | \f\*[B-Font]\-6\f[]]
+Obtain and print a list of all peers and clients showing
+\f\*[I-Font]dstadr\f[]
+(associated with any given IP version).
+.br
+.ns
+.TP 10
+.NOP \f\*[B-Font]lpeers\f[] [\f\*[B-Font]\-4\f[] | \f\*[B-Font]\-6\f[]]
+Print a peer spreadsheet for the appropriate IP version(s).
+\f\*[I-Font]dstadr\f[]
+(associated with any given IP version).
 .br
 .ns
 .TP 10
@@ -486,11 +546,11 @@ claimed DNS name which could not be verified in parentheses.
 .br
 .ns
 .TP 10
-.NOP \f\*[B-Font]mreadvar\f[] \f\*[B-Font]assocID\f[] \f\*[B-Font]assocID\f[] [variable_name [= \f\*[I-Font]value\f[]]] ...
+.NOP \f\*[B-Font]mreadvar\f[] \f\*[B-Font]assocID\f[] \f\*[B-Font]assocID\f[] [\f\*[I-Font]variable_name\f[][=\f\*[I-Font]value\f[]]] ...
 .br
 .ns
 .TP 10
-.NOP \f\*[B-Font]mrv\f[] \f\*[B-Font]assocID\f[] \f\*[B-Font]assocID\f[] [variable_name [= \f\*[I-Font]value\f[]]] ...
+.NOP \f\*[B-Font]mrv\f[] \f\*[B-Font]assocID\f[] \f\*[B-Font]assocID\f[] [\f\*[I-Font]variable_name\f[][=\f\*[I-Font]value\f[]]] ...
 Perform the same function as the
 \f\*[B-Font]readvar\f[]
 command, except for a range of association IDs.
@@ -500,9 +560,19 @@ command.
 .br
 .ns
 .TP 10
+.NOP \f\*[B-Font]opeers\f[] [\f\*[B-Font]\-4\f[] | \f\*[B-Font]\-6\f[]]
+Obtain and print the old-style list of all peers and clients showing
+\f\*[I-Font]dstadr\f[]
+(associated with any given IP version),
+rather than the
+\f\*[I-Font]refid\f[].
+.br
+.ns
+.TP 10
 .NOP \f\*[B-Font]passociations\f[]
 Perform the same function as the
-\f\*[B-Font]associations\f[] \f\*[B-Font]command\f[],
+\f\*[B-Font]associations\f[]
+command,
 except that it uses previously stored data rather than making a new query.
 .br
 .ns
@@ -595,11 +665,26 @@ jitter
 .br
 .ns
 .TP 10
-.NOP \f\*[B-Font]readvar\f[] \f\*[I-Font]assocID\f[] \f\*[I-Font]name\f[] [=\f\*[I-Font]value\f[]] [, ...]
+.NOP \f\*[B-Font]pstats\f[] \f\*[I-Font]assocID\f[]
+Show the statistics for the peer with the given
+\f\*[I-Font]assocID\f[].
 .br
 .ns
 .TP 10
-.NOP \f\*[B-Font]rv\f[] \f\*[I-Font]assocID\f[] \f\*[I-Font]name\f[] [=\f\*[I-Font]value\f[]] [, ...]
+.NOP \f\*[B-Font]readlist\f[] \f\*[I-Font]assocID\f[]
+.br
+.ns
+.TP 10
+.NOP \f\*[B-Font]rl\f[] \f\*[I-Font]assocID\f[]
+Read the system or peer variables included in the variable list.
+.br
+.ns
+.TP 10
+.NOP \f\*[B-Font]readvar\f[] \f\*[I-Font]assocID\f[] \f\*[I-Font]name\f[][=\f\*[I-Font]value\f[]] [, ...]
+.br
+.ns
+.TP 10
+.NOP \f\*[B-Font]rv\f[] \f\*[I-Font]assocID\f[] \f\*[I-Font]name\f[][=\f\*[I-Font]value\f[]] [, ...]
 Display the specified variables.
 If
 \f\*[I-Font]assocID\f[]
@@ -629,6 +714,12 @@ TTTT the time of day.
 .br
 .ns
 .TP 10
+.NOP \f\*[B-Font]reslist\f[]
+Show the access control (restrict) list for
+\f\*[B-Font]ntpq\fP.
+.br
+.ns
+.TP 10
 .NOP \f\*[B-Font]saveconfig\f[] \f\*[I-Font]filename\f[]
 Write the current configuration,
 including any runtime modifications given with
@@ -650,6 +741,16 @@ format specifies to substitute the current date and time, for example,
 The filename used is stored in system variable
 \f\*[B-Font]savedconfig\f[].
 Authentication is required.
+.br
+.ns
+.TP 10
+.NOP \f\*[B-Font]timerstats\f[]
+Display interval timer counters.
+.br
+.ns
+.TP 10
+.NOP \f\*[B-Font]writelist\f[] \f\*[I-Font]assocID\f[]
+Write the system or peer variables included in the variable list.
 .br
 .ns
 .TP 10
@@ -677,13 +778,16 @@ Display operational summary.
 Print statistics counters maintained in the protocol module.
 .PP
 .SS Status Words and Kiss Codes
-The current state of the operating program is shown in a set of status words maintained by the system and each association separately.
+The current state of the operating program is shown
+in a set of status words
+maintained by the system.
+Status information is also available on a per-association basis.
 These words are displayed in the
 \f\*[B-Font]rv\f[]
 and
 \f\*[B-Font]as\f[]
-commands both in hexadecimal and decoded short tip strings.
-The codes, tips and short explanations are on the
+commands both in hexadecimal and in decoded short tip strings.
+The codes, tips and short explanations are documented on the
 .Lk decode.html "Event Messages and Status Words"
 page.
 The page also includes a list of system and peer messages,

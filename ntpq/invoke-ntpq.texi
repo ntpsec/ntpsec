@@ -6,7 +6,7 @@
 #
 # EDIT THIS FILE WITH CAUTION  (invoke-ntpq.texi)
 #
-# It has been AutoGen-ed  September  5, 2014 at 08:56:54 AM by AutoGen 5.18.5pre1
+# It has been AutoGen-ed  September  6, 2014 at 08:56:54 AM by AutoGen 5.18.5pre1
 # From the definitions    ntpq-opts.def
 # and the template file   agtexi-cmd.tpl
 @end ignore
@@ -106,9 +106,10 @@ source of information about
 @code{ntpq}
 than this manual
 page.
-@item @code{addvars} @kbd{variable_name} @code{[@code{=value}]} @code{...}
+@item @code{addvars} @kbd{variable_name}@code{[@code{=value}]} @code{...}
 @item @code{rmvars} @kbd{variable_name} @code{...}
 @item @code{clearvars}
+@item @code{showvars}
 The data carried by NTP mode 6 messages consists of a list of
 items of the form
 @quoteleft{}variable_name=value@quoteright{},
@@ -137,6 +138,9 @@ while the
 @code{clearlist}
 command removes all variables from the
 list.
+The
+@code{showvars}
+command displays the current list of optional variables.
 @item @code{authenticate} @code{[yes | no]}
 Normally
 @code{ntpq}
@@ -183,6 +187,9 @@ or between machines whose clocks are unsynchronized.
 Actually the
 server does not now require timestamps in authenticated requests,
 so this command may be obsolete.
+@item @code{exit}
+Exit
+@code{ntpq}
 @item @code{host} @kbd{hostname}
 Set the host to which future queries will be sent.
 @kbd{hostname}
@@ -208,6 +215,17 @@ used to authenticate configuration requests.
 This must correspond
 to a key number the server has been configured to use for this
 purpose.
+@item @code{keytype} @code{[@code{md5} | @code{OpenSSLDigestType}]}
+Specify the type of key to use for authenticating requests.
+@code{md5}
+is alway supported.
+If
+@code{ntpq}
+was built with OpenSSL support,
+any digest type supported by OpenSSL can also be provided.
+If no argument is given, the current
+@code{keytype}
+is displayed.
 @item @code{ntpversion} @code{[@code{1} | @code{2} | @code{3} | @code{4}]}
 Sets the NTP version number which
 @code{ntpq}
@@ -226,6 +244,9 @@ requests.
 The password must correspond to the key configured for
 use by the NTP server for this purpose if such requests are to be
 successful.
+@code{poll}
+@kbd{n}
+@code{verbose}
 @item @code{quit}
 Exit
 @code{ntpq}
@@ -243,6 +264,10 @@ Note that since
 @code{ntpq}
 retries each query once after a timeout, the total waiting time for
 a timeout will be twice the timeout value set.
+@item @code{version}
+Print the version of the
+@code{ntpq}
+program.
 @end table
 
 @subsubsection Control Message Commands
@@ -275,8 +300,10 @@ ind assid status conf reach auth condition last_event cnt
 @item @code{last_event} @code{Ta} @code{event} @code{report} @code{(see} @code{the} @code{event} @code{field} @code{of} @code{the} @code{peer} @code{status} @code{word)}
 @item @code{cnt} @code{Ta} @code{event} @code{count} @code{(see} @code{the} @code{count} @code{field} @code{of} @code{the} @code{peer} @code{status} @code{word)}
 @end table
-@item @code{clockvar} @kbd{assocID} @code{[@kbd{name} @code{[@code{=} @kbd{value} @code{[...]}]} @code{[...]}]}
-@item @code{cv} @kbd{assocID} @code{[@kbd{name} @code{[@code{=} @kbd{value} @code{[...]}]} @code{[...]}]}
+@item @code{authinfo}
+Display the authentication statistics.
+@item @code{clockvar} @kbd{assocID} @code{[@kbd{name}@code{[@code{=}@kbd{value}]}]} @code{[...]}
+@item @code{cv} @kbd{assocID} @code{[@kbd{name}@code{[@code{=}@kbd{value}]}]} @code{[...]}
 Display a list of clock variables for those associations supporting a reference clock.
 @item @code{:config} @code{[...]}
 Send the remainder of the command line, including whitespace, to the server as a run-time configuration command in the same format as a line in the configuration file. This command is experimental until further notice and clarification. Authentication is of course required.
@@ -292,6 +319,14 @@ Display network and reference clock I/O statistics.
 Display kernel loop and PPS statistics. As with other ntpq output, times are in milliseconds. The precision value displayed is in milliseconds as well, unlike the precision system variable.
 @item @code{lassociations}
 Perform the same function as the associations command, except display mobilized and unmobilized associations.
+@item @code{lopeers} @code{[@code{-4} | @code{-6}]}
+Obtain and print a list of all peers and clients showing
+@kbd{dstadr}
+(associated with any given IP version).
+@item @code{lpeers} @code{[@code{-4} | @code{-6}]}
+Print a peer spreadsheet for the appropriate IP version(s).
+@kbd{dstadr}
+(associated with any given IP version).
 @item @code{monstats}
 Display monitor facility statistics.
 @item @code{mrulist} @code{[@code{limited} | @code{kod} | @code{mincount}=@kbd{count} | @code{laddr}=@kbd{localaddr} | @code{sort}=@kbd{sortorder} | @code{resany}=@kbd{hexmask} | @code{resall}=@kbd{hexmask}]}
@@ -365,17 +400,24 @@ Source port of last packet from this address.
 DNS name, numeric address, or address followed by
 claimed DNS name which could not be verified in parentheses.
 @end table
-@item @code{mreadvar} @code{assocID} @code{assocID} @code{[variable_name @code{[= @kbd{value}]} ...]}
-@item @code{mrv} @code{assocID} @code{assocID} @code{[variable_name @code{[= @kbd{value}]} ...]}
+@item @code{mreadvar} @code{assocID} @code{assocID} @code{[@kbd{variable_name}@code{[=@kbd{value}]} ...]}
+@item @code{mrv} @code{assocID} @code{assocID} @code{[@kbd{variable_name}@code{[=@kbd{value}]} ...]}
 Perform the same function as the
 @code{readvar}
 command, except for a range of association IDs.
 This range is determined from the association list cached by the most recent
 @code{associations}
 command.
+@item @code{opeers} @code{[@code{-4} | @code{-6}]}
+Obtain and print the old-style list of all peers and clients showing
+@kbd{dstadr}
+(associated with any given IP version),
+rather than the
+@kbd{refid}.
 @item @code{passociations}
 Perform the same function as the
-@code{associations} @code{command},
+@code{associations}
+command,
 except that it uses previously stored data rather than making a new query.
 @item @code{peers}
 Display a list of peers in the form:
@@ -430,8 +472,14 @@ offset of server relative to this host
 @item @code{jitter}
 jitter
 @end table
-@item @code{readvar} @kbd{assocID} @kbd{name} @code{[=@kbd{value}]} @code{[, ...]}
-@item @code{rv} @kbd{assocID} @kbd{name} @code{[=@kbd{value}]} @code{[, ...]}
+@item @code{pstats} @kbd{assocID}
+Show the statistics for the peer with the given
+@kbd{assocID}.
+@item @code{readlist} @kbd{assocID}
+@item @code{rl} @kbd{assocID}
+Read the system or peer variables included in the variable list.
+@item @code{readvar} @kbd{assocID} @kbd{name}@code{[=@kbd{value}]} @code{[, ...]}
+@item @code{rv} @kbd{assocID} @kbd{name}@code{[=@kbd{value}]} @code{[, ...]}
 Display the specified variables.
 If
 @kbd{assocID}
@@ -459,6 +507,10 @@ where YYYY is the year,
 MM the month of year,
 DD the day of month and
 TTTT the time of day.
+@item @code{reslist}
+Show the access control (restrict) list for
+@code{ntpq}
+
 @item @code{saveconfig} @kbd{filename}
 Write the current configuration,
 including any runtime modifications given with
@@ -480,6 +532,10 @@ format specifies to substitute the current date and time, for example,
 The filename used is stored in system variable
 @code{savedconfig}.
 Authentication is required.
+@item @code{timerstats}
+Display interval timer counters.
+@item @code{writelist} @kbd{assocID}
+Write the system or peer variables included in the variable list.
 @item @code{writevar} @kbd{assocID} @kbd{name}=@kbd{value} @code{[, ...]}
 Write the specified variables.
 If the
@@ -500,13 +556,16 @@ Print statistics counters maintained in the protocol module.
 
 @subsubsection Status Words and Kiss Codes
 
-The current state of the operating program is shown in a set of status words maintained by the system and each association separately.
+The current state of the operating program is shown
+in a set of status words
+maintained by the system.
+Status information is also available on a per-association basis.
 These words are displayed in the
 @code{rv}
 and
 @code{as}
-commands both in hexadecimal and decoded short tip strings.
-The codes, tips and short explanations are on the
+commands both in hexadecimal and in decoded short tip strings.
+The codes, tips and short explanations are documented on the
 .Lk decode.html "Event Messages and Status Words"
 page.
 The page also includes a list of system and peer messages,
@@ -776,7 +835,7 @@ with a status code of 0.
 
 @exampleindent 0
 @example
-ntpq - standard NTP query program - Ver. 4.2.7p471
+ntpq - standard NTP query program - Ver. 4.2.7p472
 Usage:  ntpq [ -<flag> [<val>] | --<name>[@{=| @}<val>] ]... [ host ...]
   Flg Arg Option-Name    Description
    -4 no  ipv4           Force IPv4 DNS name resolution

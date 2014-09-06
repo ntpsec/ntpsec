@@ -1,9 +1,9 @@
-.Dd September 5 2014
+.Dd September 6 2014
 .Dt NTPQ @NTPQ_MS@ User Commands
 .Os
 .\"  EDIT THIS FILE WITH CAUTION  (ntpq-opts.mdoc)
 .\"
-.\"  It has been AutoGen-ed  September  5, 2014 at 08:56:56 AM by AutoGen 5.18.5pre1
+.\"  It has been AutoGen-ed  September  6, 2014 at 08:56:56 AM by AutoGen 5.18.5pre1
 .\"  From the definitions    ntpq-opts.def
 .\"  and the template file   agmdoc-cmd.tpl
 .Sh NAME
@@ -108,11 +108,12 @@ source of information about
 .Nm
 than this manual
 page.
-.It Ic addvars Ar variable_name Xo Op Ic =value
+.It Ic addvars Ar variable_name Ns Xo Op Ic =value
 .Ic ...
 .Xc
 .It Ic rmvars Ar variable_name Ic ...
 .It Ic clearvars
+.It Ic showvars
 The data carried by NTP mode 6 messages consists of a list of
 items of the form
 .Ql variable_name=value ,
@@ -141,6 +142,9 @@ while the
 .Ic clearlist
 command removes all variables from the
 list.
+The
+.Ic showvars
+command displays the current list of optional variables.
 .It Ic authenticate Op yes | no
 Normally
 .Nm
@@ -194,6 +198,9 @@ or between machines whose clocks are unsynchronized.
 Actually the
 server does not now require timestamps in authenticated requests,
 so this command may be obsolete.
+.It Ic exit
+Exit
+.Nm .
 .It Ic host Ar hostname
 Set the host to which future queries will be sent.
 .Ar hostname
@@ -219,6 +226,21 @@ used to authenticate configuration requests.
 This must correspond
 to a key number the server has been configured to use for this
 purpose.
+.It Ic keytype Xo Oo
+.Cm md5 |
+.Cm OpenSSLDigestType
+.Oc
+.Xc
+Specify the type of key to use for authenticating requests.
+.Cm md5
+is alway supported.
+If
+.Nm
+was built with OpenSSL support,
+any digest type supported by OpenSSL can also be provided.
+If no argument is given, the current
+.Ic keytype
+is displayed.
 .It Ic ntpversion Xo Oo
 .Cm 1 |
 .Cm 2 |
@@ -243,9 +265,16 @@ requests.
 The password must correspond to the key configured for
 use by the NTP server for this purpose if such requests are to be
 successful.
+.\" Not yet implemented.
+.\" .It Ic poll
+.\" .Op Ar n
+.\" .Op Ic verbose
+.\" Poll an NTP server in client mode
+.\" .Ar n
+.\" times.
 .It Ic quit
 Exit
-.Nm
+.Nm .
 .It Ic raw
 Causes all output from query commands is printed as received
 from the remote server.
@@ -260,6 +289,10 @@ Note that since
 .Nm
 retries each query once after a timeout, the total waiting time for
 a timeout will be twice the timeout value set.
+.It Ic version
+Print the version of the
+.Nm
+program.
 .El
 .Ss "Control Message Commands"
 Association IDs are used to identify system, peer and clock variables.
@@ -289,8 +322,10 @@ Display a list of mobilized associations in the form:
 .It Li last_event Ta event report (see the Li event field of the peer status word)
 .It Li cnt Ta event count (see the Li count field of the peer status word)
 .El
-.It Cm clockvar Ar assocID Oo Ar name Oo Cm = Ar value Op ... Oc Oc Op ...
-.It Cm cv Ar assocID Oo Ar name Oo Cm = Ar value Op ... Oc Oc Op ...
+.It Cm authinfo
+Display the authentication statistics.
+.It Cm clockvar Ar assocID Oo Ar name Ns Oo Cm = Ns Ar value Oc Oc Op ...
+.It Cm cv Ar assocID Oo Ar name Ns Oo Cm = Ns Ar value Oc Oc Op ...
 Display a list of clock variables for those associations supporting a reference clock.
 .It Cm :config Op ...
 Send the remainder of the command line, including whitespace, to the server as a run\-time configuration command in the same format as a line in the configuration file. This command is experimental until further notice and clarification. Authentication is of course required.
@@ -306,6 +341,22 @@ Display network and reference clock I/O statistics.
 Display kernel loop and PPS statistics. As with other ntpq output, times are in milliseconds. The precision value displayed is in milliseconds as well, unlike the precision system variable.
 .It Ic lassociations
 Perform the same function as the associations command, except display mobilized and unmobilized associations.
+.It Ic lopeers Xo
+.Oo Ic \-4 |
+.Ic \-6
+.Oc
+.Xc
+Obtain and print a list of all peers and clients showing
+.Ar dstadr
+(associated with any given IP version).
+.It Ic lpeers Xo
+.Oo Ic \-4 |
+.Ic \-6
+.Oc
+.Xc
+Print a peer spreadsheet for the appropriate IP version(s).
+.Ar dstadr
+(associated with any given IP version).
 .It Ic monstats
 Display monitor facility statistics.
 .It Ic mrulist Oo Ic limited | Ic kod | Ic mincount Ns = Ns Ar count | Ic laddr Ns = Ns Ar localaddr | Ic sort Ns = Ns Ar sortorder | Ic resany Ns = Ns Ar hexmask | Ic resall Ns = Ns Ar hexmask Oc
@@ -379,17 +430,28 @@ Source port of last packet from this address.
 DNS name, numeric address, or address followed by
 claimed DNS name which could not be verified in parentheses.
 .El
-.It Ic mreadvar assocID assocID Oo variable_name Oo = Ar value Oc Oc ...
-.It Ic mrv assocID assocID Oo variable_name Oo = Ar value Oc Oc ...
+.It Ic mreadvar assocID assocID Oo Ar variable_name Ns Oo = Ns Ar value Oc Oc ...
+.It Ic mrv assocID assocID Oo Ar variable_name Ns Oo = Ns Ar value Oc Oc ...
 Perform the same function as the
 .Ic readvar
 command, except for a range of association IDs.
 This range is determined from the association list cached by the most recent
 .Ic associations
 command.
+.It Ic opeers Xo
+.Oo Ic \-4 |
+.Ic \-6
+.Oc
+.Xc
+Obtain and print the old\-style list of all peers and clients showing
+.Ar dstadr
+(associated with any given IP version),
+rather than the
+.Ar refid .
 .It Ic passociations
 Perform the same function as the
-.Ic associations command ,
+.Ic associations
+command,
 except that it uses previously stored data rather than making a new query.
 .It Ic peers
 Display a list of peers in the form:
@@ -442,8 +504,14 @@ offset of server relative to this host
 .It Ic jitter
 jitter
 .El
-.It Ic readvar Ar assocID Ar name Oo Ns = Ns Ar value Oc  Oo , ... Oc
-.It Ic rv Ar assocID Ar name Oo Ns = Ns Ar value Oc  Oo , ... Oc
+.It Ic pstats Ar assocID
+Show the statistics for the peer with the given
+.Ar assocID .
+.It Ic readlist Ar assocID
+.It Ic rl Ar assocID
+Read the system or peer variables included in the variable list.
+.It Ic readvar Ar assocID Ar name Ns Oo Ns = Ns Ar value Oc  Oo , ... Oc
+.It Ic rv Ar assocID Ar name Ns Oo Ns = Ns Ar value Oc  Oo , ... Oc
 Display the specified variables.
 If
 .Ar assocID
@@ -470,6 +538,9 @@ where YYYY is the year,
 MM the month of year,
 DD the day of month and
 TTTT the time of day.
+.It Ic reslist
+Show the access control (restrict) list for
+.Nm .
 .It Ic saveconfig Ar filename
 Write the current configuration,
 including any runtime modifications given with
@@ -491,6 +562,10 @@ format specifies to substitute the current date and time, for example,
 The filename used is stored in system variable
 .Ic savedconfig .
 Authentication is required.
+.It Ic timerstats
+Display interval timer counters.
+.It Ic writelist Ar assocID
+Write the system or peer variables included in the variable list.
 .It Ic writevar Ar assocID Ar name Ns = Ns Ar value Op , ...
 Write the specified variables.
 If the
@@ -509,13 +584,16 @@ Display operational summary.
 Print statistics counters maintained in the protocol module.
 .El
 .Ss Status Words and Kiss Codes
-The current state of the operating program is shown in a set of status words maintained by the system and each association separately.
+The current state of the operating program is shown
+in a set of status words
+maintained by the system.
+Status information is also available on a per\-association basis.
 These words are displayed in the
 .Ic rv
 and
 .Ic as
-commands both in hexadecimal and decoded short tip strings.
-The codes, tips and short explanations are on the
+commands both in hexadecimal and in decoded short tip strings.
+The codes, tips and short explanations are documented on the
 .Lk decode.html "Event Messages and Status Words"
 page.
 The page also includes a list of system and peer messages,

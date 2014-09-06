@@ -1,3 +1,4 @@
+(4.2.7p472) 2014/09/06 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 2556] mrulist is missing from the generated ntpq man page.
 (4.2.7p471) 2014/09/05 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 2649] "make install" leaves wrong owner for files in html/.
