@@ -113,7 +113,7 @@ dist-hook:
 
 install-data-local:
 	( cd $(srcdir) && find html -name SCCS -prune -o -type f \
-		-exec $(INSTALL_DATA) -C -D {} $(DESTDIR)$(htmldir)/{} ";" )
+		-exec $(INSTALL_DATA) {} $(DESTDIR)$(htmldir)/{} ";" )
 
 uninstall-local:
 		rm -rf $(DESTDIR)$(htmldir)/html
