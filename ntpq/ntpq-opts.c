@@ -1,7 +1,7 @@
 /*
  *  EDIT THIS FILE WITH CAUTION  (ntpq-opts.c)
  *
- *  It has been AutoGen-ed  September  6, 2014 at 08:56:25 AM by AutoGen 5.18.5pre1
+ *  It has been AutoGen-ed  September  6, 2014 at 10:37:18 AM by AutoGen 5.18.5pre1
  *  From the definitions    ntpq-opts.def
  *  and the template file   options
  *
@@ -69,7 +69,7 @@ extern FILE * option_usage_fp;
  *  static const strings for ntpq options
  */
 static char const ntpq_opt_strs[1875] =
-/*     0 */ "ntpq 4.2.7p472\n"
+/*     0 */ "ntpq 4.2.7p473\n"
             "Copyright (C) 1970-2014 The University of Delaware, all rights reserved.\n"
             "This is free software. It is licensed for use, modification and\n"
             "redistribution under the terms of the NTP License, copies of which\n"
@@ -128,13 +128,13 @@ static char const ntpq_opt_strs[1875] =
 /*  1669 */ "no-load-opts\0"
 /*  1682 */ "no\0"
 /*  1685 */ "NTPQ\0"
-/*  1690 */ "ntpq - standard NTP query program - Ver. 4.2.7p472\n"
+/*  1690 */ "ntpq - standard NTP query program - Ver. 4.2.7p473\n"
             "Usage:  %s [ -<flag> [<val>] | --<name>[{=| }<val>] ]... [ host ...]\n\0"
 /*  1811 */ "$HOME\0"
 /*  1817 */ ".\0"
 /*  1819 */ ".ntprc\0"
 /*  1826 */ "http://bugs.ntp.org, bugs@ntp.org\0"
-/*  1860 */ "ntpq 4.2.7p472";
+/*  1860 */ "ntpq 4.2.7p473";
 
 /**
  *  ipv4 option description with
@@ -785,7 +785,7 @@ static void bogus_function(void) {
      translate option names.
    */
   /* referenced via ntpqOptions.pzCopyright */
-  puts(_("ntpq 4.2.7p472\n\
+  puts(_("ntpq 4.2.7p473\n\
 Copyright (C) 1970-2014 The University of Delaware, all rights reserved.\n\
 This is free software. It is licensed for use, modification and\n\
 redistribution under the terms of the NTP License, copies of which\n\
@@ -850,11 +850,11 @@ provided \"as is\" without express or implied warranty.\n"));
   puts(_("load options from a config file"));
 
   /* referenced via ntpqOptions.pzUsageTitle */
-  puts(_("ntpq - standard NTP query program - Ver. 4.2.7p472\n\
+  puts(_("ntpq - standard NTP query program - Ver. 4.2.7p473\n\
 Usage:  %s [ -<flag> [<val>] | --<name>[{=| }<val>] ]... [ host ...]\n"));
 
   /* referenced via ntpqOptions.pzFullVersion */
-  puts(_("ntpq 4.2.7p472"));
+  puts(_("ntpq 4.2.7p473"));
 
   /* referenced via ntpqOptions.pzFullUsage */
   puts(_("<<<NOT-FOUND>>>"));

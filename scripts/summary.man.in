@@ -10,9 +10,9 @@
 .ds B-Font B
 .ds I-Font I
 .ds R-Font R
-.TH summary 1summaryman "06 Sep 2014" "ntp (4.2.7p472)" "User Commands"
+.TH summary 1summaryman "06 Sep 2014" "ntp (4.2.7p473)" "User Commands"
 .\"
-.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-E.aiEq/ag-R.aqDq)
+.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-t4aq.z/ag-H4ay9z)
 .\"
 .\" It has been AutoGen-ed
 .\" From the definitions summary-opts.def

@@ -44,7 +44,7 @@ monitor the operational status
 and determine the performance of
 <code>ntpd</code>, the NTP daemon.
 
-  <p>This document applies to version 4.2.7p472 of <code>ntpq</code>.
+  <p>This document applies to version 4.2.7p473 of <code>ntpq</code>.
 
 <ul class="menu">
 <li><a accesskey="1" href="#ntpq-Description">ntpq Description</a>
@@ -189,7 +189,7 @@ source of information about
 <code>ntpq</code>
 than this manual
 page. 
-<br><dt><code>addvars</code> <kbd>variable_name</kbd> <code>[=value]</code> <code>...</code><br><dt><code>rmvars</code> <kbd>variable_name</kbd> <code>...</code><br><dt><code>clearvars</code><dd>The data carried by NTP mode 6 messages consists of a list of
+<br><dt><code>addvars</code> <kbd>variable_name</kbd><code>[=value]</code> <code>...</code><br><dt><code>rmvars</code> <kbd>variable_name</kbd> <code>...</code><br><dt><code>clearvars</code><br><dt><code>showvars</code><dd>The data carried by NTP mode 6 messages consists of a list of
 items of the form
 variable_name=value,
 where the
@@ -217,6 +217,9 @@ while the
 <code>clearlist</code>
 command removes all variables from the
 list. 
+The
+<code>showvars</code>
+command displays the current list of optional variables. 
 <br><dt><code>authenticate</code> <code>[yes | no]</code><dd>Normally
 <code>ntpq</code>
 does not authenticate requests unless
@@ -259,6 +262,8 @@ or between machines whose clocks are unsynchronized.
 Actually the
 server does not now require timestamps in authenticated requests,
 so this command may be obsolete. 
+<br><dt><code>exit</code><dd>Exit
+<code>ntpq</code>
 <br><dt><code>host</code> <kbd>hostname</kbd><dd>Set the host to which future queries will be sent. 
 <kbd>hostname</kbd>
 may be either a host name or a numeric address. 
@@ -281,6 +286,16 @@ used to authenticate configuration requests.
 This must correspond
 to a key number the server has been configured to use for this
 purpose. 
+<br><dt><code>keytype</code> <code>[md5 | OpenSSLDigestType]</code><dd>Specify the type of key to use for authenticating requests. 
+<code>md5</code>
+is alway supported. 
+If
+<code>ntpq</code>
+was built with OpenSSL support,
+any digest type supported by OpenSSL can also be provided. 
+If no argument is given, the current
+<code>keytype</code>
+is displayed. 
 <br><dt><code>ntpversion</code> <code>[1 | 2 | 3 | 4]</code><dd>Sets the NTP version number which
 <code>ntpq</code>
 claims in
@@ -297,6 +312,9 @@ requests.
 The password must correspond to the key configured for
 use by the NTP server for this purpose if such requests are to be
 successful. 
+<code>poll</code>
+<kbd>n</kbd>
+<code>verbose</code>
 <br><dt><code>quit</code><dd>Exit
 <code>ntpq</code>
 <br><dt><code>raw</code><dd>Causes all output from query commands is printed as received
@@ -311,6 +329,9 @@ Note that since
 <code>ntpq</code>
 retries each query once after a timeout, the total waiting time for
 a timeout will be twice the timeout value set. 
+<br><dt><code>version</code><dd>Print the version of the
+<code>ntpq</code>
+program. 
 </dl>
 
 <h5 class="subsubsection">Control Message Commands</h5>
@@ -332,7 +353,8 @@ commands, which iterate over a range of associations.
      </pre>
           <dl>
 <dt>Sy String Ta Sy Description<br><dt><code>ind</code> <code>Ta</code> <code>index</code> <code>on</code> <code>this</code> <code>list</code><br><dt><code>assid</code> <code>Ta</code> <code>association</code> <code>ID</code><br><dt><code>status</code> <code>Ta</code> <code>peer</code> <code>status</code> <code>word</code><br><dt><code>conf</code> <code>Ta</code> <code>yes</code>: <code>persistent,</code> <code>no</code>: <code>ephemeral</code><br><dt><code>reach</code> <code>Ta</code> <code>yes</code>: <code>reachable,</code> <code>no</code>: <code>unreachable</code><br><dt><code>auth</code> <code>Ta</code> <code>ok</code>, <code>yes</code>, <code>bad</code> <code>and</code> <code>none</code><br><dt><code>condition</code> <code>Ta</code> <code>selection</code> <code>status</code> <code>(see</code> <code>the</code> <code>select</code> <code>field</code> <code>of</code> <code>the</code> <code>peer</code> <code>status</code> <code>word)</code><br><dt><code>last_event</code> <code>Ta</code> <code>event</code> <code>report</code> <code>(see</code> <code>the</code> <code>event</code> <code>field</code> <code>of</code> <code>the</code> <code>peer</code> <code>status</code> <code>word)</code><br><dt><code>cnt</code> <code>Ta</code> <code>event</code> <code>count</code> <code>(see</code> <code>the</code> <code>count</code> <code>field</code> <code>of</code> <code>the</code> <code>peer</code> <code>status</code> <code>word)</code><dd></dl>
-     <br><dt><code>clockvar</code> <kbd>assocID</kbd> <code>[</code><kbd>name</kbd><code> [= </code><kbd>value</kbd><code> [...]] [...]]</code><br><dt><code>cv</code> <kbd>assocID</kbd> <code>[</code><kbd>name</kbd><code> [= </code><kbd>value</kbd><code> [...]] [...]]</code><dd>Display a list of clock variables for those associations supporting a reference clock. 
+     <br><dt><code>authinfo</code><dd>Display the authentication statistics. 
+<br><dt><code>clockvar</code> <kbd>assocID</kbd> <code>[</code><kbd>name</kbd><code>[=</code><kbd>value</kbd><code>]]</code> <code>[...]</code><br><dt><code>cv</code> <kbd>assocID</kbd> <code>[</code><kbd>name</kbd><code>[=</code><kbd>value</kbd><code>]]</code> <code>[...]</code><dd>Display a list of clock variables for those associations supporting a reference clock. 
 <br><dt><code>:config</code> <code>[...]</code><dd>Send the remainder of the command line, including whitespace, to the server as a run-time configuration command in the same format as a line in the configuration file. This command is experimental until further notice and clarification. Authentication is of course required. 
 <br><dt><code>config-from-file</code> <kbd>filename</kbd><dd>Send the each line of
 <kbd>filename</kbd>
@@ -341,6 +363,12 @@ to the server as run-time configuration commands in the same format as a line in
 <br><dt><code>iostats</code><dd>Display network and reference clock I/O statistics. 
 <br><dt><code>kerninfo</code><dd>Display kernel loop and PPS statistics. As with other ntpq output, times are in milliseconds. The precision value displayed is in milliseconds as well, unlike the precision system variable. 
 <br><dt><code>lassociations</code><dd>Perform the same function as the associations command, except display mobilized and unmobilized associations. 
+<br><dt><code>lopeers</code> <code>[-4 | -6]</code><dd>Obtain and print a list of all peers and clients showing
+<kbd>dstadr</kbd>
+(associated with any given IP version). 
+<br><dt><code>lpeers</code> <code>[-4 | -6]</code><dd>Print a peer spreadsheet for the appropriate IP version(s). 
+<kbd>dstadr</kbd>
+(associated with any given IP version). 
 <br><dt><code>monstats</code><dd>Display monitor facility statistics. 
 <br><dt><code>mrulist</code> <code>[limited | kod | mincount=</code><kbd>count</kbd><code> | laddr=</code><kbd>localaddr</kbd><code> | sort=</code><kbd>sortorder</kbd><code> | resany=</code><kbd>hexmask</kbd><code> | resall=</code><kbd>hexmask</kbd><code>]</code><dd>Obtain and print traffic counts collected and maintained by the monitor facility. 
 With the exception of
@@ -402,14 +430,20 @@ rate limiting by discarding, or rate limiting with a KoD response, respectively.
 <br><dt><code>remote</code> <code>address</code><dd>DNS name, numeric address, or address followed by
 claimed DNS name which could not be verified in parentheses. 
 </dl>
-     <br><dt><code>mreadvar</code> <code>assocID</code> <code>assocID</code> <code>[variable_name [= </code><kbd>value</kbd><code>] ...]</code><br><dt><code>mrv</code> <code>assocID</code> <code>assocID</code> <code>[variable_name [= </code><kbd>value</kbd><code>] ...]</code><dd>Perform the same function as the
+     <br><dt><code>mreadvar</code> <code>assocID</code> <code>assocID</code> <code>[</code><kbd>variable_name</kbd><code>[=</code><kbd>value</kbd><code>] ...]</code><br><dt><code>mrv</code> <code>assocID</code> <code>assocID</code> <code>[</code><kbd>variable_name</kbd><code>[=</code><kbd>value</kbd><code>] ...]</code><dd>Perform the same function as the
 <code>readvar</code>
 command, except for a range of association IDs. 
 This range is determined from the association list cached by the most recent
 <code>associations</code>
 command. 
+<br><dt><code>opeers</code> <code>[-4 | -6]</code><dd>Obtain and print the old-style list of all peers and clients showing
+<kbd>dstadr</kbd>
+(associated with any given IP version),
+rather than the
+<kbd>refid</kbd>. 
 <br><dt><code>passociations</code><dd>Perform the same function as the
-<code>associations</code> <code>command</code>,
+<code>associations</code>
+command,
 except that it uses previously stored data rather than making a new query. 
 <br><dt><code>peers</code><dd>Display a list of peers in the form:
      <pre class="example">          [tally]remote refid st t when pool reach delay offset jitter
@@ -450,7 +484,10 @@ multicast server
 <br><dt><code>offset</code><dd>offset of server relative to this host
 <br><dt><code>jitter</code><dd>jitter
 </dl>
-     <br><dt><code>readvar</code> <kbd>assocID</kbd> <kbd>name</kbd> <code>[=</code><kbd>value</kbd><code>]</code> <code>[, ...]</code><br><dt><code>rv</code> <kbd>assocID</kbd> <kbd>name</kbd> <code>[=</code><kbd>value</kbd><code>]</code> <code>[, ...]</code><dd>Display the specified variables. 
+     <br><dt><code>pstats</code> <kbd>assocID</kbd><dd>Show the statistics for the peer with the given
+<kbd>assocID</kbd>. 
+<br><dt><code>readlist</code> <kbd>assocID</kbd><br><dt><code>rl</code> <kbd>assocID</kbd><dd>Read the system or peer variables included in the variable list. 
+<br><dt><code>readvar</code> <kbd>assocID</kbd> <kbd>name</kbd><code>[=</code><kbd>value</kbd><code>]</code> <code>[, ...]</code><br><dt><code>rv</code> <kbd>assocID</kbd> <kbd>name</kbd><code>[=</code><kbd>value</kbd><code>]</code> <code>[, ...]</code><dd>Display the specified variables. 
 If
 <kbd>assocID</kbd>
 is zero, the variables are from the
@@ -477,7 +514,10 @@ where YYYY is the year,
 MM the month of year,
 DD the day of month and
 TTTT the time of day. 
-<br><dt><code>saveconfig</code> <kbd>filename</kbd><dd>Write the current configuration,
+<br><dt><code>reslist</code><dd>Show the access control (restrict) list for
+<code>ntpq</code>
+
+     <br><dt><code>saveconfig</code> <kbd>filename</kbd><dd>Write the current configuration,
 including any runtime modifications given with
 <code>:config</code>
 or
@@ -497,6 +537,8 @@ format specifies to substitute the current date and time, for example,
 The filename used is stored in system variable
 <code>savedconfig</code>. 
 Authentication is required. 
+<br><dt><code>timerstats</code><dd>Display interval timer counters. 
+<br><dt><code>writelist</code> <kbd>assocID</kbd><dd>Write the system or peer variables included in the variable list. 
 <br><dt><code>writevar</code> <kbd>assocID</kbd> <kbd>name</kbd>=<kbd>value</kbd> <code>[, ...]</code><dd>Write the specified variables. 
 If the
 <kbd>assocID</kbd>
@@ -514,13 +556,16 @@ is required, as the same name can occur in both spaces.
 
 <h5 class="subsubsection">Status Words and Kiss Codes</h5>
 
-<p>The current state of the operating program is shown in a set of status words maintained by the system and each association separately. 
+<p>The current state of the operating program is shown
+in a set of status words
+maintained by the system. 
+Status information is also available on a per-association basis. 
 These words are displayed in the
 <code>rv</code>
 and
 <code>as</code>
-commands both in hexadecimal and decoded short tip strings. 
-The codes, tips and short explanations are on the
+commands both in hexadecimal and in decoded short tip strings. 
+The codes, tips and short explanations are documented on the
 .Lk decode.html "Event Messages and Status Words"
 page. 
 The page also includes a list of system and peer messages,
@@ -714,7 +759,7 @@ the usage text by passing it through a pager program.
 used to select the program, defaulting to <span class="file">more</span>.  Both will exit
 with a status code of 0.
 
-<pre class="example">ntpq - standard NTP query program - Ver. 4.2.7p471
+<pre class="example">ntpq - standard NTP query program - Ver. 4.2.7p472
 Usage:  ntpq [ -&lt;flag&gt; [&lt;val&gt;] | --&lt;name&gt;[{=| }&lt;val&gt;] ]... [ host ...]
   Flg Arg Option-Name    Description
    -4 no  ipv4           Force IPv4 DNS name resolution
