@@ -13,7 +13,7 @@ man8_MANS=
 
 DISTCLEANFILES=	config.log $(man_MANS)
 
-run_ag=		cd $(srcdir) &&	env PATH="$(abs_builddir):$(PATH)"	\
+run_ag=		cd $(srcdir) &&	env PATH="$(abs_builddir):$(PATH)" AUTOGEN_DNE_DATE=-D	\
 		autogen -L ../sntp/include -L ../sntp/ag-tpl --writable
 std_def_list =							\
 	$(top_srcdir)/sntp/include/debug-opt.def		\
