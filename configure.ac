@@ -210,6 +210,46 @@ case "$ntp_ok" in
 	[AC_DEFINE([LIBSECCOMP], [1],
 	    [Define to any value to include libseccomp sandboxing.])]
     )
+    AC_TRY_RUN([
+	#include <stdio.h>
+	#include <stdlib.h>
+	#include <errno.h>
+	#include <sys/prctl.h>
+	#include <linux/seccomp.h>
+
+	int main(void)
+	{
+		int ret;
+		ret = prctl(PR_GET_SECCOMP, 0, 0, 0, 0);
+		if (ret < 0) {
+			switch (errno) {
+			case ENOSYS:
+				return 1;
+			case EINVAL:
+				return 1;
+			default:
+				return 1;
+			}
+		}
+		ret = 
+		prctl(PR_SET_SECCOMP, SECCOMP_MODE_FILTER, NULL, 0, 0);
+		if (ret < 0) {
+			switch (errno) {
+			case EINVAL:
+				return 1;
+			case EFAULT:
+				return 0;
+			default:
+				return 1;
+		}
+	}
+return 1;
+}
+]
+, AC_DEFINE([KERN_SECCOMP], 1, 
+[Define to use libseccomp system call filtering.])   
+, []
+)
     ;;
 esac
 

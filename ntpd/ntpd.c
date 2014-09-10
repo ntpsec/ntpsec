@@ -113,11 +113,11 @@
 #endif /* HAVE_PRIV_H */
 #endif /* HAVE_DROPROOT */
 
-#if defined (LIBSECCOMP)
+#if defined (LIBSECCOMP) && (KERN_SECCOMP)
 /* # include <sys/types.h> */
 # include <sys/resource.h>
 # include <seccomp.h>
-#endif /* LIBSECCOMP */
+#endif /* LIBSECCOMP and KERN_SECCOMP */
 
 #ifdef HAVE_DNSREGISTRATION
 # include <dns_sd.h>
@@ -1006,7 +1006,7 @@ getgroup:
 # endif	/* HAVE_DROPROOT */
 
 /* libssecomp sandboxing */
-#if defined (LIBSECCOMP)
+#if defined (LIBSECCOMP) && (KERN_SECCOMP)
 	scmp_filter_ctx ctx;
 
 	if ((ctx = seccomp_init(SCMP_ACT_KILL)) < 0)
@@ -1107,7 +1107,7 @@ int scmp_sc[] = {
 	else {
 		msyslog(LOG_DEBUG, "%s: seccomp_load() succeeded", __func__);
 	}
-#endif /* LIBSECCOMP */
+#endif /* LIBSECCOMP and KERN_SECCOMP */
 
 # ifdef HAVE_IO_COMPLETION_PORT
 

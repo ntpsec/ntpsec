@@ -1,3 +1,4 @@
+* [Bug 2536] ntpd sandboxing support (libseccomp2) cleanup.
 * [Bug 2649] Clean up html/ page installation.
 (4.2.7p473) 2014/09/06 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 2649] Clean up html/ page installation.
