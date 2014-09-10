@@ -488,7 +488,7 @@ true_receive(
 	 * Timecode: " TRUETIME Mk III" or " TRUETIME XL"
 	 * (from a TM/TMD/XL clock during initialization.)
 	 */
-	if (strcmp(pp->a_lastcode, " TRUETIME Mk III") == 0 ||
+	if (strncmp(pp->a_lastcode, " TRUETIME Mk III ", 17) == 0 ||
 	    strncmp(pp->a_lastcode, " TRUETIME XL", 12) == 0) {
 		true_doevent(peer, e_F18);
 		NLOG(NLOG_CLOCKSTATUS) {
