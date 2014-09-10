@@ -113,7 +113,7 @@ dist-hook:
 
 install-data-local:
 	( cd $(srcdir) && find html -name SCCS -prune -o -type d \
-		-exec $(INSTALL) -d {} $(DESTDIR)$(htmldir)/{} ";" )
+		-exec $(INSTALL) -d $(DESTDIR)$(htmldir)/{} ";" )
 	( cd $(srcdir) && find html -name SCCS -prune -o -type f \
 		-exec $(INSTALL_DATA) {} $(DESTDIR)$(htmldir)/{} ";" )
 
