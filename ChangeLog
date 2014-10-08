@@ -1,3 +1,4 @@
+(4.2.7p476) 2014/10/08 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 2503] SHT utility outdated
 (4.2.7p475) 2014/09/11 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 2654] refclock_true.c doesn't identify the Mk III.

@@ -1,7 +1,7 @@
 /*
  *  EDIT THIS FILE WITH CAUTION  (sntp-opts.c)
  *
- *  It has been AutoGen-ed  September 11, 2014 at 08:48:08 AM by AutoGen 5.18.5pre1
+ *  It has been AutoGen-ed  October  8, 2014 at 09:35:48 AM by AutoGen 5.18.5pre4
  *  From the definitions    sntp-opts.def
  *  and the template file   options
  *
@@ -70,7 +70,7 @@ extern FILE * option_usage_fp;
  *  static const strings for sntp options
  */
 static char const sntp_opt_strs[2499] =
-/*     0 */ "sntp 4.2.7p475\n"
+/*     0 */ "sntp 4.2.7p476\n"
             "Copyright (C) 1970-2014 The University of Delaware, all rights reserved.\n"
             "This is free software. It is licensed for use, modification and\n"
             "redistribution under the terms of the NTP License, copies of which\n"
@@ -154,7 +154,7 @@ static char const sntp_opt_strs[2499] =
 /*  2244 */ "LOAD_OPTS\0"
 /*  2254 */ "no-load-opts\0"
 /*  2267 */ "SNTP\0"
-/*  2272 */ "sntp - standard Simple Network Time Protocol client program - Ver. 4.2.7p475\n"
+/*  2272 */ "sntp - standard Simple Network Time Protocol client program - Ver. 4.2.7p476\n"
             "Usage:  %s [ -<flag> [<val>] | --<name>[{=| }<val>] ]... \\\n"
             "\t\t[ hostname-or-IP ...]\n\0"
 /*  2433 */ "$HOME\0"
@@ -162,7 +162,7 @@ static char const sntp_opt_strs[2499] =
 /*  2441 */ ".ntprc\0"
 /*  2448 */ "http://bugs.ntp.org, bugs@ntp.org\0"
 /*  2482 */ "\n\0"
-/*  2484 */ "sntp 4.2.7p475";
+/*  2484 */ "sntp 4.2.7p476";
 
 /**
  *  ipv4 option description with
@@ -1169,7 +1169,7 @@ static void bogus_function(void) {
      translate option names.
    */
   /* referenced via sntpOptions.pzCopyright */
-  puts(_("sntp 4.2.7p475\n\
+  puts(_("sntp 4.2.7p476\n\
 Copyright (C) 1970-2014 The University of Delaware, all rights reserved.\n\
 This is free software. It is licensed for use, modification and\n\
 redistribution under the terms of the NTP License, copies of which\n\
@@ -1258,7 +1258,7 @@ provided \"as is\" without express or implied warranty.\n"));
   puts(_("load options from a config file"));
 
   /* referenced via sntpOptions.pzUsageTitle */
-  puts(_("sntp - standard Simple Network Time Protocol client program - Ver. 4.2.7p475\n\
+  puts(_("sntp - standard Simple Network Time Protocol client program - Ver. 4.2.7p476\n\
 Usage:  %s [ -<flag> [<val>] | --<name>[{=| }<val>] ]... \\\n\
 \t\t[ hostname-or-IP ...]\n"));
 
@@ -1266,7 +1266,7 @@ Usage:  %s [ -<flag> [<val>] | --<name>[{=| }<val>] ]... \\\n\
   puts(_("\n"));
 
   /* referenced via sntpOptions.pzFullVersion */
-  puts(_("sntp 4.2.7p475"));
+  puts(_("sntp 4.2.7p476"));
 
   /* referenced via sntpOptions.pzFullUsage */
   puts(_("<<<NOT-FOUND>>>"));
@@ -1280,14 +1280,14 @@ Usage:  %s [ -<flag> [<val>] | --<name>[{=| }<val>] ]... \\\n\
   puts(_("allocation of %d bytes failed\n"));
 #line 53 "../init.c"
   puts(_("AutoOpts function called without option descriptor\n"));
-#line 90 "../init.c"
+#line 86 "../init.c"
   puts(_("\tThis exceeds the compiled library version:  "));
-#line 88 "../init.c"
+#line 84 "../init.c"
   puts(_("Automated Options Processing Error!\n"
        "\t%s called AutoOpts function with structure version %d:%d:%d.\n"));
 #line 80 "../autoopts.c"
   puts(_("realloc of %d bytes at 0x%p failed\n"));
-#line 92 "../init.c"
+#line 88 "../init.c"
   puts(_("\tThis is less than the minimum library version:  "));
 #line 121 "../version.c"
   puts(_("Automated Options version %s\n"

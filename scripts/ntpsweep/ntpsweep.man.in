@@ -10,11 +10,11 @@
 .ds B-Font B
 .ds I-Font I
 .ds R-Font R
-.TH ntpsweep 1ntpsweepman "11 Sep 2014" "ntp (4.2.7p475)" "User Commands"
+.TH ntpsweep 1ntpsweepman "08 Oct 2014" "ntp (4.2.7p476)" "User Commands"
 .\"
-.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-8NaieJ/ag-iOaqdJ)
+.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-H6aamy/ag-T6aily)
 .\"
-.\" It has been AutoGen-ed September 11, 2014 at 08:51:09 AM by AutoGen 5.18.5pre1
+.\" It has been AutoGen-ed October 8, 2014 at 09:29:39 AM by AutoGen 5.18.5pre4
 .\" From the definitions ntpsweep-opts.def
 .\" and the template file agman-cmd.tpl
 .SH NAME

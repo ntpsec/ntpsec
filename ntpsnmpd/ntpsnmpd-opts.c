@@ -1,7 +1,7 @@
 /*
  *  EDIT THIS FILE WITH CAUTION  (ntpsnmpd-opts.c)
  *
- *  It has been AutoGen-ed  September 11, 2014 at 08:56:36 AM by AutoGen 5.18.5pre1
+ *  It has been AutoGen-ed  October  8, 2014 at 09:35:09 AM by AutoGen 5.18.5pre4
  *  From the definitions    ntpsnmpd-opts.def
  *  and the template file   options
  *
@@ -61,7 +61,7 @@ extern FILE * option_usage_fp;
  *  static const strings for ntpsnmpd options
  */
 static char const ntpsnmpd_opt_strs[1560] =
-/*     0 */ "ntpsnmpd 4.2.7p475\n"
+/*     0 */ "ntpsnmpd 4.2.7p476\n"
             "Copyright (C) 1970-2014 The University of Delaware, all rights reserved.\n"
             "This is free software. It is licensed for use, modification and\n"
             "redistribution under the terms of the NTP License, copies of which\n"
@@ -100,14 +100,14 @@ static char const ntpsnmpd_opt_strs[1560] =
 /*  1360 */ "no-load-opts\0"
 /*  1373 */ "no\0"
 /*  1376 */ "NTPSNMPD\0"
-/*  1385 */ "ntpsnmpd - NTP SNMP MIB agent - Ver. 4.2.7p475\n"
+/*  1385 */ "ntpsnmpd - NTP SNMP MIB agent - Ver. 4.2.7p476\n"
             "Usage:  %s [ -<flag> [<val>] | --<name>[{=| }<val>] ]...\n\0"
 /*  1490 */ "$HOME\0"
 /*  1496 */ ".\0"
 /*  1498 */ ".ntprc\0"
 /*  1505 */ "http://bugs.ntp.org, bugs@ntp.org\0"
 /*  1539 */ "\n\0"
-/*  1541 */ "ntpsnmpd 4.2.7p475";
+/*  1541 */ "ntpsnmpd 4.2.7p476";
 
 /**
  *  nofork option description:
@@ -553,7 +553,7 @@ static void bogus_function(void) {
      translate option names.
    */
   /* referenced via ntpsnmpdOptions.pzCopyright */
-  puts(_("ntpsnmpd 4.2.7p475\n\
+  puts(_("ntpsnmpd 4.2.7p476\n\
 Copyright (C) 1970-2014 The University of Delaware, all rights reserved.\n\
 This is free software. It is licensed for use, modification and\n\
 redistribution under the terms of the NTP License, copies of which\n\
@@ -597,14 +597,14 @@ provided \"as is\" without express or implied warranty.\n"));
   puts(_("load options from a config file"));
 
   /* referenced via ntpsnmpdOptions.pzUsageTitle */
-  puts(_("ntpsnmpd - NTP SNMP MIB agent - Ver. 4.2.7p475\n\
+  puts(_("ntpsnmpd - NTP SNMP MIB agent - Ver. 4.2.7p476\n\
 Usage:  %s [ -<flag> [<val>] | --<name>[{=| }<val>] ]...\n"));
 
   /* referenced via ntpsnmpdOptions.pzExplain */
   puts(_("\n"));
 
   /* referenced via ntpsnmpdOptions.pzFullVersion */
-  puts(_("ntpsnmpd 4.2.7p475"));
+  puts(_("ntpsnmpd 4.2.7p476"));
 
   /* referenced via ntpsnmpdOptions.pzFullUsage */
   puts(_("<<<NOT-FOUND>>>"));
@@ -618,14 +618,14 @@ Usage:  %s [ -<flag> [<val>] | --<name>[{=| }<val>] ]...\n"));
   puts(_("allocation of %d bytes failed\n"));
 #line 53 "../init.c"
   puts(_("AutoOpts function called without option descriptor\n"));
-#line 90 "../init.c"
+#line 86 "../init.c"
   puts(_("\tThis exceeds the compiled library version:  "));
-#line 88 "../init.c"
+#line 84 "../init.c"
   puts(_("Automated Options Processing Error!\n"
        "\t%s called AutoOpts function with structure version %d:%d:%d.\n"));
 #line 80 "../autoopts.c"
   puts(_("realloc of %d bytes at 0x%p failed\n"));
-#line 92 "../init.c"
+#line 88 "../init.c"
   puts(_("\tThis is less than the minimum library version:  "));
 #line 121 "../version.c"
   puts(_("Automated Options version %s\n"
