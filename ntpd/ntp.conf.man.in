@@ -10,11 +10,11 @@
 .ds B-Font B
 .ds I-Font I
 .ds R-Font R
-.TH ntp.conf 5 "08 Oct 2014" "4.2.7p476" "File Formats"
+.TH ntp.conf 5 "12 Nov 2014" "4.2.7p476" "File Formats"
 .\"
-.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-YaaqkE/ag-.aaijE)
+.\" EDIT THIS FILE WITH CAUTION (in-mem file)
 .\"
-.\" It has been AutoGen-ed October 8, 2014 at 09:33:37 AM by AutoGen 5.18.5pre4
+.\" It has been AutoGen-ed November 12, 2014 at 06:22:28 AM by AutoGen 5.18.5pre4
 .\" From the definitions ntp.conf.def
 .\" and the template file agman-cmd.tpl
 .SH NAME
@@ -1715,6 +1715,19 @@ Deny packets which would result in mobilizing a new association.
 This
 includes broadcast and symmetric active packets when a configured
 association does not exist.
+It also includes
+\f\*[B-Font]pool\f[]
+associations, so if you want to use servers from a 
+\f\*[B-Font]pool\f[]
+directive and also want to use
+\f\*[B-Font]nopeer\f[]
+by default, you'll want a
+\f\*[B-Font]restrict source ...\f[] \f\*[B-Font]line\f[] \f\*[B-Font]as\f[] \f\*[B-Font]well\f[] \f\*[B-Font]that\f[] \f\*[B-Font]does\f[]
+.TP 7
+.NOP not
+include the
+\f\*[B-Font]nopeer\f[]
+directive.
 .TP 7
 .NOP \f\*[B-Font]noserve\f[]
 Deny all packets except

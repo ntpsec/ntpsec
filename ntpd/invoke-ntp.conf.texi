@@ -6,7 +6,7 @@
 #
 # EDIT THIS FILE WITH CAUTION  (invoke-ntp.conf.texi)
 #
-# It has been AutoGen-ed  October  8, 2014 at 09:33:50 AM by AutoGen 5.18.5pre4
+# It has been AutoGen-ed  November 12, 2014 at 06:22:25 AM by AutoGen 5.18.5pre4
 # From the definitions    ntp.conf.def
 # and the template file   agtexi-file.tpl
 @end ignore
@@ -1510,6 +1510,18 @@ Deny packets which would result in mobilizing a new association.
 This
 includes broadcast and symmetric active packets when a configured
 association does not exist.
+It also includes
+@code{pool}
+associations, so if you want to use servers from a 
+@code{pool}
+directive and also want to use
+@code{nopeer}
+by default, you'll want a
+@code{restrict source ...} @code{line} @code{as} @code{well} @code{that} @code{does}
+@item not
+include the
+@code{nopeer}
+directive.
 @item @code{noserve}
 Deny all packets except
 @code{ntpq(1ntpqmdoc)}

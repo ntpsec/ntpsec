@@ -1579,6 +1579,18 @@ Deny packets which would result in mobilizing a new association.
 This
 includes broadcast and symmetric active packets when a configured
 association does not exist.
+It also includes
+.Cm pool
+associations, so if you want to use servers from a 
+.Cm pool
+directive and also want to use
+.Cm nopeer
+by default, you'll want a
+.Cm "restrict source ..." line as well that does
+.It not
+include the
+.Cm nopeer
+directive.
 .It Cm noserve
 Deny all packets except
 .Xr ntpq 1ntpqmdoc
