@@ -33,7 +33,7 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#dir">(dir)</a>
 <p>This document describes the configuration file for the NTP Project's
 <code>ntpd</code> program.
 
-  <p>This document applies to version 4.2.7p476 of <code>ntp.conf</code>.
+  <p>This document applies to version 4.2.7p477 of <code>ntp.conf</code>.
 
   <div class="shortcontents">
 <h2>Short Contents</h2>
@@ -1512,6 +1512,17 @@ Time service is not affected.
 This
 includes broadcast and symmetric active packets when a configured
 association does not exist. 
+It also includes
+<code>pool</code>
+associations, so if you want to use servers from a
+<code>pool</code>
+directive and also want to use
+<code>nopeer</code>
+by default, you'll want a
+<code>restrict source ...</code> <code>line</code> <code>as</code> <code>well</code> <code>that</code> <code>does</code>
+<br><dt>not<dd>include the
+<code>nopeer</code>
+directive. 
 <br><dt><code>noserve</code><dd>Deny all packets except
 <code>ntpq(1ntpqmdoc)</code>
 and
