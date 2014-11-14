@@ -13,6 +13,7 @@
 #include "ntp_unixtime.h"
 #include "ntp_stdlib.h"
 
+#include <limits.h>
 #include <stdio.h>
 #include <ctype.h>
 
@@ -123,6 +124,8 @@ static int loop_started;	/* TRUE after LOOP_DRIFTINIT */
 static void rstclock (int, double); /* transition function */
 static double direct_freq(double); /* direct set frequency */
 static void set_freq(double);	/* set frequency */
+static char relative_path[PATH_MAX + 1]; /* relative path per recursive make */
+static char *this_file = NULL;
 
 #ifdef KERNEL_PLL
 static struct timex ntv;	/* ntp_adjtime() parameters */
@@ -177,6 +180,18 @@ static sigjmp_buf env;		/* environment var. for pll_trap() */
 #endif /* KERNEL_PLL */
 
 /*
+ * file_name - return pointer to non-relative portion of this C file pathname
+ */
+static char *file_name(void)
+{
+	if (this_file == NULL) {
+	    (void)strncpy(relative_path, __FILE__, PATH_MAX);
+	    for (this_file=relative_path; *this_file && ! isalnum(*this_file); this_file++) ;
+	}
+	return this_file;
+}
+
+/*
  * init_loopfilter - initialize loop filter data
  */
 void
@@ -189,6 +204,111 @@ init_loopfilter(void)
 	clock_jitter = LOGTOD(sys_precision);
 	freq_cnt = (int)clock_minstep;
 }
+
+#ifdef KERNEL_PLL
+/*
+ * ntp_adjtime_error_handler - process errors from ntp_adjtime
+ */
+static void
+ntp_adjtime_error_handler(
+	const char *caller,	/* name of calling function */
+	struct timex *ptimex,	/* pointer to struct timex */
+	int ret,		/* return value from ntp_adjtime */
+	int saved_errno,	/* value of errno when ntp_adjtime returned */
+	int pps_call,		/* ntp_adjtime call was PPS-related */
+	int tai_call,		/* ntp_adjtime call was TAI-related */
+	int line		/* line number of ntp_adjtime call */
+	)
+{
+	switch (ret) {
+	    case -1:
+		switch (saved_errno) {
+		    case EFAULT:
+			msyslog(LOG_ERR, "%s: %s line %d: invalid struct timex pointer: 0x%lx",
+			    caller, file_name(), line,
+			    (long)((void *)ptimex)
+			);
+		    break;
+		    case EINVAL:
+			msyslog(LOG_ERR, "%s: %s line %d: invalid struct timex \"constant\" element value: %ld",
+			    caller, file_name(), line,
+			    (long)(ptimex->constant)
+			);
+		    break;
+		    case EPERM:
+			if (tai_call) {
+			    errno = saved_errno;
+			    msyslog(LOG_ERR,
+				"%s: ntp_adjtime(TAI) failed: %m",
+				caller);
+			}
+			errno = saved_errno;
+			msyslog(LOG_ERR, "%s: %s line %d: ntp_adjtime: %m",
+			    caller, file_name(), line
+			);
+		    break;
+		    default:
+			msyslog(LOG_NOTICE, "%s: %s line %d: unhandled errno value %d after failed ntp_adjtime call",
+			    caller, file_name(), line,
+			    saved_errno
+			);
+		    break;
+		}
+	    break;
+#ifdef TIME_OK
+	    case TIME_OK: /* 0 no leap second warning */
+		/* OK means OK */
+	    break;
+#endif
+#ifdef TIME_INS
+	    case TIME_INS: /* 1 positive leap second warning */
+		msyslog(LOG_INFO, "%s: %s line %d: kernel reports positive leap second warning state",
+		    caller, file_name(), line
+		);
+	    break;
+#endif
+#ifdef TIME_DEL
+	    case TIME_DEL: /* 2 negative leap second warning */
+		msyslog(LOG_INFO, "%s: %s line %d: kernel reports negative leap second warning state",
+		    caller, file_name(), line
+		);
+	    break;
+#endif
+#ifdef TIME_OOP
+	    case TIME_OOP: /* 3 leap second in progress */
+		msyslog(LOG_INFO, "%s: %s line %d: kernel reports leap second in progress",
+		    caller, file_name(), line
+		);
+	    break;
+#endif
+#ifdef TIME_WAIT
+	    case TIME_WAIT: /* 4 leap second has occured */
+		msyslog(LOG_INFO, "%s: %s line %d: kernel reports leap second has occured",
+		    caller, file_name(), line
+		);
+	    break;
+#endif
+#ifdef TIME_ERROR
+	    case TIME_ERROR: /* loss of synchronization */
+		if (pps_call && !(ptimex->status & STA_PPSSIGNAL))
+			report_event(EVNT_KERN, NULL,
+			    "PPS no signal");
+		errno = saved_errno;
+		DPRINTF(1, ("kernel loop status (%s) %d %m\n",
+			k_st_flags(ptimex->status), errno));
+	    break;
+#endif
+	    default:
+		msyslog(LOG_NOTICE, "%s: %s line %d: unhandled return value %d from ntp_adjtime in %s at line %d",
+		    caller, file_name(), line,
+		    ret,
+		    __func__, __LINE__
+		);
+	    break;
+	}
+	return;
+}
+#endif
 
 /*
  * local_clock - the NTP logical clock loop filter.
@@ -210,6 +330,7 @@ local_clock(
 {
 	int	rval;		/* return code */
 	int	osys_poll;	/* old system poll */
+	int	ntp_adj_ret;	/* returned by ntp_adjtime */
 	double	mu;		/* interval since last update */
 	double	clock_frequency; /* clock frequency */
 	double	dtemp, etemp;	/* double temps */
@@ -560,15 +681,9 @@ local_clock(
 		 * Pass the stuff to the kernel. If it squeals, turn off
 		 * the pps. In any case, fetch the kernel offset,
 		 * frequency and jitter.
-		 *
-		 * XXX: HMS: What if ntp_adjtime() returns -1?
 		 */
-		if (ntp_adjtime(&ntv) == TIME_ERROR) {
-			if (pps_enable && !(ntv.status & STA_PPSSIGNAL))
-				report_event(EVNT_KERN, NULL,
-				    "PPS no signal");
-			DPRINTF(1, ("kernel loop status (%s) %d %m\n",
-				k_st_flags(ntv.status), errno));
+		if ((ntp_adj_ret = ntp_adjtime(&ntv)) != 0) {
+		    ntp_adjtime_error_handler(__func__, &ntv, ntp_adj_ret, errno, pps_enable, 0, __LINE__ - 1);
 		}
 		pll_status = ntv.status;
 #ifdef STA_NANO
@@ -594,13 +709,11 @@ local_clock(
 		 * If the TAI changes, update the kernel TAI.
 		 */
 		if (loop_tai != sys_tai) {
-			loop_tai = sys_tai; /* XXX: HMS: what if ntp_adjtime fails? */
+			loop_tai = sys_tai;
 			ntv.modes = MOD_TAI;
 			ntv.constant = sys_tai;
-			if (ntp_adjtime(&ntv) == -1) {
-				msyslog(LOG_ERR,
-				    "%s: ntp_adjtime(TAI) failed: %m",
-				    __func__);
+			if ((ntp_adj_ret = ntp_adjtime(&ntv)) != 0) {
+			    ntp_adjtime_error_handler(__func__, &ntv, ntp_adj_ret, errno, 0, 1, __LINE__ - 1);
 			}
 		}
 #endif /* STA_NANO */
@@ -824,6 +937,7 @@ set_freq(
 	)
 {
 	const char *	loop_desc;
+	int ntp_adj_ret;
 
 	drift_comp = freq;
 	loop_desc = "ntpd";
@@ -835,10 +949,9 @@ set_freq(
 			loop_desc = "kernel";
 			ntv.freq = DTOFREQ(drift_comp);
 		}
-		if (ntp_adjtime(&ntv) == -1)
-			msyslog(LOG_ERR,
-			    "%s: ntp_adjtime() failed: %m",
-			    __func__);
+		if ((ntp_adj_ret = ntp_adjtime(&ntv)) != 0) {
+		    ntp_adjtime_error_handler(__func__, &ntv, ntp_adj_ret, errno, 0, 0, __LINE__ - 1);
+		}
 	}
 #endif /* KERNEL_PLL */
 	mprintf_event(EVNT_FSET, NULL, "%s %.3f PPM", loop_desc,
@@ -851,6 +964,7 @@ static void
 start_kern_loop(void)
 {
 	static int atexit_done;
+	int ntp_adj_ret;
 
 	pll_control = TRUE;
 	ZERO(ntv);
@@ -858,7 +972,7 @@ start_kern_loop(void)
 	ntv.status = STA_PLL;
 	ntv.maxerror = MAXDISPERSE;
 	ntv.esterror = MAXDISPERSE;
-	ntv.constant = sys_poll;
+	ntv.constant = sys_poll; /* why is it that here constant is unconditionally set to sys_poll, whereas elsewhere is is modified depending on nanosecond vs. microsecond kernel? */
 #ifdef SIGSYS
 	/*
 	 * Use sigsetjmp() to save state and then call ntp_adjtime(); if
@@ -872,10 +986,8 @@ start_kern_loop(void)
 		pll_control = FALSE;
 	} else {
 		if (sigsetjmp(env, 1) == 0) {
-			if (ntp_adjtime(&ntv) == -1) {
-				msyslog(LOG_ERR,
-				    "%s: ntp_adjtime() failed: %m",
-				    __func__);
+			if ((ntp_adj_ret = ntp_adjtime(&ntv)) != 0) {
+			    ntp_adjtime_error_handler(__func__, &ntv, ntp_adj_ret, errno, 0, 0, __LINE__ - 1);
 			}
 		}
 		if (sigaction(SIGSYS, &sigsys, NULL)) {
@@ -885,10 +997,8 @@ start_kern_loop(void)
 		}
 	}
 #else /* SIGSYS */
-	if (ntp_adjtime(&ntv) == -1) {
-		msyslog(LOG_ERR,
-		    "%s: ntp_adjtime(TAI) failed: %m",
-		    __func__);
+	if ((ntp_adj_ret = ntp_adjtime(&ntv)) != 0) {
+	    ntp_adjtime_error_handler(__func__, &ntv, ntp_adj_ret, errno, 0, 0, __LINE__ - 1);
 	}
 #endif /* SIGSYS */
 
