@@ -1,3 +1,4 @@
+* [Bug 2661] ntpq crashes with mreadvar.
 (4.2.7p477) 2014/11/13 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 2657] Document that "restrict nopeer" intereferes with "pool".
 (4.2.7p476) 2014/10/08 Released by Harlan Stenn <stenn@ntp.org>

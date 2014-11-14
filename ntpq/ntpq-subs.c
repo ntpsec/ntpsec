@@ -1030,8 +1030,8 @@ mreadvar(
 				&from, &to, fp))
 		return;
 
+	ZERO(tmplist);
 	if (pcmd->nargs >= 3) {
-		ZERO(tmplist);
 		doaddvlist(tmplist, pcmd->argval[2].string);
 		pvars = tmplist;
 	} else {
