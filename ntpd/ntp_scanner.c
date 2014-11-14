@@ -488,6 +488,8 @@ yylex(
 	int		token;		/* The return value */
 	int		ch;
 
+	if (input_from_file)
+		ip_file = fp[curr_include_level];
 	instring = FALSE;
 	yylval_was_set = FALSE;
 

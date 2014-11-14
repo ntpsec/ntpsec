@@ -1,5 +1,6 @@
 * [Sec 2630] buffer overrun in ntpq tokenize().
 * [Bug 2639] Check return value of ntp_adjtime().
+* [Bug 2650] includefile processing broken.
 * [Bug 2661] ntpq crashes with mreadvar.
 (4.2.7p477) 2014/11/13 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 2657] Document that "restrict nopeer" intereferes with "pool".
