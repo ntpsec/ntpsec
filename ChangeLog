@@ -1,3 +1,4 @@
+(4.2.7p478) 2014/11/14 Released by Harlan Stenn <stenn@ntp.org>
 * [Sec 2630] buffer overrun in ntpq tokenize().
 * [Bug 2639] Check return value of ntp_adjtime().
 * [Bug 2650] includefile processing broken.
