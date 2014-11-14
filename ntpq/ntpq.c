@@ -1575,6 +1575,8 @@ tokenize(
 
 		if (*ntok == 1 && tokens[0][0] == ':') {
 			do {
+				if (sp - tspace >= MAXLINE)
+					goto toobig;
 				*sp++ = *cp++;
 			} while (!ISEOL(*cp));
 		}
@@ -1585,19 +1587,33 @@ tokenize(
 		else if (*cp == '\"') {
 			++cp;
 			do {
+				if (sp - tspace >= MAXLINE)
+					goto toobig;
 				*sp++ = *cp++;
 			} while ((*cp != '\"') && !ISEOL(*cp));
 			/* HMS: a missing closing " should be an error */
 		}
 		else {
 			do {
+				if (sp - tspace >= MAXLINE)
+					goto toobig;
 				*sp++ = *cp++;
 			} while ((*cp != '\"') && !ISSPACE(*cp) && !ISEOL(*cp));
 			/* HMS: Why check for a " in the previous line? */
 		}
 
+		if (sp - tspace >= MAXLINE)
+			goto toobig;
 		*sp++ = '\0';
 	}
+	return;
+
+  toobig:
+	*ntok = 0;
+	fprintf(stderr,
+		"***Line `%s' is too big\n",
+		line);
+	return;
 }
 
 
