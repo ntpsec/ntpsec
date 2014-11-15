@@ -25,6 +25,7 @@ invalidsyntax: AUTOKEY should be defined only if OPENSSL is.
 #endif
 
 #include "openssl/evp.h"
+#include "ntp_calendar.h"	/* for fields in the cert_info structure */
 
 
 /*
@@ -147,6 +148,7 @@ struct exten {
 	u_int32	pkt[1];		/* start of value field */
 };
 
+
 /*
  * The certificate info/value structure
  */
@@ -158,8 +160,8 @@ struct cert_info {
 	int	nid;		/* signature/digest ID */
 	const EVP_MD *digest;	/* message digest algorithm */
 	u_long	serial;		/* serial number */
-	tstamp_t first;		/* not valid before */
-	tstamp_t last;		/* not valid after */
+	struct calendar first;	/* not valid before */
+	struct calendar last;	/* not valid after */
 	char	*subject;	/* subject common name */
 	char	*issuer;	/* issuer common name */
 	BIGNUM	*grpkey;	/* GQ group key */

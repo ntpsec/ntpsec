@@ -2319,11 +2319,14 @@ ctl_putsys(
 
 	case CS_CERTIF:
 		for (cp = cinfo; cp != NULL; cp = cp->link) {
+			tstamp_t tstamp;
+
 			snprintf(str, sizeof(str), "%s %s 0x%x",
 			    cp->subject, cp->issuer, cp->flags);
 			ctl_putstr(sys_var[CS_CERTIF].text, str,
 			    strlen(str));
-			ctl_putfs(sys_var[CS_REVTIME].text, cp->last);
+			tstamp = caltontp(&(cp->last)); /* XXX too small to hold some values, but that's what ctl_putfs requires */
+			ctl_putfs(sys_var[CS_REVTIME].text, tstamp);
 		}
 		break;
 
