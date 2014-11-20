@@ -1,3 +1,5 @@
+* [Bug 2677] PATH_MAX isn't #define'd  under Windows.
+  Regression from the patch fixing Bug 2639.
 (4.2.7p479) 2014/11/15 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 2651] Certificates with ASN timestamps w/ 4-digit years mis-parsed.
 (4.2.7p478) 2014/11/14 Released by Harlan Stenn <stenn@ntp.org>
