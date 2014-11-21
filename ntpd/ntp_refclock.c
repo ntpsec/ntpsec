@@ -1257,7 +1257,7 @@ refclock_params(
 				return (0);
 			}
 		} else {
-			pps_enable = 1;
+			hardpps_enable = 1;
 		}
 	}
 	return (1);

@@ -361,7 +361,7 @@ jupiter_ppsapi(
 			    "refclock_jupiter: time_pps_kcbind failed: %m");
 			return (0);
 		}
-		pps_enable = 1;
+		hardpps_enable = 1;
 	}
 /*	instance->peer->precision = PPS_PRECISION; */
 

@@ -2837,7 +2837,7 @@ parse_hardpps(
 			 * tell the rest, that we have a kernel PPS source, iff we ever enable HARDPPS
 			 */
 			if (mode == PARSE_HARDPPS_ENABLE)
-			        pps_enable = 1;
+			        hardpps_enable = 1;
 		}
 	}
 
@@ -6017,7 +6017,7 @@ NONEMPTY_TRANSLATION_UNIT
  * implement fast refclock startup
  *
  * Revision 4.50  2005/04/16 20:51:35  kardel
- * set pps_enable = 1 when binding a kernel PPS source
+ * set hardpps_enable = 1 when binding a kernel PPS source
  *
  * Revision 4.49  2005/04/16 17:29:26  kardel
  * add non polling clock type 18 for just listenning to Meinberg clocks

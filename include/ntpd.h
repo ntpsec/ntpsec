@@ -400,7 +400,7 @@ extern int	pll_status;		/* status bits for kernel pll */
 extern int	ntp_enable;		/* clock discipline enabled */
 extern int	pll_control;		/* kernel support available */
 extern int	kern_enable;		/* kernel support enabled */
-extern int	pps_enable;		/* kernel PPS discipline enabled */
+extern int	hardpps_enable;		/* kernel PPS discipline enabled */
 extern int	ext_enable;		/* external clock enabled */
 extern int	cal_enable;		/* refclock calibrate enable */
 extern int	allow_panic;		/* allow panic correction */

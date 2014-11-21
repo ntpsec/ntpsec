@@ -919,7 +919,7 @@ oncore_ppsapi(
 			return (0);
 		}
 
-		pps_enable = 1;
+		hardpps_enable = 1;
 	}
 	return(1);
 }

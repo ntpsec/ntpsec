@@ -1130,7 +1130,7 @@ sys_info(
 		is->flags |= INFO_FLAG_MONITOR;
 	if (ntp_enable)
 		is->flags |= INFO_FLAG_NTP;
-	if (pps_enable)
+	if (hardpps_enable)
 		is->flags |= INFO_FLAG_PPS_SYNC;
 	if (stats_control)
 		is->flags |= INFO_FLAG_FILEGEN;

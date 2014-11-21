@@ -3999,7 +3999,7 @@ init_proto(void)
 		sys_ttl[i] = (u_char)((i * 256) / MAX_TTL);
 		sys_ttlmax = i;
 	}
-	pps_enable = 0;
+	hardpps_enable = 0;
 	stats_control = 1;
 }
 
@@ -4064,7 +4064,7 @@ proto_config(
 		break;
 
 	case PROTO_PPS:		/* PPS discipline (pps) */
-		pps_enable = value;
+		hardpps_enable = value;
 		break;
 
 	case PROTO_FILEGEN:	/* statistics (stats) */

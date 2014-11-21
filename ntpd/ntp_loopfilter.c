@@ -146,7 +146,7 @@ static	void	stop_kern_loop(void);
 int	ntp_enable = TRUE;	/* clock discipline enabled */
 int	pll_control;		/* kernel support available */
 int	kern_enable = TRUE;	/* kernel support enabled */
-int	pps_enable;		/* kernel PPS discipline enabled */
+int	hardpps_enable;		/* kernel PPS discipline enabled */
 int	ext_enable;		/* external clock enabled */
 int	pps_stratum;		/* pps stratum */
 int	allow_panic = FALSE;	/* allow panic correction */
@@ -662,7 +662,7 @@ local_clock(
 			/*
 			 * Enable/disable the PPS if requested.
 			 */
-			if (pps_enable) {
+			if (hardpps_enable) {
 				if (!(pll_status & STA_PPSTIME))
 					report_event(EVNT_KERN,
 					    NULL, "PPS enabled");
@@ -686,7 +686,7 @@ local_clock(
 		 * frequency and jitter.
 		 */
 		if ((ntp_adj_ret = ntp_adjtime(&ntv)) != 0) {
-		    ntp_adjtime_error_handler(__func__, &ntv, ntp_adj_ret, errno, pps_enable, 0, __LINE__ - 1);
+		    ntp_adjtime_error_handler(__func__, &ntv, ntp_adj_ret, errno, hardpps_enable, 0, __LINE__ - 1);
 		}
 		pll_status = ntv.status;
 #ifdef STA_NANO
