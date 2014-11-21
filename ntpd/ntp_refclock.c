@@ -578,7 +578,7 @@ refclock_gtlin(
 	)
 {
 	const char *sp, *spend;
-	char       *dp, *dpend;
+	char	   *dp, *dpend;
 	int         dlen;
 
 	if (bmax <= 0)
@@ -838,7 +838,7 @@ refclock_setup(
 		ttyp->c_cflag = CS8 | CLOCAL | CREAD;
 		if (lflags & LDISC_7O1) {
 			/* HP Z3801A needs 7-bit, odd parity */
-  			ttyp->c_cflag = CS7 | PARENB | PARODD | CLOCAL | CREAD;
+			ttyp->c_cflag = CS7 | PARENB | PARODD | CLOCAL | CREAD;
 		}
 		cfsetispeed(&ttyb, speed);
 		cfsetospeed(&ttyb, speed);
@@ -1256,8 +1256,9 @@ refclock_params(
 				    "refclock_params: time_pps_kcbind: %m");
 				return (0);
 			}
+		} else {
+			pps_enable = 1;
 		}
-		pps_enable = 1;
 	}
 	return (1);
 }

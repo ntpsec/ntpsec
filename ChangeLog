@@ -1,3 +1,4 @@
+* [Bug 2314] Only enable PPS if kernel consumer binding succeeds.
 (4.2.7p480) 2014/11/21 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 2677] PATH_MAX isn't #define'd  under Windows.
   Regression from the patch fixing Bug 2639.
