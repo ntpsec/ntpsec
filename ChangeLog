@@ -1,3 +1,4 @@
+(4.2.7p480) 2014/11/21 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 2677] PATH_MAX isn't #define'd  under Windows.
   Regression from the patch fixing Bug 2639.
 (4.2.7p479) 2014/11/15 Released by Harlan Stenn <stenn@ntp.org>
