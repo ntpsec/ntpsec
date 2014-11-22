@@ -1245,20 +1245,17 @@ refclock_params(
 	}
 
 	/*
-	 * If flag3 is lit, select the kernel PPS.
+	 * If flag3 is lit, select the kernel PPS if we can.
 	 */
 	if (mode & CLK_FLAG3) {
 		if (time_pps_kcbind(ap->handle, PPS_KC_HARDPPS,
 		    ap->pps_params.mode & ~PPS_TSFMT_TSPEC,
 		    PPS_TSFMT_TSPEC) < 0) {
-			if (errno != EOPNOTSUPP) { 
-				msyslog(LOG_ERR,
-				    "refclock_params: time_pps_kcbind: %m");
-				return (0);
-			}
-		} else {
-			hardpps_enable = 1;
+			msyslog(LOG_ERR,
+			    "refclock_params: time_pps_kcbind: %m");
+			return (0);
 		}
+		hardpps_enable = 1;
 	}
 	return (1);
 }

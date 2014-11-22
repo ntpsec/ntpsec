@@ -1,4 +1,5 @@
 * [Bug 2314] Only enable PPS if kernel consumer binding succeeds.
+* [Bug 2314] Kernel PPS binding EOPNOTSUPP is a failure condition. 
 * Rename pps_enable to hardpps_enable.
 (4.2.7p480) 2014/11/21 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 2677] PATH_MAX isn't #define'd  under Windows.
