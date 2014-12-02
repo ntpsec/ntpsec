@@ -1,3 +1,4 @@
+* [Bug 2678] nmea_control() now checks 'refclock_params()' result.
 (4.2.7p481) 2014/11/22 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 2314] Only enable PPS if kernel consumer binding succeeds.
 * [Bug 2314] Kernel PPS binding EOPNOTSUPP is a failure condition. 

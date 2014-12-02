@@ -569,9 +569,19 @@ nmea_control(
 		if (-1 == up->ppsapi_fd)
 			up->ppsapi_fd = pp->io.fd;	
 		if (refclock_ppsapi(up->ppsapi_fd, &up->atom)) {
-			up->ppsapi_lit = TRUE;
 			/* use the PPS API for our own purposes now. */
-			refclock_params(pp->sloppyclockflag, &up->atom);
+			up->ppsapi_lit = refclock_params(
+				pp->sloppyclockflag, &up->atom);
+			if (!up->ppsapi_lit) {
+				/* failed to configure, drop PPS unit */
+				time_pps_destroy(up->atom.handle);
+				msyslog(LOG_WARNING,
+					"%s set PPSAPI params fails",
+					refnumtoa(&peer->srcadr));				
+			}
+			/* note: the PPS I/O handle remains valid until
+			 * flag1 is cleared or the clock is shut down. 
+			 */
 		} else {
 			msyslog(LOG_WARNING,
 				"%s flag1 1 but PPSAPI fails",
