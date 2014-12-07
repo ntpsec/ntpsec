@@ -1,3 +1,4 @@
+* [Bug 2685] Better document the KOD file for sntp.
 (4.2.7p482) 2014/12/02 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 2641] sntp is installed in the wrong location in Solaris.
 * [Bug 2678] nmea_control() now checks 'refclock_params()' result.

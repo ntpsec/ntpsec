@@ -117,7 +117,8 @@ flag = {
   descrip	= "KoD history filename";
   doc		= <<- _EndOfDoc_
 	Specifies the filename to be used for the persistent history of KoD
-	responses received from servers.
+	responses received from servers.  If the file does not exist, a
+	warning message will be displayed.  The file will not be created.
 	_EndOfDoc_;
 };
 
