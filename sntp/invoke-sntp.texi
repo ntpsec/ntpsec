@@ -6,7 +6,7 @@
 #
 # EDIT THIS FILE WITH CAUTION  (invoke-sntp.texi)
 #
-# It has been AutoGen-ed  December  2, 2014 at 08:59:28 AM by AutoGen 5.18.5pre4
+# It has been AutoGen-ed  December  8, 2014 at 08:59:19 AM by AutoGen 5.18.5pre4
 # From the definitions    sntp-opts.def
 # and the template file   agtexi-cmd.tpl
 @end ignore
@@ -100,7 +100,7 @@ with a status code of 0.
 
 @exampleindent 0
 @example
-sntp - standard Simple Network Time Protocol client program - Ver. 4.2.7p482
+sntp - standard Simple Network Time Protocol client program - Ver. 4.2.7p483
 Usage:  sntp [ -<flag> [<val>] | --<name>[@{=| @}<val>] ]... \
                 [ hostname-or-IP ...]
   Flg Arg Option-Name    Description
@@ -254,7 +254,8 @@ milliseconds.
 This is the ``kod history filename'' option.
 This option takes a file argument @file{file-name}.
 Specifies the filename to be used for the persistent history of KoD
-responses received from servers.
+responses received from servers.  If the file does not exist, a
+warning message will be displayed.  The file will not be created.
 @node sntp keyfile
 @subsection keyfile option (-k)
 @cindex sntp-keyfile

@@ -10,11 +10,11 @@
 .ds B-Font B
 .ds I-Font I
 .ds R-Font R
-.TH sntp 1sntpman "02 Dec 2014" "4.2.7p482" "User Commands"
+.TH sntp 1sntpman "08 Dec 2014" "4.2.7p483" "User Commands"
 .\"
-.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-GgaaeT/ag-5ga4cT)
+.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-ptaa2D/ag-Bta40D)
 .\"
-.\" It has been AutoGen-ed December 2, 2014 at 08:59:25 AM by AutoGen 5.18.5pre4
+.\" It has been AutoGen-ed December 8, 2014 at 08:59:15 AM by AutoGen 5.18.5pre4
 .\" From the definitions sntp-opts.def
 .\" and the template file agman-cmd.tpl
 .SH NAME
@@ -156,7 +156,8 @@ for this option is:
  /var/db/ntp-kod
 .sp
 Specifies the filename to be used for the persistent history of KoD
-responses received from servers.
+responses received from servers.  If the file does not exist, a
+warning message will be displayed.  The file will not be created.
 .TP
 .NOP \f\*[B-Font]\-k\f[] \f\*[I-Font]file\-name\f[], \f\*[B-Font]\-\-keyfile\f[]=\f\*[I-Font]file\-name\f[]
 Look in this file for the key specified with \fB-a\fP.
