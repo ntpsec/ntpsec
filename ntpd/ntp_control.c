@@ -801,6 +801,10 @@ static u_char	res_async;	/* sending async trap response? */
 static	char *reqpt;
 static	char *reqend;
 
+#ifndef MIN
+#define MIN(a, b) (((a) <= (b)) ? (a) : (b))
+#endif
+
 /*
  * init_control - initialize request data
  */
@@ -1316,6 +1320,7 @@ ctl_putdata(
 	)
 {
 	int overhead;
+	unsigned int currentlen;
 
 	overhead = 0;
 	if (!bin) {
@@ -1338,12 +1343,22 @@ ctl_putdata(
 	/*
 	 * Save room for trailing junk
 	 */
-	if (dlen + overhead + datapt > dataend) {
+	while (dlen + overhead + datapt > dataend) {
 		/*
 		 * Not enough room in this one, flush it out.
 		 */
+		currentlen = MIN(dlen, dataend - datapt);
+
+		memcpy(datapt, dp, currentlen);
+
+		datapt += currentlen;
+		dp += currentlen;
+		dlen -= currentlen;
+		datalinelen += currentlen;
+
 		ctl_flushpkt(CTL_MORE);
 	}
+
 	memcpy(datapt, dp, dlen);
 	datapt += dlen;
 	datalinelen += dlen;
