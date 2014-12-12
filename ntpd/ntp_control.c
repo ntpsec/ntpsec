@@ -3290,6 +3290,20 @@ static void configure(
 
 	/* Initialize the remote config buffer */
 	data_count = reqend - reqpt;
+
+	if (data_count > sizeof(remote_config.buffer) - 2) {
+		snprintf(remote_config.err_msg,
+			 sizeof(remote_config.err_msg),
+			 "runtime configuration failed: request too long");
+		ctl_putdata(remote_config.err_msg,
+			    strlen(remote_config.err_msg), 0);
+		ctl_flushpkt(0);
+		msyslog(LOG_NOTICE,
+			"runtime config from %s rejected: request too long",
+			stoa(&rbufp->recv_srcadr));
+		return;
+	}
+
 	memcpy(remote_config.buffer, reqpt, data_count);
 	if (data_count > 0
 	    && '\n' != remote_config.buffer[data_count - 1])
