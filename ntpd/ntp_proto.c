@@ -1089,6 +1089,7 @@ receive(
 				fast_xmit(rbufp, MODE_ACTIVE, 0,
 				    restrict_mask);
 				sys_restricted++;
+				return;
 			}
 		}
 
