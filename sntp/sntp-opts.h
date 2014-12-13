@@ -1,7 +1,7 @@
 /*
  *  EDIT THIS FILE WITH CAUTION  (sntp-opts.h)
  *
- *  It has been AutoGen-ed  December 11, 2014 at 12:02:44 PM by AutoGen 5.18.5pre4
+ *  It has been AutoGen-ed  December 12, 2014 at 11:48:45 AM by AutoGen 5.18.5pre4
  *  From the definitions    sntp-opts.def
  *  and the template file   options
  *
@@ -91,9 +91,9 @@ typedef enum {
 /** count of all options for sntp */
 #define OPTION_CT    23
 /** sntp version */
-#define SNTP_VERSION       "4.2.7p484-RC"
+#define SNTP_VERSION       "4.2.7p485-RC"
 /** Full sntp version text */
-#define SNTP_FULL_VERSION  "sntp 4.2.7p484-RC"
+#define SNTP_FULL_VERSION  "sntp 4.2.7p485-RC"
 
 /**
  *  Interface defines for all options.  Replace "n" with the UPPER_CASED

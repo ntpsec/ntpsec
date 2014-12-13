@@ -2,6 +2,7 @@
 * [Sec 2668] buffer overflow in ctl_putdata().
 * [Sec 2669] buffer overflow in configure().
 * [Sec 2670] Missing return; from error clause.
+(4.2.7p485-RC) 2014/12/12 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 2686] refclock_gpsdjson needs strtoll(), which is not always present.
 (4.2.7p484-RC) 2014/12/11 Released by Harlan Stenn <stenn@ntp.org>
 (4.2.7p483) 2014/12/08 Released by Harlan Stenn <stenn@ntp.org>
