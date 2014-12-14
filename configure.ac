@@ -3021,6 +3021,8 @@ AC_MSG_RESULT([$ans])
 
 NTP_OPENSSL
 
+NTP_CRYPTO_RAND
+
 # if we are using OpenSSL (--with-crypto), by default Autokey is enabled
 AC_MSG_CHECKING([if we want to include NTP Autokey protocol support])
 AC_ARG_ENABLE(

@@ -336,6 +336,8 @@ main(
 	ssl_check_version();
 #endif	/* OPENSSL */
 
+	ntp_crypto_srandom();
+
 	/*
 	 * Process options, initialize host name and timestamp.
 	 * gethostname() won't null-terminate if hostname is exactly the
@@ -348,7 +350,6 @@ main(
 	passwd1 = hostbuf;
 	passwd2 = NULL;
 	GETTIMEOFDAY(&tv, NULL);
-	ntp_srandom((u_long)(tv.tv_sec + tv.tv_usec));
 	epoch = tv.tv_sec;
 	fstamp = (u_int)(epoch + JAN_1970);
 
@@ -828,7 +829,14 @@ gen_md5(
 			int temp;
 
 			while (1) {
-				temp = ntp_random() & 0xff;
+				int rc;
+
+				rc = ntp_crypto_random_buf(&temp, 1);
+				if (-1 == rc) {
+					fprintf(stderr, "ntp_crypto_random_buf() failed.\n");
+					exit (-1);
+				}
+				temp &= 0xff;
 				if (temp == '#')
 					continue;
 

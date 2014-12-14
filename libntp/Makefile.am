@@ -78,16 +78,17 @@ libntp_a_SRCS =						\
 	msyslog.c					\
 	netof.c						\
 	ntp_calendar.c					\
+	ntp_crypto_rnd.c				\
 	ntp_intres.c					\
 	ntp_libopts.c					\
 	ntp_lineedit.c					\
+	ntp_random.c					\
 	ntp_rfc2553.c					\
 	ntp_worker.c					\
 	numtoa.c					\
 	numtohost.c					\
 	octtoint.c					\
 	prettydate.c					\
-	ntp_random.c					\
 	recvbuff.c					\
 	refnumtoa.c					\
 	snprintf.c					\
