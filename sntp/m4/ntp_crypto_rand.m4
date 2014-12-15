@@ -39,7 +39,7 @@ AC_MSG_RESULT([$ntp_use_openssl_random])
 # The following might need extra libraries
 NTPO_SAVED_LIBS="$LIBS"
 LIBS="$NTPO_SAVED_LIBS $LDADD_NTP"
-AC_MSG_NOTICE([LIBS is <$LIBS>])
+dnl AC_MSG_NOTICE([LIBS is <$LIBS>])
 AC_CHECK_FUNCS([RAND_bytes RAND_poll])
 LIBS="$NTPO_SAVED_LIBS"
 case "$ntp_use_openssl_random$ac_cv_func_RAND_bytes$ac_cv_func_RAND_poll" in
