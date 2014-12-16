@@ -165,7 +165,7 @@ hpgps_start(
 	 */
 	snprintf(device, sizeof(device), DEVICE, unit);
 	ldisc = LDISC_CLK;
-	ldisc = SPEED232;
+	speed = SPEED232;
 	/* mode parameter to server config line shares ttl slot */
 	if (1 == peer->ttl) {
 		ldisc |= LDISC_7O1;
