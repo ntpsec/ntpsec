@@ -4,6 +4,7 @@
 * [Sec 2669] buffer overflow in configure().
 * [Sec 2670] Missing return; from error clause.
 * [Sec 2672] On some OSes ::1 can be spoofed, bypassing source IP ACLs.
+* [Bug 2687] RefClock 26/hpgps doesn't work at default line speed
 (4.2.7p485-RC) 2014/12/12 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 2686] refclock_gpsdjson needs strtoll(), which is not always present.
 (4.2.7p484-RC) 2014/12/11 Released by Harlan Stenn <stenn@ntp.org>
