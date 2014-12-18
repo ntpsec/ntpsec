@@ -486,7 +486,7 @@ receive(
 	 */
 	authlen = LEN_PKT_NOMAC;
 	has_mac = rbufp->recv_length - authlen;
-	while (has_mac != 0) {
+	while (has_mac > 0) {
 		u_int32	len;
 #ifdef AUTOKEY
 		u_int32	hostlen;
@@ -538,6 +538,14 @@ receive(
 			authlen += len;
 			has_mac -= len;
 		}
+	}
+
+	/*
+	 * If has_mac is < 0 we had a malformed packet.
+	 */
+	if (has_mac < 0) {
+		sys_badlength++;
+		return;		/* bad length */
 	}
 
 	/*

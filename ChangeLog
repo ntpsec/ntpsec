@@ -3,6 +3,7 @@
 * [Sec 2668] buffer overflow in ctl_putdata().
 * [Sec 2669] buffer overflow in configure().
 * [Sec 2670] Missing return; from error clause.
+* [Sec 2671] vallen in extension fields are not validated.
 * [Sec 2672] On some OSes ::1 can be spoofed, bypassing source IP ACLs.
 (4.2.7p486-RC) 2014/12/18 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 2687] RefClock 26/hpgps doesn't work at default line speed
