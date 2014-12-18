@@ -453,6 +453,7 @@ crypto_recv(
 		ep = (struct exten *)pkt;
 		code = ntohl(ep->opcode) & 0xffff0000;
 		len = ntohl(ep->opcode) & 0x0000ffff;
+		// HMS: Why pkt[1] instead of ep->associd ?
 		associd = (associd_t)ntohl(pkt[1]);
 		rval = XEVNT_OK;
 #ifdef DEBUG
