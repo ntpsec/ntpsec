@@ -269,7 +269,9 @@ static	SOCKET	open_socket	(sockaddr_u *, int, int, endpt *);
 static	char *	fdbits		(int, fd_set *);
 static	void	set_reuseaddr	(int);
 static	isc_boolean_t	socket_broadcast_enable	 (struct interface *, SOCKET, sockaddr_u *);
+#ifdef  OS_MISSES_SPECIFIC_ROUTE_UPDATES
 static	isc_boolean_t	socket_broadcast_disable (struct interface *, sockaddr_u *);
+#endif
 
 typedef struct remaddr remaddr_t;
 
@@ -714,7 +716,6 @@ is_ip_address(
 	)
 {
 	struct in_addr in4;
-	struct in6_addr in6;
 	struct addrinfo hints;
 	struct addrinfo *result;
 	struct sockaddr_in6 *resaddr6;
@@ -2232,6 +2233,7 @@ socket_broadcast_enable(
 #endif /* SO_BROADCAST */
 }
 
+#ifdef  OS_MISSES_SPECIFIC_ROUTE_UPDATES
 /*
  * Remove a broadcast address from a given socket
  * The socket is in the ep_list all we need to do is disable
@@ -2258,6 +2260,7 @@ socket_broadcast_disable(
 	return ISC_FALSE;
 #endif /* SO_BROADCAST */
 }
+#endif /* OS_MISSES_SPECIFIC_ROUTE_UPDATES */
 
 #endif /* OPEN_BCAST_SOCKET */
 
