@@ -3450,8 +3450,12 @@ read_network_packet(
 	*/
 
 	if (AF_INET6 == itf->family) {
-		DPRINTF(1, ("Got an IPv6 packet, from <%s> to <%s>\n",
-			stoa(&rb->recv_srcadr), stoa(&itf->sin)));
+		DPRINTF(1, ("Got an IPv6 packet, from <%s> (%d) to <%s> (%d)\n",
+			stoa(&rb->recv_srcadr),
+			IN6_IS_ADDR_LOOPBACK(&rb->recv_srcadr),
+			stoa(&itf->sin),
+			!IN6_IS_ADDR_LOOPBACK(&itf->sin)
+			));
 	}
 
 	if (   AF_INET6 == itf->family
