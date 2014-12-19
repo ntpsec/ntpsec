@@ -680,7 +680,7 @@ ripencc_ppsapi(
 				"refclock_ripencc: time_pps_kcbind failed: %m");
 			return (0);
 		}
-		pps_enable = 1;
+		hardpps_enable = 1;
 	}
 	peer->precision = PPS_PRECISION;
 
