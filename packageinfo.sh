@@ -54,8 +54,8 @@ repotype=stable
 # odd minor numbers are for -dev, even minor numbers are for -stable
 # UpdatePoint will fail if repotype is inconsistent with minor.
 proto=4
-major=2
-minor=8
+major=4
+minor=9
 
 case "${proto}.${major}" in
  4.[012])
@@ -104,4 +104,4 @@ betapoint=0
 # - - prerelease is emptied
 # else (not in RC)
 # - rcpoint is empty and unused (for now).
-rcpoint=
+rcpoint=GRONK
