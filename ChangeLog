@@ -1,3 +1,6 @@
+---
+
+* [Sec 730] Increase RSA_generate_key modulus.
 * [Sec 2666] Use cryptographic random numbers for md5 key generation.
 * [Sec 2667] buffer overflow in crypto_recv().
 * [Sec 2668] buffer overflow in ctl_putdata().
@@ -5,6 +8,7 @@
 * [Sec 2670] Missing return; from error clause.
 * [Sec 2671] vallen in extension fields are not validated.
 * [Sec 2672] On some OSes ::1 can be spoofed, bypassing source IP ACLs.
+* [Bug 2691] Wrong variable name in refclock_ripencc.c.
 (4.2.7p486-RC) 2014/12/18 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 2687] RefClock 26/hpgps doesn't work at default line speed
 (4.2.7p485-RC) 2014/12/12 Released by Harlan Stenn <stenn@ntp.org>
