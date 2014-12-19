@@ -1,4 +1,5 @@
 ---
+(4.2.8) 2014/12/19 Released by Harlan Stenn <stenn@ntp.org>
 
 * [Sec 730] Increase RSA_generate_key modulus.
 * [Sec 2666] Use cryptographic random numbers for md5 key generation.
