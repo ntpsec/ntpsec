@@ -45,7 +45,7 @@
 #
 
 # repotype must be stable or dev
-repotype=dev
+repotype=stable
 
 # post-4.2.8:
 # version=Major.Minor
@@ -55,7 +55,7 @@ repotype=dev
 # UpdatePoint will fail if repotype is inconsistent with minor.
 proto=4
 major=2
-minor=7
+minor=8
 
 case "${proto}.${major}" in
  4.[012])
@@ -70,7 +70,7 @@ esac
 special=
 
 # prerelease can be empty, 'beta', or 'rc'.
-prerelease=rc
+prerelease=
 
 # ChangeLog starting tag (see also CommitLog-4.1.0)
 CLTAG=NTP_4_2_0
@@ -83,7 +83,7 @@ CLTAG=NTP_4_2_0
 # - Numeric values increment
 # - empty 'increments' to 1
 # - NEW 'increments' to empty
-point=486
+point=NEW
 
 ### betapoint is normally modified by script.
 # ntp-stable Beta number (betapoint)
