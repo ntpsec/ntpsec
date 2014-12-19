@@ -3449,6 +3449,8 @@ read_network_packet(
 	** Bug 2672: Some OSes (MacOSX and Linux) don't block spoofed ::1
 	*/
 
+	// temporary hack...
+#ifndef HAVE_SOLARIS_PRIVS
 	if (AF_INET6 == itf->family) {
 		DPRINTF(1, ("Got an IPv6 packet, from <%s> (%d) to <%s> (%d)\n",
 			stoa(&rb->recv_srcadr),
@@ -3468,6 +3470,7 @@ read_network_packet(
 		return buflen;
 	}
 	DPRINTF(1, ("processing that packet\n"));
+#endif
 
 	/*
 	 * Got one.  Mark how and when it got here,
