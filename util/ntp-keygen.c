@@ -958,7 +958,7 @@ gen_rsa(
 	FILE	*str;
 
 	fprintf(stderr, "Generating RSA keys (%d bits)...\n", modulus);
-	rsa = RSA_generate_key(modulus, 3, cb, "RSA");
+	rsa = RSA_generate_key(modulus, 65537, cb, "RSA");
 	fprintf(stderr, "\n");
 	if (rsa == NULL) {
 		fprintf(stderr, "RSA generate keys fails\n%s\n",
@@ -1299,7 +1299,7 @@ gen_gqkey(
 	fprintf(stderr,
 	    "Generating GQ parameters (%d bits)...\n",
 	     modulus2);
-	rsa = RSA_generate_key(modulus2, 3, cb, "GQ");
+	rsa = RSA_generate_key(modulus2, 65537, cb, "GQ");
 	fprintf(stderr, "\n");
 	if (rsa == NULL) {
 		fprintf(stderr, "RSA generate keys fails\n%s\n",

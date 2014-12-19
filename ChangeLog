@@ -1,3 +1,4 @@
+* [Sec 730] Increase RSA_generate_key modulus.
 * [Bug 2691] Wrong variable name in refclock_ripencc.c.
 (4.2.7p486-RC) 2014/12/18 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 2687] RefClock 26/hpgps doesn't work at default line speed
