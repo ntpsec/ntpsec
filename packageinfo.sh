@@ -45,7 +45,7 @@
 #
 
 # repotype must be stable or dev
-repotype=stable
+repotype=dev
 
 # post-4.2.8:
 # version=Major.Minor

@@ -1,7 +1,7 @@
 /*
  *  EDIT THIS FILE WITH CAUTION  (sntp-opts.c)
  *
- *  It has been AutoGen-ed  December 19, 2014 at 07:51:01 AM by AutoGen 5.18.5pre4
+ *  It has been AutoGen-ed  December 19, 2014 at 08:18:13 AM by AutoGen 5.18.5pre4
  *  From the definitions    sntp-opts.def
  *  and the template file   options
  *
@@ -51,7 +51,7 @@ extern "C" {
 #endif
 extern FILE * option_usage_fp;
 #define zCopyright      (sntp_opt_strs+0)
-#define zLicenseDescrip (sntp_opt_strs+310)
+#define zLicenseDescrip (sntp_opt_strs+308)
 
 /*
  *  global included definitions
@@ -69,15 +69,15 @@ extern FILE * option_usage_fp;
 /**
  *  static const strings for sntp options
  */
-static char const sntp_opt_strs[2487] =
-/*     0 */ "sntp 4.2.8\n"
+static char const sntp_opt_strs[2481] =
+/*     0 */ "sntp 4.9\n"
             "Copyright (C) 1970-2014 The University of Delaware, all rights reserved.\n"
             "This is free software. It is licensed for use, modification and\n"
             "redistribution under the terms of the NTP License, copies of which\n"
             "can be seen at:\n"
             "  <http://ntp.org/license>\n"
             "  <http://opensource.org/licenses/ntp-license.php>\n\0"
-/*   310 */ "Permission to use, copy, modify, and distribute this software and its\n"
+/*   308 */ "Permission to use, copy, modify, and distribute this software and its\n"
             "documentation for any purpose with or without fee is hereby granted,\n"
             "provided that the above copyright notice appears in all copies and that\n"
             "both the copyright notice and this permission notice appear in supporting\n"
@@ -86,94 +86,94 @@ static char const sntp_opt_strs[2487] =
             "specific, written prior permission.  The University of Delaware makes no\n"
             "representations about the suitability this software for any purpose.  It is\n"
             "provided \"as is\" without express or implied warranty.\n\0"
-/*   950 */ "Force IPv4 DNS name resolution\0"
-/*   981 */ "IPV4\0"
-/*   986 */ "ipv4\0"
-/*   991 */ "Force IPv6 DNS name resolution\0"
-/*  1022 */ "IPV6\0"
-/*  1027 */ "ipv6\0"
-/*  1032 */ "Enable authentication with the key auth-keynumber\0"
-/*  1082 */ "AUTHENTICATION\0"
-/*  1097 */ "authentication\0"
-/*  1112 */ "Listen to the address specified for broadcast time sync\0"
-/*  1168 */ "BROADCAST\0"
-/*  1178 */ "broadcast\0"
-/*  1188 */ "Concurrently query all IPs returned for host-name\0"
-/*  1238 */ "CONCURRENT\0"
-/*  1249 */ "concurrent\0"
-/*  1260 */ "Increase debug verbosity level\0"
-/*  1291 */ "DEBUG_LEVEL\0"
-/*  1303 */ "debug-level\0"
-/*  1315 */ "Set the debug verbosity level\0"
-/*  1345 */ "SET_DEBUG_LEVEL\0"
-/*  1361 */ "set-debug-level\0"
-/*  1377 */ "The gap (in milliseconds) between time requests\0"
-/*  1425 */ "GAP\0"
-/*  1429 */ "gap\0"
-/*  1433 */ "KoD history filename\0"
-/*  1454 */ "KOD\0"
-/*  1458 */ "kod\0"
-/*  1462 */ "/var/db/ntp-kod\0"
-/*  1478 */ "Look in this file for the key specified with -a\0"
-/*  1526 */ "KEYFILE\0"
-/*  1534 */ "keyfile\0"
-/*  1542 */ "Log to specified logfile\0"
-/*  1567 */ "LOGFILE\0"
-/*  1575 */ "logfile\0"
-/*  1583 */ "Adjustments less than steplimit msec will be slewed\0"
-/*  1635 */ "STEPLIMIT\0"
-/*  1645 */ "steplimit\0"
-/*  1655 */ "Send int as our NTP protocol version\0"
-/*  1692 */ "NTPVERSION\0"
-/*  1703 */ "ntpversion\0"
-/*  1714 */ "Use the NTP Reserved Port (port 123)\0"
-/*  1751 */ "USERESERVEDPORT\0"
-/*  1767 */ "usereservedport\0"
-/*  1783 */ "OK to 'step' the time with settimeofday(2)\0"
-/*  1826 */ "STEP\0"
-/*  1831 */ "step\0"
-/*  1836 */ "OK to 'slew' the time with adjtime(2)\0"
-/*  1874 */ "SLEW\0"
-/*  1879 */ "slew\0"
-/*  1884 */ "The number of seconds to wait for responses\0"
-/*  1928 */ "TIMEOUT\0"
-/*  1936 */ "timeout\0"
-/*  1944 */ "Wait for pending replies (if not setting the time)\0"
-/*  1995 */ "WAIT\0"
-/*  2000 */ "no-wait\0"
-/*  2008 */ "no\0"
-/*  2011 */ "display extended usage information and exit\0"
-/*  2055 */ "help\0"
-/*  2060 */ "extended usage information passed thru pager\0"
-/*  2105 */ "more-help\0"
-/*  2115 */ "output version information and exit\0"
-/*  2151 */ "version\0"
-/*  2159 */ "save the option state to a config file\0"
-/*  2198 */ "save-opts\0"
-/*  2208 */ "load options from a config file\0"
-/*  2240 */ "LOAD_OPTS\0"
-/*  2250 */ "no-load-opts\0"
-/*  2263 */ "SNTP\0"
-/*  2268 */ "sntp - standard Simple Network Time Protocol client program - Ver. 4.2.8\n"
+/*   948 */ "Force IPv4 DNS name resolution\0"
+/*   979 */ "IPV4\0"
+/*   984 */ "ipv4\0"
+/*   989 */ "Force IPv6 DNS name resolution\0"
+/*  1020 */ "IPV6\0"
+/*  1025 */ "ipv6\0"
+/*  1030 */ "Enable authentication with the key auth-keynumber\0"
+/*  1080 */ "AUTHENTICATION\0"
+/*  1095 */ "authentication\0"
+/*  1110 */ "Listen to the address specified for broadcast time sync\0"
+/*  1166 */ "BROADCAST\0"
+/*  1176 */ "broadcast\0"
+/*  1186 */ "Concurrently query all IPs returned for host-name\0"
+/*  1236 */ "CONCURRENT\0"
+/*  1247 */ "concurrent\0"
+/*  1258 */ "Increase debug verbosity level\0"
+/*  1289 */ "DEBUG_LEVEL\0"
+/*  1301 */ "debug-level\0"
+/*  1313 */ "Set the debug verbosity level\0"
+/*  1343 */ "SET_DEBUG_LEVEL\0"
+/*  1359 */ "set-debug-level\0"
+/*  1375 */ "The gap (in milliseconds) between time requests\0"
+/*  1423 */ "GAP\0"
+/*  1427 */ "gap\0"
+/*  1431 */ "KoD history filename\0"
+/*  1452 */ "KOD\0"
+/*  1456 */ "kod\0"
+/*  1460 */ "/var/db/ntp-kod\0"
+/*  1476 */ "Look in this file for the key specified with -a\0"
+/*  1524 */ "KEYFILE\0"
+/*  1532 */ "keyfile\0"
+/*  1540 */ "Log to specified logfile\0"
+/*  1565 */ "LOGFILE\0"
+/*  1573 */ "logfile\0"
+/*  1581 */ "Adjustments less than steplimit msec will be slewed\0"
+/*  1633 */ "STEPLIMIT\0"
+/*  1643 */ "steplimit\0"
+/*  1653 */ "Send int as our NTP protocol version\0"
+/*  1690 */ "NTPVERSION\0"
+/*  1701 */ "ntpversion\0"
+/*  1712 */ "Use the NTP Reserved Port (port 123)\0"
+/*  1749 */ "USERESERVEDPORT\0"
+/*  1765 */ "usereservedport\0"
+/*  1781 */ "OK to 'step' the time with settimeofday(2)\0"
+/*  1824 */ "STEP\0"
+/*  1829 */ "step\0"
+/*  1834 */ "OK to 'slew' the time with adjtime(2)\0"
+/*  1872 */ "SLEW\0"
+/*  1877 */ "slew\0"
+/*  1882 */ "The number of seconds to wait for responses\0"
+/*  1926 */ "TIMEOUT\0"
+/*  1934 */ "timeout\0"
+/*  1942 */ "Wait for pending replies (if not setting the time)\0"
+/*  1993 */ "WAIT\0"
+/*  1998 */ "no-wait\0"
+/*  2006 */ "no\0"
+/*  2009 */ "display extended usage information and exit\0"
+/*  2053 */ "help\0"
+/*  2058 */ "extended usage information passed thru pager\0"
+/*  2103 */ "more-help\0"
+/*  2113 */ "output version information and exit\0"
+/*  2149 */ "version\0"
+/*  2157 */ "save the option state to a config file\0"
+/*  2196 */ "save-opts\0"
+/*  2206 */ "load options from a config file\0"
+/*  2238 */ "LOAD_OPTS\0"
+/*  2248 */ "no-load-opts\0"
+/*  2261 */ "SNTP\0"
+/*  2266 */ "sntp - standard Simple Network Time Protocol client program - Ver. 4.9\n"
             "Usage:  %s [ -<flag> [<val>] | --<name>[{=| }<val>] ]... \\\n"
             "\t\t[ hostname-or-IP ...]\n\0"
-/*  2425 */ "$HOME\0"
-/*  2431 */ ".\0"
-/*  2433 */ ".ntprc\0"
-/*  2440 */ "http://bugs.ntp.org, bugs@ntp.org\0"
-/*  2474 */ "\n\0"
-/*  2476 */ "sntp 4.2.8";
+/*  2421 */ "$HOME\0"
+/*  2427 */ ".\0"
+/*  2429 */ ".ntprc\0"
+/*  2436 */ "http://bugs.ntp.org, bugs@ntp.org\0"
+/*  2470 */ "\n\0"
+/*  2472 */ "sntp 4.9";
 
 /**
  *  ipv4 option description with
  *  "Must also have options" and "Incompatible options":
  */
 /** Descriptive text for the ipv4 option */
-#define IPV4_DESC      (sntp_opt_strs+950)
+#define IPV4_DESC      (sntp_opt_strs+948)
 /** Upper-cased name for the ipv4 option */
-#define IPV4_NAME      (sntp_opt_strs+981)
+#define IPV4_NAME      (sntp_opt_strs+979)
 /** Name string for the ipv4 option */
-#define IPV4_name      (sntp_opt_strs+986)
+#define IPV4_name      (sntp_opt_strs+984)
 /** Other options that appear in conjunction with the ipv4 option */
 static int const aIpv4CantList[] = {
     INDEX_OPT_IPV6, NO_EQUIVALENT };
@@ -185,11 +185,11 @@ static int const aIpv4CantList[] = {
  *  "Must also have options" and "Incompatible options":
  */
 /** Descriptive text for the ipv6 option */
-#define IPV6_DESC      (sntp_opt_strs+991)
+#define IPV6_DESC      (sntp_opt_strs+989)
 /** Upper-cased name for the ipv6 option */
-#define IPV6_NAME      (sntp_opt_strs+1022)
+#define IPV6_NAME      (sntp_opt_strs+1020)
 /** Name string for the ipv6 option */
-#define IPV6_name      (sntp_opt_strs+1027)
+#define IPV6_name      (sntp_opt_strs+1025)
 /** Other options that appear in conjunction with the ipv6 option */
 static int const aIpv6CantList[] = {
     INDEX_OPT_IPV4, NO_EQUIVALENT };
@@ -200,11 +200,11 @@ static int const aIpv6CantList[] = {
  *  authentication option description:
  */
 /** Descriptive text for the authentication option */
-#define AUTHENTICATION_DESC      (sntp_opt_strs+1032)
+#define AUTHENTICATION_DESC      (sntp_opt_strs+1030)
 /** Upper-cased name for the authentication option */
-#define AUTHENTICATION_NAME      (sntp_opt_strs+1082)
+#define AUTHENTICATION_NAME      (sntp_opt_strs+1080)
 /** Name string for the authentication option */
-#define AUTHENTICATION_name      (sntp_opt_strs+1097)
+#define AUTHENTICATION_name      (sntp_opt_strs+1095)
 /** Compiled in flag settings for the authentication option */
 #define AUTHENTICATION_FLAGS     (OPTST_DISABLED \
         | OPTST_SET_ARGTYPE(OPARG_TYPE_NUMERIC))
@@ -213,11 +213,11 @@ static int const aIpv6CantList[] = {
  *  broadcast option description:
  */
 /** Descriptive text for the broadcast option */
-#define BROADCAST_DESC      (sntp_opt_strs+1112)
+#define BROADCAST_DESC      (sntp_opt_strs+1110)
 /** Upper-cased name for the broadcast option */
-#define BROADCAST_NAME      (sntp_opt_strs+1168)
+#define BROADCAST_NAME      (sntp_opt_strs+1166)
 /** Name string for the broadcast option */
-#define BROADCAST_name      (sntp_opt_strs+1178)
+#define BROADCAST_name      (sntp_opt_strs+1176)
 /** Compiled in flag settings for the broadcast option */
 #define BROADCAST_FLAGS     (OPTST_DISABLED | OPTST_STACKED \
         | OPTST_SET_ARGTYPE(OPARG_TYPE_STRING))
@@ -226,11 +226,11 @@ static int const aIpv6CantList[] = {
  *  concurrent option description:
  */
 /** Descriptive text for the concurrent option */
-#define CONCURRENT_DESC      (sntp_opt_strs+1188)
+#define CONCURRENT_DESC      (sntp_opt_strs+1186)
 /** Upper-cased name for the concurrent option */
-#define CONCURRENT_NAME      (sntp_opt_strs+1238)
+#define CONCURRENT_NAME      (sntp_opt_strs+1236)
 /** Name string for the concurrent option */
-#define CONCURRENT_name      (sntp_opt_strs+1249)
+#define CONCURRENT_name      (sntp_opt_strs+1247)
 /** Compiled in flag settings for the concurrent option */
 #define CONCURRENT_FLAGS     (OPTST_DISABLED | OPTST_STACKED \
         | OPTST_SET_ARGTYPE(OPARG_TYPE_STRING))
@@ -239,11 +239,11 @@ static int const aIpv6CantList[] = {
  *  debug-level option description:
  */
 /** Descriptive text for the debug-level option */
-#define DEBUG_LEVEL_DESC      (sntp_opt_strs+1260)
+#define DEBUG_LEVEL_DESC      (sntp_opt_strs+1258)
 /** Upper-cased name for the debug-level option */
-#define DEBUG_LEVEL_NAME      (sntp_opt_strs+1291)
+#define DEBUG_LEVEL_NAME      (sntp_opt_strs+1289)
 /** Name string for the debug-level option */
-#define DEBUG_LEVEL_name      (sntp_opt_strs+1303)
+#define DEBUG_LEVEL_name      (sntp_opt_strs+1301)
 /** Compiled in flag settings for the debug-level option */
 #define DEBUG_LEVEL_FLAGS     (OPTST_DISABLED)
 
@@ -251,11 +251,11 @@ static int const aIpv6CantList[] = {
  *  set-debug-level option description:
  */
 /** Descriptive text for the set-debug-level option */
-#define SET_DEBUG_LEVEL_DESC      (sntp_opt_strs+1315)
+#define SET_DEBUG_LEVEL_DESC      (sntp_opt_strs+1313)
 /** Upper-cased name for the set-debug-level option */
-#define SET_DEBUG_LEVEL_NAME      (sntp_opt_strs+1345)
+#define SET_DEBUG_LEVEL_NAME      (sntp_opt_strs+1343)
 /** Name string for the set-debug-level option */
-#define SET_DEBUG_LEVEL_name      (sntp_opt_strs+1361)
+#define SET_DEBUG_LEVEL_name      (sntp_opt_strs+1359)
 /** Compiled in flag settings for the set-debug-level option */
 #define SET_DEBUG_LEVEL_FLAGS     (OPTST_DISABLED \
         | OPTST_SET_ARGTYPE(OPARG_TYPE_NUMERIC))
@@ -264,11 +264,11 @@ static int const aIpv6CantList[] = {
  *  gap option description:
  */
 /** Descriptive text for the gap option */
-#define GAP_DESC      (sntp_opt_strs+1377)
+#define GAP_DESC      (sntp_opt_strs+1375)
 /** Upper-cased name for the gap option */
-#define GAP_NAME      (sntp_opt_strs+1425)
+#define GAP_NAME      (sntp_opt_strs+1423)
 /** Name string for the gap option */
-#define GAP_name      (sntp_opt_strs+1429)
+#define GAP_name      (sntp_opt_strs+1427)
 /** The compiled in default value for the gap option argument */
 #define GAP_DFT_ARG   ((char const*)50)
 /** Compiled in flag settings for the gap option */
@@ -279,13 +279,13 @@ static int const aIpv6CantList[] = {
  *  kod option description:
  */
 /** Descriptive text for the kod option */
-#define KOD_DESC      (sntp_opt_strs+1433)
+#define KOD_DESC      (sntp_opt_strs+1431)
 /** Upper-cased name for the kod option */
-#define KOD_NAME      (sntp_opt_strs+1454)
+#define KOD_NAME      (sntp_opt_strs+1452)
 /** Name string for the kod option */
-#define KOD_name      (sntp_opt_strs+1458)
+#define KOD_name      (sntp_opt_strs+1456)
 /** The compiled in default value for the kod option argument */
-#define KOD_DFT_ARG   (sntp_opt_strs+1462)
+#define KOD_DFT_ARG   (sntp_opt_strs+1460)
 /** Compiled in flag settings for the kod option */
 #define KOD_FLAGS     (OPTST_DISABLED \
         | OPTST_SET_ARGTYPE(OPARG_TYPE_FILE))
@@ -294,11 +294,11 @@ static int const aIpv6CantList[] = {
  *  keyfile option description:
  */
 /** Descriptive text for the keyfile option */
-#define KEYFILE_DESC      (sntp_opt_strs+1478)
+#define KEYFILE_DESC      (sntp_opt_strs+1476)
 /** Upper-cased name for the keyfile option */
-#define KEYFILE_NAME      (sntp_opt_strs+1526)
+#define KEYFILE_NAME      (sntp_opt_strs+1524)
 /** Name string for the keyfile option */
-#define KEYFILE_name      (sntp_opt_strs+1534)
+#define KEYFILE_name      (sntp_opt_strs+1532)
 /** Compiled in flag settings for the keyfile option */
 #define KEYFILE_FLAGS     (OPTST_DISABLED \
         | OPTST_SET_ARGTYPE(OPARG_TYPE_FILE))
@@ -307,11 +307,11 @@ static int const aIpv6CantList[] = {
  *  logfile option description:
  */
 /** Descriptive text for the logfile option */
-#define LOGFILE_DESC      (sntp_opt_strs+1542)
+#define LOGFILE_DESC      (sntp_opt_strs+1540)
 /** Upper-cased name for the logfile option */
-#define LOGFILE_NAME      (sntp_opt_strs+1567)
+#define LOGFILE_NAME      (sntp_opt_strs+1565)
 /** Name string for the logfile option */
-#define LOGFILE_name      (sntp_opt_strs+1575)
+#define LOGFILE_name      (sntp_opt_strs+1573)
 /** Compiled in flag settings for the logfile option */
 #define LOGFILE_FLAGS     (OPTST_DISABLED \
         | OPTST_SET_ARGTYPE(OPARG_TYPE_FILE))
@@ -320,11 +320,11 @@ static int const aIpv6CantList[] = {
  *  steplimit option description:
  */
 /** Descriptive text for the steplimit option */
-#define STEPLIMIT_DESC      (sntp_opt_strs+1583)
+#define STEPLIMIT_DESC      (sntp_opt_strs+1581)
 /** Upper-cased name for the steplimit option */
-#define STEPLIMIT_NAME      (sntp_opt_strs+1635)
+#define STEPLIMIT_NAME      (sntp_opt_strs+1633)
 /** Name string for the steplimit option */
-#define STEPLIMIT_name      (sntp_opt_strs+1645)
+#define STEPLIMIT_name      (sntp_opt_strs+1643)
 /** Compiled in flag settings for the steplimit option */
 #define STEPLIMIT_FLAGS     (OPTST_DISABLED \
         | OPTST_SET_ARGTYPE(OPARG_TYPE_NUMERIC))
@@ -333,11 +333,11 @@ static int const aIpv6CantList[] = {
  *  ntpversion option description:
  */
 /** Descriptive text for the ntpversion option */
-#define NTPVERSION_DESC      (sntp_opt_strs+1655)
+#define NTPVERSION_DESC      (sntp_opt_strs+1653)
 /** Upper-cased name for the ntpversion option */
-#define NTPVERSION_NAME      (sntp_opt_strs+1692)
+#define NTPVERSION_NAME      (sntp_opt_strs+1690)
 /** Name string for the ntpversion option */
-#define NTPVERSION_name      (sntp_opt_strs+1703)
+#define NTPVERSION_name      (sntp_opt_strs+1701)
 /** The compiled in default value for the ntpversion option argument */
 #define NTPVERSION_DFT_ARG   ((char const*)4)
 /** Compiled in flag settings for the ntpversion option */
@@ -348,11 +348,11 @@ static int const aIpv6CantList[] = {
  *  usereservedport option description:
  */
 /** Descriptive text for the usereservedport option */
-#define USERESERVEDPORT_DESC      (sntp_opt_strs+1714)
+#define USERESERVEDPORT_DESC      (sntp_opt_strs+1712)
 /** Upper-cased name for the usereservedport option */
-#define USERESERVEDPORT_NAME      (sntp_opt_strs+1751)
+#define USERESERVEDPORT_NAME      (sntp_opt_strs+1749)
 /** Name string for the usereservedport option */
-#define USERESERVEDPORT_name      (sntp_opt_strs+1767)
+#define USERESERVEDPORT_name      (sntp_opt_strs+1765)
 /** Compiled in flag settings for the usereservedport option */
 #define USERESERVEDPORT_FLAGS     (OPTST_DISABLED)
 
@@ -360,11 +360,11 @@ static int const aIpv6CantList[] = {
  *  step option description:
  */
 /** Descriptive text for the step option */
-#define STEP_DESC      (sntp_opt_strs+1783)
+#define STEP_DESC      (sntp_opt_strs+1781)
 /** Upper-cased name for the step option */
-#define STEP_NAME      (sntp_opt_strs+1826)
+#define STEP_NAME      (sntp_opt_strs+1824)
 /** Name string for the step option */
-#define STEP_name      (sntp_opt_strs+1831)
+#define STEP_name      (sntp_opt_strs+1829)
 /** Compiled in flag settings for the step option */
 #define STEP_FLAGS     (OPTST_DISABLED)
 
@@ -372,11 +372,11 @@ static int const aIpv6CantList[] = {
  *  slew option description:
  */
 /** Descriptive text for the slew option */
-#define SLEW_DESC      (sntp_opt_strs+1836)
+#define SLEW_DESC      (sntp_opt_strs+1834)
 /** Upper-cased name for the slew option */
-#define SLEW_NAME      (sntp_opt_strs+1874)
+#define SLEW_NAME      (sntp_opt_strs+1872)
 /** Name string for the slew option */
-#define SLEW_name      (sntp_opt_strs+1879)
+#define SLEW_name      (sntp_opt_strs+1877)
 /** Compiled in flag settings for the slew option */
 #define SLEW_FLAGS     (OPTST_DISABLED)
 
@@ -384,11 +384,11 @@ static int const aIpv6CantList[] = {
  *  timeout option description:
  */
 /** Descriptive text for the timeout option */
-#define TIMEOUT_DESC      (sntp_opt_strs+1884)
+#define TIMEOUT_DESC      (sntp_opt_strs+1882)
 /** Upper-cased name for the timeout option */
-#define TIMEOUT_NAME      (sntp_opt_strs+1928)
+#define TIMEOUT_NAME      (sntp_opt_strs+1926)
 /** Name string for the timeout option */
-#define TIMEOUT_name      (sntp_opt_strs+1936)
+#define TIMEOUT_name      (sntp_opt_strs+1934)
 /** The compiled in default value for the timeout option argument */
 #define TIMEOUT_DFT_ARG   ((char const*)5)
 /** Compiled in flag settings for the timeout option */
@@ -399,13 +399,13 @@ static int const aIpv6CantList[] = {
  *  wait option description:
  */
 /** Descriptive text for the wait option */
-#define WAIT_DESC      (sntp_opt_strs+1944)
+#define WAIT_DESC      (sntp_opt_strs+1942)
 /** Upper-cased name for the wait option */
-#define WAIT_NAME      (sntp_opt_strs+1995)
+#define WAIT_NAME      (sntp_opt_strs+1993)
 /** disablement name for the wait option */
-#define NOT_WAIT_name  (sntp_opt_strs+2000)
+#define NOT_WAIT_name  (sntp_opt_strs+1998)
 /** disablement prefix for the wait option */
-#define NOT_WAIT_PFX   (sntp_opt_strs+2008)
+#define NOT_WAIT_PFX   (sntp_opt_strs+2006)
 /** Name string for the wait option */
 #define WAIT_name      (NOT_WAIT_name + 3)
 /** Compiled in flag settings for the wait option */
@@ -414,11 +414,11 @@ static int const aIpv6CantList[] = {
 /*
  *  Help/More_Help/Version option descriptions:
  */
-#define HELP_DESC       (sntp_opt_strs+2011)
-#define HELP_name       (sntp_opt_strs+2055)
+#define HELP_DESC       (sntp_opt_strs+2009)
+#define HELP_name       (sntp_opt_strs+2053)
 #ifdef HAVE_WORKING_FORK
-#define MORE_HELP_DESC  (sntp_opt_strs+2060)
-#define MORE_HELP_name  (sntp_opt_strs+2105)
+#define MORE_HELP_DESC  (sntp_opt_strs+2058)
+#define MORE_HELP_name  (sntp_opt_strs+2103)
 #define MORE_HELP_FLAGS (OPTST_IMM | OPTST_NO_INIT)
 #else
 #define MORE_HELP_DESC  HELP_DESC
@@ -431,14 +431,14 @@ static int const aIpv6CantList[] = {
 #  define VER_FLAGS     (OPTST_SET_ARGTYPE(OPARG_TYPE_STRING) | \
                          OPTST_ARG_OPTIONAL | OPTST_IMM | OPTST_NO_INIT)
 #endif
-#define VER_DESC        (sntp_opt_strs+2115)
-#define VER_name        (sntp_opt_strs+2151)
-#define SAVE_OPTS_DESC  (sntp_opt_strs+2159)
-#define SAVE_OPTS_name  (sntp_opt_strs+2198)
-#define LOAD_OPTS_DESC     (sntp_opt_strs+2208)
-#define LOAD_OPTS_NAME     (sntp_opt_strs+2240)
-#define NO_LOAD_OPTS_name  (sntp_opt_strs+2250)
-#define LOAD_OPTS_pfx      (sntp_opt_strs+2008)
+#define VER_DESC        (sntp_opt_strs+2113)
+#define VER_name        (sntp_opt_strs+2149)
+#define SAVE_OPTS_DESC  (sntp_opt_strs+2157)
+#define SAVE_OPTS_name  (sntp_opt_strs+2196)
+#define LOAD_OPTS_DESC     (sntp_opt_strs+2206)
+#define LOAD_OPTS_NAME     (sntp_opt_strs+2238)
+#define NO_LOAD_OPTS_name  (sntp_opt_strs+2248)
+#define LOAD_OPTS_pfx      (sntp_opt_strs+2006)
 #define LOAD_OPTS_name     (NO_LOAD_OPTS_name + 3)
 /**
  *  Declare option callback procedures
@@ -744,24 +744,24 @@ static tOptDesc optDesc[OPTION_CT] = {
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 /** Reference to the upper cased version of sntp. */
-#define zPROGNAME       (sntp_opt_strs+2263)
+#define zPROGNAME       (sntp_opt_strs+2261)
 /** Reference to the title line for sntp usage. */
-#define zUsageTitle     (sntp_opt_strs+2268)
+#define zUsageTitle     (sntp_opt_strs+2266)
 /** sntp configuration file name. */
-#define zRcName         (sntp_opt_strs+2433)
+#define zRcName         (sntp_opt_strs+2429)
 /** Directories to search for sntp config files. */
 static char const * const apzHomeList[3] = {
-    sntp_opt_strs+2425,
-    sntp_opt_strs+2431,
+    sntp_opt_strs+2421,
+    sntp_opt_strs+2427,
     NULL };
 /** The sntp program bug email address. */
-#define zBugsAddr       (sntp_opt_strs+2440)
+#define zBugsAddr       (sntp_opt_strs+2436)
 /** Clarification/explanation of what sntp does. */
-#define zExplain        (sntp_opt_strs+2474)
+#define zExplain        (sntp_opt_strs+2470)
 /** Extra detail explaining what sntp does. */
 #define zDetail         (NULL)
 /** The full version string for sntp. */
-#define zFullVersion    (sntp_opt_strs+2476)
+#define zFullVersion    (sntp_opt_strs+2472)
 /* extracted from optcode.tlib near line 364 */
 
 #if defined(ENABLE_NLS)
@@ -1170,7 +1170,7 @@ static void bogus_function(void) {
      translate option names.
    */
   /* referenced via sntpOptions.pzCopyright */
-  puts(_("sntp 4.2.8\n\
+  puts(_("sntp 4.9\n\
 Copyright (C) 1970-2014 The University of Delaware, all rights reserved.\n\
 This is free software. It is licensed for use, modification and\n\
 redistribution under the terms of the NTP License, copies of which\n\
@@ -1259,7 +1259,7 @@ provided \"as is\" without express or implied warranty.\n"));
   puts(_("load options from a config file"));
 
   /* referenced via sntpOptions.pzUsageTitle */
-  puts(_("sntp - standard Simple Network Time Protocol client program - Ver. 4.2.8\n\
+  puts(_("sntp - standard Simple Network Time Protocol client program - Ver. 4.9\n\
 Usage:  %s [ -<flag> [<val>] | --<name>[{=| }<val>] ]... \\\n\
 \t\t[ hostname-or-IP ...]\n"));
 
@@ -1267,7 +1267,7 @@ Usage:  %s [ -<flag> [<val>] | --<name>[{=| }<val>] ]... \\\n\
   puts(_("\n"));
 
   /* referenced via sntpOptions.pzFullVersion */
-  puts(_("sntp 4.2.8"));
+  puts(_("sntp 4.9"));
 
   /* referenced via sntpOptions.pzFullUsage */
   puts(_("<<<NOT-FOUND>>>"));
