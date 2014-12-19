@@ -1,5 +1,3 @@
----
-
 * [Sec 730] Increase RSA_generate_key modulus.
 * [Sec 2666] Use cryptographic random numbers for md5 key generation.
 * [Sec 2667] buffer overflow in crypto_recv().
