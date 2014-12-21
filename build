@@ -117,7 +117,7 @@ case "$CC" in
     ;;
 esac
 
-	BDIR="$BASEDIR$KEYSUF$CCSUF"
+BDIR="$BASEDIR$KEYSUF$CCSUF"
 
 [ -d "$BDIR" ] || mkdir $BDIR
 [ -f "$BDIR/.buildcvo" ] || echo $CVO > $BDIR/.buildcvo
