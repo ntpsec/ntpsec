@@ -3450,19 +3450,18 @@ read_network_packet(
 	*/
 
 	// temporary hack...
-#ifndef HAVE_SOLARIS_PRIVS
 	if (AF_INET6 == itf->family) {
 		DPRINTF(1, ("Got an IPv6 packet, from <%s> (%d) to <%s> (%d)\n",
 			stoa(&rb->recv_srcadr),
-			IN6_IS_ADDR_LOOPBACK(&rb->recv_srcadr),
+			IN6_IS_ADDR_LOOPBACK(&rb->recv_srcadr.sa6.sin6_addr),
 			stoa(&itf->sin),
-			!IN6_IS_ADDR_LOOPBACK(&itf->sin)
+			!IN6_IS_ADDR_LOOPBACK(&itf->sin.sa6.sin6_addr)
 			));
 	}
 
 	if (   AF_INET6 == itf->family
-	    && IN6_IS_ADDR_LOOPBACK(&rb->recv_srcadr)
-	    && !IN6_IS_ADDR_LOOPBACK(&itf->sin)
+	    && IN6_IS_ADDR_LOOPBACK(&rb->recv_srcadr.sa6.sin6_addr)
+	    && !IN6_IS_ADDR_LOOPBACK(&itf->sin.sa6.sin6_addr)
 	   ) {
 		packets_dropped++;
 		DPRINTF(1, ("DROPPING that packet\n"));
@@ -3470,7 +3469,6 @@ read_network_packet(
 		return buflen;
 	}
 	DPRINTF(1, ("processing that packet\n"));
-#endif
 
 	/*
 	 * Got one.  Mark how and when it got here,

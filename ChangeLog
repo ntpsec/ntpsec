@@ -1,3 +1,4 @@
+* [Sec 2672] On some OSes ::1 can be spoofed, bypassing source IP ACLs.
 ---
 (4.2.8) 2014/12/19 Released by Harlan Stenn <stenn@ntp.org>
 
