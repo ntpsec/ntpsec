@@ -1,4 +1,7 @@
+---
+
 * [Sec 2672] On some OSes ::1 can be spoofed, bypassing source IP ACLs.
+* [Bug 2699] HAVE_SYS_SELECT_H is misspelled in refclock_gpsdjson.c.
 ---
 (4.2.8) 2014/12/19 Released by Harlan Stenn <stenn@ntp.org>
 

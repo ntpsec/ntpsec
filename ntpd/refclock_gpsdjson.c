@@ -52,7 +52,7 @@
 
 #if defined(HAVE_SYS_POLL_H)
 # include <sys/poll.h>
-#elif defined(HAVE_SYS_SLECET_H)
+#elif defined(HAVE_SYS_SELECT_H)
 # include <sys/select.h>
 #else
 # error need poll() or select()
