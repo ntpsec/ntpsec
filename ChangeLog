@@ -1,7 +1,8 @@
 ---
 
 * [Sec 2672] On some OSes ::1 can be spoofed, bypassing source IP ACLs.
-* [Bug 2699] IN6_IS_ADDR_LOOPBACK build problems on some OSes.
+* [Bug 2693] ntp-keygen doesn't build without OpenSSL.
+* [Bug 2697] IN6_IS_ADDR_LOOPBACK build problems on some OSes.
 * [Bug 2699] HAVE_SYS_SELECT_H is misspelled in refclock_gpsdjson.c.
 ---
 (4.2.8) 2014/12/19 Released by Harlan Stenn <stenn@ntp.org>
