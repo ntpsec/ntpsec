@@ -1,7 +1,7 @@
 /*
  *  EDIT THIS FILE WITH CAUTION  (ntpd-opts.c)
  *
- *  It has been AutoGen-ed  December 19, 2014 at 07:46:33 AM by AutoGen 5.18.5pre4
+ *  It has been AutoGen-ed  December 23, 2014 at 04:54:49 PM by AutoGen 5.18.5pre4
  *  From the definitions    ntpd-opts.def
  *  and the template file   options
  *
@@ -50,7 +50,7 @@ extern "C" {
 #endif
 extern FILE * option_usage_fp;
 #define zCopyright      (ntpd_opt_strs+0)
-#define zLicenseDescrip (ntpd_opt_strs+310)
+#define zLicenseDescrip (ntpd_opt_strs+318)
 
 /*
  *  global included definitions
@@ -74,15 +74,15 @@ extern FILE * option_usage_fp;
 /**
  *  static const strings for ntpd options
  */
-static char const ntpd_opt_strs[2999] =
-/*     0 */ "ntpd 4.2.8\n"
+static char const ntpd_opt_strs[3023] =
+/*     0 */ "ntpd 4.2.8p1-beta1\n"
             "Copyright (C) 1970-2014 The University of Delaware, all rights reserved.\n"
             "This is free software. It is licensed for use, modification and\n"
             "redistribution under the terms of the NTP License, copies of which\n"
             "can be seen at:\n"
             "  <http://ntp.org/license>\n"
             "  <http://opensource.org/licenses/ntp-license.php>\n\0"
-/*   310 */ "Permission to use, copy, modify, and distribute this software and its\n"
+/*   318 */ "Permission to use, copy, modify, and distribute this software and its\n"
             "documentation for any purpose with or without fee is hereby granted,\n"
             "provided that the above copyright notice appears in all copies and that\n"
             "both the copyright notice and this permission notice appear in supporting\n"
@@ -91,133 +91,133 @@ static char const ntpd_opt_strs[2999] =
             "specific, written prior permission.  The University of Delaware makes no\n"
             "representations about the suitability this software for any purpose.  It is\n"
             "provided \"as is\" without express or implied warranty.\n\0"
-/*   950 */ "Force IPv4 DNS name resolution\0"
-/*   981 */ "IPV4\0"
-/*   986 */ "ipv4\0"
-/*   991 */ "Force IPv6 DNS name resolution\0"
-/*  1022 */ "IPV6\0"
-/*  1027 */ "ipv6\0"
-/*  1032 */ "Require crypto authentication\0"
-/*  1062 */ "AUTHREQ\0"
-/*  1070 */ "authreq\0"
-/*  1078 */ "Do not require crypto authentication\0"
-/*  1115 */ "AUTHNOREQ\0"
-/*  1125 */ "authnoreq\0"
-/*  1135 */ "Allow us to sync to broadcast servers\0"
-/*  1173 */ "BCASTSYNC\0"
-/*  1183 */ "bcastsync\0"
-/*  1193 */ "configuration file name\0"
-/*  1217 */ "CONFIGFILE\0"
-/*  1228 */ "configfile\0"
-/*  1239 */ "Increase debug verbosity level\0"
-/*  1270 */ "DEBUG_LEVEL\0"
-/*  1282 */ "debug-level\0"
-/*  1294 */ "Set the debug verbosity level\0"
-/*  1324 */ "SET_DEBUG_LEVEL\0"
-/*  1340 */ "set-debug-level\0"
-/*  1356 */ "frequency drift file name\0"
-/*  1382 */ "DRIFTFILE\0"
-/*  1392 */ "driftfile\0"
-/*  1402 */ "Allow the first adjustment to be Big\0"
-/*  1439 */ "PANICGATE\0"
-/*  1449 */ "panicgate\0"
-/*  1459 */ "Jail directory\0"
-/*  1474 */ "JAILDIR\0"
-/*  1482 */ "jaildir\0"
-/*  1490 */ "built without --enable-clockctl or --enable-linuxcaps or --enable-solarisprivs\0"
-/*  1569 */ "Listen on an interface name or address\0"
-/*  1608 */ "INTERFACE\0"
-/*  1618 */ "interface\0"
-/*  1628 */ "path to symmetric keys\0"
-/*  1651 */ "KEYFILE\0"
-/*  1659 */ "keyfile\0"
-/*  1667 */ "path to the log file\0"
-/*  1688 */ "LOGFILE\0"
-/*  1696 */ "logfile\0"
-/*  1704 */ "Do not listen to virtual interfaces\0"
-/*  1740 */ "NOVIRTUALIPS\0"
-/*  1753 */ "novirtualips\0"
-/*  1766 */ "Modify Multimedia Timer (Windows only)\0"
-/*  1805 */ "MODIFYMMTIMER\0"
-/*  1819 */ "modifymmtimer\0"
-/*  1833 */ "Do not fork\0"
-/*  1845 */ "NOFORK\0"
-/*  1852 */ "nofork\0"
-/*  1859 */ "Run at high priority\0"
-/*  1880 */ "NICE\0"
-/*  1885 */ "nice\0"
-/*  1890 */ "path to the PID file\0"
-/*  1911 */ "PIDFILE\0"
-/*  1919 */ "pidfile\0"
-/*  1927 */ "Process priority\0"
-/*  1944 */ "PRIORITY\0"
-/*  1953 */ "priority\0"
-/*  1962 */ "Set the time and quit\0"
-/*  1984 */ "QUIT\0"
-/*  1989 */ "quit\0"
-/*  1994 */ "Broadcast/propagation delay\0"
-/*  2022 */ "PROPAGATIONDELAY\0"
-/*  2039 */ "propagationdelay\0"
-/*  2056 */ "Save parsed configuration and quit\0"
-/*  2091 */ "SAVECONFIGQUIT\0"
-/*  2106 */ "saveconfigquit\0"
-/*  2121 */ "Statistics file location\0"
-/*  2146 */ "STATSDIR\0"
-/*  2155 */ "statsdir\0"
-/*  2164 */ "Trusted key number\0"
-/*  2183 */ "TRUSTEDKEY\0"
-/*  2194 */ "trustedkey\0"
-/*  2205 */ "Run as userid (or userid:groupid)\0"
-/*  2239 */ "USER\0"
-/*  2244 */ "user\0"
-/*  2249 */ "interval in seconds between scans for new or dropped interfaces\0"
-/*  2313 */ "UPDATEINTERVAL\0"
-/*  2328 */ "updateinterval\0"
-/*  2343 */ "make ARG an ntp variable (RW)\0"
-/*  2373 */ "VAR\0"
-/*  2377 */ "var\0"
-/*  2381 */ "make ARG an ntp variable (RW|DEF)\0"
-/*  2415 */ "DVAR\0"
-/*  2420 */ "dvar\0"
-/*  2425 */ "Seconds to wait for first clock sync\0"
-/*  2462 */ "WAIT_SYNC\0"
-/*  2472 */ "wait-sync\0"
-/*  2482 */ "Slew up to 600 seconds\0"
-/*  2505 */ "SLEW\0"
-/*  2510 */ "slew\0"
-/*  2515 */ "Use CPU cycle counter (Windows only)\0"
-/*  2552 */ "USEPCC\0"
-/*  2559 */ "usepcc\0"
-/*  2566 */ "Force CPU cycle counter use (Windows only)\0"
-/*  2609 */ "PCCFREQ\0"
-/*  2617 */ "pccfreq\0"
-/*  2625 */ "Register with mDNS as a NTP server\0"
-/*  2660 */ "MDNS\0"
-/*  2665 */ "mdns\0"
-/*  2670 */ "display extended usage information and exit\0"
-/*  2714 */ "help\0"
-/*  2719 */ "extended usage information passed thru pager\0"
-/*  2764 */ "more-help\0"
-/*  2774 */ "output version information and exit\0"
-/*  2810 */ "version\0"
-/*  2818 */ "NTPD\0"
-/*  2823 */ "ntpd - NTP daemon program - Ver. 4.2.8\n"
+/*   958 */ "Force IPv4 DNS name resolution\0"
+/*   989 */ "IPV4\0"
+/*   994 */ "ipv4\0"
+/*   999 */ "Force IPv6 DNS name resolution\0"
+/*  1030 */ "IPV6\0"
+/*  1035 */ "ipv6\0"
+/*  1040 */ "Require crypto authentication\0"
+/*  1070 */ "AUTHREQ\0"
+/*  1078 */ "authreq\0"
+/*  1086 */ "Do not require crypto authentication\0"
+/*  1123 */ "AUTHNOREQ\0"
+/*  1133 */ "authnoreq\0"
+/*  1143 */ "Allow us to sync to broadcast servers\0"
+/*  1181 */ "BCASTSYNC\0"
+/*  1191 */ "bcastsync\0"
+/*  1201 */ "configuration file name\0"
+/*  1225 */ "CONFIGFILE\0"
+/*  1236 */ "configfile\0"
+/*  1247 */ "Increase debug verbosity level\0"
+/*  1278 */ "DEBUG_LEVEL\0"
+/*  1290 */ "debug-level\0"
+/*  1302 */ "Set the debug verbosity level\0"
+/*  1332 */ "SET_DEBUG_LEVEL\0"
+/*  1348 */ "set-debug-level\0"
+/*  1364 */ "frequency drift file name\0"
+/*  1390 */ "DRIFTFILE\0"
+/*  1400 */ "driftfile\0"
+/*  1410 */ "Allow the first adjustment to be Big\0"
+/*  1447 */ "PANICGATE\0"
+/*  1457 */ "panicgate\0"
+/*  1467 */ "Jail directory\0"
+/*  1482 */ "JAILDIR\0"
+/*  1490 */ "jaildir\0"
+/*  1498 */ "built without --enable-clockctl or --enable-linuxcaps or --enable-solarisprivs\0"
+/*  1577 */ "Listen on an interface name or address\0"
+/*  1616 */ "INTERFACE\0"
+/*  1626 */ "interface\0"
+/*  1636 */ "path to symmetric keys\0"
+/*  1659 */ "KEYFILE\0"
+/*  1667 */ "keyfile\0"
+/*  1675 */ "path to the log file\0"
+/*  1696 */ "LOGFILE\0"
+/*  1704 */ "logfile\0"
+/*  1712 */ "Do not listen to virtual interfaces\0"
+/*  1748 */ "NOVIRTUALIPS\0"
+/*  1761 */ "novirtualips\0"
+/*  1774 */ "Modify Multimedia Timer (Windows only)\0"
+/*  1813 */ "MODIFYMMTIMER\0"
+/*  1827 */ "modifymmtimer\0"
+/*  1841 */ "Do not fork\0"
+/*  1853 */ "NOFORK\0"
+/*  1860 */ "nofork\0"
+/*  1867 */ "Run at high priority\0"
+/*  1888 */ "NICE\0"
+/*  1893 */ "nice\0"
+/*  1898 */ "path to the PID file\0"
+/*  1919 */ "PIDFILE\0"
+/*  1927 */ "pidfile\0"
+/*  1935 */ "Process priority\0"
+/*  1952 */ "PRIORITY\0"
+/*  1961 */ "priority\0"
+/*  1970 */ "Set the time and quit\0"
+/*  1992 */ "QUIT\0"
+/*  1997 */ "quit\0"
+/*  2002 */ "Broadcast/propagation delay\0"
+/*  2030 */ "PROPAGATIONDELAY\0"
+/*  2047 */ "propagationdelay\0"
+/*  2064 */ "Save parsed configuration and quit\0"
+/*  2099 */ "SAVECONFIGQUIT\0"
+/*  2114 */ "saveconfigquit\0"
+/*  2129 */ "Statistics file location\0"
+/*  2154 */ "STATSDIR\0"
+/*  2163 */ "statsdir\0"
+/*  2172 */ "Trusted key number\0"
+/*  2191 */ "TRUSTEDKEY\0"
+/*  2202 */ "trustedkey\0"
+/*  2213 */ "Run as userid (or userid:groupid)\0"
+/*  2247 */ "USER\0"
+/*  2252 */ "user\0"
+/*  2257 */ "interval in seconds between scans for new or dropped interfaces\0"
+/*  2321 */ "UPDATEINTERVAL\0"
+/*  2336 */ "updateinterval\0"
+/*  2351 */ "make ARG an ntp variable (RW)\0"
+/*  2381 */ "VAR\0"
+/*  2385 */ "var\0"
+/*  2389 */ "make ARG an ntp variable (RW|DEF)\0"
+/*  2423 */ "DVAR\0"
+/*  2428 */ "dvar\0"
+/*  2433 */ "Seconds to wait for first clock sync\0"
+/*  2470 */ "WAIT_SYNC\0"
+/*  2480 */ "wait-sync\0"
+/*  2490 */ "Slew up to 600 seconds\0"
+/*  2513 */ "SLEW\0"
+/*  2518 */ "slew\0"
+/*  2523 */ "Use CPU cycle counter (Windows only)\0"
+/*  2560 */ "USEPCC\0"
+/*  2567 */ "usepcc\0"
+/*  2574 */ "Force CPU cycle counter use (Windows only)\0"
+/*  2617 */ "PCCFREQ\0"
+/*  2625 */ "pccfreq\0"
+/*  2633 */ "Register with mDNS as a NTP server\0"
+/*  2668 */ "MDNS\0"
+/*  2673 */ "mdns\0"
+/*  2678 */ "display extended usage information and exit\0"
+/*  2722 */ "help\0"
+/*  2727 */ "extended usage information passed thru pager\0"
+/*  2772 */ "more-help\0"
+/*  2782 */ "output version information and exit\0"
+/*  2818 */ "version\0"
+/*  2826 */ "NTPD\0"
+/*  2831 */ "ntpd - NTP daemon program - Ver. 4.2.8p1-beta1\n"
             "Usage:  %s [ -<flag> [<val>] | --<name>[{=| }<val>] ]... \\\n"
             "\t\t[ <server1> ... <serverN> ]\n\0"
-/*  2952 */ "http://bugs.ntp.org, bugs@ntp.org\0"
-/*  2986 */ "\n\0"
-/*  2988 */ "ntpd 4.2.8";
+/*  2968 */ "http://bugs.ntp.org, bugs@ntp.org\0"
+/*  3002 */ "\n\0"
+/*  3004 */ "ntpd 4.2.8p1-beta1";
 
 /**
  *  ipv4 option description with
  *  "Must also have options" and "Incompatible options":
  */
 /** Descriptive text for the ipv4 option */
-#define IPV4_DESC      (ntpd_opt_strs+950)
+#define IPV4_DESC      (ntpd_opt_strs+958)
 /** Upper-cased name for the ipv4 option */
-#define IPV4_NAME      (ntpd_opt_strs+981)
+#define IPV4_NAME      (ntpd_opt_strs+989)
 /** Name string for the ipv4 option */
-#define IPV4_name      (ntpd_opt_strs+986)
+#define IPV4_name      (ntpd_opt_strs+994)
 /** Other options that appear in conjunction with the ipv4 option */
 static int const aIpv4CantList[] = {
     INDEX_OPT_IPV6, NO_EQUIVALENT };
@@ -229,11 +229,11 @@ static int const aIpv4CantList[] = {
  *  "Must also have options" and "Incompatible options":
  */
 /** Descriptive text for the ipv6 option */
-#define IPV6_DESC      (ntpd_opt_strs+991)
+#define IPV6_DESC      (ntpd_opt_strs+999)
 /** Upper-cased name for the ipv6 option */
-#define IPV6_NAME      (ntpd_opt_strs+1022)
+#define IPV6_NAME      (ntpd_opt_strs+1030)
 /** Name string for the ipv6 option */
-#define IPV6_name      (ntpd_opt_strs+1027)
+#define IPV6_name      (ntpd_opt_strs+1035)
 /** Other options that appear in conjunction with the ipv6 option */
 static int const aIpv6CantList[] = {
     INDEX_OPT_IPV4, NO_EQUIVALENT };
@@ -245,11 +245,11 @@ static int const aIpv6CantList[] = {
  *  "Must also have options" and "Incompatible options":
  */
 /** Descriptive text for the authreq option */
-#define AUTHREQ_DESC      (ntpd_opt_strs+1032)
+#define AUTHREQ_DESC      (ntpd_opt_strs+1040)
 /** Upper-cased name for the authreq option */
-#define AUTHREQ_NAME      (ntpd_opt_strs+1062)
+#define AUTHREQ_NAME      (ntpd_opt_strs+1070)
 /** Name string for the authreq option */
-#define AUTHREQ_name      (ntpd_opt_strs+1070)
+#define AUTHREQ_name      (ntpd_opt_strs+1078)
 /** Other options that appear in conjunction with the authreq option */
 static int const aAuthreqCantList[] = {
     INDEX_OPT_AUTHNOREQ, NO_EQUIVALENT };
@@ -261,11 +261,11 @@ static int const aAuthreqCantList[] = {
  *  "Must also have options" and "Incompatible options":
  */
 /** Descriptive text for the authnoreq option */
-#define AUTHNOREQ_DESC      (ntpd_opt_strs+1078)
+#define AUTHNOREQ_DESC      (ntpd_opt_strs+1086)
 /** Upper-cased name for the authnoreq option */
-#define AUTHNOREQ_NAME      (ntpd_opt_strs+1115)
+#define AUTHNOREQ_NAME      (ntpd_opt_strs+1123)
 /** Name string for the authnoreq option */
-#define AUTHNOREQ_name      (ntpd_opt_strs+1125)
+#define AUTHNOREQ_name      (ntpd_opt_strs+1133)
 /** Other options that appear in conjunction with the authnoreq option */
 static int const aAuthnoreqCantList[] = {
     INDEX_OPT_AUTHREQ, NO_EQUIVALENT };
@@ -276,11 +276,11 @@ static int const aAuthnoreqCantList[] = {
  *  bcastsync option description:
  */
 /** Descriptive text for the bcastsync option */
-#define BCASTSYNC_DESC      (ntpd_opt_strs+1135)
+#define BCASTSYNC_DESC      (ntpd_opt_strs+1143)
 /** Upper-cased name for the bcastsync option */
-#define BCASTSYNC_NAME      (ntpd_opt_strs+1173)
+#define BCASTSYNC_NAME      (ntpd_opt_strs+1181)
 /** Name string for the bcastsync option */
-#define BCASTSYNC_name      (ntpd_opt_strs+1183)
+#define BCASTSYNC_name      (ntpd_opt_strs+1191)
 /** Compiled in flag settings for the bcastsync option */
 #define BCASTSYNC_FLAGS     (OPTST_DISABLED)
 
@@ -288,11 +288,11 @@ static int const aAuthnoreqCantList[] = {
  *  configfile option description:
  */
 /** Descriptive text for the configfile option */
-#define CONFIGFILE_DESC      (ntpd_opt_strs+1193)
+#define CONFIGFILE_DESC      (ntpd_opt_strs+1201)
 /** Upper-cased name for the configfile option */
-#define CONFIGFILE_NAME      (ntpd_opt_strs+1217)
+#define CONFIGFILE_NAME      (ntpd_opt_strs+1225)
 /** Name string for the configfile option */
-#define CONFIGFILE_name      (ntpd_opt_strs+1228)
+#define CONFIGFILE_name      (ntpd_opt_strs+1236)
 /** Compiled in flag settings for the configfile option */
 #define CONFIGFILE_FLAGS     (OPTST_DISABLED \
         | OPTST_SET_ARGTYPE(OPARG_TYPE_STRING))
@@ -301,11 +301,11 @@ static int const aAuthnoreqCantList[] = {
  *  debug-level option description:
  */
 /** Descriptive text for the debug-level option */
-#define DEBUG_LEVEL_DESC      (ntpd_opt_strs+1239)
+#define DEBUG_LEVEL_DESC      (ntpd_opt_strs+1247)
 /** Upper-cased name for the debug-level option */
-#define DEBUG_LEVEL_NAME      (ntpd_opt_strs+1270)
+#define DEBUG_LEVEL_NAME      (ntpd_opt_strs+1278)
 /** Name string for the debug-level option */
-#define DEBUG_LEVEL_name      (ntpd_opt_strs+1282)
+#define DEBUG_LEVEL_name      (ntpd_opt_strs+1290)
 /** Compiled in flag settings for the debug-level option */
 #define DEBUG_LEVEL_FLAGS     (OPTST_DISABLED)
 
@@ -313,11 +313,11 @@ static int const aAuthnoreqCantList[] = {
  *  set-debug-level option description:
  */
 /** Descriptive text for the set-debug-level option */
-#define SET_DEBUG_LEVEL_DESC      (ntpd_opt_strs+1294)
+#define SET_DEBUG_LEVEL_DESC      (ntpd_opt_strs+1302)
 /** Upper-cased name for the set-debug-level option */
-#define SET_DEBUG_LEVEL_NAME      (ntpd_opt_strs+1324)
+#define SET_DEBUG_LEVEL_NAME      (ntpd_opt_strs+1332)
 /** Name string for the set-debug-level option */
-#define SET_DEBUG_LEVEL_name      (ntpd_opt_strs+1340)
+#define SET_DEBUG_LEVEL_name      (ntpd_opt_strs+1348)
 /** Compiled in flag settings for the set-debug-level option */
 #define SET_DEBUG_LEVEL_FLAGS     (OPTST_DISABLED \
         | OPTST_SET_ARGTYPE(OPARG_TYPE_NUMERIC))
@@ -326,11 +326,11 @@ static int const aAuthnoreqCantList[] = {
  *  driftfile option description:
  */
 /** Descriptive text for the driftfile option */
-#define DRIFTFILE_DESC      (ntpd_opt_strs+1356)
+#define DRIFTFILE_DESC      (ntpd_opt_strs+1364)
 /** Upper-cased name for the driftfile option */
-#define DRIFTFILE_NAME      (ntpd_opt_strs+1382)
+#define DRIFTFILE_NAME      (ntpd_opt_strs+1390)
 /** Name string for the driftfile option */
-#define DRIFTFILE_name      (ntpd_opt_strs+1392)
+#define DRIFTFILE_name      (ntpd_opt_strs+1400)
 /** Compiled in flag settings for the driftfile option */
 #define DRIFTFILE_FLAGS     (OPTST_DISABLED \
         | OPTST_SET_ARGTYPE(OPARG_TYPE_STRING))
@@ -339,11 +339,11 @@ static int const aAuthnoreqCantList[] = {
  *  panicgate option description:
  */
 /** Descriptive text for the panicgate option */
-#define PANICGATE_DESC      (ntpd_opt_strs+1402)
+#define PANICGATE_DESC      (ntpd_opt_strs+1410)
 /** Upper-cased name for the panicgate option */
-#define PANICGATE_NAME      (ntpd_opt_strs+1439)
+#define PANICGATE_NAME      (ntpd_opt_strs+1447)
 /** Name string for the panicgate option */
-#define PANICGATE_name      (ntpd_opt_strs+1449)
+#define PANICGATE_name      (ntpd_opt_strs+1457)
 /** Compiled in flag settings for the panicgate option */
 #define PANICGATE_FLAGS     (OPTST_DISABLED)
 
@@ -352,11 +352,11 @@ static int const aAuthnoreqCantList[] = {
  */
 #ifdef HAVE_DROPROOT
 /** Descriptive text for the jaildir option */
-#define JAILDIR_DESC      (ntpd_opt_strs+1459)
+#define JAILDIR_DESC      (ntpd_opt_strs+1467)
 /** Upper-cased name for the jaildir option */
-#define JAILDIR_NAME      (ntpd_opt_strs+1474)
+#define JAILDIR_NAME      (ntpd_opt_strs+1482)
 /** Name string for the jaildir option */
-#define JAILDIR_name      (ntpd_opt_strs+1482)
+#define JAILDIR_name      (ntpd_opt_strs+1490)
 /** Compiled in flag settings for the jaildir option */
 #define JAILDIR_FLAGS     (OPTST_DISABLED \
         | OPTST_SET_ARGTYPE(OPARG_TYPE_STRING))
@@ -365,19 +365,19 @@ static int const aAuthnoreqCantList[] = {
 #define JAILDIR_FLAGS     (OPTST_OMITTED | OPTST_NO_INIT)
 #define JAILDIR_NAME      NULL
 /** Descriptive text for the jaildir option */
-#define JAILDIR_DESC      (ntpd_opt_strs+1490)
-#define JAILDIR_name      (ntpd_opt_strs+1482)
+#define JAILDIR_DESC      (ntpd_opt_strs+1498)
+#define JAILDIR_name      (ntpd_opt_strs+1490)
 #endif  /* HAVE_DROPROOT */
 
 /**
  *  interface option description:
  */
 /** Descriptive text for the interface option */
-#define INTERFACE_DESC      (ntpd_opt_strs+1569)
+#define INTERFACE_DESC      (ntpd_opt_strs+1577)
 /** Upper-cased name for the interface option */
-#define INTERFACE_NAME      (ntpd_opt_strs+1608)
+#define INTERFACE_NAME      (ntpd_opt_strs+1616)
 /** Name string for the interface option */
-#define INTERFACE_name      (ntpd_opt_strs+1618)
+#define INTERFACE_name      (ntpd_opt_strs+1626)
 /** Compiled in flag settings for the interface option */
 #define INTERFACE_FLAGS     (OPTST_DISABLED | OPTST_STACKED \
         | OPTST_SET_ARGTYPE(OPARG_TYPE_STRING))
@@ -386,11 +386,11 @@ static int const aAuthnoreqCantList[] = {
  *  keyfile option description:
  */
 /** Descriptive text for the keyfile option */
-#define KEYFILE_DESC      (ntpd_opt_strs+1628)
+#define KEYFILE_DESC      (ntpd_opt_strs+1636)
 /** Upper-cased name for the keyfile option */
-#define KEYFILE_NAME      (ntpd_opt_strs+1651)
+#define KEYFILE_NAME      (ntpd_opt_strs+1659)
 /** Name string for the keyfile option */
-#define KEYFILE_name      (ntpd_opt_strs+1659)
+#define KEYFILE_name      (ntpd_opt_strs+1667)
 /** Compiled in flag settings for the keyfile option */
 #define KEYFILE_FLAGS     (OPTST_DISABLED \
         | OPTST_SET_ARGTYPE(OPARG_TYPE_STRING))
@@ -399,11 +399,11 @@ static int const aAuthnoreqCantList[] = {
  *  logfile option description:
  */
 /** Descriptive text for the logfile option */
-#define LOGFILE_DESC      (ntpd_opt_strs+1667)
+#define LOGFILE_DESC      (ntpd_opt_strs+1675)
 /** Upper-cased name for the logfile option */
-#define LOGFILE_NAME      (ntpd_opt_strs+1688)
+#define LOGFILE_NAME      (ntpd_opt_strs+1696)
 /** Name string for the logfile option */
-#define LOGFILE_name      (ntpd_opt_strs+1696)
+#define LOGFILE_name      (ntpd_opt_strs+1704)
 /** Compiled in flag settings for the logfile option */
 #define LOGFILE_FLAGS     (OPTST_DISABLED \
         | OPTST_SET_ARGTYPE(OPARG_TYPE_STRING))
@@ -412,11 +412,11 @@ static int const aAuthnoreqCantList[] = {
  *  novirtualips option description:
  */
 /** Descriptive text for the novirtualips option */
-#define NOVIRTUALIPS_DESC      (ntpd_opt_strs+1704)
+#define NOVIRTUALIPS_DESC      (ntpd_opt_strs+1712)
 /** Upper-cased name for the novirtualips option */
-#define NOVIRTUALIPS_NAME      (ntpd_opt_strs+1740)
+#define NOVIRTUALIPS_NAME      (ntpd_opt_strs+1748)
 /** Name string for the novirtualips option */
-#define NOVIRTUALIPS_name      (ntpd_opt_strs+1753)
+#define NOVIRTUALIPS_name      (ntpd_opt_strs+1761)
 /** Compiled in flag settings for the novirtualips option */
 #define NOVIRTUALIPS_FLAGS     (OPTST_DISABLED)
 
@@ -425,11 +425,11 @@ static int const aAuthnoreqCantList[] = {
  */
 #ifdef SYS_WINNT
 /** Descriptive text for the modifymmtimer option */
-#define MODIFYMMTIMER_DESC      (ntpd_opt_strs+1766)
+#define MODIFYMMTIMER_DESC      (ntpd_opt_strs+1774)
 /** Upper-cased name for the modifymmtimer option */
-#define MODIFYMMTIMER_NAME      (ntpd_opt_strs+1805)
+#define MODIFYMMTIMER_NAME      (ntpd_opt_strs+1813)
 /** Name string for the modifymmtimer option */
-#define MODIFYMMTIMER_name      (ntpd_opt_strs+1819)
+#define MODIFYMMTIMER_name      (ntpd_opt_strs+1827)
 /** Compiled in flag settings for the modifymmtimer option */
 #define MODIFYMMTIMER_FLAGS     (OPTST_DISABLED)
 
@@ -445,11 +445,11 @@ static int const aAuthnoreqCantList[] = {
  *  "Must also have options" and "Incompatible options":
  */
 /** Descriptive text for the nofork option */
-#define NOFORK_DESC      (ntpd_opt_strs+1833)
+#define NOFORK_DESC      (ntpd_opt_strs+1841)
 /** Upper-cased name for the nofork option */
-#define NOFORK_NAME      (ntpd_opt_strs+1845)
+#define NOFORK_NAME      (ntpd_opt_strs+1853)
 /** Name string for the nofork option */
-#define NOFORK_name      (ntpd_opt_strs+1852)
+#define NOFORK_name      (ntpd_opt_strs+1860)
 /** Other options that appear in conjunction with the nofork option */
 static int const aNoforkCantList[] = {
     INDEX_OPT_WAIT_SYNC, NO_EQUIVALENT };
@@ -460,11 +460,11 @@ static int const aNoforkCantList[] = {
  *  nice option description:
  */
 /** Descriptive text for the nice option */
-#define NICE_DESC      (ntpd_opt_strs+1859)
+#define NICE_DESC      (ntpd_opt_strs+1867)
 /** Upper-cased name for the nice option */
-#define NICE_NAME      (ntpd_opt_strs+1880)
+#define NICE_NAME      (ntpd_opt_strs+1888)
 /** Name string for the nice option */
-#define NICE_name      (ntpd_opt_strs+1885)
+#define NICE_name      (ntpd_opt_strs+1893)
 /** Compiled in flag settings for the nice option */
 #define NICE_FLAGS     (OPTST_DISABLED)
 
@@ -472,11 +472,11 @@ static int const aNoforkCantList[] = {
  *  pidfile option description:
  */
 /** Descriptive text for the pidfile option */
-#define PIDFILE_DESC      (ntpd_opt_strs+1890)
+#define PIDFILE_DESC      (ntpd_opt_strs+1898)
 /** Upper-cased name for the pidfile option */
-#define PIDFILE_NAME      (ntpd_opt_strs+1911)
+#define PIDFILE_NAME      (ntpd_opt_strs+1919)
 /** Name string for the pidfile option */
-#define PIDFILE_name      (ntpd_opt_strs+1919)
+#define PIDFILE_name      (ntpd_opt_strs+1927)
 /** Compiled in flag settings for the pidfile option */
 #define PIDFILE_FLAGS     (OPTST_DISABLED \
         | OPTST_SET_ARGTYPE(OPARG_TYPE_STRING))
@@ -485,11 +485,11 @@ static int const aNoforkCantList[] = {
  *  priority option description:
  */
 /** Descriptive text for the priority option */
-#define PRIORITY_DESC      (ntpd_opt_strs+1927)
+#define PRIORITY_DESC      (ntpd_opt_strs+1935)
 /** Upper-cased name for the priority option */
-#define PRIORITY_NAME      (ntpd_opt_strs+1944)
+#define PRIORITY_NAME      (ntpd_opt_strs+1952)
 /** Name string for the priority option */
-#define PRIORITY_name      (ntpd_opt_strs+1953)
+#define PRIORITY_name      (ntpd_opt_strs+1961)
 /** Compiled in flag settings for the priority option */
 #define PRIORITY_FLAGS     (OPTST_DISABLED \
         | OPTST_SET_ARGTYPE(OPARG_TYPE_NUMERIC))
@@ -499,11 +499,11 @@ static int const aNoforkCantList[] = {
  *  "Must also have options" and "Incompatible options":
  */
 /** Descriptive text for the quit option */
-#define QUIT_DESC      (ntpd_opt_strs+1962)
+#define QUIT_DESC      (ntpd_opt_strs+1970)
 /** Upper-cased name for the quit option */
-#define QUIT_NAME      (ntpd_opt_strs+1984)
+#define QUIT_NAME      (ntpd_opt_strs+1992)
 /** Name string for the quit option */
-#define QUIT_name      (ntpd_opt_strs+1989)
+#define QUIT_name      (ntpd_opt_strs+1997)
 /** Other options that appear in conjunction with the quit option */
 static int const aQuitCantList[] = {
     INDEX_OPT_SAVECONFIGQUIT,
@@ -515,11 +515,11 @@ static int const aQuitCantList[] = {
  *  propagationdelay option description:
  */
 /** Descriptive text for the propagationdelay option */
-#define PROPAGATIONDELAY_DESC      (ntpd_opt_strs+1994)
+#define PROPAGATIONDELAY_DESC      (ntpd_opt_strs+2002)
 /** Upper-cased name for the propagationdelay option */
-#define PROPAGATIONDELAY_NAME      (ntpd_opt_strs+2022)
+#define PROPAGATIONDELAY_NAME      (ntpd_opt_strs+2030)
 /** Name string for the propagationdelay option */
-#define PROPAGATIONDELAY_name      (ntpd_opt_strs+2039)
+#define PROPAGATIONDELAY_name      (ntpd_opt_strs+2047)
 /** Compiled in flag settings for the propagationdelay option */
 #define PROPAGATIONDELAY_FLAGS     (OPTST_DISABLED \
         | OPTST_SET_ARGTYPE(OPARG_TYPE_STRING))
@@ -530,11 +530,11 @@ static int const aQuitCantList[] = {
  */
 #ifdef SAVECONFIG
 /** Descriptive text for the saveconfigquit option */
-#define SAVECONFIGQUIT_DESC      (ntpd_opt_strs+2056)
+#define SAVECONFIGQUIT_DESC      (ntpd_opt_strs+2064)
 /** Upper-cased name for the saveconfigquit option */
-#define SAVECONFIGQUIT_NAME      (ntpd_opt_strs+2091)
+#define SAVECONFIGQUIT_NAME      (ntpd_opt_strs+2099)
 /** Name string for the saveconfigquit option */
-#define SAVECONFIGQUIT_name      (ntpd_opt_strs+2106)
+#define SAVECONFIGQUIT_name      (ntpd_opt_strs+2114)
 /** Other options that appear in conjunction with the saveconfigquit option */
 static int const aSaveconfigquitCantList[] = {
     INDEX_OPT_QUIT,
@@ -555,11 +555,11 @@ static int const aSaveconfigquitCantList[] = {
  *  statsdir option description:
  */
 /** Descriptive text for the statsdir option */
-#define STATSDIR_DESC      (ntpd_opt_strs+2121)
+#define STATSDIR_DESC      (ntpd_opt_strs+2129)
 /** Upper-cased name for the statsdir option */
-#define STATSDIR_NAME      (ntpd_opt_strs+2146)
+#define STATSDIR_NAME      (ntpd_opt_strs+2154)
 /** Name string for the statsdir option */
-#define STATSDIR_name      (ntpd_opt_strs+2155)
+#define STATSDIR_name      (ntpd_opt_strs+2163)
 /** Compiled in flag settings for the statsdir option */
 #define STATSDIR_FLAGS     (OPTST_DISABLED \
         | OPTST_SET_ARGTYPE(OPARG_TYPE_STRING))
@@ -568,11 +568,11 @@ static int const aSaveconfigquitCantList[] = {
  *  trustedkey option description:
  */
 /** Descriptive text for the trustedkey option */
-#define TRUSTEDKEY_DESC      (ntpd_opt_strs+2164)
+#define TRUSTEDKEY_DESC      (ntpd_opt_strs+2172)
 /** Upper-cased name for the trustedkey option */
-#define TRUSTEDKEY_NAME      (ntpd_opt_strs+2183)
+#define TRUSTEDKEY_NAME      (ntpd_opt_strs+2191)
 /** Name string for the trustedkey option */
-#define TRUSTEDKEY_name      (ntpd_opt_strs+2194)
+#define TRUSTEDKEY_name      (ntpd_opt_strs+2202)
 /** Compiled in flag settings for the trustedkey option */
 #define TRUSTEDKEY_FLAGS     (OPTST_DISABLED | OPTST_STACKED \
         | OPTST_SET_ARGTYPE(OPARG_TYPE_STRING))
@@ -582,11 +582,11 @@ static int const aSaveconfigquitCantList[] = {
  */
 #ifdef HAVE_DROPROOT
 /** Descriptive text for the user option */
-#define USER_DESC      (ntpd_opt_strs+2205)
+#define USER_DESC      (ntpd_opt_strs+2213)
 /** Upper-cased name for the user option */
-#define USER_NAME      (ntpd_opt_strs+2239)
+#define USER_NAME      (ntpd_opt_strs+2247)
 /** Name string for the user option */
-#define USER_name      (ntpd_opt_strs+2244)
+#define USER_name      (ntpd_opt_strs+2252)
 /** Compiled in flag settings for the user option */
 #define USER_FLAGS     (OPTST_DISABLED \
         | OPTST_SET_ARGTYPE(OPARG_TYPE_STRING))
@@ -595,19 +595,19 @@ static int const aSaveconfigquitCantList[] = {
 #define USER_FLAGS     (OPTST_OMITTED | OPTST_NO_INIT)
 #define USER_NAME      NULL
 /** Descriptive text for the user option */
-#define USER_DESC      (ntpd_opt_strs+1490)
-#define USER_name      (ntpd_opt_strs+2244)
+#define USER_DESC      (ntpd_opt_strs+1498)
+#define USER_name      (ntpd_opt_strs+2252)
 #endif  /* HAVE_DROPROOT */
 
 /**
  *  updateinterval option description:
  */
 /** Descriptive text for the updateinterval option */
-#define UPDATEINTERVAL_DESC      (ntpd_opt_strs+2249)
+#define UPDATEINTERVAL_DESC      (ntpd_opt_strs+2257)
 /** Upper-cased name for the updateinterval option */
-#define UPDATEINTERVAL_NAME      (ntpd_opt_strs+2313)
+#define UPDATEINTERVAL_NAME      (ntpd_opt_strs+2321)
 /** Name string for the updateinterval option */
-#define UPDATEINTERVAL_name      (ntpd_opt_strs+2328)
+#define UPDATEINTERVAL_name      (ntpd_opt_strs+2336)
 /** Compiled in flag settings for the updateinterval option */
 #define UPDATEINTERVAL_FLAGS     (OPTST_DISABLED \
         | OPTST_SET_ARGTYPE(OPARG_TYPE_NUMERIC))
@@ -616,11 +616,11 @@ static int const aSaveconfigquitCantList[] = {
  *  var option description:
  */
 /** Descriptive text for the var option */
-#define VAR_DESC      (ntpd_opt_strs+2343)
+#define VAR_DESC      (ntpd_opt_strs+2351)
 /** Upper-cased name for the var option */
-#define VAR_NAME      (ntpd_opt_strs+2373)
+#define VAR_NAME      (ntpd_opt_strs+2381)
 /** Name string for the var option */
-#define VAR_name      (ntpd_opt_strs+2377)
+#define VAR_name      (ntpd_opt_strs+2385)
 /** Compiled in flag settings for the var option */
 #define VAR_FLAGS     (OPTST_DISABLED | OPTST_STACKED \
         | OPTST_SET_ARGTYPE(OPARG_TYPE_STRING))
@@ -629,11 +629,11 @@ static int const aSaveconfigquitCantList[] = {
  *  dvar option description:
  */
 /** Descriptive text for the dvar option */
-#define DVAR_DESC      (ntpd_opt_strs+2381)
+#define DVAR_DESC      (ntpd_opt_strs+2389)
 /** Upper-cased name for the dvar option */
-#define DVAR_NAME      (ntpd_opt_strs+2415)
+#define DVAR_NAME      (ntpd_opt_strs+2423)
 /** Name string for the dvar option */
-#define DVAR_name      (ntpd_opt_strs+2420)
+#define DVAR_name      (ntpd_opt_strs+2428)
 /** Compiled in flag settings for the dvar option */
 #define DVAR_FLAGS     (OPTST_DISABLED | OPTST_STACKED \
         | OPTST_SET_ARGTYPE(OPARG_TYPE_STRING))
@@ -644,11 +644,11 @@ static int const aSaveconfigquitCantList[] = {
  */
 #ifdef HAVE_WORKING_FORK
 /** Descriptive text for the wait-sync option */
-#define WAIT_SYNC_DESC      (ntpd_opt_strs+2425)
+#define WAIT_SYNC_DESC      (ntpd_opt_strs+2433)
 /** Upper-cased name for the wait-sync option */
-#define WAIT_SYNC_NAME      (ntpd_opt_strs+2462)
+#define WAIT_SYNC_NAME      (ntpd_opt_strs+2470)
 /** Name string for the wait-sync option */
-#define WAIT_SYNC_name      (ntpd_opt_strs+2472)
+#define WAIT_SYNC_name      (ntpd_opt_strs+2480)
 /** Other options that appear in conjunction with the wait-sync option */
 static int const aWait_SyncCantList[] = {
     INDEX_OPT_NOFORK,
@@ -670,11 +670,11 @@ static int const aWait_SyncCantList[] = {
  *  slew option description:
  */
 /** Descriptive text for the slew option */
-#define SLEW_DESC      (ntpd_opt_strs+2482)
+#define SLEW_DESC      (ntpd_opt_strs+2490)
 /** Upper-cased name for the slew option */
-#define SLEW_NAME      (ntpd_opt_strs+2505)
+#define SLEW_NAME      (ntpd_opt_strs+2513)
 /** Name string for the slew option */
-#define SLEW_name      (ntpd_opt_strs+2510)
+#define SLEW_name      (ntpd_opt_strs+2518)
 /** Compiled in flag settings for the slew option */
 #define SLEW_FLAGS     (OPTST_DISABLED)
 
@@ -683,11 +683,11 @@ static int const aWait_SyncCantList[] = {
  */
 #ifdef SYS_WINNT
 /** Descriptive text for the usepcc option */
-#define USEPCC_DESC      (ntpd_opt_strs+2515)
+#define USEPCC_DESC      (ntpd_opt_strs+2523)
 /** Upper-cased name for the usepcc option */
-#define USEPCC_NAME      (ntpd_opt_strs+2552)
+#define USEPCC_NAME      (ntpd_opt_strs+2560)
 /** Name string for the usepcc option */
-#define USEPCC_name      (ntpd_opt_strs+2559)
+#define USEPCC_name      (ntpd_opt_strs+2567)
 /** Compiled in flag settings for the usepcc option */
 #define USEPCC_FLAGS     (OPTST_DISABLED)
 
@@ -703,11 +703,11 @@ static int const aWait_SyncCantList[] = {
  */
 #ifdef SYS_WINNT
 /** Descriptive text for the pccfreq option */
-#define PCCFREQ_DESC      (ntpd_opt_strs+2566)
+#define PCCFREQ_DESC      (ntpd_opt_strs+2574)
 /** Upper-cased name for the pccfreq option */
-#define PCCFREQ_NAME      (ntpd_opt_strs+2609)
+#define PCCFREQ_NAME      (ntpd_opt_strs+2617)
 /** Name string for the pccfreq option */
-#define PCCFREQ_name      (ntpd_opt_strs+2617)
+#define PCCFREQ_name      (ntpd_opt_strs+2625)
 /** Compiled in flag settings for the pccfreq option */
 #define PCCFREQ_FLAGS     (OPTST_DISABLED \
         | OPTST_SET_ARGTYPE(OPARG_TYPE_STRING))
@@ -724,11 +724,11 @@ static int const aWait_SyncCantList[] = {
  */
 #ifdef HAVE_DNSREGISTRATION
 /** Descriptive text for the mdns option */
-#define MDNS_DESC      (ntpd_opt_strs+2625)
+#define MDNS_DESC      (ntpd_opt_strs+2633)
 /** Upper-cased name for the mdns option */
-#define MDNS_NAME      (ntpd_opt_strs+2660)
+#define MDNS_NAME      (ntpd_opt_strs+2668)
 /** Name string for the mdns option */
-#define MDNS_name      (ntpd_opt_strs+2665)
+#define MDNS_name      (ntpd_opt_strs+2673)
 /** Compiled in flag settings for the mdns option */
 #define MDNS_FLAGS     (OPTST_DISABLED)
 
@@ -742,11 +742,11 @@ static int const aWait_SyncCantList[] = {
 /*
  *  Help/More_Help/Version option descriptions:
  */
-#define HELP_DESC       (ntpd_opt_strs+2670)
-#define HELP_name       (ntpd_opt_strs+2714)
+#define HELP_DESC       (ntpd_opt_strs+2678)
+#define HELP_name       (ntpd_opt_strs+2722)
 #ifdef HAVE_WORKING_FORK
-#define MORE_HELP_DESC  (ntpd_opt_strs+2719)
-#define MORE_HELP_name  (ntpd_opt_strs+2764)
+#define MORE_HELP_DESC  (ntpd_opt_strs+2727)
+#define MORE_HELP_name  (ntpd_opt_strs+2772)
 #define MORE_HELP_FLAGS (OPTST_IMM | OPTST_NO_INIT)
 #else
 #define MORE_HELP_DESC  HELP_DESC
@@ -759,8 +759,8 @@ static int const aWait_SyncCantList[] = {
 #  define VER_FLAGS     (OPTST_SET_ARGTYPE(OPARG_TYPE_STRING) | \
                          OPTST_ARG_OPTIONAL | OPTST_IMM | OPTST_NO_INIT)
 #endif
-#define VER_DESC        (ntpd_opt_strs+2774)
-#define VER_name        (ntpd_opt_strs+2810)
+#define VER_DESC        (ntpd_opt_strs+2782)
+#define VER_name        (ntpd_opt_strs+2818)
 /**
  *  Declare option callback procedures
  */
@@ -1230,21 +1230,21 @@ static tOptDesc optDesc[OPTION_CT] = {
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 /** Reference to the upper cased version of ntpd. */
-#define zPROGNAME       (ntpd_opt_strs+2818)
+#define zPROGNAME       (ntpd_opt_strs+2826)
 /** Reference to the title line for ntpd usage. */
-#define zUsageTitle     (ntpd_opt_strs+2823)
+#define zUsageTitle     (ntpd_opt_strs+2831)
 /** There is no ntpd configuration file. */
 #define zRcName         NULL
 /** There are no directories to search for ntpd config files. */
 #define apzHomeList     NULL
 /** The ntpd program bug email address. */
-#define zBugsAddr       (ntpd_opt_strs+2952)
+#define zBugsAddr       (ntpd_opt_strs+2968)
 /** Clarification/explanation of what ntpd does. */
-#define zExplain        (ntpd_opt_strs+2986)
+#define zExplain        (ntpd_opt_strs+3002)
 /** Extra detail explaining what ntpd does. */
 #define zDetail         (NULL)
 /** The full version string for ntpd. */
-#define zFullVersion    (ntpd_opt_strs+2988)
+#define zFullVersion    (ntpd_opt_strs+3004)
 /* extracted from optcode.tlib near line 364 */
 
 #if defined(ENABLE_NLS)
@@ -1501,7 +1501,7 @@ static void bogus_function(void) {
      translate option names.
    */
   /* referenced via ntpdOptions.pzCopyright */
-  puts(_("ntpd 4.2.8\n\
+  puts(_("ntpd 4.2.8p1-beta1\n\
 Copyright (C) 1970-2014 The University of Delaware, all rights reserved.\n\
 This is free software. It is licensed for use, modification and\n\
 redistribution under the terms of the NTP License, copies of which\n\
@@ -1638,7 +1638,7 @@ provided \"as is\" without express or implied warranty.\n"));
   puts(_("output version information and exit"));
 
   /* referenced via ntpdOptions.pzUsageTitle */
-  puts(_("ntpd - NTP daemon program - Ver. 4.2.8\n\
+  puts(_("ntpd - NTP daemon program - Ver. 4.2.8p1-beta1\n\
 Usage:  %s [ -<flag> [<val>] | --<name>[{=| }<val>] ]... \\\n\
 \t\t[ <server1> ... <serverN> ]\n"));
 
@@ -1646,7 +1646,7 @@ Usage:  %s [ -<flag> [<val>] | --<name>[{=| }<val>] ]... \\\n\
   puts(_("\n"));
 
   /* referenced via ntpdOptions.pzFullVersion */
-  puts(_("ntpd 4.2.8"));
+  puts(_("ntpd 4.2.8p1-beta1"));
 
   /* referenced via ntpdOptions.pzFullUsage */
   puts(_("<<<NOT-FOUND>>>"));
