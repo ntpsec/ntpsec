@@ -1,6 +1,6 @@
 ---
 
-* build: see if we have a C99 compiler (not yet required).
+* [Bug 2709] see if we have a C99 compiler (not yet required).
 ---
 (4.2.8p1-beta1) 2014/12/23 Released by Harlan Stenn <stenn@ntp.org>
 
