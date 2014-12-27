@@ -1,6 +1,7 @@
 ---
 
 * [Bug 2693] ntp-keygen doesn't build without OpenSSL and sntp.
+* [Bug 2707] Avoid a C90 extension in libjsmn/jsmn.c.
 * [Bug 2709] see if we have a C99 compiler (not yet required).
 ---
 (4.2.8p1-beta1) 2014/12/23 Released by Harlan Stenn <stenn@ntp.org>

@@ -110,6 +110,8 @@ static jsmnerr_t jsmn_parse_string(jsmn_parser *parser, const char *js,
 		if (c == '\\') {
 			parser->pos++;
 			switch (js[parser->pos]) {
+				int i = 0;
+
 				/* Allowed escaped symbols */
 				case '\"': case '/' : case '\\' : case 'b' :
 				case 'f' : case 'r' : case 'n'  : case 't' :
@@ -117,7 +119,6 @@ static jsmnerr_t jsmn_parse_string(jsmn_parser *parser, const char *js,
 				/* Allows escaped symbol \uXXXX */
 				case 'u':
 					parser->pos++;
-					int i = 0;
 					for(; i < 4 && js[parser->pos] != '\0'; i++) {
 						/* If it isn't a hex character we have an error */
 						if(!((js[parser->pos] >= 48 && js[parser->pos] <= 57) || /* 0-9 */
