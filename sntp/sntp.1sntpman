@@ -10,11 +10,11 @@
 .ds B-Font B
 .ds I-Font I
 .ds R-Font R
-.TH sntp 1sntpman "23 Dec 2014" "4.2.8p1-beta1" "User Commands"
+.TH sntp 1sntpman "27 Dec 2014" "4.2.8p1-beta2" "User Commands"
 .\"
-.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-f4ayjF/ag-F4aqiF)
+.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-r3aqjG/ag-U3aiiG)
 .\"
-.\" It has been AutoGen-ed December 23, 2014 at 04:49:44 PM by AutoGen 5.18.5pre4
+.\" It has been AutoGen-ed December 27, 2014 at 06:23:39 AM by AutoGen 5.18.5pre4
 .\" From the definitions sntp-opts.def
 .\" and the template file agman-cmd.tpl
 .SH NAME

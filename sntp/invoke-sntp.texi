@@ -6,7 +6,7 @@
 #
 # EDIT THIS FILE WITH CAUTION  (invoke-sntp.texi)
 #
-# It has been AutoGen-ed  December 23, 2014 at 04:49:48 PM by AutoGen 5.18.5pre4
+# It has been AutoGen-ed  December 27, 2014 at 06:23:43 AM by AutoGen 5.18.5pre4
 # From the definitions    sntp-opts.def
 # and the template file   agtexi-cmd.tpl
 @end ignore
@@ -100,7 +100,7 @@ with a status code of 0.
 
 @exampleindent 0
 @example
-sntp - standard Simple Network Time Protocol client program - Ver. 4.2.8p1-beta1
+sntp - standard Simple Network Time Protocol client program - Ver. 4.2.8p1-beta2
 Usage:  sntp [ -<flag> [<val>] | --<name>[@{=| @}<val>] ]... \
                 [ hostname-or-IP ...]
   Flg Arg Option-Name    Description
