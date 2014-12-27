@@ -58,13 +58,14 @@ DIST_SUBDIRS = include scripts
 
 if BUILD_SNTP
 noinst_LIBRARIES = libsntp.a
-if BUILD_LIBEVENT
-SUBDIRS += libevent
-DIST_SUBDIRS += libevent
-endif
 if GTEST_AVAILABLE
 SUBDIRS += tests
 endif
+endif
+
+if BUILD_LIBEVENT
+SUBDIRS += libevent
+DIST_SUBDIRS += libevent
 endif
 
 if NEED_LIBOPTS
