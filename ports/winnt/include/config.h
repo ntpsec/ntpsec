@@ -258,6 +258,7 @@ typedef int socklen_t;
 
 /* Enable OpenSSL */
 #define OPENSSL 1
+#define USE_OPENSSL_CRYPTO_RAND 1
 
 /*
  * Keywords and functions that Microsoft maps
