@@ -56,13 +56,6 @@ sbin_PROGRAMS =		@SNTP_DS@
 SUBDIRS = include scripts
 DIST_SUBDIRS = include scripts
 
-if BUILD_SNTP
-noinst_LIBRARIES = libsntp.a
-if GTEST_AVAILABLE
-SUBDIRS += tests
-endif
-endif
-
 if BUILD_LIBEVENT
 SUBDIRS += libevent
 DIST_SUBDIRS += libevent
@@ -70,6 +63,13 @@ endif
 
 if NEED_LIBOPTS
 SUBDIRS += libopts
+endif
+
+if BUILD_SNTP
+noinst_LIBRARIES = libsntp.a
+if GTEST_AVAILABLE
+SUBDIRS += tests
+endif
 endif
 
 DIST_SUBDIRS += libopts tests
