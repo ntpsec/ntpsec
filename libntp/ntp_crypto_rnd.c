@@ -22,9 +22,9 @@
 #include <openssl/rand.h>
 
 int crypto_rand_init = 0;
-#endif
+#else
 
-#ifndef HAVE_ARC4RANDOM_BUF
+# ifndef HAVE_ARC4RANDOM_BUF
 static void
 arc4random_buf(void *buf, size_t nbytes);
 
@@ -37,6 +37,7 @@ arc4random_buf(void *buf, size_t nbytes)
 	evutil_secure_rng_get_bytes(buf, nbytes);
 	return;
 }
+# endif
 #endif
 
 /*
@@ -100,6 +101,7 @@ ntp_crypto_random_buf(
 		err = ERR_get_error();
 		err_str = ERR_error_string(err, NULL);
 		/* XXX: Log the error */
+		(void)&err_str;
 
 		return -1;
 	}

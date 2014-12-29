@@ -1,4 +1,7 @@
 ---
+
+* [Bug 2713] variable type/cast, parameter name, general cleanup from NetBSD.
+---
 (4.2.8p1-beta2) 2014/12/27 Released by Harlan Stenn <stenn@ntp.org>
 
 * [Bug 2674] Install sntp in sbin on NetBSD.

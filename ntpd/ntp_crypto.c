@@ -423,7 +423,6 @@ crypto_recv(
 	int	has_mac;	/* length of MAC field */
 	int	authlen;	/* offset of MAC field */
 	associd_t associd;	/* association ID */
-	tstamp_t tstamp = 0;	/* timestamp */
 	tstamp_t fstamp = 0;	/* filestamp */
 	u_int	len;		/* extension field length */
 	u_int	code;		/* extension field opcode */
@@ -448,7 +447,7 @@ crypto_recv(
 	 */
 	authlen = LEN_PKT_NOMAC;
 	hismode = (int)PKT_MODE((&rbufp->recv_pkt)->li_vn_mode);
-	while ((has_mac = rbufp->recv_length - authlen) > MAX_MAC_LEN) {
+	while ((has_mac = rbufp->recv_length - authlen) > (int)MAX_MAC_LEN) {
 		pkt = (u_int32 *)&rbufp->recv_pkt + authlen / 4;
 		ep = (struct exten *)pkt;
 		code = ntohl(ep->opcode) & 0xffff0000;
@@ -474,7 +473,6 @@ crypto_recv(
 		}
 
 		if (len >= VALUE_LEN) {
-			tstamp = ntohl(ep->tstamp);
 			fstamp = ntohl(ep->fstamp);
 			vallen = ntohl(ep->vallen);
 		}
@@ -1755,7 +1753,7 @@ crypto_send(
 	)
 {
 	u_int	len, vallen, siglen, opcode;
-	int	i, j;
+	u_int	i, j;
 
 	/*
 	 * Calculate extension field length and check for buffer
@@ -1783,7 +1781,7 @@ crypto_send(
 	i = 0;
 	if (vallen > 0 && vp->ptr != NULL) {
 		j = vallen / 4;
-		if (j * 4 < (int)vallen)
+		if (j * 4 < vallen)
 			ep->pkt[i + j++] = 0;
 		memcpy(&ep->pkt[i], vp->ptr, vallen);
 		i += j;
@@ -1796,7 +1794,7 @@ crypto_send(
 	ep->pkt[i++] = vp->siglen;
 	if (siglen > 0 && vp->sig != NULL) {
 		j = siglen / 4;
-		if (j * 4 < (int)siglen)
+		if (j * 4 < siglen)
 			ep->pkt[i + j++] = 0;
 		memcpy(&ep->pkt[i], vp->sig, siglen);
 		i += j;
@@ -1956,7 +1954,7 @@ asn_to_calendar	(
 	struct calendar *pjd	/* pointer to result */
 	)
 {
-	int	len;		/* length of ASN1_TIME string */
+	size_t	len;		/* length of ASN1_TIME string */
 	char	v[24];		/* writable copy of ASN1_TIME string */
 	unsigned long	temp;	/* result from strtoul */
 
@@ -3058,7 +3056,7 @@ cert_sign(
 	X509_gmtime_adj(X509_get_notAfter(cert), YEAR);
 	subj = X509_get_issuer_name(cert);
 	X509_NAME_add_entry_by_txt(subj, "commonName", MBSTRING_ASC,
-	    hostval.ptr, strlen(hostval.ptr), -1, 0);
+	    hostval.ptr, strlen((const char *)hostval.ptr), -1, 0);
 	subj = X509_get_subject_name(req);
 	X509_set_subject_name(cert, subj);
 	X509_set_pubkey(cert, pkey);
@@ -3099,7 +3097,7 @@ cert_sign(
 	vp->vallen = htonl(len);
 	vp->ptr = emalloc(len);
 	ptr = vp->ptr;
-	i2d_X509(cert, &ptr);
+	i2d_X509(cert, (unsigned char **)(intptr_t)&ptr);
 	vp->siglen = 0;
 	if (tstamp != 0) {
 		vp->sig = emalloc(sign_siglen);
@@ -3431,7 +3429,7 @@ cert_parse(
 		/*
 		 * Check for a certificate loop.
 		 */
-		if (strcmp(hostval.ptr, ret->issuer) == 0) {
+		if (strcmp((const char *)hostval.ptr, ret->issuer) == 0) {
 			msyslog(LOG_NOTICE,
 			    "cert_parse: certificate trail loop %s",
 			    ret->subject);

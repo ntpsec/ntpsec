@@ -9,7 +9,7 @@
 static jsmntok_t *jsmn_alloc_token(jsmn_parser *parser, 
 		jsmntok_t *tokens, size_t num_tokens) {
 	jsmntok_t *tok;
-	if (parser->toknext >= num_tokens) {
+	if ((size_t)parser->toknext >= num_tokens) {
 		return NULL;
 	}
 	tok = &tokens[parser->toknext++];
@@ -108,10 +108,10 @@ static jsmnerr_t jsmn_parse_string(jsmn_parser *parser, const char *js,
 
 		/* Backslash: Quoted symbol expected */
 		if (c == '\\') {
+			int i = 0;
+
 			parser->pos++;
 			switch (js[parser->pos]) {
-				int i = 0;
-
 				/* Allowed escaped symbols */
 				case '\"': case '/' : case '\\' : case 'b' :
 				case 'f' : case 'r' : case 'n'  : case 't' :

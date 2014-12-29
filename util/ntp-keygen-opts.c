@@ -1047,7 +1047,7 @@ doOptImbits(tOptions* pOptions, tOptDesc* pOptDesc)
     option_usage_fp = stderr;
 
  emit_ranges:
-    optionShowRange(pOptions, pOptDesc, (void *)rng, 1);
+    optionShowRange(pOptions, pOptDesc, rng, 1);
 }
 #endif /* defined AUTOKEY */
 
@@ -1106,7 +1106,7 @@ doOptModulus(tOptions* pOptions, tOptDesc* pOptDesc)
     option_usage_fp = stderr;
 
  emit_ranges:
-    optionShowRange(pOptions, pOptDesc, (void *)rng, 1);
+    optionShowRange(pOptions, pOptDesc, rng, 1);
 }
 #endif /* defined AUTOKEY */
 /* extracted from optmain.tlib near line 1245 */

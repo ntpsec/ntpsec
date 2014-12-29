@@ -933,7 +933,7 @@ doOptSteplimit(tOptions* pOptions, tOptDesc* pOptDesc)
     option_usage_fp = stderr;
 
  emit_ranges:
-    optionShowRange(pOptions, pOptDesc, (void *)rng, 1);
+    optionShowRange(pOptions, pOptDesc, (void *)(intptr_t)rng, 1);
 }
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -969,7 +969,7 @@ doOptNtpversion(tOptions* pOptions, tOptDesc* pOptDesc)
     option_usage_fp = stderr;
 
  emit_ranges:
-    optionShowRange(pOptions, pOptDesc, (void *)rng, 1);
+    optionShowRange(pOptions, pOptDesc, (void *)(intptr_t)rng, 1);
 }
 /* extracted from optmain.tlib near line 1245 */
 
