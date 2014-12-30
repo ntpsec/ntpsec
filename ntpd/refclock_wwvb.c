@@ -154,8 +154,7 @@ static	void	wwvb_control	(int, const struct refclockstat *,
 				 struct refclockstat *, struct peer *);
 #define		WWVB_CONTROL	wwvb_control
 #else
-#define		WWVB_CONTROL	(void)(*)
-noentry
+#define		WWVB_CONTROL	noentry
 #endif /* HAVE_PPSAPI */
 
 /*
