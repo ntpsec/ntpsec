@@ -1484,6 +1484,33 @@ ctl_putuint(
 }
 
 /*
+ * ctl_putcal - write a decoded calendar data into the response
+ */
+static void
+ctl_putcal(
+	const char *tag,
+	const struct calendar *pcal
+	)
+{
+	char buffer[100];
+	unsigned numch;
+
+	numch = snprintf(buffer, sizeof(buffer),
+			"%s=%04d%02d%02d%02d%02d",
+			tag,
+			pcal->year,
+			pcal->month,
+			pcal->monthday,
+			pcal->hour,
+			pcal->minute
+			);
+	NTP_INSIST(numch < sizeof(buffer));
+	ctl_putdata(buffer, numch, 0);
+
+	return;
+}
+
+/*
  * ctl_putfs - write a decoded filestamp into the response
  */
 static void
@@ -2331,14 +2358,11 @@ ctl_putsys(
 
 	case CS_CERTIF:
 		for (cp = cinfo; cp != NULL; cp = cp->link) {
-			tstamp_t tstamp;
-
 			snprintf(str, sizeof(str), "%s %s 0x%x",
 			    cp->subject, cp->issuer, cp->flags);
 			ctl_putstr(sys_var[CS_CERTIF].text, str,
 			    strlen(str));
-			tstamp = caltontp(&(cp->last)); /* XXX too small to hold some values, but that's what ctl_putfs requires */
-			ctl_putfs(sys_var[CS_REVTIME].text, tstamp);
+			ctl_putcal(sys_var[CS_REVTIME].text, &(cp->last));
 		}
 		break;
 

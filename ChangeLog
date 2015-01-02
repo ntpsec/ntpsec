@@ -1,5 +1,7 @@
 ---
 
+* [Bug 2681] Fix display of certificate EOValidity dates on 32-bit systems.
+* [Bug 2695] 4.2.8 does not build on Windows.
 * [Bug 2706] libparse/info_trimble.c build dependencies are broken.
 * [Bug 2713] variable type/cast, parameter name, general cleanup from NetBSD.
 * [Bug 2714] libevent may need to be built independently of any build of sntp.
