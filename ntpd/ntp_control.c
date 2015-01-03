@@ -780,6 +780,7 @@ static int	res_offset;	/* offset of payload in response */
 static u_char * datapt;
 static u_char * dataend;
 static int	datalinelen;
+static int	datasent;       /* flag to avoid initial ", " */
 static int	datanotbinflag;
 static sockaddr_u *rmt_addr;
 static struct interface *lcl_inter;
@@ -1065,6 +1066,7 @@ process_control(
 	req_count = (int)ntohs(pkt->count);
 	datanotbinflag = FALSE;
 	datalinelen = 0;
+	datasent = 0;
 	datapt = rpkt.u.data;
 	dataend = &rpkt.u.data[CTL_MAX_DATA_LEN];
 
@@ -1324,7 +1326,7 @@ ctl_putdata(
 	if (!bin) {
 		datanotbinflag = TRUE;
 		overhead = 3;
-		if (datapt != rpkt.u.data) {
+		if (datasent) {
 			*datapt++ = ',';
 			datalinelen++;
 			if ((dlen + datalinelen + 1) >= MAXDATALINELEN) {
@@ -1360,6 +1362,7 @@ ctl_putdata(
 	memcpy(datapt, dp, dlen);
 	datapt += dlen;
 	datalinelen += dlen;
+	datasent = TRUE;
 }
 
 
