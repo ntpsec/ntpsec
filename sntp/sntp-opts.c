@@ -1,7 +1,7 @@
 /*
  *  EDIT THIS FILE WITH CAUTION  (sntp-opts.c)
  *
- *  It has been AutoGen-ed  December 27, 2014 at 06:23:08 AM by AutoGen 5.18.5pre4
+ *  It has been AutoGen-ed  January  2, 2015 at 10:56:46 PM by AutoGen 5.18.5pre4
  *  From the definitions    sntp-opts.def
  *  and the template file   options
  *
@@ -70,7 +70,7 @@ extern FILE * option_usage_fp;
  *  static const strings for sntp options
  */
 static char const sntp_opt_strs[2511] =
-/*     0 */ "sntp 4.2.8p1-beta2\n"
+/*     0 */ "sntp 4.2.8p1-beta3\n"
             "Copyright (C) 1970-2014 The University of Delaware, all rights reserved.\n"
             "This is free software. It is licensed for use, modification and\n"
             "redistribution under the terms of the NTP License, copies of which\n"
@@ -154,7 +154,7 @@ static char const sntp_opt_strs[2511] =
 /*  2248 */ "LOAD_OPTS\0"
 /*  2258 */ "no-load-opts\0"
 /*  2271 */ "SNTP\0"
-/*  2276 */ "sntp - standard Simple Network Time Protocol client program - Ver. 4.2.8p1-beta2\n"
+/*  2276 */ "sntp - standard Simple Network Time Protocol client program - Ver. 4.2.8p1-beta3\n"
             "Usage:  %s [ -<flag> [<val>] | --<name>[{=| }<val>] ]... \\\n"
             "\t\t[ hostname-or-IP ...]\n\0"
 /*  2441 */ "$HOME\0"
@@ -162,7 +162,7 @@ static char const sntp_opt_strs[2511] =
 /*  2449 */ ".ntprc\0"
 /*  2456 */ "http://bugs.ntp.org, bugs@ntp.org\0"
 /*  2490 */ "\n\0"
-/*  2492 */ "sntp 4.2.8p1-beta2";
+/*  2492 */ "sntp 4.2.8p1-beta3";
 
 /**
  *  ipv4 option description with
@@ -933,7 +933,7 @@ doOptSteplimit(tOptions* pOptions, tOptDesc* pOptDesc)
     option_usage_fp = stderr;
 
  emit_ranges:
-    optionShowRange(pOptions, pOptDesc, (void *)(intptr_t)rng, 1);
+    optionShowRange(pOptions, pOptDesc, (void *)rng, 1);
 }
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -969,7 +969,7 @@ doOptNtpversion(tOptions* pOptions, tOptDesc* pOptDesc)
     option_usage_fp = stderr;
 
  emit_ranges:
-    optionShowRange(pOptions, pOptDesc, (void *)(intptr_t)rng, 1);
+    optionShowRange(pOptions, pOptDesc, (void *)rng, 1);
 }
 /* extracted from optmain.tlib near line 1245 */
 
@@ -1170,7 +1170,7 @@ static void bogus_function(void) {
      translate option names.
    */
   /* referenced via sntpOptions.pzCopyright */
-  puts(_("sntp 4.2.8p1-beta2\n\
+  puts(_("sntp 4.2.8p1-beta3\n\
 Copyright (C) 1970-2014 The University of Delaware, all rights reserved.\n\
 This is free software. It is licensed for use, modification and\n\
 redistribution under the terms of the NTP License, copies of which\n\
@@ -1259,7 +1259,7 @@ provided \"as is\" without express or implied warranty.\n"));
   puts(_("load options from a config file"));
 
   /* referenced via sntpOptions.pzUsageTitle */
-  puts(_("sntp - standard Simple Network Time Protocol client program - Ver. 4.2.8p1-beta2\n\
+  puts(_("sntp - standard Simple Network Time Protocol client program - Ver. 4.2.8p1-beta3\n\
 Usage:  %s [ -<flag> [<val>] | --<name>[{=| }<val>] ]... \\\n\
 \t\t[ hostname-or-IP ...]\n"));
 
@@ -1267,7 +1267,7 @@ Usage:  %s [ -<flag> [<val>] | --<name>[{=| }<val>] ]... \\\n\
   puts(_("\n"));
 
   /* referenced via sntpOptions.pzFullVersion */
-  puts(_("sntp 4.2.8p1-beta2"));
+  puts(_("sntp 4.2.8p1-beta3"));
 
   /* referenced via sntpOptions.pzFullUsage */
   puts(_("<<<NOT-FOUND>>>"));
