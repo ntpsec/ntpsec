@@ -920,7 +920,8 @@ do_leap_hash(
 	/* now do the byte twiddle */
 	for (wi=0; wi < 5; ++wi)
 		for (di=3; di >= 0; --di) {
-			mac->hv[wi*4 + di] = (unsigned char)tmp[wi];
+			mac->hv[wi*4 + di] =
+				(unsigned char)(tmp[wi] & 0x0FF);
 			tmp[wi] >>= 8;
 		}
 	return TRUE;

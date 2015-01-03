@@ -1,5 +1,8 @@
 ---
 
+* [Bug 2627] shm refclock allows only two units with owner-only access
+  Use mode bit 0 to select public access for units >= 2 (units 0 & 1 are
+  always private.
 * [Bug 2681] Fix display of certificate EOValidity dates on 32-bit systems.
 * [Bug 2695] 4.2.8 does not build on Windows.
 * [bug 2700] mrulist stopped working in 4.2.8.
