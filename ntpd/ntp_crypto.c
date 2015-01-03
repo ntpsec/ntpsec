@@ -1194,7 +1194,8 @@ crypto_xmit(
 	 */
 	case CRYPTO_CERT | CRYPTO_RESP:
 		vallen = ntohl(ep->vallen);
-		if (vallen == 0 || vallen > MAXHOSTNAME) {
+		if (vallen == 0 || vallen > MAXHOSTNAME ||
+		    len < VALUE_LEN + vallen) {
 			rval = XEVNT_LEN;
 			break;
 		}
@@ -1344,7 +1345,9 @@ crypto_xmit(
 	 * anything goes wrong.
 	 */
 	case CRYPTO_COOK | CRYPTO_RESP:
-		if ((opcode & 0xffff) < VALUE_LEN) {
+		vallen = ntohl(ep->vallen);
+		if (vallen == 0
+		    || (opcode & 0x0000ffff)  < VALUE_LEN + vallen) {
 			rval = XEVNT_LEN;
 			break;
 		}
@@ -2165,7 +2168,8 @@ crypto_bob(
 	tstamp_t tstamp;	/* NTP timestamp */
 	BIGNUM	*bn, *bk, *r;
 	u_char	*ptr;
-	u_int	len;
+	u_int	len;		/* extension field length */
+	u_int	vallen = 0;	/* value length */
 
 	/*
 	 * If the IFF parameters are not valid, something awful
@@ -2180,8 +2184,11 @@ crypto_bob(
 	/*
 	 * Extract r from the challenge.
 	 */
-	len = ntohl(ep->vallen);
-	if ((r = BN_bin2bn((u_char *)ep->pkt, len, NULL)) == NULL) {
+	vallen = ntohl(ep->vallen);
+	len = ntohl(ep->opcode) & 0x0000ffff;
+	if (vallen == 0 || len < VALUE_LEN + vallen)
+		return XEVNT_LEN;
+	if ((r = BN_bin2bn((u_char *)ep->pkt, vallen, NULL)) == NULL) {
 		msyslog(LOG_ERR, "crypto_bob: %s",
 		    ERR_error_string(ERR_get_error(), NULL));
 		return (XEVNT_ERR);
@@ -2193,7 +2200,7 @@ crypto_bob(
 	 */
 	bctx = BN_CTX_new(); bk = BN_new(); bn = BN_new();
 	sdsa = DSA_SIG_new();
-	BN_rand(bk, len * 8, -1, 1);		/* k */
+	BN_rand(bk, vallen * 8, -1, 1);		/* k */
 	BN_mod_mul(bn, dsa->priv_key, r, dsa->q, bctx); /* b r mod q */
 	BN_add(bn, bn, bk);
 	BN_mod(bn, bn, dsa->q, bctx);		/* k + b r mod q */
@@ -2212,8 +2219,8 @@ crypto_bob(
 	 * Encode the values in ASN.1 and sign. The filestamp is from
 	 * the local file.
 	 */
-	len = i2d_DSA_SIG(sdsa, NULL);
-	if (len == 0) {
+	vallen = i2d_DSA_SIG(sdsa, NULL);
+	if (vallen == 0) {
 		msyslog(LOG_ERR, "crypto_bob: %s",
 		    ERR_error_string(ERR_get_error(), NULL));
 		DSA_SIG_free(sdsa);
@@ -2223,8 +2230,8 @@ crypto_bob(
 	tstamp = crypto_time();
 	vp->tstamp = htonl(tstamp);
 	vp->fstamp = htonl(iffkey_info->fstamp);
-	vp->vallen = htonl(len);
-	ptr = emalloc(len);
+	vp->vallen = htonl(vallen);
+	ptr = emalloc(vallen);
 	vp->ptr = ptr;
 	i2d_DSA_SIG(sdsa, &ptr);
 	DSA_SIG_free(sdsa);
@@ -2234,8 +2241,8 @@ crypto_bob(
 	vp->sig = emalloc(sign_siglen);
 	EVP_SignInit(&ctx, sign_digest);
 	EVP_SignUpdate(&ctx, (u_char *)&vp->tstamp, 12);
-	EVP_SignUpdate(&ctx, vp->ptr, len);
-	if (EVP_SignFinal(&ctx, vp->sig, &len, sign_pkey))
+	EVP_SignUpdate(&ctx, vp->ptr, vallen);
+	if (EVP_SignFinal(&ctx, vp->sig, &vallen, sign_pkey))
 		vp->siglen = htonl(sign_siglen);
 	return (XEVNT_OK);
 }
