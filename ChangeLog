@@ -1,6 +1,7 @@
 ---
 
-* [Bug 2715]  mdnstries option for ntp.conf from NetBSD.
+* [Bug 2695] Build problem on Windows (sys/socket.h).
+* [Bug 2715] mdnstries option for ntp.conf from NetBSD.
 ---
 (4.2.8p1-beta3) 2015/01/02 Released by Harlan Stenn <stenn@ntp.org>
 
@@ -13,7 +14,7 @@
 * [Bug 2706] libparse/info_trimble.c build dependencies are broken.
 * [Bug 2713] variable type/cast, parameter name, general cleanup from NetBSD.
 * [Bug 2714] libevent may need to be built independently of any build of sntp.
-* [Bug 2715]  mdnstries option for ntp.conf from NetBSD.
+* [Bug 2715] mdnstries option for ntp.conf from NetBSD.
 ---
 (4.2.8p1-beta2) 2014/12/27 Released by Harlan Stenn <stenn@ntp.org>
 
@@ -55,7 +56,7 @@
 * [Bug 2314] Kernel PPS binding EOPNOTSUPP is a failure condition. 
 * Rename pps_enable to hardpps_enable.
 (4.2.7p480) 2014/11/21 Released by Harlan Stenn <stenn@ntp.org>
-* [Bug 2677] PATH_MAX isn't #define'd  under Windows.
+* [Bug 2677] PATH_MAX isn't #define'd under Windows.
   Regression from the patch fixing Bug 2639.
 (4.2.7p479) 2014/11/15 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 2651] Certificates with ASN timestamps w/ 4-digit years mis-parsed.
