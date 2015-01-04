@@ -1,4 +1,5 @@
 ---
+(4.2.8p1-beta4) 2015/01/04 Released by Harlan Stenn <stenn@ntp.org>
 
 * Fix a regression introduced to timepps-Solaris.h as part of:
   [Bug 1206] Required compiler changes for Windows
