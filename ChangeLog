@@ -1,5 +1,9 @@
 ---
 
+* Fix a regression introduced to timepps-Solaris.h as part of:
+  [Bug 1206] Required compiler changes for Windows
+  (4.2.5p181) 2009/06/06
+* [Bug 1084] PPSAPI for ntpd on Windows with DLL backends
 * [Bug 2695] Build problem on Windows (sys/socket.h).
 * [Bug 2715] mdnstries option for ntp.conf from NetBSD.
 ---
