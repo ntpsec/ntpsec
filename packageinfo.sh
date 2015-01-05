@@ -48,20 +48,24 @@
 repotype=dev
 
 # post-4.2.8:
-# version=Major.Minor
+# version=Protocol.Minor (.Point is added later)
 # 4.2.8 and before:
 # version=Protocol.Major.Minor
 # odd minor numbers are for -dev, even minor numbers are for -stable
+#
+# ** new format only tracks the major number for output style
+# ** The minor number becomes the "release" number.
+#
 # UpdatePoint will fail if repotype is inconsistent with minor.
 proto=4
 major=4
-minor=9
+minor=3
 
 case "${proto}.${major}" in
  4.[012])
     version=${proto}.${major}.${minor}
     ;;
- *) version=${major}.${minor}
+ *) version=${proto}.${minor}
     ;;
 esac
 
@@ -76,7 +80,7 @@ prerelease=
 CLTAG=NTP_4_2_0
 
 ### post-4.2.8:
-### Point number, after "major.minor.", normally modified by script.
+### Point number, after "proto.minor.", normally modified by script.
 ### 4.2.8 and before:
 ### Point number, after "p", normally modified by script.
 # 3 cases:
