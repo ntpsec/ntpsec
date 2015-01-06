@@ -1,3 +1,5 @@
+* [Bug 2728] Work around C99-style structure initialization code
+  for older compilers, specifically Visual Studio prior to VS2013.
 * [Bug 2695] Windows build: __func__ not supported under Windows.
 ---
 (4.2.8p1-beta4) 2015/01/04 Released by Harlan Stenn <stenn@ntp.org>
