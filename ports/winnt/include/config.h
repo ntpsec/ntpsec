@@ -300,9 +300,13 @@ typedef int socklen_t;
 #define getpid		_getpid
 #define timegm		_mkgmtime
 #define errno_to_str	isc__strerror
+/*
+ * symbol returning the name of the current function
+ */
+#define __func__	__FUNCTION__
 
 typedef int pid_t;		/* PID is an int */
-typedef int ssize_t;		/* ssize is an int */
+typedef int ssize_t;	/* ssize is an int */
 
 /*
  * Map the stream to the file number
