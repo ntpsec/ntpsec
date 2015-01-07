@@ -300,9 +300,13 @@ typedef int socklen_t;
 #define getpid		_getpid
 #define timegm		_mkgmtime
 #define errno_to_str	isc__strerror
+/*
+ * symbol returning the name of the current function
+ */
+#define __func__	__FUNCTION__
 
 typedef int pid_t;		/* PID is an int */
-typedef int ssize_t;		/* ssize is an int */
+typedef int ssize_t;	/* ssize is an int */
 
 /*
  * Map the stream to the file number
@@ -453,6 +457,7 @@ typedef unsigned long uintptr_t;
 #if defined(_MSC_VER) && _MSC_VER<1800
 # define MISSING_INTTYPES_H         1  /* not provided by VS2012 and earlier */
 # define MISSING_STDBOOL_H          1  /* not provided by VS2012 and earlier */
+# define MISSING_C99_STYLE_INIT     1  /* see [Bug 2728] */
 #else
 #if defined(_MSC_VER) && _MSC_VER>=1800
 /* VS2013 and above support C99 types */

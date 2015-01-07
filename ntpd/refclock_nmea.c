@@ -29,7 +29,9 @@
 #include <sys/stat.h>
 #include <stdio.h>
 #include <ctype.h>
+#ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
+#endif
 
 #include "ntpd.h"
 #include "ntp_io.h"

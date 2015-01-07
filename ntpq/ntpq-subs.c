@@ -330,8 +330,11 @@ typedef struct var_display_collection_tag {
 		l_fp		lfp;	/* NTP_LFP */
 	} v;				/* retrieved value */
 } vdc;
-#define VDC_INIT(a, b, c) { .tag = a, .display = b, .type = c }
-
+#if !defined(MISSING_C99_STYLE_INIT)
+# define VDC_INIT(a, b, c) { .tag = a, .display = b, .type = c }
+#else
+# define VDC_INIT(a, b, c) { a, b, c }
+#endif
 /*
  * other local function prototypes
  */
