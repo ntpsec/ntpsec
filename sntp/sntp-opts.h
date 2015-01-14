@@ -1,7 +1,7 @@
 /*
  *  EDIT THIS FILE WITH CAUTION  (sntp-opts.h)
  *
- *  It has been AutoGen-ed  December 27, 2014 at 06:23:07 AM by AutoGen 5.18.5pre4
+ *  It has been AutoGen-ed  January 14, 2015 at 10:27:38 AM by AutoGen 5.18.5pre4
  *  From the definitions    sntp-opts.def
  *  and the template file   options
  *
@@ -18,22 +18,14 @@
  * The sntp program is copyrighted and licensed
  * under the following terms:
  *
- *  Copyright (C) 1970-2014 The University of Delaware, all rights reserved.
+ *  Copyright (C) 1992-2015 The University of Delaware and Network Time Foundation, all rights reserved.
  *  This is free software. It is licensed for use, modification and
  *  redistribution under the terms of the NTP License, copies of which
  *  can be seen at:
  *    <http://ntp.org/license>
  *    <http://opensource.org/licenses/ntp-license.php>
  *
- *  Permission to use, copy, modify, and distribute this software and its
- *  documentation for any purpose with or without fee is hereby granted,
- *  provided that the above copyright notice appears in all copies and that
- *  both the copyright notice and this permission notice appear in
- *  supporting documentation, and that the name The University of Delaware not be used in
- *  advertising or publicity pertaining to distribution of the software
- *  without specific, written prior permission. The University of Delaware makes no
- *  representations about the suitability this software for any purpose. It
- *  is provided "as is" without express or implied warranty.
+GRONK: OWNER
  */
 /**
  *  This file contains the programmatic interface to the Automated

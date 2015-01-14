@@ -1,9 +1,9 @@
-.Dd December 27 2014
+.Dd January 14 2015
 .Dt NTPDC @NTPDC_MS@ User Commands
 .Os
 .\"  EDIT THIS FILE WITH CAUTION  (ntpdc-opts.mdoc)
 .\"
-.\"  It has been AutoGen-ed  December 27, 2014 at 06:31:47 AM by AutoGen 5.18.5pre4
+.\"  It has been AutoGen-ed  January 14, 2015 at 10:47:22 AM by AutoGen 5.18.5pre6
 .\"  From the definitions    ntpdc-opts.def
 .\"  and the template file   agmdoc-cmd.tpl
 .Sh NAME
@@ -787,8 +787,17 @@ it to autogen\-users@lists.sourceforge.net.  Thank you.
 .Sh AUTHORS
 The formatting directives in this document came from FreeBSD.
 .Sh "COPYRIGHT"
-Copyright (C) 1970\-2014 The University of Delaware all rights reserved.
-This program is released under the terms of the NTP license, <http://ntp.org/license>.
+Copyright (C) 1992\-2015 The University of Delaware and Network Time Foundation all rights reserved.
+This program is released under the terms of <PFX>Permission to use, copy, modify, and distribute this software and its
+<PFX>documentation for any purpose with or without fee is hereby granted,
+<PFX>provided that the above copyright notice appears in all copies and that
+<PFX>both the copyright notice and this permission notice appear in
+<PFX>supporting documentation, and that the name The Universidy of Delaware not be used in
+<PFX>advertising or publicity pertaining to distribution of the software
+<PFX>without specific, written prior permission. <owner> makes no
+<PFX>representations about the suitability this software for any purpose. It
+<PFX>is provided "as is" without express or implied warranty.
+the NTP license, <http://ntp.org/license>.
 .Sh BUGS
 The
 .Nm
