@@ -1,4 +1,7 @@
 ---
+
+* Copyright update.
+---
 (4.2.8p1-beta5) 2015/01/07 Released by Harlan Stenn <stenn@ntp.org>
 
 * [Bug 2728] Work around C99-style structure initialization code
