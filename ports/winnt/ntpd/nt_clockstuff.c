@@ -68,8 +68,8 @@ BOOL init_randfile();
 static long last_Adj = 0;
 
 #define LS_CORR_INTV_SECS  2   /* seconds to apply leap second correction */
-#define LS_CORR_INTV   ( (LONGLONG) HECTONANOSECONDS * LS_CORR_INTV_SECS )  
-#define LS_CORR_LIMIT  ( (LONGLONG) HECTONANOSECONDS / 2 )  // half a second
+#define LS_CORR_INTV   ( 1000ul * LS_CORR_INTV_SECS )  
+#define LS_CORR_LIMIT  ( 250ul )  // quarter second
 
 typedef union ft_ull {
 	FILETIME ft;
@@ -81,8 +81,6 @@ typedef union ft_ull {
 /* leap second stuff */
 static FT_ULL ls_ft;
 static DWORD ls_time_adjustment;
-static ULONGLONG ls_ref_perf_cnt;
-static LONGLONG ls_elapsed;
 
 static BOOL winnt_time_initialized = FALSE;
 static BOOL winnt_use_interpolation = FALSE;
@@ -469,13 +467,15 @@ adj_systime(
         /* ntp time scale origin as ticks since 1601-01-01 */
         static const ULONGLONG HNS_JAN_1900 = 94354848000000000ull;
 
+	static DWORD ls_start_tick; /* start of slew in 1ms ticks */
+
 	static double	adjtime_carry;
 	double		dtemp;
 	u_char		isneg;
 	BOOL		rc;
 	long		TimeAdjustment;
 	SYSTEMTIME	st;
-	ULONGLONG	this_perf_count;
+	DWORD		ls_elapsed;
 	FT_ULL		curr_ft;
         leap_result_t   lsi;
 
@@ -542,7 +542,8 @@ adj_systime(
                                 /* A leap second insert is scheduled at the end
                                  * of the day. Since we have not yet computed the
                                  * time stamp, do it now. Signal electric mode
-                                 * for this insert.
+                                 * for this insert. We start processing 1 second early
+				 * because we want to slew over 2 seconds.
                                  */
                                 ls_ft.ull = lsi.ttime.Q_s * HECTONANOSECONDS
                                           + HNS_JAN_1900;
@@ -552,6 +553,10 @@ adj_systime(
 				        "for %04d-%02d-%02d %02d:%02d:%02d UTC",
 				        st.wYear, st.wMonth, st.wDay,
 				        st.wHour, st.wMinute, st.wSecond);
+				/* slew starts with last second before insertion!
+				 * And we have to tell the core that we deal with it.
+				 */
+                                ls_ft.ull -= HECTONANOSECONDS;
                                 leapsec_electric(TRUE);
                         } else if (lsi.tai_diff < 0) {
                                 /* Do not handle negative leap seconds here. If this
@@ -574,29 +579,29 @@ adj_systime(
 
 	/*
 	 * If the time stamp for the next leap second has been set
-	 * then check if the leap second must be handled
+	 * then check if the leap second must be handled. We use
+	 * free-running milliseconds from 'GetTickCount()', which
+	 * is documented as not affected by clock and/or speed
+	 * adjustments.
 	 */
 	if (ls_ft.ull != 0) {
-		this_perf_count = perf_ctr();
-
 		if (0 == ls_time_adjustment) { /* has not yet been scheduled */
-
 	 		GetSystemTimeAsFileTime(&curr_ft.ft);
 			if (curr_ft.ull >= ls_ft.ull) {
 				ls_time_adjustment = clockperiod / LS_CORR_INTV_SECS;
-				ls_ref_perf_cnt = this_perf_count;
-				ls_elapsed = 0;
+				ls_start_tick = GetTickCount();
 				msyslog(LOG_NOTICE, "Inserting positive leap second.");
 			}
+			ls_elapsed = 0;
 		} else {  /* leap sec adjustment has been scheduled previously */
-			ls_elapsed = (this_perf_count - ls_ref_perf_cnt) 
-				     * HECTONANOSECONDS / PerfCtrFreq;
+			ls_elapsed = GetTickCount() - ls_start_tick; 
 		}
 
 		if (ls_time_adjustment != 0) {  /* leap second adjustment is currently active */
 			if (ls_elapsed > (LS_CORR_INTV - LS_CORR_LIMIT)) {
 				ls_time_adjustment = 0;  /* leap second adjustment done */
 				ls_ft.ull = 0;
+				msyslog(LOG_NOTICE, "Finished leap second insertion.");
 			}
 
 			/* 
