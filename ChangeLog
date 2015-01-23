@@ -1,6 +1,7 @@
 ---
 
 * [Bug 2617] Fix sntp Usage documentation section.
+* [Sec 2672] Code cleanup: On some OSes ::1 can be spoofed...
 ---
 (4.2.8p1-beta5) 2015/01/07 Released by Harlan Stenn <stenn@ntp.org>
 
