@@ -5,13 +5,11 @@
 <PFX>  <http://ntp.org/license>
 <PFX>  <http://opensource.org/licenses/ntp-license.php>
 
-GRONK: OWNER
-
 <PFX>Permission to use, copy, modify, and distribute this software and its
 <PFX>documentation for any purpose with or without fee is hereby granted,
 <PFX>provided that the above copyright notice appears in all copies and that
 <PFX>both the copyright notice and this permission notice appear in
-<PFX>supporting documentation, and that the name The Universidy of Delaware not be used in
+<PFX>supporting documentation, and that the name The University of Delaware not be used in
 <PFX>advertising or publicity pertaining to distribution of the software
 <PFX>without specific, written prior permission. <owner> makes no
 <PFX>representations about the suitability this software for any purpose. It
