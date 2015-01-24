@@ -3482,26 +3482,24 @@ read_network_packet(
 	** Bug 2672: Some OSes (MacOSX and Linux) don't block spoofed ::1
 	*/
 
-	// temporary hack...
 	if (AF_INET6 == itf->family) {
-		DPRINTF(1, ("Got an IPv6 packet, from <%s> (%d) to <%s> (%d)\n",
+		DPRINTF(2, ("Got an IPv6 packet, from <%s> (%d) to <%s> (%d)\n",
 			stoa(&rb->recv_srcadr),
 			IN6_IS_ADDR_LOOPBACK(PSOCK_ADDR6(&rb->recv_srcadr)),
 			stoa(&itf->sin),
 			!IN6_IS_ADDR_LOOPBACK(PSOCK_ADDR6(&itf->sin))
 			));
-	}
 
-	if (   AF_INET6 == itf->family
-	    && IN6_IS_ADDR_LOOPBACK(PSOCK_ADDR6(&rb->recv_srcadr))
-	    && !IN6_IS_ADDR_LOOPBACK(PSOCK_ADDR6(&itf->sin))
-	   ) {
-		packets_dropped++;
-		DPRINTF(1, ("DROPPING that packet\n"));
-		freerecvbuf(rb);
-		return buflen;
+		if (   IN6_IS_ADDR_LOOPBACK(PSOCK_ADDR6(&rb->recv_srcadr))
+		    && !IN6_IS_ADDR_LOOPBACK(PSOCK_ADDR6(&itf->sin))
+		   ) {
+			packets_dropped++;
+			DPRINTF(2, ("DROPPING that packet\n"));
+			freerecvbuf(rb);
+			return buflen;
+		}
+		DPRINTF(2, ("processing that packet\n"));
 	}
-	DPRINTF(1, ("processing that packet\n"));
 
 	/*
 	 * Got one.  Mark how and when it got here,
