@@ -1,5 +1,6 @@
 ---
 
+* [Bug 2187] Update version number generation scripts.
 * [Bug 2617] Fix sntp Usage documentation section.
 * [Sec 2672] Code cleanup: On some OSes ::1 can be spoofed...
 * Fix the package name.
