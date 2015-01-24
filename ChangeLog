@@ -4,6 +4,7 @@
 * [Bug 2187] Update version number generation scripts.
 * [Bug 2617] Fix sntp Usage documentation section.
 * [Sec 2672] Code cleanup: On some OSes ::1 can be spoofed...
+* [Bug 2736] Show error message if we cannot open the config file.
 * Copyright update.
 * Fix the package name.
 ---
