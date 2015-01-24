@@ -3,7 +3,7 @@ dnl
 m4_include([sntp/m4/version.m4])
 AC_PREREQ([2.61])
 AC_INIT(
-    [ntp4],
+    [ntp],
     [VERSION_NUMBER],
     [http://bugs.ntp.org./],
     [],
