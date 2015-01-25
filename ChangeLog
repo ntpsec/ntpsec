@@ -1,4 +1,5 @@
 ---
+(4.2.8p1-RC1) 2015/01/24 Released by Harlan Stenn <stenn@ntp.org>
 
 * Start the RC for 4.2.8p1.
 * [Bug 2187] Update version number generation scripts.
