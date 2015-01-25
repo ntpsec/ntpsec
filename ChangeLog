@@ -1,10 +1,12 @@
 ---
+(4.2.8p1-RC1) 2015/01/24 Released by Harlan Stenn <stenn@ntp.org>
 
 * Start the RC for 4.2.8p1.
 * [Bug 2187] Update version number generation scripts.
 * [Bug 2617] Fix sntp Usage documentation section.
 * [Sec 2671] vallen in extension fields are not validated.
 * [Sec 2672] Code cleanup: On some OSes ::1 can be spoofed...
+* [Bug 2736] Show error message if we cannot open the config file.
 * Copyright update.
 * Fix the package name.
 ---
