@@ -1,3 +1,7 @@
+* [Bug 2738] Missing buffer initialisation in parsestate().
+* [Bug 2739] Parse driver with PPS enabled occasionaly evaluates
+  PPS timestamp with wrong sign. 
+  Removed some German umlauts.
 ---
 (4.2.8p1-RC1) 2015/01/24 Released by Harlan Stenn <stenn@ntp.org>
 
