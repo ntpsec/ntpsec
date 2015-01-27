@@ -151,8 +151,9 @@ Here is a sample showing the GPS reception fading out:
 	<td align="center">0</td>
 	<td align="center">1</td>
 	<td align="center">1</td>
-	<td>The SHM segment is accessible by the world. (Ignored/rejected for
-	units 0 and 1!)</td>
+	<td>The SHM segment is private (mode 0600). This is the fixed
+	default for clock units 0 and 1; clock units &gt;1 are mode
+	0666 unless this bit is set for the specific unit.</td>
       </tr><tr>
 	<td align="center">1-31</td>
 	<td align="center">-</td>

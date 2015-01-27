@@ -1,4 +1,8 @@
 ---
+* [Bug 2627] shm refclock allows only two units with owner-only access
+  rework: reverted sense of mode bit (so default reflects previous
+  behaviour) and updated ducumentation.
+---
 (4.2.8p1-RC1) 2015/01/24 Released by Harlan Stenn <stenn@ntp.org>
 
 * Start the RC for 4.2.8p1.
