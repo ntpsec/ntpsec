@@ -556,7 +556,7 @@ adj_systime(
 				/* slew starts with last second before insertion!
 				 * And we have to tell the core that we deal with it.
 				 */
-                                ls_ft.ull -= HECTONANOSECONDS;
+                                ls_ft.ull -= (HECTONANOSECONDS + HECTONANOSECONDS/2);
                                 leapsec_electric(TRUE);
                         } else if (lsi.tai_diff < 0) {
                                 /* Do not handle negative leap seconds here. If this
