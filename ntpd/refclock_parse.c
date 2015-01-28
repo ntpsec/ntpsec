@@ -4177,20 +4177,7 @@ parse_process(
 		 */
 		if (PARSE_PPS(parsetime->parse_state) && CLK_PPS(parse->peer))
 		        {
-			  /* refclock_pps includes fudgetime1 - we keep the RS232 offset in there :-( */
-			        double savedtime1 = parse->generic->fudgetime1;
-
-				parse->generic->fudgetime1 = fudge;
-				
-				if (refclock_pps(parse->peer, &parse->atom,
-						 parse->flags & (CLK_FLAG1|CLK_FLAG2|CLK_FLAG3|CLK_FLAG4))) {
-					parse->peer->flags |= FLAG_PPS;
-				} else {
-					parse->peer->flags &= ~FLAG_PPS;
-				}
-
-				parse->generic->fudgetime1 = savedtime1;
-
+				parse->peer->flags |= FLAG_PPS;
 				parse_hardpps(parse, PARSE_HARDPPS_ENABLE);
 			}
 #endif
