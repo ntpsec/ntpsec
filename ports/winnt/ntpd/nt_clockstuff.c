@@ -588,9 +588,10 @@ adj_systime(
 		if (0 == ls_time_adjustment) { /* has not yet been scheduled */
 	 		GetSystemTimeAsFileTime(&curr_ft.ft);
 			if (curr_ft.ull >= ls_ft.ull) {
+				ls_ft.ull = _UI64_MAX; /* guard against second schedule */
 				ls_time_adjustment = clockperiod / LS_CORR_INTV_SECS;
 				ls_start_tick = GetTickCount();
-				msyslog(LOG_NOTICE, "Inserting positive leap second.");
+				msyslog(LOG_NOTICE, "Started leap second insertion.");
 			}
 			ls_elapsed = 0;
 		} else {  /* leap sec adjustment has been scheduled previously */
@@ -600,7 +601,6 @@ adj_systime(
 		if (ls_time_adjustment != 0) {  /* leap second adjustment is currently active */
 			if (ls_elapsed > (LS_CORR_INTV - LS_CORR_LIMIT)) {
 				ls_time_adjustment = 0;  /* leap second adjustment done */
-				ls_ft.ull = 0;
 				msyslog(LOG_NOTICE, "Finished leap second insertion.");
 			}
 
