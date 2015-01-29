@@ -1,4 +1,5 @@
-* [Bug 2738] Missing buffer initialisation in parsestate().
+* [Bug 2741] Incorrect buffer check in refclocK_parse.c::parsestatus().
+* [Bug 2738] Missing buffer initialisation in refclocK_parse.c::parsestate().
 * [Bug 2739] Parse driver with PPS enabled occasionaly evaluates
   PPS timestamp with wrong sign. 
   Removed some German umlauts.

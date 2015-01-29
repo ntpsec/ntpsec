@@ -2613,7 +2613,7 @@ parsestatus(
 	{
 		if (flagstrings[i].bit & lstate)
 		{
-			if (t == buffer)
+			if (t != buffer)
 				t = ap(buffer, size, t, "; ");
 			t = ap(buffer, size, t, "%s", flagstrings[i].name);
 		}
