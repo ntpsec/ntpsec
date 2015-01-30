@@ -16,7 +16,7 @@
  *   SunOS 4.x and SunOS5.x.
  *
  * Copyright (c) 1995-2009 by Frank Kardel <kardel <AT> ntp.org>
- * Copyright (c) 1989-1994 by Frank Kardel, Friedrich-Alexander Universität Erlangen-Nürnberg, Germany
+ * Copyright (c) 1989-1994 by Frank Kardel, Friedrich-Alexander Universitaet Erlangen-Nuernberg, Germany
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -2533,6 +2533,7 @@ parsestate(
 	int i;
 	char *s, *t;
 
+	*buffer = '\0';
 	s = t = buffer;
 
 	i = 0;
@@ -2612,7 +2613,7 @@ parsestatus(
 	{
 		if (flagstrings[i].bit & lstate)
 		{
-			if (t == buffer)
+			if (t != buffer)
 				t = ap(buffer, size, t, "; ");
 			t = ap(buffer, size, t, "%s", flagstrings[i].name);
 		}
@@ -4025,7 +4026,7 @@ parse_process(
 					 * implied on second offset
 					 */
 					off.l_uf = ~off.l_uf; /* map [0.5..1[ -> [-0.5..0[ */
-					off.l_i = (off.l_uf & 0x8000000) ? -1 : 0; /* sign extend */
+					off.l_i = (off.l_uf & 0x80000000) ? -1 : 0; /* sign extend */
 				}
 				else
 				{
@@ -4177,20 +4178,7 @@ parse_process(
 		 */
 		if (PARSE_PPS(parsetime->parse_state) && CLK_PPS(parse->peer))
 		        {
-			  /* refclock_pps includes fudgetime1 - we keep the RS232 offset in there :-( */
-			        double savedtime1 = parse->generic->fudgetime1;
-
-				parse->generic->fudgetime1 = fudge;
-				
-				if (refclock_pps(parse->peer, &parse->atom,
-						 parse->flags & (CLK_FLAG1|CLK_FLAG2|CLK_FLAG3|CLK_FLAG4))) {
-					parse->peer->flags |= FLAG_PPS;
-				} else {
-					parse->peer->flags &= ~FLAG_PPS;
-				}
-
-				parse->generic->fudgetime1 = savedtime1;
-
+				parse->peer->flags |= FLAG_PPS;
 				parse_hardpps(parse, PARSE_HARDPPS_ENABLE);
 			}
 #endif

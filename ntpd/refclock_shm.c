@@ -53,7 +53,7 @@
 /*
  * Mode flags
  */
-#define MODE_PUBLIC 0x0001
+#define SHM_MODE_PRIVATE 0x0001
 
 /*
  * Function prototypes
@@ -216,12 +216,7 @@ shm_start(
 	pp->io.datalen = 0;
 	pp->io.fd = -1;
 
-	up->forall = (peer->ttl & MODE_PUBLIC) != 0;
-	if (up->forall && unit < 2) {
-		msyslog(LOG_WARNING, "SHM: public mode ignored for unit %d",
-			unit);
-		up->forall = FALSE;
-	}
+	up->forall = (unit >= 2) && !(peer->ttl & SHM_MODE_PRIVATE);
 
 	up->shm = getShmTime(unit, up->forall);
 
