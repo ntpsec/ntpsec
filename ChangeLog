@@ -3,6 +3,9 @@
 * [Bug 2627] shm refclock allows only two units with owner-only access
   rework: reverted sense of mode bit (so default reflects previous
   behaviour) and updated ducumentation.
+* [Bug 2732] - Leap second not handled correctly on Windows 8
+  use 'GetTickCount()' to get the true elapsed time of slew
+  (This should work for all versions of Windows >= W2K)
 * [Bug 2738] Missing buffer initialization in refclocK_parse.c::parsestate().
 * [Bug 2739] Parse driver with PPS enabled occasionally evaluates
   PPS timestamp with wrong sign. 
