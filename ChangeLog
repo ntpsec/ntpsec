@@ -1,4 +1,8 @@
 ---
+
+* Update the NEWS file.
+* [Sec 2671] vallen in extension fields are not validated.
+---
 (4.2.8p1-RC2) 2015/01/29 Released by Harlan Stenn <stenn@ntp.org>
 
 * [Bug 2627] shm refclock allows only two units with owner-only access
@@ -19,7 +23,6 @@
 * Start the RC for 4.2.8p1.
 * [Bug 2187] Update version number generation scripts.
 * [Bug 2617] Fix sntp Usage documentation section.
-* [Sec 2671] vallen in extension fields are not validated.
 * [Sec 2672] Code cleanup: On some OSes ::1 can be spoofed...
 * [Bug 2736] Show error message if we cannot open the config file.
 * Copyright update.
