@@ -1,4 +1,5 @@
 ---
+(4.2.8p1) 2015/02/04 Released by Harlan Stenn <stenn@ntp.org>
 
 * Update the NEWS file.
 * [Sec 2671] vallen in extension fields are not validated.
