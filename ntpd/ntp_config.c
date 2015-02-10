@@ -4443,7 +4443,7 @@ getconfig(
 		&& check_netinfo && !(config_netinfo = get_netinfo_config())
 #endif /* HAVE_NETINFO */
 		) {
-		msyslog(LOG_INFO, "getconfig: Couldn't open <%s>", FindConfig(config_file));
+		msyslog(LOG_INFO, "getconfig: Couldn't open <%s>: %m", FindConfig(config_file));
 #ifndef SYS_WINNT
 		io_open_sockets();
 
@@ -4457,7 +4457,7 @@ getconfig(
 			 * Broadcast clients can sometimes run without
 			 * a configuration file.
 			 */
-			msyslog(LOG_INFO, "getconfig: Couldn't open <%s>", FindConfig(alt_config_file));
+			msyslog(LOG_INFO, "getconfig: Couldn't open <%s>: %m", FindConfig(alt_config_file));
 			io_open_sockets();
 
 			return;

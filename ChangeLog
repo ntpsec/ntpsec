@@ -1,26 +1,49 @@
 ntp-4.3 begins.
 ---
+(4.2.8p1) 2015/02/04 Released by Harlan Stenn <stenn@ntp.org>
+
+* Update the NEWS file.
+* [Sec 2671] vallen in extension fields are not validated.
+---
+(4.2.8p1-RC2) 2015/01/29 Released by Harlan Stenn <stenn@ntp.org>
+
+* [Bug 2627] shm refclock allows only two units with owner-only access
+  rework: reverted sense of mode bit (so default reflects previous
+  behaviour) and updated ducumentation.
+* [Bug 2732] - Leap second not handled correctly on Windows 8
+  use 'GetTickCount()' to get the true elapsed time of slew
+  (This should work for all versions of Windows >= W2K)
+* [Bug 2738] Missing buffer initialization in refclocK_parse.c::parsestate().
+* [Bug 2739] Parse driver with PPS enabled occasionally evaluates
+  PPS timestamp with wrong sign. 
+  Removed some German umlauts.
+* [Bug 2740] Removed some obsolete code from the parse driver.
+* [Bug 2741] Incorrect buffer check in refclocK_parse.c::parsestatus().
+---
+(4.2.8p1-RC1) 2015/01/24 Released by Harlan Stenn <stenn@ntp.org>
 
 * Start the RC for 4.2.8p1.
 * [Bug 2187] Update version number generation scripts.
 * [Bug 2617] Fix sntp Usage documentation section.
 * [Sec 2672] Code cleanup: On some OSes ::1 can be spoofed...
+* [Bug 2736] Show error message if we cannot open the config file.
+* Copyright update.
 * Fix the package name.
 ---
 (4.2.8p1-beta5) 2015/01/07 Released by Harlan Stenn <stenn@ntp.org>
 
+* [Bug 2695] Windows build: __func__ not supported under Windows.
 * [Bug 2728] Work around C99-style structure initialization code
   for older compilers, specifically Visual Studio prior to VS2013.
-* [Bug 2695] Windows build: __func__ not supported under Windows.
 ---
 (4.2.8p1-beta4) 2015/01/04 Released by Harlan Stenn <stenn@ntp.org>
 
-* Fix a regression introduced to timepps-Solaris.h as part of:
-  [Bug 1206] Required compiler changes for Windows
-  (4.2.5p181) 2009/06/06
 * [Bug 1084] PPSAPI for ntpd on Windows with DLL backends
 * [Bug 2695] Build problem on Windows (sys/socket.h).
 * [Bug 2715] mdnstries option for ntp.conf from NetBSD.
+* Fix a regression introduced to timepps-Solaris.h as part of:
+  [Bug 1206] Required compiler changes for Windows
+  (4.2.5p181) 2009/06/06
 ---
 (4.2.8p1-beta3) 2015/01/02 Released by Harlan Stenn <stenn@ntp.org>
 
