@@ -1,5 +1,8 @@
 ntp-4.3 begins.
 ---
+
+* [Bug 2747] Upgrade libevent to 2.1.5-beta.
+---
 (4.2.8p1) 2015/02/04 Released by Harlan Stenn <stenn@ntp.org>
 
 * Update the NEWS file.
