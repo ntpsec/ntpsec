@@ -1,3 +1,6 @@
+From 4.2.8p2:
+* [Bug 2747] Upgrade libevent to 2.1.5-beta.
+
 ntp-4.3 begins.
 ---
 
