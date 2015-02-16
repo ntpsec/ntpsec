@@ -1,0 +1,15 @@
+Cross Compiling
+===============
+
+Setup a cross compile environment for your architecture.
+
+Configure NTPSec with:
+
+  waf configure --enable-cross=/path/to/your/cross/cc
+
+There are also --cross-cflags and --cross-ldflags to supply the cross compiler 
+with appropriate values.
+                                                                  
+You will most likely need to install OpenSSL to get crypto support and libevent 
+2.x to get ntpdig support.  Out of the box NTPSec will compile with no 
+additional dependencies.
