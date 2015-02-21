@@ -1,4 +1,6 @@
 From 4.2.8p2:
+* [Bug 1960] setsockopt IPV6_MULTICAST_IF: Invalid argument.
+From 4.2.8p2:
 * [Bug 2728] See if C99-style structure initialization works.
 (4.3.0) 2015/02/11 Released by Harlan Stenn <stenn@ntp.org>
 From 4.2.8p2:
