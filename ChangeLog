@@ -1,3 +1,5 @@
+From 4.2.8p2:
+* [Bug 2728] See if C99-style structure initialization works.
 (4.3.0) 2015/02/11 Released by Harlan Stenn <stenn@ntp.org>
 From 4.2.8p2:
 * [Bug 2747] Upgrade libevent to 2.1.5-beta.
@@ -5,6 +7,7 @@ From 4.2.8p2:
 ntp-4.3 begins.
 ---
 
+* [Bug 2728] See if C99-style structure initialization works.
 * [Bug 2747] Upgrade libevent to 2.1.5-beta.
 ---
 (4.2.8p1) 2015/02/04 Released by Harlan Stenn <stenn@ntp.org>

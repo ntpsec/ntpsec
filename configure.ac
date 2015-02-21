@@ -68,6 +68,7 @@ AC_PROG_CPP
 AC_PROG_CXX
 AC_PROG_YACC
 AC_PROG_CC_C_O
+AX_C99_STRUCT_INIT
 
 NTP_VPATH_HACK		dnl used only by ntpd/Makefile.am
 
