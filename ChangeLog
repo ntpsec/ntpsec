@@ -12,6 +12,7 @@ ntp-4.3 begins.
 * [Bug 1960] setsockopt IPV6_MULTICAST_IF: Invalid argument.
 * [Bug 2728] See if C99-style structure initialization works.
 * [Bug 2747] Upgrade libevent to 2.1.5-beta.
+* [Bug 2749] ntp/lib/NTP/Util.pm needs update for ntpq -w, IPv6, .POOL. .
 ---
 (4.2.8p1) 2015/02/04 Released by Harlan Stenn <stenn@ntp.org>
 
