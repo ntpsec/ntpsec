@@ -1,3 +1,4 @@
+(4.3.2) 2015/02/25 Released by Harlan Stenn <stenn@ntp.org>
 (4.3.1) 2015/02/21 Released by Harlan Stenn <stenn@ntp.org>
 Below are from 4.2.8p2:
 * [Bug 1960] setsockopt IPV6_MULTICAST_IF: Invalid argument.

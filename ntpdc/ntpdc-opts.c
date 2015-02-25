@@ -1,7 +1,7 @@
 /*
  *  EDIT THIS FILE WITH CAUTION  (ntpdc-opts.c)
  *
- *  It has been AutoGen-ed  February 21, 2015 at 12:01:43 PM by AutoGen 5.18.5pre4
+ *  It has been AutoGen-ed  February 25, 2015 at 11:57:00 AM by AutoGen 5.18.5pre4
  *  From the definitions    ntpdc-opts.def
  *  and the template file   options
  *
@@ -69,7 +69,7 @@ extern FILE * option_usage_fp;
  *  static const strings for ntpdc options
  */
 static char const ntpdc_opt_strs[1905] =
-/*     0 */ "ntpdc 4.3.1\n"
+/*     0 */ "ntpdc 4.3.2\n"
             "Copyright (C) 1992-2015 The University of Delaware and Network Time Foundation, all rights reserved.\n"
             "This is free software. It is licensed for use, modification and\n"
             "redistribution under the terms of the NTP License, copies of which\n"
@@ -128,14 +128,14 @@ static char const ntpdc_opt_strs[1905] =
 /*  1692 */ "no-load-opts\0"
 /*  1705 */ "no\0"
 /*  1708 */ "NTPDC\0"
-/*  1714 */ "ntpdc - vendor-specific NTPD control program - Ver. 4.3.1\n"
+/*  1714 */ "ntpdc - vendor-specific NTPD control program - Ver. 4.3.2\n"
             "Usage:  %s [ -<flag> [<val>] | --<name>[{=| }<val>] ]... [ host ...]\n\0"
 /*  1842 */ "$HOME\0"
 /*  1848 */ ".\0"
 /*  1850 */ ".ntprc\0"
 /*  1857 */ "http://bugs.ntp.org, bugs@ntp.org\0"
 /*  1891 */ "\n\0"
-/*  1893 */ "ntpdc 4.3.1";
+/*  1893 */ "ntpdc 4.3.2";
 
 /**
  *  ipv4 option description with
@@ -796,7 +796,7 @@ static void bogus_function(void) {
      translate option names.
    */
   /* referenced via ntpdcOptions.pzCopyright */
-  puts(_("ntpdc 4.3.1\n\
+  puts(_("ntpdc 4.3.2\n\
 Copyright (C) 1992-2015 The University of Delaware and Network Time Foundation, all rights reserved.\n\
 This is free software. It is licensed for use, modification and\n\
 redistribution under the terms of the NTP License, copies of which\n\
@@ -862,14 +862,14 @@ implied warranty.\n"));
   puts(_("load options from a config file"));
 
   /* referenced via ntpdcOptions.pzUsageTitle */
-  puts(_("ntpdc - vendor-specific NTPD control program - Ver. 4.3.1\n\
+  puts(_("ntpdc - vendor-specific NTPD control program - Ver. 4.3.2\n\
 Usage:  %s [ -<flag> [<val>] | --<name>[{=| }<val>] ]... [ host ...]\n"));
 
   /* referenced via ntpdcOptions.pzExplain */
   puts(_("\n"));
 
   /* referenced via ntpdcOptions.pzFullVersion */
-  puts(_("ntpdc 4.3.1"));
+  puts(_("ntpdc 4.3.2"));
 
   /* referenced via ntpdcOptions.pzFullUsage */
   puts(_("<<<NOT-FOUND>>>"));
