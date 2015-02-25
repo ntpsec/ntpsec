@@ -3,6 +3,7 @@ Below are from 4.2.8p2:
 * [Bug 1960] setsockopt IPV6_MULTICAST_IF: Invalid argument.
 * [Bug 2728] See if C99-style structure initialization works.
 * [Bug 2749] ntp/lib/NTP/Util.pm needs update for ntpq -w, IPv6, .POOL. .
+* [Bug 2751] jitter.h has stale copies of l_fp macros.
 * [Bug 2757] Quiet compiler warnings.
 (4.3.0) 2015/02/11 Released by Harlan Stenn <stenn@ntp.org>
 From 4.2.8p2:
