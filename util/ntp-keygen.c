@@ -2181,8 +2181,12 @@ fheader	(
 		perror("Write");
 		exit (-1);
 	}
-	snprintf(linkname, sizeof(linkname), "ntpkey_%s_%s", ulink,
-	    hostname);
+        if (strcmp(ulink, "md5") == 0) {
+          strcpy(linkname,"ntp.keys");
+        } else {
+          snprintf(linkname, sizeof(linkname), "ntpkey_%s_%s", ulink,
+                   hostname);
+        }
 	(void)remove(linkname);		/* The symlink() line below matters */
 	temp = symlink(filename, linkname);
 	if (temp < 0)
