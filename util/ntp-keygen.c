@@ -2170,10 +2170,14 @@ fheader	(
 	FILE	*str;		/* file handle */
 	char	linkname[MAXFILENAME]; /* link name */
 	int	temp;
+        mode_t  orig_umask;
 
 	snprintf(filename, sizeof(filename), "ntpkey_%s_%s.%u", file,
 	    owner, fstamp); 
-	if ((str = fopen(filename, "w")) == NULL) {
+        orig_umask = umask( S_IWGRP | S_IRWXO );
+        str = fopen(filename, "w");
+        (void) umask(orig_umask);
+	if (str == NULL) {
 		perror("Write");
 		exit (-1);
 	}

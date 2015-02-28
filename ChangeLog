@@ -25,6 +25,7 @@ ntp-4.3 begins.
 * [Bug 2756] ntpd hangs in startup with gcc 3.3.5 on ARM.
 * [Bug 2757] Quiet compiler warnings.
 * [Bug 2759] Expose nonvolatile/clk_wander_threshold to ntpq.
+* [Bug 2766] ntp-keygen output files should not be world-readable.
 ---
 (4.2.8p1) 2015/02/04 Released by Harlan Stenn <stenn@ntp.org>
 
