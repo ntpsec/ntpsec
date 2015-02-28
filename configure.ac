@@ -4194,7 +4194,6 @@ case "$ans" in
 esac
 
 AC_MSG_CHECKING([if we should enable NIST lockclock scheme])
-
 AC_ARG_ENABLE(
 	[nist],
 	[AS_HELP_STRING(
@@ -4214,7 +4213,6 @@ case "$ans" in
 esac
 
 AC_MSG_CHECKING([if we want support for Samba's signing daemon])
-
 AC_ARG_ENABLE(
     [ntp-signd],
     [AS_HELP_STRING(
