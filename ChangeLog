@@ -1,3 +1,4 @@
+(4.3.3) 2015/02/28 Released by Harlan Stenn <stenn@ntp.org>
 Below are from 4.2.8p2:
 * [Bug 2751] jitter.h has stale copies of l_fp macros.
 * [Bug 2756] ntpd hangs in startup with gcc 3.3.5 on ARM.
