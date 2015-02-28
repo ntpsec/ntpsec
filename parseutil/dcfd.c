@@ -219,9 +219,16 @@ typedef struct clocktime clocktime_t;
 /*
  * (usually) quick constant multiplications
  */
+#ifndef TIMES10
 #define TIMES10(_X_) (((_X_) << 3) + ((_X_) << 1))	/* *8 + *2 */
+#endif
+#ifndef TIMES24
 #define TIMES24(_X_) (((_X_) << 4) + ((_X_) << 3))      /* *16 + *8 */
+#endif
+#ifndef TIMES60
 #define TIMES60(_X_) ((((_X_) << 4)  - (_X_)) << 2)     /* *(16 - 1) *4 */
+#endif
+
 /*
  * generic l_abs() function
  */
