@@ -777,6 +777,10 @@ void event_set_fatal_callback(event_fatal_cb cb);
 EVENT2_EXPORT_SYMBOL
 void event_enable_debug_logging(ev_uint32_t which);
 
+EVENT2_EXPORT_SYMBOL
+void
+event_disable_debug_mode(void);
+
 /**
   Associate a different event base with an event.
 
