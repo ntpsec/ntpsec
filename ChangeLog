@@ -1,5 +1,6 @@
 Below are from 4.2.8p2:
 * [Bug 2773] Early leap announcement from Palisade/Thunderbolt
+* [Bug 2775] ntp-keygen.c fails to compile under Windows.
 (4.3.3) 2015/02/28 Released by Harlan Stenn <stenn@ntp.org>
 Below are from 4.2.8p2:
 * [Bug 2751] jitter.h has stale copies of l_fp macros.
