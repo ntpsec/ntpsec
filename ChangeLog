@@ -1,3 +1,4 @@
+(4.3.4) 2015/03/04 Released by Harlan Stenn <stenn@ntp.org>
 Below are from 4.2.8p2:
 * [Bug 2773] Early leap announcement from Palisade/Thunderbolt
 * [Bug 2775] ntp-keygen.c fails to compile under Windows.
