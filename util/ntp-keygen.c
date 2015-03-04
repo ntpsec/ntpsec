@@ -2170,13 +2170,19 @@ fheader	(
 	FILE	*str;		/* file handle */
 	char	linkname[MAXFILENAME]; /* link name */
 	int	temp;
+#ifdef HAVE_UMASK
         mode_t  orig_umask;
-
+#endif
+        
 	snprintf(filename, sizeof(filename), "ntpkey_%s_%s.%u", file,
 	    owner, fstamp); 
+#ifdef HAVE_UMASK
         orig_umask = umask( S_IWGRP | S_IRWXO );
         str = fopen(filename, "w");
         (void) umask(orig_umask);
+#else
+        str = fopen(filename, "w");
+#endif
 	if (str == NULL) {
 		perror("Write");
 		exit (-1);

@@ -36,6 +36,7 @@ ntp-4.3 begins.
 * [Bug 2767] ntp-keygen -M should symlink to ntp.keys.
 * [Bug 2771] nonvolatile value is documented in wrong units.
 * [Bug 2773] Early leap announcement from Palisade/Thunderbolt
+* [Bug 2775] ntp-keygen.c fails to compile under Windows.
 ---
 (4.2.8p1) 2015/02/04 Released by Harlan Stenn <stenn@ntp.org>
 
