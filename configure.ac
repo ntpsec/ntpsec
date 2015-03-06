@@ -291,7 +291,7 @@ AC_CHECK_HEADER(
 AC_CHECK_HEADERS([fcntl.h fnmatch.h ieeefp.h inttypes.h kvm.h math.h])
 
 AC_CHECK_HEADERS([memory.h netdb.h poll.h])
-AC_CHECK_HEADERS([sgtty.h stdlib.h string.h termio.h])
+AC_CHECK_HEADERS([sgtty.h stdatomic.h stdlib.h string.h termio.h])
 AC_CHECK_HEADERS([termios.h timepps.h timex.h unistd.h])
 
 case "$host" in
@@ -374,6 +374,12 @@ case "$host" in
     AC_CHECK_HEADERS([machine/inline.h sys/pcl720.h sys/i8253.h])
     ;;
 esac
+
+dnl case "$ac_cv_header_stdatomic_h" in
+dnl  yes)
+dnl     AC_CHECK_FUNCS([atomic_thread_fence])
+dnl     ;;
+dnl esac
 
 case "$host" in
  *-*-solaris2.6)
