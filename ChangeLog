@@ -1,3 +1,5 @@
+Below are from 4.2.8p2:
+* [Bug 2782] Refactor refclock_shm.c, add memory barrier protection.
 (4.3.5) 2015/03/05 Released by Harlan Stenn <stenn@ntp.org>
 Below are from 4.2.8p2:
 * [Bug 2783] Quiet autoconf warnings about missing AC_LANG_SOURCE.
