@@ -14,6 +14,7 @@
 * [Bug 2775] ntp-keygen.c fails to compile under Windows.
 * [Bug 2782] Refactor refclock_shm.c, add memory barrier protection.
 * [Bug 2783] Quiet autoconf warnings about missing AC_LANG_SOURCE.
+* [Bug 2784] Fix for 2782 uses clock_gettime() instead of get_ostime().
 ---
 (4.2.8p1) 2015/02/04 Released by Harlan Stenn <stenn@ntp.org>
 
