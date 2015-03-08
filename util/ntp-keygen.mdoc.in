@@ -1,9 +1,9 @@
-.Dd March 6 2015
+.Dd March 7 2015
 .Dt NTP_KEYGEN @NTP_KEYGEN_MS@ User Commands
 .Os
 .\"  EDIT THIS FILE WITH CAUTION  (ntp-keygen-opts.mdoc)
 .\"
-.\"  It has been AutoGen-ed  March  6, 2015 at 11:58:36 AM by AutoGen 5.18.5pre4
+.\"  It has been AutoGen-ed  March  7, 2015 at 04:54:21 PM by AutoGen 5.18.5pre4
 .\"  From the definitions    ntp-keygen-opts.def
 .\"  and the template file   agmdoc-cmd.tpl
 .Sh NAME
