@@ -391,7 +391,12 @@ static enum segstat_t shm_query(volatile struct shmTime *shm_in, struct shm_stat
 
     /*@-type@*//* splint is confused about struct timespec */
     shm_stat->tvc.tv_sec = shm_stat->tvc.tv_nsec = 0;
-    get_ostime(&shm_stat->tvc);
+    {
+	time_t now;
+
+	time(&now);
+	shm_stat->tvc.tv_sec = now;
+    }
 
     /* relying on word access to be atomic here */
     if (shm->valid == 0) {
