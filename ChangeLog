@@ -1,3 +1,6 @@
+
+* [Bug 2774] Unreasonably verbose printout - leap pending/warning
+
 ---
 
 * [Bug 2728] See if C99-style structure initialization works.
