@@ -1,3 +1,5 @@
+* [Bug 2752] Update for mkver.bat for Windows from David Taylor.
+  Account for release numbering scheme for 4.3.x and later.
 (4.3.7) 2015/03/07 Released by Harlan Stenn <stenn@ntp.org>
 (4.3.6) 2015/03/06 Released by Harlan Stenn <stenn@ntp.org>
 Below are from 4.2.8p2:
