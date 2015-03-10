@@ -152,6 +152,7 @@ int	kern_enable = TRUE;	/* kernel support enabled */
 int	hardpps_enable;		/* kernel PPS discipline enabled */
 int	ext_enable;		/* external clock enabled */
 int	pps_stratum;		/* pps stratum */
+int	kernel_status;		/* from ntp_adjtime */
 int	allow_panic = FALSE;	/* allow panic correction */
 int	mode_ntpdate = FALSE;	/* exit on first clock set */
 int	freq_cnt;		/* initial frequency clamp */
@@ -706,8 +707,13 @@ local_clock(
 		 * the pps. In any case, fetch the kernel offset,
 		 * frequency and jitter.
 		 */
-		if ((ntp_adj_ret = ntp_adjtime(&ntv)) != 0) {
-		    ntp_adjtime_error_handler(__func__, &ntv, ntp_adj_ret, errno, hardpps_enable, 0, __LINE__ - 1);
+		ntp_adj_ret = ntp_adjtime(&ntv);
+		/*
+		 * A squeal is a return status < 0, or a state change.
+		 */
+		if ((0 > ntp_adj_ret) || (ntp_adj_ret != kernel_status)) {
+			kernel_status = ntp_adj_ret;
+			ntp_adjtime_error_handler(__func__, &ntv, ntp_adj_ret, errno, hardpps_enable, 0, __LINE__ - 1);
 		}
 		pll_status = ntv.status;
 #ifdef STA_NANO
