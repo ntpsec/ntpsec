@@ -20,6 +20,9 @@ see notes/remarks directly below this header:
 #
 #
 # Changes:
+# 02/18/2015	David J Taylor - 4.2.8/4.3.0
+#				- change to Proto.Minor.Point
+#				- replace the "p" before the Point with "."
 # 02/23/2011	David J Taylor	- Use reg instead of regedit so "run as
 #				  administrator" is not required.
 # 12/21/2009	Dave Hart
@@ -207,7 +210,7 @@ REM ****************************************************************************
 
 	FOR /F "eol=# TOKENS=2 DELIMS==" %%a IN ('findstr  "point=" %%F_POINT_SH%%') DO SET POINT=%%a
 	IF "%POINT%"=="NEW" set POINT=
-	IF NOT "%POINT%"=="" set POINT=p%POINT%
+	IF NOT "%POINT%"=="" set POINT=%POINT%
 
 	FOR /F "eol=# TOKENS=2 DELIMS==" %%a IN ('findstr  "betapoint=" %%F_PACKAGEINFO_SH%%') DO SET BETAPOINT=%%a
 	
@@ -227,7 +230,7 @@ REM ****************************************************************************
 	IF "%PR_SUF%"=="-RC" set PR_POINT=%RCPOINT%
 	IF "%PR_SUF%"=="-beta" set PR_POINT=%BETAPOINT%
 
-	SET VER=%PROTO%.%MAJOR%.%MINOR%%POINT%%SPECIAL%%PR_SUF%%PR_POINT%
+	SET VER=%PROTO%.%MINOR%.%POINT%%SPECIAL%%PR_SUF%%PR_POINT%
 	
 	REM Now we have the version info, try to add a BK ChangeSet version number
 	
