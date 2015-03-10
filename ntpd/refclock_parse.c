@@ -4459,6 +4459,8 @@ gps16x_message(
 					get_mbg_cfgh(&bufp, &cfgh);
 					if (cfgh.valid)
 					{
+						const char *cp;
+						uint16_t tmp_val;
 						int i;
 						
 						p = buffer;
@@ -4484,84 +4486,58 @@ gps16x_message(
 						p = ap(buffer, sizeof(buffer),
 						    p, "\"");
 						set_var(&parse->kv, buffer, sizeof(buffer), RO);
-						
-						for (i = MIN_SVNO; i < MAX_SVNO; i++)
+
+						for (i = 0; i < N_SVNO; i++)
 						{
 							p = buffer;
-							p = ap(buffer, sizeof(buffer), p, "gps_cfg[%d]=\"[0x%x] ", i, cfgh.cfg[i]);
-							switch (cfgh.cfg[i] & 0x7)
-							{
-							case 0:
-								p = ap(buffer, sizeof(buffer), p, "BLOCK I");
-								break;
-							case 1:
-								p = ap(buffer, sizeof(buffer), p, "BLOCK II");
-								break;
-							default:
-								p = ap(buffer, sizeof(buffer), p, "bad CFG");
-								break;
+							p = ap(buffer, sizeof(buffer), p, "sv_info[%d]=\"PRN%d", i, i + MIN_SVNO);
+
+							tmp_val = cfgh.health[i];  /* a 6 bit SV health code */
+							p = ap(buffer, sizeof(buffer), p, "; health=0x%02x (", tmp_val);
+							/* "All Ones" has a special meaning" */
+							if (tmp_val == 0x3F) /* satellite is unusable or doesn't even exist */
+								cp = "SV UNAVAILABLE";
+							else {
+								/* The MSB contains a summary of the 3 MSBs of the 8 bit health code,
+								 * indicating if the data sent by the satellite is OK or not. */
+								p = ap(buffer, sizeof(buffer), p, "DATA %s, ", (tmp_val & 0x20) ? "BAD" : "OK" );
+
+								/* The 5 LSBs contain the status of the different signals sent by the satellite. */
+								switch (tmp_val & 0x1F)
+								{
+									case 0x00: cp = "SIGNAL OK";              break;
+									/* codes 0x01 through 0x1B indicate that one or more
+									 * specific signal components are weak or dead.
+									 * We don't decode this here in detail. */
+									case 0x1C: cp = "SV IS TEMP OUT";         break;
+									case 0x1D: cp = "SV WILL BE TEMP OUT";    break;
+									default:   cp = "TRANSMISSION PROBLEMS";  break;
+								}
 							}
-							p = ap(buffer, sizeof(buffer), p, "\"");
-							set_var(&parse->kv, buffer, sizeof(buffer), RO);
-							
-							p = buffer;
-							p = ap(buffer, sizeof(buffer), p, "gps_health[%d]=\"[0x%x] ", i, cfgh.health[i]);
-							switch ((cfgh.health[i] >> 5) & 0x7 )
+							p = ap(buffer, sizeof(buffer), p, "%s)", cp );
+
+							tmp_val = cfgh.cfg[i];  /* a 4 bit SV configuration/type code */
+							p = ap(buffer, sizeof(buffer), p, "; cfg=0x%02x (", tmp_val);
+							switch (tmp_val & 0x7)
 							{
-							case 0:
-								p = ap(buffer, sizeof(buffer), p, "OK;");
-								break;
-							case 1:
-								p = ap(buffer, sizeof(buffer), p, "PARITY;");
-								break;
-							case 2:
-								p = ap(buffer, sizeof(buffer), p, "TLM/HOW;");
-								break;
-							case 3:
-								p = ap(buffer, sizeof(buffer), p, "Z-COUNT;");
-								break;
-							case 4:
-								p = ap(buffer, sizeof(buffer), p, "SUBFRAME 1,2,3;");
-								break;
-							case 5:
-								p = ap(buffer, sizeof(buffer), p, "SUBFRAME 4,5;");
-								break;
-							case 6:
-								p = ap(buffer, sizeof(buffer), p, "UPLOAD BAD;");
-								break;
-							case 7:
-								p = ap(buffer, sizeof(buffer), p, "DATA BAD;");
-								break;
+								case 0x00:  cp = "(reserved)";        break;
+								case 0x01:  cp = "BLOCK II/IIA/IIR";  break;
+								case 0x02:  cp = "BLOCK IIR-M";       break;
+								case 0x03:  cp = "BLOCK IIF";         break;
+								case 0x04:  cp = "BLOCK III";         break;
+								default:   cp = "unknown SV type";   break;
 							}
-							
-							switch (cfgh.health[i] & 0x1F)
-							{
-							case 0:
-								p = ap(buffer, sizeof(buffer), p, "SIGNAL OK");
-								break;
-							case 0x1C:
-								p = ap(buffer, sizeof(buffer), p, "SV TEMP OUT");
-								break;
-							case 0x1D:
-								p = ap(buffer, sizeof(buffer), p, "SV WILL BE TEMP OUT");
-								break;
-							case 0x1E:
-								break;
-							case 0x1F:
-								p = ap(buffer, sizeof(buffer), p, "MULTIPLE ERRS");
-								break;
-							default:
-								p = ap(buffer, sizeof(buffer), p, "TRANSMISSION PROBLEMS");
-								break;
-							}
-							
-							p = ap(buffer, sizeof(buffer), p, "\"");
+							p = ap(buffer, sizeof(buffer), p, "%s", cp );
+							if (tmp_val & 0x08)  /* A-S is on, P-code is encrypted */
+								p = ap( buffer, sizeof(buffer), p, ", A-S on" );
+
+							p = ap(buffer, sizeof(buffer), p, ")\"");
 							set_var(&parse->kv, buffer, sizeof(buffer), RO);
 						}
 					}
 				}
 			break;
-	      
+
 			case GPS_ALM:
 				break;
 				

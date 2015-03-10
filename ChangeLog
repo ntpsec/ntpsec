@@ -1,5 +1,6 @@
 ---
 
+* [Bug 2777] Fixed loops and decoding of Meinberg GPS satellite info.
 * [Bug 2728] See if C99-style structure initialization works.
 * [Bug 2747] Upgrade libevent to 2.1.5-beta.
 * [Bug 2749] ntp/lib/NTP/Util.pm needs update for ntpq -w, IPv6, .POOL. .

@@ -300,12 +300,12 @@ get_mbg_cfgh(
   get_mbg_tgps(buffpp, &cfghp->tot_63);
   get_mbg_tgps(buffpp, &cfghp->t0a);
 
-  for (i = MIN_SVNO; i <= MAX_SVNO; i++)
+  for (i = 0; i < N_SVNO; i++)
     {
       get_mbg_cfg(buffpp, &cfghp->cfg[i]);
     }
-  
-  for (i = MIN_SVNO; i <= MAX_SVNO; i++)
+
+  for (i = 0; i < N_SVNO; i++)
     {
       get_mbg_health(buffpp, &cfghp->health[i]);
     }
