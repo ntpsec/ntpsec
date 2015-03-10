@@ -1,7 +1,7 @@
 /*
  *  EDIT THIS FILE WITH CAUTION  (ntpd-opts.c)
  *
- *  It has been AutoGen-ed  March  7, 2015 at 11:53:49 AM by AutoGen 5.18.5pre4
+ *  It has been AutoGen-ed  March 10, 2015 at 12:31:30 PM by AutoGen 5.18.5pre4
  *  From the definitions    ntpd-opts.def
  *  and the template file   options
  *
@@ -75,7 +75,7 @@ extern FILE * option_usage_fp;
  *  static const strings for ntpd options
  */
 static char const ntpd_opt_strs[3055] =
-/*     0 */ "ntpd 4.3.7\n"
+/*     0 */ "ntpd 4.3.8\n"
             "Copyright (C) 1992-2015 The University of Delaware and Network Time Foundation, all rights reserved.\n"
             "This is free software. It is licensed for use, modification and\n"
             "redistribution under the terms of the NTP License, copies of which\n"
@@ -202,12 +202,12 @@ static char const ntpd_opt_strs[3055] =
 /*  2830 */ "output version information and exit\0"
 /*  2866 */ "version\0"
 /*  2874 */ "NTPD\0"
-/*  2879 */ "ntpd - NTP daemon program - Ver. 4.3.7\n"
+/*  2879 */ "ntpd - NTP daemon program - Ver. 4.3.8\n"
             "Usage:  %s [ -<flag> [<val>] | --<name>[{=| }<val>] ]... \\\n"
             "\t\t[ <server1> ... <serverN> ]\n\0"
 /*  3008 */ "http://bugs.ntp.org, bugs@ntp.org\0"
 /*  3042 */ "\n\0"
-/*  3044 */ "ntpd 4.3.7";
+/*  3044 */ "ntpd 4.3.8";
 
 /**
  *  ipv4 option description with
@@ -1502,7 +1502,7 @@ static void bogus_function(void) {
      translate option names.
    */
   /* referenced via ntpdOptions.pzCopyright */
-  puts(_("ntpd 4.3.7\n\
+  puts(_("ntpd 4.3.8\n\
 Copyright (C) 1992-2015 The University of Delaware and Network Time Foundation, all rights reserved.\n\
 This is free software. It is licensed for use, modification and\n\
 redistribution under the terms of the NTP License, copies of which\n\
@@ -1640,7 +1640,7 @@ implied warranty.\n"));
   puts(_("output version information and exit"));
 
   /* referenced via ntpdOptions.pzUsageTitle */
-  puts(_("ntpd - NTP daemon program - Ver. 4.3.7\n\
+  puts(_("ntpd - NTP daemon program - Ver. 4.3.8\n\
 Usage:  %s [ -<flag> [<val>] | --<name>[{=| }<val>] ]... \\\n\
 \t\t[ <server1> ... <serverN> ]\n"));
 
@@ -1648,7 +1648,7 @@ Usage:  %s [ -<flag> [<val>] | --<name>[{=| }<val>] ]... \\\n\
   puts(_("\n"));
 
   /* referenced via ntpdOptions.pzFullVersion */
-  puts(_("ntpd 4.3.7"));
+  puts(_("ntpd 4.3.8"));
 
   /* referenced via ntpdOptions.pzFullUsage */
   puts(_("<<<NOT-FOUND>>>"));

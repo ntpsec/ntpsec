@@ -10,11 +10,11 @@
 .ds B-Font B
 .ds I-Font I
 .ds R-Font R
-.TH ntpdc @NTPDC_MS@ "07 Mar 2015" "4.3.7" "User Commands"
+.TH ntpdc @NTPDC_MS@ "10 Mar 2015" "4.3.8" "User Commands"
 .\"
-.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-_DaWVJ/ag-mEaOUJ)
+.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-SwaWus/ag-4waOts)
 .\"
-.\" It has been AutoGen-ed March 7, 2015 at 04:52:57 PM by AutoGen 5.18.5pre4
+.\" It has been AutoGen-ed March 10, 2015 at 12:34:46 PM by AutoGen 5.18.5pre4
 .\" From the definitions ntpdc-opts.def
 .\" and the template file agman-cmd.tpl
 .SH NAME
