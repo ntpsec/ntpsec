@@ -708,9 +708,12 @@ local_clock(
 		 * frequency and jitter.
 		 */
 		ntp_adj_ret = ntp_adjtime(&ntv);
+		/*
+		 * A squeal is a return status < 0, or a state change.
+		 */
 		if ((0 > ntp_adj_ret) || (ntp_adj_ret != kernel_status)) {
-		    kernel_status = ntp_adj_ret;
-		    ntp_adjtime_error_handler(__func__, &ntv, ntp_adj_ret, errno, hardpps_enable, 0, __LINE__ - 1);
+			kernel_status = ntp_adj_ret;
+			ntp_adjtime_error_handler(__func__, &ntv, ntp_adj_ret, errno, hardpps_enable, 0, __LINE__ - 1);
 		}
 		pll_status = ntv.status;
 #ifdef STA_NANO
