@@ -1,13 +1,13 @@
 /*
  * /src/NTP/ntp4-dev/libparse/clk_schmid.c,v 4.9 2005/04/16 17:32:10 kardel RELEASE_20050508_A
- *  
+ *
  * clk_schmid.c,v 4.9 2005/04/16 17:32:10 kardel RELEASE_20050508_A
  *
  * Schmid clock support
  * based on information and testing from Adam W. Feigin et. al (Swisstime iis.ethz.ch)
  *
  * Copyright (c) 1995-2005 by Frank Kardel <kardel <AT> ntp.org>
- * Copyright (c) 1989-1994 by Frank Kardel, Friedrich-Alexander Universität Erlangen-Nürnberg, Germany
+ * Copyright (c) 1989-1994 by Frank Kardel, Friedrich-Alexander Universitaet Erlangen-Nuernberg, Germany
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -61,7 +61,7 @@ extern int printf (const char *, ...);
  * The command to Schmid's DCF77 clock is a single byte; each bit
  * allows the user to select some part of the time string, as follows (the
  * output for the lsb is sent first).
- * 
+ *
  * Bit 0:	time in MEZ, 4 bytes *binary, not BCD*; hh.mm.ss.tenths
  * Bit 1:	date 3 bytes *binary, not BCD: dd.mm.yy
  * Bit 2:	week day, 1 byte (unused here)
@@ -155,7 +155,7 @@ cvt_schmid(
 				default:
 				    return CVT_FAIL|CVT_BADFMT;
 			    }
-	  
+
 			    if (!(buffer[7] & WS_TIME))
 			    {
 				    clock_time->flags |= PARSEB_POWERUP;
@@ -185,7 +185,7 @@ cvt_schmid(
 			    }
 
 			    clock_time->flags |= PARSEB_S_LEAP|PARSEB_S_ANTENNA;
-	  
+
 			    return CVT_OK;
 		    }
 	}
@@ -204,9 +204,9 @@ inp_schmid(
 	  )
 {
 	unsigned int rtc;
-	
+
 	parseprintf(DD_PARSE, ("inp_schmid(0x%lx, 0x%x, ...)\n", (long)parseio, ch));
-	
+
 	switch (ch)
 	{
 	case 0xFD:		/*  */

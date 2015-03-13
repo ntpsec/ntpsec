@@ -43,6 +43,7 @@
 #include "ntp_types.h"
 #include "ntp_stdlib.h"
 #include "ntp_fp.h"
+#include "ntp_calendar.h"
 #include "mbg_gps166.h"
 #include "binio.h"
 #include "ieee754io.h"
@@ -63,10 +64,10 @@ put_mbg_header(
 	GPS_MSG_HDR *headerp
 	)
 {
-  put_lsb_short(bufpp, headerp->gps_cmd);
-  put_lsb_short(bufpp, headerp->gps_len);
-  put_lsb_short(bufpp, headerp->gps_data_csum);
-  put_lsb_short(bufpp, headerp->gps_hdr_csum);
+  put_lsb_short(bufpp, headerp->cmd);
+  put_lsb_short(bufpp, headerp->len);
+  put_lsb_short(bufpp, headerp->data_csum);
+  put_lsb_short(bufpp, headerp->hdr_csum);
 }
 
 void
@@ -133,18 +134,18 @@ get_mbg_tgps(
 void
 get_mbg_tm(
 	unsigned char **buffpp,
-	TM *tmp
+	TM_GPS *tmp
 	)
 {
   tmp->year = get_lsb_short(buffpp);
   tmp->month = *(*buffpp)++;
-  tmp->mday  = *(*buffpp)++;
-  tmp->yday  = get_lsb_short(buffpp);
-  tmp->wday  = *(*buffpp)++;
-  tmp->hour  = *(*buffpp)++;
-  tmp->minute = *(*buffpp)++;
-  tmp->second = *(*buffpp)++;
-  tmp->frac  = get_lsb_long(buffpp);
+  tmp->mday = *(*buffpp)++;
+  tmp->yday = get_lsb_short(buffpp);
+  tmp->wday = *(*buffpp)++;
+  tmp->hour = *(*buffpp)++;
+  tmp->min = *(*buffpp)++;
+  tmp->sec = *(*buffpp)++;
+  tmp->frac = get_lsb_long(buffpp);
   tmp->offs_from_utc = get_lsb_long(buffpp);
   tmp->status= get_lsb_short(buffpp);
 }
@@ -216,8 +217,8 @@ mbg_time_status_str(
 {
 	static struct state
 	{
-		int         flag;		/* bit flag */
-		const char *string;	/* bit name */
+		int         flag;       /* bit flag */
+		const char *string;     /* bit name */
 	} states[] =
 		  {
 			  { TM_UTC,    "UTC CORR" },
@@ -233,7 +234,7 @@ mbg_time_status_str(
 	{
 		char *start, *p;
 		struct state *s;
-	
+
 		start = p = *buffpp;
 
 		for (s = states; s->flag; s++)
@@ -252,25 +253,27 @@ mbg_time_status_str(
 		*buffpp = p;
 	}
 }
-      
+
 void
 mbg_tm_str(
 	char **buffpp,
-	TM *tmp,
-	int size
+	TM_GPS *tmp,
+	int size,
+	int print_status
 	)
 {
 	char *s = *buffpp;
 
 	snprintf(*buffpp, size, "%04d-%02d-%02d %02d:%02d:%02d.%07ld (%c%02d%02d) ",
 		 tmp->year, tmp->month, tmp->mday,
-		 tmp->hour, tmp->minute, tmp->second, tmp->frac,
+		 tmp->hour, tmp->min, tmp->sec, (long) tmp->frac,
 		 (tmp->offs_from_utc < 0) ? '-' : '+',
 		 abs((int)tmp->offs_from_utc) / 3600,
 		 (abs((int)tmp->offs_from_utc) / 60) % 60);
 	*buffpp += strlen(*buffpp);
 
-	mbg_time_status_str(buffpp, tmp->status, size - (*buffpp - s));
+	if (print_status)
+		mbg_time_status_str(buffpp, tmp->status, size - (*buffpp - s));
 }
 
 void
@@ -281,8 +284,8 @@ mbg_tgps_str(
 	)
 {
 	snprintf(*buffpp, size, "week %d + %ld days + %ld.%07ld sec",
-		 tgpsp->wn, tgpsp->sec / 86400,
-		 tgpsp->sec % 86400, tgpsp->tick);
+		 tgpsp->wn, (long) tgpsp->sec / SECSPERDAY,
+		 (long) tgpsp->sec % SECSPERDAY, (long) tgpsp->tick);
 	*buffpp += strlen(*buffpp);
 }
 
@@ -293,19 +296,19 @@ get_mbg_cfgh(
 	)
 {
   int i;
-  
+
   cfghp->csum = get_lsb_short(buffpp);
   cfghp->valid = get_lsb_short(buffpp);
   get_mbg_tgps(buffpp, &cfghp->tot_51);
   get_mbg_tgps(buffpp, &cfghp->tot_63);
   get_mbg_tgps(buffpp, &cfghp->t0a);
 
-  for (i = 0; i < N_SVNO; i++)
+  for (i = 0; i < N_SVNO_GPS; i++)
     {
       get_mbg_cfg(buffpp, &cfghp->cfg[i]);
     }
 
-  for (i = 0; i < N_SVNO; i++)
+  for (i = 0; i < N_SVNO_GPS; i++)
     {
       get_mbg_health(buffpp, &cfghp->health[i]);
     }
@@ -321,12 +324,12 @@ get_mbg_utc(
   utcp->valid = get_lsb_short(buffpp);
 
   get_mbg_tgps(buffpp, &utcp->t0t);
-  
+
   if (fetch_ieee754(buffpp, IEEE_DOUBLE, &utcp->A0, mbg_double) != IEEE_OK)
     {
       L_CLR(&utcp->A0);
     }
-  
+
   if (fetch_ieee754(buffpp, IEEE_DOUBLE, &utcp->A1, mbg_double) != IEEE_OK)
     {
       L_CLR(&utcp->A1);
@@ -345,7 +348,7 @@ get_mbg_lla(
 	)
 {
   int i;
-  
+
   for (i = LAT; i <= ALT; i++)
     {
       if  (fetch_ieee754(buffpp, IEEE_DOUBLE, &lla[i], mbg_double) != IEEE_OK)
@@ -367,7 +370,7 @@ get_mbg_xyz(
 	)
 {
   int i;
-  
+
   for (i = XP; i <= ZP; i++)
     {
       if  (fetch_ieee754(buffpp, IEEE_DOUBLE, &xyz[i], mbg_double) != IEEE_OK)
@@ -384,7 +387,7 @@ get_mbg_comparam(
 	)
 {
   size_t i;
-  
+
   comparamp->baud_rate = get_lsb_long(buffpp);
   for (i = 0; i < sizeof(comparamp->framing); i++)
     {
@@ -400,12 +403,12 @@ get_mbg_portparam(
 	)
 {
   int i;
-  
-  for (i = 0; i < N_COM; i++)
+
+  for (i = 0; i < DEFAULT_N_COM; i++)
     {
       get_mbg_comparam(buffpp, &portparamp->com[i]);
     }
-  for (i = 0; i < N_COM; i++)
+  for (i = 0; i < DEFAULT_N_COM; i++)
     {
       portparamp->mode[i] = *(*buffpp)++;
     }
@@ -416,7 +419,7 @@ get_mbg_portparam(
 	{									\
 	  L_CLR(addr);								\
 	}
-	
+
 void
 get_mbg_eph(
 	unsigned char ** buffpp,
@@ -425,7 +428,7 @@ get_mbg_eph(
 {
   ephp->csum   = get_lsb_short(buffpp);
   ephp->valid  = get_lsb_short(buffpp);
-  
+
   ephp->health = get_lsb_short(buffpp);
   ephp->IODC   = get_lsb_short(buffpp);
   ephp->IODE2  = get_lsb_short(buffpp);
@@ -470,7 +473,7 @@ get_mbg_alm(
 {
   almp->csum   = get_lsb_short(buffpp);
   almp->valid  = get_lsb_short(buffpp);
-  
+
   almp->health = get_lsb_short(buffpp);
   get_mbg_tgps(buffpp, &almp->t0a);
 

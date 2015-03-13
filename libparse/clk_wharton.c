@@ -166,7 +166,7 @@ clockformat_t   clock_wharton_400a =
 	0,			/* conversion configuration */
 	"WHARTON 400A Series clock Output Format 1",	/* String format name */
 	15,			/* string buffer */
-	0			/* no private data (complete pakets) */
+	0			/* no private data (complete packets) */
 };
 
 #else /* not (REFCLOCK && CLOCK_PARSE && CLOCK_WHARTON_400A) */

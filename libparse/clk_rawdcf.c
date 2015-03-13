@@ -1,12 +1,12 @@
 /*
  * /src/NTP/REPOSITORY/ntp4-dev/libparse/clk_rawdcf.c,v 4.18 2006/06/22 18:40:01 kardel RELEASE_20060622_A
- *  
+ *
  * clk_rawdcf.c,v 4.18 2006/06/22 18:40:01 kardel RELEASE_20060622_A
  *
  * Raw DCF77 pulse clock support
  *
  * Copyright (c) 1995-2006 by Frank Kardel <kardel <AT> ntp.org>
- * Copyright (c) 1989-1994 by Frank Kardel, Friedrich-Alexander Universität Erlangen-Nürnberg, Germany
+ * Copyright (c) 1989-1994 by Frank Kardel, Friedrich-Alexander Universitaet Erlangen-Nuernberg, Germany
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -127,13 +127,13 @@ static struct dcfparam
 {
 	const unsigned char *onebits;
 	const unsigned char *zerobits;
-} dcfparameter = 
+} dcfparameter =
 {
 	(const unsigned char *)"###############RADMLS1248124P124812P1248121241248112481248P??", /* 'ONE' representation */
 	(const unsigned char *)"--------------------s-------p------p----------------------p__"  /* 'ZERO' representation */
 };
 
-static struct rawdcfcode 
+static struct rawdcfcode
 {
 	char offset;			/* start bit */
 } rawdcfcode[] =
@@ -189,7 +189,7 @@ ext_bf(
 	int i, first;
 
 	first = rawdcfcode[idx].offset;
-  
+
 	for (i = rawdcfcode[idx+1].offset - 1; i >= first; i--)
 	{
 		sum <<= 1;
@@ -238,7 +238,7 @@ convert_rawdcf(
 #endif
 		return CVT_NONE;
 	}
-  
+
 	for (i = 0; i < size; i++)
 	{
 		if ((*s != *b) && (*s != *c))
@@ -504,7 +504,7 @@ cvt_rawdcf(
 			}
 	       }
         }
-	 
+
     	return rtc;
 }
 
@@ -546,9 +546,9 @@ snt_rawdcf(
 #else
 		parseio->parse_dtime.parse_time.fp.l_ui++;
 #endif
-		
+
 		parseprintf(DD_RAWDCF,("parse: snt_rawdcf: time stamp synthesized offset %d seconds\n", parseio->parse_index - 1));
-		
+
 		return updatetimeinfo(parseio, parseio->parse_lstate);
 	}
 	return CVT_NONE;
@@ -567,9 +567,9 @@ inp_rawdcf(
 	  )
 {
 	static struct timeval timeout = { 1, 500000 }; /* 1.5 secongs denote second #60 */
-	
+
 	parseprintf(DD_PARSE, ("inp_rawdcf(0x%lx, 0x%x, ...)\n", (long)parseio, ch));
-	
+
 	parseio->parse_dtime.parse_stime = *tstamp; /* collect timestamp */
 
 	if (parse_timedout(parseio, tstamp, &timeout))
@@ -583,7 +583,7 @@ inp_rawdcf(
 	else
 	{
 		unsigned int rtc;
-		
+
 		rtc = parse_addchar(parseio, ch);
 		if (rtc == PARSE_INP_SKIP)
 		{

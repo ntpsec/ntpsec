@@ -7,7 +7,7 @@
  * Thanks to Sven Dietrich for providing test hardware
  *
  * Copyright (c) 1995-2009 by Frank Kardel <kardel <AT> ntp.org>
- * Copyright (c) 1989-1994 by Frank Kardel, Friedrich-Alexander Universität Erlangen-Nürnberg, Germany
+ * Copyright (c) 1989-1994 by Frank Kardel, Friedrich-Alexander Universitaet Erlangen-Nuernberg, Germany
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -200,7 +200,7 @@ inp_tsip(
 
   return PARSE_INP_SKIP;
 }
-     
+
 static int
 getshort(
 	 unsigned char *p
@@ -245,7 +245,7 @@ cvt_trimtsip(
 	{
 		unsigned char *bp;
 		cmd = buffer[1];
-      
+
 		    switch(cmd)
 		    {
 		    case CMD_RCURTIME:
@@ -258,7 +258,7 @@ cvt_trimtsip(
 				    bp = &mb(0);
 				    if (fetch_ieee754(&bp, IEEE_SINGLE, &secs, trim_offsets) != IEEE_OK)
 					    return CVT_FAIL|CVT_BADFMT;
-				    
+
 				    if ((secs.l_i <= 0) ||
 					(t->t_utcknown == 0))
 				    {
@@ -275,7 +275,7 @@ cvt_trimtsip(
 				    bp = &mb(6);
 				    if (fetch_ieee754(&bp, IEEE_SINGLE, &utcoffset, trim_offsets) != IEEE_OK)
 					    return CVT_FAIL|CVT_BADFMT;
-				    
+
 				    L_SUB(&secs, &utcoffset); /* adjust GPS time to UTC time */
 
 				    gpstolfp((unsigned short)week, (unsigned short)0,
@@ -289,10 +289,10 @@ cvt_trimtsip(
 
 				    if (t->t_leap == ADDSECOND)
 					clock_time->flags |= PARSEB_LEAPADD;
-		      
+
 				    if (t->t_leap == DELSECOND)
 					clock_time->flags |= PARSEB_LEAPDEL;
-	
+
 				    switch (t->t_operable)
 				      {
 				      case STATUS_SYNC:
@@ -307,12 +307,12 @@ cvt_trimtsip(
 					clock_time->flags |= PARSEB_NOSYNC|PARSEB_POWERUP;
 					break;
 				      }
-					
+
 				    if (t->t_mode == 0)
 					    clock_time->flags |= PARSEB_POSITION;
-				    
+
 				    clock_time->flags |= PARSEB_S_LEAP|PARSEB_S_POSITION;
-				    
+
 				    return CVT_OK;
 
 			    } /* case 0x41 */
@@ -346,7 +346,7 @@ cvt_trimtsip(
 			    {
 			            l_fp t0t;
 				    unsigned char *lbp;
-				    
+
 				    /* UTC correction data - derive a leap warning */
 				    int tls   = t->t_gpsutc     = getshort((unsigned char *)&mb(12)); /* current leap correction (GPS-UTC) */
 				    int tlsf  = t->t_gpsutcleap = getshort((unsigned char *)&mb(24)); /* new leap correction */
@@ -359,13 +359,13 @@ cvt_trimtsip(
 				    t->t_week = getshort((unsigned char *)&mb(18)); /* current week no */
 				    if (t->t_week < 990)
 				      t->t_week += 1024;
-				    
+
 				    lbp = (unsigned char *)&mb(14); /* last update time */
 				    if (fetch_ieee754(&lbp, IEEE_SINGLE, &t0t, trim_offsets) != IEEE_OK)
 					    return CVT_FAIL|CVT_BADFMT;
 
 				    t->t_utcknown = t0t.l_ui != 0;
-				      
+
 				    if ((t->t_utcknown) && /* got UTC information */
 					(tlsf != tls)   && /* something will change */
 					((t->t_weekleap - t->t_week) < 5)) /* and close in the future */

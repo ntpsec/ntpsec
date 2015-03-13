@@ -4,7 +4,7 @@
  * parse.h,v 4.12 2007/01/14 08:36:03 kardel RELEASE_20070114_A
  *
  * Copyright (c) 1995-2005 by Frank Kardel <kardel <AT> ntp.org>
- * Copyright (c) 1989-1994 by Frank Kardel, Friedrich-Alexander Universität Erlangen-Nürnberg, Germany
+ * Copyright (c) 1989-1994 by Frank Kardel, Friedrich-Alexander Universitaet Erlangen-Nuernberg, Germany
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -103,6 +103,13 @@ extern unsigned int splclock (void);
 #ifndef TIMES10
 #define TIMES10(_X_)	(((_X_) << 3) + ((_X_) << 1))
 #endif
+
+/*
+ * some constants useful for GPS time conversion
+ */
+#define GPSORIGIN       2524953600UL                /* NTP origin - GPS origin in seconds */
+#define GPSWRAP         990                         /* assume week count less than this in the previous epoch */
+#define GPSWEEKS        1024                        /* number of weeks until the GPS epch rolls over */
 
 /*
  * state flags
@@ -229,13 +236,13 @@ typedef struct parsetime parsetime_t;
 #define PARSE_IO_CSIZE	0x00000003
 #define PARSE_IO_CS5	0x00000000
 #define PARSE_IO_CS6	0x00000001
-#define PARSE_IO_CS7	0x00000002 
-#define PARSE_IO_CS8	0x00000003 
+#define PARSE_IO_CS7	0x00000002
+#define PARSE_IO_CS8	0x00000003
 
 /*
  * ioctl structure
  */
-union parsectl 
+union parsectl
 {
   struct parsegettc
     {
@@ -258,7 +265,7 @@ union parsectl
       u_long         parse_cs;	/* character size (needed for stripping) */
     } parsesetcs;
 };
-  
+
 typedef union parsectl parsectl_t;
 
 /*------ for conversion routines --------*/
@@ -266,7 +273,7 @@ typedef union parsectl parsectl_t;
 struct parse			/* parse module local data */
 {
   int            parse_flags;	/* operation and current status flags */
-  
+
   int		 parse_ioflags;	   /* io handling flags (5-8 Bit control currently) */
 
   /*
@@ -286,7 +293,7 @@ struct parse			/* parse module local data */
   char          *parse_ldata;	/* last data buffer */
   unsigned short parse_ldsize;	/* last data buffer length */
   u_long         parse_badformat;	/* number of unparsable pakets */
-  
+
   timestamp_t    parse_lastchar; /* last time a character was received */
   parsetime_t    parse_dtime;	/* external data prototype */
 };

@@ -1,6 +1,6 @@
 /*
  * /src/NTP/REPOSITORY/ntp4-dev/parseutil/dcfd.c,v 4.18 2005/10/07 22:08:18 kardel RELEASE_20051008_A
- *  
+ *
  * dcfd.c,v 4.18 2005/10/07 22:08:18 kardel RELEASE_20051008_A
  *
  * DCF77 100/200ms pulse synchronisation daemon program (via 50Baud serial line)
@@ -14,7 +14,7 @@
  *  Leap second handling (at that level you should switch to NTP Version 4 - really!)
  *
  * Copyright (c) 1995-2005 by Frank Kardel <kardel <AT> ntp.org>
- * Copyright (c) 1989-1994 by Frank Kardel, Friedrich-Alexander Universität Erlangen-Nürnberg, Germany
+ * Copyright (c) 1989-1994 by Frank Kardel, Friedrich-Alexander Universitaet Erlangen-Nuernberg, Germany
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions

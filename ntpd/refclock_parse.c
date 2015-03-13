@@ -54,36 +54,36 @@
 
 /*
  * This driver currently provides the support for
- *   - Meinberg receiver DCF77 PZF 535 (TCXO version)       (DCF)
- *   - Meinberg receiver DCF77 PZF 535 (OCXO version)       (DCF)
- *   - Meinberg receiver DCF77 PZF 509                      (DCF)
+ *   - Meinberg receiver DCF77 PZF535 (TCXO version)        (DCF)
+ *   - Meinberg receiver DCF77 PZF535 (OCXO version)        (DCF)
+ *   - Meinberg receiver DCF77 PZF509                       (DCF)
  *   - Meinberg receiver DCF77 AM receivers (e.g. C51)      (DCF)
  *   - IGEL CLOCK                                           (DCF)
  *   - ELV DCF7000                                          (DCF)
  *   - Schmid clock                                         (DCF)
  *   - Conrad DCF77 receiver module                         (DCF)
  *   - FAU DCF77 NTP receiver (TimeBrick)                   (DCF)
- *   - WHARTON 400A Series clock			    (DCF)
+ *   - WHARTON 400A Series clock                            (DCF)
  *
- *   - Meinberg GPS166/GPS167                               (GPS)
+ *   - Meinberg GPS receivers                               (GPS)
  *   - Trimble (TSIP and TAIP protocol)                     (GPS)
  *
  *   - RCC8000 MSF Receiver                                 (MSF)
- *   - VARITEXT clock					    (MSF)
+ *   - VARITEXT clock                                       (MSF)
  */
 
 /*
  * Meinberg receivers are usually connected via a
- * 9600 baud serial line
+ * 9600/7E1 or 19200/8N1 serial line.
  *
  * The Meinberg GPS receivers also have a special NTP time stamp
  * format. The firmware release is Uni-Erlangen.
  *
  * Meinberg generic receiver setup:
- *	output time code every second
- *	Baud rate 9600 7E2S
+ *      output time code every second
+ *      Baud rate 9600 7E2S
  *
- * Meinberg GPS16x setup:
+ * Meinberg GPS receiver setup:
  *      output time code every second
  *      Baudrate 19200 8N1
  *
@@ -91,7 +91,9 @@
  * in Meinberg receivers.
  *
  * Special software versions are only sensible for the
- * GPS 16x family of receivers.
+ * oldest GPS receiver, GPS16x. For newer receiver types
+ * the output string format can be configured at the device,
+ * and the device name is generally GPSxxx instead of GPS16x.
  *
  * Meinberg can be reached via: http://www.meinberg.de/
  */
@@ -162,7 +164,7 @@
 /*
  * document type of PPS interfacing - copy of ifdef mechanism in local_input()
  */
-#undef PPS_METHOD 
+#undef PPS_METHOD
 
 #ifdef HAVE_PPSAPI
 #define PPS_METHOD "PPS API"
@@ -180,6 +182,18 @@
 #endif
 #endif /* TIOCDCDTIMESTAMP */
 #endif /* HAVE_PPSAPI */
+
+/*
+ * COND_DEF can be conditionally defined as DEF or 0. If defined as DEF
+ * then some more parse-specific variables are flagged to be printed with
+ * "ntpq -c cv <assid>". This can be lengthy, so by default COND_DEF
+ * should be defined as 0.
+ */
+#if 0
+# define COND_DEF   DEF   // enable this for testing
+#else
+# define COND_DEF   0     // enable this by default
+#endif
 
 #include "ntp_io.h"
 #include "ntp_stdlib.h"
@@ -382,7 +396,7 @@ struct parseunit
 	 * PARSE io
 	 */
 	bind_t	     *binding;	        /* io handling binding */
-	
+
 	/*
 	 * parse state
 	 */
@@ -466,7 +480,7 @@ typedef struct poll_info
 #define NOCLOCK_FORMAT		""
 #define NOCLOCK_TYPE		CTL_SST_TS_UNSPEC
 #define NOCLOCK_SAMPLES		0
-#define NOCLOCK_KEEP		0 
+#define NOCLOCK_KEEP		0
 
 #define DCF_TYPE		CTL_SST_TS_LF
 #define GPS_TYPE		CTL_SST_TS_UHF
@@ -536,14 +550,14 @@ typedef struct poll_info
 #define DCFPZF535OCXO_FORMAT	    "Meinberg Standard"
 
 /*
- * Meinberg GPS16X receiver
+ * Meinberg GPS receivers
  */
 static	void	gps16x_message	 (struct parseunit *, parsetime_t *);
 static  int     gps16x_poll_init (struct parseunit *);
 
 #define	GPS16X_ROOTDELAY	0.0         /* nothing here */
 #define	GPS16X_BASEDELAY	0.001968         /* XXX to be fixed ! 1.968ms +- 104us (oscilloscope) - relative to start (end of STX) */
-#define	GPS16X_DESCRIPTION      "Meinberg GPS16x receiver"
+#define	GPS16X_DESCRIPTION      "Meinberg GPS receiver"
 #define GPS16X_MAXUNSYNC        60*60*96       /* only trust clock for 4 days
 						* @ 5e-9df/f we have accumulated
 						* at most an error of 1.73 ms
@@ -745,9 +759,9 @@ static	void	trimbletsip_event	(struct parseunit *, int);
 #define TRIMBLETAIP_INIT	    trimbletaip_init
 #define TRIMBLETSIP_INIT	    trimbletsip_init
 
-#define TRIMBLETAIP_EVENT	    trimbletaip_event   
+#define TRIMBLETAIP_EVENT	    trimbletaip_event
 
-#define TRIMBLETSIP_EVENT	    trimbletsip_event   
+#define TRIMBLETSIP_EVENT	    trimbletsip_event
 #define TRIMBLETSIP_MESSAGE	    trimbletsip_message
 
 #define TRIMBLETAIP_END		    0
@@ -804,7 +818,7 @@ static poll_info_t rcc8000_pollinfo = { RCC_POLLRATE, RCC_POLLCMD, RCC_CMDSIZE }
 #define RCC8000_KEEP	        3
 
 /*
- * Hopf Radio clock 6021 Format 
+ * Hopf Radio clock 6021 Format
  *
  */
 #define HOPF6021_ROOTDELAY	0.0
@@ -1200,7 +1214,7 @@ static struct parse_clockinfo
 	},
 	{                             /* mode 12 */
 		HOPF6021_FLAGS,
-		NO_POLL,     
+		NO_POLL,
 		NO_INIT,
 		NO_EVENT,
 		NO_END,
@@ -1576,7 +1590,7 @@ list_err(
 
 	if (do_it)
 	    err->err_cnt++;
-  
+
 	if (err->err_stage->err_count &&
 	    (err->err_cnt >= err->err_stage->err_count))
 	{
@@ -1600,7 +1614,7 @@ list_err(
 			l_mktime(current_time - err->err_started));
 		err->err_suppressed = 0;
 	}
-  
+
 	return do_it;
 }
 
@@ -1715,7 +1729,7 @@ static int  stream_setfmt   (struct parseunit *, parsectl_t *);
 static int  stream_timecode (struct parseunit *, parsectl_t *);
 static void stream_receive  (struct recvbuf *);
 #endif
-					 
+
 static int  local_init     (struct parseunit *);
 static void local_end      (struct parseunit *);
 static int  local_nop      (struct parseunit *);
@@ -1796,7 +1810,7 @@ ppsclock_init(
 {
         static char m1[] = "ppsclocd";
 	static char m2[] = "ppsclock";
-	
+
 	/*
 	 * now push the parse streams module
 	 * it will ensure exclusive access to the device
@@ -1885,7 +1899,7 @@ stream_setcs(
 	)
 {
 	struct strioctl strioc;
-  
+
 	strioc.ic_cmd     = PARSEIOC_SETCS;
 	strioc.ic_timout  = 0;
 	strioc.ic_dp      = (char *)tcl;
@@ -1908,7 +1922,7 @@ stream_enable(
 	)
 {
 	struct strioctl strioc;
-  
+
 	strioc.ic_cmd     = PARSEIOC_ENABLE;
 	strioc.ic_timout  = 0;
 	strioc.ic_dp      = (char *)0;
@@ -1932,7 +1946,7 @@ stream_disable(
 	)
 {
 	struct strioctl strioc;
-  
+
 	strioc.ic_cmd     = PARSEIOC_DISABLE;
 	strioc.ic_timout  = 0;
 	strioc.ic_dp      = (char *)0;
@@ -1957,7 +1971,7 @@ stream_getfmt(
 	)
 {
 	struct strioctl strioc;
-  
+
 	strioc.ic_cmd     = PARSEIOC_GETFMT;
 	strioc.ic_timout  = 0;
 	strioc.ic_dp      = (char *)tcl;
@@ -1980,7 +1994,7 @@ stream_setfmt(
 	)
 {
 	struct strioctl strioc;
-  
+
 	strioc.ic_cmd     = PARSEIOC_SETFMT;
 	strioc.ic_timout  = 0;
 	strioc.ic_dp      = (char *)tcl;
@@ -2005,12 +2019,12 @@ stream_timecode(
 	)
 {
 	struct strioctl strioc;
-  
+
 	strioc.ic_cmd     = PARSEIOC_TIMECODE;
 	strioc.ic_timout  = 0;
 	strioc.ic_dp      = (char *)tcl;
 	strioc.ic_len     = sizeof (*tcl);
-	
+
 	if (ioctl(parse->generic->io.fd, I_STR, (caddr_t)&strioc) == -1)
 	{
 		ERR(ERR_INTERNAL)
@@ -2045,7 +2059,7 @@ stream_receive(
 		return;
 	}
 	clear_err(parse, ERR_BADIO);
-  
+
 	memmove((caddr_t)&parsetime,
 		(caddr_t)rbufp->recv_buffer,
 		sizeof(parsetime_t));
@@ -2211,7 +2225,7 @@ local_input(
 				{
 					struct timespec pps_timeout;
 					pps_info_t      pps_info;
-				
+
 					pps_timeout.tv_sec  = 0;
 					pps_timeout.tv_nsec = 0;
 
@@ -2287,11 +2301,11 @@ local_input(
 #else
 #ifdef TIOCDCDTIMESTAMP
 				struct timeval dcd_time;
-				
+
 				if (ioctl(parse->ppsfd, TIOCDCDTIMESTAMP, &dcd_time) != -1)
 				{
 					l_fp tstmp;
-					
+
 					TVTOTS(&dcd_time, &tstmp);
 					tstmp.l_ui += JAN_1970;
 					L_SUB(&ts.fp, &tstmp);
@@ -2413,7 +2427,7 @@ local_receive(
 		return;
 	}
 	clear_err(parse, ERR_BADIO);
-  
+
 	memmove((caddr_t)&parsetime,
 		(caddr_t)rbufp->recv_buffer,
 		sizeof(parsetime_t));
@@ -2566,7 +2580,7 @@ parsestate(
 				{
 					t = ap(buffer, size, t, "; ");
 				}
-	
+
 				t = ap(buffer, size, t, "%s",
 				    sflagstrings[i].name);
 			}
@@ -2808,7 +2822,7 @@ parse_shutdown(
 	{
 		parse->parse_type->cl_end(parse);
 	}
-	
+
 	/*
 	 * cleanup before leaving this world
 	 */
@@ -2821,7 +2835,7 @@ parse_shutdown(
 	io_closeclock(&parse->generic->io);
 
 	free_varlist(parse->kv);
-  
+
 	NLOG(NLOG_CLOCKINFO) /* conditional if clause for conditional syslog */
 		msyslog(LOG_INFO, "PARSE receiver #%d: reference clock \"%s\" removed",
 			CLK_UNIT(parse->peer), parse->parse_type->cl_description);
@@ -2847,14 +2861,14 @@ parse_hardpps(
 	if (CLK_PPS(parse->peer) && (parse->flags & PARSE_PPSKERNEL)) {
 		int	i = 0;
 
-		if (mode == PARSE_HARDPPS_ENABLE) 
+		if (mode == PARSE_HARDPPS_ENABLE)
 		        {
 			        if (parse->flags & PARSE_CLEAR)
 				        i = PPS_CAPTURECLEAR;
 				else
 				        i = PPS_CAPTUREASSERT;
 			}
-		
+
 		if (time_pps_kcbind(parse->atom.handle, PPS_KC_HARDPPS, i,
 		    PPS_TSFMT_TSPEC) < 0) {
 		        msyslog(LOG_ERR, "PARSE receiver #%d: time_pps_kcbind failed: %m",
@@ -2884,7 +2898,7 @@ parse_ppsapi(
 {
 	int cap, mode_ppsoffset;
 	const char *cp;
-	
+
 	parse->flags &= ~PARSE_PPSCLOCK;
 
 	/*
@@ -2893,7 +2907,7 @@ parse_ppsapi(
 	if (time_pps_getcap(parse->atom.handle, &cap) < 0) {
 		msyslog(LOG_ERR, "PARSE receiver #%d: parse_ppsapi: time_pps_getcap failed: %m",
 			CLK_UNIT(parse->peer));
-		
+
 		return 0;
 	}
 
@@ -2927,19 +2941,19 @@ parse_ppsapi(
 		  CLK_UNIT(parse->peer), cp, cap);
 		mode_ppsoffset = 0;
 	} else {
-	        if (mode_ppsoffset == PPS_OFFSETCLEAR) 
+	        if (mode_ppsoffset == PPS_OFFSETCLEAR)
 		        {
 			        parse->atom.pps_params.clear_offset.tv_sec = -parse->ppsphaseadjust;
 			        parse->atom.pps_params.clear_offset.tv_nsec = -1e9*(parse->ppsphaseadjust - (long)parse->ppsphaseadjust);
 			}
-	  
+
 		if (mode_ppsoffset == PPS_OFFSETASSERT)
 	                {
 		                parse->atom.pps_params.assert_offset.tv_sec = -parse->ppsphaseadjust;
 				parse->atom.pps_params.assert_offset.tv_nsec = -1e9*(parse->ppsphaseadjust - (long)parse->ppsphaseadjust);
 			}
 	}
-	
+
 	parse->atom.pps_params.mode |= mode_ppsoffset;
 
 	if (time_pps_setparams(parse->atom.handle, &parse->atom.pps_params) < 0) {
@@ -3043,9 +3057,9 @@ parse_start(
 	parse->kv             = (struct ctl_var *)0;
 
 	clear_err(parse, ERR_ALL);
-  
+
 	parse->parse_type     = &parse_clockinfo[type];
-	
+
 	parse->maxunsync      = parse->parse_type->cl_maxunsync;
 
 	parse->generic->fudgetime1 = parse->parse_type->cl_basedelay;
@@ -3058,16 +3072,16 @@ parse_start(
 	peer->rootdelay       = parse->parse_type->cl_rootdelay;
 	peer->sstclktype      = parse->parse_type->cl_type;
 	peer->precision       = sys_precision;
-	
+
 	peer->stratum         = STRATUM_REFCLOCK;
 
 	if (peer->stratum <= 1)
 	    memmove((char *)&parse->generic->refid, parse->parse_type->cl_id, 4);
 	else
 	    parse->generic->refid = htonl(PARSEHSREFID);
-	
+
 	parse->generic->io.fd = fd232;
-	
+
 	parse->peer = peer;		/* marks it also as busy */
 
 	/*
@@ -3114,7 +3128,7 @@ parse_start(
 		tio.c_iflag = parse_clockinfo[type].cl_iflag;
 		tio.c_oflag = parse_clockinfo[type].cl_oflag;
 		tio.c_lflag = parse_clockinfo[type].cl_lflag;
-	
+
 
 #ifdef HAVE_TERMIOS
 		if ((cfsetospeed(&tio, parse_clockinfo[type].cl_speed) == -1) ||
@@ -3178,7 +3192,7 @@ parse_start(
 		if (CLK_PPS(parse->peer))
 		    {
 			int i = 1;
-		    
+
 			if (ioctl(parse->ppsfd, TIOCSPPS, (caddr_t)&i) == 0)
 			    {
 				parse->flags |= PARSE_PPSCLOCK;
@@ -3217,7 +3231,7 @@ parse_start(
 	 */
 	parse->generic->io.srcclock = peer;
 	parse->generic->io.datalen = 0;
-	
+
 	parse->binding = init_iobinding(parse);
 
 	if (parse->binding == (bind_t *)0)
@@ -3263,7 +3277,7 @@ parse_start(
 		parse_shutdown(CLK_UNIT(parse->peer), peer); /* let our cleaning staff do the work */
 		return 0;			/* well, ok - special initialisation broke */
 	}
-  
+
 	strlcpy(tmp_ctl.parseformat.parse_buffer, parse->parse_type->cl_format, sizeof(tmp_ctl.parseformat.parse_buffer));
 	tmp_ctl.parseformat.parse_count = strlen(tmp_ctl.parseformat.parse_buffer);
 
@@ -3273,7 +3287,7 @@ parse_start(
 		parse_shutdown(CLK_UNIT(parse->peer), peer); /* let our cleaning staff do the work */
 		return 0;			/* well, ok - special initialisation broke */
 	}
-  
+
 	/*
 	 * get rid of all IO accumulated so far
 	 */
@@ -3300,7 +3314,7 @@ parse_start(
 					return 0;		/* well, ok - special initialisation broke */
 				}
 		}
-	
+
 	/*
 	 * Insert in async io device list.
 	 */
@@ -3374,7 +3388,7 @@ parse_ctl(
 		    }
 #endif
 		}
-		
+
 		if (in->haveflags & CLK_HAVETIME1)
                 {
 		  parse->generic->fudgetime1 = in->fudgetime1;
@@ -3382,11 +3396,11 @@ parse_ctl(
 			  CLK_UNIT(parse->peer),
 			  parse->generic->fudgetime1);
 		}
-		
+
 		if (in->haveflags & CLK_HAVETIME2)
                 {
 		  parse->generic->fudgetime2 = in->fudgetime2;
-		  if (parse->flags & PARSE_TRUSTTIME) 
+		  if (parse->flags & PARSE_TRUSTTIME)
 		    {
 		      parse->maxunsync = (u_long)ABS(in->fudgetime2);
 		      msyslog(LOG_INFO, "PARSE receiver #%d: new trust time %s",
@@ -3434,7 +3448,7 @@ parse_poll(
 	 */
 	parse->generic->polls++;
 
-	if (parse->pollneeddata && 
+	if (parse->pollneeddata &&
 	    ((int)(current_time - parse->pollneeddata) > (1<<(max(min(parse->peer->hpoll, parse->peer->ppoll), parse->peer->minpoll)))))
 	{
 		/*
@@ -3443,7 +3457,7 @@ parse_poll(
 		 */
 		parse->lastmissed = current_time;
 		parse_event(parse, CEVNT_TIMEOUT);
-		
+
 		ERR(ERR_NODATA)
 			msyslog(LOG_WARNING, "PARSE receiver #%d: no data from device within poll interval (check receiver / wiring)", CLK_UNIT(parse->peer));
 	}
@@ -3501,7 +3515,7 @@ parse_control(
 	 * handle changes
 	 */
 	parse_ctl(parse, in);
-		
+
 	/*
 	 * supply data
 	 */
@@ -3587,9 +3601,9 @@ parse_control(
 				    tmpctl.parsegettc.parse_buffer, (unsigned)(tmpctl.parsegettc.parse_count));
 
 		}
-	
+
 		tmpctl.parseformat.parse_format = tmpctl.parsegettc.parse_format;
-	
+
 		if (!PARSE_GETFMT(parse, &tmpctl))
 		{
 			ERR(ERR_INTERNAL)
@@ -3603,7 +3617,7 @@ parse_control(
 			tt = ap(start, 80, tt, "refclock_format=\"");
 
 			if (count > 0) {
-				tt = ap(start, 80, tt, "%*.*s", 
+				tt = ap(start, 80, tt, "%*.*s",
 			        	count,
 			        	count,
 			        	tmpctl.parseformat.parse_buffer);
@@ -3632,7 +3646,7 @@ parse_control(
 				percent /= 10;
 				d       /= 10;
 			}
-	
+
 			if (d)
 			    percent = (percent * 10000) / d;
 			else
@@ -3642,7 +3656,7 @@ parse_control(
 			{
 				char item[80];
 				int count;
-				
+
 				snprintf(item, 80, "%s%s%s: %s (%d.%02d%%)",
 					sum ? "; " : "",
 					(parse->generic->currentstatus == i) ? "*" : "",
@@ -3657,22 +3671,22 @@ parse_control(
 				sum += s_time;
 			}
 		}
-		
+
 		tt = ap(start, LEN_STATES, tt,
 		    "; running time: %s\"", l_mktime(sum));
-		
+
 		tt = add_var(&out->kv_list, 32, RO);
 		snprintf(tt, 32,  "refclock_id=\"%s\"", parse->parse_type->cl_id);
-		
+
 		tt = add_var(&out->kv_list, 80, RO);
 		snprintf(tt, 80,  "refclock_iomode=\"%s\"", parse->binding->bd_description);
 
 		tt = add_var(&out->kv_list, 128, RO);
 		snprintf(tt, 128, "refclock_driver_version=\"%s\"", rcsid);
-		
+
 		{
 			struct ctl_var *k;
-			
+
 			k = parse->kv;
 			while (k && !(k->flags & EOV))
 			{
@@ -3680,7 +3694,7 @@ parse_control(
 				k++;
 			}
 		}
-      
+
 		out->lencode       = strlen(outstatus);
 		out->p_lastcode    = outstatus;
 	}
@@ -3730,7 +3744,7 @@ parse_process(
 {
 	l_fp off, rectime, reftime;
 	double fudge;
-	
+
 	/* silence warning: 'off.Ul_i.Xl_i' may be used uninitialized in this function */
 	ZERO(off);
 
@@ -3743,11 +3757,11 @@ parse_process(
 	    (parse->timedata.parse_status != parsetime->parse_status))
 	{
 		char buffer[400];
-		
+
 		NLOG(NLOG_CLOCKINFO) /* conditional if clause for conditional syslog */
 			msyslog(LOG_WARNING, "PARSE receiver #%d: conversion status \"%s\"",
 				CLK_UNIT(parse->peer), parsestatus(parsetime->parse_status, buffer, sizeof(buffer)));
-		
+
 		if ((parsetime->parse_status & CVT_MASK) == CVT_FAIL)
 		{
 			/*
@@ -3756,7 +3770,7 @@ parse_process(
 			 * the time code might be overwritten by the next packet
 			 */
 			parsectl_t tmpctl;
-			
+
 			if (!PARSE_GETTIMECODE(parse, &tmpctl))
 			{
 				ERR(ERR_INTERNAL)
@@ -3794,7 +3808,7 @@ parse_process(
 			    parse->timedata.parse_ptime  = parsetime->parse_ptime;
 			  }
 			break; 		/* well, still waiting - timeout is handled at higher levels */
-			    
+
 		case CVT_FAIL:
 			if (parsetime->parse_status & CVT_BADFMT)
 			{
@@ -3825,7 +3839,7 @@ parse_process(
 	if (parse->lastformat != parsetime->parse_format)
 	{
 		parsectl_t tmpctl;
-	
+
 		tmpctl.parseformat.parse_format = parsetime->parse_format;
 
 		if (!PARSE_GETFMT(parse, &tmpctl))
@@ -3853,10 +3867,10 @@ parse_process(
 		/*
 		 * something happend - except for PPS events
 		 */
-	
+
 		(void) parsestate(parsetime->parse_state, tmp1, sizeof(tmp1));
 		(void) parsestate(parse->timedata.parse_state, tmp2, sizeof(tmp2));
-	
+
 		NLOG(NLOG_CLOCKINFO) /* conditional if clause for conditional syslog */
 			msyslog(LOG_INFO,"PARSE receiver #%d: STATE CHANGE: %s -> %s",
 				CLK_UNIT(parse->peer), tmp2, tmp1);
@@ -3959,12 +3973,12 @@ parse_process(
 	}
 
 	fudge = parse->generic->fudgetime1; /* standard RS232 Fudgefactor */
-	
+
 	if (PARSE_TIMECODE(parsetime->parse_state))
 	{
 		rectime = parsetime->parse_stime.fp;
 		off = reftime = parsetime->parse_time.fp;
-	
+
 		L_SUB(&off, &rectime); /* prepare for PPS adjustments logic */
 
 #ifdef DEBUG
@@ -4009,7 +4023,7 @@ parse_process(
 			    M_ISGEQ(0, 0x7fffffff, off.l_i, off.l_uf))
 			{
 				fudge = ppsphaseadjust; /* pick PPS fudge factor */
-			
+
 				/*
 				 * RS232 offsets within [-0.5..0.5[ - take PPS offsets
 				 */
@@ -4021,7 +4035,7 @@ parse_process(
 						reftime.l_ui++;
 					reftime.l_uf = 0;
 
-					
+
 					/*
 					 * implied on second offset
 					 */
@@ -4087,7 +4101,7 @@ parse_process(
 
 	rectime = reftime;
 	L_SUB(&rectime, &off);	/* just to keep the ntp interface happy */
-	
+
 #ifdef DEBUG
 	if (debug > 3)
 		printf("PARSE receiver #%d: calculated Reftime %s, Recvtime %s\n",
@@ -4112,14 +4126,14 @@ parse_process(
 	clear_err(parse, ERR_BADDATA);
 	clear_err(parse, ERR_NODATA);
 	clear_err(parse, ERR_INTERNAL);
-  
+
 	/*
 	 * and now stick it into the clock machine
 	 * samples are only valid iff lastsync is not too old and
 	 * we have seen the clock in sync at least once
 	 * after the last time we didn't see an expected data telegram
 	 * at startup being not in sync is also bad just like
-	 * POWERUP state unless PARSE_F_POWERUPTRUST is set 
+	 * POWERUP state unless PARSE_F_POWERUPTRUST is set
 	 * see the clock states section above for more reasoning
 	 */
 	if (((current_time - parse->lastsync) > parse->maxunsync)           ||
@@ -4159,7 +4173,7 @@ parse_process(
 		 * only good/trusted samples are interesting
 		 */
 #ifdef DEBUG
-	        if (debug > 2) 
+	        if (debug > 2)
 		        {
 			        printf("PARSE receiver #%d: refclock_process_offset(reftime=%s, rectime=%s, Fudge=%f)\n",
 				       CLK_UNIT(parse->peer),
@@ -4169,7 +4183,7 @@ parse_process(
 			}
 #endif
 		parse->generic->lastref = reftime;
-		
+
 		refclock_process_offset(parse->generic, reftime, rectime, fudge);
 
 #ifdef HAVE_PPSAPI
@@ -4188,7 +4202,7 @@ parse_process(
 	}
 
 	/*
-	 * ready, unless the machine wants a sample or 
+	 * ready, unless the machine wants a sample or
 	 * we are in fast startup mode (peer->dist > MAXDISTANCE)
 	 */
 	if (!parse->pollneeddata && parse->peer->disp <= MAXDISTANCE)
@@ -4200,56 +4214,71 @@ parse_process(
 
 	refclock_receive(parse->peer);
 }
-
+
 /**===========================================================================
  ** special code for special clocks
  **/
 
 static void
 mk_utcinfo(
-	   char *t,
+	   char *t,  // pointer to the output string buffer
 	   int wnt,
 	   int wnlsf,
 	   int dn,
 	   int dtls,
 	   int dtlsf,
-	   int size
+	   int size  // size of the output string buffer
 	   )
 {
-  l_fp leapdate;
-  char *start = t;
-  
-  snprintf(t, size, "current correction %d sec", dtls);
-  t += strlen(t);
-  
-  if (wnlsf < 990)
-    wnlsf += 1024;
-  
-  if (wnt < 990)
-    wnt += 1024;
-  
-  gpstolfp((unsigned short)wnlsf, (unsigned short)dn, 0, &leapdate);
-  
-  if ((dtlsf != dtls) &&
-      ((wnlsf - wnt) < 52))
-    {
-	    snprintf(t, BUFFER_SIZES(start, t, size), ", next correction %d sec on %s, new GPS-UTC offset %d",
-	      dtlsf - dtls, gmprettydate(&leapdate), dtlsf);
-    }
-  else
-    {
-	    snprintf(t, BUFFER_SIZES(start, t, size), ", last correction on %s",
-	      gmprettydate(&leapdate));
-    }
+	/*
+	 * The week number transmitted by the GPS satellites for the leap date
+	 * is truncated to 8 bits only. If the nearest leap second date is off
+	 * the current date by more than +/- 128 weeks then conversion to a
+	 * calendar date is ambiguous. On the other hand, if a leap second is
+	 * currently being announced (i.e. dtlsf != dtls) then the week number
+	 * wnlsf is close enough, and we can unambiguously determine the date
+	 * for which the leap second is scheduled.
+	 */
+	if ( dtlsf != dtls )
+	{
+		time_t t_ls;
+		struct tm *tm;
+		int n = 0;
+
+		if (wnlsf < GPSWRAP)
+			wnlsf += GPSWEEKS;
+
+		if (wnt < GPSWRAP)
+			wnt += GPSWEEKS;
+
+		t_ls = (time_t) wnlsf * SECSPERWEEK
+			+ (time_t) dn * SECSPERDAY
+			+ GPS_SEC_BIAS - 1;
+
+		tm = gmtime( &t_ls );
+		if (tm == NULL)  // gmtime() failed
+		{
+			snprintf( t, size, "** (gmtime() failed in mk_utcinfo())" );
+			return;
+		}
+
+		n += snprintf( t, size, "UTC offset transition from %is to %is due to leap second %s",
+				dtls, dtlsf, ( dtls < dtlsf ) ? "insertion" : "deletion" );
+		n += snprintf( t + n, size - n, " at UTC midnight at the end of %s, %04i-%02i-%02i",
+				daynames[tm->tm_wday], tm->tm_year + 1900, tm->tm_mon + 1, tm->tm_mday );
+	}
+	else
+		snprintf( t, size, "UTC offset parameter: %is, no leap second announced.\n", dtls );
+
 }
 
 #ifdef CLOCK_MEINBERG
 /**===========================================================================
- ** Meinberg GPS166/GPS167 support
+ ** Meinberg GPS receiver support
  **/
 
 /*------------------------------------------------------------
- * gps16x_message - process GPS16x messages
+ * gps16x_message - process messages from Meinberg GPS receiver
  */
 static void
 gps16x_message(
@@ -4261,12 +4290,12 @@ gps16x_message(
 	{
 		GPS_MSG_HDR header;
 		unsigned char *bufp = (unsigned char *)parsetime->parse_msg + 1;
-		
+
 #ifdef DEBUG
 		if (debug > 2)
 		{
 			char msgbuffer[600];
-			
+
 			mkreadable(msgbuffer, sizeof(msgbuffer), (char *)parsetime->parse_msg, parsetime->parse_msglen, 1);
 			printf("PARSE receiver #%d: received message (%d bytes) >%s<\n",
 				CLK_UNIT(parse->peer),
@@ -4275,21 +4304,21 @@ gps16x_message(
 		}
 #endif
 		get_mbg_header(&bufp, &header);
-		if (header.gps_hdr_csum == mbg_csum(parsetime->parse_msg + 1, 6) &&
-		    (header.gps_len == 0 ||
-		     (header.gps_len < sizeof(parsetime->parse_msg) &&
-		      header.gps_data_csum == mbg_csum(bufp, header.gps_len))))
+		if (header.hdr_csum == mbg_csum(parsetime->parse_msg + 1, 6) &&
+		    (header.len == 0 ||
+		     (header.len < sizeof(parsetime->parse_msg) &&
+		      header.data_csum == mbg_csum(bufp, header.len))))
 		{
 			/*
 			 * clean message
 			 */
-			switch (header.gps_cmd)
+			switch (header.cmd)
 			{
 			case GPS_SW_REV:
 				{
 					char buffer[64];
 					SW_REV gps_sw_rev;
-					
+
 					get_mbg_sw_rev(&bufp, &gps_sw_rev);
 					snprintf(buffer, sizeof(buffer), "meinberg_gps_version=\"%x.%02x%s%s\"",
 						(gps_sw_rev.code >> 8) & 0xFF,
@@ -4300,33 +4329,35 @@ gps16x_message(
 				}
 			break;
 
-			case GPS_STAT:
+			case GPS_BVAR_STAT:
 				{
 					static struct state
 					{
-						unsigned short flag; /* status flag */
-						unsigned const char *string; /* bit name */
+						BVAR_STAT flag; /* status flag */
+						const char *string; /* bit name */
 					} states[] =
 					  {
-						  { TM_ANT_DISCONN, (const unsigned char *)"ANTENNA FAULTY" },
-						  { TM_SYN_FLAG,    (const unsigned char *)"NO SYNC SIGNAL" },
-						  { TM_NO_SYNC,     (const unsigned char *)"NO SYNC POWERUP" },
-						  { TM_NO_POS,      (const unsigned char *)"NO POSITION" },
-						  { 0, (const unsigned char *)"" }
+						  { BVAR_CFGH_INVALID,     "Configuration/Health" },
+						  { BVAR_ALM_NOT_COMPLETE, "Almanachs" },
+						  { BVAR_UTC_INVALID,      "UTC Correction" },
+						  { BVAR_IONO_INVALID,     "Ionospheric Correction" },
+						  { BVAR_RCVR_POS_INVALID, "Receiver Position" },
+						  { 0, "" }
 					  };
-					unsigned short status;
+					BVAR_STAT status;
 					struct state *s = states;
 					char buffer[512];
 					char *p, *b;
-					
+
 					status = get_lsb_short(&bufp);
 					p = b = buffer;
 					p = ap(buffer, sizeof(buffer), p,
 					    "meinberg_gps_status=\"[0x%04x] ",
 					    status);
-					
+
 					if (status)
 					{
+						p = ap(buffer, sizeof(buffer), p, "incomplete buffered data: ");
 						b = p;
 						while (s->flag)
 						{
@@ -4336,7 +4367,7 @@ gps16x_message(
 								{
 									p = ap(buffer, sizeof(buffer), p, ", ");
 								}
-								
+
 								p = ap(buffer, sizeof(buffer), p, "%s", (const char *)s->string);
 							}
 							s++;
@@ -4345,9 +4376,9 @@ gps16x_message(
 					}
 					else
 					{
-						p = ap(buffer, sizeof(buffer), p, "<OK>\"");
+						p = ap(buffer, sizeof(buffer), p, "<all buffered data complete>\"");
 					}
-		
+
 					set_var(&parse->kv, buffer, strlen(buffer)+1, RO|DEF);
 				}
 			break;
@@ -4356,141 +4387,141 @@ gps16x_message(
 				{
 					XYZ xyz;
 					char buffer[256];
-					
+
 					get_mbg_xyz(&bufp, xyz);
 					snprintf(buffer, sizeof(buffer), "gps_position(XYZ)=\"%s m, %s m, %s m\"",
 						mfptoa(xyz[XP].l_ui, xyz[XP].l_uf, 1),
 						mfptoa(xyz[YP].l_ui, xyz[YP].l_uf, 1),
 						mfptoa(xyz[ZP].l_ui, xyz[ZP].l_uf, 1));
-					
+
 					set_var(&parse->kv, buffer, sizeof(buffer), RO|DEF);
 				}
 			break;
-	      
+
 			case GPS_POS_LLA:
 				{
 					LLA lla;
 					char buffer[256];
-					
+
 					get_mbg_lla(&bufp, lla);
-					
+
 					snprintf(buffer, sizeof(buffer), "gps_position(LLA)=\"%s deg, %s deg, %s m\"",
 						mfptoa(lla[LAT].l_ui, lla[LAT].l_uf, 4),
-						mfptoa(lla[LON].l_ui, lla[LON].l_uf, 4), 
+						mfptoa(lla[LON].l_ui, lla[LON].l_uf, 4),
 						mfptoa(lla[ALT].l_ui, lla[ALT].l_uf, 1));
-					
+
 					set_var(&parse->kv, buffer, sizeof(buffer), RO|DEF);
 				}
 			break;
-	      
+
 			case GPS_TZDL:
 				break;
-	      
+
 			case GPS_PORT_PARM:
 				break;
-	      
+
 			case GPS_SYNTH:
 				break;
-				
+
 			case GPS_ANT_INFO:
 				{
 					ANT_INFO antinfo;
 					char buffer[512];
 					char *p, *q;
-					
+
 					get_mbg_antinfo(&bufp, &antinfo);
 					p = buffer;
 					p = ap(buffer, sizeof(buffer), p, "meinberg_antenna_status=\"");
 					switch (antinfo.status)
 					{
-					case ANT_INVALID:
+					case ANT_INVALID: // No other fields valid since antenna has not yet been disconnected
 						p = ap(buffer, sizeof(buffer),
 						    p, "<OK>");
 						break;
-						
-					case ANT_DISCONN:
+
+					case ANT_DISCONN: // Antenna is disconnected, tm_reconn and delta_t not yet set
 						q = ap(buffer, sizeof(buffer),
 						    p, "DISCONNECTED since ");
 						NLOG(NLOG_CLOCKSTATUS)
 							ERR(ERR_BADSTATUS)
 							msyslog(LOG_ERR,"PARSE receiver #%d: ANTENNA FAILURE: %s",
 								CLK_UNIT(parse->peer), p);
-						
+
 						p = q;
-						mbg_tm_str(&p, &antinfo.tm_disconn, BUFFER_SIZE(buffer, p));
+						mbg_tm_str(&p, &antinfo.tm_disconn, BUFFER_SIZE(buffer, p), 0);
 						*p = '\0';
 						break;
-		    
-					case ANT_RECONN:
+
+					case ANT_RECONN: // Antenna had been disconnect, but receiver sync. after reconnect, so all fields valid
 						p = ap(buffer, sizeof(buffer),
-						    p, "RECONNECTED on ");
-						mbg_tm_str(&p, &antinfo.tm_reconn, BUFFER_SIZE(buffer, p));
+						    p, "SYNC AFTER RECONNECT on ");
+						mbg_tm_str(&p, &antinfo.tm_reconn, BUFFER_SIZE(buffer, p), 0);
 						p = ap(buffer, sizeof(buffer),
-							p, ", reconnect clockoffset %c%ld.%07ld s, disconnect time ",
+							p, ", clock offset at reconnect %c%ld.%07ld s, disconnect time ",
 							(antinfo.delta_t < 0) ? '-' : '+',
-							ABS(antinfo.delta_t) / 10000,
-							ABS(antinfo.delta_t) % 10000);
-						mbg_tm_str(&p, &antinfo.tm_disconn, BUFFER_SIZE(buffer, p));
+							(long) ABS(antinfo.delta_t) / 10000,
+							(long) ABS(antinfo.delta_t) % 10000);
+						mbg_tm_str(&p, &antinfo.tm_disconn, BUFFER_SIZE(buffer, p), 0);
 						*p = '\0';
 						break;
-		    
+
 					default:
 						p = ap(buffer, sizeof(buffer),
 						    p, "bad status 0x%04x",
 						    antinfo.status);
 						break;
 					}
-					
+
 					p = ap(buffer, sizeof(buffer), p, "\"");
-					
+
 					set_var(&parse->kv, buffer, sizeof(buffer), RO|DEF);
 				}
 			break;
-	      
+
 			case GPS_UCAP:
 				break;
-				
+
 			case GPS_CFGH:
 				{
 					CFGH cfgh;
 					char buffer[512];
 					char *p;
-					
+
 					get_mbg_cfgh(&bufp, &cfgh);
 					if (cfgh.valid)
 					{
 						const char *cp;
 						uint16_t tmp_val;
 						int i;
-						
+
 						p = buffer;
 						p = ap(buffer, sizeof(buffer),
 						    p, "gps_tot_51=\"");
 						mbg_tgps_str(&p, &cfgh.tot_51, BUFFER_SIZE(buffer, p));
 						p = ap(buffer, sizeof(buffer),
 						    p, "\"");
-						set_var(&parse->kv, buffer, sizeof(buffer), RO);
-						
+						set_var(&parse->kv, buffer, sizeof(buffer), RO|COND_DEF);
+
 						p = buffer;
 						p = ap(buffer, sizeof(buffer),
 						    p, "gps_tot_63=\"");
 						mbg_tgps_str(&p, &cfgh.tot_63, BUFFER_SIZE(buffer, p));
 						p = ap(buffer, sizeof(buffer),
 						    p, "\"");
-						set_var(&parse->kv, buffer, sizeof(buffer), RO);
-						
+						set_var(&parse->kv, buffer, sizeof(buffer), RO|COND_DEF);
+
 						p = buffer;
 						p = ap(buffer, sizeof(buffer),
 						    p, "gps_t0a=\"");
 						mbg_tgps_str(&p, &cfgh.t0a, BUFFER_SIZE(buffer, p));
 						p = ap(buffer, sizeof(buffer),
 						    p, "\"");
-						set_var(&parse->kv, buffer, sizeof(buffer), RO);
+						set_var(&parse->kv, buffer, sizeof(buffer), RO|COND_DEF);
 
-						for (i = 0; i < N_SVNO; i++)
+						for (i = 0; i < N_SVNO_GPS; i++)
 						{
 							p = buffer;
-							p = ap(buffer, sizeof(buffer), p, "sv_info[%d]=\"PRN%d", i, i + MIN_SVNO);
+							p = ap(buffer, sizeof(buffer), p, "sv_info[%d]=\"PRN%d", i, i + N_SVNO_GPS);
 
 							tmp_val = cfgh.health[i];  /* a 6 bit SV health code */
 							p = ap(buffer, sizeof(buffer), p, "; health=0x%02x (", tmp_val);
@@ -4532,7 +4563,7 @@ gps16x_message(
 								p = ap( buffer, sizeof(buffer), p, ", A-S on" );
 
 							p = ap(buffer, sizeof(buffer), p, ")\"");
-							set_var(&parse->kv, buffer, sizeof(buffer), RO);
+							set_var(&parse->kv, buffer, sizeof(buffer), RO|COND_DEF);
 						}
 					}
 				}
@@ -4540,20 +4571,20 @@ gps16x_message(
 
 			case GPS_ALM:
 				break;
-				
+
 			case GPS_EPH:
 				break;
-				
+
 			case GPS_UTC:
 				{
 					UTC utc;
 					char buffer[512];
 					char *p;
-					
+
 					p = buffer;
-					
+
 					get_mbg_utc(&bufp, &utc);
-					
+
 					if (utc.valid)
 					{
 						p = ap(buffer, sizeof(buffer), p, "gps_utc_correction=\"");
@@ -4568,32 +4599,32 @@ gps16x_message(
 					set_var(&parse->kv, buffer, sizeof(buffer), RO|DEF);
 				}
 			break;
-			
+
 			case GPS_IONO:
 				break;
-				
+
 			case GPS_ASCII_MSG:
 				{
 					ASCII_MSG gps_ascii_msg;
 					char buffer[128];
-		
+
 					get_mbg_ascii_msg(&bufp, &gps_ascii_msg);
-					
+
 					if (gps_ascii_msg.valid)
 						{
 							char buffer1[128];
 							mkreadable(buffer1, sizeof(buffer1), gps_ascii_msg.s, strlen(gps_ascii_msg.s), (int)0);
-							
+
 							snprintf(buffer, sizeof(buffer), "gps_message=\"%s\"", buffer1);
 						}
 					else
 						snprintf(buffer, sizeof(buffer), "gps_message=<NONE>");
-					
+
 					set_var(&parse->kv, buffer, sizeof(buffer), RO|DEF);
 				}
-			
+
 			break;
-	      
+
 			default:
 				break;
 			}
@@ -4602,12 +4633,12 @@ gps16x_message(
 		{
 			msyslog(LOG_DEBUG, "PARSE receiver #%d: gps16x_message: message checksum error: hdr_csum = 0x%x (expected 0x%lx), data_len = %d, data_csum = 0x%x (expected 0x%lx)",
 				CLK_UNIT(parse->peer),
-				header.gps_hdr_csum, mbg_csum(parsetime->parse_msg + 1, 6),
-				header.gps_len,
-				header.gps_data_csum, mbg_csum(bufp, (unsigned)((header.gps_len < sizeof(parsetime->parse_msg)) ? header.gps_len : 0)));
+				header.hdr_csum, mbg_csum(parsetime->parse_msg + 1, 6),
+				header.len,
+				header.data_csum, mbg_csum(bufp, (unsigned)((header.len < sizeof(parsetime->parse_msg)) ? header.len : 0)));
 		}
 	}
-  
+
 	return;
 }
 
@@ -4620,11 +4651,11 @@ gps16x_poll(
 	    )
 {
 	struct parseunit *parse = peer->procptr->unitptr;
-	
-	static GPS_MSG_HDR sequence[] = 
+
+	static GPS_MSG_HDR sequence[] =
 	{
 		{ GPS_SW_REV,          0, 0, 0 },
-		{ GPS_STAT,            0, 0, 0 },
+		{ GPS_BVAR_STAT,       0, 0, 0 },
 		{ GPS_UTC,             0, 0, 0 },
 		{ GPS_ASCII_MSG,       0, 0, 0 },
 		{ GPS_ANT_INFO,        0, 0, 0 },
@@ -4638,41 +4669,41 @@ gps16x_poll(
 	unsigned char cmd_buffer[64];
 	unsigned char *outp = cmd_buffer;
 	GPS_MSG_HDR *header;
-	
+
 	if (((poll_info_t *)parse->parse_type->cl_data)->rate)
 	{
 		parse->peer->procptr->nextaction = current_time + ((poll_info_t *)parse->parse_type->cl_data)->rate;
 	}
 
-	if (sequence[parse->localstate].gps_cmd == (unsigned short)~0)
+	if (sequence[parse->localstate].cmd == (unsigned short)~0)
 		parse->localstate = 0;
-	
+
 	header = sequence + parse->localstate++;
-	
+
 	*outp++ = SOH;		/* start command */
-	
+
 	put_mbg_header(&outp, header);
 	outp = cmd_buffer + 1;
-	
-	header->gps_hdr_csum = (short)mbg_csum(outp, 6);
+
+	header->hdr_csum = (short)mbg_csum(outp, 6);
 	put_mbg_header(&outp, header);
-	
+
 #ifdef DEBUG
 	if (debug > 2)
 	{
 		char buffer[128];
-		
+
 		mkreadable(buffer, sizeof(buffer), (char *)cmd_buffer, (unsigned)(outp - cmd_buffer), 1);
 		printf("PARSE receiver #%d: transmitted message #%ld (%d bytes) >%s<\n",
 		       CLK_UNIT(parse->peer),
 		       parse->localstate - 1,
 		       (int)(outp - cmd_buffer),
-		       buffer); 
+		       buffer);
 	}
 #endif
-  
+
 	rtc = write(parse->generic->io.fd, cmd_buffer, (unsigned long)(outp - cmd_buffer));
-	
+
 	if (rtc < 0)
 	{
 		ERR(ERR_BADIO)
@@ -4721,7 +4752,7 @@ gps16x_poll_init(
 	return 1;
 }
 #endif /* CLOCK_MEINBERG */
-
+
 /**===========================================================================
  ** clock polling support
  **/
@@ -4762,7 +4793,7 @@ poll_poll(
 	)
 {
 	struct parseunit *parse = peer->procptr->unitptr;
-	
+
 	if (parse->parse_type->cl_poll)
 		parse->parse_type->cl_poll(parse);
 
@@ -4788,7 +4819,7 @@ poll_init(
 
 	return 0;
 }
-
+
 /**===========================================================================
  ** Trimble support
  **/
@@ -4818,7 +4849,7 @@ trimbletaip_init(
 	else
 	{
 		tio.c_cc[VEOL] = TRIMBLETAIP_EOL;
-	
+
 		if (TTY_SETATTR(parse->generic->io.fd, &tio) == -1)
 		{
 			msyslog(LOG_ERR, "PARSE receiver #%d: trimbletaip_init: tcsetattr(fd, &tio): %m", CLK_UNIT(parse->peer));
@@ -4837,7 +4868,7 @@ static const char *taipinit[] = {
 	">FTM00020001<",
 	(char *)0
 };
-      
+
 static void
 trimbletaip_event(
 	struct parseunit *parse,
@@ -4982,19 +5013,19 @@ union uval {
 	float   fv;
 	double  dv;
 };
-  
+
 struct txbuf
 {
 	short idx;			/* index to first unused byte */
 	u_char *txt;			/* pointer to actual data buffer */
 };
 
-void	sendcmd		(struct txbuf *buf, int c); 
-void	sendbyte	(struct txbuf *buf, int b); 
-void	sendetx		(struct txbuf *buf, struct parseunit *parse); 
-void	sendint		(struct txbuf *buf, int a); 
-void	sendflt		(struct txbuf *buf, double a); 
- 
+void	sendcmd		(struct txbuf *buf, int c);
+void	sendbyte	(struct txbuf *buf, int b);
+void	sendetx		(struct txbuf *buf, struct parseunit *parse);
+void	sendint		(struct txbuf *buf, int a);
+void	sendflt		(struct txbuf *buf, double a);
+
 void
 sendcmd(
 	struct txbuf *buf,
@@ -5006,12 +5037,12 @@ sendcmd(
 	buf->idx = 2;
 }
 
-void	sendcmd		(struct txbuf *buf, int c); 
-void	sendbyte	(struct txbuf *buf, int b); 
-void	sendetx		(struct txbuf *buf, struct parseunit *parse); 
-void	sendint		(struct txbuf *buf, int a); 
-void	sendflt		(struct txbuf *buf, double a); 
- 
+void	sendcmd		(struct txbuf *buf, int c);
+void	sendbyte	(struct txbuf *buf, int b);
+void	sendetx		(struct txbuf *buf, struct parseunit *parse);
+void	sendint		(struct txbuf *buf, int a);
+void	sendflt		(struct txbuf *buf, double a);
+
 void
 sendbyte(
 	struct txbuf *buf,
@@ -5043,18 +5074,18 @@ sendetx(
 	  if (debug > 2)
 	  {
 		  char buffer[256];
-		  
+
 		  mkreadable(buffer, sizeof(buffer), (char *)buf->txt, (unsigned)buf->idx, 1);
 		  printf("PARSE receiver #%d: transmitted message (%d bytes) >%s<\n",
 			 CLK_UNIT(parse->peer),
-			 buf->idx, buffer); 
+			 buf->idx, buffer);
 	  }
 #endif
 		clear_err(parse, ERR_BADIO);
 	}
 }
 
-void  
+void
 sendint(
 	struct txbuf *buf,
 	int a
@@ -5106,12 +5137,12 @@ trimbletsip_setup(
 
 	if (t)
 		t->last_reset = current_time;
-			
+
 	buf.txt = buffer;
-  
+
 	sendcmd(&buf, CMD_CVERSION);	/* request software versions */
 	sendetx(&buf, parse);
-	
+
 	sendcmd(&buf, CMD_COPERPARAM);	/* set operating parameters */
 	sendbyte(&buf, 4);	/* static */
 	sendflt(&buf, 5.0*D2R);	/* elevation angle mask = 10 deg XXX */
@@ -5119,25 +5150,25 @@ trimbletsip_setup(
 	sendflt(&buf, 12.0);	/* PDOP mask = 12 */
 	sendflt(&buf, 8.0);	/* PDOP switch level = 8 */
 	sendetx(&buf, parse);
-	
+
 	sendcmd(&buf, CMD_CMODESEL);	/* fix mode select */
 	sendbyte(&buf, 1);	/* time transfer mode */
 	sendetx(&buf, parse);
-	
+
 	sendcmd(&buf, CMD_CMESSAGE);	/* request system message */
 	sendetx(&buf, parse);
-	
+
 	sendcmd(&buf, CMD_CSUPER);	/* superpacket fix */
 	sendbyte(&buf, 0x2);	/* binary mode */
 	sendetx(&buf, parse);
-	
+
 	sendcmd(&buf, CMD_CIOOPTIONS);	/* set I/O options */
 	sendbyte(&buf, TRIM_POS_OPT);	/* position output */
 	sendbyte(&buf, 0x00);	/* no velocity output */
 	sendbyte(&buf, TRIM_TIME_OPT);	/* UTC, compute on seconds */
 	sendbyte(&buf, 0x00);	/* no raw measurements */
 	sendetx(&buf, parse);
-	
+
 	sendcmd(&buf, CMD_CUTCPARAM);	/* request UTC correction data */
 	sendetx(&buf, parse);
 
@@ -5161,7 +5192,7 @@ trimble_check(
 	u_char buffer[256];
 	struct txbuf buf;
 	buf.txt = buffer;
-	
+
 	if (t)
 	{
 		if (current_time > t->last_msg + TRIMBLETSIP_IDLE_TIME)
@@ -5169,18 +5200,18 @@ trimble_check(
 	}
 
 	poll_poll(parse->peer);	/* emit query string and re-arm timer */
-	
+
 	if (t && t->qtracking)
 	{
 		u_long oldsats = t->ltrack & ~t->ctrack;
-		
+
 		t->qtracking = 0;
 		t->ltrack = t->ctrack;
-		
+
 		if (oldsats)
 		{
 			int i;
-				
+
 			for (i = 0; oldsats; i++) {
 				if (oldsats & (1 << i))
 					{
@@ -5191,7 +5222,7 @@ trimble_check(
 				oldsats &= ~(1 << i);
 			}
 		}
-						
+
 		sendcmd(&buf, CMD_CSTATTRACK);
 		sendbyte(&buf, 0x00);	/* current tracking set */
 		sendetx(&buf, parse);
@@ -5206,7 +5237,7 @@ trimbletsip_end(
 	      struct parseunit *parse
 	      )
 {	trimble_t *t = parse->localdata;
-	
+
 	if (t)
 	{
 		free(t);
@@ -5237,9 +5268,9 @@ trimbletsip_init(
 	if (!parse->localdata)
 	{
 		trimble_t *t;
-		
+
 		t = (trimble_t *)(parse->localdata = emalloc(sizeof(trimble_t)));
-		
+
 		if (t)
 		{
 			memset((char *)t, 0, sizeof(trimble_t));
@@ -5319,7 +5350,7 @@ getflt(
 	)
 {
 	union uval uval;
-	
+
 #ifdef WORDS_BIGENDIAN
 	uval.bd[0] = *bp++;
 	uval.bd[1] = *bp++;
@@ -5340,7 +5371,7 @@ getdbl(
 	)
 {
 	union uval uval;
-	
+
 #ifdef WORDS_BIGENDIAN
 	uval.bd[0] = *bp++;
 	uval.bd[1] = *bp++;
@@ -5385,7 +5416,7 @@ trimbletsip_message(
 {
 	unsigned char *buffer = parsetime->parse_msg;
 	unsigned int   size   = parsetime->parse_msglen;
-	
+
 	if ((size < 4) ||
 	    (buffer[0]      != DLE) ||
 	    (buffer[size-1] != ETX) ||
@@ -5413,7 +5444,7 @@ trimbletsip_message(
 		char pbuffer[200];
 		char *t = pbuffer;
 		cmd_info_t *s;
-		
+
 #ifdef DEBUG
 		if (debug > 3) {
 			size_t i;
@@ -5429,9 +5460,9 @@ trimbletsip_message(
 
 		if (tr)
 			tr->last_msg = current_time;
-		
+
 		s = trimble_convert(cmd, trimble_rcmds);
-		
+
 		if (s)
 		{
 			t = ap(pbuffer, sizeof(pbuffer), t, "%s=\"", s->varname);
@@ -5451,7 +5482,7 @@ trimbletsip_message(
 				 getflt((unsigned char *)&mb(0)), getshort((unsigned char *)&mb(4)),
 				 getflt((unsigned char *)&mb(6)));
 			break;
-			
+
 		case CMD_RBEST4:
 			t = ap(pbuffer, sizeof(pbuffer), t, "mode: ");
 			switch (mb(0) & 0xF)
@@ -5464,11 +5495,11 @@ trimbletsip_message(
 			case 1:
 				t = ap(pbuffer, sizeof(pbuffer), t, "0D");
 				break;
-				
+
 			case 3:
 				t = ap(pbuffer, sizeof(pbuffer), t, "2D");
 				break;
-				
+
 			case 4:
 				t = ap(pbuffer, sizeof(pbuffer), t, "3D");
 				break;
@@ -5477,7 +5508,7 @@ trimbletsip_message(
 				t = ap(pbuffer, sizeof(pbuffer), t, "-MANUAL, ");
 			else
 				t = ap(pbuffer, sizeof(pbuffer), t, "-AUTO, ");
-			
+
 			t = ap(pbuffer, sizeof(pbuffer), t, "satellites %02d %02d %02d %02d, PDOP %.2f, HDOP %.2f, VDOP %.2f, TDOP %.2f",
 				mb(1), mb(2), mb(3), mb(4),
 				getflt((unsigned char *)&mb(5)),
@@ -5486,12 +5517,12 @@ trimbletsip_message(
 				getflt((unsigned char *)&mb(17)));
 
 			break;
-			
+
 		case CMD_RVERSION:
 			t = ap(pbuffer, sizeof(pbuffer), t, "%d.%d (%d/%d/%d)",
 				mb(0)&0xff, mb(1)&0xff, 1900+(mb(4)&0xff), mb(2)&0xff, mb(3)&0xff);
 			break;
-			
+
 		case CMD_RRECVHEALTH:
 		{
 			static const char *msgs[] =
@@ -5505,9 +5536,9 @@ trimbletsip_message(
 				"<BIT 6>",
 				"<BIT 7>"
 			};
-			
+
 			int i, bits;
-			
+
 			switch (mb(0) & 0xFF)
 			{
 			default:
@@ -5540,7 +5571,7 @@ trimbletsip_message(
 			}
 
 			bits = mb(1) & 0xFF;
-			
+
 			for (i = 0; i < 8; i++)
 				if (bits & (0x1<<i))
 				{
@@ -5548,11 +5579,11 @@ trimbletsip_message(
 				}
 		}
 		break;
-			
+
 		case CMD_RMESSAGE:
 			mkreadable(t, (int)BUFFER_SIZE(pbuffer, t), (char *)&mb(0), (unsigned)(size - 2 - (&mb(0) - buffer)), 0);
 			break;
-			
+
 		case CMD_RMACHSTAT:
 		{
 			static const char *msgs[] =
@@ -5566,12 +5597,12 @@ trimbletsip_message(
 				"<BIT 6>",
 				"<BIT 7>"
 			};
-			
+
 			int i, bits;
 
 			t = ap(pbuffer, sizeof(pbuffer), t, "machine id 0x%02x", mb(0) & 0xFF);
 			bits = mb(1) & 0xFF;
-			
+
 			for (i = 0; i < 8; i++)
 				if (bits & (0x1<<i))
 				{
@@ -5581,13 +5612,13 @@ trimbletsip_message(
 			t = ap(pbuffer, sizeof(pbuffer), t, ", Superpackets %ssupported", (mb(2) & 0xFF) ? "" :"un" );
 		}
 		break;
-			
+
 		case CMD_ROPERPARAM:
 			t = ap(pbuffer, sizeof(pbuffer), t, "%2x %.1f %.1f %.1f %.1f",
 				mb(0), getflt((unsigned char *)&mb(1)), getflt((unsigned char *)&mb(5)),
 				getflt((unsigned char *)&mb(9)), getflt((unsigned char *)&mb(13)));
 			break;
-			
+
 		case CMD_RUTCPARAM:
 		{
 			float t0t = getflt((unsigned char *)&mb(14));
@@ -5624,14 +5655,14 @@ trimbletsip_message(
 			}
 		}
 		break;
-		
+
 		case CMD_RSPOSXYZ:
 		{
 			double x = getflt((unsigned char *)&mb(0));
 			double y = getflt((unsigned char *)&mb(4));
 			double z = getflt((unsigned char *)&mb(8));
 			double f = getflt((unsigned char *)&mb(12));
-			
+
 			if (f > 0.0)
 			  t = ap(pbuffer, sizeof(pbuffer), t, "x= %.1fm, y= %.1fm, z= %.1fm, time_of_fix= %f sec",
 				  x, y, z,
@@ -5646,7 +5677,7 @@ trimbletsip_message(
 			double lat = getflt((unsigned char *)&mb(0));
 			double lng = getflt((unsigned char *)&mb(4));
 			double f   = getflt((unsigned char *)&mb(12));
-			
+
 			if (f > 0.0)
 			  t = ap(pbuffer, sizeof(pbuffer), t, "lat %f %c, long %f %c, alt %.2fm",
 				  ((lat < 0.0) ? (-lat) : (lat))*RTOD, (lat < 0.0 ? 'S' : 'N'),
@@ -5666,7 +5697,7 @@ trimbletsip_message(
 				x, y, z);
 		}
 		break;
-				
+
 		case CMD_RDOUBLELLA:
 		{
 			double lat = getdbl((unsigned char *)&mb(0));
@@ -5681,7 +5712,7 @@ trimbletsip_message(
 		case CMD_RALLINVIEW:
 		{
 			int i, sats;
-			
+
 			t = ap(pbuffer, sizeof(pbuffer), t, "mode: ");
 			switch (mb(0) & 0x7)
 			{
@@ -5692,7 +5723,7 @@ trimbletsip_message(
 			case 3:
 				t = ap(pbuffer, sizeof(pbuffer), t, "2D");
 				break;
-				
+
 			case 4:
 				t = ap(pbuffer, sizeof(pbuffer), t, "3D");
 				break;
@@ -5701,9 +5732,9 @@ trimbletsip_message(
 				t = ap(pbuffer, sizeof(pbuffer), t, "-MANUAL, ");
 			else
 				t = ap(pbuffer, sizeof(pbuffer), t, "-AUTO, ");
-			
+
 			sats = (mb(0)>>4) & 0xF;
-			
+
 			t = ap(pbuffer, sizeof(pbuffer), t, "PDOP %.2f, HDOP %.2f, VDOP %.2f, TDOP %.2f, %d satellite%s in view: ",
 				getflt((unsigned char *)&mb(1)),
 				getflt((unsigned char *)&mb(5)),
@@ -5724,7 +5755,7 @@ trimbletsip_message(
 			}
 		}
 		break;
-		
+
 		case CMD_RSTATTRACK:
 		{
 			t = ap(pbuffer, sizeof(pbuffer), t-2, "[%02d]=\"", mb(0)); /* add index to var name */
@@ -5734,7 +5765,7 @@ trimbletsip_message(
 				var_flag &= ~DEF;
 			}
 			else
-			{	
+			{
 				t = ap(pbuffer, sizeof(pbuffer), t, "ch=%d, acq=%s, eph=%d, signal_level= %5.2f, elevation= %5.2f, azimuth= %6.2f",
 					(mb(1) & 0xFF)>>3,
 					mb(2) ? ((mb(2) == 1) ? "ACQ" : "SRCH") : "NEVER",
@@ -5760,7 +5791,7 @@ trimbletsip_message(
 			}
 		}
 		break;
-		
+
 		default:
 			t = ap(pbuffer, sizeof(pbuffer), t, "<UNDECODED>");
 			break;
@@ -5771,7 +5802,7 @@ trimbletsip_message(
 	}
 }
 
-
+
 /**============================================================
  ** RAWDCF support
  **/
