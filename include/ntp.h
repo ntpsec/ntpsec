@@ -713,17 +713,19 @@ struct pkt {
  */
 #define	LOOP_DRIFTINIT		1	/* iniitialize frequency */
 #define	LOOP_KERN_CLEAR		2	/* set initial frequency offset */
-#define LOOP_MAX		3	/* set step offset */
-#define LOOP_PANIC		4	/* set panic offseet */
-#define LOOP_PHI		5	/* set dispersion rate */
-#define LOOP_MINSTEP		6	/* set step timeout */
-#define LOOP_MINPOLL		7	/* set min poll interval (log2 s) */
-#define LOOP_ALLAN		8	/* set minimum Allan intercept */
-#define LOOP_HUFFPUFF		9	/* set huff-n'-puff filter length */
-#define LOOP_FREQ		10	/* set initial frequency */
-#define LOOP_CODEC		11	/* set audio codec frequency */
-#define	LOOP_LEAP		12	/* insert leap after second 23:59 */
-#define	LOOP_TICK		13	/* sim. low precision clock */
+#define LOOP_MAX		3	/* set both step offsets */
+#define LOOP_MAX_BACK		4	/* set bacward-step offset */
+#define LOOP_MAX_FWD		5	/* set forward-step offset */
+#define LOOP_PANIC		6	/* set panic offseet */
+#define LOOP_PHI		7	/* set dispersion rate */
+#define LOOP_MINSTEP		8	/* set step timeout */
+#define LOOP_MINPOLL		9	/* set min poll interval (log2 s) */
+#define LOOP_ALLAN		10	/* set minimum Allan intercept */
+#define LOOP_HUFFPUFF		11	/* set huff-n'-puff filter length */
+#define LOOP_FREQ		12	/* set initial frequency */
+#define LOOP_CODEC		13	/* set audio codec frequency */
+#define	LOOP_LEAP		14	/* insert leap after second 23:59 */
+#define	LOOP_TICK		15	/* sim. low precision clock */
 
 /*
  * Configuration items for the stats printer

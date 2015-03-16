@@ -385,7 +385,8 @@ extern endpt *	ep_list;		/* linked list */
 /* ntp_loopfilter.c */
 extern double	drift_comp;		/* clock frequency (s/s) */
 extern double	clock_stability;	/* clock stability (s/s) */
-extern double	clock_max;		/* max offset before step (s) */
+extern double	clock_max_back;		/* max backward offset before step (s) */
+extern double	clock_max_fwd;		/* max forward offset before step (s) */
 extern double	clock_panic;		/* max offset before panic (s) */
 extern double	clock_phi;		/* dispersion rate (s/s) */
 extern double	clock_minstep;		/* step timeout (s) */
