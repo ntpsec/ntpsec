@@ -1,3 +1,5 @@
+Below are from 4.2.8p2:
+* [Bug 2763] Allow different thresholds for forward and backward steps.
 (4.3.8) 2015/03/10 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 2752] Update for mkver.bat for Windows from David Taylor.
   Account for release numbering scheme for 4.3.x and later.
@@ -71,12 +73,12 @@ ntp-4.3 begins.
 * [Bug 2732] - Leap second not handled correctly on Windows 8
   use 'GetTickCount()' to get the true elapsed time of slew
   (This should work for all versions of Windows >= W2K)
-* [Bug 2738] Missing buffer initialization in refclocK_parse.c::parsestate().
+* [Bug 2738] Missing buffer initialization in refclock_parse.c::parsestate().
 * [Bug 2739] Parse driver with PPS enabled occasionally evaluates
   PPS timestamp with wrong sign. 
   Removed some German umlauts.
 * [Bug 2740] Removed some obsolete code from the parse driver.
-* [Bug 2741] Incorrect buffer check in refclocK_parse.c::parsestatus().
+* [Bug 2741] Incorrect buffer check in refclock_parse.c::parsestatus().
 ---
 (4.2.8p1-RC1) 2015/01/24 Released by Harlan Stenn <stenn@ntp.org>
 
