@@ -1,3 +1,4 @@
+(4.3.9) 2015/03/16 Released by Harlan Stenn <stenn@ntp.org>
 Below are from 4.2.8p2:
 * [Bug 2763] Allow different thresholds for forward and backward steps.
 (4.3.8) 2015/03/10 Released by Harlan Stenn <stenn@ntp.org>
