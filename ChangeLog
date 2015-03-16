@@ -7,6 +7,7 @@
 * [Bug 2756] ntpd hangs in startup with gcc 3.3.5 on ARM.
 * [Bug 2757] Quiet compiler warnings.
 * [Bug 2759] Expose nonvolatile/clk_wander_threshold to ntpq.
+* [Bug 2763] Allow different thresholds for forward and backward steps.
 * [Bug 2766] ntp-keygen output files should not be world-readable.
 * [Bug 2767] ntp-keygen -M should symlink to ntp.keys.
 * [Bug 2771] nonvolatile value is documented in wrong units.
