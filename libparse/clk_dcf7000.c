@@ -64,8 +64,9 @@ static struct format dcf7000_fmt =
 	(const unsigned char *)"  -  -  -  -  -  -  -  \r",
 	0
 };
-static u_long cvt_dcf7000 (unsigned char *, int, struct format *, clocktime_t *, void *);
-static unsigned long inp_dcf7000 (parse_t *, unsigned int, timestamp_t *);
+
+static parse_cvt_fnc_t cvt_dcf7000;
+static parse_inp_fnc_t inp_dcf7000;
 
 clockformat_t clock_dcf7000 =
 {
@@ -79,7 +80,7 @@ clockformat_t clock_dcf7000 =
 };
 
 /*
- * cvt_dcf7000
+ * parse_cvt_fnc_t cvt_dcf7000
  *
  * convert dcf7000 type format
  */
@@ -144,14 +145,14 @@ cvt_dcf7000(
 }
 
 /*
- * inp_dcf700
+ * parse_inp_fnc_t inp_dcf700
  *
- * grep data from input stream
+ * grab data from input stream
  */
 static u_long
 inp_dcf7000(
 	  parse_t      *parseio,
-	  unsigned int  ch,
+	  char         ch,
 	  timestamp_t  *tstamp
 	  )
 {

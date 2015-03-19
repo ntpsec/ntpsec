@@ -78,8 +78,8 @@ extern int printf (const char *, ...);
   0
 };
 
-static unsigned long cvt_trimtaip (unsigned char *, int, struct format *, clocktime_t *, void *);
-static unsigned long inp_trimtaip (parse_t *, unsigned int, timestamp_t *);
+static parse_cvt_fnc_t cvt_trimtaip;
+static parse_inp_fnc_t inp_trimtaip;
 
 clockformat_t clock_trimtaip =
 {
@@ -92,7 +92,8 @@ clockformat_t clock_trimtaip =
   0				/* no private data */
 };
 
-static unsigned long
+/* parse_cvt_fnc_t cvt_trimtaip */
+static u_long
 cvt_trimtaip(
 	     unsigned char *buffer,
 	     int            size,
@@ -141,14 +142,14 @@ cvt_trimtaip(
 }
 
 /*
- * inp_trimtaip
+ * parse_inp_fnc_t inp_trimtaip
  *
- * grep data from input stream
+ * grab data from input stream
  */
 static u_long
 inp_trimtaip(
 	     parse_t      *parseio,
-	     unsigned int  ch,
+	     char         ch,
 	     timestamp_t  *tstamp
 	  )
 {

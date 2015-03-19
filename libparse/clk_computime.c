@@ -88,10 +88,10 @@ static struct format computime_fmt =
 	0
 };
 
-static u_long cvt_computime (unsigned char *, int, struct format *, clocktime_t *, void *);
-static unsigned long inp_computime (parse_t *, unsigned int, timestamp_t *);
+static parse_cvt_fnc_t cvt_computime;
+static parse_inp_fnc_t inp_computime;
 
-clockformat_t   clock_computime =
+clockformat_t clock_computime =
 {
 	inp_computime,		/* Computime input handling */
 	cvt_computime,		/* Computime conversion */
@@ -103,11 +103,11 @@ clockformat_t   clock_computime =
 };
 
 /*
- * cvt_computime
+ * parse_cvt_fnc_t cvt_computime
  *
  * convert simple type format
  */
-static          u_long
+static u_long
 cvt_computime(
 	unsigned char *buffer,
 	int            size,
@@ -144,14 +144,14 @@ cvt_computime(
 }
 
 /*
- * inp_computime
+ * parse_inp_fnc_t inp_computime
  *
- * grep data from input stream
+ * grab data from input stream
  */
 static u_long
 inp_computime(
 	      parse_t      *parseio,
-	      unsigned int  ch,
+	      char         ch,
 	      timestamp_t  *tstamp
 	      )
 {

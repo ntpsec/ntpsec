@@ -105,8 +105,8 @@ static struct format varitext_fmt =
   0
 };
 
-static u_long   cvt_varitext (unsigned char *, int, struct format *, clocktime_t *, void *);
-static u_long   inp_varitext (parse_t *, unsigned int, timestamp_t *);
+static parse_cvt_fnc_t cvt_varitext;
+static parse_inp_fnc_t inp_varitext;
 
 struct varitext {
   unsigned char start_found;
@@ -128,11 +128,11 @@ clockformat_t   clock_varitext =
 };
 
 /*
- * cvt_varitext
+ * parse_cvt_fnc_t cvt_varitext
  *
  * convert simple type format
  */
-static          u_long
+static u_long
 cvt_varitext(
 	     unsigned char	*buffer,
 	     int    		size,
@@ -184,10 +184,11 @@ cvt_varitext(
   }
 }
 
+/* parse_inp_fnc_t inp_varitext */
 static u_long
 inp_varitext(
 	     parse_t	 *parseio,
-	     unsigned int ch,
+	     char ch,
 	     timestamp_t *tstamp
 	     )
 {

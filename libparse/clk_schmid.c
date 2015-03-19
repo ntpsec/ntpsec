@@ -89,8 +89,8 @@ extern int printf (const char *, ...);
 #define   WS_MEST	0x04
 #define WS_LEAP		0x10
 
-static u_long cvt_schmid (unsigned char *, int, struct format *, clocktime_t *, void *);
-static unsigned long inp_schmid (parse_t *, unsigned int, timestamp_t *);
+static parse_cvt_fnc_t cvt_schmid;
+static parse_inp_fnc_t inp_schmid;
 
 clockformat_t clock_schmid =
 {
@@ -103,7 +103,7 @@ clockformat_t clock_schmid =
   0,				/* no private data (complete messages) */
 };
 
-
+/* parse_cvt_fnc_t */
 static u_long
 cvt_schmid(
 	   unsigned char *buffer,
@@ -192,14 +192,14 @@ cvt_schmid(
 }
 
 /*
- * inp_schmid
+ * parse_inp_fnc_t inp_schmid
  *
- * grep data from input stream
+ * grab data from input stream
  */
 static u_long
 inp_schmid(
 	  parse_t      *parseio,
-	  unsigned int  ch,
+	  char         ch,
 	  timestamp_t  *tstamp
 	  )
 {
@@ -207,10 +207,10 @@ inp_schmid(
 
 	parseprintf(DD_PARSE, ("inp_schmid(0x%lx, 0x%x, ...)\n", (long)parseio, ch));
 
-	switch (ch)
+	switch ((uint8_t)ch)
 	{
 	case 0xFD:		/*  */
-		parseprintf(DD_PARSE, ("mbg_input: ETX seen\n"));
+		parseprintf(DD_PARSE, ("inp_schmid: 0xFD seen\n"));
 		if ((rtc = parse_addchar(parseio, ch)) == PARSE_INP_SKIP)
 			return parse_end(parseio);
 		else

@@ -101,9 +101,9 @@
  * 59		      - usually missing (minute indication), except for leap insertion
  */
 
-static u_long pps_rawdcf (parse_t *, int, timestamp_t *);
-static u_long cvt_rawdcf (unsigned char *, int, struct format *, clocktime_t *, void *);
-static u_long inp_rawdcf (parse_t *, unsigned int, timestamp_t  *);
+static parse_pps_fnc_t pps_rawdcf;
+static parse_cvt_fnc_t cvt_rawdcf;
+static parse_inp_fnc_t inp_rawdcf;
 
 typedef struct last_tcode {
 	time_t tcode;	/* last converted time code */
@@ -327,6 +327,7 @@ convert_rawdcf(
 }
 
 /*
+ * parse_cvt_fnc_t cvt_rawdcf
  * raw dcf input routine - needs to fix up 50 baud
  * characters for 1/0 decision
  */
@@ -379,7 +380,7 @@ cvt_rawdcf(
 				ch >>= 1;
 			}
 
-			*s = i;
+			*s = (unsigned char) i;
 			histbuf[i]++;
 			cutoff += i;
 			lowmax++;
@@ -509,7 +510,7 @@ cvt_rawdcf(
 }
 
 /*
- * pps_rawdcf
+ * parse_pps_fnc_t pps_rawdcf
  *
  * currently a very stupid version - should be extended to decode
  * also ones and zeros (which is easy)
@@ -555,14 +556,14 @@ snt_rawdcf(
 }
 
 /*
- * inp_rawdcf
+ * parse_inp_fnc_t inp_rawdcf
  *
  * grab DCF77 data from input stream
  */
 static u_long
 inp_rawdcf(
 	  parse_t      *parseio,
-	  unsigned int  ch,
+	  char         ch,
 	  timestamp_t  *tstamp
 	  )
 {

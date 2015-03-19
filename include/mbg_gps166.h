@@ -981,7 +981,7 @@ void get_mbg_eph (unsigned char **, EPH *);
 void get_mbg_alm (unsigned char **, ALM *);
 void get_mbg_iono (unsigned char **, IONO *);
 
-unsigned long mbg_csum (unsigned char *, unsigned int);
+CSUM mbg_csum (unsigned char *, unsigned int);
 
 #endif
 /*

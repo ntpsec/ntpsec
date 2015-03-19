@@ -188,7 +188,7 @@ parse_ioend(
 unsigned int
 parse_restart(
 	      parse_t *parseio,
-	      unsigned int ch
+	      char ch
 	      )
 {
 	unsigned int updated = PARSE_INP_SKIP;
@@ -218,7 +218,7 @@ parse_restart(
 unsigned int
 parse_addchar(
 	      parse_t *parseio,
-	      unsigned int ch
+	      char ch
 	      )
 {
 	/*
@@ -260,11 +260,11 @@ parse_end(
 int
 parse_ioread(
 	register parse_t *parseio,
-	register unsigned int ch,
+	register char ch,
 	register timestamp_t *tstamp
 	)
 {
-	register unsigned updated = CVT_NONE;
+	register u_int updated = CVT_NONE;
 	/*
 	 * within STREAMS CSx (x < 8) chars still have the upper bits set
 	 * so we normalize the characters by masking unecessary bits off.
@@ -284,7 +284,7 @@ parse_ioread(
 		break;
 
 	    case PARSE_IO_CS8:
-		ch &= 0xFF;
+		ch &= (char) 0xFF;
 		break;
 	}
 
@@ -309,7 +309,7 @@ parse_ioread(
 
 		if (input_status & PARSE_INP_TIME)	/* time sample is available */
 		{
-			updated = timepacket(parseio);
+			updated = (u_int) timepacket(parseio);
 		}
 
 		if (input_status & PARSE_INP_DATA) /* got additional data */
@@ -353,7 +353,7 @@ parse_iopps(
 	register timestamp_t *ptime
 	)
 {
-	register unsigned updated = CVT_NONE;
+	register u_int updated = CVT_NONE;
 
 	/*
 	 * PPS pulse information will only be delivered to ONE clock format
@@ -364,7 +364,7 @@ parse_iopps(
 
 	if (clockformats[parseio->parse_lformat]->syncpps)
 	{
-		updated = clockformats[parseio->parse_lformat]->syncpps(parseio, status == SYNC_ONE, ptime);
+		updated = (u_int) clockformats[parseio->parse_lformat]->syncpps(parseio, status == SYNC_ONE, ptime);
 		parseprintf(DD_PARSE, ("parse_iopps: updated = 0x%x\n", updated));
 	}
 
@@ -614,7 +614,7 @@ syn_simple(
 }
 
 /*
- * pps_simple
+ * parse_pps_fnc_t pps_simple
  *
  * handle a pps time stamp
  */
@@ -633,7 +633,7 @@ pps_simple(
 }
 
 /*
- * pps_one
+ * parse_pps_fnc_t pps_one
  *
  * handle a pps time stamp in ONE edge
  */
@@ -652,7 +652,7 @@ pps_one(
 }
 
 /*
- * pps_zero
+ * parse_pps_fnc_t pps_zero
  *
  * handle a pps time stamp in ZERO edge
  */
@@ -732,7 +732,7 @@ timepacket(
 	parseio->parse_dtime.parse_time.tv.tv_sec  = t;
 	parseio->parse_dtime.parse_time.tv.tv_usec = clock_time.usecond;
 #else
-	parseio->parse_dtime.parse_time.fp.l_ui = t + JAN_1970;
+	parseio->parse_dtime.parse_time.fp.l_ui = (uint32_t) (t + JAN_1970);
 	TVUTOTSF(clock_time.usecond, parseio->parse_dtime.parse_time.fp.l_uf);
 #endif
 
@@ -852,7 +852,7 @@ parse_getfmt(
 	if (dct->parseformat.parse_format < nformats &&
 	    Strlen(clockformats[dct->parseformat.parse_format]->name) <= PARSE_TCMAX)
 	{
-		dct->parseformat.parse_count = Strlen(clockformats[dct->parseformat.parse_format]->name)+1;
+		dct->parseformat.parse_count = (unsigned short) (Strlen(clockformats[dct->parseformat.parse_format]->name) + 1);
 		memcpy(dct->parseformat.parse_buffer, clockformats[dct->parseformat.parse_format]->name, dct->parseformat.parse_count);
 		return 1;
 	}
@@ -870,7 +870,7 @@ parse_setcs(
 	)
 {
 	parse->parse_ioflags &= ~PARSE_IO_CSIZE;
-	parse->parse_ioflags |= dct->parsesetcs.parse_cs & PARSE_IO_CSIZE;
+	parse->parse_ioflags |= (int) (dct->parsesetcs.parse_cs & PARSE_IO_CSIZE);
 	return 1;
 }
 

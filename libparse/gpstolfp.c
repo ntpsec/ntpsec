@@ -50,7 +50,7 @@ gpstolfp(
       weeks += GPSWEEKS;
     }
 
-  lfp->l_ui = weeks * SECSPERWEEK + days * SECSPERDAY + seconds + GPSORIGIN; /* convert to NTP time */
+  lfp->l_ui = (uint32_t)(weeks * SECSPERWEEK + days * SECSPERDAY + seconds + GPSORIGIN); /* convert to NTP time */
   lfp->l_uf = 0;
 }
 

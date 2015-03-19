@@ -108,8 +108,8 @@ extern unsigned int splclock (void);
  * some constants useful for GPS time conversion
  */
 #define GPSORIGIN       2524953600UL                /* NTP origin - GPS origin in seconds */
-#define GPSWRAP         990                         /* assume week count less than this in the previous epoch */
-#define GPSWEEKS        1024                        /* number of weeks until the GPS epch rolls over */
+#define GPSWRAP         990U                        /* assume week count less than this in the previous epoch */
+#define GPSWEEKS        1024U                       /* number of weeks until the GPS epch rolls over */
 
 /*
  * state flags
@@ -344,15 +344,19 @@ typedef struct clocktime clocktime_t;
 #define SYNC_ZERO	0x00
 #define SYNC_ONE	0x01
 
+typedef u_long parse_inp_fnc_t(parse_t *, char, timestamp_t *);
+typedef u_long parse_cvt_fnc_t(unsigned char *, int, struct format *, clocktime_t *, void *);
+typedef u_long parse_pps_fnc_t(parse_t *, int, timestamp_t *);
+
 struct clockformat
 {
   /* special input protocol - implies fixed format */
-  u_long	(*input)   (parse_t *, unsigned int, timestamp_t *);
+  parse_inp_fnc_t *input;
   /* conversion routine */
-  u_long        (*convert) (unsigned char *, int, struct format *, clocktime_t *, void *);
+  parse_cvt_fnc_t *convert;
   /* routine for handling RS232 sync events (time stamps) */
   /* PPS input routine */
-  u_long        (*syncpps) (parse_t *, int, timestamp_t *);
+  parse_pps_fnc_t *syncpps;
   /* time code synthesizer */
 
   void           *data;		/* local parameters */
@@ -368,7 +372,7 @@ typedef struct clockformat clockformat_t;
  */
 extern int  parse_ioinit (parse_t *);
 extern void parse_ioend (parse_t *);
-extern int  parse_ioread (parse_t *, unsigned int, timestamp_t *);
+extern int  parse_ioread (parse_t *, char, timestamp_t *);
 extern int  parse_iopps (parse_t *, int, timestamp_t *);
 extern void parse_iodone (parse_t *);
 extern int  parse_timecode (parsectl_t *, parse_t *);
@@ -376,8 +380,8 @@ extern int  parse_getfmt (parsectl_t *, parse_t *);
 extern int  parse_setfmt (parsectl_t *, parse_t *);
 extern int  parse_setcs (parsectl_t *, parse_t *);
 
-extern unsigned int parse_restart (parse_t *, unsigned int);
-extern unsigned int parse_addchar (parse_t *, unsigned int);
+extern unsigned int parse_restart (parse_t *, char);
+extern unsigned int parse_addchar (parse_t *, char);
 extern unsigned int parse_end (parse_t *);
 
 extern int Strok (const unsigned char *, const unsigned char *);
@@ -386,9 +390,9 @@ extern int Stoi (const unsigned char *, long *, int);
 extern time_t parse_to_unixtime (clocktime_t *, u_long *);
 extern u_long updatetimeinfo (parse_t *, u_long);
 extern void syn_simple (parse_t *, timestamp_t *, struct format *, u_long);
-extern u_long pps_simple (parse_t *, int, timestamp_t *);
-extern u_long pps_one (parse_t *, int, timestamp_t *);
-extern u_long pps_zero (parse_t *, int, timestamp_t *);
+extern parse_pps_fnc_t pps_simple;
+extern parse_pps_fnc_t pps_one;
+extern parse_pps_fnc_t pps_zero;
 extern int parse_timedout (parse_t *, timestamp_t *, struct timeval *);
 
 #endif

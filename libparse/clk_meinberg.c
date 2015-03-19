@@ -151,19 +151,20 @@
 /* Ret val:      the checksum                                   */
 /*+-------------------------------------------------------------*/
 
-unsigned long
+CSUM
 mbg_csum(
 	 unsigned char *p,
 	 unsigned int n
 	 )
 {
-  unsigned long sum = 0;
+  unsigned int sum = 0;
   unsigned int i;
 
   for ( i = 0; i < n; i++ )
     sum += *p++;
 
-  return( sum );
+  return (CSUM) sum;
+
 }  /* csum */
 
 void
@@ -172,10 +173,10 @@ get_mbg_header(
 	       GPS_MSG_HDR *headerp
 	       )
 {
-  headerp->cmd = get_lsb_short(bufpp);
-  headerp->len = get_lsb_short(bufpp);
-  headerp->data_csum = get_lsb_short(bufpp);
-  headerp->hdr_csum  = get_lsb_short(bufpp);
+  headerp->cmd = (GPS_CMD) get_lsb_short(bufpp);
+  headerp->len = get_lsb_uint16(bufpp);
+  headerp->data_csum = (CSUM) get_lsb_short(bufpp);
+  headerp->hdr_csum  = (CSUM) get_lsb_short(bufpp);
 }
 
 static struct format meinberg_fmt[] =
@@ -210,10 +211,10 @@ static struct format meinberg_fmt[] =
 	}
 };
 
-static u_long cvt_meinberg (unsigned char *, int, struct format *, clocktime_t *, void *);
-static u_long cvt_mgps     (unsigned char *, int, struct format *, clocktime_t *, void *);
-static u_long mbg_input    (parse_t *, unsigned int, timestamp_t *);
-static u_long gps_input    (parse_t *, unsigned int, timestamp_t *);
+static parse_cvt_fnc_t cvt_meinberg;
+static parse_cvt_fnc_t cvt_mgps;
+static parse_inp_fnc_t mbg_input;
+static parse_inp_fnc_t gps_input;
 
 struct msg_buf
 {
@@ -258,7 +259,7 @@ clockformat_t clock_meinberg[] =
 };
 
 /*
- * cvt_meinberg
+ * parse_cvt_fnc_t cvt_meinberg
  *
  * convert simple type format
  */
@@ -417,14 +418,14 @@ cvt_meinberg(
 
 
 /*
- * mbg_input
+ * parse_inp_fnc_t mbg_input
  *
- * grep data from input stream
+ * grab data from input stream
  */
 static u_long
 mbg_input(
 	  parse_t      *parseio,
-	  unsigned int  ch,
+	  char         ch,
 	  timestamp_t  *tstamp
 	  )
 {
@@ -456,7 +457,7 @@ mbg_input(
 
 
 /*
- * cvt_mgps
+ * parse_cvt_fnc_t cvt_mgps
  *
  * convert Meinberg GPS format
  */
@@ -581,14 +582,14 @@ cvt_mgps(
 }
 
 /*
- * gps_input
+ * parse_inp_fnc_t gps_input
  *
  * grep binary data from input stream
  */
 static u_long
 gps_input(
 	  parse_t      *parseio,
-	  unsigned int  ch,
+	  char ch,
 	  timestamp_t  *tstamp
 	  )
 {

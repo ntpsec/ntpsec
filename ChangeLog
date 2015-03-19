@@ -1,5 +1,12 @@
 ---
 
+* Use predefined function types for parse driver functions
+  used to set up function pointers.
+  Account for changed prototype of parse_inp_fnc_t functions.
+  Cast parse conversion results to appropriate types to avoid
+  compiler warnings.
+  Let ioctl() for Windows accept a (void *) to avoid compiler warnings
+  when called with pointers to different types.
 * [Bug 2777] Fixed loops and decoding of Meinberg GPS satellite info.
   Removed non-ASCII characters from some copyright comments.
   Removed trailing whitespace.

@@ -158,8 +158,8 @@
 # endif
 #endif
 
-#define BUFFER_SIZE(_BUF, _PTR) ((_BUF) + sizeof(_BUF) - (_PTR))
-#define BUFFER_SIZES(_BUF, _PTR, _SZ) ((_BUF) + (_SZ) - (_PTR))
+# define BUFFER_SIZE(_BUF, _PTR)       ((int)((_BUF) + sizeof(_BUF) - (_PTR)))
+# define BUFFER_SIZES(_BUF, _PTR, _SZ) ((int)((_BUF) + (_SZ) - (_PTR)))
 
 /*
  * document type of PPS interfacing - copy of ifdef mechanism in local_input()
@@ -2246,9 +2246,9 @@ local_input(
 							else
 							  pts = pps_info.assert_timestamp;
 
-							parse->parseio.parse_dtime.parse_ptime.fp.l_ui = pts.tv_sec + JAN_1970;
+							parse->parseio.parse_dtime.parse_ptime.fp.l_ui = (uint32_t) (pts.tv_sec + JAN_1970);
 
-							dtemp = pts.tv_nsec / 1e9;
+							dtemp = (double) pts.tv_nsec / 1e9;
 							if (dtemp < 0.) {
 								dtemp += 1;
 								parse->parseio.parse_dtime.parse_ptime.fp.l_ui--;
@@ -2257,9 +2257,9 @@ local_input(
 								dtemp -= 1;
 								parse->parseio.parse_dtime.parse_ptime.fp.l_ui++;
 							}
-							parse->parseio.parse_dtime.parse_ptime.fp.l_uf = dtemp * FRAC;
+							parse->parseio.parse_dtime.parse_ptime.fp.l_uf = (uint32_t)(dtemp * FRAC);
 
-						        parse->parseio.parse_dtime.parse_state |= PARSEB_PPS|PARSEB_S_PPS;
+							parse->parseio.parse_dtime.parse_state |= PARSEB_PPS|PARSEB_S_PPS;
 #ifdef DEBUG
 							if (debug > 3)
 							{
@@ -2899,7 +2899,7 @@ parse_ppsapi(
 	int cap, mode_ppsoffset;
 	const char *cp;
 
-	parse->flags &= ~PARSE_PPSCLOCK;
+	parse->flags &= (u_char) (~PARSE_PPSCLOCK);
 
 	/*
 	 * collect PPSAPI offset capability - should move into generic handling
@@ -2941,16 +2941,16 @@ parse_ppsapi(
 		  CLK_UNIT(parse->peer), cp, cap);
 		mode_ppsoffset = 0;
 	} else {
-	        if (mode_ppsoffset == PPS_OFFSETCLEAR)
-		        {
-			        parse->atom.pps_params.clear_offset.tv_sec = -parse->ppsphaseadjust;
-			        parse->atom.pps_params.clear_offset.tv_nsec = -1e9*(parse->ppsphaseadjust - (long)parse->ppsphaseadjust);
+		if (mode_ppsoffset == PPS_OFFSETCLEAR)
+			{
+				parse->atom.pps_params.clear_offset.tv_sec = (time_t)(-parse->ppsphaseadjust);
+				parse->atom.pps_params.clear_offset.tv_nsec = (long)(-1e9*(parse->ppsphaseadjust - (double)(long)parse->ppsphaseadjust));
 			}
 
 		if (mode_ppsoffset == PPS_OFFSETASSERT)
-	                {
-		                parse->atom.pps_params.assert_offset.tv_sec = -parse->ppsphaseadjust;
-				parse->atom.pps_params.assert_offset.tv_nsec = -1e9*(parse->ppsphaseadjust - (long)parse->ppsphaseadjust);
+			{
+				parse->atom.pps_params.assert_offset.tv_sec = (time_t)(-parse->ppsphaseadjust);
+				parse->atom.pps_params.assert_offset.tv_nsec = (long)(-1e9*(parse->ppsphaseadjust - (double)(long)parse->ppsphaseadjust));
 			}
 	}
 
@@ -3124,15 +3124,15 @@ parse_start(
 		}
 #endif
 
-		tio.c_cflag = parse_clockinfo[type].cl_cflag;
-		tio.c_iflag = parse_clockinfo[type].cl_iflag;
-		tio.c_oflag = parse_clockinfo[type].cl_oflag;
-		tio.c_lflag = parse_clockinfo[type].cl_lflag;
+		tio.c_cflag = (tcflag_t) parse_clockinfo[type].cl_cflag;
+		tio.c_iflag = (tcflag_t) parse_clockinfo[type].cl_iflag;
+		tio.c_oflag = (tcflag_t) parse_clockinfo[type].cl_oflag;
+		tio.c_lflag = (tcflag_t) parse_clockinfo[type].cl_lflag;
 
 
 #ifdef HAVE_TERMIOS
-		if ((cfsetospeed(&tio, parse_clockinfo[type].cl_speed) == -1) ||
-		    (cfsetispeed(&tio, parse_clockinfo[type].cl_speed) == -1))
+		if ((cfsetospeed(&tio, (speed_t) parse_clockinfo[type].cl_speed) == -1) ||
+		    (cfsetispeed(&tio, (speed_t) parse_clockinfo[type].cl_speed) == -1))
 		{
 			msyslog(LOG_ERR, "PARSE receiver #%d: parse_start: tcset{i,o}speed(&tio, speed): %m", unit);
 			parse_shutdown(CLK_UNIT(parse->peer), peer); /* let our cleaning staff do the work */
@@ -3279,7 +3279,7 @@ parse_start(
 	}
 
 	strlcpy(tmp_ctl.parseformat.parse_buffer, parse->parse_type->cl_format, sizeof(tmp_ctl.parseformat.parse_buffer));
-	tmp_ctl.parseformat.parse_count = strlen(tmp_ctl.parseformat.parse_buffer);
+	tmp_ctl.parseformat.parse_count = (u_short) strlen(tmp_ctl.parseformat.parse_buffer);
 
 	if (!PARSE_SETFMT(parse, &tmp_ctl))
 	{
@@ -3379,8 +3379,8 @@ parse_ctl(
 	{
 		if (in->haveflags & (CLK_HAVEFLAG1|CLK_HAVEFLAG2|CLK_HAVEFLAG3|CLK_HAVEFLAG4))
 		{
-		  parse->flags = (parse->flags & ~(CLK_FLAG1|CLK_FLAG2|CLK_FLAG3|CLK_FLAG4)) |
-		    (in->flags & (CLK_FLAG1|CLK_FLAG2|CLK_FLAG3|CLK_FLAG4));
+		  u_char mask = CLK_FLAG1|CLK_FLAG2|CLK_FLAG3|CLK_FLAG4;
+		  parse->flags = (parse->flags & (u_char)(~mask)) | (in->flags & mask);
 #if defined(HAVE_PPSAPI)
 		  if (CLK_PPS(parse->peer))
 		    {
@@ -3663,7 +3663,7 @@ parse_control(
 					clockstatus((unsigned int)i),
 					l_mktime(s_time),
 					(int)(percent / 100), (int)(percent % 100));
-				if ((count = strlen(item)) < (LEN_STATES - 40 - (tt - start)))
+				if ((count = (int) strlen(item)) < (LEN_STATES - 40 - (tt - start)))
 					{
 						tt = ap(start, LEN_STATES, tt,
 						    "%s", item);
@@ -3695,7 +3695,7 @@ parse_control(
 			}
 		}
 
-		out->lencode       = strlen(outstatus);
+		out->lencode       = (u_short) strlen(outstatus);
 		out->p_lastcode    = outstatus;
 	}
 }
@@ -4349,7 +4349,7 @@ gps16x_message(
 					char buffer[512];
 					char *p, *b;
 
-					status = get_lsb_short(&bufp);
+					status = (BVAR_STAT) get_lsb_short(&bufp);
 					p = b = buffer;
 					p = ap(buffer, sizeof(buffer), p,
 					    "meinberg_gps_status=\"[0x%04x] ",
@@ -4631,7 +4631,8 @@ gps16x_message(
 		}
 		else
 		{
-			msyslog(LOG_DEBUG, "PARSE receiver #%d: gps16x_message: message checksum error: hdr_csum = 0x%x (expected 0x%lx), data_len = %d, data_csum = 0x%x (expected 0x%lx)",
+			msyslog(LOG_DEBUG, "PARSE receiver #%d: gps16x_message: message checksum error: hdr_csum = 0x%x (expected 0x%x), "
+			                   "data_len = %d, data_csum = 0x%x (expected 0x%x)",
 				CLK_UNIT(parse->peer),
 				header.hdr_csum, mbg_csum(parsetime->parse_msg + 1, 6),
 				header.len,
@@ -4702,7 +4703,7 @@ gps16x_poll(
 	}
 #endif
 
-	rtc = write(parse->generic->io.fd, cmd_buffer, (unsigned long)(outp - cmd_buffer));
+	rtc = (int) write(parse->generic->io.fd, cmd_buffer, (unsigned long)(outp - cmd_buffer));
 
 	if (rtc < 0)
 	{
@@ -4765,11 +4766,11 @@ poll_dpoll(
 	struct parseunit *parse
 	)
 {
-	int rtc;
+	long rtc;
 	const char *ps = ((poll_info_t *)parse->parse_type->cl_data)->string;
-	int   ct = ((poll_info_t *)parse->parse_type->cl_data)->count;
+	long ct = ((poll_info_t *)parse->parse_type->cl_data)->count;
 
-	rtc = write(parse->generic->io.fd, ps, (unsigned long)ct);
+	rtc = write(parse->generic->io.fd, ps, ct);
 	if (rtc < 0)
 	{
 		ERR(ERR_BADIO)
@@ -4779,7 +4780,7 @@ poll_dpoll(
 	    if (rtc != ct)
 	    {
 		    ERR(ERR_BADIO)
-			    msyslog(LOG_ERR, "PARSE receiver #%d: poll_dpoll: failed to send cmd incomplete (%d of %d bytes sent)", CLK_UNIT(parse->peer), rtc, ct);
+			    msyslog(LOG_ERR, "PARSE receiver #%d: poll_dpoll: failed to send cmd incomplete (%ld of %ld bytes sent)", CLK_UNIT(parse->peer), rtc, ct);
 	    }
 	clear_err(parse, ERR_BADIO);
 }
@@ -4885,7 +4886,7 @@ trimbletaip_event(
 			    iv = taipinit;
 			    while (*iv)
 			    {
-				    int rtc = write(parse->generic->io.fd, *iv, strlen(*iv));
+				    int rtc = (int) write(parse->generic->io.fd, *iv, strlen(*iv));
 				    if (rtc < 0)
 				    {
 					    msyslog(LOG_ERR, "PARSE receiver #%d: trimbletaip_event: failed to send cmd to clock: %m", CLK_UNIT(parse->peer));
@@ -5105,7 +5106,7 @@ sendflt(
 	int i;
 	union uval uval;
 
-	uval.fv = a;
+	uval.fv = (float) a;
 #ifdef WORDS_BIGENDIAN
 	for (i=0; i<=3; i++)
 #else
@@ -5399,7 +5400,7 @@ getshort(
 	 unsigned char *p
 	 )
 {
-	return get_msb_short(&p);
+	return (int) get_msb_short(&p);
 }
 
 /*--------------------------------------------------
@@ -5438,7 +5439,7 @@ trimbletsip_message(
 	}
 	else
 	{
-		int var_flag;
+		u_short var_flag;
 		trimble_t *tr = parse->localdata;
 		unsigned int cmd = buffer[1];
 		char pbuffer[200];
@@ -5473,7 +5474,7 @@ trimbletsip_message(
 			return;
 		}
 
-		var_flag = s->varmode;
+		var_flag = (u_short) s->varmode;
 
 		switch(cmd)
 		{
@@ -5622,11 +5623,11 @@ trimbletsip_message(
 		case CMD_RUTCPARAM:
 		{
 			float t0t = getflt((unsigned char *)&mb(14));
-			short wnt = getshort((unsigned char *)&mb(18));
-			short dtls = getshort((unsigned char *)&mb(12));
-			short wnlsf = getshort((unsigned char *)&mb(20));
-			short dn = getshort((unsigned char *)&mb(22));
-			short dtlsf = getshort((unsigned char *)&mb(24));
+			short wnt = (short) getshort((unsigned char *)&mb(18));
+			short dtls = (short) getshort((unsigned char *)&mb(12));
+			short wnlsf = (short) getshort((unsigned char *)&mb(20));
+			short dn = (short) getshort((unsigned char *)&mb(22));
+			short dtlsf = (short) getshort((unsigned char *)&mb(24));
 
 			if ((int)t0t != 0)
 			{
@@ -5762,7 +5763,7 @@ trimbletsip_message(
 			if (getflt((unsigned char *)&mb(4)) < 0.0)
 			{
 				t = ap(pbuffer, sizeof(pbuffer), t, "<NO MEASUREMENTS>");
-				var_flag &= ~DEF;
+				var_flag &= (u_short)(~DEF);
 			}
 			else
 			{
@@ -5775,7 +5776,7 @@ trimbletsip_message(
 					getflt((unsigned char *)&mb(16)) * RTOD);
 				if (mb(20))
 				{
-					var_flag &= ~DEF;
+					var_flag &= (u_short)(~DEF);
 					t = ap(pbuffer, sizeof(pbuffer), t, ", OLD");
 				}
 				if (mb(22))
@@ -5797,7 +5798,7 @@ trimbletsip_message(
 			break;
 		}
 
-		t = ap(pbuffer, sizeof(pbuffer), t,"\"");
+		t = ap(pbuffer, sizeof(pbuffer), t, "\"");
 		set_var(&parse->kv, pbuffer, sizeof(pbuffer), var_flag);
 	}
 }
