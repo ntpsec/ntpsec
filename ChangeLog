@@ -1,5 +1,6 @@
 ---
 
+* Added a comment from Juergen Perlinger in ntp_date.c to make the code clearer.
 * Use predefined function types for parse driver functions
   used to set up function pointers.
   Account for changed prototype of parse_inp_fnc_t functions.
