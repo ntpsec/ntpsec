@@ -1,5 +1,7 @@
 ---
-
+* [Bug 2790] If ntpd sets the Windows MM timer highest resolution
+  pause briefly before measuring system clock precision to yield
+  correct results.
 * [Bug 2728] See if C99-style structure initialization works.
 * [Bug 2747] Upgrade libevent to 2.1.5-beta.
 * [Bug 2749] ntp/lib/NTP/Util.pm needs update for ntpq -w, IPv6, .POOL. .
