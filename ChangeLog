@@ -1,5 +1,6 @@
 ---
 
+* [Bug 2791] Quiet compiler warnings from libevent.
 * [Bug 1787] DCF77's formerly "antenna" bit is "call bit" since 2003.
 * Comment from Juergen Perlinger in ntp_calendar.c to make the code clearer.
 * Use predefined function types for parse driver functions
