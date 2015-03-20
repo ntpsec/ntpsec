@@ -75,7 +75,8 @@
  * Second	Contents
  * 0  - 10	AM: free, FM: 0
  * 11 - 14	free
- * 15		R     - alternate antenna
+ * 15		R     - "call bit" used to signalize irregularities in the control facilities
+ *		        (until 2003 indicated transmission via alternate antenna)
  * 16		A1    - expect zone change (1 hour before)
  * 17 - 18	Z1,Z2 - time zone
  *		 0  0 illegal
@@ -307,7 +308,7 @@ convert_rawdcf(
 		    clock_time->flags |= PARSEB_LEAPADD; /* default: DCF77 data format deficiency */
 
 		if (ext_bf(buffer, DCF_R, dcfprm->zerobits))
-		    clock_time->flags |= PARSEB_ALTERNATE;
+		    clock_time->flags |= PARSEB_CALLBIT;
 
 		parseprintf(DD_RAWDCF,("parse: convert_rawdcf: TIME CODE OK: %d:%d, %d.%d.%d, flags 0x%lx\n",
 				       (int)clock_time->hour, (int)clock_time->minute, (int)clock_time->day, (int)clock_time->month,(int) clock_time->year,

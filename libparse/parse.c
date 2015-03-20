@@ -284,7 +284,7 @@ parse_ioread(
 		break;
 
 	    case PARSE_IO_CS8:
-		ch &= (char) 0xFF;
+		ch &= (char) 0xFFU;
 		break;
 	}
 

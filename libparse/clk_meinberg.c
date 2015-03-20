@@ -105,7 +105,8 @@
  * <A>             = '!' during the hour preceeding an daylight saving time
  *                       start/end change
  * <L>             = 'A' LEAP second announcement
- * <R>             = 'R' alternate antenna
+ * <R>             = 'R' "call bit" used to signalize irregularities in the control facilities,
+ *                   usually ' ', until 2003 indicated transmission via alternate antenna
  *
  * Meinberg GPS receivers
  *
@@ -132,8 +133,10 @@
  * <A>             = '!' during the hour preceeding an daylight saving time
  *                       start/end change
  * <L>             = 'A' LEAP second announcement
- * <R>             = 'R' alternate antenna (reminiscent of PZF535) usually ' '
- * <L>		   = 'L' on 23:59:60
+ * <R>             = 'R' "call bit" used to signalize irregularities in the control facilities,
+ *                   usually ' ', until 2003 indicated transmission via alternate antenna
+ *                   (reminiscent of PZF receivers)
+ * <L>             = 'L' on 23:59:60
  *
  * Binary messages have a lead in for a fixed header of SOH
  */
@@ -410,7 +413,7 @@ cvt_meinberg(
 				clock_time->flags |= PARSEB_LEAPADD;
 
 			if (f[5] == 'R')
-				clock_time->flags |= PARSEB_ALTERNATE;
+				clock_time->flags |= PARSEB_CALLBIT;
 		}
 		return CVT_OK;
 	}

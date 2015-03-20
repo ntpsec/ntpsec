@@ -134,7 +134,7 @@ extern unsigned int splclock (void);
 /*
  * optional status information
  */
-#define PARSEB_ALTERNATE	  0x00001000 /* alternate antenna used */
+#define PARSEB_CALLBIT		  0x00001000 /* "call bit" used to signalize irregularities in the control facilities */
 #define PARSEB_POSITION		  0x00002000 /* position available */
 #define PARSEB_MESSAGE            0x00004000 /* addtitional message data */
 /*
@@ -152,7 +152,7 @@ extern unsigned int splclock (void);
 #define PARSEB_PPS		  0x20000000 /* valid PPS sample */
 
 #define PARSE_TCINFO		(PARSEB_ANNOUNCE|PARSEB_POWERUP|PARSEB_NOSYNC|PARSEB_DST|\
-				 PARSEB_UTC|PARSEB_LEAPS|PARSEB_ALTERNATE|PARSEB_S_LEAP|\
+				 PARSEB_UTC|PARSEB_LEAPS|PARSEB_CALLBIT|PARSEB_S_LEAP|\
 				 PARSEB_S_LOCATION|PARSEB_TIMECODE|PARSEB_MESSAGE)
 
 #define PARSE_POWERUP(x)        ((x) & PARSEB_POWERUP)
@@ -163,7 +163,7 @@ extern unsigned int splclock (void);
 #define PARSE_UTC(x)		((x) & PARSEB_UTC)
 #define PARSE_LEAPADD(x)	(PARSE_SYNC(x) && (((x) & PARSEB_LEAPS) == PARSEB_LEAPADD))
 #define PARSE_LEAPDEL(x)	(PARSE_SYNC(x) && (((x) & PARSEB_LEAPS) == PARSEB_LEAPDEL))
-#define PARSE_ALTERNATE(x)	((x) & PARSEB_ALTERNATE)
+#define PARSE_CALLBIT(x)	((x) & PARSEB_CALLBIT)
 #define PARSE_LEAPSECOND(x)	(PARSE_SYNC(x) && ((x) & PARSEB_LEAP_SECOND))
 
 #define PARSE_S_LEAP(x)		((x) & PARSEB_S_LEAP)

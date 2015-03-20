@@ -1,6 +1,7 @@
 ---
 
-* Added a comment from Juergen Perlinger in ntp_date.c to make the code clearer.
+* [Bug 1787] DCF77's formerly "antenna" bit is "call bit" since 2003.
+* Comment from Juergen Perlinger in ntp_calendar.c to make the code clearer.
 * Use predefined function types for parse driver functions
   used to set up function pointers.
   Account for changed prototype of parse_inp_fnc_t functions.
@@ -50,7 +51,7 @@
   (This should work for all versions of Windows >= W2K)
 * [Bug 2738] Missing buffer initialization in refclocK_parse.c::parsestate().
 * [Bug 2739] Parse driver with PPS enabled occasionally evaluates
-  PPS timestamp with wrong sign. 
+  PPS timestamp with wrong sign.
   Removed some German umlauts.
 * [Bug 2740] Removed some obsolete code from the parse driver.
 * [Bug 2741] Incorrect buffer check in refclocK_parse.c::parsestatus().
@@ -130,7 +131,7 @@
 * [Bug 2678] nmea_control() now checks 'refclock_params()' result.
 (4.2.7p481) 2014/11/22 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 2314] Only enable PPS if kernel consumer binding succeeds.
-* [Bug 2314] Kernel PPS binding EOPNOTSUPP is a failure condition. 
+* [Bug 2314] Kernel PPS binding EOPNOTSUPP is a failure condition.
 * Rename pps_enable to hardpps_enable.
 (4.2.7p480) 2014/11/21 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 2677] PATH_MAX isn't #define'd under Windows.

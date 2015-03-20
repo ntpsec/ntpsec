@@ -82,7 +82,7 @@ extern int printf (const char *, ...);
 #define WS_TIME		0x01
 #define WS_SIGNAL	0x02
 
-#define WS_ALTERNATE	0x01
+#define WS_CALLBIT	0x01  /* "call bit" used to signalize irregularities in the control facilities */
 #define WS_ANNOUNCE	0x02
 #define WS_TZ		0x0c
 #define   WS_MET	0x08
@@ -168,9 +168,9 @@ cvt_schmid(
 
 			    if (buffer[7] & WS_SIGNAL)
 			    {
-				    if (buffer[8] & WS_ALTERNATE)
+				    if (buffer[8] & WS_CALLBIT)
 				    {
-					    clock_time->flags |= PARSEB_ALTERNATE;
+					    clock_time->flags |= PARSEB_CALLBIT;
 				    }
 
 				    if (buffer[8] & WS_ANNOUNCE)
