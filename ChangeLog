@@ -107,7 +107,6 @@ ntp-4.3 begins.
 * [Bug 2790] If ntpd sets the Windows MM timer highest resolution
   pause briefly before measuring system clock precision to yield
   correct results.
-* [Bug 2791] Quiet compiler warnings from libevent.
 * Comment from Juergen Perlinger in ntp_calendar.c to make the code clearer.
 * Use predefined function types for parse driver functions
   used to set up function pointers.
