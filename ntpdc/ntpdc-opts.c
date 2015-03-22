@@ -1,7 +1,7 @@
 /*
  *  EDIT THIS FILE WITH CAUTION  (ntpdc-opts.c)
  *
- *  It has been AutoGen-ed  March 16, 2015 at 11:58:01 AM by AutoGen 5.18.5pre4
+ *  It has been AutoGen-ed  March 22, 2015 at 08:28:11 AM by AutoGen 5.18.5pre4
  *  From the definitions    ntpdc-opts.def
  *  and the template file   options
  *
@@ -50,7 +50,7 @@ extern "C" {
 #endif
 extern FILE * option_usage_fp;
 #define zCopyright      (ntpdc_opt_strs+0)
-#define zLicenseDescrip (ntpdc_opt_strs+339)
+#define zLicenseDescrip (ntpdc_opt_strs+340)
 
 /*
  *  global included definitions
@@ -68,15 +68,15 @@ extern FILE * option_usage_fp;
 /**
  *  static const strings for ntpdc options
  */
-static char const ntpdc_opt_strs[1905] =
-/*     0 */ "ntpdc 4.3.9\n"
+static char const ntpdc_opt_strs[1908] =
+/*     0 */ "ntpdc 4.3.10\n"
             "Copyright (C) 1992-2015 The University of Delaware and Network Time Foundation, all rights reserved.\n"
             "This is free software. It is licensed for use, modification and\n"
             "redistribution under the terms of the NTP License, copies of which\n"
             "can be seen at:\n"
             "  <http://ntp.org/license>\n"
             "  <http://opensource.org/licenses/ntp-license.php>\n\0"
-/*   339 */ "Permission to use, copy, modify, and distribute this software and its\n"
+/*   340 */ "Permission to use, copy, modify, and distribute this software and its\n"
             "documentation for any purpose with or without fee is hereby granted,\n"
             "provided that the above copyright notice appears in all copies and that\n"
             "both the copyright notice and this permission notice appear in supporting\n"
@@ -86,67 +86,67 @@ static char const ntpdc_opt_strs[1905] =
             "Time Foundation makes no representations about the suitability this\n"
             "software for any purpose.  It is provided \"as is\" without express or\n"
             "implied warranty.\n\0"
-/*  1007 */ "Force IPv4 DNS name resolution\0"
-/*  1038 */ "IPV4\0"
-/*  1043 */ "ipv4\0"
-/*  1048 */ "Force IPv6 DNS name resolution\0"
-/*  1079 */ "IPV6\0"
-/*  1084 */ "ipv6\0"
-/*  1089 */ "run a command and exit\0"
-/*  1112 */ "COMMAND\0"
-/*  1120 */ "command\0"
-/*  1128 */ "Increase debug verbosity level\0"
-/*  1159 */ "DEBUG_LEVEL\0"
-/*  1171 */ "debug-level\0"
-/*  1183 */ "Set the debug verbosity level\0"
-/*  1213 */ "SET_DEBUG_LEVEL\0"
-/*  1229 */ "set-debug-level\0"
-/*  1245 */ "Force ntpq to operate in interactive mode\0"
-/*  1287 */ "INTERACTIVE\0"
-/*  1299 */ "interactive\0"
-/*  1311 */ "Print a list of the peers\0"
-/*  1337 */ "LISTPEERS\0"
-/*  1347 */ "listpeers\0"
-/*  1357 */ "numeric host addresses\0"
-/*  1380 */ "NUMERIC\0"
-/*  1388 */ "numeric\0"
-/*  1396 */ "PEERS\0"
-/*  1402 */ "peers\0"
-/*  1408 */ "Show a list of the peers\0"
-/*  1433 */ "SHOWPEERS\0"
-/*  1443 */ "showpeers\0"
-/*  1453 */ "display extended usage information and exit\0"
-/*  1497 */ "help\0"
-/*  1502 */ "extended usage information passed thru pager\0"
-/*  1547 */ "more-help\0"
-/*  1557 */ "output version information and exit\0"
-/*  1593 */ "version\0"
-/*  1601 */ "save the option state to a config file\0"
-/*  1640 */ "save-opts\0"
-/*  1650 */ "load options from a config file\0"
-/*  1682 */ "LOAD_OPTS\0"
-/*  1692 */ "no-load-opts\0"
-/*  1705 */ "no\0"
-/*  1708 */ "NTPDC\0"
-/*  1714 */ "ntpdc - vendor-specific NTPD control program - Ver. 4.3.9\n"
+/*  1008 */ "Force IPv4 DNS name resolution\0"
+/*  1039 */ "IPV4\0"
+/*  1044 */ "ipv4\0"
+/*  1049 */ "Force IPv6 DNS name resolution\0"
+/*  1080 */ "IPV6\0"
+/*  1085 */ "ipv6\0"
+/*  1090 */ "run a command and exit\0"
+/*  1113 */ "COMMAND\0"
+/*  1121 */ "command\0"
+/*  1129 */ "Increase debug verbosity level\0"
+/*  1160 */ "DEBUG_LEVEL\0"
+/*  1172 */ "debug-level\0"
+/*  1184 */ "Set the debug verbosity level\0"
+/*  1214 */ "SET_DEBUG_LEVEL\0"
+/*  1230 */ "set-debug-level\0"
+/*  1246 */ "Force ntpq to operate in interactive mode\0"
+/*  1288 */ "INTERACTIVE\0"
+/*  1300 */ "interactive\0"
+/*  1312 */ "Print a list of the peers\0"
+/*  1338 */ "LISTPEERS\0"
+/*  1348 */ "listpeers\0"
+/*  1358 */ "numeric host addresses\0"
+/*  1381 */ "NUMERIC\0"
+/*  1389 */ "numeric\0"
+/*  1397 */ "PEERS\0"
+/*  1403 */ "peers\0"
+/*  1409 */ "Show a list of the peers\0"
+/*  1434 */ "SHOWPEERS\0"
+/*  1444 */ "showpeers\0"
+/*  1454 */ "display extended usage information and exit\0"
+/*  1498 */ "help\0"
+/*  1503 */ "extended usage information passed thru pager\0"
+/*  1548 */ "more-help\0"
+/*  1558 */ "output version information and exit\0"
+/*  1594 */ "version\0"
+/*  1602 */ "save the option state to a config file\0"
+/*  1641 */ "save-opts\0"
+/*  1651 */ "load options from a config file\0"
+/*  1683 */ "LOAD_OPTS\0"
+/*  1693 */ "no-load-opts\0"
+/*  1706 */ "no\0"
+/*  1709 */ "NTPDC\0"
+/*  1715 */ "ntpdc - vendor-specific NTPD control program - Ver. 4.3.10\n"
             "Usage:  %s [ -<flag> [<val>] | --<name>[{=| }<val>] ]... [ host ...]\n\0"
-/*  1842 */ "$HOME\0"
-/*  1848 */ ".\0"
-/*  1850 */ ".ntprc\0"
-/*  1857 */ "http://bugs.ntp.org, bugs@ntp.org\0"
-/*  1891 */ "\n\0"
-/*  1893 */ "ntpdc 4.3.9";
+/*  1844 */ "$HOME\0"
+/*  1850 */ ".\0"
+/*  1852 */ ".ntprc\0"
+/*  1859 */ "http://bugs.ntp.org, bugs@ntp.org\0"
+/*  1893 */ "\n\0"
+/*  1895 */ "ntpdc 4.3.10";
 
 /**
  *  ipv4 option description with
  *  "Must also have options" and "Incompatible options":
  */
 /** Descriptive text for the ipv4 option */
-#define IPV4_DESC      (ntpdc_opt_strs+1007)
+#define IPV4_DESC      (ntpdc_opt_strs+1008)
 /** Upper-cased name for the ipv4 option */
-#define IPV4_NAME      (ntpdc_opt_strs+1038)
+#define IPV4_NAME      (ntpdc_opt_strs+1039)
 /** Name string for the ipv4 option */
-#define IPV4_name      (ntpdc_opt_strs+1043)
+#define IPV4_name      (ntpdc_opt_strs+1044)
 /** Other options that appear in conjunction with the ipv4 option */
 static int const aIpv4CantList[] = {
     INDEX_OPT_IPV6, NO_EQUIVALENT };
@@ -158,11 +158,11 @@ static int const aIpv4CantList[] = {
  *  "Must also have options" and "Incompatible options":
  */
 /** Descriptive text for the ipv6 option */
-#define IPV6_DESC      (ntpdc_opt_strs+1048)
+#define IPV6_DESC      (ntpdc_opt_strs+1049)
 /** Upper-cased name for the ipv6 option */
-#define IPV6_NAME      (ntpdc_opt_strs+1079)
+#define IPV6_NAME      (ntpdc_opt_strs+1080)
 /** Name string for the ipv6 option */
-#define IPV6_name      (ntpdc_opt_strs+1084)
+#define IPV6_name      (ntpdc_opt_strs+1085)
 /** Other options that appear in conjunction with the ipv6 option */
 static int const aIpv6CantList[] = {
     INDEX_OPT_IPV4, NO_EQUIVALENT };
@@ -173,11 +173,11 @@ static int const aIpv6CantList[] = {
  *  command option description:
  */
 /** Descriptive text for the command option */
-#define COMMAND_DESC      (ntpdc_opt_strs+1089)
+#define COMMAND_DESC      (ntpdc_opt_strs+1090)
 /** Upper-cased name for the command option */
-#define COMMAND_NAME      (ntpdc_opt_strs+1112)
+#define COMMAND_NAME      (ntpdc_opt_strs+1113)
 /** Name string for the command option */
-#define COMMAND_name      (ntpdc_opt_strs+1120)
+#define COMMAND_name      (ntpdc_opt_strs+1121)
 /** Compiled in flag settings for the command option */
 #define COMMAND_FLAGS     (OPTST_DISABLED | OPTST_STACKED \
         | OPTST_SET_ARGTYPE(OPARG_TYPE_STRING))
@@ -186,11 +186,11 @@ static int const aIpv6CantList[] = {
  *  debug-level option description:
  */
 /** Descriptive text for the debug-level option */
-#define DEBUG_LEVEL_DESC      (ntpdc_opt_strs+1128)
+#define DEBUG_LEVEL_DESC      (ntpdc_opt_strs+1129)
 /** Upper-cased name for the debug-level option */
-#define DEBUG_LEVEL_NAME      (ntpdc_opt_strs+1159)
+#define DEBUG_LEVEL_NAME      (ntpdc_opt_strs+1160)
 /** Name string for the debug-level option */
-#define DEBUG_LEVEL_name      (ntpdc_opt_strs+1171)
+#define DEBUG_LEVEL_name      (ntpdc_opt_strs+1172)
 /** Compiled in flag settings for the debug-level option */
 #define DEBUG_LEVEL_FLAGS     (OPTST_DISABLED)
 
@@ -198,11 +198,11 @@ static int const aIpv6CantList[] = {
  *  set-debug-level option description:
  */
 /** Descriptive text for the set-debug-level option */
-#define SET_DEBUG_LEVEL_DESC      (ntpdc_opt_strs+1183)
+#define SET_DEBUG_LEVEL_DESC      (ntpdc_opt_strs+1184)
 /** Upper-cased name for the set-debug-level option */
-#define SET_DEBUG_LEVEL_NAME      (ntpdc_opt_strs+1213)
+#define SET_DEBUG_LEVEL_NAME      (ntpdc_opt_strs+1214)
 /** Name string for the set-debug-level option */
-#define SET_DEBUG_LEVEL_name      (ntpdc_opt_strs+1229)
+#define SET_DEBUG_LEVEL_name      (ntpdc_opt_strs+1230)
 /** Compiled in flag settings for the set-debug-level option */
 #define SET_DEBUG_LEVEL_FLAGS     (OPTST_DISABLED \
         | OPTST_SET_ARGTYPE(OPARG_TYPE_NUMERIC))
@@ -212,11 +212,11 @@ static int const aIpv6CantList[] = {
  *  "Must also have options" and "Incompatible options":
  */
 /** Descriptive text for the interactive option */
-#define INTERACTIVE_DESC      (ntpdc_opt_strs+1245)
+#define INTERACTIVE_DESC      (ntpdc_opt_strs+1246)
 /** Upper-cased name for the interactive option */
-#define INTERACTIVE_NAME      (ntpdc_opt_strs+1287)
+#define INTERACTIVE_NAME      (ntpdc_opt_strs+1288)
 /** Name string for the interactive option */
-#define INTERACTIVE_name      (ntpdc_opt_strs+1299)
+#define INTERACTIVE_name      (ntpdc_opt_strs+1300)
 /** Other options that appear in conjunction with the interactive option */
 static int const aInteractiveCantList[] = {
     INDEX_OPT_COMMAND,
@@ -231,11 +231,11 @@ static int const aInteractiveCantList[] = {
  *  "Must also have options" and "Incompatible options":
  */
 /** Descriptive text for the listpeers option */
-#define LISTPEERS_DESC      (ntpdc_opt_strs+1311)
+#define LISTPEERS_DESC      (ntpdc_opt_strs+1312)
 /** Upper-cased name for the listpeers option */
-#define LISTPEERS_NAME      (ntpdc_opt_strs+1337)
+#define LISTPEERS_NAME      (ntpdc_opt_strs+1338)
 /** Name string for the listpeers option */
-#define LISTPEERS_name      (ntpdc_opt_strs+1347)
+#define LISTPEERS_name      (ntpdc_opt_strs+1348)
 /** Other options that appear in conjunction with the listpeers option */
 static int const aListpeersCantList[] = {
     INDEX_OPT_COMMAND, NO_EQUIVALENT };
@@ -246,11 +246,11 @@ static int const aListpeersCantList[] = {
  *  numeric option description:
  */
 /** Descriptive text for the numeric option */
-#define NUMERIC_DESC      (ntpdc_opt_strs+1357)
+#define NUMERIC_DESC      (ntpdc_opt_strs+1358)
 /** Upper-cased name for the numeric option */
-#define NUMERIC_NAME      (ntpdc_opt_strs+1380)
+#define NUMERIC_NAME      (ntpdc_opt_strs+1381)
 /** Name string for the numeric option */
-#define NUMERIC_name      (ntpdc_opt_strs+1388)
+#define NUMERIC_name      (ntpdc_opt_strs+1389)
 /** Compiled in flag settings for the numeric option */
 #define NUMERIC_FLAGS     (OPTST_DISABLED)
 
@@ -259,11 +259,11 @@ static int const aListpeersCantList[] = {
  *  "Must also have options" and "Incompatible options":
  */
 /** Descriptive text for the peers option */
-#define PEERS_DESC      (ntpdc_opt_strs+1311)
+#define PEERS_DESC      (ntpdc_opt_strs+1312)
 /** Upper-cased name for the peers option */
-#define PEERS_NAME      (ntpdc_opt_strs+1396)
+#define PEERS_NAME      (ntpdc_opt_strs+1397)
 /** Name string for the peers option */
-#define PEERS_name      (ntpdc_opt_strs+1402)
+#define PEERS_name      (ntpdc_opt_strs+1403)
 /** Other options that appear in conjunction with the peers option */
 static int const aPeersCantList[] = {
     INDEX_OPT_COMMAND, NO_EQUIVALENT };
@@ -275,11 +275,11 @@ static int const aPeersCantList[] = {
  *  "Must also have options" and "Incompatible options":
  */
 /** Descriptive text for the showpeers option */
-#define SHOWPEERS_DESC      (ntpdc_opt_strs+1408)
+#define SHOWPEERS_DESC      (ntpdc_opt_strs+1409)
 /** Upper-cased name for the showpeers option */
-#define SHOWPEERS_NAME      (ntpdc_opt_strs+1433)
+#define SHOWPEERS_NAME      (ntpdc_opt_strs+1434)
 /** Name string for the showpeers option */
-#define SHOWPEERS_name      (ntpdc_opt_strs+1443)
+#define SHOWPEERS_name      (ntpdc_opt_strs+1444)
 /** Other options that appear in conjunction with the showpeers option */
 static int const aShowpeersCantList[] = {
     INDEX_OPT_COMMAND, NO_EQUIVALENT };
@@ -289,11 +289,11 @@ static int const aShowpeersCantList[] = {
 /*
  *  Help/More_Help/Version option descriptions:
  */
-#define HELP_DESC       (ntpdc_opt_strs+1453)
-#define HELP_name       (ntpdc_opt_strs+1497)
+#define HELP_DESC       (ntpdc_opt_strs+1454)
+#define HELP_name       (ntpdc_opt_strs+1498)
 #ifdef HAVE_WORKING_FORK
-#define MORE_HELP_DESC  (ntpdc_opt_strs+1502)
-#define MORE_HELP_name  (ntpdc_opt_strs+1547)
+#define MORE_HELP_DESC  (ntpdc_opt_strs+1503)
+#define MORE_HELP_name  (ntpdc_opt_strs+1548)
 #define MORE_HELP_FLAGS (OPTST_IMM | OPTST_NO_INIT)
 #else
 #define MORE_HELP_DESC  HELP_DESC
@@ -306,14 +306,14 @@ static int const aShowpeersCantList[] = {
 #  define VER_FLAGS     (OPTST_SET_ARGTYPE(OPARG_TYPE_STRING) | \
                          OPTST_ARG_OPTIONAL | OPTST_IMM | OPTST_NO_INIT)
 #endif
-#define VER_DESC        (ntpdc_opt_strs+1557)
-#define VER_name        (ntpdc_opt_strs+1593)
-#define SAVE_OPTS_DESC  (ntpdc_opt_strs+1601)
-#define SAVE_OPTS_name  (ntpdc_opt_strs+1640)
-#define LOAD_OPTS_DESC     (ntpdc_opt_strs+1650)
-#define LOAD_OPTS_NAME     (ntpdc_opt_strs+1682)
-#define NO_LOAD_OPTS_name  (ntpdc_opt_strs+1692)
-#define LOAD_OPTS_pfx      (ntpdc_opt_strs+1705)
+#define VER_DESC        (ntpdc_opt_strs+1558)
+#define VER_name        (ntpdc_opt_strs+1594)
+#define SAVE_OPTS_DESC  (ntpdc_opt_strs+1602)
+#define SAVE_OPTS_name  (ntpdc_opt_strs+1641)
+#define LOAD_OPTS_DESC     (ntpdc_opt_strs+1651)
+#define LOAD_OPTS_NAME     (ntpdc_opt_strs+1683)
+#define NO_LOAD_OPTS_name  (ntpdc_opt_strs+1693)
+#define LOAD_OPTS_pfx      (ntpdc_opt_strs+1706)
 #define LOAD_OPTS_name     (NO_LOAD_OPTS_name + 3)
 /**
  *  Declare option callback procedures
@@ -522,24 +522,24 @@ static tOptDesc optDesc[OPTION_CT] = {
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 /** Reference to the upper cased version of ntpdc. */
-#define zPROGNAME       (ntpdc_opt_strs+1708)
+#define zPROGNAME       (ntpdc_opt_strs+1709)
 /** Reference to the title line for ntpdc usage. */
-#define zUsageTitle     (ntpdc_opt_strs+1714)
+#define zUsageTitle     (ntpdc_opt_strs+1715)
 /** ntpdc configuration file name. */
-#define zRcName         (ntpdc_opt_strs+1850)
+#define zRcName         (ntpdc_opt_strs+1852)
 /** Directories to search for ntpdc config files. */
 static char const * const apzHomeList[3] = {
-    ntpdc_opt_strs+1842,
-    ntpdc_opt_strs+1848,
+    ntpdc_opt_strs+1844,
+    ntpdc_opt_strs+1850,
     NULL };
 /** The ntpdc program bug email address. */
-#define zBugsAddr       (ntpdc_opt_strs+1857)
+#define zBugsAddr       (ntpdc_opt_strs+1859)
 /** Clarification/explanation of what ntpdc does. */
-#define zExplain        (ntpdc_opt_strs+1891)
+#define zExplain        (ntpdc_opt_strs+1893)
 /** Extra detail explaining what ntpdc does. */
 #define zDetail         (NULL)
 /** The full version string for ntpdc. */
-#define zFullVersion    (ntpdc_opt_strs+1893)
+#define zFullVersion    (ntpdc_opt_strs+1895)
 /* extracted from optcode.tlib near line 364 */
 
 #if defined(ENABLE_NLS)
@@ -796,7 +796,7 @@ static void bogus_function(void) {
      translate option names.
    */
   /* referenced via ntpdcOptions.pzCopyright */
-  puts(_("ntpdc 4.3.9\n\
+  puts(_("ntpdc 4.3.10\n\
 Copyright (C) 1992-2015 The University of Delaware and Network Time Foundation, all rights reserved.\n\
 This is free software. It is licensed for use, modification and\n\
 redistribution under the terms of the NTP License, copies of which\n\
@@ -862,14 +862,14 @@ implied warranty.\n"));
   puts(_("load options from a config file"));
 
   /* referenced via ntpdcOptions.pzUsageTitle */
-  puts(_("ntpdc - vendor-specific NTPD control program - Ver. 4.3.9\n\
+  puts(_("ntpdc - vendor-specific NTPD control program - Ver. 4.3.10\n\
 Usage:  %s [ -<flag> [<val>] | --<name>[{=| }<val>] ]... [ host ...]\n"));
 
   /* referenced via ntpdcOptions.pzExplain */
   puts(_("\n"));
 
   /* referenced via ntpdcOptions.pzFullVersion */
-  puts(_("ntpdc 4.3.9"));
+  puts(_("ntpdc 4.3.10"));
 
   /* referenced via ntpdcOptions.pzFullUsage */
   puts(_("<<<NOT-FOUND>>>"));
