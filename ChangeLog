@@ -14,7 +14,7 @@ Below are from 4.2.8p2:
   Reworked mk_utcinfo() to avoid printing of ambiguous leap second dates.
   Modified mbg_tm_str() which now expexts an additional parameter controlling
   if the time status shall be printed.
-* [Bug 2791] Quiet compiler warnings from libevent.
+* [Bug 2789] Quiet compiler warnings from libevent.
 * Comment from Juergen Perlinger in ntp_calendar.c to make the code clearer.
 * Use predefined function types for parse driver functions
   used to set up function pointers.
