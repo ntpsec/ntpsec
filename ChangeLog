@@ -68,19 +68,6 @@ ntp-4.3 begins.
 ---
 
 * [Bug 1787] DCF77's formerly "antenna" bit is "call bit" since 2003.
-* [Bug 2777] Fixed loops and decoding of Meinberg GPS satellite info.
-  Removed non-ASCII characters from some copyright comments.
-  Removed trailing whitespace.
-  Updated definitions for Meinberg clocks from current Meinberg header files.
-  Now use C99 fixed-width types and avoid non-ASCII characters in comments.
-  Account for updated definitions pulled from Meinberg header files.
-  Updated comments on Meinberg GPS receivers which are not only called GPS16x.
-  Replaced some constant numbers by defines from ntp_calendar.h
-  Modified creation of parse-specific variables for Meinberg devices
-  in gps16x_message().
-  Reworked mk_utcinfo() to avoid printing of ambiguous leap second dates.
-  Modified mbg_tm_str() which now expexts an additional parameter controlling
-  if the time status shall be printed.
 * [Bug 1960] setsockopt IPV6_MULTICAST_IF: Invalid argument.
 * [Bug 2728] See if C99-style structure initialization works.
 * [Bug 2747] Upgrade libevent to 2.1.5-beta.
@@ -97,6 +84,19 @@ ntp-4.3 begins.
 * [Bug 2773] Early leap announcement from Palisade/Thunderbolt
 * [Bug 2774] Unreasonably verbose printout - leap pending/warning
 * [Bug 2775] ntp-keygen.c fails to compile under Windows.
+* [Bug 2777] Fixed loops and decoding of Meinberg GPS satellite info.
+  Removed non-ASCII characters from some copyright comments.
+  Removed trailing whitespace.
+  Updated definitions for Meinberg clocks from current Meinberg header files.
+  Now use C99 fixed-width types and avoid non-ASCII characters in comments.
+  Account for updated definitions pulled from Meinberg header files.
+  Updated comments on Meinberg GPS receivers which are not only called GPS16x.
+  Replaced some constant numbers by defines from ntp_calendar.h
+  Modified creation of parse-specific variables for Meinberg devices
+  in gps16x_message().
+  Reworked mk_utcinfo() to avoid printing of ambiguous leap second dates.
+  Modified mbg_tm_str() which now expexts an additional parameter controlling
+  if the time status shall be printed.
 * [Bug 2782] Refactor refclock_shm.c, add memory barrier protection.
 * [Bug 2783] Quiet autoconf warnings about missing AC_LANG_SOURCE.
 * [Bug 2784] Fix for 2782 uses clock_gettime() instead of get_ostime().
