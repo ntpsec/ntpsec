@@ -51,7 +51,8 @@ noinst_DATA =				\
 	update-leap-opts		\
 	$(NULL)
 
-update-leap: $(srcdir)/update-leap-opts
+$(srcdir)/update-leap: $(srcdir)/update-leap-opts
+	@: do-nothing action to avoid default SCCS get
 
 $(srcdir)/update-leap-opts: update-leap-opts.def $(std_def_list)
 	$(run_ag) update-leap-opts.def
