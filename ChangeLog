@@ -100,7 +100,7 @@ ntp-4.3 begins.
 * [Bug 2782] Refactor refclock_shm.c, add memory barrier protection.
 * [Bug 2783] Quiet autoconf warnings about missing AC_LANG_SOURCE.
 * [Bug 2784] Fix for 2782 uses clock_gettime() instead of get_ostime().
-* [Bug 2791] Quiet compiler warnings from libevent.
+* [Bug 2789] Quiet compiler warnings from libevent.
 * Comment from Juergen Perlinger in ntp_calendar.c to make the code clearer.
 * Use predefined function types for parse driver functions
   used to set up function pointers.
