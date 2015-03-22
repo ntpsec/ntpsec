@@ -29,7 +29,7 @@
   Modified mbg_tm_str() which now expexts an additional parameter controlling
   if the time status shall be printed.
 * [Bug 2783] Quiet autoconf warnings about missing AC_LANG_SOURCE.
-* [Bug 2791] Quiet compiler warnings from libevent.
+* [Bug 2789] Quiet compiler warnings from libevent.
 * Comment from Juergen Perlinger in ntp_calendar.c to make the code clearer.
 * Use predefined function types for parse driver functions
   used to set up function pointers.
