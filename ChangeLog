@@ -29,6 +29,7 @@
   Modified mbg_tm_str() which now expexts an additional parameter controlling
   if the time status shall be printed.
 * [Bug 2783] Quiet autoconf warnings about missing AC_LANG_SOURCE.
+* [Bug 2789] Quiet compiler warnings from libevent.
 * [Bug 2790] If ntpd sets the Windows MM timer highest resolution
   pause briefly before measuring system clock precision to yield
   correct results.
