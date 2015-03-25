@@ -464,23 +464,23 @@ typedef struct poll_info
 #define DCF_P_ID	"DCFp"	/* psuedo random phase shift */
 #define GPS_ID		"GPS"	/* GPS receiver */
 
-#define	NOCLOCK_ROOTDELAY	0.0
-#define	NOCLOCK_BASEDELAY	0.0
-#define	NOCLOCK_DESCRIPTION	0
+#define NOCLOCK_ROOTDELAY       0.0
+#define NOCLOCK_BASEDELAY       0.0
+#define NOCLOCK_DESCRIPTION     0
 #define NOCLOCK_MAXUNSYNC       0
 #define NOCLOCK_CFLAG           0
 #define NOCLOCK_IFLAG           0
 #define NOCLOCK_OFLAG           0
 #define NOCLOCK_LFLAG           0
-#define NOCLOCK_ID		"TILT"
-#define NOCLOCK_POLL		NO_POLL
-#define NOCLOCK_INIT		NO_INIT
-#define NOCLOCK_END		NO_END
-#define NOCLOCK_DATA		NO_LCLDATA
-#define NOCLOCK_FORMAT		""
-#define NOCLOCK_TYPE		CTL_SST_TS_UNSPEC
-#define NOCLOCK_SAMPLES		0
-#define NOCLOCK_KEEP		0
+#define NOCLOCK_ID              "TILT"
+#define NOCLOCK_POLL            NO_POLL
+#define NOCLOCK_INIT            NO_INIT
+#define NOCLOCK_END             NO_END
+#define NOCLOCK_DATA            NO_LCLDATA
+#define NOCLOCK_FORMAT          ""
+#define NOCLOCK_TYPE            CTL_SST_TS_UNSPEC
+#define NOCLOCK_SAMPLES         0
+#define NOCLOCK_KEEP            0
 
 #define DCF_TYPE		CTL_SST_TS_LF
 #define GPS_TYPE		CTL_SST_TS_UHF
@@ -4174,8 +4174,8 @@ parse_process(
 		 */
 #ifdef DEBUG
 	        if (debug > 2)
-		        {
-			        printf("PARSE receiver #%d: refclock_process_offset(reftime=%s, rectime=%s, Fudge=%f)\n",
+			{
+				       printf("PARSE receiver #%d: refclock_process_offset(reftime=%s, rectime=%s, Fudge=%f)\n",
 				       CLK_UNIT(parse->peer),
 				       prettydate(&reftime),
 				       prettydate(&rectime),
@@ -4191,13 +4191,13 @@ parse_process(
 		 * pass PPS information on to PPS clock
 		 */
 		if (PARSE_PPS(parsetime->parse_state) && CLK_PPS(parse->peer))
-		        {
+			{
 				parse->peer->flags |= FLAG_PPS;
 				parse_hardpps(parse, PARSE_HARDPPS_ENABLE);
 			}
 #endif
 	} else {
-	        parse_hardpps(parse, PARSE_HARDPPS_DISABLE);
+		parse_hardpps(parse, PARSE_HARDPPS_DISABLE);
 		parse->peer->flags &= ~FLAG_PPS;
 	}
 
