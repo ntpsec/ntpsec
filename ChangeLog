@@ -1,5 +1,7 @@
 ---
 
+* [Bug 2592] Account for PPS sources which can provide an accurate
+  absolute time stamp, and status information.
   Fixed indention and removed trailing whitespace.
 * [Bug 1787] DCF77's formerly "antenna" bit is "call bit" since 2003.
 * [Bug 2728] See if C99-style structure initialization works.

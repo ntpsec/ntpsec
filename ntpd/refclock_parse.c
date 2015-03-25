@@ -4192,13 +4192,13 @@ parse_process(
 		 */
 		if (PARSE_PPS(parsetime->parse_state) && CLK_PPS(parse->peer))
 			{
-				parse->peer->flags |= FLAG_PPS;
+				parse->peer->flags |= (FLAG_PPS | FLAG_TSTAMP_PPS);
 				parse_hardpps(parse, PARSE_HARDPPS_ENABLE);
 			}
 #endif
 	} else {
 		parse_hardpps(parse, PARSE_HARDPPS_DISABLE);
-		parse->peer->flags &= ~FLAG_PPS;
+		parse->peer->flags &= ~(FLAG_PPS | FLAG_TSTAMP_PPS);
 	}
 
 	/*

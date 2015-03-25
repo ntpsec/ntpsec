@@ -2661,7 +2661,8 @@ clock_select(void)
 		if (peer->flags & FLAG_PPS) {
 			if (typepps == NULL)
 				typepps = peer;
-			continue;
+			if (!(peer->flags & FLAG_TSTAMP_PPS))
+				continue;
 		}
 #endif /* REFCLOCK */
 

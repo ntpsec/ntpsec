@@ -435,7 +435,7 @@ struct peer {
 #define	STRATUM_UNSPEC	((u_char)16) /* unspecified */
 
 /*
- * Values for peer.flags
+ * Values for peer.flags (u_int)
  */
 #define	FLAG_CONFIG	0x0001	/* association was configured */
 #define	FLAG_PREEMPT	0x0002	/* preemptable association */
@@ -455,6 +455,7 @@ struct peer {
 #ifdef	OPENSSL
 # define FLAG_ASSOC	0x8000	/* autokey request */
 #endif /* OPENSSL */
+#define FLAG_TSTAMP_PPS	0x10000	/* PPS source provides absolute timestamp */
 
 /*
  * Definitions for the clear() routine.  We use memset() to clear
