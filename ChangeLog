@@ -30,6 +30,9 @@
   Reworked mk_utcinfo() to avoid printing of ambiguous leap second dates.
   Modified mbg_tm_str() which now expexts an additional parameter controlling
   if the time status shall be printed.
+* [Sec 2779] ntpd accepts unauthenticated packets with symmetric key crypto.
+* [Sec 2781] Authentication doesn't protect symmetric associations against
+  DoS attacks.
 * [Bug 2783] Quiet autoconf warnings about missing AC_LANG_SOURCE.
 * [Bug 2789] Quiet compiler warnings from libevent.
 * [Bug 2790] If ntpd sets the Windows MM timer highest resolution

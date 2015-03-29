@@ -1256,16 +1256,6 @@ receive(
 	}
 
 	/*
-	 * Update the state variables.
-	 */
-	if (peer->flip == 0) {
-		if (hismode != MODE_BROADCAST)
-			peer->rec = p_xmt;
-		peer->dst = rbufp->recv_time;
-	}
-	peer->xmt = p_xmt;
-
-	/*
 	 * If this is a crypto_NAK, the server cannot authenticate a
 	 * client packet. The server might have just changed keys. Clear
 	 * the association and restart the protocol.
@@ -1285,18 +1275,20 @@ receive(
 		return;
 
 	/* 
-	 * If the digest fails, the client cannot authenticate a server
+	 * If the digest fails or it's missing for authenticated
+	 * associations, the client cannot authenticate a server
 	 * reply to a client packet previously sent. The loopback check
 	 * is designed to avoid a bait-and-switch attack, which was
 	 * possible in past versions. If symmetric modes, return a
 	 * crypto-NAK. The peer should restart the protocol.
 	 */
-	} else if (!AUTH(has_mac || (restrict_mask & RES_DONTTRUST),
-	    is_authentic)) {
+	} else if (!AUTH(peer->keyid || has_mac ||
+			 (restrict_mask & RES_DONTTRUST), is_authentic)) {
 		report_event(PEVNT_AUTH, peer, "digest");
 		peer->flash |= TEST5;		/* bad auth */
 		peer->badauth++;
-		if (hismode == MODE_ACTIVE || hismode == MODE_PASSIVE)
+		if (has_mac &&
+		    (hismode == MODE_ACTIVE || hismode == MODE_PASSIVE))
 			fast_xmit(rbufp, MODE_ACTIVE, 0, restrict_mask);
 		if (peer->flags & FLAG_PREEMPT) {
 			unpeer(peer);
@@ -1308,6 +1300,16 @@ receive(
 #endif	/* AUTOKEY */
 		return;
 	}
+
+	/*
+	 * Update the state variables.
+	 */
+	if (peer->flip == 0) {
+		if (hismode != MODE_BROADCAST)
+			peer->rec = p_xmt;
+		peer->dst = rbufp->recv_time;
+	}
+	peer->xmt = p_xmt;
 
 	/*
 	 * Set the peer ppoll to the maximum of the packet ppoll and the
