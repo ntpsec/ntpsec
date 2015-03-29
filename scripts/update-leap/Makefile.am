@@ -28,6 +28,7 @@ endif
 EXTRA_DIST =				\
 	invoke-update-leap.menu		\
 	invoke-update-leap.texi		\
+	update-leap			\
 	update-leap-opts.def		\
 	update-leap-opts		\
 	update-leap.1update-leapman	\
