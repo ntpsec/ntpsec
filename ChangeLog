@@ -1,3 +1,4 @@
+(4.3.11) 2015/03/29 Released by Harlan Stenn <stenn@ntp.org>
 Below are from 4.2.8p2:
 * [Bug 2346] "graceful termination" signals do not do peer cleanup.
 * [Bug 2769] cleannup for update-leap
