@@ -73,6 +73,7 @@ ntp-4.3 begins.
 
 * [Bug 1787] DCF77's formerly "antenna" bit is "call bit" since 2003.
 * [Bug 1960] setsockopt IPV6_MULTICAST_IF: Invalid argument.
+* [Bug 2346] "graceful termination" signals do not do peer cleanup.
 * [Bug 2728] See if C99-style structure initialization works.
 * [Bug 2747] Upgrade libevent to 2.1.5-beta.
 * [Bug 2749] ntp/lib/NTP/Util.pm needs update for ntpq -w, IPv6, .POOL. .
