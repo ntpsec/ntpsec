@@ -1,3 +1,5 @@
+Below are from 4.2.8p2:
+* [Bug 2346] "graceful termination" signals do not do peer cleanup.
 (4.3.10) 2015/03/22 Released by Harlan Stenn <stenn@ntp.org>
 Below are from 4.2.8p2:
 * [Bug 1787] DCF77's formerly "antenna" bit is "call bit" since 2003.
