@@ -188,6 +188,7 @@ extern	void	unpeer		(struct peer *);
 extern	void	clear_all	(void);
 extern	int	score_all	(struct peer *);
 extern	struct peer *findmanycastpeer(struct recvbuf *);
+extern	void	peer_cleanup	(void);
 
 /* ntp_crypto.c */
 #ifdef AUTOKEY
