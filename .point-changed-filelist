@@ -85,6 +85,13 @@ scripts/summary.1summarymdoc
 scripts/summary.html
 scripts/summary.man.in
 scripts/summary.mdoc.in
+scripts/update-leap/invoke-update-leap.texi
+scripts/update-leap/update-leap-opts
+scripts/update-leap/update-leap.1update-leapman
+scripts/update-leap/update-leap.1update-leapmdoc
+scripts/update-leap/update-leap.html
+scripts/update-leap/update-leap.man.in
+scripts/update-leap/update-leap.mdoc.in
 sntp/invoke-sntp.texi
 sntp/sntp-opts.c
 sntp/sntp-opts.h
