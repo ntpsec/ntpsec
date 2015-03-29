@@ -1,3 +1,11 @@
+* New script: update-leap
+The update-leap script will verify and if necessary, update the
+leap-second definition file.
+It requires the following commands in order to work:
+
+	wget logger tr sed shasum
+
+Some may choose to run this from cron.
 ---
 NTP 4.2.8p1 (Harlan Stenn <stenn@ntp.org>, 2015/02/04) 
 
