@@ -2170,15 +2170,29 @@ fheader	(
 	FILE	*str;		/* file handle */
 	char	linkname[MAXFILENAME]; /* link name */
 	int	temp;
-
+#ifdef HAVE_UMASK
+        mode_t  orig_umask;
+#endif
+        
 	snprintf(filename, sizeof(filename), "ntpkey_%s_%s.%u", file,
 	    owner, fstamp); 
-	if ((str = fopen(filename, "w")) == NULL) {
+#ifdef HAVE_UMASK
+        orig_umask = umask( S_IWGRP | S_IRWXO );
+        str = fopen(filename, "w");
+        (void) umask(orig_umask);
+#else
+        str = fopen(filename, "w");
+#endif
+	if (str == NULL) {
 		perror("Write");
 		exit (-1);
 	}
-	snprintf(linkname, sizeof(linkname), "ntpkey_%s_%s", ulink,
-	    hostname);
+        if (strcmp(ulink, "md5") == 0) {
+          strcpy(linkname,"ntp.keys");
+        } else {
+          snprintf(linkname, sizeof(linkname), "ntpkey_%s_%s", ulink,
+                   hostname);
+        }
 	(void)remove(linkname);		/* The symlink() line below matters */
 	temp = symlink(filename, linkname);
 	if (temp < 0)

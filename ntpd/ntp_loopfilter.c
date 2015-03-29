@@ -106,7 +106,8 @@
 /*
  * Program variables that can be tinkered.
  */
-double	clock_max = CLOCK_MAX;	/* step threshold */
+double	clock_max_back = CLOCK_MAX;	/* step threshold */
+double	clock_max_fwd =  CLOCK_MAX;	/* step threshold */
 double	clock_minstep = CLOCK_MINSTEP; /* stepout threshold */
 double	clock_panic = CLOCK_PANIC; /* panic threshold */
 double	clock_phi = CLOCK_PHI;	/* dispersion rate (s/s) */
@@ -152,6 +153,7 @@ int	kern_enable = TRUE;	/* kernel support enabled */
 int	hardpps_enable;		/* kernel PPS discipline enabled */
 int	ext_enable;		/* external clock enabled */
 int	pps_stratum;		/* pps stratum */
+int	kernel_status;		/* from ntp_adjtime */
 int	allow_panic = FALSE;	/* allow panic correction */
 int	mode_ntpdate = FALSE;	/* exit on first clock set */
 int	freq_cnt;		/* initial frequency clamp */
@@ -403,7 +405,8 @@ local_clock(
 	 * directly to the terminal.
 	 */
 	if (mode_ntpdate) {
-		if (fabs(fp_offset) > clock_max && clock_max > 0) {
+		if (  ( fp_offset > clock_max_fwd  && clock_max_fwd  > 0)
+		   || (-fp_offset > clock_max_back && clock_max_back > 0)) {
 			step_systime(fp_offset);
 			msyslog(LOG_NOTICE, "ntpd: time set %+.6f s",
 			    fp_offset);
@@ -465,7 +468,8 @@ local_clock(
 	mu = current_time - clock_epoch;
 	clock_frequency = drift_comp;
 	rval = 1;
-	if (fabs(fp_offset) > clock_max && clock_max > 0) {
+	if (  ( fp_offset > clock_max_fwd  && clock_max_fwd  > 0)
+	   || (-fp_offset > clock_max_back && clock_max_back > 0)) {
 		switch (state) {
 
 		/*
@@ -706,8 +710,13 @@ local_clock(
 		 * the pps. In any case, fetch the kernel offset,
 		 * frequency and jitter.
 		 */
-		if ((ntp_adj_ret = ntp_adjtime(&ntv)) != 0) {
-		    ntp_adjtime_error_handler(__func__, &ntv, ntp_adj_ret, errno, hardpps_enable, 0, __LINE__ - 1);
+		ntp_adj_ret = ntp_adjtime(&ntv);
+		/*
+		 * A squeal is a return status < 0, or a state change.
+		 */
+		if ((0 > ntp_adj_ret) || (ntp_adj_ret != kernel_status)) {
+			kernel_status = ntp_adj_ret;
+			ntp_adjtime_error_handler(__func__, &ntv, ntp_adj_ret, errno, hardpps_enable, 0, __LINE__ - 1);
 		}
 		pll_status = ntv.status;
 #ifdef STA_NANO
@@ -1216,8 +1225,27 @@ loop_config(
 		break;
 
 	case LOOP_MAX:		/* step threshold (step) */
-		clock_max = freq;
-		if (clock_max == 0 || clock_max > 0.5)
+		clock_max_fwd = clock_max_back = freq;
+		if (freq == 0 || freq > 0.5)
+			select_loop(FALSE);
+		break;
+
+	case LOOP_MAX_BACK:	/* step threshold (step) */
+		clock_max_back = freq;
+		/*
+		 * Leave using the kernel discipline code unless both
+		 * limits are massive.  This assumes the reason to stop
+		 * using it is that it's pointless, not that it goes wrong.
+		 */
+		if (  (clock_max_back == 0 || clock_max_back > 0.5)
+		   && (clock_max_fwd  == 0 || clock_max_fwd  > 0.5))
+			select_loop(FALSE);
+		break;
+
+	case LOOP_MAX_FWD:	/* step threshold (step) */
+		clock_max_fwd = freq;
+		if (  (clock_max_back == 0 || clock_max_back > 0.5)
+		   && (clock_max_fwd  == 0 || clock_max_fwd  > 0.5))
 			select_loop(FALSE);
 		break;
 
