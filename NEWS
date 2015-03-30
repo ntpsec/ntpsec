@@ -1,4 +1,53 @@
 ---
+NTP 4.2.8p2 (Harlan Stenn <stenn@ntp.org>, 2015/04/xx) 
+
+Focus: Bug fixes, enhancements.
+
+* [Bug 1787] DCF77's formerly "antenna" bit is "call bit" since 2003.
+* [Bug 1960] setsockopt IPV6_MULTICAST_IF: Invalid argument.
+* [Bug 2346] "graceful termination" signals do not do peer cleanup.
+* [Bug 2728] See if C99-style structure initialization works.
+* [Bug 2747] Upgrade libevent to 2.1.5-beta.
+* [Bug 2749] ntp/lib/NTP/Util.pm needs update for ntpq -w, IPv6, .POOL. .
+* [Bug 2751] jitter.h has stale copies of l_fp macros.
+* [Bug 2756] ntpd hangs in startup with gcc 3.3.5 on ARM.
+* [Bug 2757] Quiet compiler warnings.
+* [Bug 2759] Expose nonvolatile/clk_wander_threshold to ntpq.
+* [Bug 2763] Allow different thresholds for forward and backward steps.
+* [Bug 2766] ntp-keygen output files should not be world-readable.
+* [Bug 2767] ntp-keygen -M should symlink to ntp.keys.
+* [Bug 2771] nonvolatile value is documented in wrong units.
+* [Bug 2773] Early leap announcement from Palisade/Thunderbolt
+* [Bug 2774] Unreasonably verbose printout - leap pending/warning
+* [Bug 2775] ntp-keygen.c fails to compile under Windows.
+* [Bug 2777] Fixed loops and decoding of Meinberg GPS satellite info.
+  Removed non-ASCII characters from some copyright comments.
+  Removed trailing whitespace.
+  Updated definitions for Meinberg clocks from current Meinberg header files.
+  Now use C99 fixed-width types and avoid non-ASCII characters in comments.
+  Account for updated definitions pulled from Meinberg header files.
+  Updated comments on Meinberg GPS receivers which are not only called GPS16x.
+  Replaced some constant numbers by defines from ntp_calendar.h
+  Modified creation of parse-specific variables for Meinberg devices
+  in gps16x_message().
+  Reworked mk_utcinfo() to avoid printing of ambiguous leap second dates.
+  Modified mbg_tm_str() which now expexts an additional parameter controlling
+  if the time status shall be printed.
+* [Bug 2783] Quiet autoconf warnings about missing AC_LANG_SOURCE.
+* [Bug 2789] Quiet compiler warnings from libevent.
+* [Bug 2790] If ntpd sets the Windows MM timer highest resolution
+  pause briefly before measuring system clock precision to yield
+  correct results.
+* Comment from Juergen Perlinger in ntp_calendar.c to make the code clearer.
+* Use predefined function types for parse driver functions
+  used to set up function pointers.
+  Account for changed prototype of parse_inp_fnc_t functions.
+  Cast parse conversion results to appropriate types to avoid
+  compiler warnings.
+  Let ioctl() for Windows accept a (void *) to avoid compiler warnings
+  when called with pointers to different types.
+
+---
 NTP 4.2.8p1 (Harlan Stenn <stenn@ntp.org>, 2015/02/04) 
 
 Focus: Security and Bug fixes, enhancements.
