@@ -46,7 +46,7 @@
 #define CLOCK_LIMIT	30	/* poll-adjust threshold */
 #define CLOCK_PGATE	4.	/* poll-adjust gate */
 #define PPS_MAXAGE	120	/* kernel pps signal timeout (s) */
-#define	FREQTOD(x)	((x) / 65536e6) /* NTP to double */ 
+#define	FREQTOD(x)	((x) / 65536e6) /* NTP to double */
 #define	DTOFREQ(x)	((int32)((x) * 65536e6)) /* double to NTP */
 
 /*
@@ -154,8 +154,9 @@ int	hardpps_enable;		/* kernel PPS discipline enabled */
 int	ext_enable;		/* external clock enabled */
 int	pps_stratum;		/* pps stratum */
 int	kernel_status;		/* from ntp_adjtime */
-int	allow_panic = FALSE;	/* allow panic correction */
-int	mode_ntpdate = FALSE;	/* exit on first clock set */
+int	allow_panic = FALSE;	/* allow panic correction (-g) */
+int	force_step_once = FALSE; /* always step time once at startup (-G) */
+int	mode_ntpdate = FALSE;	/* exit on first clock set (-q) */
 int	freq_cnt;		/* initial frequency clamp */
 int	freq_set;		/* initial set frequency switch */
 
@@ -455,10 +456,10 @@ local_clock(
 	 * threshold (128 ms) and when it does not. Under certain
 	 * conditions updates are suspended until the stepout theshold
 	 * (900 s) is exceeded. See the documentation on how these
-	 * thresholds interact with commands and command line options. 
+	 * thresholds interact with commands and command line options.
 	 *
 	 * Note the kernel is disabled if step is disabled or greater
-	 * than 0.5 s or in ntpdate mode. 
+	 * than 0.5 s or in ntpdate mode.
 	 */
 	osys_poll = sys_poll;
 	if (sys_poll < peer->minpoll)
@@ -469,7 +470,13 @@ local_clock(
 	clock_frequency = drift_comp;
 	rval = 1;
 	if (  ( fp_offset > clock_max_fwd  && clock_max_fwd  > 0)
-	   || (-fp_offset > clock_max_back && clock_max_back > 0)) {
+	   || (-fp_offset > clock_max_back && clock_max_back > 0)
+	   || force_step_once ) {
+		if (force_step_once) {
+			force_step_once = FALSE;  /* we want this only once after startup */
+			msyslog(LOG_NOTICE, "Doing intital time step" );
+		}
+
 		switch (state) {
 
 		/*
@@ -529,7 +536,7 @@ local_clock(
 		 * threshold. Note that a single spike greater than the
 		 * step threshold is always suppressed, even with a
 		 * long time constant.
-		 */ 
+		 */
 		default:
 			snprintf(tbuf, sizeof(tbuf), "%+.6f s",
 			    fp_offset);
@@ -547,7 +554,6 @@ local_clock(
 		}
 		rstclock(EVNT_SYNC, 0);
 	} else {
-
 		/*
 		 * The offset is less than the step threshold. Calculate
 		 * the jitter as the exponentially weighted offset
@@ -609,9 +615,9 @@ local_clock(
 				/*
 				 * The PLL frequency gain (numerator) depends on
 				 * the minimum of the update interval and Allan
-				 * intercept. This reduces the PLL gain when the 
+				 * intercept. This reduces the PLL gain when the
 				 * FLL becomes effective.
-				 */ 
+				 */
 				etemp = min(ULOGTOD(allan_xpt), mu);
 				dtemp = 4 * CLOCK_PLL * ULOGTOD(sys_poll);
 				clock_frequency += fp_offset * etemp / (dtemp *
@@ -897,7 +903,7 @@ adj_host_clock(
 	clock_offset -= offset_adj;
 	/*
 	 * Windows port adj_systime() must be called each second,
-	 * even if the argument is zero, to ease emulation of 
+	 * even if the argument is zero, to ease emulation of
 	 * adjtime() using Windows' slew API which controls the rate
 	 * but does not automatically stop slewing when an offset
 	 * has decayed to zero.
@@ -926,7 +932,7 @@ rstclock(
 		report_event(trans, NULL, NULL);
 	state = trans;
 	last_offset = clock_offset = offset;
-	clock_epoch = current_time; 
+	clock_epoch = current_time;
 }
 
 
@@ -1199,12 +1205,12 @@ loop_config(
 	case LOOP_CODEC:	/* audio codec frequency (codec) */
 		clock_codec = freq / 1e6;
 		break;
-	
+
 	case LOOP_PHI:		/* dispersion threshold (dispersion) */
 		clock_phi = freq / 1e6;
 		break;
 
-	case LOOP_FREQ:		/* initial frequency (freq) */	
+	case LOOP_FREQ:		/* initial frequency (freq) */
 		init_drift_comp = freq;
 		freq_set++;
 		break;
@@ -1253,7 +1259,7 @@ loop_config(
 		if (freq < CLOCK_MINSTEP)
 			clock_minstep = CLOCK_MINSTEP;
 		else
-			clock_minstep = freq; 
+			clock_minstep = freq;
 		break;
 
 	case LOOP_TICK:		/* tick increment (tick) */
