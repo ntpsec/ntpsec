@@ -1,5 +1,7 @@
 ---
 
+* [Bug 2794] Don't let reports on normal kernel status changes
+  look like errors.
 * [Bug 2788] New flag -G (force_step_once).
 * [Bug 2592] Account for PPS sources which can provide an accurate
   absolute time stamp, and status information.
