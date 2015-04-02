@@ -46,7 +46,7 @@
 #define CLOCK_LIMIT	30	/* poll-adjust threshold */
 #define CLOCK_PGATE	4.	/* poll-adjust gate */
 #define PPS_MAXAGE	120	/* kernel pps signal timeout (s) */
-#define	FREQTOD(x)	((x) / 65536e6) /* NTP to double */ 
+#define	FREQTOD(x)	((x) / 65536e6) /* NTP to double */
 #define	DTOFREQ(x)	((int32)((x) * 65536e6)) /* double to NTP */
 
 /*
@@ -154,8 +154,9 @@ int	hardpps_enable;		/* kernel PPS discipline enabled */
 int	ext_enable;		/* external clock enabled */
 int	pps_stratum;		/* pps stratum */
 int	kernel_status;		/* from ntp_adjtime */
-int	allow_panic = FALSE;	/* allow panic correction */
-int	mode_ntpdate = FALSE;	/* exit on first clock set */
+int	allow_panic = FALSE;	/* allow panic correction (-g) */
+int	force_step_once = FALSE; /* always step time once at startup (-G) */
+int	mode_ntpdate = FALSE;	/* exit on first clock set (-q) */
 int	freq_cnt;		/* initial frequency clamp */
 int	freq_set;		/* initial set frequency switch */
 
@@ -281,47 +282,58 @@ ntp_adjtime_error_handler(
 		}
 	    break;
 #ifdef TIME_OK
-	    case TIME_OK: /* 0 no leap second warning */
-		/* OK means OK */
+	    case TIME_OK: /* 0: synchronized, no leap second warning */
+		/* msyslog(LOG_INFO, "kernel reports time is synchronized normally"); */
 	    break;
+#else
+# warning TIME_OK is not defined
 #endif
 #ifdef TIME_INS
-	    case TIME_INS: /* 1 positive leap second warning */
-		msyslog(LOG_INFO, "%s: %s line %d: kernel reports positive leap second warning state",
-		    caller, file_name(), line
-		);
+	    case TIME_INS: /* 1: positive leap second warning */
+		msyslog(LOG_INFO, "kernel reports positive leap second warning state");
 	    break;
+#else
+# warning TIME_INS is not defined
 #endif
 #ifdef TIME_DEL
-	    case TIME_DEL: /* 2 negative leap second warning */
-		msyslog(LOG_INFO, "%s: %s line %d: kernel reports negative leap second warning state",
-		    caller, file_name(), line
-		);
+	    case TIME_DEL: /* 2: negative leap second warning */
+		msyslog(LOG_INFO, "kernel reports negative leap second warning state");
 	    break;
+#else
+# warning TIME_DEL is not defined
 #endif
 #ifdef TIME_OOP
-	    case TIME_OOP: /* 3 leap second in progress */
-		msyslog(LOG_INFO, "%s: %s line %d: kernel reports leap second in progress",
-		    caller, file_name(), line
-		);
+	    case TIME_OOP: /* 3: leap second in progress */
+		msyslog(LOG_INFO, "kernel reports leap second in progress");
 	    break;
+#else
+# warning TIME_OOP is not defined
 #endif
 #ifdef TIME_WAIT
-	    case TIME_WAIT: /* 4 leap second has occured */
-		msyslog(LOG_INFO, "%s: %s line %d: kernel reports leap second has occured",
-		    caller, file_name(), line
-		);
+	    case TIME_WAIT: /* 4: leap second has occured */
+		msyslog(LOG_INFO, "kernel reports leap second has occured");
 	    break;
+#else
+# warning TIME_WAIT is not defined
 #endif
 #ifdef TIME_ERROR
-	    case TIME_ERROR: /* loss of synchronization */
+	    case TIME_ERROR: /* 5: unsynchronized, or loss of synchronization */
 		if (pps_call && !(ptimex->status & STA_PPSSIGNAL))
 			report_event(EVNT_KERN, NULL,
 			    "PPS no signal");
 		errno = saved_errno;
 		DPRINTF(1, ("kernel loop status (%s) %d %m\n",
 			k_st_flags(ptimex->status), errno));
+		/*
+		 * This code may be returned when ntp_adjtime() has just been called for
+		 * the first time, quite a while after startup, when ntpd just starts to
+		 * discipline the kernel time. In this case the occurrence of this message
+		 * can be pretty confusing.
+		 * msyslog(LOG_INFO, "kernel reports time synchronization lost");
+		 */
 	    break;
+#else
+# warning TIME_ERROR is not defined
 #endif
 	    default:
 		msyslog(LOG_NOTICE, "%s: %s line %d: unhandled return value %d from ntp_adjtime in %s at line %d",
@@ -455,10 +467,10 @@ local_clock(
 	 * threshold (128 ms) and when it does not. Under certain
 	 * conditions updates are suspended until the stepout theshold
 	 * (900 s) is exceeded. See the documentation on how these
-	 * thresholds interact with commands and command line options. 
+	 * thresholds interact with commands and command line options.
 	 *
 	 * Note the kernel is disabled if step is disabled or greater
-	 * than 0.5 s or in ntpdate mode. 
+	 * than 0.5 s or in ntpdate mode.
 	 */
 	osys_poll = sys_poll;
 	if (sys_poll < peer->minpoll)
@@ -469,7 +481,13 @@ local_clock(
 	clock_frequency = drift_comp;
 	rval = 1;
 	if (  ( fp_offset > clock_max_fwd  && clock_max_fwd  > 0)
-	   || (-fp_offset > clock_max_back && clock_max_back > 0)) {
+	   || (-fp_offset > clock_max_back && clock_max_back > 0)
+	   || force_step_once ) {
+		if (force_step_once) {
+			force_step_once = FALSE;  /* we want this only once after startup */
+			msyslog(LOG_NOTICE, "Doing intital time step" );
+		}
+
 		switch (state) {
 
 		/*
@@ -529,7 +547,7 @@ local_clock(
 		 * threshold. Note that a single spike greater than the
 		 * step threshold is always suppressed, even with a
 		 * long time constant.
-		 */ 
+		 */
 		default:
 			snprintf(tbuf, sizeof(tbuf), "%+.6f s",
 			    fp_offset);
@@ -547,7 +565,6 @@ local_clock(
 		}
 		rstclock(EVNT_SYNC, 0);
 	} else {
-
 		/*
 		 * The offset is less than the step threshold. Calculate
 		 * the jitter as the exponentially weighted offset
@@ -609,9 +626,9 @@ local_clock(
 				/*
 				 * The PLL frequency gain (numerator) depends on
 				 * the minimum of the update interval and Allan
-				 * intercept. This reduces the PLL gain when the 
+				 * intercept. This reduces the PLL gain when the
 				 * FLL becomes effective.
-				 */ 
+				 */
 				etemp = min(ULOGTOD(allan_xpt), mu);
 				dtemp = 4 * CLOCK_PLL * ULOGTOD(sys_poll);
 				clock_frequency += fp_offset * etemp / (dtemp *
@@ -897,7 +914,7 @@ adj_host_clock(
 	clock_offset -= offset_adj;
 	/*
 	 * Windows port adj_systime() must be called each second,
-	 * even if the argument is zero, to ease emulation of 
+	 * even if the argument is zero, to ease emulation of
 	 * adjtime() using Windows' slew API which controls the rate
 	 * but does not automatically stop slewing when an offset
 	 * has decayed to zero.
@@ -926,7 +943,7 @@ rstclock(
 		report_event(trans, NULL, NULL);
 	state = trans;
 	last_offset = clock_offset = offset;
-	clock_epoch = current_time; 
+	clock_epoch = current_time;
 }
 
 
@@ -1199,12 +1216,12 @@ loop_config(
 	case LOOP_CODEC:	/* audio codec frequency (codec) */
 		clock_codec = freq / 1e6;
 		break;
-	
+
 	case LOOP_PHI:		/* dispersion threshold (dispersion) */
 		clock_phi = freq / 1e6;
 		break;
 
-	case LOOP_FREQ:		/* initial frequency (freq) */	
+	case LOOP_FREQ:		/* initial frequency (freq) */
 		init_drift_comp = freq;
 		freq_set++;
 		break;
@@ -1253,7 +1270,7 @@ loop_config(
 		if (freq < CLOCK_MINSTEP)
 			clock_minstep = CLOCK_MINSTEP;
 		else
-			clock_minstep = freq; 
+			clock_minstep = freq;
 		break;
 
 	case LOOP_TICK:		/* tick increment (tick) */
