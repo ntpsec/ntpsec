@@ -6,7 +6,7 @@
 #
 # EDIT THIS FILE WITH CAUTION  (invoke-update-leap.texi)
 #
-# It has been AutoGen-ed  March 29, 2015 at 07:07:26 AM by AutoGen 5.18.5pre4
+# It has been AutoGen-ed  April  2, 2015 at 09:06:58 AM by AutoGen 5.18.5pre4
 # From the definitions    update-leap-opts.def
 # and the template file   agtexi-cmd.tpl
 @end ignore
