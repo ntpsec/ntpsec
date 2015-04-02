@@ -1,6 +1,8 @@
 ---
+
 * [Bug 2797] ntp-keygen trapped in endless loop for MD5 keys
   on big-endian machines
+* [Bug 2798] sntp should decode and display the leap indicator.
 ---
 (4.2.8p2-RC1) 2015/03/30 Released by Harlan Stenn <stenn@ntp.org>
 
