@@ -405,8 +405,9 @@ extern int	kern_enable;		/* kernel support enabled */
 extern int	hardpps_enable;		/* kernel PPS discipline enabled */
 extern int	ext_enable;		/* external clock enabled */
 extern int	cal_enable;		/* refclock calibrate enable */
-extern int	allow_panic;		/* allow panic correction */
-extern int	mode_ntpdate;		/* exit on first clock set */
+extern int	allow_panic;		/* allow panic correction (-g) */
+extern int	force_step_once;	/* always step time once at startup (-G) */
+extern int	mode_ntpdate;		/* exit on first clock set (-q) */
 extern int	peer_ntpdate;		/* count of ntpdate peers */
 
 /*
@@ -520,7 +521,7 @@ extern u_int32		conf_file_sum;	/* Simple sum of characters */
 
 /* ntp_signd.c */
 #ifdef HAVE_NTP_SIGND
-extern void send_via_ntp_signd(struct recvbuf *, int, keyid_t, int, 
+extern void send_via_ntp_signd(struct recvbuf *, int, keyid_t, int,
 			       struct pkt *);
 #endif
 
