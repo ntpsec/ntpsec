@@ -290,14 +290,14 @@ ntp_adjtime_error_handler(
 #endif
 #ifdef TIME_INS
 	    case TIME_INS: /* 1: positive leap second warning */
-		msyslog(LOG_INFO, "kernel reports positive leap second warning state");
+		msyslog(LOG_INFO, "kernel reports leap second insertion scheduled");
 	    break;
 #else
 # warning TIME_INS is not defined
 #endif
 #ifdef TIME_DEL
 	    case TIME_DEL: /* 2: negative leap second warning */
-		msyslog(LOG_INFO, "kernel reports negative leap second warning state");
+		msyslog(LOG_INFO, "kernel reports leap second deletion scheduled");
 	    break;
 #else
 # warning TIME_DEL is not defined
@@ -311,13 +311,14 @@ ntp_adjtime_error_handler(
 #endif
 #ifdef TIME_WAIT
 	    case TIME_WAIT: /* 4: leap second has occured */
-		msyslog(LOG_INFO, "kernel reports leap second has occured");
+		msyslog(LOG_INFO, "kernel reports leap second has occurred");
 	    break;
 #else
 # warning TIME_WAIT is not defined
 #endif
 #ifdef TIME_ERROR
 	    case TIME_ERROR: /* 5: unsynchronized, or loss of synchronization */
+				/* error (see status word) */
 		if (pps_call && !(ptimex->status & STA_PPSSIGNAL))
 			report_event(EVNT_KERN, NULL,
 			    "PPS no signal");
@@ -325,12 +326,22 @@ ntp_adjtime_error_handler(
 		DPRINTF(1, ("kernel loop status (%s) %d %m\n",
 			k_st_flags(ptimex->status), errno));
 		/*
-		 * This code may be returned when ntp_adjtime() has just been called for
-		 * the first time, quite a while after startup, when ntpd just starts to
-		 * discipline the kernel time. In this case the occurrence of this message
+		 * This code may be returned when ntp_adjtime() has just
+		 * been called for the first time, quite a while after
+		 * startup, when ntpd just starts to discipline the kernel
+		 * time. In this case the occurrence of this message
 		 * can be pretty confusing.
+		 *
+		 * HMS: How about a message when we begin kernel processing:
+		 *    Determining kernel clock state...
+		 * so an initial TIME_ERROR message is less confising,
+		 * or skipping the first message (ugh),
+		 * or ???
 		 * msyslog(LOG_INFO, "kernel reports time synchronization lost");
 		 */
+		errno = saved_errno;	/* may not be needed */
+		msyslog(LOG_INFO, "kernel reports TIME_ERROR: %#x: %s %m",
+			ptimex->status, k_st_flags(ptimex->status));
 	    break;
 #else
 # warning TIME_ERROR is not defined

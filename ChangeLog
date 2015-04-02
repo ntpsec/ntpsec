@@ -1,4 +1,8 @@
 ---
+
+* [Bug 2788] New flag -G (force_step_once).
+* [Bug 2794] Clean up kernel clock status reports.
+---
 (4.2.8p2-RC1) 2015/03/30 Released by Harlan Stenn <stenn@ntp.org>
 
 * [Bug 2794] Don't let reports on normal kernel status changes

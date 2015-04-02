@@ -117,15 +117,18 @@ flag = {
 flag = {
     name      = force_step_once;
     value     = G;
-    descrip   = "Always step the time once at startup";
+    descrip   = "Step any initial offset correction.";
     doc = <<-  _EndOfDoc_
 	Normally,
 	@code{ntpd}
-	steps the time if the time offset exceeds the step threshold, which is 128 ms by default, and otherwise always slews the time. This option allows the time to be stepped always once at startup, so the highest time accuracy can be achieved quickly. However, this may also cause the time to be stepped back, so care must be taken if sensitive applications are used. Using this option also implies
-	@code{-g}.
-	See the
-	@code{tinker}
-	configuration file directive for other options.
+	steps the time if the time offset exceeds the step threshold,
+	which is 128 ms by default, and otherwise slews the time.
+	This option forces the initial offset correction to be stepped,
+	so the highest time accuracy can be achieved quickly.
+	However, this may also cause the time to be stepped back
+	so this option must not be used if
+	applications requiring monotonic time are running.
+	See the @code{tinker} configuration file directive for other options.
 	_EndOfDoc_;
 };
 
