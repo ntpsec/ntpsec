@@ -1266,14 +1266,14 @@ loop_config(
 		 * using it is that it's pointless, not that it goes wrong.
 		 */
 		if (  (clock_max_back == 0 || clock_max_back > 0.5)
-		   && (clock_max_fwd  == 0 || clock_max_fwd  > 0.5))
+		   || (clock_max_fwd  == 0 || clock_max_fwd  > 0.5))
 			select_loop(FALSE);
 		break;
 
 	case LOOP_MAX_FWD:	/* step threshold (step) */
 		clock_max_fwd = freq;
 		if (  (clock_max_back == 0 || clock_max_back > 0.5)
-		   && (clock_max_fwd  == 0 || clock_max_fwd  > 0.5))
+		   || (clock_max_fwd  == 0 || clock_max_fwd  > 0.5))
 			select_loop(FALSE);
 		break;
 
