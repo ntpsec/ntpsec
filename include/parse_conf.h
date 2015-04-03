@@ -41,13 +41,13 @@
 /*
  * field location structure
  */
-#define O_DAY	0
+#define O_DAY   0
 #define O_MONTH 1
-#define O_YEAR	2
-#define O_HOUR	3
-#define O_MIN	4
-#define	O_SEC	5
-#define O_WDAY	6
+#define O_YEAR  2
+#define O_HOUR  3
+#define O_MIN   4
+#define O_SEC   5
+#define O_WDAY  6
 #define O_FLAGS 7
 #define O_ZONE  8
 #define O_UTCHOFFSET 9

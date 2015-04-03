@@ -1,6 +1,25 @@
 ---
+
+* [Bug 2788] New flag -G (force_step_once).
+* [Bug 2592] FLAG_TSTAMP_PPS cleanup for refclock_parse.c.
+* [Bug 2794] Clean up kernel clock status reports.
+* [Bug 2795] Cannot build without OpenSLL (on Win32).
+  Provided a Win32 specific wrapper around libevent/arc4random.c.
+  fixed some minor warnings.
+* [Bug 2796] ntp-keygen crashes in 'getclock()' on Win32.
+* [Bug 2797] ntp-keygen trapped in endless loop for MD5 keys
+  on big-endian machines.
+* [Bug 2798] sntp should decode and display the leap indicator.
+* Simple cleanup to html/build.html
+---
 (4.2.8p2-RC1) 2015/03/30 Released by Harlan Stenn <stenn@ntp.org>
 
+* [Bug 2794] Don't let reports on normal kernel status changes
+  look like errors.
+* [Bug 2788] New flag -G (force_step_once).
+* [Bug 2592] Account for PPS sources which can provide an accurate
+  absolute time stamp, and status information.
+  Fixed indention and removed trailing whitespace.
 * [Bug 1787] DCF77's formerly "antenna" bit is "call bit" since 2003.
 * [Bug 1960] setsockopt IPV6_MULTICAST_IF: Invalid argument.
 * [Bug 2346] "graceful termination" signals do not do peer cleanup.
