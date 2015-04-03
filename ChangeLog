@@ -1,4 +1,5 @@
 ---
+(4.2.8p2-RC2) 2015/04/03 Released by Harlan Stenn <stenn@ntp.org>
 
 * [Bug 2592] FLAG_TSTAMP_PPS cleanup for refclock_parse.c.
 * [Bug 2769] New script: update-leap

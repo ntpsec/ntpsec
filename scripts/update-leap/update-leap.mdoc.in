@@ -1,9 +1,9 @@
-.Dd March 22 2015
+.Dd April 3 2015
 .Dt UPDATE_LEAP 1update-leapmdoc User Commands
 .Os
 .\"  EDIT THIS FILE WITH CAUTION  (update-leap-opts.mdoc)
 .\"
-.\"  It has been AutoGen-ed  March 22, 2015 at 01:21:23 AM by AutoGen 5.18.5pre6
+.\"  It has been AutoGen-ed  April  3, 2015 at 01:10:09 AM by AutoGen 5.18.5pre4
 .\"  From the definitions    update-leap-opts.def
 .\"  and the template file   agmdoc-cmd.tpl
 .Sh NAME
@@ -20,10 +20,11 @@ All arguments must be options.
 .Pp
 .Sh DESCRIPTION
 .Nm
-will validate the file currently on the local syste
+will validate the file currently on the local system
 and if necessary, updates leap\-second definition file.
 .Pp
-Ordinarily, the file is found using the "leapfile" directive in $NTPCONF.
+Ordinarily, the file is found using the "leapfile" directive in
+.Xr ntp.conf 5 .
 However, an alternate location can be specified on the command line.
 .Pp
 If the file does not exist, is not valid, has expired, or is expiring soon,
@@ -96,7 +97,7 @@ Location of the ntp.conf file.
 .sp
 Specify location of ntp.conf (used to make sure leapfile directive is
 present and to default  leapfile)
-$NTPCONF
+/etc/ntp.conf
 .It  Fl F , Fl \-force\-update 
 Force update of the leapfile.
 .sp
