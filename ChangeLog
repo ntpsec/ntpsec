@@ -1,6 +1,7 @@
 (4.3.12) 2015/04/02 Released by Harlan Stenn <stenn@ntp.org>
 Below are from 4.2.8p2:
 * [Bug 2788] New flag -G (force_step_once).
+* [Bug 2592] FLAG_TSTAMP_PPS cleanup for refclock_parse.c.
 * [Bug 2794] Clean up kernel clock status reports.
 * [Bug 2795] Cannot build without OpenSLL (on Win32).
   Provided a Win32 specific wrapper around libevent/arc4random.c.
