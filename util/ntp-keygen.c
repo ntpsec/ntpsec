@@ -827,24 +827,24 @@ gen_md5(
 	str = fheader("MD5key", id, groupname);
 	for (i = 1; i <= MD5KEYS; i++) {
 		for (j = 0; j < MD5SIZE; j++) {
-			int temp;
+			u_char temp;
 
 			while (1) {
 				int rc;
 
-				rc = ntp_crypto_random_buf(&temp, 1);
+				rc = ntp_crypto_random_buf(
+				    &temp, sizeof(temp));
 				if (-1 == rc) {
 					fprintf(stderr, "ntp_crypto_random_buf() failed.\n");
 					exit (-1);
 				}
-				temp &= 0xff;
 				if (temp == '#')
 					continue;
 
 				if (temp > 0x20 && temp < 0x7f)
 					break;
 			}
-			md5key[j] = (u_char)temp;
+			md5key[j] = temp;
 		}
 		md5key[j] = '\0';
 		fprintf(str, "%2d MD5 %s  # MD5 key\n", i,
