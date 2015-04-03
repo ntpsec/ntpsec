@@ -10,11 +10,11 @@
 .ds B-Font B
 .ds I-Font I
 .ds R-Font R
-.TH update-leap 1update-leapman "22 Mar 2015" "ntp (4.2.8p1)" "User Commands"
+.TH update-leap 1update-leapman "03 Apr 2015" "ntp (4.2.8p2-RC2)" "User Commands"
 .\"
-.\" EDIT THIS FILE WITH CAUTION (in-mem file)
+.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-ieayER/ag-veaGDR)
 .\"
-.\" It has been AutoGen-ed March 22, 2015 at 01:38:24 AM by AutoGen 5.18.5pre6
+.\" It has been AutoGen-ed April 3, 2015 at 01:10:04 AM by AutoGen 5.18.5pre4
 .\" From the definitions update-leap-opts.def
 .\" and the template file agman-cmd.tpl
 .SH NAME
@@ -35,12 +35,13 @@ All arguments must be options.
 
 .SH DESCRIPTION
 \f\*[B-Font]update-leap\fP
-will validate the file currently on the local syste
+will validate the file currently on the local system
 and if necessary, updates leap-second definition file.
 .sp \n(Ppu
 .ne 2
 
-Ordinarily, the file is found using the "leapfile" directive in $NTPCONF.
+Ordinarily, the file is found using the "leapfile" directive in
+\fCntp.conf\fR(5)\f[].
 However, an alternate location can be specified on the command line.
 .sp \n(Ppu
 .ne 2
@@ -123,7 +124,7 @@ Location of the ntp.conf file.
 .sp
 Specify location of ntp.conf (used to make sure leapfile directive is
 present and to default  leapfile)
-$NTPCONF
+/etc/ntp.conf
 .TP
 .NOP \f\*[B-Font]\-F\f[], \f\*[B-Font]\-\-force\-update\f[]
 Force update of the leapfile.
