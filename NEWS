@@ -1,3 +1,8 @@
+---
+NTP 4.2.8p2 (Harlan Stenn <stenn@ntp.org>, 2015/04/xx) 
+
+Focus: Bug fixes, enhancements.
+
 * New script: update-leap
 The update-leap script will verify and if necessary, update the
 leap-second definition file.
@@ -5,11 +10,7 @@ It requires the following commands in order to work:
 
 	wget logger tr sed shasum
 
-Some may choose to run this from cron.
----
-NTP 4.2.8p2 (Harlan Stenn <stenn@ntp.org>, 2015/04/xx) 
-
-Focus: Bug fixes, enhancements.
+Some may choose to run this from cron.  It needs more portability testing.
 
 * [Bug 1787] DCF77's formerly "antenna" bit is "call bit" since 2003.
 * [Bug 1960] setsockopt IPV6_MULTICAST_IF: Invalid argument.
