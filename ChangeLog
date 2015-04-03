@@ -1,7 +1,9 @@
 ---
 
-* [Bug 2788] New flag -G (force_step_once).
 * [Bug 2592] FLAG_TSTAMP_PPS cleanup for refclock_parse.c.
+* [Bug 2769] New script: update-leap
+* [Bug 2769] cleannup for update-leap
+* [Bug 2788] New flag -G (force_step_once).
 * [Bug 2794] Clean up kernel clock status reports.
 * [Bug 2795] Cannot build without OpenSLL (on Win32).
   Provided a Win32 specific wrapper around libevent/arc4random.c.
@@ -33,8 +35,6 @@
 * [Bug 2763] Allow different thresholds for forward and backward steps.
 * [Bug 2766] ntp-keygen output files should not be world-readable.
 * [Bug 2767] ntp-keygen -M should symlink to ntp.keys.
-* [Bug 2769] New script: update-leap
-* [Bug 2769] cleannup for update-leap
 * [Bug 2771] nonvolatile value is documented in wrong units.
 * [Bug 2773] Early leap announcement from Palisade/Thunderbolt
 * [Bug 2774] Unreasonably verbose printout - leap pending/warning
