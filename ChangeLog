@@ -89,6 +89,7 @@ From 4.2.8p2:
 
 ntp-4.3 begins.
 ---
+(4.2.8p2) 2015/04/07 Released by Harlan Stenn <stenn@ntp.org>
 (4.2.8p2-RC3) 2015/04/03 Released by Harlan Stenn <stenn@ntp.org>
 
 * [Bug 2763] Fix for different thresholds for forward and backward steps.
@@ -147,6 +148,9 @@ ntp-4.3 begins.
   Reworked mk_utcinfo() to avoid printing of ambiguous leap second dates.
   Modified mbg_tm_str() which now expexts an additional parameter controlling
   if the time status shall be printed.
+* [Sec 2779] ntpd accepts unauthenticated packets with symmetric key crypto.
+* [Sec 2781] Authentication doesn't protect symmetric associations against
+  DoS attacks.
 * [Bug 2782] Refactor refclock_shm.c, add memory barrier protection.
 * [Bug 2783] Quiet autoconf warnings about missing AC_LANG_SOURCE.
 * [Bug 2784] Fix for 2782 uses clock_gettime() instead of get_ostime().
