@@ -1,3 +1,7 @@
+Below are from 4.2.8p2:
+* [Sec 2779] ntpd accepts unauthenticated packets with symmetric key crypto.
+* [Sec 2781] Authentication doesn't protect symmetric associations against
+  DoS attacks.
 (4.3.13) 2015/04/03 Released by Harlan Stenn <stenn@ntp.org>
 Below are from 4.2.8p2:
 * [Bug 2763] Fix for different thresholds for forward and backward steps.
