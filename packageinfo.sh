@@ -41,7 +41,7 @@
 # To see what UpdatePoint will do without modifying packageinfo.sh as it
 # does by default, use the -t/--test option before the repo type:
 #
-# shell# scripts/UpdatePoint -t stable
+# shell# scripts/build/UpdatePoint -t stable
 #
 
 # repotype must be stable or dev
@@ -104,4 +104,4 @@ betapoint=0
 # - - prerelease is emptied
 # else (not in RC)
 # - rcpoint is empty and unused (for now).
-rcpoint=3
+rcpoint=GO
