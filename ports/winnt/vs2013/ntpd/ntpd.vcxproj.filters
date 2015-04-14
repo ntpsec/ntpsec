@@ -99,9 +99,6 @@
     <ClCompile Include="..\..\ntpd\ntservice.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="version.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\ntpd\hopf_PCI_io.c">
       <Filter>Reference Clock</Filter>
     </ClCompile>
@@ -287,6 +284,9 @@
     </ClCompile>
     <ClCompile Include="..\..\..\..\libparse\trim_info.c">
       <Filter>Parse Lib</Filter>
+    </ClCompile>
+    <ClCompile Include="version.c">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -538,9 +538,6 @@
   <ItemGroup>
     <CustomBuild Include="..\..\..\..\ntpd\ntp_parser.h">
       <Filter>Header Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\scripts\mkver.bat">
-      <Filter>Source Files</Filter>
     </CustomBuild>
     <CustomBuild Include="..\..\..\..\packageinfo.sh" />
   </ItemGroup>

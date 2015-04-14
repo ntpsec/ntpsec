@@ -387,32 +387,37 @@
       <Message Condition="'$(Configuration)|$(Platform)'=='DebugXP|Win32'">invoking keyword-gen on ntp_parser.h to produce ntp_keyword.h</Message>
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">.\gen-ntp_keyword $(TmpBaseDir)
 </Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='DebugXP|Win32'">.\gen-ntp_keyword $(TmpBaseDir)
+      <Command Condition="'$(Configuration)|$(Platform)'=='DebugXP|Win32'">call .\gen-ntp_keyword.bat $(TmpBaseDir)
 </Command>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">..\..\..\..\ntpd\ntp_parser.h;%(AdditionalInputs)</AdditionalInputs>
-      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='DebugXP|Win32'">..\..\..\..\ntpd\ntp_parser.h;%(AdditionalInputs)</AdditionalInputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='DebugXP|Win32'">
+      </AdditionalInputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">..\..\..\..\ntpd\ntp_keyword.h;..\..\..\..\ntpd\keyword-gen-utd;%(Outputs)</Outputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='DebugXP|Win32'">..\..\..\..\ntpd\ntp_keyword.h;..\..\..\..\ntpd\keyword-gen-utd;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='DebugXP|Win32'">..\..\..\..\ntpd\ntp_keyword.h;..\..\..\..\ntpd\keyword-gen-utd</Outputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">invoking keyword-gen on ntp_parser.h to produce ntp_keyword.h</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.\gen-ntp_keyword $(TmpBaseDir)
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">call .\gen-ntp_keyword.bat $(TmpBaseDir)
 </Command>
-      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">..\..\..\..\ntpd\ntp_parser.h;%(AdditionalInputs)</AdditionalInputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">..\..\..\..\ntpd\ntp_keyword.h;..\..\..\..\ntpd\keyword-gen-utd;%(Outputs)</Outputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+      </AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">..\..\..\..\ntpd\ntp_keyword.h;..\..\..\..\ntpd\keyword-gen-utd</Outputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">invoking keyword-gen on ntp_parser.h to produce ntp_keyword.h</Message>
       <Message Condition="'$(Configuration)|$(Platform)'=='ReleaseXP|Win32'">invoking keyword-gen on ntp_parser.h to produce ntp_keyword.h</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.\gen-ntp_keyword $(TmpBaseDir)
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">call .\gen-ntp_keyword.bat $(TmpBaseDir)
 </Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='ReleaseXP|Win32'">.\gen-ntp_keyword $(TmpBaseDir)
+      <Command Condition="'$(Configuration)|$(Platform)'=='ReleaseXP|Win32'">call .\gen-ntp_keyword.bat $(TmpBaseDir)
 </Command>
-      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">..\..\..\..\ntpd\ntp_parser.h;%(AdditionalInputs)</AdditionalInputs>
-      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='ReleaseXP|Win32'">..\..\..\..\ntpd\ntp_parser.h;%(AdditionalInputs)</AdditionalInputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">..\..\..\..\ntpd\ntp_keyword.h;..\..\..\..\ntpd\keyword-gen-utd;%(Outputs)</Outputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='ReleaseXP|Win32'">..\..\..\..\ntpd\ntp_keyword.h;..\..\..\..\ntpd\keyword-gen-utd;%(Outputs)</Outputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+      </AdditionalInputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='ReleaseXP|Win32'">
+      </AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">..\..\..\..\ntpd\ntp_keyword.h;..\..\..\..\ntpd\keyword-gen-utd</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='ReleaseXP|Win32'">..\..\..\..\ntpd\ntp_keyword.h;..\..\..\..\ntpd\keyword-gen-utd</Outputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">invoking keyword-gen on ntp_parser.h to produce ntp_keyword.h</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.\gen-ntp_keyword $(TmpBaseDir)
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">call .\gen-ntp_keyword.bat $(TmpBaseDir)
 </Command>
-      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">..\..\..\..\ntpd\ntp_parser.h;%(AdditionalInputs)</AdditionalInputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">..\..\..\..\ntpd\ntp_keyword.h;..\..\..\..\ntpd\keyword-gen-utd;%(Outputs)</Outputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+      </AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">..\..\..\..\ntpd\ntp_keyword.h;..\..\..\..\ntpd\keyword-gen-utd</Outputs>
     </CustomBuild>
     <ClInclude Include="..\..\..\..\ntpd\ntp_scanner.h" />
     <ClInclude Include="..\..\..\..\ntpd\refclock_palisade.h" />
@@ -449,42 +454,39 @@
       <Message Condition="'$(Configuration)|$(Platform)'=='DebugXP|Win32'">Using NT Shell Script to generate version.c</Message>
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">..\..\scripts\mkver.bat -P $(ProjectName)
 </Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='DebugXP|Win32'">..\..\scripts\mkver.bat -P $(ProjectName)
+      <Command Condition="'$(Configuration)|$(Platform)'=='DebugXP|Win32'">call ..\..\scripts\mkver.bat -P $(ProjectName)
 </Command>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">..\..\scripts\mkver.bat;..\..\include\config.h;%(AdditionalInputs)</AdditionalInputs>
-      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='DebugXP|Win32'">..\..\scripts\mkver.bat;..\..\include\config.h;%(AdditionalInputs)</AdditionalInputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='DebugXP|Win32'">
+      </AdditionalInputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">.\version.c;%(Outputs)</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='DebugXP|Win32'">.\version.c;%(Outputs)</Outputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Using NT Shell Script to generate version.c</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">..\..\scripts\mkver.bat -P $(ProjectName)
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">call ..\..\scripts\mkver.bat -P $(ProjectName)
 </Command>
-      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">..\..\scripts\mkver.bat;..\..\include\config.h;%(AdditionalInputs)</AdditionalInputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+      </AdditionalInputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.\version.c;%(Outputs)</Outputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Using NT Shell Script to generate version.c</Message>
       <Message Condition="'$(Configuration)|$(Platform)'=='ReleaseXP|Win32'">Using NT Shell Script to generate version.c</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">..\..\scripts\mkver.bat -P $(ProjectName)
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">call ..\..\scripts\mkver.bat -P $(ProjectName)
 </Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='ReleaseXP|Win32'">..\..\scripts\mkver.bat -P $(ProjectName)
+      <Command Condition="'$(Configuration)|$(Platform)'=='ReleaseXP|Win32'">call ..\..\scripts\mkver.bat -P $(ProjectName)
 </Command>
-      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">..\..\scripts\mkver.bat;..\..\include\config.h;%(AdditionalInputs)</AdditionalInputs>
-      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='ReleaseXP|Win32'">..\..\scripts\mkver.bat;..\..\include\config.h;%(AdditionalInputs)</AdditionalInputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+      </AdditionalInputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='ReleaseXP|Win32'">
+      </AdditionalInputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.\version.c;%(Outputs)</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='ReleaseXP|Win32'">.\version.c;%(Outputs)</Outputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Using NT Shell Script to generate version.c</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">..\..\scripts\mkver.bat -P $(ProjectName)
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">call ..\..\scripts\mkver.bat -P $(ProjectName)
 </Command>
-      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">..\..\scripts\mkver.bat;..\..\include\config.h;%(AdditionalInputs)</AdditionalInputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+      </AdditionalInputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.\version.c;%(Outputs)</Outputs>
     </CustomBuild>
     <None Include="..\..\libntp\MSG00001.bin" />
-    <CustomBuild Include="..\..\scripts\mkver.bat">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='DebugXP|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseXP|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-    </CustomBuild>
     <None Include="..\libntp\messages.mc" />
   </ItemGroup>
   <ItemGroup>
