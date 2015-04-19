@@ -721,19 +721,11 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\..\include\global.h"
-				>
-			</File>
-			<File
 				RelativePath="..\..\..\..\lib\isc\include\isc\hash.h"
 				>
 			</File>
 			<File
 				RelativePath="..\..\..\..\include\ieee754io.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\include\netinet\in.h"
 				>
 			</File>
 			<File
@@ -773,7 +765,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\..\include\md5.h"
+				RelativePath="..\..\..\..\lib\isc\include\isc\md5.h"
 				>
 			</File>
 			<File
@@ -789,7 +781,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\..\include\isc\netaddr.h"
+				RelativePath="..\..\..\..\lib\isc\include\isc\netaddr.h"
 				>
 			</File>
 			<File
@@ -797,7 +789,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\..\include\isc\netscope.h"
+				RelativePath="..\..\..\..\lib\isc\include\isc\netscope.h"
 				>
 			</File>
 			<File
@@ -937,7 +929,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\include\sys\socket.h"
+				RelativePath="..\..\..\..\lib\isc\include\isc\socket.h"
 				>
 			</File>
 			<File
@@ -965,15 +957,15 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\..\lib\isc\win32\include\isc\time.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\..\..\lib\isc\win32\include\isc\time.h"
-				>
-			</File>
-			<File
 				RelativePath="..\..\include\sys\time.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\..\lib\isc\win32\include\isc\time.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\..\lib\isc\win32\include\isc\time.h"
 				>
 			</File>
 			<File
@@ -997,7 +989,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\include\isc\win32os.h"
+				RelativePath="..\..\..\..\lib\isc\win32\include\isc\win32os.h"
 				>
 			</File>
 		</Filter>

@@ -453,15 +453,11 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\include\netinet\in.h"
+				RelativePath="..\..\..\..\lib\isc\win32\include\isc\net.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\include\arpa\inet.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\include\isc\int.h"
+				RelativePath="..\..\..\..\lib\isc\win32\include\isc\int.h"
 				>
 			</File>
 			<File
@@ -485,15 +481,11 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\libntp\log.h"
+				RelativePath="..\..\..\..\lib\isc\include\isc\log.h"
 				>
 			</File>
 			<File
 				RelativePath="..\..\..\..\include\mbg_gps166.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\include\isc\net.h"
 				>
 			</File>
 			<File
@@ -713,7 +705,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\include\isc\offset.h"
+				RelativePath="..\..\..\..\lib\isc\win32\include\isc\offset.h"
 				>
 			</File>
 			<File
@@ -725,7 +717,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\include\isc\platform.h"
+				RelativePath="..\..\..\..\lib\isc\win32\include\isc\platform.h"
 				>
 			</File>
 			<File
@@ -741,7 +733,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\include\sys\socket.h"
+				RelativePath="..\..\..\..\lib\isc\include\isc\socket.h"
 				>
 			</File>
 			<File
@@ -773,7 +765,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\include\isc\win32os.h"
+				RelativePath="..\..\..\..\lib\isc\win32\include\isc\win32os.h"
 				>
 			</File>
 		</Filter>
@@ -794,7 +786,7 @@
 			Filter="ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe"
 			>
 			<File
-				RelativePath="..\libntp\messages.mc"
+				RelativePath="..\..\libntp\messages.mc"
 				>
 			</File>
 		</Filter>

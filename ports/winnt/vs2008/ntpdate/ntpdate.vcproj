@@ -317,7 +317,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\include\isc\net.h"
+				RelativePath="..\..\..\..\lib\isc\win32\include\isc\net.h"
 				>
 			</File>
 			<File
