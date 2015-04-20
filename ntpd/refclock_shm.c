@@ -367,9 +367,9 @@ struct shm_stat_t {
 
 static inline void memory_barrier(void)
 {
-#ifdef HAVE_STDATOMIC_H
+#ifdef HAVE_ATOMIC_THREAD_FENCE
     atomic_thread_fence(memory_order_seq_cst);
-#endif /* HAVE_STDATOMIC_H */
+#endif /* HAVE_ATOMIC_THREAD_FENCE */
 }
 
 static enum segstat_t shm_query(volatile struct shmTime *shm_in, struct shm_stat_t *shm_stat)
