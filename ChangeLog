@@ -1,5 +1,6 @@
 ---
 
+* [Bug 2782] Refactor refclock_shm.c, add memory barrier protection.
 * [Bug 2808] GPSD_JSON driver enhancements, step 1.
   Various improvements, see http://bugs.ntp.org/2808 for details.
   Changed libjsmn to a more recent version.
@@ -67,6 +68,7 @@
 * [Sec 2781] Authentication doesn't protect symmetric associations against
   DoS attacks.
 * [Bug 2783] Quiet autoconf warnings about missing AC_LANG_SOURCE.
+* [Bug 2784] Fix for 2782 uses clock_gettime() instead of get_ostime().
 * [Bug 2789] Quiet compiler warnings from libevent.
 * [Bug 2790] If ntpd sets the Windows MM timer highest resolution
   pause briefly before measuring system clock precision to yield
