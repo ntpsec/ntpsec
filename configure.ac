@@ -375,11 +375,27 @@ case "$host" in
     ;;
 esac
 
-dnl case "$ac_cv_header_stdatomic_h" in
-dnl  yes)
-dnl     AC_CHECK_FUNCS([atomic_thread_fence])
-dnl     ;;
-dnl esac
+case "$ac_cv_header_stdatomic_h" in
+ yes)
+	AC_CHECK_FUNCS([atomic_thread_fence])
+	AC_CACHE_CHECK(
+	    [for atomic_thread_fence()],
+	    [ntp_cv_func_atomic_thread_fence],
+	    [AC_COMPILE_IFELSE(
+		[AC_LANG_PROGRAM(
+		    [[
+			#include <stdatomic.h>
+		    ]],
+		    [[
+			atomic_thread_fence(memory_order_seq_cst);
+		    ]]
+		)]
+		[ntp_cv_func_atomic_thread_fence=yes],
+		[ntp_cv_func_atomic_thread_fence=no]
+	    )]
+	)
+    ;;
+esac
 
 case "$host" in
  *-*-solaris2.6)
