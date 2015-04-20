@@ -113,10 +113,12 @@ dist-hook:
 	@find $(distdir) -type d -name SCCS -print | xargs rm -rf
 
 install-data-local:
-	( cd $(srcdir) && find html -name SCCS -prune -o -type d \
-		-exec $(INSTALL) -d $(DESTDIR)$(htmldir)/{} ";" )
-	( cd $(srcdir) && find html -name SCCS -prune -o -type f \
-		-exec $(INSTALL_DATA) {} $(DESTDIR)$(htmldir)/{} ";" )
+	( cd $(srcdir) && \
+		for i in `find html -type d | grep -v SCCS` ; \
+		do $(INSTALL) -d $(DESTDIR)$(htmldir)/$$i ; done )
+	( cd $(srcdir) && \
+		for i in `find html -name SCCS -prune -o -type f` ; \
+		do $(INSTALL_DATA) $$i $(DESTDIR)$(htmldir)/$$i ; done )
 
 uninstall-local:
 		rm -rf $(DESTDIR)$(htmldir)/html
