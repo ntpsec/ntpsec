@@ -1,3 +1,4 @@
+(4.3.15) 2015/04/20 Released by Harlan Stenn <stenn@ntp.org>
 Below are from 4.2.8p3:
 * [Bug 2804] install-local-data assumes GNU 'find' semantics.
 * [Bug 2808] GPSD_JSON driver enhancements, step 1.
