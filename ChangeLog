@@ -1,3 +1,7 @@
+Below are from 4.2.8p3:
+* [Bug 2808] GPSD_JSON driver enhancements, step 1.
+  Various improvements, see http://bugs.ntp.org/2808 for details.
+  Changed libjsmn to a more recent version.
 (4.3.14) 2015/04/07 Released by Harlan Stenn <stenn@ntp.org>
 Below are from 4.2.8p2:
 * [Sec 2779] ntpd accepts unauthenticated packets with symmetric key crypto.
