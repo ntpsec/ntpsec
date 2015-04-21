@@ -1,5 +1,6 @@
 ---
 
+* [Bug 2776] Improve ntpq's 'help keytype'.
 * [Bug 2794] Clean up kernel clock status reports.
 * [Bug 2804] install-local-data assumes GNU 'find' semantics.
 * [Bug 2808] GPSD_JSON driver enhancements, step 1.
