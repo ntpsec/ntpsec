@@ -1,3 +1,5 @@
+Below are from 4.2.8p3:
+* [Bug 2794] Clean up kernel clock status reports.
 (4.3.15) 2015/04/20 Released by Harlan Stenn <stenn@ntp.org>
 Below are from 4.2.8p3:
 * [Bug 2804] install-local-data assumes GNU 'find' semantics.
@@ -104,6 +106,7 @@ ntp-4.3 begins.
 ---
 
 * [Bug 2782] Refactor refclock_shm.c, add memory barrier protection.
+* [Bug 2794] Clean up kernel clock status reports.
 * [Bug 2804] install-local-data assumes GNU 'find' semantics.
 * [Bug 2808] GPSD_JSON driver enhancements, step 1.
   Various improvements, see http://bugs.ntp.org/2808 for details.
