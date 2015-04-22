@@ -472,7 +472,7 @@ alarming(
 # endif
 # ifdef DEBUG
 	if (debug >= 4)
-		write(1, msg, strlen(msg));
+		(void)(0 != write(1, msg, strlen(msg)));
 # endif
 }
 #endif /* SYS_WINNT */
@@ -521,11 +521,21 @@ check_leapsec(
 		 * announce the leap event has happened.
 		 */
 		if (lsdata.warped < 0) {
-			step_systime(lsdata.warped);
-			msyslog(LOG_NOTICE, "Inserting positive leap second.");
+			if (clock_max_back > 0.0 &&
+			    clock_max_back < fabs(lsdata.warped)) {
+				step_systime(lsdata.warped);
+				msyslog(LOG_NOTICE, "Positive leap second, stepped backward.");
+			} else {
+				msyslog(LOG_NOTICE, "Positive leap second, expect heavy slowdown slew.");
+			}
 		} else 	if (lsdata.warped > 0) {
-			step_systime(lsdata.warped);
-			msyslog(LOG_NOTICE, "Inserting negative leap second.");
+			if (clock_max_fwd > 0.0 &&
+			    clock_max_fwd < fabs(lsdata.warped)) {
+				step_systime(lsdata.warped);
+				msyslog(LOG_NOTICE, "Negative leap second, stepped forward.");
+			} else {
+				msyslog(LOG_NOTICE, "Negative leap second, expect heavy speedup slew.");
+			}
 		}
 		report_event(EVNT_LEAP, NULL, NULL);
 		lsprox  = LSPROX_NOWARN;
