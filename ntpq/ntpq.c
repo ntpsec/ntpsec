@@ -3532,7 +3532,7 @@ static char *list_digest_names(void)
 {
     char *list = NULL;
 
-#ifdef OPENSSL
+#ifdef HAVE_EVP_MD_DO_ALL_SORTED
     struct hstate hstate = { NULL, NULL, K_PER_LINE+1 };
 
     hstate.seen = (const char **)calloc(1, sizeof( const char * ));
