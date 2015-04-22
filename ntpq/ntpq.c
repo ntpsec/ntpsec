@@ -3532,7 +3532,8 @@ static char *list_digest_names(void)
 {
     char *list = NULL;
 
-#ifdef HAVE_EVP_MD_DO_ALL_SORTED
+#ifdef OPENSSL
+# ifdef HAVE_EVP_MD_DO_ALL_SORTED
     struct hstate hstate = { NULL, NULL, K_PER_LINE+1 };
 
     hstate.seen = (const char **)calloc(1, sizeof( const char * ));
@@ -3541,9 +3542,13 @@ static char *list_digest_names(void)
     EVP_MD_do_all_sorted(list_md_fn, &hstate);
     list = hstate.list;
     free(hstate.seen);
+# else
+    list = (char *)malloc(sizeof("md5, others (upgrade to OpenSSL-1.0 for full list)"));
+    strcpy(list, "md5, others (upgrade to OpenSSL-1.0 for full list)");
+# endif
 #else
     list = (char *)malloc(sizeof("md5"));
-    strcpy(list,"md5");
+    strcpy(list, "md5");
 #endif
 
     return list;
