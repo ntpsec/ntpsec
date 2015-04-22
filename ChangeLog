@@ -1,3 +1,4 @@
+(4.3.16) 2015/04/22 Released by Harlan Stenn <stenn@ntp.org>
 Below are from 4.2.8p3:
 * [Bug 2776] Improve ntpq's 'help keytype'.
 * [Bug 2794] Clean up kernel clock status reports.
