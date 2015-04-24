@@ -225,7 +225,6 @@ AC_MSG_RESULT([$ntp_openssl])
 
 case "$ntp_openssl" in
  yes)
-    AC_CHECK_FUNCS([EVP_MD_do_all_sorted])
     AC_DEFINE([OPENSSL], [], [Use OpenSSL?])
     case "$VER_SUFFIX" in
      *o*) ;;
@@ -359,6 +358,13 @@ case "$ntp_openssl:$GCC" in
  no:yes)
     # gcc without OpenSSL
     CFLAGS_NTP="$CFLAGS_NTP -Wstrict-prototypes"
+esac
+
+case "$ntp_openssl" in
+ yes)
+    LIBS="$NTPO_SAVED_LIBS $LDADD_NTP"
+    AC_CHECK_FUNCS([EVP_MD_do_all_sorted])
+    ;;
 esac
 
 CFLAGS="$NTPO_SAVED_CFLAGS"
