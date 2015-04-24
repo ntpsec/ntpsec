@@ -1,3 +1,4 @@
+(4.3.18) 2015/04/24 Released by Harlan Stenn <stenn@ntp.org>
 Below are from 4.2.8p3:
 * [Bug 2776] Improve ntpq's 'help keytype'.
 * [Bug 2800] refclock_true.c true_debug() can't open debug log because
