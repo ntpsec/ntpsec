@@ -1,3 +1,5 @@
+Below are from 4.2.8p3:
+* [Bug 2804] install-local-data assumes GNU 'find' semantics.
 (4.3.17) 2015/04/23 Released by Harlan Stenn <stenn@ntp.org>
 Below are from 4.2.8p3:
 * [Bug 2776] Improve ntpq's 'help keytype' on pre-OpenSSL 1.0.
