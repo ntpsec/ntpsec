@@ -117,7 +117,7 @@ install-data-local:
 		for i in `find html -type d | grep -v SCCS` ; \
 		do $(INSTALL) -d $(DESTDIR)$(htmldir)/$$i ; done )
 	( cd $(srcdir) && \
-		for i in `find html -name SCCS -prune -o -type f` ; \
+		for i in `find html -type f | grep -v SCCS` ; \
 		do $(INSTALL_DATA) $$i $(DESTDIR)$(htmldir)/$$i ; done )
 
 uninstall-local:
