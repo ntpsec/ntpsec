@@ -238,24 +238,62 @@
     <br><h4>Clockstats</h4>
     <p>If flag4 is set when the driver is polled, a clockstats record
       is written for the primary clock unit. (The secondary PPS unit
-      does not provide clock stats yet.) The first 3 fields are the
-      normal date, time, and IP address common to all clockstats
+      does not provide clock stats on its own.) The first 3 fields are
+      the normal date, time, and IP address common to all clockstats
       records.
     </p><p>
-      The 4th field is the number of good time samples processed
-      since the last poll.
-    </p><p>
-      The 5th field is the number of bad replies since the last
-      poll. A bad reply is considered malformed when it is missing
-      vital fields or the fields contain malformed data. If the data
-      indicates that the GPS receiver has no valid fix the sample is
-      also accounted as bad.
-    </p><p>
-      The 6th field is the number of received and known JSON records
-      since the last poll. (<b>Note:</b> Since the sample data is
-      collected from several JSON records and some JSON data is not
-      related to samples, this is <i>not</i> the sum of the other
-      fields.
+      <table border="1" frame="box" rules="all">
+	<th colspan="2">The Clockstats Line</th>
+	<tr> <td>field</td><td>Description</td>	</tr>
+	<tr>
+	  <td align="center">1</td>
+	  <td>Date as day number since NTP epoch.</td>
+	</tr><tr>
+	  <td align="center">2</td>
+	  <td>Time as seconds since midnight.</td>
+	</tr><tr>
+	  <td align="center">3</td>
+	  <td>(Pseudo-) IP address of clock unit.</td>
+	</tr><tr>
+	  <td align="center">4</td>
+	  <td>Number of received known JSON records since last
+	    poll. The driver knows about TPV, PPS, TOFF, VERSION and
+	    WATCH records; others are silently ignored.
+	  </td>
+	</tr><tr>
+	  <td align="center">5</td>
+	  <td>Bad replies since last poll. A record is considered
+	    malformed or a bad reply when it is missing vital fields
+	    or the fields contain malformed data that cannot be
+	    parsed.
+	  </td>
+	</tr><tr>
+	  <td align="center">6</td>
+	  <td>Number of sample cycles since last poll that were
+	    discarded because there was no GPS fix. This is
+	    effectively the number of TPV records with a fix value
+	    &lt; 2 or without a time stamp.
+	  </td>
+	</tr><tr>
+	  <td align="center">7</td>
+	  <td>Number of serial time information records (TPV or TOFF,
+	    depending on the GPSD version) received since last poll.
+	  </td>
+	</tr><tr>
+	  <td align="center">8</td>
+	  <td>Number of serial time information records used for
+	    clock samples since the last poll.
+	  </td>
+	</tr><tr>
+	  <td align="center">9</td>
+	  <td>Number of PPS records received since the last poll.</td>
+	</tr><tr>
+	  <td align="center">10</td>
+	  <td>Number of PPS records used for clock samples on the
+	    secondary channel since the last poll.
+	  </td>
+	</tr>
+      </table>
     </p>
 
     <!-- --------------------------------------------------------- -->

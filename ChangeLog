@@ -1,5 +1,7 @@
 ---
 
+* [Bug 2808] GPSD_JSON driver enhancements, step 1.
+  Add a few more tallies as per Hal Murray's suggestions
 * [Bug 2794] Clean up kernel clock status reports.
 * [Bug 2800] refclock_true.c true_debug() can't open debug log because
   of incompatible open/fdopen parameters.

@@ -311,9 +311,13 @@ struct gpsd_unit {
 	u_int       tickpres;	/* timeout preset */
 
 	/* tallies for the various events */
-	u_int       tc_good;	/* good samples received */
-	u_int       tc_breply;	/* bad replies */
 	u_int       tc_recv;	/* received known records */
+	u_int       tc_breply;	/* bad replies / parsing errors */
+	u_int       tc_nosync;	/* TPV / sample cycles w/o fix */
+	u_int       tc_sti_recv;/* received serial time info records */
+	u_int       tc_sti_used;/* used        --^-- */
+	u_int       tc_pps_recv;/* received PPS timing info records */
+	u_int       tc_pps_used;/* used        --^-- */
 
 	/* log bloat throttle */
 	u_int       logthrottle;/* seconds to next log slot */
@@ -651,13 +655,20 @@ poll_primary(
 
 	if (pp->sloppyclockflag & CLK_FLAG4)
 		mprintf_clock_stats(
-			&peer->srcadr,"%u %u %u",
-			up->tc_good, up->tc_breply, up->tc_recv);
+			&peer->srcadr,"%u %u %u %u %u %u %u",
+			up->tc_recv,
+			up->tc_breply, up->tc_nosync,
+			up->tc_sti_recv, up->tc_sti_used,
+			up->tc_pps_recv, up->tc_pps_used);
 
 	/* clear tallies for next round */
-	up->tc_good   = 0;
-	up->tc_breply = 0;
-	up->tc_recv   = 0;
+	up->tc_breply   = 0;
+	up->tc_recv     = 0;
+	up->tc_nosync   = 0;
+	up->tc_sti_recv = 0;
+	up->tc_sti_used = 0;
+	up->tc_pps_recv = 0;
+	up->tc_pps_used = 0;
 }
 
 static void
@@ -883,10 +894,11 @@ eval_strict(
 		/* use TPV reference time + PPS receive time */
 		add_clock_sample(peer, pp, up->sti_stamp, up->pps_recvt);
 		peer->precision = up->pps_prec;
-		up->tc_good += 1;
+		//DEAD? up->tc_good += 1;
 		/* both packets consumed now... */
 		up->fl_pps = 0;
 		up->fl_sti = 0;
+		++up->tc_sti_used;
 	}
 }
 
@@ -913,6 +925,7 @@ eval_pps_secondary(
 			peer->flags |= FLAG_PPS;
 		/* mark time stamp as burned... */
 		up->fl_pps2 = 0;
+		++up->tc_pps_used;
 	}
 }
 
@@ -927,9 +940,10 @@ eval_serial(
 	if (up->fl_sti) {
 		add_clock_sample(peer, pp, up->sti_stamp, up->sti_recvt);
 		peer->precision = up->sti_prec;
-		up->tc_good += 1;
+		//DEAD? up->tc_good += 1;
 		/* mark time stamp as burned... */
 		up->fl_sti = 0;
+		++up->tc_sti_used;
 	}
 }
 
@@ -1457,10 +1471,12 @@ process_tpv(
 	/* accept time stamps only in 2d or 3d fix */
 	if (gps_mode < 2 || NULL == gps_time) {
 		/* receiver has no fix; tell about and avoid stale data */
-		up->tc_breply += 1;
-		up->fl_sti     = 0;
-		up->fl_pps     = 0;
-		up->fl_nosync  = -1;
+		if ( ! up->pf_toff)
+			++up->tc_sti_recv;
+		++up->tc_nosync;
+		up->fl_sti    = 0;
+		up->fl_pps    = 0;
+		up->fl_nosync = -1;
 		return;
 	}
 	up->fl_nosync = 0;
@@ -1469,6 +1485,7 @@ process_tpv(
 	 * TOFF sentence is *not* available
 	 */
 	if ( ! up->pf_toff) {
+		++up->tc_sti_recv;
 		/* save last time code to clock data */
 		save_ltc(pp, gps_time);
 		/* now parse the time string */
@@ -1489,8 +1506,8 @@ process_tpv(
 			L_SUB(&up->sti_recvt, &up->sti_fudge);
 			up->fl_sti = -1;
 		} else {
-			up->tc_breply += 1;
-			up->fl_sti     = 0;
+			++up->tc_breply;
+			up->fl_sti = 0;
 		}
 	}
 
@@ -1522,6 +1539,8 @@ process_pps(
 	gpsd_unitT * const up = (gpsd_unitT *)pp->unitptr;
 
 	int xlog2;
+
+	++up->tc_pps_recv;
 
 	/* Bail out if there's indication that time sync is bad or
 	 * if we're explicitely requested to ignore PPS data.
@@ -1586,7 +1605,7 @@ process_pps(
   fail:
 	DPRINTF(1, ("%s: PPS record processing FAILED\n",
 		    up->logname));
-	up->tc_breply += 1;
+	++up->tc_breply;
 }
 
 /* ------------------------------------------------------------------ */
@@ -1599,6 +1618,8 @@ process_toff(
 {
 	clockprocT * const pp = peer->procptr;
 	gpsd_unitT * const up = (gpsd_unitT *)pp->unitptr;
+
+	++up->tc_sti_recv;
 
 	/* remember this! */
 	up->pf_toff = -1;
@@ -1628,7 +1649,7 @@ process_toff(
   fail:
 	DPRINTF(1, ("%s: TOFF record processing FAILED\n",
 		    up->logname));
-	up->tc_breply += 1;
+	++up->tc_breply;
 }
 
 /* ------------------------------------------------------------------ */
@@ -1670,7 +1691,7 @@ gpsd_parse(
 		process_watch(peer, &up->json_parse, rtime);
 	else
 		return; /* nothing we know about... */
-	up->tc_recv += 1;
+	++up->tc_recv;
 
 	/* if possible, feed the PPS side channel */
 	if (up->pps_peer)
