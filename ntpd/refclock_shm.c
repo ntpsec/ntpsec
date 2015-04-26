@@ -24,6 +24,7 @@
 #include "timespecops.h"
 #undef fileno
 #include "ntp_stdlib.h"
+#include "ntp_assert.h"
 
 #undef fileno
 #include <ctype.h>
@@ -199,9 +200,11 @@ getShmTime(
 		return NULL;
 	}
 
+	return p;
 #endif
 
-	return p;
+	/* NOTREACHED */
+	ENSURE(!"getShmTime(): Not reached.");
 }
 /*
  * shm_start - attach to shared memory

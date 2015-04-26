@@ -1,5 +1,6 @@
 Below are from 4.2.8p3:
 * CID 1295478: Quiet a pedantic potential error from the fix for Bug 2776.
+* CID 1269537: Clean up a line of dead code in getShmTime().
 * ntpq.c cleanup.
 * Improve the ntpq documentation around the controlkey keyid.
 (4.3.19) 2015/04/25 Released by Harlan Stenn <stenn@ntp.org>
@@ -123,9 +124,10 @@ From 4.2.8p2:
 ntp-4.3 begins.
 ---
 
-* CID 1295478: Quiet a pedantic potential error from the fix for Bug 2776.
 * [Bug 2776] Improve ntpq's 'help keytype'.
 * [Bug 2782] Refactor refclock_shm.c, add memory barrier protection.
+* CID 1295478: Quiet a pedantic potential error from the fix for Bug 2776.
+* CID 1269537: Clean up a line of dead code in getShmTime().
 * [Bug 2794] Clean up kernel clock status reports.
 * [Bug 2800] refclock_true.c true_debug() can't open debug log because
   of incompatible open/fdopen parameters.
