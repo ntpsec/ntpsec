@@ -3,6 +3,7 @@ Below are from 4.2.8p3:
 * CID 1269537: Clean up a line of dead code in getShmTime().
 * ntpq.c cleanup.
 * Improve the ntpq documentation around the controlkey keyid.
+* autogen-5.18.5.
 (4.3.19) 2015/04/25 Released by Harlan Stenn <stenn@ntp.org>
 Below are from 4.2.8p3:
 * [Bug 2804] Fix regression in previous fix.
