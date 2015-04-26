@@ -325,7 +325,9 @@ switch.
 This command allows the specification of a key number to be
 used to authenticate configuration requests.
 This must correspond
-to a key number the server has been configured to use for this
+to the
+.Cm controlkey
+key number the server has been configured to use for this
 purpose.
 .It Ic keytype Xo Oo
 .Cm md5 |
