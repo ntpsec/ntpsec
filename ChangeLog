@@ -1,5 +1,6 @@
 ---
 
+* CID 1295478: Quiet a pedantic potential error from the fix for Bug 2776.
 * [Bug 2776] Improve ntpq's 'help keytype'.
 * [Bug 2794] Clean up kernel clock status reports.
 * [Bug 2800] refclock_true.c true_debug() can't open debug log because
@@ -9,6 +10,7 @@
   Various improvements, see http://bugs.ntp.org/2808 for details.
   Changed libjsmn to a more recent version.
 * Improve the ntpq documentation around the controlkey keyid.
+* ntpq.c cleanup.
 ---
 (4.2.8p2) 2015/04/07 Released by Harlan Stenn <stenn@ntp.org>
 (4.2.8p2-RC3) 2015/04/03 Released by Harlan Stenn <stenn@ntp.org>

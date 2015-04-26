@@ -21,6 +21,7 @@
 #include <isc/result.h>
 
 #include "ntpq.h"
+#include "ntp_assert.h"
 #include "ntp_stdlib.h"
 #include "ntp_unixtime.h"
 #include "ntp_calendar.h"
@@ -219,8 +220,10 @@ static	int	assoccmp	(const void *, const void *);
 void	ntpq_custom_opt_handler	(tOptions *, tOptDesc *);
 
 #ifdef OPENSSL
+# ifdef HAVE_EVP_MD_DO_ALL_SORTED
 static void list_md_fn(const EVP_MD *m, const char *from,
 		       const char *to, void *arg );
+# endif
 #endif
 static char *list_digest_names(void);
 
@@ -474,6 +477,10 @@ ntpqmain(
 		if (strcmp("keytype", builtins[icmd].keyword) == 0)
 		    break;
 	    }
+
+	    /* CID: 1295478 */
+	    /* This should only "trip" if "keytype" is removed from builtins */
+	    INSIST(icmd < sizeof(builtins)/sizeof(builtins[0]));
 
 #ifdef OPENSSL
 	    builtins[icmd].desc[0] = "digest-name";
@@ -3459,6 +3466,7 @@ ntpq_custom_opt_handler(
  */
 
 #ifdef OPENSSL
+# ifdef HAVE_EVP_MD_DO_ALL_SORTED
 struct hstate {
    char *list;
    const char **seen;
@@ -3526,6 +3534,7 @@ static void list_md_fn(const EVP_MD *m, const char *from, const char *to, void *
     else
 	hstate->idx++;
 }
+# endif
 #endif
 
 static char *list_digest_names(void)
