@@ -1,9 +1,9 @@
-.Dd April 25 2015
+.Dd April 26 2015
 .Dt UPDATE_LEAP 1update-leapmdoc User Commands
 .Os
 .\"  EDIT THIS FILE WITH CAUTION  (update-leap-opts.mdoc)
 .\"
-.\"  It has been AutoGen-ed  April 25, 2015 at 11:52:51 AM by AutoGen 5.18.5pre4
+.\"  It has been AutoGen-ed  April 26, 2015 at 01:40:59 PM by AutoGen 5.18.5
 .\"  From the definitions    update-leap-opts.def
 .\"  and the template file   agmdoc-cmd.tpl
 .Sh NAME
