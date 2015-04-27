@@ -8,6 +8,7 @@
 * [Bug 2808] GPSD_JSON driver enhancements, step 1.
   Various improvements, see http://bugs.ntp.org/2808 for details.
   Changed libjsmn to a more recent version.
+* [Bug 2813] HP-UX needs -D__STDC_VERSION__=199901L and limits.h.
 * Improve the ntpq documentation around the controlkey keyid.
 * autogen-5.18.5
 ---
