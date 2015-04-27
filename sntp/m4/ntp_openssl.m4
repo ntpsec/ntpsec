@@ -360,6 +360,9 @@ case "$ntp_openssl:$GCC" in
     CFLAGS_NTP="$CFLAGS_NTP -Wstrict-prototypes"
 esac
 
+# Because we don't want -Werror for the EVP_MD_do_all_sorted check
+CFLAGS="$NTPO_SAVED_CFLAGS"
+
 case "$ntp_openssl" in
  yes)
     LIBS="$NTPO_SAVED_LIBS $LDADD_NTP"
@@ -367,7 +370,6 @@ case "$ntp_openssl" in
     ;;
 esac
 
-CFLAGS="$NTPO_SAVED_CFLAGS"
 CPPFLAGS="$NTPO_SAVED_CPPFLAGS"
 LIBS="$NTPO_SAVED_LIBS"
 AS_UNSET([NTPO_SAVED_CFLAGS])
