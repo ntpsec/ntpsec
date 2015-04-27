@@ -1,3 +1,5 @@
+Below are from 4.2.8p3:
+* [Bug 2813] HP-UX needs -D__STDC_VERSION__=199901L and limits.h.
 (4.3.20) 2015/04/26 Released by Harlan Stenn <stenn@ntp.org>
 Below are from 4.2.8p3:
 * CID 1295478: Quiet a pedantic potential error from the fix for Bug 2776.
@@ -138,6 +140,7 @@ ntp-4.3 begins.
   Various improvements, see http://bugs.ntp.org/2808 for details.
   Changed libjsmn to a more recent version.
 * [Bug 2810] refclock_shm.c memory barrier code needs tweaks for QNX.
+* [Bug 2813] HP-UX needs -D__STDC_VERSION__=199901L and limits.h.
 * Improve the ntpq documentation around the controlkey keyid.
 * ntpq.c cleanup.
 * autogen-5.18.5
