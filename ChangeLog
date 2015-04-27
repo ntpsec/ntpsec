@@ -1,4 +1,5 @@
 Below are from 4.2.8p3:
+* [Bug 2776] Clean up EVP_MD_do_all_sorted() test.
 * [Bug 2813] HP-UX needs -D__STDC_VERSION__=199901L and limits.h.
 (4.3.20) 2015/04/26 Released by Harlan Stenn <stenn@ntp.org>
 Below are from 4.2.8p3:
