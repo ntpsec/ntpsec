@@ -10,11 +10,11 @@
 .ds B-Font B
 .ds I-Font I
 .ds R-Font R
-.TH ntp-keygen 1ntp-keygenman "27 Apr 2015" "ntp (4.3.21)" "User Commands"
+.TH ntp-keygen 1ntp-keygenman "28 Apr 2015" "ntp (4.3.22)" "User Commands"
 .\"
-.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-YtaWDi/ag-.taOCi)
+.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-10aWsp/ag-c1aOrp)
 .\"
-.\" It has been AutoGen-ed April 27, 2015 at 11:58:52 AM by AutoGen 5.18.5
+.\" It has been AutoGen-ed April 28, 2015 at 11:59:03 AM by AutoGen 5.18.5
 .\" From the definitions ntp-keygen-opts.def
 .\" and the template file agman-cmd.tpl
 .SH NAME
