@@ -1,3 +1,6 @@
+Below are from 4.2.8p3:
+* [Bug 2612] restrict: Warn when 'monitor' can't be disabled because
+  of 'limited'.
 (4.3.21) 2015/04/27 Released by Harlan Stenn <stenn@ntp.org>
 Below are from 4.2.8p3:
 * [Bug 2776] Clean up EVP_MD_do_all_sorted() test.
@@ -135,6 +138,8 @@ ntp-4.3 begins.
 * [Bug 2782] Refactor refclock_shm.c, add memory barrier protection.
 * CID 1295478: Quiet a pedantic potential error from the fix for Bug 2776.
 * CID 1269537: Clean up a line of dead code in getShmTime().
+* [Bug 2612] restrict: Warn when 'monitor' can't be disabled because
+  of 'limited'.
 * [Bug 2794] Clean up kernel clock status reports.
 * [Bug 2800] refclock_true.c true_debug() can't open debug log because
   of incompatible open/fdopen parameters.
