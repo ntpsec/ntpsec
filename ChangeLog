@@ -1,6 +1,8 @@
 ---
 
 * CID 1269537: Clean up a line of dead code in getShmTime().
+* [Bug 2612] restrict: Warn when 'monitor' can't be disabled because
+  of 'limited'.
 * [Bug 2794] Clean up kernel clock status reports.
 * [Bug 2800] refclock_true.c true_debug() can't open debug log because
   of incompatible open/fdopen parameters.
