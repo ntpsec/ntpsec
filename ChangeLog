@@ -1,5 +1,7 @@
 ---
 
+* [Bug 2808] GPSD_JSON driver enhancements, step 1
+  fix coverity issues with refclock_gpsdjson and refclock_shm
 * [Bug 2808] GPSD_JSON driver enhancements, step 1.
   Add a few more tallies as per Hal Murray's suggestions
 * [Bug 2794] Clean up kernel clock status reports.

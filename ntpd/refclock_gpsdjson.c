@@ -894,7 +894,6 @@ eval_strict(
 		/* use TPV reference time + PPS receive time */
 		add_clock_sample(peer, pp, up->sti_stamp, up->pps_recvt);
 		peer->precision = up->pps_prec;
-		//DEAD? up->tc_good += 1;
 		/* both packets consumed now... */
 		up->fl_pps = 0;
 		up->fl_sti = 0;
@@ -940,7 +939,6 @@ eval_serial(
 	if (up->fl_sti) {
 		add_clock_sample(peer, pp, up->sti_stamp, up->sti_recvt);
 		peer->precision = up->sti_prec;
-		//DEAD? up->tc_good += 1;
 		/* mark time stamp as burned... */
 		up->fl_sti = 0;
 		++up->tc_sti_used;
@@ -1126,6 +1124,9 @@ json_object_lookup(
 		} else {
 			break;
 		}
+		/* if skipping ahead returned an error, bail out here. */
+		if (tid < 0)
+			break;
 	}
 	return INVALID_TOKEN;
 }
