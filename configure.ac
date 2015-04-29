@@ -180,6 +180,15 @@ case "$PROG_NET_SNMP_CONFIG" in
 esac
 AC_MSG_RESULT([$PATH_NET_SNMP_CONFIG])
 
+case "$PATH_NET_SNMP_CONFIG" in
+ /*)	AC_CACHE_CHECK(
+	    [for net-snmp version],
+	    [ntp_cv_net_snmp_version],
+	    [ntp_cv_net_snmp_version=`$PATH_NET_SNMP_CONFIG --version`]
+	)
+	;;
+esac
+
 case "$host" in
  *-*-vxworks*)
     ac_link="$ac_link $VX_KERNEL"
@@ -3873,6 +3882,11 @@ case "$ans" in
     case "$PATH_NET_SNMP_CONFIG" in
      /*)
 	SNMP_LIBS=`$PATH_NET_SNMP_CONFIG --agent-libs`
+	# Bug 2815.  This is a bit of a hack, but it works...
+	case "$ntp_cv_net_snmp_version" in
+	 5.3*)	SNMP_LIBS=`echo $SNMP_LIBS | $SED -e 's/-lnetsnmpagent/-lnetsnmpagent -lnetsnmpmibs/'`
+		;;
+	esac
 	AC_SUBST([SNMP_LIBS])
 	# HMS: we really want to separate CPPFLAGS and CFLAGS
 	foo=`$PATH_NET_SNMP_CONFIG --cflags`
