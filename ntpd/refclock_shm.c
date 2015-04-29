@@ -149,7 +149,6 @@ getShmTime(
 		msyslog(LOG_ERR, "SHM shmat (unit %d): %m", unit);
 		return NULL;
 	}
-	return p;
 
 #else
 

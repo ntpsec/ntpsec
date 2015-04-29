@@ -1,3 +1,6 @@
+* [Bug 2808] GPSD_JSON driver enhancements, step 1
+  fix coverity issues with refclock_gpsdjson and refclock_shm
+  Add a few more tallies as per Hal Murray's suggestions
 (4.3.23) 2015/04/29 Released by Harlan Stenn <stenn@ntp.org>
 Below are from 4.2.8p3:
 * [Bug 2805] ntpd fails to join multicast group.
