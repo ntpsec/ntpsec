@@ -8,9 +8,6 @@
  * Copyright (c) 2006
  */
 
-%parse-param {struct FILE_INFO *ip_file}
-%lex-param {struct FILE_INFO *ip_file}
-
 %{
   #ifdef HAVE_CONFIG_H
   # include <config.h>
@@ -36,7 +33,7 @@
   #define YYFREE	free
   #define YYERROR_VERBOSE
   #define YYMAXDEPTH	1000	/* stop the madness sooner */
-  void yyerror(struct FILE_INFO *ip_file, const char *msg);
+  void yyerror(const char *msg);
 
   #ifdef SIM
   #  define ONLY_SIM(a)	(a)
@@ -373,11 +370,12 @@ command_list
 			 * error messages. The following should suffice for
 			 * the time being.
 			 */
+			struct FILE_INFO * ip_ctx = lex_current();
 			msyslog(LOG_ERR, 
 				"syntax error in %s line %d, column %d",
-				ip_file->fname,
-				ip_file->err_line_no,
-				ip_file->err_col_no);
+				ip_ctx->fname,
+				ip_ctx->errpos.nline,
+				ip_ctx->errpos.ncol);
 		}
 	;
 
@@ -663,11 +661,11 @@ monitoring_command
 			{ CONCAT_G_FIFOS(cfgt.stats_list, $2); }
 	|	T_Statsdir T_String
 		{
-			if (input_from_file) {
+			if (lex_from_file()) {
 				cfgt.stats_dir = $2;
 			} else {
 				YYFREE($2);
-				yyerror(ip_file, "statsdir remote configuration ignored");
+				yyerror("statsdir remote configuration ignored");
 			}
 		}
 	|	T_Filegen stat filegen_option_list
@@ -716,28 +714,28 @@ filegen_option_list
 filegen_option
 	:	T_File T_String
 		{
-			if (input_from_file) {
+			if (lex_from_file()) {
 				$$ = create_attr_sval($1, $2);
 			} else {
 				$$ = NULL;
 				YYFREE($2);
-				yyerror(ip_file, "filegen file remote config ignored");
+				yyerror("filegen file remote config ignored");
 			}
 		}
 	|	T_Type filegen_type
 		{
-			if (input_from_file) {
+			if (lex_from_file()) {
 				$$ = create_attr_ival($1, $2);
 			} else {
 				$$ = NULL;
-				yyerror(ip_file, "filegen type remote config ignored");
+				yyerror("filegen type remote config ignored");
 			}
 		}
 	|	link_nolink
 		{
 			const char *err;
 			
-			if (input_from_file) {
+			if (lex_from_file()) {
 				$$ = create_attr_ival(T_Flag, $1);
 			} else {
 				$$ = NULL;
@@ -745,7 +743,7 @@ filegen_option
 					err = "filegen link remote config ignored";
 				else
 					err = "filegen nolink remote config ignored";
-				yyerror(ip_file, err);
+				yyerror(err);
 			}
 		}
 	|	enable_disable
@@ -791,7 +789,7 @@ access_control_command
 			restrict_node *rn;
 
 			rn = create_restrict_node($2, NULL, $3,
-						  ip_file->line_no);
+						  lex_current()->curpos.nline);
 			APPEND_G_FIFO(cfgt.restrict_opts, rn);
 		}
 	|	T_Restrict ip_address T_Mask ip_address ac_flag_list
@@ -799,7 +797,7 @@ access_control_command
 			restrict_node *rn;
 
 			rn = create_restrict_node($2, $4, $5,
-						  ip_file->line_no);
+						  lex_current()->curpos.nline);
 			APPEND_G_FIFO(cfgt.restrict_opts, rn);
 		}
 	|	T_Restrict T_Default ac_flag_list
@@ -807,7 +805,7 @@ access_control_command
 			restrict_node *rn;
 
 			rn = create_restrict_node(NULL, NULL, $3,
-						  ip_file->line_no);
+						  lex_current()->curpos.nline);
 			APPEND_G_FIFO(cfgt.restrict_opts, rn);
 		}
 	|	T_Restrict T_Ipv4_flag T_Default ac_flag_list
@@ -822,7 +820,7 @@ access_control_command
 					estrdup("0.0.0.0"), 
 					AF_INET),
 				$4, 
-				ip_file->line_no);
+				lex_current()->curpos.nline);
 			APPEND_G_FIFO(cfgt.restrict_opts, rn);
 		}
 	|	T_Restrict T_Ipv6_flag T_Default ac_flag_list
@@ -837,7 +835,7 @@ access_control_command
 					estrdup("::"), 
 					AF_INET6),
 				$4, 
-				ip_file->line_no);
+				lex_current()->curpos.nline);
 			APPEND_G_FIFO(cfgt.restrict_opts, rn);
 		}
 	|	T_Restrict T_Source ac_flag_list
@@ -846,7 +844,7 @@ access_control_command
 
 			APPEND_G_FIFO($3, create_int_node($2));
 			rn = create_restrict_node(
-				NULL, NULL, $3, ip_file->line_no);
+				NULL, NULL, $3, lex_current()->curpos.nline);
 			APPEND_G_FIFO(cfgt.restrict_opts, rn);
 		}
 	;
@@ -1047,7 +1045,7 @@ system_option
 			{ $$ = create_attr_ival(T_Flag, $1); }
 	|	system_option_local_flag_keyword
 		{ 
-			if (input_from_file) {
+			if (lex_from_file()) {
 				$$ = create_attr_ival(T_Flag, $1);
 			} else {
 				char err_str[128];
@@ -1056,7 +1054,7 @@ system_option
 				snprintf(err_str, sizeof(err_str),
 					 "enable/disable %s remote configuration ignored",
 					 keyword($1));
-				yyerror(ip_file, err_str);
+				yyerror(err_str);
 			}
 		}
 	;
@@ -1140,7 +1138,7 @@ miscellaneous_command
 			char error_text[64];
 			attr_val *av;
 
-			if (input_from_file) {
+			if (lex_from_file()) {
 				av = create_attr_sval($1, $2);
 				APPEND_G_FIFO(cfgt.vars, av);
 			} else {
@@ -1148,33 +1146,30 @@ miscellaneous_command
 				snprintf(error_text, sizeof(error_text),
 					 "%s remote config ignored",
 					 keyword($1));
-				yyerror(ip_file, error_text);
+				yyerror(error_text);
 			}
 		}
 	|	T_Includefile T_String command
 		{
-			if (!input_from_file) {
-				yyerror(ip_file, "remote includefile ignored");
+			if (!lex_from_file()) {
+				YYFREE($2); /* avoid leak */
+				yyerror("remote includefile ignored");
 				break;
 			}
-			if (curr_include_level >= MAXINCLUDELEVEL) {
+			if (lex_level() > MAXINCLUDELEVEL) {
 				fprintf(stderr, "getconfig: Maximum include file level exceeded.\n");
 				msyslog(LOG_ERR, "getconfig: Maximum include file level exceeded.");
 			} else {
-				fp[curr_include_level + 1] = F_OPEN(FindConfig($2), "r");
-				if (fp[curr_include_level + 1] == NULL) {
-					fprintf(stderr, "getconfig: Couldn't open <%s>\n", FindConfig($2));
-					msyslog(LOG_ERR, "getconfig: Couldn't open <%s>", FindConfig($2));
-				} else {
-					ip_file = fp[++curr_include_level];
+				const char * path = FindConfig($2); /* might return $2! */
+				if (!lex_push_file(path, "r")) {
+					fprintf(stderr, "getconfig: Couldn't open <%s>\n", path);
+					msyslog(LOG_ERR, "getconfig: Couldn't open <%s>", path);
 				}
 			}
+			YYFREE($2); /* avoid leak */
 		}
 	|	T_End
-		{
-			while (curr_include_level != -1)
-				FCLOSE(fp[curr_include_level--]);
-		}
+			{ lex_flush_stack(); }
 	|	T_Driftfile drift_parm
 			{ /* see drift_parm below for actions */ }
 	|	T_Logconfig log_config_list
@@ -1442,7 +1437,7 @@ boolean
 	:	T_Integer
 		{
 			if ($1 != 0 && $1 != 1) {
-				yyerror(ip_file, "Integer value is not boolean (0 or 1). Assuming 1");
+				yyerror("Integer value is not boolean (0 or 1). Assuming 1");
 				$$ = 1;
 			} else {
 				$$ = $1;
@@ -1583,26 +1578,23 @@ sim_act_keyword
 
 void 
 yyerror(
-	struct FILE_INFO *ip_file,
 	const char *msg
 	)
 {
 	int retval;
+	struct FILE_INFO * ip_ctx;
 
-	ip_file->err_line_no = ip_file->prev_token_line_no;
-	ip_file->err_col_no = ip_file->prev_token_col_no;
+	ip_ctx = lex_current();
+	ip_ctx->errpos = ip_ctx->tokpos;
 	
-	msyslog(LOG_ERR, 
-		"line %d column %d %s", 
-		ip_file->err_line_no,
-		ip_file->err_col_no,
-		msg);
-	if (!input_from_file) {
+	msyslog(LOG_ERR, "line %d column %d %s", 
+		ip_ctx->errpos.nline, ip_ctx->errpos.ncol, msg);
+	if (!lex_from_file()) {
 		/* Save the error message in the correct buffer */
 		retval = snprintf(remote_config.err_msg + remote_config.err_pos,
 				  MAXLINE - remote_config.err_pos,
 				  "column %d %s",
-				  ip_file->err_col_no, msg);
+				  ip_ctx->errpos.ncol, msg);
 
 		/* Increment the value of err_pos */
 		if (retval > 0)
