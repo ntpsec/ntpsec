@@ -1,4 +1,6 @@
 Below are from 4.2.8p3:
+* [Bug 2806] refclock_jjy.c supports the Telephone JJY
+Below are from 4.2.8p3:
 * [Bug 2805] ntpd fails to join multicast group.
 (4.3.22) 2015/04/28 Released by Harlan Stenn <stenn@ntp.org>
 Below are from 4.2.8p3:
@@ -140,6 +142,7 @@ ntp-4.3 begins.
 * [Bug 2776] Improve ntpq's 'help keytype'.
 * [Bug 2782] Refactor refclock_shm.c, add memory barrier protection.
 * CID 1295478: Quiet a pedantic potential error from the fix for Bug 2776.
+* [Bug 2806] refclock_jjy.c supports the Telephone JJY
 * CID 1269537: Clean up a line of dead code in getShmTime().
 * [Bug 2612] restrict: Warn when 'monitor' can't be disabled because
   of 'limited'.
