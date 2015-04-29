@@ -1,3 +1,5 @@
+Below are from 4.2.8p3:
+* [Bug 2805] ntpd fails to join multicast group.
 (4.3.22) 2015/04/28 Released by Harlan Stenn <stenn@ntp.org>
 Below are from 4.2.8p3:
 * [Bug 2612] restrict: Warn when 'monitor' can't be disabled because
