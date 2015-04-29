@@ -4062,8 +4062,12 @@ proto_config(
 	case PROTO_MONITOR:	/* monitoring (monitor) */
 		if (value)
 			mon_start(MON_ON);
-		else
+		else {
 			mon_stop(MON_ON);
+			if (mon_enabled)
+				msyslog(LOG_WARNING,
+					"restrict: 'monitor' cannot be disabled while 'limited' is enabled");
+		}
 		break;
 
 	case PROTO_NTP:		/* NTP discipline (ntp) */
