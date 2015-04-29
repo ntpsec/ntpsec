@@ -10,11 +10,11 @@
 .ds B-Font B
 .ds I-Font I
 .ds R-Font R
-.TH ntpq 1ntpqman "07 Apr 2015" "4.3.14" "User Commands"
+.TH ntpq 1ntpqman "29 Apr 2015" "4.3.23" "User Commands"
 .\"
-.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-WBaib1/ag-8Baaa1)
+.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-aeaiFS/ag-meaaES)
 .\"
-.\" It has been AutoGen-ed April 7, 2015 at 09:41:39 AM by AutoGen 5.18.5pre4
+.\" It has been AutoGen-ed April 29, 2015 at 11:57:47 AM by AutoGen 5.18.5
 .\" From the definitions ntpq-opts.def
 .\" and the template file agman-cmd.tpl
 .SH NAME
@@ -267,7 +267,9 @@ switch.
 This command allows the specification of a key number to be
 used to authenticate configuration requests.
 This must correspond
-to a key number the server has been configured to use for this
+to the
+\f\*[B-Font]controlkey\f[]
+key number the server has been configured to use for this
 purpose.
 .br
 .ns

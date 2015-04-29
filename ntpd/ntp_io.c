@@ -2009,6 +2009,32 @@ update_interfaces(
 	if (sys_bclient)
 		io_setbclient();
 
+	/*
+	 * Check multicast interfaces and try to join multicast groups if
+         * not joined yet.
+         */
+	for (ep = ep_list; ep != NULL; ep = ep->elink) {
+		remaddr_t *entry;
+
+		if (!(INT_MCASTIF & ep->flags) || (INT_MCASTOPEN & ep->flags))
+			continue;
+
+		/* Find remote address that was linked to this interface */
+		for (entry = remoteaddr_list;
+		     entry != NULL;
+		     entry = entry->link) {
+			if (entry->ep == ep) {
+				if (socket_multicast_enable(ep, &entry->addr)) {
+					msyslog(LOG_INFO, 
+						"Joined %s socket to multicast group %s",
+						stoa(&ep->sin),
+						stoa(&entry->addr));
+				}
+				break;
+			}
+		}
+	}
+
 	return new_interface_found;
 }
 
@@ -2432,12 +2458,12 @@ socket_multicast_enable(
 			       IP_ADD_MEMBERSHIP,
 			       (char *)&mreq,
 			       sizeof(mreq))) {
-			msyslog(LOG_ERR,
+			DPRINTF(2, (
 				"setsockopt IP_ADD_MEMBERSHIP failed: %m on socket %d, addr %s for %x / %x (%s)",
 				iface->fd, stoa(&iface->sin),
 				mreq.imr_multiaddr.s_addr,
 				mreq.imr_interface.s_addr,
-				stoa(maddr));
+				stoa(maddr)));
 			return ISC_FALSE;
 		}
 		DPRINTF(4, ("Added IPv4 multicast membership on socket %d, addr %s for %x / %x (%s)\n",
@@ -2462,10 +2488,10 @@ socket_multicast_enable(
 		if (setsockopt(iface->fd, IPPROTO_IPV6,
 			       IPV6_JOIN_GROUP, (char *)&mreq6,
 			       sizeof(mreq6))) {
-			msyslog(LOG_ERR,
+			DPRINTF(2, (
 				"setsockopt IPV6_JOIN_GROUP failed: %m on socket %d, addr %s for interface %u (%s)",
 				iface->fd, stoa(&iface->sin),
-				mreq6.ipv6mr_interface, stoa(maddr));
+				mreq6.ipv6mr_interface, stoa(maddr)));
 			return ISC_FALSE;
 		}
 		DPRINTF(4, ("Added IPv6 multicast group on socket %d, addr %s for interface %u (%s)\n",
@@ -2765,11 +2791,6 @@ io_multicast_add(
 		if (socket_multicast_enable(ep, addr))
 			msyslog(LOG_INFO,
 				"Joined %s socket to multicast group %s",
-				stoa(&ep->sin),
-				stoa(addr));
-		else
-			msyslog(LOG_ERR,
-				"Failed to join %s socket to multicast group %s",
 				stoa(&ep->sin),
 				stoa(addr));
 	}

@@ -24,6 +24,7 @@
 #include "timespecops.h"
 #undef fileno
 #include "ntp_stdlib.h"
+#include "ntp_assert.h"
 
 #undef fileno
 #include <ctype.h>
@@ -199,9 +200,11 @@ getShmTime(
 		return NULL;
 	}
 
+	return p;
 #endif
 
-	return p;
+	/* NOTREACHED */
+	ENSURE(!"getShmTime(): Not reached.");
 }
 /*
  * shm_start - attach to shared memory
@@ -367,9 +370,9 @@ struct shm_stat_t {
 
 static inline void memory_barrier(void)
 {
-#ifdef HAVE_STDATOMIC_H
+#ifdef HAVE_ATOMIC_THREAD_FENCE
     atomic_thread_fence(memory_order_seq_cst);
-#endif /* HAVE_STDATOMIC_H */
+#endif /* HAVE_ATOMIC_THREAD_FENCE */
 }
 
 static enum segstat_t shm_query(volatile struct shmTime *shm_in, struct shm_stat_t *shm_stat)
