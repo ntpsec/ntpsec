@@ -140,18 +140,18 @@ From 4.2.8p2:
 ntp-4.3 begins.
 ---
 
-* [Bug 2776] Improve ntpq's 'help keytype'.
-* [Bug 2782] Refactor refclock_shm.c, add memory barrier protection.
 * CID 1295478: Quiet a pedantic potential error from the fix for Bug 2776.
-* [Bug 2806] refclock_jjy.c supports the Telephone JJY
 * CID 1269537: Clean up a line of dead code in getShmTime().
 * [Bug 2612] restrict: Warn when 'monitor' can't be disabled because
   of 'limited'.
+* [Bug 2776] Improve ntpq's 'help keytype'.
+* [Bug 2782] Refactor refclock_shm.c, add memory barrier protection.
 * [Bug 2794] Clean up kernel clock status reports.
 * [Bug 2800] refclock_true.c true_debug() can't open debug log because
   of incompatible open/fdopen parameters.
 * [Bug 2804] install-local-data assumes GNU 'find' semantics.
 * [Bug 2805] ntpd fails to join multicast group.
+* [Bug 2806] refclock_jjy.c supports the Telephone JJY.
 * [Bug 2808] GPSD_JSON driver enhancements, step 1.
   Various improvements, see http://bugs.ntp.org/2808 for details.
   Changed libjsmn to a more recent version.
