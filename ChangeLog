@@ -1,3 +1,4 @@
+* [Bug 2818] refclock_shm.c missing a line from -stable version.
 (4.3.24) 2015/04/30 Released by Harlan Stenn <stenn@ntp.org>
 Below are from 4.2.8p3:
 * [Bug 2745] ntpd -x steps clock on leap second 
