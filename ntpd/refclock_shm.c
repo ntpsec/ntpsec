@@ -151,6 +151,7 @@ getShmTime(
 		return NULL;
 	}
 
+	return p;
 #else
 
 	static const char * nspref[2] = { "Local", "Global" };
