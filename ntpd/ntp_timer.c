@@ -472,7 +472,7 @@ alarming(
 # endif
 # ifdef DEBUG
 	if (debug >= 4)
-		write(1, msg, strlen(msg));
+		(void)(-1 == write(1, msg, strlen(msg)));
 # endif
 }
 #endif /* SYS_WINNT */
@@ -502,6 +502,18 @@ check_leapsec(
 	const time_t * tpiv ,
         int/*BOOL*/    reset)
 {
+	static const char leapmsg_p_step[] =
+	    "Positive leap second, stepped backward.";
+	static const char leapmsg_p_slew[] =
+	    "Positive leap second, no step correction. "
+	    "System clock will be inaccurate for a long time.";
+
+	static const char leapmsg_n_step[] =
+	    "Negative leap second, stepped forward.";
+	static const char leapmsg_n_slew[] =
+	    "Negative leap second, no step correction. "
+	    "System clock will be inaccurate for a long time.";
+
 	leap_result_t lsdata;
 	u_int32       lsprox;
 	
@@ -520,13 +532,26 @@ check_leapsec(
 		/* Full hit. Eventually step the clock, but always
 		 * announce the leap event has happened.
 		 */
+		const char *leapmsg = NULL;
 		if (lsdata.warped < 0) {
-			step_systime(lsdata.warped);
-			msyslog(LOG_NOTICE, "Inserting positive leap second.");
+			if (clock_max_back > 0.0 &&
+			    clock_max_back < fabs(lsdata.warped)) {
+				step_systime(lsdata.warped);
+				leapmsg = leapmsg_p_step;
+			} else {
+				leapmsg = leapmsg_p_slew;
+			}
 		} else 	if (lsdata.warped > 0) {
-			step_systime(lsdata.warped);
-			msyslog(LOG_NOTICE, "Inserting negative leap second.");
+			if (clock_max_fwd > 0.0 &&
+			    clock_max_fwd < fabs(lsdata.warped)) {
+				step_systime(lsdata.warped);
+				leapmsg = leapmsg_n_step;
+			} else {
+				leapmsg = leapmsg_n_slew;
+			}
 		}
+		if (leapmsg)
+			msyslog(LOG_NOTICE, "%s", leapmsg);
 		report_event(EVNT_LEAP, NULL, NULL);
 		lsprox  = LSPROX_NOWARN;
 		leapsec = LSPROX_NOWARN;

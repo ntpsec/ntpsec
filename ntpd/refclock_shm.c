@@ -122,6 +122,7 @@ struct shmunit {
 	time_t max_delay;	/* age/stale limit */
 };
 
+
 static struct shmTime*
 getShmTime(
 	int unit,
@@ -205,6 +206,8 @@ getShmTime(
 	/* NOTREACHED */
 	ENSURE(!"getShmTime(): Not reached.");
 }
+
+
 /*
  * shm_start - attach to shared memory
  */
