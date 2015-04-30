@@ -1,8 +1,5 @@
 ---
 
-* [Bug 2808] GPSD_JSON driver enhancements, step 1
-  fix coverity issues with refclock_gpsdjson and refclock_shm
-  Add a few more tallies as per Hal Murray's suggestions
 * CID 1269537: Clean up a line of dead code in getShmTime().
 * [Bug 2612] restrict: Warn when 'monitor' can't be disabled because
   of 'limited'.
