@@ -1,4 +1,7 @@
 Below are from 4.2.8p3:
+* [Bug 2745] ntpd -x steps clock on leap second 
+   Do leap second stepping only of the step adjustment is beyond the
+   proper jump distance limit and step correction is allowed at all. 
 * [Bug 2806] refclock_jjy.c supports the Telephone JJY
 (4.3.23) 2015/04/29 Released by Harlan Stenn <stenn@ntp.org>
 Below are from 4.2.8p3:
@@ -144,6 +147,9 @@ ntp-4.3 begins.
 * CID 1269537: Clean up a line of dead code in getShmTime().
 * [Bug 2612] restrict: Warn when 'monitor' can't be disabled because
   of 'limited'.
+* [Bug 2745] ntpd -x steps clock on leap second 
+   Do leap second stepping only of the step adjustment is beyond the
+   proper jump distance limit and step correction is allowed at all. 
 * [Bug 2776] Improve ntpq's 'help keytype'.
 * [Bug 2782] Refactor refclock_shm.c, add memory barrier protection.
 * [Bug 2794] Clean up kernel clock status reports.
