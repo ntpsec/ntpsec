@@ -472,7 +472,7 @@ alarming(
 # endif
 # ifdef DEBUG
 	if (debug >= 4)
-		(void)(0 != write(1, msg, strlen(msg)));
+		(void)(-1 == write(1, msg, strlen(msg)));
 # endif
 }
 #endif /* SYS_WINNT */

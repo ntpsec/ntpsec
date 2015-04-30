@@ -118,6 +118,7 @@ struct shmunit {
 	time_t max_delay;	/* age/stale limit */
 };
 
+
 static struct shmTime*
 getShmTime(
 	int unit,
@@ -145,8 +146,8 @@ getShmTime(
 		msyslog(LOG_ERR, "SHM shmat (unit %d): %m", unit);
 		return NULL;
 	}
-	return p;
 
+	return p;
 #else
 
 	static const char * nspref[2] = { "Local", "Global" };
@@ -202,6 +203,8 @@ getShmTime(
 	/* NOTREACHED */
 	ENSURE(!"getShmTime(): Not reached.");
 }
+
+
 /*
  * shm_start - attach to shared memory
  */
