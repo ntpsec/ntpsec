@@ -1,4 +1,6 @@
 Below are from 4.2.8p3:
+* CID 1296235: Fix refclock_jjy.c and correcting type of the driver40-ja.html
+Below are from 4.2.8p3:
 * [Bug 2806] refclock_jjy.c supports the Telephone JJY
 (4.3.23) 2015/04/29 Released by Harlan Stenn <stenn@ntp.org>
 Below are from 4.2.8p3:
@@ -140,6 +142,18 @@ From 4.2.8p2:
 ntp-4.3 begins.
 ---
 
+* CID 1296235: Fix refclock_jjy.c and correcting type of the driver40-ja.html
+* [Bug 2806] refclock_jjy.c supports the Telephone JJY
+* CID 1269537: Clean up a line of dead code in getShmTime().
+* [Bug 2612] restrict: Warn when 'monitor' can't be disabled because
+  of 'limited'.
+* CID 1295478: Quiet a pedantic potential error from the fix for Bug 2776.
+* CID 1269537: Clean up a line of dead code in getShmTime().
+* CID 1295478: Quiet a pedantic potential error from the fix for Bug 2776.
+* [Bug 2590] autogen-5.18.5.
+* [Bug 2612] restrict: Warn when 'monitor' can't be disabled because
+  of 'limited'.
+* [Bug 2650] fix includefile processing.
 * [Bug 2776] Improve ntpq's 'help keytype'.
 * [Bug 2782] Refactor refclock_shm.c, add memory barrier protection.
 * CID 1295478: Quiet a pedantic potential error from the fix for Bug 2776.
@@ -151,7 +165,9 @@ ntp-4.3 begins.
 * [Bug 2800] refclock_true.c true_debug() can't open debug log because
   of incompatible open/fdopen parameters.
 * [Bug 2804] install-local-data assumes GNU 'find' semantics.
+* [Bug 2782] Refactor refclock_shm.c, add memory barrier protection.
 * [Bug 2805] ntpd fails to join multicast group.
+* [Bug 2806] refclock_jjy.c supports the Telephone JJY.
 * [Bug 2808] GPSD_JSON driver enhancements, step 1.
   Various improvements, see http://bugs.ntp.org/2808 for details.
   Changed libjsmn to a more recent version.
@@ -160,6 +176,12 @@ ntp-4.3 begins.
 * [Bug 2815] net-snmp before v5.4 has circular library dependencies.
 * Improve the ntpq documentation around the controlkey keyid.
 * ntpq.c cleanup.
+* [Bug 2813] HP-UX needs -D__STDC_VERSION__=199901L and limits.h.
+* [Bug 2815] net-snmp before v5.4 has circular library dependencies.
+* Improve the ntpq documentation around the controlkey keyid.
+* ntpq.c cleanup.
+* autogen-5.18.5
+* [Bug 2810] refclock_shm.c memory barrier code needs tweaks for QNX.
 * autogen-5.18.5
 ---
 (4.2.8p2) 2015/04/07 Released by Harlan Stenn <stenn@ntp.org>

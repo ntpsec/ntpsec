@@ -587,7 +587,10 @@ jjy_receive ( struct recvbuf *rbufp )
 	 */
 	if ( up->linediscipline == LDISC_RAW ) {
 
-		pp->lencode  = refclock_gtraw ( rbufp, pp->a_lastcode, BMAX, &tRecvTimestamp ) ;
+		pp->lencode  = refclock_gtraw ( rbufp, pp->a_lastcode, BMAX-1, &tRecvTimestamp ) ;
+		/* 3rd argument can be BMAX, but the coverity scan tool claim "Memory - corruptions  (OVERRUN)" */
+		/* "a_lastcode" is defined as "char a_lastcode[BMAX]" in the ntp_refclock.h */
+		/* To avoid its claim, pass the value BMAX-1. */
 
 		/*
 		 * Append received charaters to temporary buffer
@@ -2461,7 +2464,7 @@ jjy_start_telephone ( int unit, struct peer *peer, struct jjyunit *up )
 	iNumberOfDigitsOfPhoneNumber = iCommaCount = iCommaPosition = iFirstThreeDigitsCount = 0 ;
 	for ( i = 0 ; i < strlen( sys_phone[0] ) ; i ++ ) {
 		if ( isdigit( *(sys_phone[0]+i) ) ) {
-			if ( iFirstThreeDigitsCount < MAX_LOOPBACK ) {
+			if ( iFirstThreeDigitsCount < sizeof(sFirstThreeDigits)-1 ) {
 				sFirstThreeDigits[iFirstThreeDigitsCount++] = *(sys_phone[0]+i) ;
 			}
 			iNumberOfDigitsOfPhoneNumber ++ ;
@@ -2834,6 +2837,13 @@ teljjy_getDelay ( struct peer *peer, struct jjyunit *up )
 		}
 		averTime.tv_usec += up->delayTime[i].tv_usec ;
 		iAverCount ++ ;
+	}
+
+	if ( iAverCount == 0 ) {
+		/* This is never happened. */
+		/* Previous for-if-for blocks assure iAverCount > 0. */
+		/* This code avoids a claim by the coverity scan tool. */
+		return -1 ;
 	}
 
 	/* mode 101 = 1%, mode 150 = 50%, mode 180 = 80% */
