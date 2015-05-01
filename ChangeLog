@@ -1,4 +1,6 @@
 * [Bug 2818] refclock_shm.c missing a line from -stable version.
+Below are from 4.2.8p3:
+* [Bug 2650] fix includefile processing.
 (4.3.24) 2015/04/30 Released by Harlan Stenn <stenn@ntp.org>
 Below are from 4.2.8p3:
 * [Bug 2745] ntpd -x steps clock on leap second 
@@ -154,6 +156,7 @@ ntp-4.3 begins.
 * CID 1269537: Clean up a line of dead code in getShmTime().
 * [Bug 2612] restrict: Warn when 'monitor' can't be disabled because
   of 'limited'.
+* [Bug 2650] fix includefile processing.
 * [Bug 2745] ntpd -x steps clock on leap second 
    Do leap second stepping only of the step adjustment is beyond the
    proper jump distance limit and step correction is allowed at all. 

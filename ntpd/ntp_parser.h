@@ -432,7 +432,7 @@ extern int yydebug;
 typedef union YYSTYPE YYSTYPE;
 union YYSTYPE
 {
-#line 54 "ntp_parser.y" /* yacc.c:1909  */
+#line 51 "ntp_parser.y" /* yacc.c:1909  */
 
 	char *			String;
 	double			Double;
@@ -460,6 +460,6 @@ union YYSTYPE
 
 extern YYSTYPE yylval;
 
-int yyparse (struct FILE_INFO *ip_file);
+int yyparse (void);
 
 #endif /* !YY_YY_NTP_PARSER_H_INCLUDED  */
