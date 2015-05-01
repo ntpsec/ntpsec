@@ -1,6 +1,7 @@
 ---
 
 * CID 1269537: Clean up a line of dead code in getShmTime().
+* [Bug 2590] autogen-5.18.5.
 * [Bug 2612] restrict: Warn when 'monitor' can't be disabled because
   of 'limited'.
 * [Bug 2650] fix includefile processing.
@@ -15,7 +16,6 @@
 * [Bug 2813] HP-UX needs -D__STDC_VERSION__=199901L and limits.h.
 * [Bug 2815] net-snmp before v5.4 has circular library dependencies.
 * Improve the ntpq documentation around the controlkey keyid.
-* autogen-5.18.5
 ---
 (4.2.8p2) 2015/04/07 Released by Harlan Stenn <stenn@ntp.org>
 (4.2.8p2-RC3) 2015/04/03 Released by Harlan Stenn <stenn@ntp.org>
