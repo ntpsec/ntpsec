@@ -24,6 +24,7 @@
 #include "timespecops.h"
 #undef fileno
 #include "ntp_stdlib.h"
+#include "ntp_assert.h"
 
 #undef fileno
 #include <ctype.h>
@@ -121,6 +122,7 @@ struct shmunit {
 	time_t max_delay;	/* age/stale limit */
 };
 
+
 static struct shmTime*
 getShmTime(
 	int unit,
@@ -148,8 +150,8 @@ getShmTime(
 		msyslog(LOG_ERR, "SHM shmat (unit %d): %m", unit);
 		return NULL;
 	}
-	return p;
 
+	return p;
 #else
 
 	static const char * nspref[2] = { "Local", "Global" };
@@ -199,10 +201,14 @@ getShmTime(
 		return NULL;
 	}
 
+	return p;
 #endif
 
-	return p;
+	/* NOTREACHED */
+	ENSURE(!"getShmTime(): Not reached.");
 }
+
+
 /*
  * shm_start - attach to shared memory
  */

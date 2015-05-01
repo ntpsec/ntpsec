@@ -1,10 +1,23 @@
 ---
 
+* CID 1269537: Clean up a line of dead code in getShmTime().
+* [Bug 2590] autogen-5.18.5.
+* [Bug 2612] restrict: Warn when 'monitor' can't be disabled because
+  of 'limited'.
+* [Bug 2650] fix includefile processing.
 * [Bug 2782] Refactor refclock_shm.c, add memory barrier protection.
+* [Bug 2794] Clean up kernel clock status reports.
+* [Bug 2800] refclock_true.c true_debug() can't open debug log because
+  of incompatible open/fdopen parameters.
+* [Bug 2804] install-local-data assumes GNU 'find' semantics.
+* [Bug 2806] refclock_jjy.c supports the Telephone JJY.
 * [Bug 2808] GPSD_JSON driver enhancements, step 1.
   Various improvements, see http://bugs.ntp.org/2808 for details.
   Changed libjsmn to a more recent version.
 * [Bug 2810] refclock_shm.c memory barrier code needs tweaks for QNX.
+* [Bug 2813] HP-UX needs -D__STDC_VERSION__=199901L and limits.h.
+* [Bug 2815] net-snmp before v5.4 has circular library dependencies.
+* Improve the ntpq documentation around the controlkey keyid.
 ---
 (4.2.8p2) 2015/04/07 Released by Harlan Stenn <stenn@ntp.org>
 (4.2.8p2-RC3) 2015/04/03 Released by Harlan Stenn <stenn@ntp.org>
