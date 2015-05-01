@@ -88,7 +88,11 @@ struct LCPOS {
 	int ncol;
 };
 
-/* Structure to hold a filename, file pointer and positional info */
+/* Structure to hold a filename, file pointer and positional info.
+ * Instances are dynamically allocated, and the file name is copied by
+ * value into a dynamic extension of the 'fname' array. (Which *must* be
+ * the last field for that reason!)
+ */
 struct FILE_INFO {
 	struct FILE_INFO * st_next;	/* next on stack */
 	FILE *		   fpi;		/* File Descriptor */
@@ -121,13 +125,16 @@ extern const char *keyword(int token);
 extern char *quote_if_needed(char *str);
 int yylex(void);
 
+/* managing the input source stack itself */
 extern int/*BOOL*/ lex_init_stack(const char * path, const char * mode);
 extern void        lex_drop_stack(void);
 extern int/*BOOL*/ lex_flush_stack(void);
 
+/* add/remove a nested input source */
 extern int/*BOOL*/ lex_push_file(const char * path, const char * mode);
 extern int/*BOOL*/ lex_pop_file(void);
 
+/* input stack state query functions */
 extern size_t      lex_level(void);
 extern int/*BOOL*/ lex_from_file(void);
 extern struct FILE_INFO * lex_current(void);

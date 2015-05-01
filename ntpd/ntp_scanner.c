@@ -87,10 +87,26 @@ keyword(
 }
 
 
-/* FILE INTERFACE
- * --------------
- * We define a couple of wrapper functions around the standard C fgetc
- * and ungetc functions in order to include positional bookkeeping
+/* FILE & STRING BUFFER INTERFACE
+ * ------------------------------
+ *
+ * This set out as a couple of wrapper functions around the standard C
+ * fgetc and ungetc functions in order to include positional
+ * bookkeeping. Alas, this is no longer a good solution with nested
+ * input files and the possibility to send configuration commands via
+ * 'ntpdc' and 'ntpq'.
+ *
+ * Now there are a few functions to maintain a stack of nested input
+ * sources (though nesting is only allowd for disk files) and from the
+ * scanner / parser point of view there's no difference between both
+ * types of sources.
+ *
+ * The 'fgetc()' / 'ungetc()' replacements now operate on a FILE_INFO
+ * structure. Instead of trying different 'ungetc()' strategies for file
+ * and buffer based parsing, we keep the backup char in our own
+ * FILE_INFO structure. This is sufficient, as the parser does *not*
+ * jump around via 'seek' or the like, and there's no need to
+ * check/clear the backup store in other places than 'lex_getch()'.
  */
 
 /*
@@ -112,23 +128,24 @@ lex_open(
 	const char *mode
 	)
 {
-	struct FILE_INFO *my_info;
+	struct FILE_INFO *stream;
 	size_t            nnambuf;
 
 	nnambuf = strlen(path);
-	my_info = emalloc_zero(sizeof(*my_info) + nnambuf);
-	my_info->curpos.nline = 1;
+	stream = emalloc_zero(sizeof(*stream) + nnambuf);
+	stream->curpos.nline = 1;
+	stream->backch = EOF;
 	/* copy name with memcpy -- trailing NUL already there! */
-	memcpy(my_info->fname, path, nnambuf);
+	memcpy(stream->fname, path, nnambuf);
 
 	if (NULL != mode) {
-		my_info->fpi = fopen(path, mode);
-		if (NULL == my_info->fpi) {
-			free(my_info);
-			my_info = NULL;
+		stream->fpi = fopen(path, mode);
+		if (NULL == stream->fpi) {
+			free(stream);
+			stream = NULL;
 		}
 	}
-	return my_info;
+	return stream;
 }
 
 /* get next character from buffer or file. This will return any putback
@@ -145,25 +162,26 @@ lex_getch(
 	if (NULL == stream || stream->force_eof)
 		return EOF;
 
-	if (0 != stream->backch) {
+	if (EOF != stream->backch) {
 		ch = stream->backch;
-		stream->backch = 0;
+		stream->backch = EOF;
+		if (stream->fpi)
+			conf_file_sum += ch;
 	} else if (stream->fpi) {
 		/* fetch next 7-bit ASCII char (or EOF) from file */
 		while ((ch = fgetc(stream->fpi)) != EOF && ch > SCHAR_MAX)
 			stream->curpos.ncol++;
 		if (EOF != ch) {
-			conf_file_sum += (u_char)ch;
+			conf_file_sum += ch;
 			stream->curpos.ncol++;
 		}
 	} else {
 		/* fetch next 7-bit ASCII char from buffer */
-		const u_char * scan;
-		scan = (u_char*)&remote_config.buffer[remote_config.pos];
-		while ((ch = *scan) > SCHAR_MAX) {
+		const char * scan;
+		scan = &remote_config.buffer[remote_config.pos];
+		while ((ch = (u_char)*scan) > SCHAR_MAX) {
 			scan++;
 			stream->curpos.ncol++;
-
 		}
 		if ('\0' != ch) {
 			scan++;
@@ -171,15 +189,14 @@ lex_getch(
 		} else {
 			ch = EOF;
 		}
-		remote_config.pos = (int)(
-			scan - (u_char*)remote_config.buffer);
+		remote_config.pos = (int)(scan - remote_config.buffer);
 	}
 
 	/* If the last line ends without '\n', generate one. This
 	 * happens most likely on Windows, where editors often have a
 	 * sloppy concept of a line.
 	 */
-	if (ch == EOF && stream->curpos.ncol != 0)
+	if (EOF == ch && stream->curpos.ncol != 0)
 		ch = '\n';
 
 	/* update scan position tallies */
@@ -195,12 +212,6 @@ lex_getch(
 /* Note: lex_ungetch will fail to track more than one line of push
  * back. But since it guarantees only one char of back storage anyway,
  * this should not be a problem.
- *
- * Instead of trying different strategies for file and buffer based
- * parsing, we keep the backup char in our own buffer structure. This is
- * sufficient, as the parser does *not* jump around via 'seek' or the
- * like, so we do not need to check/clear the backup store in other
- * places than lex_getch().
  */
 static int
 lex_ungetch(
@@ -211,13 +222,13 @@ lex_ungetch(
 	/* check preconditions */
 	if (NULL == stream || stream->force_eof)
 		return EOF;
-	if (0 != stream->backch || EOF == ch)
+	if (EOF != stream->backch || EOF == ch)
 		return EOF;
 
 	/* keep for later reference and update checksum */
 	stream->backch = (u_char)ch;
 	if (stream->fpi)
-		conf_file_sum -= (u_char)stream->backch;
+		conf_file_sum -= stream->backch;
 
 	/* update position */
 	if (stream->backch == '\n') {
@@ -293,7 +304,7 @@ lex_init_stack(
 
 /* This removes *all* input sources from the stack, leaving the head
  * pointer as NULL. Any attempt to parse in that state is likely to bomb
- * with segmentations or the like.
+ * with segmentation faults or the like.
  *
  * In other words: Use this to clean up after parsing, and do not parse
  * anything until the next 'lex_init_stack()' succeeded.
@@ -306,8 +317,8 @@ lex_drop_stack()
 
 /* Flush the lexer input stack: This will nip all input objects on the
  * stack (but keeps the current top-of-stack) and marks the top-of-stack
- * as inactive. Any further calls to lex_getch yield only EOF; and it's no
- * longer possible to push something back.
+ * as inactive. Any further calls to lex_getch yield only EOF, and it's
+ * no longer possible to push something back.
  *
  * Returns TRUE if there is a head element (top-of-stack) that was not
  * in the force-eof mode before this call.
@@ -320,8 +331,8 @@ lex_flush_stack()
 	if (NULL != lex_stack) {
 		retv = !lex_stack->force_eof;
 		lex_stack->force_eof = TRUE;
-		lex_stack->st_next =
-		    _drop_stack_do(lex_stack->st_next);
+		lex_stack->st_next = _drop_stack_do(
+					lex_stack->st_next);
 	}
 	return retv;
 }
@@ -476,7 +487,7 @@ is_integer(
 
 	/* Check that all the remaining characters are digits */
 	for (; lexeme[i] != '\0'; i++) {
-		if (!isdigit((unsigned char)lexeme[i]))
+		if (!isdigit((u_char)lexeme[i]))
 			return FALSE;
 	}
 
@@ -501,7 +512,7 @@ is_u_int(
 	int	is_hex;
 	
 	i = 0;
-	if ('0' == lexeme[i] && 'x' == tolower((unsigned char)lexeme[i + 1])) {
+	if ('0' == lexeme[i] && 'x' == tolower((u_char)lexeme[i + 1])) {
 		i += 2;
 		is_hex = TRUE;
 	} else {
@@ -510,9 +521,9 @@ is_u_int(
 
 	/* Check that all the remaining characters are digits */
 	for (; lexeme[i] != '\0'; i++) {
-		if (is_hex && !isxdigit((unsigned char)lexeme[i]))
+		if (is_hex && !isxdigit((u_char)lexeme[i]))
 			return FALSE;
-		if (!is_hex && !isdigit((unsigned char)lexeme[i]))
+		if (!is_hex && !isdigit((u_char)lexeme[i]))
 			return FALSE;
 	}
 
@@ -536,14 +547,14 @@ is_double(
 		i++;
 
 	/* Read the integer part */
-	for (; lexeme[i] && isdigit((unsigned char)lexeme[i]); i++)
+	for (; lexeme[i] && isdigit((u_char)lexeme[i]); i++)
 		num_digits++;
 
 	/* Check for the optional decimal point */
 	if ('.' == lexeme[i]) {
 		i++;
 		/* Check for any digits after the decimal point */
-		for (; lexeme[i] && isdigit((unsigned char)lexeme[i]); i++)
+		for (; lexeme[i] && isdigit((u_char)lexeme[i]); i++)
 			num_digits++;
 	}
 
@@ -559,7 +570,7 @@ is_double(
 		return 1;
 
 	/* There is still more input, read the exponent */
-	if ('e' == tolower((unsigned char)lexeme[i]))
+	if ('e' == tolower((u_char)lexeme[i]))
 		i++;
 	else
 		return 0;
@@ -569,7 +580,7 @@ is_double(
 		i++;
 
 	/* Now read the exponent part */
-	while (lexeme[i] && isdigit((unsigned char)lexeme[i]))
+	while (lexeme[i] && isdigit((u_char)lexeme[i]))
 		i++;
 
 	/* Check if we are done */
@@ -634,7 +645,7 @@ create_string_token(
 	 * ignore end of line whitespace
 	 */
 	pch = lexeme;
-	while (*pch && isspace((unsigned char)*pch))
+	while (*pch && isspace((u_char)*pch))
 		pch++;
 
 	if (!*pch) {
