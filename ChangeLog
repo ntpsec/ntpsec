@@ -1,3 +1,4 @@
+(4.3.25) 2015/05/01 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 2818] refclock_shm.c missing a line from -stable version.
 Below are from 4.2.8p3:
 * [Bug 2590] autogen-5.18.5.

@@ -1,7 +1,7 @@
 /*
  *  EDIT THIS FILE WITH CAUTION  (ntpq-opts.c)
  *
- *  It has been AutoGen-ed  April 30, 2015 at 09:24:20 AM by AutoGen 5.18.5
+ *  It has been AutoGen-ed  May  1, 2015 at 11:57:38 AM by AutoGen 5.18.5
  *  From the definitions    ntpq-opts.def
  *  and the template file   options
  *
@@ -69,7 +69,7 @@ extern FILE * option_usage_fp;
  *  static const strings for ntpq options
  */
 static char const ntpq_opt_strs[1922] =
-/*     0 */ "ntpq 4.3.24\n"
+/*     0 */ "ntpq 4.3.25\n"
             "Copyright (C) 1992-2015 The University of Delaware and Network Time Foundation, all rights reserved.\n"
             "This is free software. It is licensed for use, modification and\n"
             "redistribution under the terms of the NTP License, copies of which\n"
@@ -129,13 +129,13 @@ static char const ntpq_opt_strs[1922] =
 /*  1722 */ "no-load-opts\0"
 /*  1735 */ "no\0"
 /*  1738 */ "NTPQ\0"
-/*  1743 */ "ntpq - standard NTP query program - Ver. 4.3.24\n"
+/*  1743 */ "ntpq - standard NTP query program - Ver. 4.3.25\n"
             "Usage:  %s [ -<flag> [<val>] | --<name>[{=| }<val>] ]... [ host ...]\n\0"
 /*  1861 */ "$HOME\0"
 /*  1867 */ ".\0"
 /*  1869 */ ".ntprc\0"
 /*  1876 */ "http://bugs.ntp.org, bugs@ntp.org\0"
-/*  1910 */ "ntpq 4.3.24";
+/*  1910 */ "ntpq 4.3.25";
 
 /**
  *  ipv4 option description with
@@ -786,7 +786,7 @@ static void bogus_function(void) {
      translate option names.
    */
   /* referenced via ntpqOptions.pzCopyright */
-  puts(_("ntpq 4.3.24\n\
+  puts(_("ntpq 4.3.25\n\
 Copyright (C) 1992-2015 The University of Delaware and Network Time Foundation, all rights reserved.\n\
 This is free software. It is licensed for use, modification and\n\
 redistribution under the terms of the NTP License, copies of which\n\
@@ -852,11 +852,11 @@ implied warranty.\n"));
   puts(_("load options from a config file"));
 
   /* referenced via ntpqOptions.pzUsageTitle */
-  puts(_("ntpq - standard NTP query program - Ver. 4.3.24\n\
+  puts(_("ntpq - standard NTP query program - Ver. 4.3.25\n\
 Usage:  %s [ -<flag> [<val>] | --<name>[{=| }<val>] ]... [ host ...]\n"));
 
   /* referenced via ntpqOptions.pzFullVersion */
-  puts(_("ntpq 4.3.24"));
+  puts(_("ntpq 4.3.25"));
 
   /* referenced via ntpqOptions.pzFullUsage */
   puts(_("<<<NOT-FOUND>>>"));
