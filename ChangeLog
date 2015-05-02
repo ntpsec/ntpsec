@@ -1,3 +1,5 @@
+Below are from 4.2.8p3:
+* CID 1296235: Fix refclock_jjy.c and correcting type of the driver40-ja.html
 (4.3.25) 2015/05/01 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 2818] refclock_shm.c missing a line from -stable version.
 Below are from 4.2.8p3:
@@ -155,6 +157,7 @@ ntp-4.3 begins.
 ---
 
 * CID 1295478: Quiet a pedantic potential error from the fix for Bug 2776.
+* CID 1296235: Fix refclock_jjy.c and correcting type of the driver40-ja.html
 * CID 1269537: Clean up a line of dead code in getShmTime().
 * [Bug 2590] autogen-5.18.5.
 * [Bug 2612] restrict: Warn when 'monitor' can't be disabled because
@@ -163,7 +166,6 @@ ntp-4.3 begins.
 * [Bug 2745] ntpd -x steps clock on leap second 
    Do leap second stepping only of the step adjustment is beyond the
    proper jump distance limit and step correction is allowed at all. 
-* [Bug 2782] Refactor refclock_shm.c, add memory barrier protection.
 * [Bug 2776] Improve ntpq's 'help keytype'.
 * [Bug 2782] Refactor refclock_shm.c, add memory barrier protection.
 * [Bug 2794] Clean up kernel clock status reports.
