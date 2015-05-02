@@ -180,6 +180,15 @@ case "$PROG_NET_SNMP_CONFIG" in
 esac
 AC_MSG_RESULT([$PATH_NET_SNMP_CONFIG])
 
+case "$PATH_NET_SNMP_CONFIG" in
+ /*)	AC_CACHE_CHECK(
+	    [for net-snmp version],
+	    [ntp_cv_net_snmp_version],
+	    [ntp_cv_net_snmp_version=`$PATH_NET_SNMP_CONFIG --version`]
+	)
+	;;
+esac
+
 case "$host" in
  *-*-vxworks*)
     ac_link="$ac_link $VX_KERNEL"
@@ -291,7 +300,7 @@ AC_CHECK_HEADER(
 AC_CHECK_HEADERS([fcntl.h fnmatch.h ieeefp.h inttypes.h kvm.h math.h])
 
 AC_CHECK_HEADERS([memory.h netdb.h poll.h])
-AC_CHECK_HEADERS([sgtty.h stdlib.h string.h termio.h])
+AC_CHECK_HEADERS([sgtty.h stdatomic.h stdlib.h string.h termio.h])
 AC_CHECK_HEADERS([termios.h timepps.h timex.h unistd.h])
 
 case "$host" in
@@ -372,6 +381,28 @@ case "$host" in
     ;;
 *-*-bsdi*)
     AC_CHECK_HEADERS([machine/inline.h sys/pcl720.h sys/i8253.h])
+    ;;
+esac
+
+case "$ac_cv_header_stdatomic_h" in
+ yes)
+	AC_CHECK_FUNCS([atomic_thread_fence])
+	AC_CACHE_CHECK(
+	    [for atomic_thread_fence()],
+	    [ntp_cv_func_atomic_thread_fence],
+	    [AC_COMPILE_IFELSE(
+		[AC_LANG_PROGRAM(
+		    [[
+			#include <stdatomic.h>
+		    ]],
+		    [[
+			atomic_thread_fence(memory_order_seq_cst);
+		    ]]
+		)]
+		[ntp_cv_func_atomic_thread_fence=yes],
+		[ntp_cv_func_atomic_thread_fence=no]
+	    )]
+	)
     ;;
 esac
 
@@ -3873,6 +3904,11 @@ case "$ans" in
     case "$PATH_NET_SNMP_CONFIG" in
      /*)
 	SNMP_LIBS=`$PATH_NET_SNMP_CONFIG --agent-libs`
+	# Bug 2815.  This is a bit of a hack, but it works...
+	case "$ntp_cv_net_snmp_version" in
+	 5.3*)	SNMP_LIBS=`echo $SNMP_LIBS | $SED -e 's/-lnetsnmpagent/-lnetsnmpagent -lnetsnmpmibs/'`
+		;;
+	esac
 	AC_SUBST([SNMP_LIBS])
 	# HMS: we really want to separate CPPFLAGS and CFLAGS
 	foo=`$PATH_NET_SNMP_CONFIG --cflags`

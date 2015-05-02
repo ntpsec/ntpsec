@@ -333,7 +333,6 @@ generate_fsm(void)
 	char *r;
 	u_short initial_state;
 	u_short this_state;
-	u_short prev_state;
 	u_short state;
 	u_short i;
 	u_short token;
@@ -442,7 +441,6 @@ generate_fsm(void)
 		 * spellings result in the same T_* value.
 		 */
 			prefix_len = 0;
-			prev_state = 0;
 			this_state = i;
 			do {
 				for (state = 1; state < sst_highwater; state++)
