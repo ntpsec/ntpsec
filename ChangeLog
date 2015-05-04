@@ -1,3 +1,5 @@
+Below are from 4.2.8p3:
+* [Bug 2822] New leap column in sntp broke NTP::Util.pm.
 (4.3.27) 2015/05/03 Released by Harlan Stenn <stenn@ntp.org>
 Below are from 4.2.8p3:
 * Windows port build cleanup.
@@ -186,6 +188,7 @@ ntp-4.3 begins.
 * [Bug 2810] refclock_shm.c memory barrier code needs tweaks for QNX.
 * [Bug 2813] HP-UX needs -D__STDC_VERSION__=199901L and limits.h.
 * [Bug 2815] net-snmp before v5.4 has circular library dependencies.
+* [Bug 2822] New leap column in sntp broke NTP::Util.pm.
 * Improve the ntpq documentation around the controlkey keyid.
 * ntpq.c cleanup.
 * Windows port build cleanup.
