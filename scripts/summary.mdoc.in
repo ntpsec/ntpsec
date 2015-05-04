@@ -1,9 +1,9 @@
-.Dd May 3 2015
+.Dd May 4 2015
 .Dt SUMMARY 1summarymdoc User Commands
 .Os
 .\"  EDIT THIS FILE WITH CAUTION  (summary-opts.mdoc)
 .\"
-.\"  It has been AutoGen-ed  May  3, 2015 at 11:53:39 AM by AutoGen 5.18.5
+.\"  It has been AutoGen-ed  May  4, 2015 at 11:52:52 AM by AutoGen 5.18.5
 .\"  From the definitions    summary-opts.def
 .\"  and the template file   agmdoc-cmd.tpl
 .Sh NAME

@@ -1,3 +1,4 @@
+(4.3.28) 2015/05/04 Released by Harlan Stenn <stenn@ntp.org>
 Below are from 4.2.8p3:
 * [Bug 2822] New leap column in sntp broke NTP::Util.pm.
 (4.3.27) 2015/05/03 Released by Harlan Stenn <stenn@ntp.org>
