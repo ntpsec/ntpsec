@@ -111,6 +111,7 @@
       <Version>4.2</Version>
       <AdditionalLibraryDirectories>$(OutDir);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <SubSystem>Windows</SubSystem>
+      <ModuleDefinitionFile>..\..\ppsapi\loopback\src\loopback-ppsapi.def</ModuleDefinitionFile>
     </Link>
     <Bscmake>
       <OutputFile>$(IntDir)$(ProjectName).bsc</OutputFile>
@@ -125,6 +126,7 @@
       <Version>4.2</Version>
       <AdditionalLibraryDirectories>$(OutDir);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <SubSystem>Windows</SubSystem>
+      <ModuleDefinitionFile>..\..\ppsapi\loopback\src\loopback-ppsapi.def</ModuleDefinitionFile>
     </Link>
     <Bscmake>
       <OutputFile>$(IntDir)$(ProjectName).bsc</OutputFile>
@@ -155,6 +157,7 @@
       <AdditionalDependencies>ntpd.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(OutDir);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <SubSystem>Windows</SubSystem>
+      <ModuleDefinitionFile>..\..\ppsapi\loopback\src\loopback-ppsapi.def</ModuleDefinitionFile>
     </Link>
     <Bscmake>
       <OutputFile>$(IntDir)$(ProjectName).bsc</OutputFile>
@@ -169,6 +172,7 @@
       <AdditionalDependencies>ntpd.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(OutDir);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <SubSystem>Windows</SubSystem>
+      <ModuleDefinitionFile>..\..\ppsapi\loopback\src\loopback-ppsapi.def</ModuleDefinitionFile>
     </Link>
     <Bscmake>
       <OutputFile>$(IntDir)$(ProjectName).bsc</OutputFile>
