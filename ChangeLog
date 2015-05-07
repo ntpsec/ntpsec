@@ -1,5 +1,8 @@
 ---
 
+* [Bug 2745] ntpd -x steps clock on leap second 
+   Do leap second stepping only of the step adjustment is beyond the
+   proper jump distance limit and step correction is allowed at all. 
 * CID 1295478: Quiet a pedantic potential error from the fix for Bug 2776.
 * CID 1296235: Fix refclock_jjy.c and correcting type of the driver40-ja.html
 * CID 1269537: Clean up a line of dead code in getShmTime().
