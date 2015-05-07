@@ -185,12 +185,25 @@ ntp-4.3 begins.
 * [Bug 2808] GPSD_JSON driver enhancements, step 1.
   Various improvements, see http://bugs.ntp.org/2808 for details.
   Changed libjsmn to a more recent version.
+<<<<<<< gca ChangeLog 1.1593.1.50
+* [Bug 2810] refclock_shm.c memory barrier code needs tweaks for QNX.
+* [Bug 2813] HP-UX needs -D__STDC_VERSION__=199901L and limits.h.
+* [Bug 2815] net-snmp before v5.4 has circular library dependencies.
+* [Bug 2822] New leap column in sntp broke NTP::Util.pm.
+<<<<<<< local ChangeLog 1.1695
   fix coverity issues with refclock_gpsdjson and refclock_shm
   Add a few more tallies as per Hal Murray's suggestions
 * [Bug 2810] refclock_shm.c memory barrier code needs tweaks for QNX.
 * [Bug 2813] HP-UX needs -D__STDC_VERSION__=199901L and limits.h.
 * [Bug 2815] net-snmp before v5.4 has circular library dependencies.
 * [Bug 2822] New leap column in sntp broke NTP::Util.pm.
+<<<<<<< remote ChangeLog 1.1593.1.51
+* [Bug 2810] refclock_shm.c memory barrier code needs tweaks for QNX.
+* [Bug 2813] HP-UX needs -D__STDC_VERSION__=199901L and limits.h.
+* [Bug 2815] net-snmp before v5.4 has circular library dependencies.
+* [Bug 2822] New leap column in sntp broke NTP::Util.pm.
+* [Bug 2825] Quiet file installation in html/ .
+>>>>>>>
 * Improve the ntpq documentation around the controlkey keyid.
 * ntpq.c cleanup.
 * Windows port build cleanup.
