@@ -1,8 +1,8 @@
-.TH ntp.keys 5 "05 May 2015" "4.3.29" "File Formats"
+.TH ntp.keys 5 "07 May 2015" "4.3.30" "File Formats"
 .\"
 .\"  EDIT THIS FILE WITH CAUTION  (ntp.man)
 .\"
-.\"  It has been AutoGen-ed  May  5, 2015 at 11:56:29 AM by AutoGen 5.18.5
+.\"  It has been AutoGen-ed  May  7, 2015 at 11:56:58 AM by AutoGen 5.18.5
 .\"  From the definitions    ntp.keys.def
 .\"  and the template file   agman-file.tpl
 .Sh NAME
