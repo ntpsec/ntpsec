@@ -22,6 +22,7 @@
 * [Bug 2815] net-snmp before v5.4 has circular library dependencies.
 * [Bug 2822] New leap column in sntp broke NTP::Util.pm.
 * [Bug 2825] Quiet file installation in html/ .
+* Add an assert to the ntpq ifstats code.
 * Clean up the RLIMIT_STACK code.
 * Improve the ntpq documentation around the controlkey keyid.
 * ntpq.c cleanup.
