@@ -47,7 +47,33 @@
  * This design is a compromise to reduce the IO load for both NTPD and
  * GPSD; it also ensures that data is transmitted and evaluated only
  * once on the side of NTPD.
+ *
+ * ---------------------------------------------------------------------
+ *
+ * trouble shooting hints:
+ *
+ *   Enable and check the clock stats. Check if there are bad replies;
+ *   there should be none. If there are actually bad replies, then the
+ *   driver cannot parse all JSON records from GPSD, and some record
+ *   types are vital for the operation of the driver. This indicates a
+ *   problem on the protocol level.
+ *
+ *   When started on the command line with a debug level >= 2, the
+ *   driver dumps the raw received data and the parser input to
+ *   stdout. Since the debug level is global, NTPD starts to create a
+ *   *lot* of output. It makes sense to pipe it through '(f)grep
+ *   GPSD_JSON' before writing the result to disk.
+ *
+ *   A bit less intrusive is using netcat or telnet to connect to GPSD
+ *   and snoop what NTPD would get. If you try this, you have to send a
+ *   WATCH command to GPSD:
+ *
+ * ?WATCH={"device":"/dev/gps0","enable":true,"json":true,"pps":true};<CRLF>
+ *
+ *   should show you what GPSD has to say to NTPD. Replace "/dev/gps0"
+ *   with the device link used by GPSD, if necessary.
  */
+
 
 #ifdef HAVE_CONFIG_H
 #include <config.h>
@@ -58,7 +84,8 @@
 #if defined(REFCLOCK) && defined(CLOCK_GPSDJSON) && !defined(SYS_WINNT)
 
 /* =====================================================================
- * get the little JSMN library directly into our guts
+ * Get the little JSMN library directly into our guts. Use the 'parent
+ * link' feature for maximum speed.
  */
 #define JSMN_PARENT_LINKS
 #include "../libjsmn/jsmn.c"
@@ -67,7 +94,7 @@
  * JSON parsing stuff
  */
 
-#define JSMN_MAXTOK	30
+#define JSMN_MAXTOK	350
 #define INVALID_TOKEN (-1)
 
 typedef struct json_ctx {
@@ -364,8 +391,16 @@ static const char * const s_req_watch[2] = {
 static const char * const s_req_version =
     "?VERSION;\r\n";
 
-/* We keep a static list of network addresses for 'localhost:gpsd', and
- * we try to connect to them in round-robin fashion.
+/* We keep a static list of network addresses for 'localhost:gpsd' or a
+ * fallback alias of it, and we try to connect to them in round-robin
+ * fashion. The service lookup is done during the driver init
+ * function to minmise the impact of 'getaddrinfo()'.
+ *
+ * Alas, the init function is called even if there are no clocks
+ * configured for this driver. So it makes sense to defer the logging of
+ * any errors or other notifications until the first clock unit is
+ * started -- otherwise there might be syslog entries from a driver that
+ * is not used at all.
  */
 static addrinfoT  *s_gpsd_addr;
 static gpsd_unitT *s_clock_units;
@@ -377,6 +412,12 @@ static const char * const s_svctab[][2] = {
 	{ "127.0.0.1", "2947" },
 	{ NULL, NULL }
 };
+
+/* list of address resolution errors and index of service entry that
+ * finally worked.
+ */
+static int s_svcerr[sizeof(s_svctab)/sizeof(s_svctab[0])];
+static int s_svcidx;
 
 /* =====================================================================
  * log throttling
@@ -407,6 +448,7 @@ gpsd_init(void)
 	addrinfoT   hints;
 	int         rc, idx;
 
+	memset(s_svcerr, 0, sizeof(s_svcerr));
 	memset(&hints, 0, sizeof(hints));
 	hints.ai_family   = AF_UNSPEC;
 	hints.ai_protocol = IPPROTO_TCP;
@@ -415,23 +457,49 @@ gpsd_init(void)
 	for (idx = 0; s_svctab[idx][0] && !s_gpsd_addr; idx++) {
 		rc = getaddrinfo(s_svctab[idx][0], s_svctab[idx][1],
 				 &hints, &s_gpsd_addr);
+		s_svcerr[idx] = rc;
 		if (0 == rc)
 			break;
+		s_gpsd_addr = NULL;
+	}
+	s_svcidx = idx;
+}
+
+/* ---------------------------------------------------------------------
+ * Init Check: flush pending log messages and check if we can proceed
+ */
+static int/*BOOL*/
+gpsd_init_check(void)
+{
+	int idx;
+
+	/* Check if there is something to log */
+	if (s_svcidx == 0)
+		return (s_gpsd_addr != NULL);
+
+	/* spool out the resolver errors */
+	for (idx = 0; idx < s_svcidx; ++idx) {
 		msyslog(LOG_WARNING,
 			"GPSD_JSON: failed to resolve '%s:%s', rc=%d (%s)",
 			s_svctab[idx][0], s_svctab[idx][1],
-			rc, gai_strerror(rc));
-		s_gpsd_addr = NULL;
+			s_svcerr[idx], gai_strerror(s_svcerr[idx]));
 	}
 
+	/* check if it was fatal, or if we can proceed */
 	if (s_gpsd_addr == NULL)
 		msyslog(LOG_ERR, "%s",
 			"GPSD_JSON: failed to get socket address, giving up.");
 	else if (idx != 0)
 		msyslog(LOG_WARNING,
-			"GPSD_JSON: using '%s:%s' instead off '%s:%s'",
+			"GPSD_JSON: using '%s:%s' instead of '%s:%s'",
 			s_svctab[idx][0], s_svctab[idx][1],
 			s_svctab[0][0], s_svctab[0][1]);
+
+	/* make sure this gets logged only once and tell if we can
+	 * proceed or not
+	 */
+	s_svcidx = 0;
+	return (s_gpsd_addr != NULL);
 }
 
 /* ---------------------------------------------------------------------
@@ -447,6 +515,10 @@ gpsd_start(
 	gpsd_unitT ** uscan    = &s_clock_units;
 
 	struct stat sb;
+
+	/* check if we can proceed at all or if init failed */
+	if ( ! gpsd_init_check())
+		return FALSE;
 
 	/* search for matching unit */
 	while ((up = *uscan) != NULL && up->unit != (unit & 0x7F))
@@ -1672,13 +1744,17 @@ gpsd_parse(
 	/* See if we can grab anything potentially useful. JSMN does not
 	 * need a trailing NUL, but it needs the number of bytes to
 	 * process. */
-	if (!json_parse_record(&up->json_parse, up->buffer, up->buflen))
+	if (!json_parse_record(&up->json_parse, up->buffer, up->buflen)) {
+		++up->tc_breply;
 		return;
-
+	}
+	
 	/* Now dispatch over the objects we know */
 	clsid = json_object_lookup_string(&up->json_parse, 0, "class");
-	if (NULL == clsid)
-	    return;
+	if (NULL == clsid) {
+		++up->tc_breply;
+		return;
+	}
 
 	if      (!strcmp("TPV", clsid))
 		process_tpv(peer, &up->json_parse, rtime);

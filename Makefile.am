@@ -113,10 +113,11 @@ dist-hook:
 	@find $(distdir) -type d -name SCCS -print | xargs rm -rf
 
 install-data-local:
-	( cd $(srcdir) && \
+	@echo "Installing stand-alone HTML documentation"
+	@( cd $(srcdir) && \
 		for i in `find html -type d | grep -v SCCS` ; \
 		do $(INSTALL) -d $(DESTDIR)$(htmldir)/$$i ; done )
-	( cd $(srcdir) && \
+	@( cd $(srcdir) && \
 		for i in `find html -type f | grep -v SCCS` ; \
 		do $(INSTALL_DATA) $$i $(DESTDIR)$(htmldir)/$$i ; done )
 
