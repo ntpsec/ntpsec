@@ -1,4 +1,5 @@
 Below are from 4.2.8p3:
+* CID 739725: Fix a rare resource leak in libevent/listener.c.
 * [Bug 2750] build for Win64
   Building for 32bit of loopback ppsapi needs def file
 * [Bug 2808] GPSD_JSON driver enhancements, step 1.
