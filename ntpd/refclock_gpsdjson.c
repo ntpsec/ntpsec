@@ -258,7 +258,7 @@ static	void	gpsd_control	(int, const struct refclockstat *,
 				 struct refclockstat *, peerT *);
 static	void	gpsd_timer	(int, peerT *);
 
-static  int     myasprintf(char**, char const*, ...);
+static  int     myasprintf(char**, char const*, ...) NTP_PRINTF(2, 3);
 
 static void     enter_opmode(peerT *peer, int mode);
 static void	leave_opmode(peerT *peer, int mode);
