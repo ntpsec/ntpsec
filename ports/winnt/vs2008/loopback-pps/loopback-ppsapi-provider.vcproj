@@ -59,6 +59,7 @@
 				AdditionalDependencies="ntpd.lib"
 				Version="4.2"
 				AdditionalLibraryDirectories="$(OutDir)"
+				ModuleDefinitionFile="..\..\ppsapi\loopback\src\loopback-ppsapi.def"
 				SubSystem="2"
 			/>
 			<Tool
@@ -188,6 +189,7 @@
 				Name="VCLinkerTool"
 				AdditionalDependencies="ntpd.lib"
 				AdditionalLibraryDirectories="$(OutDir)"
+				ModuleDefinitionFile="..\..\ppsapi\loopback\src\loopback-ppsapi.def"
 				SubSystem="2"
 			/>
 			<Tool
