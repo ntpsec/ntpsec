@@ -1,9 +1,5 @@
 ---
 
-* [Bug 2808] GPSD_JSON driver enhancements, step 1.
-  Increase internal token buffer to parse all JSON data, even SKY.
-  Defer logging of errors during driver init until the first unit is
-  started, so the syslog is not cluttered when the driver is not used.
 * CID 1295478: Quiet a pedantic potential error from the fix for Bug 2776.
 * CID 1296235: Fix refclock_jjy.c and correcting type of the driver40-ja.html
 * CID 1269537: Clean up a line of dead code in getShmTime().
@@ -19,6 +15,9 @@
 * [Bug 2804] install-local-data assumes GNU 'find' semantics.
 * [Bug 2806] refclock_jjy.c supports the Telephone JJY.
 * [Bug 2808] GPSD_JSON driver enhancements, step 1.
+  Increase internal token buffer to parse all JSON data, even SKY.
+  Defer logging of errors during driver init until the first unit is
+  started, so the syslog is not cluttered when the driver is not used.
   Various improvements, see http://bugs.ntp.org/2808 for details.
   Changed libjsmn to a more recent version.
 * [Bug 2810] refclock_shm.c memory barrier code needs tweaks for QNX.
