@@ -1,5 +1,8 @@
 ---
 
+* [Bug 2792] If the IFF_RUNNING interface flag is supported then an interface
+  is ignored as long as this flag is not set since the interface is not usable
+  (e.g., no link).
 * CID 739725: Fix a rare resource leak in libevent/listener.c.
 * CID 1295478: Quiet a pedantic potential error from the fix for Bug 2776.
 * CID 1296235: Fix refclock_jjy.c and correcting type of the driver40-ja.html
