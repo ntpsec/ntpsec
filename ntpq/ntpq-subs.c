@@ -3245,6 +3245,7 @@ ifstats(
 		case 'n':
 			if (1 == sscanf(tag, name_fmt, &ui)) {
 				/* strip quotes */
+				INSIST(val);
 				len = strlen(val);
 				if (len >= 2 &&
 				    len - 2 < sizeof(row.name)) {
