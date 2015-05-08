@@ -177,6 +177,7 @@ From 4.2.8p2:
 ntp-4.3 begins.
 ---
 
+* CID 739725: Fix a rare resource leak in libevent/listener.c.
 * CID 1295478: Quiet a pedantic potential error from the fix for Bug 2776.
 * CID 1296235: Fix refclock_jjy.c and correcting type of the driver40-ja.html
 * CID 1269537: Clean up a line of dead code in getShmTime().
