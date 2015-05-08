@@ -4938,7 +4938,7 @@ ntp_rlimit(
 		DPRINTF(2, ("ntp_rlimit: STACK: %d %s pages\n",
 			    (int)(rl_value / rl_scale), rl_sstr));
 		if (-1 == getrlimit(RLIMIT_STACK, &rl)) {
-			msyslog(LOG_ERR, "getrlimit() failed: %m");
+			msyslog(LOG_ERR, "getrlimit(RLIMIT_STACK) failed: %m");
 		} else {
 			if (rl_value > rl.rlim_max) {
 				msyslog(LOG_WARNING,
@@ -4947,9 +4947,10 @@ ntp_rlimit(
 					(u_long)rl_value);
 				rl_value = rl.rlim_max;
 			}
+			rl.rlim_cur = rl_value;
 			if (-1 == setrlimit(RLIMIT_STACK, &rl)) {
 				msyslog(LOG_ERR,
-					"ntp_rlimit: Cannot adjust stack limit: %m");
+					"ntp_rlimit: Cannot set RLIMIT_STACK: %m");
 			}
 		}
 		break;
