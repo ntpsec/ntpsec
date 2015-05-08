@@ -899,3 +899,46 @@ TEST_F(leapsecTest, ls2012seqInsDumb) {
 	EXPECT_EQ(LSPROX_NOWARN, qr.proximity);
 }
 
+// ----------------------------------------------------------------------
+// test repeated query on empty table in dumb mode
+TEST_F(leapsecTest, lsEmptyTableDumb) {
+	int            rc;
+	leap_result_t  qr;
+
+	const time_t   pivot(lsec2012);	
+	const uint32_t t0   (lsec2012 - 10);
+	const uint32_t tE   (lsec2012 + 10);
+
+	leapsec_electric(0);
+	EXPECT_EQ(0, leapsec_electric(-1));
+
+	leapsec_clear(leapsec_get_table(FALSE));
+	for (uint32_t t = t0; t != tE; ++t) {
+		rc = leapsec_query(&qr, t, &pivot);
+		EXPECT_EQ(FALSE, rc);
+		EXPECT_EQ(0,             qr.warped   );
+		EXPECT_EQ(LSPROX_NOWARN, qr.proximity);
+	}
+}
+
+// ----------------------------------------------------------------------
+// test repeated query on empty table in electric mode
+TEST_F(leapsecTest, lsEmptyTableElectric) {
+	int            rc;
+	leap_result_t  qr;
+	
+	leapsec_electric(1);
+	EXPECT_EQ(1, leapsec_electric(-1));
+
+	const time_t   pivot(lsec2012);	
+	const uint32_t t0   (lsec2012 - 10);
+	const uint32_t tE   (lsec2012 + 10);
+
+	leapsec_clear(leapsec_get_table(FALSE));
+	for (time_t t = t0; t != tE; ++t) {
+		rc = leapsec_query(&qr, t, &pivot);
+		EXPECT_EQ(FALSE, rc);
+		EXPECT_EQ(0,             qr.warped   );
+		EXPECT_EQ(LSPROX_NOWARN, qr.proximity);
+	}
+}
