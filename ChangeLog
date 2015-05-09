@@ -1,3 +1,6 @@
+Below are from 4.2.8p3:
+* [Bug 2808] GPSD_JSON driver enhancements, step 1.
+  Increase internal token buffer to parse all JSON data, even SKY.
 (4.3.31) 2015/05/08 Released by Harlan Stenn <stenn@ntp.org>
 Below are from 4.2.8p3:
 * CID 739725: Fix a rare resource leak in libevent/listener.c.
