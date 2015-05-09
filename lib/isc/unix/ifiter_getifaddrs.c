@@ -148,6 +148,7 @@ internal_current(isc_interfaceiter_t *iter) {
 
 #ifdef __linux
 	/*
+	 * [Bug 2792]
 	 * burnicki: iter->pos is usually never NULL here (anymore?),
 	 * so linux_if_inet6_current(iter) is never called here.
 	 * However, that routine would check (under Linux), if the
@@ -164,6 +165,7 @@ internal_current(isc_interfaceiter_t *iter) {
 
 #ifdef IFF_RUNNING
 	/*
+	 * [Bug 2792]
 	 * burnicki: if the interface is not running then
 	 * it may be in a tentative state. See above.
 	 */
