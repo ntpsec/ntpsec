@@ -215,4 +215,7 @@ extern int/*BOOL*/ leapsec_query(leap_result_t *qr, uint32_t ntpts,
  */
 extern int/*BOOL*/ leapsec_frame(leap_result_t *qr);
 
+/* reset global state for unit tests */
+extern void leapsec_ut_pristine(void);
+
 #endif /* !defined(NTP_LEAPSEC_H) */

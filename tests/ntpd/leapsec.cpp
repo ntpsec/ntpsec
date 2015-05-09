@@ -292,7 +292,7 @@ void leapsecTest::SetUp()
 {
     ntpcal_set_timefunc(timefunc);
     settime(1970, 1, 1, 0, 0, 0);
-    leapsec_electric(1);
+    leapsec_ut_pristine();
 }
 
 void leapsecTest::TearDown()
@@ -427,6 +427,18 @@ TEST_F(leapsecTest, loadFileTTL) {
 	// expired since 1 sec
 	rc = leapsec_daystolive(limit + 1, &pivot);
 	EXPECT_EQ(-1, rc);	
+}
+
+// ----------------------------------------------------------------------
+// test query in pristine state (bug#2745 misbehaviour)
+TEST_F(leapsecTest, lsQueryPristineState) {
+	int            rc;
+	leap_result_t  qr;
+	
+	rc = leapsec_query(&qr, lsec2012, NULL);
+	EXPECT_EQ(FALSE, rc);
+	EXPECT_EQ(0,             qr.warped   );
+	EXPECT_EQ(LSPROX_NOWARN, qr.proximity);
 }
 
 // ----------------------------------------------------------------------
@@ -641,6 +653,7 @@ TEST_F(leapsecTest, ls2009seqInsElectric) {
 	rc = setup_load_table(leap1);
 	EXPECT_EQ(1, rc);
 	leapsec_electric(1);
+	EXPECT_EQ(1, leapsec_electric(-1));
 
 	rc = leapsec_query(&qr, lsec2009 - 60*SECSPERDAY, NULL);
 	EXPECT_EQ(FALSE, rc);
@@ -682,7 +695,7 @@ TEST_F(leapsecTest, ls2009seqInsDumb) {
 
 	rc = setup_load_table(leap1);
 	EXPECT_EQ(1, rc);
-	leapsec_electric(0);
+	EXPECT_EQ(0, leapsec_electric(-1));
 
 	rc = leapsec_query(&qr, lsec2009 - 60*SECSPERDAY, NULL);
 	EXPECT_EQ(FALSE, rc);
@@ -731,6 +744,7 @@ TEST_F(leapsecTest, ls2009seqDelElectric) {
 	rc = setup_load_table(leap3);
 	EXPECT_EQ(1, rc);
 	leapsec_electric(1);
+	EXPECT_EQ(1, leapsec_electric(-1));
 
 	rc = leapsec_query(&qr, lsec2009 - 60*SECSPERDAY, NULL);
 	EXPECT_EQ(FALSE, rc);
@@ -772,7 +786,7 @@ TEST_F(leapsecTest, ls2009seqDelDumb) {
 
 	rc = setup_load_table(leap3);
 	EXPECT_EQ(1, rc);
-	leapsec_electric(0);
+	EXPECT_EQ(0, leapsec_electric(-1));
 
 	rc = leapsec_query(&qr, lsec2009 - 60*SECSPERDAY, NULL);
 	EXPECT_EQ(FALSE, rc);
@@ -814,6 +828,8 @@ TEST_F(leapsecTest, ls2012seqInsElectric) {
 
 	rc = setup_load_table(leap1);
 	EXPECT_EQ(1, rc);
+	leapsec_electric(1);
+	EXPECT_EQ(1, leapsec_electric(-1));
 
 	rc = leapsec_query(&qr, lsec2012 - 60*SECSPERDAY, NULL);
 	EXPECT_EQ(FALSE, rc);
@@ -853,12 +869,9 @@ TEST_F(leapsecTest, ls2012seqInsDumb) {
 	int            rc;
 	leap_result_t  qr;
 
-	leapsec_electric(0);
-	EXPECT_EQ(0, leapsec_electric(-1));
-	EXPECT_EQ(0, leapsec_electric(-1));
-
 	rc = setup_load_table(leap1);
 	EXPECT_EQ(1, rc);
+	EXPECT_EQ(0, leapsec_electric(-1));
 
 	rc = leapsec_query(&qr, lsec2012 - 60*SECSPERDAY, NULL);
 	EXPECT_EQ(FALSE, rc);
@@ -909,10 +922,8 @@ TEST_F(leapsecTest, lsEmptyTableDumb) {
 	const uint32_t t0   (lsec2012 - 10);
 	const uint32_t tE   (lsec2012 + 10);
 
-	leapsec_electric(0);
 	EXPECT_EQ(0, leapsec_electric(-1));
 
-	leapsec_clear(leapsec_get_table(FALSE));
 	for (uint32_t t = t0; t != tE; ++t) {
 		rc = leapsec_query(&qr, t, &pivot);
 		EXPECT_EQ(FALSE, rc);
@@ -934,7 +945,6 @@ TEST_F(leapsecTest, lsEmptyTableElectric) {
 	const uint32_t t0   (lsec2012 - 10);
 	const uint32_t tE   (lsec2012 + 10);
 
-	leapsec_clear(leapsec_get_table(FALSE));
 	for (time_t t = t0; t != tE; ++t) {
 		rc = leapsec_query(&qr, t, &pivot);
 		EXPECT_EQ(FALSE, rc);
