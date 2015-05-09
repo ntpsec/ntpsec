@@ -200,6 +200,9 @@ ntp-4.3 begins.
   Building for 32bit of loopback ppsapi needs def file
 * [Bug 2776] Improve ntpq's 'help keytype'.
 * [Bug 2782] Refactor refclock_shm.c, add memory barrier protection.
+* [Bug 2792] If the IFF_RUNNING interface flag is supported then an
+  interface is ignored as long as this flag is not set since the
+  interface is not usable (e.g., no link).
 * [Bug 2794] Clean up kernel clock status reports.
 * [Bug 2800] refclock_true.c true_debug() can't open debug log because
   of incompatible open/fdopen parameters.
