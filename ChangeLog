@@ -1,3 +1,4 @@
+(4.3.32) 2015/05/09 Released by Harlan Stenn <stenn@ntp.org>
 Below are from 4.2.8p3:
 * [Bug 2792] If the IFF_RUNNING interface flag is supported then an
   interface is ignored as long as this flag is not set since the
