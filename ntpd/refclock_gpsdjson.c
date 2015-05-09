@@ -524,8 +524,10 @@ gpsd_start(
 	while ((up = *uscan) != NULL && up->unit != (unit & 0x7F))
 		uscan = &up->next_unit;
 	if (up == NULL) {
+		/* alloc unit, add to list and increment use count ASAP. */
 		up = emalloc_zero(sizeof(*up));
 		*uscan = up;
+		++up->refcount;
 
 		/* initialize the unit structure */
 		up->logname  = estrdup(refnumtoa(&peer->srcadr));
@@ -551,9 +553,11 @@ gpsd_start(
 				up->logname, up->device);
 			goto dev_fail;
 		}
+	} else {
+		/* All set up, just increment use count. */
+		++up->refcount;
 	}
-	up->refcount++;
-
+	
 	/* setup refclock processing */
 	pp->unitptr = (caddr_t)up;
 	pp->io.fd         = -1;
@@ -617,7 +621,11 @@ gpsd_shutdown(
 
 	UNUSED_ARG(unit);
 
-	INSIST(up);
+	/* The unit pointer might have been removed already. */
+	if (up == NULL)
+		return;
+
+	/* now check if we must close IO resources */
 	if (peer != up->pps_peer) {
 		if (-1 != pp->io.fd) {
 			DPRINTF(1, ("%s: closing clock, fd=%d\n",
@@ -628,6 +636,7 @@ gpsd_shutdown(
 		if (up->fdt != -1)
 			close(up->fdt);
 	}
+	/* decrement use count and eventually remove this unit. */
 	if (!--up->refcount) {
 		/* unlink this unit */
 		while (*uscan != NULL)
