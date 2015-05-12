@@ -1,4 +1,5 @@
 ---
+(4.2.8p3-RC1) 2015/05/12 Released by Harlan Stenn <stenn@ntp.org>
 
 * CID 739725: Fix a rare resource leak in libevent/listener.c.
 * CID 1295478: Quiet a pedantic potential error from the fix for Bug 2776.
