@@ -1,4 +1,5 @@
 Below are from 4.2.8p3:
+* 4.2.8p3-RC1
 * [Bug 2745] ntpd -x steps clock on leap second 
    Do leap second stepping only of the step adjustment is beyond the
    proper jump distance limit and step correction is allowed at all. 
