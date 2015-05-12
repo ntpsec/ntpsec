@@ -8,6 +8,11 @@
 * [Bug 2612] restrict: Warn when 'monitor' can't be disabled because
   of 'limited'.
 * [Bug 2650] fix includefile processing.
+* [Bug 2745] ntpd -x steps clock on leap second
+   Fixed an initial-value problem that caused misbehaviour in absence of
+   any leapsecond information.
+   Do leap second stepping only of the step adjustment is beyond the
+   proper jump distance limit and step correction is allowed at all.
 * [Bug 2750] build for Win64
   Building for 32bit of loopback ppsapi needs def file
 * [Bug 2776] Improve ntpq's 'help keytype'.
