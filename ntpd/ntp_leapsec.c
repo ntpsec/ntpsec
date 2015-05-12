@@ -107,8 +107,17 @@ leapsec_get_table(
 	leap_table_t *p1, *p2;
 
 	p1 = _lptr;
-	p1 = &_ltab[p1 == &_ltab[1]];
-	p2 = &_ltab[p1 == &_ltab[0]];
+	if (p1 == &_ltab[0]) {
+		p2 = &_ltab[1];
+	} else if (p1 == &_ltab[1]) {
+		p2 = &_ltab[0];
+	} else {
+		p1 = &_ltab[0];
+		p2 = &_ltab[1];
+		reset_times(p1);
+		reset_times(p2);
+		_lptr = p1;
+	}
 	if (alternate) {
 		memcpy(p2, p1, sizeof(leap_table_t));
 		p1 = p2;
@@ -288,7 +297,7 @@ leapsec_query(
 		 * leap era frame.
 		 */
 		reload_limits(pt, &ts64);
-	} else if (ucmpv64(&ts64, &pt->head.dtime) >= 0)	{
+	} else if (ucmpv64(&ts64, &pt->head.dtime) >= 0) {
 		/* Boundary crossed in forward direction. This might
 		 * indicate a leap transition, so we prepare for that
 		 * case.
@@ -1003,6 +1012,15 @@ static char * lstostr(
 			 tm.year, tm.month, tm.monthday,
 			 tm.hour, tm.minute);
 	return buf;
+}
+
+/* reset the global state for unit tests */
+void
+leapsec_ut_pristine(void)
+{
+	memset(_ltab, 0, sizeof(_ltab));
+	_lptr     = NULL;
+	_electric = 0;
 }
 
 
