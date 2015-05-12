@@ -1,6 +1,6 @@
 # EDIT THIS FILE WITH CAUTION  (ntpsweep-opts)
 #
-# It has been AutoGen-ed  May  9, 2015 at 11:52:00 AM by AutoGen 5.18.5
+# It has been AutoGen-ed  May 12, 2015 at 09:36:09 AM by AutoGen 5.18.5
 # From the definitions    ntpsweep-opts.def
 # and the template file   perlopt
 
@@ -43,7 +43,7 @@ sub processOptions {
         'help|?', 'more-help'));
 
     $usage = <<'USAGE';
-ntpsweep - Print various informations about given ntp servers - Ver. 4.3.32
+ntpsweep - Print various informations about given ntp servers - Ver. 4.3.33
 USAGE: ntpsweep [ -<flag> [<val>] | --<name>[{=| }<val>] ]... [hostfile]
 
     -l, --host-list=str          Host to execute actions on
