@@ -1,3 +1,7 @@
+Below are from 4.2.8p3:
+* [Bug 2745] ntpd -x steps clock on leap second 
+   Do leap second stepping only of the step adjustment is beyond the
+   proper jump distance limit and step correction is allowed at all. 
 (4.3.32) 2015/05/09 Released by Harlan Stenn <stenn@ntp.org>
 Below are from 4.2.8p3:
 * [Bug 2792] If the IFF_RUNNING interface flag is supported then an
