@@ -5,6 +5,7 @@
 	<head>
 		<meta http-equiv="content-type" content="text/html;charset=utf-8">
 		<meta name="generator" content="HTML Tidy, see www.w3.org">
+		<meta http-equiv="Content-Style-Type" content="text/css">
 		<meta http-equiv="Content-Script-Type" content="text/javascript">
 		<title>JJY Receivers</title>
 		<link rev="made" href="http://www.bea.hi-ho.ne.jp/abetakao/">
@@ -15,7 +16,7 @@
 	<body>
 		<h3>JJY Receivers</h3>
 <p>Last update:
-  <!-- #BeginDate format:En2m -->11-Apr-2015  00:00<!-- #EndDate -->
+  <!-- #BeginDate format:En2m -->15-May-2015  00:00<!-- #EndDate -->
   UTC &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;<a href="driver40.html">ENGLISH（英語）</a> &nbsp; <a href="driver40-ja.html">JAPANESE（日本語）</a></p>
 		<hr>
 		<h4>Synopsis</h4>
@@ -24,13 +25,23 @@
 		Driver ID: <code>JJY</code><br>
 		Serial Port: <code>/dev/jjy<em>u</em></code>; それぞれのJJY受信機、GPS時計、テレフォンJJYを参照して下さい。
 		<h4>Description</h4>
-		<p>このドライバーは、以下の、日本で販売されている JJY受信機、GPS時計と、電話回線による時刻配信サービスをサポートしています。<br>
+		<p>このドライバーは、以下の、日本で販売されている JJY受信機、GPS時計と、電話回線による時刻配信サービスをサポートしています。
+		</p>
+		<table width="100%">
+		<tr>
+		<td width="50%" style="vertical-align:top;">
 		<a href="#mode-1">トライステート &nbsp; TS-JJY01, TS-JJY02</a><br>
 		<a href="#mode-2">シーデックス &nbsp; JST2000</a><br>
 		<a href="#mode-3">エコー計測器 &nbsp; LT-2000</a><br>
 		<a href="#mode-4">シチズンTIC &nbsp; JJY-200</a><br>
 		<a href="#mode-5">トライステート &nbsp; TS-GPSclock-01</a><br>
-		<a href="#mode-100">テレフォンJJY</a></p>
+		</td>
+		<td width="50%" style="vertical-align:top; border-left:solid; padding:0px 0px 0px 10px;">
+		<a href="#mode-6">セイコー タイム システム &nbsp; TDC-300</a><br>
+		<a href="#mode-100">テレフォンJJY</a><br>
+		</td>
+		</tr>
+		</table>
 		<ul>
 
 			<li>
@@ -41,7 +52,7 @@
 						<dl>
 							<dt>server &nbsp; 127.127.40.X &nbsp; mode 1</dt>
 							<dd><br></dd>
-							<dt>fudge &nbsp; 127.127.40.X &nbsp; stratum 1 &nbsp; time1 0.NNN &nbsp; flag1 0|1</dt>
+							<dt>fudge &nbsp; 127.127.40.X &nbsp; time1 0.NNN &nbsp; flag1 0|1</dt>
 							<dd>
 								<p>Time1 は、受信機からの時刻に加算する調整時間を、固定小数点形式の秒で設定します。<br>
 								この受信機には、数10ミリ秒 ( 0.0NN秒 ) から百数10ミリ秒 ( 0.1NN秒 ) の調整時間を設定すると良いでしょう。</p>
@@ -106,7 +117,7 @@
 						<dl>
 							<dt>server &nbsp; 127.127.40.X &nbsp; mode 2</dt>
 							<dd><br></dd>
-							<dt>fudge &nbsp; 127.127.40.X &nbsp; stratum 1</dt>
+							<dt>fudge &nbsp; 127.127.40.X &nbsp; time1 0.NNN</dt>
 						</dl>
 						<br>
 					</dd>
@@ -142,7 +153,7 @@
 						<dl>
 							<dt>server &nbsp; 127.127.40.X &nbsp; mode 3</dt>
 							<dd><br></dd>
-							<dt>fudge &nbsp; 127.127.40.X &nbsp; stratum 1</dt>
+							<dt>fudge &nbsp; 127.127.40.X &nbsp; time1 0.NNN</dt>
 						</dl>
 						<br>
 					</dd>
@@ -188,7 +199,7 @@
 						<dl>
 							<dt>server &nbsp; 127.127.40.X &nbsp; mode 4</dt>
 							<dd><br></dd>
-							<dt>fudge &nbsp; 127.127.40.X &nbsp; stratum 1</dt>
+							<dt>fudge &nbsp; 127.127.40.X &nbsp; time1 0.NNN</dt>
 						</dl>
 						<br>
 					</dd>
@@ -227,7 +238,7 @@
 						<dl>
 							<dt>server &nbsp; 127.127.40.X &nbsp; mode 5</dt>
 							<dd><br></dd>
-							<dt>fudge &nbsp; 127.127.40.X &nbsp; stratum 1 &nbsp; time1 0.NNN &nbsp; flag1 0|1</dt>
+							<dt>fudge &nbsp; 127.127.40.X &nbsp; time1 0.NNN &nbsp; flag1 0|1</dt>
 							<dd>
 								<p>Time1 は、受信機からの時刻に加算する調整時間を、固定小数点形式の秒で設定します</p>
 								<p>Flag1 は、時刻同期には無関係です。Flag1 を 1 に設定すると、状態を問い合わせるコマンドを DATE コマンドと STIM コマンドの前に発行して、応答を clockstats ファイルに記録します。</p>
@@ -279,6 +290,48 @@
 			</li>
 
 			<li>
+				<p><a name="mode-6">セイコー タイム システム &nbsp; TDC-300</a> &nbsp; <a href="http://www.seiko-sts.co.jp/">http://www.seiko-sts.co.jp/</a> (英語と日本語)</p><br>
+				<p>TDC-300 は、フロント・パネルのメニュー表示とスイッチで type 3 のデータ形式に設定しなければなりません。</p>
+				<dl>
+					<dt>NTP configuration ( ntp.conf )</dt>
+					<dd><br>
+						<dl>
+							<dt>server &nbsp; 127.127.40.X &nbsp; mode 6</dt>
+							<dd><br></dd>
+							<dt>fudge &nbsp; 127.127.40.X &nbsp; time1 0.NNN</dt>
+						</dl>
+						<br>
+					</dd>
+					<dt>インターフェース</dt>
+					<dd>
+						<p>RS-232C, 2400 BPS, 8-bits, no parity, 1 stop bit</p>
+						<br>
+					</dd>
+					<dt>日時データの形式</dt>
+					<dd><br>
+						<table summary="CommandAndReply">
+							<tr>
+								<td>コマンド</td>
+								<td>&nbsp;--&gt;&nbsp;</td>
+								<td>応答</td>
+							</tr>
+							<tr>
+								<td></td>
+								<td></td>
+								<td><code>{STX}YYMMDDWHHMMSS{ETX}</code></td>
+							</tr>
+							<tr>
+								<td>( 5 to 10 mSec. before second )</td>
+								<td></td>
+								<td><code>{STX}{xE5}{ETX}</code></td>
+							</tr>
+						</table>
+						<br>
+					</dd>
+				</dl>
+			</li>
+
+			<li>
 				<p><a name="mode-100">テレフォンJJY</a> &nbsp; <a href="http://jjy.nict.go.jp/">http://jjy.nict.go.jp/</a> (英語と日本語)</p>
 				<p>テレフォンJJYは、電話回線による時刻配信サービスです。<br>
 				このサービスは、国立研究開発法人　情報通信研究機構が提供しています。</p>
@@ -302,7 +355,7 @@
 							<p>デフォルトの日時問い合わせ処理間隔 6 ( 64 秒 ) は、このモードには、短すぎます。　"minpoll" は、8 ( 256 秒, 約 4 分 ) 以上を設定して下さい。<br>
 							日時問い合わせ処理間隔は、秒数を 2 のべき乗で指定します。　minpoll の値が、12 なら 4096 秒（約1時間）、14 なら 16384 秒（約4.5時間）、16 なら 65536 秒（約18時間）となります。</p><br>
 							</dd>
-							<dt>fudge &nbsp; 127.127.40.X &nbsp; stratum 1 &nbsp; flag1 0|1 &nbsp; flag2 0|1 &nbsp; flag3 0|1 &nbsp; flag4 0|1</dt>
+							<dt>fudge &nbsp; 127.127.40.X &nbsp; flag1 0|1 &nbsp; flag2 0|1 &nbsp; flag3 0|1 &nbsp; flag4 0|1</dt>
 							<dd>
 								<p>Time1 は、受信機からの時刻に加算する調整時間を、固定小数点形式の秒で設定します。<br>
 								mode 100 の場合は、time1 で調整する時間を設定したほうが良いでしょう。<br>
