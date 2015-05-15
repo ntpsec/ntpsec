@@ -5,6 +5,7 @@
 * CID 1295478: Quiet a pedantic potential error from the fix for Bug 2776.
 * CID 1296235: Fix refclock_jjy.c and correcting type of the driver40-ja.html
 * CID 1269537: Clean up a line of dead code in getShmTime().
+* [Bug 2832] refclock_jjy.c supports the TDC-300
 * [Bug 2590] autogen-5.18.5.
 * [Bug 2612] restrict: Warn when 'monitor' can't be disabled because
   of 'limited'.

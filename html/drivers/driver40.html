@@ -5,6 +5,7 @@
 	<head>
 		<meta http-equiv="content-type" content="text/html;charset=iso-8859-1">
 		<meta name="generator" content="HTML Tidy, see www.w3.org">
+		<meta http-equiv="Content-Style-Type" content="text/css">
 		<meta http-equiv="Content-Script-Type" content="text/javascript">
 		<title>JJY Receivers</title>
 		<link rev="made" href="http://www.bea.hi-ho.ne.jp/abetakao/">
@@ -15,7 +16,7 @@
 	<body>
 		<h3>JJY Receivers</h3>
 <p>Last update:
-  <!-- #BeginDate format:En2m -->30-Apr-2015  05:53<!-- #EndDate -->
+  <!-- #BeginDate format:En2m -->15-May-2015  00:00<!-- #EndDate -->
   UTC &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;<a href="driver40.html">ENGLISH</a> &nbsp; <a href="driver40-ja.html">JAPANESE</a></p>
 		<hr>
 		<h4>Synopsis</h4>
@@ -24,13 +25,23 @@
 		Driver ID: <code>JJY</code><br>
 		Serial Port: <code>/dev/jjy<em>u</em></code>; See corresponding receiver
 		<h4>Description</h4>
-		<p>This driver supports the following the JJY receivers and the GPS clock sold in Japan, and the time service through a telephone line.<br>
+		<p>This driver supports the following the JJY receivers and the GPS clock sold in Japan, and the time service through a telephone line.
+		</p>
+		<table width="100%">
+		<tr>
+		<td width="50%" style="vertical-align:top;">
 		<a href="#mode-1">Tristate Ltd. &nbsp; TS-JJY01, TS-JJY02</a><br>
 		<a href="#mode-2">C-DEX Co.,Ltd. &nbsp; JST2000</a><br>
 		<a href="#mode-3">Echo Keisokuki Co.,Ltd. &nbsp; LT-2000</a><br>
 		<a href="#mode-4">CITIZEN T.I.C. CO.,LTD. &nbsp; JJY-200</a><br>
 		<a href="#mode-5">Tristate Ltd. &nbsp; TS-GPSclock-01</a><br>
-		<a href="#mode-100">Telephone JJY</a></p>
+		</td>
+		<td width="50%" style="vertical-align:top; border-left:solid; padding:0px 0px 0px 10px;">
+		<a href="#mode-6">SEIKO TIME SYSTEMS INC. &nbsp; TDC-300</a><br>
+		<a href="#mode-100">Telephone JJY</a><br>
+		</td>
+		</tr>
+		</table>
 		<ul>
 
 			<li>
@@ -41,7 +52,7 @@
 						<dl>
 							<dt>server &nbsp; 127.127.40.X &nbsp; mode 1</dt>
 							<dd><br></dd>
-							<dt>fudge &nbsp; 127.127.40.X &nbsp; stratum 1 &nbsp; time1 0.NNN &nbsp; flag1 0|1</dt>
+							<dt>fudge &nbsp; 127.127.40.X &nbsp; time1 0.NNN &nbsp; flag1 0|1</dt>
 							<dd>
 								<p>Time1 may specify a constant to be added to the time offset for the time from the receiver, a fixed-point decimal number in seconds. You may specify the time offset from several tens of milli-seconds ( 0.0NN seconds ) to a hundred and several tens of milli-seconds  ( 0.1NN seconds ) for this clock.</p>
 								<p>Flag1 has no effect for time synchronization. When flag1 is set to 1, status commands are issued before DATE and STIM commands, and write a response text into the clockstats file.</p>
@@ -105,7 +116,7 @@
 						<dl>
 							<dt>server &nbsp; 127.127.40.X &nbsp; mode 2</dt>
 							<dd><br></dd>
-							<dt>fudge &nbsp; 127.127.40.X &nbsp; stratum 1</dt>
+							<dt>fudge &nbsp; 127.127.40.X &nbsp; time1 0.NNN</dt>
 						</dl>
 						<br>
 					</dd>
@@ -141,7 +152,7 @@
 						<dl>
 							<dt>server &nbsp; 127.127.40.X &nbsp; mode 3</dt>
 							<dd><br></dd>
-							<dt>fudge &nbsp; 127.127.40.X &nbsp; stratum 1</dt>
+							<dt>fudge &nbsp; 127.127.40.X &nbsp; time1 0.NNN</dt>
 						</dl>
 						<br>
 					</dd>
@@ -187,7 +198,7 @@
 						<dl>
 							<dt>server &nbsp; 127.127.40.X &nbsp; mode 4</dt>
 							<dd><br></dd>
-							<dt>fudge &nbsp; 127.127.40.X &nbsp; stratum 1</dt>
+							<dt>fudge &nbsp; 127.127.40.X &nbsp; time1 0.NNN</dt>
 						</dl>
 						<br>
 					</dd>
@@ -225,7 +236,7 @@
 						<dl>
 							<dt>server &nbsp; 127.127.40.X &nbsp; mode 5</dt>
 							<dd><br></dd>
-							<dt>fudge &nbsp; 127.127.40.X &nbsp; stratum 1 &nbsp; time1 0.NNN &nbsp; flag1 0|1</dt>
+							<dt>fudge &nbsp; 127.127.40.X &nbsp; time1 0.NNN &nbsp; flag1 0|1</dt>
 							<dd>
 								<p>Time1 may specify a constant to be added to the time offset for the time from the receiver, a fixed-point decimal number in seconds.</p>
 								<p>Flag1 has no effect for time synchronization. When a flag1 is set to 1, status command is issued before DATE and TIME commands, and write a response text into a clockstats file.</p>
@@ -277,6 +288,48 @@
 			</li>
 
 			<li>
+				<p><a name="mode-6">SEIKO TIME SYSTEMS INC. &nbsp; TDC-300</a> &nbsp; <a href="http://www.seiko-sts.co.jp/">http://www.seiko-sts.co.jp/</a> (English and Japanese)</p><br>
+				<p>The TDC-300 must be set to the type 3 data format using the front panel menu display and the switches.</p>
+				<dl>
+					<dt>NTP configuration ( ntp.conf )</dt>
+					<dd><br>
+						<dl>
+							<dt>server &nbsp; 127.127.40.X &nbsp; mode 6</dt>
+							<dd><br></dd>
+							<dt>fudge &nbsp; 127.127.40.X &nbsp; time1 0.NNN</dt>
+						</dl>
+						<br>
+					</dd>
+					<dt>Interface</dt>
+					<dd>
+						<p>RS-232C, 2400 BPS, 8-bits, no parity, 1 stop bit</p>
+						<br>
+					</dd>
+					<dt>Time code format</dt>
+					<dd><br>
+						<table summary="CommandAndReply">
+							<tr>
+								<td>Command</td>
+								<td>&nbsp;--&gt;&nbsp;</td>
+								<td>Reply</td>
+							</tr>
+							<tr>
+								<td></td>
+								<td></td>
+								<td><code>{STX}YYMMDDWHHMMSS{ETX}</code></td>
+							</tr>
+							<tr>
+								<td>( 5 to 10 mSec. before second )</td>
+								<td></td>
+								<td><code>{STX}{xE5}{ETX}</code></td>
+							</tr>
+						</table>
+						<br>
+					</dd>
+				</dl>
+			</li>
+
+			<li>
 				<p><a name="mode-100">Telephone JJY</a> &nbsp; <a href="http://jjy.nict.go.jp/">http://jjy.nict.go.jp/</a> (English and Japanese)</p>
 				<p>The telephone JJY is the time service through a public telephone line.<br>
 				The service is provided by the National Institute of Information and Communications Technology in Japan.</p>
@@ -301,7 +354,7 @@
 							<p>The default polling interval 6 ( 64 seconds ) is too short for this mode. The "minpoll" should be set to greater than or equal to 8 ( 256 seconds, about 4 minutes ).<br>
 							The interval time is given the value in second power of 2. The minpoll value 12 is 4096 seconds interval ( about 1 hour ), 14 is 16384 seconds interval ( about 4.5 hours ), 16 is 65536 seconds ( about 18 hours ), respectively.</p><br>
 							</dd>
-							<dt>fudge &nbsp; 127.127.40.X &nbsp; stratum 1 &nbsp; flag1 0|1 &nbsp; flag2 0|1 &nbsp; flag3 0|1 &nbsp; flag4 0|1</dt>
+							<dt>fudge &nbsp; 127.127.40.X &nbsp; flag1 0|1 &nbsp; flag2 0|1 &nbsp; flag3 0|1 &nbsp; flag4 0|1</dt>
 							<dd>
 								<p>Time1 may specify a constant to be added to the time offset for the time from the receiver, a fixed-point decimal number in seconds.<br>
 								When the mode 100 is specified, the time1 may be specified in order to adjust the time offset.<br>

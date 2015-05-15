@@ -103,6 +103,9 @@
 /*             to put DATE command between before and after TIME's.   */
 /*             Unify the writing clockstats of all JJY receivers.     */
 /*								      */
+/*  2015/05/15							      */
+/*    [Add]    Support the SEIKO TIME SYSTEMS TDC-300		      */
+/*								      */
 /**********************************************************************/
 
 #ifdef HAVE_CONFIG_H
@@ -135,6 +138,7 @@
 #define	SPEED232_ECHOKEISOKUKI_LT2000	B9600   /* UART speed (9600 baud) */
 #define	SPEED232_CITIZENTIC_JJY200	B4800   /* UART speed (4800 baud) */
 #define	SPEED232_TRISTATE_GPSCLOCK01	B38400  /* USB  speed (38400 baud) */
+#define	SPEED232_SEIKO_TIMESYS_TDC_300	B2400   /* UART speed (2400 baud) */
 #define	SPEED232_TELEPHONE		B2400   /* UART speed (4800 baud) */
 #define	REFID   	"JJY"		/* reference ID */
 #define	DESCRIPTION	"JJY Receiver"
@@ -164,7 +168,8 @@ struct jjyunit {
 	short	iProcessState ;     /* JJY_PROCESS_STATE_XXXXXX */
 	char	bReceiveFlag ;      /* Set and reset by jjy_receive */
 	char	bLineError ;	    /* Reset by jjy_poll / Set by jjy_receive_xxxxxxxx*/
-	int 	iCommandSeq ;       /* 0:Idle  Non-Zero:Issued */
+	short	iCommandSeq ;       /* 0:Idle  Non-Zero:Issued */
+	short	iReceiveSeq ;
 	int 	iLineCount ;
 	int 	year, month, day, hour, minute, second, msecond ;
 	int 	leapsecond ;
@@ -208,6 +213,7 @@ struct jjyunit {
 #define	UNITTYPE_ECHOKEISOKUKI_LT2000  	3
 #define	UNITTYPE_CITIZENTIC_JJY200  	4
 #define	UNITTYPE_TRISTATE_GPSCLOCK01	5
+#define	UNITTYPE_SEIKO_TIMESYS_TDC_300	6
 #define	UNITTYPE_TELEPHONE		100
 
 #define	JJY_PROCESS_STATE_IDLE   	0
@@ -227,6 +233,7 @@ struct jjyunit {
  *   |--  jjy_start_echokeisokuki_lt2000
  *   |--  jjy_start_citizentic_jjy200
  *   |--  jjy_start_tristate_gpsclock01
+ *   |--  jjy_start_seiko_tsys_tdc_300
  *   |--  jjy_start_telephone
  *
  *  jjy_shutdown
@@ -237,6 +244,7 @@ struct jjyunit {
  *   |--  jjy_poll_echokeisokuki_lt2000
  *   |--  jjy_poll_citizentic_jjy200
  *   |--  jjy_poll_tristate_gpsclock01
+ *   |--  jjy_poll_seiko_tsys_tdc_300
  *   |--  jjy_poll_telephone
  *         |--  teljjy_control
  *               |--  teljjy_XXXX_YYYY ( XXXX_YYYY is an event handler name. )
@@ -255,6 +263,8 @@ struct jjyunit {
  *   |--  jjy_receive_citizentic_jjy200
  *   |     |--  jjy_synctime
  *   |--  jjy_receive_tristate_gpsclock01
+ *   |     |--  jjy_synctime
+ *   |--  jjy_receive_seiko_tsys_tdc_300
  *   |     |--  jjy_synctime
  *   |--  jjy_receive_telephone
  *         |--  modem_receive
@@ -287,6 +297,7 @@ static	int 	jjy_start_cdex_jst2000		(int, struct peer *, struct jjyunit *);
 static	int 	jjy_start_echokeisokuki_lt2000	(int, struct peer *, struct jjyunit *);
 static	int 	jjy_start_citizentic_jjy200	(int, struct peer *, struct jjyunit *);
 static	int 	jjy_start_tristate_gpsclock01	(int, struct peer *, struct jjyunit *);
+static	int 	jjy_start_seiko_tsys_tdc_300	(int, struct peer *, struct jjyunit *);
 static	int 	jjy_start_telephone		(int, struct peer *, struct jjyunit *);
 
 static	void	jjy_shutdown			(int, struct peer *);
@@ -297,6 +308,7 @@ static	void	jjy_poll_cdex_jst2000	    	(int, struct peer *);
 static	void	jjy_poll_echokeisokuki_lt2000	(int, struct peer *);
 static	void	jjy_poll_citizentic_jjy200	(int, struct peer *);
 static	void	jjy_poll_tristate_gpsclock01	(int, struct peer *);
+static	void	jjy_poll_seiko_tsys_tdc_300	(int, struct peer *);
 static	void	jjy_poll_telephone		(int, struct peer *);
 
 static	void	jjy_receive			(struct recvbuf *);
@@ -305,6 +317,7 @@ static	int 	jjy_receive_cdex_jst2000	(struct recvbuf *);
 static	int 	jjy_receive_echokeisokuki_lt2000 (struct recvbuf *);
 static  int 	jjy_receive_citizentic_jjy200	(struct recvbuf *);
 static	int 	jjy_receive_tristate_gpsclock01	(struct recvbuf *);
+static	int 	jjy_receive_seiko_tsys_tdc_300	(struct recvbuf *);
 static	int 	jjy_receive_telephone		(struct recvbuf *);
 
 static	void	jjy_timer			(int, struct peer *);
@@ -471,6 +484,9 @@ jjy_start ( int unit, struct peer *peer )
 		break ;
 	case 5 :
 		rc = jjy_start_tristate_gpsclock01 ( unit, peer, up ) ;
+		break ;
+	case 6 :
+		rc = jjy_start_seiko_tsys_tdc_300 ( unit, peer, up ) ;
 		break ;
 	case 100 :
 		rc = jjy_start_telephone ( unit, peer, up ) ;
@@ -750,6 +766,10 @@ jjy_receive ( struct recvbuf *rbufp )
 			rc = jjy_receive_tristate_gpsclock01 ( rbufp ) ;
 			break ;
 
+		case UNITTYPE_SEIKO_TIMESYS_TDC_300 :
+			rc = jjy_receive_seiko_tsys_tdc_300 ( rbufp ) ;
+			break ;
+
 		case UNITTYPE_TELEPHONE :
 			rc = jjy_receive_telephone ( rbufp ) ;
 			break ;
@@ -890,6 +910,7 @@ jjy_poll ( int unit, struct peer *peer )
 
 	up->iProcessState = JJY_PROCESS_STATE_POLL ;
 	up->iCommandSeq = 0 ;
+	up->iReceiveSeq = 0 ;
 	up->iLineCount = 0 ;
 	up->bLineError = FALSE ;
 	up->iRawBufLen = 0 ;
@@ -914,6 +935,10 @@ jjy_poll ( int unit, struct peer *peer )
 
 	case UNITTYPE_TRISTATE_GPSCLOCK01 :
 		jjy_poll_tristate_gpsclock01 ( unit, peer ) ;
+		break ;
+
+	case UNITTYPE_SEIKO_TIMESYS_TDC_300 :
+		jjy_poll_seiko_tsys_tdc_300 ( unit, peer ) ;
 		break ;
 
 	case UNITTYPE_TELEPHONE :
@@ -2249,6 +2274,233 @@ jjy_poll_tristate_gpsclock01 ( int unit, struct peer *peer )
 	}
 
 	jjy_write_clockstats( peer, JJY_CLOCKSTATS_MARK_SEND, pCmd ) ;
+
+}
+
+/*################################################################################################*/
+/*################################################################################################*/
+/*##												##*/
+/*##    The SEIKO TIME SYSTEMS TDC-300								##*/
+/*##												##*/
+/*##    server  127.127.40.X  mode 6								##*/
+/*##												##*/
+/*################################################################################################*/
+/*################################################################################################*/
+/*                                                                                                */
+/*  Type                  Response                                  Remarks                       */
+/*  --------------------  ----------------------------------------  ----------------------------  */
+/*  Type 1                <STX>HH:MM:SS<ETX>                                                      */
+/*  Type 2                <STX>YYMMDDHHMMSSWLSCU<ETX>               W:0(Sun)-6(Sat)               */
+/*  Type 3                <STX>YYMMDDWHHMMSS<ETX>                   W:0(Sun)-6(Sat)               */
+/*                        <STX><xE5><ETX>                           5 to 10 mSec. before second   */
+/*                                                                                                */
+/*################################################################################################*/
+
+static struct jjyRawDataBreak seiko_tsys_tdc_300_raw_break [ ] =
+{
+	{ "\x03", 1 }, { NULL, 0 }
+} ;
+
+/**************************************************************************************************/
+
+static int
+jjy_start_seiko_tsys_tdc_300 ( int unit, struct peer *peer, struct jjyunit *up )
+{
+
+	jjy_write_clockstats( peer, JJY_CLOCKSTATS_MARK_JJY, "Refclock: SEIKO TIME SYSTEMS TDC-300" ) ;
+
+	up->unittype  = UNITTYPE_SEIKO_TIMESYS_TDC_300 ;
+	up->linespeed = SPEED232_SEIKO_TIMESYS_TDC_300 ;
+	up->linediscipline = LDISC_RAW ;
+
+	up->pRawBreak = seiko_tsys_tdc_300_raw_break ;
+	up->bWaitBreakString = TRUE ;
+
+	up->bSkipCntrlCharOnly = FALSE ;
+
+	return 0 ;
+
+}
+
+/**************************************************************************************************/
+
+static int
+jjy_receive_seiko_tsys_tdc_300 ( struct recvbuf *rbufp )
+{
+
+	struct peer		*peer;
+	struct refclockproc	*pp ;
+	struct jjyunit		*up ;
+
+	char	*pBuf, sLog [ 100 ] ;
+	int	iLen, i ;
+	int	rc, iWeekday ;
+	time_t	now ;
+	struct	tm	*pTime ;
+
+	/* Initialize pointers */
+
+	peer = rbufp->recv_peer ;
+	pp = peer->procptr ;
+	up = pp->unitptr ;
+
+	if ( up->linediscipline == LDISC_RAW ) {
+		pBuf = up->sTextBuf ;
+		iLen = up->iTextBufLen ;
+	} else {
+		pBuf = pp->a_lastcode ;
+		iLen = pp->lencode ;
+	}
+
+	DEBUG_PRINTF_JJY_RECEIVE( "jjy_receive_seiko_tsys_tdc_300", iLen ) ;
+
+	/*
+	 * TDC-300 sends a timestamp every second.
+	 * So, a timestamp is ignored unless it is right after polled.
+	 */
+
+	if ( up->iProcessState != JJY_PROCESS_STATE_RECEIVE ) {
+		return JJY_RECEIVE_SKIP ;
+	}
+
+	/* Process timestamp */
+
+	up->iReceiveSeq ++ ;
+
+	switch ( iLen ) {
+
+	case 8 : /* Type 1 : <STX>HH:MM:SS<ETX> */
+
+		for ( i = 0 ; i < iLen ; i ++ ) {
+			pBuf[i] &= 0x7F ;
+		}
+
+		rc = sscanf ( pBuf+1, "%2d:%2d:%2d",
+		      &up->hour, &up->minute, &up->second ) ;
+
+		if ( rc != 3
+		  || up->hour > 23 || up->minute > 59 || up->second > 60 ) {
+			/* Invalid time */
+			snprintf( sLog, sizeof(sLog)-1, JJY_CLOCKSTATS_MESSAGE_SSCANF_INVALID_TIME,
+				  rc, up->hour, up->minute, up->second ) ;
+			jjy_write_clockstats( peer, JJY_CLOCKSTATS_MARK_ERROR, sLog ) ;
+			up->bLineError = TRUE ;
+			return JJY_RECEIVE_ERROR ;
+		} else if ( up->hour == 23 && up->minute == 59 && up->second >= 55 ) {
+			/* Uncertainty date guard */
+			return JJY_RECEIVE_WAIT ;
+		}
+
+		time( &now ) ;
+		pTime = localtime( &now ) ;
+		up->year  = pTime->tm_year ;
+		up->month = pTime->tm_mon + 1 ;
+		up->day   = pTime->tm_mday ;
+
+		break ;
+
+	case 17 : /* Type 2 : <STX>YYMMDDHHMMSSWLSCU<ETX> */
+
+		for ( i = 0 ; i < iLen ; i ++ ) {
+			pBuf[i] &= 0x7F ;
+		}
+
+		rc = sscanf ( pBuf+1, "%2d%2d%2d%2d%2d%2d%1d",
+		      &up->year, &up->month, &up->day,
+		      &up->hour, &up->minute, &up->second, &iWeekday ) ;
+
+		if ( rc != 7
+		  || up->month < 1 || up->month > 12 || up->day < 1 || up->day > 31
+		  || iWeekday > 6
+		  || up->hour > 23 || up->minute > 59 || up->second > 60 ) {
+			/* Invalid date and time */
+			snprintf( sLog, sizeof(sLog)-1, JJY_CLOCKSTATS_MESSAGE_SSCANF_INVALID_DATETIME,
+				  rc, up->year, up->month, up->day,
+				  up->hour, up->minute, up->second ) ;
+			jjy_write_clockstats( peer, JJY_CLOCKSTATS_MARK_ERROR, sLog ) ;
+			up->bLineError = TRUE ;
+			return JJY_RECEIVE_ERROR ;
+		}
+
+		break ;
+
+	case 13 : /* Type 3 : <STX>YYMMDDWHHMMSS<ETX> */
+
+		rc = sscanf ( pBuf, "%2d%2d%2d%1d%2d%2d%2d",
+		      &up->year, &up->month, &up->day, &iWeekday,
+		      &up->hour, &up->minute, &up->second ) ;
+
+		if ( rc != 7
+		  || up->month < 1 || up->month > 12 || up->day < 1 || up->day > 31
+		  || iWeekday > 6
+		  || up->hour > 23 || up->minute > 59 || up->second > 60 ) {
+			/* Invalid date and time */
+			snprintf( sLog, sizeof(sLog)-1, JJY_CLOCKSTATS_MESSAGE_SSCANF_INVALID_DATETIME,
+				  rc, up->year, up->month, up->day,
+				  up->hour, up->minute, up->second ) ;
+			jjy_write_clockstats( peer, JJY_CLOCKSTATS_MARK_ERROR, sLog ) ;
+			up->bLineError = TRUE ;
+			return JJY_RECEIVE_ERROR ;
+		}
+
+		return JJY_RECEIVE_WAIT ;
+
+	case 1 : /* Type 3 : <STX><xE5><ETX> */
+
+		if ( ( *pBuf & 0xFF ) != 0xE5 ) {
+			/* Invalid second signal */
+			snprintf( sLog, sizeof(sLog)-1, JJY_CLOCKSTATS_MESSAGE_INVALID_REPLY,
+				  up->sLineBuf ) ;
+			jjy_write_clockstats( peer, JJY_CLOCKSTATS_MARK_ERROR, sLog ) ;
+			up->bLineError = TRUE ;
+			return JJY_RECEIVE_ERROR ;
+		} else if ( up->iReceiveSeq == 1 ) {
+			/* Wait for next timestamp */
+			up->iReceiveSeq -- ;
+			return JJY_RECEIVE_WAIT ;
+		} else if ( up->iReceiveSeq >= 3 ) {
+			/* Unexpected second signal */
+			snprintf( sLog, sizeof(sLog)-1, JJY_CLOCKSTATS_MESSAGE_UNEXPECTED_REPLY,
+				  up->sLineBuf ) ;
+			jjy_write_clockstats( peer, JJY_CLOCKSTATS_MARK_ERROR, sLog ) ;
+			up->bLineError = TRUE ;
+			return JJY_RECEIVE_ERROR ;
+		}
+
+		break ;
+
+	default : /* Unexpected reply length */
+
+		snprintf( sLog, sizeof(sLog)-1, JJY_CLOCKSTATS_MESSAGE_INVALID_LENGTH,
+			  iLen ) ;
+		jjy_write_clockstats( peer, JJY_CLOCKSTATS_MARK_ERROR, sLog ) ;
+		up->bLineError = TRUE ;
+		return JJY_RECEIVE_ERROR ;
+
+	}
+
+	up->year += 2000 ;
+	up->msecond = 0 ;
+
+	jjy_synctime( peer, pp, up ) ;
+
+	return JJY_RECEIVE_DONE ;
+
+}
+
+/**************************************************************************************************/
+
+static void
+jjy_poll_seiko_tsys_tdc_300 ( int unit, struct peer *peer )
+{
+
+	struct refclockproc *pp ;
+	struct jjyunit	    *up ;
+
+	pp = peer->procptr ;
+	up = pp->unitptr ;
+
+	up->bLineError = FALSE ;
 
 }
 
