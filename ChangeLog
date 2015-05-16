@@ -1,4 +1,5 @@
 Below are from 4.2.8p3:
+* [Bug 2834] Correct a broken html tag in html/refclock.html
 * [Bug 2832] refclock_jjy.c supports the TDC-300
 (4.3.33) 2015/05/12 Released by Harlan Stenn <stenn@ntp.org>
 Below are from 4.2.8p3:
