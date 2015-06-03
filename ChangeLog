@@ -191,6 +191,9 @@ From 4.2.8p2:
 
 ntp-4.3 begins.
 ---
+
+* [Bug 2769] Convert update-leap to perl.
+---
 (4.2.8p3-RC1) 2015/05/12 Released by Harlan Stenn <stenn@ntp.org>
 
 * CID 739725: Fix a rare resource leak in libevent/listener.c.
