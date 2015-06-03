@@ -46,6 +46,7 @@ struct key_tok ntp_keywords[] = {
 { "ctl",		T_Ctl,			FOLLBY_TOKEN },
 { "disable",		T_Disable,		FOLLBY_TOKEN },
 { "driftfile",		T_Driftfile,		FOLLBY_STRING },
+{ "dscp",		T_Dscp,			FOLLBY_TOKEN },
 { "enable",		T_Enable,		FOLLBY_TOKEN },
 { "end",		T_End,			FOLLBY_TOKEN },
 { "filegen",		T_Filegen,		FOLLBY_TOKEN },

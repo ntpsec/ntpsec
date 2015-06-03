@@ -3493,6 +3493,11 @@ config_vars(
 				stats_config(STATS_FREQ_FILE, curr_var->value.s);
 			break;
 
+		case T_Dscp:
+			/* DSCP is in the upper 6 bits of the IP TOS/DS field */
+			qos = curr_var->value.i << 2;
+			break;
+
 		case T_Ident:
 			sys_ident = curr_var->value.s;
 			break;
@@ -4291,7 +4296,6 @@ config_ntpd(
 	)
 {
 	config_nic_rules(ptree, input_from_files);
-	io_open_sockets();
 	config_monitor(ptree);
 	config_auth(ptree);
 	config_tos(ptree);
@@ -4306,6 +4310,9 @@ config_ntpd(
 	config_ttl(ptree);
 	config_trap(ptree);
 	config_vars(ptree);
+
+	io_open_sockets();
+
 	config_other_modes(ptree);
 	config_peers(ptree);
 	config_unpeers(ptree);

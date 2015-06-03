@@ -170,6 +170,8 @@
   <dd>The trap receiver will generally log event messages and other information from the server in a log file. While such monitor programs may also request their own trap dynamically, configuring a trap receiver will ensure that no messages are lost when the server is started.</dd>
   <dt id="ttl"><tt>ttl <i>hop</i> ...</tt></dt>
   <dd>This command specifies a list of TTL values in increasing order. up to 8 values can be specified. In manycast mode these values are used in turn in an expanding-ring search. The default is eight multiples of 32 starting at 31.</dd>
+  <dt id="dscp"><tt>dscp <i>dscp</i></tt></dt>
+  <dd>This command specifies the Differentiated Services Code Point (DSCP) value that is used in sent NTP packets.  The default value is 46 for Expedited Forwarding (EF).</dd>
 </dl>
 <hr>
 <script type="text/javascript" language="javascript" src="scripts/footer.txt"></script>

@@ -1,8 +1,9 @@
 ---
 
 * [Bug 2824] Convert update-leap to perl. (also see 2769)
-* [Bug 2832] refclock_jjy.c supports the TDC-300
+* [Bug 2832] refclock_jjy.c supports the TDC-300.
 * [Bug 2834] Correct a broken html tag in html/refclock.html
+* [Bug 2837] Allow a configurable DSCP value.
 ---
 (4.2.8p3-RC1) 2015/05/12 Released by Harlan Stenn <stenn@ntp.org>
 
