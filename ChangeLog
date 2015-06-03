@@ -1,6 +1,7 @@
 Below are from 4.2.8p3:
-* [Bug 2834] Correct a broken html tag in html/refclock.html
+* [Bug 2824] Convert update-leap to perl. (also see 2769)
 * [Bug 2832] refclock_jjy.c supports the TDC-300
+* [Bug 2834] Correct a broken html tag in html/refclock.html
 (4.3.33) 2015/05/12 Released by Harlan Stenn <stenn@ntp.org>
 Below are from 4.2.8p3:
 * 4.2.8p3-RC1
@@ -193,6 +194,9 @@ From 4.2.8p2:
 * [Bug 2747] Upgrade libevent to 2.1.5-beta.
 
 ntp-4.3 begins.
+---
+
+* [Bug 2824] Convert update-leap to perl. (also see 2769)
 ---
 (4.2.8p3-RC1) 2015/05/12 Released by Harlan Stenn <stenn@ntp.org>
 
