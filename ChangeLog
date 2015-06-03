@@ -1,6 +1,8 @@
 ---
 
 * [Bug 2824] Convert update-leap to perl. (also see 2769)
+* [Bug 2832] refclock_jjy.c supports the TDC-300
+* [Bug 2834] Correct a broken html tag in html/refclock.html
 ---
 (4.2.8p3-RC1) 2015/05/12 Released by Harlan Stenn <stenn@ntp.org>
 
@@ -42,8 +44,6 @@
 * [Bug 2821] Add a missing NTP_PRINTF and a missing const.
 * [Bug 2822] New leap column in sntp broke NTP::Util.pm.
 * [Bug 2825] Quiet file installation in html/ .
-* [Bug 2832] refclock_jjy.c supports the TDC-300
-* [Bug 2834] Correct a broken html tag in html/refclock.html
 * Add an assert to the ntpq ifstats code.
 * Clean up the RLIMIT_STACK code.
 * Improve the ntpq documentation around the controlkey keyid.
