@@ -73,6 +73,11 @@
 
 extern int listen_to_virtual_ips;
 
+#ifndef IPTOS_DSCP_EF
+#define IPTOS_DSCP_EF 0xb8
+#endif
+int qos = IPTOS_DSCP_EF;	/* QoS RFC3246 */
+
 /*
  * NIC rule entry
  */
@@ -2862,11 +2867,6 @@ open_socket(
 	 */
 	int	on = 1;
 	int	off = 0;
-
-#ifndef IPTOS_DSCP_EF
-#define IPTOS_DSCP_EF 0xb8
-#endif
-	int	qos = IPTOS_DSCP_EF;	/* QoS RFC3246 */
 
 	if (IS_IPV6(addr) && !ipv6_works)
 		return INVALID_SOCKET;

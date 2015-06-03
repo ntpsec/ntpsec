@@ -100,6 +100,7 @@
 %token	<Double>	T_Double		/* not a token */
 %token	<Integer>	T_Driftfile
 %token	<Integer>	T_Drop
+%token	<Integer>	T_Dscp
 %token	<Integer>	T_Ellipsis	/* "..." not "ellipsis" */
 %token	<Integer>	T_Enable
 %token	<Integer>	T_End
@@ -299,6 +300,7 @@
 %type	<Attr_val>	log_config_command
 %type	<Attr_val_fifo>	log_config_list
 %type	<Integer>	misc_cmd_dbl_keyword
+%type	<Integer>	misc_cmd_int_keyword
 %type	<Integer>	misc_cmd_str_keyword
 %type	<Integer>	misc_cmd_str_lcl_keyword
 %type	<Attr_val>	mru_option
@@ -1130,6 +1132,13 @@ miscellaneous_command
 			av = create_attr_dval($1, $2);
 			APPEND_G_FIFO(cfgt.vars, av);
 		}
+	|	misc_cmd_int_keyword T_Integer
+		{
+			attr_val *av;
+			
+			av = create_attr_ival($1, $2);
+			APPEND_G_FIFO(cfgt.vars, av);
+		}
 	|	misc_cmd_str_keyword T_String
 		{
 			attr_val *av;
@@ -1197,6 +1206,10 @@ misc_cmd_dbl_keyword
 	:	T_Broadcastdelay
 	|	T_Nonvolatile
 	|	T_Tick
+	;
+
+misc_cmd_int_keyword
+	:	T_Dscp
 	;
 
 misc_cmd_str_keyword
