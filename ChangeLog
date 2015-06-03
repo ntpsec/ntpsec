@@ -194,7 +194,7 @@ From 4.2.8p2:
 ntp-4.3 begins.
 ---
 
-* [Bug 2769] Convert update-leap to perl.
+* [Bug 2824] Convert update-leap to perl. (also see 2769)
 ---
 (4.2.8p3-RC1) 2015/05/12 Released by Harlan Stenn <stenn@ntp.org>
 
