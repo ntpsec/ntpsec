@@ -1,3 +1,4 @@
+(4.3.34) 2015/06/04 Released by Harlan Stenn <stenn@ntp.org>
 Below are from 4.2.8p3:
 * [Bug 2824] Convert update-leap to perl. (also see 2769)
 * [Bug 2832] refclock_jjy.c supports the TDC-300.
