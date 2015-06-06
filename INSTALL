@@ -1,3 +1,9 @@
+Bootstrapping from the repository
+=================================
+
+If you are building direct from a repository checkout, you need to run
+the script 'boostrap' before configure and make.
+
 Basic Installation
 ==================
 

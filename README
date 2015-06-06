@@ -34,9 +34,6 @@ NEWS		What's new in this release.
 
 README		This file.
 
-README.bk	Instructions for folks who use the BitKeeper-repository
-		version of NTP.
-
 README.hackers	Notes to folks who want to hack on the code.
 
 TODO            List of items the NTP developers are working on.

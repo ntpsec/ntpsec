@@ -32,7 +32,6 @@ EXTRA_DIST =			\
 	CommitLog-4.1.0		\
 	NEWS			\
 	NOTES.y2kfixes		\
-	README.bk		\
 	README.hackers		\
 	README.patches		\
 	README.refclocks	\
