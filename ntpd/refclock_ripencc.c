@@ -1,6 +1,4 @@
 /*
- * $Id: refclock_ripencc.c,v 1.13 2002/06/18 14:20:55 marks Exp marks $
- *
  * Copyright (c) 2002  RIPE NCC
  *
  * All Rights Reserved

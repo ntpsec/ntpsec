@@ -33,8 +33,6 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.  */
 
-/*static char *sccsid = "from: @(#)ctime.c	5.26 (Berkeley) 2/23/91";*/
-
 /*
  * This implementation of mktime is lifted straight from the NetBSD (BSD 4.4)
  * version.  I modified it slightly to divorce it from the internals of the

@@ -30,13 +30,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $FreeBSD: src/lib/libc/stdlib/random.c,v 1.4.2.2 1999/09/05 11:16:45 peter Exp $
- *
  */
-
-#if defined(LIBC_SCCS) && !defined(lint)
-static char sccsid[] = "@(#)random.c	8.2 (Berkeley) 5/19/95";
-#endif /* LIBC_SCCS and not lint */
 
 #include "config.h"
 #include <sys/types.h>

@@ -1,4 +1,3 @@
-/*	$OpenBSD: tree.h,v 1.7 2002/10/17 21:51:54 art Exp $	*/
 /*
  * Copyright 2002 Niels Provos <provos@citi.umich.edu>
  * All rights reserved.

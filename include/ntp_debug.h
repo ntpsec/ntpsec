@@ -1,7 +1,5 @@
 /*
- * $Header$
- *
- * $Created: Sat Aug 20 14:23:01 2005 $
+ * Created: Sat Aug 20 14:23:01 2005
  *
  * Copyright (C) 2005 by Frank Kardel
  */

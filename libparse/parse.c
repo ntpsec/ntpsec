@@ -46,10 +46,6 @@
 
 #if defined(REFCLOCK) && defined(CLOCK_PARSE)
 
-#if	!(defined(lint) || defined(__GNUC__))
-static char rcsid[] = "parse.c,v 4.20 2005/08/06 17:39:40 kardel RELEASE_20050806_A";
-#endif
-
 #include "ntp_fp.h"
 #include "timevalops.h"
 #include "ntp_calendar.h"

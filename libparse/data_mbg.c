@@ -1,9 +1,5 @@
 /*
- * /src/NTP/REPOSITORY/ntp4-dev/libparse/data_mbg.c,v 4.8 2006/06/22 18:40:01 kardel RELEASE_20060622_A
- *
- * data_mbg.c,v 4.8 2006/06/22 18:40:01 kardel RELEASE_20060622_A
- *
- * $Created: Sun Jul 20 12:08:14 1997 $
+ * Created: Sun Jul 20 12:08:14 1997
  *
  * Copyright (c) 1997-2005 by Frank Kardel <kardel <AT> ntp.org>
  *

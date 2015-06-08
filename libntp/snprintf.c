@@ -10,8 +10,6 @@
  * C99-compliant implementations.
  */
 
-/* $Id: snprintf.c 1.12 2011/10/21 19:10:01+00:00 davehart@shiny.ad.hartbrothers.com $ */
-
 /*
  * Copyright (c) 1995 Patrick Powell.
  *

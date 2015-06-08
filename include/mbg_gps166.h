@@ -1,9 +1,5 @@
 /*
- * /src/NTP/REPOSITORY/ntp4-dev/include/mbg_gps166.h,v 4.7 2006/06/22 18:41:43 kardel RELEASE_20060622_A
- *
- * mbg_gps166.h,v 4.7 2006/06/22 18:41:43 kardel RELEASE_20060622_A
- *
- * $Created: Sun Jul 20 09:20:50 1997 $
+ * Created: Sun Jul 20 09:20:50 1997
  *
  * File GPSSERIO.H Copyright (c) by Meinberg Funkuhren (www.meinberg.de)
  *

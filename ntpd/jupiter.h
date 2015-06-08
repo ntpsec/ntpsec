@@ -1,5 +1,3 @@
-/* @(#) $Header: /mnt/devel/ntp/conv/dev/ntp-dev/ntpd/jupiter.h 1.2 2001/10/08 21:18:16-04:00 stenn@whimsy.udel.edu $ (LBL) */
-
 /*
  * Rockwell Jupiter GPS receiver definitions
  *

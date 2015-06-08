@@ -49,7 +49,6 @@
  * 10, but not yet with other machines. It uses no special features and
  * should be readily portable to other hardware and operating systems.
  *
- * $Log: tg.c,v $
  * Revision 1.28  2007/02/12 23:57:45  dmw
  * v0.23 2007-02-12 dmw:
  * - Changed statistics to include calculated error

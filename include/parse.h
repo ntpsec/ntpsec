@@ -34,9 +34,6 @@
 
 #ifndef __PARSE_H__
 #define __PARSE_H__
-#if	!(defined(lint) || defined(__GNUC__))
-  static char parsehrcsid[]="parse.h,v 4.12 2007/01/14 08:36:03 kardel RELEASE_20070114_A";
-#endif
 
 #include "ntp_types.h"
 

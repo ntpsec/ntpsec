@@ -18,10 +18,6 @@
  * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
-#if defined(LIBC_SCCS) && !defined(lint)
-static const char sccsid[] = "@(#)strerror.c	5.1 (Berkeley) 4/9/89";
-#endif /* LIBC_SCCS and not lint */
-
 #include <sys/types.h>
 
 #include <stdio.h>

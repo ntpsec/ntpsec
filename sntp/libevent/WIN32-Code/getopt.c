@@ -1,5 +1,3 @@
-/*	$NetBSD: getopt.c,v 1.16 1999/12/02 13:15:56 kleink Exp $	*/
-
 /*
  * Copyright (c) 1987, 1993, 1994, 1995
  *	The Regents of the University of California.  All rights reserved.
@@ -28,10 +26,6 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-
-#if 0
-static char sccsid[] = "@(#)getopt.c	8.3 (Berkeley) 4/27/95";
-#endif
 
 #include <assert.h>
 #include <errno.h>

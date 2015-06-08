@@ -34,9 +34,7 @@
 
 #ifndef __PARSE_CONF_H__
 #define __PARSE_CONF_H__
-#if	!(defined(lint) || defined(__GNUC__))
-  static char prshrcsid[] = "parse_conf.h,v 4.7 2005/06/25 10:58:45 kardel RELEASE_20050625_A";
-#endif
+
 
 /*
  * field location structure

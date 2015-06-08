@@ -1,9 +1,5 @@
 /*
- * /src/NTP/ntp4-dev/libntp/gpstolfp.c,v 4.8 2005/04/16 17:32:10 kardel RELEASE_20050508_A
- *
- * gpstolfp.c,v 4.8 2005/04/16 17:32:10 kardel RELEASE_20050508_A
- *
- * $Created: Sun Jun 28 16:30:38 1998 $
+ * Created: Sun Jun 28 16:30:38 1998
  *
  * Copyright (c) 1998-2005 by Frank Kardel <kardel <AT> ntp.org>
  *

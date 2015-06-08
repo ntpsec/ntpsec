@@ -1,5 +1,3 @@
-/*	$OpenBSD: poll.c,v 1.2 2002/06/25 15:50:15 mickey Exp $	*/
-
 /*
  * Copyright 2000-2007 Niels Provos <provos@citi.umich.edu>
  * Copyright 2007-2012 Niels Provos and Nick Mathewson

@@ -1,9 +1,5 @@
 /*
- * /src/NTP/ntp4-dev/include/ieee754io.h,v 4.3 2005/04/16 17:32:10 kardel RELEASE_20050508_A
- *
- * ieee754io.h,v 4.3 2005/04/16 17:32:10 kardel RELEASE_20050508_A
- *
- * $Created: Sun Jul 13 12:22:11 1997 $
+ * Created: Sun Jul 13 12:22:11 1997
  *
  * Copyright (c) 1997-2005 by Frank Kardel <kardel <AT> ntp.org>
  *
