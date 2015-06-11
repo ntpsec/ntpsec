@@ -1,5 +1,11 @@
 = Patch and change-comment conventions =
 
+Annoying but necessary legalese:
+
+    By submitting patches to this project, you agree to allow them to be
+    redistributed under the project's license according to the normal
+    forms and usages of the open-source community.
+
 See README.hackers for notes on coding styles.
 
 The code history has been moved to git; the BitKeeper-based advice that used
