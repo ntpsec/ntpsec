@@ -13,3 +13,10 @@ We'd like to see *all* system function declarations live in include/l_stdlib.h
 and NEVER appear in the .c files.
 
 ---
+
+The baseline C standard is C99.  Only POSIX 2001 library functions
+should be used.  If a library function not in POSIX 2001 is used then a
+wrapper function for back compatibility must be provided.
+
+---
+
