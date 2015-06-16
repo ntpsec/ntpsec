@@ -14,10 +14,10 @@ documented here.
 
 == Patch format ==
 
-Please submit patches as git fast-format patches *only*.  This ensures that
+Please submit patches as git format-patch patches *only*.  This ensures that
 your change comment and attribution will be properly imported.
 
-If for some reason it is impossible for you to use git fast-format, at least
+If for some reason it is impossible for you to use git format-patch, at least
 send context (-c) or unified (-u) diffs rather than the default ed (-e) style,
 which is very brittle.
 
@@ -39,7 +39,7 @@ should consist of:
 * The remainder of your comment should be one or more paragraphs line-wrapped at
   72 characters - please do *not* enter entire paragraphs as single lines, it
   makes life more difficult for browsing tools and people viewing the output of
-  git-format-patch. Bulleted list items are also OK.
+  git format-patch. Bulleted list items are also OK.
 
 * In some cases it may be appropriate to end your summary line with a comma
   or elipsis ("...") to indicate that it runs dictly into a following paragraph.
