@@ -502,9 +502,7 @@ AC_CHECK_HEADERS([sys/resource.h], [], [], [
 
 AC_CHECK_HEADERS([sys/shm.h], [], [], [
     #include <sys/types.h>
-    #ifdef HAVE_SYS_IPC_H
-    # include <sys/ipc.h>
-    #endif
+    #include <sys/ipc.h>
 ])
 
 AC_CHECK_HEADERS([sys/timex.h], [], [], [
