@@ -373,7 +373,7 @@ case "$host" in
     AC_CHECK_HEADERS([machine/soundcard.h sys/soundcard.h])
     ;;
 esac
-AC_CHECK_HEADERS([sys/stat.h sys/stream.h stropts.h sys/stropts.h sys/syssgi.h])
+AC_CHECK_HEADERS([sys/stream.h stropts.h sys/stropts.h sys/syssgi.h])
 AC_CHECK_HEADERS([sys/systune.h sys/termios.h sys/tpro.h sys/wait.h])
 case "$host" in
 *-convex-*)
