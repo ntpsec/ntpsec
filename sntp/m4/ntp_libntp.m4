@@ -801,9 +801,7 @@ AC_CHECK_HEADERS(
 	#ifdef HAVE_SYS_TIME_H
 	# include <sys/time.h>
 	#endif
-	#ifdef HAVE_ERRNO_H
-	# include <errno.h>
-	#endif
+	#include <errno.h>
     ]
 )
 
@@ -816,9 +814,7 @@ AC_CACHE_CHECK(
 		#include <sys/time.h>
 		/* Under SunOS, timespec is in sys/timepps.h,
 		   which needs errno.h and FRAC */
-		#ifdef HAVE_ERRNO_H
 		# include <errno.h>
-		#endif
 		#ifdef HAVE_SYS_TIMEPPS_H
 		# define FRAC 4294967296
 		# include <sys/timepps.h>

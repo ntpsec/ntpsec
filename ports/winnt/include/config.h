@@ -390,7 +390,6 @@ typedef int ssize_t;	/* ssize is an int */
 /* libntp/snprintf.c doesn't know %I64d */
 #define ISC_PLATFORM_QUADFORMAT "ll"
 
-# define HAVE_ERRNO_H			1
 # define HAVE_FCNTL_H			1
 # define HAVE_LIMITS_H			1
 # define HAVE_STDARG_H			1
