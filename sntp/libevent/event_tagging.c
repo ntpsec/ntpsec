@@ -28,9 +28,7 @@
 #include "event2/event-config.h"
 #include "evconfig-private.h"
 
-#ifdef EVENT__HAVE_SYS_TYPES_H
 #include <sys/types.h>
-#endif
 #ifdef EVENT__HAVE_SYS_PARAM_H
 #include <sys/param.h>
 #endif

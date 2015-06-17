@@ -175,9 +175,7 @@ AC_CHECK_HEADERS([sys/sysctl.h], [], [], [
 AC_CHECK_HEADERS([netinet/in_system.h netinet/in_systm.h netinet/in.h])
 
 AC_CHECK_HEADERS([resolv.h], [], [], [
-    #ifdef HAVE_SYS_TYPES_H
-    # include <sys/types.h>
-    #endif
+    #include <sys/types.h>
     #ifdef HAVE_NETINET_IN_H
     # include <netinet/in.h>
     #endif
@@ -187,9 +185,7 @@ AC_CHECK_HEADERS([resolv.h], [], [], [
 ])
 
 AC_CHECK_HEADERS([net/if_var.h], [], [], [
-    #if HAVE_SYS_TYPES_H
-    # include <sys/types.h>
-    #endif
+    #include <sys/types.h>
     #ifdef HAVE_SYS_SOCKET_H
     # include <sys/socket.h>
     #endif
@@ -202,9 +198,7 @@ AC_CHECK_HEADERS([net/if_var.h], [], [], [
 ])
 
 AC_CHECK_HEADERS([netinet/ip.h netinet/in_var.h], [], [], [
-    #ifdef HAVE_SYS_TYPES_H
-    # include <sys/types.h>
-    #endif
+    #include <sys/types.h>
     #ifdef HAVE_SYS_SOCKET_H
     # include <sys/socket.h>
     #endif
@@ -861,9 +855,7 @@ AC_CHECK_HEADERS(
     [],
     [],
     [
-	#ifdef HAVE_SYS_TYPES_H
-	# include <sys/types.h>
-	#endif
+	#include <sys/types.h>
     ]
 )
 
