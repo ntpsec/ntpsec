@@ -17,9 +17,7 @@
 #include "l_stdlib.h"
 
 #include <stdio.h>
-#ifdef HAVE_UNISTD_H
-# include <unistd.h>
-#endif /* HAVE_UNISTD_H */
+#include <unistd.h>
 
 #ifdef HAVE_SYS_TIMEX_H
 # include <sys/timex.h>

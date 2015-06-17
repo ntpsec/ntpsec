@@ -39,9 +39,7 @@
 #include <sys/socket.h>
 #include <stdio.h>
 #include <stdlib.h>
-#ifdef EVENT__HAVE_UNISTD_H
 #include <unistd.h>
-#endif
 #include <ctype.h>
 #include <errno.h>
 #include <signal.h>

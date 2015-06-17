@@ -26,9 +26,7 @@
 #include "isc/result.h"
 #include "isc/sockaddr.h"
 
-#ifdef HAVE_UNISTD_H
-# include <unistd.h>
-#endif
+#include <unistd.h>
 
 #include <stdio.h>
 #include <signal.h>

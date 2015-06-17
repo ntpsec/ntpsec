@@ -52,9 +52,7 @@
 #ifndef _WIN32
 #include <syslog.h>
 #endif
-#ifdef EVENT__HAVE_UNISTD_H
 #include <unistd.h>
-#endif
 #include <limits.h>
 
 #include "event2/event.h"

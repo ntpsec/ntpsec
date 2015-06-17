@@ -21,9 +21,7 @@
 #ifdef HAVE_SYS_SIGNAL_H
 # include <sys/signal.h>
 #endif
-#ifdef HAVE_UNISTD_H
-# include <unistd.h>
-#endif
+#include <unistd.h>
 
 #ifdef KERNEL_PLL
 #include "ntp_syscall.h"

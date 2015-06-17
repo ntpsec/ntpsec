@@ -50,9 +50,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#ifdef EVENT__HAVE_UNISTD_H
 #include <unistd.h>
-#endif
 #include <errno.h>
 
 #ifdef _WIN32

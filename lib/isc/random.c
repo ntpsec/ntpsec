@@ -24,9 +24,7 @@
 #include <stdlib.h>
 #include <time.h>		/* Required for time(). */
 #include <sys/types.h>
-#ifdef HAVE_UNISTD_H
 #include <unistd.h>
-#endif
 
 #include <isc/mutex.h>
 #include <isc/once.h>

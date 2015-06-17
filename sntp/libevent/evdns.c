@@ -66,9 +66,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
-#ifdef EVENT__HAVE_UNISTD_H
 #include <unistd.h>
-#endif
 #include <limits.h>
 #include <sys/stat.h>
 #include <stdio.h>

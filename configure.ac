@@ -982,9 +982,7 @@ AC_CACHE_CHECK(
 	[AC_LANG_PROGRAM(
 	    [[
 		#include <sys/types.h>
-		#ifdef HAVE_UNISTD_H
-		# include <unistd.h>
-		#endif
+		#include <unistd.h>
 	    ]],
 	    [[
 		setpgrp(0, 0);
@@ -1007,9 +1005,7 @@ AC_CACHE_CHECK(
 	[AC_LANG_PROGRAM(
 	    [[
 		#include <sys/types.h>
-		#ifdef HAVE_UNISTD_H
-		# include <unistd.h>
-		#endif
+		#include <unistd.h>
 	    ]],
 	    [[
 		extern int syscall (int, ...);
@@ -1744,9 +1740,7 @@ AC_CACHE_CHECK(
     [AC_COMPILE_IFELSE(
 	[AC_LANG_PROGRAM(
 	    [[
-		#ifdef HAVE_UNISTD_H
-		# include <unistd.h>
-		#endif
+		#include <unistd.h>
 		#ifdef HAVE_TERMIOS_H
 		# include <termios.h>
 		#endif

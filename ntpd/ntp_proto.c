@@ -19,9 +19,7 @@
 #ifdef HAVE_LIBSCF_H
 #include <libscf.h>
 #endif
-#ifdef HAVE_UNISTD_H
 #include <unistd.h>
-#endif
 
 /*
  * This macro defines the authentication state. If x is 1 authentication
