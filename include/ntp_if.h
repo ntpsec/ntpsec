@@ -22,6 +22,4 @@
 # include <sys/stropts.h>
 #endif
 
-#ifdef HAVE_NET_IF_H
-# include <net/if.h>
-#endif /* HAVE_NET_IF_H */
+#include <net/if.h>
