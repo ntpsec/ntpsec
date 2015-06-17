@@ -77,9 +77,7 @@ SOFTWARE.
 #if HAVE_WINSOCK_H
 #include <winsock.h>
 #endif
-#if HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
-#endif
 #if HAVE_NET_IF_H
 #include <net/if.h>
 #endif

@@ -97,9 +97,7 @@ dnl  configure tests) and config.h.
 #
 AC_CHECK_HEADERS([errno.h sys/socket.h sys/types.h time.h])
 AC_CHECK_HEADERS([net/if.h], [], [], [
-    #ifdef HAVE_SYS_SOCKET_H
-    # include <sys/socket.h>
-    #endif
+    #include <sys/socket.h>
 ])
 case "$host" in
  *-hp-hpux*)
@@ -117,9 +115,7 @@ case "$host" in
 				    struct pdk_mpinfo *pdkptr;
 				    struct mpinfo *pikptr;
 			    } mpinfou_t;
-			    #ifdef HAVE_SYS_SOCKET_H
-			    # include <sys/socket.h>
-			    #endif
+			    #include <sys/socket.h>
 			    #include <net/if.h>
 			]],
 			[[
@@ -159,9 +155,7 @@ esac
 case "$host" in
  *-linux*)
     AC_CHECK_HEADERS([linux/if_addr.h], [], [], [
-	#ifdef HAVE_SYS_SOCKET_H
-	# include <sys/socket.h>
-	#endif
+	#include <sys/socket.h>
     ])
 esac
 
@@ -186,9 +180,7 @@ AC_CHECK_HEADERS([resolv.h], [], [], [
 
 AC_CHECK_HEADERS([net/if_var.h], [], [], [
     #include <sys/types.h>
-    #ifdef HAVE_SYS_SOCKET_H
-    # include <sys/socket.h>
-    #endif
+    #include <sys/socket.h>
     #ifdef HAVE_NETINET_IN_H
     # include <netinet/in.h>
     #endif

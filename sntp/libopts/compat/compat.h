@@ -79,9 +79,7 @@
 #  include <sys/stropts.h>
 #  endif
 
-#  if HAVE_SYS_SOCKET_H
-#  include <sys/socket.h>
-#  endif
+#include <sys/socket.h>
 
 #  if ! defined(HAVE_SYS_POLL_H) && ! defined(HAVE_SYS_SELECT_H)
 #    error This system cannot support daemon processing

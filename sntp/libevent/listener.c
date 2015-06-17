@@ -39,9 +39,7 @@
 #include <mswsock.h>
 #endif
 #include <errno.h>
-#ifdef EVENT__HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
-#endif
 #ifdef EVENT__HAVE_FCNTL_H
 #include <fcntl.h>
 #endif

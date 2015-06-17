@@ -644,9 +644,7 @@ AC_CHECK_TYPES([struct in6_addr, struct sockaddr_in6, sa_family_t, struct addrin
 #ifdef HAVE_NETINET_IN6_H
 #include <netinet/in6.h>
 #endif
-#ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
-#endif
 #ifdef HAVE_NETDB_H
 #include <netdb.h>
 #endif
@@ -670,9 +668,7 @@ AC_CHECK_MEMBERS([struct in6_addr.s6_addr32, struct in6_addr.s6_addr16, struct s
 #ifdef HAVE_NETINET_IN6_H
 #include <netinet/in6.h>
 #endif
-#ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
-#endif
 #ifdef _WIN32
 #define WIN32_WINNT 0x400
 #define _WIN32_WINNT 0x400
@@ -689,9 +685,7 @@ AC_CHECK_MEMBERS([struct in6_addr.s6_addr32, struct in6_addr.s6_addr16, struct s
 AC_CHECK_TYPES([struct so_linger],
 [#define HAVE_SO_LINGER], ,
 [
-#ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
-#endif
 ])
 
 AC_MSG_CHECKING([for socklen_t])

@@ -31,9 +31,7 @@
 #endif
 #include <sys/types.h>
 #include <sys/stat.h>
-#ifdef EVENT__HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
-#endif
 #include <fcntl.h>
 #include <stdlib.h>
 #include <stdio.h>

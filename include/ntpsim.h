@@ -13,9 +13,7 @@
 
 #include <stdio.h>
 #include <math.h>
-#ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
-#endif
 #include <arpa/inet.h>
 #include "ntp_syslog.h"
 #include "ntp_fp.h"

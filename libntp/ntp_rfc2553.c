@@ -69,9 +69,7 @@
 
 #include <sys/types.h>
 #include <ctype.h>
-#ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
-#endif
 #include <isc/net.h>
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>

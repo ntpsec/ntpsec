@@ -5,9 +5,7 @@
 #define NTP_STDLIB_H
 
 #include <sys/types.h>
-#ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
-#endif
 
 #include "declcond.h"	/* ntpd uses ntpd/declcond.h, others include/ */
 #include "l_stdlib.h"
