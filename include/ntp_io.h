@@ -13,9 +13,7 @@
 #ifdef HAVE_SYS_FILE_H
 # include <sys/file.h>
 #endif
-#ifdef HAVE_FCNTL_H
-# include <fcntl.h>
-#endif
+#include <fcntl.h>
 #if !defined(SEEK_SET) && defined(L_SET)
 # define SEEK_SET L_SET
 #endif

@@ -9,9 +9,7 @@
 #include <sys/types.h>
 #include <sys/time.h>
 #include <unistd.h>
-#ifdef HAVE_FCNTL_H
-# include <fcntl.h>
-#endif
+#include <fcntl.h>
 #ifdef SYS_WINNT
 # include <mswsock.h>
 #endif

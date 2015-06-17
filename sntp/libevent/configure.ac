@@ -379,9 +379,7 @@ AC_CACHE_CHECK(
     [AC_LINK_IFELSE(
 	[AC_LANG_PROGRAM(
 	    [[
-		#ifdef HAVE_NETDB_H
 		#include <netdb.h>
-		#endif
 	    ]],
 	    [[
 		getaddrinfo;
@@ -615,7 +613,7 @@ AC_TYPE_SSIZE_T
 AC_CHECK_TYPES([uint64_t, uint32_t, uint16_t, uint8_t, uintptr_t], , ,
 [#ifdef HAVE_STDINT_H
 #include <stdint.h>
-#elif defined(HAVE_INTTYPES_H)
+#else
 #include <inttypes.h>
 #endif
 #include <sys/types.h>
@@ -645,9 +643,7 @@ AC_CHECK_TYPES([struct in6_addr, struct sockaddr_in6, sa_family_t, struct addrin
 #include <netinet/in6.h>
 #endif
 #include <sys/socket.h>
-#ifdef HAVE_NETDB_H
 #include <netdb.h>
-#endif
 #ifdef _WIN32
 #define WIN32_WINNT 0x400
 #define _WIN32_WINNT 0x400

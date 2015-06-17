@@ -45,9 +45,7 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <unistd.h>
-#ifdef EVENT__HAVE_FCNTL_H
 #include <fcntl.h>
-#endif
 #ifdef EVENT__HAVE_STDLIB_H
 #include <stdlib.h>
 #endif

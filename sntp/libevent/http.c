@@ -56,9 +56,7 @@
 #ifdef EVENT__HAVE_ARPA_INET_H
 #include <arpa/inet.h>
 #endif
-#ifdef EVENT__HAVE_NETDB_H
 #include <netdb.h>
-#endif
 
 #ifdef _WIN32
 #include <winsock2.h>
@@ -74,9 +72,7 @@
 #include <signal.h>
 #include <time.h>
 #include <unistd.h>
-#ifdef EVENT__HAVE_FCNTL_H
 #include <fcntl.h>
-#endif
 
 #undef timeout_pending
 #undef timeout_initialized

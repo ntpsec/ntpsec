@@ -13,11 +13,7 @@
 #define NTP_TYPES_H
 
 #include <sys/types.h>
-#if defined(HAVE_INTTYPES_H)
-# include <inttypes.h>
-#elif defined(HAVE_STDINT_H)
-# include <stdint.h>
-#endif
+#include <inttypes.h>
 
 /* Bug 2813 */
 #ifdef HAVE_LIMITS_H

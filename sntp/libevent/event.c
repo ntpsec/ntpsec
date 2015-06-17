@@ -74,9 +74,7 @@ extern const struct eventop evportops;
 #ifdef EVENT__HAVE_SELECT
 extern const struct eventop selectops;
 #endif
-#ifdef EVENT__HAVE_POLL
 extern const struct eventop pollops;
-#endif
 #ifdef EVENT__HAVE_EPOLL
 extern const struct eventop epollops;
 #endif
@@ -104,9 +102,7 @@ static const struct eventop *eventops[] = {
 #ifdef EVENT__HAVE_DEVPOLL
 	&devpollops,
 #endif
-#ifdef EVENT__HAVE_POLL
 	&pollops,
-#endif
 #ifdef EVENT__HAVE_SELECT
 	&selectops,
 #endif

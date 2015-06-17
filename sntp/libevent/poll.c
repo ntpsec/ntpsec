@@ -27,8 +27,6 @@
 #include "event2/event-config.h"
 #include "evconfig-private.h"
 
-#ifdef EVENT__HAVE_POLL
-
 #include <sys/types.h>
 #include <sys/time.h>
 #include <sys/queue.h>
@@ -334,4 +332,3 @@ poll_dealloc(struct event_base *base)
 	mm_free(pop);
 }
 
-#endif /* EVENT__HAVE_POLL */

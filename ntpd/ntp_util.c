@@ -27,9 +27,7 @@
 #ifdef HAVE_IEEEFP_H
 # include <ieeefp.h>
 #endif
-#ifdef HAVE_MATH_H
-# include <math.h>
-#endif
+#include <math.h>
 
 #if defined(VMS)
 # include <descrip.h>

@@ -30,19 +30,7 @@
 #define AG_CHAR_MAP_H_GUARD 1
 
 #ifdef HAVE_CONFIG_H
-# if defined(HAVE_INTTYPES_H)
-#   include <inttypes.h>
-
-# elif defined(HAVE_STDINT_H)
-#   include <stdint.h>
-
-# elif !defined(HAVE_UINT32_T)
-#   if SIZEOF_INT == 4
-      typedef unsigned int    uint32_t;
-#   elif SIZEOF_LONG == 4
-      typedef unsigned long   uint32_t;
-#   endif
-# endif /* HAVE_*INT*_H header */
+#include <inttypes.h>
 
 #else /* not HAVE_CONFIG_H -- */
 # include <inttypes.h>

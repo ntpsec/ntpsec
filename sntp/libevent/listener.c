@@ -40,9 +40,7 @@
 #endif
 #include <errno.h>
 #include <sys/socket.h>
-#ifdef EVENT__HAVE_FCNTL_H
 #include <fcntl.h>
-#endif
 #include <unistd.h>
 
 #include "event2/listener.h"
