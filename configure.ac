@@ -572,9 +572,7 @@ dnl fi
 dnl AC_MSG_CHECKING(if we can get the system boot time)
 dnl AC_CACHE_VAL(su_cv_have_boot_time,
 dnl [AC_EGREP_CPP(yes,
-dnl [#ifdef HAVE_UTMPX_H
 dnl #include <utmpx.h>
-dnl #else
 dnl #include <utmp.h>
 dnl #endif
 dnl #ifdef BOOT_TIME

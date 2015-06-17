@@ -619,7 +619,7 @@ AC_CHECK_TYPES([uint64_t, uint32_t, uint16_t, uint8_t, uintptr_t], , ,
 #include <inttypes.h>
 #endif
 #include <sys/types.h>
-)
+])
 
 AC_CHECK_TYPES([fd_mask], , ,
 [#include <sys/types.h>

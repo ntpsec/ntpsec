@@ -18,12 +18,7 @@
 #ifdef HAVE_SYS_PARAM_H
 # include <sys/param.h>
 #endif
-#ifdef HAVE_UTMP_H
-# include <utmp.h>
-#endif /* HAVE_UTMP_H */
-#ifdef HAVE_UTMPX_H
-# include <utmpx.h>
-#endif /* HAVE_UTMPX_H */
+#include <utmpx.h>
 
 
 #ifndef USE_COMPILETIME_PIVOT
@@ -459,19 +454,9 @@ step_systime(
 	 */
 	tvdiff = abs_tval(sub_tval(timetv, tvlast));
 	if (tvdiff.tv_sec > 0) {
-#ifdef HAVE_UTMP_H
-		struct utmp ut;
-#endif
-#ifdef HAVE_UTMPX_H
 		struct utmpx utx;
-#endif
 
-#ifdef HAVE_UTMP_H
-		ZERO(ut);
-#endif
-#ifdef HAVE_UTMPX_H
 		ZERO(utx);
-#endif
 
 		/* UTMP */
 
