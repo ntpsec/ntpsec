@@ -35,9 +35,7 @@ AC_CACHE_CHECK(
 	[AC_LANG_PROGRAM(
 	    [[
 		#include <sys/types.h>
-		#ifdef HAVE_SYS_TIME_H
-		# include <sys/time.h>
-		#endif
+		#include <sys/time.h>
 		#ifdef HAVE_SYS_RESOURCE_H
 		# include <sys/resource.h>
 		#endif

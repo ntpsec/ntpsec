@@ -493,15 +493,11 @@ esac
 
 AC_CHECK_HEADERS([sys/proc.h], [], [], [
     #include <sys/types.h>
-    #ifdef HAVE_SYS_TIME_H
-    # include <sys/time.h>
-    #endif
+    #include <sys/time.h>
 ])
 
 AC_CHECK_HEADERS([sys/resource.h], [], [], [
-    #ifdef HAVE_SYS_TIME_H
-    # include <sys/time.h>
-    #endif
+    #include <sys/time.h>
 ])
 
 AC_CHECK_HEADERS([sys/shm.h], [], [], [
@@ -512,9 +508,7 @@ AC_CHECK_HEADERS([sys/shm.h], [], [], [
 ])
 
 AC_CHECK_HEADERS([sys/timex.h], [], [], [
-    #ifdef HAVE_SYS_TIME_H
-    # include <sys/time.h>
-    #endif
+    #include <sys/time.h>
 ])
 
 AC_TYPE_SIGNAL
@@ -673,9 +667,7 @@ AC_CACHE_CHECK(
 		#ifdef HAVE_SYS_TERMIOS_H
 		# include <sys/termios.h>
 		#endif
-		#ifdef HAVE_SYS_TIME_H
-		# include <sys/time.h>
-		#endif
+		#include <sys/time.h>
 		#ifdef HAVE_SYS_PPSCLOCK_H
 		# include <sys/ppsclock.h>
 		#endif
@@ -777,13 +769,7 @@ case "$ntp_cv_struct_ntptimeval" in
 	[],
 	[],
 	[
-	    #ifdef HAVE_SYS_TIME_H
-	    # include <sys/time.h>
-	    #else
-	    # ifdef HAVE_TIME_H
-	    #  include <time.h>
-	    # endif
-	    #endif
+	    #include <sys/time.h>
 	    #ifdef HAVE_SYS_TIMEX_H
 	    # include <sys/timex.h>
 	    #else

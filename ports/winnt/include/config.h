@@ -394,7 +394,6 @@ typedef int ssize_t;	/* ssize is an int */
 # define HAVE_LIMITS_H			1
 # define HAVE_STDARG_H			1
 # define HAVE_SYS_RESOURCE_H		1
-# define HAVE_SYS_TIME_H		1
 # define HAVE_TERMIOS_H			1
 
 # define HAVE_ALLOCA			1

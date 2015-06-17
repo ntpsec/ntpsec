@@ -18,9 +18,7 @@
 #include <unistd.h>
 #endif
 #include <time.h>
-#ifdef EVENT__HAVE_SYS_TIME_H
 #include <sys/time.h>
-#endif
 #include <fcntl.h>
 #include <stdlib.h>
 #include <stdio.h>
