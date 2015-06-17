@@ -76,9 +76,7 @@ SOFTWARE.
 #include <winsock.h>
 #endif
 #include <sys/socket.h>
-#if HAVE_NET_IF_H
 #include <net/if.h>
-#endif
 
 #if HAVE_SYS_SOCKIO_H
 #include <sys/sockio.h>
