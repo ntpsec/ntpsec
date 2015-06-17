@@ -35,9 +35,7 @@
 #include "log-internal.h"
 #include <stdio.h>
 #include <stdlib.h>
-#ifdef EVENT__HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
-#endif
 #ifdef EVENT__HAVE_SYS_EVENTFD_H
 #include <sys/eventfd.h>
 #endif

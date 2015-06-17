@@ -42,10 +42,7 @@
 
 #include <sys/types.h>
 #include <sys/time.h>
-
-#ifdef EVENT__HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
-#endif
 
 #ifdef EVENT__HAVE_SYS_UIO_H
 #include <sys/uio.h>

@@ -988,9 +988,7 @@ case "$ac_cv_func_recvmsg" in
 		    [AC_LANG_PROGRAM(
 			[[
 			    #include <sys/types.h>
-			    #ifdef HAVE_SYS_SOCKET_H
-			    # include <sys/socket.h>
-			    #endif
+			    #include <sys/socket.h>
 			    #if $ntp_cv_struct_iovec_help
 			    # include <sys/uio.h>
 			    #endif

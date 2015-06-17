@@ -43,9 +43,7 @@
 #endif
 
 #include <sys/types.h>
-#ifdef EVENT__HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
-#endif
 #ifdef EVENT__HAVE_UNISTD_H
 #include <unistd.h>
 #endif

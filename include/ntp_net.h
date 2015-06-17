@@ -6,9 +6,7 @@
 #define NTP_NET_H
 
 #include <sys/types.h>
-#ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
-#endif
 #ifdef HAVE_NET_IF_H
 #include <net/if.h>
 #endif

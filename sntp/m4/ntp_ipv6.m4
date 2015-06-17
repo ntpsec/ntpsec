@@ -33,9 +33,7 @@ case "$ntp_cv_sockaddr_storage" in
 	    [AC_LANG_PROGRAM(
 		[[
 		    #include <sys/types.h>
-		    #ifdef HAVE_SYS_SOCKET_H
-		    # include <sys/socket.h>
-		    #endif
+		    #include <sys/socket.h>
 		    #ifdef HAVE_NETINET_IN_H
 		    # include <netinet/in.h>
 		    #endif
@@ -104,9 +102,7 @@ AC_CACHE_CHECK(
 		[AC_LANG_PROGRAM(
 		    [[
 			#include <sys/types.h>
-			#ifdef HAVE_SYS_SOCKET_H
-			# include <sys/socket.h>
-			#endif
+			#include <sys/socket.h>
 		    ]], [[
 			extern
 			getsockname(int, $getsockname_arg2, 

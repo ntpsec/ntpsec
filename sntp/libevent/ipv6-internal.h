@@ -34,9 +34,7 @@
 #include "evconfig-private.h"
 
 #include <sys/types.h>
-#ifdef EVENT__HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
-#endif
 #include "event2/util.h"
 
 #ifdef __cplusplus
