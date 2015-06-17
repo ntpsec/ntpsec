@@ -105,20 +105,11 @@ typedef struct json_ctx {
 
 typedef int tok_ref;
 
-/* Not all targets have 'long long', and not all of them have 'strtoll'.
- * Sigh. We roll our own integer number parser.
+/* We roll our own integer number parser.
  */
-#ifdef HAVE_LONG_LONG
-typedef signed   long long int json_int;
 typedef unsigned long long int json_uint;
 #define JSON_INT_MAX LLONG_MAX
 #define JSON_INT_MIN LLONG_MIN
-#else
-typedef signed   long int json_int;
-typedef unsigned long int json_uint;
-#define JSON_INT_MAX LONG_MAX
-#define JSON_INT_MIN LONG_MIN
-#endif
 
 /* =====================================================================
  * header stuff we need
