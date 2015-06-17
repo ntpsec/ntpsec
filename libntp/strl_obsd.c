@@ -21,9 +21,7 @@
  */
 
 #include <config.h>		/* + marks local changes */
-#ifdef HAVE_SYS_TYPES_H		/* + */
 #include <sys/types.h>
-#endif				/* + */
 #include <string.h>
 
 #include "ntp_stdlib.h"		/* + strlcpy, strlcat prototypes */

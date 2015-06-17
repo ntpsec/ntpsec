@@ -80,9 +80,7 @@ extern "C" {
 
 #include <event2/event-config.h>
 #include <stdarg.h>
-#ifdef EVENT__HAVE_SYS_TYPES_H
 #include <sys/types.h>
-#endif
 #ifdef EVENT__HAVE_SYS_UIO_H
 #include <sys/uio.h>
 #endif

@@ -492,9 +492,7 @@ case "$have_adjtimex" in
 esac
 
 AC_CHECK_HEADERS([sys/proc.h], [], [], [
-    #ifdef HAVE_SYS_TYPES_H
-    # include <sys/types.h>
-    #endif
+    #include <sys/types.h>
     #ifdef HAVE_SYS_TIME_H
     # include <sys/time.h>
     #endif
@@ -507,9 +505,7 @@ AC_CHECK_HEADERS([sys/resource.h], [], [], [
 ])
 
 AC_CHECK_HEADERS([sys/shm.h], [], [], [
-    #ifdef HAVE_SYS_TYPES_H
-    # include <sys/types.h>
-    #endif
+    #include <sys/types.h>
     #ifdef HAVE_SYS_IPC_H
     # include <sys/ipc.h>
     #endif
@@ -673,9 +669,7 @@ AC_CACHE_CHECK(
     [AC_COMPILE_IFELSE(
 	[AC_LANG_PROGRAM(
 	    [[
-		#ifdef HAVE_SYS_TYPES_H
-		# include <sys/types.h>
-		#endif
+		#include <sys/types.h>
 		#ifdef HAVE_SYS_TERMIOS_H
 		# include <sys/termios.h>
 		#endif
@@ -1011,9 +1005,7 @@ case "$ac_cv_func_recvmsg" in
 		AC_COMPILE_IFELSE(
 		    [AC_LANG_PROGRAM(
 			[[
-			    #ifdef HAVE_SYS_TYPES_H
-			    # include <sys/types.h>
-			    #endif
+			    #include <sys/types.h>
 			    #ifdef HAVE_SYS_SOCKET_H
 			    # include <sys/socket.h>
 			    #endif
@@ -1058,9 +1050,7 @@ AC_CACHE_CHECK(
     [AC_COMPILE_IFELSE(
 	[AC_LANG_PROGRAM(
 	    [[
-		#ifdef HAVE_SYS_TYPES_H
-		# include <sys/types.h>
-		#endif
+		#include <sys/types.h>
 		#ifdef HAVE_UNISTD_H
 		# include <unistd.h>
 		#endif
@@ -1085,9 +1075,7 @@ AC_CACHE_CHECK(
     [AC_COMPILE_IFELSE(
 	[AC_LANG_PROGRAM(
 	    [[
-		#ifdef HAVE_SYS_TYPES_H
-		# include <sys/types.h>
-		#endif
+		#include <sys/types.h>
 		#ifdef HAVE_UNISTD_H
 		# include <unistd.h>
 		#endif

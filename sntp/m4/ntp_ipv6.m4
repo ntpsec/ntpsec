@@ -8,12 +8,8 @@ AC_CACHE_CHECK(
     [AC_COMPILE_IFELSE(
 	[AC_LANG_PROGRAM(
 	    [[
-		#ifdef HAVE_SYS_TYPES_H
-		# include <sys/types.h>
-		#endif
-		#ifdef HAVE_SYS_SOCKET_H
-		# include <sys/socket.h>
-		#endif
+		#include <sys/types.h>
+		#include <sys/socket.h>
 		#ifdef HAVE_NETINET_IN_H
 		# include <netinet/in.h>
 		#endif
@@ -36,9 +32,7 @@ case "$ntp_cv_sockaddr_storage" in
 	[AC_COMPILE_IFELSE(
 	    [AC_LANG_PROGRAM(
 		[[
-		    #ifdef HAVE_SYS_TYPES_H
-		    # include <sys/types.h>
-		    #endif
+		    #include <sys/types.h>
 		    #ifdef HAVE_SYS_SOCKET_H
 		    # include <sys/socket.h>
 		    #endif
@@ -109,9 +103,7 @@ AC_CACHE_CHECK(
 	    AC_COMPILE_IFELSE(
 		[AC_LANG_PROGRAM(
 		    [[
-			#ifdef HAVE_SYS_TYPES_H
-			# include <sys/types.h>
-			#endif
+			#include <sys/types.h>
 			#ifdef HAVE_SYS_SOCKET_H
 			# include <sys/socket.h>
 			#endif

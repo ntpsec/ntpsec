@@ -8,12 +8,8 @@ AC_CACHE_CHECK(
     [AC_COMPILE_IFELSE(
 	[AC_LANG_PROGRAM(
 	    [[
-		#ifdef HAVE_SYS_TYPES_H
-		# include <sys/types.h>
-		#endif
-		#ifdef HAVE_SYS_TIME_H
-		# include <sys/time.h>
-		#endif
+		#include <sys/types.h>
+		#include <sys/time.h>
 		#ifdef HAVE_SYS_RESOURCE_H
 		# include <sys/resource.h>
 		#endif
@@ -38,9 +34,7 @@ AC_CACHE_CHECK(
     [AC_COMPILE_IFELSE(
 	[AC_LANG_PROGRAM(
 	    [[
-		#ifdef HAVE_SYS_TYPES_H
-		# include <sys/types.h>
-		#endif
+		#include <sys/types.h>
 		#ifdef HAVE_SYS_TIME_H
 		# include <sys/time.h>
 		#endif

@@ -47,9 +47,7 @@ extern "C" {
 #elif defined(EVENT__HAVE_INTTYPES_H)
 #include <inttypes.h>
 #endif
-#ifdef EVENT__HAVE_SYS_TYPES_H
 #include <sys/types.h>
-#endif
 #ifdef EVENT__HAVE_STDDEF_H
 #include <stddef.h>
 #endif
