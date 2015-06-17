@@ -560,7 +560,7 @@ if test "x$ac_cv_header_sys_epoll_h" = "xyes"; then
 	if test "x$haveepoll" = "xno" ; then
 		AC_MSG_CHECKING(for epoll system call)
 		AC_TRY_RUN(
-#include <stdint.h>
+#include <inttypes.h>
 #include <sys/param.h>
 #include <sys/types.h>
 #include <sys/syscall.h>
@@ -611,11 +611,7 @@ AC_TYPE_SIZE_T
 AC_TYPE_SSIZE_T
 
 AC_CHECK_TYPES([uint64_t, uint32_t, uint16_t, uint8_t, uintptr_t], , ,
-[#ifdef HAVE_STDINT_H
-#include <stdint.h>
-#else
-#include <inttypes.h>
-#endif
+[#include <inttypes.h>
 #include <sys/types.h>
 ])
 

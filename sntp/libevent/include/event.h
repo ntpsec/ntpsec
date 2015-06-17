@@ -44,9 +44,7 @@ extern "C" {
 #include <event2/event-config.h>
 #include <sys/types.h>
 #include <sys/time.h>
-#ifdef EVENT__HAVE_STDINT_H
-#include <stdint.h>
-#endif
+#include <inttypes.h>
 #include <stdarg.h>
 
 /* For int types. */

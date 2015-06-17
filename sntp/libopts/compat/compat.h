@@ -154,14 +154,7 @@
 #include <memory.h>
 #include <setjmp.h>
 #include <signal.h>
-
-#if defined(HAVE_STDINT_H)
-#  include <stdint.h>
-
-#else
-#  include <inttypes.h>
-#endif
-
+#include <inttypes.h>
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>

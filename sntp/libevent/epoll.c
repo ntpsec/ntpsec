@@ -29,7 +29,7 @@
 
 #ifdef EVENT__HAVE_EPOLL
 
-#include <stdint.h>
+#include <inttypes.h>
 #include <sys/types.h>
 #include <sys/resource.h>
 #include <sys/time.h>

@@ -127,7 +127,6 @@
  *	HAVE_ASPRINTF	// define to 1 #if HW_WANT_RPL_ASPRINTF
  *	HAVE_STDARG_H
  *	HAVE_STDDEF_H
- *	HAVE_STDINT_H
  *	HAVE_STDLIB_H
  *	HAVE_LOCALE_H
  *	HAVE_LOCALECONV
@@ -241,9 +240,6 @@
 #ifndef HAVE_STDDEF_H
 #define HAVE_STDDEF_H 1
 #endif	/* HAVE_STDDEF_H */
-#ifndef HAVE_STDINT_H
-#define HAVE_STDINT_H 1
-#endif	/* HAVE_STDINT_H */
 #ifndef HAVE_STDLIB_H
 #define HAVE_STDLIB_H 1
 #endif	/* HAVE_STDLIB_H */
@@ -338,16 +334,13 @@ static void *mymemcpy(void *, void *, size_t);
 #if HW_WANT_RPL_VSNPRINTF
 #include <errno.h>	/* For ERANGE and errno. */
 #include <limits.h>	/* For *_MAX. */
-#include <inttypes.h>	/* For intmax_t (if not defined in <stdint.h>). */
+#include <inttypes.h>	/* For intmax_t */
 #if HAVE_LOCALE_H
 #include <locale.h>	/* For localeconv(3). */
 #endif	/* HAVE_LOCALE_H */
 #if HAVE_STDDEF_H
 #include <stddef.h>	/* For ptrdiff_t. */
 #endif	/* HAVE_STDDEF_H */
-#if HAVE_STDINT_H
-#include <stdint.h>	/* For intmax_t. */
-#endif	/* HAVE_STDINT_H */
 
 /* Support for unsigned long long int.  We may also need ULLONG_MAX. */
 #ifndef ULONG_MAX	/* We may need ULONG_MAX as a fallback. */

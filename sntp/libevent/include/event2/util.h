@@ -40,8 +40,6 @@ extern "C" {
 
 #include <event2/event-config.h>
 #include <sys/time.h>
-#ifdef EVENT__HAVE_STDINT_H
-#include <stdint.h>
 #include <inttypes.h>
 #include <sys/types.h>
 #ifdef EVENT__HAVE_STDDEF_H
@@ -75,8 +73,8 @@ extern "C" {
  * @name Standard integer types.
  *
  * Integer type definitions for types that are supposed to be defined in the
- * C99-specified stdint.h.  Shamefully, some platforms do not include
- * stdint.h, so we need to replace it.  (If you are on a platform like this,
+ * C99-specified inttypes.h.  Shamefully, some platforms do not include
+ * inttypes.h, so we need to replace it.  (If you are on a platform like this,
  * your C headers are now over 10 years out of date.  You should bug them to
  * do something about this.)
  *

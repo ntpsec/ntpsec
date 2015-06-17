@@ -49,9 +49,6 @@
 /* Define if your system supports event ports */
 /* #undef EVENT__HAVE_EVENT_PORTS */
 
-/* Define to 1 if you have the `fcntl' function. */
-/* #undef EVENT__HAVE_FCNTL */
-
 /* Define to 1 if you have the `getaddrinfo' function. */
 #define EVENT__HAVE_GETADDRINFO 1
 
@@ -132,9 +129,6 @@
 
 /* Define to 1 if you have the <stddef.h> header file. */
 #define EVENT__HAVE_STDDEF_H 1
-
-/* Define to 1 if you have the <stdint.h> header file. */
-/* #define EVENT__HAVE_STDINT_H 1 */
 
 /* Define to 1 if you have the <stdlib.h> header file. */
 #define EVENT__HAVE_STDLIB_H 1
