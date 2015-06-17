@@ -1080,67 +1080,6 @@ case "$ntp_cv_func_setpgrp_nargs" in
 esac
 
 AC_CACHE_CHECK(
-    [if we need to declare 'errno'],
-    [ntp_cv_decl_errno],
-    [AC_COMPILE_IFELSE(
-	[AC_LANG_PROGRAM(
-	    [[
-		#ifdef HAVE_ERRNO_H
-		# include <errno.h>
-		#endif
-	    ]],
-	    [[
-		errno = 0;
-	    ]]
-	)],
-	[ntp_cv_decl_errno=no],
-	[ntp_cv_decl_errno=yes]
-    )]
-)
-case "$ntp_cv_decl_errno" in
- yes)
-    AC_DEFINE([DECL_ERRNO], [1], [Declare errno?])
-esac
-
-dnl (prr) aix 4.3 defines h_errno as (*(int *)h_errno_which()) for
-dnl MT purposes.  This makes the line "extern int h_errno" choke
-dnl the compiler.  Hopefully adding !defined(h_errno) fixes this
-dnl without breaking any other platforms.
-dnl
-AC_CACHE_CHECK(
-    [if we may declare 'h_errno'],
-    [ntp_cv_decl_h_errno],
-    [AC_COMPILE_IFELSE(
-	[AC_LANG_PROGRAM(
-	    [[
-		#include <sys/types.h>
-		#ifdef HAVE_NETINET_IN_H
-		# include <netinet/in.h>
-		#endif
-		#ifdef HAVE_ARPA_NAMESER_H
-		# include <arpa/nameser.h>
-		#endif
-		#ifdef HAVE_NETDB_H
-		# include <netdb.h>
-		#endif
-		#ifdef HAVE_RESOLV_H
-		# include <resolv.h>
-		#endif
-	    ]],
-	    [[
-		extern int h_errno;
-	    ]]
-	)],
-	[ntp_cv_decl_h_errno=yes],
-	[ntp_cv_decl_h_errno=no]
-    )]
-)
-case "$ntp_cv_decl_h_errno" in
- yes)
-    AC_DEFINE([DECL_H_ERRNO], [1], [Declare h_errno?])
-esac
-
-AC_CACHE_CHECK(
     [if declaring 'syscall()' is ok],
     [ntp_cv_decl_syscall],
     [AC_COMPILE_IFELSE(

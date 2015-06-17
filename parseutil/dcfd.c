@@ -126,10 +126,6 @@
 #define dprintf(_x_)
 #endif
 
-#ifdef DECL_ERRNO
-     extern int errno;
-#endif
-
 static char *revision = "4.18";
 
 /*

@@ -18,9 +18,7 @@
 # include <termios.h>
 #endif
 
-#ifdef HAVE_ERRNO_H
 # include <errno.h>
-#endif
 
 #include "ntp_types.h"
 #include "ntp_proto.h"
@@ -213,12 +211,5 @@ extern	int	toupper		(int);
 /*
  * Necessary variable declarations.
  */
-#ifdef DECL_ERRNO
-extern	int	errno;
-#endif
-
-#if defined(DECL_H_ERRNO) && !defined(h_errno)
-extern	int	h_errno;
-#endif
 
 #endif	/* L_STDLIB_H */
