@@ -249,9 +249,6 @@
 /* Define to 1 if the system has the type `uint8_t'. */
 /* #define EVENT__HAVE_UINT8_T 1 */
 
-/* Define to 1 if you have the <unistd.h> header file. */
-/* #define EVENT__HAVE_UNISTD_H 1 */
-
 /* Define to 1 if you have the `vasprintf' function. */
 /* #undef EVENT__HAVE_VASPRINTF */
 

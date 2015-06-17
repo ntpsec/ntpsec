@@ -1,9 +1,7 @@
 /*
  * ntpq.h - definitions of interest to ntpq
  */
-#ifdef HAVE_UNISTD_H
-# include <unistd.h>
-#endif
+#include <unistd.h>
 #include "ntp_fp.h"
 #include "ntp.h"
 #include "ntp_stdlib.h"

@@ -10,9 +10,7 @@
 #endif
 
 #include <sys/types.h>
-#ifdef HAVE_UNISTD_H
-# include <unistd.h>
-#endif
+#include <unistd.h>
 #include <stdio.h>
 
 #include "ntp_string.h"

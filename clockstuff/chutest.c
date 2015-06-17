@@ -7,9 +7,7 @@
 #endif
 #include <stdio.h>
 #include <fcntl.h>
-#ifdef HAVE_UNISTD_H
-# include <unistd.h>
-#endif
+#include <unistd.h>
 #ifdef HAVE_STROPTS_H
 # include <stropts.h>
 #else

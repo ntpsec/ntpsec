@@ -33,9 +33,7 @@
 
 #include "ntpd.h"
 
-#ifdef HAVE_UNISTD_H
-# include <unistd.h>
-#endif
+#include <unistd.h>
 #include <sys/stat.h>
 #include <stdio.h>
 #include <errno.h>

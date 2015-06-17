@@ -8,9 +8,7 @@
  * SEEK_SET symbol form <unistd.h>.
  */
 #include <sys/types.h>
-#ifdef HAVE_UNISTD_H
-# include <unistd.h>
-#endif
+#include <unistd.h>
 #include <stdio.h>
 #ifdef HAVE_SYS_FILE_H
 # include <sys/file.h>

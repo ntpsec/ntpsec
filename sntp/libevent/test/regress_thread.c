@@ -34,9 +34,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#ifdef EVENT__HAVE_UNISTD_H
 #include <unistd.h>
-#endif
 #ifdef EVENT__HAVE_SYS_WAIT_H
 #include <sys/wait.h>
 #endif
@@ -47,9 +45,7 @@
 #include <process.h>
 #endif
 #include <assert.h>
-#ifdef EVENT__HAVE_UNISTD_H
 #include <unistd.h>
-#endif
 #include <time.h>
 
 #include "sys/queue.h"

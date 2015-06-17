@@ -11,9 +11,7 @@
 #include "audio.h"
 #include "ntp_stdlib.h"
 #include "ntp_syslog.h"
-#ifdef HAVE_UNISTD_H
-# include <unistd.h>
-#endif
+#include <unistd.h>
 #include <stdio.h>
 #include "ntp_string.h"
 

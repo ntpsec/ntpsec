@@ -176,9 +176,7 @@
 #  include <utime.h>
 #endif
 
-#ifdef HAVE_UNISTD_H
-#  include <unistd.h>
-#endif
+#include <unistd.h>
 
 #ifdef HAVE_STDBOOL_H
 #  include <stdbool.h>

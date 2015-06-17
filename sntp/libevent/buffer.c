@@ -66,9 +66,7 @@
 #ifdef EVENT__HAVE_STDARG_H
 #include <stdarg.h>
 #endif
-#ifdef EVENT__HAVE_UNISTD_H
 #include <unistd.h>
-#endif
 #include <limits.h>
 
 #include "event2/event.h"

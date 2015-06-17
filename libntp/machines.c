@@ -15,10 +15,7 @@
 #include "ntp_unixtime.h"
 #include "lib_strbuf.h"
 #include "ntp_debug.h"
-
-#ifdef HAVE_UNISTD_H
 #include <unistd.h>
-#endif
 
 #ifdef SYS_WINNT
 int _getch(void);	/* Declare the one function rather than include conio.h */

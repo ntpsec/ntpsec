@@ -43,9 +43,7 @@
 #ifdef EVENT__HAVE_FCNTL_H
 #include <fcntl.h>
 #endif
-#ifdef EVENT__HAVE_UNISTD_H
 #include <unistd.h>
-#endif
 
 #include "event2/listener.h"
 #include "event2/util.h"

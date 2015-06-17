@@ -43,9 +43,7 @@
 #ifdef EVENT__HAVE_STDARG_H
 #include <stdarg.h>
 #endif
-#ifdef EVENT__HAVE_UNISTD_H
 #include <unistd.h>
-#endif
 
 #ifdef _WIN32
 #include <winsock2.h>

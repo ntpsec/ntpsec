@@ -27,9 +27,7 @@
 #include "ntp_libopts.h"
 #include "ntpd-opts.h"
 
-#ifdef HAVE_UNISTD_H
-# include <unistd.h>
-#endif
+#include <unistd.h>
 #include <sys/stat.h>
 #include <stdio.h>
 #ifdef HAVE_SYS_PARAM_H

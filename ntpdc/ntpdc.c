@@ -7,9 +7,7 @@
 #include <ctype.h>
 #include <signal.h>
 #include <setjmp.h>
-#ifdef HAVE_UNISTD_H
-# include <unistd.h>
-#endif
+#include <unistd.h>
 #ifdef HAVE_FCNTL_H
 # include <fcntl.h>
 #endif
