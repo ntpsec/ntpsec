@@ -4,13 +4,7 @@
 #ifndef NTP_MALLOC_H
 #define NTP_MALLOC_H
 
-#ifdef HAVE_STDLIB_H
-# include <stdlib.h>
-#else
-# ifdef HAVE_MALLOC_H
-#  include <malloc.h>
-# endif
-#endif
+#include <stdlib.h>
 
 /*
  * Deal with platform differences declaring alloca()
@@ -48,10 +42,8 @@ void * alloca(size_t);
 	 realloc(ptr, (newsz))
 #endif
 
-#ifdef HAVE_STRINGS_H
-# include <strings.h>
-# define zero_mem(p, s)		bzero(p, s)
-#endif
+#include <strings.h>
+#define zero_mem(p, s)		bzero(p, s)
 
 #ifndef zero_mem
 # define zero_mem(p, s)		memset(p, 0, s)

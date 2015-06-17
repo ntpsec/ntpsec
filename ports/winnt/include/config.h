@@ -60,7 +60,6 @@
 #if defined(_MSC_VER) && defined(_DEBUG)
 # define _CRTDBG_MAP_ALLOC
 # include <stdlib.h>
-# include <malloc.h>
 # include <crtdbg.h>
 /* # define MALLOC_LINT */	/* defers free() */
 # define EREALLOC_IMPL(ptr, newsz, filenm, loc) \
@@ -393,7 +392,6 @@ typedef int ssize_t;	/* ssize is an int */
 # define HAVE_LIMITS_H			1
 # define HAVE_STDARG_H			1
 # define HAVE_SYS_RESOURCE_H		1
-# define HAVE_TERMIOS_H			1
 
 # define HAVE_ALLOCA			1
 # define HAVE_GETCLOCK			1

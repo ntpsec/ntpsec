@@ -115,7 +115,7 @@
  * 1) The following preprocessor macros should be defined to 1 if the feature or
  *    file in question is available on the target system (by using Autoconf or
  *    other means), though basic functionality should be available as long as
- *    HAVE_STDARG_H and HAVE_STDLIB_H are defined correctly:
+ *    HAVE_STDARG_H is defined correctly:
  *
  *	HW_WANT_RPL_VSNPRINTF
  *	HW_WANT_RPL_SNPRINTF
@@ -127,7 +127,6 @@
  *	HAVE_ASPRINTF	// define to 1 #if HW_WANT_RPL_ASPRINTF
  *	HAVE_STDARG_H
  *	HAVE_STDDEF_H
- *	HAVE_STDLIB_H
  *	HAVE_LOCALE_H
  *	HAVE_LOCALECONV
  *	HAVE_LCONV_DECIMAL_POINT
@@ -240,9 +239,6 @@
 #ifndef HAVE_STDDEF_H
 #define HAVE_STDDEF_H 1
 #endif	/* HAVE_STDDEF_H */
-#ifndef HAVE_STDLIB_H
-#define HAVE_STDLIB_H 1
-#endif	/* HAVE_STDLIB_H */
 #ifndef HAVE_LOCALE_H
 #define HAVE_LOCALE_H 1
 #endif	/* HAVE_LOCALE_H */
@@ -308,9 +304,7 @@
 #endif	/* HAVE_STDARG_H */
 
 #if HW_WANT_RPL_VASPRINTF
-#if HAVE_STDLIB_H
 #include <stdlib.h>	/* For malloc(3). */
-#endif	/* HAVE_STDLIB_H */
 #ifdef VA_COPY
 #undef VA_COPY
 #endif	/* defined(VA_COPY) */

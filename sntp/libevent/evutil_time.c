@@ -35,9 +35,7 @@
 #endif
 
 #include <sys/types.h>
-#ifdef EVENT__HAVE_STDLIB_H
 #include <stdlib.h>
-#endif
 #include <errno.h>
 #include <limits.h>
 #ifndef EVENT__HAVE_GETTIMEOFDAY

@@ -65,22 +65,9 @@
 /*
  * select which terminal handling to use (currently only SysV variants)
  */
-#if defined(HAVE_TERMIOS_H) || defined(STREAM)
 #include <termios.h>
 #define TTY_GETATTR(_FD_, _ARG_) tcgetattr((_FD_), (_ARG_))
 #define TTY_SETATTR(_FD_, _ARG_) tcsetattr((_FD_), TCSANOW, (_ARG_))
-#else  /* not HAVE_TERMIOS_H || STREAM */
-# if defined(HAVE_TERMIO_H) || defined(HAVE_SYSV_TTYS)
-#  include <termio.h>
-#  define TTY_GETATTR(_FD_, _ARG_) ioctl((_FD_), TCGETA, (_ARG_))
-#  define TTY_SETATTR(_FD_, _ARG_) ioctl((_FD_), TCSETAW, (_ARG_))
-# endif/* HAVE_TERMIO_H || HAVE_SYSV_TTYS */
-#endif /* not HAVE_TERMIOS_H || STREAM */
-
-
-#ifndef TTY_GETATTR
-#include "Bletch: MUST DEFINE ONE OF 'HAVE_TERMIOS_H' or 'HAVE_TERMIO_H'"
-#endif
 
 #ifndef days_per_year
 #define days_per_year(_x_) (((_x_) % 4) ? 365 : (((_x_) % 400) ? 365 : 366))
@@ -1513,13 +1500,7 @@ main(
 		time_t last_utc_time = 0;
 		long usecerror = 0;
 		long lasterror = 0;
-#if defined(HAVE_TERMIOS_H) || defined(STREAM)
 		struct termios term;
-#else  /* not HAVE_TERMIOS_H || STREAM */
-# if defined(HAVE_TERMIO_H) || defined(HAVE_SYSV_TTYS)
-		struct termio term;
-# endif/* HAVE_TERMIO_H || HAVE_SYSV_TTYS */
-#endif /* not HAVE_TERMIOS_H || STREAM */
 		unsigned int rtc = CVT_NONE;
 
 		rawdcf_init(fd);

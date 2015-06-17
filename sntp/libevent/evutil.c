@@ -46,9 +46,7 @@
 #include <sys/socket.h>
 #include <unistd.h>
 #include <fcntl.h>
-#ifdef EVENT__HAVE_STDLIB_H
 #include <stdlib.h>
-#endif
 #include <errno.h>
 #include <limits.h>
 #include <stdio.h>

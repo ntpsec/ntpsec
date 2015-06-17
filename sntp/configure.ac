@@ -132,7 +132,6 @@ NTP_IPV6
 # Hacks
 # these need work if we're to move libntp under sntp
 AC_DEFINE([HAVE_NO_NICE], 1, [sntp does not care about 'nice'])
-AC_DEFINE([HAVE_TERMIOS], 1, [sntp does not care about TTY stuff])
 
 # Checks for library functions.
 AC_CHECK_FUNCS([socket])

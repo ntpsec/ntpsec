@@ -9,9 +9,7 @@
 # include <memory.h>
 #endif
 
-#ifdef HAVE_STRING_H
-# include <string.h>
-#endif
+#include <string.h>
 
 #ifdef HAVE_BSTRING_H
 # include <bstring.h>
@@ -19,9 +17,7 @@
 
 #ifdef NTP_NEED_BOPS
 
-#ifdef HAVE_STRINGS_H
 # include <strings.h>		/* bcmp, bcopy, bzero */
-#endif
 
 void	ntp_memset	(char *, int, int);
 

@@ -721,7 +721,6 @@ process_refclock_packet(
  * The following code does not apply to WINNT & VMS ...
  */
 #if !defined(SYS_VXWORKS) && !defined(SYS_WINNT)
-#if defined(HAVE_TERMIOS) || defined(HAVE_SYSV_TTYS) || defined(HAVE_BSD_TTYS)
 
 /*
  * refclock_open - open serial port for reference clock
@@ -812,7 +811,6 @@ refclock_setup(
 	 * time. The flag bits can be used to set raw mode and echo.
 	 */
 	ttyp = &ttyb;
-#ifdef HAVE_TERMIOS
 
 	/*
 	 * POSIX serial line parameters (termios interface)
@@ -893,100 +891,8 @@ refclock_setup(
 	if (tcflush(fd, TCIOFLUSH) < 0)
 		msyslog(LOG_ERR, "refclock_setup fd %d tcflush(): %m",
 			fd);
-#endif /* HAVE_TERMIOS */
-
-#ifdef HAVE_SYSV_TTYS
-
-	/*
-	 * System V serial line parameters (termio interface)
-	 *
-	 */
-	if (ioctl(fd, TCGETA, ttyp) < 0) {
-		SAVE_ERRNO(
-			msyslog(LOG_ERR,
-				"refclock_setup fd %d TCGETA: %m",
-				fd);
-		)
-		return FALSE;
-	}
-
-	/*
-	 * Set canonical mode and local connection; set specified speed,
-	 * 8 bits and no parity; map CR to NL; ignore break.
-	 */
-	if (speed) {
-		u_int	ltemp = 0;
-
-		ttyp->c_iflag = IGNBRK | IGNPAR | ICRNL;
-		ttyp->c_oflag = 0;
-		ttyp->c_cflag = speed | CS8 | CLOCAL | CREAD;
-		for (i = 0; i < NCCS; ++i)
-			ttyp->c_cc[i] = '\0';
-
-#if defined(TIOCMGET) && !defined(SCO5_CLOCK)
-
-		/*
-		 * If we have modem control, check to see if modem leads
-		 * are active; if so, set remote connection. This is
-		 * necessary for the kernel pps mods to work.
-		 */
-		if (ioctl(fd, TIOCMGET, (char *)&ltemp) < 0)
-			msyslog(LOG_ERR,
-			    "refclock_setup fd %d TIOCMGET: %m", fd);
-#ifdef DEBUG
-		if (debug)
-			printf("refclock_setup fd %d modem status: %x\n",
-			    fd, ltemp);
-#endif
-		if (ltemp & TIOCM_DSR)
-			ttyp->c_cflag &= ~CLOCAL;
-#endif /* TIOCMGET */
-	}
-
-	/*
-	 * Set raw and echo modes. These can be changed on-fly.
-	 */
-	ttyp->c_lflag = ICANON;
-	if (lflags & LDISC_RAW) {
-		ttyp->c_lflag = 0;
-		ttyp->c_iflag = 0;
-		ttyp->c_cc[VMIN] = 1;
-	}
-	if (ioctl(fd, TCSETA, ttyp) < 0) {
-		SAVE_ERRNO(
-			msyslog(LOG_ERR,
-				"refclock_setup fd %d TCSETA: %m", fd);
-		)
-		return FALSE;
-	}
-#endif /* HAVE_SYSV_TTYS */
-
-#ifdef HAVE_BSD_TTYS
-
-	/*
-	 * 4.3bsd serial line parameters (sgttyb interface)
-	 */
-	if (ioctl(fd, TIOCGETP, (char *)ttyp) < 0) {
-		SAVE_ERRNO(
-			msyslog(LOG_ERR,
-				"refclock_setup fd %d TIOCGETP: %m",
-				fd);
-		)
-		return FALSE;
-	}
-	if (speed)
-		ttyp->sg_ispeed = ttyp->sg_ospeed = speed;
-	ttyp->sg_flags = EVENP | ODDP | CRMOD;
-	if (ioctl(fd, TIOCSETP, (char *)ttyp) < 0) {
-		SAVE_ERRNO(
-			msyslog(LOG_ERR, "refclock_setup TIOCSETP: %m");
-		)
-		return FALSE;
-	}
-#endif /* HAVE_BSD_TTYS */
 	return(1);
 }
-#endif /* HAVE_TERMIOS || HAVE_SYSV_TTYS || HAVE_BSD_TTYS */
 
 
 /*

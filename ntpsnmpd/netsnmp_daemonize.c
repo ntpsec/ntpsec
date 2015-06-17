@@ -51,9 +51,7 @@ SOFTWARE.
 #include <errno.h>
 
 #include <unistd.h>
-#if HAVE_STDLIB_H
 #include <stdlib.h>
-#endif
 
 #if TIME_WITH_SYS_TIME
 # ifdef WIN32
@@ -105,11 +103,8 @@ SOFTWARE.
 #include <sys/sysctl.h>
 #endif
 
-#if HAVE_STRING_H
 #include <string.h>
-#else
 #include <strings.h>
-#endif
 
 #if HAVE_DMALLOC_H
 #include <dmalloc.h>

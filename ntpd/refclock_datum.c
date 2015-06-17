@@ -221,10 +221,8 @@ datum_pts_start(
 	struct refclockproc *pp;
 	struct datum_pts_unit *datum_pts;
 	int fd;
-#ifdef HAVE_TERMIOS
 	int rc;
 	struct termios arg;
-#endif
 
 #ifdef DEBUG_DATUM_PTC
 	if (debug)

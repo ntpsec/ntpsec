@@ -299,9 +299,9 @@ AC_CHECK_HEADER(
 )
 AC_CHECK_HEADERS([ieeefp.h kvm.h])
 
-AC_CHECK_HEADERS([memory.h netdb.h poll.h])
-AC_CHECK_HEADERS([sgtty.h stdatomic.h stdlib.h string.h termio.h])
-AC_CHECK_HEADERS([termios.h timepps.h timex.h unistd.h])
+AC_CHECK_HEADERS([memory.h])
+AC_CHECK_HEADERS([sgtty.h stdatomic.h termio.h])
+AC_CHECK_HEADERS([timepps.h timex.h])
 
 #
 # On Suns only (so far) getpass() truncates the typed password to 8
@@ -1705,9 +1705,7 @@ AC_CACHE_CHECK(
 	[AC_LANG_PROGRAM(
 	    [[
 		#include <unistd.h>
-		#ifdef HAVE_TERMIOS_H
-		# include <termios.h>
-		#endif
+		#include <termios.h>
 		#ifdef HAVE_SYS_IOCTL_H
 		# include <sys/ioctl.h>
 		#endif

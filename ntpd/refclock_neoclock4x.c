@@ -39,14 +39,12 @@
 # endif
 #endif
 
-#ifdef HAVE_TERMIOS_H
-# ifdef TERMIOS_NEEDS__SVID3
-#  define _SVID3
-# endif
-# include <termios.h>
-# ifdef TERMIOS_NEEDS__SVID3
-#  undef _SVID3
-# endif
+#ifdef TERMIOS_NEEDS__SVID3
+# define _SVID3
+#endif
+#include <termios.h>
+#ifdef TERMIOS_NEEDS__SVID3
+# undef _SVID3
 #endif
 
 #ifdef HAVE_SYS_IOCTL_H
@@ -166,9 +164,7 @@ neoclock4x_start(int unit,
   int fd;
   char dev[20];
   int sl232;
-#if defined(HAVE_TERMIOS)
   struct termios termsettings;
-#endif
 #if !defined(NEOCLOCK4X_FIRMWARE)
   int tries;
 #endif
@@ -183,8 +179,6 @@ neoclock4x_start(int unit,
     {
       return (0);
     }
-
-#if defined(HAVE_TERMIOS)
 
 #if 1
   if(tcgetattr(fd, &termsettings) < 0)
@@ -228,32 +222,6 @@ neoclock4x_start(int unit,
       (void) close(fd);
       return (0);
     }
-#endif
-
-#elif defined(HAVE_SYSV_TTYS)
-  if(ioctl(fd, TCGETA, &termsettings) < 0)
-    {
-      msyslog(LOG_CRIT, "NeoClock4X(%d): (TCGETA) can't query serial port settings: %m", unit);
-      (void) close(fd);
-      return (0);
-    }
-
-  /* 2400 Baud 8N2 */
-  termsettings.c_cflag &= ~PARENB;
-  termsettings.c_cflag |= CSTOPB;
-  termsettings.c_cflag &= ~CSIZE;
-  termsettings.c_cflag |= CS8;
-
-  if(ioctl(fd, TCSETA, &termsettings) < 0)
-    {
-      msyslog(LOG_CRIT, "NeoClock4X(%d): (TSGETA) can't set serial port 2400 8N2: %m", unit);
-      (void) close(fd);
-      return (0);
-    }
-#else
-  msyslog(LOG_EMERG, "NeoClock4X(%d): don't know how to set port to 2400 8N2 with this OS!", unit);
-  (void) close(fd);
-  return (0);
 #endif
 
 #if defined(TIOCMSET) && (defined(TIOCM_RTS) || defined(CIOCM_RTS))
