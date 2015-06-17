@@ -6,19 +6,13 @@
 #ifndef L_STDLIB_H
 #define L_STDLIB_H
 
-#ifdef HAVE_STDLIB_H
-# include <stdlib.h>
-#endif
-
+#include <stdlib.h>
 #include <stdarg.h>
 #include <sys/types.h>
 
 /* Needed for speed_t. */
-#ifdef HAVE_TERMIOS_H
-# include <termios.h>
-#endif
-
-# include <errno.h>
+#include <termios.h>
+#include <errno.h>
 
 #include "ntp_types.h"
 #include "ntp_proto.h"

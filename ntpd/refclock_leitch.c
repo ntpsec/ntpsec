@@ -271,30 +271,6 @@ leitch_start(
 	leitch = &leitchunits[unit];
 	memset(leitch, 0, sizeof(*leitch));
 
-#if defined(HAVE_SYSV_TTYS)
-	/*
-	 * System V serial line parameters (termio interface)
-	 *
-	 */
-	{	struct termio ttyb;
-	if (ioctl(fd232, TCGETA, &ttyb) < 0) {
-		msyslog(LOG_ERR,
-			"leitch_start: ioctl(%s, TCGETA): %m", leitchdev);
-		goto screwed;
-	}
-	ttyb.c_iflag = IGNBRK|IGNPAR|ICRNL;
-	ttyb.c_oflag = 0;
-	ttyb.c_cflag = SPEED232|CS8|CLOCAL|CREAD;
-	ttyb.c_lflag = ICANON;
-	ttyb.c_cc[VERASE] = ttyb.c_cc[VKILL] = '\0';
-	if (ioctl(fd232, TCSETA, &ttyb) < 0) {
-		msyslog(LOG_ERR,
-			"leitch_start: ioctl(%s, TCSETA): %m", leitchdev);
-		goto screwed;
-	}
-	}
-#endif /* HAVE_SYSV_TTYS */
-#if defined(HAVE_TERMIOS)
 	/*
 	 * POSIX serial line parameters (termios interface)
 	 */
@@ -322,29 +298,6 @@ leitch_start(
 		goto screwed;
 	}
 	}
-#endif /* HAVE_TERMIOS */
-#if defined(HAVE_BSD_TTYS)
-	/*
-	 * 4.3bsd serial line parameters (sgttyb interface)
-	 */
-	{
-		struct sgttyb ttyb;
-
-	if (ioctl(fd232, TIOCGETP, &ttyb) < 0) {
-		msyslog(LOG_ERR,
-			"leitch_start: ioctl(%s, TIOCGETP): %m", leitchdev);
-		goto screwed;
-	}
-	ttyb.sg_ispeed = ttyb.sg_ospeed = SPEED232;
-	ttyb.sg_erase = ttyb.sg_kill = '\0';
-	ttyb.sg_flags = EVENP|ODDP|CRMOD;
-	if (ioctl(fd232, TIOCSETP, &ttyb) < 0) {
-		msyslog(LOG_ERR,
-			"leitch_start: ioctl(%s, TIOCSETP): %m", leitchdev);
-		goto screwed;
-	}
-	}
-#endif /* HAVE_BSD_TTYS */
 
 	/*
 	 * Set up the structures

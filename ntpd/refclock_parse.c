@@ -112,31 +112,14 @@
 
 #include <unistd.h>
 
-#if !defined(STREAM) && !defined(HAVE_SYSV_TTYS) && !defined(HAVE_BSD_TTYS) && !defined(HAVE_TERMIOS)
-# include "Bletch:  Define one of {STREAM,HAVE_SYSV_TTYS,HAVE_TERMIOS}"
-#endif
-
 #ifdef STREAM
 # include <sys/stream.h>
 # include <sys/stropts.h>
 #endif
 
-#ifdef HAVE_TERMIOS
-# include <termios.h>
-# define TTY_GETATTR(_FD_, _ARG_) tcgetattr((_FD_), (_ARG_))
-# define TTY_SETATTR(_FD_, _ARG_) tcsetattr((_FD_), TCSANOW, (_ARG_))
-# undef HAVE_SYSV_TTYS
-#endif
-
-#ifdef HAVE_SYSV_TTYS
-# define TTY_GETATTR(_FD_, _ARG_) ioctl((_FD_), TCGETA, (_ARG_))
-# define TTY_SETATTR(_FD_, _ARG_) ioctl((_FD_), TCSETAW, (_ARG_))
-#endif
-
-#ifdef HAVE_BSD_TTYS
-/* #error CURRENTLY NO BSD TTY SUPPORT */
-# include "Bletch: BSD TTY not currently supported"
-#endif
+#include <termios.h>
+#define TTY_GETATTR(_FD_, _ARG_) tcgetattr((_FD_), (_ARG_))
+#define TTY_SETATTR(_FD_, _ARG_) tcsetattr((_FD_), TCSANOW, (_ARG_))
 
 #ifdef HAVE_SYS_IOCTL_H
 # include <sys/ioctl.h>
@@ -2978,12 +2961,7 @@ parse_start(
 {
 	u_int unit;
 	int fd232;
-#ifdef HAVE_TERMIOS
 	struct termios tio;		/* NEEDED FOR A LONG TIME ! */
-#endif
-#ifdef HAVE_SYSV_TTYS
-	struct termio tio;		/* NEEDED FOR A LONG TIME ! */
-#endif
 	struct parseunit * parse;
 	char parsedev[sizeof(PARSEDEVICE)+20];
 	char parseppsdev[sizeof(PARSEPPSDEVICE)+20];
@@ -3128,7 +3106,6 @@ parse_start(
 		tio.c_lflag = (tcflag_t) parse_clockinfo[type].cl_lflag;
 
 
-#ifdef HAVE_TERMIOS
 		if ((cfsetospeed(&tio, (speed_t) parse_clockinfo[type].cl_speed) == -1) ||
 		    (cfsetispeed(&tio, (speed_t) parse_clockinfo[type].cl_speed) == -1))
 		{
@@ -3136,9 +3113,6 @@ parse_start(
 			parse_shutdown(CLK_UNIT(parse->peer), peer); /* let our cleaning staff do the work */
 			return 0;
 		}
-#else
-		tio.c_cflag     |= parse_clockinfo[type].cl_speed;
-#endif
 
 		/*
 		 * set up pps device
@@ -3289,17 +3263,7 @@ parse_start(
 	/*
 	 * get rid of all IO accumulated so far
 	 */
-#ifdef HAVE_TERMIOS
 	(void) tcflush(parse->generic->io.fd, TCIOFLUSH);
-#else
-#if defined(TCFLSH) && defined(TCIOFLUSH)
-	{
-		int flshcmd = TCIOFLUSH;
-
-		(void) ioctl(parse->generic->io.fd, TCFLSH, (caddr_t)&flshcmd);
-	}
-#endif
-#endif
 
 	/*
 	 * try to do any special initializations
@@ -4831,12 +4795,7 @@ trimbletaip_init(
 	struct parseunit *parse
 	)
 {
-#ifdef HAVE_TERMIOS
 	struct termios tio;
-#endif
-#ifdef HAVE_SYSV_TTYS
-	struct termio tio;
-#endif
 	/*
 	 * configure terminal line for trimble receiver
 	 */
@@ -5255,12 +5214,7 @@ trimbletsip_init(
 	)
 {
 #if defined(VEOL) || defined(VEOL2)
-#ifdef HAVE_TERMIOS
 	struct termios tio;		/* NEEDED FOR A LONG TIME ! */
-#endif
-#ifdef HAVE_SYSV_TTYS
-	struct termio tio;		/* NEEDED FOR A LONG TIME ! */
-#endif
 	/*
 	 * allocate local data area
 	 */

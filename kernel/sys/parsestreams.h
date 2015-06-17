@@ -60,7 +60,6 @@
  * mem* operations. I don't want them - bcopy, bzero
  * are fine in the kernel
  */
-#undef HAVE_STRING_H	/* don't include that at kernel level - prototype mismatch in Solaris 2.6 */
 #include "ntp_string.h"
 #else
 #include <stdio.h>

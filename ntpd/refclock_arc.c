@@ -358,17 +358,7 @@ Also note h<cr> command which starts a resync to MSF signal.
 #include <stdio.h>
 #include <ctype.h>
 
-#if defined(HAVE_BSD_TTYS)
-#include <sgtty.h>
-#endif /* HAVE_BSD_TTYS */
-
-#if defined(HAVE_SYSV_TTYS)
-#include <termio.h>
-#endif /* HAVE_SYSV_TTYS */
-
-#if defined(HAVE_TERMIOS)
 #include <termios.h>
-#endif
 
 /*
  * This driver supports the ARCRON MSF/DCF/WWVB Radio Controlled Clock
@@ -632,9 +622,7 @@ arc_start(
 	int temp_fd;
 	int fd;
 	char device[20];
-#ifdef HAVE_TERMIOS
 	struct termios arg;
-#endif
 
 	msyslog(LOG_NOTICE, "MSF_ARCRON %s: opening unit %d",
 		arc_version, unit);
@@ -667,8 +655,6 @@ arc_start(
 #endif
 	DPRINTF(1, ("arc: opened RS232 port with file descriptor %d.\n", fd));
 
-#ifdef HAVE_TERMIOS
-
 	if (tcgetattr(fd, &arg) < 0) {
 		msyslog(LOG_ERR, "MSF_ARCRON(%d): tcgetattr(%s): %m.",
 			unit, device);
@@ -689,15 +675,6 @@ arc_start(
 		close(fd);
 		return 0;
 	}
-
-#else
-
-	msyslog(LOG_ERR, "ARCRON: termios required by this driver");
-	(void)close(fd);
-
-	return 0;
-
-#endif
 
 	/* Set structure to all zeros... */
 	up = emalloc_zero(sizeof(*up));

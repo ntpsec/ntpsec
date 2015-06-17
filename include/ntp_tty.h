@@ -7,67 +7,17 @@
 /*
  * use only one tty model - no use in initialising
  * a tty in three ways
- * HAVE_TERMIOS is preferred over HAVE_SYSV_TTYS over HAVE_BSD_TTYS
+ * only use HAVE_TERMIOS as it is POSIX-1:2001
  */
 
-#if defined(HAVE_TERMIOS_H) || defined(HAVE_SYS_TERMIOS_H)
-# define HAVE_TERMIOS
-#elif defined(HAVE_TERMIO_H)
-# define HAVE_SYSV_TTYS
-#elif defined(HAVE_SGTTY_H)
-# define HAVE_BSD_TTYS
+#ifdef TERMIOS_NEEDS__SVID3
+# define _SVID3
 #endif
-
-#if !defined(VMS) && !defined(SYS_VXWORKS)
-# if	!defined(HAVE_SYSV_TTYS) \
-	&& !defined(HAVE_BSD_TTYS) \
-	&& !defined(HAVE_TERMIOS)
-#include "ERROR: no tty type defined!"
-# endif
-#endif /* !VMS && !SYS_VXWORKS*/
-
-#if defined(HAVE_BSD_TTYS)
-#include <sgtty.h>
-#define TTY	struct sgttyb
-#endif /* HAVE_BSD_TTYS */
-
-#if defined(HAVE_SYSV_TTYS)
-#include <termio.h>
-#define TTY	struct termio
-#ifndef tcsetattr
-#define tcsetattr(fd, cmd, arg) ioctl(fd, cmd, arg)
+#include <termios.h>
+#ifdef TERMIOS_NEEDS__SVID3
+# undef _SVID3
 #endif
-#ifndef TCSANOW
-#define TCSANOW	TCSETA
-#endif
-#ifndef TCIFLUSH
-#define TCIFLUSH 0
-#endif
-#ifndef TCOFLUSH
-#define TCOFLUSH 1
-#endif
-#ifndef TCIOFLUSH
-#define TCIOFLUSH 2
-#endif
-#ifndef tcflush
-#define tcflush(fd, arg) ioctl(fd, TCFLSH, arg)
-#endif
-#endif /* HAVE_SYSV_TTYS */
-
-#if defined(HAVE_TERMIOS)
-# if defined(HAVE_TERMIOS_H)
-#  ifdef TERMIOS_NEEDS__SVID3
-#   define _SVID3
-#  endif
-#  include <termios.h>
-#  ifdef TERMIOS_NEEDS__SVID3
-#   undef _SVID3
-#  endif
-# elif defined(HAVE_SYS_TERMIOS_H)
-#  include <sys/termios.h>
-# endif
-# define TTY	struct termios
-#endif
+#define TTY	struct termios
 
 #if defined(HAVE_SYS_MODEM_H)
 #include <sys/modem.h>
@@ -93,11 +43,8 @@
 
 /* function prototypes for ntp_tty.c */
 #if !defined(SYS_VXWORKS) && !defined(SYS_WINNT)
-# if defined(HAVE_TERMIOS) || defined(HAVE_SYSV_TTYS) || \
-     defined(HAVE_BSD_TTYS)
 extern	int	ntp_tty_setup(int, u_int, u_int);
 extern	int	ntp_tty_ioctl(int, u_int);
-# endif
 #endif
 
 #endif /* NTP_TTY_H */

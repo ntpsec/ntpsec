@@ -19,11 +19,7 @@
 #include <stdio.h>
 #include <ctype.h>
 
-#if defined(HAVE_TERMIOS_H)
-# include <termios.h>
-#elif defined(HAVE_SYS_TERMIOS_H)
-# include <sys/termios.h>
-#endif
+#include <termios.h>
 #ifdef HAVE_SYS_PPSCLOCK_H
 # include <sys/ppsclock.h>
 #endif

@@ -21,12 +21,7 @@
 #include <sys/ioctl.h>
 #include <sys/time.h>
 #include <sys/file.h>
-#ifdef HAVE_TERMIOS_H
-# include <termios.h>
-#else
-# ifdef HAVE_SGTTY_H
-#  include <sgtty.h>
-# endif
+#include <termios.h>
 #endif
 
 #include "ntp_fp.h"
