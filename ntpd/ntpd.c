@@ -424,9 +424,7 @@ ntpdmain(
 	l_fp		now;
 	struct recvbuf *rbuf;
 	const char *	logfilename;
-# ifdef HAVE_UMASK
 	mode_t		uv;
-# endif
 # if defined(HAVE_GETUID) && !defined(MPE) /* MPE lacks the concept of root */
 	uid_t		uid;
 # endif
@@ -447,13 +445,11 @@ ntpdmain(
 	int		zero;
 # endif
 
-# ifdef HAVE_UMASK
 	uv = umask(0);
 	if (uv)
 		umask(uv);
 	else
 		umask(022);
-# endif
 	saved_argc = argc;
 	saved_argv = argv;
 	progname = argv[0];

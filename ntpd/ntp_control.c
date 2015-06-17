@@ -643,20 +643,8 @@ static const char last_fmt[] =		"last.%d";
 /*
  * System and processor definitions.
  */
-#ifndef HAVE_UNAME
-# ifndef STR_SYSTEM
-#  define		STR_SYSTEM	"UNIX"
-# endif
-# ifndef STR_PROCESSOR
-#  define		STR_PROCESSOR	"unknown"
-# endif
-
-static const char str_system[] = STR_SYSTEM;
-static const char str_processor[] = STR_PROCESSOR;
-#else
 # include <sys/utsname.h>
 static struct utsname utsnamebuf;
-#endif /* HAVE_UNAME */
 
 /*
  * Trap structures. We only allow a few of these, and send a copy of
@@ -813,9 +801,7 @@ init_control(void)
 {
 	size_t i;
 
-#ifdef HAVE_UNAME
 	uname(&utsnamebuf);
-#endif /* HAVE_UNAME */
 
 	ctl_clr_stats();
 
@@ -1858,24 +1844,14 @@ ctl_putsys(
 		break;
 
 	case CS_PROCESSOR:
-#ifndef HAVE_UNAME
-		ctl_putstr(sys_var[CS_PROCESSOR].text, str_processor,
-			   sizeof(str_processor) - 1);
-#else
 		ctl_putstr(sys_var[CS_PROCESSOR].text,
 			   utsnamebuf.machine, strlen(utsnamebuf.machine));
-#endif /* HAVE_UNAME */
 		break;
 
 	case CS_SYSTEM:
-#ifndef HAVE_UNAME
-		ctl_putstr(sys_var[CS_SYSTEM].text, str_system,
-			   sizeof(str_system) - 1);
-#else
 		snprintf(str, sizeof(str), "%s/%s", utsnamebuf.sysname,
 			 utsnamebuf.release);
 		ctl_putstr(sys_var[CS_SYSTEM].text, str, strlen(str));
-#endif /* HAVE_UNAME */
 		break;
 
 	case CS_VERSION:

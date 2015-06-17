@@ -935,7 +935,7 @@ esac
 AC_DEFINE_UNQUOTED([WORKER_CHILD_EXIT], [$ntp_worker_child_exit],
 		   [routine worker child proc uses to exit.])
 
-AC_CHECK_FUNCS([umask uname updwtmp updwtmpx])
+AC_CHECK_FUNCS([updwtmp updwtmpx])
 
 ###
 
