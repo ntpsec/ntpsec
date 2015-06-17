@@ -30,9 +30,7 @@
 #ifdef EVENT__HAVE_POLL
 
 #include <sys/types.h>
-#ifdef EVENT__HAVE_SYS_TIME_H
 #include <sys/time.h>
-#endif
 #include <sys/queue.h>
 #include <poll.h>
 #include <signal.h>

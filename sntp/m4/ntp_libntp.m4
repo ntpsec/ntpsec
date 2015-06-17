@@ -792,9 +792,7 @@ AC_CHECK_HEADERS(
     [],
     [],
     [
-	#ifdef HAVE_SYS_TIME_H
-	# include <sys/time.h>
-	#endif
+	#include <sys/time.h>
 	#include <errno.h>
     ]
 )

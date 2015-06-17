@@ -39,9 +39,7 @@ extern "C" {
 #endif
 
 #include <event2/event-config.h>
-#ifdef EVENT__HAVE_SYS_TIME_H
 #include <sys/time.h>
-#endif
 #ifdef EVENT__HAVE_STDINT_H
 #include <stdint.h>
 #elif defined(EVENT__HAVE_INTTYPES_H)

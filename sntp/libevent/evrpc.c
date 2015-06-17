@@ -38,9 +38,7 @@
 #ifndef _WIN32
 #include <sys/socket.h>
 #endif
-#ifdef EVENT__HAVE_SYS_TIME_H
 #include <sys/time.h>
-#endif
 #include <sys/queue.h>
 #include <stdio.h>
 #include <stdlib.h>

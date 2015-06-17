@@ -43,9 +43,7 @@
 #endif
 
 #include <sys/queue.h>
-#ifdef EVENT__HAVE_SYS_TIME_H
 #include <sys/time.h>
-#endif
 
 #include <errno.h>
 #include <stdio.h>
