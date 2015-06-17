@@ -59,9 +59,7 @@
 #endif
 
 #include <sys/types.h>
-#ifdef EVENT__HAVE_SYS_STAT_H
 #include <sys/stat.h>
-#endif
 
 #ifndef _WIN32
 #include <sys/socket.h>
