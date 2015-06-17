@@ -136,9 +136,7 @@
 # endif /* !HAVE_DIRENT_H */
 
 #include <errno.h>
-#ifdef HAVE_FCNTL_H
-# include <fcntl.h>
-#endif
+#include <fcntl.h>
 #ifndef O_NONBLOCK
 # define O_NONBLOCK FNDELAY
 #endif
@@ -160,7 +158,7 @@
 #if defined(HAVE_STDINT_H)
 #  include <stdint.h>
 
-#elif defined(HAVE_INTTYPES_H)
+#else
 #  include <inttypes.h>
 #endif
 

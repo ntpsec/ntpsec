@@ -129,7 +129,6 @@
  *	HAVE_STDDEF_H
  *	HAVE_STDINT_H
  *	HAVE_STDLIB_H
- *	HAVE_INTTYPES_H
  *	HAVE_LOCALE_H
  *	HAVE_LOCALECONV
  *	HAVE_LCONV_DECIMAL_POINT
@@ -248,9 +247,6 @@
 #ifndef HAVE_STDLIB_H
 #define HAVE_STDLIB_H 1
 #endif	/* HAVE_STDLIB_H */
-#ifndef HAVE_INTTYPES_H
-#define HAVE_INTTYPES_H 1
-#endif	/* HAVE_INTTYPES_H */
 #ifndef HAVE_LOCALE_H
 #define HAVE_LOCALE_H 1
 #endif	/* HAVE_LOCALE_H */
@@ -342,9 +338,7 @@ static void *mymemcpy(void *, void *, size_t);
 #if HW_WANT_RPL_VSNPRINTF
 #include <errno.h>	/* For ERANGE and errno. */
 #include <limits.h>	/* For *_MAX. */
-#if HAVE_INTTYPES_H
 #include <inttypes.h>	/* For intmax_t (if not defined in <stdint.h>). */
-#endif	/* HAVE_INTTYPES_H */
 #if HAVE_LOCALE_H
 #include <locale.h>	/* For localeconv(3). */
 #endif	/* HAVE_LOCALE_H */

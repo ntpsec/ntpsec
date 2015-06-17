@@ -53,7 +53,6 @@
 #define HAVE_LIMITS_H   1
 #define HAVE_STRDUP     1
 #define HAVE_STRCHR     1
-#define HAVE_FCNTL_H    1
 
 /*
  * VS.NET's version of wspiapi.h has a bug in it where it assigns a value

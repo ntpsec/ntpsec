@@ -48,7 +48,7 @@
  */
 #  if defined(HAVE_STDINT_H)
 #    include <stdint.h>
-#  elif defined(HAVE_INTTYPES_H)
+#  else
 #    include <inttypes.h>
 #  endif /* HAVE_STDINT/INTTYPES_H */
 

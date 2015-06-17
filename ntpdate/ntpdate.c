@@ -31,9 +31,7 @@
 #include <stdio.h>
 #include <signal.h>
 #include <ctype.h>
-#ifdef HAVE_POLL_H
-# include <poll.h>
-#endif
+#include <poll.h>
 #ifdef HAVE_SYS_SIGNAL_H
 # include <sys/signal.h>
 #endif
@@ -115,12 +113,7 @@ int ai_fam_templ;
 int nbsock;			/* the number of sockets used */
 SOCKET fd[MAX_AF];
 int fd_family[MAX_AF];		/* to remember the socket family */
-#ifdef HAVE_POLL_H
 struct pollfd fdmask[MAX_AF];
-#else
-fd_set fdmask;
-SOCKET maxfd;
-#endif
 int polltest = 0;
 
 /*
@@ -537,13 +530,8 @@ ntpdatemain (
 	was_alarmed = 0;
 
 	while (complete_servers < sys_numservers) {
-#ifdef HAVE_POLL_H
 		struct pollfd* rdfdes;
 		rdfdes = fdmask;
-#else
-		fd_set rdfdes;
-		rdfdes = fdmask;
-#endif
 
 		if (alarm_flag) {		/* alarmed? */
 			was_alarmed = 1;
@@ -555,13 +543,8 @@ ntpdatemain (
 			/*
 			 * Nothing to do.	 Wait for something.
 			 */
-#ifdef HAVE_POLL_H
 			nfound = poll(rdfdes, (unsigned int)nbsock, timeout.tv_sec * 1000);
 
-#else
-			nfound = select(maxfd, &rdfdes, (fd_set *)0,
-					(fd_set *)0, &timeout);
-#endif
 			if (nfound > 0)
 				input_handler();
 			else if (nfound == SOCKET_ERROR)
@@ -572,20 +555,12 @@ ntpdatemain (
 				if (WSAGetLastError() != WSAEINTR)
 #endif
 					msyslog(LOG_ERR,
-#ifdef HAVE_POLL_H
 						"poll() error: %m"
-#else
-						"select() error: %m"
-#endif
 						);
 			} else if (errno != 0) {
 #ifndef SYS_VXWORKS
 				msyslog(LOG_DEBUG,
-#ifdef HAVE_POLL_H
 					"poll(): nfound = %d, error: %m",
-#else
-					"select(): nfound = %d, error: %m",
-#endif
 					nfound);
 #endif
 			}
@@ -1769,15 +1744,8 @@ init_io(void)
 			}
 		}
 
-#ifdef HAVE_POLL_H
 		fdmask[nbsock].fd = fd[nbsock];
 		fdmask[nbsock].events = POLLIN;
-#else
-		FD_SET(fd[nbsock], &fdmask);
-		if (maxfd < fd[nbsock]+1) {
-			maxfd = fd[nbsock]+1;
-		}
-#endif
 
 		/*
 		 * set non-blocking,
@@ -1881,11 +1849,7 @@ input_handler(void)
 	GETSOCKNAME_SOCKLEN_TYPE fromlen;
 	l_fp ts;
 	int i;
-#ifdef HAVE_POLL_H
 	struct pollfd fds[MAX_AF];
-#else
-	fd_set fds;
-#endif
 	int fdc = 0;
 
 	/*
@@ -1893,7 +1857,6 @@ input_handler(void)
 	 */
 	for (;;) {
 		tvzero.tv_sec = tvzero.tv_usec = 0;
-#ifdef HAVE_POLL_H
 		memcpy(fds, fdmask, sizeof(fdmask));
 		n = poll(fds, (unsigned int)nbsock, tvzero.tv_sec * 1000);
 
@@ -1908,23 +1871,6 @@ input_handler(void)
 			}
 		}
 
-#else
-		fds = fdmask;
-		n = select(maxfd, &fds, (fd_set *)0, (fd_set *)0, &tvzero);
-
-		/*
-		 * Determine which socket received data
-		 */
-
-		for(i=0; i < nbsock; i++) {
-			if(FD_ISSET(fd[i], &fds)) {
-				 fdc = fd[i];
-				 break;
-			}
-		}
-
-#endif
-
 		/*
 		 * If nothing to do, just return.  If an error occurred,
 		 * complain and return.  If we've got some, freeze a
@@ -1935,11 +1881,7 @@ input_handler(void)
 		else if (n == -1) {
 			if (errno != EINTR)
 				msyslog(LOG_ERR,
-#ifdef HAVE_POLL_H
 					"poll() error: %m"
-#else
-					"select() error: %m"
-#endif
 					);
 			return;
 		}

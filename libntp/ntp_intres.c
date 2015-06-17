@@ -78,9 +78,7 @@
 # ifdef HAVE_ARPA_NAMESER_H
 #  include <arpa/nameser.h> /* DNS HEADER struct */
 # endif
-# ifdef HAVE_NETDB_H
-#  include <netdb.h>
-# endif
+# include <netdb.h>
 # include <resolv.h>
 # ifdef HAVE_INT32_ONLY_WITH_DNS
 #  define HAVE_INT32

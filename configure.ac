@@ -297,7 +297,7 @@ AC_CHECK_HEADER(
 	    [Use Rendezvous/DNS-SD registration])]
     )]
 )
-AC_CHECK_HEADERS([fcntl.h fnmatch.h ieeefp.h inttypes.h kvm.h math.h])
+AC_CHECK_HEADERS([ieeefp.h kvm.h])
 
 AC_CHECK_HEADERS([memory.h netdb.h poll.h])
 AC_CHECK_HEADERS([sgtty.h stdatomic.h stdlib.h string.h termio.h])

@@ -52,9 +52,6 @@
 /* Define to 1 if you have the `fcntl' function. */
 /* #undef EVENT__HAVE_FCNTL */
 
-/* Define to 1 if you have the <fcntl.h> header file. */
-#define EVENT__HAVE_FCNTL_H 1
-
 /* Define to 1 if you have the `getaddrinfo' function. */
 #define EVENT__HAVE_GETADDRINFO 1
 
@@ -76,9 +73,6 @@
 /* Define to 1 if you have the `inet_pton' function. */
 /* #undef EVENT__HAVE_INET_PTON */
 
-/* Define to 1 if you have the <inttypes.h> header file. */
-/* #define EVENT__HAVE_INTTYPES_H 1 */
-
 /* Define to 1 if you have the `kqueue' function. */
 /* #undef EVENT__HAVE_KQUEUE */
 
@@ -99,12 +93,6 @@
 
 /* Define to 1 if you have the `pipe' function. */
 /* #undef EVENT__HAVE_PIPE */
-
-/* Define to 1 if you have the `poll' function. */
-/* #undef EVENT__HAVE_POLL */
-
-/* Define to 1 if you have the <poll.h> header file. */
-/* #undef EVENT__HAVE_POLL_H */
 
 /* Define to 1 if you have the `port_create' function. */
 /* #undef EVENT__HAVE_PORT_CREATE */

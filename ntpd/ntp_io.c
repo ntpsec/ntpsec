@@ -9,11 +9,9 @@
 
 #include <stdio.h>
 #include <signal.h>
-#ifdef HAVE_FNMATCH_H
-# include <fnmatch.h>
-# if !defined(FNM_CASEFOLD) && defined(FNM_IGNORECASE)
-#  define FNM_CASEFOLD FNM_IGNORECASE
-# endif
+#include <fnmatch.h>
+#if !defined(FNM_CASEFOLD) && defined(FNM_IGNORECASE)
+# define FNM_CASEFOLD FNM_IGNORECASE
 #endif
 #ifdef HAVE_SYS_PARAM_H
 # include <sys/param.h>
@@ -1366,7 +1364,7 @@ interface_action(
 
 		case MATCH_IFNAME:
 			if (if_name != NULL
-#if defined(HAVE_FNMATCH) && defined(FNM_CASEFOLD)
+#if defined(FNM_CASEFOLD)
 			    && !fnmatch(rule->if_name, if_name, FNM_CASEFOLD)
 #else
 			    && !strcasecmp(if_name, rule->if_name)

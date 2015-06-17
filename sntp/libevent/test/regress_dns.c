@@ -48,9 +48,7 @@
 #ifdef EVENT__HAVE_NETINET_IN6_H
 #include <netinet/in6.h>
 #endif
-#ifdef HAVE_NETDB_H
 #include <netdb.h>
-#endif
 #include <fcntl.h>
 #include <stdlib.h>
 #include <stdio.h>

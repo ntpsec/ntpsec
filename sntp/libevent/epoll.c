@@ -42,9 +42,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <errno.h>
-#ifdef EVENT__HAVE_FCNTL_H
 #include <fcntl.h>
-#endif
 #ifdef EVENT__HAVE_SYS_TIMERFD_H
 #include <sys/timerfd.h>
 #endif

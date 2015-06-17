@@ -116,9 +116,7 @@ SOFTWARE.
 #endif
 
 #include <sys/stat.h>
-#if HAVE_FCNTL_H
 #include <fcntl.h>
-#endif
 
 #if defined(hpux10) || defined(hpux11)
 #include <sys/pstat.h>

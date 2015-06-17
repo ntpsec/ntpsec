@@ -42,9 +42,7 @@ extern "C" {
 #include <sys/time.h>
 #ifdef EVENT__HAVE_STDINT_H
 #include <stdint.h>
-#elif defined(EVENT__HAVE_INTTYPES_H)
 #include <inttypes.h>
-#endif
 #include <sys/types.h>
 #ifdef EVENT__HAVE_STDDEF_H
 #include <stddef.h>
@@ -53,12 +51,10 @@ extern "C" {
 #include <BaseTsd.h>
 #endif
 #include <stdarg.h>
-#ifdef EVENT__HAVE_NETDB_H
 #if !defined(_GNU_SOURCE)
 #define _GNU_SOURCE
 #endif
 #include <netdb.h>
-#endif
 
 #ifdef _WIN32
 #include <winsock2.h>
