@@ -60,9 +60,7 @@
 #include <string.h>
 #include <fcntl.h>
 #include <sys/time.h>
-#ifdef EVENT__HAVE_STDINT_H
-#include <stdint.h>
-#endif
+#include <inttypes.h>
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>

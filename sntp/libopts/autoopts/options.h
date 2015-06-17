@@ -46,11 +46,7 @@
  * This is needed for test compilations where the "compat.h"
  * header is not usually available.
  */
-#  if defined(HAVE_STDINT_H)
-#    include <stdint.h>
-#  else
-#    include <inttypes.h>
-#  endif /* HAVE_STDINT/INTTYPES_H */
+#include <inttypes.h>
 
 #  if defined(HAVE_LIMITS_H)
 #    include <limits.h>

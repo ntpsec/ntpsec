@@ -35,9 +35,6 @@ AC_DEFUN([INVOKE_LIBOPTS_MACROS_FIRST],[
       [lo_have_lim_hdr=true;break],
       [lo_have_lim_hdr=false])
 
-  AC_CHECK_HEADERS([inttypes.h   stdint.h],
-      [lo_have_typ_hdr=true;break],
-      [lo_have_typ_hdr=false])
   gl_STDNORETURN_H
 
   # ----------------------------------------------------------------------
@@ -69,9 +66,6 @@ AC_DEFUN([INVOKE_LIBOPTS_MACROS_FIRST],[
   ${lo_have_lim_hdr} || \
     ]AC_MSG_ERROR(
       [you must have one of limits.h, sys/limits.h or values.h])[
-
-  ${lo_have_typ_hdr} || \
-    ]AC_MSG_ERROR([you must have inttypes.h or stdint.h on your system])[
 
   for f in sys_types sys_param sys_stat string errno stdlib memory setjmp
   do eval as_ac_var=\${ac_cv_header_${f}_h}

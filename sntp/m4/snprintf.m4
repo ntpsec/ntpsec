@@ -151,7 +151,7 @@ AC_DEFUN([HW_FUNC_VSNPRINTF],
     AS_IF([test ${hw_nodef_vsnprintf=no} = no],
       [AC_DEFINE([vsnprintf], [rpl_vsnprintf],
         [Define to rpl_vsnprintf if the replacement function should be used.])])
-    AC_CHECK_HEADERS([inttypes.h locale.h stddef.h stdint.h])
+    AC_CHECK_HEADERS([locale.h stddef.h])
     AC_CHECK_MEMBERS([struct lconv.decimal_point, struct lconv.thousands_sep],
       [], [], [#include <locale.h>])
     AC_TYPE_LONG_DOUBLE
