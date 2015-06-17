@@ -107,6 +107,7 @@ typedef int tok_ref;
 
 /* We roll our own integer number parser.
  */
+typedef signed   long long int json_int;
 typedef unsigned long long int json_uint;
 #define JSON_INT_MAX LLONG_MAX
 #define JSON_INT_MIN LLONG_MIN
