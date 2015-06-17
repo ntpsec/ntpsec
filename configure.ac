@@ -975,55 +975,6 @@ AC_CHECK_FUNCS([umask uname updwtmp updwtmpx])
 
 ###
 
-# http://bugs.ntp.org/737
-case "$ac_cv_func_recvmsg" in
- yes)
-    AC_CACHE_CHECK(
-	[if we need extra help to define struct iovec],
-	[ntp_cv_struct_iovec_help],
-	[
-	    compiled=no
-	    for ntp_cv_struct_iovec_help in '0' '1'; do
-		AC_COMPILE_IFELSE(
-		    [AC_LANG_PROGRAM(
-			[[
-			    #include <sys/types.h>
-			    #include <sys/socket.h>
-			    #if $ntp_cv_struct_iovec_help
-			    # include <sys/uio.h>
-			    #endif
-			]],
-			[[
-			    void foo(void) {
-				ssize_t x;
-				int s = 0;
-				struct iovec iov;
-				struct msghdr mh;
-				int flags = 0;
-
-				mh.msg_iov = &iov;
-				x = recvmsg(s, &mh, flags);
-			    }
-			]]
-		    )],
-		    [compiled=yes ; break 1],
-		    []
-		)
-	    done
-	    case "$compiled" in
-	     no)
-		ntp_cv_struct_iovec_help=0
-	    esac
-	    AS_UNSET([compiled])
-	]
-    )
-    case "$ntp_cv_struct_iovec_help" in
-     1)
-	AC_DEFINE([HAVE_SYS_UIO_H], [1],
-	    [Use sys/uio.h for struct iovec help])
-    esac
-esac
-
 AC_CACHE_CHECK(
     [number of arguments taken by setpgrp()],
     [ntp_cv_func_setpgrp_nargs],

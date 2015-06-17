@@ -43,10 +43,7 @@
 #include <sys/types.h>
 #include <sys/time.h>
 #include <sys/socket.h>
-
-#ifdef EVENT__HAVE_SYS_UIO_H
 #include <sys/uio.h>
-#endif
 
 #ifdef EVENT__HAVE_SYS_IOCTL_H
 #include <sys/ioctl.h>
@@ -2145,13 +2142,10 @@ evbuffer_expand(struct evbuffer *buf, size_t datlen)
  * Reads data from a file descriptor into a buffer.
  */
 
-#if defined(EVENT__HAVE_SYS_UIO_H) || defined(_WIN32)
 #define USE_IOVEC_IMPL
-#endif
 
 #ifdef USE_IOVEC_IMPL
 
-#ifdef EVENT__HAVE_SYS_UIO_H
 /* number of iovec we use for writev, fragmentation is going to determine
  * how much we end up writing */
 
@@ -2169,13 +2163,6 @@ evbuffer_expand(struct evbuffer *buf, size_t datlen)
 #define IOV_PTR_FIELD iov_base
 #define IOV_LEN_FIELD iov_len
 #define IOV_LEN_TYPE size_t
-#else
-#define NUM_WRITE_IOVEC 16
-#define IOV_TYPE WSABUF
-#define IOV_PTR_FIELD buf
-#define IOV_LEN_FIELD len
-#define IOV_LEN_TYPE unsigned long
-#endif
 #endif
 #define NUM_READ_IOVEC 4
 

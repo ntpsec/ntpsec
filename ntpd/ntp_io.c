@@ -24,9 +24,7 @@
 #ifdef HAVE_SYS_SOCKIO_H	/* UXPV: SIOC* #defines (Frank Vance <fvance@waii.com>) */
 # include <sys/sockio.h>
 #endif
-#ifdef HAVE_SYS_UIO_H
-# include <sys/uio.h>
-#endif
+#include <sys/uio.h>
 
 #include "ntp_machine.h"
 #include "ntpd.h"
