@@ -19,6 +19,9 @@ compatibility must be provided.  One notabale case is clock_gettime()
 which is used, when available, for increased accuracy, and must have a
 fallback implementation using native time calls .
 
+You can view POSIX-1.2001, with 2004 Corrigendum, online for free here:
+    http://pubs.opengroup.org/onlinepubs/009695399/toc.htm
+
 The only scripting languages allowed and supported are POSIX sh and
 Python 2.5.
 
