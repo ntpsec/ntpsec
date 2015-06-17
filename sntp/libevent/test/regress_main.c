@@ -126,9 +126,7 @@ regress_make_tmpfile(const void *data, size_t datalen, char **filename_out)
 	int fd;
 	*filename_out = NULL;
 	strcpy(tmpfilename, "/tmp/eventtmp.XXXXXX");
-#ifdef EVENT__HAVE_UMASK
 	umask(0077);
-#endif
 	fd = mkstemp(tmpfilename);
 	if (fd == -1)
 		return (-1);

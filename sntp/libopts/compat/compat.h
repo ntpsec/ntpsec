@@ -68,11 +68,7 @@
 #  include <sys/wait.h>
 #endif
 
-#if defined( HAVE_SOLARIS_SYSINFO )
-#  include <sys/systeminfo.h>
-#elif defined( HAVE_UNAME_SYSCALL )
-#  include <sys/utsname.h>
-#endif
+#include <sys/utsname.h>
 
 #ifdef DAEMON_ENABLED
 #  if HAVE_SYS_STROPTS_H
