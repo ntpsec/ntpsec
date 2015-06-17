@@ -303,22 +303,6 @@ AC_CHECK_HEADERS([memory.h netdb.h poll.h])
 AC_CHECK_HEADERS([sgtty.h stdatomic.h stdlib.h string.h termio.h])
 AC_CHECK_HEADERS([termios.h timepps.h timex.h unistd.h])
 
-case "$host" in
- *-*-aix*)
-    AC_CHECK_HEADERS([utmpx.h])
-    case "$ac_cv_header_utmpx_h" in
-     yes)
-	;;
-     *)
-	AC_CHECK_HEADERS([utmp.h])
-	;;
-    esac
-    ;;
- *)
-    AC_CHECK_HEADERS([utmp.h utmpx.h])
-    ;;
-esac
-
 #
 # On Suns only (so far) getpass() truncates the typed password to 8
 # characters, but getpassphrase() allows up to 257.  Most systems'
@@ -560,26 +544,6 @@ case "$ntp_cv_override_hz" in
     AC_DEFINE([OVERRIDE_HZ], [1],
 	[Do we need to override the system's idea of HZ?])
 esac
-
-dnl AC_CACHE_CHECK(ut_host in struct utmp, ac_cv_func_ut_host_in_utmp,
-dnl [AC_TRY_LINK([#include <sys/types.h>
-dnl #include <utmp.h>], [struct utmp ut; ut.ut_host;],
-dnl ac_cv_func_ut_host_in_utmp=yes, ac_cv_func_ut_host_in_utmp=no)])
-dnl if test $su_cv_func_ut_host_in_utmp = yes; then
-dnl   AC_DEFINE(HAVE_UT_HOST)
-dnl fi
-
-dnl AC_MSG_CHECKING(if we can get the system boot time)
-dnl AC_CACHE_VAL(su_cv_have_boot_time,
-dnl [AC_EGREP_CPP(yes,
-dnl #include <utmpx.h>
-dnl #include <utmp.h>
-dnl #endif
-dnl #ifdef BOOT_TIME
-dnl yes
-dnl #endif
-dnl ], su_cv_have_boot_time=yes, su_cv_have_boot_time=no)])
-dnl AC_MSG_RESULT($su_cv_have_boot_time)
 
 AC_CACHE_CHECK(
     [for struct rt_msghdr],
