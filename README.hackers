@@ -4,19 +4,28 @@ See README.patches for information about submitting patches.
 
 ---
 
-Dave likes this code indented formatted in a consistent way.
+Dr. Dave Mills likes this code indented formatted in a consistent way.
 The file "dot.emacs" has the emacs C-mode indentation style that Dave likes.
 
 ---
 
-We'd like to see *all* system function declarations live in include/l_stdlib.h
-and NEVER appear in the .c files.
+The baseline C standard is ISO/IEC 9899:1999, also known as C99.  Note
+that this is a coding standard, not an ABI standard, so it can happily
+coexist with distributions that use C89 conventions.
+
+Only POSIX-1.2001/SuSv3 library functions should be used.  If a library
+function not in POSIX 2001 is required, then a wrapper function for back
+compatibility must be provided.  One notabale case is clock_gettime()
+which is used, when available, for increased accuracy, and must have a
+fallback implementation using native time calls .
+
+The only scripting languages allowed and supported are POSIX sh and
+Python 2.5.
 
 ---
 
-The baseline C standard is C99.  Only POSIX 2001 library functions
-should be used.  If a library function not in POSIX 2001 is used then a
-wrapper function for back compatibility must be provided.
+Care must be taken to ensure that 32- and 64-bit machines of any endianness
+and any character signedness function as expected.
 
 ---
 
