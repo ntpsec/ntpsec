@@ -201,16 +201,6 @@ case "$ac_cv_search_setsockopt" in
 esac
 AS_UNSET([saved_LIBS])
 
-AC_C_INLINE
-
-case "$ac_cv_c_inline" in
- '')
-    ;;
- *)
-    AC_DEFINE([HAVE_INLINE], [1], [inline keyword or macro available])
-    AC_SUBST([HAVE_INLINE])
-esac
-
 AC_HEADER_TIME
 AC_CHECK_SIZEOF([time_t])
 AC_C_CHAR_UNSIGNED		dnl CROSS_COMPILE?
@@ -747,34 +737,6 @@ AC_CHECK_HEADERS(
 	#include <errno.h>
     ]
 )
-
-AC_CACHE_CHECK(
-    [for struct timespec],
-    [ntp_cv_struct_timespec],
-    [AC_COMPILE_IFELSE(
-	[AC_LANG_PROGRAM(
-	    [[
-		#include <sys/time.h>
-		/* Under SunOS, timespec is in sys/timepps.h,
-		   which needs errno.h and FRAC */
-		# include <errno.h>
-		#ifdef HAVE_SYS_TIMEPPS_H
-		# define FRAC 4294967296
-		# include <sys/timepps.h>
-		#endif
-	    ]],
-	    [[
-		struct timespec n;
-	    ]]
-	)],
-	[ntp_cv_struct_timespec=yes],
-	[ntp_cv_struct_timespec=no]
-    )]
-)
-case "$ntp_cv_struct_timespec" in
- yes)
-    AC_DEFINE([HAVE_STRUCT_TIMESPEC], [1], [struct timespec declared?])
-esac
 
 AC_CACHE_CHECK(
     [for struct ntptimeval],
