@@ -169,12 +169,10 @@
 #include <ctype.h>
 #include <sys/stat.h>
 #ifdef ONCORE_SHMEM_STATUS
-# ifdef HAVE_SYS_MMAN_H
 #  include <sys/mman.h>
 #  ifndef MAP_FAILED
 #   define MAP_FAILED ((u_char *) -1)
 #  endif  /* MAP_FAILED */
-# endif /* HAVE_SYS_MMAN_H */
 #endif /* ONCORE_SHMEM_STATUS */
 
 #ifdef HAVE_PPSAPI

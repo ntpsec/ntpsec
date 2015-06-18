@@ -351,22 +351,7 @@ ao_strdup(char const * str);
 /*
  *  text_mmap structure.  Only active on platforms with mmap(2).
  */
-#ifdef HAVE_SYS_MMAN_H
-#  include <sys/mman.h>
-#else
-#  ifndef  PROT_READ
-#   define PROT_READ            0x01
-#  endif
-#  ifndef  PROT_WRITE
-#   define PROT_WRITE           0x02
-#  endif
-#  ifndef  MAP_SHARED
-#   define MAP_SHARED           0x01
-#  endif
-#  ifndef  MAP_PRIVATE
-#   define MAP_PRIVATE          0x02
-#  endif
-#endif
+#include <sys/mman.h>
 
 #ifndef MAP_FAILED
 #  define  MAP_FAILED           VOIDP(-1)
