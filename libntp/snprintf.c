@@ -114,8 +114,7 @@
  *
  * 1) The following preprocessor macros should be defined to 1 if the feature or
  *    file in question is available on the target system (by using Autoconf or
- *    other means), though basic functionality should be available as long as
- *    HAVE_STDARG_H is defined correctly:
+ *    other means), though basic functionality should be available.
  *
  *	HW_WANT_RPL_VSNPRINTF
  *	HW_WANT_RPL_SNPRINTF
@@ -125,7 +124,6 @@
  *	HAVE_SNPRINTF	// define to 1 #if HW_WANT_RPL_SNPRINTF
  *	HAVE_VASPRINTF	// define to 1 #if HW_WANT_RPL_VASPRINTF
  *	HAVE_ASPRINTF	// define to 1 #if HW_WANT_RPL_ASPRINTF
- *	HAVE_STDARG_H
  *	HAVE_STDDEF_H
  *	HAVE_LOCALE_H
  *	HAVE_LOCALECONV
@@ -163,7 +161,6 @@
  *	#if HAVE_CONFIG_H
  *	#include <config.h>
  *	#endif
- *	#if HAVE_STDARG_H
  *	#include <stdarg.h>
  *	#if HW_WANT_RPL_VSNPRINTF
  *	int rpl_vsnprintf(char *, size_t, const char *, va_list);
@@ -176,7 +173,6 @@
  *	#endif
  *	#if HW_WANT_RPL_ASPRINTF
  *	int rpl_asprintf(char **, const char *, ...);
- *	#endif
  *	#endif
  *
  * Autoconf macros for handling step 1 and step 2 are available at
@@ -233,9 +229,6 @@
 #undef vasprintf
 #endif	/* defined(vasprintf) */
 #else	/* By default, we assume a modern system for testing. */
-#ifndef HAVE_STDARG_H
-#define HAVE_STDARG_H 1
-#endif	/* HAVE_STDARG_H */
 #ifndef HAVE_STDDEF_H
 #define HAVE_STDDEF_H 1
 #endif	/* HAVE_STDDEF_H */
@@ -293,15 +286,9 @@
 #ifdef VA_SHIFT
 #undef VA_SHIFT
 #endif	/* defined(VA_SHIFT) */
-#if HAVE_STDARG_H
 #include <stdarg.h>
 #define VA_START(ap, last) va_start(ap, last)
 #define VA_SHIFT(ap, value, type) /* No-op for ANSI C. */
-#else	/* Assume <varargs.h> is available. */
-#include <varargs.h>
-#define VA_START(ap, last) va_start(ap)	/* "last" is ignored. */
-#define VA_SHIFT(ap, value, type) value = va_arg(ap, type)
-#endif	/* HAVE_STDARG_H */
 
 #if HW_WANT_RPL_VASPRINTF
 #include <stdlib.h>	/* For malloc(3). */
@@ -1509,22 +1496,12 @@ rpl_vasprintf(char **ret, const char *format, va_list ap)
 #endif	/* HW_WANT_RPL_VASPRINTF */
 
 #if HW_WANT_RPL_SNPRINTF
-#if HAVE_STDARG_H
 int
 rpl_snprintf(char *str, size_t size, const char *format, ...);
 
 int
 rpl_snprintf(char *str, size_t size, const char *format, ...)
-#else
-int
-rpl_snprintf(va_alist) va_dcl
-#endif	/* HAVE_STDARG_H */
 {
-#if !HAVE_STDARG_H
-	char *str;
-	size_t size;
-	char *format;
-#endif	/* HAVE_STDARG_H */
 	va_list ap;
 	int len;
 
@@ -1539,21 +1516,12 @@ rpl_snprintf(va_alist) va_dcl
 #endif	/* HW_WANT_RPL_SNPRINTF */
 
 #if HW_WANT_RPL_ASPRINTF
-#if HAVE_STDARG_H
 int
 rpl_asprintf(char **ret, const char *format, ...);
 
 int
 rpl_asprintf(char **ret, const char *format, ...)
-#else
-int
-rpl_asprintf(va_alist) va_dcl
-#endif	/* HAVE_STDARG_H */
 {
-#if !HAVE_STDARG_H
-	char **ret;
-	char *format;
-#endif	/* HAVE_STDARG_H */
 	va_list ap;
 	int len;
 

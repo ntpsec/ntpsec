@@ -61,9 +61,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#ifdef EVENT__HAVE_STDARG_H
 #include <stdarg.h>
-#endif
 #include <unistd.h>
 #include <limits.h>
 

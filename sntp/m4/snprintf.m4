@@ -25,24 +25,6 @@
 # not a requirement for using or redistributing (possibly modified) versions of
 # this file, nor is leaving this notice intact mandatory.
 
-# HW_HEADER_STDARG_H
-# ------------------
-# Define HAVE_STDARG_H to 1 if <stdarg.h> is available.
-AC_DEFUN([HW_HEADER_STDARG_H],
-[
-  AC_PREREQ([2.60])dnl Older releases should work if AC_CHECK_HEADERS is used.
-  AC_CHECK_HEADERS_ONCE([stdarg.h])
-])# HW_HEADER_STDARG_H
-
-# HW_HEADER_VARARGS_H
-# -------------------
-# Define HAVE_VARARGS_H to 1 if <varargs.h> is available.
-AC_DEFUN([HW_HEADER_VARARGS_H],
-[
-  AC_PREREQ([2.60])dnl Older releases should work if AC_CHECK_HEADERS is used.
-  AC_CHECK_HEADERS_ONCE([varargs.h])
-])# HW_HEADER_VARARGS_H
-
 # HW_FUNC_VA_COPY
 # ---------------
 # Set $hw_cv_func_va_copy to "yes" or "no".  Define HAVE_VA_COPY to 1 if
@@ -52,17 +34,13 @@ AC_DEFUN([HW_HEADER_VARARGS_H],
 # tested with #ifdef", as suggested by the Autoconf manual (5.5.1).
 AC_DEFUN([HW_FUNC_VA_COPY],
 [
-  AC_REQUIRE([HW_HEADER_STDARG_H])dnl Our check evaluates HAVE_STDARG_H.
-  AC_REQUIRE([HW_HEADER_VARARGS_H])dnl Our check evaluates HAVE_VARARGS_H.
   AC_CACHE_CHECK([for va_copy],
     [hw_cv_func_va_copy],
     [AC_RUN_IFELSE(
       [AC_LANG_PROGRAM(
-        [[#if HAVE_STDARG_H
+        [[
         #include <stdarg.h>
-        #elif HAVE_VARARGS_H
-        #include <varargs.h>
-        #endif]],
+        ]],
         [[va_list ap, aq; va_copy(aq, ap);]])],
       [hw_cv_func_va_copy=yes],
       [hw_cv_func_va_copy=no],
@@ -78,17 +56,13 @@ AC_DEFUN([HW_FUNC_VA_COPY],
 # $hw_cv_func___va_copy is set to "yes".
 AC_DEFUN([HW_FUNC___VA_COPY],
 [
-  AC_REQUIRE([HW_HEADER_STDARG_H])dnl Our check evaluates HAVE_STDARG_H.
-  AC_REQUIRE([HW_HEADER_VARARGS_H])dnl Our check evaluates HAVE_VARARGS_H.
   AC_CACHE_CHECK([for __va_copy],
     [hw_cv_func___va_copy],
     [AC_RUN_IFELSE(
       [AC_LANG_PROGRAM(
-        [[#if HAVE_STDARG_H
+        [[
         #include <stdarg.h>
-        #elif HAVE_VARARGS_H
-        #include <varargs.h>
-        #endif]],
+        ]],
         [[va_list ap, aq; __va_copy(aq, ap);]])],
       [hw_cv_func___va_copy=yes],
       [hw_cv_func___va_copy=no],
@@ -107,7 +81,6 @@ AC_DEFUN([HW_FUNC___VA_COPY],
 AC_DEFUN([HW_FUNC_VSNPRINTF],
 [
   AC_PREREQ([2.60])dnl 2.59 should work if some AC_TYPE_* macros are replaced.
-  AC_REQUIRE([HW_HEADER_STDARG_H])dnl Our check evaluates HAVE_STDARG_H.
   AC_CHECK_FUNC([vsnprintf],
     [hw_cv_func_vsnprintf=yes],
     [hw_cv_func_vsnprintf=no])
@@ -116,9 +89,8 @@ AC_DEFUN([HW_FUNC_VSNPRINTF],
       [hw_cv_func_vsnprintf_c99],
       [AC_RUN_IFELSE(
         [AC_LANG_PROGRAM(
-          [[#if HAVE_STDARG_H
+          [[
           #include <stdarg.h>
-          #endif
           #include <stdio.h>
           static int testprintf(char *buf, size_t size, const char *format, ...)
           {
@@ -280,7 +252,6 @@ AC_DEFUN([_HW_FUNC_XPRINTF_REPLACE],
 [
   AS_IF([test "x$_hw_cv_func_xprintf_replace_done" != xyes],
     [AC_C_CONST
-    HW_HEADER_STDARG_H
     AC_LIBOBJ([snprintf])
     _hw_cv_func_xprintf_replace_done=yes])
 ])# _HW_FUNC_XPRINTF_REPLACE

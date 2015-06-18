@@ -15,11 +15,7 @@
 #include <sys/types.h>
 #include <inttypes.h>
 
-/* Bug 2813 */
-#ifdef HAVE_LIMITS_H
-# include <limits.h>
-#endif
-
+#include <limits.h>
 #include "ntp_machine.h"
 
 
