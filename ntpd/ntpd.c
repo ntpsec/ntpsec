@@ -415,9 +415,7 @@ ntpdmain(
 	struct recvbuf *rbuf;
 	const char *	logfilename;
 	mode_t		uv;
-# if defined(HAVE_GETUID) && !defined(MPE) /* MPE lacks the concept of root */
 	uid_t		uid;
-# endif
 # if defined(HAVE_WORKING_FORK)
 	long		wait_sync = 0;
 	int		pipe_fds[2];
@@ -500,7 +498,7 @@ ntpdmain(
 	isc_error_setunexpected(library_unexpected_error);
 
 	/* MPE lacks the concept of root */
-# if defined(HAVE_GETUID) && !defined(MPE)
+# if !defined(MPE)
 	uid = getuid();
 	if (uid && !HAVE_OPT( SAVECONFIGQUIT )) {
 		msyslog_term = TRUE;

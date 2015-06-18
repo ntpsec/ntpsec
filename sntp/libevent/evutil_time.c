@@ -41,10 +41,6 @@
 #ifndef EVENT__HAVE_GETTIMEOFDAY
 #include <sys/timeb.h>
 #endif
-#if !defined(EVENT__HAVE_NANOSLEEP) && !defined(EVENT_HAVE_USLEEP) && \
-	!defined(_WIN32)
-#include <sys/select.h>
-#endif
 #include <time.h>
 #include <sys/stat.h>
 #include <string.h>
@@ -120,19 +116,13 @@ evutil_usleep_(const struct timeval *tv)
 		long msec = evutil_tv_to_msec_(tv);
 		Sleep((DWORD)msec);
 	}
-#elif defined(EVENT__HAVE_NANOSLEEP)
+#else
 	{
 		struct timespec ts;
 		ts.tv_sec = tv->tv_sec;
 		ts.tv_nsec = tv->tv_usec*1000;
 		nanosleep(&ts, NULL);
 	}
-#elif defined(EVENT__HAVE_USLEEP)
-	/* Some systems don't like to usleep more than 999999 usec */
-	sleep(tv->tv_sec);
-	usleep(tv->tv_usec);
-#else
-	select(0, NULL, NULL, NULL, tv);
 #endif
 }
 
