@@ -351,7 +351,7 @@ case "$host" in
     ;;
 esac
 AC_CHECK_HEADERS([sys/stream.h sys/stropts.h sys/syssgi.h])
-AC_CHECK_HEADERS([sys/systune.h sys/termios.h sys/tpro.h sys/wait.h])
+AC_CHECK_HEADERS([sys/systune.h sys/termios.h sys/tpro.h])
 case "$host" in
 *-convex-*)
     AC_CHECK_HEADERS([/sys/sync/queue.h /sys/sync/sema.h])
