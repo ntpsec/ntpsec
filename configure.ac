@@ -300,7 +300,7 @@ AC_CHECK_HEADER(
 AC_CHECK_HEADERS([ieeefp.h kvm.h])
 
 AC_CHECK_HEADERS([memory.h])
-AC_CHECK_HEADERS([sgtty.h stdatomic.h termio.h])
+AC_CHECK_HEADERS([sgtty.h stdatomic.h])
 AC_CHECK_HEADERS([timepps.h timex.h])
 
 #
@@ -337,18 +337,11 @@ case "$host" in
     AC_CHECK_HEADERS([sys/ioctl.h])
     ;;
 esac
-AC_CHECK_HEADERS([sys/ipc.h sys/lock.h sys/mman.h])
+AC_CHECK_HEADERS([sys/lock.h sys/mman.h])
 # HMS: Check sys/proc.h and sys/resource.h after some others
-AC_CHECK_HEADERS([sys/modem.h sys/ppsclock.h sys/ppstime.h sched.h])
-case "$ac_cv_header_sched_h" in
- yes)
-    ;;
- *)
-    AC_CHECK_HEADERS([sys/sched.h])
-    ;;
-esac
+AC_CHECK_HEADERS([sys/modem.h sys/ppsclock.h sys/ppstime.h])
 # HMS: Check sys/shm.h after some others
-AC_CHECK_HEADERS([sys/select.h sys/signal.h sys/sockio.h])
+AC_CHECK_HEADERS([sys/signal.h sys/sockio.h])
 # HMS: Checked sys/socket.h earlier
 case "$host" in
  *-*-netbsd*)
@@ -357,7 +350,7 @@ case "$host" in
     AC_CHECK_HEADERS([machine/soundcard.h sys/soundcard.h])
     ;;
 esac
-AC_CHECK_HEADERS([sys/stream.h stropts.h sys/stropts.h sys/syssgi.h])
+AC_CHECK_HEADERS([sys/stream.h sys/stropts.h sys/syssgi.h])
 AC_CHECK_HEADERS([sys/systune.h sys/termios.h sys/tpro.h sys/wait.h])
 case "$host" in
 *-convex-*)

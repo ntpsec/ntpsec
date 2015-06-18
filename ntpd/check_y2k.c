@@ -73,13 +73,7 @@
 # endif
 #endif
 #if defined(HAVE_SCHED_SETSCHEDULER)
-# ifdef HAVE_SCHED_H
-#  include <sched.h>
-# else
-#  ifdef HAVE_SYS_SCHED_H
-#   include <sys/sched.h>
-#  endif
-# endif
+#include <sched.h>
 #endif
 #if defined(HAVE_SYS_MMAN_H)
 # include <sys/mman.h>
