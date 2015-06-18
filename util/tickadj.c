@@ -166,9 +166,6 @@ main(
 
 #else	/* not Linux... kmem tweaking: */
 
-#ifdef HAVE_SYS_FILE_H
-# include <sys/file.h>
-#endif
 #include <sys/stat.h>
 
 #ifdef HAVE_SYS_PARAM_H

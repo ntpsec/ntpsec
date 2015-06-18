@@ -10,9 +10,6 @@
 #include <sys/types.h>
 #include <unistd.h>
 #include <stdio.h>
-#ifdef HAVE_SYS_FILE_H
-# include <sys/file.h>
-#endif
 #include <fcntl.h>
 #if !defined(SEEK_SET) && defined(L_SET)
 # define SEEK_SET L_SET
