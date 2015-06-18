@@ -329,7 +329,7 @@ case "$ac_cv_header_netinfo_ni_h" in
  yes)
     AC_DEFINE([HAVE_NETINFO], [1], [NetInfo support?])
 esac
-AC_CHECK_HEADERS([sun/audioio.h sys/audioio.h sys/file.h])
+AC_CHECK_HEADERS([sun/audioio.h sys/audioio.h])
 case "$host" in
  *-*-sunos4*)
     ;;

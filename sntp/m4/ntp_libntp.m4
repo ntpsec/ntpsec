@@ -95,10 +95,6 @@ dnl  net/if.h.  If that fails, try adding a duplicate definition of
 dnl  mpinfou, and if that helps add it to confdefs.h (used for further
 dnl  configure tests) and config.h.
 #
-AC_CHECK_HEADERS([errno.h sys/socket.h sys/types.h time.h])
-AC_CHECK_HEADERS([net/if.h], [], [], [
-    #include <sys/socket.h>
-])
 case "$host" in
  *-hp-hpux*)
     AC_CACHE_CHECK(
@@ -106,27 +102,6 @@ case "$host" in
 	[ntp_cv_predecl_mpinfou],
 	[
 	    np_cv_predecl_mpinfou=no
-	    case "$ac_cv_header_net_if_h" in
-	     no)
-		AC_COMPILE_IFELSE(
-		    [AC_LANG_PROGRAM(
-			[[
-			    typedef union mpinfou {
-				    struct pdk_mpinfo *pdkptr;
-				    struct mpinfo *pikptr;
-			    } mpinfou_t;
-			    #include <sys/socket.h>
-			    #include <net/if.h>
-			]],
-			[[
-			]]
-		    )],
-		    [
-			ntp_cv_predecl_mpinfou=yes
-			ac_cv_header_net_if_h=yes
-		    ]
-		)
-	    esac
 	]
     )
     case "$ntp_cv_predecl_mpinfou" in
