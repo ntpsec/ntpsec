@@ -338,7 +338,7 @@ case "$host" in
     ;;
 esac
 AC_CHECK_HEADERS([sys/lock.h])
-# HMS: Check sys/proc.h and sys/resource.h after some others
+# HMS: Check sys/proc.h after some others
 AC_CHECK_HEADERS([sys/modem.h sys/ppsclock.h sys/ppstime.h])
 # HMS: Check sys/shm.h after some others
 AC_CHECK_HEADERS([sys/signal.h sys/sockio.h])
@@ -470,10 +470,6 @@ esac
 
 AC_CHECK_HEADERS([sys/proc.h], [], [], [
     #include <sys/types.h>
-    #include <sys/time.h>
-])
-
-AC_CHECK_HEADERS([sys/resource.h], [], [], [
     #include <sys/time.h>
 ])
 

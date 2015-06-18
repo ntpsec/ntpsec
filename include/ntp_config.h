@@ -1,9 +1,7 @@
 #ifndef NTP_CONFIG_H
 #define NTP_CONFIG_H
 
-#ifdef HAVE_SYS_RESOURCE_H
-# include <sys/resource.h>
-#endif /* HAVE_SYS_RESOURCE_H */
+#include <sys/resource.h>
 
 #include "ntp_machine.h"
 #include "ntpsim.h"
