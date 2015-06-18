@@ -395,7 +395,6 @@ typedef int ssize_t;	/* ssize is an int */
 # define HAVE_ALLOCA			1
 # define HAVE_GETCLOCK			1
 # define HAVE_MEMMOVE			1
-# define HAVE_MKTIME			1
 # define HAVE_TIMEGM			1	/* actually _mkgmtime */
 
 # define HAVE_STRUCT_TIMESPEC

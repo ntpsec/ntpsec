@@ -747,7 +747,6 @@ case "$ac_cv_header_kvm_h" in
     ;;
 esac
 
-AC_CHECK_FUNCS([mktime])
 case "$host" in
  *-*-aix[[4-9]]*)
     # XXX only verified thru AIX6.
@@ -2127,7 +2126,7 @@ AC_ARG_ENABLE(
 	[+ GPSD JSON receiver]
     )],
     [ntp_ok=$enableval],
-     ntp_ok=$ntp_eac ;;
+     ntp_ok=$ntp_eac
 )
 case "$ntp_ok" in
  yes)
