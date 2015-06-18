@@ -939,9 +939,7 @@ AC_DEFUN([OL_FUNC_INET_ATON],
     [AC_LINK_IFELSE([AC_LANG_PROGRAM([[
 #include <sys/types.h>
 #include <sys/socket.h>
-#ifdef HAVE_SYS_SELECT_H
-#	include <sys/select.h>
-#endif
+#include <sys/select.h>
 #include <netinet/in.h>
 #ifdef HAVE_ARPA_INET_H
 #	include <arpa/inet.h>

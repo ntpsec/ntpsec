@@ -16,8 +16,8 @@ AC_DEFUN([INVOKE_LIBOPTS_MACROS_FIRST],[
   # AC_CHECK_HEADERS
   # =================
   AC_CHECK_HEADERS([ \
-      sys/mman.h    sys/param.h   sys/poll.h    sys/procset.h \
-      sys/select.h  sys/socket.h  sys/stropts.h sys/time.h \
+      sys/param.h   sys/poll.h    sys/procset.h \
+      sys/socket.h  sys/stropts.h sys/time.h \
       sys/un.h      sys/wait.h    dlfcn.h       \
       fcntl.h       libgen.h      libintl.h     memory.h \
       netinet/in.h  setjmp.h      stdbool.h     sysexits.h \

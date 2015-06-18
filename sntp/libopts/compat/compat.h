@@ -73,18 +73,11 @@
 
 #include <sys/socket.h>
 
-#  if ! defined(HAVE_SYS_POLL_H) && ! defined(HAVE_SYS_SELECT_H)
-#    error This system cannot support daemon processing
-     Choke Me.
-#  endif
-
 #  if HAVE_SYS_POLL_H
 #  include <sys/poll.h>
 #  endif
 
-#  if HAVE_SYS_SELECT_H
-#  include <sys/select.h>
-#  endif
+#include <sys/select.h>
 
 #  if HAVE_NETINET_IN_H
 #  include <netinet/in.h>
