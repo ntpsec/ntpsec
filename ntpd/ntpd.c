@@ -682,10 +682,9 @@ ntpdmain(
 # endif
 
 	/* Setup stack size in preparation for locking pages in memory. */
-# if defined(HAVE_MLOCKALL)
-#  ifdef HAVE_SETRLIMIT
+#ifdef HAVE_SETRLIMIT
 	ntp_rlimit(RLIMIT_STACK, DFLT_RLIMIT_STACK * 4096, 4096, "4k");
-#   ifdef RLIMIT_MEMLOCK
+# ifdef RLIMIT_MEMLOCK
 	/*
 	 * The default RLIMIT_MEMLOCK is very low on Linux systems.
 	 * Unless we increase this limit malloc calls are likely to
@@ -693,23 +692,8 @@ ntpdmain(
 	 * has to be larger than the largest ntpd resident set size.
 	 */
 	ntp_rlimit(RLIMIT_MEMLOCK, DFLT_RLIMIT_MEMLOCK * 1024 * 1024, 1024 * 1024, "MB");
-#   endif	/* RLIMIT_MEMLOCK */
-#  endif	/* HAVE_SETRLIMIT */
-# else	/* !HAVE_MLOCKALL follows */
-#  ifdef HAVE_PLOCK
-#   ifdef PROCLOCK
-#    ifdef _AIX
-	/*
-	 * set the stack limit for AIX for plock().
-	 * see get_aix_stack() for more info.
-	 */
-	if (ulimit(SET_STACKLIM, (get_aix_stack() - 8 * 4096)) < 0)
-		msyslog(LOG_ERR,
-			"Cannot adjust stack limit for plock: %m");
-#    endif	/* _AIX */
-#   endif	/* PROCLOCK */
-#  endif	/* HAVE_PLOCK */
-# endif	/* !HAVE_MLOCKALL */
+# endif	/* RLIMIT_MEMLOCK */
+#endif	/* HAVE_SETRLIMIT */
 
 	/*
 	 * Set up signals we pay attention to locally.
@@ -772,34 +756,12 @@ ntpdmain(
 	getconfig(argc, argv);
 
 	if (do_memlock) {
-# if defined(HAVE_MLOCKALL)
 		/*
 		 * lock the process into memory
 		 */
 		if (!HAVE_OPT(SAVECONFIGQUIT) &&
 		    0 != mlockall(MCL_CURRENT|MCL_FUTURE))
 			msyslog(LOG_ERR, "mlockall(): %m");
-# else	/* !HAVE_MLOCKALL follows */
-#  ifdef HAVE_PLOCK
-#   ifdef PROCLOCK
-		/*
-		 * lock the process into memory
-		 */
-		if (!HAVE_OPT(SAVECONFIGQUIT) && 0 != plock(PROCLOCK))
-			msyslog(LOG_ERR, "plock(PROCLOCK): %m");
-#   else	/* !PROCLOCK follows  */
-#    ifdef TXTLOCK
-		/*
-		 * Lock text into ram
-		 */
-		if (!HAVE_OPT(SAVECONFIGQUIT) && 0 != plock(TXTLOCK))
-			msyslog(LOG_ERR, "plock(TXTLOCK) error: %m");
-#    else	/* !TXTLOCK follows */
-		msyslog(LOG_ERR, "plock() - don't know what to lock!");
-#    endif	/* !TXTLOCK */
-#   endif	/* !PROCLOCK */
-#  endif	/* HAVE_PLOCK */
-# endif	/* !HAVE_MLOCKALL */
 	}
 
 	loop_config(LOOP_DRIFTINIT, 0);

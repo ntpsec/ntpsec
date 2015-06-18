@@ -275,9 +275,7 @@ extern char *strdup(const char *);
 # ifdef HAVE_SETPRIORITY
 #  define HAVE_BSD_NICE
 # else
-#  ifdef HAVE_NICE
-#	define HAVE_ATT_NICE
-#  endif
+#  define HAVE_ATT_NICE
 # endif
 #endif
 
