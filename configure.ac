@@ -770,7 +770,6 @@ case "$host" in
     # mlockall is there, as a #define calling memlk via <sys/mman.h>
     # Not easy to test for - cheat.
     AC_CHECK_FUNCS([memlk], [ac_cv_func_mlockall=yes])
-    AC_CHECK_FUNCS([mlockall])
     ;;
 esac
 AC_CHECK_FUNCS([plock pututline rtprio])
