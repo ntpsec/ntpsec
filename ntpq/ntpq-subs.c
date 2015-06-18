@@ -2665,8 +2665,6 @@ collect_mru_list(
 		 */
 #ifdef SYS_WINNT
 		Sleep(sleep_msecs);
-#elif !defined(HAVE_NANOSLEEP)
-		sleep((sleep_msecs / 1000) + 1);
 #else
 		{
 			struct timespec interv = { 0,

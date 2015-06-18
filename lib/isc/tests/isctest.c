@@ -160,19 +160,9 @@ isc_test_end() {
  */
 void
 isc_test_nap(isc_uint32_t usec) {
-#ifdef HAVE_NANOSLEEP
 	struct timespec ts;
 
 	ts.tv_sec = usec / 1000000;
 	ts.tv_nsec = (usec % 1000000) * 1000;
 	nanosleep(&ts, NULL);
-#elif HAVE_USLEEP
-	usleep(usec);
-#else
-	/*
-	 * No fractional-second sleep function is available, so we
-	 * round up to the nearest second and sleep instead
-	 */
-	sleep((usec / 1000000) + 1);
-#endif
 }

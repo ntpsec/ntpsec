@@ -738,7 +738,7 @@ AC_CHECK_FUNCS([daemon])
 LIBS="$saved_LIBS"
 AS_UNSET([saved_LIBS])
 
-AC_CHECK_FUNCS([fnmatch getbootfile getuid getrusage nanosleep strsignal])
+AC_CHECK_FUNCS([getbootfile strsignal])
 
 # kvm_open() is only used by tickadj.  Also see above.
 case "$ac_cv_header_kvm_h" in
