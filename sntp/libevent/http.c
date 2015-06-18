@@ -50,9 +50,7 @@
 
 #include <sys/queue.h>
 
-#ifdef EVENT__HAVE_NETINET_IN_H
 #include <netinet/in.h>
-#endif
 #ifdef EVENT__HAVE_ARPA_INET_H
 #include <arpa/inet.h>
 #endif

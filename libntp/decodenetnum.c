@@ -5,9 +5,7 @@
 #include <sys/types.h>
 #include <ctype.h>
 #include <sys/socket.h>
-#ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
-#endif
 
 #include "ntp.h"
 #include "ntp_stdlib.h"

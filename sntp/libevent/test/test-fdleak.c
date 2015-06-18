@@ -35,9 +35,7 @@
 #include <errno.h>
 #include <sys/time.h>
 #include <sys/resource.h>
-#ifdef EVENT__HAVE_NETINET_IN_H
 #include <netinet/in.h>
-#endif
 
 #include "event2/event.h"
 #include "event2/bufferevent.h"

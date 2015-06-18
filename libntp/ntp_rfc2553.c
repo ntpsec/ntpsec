@@ -71,9 +71,8 @@
 #include <ctype.h>
 #include <sys/socket.h>
 #include <isc/net.h>
-#ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
-#endif
+
 #include "ntp_rfc2553.h"
 
 #include "ntpd.h"

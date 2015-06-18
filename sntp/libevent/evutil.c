@@ -51,9 +51,7 @@
 #include <limits.h>
 #include <stdio.h>
 #include <string.h>
-#ifdef EVENT__HAVE_NETINET_IN_H
 #include <netinet/in.h>
-#endif
 #ifdef EVENT__HAVE_NETINET_IN6_H
 #include <netinet/in6.h>
 #endif
