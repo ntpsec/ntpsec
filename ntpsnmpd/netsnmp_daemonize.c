@@ -88,10 +88,6 @@ SOFTWARE.
 #include <nlist.h>
 #endif
 
-#if HAVE_SYS_FILE_H
-#include <sys/file.h>
-#endif
-
 #if HAVE_KSTAT_H
 #include <kstat.h>
 #endif
