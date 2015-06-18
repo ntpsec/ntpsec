@@ -32,9 +32,7 @@
 #include <signal.h>
 #include <ctype.h>
 #include <poll.h>
-#ifdef HAVE_SYS_SIGNAL_H
-# include <sys/signal.h>
-#endif
+
 #ifdef HAVE_SYS_IOCTL_H
 # include <sys/ioctl.h>
 #endif
