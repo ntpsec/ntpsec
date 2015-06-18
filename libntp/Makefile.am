@@ -52,7 +52,6 @@ libntp_a_SRCS =						\
 	authkeys.c					\
 	authreadkeys.c					\
 	authusekey.c					\
-	bsd_strerror.c					\
 	buftvtots.c					\
 	caljulian.c					\
 	caltontp.c					\
