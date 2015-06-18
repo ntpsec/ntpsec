@@ -327,7 +327,6 @@ fi
 
 dnl Checks for typedefs, structures, and compiler characteristics.
 AC_C_CONST
-AC_C_INLINE
 AC_HEADER_TIME
 
 dnl Checks for library functions.

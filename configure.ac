@@ -1423,21 +1423,15 @@ ntp_atom_ok=yes
 
 # Check for header timepps.h, if found then we have PPS API (Draft RFC) stuff.
 
-# The PPSAPI headers need "inline" ($ac_cv_c_inline='inline')
-# The PPSAPI needs struct timespec.
 # The PPSAPI also needs a timepps header.
 
-case "$ac_cv_c_inline$ntp_cv_struct_timespec" in
- inlineyes)
-    case "$ac_cv_header_timepps_h$ac_cv_header_sys_timepps_h$host_os" in
-     *yes* | *sunos* | *solaris* | *sco* | *netbsd* )
-	AC_DEFINE(HAVE_PPSAPI, 1, [Do we have the PPS API per the Draft RFC?])
-	ntp_jupiter_ok=yes
-	ntp_oncore_ok=yes
-	ntp_parse_ok=yes
-	ntp_ripe_ncc_ok=yes
-	;;
-    esac
+case "$ac_cv_header_timepps_h$ac_cv_header_sys_timepps_h$host_os" in
+ *yes* | *sunos* | *solaris* | *sco* | *netbsd* )
+    AC_DEFINE(HAVE_PPSAPI, 1, [Do we have the PPS API per the Draft RFC?])
+    ntp_jupiter_ok=yes
+    ntp_oncore_ok=yes
+    ntp_parse_ok=yes
+    ntp_ripe_ncc_ok=yes
     ;;
 esac
 
