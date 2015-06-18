@@ -1,9 +1,4 @@
 
-#ifndef HAVE_VPRINTF
-#include "choke-me: no vprintf and no snprintf"
-  choke me.
-#endif
-
 #if defined(HAVE_STDARG_H)
 #  include <stdarg.h>
 #  ifndef   VA_START
