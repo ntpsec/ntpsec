@@ -10,9 +10,7 @@ AC_CACHE_CHECK(
 	    [[
 		#include <sys/types.h>
 		#include <sys/socket.h>
-		#ifdef HAVE_NETINET_IN_H
-		# include <netinet/in.h>
-		#endif
+		#include <netinet/in.h>
 	    ]],
 	    [[
 		struct sockaddr_storage n;

@@ -79,9 +79,7 @@
 
 #include <sys/select.h>
 
-#  if HAVE_NETINET_IN_H
-#  include <netinet/in.h>
-#  endif
+#include <netinet/in.h>
 
 #  if HAVE_SYS_UN_H
 #  include <sys/un.h>
