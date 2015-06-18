@@ -11,15 +11,8 @@
  */
 #if defined(SYS_WINNT)
 # define WORK_THREAD
-#elif defined(ISC_PLATFORM_USETHREADS) && \
-      defined(HAVE_SEM_TIMEDWAIT) && \
-      (defined(HAVE_GETCLOCK) || defined(HAVE_CLOCK_GETTIME))
+#else
 # define WORK_THREAD
-# define WORK_PIPE
-#elif defined(VMS) || defined(SYS_VXWORKS)
-  /* empty */
-#elif defined(HAVE_WORKING_FORK)
-# define WORK_FORK
 # define WORK_PIPE
 #endif
 

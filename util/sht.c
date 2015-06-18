@@ -198,8 +198,6 @@ again:
 		time_t clk_sec, rcv_sec;
 		uint   clk_frc, rcv_frc;
 
-#if defined(HAVE_CLOCK_GETTIME) && defined(CLOCK_REALTIME)
-		
 		/* Here we have a high-resolution system clock, and
 		 * we're not afraid to use it!
 		 */
@@ -209,7 +207,6 @@ again:
 			rcv_frc = (uint)tmptime.tv_nsec;
 		}
 		else
-#endif
 		{
 			time(&rcv_sec);
 			rcv_frc = (uint)random() % 1000000000u;

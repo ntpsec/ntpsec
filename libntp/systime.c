@@ -126,17 +126,7 @@ get_ostime(
 	int	rc;
 	long	ticks;
 
-#if defined(HAVE_CLOCK_GETTIME)
 	rc = clock_gettime(CLOCK_REALTIME, tsp);
-#elif defined(HAVE_GETCLOCK)
-	rc = getclock(TIMEOFDAY, tsp);
-#else
-	struct timeval		tv;
-
-	rc = GETTIMEOFDAY(&tv, NULL);
-	tsp->tv_sec = tv.tv_sec;
-	tsp->tv_nsec = tv.tv_usec * 1000;
-#endif
 	if (rc < 0) {
 		msyslog(LOG_ERR, "read system clock failed: %m (%d)",
 			errno);

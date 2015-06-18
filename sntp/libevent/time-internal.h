@@ -43,15 +43,7 @@
 extern "C" {
 #endif
 
-#if defined(EVENT__HAVE_CLOCK_GETTIME) && defined(CLOCK_MONOTONIC)
 #define HAVE_POSIX_MONOTONIC
-#elif defined(EVENT__HAVE_MACH_ABSOLUTE_TIME)
-#define HAVE_MACH_MONOTONIC
-#elif defined(_WIN32)
-#define HAVE_WIN32_MONOTONIC
-#else
-#define HAVE_FALLBACK_MONOTONIC
-#endif
 
 long evutil_tv_to_msec_(const struct timeval *tv);
 void evutil_usleep_(const struct timeval *tv);

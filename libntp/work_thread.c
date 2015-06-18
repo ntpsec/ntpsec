@@ -86,17 +86,10 @@ worker_sleep(
 	struct timespec	until;
 	int		rc;
 
-# ifdef HAVE_CLOCK_GETTIME
 	if (0 != clock_gettime(CLOCK_REALTIME, &until)) {
 		msyslog(LOG_ERR, "worker_sleep: clock_gettime() failed: %m");
 		return -1;
 	}
-# else
-	if (0 != getclock(TIMEOFDAY, &until)) {
-		msyslog(LOG_ERR, "worker_sleep: getclock() failed: %m");
-		return -1;
-	}
-# endif
 	until.tv_sec += seconds;
 	do {
 		rc = wait_for_sem(c->wake_scheduled_sleep, &until);
