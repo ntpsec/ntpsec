@@ -53,16 +53,12 @@ SOFTWARE.
 #include <unistd.h>
 #include <stdlib.h>
 
-#if TIME_WITH_SYS_TIME
-# ifdef WIN32
-#  include <sys/timeb.h>
-# else
-#  include <sys/time.h>
-# endif
-# include <time.h>
+#ifdef WIN32
+# include <sys/timeb.h>
 #else
-#include <sys/time.h>
+# include <sys/time.h>
 #endif
+#include <time.h>
 
 #include <sys/types.h>
 
