@@ -27,30 +27,9 @@ NTP_LINEEDITLIBS
 NTP_LIB_M
 
 AC_FUNC_ALLOCA
-ac_busted_vpath_in_make=no
-case "$build" in
- *-*-irix6.1*)	# 64 bit only
-    # busted vpath?
-    ;;
- *-*-irix6*)	# 6.2 (and later?)
-    ac_busted_vpath_in_make=yes
-    ;;
- *-*-solaris2.5.1)
-    ac_busted_vpath_in_make=yes
-    ;;
- *-*-unicosmp*)
-    ac_busted_vpath_in_make=yes
-    ;;
-esac
-
-case "$ac_busted_vpath_in_make$srcdir" in
- yes.|no*)
-    ;;
- *) case "`${MAKE-make} -v -f /dev/null 2>/dev/null | grep 'GNU Make'`" in
+case "`${MAKE-make} -v -f /dev/null 2>/dev/null | grep 'GNU Make'`" in
      '')
-	AC_MSG_ERROR([building outside of the main directory requires GNU make])
-    esac
-    ;;
+       AC_MSG_ERROR([building outside of the main directory requires GNU make])
 esac
 
 AC_CHECK_FUNCS([getclock stime timegm strlcpy strlcat])
@@ -147,10 +126,6 @@ AC_CHECK_HEADERS([netinet/ip.h netinet/in_var.h], [], [], [
     # include <netinet/in_systm.h>
     #endif
 ])
-
-# HMS: Do we need to check for -lsocket before or after these tests?
-HMS_SEARCH_LIBS([LDADD_LIBNTP], [inet_pton], [nsl])
-HMS_SEARCH_LIBS([LDADD_LIBNTP], [inet_ntop], [resolv], , , [-lnsl])
 
 # [Bug 1628] On Solaris, we need -lxnet -lsocket.  Generalize this to
 # avoid keying on the OS name:  If we find socket functions in
