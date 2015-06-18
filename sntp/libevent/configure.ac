@@ -138,7 +138,6 @@ dnl Checks for libraries.
 AC_SEARCH_LIBS([inet_ntoa], [nsl])
 AC_SEARCH_LIBS([socket], [socket])
 AC_SEARCH_LIBS([inet_aton], [resolv])
-AC_SEARCH_LIBS([clock_gettime], [rt])
 AC_SEARCH_LIBS([sendfile], [sendfile])
 
 dnl - check if the macro _WIN32 is defined on this compiler.
@@ -334,7 +333,6 @@ AC_CHECK_FUNCS([ \
   accept4 \
   arc4random \
   arc4random_buf \
-  clock_gettime \
   eventfd \
   epoll_create1 \
   fcntl \
