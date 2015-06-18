@@ -1,7 +1,6 @@
 dnl ######################################################################
 dnl Common m4sh code for compiler stuff
 AC_DEFUN([NTP_COMPILER], [
-AC_REQUIRE([AC_PROG_CC_C89])
 AC_REQUIRE([AC_PROG_CC_C99])
 
 CFLAGS_NTP=
@@ -13,10 +12,10 @@ AC_SUBST([CPPFLAGS_NTP])
 AC_SUBST([LDADD_NTP])
 AC_SUBST([LDFLAGS_NTP])
 
-case "$ac_cv_prog_cc_c89" in
+case "$ac_cv_prog_cc_c99" in
  no)
-    AC_MSG_WARN([ANSI C89/ISO C90 is the minimum to compile NTP]
-		[ version 4.2.5 and higher.])
+    AC_MSG_WARN([ANSI C99/ISO C99 is the minimum to compile NTP]
+		[])
     ;;
 esac
 
@@ -66,6 +65,7 @@ AH_VERBATIM(
 
 case "$GCC" in
  yes)
+    CFLAGS="$CFLAGS -std=c99"
     SAVED_CFLAGS="$CFLAGS"
     CFLAGS="$CFLAGS -Wstrict-overflow"
     AC_CACHE_CHECK(
