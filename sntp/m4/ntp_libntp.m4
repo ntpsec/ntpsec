@@ -166,7 +166,7 @@ AC_CHECK_HEADERS([sys/sysctl.h], [], [], [
     # include <sys/param.h>
     #endif
 ])
-AC_CHECK_HEADERS([netinet/in_system.h netinet/in_systm.h netinet/in.h])
+AC_CHECK_HEADERS([netinet/in_system.h netinet/in_systm.h])
 
 AC_CHECK_HEADERS([resolv.h], [], [], [
     #include <sys/types.h>
