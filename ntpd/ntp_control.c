@@ -11,9 +11,7 @@
 #include <ctype.h>
 #include <signal.h>
 #include <sys/stat.h>
-#ifdef HAVE_NETINET_IN_H
-# include <netinet/in.h>
-#endif
+#include <netinet/in.h>
 #include <arpa/inet.h>
 
 #include "ntpd.h"

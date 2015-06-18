@@ -8,9 +8,7 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <net/if.h>
-#ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
-#endif
 #ifdef HAVE_NET_IF_VAR_H
 #include <net/if_var.h>
 #endif

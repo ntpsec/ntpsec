@@ -21,9 +21,7 @@
 # include <sys/timex.h>
 #endif
 #if !defined(__bsdi__) && !defined(apollo)
-#ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
-#endif
 #endif
 
 #include <arpa/inet.h>
