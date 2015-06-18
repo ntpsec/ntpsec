@@ -38,9 +38,7 @@
 #ifdef HAVE_SYS_IOCTL_H
 # include <sys/ioctl.h>
 #endif
-#ifdef HAVE_SYS_RESOURCE_H
-# include <sys/resource.h>
-#endif
+#include <sys/resource.h>
 
 #include <arpa/inet.h>
 

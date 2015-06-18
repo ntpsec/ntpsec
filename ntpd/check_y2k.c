@@ -58,9 +58,7 @@
 # include "../libntp/log.h"
 #endif /* SYS_WINNT */
 #if defined(HAVE_RTPRIO)
-# ifdef HAVE_SYS_RESOURCE_H
-#  include <sys/resource.h>
-# endif
+#include <sys/resource.h>
 # ifdef HAVE_SYS_LOCK_H
 #  include <sys/lock.h>
 # endif

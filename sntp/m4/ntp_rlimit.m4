@@ -10,9 +10,7 @@ AC_CACHE_CHECK(
 	    [[
 		#include <sys/types.h>
 		#include <sys/time.h>
-		#ifdef HAVE_SYS_RESOURCE_H
-		# include <sys/resource.h>
-		#endif
+		#include <sys/resource.h>
 	    ]],
 	    [[
 		getrlimit(RLIMIT_MEMLOCK, 0);
@@ -36,9 +34,7 @@ AC_CACHE_CHECK(
 	    [[
 		#include <sys/types.h>
 		#include <sys/time.h>
-		#ifdef HAVE_SYS_RESOURCE_H
-		# include <sys/resource.h>
-		#endif
+		#include <sys/resource.h>
 	    ]],
 	    [[
 		getrlimit(RLIMIT_STACK, 0);

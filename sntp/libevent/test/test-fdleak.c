@@ -34,9 +34,7 @@
 #include <stdlib.h>
 #include <errno.h>
 #include <sys/time.h>
-#ifdef EVENT__HAVE_SYS_RESOURCE_H
 #include <sys/resource.h>
-#endif
 #ifdef EVENT__HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
