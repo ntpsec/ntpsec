@@ -130,10 +130,8 @@ typedef unsigned long long int json_uint;
 
 #if defined(HAVE_SYS_POLL_H)
 # include <sys/poll.h>
-#elif defined(HAVE_SYS_SELECT_H)
-# include <sys/select.h>
 #else
-# error need poll() or select()
+# include <sys/select.h>
 #endif
 
 #include "ntpd.h"
@@ -1971,7 +1969,7 @@ gpsd_test_socket(
 		if (1 != rc || !(pfd.revents & POLLOUT))
 			return;
 	}
-#elif defined(HAVE_SYS_SELECT_H)
+#else
 	{
 		struct timeval tout;
 		fd_set         wset;
@@ -1983,8 +1981,6 @@ gpsd_test_socket(
 		if (0 == rc || !(FD_ISSET(up->fdt, &wset)))
 			return;
 	}
-#else
-# error Blooper! That should have been found earlier!
 #endif
 
 	/* next timeout is a full one... */

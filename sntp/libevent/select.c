@@ -27,19 +27,14 @@
 #include "event2/event-config.h"
 #include "evconfig-private.h"
 
-#ifdef EVENT__HAVE_SELECT
-
 #ifdef __APPLE__
 /* Apple wants us to define this if we might ever pass more than
  * FD_SETSIZE bits to select(). */
 #define _DARWIN_UNLIMITED_SELECT
-#endif
 
 #include <sys/types.h>
 #include <sys/time.h>
-#ifdef EVENT__HAVE_SYS_SELECT_H
 #include <sys/select.h>
-#endif
 #include <sys/queue.h>
 #include <signal.h>
 #include <stdio.h>
@@ -339,4 +334,3 @@ select_dealloc(struct event_base *base)
 	select_free_selectop(base->evbase);
 }
 
-#endif /* EVENT__HAVE_SELECT */

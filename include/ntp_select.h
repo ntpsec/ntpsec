@@ -7,14 +7,12 @@
 /* Was: (defined(RS6000)||defined(SYS_PTX))&&!defined(_BSD) */
 /* Could say: !defined(FD_SET) && defined(HAVE_SYS_SELECT_H) */
 /* except FD_SET can legitimately be a typedef... */
-#if defined(HAVE_SYS_SELECT_H) && !defined(_BSD)
-# ifndef SYS_VXWORKS
+#ifndef SYS_VXWORKS
 #  include <sys/select.h>
-# else
+#else
 #  include <sockLib.h>
 extern	int	select(int width, fd_set *pReadFds, fd_set *pWriteFds,
 		       fd_set *pExceptFds, struct timeval *pTimeOut);
-# endif
 #endif
 
 #if !defined(FD_SET)
