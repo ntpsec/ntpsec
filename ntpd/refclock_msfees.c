@@ -24,9 +24,6 @@
 #include <stropts.h>
 #endif
 
-#ifdef HAVE_SYS_TERMIOS_H
-# include <sys/termios.h>
-#endif
 #ifdef HAVE_SYS_PPSCLOCK_H
 # include <sys/ppsclock.h>
 #endif
