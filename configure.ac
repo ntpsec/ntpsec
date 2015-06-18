@@ -337,7 +337,7 @@ case "$host" in
     AC_CHECK_HEADERS([sys/ioctl.h])
     ;;
 esac
-AC_CHECK_HEADERS([sys/lock.h sys/mman.h])
+AC_CHECK_HEADERS([sys/lock.h])
 # HMS: Check sys/proc.h and sys/resource.h after some others
 AC_CHECK_HEADERS([sys/modem.h sys/ppsclock.h sys/ppstime.h])
 # HMS: Check sys/shm.h after some others

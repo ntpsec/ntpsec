@@ -56,9 +56,7 @@
 #if defined(HAVE_SCHED_SETSCHEDULER)
 #include <sched.h>
 #endif
-#if defined(HAVE_SYS_MMAN_H)
-# include <sys/mman.h>
-#endif
+#include <sys/mman.h>
 
 #include <termios.h>
 

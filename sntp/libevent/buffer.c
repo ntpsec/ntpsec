@@ -49,9 +49,7 @@
 #include <sys/ioctl.h>
 #endif
 
-#ifdef EVENT__HAVE_SYS_MMAN_H
 #include <sys/mman.h>
-#endif
 
 #ifdef EVENT__HAVE_SYS_SENDFILE_H
 #include <sys/sendfile.h>
