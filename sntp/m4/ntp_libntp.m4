@@ -27,8 +27,6 @@ NTP_LINEEDITLIBS
 NTP_LIB_M
 
 AC_FUNC_ALLOCA
-AC_FUNC_STRERROR_R
-
 ac_busted_vpath_in_make=no
 case "$build" in
  *-*-irix6.1*)	# 64 bit only
