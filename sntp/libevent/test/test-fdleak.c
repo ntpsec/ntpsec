@@ -213,7 +213,6 @@ start_client(struct event_base *base)
 int
 main(int argc, char **argv)
 {
-#ifdef EVENT__HAVE_SETRLIMIT
 	/* Set the fd limit to a low value so that any fd leak is caught without
 	making many requests. */
 	struct rlimit rl;
@@ -222,7 +221,6 @@ main(int argc, char **argv)
 		my_perror("setrlimit");
 		exit(3);
 	}
-#endif
 
 #ifdef _WIN32
 	WSADATA WSAData;

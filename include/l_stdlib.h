@@ -152,10 +152,6 @@ extern	int	stime		(const time_t *);
 extern	int	stime		(long *);
 #endif
 
-#ifdef DECL_STRERROR_0
-extern	char *	strerror		(int errnum);
-#endif
-
 #ifdef DECL_STRTOL_0
 extern	long	strtol		(const char *, char **, int);
 #endif

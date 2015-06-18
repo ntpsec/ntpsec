@@ -4886,7 +4886,6 @@ getnetnum(
 }
 #endif	/* !SIM */
 
-#if defined(HAVE_SETRLIMIT)
 void
 ntp_rlimit(
 	int	rl_what,
@@ -4898,7 +4897,7 @@ ntp_rlimit(
 	struct rlimit	rl;
 
 	switch (rl_what) {
-# ifdef RLIMIT_MEMLOCK
+#ifdef RLIMIT_MEMLOCK
 	    case RLIMIT_MEMLOCK:
 		/*
 		 * The default RLIMIT_MEMLOCK is very low on Linux systems.
@@ -4912,9 +4911,9 @@ ntp_rlimit(
 		if (setrlimit(RLIMIT_MEMLOCK, &rl) == -1)
 			msyslog(LOG_ERR, "Cannot set RLIMIT_MEMLOCK: %m");
 		break;
-# endif /* RLIMIT_MEMLOCK */
+#endif /* RLIMIT_MEMLOCK */
 
-# ifdef RLIMIT_NOFILE
+#ifdef RLIMIT_NOFILE
 	    case RLIMIT_NOFILE:
 		/*
 		 * For large systems the default file descriptor limit may
@@ -4926,9 +4925,9 @@ ntp_rlimit(
 		if (setrlimit(RLIMIT_NOFILE, &rl) == -1)
 			msyslog(LOG_ERR, "Cannot set RLIMIT_NOFILE: %m");
 		break;
-# endif /* RLIMIT_NOFILE */
+#endif /* RLIMIT_NOFILE */
 
-# ifdef RLIMIT_STACK
+#ifdef RLIMIT_STACK
 	    case RLIMIT_STACK:
 		/*
 		 * Provide a way to set the stack limit to something
@@ -4954,11 +4953,10 @@ ntp_rlimit(
 			}
 		}
 		break;
-# endif /* RLIMIT_STACK */
+#endif /* RLIMIT_STACK */
 
 	    default:
 		INSIST(!"Unexpected setrlimit() case!");
 		break;
 	}
 }
-#endif	/* HAVE_SETRLIMIT */

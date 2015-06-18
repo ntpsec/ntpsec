@@ -312,10 +312,6 @@
 #endif
 
 /* redefine these for BSD style string libraries */
-#ifndef HAVE_STRCHR
-#  define strchr            index
-#  define strrchr           rindex
-#endif
 
 #ifdef USE_FOPEN_BINARY
 #  ifndef FOPEN_BINARY_FLAG

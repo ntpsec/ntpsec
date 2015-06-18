@@ -363,11 +363,6 @@ ao_strdup(char const * str);
 # endif
 #endif
 
-#ifndef HAVE_STRCHR
-extern char * strchr(char const * s, int c);
-extern char * strrchr(char const * s, int c);
-#endif
-
 /**
  * INQUERY_CALL() tests whether the option handling function has been
  * called by an inquery (help text needed, or option being reset),

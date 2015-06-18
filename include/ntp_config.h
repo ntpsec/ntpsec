@@ -314,8 +314,6 @@ int dump_config_tree(config_tree *ptree, FILE *df, int comment);
 int dump_all_config_trees(FILE *df, int comment);
 #endif
 
-#if defined(HAVE_SETRLIMIT)
 void ntp_rlimit(int, rlim_t, int, const char *);
-#endif
 
 #endif	/* !defined(NTP_CONFIG_H) */
