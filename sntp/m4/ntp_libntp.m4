@@ -56,25 +56,6 @@ case "$ac_busted_vpath_in_make$srcdir" in
     ;;
 esac
 
-case "$host" in
- *-*-aix4*)
-	# Bug 2516:
-	# Was *-*-aix[[4-9]]*
-	# XXX only verified thru AIX6.  But...
-	# Ken Link says this is fine for AIX 5.3 and 7.1, and sees no reason
-	# that this support would be in 5.3, removed in 6, and added back.
-	#
-	# (prr) aix 4.1 doesn't have clock_settime, but in aix 4.3 it's a stub
-	# (returning ENOSYS).  I didn't check 4.2.  If, in the future,
-	# IBM pulls its thumbs out long enough to implement clock_settime,
-	# this conditional will need to change.  Maybe use AC_TRY_RUN
-	# instead to try to set the time to itself and check errno.
-    ;;
- *)
-    HMS_SEARCH_LIBS([LDADD_LIBNTP], [clock_gettime], [rt])
-    ;;
-esac
-
 AC_CHECK_FUNCS([getclock stime timegm strlcpy strlcat])
 
 # Bug 2713
@@ -1000,38 +981,6 @@ AC_CHECK_FUNCS([settimeofday], ,[
      *-*-mpeix*) ac_cv_func_settimeofday=yes
     esac
 ])
-
-AC_MSG_CHECKING([if we'll use clock_settime or settimeofday or stime])
-ntp_warning='GRONK'
-ans=none
-case "$ac_cv_func_clock_settime$ac_cv_func_settimeofday$ac_cv_func_stime" in
- yes*)
-    ntp_warning=''
-    ans='clock_settime()'
-    ;;
- noyes*)
-    ntp_warning='But clock_settime() would be better (if we had it)'
-    ans='settimeofday()'
-    ;;
- nonoyes)
-    ntp_warning='Which is the worst of the three'
-    ans='stime()'
-    ;;
- *) 
-    case "$build" in
-     $host) 
-	ntp_warning='Which leaves us with nothing to use!'
-    esac
-esac
-AC_MSG_RESULT([$ans])
-case "$ntp_warning" in
- '')
-    ;;
- *)
-    AC_MSG_WARN([*** $ntp_warning ***])
-    ;;
-esac
-
 
 dnl add to LDADD_LIBNTP set by ntp_compiler.m4
 LDADD_LIBNTP="$LDADD_LIBNTP $LIBS"
