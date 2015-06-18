@@ -197,10 +197,8 @@ netsnmp_daemonize(int quit_immediately, int stderr_log)
         }
     } else {
         /* Child. */
-#ifdef HAVE_SETSID
         /* Become a process/session group leader. */
         setsid();
-#endif
         /*
          * Fork to let the process/session group leader exit.
          */

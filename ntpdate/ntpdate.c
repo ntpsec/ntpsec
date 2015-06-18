@@ -427,12 +427,8 @@ ntpdatemain (
 	}
 
 	if (debug || simple_query) {
-#ifdef HAVE_SETVBUF
 		static char buf[BUFSIZ];
 		setvbuf(stdout, buf, _IOLBF, BUFSIZ);
-#else
-		setlinebuf(stdout);
-#endif
 	}
 
 	/*

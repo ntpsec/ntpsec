@@ -320,10 +320,8 @@ extern	void	parse_cmdline_opts(int *, char ***);
 /* ntp_config.c */
 extern char const *	progname;
 extern char	*sys_phone[];		/* ACTS phone numbers */
-#if defined(HAVE_SCHED_SETSCHEDULER)
 extern int	config_priority_override;
 extern int	config_priority;
-#endif
 extern char *ntp_signd_socket;
 extern struct config_tree_tag *cfg_tree_history;
 

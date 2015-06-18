@@ -396,7 +396,6 @@ typedef int ssize_t;	/* ssize is an int */
 # define HAVE_GETCLOCK			1
 # define HAVE_MEMMOVE			1
 # define HAVE_MKTIME			1
-# define HAVE_SETVBUF			1
 # define HAVE_STRCHR			1	/* for libopts */
 # define HAVE_STRDUP			1
 # define HAVE_TIMEGM			1	/* actually _mkgmtime */
