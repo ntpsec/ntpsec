@@ -231,9 +231,6 @@ sntp_main (
 		printf("%s: event_config_new() failed!\n", progname);
 		return -1;
 	}
-#ifndef HAVE_SOCKETPAIR
-	event_config_require_features(evcfg, EV_FEATURE_FDS);
-#endif
 	/* all libevent calls are from main thread */
 	/* event_config_set_flag(evcfg, EVENT_BASE_FLAG_NOLOCK); */
 	base = event_base_new_with_config(evcfg);
@@ -947,13 +944,10 @@ void sntp_addremove_fd(
 	blocking_child *c;
 	struct event *	ev;
 
-#ifdef HAVE_SOCKETPAIR
 	if (is_pipe) {
-		/* sntp only asks for EV_FEATURE_FDS without HAVE_SOCKETPAIR */
 		msyslog(LOG_ERR, "fatal: pipes not supported on systems with socketpair()");
 		exit(1);
 	}
-#endif
 
 	c = NULL;
 	for (idx = 0; idx < blocking_children_alloc; idx++) {
