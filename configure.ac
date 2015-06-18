@@ -2121,7 +2121,6 @@ case "$ntp_ok" in
 esac
 AC_MSG_RESULT([$ntp_ok])
 
-AC_CHECK_FUNCS([strtoll])
 AC_MSG_CHECKING([for GPSD JSON receiver])
 AC_ARG_ENABLE(
     [GPSD],
@@ -2130,10 +2129,7 @@ AC_ARG_ENABLE(
 	[+ GPSD JSON receiver]
     )],
     [ntp_ok=$enableval],
-    [case "$ac_cv_func_strtoll" in
-     yes) ntp_ok=$ntp_eac ;;
-     *)   ntp_ok="no" ;;
-    esac]
+     ntp_ok=$ntp_eac ;;
 )
 case "$ntp_ok" in
  yes)
