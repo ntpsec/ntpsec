@@ -14,7 +14,6 @@ Poul-Henning
 #include <sys/types.h>
 #include <time.h>
 #include <sys/timepps.h>
-#include <sys/termios.h>
 
 #define timespecsub(vvp, uvp)                                           \
         do {                                                            \
