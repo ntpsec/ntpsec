@@ -11,7 +11,7 @@
 
 static ctrl_c_fn	ctrl_c_hook;
 #ifndef SYS_WINNT
-RETSIGTYPE sigint_handler(int);
+void sigint_handler(int);
 #else
 BOOL WINAPI console_event_handler(DWORD);
 #endif
@@ -63,7 +63,7 @@ signal_no_reset(
 void
 signal_no_reset(
 	int sig,
-	RETSIGTYPE (*func)(int)
+	void (*func)(int)
 	)
 {
 	struct sigvec sv;
@@ -83,7 +83,7 @@ signal_no_reset(
 void
 signal_no_reset(
 	int sig,
-	RETSIGTYPE (*func)(int)
+	void (*func)(int)
 	)
 {
 	int n;
@@ -101,7 +101,7 @@ signal_no_reset(
 void
 signal_no_reset(
 	int sig,
-	RETSIGTYPE (*func)(int)
+	void (*func)(int)
 	)
 {
 #ifndef SIG_ERR
@@ -119,7 +119,7 @@ signal_no_reset(
 /*
  * POSIX implementation of set_ctrl_c_hook()
  */
-RETSIGTYPE
+void
 sigint_handler(
 	int	signum
 	)
@@ -134,7 +134,7 @@ set_ctrl_c_hook(
 	ctrl_c_fn	c_hook
 	)
 {
-	RETSIGTYPE (*handler)(int);
+	void (*handler)(int);
 
 	if (NULL == c_hook) {
 		handler = SIG_DFL;

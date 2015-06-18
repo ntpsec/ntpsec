@@ -170,7 +170,7 @@ static	char *	tstflags	(u_long);
 #ifndef BUILD_AS_LIB
 static	void	getcmds		(void);
 #ifndef SYS_WINNT
-static	RETSIGTYPE abortcmd	(int);
+static	void abortcmd	(int);
 #endif	/* SYS_WINNT */
 static	void	docmd		(const char *);
 static	void	tokenize	(const char *, char **, int *);
@@ -1456,7 +1456,7 @@ getcmds(void)
 /*
  * abortcmd - catch interrupts and abort the current command
  */
-static RETSIGTYPE
+static void
 abortcmd(
 	int sig
 	)

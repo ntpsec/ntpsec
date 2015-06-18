@@ -45,7 +45,7 @@
 #include "iosignal.h"
 
 #if defined(HAVE_SIGNALED_IO)
-static RETSIGTYPE sigio_handler	(int);
+static void sigio_handler	(int);
 
 /* consistency safegurad to catch BLOCK/UNBLOCK oversights */
 static int sigio_block_count = 0;
@@ -283,7 +283,7 @@ init_socket_sig(
 # endif /* USE_UDP_SIGPOLL */
 }
 
-static RETSIGTYPE
+static void
 sigio_handler(
 	int sig
 	)

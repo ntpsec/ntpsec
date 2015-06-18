@@ -187,7 +187,7 @@ extern int syscall	(int, ...);
 
 
 #if !defined(SIM) && defined(SIGDIE1)
-static	RETSIGTYPE	finish		(int);
+static	void	finish		(int);
 #endif
 
 #if !defined(SIM) && defined(HAVE_WORKING_FORK)
@@ -196,10 +196,10 @@ static int	wait_child_sync_if	(int, long);
 
 #if !defined(SIM) && !defined(SYS_WINNT)
 # ifdef	DEBUG
-static	RETSIGTYPE	moredebug	(int);
-static	RETSIGTYPE	lessdebug	(int);
+static	void	moredebug	(int);
+static	void	lessdebug	(int);
 # else	/* !DEBUG follows */
-static	RETSIGTYPE	no_debug	(int);
+static	void	no_debug	(int);
 # endif	/* !DEBUG */
 #endif	/* !SIM && !SYS_WINNT */
 
@@ -1162,7 +1162,7 @@ int scmp_sc[] = {
 /*
  * finish - exit gracefully
  */
-static RETSIGTYPE
+static void
 finish(
 	int sig
 	)
@@ -1349,7 +1349,7 @@ library_unexpected_error(
 /*
  * moredebug - increase debugging verbosity
  */
-static RETSIGTYPE
+static void
 moredebug(
 	int sig
 	)
@@ -1368,7 +1368,7 @@ moredebug(
 /*
  * lessdebug - decrease debugging verbosity
  */
-static RETSIGTYPE
+static void
 lessdebug(
 	int sig
 	)
@@ -1389,7 +1389,7 @@ lessdebug(
 /*
  * no_debug - We don't do the debug here.
  */
-static RETSIGTYPE
+static void
 no_debug(
 	int sig
 	)

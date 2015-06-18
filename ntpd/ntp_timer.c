@@ -99,7 +99,7 @@ static int vmsinc[2];		/* timer increment */
 #ifdef SYS_WINNT
 HANDLE WaitableTimerHandle;
 #else
-static	RETSIGTYPE alarming (int);
+static	void alarming (int);
 #endif /* SYS_WINNT */
 
 #if !defined(VMS)
@@ -437,7 +437,7 @@ timer(void)
 /*
  * alarming - tell the world we've been alarmed
  */
-static RETSIGTYPE
+static void
 alarming(
 	int sig
 	)
