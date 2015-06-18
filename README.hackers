@@ -13,6 +13,9 @@ The baseline C standard is ISO/IEC 9899:1999, also known as C99.  Note
 that this is a coding standard, not an ABI standard, so it can happily
 coexist with distributions that use C89 conventions.
 
+You can download the C99 standard for free from here:
+    http://atrey.karlin.mff.cuni.cz/projekty/vrr/doc/c99.pdf
+
 Only POSIX-1.2001/SuSv3 library functions should be used.  If a library
 function not in POSIX 2001 is required, then a wrapper function for back
 compatibility must be provided.  One notabale case is clock_gettime()
