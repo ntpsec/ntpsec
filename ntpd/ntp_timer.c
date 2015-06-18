@@ -101,14 +101,9 @@ static	void alarming (int);
 
 #if !defined(VMS)
 # if !defined SYS_WINNT || defined(SYS_CYGWIN32)
-#  ifdef HAVE_TIMER_CREATE
 static timer_t timer_id;
 typedef struct itimerspec intervaltimer;
 #   define	itv_frac	tv_nsec
-#  else 
-typedef struct itimerval intervaltimer;
-#   define	itv_frac	tv_usec
-#  endif
 intervaltimer itimer;
 # endif
 #endif
@@ -127,13 +122,8 @@ set_timer_or_die(
 	const char *	setfunc;
 	int		rc;
 
-# ifdef HAVE_TIMER_CREATE
 	setfunc = "timer_settime";
 	rc = timer_settime(timer_id, 0, &itimer, NULL);
-# else
-	setfunc = "setitimer";
-	rc = setitimer(ITIMER_REAL, &itimer, NULL);
-# endif
 	if (-1 == rc) {
 		msyslog(LOG_ERR, "interval timer %s failed, %m",
 			setfunc);
@@ -151,11 +141,7 @@ reinit_timer(void)
 {
 #if !defined(SYS_WINNT) && !defined(VMS)
 	ZERO(itimer);
-# ifdef HAVE_TIMER_CREATE
 	timer_gettime(timer_id, &itimer);
-# else
-	getitimer(ITIMER_REAL, &itimer);
-# endif
 	if (itimer.it_value.tv_sec < 0 ||
 	    itimer.it_value.tv_sec > (1 << EVENT_TIMEOUT))
 		itimer.it_value.tv_sec = (1 << EVENT_TIMEOUT);
@@ -199,12 +185,10 @@ init_timer(void)
 	 * seconds.
 	 */
 # ifndef VMS
-#  ifdef HAVE_TIMER_CREATE
 	if (TC_ERR == timer_create(CLOCK_REALTIME, NULL, &timer_id)) {
 		msyslog(LOG_ERR, "timer_create failed, %m");
 		exit(1);
 	}
-#  endif
 	signal_no_reset(SIGALRM, alarming);
 	itimer.it_interval.tv_sec = 
 		itimer.it_value.tv_sec = (1 << EVENT_TIMEOUT);

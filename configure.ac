@@ -773,24 +773,7 @@ case "$host" in
 esac
 AC_CHECK_FUNCS([plock pututline rtprio])
 AC_CHECK_FUNCS([setlinebuf])
-case "$host" in
- *-*-aix[[4-9]]*)
-    # XXX only verified thru AIX6.
-    # Just stubs.  Sigh.
-    ;;
- *-*-netbsd1*)
-    # Just stubs.  Sigh.
-    ;;
- *-*-netbsdelf1*)
-    # Just stubs.  Sigh.
-    ;;
- *-*-openbsd*)
-    # Just stubs.  Sigh.
-    ;;
- *)
-    AC_CHECK_FUNCS([timer_create])
-    ;;
-esac
+AC_SEARCH_LIBS([timer_create], [rt posix4])
 
 NTP_RLIMIT_ITEMS
 
