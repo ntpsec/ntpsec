@@ -77,10 +77,6 @@ extern	void *	memmove		(void *, const void *, size_t);
 extern	char *	memset		(char *, int, int);
 #endif
 
-#ifdef DECL_MKSTEMP_0
-extern	int	mkstemp		(char *);
-#endif
-
 #ifdef DECL_MKTEMP_0
 extern	char   *mktemp		(char *);	
 #endif
