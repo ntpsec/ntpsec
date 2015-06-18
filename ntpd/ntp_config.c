@@ -23,9 +23,6 @@
 # include <sys/param.h>
 #endif
 #include <signal.h>
-#ifndef SIGCHLD
-# define SIGCHLD SIGCLD
-#endif
 #include <sys/wait.h>
 
 #include <isc/net.h>
