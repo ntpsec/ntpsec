@@ -774,7 +774,6 @@ case "$host" in
 esac
 AC_CHECK_FUNCS([plock pututline rtprio])
 AC_CHECK_FUNCS([setlinebuf])
-AC_CHECK_FUNCS([strdup strerror setrlimit strchr])
 case "$host" in
  *-*-aix[[4-9]]*)
     # XXX only verified thru AIX6.
@@ -982,7 +981,6 @@ case "$host" in
     AC_DEFINE([DECL_TIMEOFDAY_0], [1], [Declaration style])
     AC_DEFINE([DECL_TOLOWER_0], [1], [Declaration style])
     AC_DEFINE([DECL_TOUPPER_0], [1], [Declaration style])
-    AC_DEFINE([DECL_STRERROR_0], [1], [Declaration style])
     ;;
  *-*-ultrix4*)
     AC_DEFINE([DECL_ADJTIME_0], [1], [Declaration style])

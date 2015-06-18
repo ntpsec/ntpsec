@@ -48,17 +48,6 @@ static unsigned int tab_skip_ct          = 0;
 #  include "compat/snprintf.c"
 #endif
 
-#ifndef HAVE_STRDUP
-#  define  strdup(_s)     option_strdup(_s)
-#  include "compat/strdup.c"
-#endif
-
-#ifndef HAVE_STRCHR
-#  define strrchr(_s, _c) option_strrchr(_s, _c)
-#  define strchr(_s, _c)  option_strchr(_s, _c)
-#  include "compat/strchr.c"
-#endif
-
 LOCAL void *
 ao_malloc(size_t sz)
 {
