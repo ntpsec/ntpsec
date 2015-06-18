@@ -18,7 +18,7 @@ AC_DEFUN([INVOKE_LIBOPTS_MACROS_FIRST],[
   AC_CHECK_HEADERS([ \
       sys/mman.h    sys/param.h   sys/poll.h    sys/procset.h \
       sys/select.h  sys/socket.h  sys/stropts.h sys/time.h \
-      sys/un.h      sys/wait.h    dlfcn.h       errno.h \
+      sys/un.h      sys/wait.h    dlfcn.h       \
       fcntl.h       libgen.h      libintl.h     memory.h \
       netinet/in.h  setjmp.h      stdbool.h     sysexits.h \
       unistd.h      utime.h])
@@ -67,7 +67,7 @@ AC_DEFUN([INVOKE_LIBOPTS_MACROS_FIRST],[
     ]AC_MSG_ERROR(
       [you must have one of limits.h, sys/limits.h or values.h])[
 
-  for f in sys_types sys_param sys_stat string errno stdlib memory setjmp
+  for f in sys_types sys_param sys_stat string stdlib memory setjmp
   do eval as_ac_var=\${ac_cv_header_${f}_h}
      test "X${as_ac_var}" = Xyes || {
        ]AC_MSG_ERROR([you must have ${f}.h on your system])[
