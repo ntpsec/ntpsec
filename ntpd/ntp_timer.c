@@ -18,9 +18,6 @@
 
 #include <stdio.h>
 #include <signal.h>
-#ifdef HAVE_SYS_SIGNAL_H
-# include <sys/signal.h>
-#endif
 #include <unistd.h>
 
 #ifdef KERNEL_PLL

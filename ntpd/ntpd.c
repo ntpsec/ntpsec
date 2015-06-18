@@ -33,11 +33,7 @@
 #ifdef HAVE_SYS_PARAM_H
 # include <sys/param.h>
 #endif
-#ifdef HAVE_SYS_SIGNAL_H
-# include <sys/signal.h>
-#else
-# include <signal.h>
-#endif
+#include <signal.h>
 #ifdef HAVE_SYS_IOCTL_H
 # include <sys/ioctl.h>
 #endif /* HAVE_SYS_IOCTL_H */
