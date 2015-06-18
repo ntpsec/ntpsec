@@ -160,9 +160,7 @@ AC_CHECK_HEADERS([net/if_var.h], [], [], [
 
 AC_CHECK_HEADERS([netinet/ip.h netinet/in_var.h], [], [], [
     #include <sys/types.h>
-    #ifdef HAVE_SYS_SOCKET_H
-    # include <sys/socket.h>
-    #endif
+    #include <sys/socket.h>
     #include <net/if.h>
     #include <netinet/in.h>
     #ifdef HAVE_NET_IF_VAR_H
