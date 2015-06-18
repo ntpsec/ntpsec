@@ -134,7 +134,7 @@ case "$host" in
     ])
 esac
 
-AC_CHECK_HEADERS([arpa/nameser.h sys/param.h sys/time.h sys/timers.h])
+AC_CHECK_HEADERS([arpa/nameser.h sys/param.h sys/timers.h])
 # sys/sysctl.h depends on sys/param.h on OpenBSD - Bug 1576
 AC_CHECK_HEADERS([sys/sysctl.h], [], [], [
     #if defined HAVE_SYS_PARAM_H
