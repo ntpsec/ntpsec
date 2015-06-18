@@ -46,11 +46,7 @@ pipe_socketpair(
 	int	fds[2];
 	int	called_pipe;
 
-#ifdef HAVE_SOCKETPAIR
 	rc = socketpair(AF_UNIX, SOCK_STREAM, 0, &fds[0]);
-#else
-	rc = -1;
-#endif
 
 	if (-1 == rc) {
 		rc = pipe(&fds[0]);
