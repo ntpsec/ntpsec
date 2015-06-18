@@ -241,13 +241,9 @@ true_debug(struct peer *peer, const char *fmt, ...)
 			fd = open(filename, O_CREAT | O_WRONLY | O_EXCL,
 				  0600);
 			if (fd >= 0 && (up->debug = fdopen(fd, "w"))) {
-#ifdef HAVE_SETVBUF
 				static char buf[BUFSIZ];
 
 				setvbuf(up->debug, buf, _IOLBF, BUFSIZ);
-#else
-				setlinebuf(up->debug);
-#endif
 			}
 		} else {
 			fclose(up->debug);

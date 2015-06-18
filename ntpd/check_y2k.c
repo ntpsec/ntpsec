@@ -70,9 +70,7 @@
 #  endif
 # endif
 #endif
-#if defined(HAVE_SCHED_SETSCHEDULER)
 #include <sched.h>
-#endif
 #include <sys/mman.h>
 
 #include <termios.h>

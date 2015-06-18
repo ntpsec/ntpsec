@@ -781,18 +781,7 @@ case "$host" in
     ;;
 esac
 AC_CHECK_FUNCS([plock pututline rtprio])
-case "$host" in
- *-*-aix[[4-9]]*)
-    # XXX only verified thru AIX6.
-    # Just a stub in AIX 4.  Sigh.
-    ;;
- *-*-solaris2.5*)
-    # Just stubs in solaris2.5.  Sigh.
-    ;;
- *) AC_CHECK_FUNCS([sched_setscheduler])
-    ;;
-esac
-AC_CHECK_FUNCS([setlinebuf setpgid setpriority setsid setvbuf])
+AC_CHECK_FUNCS([setlinebuf])
 AC_CHECK_FUNCS([strdup strerror setrlimit strchr])
 case "$host" in
  *-*-aix[[4-9]]*)

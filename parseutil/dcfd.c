@@ -1183,31 +1183,8 @@ detach(
 			proc2_$make_server(&puid, &st);
 		}
 #endif /* SYS_DOMAINOS */
-#if defined(HAVE_SETPGID) || defined(HAVE_SETSID)
-# ifdef HAVE_SETSID
 		if (setsid() == (pid_t)-1)
 		    syslog(LOG_ERR, "dcfd: setsid(): %m");
-# else
-		if (setpgid(0, 0) == -1)
-		    syslog(LOG_ERR, "dcfd: setpgid(): %m");
-# endif
-#else /* HAVE_SETPGID || HAVE_SETSID */
-		{
-			int fid;
-
-			fid = open("/dev/tty", 2);
-			if (fid >= 0)
-			{
-				(void) ioctl(fid, (u_long) TIOCNOTTY, (char *) 0);
-				(void) close(fid);
-			}
-# ifdef HAVE_SETPGRP_0
-			(void) setpgrp();
-# else /* HAVE_SETPGRP_0 */
-			(void) setpgrp(0, getpid());
-# endif /* HAVE_SETPGRP_0 */
-		}
-#endif /* HAVE_SETPGID || HAVE_SETSID */
 	}
 #endif /* not HAVE_DAEMON */
 }

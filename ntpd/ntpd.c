@@ -53,9 +53,7 @@
 #  endif
 # endif
 #endif
-#if defined(HAVE_SCHED_SETSCHEDULER)
 #include <sched.h>
-#endif
 #include <sys/mman.h>
 
 #include <termios.h>
@@ -330,7 +328,6 @@ set_process_priority(void)
 			priority_done);
 # endif /* DEBUG */
 
-# if defined(HAVE_SCHED_SETSCHEDULER)
 	if (!priority_done) {
 		extern int config_priority_override, config_priority;
 		int pmax, pmin;
@@ -352,7 +349,6 @@ set_process_priority(void)
 		else
 			++priority_done;
 	}
-# endif /* HAVE_SCHED_SETSCHEDULER */
 # ifdef HAVE_RTPRIO
 #  ifdef RTP_SET
 	if (!priority_done) {
@@ -424,9 +420,7 @@ ntpdmain(
 #  ifdef _AIX
 	struct sigaction sa;
 #  endif
-#  if !defined(HAVE_SETSID) && !defined (HAVE_SETPGID) && defined(TIOCNOTTY)
 	int		fid;
-#  endif
 # endif	/* HAVE_WORKING_FORK*/
 # ifdef SCO5_CLOCK
 	int		fd;
@@ -549,13 +543,11 @@ ntpdmain(
 	if (HAVE_OPT( NICE ))
 		priority_done = 0;
 
-# ifdef HAVE_SCHED_SETSCHEDULER
 	if (HAVE_OPT( PRIORITY )) {
 		config_priority = OPT_VALUE_PRIORITY;
 		config_priority_override = 1;
 		priority_done = 0;
 	}
-# endif
 
 # ifdef HAVE_WORKING_FORK
 	do {					/* 'loop' once */
@@ -640,22 +632,8 @@ ntpdmain(
 			proc2_$make_server(&puid, &st);
 		}
 #  endif	/* SYS_DOMAINOS */
-#  ifdef HAVE_SETSID
 		if (setsid() == (pid_t)-1)
 			msyslog(LOG_ERR, "setsid(): %m");
-#  elif defined(HAVE_SETPGID)
-		if (setpgid(0, 0) == -1)
-			msyslog(LOG_ERR, "setpgid(): %m");
-#  else		/* !HAVE_SETSID && !HAVE_SETPGID follows */
-#   ifdef TIOCNOTTY
-		fid = open("/dev/tty", 2);
-		if (fid >= 0) {
-			ioctl(fid, (u_long)TIOCNOTTY, NULL);
-			close(fid);
-		}
-#   endif	/* TIOCNOTTY */
-		ntp_setpgrp(0, getpid());
-#  endif	/* !HAVE_SETSID && !HAVE_SETPGID */
 #  ifdef _AIX
 		/* Don't get killed by low-on-memory signal. */
 		sa.sa_handler = catch_danger;
