@@ -170,9 +170,7 @@ AC_CHECK_HEADERS([netinet/in_system.h netinet/in_systm.h netinet/in.h])
 
 AC_CHECK_HEADERS([resolv.h], [], [], [
     #include <sys/types.h>
-    #ifdef HAVE_NETINET_IN_H
-    # include <netinet/in.h>
-    #endif
+    #include <netinet/in.h>
     #ifdef HAVE_ARPA_NAMESER_H
     # include <arpa/nameser.h>
     #endif
@@ -181,9 +179,7 @@ AC_CHECK_HEADERS([resolv.h], [], [], [
 AC_CHECK_HEADERS([net/if_var.h], [], [], [
     #include <sys/types.h>
     #include <sys/socket.h>
-    #ifdef HAVE_NETINET_IN_H
-    # include <netinet/in.h>
-    #endif
+    #include <netinet/in.h>
     #include <net/if.h>
 ])
 
@@ -193,9 +189,7 @@ AC_CHECK_HEADERS([netinet/ip.h netinet/in_var.h], [], [], [
     # include <sys/socket.h>
     #endif
     #include <net/if.h>
-    #ifdef HAVE_NETINET_IN_H
-    # include <netinet/in.h>
-    #endif
+    #include <netinet/in.h>
     #ifdef HAVE_NET_IF_VAR_H
     # include <net/if_var.h>
     #endif

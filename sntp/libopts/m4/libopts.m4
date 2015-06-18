@@ -20,7 +20,7 @@ AC_DEFUN([INVOKE_LIBOPTS_MACROS_FIRST],[
       sys/socket.h  sys/stropts.h sys/time.h \
       sys/un.h      sys/wait.h    dlfcn.h       \
       fcntl.h       libgen.h      libintl.h     memory.h \
-      netinet/in.h  setjmp.h      stdbool.h     sysexits.h \
+      setjmp.h      stdbool.h     sysexits.h \
       unistd.h      utime.h])
 
   AC_CHECK_HEADERS([stdarg.h     varargs.h],

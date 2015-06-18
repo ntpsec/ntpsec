@@ -631,9 +631,7 @@ AC_CHECK_SIZEOF(off_t)
 AC_CHECK_TYPES([struct in6_addr, struct sockaddr_in6, sa_family_t, struct addrinfo, struct sockaddr_storage], , ,
 [#define _GNU_SOURCE
 #include <sys/types.h>
-#ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
-#endif
 #ifdef HAVE_NETINET_IN6_H
 #include <netinet/in6.h>
 #endif
