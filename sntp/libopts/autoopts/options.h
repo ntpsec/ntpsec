@@ -48,11 +48,7 @@
  */
 #include <inttypes.h>
 
-#  if defined(HAVE_LIMITS_H)
-#    include <limits.h>
-#  elif defined(HAVE_SYS_LIMITS_H)
-#    include <sys/limits.h>
-#  endif /* HAVE_LIMITS/SYS_LIMITS_H */
+#include <limits.h>
 
 #  if defined(HAVE_SYSEXITS_H)
 #    include <sysexits.h>

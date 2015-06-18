@@ -23,10 +23,6 @@ AC_DEFUN([INVOKE_LIBOPTS_MACROS_FIRST],[
       setjmp.h      stdbool.h     sysexits.h \
       unistd.h      utime.h])
 
-  AC_CHECK_HEADERS([stdarg.h     varargs.h],
-      [lo_have_arg_hdr=true;break],
-      [lo_have_arg_hdr=false])
-
   AC_CHECK_HEADERS([string.h     strings.h],
       [lo_have_str_hdr=true;break],
       [lo_have_str_hdr=false])
@@ -57,10 +53,7 @@ AC_DEFUN([INVOKE_LIBOPTS_MACROS_FIRST],[
   # --------------------------------------------
   # Verify certain entries from AC_CHECK_HEADERS
   # --------------------------------------------
-  [${lo_have_arg_hdr} || \
-    ]AC_MSG_ERROR([you must have stdarg.h or varargs.h on your system])[
-
-  ${lo_have_str_hdr} || \
+  [${lo_have_str_hdr} || \
     ]AC_MSG_ERROR([you must have string.h or strings.h on your system])[
 
   ${lo_have_lim_hdr} || \

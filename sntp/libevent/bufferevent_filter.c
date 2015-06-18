@@ -38,9 +38,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#ifdef EVENT__HAVE_STDARG_H
 #include <stdarg.h>
-#endif
 
 #ifdef _WIN32
 #include <winsock2.h>

@@ -132,11 +132,7 @@
 #  include <libgen.h>
 #endif
 
-#if defined(HAVE_LIMITS_H)  /* this is also in options.h */
-#  include <limits.h>
-#elif defined(HAVE_SYS_LIMITS_H)
-#  include <sys/limits.h>
-#endif /* HAVE_LIMITS/SYS_LIMITS_H */
+#include <limits.h>
 
 #include <memory.h>
 #include <setjmp.h>
