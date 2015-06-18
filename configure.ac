@@ -473,11 +473,6 @@ AC_CHECK_HEADERS([sys/proc.h], [], [], [
     #include <sys/time.h>
 ])
 
-AC_CHECK_HEADERS([sys/shm.h], [], [], [
-    #include <sys/types.h>
-    #include <sys/ipc.h>
-])
-
 AC_CHECK_HEADERS([sys/timex.h], [], [], [
     #include <sys/time.h>
 ])
