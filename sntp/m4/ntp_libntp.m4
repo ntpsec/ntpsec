@@ -72,7 +72,6 @@ case "$host" in
     ;;
  *)
     HMS_SEARCH_LIBS([LDADD_LIBNTP], [clock_gettime], [rt])
-    AC_CHECK_FUNCS([clock_getres clock_gettime clock_settime])
     ;;
 esac
 

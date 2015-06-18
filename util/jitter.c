@@ -18,7 +18,6 @@
 
 #define NBUF	800002
 #define JAN_1970 2208988800UL		/* Unix base epoch */
-#define CLOCK_GETTIME			/* Solaris hires clock */
 
 char progname[10];
 double sys_residual;
@@ -93,31 +92,14 @@ get_systime(
 {
 	double dtemp;
 
-#if defined(HAVE_CLOCK_GETTIME) || defined(HAVE_GETCLOCK)
 	struct timespec ts;	/* seconds and nanoseconds */
 
 	/*
 	 * Convert Unix clock from seconds and nanoseconds to seconds.
 	 */
-# ifdef HAVE_CLOCK_GETTIME
 	clock_gettime(CLOCK_REALTIME, &ts);
-# else
-	getclock(TIMEOFDAY, &ts);
-# endif
 	now->l_i = ts.tv_sec + JAN_1970;
 	dtemp = ts.tv_nsec / 1e9;
-
-#else /* HAVE_CLOCK_GETTIME || HAVE_GETCLOCK */
-	struct timeval tv;	/* seconds and microseconds */
-
-	/*
-	 * Convert Unix clock from seconds and microseconds to seconds.
-	 */
-	gettimeofday(&tv, NULL);
-	now->l_i = tv.tv_sec + JAN_1970;
-	dtemp = tv.tv_usec / 1e6;
-
-#endif /* HAVE_CLOCK_GETTIME || HAVE_GETCLOCK */
 
 	/*
 	 * Renormalize to seconds past 1900 and fraction.

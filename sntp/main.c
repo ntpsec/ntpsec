@@ -1525,7 +1525,6 @@ gettimeofday_cached(
 	struct timeval *	caller_tv
 	)
 {
-#if defined(_EVENT_HAVE_CLOCK_GETTIME) && defined(CLOCK_MONOTONIC)
 	static struct event_base *	cached_b;
 	static struct timeval		cached;
 	static struct timeval		adj_cached;
@@ -1587,8 +1586,5 @@ gettimeofday_cached(
 	*caller_tv = adj_cached;
 
 	return 0;
-#else
-	return event_base_gettimeofday_cached(b, caller_tv);
-#endif
 }
 
