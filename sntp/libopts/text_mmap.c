@@ -27,26 +27,23 @@
  *  4379e7444a0e2ce2b12dd6f5a52a27a4d02d39d247901d3285c88cf0d37f477b  COPYING.lgplv3
  *  13aa749a5b0a454917a944ed8fffc530b784f5ead522b1aacaf4ec8aa55a6239  COPYING.mbsd
  */
-#if defined(HAVE_MMAP)
-#  ifndef      MAP_ANONYMOUS
-#    ifdef     MAP_ANON
-#      define  MAP_ANONYMOUS   MAP_ANON
-#    endif
+#ifndef      MAP_ANONYMOUS
+#  ifdef     MAP_ANON
+#    define  MAP_ANONYMOUS   MAP_ANON
 #  endif
+#endif
 
-#  if ! defined(MAP_ANONYMOUS) && ! defined(HAVE_DEV_ZERO)
+#if ! defined(MAP_ANONYMOUS) && ! defined(HAVE_DEV_ZERO)
      /*
       * We must have either /dev/zero or anonymous mapping for
       * this to work.
       */
-#    undef HAVE_MMAP
 
+#else
+#  ifdef _SC_PAGESIZE
+#    define GETPAGESIZE() sysconf(_SC_PAGESIZE)
 #  else
-#    ifdef _SC_PAGESIZE
-#      define GETPAGESIZE() sysconf(_SC_PAGESIZE)
-#    else
-#      define GETPAGESIZE() getpagesize()
-#    endif
+#    define GETPAGESIZE() getpagesize()
 #  endif
 #endif
 
@@ -84,36 +81,6 @@
 static void
 load_text_file(tmap_info_t * mapinfo, char const * pzFile)
 {
-#if ! defined(HAVE_MMAP)
-    mapinfo->txt_data = AGALOC(mapinfo->txt_size+1, "file text");
-    if (mapinfo->txt_data == NULL) {
-        mapinfo->txt_errno = ENOMEM;
-        return;
-    }
-
-    {
-        size_t sz = mapinfo->txt_size;
-        char * pz = mapinfo->txt_data;
-
-        while (sz > 0) {
-            ssize_t rdct = read(mapinfo->txt_fd, pz, sz);
-            if (rdct <= 0) {
-                mapinfo->txt_errno = errno;
-                fserr_warn("libopts", "read", pzFile);
-                free(mapinfo->txt_data);
-                return;
-            }
-
-            pz += rdct;
-            sz -= rdct;
-        }
-
-        *pz = NUL;
-    }
-
-    mapinfo->txt_errno   = 0;
-
-#else /* HAVE mmap */
     size_t const pgsz = (size_t)GETPAGESIZE();
     void * map_addr   = NULL;
 
@@ -151,7 +118,6 @@ load_text_file(tmap_info_t * mapinfo, char const * pzFile)
 
     if (mapinfo->txt_data == MAP_FAILED_PTR)
         mapinfo->txt_errno = errno;
-#endif /* HAVE_MMAP */
 }
 
 /**
@@ -168,9 +134,7 @@ static void
 validate_mmap(char const * fname, int prot, int flags, tmap_info_t * mapinfo)
 {
     memset(mapinfo, 0, sizeof(*mapinfo));
-#if defined(HAVE_MMAP) && ! defined(MAP_ANONYMOUS)
     mapinfo->txt_zero_fd = AO_INVALID_FD;
-#endif
     mapinfo->txt_fd      = AO_INVALID_FD;
     mapinfo->txt_prot    = prot;
     mapinfo->txt_flags   = flags;
@@ -240,13 +204,11 @@ close_mmap_files(tmap_info_t * mi)
     close(mi->txt_fd);
     mi->txt_fd = AO_INVALID_FD;
 
-#if defined(HAVE_MMAP) && ! defined(MAP_ANONYMOUS)
     if (mi->txt_zero_fd == AO_INVALID_FD)
         return;
 
     close(mi->txt_zero_fd);
     mi->txt_zero_fd = AO_INVALID_FD;
-#endif
 }
 
 /*=export_func  text_mmap
@@ -346,22 +308,7 @@ text_munmap(tmap_info_t * mi)
 {
     errno = 0;
 
-#ifdef HAVE_MMAP
     (void)munmap(mi->txt_data, mi->txt_full_size);
-
-#else  /* don't HAVE_MMAP */
-    /*
-     *  IF the memory is writable *AND* it is not private (copy-on-write)
-     *     *AND* the memory is "sharable" (seen by other processes)
-     *  THEN rewrite the data.  Emulate mmap visibility.
-     */
-    if (   FILE_WRITABLE(mi->txt_prot, mi->txt_flags)
-        && (lseek(mi->txt_fd, 0, SEEK_SET) >= 0) ) {
-        write(mi->txt_fd, mi->txt_data, mi->txt_size);
-    }
-
-    free(mi->txt_data);
-#endif /* HAVE_MMAP */
 
     mi->txt_errno = errno;
     close_mmap_files(mi);

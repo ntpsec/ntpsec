@@ -2974,7 +2974,6 @@ err:
 	return NULL;
 }
 
-#ifdef EVENT__HAVE_MMAP
 static long
 get_page_size(void)
 {
@@ -2986,7 +2985,6 @@ get_page_size(void)
 	return 1;
 #endif
 }
-#endif
 
 /* DOCDOC */
 /* Requires lock */
@@ -3001,7 +2999,6 @@ evbuffer_file_segment_materialize(struct evbuffer_file_segment *seg)
 	if (seg->contents)
 		return 0; /* already materialized */
 
-#if defined(EVENT__HAVE_MMAP)
 	if (!(flags & EVBUF_FS_DISABLE_MMAP)) {
 		off_t offset_rounded = 0, offset_leftover = 0;
 		void *mapped;
@@ -3035,7 +3032,6 @@ evbuffer_file_segment_materialize(struct evbuffer_file_segment *seg)
 			goto done;
 		}
 	}
-#endif
 #ifdef _WIN32
 	if (!(flags & EVBUF_FS_DISABLE_MMAP)) {
 		intptr_t h = _get_osfhandle(fd);
@@ -3119,7 +3115,7 @@ evbuffer_file_segment_free(struct evbuffer_file_segment *seg)
 	if (seg->is_mapping) {
 #ifdef _WIN32
 		CloseHandle(seg->mapping_handle);
-#elif defined (EVENT__HAVE_MMAP)
+#else
 		off_t offset_leftover;
 		offset_leftover = seg->file_offset % get_page_size();
 		if (munmap(seg->mapping, seg->length + offset_leftover) == -1)
