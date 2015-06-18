@@ -851,7 +851,6 @@ AC_DEFINE_UNQUOTED([DFLT_RLIMIT_MEMLOCK], [$ans],
 
 
 # some OSes prefer _exit() in forked children to exit()
-AC_CHECK_FUNCS([_exit])
 ntp_worker_child_exit=exit
 case "$ac_cv_func__exit::$host_os" in
  yes::netbsd*)
