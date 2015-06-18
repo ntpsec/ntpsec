@@ -1897,7 +1897,6 @@ nmead_open(
 {
 	int	fd = -1;		/* result file descriptor */
 	
-#ifdef HAVE_READLINK
 	char	host[80];		/* link target buffer	*/
 	char  * port;			/* port name or number	*/
 	int	rc;			/* result code (several)*/
@@ -1946,9 +1945,6 @@ nmead_open(
 			close(sh);
 	}
 	freeaddrinfo(ai_list);
-#else
-	fd = -1;
-#endif
 
 	return fd;
 }

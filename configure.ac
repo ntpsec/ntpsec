@@ -779,10 +779,8 @@ case "$host" in
     AC_CHECK_FUNCS([memlk], [ac_cv_func_mlockall=yes])
     AC_CHECK_FUNCS([mlockall])
     ;;
- *) AC_CHECK_FUNCS([mlockall])
-    ;;
 esac
-AC_CHECK_FUNCS([nice plock pututline pututxline readlink rtprio])
+AC_CHECK_FUNCS([plock pututline rtprio])
 case "$host" in
  *-*-aix[[4-9]]*)
     # XXX only verified thru AIX6.
