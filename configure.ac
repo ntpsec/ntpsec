@@ -747,13 +747,6 @@ case "$ac_cv_header_kvm_h" in
     ;;
 esac
 
-case "$host" in
- *-*-sco3.2v5.0.*)
-    # Just stubs.  Sigh.
-    ;;
- *) AC_CHECK_FUNCS([mkstemp])
-    ;;
-esac
 AC_CHECK_FUNCS([mktime])
 case "$host" in
  *-*-aix[[4-9]]*)
@@ -960,7 +953,6 @@ case "$host" in
     AC_DEFINE([DECL_TOLOWER_0], [1], [Declaration style])
     ;;
  *-*-solaris2*)
-    AC_DEFINE([DECL_MKSTEMP_0], [1], [Declaration style])
     AC_DEFINE([DECL_SETPRIORITY_1], [1], [Declaration style])
     case "$host" in
      *-*-solaris2.4)
@@ -976,7 +968,6 @@ case "$host" in
     AC_DEFINE([DECL_IPC_0], [1], [Declaration style])
     AC_DEFINE([DECL_MEMMOVE_0], [1], [Declaration style])
     AC_DEFINE([DECL_MKTEMP_0], [1], [Declaration style])
-    AC_DEFINE([DECL_MKSTEMP_0], [1], [Declaration style])
     AC_DEFINE([DECL_RENAME_0], [1], [Declaration style])
     AC_DEFINE([DECL_SELECT_0], [1], [Declaration style])
     AC_DEFINE([DECL_SETITIMER_0], [1], [Declaration style])
