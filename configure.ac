@@ -738,40 +738,6 @@ AC_CHECK_FUNCS([daemon])
 LIBS="$saved_LIBS"
 AS_UNSET([saved_LIBS])
 
-AC_CHECK_FUNCS(
-    [finite],
-    [],
-    [AC_CHECK_FUNCS(
-	[isfinite],
-	[],
-	[
-	    AC_MSG_CHECKING([for isfinite with <math.h>])
-	    _libs=$LIBS
-	    # XXX
-	    LIBS="$LIBS -lm"
-	    AC_LINK_IFELSE(
-		[AC_LANG_PROGRAM(
-		    [[
-			#include <math.h>
-		    ]],
-		    [[
-			float f = 0.0;
-			isfinite(f);
-		    ]]
-		)],
-		[ans=yes],
-		[ans=no]
-	    )
-	    LIBS=$_libs
-	    AC_MSG_RESULT([$ans])
-	    case "$ans" in
-	     yes)
-		AC_DEFINE([HAVE_ISFINITE], [1])
-	    esac
-	]
-    )]
-)
-
 AC_CHECK_FUNCS([fnmatch getbootfile getuid getrusage nanosleep strsignal])
 
 # kvm_open() is only used by tickadj.  Also see above.
