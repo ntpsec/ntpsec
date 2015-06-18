@@ -157,7 +157,7 @@ extern	int	decodenetnum	(const char *, sockaddr_u *);
 
 extern	const char * FindConfig	(const char *);
 
-extern	void	signal_no_reset (int, RETSIGTYPE (*func)(int));
+extern	void	signal_no_reset (int, void (*func)(int));
 extern	void	set_ctrl_c_hook (ctrl_c_fn);
 
 extern	void	getauthkeys 	(const char *);

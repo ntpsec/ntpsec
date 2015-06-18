@@ -200,7 +200,7 @@ static	struct server *findserver (sockaddr_u *);
 		void	timer		(void);
 static	void	init_alarm	(void);
 #ifndef SYS_WINNT
-static	RETSIGTYPE alarming (int);
+static	void alarming (int);
 #endif /* SYS_WINNT */
 static	void	init_io 	(void);
 static	void	sendpkt 	(sockaddr_u *, struct pkt *, int);
@@ -1473,7 +1473,7 @@ timer(void)
 /*
  * alarming - record the occurance of an alarm interrupt
  */
-static RETSIGTYPE
+static void
 alarming(
 	int sig
 	)

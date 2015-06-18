@@ -478,7 +478,6 @@ typedef unsigned long uintptr_t;
 #define ULONG_CONST(a) a ## UL
 
 #define NOKMEM
-#define RETSIGTYPE void
 
 #ifndef STR_SYSTEM
 #define STR_SYSTEM "Windows"

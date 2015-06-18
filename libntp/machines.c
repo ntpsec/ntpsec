@@ -228,7 +228,7 @@ extern unsigned int px_alarm(unsigned long, int *);
  * call the original SIGALRM handler (if any).
  */
 
-static RETSIGTYPE setitimer_mpe_handler(int sig)
+static void setitimer_mpe_handler(int sig)
 {
 int alarm_hpe_status;
 

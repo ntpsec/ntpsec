@@ -73,7 +73,7 @@ static	void	growpktdata	(void);
 static	int	getresponse	(int, int, int *, int *, char **, int);
 static	int	sendrequest	(int, int, int, u_int, size_t, char *);
 static	void	getcmds		(void);
-static	RETSIGTYPE abortcmd	(int);
+static	void abortcmd	(int);
 static	void	docmd		(const char *);
 static	void	tokenize	(const char *, char **, int *);
 static	int	findcmd		(char *, struct xcmd *, struct xcmd *, struct xcmd **);
@@ -1088,7 +1088,7 @@ getcmds(void)
 /*
  * abortcmd - catch interrupts and abort the current command
  */
-static RETSIGTYPE
+static void
 abortcmd(
 	int sig
 	)

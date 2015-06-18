@@ -58,7 +58,6 @@ WILL IOCTL(SIOCGIFCONF) WORK ON A SOCKET
 MISC
 
   DOSYNCTODR		- Resync TODR clock  every hour.
-  RETSIGTYPE		- Define signal function type.
   NO_SIGNED_CHAR_DECL - No "signed char" see include/ntp.h
   LOCK_PROCESS		- Have plock.
 */
@@ -208,14 +207,6 @@ struct servent *getservbyname (char *name, char *type);
 #ifdef HAVE_SYS_STROPTS_H
 # ifdef HAVE_SYS_STREAM_H
 #  define STREAM
-# endif
-#endif
-
-#ifndef RETSIGTYPE
-# if defined(NTP_POSIX_SOURCE)
-#  define	RETSIGTYPE	void
-# else
-#  define	RETSIGTYPE	int
 # endif
 #endif
 

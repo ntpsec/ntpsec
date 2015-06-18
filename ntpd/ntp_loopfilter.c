@@ -1380,7 +1380,7 @@ loop_config(
  * the kernel. In this case the phase-lock loop is emulated by
  * the stock adjtime() syscall and a lot of indelicate abuse.
  */
-static RETSIGTYPE
+static void
 pll_trap(
 	int arg
 	)

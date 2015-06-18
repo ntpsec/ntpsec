@@ -32,9 +32,9 @@
 #include <ntpsnmpd-opts.h>
 
 static int keep_running;
-RETSIGTYPE stop_server(int);
+void stop_server(int);
 
-RETSIGTYPE
+void
 stop_server(int a) {
     keep_running = 0;
 }

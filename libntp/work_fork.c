@@ -26,7 +26,7 @@ static	volatile int		worker_sighup_received;
 
 /* === function prototypes === */
 static	void		fork_blocking_child(blocking_child *);
-static	RETSIGTYPE	worker_sighup(int);
+static	void	worker_sighup(int);
 static	void		send_worker_home_atexit(void);
 static	void		cleanup_after_child(blocking_child *);
 
@@ -55,7 +55,7 @@ exit_worker(
 }
 
 
-static RETSIGTYPE
+static void
 worker_sighup(
 	int sig
 	)
