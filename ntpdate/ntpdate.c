@@ -80,10 +80,8 @@ UINT wTimerRes;
 # define	NTPDATE_PRIO	(100)
 #endif
 
-#ifdef HAVE_TIMER_CREATE
 /* POSIX TIMERS - vxWorks doesn't have itimer - casey */
 static timer_t ntpdate_timerid;
-#endif
 
 /*
  * Compatibility stuff for Version 2
@@ -1504,11 +1502,7 @@ static void
 init_alarm(void)
 {
 #ifndef SYS_WINNT
-# ifdef HAVE_TIMER_CREATE
 	struct itimerspec its;
-# else
-	struct itimerval itv;
-# endif
 #else	/* SYS_WINNT follows */
 	TIMECAPS tc;
 	UINT wTimerID;
@@ -1520,7 +1514,6 @@ init_alarm(void)
 	alarm_flag = 0;
 
 #ifndef SYS_WINNT
-# ifdef HAVE_TIMER_CREATE
 	alarm_flag = 0;
 	/* this code was put in as setitimer() is non existant this us the
 	 * POSIX "equivalents" setup - casey
@@ -1548,19 +1541,6 @@ init_alarm(void)
 	its.it_interval.tv_nsec = 1000000000/TIMER_HZ;
 	its.it_value.tv_nsec = 1000000000/(TIMER_HZ<<1);
 	timer_settime(ntpdate_timerid, 0 /* !TIMER_ABSTIME */, &its, NULL);
-# else	/* !HAVE_TIMER_CREATE follows */
-	/*
-	 * Set up the alarm interrupt.	The first comes 1/(2*TIMER_HZ)
-	 * seconds from now and they continue on every 1/TIMER_HZ seconds.
-	 */
-	signal_no_reset(SIGALRM, alarming);
-	itv.it_interval.tv_sec = 0;
-	itv.it_value.tv_sec = 0;
-	itv.it_interval.tv_usec = 1000000/TIMER_HZ;
-	itv.it_value.tv_usec = 1000000/(TIMER_HZ<<1);
-
-	setitimer(ITIMER_REAL, &itv, NULL);
-# endif	/* !HAVE_TIMER_CREATE */
 #else	/* SYS_WINNT follows */
 	_tzset();
 
