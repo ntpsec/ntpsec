@@ -2,10 +2,12 @@
  * ntpq.h - definitions of interest to ntpq
  */
 #include <unistd.h>
+#include <string.h>
+
+
 #include "ntp_fp.h"
 #include "ntp.h"
 #include "ntp_stdlib.h"
-#include "ntp_string.h"
 #include "ntp_malloc.h"
 #include "ntp_assert.h"
 #include "ntp_control.h"

@@ -6,13 +6,13 @@
 
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <string.h>
 
 #include "declcond.h"	/* ntpd uses ntpd/declcond.h, others include/ */
 #include "l_stdlib.h"
 #include "ntp_net.h"
 #include "ntp_debug.h"
 #include "ntp_malloc.h"
-#include "ntp_string.h"
 #include "ntp_syslog.h"
 
 #ifdef __GNUC__
