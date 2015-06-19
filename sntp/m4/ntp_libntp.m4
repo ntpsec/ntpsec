@@ -611,11 +611,6 @@ AC_HEADER_RESOLV
 AC_CHECK_FUNCS([res_init], , [AC_CHECK_FUNCS([__res_init])])
 
 # We also need -lsocket, but we have tested for that already.
-AC_CHECK_FUNC([inet_ntop], [], 
-    [AC_DEFINE([ISC_PLATFORM_NEEDNTOP], [1], [ISC: provide inet_ntop()])])
-AC_CHECK_FUNC([inet_pton], [],
-    [AC_DEFINE([ISC_PLATFORM_NEEDPTON], [1], [ISC: provide inet_pton()])])
-
 AC_CHECK_TYPES([uintptr_t, int32, u_int32])
  
 AH_VERBATIM([TYPEDEF_UINTPTR_T],

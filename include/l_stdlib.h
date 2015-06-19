@@ -48,11 +48,6 @@ extern	char *	getpass		(const char *);
 extern	const char * hstrerror	(int);
 #endif
 
-#ifdef DECL_INET_NTOA_0
-struct in_addr;
-extern	char *	inet_ntoa	(struct in_addr);
-#endif
-
 #ifdef DECL_IOCTL_0
 extern	int	ioctl		(int, u_long, char *);
 #endif
