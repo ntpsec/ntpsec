@@ -31,6 +31,7 @@
 /* Apple wants us to define this if we might ever pass more than
  * FD_SETSIZE bits to select(). */
 #define _DARWIN_UNLIMITED_SELECT
+#endif
 
 #include <sys/types.h>
 #include <sys/time.h>
