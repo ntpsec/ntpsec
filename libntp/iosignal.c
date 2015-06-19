@@ -53,7 +53,6 @@ static int sigio_block_count = 0;
 /* main inputhandler to be called on SIGIO */
 static input_handler_t *input_handler_callback = NULL;
 
-# if defined(HAVE_SIGACTION)
 /*
  * If sigaction() is used for signal handling and a signal is
  * pending then the kernel blocks the signal before it calls
@@ -65,7 +64,6 @@ static input_handler_t *input_handler_callback = NULL;
  * bracketed by BLOCKIO()/UNBLOCKIO() calls.
  */
 static int sigio_handler_active = 0;
-# endif
 
 /*
  * SIGPOLL and SIGIO ROUTINES.
@@ -293,20 +291,16 @@ sigio_handler(
 
 	get_systime(&ts);
 
-# if defined(HAVE_SIGACTION)
 	sigio_handler_active++;
 	if (sigio_handler_active != 1)  /* This should never happen! */
 	    msyslog(LOG_ERR, "sigio_handler: sigio_handler_active != 1");
-# endif
 
 	INSIST(input_handler_callback != NULL);
 	(*input_handler_callback)(&ts);
 
-# if defined(HAVE_SIGACTION)
 	sigio_handler_active--;
 	if (sigio_handler_active != 0)  /* This should never happen! */
 	    msyslog(LOG_ERR, "sigio_handler: sigio_handler_active != 0");
-# endif
 
 	errno = saved_errno;
 }
@@ -314,7 +308,6 @@ sigio_handler(
 /*
  * Signal support routines.
  */
-# ifdef HAVE_SIGACTION
 void
 set_signal(input_handler_t *input)
 {
@@ -458,89 +451,6 @@ wait_for_signal(void)
 	    msyslog(LOG_ERR, "wait_for_signal: sigsuspend() failed: %m");
 }
 
-# else /* !HAVE_SIGACTION */
-/*
- * Must be an old bsd system.
- * We assume there is no SIGPOLL.
- */
-
-void
-block_io_and_alarm(void)
-{
-	int mask;
-
-	mask = sigmask(SIGIO) | sigmask(SIGALRM);
-	if (sigblock(mask))
-	    msyslog(LOG_ERR, "block_io_and_alarm: sigblock() failed: %m");
-}
-
-void
-block_sigio(void)
-{
-	int mask;
-
-	++sigio_block_count;
-	if (sigio_block_count > 1)
-	    msyslog(LOG_INFO, "block_sigio: sigio_block_count > 1");
-	if (sigio_block_count < 1)
-	    msyslog(LOG_INFO, "block_sigio: sigio_block_count < 1");
-
-	mask = sigmask(SIGIO);
-	if (sigblock(mask))
-	    msyslog(LOG_ERR, "block_sigio: sigblock() failed: %m");
-}
-
-void
-set_signal(input_handler_t *input)
-{
-	INSIST(input != NULL);
-
-	input_handler_callback = input;
-
-	using_sigio = TRUE;
-	(void) signal_no_reset(SIGIO, sigio_handler);
-}
-
-void
-unblock_io_and_alarm(void)
-{
-	int mask, omask;
-
-	mask = sigmask(SIGIO) | sigmask(SIGALRM);
-	omask = sigblock(0);
-	omask &= ~mask;
-	(void) sigsetmask(omask);
-}
-
-void
-unblock_sigio(void)
-{
-	int mask, omask;
-
-	--sigio_block_count;
-	if (sigio_block_count > 0)
-	    msyslog(LOG_INFO, "unblock_sigio: sigio_block_count > 0");
-	if (sigio_block_count < 0)
-	    msyslog(LOG_INFO, "unblock_sigio: sigio_block_count < 0");
-	mask = sigmask(SIGIO);
-	omask = sigblock(0);
-	omask &= ~mask;
-	(void) sigsetmask(omask);
-}
-
-void
-wait_for_signal(void)
-{
-	int mask, omask;
-
-	mask = sigmask(SIGIO) | sigmask(SIGALRM);
-	omask = sigblock(0);
-	omask &= ~mask;
-	if (sigpause(omask) && (errno != EINTR))
-	    msyslog(LOG_ERR, "wait_for_signal: sigspause() failed: %m");
-}
-
-# endif /* HAVE_SIGACTION */
 #else
 int  NotAnEmptyCompilationUnit;
 #endif 

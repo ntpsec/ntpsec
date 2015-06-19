@@ -1535,13 +1535,10 @@ main(
 		/*
 		 * setup periodic operations (state control / frequency control)
 		 */
-#ifdef HAVE_SIGACTION
 		{
 			struct sigaction act;
 
-# ifdef HAVE_SA_SIGACTION_IN_STRUCT_SIGACTION
 			act.sa_sigaction = (void (*) (int, siginfo_t *, void *))0;
-# endif /* HAVE_SA_SIGACTION_IN_STRUCT_SIGACTION */
 			act.sa_handler   = tick;
 			sigemptyset(&act.sa_mask);
 			act.sa_flags     = 0;
@@ -1552,25 +1549,6 @@ main(
 				exit(1);
 			}
 		}
-#else
-#ifdef HAVE_SIGVEC
-		{
-			struct sigvec vec;
-
-			vec.sv_handler   = tick;
-			vec.sv_mask      = 0;
-			vec.sv_flags     = 0;
-
-			if (sigvec(SIGALRM, &vec, (struct sigvec *)0) == -1)
-			{
-				syslog(LOG_ERR, "sigvec(SIGALRM): %m");
-				exit(1);
-			}
-		}
-#else
-		(void) signal(SIGALRM, tick);
-#endif
-#endif
 
 #ifdef ITIMER_REAL
 		{

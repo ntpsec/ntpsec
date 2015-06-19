@@ -17,8 +17,6 @@ BOOL WINAPI console_event_handler(DWORD);
 #endif
 
 
-#ifdef HAVE_SIGACTION
-
 # ifdef SA_RESTART
 #  define Z_SA_RESTART		SA_RESTART
 # else
@@ -57,63 +55,6 @@ signal_no_reset(
 		exit(1);
 	}
 }
-
-#elif  HAVE_SIGVEC
-
-void
-signal_no_reset(
-	int sig,
-	void (*func)(int)
-	)
-{
-	struct sigvec sv;
-	int n;
-
-	ZERO(sv);
-	sv.sv_handler = func;
-	n = sigvec(sig, &sv, (struct sigvec *)NULL);
-	if (-1 == n) {
-		perror("sigvec");
-		exit(1);
-	}
-}
-
-#elif  HAVE_SIGSET
-
-void
-signal_no_reset(
-	int sig,
-	void (*func)(int)
-	)
-{
-	int n;
-
-	n = sigset(sig, func);
-	if (-1 == n) {
-		perror("sigset");
-		exit(1);
-	}
-}
-
-#else
-
-/* Beware!	This implementation resets the signal to SIG_DFL */
-void
-signal_no_reset(
-	int sig,
-	void (*func)(int)
-	)
-{
-#ifndef SIG_ERR
-# define SIG_ERR	(-1)
-#endif
-	if (SIG_ERR == signal(sig, func)) {
-		perror("signal");
-		exit(1);
-	}
-}
-
-#endif
 
 #ifndef SYS_WINNT
 /*
