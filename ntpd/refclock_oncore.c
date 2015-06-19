@@ -1646,17 +1646,10 @@ oncore_get_timestamp(
 			u_long i;
 
 			i = (u_long) pps_i.assert_sequence;
-# ifdef HAVE_STRUCT_TIMESPEC
 			oncore_log_f(instance, LOG_DEBUG,
 				     "serial/j (%lu, %lu) %ld.%09ld", i,
 				     j, (long)tsp->tv_sec,
 				     (long)tsp->tv_nsec);
-# else
-			oncore_log_f(instance, LOG_DEBUG,
-				     "serial/j (%lu, %lu) %ld.%06ld", i,
-				     j, (long)tsp->tv_sec,
-				     (long)tsp->tv_usec);
-# endif
 		}
 #endif
 
@@ -1675,17 +1668,10 @@ oncore_get_timestamp(
 			u_long i;
 
 			i = (u_long) pps_i.clear_sequence;
-# ifdef HAVE_STRUCT_TIMESPEC
 			oncore_log_f(instance, LOG_DEBUG,
 				     "serial/j (%lu, %lu) %ld.%09ld", i,
 				     j, (long)tsp->tv_sec,
 				     (long)tsp->tv_nsec);
-# else
-			oncore_log_f(instance, LOG_DEBUG,
-				     "serial/j (%lu, %lu) %ld.%06ld", i,
-				     j, (long)tsp->tv_sec,
-				     (long)tsp->tv_usec);
-# endif
 		}
 #endif
 
