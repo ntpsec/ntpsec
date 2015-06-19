@@ -18,12 +18,7 @@
 /* $Id: os.c,v 1.18 2007/06/19 23:47:18 tbox Exp $ */
 
 #include <config.h>
-
 #include <isc/os.h>
-
-
-#ifdef HAVE_SYSCONF
-
 #include <unistd.h>
 
 #ifndef __hpux
@@ -38,7 +33,6 @@ sysconf_ncpus(void) {
 #endif
 }
 #endif
-#endif /* HAVE_SYSCONF */
 
 
 #ifdef __hpux
@@ -80,7 +74,7 @@ isc_os_ncpus(void) {
 
 #ifdef __hpux
 	ncpus = hpux_ncpus();
-#elif defined(HAVE_SYSCONF)
+#else
 	ncpus = sysconf_ncpus();
 #endif
 #if defined(HAVE_SYS_SYSCTL_H) && defined(HAVE_SYSCTLBYNAME)
