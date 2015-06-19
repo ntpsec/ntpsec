@@ -23,10 +23,6 @@ AC_DEFUN([INVOKE_LIBOPTS_MACROS_FIRST],[
       setjmp.h      stdbool.h     sysexits.h \
       unistd.h      utime.h])
 
-  AC_CHECK_HEADERS([string.h     strings.h],
-      [lo_have_str_hdr=true;break],
-      [lo_have_str_hdr=false])
-
   AC_CHECK_HEADERS([limits.h     sys/limits.h  values.h],
       [lo_have_lim_hdr=true;break],
       [lo_have_lim_hdr=false])
@@ -53,14 +49,11 @@ AC_DEFUN([INVOKE_LIBOPTS_MACROS_FIRST],[
   # --------------------------------------------
   # Verify certain entries from AC_CHECK_HEADERS
   # --------------------------------------------
-  [${lo_have_str_hdr} || \
-    ]AC_MSG_ERROR([you must have string.h or strings.h on your system])[
-
-  ${lo_have_lim_hdr} || \
+  [${lo_have_lim_hdr} || \
     ]AC_MSG_ERROR(
       [you must have one of limits.h, sys/limits.h or values.h])[
 
-  for f in sys_types sys_param sys_stat string stdlib memory setjmp
+  for f in sys_types sys_param sys_stat stdlib memory setjmp
   do eval as_ac_var=\${ac_cv_header_${f}_h}
      test "X${as_ac_var}" = Xyes || {
        ]AC_MSG_ERROR([you must have ${f}.h on your system])[
