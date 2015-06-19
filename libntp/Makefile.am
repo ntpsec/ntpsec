@@ -90,7 +90,6 @@ libntp_a_SRCS =						\
 	prettydate.c					\
 	recvbuff.c					\
 	refnumtoa.c					\
-	snprintf.c					\
 	socket.c					\
 	socktoa.c					\
 	socktohost.c					\
