@@ -4,8 +4,9 @@
 #include "ntp_fp.h"
 #include "ntp.h"
 #include "ntp_request.h"
-#include "ntp_string.h"
 #include "ntp_malloc.h"
+
+#include <string.h>
 
 /*
  * Maximum number of arguments
