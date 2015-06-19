@@ -31,8 +31,7 @@
 
 #include <config.h>
 #ifdef PARSESTREAM
-#define NEED_BOPS
-#include "ntp_string.h"
+#include <string.h>
 #else
 #include <stdio.h>
 #endif

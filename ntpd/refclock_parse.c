@@ -102,8 +102,8 @@
 #include "ntp_refclock.h"
 #include "timevalops.h"		/* includes <sys/time.h> */
 #include "ntp_control.h"
-#include "ntp_string.h"
 
+#include <string.h>
 #include <stdio.h>
 #include <ctype.h>
 #ifndef TM_IN_SYS_TIME

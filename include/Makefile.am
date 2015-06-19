@@ -50,7 +50,6 @@ noinst_HEADERS =	\
 	ntp_rfc2553.h	\
 	ntp_select.h	\
 	ntp_stdlib.h	\
-	ntp_string.h	\
 	ntp_syscall.h	\
 	ntp_syslog.h	\
 	ntp_tty.h	\

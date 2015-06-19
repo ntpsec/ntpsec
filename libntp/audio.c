@@ -5,6 +5,8 @@
 # include <config.h>
 #endif
 
+#include <string.h>
+
 #if defined(HAVE_SYS_AUDIOIO_H) || defined(HAVE_SUN_AUDIOIO_H) || \
     defined(HAVE_SYS_SOUNDCARD_H) || defined(HAVE_MACHINE_SOUNDCARD_H)
 
@@ -13,7 +15,6 @@
 #include "ntp_syslog.h"
 #include <unistd.h>
 #include <stdio.h>
-#include "ntp_string.h"
 
 #ifdef HAVE_SYS_AUDIOIO_H
 # include <sys/audioio.h>

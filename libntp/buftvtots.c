@@ -7,8 +7,10 @@
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
+
+#include <string.h>
+
 #include "ntp_fp.h"
-#include "ntp_string.h"
 #include "timevalops.h"
 
 #ifndef SYS_WINNT

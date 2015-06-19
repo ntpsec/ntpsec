@@ -16,7 +16,6 @@
 #include "ntp_io.h"
 #include "timevalops.h"
 #include "ntpdate.h"
-#include "ntp_string.h"
 #include "ntp_syslog.h"
 #include "ntp_select.h"
 #include "ntp_stdlib.h"
@@ -27,6 +26,7 @@
 #include "isc/sockaddr.h"
 
 #include <unistd.h>
+#include <string.h>
 
 #include <stdio.h>
 #include <signal.h>

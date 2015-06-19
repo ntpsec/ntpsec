@@ -5,8 +5,9 @@
 #include <config.h>
 #endif
 
+#include <string.h>
+
 #include "ntp_fp.h"
-#include "ntp_string.h"
 #include "ntp_stdlib.h"
 #include "ntp.h"
 #include "ntp_md5.h"	/* provides OpenSSL digest API */

@@ -7,12 +7,12 @@
 
 #include <math.h>
 #include <stdio.h>
+#include <string.h>
 
 #include "ntp.h"
 #include "ntp_fp.h"
 #include "ntpd.h"
 #include "ntp_lists.h"
-#include "ntp_string.h"
 #include "ntp_malloc.h"
 #include "ntp_stdlib.h"
 

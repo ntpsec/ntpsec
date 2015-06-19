@@ -19,10 +19,10 @@
 #include <stdio.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <string.h>
 
 #include "ntpd.h"
 #include "ntp_io.h"
-#include "ntp_string.h"
 #include "ntp_calendar.h"
 #include "ntp_filegen.h"
 #include "ntp_stdlib.h"

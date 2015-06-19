@@ -12,11 +12,11 @@
 #include <sys/param.h>
 #include <unistd.h>
 #include <fcntl.h>
+#include <string.h>
 
 #include "ntpd.h"
 #include "ntp_stdlib.h"
 #include "ntp_unixtime.h"
-#include "ntp_string.h"
 #include "ntp_random.h"
 #include "ntp_assert.h"
 #include "ntp_calendar.h"
