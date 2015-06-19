@@ -253,7 +253,6 @@ extern int __filbuf(FILE *);
 extern int __flsbuf(int, FILE *);
 extern int gethostname(char *, int);
 extern unsigned long inet_addr(char *);
-extern char *strdup(const char *);
 
 /* miscellaneous NTP macros */
 
