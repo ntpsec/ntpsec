@@ -492,23 +492,5 @@ case $want_getifaddrs in
     ;;
 esac
 
-#
-# Check for if_nametoindex() for IPv6 scoped addresses support
-#
-case "$host" in
- *-hp-hpux*)
-    AC_SEARCH_LIBS([if_nametoindex], [ipv6])
-esac
-SAVED_LIBS="$LIBS"
-LIBS="$LDADD_LIBNTP $LIBS"
-AC_CHECK_FUNCS([if_nametoindex])
-LIBS="$SAVED_LIBS"
-AS_UNSET([SAVED_LIBS])
-case "$ac_cv_func_if_nametoindex" in
- yes)
-	AC_DEFINE([ISC_PLATFORM_HAVEIFNAMETOINDEX], [1],
-	    [ISC: do we have if_nametoindex()?])
-esac
-
 ])dnl
 dnl ======================================================================
