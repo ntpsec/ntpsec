@@ -96,7 +96,6 @@ libntp_a_SRCS =						\
 	socktohost.c					\
 	ssl_init.c					\
 	statestr.c					\
-	strdup.c					\
 	strl_obsd.c					\
 	syssignal.c					\
 	timetoa.c					\

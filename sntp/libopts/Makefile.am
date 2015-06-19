@@ -42,8 +42,8 @@ EXTRA_DIST += \
     alias.c                 ao-strs.c               ao-strs.h  \
     autoopts/usage-txt.h    autoopts/options.h      autoopts/project.h  \
     autoopts.c              autoopts.h              boolean.c  \
-    check.c                 compat/compat.h         compat/strdup.c  \
-    compat/windows-config.h compat/strchr.c         compat/pathfind.c  \
+    check.c                 compat/compat.h    \
+    compat/windows-config.h compat/pathfind.c  \
     compat/snprintf.c       compat/_Noreturn.h      configfile.c  \
     cook.c                  enum.c                  env.c  \
     file.c                  find.c                  genshell.c  \
