@@ -1580,11 +1580,8 @@ oncore_get_timestamp(
 	u_long	j;
 	l_fp ts, ts_tmp;
 	double dmy;
-#ifdef HAVE_STRUCT_TIMESPEC
 	struct timespec *tsp = 0;
-#else
-	struct timeval	*tsp = 0;
-#endif
+
 	int	current_mode;
 	pps_params_t current_params;
 	struct timespec timeout;
