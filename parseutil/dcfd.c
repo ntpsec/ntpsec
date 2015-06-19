@@ -1160,11 +1160,11 @@ detach(
 		u_long s;
 		int max_fd;
 
-#if defined(HAVE_SYSCONF) && defined(_SC_OPEN_MAX)
+#if defined(_SC_OPEN_MAX)
 		max_fd = sysconf(_SC_OPEN_MAX);
-#else /* HAVE_SYSCONF && _SC_OPEN_MAX */
+#else /* _SC_OPEN_MAX */
 		max_fd = getdtablesize();
-#endif /* HAVE_SYSCONF && _SC_OPEN_MAX */
+#endif /* _SC_OPEN_MAX */
 		for (s = 0; s < max_fd; s++)
 		    (void) close((int)s);
 		(void) open("/", 0);

@@ -426,9 +426,9 @@ main(
 	}
 
 	hz = HZ;
-#if defined(HAVE_SYSCONF) && defined(_SC_CLK_TCK)
+#if defined(_SC_CLK_TCK)
 	hz = (int) sysconf (_SC_CLK_TCK);
-#endif /* not HAVE_SYSCONF && _SC_CLK_TCK */
+#endif /* not _SC_CLK_TCK */
 #ifdef OVERRIDE_HZ
 	hz = DEFAULT_HZ;
 #endif

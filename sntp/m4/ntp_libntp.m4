@@ -306,7 +306,7 @@ case "$have_pthreads" in
     esac
 
     AC_CHECK_FUNCS([pthread_attr_getstacksize])
-    AC_CHECK_FUNCS([pthread_attr_setstacksize sysconf])
+    AC_CHECK_FUNCS([pthread_attr_setstacksize])
 
     case "$host" in
      *-freebsd5.[[012]]|*-freebsd5.[[012]].*)
@@ -724,7 +724,7 @@ AC_CHECK_HEADERS(
 )
 
 AC_SEARCH_LIBS([MD5Init], [md5 md])
-AC_CHECK_FUNCS([MD5Init sysconf getdtablesize sigaction sigset sigvec])
+AC_CHECK_FUNCS([MD5Init getdtablesize sigaction sigset sigvec])
 
 AC_CACHE_CHECK(
     [for SIGIO],

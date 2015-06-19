@@ -1,6 +1,6 @@
 /* libntp.h */
 
-#if defined(HAVE_SYSCONF) && defined(_SC_OPEN_MAX)
+#if defined(_SC_OPEN_MAX)
 #define GETDTABLESIZE()	((int)sysconf(_SC_OPEN_MAX))
 #elif defined(HAVE_GETDTABLESIZE)
 #define GETDTABLESIZE	getdtablesize
