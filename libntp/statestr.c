@@ -4,14 +4,16 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
+
 #include <stdio.h>
+#include <string.h>
+
 #include "ntp_stdlib.h"
 #include "ntp_fp.h"
 #include "ntp.h"
 #include "lib_strbuf.h"
 #include "ntp_refclock.h"
 #include "ntp_control.h"
-#include "ntp_string.h"
 #ifdef KERNEL_PLL
 # include "ntp_syscall.h"
 #endif

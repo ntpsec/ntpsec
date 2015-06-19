@@ -72,12 +72,12 @@
 #include <sys/socket.h>
 #include <isc/net.h>
 #include <netinet/in.h>
+#include <string.h>
 
 #include "ntp_rfc2553.h"
 
 #include "ntpd.h"
 #include "ntp_malloc.h"
-#include "ntp_string.h"
 #include "ntp_debug.h"
 
 

@@ -12,9 +12,9 @@
 #include "ntp_stdlib.h"
 #include "ntp_unixtime.h"
 #include "ntp_control.h"
-#include "ntp_string.h"
 #include "ntp_leapsec.h"
 
+#include <string.h>
 #include <stdio.h>
 #ifdef HAVE_LIBSCF_H
 #include <libscf.h>
