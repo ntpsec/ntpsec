@@ -94,7 +94,7 @@ dns_gethostbyname_cb(int result, char type, int count, int ttl,
 
 	switch (type) {
 	case DNS_IPv6_AAAA: {
-#if defined(EVENT__HAVE_STRUCT_IN6_ADDR) && defined(EVENT__HAVE_INET_NTOP) && defined(INET6_ADDRSTRLEN)
+#if defined(EVENT__HAVE_STRUCT_IN6_ADDR) && defined(INET6_ADDRSTRLEN)
 		struct in6_addr *in6_addrs = addresses;
 		char buf[INET6_ADDRSTRLEN+1];
 		int i;
@@ -315,7 +315,7 @@ dns_server_gethostbyname_cb(int result, char type, int count, int ttl,
 		break;
 	}
 	case DNS_IPv6_AAAA: {
-#if defined (EVENT__HAVE_STRUCT_IN6_ADDR) && defined(EVENT__HAVE_INET_NTOP) && defined(INET6_ADDRSTRLEN)
+#if defined (EVENT__HAVE_STRUCT_IN6_ADDR) && defined(INET6_ADDRSTRLEN)
 		struct in6_addr *in6_addrs = addresses;
 		char buf[INET6_ADDRSTRLEN+1];
 		if (memcmp(&in6_addrs[0].s6_addr, "abcdefghijklmnop", 16)

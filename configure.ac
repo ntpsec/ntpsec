@@ -899,7 +899,6 @@ case "$host" in
     ;;
  *-*-mpeix*)
     AC_DEFINE([DECL_ADJTIME_0], [1], [Declaration style])
-    AC_DEFINE([DECL_INET_NTOA_0], [1], [Declaration style])
     AC_DEFINE([DECL_MKTEMP_0], [1], [Declaration style])
     AC_DEFINE([DECL_SELECT_0], [1], [Declaration style])
     AC_DEFINE([DECL_SETITIMER_0], [1], [Declaration style])
