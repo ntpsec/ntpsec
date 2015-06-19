@@ -43,11 +43,9 @@ void * alloca(size_t);
 #endif
 
 #include <strings.h>
-#define zero_mem(p, s)		bzero(p, s)
 
-#ifndef zero_mem
-# define zero_mem(p, s)		memset(p, 0, s)
-#endif
+#define zero_mem(p, s)		memset(p, 0, s)
+
 #define ZERO(var)		zero_mem(&(var), sizeof(var))
 
 #endif	/* NTP_MALLOC_H */
