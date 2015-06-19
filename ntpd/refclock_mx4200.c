@@ -66,11 +66,7 @@
 
 #ifndef HAVE_STRUCT_PPSCLOCKEV
 struct ppsclockev {
-# ifdef HAVE_STRUCT_TIMESPEC
 	struct timespec tv;
-# else
-	struct timeval tv;
-# endif
 	u_int serial;
 };
 #endif /* ! HAVE_STRUCT_PPSCLOCKEV */

@@ -394,7 +394,6 @@ typedef int ssize_t;	/* ssize is an int */
 # define HAVE_MEMMOVE			1
 # define HAVE_TIMEGM			1	/* actually _mkgmtime */
 
-# define HAVE_STRUCT_TIMESPEC
 # define HAVE_IO_COMPLETION_PORT
 # define ISC_PLATFORM_NEEDNTOP
 # define ISC_PLATFORM_NEEDPTON
