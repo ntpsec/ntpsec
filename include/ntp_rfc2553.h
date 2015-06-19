@@ -125,25 +125,6 @@ struct addrinfo *copy_addrinfo_list_impl(const struct addrinfo *
 #endif
 
 /*
- * If we don't have the sockaddr_storage structure
- * we need to define it
- */
-
-#ifndef HAVE_STRUCT_SOCKADDR_STORAGE
-struct sockaddr_storage {
-#ifdef ISC_PLATFORM_HAVESALEN
-	ntp_u_int8_t	ss_len;		/* address length */
-	ntp_u_int8_t	ss_family;	/* address family */
-#else
-	short		ss_family;	/* address family */
-#endif
-	char		__ss_pad1[_SS_PAD1SIZE];
-	ntp_uint64_t	__ss_align;	/* force desired structure storage alignment */
-	char		__ss_pad2[_SS_PAD2SIZE];
-};
-#endif
-
-/*
  * Finally if the platform doesn't support IPv6 we need some
  * additional definitions
  */
