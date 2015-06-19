@@ -133,9 +133,6 @@ NTP_IPV6
 # these need work if we're to move libntp under sntp
 AC_DEFINE([HAVE_NO_NICE], 1, [sntp does not care about 'nice'])
 
-# Checks for library functions.
-AC_CHECK_FUNCS([socket])
-
 # HMS: if we don't find c++ we should not look for gtest.
 AC_PROG_CXX
 NTP_GOOGLETEST
