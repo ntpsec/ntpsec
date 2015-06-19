@@ -87,8 +87,7 @@ AC_DEFUN([INVOKE_LIBOPTS_MACROS_FIRST],[
   # ------------
   AC_CHECK_LIB(gen, pathfind)
   AC_CHECK_LIB(intl,gettext)
-  AC_CHECK_FUNCS([canonicalize_file_name snprintf strdup strchr \
-                 strrchr strsignal fchmod fstat chmod])
+  AC_CHECK_FUNCS([canonicalize_file_name strsignal])
   AC_PROG_SED
   [while :
   do

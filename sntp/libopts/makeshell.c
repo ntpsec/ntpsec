@@ -199,9 +199,7 @@ optionParseShell(tOptions * opts)
     else if (ENABLED_GENSHELL_OPT(SHELL))
         printf(SHOW_PROG_ENV, opts->pzPROGNAME);
 
-#ifdef HAVE_FCHMOD
     fchmod(STDOUT_FILENO, 0755);
-#endif
     fclose(stdout);
 
     if (ferror(stdout))
