@@ -206,7 +206,6 @@ NTP_DEBUG
 
 # check if we can compile with pthreads
 AC_CHECK_HEADERS([semaphore.h])
-AC_CHECK_FUNCS([socketpair])
 AC_ARG_ENABLE(
     [thread-support],
     [AS_HELP_STRING([--enable-thread-support],
