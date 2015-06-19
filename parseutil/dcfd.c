@@ -1107,10 +1107,6 @@ tick(
 {
 	static unsigned long last_notice = 0;
 
-#if !defined(HAVE_SIGACTION) && !defined(HAVE_SIGVEC)
-	(void)signal(SIGALRM, tick);
-#endif
-
 	periodic_adjust();
 
 	ticks += 1<<ADJINTERVAL;
