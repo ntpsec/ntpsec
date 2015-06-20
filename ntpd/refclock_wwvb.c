@@ -191,6 +191,7 @@ wwvb_start(
 	snprintf(device, sizeof(device), DEVICE, unit);
 	fd = refclock_open(device, SPEED232, LDISC_CLK);
 	if (fd <= 0)
+		/* coverity[leaked_handle] */
 		return (0);
 
 	/*

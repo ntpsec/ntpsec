@@ -635,6 +635,7 @@ arc_start(
 	snprintf(device, sizeof(device), DEVICE, unit);
 	temp_fd = refclock_open(device, SPEED, LDISC_CLK);
 	if (temp_fd <= 0)
+		/* coverity[leaked_handle] */
 		return 0;
 	DPRINTF(1, ("arc: unit %d using tty_open().\n", unit));
 	fd = tty_open(device, OPEN_FLAGS, 0777);

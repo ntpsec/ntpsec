@@ -240,6 +240,7 @@ send_document_cb(struct evhttp_request *req, void *arg)
 		if (d == INVALID_HANDLE_VALUE)
 			goto err;
 #else
+		/* coverity[toctou] */
 		if (!(d = opendir(whole_path)))
 			goto err;
 #endif

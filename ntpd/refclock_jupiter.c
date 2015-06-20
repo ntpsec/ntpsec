@@ -189,6 +189,7 @@ jupiter_start(
 	if (fd <= 0) {
 		jupiter_debug(peer, "jupiter_start", "open %s: %m",
 			      gpsdev);
+		/* coverity[leaked_handle] */
 		return (0);
 	}
 

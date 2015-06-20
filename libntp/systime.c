@@ -128,8 +128,10 @@ get_ostime(
 
 	rc = clock_gettime(CLOCK_REALTIME, tsp);
 	if (rc < 0) {
+#ifndef __COVERITY__
 		msyslog(LOG_ERR, "read system clock failed: %m (%d)",
 			errno);
+#endif /* __COVERITY__ */
 		exit(1);
 	}
 

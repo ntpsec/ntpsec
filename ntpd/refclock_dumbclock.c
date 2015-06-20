@@ -122,6 +122,7 @@ dumbclock_start(
 #endif
 	fd = refclock_open(device, SPEED232, 0);
 	if (fd <= 0)
+		/* coverity[leaked_handle] */
 		return (0);
 
 	/*

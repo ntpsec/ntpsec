@@ -114,6 +114,7 @@ main(int argc, char **argv)
 		}
 	}
 
+	/* coverity[toctou] */
 	unlink(fifo);
 	if (mkfifo(fifo, 0600) == -1) {
 		perror("mkfifo");

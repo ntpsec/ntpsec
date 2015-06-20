@@ -135,6 +135,7 @@ hopfserial_start (
 #ifdef DEBUG
 		printf("hopfSerialClock(%d) start: open %s failed\n", unit, gpsdev);
 #endif
+		/* coverity[leaked_handle] */
 		return 0;
 	}
 

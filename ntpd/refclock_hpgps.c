@@ -173,6 +173,7 @@ hpgps_start(
 	}
 	fd = refclock_open(device, speed, ldisc);
 	if (fd <= 0)
+		/* coverity[leaked_handle] */
 		return (0);
 	/*
 	 * Allocate and initialize unit structure

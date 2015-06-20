@@ -2416,11 +2416,12 @@ enable_multicast_if(
 		if (setsockopt(iface->fd, IPPROTO_IPV6,
 			       IPV6_MULTICAST_LOOP,
 			       (char *) &off6, sizeof(off6))) {
-
+#ifndef __COVERITY__
 			msyslog(LOG_ERR,
 				"setsockopt IPV6_MULTICAST_LOOP failed: %m on socket %d, addr %s for multicast address %s",
 				iface->fd, stoa(&iface->sin),
 				stoa(maddr));
+#endif /* __COVERITY__ */
 		}
 #endif
 		break;
@@ -2459,12 +2460,14 @@ socket_multicast_enable(
 			       IP_ADD_MEMBERSHIP,
 			       (char *)&mreq,
 			       sizeof(mreq))) {
+#ifndef __COVERITY__
 			DPRINTF(2, (
 				"setsockopt IP_ADD_MEMBERSHIP failed: %m on socket %d, addr %s for %x / %x (%s)",
 				iface->fd, stoa(&iface->sin),
 				mreq.imr_multiaddr.s_addr,
 				mreq.imr_interface.s_addr,
 				stoa(maddr)));
+#endif /* __COVERTY__ */
 			return ISC_FALSE;
 		}
 		DPRINTF(4, ("Added IPv4 multicast membership on socket %d, addr %s for %x / %x (%s)\n",
@@ -2489,10 +2492,12 @@ socket_multicast_enable(
 		if (setsockopt(iface->fd, IPPROTO_IPV6,
 			       IPV6_JOIN_GROUP, (char *)&mreq6,
 			       sizeof(mreq6))) {
+#ifndef __COVERITY__
 			DPRINTF(2, (
 				"setsockopt IPV6_JOIN_GROUP failed: %m on socket %d, addr %s for interface %u (%s)",
 				iface->fd, stoa(&iface->sin),
 				mreq6.ipv6mr_interface, stoa(maddr)));
+#endif /* __COVERITY__ */
 			return ISC_FALSE;
 		}
 		DPRINTF(4, ("Added IPv6 multicast group on socket %d, addr %s for interface %u (%s)\n",
@@ -2544,12 +2549,14 @@ socket_multicast_disable(
 			       IP_DROP_MEMBERSHIP, (char *)&mreq,
 			       sizeof(mreq))) {
 
+#ifndef __COVERITY__
 			msyslog(LOG_ERR,
 				"setsockopt IP_DROP_MEMBERSHIP failed: %m on socket %d, addr %s for %x / %x (%s)",
 				iface->fd, stoa(&iface->sin),
 				SRCADR(maddr), SRCADR(&iface->sin),
 				stoa(maddr));
 			return ISC_FALSE;
+#endif /* __COVERITY__ */
 		}
 		break;
 	case AF_INET6:
@@ -2567,11 +2574,12 @@ socket_multicast_disable(
 		if (setsockopt(iface->fd, IPPROTO_IPV6,
 			       IPV6_LEAVE_GROUP, (char *)&mreq6,
 			       sizeof(mreq6))) {
-
+#ifndef __COVERITY__
 			msyslog(LOG_ERR,
 				"setsockopt IPV6_LEAVE_GROUP failure: %m on socket %d, addr %s for %d (%s)",
 				iface->fd, stoa(&iface->sin),
 				iface->ifindex, stoa(maddr));
+#endif /* __COVERITY__ */
 			return ISC_FALSE;
 		}
 		break;
@@ -2881,10 +2889,12 @@ open_socket(
 			return (INVALID_SOCKET);
 
 		errno = errval;
+#ifndef __COVERITY__
 		msyslog(LOG_ERR,
 			"unexpected socket() error %m code %d (not EPROTONOSUPPORT nor EAFNOSUPPORT nor EPFNOSUPPORT) - exiting",
 			errno);
 		exit(1);
+#endif /* __COVERITY__ */
 	}
 
 #ifdef SYS_WINNT
