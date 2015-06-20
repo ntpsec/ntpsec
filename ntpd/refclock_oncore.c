@@ -684,7 +684,7 @@ oncore_start(
 	if (fd1 <= 0) {
 		oncore_log_f(instance, LOG_ERR, "Can't open fd1 (%s)",
 			     device1);
-		/* coverity[leaked_handle] */
+		/* coverity[leaked_storage] */
 		return(0);			/* exit, can't open file, can't start driver */
 	}
 
