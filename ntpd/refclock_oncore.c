@@ -684,6 +684,7 @@ oncore_start(
 	if (fd1 <= 0) {
 		oncore_log_f(instance, LOG_ERR, "Can't open fd1 (%s)",
 			     device1);
+		/* coverity[leaked_handle] */
 		return(0);			/* exit, can't open file, can't start driver */
 	}
 
@@ -701,6 +702,8 @@ oncore_start(
 		if ((fd2=tty_open(device2, O_RDWR, 0777)) < 0) {
 			oncore_log_f(instance, LOG_ERR,
 				     "Can't open fd2 (%s)", device2);
+			close(fd1);
+			free(instance);
 			return(0);		/* exit, can't open PPS file, can't start driver */
 		}
 	}
@@ -709,6 +712,7 @@ oncore_start(
 
 	if (time_pps_create(fd2, &instance->pps_h) < 0) {
 		oncore_log(instance, LOG_ERR, "exit, PPSAPI not found in kernel");
+		free(instance);
 		return(0);			/* exit, don't find PPSAPI in kernel */
 	}
 
@@ -721,8 +725,10 @@ oncore_start(
 
 	oncore_read_config(instance);
 
-	if (!oncore_ppsapi(instance))
+	if (!oncore_ppsapi(instance)) {
+		free(instance);
 		return(0);
+	}
 
 	pp->io.clock_recv = oncore_receive;
 	pp->io.srcclock = peer;
