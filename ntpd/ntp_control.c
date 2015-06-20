@@ -3780,6 +3780,7 @@ static void read_mru_list(
 		} else if (!strcmp(resany_text, v->text)) {
 			sscanf(val, resaxx_fmt, &resany);
 		} else if (!strcmp(maxlstint_text, v->text)) {
+			/* coverity[unchecked_value] */
 			sscanf(val, "%u", &maxlstint);
 		} else if (!strcmp(laddr_text, v->text)) {
 			if (decodenetnum(val, &laddr))

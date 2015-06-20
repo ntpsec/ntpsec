@@ -225,6 +225,7 @@ heath_start(
 	fd = refclock_open(device, speed[peer->ttl & 0x3],
 			   LDISC_REMOTE);
 	if (fd <= 0)
+		/* coverity[leaked_handle] */
 		return (0);
 	pp = peer->procptr;
 	pp->io.clock_recv = heath_receive;
@@ -429,7 +430,7 @@ heath_poll(
 	get_systime(&pp->lastrec);
 	if (write(pp->io.fd, "T", 1) != 1)
 		refclock_report(peer, CEVNT_FAULT);
-	ioctl(pp->io.fd, TIOCMBIS, (char *)&bits);
+	(void)ioctl(pp->io.fd, TIOCMBIS, (char *)&bits);
 	if (pp->coderecv == pp->codeproc) {
 		refclock_report(peer, CEVNT_TIMEOUT);
 		return;

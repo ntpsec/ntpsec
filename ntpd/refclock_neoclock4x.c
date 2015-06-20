@@ -177,6 +177,7 @@ neoclock4x_start(int unit,
   fd = refclock_open(dev, B2400, LDISC_STD);
   if(fd <= 0)
     {
+      /* coverity[leaked_handle] */
       return (0);
     }
 

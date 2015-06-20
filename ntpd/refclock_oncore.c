@@ -1373,6 +1373,7 @@ oncore_read_config(
 			if (!strcmp(ca, "NO") || !strcmp(ca, "OFF"))    /* Yes/No, On/Off */
 				instance->traim_in = 0;
 		} else if (!strncmp(cc, "MASK", (size_t) 4)) {
+			/* coverity[unchecked_value] */
 			sscanf(ca, "%d", &mask);
 			if (mask > -1 && mask < 90)
 				instance->Ag = mask;			/* Satellite mask angle */

@@ -513,6 +513,7 @@ jjy_start ( int unit, struct peer *peer )
 	fd = refclock_open ( sDeviceName, up->linespeed, up->linediscipline ) ;
 	if ( fd <= 0 ) {
 		free ( (void*) up ) ;
+		/* coverity[leaked_handle] */
 		return RC_START_ERROR ;
 	}
 

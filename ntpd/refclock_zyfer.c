@@ -135,6 +135,7 @@ zyfer_start(
 	snprintf(device, sizeof(device), DEVICE, unit);
 	fd = refclock_open(device, SPEED232, LDISC_RAW);
 	if (fd <= 0)
+		/* coverity[leaked_handle] */
 		return (0);
 
 	msyslog(LOG_NOTICE, "zyfer(%d) fd: %d dev <%s>", unit, fd, device);

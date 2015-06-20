@@ -168,6 +168,7 @@ as2201_start(
 	snprintf(gpsdev, sizeof(gpsdev), DEVICE, unit);
 	fd = refclock_open(gpsdev, SPEED232, LDISC_CLK);
 	if (fd <= 0)
+		/* coverity[leaked_handle] */
 		return (0);
 
 	/*

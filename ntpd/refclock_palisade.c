@@ -283,6 +283,7 @@ palisade_start (
 #ifdef DEBUG
 		printf("Palisade(%d) start: open %s failed\n", unit, gpsdev);
 #endif
+		/* coverity[leaked_handle] */
 		return 0;
 	}
 
