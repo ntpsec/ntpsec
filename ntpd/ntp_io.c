@@ -2398,11 +2398,12 @@ enable_multicast_if(
 			       IP_MULTICAST_LOOP,
 			       SETSOCKOPT_ARG_CAST &off,
 			       sizeof(off))) {
-
+#ifndef __COVERITY__
 			msyslog(LOG_ERR,
 				"setsockopt IP_MULTICAST_LOOP failed: %m on socket %d, addr %s for multicast address %s",
 				iface->fd, stoa(&iface->sin),
 				stoa(maddr));
+#endif /* __COVERITY__ */
 		}
 #endif
 		break;
