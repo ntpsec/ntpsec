@@ -1924,10 +1924,10 @@ getkeyid(
 
 #ifndef SYS_WINNT
 	fd = open("/dev/tty", 2);
-	if ((fi = fdopen(fd, "r")) == NULL)
+	if (fd < 0 || (fi = fdopen(fd, "r")) == NULL)
 #else
 	    fd = open("CONIN$", _O_TEXT);
-	if ((fi = _fdopen(fd, "r")) == NULL)
+	if (fd < 0 || (fi = _fdopen(fd, "r")) == NULL)
 #endif /* SYS_WINNT */
 		fi = stdin;
 	else
