@@ -239,21 +239,22 @@ filegen_open(
 							filename);
 					free(savename);
 				} else {
+#if defined(VMS)
+#define unlink delete
+#endif
 					/*
 					 * there is at least a second link to
 					 * this file.
 					 * just remove the conflicting one
 					 */
-					if (
-#if !defined(VMS)
-						unlink(filename) != 0
-#else
-						delete(filename) != 0
-#endif
-						)
+					/* coverity[toctou] */
+					if (unlink(filename) != 0)
 						msyslog(LOG_ERR, 
 							"couldn't unlink %s: %m",
 							filename);
+#if defined(VMS)
+#undef unlink
+#endif
 				}
 			} else {
 				/*
