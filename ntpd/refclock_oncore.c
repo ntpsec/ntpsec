@@ -3413,7 +3413,7 @@ oncore_check_leap_sec(
 		if (instance->saw_Gj < 0) {	/* -1 DONT have Gj use Bj */
 			if ((instance->BEHa[4] == 6) || (instance->BEHa[4] == 12))
 				oncore_sendmsg(instance, oncore_cmd_Bj, sizeof(oncore_cmd_Bj));
-				oncore_sendmsg(instance, oncore_cmd_Bl, sizeof(oncore_cmd_Bl));
+			oncore_sendmsg(instance, oncore_cmd_Bl, sizeof(oncore_cmd_Bl));
 			return;
 		}
 
