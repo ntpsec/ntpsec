@@ -1920,11 +1920,14 @@ getkeyid(
 	char pbuf[20];
 	size_t i;
 	size_t ilim;
+	int fd;
 
 #ifndef SYS_WINNT
-	if ((fi = fdopen(open("/dev/tty", 2), "r")) == NULL)
+	fd = open("/dev/tty", 2);
+	if ((fi = fdopen(fd, "r")) == NULL)
 #else
-	if ((fi = _fdopen(open("CONIN$", _O_TEXT), "r")) == NULL)
+	    fd = open("CONIN$", _O_TEXT);
+	if ((fi = _fdopen(fd, "r")) == NULL)
 #endif /* SYS_WINNT */
 		fi = stdin;
 	else
