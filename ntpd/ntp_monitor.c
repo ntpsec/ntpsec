@@ -190,6 +190,7 @@ mon_getmoremem(void)
 
 		mon_mem_increments++;
 	}
+	/* coverity[leaked_storage] */
 }
 
 
