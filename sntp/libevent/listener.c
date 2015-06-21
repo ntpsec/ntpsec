@@ -420,6 +420,7 @@ listener_read_cb(evutil_socket_t fd, short what, void *p)
 			return;
 		}
 		--lev->refcnt;
+		evutil_closesocket(new_fd);
 	}
 	err = evutil_socket_geterror(fd);
 	if (EVUTIL_ERR_ACCEPT_RETRIABLE(err)) {
