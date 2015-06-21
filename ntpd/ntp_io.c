@@ -2798,7 +2798,7 @@ io_multicast_add(
 			continue;
 		one_ep = ep;
 #endif	/* MULTICAST_NONEWSOCKET */
-		if (socket_multicast_enable(ep, addr))
+		if (ep->fd >= 0 && socket_multicast_enable(ep, addr))
 			msyslog(LOG_INFO,
 				"Joined %s socket to multicast group %s",
 				stoa(&ep->sin),
