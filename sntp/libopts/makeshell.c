@@ -30,6 +30,11 @@
  *  13aa749a5b0a454917a944ed8fffc530b784f5ead522b1aacaf4ec8aa55a6239  COPYING.mbsd
  */
 
+/* FIXME: an unpleasant kluge, fix this when we replace the build system */
+#ifdef __COVERITY__
+#define noreturn
+#endif /* __COVERITY__ */
+
  static inline unsigned char to_uchar (char ch) { return ch; }
 
 #define UPPER(_c) (toupper(to_uchar(_c)))
