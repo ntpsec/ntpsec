@@ -31,6 +31,7 @@
  *  13aa749a5b0a454917a944ed8fffc530b784f5ead522b1aacaf4ec8aa55a6239  COPYING.mbsd
  */
 
+#ifndef __COVERITY__
 typedef struct {
     int     xml_ch;
     int     xml_len;
@@ -44,6 +45,7 @@ static xml_xlate_t const xml_xlate[] = {
     { '"', 5, "quot;" },
     { '\'',5, "apos;" }
 };
+#endif /* __COVERITY */
 
 #ifndef ENOMSG
 #define ENOMSG ENOENT
@@ -884,6 +886,7 @@ get_special_char(char const ** ppz, int * ct)
         return retch;
     }
 
+#ifndef __COVERITY__
     {
         int ctr = sizeof(xml_xlate) / sizeof(xml_xlate[0]);
         xml_xlate_t const * xlatp = xml_xlate;
@@ -901,6 +904,7 @@ get_special_char(char const ** ppz, int * ct)
             xlatp++;
         }
     }
+#endif /* __COVERITY */
     return '&';
 }
 
@@ -910,6 +914,7 @@ get_special_char(char const ** ppz, int * ct)
 LOCAL void
 emit_special_char(FILE * fp, int ch)
 {
+#ifndef __COVERITY__
     int ctr = sizeof(xml_xlate) / sizeof(xml_xlate[0]);
     xml_xlate_t const * xlatp = xml_xlate;
 
@@ -923,6 +928,7 @@ emit_special_char(FILE * fp, int ch)
             break;
         xlatp++;
     }
+#endif /* __COVERITY */
     fprintf(fp, XML_HEX_BYTE_FMT, (ch & 0xFF));
 }
 
