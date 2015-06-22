@@ -903,8 +903,13 @@ evhttp_handle_chunked_read(struct evhttp_request *req, struct evbuffer *buf)
 			continue;
 		}
 
-		/* req->ntoread is signed int64, len is ssize_t, based on arch,
-		 * ssize_t could only be 32b, check for these conditions */
+		/* req->ntoread is signed int64, len is ssize_t; based on arch
+		 * ssize_t could only be 32b, check for these conditions.
+		 *
+		 * This confuses Coverity on a 64-bit machine, where
+		 * it correctly sdeduces the expression is always false.
+		 */
+		/* coverity[result_independent_of_operands] */
 		if (req->ntoread > EV_SSIZE_MAX) {
 			return DATA_CORRUPTED;
 		}
