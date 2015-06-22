@@ -115,6 +115,10 @@ isc_netaddr_eqprefix(const isc_netaddr_t *a, const isc_netaddr_t *b,
 		unsigned int bytea, byteb, mask;
 		INSIST(nbytes < ipabytes);
 		INSIST(nbits < 8);
+#ifdef __COVERITY__
+		/* head off CID 117240 */
+		assert(nbytes < ipabytes)
+#endif /* __COVERITY__ */
 		bytea = pa[nbytes];
 		byteb = pb[nbytes];
 		mask = (0xFF << (8-nbits)) & 0xFF;
@@ -237,6 +241,10 @@ isc_netaddr_prefixok(const isc_netaddr_t *na, unsigned int prefixlen) {
 	nbytes = prefixlen / 8;
 	nbits = prefixlen % 8;
 	if (nbits != 0) {
+#ifdef __COVERITY__
+		/* head off CID 85346 */
+		assert(nbytes < ipbytes)
+#endif /* __COVERITY__ */
 		if ((p[nbytes] & (0xff>>nbits)) != 0U)
 			return (ISC_R_FAILURE);
 		nbytes++;
