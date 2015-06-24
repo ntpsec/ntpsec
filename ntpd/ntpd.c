@@ -1153,9 +1153,7 @@ finish(
 	const char *sig_desc;
 
 	sig_desc = NULL;
-#ifdef HAVE_STRSIGNAL
 	sig_desc = strsignal(sig);
-#endif
 	if (sig_desc == NULL)
 		sig_desc = "";
 	msyslog(LOG_NOTICE, "%s exiting on signal %d (%s)", progname,
