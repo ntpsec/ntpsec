@@ -105,22 +105,7 @@
 #    define REAL_DIR_ENTRY(dp) (dp->d_ino != 0)
 # endif /* !_POSIX_SOURCE */
 
-# if defined (HAVE_DIRENT_H)
-#   include <dirent.h>
-#   define D_NAMLEN(dirent) strlen((dirent)->d_name)
-# else /* !HAVE_DIRENT_H */
-#   define dirent direct
-#   define D_NAMLEN(dirent) (dirent)->d_namlen
-#   if defined (HAVE_SYS_NDIR_H)
-#     include <sys/ndir.h>
-#   endif /* HAVE_SYS_NDIR_H */
-#   if defined (HAVE_SYS_DIR_H)
-#     include <sys/dir.h>
-#   endif /* HAVE_SYS_DIR_H */
-#   if defined (HAVE_NDIR_H)
-#     include <ndir.h>
-#   endif /* HAVE_NDIR_H */
-# endif /* !HAVE_DIRENT_H */
+#include <dirent.h>
 
 #include <errno.h>
 #include <fcntl.h>
