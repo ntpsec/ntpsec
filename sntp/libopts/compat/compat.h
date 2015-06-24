@@ -41,12 +41,6 @@
 #endif
 
 
-#ifndef HAVE_STRSIGNAL
-# ifndef HAVE_RAW_DECL_STRSIGNAL
-   char * strsignal(int signo);
-# endif
-#endif
-
 #define  _GNU_SOURCE    1 /* for strsignal in GNU's libc */
 #define  __USE_GNU      1 /* exact same thing as above   */
 #define  __EXTENSIONS__ 1 /* and another way to call for it */
