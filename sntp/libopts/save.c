@@ -217,11 +217,7 @@ find_file_name(tOptions * opts, int * p_free_name)
 
         {
             char * pzPath = (char *)AGALOC(sz, "file name");
-#ifdef HAVE_SNPRINTF
             snprintf(pzPath, sz, "%s/%s", pzDir, opts->pzRcName);
-#else
-            sprintf(pzPath, "%s/%s", pzDir, opts->pzRcName);
-#endif
             if (free_dir_name)
                 AGFREE(pzDir);
             pzDir = pzPath;

@@ -42,12 +42,6 @@ static unsigned int tab_skip_ct          = 0;
 #  include "compat/pathfind.c"
 #endif
 
-#ifndef HAVE_SNPRINTF
-#  define vsnprintf       option_vsnprintf
-#  define snprintf        option_snprintf
-#  include "compat/snprintf.c"
-#endif
-
 LOCAL void *
 ao_malloc(size_t sz)
 {
