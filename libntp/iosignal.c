@@ -26,6 +26,7 @@
 #endif
 
 #include <arpa/inet.h>
+#include <net/if.h>
 
 #if _BSDI_VERSION >= 199510
 # include <ifaddrs.h>
@@ -40,7 +41,6 @@
 #include "ntp_machine.h"
 #include "ntpd.h"
 #include "ntp_io.h"
-#include "ntp_if.h"
 #include "ntp_stdlib.h"
 #include "iosignal.h"
 

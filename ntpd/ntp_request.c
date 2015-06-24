@@ -11,7 +11,6 @@
 #include "ntp_request.h"
 #include "ntp_control.h"
 #include "ntp_refclock.h"
-#include "ntp_if.h"
 #include "ntp_stdlib.h"
 #include "ntp_assert.h"
 
