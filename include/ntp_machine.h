@@ -261,14 +261,6 @@ extern unsigned long inet_addr(char *);
 
 #ifdef HAVE_RTPRIO
 # define HAVE_NO_NICE
-#else
-#define HAVE_BSD_NICE
-#endif
-
-#if !defined(HAVE_ATT_NICE) \
-	&& !defined(HAVE_BSD_NICE) \
-	&& !defined(HAVE_NO_NICE)
-#include "ERROR: You must define one of the HAVE_xx_NICE defines!"
 #endif
 
 #ifndef HAVE_TIMEGM
