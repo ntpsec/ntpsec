@@ -9,7 +9,6 @@
 #include <sys/types.h>
 
 #include "ntpd.h"
-#include "ntp_if.h"
 #include "ntp_lists.h"
 #include "ntp_stdlib.h"
 #include "ntp_assert.h"
