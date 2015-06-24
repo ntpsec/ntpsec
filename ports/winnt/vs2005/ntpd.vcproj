@@ -818,10 +818,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\include\ntp_if.h"
-				>
-			</File>
-			<File
 				RelativePath="..\..\..\include\ntp_io.h"
 				>
 			</File>

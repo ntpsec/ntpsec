@@ -58,7 +58,6 @@ Problems that need to be fixed:
   SYS_WINNT:
    include/ntp.h
    include/ntp_fp.h
-   include/ntp_if.h
    include/ntp_machine.h
    include/ntp_select.h
    include/ntp_syslog.h

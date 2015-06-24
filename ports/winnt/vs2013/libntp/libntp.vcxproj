@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="DebugXP|Win32">
@@ -331,7 +331,6 @@
     <ClInclude Include="..\..\..\..\include\ntp_control.h" />
     <ClInclude Include="..\..\..\..\include\ntp_debug.h" />
     <ClInclude Include="..\..\..\..\include\ntp_fp.h" />
-    <ClInclude Include="..\..\..\..\include\ntp_if.h" />
     <ClInclude Include="..\..\..\..\include\ntp_intres.h" />
     <ClInclude Include="..\..\..\..\include\ntp_io.h" />
     <ClInclude Include="..\..\..\..\include\ntp_libopts.h" />

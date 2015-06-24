@@ -817,10 +817,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\..\include\ntp_if.h"
-				>
-			</File>
-			<File
 				RelativePath="..\..\..\..\include\ntp_intres.h"
 				>
 			</File>

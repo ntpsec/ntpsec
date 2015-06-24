@@ -33,7 +33,6 @@ noinst_HEADERS =	\
 	ntp_debug.h	\
 	ntp_filegen.h	\
 	ntp_fp.h	\
-	ntp_if.h	\
 	ntp_intres.h	\
 	ntp_io.h	\
 	ntp_libopts.h	\
