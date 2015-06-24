@@ -69,10 +69,6 @@
 #ifdef DAEMON_ENABLED
 #include <sys/socket.h>
 
-#  if HAVE_SYS_POLL_H
-#  include <sys/poll.h>
-#  endif
-
 #include <sys/select.h>
 
 #include <netinet/in.h>

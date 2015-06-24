@@ -128,11 +128,7 @@ typedef unsigned long long int json_uint;
 #include <sys/stat.h>
 #include <netinet/tcp.h>
 
-#if defined(HAVE_SYS_POLL_H)
-# include <sys/poll.h>
-#else
-# include <sys/select.h>
-#endif
+#include <sys/select.h>
 
 #include "ntpd.h"
 #include "ntp_io.h"
@@ -1959,17 +1955,6 @@ gpsd_test_socket(
 	DPRINTF(2, ("%s: check connect, fd=%d\n",
 		    up->logname, up->fdt));
 
-#if defined(HAVE_SYS_POLL_H)
-	{
-		struct pollfd pfd;
-
-		pfd.events = POLLOUT;
-		pfd.fd     = up->fdt;
-		rc = poll(&pfd, 1, 0);
-		if (1 != rc || !(pfd.revents & POLLOUT))
-			return;
-	}
-#else
 	{
 		struct timeval tout;
 		fd_set         wset;
@@ -1981,7 +1966,6 @@ gpsd_test_socket(
 		if (0 == rc || !(FD_ISSET(up->fdt, &wset)))
 			return;
 	}
-#endif
 
 	/* next timeout is a full one... */
 	up->tickover = TICKOVER_LOW;
