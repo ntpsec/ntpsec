@@ -47,95 +47,14 @@ SOFTWARE.
 #ifdef NEED_NETSNMP_DAEMONIZE
 
 #include <stdio.h>
-#include <ctype.h>
 #include <errno.h>
 
 #include <unistd.h>
 #include <stdlib.h>
 
-#ifdef WIN32
-# include <sys/timeb.h>
-#else
-# include <sys/time.h>
-#endif
-#include <time.h>
-
 #include <sys/types.h>
-
-#include <netinet/in.h>
-
-#if HAVE_WINSOCK_H
-#include <winsock.h>
-#endif
-#include <sys/socket.h>
-#include <net/if.h>
-
-#if HAVE_SYS_SOCKIO_H
-#include <sys/sockio.h>
-#endif
-
-#if HAVE_SYS_IOCTL_H
-#include <sys/ioctl.h>
-#endif
-
-#ifdef HAVE_NLIST_H
-#include <nlist.h>
-#endif
-
-#if HAVE_KSTAT_H
-#include <kstat.h>
-#endif
-
-#if HAVE_SYS_PARAM_H
-#include <sys/param.h>
-#endif
-#if HAVE_SYS_SYSCTL_H
-#include <sys/sysctl.h>
-#endif
-
-#include <string.h>
-#include <strings.h>
-
-#if HAVE_DMALLOC_H
-#include <dmalloc.h>
-#endif
-
 #include <sys/stat.h>
 #include <fcntl.h>
-
-#if defined(hpux10) || defined(hpux11)
-#include <sys/pstat.h>
-#endif
-
-#if HAVE_SYS_UTSNAME_H
-#include <sys/utsname.h>
-#endif
-
-#if HAVE_SYS_SYSTEMCFG_H
-#include <sys/systemcfg.h>
-#endif
-
-#if HAVE_SYS_SYSTEMINFO_H
-#include <sys/systeminfo.h>
-#endif
-
-#include <net-snmp/types.h>
-#include <net-snmp/output_api.h>
-#include <net-snmp/utilities.h>
-#include <net-snmp/library/system.h>    /* for "internal" definitions */
-
-#include <net-snmp/library/snmp_api.h>
-#include <net-snmp/library/read_config.h> /* for get_temp_file_pattern() */
-
-#ifndef IFF_LOOPBACK
-#	define IFF_LOOPBACK 0
-#endif
-
-#ifdef  INADDR_LOOPBACK
-# define LOOPBACK    INADDR_LOOPBACK
-#else
-# define LOOPBACK    0x7f000001
-#endif
 
 /**
  * fork current process into the background.
