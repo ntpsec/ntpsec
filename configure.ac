@@ -279,10 +279,6 @@ case "$host" in
  *-*-osf4*) ;;
  *-*-osf5*) ;;
  *)
-    # HMS: Make sure we check for -lrt for clock_* before this...
-    case "$ac_cv_search_clock_gettime" in
-     '') AC_MSG_ERROR([Internal Error: Haven't looked for clock_gettime() yet!]) ;;
-    esac
     AC_SEARCH_LIBS([sched_setscheduler], [rt posix4])
     ;;
 esac
