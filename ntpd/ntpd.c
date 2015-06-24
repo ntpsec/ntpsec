@@ -368,23 +368,12 @@ set_process_priority(void)
 #  endif	/* !RTP_SET */
 # endif	/* HAVE_RTPRIO */
 # if defined(NTPD_PRIO) && NTPD_PRIO != 0
-#  ifdef HAVE_ATT_NICE
-	if (!priority_done) {
-		errno = 0;
-		if (-1 == nice (NTPD_PRIO) && errno != 0)
-			msyslog(LOG_ERR, "nice() error: %m");
-		else
-			++priority_done;
-	}
-#  endif	/* HAVE_ATT_NICE */
-#  ifdef HAVE_BSD_NICE
 	if (!priority_done) {
 		if (-1 == setpriority(PRIO_PROCESS, 0, NTPD_PRIO))
 			msyslog(LOG_ERR, "setpriority() error: %m");
 		else
 			++priority_done;
 	}
-#  endif	/* HAVE_BSD_NICE */
 # endif	/* NTPD_PRIO && NTPD_PRIO != 0 */
 	if (!priority_done)
 		msyslog(LOG_ERR, "set_process_priority: No way found to improve our priority");

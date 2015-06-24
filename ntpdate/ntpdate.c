@@ -505,16 +505,7 @@ ntpdatemain (
 	/*
 	 * Set the priority.
 	 */
-#ifdef SYS_VXWORKS
-	taskPrioritySet( taskIdSelf(), NTPDATE_PRIO);
-#endif
-#if defined(HAVE_ATT_NICE)
-	nice (NTPDATE_PRIO);
-#endif
-#if defined(HAVE_BSD_NICE)
 	(void) setpriority(PRIO_PROCESS, 0, NTPDATE_PRIO);
-#endif
-
 
 	initializing = 0;
 	was_alarmed = 0;
