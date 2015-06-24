@@ -29,7 +29,7 @@ NTP_LIB_M
 AC_FUNC_ALLOCA
 case "`${MAKE-make} -v -f /dev/null 2>/dev/null | grep 'GNU Make'`" in
      '')
-       AC_MSG_ERROR([building outside of the main directory requires GNU make])
+       AC_MSG_WARN([building outside of the main directory requires GNU make])
 esac
 
 AC_CHECK_FUNCS([getclock stime timegm strlcpy strlcat])
