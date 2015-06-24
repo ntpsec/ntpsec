@@ -18,7 +18,6 @@ SUBDIRS =		\
 	parseutil	\
 	adjtimed	\
 	clockstuff	\
-	kernel		\
 	util		\
 	tests		\
 	$(NULL)
