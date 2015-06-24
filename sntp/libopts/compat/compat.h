@@ -67,10 +67,6 @@
 #include <sys/utsname.h>
 
 #ifdef DAEMON_ENABLED
-#  if HAVE_SYS_STROPTS_H
-#  include <sys/stropts.h>
-#  endif
-
 #include <sys/socket.h>
 
 #  if HAVE_SYS_POLL_H

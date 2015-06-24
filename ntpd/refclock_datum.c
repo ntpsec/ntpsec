@@ -29,10 +29,6 @@
 #include <stdio.h>
 #include <ctype.h>
 
-#if defined(STREAM)
-#include <stropts.h>
-#endif /* STREAM */
-
 #include "ntp_stdlib.h"
 
 /*
