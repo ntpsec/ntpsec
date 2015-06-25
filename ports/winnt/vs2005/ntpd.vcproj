@@ -1753,7 +1753,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\..\..\ntpd\refclock_wwvb.c"
+				RelativePath="..\..\..\ntpd\refclock_spectracom.c"
 				>
 				<FileConfiguration
 					Name="Release|Win32"

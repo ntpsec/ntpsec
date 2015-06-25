@@ -1,5 +1,5 @@
 /*
- * refclock_wwvb - clock driver for Spectracom WWVB and GPS receivers
+ * refclock_spectracom.c - clock driver for Spectracom GPS receivers
  */
 
 #ifdef HAVE_CONFIG_H
@@ -23,28 +23,14 @@
 #endif /* HAVE_PPSAPI */
 
 /*
- * This driver supports the Spectracom Model 8170 and Netclock/2 WWVB
- * Synchronized Clocks and the Netclock/GPS Master Clock. Both the WWVB
- * and GPS clocks have proven reliable sources of time; however, the
- * WWVB clocks have proven vulnerable to high ambient conductive RF
- * interference. The claimed accuracy of the WWVB clocks is 100 us
- * relative to the broadcast signal, while the claimed accuracy of the
- * GPS clock is 50 ns; however, in most cases the actual accuracy is
- * limited by the resolution of the timecode and the latencies of the
- * serial interface and operating system.
+ * This driver supports the "Type 2" format emitted by Spectracom time
+ * servers including the 9483, 9489, and SecureSync.
  *
- * The WWVB and GPS clocks should be configured for 24-hour display,
- * AUTO DST off, time zone 0 (UTC), data format 0 or 2 (see below) and
- * baud rate 9600. If the clock is to used as the source for the IRIG
- * Audio Decoder (refclock_irig.c in this distribution), it should be
- * configured for AM IRIG output and IRIG format 1 (IRIG B with
- * signature control). The GPS clock can be configured either to respond
- * to a 'T' poll character or left running continuously. 
+ * In former times this driver supported the Spectracom 9300 (now
+ * end-of-lifed) and several models of Spectracom radio clocks that were
+ * obsolesced by the WWVB modulation change in 2013.
  *
- * There are two timecode formats used by these clocks. Format 0, which
- * is available with both the Netclock/2 and 8170, and format 2, which
- * is available only with the Netclock/2, specially modified 8170 and
- * GPS.
+ * There are two timecode formats used by these clocks:
  *
  * Format 0 (22 ASCII printing characters):
  *
@@ -112,22 +98,22 @@
 /*
  * Interface definitions
  */
-#define	DEVICE		"/dev/wwvb%d" /* device name and unit */
+#define	DEVICE		"/dev/spectracom%d" /* device name and unit */
 #define	SPEED232	B9600	/* uart speed (9600 baud) */
 #define	PRECISION	(-13)	/* precision assumed (about 100 us) */
 #define	PPS_PRECISION	(-13)	/* precision assumed (about 100 us) */
-#define	REFID		"WWVB"	/* reference ID */
-#define	DESCRIPTION	"Spectracom WWVB/GPS Receiver" /* WRU */
+#define	REFID		"GPS\0"	/* reference ID */
+#define	DESCRIPTION	"Spectracom GPS Receiver" /* WRU */
 
-#define	LENWWVB0	22	/* format 0 timecode length */
-#define	LENWWVB2	24	/* format 2 timecode length */
-#define LENWWVB3	29	/* format 3 timecode length */
+#define	LENTYPE0	22	/* format 0 timecode length */
+#define	LENTYPE2	24	/* format 2 timecode length */
+#define LENTYPE3	29	/* format 3 timecode length */
 #define MONLIN		15	/* number of monitoring lines */
 
 /*
- * WWVB unit control structure
+ * Spectracom unit control structure
  */
-struct wwvbunit {
+struct spectracomunit {
 #ifdef HAVE_PPSAPI
 	struct refclock_atom atom; /* PPSAPI structure */
 	int	ppsapi_tried;	/* attempt PPSAPI once */
@@ -144,43 +130,43 @@ struct wwvbunit {
 /*
  * Function prototypes
  */
-static	int	wwvb_start	(int, struct peer *);
-static	void	wwvb_shutdown	(int, struct peer *);
-static	void	wwvb_receive	(struct recvbuf *);
-static	void	wwvb_poll	(int, struct peer *);
-static	void	wwvb_timer	(int, struct peer *);
+static	int	spectracom_start	(int, struct peer *);
+static	void	spectracom_shutdown	(int, struct peer *);
+static	void	spectracom_receive	(struct recvbuf *);
+static	void	spectracom_poll	(int, struct peer *);
+static	void	spectracom_timer	(int, struct peer *);
 #ifdef HAVE_PPSAPI
-static	void	wwvb_control	(int, const struct refclockstat *,
+static	void	spectracom_control	(int, const struct refclockstat *,
 				 struct refclockstat *, struct peer *);
-#define		WWVB_CONTROL	wwvb_control
+#define		SPECTRACOM_CONTROL	spectracom_control
 #else
-#define		WWVB_CONTROL	noentry
+#define		SPECTRACOM_CONTROL	noentry
 #endif /* HAVE_PPSAPI */
 
 /*
  * Transfer vector
  */
-struct	refclock refclock_wwvb = {
-	wwvb_start,		/* start up driver */
-	wwvb_shutdown,		/* shut down driver */
-	wwvb_poll,		/* transmit poll message */
-	WWVB_CONTROL,		/* fudge set/change notification */
+struct	refclock refclock_spectracom = {
+	spectracom_start,		/* start up driver */
+	spectracom_shutdown,		/* shut down driver */
+	spectracom_poll,		/* transmit poll message */
+	SPECTRACOM_CONTROL,		/* fudge set/change notification */
 	noentry,		/* initialize driver (not used) */
 	noentry,		/* not used (old wwvb_buginfo) */
-	wwvb_timer		/* called once per second */
+	spectracom_timer		/* called once per second */
 };
 
 
 /*
- * wwvb_start - open the devices and initialize data for processing
+ * spectracom_start - open the devices and initialize data for processing
  */
 static int
-wwvb_start(
+spectracom_start(
 	int unit,
 	struct peer *peer
 	)
 {
-	register struct wwvbunit *up;
+	register struct spectracomunit *up;
 	struct refclockproc *pp;
 	int fd;
 	char device[20];
@@ -199,7 +185,7 @@ wwvb_start(
 	 */
 	up = emalloc_zero(sizeof(*up));
 	pp = peer->procptr;
-	pp->io.clock_recv = wwvb_receive;
+	pp->io.clock_recv = spectracom_receive;
 	pp->io.srcclock = peer;
 	pp->io.datalen = 0;
 	pp->io.fd = fd;
@@ -222,16 +208,16 @@ wwvb_start(
 
 
 /*
- * wwvb_shutdown - shut down the clock
+ * spectracom_shutdown - shut down the clock
  */
 static void
-wwvb_shutdown(
+spectracom_shutdown(
 	int unit,
 	struct peer *peer
 	)
 {
 	struct refclockproc *	pp;
-	struct wwvbunit *	up;
+	struct spectracomunit *	up;
 
 	pp = peer->procptr;
 	up = pp->unitptr;
@@ -243,14 +229,14 @@ wwvb_shutdown(
 
 
 /*
- * wwvb_receive - receive data from the serial interface
+ * spectracom_receive - receive data from the serial interface
  */
 static void
-wwvb_receive(
+spectracom_receive(
 	struct recvbuf *rbufp
 	)
 {
-	struct wwvbunit *up;
+	struct spectracomunit *up;
 	struct refclockproc *pp;
 	struct peer *peer;
 
@@ -323,7 +309,7 @@ wwvb_receive(
 	tz = 0;
 	switch (pp->lencode) {
 
-	case LENWWVB0:
+	case LENTYPE0:
 
 		/*
 		 * Timecode format 0: "I  ddd hh:mm:ss DTZ=nn"
@@ -337,7 +323,7 @@ wwvb_receive(
 		}
 		goto bad_format;
 
-	case LENWWVB2:
+	case LENTYPE2:
 
 		/*
 		 * Timecode format 2: "IQyy ddd hh:mm:ss.mmm LD" */
@@ -351,7 +337,7 @@ wwvb_receive(
 		}
 		goto bad_format;
 
-	case LENWWVB3:
+	case LENTYPE3:
 
 		/*
 		 * Timecode format 3: "0003I yyyymmdd hhmmss+0000SL#"
@@ -445,15 +431,15 @@ wwvb_receive(
 
 
 /*
- * wwvb_timer - called once per second by the transmit procedure
+ * spectracom_timer - called once per second by the transmit procedure
  */
 static void
-wwvb_timer(
+spectracom_timer(
 	int unit,
 	struct peer *peer
 	)
 {
-	register struct wwvbunit *up;
+	register struct spectracomunit *up;
 	struct refclockproc *pp;
 	char	pollchar;	/* character sent to clock */
 #ifdef DEBUG
@@ -492,15 +478,15 @@ wwvb_timer(
 
 
 /*
- * wwvb_poll - called by the transmit procedure
+ * spectracom_poll - called by the transmit procedure
  */
 static void
-wwvb_poll(
+spectracom_poll(
 	int unit,
 	struct peer *peer
 	)
 {
-	register struct wwvbunit *up;
+	register struct spectracomunit *up;
 	struct refclockproc *pp;
 
 	/*
@@ -552,18 +538,18 @@ wwvb_poll(
 
 
 /*
- * wwvb_control - fudge parameters have been set or changed
+ * spectracom_control - fudge parameters have been set or changed
  */
 #ifdef HAVE_PPSAPI
 static void
-wwvb_control(
+spectracom_control(
 	int unit,
 	const struct refclockstat *in_st,
 	struct refclockstat *out_st,
 	struct peer *peer
 	)
 {
-	register struct wwvbunit *up;
+	register struct spectracomunit *up;
 	struct refclockproc *pp;
 	
 	pp = peer->procptr;
@@ -600,5 +586,5 @@ wwvb_control(
 #endif	/* HAVE_PPSAPI */
 
 #else
-int refclock_wwvb_bs;
+int refclock_spectracom_bs;
 #endif /* REFCLOCK */

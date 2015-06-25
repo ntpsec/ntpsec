@@ -5,7 +5,7 @@
 # This program works for the following radios:
 # PST/Traconex 1020 WWV reciever
 # Arbiter 1088 GPS receiver
-# Spectracom 8170/Netclock-2 WWVB receiver
+# Spectracom GPS receiver
 # IRIG audio decoder
 # Austron 2200A/2201A GPS receiver (see README.austron file)
 #
@@ -79,7 +79,7 @@ BEGIN {
 		continue
 	}
 	#
-	# select Spectracom WWVB records
+	# select Spectracom records
 	# see summary for decode
 	#   96 189 23:59:32.248  D
 	#

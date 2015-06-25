@@ -2231,12 +2231,12 @@ case "$ntp_ok" in
 esac
 AC_MSG_RESULT([$ntp_ok])
 
-AC_MSG_CHECKING([Spectracom 8170/Netclock/2 WWVB receiver])
+AC_MSG_CHECKING([Spectracom GPS receiver])
 AC_ARG_ENABLE(
     [SPECTRACOM],
     [AS_HELP_STRING(
 	[--enable-SPECTRACOM],
-	[+ Spectracom 8170/Netclock/2 WWVB receiver]
+	[+ Spectracom GPS receiver]
     )],
     [ntp_ok=$enableval],
     [ntp_ok=$ntp_eac]
@@ -2245,7 +2245,7 @@ case "$ntp_ok" in
  yes)
     ntp_refclock=yes
     AC_DEFINE([CLOCK_SPECTRACOM], [1],
-	[Spectracom 8170/Netclock/2 WWVB receiver])
+	[Spectracom GPS receiver])
     ;;
 esac
 AC_MSG_RESULT([$ntp_ok])

@@ -56,7 +56,7 @@ radios, e.g.:
 
   49234             modified Julian day number
   60517.826         time of day (s) past midnight UTC
-  127.127.4.1       receiver identifier (Spectracom 8170/Netclock-2)
+  127.127.4.1       receiver identifier (Spectracom)
   93 247 16:48:21.814  timecode (format varies)
 
 In the case of the Austron GPS receiver, a good deal of additional
@@ -66,7 +66,7 @@ timecode formats specific to each radio follow. See the file
 README.timecodes for detailed information on the timecode formats used
 by these radios.
 
-Spectracom 8170/Netclock-2 WWVB receiver
+Spectracom receiver
 
   49234 60517.826 127.127.4.1 ?A93 247 16:48:21.814
 

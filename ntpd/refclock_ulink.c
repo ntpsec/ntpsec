@@ -18,8 +18,8 @@
 
 /* This driver supports ultralink Model 320,325,330,331,332 WWVB radios
  *
- * this driver was based on the refclock_wwvb.c driver
- * in the ntp distribution.
+ * this driver was based on the refclock_wwvb.c driver (now 
+ * refclock_spectracom.c) in the ntp distribution.
  *
  * Fudge Factors
  *

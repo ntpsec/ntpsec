@@ -29,7 +29,7 @@ extern int async_write(int, const void *, unsigned int);
 
 /*
  * This driver supports the US (NIST, USNO) and European (PTB, NPL,
- * etc.) modem time services, as well as Spectracom GPS and WWVB
+ * etc.) modem time services, as well as Spectracom GPS
  * receivers connected via a modem. The driver periodically dials a
  * number from a telephone list, receives the timecode data and
  * calculates the local clock correction. It is designed primarily for
@@ -54,7 +54,7 @@ extern int async_write(int, const void *, unsigned int);
  * before a sufficient nuimber of timecodes have been received. 
  *
  * The driver is transparent to each of the modem time services and
- * Spectracom radios. It selects the parsing algorithm depending on the
+ * Spectracom receivers. It selects the parsing algorithm depending on the
  * message length. There is some hazard should the message be corrupted.
  * However, the data format is checked carefully and only if all checks
  * succeed is the message accepted. Corrupted lines are discarded
@@ -124,7 +124,7 @@ extern int async_write(int, const void *, unsigned int);
  *
  * 1995-01-23 20:58:51 MEZ  10402303260219950123195849740+40000500<CR><LF>
  *
- * Spectracom GPS and WWVB Receivers
+ * Spectracom GPS Receivers
  *
  * If a modem is connected to a Spectracom receiver, this driver will
  * call it up and retrieve the time in one of two formats. As this
@@ -159,9 +159,9 @@ extern int async_write(int, const void *, unsigned int);
 #define LENUSNO		20	/* USNO */
 #define REFPTB		"PTB\0"	/* PTB/NPL reference ID */
 #define LENPTB		78	/* PTB/NPL format */
-#define REFWWVB		"WWVB"	/* WWVB reference ID */
-#define	LENWWVB0	22	/* WWVB format 0 */
-#define	LENWWVB2	24	/* WWVB format 2 */
+#define REFTYPE		"GPS\0"	/* Spectracom reference ID */
+#define	LENTYPE0	22	/* SPECTRACOM format 0 */
+#define	LENTYPE2	24	/* SPECTRACOM format 2 */
 #define LF		0x0a	/* ASCII LF */
 
 /*
@@ -740,11 +740,11 @@ acts_timecode(
 	char	utc[10];	/* ACTS timescale */
 	char	flag;		/* ACTS on-time character (* or #) */
 
-	char	synchar;	/* WWVB synchronized indicator */
-	char	qualchar;	/* WWVB quality indicator */
-	char	leapchar;	/* WWVB leap indicator */
-	char	dstchar;	/* WWVB daylight/savings indicator */
-	int	tz;		/* WWVB timezone */
+	char	synchar;	/* Spectracom synchronized indicator */
+	char	qualchar;	/* Spectracom quality indicator */
+	char	leapchar;	/* Spectracom leap indicator */
+	char	dstchar;	/* Spectracom daylight/savings indicator */
+	int	tz;		/* Spectracom timezone */
 
 	int	leapmonth;	/* PTB/NPL month of leap */
 	char	leapdir;	/* PTB/NPL leap direction */
@@ -842,9 +842,9 @@ acts_timecode(
 
 
 	/*
-	 * WWVB format 0: "I  ddd hh:mm:ss DTZ=nn"
+	 * Spectracom format 0: "I  ddd hh:mm:ss DTZ=nn"
 	 */
-	case LENWWVB0:
+	case LENTYPE0:
 		if (sscanf(str, "%c %3d %2d:%2d:%2d %cTZ=%2d",
 		    &synchar, &pp->day, &pp->hour, &pp->minute,
 		    &pp->second, &dstchar, &tz) != 7) {
@@ -854,14 +854,14 @@ acts_timecode(
 		pp->leap = LEAP_NOWARNING;
 		if (synchar != ' ')
 			pp->leap = LEAP_NOTINSYNC;
-		memcpy(&pp->refid, REFWWVB, 4);
+		memcpy(&pp->refid, REFTYPE, 4);
 		up->msgcnt++;
 		break;
 
 	/*
-	 * WWVB format 2: "IQyy ddd hh:mm:ss.mmm LD"
+	 * Spectracom format 2: "IQyy ddd hh:mm:ss.mmm LD"
 	 */
-	case LENWWVB2:
+	case LENTYPE2:
 		if (sscanf(str, "%c%c%2d %3d %2d:%2d:%2d.%3ld%c%c%c",
 		    &synchar, &qualchar, &pp->year, &pp->day,
 		    &pp->hour, &pp->minute, &pp->second, &pp->nsec,
@@ -875,7 +875,7 @@ acts_timecode(
 			pp->leap = LEAP_NOTINSYNC;
 		else if (leapchar == 'L')
 			pp->leap = LEAP_ADDSECOND;
-		memcpy(&pp->refid, REFWWVB, 4);
+		memcpy(&pp->refid, REFTYPE, 4);
 		up->msgcnt++;
 		break;
 

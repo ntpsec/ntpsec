@@ -22,7 +22,7 @@
 			Features: <tt>(none)</tt></p>
 		<h4>Description</h4>
 		<p>This driver supports a dumb ASCII clock that only emits localtime at a reliable interval. This has no provisions for leap seconds, quality codes, etc. It assumes output in the local time zone, and that the C library mktime()/localtime() routines will correctly convert back and forth between local and UTC.</p>
-		<p>Most of this code is originally from refclock_wwvb.c with thanks. It has been so mangled that wwvb is not a recognizable ancestor.</p>
+		<p>Most of this code is originally from refclock_wwvb.c (now refclock_spectracom.c) with thanks. It has been so mangled that wwvb is not a recognizable ancestor.</p>
 		<pre>
 Timecode format: hh:mm:ssCL
 hh:mm:ss - local time

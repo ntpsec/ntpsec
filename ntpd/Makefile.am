@@ -266,12 +266,12 @@ libntpd_a_SOURCES =		\
 	refclock_pst.c		\
 	refclock_ripencc.c	\
 	refclock_shm.c		\
+	refclock_spectracom.c	\
 	refclock_tpro.c		\
 	refclock_true.c		\
 	refclock_tt560.c	\
 	refclock_ulink.c	\
 	refclock_wwv.c		\
-	refclock_wwvb.c		\
 	refclock_zyfer.c	\
 	refclock_tsyncpci.c	\
 	$(NULL)

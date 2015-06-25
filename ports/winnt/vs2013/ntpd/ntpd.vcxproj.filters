@@ -201,6 +201,9 @@
     <ClCompile Include="..\..\..\..\ntpd\refclock_shm.c">
       <Filter>Reference Clock</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\ntpd\refclock_spectracom.c">
+      <Filter>Reference Clock</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\ntpd\refclock_tpro.c">
       <Filter>Reference Clock</Filter>
     </ClCompile>
@@ -217,9 +220,6 @@
       <Filter>Reference Clock</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\ntpd\refclock_wwv.c">
-      <Filter>Reference Clock</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\ntpd\refclock_wwvb.c">
       <Filter>Reference Clock</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\ntpd\refclock_zyfer.c">

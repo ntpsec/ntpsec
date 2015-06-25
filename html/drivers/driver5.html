@@ -19,7 +19,7 @@
 		Features: <tt>tty_clk</tt>
 		<h4>Description</h4>
 		<p>This driver supports several models models of Kinemetrics/TrueTime timing receivers, including 468-DC MK III GOES Synchronized Clock, GPS- DC MK III and GPS/TM-TMD GPS Synchronized Clock, XL-DC (a 151-602-210, reported by the driver as a GPS/TM-TMD), GPS-800 TCU (an 805-957 with the RS232 Talker/Listener module), OM-DC OMEGA Synchronized Clock, the TL-3 WWV receiver, and very likely others in the same model families that use the same timecode formats.</p>
-		<p>Most of this code is originally from refclock_wwvb.c with thanks. It has been so mangled that wwvb is not a recognizable ancestor.</p>
+		<p>Most of this code is originally from refclock_wwvb.c (now refclock_spectracom.c) with thanks. It has been so mangled that wwvb is not a recognizable ancestor.</p>
 		<p>Timcode format: <tt>ADDD:HH:MM:SSQCL</tt><br>
 A - control A (this is stripped before we see it) Q - Quality indication (see below) C - Carriage return L - Line feed</p><br>
 Quality codes indicate possible error of:

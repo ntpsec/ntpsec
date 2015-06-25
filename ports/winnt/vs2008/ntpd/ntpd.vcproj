@@ -926,6 +926,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\..\..\ntpd\refclock_spectracom.c"
+				>
+			</File>
+			<File
 				RelativePath="..\..\..\..\ntpd\refclock_tpro.c"
 				>
 			</File>
@@ -947,10 +951,6 @@
 			</File>
 			<File
 				RelativePath="..\..\..\..\ntpd\refclock_wwv.c"
-				>
-			</File>
-			<File
-				RelativePath="..\..\..\..\ntpd\refclock_wwvb.c"
 				>
 			</File>
 			<File
