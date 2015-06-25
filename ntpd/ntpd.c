@@ -424,9 +424,7 @@ ntpdmain(
 	parse_cmdline_opts(&argc, &argv);
 # ifdef DEBUG
 	debug = OPT_VALUE_SET_DEBUG_LEVEL;
-#  ifdef HAVE_SETLINEBUF
-	setlinebuf(stdout);
-#  endif
+	setvbuf(stdout, NULL, _IOLBF, 0);
 # endif
 
 	if (HAVE_OPT(NOFORK) || HAVE_OPT(QUIT)

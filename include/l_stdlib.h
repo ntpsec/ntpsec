@@ -128,9 +128,6 @@ extern	int	fread		(char *, int, int, FILE *);
 extern	void	perror		(const char *);
 extern	int	printf		(const char *, ...);
 extern	int	setbuf		(FILE *, char *);
-# ifdef HAVE_SETLINEBUF
-extern	int	setlinebuf	(FILE *);
-# endif
 extern	int	setvbuf		(FILE *, char *, int, int);
 extern	int	scanf		(const char *, ...);
 extern	int	sscanf		(const char *, const char *, ...);
