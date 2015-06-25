@@ -43,9 +43,9 @@ extern  struct refclock refclock_wwv;
 #endif
 
 #ifdef CLOCK_SPECTRACOM
-extern	struct refclock	refclock_wwvb;
+extern	struct refclock	refclock_spectracom;
 #else
-#define	refclock_wwvb	refclock_none
+#define	refclock_spectracom	refclock_none
 #endif
 
 #ifdef CLOCK_PARSE
@@ -274,7 +274,7 @@ struct refclock * const refclock_conf[] = {
 	&refclock_local,	/* 1 REFCLK_LOCAL */
 	&refclock_none,		/* 2 deprecated: REFCLK_GPS_TRAK */
 	&refclock_pst,		/* 3 REFCLK_WWV_PST */
-	&refclock_wwvb, 	/* 4 REFCLK_SPECTRACOM */
+	&refclock_spectracom, 	/* 4 REFCLK_SPECTRACOM */
 	&refclock_true,		/* 5 REFCLK_TRUETIME */
 	&refclock_irig,		/* 6 REFCLK_IRIG_AUDIO */
 	&refclock_chu,		/* 7 REFCLK_CHU_AUDIO */

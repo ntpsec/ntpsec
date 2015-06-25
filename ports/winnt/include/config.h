@@ -366,7 +366,7 @@ typedef int ssize_t;	/* ssize is an int */
 #define CLOCK_WHARTON_400A
 /* end parse component drivers */
 /* # define CLOCK_SHM */
-#define CLOCK_SPECTRACOM	/* refclock_wwvb.c */
+#define CLOCK_SPECTRACOM	/* refclock_spectracom.c */
 #define CLOCK_TRIMBLEDC
 #define CLOCK_TRUETIME
 

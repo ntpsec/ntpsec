@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta http-equiv="content-type" content="text/html;charset=iso-8859-1">
-<title>Spectracom WWVB/GPS Receivers</title>
+<title>Spectracom GPS Receivers</title>
 <link href="scripts/style.css" type="text/css" rel="stylesheet">
 <style type="text/css">
 <!--
@@ -13,23 +13,29 @@
 </style>
 </head>
 <body>
-<h3>Spectracom WWVB/GPS Receivers</h3>
+<h3>Spectracom</h3>
 <p>Author: David L. Mills (mills@udel.edu)<br>
   Last update:
-  <!-- #BeginDate format:En2m -->11-Sep-2010  05:56<!-- #EndDate -->
+  <!-- #BeginDate format:En2m -->25-Jun-2015  13:32<!-- #EndDate -->
   UTC</p>
 <hr>
 <h4>Synopsis</h4>
 <p>Address: 127.127.4.<i>u</i><br>
-  Reference ID: <tt>WWVB</tt><br>
-  Driver ID: <tt>WWVB_SPEC</tt><br>
-  Serial Port: <tt>/dev/wwvb<i>u</i></tt>; 9600 baud, 8-bits, no parity<br>
+  Reference ID: <tt>SPECTRACOM</tt><br>
+  Driver ID: <tt>SPECTRACOM</tt><br>
+  Serial Port: <tt>/dev/spectracom<i>u</i></tt>; 9600 baud, 8-bits, no parity<br>
   Features: Optional PPS signal processing, <tt>tty_clk</tt><br>
   Requires: Optional PPS signal processing requires the PPSAPI signal interface.</p>
 <h4>Description</h4>
-<p>This driver supports all known Spectracom radio and satellite clocks, including the Model 8170 and Netclock/2 WWVB Synchronized Clocks and the Netclock/GPS GPS Master Clock. The claimed accuracy of the WWVB clocks is 100 <span class="style1">m</span>s relative to the broadcast signal. These clocks have proven a reliable source of time, except in some parts of the country with high levels of conducted RF interference. WIth the GPS clock the claimed accuracy is 130 ns. However, in most cases the actual accuracy is limited by the precision of the timecode and the latencies of the serial interface and operating system.</p>
-<p>The DIPswitches on these clocks should be set to 24-hour display, AUTO DST off, data format 0 or 2 (see below) and baud rate 9600. If this clock is used as the source for the IRIG Audio Decoder (<tt>refclock_irig.c</tt> in this distribution), set the DIPswitches for AM IRIG output and IRIG format 1 (IRIG B with signature control).</p>
-<p>There are two timecode formats used by these clocks. Format 0, which is available with all clocks, and format 2, which is available with all clocks except the original (unmodified) Model 8170.</p>
+<p>This driver supports the "Type 2" format emitted by Spectracom time
+servers including the 9483, 9489, and SecureSync.</p>
+<p>In former times this driver supported the Spectracom 9300 (now
+end-of-lifed) and several models of Spectracom radio clocks that were
+obsolesced by the WWVB modulation change in 2013.</p>
+<p>There are two timecode formats used by these clocks. Format 0,
+which is available with all clocks, and format 2, which is available
+with all clocks except the obsolete Model 8170. Consult your vendor
+documentation for information on how to enable these formats.</p>
 <p>Format 0 (22 ASCII printing characters):<br>
   &lt;cr&gt;&lt;lf&gt;i ddd hh:mm:ss TZ=zz&lt;cr&gt;&lt;lf&gt;</p>
 <p>on-time = first &lt;cr&gt;<br>

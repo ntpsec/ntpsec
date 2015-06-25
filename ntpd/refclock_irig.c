@@ -917,7 +917,7 @@ irig_decode(
 			 * enabled and the device has lost
 			 * synchronization. Raise an alarm if the year
 			 * field is nonzero and the sync indicator is
-			 * zero, which happens when a Spectracom radio
+			 * zero, which happens when a Spectracom receiver
 			 * has lost synchronization. Raise an alarm if
 			 * the expected second does not agree with the
 			 * decoded second, which happens with a garbled

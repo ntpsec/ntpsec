@@ -56,7 +56,8 @@ extern int async_write(int, const void *, unsigned int);
  *      TL-3:           3 channel WWV/H receiver w/ IRIG and RS-232 outputs
  *	OM-DC:		getting stale ("OMEGA")
  *
- * Most of this code is originally from refclock_wwvb.c with thanks.
+ * Most of this code is originally from refclock_wwvb.c (now 
+ * refclock_spectracom.c) with thanks.
  * It has been so mangled that wwvb is not a recognizable ancestor.
  *
  * Timcode format: ADDD:HH:MM:SSQCL
