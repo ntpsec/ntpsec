@@ -302,27 +302,27 @@ print_offer_usage(tOptions * opts)
         case OPTPROC_LONGOPT:
         case (OPTPROC_LONGOPT | OPTPROC_SHORTOPT):
             help[0] = help[1] = '-';
-            strncpy(help + 2, od->pz_Name, 20);
+            strlcpy(help + 2, od->pz_Name, sizeof(help) - 2);
             break;
         
         case 0:
-            strncpy(help, od->pz_Name, 20);
+            strlcpy(help, od->pz_Name, sizeof(help));
             break;
         }
 
     } else {
         switch (opts->fOptSet & (OPTPROC_LONGOPT | OPTPROC_SHORTOPT)) {
         case OPTPROC_SHORTOPT:
-            strcpy(help, "-h");
+            strlcpy(help, "-h", sizeof(help));
             break;
 
         case OPTPROC_LONGOPT:
         case (OPTPROC_LONGOPT | OPTPROC_SHORTOPT):
-            strcpy(help, "--help");
+            strlcpy(help, "--help", sizeof(help));
             break;
         
         case 0:
-            strcpy(help, "help");
+            strlcpy(help, "help", sizeof(help));
             break;
         }
     }
