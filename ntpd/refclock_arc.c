@@ -254,7 +254,7 @@ GENERAL
 TO-DO LIST
 ==========
 
-  * Eliminate use of scanf(), and maybe sprintf().
+  * Eliminate use of scanf().
 
   * Allow user setting of resync interval to trade battery life for
     accuracy; maybe could be done via fudge factor or unit number.
