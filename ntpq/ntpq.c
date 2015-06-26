@@ -444,7 +444,7 @@ ntpqmain(
 {
 	u_int ihost;
 	int icmd;
-
+	int msglen;
 
 #ifdef SYS_VXWORKS
 	clear_globals();
@@ -485,8 +485,9 @@ ntpqmain(
 	    builtins[icmd].desc[0] = "md5";
 	    fmt = "set key type to use for authenticated requests (%s)";
 #endif
-	    msg = malloc(strlen(fmt) + strlen(list) - strlen("%s") +1);
-	    sprintf(msg, fmt, list);
+	    msglen = strlen(fmt) + strlen(list) - strlen("%s") + 1;
+	    msg = malloc(msglen);
+	    snprintf(msg, msglen, fmt, list);
 	    builtins[icmd].comment = msg;
 	    free(list);
 	}
@@ -3525,9 +3526,10 @@ static void list_md_fn(const EVP_MD *m, const char *from, const char *to, void *
     } else
 	hstate->list = (char *)realloc(hstate->list, len);
 
-    sprintf(hstate->list + strlen(hstate->list), "%s%s",
-	    ((hstate->idx >= K_PER_LINE)? K_NL_PFX_STR : K_DELIM_STR),
-	    name);
+    snprintf(hstate->list + strlen(hstate->list), len - strlen(hstate->list),
+	     "%s%s",
+	     ((hstate->idx >= K_PER_LINE)? K_NL_PFX_STR : K_DELIM_STR),
+	     name);
     if (hstate->idx >= K_PER_LINE)
 	hstate->idx = 1;
     else
