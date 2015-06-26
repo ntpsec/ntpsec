@@ -155,7 +155,7 @@ pst_start(
 	 */
 	peer->precision = PRECISION;
 	pp->clockdesc = DESCRIPTION;
-	memcpy((char *)&pp->refid, WWVREFID, 4);
+	memcpy((char *)&pp->refid, WWVREFID, REFIDLEN);
 	return (1);
 }
 
@@ -254,9 +254,9 @@ pst_receive(
 	if (info[9] != '8')
 		pp->leap = LEAP_NOTINSYNC;
 	if (info[12] == 'H')
-		memcpy((char *)&pp->refid, WWVHREFID, 4);
+		memcpy((char *)&pp->refid, WWVHREFID, REFIDLEN);
 	else
-		memcpy((char *)&pp->refid, WWVREFID, 4);
+		memcpy((char *)&pp->refid, WWVREFID, REFIDLEN);
 	if (peer->stratum <= 1)
 		peer->refid = pp->refid;
 	if (ltemp == 0)

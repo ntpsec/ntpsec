@@ -233,7 +233,7 @@ shm_start(
 	/*
 	 * Initialize miscellaneous peer variables
 	 */
-	memcpy((char *)&pp->refid, REFID, 4);
+	memcpy((char *)&pp->refid, REFID, REFIDLEN);
 	if (up->shm != 0) {
 		pp->unitptr = up;
 		up->shm->precision = PRECISION;

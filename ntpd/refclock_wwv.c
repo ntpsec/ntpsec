@@ -2446,7 +2446,7 @@ wwv_newchan(
 	} else {
 		up->dchan = j;
 		up->sptr = sp;
-		memcpy(&pp->refid, sp->refid, 4);
+		memcpy(&pp->refid, sp->refid, REFIDLEN);
 		peer->refid = pp->refid;
 		up->status |= METRIC;
 		if (sp->select & SELV) {

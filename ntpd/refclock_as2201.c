@@ -193,7 +193,7 @@ as2201_start(
 	 */
 	peer->precision = PRECISION;
 	pp->clockdesc = DESCRIPTION;
-	memcpy((char *)&pp->refid, REFID, 4);
+	memcpy((char *)&pp->refid, REFID, REFIDLEN);
 	up->lastptr = up->stats;
 	up->index = 0;
 	return (1);

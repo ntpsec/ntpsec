@@ -168,7 +168,7 @@ hopfserial_start (
 	 */
 	pp->clockdesc = DESCRIPTION;
 	peer->precision = PRECISION;
-	memcpy((char *)&pp->refid, REFID, 4);
+	memcpy((char *)&pp->refid, REFID, REFIDLEN);
 
 	up->leap_status = 0;
 	up->unit = (short) unit;

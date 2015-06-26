@@ -129,7 +129,7 @@ local_start(
 	peer->stratum = STRATUM;
 	pp->stratum = STRATUM;
 	pp->clockdesc = DESCRIPTION;
-	memcpy(&pp->refid, "LOCL", 4);
+	memcpy(&pp->refid, "LOCL", REFIDLEN);
 	poll_time = current_time;
 	return (1);
 }

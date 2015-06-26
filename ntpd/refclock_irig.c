@@ -351,7 +351,7 @@ irig_start(
 	 */
 	peer->precision = PRECISION;
 	pp->clockdesc = DESCRIPTION;
-	memcpy((char *)&pp->refid, REFID, 4);
+	memcpy((char *)&pp->refid, REFID, REFIDLEN);
 	up->tc = MINTC;
 	up->decim = 1;
 	up->gain = 127;

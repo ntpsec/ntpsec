@@ -707,16 +707,16 @@ arc_start(
 #endif
 	switch (peer->MODE) {
 	    case 1:
-		memcpy((char *)&pp->refid, REFID_MSF, 4);
+		memcpy((char *)&pp->refid, REFID_MSF, REFIDLEN);
 		break;
 	    case 2:
-		memcpy((char *)&pp->refid, REFID_DCF77, 4);
+		memcpy((char *)&pp->refid, REFID_DCF77, REFIDLEN);
 		break;
 	    case 3:
-		memcpy((char *)&pp->refid, REFID_WWVB, 4);
+		memcpy((char *)&pp->refid, REFID_WWVB, REFIDLEN);
 		break;
 	    default:
-		memcpy((char *)&pp->refid, REFID, 4);
+		memcpy((char *)&pp->refid, REFID, REFIDLEN);
 		break;
 	}
 	/* Spread out resyncs so that they should remain separated. */

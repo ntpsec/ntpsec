@@ -150,7 +150,7 @@ hopfpci_start(
 	/*
 	 * Initialize miscellaneous peer variables
 	 */
-	memcpy((char *)&pp->refid, REFID, 4);
+	memcpy((char *)&pp->refid, REFID, REFIDLEN);
 	peer->precision = PRECISION;
 	pp->clockdesc = DESCRIPTION;
 	up->leap_status = 0;
