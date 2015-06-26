@@ -164,7 +164,7 @@ isc_file_safemovefile(const char *oldname, const char *newname) {
 	if (stat(newname, &sbuf) == 0) {
 		exists = TRUE;
 		strcpy(buf, newname);
-		strcat(buf, ".XXXXX");
+		strlcat(buf, ".XXXXX", sizeof(buf));
 		tmpfd = mkstemp(buf);
 		if (tmpfd > 0)
 			_close(tmpfd);
@@ -278,14 +278,14 @@ isc_file_template(const char *path, const char *templet, char *buf,
 		if ((s - path + 1 + strlen(templet) + 1) > buflen)
 			return (ISC_R_NOSPACE);
 
-		strncpy(buf, path, s - path + 1);
+		strlcpy(buf, path, s - path + 1, buflen);
 		buf[s - path + 1] = '\0';
-		strcat(buf, templet);
+		strlcat(buf, templet, buflen);
 	} else {
 		if ((strlen(templet) + 1) > buflen)
 			return (ISC_R_NOSPACE);
 
-		strcpy(buf, templet);
+		strlcpy(buf, templet, buflen);
 	}
 
 	return (ISC_R_SUCCESS);
