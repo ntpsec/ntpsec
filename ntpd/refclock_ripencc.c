@@ -1505,7 +1505,7 @@ parse0x8FAD(
 	utcflags =	buf[19];
 
 
-	sprintf(logbuf, "U1 %d.%d.%d %02d:%02d:%02d %d %02x",
+	snprintf(logbuf, len(logbuf), "U1 %d.%d.%d %02d:%02d:%02d %d %02x",
 		day, month, year, hour, minute, second, trackstat, utcflags);
 
 #ifdef DEBUG_NCC
@@ -1672,7 +1672,8 @@ parse0x8F0B(
 	}
 
 
-	sprintf(logbuf, "C1 %02d%02d%04d %02d%02d%02d %d %7.0f %.1f %.0f %.1f %d %02d%09.6f %c %02d%09.6f %c %.0f  %d %d %d %d %d %d %d %d",
+	snprintf(logbuf, len(logbuf),
+		"C1 %02d%02d%04d %02d%02d%02d %d %7.0f %.1f %.0f %.1f %d %02d%09.6f %c %02d%09.6f %c %.0f  %d %d %d %d %d %d %d %d",
 		day, month, year, hour, minute, second, mode, bias, biasunc,
 		rate, rateunc, utcoff, lat_deg, lat_min, north_south, lon_deg,
 		lon_min, east_west, alt, sv[0], sv[1], sv[2], sv[3], sv[4],
@@ -1748,8 +1749,9 @@ parse0x4F(
 	dn = bGetShort (&buf[22]);
 	dt_lsf = bGetShort (&buf[24]);
 
-	sprintf(logbuf, "L1 %d %d %d %g %g %g %d %d %d",
-		dt_lsf - dt_ls, dt_ls, dt_lsf, a0, a1, tot, wn_t, wn_lsf, dn); 
+	snprintf(logbuf, len(logbuf),
+		 "L1 %d %d %d %g %g %g %d %d %d",
+		 dt_lsf - dt_ls, dt_ls, dt_lsf, a0, a1, tot, wn_t, wn_lsf, dn); 
 
 #ifdef DEBUG_NCC
 	if (debug) 
@@ -1800,8 +1802,9 @@ parse0x5C(
 	elevation = bGetSingle(&buf[12]) * R2D;
 	azinuth = bGetSingle(&buf[16]) * R2D;
 
-	sprintf(logbuf, "S1 %02d %d %d %02x %4.1f %5.1f %4.1f",
-		prn, channel, aqflag, ephstat, snr, azinuth, elevation);
+	snprintf(logbuf, len(logbuf),
+		 "S1 %02d %d %d %02x %4.1f %5.1f %4.1f",
+		 prn, channel, aqflag, ephstat, snr, azinuth, elevation);
 
 #ifdef DEBUG_NCC
 	if (debug) 
@@ -3230,11 +3233,11 @@ show_time(
 
 	if (time_of_week == -1.0)
 	{
-		sprintf(timestring, "   <No time yet>   ");
+		snprintf(timestring, len(timestring), "   <No time yet>   ");
 	}
 	else if ((time_of_week >= 604800.0) || (time_of_week < 0.0))
 	{
-		sprintf(timestring, "     <Bad time>     ");
+		snprintf(timestring, len(timestring), "     <Bad time>     ");
 	}
 	else
 	{
@@ -3244,8 +3247,9 @@ show_time(
 		minutes =  (short) fmod(tow/60., 60.);
 		hours = (short)fmod(tow / 3600., 24.);
 		days = (short)(tow / 86400.0);
-		sprintf(timestring, " %s %02d:%02d:%05.2f   ",
-			dayname[days], hours, minutes, seconds);
+		snprintf(timestring, len(timestring),
+			 " %s %02d:%02d:%05.2f   ",
+			 dayname[days], hours, minutes, seconds);
 	}
 	return timestring;
 }
