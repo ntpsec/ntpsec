@@ -229,8 +229,8 @@ int addSourceToRegistry(LPSTR pszAppname, LPSTR pszMsgDLL)
      under the Application key and adding registry values to the new
      subkey. */
 
-  strcpy(lpregarray, "SYSTEM\\CurrentControlSet\\Services\\EventLog\\Application\\");
-  strcat(lpregarray, pszAppname);
+  strlcpy(lpregarray, "SYSTEM\\CurrentControlSet\\Services\\EventLog\\Application\\", sizeof(regarray));
+  strlcat(lpregarray, pszAppname,  sizeof(regarray));
   /* Create a new key for our application */
   bSuccess = RegCreateKey(HKEY_LOCAL_MACHINE, lpregarray, &hk);
    if(bSuccess != ERROR_SUCCESS)
