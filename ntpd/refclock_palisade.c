@@ -365,7 +365,7 @@ palisade_start (
 	peer->sstclktype = CTL_SST_TS_UHF;
 	peer->minpoll = TRMB_MINPOLL;
 	peer->maxpoll = TRMB_MAXPOLL;
-	memcpy((char *)&pp->refid, REFID, 4);
+	memcpy((char *)&pp->refid, REFID, REFIDLEN);
 	
 	up->leap_status = 0;
 	up->unit = (short) unit;

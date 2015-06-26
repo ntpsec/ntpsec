@@ -100,7 +100,7 @@ pcf_start(
 	/* one transmission takes 172.5 milliseconds since the radio clock
 	   transmits 69 bits with a period of 2.5 milliseconds per bit */
 	pp->fudgetime1 = 0.1725;
-	memcpy((char *)&pp->refid, REFID, 4);
+	memcpy((char *)&pp->refid, REFID, REFIDLEN);
 
 	return (1);
 }

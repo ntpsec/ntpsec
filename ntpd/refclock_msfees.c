@@ -568,7 +568,7 @@ msfees_start(
 	peer->precision	= sys_precision;
 	peer->stratum	= stratumtouse[unit];
 	if (stratumtouse[unit] <= 1) {
-		memcpy((char *)&pp->refid, EESREFID, 4);
+		memcpy((char *)&pp->refid, EESREFID, REFIDLEN);
 		if (unit > 0 && unit < 10)
 		    ((char *)&pp->refid)[3] = '0' + unit;
 	} else {

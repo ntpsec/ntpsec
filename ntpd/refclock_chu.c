@@ -531,7 +531,7 @@ chu_start(
 	peer->precision = PRECISION;
 	pp->clockdesc = DESCRIPTION;
 	strlcpy(up->ident, "CHU", sizeof(up->ident));
-	memcpy(&pp->refid, up->ident, 4); 
+	memcpy(&pp->refid, up->ident, REFIDLEN);
 	DTOLFP(CHAR, &up->charstamp);
 #ifdef HAVE_AUDIO
 
@@ -1589,8 +1589,8 @@ chu_newchan(
 	rval = icom_freq(up->fd_icom, peer->ttl & 0x7f, qsy[up->chan] +
 	    TUNE);
 	snprintf(up->ident, sizeof(up->ident), "CHU%d", up->chan);
-	memcpy(&pp->refid, up->ident, 4); 
-	memcpy(&peer->refid, up->ident, 4);
+	memcpy(&pp->refid, up->ident, REFIDLEN);
+	memcpy(&peer->refid, up->ident, REFIDLEN);
 	if (metric == 0 && up->status & METRIC) {
 		up->status &= ~METRIC;
 		refclock_report(peer, CEVNT_PROP);

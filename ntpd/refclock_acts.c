@@ -271,7 +271,7 @@ acts_start(
 	 */
 	peer->precision = PRECISION;
 	pp->clockdesc = DESCRIPTION;
-	memcpy(&pp->refid, REFID, 4);
+	memcpy(&pp->refid, REFID, REFIDLEN);
 	peer->sstclktype = CTL_SST_TS_TELEPHONE;
 	up->bufptr = up->buf;
 	if (def_modem_setup == modem_setup) {
@@ -788,7 +788,7 @@ acts_timecode(
 			pp->leap = LEAP_ADDSECOND;
 		else if (leap == 2)
 			pp->leap = LEAP_DELSECOND;
-		memcpy(&pp->refid, REFACTS, 4);
+		memcpy(&pp->refid, REFACTS, REFIDLEN);
 		up->msgcnt++;
 		if (flag != '#' && up->msgcnt < 10)
 			return;
@@ -812,7 +812,7 @@ acts_timecode(
 		 * warning.
 		 */
 		pp->leap = LEAP_NOWARNING;
-		memcpy(&pp->refid, REFUSNO, 4);
+		memcpy(&pp->refid, REFUSNO, REFIDLEN);
 		up->msgcnt++;
 		break;
 
@@ -836,7 +836,7 @@ acts_timecode(
 				pp->leap = LEAP_DELSECOND;
 		}
 		pp->day = ymd2yd(pp->year, month, day);
-		memcpy(&pp->refid, REFPTB, 4);
+		memcpy(&pp->refid, REFPTB, REFIDLEN);
 		up->msgcnt++;
 		break;
 
@@ -854,7 +854,7 @@ acts_timecode(
 		pp->leap = LEAP_NOWARNING;
 		if (synchar != ' ')
 			pp->leap = LEAP_NOTINSYNC;
-		memcpy(&pp->refid, REFTYPE, 4);
+		memcpy(&pp->refid, REFTYPE, REFIDLEN);
 		up->msgcnt++;
 		break;
 
@@ -875,7 +875,7 @@ acts_timecode(
 			pp->leap = LEAP_NOTINSYNC;
 		else if (leapchar == 'L')
 			pp->leap = LEAP_ADDSECOND;
-		memcpy(&pp->refid, REFTYPE, 4);
+		memcpy(&pp->refid, REFTYPE, REFIDLEN);
 		up->msgcnt++;
 		break;
 

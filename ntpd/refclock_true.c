@@ -305,7 +305,7 @@ true_start(
 	 */
 	peer->precision = PRECISION;
 	pp->clockdesc = DESCRIPTION;
-	memcpy(&pp->refid, REFID, 4);
+	memcpy(&pp->refid, REFID, REFIDLEN);
 	up->pollcnt = 2;
 	up->type = t_unknown;
 	up->state = s_Base;

@@ -127,7 +127,7 @@ psc_start(
     pp->io.fd = -1;
     pp->unitptr = up;
     get_systime(&pp->lastrec);
-    memcpy(&pp->refid, REFID, 4);
+    memcpy(&pp->refid, REFID, REFIDLEN);
     peer->precision = PRECISION;
     pp->clockdesc = DESCRIPTION;
     up->unit = unit;

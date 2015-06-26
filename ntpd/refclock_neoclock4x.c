@@ -281,7 +281,7 @@ neoclock4x_start(int unit,
    * Initialize miscellaneous variables
    */
   peer->precision = -10;
-  memcpy((char *)&pp->refid, "neol", 4);
+  memcpy((char *)&pp->refid, "neol", REFIDLEN);
 
   up->leap_status = 0;
   up->unit = unit;

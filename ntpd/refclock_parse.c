@@ -3052,7 +3052,7 @@ parse_start(
 	peer->stratum         = STRATUM_REFCLOCK;
 
 	if (peer->stratum <= 1)
-	    memmove((char *)&parse->generic->refid, parse->parse_type->cl_id, 4);
+	    memmove((char *)&parse->generic->refid, parse->parse_type->cl_id, REFIDLEN);
 	else
 	    parse->generic->refid = htonl(PARSEHSREFID);
 

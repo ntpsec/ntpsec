@@ -190,7 +190,7 @@ arb_start(
 	 */
 	peer->precision = PRECISION;
 	pp->clockdesc = DESCRIPTION;
-	memcpy((char *)&pp->refid, REFID, 4);
+	memcpy((char *)&pp->refid, REFID, REFIDLEN);
 	if (peer->MODE > 1) {
 		msyslog(LOG_NOTICE, "ARBITER: Invalid mode %d", peer->MODE);
 		close(fd);

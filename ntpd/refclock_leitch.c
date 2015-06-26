@@ -132,7 +132,7 @@ leitch_init(void)
 	memset((char*)leitchunits, 0, sizeof(leitchunits));
 	memset((char*)unitinuse, 0, sizeof(unitinuse));
 	for (i = 0; i < MAXUNITS; i++)
-	    memcpy((char *)&refid[i], LEITCHREFID, 4);
+	    memcpy((char *)&refid[i], LEITCHREFID, REFIDLEN);
 }
 
 /*

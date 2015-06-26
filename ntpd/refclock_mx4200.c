@@ -236,7 +236,7 @@ mx4200_start(
 	 */
 	peer->precision = PRECISION;
 	pp->clockdesc = DESCRIPTION;
-	memcpy((char *)&pp->refid, REFID, 4);
+	memcpy((char *)&pp->refid, REFID, REFIDLEN);
 
 	/* Ensure the receiver is properly configured */
 	return mx4200_config(peer);

@@ -466,7 +466,7 @@ nmea_start(
 	/* Initialize miscellaneous variables */
 	peer->precision = PRECISION;
 	pp->clockdesc = DESCRIPTION;
-	memcpy(&pp->refid, REFID, 4);
+	memcpy(&pp->refid, REFID, REFIDLEN);
 
 	/* Open serial port. Use CLK line discipline, if available. */
 	devlen = snprintf(device, sizeof(device), DEVICE, unit);
@@ -975,7 +975,7 @@ nmea_receive(
 		 */
 		rc_date  = parse_weekdata(&gpsw, &rdata, 1, 2, 5)
 		        && parse_date(&date, &rdata, 3, DATE_1_DDMMYY);
-		rc_time  = parse_time(&date, &tofs.tv_nsec, &rdata, 4);
+		rc_time  = parse_time(&date, &tofs.tv_nsec, &rdata, REFIDLEN);
 		pp->leap = parse_qual(&rdata, 11, '0', 1);		
 		rc_date  = rc_date
 		        && gpsfix_century(&date, &gpsw, &up->century_cache);

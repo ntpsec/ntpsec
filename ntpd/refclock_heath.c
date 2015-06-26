@@ -243,7 +243,7 @@ heath_start(
 	 */
 	peer->precision = PRECISION;
 	pp->clockdesc = DESCRIPTION;
-	memcpy(&pp->refid, REFID, 4);
+	memcpy(&pp->refid, REFID, REFIDLEN);
 	return (1);
 }
 

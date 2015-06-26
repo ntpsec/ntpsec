@@ -553,7 +553,7 @@ gpsd_start(
 	pp->a_lastcode[0] = '\0';
 	pp->lencode       = 0;
 	pp->clockdesc     = DESCRIPTION;
-	memcpy(&pp->refid, REFID, 4);
+	memcpy(&pp->refid, REFID, REFIDLEN);
 
 	/* Initialize miscellaneous variables */
 	if (unit >= 128)
