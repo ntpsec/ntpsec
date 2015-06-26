@@ -3551,12 +3551,10 @@ static char *list_digest_names(void)
     list = hstate.list;
     free(hstate.seen);
 # else
-    list = (char *)malloc(sizeof("md5, others (upgrade to OpenSSL-1.0 for full list)"));
-    strcpy(list, "md5, others (upgrade to OpenSSL-1.0 for full list)");
+    list = strdup("md5, others (upgrade to OpenSSL-1.0 for full list)");
 # endif
 #else
-    list = (char *)malloc(sizeof("md5"));
-    strcpy(list, "md5");
+    list = strdup("md5");
 #endif
 
     return list;
