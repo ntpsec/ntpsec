@@ -78,8 +78,7 @@ is_ntfs(const char * file) {
 	 */
 	if (isalpha(filename[0]) && filename[1] == ':' && 
 		(filename[2] == '\\' || filename[2] == '/')) {
-		strncpy(drive, filename, 3);
-		drive[3] = '\0';
+		strlcpy(drive, filename, 4);
 	}
 
 	else if ((filename[0] == '\\') && (filename[1] == '\\')) {
@@ -87,7 +86,7 @@ is_ntfs(const char * file) {
 	    strlcpy(tmpbuf, filename, sizeof(tmpbuf));
 		machinename = strtok(tmpbuf, "\\");
 		sharename = strtok(NULL, "\\");
-		strcpy(drive, "\\\\", sizeof(drive));
+		strlcpy(drive, "\\\\", sizeof(drive));
 		strlcat(drive, machinename, sizeof(drive));
 		strlcat(drive, "\\", sizeof(drive));
 		strlcat(drive, sharename, sizeof(drive));

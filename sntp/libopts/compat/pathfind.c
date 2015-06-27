@@ -118,7 +118,7 @@ make_absolute( char const * string, char const * dot_path )
     } else {
         if (dot_path && dot_path[0]) {
             result = malloc( 2 + strlen( dot_path ) + strlen( string ) );
-            strcpy( result, dot_path );
+            strlcpy( result, dot_path, strlen(dot_path)+1);
             result_len = (int)strlen(result);
             if (result[result_len - 1] != '/') {
                 result[result_len++] = '/';
@@ -130,7 +130,7 @@ make_absolute( char const * string, char const * dot_path )
             result_len = 2;
         }
 
-        strcpy( result + result_len, string );
+        strlcpy( result + result_len, string, strlen(string) + 1 );
     }
 
     return result;
@@ -182,7 +182,7 @@ canonicalize_pathname( char *path )
         if ((start + 1) != i && (start != 0 || i != 2))
 #endif /* apollo */
         {
-            strcpy( result + start + 1, result + i );
+            strlcpy( result + start + 1, result + i, strlen(result + i) + 1 );
             i = start + 1;
         }
 
@@ -201,7 +201,7 @@ canonicalize_pathname( char *path )
         if (result[i] == '.') {
             /* Handle `./'. */
             if (result[i + 1] == '/') {
-                strcpy( result + i, result + i + 1 );
+                strlcpy( result + i, result + i + 1, strlen(result + i + 1) + 1 );
                 i = (start < 0) ? 0 : start;
                 continue;
             }
@@ -211,7 +211,7 @@ canonicalize_pathname( char *path )
                 (result[i + 2] == '/' || !result[i + 2])) {
                 while (--start > -1 && result[start] != '/')
                     ;
-                strcpy( result + start + 1, result + i + 2 );
+                strlcpy( result + start + 1, result + i + 2, strlen(result + i + 2) + 1 );
                 i = (start < 0) ? 0 : start;
                 continue;
             }

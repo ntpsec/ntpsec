@@ -4966,7 +4966,7 @@ isc__socket_permunix(isc_sockaddr_t *sockaddr, isc_uint32_t perm,
 
 	REQUIRE(sockaddr->type.sa.sa_family == AF_UNIX);
 	INSIST(strlen(sockaddr->type.sunix.sun_path) < sizeof(path));
-	strcpy(path, sockaddr->type.sunix.sun_path);
+	strlcpy(path, sockaddr->type.sunix.sun_path, sizeof(path));
 
 #ifdef NEED_SECURE_DIRECTORY
 	slash = strrchr(path, '/');
@@ -4974,9 +4974,9 @@ isc__socket_permunix(isc_sockaddr_t *sockaddr, isc_uint32_t perm,
 		if (slash != path)
 			*slash = '\0';
 		else
-			strcpy(path, "/");
+		    strlcpy(path, "/", sizeof(path));
 	} else
-		strcpy(path, ".");
+		strlcpy(path, ".", sizeof(path));
 #endif
 
 	if (chmod(path, perm) < 0) {
@@ -5097,7 +5097,7 @@ isc__socket_filter(isc_socket_t *sock0, const char *filter) {
 
 #if defined(SO_ACCEPTFILTER) && defined(ENABLE_ACCEPTFILTER)
 	bzero(&afa, sizeof(afa));
-	strncpy(afa.af_name, filter, sizeof(afa.af_name));
+	strlcpy(afa.af_name, filter, sizeof(afa.af_name));
 	if (setsockopt(sock->fd, SOL_SOCKET, SO_ACCEPTFILTER,
 			 &afa, sizeof(afa)) == -1) {
 		isc__strerror(errno, strbuf, sizeof(strbuf));
@@ -5849,7 +5849,7 @@ isc__socket_setname(isc_socket_t *socket0, const char *name, void *tag) {
 
 	LOCK(&socket->lock);
 	memset(socket->name, 0, sizeof(socket->name));
-	strncpy(socket->name, name, sizeof(socket->name) - 1);
+	strlcpy(socket->name, name, sizeof(socket->name));
 	socket->tag = tag;
 	UNLOCK(&socket->lock);
 }

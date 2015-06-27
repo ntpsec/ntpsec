@@ -1629,7 +1629,7 @@ isc_log_doit(isc_log_t *lctx, isc_logcategory_t *category,
 				if (new != NULL) {
 					/*
 					 * Put the text immediately after
-					 * the struct.  The strcpy is safe.
+					 * the struct.
 					 */
 					new->text = (char *)(new + 1);
 					strlcpy(new->text, lctx->buffer, octets);

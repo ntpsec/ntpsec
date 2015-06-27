@@ -250,7 +250,7 @@ add_prog_path(char * buf, int b_sz, char const * fname, char const * prg_path)
         return false;
 
     memcpy(buf, path, (size_t)((pz - path)+1));
-    strcpy(buf + (pz - path) + 1, fname);
+    strlcpy(buf + (pz - path) + 1, fname, b_sz);
 
     /*
      *  If the "path" path was gotten from "pathfind()", then it was

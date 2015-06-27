@@ -589,7 +589,6 @@ jjy_receive ( struct recvbuf *rbufp )
 	l_fp	tRecvTimestamp;		/* arrival timestamp */
 	int 	rc ;
 	char	*pBuf, sLogText [ MAX_LOGTEXT ] ;
-	int 	iLen, iCopyLen ;
 	int 	i, j, iReadRawBuf, iBreakPosition ;
 
 	/*
@@ -734,15 +733,11 @@ jjy_receive ( struct recvbuf *rbufp )
 
 		if ( up->linediscipline == LDISC_RAW ) {
 			pBuf = up->sLineBuf ;
-			iLen = up->iLineBufLen ;
 		} else {
 			pBuf = pp->a_lastcode ;
-			iLen = pp->lencode ;
 		}
 
-		iCopyLen = ( iLen <= sizeof(sLogText)-1 ? iLen : sizeof(sLogText)-1 ) ;
-		strncpy( sLogText, pBuf, iCopyLen ) ;
-		sLogText[iCopyLen] = 0 ;
+		strlcpy( sLogText, pBuf, sizeof(sLogText) ) ;
 		jjy_write_clockstats( peer, JJY_CLOCKSTATS_MARK_RECEIVE, sLogText ) ;
 
 		switch ( up->unittype ) {
@@ -3854,8 +3849,7 @@ modem_receive ( struct recvbuf *rbufp )
 		char	sResp [ 40 ] ;
 		int	iCopyLen ;
 		iCopyLen = ( iLen <= sizeof(sResp)-1 ? iLen : sizeof(sResp)-1 ) ;
-		strncpy( sResp, pBuf, iLen <= sizeof(sResp)-1 ? iLen : sizeof(sResp)-1 ) ;
-		sResp[iCopyLen] = 0 ;
+		strlcpy( sResp, pBuf, sizeof(sResp) ) ;
 		printf ( "refclock_jjy.c : modem_receive : iLen=%d pBuf=[%s] iModemEvent=%d\n", iCopyLen, sResp, up->iModemEvent ) ;
 	}
 #endif
@@ -4383,7 +4377,7 @@ jjy_write_clockstats ( struct peer *peer, int iMark, const char *pData )
 
 	iDataLen = strlen( pData ) ;
 	iMarkLen = strlen( pMark ) ;
-	strcpy( sLog, pMark ) ; /* Harmless because of enough length */
+	strlcpy( sLog, pMark, sizeof( sLog )) ;
 	printableString( sLog+iMarkLen, sizeof(sLog)-iMarkLen, pData, iDataLen ) ;
 
 #ifdef DEBUG

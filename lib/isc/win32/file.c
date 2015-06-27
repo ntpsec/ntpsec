@@ -163,7 +163,7 @@ isc_file_safemovefile(const char *oldname, const char *newname) {
 	 */
 	if (stat(newname, &sbuf) == 0) {
 		exists = TRUE;
-		strcpy(buf, newname);
+		strlcpy(buf, newname, sizeof(buf));
 		strlcat(buf, ".XXXXX", sizeof(buf));
 		tmpfd = mkstemp(buf);
 		if (tmpfd > 0)
@@ -489,7 +489,7 @@ isc_file_progname(const char *filename, char *progname, size_t namelen) {
 		if (namelen <= strlen(s))
 			return (ISC_R_NOSPACE);
 
-		strcpy(progname, s);
+		strlcpy(progname, s, strlen(s)+1);
 		return (ISC_R_SUCCESS);
 	}
 
@@ -500,8 +500,7 @@ isc_file_progname(const char *filename, char *progname, size_t namelen) {
 	if (len >= namelen)
 		return (ISC_R_NOSPACE);
 
-	strncpy(progname, s, len);
-	progname[len] = '\0';
+	strlcpy(progname, s, len+1);
 	return (ISC_R_SUCCESS);
 }
 

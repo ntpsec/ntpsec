@@ -71,7 +71,7 @@ isc_ntpaths_init() {
 
 	if (keyFound == FALSE)
 		/* Use the System Directory as a default */
-		strcpy(namedBase, systemDir);
+	    strlcpy(namedBase, systemDir, sizeof(namedBase));
 
 	strlcpy(ns_confFile, namedBase, sizeof(ns_confFile));
 	strlcat(ns_confFile, "\\etc\\named.conf", sizeof(ns_confFile));
