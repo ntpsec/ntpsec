@@ -70,7 +70,7 @@ isc_interfaceiter_create(isc_mem_t *mctx, isc_interfaceiter_t **iterp) {
 	isc_result_t result;
 	size_t bufsize;
 	size_t bufused;
-	char strbuf[ISC_STRERRORSIZE];
+	char strbuf[BUFSIZ];
 
 	REQUIRE(mctx != NULL);
 	REQUIRE(iterp != NULL);
@@ -88,7 +88,7 @@ isc_interfaceiter_create(isc_mem_t *mctx, isc_interfaceiter_t **iterp) {
 	 */
 	bufsize = 0;
 	if (sysctl(mib, 6, NULL, &bufsize, NULL, (size_t) 0) < 0) {
-		isc__strerror(errno, strbuf, sizeof(strbuf));
+		strerror_r(errno, strbuf, sizeof(strbuf));
 		UNEXPECTED_ERROR(__FILE__, __LINE__,
 				 isc_msgcat_get(isc_msgcat,
 						ISC_MSGSET_IFITERSYSCTL,
@@ -109,7 +109,7 @@ isc_interfaceiter_create(isc_mem_t *mctx, isc_interfaceiter_t **iterp) {
 
 	bufused = bufsize;
 	if (sysctl(mib, 6, iter->buf, &bufused, NULL, (size_t) 0) < 0) {
-		isc__strerror(errno, strbuf, sizeof(strbuf));
+		strerror_r(errno, strbuf, sizeof(strbuf));
 		UNEXPECTED_ERROR(__FILE__, __LINE__,
 				 isc_msgcat_get(isc_msgcat,
 						ISC_MSGSET_IFITERSYSCTL,

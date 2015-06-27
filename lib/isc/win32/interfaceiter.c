@@ -31,7 +31,6 @@
 #include <isc/mem.h>
 #include <isc/result.h>
 #include <isc/string.h>
-#include <isc/strerror.h>
 #include <isc/types.h>
 #include <isc/util.h>
 #include <isc/win32os.h>
@@ -115,7 +114,7 @@ get_broadcastaddr(isc_netaddr_t *bcastaddr, isc_netaddr_t *addr, isc_netaddr_t *
 
 isc_result_t
 isc_interfaceiter_create(isc_mem_t *mctx, isc_interfaceiter_t **iterp) {
-	char strbuf[ISC_STRERRORSIZE];
+	char strbuf[BUFSIZ];
 	isc_interfaceiter_t *iter;
 	isc_result_t result;
 	unsigned int major;
@@ -199,7 +198,7 @@ isc_interfaceiter_create(isc_mem_t *mctx, isc_interfaceiter_t **iterp) {
 	}
 
 	if (NO_ERROR != err) {
-		isc__strerror(err, strbuf, sizeof(strbuf));
+		strerror_r(err, strbuf, sizeof(strbuf));
 		UNEXPECTED_ERROR(__FILE__, __LINE__,
 				"GetAdaptersAddresses: %s",
 				strbuf);
@@ -219,7 +218,7 @@ isc_interfaceiter_create(isc_mem_t *mctx, isc_interfaceiter_t **iterp) {
 		error = WSAGetLastError();
 		if (error == WSAEAFNOSUPPORT)
 			goto inet6_only;
-		isc__strerror(error, strbuf, sizeof(strbuf));
+		strerror_r(error, strbuf, sizeof(strbuf));
 		UNEXPECTED_ERROR(__FILE__, __LINE__,
 				"making interface scan socket: %s",
 				strbuf);
@@ -247,7 +246,7 @@ isc_interfaceiter_create(isc_mem_t *mctx, isc_interfaceiter_t **iterp) {
 			error = WSAGetLastError();
 			if (error != WSAEFAULT && error != WSAENOBUFS) {
 				errno = error;
-				isc__strerror(error, strbuf, sizeof(strbuf));
+				strerror_r(error, strbuf, sizeof(strbuf));
 				UNEXPECTED_ERROR(__FILE__, __LINE__,
 						"get interface configuration: %s",
 						strbuf);
@@ -299,7 +298,7 @@ isc_interfaceiter_create(isc_mem_t *mctx, isc_interfaceiter_t **iterp) {
 		error = WSAGetLastError();
 		if (error == WSAEAFNOSUPPORT)
 			goto success;
-		isc__strerror(error, strbuf, sizeof(strbuf));
+		strerror_r(error, strbuf, sizeof(strbuf));
 		UNEXPECTED_ERROR(__FILE__, __LINE__,
 				"making interface scan socket: %s",
 				strbuf);
@@ -328,7 +327,7 @@ isc_interfaceiter_create(isc_mem_t *mctx, isc_interfaceiter_t **iterp) {
 			error = WSAGetLastError();
 			if (error != WSAEFAULT && error != WSAENOBUFS) {
 				errno = error;
-				isc__strerror(error, strbuf, sizeof(strbuf));
+				strerror_r(error, strbuf, sizeof(strbuf));
 				UNEXPECTED_ERROR(__FILE__, __LINE__,
 						 "sio address list query: %s",
 						 strbuf);

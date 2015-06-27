@@ -22,7 +22,6 @@
 #include <config.h>
 
 #include <isc/result.h>
-#include <isc/strerror.h>
 #include <isc/util.h>
 
 #include "errno2result.h"
@@ -35,7 +34,7 @@
  */
 isc_result_t
 isc___errno2result(int posixerrno, const char *file, unsigned int line) {
-	char strbuf[ISC_STRERRORSIZE];
+	char strbuf[BUFSIZ];
 
 	switch (posixerrno) {
 	case ENOTDIR:
@@ -107,7 +106,7 @@ isc___errno2result(int posixerrno, const char *file, unsigned int line) {
 	case ECONNREFUSED:
 		return (ISC_R_CONNREFUSED);
 	default:
-		isc__strerror(posixerrno, strbuf, sizeof(strbuf));
+		strerror_r(posixerrno, strbuf, sizeof(strbuf));
 		UNEXPECTED_ERROR(file, line, "unable to convert errno "
 				 "to isc_result: %d: %s",
 				 posixerrno, strbuf);
