@@ -30,6 +30,15 @@ Python 2.5.
 
 ---
 
+The following C99 functions are BANNED.  They are unsafe, tending to
+cause buffer overruns and (all too often) exploitable security holes:
+
+* strcpy, strncpy, strcat:  Use strlcpy and strlcat instead.
+* sprintf, vsprintf: use snprintf and vsnprintf instead
+* gets: Use fgets instead. 
+
+---
+
 Care must be taken to ensure that 32- and 64-bit machines of any endianness
 and any character signedness function as expected.
 
