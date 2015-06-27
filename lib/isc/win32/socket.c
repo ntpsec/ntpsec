@@ -66,7 +66,6 @@
 #include <isc/region.h>
 #include <isc/socket.h>
 #include <isc/stats.h>
-#include <isc/strerror.h>
 #include <isc/syslog.h>
 #include <isc/task.h>
 #include <isc/thread.h>
@@ -438,14 +437,14 @@ static void
 signal_iocompletionport_exit(isc_socketmgr_t *manager) {
 	int i;
 	int errval;
-	char strbuf[ISC_STRERRORSIZE];
+	char strbuf[BUFSIZ];
 
 	REQUIRE(VALID_MANAGER(manager));
 	for (i = 0; i < manager->maxIOCPThreads; i++) {
 		if (!PostQueuedCompletionStatus(manager->hIoCompletionPort,
 						0, 0, 0)) {
 			errval = GetLastError();
-			isc__strerror(errval, strbuf, sizeof(strbuf));
+			strerror_r(errval, strbuf, sizeof(strbuf));
 			FATAL_ERROR(__FILE__, __LINE__,
 				isc_msgcat_get(isc_msgcat, ISC_MSGSET_SOCKET,
 				ISC_MSG_FAILED,
@@ -461,7 +460,7 @@ signal_iocompletionport_exit(isc_socketmgr_t *manager) {
 void
 iocompletionport_createthreads(int total_threads, isc_socketmgr_t *manager) {
 	int errval;
-	char strbuf[ISC_STRERRORSIZE];
+	char strbuf[BUFSIZ];
 	int i;
 
 	INSIST(total_threads > 0);
@@ -475,7 +474,7 @@ iocompletionport_createthreads(int total_threads, isc_socketmgr_t *manager) {
 						&manager->dwIOCPThreadIds[i]);
 		if (manager->hIOCPThreads[i] == NULL) {
 			errval = GetLastError();
-			isc__strerror(errval, strbuf, sizeof(strbuf));
+			strerror_r(errval, strbuf, sizeof(strbuf));
 			FATAL_ERROR(__FILE__, __LINE__,
 				isc_msgcat_get(isc_msgcat, ISC_MSGSET_SOCKET,
 				ISC_MSG_FAILED,
@@ -492,7 +491,7 @@ iocompletionport_createthreads(int total_threads, isc_socketmgr_t *manager) {
 void
 iocompletionport_init(isc_socketmgr_t *manager) {
 	int errval;
-	char strbuf[ISC_STRERRORSIZE];
+	char strbuf[BUFSIZ];
 
 	REQUIRE(VALID_MANAGER(manager));
 	/*
@@ -502,7 +501,7 @@ iocompletionport_init(isc_socketmgr_t *manager) {
 	hHeapHandle = HeapCreate(0, 10 * sizeof(IoCompletionInfo), 0);
 	if (hHeapHandle == NULL) {
 		errval = GetLastError();
-		isc__strerror(errval, strbuf, sizeof(strbuf));
+		strerror_r(errval, strbuf, sizeof(strbuf));
 		FATAL_ERROR(__FILE__, __LINE__,
 			    isc_msgcat_get(isc_msgcat, ISC_MSGSET_SOCKET,
 					   ISC_MSG_FAILED,
@@ -520,7 +519,7 @@ iocompletionport_init(isc_socketmgr_t *manager) {
 			0, manager->maxIOCPThreads);
 	if (manager->hIoCompletionPort == NULL) {
 		errval = GetLastError();
-		isc__strerror(errval, strbuf, sizeof(strbuf));
+		strerror_r(errval, strbuf, sizeof(strbuf));
 		FATAL_ERROR(__FILE__, __LINE__,
 				isc_msgcat_get(isc_msgcat, ISC_MSGSET_SOCKET,
 				ISC_MSG_FAILED,
@@ -543,7 +542,7 @@ iocompletionport_init(isc_socketmgr_t *manager) {
 void
 iocompletionport_update(isc_socket_t *sock) {
 	HANDLE hiocp;
-	char strbuf[ISC_STRERRORSIZE];
+	char strbuf[BUFSIZ];
 
 	REQUIRE(VALID_SOCKET(sock));
 
@@ -552,7 +551,7 @@ iocompletionport_update(isc_socket_t *sock) {
 
 	if (hiocp == NULL) {
 		DWORD errval = GetLastError();
-		isc__strerror(errval, strbuf, sizeof(strbuf));
+		strerror_r(errval, strbuf, sizeof(strbuf));
 		isc_log_iwrite(isc_lctx,
 				ISC_LOGCATEGORY_GENERAL,
 				ISC_LOGMODULE_SOCKET, ISC_LOG_ERROR,
@@ -618,8 +617,8 @@ initialise(void) {
 
 	err = WSAStartup(wVersionRequested, &wsaData);
 	if (err != 0) {
-		char strbuf[ISC_STRERRORSIZE];
-		isc__strerror(err, strbuf, sizeof(strbuf));
+		char strbuf[BUFSIZ];
+		strerror_r(err, strbuf, sizeof(strbuf));
 		FATAL_ERROR(__FILE__, __LINE__, "WSAStartup() %s: %s",
 			    isc_msgcat_get(isc_msgcat, ISC_MSGSET_GENERAL,
 					   ISC_MSG_FAILED, "failed"),
@@ -882,13 +881,13 @@ static isc_result_t
 make_nonblock(SOCKET fd) {
 	int ret;
 	unsigned long flags = 1;
-	char strbuf[ISC_STRERRORSIZE];
+	char strbuf[BUFSIZ];
 
 	/* Set the socket to non-blocking */
 	ret = ioctlsocket(fd, FIONBIO, &flags);
 
 	if (ret == -1) {
-		isc__strerror(errno, strbuf, sizeof(strbuf));
+		strerror_r(errno, strbuf, sizeof(strbuf));
 		UNEXPECTED_ERROR(__FILE__, __LINE__,
 				 "ioctlsocket(%d, FIOBIO, %d): %s",
 				 fd, flags, strbuf);
@@ -1205,7 +1204,7 @@ map_socket_error(isc_socket_t *sock, int windows_errno, int *isc_errno,
 		break;
 	}
 	if (doreturn == DOIO_HARD) {
-		isc__strerror(windows_errno, errorstring, bufsize);
+		strerror_r(windows_errno, errorstring, bufsize);
 	}
 	return (doreturn);
 }
@@ -1329,7 +1328,7 @@ completeio_send(isc_socket_t *sock, isc_socketevent_t *dev,
 		struct msghdr *messagehdr, int cc, int send_errno)
 {
 	char addrbuf[ISC_SOCKADDR_FORMATSIZE];
-	char strbuf[ISC_STRERRORSIZE];
+	char strbuf[BUFSIZ];
 
 	if (send_errno != 0) {
 		if (SOFT_ERROR(send_errno))
@@ -1348,7 +1347,7 @@ completeio_send(isc_socket_t *sock, isc_socketevent_t *dev,
 		 * a status.
 		 */
 		isc_sockaddr_format(&dev->address, addrbuf, sizeof(addrbuf));
-		isc__strerror(send_errno, strbuf, sizeof(strbuf));
+		strerror_r(send_errno, strbuf, sizeof(strbuf));
 		UNEXPECTED_ERROR(__FILE__, __LINE__, "completeio_send: %s: %s",
 				 addrbuf, strbuf);
 		dev->result = isc__errno2result(send_errno);
@@ -1375,7 +1374,7 @@ startio_send(isc_socket_t *sock, isc_socketevent_t *dev, int *nbytes,
 	     int *send_errno)
 {
 	char *cmsg = NULL;
-	char strbuf[ISC_STRERRORSIZE];
+	char strbuf[BUFSIZ];
 	IoCompletionInfo *lpo;
 	int status;
 	struct msghdr *msghdr;
@@ -1413,7 +1412,7 @@ startio_send(isc_socket_t *sock, isc_socketevent_t *dev, int *nbytes,
 		 * If we got this far then something is wrong
 		 */
 		if (isc_log_wouldlog(isc_lctx, IOEVENT_LEVEL)) {
-			isc__strerror(*send_errno, strbuf, sizeof(strbuf));
+			strerror_r(*send_errno, strbuf, sizeof(strbuf));
 			socket_log(__LINE__, sock, NULL, IOEVENT,
 				   isc_msgcat, ISC_MSGSET_SOCKET,
 				   ISC_MSG_INTERNALSEND,
@@ -1643,7 +1642,7 @@ socket_create(isc_socketmgr_t *manager, int pf, isc_sockettype_t type,
 	int size;
 #endif
 	int socket_errno;
-	char strbuf[ISC_STRERRORSIZE];
+	char strbuf[BUFSIZ];
 
 	REQUIRE(VALID_MANAGER(manager));
 	REQUIRE(socketp != NULL && *socketp == NULL);
@@ -1713,7 +1712,7 @@ socket_create(isc_socketmgr_t *manager, int pf, isc_sockettype_t type,
 			return (ISC_R_FAMILYNOSUPPORT);
 
 		default:
-			isc__strerror(socket_errno, strbuf, sizeof(strbuf));
+			strerror_r(socket_errno, strbuf, sizeof(strbuf));
 			UNEXPECTED_ERROR(__FILE__, __LINE__,
 					 "socket() %s: %s",
 					 isc_msgcat_get(isc_msgcat,
@@ -1748,7 +1747,7 @@ socket_create(isc_socketmgr_t *manager, int pf, isc_sockettype_t type,
 		if ((pf == AF_INET6)
 		    && (setsockopt(sock->fd, IPPROTO_IPV6, IPV6_RECVPKTINFO,
 				   (char *)&on, sizeof(on)) < 0)) {
-			isc__strerror(WSAGetLastError(), strbuf, sizeof(strbuf));
+			strerror_r(WSAGetLastError(), strbuf, sizeof(strbuf));
 			UNEXPECTED_ERROR(__FILE__, __LINE__,
 					 "setsockopt(%d, IPV6_RECVPKTINFO) "
 					 "%s: %s", sock->fd,
@@ -1763,7 +1762,7 @@ socket_create(isc_socketmgr_t *manager, int pf, isc_sockettype_t type,
 		if ((pf == AF_INET6)
 		    && (setsockopt(sock->fd, IPPROTO_IPV6, IPV6_PKTINFO,
 				   (char *)&on, sizeof(on)) < 0)) {
-			isc__strerror(WSAGetLastError(), strbuf, sizeof(strbuf));
+			strerror_r(WSAGetLastError(), strbuf, sizeof(strbuf));
 			UNEXPECTED_ERROR(__FILE__, __LINE__,
 					 "setsockopt(%d, IPV6_PKTINFO) %s: %s",
 					 sock->fd,
@@ -2106,7 +2105,7 @@ done:
 static void
 internal_connect(isc_socket_t *sock, IoCompletionInfo *lpo, int connect_errno) {
 	isc_socket_connev_t *cdev;
-	char strbuf[ISC_STRERRORSIZE];
+	char strbuf[BUFSIZ];
 
 	INSIST(VALID_SOCKET(sock));
 
@@ -2169,7 +2168,7 @@ internal_connect(isc_socket_t *sock, IoCompletionInfo *lpo, int connect_errno) {
 #undef ERROR_MATCH
 		default:
 			cdev->result = ISC_R_UNEXPECTED;
-			isc__strerror(connect_errno, strbuf, sizeof(strbuf));
+			strerror_r(connect_errno, strbuf, sizeof(strbuf));
 			UNEXPECTED_ERROR(__FILE__, __LINE__,
 					 "internal_connect: connect() %s",
 					 strbuf);
@@ -2425,7 +2424,7 @@ SocketIoThread(LPVOID ThreadContext) {
 	int request;
 	struct msghdr *messagehdr = NULL;
 	int errval;
-	char strbuf[ISC_STRERRORSIZE];
+	char strbuf[BUFSIZ];
 	int errstatus;
 
 	REQUIRE(VALID_MANAGER(manager));
@@ -2438,7 +2437,7 @@ SocketIoThread(LPVOID ThreadContext) {
 	if (!SetThreadPriority(GetCurrentThread(),
 			       THREAD_PRIORITY_ABOVE_NORMAL)) {
 		errval = GetLastError();
-		isc__strerror(errval, strbuf, sizeof(strbuf));
+		strerror_r(errval, strbuf, sizeof(strbuf));
 		FATAL_ERROR(__FILE__, __LINE__,
 				isc_msgcat_get(isc_msgcat, ISC_MSGSET_SOCKET,
 				ISC_MSG_FAILED,
@@ -3171,7 +3170,7 @@ isc_result_t
 isc__socket_bind(isc_socket_t *sock, isc_sockaddr_t *sockaddr,
 		 unsigned int options) {
 	int bind_errno;
-	char strbuf[ISC_STRERRORSIZE];
+	char strbuf[BUFSIZ];
 	int on = 1;
 
 	REQUIRE(VALID_SOCKET(sock));
@@ -3219,7 +3218,7 @@ isc__socket_bind(isc_socket_t *sock, isc_sockaddr_t *sockaddr,
 		case WSAEINVAL:
 			return (ISC_R_BOUND);
 		default:
-			isc__strerror(bind_errno, strbuf, sizeof(strbuf));
+			strerror_r(bind_errno, strbuf, sizeof(strbuf));
 			UNEXPECTED_ERROR(__FILE__, __LINE__, "bind: %s",
 					 strbuf);
 			return (ISC_R_UNEXPECTED);
@@ -3255,7 +3254,7 @@ isc__socket_filter(isc_socket_t *sock, const char *filter) {
  */
 isc_result_t
 isc__socket_listen(isc_socket_t *sock, unsigned int backlog) {
-	char strbuf[ISC_STRERRORSIZE];
+	char strbuf[BUFSIZ];
 
 	REQUIRE(VALID_SOCKET(sock));
 
@@ -3279,7 +3278,7 @@ isc__socket_listen(isc_socket_t *sock, unsigned int backlog) {
 
 	if (listen(sock->fd, (int)backlog) < 0) {
 		UNLOCK(&sock->lock);
-		isc__strerror(WSAGetLastError(), strbuf, sizeof(strbuf));
+		strerror_r(WSAGetLastError(), strbuf, sizeof(strbuf));
 
 		UNEXPECTED_ERROR(__FILE__, __LINE__, "listen: %s", strbuf);
 
@@ -3420,7 +3419,7 @@ isc_result_t
 isc__socket_connect(isc_socket_t *sock, isc_sockaddr_t *addr,
 		    isc_task_t *task, isc_taskaction_t action, const void *arg)
 {
-	char strbuf[ISC_STRERRORSIZE];
+	char strbuf[BUFSIZ];
 	isc_socket_connev_t *cdev;
 	isc_task_t *ntask = NULL;
 	isc_socketmgr_t *manager;
@@ -3470,7 +3469,7 @@ isc__socket_connect(isc_socket_t *sock, isc_sockaddr_t *addr,
 			case WSAEINVAL:
 				return (ISC_R_BOUND);
 			default:
-				isc__strerror(bind_errno, strbuf,
+				strerror_r(bind_errno, strbuf,
 					      sizeof(strbuf));
 				UNEXPECTED_ERROR(__FILE__, __LINE__,
 						 "bind: %s", strbuf);
@@ -3565,7 +3564,7 @@ isc_result_t
 isc__socket_getsockname(isc_socket_t *sock, isc_sockaddr_t *addressp) {
 	ISC_SOCKADDR_LEN_T len;
 	isc_result_t result;
-	char strbuf[ISC_STRERRORSIZE];
+	char strbuf[BUFSIZ];
 
 	REQUIRE(VALID_SOCKET(sock));
 	REQUIRE(addressp != NULL);
@@ -3590,7 +3589,7 @@ isc__socket_getsockname(isc_socket_t *sock, isc_sockaddr_t *addressp) {
 
 	len = sizeof(addressp->type);
 	if (getsockname(sock->fd, &addressp->type.sa, (void *)&len) < 0) {
-		isc__strerror(WSAGetLastError(), strbuf, sizeof(strbuf));
+		strerror_r(WSAGetLastError(), strbuf, sizeof(strbuf));
 		UNEXPECTED_ERROR(__FILE__, __LINE__, "getsockname: %s",
 				 strbuf);
 		result = ISC_R_UNEXPECTED;

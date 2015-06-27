@@ -25,10 +25,10 @@
 #include <time.h>
 #include <sys/time.h>
 #include <errno.h>
+#include <string.h>
 
 #include <isc/mutex.h>
 #include <isc/util.h>
-#include <isc/strerror.h>
 
 #if HAVE_PTHREADS < 5		/* HP-UX 10.20 has 4, needs this */
 # define pthread_mutex_init(m, a)					\
@@ -266,7 +266,7 @@ pthread_mutexattr_t isc__mutex_attrs = {
 #if !(ISC_MUTEX_DEBUG && defined(PTHREAD_MUTEX_ERRORCHECK)) && !ISC_MUTEX_PROFILE
 isc_result_t
 isc__mutex_init(isc_mutex_t *mp, const char *file, unsigned int line) {
-	char strbuf[ISC_STRERRORSIZE];
+	char strbuf[BUFSIZ];
 	isc_result_t result = ISC_R_SUCCESS;
 	int err;
 
@@ -274,7 +274,7 @@ isc__mutex_init(isc_mutex_t *mp, const char *file, unsigned int line) {
 	if (err == ENOMEM)
 		return (ISC_R_NOMEMORY);
 	if (err != 0) {
-		isc__strerror(errno, strbuf, sizeof(strbuf));
+		strerror_r(errno, strbuf, sizeof(strbuf));
 		UNEXPECTED_ERROR(file, line, "isc_mutex_init() failed: %s",
 				 strbuf);
 		result = ISC_R_UNEXPECTED;

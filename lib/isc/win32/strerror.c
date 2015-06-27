@@ -25,8 +25,6 @@
 
 #include <isc/mutex.h>
 #include <isc/once.h>
-#include <isc/print.h>
-#include <isc/strerror.h>
 #include <isc/util.h>
 
 /*
@@ -57,7 +55,7 @@ static void init_lock(void) {
  */
 
 void
-isc__strerror(int num, char *buf, size_t size) {
+strerror_r(int num, char *buf, size_t size) {
 	char *msg;
 	BOOL freebuf;
 	unsigned int unum = num;
@@ -82,7 +80,7 @@ isc__strerror(int num, char *buf, size_t size) {
 
 /*
  * Note this will cause a memory leak unless the memory allocated here
- * is freed by calling LocalFree.  isc__strerror does this before unlocking.
+ * is freed by calling LocalFree.  strerror_r does this before unlocking.
  * This only gets called if there is a system type of error and will likely
  * be an unusual event.
  */

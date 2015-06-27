@@ -511,10 +511,6 @@ SOURCE=..\include\isc\stdio.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\include\isc\strerror.h
-# End Source File
-# Begin Source File
-
 SOURCE=.\include\isc\stdtime.h
 # End Source File
 # Begin Source File

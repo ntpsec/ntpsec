@@ -42,7 +42,6 @@
 #include <isc/mutex.h>
 #include <isc/event.h>
 #include <isc/platform.h>
-#include <isc/strerror.h>
 #include <isc/string.h>
 #include <isc/task.h>
 #include <isc/time.h>
@@ -203,14 +202,14 @@ reload_action(int arg) {
 static isc_result_t
 handle_signal(int sig, void (*handler)(int)) {
 	struct sigaction sa;
-	char strbuf[ISC_STRERRORSIZE];
+	char strbuf[BUFSIZ];
 
 	memset(&sa, 0, sizeof(sa));
 	sa.sa_handler = handler;
 
 	if (sigfillset(&sa.sa_mask) != 0 ||
 	    sigaction(sig, &sa, NULL) < 0) {
-		isc__strerror(errno, strbuf, sizeof(strbuf));
+		strerror_r(errno, strbuf, sizeof(strbuf));
 		UNEXPECTED_ERROR(__FILE__, __LINE__,
 				 isc_msgcat_get(isc_msgcat, ISC_MSGSET_APP,
 					       ISC_MSG_SIGNALSETUP,
@@ -239,7 +238,7 @@ isc__app_ctxstart(isc_appctx_t *ctx0) {
 	 */
 	presult = pthread_init();
 	if (presult != 0) {
-		isc__strerror(presult, strbuf, sizeof(strbuf));
+		strerror_r(presult, strbuf, sizeof(strbuf));
 		UNEXPECTED_ERROR(__FILE__, __LINE__,
 				 "isc_app_start() pthread_init: %s", strbuf);
 		return (ISC_R_UNEXPECTED);
@@ -270,7 +269,7 @@ isc__app_start(void) {
 	isc_result_t result;
 	int presult;
 	sigset_t sset;
-	char strbuf[ISC_STRERRORSIZE];
+	char strbuf[BUFSIZ];
 
 	isc_g_appctx.common.impmagic = APPCTX_MAGIC;
 	isc_g_appctx.common.magic = ISCAPI_APPCTX_MAGIC;
@@ -341,14 +340,14 @@ isc__app_start(void) {
 	    sigaddset(&sset, SIGHUP) != 0 ||
 	    sigaddset(&sset, SIGINT) != 0 ||
 	    sigaddset(&sset, SIGTERM) != 0) {
-		isc__strerror(errno, strbuf, sizeof(strbuf));
+		strerror_r(errno, strbuf, sizeof(strbuf));
 		UNEXPECTED_ERROR(__FILE__, __LINE__,
 				 "isc_app_start() sigsetops: %s", strbuf);
 		return (ISC_R_UNEXPECTED);
 	}
 	presult = pthread_sigmask(SIG_BLOCK, &sset, NULL);
 	if (presult != 0) {
-		isc__strerror(presult, strbuf, sizeof(strbuf));
+		strerror_r(presult, strbuf, sizeof(strbuf));
 		UNEXPECTED_ERROR(__FILE__, __LINE__,
 				 "isc_app_start() pthread_sigmask: %s",
 				 strbuf);
@@ -366,14 +365,14 @@ isc__app_start(void) {
 	    sigaddset(&sset, SIGHUP) != 0 ||
 	    sigaddset(&sset, SIGINT) != 0 ||
 	    sigaddset(&sset, SIGTERM) != 0) {
-		isc__strerror(errno, strbuf, sizeof(strbuf));
+		strerror_r(errno, strbuf, sizeof(strbuf));
 		UNEXPECTED_ERROR(__FILE__, __LINE__,
 				 "isc_app_start() sigsetops: %s", strbuf);
 		return (ISC_R_UNEXPECTED);
 	}
 	presult = sigprocmask(SIG_UNBLOCK, &sset, NULL);
 	if (presult != 0) {
-		isc__strerror(presult, strbuf, sizeof(strbuf));
+		strerror_r(presult, strbuf, sizeof(strbuf));
 		UNEXPECTED_ERROR(__FILE__, __LINE__,
 				 "isc_app_start() sigprocmask: %s", strbuf);
 		return (ISC_R_UNEXPECTED);
@@ -571,7 +570,7 @@ isc__app_ctxrun(isc_appctx_t *ctx0) {
 	isc_task_t *task;
 #ifdef USE_THREADS_SINGLECTX
 	sigset_t sset;
-	char strbuf[ISC_STRERRORSIZE];
+	char strbuf[BUFSIZ];
 #ifdef HAVE_SIGWAIT
 	int sig;
 #endif
@@ -641,7 +640,7 @@ isc__app_ctxrun(isc_appctx_t *ctx0) {
 		    sigaddset(&sset, SIGHUP) != 0 ||
 		    sigaddset(&sset, SIGINT) != 0 ||
 		    sigaddset(&sset, SIGTERM) != 0) {
-			isc__strerror(errno, strbuf, sizeof(strbuf));
+			strerror_r(errno, strbuf, sizeof(strbuf));
 			UNEXPECTED_ERROR(__FILE__, __LINE__,
 					 "isc_app_run() sigsetops: %s", strbuf);
 			return (ISC_R_UNEXPECTED);
@@ -671,7 +670,7 @@ isc__app_ctxrun(isc_appctx_t *ctx0) {
 		 * Listen for all signals.
 		 */
 		if (sigemptyset(&sset) != 0) {
-			isc__strerror(errno, strbuf, sizeof(strbuf));
+			strerror_r(errno, strbuf, sizeof(strbuf));
 			UNEXPECTED_ERROR(__FILE__, __LINE__,
 					 "isc_app_run() sigsetops: %s",
 					 strbuf);
@@ -711,7 +710,7 @@ ISC_APPFUNC_SCOPE isc_result_t
 isc__app_ctxshutdown(isc_appctx_t *ctx0) {
 	isc__appctx_t *ctx = (isc__appctx_t *)ctx0;
 	isc_boolean_t want_kill = ISC_TRUE;
-	char strbuf[ISC_STRERRORSIZE];
+	char strbuf[BUFSIZ];
 
 	REQUIRE(VALID_APPCTX(ctx));
 
@@ -735,7 +734,7 @@ isc__app_ctxshutdown(isc_appctx_t *ctx0) {
 
 			result = pthread_kill(main_thread, SIGTERM);
 			if (result != 0) {
-				isc__strerror(result, strbuf, sizeof(strbuf));
+				strerror_r(result, strbuf, sizeof(strbuf));
 				UNEXPECTED_ERROR(__FILE__, __LINE__,
 						 "isc_app_shutdown() "
 						 "pthread_kill: %s",
@@ -744,7 +743,7 @@ isc__app_ctxshutdown(isc_appctx_t *ctx0) {
 			}
 #else
 			if (kill(getpid(), SIGTERM) < 0) {
-				isc__strerror(errno, strbuf, sizeof(strbuf));
+				strerror_r(errno, strbuf, sizeof(strbuf));
 				UNEXPECTED_ERROR(__FILE__, __LINE__,
 						 "isc_app_shutdown() "
 						 "kill: %s", strbuf);
@@ -766,7 +765,7 @@ ISC_APPFUNC_SCOPE isc_result_t
 isc__app_ctxsuspend(isc_appctx_t *ctx0) {
 	isc__appctx_t *ctx = (isc__appctx_t *)ctx0;
 	isc_boolean_t want_kill = ISC_TRUE;
-	char strbuf[ISC_STRERRORSIZE];
+	char strbuf[BUFSIZ];
 
 	REQUIRE(VALID_APPCTX(ctx));
 
@@ -791,7 +790,7 @@ isc__app_ctxsuspend(isc_appctx_t *ctx0) {
 
 			result = pthread_kill(main_thread, SIGHUP);
 			if (result != 0) {
-				isc__strerror(result, strbuf, sizeof(strbuf));
+				strerror_r(result, strbuf, sizeof(strbuf));
 				UNEXPECTED_ERROR(__FILE__, __LINE__,
 						 "isc_app_reload() "
 						 "pthread_kill: %s",
@@ -800,7 +799,7 @@ isc__app_ctxsuspend(isc_appctx_t *ctx0) {
 			}
 #else
 			if (kill(getpid(), SIGHUP) < 0) {
-				isc__strerror(errno, strbuf, sizeof(strbuf));
+				strerror_r(errno, strbuf, sizeof(strbuf));
 				UNEXPECTED_ERROR(__FILE__, __LINE__,
 						 "isc_app_reload() "
 						 "kill: %s", strbuf);

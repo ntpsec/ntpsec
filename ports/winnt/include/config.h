@@ -118,7 +118,6 @@
 #include <process.h>
 #include <time.h>		/* time_t for timeval decl */
 #include <io.h>
-#include <isc/strerror.h>
 
 /* ---------------------------------------------------------------------
  * Above this line are #include lines and the few #define lines

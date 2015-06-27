@@ -35,7 +35,6 @@
 #include <isc/msgs.h>
 #include <isc/net.h>
 #include <isc/once.h>
-#include <isc/strerror.h>
 #include <isc/string.h>
 #include <isc/util.h>
 
@@ -124,7 +123,7 @@ static isc_result_t
 try_proto(int domain) {
 	int s;
 	isc_result_t result = ISC_R_SUCCESS;
-	char strbuf[ISC_STRERRORSIZE];
+	char strbuf[BUFSIZ];
 
 	s = socket(domain, SOCK_STREAM, 0);
 	if (s == -1) {
@@ -140,7 +139,7 @@ try_proto(int domain) {
 #endif
 			return (ISC_R_NOTFOUND);
 		default:
-			isc__strerror(errno, strbuf, sizeof(strbuf));
+			strerror_r(errno, strbuf, sizeof(strbuf));
 			UNEXPECTED_ERROR(__FILE__, __LINE__,
 					 "socket() %s: %s",
 					 isc_msgcat_get(isc_msgcat,
@@ -245,7 +244,7 @@ static void
 try_ipv6only(void) {
 #ifdef IPV6_V6ONLY
 	int s, on;
-	char strbuf[ISC_STRERRORSIZE];
+	char strbuf[BUFSIZ];
 #endif
 	isc_result_t result;
 
@@ -262,7 +261,7 @@ try_ipv6only(void) {
 	/* check for TCP sockets */
 	s = socket(PF_INET6, SOCK_STREAM, 0);
 	if (s == -1) {
-		isc__strerror(errno, strbuf, sizeof(strbuf));
+		strerror_r(errno, strbuf, sizeof(strbuf));
 		UNEXPECTED_ERROR(__FILE__, __LINE__,
 				 "socket() %s: %s",
 				 isc_msgcat_get(isc_msgcat,
@@ -285,7 +284,7 @@ try_ipv6only(void) {
 	/* check for UDP sockets */
 	s = socket(PF_INET6, SOCK_DGRAM, 0);
 	if (s == -1) {
-		isc__strerror(errno, strbuf, sizeof(strbuf));
+		strerror_r(errno, strbuf, sizeof(strbuf));
 		UNEXPECTED_ERROR(__FILE__, __LINE__,
 				 "socket() %s: %s",
 				 isc_msgcat_get(isc_msgcat,
@@ -321,7 +320,7 @@ initialize_ipv6only(void) {
 static void
 try_ipv6pktinfo(void) {
 	int s, on;
-	char strbuf[ISC_STRERRORSIZE];
+	char strbuf[BUFSIZ];
 	isc_result_t result;
 	int optname;
 
@@ -334,7 +333,7 @@ try_ipv6pktinfo(void) {
 	/* we only use this for UDP sockets */
 	s = socket(PF_INET6, SOCK_DGRAM, IPPROTO_UDP);
 	if (s == -1) {
-		isc__strerror(errno, strbuf, sizeof(strbuf));
+		strerror_r(errno, strbuf, sizeof(strbuf));
 		UNEXPECTED_ERROR(__FILE__, __LINE__,
 				 "socket() %s: %s",
 				 isc_msgcat_get(isc_msgcat,

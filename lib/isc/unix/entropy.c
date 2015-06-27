@@ -35,7 +35,6 @@
 #include <unistd.h>
 
 #include <isc/platform.h>
-#include <isc/strerror.h>
 
 #ifdef ISC_PLATFORM_NEEDSYSSELECTH
 #include <sys/select.h>
@@ -451,7 +450,7 @@ static isc_result_t
 make_nonblock(int fd) {
 	int ret;
 	int flags;
-	char strbuf[ISC_STRERRORSIZE];
+	char strbuf[BUFSIZ];
 #ifdef USE_FIONBIO_IOCTL
 	int on = 1;
 
@@ -463,7 +462,7 @@ make_nonblock(int fd) {
 #endif
 
 	if (ret == -1) {
-		isc__strerror(errno, strbuf, sizeof(strbuf));
+		strerror_r(errno, strbuf, sizeof(strbuf));
 		UNEXPECTED_ERROR(__FILE__, __LINE__,
 #ifdef USE_FIONBIO_IOCTL
 				 "ioctl(%d, FIONBIO, &on): %s", fd,

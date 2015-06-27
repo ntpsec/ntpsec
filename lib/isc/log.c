@@ -35,7 +35,6 @@
 #include <isc/magic.h>
 #include <isc/mem.h>
 #include <isc/msgs.h>
-#include <isc/print.h>
 #include <isc/stat.h>
 #include <isc/stdio.h>
 #include <isc/string.h>

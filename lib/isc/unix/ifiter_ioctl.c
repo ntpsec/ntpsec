@@ -130,7 +130,7 @@ isc_ioctl(int fildes, int req, char *arg) {
 
 static isc_result_t
 getbuf4(isc_interfaceiter_t *iter) {
-	char strbuf[ISC_STRERRORSIZE];
+	char strbuf[BUFSIZ];
 
 	iter->bufsize = IFCONF_BUFSIZE_INITIAL;
 
@@ -150,7 +150,7 @@ getbuf4(isc_interfaceiter_t *iter) {
 		if (isc_ioctl(iter->socket, SIOCGIFCONF, (char *)&iter->ifc)
 		    == -1) {
 			if (errno != EINVAL) {
-				isc__strerror(errno, strbuf, sizeof(strbuf));
+				strerror_r(errno, strbuf, sizeof(strbuf));
 				UNEXPECTED_ERROR(__FILE__, __LINE__,
 						 isc_msgcat_get(isc_msgcat,
 							ISC_MSGSET_IFITERIOCTL,
@@ -203,7 +203,7 @@ getbuf4(isc_interfaceiter_t *iter) {
 #if defined(SIOCGLIFCONF) && defined(SIOCGLIFADDR)
 static isc_result_t
 getbuf6(isc_interfaceiter_t *iter) {
-	char strbuf[ISC_STRERRORSIZE];
+	char strbuf[BUFSIZ];
 	isc_result_t result;
 
 	iter->bufsize6 = IFCONF_BUFSIZE_INITIAL;
@@ -235,7 +235,7 @@ getbuf6(isc_interfaceiter_t *iter) {
 			 * kernels w/ IPv6 sockets.
 			 */
 			if (errno == ENOENT) {
-				isc__strerror(errno, strbuf, sizeof(strbuf));
+				strerror_r(errno, strbuf, sizeof(strbuf));
 				isc_log_write(isc_lctx, ISC_LOGCATEGORY_GENERAL,
 					      ISC_LOGMODULE_INTERFACE,
 					      ISC_LOG_DEBUG(1),
@@ -250,7 +250,7 @@ getbuf6(isc_interfaceiter_t *iter) {
 			}
 #endif
 			if (errno != EINVAL) {
-				isc__strerror(errno, strbuf, sizeof(strbuf));
+				strerror_r(errno, strbuf, sizeof(strbuf));
 				UNEXPECTED_ERROR(__FILE__, __LINE__,
 						 isc_msgcat_get(isc_msgcat,
 							ISC_MSGSET_IFITERIOCTL,
@@ -310,7 +310,7 @@ isc_result_t
 isc_interfaceiter_create(isc_mem_t *mctx, isc_interfaceiter_t **iterp) {
 	isc_interfaceiter_t *iter;
 	isc_result_t result;
-	char strbuf[ISC_STRERRORSIZE];
+	char strbuf[BUFSIZ];
 
 	REQUIRE(mctx != NULL);
 	REQUIRE(iterp != NULL);
@@ -346,7 +346,7 @@ isc_interfaceiter_create(isc_mem_t *mctx, isc_interfaceiter_t **iterp) {
 		 * SIOCGLIFCONF to get IPv6 addresses.
 		 */
 		if ((iter->socket6 = socket(AF_INET6, SOCK_DGRAM, 0)) < 0) {
-			isc__strerror(errno, strbuf, sizeof(strbuf));
+			strerror_r(errno, strbuf, sizeof(strbuf));
 			UNEXPECTED_ERROR(__FILE__, __LINE__,
 					 isc_msgcat_get(isc_msgcat,
 							ISC_MSGSET_IFITERIOCTL,
@@ -363,7 +363,7 @@ isc_interfaceiter_create(isc_mem_t *mctx, isc_interfaceiter_t **iterp) {
 	}
 #endif
 	if ((iter->socket = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
-		isc__strerror(errno, strbuf, sizeof(strbuf));
+		strerror_r(errno, strbuf, sizeof(strbuf));
 		UNEXPECTED_ERROR(__FILE__, __LINE__,
 				 isc_msgcat_get(isc_msgcat,
 						ISC_MSGSET_IFITERIOCTL,
@@ -451,7 +451,7 @@ internal_current4(isc_interfaceiter_t *iter) {
 	struct ifreq *ifrp;
 	struct ifreq ifreq;
 	int family;
-	char strbuf[ISC_STRERRORSIZE];
+	char strbuf[BUFSIZ];
 #if !defined(ISC_PLATFORM_HAVEIF_LADDRREQ) && defined(SIOCGLIFADDR)
 	struct lifreq lifreq;
 #else
@@ -522,7 +522,7 @@ internal_current4(isc_interfaceiter_t *iter) {
 	 * and is really hard to shut up.
 	 */
 	if (isc_ioctl(iter->socket, SIOCGIFFLAGS, (char *) &ifreq) < 0) {
-		isc__strerror(errno, strbuf, sizeof(strbuf));
+		strerror_r(errno, strbuf, sizeof(strbuf));
 		UNEXPECTED_ERROR(__FILE__, __LINE__,
 				 "%s: getting interface flags: %s",
 				 ifreq.ifr_name, strbuf);
@@ -558,7 +558,7 @@ internal_current4(isc_interfaceiter_t *iter) {
 	       sizeof(iter->current.address.type.in6));
 
 	if (isc_ioctl(iter->socket, SIOCGLIFADDR, &lifreq) < 0) {
-		isc__strerror(errno, strbuf, sizeof(strbuf));
+		strerror_r(errno, strbuf, sizeof(strbuf));
 		UNEXPECTED_ERROR(__FILE__, __LINE__,
 				 "%s: getting interface address: %s",
 				 ifreq.ifr_name, strbuf);
@@ -612,7 +612,7 @@ internal_current4(isc_interfaceiter_t *iter) {
 		 */
 		if (isc_ioctl(iter->socket, SIOCGIFDSTADDR, (char *)&ifreq)
 		    < 0) {
-			isc__strerror(errno, strbuf, sizeof(strbuf));
+			strerror_r(errno, strbuf, sizeof(strbuf));
 			UNEXPECTED_ERROR(__FILE__, __LINE__,
 				isc_msgcat_get(isc_msgcat,
 					       ISC_MSGSET_IFITERIOCTL,
@@ -635,7 +635,7 @@ internal_current4(isc_interfaceiter_t *iter) {
 		 */
 		if (isc_ioctl(iter->socket, SIOCGIFBRDADDR, (char *)&ifreq)
 		    < 0) {
-			isc__strerror(errno, strbuf, sizeof(strbuf));
+			strerror_r(errno, strbuf, sizeof(strbuf));
 			UNEXPECTED_ERROR(__FILE__, __LINE__,
 				isc_msgcat_get(isc_msgcat,
 					       ISC_MSGSET_IFITERIOCTL,
@@ -660,7 +660,7 @@ internal_current4(isc_interfaceiter_t *iter) {
 	 * and is really hard to shut up.
 	 */
 	if (isc_ioctl(iter->socket, SIOCGIFNETMASK, (char *)&ifreq) < 0) {
-		isc__strerror(errno, strbuf, sizeof(strbuf));
+		strerror_r(errno, strbuf, sizeof(strbuf));
 		UNEXPECTED_ERROR(__FILE__, __LINE__,
 			isc_msgcat_get(isc_msgcat,
 				       ISC_MSGSET_IFITERIOCTL,
@@ -683,7 +683,7 @@ internal_current6(isc_interfaceiter_t *iter) {
 	struct LIFREQ *ifrp;
 	struct LIFREQ lifreq;
 	int family;
-	char strbuf[ISC_STRERRORSIZE];
+	char strbuf[BUFSIZ];
 	int fd;
 
 	REQUIRE(VALID_IFITER(iter));
@@ -750,7 +750,7 @@ internal_current6(isc_interfaceiter_t *iter) {
 	 * and is really hard to shut up.
 	 */
 	if (isc_ioctl(fd, SIOCGLIFFLAGS, (char *) &lifreq) < 0) {
-		isc__strerror(errno, strbuf, sizeof(strbuf));
+		strerror_r(errno, strbuf, sizeof(strbuf));
 		UNEXPECTED_ERROR(__FILE__, __LINE__,
 				 "%s: getting interface flags: %s",
 				 lifreq.lifr_name, strbuf);
@@ -790,7 +790,7 @@ internal_current6(isc_interfaceiter_t *iter) {
 		 */
 		if (isc_ioctl(fd, SIOCGLIFDSTADDR, (char *)&lifreq)
 		    < 0) {
-			isc__strerror(errno, strbuf, sizeof(strbuf));
+			strerror_r(errno, strbuf, sizeof(strbuf));
 			UNEXPECTED_ERROR(__FILE__, __LINE__,
 				isc_msgcat_get(isc_msgcat,
 					       ISC_MSGSET_IFITERIOCTL,
@@ -815,7 +815,7 @@ internal_current6(isc_interfaceiter_t *iter) {
 		 */
 		if (isc_ioctl(iter->socket, SIOCGLIFBRDADDR, (char *)&lifreq)
 		    < 0) {
-			isc__strerror(errno, strbuf, sizeof(strbuf));
+			strerror_r(errno, strbuf, sizeof(strbuf));
 			UNEXPECTED_ERROR(__FILE__, __LINE__,
 				isc_msgcat_get(isc_msgcat,
 					       ISC_MSGSET_IFITERIOCTL,
@@ -866,7 +866,7 @@ internal_current6(isc_interfaceiter_t *iter) {
 	 * and is really hard to shut up.
 	 */
 	if (isc_ioctl(fd, SIOCGLIFNETMASK, (char *)&lifreq) < 0) {
-		isc__strerror(errno, strbuf, sizeof(strbuf));
+		strerror_r(errno, strbuf, sizeof(strbuf));
 		UNEXPECTED_ERROR(__FILE__, __LINE__,
 				 isc_msgcat_get(isc_msgcat,
 						ISC_MSGSET_IFITERIOCTL,

@@ -25,7 +25,6 @@
 #include <stdlib.h>
 #include <syslog.h>
 
-#include <isc/strerror.h>
 #include <lib_strbuf.h>
 
 #include "ntp_stdlib.h"
@@ -201,7 +200,7 @@ NTReportError(const char *name, const char *str) {
 
 /*
  * ntp_strerror() - provide strerror()-compatible wrapper for libisc's
- *		    isc__strerror(), which knows about Windows as well as
+ *		    strerror_r(), which knows about Windows as well as
  *		    C runtime error messages.
  */
 
@@ -213,7 +212,7 @@ ntp_strerror(
 	char *	buf;
 
 	LIB_GETBUF(buf);
-	isc__strerror(code, buf, LIB_BUFLENGTH);
+	strerror_r(code, buf, LIB_BUFLENGTH);
 
 	return buf;
 }

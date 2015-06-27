@@ -25,12 +25,11 @@
 #include <limits.h>
 #include <syslog.h>
 #include <time.h>
+#include <string.h>
 
 #include <sys/time.h>	/* Required for struct timeval on some platforms. */
 
 #include <isc/log.h>
-#include <isc/print.h>
-#include <isc/strerror.h>
 #include <isc/string.h>
 #include <isc/time.h>
 #include <isc/util.h>
@@ -145,12 +144,12 @@ isc_time_isepoch(const isc_time_t *t) {
 isc_result_t
 isc_time_now(isc_time_t *t) {
 	struct timeval tv;
-	char strbuf[ISC_STRERRORSIZE];
+	char strbuf[BUFSIZ];
 
 	REQUIRE(t != NULL);
 
 	if (gettimeofday(&tv, NULL) == -1) {
-		isc__strerror(errno, strbuf, sizeof(strbuf));
+		strerror_r(errno, strbuf, sizeof(strbuf));
 		UNEXPECTED_ERROR(__FILE__, __LINE__, "%s", strbuf);
 		return (ISC_R_UNEXPECTED);
 	}
@@ -187,14 +186,14 @@ isc_time_now(isc_time_t *t) {
 isc_result_t
 isc_time_nowplusinterval(isc_time_t *t, const isc_interval_t *i) {
 	struct timeval tv;
-	char strbuf[ISC_STRERRORSIZE];
+	char strbuf[BUFSIZ];
 
 	REQUIRE(t != NULL);
 	REQUIRE(i != NULL);
 	INSIST(i->nanoseconds < NS_PER_S);
 
 	if (gettimeofday(&tv, NULL) == -1) {
-		isc__strerror(errno, strbuf, sizeof(strbuf));
+		strerror_r(errno, strbuf, sizeof(strbuf));
 		UNEXPECTED_ERROR(__FILE__, __LINE__, "%s", strbuf);
 		return (ISC_R_UNEXPECTED);
 	}

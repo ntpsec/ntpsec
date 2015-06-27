@@ -22,7 +22,6 @@
 #include <winsock2.h>
 #include "errno2result.h"
 #include <isc/result.h>
-#include <isc/strerror.h>
 #include <isc/util.h>
 
 /*
@@ -33,7 +32,7 @@
  */
 isc_result_t
 isc__errno2resultx(int posixerrno, const char *file, int line) {
-	char strbuf[ISC_STRERRORSIZE];
+	char strbuf[BUFSIZ];
 
 	switch (posixerrno) {
 	case ENOTDIR:
@@ -99,7 +98,7 @@ isc__errno2resultx(int posixerrno, const char *file, int line) {
 	case WSAENOBUFS:
 		return (ISC_R_NORESOURCES);
 	default:
-		isc__strerror(posixerrno, strbuf, sizeof(strbuf));
+		strerror_r(posixerrno, strbuf, sizeof(strbuf));
 		UNEXPECTED_ERROR(file, line, "unable to convert errno "
 				 "to isc_result: %d: %s", posixerrno, strbuf);
 		/*

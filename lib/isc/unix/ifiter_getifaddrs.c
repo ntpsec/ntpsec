@@ -54,7 +54,7 @@ isc_result_t
 isc_interfaceiter_create(isc_mem_t *mctx, isc_interfaceiter_t **iterp) {
 	isc_interfaceiter_t *iter;
 	isc_result_t result;
-	char strbuf[ISC_STRERRORSIZE];
+	char strbuf[BUFSIZ];
 	int trys, ret;
 
 	REQUIRE(mctx != NULL);
@@ -77,7 +77,7 @@ isc_interfaceiter_create(isc_mem_t *mctx, isc_interfaceiter_t **iterp) {
 	if (!seenv6) {
 		iter->proc = fopen("/proc/net/if_inet6", "r");
 		if (iter->proc == NULL) {
-			isc__strerror(errno, strbuf, sizeof(strbuf));
+			strerror_r(errno, strbuf, sizeof(strbuf));
 			isc_log_write(isc_lctx, ISC_LOGCATEGORY_GENERAL,
 				      ISC_LOGMODULE_SOCKET, ISC_LOG_WARNING,
 				      "failed to open /proc/net/if_inet6");
@@ -95,7 +95,7 @@ isc_interfaceiter_create(isc_mem_t *mctx, isc_interfaceiter_t **iterp) {
 			break;
 	}
 	if (ret < 0) {
-		isc__strerror(errno, strbuf, sizeof(strbuf));
+		strerror_r(errno, strbuf, sizeof(strbuf));
 		UNEXPECTED_ERROR(__FILE__, __LINE__,
                 		 "getting interface addresses: %s: %s",
 				 isc_msgcat_get(isc_msgcat,

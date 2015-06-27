@@ -30,7 +30,6 @@ libisc_SRCS =								\
 	$(srcdir)/../lib/isc/result.c					\
 	$(srcdir)/../lib/isc/unix/stdio.c				\
 	$(srcdir)/../lib/isc/unix/stdtime.c				\
-	$(srcdir)/../lib/isc/unix/strerror.c				\
 	$(srcdir)/../lib/isc/task.c					\
 	$(srcdir)/../lib/isc/$(LIBISC_PTHREADS_NOTHREADS)/thread.c	\
 	$(srcdir)/../lib/isc/unix/time.c				\
