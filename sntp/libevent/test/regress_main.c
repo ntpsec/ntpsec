@@ -125,7 +125,7 @@ regress_make_tmpfile(const void *data, size_t datalen, char **filename_out)
 	char tmpfilename[32];
 	int fd;
 	*filename_out = NULL;
-	strcpy(tmpfilename, "/tmp/eventtmp.XXXXXX");
+	strlcpy(tmpfilename, "/tmp/eventtmp.XXXXXX", sizeof(tmpfilename));
 	umask(0077);
 	fd = mkstemp(tmpfilename);
 	if (fd == -1)

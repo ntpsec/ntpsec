@@ -148,7 +148,7 @@ test_memcpy(void *ptr)
 	char *mem = NULL;
 
 	/* Let's make sure that memcpy does what we'd like. */
-	strcpy(db->buffer1, "String 0");
+	strlcpy(db->buffer1, "String 0", sizeof(db->buffer1));
 	memcpy(db->buffer2, db->buffer1, sizeof(db->buffer1));
 	tt_str_op(db->buffer1, ==, db->buffer2);
 

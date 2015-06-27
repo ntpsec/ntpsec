@@ -2182,7 +2182,7 @@ fheader	(
 		exit (-1);
 	}
         if (strcmp(ulink, "md5") == 0) {
-          strcpy(linkname,"ntp.keys");
+		strlcpy(linkname,"ntp.keys",sizeof(linkname));
         } else {
           snprintf(linkname, sizeof(linkname), "ntpkey_%s_%s", ulink,
                    hostname);

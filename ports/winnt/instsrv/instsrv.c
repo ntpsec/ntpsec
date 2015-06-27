@@ -292,14 +292,14 @@ int addKeysToRegistry()
       return 1;
     }
 
-  strcpy(lpmyarray,"TcpIp");
+  strlcpy(lpmyarray,"TcpIp", sizeof(myarray));
   lpmyarray = lpmyarray + 6;
   arsize = arsize + 6;
-  strcpy(lpmyarray,"Afd");
+  strlcpy(lpmyarray,"Afd", sizeof(myarray)-6);
   lpmyarray = lpmyarray + 4;
   arsize = arsize + 4;
   arsize = arsize + 2;
-  strcpy(lpmyarray,"\0\0");
+  strlcpy(lpmyarray,"\0\0", sizeof(myarray)-10);
   
   bSuccess = RegSetValueEx(hk,  /* subkey handle         */
       "DependOnService",        /* value name            */
@@ -406,7 +406,7 @@ int main(int argc, char *argv[])
   else
   {
    /* get the exe name */
-   strcpy(lpszExeName,argv[1]);
+   strlcpy(lpszExeName,argv[1], sizeof(ucExeNBuf));
    ok = InstallService(lpszServName, lpszDispName, lpszExeName);
   }
 

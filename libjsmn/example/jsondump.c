@@ -87,7 +87,7 @@ int main() {
 			fprintf(stderr, "realloc(): errno=%d\n", errno);
 			return 3;
 		}
-		strncpy(js + jslen, buf, r);
+		strlcpy(js + jslen, buf, r + 1);
 		jslen = jslen + r;
 
 again:

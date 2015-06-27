@@ -454,12 +454,10 @@ ppsapi_prov_init(
 
 	p_create_pps_handle = create_pps_handle;
 
-	strncpy(short_name_buf, "loopback", short_name_size);
-	short_name_buf[short_name_size - 1] ='\0'; /* ensure ASCIIZ */
-	strncpy(full_name_buf, 
+	strlcpy(short_name_buf, "loopback", short_name_size);
+	strlcpy(full_name_buf,
 		"loopback user mode DCD change detection",
 		full_name_size);
-	full_name_buf[full_name_size - 1] ='\0'; /* ensure ASCIIZ */
 
 	return SERIALPPS_CAPS;
 }

@@ -209,7 +209,7 @@ sync_status(const char *what, int ostatus, int nstatus)
 static char *file_name(void)
 {
 	if (this_file == NULL) {
-	    (void)strncpy(relative_path, __FILE__, PATH_MAX);
+	    (void)strlcpy(relative_path, __FILE__, PATH_MAX);
 	    for (this_file=relative_path;
 		*this_file && ! isalnum((unsigned char)*this_file);
 		this_file++) ;

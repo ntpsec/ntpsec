@@ -1994,7 +1994,7 @@ asn_to_calendar	(
 	 */
 	len = asn1time->length;
 	NTP_REQUIRE(len < sizeof(v));
-	(void)strncpy(v, (char *)(asn1time->data), len);
+	(void)strlcpy(v, (char *)(asn1time->data), sizeof(v));
 	NTP_REQUIRE(len >= 13);
 	temp = strtoul(v+len-3, NULL, 10);
 	pjd->second = temp;

@@ -363,8 +363,8 @@ ppsapi_prov_init(
 	p_create_pps_handle = create_pps_handle;
 	p_ntp_timestamp_from_counter = ntp_timestamp_from_counter;
 
-	strncpy(short_name_buf, "skeleton", short_name_size);
-	strncpy(full_name_buf, 
+	strlcpy(short_name_buf, "skeleton", short_name_size);
+	strlcpy(full_name_buf,
 		"skeleton, ADD CODE to make useful",
 		full_name_size);
 
