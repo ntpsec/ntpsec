@@ -366,7 +366,7 @@ acts_message(
 {
 	struct actsunit *up;
 	struct refclockproc *pp;
-	char	tbuf[BMAX];
+	char	tbuf[BMAX], *cp;
 	int		dtr = TIOCM_DTR;
 
 	DPRINTF(1, ("acts: %d %s\n", (int)strlen(msg), msg));
@@ -382,7 +382,10 @@ acts_message(
 	 * Extract the first token in the line.
 	 */
 	strlcpy(tbuf, msg, sizeof(tbuf));
-	strtok(tbuf, " ");
+	for (cp = tbuf; cp < tbuf + sizeof(tbuf); cp++)
+	    if (isspace(*cp))
+		*cp = '\0';
+
 	switch (up->state) {
 
 	/*
