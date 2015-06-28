@@ -1,3 +1,7 @@
+This is the historical change log from before the DVCS repository conversion.
+If you want the level of detail this contained about post-conversion changes,
+read the per-commit change comments.
+
 (4.3.34) 2015/06/04 Released by Harlan Stenn <stenn@ntp.org>
 Below are from 4.2.8p3:
 * [Bug 2824] Convert update-leap to perl. (also see 2769)
