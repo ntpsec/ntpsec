@@ -70,7 +70,6 @@
 #include <isc/log.h>
 #include <isc/mem.h>
 #include <isc/random.h>
-#include <isc/string.h>
 #include <isc/time.h>
 #include <isc/util.h>
 

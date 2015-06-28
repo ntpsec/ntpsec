@@ -37,7 +37,6 @@
 #include <isc/msgs.h>
 #include <isc/stat.h>
 #include <isc/stdio.h>
-#include <isc/string.h>
 #include <isc/time.h>
 #include <isc/util.h>
 #include "ntp_stdlib.h"		/* NTP change for strlcpy, strlcat */

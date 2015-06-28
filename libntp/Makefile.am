@@ -24,8 +24,6 @@ libisc_SRCS =								\
 	$(srcdir)/../lib/isc/nls/msgcat.c				\
 	$(srcdir)/../lib/isc/unix/net.c					\
 	$(srcdir)/../lib/isc/netaddr.c					\
-	$(srcdir)/../lib/isc/netscope.c					\
-	$(srcdir)/../lib/isc/ondestroy.c				\
 	$(srcdir)/../lib/isc/random.c					\
 	$(srcdir)/../lib/isc/result.c					\
 	$(srcdir)/../lib/isc/unix/stdio.c				\

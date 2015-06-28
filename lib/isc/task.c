@@ -34,7 +34,6 @@
 #include <isc/mem.h>
 #include <isc/msgs.h>
 #include <isc/platform.h>
-#include <isc/string.h>
 #include <isc/task.h>
 #include <isc/thread.h>
 #include <isc/util.h>
