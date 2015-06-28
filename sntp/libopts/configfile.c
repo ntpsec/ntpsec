@@ -737,7 +737,7 @@ handle_section(tOptions * opts, char * txt)
 
     {
         char z[24];
-        sprintf(z, "[%s]", opts->pzPROGNAME);
+        snprintf(z, sizeof(z), "[%s]", opts->pzPROGNAME);
         txt = strstr(txt, z);
     }
 
@@ -848,7 +848,7 @@ trim_xml_text(char * intxt, char const * pznm, tOptionLoadMode mode)
         if (len >= sizeof(z))
             pz = AGALOC(len, "scan name");
 
-        len = (size_t)sprintf(pz, fmt, pznm);
+        len = (size_t)snprintf(pz, len, fmt, pznm);
         *intxt = ' ';
         etext = strstr(intxt, pz);
         if (pz != z) AGFREE(pz);

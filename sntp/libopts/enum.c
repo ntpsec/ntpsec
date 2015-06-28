@@ -132,7 +132,7 @@ enum_err(tOptions * pOpts, tOptDesc * pOD,
         unsigned int ent_no = 0;
         char  zFmt[16];  /* format for all-but-last entries on a line */
 
-        sprintf(zFmt, ENUM_ERR_WIDTH, (int)max_len);
+        snprintf(zFmt, sizeof(zFmt), ENUM_ERR_WIDTH, (int)max_len);
         max_len = 78 / max_len; /* max_len is now max entries on a line */
         fputs(TWO_SPACES_STR, option_usage_fp);
 

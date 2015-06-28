@@ -349,12 +349,12 @@ print_usage_details(tOptions * opts, int exit_code)
          */
         if (do_gnu_usage(opts)) {
             flen = setGnuOptFmts(opts, &pOptTitle);
-            sprintf(line_fmt_buf, zFmtFmt, flen);
+            snprintf(line_fmt_buf, sizeof(line_fmt_buf), zFmtFmt, flen);
             fputc(NL, option_usage_fp);
         }
         else {
             flen = setStdOptFmts(opts, &pOptTitle);
-            sprintf(line_fmt_buf, zFmtFmt, flen);
+            snprintf(line_fmt_buf, sizeof(line_fmt_buf), zFmtFmt, flen);
 
             /*
              *  When we exit with EXIT_SUCCESS and the first option is a doc
