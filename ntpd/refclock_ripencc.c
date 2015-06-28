@@ -3219,6 +3219,7 @@ static char
 static short
 parsed;
 
+#define OBLEN	sizeof(TextOutputBuffer)-strlen(TextOutputBuffer)
 
 /* convert time of week into day-hour-minute-second and print */
 char *
@@ -3277,16 +3278,16 @@ rpt_chan_A_config(
 		return;
 	}
 
-	pbuf += sprintf(pbuf, "\nChannel A Configuration");
+	pbuf += snprintf(pbuf, OBLEN, "\nChannel A Configuration");
 
 	nbaud = sizeof(old_baudnum);
 
 	for (i = 0; i < nbaud; ++i) if (tx_baud_index == old_baudnum[i]) break;
-	pbuf += sprintf(pbuf, "\n   Transmit speed: %s at %s",
+	pbuf += snprintf(pbuf, OBLEN, "\n   Transmit speed: %s at %s",
 			old_output_ch[tx_mode_index], st_baud_text_app[i]);
 
 	for (i = 0; i < nbaud; ++i) if (rx_baud_index == old_baudnum[i]) break;
-	pbuf += sprintf(pbuf, "\n   Receive speed: %s at %s",
+	pbuf += snprintf(pbuf, OBLEN, "\n   Receive speed: %s at %s",
 			old_input_ch[rx_mode_index], st_baud_text_app[i]);
 
 	databits = (unsigned char)((char_format_index & 0x03) + 5);
@@ -3294,7 +3295,7 @@ rpt_chan_A_config(
 	parity = (unsigned char)(char_format_index >> 2);
 	if (parity > 4) parity = 2;
 
-	pbuf += sprintf(pbuf, "\n   Character format (bits/char, parity, stop bits): %d-%s-%d",
+	pbuf += snprintf(pbuf, OBLEN, "\n   Character format (bits/char, parity, stop bits): %d-%s-%d",
 			databits, old_parity_text[parity], stop_bits);
 }
 
@@ -3328,19 +3329,19 @@ rpt_almanac_data_page(
 		return;
 	}
 
-	pbuf += sprintf(pbuf, "\nAlmanac for SV %02d", sv_prn);
-	pbuf += sprintf(pbuf, "\n       Captured:%15.0f %s",
+	pbuf += snprintf(pbuf, OBLEN, "\nAlmanac for SV %02d", sv_prn);
+	pbuf += snprintf(pbuf, OBLEN, "\n       Captured:%15.0f %s",
 			t_zc, show_time (t_zc));
-	pbuf += sprintf(pbuf, "\n           week:%15d", week_num);
-	pbuf += sprintf(pbuf, "\n   Eccentricity:%15g", eccentricity);
-	pbuf += sprintf(pbuf, "\n           T_oa:%15.0f %s",
+	pbuf += snprintf(pbuf, OBLEN, "\n           week:%15d", week_num);
+	pbuf += snprintf(pbuf, OBLEN, "\n   Eccentricity:%15g", eccentricity);
+	pbuf += snprintf(pbuf, OBLEN, "\n           T_oa:%15.0f %s",
 			t_oa, show_time (t_oa));
-	pbuf += sprintf(pbuf, "\n            i 0:%15g", i_0);
-	pbuf += sprintf(pbuf, "\n      OMEGA dot:%15g", OMEGA_dot);
-	pbuf += sprintf(pbuf, "\n         sqrt A:%15g", sqrt_A);
-	pbuf += sprintf(pbuf, "\n        OMEGA 0:%15g", OMEGA_0);
-	pbuf += sprintf(pbuf, "\n          omega:%15g", omega);
-	pbuf += sprintf(pbuf, "\n            M 0:%15g", M_0);
+	pbuf += snprintf(pbuf, OBLEN, "\n            i 0:%15g", i_0);
+	pbuf += snprintf(pbuf, OBLEN, "\n      OMEGA dot:%15g", OMEGA_dot);
+	pbuf += snprintf(pbuf, OBLEN, "\n         sqrt A:%15g", sqrt_A);
+	pbuf += snprintf(pbuf, OBLEN, "\n        OMEGA 0:%15g", OMEGA_0);
+	pbuf += snprintf(pbuf, OBLEN, "\n          omega:%15g", omega);
+	pbuf += snprintf(pbuf, OBLEN, "\n            M 0:%15g", M_0);
 }
 
 /* 0x41 */
@@ -3360,7 +3361,7 @@ rpt_GPS_time(
 		return;
 	}
 
-	pbuf += sprintf(pbuf, "\nGPS time:%s GPS week: %d   UTC offset %.1f",
+	pbuf += snprintf(pbuf, OBLEN, "\nGPS time:%s GPS week: %d   UTC offset %.1f",
 			show_time(time_of_week), week_num, UTC_offset);
 
 }
@@ -3380,7 +3381,7 @@ rpt_single_ECEF_position(
 		return;
 	}
 
-	pbuf += sprintf(pbuf, "\nSXYZ:  %15.0f  %15.0f  %15.0f    %s",
+	pbuf += snprintf(pbuf, OBLEN, "\nSXYZ:  %15.0f  %15.0f  %15.0f    %s",
 			ECEF_pos[0], ECEF_pos[1], ECEF_pos[2],
 			show_time(time_of_fix));
 }
@@ -3401,7 +3402,7 @@ rpt_single_ECEF_velocity(
 		return;
 	}
 
-	pbuf += sprintf(pbuf, "\nVelECEF: %11.3f  %11.3f  %11.3f  %12.3f%s",
+	pbuf += snprintf(pbuf, OBLEN, "\nVelECEF: %11.3f  %11.3f  %11.3f  %12.3f%s",
 			ECEF_vel[0], ECEF_vel[1], ECEF_vel[2], freq_offset,
 			show_time(time_of_fix));
 }
@@ -3428,7 +3429,7 @@ rpt_SW_version(
 		return;
 	}
 
-	pbuf += sprintf(pbuf,
+	pbuf += snprintf(pbuf, OBLEN,
 			"\nFW Versions:  Nav Proc %2d.%02d  %2d/%2d/%2d  Sig Proc %2d.%02d  %2d/%2d/%2d",
 			major_nav_version, minor_nav_version, nav_day, nav_month, nav_year,
 			major_dsp_version, minor_dsp_version, dsp_day, dsp_month, dsp_year);
@@ -3471,10 +3472,10 @@ rpt_rcvr_health(
 	text = (status1 < COUNTOF(sc_text))
 	    ? sc_text[status1]
 	    : "(out of range)";
-	pbuf += sprintf(pbuf, "\nRcvr status1: %s (%02Xh); ",
+	pbuf += snprintf(pbuf, OBLEN, "\nRcvr status1: %s (%02Xh); ",
 			text, status1);
 
-	pbuf += sprintf(pbuf, "status2: %s, %s (%02Xh)",
+	pbuf += snprintf(pbuf, OBLEN, "status2: %s, %s (%02Xh)",
 			(status2 & 0x01)?"No BBRAM":"BBRAM OK",
 			(status2 & 0x10)?"No Ant":"Ant OK",
 			status2);
@@ -3500,10 +3501,10 @@ rpt_SNR_all_SVs(
 		return;
 	}
 
-	pbuf += sprintf(pbuf, "\nSNR for satellites: %d", nsvs);
+	pbuf += snprintf(pbuf, OBLEN, "\nSNR for satellites: %d", nsvs);
 	for (isv = 0; isv < nsvs; isv++)
 	{
-		pbuf += sprintf(pbuf, "\n    SV %02d   %6.2f",
+		pbuf += snprintf(pbuf, OBLEN, "\n    SV %02d   %6.2f",
 				sv_prn[isv], snr[isv]);
 	}
 }
@@ -3524,7 +3525,7 @@ rpt_GPS_system_message(
 		return;
 	}
 
-	pbuf += sprintf(pbuf, "\nGPS message: %s", message);
+	pbuf += snprintf(pbuf, OBLEN, "\nGPS message: %s", message);
 }
 
 /* 0x49 */
@@ -3545,11 +3546,11 @@ rpt_almanac_health_page(
 		return;
 	}
 
-	pbuf += sprintf(pbuf, "\nAlmanac health page:");
+	pbuf += snprintf(pbuf, OBLEN, "\nAlmanac health page:");
 	for (iprn = 0; iprn < 32; iprn++)
 	{
 		if (!(iprn%5)) *pbuf++ = '\n';
-		pbuf += sprintf(pbuf, "    SV%02d  %2X",
+		pbuf += snprintf(pbuf, OBLEN, "    SV%02d  %2X",
 				(iprn+1) , sv_health[iprn]);
 	}
 }
@@ -3597,7 +3598,7 @@ rpt_single_lla_position(
 	lon_deg = (short)lon;
 	lon_min = (lon - lon_deg) * 60.0;
 
-	pbuf += sprintf(pbuf, "\nSLLA: %4d: %06.3f  %c%5d:%06.3f  %c%10.2f  %12.2f%s",
+	pbuf += snprintf(pbuf, OBLEN, "\nSLLA: %4d: %06.3f  %c%5d:%06.3f  %c%10.2f  %12.2f%s",
 			lat_deg, lat_min, north_south,
 			lon_deg, lon_min, east_west,
 			alt, clock_bias,
@@ -3621,7 +3622,7 @@ rpt_ref_alt(
 		return;
 	}
 
-	pbuf += sprintf(pbuf, "\nReference Alt:   %.1f m;    %s",
+	pbuf += snprintf(pbuf, OBLEN, "\nReference Alt:   %.1f m;    %s",
 			alt, alt_flag?"ON":"OFF");
 }
 
@@ -3642,7 +3643,7 @@ rpt_rcvr_id_and_status(
 		return;
 	}
 
-	pbuf += sprintf(pbuf, "\nRcvr Machine ID: %d; Status3 = %s, %s (%02Xh)",
+	pbuf += snprintf(pbuf, OBLEN, "\nRcvr Machine ID: %d; Status3 = %s, %s (%02Xh)",
 			machine_id,
 			(status3 & 0x02)?"No RTC":"RTC OK",
 			(status3 & 0x08)?"No Alm":"Alm OK",
@@ -3668,13 +3669,13 @@ rpt_operating_parameters(
 		return;
 	}
 
-	pbuf += sprintf(pbuf, "\nOperating Parameters:");
-	pbuf += sprintf(pbuf, "\n     Dynamics code = %d %s",
+	pbuf += snprintf(pbuf, OBLEN, "\nOperating Parameters:");
+	pbuf += snprintf(pbuf, OBLEN, "\n     Dynamics code = %d %s",
 			dyn_code, dyn_text[dyn_code]);
-	pbuf += sprintf(pbuf, "\n     Elevation mask = %.2f", el_mask * R2D);
-	pbuf += sprintf(pbuf, "\n     SNR mask = %.2f", snr_mask);
-	pbuf += sprintf(pbuf, "\n     DOP mask = %.2f", dop_mask);
-	pbuf += sprintf(pbuf, "\n     DOP switch = %.2f", dop_switch);
+	pbuf += snprintf(pbuf, OBLEN, "\n     Elevation mask = %.2f", el_mask * R2D);
+	pbuf += snprintf(pbuf, OBLEN, "\n     SNR mask = %.2f", snr_mask);
+	pbuf += snprintf(pbuf, OBLEN, "\n     DOP mask = %.2f", dop_mask);
+	pbuf += snprintf(pbuf, OBLEN, "\n     DOP switch = %.2f", dop_switch);
 }
 
 /* 0x4D */
@@ -3693,7 +3694,7 @@ rpt_oscillator_offset(
 		return;
 	}
 
-	pbuf += sprintf(pbuf, "\nOscillator offset: %.2f Hz = %.3f PPM",
+	pbuf += snprintf(pbuf, OBLEN, "\nOscillator offset: %.2f Hz = %.3f PPM",
 			osc_offset, osc_offset/1575.42);
 }
 
@@ -3716,11 +3717,11 @@ rpt_GPS_time_set_response(
 	switch (response)
 	{
 	    case 'Y':
-		pbuf += sprintf(pbuf, "\nTime set accepted");
+		pbuf += snprintf(pbuf, OBLEN, "\nTime set accepted");
 		break;
 
 	    case 'N':
-		pbuf += sprintf(pbuf, "\nTime set rejected or not required");
+		pbuf += snprintf(pbuf, OBLEN, "\nTime set rejected or not required");
 		break;
 
 	    default:
@@ -3748,15 +3749,15 @@ rpt_UTC_offset(
 		return;
 	}
 
-	pbuf += sprintf(pbuf, "\nUTC Correction Data");
-	pbuf += sprintf(pbuf, "\n   A_0         = %g  ", a0);
-	pbuf += sprintf(pbuf, "\n   A_1         = %g  ", a1);
-	pbuf += sprintf(pbuf, "\n   delta_t_LS  = %d  ", dt_ls);
-	pbuf += sprintf(pbuf, "\n   t_ot        = %.0f  ", time_of_data);
-	pbuf += sprintf(pbuf, "\n   WN_t        = %d  ", wn_t );
-	pbuf += sprintf(pbuf, "\n   WN_LSF      = %d  ", wn_lsf );
-	pbuf += sprintf(pbuf, "\n   DN          = %d  ", dn );
-	pbuf += sprintf(pbuf, "\n   delta_t_LSF = %d  ", dt_lsf );
+	pbuf += snprintf(pbuf, OBLEN, "\nUTC Correction Data");
+	pbuf += snprintf(pbuf, OBLEN, "\n   A_0         = %g  ", a0);
+	pbuf += snprintf(pbuf, OBLEN, "\n   A_1         = %g  ", a1);
+	pbuf += snprintf(pbuf, OBLEN, "\n   delta_t_LS  = %d  ", dt_ls);
+	pbuf += snprintf(pbuf, OBLEN, "\n   t_ot        = %.0f  ", time_of_data);
+	pbuf += snprintf(pbuf, OBLEN, "\n   WN_t        = %d  ", wn_t );
+	pbuf += snprintf(pbuf, OBLEN, "\n   WN_LSF      = %d  ", wn_lsf );
+	pbuf += snprintf(pbuf, OBLEN, "\n   DN          = %d  ", dn );
+	pbuf += snprintf(pbuf, OBLEN, "\n   delta_t_LSF = %d  ", dt_lsf );
 }
 
 /**/
@@ -3775,8 +3776,9 @@ rpt_1SV_bias(
 		return;
 	}
 
-	pbuf += sprintf (pbuf, "\nTime Fix   Clock Bias: %6.2f m  Freq Bias: %6.2f m/s%s",
-			 clock_bias, freq_offset, show_time (time_of_fix));
+	pbuf += snprintf(pbuf, OBLEN,
+			  "\nTime Fix   Clock Bias: %6.2f m  Freq Bias: %6.2f m/s%s",
+			  clock_bias, freq_offset, show_time (time_of_fix));
 }
 
 /* 0x55 */
@@ -3796,78 +3798,78 @@ rpt_io_opt(
 	}
 	/* rptbuf unloaded */
 
-	pbuf += sprintf(pbuf, "\nI/O Options: %2X %2X %2X %2X",
+	pbuf += snprintf(pbuf, OBLEN, "\nI/O Options: %2X %2X %2X %2X",
 			pos_code, vel_code, time_code, aux_code);
 
 	if (pos_code & 0x01) {
-		pbuf += sprintf(pbuf, "\n    ECEF XYZ position output");
+		pbuf += snprintf(pbuf, OBLEN, "\n    ECEF XYZ position output");
 	}
 
 	if (pos_code & 0x02) {
-		pbuf += sprintf(pbuf, "\n    LLA position output");
+		pbuf += snprintf(pbuf, OBLEN, "\n    LLA position output");
 	}
 
-	pbuf += sprintf(pbuf, (pos_code & 0x04)?
+	pbuf += snprintf(pbuf, OBLEN, (pos_code & 0x04)?
 			"\n    MSL altitude output (Geoid height) ":
 			"\n    WGS-84 altitude output");
 
-	pbuf += sprintf(pbuf, (pos_code & 0x08)?
+	pbuf += snprintf(pbuf, OBLEN, (pos_code & 0x08)?
 			"\n    MSL altitude input":
 			"\n    WGS-84 altitude input");
 
-	pbuf += sprintf(pbuf, (pos_code & 0x10)?
+	pbuf += snprintf(pbuf, OBLEN, (pos_code & 0x10)?
 			"\n    Double precision":
 			"\n    Single precision");
 
 	if (pos_code & 0x20) {
-		pbuf += sprintf(pbuf, "\n    All Enabled Superpackets");
+		pbuf += snprintf(pbuf, OBLEN, "\n    All Enabled Superpackets");
 	}
 
 	if (vel_code & 0x01) {
-		pbuf += sprintf(pbuf, "\n    ECEF XYZ velocity output");
+		pbuf += snprintf(pbuf, OBLEN, "\n    ECEF XYZ velocity output");
 	}
 
 	if (vel_code & 0x02) {
-		pbuf += sprintf(pbuf, "\n    ENU velocity output");
+		pbuf += snprintf(pbuf, OBLEN, "\n    ENU velocity output");
 	}
 
-	pbuf += sprintf(pbuf, (time_code & 0x01)?
+	pbuf += snprintf(pbuf, OBLEN, (time_code & 0x01)?
 			"\n    Time tags in UTC":
 			"\n    Time tags in GPS time");
 
 	if (time_code & 0x02) {
-		pbuf += sprintf(pbuf, "\n    Fixes delayed to integer seconds");
+		pbuf += snprintf(pbuf, OBLEN, "\n    Fixes delayed to integer seconds");
 	}
 
 	if (time_code & 0x04) {
-		pbuf += sprintf(pbuf, "\n    Fixes sent only on request");
+		pbuf += snprintf(pbuf, OBLEN, "\n    Fixes sent only on request");
 	}
 
 	if (time_code & 0x08) {
-		pbuf += sprintf(pbuf, "\n    Synchronized measurements");
+		pbuf += snprintf(pbuf, OBLEN, "\n    Synchronized measurements");
 	}
 
 	if (time_code & 0x10) {
-		pbuf += sprintf(pbuf, "\n    Minimize measurement propagation");
+		pbuf += snprintf(pbuf, OBLEN, "\n    Minimize measurement propagation");
 	}
 
-	pbuf += sprintf(pbuf, (time_code & 0x20) ?
+	pbuf += snprintf(pbuf, OBLEN, (time_code & 0x20) ?
 			"\n    PPS output at all times" :
 			"\n    PPS output during fixes");
 
 	if (aux_code & 0x01) {
-		pbuf += sprintf(pbuf, "\n    Raw measurement output");
+		pbuf += snprintf(pbuf, OBLEN, "\n    Raw measurement output");
 	}
 
 	if (aux_code & 0x02) {
-		pbuf += sprintf(pbuf, "\n    Code-phase smoothed before output");
+		pbuf += snprintf(pbuf, OBLEN, "\n    Code-phase smoothed before output");
 	}
 
 	if (aux_code & 0x04) {
-		pbuf += sprintf(pbuf, "\n    Additional fix status");
+		pbuf += snprintf(pbuf, OBLEN, "\n    Additional fix status");
 	}
 
-	pbuf += sprintf(pbuf, (aux_code & 0x08)?
+	pbuf += snprintf(pbuf, OBLEN, (aux_code & 0x08)?
 			"\n    Signal Strength Output as dBHz" :
 			"\n    Signal Strength Output as AMU");
 }
@@ -3887,7 +3889,7 @@ rpt_ENU_velocity(
 		return;
 	}
 
-	pbuf += sprintf(pbuf, "\nVel ENU: %11.3f  %11.3f  %11.3f  %12.3f%s",
+	pbuf += snprintf(pbuf, OBLEN, "\nVel ENU: %11.3f  %11.3f  %11.3f  %12.3f%s",
 			vel_ENU[0], vel_ENU[1], vel_ENU[2], freq_offset,
 			show_time (time_of_fix));
 }
@@ -3911,10 +3913,10 @@ rpt_last_fix_info(
 		return;
 	}
 
-	pbuf += sprintf(pbuf, "\n source code %d;   diag code: %2Xh",
+	pbuf += snprintf(pbuf, OBLEN, "\n source code %d;   diag code: %2Xh",
 			source_code, diag_code);
-	pbuf += sprintf(pbuf, "\n    Time of last fix:%s", show_time(time_of_fix));
-	pbuf += sprintf(pbuf, "\n    Week of last fix: %d", week_num);
+	pbuf += snprintf(pbuf, OBLEN, "\n    Time of last fix:%s", show_time(time_of_fix));
+	pbuf += snprintf(pbuf, OBLEN, "\n    Week of last fix: %d", week_num);
 }
 
 /* 0x58 */
@@ -3959,132 +3961,132 @@ rpt_GPS_system_data(
 		return;
 	}
 
-	pbuf += sprintf(pbuf, "\nSystem data [%d]:  %s  SV%02d",
+	pbuf += snprintf(pbuf, OBLEN, "\nSystem data [%d]:  %s  SV%02d",
 			data_type, datname[data_type], sv_prn);
 	switch (op_code)
 	{
 	    case 1:
-		pbuf += sprintf(pbuf, "  Acknowledgment");
+		pbuf += snprintf(pbuf, OBLEN, "  Acknowledgment");
 		break;
 	    case 2:
-		pbuf += sprintf(pbuf, "  length = %d bytes", data_length);
+		pbuf += snprintf(pbuf, OBLEN, "  length = %d bytes", data_length);
 		switch (data_type) {
 		    case 2:
 			/* Almanac */
 			if (sv_prn == 0 || sv_prn > 32) {
-				pbuf += sprintf(pbuf, "  Binary PRN invalid");
+				pbuf += snprintf(pbuf, OBLEN, "  Binary PRN invalid");
 				return;
 			}
 			almanac = (ALM_INFO*)data_packet;
-			pbuf += sprintf(pbuf, "\n   t_oa_raw = % -12d    SV_hlth  = % -12d  ",
+			pbuf += snprintf(pbuf, OBLEN, "\n   t_oa_raw = % -12d    SV_hlth  = % -12d  ",
 					almanac->t_oa_raw , almanac->SV_health );
-			pbuf += sprintf(pbuf, "\n   e        = % -12g    t_oa     = % -12g  ",
+			pbuf += snprintf(pbuf, OBLEN, "\n   e        = % -12g    t_oa     = % -12g  ",
 					almanac->e        , almanac->t_oa     );
-			pbuf += sprintf(pbuf, "\n   i_0      = % -12g    OMEGADOT = % -12g  ",
+			pbuf += snprintf(pbuf, OBLEN, "\n   i_0      = % -12g    OMEGADOT = % -12g  ",
 					almanac->i_0      , almanac->OMEGADOT );
-			pbuf += sprintf(pbuf, "\n   sqrt_A   = % -12g    OMEGA_0  = % -12g  ",
+			pbuf += snprintf(pbuf, OBLEN, "\n   sqrt_A   = % -12g    OMEGA_0  = % -12g  ",
 					almanac->sqrt_A   , almanac->OMEGA_0  );
-			pbuf += sprintf(pbuf, "\n   omega    = % -12g    M_0      = % -12g  ",
+			pbuf += snprintf(pbuf, OBLEN, "\n   omega    = % -12g    M_0      = % -12g  ",
 					almanac->omega    , almanac->M_0      );
-			pbuf += sprintf(pbuf, "\n   a_f0     = % -12g    a_f1     = % -12g  ",
+			pbuf += snprintf(pbuf, OBLEN, "\n   a_f0     = % -12g    a_f1     = % -12g  ",
 					almanac->a_f0     , almanac->a_f1     );
-			pbuf += sprintf(pbuf, "\n   Axis     = % -12g    n        = % -12g  ",
+			pbuf += snprintf(pbuf, OBLEN, "\n   Axis     = % -12g    n        = % -12g  ",
 					almanac->Axis     , almanac->n        );
-			pbuf += sprintf(pbuf, "\n   OMEGA_n  = % -12g    ODOT_n   = % -12g  ",
+			pbuf += snprintf(pbuf, OBLEN, "\n   OMEGA_n  = % -12g    ODOT_n   = % -12g  ",
 					almanac->OMEGA_n  , almanac->ODOT_n   );
-			pbuf += sprintf(pbuf, "\n   t_zc     = % -12g    weeknum  = % -12d  ",
+			pbuf += snprintf(pbuf, OBLEN, "\n   t_zc     = % -12g    weeknum  = % -12d  ",
 					almanac->t_zc     , almanac->weeknum  );
-			pbuf += sprintf(pbuf, "\n   wn_oa    = % -12d", almanac->wn_oa    );
+			pbuf += snprintf(pbuf, OBLEN, "\n   wn_oa    = % -12d", almanac->wn_oa    );
 			break;
 
 		    case 3:
 			/* Almanac health page */
 			almh = (ALH_PARMS*)data_packet;
-			pbuf += sprintf(pbuf, "\n   t_oa = %d, wn_oa&0xFF = %d  ",
+			pbuf += snprintf(pbuf, OBLEN, "\n   t_oa = %d, wn_oa&0xFF = %d  ",
 					almh->t_oa, almh->WN_a);
-			pbuf += sprintf(pbuf, "\nAlmanac health page:");
+			pbuf += snprintf(pbuf, OBLEN, "\nAlmanac health page:");
 			for (iprn = 0; iprn < 32; iprn++) {
 				if (!(iprn%5)) *pbuf++ = '\n';
-				pbuf += sprintf(pbuf, "    SV%02d  %2X",
+				pbuf += snprintf(pbuf, OBLEN, "    SV%02d  %2X",
 						(iprn+1) , almh->SV_health[iprn]);
 			}
 			curr_t_oa = data_packet[34];
 			curr_wn_oa = (unsigned short)((data_packet[35]<<8) + data_packet[36]);
-			pbuf += sprintf(pbuf, "\n   current t_oa = %d, wn_oa = %d  ",
+			pbuf += snprintf(pbuf, OBLEN, "\n   current t_oa = %d, wn_oa = %d  ",
 					curr_t_oa, curr_wn_oa);
 			break;
 
 		    case 4:
 			/* Ionosphere */
 			ionosphere = (ION_INFO*)data_packet;
-			pbuf += sprintf(pbuf, "\n   alpha_0 = % -12g  alpha_1 = % -12g ",
+			pbuf += snprintf(pbuf, OBLEN, "\n   alpha_0 = % -12g  alpha_1 = % -12g ",
 					ionosphere->alpha_0, ionosphere->alpha_1);
-			pbuf += sprintf(pbuf, "\n   alpha_2 = % -12g  alpha_3 = % -12g ",
+			pbuf += snprintf(pbuf, OBLEN, "\n   alpha_2 = % -12g  alpha_3 = % -12g ",
 					ionosphere->alpha_2, ionosphere->alpha_3);
-			pbuf += sprintf(pbuf, "\n   beta_0  = % -12g  beta_1  = % -12g  ",
+			pbuf += snprintf(pbuf, OBLEN, "\n   beta_0  = % -12g  beta_1  = % -12g  ",
 					ionosphere->beta_0, ionosphere->beta_1);
-			pbuf += sprintf(pbuf, "\n   beta_2  = % -12g  beta_3  = % -12g  ",
+			pbuf += snprintf(pbuf, OBLEN, "\n   beta_2  = % -12g  beta_3  = % -12g  ",
 					ionosphere->beta_2, ionosphere->beta_3);
 			break;
 
 		    case 5:
 			/* UTC */
 			utc = (UTC_INFO*)data_packet;
-			pbuf += sprintf(pbuf, "\n   A_0         = %g  ", utc->A_0);
-			pbuf += sprintf(pbuf, "\n   A_1         = %g  ", utc->A_1);
-			pbuf += sprintf(pbuf, "\n   delta_t_LS  = %d  ", utc->delta_t_LS);
-			pbuf += sprintf(pbuf, "\n   t_ot        = %.0f  ", utc->t_ot );
-			pbuf += sprintf(pbuf, "\n   WN_t        = %d  ", utc->WN_t );
-			pbuf += sprintf(pbuf, "\n   WN_LSF      = %d  ", utc->WN_LSF );
-			pbuf += sprintf(pbuf, "\n   DN          = %d  ", utc->DN );
-			pbuf += sprintf(pbuf, "\n   delta_t_LSF = %d  ", utc->delta_t_LSF );
+			pbuf += snprintf(pbuf, OBLEN, "\n   A_0         = %g  ", utc->A_0);
+			pbuf += snprintf(pbuf, OBLEN, "\n   A_1         = %g  ", utc->A_1);
+			pbuf += snprintf(pbuf, OBLEN, "\n   delta_t_LS  = %d  ", utc->delta_t_LS);
+			pbuf += snprintf(pbuf, OBLEN, "\n   t_ot        = %.0f  ", utc->t_ot );
+			pbuf += snprintf(pbuf, OBLEN, "\n   WN_t        = %d  ", utc->WN_t );
+			pbuf += snprintf(pbuf, OBLEN, "\n   WN_LSF      = %d  ", utc->WN_LSF );
+			pbuf += snprintf(pbuf, OBLEN, "\n   DN          = %d  ", utc->DN );
+			pbuf += snprintf(pbuf, OBLEN, "\n   delta_t_LSF = %d  ", utc->delta_t_LSF );
 			break;
 
 		    case 6: /* Ephemeris */
 			if (sv_prn == 0 || sv_prn > 32) {
-				pbuf += sprintf(pbuf, "  Binary PRN invalid");
+				pbuf += snprintf(pbuf, OBLEN, "  Binary PRN invalid");
 				return;
 			}
 			nav_data = (NAV_INFO*)data_packet;
 
-			pbuf += sprintf(pbuf, "\n     SV_PRN = % -12d .  t_ephem = % -12g . ",
+			pbuf += snprintf(pbuf, OBLEN, "\n     SV_PRN = % -12d .  t_ephem = % -12g . ",
 					nav_data->sv_number , nav_data->t_ephem );
 			cdata = &(nav_data->ephclk);
-			pbuf += sprintf(pbuf,
+			pbuf += snprintf(pbuf, OBLEN,
 					"\n    weeknum = % -12d .   codeL2 = % -12d .  L2Pdata = % -12d",
 					cdata->weeknum , cdata->codeL2 , cdata->L2Pdata );
-			pbuf += sprintf(pbuf,
+			pbuf += snprintf(pbuf, OBLEN,
 					"\n  SVacc_raw = % -12d .SV_health = % -12d .     IODC = % -12d",
 					cdata->SVacc_raw, cdata->SV_health, cdata->IODC );
-			pbuf += sprintf(pbuf,
+			pbuf += snprintf(pbuf, OBLEN,
 					"\n       T_GD = % -12g .     t_oc = % -12g .     a_f2 = % -12g",
 					cdata->T_GD, cdata->t_oc, cdata->a_f2 );
-			pbuf += sprintf(pbuf,
+			pbuf += snprintf(pbuf, OBLEN,
 					"\n       a_f1 = % -12g .     a_f0 = % -12g .    SVacc = % -12g",
 					cdata->a_f1, cdata->a_f0, cdata->SVacc );
 			edata = &(nav_data->ephorb);
-			pbuf += sprintf(pbuf,
+			pbuf += snprintf(pbuf, OBLEN,
 					"\n       IODE = % -12d .fit_intvl = % -12d .     C_rs = % -12g",
 					edata->IODE, edata->fit_interval, edata->C_rs );
-			pbuf += sprintf(pbuf,
+			pbuf += snprintf(pbuf, OBLEN,
 					"\n    delta_n = % -12g .      M_0 = % -12g .     C_uc = % -12g",
 					edata->delta_n, edata->M_0, edata->C_uc );
-			pbuf += sprintf(pbuf,
+			pbuf += snprintf(pbuf, OBLEN,
 					"\n        ecc = % -12g .     C_us = % -12g .   sqrt_A = % -12g",
 					edata->e, edata->C_us, edata->sqrt_A );
-			pbuf += sprintf(pbuf,
+			pbuf += snprintf(pbuf, OBLEN,
 					"\n       t_oe = % -12g .     C_ic = % -12g .  OMEGA_0 = % -12g",
 					edata->t_oe, edata->C_ic, edata->OMEGA_0 );
-			pbuf += sprintf(pbuf,
+			pbuf += snprintf(pbuf, OBLEN,
 					"\n       C_is = % -12g .      i_0 = % -12g .     C_rc = % -12g",
 					edata->C_is, edata->i_0, edata->C_rc );
-			pbuf += sprintf(pbuf,
+			pbuf += snprintf(pbuf, OBLEN,
 					"\n      omega = % -12g . OMEGADOT = % -12g .     IDOT = % -12g",
 					edata->omega, edata->OMEGADOT, edata->IDOT );
-			pbuf += sprintf(pbuf,
+			pbuf += snprintf(pbuf, OBLEN,
 					"\n       Axis = % -12g .        n = % -12g .    r1me2 = % -12g",
 					edata->Axis, edata->n, edata->r1me2 );
-			pbuf += sprintf(pbuf,
+			pbuf += snprintf(pbuf, OBLEN,
 					"\n    OMEGA_n = % -12g .   ODOT_n = % -12g",
 					edata->OMEGA_n, edata->ODOT_n );
 			break;
@@ -4114,8 +4116,8 @@ rpt_SVs_enabled(
 	}
 	switch (code_type)
 	{
-	    case 3: pbuf += sprintf(pbuf, "\nSVs Disabled:\n"); break;
-	    case 6: pbuf += sprintf(pbuf, "\nSVs with Health Ignored:\n"); break;
+	    case 3: pbuf += snprintf(pbuf, OBLEN, "\nSVs Disabled:\n"); break;
+	    case 6: pbuf += snprintf(pbuf, OBLEN, "\nSVs with Health Ignored:\n"); break;
 	    default: return;
 	}
 	numsvs = 0;
@@ -4123,11 +4125,11 @@ rpt_SVs_enabled(
 	{
 		if (status_code[iprn])
 		{
-			pbuf += sprintf(pbuf, " %02d", iprn+1);
+			pbuf += snprintf(pbuf, OBLEN, " %02d", iprn+1);
 			numsvs++;
 		}
 	}
-	if (numsvs == 0) pbuf += sprintf(pbuf, "None");
+	if (numsvs == 0) pbuf += snprintf(pbuf, OBLEN, "None");
 }
 
 
@@ -4152,7 +4154,7 @@ rpt_raw_msmt(
 		return;
 	}
 
-	pbuf += sprintf(pbuf, "\n   %02d %5.0f %7.1f %10.2f %10.2f %12.3f %s",
+	pbuf += snprintf(pbuf, OBLEN, "\n   %02d %5.0f %7.1f %10.2f %10.2f %12.3f %s",
 			sv_prn, sample_length, signal_level, code_phase, Doppler, time_of_fix,
 			show_time ((float)time_of_fix));
 }
@@ -4176,10 +4178,10 @@ rpt_SV_ephemeris_status(
 		return;
 	}
 
-	pbuf += sprintf(pbuf, "\n  SV%02d  %s   %2Xh     %2Xh ",
+	pbuf += snprintf(pbuf, OBLEN, "\n  SV%02d  %s   %2Xh     %2Xh ",
 			sv_prn, show_time (time_of_collection), sv_health, sv_iode);
 	/* note: cannot use show_time twice in same call */
-	pbuf += sprintf(pbuf, "%s   %1d   %4.1f",
+	pbuf += snprintf(pbuf, OBLEN, "%s   %1d   %4.1f",
 			show_time (time_of_eph), fit_interval_flag, sv_accy);
 }
 
@@ -4208,7 +4210,7 @@ rpt_SV_tracking_status(
 		return;
 	}
 
-	pbuf += sprintf(pbuf,
+	pbuf += snprintf(pbuf, OBLEN,
 			"\n SV%2d  %1d   %1d   %1d   %4.1f  %s  %5.1f  %5.1f",
 			sv_prn, chan,
 			acq_flag, eph_flag, signal_level,
@@ -4242,30 +4244,30 @@ rpt_allSV_selection(
 	switch (ndim)
 	{
 	    case 0:
-		pbuf += sprintf(pbuf, "\nMode: Searching, %d-SV:", nsvs);
+		pbuf += snprintf(pbuf, OBLEN, "\nMode: Searching, %d-SV:", nsvs);
 		break;
 	    case 1:
-		pbuf += sprintf(pbuf, "\nMode: One-SV Timing:");
+		pbuf += snprintf(pbuf, OBLEN, "\nMode: One-SV Timing:");
 		break;
 	    case 3: case 4:
-		pbuf += sprintf(pbuf, "\nMode: %c-%dD, %d-SV:",
+		pbuf += snprintf(pbuf, OBLEN, "\nMode: %c-%dD, %d-SV:",
 				manual_mode ? 'M' : 'A', ndim - 1,  nsvs);
 		break;
 	    case 5:
-		pbuf += sprintf(pbuf, "\nMode: Timing, %d-SV:", nsvs);
+		pbuf += snprintf(pbuf, OBLEN, "\nMode: Timing, %d-SV:", nsvs);
 		break;
 	    default:
-		pbuf += sprintf(pbuf, "\nMode: Unknown = %d:", ndim);
+		pbuf += snprintf(pbuf, OBLEN, "\nMode: Unknown = %d:", ndim);
 		break;
 	}
 
 	for (islot = 0; islot < nsvs; islot++)
 	{
-		if (sv_prn[islot]) pbuf += sprintf(pbuf, " %02d", sv_prn[islot]);
+		if (sv_prn[islot]) pbuf += snprintf(pbuf, OBLEN, " %02d", sv_prn[islot]);
 	}
 	if (ndim == 3 || ndim == 4)
 	{
-		pbuf += sprintf(pbuf, ";  DOPs: P %.1f H %.1f V %.1f T %.1f",
+		pbuf += snprintf(pbuf, OBLEN, ";  DOPs: P %.1f H %.1f V %.1f T %.1f",
 				pdop, hdop, vdop, tdop);
 	}
 }
@@ -4286,7 +4288,7 @@ rpt_DGPS_position_mode(
 		return;
 	}
 
-	pbuf += sprintf(pbuf, "\nFix is%s DGPS-corrected (%s mode)  (%d)",
+	pbuf += snprintf(pbuf, OBLEN, "\nFix is%s DGPS-corrected (%s mode)  (%d)",
 			(diff_mode&1) ? "" : " not",
 			(diff_mode&2) ? "auto" : "manual",
 			diff_mode);
@@ -4310,7 +4312,7 @@ rpt_double_ECEF_position(
 		return;
 	}
 
-	pbuf += sprintf(pbuf, "\nDXYZ:%12.2f  %13.2f  %13.2f %12.2f%s",
+	pbuf += snprintf(pbuf, OBLEN, "\nDXYZ:%12.2f  %13.2f  %13.2f %12.2f%s",
 			ECEF_pos[0], ECEF_pos[1], ECEF_pos[2], clock_bias,
 			show_time(time_of_fix));
 }
@@ -4358,7 +4360,7 @@ rpt_double_lla_position(
 	}
 	lon_deg = (short)lon;
 	lon_min = (lon - lon_deg) * 60.0;
-	pbuf += sprintf(pbuf, "\nDLLA: %2d:%08.5f %c; %3d:%08.5f %c; %10.2f %12.2f%s",
+	pbuf += snprintf(pbuf, OBLEN, "\nDLLA: %2d:%08.5f %c; %3d:%08.5f %c; %10.2f %12.2f%s",
 			lat_deg, lat_min, north_south,
 			lon_deg, lon_min, east_west,
 			alt, clock_bias,
@@ -4379,17 +4381,17 @@ rpt_complete_rcvr_config(
 		return;
 	}
 
-	pbuf += sprintf(pbuf, "\n   operating mode:      %s",
+	pbuf += snprintf(pbuf, OBLEN, "\n   operating mode:      %s",
 			NavModeText0xBB[TsipxBB.operating_mode]);
-	pbuf += sprintf(pbuf, "\n   dynamics:            %s",
+	pbuf += snprintf(pbuf, OBLEN, "\n   dynamics:            %s",
 			dyn_text[TsipxBB.dyn_code]);
-	pbuf += sprintf(pbuf, "\n   elev angle mask:     %g deg",
+	pbuf += snprintf(pbuf, OBLEN, "\n   elev angle mask:     %g deg",
 			TsipxBB.elev_mask * R2D);
-	pbuf += sprintf(pbuf, "\n   SNR mask:            %g AMU",
+	pbuf += snprintf(pbuf, OBLEN, "\n   SNR mask:            %g AMU",
 			TsipxBB.cno_mask);
-	pbuf += sprintf(pbuf, "\n   DOP mask:            %g",
+	pbuf += snprintf(pbuf, OBLEN, "\n   DOP mask:            %g",
 			TsipxBB.dop_mask);
-	pbuf += sprintf(pbuf, "\n   DOP switch:          %g",
+	pbuf += snprintf(pbuf, OBLEN, "\n   DOP switch:          %g",
 			TsipxBB.dop_switch);
 	return ;
 }
@@ -4413,37 +4415,37 @@ rpt_rcvr_serial_port_config(
 	}
 	/* rptbuf unloaded */
 
-	pbuf += sprintf(pbuf, "\n   RECEIVER serial port %s config:",
+	pbuf += snprintf(pbuf, OBLEN, "\n   RECEIVER serial port %s config:",
 			rcvr_port_text[port_num]);
 
-	pbuf += sprintf(pbuf, "\n             I/O Baud %s/%s, %d - %s - %d",
+	pbuf += snprintf(pbuf, OBLEN, "\n             I/O Baud %s/%s, %d - %s - %d",
 			st_baud_text_app[in_baud],
 			st_baud_text_app[out_baud],
 			data_bits+5,
 			parity_text[parity],
 			stop_bits=1);
-	pbuf += sprintf(pbuf, "\n             Input protocols: ");
+	pbuf += snprintf(pbuf, OBLEN, "\n             Input protocols: ");
 	known = FALSE;
 	if (protocols_in&B_TSIP)
 	{
-		pbuf += sprintf(pbuf, "%s ", protocols_in_text[1]);
+		pbuf += snprintf(pbuf, OBLEN, "%s ", protocols_in_text[1]);
 		known = TRUE;
 	}
-	if (known == FALSE) pbuf += sprintf(pbuf, "No known");
+	if (known == FALSE) pbuf += snprintf(pbuf, OBLEN, "No known");
 
-	pbuf += sprintf(pbuf, "\n             Output protocols: ");
+	pbuf += snprintf(pbuf, OBLEN, "\n             Output protocols: ");
 	known = FALSE;
 	if (protocols_out&B_TSIP)
 	{
-		pbuf += sprintf(pbuf, "%s ", protocols_out_text[1]);
+		pbuf += snprintf(pbuf, OBLEN, "%s ", protocols_out_text[1]);
 		known = TRUE;
 	}
 	if (protocols_out&B_NMEA)
 	{
-		pbuf += sprintf(pbuf, "%s ", protocols_out_text[2]);
+		pbuf += snprintf(pbuf, OBLEN, "%s ", protocols_out_text[2]);
 		known = TRUE;
 	}
-	if (known == FALSE) pbuf += sprintf(pbuf, "No known");
+	if (known == FALSE) pbuf += snprintf(pbuf, OBLEN, "No known");
 	reserved = reserved;
 
 }
@@ -4520,21 +4522,21 @@ rpt_8F0B(
 
 	if (event == 0)
 	{
-		pbuf += sprintf(pbuf, "\nNew partial+full meas");
+		pbuf += snprintf(pbuf, OBLEN, "\nNew partial+full meas");
 	}
 	else
 	{
-		pbuf += sprintf(pbuf, "\nEvent count: %5d", event);
+		pbuf += snprintf(pbuf, OBLEN, "\nEvent count: %5d", event);
 	}
 
-	pbuf += sprintf(pbuf, "\nGPS time  : %s %2d/%2d/%2d (DMY)",
+	pbuf += snprintf(pbuf, OBLEN, "\nGPS time  : %s %2d/%2d/%2d (DMY)",
 			show_time(tow), date, month, year);
-	pbuf += sprintf(pbuf, "\nMode      : %s", oprtng_dim[dim_mode]);
-	pbuf += sprintf(pbuf, "\nUTC offset: %2d", utc_offset);
-	pbuf += sprintf(pbuf, "\nClock Bias: %6.2f m", bias);
-	pbuf += sprintf(pbuf, "\nFreq bias : %6.2f m/s", drift);
-	pbuf += sprintf(pbuf, "\nBias unc  : %6.2f m", bias_unc);
-	pbuf += sprintf(pbuf, "\nFreq unc  : %6.2f m/s", dr_unc);
+	pbuf += snprintf(pbuf, OBLEN, "\nMode      : %s", oprtng_dim[dim_mode]);
+	pbuf += snprintf(pbuf, OBLEN, "\nUTC offset: %2d", utc_offset);
+	pbuf += snprintf(pbuf, OBLEN, "\nClock Bias: %6.2f m", bias);
+	pbuf += snprintf(pbuf, OBLEN, "\nFreq bias : %6.2f m/s", drift);
+	pbuf += snprintf(pbuf, OBLEN, "\nBias unc  : %6.2f m", bias_unc);
+	pbuf += snprintf(pbuf, OBLEN, "\nFreq unc  : %6.2f m/s", dr_unc);
 
 	lat *= R2D; /* convert from radians to degrees */
 	lon *= R2D;
@@ -4562,10 +4564,10 @@ rpt_8F0B(
 
 	lon_deg = (short)lon;
 	lon_min = (lon - lon_deg) * 60.0;
-	pbuf += sprintf(pbuf, "\nPosition  :");
-	pbuf += sprintf(pbuf, " %4d %6.3f %c", lat_deg, lat_min, north_south);
-	pbuf += sprintf(pbuf, " %5d %6.3f %c", lon_deg, lon_min, east_west);
-	pbuf += sprintf(pbuf, " %10.2f", alt);
+	pbuf += snprintf(pbuf, OBLEN, "\nPosition  :");
+	pbuf += snprintf(pbuf, OBLEN, " %4d %6.3f %c", lat_deg, lat_min, north_south);
+	pbuf += snprintf(pbuf, OBLEN, " %5d %6.3f %c", lon_deg, lon_min, east_west);
+	pbuf += snprintf(pbuf, OBLEN, " %10.2f", alt);
 
 	numfix = numnotfix = 0;
 	for (local_index=0; local_index<8; local_index++)
@@ -4575,23 +4577,23 @@ rpt_8F0B(
 	}
 	if (numfix > 0)
 	{
-		pbuf += sprintf(pbuf, "\nSVs used in fix  : ");
+		pbuf += snprintf(pbuf, OBLEN, "\nSVs used in fix  : ");
 		for (local_index=0; local_index<8; local_index++)
 		{
 			if (sv_id[local_index] > 0)
 			{
-				pbuf += sprintf(pbuf, "%2d ", sv_id[local_index]);
+				pbuf += snprintf(pbuf, OBLEN, "%2d ", sv_id[local_index]);
 			}
 		}
 	}
 	if (numnotfix > 0)
 	{
-		pbuf += sprintf(pbuf, "\nOther SVs tracked: ");
+		pbuf += snprintf(pbuf, OBLEN, "\nOther SVs tracked: ");
 		for (local_index=0; local_index<8; local_index++)
 		{
 			if (sv_id[local_index] < 0)
 			{
-				pbuf += sprintf(pbuf, "%2d ", sv_id[local_index]);
+				pbuf += snprintf(pbuf, OBLEN, "%2d ", sv_id[local_index]);
 			}
 		}
 	}
@@ -4618,20 +4620,20 @@ rpt_8F14(
 
 	if (datum_idx == -1)
 	{
-		pbuf += sprintf(pbuf, "\nUser-Entered Datum:");
-		pbuf += sprintf(pbuf, "\n   dx        = %6.1f", datum_coeffs[0]);
-		pbuf += sprintf(pbuf, "\n   dy        = %6.1f", datum_coeffs[1]);
-		pbuf += sprintf(pbuf, "\n   dz        = %6.1f", datum_coeffs[2]);
-		pbuf += sprintf(pbuf, "\n   a-axis    = %10.3f", datum_coeffs[3]);
-		pbuf += sprintf(pbuf, "\n   e-squared = %16.14f", datum_coeffs[4]);
+		pbuf += snprintf(pbuf, OBLEN, "\nUser-Entered Datum:");
+		pbuf += snprintf(pbuf, OBLEN, "\n   dx        = %6.1f", datum_coeffs[0]);
+		pbuf += snprintf(pbuf, OBLEN, "\n   dy        = %6.1f", datum_coeffs[1]);
+		pbuf += snprintf(pbuf, OBLEN, "\n   dz        = %6.1f", datum_coeffs[2]);
+		pbuf += snprintf(pbuf, OBLEN, "\n   a-axis    = %10.3f", datum_coeffs[3]);
+		pbuf += snprintf(pbuf, OBLEN, "\n   e-squared = %16.14f", datum_coeffs[4]);
 	}
 	else if (datum_idx == 0)
 	{
-		pbuf += sprintf(pbuf, "\nWGS-84 datum, Index 0 ");
+		pbuf += snprintf(pbuf, OBLEN, "\nWGS-84 datum, Index 0 ");
 	}
 	else
 	{
-		pbuf += sprintf(pbuf, "\nStandard Datum, Index %3d ", datum_idx);
+		pbuf += snprintf(pbuf, OBLEN, "\nStandard Datum, Index %3d ", datum_idx);
 	}
 }
 
@@ -4655,20 +4657,20 @@ rpt_8F15(
 
 	if (datum_idx == -1)
 	{
-		pbuf += sprintf(pbuf, "\nUser-Entered Datum:");
-		pbuf += sprintf(pbuf, "\n   dx        = %6.1f", datum_coeffs[0]);
-		pbuf += sprintf(pbuf, "\n   dy        = %6.1f", datum_coeffs[1]);
-		pbuf += sprintf(pbuf, "\n   dz        = %6.1f", datum_coeffs[2]);
-		pbuf += sprintf(pbuf, "\n   a-axis    = %10.3f", datum_coeffs[3]);
-		pbuf += sprintf(pbuf, "\n   e-squared = %16.14f", datum_coeffs[4]);
+		pbuf += snprintf(pbuf, OBLEN, "\nUser-Entered Datum:");
+		pbuf += snprintf(pbuf, OBLEN, "\n   dx        = %6.1f", datum_coeffs[0]);
+		pbuf += snprintf(pbuf, OBLEN, "\n   dy        = %6.1f", datum_coeffs[1]);
+		pbuf += snprintf(pbuf, OBLEN, "\n   dz        = %6.1f", datum_coeffs[2]);
+		pbuf += snprintf(pbuf, OBLEN, "\n   a-axis    = %10.3f", datum_coeffs[3]);
+		pbuf += snprintf(pbuf, OBLEN, "\n   e-squared = %16.14f", datum_coeffs[4]);
 	}
 	else if (datum_idx == 0)
 	{
-		pbuf += sprintf(pbuf, "\nWGS-84 datum, Index 0 ");
+		pbuf += snprintf(pbuf, OBLEN, "\nWGS-84 datum, Index 0 ");
 	}
 	else
 	{
-		pbuf += sprintf(pbuf, "\nStandard Datum, Index %3d ", datum_idx);
+		pbuf += snprintf(pbuf, OBLEN, "\nStandard Datum, Index %3d ", datum_idx);
 	}
 }
 
@@ -4704,7 +4706,7 @@ rpt_8F20(
 		parsed = BADLEN_PARSE;
 		return;
 	}
-	pbuf += sprintf(pbuf,
+	pbuf += snprintf(pbuf, OBLEN,
 			"\nFix at: %04d:%3s:%02d:%02d:%06.3f GPS (=UTC+%2ds)  FixType: %s%s%s",
 			week_num,
 			dayname[(short)(time_of_fix/86400.0)],
@@ -4718,21 +4720,21 @@ rpt_8F20(
 
 	if (datum_index > 0)
 	{
-		sprintf(datum_string, "Datum%3d", datum_index);
+		snprintf(datum_string, sizeof(datum_string), "Datum%3d", datum_index);
 	}
 	else if (datum_index)
 	{
-		sprintf(datum_string, "Unknown ");
+		snprintf(datum_string, sizeof(datum_string), "Unknown ");
 	}
 	else
 	{
-		sprintf(datum_string, "WGS-84");
+		snprintf(datum_string, sizeof(datum_string), "WGS-84");
 	}
 
 	/* convert from radians to degrees */
 	latdeg = R2D * fabs(lat);
 	londeg = R2D * fabs(lon);
-	pbuf += sprintf(pbuf,
+	pbuf += snprintf(pbuf, OBLEN,
 			"\n   Pos: %4d:%09.6f %c %5d:%09.6f %c %10.2f m HAE (%s)",
 			(short)latdeg, fmod (latdeg, 1.)*60.0,
 			(lat<0.0)?'S':'N',
@@ -4740,20 +4742,20 @@ rpt_8F20(
 			(lon<0.0)?'W':'E',
 			alt,
 			datum_string);
-	pbuf += sprintf(pbuf,
+	pbuf += snprintf(pbuf, OBLEN,
 			"\n   Vel:    %9.3f E       %9.3f N      %9.3f U   (m/sec)",
 			vel[0], vel[1], vel[2]);
 
-	pbuf += sprintf(pbuf,
+	pbuf += snprintf(pbuf, OBLEN,
 			"\n   SVs: ");
 	for (isv = 0; isv < nsvs; isv++) {
-		pbuf += sprintf(pbuf, " %02d", sv_prn[isv]);
+		pbuf += snprintf(pbuf, OBLEN, " %02d", sv_prn[isv]);
 	}
-	pbuf += sprintf(pbuf, "     (IODEs:");
+	pbuf += snprintf(pbuf, OBLEN, "     (IODEs:");
 	for (isv = 0; isv < nsvs; isv++) {
-		pbuf += sprintf(pbuf, " %02X", sv_IODC[isv]&0xFF);
+		pbuf += snprintf(pbuf, OBLEN, " %02X", sv_IODC[isv]&0xFF);
 	}
-	pbuf += sprintf(pbuf, ")");
+	pbuf += snprintf(pbuf, OBLEN, ")");
 }
 
 /* 0x8F41 */
@@ -4791,17 +4793,17 @@ rpt_8F41(
 		return;
 	}
 
-	pbuf += sprintf(pbuf, "\n  search range:          %d",
+	pbuf += snprintf(pbuf, OBLEN, "\n  search range:          %d",
 			bSearchRange);
-	pbuf += sprintf(pbuf, "\n  board options:         %d",
+	pbuf += snprintf(pbuf, OBLEN, "\n  board options:         %d",
 			bBoardOptions);
-	pbuf += sprintf(pbuf, "\n  board serial #:        %ld",
+	pbuf += snprintf(pbuf, OBLEN, "\n  board serial #:        %ld",
 			iiSerialNumber);
-	pbuf += sprintf(pbuf, "\n  build date/hour:       %02d/%02d/%02d %02d:00",
+	pbuf += snprintf(pbuf, OBLEN, "\n  build date/hour:       %02d/%02d/%02d %02d:00",
 			bBuildDay, bBuildMonth, bBuildYear, bBuildHour);
-	pbuf += sprintf(pbuf, "\n  osc offset:            %.3f PPM (%.0f Hz)",
+	pbuf += snprintf(pbuf, OBLEN, "\n  osc offset:            %.3f PPM (%.0f Hz)",
 			fOscOffset/1575.42, fOscOffset);
-	pbuf += sprintf(pbuf, "\n  test code:             %d",
+	pbuf += snprintf(pbuf, OBLEN, "\n  test code:             %d",
 			iTestCodeId);
 }
 
@@ -4837,14 +4839,14 @@ rpt_8F42(
 		return;
 	}
 
-	pbuf += sprintf(pbuf, "\nProduct ID 8F42");
-	pbuf += sprintf(pbuf, "\n   extension:            %d", bProdNumberExt);
-	pbuf += sprintf(pbuf, "\n   case serial # prefix: %d", iCaseSerialNumberPre);
-	pbuf += sprintf(pbuf, "\n   case serial #:        %ld", iiCaseSerialNumber);
-	pbuf += sprintf(pbuf, "\n   prod. #:              %ld", iiProdNumber);
-	pbuf += sprintf(pbuf, "\n   premium options:      %Xh", iPremiumOptions);
-	pbuf += sprintf(pbuf, "\n   machine ID:           %d", iMachineID);
-	pbuf += sprintf(pbuf, "\n   key:                  %Xh", iKey);
+	pbuf += snprintf(pbuf, OBLEN, "\nProduct ID 8F42");
+	pbuf += snprintf(pbuf, OBLEN, "\n   extension:            %d", bProdNumberExt);
+	pbuf += snprintf(pbuf, OBLEN, "\n   case serial # prefix: %d", iCaseSerialNumberPre);
+	pbuf += snprintf(pbuf, OBLEN, "\n   case serial #:        %ld", iiCaseSerialNumber);
+	pbuf += snprintf(pbuf, OBLEN, "\n   prod. #:              %ld", iiProdNumber);
+	pbuf += snprintf(pbuf, OBLEN, "\n   premium options:      %Xh", iPremiumOptions);
+	pbuf += snprintf(pbuf, OBLEN, "\n   machine ID:           %d", iMachineID);
+	pbuf += snprintf(pbuf, OBLEN, "\n   key:                  %Xh", iKey);
 }
 
 /* 0x8F45 */
@@ -4861,7 +4863,7 @@ rpt_8F45(
 		parsed = BADLEN_PARSE;
 		return;
 	}
-	pbuf += sprintf(pbuf, "\nCleared Segment Mask: %Xh", bSegMask);
+	pbuf += snprintf(pbuf, OBLEN, "\nCleared Segment Mask: %Xh", bSegMask);
 }
 
 /* Stinger PPS def */
@@ -4890,11 +4892,11 @@ rpt_8F4A(
 		return;
 	}
 
-	pbuf += sprintf(pbuf, "\nPPS is         %s",	pps_enabled?"enabled":"disabled");
-	pbuf += sprintf(pbuf, "\n   timebase:   %s", PPSTimeBaseText[pps_timebase]);
-	pbuf += sprintf(pbuf, "\n   polarity:   %s", PPSPolarityText[pps_polarity]);
-	pbuf += sprintf(pbuf, "\n   offset:     %.1f ns, ", pps_offset*1.e9);
-	pbuf += sprintf(pbuf, "\n   biasunc:    %.1f ns", bias_unc_threshold/GPS_C*1.e9);
+	pbuf += snprintf(pbuf, OBLEN, "\nPPS is         %s",	pps_enabled?"enabled":"disabled");
+	pbuf += snprintf(pbuf, OBLEN, "\n   timebase:   %s", PPSTimeBaseText[pps_timebase]);
+	pbuf += snprintf(pbuf, OBLEN, "\n   polarity:   %s", PPSPolarityText[pps_polarity]);
+	pbuf += snprintf(pbuf, OBLEN, "\n   offset:     %.1f ns, ", pps_offset*1.e9);
+	pbuf += snprintf(pbuf, OBLEN, "\n   biasunc:    %.1f ns", bias_unc_threshold/GPS_C*1.e9);
 }
 
 /* fast-SA decorrolation time for self-survey */
@@ -4912,7 +4914,7 @@ rpt_8F4B(
 		return;
 	}
 
-	pbuf += sprintf(pbuf,
+	pbuf += snprintf(pbuf, OBLEN,
 			"\nMax # of position fixes for self-survey : %ld",
 			decorr_max);
 }
@@ -4942,32 +4944,32 @@ rpt_8F4D(
 		return;
 	}
 
-	pbuf += sprintf(pbuf, "\nAuto-Report Mask: %02X %02X %02X %02X",
+	pbuf += snprintf(pbuf, OBLEN, "\nAuto-Report Mask: %02X %02X %02X %02X",
 			(unsigned char)(OutputMask>>24),
 			(unsigned char)(OutputMask>>16),
 			(unsigned char)(OutputMask>>8),
 			(unsigned char)OutputMask);
 
 	numchoices = sizeof(MaskText)/sizeof(char*);
-	pbuf += sprintf(pbuf, "\nAuto-Reports scheduled for Output:");
+	pbuf += snprintf(pbuf, OBLEN, "\nAuto-Reports scheduled for Output:");
 	linestart = pbuf;
 	for (ichoice = 0; ichoice < numchoices; ichoice++)
 	{
 		if (OutputMask&MaskBit[ichoice])
 		{
-			pbuf += sprintf(pbuf, "%s %s",
+			pbuf += snprintf(pbuf, OBLEN, "%s %s",
 					(pbuf==linestart)?"\n     ":",",
 					MaskText[ichoice]);
 			if (pbuf-linestart > 60) linestart = pbuf;
 		}
 	}
 
-	pbuf += sprintf(pbuf, "\nAuto-Reports NOT scheduled for Output:");
+	pbuf += snprintf(pbuf, OBLEN, "\nAuto-Reports NOT scheduled for Output:");
 	linestart = pbuf;
 	for (ichoice = 0; ichoice < numchoices; ichoice++)
 	{
 		if (OutputMask&MaskBit[ichoice]) continue;
-	     	pbuf += sprintf(pbuf, "%s %s",
+	     	pbuf += snprintf(pbuf, OBLEN, "%s %s",
 				(pbuf==linestart)?"\n     ":",",
 				MaskText[ichoice]);
 		if (pbuf-linestart > 60) linestart = pbuf;
@@ -4988,14 +4990,14 @@ rpt_8FA5(
 		return;
 	}
 
-	pbuf += sprintf(pbuf, "\nSuperpacket auto-output mask: %02X %02X %02X %02X",
+	pbuf += snprintf(pbuf, OBLEN, "\nSuperpacket auto-output mask: %02X %02X %02X %02X",
 			spktmask[0], spktmask[1], spktmask[2], spktmask[3]);
 
-	if (spktmask[0]&0x01) pbuf+= sprintf (pbuf, "\n    PPS   8F-0B");
-	if (spktmask[0]&0x02) pbuf+= sprintf (pbuf, "\n    Event 8F-0B");
-	if (spktmask[0]&0x10) pbuf+= sprintf (pbuf, "\n    PPS   8F-AD");
-	if (spktmask[0]&0x20) pbuf+= sprintf (pbuf, "\n    Event 8F-AD");
-	if (spktmask[2]&0x01) pbuf+= sprintf (pbuf, "\n    ppos Fix 8F-20");
+	if (spktmask[0]&0x01) pbuf+= snprintf (pbuf, OBLEN, "\n    PPS   8F-0B");
+	if (spktmask[0]&0x02) pbuf+= snprintf (pbuf, OBLEN, "\n    Event 8F-0B");
+	if (spktmask[0]&0x10) pbuf+= snprintf (pbuf, OBLEN, "\n    PPS   8F-AD");
+	if (spktmask[0]&0x20) pbuf+= snprintf (pbuf, OBLEN, "\n    Event 8F-AD");
+	if (spktmask[2]&0x01) pbuf+= snprintf (pbuf, OBLEN, "\n    ppos Fix 8F-20");
 }
 
 static void
@@ -5053,23 +5055,23 @@ rpt_8FAD(
 		return;
 	}
 
-	pbuf += sprintf(pbuf,    "\n8FAD   Count: %d   Status: %s",
+	pbuf += snprintf(pbuf, OBLEN,    "\n8FAD   Count: %d   Status: %s",
 			Count, Status8FADText[Status]);
 
-	pbuf += sprintf(pbuf, "\n   Leap Flags:");
+	pbuf += snprintf(pbuf, OBLEN, "\n   Leap Flags:");
 	if (Flags)
 	{
 		for (i=0; i<8; i++)
 		{
-			if (Flags&(1<<i)) pbuf += sprintf(pbuf, LeapStatusText[i]);
+			if (Flags&(1<<i)) pbuf += snprintf(pbuf, OBLEN, LeapStatusText[i]);
 		}
 	}
 	else
 	{
-		pbuf += sprintf(pbuf, "  UTC info not available");
+		pbuf += snprintf(pbuf, OBLEN, "  UTC info not available");
 	}
 
-	pbuf += sprintf(pbuf,     "\n      %02d/%02d/%04d (DMY)  %02d:%02d:%02d.%09ld UTC",
+	pbuf += snprintf(pbuf, OBLEN,     "\n      %02d/%02d/%04d (DMY)  %02d:%02d:%02d.%09ld UTC",
 			Day, Month, Year, Hour, Minute, Second, (long)(FracSec*1.e9));
 }
 
@@ -5096,20 +5098,21 @@ print_msg_table_header(
 		switch (rptcode)
 		{
 		    case 0x5A:
-			numchars = sprintf(HdrStr, "\nRaw Measurement Data");
-			numchars += sprintf(HdrStr+numchars,
+			numchars = snprintf(HdrStr, OBLEN,
+					    "\nRaw Measurement Data");
+			numchars += snprintf(HdrStr+numchars, OBLEN,
 					    "\n   SV  Sample   SNR  Code Phase   Doppler    Seconds     Time of Meas");
 			break;
 
 		    case 0x5B:
-			numchars = sprintf(HdrStr, "\nEphemeris Status");
-			numchars += sprintf(HdrStr+numchars,
+			numchars = snprintf(HdrStr, OBLEN, "\nEphemeris Status");
+			numchars += snprintf(HdrStr+numchars, OBLEN,
 					    "\n    SV     Time collected     Health  IODE        t oe         Fit   URA");
 			break;
 
 		    case 0x5C:
-			numchars = sprintf(HdrStr, "\nTracking Info");
-			numchars += sprintf(HdrStr+numchars,
+			numchars = snprintf(HdrStr, OBLEN, "\nTracking Info");
+			numchars += snprintf(HdrStr+numchars, OBLEN,
 					    "\n   SV  C Acq Eph   SNR     Time of Meas       Elev  Azim   ");
 			break;
 
@@ -5129,26 +5132,26 @@ unknown_rpt(
 	/* app-specific rpt packets */
 	if (parsed == BADLEN_PARSE)
 	{
-		pbuf += sprintf(pbuf, "\nTSIP report packet ID %2Xh, length %d: Bad length",
+		pbuf += snprintf(pbuf, OBLEN, "\nTSIP report packet ID %2Xh, length %d: Bad length",
 				rpt->code, rpt->len);
 	}
 	if (parsed == BADID_PARSE)
 	{
-		pbuf += sprintf(pbuf,
+		pbuf += snprintf(pbuf, OBLEN,
 				"\nTSIP report packet ID %2Xh, length %d: translation not supported",
 				rpt->code, rpt->len);
 	}
 
 	if (parsed == BADDATA_PARSE)
 	{
-		pbuf += sprintf(pbuf,
+		pbuf += snprintf(pbuf, OBLEN,
 				"\nTSIP report packet ID %2Xh, length %d: data content incorrect",
 				rpt->code, rpt->len);
 	}
 
 	for (i = 0; i < rpt->len; i++) {
 		if ((i % 20) == 0) *pbuf++ = '\n';
-		pbuf += sprintf(pbuf, " %02X", rpt->buf[i]);
+		pbuf += snprintf(pbuf, OBLEN, " %02X", rpt->buf[i]);
 	}
 }
 /**/
