@@ -29,7 +29,6 @@
 #include <isc/mem.h>
 #include <isc/msgs.h>
 #include <isc/once.h>
-#include <isc/socket.h>
 #include <isc/task.h>
 #include <isc/timer.h>
 #include <isc/util.h>

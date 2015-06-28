@@ -30,7 +30,6 @@
 #include <sys/time.h>	/* Required for struct timeval on some platforms. */
 
 #include <isc/log.h>
-#include <isc/string.h>
 #include <isc/time.h>
 #include <isc/util.h>
 

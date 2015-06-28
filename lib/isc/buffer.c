@@ -24,7 +24,6 @@
 #include <isc/buffer.h>
 #include <isc/mem.h>
 #include <isc/region.h>
-#include <isc/string.h>
 #include <isc/util.h>
 
 void
