@@ -292,7 +292,7 @@ add_env_val(char * buf, int buf_sz, char const * name)
     if (strlen(dir_part) + 1 + strlen(name) >= (unsigned)buf_sz)
         return false;
 
-    sprintf(buf, "%s%s", dir_part, name);
+    snprintf(buf, buf_sz, "%s%s", dir_part, name);
     return true;
 }
 

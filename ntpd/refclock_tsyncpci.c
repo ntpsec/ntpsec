@@ -417,7 +417,7 @@ static void tsync_poll(int unit, struct peer *peer)
 
 
     /* Construct the device name */
-    sprintf(device, "%s%d", DEVICE, (int)peer->refclkunit);
+    snprintf(device, sizeof(device), "%s%d", DEVICE, (int)peer->refclkunit);
 
     printf("Polling device number %d...\n", (int)peer->refclkunit);
 
@@ -611,7 +611,8 @@ static void tsync_poll(int unit, struct peer *peer)
     /*
     **  set the reference clock object
     */
-    sprintf(pp->a_lastcode, "%03d %02d:%02d:%02.6f",
+    snprintf(pp->a_lastcode, sizeof(pp->a_lastcode),
+	    "%03d %02d:%02d:%02.6f",
             TimeContext.timeObj.days, TimeContext.timeObj.hours,
             TimeContext.timeObj.minutes, seconds);
 

@@ -139,17 +139,17 @@ find_dir_name(tOptions * opts, int * p_free)
         {
             size_t sz = strlen(pzEnv) + strlen(pzEndDir) + 2;
             pzFileName = (char *)AGALOC(sz, "dir name");
+
+            if (pzFileName == NULL)
+                return NULL;
+
+            *p_free = 1;
+            /*
+             *  Glue together the full name into the allocated memory.
+             *  FIXME: We lose track of this memory.
+             */
+            snprintf(pzFileName, sz, "%s/%s", pzEnv, pzEndDir);
         }
-
-        if (pzFileName == NULL)
-            return NULL;
-
-        *p_free = 1;
-        /*
-         *  Glue together the full name into the allocated memory.
-         *  FIXME: We lose track of this memory.
-         */
-        sprintf(pzFileName, "%s/%s", pzEnv, pzEndDir);
         return pzFileName;
     }
 }

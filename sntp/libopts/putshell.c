@@ -187,7 +187,7 @@ optionQuoteString(char const * text, char const * nl)
              *  sprintf is safe here, because we already computed
              *  the amount of space we will be using.
              */
-            sprintf(out, MK_STR_OCT_FMT, ch);
+            snprintf(out, 4, MK_STR_OCT_FMT, ch);
             out += 4;
         }
 
