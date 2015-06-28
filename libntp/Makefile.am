@@ -15,8 +15,6 @@ libisc_SRCS =								\
 	$(srcdir)/../lib/isc/unix/errno2result.c			\
 	$(srcdir)/../lib/isc/event.c					\
 	$(srcdir)/../lib/isc/unix/file.c				\
-	$(srcdir)/../lib/isc/inet_ntop.c				\
-	$(srcdir)/../lib/isc/inet_pton.c				\
 	$(srcdir)/../lib/isc/unix/interfaceiter.c			\
 	$(srcdir)/../lib/isc/lib.c					\
 	$(srcdir)/../lib/isc/log.c					\
