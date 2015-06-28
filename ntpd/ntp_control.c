@@ -684,7 +684,7 @@ static const u_char clocktypes[] = {
 	CTL_SST_TS_UHF,		/* REFCLK_GPS_ARBITER (11) */
 	CTL_SST_TS_UHF,		/* REFCLK_IRIG_TPRO (12) */
 	CTL_SST_TS_ATOM,	/* REFCLK_ATOM_LEITCH (13) */
-	CTL_SST_TS_LF,		/* deprecated REFCLK_MSF_EES (14) */
+	CTL_SST_TS_LF,		/* not used (14) */
 	CTL_SST_TS_NTP,		/* not used (15) */
 	CTL_SST_TS_UHF,		/* REFCLK_IRIG_BANCOMM (16) */
 	CTL_SST_TS_UHF,		/* REFCLK_GPS_DATU (17) */

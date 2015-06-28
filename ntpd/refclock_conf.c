@@ -90,12 +90,6 @@ extern	struct refclock	refclock_irig;
 #define refclock_irig	refclock_none
 #endif
 
-#if 0 && defined(CLOCK_MSFEES) && defined(PPS)
-extern	struct refclock	refclock_msfees;
-#else
-#define refclock_msfees	refclock_none
-#endif
-
 #ifdef CLOCK_BANC
 extern	struct refclock refclock_bancomm;
 #else
@@ -284,7 +278,7 @@ struct refclock * const refclock_conf[] = {
 	&refclock_arbiter,	/* 11 REFCLK_GPS_ARBITER */
 	&refclock_tpro,		/* 12 REFCLK_IRIG_TPRO */
 	&refclock_leitch,	/* 13 REFCLK_ATOM_LEITCH */
-	&refclock_none,		/* 14 deprecated: REFCLK_MSF_EES */
+	&refclock_none,		/* 14 not used */
 	&refclock_none,		/* 15 not used */
 	&refclock_bancomm,	/* 16 REFCLK_IRIG_BANCOMM */
 	&refclock_datum,	/* 17 REFCLK_GPS_DATUM */
