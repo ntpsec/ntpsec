@@ -76,7 +76,6 @@
 #define TSYNC_REF_MAX_OUT_LEN       (16)
 #define TSYNC_REF_PYLD_LEN          (TSYNC_REF_IN_LEN +                     \
                                      TSYNC_REF_MAX_OUT_LEN)
-#define TSYNC_REF_LEN               (4)
 #define TSYNC_REF_LOCAL             ("LOCL")
 
 #define TSYNC_TMSCL_IID              (0x2301)    // CS CAI, TIMESCALE IID
@@ -165,8 +164,8 @@ typedef struct NtpTimeObj {
 */
 typedef struct ReferenceObj {
 
-    char time[TSYNC_REF_LEN];
-    char pps[TSYNC_REF_LEN];
+    char time[REFIDLEN];
+    char pps[REFIDLEN];
 
 } ReferenceObj;
 
@@ -343,7 +342,7 @@ static int tsync_start(int unit, struct peer *peer)
 
     // Initialize reference stratum level and ID
     up->refStratum = STRATUM_UNSPEC;
-    strncpy((char *)&up->refId, TSYNC_REF_LOCAL, TSYNC_REF_LEN);
+    memcpy((char *)&up->refId, TSYNC_REF_LOCAL, REFIDLEN);
 
     // Attach unit structure
     pp->unitptr = (caddr_t)up;
@@ -351,7 +350,7 @@ static int tsync_start(int unit, struct peer *peer)
     /* Declare our refId as local in the beginning because we do not know
      * what our actual refid is yet.
      */
-    strncpy((char *)&pp->refid, TSYNC_REF_LOCAL, TSYNC_REF_LEN);
+    memcpy((char *)&pp->refid, TSYNC_REF_LOCAL, REFIDLEN);
 
     return (1);
 
@@ -404,8 +403,8 @@ static void tsync_poll(int unit, struct peer *peer)
     unsigned int         itAllocationLength2;
     NtpTimeObj           TimeContext;
     BoardObj             hBoard;
-    char                 timeRef[TSYNC_REF_LEN + 1];
-    char                 ppsRef [TSYNC_REF_LEN + 1];
+    char                 timeRef[REFIDLEN + 1];
+    char                 ppsRef [REFIDLEN + 1];
     TIME_SCALE           tmscl = TIME_SCALE_UTC;
     LeapSecondObj        leapSec;
     ioctl_trans_di      *it;
@@ -545,8 +544,8 @@ static void tsync_poll(int unit, struct peer *peer)
     memset(timeRef, '\0', sizeof(timeRef));
     memset(ppsRef, '\0', sizeof(ppsRef));
     pRefObj = (void *)it->payloads;
-    memcpy(timeRef, pRefObj->time, TSYNC_REF_LEN);
-    memcpy(ppsRef, pRefObj->pps, TSYNC_REF_LEN);
+    memcpy(timeRef, pRefObj->time, REFIDLEN);
+    memcpy(ppsRef, pRefObj->pps, REFIDLEN);
 
     // Extract the Clock Service Time Scale and convert to correct byte order
     memcpy(&tmscl, ((TIME_SCALE*)(it1->payloads)), sizeof(tmscl));
@@ -715,8 +714,7 @@ static void tsync_poll(int unit, struct peer *peer)
 
                 // Store reference stratum as local clock
                 up->refStratum = TSYNC_LCL_STRATUM;
-                strncpy((char *)&up->refId, RefIdLookupTbl[j].pRefId,
-                    TSYNC_REF_LEN);
+                memcpy((char *)&up->refId, RefIdLookupTbl[j].pRefId, REFIDLEN);
 
                 // Set reference clock stratum level as local clock
                 pp->stratum   = TSYNC_LCL_STRATUM;
@@ -724,8 +722,8 @@ static void tsync_poll(int unit, struct peer *peer)
             }
 
             // Update reference name
-            strncpy((char *)&pp->refid, RefIdLookupTbl[j].pRefId,
-                TSYNC_REF_LEN);
+            memcpy((char *)&pp->refid, RefIdLookupTbl[j].pRefId,
+                REFIDLEN);
             peer->refid = pp->refid;
         }
         // Else in holdover
@@ -746,7 +744,7 @@ static void tsync_poll(int unit, struct peer *peer)
     // Else KTS not in sync
     else {
         // Place local identifier in peer RefID
-        strncpy((char *)&pp->refid, TSYNC_REF_LOCAL, TSYNC_REF_LEN);
+        memcpy((char *)&pp->refid, TSYNC_REF_LOCAL, REFIDLEN);
         peer->refid = pp->refid;
 
         // Report not in sync
