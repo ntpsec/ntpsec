@@ -77,6 +77,14 @@ lib		Source code for third-party libraries included in the
 		distribution.  Xurrently juat onme: isc, utilty code
 		from Interactive Sytems Corporation.
 
+libjsmn		A minimal JSON library used by the GPSD-JSON driver.
+
+libparse 	This directory contains the files making up the parser for
+		the parse refclock driver. For reasonably sane clocks
+		this refclock drivers allows a refclock implementation
+		by just providing a conversion routine and the
+		appropriate NTP parameters
+
 libntp		Directory containing library source code used by most
 		programs in the distribution.
 
@@ -94,6 +102,11 @@ ntptrace        Directory containing sources for a utility program that
 		designated peer to the primary server at the root of the
 		timekeeping subnet.
 
+ntpsnmpd	NTP SNMP subagent for Net-SNMP.
+
+parseutil	Some utilities for DCF77 clocks.  Obsolete - working only
+		on SunOS 4.x, which went out of support in December 2003.
+
 ports		Subdirectories of this contain code for non-Unix operating
 		systems.  At present there is just one, for Windows.
 
@@ -102,6 +115,8 @@ scripts		Directory containing scripts to build the configuration
 		various dependent directories. the subdirectories
 		monitoring and support hold various perl and shell
 		scripts for visualizing synchronization and daemon startup.
+
+sntp		Query an NTP or SNTP server to report or set the time.
 
 stamp.h.in	Configuration file generated automatically from configure.in.
 		Do not edit.
