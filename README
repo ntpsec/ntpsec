@@ -51,7 +51,7 @@ clockstuff	Directory containing sources for miscellaneous programs
 conf            Directory containing a motley collection of
 		configuration files for various systems. For example only.
 
-config.status	Script usable to recreate the current autotools xonfiguration.
+config.status	Script usable to recreate the current autotools configuration.
 
 config.h.in	Configuration file generated automatically from
 		configure.in. Do not edit.
