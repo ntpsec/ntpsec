@@ -1,8 +1,3 @@
-
-Submit patches, bug reports, and enhancement requests via
-
-			http://bugs.ntp.org
-
 		  The ntp Distribution Base Directory
 
 This directory and its subdirectories contain the Network Time Protocol
@@ -10,14 +5,11 @@ Version 4 (NTP) distribution for Unix and Windows/NT systems.  This release
 may still work on VxWorks, too.
 
 The contents of the base directory are given in this file. The contents of
-subdirectories are given in the README files in each subdirectory.
+subdirectories are usually given in the README files in each subdirectory.
 
 A complete explanation of the configure, compile and install process, as
 well as setting up an NTP subnet, is in the HTML pages in the ./html/
-directory. For more information on NTP and how to get a working setup,
-read WHERE-TO-START.
-
-For Windows/NT, visit html/build/hints/winnt.html .
+directory.
 
 The base directory ./ contains the autoconfiguration files, source
 directories and related stuff:
@@ -29,34 +21,25 @@ COPYRIGHT	Excerpt from the HTML file ./html/copyright.html. This file
 INSTALL		Generic installation instructions for autoconf-based programs.
 		Unless you really know what you are doing, you should read the
 		directions in the HTML pages, starting with ./html/index.html.
+		For Windows/NT, visit html/build/hints/winnt.html
 
 NEWS		What's new in this release.
 
 README		This file.
 
-README.hackers	Notes to folks who want to hack on the code.
-
-TODO            List of items the NTP developers are working on.
-
-WHERE-TO-START	Hints on what to read in order to get a working
-		configuration.
+devel-docs	Documentation aimed at developers.
 
 Makefile.am	Automake file configuration file. Edit only if you have the
 		GNU automake and autoconf utilities installed.
 
 Makefile.in	Autoconf make file template for Unix.
 
+*.mf		Automake fragments created by the build sytem.  Safely ignorable.
+
 adjtimed        Directory containing the sources for the adjtime daemon
 		for HP/UX systems prior to HP-UX 10.0.
 
-authstuff       Directory containing sources for miscellaneous programs
-		to test, calibrate and certify the cryptographic
-		mechanisms for DES and MD5 based authentication. These
-		programs do not include the cryptographic routines
-		themselves, so are free of U.S. export restrictions.
-
-build		A script to build the distribution in A.`config.guess`
-		subdirectory (more or less).
+bootstrap	A script to initialize the build  system on first checkout.
 
 clockstuff	Directory containing sources for miscellaneous programs
 		to test certain auxiliary programs used with some kernel
@@ -68,8 +51,7 @@ clockstuff	Directory containing sources for miscellaneous programs
 conf            Directory containing a motley collection of
 		configuration files for various systems. For example only.
 
-config.guess	Script used to identify the machine architecture and
-		operating system.
+config.status	Script usable to recreate the current autotools xonfiguration.
 
 config.h.in	Configuration file generated automatically from
 		configure.in. Do not edit.
@@ -78,13 +60,8 @@ configure	Script used to configure the distribution. See the HTML pages
 		(./html/index.html) for a complete description of the options
 		available.
 
-configure.in	Master configuration template. Edit only if you have the
+configure.ac	Master configuration template. Edit only if you have the
 		GNU automake and autoconf utilities installed.
-
-dot.emacs	C-mode indentation rules for code "Just the way Dave likes it".
-
-flock_build	(UDel only) Build the distribution on a number of
-		different platforms.
 
 html            Directory containing a complete set of documentation on
 		building and configuring a NTP server or client. The
@@ -96,11 +73,9 @@ html            Directory containing a complete set of documentation on
 include		Directory containing include header files used by most
 		programs in the distribution.
 
-install-sh	Script to install a program, script or data file.
-
-kernel		Directory containing sources for kernel programs such as
-		line disciplines and STREAMS modules used with the CHU
-		decoder and precision PPS signals.
+lib		Source code for third-party libraries included in the
+		distribution.  Xurrently juat onme: isc, utilty code
+		from Interactive Sytems Corporation.
 
 libntp		Directory containing library source code used by most
 		programs in the distribution.
@@ -119,15 +94,8 @@ ntptrace        Directory containing sources for a utility program that
 		designated peer to the primary server at the root of the
 		timekeeping subnet.
 
-parse		Directory containing files belonging to the generic
-		parse reference clock driver. For reasonably simple
-		clocks it is possible to get away with about 3-4Kb of
-		code. additionally the SunOS 4.x/Solaris 5.3 streams
-		module for parse squats here.
-
-patches		Directory containing patches already applied to this
-		distribution. These are included for record and to help
-		in possible porting problems.
+ports		Subdirectories of this contain code for non-Unix operating
+		systems.  At present there is just one, for Windows.
 
 scripts		Directory containing scripts to build the configuration
 		files in this directory and then the makefiles used in
@@ -138,8 +106,8 @@ scripts		Directory containing scripts to build the configuration
 stamp.h.in	Configuration file generated automatically from configure.in.
 		Do not edit.
 
+tests		Self-test code.
+
 util            Directory containing sources for various utility and
 		testing programs.
 
-David L. Mills (mills@udel.edu)
-21 June 1998
