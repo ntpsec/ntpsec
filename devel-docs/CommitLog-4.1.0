@@ -1,3 +1,8 @@
+This is the historical change log from before the source was under
+version control.  Describes changes from 1997 to 2001.  For changes
+from 2001 to mid-2015, see ChangeLog.  For newer changes, browse the
+comments in the version-control system.
+
 2001-08-01  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* configure.in: 4.1.0
