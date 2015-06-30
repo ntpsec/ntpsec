@@ -1,19 +1,34 @@
+= README for development documentation =
+
 This directory contains internal and historical documentation of interest to
 NTP developers.  Some of the files are:
 
-CommitLog-4.1.0	 Changes from 1997 to 2001.
+CommitLog-4.1.0::
+	Changes from 1997 to 2001.
 
-ChangeLog	 Changes from 2001 to mid-2015.  (Temporarily moved back to
-		 the root directory until we fix the build to not care where
-		 it lives.)
+ChangeLog::
+	Changes from 2001 to mid-2015.  (Temporarily moved back to
+	the root directory until we fix the build to not care where
+	it lives.)
 
-hacking.txt	Notes to folks who want to hack on the code.
+hacking.txt::
+	Notes to folks who want to hack on the code.
 
-TODO            List of items the NTP developers are working on.
+dot.emacs::
+	C-mode indentation rules for code "Just the way Dave likes it".
 
-WHERE-TO-START	Hints on what to read in order to get a working
-		configuration.  Somewhat historical.
+TODO::
+	List of items the NTP developers are working on.
 
-dot.emacs	C-mode indentation rules for code "Just the way Dave likes it".
+HISTORIC-README::
+	Dave Mills's original README; the ftp location and some other
+	things are wrong but it maintains some historical interest.
+	Long in the source tree as WHERE-TO-START.
 
-y2k.txt		Notes on Y2K conformance.
+HISTORIC-VERSIONS::
+	How to read NTP Classic version numbers.
+
+y2k.txt::
+	Notes on Y2K conformance.
+
+//end
