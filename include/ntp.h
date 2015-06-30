@@ -472,6 +472,9 @@ struct peer {
 
 /*
  * Reference clock types.  Added as necessary.
+ *
+ * This is all assigned refclock types since the beginning of time.
+ * Some are no longer in use.
  */
 #define	REFCLK_NONE		0	/* unknown or missing */
 #define	REFCLK_LOCALCLOCK	1	/* external (e.g., lockclock) */
