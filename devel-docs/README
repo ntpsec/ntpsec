@@ -16,3 +16,4 @@ WHERE-TO-START	Hints on what to read in order to get a working
 
 dot.emacs	C-mode indentation rules for code "Just the way Dave likes it".
 
+y2k.txt		Notes on Y2K conformance.
