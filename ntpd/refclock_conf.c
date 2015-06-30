@@ -78,12 +78,6 @@ extern	struct refclock	refclock_tpro;
 #define	refclock_tpro	refclock_none
 #endif
 
-#ifdef CLOCK_LEITCH
-extern	struct refclock	refclock_leitch;
-#else
-#define	refclock_leitch	refclock_none
-#endif
-
 #ifdef CLOCK_IRIG
 extern	struct refclock	refclock_irig;
 #else
@@ -100,12 +94,6 @@ extern	struct refclock refclock_bancomm;
 extern	struct refclock	refclock_true;
 #else
 #define	refclock_true	refclock_none
-#endif
-
-#ifdef CLOCK_DATUM
-extern	struct refclock	refclock_datum;
-#else
-#define refclock_datum	refclock_none
 #endif
 
 #ifdef CLOCK_ACTS
@@ -136,12 +124,6 @@ extern	struct refclock	refclock_atom;
 extern	struct refclock	refclock_hpgps;
 #else
 #define	refclock_hpgps	refclock_none
-#endif
-
-#ifdef CLOCK_GPSVME
-extern	struct refclock refclock_gpsvme;
-#else
-#define refclock_gpsvme refclock_none
 #endif
 
 #ifdef CLOCK_ARCRON_MSF
@@ -266,7 +248,7 @@ extern struct refclock refclock_gpsdjson;
 struct refclock * const refclock_conf[] = {
 	&refclock_none,		/* 0 REFCLK_NONE */
 	&refclock_local,	/* 1 REFCLK_LOCAL */
-	&refclock_none,		/* 2 deprecated: REFCLK_GPS_TRAK */
+	&refclock_none,		/* 2 was: REFCLK_GPS_TRAK */
 	&refclock_pst,		/* 3 REFCLK_WWV_PST */
 	&refclock_spectracom, 	/* 4 REFCLK_SPECTRACOM */
 	&refclock_true,		/* 5 REFCLK_TRUETIME */
@@ -277,15 +259,15 @@ struct refclock * const refclock_conf[] = {
 	&refclock_as2201,	/* 10 REFCLK_GPS_AS2201 */
 	&refclock_arbiter,	/* 11 REFCLK_GPS_ARBITER */
 	&refclock_tpro,		/* 12 REFCLK_IRIG_TPRO */
-	&refclock_leitch,	/* 13 REFCLK_ATOM_LEITCH */
-	&refclock_none,		/* 14 not used */
-	&refclock_none,		/* 15 not used */
+	&refclock_none,		/* 13 was: REFCLK_ATOM_LEITCH */
+	&refclock_none,		/* 14 was: REFCLOCK_MSF_EES */
+	&refclock_none,		/* 15 was: OLD TrueTime GPS/TM-TMD Receiver */
 	&refclock_bancomm,	/* 16 REFCLK_IRIG_BANCOMM */
-	&refclock_datum,	/* 17 REFCLK_GPS_DATUM */
+	&refclock_none,		/* 17 was: REFCLK_GPS_DATUM */
 	&refclock_acts,		/* 18 REFCLK_ACTS */
 	&refclock_heath,	/* 19 REFCLK_WWV_HEATH */
 	&refclock_nmea,		/* 20 REFCLK_GPS_NMEA */
-	&refclock_gpsvme,	/* 21 REFCLK_GPS_VME */
+	&refclock_none,		/* 21 was: REFCLK_GPS_VME */
 	&refclock_atom,		/* 22 REFCLK_ATOM_PPS */
 	&refclock_none,		/* 23 not used */
 	&refclock_none,		/* 24 not used */

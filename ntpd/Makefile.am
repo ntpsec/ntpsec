@@ -241,11 +241,9 @@ libntpd_a_SOURCES =		\
 	refclock_chronolog.c	\
 	refclock_chu.c		\
 	refclock_conf.c		\
-	refclock_datum.c	\
 	refclock_dumbclock.c	\
 	refclock_fg.c		\
 	refclock_gpsdjson.c	\
-	refclock_gpsvme.c	\
 	refclock_heath.c	\
 	refclock_hopfser.c	\
 	refclock_hopfpci.c	\
@@ -253,7 +251,6 @@ libntpd_a_SOURCES =		\
 	refclock_irig.c		\
 	refclock_jjy.c		\
 	refclock_jupiter.c	\
-	refclock_leitch.c	\
 	refclock_local.c	\
 	refclock_mx4200.c	\
 	refclock_neoclock4x.c	\
