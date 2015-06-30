@@ -266,7 +266,6 @@ libntpd_a_SOURCES =		\
 	refclock_spectracom.c	\
 	refclock_tpro.c		\
 	refclock_true.c		\
-	refclock_tt560.c	\
 	refclock_ulink.c	\
 	refclock_wwv.c		\
 	refclock_zyfer.c	\
