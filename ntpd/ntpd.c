@@ -61,16 +61,6 @@
 #include "recvbuff.h"
 #include "ntp_cmdargs.h"
 
-#if 0				/* HMS: I don't think we need this. 961223 */
-#ifdef LOCK_PROCESS
-# ifdef SYS_SOLARIS
-#  include <sys/mman.h>
-# else
-#  include <sys/lock.h>
-# endif
-#endif
-#endif
-
 #ifdef _AIX
 # include <ulimit.h>
 #endif /* _AIX */
