@@ -36,6 +36,8 @@
 
 #include "config.h"
 
+#include <string.h>
+
 #include <isc/assertions.h>
 #include <isc/md5.h>
 #include <isc/platform.h>
