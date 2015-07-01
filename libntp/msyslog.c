@@ -100,10 +100,14 @@ errno_to_str(
 	size_t	bufsiz
 	)
 {
-	int	rc;
+#ifdef _GNU_SOURCE
+	char	*rc;
+#else
+	int rc;
+#endif /* _GNU_SOURCE */
 
 	rc = strerror_r(err, buf, bufsiz);
-	if (rc < 0)
+	if (rc)
 		snprintf(buf, bufsiz, "strerror_r(%d): errno %d",
 			 err, errno);
 }
