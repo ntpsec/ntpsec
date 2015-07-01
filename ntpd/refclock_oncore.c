@@ -364,7 +364,9 @@ static	void	oncore_read_config    (struct instance *);
 static	void	oncore_receive	      (struct recvbuf *);
 static	int	oncore_ppsapi	      (struct instance *);
 static	void	oncore_get_timestamp  (struct instance *, long, long);
+#ifdef ONCORE_SHMEM_STATUS
 static	void	oncore_init_shmem     (struct instance *);
+#endif
 
 static	void	oncore_antenna_report (struct instance *, enum antenna_state);
 static	void	oncore_chan_test      (struct instance *);
