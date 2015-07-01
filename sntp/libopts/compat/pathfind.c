@@ -12,6 +12,7 @@ pathfind( char const * path,
           char const * mode );
 
 #include "compat.h"
+
 #ifndef HAVE_PATHFIND
 #if defined(__windows__) && !defined(__CYGWIN__)
 static char *
