@@ -65,18 +65,10 @@ AH_VERBATIM(
 
 case "$GCC" in
  yes)
-    CFLAGS="$CFLAGS -std=c99"
-    SAVED_CFLAGS="$CFLAGS"
-    CFLAGS="$CFLAGS -Wstrict-overflow"
-    AC_CACHE_CHECK(
-	[if $CC can handle -Wstrict-overflow], 
-	[ntp_cv_gcc_Wstrict_overflow], 
-	[AC_COMPILE_IFELSE(
-	    [AC_LANG_PROGRAM([[]], [[]])],
-	    [ntp_cv_gcc_Wstrict_overflow=yes],
-	    [ntp_cv_gcc_Wstrict_overflow=no]
-	)	]
-    )
+    # -Wstrict-overflow throws false positives when the optimizer is enabled.
+    # See https://gcc.gnu.org/ml/gcc/2012-12/msg00228.html
+    # Therefore, never enable this switch.
+    ntp_cv_gcc_Wstrict_overflow=no
     #
     # $ntp_cv_gcc_Wstrict_overflow is tested later to add the 
     # flag to CFLAGS.
