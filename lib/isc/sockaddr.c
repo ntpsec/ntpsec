@@ -22,6 +22,7 @@
 #include <config.h>
 
 #include <stdio.h>
+#include <string.h>
 
 #include <isc/buffer.h>
 #include <isc/hash.h>
