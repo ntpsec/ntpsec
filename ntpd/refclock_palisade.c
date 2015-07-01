@@ -1161,7 +1161,7 @@ HW_poll (
 
 	/* Edge trigger */
 	if (up->type == CLK_ACUTIME)
-		write (pp->io.fd, "", 1);
+		IGNORE(write (pp->io.fd, "", 1));
 		
 	if (ioctl(pp->io.fd, TIOCMSET, &x) < 0) { 
 #ifdef DEBUG

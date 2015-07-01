@@ -22,6 +22,7 @@
 #include <config.h>
 
 #include <errno.h>
+#include <string.h>
 
 #include <isc/condition.h>
 #include <isc/msgs.h>
@@ -62,7 +63,7 @@ isc_condition_waituntil(isc_condition_t *c, isc_mutex_t *m, isc_time_t *t) {
 			return (ISC_R_TIMEDOUT);
 	} while (presult == EINTR);
 
-	strerror_r(presult, strbuf, sizeof(strbuf));
+	IGNORE(strerror_r(presult, strbuf, sizeof(strbuf)));
 	UNEXPECTED_ERROR(__FILE__, __LINE__,
 			 "pthread_cond_timedwait() %s %s",
 			 isc_msgcat_get(isc_msgcat, ISC_MSGSET_GENERAL,

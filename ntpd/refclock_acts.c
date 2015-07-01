@@ -414,7 +414,7 @@ acts_message(
 		if (write(pp->io.fd, sys_phone[up->retry],
 		    strlen(sys_phone[up->retry])) < 0)
 			msyslog(LOG_ERR, "acts: write DIAL fails %m");
-		write(pp->io.fd, "\r", 1);
+		IGNORE(write(pp->io.fd, "\r", 1));
 		up->retry++;
 		up->state = S_CONNECT;
 		up->timer = ANSWER;
@@ -553,7 +553,7 @@ acts_timeout(
 		rc = write(pp->io.fd, modem_setup, strlen(modem_setup));
 		if (rc < 0)
 			msyslog(LOG_ERR, "acts: write SETUP fails %m");
-		write(pp->io.fd, "\r", 1);
+		IGNORE(write(pp->io.fd, "\r", 1));
 		up->state = S_SETUP;
 		up->timer = SETUP;
 		return;

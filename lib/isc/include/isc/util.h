@@ -230,6 +230,8 @@
 /*% Runtime Check */
 #define RUNTIME_CHECK(cond)		ISC_ERROR_RUNTIMECHECK(cond)
 
+void inline IGNORE() {}  /* hack to ignore GCC Unused Result */
+
 /*%
  * Time
  */

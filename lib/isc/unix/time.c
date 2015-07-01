@@ -148,7 +148,7 @@ isc_time_now(isc_time_t *t) {
 	REQUIRE(t != NULL);
 
 	if (gettimeofday(&tv, NULL) == -1) {
-		strerror_r(errno, strbuf, sizeof(strbuf));
+		IGNORE(strerror_r(errno, strbuf, sizeof(strbuf)));
 		UNEXPECTED_ERROR(__FILE__, __LINE__, "%s", strbuf);
 		return (ISC_R_UNEXPECTED);
 	}
@@ -192,7 +192,7 @@ isc_time_nowplusinterval(isc_time_t *t, const isc_interval_t *i) {
 	INSIST(i->nanoseconds < NS_PER_S);
 
 	if (gettimeofday(&tv, NULL) == -1) {
-		strerror_r(errno, strbuf, sizeof(strbuf));
+		IGNORE(strerror_r(errno, strbuf, sizeof(strbuf)));
 		UNEXPECTED_ERROR(__FILE__, __LINE__, "%s", strbuf);
 		return (ISC_R_UNEXPECTED);
 	}

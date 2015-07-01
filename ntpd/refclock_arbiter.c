@@ -201,7 +201,7 @@ arb_start(
 #ifdef DEBUG
 	if(debug) { printf("arbiter: mode = %d.\n", peer->MODE); }
 #endif
-	write(pp->io.fd, COMMAND_HALT_BCAST, 2);
+	IGNORE(write(pp->io.fd, COMMAND_HALT_BCAST, 2));
 	return (1);
 }
 
@@ -286,33 +286,33 @@ arb_receive(
 		 */
 		if (!strncmp(tbuf, "TQ", 2)) {
 			up->qualchar = tbuf[2];
-			write(pp->io.fd, "SR", 2);
+			IGNORE(write(pp->io.fd, "SR", 2));
 			return;
 
 		} else if (!strncmp(tbuf, "SR", 2)) {
 			strlcpy(up->status, tbuf + 2,
 				sizeof(up->status));
 			if (pp->sloppyclockflag & CLK_FLAG4)
-				write(pp->io.fd, "LA", 2);
+				IGNORE(write(pp->io.fd, "LA", 2));
 			else
-				write(pp->io.fd, COMMAND_START_BCAST, 2);
+				IGNORE(write(pp->io.fd, COMMAND_START_BCAST, 2));
 			return;
 
 		} else if (!strncmp(tbuf, "LA", 2)) {
 			strlcpy(up->latlon, tbuf + 2, sizeof(up->latlon));
-			write(pp->io.fd, "LO", 2);
+			IGNORE(write(pp->io.fd, "LO", 2));
 			return;
 
 		} else if (!strncmp(tbuf, "LO", 2)) {
 			strlcat(up->latlon, " ", sizeof(up->latlon));
 			strlcat(up->latlon, tbuf + 2, sizeof(up->latlon));
-			write(pp->io.fd, "LH", 2);
+			IGNORE(write(pp->io.fd, "LH", 2));
 			return;
 
 		} else if (!strncmp(tbuf, "LH", 2)) {
 			strlcat(up->latlon, " ", sizeof(up->latlon));
 			strlcat(up->latlon, tbuf + 2, sizeof(up->latlon));
-			write(pp->io.fd, "DB", 2);
+			IGNORE(write(pp->io.fd, "DB", 2));
 			return;
 
 		} else if (!strncmp(tbuf, "DB", 2)) {
@@ -323,7 +323,7 @@ arb_receive(
 			if (debug)
 				printf("arbiter: %s\n", up->latlon);
 #endif
-			write(pp->io.fd, COMMAND_START_BCAST, 2);
+			IGNORE(write(pp->io.fd, COMMAND_START_BCAST, 2));
 		}
 	}
 
@@ -352,7 +352,7 @@ arb_receive(
 	    &syncchar, &pp->year, &pp->day, &pp->hour,
 	    &pp->minute, &pp->second) != 6) {
 		refclock_report(peer, CEVNT_BADREPLY);
-		write(pp->io.fd, COMMAND_HALT_BCAST, 2);
+		IGNORE(write(pp->io.fd, COMMAND_HALT_BCAST, 2));
 		return;
 	}
 
@@ -402,13 +402,13 @@ arb_receive(
 	    case 'F':		/* clock failure */
 		pp->disp = MAXDISPERSE;
 		refclock_report(peer, CEVNT_FAULT);
-		write(pp->io.fd, COMMAND_HALT_BCAST, 2);
+		IGNORE(write(pp->io.fd, COMMAND_HALT_BCAST, 2));
 		return;
 
 	    default:
 		pp->disp = MAXDISPERSE;
 		refclock_report(peer, CEVNT_BADREPLY);
-		write(pp->io.fd, COMMAND_HALT_BCAST, 2);
+		IGNORE(write(pp->io.fd, COMMAND_HALT_BCAST, 2));
 		return;
 	}
 	if (syncchar != ' ')
@@ -426,7 +426,7 @@ arb_receive(
 		refclock_receive(peer);
 
 	/* if (up->tcswitch >= MAXSTAGE) { */
-	write(pp->io.fd, COMMAND_HALT_BCAST, 2);
+	IGNORE(write(pp->io.fd, COMMAND_HALT_BCAST, 2));
 	/* } */
 }
 
