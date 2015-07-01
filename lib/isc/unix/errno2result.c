@@ -108,7 +108,7 @@ isc___errno2result(int posixerrno, const char *file, unsigned int line) {
 	case ECONNREFUSED:
 		return (ISC_R_CONNREFUSED);
 	default:
-		IGNORE(strerror_r(posixerrno, strbuf, sizeof(strbuf)));
+		ISC_IGNORE(strerror_r(posixerrno, strbuf, sizeof(strbuf)));
 		UNEXPECTED_ERROR(file, line, "unable to convert errno "
 				 "to isc_result: %d: %s",
 				 posixerrno, strbuf);
