@@ -3519,7 +3519,7 @@ oncore_load_almanac(
 		if (!strncmp((char *) cp, "@@Cb", 4) &&
 		    oncore_checksum_ok(cp, 33) &&
 		    (*(cp+4) == 4 || *(cp+4) == 5)) {
-			write(instance->ttyfd, cp, n);
+			IGNORE(write(instance->ttyfd, cp, n));
 			oncore_print_Cb(instance, cp);
 		}
 	}
@@ -3750,12 +3750,12 @@ oncore_sendmsg(
 			     ptr[0], ptr[1], (int)len);
 	}
 #endif
-	write(fd, "@@", (size_t) 2);
-	write(fd, ptr, len);
+	IGNORE(write(fd, "@@", (size_t) 2));
+	IGNORE(write(fd, ptr, len));
 	while (len--)
 		cs ^= *ptr++;
-	write(fd, &cs, (size_t) 1);
-	write(fd, "\r\n", (size_t) 2);
+	IGNORE(write(fd, &cs, (size_t) 1));
+	IGNORE(write(fd, "\r\n", (size_t) 2));
 }
 
 

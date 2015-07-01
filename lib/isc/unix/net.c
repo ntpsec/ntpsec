@@ -30,6 +30,7 @@
 
 #include <errno.h>
 #include <unistd.h>
+#include <string.h>
 
 #include <isc/log.h>
 #include <isc/msgs.h>
@@ -138,7 +139,7 @@ try_proto(int domain) {
 #endif
 			return (ISC_R_NOTFOUND);
 		default:
-			strerror_r(errno, strbuf, sizeof(strbuf));
+			IGNORE(strerror_r(errno, strbuf, sizeof(strbuf)));
 			UNEXPECTED_ERROR(__FILE__, __LINE__,
 					 "socket() %s: %s",
 					 isc_msgcat_get(isc_msgcat,
@@ -260,7 +261,7 @@ try_ipv6only(void) {
 	/* check for TCP sockets */
 	s = socket(PF_INET6, SOCK_STREAM, 0);
 	if (s == -1) {
-		strerror_r(errno, strbuf, sizeof(strbuf));
+		IGNORE(strerror_r(errno, strbuf, sizeof(strbuf)));
 		UNEXPECTED_ERROR(__FILE__, __LINE__,
 				 "socket() %s: %s",
 				 isc_msgcat_get(isc_msgcat,
@@ -283,7 +284,7 @@ try_ipv6only(void) {
 	/* check for UDP sockets */
 	s = socket(PF_INET6, SOCK_DGRAM, 0);
 	if (s == -1) {
-		strerror_r(errno, strbuf, sizeof(strbuf));
+		IGNORE(strerror_r(errno, strbuf, sizeof(strbuf)));
 		UNEXPECTED_ERROR(__FILE__, __LINE__,
 				 "socket() %s: %s",
 				 isc_msgcat_get(isc_msgcat,
@@ -332,7 +333,7 @@ try_ipv6pktinfo(void) {
 	/* we only use this for UDP sockets */
 	s = socket(PF_INET6, SOCK_DGRAM, IPPROTO_UDP);
 	if (s == -1) {
-		strerror_r(errno, strbuf, sizeof(strbuf));
+		IGNORE(strerror_r(errno, strbuf, sizeof(strbuf)));
 		UNEXPECTED_ERROR(__FILE__, __LINE__,
 				 "socket() %s: %s",
 				 isc_msgcat_get(isc_msgcat,

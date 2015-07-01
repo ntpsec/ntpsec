@@ -1861,7 +1861,7 @@ input_handler(void)
 
 #ifndef SYS_WINNT
 			/* coverity[check_return] */
-			(void) read(fdc, buf, sizeof buf);
+			IGNORE(read(fdc, buf, sizeof buf));
 #else
 			/* NT's _read does not operate on nonblocking sockets
 			 * either recvfrom or ReadFile() has to be used here.

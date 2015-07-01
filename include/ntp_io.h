@@ -88,5 +88,6 @@ extern	void	maintain_activefds(int fd, int closing);
 #define		maintain_activefds(f, c)	do {} while (0)
 #endif
 
+void inline IGNORE() {}  /* hack to ignore GCC Unused Result */
 
 #endif	/* NTP_IO_H */

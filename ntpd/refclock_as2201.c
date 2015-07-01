@@ -341,8 +341,8 @@ as2201_receive(
 		memcpy(up->lastptr, stat_command[up->index], octets);
 		up->lastptr += octets - 1;
 		*up->lastptr = '\0';
-		(void)write(pp->io.fd, stat_command[up->index],
-		    strlen(stat_command[up->index]));
+		IGNORE(write(pp->io.fd, stat_command[up->index],
+			     strlen(stat_command[up->index])));
 		up->index++;
 		if (*stat_command[up->index] == '\0')
 			up->index = 0;

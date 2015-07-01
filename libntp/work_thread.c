@@ -287,7 +287,7 @@ send_blocking_resp_internal(
 	c->next_response = (1 + c->next_response) % c->responses_alloc;
 
 #ifdef WORK_PIPE
-	write(c->resp_write_pipe, "", 1);
+	IGNORE(write(c->resp_write_pipe, "", 1));
 #else
 	tickle_sem(c->blocking_response_ready);
 #endif

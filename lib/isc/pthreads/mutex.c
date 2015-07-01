@@ -274,7 +274,7 @@ isc__mutex_init(isc_mutex_t *mp, const char *file, unsigned int line) {
 	if (err == ENOMEM)
 		return (ISC_R_NOMEMORY);
 	if (err != 0) {
-		strerror_r(errno, strbuf, sizeof(strbuf));
+	    IGNORE(strerror_r(errno, strbuf, sizeof(strbuf)));
 		UNEXPECTED_ERROR(file, line, "isc_mutex_init() failed: %s",
 				 strbuf);
 		result = ISC_R_UNEXPECTED;
