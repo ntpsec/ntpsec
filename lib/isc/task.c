@@ -37,7 +37,6 @@
 #include <isc/task.h>
 #include <isc/thread.h>
 #include <isc/util.h>
-#include <isc/xml.h>
 
 #ifdef OPENSSL_LEAKS
 #include <openssl/err.h>

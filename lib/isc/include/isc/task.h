@@ -84,7 +84,6 @@
 #include <isc/lang.h>
 #include <isc/stdtime.h>
 #include <isc/types.h>
-#include <isc/xml.h>
 
 #define ISC_TASKEVENT_FIRSTEVENT	(ISC_EVENTCLASS_TASK + 0)
 #define ISC_TASKEVENT_SHUTDOWN		(ISC_EVENTCLASS_TASK + 1)
