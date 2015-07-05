@@ -24,7 +24,6 @@
 #include <stdio.h>
 #include <string.h>
 
-#include <isc/buffer.h>
 #include <isc/hash.h>
 #include <isc/msgs.h>
 #include <isc/netaddr.h>
@@ -97,107 +96,6 @@ isc_sockaddr_compare(const isc_sockaddr_t *a, const isc_sockaddr_t *b,
 			return (ISC_FALSE);
 	}
 	return (ISC_TRUE);
-}
-
-isc_boolean_t
-isc_sockaddr_eqaddrprefix(const isc_sockaddr_t *a, const isc_sockaddr_t *b,
-			  unsigned int prefixlen)
-{
-	isc_netaddr_t na, nb;
-	isc_netaddr_fromsockaddr(&na, a);
-	isc_netaddr_fromsockaddr(&nb, b);
-	return (isc_netaddr_eqprefix(&na, &nb, prefixlen));
-}
-
-isc_result_t
-isc_sockaddr_totext(const isc_sockaddr_t *sockaddr, isc_buffer_t *target) {
-	isc_result_t result;
-	isc_netaddr_t netaddr;
-	char pbuf[sizeof("65000")];
-	unsigned int plen;
-	isc_region_t avail;
-
-	REQUIRE(sockaddr != NULL);
-
-	/*
-	 * Do the port first, giving us the opportunity to check for
-	 * unsupported address families before calling
-	 * isc_netaddr_fromsockaddr().
-	 */
-	switch (sockaddr->type.sa.sa_family) {
-	case AF_INET:
-		snprintf(pbuf, sizeof(pbuf), "%u", ntohs(sockaddr->type.sin.sin_port));
-		break;
-	case AF_INET6:
-		snprintf(pbuf, sizeof(pbuf), "%u", ntohs(sockaddr->type.sin6.sin6_port));
-		break;
-#ifdef ISC_PLAFORM_HAVESYSUNH
-	case AF_UNIX:
-		plen = strlen(sockaddr->type.sunix.sun_path);
-		if (plen >= isc_buffer_availablelength(target))
-			return (ISC_R_NOSPACE);
-
-		isc_buffer_putmem(target, sockaddr->type.sunix.sun_path, plen);
-
-		/*
-		 * Null terminate after used region.
-		 */
-		isc_buffer_availableregion(target, &avail);
-		INSIST(avail.length >= 1);
-		avail.base[0] = '\0';
-
-		return (ISC_R_SUCCESS);
-#endif
-	default:
-		return (ISC_R_FAILURE);
-	}
-
-	plen = strlen(pbuf);
-	INSIST(plen < sizeof(pbuf));
-
-	isc_netaddr_fromsockaddr(&netaddr, sockaddr);
-	result = isc_netaddr_totext(&netaddr, target);
-	if (result != ISC_R_SUCCESS)
-		return (result);
-
-	if (1 + plen + 1 > isc_buffer_availablelength(target))
-		return (ISC_R_NOSPACE);
-
-	isc_buffer_putmem(target, (const unsigned char *)"#", 1);
-	isc_buffer_putmem(target, (const unsigned char *)pbuf, plen);
-
-	/*
-	 * Null terminate after used region.
-	 */
-	isc_buffer_availableregion(target, &avail);
-	INSIST(avail.length >= 1);
-	avail.base[0] = '\0';
-
-	return (ISC_R_SUCCESS);
-}
-
-void
-isc_sockaddr_format(const isc_sockaddr_t *sa, char *array, unsigned int size) {
-	isc_result_t result;
-	isc_buffer_t buf;
-
-	if (size == 0U)
-		return;
-
-	isc_buffer_init(&buf, array, size);
-	result = isc_sockaddr_totext(sa, &buf);
-	if (result != ISC_R_SUCCESS) {
-		/*
-		 * The message is the same as in netaddr.c.
-		 */
-		snprintf(array, size,
-			 "<%s %u>",
-			 isc_msgcat_get(isc_msgcat, ISC_MSGSET_NETADDR,
-					ISC_MSG_UNKNOWNADDR,
-					"unknown address, family"),
-			 sa->type.sa.sa_family);
-		array[size - 1] = '\0';
-	}
 }
 
 unsigned int
