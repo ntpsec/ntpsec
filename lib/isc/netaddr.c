@@ -23,7 +23,6 @@
 
 #include <stdio.h>
 
-#include <isc/buffer.h>
 #include <isc/msgs.h>
 #include <isc/net.h>
 #include <isc/netaddr.h>
@@ -125,94 +124,6 @@ isc_netaddr_eqprefix(const isc_netaddr_t *a, const isc_netaddr_t *b,
 	}
 	return (ISC_TRUE);
 }
-
-isc_result_t
-isc_netaddr_totext(const isc_netaddr_t *netaddr, isc_buffer_t *target) {
-	char abuf[sizeof("xxxx:xxxx:xxxx:xxxx:xxxx:xxxx:255.255.255.255")];
-	char zbuf[sizeof("%4294967295")];
-	unsigned int alen;
-	int zlen;
-	const char *r;
-	const void *type;
-
-	REQUIRE(netaddr != NULL);
-
-	switch (netaddr->family) {
-	case AF_INET:
-		type = &netaddr->type.in;
-		break;
-	case AF_INET6:
-		type = &netaddr->type.in6;
-		break;
-#ifdef ISC_PLATFORM_HAVESYSUNH
-	case AF_UNIX:
-		alen = strlen(netaddr->type.un);
-		if (alen > isc_buffer_availablelength(target))
-			return (ISC_R_NOSPACE);
-		isc_buffer_putmem(target,
-				  (const unsigned char *)(netaddr->type.un),
-				  alen);
-		return (ISC_R_SUCCESS);
-#endif
-	default:
-		return (ISC_R_FAILURE);
-	}
-	r = inet_ntop(netaddr->family, type, abuf, sizeof(abuf));
-	if (r == NULL)
-		return (ISC_R_FAILURE);
-
-	alen = strlen(abuf);
-	INSIST(alen < sizeof(abuf));
-
-	zlen = 0;
-	if (netaddr->family == AF_INET6 && netaddr->zone != 0) {
-		zlen = snprintf(zbuf, sizeof(zbuf), "%%%u", netaddr->zone);
-		if (zlen < 0)
-			return (ISC_R_FAILURE);
-		INSIST((unsigned int)zlen < sizeof(zbuf));
-	}
-
-	if (alen + zlen > isc_buffer_availablelength(target))
-		return (ISC_R_NOSPACE);
-
-	isc_buffer_putmem(target, (unsigned char *)abuf, alen);
-	isc_buffer_putmem(target, (unsigned char *)zbuf, zlen);
-
-	return (ISC_R_SUCCESS);
-}
-
-void
-isc_netaddr_format(const isc_netaddr_t *na, char *array, unsigned int size) {
-	isc_result_t result;
-	isc_buffer_t buf;
-
-	isc_buffer_init(&buf, array, size);
-	result = isc_netaddr_totext(na, &buf);
-
-	if (size == 0)
-		return;
-
-	/*
-	 * Null terminate.
-	 */
-	if (result == ISC_R_SUCCESS) {
-		if (isc_buffer_availablelength(&buf) >= 1)
-			isc_buffer_putuint8(&buf, 0);
-		else
-			result = ISC_R_NOSPACE;
-	}
-
-	if (result != ISC_R_SUCCESS) {
-		snprintf(array, size,
-			 "<%s %u>",
-			 isc_msgcat_get(isc_msgcat, ISC_MSGSET_NETADDR,
-					ISC_MSG_UNKNOWNADDR,
-					"unknown address, family"),
-			 na->family);
-		array[size - 1] = '\0';
-	}
-}
-
 
 isc_result_t
 isc_netaddr_prefixok(const isc_netaddr_t *na, unsigned int prefixlen) {
