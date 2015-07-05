@@ -37,7 +37,6 @@
 #include <isc/mutex.h>
 #include <isc/platform.h>
 #include <isc/types.h>
-#include <isc/xml.h>
 
 #include <ntp_stdlib.h>
 
