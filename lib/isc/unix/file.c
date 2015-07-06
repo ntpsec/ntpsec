@@ -65,7 +65,6 @@
 #include <sys/stat.h>
 #include <sys/time.h>
 
-#include <isc/dir.h>
 #include <isc/file.h>
 #include <isc/log.h>
 #include <isc/mem.h>

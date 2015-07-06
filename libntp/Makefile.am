@@ -9,7 +9,6 @@ libisc_SRCS =								\
 	$(srcdir)/../lib/isc/backtrace-emptytbl.c			\
 	$(srcdir)/../lib/isc/backtrace.c				\
 	$(srcdir)/../lib/isc/$(LIBISC_PTHREADS_NOTHREADS)/condition.c	\
-	$(srcdir)/../lib/isc/unix/dir.c					\
 	$(srcdir)/../lib/isc/error.c					\
 	$(srcdir)/../lib/isc/unix/errno2result.c			\
 	$(srcdir)/../lib/isc/event.c					\

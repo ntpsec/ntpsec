@@ -26,10 +26,10 @@
 #include <stdlib.h>
 #include <limits.h>
 #include <time.h>
+#include <dirent.h>
 
 #include <sys/types.h>	/* dev_t FreeBSD 2.1 */
 
-#include <isc/dir.h>
 #include <isc/file.h>
 #include <isc/log.h>
 #include <isc/magic.h>
@@ -1145,8 +1145,8 @@ greatest_version(isc_logchannel_t *channel, int *greatestp) {
 	const char *dirname;
 	int version, greatest = -1;
 	unsigned int basenamelen;
-	isc_dir_t dir;
-	isc_result_t result;
+	DIR *dir;
+	struct dirent *entry;
 	char sep = '/';
 #ifdef _WIN32
 	char *basename2;
@@ -1176,8 +1176,7 @@ greatest_version(isc_logchannel_t *channel, int *greatestp) {
 	}
 	basenamelen = strlen(basenam);
 
-	isc_dir_init(&dir);
-	result = isc_dir_open(&dir, dirname);
+	dir = opendir(dirname);
 
 	/*
 	 * Replace the file separator if it was taken out.
@@ -1188,21 +1187,22 @@ greatest_version(isc_logchannel_t *channel, int *greatestp) {
 	/*
 	 * Return if the directory open failed.
 	 */
-	if (result != ISC_R_SUCCESS)
-		return (result);
+	if (dir == NULL) {
+		return ISC_R_FAILURE;
+	}
 
-	while (isc_dir_read(&dir) == ISC_R_SUCCESS) {
-		if (dir.entry.length > basenamelen &&
-		    strncmp(dir.entry.name, basenam, basenamelen) == 0 &&
-		    dir.entry.name[basenamelen] == '.') {
+	while ((entry = readdir(dir)) != NULL) {
+		if (strlen(entry->d_name) > basenamelen &&
+		    strncmp(entry->d_name, basenam, basenamelen) == 0 &&
+		    entry->d_name[basenamelen] == '.') {
 
-			version = strtol(&dir.entry.name[basenamelen + 1],
+			version = strtol(&entry->d_name[basenamelen + 1],
 					 &digit_end, 10);
 			if (*digit_end == '\0' && version > greatest)
 				greatest = version;
 		}
 	}
-	isc_dir_close(&dir);
+	closedir(dir);
 
 	*greatestp = ++greatest;
 
