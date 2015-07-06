@@ -126,7 +126,7 @@ struct shmunit {
 static struct shmTime*
 getShmTime(
 	int unit,
-	int/*BOOL*/ forall
+	bool forall
 	)
 {
 	struct shmTime *p = NULL;
@@ -173,13 +173,13 @@ getShmTime(
 			msyslog(LOG_ERR,"SHM InitializeSecurityDescriptor (unit %d): %m", unit);
 			return NULL;
 		}
-		if (!SetSecurityDescriptorDacl(&sd, TRUE, NULL, FALSE)) {
+		if (!SetSecurityDescriptorDacl(&sd, true, NULL, false)) {
 			msyslog(LOG_ERR, "SHM SetSecurityDescriptorDacl (unit %d): %m", unit);
 			return NULL;
 		}
 		sa.nLength = sizeof(SECURITY_ATTRIBUTES);
 		sa.lpSecurityDescriptor = &sd;
-		sa.bInheritHandle = FALSE;
+		sa.bInheritHandle = false;
 		psec = &sa;
 	}
 	shmid = CreateFileMapping ((HANDLE)0xffffffff, psec, PAGE_READWRITE,
@@ -212,7 +212,7 @@ getShmTime(
 /*
  * shm_start - attach to shared memory
  */
-static int
+static bool
 shm_start(
 	int unit,
 	struct peer *peer
@@ -244,11 +244,11 @@ shm_start(
 		/* items to be changed later in 'shm_control()': */
 		up->max_delay = 5;
 		up->max_delta = 4*3600;
-		return 1;
+		return true;
 	} else {
 		free(up);
 		pp->unitptr = NULL;
-		return 0;
+		return false;
 	}
 }
 

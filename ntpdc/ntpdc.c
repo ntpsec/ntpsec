@@ -45,14 +45,14 @@
  * it requires a lot of commands to talk to ntpd) we will run
  * interactive if connected to a terminal.
  */
-static	int	interactive = 0;	/* set to 1 when we should prompt */
+static	bool	interactive = false;	/* set to true when we should prompt */
 static	const char *	prompt = "ntpdc> ";	/* prompt to ask him about */
 
 /*
  * Keyid used for authenticated requests.  Obtained on the fly.
  */
 static	u_long	info_auth_keyid;
-static int keyid_entered = 0;
+static bool keyid_entered = false;
 
 static	int	info_auth_keytype = NID_md5;	/* MD5 */
 static	size_t	info_auth_hashlen = 16;		/* MD5 */
@@ -67,7 +67,7 @@ int		ntpdcmain	(int,	char **);
 /*
  * Built in command handler declarations
  */
-static	int	openhost	(const char *);
+static	bool	openhost	(const char *);
 static	int	sendpkt		(void *, size_t);
 static	void	growpktdata	(void);
 static	int	getresponse	(int, int, int *, int *, char **, int);
@@ -169,12 +169,12 @@ static	struct sock_timeval tvout = { DEFTIMEOUT, 0 };	/* time out for reads */
 static	struct sock_timeval tvsout = { DEFSTIMEOUT, 0 };/* secondary time out */
 static	l_fp delay_time;				/* delay time */
 static	char currenthost[LENHOSTNAME];			/* current host name */
-int showhostnames = 1;					/* show host names by default */
+bool showhostnames = true;				/* show host names by default */
 
 static	int ai_fam_templ;				/* address family */
 static	int ai_fam_default;				/* default address family */
 static	SOCKET sockfd;					/* fd socket is opened on */
-static	int havehost = 0;				/* set to 1 when host open */
+static	bool havehost = false;				/* set to trur when host open */
 int s_port = 0;
 
 /*
@@ -224,7 +224,7 @@ static	const char *chosts[MAXHOSTS];
  * Jump buffer for longjumping back to the command level
  */
 static	jmp_buf interrupt_buf;
-static  volatile int jump = 0;
+static  volatile bool jump = false;
 
 /*
  * Pointer to current output unit
@@ -254,8 +254,8 @@ main(
 #ifdef SYS_VXWORKS
 void clear_globals(void)
 {
-    showhostnames = 0;              /* show host names by default */
-    havehost = 0;                   /* set to 1 when host open */
+    showhostnames = false;              /* show host names by default */
+    havehost = false;                   /* set to true when host open */
     numcmds = 0;
     numhosts = 0;
 }
@@ -314,11 +314,11 @@ ntpdcmain(
 	debug = OPT_VALUE_SET_DEBUG_LEVEL;
 
 	if (HAVE_OPT(INTERACTIVE)) {
-		interactive = 1;
+		interactive = true;
 	}
 
 	if (HAVE_OPT(NUMERIC)) {
-		showhostnames = 0;
+		showhostnames = false;
 	}
 
 	if (HAVE_OPT(LISTPEERS)) {
@@ -340,9 +340,9 @@ ntpdcmain(
 		    ADDHOST(argv[ntp_optind]);
 	}
 
-	if (numcmds == 0 && interactive == 0
+	if (numcmds == 0 && !interactive
 	    && isatty(fileno(stdin)) && isatty(fileno(stderr))) {
-		interactive = 1;
+		interactive = true;
 	}
 
 #ifndef SYS_WINNT /* Under NT cannot handle SIGINT, WIN32 spawns a handler */
@@ -382,7 +382,7 @@ ntpdcmain(
 /*
  * openhost - open a socket to a host
  */
-static int
+static bool
 openhost(
 	const char *hname
 	)
@@ -410,7 +410,7 @@ openhost(
 			name[i] = '\0';
 			hname = name;
 		} else {
-			return 0;
+			return false;
 		}
 	}	
 
@@ -449,7 +449,7 @@ openhost(
 		fprintf(stderr, "%s\n", gai_strerror(a_info));
 		if (ai != NULL)
 			freeaddrinfo(ai);
-		return 0;
+		return false;
 	}
 
 	/* 
@@ -469,11 +469,11 @@ openhost(
 	if (debug > 2)
 		printf("Opening host %s\n", temphost);
 
-	if (havehost == 1) {
+	if (havehost) {
 		if (debug > 2)
 			printf("Closing old host %s\n", currenthost);
 		closesocket(sockfd);
-		havehost = 0;
+		havehost = false;
 	}
 	strlcpy(currenthost, temphost, sizeof(currenthost));
 	
@@ -531,10 +531,10 @@ openhost(
 	}
 
 	freeaddrinfo(ai);
-	havehost = 1;
+	havehost = true;
 	req_pkt_size = REQ_LEN_NOMAC;
 	impl_ver = IMPL_XNTPD;
-	return 1;
+	return true;
 }
 
 
@@ -593,7 +593,7 @@ getresponse(
 	char *datap;
 	char *tmp_data;
 	char haveseq[MAXSEQ+1];
-	int firstpkt;
+	bool firstpkt;
 	int lastseq;
 	int numrecv;
 	int seq;
@@ -610,7 +610,7 @@ getresponse(
 	 */
 	*ritems = 0;
 	*rsize = 0;
-	firstpkt = 1;
+	firstpkt = true;
 	numrecv = 0;
 	*rdata = datap = pktdata;
 	lastseq = 999;	/* too big to be a sequence number */
@@ -796,7 +796,7 @@ getresponse(
 	}
 
 	if (firstpkt) {
-		firstpkt = 0;
+		firstpkt = false;
 		*rsize = size + pad;
 	}
 	*ritems += items;
@@ -1213,9 +1213,9 @@ docmd(
 	if (interactive && setjmp(interrupt_buf)) {
 		return;
 	} else {
-		jump = 1;
+		jump = true;
 		(xcmd->handler)(&pcmd, current_output);
-		jump = 0;
+		jump = false;
 		if (current_output != stdout)
 			(void) fclose(current_output);
 		current_output = NULL;
@@ -1339,7 +1339,7 @@ getarg(
 	arg_v *argp
 	)
 {
-	int isneg;
+	bool isneg;
 	char *cp, *np;
 	static const char *digits = "0123456789";
 
@@ -1364,11 +1364,11 @@ getarg(
 		break;
 	    case NTP_INT:
 	    case NTP_UINT:
-		isneg = 0;
+		isneg = false;
 		np = str;
 		if (*np == '-') {
 			np++;
-			isneg = 1;
+			isneg = true;
 		}
 
 		argp->uval = 0;
@@ -1567,14 +1567,15 @@ printusage(
 	FILE *fp
 	)
 {
-	int i, opt46;
+	int i;
+	bool opt46;
 
-	opt46 = 0;
+	opt46 = false;
 	(void) fprintf(fp, "usage: %s", xcp->keyword);
 	for (i = 0; i < MAXARGS && xcp->arg[i] != NO; i++) {
-		if (opt46 == 0 && (xcp->arg[i] & ~OPT) == NTP_ADD) {
+		if (!opt46 && (xcp->arg[i] & ~OPT) == NTP_ADD) {
 			(void) fprintf(fp, " [ -4|-6 ]");
-			opt46 = 1;
+			opt46 = true;
 		}
 		if (xcp->arg[i] & OPT)
 		    (void) fprintf(fp, " [ %s ]", xcp->desc[i]);
@@ -1616,7 +1617,7 @@ my_delay(
 	FILE *fp
 	)
 {
-	int isneg;
+	bool isneg;
 	u_long val;
 
 	if (pcmd->nargs == 0) {
@@ -1624,10 +1625,10 @@ my_delay(
 		(void) fprintf(fp, "delay %lu ms\n", val);
 	} else {
 		if (pcmd->argval[0].ival < 0) {
-			isneg = 1;
+			isneg = true;
 			val = (u_long)(-pcmd->argval[0].ival);
 		} else {
-			isneg = 0;
+			isneg = false;
 			val = (u_long)pcmd->argval[0].ival;
 		}
 
@@ -1706,7 +1707,7 @@ keyid(
 		    (void) fprintf(fp, "keyid is %lu\n", (u_long)info_auth_keyid);
 	} else {
 		info_auth_keyid = pcmd->argval[0].uval;
-		keyid_entered = 1;
+		keyid_entered = true;
 	}
 }
 
@@ -1799,9 +1800,9 @@ hostnames(
 		    (void) fprintf(fp, "hostnames not being shown\n");
 	} else {
 		if (STREQ(pcmd->argval[0].string, "yes"))
-		    showhostnames = 1;
+		    showhostnames = true;
 		else if (STREQ(pcmd->argval[0].string, "no"))
-		    showhostnames = 0;
+		    showhostnames = false;
 		else
 		    (void)fprintf(stderr, "What?\n");
 	}

@@ -14,9 +14,9 @@
 /*
  * decodenetnum		convert text IP address and port to sockaddr_u
  *
- * Returns 0 for failure, 1 for success.
+ * Returns false for failure, true for success.
  */
-int
+bool
 decodenetnum(
 	const char *num,
 	sockaddr_u *netnum
@@ -67,7 +67,7 @@ decodenetnum(
 	hints.ai_flags = Z_AI_NUMERICHOST;
 	err = getaddrinfo(cp, "ntp", &hints, &ai);
 	if (err != 0)
-		return 0;
+		return false;
 	NTP_INSIST(ai->ai_addrlen <= sizeof(*netnum));
 	ZERO(*netnum);
 	memcpy(netnum, ai->ai_addr, ai->ai_addrlen);
@@ -75,5 +75,5 @@ decodenetnum(
 	if (NULL == port_str || 1 != sscanf(port_str, "%hu", &port))
 		port = NTP_PORT;
 	SET_PORT(netnum, port);
-	return 1;
+	return true;
 }

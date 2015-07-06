@@ -64,7 +64,7 @@ extern int async_write(int, const void *, unsigned int);
  * Dumb clock control structure
  */
 struct dumbclock_unit {
-	u_char	  tcswitch;	/* timecode switch */
+	bool	  tcswitch;	/* timecode switch */
 	l_fp	  laststamp;	/* last receive timestamp */
 	u_char	  lasthour;	/* last hour (for monitor) */
 	u_char	  linect;	/* count ignored lines (for monitor */
@@ -74,7 +74,7 @@ struct dumbclock_unit {
 /*
  * Function prototypes
  */
-static	int	dumbclock_start		(int, struct peer *);
+static	bool	dumbclock_start		(int, struct peer *);
 static	void	dumbclock_shutdown	(int, struct peer *);
 static	void	dumbclock_receive	(struct recvbuf *);
 #if 0
@@ -98,7 +98,7 @@ struct	refclock refclock_dumbclock = {
 /*
  * dumbclock_start - open the devices and initialize data for processing
  */
-static int
+static bool
 dumbclock_start(
 	int unit,
 	struct peer *peer
@@ -123,7 +123,7 @@ dumbclock_start(
 	fd = refclock_open(device, SPEED232, 0);
 	if (fd <= 0)
 		/* coverity[leaked_handle] */
-		return (0);
+		return false;
 
 	/*
 	 * Allocate and initialize unit structure
@@ -140,7 +140,7 @@ dumbclock_start(
 		pp->io.fd = -1;
 		free(up);
 		pp->unitptr = NULL;
-		return (0);
+		return false;
 	}
 
 
@@ -153,7 +153,7 @@ dumbclock_start(
 	if (tm_time_p)
 		up->ymd = *tm_time_p;
 	else
-		return 0;
+		return false;
 
 	/*
 	 * Initialize miscellaneous variables
@@ -161,7 +161,7 @@ dumbclock_start(
 	peer->precision = PRECISION;
 	pp->clockdesc = DESCRIPTION;
 	memcpy((char *)&pp->refid, REFID, REFIDLEN);
-	return (1);
+	return true;
 }
 
 
@@ -214,17 +214,17 @@ dumbclock_receive(
 	temp = refclock_gtlin(rbufp, pp->a_lastcode, BMAX, &trtmp);
 
 	if (temp == 0) {
-		if (up->tcswitch == 0) {
-			up->tcswitch = 1;
+		if (!up->tcswitch) {
+			up->tcswitch = true;
 			up->laststamp = trtmp;
 		} else
-			up->tcswitch = 0;
+			up->tcswitch = false;
 		return;
 	}
 	pp->lencode = (u_short)temp;
 	pp->lastrec = up->laststamp;
 	up->laststamp = trtmp;
-	up->tcswitch = 1;
+	up->tcswitch = true;
 
 #ifdef DEBUG
 	if (debug)

@@ -49,11 +49,11 @@
 /* nanoseconds per second */
 #define NANOSECONDS 1000000000
 
-/* predicate: returns TRUE if the nanoseconds are in nominal range */
+/* predicate: returns true if the nanoseconds are in nominal range */
 #define timespec_isnormal(x) \
 	((x)->tv_nsec >= 0 && (x)->tv_nsec < NANOSECONDS)
 
-/* predicate: returns TRUE if the nanoseconds are out-of-bounds */
+/* predicate: returns true if the nanoseconds are out-of-bounds */
 #define timespec_isdenormal(x)	(!timespec_isnormal(x))
 
 /* conversion between l_fp fractions and nanoseconds */

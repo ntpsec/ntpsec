@@ -1013,7 +1013,7 @@ struct zsops   *emergencyzs;
 extern void zsopinit   (struct zscom *, struct zsops *);
 static int  zs_xsisr   (struct zscom *);	/* zs external status interupt handler */
 
-static int
+static bool
 init_zs_linemon(
 	register queue_t *q,
 	register queue_t *my_q
@@ -1033,7 +1033,7 @@ init_zs_linemon(
 		/*
 		 * well - not found on startup - just say no (shouldn't happen though)
 		 */
-		return 0;
+		return false;
 	}
 	else
 	{
@@ -1050,7 +1050,7 @@ init_zs_linemon(
 		{
 			parseprintf(DD_INSTALL, ("init_zs_linemon: CD monitor NOT installed - no memory\n"));
 
-			return 0;
+			return false;
 		}
 		else
 		{
@@ -1071,7 +1071,7 @@ init_zs_linemon(
 
 			parseprintf(DD_INSTALL, ("init_zs_linemon: CD monitor installed\n"));
 
-			return 1;
+			return true;
 		}
 	}
 }
@@ -1123,7 +1123,7 @@ extern struct timeval pps_time;
 /*
  * take external status interrupt (only CD interests us)
  */
-static int
+static bool
 zs_xsisr(
 	 struct zscom *zs
 	)
@@ -1249,7 +1249,7 @@ zs_xsisr(
 			 * all done - kill status indication and return
 			 */
 			zsaddr->zscc_control = ZSWR0_RESET_STATUS; /* might kill other conditions here */
-			return 0;
+			return false;
 		}
 	}
 
@@ -1297,7 +1297,7 @@ zs_xsisr(
 				/*
 				 * now back to our program ...
 				 */
-				return 0;
+				return false;
 			}
 		}
 
@@ -1319,7 +1319,7 @@ zs_xsisr(
 	    emergencyzs->zsop_xsint(zs);
 	else
 	    panic("zs_xsisr: no emergency ISR handler");
-	return 0;
+	return false;
 }
 #endif				/* sun */
 

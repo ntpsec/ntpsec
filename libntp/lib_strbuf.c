@@ -21,7 +21,7 @@ libbufstr	lib_stringbuf[LIB_NUMBUF];
 int		lib_nextbuf;
 int		ipv4_works;
 int		ipv6_works;
-int		lib_inited;
+bool		lib_inited;
 
 
 /*
@@ -35,5 +35,5 @@ init_lib(void)
 	ipv4_works = (ISC_R_SUCCESS == isc_net_probeipv4());
 	ipv6_works = (ISC_R_SUCCESS == isc_net_probeipv6());
 	init_systime();
-	lib_inited = TRUE;
+	lib_inited = true;
 }

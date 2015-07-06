@@ -119,7 +119,7 @@ int day_of_year (char *dt);
 #define CLK_ACUTIME     3	/* Trimble Acutime Gold */
 #define CLK_ACUTIMEB    4	/* Trimble Actutime Gold Port B */
 
-int praecis_msg;
+bool praecis_msg;
 static void praecis_parse(struct recvbuf *rbufp, struct peer *peer);
 
 /* These routines are for sending packets to the Thunderbolt receiver
@@ -261,7 +261,7 @@ init_acutime (
 /*
  * palisade_start - open the devices and initialize data for processing
  */
-static int
+static bool
 palisade_start (
 	int unit,
 	struct peer *peer
@@ -284,7 +284,7 @@ palisade_start (
 		printf("Palisade(%d) start: open %s failed\n", unit, gpsdev);
 #endif
 		/* coverity[leaked_handle] */
-		return 0;
+		return false;
 	}
 
 	msyslog(LOG_NOTICE, "Palisade(%d) fd: %d dev: %s", unit, fd,
@@ -297,7 +297,7 @@ palisade_start (
 		printf("Palisade(%d) tcgetattr(fd, &tio)\n",unit);
 #endif
 		close(fd);
-		return (0);
+		return false;
 	}
 
 	tio.c_cflag |= (PARENB|PARODD);
@@ -337,7 +337,7 @@ palisade_start (
 #endif
 		close(fd);
 		free(up);
-		return 0;
+		return false;
 	}
 
 	pp = peer->procptr;
@@ -352,7 +352,7 @@ palisade_start (
 		close(fd);
 		pp->io.fd = -1;
 		free(up);
-		return (0);
+		return false;
 	}
 
 	/*
@@ -377,7 +377,7 @@ palisade_start (
 	if (up->type == CLK_ACUTIME)
 		init_acutime(fd);
 
-	return 1;
+	return true;
 }
 
 
@@ -467,7 +467,7 @@ TSIP_decode (
 			printf("Palisade Port B packets detected. Connect to Port A\n");
 #endif
 
-			return 0;	
+			return 0;
 		}
 	}
 
@@ -992,7 +992,7 @@ palisade_poll (
 		if(write(peer->procptr->io.fd,"SPSTAT\r\n",8) < 0)
 			msyslog(LOG_ERR, "Palisade(%d) write: %m:",unit);
 		else {
-			praecis_msg = 1;
+			praecis_msg = true;
 			return;
 		}
 	}
@@ -1021,7 +1021,7 @@ praecis_parse (
 		record_clock_stats(&peer->srcadr, buf);
 
 		p = 0;
-		praecis_msg = 0;
+		praecis_msg = false;
 
 		if (HW_poll(pp) < 0)
 			refclock_report(peer, CEVNT_FAULT);

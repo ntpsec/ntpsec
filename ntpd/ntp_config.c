@@ -53,8 +53,8 @@
 int	cmdline_server_count;
 char **	cmdline_servers;
 
-/* set to zero if admin doesn't want memory locked */
-int	do_memlock = 1;
+/* set to false if admin doesn't want memory locked */
+bool	do_memlock = true;
 
 /*
  * "logconfig" building blocks
@@ -169,11 +169,11 @@ struct netinfo_config_state {
 
 struct REMOTE_CONFIG_INFO remote_config;  /* Remote configuration buffer and
 					     pointer info */
-int old_config_style = 1;    /* A boolean flag, which when set,
-			      * indicates that the old configuration
-			      * format with a newline at the end of
-			      * every command is being used
-			      */
+bool old_config_style = true;	/* A boolean flag, which when set,
+		       		 * indicates that the old configuration
+		   		 * format with a newline at the end of
+		  		 * every command is being used
+			 	 */
 int	cryptosw;		/* crypto command called */
 
 extern char *stats_drift_file;	/* name of the driftfile */
@@ -239,8 +239,8 @@ static void free_config_tree(config_tree *ptree);
 #endif	/* FREE_CFG_T */
 
 static void destroy_restrict_node(restrict_node *my_node);
-static int is_sane_resolved_address(sockaddr_u *peeraddr, int hmode);
-static void save_and_apply_config_tree(int/*BOOL*/ from_file);
+static bool is_sane_resolved_address(sockaddr_u *peeraddr, int hmode);
+static void save_and_apply_config_tree(bool from_file);
 static void destroy_int_fifo(int_fifo *);
 #define FREE_INT_FIFO(pf)			\
 	do {					\
@@ -297,7 +297,7 @@ static sockaddr_u *get_next_address(address_node *addr);
 static void config_sim(config_tree *);
 static void config_ntpdsim(config_tree *);
 #else	/* !SIM follows */
-static void config_ntpd(config_tree *, int/*BOOL*/ input_from_file);
+static void config_ntpd(config_tree *, bool input_from_file);
 static void config_other_modes(config_tree *);
 static void config_auth(config_tree *);
 static void config_access(config_tree *);
@@ -309,7 +309,7 @@ static void config_trap(config_tree *);
 static void config_fudge(config_tree *);
 static void config_peers(config_tree *);
 static void config_unpeers(config_tree *);
-static void config_nic_rules(config_tree *, int/*BOOL*/ input_from_file);
+static void config_nic_rules(config_tree *, bool input_from_file);
 static void config_reset_counters(config_tree *);
 static u_char get_correct_host_mode(int token);
 static int peerflag_bits(peer_node *);
@@ -1918,7 +1918,7 @@ config_auth(
 		if (T_Integer == my_val->type) {
 			first = my_val->value.i;
 			if (first >= 1 && first <= NTP_MAXKEY) {
-				authtrust(first, TRUE);
+				authtrust(first, true);
 			} else {
 				msyslog(LOG_NOTICE,
 					"Ignoring invalid trustedkey %d, min 1 max %d.",
@@ -1934,7 +1934,7 @@ config_auth(
 					first, last, NTP_MAXKEY);
 			} else {
 				for (i = first; i <= last; i++) {
-					authtrust(i, TRUE);
+					authtrust(i, true);
 				}
 			}
 		}
@@ -2237,10 +2237,10 @@ config_access(
 	struct addrinfo *	ai_list;
 	struct addrinfo *	pai;
 	int			rc;
-	int			restrict_default;
+	bool			restrict_default;
 	u_short			flags;
 	u_short			mflags;
-	int			range_err;
+	bool			range_err;
 	const char *		signd_warning =
 #ifdef HAVE_NTP_SIGND
 	    "MS-SNTP signd operations currently block ntpd degrading service to all clients.";
@@ -2252,7 +2252,7 @@ config_access(
 	my_opt = HEAD_PFIFO(ptree->mru_opts);
 	for (; my_opt != NULL; my_opt = my_opt->link) {
 
-		range_err = FALSE;
+		range_err = false;
 
 		switch (my_opt->attr) {
 
@@ -2260,7 +2260,7 @@ config_access(
 			if (0 <= my_opt->value.i)
 				mru_incalloc = my_opt->value.u;
 			else
-				range_err = TRUE;
+				range_err = true;
 			break;
 
 		case T_Incmem:
@@ -2268,14 +2268,14 @@ config_access(
 				mru_incalloc = (my_opt->value.u * 1024U)
 						/ sizeof(mon_entry);
 			else
-				range_err = TRUE;
+				range_err = true;
 			break;
 
 		case T_Initalloc:
 			if (0 <= my_opt->value.i)
 				mru_initalloc = my_opt->value.u;
 			else
-				range_err = TRUE;
+				range_err = true;
 			break;
 
 		case T_Initmem:
@@ -2283,14 +2283,14 @@ config_access(
 				mru_initalloc = (my_opt->value.u * 1024U)
 						 / sizeof(mon_entry);
 			else
-				range_err = TRUE;
+				range_err = true;
 			break;
 
 		case T_Mindepth:
 			if (0 <= my_opt->value.i)
 				mru_mindepth = my_opt->value.u;
 			else
-				range_err = TRUE;
+				range_err = true;
 			break;
 
 		case T_Maxage:
@@ -2459,7 +2459,7 @@ config_access(
 		ZERO_SOCK(&addr);
 		ai_list = NULL;
 		pai = NULL;
-		restrict_default = 0;
+		restrict_default = false;
 
 		if (NULL == my_node->addr) {
 			ZERO_SOCK(&mask);
@@ -2469,7 +2469,7 @@ config_access(
 				 * without a -4 / -6 qualifier, add to
 				 * both lists
 				 */
-				restrict_default = 1;
+				restrict_default = true;
 			} else {
 				/* apply "restrict source ..." */
 				DPRINTF(1, ("restrict source template mflags %x flags %x\n",
@@ -2614,7 +2614,7 @@ config_rlimit(
 				msyslog(LOG_WARNING, "'rlimit memlock' specified but is not available on this system.");
 #endif /* RLIMIT_MEMLOCK */
 			} else {
-				do_memlock = 0;
+				do_memlock = false;
 			}
 			break;
 
@@ -2735,7 +2735,7 @@ free_config_tinker(
 static void
 config_nic_rules(
 	config_tree *ptree,
-	int/*BOOL*/ input_from_file
+	bool input_from_file
 	)
 {
 	nic_rule_node *	curr_node;
@@ -2775,7 +2775,7 @@ config_nic_rules(
 			 * other reason.
 			 */
 			match_type = MATCH_ALL;
-			INSIST(FALSE);
+			INSIST(false);
 			break;
 
 		case 0:
@@ -2833,7 +2833,7 @@ config_nic_rules(
 			 * other reason.
 			 */
 			action = ACTION_LISTEN;
-			INSIST(FALSE);
+			INSIST(false);
 			break;
 
 		case T_Listen:
@@ -3509,7 +3509,7 @@ config_vars(
 			break;
 
 		case T_Logfile:
-			if (-1 == change_logfile(curr_var->value.s, TRUE))
+			if (-1 == change_logfile(curr_var->value.s, true))
 				msyslog(LOG_ERR,
 					"Cannot open logfile %s: %m",
 					curr_var->value.s);
@@ -3565,9 +3565,9 @@ free_config_vars(
 
 
 /* Define a function to check if a resolved address is sane.
- * If yes, return 1, else return 0;
+ * If yes, return true, else return false;
  */
-static int
+static bool
 is_sane_resolved_address(
 	sockaddr_u *	peeraddr,
 	int		hmode
@@ -3577,7 +3577,7 @@ is_sane_resolved_address(
 		msyslog(LOG_ERR,
 			"attempt to configure invalid address %s",
 			stoa(peeraddr));
-		return 0;
+		return false;
 	}
 	/*
 	 * Shouldn't be able to specify multicast
@@ -3589,20 +3589,20 @@ is_sane_resolved_address(
 		msyslog(LOG_ERR,
 			"attempt to configure invalid address %s",
 			stoa(peeraddr));
-		return 0;
+		return false;
 	}
 	if (T_Manycastclient == hmode && !IS_MCAST(peeraddr)) {
 		msyslog(LOG_ERR,
 			"attempt to configure invalid address %s",
 			stoa(peeraddr));
-		return 0;
+		return false;
 	}
 
 	if (IS_IPV6(peeraddr) && !ipv6_works)
-		return 0;
+		return false;
 
-	/* Ok, all tests succeeded, now we can return 1 */
-	return 1;
+	/* Ok, all tests succeeded, now we can return true */
+	return true;
 }
 
 
@@ -4285,7 +4285,7 @@ free_config_sim(
 static void
 config_ntpd(
 	config_tree *ptree,
-	int/*BOOL*/ input_from_files
+	bool input_from_files
 	)
 {
 	config_nic_rules(ptree, input_from_files);
@@ -4377,7 +4377,7 @@ config_remotely(
 
 	DPRINTF(1, ("Finished Parsing!!\n"));
 
-	save_and_apply_config_tree(FALSE);
+	save_and_apply_config_tree(false);
 }
 
 
@@ -4472,7 +4472,7 @@ getconfig(
 	cfgt.source.attr = CONF_SOURCE_FILE;
 	cfgt.timestamp = time(NULL);
 
-	save_and_apply_config_tree(TRUE);
+	save_and_apply_config_tree(true);
 
 #ifdef HAVE_NETINFO
 	if (config_netinfo)
@@ -4482,7 +4482,7 @@ getconfig(
 
 
 void
-save_and_apply_config_tree(int/*BOOL*/ input_from_file)
+save_and_apply_config_tree(bool input_from_file)
 {
 	config_tree *ptree;
 #ifndef SAVECONFIG

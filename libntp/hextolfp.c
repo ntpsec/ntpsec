@@ -9,7 +9,7 @@
 #include "ntp_fp.h"
 #include "ntp_stdlib.h"
 
-int
+bool
 hextolfp(
 	const char *str,
 	l_fp *lfp
@@ -43,7 +43,7 @@ hextolfp(
 	}
 
 	if ((cp - cpstart) < 8 || ind == NULL)
-	    return 0;
+	    return false;
 	if (*cp == '.')
 	    cp++;
 
@@ -57,12 +57,12 @@ hextolfp(
 	}
 
 	if ((cp - cpstart) < 8 || ind == NULL)
-	    return 0;
+	    return false;
 	
 	if (*cp != '\0' && !isspace((unsigned char)*cp))
-	    return 0;
+	    return false;
 
 	lfp->l_ui = dec_i;
 	lfp->l_uf = dec_f;
-	return 1;
+	return true;
 }

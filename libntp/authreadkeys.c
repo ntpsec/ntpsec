@@ -65,7 +65,7 @@ nexttok(
 /*
  * authreadkeys - (re)read keys from a file.
  */
-int
+bool
 authreadkeys(
 	const char *file
 	)
@@ -87,7 +87,7 @@ authreadkeys(
 	if (fp == NULL) {
 		msyslog(LOG_ERR, "authreadkeys: file %s: %m",
 		    file);
-		return (0);
+		return false;
 	}
 	INIT_SSL();
 
@@ -203,5 +203,5 @@ authreadkeys(
 		}
 	}
 	fclose(fp);
-	return (1);
+	return true;
 }

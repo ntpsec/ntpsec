@@ -67,7 +67,7 @@ double	sys_fuzz = 0;		/* min. time to read the clock (s) */
 long	sys_fuzz_nsec = 0;	/* min. time to read the clock (ns) */
 double	measured_tick;		/* non-overridable sys_tick (s) */
 double	sys_residual = 0;	/* adjustment residue (s) */
-int	trunc_os_clock;		/* sys_tick > measured_tick */
+bool	trunc_os_clock;		/* sys_tick > measured_tick */
 time_stepped_callback	step_callback;
 
 #ifndef SIM
@@ -80,10 +80,10 @@ static int lamport_violated;	/* clock was stepped back */
 #endif	/* !SIM */
 
 #ifdef DEBUG
-static int systime_init_done;
-# define DONE_SYSTIME_INIT()	systime_init_done = TRUE
+static bool systime_init_done;
+# define DONE_SYSTIME_INIT()	systime_init_done = true
 #else
-# define DONE_SYSTIME_INIT()	do {} while (FALSE)
+# define DONE_SYSTIME_INIT()	do {} while (false)
 #endif
 
 #ifdef HAVE_SIGNALED_IO
@@ -250,7 +250,7 @@ get_systime(
 		lfp_prev = result;
 		dfuzz_prev = dfuzz;
 		if (lamport_violated) 
-			lamport_violated = FALSE;
+			lamport_violated = false;
 	}
 	LEAVE_GET_SYSTIME_CRITSEC();
 	*now = result;
@@ -283,7 +283,7 @@ adj_systime(
 	 * triggered by sys_residual.
 	 */
 	if (0. == now)
-		return TRUE;
+		return true;
 
 	/*
 	 * Most Unix adjtime() implementations adjust the system clock
@@ -320,10 +320,10 @@ adj_systime(
 	if (adjtv.tv_sec != 0 || adjtv.tv_usec != 0) {
 		if (adjtime(&adjtv, &oadjtv) < 0) {
 			msyslog(LOG_ERR, "adj_systime: %m");
-			return FALSE;
+			return false;
 		}
 	}
-	return TRUE;
+	return true;
 }
 #endif
 
@@ -406,7 +406,7 @@ step_systime(
 	/* now set new system time */
 	if (ntp_set_tod(&timetv, NULL) != 0) {
 		msyslog(LOG_ERR, "step-systime: %m");
-		return FALSE;
+		return false;
 	}
 
 	/* <--- time-critical path ended with 'ntp_set_tod()' <--- */
@@ -532,7 +532,7 @@ step_systime(
 #endif /* UPDATE_WTMPX */
 
 	}
-	return TRUE;
+	return true;
 }
 
 #endif	/* !SIM */

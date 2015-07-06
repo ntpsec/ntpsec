@@ -106,7 +106,7 @@ Strcmp(
 	return c;
 }
 
-int
+bool
 parse_timedout(
 	       parse_t *parseio,
 	       timestamp_t *tstamp,
@@ -134,17 +134,17 @@ parse_timedout(
 	if (timercmp(&delta, del, >))
 	{
 		parseprintf(DD_PARSE, ("parse: timedout: TRUE\n"));
-		return 1;
+		return true;
 	}
 	else
 	{
 		parseprintf(DD_PARSE, ("parse: timedout: FALSE\n"));
-		return 0;
+		return false;
 	}
 }
 
 /*ARGSUSED*/
-int
+bool
 parse_ioinit(
 	register parse_t *parseio
 	)
@@ -163,7 +163,7 @@ parse_ioinit(
 	parseio->parse_index     = 0;
 	parseio->parse_ldsize    = 0;
 
-	return 1;
+	return true;
 }
 
 /*ARGSUSED*/
@@ -738,7 +738,7 @@ timepacket(
 }
 
 /*ARGSUSED*/
-int
+bool
 parse_timecode(
 	parsectl_t *dct,
 	parse_t    *parse
@@ -759,17 +759,17 @@ parse_timecode(
 	{
 		dct->parsegettc.parse_count = parse->parse_ldsize;
 		memcpy(dct->parsegettc.parse_buffer, parse->parse_ldata, dct->parsegettc.parse_count);
-		return 1;
+		return true;
 	}
 	else
 	{
-		return 0;
+		return false;
 	}
 }
 
 
 /*ARGSUSED*/
-int
+bool
 parse_setfmt(
 	parsectl_t *dct,
 	parse_t    *parse
@@ -797,7 +797,7 @@ parse_setfmt(
 						if (!parse->parse_pdata)
 						{
 							parseprintf(DD_PARSE, ("set format failed: malloc for private data area failed\n"));
-							return 0;
+							return false;
 						}
 						memset((char *)parse->parse_pdata, 0, parse->parse_plen);
 					}
@@ -818,7 +818,7 @@ parse_setfmt(
 							parse->parse_pdata = 0;
 
 							parseprintf(DD_PARSE, ("init failed: malloc for data area failed\n"));
-							return 0;
+							return false;
 						}
 					}
 
@@ -830,12 +830,12 @@ parse_setfmt(
 
 					parse->parse_lformat  = i;
 
-					return 1;
+					return true;
 				}
 			}
 		}
 	}
-	return 0;
+	return false;
 }
 
 /*ARGSUSED*/
@@ -859,7 +859,7 @@ parse_getfmt(
 }
 
 /*ARGSUSED*/
-int
+bool
 parse_setcs(
 	parsectl_t *dct,
 	parse_t    *parse
@@ -867,7 +867,7 @@ parse_setcs(
 {
 	parse->parse_ioflags &= ~PARSE_IO_CSIZE;
 	parse->parse_ioflags |= (int) (dct->parsesetcs.parse_cs & PARSE_IO_CSIZE);
-	return 1;
+	return true;
 }
 
 #else /* not (REFCLOCK && CLOCK_PARSE) */

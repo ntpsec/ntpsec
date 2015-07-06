@@ -285,7 +285,7 @@ int main(int argc, char **argv)
 		fprintf(stderr, "Usage:\n%s t_header.h\n", argv[0]);
 		exit(1);
 	}
-	debug = 1;
+	debug = true;
 
 	populate_symb(argv[1]);
 
@@ -676,12 +676,12 @@ compare_key_tok_id(
 	const struct key_tok *p2 = a2;
 
 	if (p1->token == p2->token)
-		return 0;
+		return COMPARE_EQUAL;
 
 	if (p1->token < p2->token)
-		return -1;
+		return COMPARE_LESSTHAN;
 	else
-		return 1;
+		return COMPARE_GREATERTHAN;
 }
 
 

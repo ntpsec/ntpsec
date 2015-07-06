@@ -7,7 +7,7 @@
 
 #include "ntp_stdlib.h"
 
-int
+bool
 hextoint(
 	const char *str,
 	u_long *pu
@@ -19,14 +19,14 @@ hextoint(
 	cp = str;
 
 	if (*cp == '\0')
-		return 0;
+		return false;
 
 	u = 0;
 	while (*cp != '\0') {
 		if (!isxdigit((unsigned char)*cp))
-			return 0;
+			return false;
 		if (u & 0xF0000000)
-			return 0;	/* overflow */
+			return false;	/* overflow */
 		u <<= 4;
 		if ('0' <= *cp && *cp <= '9')
 			u += *cp++ - '0';
@@ -35,8 +35,8 @@ hextoint(
 		else if ('A' <= *cp && *cp <= 'F')
 			u += *cp++ - 'A' + 10;
 		else
-			return 0;
+			return false;
 	}
 	*pu = u;
-	return 1;
+	return true;
 }

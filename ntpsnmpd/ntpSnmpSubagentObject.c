@@ -69,7 +69,7 @@ ntpsnmpd_parse_string(
 {
 	int i;
 	int j;
-	int loop;
+	bool loop;
 	size_t str_cnt;
 	size_t val_cnt;
 
@@ -81,7 +81,7 @@ ntpsnmpd_parse_string(
 
 	/* Parsing the field name */
 	j = 0;
-	loop = TRUE;
+	loop = true;
 	for (i = 0; loop && i <= str_cnt; i++) {
 		switch (string[i]) {
 
@@ -92,7 +92,7 @@ ntpsnmpd_parse_string(
 			break;
 
 		case '=':
-			loop = FALSE;
+			loop = false;
 			break;
 
 		default:

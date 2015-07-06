@@ -26,7 +26,7 @@ static u_long ten_to_the_n[10] = {
 };
 
 
-int
+bool
 atolfp(
 	const char *str,
 	l_fp *lfp
@@ -64,7 +64,7 @@ atolfp(
 	    cp++;
 
 	if (*cp != '.' && !isdigit((unsigned char)*cp))
-	    return 0;
+	    return false;
 
 	while (*cp != '\0' && (ind = strchr(digits, *cp)) != NULL) {
 		dec_i = (dec_i << 3) + (dec_i << 1);	/* multiply by 10 */
@@ -74,7 +74,7 @@ atolfp(
 
 	if (*cp != '\0' && !isspace((unsigned char)*cp)) {
 		if (*cp++ != '.')
-		    return 0;
+		    return false;
 	
 		while (ndec < 9 && *cp != '\0'
 		       && (ind = strchr(digits, *cp)) != NULL) {
@@ -88,7 +88,7 @@ atolfp(
 		    cp++;
 		
 		if (*cp != '\0' && !isspace((unsigned char)*cp))
-		    return 0;
+		    return false;
 	}
 
 	if (ndec > 0) {
@@ -118,5 +118,5 @@ atolfp(
 	
 	lfp->l_ui = dec_i;
 	lfp->l_uf = dec_f;
-	return 1;
+	return true;
 }

@@ -222,7 +222,7 @@ ntpcal_date_to_rd(const struct calendar * /* jt */);
  * for regular years and a non-zero value for leap years.
  */
 extern ntpcal_split
-ntpcal_split_eradays(int32_t /* days */, int/*BOOL*/ * /* isleapyear */);
+ntpcal_split_eradays(int32_t /* days */, bool * /* isleapyear */);
 
 /*
  * Given a number of elapsed days in a year and a leap year indicator,
@@ -231,14 +231,14 @@ ntpcal_split_eradays(int32_t /* days */, int/*BOOL*/ * /* isleapyear */);
  * 'res.rem'.
  */
 extern ntpcal_split
-ntpcal_split_yeardays(int32_t /* eyd */, int/*BOOL*/ /* isleapyear */);
+ntpcal_split_yeardays(int32_t /* eyd */, bool /* isleapyear */);
 
 /*
  * Convert a RataDie number into the date part of a 'struct
  * calendar'. Return 0 if the year is regular year, !0 if the year is
  * a leap year.
  */
-extern int/*BOOL*/
+extern bool
 ntpcal_rd_to_date(struct calendar * /* jt */, int32_t /* rd */);
 
 /*
@@ -246,7 +246,7 @@ ntpcal_rd_to_date(struct calendar * /* jt */, int32_t /* rd */);
  * tm'. Return 0 if the year is regular year, !0 if the year is a leap
  * year.
  */
-extern int/*BOOL*/
+extern bool
 ntpcal_rd_to_tm(struct tm * /* utm */, int32_t /* rd */);
 
 /*

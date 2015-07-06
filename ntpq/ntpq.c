@@ -80,12 +80,12 @@ u_long	current_time;		/* needed by authkeys; not used */
 /*
  * Flag which indicates we should always send authenticated requests
  */
-int always_auth = 0;
+bool always_auth = false;
 
 /*
  * Flag which indicates raw mode output.
  */
-int rawmode = 0;
+bool rawmode = false;
 
 /*
  * Packet version number we use
@@ -161,7 +161,7 @@ int		ntpqmain	(int,	char **);
 /*
  * Built in command handler declarations
  */
-static	int	openhost	(const char *, int);
+static	bool	openhost	(const char *, int);
 static	void	dump_hex_printable(const void *, size_t);
 static	int	sendpkt		(void *, size_t);
 static	int	getresponse	(int, int, u_short *, int *, const char **, int);
@@ -174,12 +174,12 @@ static	void abortcmd	(int);
 #endif	/* SYS_WINNT */
 static	void	docmd		(const char *);
 static	void	tokenize	(const char *, char **, int *);
-static	int	getarg		(const char *, int, arg_v *);
+static	bool	getarg		(const char *, int, arg_v *);
 #endif	/* BUILD_AS_LIB */
 static	int	findcmd		(const char *, struct xcmd *,
 				 struct xcmd *, struct xcmd **);
-static	int	rtdatetolfp	(char *, l_fp *);
-static	int	decodearr	(char *, int *, l_fp *);
+static	bool	rtdatetolfp	(char *, l_fp *);
+static	bool	decodearr	(char *, int *, l_fp *);
 static	void	help		(struct parse *, FILE *);
 static	int	helpsort	(const void *, const void *);
 static	void	printusage	(struct xcmd *, FILE *);
@@ -320,15 +320,15 @@ struct sock_timeval tvout = { DEFTIMEOUT, 0 };	/* time out for reads */
 struct sock_timeval tvsout = { DEFSTIMEOUT, 0 };/* secondary time out */
 l_fp delay_time;				/* delay time */
 char currenthost[LENHOSTNAME];			/* current host name */
-int currenthostisnum;				/* is prior text from IP? */
+bool currenthostisnum;				/* is prior text from IP? */
 struct sockaddr_in hostaddr;			/* host address */
-int showhostnames = 1;				/* show host names by default */
-int wideremote = 0;				/* show wide remote names? */
+bool showhostnames = true;			/* show host names by default */
+bool wideremote = false;			/* show wide remote names? */
 
 int ai_fam_templ;				/* address family */
 int ai_fam_default;				/* default address family */
 SOCKET sockfd;					/* fd socket is opened on */
-int havehost = 0;				/* set to 1 when host open */
+bool havehost = false;				/* set to true when host open */
 int s_port = 0;
 struct servent *server_entry = NULL;		/* server entry for ntp */
 
@@ -515,13 +515,13 @@ ntpqmain(
 		ai_fam_templ = ai_fam_default;
 
 	if (HAVE_OPT(INTERACTIVE))
-		interactive = 1;
+		interactive = true;
 
 	if (HAVE_OPT(NUMERIC))
-		showhostnames = 0;
+		showhostnames = false;
 
 	if (HAVE_OPT(WIDE))
-		wideremote = 1;
+		wideremote = true;
 
 	old_rv = HAVE_OPT(OLD_RV);
 
@@ -550,9 +550,9 @@ ntpqmain(
 		}
 	}
 
-	if (numcmds == 0 && interactive == 0
+	if (numcmds == 0 && !interactive
 	    && isatty(fileno(stdin)) && isatty(fileno(stderr))) {
-		interactive = 1;
+		interactive = true;
 	}
 
 #ifndef SYS_WINNT /* Under NT cannot handle SIGINT, WIN32 spawns a handler */
@@ -580,7 +580,7 @@ ntpqmain(
 /*
  * openhost - open a socket to a host
  */
-static	int
+static bool
 openhost(
 	const char *hname,
 	int	    fam
@@ -609,7 +609,7 @@ openhost(
 			name[i] = '\0';
 			hname = name;
 		} else {
-			return 0;
+			return false;
 		}
 	}
 
@@ -648,7 +648,7 @@ openhost(
 #endif
 	if (a_info != 0) {
 		fprintf(stderr, "%s\n", gai_strerror(a_info));
-		return 0;
+		return false;
 	}
 
 	INSIST(ai != NULL);
@@ -658,10 +658,10 @@ openhost(
 
 	if (ai->ai_canonname == NULL) {
 		strlcpy(temphost, stoa(&addr), sizeof(temphost));
-		currenthostisnum = TRUE;
+		currenthostisnum = true;
 	} else {
 		strlcpy(temphost, ai->ai_canonname, sizeof(temphost));
-		currenthostisnum = FALSE;
+		currenthostisnum = false;
 	}
 
 	if (debug > 2)
@@ -678,7 +678,7 @@ openhost(
 		if (debug > 2)
 			printf("Closing old host %s\n", currenthost);
 		closesocket(sockfd);
-		havehost = 0;
+		havehost = false;
 	}
 	strlcpy(currenthost, temphost, sizeof(currenthost));
 
@@ -716,7 +716,7 @@ openhost(
 	if (sockfd == INVALID_SOCKET) {
 		error("socket");
 		freeaddrinfo(ai);
-		return 0;
+		return false;
 	}
 
 
@@ -741,13 +741,13 @@ openhost(
 	    {
 		error("connect");
 		freeaddrinfo(ai);
-		return 0;
+		return false;
 	}
 	freeaddrinfo(ai);
-	havehost = 1;
+	havehost = true;
 	numassoc = 0;
 
-	return 1;
+	return true;
 }
 
 
@@ -833,7 +833,7 @@ getresponse(
 	size_t numfrags;
 	size_t f;
 	size_t ff;
-	int seenlastfrag;
+	bool seenlastfrag;
 	int shouldbesize;
 	fd_set fds;
 	int n;
@@ -852,7 +852,7 @@ getresponse(
 	*rdata = (char *)pktdata;
 
 	numfrags = 0;
-	seenlastfrag = 0;
+	seenlastfrag = false;
 
 	FD_ZERO(&fds);
 
@@ -1130,7 +1130,7 @@ getresponse(
 		 * Record status info out of the last packet.
 		 */
 		if (!CTL_ISMORE(rpkt.r_m_e_op)) {
-			seenlastfrag = 1;
+			seenlastfrag = true;
 			if (rstatus != 0)
 				*rstatus = ntohs(rpkt.status);
 		}
@@ -1360,7 +1360,7 @@ doquery(
 	)
 {
 	return doqueryex(opcode, associd, auth, qsize, qdata, rstatus,
-			 rsize, rdata, FALSE);
+			 rsize, rdata, false);
 }
 
 
@@ -1378,11 +1378,11 @@ doqueryex(
 	u_short *rstatus,
 	int *rsize,
 	const char **rdata,
-	int quiet
+	bool quiet
 	)
 {
 	int res;
-	int done;
+	bool done;
 
 	/*
 	 * Check to make sure host is open
@@ -1392,7 +1392,7 @@ doqueryex(
 		return -1;
 	}
 
-	done = 0;
+	done = false;
 	sequence++;
 
     again:
@@ -1417,7 +1417,7 @@ doqueryex(
 				 */
 				sequence++;
 			}
-			done = 1;
+			done = true;
 			goto again;
 		}
 		if (!quiet)
@@ -1656,7 +1656,7 @@ tokenize(
 /*
  * getarg - interpret an argument token
  */
-static int
+static bool
 getarg(
 	const char *str,
 	int code,
@@ -1672,7 +1672,7 @@ getarg(
 
 	case NTP_ADD:
 		if (!getnetnum(str, &argp->netnum, NULL, 0))
-			return 0;
+			return false;
 		break;
 
 	case NTP_UINT:
@@ -1681,7 +1681,7 @@ getarg(
 				fprintf(stderr,
 					"***Association index `%s' invalid/undecodable\n",
 					str);
-				return 0;
+				return false;
 			}
 			if (0 == numassoc) {
 				dogetassoc(stdout);
@@ -1689,7 +1689,7 @@ getarg(
 					fprintf(stderr,
 						"***No associations found, `%s' unknown\n",
 						str);
-					return 0;
+					return false;
 				}
 			}
 			ul = min(ul, numassoc);
@@ -1699,7 +1699,7 @@ getarg(
 		if (!atouint(str, &argp->uval)) {
 			fprintf(stderr, "***Illegal unsigned value %s\n",
 				str);
-			return 0;
+			return false;
 		}
 		break;
 
@@ -1707,7 +1707,7 @@ getarg(
 		if (!atoint(str, &argp->ival)) {
 			fprintf(stderr, "***Illegal integer value %s\n",
 				str);
-			return 0;
+			return false;
 		}
 		break;
 
@@ -1718,12 +1718,12 @@ getarg(
 			argp->ival = 4;
 		} else {
 			fprintf(stderr, "***Version must be either 4 or 6\n");
-			return 0;
+			return false;
 		}
 		break;
 	}
 
-	return 1;
+	return true;
 }
 #endif	/* !BUILD_AS_LIB */
 
@@ -1799,7 +1799,7 @@ findcmd(
  * getnetnum - given a host name, return its net number
  *	       and (optional) full name
  */
-int
+bool
 getnetnum(
 	const char *hname,
 	sockaddr_u *num,
@@ -1837,11 +1837,11 @@ getnetnum(
 					    0, 0);
 		}
 		freeaddrinfo(ai);
-		return 1;
+		return true;
 	}
 	fprintf(stderr, "***Can't find host %s\n", hname);
 
-	return 0;
+	return false;
 }
 
 
@@ -1854,7 +1854,7 @@ nntohost(
 	sockaddr_u *netnum
 	)
 {
-	return nntohost_col(netnum, LIB_BUFLENGTH - 1, FALSE);
+	return nntohost_col(netnum, LIB_BUFLENGTH - 1, false);
 }
 
 
@@ -1916,7 +1916,7 @@ nntohostp(
 /*
  * rtdatetolfp - decode an RT-11 date into an l_fp
  */
-static int
+static bool
 rtdatetolfp(
 	char *str,
 	l_fp *lfp
@@ -1945,9 +1945,9 @@ rtdatetolfp(
 			 * Catch special case
 			 */
 			L_CLR(lfp);
-			return 1;
+			return true;
 		}
-		return 0;
+		return false;
 	}
 
 	cal.monthday = (u_char) (*cp++ - '0');	/* ascii dependent */
@@ -1957,7 +1957,7 @@ rtdatetolfp(
 	}
 
 	if (*cp++ != '-')
-	    return 0;
+	    return false;
 
 	for (i = 0; i < 3; i++)
 	    buf[i] = *cp++;
@@ -1967,14 +1967,14 @@ rtdatetolfp(
 	    if (STREQ(buf, months[i]))
 		break;
 	if (i == 12)
-	    return 0;
+	    return false;
 	cal.month = (u_char)(i + 1);
 
 	if (*cp++ != '-')
-	    return 0;
+	    return false;
 
 	if (!isdigit((int)*cp))
-	    return 0;
+	    return false;
 	cal.year = (u_short)(*cp++ - '0');
 	if (isdigit((int)*cp)) {
 		cal.year = (u_short)((cal.year << 3) + (cal.year << 1));
@@ -1994,11 +1994,11 @@ rtdatetolfp(
 	 */
 	if (cal.year == 0) {
 		L_CLR(lfp);
-		return 1;
+		return true;
 	}
 
 	if (*cp++ != ' ' || !isdigit((int)*cp))
-	    return 0;
+	    return false;
 	cal.hour = (u_char)(*cp++ - '0');
 	if (isdigit((int)*cp)) {
 		cal.hour = (u_char)((cal.hour << 3) + (cal.hour << 1));
@@ -2006,7 +2006,7 @@ rtdatetolfp(
 	}
 
 	if (*cp++ != ':' || !isdigit((int)*cp))
-	    return 0;
+	    return false;
 	cal.minute = (u_char)(*cp++ - '0');
 	if (isdigit((int)*cp)) {
 		cal.minute = (u_char)((cal.minute << 3) + (cal.minute << 1));
@@ -2014,7 +2014,7 @@ rtdatetolfp(
 	}
 
 	if (*cp++ != ':' || !isdigit((int)*cp))
-	    return 0;
+	    return false;
 	cal.second = (u_char)(*cp++ - '0');
 	if (isdigit((int)*cp)) {
 		cal.second = (u_char)((cal.second << 3) + (cal.second << 1));
@@ -2030,8 +2030,8 @@ rtdatetolfp(
 		cal.year += 1900;
 
 	lfp->l_ui = caltontp(&cal);
-	lfp->l_uf = 0;
-	return 1;
+	lfp->l_uf = false;
+	return true;
 }
 
 
@@ -2039,7 +2039,7 @@ rtdatetolfp(
  * decodets - decode a timestamp into an l_fp format number, with
  *	      consideration of fuzzball formats.
  */
-int
+bool
 decodets(
 	char *str,
 	l_fp *lfp
@@ -2080,7 +2080,7 @@ decodets(
 	 * RT-11 date.  This code should go away eventually.
 	 */
 	if (atolfp(str, lfp))
-		return 1;
+		return true;
 
 	return rtdatetolfp(str, lfp);
 }
@@ -2089,7 +2089,7 @@ decodets(
 /*
  * decodetime - decode a time value.  It should be in milliseconds
  */
-int
+bool
 decodetime(
 	char *str,
 	l_fp *lfp
@@ -2102,7 +2102,7 @@ decodetime(
 /*
  * decodeint - decode an integer
  */
-int
+bool
 decodeint(
 	char *str,
 	long *val
@@ -2120,7 +2120,7 @@ decodeint(
 /*
  * decodeuint - decode an unsigned integer
  */
-int
+bool
 decodeuint(
 	char *str,
 	u_long *val
@@ -2138,7 +2138,7 @@ decodeuint(
 /*
  * decodearr - decode an array of time values
  */
-static int
+static bool
 decodearr(
 	char *str,
 	int *narr,
@@ -2165,11 +2165,11 @@ decodearr(
 		*bp++ = '\0';
 
 		if (!decodetime(buf, lfp))
-		    return 0;
+		    return false;
 		(*narr)++;
 		lfp++;
 	}
-	return 1;
+	return true;
 }
 
 
@@ -2312,7 +2312,7 @@ auth_delay(
 	FILE *fp
 	)
 {
-	int isneg;
+	bool isneg;
 	u_long val;
 
 	if (pcmd->nargs == 0) {
@@ -2320,10 +2320,10 @@ auth_delay(
 		(void) fprintf(fp, "delay %lu ms\n", val);
 	} else {
 		if (pcmd->argval[0].ival < 0) {
-			isneg = 1;
+			isneg = true;
 			val = (u_long)(-pcmd->argval[0].ival);
 		} else {
-			isneg = 0;
+			isneg = false;
 			val = (u_long)pcmd->argval[0].ival;
 		}
 
@@ -2584,7 +2584,7 @@ raw(
 	FILE *fp
 	)
 {
-	rawmode = 1;
+	rawmode = true;
 	(void) fprintf(fp, "Output set to raw\n");
 }
 
@@ -2599,7 +2599,7 @@ cooked(
 	FILE *fp
 	)
 {
-	rawmode = 0;
+	rawmode = false;
 	(void) fprintf(fp, "Output set to cooked\n");
 	return;
 }
@@ -2623,9 +2623,9 @@ authenticate(
 				   "unauthenticated requests being sent\n");
 	} else {
 		if (STREQ(pcmd->argval[0].string, "yes")) {
-			always_auth = 1;
+			always_auth = true;
 		} else if (STREQ(pcmd->argval[0].string, "no")) {
-			always_auth = 0;
+			always_auth = false;
 		} else
 		    (void)fprintf(stderr, "What?\n");
 	}
@@ -3401,10 +3401,10 @@ assoccmp(
 	const struct association *ass2 = t2;
 
 	if (ass1->assid < ass2->assid)
-		return -1;
+		return COMPARE_LESSTHAN;
 	if (ass1->assid > ass2->assid)
-		return 1;
-	return 0;
+		return COMPARE_GREATERTHAN;
+	return COMPARE_EQUAL;
 }
 
 

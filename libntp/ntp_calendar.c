@@ -184,7 +184,7 @@ ntpcal_get_build_date(
 	    ignore = 1 + (envstr && (!*envstr || !strcasecmp(envstr, "yes")));
 	}
 	if (ignore > 1)
-	    return FALSE;
+	    return false;
 #endif
 
 	if (6 == sscanf(build, "%hu:%hu:%hu/%3s %hu %hu",
@@ -198,11 +198,11 @@ ntpcal_get_build_date(
 			jd->minute   = (uint8_t)minute;
 			jd->second   = (uint8_t)second;
 
-			return TRUE;
+			return true;
 		}
 	}
 
-	return FALSE;
+	return false;
 }
 
 
@@ -627,7 +627,7 @@ priv_timesplit(
 ntpcal_split
 ntpcal_split_eradays(
 	int32_t days,
-	int  *isleapyear
+	bool  *isleapyear
 	)
 {
 	ntpcal_split res;
@@ -686,7 +686,7 @@ ntpcal_split_eradays(
 ntpcal_split
 ntpcal_split_yeardays(
 	int32_t eyd,
-	int     isleapyear
+	bool    isleapyear
 	)
 {
 	ntpcal_split    res;
@@ -712,18 +712,18 @@ ntpcal_split_yeardays(
  * Convert a RD into the date part of a 'struct calendar'.
  *---------------------------------------------------------------------
  */
-int
+bool
 ntpcal_rd_to_date(
 	struct calendar *jd,
 	int32_t		 rd
 	)
 {
 	ntpcal_split split;
-	int	     leaps;
-	int	     retv;
+	bool	     leaps;
+	bool	     retv;
 
-	leaps = 0;
-	retv = 0;
+	leaps = false;
+	retv = false;
 	/* Get day-of-week first. Since rd is signed, the remainder can
 	 * be in the range [-6..+6], but the assignment to an unsigned
 	 * variable maps the negative values to positive values >=7.
@@ -758,14 +758,14 @@ ntpcal_rd_to_date(
  * Convert a RD into the date part of a 'struct tm'.
  *---------------------------------------------------------------------
  */
-int
+bool
 ntpcal_rd_to_tm(
 	struct tm  *utm,
 	int32_t	    rd
 	)
 {
 	ntpcal_split split;
-	int	     leaps;
+	bool	     leaps;
 
 	leaps = 0;
 	/* get day-of-week first */
@@ -1214,7 +1214,7 @@ ntpcal_rd_to_mstart(
 	)
 {
 	ntpcal_split split;
-	int	     leaps;
+	bool	     leaps;
 
 	split = ntpcal_split_eradays(rd - 1, &leaps);
 	split = ntpcal_split_yeardays(split.lo, leaps);

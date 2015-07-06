@@ -91,12 +91,12 @@ extern int ntpq_stripquotes ( char *resultbuf, char *srcbuf, int datalen, int ma
 extern int ntpq_queryhost_peervars(associd_t association, char *resultbuf, int maxlen);
 extern int ntpq_get_peervar( const char *varname, char *varvalue, int maxlen);
 extern size_t ntpq_read_sysvars(char *resultbuf, size_t maxsize);
-extern int ntpq_get_sysvars( void );
+extern bool ntpq_get_sysvars( void );
 extern int ntpq_read_associations ( unsigned short resultbuf[], int max_entries );
 extern int ntpq_get_assocs ( void );
 extern int ntpq_get_assoc_number ( associd_t associd );
-extern int ntpq_get_assoc_peervars( associd_t associd );
-extern int ntpq_get_assoc_clockvars( associd_t associd );
+extern bool ntpq_get_assoc_peervars( associd_t associd );
+extern bool ntpq_get_assoc_clockvars( associd_t associd );
 extern int ntpq_get_assoc_allvars( associd_t associd  );
 extern int ntpq_get_assoc_clocktype(int assoc_index);
 extern int ntpq_read_assoc_peervars( associd_t associd, char *resultbuf, int maxsize );

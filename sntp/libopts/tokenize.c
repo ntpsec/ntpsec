@@ -301,6 +301,7 @@ ao_string_tokenize(char const * str)
 
 #ifdef TEST
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 int
@@ -308,7 +309,7 @@ main(int argc, char ** argv)
 {
     if (argc == 1) {
         printf("USAGE:  %s arg [ ... ]\n", *argv);
-        return 1;
+        return EXIT_FAILURE;
     }
     while (--argc > 0) {
         char * arg = *(++argv);
@@ -325,7 +326,7 @@ main(int argc, char ** argv)
             free(p);
         }
     }
-    return 0;
+    return EXIT_SUCCESS;
 }
 #endif
 

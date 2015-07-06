@@ -63,10 +63,10 @@
 #define TRIMBLE_OUTPUT_FUNC
 #define TSIP_VERNUM "7.12a"
 
-#ifndef FALSE
-#define FALSE 	(0)
-#define TRUE 	(!FALSE)
-#endif /* FALSE */
+#ifndef false
+#define false 	(0)
+#define true 	(!false)
+#endif /* false */
 
 #define GPS_PI 	(3.1415926535898)
 #define GPS_C 		(299792458.)
@@ -429,9 +429,9 @@ static	char *	show_time	(float time_of_week);
 /* RIPE NCC functions */
 static	void	ripencc_control	(int, const struct refclockstat *,
 				 struct refclockstat *, struct peer *);
-static	int	ripencc_ppsapi	(struct peer *, int, int);
+static	bool	ripencc_ppsapi	(struct peer *, int, int);
 static	int	ripencc_get_pps_ts	(struct ripencc_unit *, l_fp *);
-static	int	ripencc_start	(int, struct peer *);
+static	bool	ripencc_start	(int, struct peer *);
 static 	void	ripencc_shutdown	(int, struct peer *);
 static 	void	ripencc_poll	(int, struct peer *);
 static 	void	ripencc_send	(struct peer *, TSIPPKT spt);
@@ -459,7 +459,7 @@ static int day2tab[] = {31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
 /*
  * ripencc_start - open the GPS devices and initialize data for processing
  */
-static int
+static bool
 ripencc_start(int unit, struct peer *peer)
 {
 	register struct ripencc_unit *up;
@@ -478,7 +478,7 @@ ripencc_start(int unit, struct peer *peer)
 	fd = refclock_open(device, SPEED232, LDISC_RAW);
 	if (fd <= 0) {
 		pp->io.fd = -1;
-		return (0);
+		return false;
 	}
 
 	pp->io.fd = fd;
@@ -486,7 +486,7 @@ ripencc_start(int unit, struct peer *peer)
 	/* from refclock_palisade.c */
 	if (tcgetattr(fd, &tio) < 0) {
 		msyslog(LOG_ERR, "Palisade(%d) tcgetattr(fd, &tio): %m",unit);
-		return (0);
+		return false;
 	}
 
 	/*
@@ -496,7 +496,7 @@ ripencc_start(int unit, struct peer *peer)
 	tio.c_iflag &= ~ICRNL;
 	if (tcsetattr(fd, TCSANOW, &tio) == -1) {
 		msyslog(LOG_ERR, "Palisade(%d) tcsetattr(fd, &tio): %m",unit);
-		return (0);
+		return false;
 	}
 
 	/*
@@ -511,7 +511,7 @@ ripencc_start(int unit, struct peer *peer)
 		pp->io.fd = -1;
 		close(fd);
 		free(up);
-		return (0);
+		return false;
 	}
 	pp->unitptr = up;
 
@@ -603,7 +603,7 @@ ripencc_start(int unit, struct peer *peer)
 	if (time_pps_create(fd, &up->handle) < 0) {
 		up->handle = 0;
 		msyslog(LOG_ERR, "refclock_ripencc: time_pps_create failed: %m");
-		return (1);
+		return true;
 	}
 
 	return(ripencc_ppsapi(peer, 0, 0));
@@ -635,11 +635,11 @@ ripencc_control(
 /*
  * Initialize PPSAPI
  */
-int
+bool
 ripencc_ppsapi(
 	struct peer *peer,	/* peer structure pointer */
-	int enb_clear,		/* clear enable */
-	int enb_hardpps		/* hardpps enable */
+	bool enb_clear,		/* clear enable */
+	bool enb_hardpps	/* hardpps enable */
 	)
 {
 	struct refclockproc *pp;
@@ -651,7 +651,7 @@ ripencc_ppsapi(
 	if (time_pps_getcap(up->handle, &capability) < 0) {
 		msyslog(LOG_ERR,
 			"refclock_ripencc: time_pps_getcap failed: %m");
-		return (0);
+		return false;
 	}
 	memset(&up->pps_params, 0, sizeof(pps_params_t));
 	if (enb_clear)
@@ -662,13 +662,13 @@ ripencc_ppsapi(
 		msyslog(LOG_ERR,
 			"refclock_ripencc: invalid capture edge %d",
 			!enb_clear);
-		return (0);
+		return false;
 	}
 	up->pps_params.mode |= PPS_TSFMT_TSPEC;
 	if (time_pps_setparams(up->handle, &up->pps_params) < 0) {
 		msyslog(LOG_ERR,
 			"refclock_ripencc: time_pps_setparams failed: %m");
-		return (0);
+		return false;
 	}
 	if (enb_hardpps) {
 		if (time_pps_kcbind(up->handle, PPS_KC_HARDPPS,
@@ -676,9 +676,9 @@ ripencc_ppsapi(
 				    PPS_TSFMT_TSPEC) < 0) {
 			msyslog(LOG_ERR,
 				"refclock_ripencc: time_pps_kcbind failed: %m");
-			return (0);
+			return false;
 		}
-		hardpps_enable = 1;
+		hardpps_enable = true;
 	}
 	peer->precision = PPS_PRECISION;
 
@@ -692,16 +692,16 @@ ripencc_ppsapi(
 	}
 #endif /* DEBUG_NCC */
 
-	return (1);
+	return true;
 }
 
 /*
  * This function is called every 64 seconds from ripencc_receive
  * It will fetch the pps time 
  *
- * Return 0 on failure and 1 on success.
+ * Return false on failure and true on success.
  */
-static int
+static bool
 ripencc_get_pps_ts(
 	struct ripencc_unit *up,
 	l_fp *tsptr
@@ -721,28 +721,28 @@ ripencc_get_pps_ts(
 	 * Convert the timespec nanoseconds field to ntp l_fp units.
 	 */ 
 	if (up->handle == 0)
-		return (0);
+		return false;
 	timeout.tv_sec = 0;
 	timeout.tv_nsec = 0;
 	memcpy(&pps_info, &up->pps_info, sizeof(pps_info_t));
 	if (time_pps_fetch(up->handle, PPS_TSFMT_TSPEC, &up->pps_info,
 			   &timeout) < 0)
-		return (0);
+		return false;
 	if (up->pps_params.mode & PPS_CAPTUREASSERT) {
 		if (pps_info.assert_sequence ==
 		    up->pps_info.assert_sequence)
-			return (0);
+			return false;
 		ts = up->pps_info.assert_timestamp;
 	} else if (up->pps_params.mode & PPS_CAPTURECLEAR) {
 		if (pps_info.clear_sequence ==
 		    up->pps_info.clear_sequence)
-			return (0);
+			return false;
 		ts = up->pps_info.clear_timestamp;
 	} else {
-		return (0);
+		return false;
 	}
 	if ((up->ts.tv_sec == ts.tv_sec) && (up->ts.tv_nsec == ts.tv_nsec))
-		return (0);
+		return false;
 	up->ts = ts;
 
 	tstmp.l_ui = ts.tv_sec + JAN_1970;
@@ -755,7 +755,7 @@ ripencc_get_pps_ts(
 #endif /* DEBUG_PPS */
 
 	*tsptr = tstmp;
-	return (1);
+	return true;
 }
 
 /*
@@ -1565,7 +1565,7 @@ parse0x8FAD(
 	else
 		pp-> leap = LEAP_NOWARNING;  
 
-	return (0);
+	return 0;
 }
 
 /*
@@ -1872,8 +1872,7 @@ parse0x5C(
  * 2) The functions rpt_0x??() are report string interpreters patterned after
  * the document called "Trimble Standard Interface Protocol".  It should be
  * noted that if the report buffer is sent into the receiver with the wrong
- * length (byte count), the rpt_0x??() returns the Boolean equivalence for
- * TRUE.
+ * length (byte count), the rpt_0x??() returns true.
  *
  * *************************************************************************
  *
@@ -1942,7 +1941,7 @@ tsip_input_proc(
 			rpt->status = TSIP_PARSED_DATA;
 			break;
 		    case ETX:
-			/* end of message; return TRUE here. */
+			/* end of message; return true here. */
 			rpt->status = TSIP_PARSED_FULL;
 			break;
 		    default:
@@ -1979,7 +1978,7 @@ tsip_input_proc(
 
 /**/
 /* Channel A configuration for dual port operation */
-short
+bool
 rpt_0x3D(
 	 TSIPPKT *rpt,
 	 unsigned char *tx_baud_index,
@@ -1993,19 +1992,19 @@ rpt_0x3D(
 	unsigned char *buf;
 	buf = rpt->buf;
 
-	if (rpt->len != 6) return TRUE;
+	if (rpt->len != 6) return true;
 	*tx_baud_index = buf[0];
 	*rx_baud_index = buf[1];
 	*char_format_index = buf[2];
 	*stop_bits = (unsigned char)((buf[3] == 0x07) ? 1 : 2);
 	*tx_mode_index = buf[4];
 	*rx_mode_index = buf[5];
-	return FALSE;
+	return false;
 }
 
 /**/
 /* almanac data for specified satellite */
-short
+bool
 rpt_0x40(
 	 TSIPPKT *rpt,
 	 unsigned char *sv_prn,
@@ -2024,7 +2023,7 @@ rpt_0x40(
 	unsigned char *buf;
 	buf = rpt->buf;
 
-	if (rpt->len != 39) return TRUE;
+	if (rpt->len != 39) return true;
 	*sv_prn = buf[0];
 	*t_zc = bGetSingle (&buf[1]);
 	*week_num = bGetShort (&buf[5]);
@@ -2036,11 +2035,11 @@ rpt_0x40(
 	*OMEGA_0 = bGetSingle (&buf[27]);
 	*omega = bGetSingle (&buf[31]);
 	*M_0 = bGetSingle (&buf[35]);
-	return FALSE;
+	return false;
 }
 
 /* GPS time */
-short
+bool
 rpt_0x41(
 	 TSIPPKT *rpt,
 	 float *time_of_week,
@@ -2051,15 +2050,15 @@ rpt_0x41(
 	unsigned char *buf;
 	buf = rpt->buf;
 	
-	if (rpt->len != 10) return TRUE;
+	if (rpt->len != 10) return true;
 	*time_of_week = bGetSingle (buf);
 	*week_num = bGetShort (&buf[4]);
 	*UTC_offset = bGetSingle (&buf[6]);
-	return FALSE;
+	return false;
 }
 
 /* position in ECEF, single precision */
-short
+bool
 rpt_0x42(
 	 TSIPPKT *rpt,
 	 float pos_ECEF[3],
@@ -2069,16 +2068,16 @@ rpt_0x42(
 	unsigned char *buf;
 	buf = rpt->buf;
 	
-	if (rpt->len != 16) return TRUE;
+	if (rpt->len != 16) return true;
 	pos_ECEF[0] = bGetSingle (buf);
 	pos_ECEF[1]= bGetSingle (&buf[4]);
 	pos_ECEF[2]= bGetSingle (&buf[8]);
 	*time_of_fix = bGetSingle (&buf[12]);
-	return FALSE;
+	return false;
 }
 
 /* velocity in ECEF, single precision */
-short
+bool
 rpt_0x43(
 	 TSIPPKT *rpt,
 	 float ECEF_vel[3],
@@ -2089,17 +2088,17 @@ rpt_0x43(
 	unsigned char *buf;
 	buf = rpt->buf;
 
-	if (rpt->len != 20) return TRUE;
+	if (rpt->len != 20) return true;
 	ECEF_vel[0] = bGetSingle (buf);
 	ECEF_vel[1] = bGetSingle (&buf[4]);
 	ECEF_vel[2] = bGetSingle (&buf[8]);
 	*freq_offset = bGetSingle (&buf[12]);
 	*time_of_fix = bGetSingle (&buf[16]);
-	return FALSE;
+	return false;
 }
 
 /* software versions */	
-short
+bool
 rpt_0x45(
 	 TSIPPKT *rpt,
 	 unsigned char *major_nav_version,
@@ -2117,7 +2116,7 @@ rpt_0x45(
 	unsigned char *buf;
 	buf = rpt->buf;
 
-	if (rpt->len != 10) return TRUE;
+	if (rpt->len != 10) return true;
 	*major_nav_version = buf[0];
 	*minor_nav_version = buf[1];
 	*nav_day = buf[2];
@@ -2128,11 +2127,11 @@ rpt_0x45(
 	*dsp_day = buf[7];
 	*dsp_month = buf[8];
 	*dsp_year = buf[9];
-	return FALSE;
+	return false;
 }
 
 /* receiver health and status */
-short
+bool
 rpt_0x46(
 	 TSIPPKT *rpt,
 	 unsigned char *status1,
@@ -2142,14 +2141,14 @@ rpt_0x46(
 	unsigned char *buf;
 	buf = rpt->buf;
 
-	if (rpt->len != 2) return TRUE;
+	if (rpt->len != 2) return true;
 	*status1 = buf[0];
 	*status2 = buf[1];
-	return FALSE;
+	return false;
 }
 
 /* signal levels for all satellites tracked */
-short
+bool
 rpt_0x47(
 	 TSIPPKT *rpt,
 	 unsigned char *nsvs,
@@ -2161,17 +2160,17 @@ rpt_0x47(
 	unsigned char *buf;
 	buf = rpt->buf;
 
-	if (rpt->len != 1 + 5*buf[0]) return TRUE;
+	if (rpt->len != 1 + 5*buf[0]) return true;
 	*nsvs = buf[0];
 	for (isv = 0; isv < (*nsvs); isv++) {
 		sv_prn[isv] = buf[5*isv + 1];
 		snr[isv] = bGetSingle (&buf[5*isv + 2]);
 	}
-	return FALSE;
+	return false;
 }
 
 /* GPS system message */
-short
+bool
 rpt_0x48(
 	 TSIPPKT *rpt,
 	 unsigned char *message
@@ -2180,14 +2179,14 @@ rpt_0x48(
 	unsigned char *buf;
 	buf = rpt->buf;
 
-	if (rpt->len != 22) return TRUE;
+	if (rpt->len != 22) return true;
 	memcpy (message, buf, 22);
 	message[22] = 0;
-	return FALSE;
+	return false;
 }
 
 /* health for all satellites from almanac health page */
-short
+bool
 rpt_0x49(
 	 TSIPPKT *rpt,
 	 unsigned char *sv_health
@@ -2197,9 +2196,9 @@ rpt_0x49(
 	unsigned char *buf;
 	buf = rpt->buf;
 
-	if (rpt->len != 32) return TRUE;
+	if (rpt->len != 32) return true;
 	for (i = 0; i < 32; i++) sv_health [i]= buf[i];
-	return FALSE;
+	return false;
 }
 
 /* position in lat-lon-alt, single precision */
@@ -2216,17 +2215,17 @@ rpt_0x4A(
 	unsigned char *buf;
 	buf = rpt->buf;
 
-	if (rpt->len != 20) return TRUE;
+	if (rpt->len != 20) return true;
 	*lat = bGetSingle (buf);
 	*lon = bGetSingle (&buf[4]);
 	*alt = bGetSingle (&buf[8]);
 	*clock_bias = bGetSingle (&buf[12]);
 	*time_of_fix = bGetSingle (&buf[16]);
-	return FALSE;
+	return false;
 }
 
 /* reference altitude parameters */
-short
+bool
 rpt_0x4A_2(
 	   TSIPPKT *rpt,
 	   float *alt,
@@ -2238,15 +2237,15 @@ rpt_0x4A_2(
 
 	buf = rpt->buf;
 
-	if (rpt->len != 9) return TRUE;
+	if (rpt->len != 9) return true;
 	*alt = bGetSingle (buf);
 	*dummy = bGetSingle (&buf[4]);
 	*alt_flag = buf[8];
-	return FALSE;
+	return false;
 }
 
 /* machine ID code, status */
-short
+bool
 rpt_0x4B(
 	 TSIPPKT *rpt,
 	 unsigned char *machine_id,
@@ -2257,15 +2256,15 @@ rpt_0x4B(
 	unsigned char *buf;
 	buf = rpt->buf;
 
-	if (rpt->len != 3) return TRUE;
+	if (rpt->len != 3) return true;
 	*machine_id = buf[0];
 	*status3 = buf[1];
 	*status4 = buf[2];
-	return FALSE;
+	return false;
 }
 
 /* operating parameters and masks */
-short
+bool
 rpt_0x4C(
 	 TSIPPKT *rpt,
 	 unsigned char *dyn_code,
@@ -2278,17 +2277,17 @@ rpt_0x4C(
 	unsigned char *buf;
 	buf = rpt->buf;
 
-	if (rpt->len != 17) return TRUE;
+	if (rpt->len != 17) return true;
 	*dyn_code = buf[0];
 	*el_mask = bGetSingle (&buf[1]);
 	*snr_mask = bGetSingle (&buf[5]);
 	*dop_mask = bGetSingle (&buf[9]);
 	*dop_switch = bGetSingle (&buf[13]);
-	return FALSE;
+	return false;
 }
 
 /* oscillator offset */
-short
+bool
 rpt_0x4D(
 	 TSIPPKT *rpt,
 	 float *osc_offset
@@ -2297,13 +2296,13 @@ rpt_0x4D(
 	unsigned char *buf;
 	buf = rpt->buf;
 
-	if (rpt->len != 4) return TRUE;
+	if (rpt->len != 4) return true;
 	*osc_offset = bGetSingle (buf);
-	return FALSE;
+	return false;
 }
 
 /* yes/no response to command to set GPS time */
-short
+bool
 rpt_0x4E(
 	 TSIPPKT *rpt,
 	 unsigned char *response
@@ -2312,13 +2311,13 @@ rpt_0x4E(
 	unsigned char *buf;
 	buf = rpt->buf;
 
-	if (rpt->len != 1) return TRUE;
+	if (rpt->len != 1) return true;
 	*response = buf[0];
-	return FALSE;
+	return false;
 }
 
 /* UTC data */
-short
+bool
 rpt_0x4F(
 	 TSIPPKT *rpt,
 	 double *a0,
@@ -2334,7 +2333,7 @@ rpt_0x4F(
 	unsigned char *buf;
 	buf = rpt->buf;
 
-	if (rpt->len != 26) return TRUE;
+	if (rpt->len != 26) return true;
 	*a0 = bGetDouble (buf);
 	*a1 = bGetSingle (&buf[8]);
 	*dt_ls = bGetShort (&buf[12]);
@@ -2343,12 +2342,12 @@ rpt_0x4F(
 	*wn_lsf = bGetShort (&buf[20]);
 	*dn = bGetShort (&buf[22]);
 	*dt_lsf = bGetShort (&buf[24]);
-	return FALSE;
+	return false;
 }
 
 /**/
 /* clock offset and frequency offset in 1-SV (0-D) mode */
-short
+bool
 rpt_0x54(
 	 TSIPPKT *rpt,
 	 float *clock_bias,
@@ -2359,15 +2358,15 @@ rpt_0x54(
 	unsigned char *buf;
 	buf = rpt->buf;
 
-	if (rpt->len != 12) return TRUE;
+	if (rpt->len != 12) return true;
 	*clock_bias = bGetSingle (buf);
 	*freq_offset = bGetSingle (&buf[4]);
 	*time_of_fix = bGetSingle (&buf[8]);
-	return FALSE;
+	return false;
 }
 
 /* I/O serial options */
-short
+bool
 rpt_0x55(
 	 TSIPPKT *rpt,
 	 unsigned char *pos_code,
@@ -2379,16 +2378,16 @@ rpt_0x55(
 	unsigned char *buf;
 	buf = rpt->buf;
 	
-	if (rpt->len != 4) return TRUE;
+	if (rpt->len != 4) return true;
 	*pos_code = buf[0];
 	*vel_code = buf[1];
 	*time_code = buf[2];
 	*aux_code = buf[3];
-	return FALSE;
+	return false;
 }
 
 /* velocity in east-north-up coordinates */	
-short
+bool
 rpt_0x56(
 	 TSIPPKT *rpt,
 	 float vel_ENU[3],
@@ -2399,7 +2398,7 @@ rpt_0x56(
 	unsigned char *buf;
 	buf = rpt->buf;
 	
-	if (rpt->len != 20) return TRUE;
+	if (rpt->len != 20) return true;
 	/* east */
 	vel_ENU[0] = bGetSingle (buf);
 	/* north */
@@ -2408,11 +2407,11 @@ rpt_0x56(
 	vel_ENU[2] = bGetSingle (&buf[8]);
 	*freq_offset = bGetSingle (&buf[12]);
 	*time_of_fix = bGetSingle (&buf[16]);
-	return FALSE;
+	return false;
 }
 
 /* info about last computed fix */
-short
+bool
 rpt_0x57(
 	 TSIPPKT *rpt,
 	 unsigned char *source_code,
@@ -2424,16 +2423,16 @@ rpt_0x57(
 	unsigned char *buf;
 	buf = rpt->buf;
 	
-	if (rpt->len != 8) return TRUE;
+	if (rpt->len != 8) return true;
 	*source_code = buf[0];
 	*diag_code = buf[1];
 	*time_of_fix = bGetSingle (&buf[2]);
 	*week_num = bGetShort (&buf[6]);
-	return FALSE;
+	return false;
 }
 
 /* GPS system data or acknowledgment of GPS system data load */
-short
+bool
 rpt_0x58(
 	 TSIPPKT *rpt,
 	 unsigned char *op_code,
@@ -2453,11 +2452,11 @@ rpt_0x58(
 	buf = rpt->buf;
 
 	if (buf[0] == 2) {
-		if (rpt->len < 4) return TRUE;
-		if (rpt->len != 4+buf[3]) return TRUE;
+		if (rpt->len < 4) return true;
+		if (rpt->len != 4+buf[3]) return true;
 	}
 	else if (rpt->len != 3) {
-		return TRUE;
+		return true;
 	}
 	*op_code = buf[0];
 	*data_type = buf[1];
@@ -2469,7 +2468,7 @@ rpt_0x58(
 		switch (*data_type) {
 		    case 2:
 			/* Almanac */
-			if (*data_length != sizeof (ALM_INFO)) return TRUE;
+			if (*data_length != sizeof (ALM_INFO)) return true;
 			alminfo = (ALM_INFO*)data_packet;
 			alminfo->t_oa_raw  = buf4[0];
 			alminfo->SV_health = buf4[1];
@@ -2494,7 +2493,7 @@ rpt_0x58(
 
 		    case 3:
 			/* Almanac health page */
-			if (*data_length != sizeof (ALH_PARMS) + 3) return TRUE;
+			if (*data_length != sizeof (ALH_PARMS) + 3) return true;
 
 			/* this record is returned raw */
 			memcpy (data_packet, buf4, dl);
@@ -2502,7 +2501,7 @@ rpt_0x58(
 
 		    case 4:
 			/* Ionosphere */
-			if (*data_length != sizeof (ION_INFO) + 8) return TRUE;
+			if (*data_length != sizeof (ION_INFO) + 8) return true;
 			ioninfo = (ION_INFO*)data_packet;
 			ioninfo->alpha_0   = bGetSingle (&buf4[8]);
 			ioninfo->alpha_1   = bGetSingle (&buf4[12]);
@@ -2516,7 +2515,7 @@ rpt_0x58(
 
 		    case 5:
 			/* UTC */
-			if (*data_length != sizeof (UTC_INFO) + 13) return TRUE;
+			if (*data_length != sizeof (UTC_INFO) + 13) return true;
 			utcinfo = (UTC_INFO*)data_packet;
 			utcinfo->A_0       = bGetDouble (&buf4[13]);
 			utcinfo->A_1       = bGetSingle (&buf4[21]);
@@ -2530,7 +2529,7 @@ rpt_0x58(
 
 		    case 6:
 			/* Ephemeris */
-			if (*data_length != sizeof (NAV_INFO) - 1) return TRUE;
+			if (*data_length != sizeof (NAV_INFO) - 1) return true;
 
 			navinfo = (NAV_INFO*)data_packet;
 
@@ -2576,11 +2575,11 @@ rpt_0x58(
 			break;
 		}
 	}
-	return FALSE;
+	return false;
 }
 
 /* satellite enable/disable or health heed/ignore list */	
-short
+bool
 rpt_0x59(
 	 TSIPPKT *rpt,
 	 unsigned char *code_type,
@@ -2591,15 +2590,15 @@ rpt_0x59(
 	unsigned char *buf;
 	buf = rpt->buf;
 	
-	if (rpt->len != 33) return TRUE;
+	if (rpt->len != 33) return true;
 	*code_type = buf[0];
 	for (iprn = 0; iprn < 32; iprn++)
 		status_code[iprn] = buf[iprn + 1];
-	return FALSE;
+	return false;
 }
 
 /* raw measurement data - code phase/Doppler */
-short
+bool
 rpt_0x5A(
 	 TSIPPKT *rpt,
 	 unsigned char *sv_prn,
@@ -2613,18 +2612,18 @@ rpt_0x5A(
 	unsigned char *buf;
 	buf = rpt->buf;
 
-	if (rpt->len != 25) return TRUE;
+	if (rpt->len != 25) return true;
 	*sv_prn = buf[0];
 	*sample_length = bGetSingle (&buf[1]);
 	*signal_level = bGetSingle (&buf[5]);
 	*code_phase = bGetSingle (&buf[9]);
 	*Doppler = bGetSingle (&buf[13]);
 	*time_of_fix = bGetDouble (&buf[17]);
-	return FALSE;
+	return false;
 }
 
 /* satellite ephorb status */	
-short
+bool
 rpt_0x5B(
 	 TSIPPKT *rpt,
 	 unsigned char *sv_prn,
@@ -2639,7 +2638,7 @@ rpt_0x5B(
 	unsigned char *buf;
 	buf = rpt->buf;
 	
-	if (rpt->len != 16) return TRUE;
+	if (rpt->len != 16) return true;
 	*sv_prn = buf[0];
 	*time_of_collection = bGetSingle (&buf[1]);
 	*sv_health = buf[5];
@@ -2647,11 +2646,11 @@ rpt_0x5B(
 	*time_of_eph = bGetSingle (&buf[7]);
 	*fit_interval_flag = buf[11];
 	*sv_accy = bGetSingle (&buf[12]);
-	return FALSE;
+	return false;
 }
 
 /* satellite tracking status */
-short
+bool
 rpt_0x5C(
 	 TSIPPKT *rpt,
 	 unsigned char *sv_prn,
@@ -2672,7 +2671,7 @@ rpt_0x5C(
 	unsigned char *buf;
 	buf = rpt->buf;
 	
-	if (rpt->len != 24) return TRUE;
+	if (rpt->len != 24) return true;
 	*sv_prn = buf[0];
 	*slot = (unsigned char)((buf[1] & 0x07) + 1);
 	*chan = (unsigned char)(buf[1] >> 3);
@@ -2688,12 +2687,12 @@ rpt_0x5C(
 	*integer_msec_flag = buf[21];
 	*bad_data_flag = buf[22];
 	*data_collect_flag = buf[23];
-	return FALSE;
+	return false;
 }
 
 /**/
 /* over-determined satellite selection for position fixes, PDOP, fix mode */
-short
+bool
 rpt_0x6D(
 	 TSIPPKT *rpt,
 	 unsigned char *manual_mode,
@@ -2711,8 +2710,8 @@ rpt_0x6D(
 	buf = rpt->buf;
 
 	*nsvs = (unsigned char)((buf[0] & 0xF0) >> 4);
-	if ((*nsvs)>8) return TRUE;
-	if (rpt->len != 17 + (*nsvs) ) return TRUE;
+	if ((*nsvs)>8) return true;
+	if (rpt->len != 17 + (*nsvs) ) return true;
 
 	*manual_mode = (unsigned char)(buf[0] & 0x08);
 	*ndim  = (unsigned char)((buf[0] & 0x07));
@@ -2722,12 +2721,12 @@ rpt_0x6D(
 	*tdop = bGetSingle (&buf[13]);
 	for (islot = 0; islot < (*nsvs); islot++)
 		sv_prn[islot] = buf[islot + 17];
-	return FALSE;
+	return false;
 }
 
 /**/
 /* differential fix mode */
-short
+bool
 rpt_0x82(
 	 TSIPPKT *rpt,
 	 unsigned char *diff_mode
@@ -2736,13 +2735,13 @@ rpt_0x82(
 	unsigned char *buf;
 	buf = rpt->buf;
 
-	if (rpt->len != 1) return TRUE;
+	if (rpt->len != 1) return true;
 	*diff_mode = buf[0];
-	return FALSE;
+	return false;
 }
 
 /* position, ECEF double precision */
-short
+bool
 rpt_0x83(
 	 TSIPPKT *rpt,
 	 double ECEF_pos[3],
@@ -2753,17 +2752,17 @@ rpt_0x83(
 	unsigned char *buf;
 	buf = rpt->buf;
 
-	if (rpt->len != 36) return TRUE;
+	if (rpt->len != 36) return true;
 	ECEF_pos[0] = bGetDouble (buf);
 	ECEF_pos[1] = bGetDouble (&buf[8]);
 	ECEF_pos[2] = bGetDouble (&buf[16]);
 	*clock_bias  = bGetDouble (&buf[24]);
 	*time_of_fix = bGetSingle (&buf[32]);
-	return FALSE;
+	return false;
 }
 
 /* position, lat-lon-alt double precision */	
-short
+bool
 rpt_0x84(
 	 TSIPPKT *rpt,
 	 double *lat,
@@ -2776,16 +2775,16 @@ rpt_0x84(
 	unsigned char *buf;
 	buf = rpt->buf;
 
-	if (rpt->len != 36) return TRUE;
+	if (rpt->len != 36) return true;
 	*lat = bGetDouble (buf);
 	*lon = bGetDouble (&buf[8]);
 	*alt = bGetDouble (&buf[16]);
 	*clock_bias = bGetDouble (&buf[24]);
 	*time_of_fix = bGetSingle (&buf[32]);
-	return FALSE;
+	return false;
 }
 
-short
+bool
 rpt_Paly0xBB(
 	     TSIPPKT *rpt,
 	     TSIP_RCVR_CFG *TsipxBB
@@ -2795,8 +2794,8 @@ rpt_Paly0xBB(
 	buf = rpt->buf;
 
 	/* Palisade is inconsistent with other TSIP, which has a length of 40 */
-	/* if (rpt->len != 40) return TRUE; */
-	if (rpt->len != 43) return TRUE;
+	/* if (rpt->len != 40) return true; */
+	if (rpt->len != 43) return true;
 
 	TsipxBB->bSubcode	=  buf[0];
 	TsipxBB->operating_mode	=  buf[1];
@@ -2805,11 +2804,11 @@ rpt_Paly0xBB(
 	TsipxBB->cno_mask	=  bGetSingle (&buf[9]);
 	TsipxBB->dop_mask 	=  bGetSingle (&buf[13]);
 	TsipxBB->dop_switch 	=  bGetSingle (&buf[17]);
-	return FALSE;
+	return false;
 }
 
 /* Receiver serial port configuration */
-short
+bool
 rpt_0xBC(
 	 TSIPPKT *rpt,
 	 unsigned char *port_num,
@@ -2827,7 +2826,7 @@ rpt_0xBC(
 	unsigned char *buf;
 	buf = rpt->buf;
 
-	if (rpt->len != 10) return TRUE;
+	if (rpt->len != 10) return true;
 	*port_num = buf[0];
 	*in_baud = buf[1];
 	*out_baud = buf[2];
@@ -2839,12 +2838,12 @@ rpt_0xBC(
 	*protocols_out = buf[8];
 	*reserved = buf[9];
 
-	return FALSE;
+	return false;
 }
 
 /**** Superpackets ****/
 
-short
+bool
 rpt_0x8F0B(
 	   TSIPPKT *rpt,
 	   unsigned short *event,
@@ -2868,7 +2867,7 @@ rpt_0x8F0B(
 	unsigned char *buf;
 
 	buf = rpt->buf;
-	if (rpt->len != 74) return TRUE;
+	if (rpt->len != 74) return true;
 	*event = bGetShort(&buf[1]);
 	*tow = bGetDouble(&buf[3]);
 	*date = buf[11];
@@ -2885,11 +2884,11 @@ rpt_0x8F0B(
 	*alt = bGetDouble(&buf[58]);
 
 	for (local_index=0; local_index<8; local_index++) sv_id[local_index] = buf[local_index + 66];
-	return FALSE;
+	return false;
 }
 
 /* datum index and coefficients  */
-short
+bool
 rpt_0x8F14(
 	   TSIPPKT *rpt,
 	   short *datum_idx,
@@ -2899,19 +2898,19 @@ rpt_0x8F14(
 	unsigned char *buf;
 	buf = rpt->buf;
 
-	if (rpt->len != 43) return TRUE;
+	if (rpt->len != 43) return true;
 	*datum_idx = bGetShort(&buf[1]);
 	datum_coeffs[0] = bGetDouble (&buf[3]);
 	datum_coeffs[1] = bGetDouble (&buf[11]);
 	datum_coeffs[2] = bGetDouble (&buf[19]);
 	datum_coeffs[3] = bGetDouble (&buf[27]);
 	datum_coeffs[4] = bGetDouble (&buf[35]);
-	return FALSE;
+	return false;
 }
 
 
 /* datum index and coefficients  */
-short
+bool
 rpt_0x8F15(
 	   TSIPPKT *rpt,
 	   short *datum_idx,
@@ -2921,20 +2920,20 @@ rpt_0x8F15(
 	unsigned char *buf;
 	buf = rpt->buf;
 
-	if (rpt->len != 43) return TRUE;
+	if (rpt->len != 43) return true;
 	*datum_idx = bGetShort(&buf[1]);
 	datum_coeffs[0] = bGetDouble (&buf[3]);
 	datum_coeffs[1] = bGetDouble (&buf[11]);
 	datum_coeffs[2] = bGetDouble (&buf[19]);
 	datum_coeffs[3] = bGetDouble (&buf[27]);
 	datum_coeffs[4] = bGetDouble (&buf[35]);
-	return FALSE;
+	return false;
 }
 
 
 #define MAX_LONG  (2147483648.)   /* 2**31 */
 
-short
+bool
 rpt_0x8F20(
 	   TSIPPKT *rpt,
 	   unsigned char *info,
@@ -2963,7 +2962,7 @@ rpt_0x8F20(
 
 	buf = rpt->buf;
 
-	if (rpt->len != 56) return TRUE;
+	if (rpt->len != 56) return true;
 
 	vel_scale = (buf[24]&1)? 0.020 : 0.005;
 	vel_enu[0] = bGetShort (buf+2)*vel_scale;
@@ -2991,10 +2990,10 @@ rpt_0x8F20(
 		iode = buf[33+2*isv];
 		sv_IODC[isv] = (short)(iode | ((prnx>>6)<<8));
 	}
-	return FALSE;
+	return false;
 }
 
-short
+bool
 rpt_0x8F41(
 	   TSIPPKT *rpt,
 	   unsigned char *bSearchRange,
@@ -3008,7 +3007,7 @@ rpt_0x8F41(
 	   unsigned short *iTestCodeId
 	   )
 {
-	if (rpt->len != 17) return FALSE;
+	if (rpt->len != 17) return false;
 	*bSearchRange = rpt->buf[1];
 	*bBoardOptions = rpt->buf[2];
 	*iiSerialNumber = bGetLong(&rpt->buf[3]);
@@ -3019,10 +3018,10 @@ rpt_0x8F41(
 	*fOscOffset = bGetSingle(&rpt->buf[11]);
 	*iTestCodeId = bGetShort(&rpt->buf[15]);
 /*	Tsipx8E41Data = *Tsipx8E41; */
-	return TRUE;
+	return true;
 }
 
-short
+bool
 rpt_0x8F42(
 	   TSIPPKT *rpt,
 	   unsigned char *bProdOptionsPre,
@@ -3035,7 +3034,7 @@ rpt_0x8F42(
 	   unsigned short *iKey
 	   )
 {
-	if (rpt->len != 19) return FALSE;
+	if (rpt->len != 19) return false;
 	*bProdOptionsPre = rpt->buf[1];
 	*bProdNumberExt = rpt->buf[2];
 	*iCaseSerialNumberPre = bGetShort(&rpt->buf[3]);
@@ -3044,22 +3043,22 @@ rpt_0x8F42(
 	*iPremiumOptions = bGetShort(&rpt->buf[13]);
 	*iMachineID = bGetShort(&rpt->buf[15]);
 	*iKey = bGetShort(&rpt->buf[17]);
-	return TRUE;
+	return true;
 }
 
-short
+bool
 rpt_0x8F45(
 	   TSIPPKT *rpt,
 	   unsigned char *bSegMask
 	   )
 {
-	if (rpt->len != 2) return FALSE;
+	if (rpt->len != 2) return false;
 	*bSegMask = rpt->buf[1];
-	return TRUE;
+	return true;
 }
 
 /* Stinger PPS definition */
-short
+bool
 rpt_0x8F4A_16(
 	      TSIPPKT *rpt,
 	      unsigned char *pps_enabled,
@@ -3073,16 +3072,16 @@ rpt_0x8F4A_16(
 	    *buf;
 
 	buf = rpt->buf;
-	if (rpt->len != 16) return TRUE;
+	if (rpt->len != 16) return true;
 	*pps_enabled = buf[1];
 	*pps_timebase = buf[2];
 	*pos_polarity = buf[3];
 	*pps_offset = bGetDouble(&buf[4]);
 	*bias_unc_threshold = bGetSingle(&buf[12]);
-	return FALSE;
+	return false;
 }
 
-short
+bool
 rpt_0x8F4B(
 	   TSIPPKT *rpt,
 	   unsigned long *decorr_max
@@ -3092,12 +3091,12 @@ rpt_0x8F4B(
 	    *buf;
 
 	buf = rpt->buf;
-	if (rpt->len != 5) return TRUE;
+	if (rpt->len != 5) return true;
 	*decorr_max = bGetLong(&buf[1]);
-	return FALSE;
+	return false;
 }
 
-short
+bool
 rpt_0x8F4D(
 	   TSIPPKT *rpt,
 	   unsigned long *event_mask
@@ -3107,12 +3106,12 @@ rpt_0x8F4D(
 	    *buf;
 
 	buf = rpt->buf;
-	if (rpt->len != 5) return TRUE;
+	if (rpt->len != 5) return true;
 	*event_mask = bGetULong (&buf[1]);
-	return FALSE;
+	return false;
 }
 
-short
+bool
 rpt_0x8FA5(
 	   TSIPPKT *rpt,
 	   unsigned char *spktmask
@@ -3122,15 +3121,15 @@ rpt_0x8FA5(
 	    *buf;
 
 	buf = rpt->buf;
-	if (rpt->len != 5) return TRUE;
+	if (rpt->len != 5) return true;
 	spktmask[0] = buf[1];
 	spktmask[1] = buf[2];
 	spktmask[2] = buf[3];
 	spktmask[3] = buf[4];
-	return FALSE;
+	return false;
 }
 
-short
+bool
 rpt_0x8FAD(
 	   TSIPPKT *rpt,
 	   unsigned short *COUNT,
@@ -3145,7 +3144,7 @@ rpt_0x8FAD(
 	   unsigned char *Flags
 	   )
 {
-	if (rpt->len != 22) return TRUE;
+	if (rpt->len != 22) return true;
 
 	*COUNT = bGetUShort(&rpt->buf[1]);
 	*FracSec = bGetDouble(&rpt->buf[3]);
@@ -3157,7 +3156,7 @@ rpt_0x8FAD(
 	*Year = bGetUShort(&rpt->buf[16]);
 	*Status = rpt->buf[18];
 	*Flags = rpt->buf[19];
-	return FALSE;
+	return false;
 }
 
 
@@ -4425,27 +4424,27 @@ rpt_rcvr_serial_port_config(
 			parity_text[parity],
 			stop_bits=1);
 	pbuf += snprintf(pbuf, OBLEN, "\n             Input protocols: ");
-	known = FALSE;
+	known = false;
 	if (protocols_in&B_TSIP)
 	{
 		pbuf += snprintf(pbuf, OBLEN, "%s ", protocols_in_text[1]);
-		known = TRUE;
+		known = true;
 	}
-	if (known == FALSE) pbuf += snprintf(pbuf, OBLEN, "No known");
+	if (!known) pbuf += snprintf(pbuf, OBLEN, "No known");
 
 	pbuf += snprintf(pbuf, OBLEN, "\n             Output protocols: ");
-	known = FALSE;
+	known = false;
 	if (protocols_out&B_TSIP)
 	{
 		pbuf += snprintf(pbuf, OBLEN, "%s ", protocols_out_text[1]);
-		known = TRUE;
+		known = true;
 	}
 	if (protocols_out&B_NMEA)
 	{
 		pbuf += snprintf(pbuf, OBLEN, "%s ", protocols_out_text[2]);
-		known = TRUE;
+		known = true;
 	}
-	if (known == FALSE) pbuf += snprintf(pbuf, OBLEN, "No known");
+	if (!known) pbuf += snprintf(pbuf, OBLEN, "No known");
 	reserved = reserved;
 
 }
@@ -5173,7 +5172,7 @@ TranslateTSIPReportToText(
 	parsed = GOOD_PARSE;
 
 	/* print a header if this is the first of a series of messages */
-	pbuf += print_msg_table_header (rpt->code, pbuf, FALSE);
+	pbuf += print_msg_table_header (rpt->code, pbuf, false);
 
 	/* process incoming TSIP report according to code */
 	switch (rpt->code)

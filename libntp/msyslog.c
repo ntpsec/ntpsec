@@ -24,10 +24,10 @@
 #endif
 
 
-int	syslogit = TRUE;
-int	msyslog_term = FALSE;	/* duplicate to stdout/err */
-int	msyslog_term_pid = TRUE;
-int	msyslog_include_timestamp = TRUE;
+bool	syslogit = true;
+bool	msyslog_term = false;	/* duplicate to stdout/err */
+bool	msyslog_term_pid = true;
+bool	msyslog_include_timestamp = true;
 FILE *	syslog_file;
 char *	syslog_fname;
 char *	syslog_abs_fname;
@@ -130,8 +130,8 @@ addto_syslog(
 	const char	nl[] = "\n";
 	const char	empty[] = "";
 	FILE *		term_file;
-	int		log_to_term;
-	int		log_to_file;
+	bool		log_to_term;
+	bool		log_to_file;
 	int		pid;
 	const char *	nl_or_empty;
 	const char *	human_time;
@@ -147,19 +147,19 @@ addto_syslog(
 	}
 
 	log_to_term = msyslog_term;
-	log_to_file = FALSE;
+	log_to_file = false;
 #if !defined(VMS) && !defined(SYS_VXWORKS)
 	if (syslogit)
 		syslog(level, "%s", msg);
 	else
 #endif
 		if (syslog_file != NULL)
-			log_to_file = TRUE;
+			log_to_file = true;
 		else
-			log_to_term = TRUE;
+			log_to_term = true;
 #if DEBUG
 	if (debug > 0)
-		log_to_term = TRUE;
+		log_to_term = true;
 #endif
 	if (!(log_to_file || log_to_term))
 		return;
@@ -350,7 +350,7 @@ init_logging(
 	int		is_daemon
 	)
 {
-	static int	was_daemon;
+	static bool	was_daemon;
 	const char *	cp;
 	const char *	pname;
 
@@ -388,7 +388,7 @@ init_logging(
 #if !defined(VMS)
 
 	if (is_daemon)
-		was_daemon = TRUE;
+		was_daemon = true;
 # ifndef LOG_DAEMON
 	openlog(progname, LOG_PID);
 # else /* LOG_DAEMON */
@@ -510,7 +510,7 @@ change_logfile(
 		syslog_fname = estrdup(log_fname);
 		syslog_abs_fname = abs_fname;
 	}
-	syslogit = FALSE;
+	syslogit = false;
 
 	return 0;
 }
@@ -538,7 +538,7 @@ setup_logfile(
 	)
 {
 	if (NULL == syslog_fname && NULL != name) {
-		if (-1 == change_logfile(name, TRUE))
+		if (-1 == change_logfile(name, true))
 			msyslog(LOG_ERR, "Cannot open log file %s, %m",
 				name);
 		return ;
@@ -546,7 +546,7 @@ setup_logfile(
 	if (NULL == syslog_fname)
 		return;
 
-	if (-1 == change_logfile(syslog_fname, FALSE))
+	if (-1 == change_logfile(syslog_fname, false))
 		msyslog(LOG_ERR, "Cannot reopen log file %s, %m",
 			syslog_fname);
 }

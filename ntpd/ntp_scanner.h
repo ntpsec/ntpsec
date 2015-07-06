@@ -96,7 +96,7 @@ struct LCPOS {
 struct FILE_INFO {
 	struct FILE_INFO * st_next;	/* next on stack */
 	FILE *		   fpi;		/* File Descriptor */
-	int                force_eof;	/* locked or not */
+	bool               force_eof;	/* locked or not */
 	int                backch;	/* ungetch buffer */
 	
 	struct LCPOS       curpos;	/* current scan position */
@@ -116,7 +116,7 @@ extern config_tree cfgt;	  /* Parser output stored here */
 /* VARIOUS EXTERNAL DECLARATIONS
  * -----------------------------
  */
-extern int old_config_style;
+extern bool old_config_style;
 
 /* VARIOUS SUBROUTINE DECLARATIONS
  * -------------------------------
@@ -126,17 +126,17 @@ extern char *quote_if_needed(char *str);
 int yylex(void);
 
 /* managing the input source stack itself */
-extern int/*BOOL*/ lex_init_stack(const char * path, const char * mode);
+extern bool lex_init_stack(const char * path, const char * mode);
 extern void        lex_drop_stack(void);
-extern int/*BOOL*/ lex_flush_stack(void);
+extern bool lex_flush_stack(void);
 
 /* add/remove a nested input source */
-extern int/*BOOL*/ lex_push_file(const char * path, const char * mode);
-extern int/*BOOL*/ lex_pop_file(void);
+extern bool lex_push_file(const char * path, const char * mode);
+extern bool lex_pop_file(void);
 
 /* input stack state query functions */
 extern size_t      lex_level(void);
-extern int/*BOOL*/ lex_from_file(void);
+extern bool lex_from_file(void);
 extern struct FILE_INFO * lex_current(void);
 
 #endif	/* NTP_SCANNER_H */

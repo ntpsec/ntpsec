@@ -122,7 +122,7 @@ copy_addrinfo_impl(
 #endif
 	)
 {
-	return copy_addrinfo_common(src, TRUE
+	return copy_addrinfo_common(src, true
 #ifdef EREALLOC_CALLSITE
 					      ,
 				    caller_file, caller_line
@@ -141,7 +141,7 @@ copy_addrinfo_list_impl(
 #endif
 	)
 {
-	return copy_addrinfo_common(src, FALSE
+	return copy_addrinfo_common(src, false
 #ifdef EREALLOC_CALLSITE
 					      ,
 				    caller_file, caller_line
@@ -188,7 +188,7 @@ copy_addrinfo_common(
 	octets = elements * (sizeof(*ai_cpy) + sizeof(*psau));
 	octets += canons_octets;
 
-	dst = erealloczsite(NULL, octets, 0, TRUE, caller_file,
+	dst = erealloczsite(NULL, octets, 0, true, caller_file,
 			    caller_line);
 	ai_cpy = dst;
 	psau = (void *)(ai_cpy + elements);

@@ -16,7 +16,7 @@
 typedef char libbufstr[LIB_BUFLENGTH];
 extern libbufstr lib_stringbuf[LIB_NUMBUF];
 extern int lib_nextbuf;
-extern int lib_inited;
+extern bool lib_inited;
 
 
 /*
@@ -27,6 +27,6 @@ extern int lib_inited;
 		ZERO(lib_stringbuf[lib_nextbuf]);		\
 		(bufp) = &lib_stringbuf[lib_nextbuf++][0];	\
 		lib_nextbuf %= COUNTOF(lib_stringbuf);		\
-	} while (FALSE)
+	} while (false)
 
 #endif	/* LIB_STRBUF_H */

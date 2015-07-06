@@ -125,7 +125,7 @@ struct hpgpsunit {
 /*
  * Function prototypes
  */
-static	int	hpgps_start	(int, struct peer *);
+static	bool	hpgps_start	(int, struct peer *);
 static	void	hpgps_shutdown	(int, struct peer *);
 static	void	hpgps_receive	(struct recvbuf *);
 static	void	hpgps_poll	(int, struct peer *);
@@ -147,7 +147,7 @@ struct	refclock refclock_hpgps = {
 /*
  * hpgps_start - open the devices and initialize data for processing
  */
-static int
+static bool
 hpgps_start(
 	int unit,
 	struct peer *peer
@@ -174,7 +174,7 @@ hpgps_start(
 	fd = refclock_open(device, speed, ldisc);
 	if (fd <= 0)
 		/* coverity[leaked_handle] */
-		return (0);
+		return false;
 	/*
 	 * Allocate and initialize unit structure
 	 */
@@ -188,7 +188,7 @@ hpgps_start(
 		close(fd);
 		pp->io.fd = -1;
 		free(up);
-		return (0);
+		return false;
 	}
 	pp->unitptr = up;
 
@@ -213,7 +213,7 @@ hpgps_start(
 	if (write(pp->io.fd, "*IDN?\r:PTIME:TZONE?\r", 20) != 20)
 	    refclock_report(peer, CEVNT_FAULT);
 
-	return (1);
+	return true;
 }
 
 

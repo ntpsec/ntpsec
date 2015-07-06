@@ -126,7 +126,7 @@ struct arbunit {
 /*
  * Function prototypes
  */
-static	int	arb_start	(int, struct peer *);
+static	bool	arb_start	(int, struct peer *);
 static	void	arb_shutdown	(int, struct peer *);
 static	void	arb_receive	(struct recvbuf *);
 static	void	arb_poll	(int, struct peer *);
@@ -148,7 +148,7 @@ struct	refclock refclock_arbiter = {
 /*
  * arb_start - open the devices and initialize data for processing
  */
-static int
+static bool
 arb_start(
 	int unit,
 	struct peer *peer
@@ -166,7 +166,7 @@ arb_start(
 	fd = refclock_open(device, SPEED232, LDISC_CLK);
 	if (fd <= 0)
 		/* coverity[leaked_handle] */
-		return (0);
+		return false;
 
 	/*
 	 * Allocate and initialize unit structure
@@ -181,7 +181,7 @@ arb_start(
 		close(fd);
 		pp->io.fd = -1;
 		free(up);
-		return (0);
+		return false;
 	}
 	pp->unitptr = up;
 
@@ -196,13 +196,13 @@ arb_start(
 		close(fd);
 		pp->io.fd = -1;
 		free(up);
-		return (0);
+		return false;
 	}
 #ifdef DEBUG
 	if(debug) { printf("arbiter: mode = %d.\n", peer->MODE); }
 #endif
 	IGNORE(write(pp->io.fd, COMMAND_HALT_BCAST, 2));
-	return (1);
+	return true;
 }
 
 

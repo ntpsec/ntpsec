@@ -193,12 +193,12 @@ static  u_short		sys_interphase = 0;
 
 static endpt *	new_interface(endpt *);
 static void	add_interface(endpt *);
-static int	update_interfaces(u_short, interface_receiver_t,
+static bool	update_interfaces(u_short, interface_receiver_t,
 				  void *);
 static void	remove_interface(endpt *);
 static endpt *	create_interface(u_short, endpt *);
 
-static int	is_wildcard_addr	(const sockaddr_u *);
+static bool	is_wildcard_addr	(const sockaddr_u *);
 
 /*
  * Multicast functions
@@ -261,9 +261,9 @@ static void remove_asyncio_reader (struct asyncio_reader *);
 
 static void init_async_notifications (void);
 
-static	int	addr_eqprefix	(const sockaddr_u *, const sockaddr_u *,
+static	bool	addr_eqprefix	(const sockaddr_u *, const sockaddr_u *,
 				 int);
-static int	addr_samesubnet	(const sockaddr_u *, const sockaddr_u *,
+static  bool	addr_samesubnet	(const sockaddr_u *, const sockaddr_u *,
 				 const sockaddr_u *, const sockaddr_u *);
 static	int	create_sockets	(u_short);
 static	SOCKET	open_socket	(sockaddr_u *, int, int, endpt *);
@@ -293,7 +293,7 @@ static endpt *	wildipv6;
 #ifdef SYS_WINNT
 int accept_wildcard_if_for_winnt;
 #else
-const int accept_wildcard_if_for_winnt = FALSE;
+const int accept_wildcard_if_for_winnt = false;
 #endif
 
 static void	add_fd_to_list		(SOCKET, enum desc_type);
@@ -637,7 +637,7 @@ remove_asyncio_reader(
 
 
 /* compare two sockaddr prefixes */
-static int
+static bool
 addr_eqprefix(
 	const sockaddr_u *	a,
 	const sockaddr_u *	b,
@@ -656,12 +656,12 @@ addr_eqprefix(
 	memcpy(&isc_sa.type, b, min(sizeof(isc_sa.type), sizeof(*b)));
 	isc_netaddr_fromsockaddr(&isc_b, &isc_sa);
 
-	return (int)isc_netaddr_eqprefix(&isc_a, &isc_b,
+	return isc_netaddr_eqprefix(&isc_a, &isc_b,
 					 (u_int)prefixlen);
 }
 
 
-static int
+static bool
 addr_samesubnet(
 	const sockaddr_u *	a,
 	const sockaddr_u *	a_mask,
@@ -682,7 +682,7 @@ addr_samesubnet(
 	 * the masks also validates the address's families match.
 	 */
 	if (!SOCK_EQ(a_mask, b_mask))
-		return FALSE;
+		return false;
 
 	if (IS_IPV6(a)) {
 		loops = sizeof(NSRCADR6(a)) / sizeof(*pa);
@@ -697,9 +697,9 @@ addr_samesubnet(
 	}
 	for (pa_limit = pa + loops; pa < pa_limit; pa++, pb++, pm++)
 		if ((*pa & *pm) != (*pb & *pm))
-			return FALSE;
+			return false;
 
-	return TRUE;
+	return true;
 }
 
 
@@ -742,7 +742,7 @@ is_ip_address(
 			AF(addr) = AF_INET;
 			SET_ADDR4N(addr, in4.s_addr);
 
-			return TRUE;
+			return true;
 		}
 
 	if (AF_UNSPEC == af || AF_INET6 == af)
@@ -765,13 +765,13 @@ is_ip_address(
 				SET_SCOPE(addr, resaddr6->sin6_scope_id);
 
 				freeaddrinfo(result);
-				return TRUE;
+				return true;
 			}
 		}
 	/*
 	 * If we got here it was not an IP address
 	 */
-	return FALSE;
+	return false;
 }
 
 
@@ -858,13 +858,13 @@ add_interface(
 	endpt *		scan_next;
 	endpt *		unlinked;
 	sockaddr_u *	addr;
-	int		ep_local;
-	int		scan_local;
-	int		same_subnet;
-	int		ep_univ_iid;	/* iface ID from MAC address */
-	int		scan_univ_iid;	/* see RFC 4291 */
-	int		ep_privacy;	/* random local iface ID */
-	int		scan_privacy;	/* see RFC 4941 */
+	bool		ep_local;
+	bool		scan_local;
+	bool		same_subnet;
+	bool		ep_univ_iid;	/* iface ID from MAC address */
+	bool		scan_univ_iid;	/* see RFC 4291 */
+	bool		ep_privacy;	/* random local iface ID */
+	bool		scan_privacy;	/* see RFC 4941 */
 	int		rc;
 
 	/* Calculate the refid */
@@ -892,9 +892,9 @@ add_interface(
 		ep_univ_iid = IS_IID_UNIV(&ep->sin);
 		ep_privacy = !!(INT_PRIVACY & ep->flags);
 	} else {
-		ep_local = FALSE;
-		ep_univ_iid = FALSE;
-		ep_privacy = FALSE;
+		ep_local = false;
+		ep_univ_iid = false;
+		ep_privacy = false;
 	}
 	DPRINTF(4, ("add_interface mcast-capable %s%s%s%s\n",
 		    stoa(&ep->sin),
@@ -929,9 +929,9 @@ add_interface(
 			scan_univ_iid = IS_IID_UNIV(addr);
 			scan_privacy = !!(INT_PRIVACY & scan->flags);
 		} else {
-			scan_local = FALSE;
-			scan_univ_iid = FALSE;
-			scan_privacy = FALSE;
+			scan_local = false;
+			scan_univ_iid = false;
+			scan_privacy = false;
 		}
 		DPRINTF(4, ("add_interface mcast-capable scan %s%s%s%s\n",
 			    stoa(&scan->sin),
@@ -1512,7 +1512,7 @@ convert_isc_if(
  * this can be mitigated by re-binding
  * the socket.
  */
-static int
+static bool
 refresh_interface(
 	struct interface * interface
 	)
@@ -1538,7 +1538,7 @@ refresh_interface(
 		interface->last_ttl = 0;
 		return (interface->fd != INVALID_SOCKET);
 	} else
-		return 0;	/* invalid sockets are not refreshable */
+		return false;	/* invalid sockets are not refreshable */
 #else /* !OS_MISSES_SPECIFIC_ROUTE_UPDATES */
 	return (interface->fd != INVALID_SOCKET);
 #endif /* !OS_MISSES_SPECIFIC_ROUTE_UPDATES */
@@ -1552,7 +1552,7 @@ interface_update(
 	interface_receiver_t	receiver,
 	void *			data)
 {
-	int new_interface_found;
+	bool new_interface_found;
 
 	if (disable_dynamic_updates)
 		return;
@@ -1598,20 +1598,20 @@ sau_from_netaddr(
 }
 
 
-static int
+static bool
 is_wildcard_addr(
 	const sockaddr_u *psau
 	)
 {
 	if (IS_IPV4(psau) && !NSRCADR(psau))
-		return 1;
+		return true;
 
 #ifdef INCLUDE_IPV6_SUPPORT
 	if (IS_IPV6(psau) && S_ADDR6_EQ(psau, &in6addr_any))
-		return 1;
+		return true;
 #endif
 
-	return 0;
+	return false;
 }
 
 
@@ -1735,7 +1735,7 @@ is_valid(
  *
  */
 
-static int
+static bool
 update_interfaces(
 	u_short			port,
 	interface_receiver_t	receiver,
@@ -1761,12 +1761,12 @@ update_interfaces(
 	 * - update those that are found
 	 */
 
-	new_interface_found = FALSE;
+	new_interface_found = false;
 	iter = NULL;
 	result = isc_interfaceiter_create(mctx, &iter);
 
 	if (result != ISC_R_SUCCESS)
-		return 0;
+		return false;
 
 	/*
 	 * Toggle system interface scan phase to find untouched
@@ -1936,7 +1936,7 @@ update_interfaces(
 				if (receiver != NULL)
 					(*receiver)(data, &ifi);
 
-				new_interface_found = TRUE;
+				new_interface_found = true;
 				DPRINT_INTERFACE(3,
 					(ep, "updating ",
 					 " new - created\n"));
@@ -3727,11 +3727,11 @@ input_handler(
 				clk = refnumtoa(&rp->srcclock->srcadr);
 				errno = saved_errno;
 				msyslog(LOG_ERR, "%s read: %m", clk);
-				maintain_activefds(fd, TRUE);
+				maintain_activefds(fd, true);
 			} else if (0 == buflen) {
 				clk = refnumtoa(&rp->srcclock->srcadr);
 				msyslog(LOG_ERR, "%s read EOF", clk);
-				maintain_activefds(fd, TRUE);
+				maintain_activefds(fd, true);
 			} else {
 				/* drain any remaining refclock input */
 				do {
@@ -4074,8 +4074,8 @@ calc_addr_distance(
 	u_int32	a1val;
 	u_int32	a2val;
 	u_int32	v4dist;
-	int	found_greater;
-	int	a1_greater;
+	bool	found_greater;
+	bool	a1_greater;
 	int	i;
 
 	NTP_REQUIRE(AF(a1) == AF(a2));
@@ -4095,12 +4095,12 @@ calc_addr_distance(
 		return;
 	}
 
-	found_greater = FALSE;
-	a1_greater = FALSE;	/* suppress pot. uninit. warning */
+	found_greater = false;
+	a1_greater = false;	/* suppress pot. uninit. warning */
 	for (i = 0; i < (int)sizeof(NSRCADR6(a1)); i++) {
 		if (!found_greater &&
 		    NSRCADR6(a1)[i] != NSRCADR6(a2)[i]) {
-			found_greater = TRUE;
+			found_greater = true;
 			a1_greater = (NSRCADR6(a1)[i] > NSRCADR6(a2)[i]);
 		}
 		if (!found_greater) {
@@ -4133,21 +4133,22 @@ cmp_addr_distance(
 
 	if (IS_IPV4(d1)) {
 		if (SRCADR(d1) < SRCADR(d2))
-			return -1;
+			return COMPARE_LESSTHAN;
 		else if (SRCADR(d1) == SRCADR(d2))
-			return 0;
+			return COMPARE_EQUAL;
 		else
-			return 1;
+			return COMPARE_GREATERTHAN;
 	}
 
 	for (i = 0; i < (int)sizeof(NSRCADR6(d1)); i++) {
 		if (NSRCADR6(d1)[i] < NSRCADR6(d2)[i])
-			return -1;
+			return COMPARE_LESSTHAN;
 		else if (NSRCADR6(d1)[i] > NSRCADR6(d2)[i])
-			return 1;
+
+		    return COMPARE_GREATERTHAN;
 	}
 
-	return 0;
+	return COMPARE_EQUAL;
 }
 
 
@@ -4299,7 +4300,7 @@ io_clr_stats(void)
  * io_addclock - add a reference clock to the list and arrange that we
  *				 get SIGIO interrupts from it.
  */
-int
+bool
 io_addclock(
 	struct refclockio *rio
 	)
@@ -4310,17 +4311,17 @@ io_addclock(
 	 * Stuff the I/O structure in the list and mark the descriptor
 	 * in use.  There is a harmless (I hope) race condition here.
 	 */
-	rio->active = TRUE;
+	rio->active = true;
 
 # ifdef HAVE_SIGNALED_IO
 	if (init_clock_sig(rio)) {
 		UNBLOCKIO();
-		return 0;
+		return false;
 	}
 # elif defined(HAVE_IO_COMPLETION_PORT)
 	if (io_completion_port_add_clock_io(rio)) {
 		UNBLOCKIO();
-		return 0;
+		return false;
 	}
 # endif
 
@@ -4335,7 +4336,7 @@ io_addclock(
 	add_fd_to_list(rio->fd, FD_TYPE_FILE);
 
 	UNBLOCKIO();
-	return 1;
+	return true;
 }
 
 
@@ -4354,7 +4355,7 @@ io_closeclock(
 	/*
 	 * Remove structure from the list
 	 */
-	rio->active = FALSE;
+	rio->active = false;
 	UNLINK_SLIST(unlinked, refio, rio, next, struct refclockio);
 	if (NULL != unlinked) {
 		purge_recv_buffers_for_fd(rio->fd);

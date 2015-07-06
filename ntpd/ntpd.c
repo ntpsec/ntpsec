@@ -114,12 +114,12 @@ int priority_done = 2;		/* 0 - Set priority */
 				/* 2 - Don't set priority */
 				/* 1 and 2 are pretty much the same */
 
-int listen_to_virtual_ips = TRUE;
+bool listen_to_virtual_ips = true;
 
 /*
  * No-fork flag.  If set, we do not become a background daemon.
  */
-int nofork;			/* Fork by default */
+bool nofork;			/* Fork by default */
 
 #ifdef HAVE_DNSREGISTRATION
 /*
@@ -127,13 +127,13 @@ int nofork;			/* Fork by default */
  * after we have synched the first time. If the attempt fails, then try again once per 
  * minute for up to 5 times. After all, we may be starting before mDNS.
  */
-int mdnsreg = FALSE;
+bool mdnsreg = false;
 int mdnstries = 5;
 #endif  /* HAVE_DNSREGISTRATION */
 
 #ifdef HAVE_DROPROOT
-int droproot;
-int root_dropped;
+bool droproot;
+bool root_dropped;
 char *user;		/* User to switch to */
 char *group;		/* group to switch to */
 const char *chrootdir;	/* directory to chroot to */
@@ -152,7 +152,7 @@ int	waitsync_fd_to_close = -1;	/* -w/--wait-sync */
  * Initializing flag.  All async routines watch this and only do their
  * thing when it is clear.
  */
-int initializing;
+bool initializing;
 
 /*
  * Version declaration
@@ -161,7 +161,7 @@ extern const char *Version;
 
 char const *progname;
 
-int was_alarmed;
+bool was_alarmed;
 
 #ifdef DECL_SYSCALL
 /*
@@ -409,7 +409,7 @@ ntpdmain(
 	saved_argc = argc;
 	saved_argv = argv;
 	progname = argv[0];
-	initializing = TRUE;		/* mark that we are initializing */
+	initializing = true;		/* mark that we are initializing */
 	parse_cmdline_opts(&argc, &argv);
 # ifdef DEBUG
 	debug = OPT_VALUE_SET_DEBUG_LEVEL;
@@ -421,20 +421,20 @@ ntpdmain(
 	    || debug
 # endif
 	    || HAVE_OPT(SAVECONFIGQUIT))
-		nofork = TRUE;
+		nofork = true;
 
-	init_logging(progname, NLOG_SYNCMASK, TRUE);
+	init_logging(progname, NLOG_SYNCMASK, true);
 	/* honor -l/--logfile option to log to a file */
 	if (HAVE_OPT(LOGFILE)) {
 		logfilename = OPT_ARG(LOGFILE);
-		syslogit = FALSE;
-		change_logfile(logfilename, FALSE);
+		syslogit = false;
+		change_logfile(logfilename, false);
 	} else {
 		logfilename = NULL;
 		if (nofork)
-			msyslog_term = TRUE;
+			msyslog_term = true;
 		if (HAVE_OPT(SAVECONFIGQUIT))
-			syslogit = FALSE;
+			syslogit = false;
 	}
 	msyslog(LOG_NOTICE, "%s: Starting", Version);
 
@@ -467,7 +467,7 @@ ntpdmain(
 # if !defined(MPE)
 	uid = getuid();
 	if (uid && !HAVE_OPT( SAVECONFIGQUIT )) {
-		msyslog_term = TRUE;
+		msyslog_term = true;
 		msyslog(LOG_ERR,
 			"must be run as root, not uid %ld", (long)uid);
 		exit(1);
@@ -487,7 +487,7 @@ ntpdmain(
  * Enable mDNS registrations?
  */
 	if (HAVE_OPT( MDNS )) {
-		mdnsreg = TRUE;
+		mdnsreg = true;
 	}
 #endif  /* HAVE_DNSREGISTRATION */
 
@@ -531,7 +531,7 @@ ntpdmain(
 			break;
 		}
 		/* -w requires a fork() even with debug > 0 */
-		nofork = FALSE;
+		nofork = false;
 		if (pipe(pipe_fds)) {
 			exit_code = (errno) ? errno : -1;
 			msyslog(LOG_ERR,
@@ -585,13 +585,13 @@ ntpdmain(
 		if (syslog_file != NULL) {
 			fclose(syslog_file);
 			syslog_file = NULL;
-			syslogit = TRUE;
+			syslogit = true;
 		}
 		close_all_except(waitsync_fd_to_close);
 		INSIST(0 == open("/dev/null", 0) && 1 == dup2(0, 1) \
 			&& 2 == dup2(0, 2));
 
-		init_logging(progname, 0, TRUE);
+		init_logging(progname, 0, true);
 		/* we lost our logfile (if any) daemonizing */
 		setup_logfile(logfilename);
 
@@ -714,7 +714,7 @@ ntpdmain(
 
 	loop_config(LOOP_DRIFTINIT, 0);
 	report_event(EVNT_SYSRESTART, NULL, NULL);
-	initializing = FALSE;
+	initializing = false;
 
 # ifdef HAVE_DROPROOT
 	if (droproot) {
@@ -894,7 +894,7 @@ getgroup:
 		priv_freeset(lowprivs);
 		priv_freeset(highprivs);
 #  endif /* HAVE_SOLARIS_PRIVS */
-		root_dropped = TRUE;
+		root_dropped = true;
 		fork_deferred_worker();
 	}	/* if (droproot) */
 # endif	/* HAVE_DROPROOT */
@@ -1010,12 +1010,12 @@ int scmp_sc[] = {
 # else /* normal I/O */
 
 	BLOCK_IO_AND_ALARM();
-	was_alarmed = FALSE;
+	was_alarmed = false;
 
 	for (;;) {
 		if (alarm_flag) {	/* alarmed? */
-			was_alarmed = TRUE;
-			alarm_flag = FALSE;
+			was_alarmed = true;
+			alarm_flag = false;
 		}
 
 		if (!was_alarmed && !has_full_recv_buffer()) {
@@ -1026,8 +1026,8 @@ int scmp_sc[] = {
 		}
 
 		if (alarm_flag) {	/* alarmed? */
-			was_alarmed = TRUE;
-			alarm_flag = FALSE;
+			was_alarmed = true;
+			alarm_flag = false;
 		}
 
 		if (was_alarmed) {
@@ -1037,7 +1037,7 @@ int scmp_sc[] = {
 			 * to process expiry.
 			 */
 			timer();
-			was_alarmed = FALSE;
+			was_alarmed = false;
 			BLOCK_IO_AND_ALARM();
 		}
 
@@ -1055,15 +1055,15 @@ int scmp_sc[] = {
 			rbuf = get_full_recv_buffer();
 			while (rbuf != NULL) {
 				if (alarm_flag) {
-					was_alarmed = TRUE;
-					alarm_flag = FALSE;
+					was_alarmed = true;
+					alarm_flag = false;
 				}
 				UNBLOCK_IO_AND_ALARM();
 
 				if (was_alarmed) {
 					/* avoid timer starvation during lengthy I/O handling */
 					timer();
-					was_alarmed = FALSE;
+					was_alarmed = false;
 				}
 
 				/*
@@ -1116,7 +1116,7 @@ int scmp_sc[] = {
 				}
 			} else {
 				msyslog(LOG_INFO, "mDNS service registered.");
-				mdnsreg = FALSE;
+				mdnsreg = false;
 			}
 		}
 # endif /* HAVE_DNSREGISTRATION */

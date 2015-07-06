@@ -299,7 +299,7 @@ int ntpq_closehost(void)
  *			been returned.
  ****************************************************************************/
  
- int  ntpq_read_associations ( u_short resultbuf[], int max_entries )
+int  ntpq_read_associations ( u_short resultbuf[], int max_entries )
 {
     int i = 0;
 
@@ -545,19 +545,19 @@ ntpq_read_sysvars(
  *	- none -
  *
  * Returns:
- *	int		nonzero if the variable set could be read
+ *	bool		true if the variable set could be read
  * 			- OR - 
- *			0 (zero) if an error occured and the sysvars
+ *			false (zero) if an error occured and the sysvars
  *			could not be read
  ****************************************************************************/
-int
+bool
 ntpq_get_sysvars(void)
 {
 	sysvarlen = ntpq_read_sysvars(sysvars, sizeof(sysvars));
 	if (sysvarlen <= 0)
-		return 0;
+		return false;
 	else
-		return 1;
+		return true;
 }
 
 
@@ -603,12 +603,12 @@ int ntpq_get_peervar( const char *varname, char *varvalue, int maxlen)
  *	associd		int	requested associaton ID 
  *
  * Returns:
- *	int		1 (one) if the peervars have been read
+ *	bool		true if the peervars have been read
  * 			- OR - 
- *			0 (zero) if an error occured and the variable set
+ *			false if an error occured and the variable set
  *			could not be read
  ****************************************************************************/
-int
+bool
 ntpq_get_assoc_peervars(
 	associd_t associd
 	)
@@ -618,11 +618,11 @@ ntpq_get_assoc_peervars(
 	if (peervarlen <= 0) {
 		peervar_assoc = 0;
 
-		return 0;
+		return false;
 	}
 	peervar_assoc = associd;
 
-	return 1;
+	return true;
 }
 
 
@@ -747,24 +747,24 @@ ntpq_get_assoc_clocktype(
  *	associd		int	requested associaton ID 
  *
  * Returns:
- *	int		1 (one) if the clockvars have been read
+ *	bool		true if the clockvars have been read
  * 			- OR - 
- *			0 (zero) if an error occured and the variable set
+ *			false if an error occured and the variable set
  *			could not be read
  ****************************************************************************/
-int  ntpq_get_assoc_clockvars( associd_t associd )
+bool ntpq_get_assoc_clockvars( associd_t associd )
 {
 	if (NTP_CLOCKTYPE_LOCAL != ntpq_get_assoc_clocktype(
 	    ntpq_get_assoc_number(associd)))
-		return 0;
+		return false;
 	clockvarlen = ntpq_read_assoc_clockvars( associd, clockvars,
 						 sizeof(clockvars) );
 	if ( clockvarlen <= 0 ) {
 		clockvar_assoc = 0;
-		return 0;
+		return false;
 	} else {
 		clockvar_assoc = associd;
-		return 1;
+		return true;
 	}
 }
 

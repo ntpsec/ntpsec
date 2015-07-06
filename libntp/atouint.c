@@ -7,13 +7,13 @@
 
 /*
  * atouint() - convert an ascii string representing a whole base 10
- *	       number to u_long *uval, returning TRUE if successful.
- *	       Does not modify *uval and returns FALSE if str is not
+ *	       number to u_long *uval, returning true if successful.
+ *	       Does not modify *uval and returns false if str is not
  *	       a positive base10 integer or is too large for a u_int32.
  *	       this function uses u_long but should use u_int32, and
  *	       probably be renamed.
  */
-int
+bool
 atouint(
 	const char *str,
 	u_long *uval
@@ -24,19 +24,19 @@ atouint(
 
 	cp = str;
 	if ('\0' == *cp)
-		return 0;
+		return false;
 
 	u = 0;
 	while ('\0' != *cp) {
 		if (!isdigit((unsigned char)*cp))
-			return 0;
+			return false;
 		if (u > 429496729 || (u == 429496729 && *cp >= '6'))
-			return 0;		/* overflow */
+			return false;		/* overflow */
 		/* hand-optimized u *= 10; */
 		u = (u << 3) + (u << 1);
 		u += *cp++ - '0';		/* not '\0' */
 	}
 
 	*uval = u;
-	return 1;
+	return true;
 }

@@ -86,7 +86,7 @@ extern s_char sys_precision;
 /*
  * Function prototypes
  */
-static	int local_start (int, struct peer *);
+static	bool	local_start (int, struct peer *);
 static	void	local_poll	(int, struct peer *);
 
 /*
@@ -111,7 +111,7 @@ struct	refclock refclock_local = {
 /*
  * local_start - start up the clock
  */
-static int
+static bool
 local_start(
 	int unit,
 	struct peer *peer
@@ -131,7 +131,7 @@ local_start(
 	pp->clockdesc = DESCRIPTION;
 	memcpy(&pp->refid, "LOCL", REFIDLEN);
 	poll_time = current_time;
-	return (1);
+	return true;
 }
 
 

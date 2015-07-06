@@ -122,7 +122,7 @@ struct spectracomunit {
 	int	pcount;		/* PPS sample counter */
 #endif /* HAVE_PPSAPI */
 	l_fp	laststamp;	/* last <CR> timestamp */
-	int	prev_eol_cr;	/* was last EOL <CR> (not <LF>)? */
+	bool	prev_eol_cr;	/* was last EOL <CR> (not <LF>)? */
 	u_char	lasthour;	/* last hour (for monitor) */
 	u_char	linect;		/* count ignored lines (for monitor */
 };
@@ -130,7 +130,7 @@ struct spectracomunit {
 /*
  * Function prototypes
  */
-static	int	spectracom_start	(int, struct peer *);
+static	bool	spectracom_start	(int, struct peer *);
 static	void	spectracom_shutdown	(int, struct peer *);
 static	void	spectracom_receive	(struct recvbuf *);
 static	void	spectracom_poll	(int, struct peer *);
@@ -160,7 +160,7 @@ struct	refclock refclock_spectracom = {
 /*
  * spectracom_start - open the devices and initialize data for processing
  */
-static int
+static bool
 spectracom_start(
 	int unit,
 	struct peer *peer
@@ -178,7 +178,7 @@ spectracom_start(
 	fd = refclock_open(device, SPEED232, LDISC_CLK);
 	if (fd <= 0)
 		/* coverity[leaked_handle] */
-		return (0);
+		return false;
 
 	/*
 	 * Allocate and initialize unit structure
@@ -193,7 +193,7 @@ spectracom_start(
 		close(fd);
 		pp->io.fd = -1;
 		free(up);
-		return (0);
+		return false;
 	}
 	pp->unitptr = up;
 
@@ -203,7 +203,7 @@ spectracom_start(
 	peer->precision = PRECISION;
 	pp->clockdesc = DESCRIPTION;
 	memcpy(&pp->refid, REFID, REFIDLEN);
-	return (1);
+	return true;
 }
 
 
@@ -292,7 +292,7 @@ spectracom_receive(
 	pp->lencode = temp;
 	pp->lastrec = up->laststamp;
 	up->laststamp = trtmp;
-	up->prev_eol_cr = TRUE;
+	up->prev_eol_cr = true;
 	DPRINTF(2, ("wwvb: code @ %s\n"
 		    "       using %s minus one char\n",
 		    prettydate(&trtmp), prettydate(&pp->lastrec)));

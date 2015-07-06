@@ -67,7 +67,7 @@ struct chronolog_unit {
 /*
  * Function prototypes
  */
-static	int	chronolog_start		(int, struct peer *);
+static	bool	chronolog_start		(int, struct peer *);
 static	void	chronolog_shutdown	(int, struct peer *);
 static	void	chronolog_receive	(struct recvbuf *);
 static	void	chronolog_poll		(int, struct peer *);
@@ -89,7 +89,7 @@ struct	refclock refclock_chronolog = {
 /*
  * chronolog_start - open the devices and initialize data for processing
  */
-static int
+static bool
 chronolog_start(
 	int unit,
 	struct peer *peer
@@ -112,7 +112,7 @@ chronolog_start(
 	fd = refclock_open(device, SPEED232, 0);
 	if (fd <= 0)
 		/* coverity[leaked_handle] */
-		return (0);
+		return false;
 
 	/*
 	 * Allocate and initialize unit structure
@@ -129,7 +129,7 @@ chronolog_start(
 		pp->io.fd = -1;
 		free(up);
 		pp->unitptr = NULL;
-		return (0);
+		return false;
 	}
 
 	/*
@@ -138,7 +138,7 @@ chronolog_start(
 	peer->precision = PRECISION;
 	pp->clockdesc = DESCRIPTION;
 	memcpy((char *)&pp->refid, REFID, REFIDLEN);
-	return (1);
+	return true;
 }
 
 

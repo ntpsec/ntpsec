@@ -18,12 +18,12 @@
 #include <limits.h>
 #include "ntp_machine.h"
 
-
-#ifndef TRUE
-# define	TRUE	1
-#endif
-#ifndef FALSE
-# define	FALSE	0
+#ifdef HAVE_STDBOOL_H
+# include <stdbool.h>
+#else
+typedef int bool;
+#define true	1
+#define false	0
 #endif
 
 /*

@@ -39,7 +39,7 @@ make_mac(
  * the packet's MAC. If they're equal this function returns 1 (packet is 
  * authentic) or else 0 (not authentic).
  */
-int
+bool
 auth_md5(
 	char *pkt_data,
 	int pkt_size,
@@ -48,7 +48,7 @@ auth_md5(
 	)
 {
 	int  hash_len;
-	int  authentic;
+	bool  authentic;
 	char digest[20];
 
 	if (mac_size > (int)sizeof(digest))
@@ -56,7 +56,7 @@ auth_md5(
 	hash_len = make_mac(pkt_data, pkt_size, sizeof(digest), cmp_key,
 			    digest);
 	if (!hash_len)
-		authentic = FALSE;
+		authentic = false;
 	else
 		authentic = !memcmp(digest, pkt_data + pkt_size + 4,
 				    hash_len);

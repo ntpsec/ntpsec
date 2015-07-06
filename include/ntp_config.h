@@ -44,8 +44,8 @@
 extern	int	cmdline_server_count;
 extern	char **	cmdline_servers;
 
-/* set to zero if admin doesn't want memory locked */
-extern	int	do_memlock;
+/* set to false if admin doesn't want memory locked */
+extern	bool	do_memlock;
 
 typedef struct int_range_tag {
 	int	first;

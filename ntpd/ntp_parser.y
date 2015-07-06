@@ -1483,7 +1483,7 @@ simulate_command
 			APPEND_G_FIFO(cfgt.sim_details, sn);
 
 			/* Revert from ; to \n for end-of-command */
-			old_config_style = 1;
+			old_config_style = true;
 		}
 	;
 
@@ -1493,7 +1493,7 @@ simulate_command
  * configuration file.
  */
 sim_conf_start
-	:	T_Simulate { old_config_style = 0; }
+	:	T_Simulate { old_config_style = false; }
 	;
 
 sim_init_statement_list

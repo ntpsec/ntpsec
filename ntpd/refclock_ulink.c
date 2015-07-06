@@ -82,14 +82,14 @@
  *  unit control structure
  */
 struct ulinkunit {
-	u_char	tcswitch;	/* timecode switch */
+	bool	tcswitch;	/* timecode switch */
 	l_fp	laststamp;	/* last receive timestamp */
 };
 
 /*
  * Function prototypes
  */
-static	int	ulink_start	(int, struct peer *);
+static	bool	ulink_start	(int, struct peer *);
 static	void	ulink_shutdown	(int, struct peer *);
 static	void	ulink_receive	(struct recvbuf *);
 static	void	ulink_poll	(int, struct peer *);
@@ -111,7 +111,7 @@ struct	refclock refclock_ulink = {
 /*
  * ulink_start - open the devices and initialize data for processing
  */
-static int
+static bool
 ulink_start(
 	int unit,
 	struct peer *peer
@@ -129,7 +129,7 @@ ulink_start(
 	fd = refclock_open(device, SPEED232, LDISC_CLK);
 	if (fd <= 0)
 		/* coverity[leaked_handle] */
-		return (0);
+		return false;
 
 	/*
 	 * Allocate and initialize unit structure
@@ -145,7 +145,7 @@ ulink_start(
 		close(fd);
 		pp->io.fd = -1;
 		free(up);
-		return (0);
+		return false;
 	}
 	pp->unitptr = up;
 
@@ -155,7 +155,7 @@ ulink_start(
 	peer->precision = PRECISION;
 	pp->clockdesc = DESCRIPTION;
 	memcpy((char *)&pp->refid, REFID, REFIDLEN);
-	return (1);
+	return true;
 }
 
 
@@ -214,17 +214,17 @@ ulink_receive(
 	 * but only the <cr> timestamp is retained. 
 	 */
 	if (temp == 0) {
-		if (up->tcswitch == 0) {
-			up->tcswitch = 1;
+		if (!up->tcswitch) {
+			up->tcswitch = true;
 			up->laststamp = trtmp;
 		} else
-		    up->tcswitch = 0;
+		    up->tcswitch = false;
 		return;
 	}
 	pp->lencode = temp;
 	pp->lastrec = up->laststamp;
 	up->laststamp = trtmp;
-	up->tcswitch = 1;
+	up->tcswitch = true;
 #ifdef DEBUG
 	if (debug)
 		printf("ulink: timecode %d %s\n", pp->lencode,

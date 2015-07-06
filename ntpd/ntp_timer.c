@@ -36,7 +36,7 @@
 #define	TC_ERR	(-1)
 #endif
 
-static void check_leapsec(u_int32, const time_t*, int/*BOOL*/);
+static void check_leapsec(u_int32, const time_t*, bool);
 
 /*
  * These routines provide support for the event timer.  The timer is
@@ -53,7 +53,7 @@ volatile int interface_interval;     /* init_io() sets def. 300s */
 /*
  * Alarm flag. The mainline code imports this.
  */
-volatile int alarm_flag;
+volatile bool alarm_flag;
 
 /*
  * The counters and timeouts
@@ -166,7 +166,7 @@ init_timer(void)
 	/*
 	 * Initialize...
 	 */
-	alarm_flag = FALSE;
+	alarm_flag = false;
 	alarm_overflow = 0;
 	adjust_timer = 1;
 	stats_timer = SECSPERHR;
@@ -210,7 +210,7 @@ init_timer(void)
 	 * Under Windows/NT, 
 	 */
 
-	WaitableTimerHandle = CreateWaitableTimer(NULL, FALSE, NULL);
+	WaitableTimerHandle = CreateWaitableTimer(NULL, false, NULL);
 	if (WaitableTimerHandle == NULL) {
 		msyslog(LOG_ERR, "CreateWaitableTimer failed: %m");
 		exit(1);
@@ -218,12 +218,12 @@ init_timer(void)
 	else {
 		DWORD		Period;
 		LARGE_INTEGER	DueTime;
-		BOOL		rc;
+		bool		rc;
 
 		Period = (1 << EVENT_TIMEOUT) * 1000;
 		DueTime.QuadPart = Period * 10000i64;
 		rc = SetWaitableTimer(WaitableTimerHandle, &DueTime,
-				      Period, NULL, NULL, FALSE);
+				      Period, NULL, NULL, false);
 		if (!rc) {
 			msyslog(LOG_ERR, "SetWaitableTimer failed: %m");
 			exit(1);
@@ -406,9 +406,9 @@ timer(void)
 		write_stats();
 		if (leapf_timer <= current_time) {
 			leapf_timer += SECSPERDAY;
-			check_leap_file(TRUE, now.l_ui, &tnow);
+			check_leap_file(true, now.l_ui, &tnow);
 		} else {
-			check_leap_file(FALSE, now.l_ui, &tnow);
+			check_leap_file(false, now.l_ui, &tnow);
 		}
 	}
 }
@@ -438,7 +438,7 @@ alarming(
 			alarm_flag++;
 # else
 			/* VMS AST routine, increment is no good */
-			alarm_flag = 1;
+			alarm_flag = true;
 # endif
 # ifdef DEBUG
 			msg = "alarming: normal\n";
@@ -479,7 +479,7 @@ static void
 check_leapsec(
 	u_int32        now  ,
 	const time_t * tpiv ,
-        int/*BOOL*/    reset)
+        bool           reset)
 {
 	static const char leapmsg_p_step[] =
 	    "Positive leap second, stepped backward.";

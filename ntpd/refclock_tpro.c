@@ -42,7 +42,7 @@ struct tprounit {
 /*
  * Function prototypes
  */
-static	int	tpro_start	(int, struct peer *);
+static	bool	tpro_start	(int, struct peer *);
 static	void	tpro_shutdown	(int, struct peer *);
 static	void	tpro_poll	(int unit, struct peer *);
 
@@ -63,7 +63,7 @@ struct	refclock refclock_tpro = {
 /*
  * tpro_start - open the TPRO device and initialize data for processing
  */
-static int
+static bool
 tpro_start(
 	int unit,
 	struct peer *peer
@@ -81,7 +81,7 @@ tpro_start(
 	fd = open(device, O_RDONLY | O_NDELAY, 0777);
 	if (fd == -1) {
 		msyslog(LOG_ERR, "tpro_start: open of %s: %m", device);
-		return (0);
+		return false;
 	}
 
 	/*
@@ -101,7 +101,7 @@ tpro_start(
 	peer->precision = PRECISION;
 	pp->clockdesc = DESCRIPTION;
 	memcpy((char *)&pp->refid, REFID, REFIDLEN);
-	return (1);
+	return true;
 }
 
 

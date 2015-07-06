@@ -218,7 +218,7 @@ struct actsunit {
 /*
  * Function prototypes
  */
-static	int	acts_start	(int, struct peer *);
+static	bool	acts_start	(int, struct peer *);
 static	void	acts_shutdown	(int, struct peer *);
 static	void	acts_receive	(struct recvbuf *);
 static	void	acts_message	(struct peer *, const char *);
@@ -244,7 +244,7 @@ struct refclock refclock_acts = {
 /*
  * Initialize data for processing
  */
-static int
+static bool
 acts_start(
 	int	unit,
 	struct peer *peer
@@ -280,7 +280,7 @@ acts_start(
 			modem_setup = estrdup(setup);
 	}
 
-	return (1);
+	return true;
 }
 
 

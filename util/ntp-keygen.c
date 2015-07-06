@@ -132,7 +132,7 @@
  * Prototypes
  */
 FILE	*fheader	(const char *, const char *, const char *);
-int	gen_md5		(const char *);
+bool	gen_md5		(const char *);
 void	followlink	(char *, size_t);
 #ifdef AUTOKEY
 EVP_PKEY *gen_rsa	(const char *);
@@ -141,7 +141,7 @@ EVP_PKEY *gen_iffkey	(const char *);
 EVP_PKEY *gen_gqkey	(const char *);
 EVP_PKEY *gen_mvkey	(const char *, EVP_PKEY **);
 void	gen_mvserv	(char *, EVP_PKEY **);
-int	x509		(EVP_PKEY *, const EVP_MD *, char *, const char *,
+bool	x509		(EVP_PKEY *, const EVP_MD *, char *, const char *,
 			    char *);
 void	cb		(int, int, void *);
 EVP_PKEY *genkey	(const char *, const char *);
@@ -810,7 +810,7 @@ main(
  * if OpenSSL is around, generate random SHA1 keys compatible with
  * symmetric key cryptography.
  */
-int
+bool
 gen_md5(
 	const char *id		/* file name id */
 	)
@@ -863,7 +863,7 @@ gen_md5(
 	}
 #endif	/* OPENSSL */
 	fclose(str);
-	return (1);
+	return true;
 }
 
 
@@ -1921,7 +1921,7 @@ gen_mvkey(
  * year hence. For NTP purposes, it is convenient to use the NTP seconds
  * of the current time as the serial number.
  */
-int
+bool
 x509	(
 	EVP_PKEY *pkey,		/* signing key */
 	const EVP_MD *md,	/* signature/digest scheme */
@@ -1965,7 +1965,7 @@ x509	(
 		fprintf(stderr, "Assign certificate signing key fails\n%s\n",
 		    ERR_error_string(ERR_get_error(), NULL));
 		X509_free(cert);
-		return (0);
+		return false;
 	}
 
 	/*
@@ -1984,7 +1984,7 @@ x509	(
 	if (!X509_add_ext(cert, ex, -1)) {
 		fprintf(stderr, "Add extension field fails\n%s\n",
 		    ERR_error_string(ERR_get_error(), NULL));
-		return (0);
+		return false;
 	}
 	X509_EXTENSION_free(ex);
 
@@ -1997,7 +1997,7 @@ x509	(
 	if (!X509_add_ext(cert, ex, -1)) {
 		fprintf(stderr, "Add extension field fails\n%s\n",
 		    ERR_error_string(ERR_get_error(), NULL));
-		return (0);
+		return false;
 	}
 	X509_EXTENSION_free(ex);
 	/*
@@ -2012,7 +2012,7 @@ x509	(
 			fprintf(stderr,
 			    "Add extension field fails\n%s\n",
 			    ERR_error_string(ERR_get_error(), NULL));
-			return (0);
+			return false;
 		}
 		X509_EXTENSION_free(ex);
 	}
@@ -2033,7 +2033,7 @@ x509	(
 			fprintf(stderr,
 			    "Add extension field fails\n%s\n",
 			    ERR_error_string(ERR_get_error(), NULL));
-			return (0);
+			return false;
 		}
 		X509_EXTENSION_free(ex);
 	}
@@ -2046,7 +2046,7 @@ x509	(
 		fprintf(stderr, "Verify %s certificate fails\n%s\n", id,
 		    ERR_error_string(ERR_get_error(), NULL));
 		X509_free(cert);
-		return (0);
+		return false;
 	}
 
 	/*
@@ -2059,7 +2059,7 @@ x509	(
 	if (debug)
 		X509_print_fp(stderr, cert);
 	X509_free(cert);
-	return (1);
+	return true;
 }
 
 #if 0	/* asn2ntp is used only with commercial certificates */

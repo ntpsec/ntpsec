@@ -158,7 +158,7 @@ struct vmeunit {
 /*
  * Function prototypes
  */
-static  int     vme_start       (int, struct peer *);
+static  bool     vme_start       (int, struct peer *);
 static  void    vme_shutdown    (int, struct peer *);
 static  void    vme_receive     (struct recvbuf *);
 static  void    vme_poll        (int unit, struct peer *);
@@ -208,7 +208,7 @@ inline const char* DEVICE_NAME(int n) {static char s[20]={0}; snprintf(s,19,"/de
 /*
  * vme_start - open the VME device and initialize data for processing
  */
-static int
+static bool
 vme_start(
 	int unit,
 	struct peer *peer
@@ -239,7 +239,7 @@ vme_start(
 #endif
 	if ( (fd_vme = open(DEVICE_NAME(peer->refclkunit), O_RDWR)) < 0) {
 		msyslog(LOG_ERR, "vme_start: failed open of %s: %m", vmedev);
-		return (0);
+		return false;
 	}
 	else  { 
 		switch (tfp_type) {
@@ -284,7 +284,7 @@ vme_start(
 	 */
 	peer->precision = VMEPRECISION;
 	memcpy(&pp->refid, USNOREFID,4);
-	return (1);
+	return true;
 }
 
 

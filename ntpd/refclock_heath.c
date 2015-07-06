@@ -186,7 +186,7 @@ static int speed[] = {B1200, B2400, B4800, B9600};
 /*
  * Function prototypes
  */
-static	int	heath_start	(int, struct peer *);
+static	bool	heath_start	(int, struct peer *);
 static	void	heath_shutdown	(int, struct peer *);
 static	void	heath_receive	(struct recvbuf *);
 static	void	heath_poll	(int, struct peer *);
@@ -208,7 +208,7 @@ struct	refclock refclock_heath = {
 /*
  * heath_start - open the devices and initialize data for processing
  */
-static int
+static bool
 heath_start(
 	int unit,
 	struct peer *peer
@@ -226,7 +226,7 @@ heath_start(
 			   LDISC_REMOTE);
 	if (fd <= 0)
 		/* coverity[leaked_handle] */
-		return (0);
+		return false;
 	pp = peer->procptr;
 	pp->io.clock_recv = heath_receive;
 	pp->io.srcclock = peer;
@@ -235,7 +235,7 @@ heath_start(
 	if (!io_addclock(&pp->io)) {
 		close(fd);
 		pp->io.fd = -1;
-		return (0);
+		return false;
 	}
 
 	/*
@@ -244,7 +244,7 @@ heath_start(
 	peer->precision = PRECISION;
 	pp->clockdesc = DESCRIPTION;
 	memcpy(&pp->refid, REFID, REFIDLEN);
-	return (1);
+	return true;
 }
 
 

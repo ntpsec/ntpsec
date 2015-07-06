@@ -203,16 +203,6 @@ typedef unsigned long long int json_uint;
  */
 #define PPS2_MAXCOUNT 10
 
-#ifndef BOOL
-# define BOOL int
-#endif
-#ifndef TRUE
-# define TRUE 1
-#endif
-#ifndef FALSE
-# define FALSE 0
-#endif
-
 #define PROTO_VERSION(hi,lo) \
 	    ((((uint32_t)(hi) << 16) & 0xFFFF0000u) | \
 	     ((uint32_t)(lo) & 0x0FFFFu))
@@ -236,7 +226,7 @@ static const char * s_dev_stem = "/dev/gps";
  */
 
 static	void	gpsd_init	(void);
-static	int	gpsd_start	(int, peerT *);
+static	bool	gpsd_start	(int, peerT *);
 static	void	gpsd_shutdown	(int, peerT *);
 static	void	gpsd_receive	(struct recvbuf *);
 static	void	gpsd_poll	(int, peerT *);
@@ -352,9 +342,9 @@ static void gpsd_stop_socket(peerT * const peer);
 
 static void gpsd_parse(peerT * const peer,
 		       const l_fp  * const rtime);
-static BOOL convert_ascii_time(l_fp * fp, const char * gps_time);
+static bool convert_ascii_time(l_fp * fp, const char * gps_time);
 static void save_ltc(clockprocT * const pp, const char * const tc);
-static int  syslogok(clockprocT * const pp, gpsd_unitT * const up);
+static bool syslogok(clockprocT * const pp, gpsd_unitT * const up);
 static void log_data(peerT *peer, const char *what,
 		     const char *buf, size_t len);
 static int16_t clamped_precision(int rawprec);
@@ -408,7 +398,7 @@ static int s_svcidx;
 /* =====================================================================
  * log throttling
  */
-static int/*BOOL*/
+static bool
 syslogok(
 	clockprocT * const pp,
 	gpsd_unitT * const up)
@@ -454,7 +444,7 @@ gpsd_init(void)
 /* ---------------------------------------------------------------------
  * Init Check: flush pending log messages and check if we can proceed
  */
-static int/*BOOL*/
+static bool
 gpsd_init_check(void)
 {
 	int idx;
@@ -491,7 +481,7 @@ gpsd_init_check(void)
 /* ---------------------------------------------------------------------
  * Start: allocate a unit pointer and set up the runtime data
  */
-static int
+static bool
 gpsd_start(
 	int     unit,
 	peerT * peer)
@@ -504,7 +494,7 @@ gpsd_start(
 
 	/* check if we can proceed at all or if init failed */
 	if ( ! gpsd_init_check())
-		return FALSE;
+		return false;
 
 	/* search for matching unit */
 	while ((up = *uscan) != NULL && up->unit != (unit & 0x7F))
@@ -578,7 +568,7 @@ gpsd_start(
 		up->pps_peer = peer;
 	else
 		enter_opmode(peer, up->mode);
-	return TRUE;
+	return true;
 
 dev_fail:
 	/* On failure, remove all UNIT ressources and declare defeat. */
@@ -591,7 +581,7 @@ dev_fail:
 	}
 
 	pp->unitptr = (caddr_t)NULL;
-	return FALSE;
+	return false;
 }
 
 /* ------------------------------------------------------------------ */
@@ -1347,7 +1337,7 @@ json_object_lookup_float_default(
 
 /* ------------------------------------------------------------------ */
 
-static BOOL
+static bool
 json_parse_record(
 	json_ctx * ctx,
 	char     * buf,
@@ -1359,12 +1349,12 @@ json_parse_record(
 	jsmn_init(&jsm);
 	rc = jsmn_parse(&jsm, buf, len, ctx->tok, JSMN_MAXTOK);
 	if (rc <= 0)
-		return FALSE;
+		return false;
 	ctx->buf  = buf;
 	ctx->ntok = rc;
 
 	if (JSMN_OBJECT != ctx->tok[0].type)
-		return FALSE; /* not object!?! */
+		return false; /* not object!?! */
 
 	/* Make all tokens NUL terminated by overwriting the
 	 * terminator symbol. Makes string compares and number parsing a
@@ -1373,14 +1363,14 @@ json_parse_record(
 	for (idx = 0; idx < ctx->ntok; ++idx)
 		if (ctx->tok[idx].end > ctx->tok[idx].start)
 			ctx->buf[ctx->tok[idx].end] = '\0';
-	return TRUE;
+	return true;
 }
 
 
 /* =====================================================================
  * static local helpers
  */
-static BOOL
+static bool
 get_binary_time(
 	l_fp       * const dest     ,
 	json_ctx   * const jctx     ,
@@ -1388,7 +1378,7 @@ get_binary_time(
 	const char * const frac_name,
 	long               fscale   )
 {
-	BOOL            retv = FALSE;
+	bool            retv = false;
 	struct timespec ts;
 
 	errno = 0;
@@ -1397,7 +1387,7 @@ get_binary_time(
 	if (0 == errno) {
 		ts.tv_nsec *= fscale;
 		*dest = tspec_stamp_to_lfp(ts);
-		retv  = TRUE;
+		retv  = true;
 	}
 	return retv;
 }
@@ -2038,7 +2028,7 @@ clamped_precision(
 /* -------------------------------------------------------------------
  * Convert a GPSD timestamp (ISO8601 Format) to an l_fp
  */
-static BOOL
+static bool
 convert_ascii_time(
 	l_fp       * fp      ,
 	const char * gps_time)
@@ -2055,7 +2045,7 @@ convert_ascii_time(
 	ts.tv_nsec = 0;
 	ep = strptime(gps_time, "%Y-%m-%dT%H:%M:%S", &gd);
 	if (NULL == ep)
-		return FALSE; /* could not parse the mandatory stuff! */
+		return false; /* could not parse the mandatory stuff! */
 	if (*ep == '.') {
 		dw = 100000000u;
 		while (isdigit(*(unsigned char*)++ep)) {
@@ -2064,7 +2054,7 @@ convert_ascii_time(
 		}
 	}
 	if (ep[0] != 'Z' || ep[1] != '\0')
-		return FALSE; /* trailing garbage */
+		return false; /* trailing garbage */
 
 	/* Now convert the whole thing into a 'l_fp'. We do not use
 	 * 'mkgmtime()' since its not standard and going through the
@@ -2074,7 +2064,7 @@ convert_ascii_time(
 	          + ntpcal_tm_to_daysec(&gd);
 	*fp = tspec_intv_to_lfp(ts);
 
-	return TRUE;
+	return true;
 }
 
 /* -------------------------------------------------------------------

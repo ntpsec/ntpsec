@@ -109,7 +109,7 @@ struct neoclock4x_unit {
   short	unit;		/* NTP refclock unit number */
   u_long polled;	/* flag to detect noreplies */
   char	leap_status;	/* leap second flag */
-  int	recvnow;
+  bool	recvnow;
 
   char  firmware[80];
   char  firmwaretag;
@@ -129,7 +129,7 @@ struct neoclock4x_unit {
   int   utc_msec;
 };
 
-static	int	neoclock4x_start	(int, struct peer *);
+static	bool	neoclock4x_start	(int, struct peer *);
 static	void	neoclock4x_shutdown	(int, struct peer *);
 static	void	neoclock4x_receive	(struct recvbuf *);
 static	void	neoclock4x_poll		(int, struct peer *);
@@ -142,7 +142,7 @@ static void	neol_localtime		(unsigned long, int* , int*, int*, int*, int*, int*)
 static unsigned long neol_mktime	(int, int, int, int, int, int);
 #if !defined(NEOCLOCK4X_FIRMWARE)
 static int	neol_query_firmware	(int, int, char *, size_t);
-static int	neol_check_firmware	(int, const char*, char *);
+static bool	neol_check_firmware	(int, const char*, char *);
 #endif
 
 struct refclock refclock_neoclock4x = {
@@ -155,7 +155,7 @@ struct refclock refclock_neoclock4x = {
   NOFLAGS			/* not used */
 };
 
-static int
+static bool
 neoclock4x_start(int unit,
 		 struct peer *peer)
 {
@@ -178,7 +178,7 @@ neoclock4x_start(int unit,
   if(fd <= 0)
     {
       /* coverity[leaked_handle] */
-      return (0);
+      return false;
     }
 
 #if 1
@@ -186,7 +186,7 @@ neoclock4x_start(int unit,
     {
       msyslog(LOG_CRIT, "NeoClock4X(%d): (tcgetattr) can't query serial port settings: %m", unit);
       (void) close(fd);
-      return (0);
+      return false;
     }
 
   /* 2400 Baud 8N2 */
@@ -200,7 +200,7 @@ neoclock4x_start(int unit,
     {
       msyslog(LOG_CRIT, "NeoClock4X(%d): (tcsetattr) can't set serial port 2400 8N2: %m", unit);
       (void) close(fd);
-      return (0);
+      return false;
     }
 
 #else
@@ -208,7 +208,7 @@ neoclock4x_start(int unit,
     {
       msyslog(LOG_CRIT, "NeoClock4X(%d): (tcgetattr) can't query serial port settings: %m", unit);
       (void) close(fd);
-      return (0);
+      return false;
     }
 
   /* 2400 Baud 8N2 */
@@ -221,7 +221,7 @@ neoclock4x_start(int unit,
     {
       msyslog(LOG_CRIT, "NeoClock4X(%d): (tcsetattr) can't set serial port 2400 8N2: %m", unit);
       (void) close(fd);
-      return (0);
+      return false;
     }
 #endif
 
@@ -232,7 +232,7 @@ neoclock4x_start(int unit,
     {
       msyslog(LOG_CRIT, "NeoClock4X(%d): can't query RTS/DTR state: %m", unit);
       (void) close(fd);
-      return (0);
+      return false;
     }
 #ifdef TIOCM_RTS
   sl232 = sl232 | TIOCM_DTR | TIOCM_RTS;	/* turn on RTS, and DTR for power supply */
@@ -243,13 +243,13 @@ neoclock4x_start(int unit,
     {
       msyslog(LOG_CRIT, "NeoClock4X(%d): can't set RTS/DTR to power neoclock4x: %m", unit);
       (void) close(fd);
-      return (0);
+      return false;
     }
 #else
   msyslog(LOG_EMERG, "NeoClock4X(%d): don't know how to set DTR/RTS to power NeoClock4X with this OS!",
 	  unit);
   (void) close(fd);
-  return (0);
+  return false;
 #endif
 
   up = (struct neoclock4x_unit *) emalloc(sizeof(struct neoclock4x_unit));
@@ -257,7 +257,7 @@ neoclock4x_start(int unit,
     {
       msyslog(LOG_ERR, "NeoClock4X(%d): can't allocate memory for: %m",unit);
       (void) close(fd);
-      return (0);
+      return false;
     }
 
   memset((char *)up, 0, sizeof(struct neoclock4x_unit));
@@ -314,7 +314,7 @@ neoclock4x_start(int unit,
   pp->io.fd = -1;
   free(pp->unitptr);
   pp->unitptr = NULL;
-  return (0);
+  return false;
 #endif
 #else
   for(tries=0; tries < 5; tries++)
@@ -336,7 +336,7 @@ neoclock4x_start(int unit,
       pp->io.fd = -1;
       free(pp->unitptr);
       pp->unitptr = NULL;
-      return (0);
+      return false;
     }
 #endif
 
@@ -347,13 +347,13 @@ neoclock4x_start(int unit,
       pp->io.fd = -1;
       free(pp->unitptr);
       pp->unitptr = NULL;
-      return (0);
+      return false;
     }
 
   NLOG(NLOG_CLOCKINFO)
     msyslog(LOG_INFO, "NeoClock4X(%d): receiver setup successful done", unit);
 
-  return (1);
+  return true;
 }
 
 static void
@@ -428,11 +428,11 @@ neoclock4x_receive(struct recvbuf *rbufp)
   up = pp->unitptr;
 
   /* wait till poll interval is reached */
-  if(0 == up->recvnow)
+  if (!up->recvnow)
     return;
 
   /* reset poll interval flag */
-  up->recvnow = 0;
+  up->recvnow = false;
 
   /* read last received timecode */
   pp->lencode = refclock_gtlin(rbufp, pp->a_lastcode, BMAX, &pp->lastrec);
@@ -635,7 +635,7 @@ neoclock4x_poll(int unit,
   up = pp->unitptr;
 
   pp->polls++;
-  up->recvnow = 1;
+  up->recvnow = true;
 }
 
 static void
@@ -873,11 +873,11 @@ neol_query_firmware(int fd,
   size_t len;
   int lastsearch;
   unsigned char c;
-  int last_c_was_crlf;
-  int last_crlf_conv_len;
-  int init;
+  bool last_c_was_crlf;
+  bool last_crlf_conv_len;
+  bool init;
   int read_errors;
-  int flag = 0;
+  bool flag = false;
   int chars_read;
 
   /* wait a little bit */
@@ -890,9 +890,9 @@ neol_query_firmware(int fd,
 
       len = 0;
       lastsearch = 0;
-      last_c_was_crlf = 0;
+      last_c_was_crlf = false;
       last_crlf_conv_len = 0;
-      init = 1;
+      init = true;
       read_errors = 0;
       chars_read = 0;
       for(;;)
@@ -934,7 +934,7 @@ neol_query_firmware(int fd,
 
 	      strlcpy(tmpbuf, "(c)", sizeof(tmpbuf));
 	      len = 3;
-	      init = 0;
+	      init = false;
 	      continue;
 	    }
 
@@ -951,7 +951,7 @@ neol_query_firmware(int fd,
 		  if(NULL != ptr)
 		    {
 		      tmpbuf[last_crlf_conv_len] = 0;
-		      flag = 1;
+		      flag = true;
 		      break;
 		    }
 		  /* convert \n to / */
@@ -961,11 +961,11 @@ neol_query_firmware(int fd,
 		  tmpbuf[len++] = ' ';
 		  lastsearch = len;
 		}
-	      last_c_was_crlf = 1;
+	      last_c_was_crlf = true;
 	    }
 	  else
 	    {
-	      last_c_was_crlf = 0;
+	      last_c_was_crlf = false;
 	      if(0x00 != c)
 		tmpbuf[len++] = (char) c;
 	    }
@@ -997,7 +997,7 @@ neol_query_firmware(int fd,
   return (flag);
 }
 
-static int
+static bool
 neol_check_firmware(int unit,
                     const char *firmware,
                     char *firmwaretag)
@@ -1018,10 +1018,10 @@ neol_check_firmware(int unit,
   if('A' != *firmwaretag)
     {
       msyslog(LOG_CRIT, "NeoClock4X(%d): firmware version \"%c\" not supported with this driver version!", unit, *firmwaretag);
-      return (0);
+      return false;
     }
 
-  return (1);
+  return true;
 }
 #endif
 

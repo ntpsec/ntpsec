@@ -74,14 +74,14 @@ getCmdOpts(
 		stats_config(STATS_FREQ_FILE, OPT_ARG( DRIFTFILE ));
 
 	if (HAVE_OPT( PANICGATE ))
-		allow_panic = TRUE;
+		allow_panic = true;
 
 	if (HAVE_OPT( FORCE_STEP_ONCE ))
-		force_step_once = TRUE;
+		force_step_once = true;
 
 #ifdef HAVE_DROPROOT
 	if (HAVE_OPT( JAILDIR )) {
-		droproot = 1;
+		droproot = true;
 		chrootdir = OPT_ARG( JAILDIR );
 	}
 #endif
@@ -93,7 +93,7 @@ getCmdOpts(
 		stats_config(STATS_PID_FILE, OPT_ARG( PIDFILE ));
 
 	if (HAVE_OPT( QUIT ))
-		mode_ntpdate = TRUE;
+		mode_ntpdate = true;
 
 	if (HAVE_OPT( PROPAGATIONDELAY ))
 		do {
@@ -133,7 +133,7 @@ getCmdOpts(
 
 #ifdef HAVE_DROPROOT
 	if (HAVE_OPT( USER )) {
-		droproot = 1;
+		droproot = true;
 		user = estrdup(OPT_ARG( USER ));
 		group = strrchr(user, ':');
 		if (group != NULL) {

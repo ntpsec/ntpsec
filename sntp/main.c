@@ -17,9 +17,9 @@
 #include "libntp.h"
 
 
-int shutting_down;
-int time_derived;
-int time_adjusted;
+bool shutting_down;
+bool time_derived;
+bool time_adjusted;
 int n_pending_dns = 0;
 int n_pending_ntp = 0;
 int ai_fam_pref = AF_UNSPEC;
@@ -91,8 +91,8 @@ static union {
 #define r_pkt  rbuf.pkt
 
 #ifdef HAVE_DROPROOT
-int droproot;			/* intres imports these */
-int root_dropped;
+bool droproot;			/* intres imports these */
+bool root_dropped;
 #endif
 u_long current_time;		/* libntp/authkeys.c */
 
@@ -108,7 +108,7 @@ void queue_xmt(SOCKET sock, struct dns_ctx *dctx, sent_pkt *spkt,
 	       u_int xmt_delay);
 void xmt_timer_cb(evutil_socket_t, short, void *ptr);
 void xmt(xmt_ctx *xctx);
-int  check_kod(const struct addrinfo *ai);
+bool check_kod(const struct addrinfo *ai);
 void timeout_query(sent_pkt *);
 void timeout_queries(void);
 void sock_cb(evutil_socket_t, short, void *);
@@ -117,7 +117,7 @@ void sntp_libevent_log_cb(int, const char *);
 void set_li_vn_mode(struct pkt *spkt, char leap, char version, char mode);
 int  set_time(double offset);
 void dec_pending_ntp(const char *, sockaddr_u *);
-int  libevent_version_ok(void);
+bool libevent_version_ok(void);
 int  gettimeofday_cached(struct event_base *b, struct timeval *tv);
 
 
@@ -205,7 +205,7 @@ sntp_main (
 	** For embedded systems with no writable filesystem,
 	** -K /dev/null can be used to disable KoD storage.
 	*/
-	kod_init_kod_db(OPT_ARG(KOD), FALSE);
+	kod_init_kod_db(OPT_ARG(KOD), false);
 
 	// HMS: Should we use arg-defalt for this too?
 	if (HAVE_OPT(KEYFILE))
@@ -241,7 +241,7 @@ sntp_main (
 	}
 
 	/* wire into intres resolver */
-	worker_per_query = TRUE;
+	worker_per_query = true;
 	addremove_io_fd = &sntp_addremove_fd;
 
 	open_sockets();
@@ -741,7 +741,7 @@ timeout_queries(void)
 	if (start_cb.tv_sec - start_tv.tv_sec > response_timeout) {
 		TRACE(3, ("timeout_queries: bail!\n"));
 		event_base_loopexit(base, NULL);
-		shutting_down = TRUE;
+		shutting_down = true;
 	}
 }
 
@@ -783,7 +783,7 @@ void timeout_query(
 		INSIST(!"spkt->dctx->flags neither UCST nor BCST");
 		break;
 	}
-	spkt->done = TRUE;
+	spkt->done = true;
 	server = &spkt->addr;
 	msyslog(LOG_INFO, "%s no %cCST response after %d seconds",
 		hostnameaddr(spkt->dctx->name, server), xcst,
@@ -796,7 +796,7 @@ void timeout_query(
 /*
 ** check_kod
 */
-int
+bool
 check_kod(
 	const struct addrinfo *	ai
 	)
@@ -813,11 +813,11 @@ check_kod(
 		free(reason);
 		free(hostname);
 
-		return 1;
+		return true;
 	}
 	free(hostname);
 
-	return 0;
+	return false;
 }
 
 
@@ -898,7 +898,7 @@ sock_cb(
 	/* If this is a Unicast packet, one down ... */
 	if (!spkt->done && (CTX_UCST & spkt->dctx->flags)) {
 		dec_pending_ntp(spkt->dctx->name, &spkt->addr);
-		spkt->done = TRUE;
+		spkt->done = true;
 	}
 
 
@@ -922,7 +922,7 @@ check_exit_conditions(void)
 	if ((0 == n_pending_ntp && 0 == n_pending_dns) ||
 	    (time_derived && !HAVE_OPT(WAIT))) {
 		event_base_loopexit(base, NULL);
-		shutting_down = TRUE;
+		shutting_down = true;
 	} else {
 		TRACE(2, ("%d NTP and %d name queries pending\n",
 			  n_pending_ntp, n_pending_dns));
@@ -1228,7 +1228,7 @@ handle_pkt(
 
 		offset_calculation(rpkt, rpktl, &tv_dst, &offset,
 				   &precision, &synch_distance);
-		time_derived = TRUE;
+		time_derived = true;
 
 		for (digits = 0; (precision *= 10.) < 1.; ++digits)
 			/* empty */ ;
@@ -1447,7 +1447,7 @@ set_time(
 
 		/* If there was a problem, can we rely on errno? */
 		if (1 == rc)
-			time_adjusted = TRUE;
+			time_adjusted = true;
 		return (time_adjusted)
 			   ? EX_OK 
 			   : 1;
@@ -1464,7 +1464,7 @@ set_time(
 
 		/* If there was a problem, can we rely on errno? */
 		if (1 == rc)
-			time_adjusted = TRUE;
+			time_adjusted = true;
 		return (time_adjusted)
 			   ? EX_OK 
 			   : 1;
@@ -1480,7 +1480,7 @@ set_time(
 }
 
 
-int
+bool
 libevent_version_ok(void)
 {
 	ev_uint32_t v_compile_maj;
@@ -1493,9 +1493,9 @@ libevent_version_ok(void)
 			"Incompatible libevent versions: have %s, built with %s\n",
 			event_get_version(),
 			LIBEVENT_VERSION);
-		return 0;
+		return false;
 	}
-	return 1;
+	return true;
 }
 
 /*
@@ -1580,7 +1580,7 @@ gettimeofday_cached(
 					 (long)offset.tv_usec));
 			}
 		}
-		offset_ready = TRUE;
+		offset_ready = true;
 	}
 	adj_cached = add_tval(cached, offset);
 	*caller_tv = adj_cached;

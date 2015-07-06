@@ -8,7 +8,7 @@
 #include "ntp_fp.h"
 #include "ntp_stdlib.h"
 
-int
+bool
 mstolfp(
 	const char *str,
 	l_fp *lfp
@@ -41,7 +41,7 @@ mstolfp(
 	}
 
 	if (*cp != '.' && !isdigit((unsigned char)*cp))
-	    return 0;
+	    return false;
 
 
 	/*
@@ -96,6 +96,6 @@ mstolfp(
 	 * so, give the buffer to the decoding routine.
 	 */
 	if (*cp != '\0' && !isspace((unsigned char)*cp))
-	    return 0;
+	    return false;
 	return atolfp(buf, lfp);
 }

@@ -66,9 +66,9 @@ extern	int	authdecrypt	(keyid_t, u_int32 *, int, int);
 extern	int	authencrypt	(keyid_t, u_int32 *, int);
 extern	int	authhavekey	(keyid_t);
 extern	int	authistrusted	(keyid_t);
-extern	int	authreadkeys	(const char *);
+extern	bool	authreadkeys	(const char *);
 extern	void	authtrust	(keyid_t, u_long);
-extern	int	authusekey	(keyid_t, int, const u_char *);
+extern	bool	authusekey	(keyid_t, int, const u_char *);
 
 /*
  * Based on the NTP timestamp, calculate the NTP timestamp of
@@ -101,32 +101,32 @@ extern	u_int32	addr2refid	(sockaddr_u *);
 #ifndef EREALLOC_CALLSITE	/* ntp_malloc.h defines */
 extern	void *	ereallocz	(void *, size_t, size_t, int);
 #define	erealloczsite(p, n, o, z, f, l) ereallocz(p, n, o, (z))
-#define	emalloc(n)		ereallocz(NULL, n, 0, FALSE)
-#define	emalloc_zero(c)		ereallocz(NULL, (c), 0, TRUE)
-#define	erealloc(p, c)		ereallocz(p, (c), 0, FALSE)
-#define erealloc_zero(p, n, o)	ereallocz(p, n, (o), TRUE)
+#define	emalloc(n)		ereallocz(NULL, n, 0, false)
+#define	emalloc_zero(c)		ereallocz(NULL, (c), 0, true)
+#define	erealloc(p, c)		ereallocz(p, (c), 0, false)
+#define erealloc_zero(p, n, o)	ereallocz(p, n, (o), true)
 extern	char *	estrdup_impl	(const char *);
 #define	estrdup(s)		estrdup_impl(s)
 #else
 extern	void *	ereallocz	(void *, size_t, size_t, int,
 				 const char *, int);
 #define erealloczsite		ereallocz
-#define	emalloc(c)		ereallocz(NULL, (c), 0, FALSE, \
+#define	emalloc(c)		ereallocz(NULL, (c), 0, false, \
 					  __FILE__, __LINE__)
-#define	emalloc_zero(c)		ereallocz(NULL, (c), 0, TRUE, \
+#define	emalloc_zero(c)		ereallocz(NULL, (c), 0, true, \
 					  __FILE__, __LINE__)
-#define	erealloc(p, c)		ereallocz(p, (c), 0, FALSE, \
+#define	erealloc(p, c)		ereallocz(p, (c), 0, false, \
 					  __FILE__, __LINE__)
-#define	erealloc_zero(p, n, o)	ereallocz(p, n, (o), TRUE, \
+#define	erealloc_zero(p, n, o)	ereallocz(p, n, (o), true, \
 					  __FILE__, __LINE__)
 extern	char *	estrdup_impl	(const char *, const char *, int);
 #define	estrdup(s) estrdup_impl((s), __FILE__, __LINE__)
 #endif
 
 
-extern	int	atoint		(const char *, long *);
-extern	int	atouint		(const char *, u_long *);
-extern	int	hextoint	(const char *, u_long *);
+extern	bool	atoint		(const char *, long *);
+extern	bool	atouint		(const char *, u_long *);
+extern	bool	hextoint	(const char *, u_long *);
 extern	const char *	humanlogtime	(void);
 extern	const char *	humantime	(time_t);
 extern	char *	mfptoa		(u_int32, u_int32, short);
@@ -148,12 +148,12 @@ extern	const char * sockporttoa(const sockaddr_u *);
 extern	u_short	sock_hash	(const sockaddr_u *);
 extern	int	sockaddr_masktoprefixlen(const sockaddr_u *);
 extern	const char * socktohost	(const sockaddr_u *);
-extern	int	octtoint	(const char *, u_long *);
+extern	bool	octtoint	(const char *, u_long *);
 extern	u_long	ranp2		(int);
 extern	const char *refnumtoa	(sockaddr_u *);
 extern	const char *refid_str	(u_int32, int);
 
-extern	int	decodenetnum	(const char *, sockaddr_u *);
+extern	bool	decodenetnum	(const char *, sockaddr_u *);
 
 extern	const char * FindConfig	(const char *);
 
@@ -204,7 +204,7 @@ extern pset_tod_using	set_tod_using;
 #ifdef OPENSSL
 extern	void	ssl_init		(void);
 extern	void	ssl_check_version	(void);
-extern	int	ssl_init_done;
+extern	bool	ssl_init_done;
 #define	INIT_SSL()				\
 	do {					\
 		if (!ssl_init_done)		\
@@ -257,9 +257,14 @@ extern char *	ntp_strerror	(int e);
 extern double	sys_tick;		/* tick size or time to read */
 extern double	measured_tick;		/* non-overridable sys_tick */
 extern double	sys_fuzz;		/* min clock read latency */
-extern int	trunc_os_clock;		/* sys_tick > measured_tick */
+extern bool	trunc_os_clock;		/* sys_tick > measured_tick */
 
 /* version.c */
 extern const char *Version;		/* version declaration */
+
+/* use these as return values for sort-comparison functions */
+#define COMPARE_GREATERTHAN	1
+#define COMPARE_EQUAL		0
+#define COMPARE_LESSTHAN	-1
 
 #endif	/* NTP_STDLIB_H */

@@ -143,7 +143,7 @@ int sys_samples = DEFSAMPLES;	/* number of samples/server */
 u_long sys_timeout = DEFTIMEOUT; /* timeout time, in TIMER_HZ units */
 struct server *sys_servers;	/* the server list */
 int sys_numservers = 0; 	/* number of servers to poll */
-int sys_authenticate = 0;	/* true when authenticating */
+bool sys_authenticate = false;	/* true when authenticating */
 u_int32 sys_authkey = 0;	/* set to authentication key in use */
 u_long sys_authdelay = 0;	/* authentication delay */
 int sys_version = NTP_VERSION;	/* version to poll with */
@@ -190,7 +190,7 @@ static	void	receive 	(struct recvbuf *);
 static	void	server_data (struct server *, s_fp, l_fp *, u_fp);
 static	void	clock_filter	(struct server *);
 static	struct server *clock_select (void);
-static	int clock_adjust	(void);
+static	bool	clock_adjust	(void);
 static	void	addserver	(char *);
 static	struct server *findserver (sockaddr_u *);
 		void	timer		(void);
@@ -249,7 +249,7 @@ void clear_globals()
    * Systemwide parameters and flags
    */
   sys_numservers = 0;	  /* number of servers to poll */
-  sys_authenticate = 0;   /* true when authenticating */
+  sys_authenticate = false;   /* true when authenticating */
   sys_authkey = 0;	   /* set to authentication key in use */
   sys_authdelay = 0;   /* authentication delay */
   sys_version = NTP_VERSION;  /* version to poll with */
@@ -342,7 +342,7 @@ ntpdatemain (
 			break;
 		case 'a':
 			c = atoi(ntp_optarg);
-			sys_authenticate = 1;
+			sys_authenticate = true;
 			sys_authkey = c;
 			break;
 		case 'b':
@@ -695,7 +695,7 @@ receive(
 	l_fp rec;
 	l_fp ci;
 	int has_mac;
-	int is_authentic;
+	bool is_authentic;
 
 	if (debug)
 		printf("receive(%s)\n", stoa(&rbufp->recv_srcadr));
@@ -754,9 +754,9 @@ receive(
 	 * Check out the authenticity if we're doing that.
 	 */
 	if (!sys_authenticate)
-		is_authentic = 1;
+		is_authentic = true;
 	else {
-		is_authentic = 0;
+		is_authentic = false;
 
 		if (debug > 3)
 			printf("receive: rpkt keyid=%ld sys_authkey=%ld decrypt=%ld\n",
@@ -767,7 +767,7 @@ receive(
 		if (has_mac && ntohl(rpkt->exten[0]) == sys_authkey &&
 			authdecrypt(sys_authkey, (u_int32 *)rpkt, LEN_PKT_NOMAC,
 			(int)(rbufp->recv_length - LEN_PKT_NOMAC)))
-			is_authentic = 1;
+			is_authentic = true;
 		if (debug)
 			printf("receive: authentication %s\n",
 			   is_authentic ? "passed" : "failed");
@@ -1197,7 +1197,7 @@ clock_select(void)
  * clock_adjust - process what we've received, and adjust the time
  *		 if we got anything decent.
  */
-static int
+static bool
 clock_adjust(void)
 {
 	register struct server *sp, *server;
@@ -1216,7 +1216,7 @@ clock_adjust(void)
 	if (server == 0) {
 		msyslog(LOG_ERR,
 			"no server suitable for synchronization found");
-		return(1);
+		return true;
 	}
 
 	if (always_step) {
@@ -1257,7 +1257,7 @@ clock_adjust(void)
 		exit(1);
 #endif /* SYS_WINNT */
 	}
-	return(0);
+	return false;
 }
 
 
@@ -1265,22 +1265,22 @@ clock_adjust(void)
  * is_unreachable - check to see if we have a route to given destination
  *		    (non-blocking).
  */
-static int
+static bool
 is_reachable (sockaddr_u *dst)
 {
 	SOCKET sockfd;
 
 	sockfd = socket(AF(dst), SOCK_DGRAM, 0);
 	if (sockfd == -1) {
-		return 0;
+		return false;
 	}
 
 	if (connect(sockfd, &dst->sa, SOCKLEN(dst))) {
 		closesocket(sockfd);
-		return 0;
+		return false;
 	}
 	closesocket(sockfd);
-	return 1;
+	return true;
 }
 
 
@@ -1549,7 +1549,7 @@ init_alarm(void)
 	tkp.PrivilegeCount = 1;		/* one privilege to set */
 	tkp.Privileges[0].Attributes = SE_PRIVILEGE_ENABLED;
 	/* get set-time privilege for this process. */
-	AdjustTokenPrivileges(hToken, FALSE, &tkp, 0,(PTOKEN_PRIVILEGES) NULL, 0);
+	AdjustTokenPrivileges(hToken, false, &tkp, 0,(PTOKEN_PRIVILEGES) NULL, 0);
 	/* cannot test return value of AdjustTokenPrivileges. */
 	if (GetLastError() != ERROR_SUCCESS)
 		msyslog(LOG_ERR, "AdjustTokenPrivileges failed: %m");
@@ -1716,7 +1716,7 @@ init_io(void)
 #ifndef SYS_WINNT
 # ifdef SYS_VXWORKS
 		{
-			int on = TRUE;
+			bool on = true;
 
 			if (ioctl(fd[nbsock],FIONBIO, &on) == ERROR) {
 				msyslog(LOG_ERR, "ioctl(FIONBIO) fails: %m");
@@ -1963,7 +1963,7 @@ l_step_systime(
 #ifdef SLEWALWAYS
 #ifdef STEP_SLEW
 	l_fp ftmp;
-	int isneg;
+	bool isneg;
 	int n;
 
 	if (debug) return 1;
@@ -1973,9 +1973,9 @@ l_step_systime(
 	ftmp = *ts;
 	if (L_ISNEG(&ftmp)) {
 		L_NEG(&ftmp);
-		isneg = 1;
+		isneg = true;
 	} else
-		isneg = 0;
+		isneg = false;
 
 	if (ftmp.l_ui >= 3) {		/* Step it and slew - we might win */
 		LFPTOD(ts, dtemp);

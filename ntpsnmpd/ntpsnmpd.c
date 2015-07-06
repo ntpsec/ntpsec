@@ -31,12 +31,12 @@
 #include <libntpq.h>
 #include <ntpsnmpd-opts.h>
 
-static int keep_running;
+static bool keep_running;
 void stop_server(int);
 
 void
 stop_server(int a) {
-    keep_running = 0;
+    keep_running = false;
 }
 
 /* The main function just sets up a few things and then enters a loop in which it will 
@@ -45,8 +45,8 @@ stop_server(int a) {
 
 int
 main (int argc, char **argv) {
-  int background = 0; /* start as background process */
-  int use_syslog = 1; /* use syslog for logging */
+	bool background = false; /* start as background process */
+	bool use_syslog = true; /* use syslog for logging */
 
 	{
 		int optct = optionProcess(&ntpsnmpdOptions, argc, argv);
@@ -55,10 +55,10 @@ main (int argc, char **argv) {
 	}
 
 	if (!HAVE_OPT(NOFORK))
-		background = 1;
+		background = true;
 
 	if (!HAVE_OPT(SYSLOG))
-		use_syslog = 0;
+	    use_syslog = false;
 
   /* using the net-snmp syslog facility */
   if (use_syslog)
@@ -97,7 +97,7 @@ main (int argc, char **argv) {
   init_snmp("ntpsnmpd");
 
   /* Signal handler */
-  keep_running = 1;
+  keep_running = true;
   signal(SIGTERM, stop_server);
   signal(SIGINT, stop_server);
 

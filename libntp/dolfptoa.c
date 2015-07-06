@@ -100,7 +100,7 @@ dolfptoa(
 			if (*tp == 10)
 				*tp = 0;
 			else 
-				carry = FALSE;
+				carry = false;
 		}
 
 		if (tp < cp) /* rounding from 999 to 1000 or similiar? */
@@ -150,7 +150,7 @@ mfptoa(
 		M_NEG(fpi, fpf);
 	}
 
-	return dolfptoa(fpi, fpf, isneg, ndec, FALSE);
+	return dolfptoa(fpi, fpf, isneg, ndec, false);
 }
 
 
@@ -168,7 +168,7 @@ mfptoms(
 		M_NEG(fpi, fpf);
 	}
 
-	return dolfptoa(fpi, fpf, isneg, ndec, TRUE);
+	return dolfptoa(fpi, fpf, isneg, ndec, true);
 }
 
 

@@ -174,7 +174,7 @@ struct palisade_unit {
  * Function prototypes
  */
 
-static	int	palisade_start		(int, struct peer *);
+static	bool	palisade_start		(int, struct peer *);
 static	void	palisade_shutdown	(int, struct peer *);
 static	void	palisade_receive	(struct peer *);
 static	void	palisade_poll		(int, struct peer *);

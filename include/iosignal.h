@@ -38,11 +38,11 @@ typedef void (input_handler_t)(l_fp *);
 
 #define	USING_SIGIO()	using_sigio
 
-extern int		using_sigio;
+extern bool		using_sigio;
 
 extern void		block_sigio	(void);
 extern void		unblock_sigio	(void);
-extern int		init_clock_sig	(struct refclockio *);
+extern bool		init_clock_sig	(struct refclockio *);
 extern void		init_socket_sig	(int);
 extern void		set_signal	(input_handler_t *);
 
@@ -52,7 +52,7 @@ extern void		set_signal	(input_handler_t *);
 #else	/* !HAVE_SIGNALED_IO follows */
 # define BLOCKIO()	do {} while (0)
 # define UNBLOCKIO()	do {} while (0)
-# define USING_SIGIO()	FALSE
+# define USING_SIGIO()	false
 #endif
 
 #endif	/* IOSIGNAL_H */

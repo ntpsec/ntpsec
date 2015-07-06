@@ -83,7 +83,7 @@ struct	peer *sys_peer;		/* current peer */
  */
 int	sys_bclient;		/* broadcast client enable */
 double	sys_bdelay;		/* broadcast client default delay */
-int	sys_authenticate;	/* requre authentication for config */
+bool	sys_authenticate;	/* require authentication for config */
 l_fp	sys_authdelay;		/* authentication delay */
 double	sys_offset;	/* current local clock offset */
 double	sys_mindisp = MINDISPERSE; /* minimum distance (s) */
@@ -95,7 +95,7 @@ static int leap_vote_ins;	/* leap consensus for insert */
 static int leap_vote_del;	/* leap consensus for delete */
 keyid_t	sys_private;		/* private value for session seed */
 int	sys_manycastserver;	/* respond to manycast client pkts */
-int	ntp_mode7;		/* respond to ntpdc (mode7) */
+bool	ntp_mode7;		/* respond to ntpdc (mode7) */
 int	peer_ntpdate;		/* active peers in ntpdate mode */
 int	sys_survivors;		/* truest of the truechimers */
 char	*sys_ident = NULL;	/* identity scheme */
@@ -139,9 +139,9 @@ static	void	clock_update	(struct peer *);
 static	void	measure_precision(void);
 static	double	measure_tick_fuzz(void);
 static	int	local_refid	(struct peer *);
-static	int	peer_unfit	(struct peer *);
+static	bool	peer_unfit	(struct peer *);
 #ifdef AUTOKEY
-static	int	group_test	(char *, char *);
+static	bool	group_test	(char *, char *);
 #endif /* AUTOKEY */
 #ifdef WORKER
 void	pool_name_resolved	(int, int, void *, const char *,
@@ -898,7 +898,7 @@ receive(
 			return;			/* not enabled */
 		}
 		if (!AUTH((!(peer2->cast_flags & MDF_POOL) &&
-		    sys_authenticate) | (restrict_mask & (RES_NOPEER |
+			   (sys_authenticate?1:0)) | (restrict_mask & (RES_NOPEER |
 		    RES_DONTTRUST)), is_authentic)) {
 			sys_restricted++;
 			return;			/* access denied */
@@ -961,7 +961,7 @@ receive(
 			sys_restricted++;
 			return;			/* not enabled */
 		}
-		if (!AUTH(sys_authenticate | (restrict_mask &
+		if (!AUTH((sys_authenticate?1:0) | (restrict_mask &
 		    (RES_NOPEER | RES_DONTTRUST)), is_authentic)) {
 			sys_restricted++;
 			return;			/* access denied */
@@ -1075,7 +1075,7 @@ receive(
 			return;
 		}
 #endif /* AUTOKEY */
-		if (!AUTH(sys_authenticate | (restrict_mask &
+		if (!AUTH((sys_authenticate?1:0) | (restrict_mask &
 		    (RES_NOPEER | RES_DONTTRUST)), is_authentic)) {
 
 			/*
@@ -1959,12 +1959,12 @@ clock_update(
 			if (leap_vote_ins > leap_vote_del
 			    && leap_vote_ins > sys_survivors / 2) {
 				get_systime(&now);
-				leapsec_add_dyn(TRUE, now.l_ui, NULL);
+				leapsec_add_dyn(true, now.l_ui, NULL);
 			}
 			if (leap_vote_del > leap_vote_ins
 			    && leap_vote_del > sys_survivors / 2) {
 				get_systime(&now);
-				leapsec_add_dyn(FALSE, now.l_ui, NULL);
+				leapsec_add_dyn(false, now.l_ui, NULL);
 			}
 		}
 		break;
@@ -3662,24 +3662,24 @@ pool_xmit(
 	 * group	different	1		ignore
 	 * * ignore if notrust
 	 */
-int group_test(
+bool group_test(
 	char	*grp,
 	char	*ident
 	)
 {
 	if (grp == NULL)
-		return (0);
+		return false;
 
 	if (strcmp(grp, sys_groupname) == 0)
-		return (0);
+		return false;
 
 	if (ident == NULL)
-		return (1);
+		return true;
 
 	if (strcmp(grp, ident) == 0)
-		return (0);
+		return false;
 
-	return (1);
+	return true;
 }
 #endif /* AUTOKEY */
 
@@ -3768,9 +3768,9 @@ local_refid(
 		unicast_ep = findinterface(&p->srcadr);
 
 	if (unicast_ep != NULL && p->refid == unicast_ep->addr_refid)
-		return TRUE;
+		return true;
 	else
-		return FALSE;
+		return false;
 }
 
 
@@ -3783,7 +3783,7 @@ local_refid(
  * > TEST12 a direct or indirect synchronization loop would form
  * > TEST13 unreachable or noselect
  */
-int				/* FALSE if fit, TRUE if unfit */
+bool				/* false if fit, true if unfit */
 peer_unfit(
 	struct peer *peer	/* peer structure pointer */
 	)
@@ -3863,11 +3863,11 @@ measure_precision(void)
 {
 	/*
 	 * With sys_fuzz set to zero, get_systime() fuzzing of low bits
-	 * is effectively disabled.  trunc_os_clock is FALSE to disable
+	 * is effectively disabled.  trunc_os_clock is false to disable
 	 * get_ostime() simulation of a low-precision system clock.
 	 */
 	set_sys_fuzz(0.);
-	trunc_os_clock = FALSE;
+	trunc_os_clock = false;
 	measured_tick = measure_tick_fuzz();
 	set_sys_tick_precision(measured_tick);
 	msyslog(LOG_INFO, "proto: precision = %.3f usec (%d)",
@@ -3954,7 +3954,7 @@ set_sys_tick_precision(
 			tick, measured_tick);
 		return;
 	} else if (tick > measured_tick) {
-		trunc_os_clock = TRUE;
+		trunc_os_clock = true;
 		msyslog(LOG_NOTICE,
 			"proto: truncating system clock to multiples of %.9f",
 			tick);
@@ -4000,7 +4000,7 @@ init_proto(void)
 	sys_manycastserver = 0;
 	sys_bclient = 0;
 	sys_bdelay = 0;
-	sys_authenticate = 1;
+	sys_authenticate = true;
 	sys_stattime = current_time;
 	orphwait = current_time + sys_orphwait;
 	proto_clr_stats();
@@ -4008,8 +4008,8 @@ init_proto(void)
 		sys_ttl[i] = (u_char)((i * 256) / MAX_TTL);
 		sys_ttlmax = i;
 	}
-	hardpps_enable = 0;
-	stats_control = 1;
+	hardpps_enable = true;
+	stats_control = true;
 }
 
 
@@ -4036,7 +4036,7 @@ proto_config(
 	 * enable and disable commands - arguments are Boolean.
 	 */
 	case PROTO_AUTHENTICATE: /* authentication (auth) */
-		sys_authenticate = value;
+		sys_authenticate = (bool)value;
 		break;
 
 	case PROTO_BROADCLIENT: /* broadcast client (bclient) */
@@ -4069,19 +4069,19 @@ proto_config(
 		break;
 
 	case PROTO_NTP:		/* NTP discipline (ntp) */
-		ntp_enable = value;
+		ntp_enable = (bool)value;
 		break;
 
 	case PROTO_MODE7:	/* mode7 management (ntpdc) */
-		ntp_mode7 = value;
+		ntp_mode7 = (bool)value;
 		break;
 
 	case PROTO_PPS:		/* PPS discipline (pps) */
-		hardpps_enable = value;
+	 	hardpps_enable = (bool)value;
 		break;
 
 	case PROTO_FILEGEN:	/* statistics (stats) */
-		stats_control = value;
+		stats_control = (bool)value;
 		break;
 
 	/*

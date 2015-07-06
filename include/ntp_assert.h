@@ -99,10 +99,10 @@ extern void calysto_assert(unsigned char cnd); /* check whether this holds */
 #define	DEBUG_INVARIANT(x)	INVARIANT(x)
 #define	DEBUG_ENSURE(x)		ENSURE(x)
 # else
-#define	DEBUG_REQUIRE(x)	do {} while (FALSE)
-#define	DEBUG_INSIST(x)		do {} while (FALSE)
-#define	DEBUG_INVARIANT(x)	do {} while (FALSE)
-#define	DEBUG_ENSURE(x)		do {} while (FALSE)
+#define	DEBUG_REQUIRE(x)	do {} while (false)
+#define	DEBUG_INSIST(x)		do {} while (false)
+#define	DEBUG_INVARIANT(x)	do {} while (false)
+#define	DEBUG_ENSURE(x)		do {} while (false)
 # endif
 
 #endif	/* NTP_ASSERT_H */

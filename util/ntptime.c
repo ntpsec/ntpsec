@@ -413,7 +413,7 @@ sprintb(
 	char *cp;
 	char *cplim;
 	int i;
-	int any;
+	bool any;
 	char c;
 	static char buf[132];
 
@@ -427,7 +427,7 @@ sprintb(
 		bits++;
 		*cp++ = ' ';
 		*cp++ = '(';
-		any = FALSE;
+		any = false;
 		while ((i = *bits++) != 0) {
 			if (v & (1 << (i - 1))) {
 				if (any) {
@@ -435,7 +435,7 @@ sprintb(
 					if (cp >= cplim)
 						goto overrun;
 				}
-				any = TRUE;
+				any = true;
 				for (; (c = *bits) > 32; bits++) {
 					*cp++ = c;
 					if (cp >= cplim)

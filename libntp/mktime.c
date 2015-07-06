@@ -70,9 +70,6 @@
 #define DSTMINUTES 60
 #endif
 
-#define FALSE 0
-#define TRUE 1
-
 /* some constants from tzfile.h */
 #define SECSPERMIN      60
 #define MINSPERHOUR     60
@@ -179,7 +176,7 @@ tmcomp(
 static time_t
 time2(
 	struct tm *	tmp,
-	int * 		okayp,
+	bool * 		okayp,
 	int		usezn
 	)
 {
@@ -190,7 +187,7 @@ time2(
 	time_t				t;
 	struct tm			yourtm, mytm;
 
-	*okayp = FALSE;
+	*okayp = false;
 	yourtm = *tmp;
 	if (yourtm.tm_sec >= SECSPERMIN + 2 || yourtm.tm_sec < 0)
 		normalize(&yourtm.tm_min, &yourtm.tm_sec, SECSPERMIN);
@@ -253,7 +250,7 @@ time2(
 		*tmp = *localtime(&t);
 	else
 		*tmp = *gmtime(&t);
-	*okayp = TRUE;
+	*okayp = true;
 	return t;
 }
 #else
@@ -267,7 +264,7 @@ time1(
 	)
 {
 	register time_t			t;
-	int				okay;
+	bool				okay;
 
 	if (tmp->tm_isdst > 1)
 		tmp->tm_isdst = 1;

@@ -52,7 +52,7 @@
 static	char *key_file_name;		/* keys file name */
 static char	  *leapfile_name;		/* leapseconds file name */
 static struct stat leapfile_stat;	/* leapseconds file stat() buffer */
-static int /*BOOL*/have_leapfile = FALSE;
+static bool        have_leapfile = false;
 char	*stats_drift_file;		/* frequency file name */
 static	char *stats_temp_file;		/* temp frequency file name */
 static double wander_resid;		/* last frequency update */
@@ -84,7 +84,7 @@ static FILEGEN timingstats;
  * This controls whether stats are written to the fileset. Provided
  * so that ntpdc can turn off stats when the file system fills up. 
  */
-int stats_control;
+bool stats_control;
 
 /*
  * Last frequency written to file.
@@ -431,13 +431,13 @@ stats_config(
 			    "statsdir too long (>%d, sigh)",
 			    (int)sizeof(statsdir) - 2);
 		} else {
-			int add_dir_sep;
+			bool add_dir_sep;
 			int value_l;
 
 			/* Add a DIR_SEP unless we already have one. */
 			value_l = strlen(value);
 			if (0 == value_l)
-				add_dir_sep = FALSE;
+				add_dir_sep = false;
 			else
 				add_dir_sep = (DIR_SEP !=
 				    value[value_l - 1]);
@@ -480,7 +480,7 @@ stats_config(
 		memcpy(leapfile_name, value, len + 1);
 
 		if (leapsec_load_file(
-			    leapfile_name, &leapfile_stat, TRUE, TRUE))
+			    leapfile_name, &leapfile_stat, true, true))
 		{
 			leap_signature_t lsig;
 
@@ -496,12 +496,12 @@ stats_config(
 					  : "expires",
 				      fstostr(lsig.etime));
 
-			have_leapfile = TRUE;
+			have_leapfile = true;
 
 			/* force an immediate daily expiration check of
 			 * the leap seconds table
 			 */
-			check_leap_expiration(TRUE, now.l_ui, &ttnow);
+			check_leap_expiration(true, now.l_ui, &ttnow);
 		}
 		break;
 
@@ -878,7 +878,7 @@ check_leap_file(
 	if (leapsec_load_file(
 		    leapfile_name, &leapfile_stat,
 		    !have_leapfile, is_daily_check))
-		have_leapfile = TRUE;
+		have_leapfile = true;
 	else if (!have_leapfile)
 		return;
 
