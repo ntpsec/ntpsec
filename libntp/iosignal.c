@@ -63,7 +63,7 @@ static input_handler_t *input_handler_callback = NULL;
  * if the handler executes a piece of code that is normally
  * bracketed by BLOCKIO()/UNBLOCKIO() calls.
  */
-static int sigio_handler_active = 0;
+static int sigio_handler_active = 0;	/* semaphore, not bool */
 
 /*
  * SIGPOLL and SIGIO ROUTINES.
@@ -74,7 +74,7 @@ static int sigio_handler_active = 0;
 /*
  * TTY initialization routines.
  */
-int
+bool
 init_clock_sig(
 	struct refclockio *rio
 	)
@@ -86,9 +86,9 @@ init_clock_sig(
 		{
 			msyslog(LOG_ERR,
 				"init_clock_sig: ioctl(I_SETSIG, S_INPUT) failed: %m");
-			return 1;
+			return true;
 		}
-		return 0;
+		return false;
 	}
 # else
 	/*
@@ -125,7 +125,7 @@ init_clock_sig(
 			exit(1);
 			/*NOTREACHED*/
 		}
-		return 0;
+		return false;
 	}
 #  endif /* SYS_HPUX: FIOSSAIOOWN && FIOSNBIO && FIOSSAIOSTAT */
 	/* Was: defined(SYS_AIX) && !defined(_BSD) */
@@ -141,21 +141,21 @@ init_clock_sig(
 		if (ioctl(rio->fd, FIOASYNC, (char *)&on) == -1)
 		{
 			msyslog(LOG_ERR, "ioctl(FIOASYNC) fails for clock I/O: %m");
-			return 1;
+			return true;
 		}
 		pgrp = -getpid();
 		if (ioctl(rio->fd, FIOSETOWN, (char*)&pgrp) == -1)
 		{
 			msyslog(LOG_ERR, "ioctl(FIOSETOWN) fails for clock I/O: %m");
-			return 1;
+			return true;
 		}
 
 		if (fcntl(rio->fd, F_SETFL, FNDELAY|FASYNC) < 0)
 		{
 			msyslog(LOG_ERR, "fcntl(FNDELAY|FASYNC) fails for clock I/O: %m");
-			return 1;
+			return true;
 		}
-		return 0;
+		return false;
 	}
 #  endif /* AIX && !BSD: !_BSD && FIOASYNC && FIOSETOWN */
 #  ifndef  CLOCK_DONE
@@ -174,23 +174,23 @@ init_clock_sig(
 		if (ioctl(rio->fd, TIOCSCTTY, 0) == -1)
 		{
 			msyslog(LOG_ERR, "ioctl(TIOCSCTTY, 0) fails for clock I/O: %m");
-			return 1;
+			return true;
 		}
 #	endif /* TIOCSCTTY && USE_FSETOWNCTTY */
 
 		if (fcntl(rio->fd, F_SETOWN, getpid()) == -1)
 		{
 			msyslog(LOG_ERR, "fcntl(F_SETOWN) fails for clock I/O: %m");
-			return 1;
+			return true;
 		}
 
 		if (fcntl(rio->fd, F_SETFL, FNDELAY|FASYNC) < 0)
 		{
 			msyslog(LOG_ERR,
 				"fcntl(FNDELAY|FASYNC) fails for clock I/O: %m");
-			return 1;
+			return true;
 		}
-		return 0;
+		return false;
 	}
 #  endif /* CLOCK_DONE */
 # endif /* !USE_TTY_SIGPOLL  */

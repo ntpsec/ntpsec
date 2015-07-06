@@ -167,7 +167,7 @@ static	char *	mx4200_parse_t	(struct peer *);
 static	char *	mx4200_parse_p	(struct peer *);
 static	char *	mx4200_parse_s	(struct peer *);
 int	mx4200_cmpl_fp	(const void *, const void *);
-static	int	mx4200_config	(struct peer *);
+static	bool	mx4200_config	(struct peer *);
 static	void	mx4200_ref	(struct peer *);
 static	void	mx4200_send	(struct peer *, char *, ...)
     __attribute__ ((format (printf, 2, 3)));
@@ -195,7 +195,7 @@ struct	refclock refclock_mx4200 = {
 /*
  * mx4200_start - open the devices and initialize data for processing
  */
-static int
+static bool
 mx4200_start(
 	int unit,
 	struct peer *peer
@@ -212,7 +212,7 @@ mx4200_start(
 	snprintf(gpsdev, sizeof(gpsdev), DEVICE, unit);
 	fd = refclock_open(gpsdev, SPEED232, LDISC_PPS);
 	if (fd <= 0)
-		return 0;
+		return false;
 
 	/*
 	 * Allocate unit structure
@@ -227,7 +227,7 @@ mx4200_start(
 		close(fd);
 		pp->io.fd = -1;
 		free(up);
-		return (0);
+		return false;
 	}
 	pp->unitptr = up;
 
@@ -267,7 +267,7 @@ mx4200_shutdown(
 /*
  * mx4200_config - Configure the receiver
  */
-static int
+static bool
 mx4200_config(
 	struct peer *peer
 	)
@@ -311,18 +311,18 @@ mx4200_config(
 		perror("time_pps_create");
 		msyslog(LOG_ERR,
 			"mx4200_config: time_pps_create failed: %m");
-		return (0);
+		return false;
 	}
 	if (time_pps_getcap(up->pps_h, &mode) < 0) {
 		msyslog(LOG_ERR,
 			"mx4200_config: time_pps_getcap failed: %m");
-		return (0);
+		return false;
 	}
 
 	if (time_pps_getparams(up->pps_h, &up->pps_p) < 0) {
 		msyslog(LOG_ERR,
 			"mx4200_config: time_pps_getparams failed: %m");
-		return (0);
+		return false;
 	}
 
 	/* nb. only turn things on, if someone else has turned something
@@ -461,7 +461,7 @@ mx4200_config(
 			/* nmea version for cga & gll output */
 			/* pass-through control */
 
-	return (1);
+	return true;
 }
 
 /*
@@ -1132,21 +1132,21 @@ mx4200_jday(
 	)
 {
 	register int day, i;
-	int leap_year;
+	bool leap_year;
 
 	/*
 	 * Is this a leap year ?
 	 */
 	if (year % 4) {
-		leap_year = 0; /* FALSE */
+		leap_year = false;
 	} else {
 		if (year % 100) {
-			leap_year = 1; /* TRUE */
+			leap_year = true;
 		} else {
 			if (year % 400) {
-				leap_year = 0; /* FALSE */
+			    leap_year = false;
 			} else {
-				leap_year = 1; /* TRUE */
+				leap_year = true;
 			}
 		}
 	}
@@ -1482,7 +1482,7 @@ mx4200_parse_s(
 /*
  * Process a PPS signal, placing a timestamp in pp->lastrec.
  */
-static int
+static bool
 mx4200_pps(
 	struct peer *peer
 	)
@@ -1508,14 +1508,14 @@ mx4200_pps(
 		  "mx4200_pps: time_pps_fetch: serial=%lu, %m\n",
 		     (unsigned long)up->pps_i.assert_sequence);
 		refclock_report(peer, CEVNT_FAULT);
-		return(1);
+		return true;
 	}
 	if (temp_serial == up->pps_i.assert_sequence) {
 		mx4200_debug(peer,
 		   "mx4200_pps: assert_sequence serial not incrementing: %lu\n",
 			(unsigned long)up->pps_i.assert_sequence);
 		refclock_report(peer, CEVNT_FAULT);
-		return(1);
+		return true;
 	}
 	/*
 	 * Check pps serial number against last one
@@ -1541,7 +1541,7 @@ mx4200_pps(
 	pp->lastrec.l_uf = ((double)(up->pps_i.assert_timestamp.tv_nsec) *
 			   4.2949672960) + 0.5;
 
-	return(0);
+	return false;
 }
 
 /*

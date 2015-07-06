@@ -104,13 +104,13 @@
 struct instance {
 	struct peer *peer;		/* peer */
 	u_int  pollcnt;			/* poll message counter */
-	u_int  polled;			/* Hand in a time sample? */
+	bool  polled;			/* Hand in a time sample? */
 #ifdef HAVE_PPSAPI
 	pps_params_t pps_params;	/* pps parameters */
 	pps_info_t pps_info;		/* last pps data */
 	pps_handle_t pps_handle;	/* pps handle */
-	u_int assert;			/* pps edge to use */
-	u_int hardpps;			/* enable kernel mode */
+	bool assert;			/* pps edge to use */
+	bool hardpps;			/* enable kernel mode */
 	struct timespec ts;		/* last timestamp */
 #endif
 	l_fp limit;
@@ -120,7 +120,7 @@ struct instance {
 	u_int32 lastsweek;		/* last seconds into GPS week */
 	time_t timecode;		/* current ntp timecode */
 	u_int32 stime;			/* used to detect firmware bug */
-	int wantid;			/* don't reconfig on channel id msg */
+	bool wantid;			/* don't reconfig on channel id msg */
 	u_int  moving;			/* mobile platform? */
 	u_char sloppyclockflag;		/* fudge flags */
 	u_short sbuf[512];		/* local input buffer */
@@ -132,7 +132,7 @@ struct instance {
  */
 static	void	jupiter_canmsg	(struct instance *, u_int);
 static	u_short	jupiter_cksum	(u_short *, u_int);
-static	int	jupiter_config	(struct instance *);
+static	bool	jupiter_config	(struct instance *);
 static	void	jupiter_debug	(struct peer *, const char *,
 				 const char *, ...)
 			__attribute__ ((format (printf, 3, 4)));
@@ -143,8 +143,8 @@ static	void	jupiter_poll	(int, struct peer *);
 static	void	jupiter_control	(int, const struct refclockstat *,
 				 struct refclockstat *, struct peer *);
 #ifdef HAVE_PPSAPI
-static	int	jupiter_ppsapi	(struct instance *);
-static	int	jupiter_pps	(struct instance *);
+static	bool	jupiter_ppsapi	(struct instance *);
+static	bool	jupiter_pps	(struct instance *);
 #endif /* HAVE_PPSAPI */
 static	int	jupiter_recv	(struct instance *);
 static	void	jupiter_receive (struct recvbuf *rbufp);
@@ -152,7 +152,7 @@ static	void	jupiter_reqmsg	(struct instance *, u_int, u_int);
 static	void	jupiter_reqonemsg(struct instance *, u_int);
 static	char *	jupiter_send	(struct instance *, struct jheader *);
 static	void	jupiter_shutdown(int, struct peer *);
-static	int	jupiter_start	(int, struct peer *);
+static	bool	jupiter_start	(int, struct peer *);
 
 /*
  * Transfer vector
@@ -170,7 +170,7 @@ struct	refclock refclock_jupiter = {
 /*
  * jupiter_start - open the devices and initialize data for processing
  */
-static int
+static bool
 jupiter_start(
 	int unit,
 	struct peer *peer
@@ -190,7 +190,7 @@ jupiter_start(
 		jupiter_debug(peer, "jupiter_start", "open %s: %m",
 			      gpsdev);
 		/* coverity[leaked_handle] */
-		return (0);
+		return false;
 	}
 
 	/* Allocate unit structure */
@@ -205,7 +205,7 @@ jupiter_start(
 		close(fd);
 		pp->io.fd = -1;
 		free(instance);
-		return (0);
+		return false;
 	}
 	pp->unitptr = instance;
 
@@ -217,8 +217,8 @@ jupiter_start(
 	memcpy((char *)&pp->refid, REFID, REFIDLEN);
 
 #ifdef HAVE_PPSAPI
-	instance->assert = 1;
-	instance->hardpps = 0;
+	instance->assert = true;
+	instance->hardpps = false;
 	/*
 	 * Start the PPSAPI interface if it is there. Default to use
 	 * the assert edge and do not enable the kernel hardpps.
@@ -236,12 +236,12 @@ jupiter_start(
 	if (!jupiter_config(instance))
 		goto clean_up;
 
-	return (1);
+	return true;
 
 clean_up:
 	jupiter_shutdown(unit, peer);
 	pp->unitptr = 0;
-	return (0);
+	return false;
 }
 
 /*
@@ -273,7 +273,7 @@ jupiter_shutdown(int unit, struct peer *peer)
 /*
  * jupiter_config - Configure the receiver
  */
-static int
+static bool
 jupiter_config(struct instance *instance)
 {
 	jupiter_debug(instance->peer, __func__, "init receiver");
@@ -287,7 +287,7 @@ jupiter_config(struct instance *instance)
 		jupiter_debug(instance->peer, __func__, "mobile platform");
 
 	instance->pollcnt     = 2;
-	instance->polled      = 0;
+	instance->polled      = false;
 	instance->gpos_gweek = 0;
 	instance->gpos_sweek = 0;
 	instance->gweek = 0;
@@ -303,7 +303,7 @@ jupiter_config(struct instance *instance)
 	jupiter_reqonemsg(instance, JUPITER_O_ID);
 
 	/* Flag that this the id was requested (so we don't get called again) */
-	instance->wantid = 1;
+	instance->wantid = true;
 
 	/* Request perodic time mark pulse messages */
 	jupiter_reqmsg(instance, JUPITER_O_PULSE, 1);
@@ -317,14 +317,14 @@ jupiter_config(struct instance *instance)
 	else
 		jupiter_platform(instance, JUPITER_I_PLAT_LOW);
 
-	return (1);
+	return true;
 }
 
 #ifdef HAVE_PPSAPI
 /*
  * Initialize PPSAPI
  */
-int
+bool
 jupiter_ppsapi(
 	struct instance *instance	/* unit structure pointer */
 	)
@@ -334,7 +334,7 @@ jupiter_ppsapi(
 	if (time_pps_getcap(instance->pps_handle, &capability) < 0) {
 		msyslog(LOG_ERR,
 		    "refclock_jupiter: time_pps_getcap failed: %m");
-		return (0);
+		return false;
 	}
 	memset(&instance->pps_params, 0, sizeof(pps_params_t));
 	if (!instance->assert)
@@ -345,13 +345,13 @@ jupiter_ppsapi(
 		msyslog(LOG_ERR,
 		    "refclock_jupiter: invalid capture edge %d",
 		    instance->assert);
-		return (0);
+		return false;
 	}
 	instance->pps_params.mode |= PPS_TSFMT_TSPEC;
 	if (time_pps_setparams(instance->pps_handle, &instance->pps_params) < 0) {
 		msyslog(LOG_ERR,
 		    "refclock_jupiter: time_pps_setparams failed: %m");
-		return (0);
+		return false;
 	}
 	if (instance->hardpps) {
 		if (time_pps_kcbind(instance->pps_handle, PPS_KC_HARDPPS,
@@ -359,9 +359,9 @@ jupiter_ppsapi(
 				    PPS_TSFMT_TSPEC) < 0) {
 			msyslog(LOG_ERR,
 			    "refclock_jupiter: time_pps_kcbind failed: %m");
-			return (0);
+			return false;
 		}
-		hardpps_enable = 1;
+		hardpps_enable = true;
 	}
 /*	instance->peer->precision = PPS_PRECISION; */
 
@@ -375,15 +375,15 @@ jupiter_ppsapi(
 	}
 #endif
 
-	return (1);
+	return true;
 }
 
 /*
  * Get PPSAPI timestamps.
  *
- * Return 0 on failure and 1 on success.
+ * Return false on failure and true on success.
  */
-static int
+static bool
 jupiter_pps(struct instance *instance)
 {
 	pps_info_t pps_info;
@@ -395,35 +395,35 @@ jupiter_pps(struct instance *instance)
 	 * Convert the timespec nanoseconds field to ntp l_fp units.
 	 */ 
 	if (instance->pps_handle == 0)
-		return 1;
+		return true;
 	timeout.tv_sec = 0;
 	timeout.tv_nsec = 0;
 	memcpy(&pps_info, &instance->pps_info, sizeof(pps_info_t));
 	if (time_pps_fetch(instance->pps_handle, PPS_TSFMT_TSPEC, &instance->pps_info,
 	    &timeout) < 0)
-		return 1;
+		return true;
 	if (instance->pps_params.mode & PPS_CAPTUREASSERT) {
 		if (pps_info.assert_sequence ==
 		    instance->pps_info.assert_sequence)
-			return 1;
+			return true;
 		ts = instance->pps_info.assert_timestamp;
 	} else if (instance->pps_params.mode & PPS_CAPTURECLEAR) {
 		if (pps_info.clear_sequence ==
 		    instance->pps_info.clear_sequence)
-			return 1;
+			return true;
 		ts = instance->pps_info.clear_timestamp;
 	} else {
-		return 1;
+		return true;
 	}
 	if ((instance->ts.tv_sec == ts.tv_sec) && (instance->ts.tv_nsec == ts.tv_nsec))
-		return 1;
+		return true;
 	instance->ts = ts;
 
 	tstmp.l_ui = (u_int32)ts.tv_sec + JAN_1970;
 	dtemp = ts.tv_nsec * FRAC / 1e9;
 	tstmp.l_uf = (u_int32)dtemp;
 	instance->peer->procptr->lastrec = tstmp;
-	return 0;
+	return false;
 }
 #endif /* HAVE_PPSAPI */
 
@@ -455,14 +455,14 @@ jupiter_poll(int unit, struct peer *peer)
 
 		/* Request the receiver id to trigger a reconfig */
 		jupiter_reqonemsg(instance, JUPITER_O_ID);
-		instance->wantid = 0;
+		instance->wantid = false;
 	}
 
 	/*
 	 * polled every 64 seconds. Ask jupiter_receive to hand in
 	 * a timestamp.
 	 */
-	instance->polled = 1;
+	instance->polled = true;
 	pp->polls++;
 }
 
@@ -513,7 +513,8 @@ static void
 jupiter_receive(struct recvbuf *rbufp)
 {
 	size_t bpcnt;
-	int cc, size, ppsret;
+	int cc, size;
+	bool ppsret;
 	time_t last_timecode;
 	u_int32 laststime;
 	const char *cp;
@@ -621,7 +622,7 @@ jupiter_receive(struct recvbuf *rbufp)
 			 */
 			if (!instance->polled)
 				break;
-			instance->polled = 0;
+			instance->polled = false;
 
 			/*
 			 * It's a live one!  Remember this time.
@@ -640,7 +641,7 @@ jupiter_receive(struct recvbuf *rbufp)
 			 * We have succeeded in answering the poll.
 			 * Turn off the flag and return
 			 */
-			instance->polled = 0;
+			instance->polled = false;
 			break;
 
 		case JUPITER_O_GPOS:
@@ -679,7 +680,7 @@ jupiter_receive(struct recvbuf *rbufp)
 			    "jupiter_receive: %s chan ver %s, %s (%s)",
 			    ip->chans, ip->vers, ip->date, ip->opts);
 			if (instance->wantid)
-				instance->wantid = 0;
+				instance->wantid = false;
 			else {
 				jupiter_debug(peer, __func__, "reset receiver");
 				jupiter_config(instance);

@@ -11,10 +11,10 @@ sntp_init_logging(
 	const char *prog
 	)
 {
-	msyslog_term = TRUE;
-	init_logging(prog, 0, FALSE);
-	msyslog_term_pid = FALSE;
-	msyslog_include_timestamp = FALSE;
+	msyslog_term = true;
+	init_logging(prog, 0, false);
+	msyslog_term_pid = false;
+	msyslog_include_timestamp = false;
 }
 
 
@@ -23,7 +23,7 @@ open_logfile(
 	const char *logfile
 	)
 {
-	change_logfile(logfile, FALSE);
+	change_logfile(logfile, false);
 	atexit(cleanup_log);
 }
 
@@ -31,7 +31,7 @@ open_logfile(
 static void
 cleanup_log(void)
 {
-	syslogit = TRUE;
+	syslogit = true;
 	fflush(syslog_file);
 	fclose(syslog_file);
 	syslog_file = NULL;

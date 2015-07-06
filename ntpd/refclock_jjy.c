@@ -164,10 +164,10 @@ struct jjyunit {
 	int 	linespeed ;         /* SPEED232_XXXXXXXXXX */
 	short	linediscipline ;    /* LDISC_CLK or LDISC_RAW */
 /* Receiving data */
-	char	bInitError ;        /* Set by jjy_start if any error during initialization */
+	bool	bInitError ;        /* Set by jjy_start if any error during initialization */
 	short	iProcessState ;     /* JJY_PROCESS_STATE_XXXXXX */
-	char	bReceiveFlag ;      /* Set and reset by jjy_receive */
-	char	bLineError ;	    /* Reset by jjy_poll / Set by jjy_receive_xxxxxxxx*/
+	bool	bReceiveFlag ;      /* Set and reset by jjy_receive */
+	bool	bLineError ;	    /* Reset by jjy_poll / Set by jjy_receive_xxxxxxxx*/
 	short	iCommandSeq ;       /* 0:Idle  Non-Zero:Issued */
 	short	iReceiveSeq ;
 	int 	iLineCount ;
@@ -179,17 +179,17 @@ struct jjyunit {
 	char	sRawBuf [ MAX_RAWBUF ] ;
 	int 	iRawBufLen ;
 	struct	jjyRawDataBreak *pRawBreak ;
-	char	bWaitBreakString ;
+	bool	bWaitBreakString ;
 	char	sLineBuf [ MAX_RAWBUF ] ;
 	int 	iLineBufLen ;
 	char	sTextBuf [ MAX_RAWBUF ] ;
 	int 	iTextBufLen ;
-	char	bSkipCntrlCharOnly ;
+	bool	bSkipCntrlCharOnly ;
 /* Telephone JJY auto measurement of the loopback delay */
-	char	bLoopbackMode ;
+	bool	bLoopbackMode ;
 	short	iLoopbackCount ;
 	struct	timeval sendTime[MAX_LOOPBACK], delayTime[MAX_LOOPBACK] ;
-	char	bLoopbackTimeout[MAX_LOOPBACK] ;
+	bool	bLoopbackTimeout[MAX_LOOPBACK] ;
 	short	iLoopbackValidCount ;
 /* Telephone JJY timer */
 	short	iTeljjySilentTimer ;
@@ -291,14 +291,14 @@ struct jjyunit {
  * Function prototypes
  */
 
-static	int 	jjy_start			(int, struct peer *);
+static	bool 	jjy_start			(int, struct peer *);
 static	int 	jjy_start_tristate_jjy01	(int, struct peer *, struct jjyunit *);
 static	int 	jjy_start_cdex_jst2000		(int, struct peer *, struct jjyunit *);
 static	int 	jjy_start_echokeisokuki_lt2000	(int, struct peer *, struct jjyunit *);
 static	int 	jjy_start_citizentic_jjy200	(int, struct peer *, struct jjyunit *);
 static	int 	jjy_start_tristate_gpsclock01	(int, struct peer *, struct jjyunit *);
 static	int 	jjy_start_seiko_tsys_tdc_300	(int, struct peer *, struct jjyunit *);
-static	int 	jjy_start_telephone		(int, struct peer *, struct jjyunit *);
+static	bool 	jjy_start_telephone		(int, struct peer *, struct jjyunit *);
 
 static	void	jjy_shutdown			(int, struct peer *);
 
@@ -353,23 +353,10 @@ struct	refclock refclock_jjy = {
 };
 
 /*
- * Start up driver return code
- */
-#define	RC_START_SUCCESS	1
-#define	RC_START_ERROR		0
-
-/*
  * Local constants definition
  */
 
 #define	MAX_LOGTEXT	100
-
-#ifndef	TRUE
-#define	TRUE	(0==0)
-#endif
-#ifndef	FALSE
-#define	FALSE	(!TRUE)
-#endif
 
 /* Local constants definition for the return code of the jjy_receive_xxxxxxxx */
 
@@ -424,7 +411,7 @@ struct	refclock refclock_jjy = {
 /**************************************************************************************************/
 /*  jjy_start - open the devices and initialize data for processing                               */
 /**************************************************************************************************/
-static int
+static bool
 jjy_start ( int unit, struct peer *peer )
 {
 
@@ -445,19 +432,19 @@ jjy_start ( int unit, struct peer *peer )
 	up = emalloc( sizeof(*up) ) ;
 	if ( up == NULL ) {
 		msyslog ( LOG_ERR, "refclock_jjy.c : jjy_start : emalloc" ) ;
-		return RC_START_ERROR ;
+		return false ;
 	}
 	memset ( up, 0, sizeof(*up) ) ;
 
-	up->bInitError = FALSE ;
+	up->bInitError = false ;
 	up->iProcessState = JJY_PROCESS_STATE_IDLE ;
-	up->bReceiveFlag = FALSE ;
+	up->bReceiveFlag = false ;
 	up->iCommandSeq = 0 ;
 	up->iLineCount = 0 ;
 	up->iTimestampCount = 0 ;
-	up->bWaitBreakString = FALSE ;
+	up->bWaitBreakString = false ;
 	up->iRawBufLen = up->iLineBufLen = up->iTextBufLen = 0 ;
-	up->bSkipCntrlCharOnly = TRUE ;
+	up->bSkipCntrlCharOnly = true ;
 
 	/* Set up the device name */
 	snprintf( sDeviceName, sizeof(sDeviceName), DEVICE, unit ) ;
@@ -498,7 +485,7 @@ jjy_start ( int unit, struct peer *peer )
 			msyslog ( LOG_ERR, "JJY receiver [ %s mode %d ] : Unsupported mode",
 				  ntoa(&peer->srcadr), peer->ttl ) ;
 			free ( (void*) up ) ;
-		return RC_START_ERROR ;
+		return false ;
 		}
 	}
 
@@ -506,7 +493,7 @@ jjy_start ( int unit, struct peer *peer )
 		msyslog ( LOG_ERR, "JJY receiver [ %s mode %d ] : Initialize error",
 			  ntoa(&peer->srcadr), peer->ttl ) ;
 		free ( (void*) up ) ;
-		return RC_START_ERROR ;
+		return false ;
 	}
 
 	/* Open the device */
@@ -514,7 +501,7 @@ jjy_start ( int unit, struct peer *peer )
 	if ( fd <= 0 ) {
 		free ( (void*) up ) ;
 		/* coverity[leaked_handle] */
-		return RC_START_ERROR ;
+		return false ;
 	}
 
 	/*
@@ -533,7 +520,7 @@ jjy_start ( int unit, struct peer *peer )
 		pp->io.fd = -1 ;
 		free ( up ) ;
 		pp->unitptr = NULL ;
-		return RC_START_ERROR ;
+		return false ;
 	}
 	memcpy( (char*)&pp->refid, REFID, strlen(REFID) ) ;
 
@@ -542,7 +529,7 @@ jjy_start ( int unit, struct peer *peer )
 	snprintf( sLog, sizeof(sLog), "minpoll=%d maxpoll=%d", peer->minpoll, peer->maxpoll ) ;
 	jjy_write_clockstats( peer, JJY_CLOCKSTATS_MARK_JJY, sLog ) ;
 
-	return RC_START_SUCCESS ;
+	return true;
 
 }
 
@@ -668,7 +655,7 @@ jjy_receive ( struct recvbuf *rbufp )
 	up->iLineCount ++ ;
 
 	up->iProcessState = JJY_PROCESS_STATE_RECEIVE ;
-	up->bReceiveFlag = TRUE ;
+	up->bReceiveFlag = true ;
 
 	iReadRawBuf = 0 ;
 	iBreakPosition = up->iRawBufLen - 1 ;
@@ -815,7 +802,7 @@ jjy_receive ( struct recvbuf *rbufp )
 		}
 	}
 
-	up->bReceiveFlag = FALSE ;
+	up->bReceiveFlag = false ;
 
 }
 
@@ -908,7 +895,7 @@ jjy_poll ( int unit, struct peer *peer )
 	up->iCommandSeq = 0 ;
 	up->iReceiveSeq = 0 ;
 	up->iLineCount = 0 ;
-	up->bLineError = FALSE ;
+	up->bLineError = false ;
 	up->iRawBufLen = 0 ;
 
 	switch ( up->unittype ) {
@@ -970,7 +957,7 @@ jjy_timer ( int unit, struct peer *peer )
 	if ( up->bReceiveFlag ) {
 #ifdef DEBUG
 		if ( debug ) {
-			printf ( "refclock_jjy.c : jjy_timer : up->bReceiveFlag= TRUE : Timer skipped.\n" ) ;
+			printf ( "refclock_jjy.c : jjy_timer : up->bReceiveFlag= true : Timer skipped.\n" ) ;
 		}
 #endif
 		return ;
@@ -1180,7 +1167,7 @@ jjy_receive_tristate_jjy01 ( struct recvbuf *rbufp )
 		snprintf( sLog, sizeof(sLog)-1, JJY_CLOCKSTATS_MESSAGE_UNEXPECTED_REPLY,
 			  pBuf ) ;
 		jjy_write_clockstats( peer, JJY_CLOCKSTATS_MARK_ERROR, sLog ) ;
-		up->bLineError = TRUE ;
+		up->bLineError = true ;
 		return JJY_RECEIVE_ERROR ;
 	}
 
@@ -1192,7 +1179,7 @@ jjy_receive_tristate_jjy01 ( struct recvbuf *rbufp )
 		snprintf( sLog, sizeof(sLog)-1, JJY_CLOCKSTATS_MESSAGE_INVALID_LENGTH,
 			  iLen ) ;
 		jjy_write_clockstats( peer, JJY_CLOCKSTATS_MARK_ERROR, sLog ) ;
-		up->bLineError = TRUE ;
+		up->bLineError = true ;
 		return JJY_RECEIVE_ERROR ;
 	}
 
@@ -1212,7 +1199,7 @@ jjy_receive_tristate_jjy01 ( struct recvbuf *rbufp )
 			snprintf( sLog, sizeof(sLog)-1, JJY_CLOCKSTATS_MESSAGE_SSCANF_INVALID_DATE,
 				  rc, up->year, up->month, up->day ) ;
 			jjy_write_clockstats( peer, JJY_CLOCKSTATS_MARK_ERROR, sLog ) ;
-			up->bLineError = TRUE ;
+			up->bLineError = true ;
 			return JJY_RECEIVE_ERROR ;
 		}
 
@@ -1226,7 +1213,7 @@ jjy_receive_tristate_jjy01 ( struct recvbuf *rbufp )
 			snprintf( sLog, sizeof(sLog)-1, JJY_CLOCKSTATS_MESSAGE_TOO_MANY_REPLY,
 				  up->iTimestampCount ) ;
 			jjy_write_clockstats( peer, JJY_CLOCKSTATS_MARK_ERROR, sLog ) ;
-			up->bLineError = TRUE ;
+			up->bLineError = true ;
 			return JJY_RECEIVE_ERROR ;
 		}
 
@@ -1239,7 +1226,7 @@ jjy_receive_tristate_jjy01 ( struct recvbuf *rbufp )
 			snprintf( sLog, sizeof(sLog)-1, JJY_CLOCKSTATS_MESSAGE_SSCANF_INVALID_TIME,
 				  rc, up->hour, up->minute, up->second ) ;
 			jjy_write_clockstats( peer, JJY_CLOCKSTATS_MARK_ERROR, sLog ) ;
-			up->bLineError = TRUE ;
+			up->bLineError = true ;
 			return JJY_RECEIVE_ERROR ;
 		}
 
@@ -1262,7 +1249,7 @@ jjy_receive_tristate_jjy01 ( struct recvbuf *rbufp )
 			snprintf( sLog, sizeof(sLog)-1, JJY_CLOCKSTATS_MESSAGE_INVALID_REPLY,
 				  pBuf ) ;
 			jjy_write_clockstats( peer, JJY_CLOCKSTATS_MARK_ERROR, sLog ) ;
-			up->bLineError = TRUE ;
+			up->bLineError = true ;
 			return JJY_RECEIVE_ERROR ;
 		}
 
@@ -1279,7 +1266,7 @@ jjy_receive_tristate_jjy01 ( struct recvbuf *rbufp )
 			snprintf( sLog, sizeof(sLog)-1, JJY_CLOCKSTATS_MESSAGE_INVALID_REPLY,
 				  pBuf ) ;
 			jjy_write_clockstats( peer, JJY_CLOCKSTATS_MARK_ERROR, sLog ) ;
-			up->bLineError = TRUE ;
+			up->bLineError = true ;
 			return JJY_RECEIVE_ERROR ;
 		}
 
@@ -1290,7 +1277,7 @@ jjy_receive_tristate_jjy01 ( struct recvbuf *rbufp )
 		snprintf( sLog, sizeof(sLog)-1, JJY_CLOCKSTATS_MESSAGE_INVALID_REPLY,
 			  pBuf ) ;
 		jjy_write_clockstats( peer, JJY_CLOCKSTATS_MARK_ERROR, sLog ) ;
-		up->bLineError = TRUE ;
+		up->bLineError = true ;
 		return JJY_RECEIVE_ERROR ;
 
 	}
@@ -1314,7 +1301,7 @@ jjy_receive_tristate_jjy01 ( struct recvbuf *rbufp )
 			snprintf( sLog, sizeof(sLog)-1, JJY_CLOCKSTATS_MESSAGE_SLOW_REPLY_2,
 				  up->iTimestamp[0], up->iTimestamp[1] ) ;
 			jjy_write_clockstats( peer, JJY_CLOCKSTATS_MARK_ERROR, sLog ) ;
-			up->bLineError = TRUE ;
+			up->bLineError = true ;
 			return JJY_RECEIVE_ERROR ;
 		}
 
@@ -1361,7 +1348,7 @@ jjy_poll_tristate_jjy01  ( int unit, struct peer *peer )
 	pp = peer->procptr;
 	up = pp->unitptr ;
 
-	up->bLineError = FALSE ;
+	up->bLineError = false ;
 	up->iTimestampCount = 0 ;
 
 	if ( ( pp->sloppyclockflag & CLK_FLAG1 ) == 0 ) {
@@ -1428,9 +1415,9 @@ jjy_start_cdex_jst2000 ( int unit, struct peer *peer, struct jjyunit *up )
 	up->linediscipline = LDISC_RAW ;
 
 	up->pRawBreak = cdex_jst2000_raw_break ;
-	up->bWaitBreakString = TRUE ;
+	up->bWaitBreakString = true ;
 
-	up->bSkipCntrlCharOnly = FALSE ;
+	up->bSkipCntrlCharOnly = false ;
 
 	return 0 ;
 
@@ -1473,7 +1460,7 @@ jjy_receive_cdex_jst2000 ( struct recvbuf *rbufp )
 		snprintf( sLog, sizeof(sLog)-1, JJY_CLOCKSTATS_MESSAGE_UNEXPECTED_REPLY,
 			  pBuf ) ;
 		jjy_write_clockstats( peer, JJY_CLOCKSTATS_MARK_ERROR, sLog ) ;
-		up->bLineError = TRUE ;
+		up->bLineError = true ;
 		return JJY_RECEIVE_ERROR ;
 	}
 
@@ -1490,7 +1477,7 @@ jjy_receive_cdex_jst2000 ( struct recvbuf *rbufp )
 		snprintf( sLog, sizeof(sLog)-1, JJY_CLOCKSTATS_MESSAGE_INVALID_LENGTH,
 			  iLen ) ;
 		jjy_write_clockstats( peer, JJY_CLOCKSTATS_MARK_ERROR, sLog ) ;
-		up->bLineError = TRUE ;
+		up->bLineError = true ;
 		return JJY_RECEIVE_ERROR ;
 	}
 
@@ -1509,7 +1496,7 @@ jjy_receive_cdex_jst2000 ( struct recvbuf *rbufp )
 			  rc, up->year, up->month, up->day,
 			  up->hour, up->minute, up->second ) ;
 		jjy_write_clockstats( peer, JJY_CLOCKSTATS_MARK_ERROR, sLog ) ;
-		up->bLineError = TRUE ;
+		up->bLineError = true ;
 		return JJY_RECEIVE_ERROR ;
 	}
 
@@ -1534,7 +1521,7 @@ jjy_poll_cdex_jst2000 ( int unit, struct peer *peer )
 	pp = peer->procptr ;
 	up = pp->unitptr ;
 
-	up->bLineError = FALSE ;
+	up->bLineError = false ;
 	up->iRawBufLen = 0 ;
 	up->iLineBufLen = 0 ;
 	up->iTextBufLen = 0 ;
@@ -1642,7 +1629,7 @@ jjy_receive_echokeisokuki_lt2000 ( struct recvbuf *rbufp )
 		snprintf( sLog, sizeof(sLog)-1, JJY_CLOCKSTATS_MESSAGE_INVALID_LENGTH,
 			  iLen ) ;
 			jjy_write_clockstats( peer, JJY_CLOCKSTATS_MARK_ERROR, sLog ) ;
-		up->bLineError = TRUE ;
+		up->bLineError = true ;
 		return JJY_RECEIVE_ERROR ;
 	}
 
@@ -1662,7 +1649,7 @@ jjy_receive_echokeisokuki_lt2000 ( struct recvbuf *rbufp )
 			snprintf( sLog, sizeof(sLog)-1, JJY_CLOCKSTATS_MESSAGE_INVALID_REPLY,
 				  sErr ) ;
 			jjy_write_clockstats( peer, JJY_CLOCKSTATS_MARK_ERROR, sLog ) ;
-			up->bLineError = TRUE ;
+			up->bLineError = true ;
 			return JJY_RECEIVE_ERROR ;
 		}
 
@@ -1688,7 +1675,7 @@ jjy_receive_echokeisokuki_lt2000 ( struct recvbuf *rbufp )
 				  rc, up->year, up->month, up->day,
 				  up->hour, up->minute, up->second ) ;
 			jjy_write_clockstats( peer, JJY_CLOCKSTATS_MARK_ERROR, sLog ) ;
-			up->bLineError = TRUE ;
+			up->bLineError = true ;
 			return JJY_RECEIVE_ERROR ;
 		}
 
@@ -1757,7 +1744,7 @@ jjy_poll_echokeisokuki_lt2000 ( int unit, struct peer *peer )
 	pp = peer->procptr ;
 	up = pp->unitptr ;
 
-	up->bLineError = FALSE ;
+	up->bLineError = false ;
 
 	/*
 	 * Send "T" or "C" command
@@ -1860,7 +1847,7 @@ jjy_receive_citizentic_jjy200 ( struct recvbuf *rbufp )
 		snprintf( sLog, sizeof(sLog)-1, JJY_CLOCKSTATS_MESSAGE_INVALID_LENGTH,
 			  iLen ) ;
 		jjy_write_clockstats( peer, JJY_CLOCKSTATS_MARK_ERROR, sLog ) ;
-		up->bLineError = TRUE ;
+		up->bLineError = true ;
 		return JJY_RECEIVE_ERROR ;
 	}
 
@@ -1884,7 +1871,7 @@ jjy_receive_citizentic_jjy200 ( struct recvbuf *rbufp )
 			  rc, up->year, up->month, up->day,
 			  up->hour, up->minute, up->second ) ;
 		jjy_write_clockstats( peer, JJY_CLOCKSTATS_MARK_ERROR, sLog ) ;
-		up->bLineError = TRUE ;
+		up->bLineError = true ;
 		return JJY_RECEIVE_ERROR ;
 	} else if ( strcmp( sStatus, "NG" ) == 0
 		 || strcmp( sStatus, "ER" ) == 0 ) {
@@ -1917,7 +1904,7 @@ jjy_poll_citizentic_jjy200 ( int unit, struct peer *peer )
 	pp = peer->procptr ;
 	up = pp->unitptr ;
 
-	up->bLineError = FALSE ;
+	up->bLineError = false ;
 
 }
 
@@ -2073,7 +2060,7 @@ jjy_receive_tristate_gpsclock01 ( struct recvbuf *rbufp )
 		snprintf( sLog, sizeof(sLog)-1, JJY_CLOCKSTATS_MESSAGE_UNEXPECTED_REPLY,
 			  pBuf ) ;
 		jjy_write_clockstats( peer, JJY_CLOCKSTATS_MARK_ERROR, sLog ) ;
-		up->bLineError = TRUE ;
+		up->bLineError = true ;
 		return JJY_RECEIVE_ERROR ;
 	}
 
@@ -2084,7 +2071,7 @@ jjy_receive_tristate_gpsclock01 ( struct recvbuf *rbufp )
 		snprintf( sLog, sizeof(sLog)-1, JJY_CLOCKSTATS_MESSAGE_INVALID_LENGTH,
 			  iLen ) ;
 		jjy_write_clockstats( peer, JJY_CLOCKSTATS_MARK_ERROR, sLog ) ;
-		up->bLineError = TRUE ;
+		up->bLineError = true ;
 		return JJY_RECEIVE_ERROR ;
 	}
 
@@ -2103,7 +2090,7 @@ jjy_receive_tristate_gpsclock01 ( struct recvbuf *rbufp )
 			snprintf( sLog, sizeof(sLog)-1, JJY_CLOCKSTATS_MESSAGE_SSCANF_INVALID_DATE,
 				  rc, up->year, up->month, up->day ) ;
 			jjy_write_clockstats( peer, JJY_CLOCKSTATS_MARK_ERROR, sLog ) ;
-			up->bLineError = TRUE ;
+			up->bLineError = true ;
 			return JJY_RECEIVE_ERROR ;
 		}
 
@@ -2116,7 +2103,7 @@ jjy_receive_tristate_gpsclock01 ( struct recvbuf *rbufp )
 			snprintf( sLog, sizeof(sLog)-1, JJY_CLOCKSTATS_MESSAGE_TOO_MANY_REPLY,
 				  up->iTimestampCount ) ;
 			jjy_write_clockstats( peer, JJY_CLOCKSTATS_MARK_ERROR, sLog ) ;
-			up->bLineError = TRUE ;
+			up->bLineError = true ;
 			return JJY_RECEIVE_ERROR ;
 		}
 
@@ -2129,7 +2116,7 @@ jjy_receive_tristate_gpsclock01 ( struct recvbuf *rbufp )
 			snprintf( sLog, sizeof(sLog)-1, JJY_CLOCKSTATS_MESSAGE_SSCANF_INVALID_TIME,
 				  rc, up->hour, up->minute, up->second ) ;
 			jjy_write_clockstats( peer, JJY_CLOCKSTATS_MARK_ERROR, sLog ) ;
-			up->bLineError = TRUE ;
+			up->bLineError = true ;
 			return JJY_RECEIVE_ERROR ;
 		}
 
@@ -2152,7 +2139,7 @@ jjy_receive_tristate_gpsclock01 ( struct recvbuf *rbufp )
 			snprintf( sLog, sizeof(sLog)-1, JJY_CLOCKSTATS_MESSAGE_INVALID_REPLY,
 				  pBuf ) ;
 			jjy_write_clockstats( peer, JJY_CLOCKSTATS_MARK_ERROR, sLog ) ;
-			up->bLineError = TRUE ;
+			up->bLineError = true ;
 			return JJY_RECEIVE_ERROR ;
 		}
 
@@ -2163,7 +2150,7 @@ jjy_receive_tristate_gpsclock01 ( struct recvbuf *rbufp )
 		snprintf( sLog, sizeof(sLog)-1, JJY_CLOCKSTATS_MESSAGE_INVALID_REPLY,
 			  pBuf ) ;
 		jjy_write_clockstats( peer, JJY_CLOCKSTATS_MARK_ERROR, sLog ) ;
-		up->bLineError = TRUE ;
+		up->bLineError = true ;
 		return JJY_RECEIVE_ERROR ;
 
 	}
@@ -2187,7 +2174,7 @@ jjy_receive_tristate_gpsclock01 ( struct recvbuf *rbufp )
 			snprintf( sLog, sizeof(sLog)-1, JJY_CLOCKSTATS_MESSAGE_SLOW_REPLY_2,
 				  up->iTimestamp[0], up->iTimestamp[1] ) ;
 			jjy_write_clockstats( peer, JJY_CLOCKSTATS_MARK_ERROR, sLog ) ;
-			up->bLineError = TRUE ;
+			up->bLineError = true ;
 			return JJY_RECEIVE_ERROR ;
 		}
 
@@ -2310,9 +2297,9 @@ jjy_start_seiko_tsys_tdc_300 ( int unit, struct peer *peer, struct jjyunit *up )
 	up->linediscipline = LDISC_RAW ;
 
 	up->pRawBreak = seiko_tsys_tdc_300_raw_break ;
-	up->bWaitBreakString = TRUE ;
+	up->bWaitBreakString = true ;
 
-	up->bSkipCntrlCharOnly = FALSE ;
+	up->bSkipCntrlCharOnly = false ;
 
 	return 0 ;
 
@@ -2380,7 +2367,7 @@ jjy_receive_seiko_tsys_tdc_300 ( struct recvbuf *rbufp )
 			snprintf( sLog, sizeof(sLog)-1, JJY_CLOCKSTATS_MESSAGE_SSCANF_INVALID_TIME,
 				  rc, up->hour, up->minute, up->second ) ;
 			jjy_write_clockstats( peer, JJY_CLOCKSTATS_MARK_ERROR, sLog ) ;
-			up->bLineError = TRUE ;
+			up->bLineError = true ;
 			return JJY_RECEIVE_ERROR ;
 		} else if ( up->hour == 23 && up->minute == 59 && up->second >= 55 ) {
 			/* Uncertainty date guard */
@@ -2414,7 +2401,7 @@ jjy_receive_seiko_tsys_tdc_300 ( struct recvbuf *rbufp )
 				  rc, up->year, up->month, up->day,
 				  up->hour, up->minute, up->second ) ;
 			jjy_write_clockstats( peer, JJY_CLOCKSTATS_MARK_ERROR, sLog ) ;
-			up->bLineError = TRUE ;
+			up->bLineError = true ;
 			return JJY_RECEIVE_ERROR ;
 		}
 
@@ -2435,7 +2422,7 @@ jjy_receive_seiko_tsys_tdc_300 ( struct recvbuf *rbufp )
 				  rc, up->year, up->month, up->day,
 				  up->hour, up->minute, up->second ) ;
 			jjy_write_clockstats( peer, JJY_CLOCKSTATS_MARK_ERROR, sLog ) ;
-			up->bLineError = TRUE ;
+			up->bLineError = true ;
 			return JJY_RECEIVE_ERROR ;
 		}
 
@@ -2448,7 +2435,7 @@ jjy_receive_seiko_tsys_tdc_300 ( struct recvbuf *rbufp )
 			snprintf( sLog, sizeof(sLog)-1, JJY_CLOCKSTATS_MESSAGE_INVALID_REPLY,
 				  up->sLineBuf ) ;
 			jjy_write_clockstats( peer, JJY_CLOCKSTATS_MARK_ERROR, sLog ) ;
-			up->bLineError = TRUE ;
+			up->bLineError = true ;
 			return JJY_RECEIVE_ERROR ;
 		} else if ( up->iReceiveSeq == 1 ) {
 			/* Wait for next timestamp */
@@ -2459,7 +2446,7 @@ jjy_receive_seiko_tsys_tdc_300 ( struct recvbuf *rbufp )
 			snprintf( sLog, sizeof(sLog)-1, JJY_CLOCKSTATS_MESSAGE_UNEXPECTED_REPLY,
 				  up->sLineBuf ) ;
 			jjy_write_clockstats( peer, JJY_CLOCKSTATS_MARK_ERROR, sLog ) ;
-			up->bLineError = TRUE ;
+			up->bLineError = true ;
 			return JJY_RECEIVE_ERROR ;
 		}
 
@@ -2470,7 +2457,7 @@ jjy_receive_seiko_tsys_tdc_300 ( struct recvbuf *rbufp )
 		snprintf( sLog, sizeof(sLog)-1, JJY_CLOCKSTATS_MESSAGE_INVALID_LENGTH,
 			  iLen ) ;
 		jjy_write_clockstats( peer, JJY_CLOCKSTATS_MARK_ERROR, sLog ) ;
-		up->bLineError = TRUE ;
+		up->bLineError = true ;
 		return JJY_RECEIVE_ERROR ;
 
 	}
@@ -2496,7 +2483,7 @@ jjy_poll_seiko_tsys_tdc_300 ( int unit, struct peer *peer )
 	pp = peer->procptr ;
 	up = pp->unitptr ;
 
-	up->bLineError = FALSE ;
+	up->bLineError = false ;
 
 }
 
@@ -2673,7 +2660,7 @@ static  struct
 
 /**************************************************************************************************/
 
-static int
+static bool
 jjy_start_telephone ( int unit, struct peer *peer, struct jjyunit *up )
 {
 
@@ -2688,9 +2675,9 @@ jjy_start_telephone ( int unit, struct peer *peer, struct jjyunit *up )
 	up->linediscipline = LDISC_RAW ;
 
 	up->pRawBreak = teljjy_raw_break ;
-	up->bWaitBreakString = TRUE ;
+	up->bWaitBreakString = true ;
 
-	up->bSkipCntrlCharOnly = TRUE ;
+	up->bSkipCntrlCharOnly = true ;
 
 	up->iClockState = TELJJY_STATE_IDLE ;
 	up->iClockEvent = TELJJY_EVENT_NULL ;
@@ -2699,14 +2686,14 @@ jjy_start_telephone ( int unit, struct peer *peer, struct jjyunit *up )
 
 	if ( sys_phone[0] == NULL ) {
 		msyslog( LOG_ERR, "refclock_jjy.c : jjy_start_telephone : phone in the ntpd.conf must be specified." ) ;
-		up->bInitError = TRUE ;
-		return 1 ;
+		up->bInitError = true ;
+		return true ;
 	}
 
 	if ( sys_phone[1] != NULL ) {
 		msyslog( LOG_ERR, "refclock_jjy.c : jjy_start_telephone : phone in the ntpd.conf should be only one." ) ;
-		up->bInitError = TRUE ;
-		return 1 ;
+		up->bInitError = true ;
+		return true ;
 	}
 
 	iNumberOfDigitsOfPhoneNumber = iCommaCount = iCommaPosition = iFirstThreeDigitsCount = 0 ;
@@ -2720,15 +2707,15 @@ jjy_start_telephone ( int unit, struct peer *peer, struct jjyunit *up )
 			iCommaCount ++ ;
 			if ( iCommaCount > 1 ) {
 				msyslog( LOG_ERR, "refclock_jjy.c : jjy_start_telephone : phone in the ntpd.conf should be zero or one comma." ) ;
-				up->bInitError = TRUE ;
-				return 1 ;
+				up->bInitError = true ;
+				return true ;
 			}
 			iFirstThreeDigitsCount = 0 ;
 			iCommaPosition = i ;
 		} else if ( *(sys_phone[0]+i) != '-' ) {
 			msyslog( LOG_ERR, "refclock_jjy.c : jjy_start_telephone : phone in the ntpd.conf should be a number or a hyphen." ) ;
-			up->bInitError = TRUE ;
-			return 1 ;
+			up->bInitError = true ;
+			return true ;
 		}
 	}
 	sFirstThreeDigits[iFirstThreeDigitsCount] = 0 ;
@@ -2736,16 +2723,16 @@ jjy_start_telephone ( int unit, struct peer *peer, struct jjyunit *up )
 	if ( iCommaCount == 1 ) {
 		if ( iCommaPosition != 1 || *sys_phone[0] != '0' ) {
 			msyslog( LOG_ERR, "refclock_jjy.c : jjy_start_telephone : Getting an outside line should be '0,'." ) ;
-			up->bInitError = TRUE ;
-			return 1 ;
+			up->bInitError = true ;
+			return true ;
 		}
 	}
 
 	if ( iNumberOfDigitsOfPhoneNumber - iCommaPosition < 6 || 10 < iNumberOfDigitsOfPhoneNumber - iCommaPosition ) {
 		/* Too short or too long */
 		msyslog( LOG_ERR, "refclock_jjy.c : jjy_start_telephone : phone=%s : Number of digits should be 6 to 10.", sys_phone[0] ) ;
-		up->bInitError = TRUE ;
-		return 1 ;
+		up->bInitError = true ;
+		return true ;
 	}
 
 	if ( strncmp( sFirstThreeDigits + iCommaPosition, "00" , 2 ) == 0
@@ -2757,8 +2744,8 @@ jjy_start_telephone ( int unit, struct peer *peer, struct jjyunit *up )
 	  || ( sFirstThreeDigits[0] == '0' &&  sFirstThreeDigits[2] == '0' ) ) {
 		/* Not allowed because of emergency numbers or special service numbers */
 		msyslog( LOG_ERR, "refclock_jjy.c : jjy_start_telephone : phone=%s : First 2 or 3 digits are not allowed.", sys_phone[0] ) ;
-		up->bInitError = TRUE ;
-		return 1 ;
+		up->bInitError = true ;
+		return true ;
 	}
 
 	snprintf( sLog, sizeof(sLog), "phone=%s", sys_phone[0] ) ;
@@ -2778,7 +2765,7 @@ jjy_start_telephone ( int unit, struct peer *peer, struct jjyunit *up )
 		jjy_write_clockstats( peer, JJY_CLOCKSTATS_MARK_JJY, sLog ) ;
 	}
 
-	return 0 ;
+	return false ;
 
 }
 
@@ -2955,12 +2942,12 @@ teljjy_control ( struct peer *peer, struct refclockproc *pp, struct jjyunit *up 
 		if ( up->iClockState != iTeljjyNextState[up->iClockEvent][up->iClockState] ) {
 			/* Telephone JJY state is changing now */
 			up->iTeljjyStateTimer = 0 ;
-			up->bLineError = FALSE ;
+			up->bLineError = false ;
 			up->iClockCommandSeq = 0 ;
 			up->iTimestampCount = 0 ;
 			up->iLoopbackCount = 0 ;
 			for ( i = 0 ; i < MAX_LOOPBACK ; i ++ ) {
-				up->bLoopbackTimeout[i] = FALSE ;
+				up->bLoopbackTimeout[i] = false ;
 			}
 			if (iTeljjyNextState[up->iClockEvent][up->iClockState] == TELJJY_STATE_IDLE ) {
 				/* Telephone JJY state is changing to IDLE just now */
@@ -3192,12 +3179,12 @@ teljjy_login_conn ( struct peer *peer, struct refclockproc *pp, struct jjyunit *
 
 	DEBUG_TELJJY_PRINTF( "teljjy_login_conn" ) ;
 
-	up->bLineError = FALSE ;
+	up->bLineError = false ;
 	up->iClockCommandSeq = 0 ;
 	up->iTimestampCount = 0 ;
 	up->iLoopbackCount = 0 ;
 	for ( i = 0 ; i < MAX_LOOPBACK ; i ++ ) {
-		up->bLoopbackTimeout[i] = FALSE ;
+		up->bLoopbackTimeout[i] = false ;
 	}
 
 	return TELJJY_CHANGE_CLOCK_STATE ;
@@ -3307,7 +3294,7 @@ teljjy_conn_send ( struct peer *peer, struct refclockproc *pp, struct jjyunit *u
 
 		up->iLoopbackCount = 0 ;
 		for ( i = 0 ; i < MAX_LOOPBACK ; i ++ ) {
-			up->bLoopbackTimeout[i] = FALSE ;
+			up->bLoopbackTimeout[i] = false ;
 		}
 
 	} else if ( up->iClockCommandSeq > 0 && peer->ttl != 100
@@ -3341,10 +3328,10 @@ teljjy_conn_send ( struct peer *peer, struct refclockproc *pp, struct jjyunit *u
 		if ( teljjy_command_sequence[up->iClockCommandSeq].iExpectedReplyType == TELJJY_REPLY_LOOPBACK ) {
 			/* Loopback character and timestamp */
 			gettimeofday( &(up->sendTime[up->iLoopbackCount]), NULL ) ;
-			up->bLoopbackMode = TRUE ;
+			up->bLoopbackMode = true ;
 		} else {
 			/* Regular command */
-			up->bLoopbackMode = FALSE ;
+			up->bLoopbackMode = false ;
 		}
 
 		jjy_write_clockstats( peer, JJY_CLOCKSTATS_MARK_SEND, pCmd ) ;
@@ -3416,7 +3403,7 @@ teljjy_conn_data ( struct peer *peer, struct refclockproc *pp, struct jjyunit *u
 			snprintf( sLog, sizeof(sLog)-1, JJY_CLOCKSTATS_MESSAGE_SSCANF_INVALID_DATE,
 				  rc, up->year, up->month, up->day ) ;
 			jjy_write_clockstats( peer, JJY_CLOCKSTATS_MARK_ERROR, sLog ) ;
-			up->bLineError = TRUE ;
+			up->bLineError = true ;
 		}
 
 	} else if ( teljjy_command_sequence[up->iClockCommandSeq].iExpectedReplyLength == iLen
@@ -3431,7 +3418,7 @@ teljjy_conn_data ( struct peer *peer, struct refclockproc *pp, struct jjyunit *u
 			snprintf( sLog, sizeof(sLog)-1, JJY_CLOCKSTATS_MESSAGE_SSCANF_INVALID_LEAP,
 				  pBuf ) ;
 			jjy_write_clockstats( peer, JJY_CLOCKSTATS_MARK_ERROR, sLog ) ;
-			up->bLineError = TRUE ;
+			up->bLineError = true ;
 		}
 
 	} else if ( teljjy_command_sequence[up->iClockCommandSeq].iExpectedReplyLength == iLen
@@ -3445,7 +3432,7 @@ teljjy_conn_data ( struct peer *peer, struct refclockproc *pp, struct jjyunit *u
 			snprintf( sLog, sizeof(sLog)-1, JJY_CLOCKSTATS_MESSAGE_SSCANF_INVALID_TIME,
 				  rc, up->hour, up->minute, up->second ) ;
 			jjy_write_clockstats( peer, JJY_CLOCKSTATS_MARK_ERROR, sLog ) ;
-			up->bLineError = TRUE ;
+			up->bLineError = true ;
 		}
 		up->iTimestamp[up->iTimestampCount] = ( up->hour * 60 + up->minute ) * 60 + up->second ;
 
@@ -3457,7 +3444,7 @@ teljjy_conn_data ( struct peer *peer, struct refclockproc *pp, struct jjyunit *u
 				up->bLineError,
 				up->iTimestamp[3], up->iTimestamp[4], up->iTimestamp[5] ) ;
 #endif
-			bAdjustment = TRUE ;
+			bAdjustment = true ;
 
 			if ( peer->ttl == 100 ) {
 				/* mode=100 */
@@ -3467,7 +3454,7 @@ teljjy_conn_data ( struct peer *peer, struct refclockproc *pp, struct jjyunit *u
 				up->msecond = teljjy_getDelay( peer, up ) ;
 				if (up->msecond < 0 ) {
 					up->msecond = 0 ;
-					bAdjustment = FALSE ;
+					bAdjustment = false ;
 				}
 			}
 
@@ -3506,7 +3493,7 @@ teljjy_conn_data ( struct peer *peer, struct refclockproc *pp, struct jjyunit *u
 
 	} else {
 
-		up->bLineError = TRUE ;
+		up->bLineError = true ;
 
 		snprintf( sLog, sizeof(sLog)-1, JJY_CLOCKSTATS_MESSAGE_UNEXPECTED_REPLY,
 			  pBuf ) ;
@@ -3536,7 +3523,7 @@ teljjy_conn_silent ( struct peer *peer, struct refclockproc *pp, struct jjyunit 
 		}
 #endif
 		if ( teljjy_command_sequence[up->iClockCommandSeq].iExpectedReplyType == TELJJY_REPLY_LOOPBACK ) {
-			up->bLoopbackTimeout[up->iLoopbackCount] = TRUE ;
+			up->bLoopbackTimeout[up->iLoopbackCount] = true ;
 		}
 		up->iTeljjySilentTimer = 0 ;
 		return teljjy_conn_send( peer, pp, up ) ;

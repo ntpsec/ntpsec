@@ -33,8 +33,8 @@
 /*
  * Function prototypes
  */
-static	int 	fg_init 	(int);
-static	int 	fg_start 	(int, struct peer *);
+static	bool 	fg_init 	(int);
+static	bool 	fg_start 	(int, struct peer *);
 static	void	fg_shutdown	(int, struct peer *);
 static	void	fg_poll		(int, struct peer *);
 static	void	fg_receive	(struct recvbuf *);
@@ -74,21 +74,21 @@ struct  refclock refclock_fg = {
  * fg_init - Initialization of FG GPS.
  */
 
-static int
+static bool
 fg_init(
 	int fd
 	)
 {
 	if (write(fd, fginit, LENFG) != LENFG)
-		return 0;
+		return false;
 
-	return 1;
+	return true;
 }
 
 /*
  * fg_start - open the device and initialize data for processing
  */
-static int
+static bool
 fg_start(
 	int unit,
 	struct peer *peer
@@ -110,7 +110,7 @@ fg_start(
 	fd = refclock_open(device, SPEED232, LDISC_CLK);
 	if (fd <= 0)
 		/* coverity[leaked_handle] */
-		return (0);
+		return false;
 	
 	/*
 	 * Allocate and initialize unit structure
@@ -127,7 +127,7 @@ fg_start(
  	if (!io_addclock(&pp->io)) {
 		close(fd);
 		pp->io.fd = -1;
-		return 0;
+		return false;
 	}
 
 	
@@ -146,7 +146,7 @@ fg_start(
 	if(!fg_init(pp->io.fd))
 		refclock_report(peer, CEVNT_FAULT);
 
-	return (1);
+	return true;
 }
 
 

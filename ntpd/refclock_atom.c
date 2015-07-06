@@ -92,7 +92,7 @@ struct ppsunit {
 /*
  * Function prototypes
  */
-static	int	atom_start	(int, struct peer *);
+static	bool	atom_start	(int, struct peer *);
 static	void	atom_shutdown	(int, struct peer *);
 static	void	atom_poll	(int, struct peer *);
 static	void	atom_timer	(int, struct peer *);
@@ -114,7 +114,7 @@ struct	refclock refclock_atom = {
 /*
  * atom_start - initialize data for processing
  */
-static int
+static bool
 atom_start(
 	int unit,		/* unit number (not used) */
 	struct peer *peer	/* peer structure pointer */
@@ -145,7 +145,7 @@ atom_start(
 	if (up->fddev <= 0) {
 		msyslog(LOG_ERR,
 			"refclock_atom: %s: %m", device);
-		return (0);
+		return false;
 	}
 
 	/*

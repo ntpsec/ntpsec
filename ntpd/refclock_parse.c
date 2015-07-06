@@ -1784,7 +1784,7 @@ static bind_t io_bindings[] =
 /*--------------------------------------------------
  * ppsclock STREAM init
  */
-static int
+static bool
 ppsclock_init(
 	struct parseunit *parse
 	)
@@ -1804,22 +1804,22 @@ ppsclock_init(
 			msyslog(LOG_ERR, "PARSE receiver #%d: ppsclock_init: ioctl(fd, I_PUSH, \"ppsclock\"): %m",
 				CLK_UNIT(parse->peer));
 		}
-		return 0;
+		return false;
 	}
 	if (!local_init(parse))
 	{
 		(void)ioctl(parse->ppsfd, I_POP, (caddr_t)0);
-		return 0;
+		return false;
 	}
 
 	parse->flags |= PARSE_PPSCLOCK;
-	return 1;
+	return true;
 }
 
 /*--------------------------------------------------
  * parse STREAM init
  */
-static int
+static bool
 stream_init(
 	struct parseunit *parse
 	)
@@ -1835,7 +1835,7 @@ stream_init(
 		{
 			msyslog(LOG_ERR, "PARSE receiver #%d: stream_init: ioctl(fd, I_PUSH, \"parse\"): %m", CLK_UNIT(parse->peer));
 		}
-		return 0;
+		return false;
 	}
 	else
 	{
@@ -1849,11 +1849,11 @@ stream_init(
 		if (ioctl(parse->generic->io.fd, I_PUSH, (caddr_t)m1) == -1)
 		{
 			msyslog(LOG_ERR, "PARSE receiver #%d: stream_init: ioctl(fd, I_PUSH, \"parse\"): %m", CLK_UNIT(parse->peer));
-			return 0;
+			return false;
 		}
 		else
 		{
-			return 1;
+			return true;
 		}
 	}
 }
@@ -1873,7 +1873,7 @@ stream_end(
 /*--------------------------------------------------
  * STREAM setcs
  */
-static int
+static bool
 stream_setcs(
 	struct parseunit *parse,
 	parsectl_t  *tcl
@@ -1889,15 +1889,15 @@ stream_setcs(
 	if (ioctl(parse->generic->io.fd, I_STR, (caddr_t)&strioc) == -1)
 	{
 		msyslog(LOG_ERR, "PARSE receiver #%d: stream_setcs: ioctl(fd, I_STR, PARSEIOC_SETCS): %m", CLK_UNIT(parse->peer));
-		return 0;
+		return false;
 	}
-	return 1;
+	return true;
 }
 
 /*--------------------------------------------------
  * STREAM enable
  */
-static int
+static bool
 stream_enable(
 	struct parseunit *parse
 	)
@@ -1912,16 +1912,16 @@ stream_enable(
 	if (ioctl(parse->generic->io.fd, I_STR, (caddr_t)&strioc) == -1)
 	{
 		msyslog(LOG_ERR, "PARSE receiver #%d: stream_enable: ioctl(fd, I_STR, PARSEIOC_ENABLE): %m", CLK_UNIT(parse->peer));
-		return 0;
+		return false;
 	}
 	parse->generic->io.clock_recv = stream_receive; /* ok - parse input in kernel */
-	return 1;
+	return true;
 }
 
 /*--------------------------------------------------
  * STREAM disable
  */
-static int
+static bool
 stream_disable(
 	struct parseunit *parse
 	)
@@ -1936,16 +1936,16 @@ stream_disable(
 	if (ioctl(parse->generic->io.fd, I_STR, (caddr_t)&strioc) == -1)
 	{
 		msyslog(LOG_ERR, "PARSE receiver #%d: stream_disable: ioctl(fd, I_STR, PARSEIOC_DISABLE): %m", CLK_UNIT(parse->peer));
-		return 0;
+		return false;
 	}
 	parse->generic->io.clock_recv = local_receive; /* ok - parse input in daemon */
-	return 1;
+	return true;
 }
 
 /*--------------------------------------------------
  * STREAM getfmt
  */
-static int
+static bool
 stream_getfmt(
 	struct parseunit *parse,
 	parsectl_t  *tcl
@@ -1960,15 +1960,15 @@ stream_getfmt(
 	if (ioctl(parse->generic->io.fd, I_STR, (caddr_t)&strioc) == -1)
 	{
 		msyslog(LOG_ERR, "PARSE receiver #%d: ioctl(fd, I_STR, PARSEIOC_GETFMT): %m", CLK_UNIT(parse->peer));
-		return 0;
+		return false;
 	}
-	return 1;
+	return true;
 }
 
 /*--------------------------------------------------
  * STREAM setfmt
  */
-static int
+static bool
 stream_setfmt(
 	struct parseunit *parse,
 	parsectl_t  *tcl
@@ -1984,16 +1984,16 @@ stream_setfmt(
 	if (ioctl(parse->generic->io.fd, I_STR, (caddr_t)&strioc) == -1)
 	{
 		msyslog(LOG_ERR, "PARSE receiver #%d: stream_setfmt: ioctl(fd, I_STR, PARSEIOC_SETFMT): %m", CLK_UNIT(parse->peer));
-		return 0;
+		return false;
 	}
-	return 1;
+	return true;
 }
 
 
 /*--------------------------------------------------
  * STREAM timecode
  */
-static int
+static bool
 stream_timecode(
 	struct parseunit *parse,
 	parsectl_t  *tcl
@@ -2010,10 +2010,10 @@ stream_timecode(
 	{
 		ERR(ERR_INTERNAL)
 			msyslog(LOG_ERR, "PARSE receiver #%d: stream_timecode: ioctl(fd, I_STR, PARSEIOC_TIMECODE): %m", CLK_UNIT(parse->peer));
-		return 0;
+		return false;
 	}
 	clear_err(parse, ERR_INTERNAL);
-	return 1;
+	return true;
 }
 
 /*--------------------------------------------------
@@ -2108,18 +2108,18 @@ local_end(
 /*--------------------------------------------------
  * local nop
  */
-static int
+static bool
 local_nop(
 	struct parseunit *parse
 	)
 {
-	return 1;
+	return true;
 }
 
 /*--------------------------------------------------
  * local setcs
  */
-static int
+static bool
 local_setcs(
 	struct parseunit *parse,
 	parsectl_t  *tcl
@@ -2168,7 +2168,7 @@ local_timecode(
 /*--------------------------------------------------
  * local input
  */
-static int
+static bool
 local_input(
 	struct recvbuf *rbufp
 	)
@@ -2181,7 +2181,7 @@ local_input(
 
 	parse = (struct parseunit *)rbufp->recv_peer->procptr->unitptr;
 	if (!parse->peer)
-		return 0;
+		return false;
 
 	/*
 	 * eat all characters, parsing then and feeding complete samples
@@ -2377,11 +2377,11 @@ local_input(
 					sizeof(parsetime_t));
 				parse_iodone(&parse->parseio);
 				rbufp->recv_length = sizeof(parsetime_t);
-				return 1; /* got something & in place return */
+				return true; /* got something & in place return */
 			}
 		}
 	}
-	return 0;		/* nothing to pass up */
+	return false;		/* nothing to pass up */
 }
 
 /*--------------------------------------------------
@@ -2862,7 +2862,7 @@ parse_hardpps(
 			 * tell the rest, that we have a kernel PPS source, iff we ever enable HARDPPS
 			 */
 			if (mode == PARSE_HARDPPS_ENABLE)
-			        hardpps_enable = 1;
+			        hardpps_enable = true;
 		}
 	}
 
@@ -2872,7 +2872,7 @@ parse_hardpps(
 /*----------------------------------------
  * set up PPS via PPSAPI
  */
-static int
+static bool
 parse_ppsapi(
 	     struct parseunit *parse
 	)
@@ -2889,7 +2889,7 @@ parse_ppsapi(
 		msyslog(LOG_ERR, "PARSE receiver #%d: parse_ppsapi: time_pps_getcap failed: %m",
 			CLK_UNIT(parse->peer));
 
-		return 0;
+		return false;
 	}
 
 	/*
@@ -2900,7 +2900,7 @@ parse_ppsapi(
 	 * be part of the generic PPSAPI interface
 	 */
 	if (!refclock_params(parse->flags & (CLK_FLAG1|CLK_FLAG2|CLK_FLAG4), &parse->atom))
-		return 0;
+		return false;
 
 	/* nb. only turn things on, if someone else has turned something
 	 *	on before we get here, leave it alone!
@@ -2940,11 +2940,11 @@ parse_ppsapi(
 	if (time_pps_setparams(parse->atom.handle, &parse->atom.pps_params) < 0) {
 	  msyslog(LOG_ERR, "PARSE receiver #%d: FAILED set PPS parameters: %m",
 		  CLK_UNIT(parse->peer));
-		return 0;
+		return false;
 	}
 
 	parse->flags |= PARSE_PPSCLOCK;
-	return 1;
+	return true;
 }
 #else
 #define parse_hardpps(_PARSE_, _MODE_) /* empty */
@@ -2953,7 +2953,7 @@ parse_ppsapi(
 /*--------------------------------------------------
  * parse_start - open the PARSE devices and initialize data for processing
  */
-static int
+static bool
 parse_start(
 	int sysunit,
 	struct peer *peer
@@ -2985,7 +2985,7 @@ parse_start(
 	{
 		msyslog(LOG_ERR, "PARSE receiver #%d: parse_start: unsupported clock type %d (max %d)",
 			unit, CLK_REALTYPE(peer), ncltypes-1);
-		return 0;
+		return false;
 	}
 
 	/*
@@ -3006,7 +3006,7 @@ parse_start(
 	if (fd232 == -1)
 	{
 		msyslog(LOG_ERR, "PARSE receiver #%d: parse_start: open of %s failed: %m", unit, parsedev);
-		return 0;
+		return false;
 	}
 
 	parse = emalloc_zero(sizeof(*parse));
@@ -3067,7 +3067,7 @@ parse_start(
 	{
 		msyslog(LOG_ERR, "PARSE receiver #%d: parse_start: tcgetattr(%d, &tio): %m", unit, fd232);
 		parse_shutdown(CLK_UNIT(parse->peer), peer); /* let our cleaning staff do the work */
-		return 0;
+		return false;
 	}
 	else
 	{
@@ -3111,7 +3111,7 @@ parse_start(
 		{
 			msyslog(LOG_ERR, "PARSE receiver #%d: parse_start: tcset{i,o}speed(&tio, speed): %m", unit);
 			parse_shutdown(CLK_UNIT(parse->peer), peer); /* let our cleaning staff do the work */
-			return 0;
+			return false;
 		}
 
 		/*
@@ -3194,7 +3194,7 @@ parse_start(
 		{
 			msyslog(LOG_ERR, "PARSE receiver #%d: parse_start: tcsetattr(%d, &tio): %m", unit, fd232);
 			parse_shutdown(CLK_UNIT(parse->peer), peer); /* let our cleaning staff do the work */
-			return 0;
+			return false;
 		}
 	}
 
@@ -3210,7 +3210,7 @@ parse_start(
 		{
 			msyslog(LOG_ERR, "PARSE receiver #%d: parse_start: io sub system initialisation failed.", CLK_UNIT(parse->peer));
 			parse_shutdown(CLK_UNIT(parse->peer), peer); /* let our cleaning staff do the work */
-			return 0;			/* well, ok - special initialisation broke */
+			return false;			/* well, ok - special initialisation broke */
 		}
 
 	parse->generic->io.clock_recv = parse->binding->bd_receive; /* pick correct receive routine */
@@ -3247,7 +3247,7 @@ parse_start(
 	{
 		msyslog(LOG_ERR, "PARSE receiver #%d: parse_start: parse_setcs() FAILED.", unit);
 		parse_shutdown(CLK_UNIT(parse->peer), peer); /* let our cleaning staff do the work */
-		return 0;			/* well, ok - special initialisation broke */
+		return false;			/* well, ok - special initialisation broke */
 	}
 
 	strlcpy(tmp_ctl.parseformat.parse_buffer, parse->parse_type->cl_format, sizeof(tmp_ctl.parseformat.parse_buffer));
@@ -3257,7 +3257,7 @@ parse_start(
 	{
 		msyslog(LOG_ERR, "PARSE receiver #%d: parse_start: parse_setfmt() FAILED.", unit);
 		parse_shutdown(CLK_UNIT(parse->peer), peer); /* let our cleaning staff do the work */
-		return 0;			/* well, ok - special initialisation broke */
+		return false;			/* well, ok - special initialisation broke */
 	}
 
 	/*
@@ -3273,7 +3273,7 @@ parse_start(
 			if (parse->parse_type->cl_init(parse))
 				{
 					parse_shutdown(CLK_UNIT(parse->peer), peer); /* let our cleaning staff do the work */
-					return 0;		/* well, ok - special initialisation broke */
+					return false;		/* well, ok - special initialisation broke */
 				}
 		}
 
@@ -3285,7 +3285,7 @@ parse_start(
 		msyslog(LOG_ERR,
 			"PARSE receiver #%d: parse_start: addclock %s fails (ABORT - clock type requires async io)", CLK_UNIT(parse->peer), parsedev);
 		parse_shutdown(CLK_UNIT(parse->peer), peer); /* let our cleaning staff do the work */
-		return 0;
+		return false;
 	}
 
 	/*
@@ -3325,7 +3325,7 @@ parse_start(
 				);
 		}
 
-	return 1;
+	return true;
 }
 
 /*--------------------------------------------------
@@ -4686,7 +4686,7 @@ gps16x_poll(
 /*--------------------------------------------------
  * init routine - setup timer
  */
-static int
+static bool
 gps16x_poll_init(
 	struct parseunit *parse
 	)
@@ -4697,7 +4697,7 @@ gps16x_poll_init(
 		gps16x_poll(parse->peer);
 	}
 
-	return 0;
+	return false;
 }
 
 #else
@@ -4707,12 +4707,12 @@ gps16x_message(
 	       parsetime_t      *parsetime
 	       )
 {}
-static int
+static bool
 gps16x_poll_init(
 	struct parseunit *parse
 	)
 {
-	return 1;
+	return true;
 }
 #endif /* CLOCK_MEINBERG */
 
@@ -4769,7 +4769,7 @@ poll_poll(
 /*--------------------------------------------------
  * init routine - setup timer
  */
-static int
+static bool
 poll_init(
 	struct parseunit *parse
 	)
@@ -4780,7 +4780,7 @@ poll_init(
 		poll_poll(parse->peer);
 	}
 
-	return 0;
+	return false;
 }
 
 /**===========================================================================
@@ -4802,7 +4802,7 @@ trimbletaip_init(
 	if (TTY_GETATTR(parse->generic->io.fd, &tio) == -1)
 	{
 		msyslog(LOG_ERR, "PARSE receiver #%d: trimbletaip_init: tcgetattr(fd, &tio): %m", CLK_UNIT(parse->peer));
-		return 0;
+		return false;
 	}
 	else
 	{
@@ -4811,7 +4811,7 @@ trimbletaip_init(
 		if (TTY_SETATTR(parse->generic->io.fd, &tio) == -1)
 		{
 			msyslog(LOG_ERR, "PARSE receiver #%d: trimbletaip_init: tcsetattr(fd, &tio): %m", CLK_UNIT(parse->peer));
-			return 0;
+			return false;
 		}
 	}
 	return poll_init(parse);
@@ -5078,7 +5078,7 @@ sendflt(
 /*--------------------------------------------------
  * trimble TSIP setup routine
  */
-static int
+static bool
 trimbletsip_setup(
 		  struct parseunit *parse,
 		  const char *reason
@@ -5090,7 +5090,7 @@ trimbletsip_setup(
 
 	if (t && t->last_reset &&
 	    ((t->last_reset + TRIMBLE_RESET_HOLDOFF) > current_time)) {
-		return 1;	/* not yet */
+		return true;	/* not yet */
 	}
 
 	if (t)
@@ -5134,7 +5134,7 @@ trimbletsip_setup(
 		ERR(ERR_BADIO)
 		msyslog(LOG_ERR, "PARSE receiver #%d: trimbletsip_setup: RECEIVER RE-INITIALIZED (%s)", CLK_UNIT(parse->peer), reason);
 
-	return 0;
+	return false;
 }
 
 /*--------------------------------------------------
@@ -5208,7 +5208,7 @@ trimbletsip_end(
 /*--------------------------------------------------
  * TRIMBLE TSIP init routine
  */
-static int
+static bool
 trimbletsip_init(
 	struct parseunit *parse
 	)
@@ -5240,7 +5240,7 @@ trimbletsip_init(
 	if (TTY_GETATTR(parse->generic->io.fd, &tio) == -1)
 	{
 		msyslog(LOG_ERR, "PARSE receiver #%d: trimbletsip_init: tcgetattr(%d, &tio): %m", CLK_UNIT(parse->peer), parse->generic->io.fd);
-		return 0;
+		return false;
 	}
 	else
 	{
@@ -5257,7 +5257,7 @@ trimbletsip_init(
 		if (TTY_SETATTR(parse->generic->io.fd, &tio) == -1)
 		{
 			msyslog(LOG_ERR, "PARSE receiver #%d: trimbletsip_init: tcsetattr(%d, &tio): %m", CLK_UNIT(parse->peer), parse->generic->io.fd);
-			return 0;
+			return false;
 		}
 	}
 #endif

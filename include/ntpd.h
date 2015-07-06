@@ -60,9 +60,9 @@ extern	char *	saveconfigdir;	/* ntpq saveconfig output directory */
 
 extern	void	getconfig	(int, char **);
 extern	void	ctl_clr_stats	(void);
-extern	int	ctlclrtrap	(sockaddr_u *, struct interface *, int);
+extern	bool	ctlclrtrap	(sockaddr_u *, struct interface *, int);
 extern	u_short ctlpeerstatus	(struct peer *);
-extern	int	ctlsettrap	(sockaddr_u *, struct interface *, int, int);
+extern	bool	ctlsettrap	(sockaddr_u *, struct interface *, int, int);
 extern	u_short ctlsysstatus	(void);
 extern	void	init_control	(void);
 extern	void	process_control (struct recvbuf *, int);
@@ -241,7 +241,7 @@ extern	void	proto_clr_stats (void);
 
 /* ntp_refclock.c */
 #ifdef	REFCLOCK
-extern	int	refclock_newpeer (struct peer *);
+extern	bool	refclock_newpeer (struct peer *);
 extern	void	refclock_unpeer (struct peer *);
 extern	void	refclock_receive (struct peer *);
 extern	void	refclock_transmit (struct peer *);
@@ -397,15 +397,15 @@ extern int	pll_status;		/* status bits for kernel pll */
 /*
  * Clock state machine control flags
  */
-extern int	ntp_enable;		/* clock discipline enabled */
-extern int	pll_control;		/* kernel support available */
-extern int	kern_enable;		/* kernel support enabled */
-extern int	hardpps_enable;		/* kernel PPS discipline enabled */
-extern int	ext_enable;		/* external clock enabled */
-extern int	cal_enable;		/* refclock calibrate enable */
-extern int	allow_panic;		/* allow panic correction (-g) */
-extern int	force_step_once;	/* always step time once at startup (-G) */
-extern int	mode_ntpdate;		/* exit on first clock set (-q) */
+extern bool	ntp_enable;		/* clock discipline enabled */
+extern bool	pll_control;		/* kernel support available */
+extern bool	kern_enable;		/* kernel support enabled */
+extern bool	hardpps_enable;		/* kernel PPS discipline enabled */
+extern bool	ext_enable;		/* external clock enabled */
+extern bool	cal_enable;		/* refclock calibrate enable */
+extern bool	allow_panic;		/* allow panic correction (-g) */
+extern bool	force_step_once;	/* always step time once at startup (-G) */
+extern bool	mode_ntpdate;		/* exit on first clock set (-q) */
 extern int	peer_ntpdate;		/* count of ntpdate peers */
 
 /*
@@ -476,7 +476,7 @@ extern struct peer *sys_peer;		/* current peer */
  */
 extern int	sys_bclient;		/* we set our time to broadcasts */
 extern double	sys_bdelay; 		/* broadcast client default delay */
-extern int	sys_authenticate;	/* requre authentication for config */
+extern bool	sys_authenticate;	/* requre authentication for config */
 extern l_fp	sys_authdelay;		/* authentication delay */
 extern u_long 	sys_epoch;		/* last clock update time */
 extern keyid_t	sys_private;		/* private value for session seed */
@@ -524,7 +524,7 @@ extern void send_via_ntp_signd(struct recvbuf *, int, keyid_t, int,
 #endif
 
 /* ntp_timer.c */
-extern volatile int alarm_flag;		/* alarm flag */
+extern volatile bool alarm_flag;		/* alarm flag */
 extern volatile u_long alarm_overflow;
 extern u_long	current_time;		/* seconds since startup */
 extern u_long	timer_timereset;
@@ -536,17 +536,17 @@ HANDLE WaitableTimerHandle;
 
 /* ntp_util.c */
 extern	char	statsdir[MAXFILENAME];
-extern	int	stats_control;		/* write stats to fileset? */
+extern	bool	stats_control;		/* write stats to fileset? */
 extern	int	stats_write_period;	/* # of seconds between writes. */
 extern	double	stats_write_tolerance;
 extern	double	wander_threshold;
 
 /* ntpd.c */
-extern	int	nofork;		/* no-fork flag */
-extern	int	initializing;	/* initializing flag */
+extern	bool	nofork;		/* no-fork flag */
+extern	bool	initializing;	/* initializing flag */
 #ifdef HAVE_DROPROOT
-extern	int	droproot;	/* flag: try to drop root privileges after startup */
-extern	int	root_dropped;	/* root has been dropped */
+extern	bool	droproot;	/* flag: try to drop root privileges after startup */
+extern	bool	root_dropped;	/* root has been dropped */
 extern char *user;		/* user to switch to */
 extern char *group;		/* group to switch to */
 extern const char *chrootdir;	/* directory to chroot() to */

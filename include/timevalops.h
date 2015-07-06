@@ -77,7 +77,7 @@ extern const u_int32 tstoushi[128];
 	do { \
 		(ts)->l_ui = (u_long)(tv)->tv_sec; \
 		TVUTOTSF((tv)->tv_usec, (ts)->l_uf); \
-	} while (FALSE)
+	} while (false)
 
 #define sTVTOTS(tv, ts) \
 	do { \
@@ -94,7 +94,7 @@ extern const u_int32 tstoushi[128];
 		if (isneg) { \
 			L_NEG((ts)); \
 		} \
-	} while (FALSE)
+	} while (false)
 
 /*
  * Convert a time stamp to a struct timeval.  The time stamp
@@ -108,11 +108,11 @@ extern const u_int32 tstoushi[128];
 			(tv)->tv_sec++; \
 			(tv)->tv_usec = 0; \
 		} \
-	} while (FALSE)
+	} while (false)
 
 
 /*
- * predicate: returns TRUE if the microseconds are in nominal range
+ * predicate: returns true if the microseconds are in nominal range
  * use like: int timeval_isnormal(const struct timeval *x)
  */
 #define timeval_isnormal(x) \
@@ -126,7 +126,7 @@ extern const u_int32 tstoushi[128];
 #define	MSUTOTSF(msu, tsf)	TVUTOTSF((msu) * 1000, tsf)
 
 /*
- * predicate: returns TRUE if the microseconds are out-of-bounds
+ * predicate: returns true if the microseconds are out-of-bounds
  * use like: int timeval_isdenormal(const struct timeval *x)
  */
 #define timeval_isdenormal(x)	(!timeval_isnormal(x))

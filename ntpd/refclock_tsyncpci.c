@@ -254,7 +254,7 @@ typedef struct  {
 */
 static void tsync_poll     (int unit, struct peer *);
 static void tsync_shutdown (int, struct peer *);
-static int  tsync_start    (int, struct peer *);
+static bool  tsync_start    (int, struct peer *);
 
 /*
 **  Helper functions
@@ -311,11 +311,11 @@ static RefIdLookup RefIdLookupTbl[] =
  * Parameters:
  *     IN:  unit - not used.
  *         *peer - pointer to this reference clock's peer structure
- *     Returns: 0 - unsuccessful
- *              1 - successful
+ *     Returns: false - unsuccessful
+ *              true - successful
  *
 *******************************************************************************/
-static int tsync_start(int unit, struct peer *peer)
+static bool tsync_start(int unit, struct peer *peer)
 {
     struct refclockproc *pp;
     TsyncUnit           *up;
@@ -334,7 +334,7 @@ static int tsync_start(int unit, struct peer *peer)
     // Allocate and initialize unit structure
     if (!(up = (TsyncUnit*)emalloc(sizeof(TsyncUnit))))
     {
-        return (0);
+        return false;
     }
 
     // Store reference preference
@@ -352,7 +352,7 @@ static int tsync_start(int unit, struct peer *peer)
      */
     memcpy((char *)&pp->refid, TSYNC_REF_LOCAL, REFIDLEN);
 
-    return (1);
+    return true;
 
 } /* End - tsync_start() */
 

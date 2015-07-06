@@ -59,7 +59,7 @@ extern int leapsec_validate(leapsec_reader, void*);
  * does not have any unwanted side effects.  You can query by giving a
  * negative value for the switch.
  */
-extern int/*BOOL*/ leapsec_electric(int/*BOOL*/ on);
+extern bool leapsec_electric(bool on);
 
 
 /* Query result for a leap second schedule
@@ -112,9 +112,9 @@ extern leap_table_t *leapsec_get_table(int alternate);
 
 /* Set the current leap table. Accepts only return values from
  * 'leapsec_get_table()', so it's hard to do something wrong. Returns
- * TRUE if the current table is the requested one.
+ * true if the current table is the requested one.
  */
-extern int/*BOOL*/ leapsec_set_table(leap_table_t *);
+extern bool leapsec_set_table(leap_table_t *);
 
 /* Clear all leap second data. Use it for init & cleanup */
 extern void leapsec_clear(leap_table_t*);
@@ -123,7 +123,7 @@ extern void leapsec_clear(leap_table_t*);
  * register with their TAI offset) leap entries before the build date.
  * Update the leap signature data on the fly.
  */
-extern int/*BOOL*/ leapsec_load(leap_table_t*, leapsec_reader,
+extern bool leapsec_load(leap_table_t*, leapsec_reader,
 				void*, int blimit);
 
 /* Dump the current leap table in readable format, using the provided
@@ -134,18 +134,18 @@ extern void leapsec_dump(const leap_table_t*, leapsec_dumper func, void *farg);
 /* Read a leap second file from stream. This is a convenience wrapper
  * around the generic load function, 'leapsec_load()'.
  */
-extern int/*BOOL*/ leapsec_load_stream(FILE * fp, const char * fname,
-				       int/*BOOL*/logall);
+extern bool leapsec_load_stream(FILE * fp, const char * fname,
+				       bool logall);
 
 /* Read a leap second file from file. It checks that the file exists and
  * (if 'force' is not applied) the ctime/mtime has changed since the
  * last load. If the file has to be loaded, either due to 'force' or
  * changed time stamps, the 'stat()' results of the file are stored in
- * '*sb' for the next cycle. Returns TRUE on successful load, FALSE
+ * '*sb' for the next cycle. Returns true on successful load, false
  * otherwise. Uses 'leapsec_load_stream()' internally.
  */
-extern int/*BOOL*/ leapsec_load_file(const char * fname, struct stat * sb,
-				     int/*BOOL*/force, int/*BOOL*/logall);
+extern bool leapsec_load_file(const char * fname, struct stat * sb,
+				     bool force, bool logall);
 
 /* Get the current leap data signature. This consists of the last
  * ransition, the table expiration, and the total TAI difference at the
@@ -156,7 +156,7 @@ extern void        leapsec_getsig(leap_signature_t * psig);
 
 /* Check if the leap table is expired at the given time.
  */
-extern int/*BOOL*/ leapsec_expired(uint32_t when, const time_t * pivot);
+extern bool leapsec_expired(uint32_t when, const time_t * pivot);
 
 /* Get the distance to expiration in days.
  * Returns negative values if expired, zero if there are less than 24hrs
@@ -175,7 +175,7 @@ extern void leapsec_reset_frame(void);
  * works if the existing table is extended. On success, updates the
  * signature data.
  */
-extern int/*BOOL*/ leapsec_add_fix(int offset, uint32_t ttime, uint32_t etime,
+extern bool leapsec_add_fix(int offset, uint32_t ttime, uint32_t etime,
 				   const time_t * pivot);
 
 /* Take a time stamp and create a leap second frame for it. This will
@@ -190,21 +190,21 @@ extern int/*BOOL*/ leapsec_add_fix(int offset, uint32_t ttime, uint32_t etime,
  * 'ntp_now' is subject to era unfolding. The entry is marked
  * dynamic. The leap signature is NOT updated.
  */
-extern int/*BOOL*/ leapsec_add_dyn(int/*BOOL*/ insert, uint32_t ntp_now,
+extern bool leapsec_add_dyn(bool insert, uint32_t ntp_now,
 				   const time_t * pivot);
 
 /* Take a time stamp and get the associated leap information. The time
  * stamp is subject to era unfolding around the pivot or the current
  * system time if pivot is NULL. Sets the information in '*qr' and
- * returns TRUE if a leap second era boundary was crossed between the
+ * returns true if a leap second era boundary was crossed between the
  * last and the current query. In that case, qr->warped contains the
  * required clock stepping, which is always zero in electric mode.
  */
-extern int/*BOOL*/ leapsec_query(leap_result_t *qr, uint32_t ntpts,
+extern bool leapsec_query(leap_result_t *qr, uint32_t ntpts,
 				 const time_t * pivot);
 
-/* Get the current leap frame info. Returns TRUE if the result contains
- * useable data, FALSE if there is currently no leap second frame.
+/* Get the current leap frame info. Returns true if the result contains
+ * useable data, false if there is currently no leap second frame.
  * This merely replicates some results from a previous query, but since
  * it does not check the current time, only the following entries are
  * meaningful:
@@ -213,7 +213,7 @@ extern int/*BOOL*/ leapsec_query(leap_result_t *qr, uint32_t ntpts,
  *  qr->tai_diff;
  *  qr->dynamic;
  */
-extern int/*BOOL*/ leapsec_frame(leap_result_t *qr);
+extern bool leapsec_frame(leap_result_t *qr);
 
 /* reset global state for unit tests */
 extern void leapsec_ut_pristine(void);

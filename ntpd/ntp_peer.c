@@ -543,7 +543,7 @@ unpeer(
 		refclock_unpeer(peer);
 #endif
 
-	free_peer(peer, TRUE);
+	free_peer(peer, true);
 }
 
 

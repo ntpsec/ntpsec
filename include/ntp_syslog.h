@@ -16,11 +16,11 @@ extern void msyslog();
 #endif /* VMS */
 #include <stdio.h>
 
-extern int	syslogit;
-extern int	msyslog_term;	/* duplicate to stdout/err */
-extern int	msyslog_term_pid;
-extern int	msyslog_include_timestamp;
-extern FILE *	syslog_file;	/* if syslogit is FALSE, log to 
+extern bool	syslogit;
+extern bool	msyslog_term;	/* duplicate to stdout/err */
+extern bool	msyslog_term_pid;
+extern bool	msyslog_include_timestamp;
+extern FILE *	syslog_file;	/* if syslogit is false, log to
 				   this file and not syslog */
 extern char *	syslog_fname;
 extern char *	syslog_abs_fname;
@@ -80,6 +80,6 @@ extern u_int32 ntp_syslogmask;
 do {								\
 	NLOG(NLOG_##nlog_suffix)	/* like "if (...) */	\
 		msyslog msl_args;				\
-} while (FALSE)
+} while (false)
 
 #endif /* NTP_SYSLOG_H */

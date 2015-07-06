@@ -106,7 +106,7 @@
 #ifndef NTP_LISTS_H
 #define NTP_LISTS_H
 
-#include "ntp_types.h"		/* TRUE and FALSE */
+#include "ntp_types.h"		/* true and false */
 #include "ntp_assert.h"
 
 #ifdef DEBUG
@@ -120,7 +120,7 @@
  * list.
  */
 #ifndef NTP_DEBUG_LISTS_H
-#define MAYBE_Z_LISTS(p)	do { } while (FALSE)
+#define MAYBE_Z_LISTS(p)	do { } while (false)
 #else
 #define MAYBE_Z_LISTS(p)	(p) = NULL
 #endif
@@ -129,7 +129,7 @@
 do {								\
 	(pentry)->nextlink = (listhead);			\
 	(listhead) = (pentry);					\
-} while (FALSE)
+} while (false)
 
 #define LINK_TAIL_SLIST(listhead, pentry, nextlink, entrytype)	\
 do {								\
@@ -141,7 +141,7 @@ do {								\
 								\
 	(pentry)->nextlink = NULL;				\
 	*pptail = (pentry);					\
-} while (FALSE)
+} while (false)
 
 #define LINK_SORT_SLIST_CURRENT()	(*ppentry)
 #define	L_S_S_CUR()			LINK_SORT_SLIST_CURRENT()
@@ -152,7 +152,7 @@ do {								\
 	entrytype **ppentry;					\
 								\
 	ppentry = &(listhead);					\
-	while (TRUE) {						\
+	while (true) {						\
 		if (NULL == *ppentry || (beforecur)) {		\
 			(pentry)->nextlink = *ppentry;		\
 			*ppentry = (pentry);			\
@@ -165,7 +165,7 @@ do {								\
 			break;					\
 		}						\
 	}							\
-} while (FALSE)
+} while (false)
 
 #define UNLINK_HEAD_SLIST(punlinked, listhead, nextlink)	\
 do {								\
@@ -174,7 +174,7 @@ do {								\
 		(listhead) = (punlinked)->nextlink;		\
 		MAYBE_Z_LISTS((punlinked)->nextlink);		\
 	}							\
-} while (FALSE)
+} while (false)
 
 #define UNLINK_EXPR_SLIST_CURRENT()	(*ppentry)
 #define	U_E_S_CUR()			UNLINK_EXPR_SLIST_CURRENT()
@@ -202,7 +202,7 @@ do {								\
 	} else {						\
 		(punlinked) = NULL;				\
 	}							\
-} while (FALSE)
+} while (false)
 
 #define UNLINK_SLIST(punlinked, listhead, ptounlink, nextlink,	\
 		     entrytype)					\
@@ -219,7 +219,7 @@ do {								\
 		NTP_INSIST(pentry != pentry->nextlink);		\
 		NTP_INSIST((listhead) != pentry->nextlink);	\
 	}							\
-} while (FALSE)
+} while (false)
 
 /*
  * FIFO
@@ -241,7 +241,7 @@ struct {							\
  * are NULL with each operation.
  */
 #if !defined(NTP_DEBUG_LISTS_H)
-#define	CHECK_FIFO_CONSISTENCY(anchor)	do { } while (FALSE)
+#define	CHECK_FIFO_CONSISTENCY(anchor)	do { } while (false)
 #else
 #define	CHECK_FIFO_CONSISTENCY(anchor)				\
 	check_gen_fifo_consistency(&(anchor))
@@ -276,7 +276,7 @@ do {								\
 	}							\
 								\
 	CHECK_FIFO_CONSISTENCY(anchor);				\
-} while (FALSE)
+} while (false)
 
 #define UNLINK_FIFO(punlinked, anchor, nextlink)		\
 do {								\
@@ -293,7 +293,7 @@ do {								\
 		MAYBE_Z_LISTS((punlinked)->nextlink);		\
 		CHECK_FIFO_CONSISTENCY(anchor);			\
 	}							\
-} while (FALSE)
+} while (false)
 
 #define UNLINK_MID_FIFO(punlinked, anchor, tounlink, nextlink,	\
 			entrytype)				\
@@ -325,7 +325,7 @@ do {								\
 	} else {						\
 		(punlinked) = NULL;				\
 	}							\
-} while (FALSE)
+} while (false)
 
 #define CONCAT_FIFO(f1, f2, nextlink)				\
 do {								\
@@ -347,7 +347,7 @@ do {								\
 		MAYBE_Z_LISTS((f2).phead);			\
 		MAYBE_Z_LISTS((f2).pptail);			\
 	}							\
-} while (FALSE)
+} while (false)
 
 /*
  * DLIST
@@ -362,7 +362,7 @@ struct {							\
 do {								\
 	(listhead).link.f = &(listhead);			\
 	(listhead).link.b = &(listhead);			\
-} while (FALSE)
+} while (false)
 
 #define HEAD_DLIST(listhead, link)				\
 	(							\
@@ -398,7 +398,7 @@ do {								\
 	(pentry)->link.b = &(listhead);				\
 	(listhead).link.f->link.b = (pentry);			\
 	(listhead).link.f = (pentry);				\
-} while (FALSE)
+} while (false)
 
 #define LINK_TAIL_DLIST(listhead, pentry, link)			\
 do {								\
@@ -406,7 +406,7 @@ do {								\
 	(pentry)->link.f = &(listhead);				\
 	(listhead).link.b->link.f = (pentry);			\
 	(listhead).link.b = (pentry);				\
-} while (FALSE)
+} while (false)
 
 #define UNLINK_DLIST(ptounlink, link)				\
 do {								\
@@ -414,7 +414,7 @@ do {								\
 	(ptounlink)->link.f->link.b = (ptounlink)->link.b;	\
 	MAYBE_Z_LISTS((ptounlink)->link.b);			\
 	MAYBE_Z_LISTS((ptounlink)->link.f);			\
-} while (FALSE)
+} while (false)
 
 #define ITER_DLIST_BEGIN(listhead, iter, link, entrytype)	\
 {								\
@@ -422,7 +422,7 @@ do {								\
 								\
 	for ((iter) = (listhead).link.f;			\
 	     (iter) != &(listhead)				\
-	     && ((i_dl_nextiter = (iter)->link.f), TRUE);	\
+	     && ((i_dl_nextiter = (iter)->link.f), true);	\
 	     (iter) = i_dl_nextiter) {
 #define ITER_DLIST_END()					\
 	}							\
@@ -434,7 +434,7 @@ do {								\
 								\
 	for ((iter) = (listhead).link.b;			\
 	     (iter) != &(listhead)				\
-	     && ((i_dl_nextiter = (iter)->link.b), TRUE);	\
+	     && ((i_dl_nextiter = (iter)->link.b), true);	\
 	     (iter) = i_dl_nextiter) {
 #define REV_ITER_DLIST_END()					\
 	}							\

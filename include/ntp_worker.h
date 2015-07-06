@@ -57,14 +57,14 @@ typedef HANDLE		sem_ref;
  */
 #ifdef WORK_FORK
 typedef struct blocking_child_tag {
-	int	reusable;
+	bool	reusable;
 	int	pid;
 	int	req_write_pipe;		/* parent */
 	int	resp_read_pipe;
 	void *	resp_read_ctx;
 	int	req_read_pipe;		/* child */
 	int	resp_write_pipe;
-	int	ispipe;
+	bool	ispipe;
 } blocking_child;
 #elif defined(WORK_THREAD)
 typedef struct blocking_child_tag {
@@ -132,7 +132,7 @@ extern	void	worker_idle_timer_fired(void);
 extern	void	interrupt_worker_sleep(void);
 extern	int	req_child_exit(blocking_child *);
 #ifndef HAVE_IO_COMPLETION_PORT
-extern	int	pipe_socketpair(int fds[2], int *is_pipe);
+extern	int	pipe_socketpair(int fds[2], bool *is_pipe);
 extern	void	close_all_beyond(int);
 extern	void	close_all_except(int);
 extern	void	kill_asyncio	(int);

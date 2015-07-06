@@ -287,16 +287,16 @@ _drop_stack_do(
  * fail if there is already an input source, or if the underlying disk
  * file cannot be opened.
  *
- * Returns TRUE if a new input object was successfully created.
+ * Returns true if a new input object was successfully created.
  */
-int/*BOOL*/
+bool
 lex_init_stack(
 	const char * path,
 	const char * mode
 	)
 {
 	if (NULL != lex_stack || NULL == path)
-		return FALSE;
+		return false;
 
 	lex_stack = lex_open(path, mode);
 	return (NULL != lex_stack);
@@ -320,17 +320,17 @@ lex_drop_stack()
  * as inactive. Any further calls to lex_getch yield only EOF, and it's
  * no longer possible to push something back.
  *
- * Returns TRUE if there is a head element (top-of-stack) that was not
+ * Returns true if there is a head element (top-of-stack) that was not
  * in the force-eof mode before this call.
  */
-int/*BOOL*/
+bool
 lex_flush_stack()
 {
-	int retv = FALSE;
+	bool retv = false;
 
 	if (NULL != lex_stack) {
 		retv = !lex_stack->force_eof;
-		lex_stack->force_eof = TRUE;
+		lex_stack->force_eof = true;
 		lex_stack->st_next = _drop_stack_do(
 					lex_stack->st_next);
 	}
@@ -342,9 +342,9 @@ lex_flush_stack()
  * FILE_INFO that is bound to a local/disc file. Note that 'path' must
  * not be NULL, or the function will fail.
  *
- * Returns TRUE if a new info record was pushed onto the stack.
+ * Returns true if a new info record was pushed onto the stack.
  */
-int/*BOOL*/ lex_push_file(
+bool lex_push_file(
 	const char * path,
 	const char * mode
 	)
@@ -366,9 +366,9 @@ int/*BOOL*/ lex_push_file(
  * fails, because the parser does not expect the input stack to be
  * empty.
  *
- * Returns TRUE if an object was successfuly popped from the stack.
+ * Returns true if an object was successfully popped from the stack.
  */
-int/*BOOL*/
+bool
 lex_pop_file(void)
 {
 	struct FILE_INFO * head = lex_stack;
@@ -408,7 +408,7 @@ lex_level(void)
 }
 
 /* check if the current input is from a file */	
-int/*BOOL*/
+bool
 lex_from_file(void)
 {
 	return (NULL != lex_stack) && (NULL != lex_stack->fpi);
@@ -480,29 +480,29 @@ is_integer(
 	/* Allow a leading minus sign */
 	if (lexeme[i] == '-') {
 		i++;
-		is_neg = TRUE;
+		is_neg = true;
 	} else {
-		is_neg = FALSE;
+		is_neg = false;
 	}
 
 	/* Check that all the remaining characters are digits */
 	for (; lexeme[i] != '\0'; i++) {
 		if (!isdigit((u_char)lexeme[i]))
-			return FALSE;
+			return false;
 	}
 
 	if (is_neg)
-		return TRUE;
+		return true;
 
 	/* Reject numbers that fit in unsigned but not in signed int */
 	if (1 == sscanf(lexeme, "%u", &u_val))
 		return (u_val <= INT_MAX);
 	else
-		return FALSE;
+		return false;
 }
 
 
-/* U_int -- assumes is_integer() has returned FALSE */
+/* U_int -- assumes is_integer() has returned false */
 static int
 is_u_int(
 	char *lexeme
@@ -514,25 +514,25 @@ is_u_int(
 	i = 0;
 	if ('0' == lexeme[i] && 'x' == tolower((u_char)lexeme[i + 1])) {
 		i += 2;
-		is_hex = TRUE;
+		is_hex = true;
 	} else {
-		is_hex = FALSE;
+		is_hex = false;
 	}
 
 	/* Check that all the remaining characters are digits */
 	for (; lexeme[i] != '\0'; i++) {
 		if (is_hex && !isxdigit((u_char)lexeme[i]))
-			return FALSE;
+			return false;
 		if (!is_hex && !isdigit((u_char)lexeme[i]))
-			return FALSE;
+			return false;
 	}
 
-	return TRUE;
+	return true;
 }
 
 
 /* Double */
-static int
+static bool
 is_double(
 	char *lexeme
 	)
@@ -563,17 +563,17 @@ is_double(
 	 * fraction part must not be zero at this point 
 	 */
 	if (!num_digits)
-		return 0;
+		return false;
 
 	/* Check if we are done */
 	if (!lexeme[i])
-		return 1;
+		return true;
 
 	/* There is still more input, read the exponent */
 	if ('e' == tolower((u_char)lexeme[i]))
 		i++;
 	else
-		return 0;
+		return false;
 
 	/* Read an optional Sign */
 	if ('+' == lexeme[i] || '-' == lexeme[i])
@@ -585,14 +585,14 @@ is_double(
 
 	/* Check if we are done */
 	if (!lexeme[i])
-		return 1;
+		return true;
 	else
-		return 0;
+		return false;
 }
 
 
 /* is_special() - Test whether a character is a token */
-static inline int
+static inline bool
 is_special(
 	int ch
 	)
@@ -601,15 +601,15 @@ is_special(
 }
 
 
-static int
+static bool
 is_EOC(
 	int ch
 	)
 {
 	if ((old_config_style && (ch == '\n')) ||
 	    (!old_config_style && (ch == ';')))
-		return 1;
-	return 0;
+		return true;
+	return false;
 }
 
 
@@ -670,14 +670,14 @@ yylex(void)
 {
 	static follby	followedby = FOLLBY_TOKEN;
 	int		i;
-	int		instring;
-	int		yylval_was_set;
+	bool		instring;
+	bool		yylval_was_set;
 	int		converted;
 	int		token;		/* The return value */
 	int		ch;
 
-	instring = FALSE;
-	yylval_was_set = FALSE;
+	instring = false;
+	yylval_was_set = false;
 
 	do {
 		/* Ignore whitespace at the beginning */
@@ -753,7 +753,7 @@ yylex(void)
 		 * XXX - HMS: I'm not sure we want to assume the closing "
 		 */
 		if ('"' == ch) {
-			instring = TRUE;
+			instring = true;
 			while (EOF != (ch = lex_getch(lex_stack)) &&
 			       ch != '"' && ch != '\n') {
 				yytext[i++] = (char)ch;
@@ -800,7 +800,7 @@ yylex(void)
 				followedby = FOLLBY_TOKEN;
 			goto normal_return;
 		} else if (is_integer(yytext)) {
-			yylval_was_set = TRUE;
+			yylval_was_set = true;
 			errno = 0;
 			if ((yylval.Integer = strtol(yytext, NULL, 10)) == 0
 			    && ((errno == EINVAL) || (errno == ERANGE))) {
@@ -818,7 +818,7 @@ yylex(void)
 			token = T_Integer;
 			goto normal_return;
 		} else if (is_u_int(yytext)) {
-			yylval_was_set = TRUE;
+			yylval_was_set = true;
 			if ('0' == yytext[0] &&
 			    'x' == tolower((unsigned long)yytext[1]))
 				converted = sscanf(&yytext[2], "%x",
@@ -841,7 +841,7 @@ yylex(void)
 			token = T_U_int;
 			goto normal_return;
 		} else if (is_double(yytext)) {
-			yylval_was_set = TRUE;
+			yylval_was_set = true;
 			errno = 0;
 			if ((yylval.Double = atof(yytext)) == 0 && errno == ERANGE) {
 				msyslog(LOG_ERR,
@@ -854,7 +854,7 @@ yylex(void)
 			}
 		} else {
 			/* Default: Everything is a string */
-			yylval_was_set = TRUE;
+			yylval_was_set = true;
 			token = create_string_token(yytext);
 			goto normal_return;
 		}
@@ -892,11 +892,11 @@ yylex(void)
 		}
 	}
 
-	instring = FALSE;
+	instring = false;
 	if (FOLLBY_STRING == followedby)
 		followedby = FOLLBY_TOKEN;
 
-	yylval_was_set = TRUE;
+	yylval_was_set = true;
 	token = create_string_token(yytext);
 
 normal_return:

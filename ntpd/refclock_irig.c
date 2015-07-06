@@ -271,7 +271,7 @@ struct irigunit {
 /*
  * Function prototypes
  */
-static	int	irig_start	(int, struct peer *);
+static	bool	irig_start	(int, struct peer *);
 static	void	irig_shutdown	(int, struct peer *);
 static	void	irig_receive	(struct recvbuf *);
 static	void	irig_poll	(int, struct peer *);
@@ -302,7 +302,7 @@ struct	refclock refclock_irig = {
 /*
  * irig_start - open the devices and initialize data for processing
  */
-static int
+static bool
 irig_start(
 	int	unit,		/* instance number (used for PCM) */
 	struct peer *peer	/* peer structure pointer */
@@ -323,7 +323,7 @@ irig_start(
 	 */
 	fd = audio_init(DEVICE_AUDIO, AUDIO_BUFSIZ, unit);
 	if (fd < 0)
-		return (0);
+		return false;
 #ifdef DEBUG
 	if (debug)
 		audio_show();
@@ -342,7 +342,7 @@ irig_start(
 		close(fd);
 		pp->io.fd = -1;
 		free(up);
-		return (0);
+		return false;
 	}
 	pp->unitptr = up;
 
@@ -371,7 +371,7 @@ irig_start(
 			step *= 2.;
 	}
 	DTOLFP(1. / SECOND, &up->tick);
-	return (1);
+	return true;
 }
 
 

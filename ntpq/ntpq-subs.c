@@ -30,7 +30,7 @@ static	void	addvars 	(struct parse *, FILE *);
 static	void	rmvars		(struct parse *, FILE *);
 static	void	clearvars	(struct parse *, FILE *);
 static	void	showvars	(struct parse *, FILE *);
-static	int	dolist		(struct varlist *, associd_t, int, int,
+static	bool	dolist		(struct varlist *, associd_t, int, int,
 				 FILE *);
 static	void	readlist	(struct parse *, FILE *);
 static	void	writelist	(struct parse *, FILE *);
@@ -38,7 +38,7 @@ static	void	readvar 	(struct parse *, FILE *);
 static	void	writevar	(struct parse *, FILE *);
 static	void	clocklist	(struct parse *, FILE *);
 static	void	clockvar	(struct parse *, FILE *);
-static	int	findassidrange	(u_int32, u_int32, int *, int *,
+static	bool	findassidrange	(u_int32, u_int32, int *, int *,
 				 FILE *);
 static	void	mreadlist	(struct parse *, FILE *);
 static	void	mreadvar	(struct parse *, FILE *);
@@ -56,8 +56,8 @@ static	void	authinfo	(struct parse *, FILE *);
 static	void	pstats	 	(struct parse *, FILE *);
 static	long	when		(l_fp *, l_fp *, l_fp *);
 static	char *	prettyinterval	(char *, size_t, long);
-static	int	doprintpeers	(struct varlist *, int, int, int, const char *, FILE *, int);
-static	int	dogetpeers	(struct varlist *, associd_t, FILE *, int);
+static	bool	doprintpeers	(struct varlist *, int, int, int, const char *, FILE *, int);
+static	bool	dogetpeers	(struct varlist *, associd_t, FILE *, int);
 static	void	dopeers 	(int, FILE *, int);
 static	void	peers		(struct parse *, FILE *);
 static	void	lpeers		(struct parse *, FILE *);
@@ -336,7 +336,7 @@ typedef struct var_display_collection_tag {
  */
 void		mrulist_ctrl_c_hook(void);
 static mru *	add_mru(mru *);
-static int	collect_mru_list(const char *, l_fp *);
+static bool	collect_mru_list(const char *, l_fp *);
 static int	fetch_nonce(char *, size_t);
 static int	qcmp_mru_avgint(const void *, const void *);
 static int	qcmp_mru_r_avgint(const void *, const void *);
@@ -354,7 +354,7 @@ static void	collect_display_vdc(associd_t as, vdc *table,
  */
 static u_int	mru_count;
 static u_int	mru_dupes;
-volatile int	mrulist_interrupted;
+volatile bool	mrulist_interrupted;
 static mru	mru_list;		/* listhead */
 static mru **	hash_table;
 
@@ -666,7 +666,7 @@ showvars(
 /*
  * dolist - send a request with the given list of variables
  */
-static int
+static bool
 dolist(
 	struct varlist *vlist,
 	associd_t associd,
@@ -679,21 +679,21 @@ dolist(
 	int res;
 	int dsize;
 	u_short rstatus;
-	int quiet;
+	bool quiet;
 
 	/*
 	 * if we're asking for specific variables don't include the
 	 * status header line in the output.
 	 */
 	if (old_rv)
-		quiet = 0;
+		quiet = false;
 	else
 		quiet = (vlist->name != NULL);
 
 	res = doquerylist(vlist, op, associd, 0, &rstatus, &dsize, &datap);
 
 	if (res != 0)
-		return 0;
+		return false;
 
 	if (numhosts > 1)
 		fprintf(fp, "server=%s ", currenthost);
@@ -706,13 +706,13 @@ dolist(
 				"No information returned for%s association %u\n",
 				(type == TYPE_CLOCK) ? " clock" : "",
 				associd);
-		return 1;
+		return true;
 	}
 
 	if (!quiet)
 		fprintf(fp, "associd=%u ", associd);
 	printvars(dsize, datap, (int)rstatus, type, quiet, fp);
-	return 1;
+	return true;
 }
 
 
@@ -932,7 +932,7 @@ clockvar(
 /*
  * findassidrange - verify a range of association ID's
  */
-static int
+static bool
 findassidrange(
 	u_int32	assid1,
 	u_int32	assid2,
@@ -952,10 +952,10 @@ findassidrange(
 
 	assids[0] = checkassocid(assid1);
 	if (0 == assids[0])
-		return 0;
+		return false;
 	assids[1] = checkassocid(assid2);
 	if (0 == assids[1])
-		return 0;
+		return false;
 
 	for (a = 0; a < COUNTOF(assids); a++) {
 		ind[a] = -1;
@@ -968,7 +968,7 @@ findassidrange(
 			fprintf(stderr,
 				"***Association ID %u not found in list\n",
 				assids[a]);
-			return 0;
+			return false;
 		}
 
 	if (ind[0] < ind[1]) {
@@ -978,7 +978,7 @@ findassidrange(
 		*to = ind[0];
 		*from = ind[1];
 	}
-	return 1;
+	return true;
 }
 
 
@@ -1054,7 +1054,7 @@ mreadvar(
 /*
  * dogetassoc - query the host for its list of associations
  */
-int
+bool
 dogetassoc(
 	FILE *fp
 	)
@@ -1069,13 +1069,13 @@ dogetassoc(
 			  &dsize, &datap);
 
 	if (res != 0)
-		return 0;
+		return false;
 
 	if (dsize == 0) {
 		if (numhosts > 1)
 			fprintf(fp, "server=%s ", currenthost);
 		fprintf(fp, "No association ID's returned\n");
-		return 0;
+		return false;
 	}
 
 	if (dsize & 0x3) {
@@ -1084,7 +1084,7 @@ dogetassoc(
 		fprintf(stderr,
 			"***Server returned %d octets, should be multiple of 4\n",
 			dsize);
-		return 0;
+		return false;
 	}
 
 	numassoc = 0;
@@ -1110,7 +1110,7 @@ dogetassoc(
 		fprintf(stderr, "\n%d associations total\n", numassoc);
 	}
 	sortassoc();
-	return 1;
+	return true;
 }
 
 
@@ -1559,7 +1559,7 @@ struct varlist peervarlist[] = {
 /*
  * Decode an incoming data buffer and print a line in the peer list
  */
-static int
+static bool
 doprintpeers(
 	struct varlist *pvl,
 	int associd,
@@ -1574,10 +1574,10 @@ doprintpeers(
 	char *value = NULL;
 	int c;
 	int len;
-	int have_srchost;
-	int have_dstadr;
-	int have_da_rid;
-	int have_jitter;
+	bool have_srchost;
+	bool have_dstadr;
+	bool have_da_rid;
+	bool have_jitter;
 	sockaddr_u srcadr;
 	sockaddr_u dstadr;
 	sockaddr_u dum_store;
@@ -1606,10 +1606,10 @@ doprintpeers(
 
 	get_systime(&ts);
 	
-	have_srchost = FALSE;
-	have_dstadr = FALSE;
-	have_da_rid = FALSE;
-	have_jitter = FALSE;
+	have_srchost = false;
+	have_dstadr = false;
+	have_da_rid = false;
+	have_jitter = false;
 	ZERO_SOCK(&srcadr);
 	ZERO_SOCK(&dstadr);
 	clock_name[0] = '\0';
@@ -1634,16 +1634,16 @@ doprintpeers(
 					len -= 2;
 					memcpy(clock_name, value, len);
 					clock_name[len] = '\0';
-					have_srchost = TRUE;
+					have_srchost = true;
 				}
 			}
 		} else if (!strcmp("dstadr", name)) {
 			if (decodenetnum(value, &dum_store)) {
 				type = decodeaddrtype(&dum_store);
-				have_dstadr = TRUE;
+				have_dstadr = true;
 				dstadr = dum_store;
 				if (pvl == opeervarlist) {
-					have_da_rid = TRUE;
+					have_da_rid = true;
 					dstadr_refid = trunc_left(stoa(&dstadr), 15);
 				}
 			}
@@ -1651,7 +1651,7 @@ doprintpeers(
 			decodeint(value, &hmode);
 		} else if (!strcmp("refid", name)) {
 			if (pvl == peervarlist) {
-				have_da_rid = TRUE;
+				have_da_rid = true;
 				drlen = strlen(value);
 				if (0 == drlen) {
 					dstadr_refid = "";
@@ -1669,7 +1669,7 @@ doprintpeers(
 						dstadr_refid =
 						    stoa(&refidadr);
 				} else {
-					have_da_rid = FALSE;
+					have_da_rid = false;
 				}
 			}
 		} else if (!strcmp("stratum", name)) {
@@ -1689,7 +1689,7 @@ doprintpeers(
 		} else if (!strcmp("jitter", name)) {
 			if (pvl == peervarlist &&
 			    decodetime(value, &estjitter))
-				have_jitter = 1;
+				have_jitter = true;
 		} else if (!strcmp("rootdisp", name) ||
 			   !strcmp("dispersion", name)) {
 			decodetime(value, &estdisp);
@@ -1755,7 +1755,7 @@ doprintpeers(
 		if (peervarlist == pvl && have_dstadr) {
 			serverlocal = nntohost_col(&dstadr,
 			    (size_t)min(LIB_BUFLENGTH - 1, maxhostlen),
-			    TRUE);
+			    true);
 		} else {
 			if (currenthostisnum)
 				serverlocal = trunc_left(currenthost,
@@ -1793,10 +1793,10 @@ doprintpeers(
 			(have_jitter)
 			    ? lfptoms(&estjitter, 3)
 			    : lfptoms(&estdisp, 3));
-		return (1);
+		return true;
 	}
 	else
-		return(1);
+		return true;
 }
 
 
@@ -1804,7 +1804,7 @@ doprintpeers(
  * dogetpeers - given an association ID, read and print the spreadsheet
  *		peer variables.
  */
-static int
+static bool
 dogetpeers(
 	struct varlist *pvl,
 	associd_t associd,
@@ -1829,7 +1829,7 @@ dogetpeers(
 #endif
 
 	if (res != 0)
-		return 0;
+		return false;
 
 	if (dsize == 0) {
 		if (numhosts > 1)
@@ -1837,7 +1837,7 @@ dogetpeers(
 		fprintf(stderr,
 			"***No information returned for association %u\n",
 			associd);
-		return 0;
+		return false;
 	}
 
 	return doprintpeers(pvl, associd, (int)rstatus, dsize, datap,
@@ -2189,18 +2189,18 @@ fetch_nonce(
 		       &rsize, &rdata);
 	if (qres) {
 		fprintf(stderr, "nonce request failed\n");
-		return FALSE;
+		return false;
 	}
 
 	if ((size_t)rsize <= sizeof(nonce_eq) - 1 ||
 	    strncmp(rdata, nonce_eq, sizeof(nonce_eq) - 1)) {
 		fprintf(stderr, "unexpected nonce response format: %.*s\n",
 			rsize, rdata);
-		return FALSE;
+		return false;
 	}
 	chars = rsize - (sizeof(nonce_eq) - 1);
 	if (chars >= (int)cb_nonce)
-		return FALSE;
+		return false;
 	memcpy(nonce, rdata + sizeof(nonce_eq) - 1, chars);
 	nonce[chars] = '\0';
 	while (chars > 0 &&
@@ -2209,7 +2209,7 @@ fetch_nonce(
 		nonce[chars] = '\0';
 	}
 	
-	return TRUE;
+	return true;
 }
 
 
@@ -2281,11 +2281,11 @@ add_mru(
 void
 mrulist_ctrl_c_hook(void)
 {
-	mrulist_interrupted = TRUE;
+	mrulist_interrupted = true;
 }
 
 
-static int
+static bool
 collect_mru_list(
 	const char *	parms,
 	l_fp *		pnow
@@ -2293,14 +2293,14 @@ collect_mru_list(
 {
 	const u_int sleep_msecs = 5;
 	static int ntpd_row_limit = MRU_ROW_LIMIT;
-	int c_mru_l_rc;		/* this function's return code */
+	bool c_mru_l_rc;		/* this function's return code */
 	u_char got;		/* MRU_GOT_* bits */
 	time_t next_report;
 	size_t cb;
 	mru *mon;
 	mru *head;
 	mru *recent;
-	int list_complete;
+	bool list_complete;
 	char nonce[128];
 	char buf[128];
 	char req_buf[CTL_MAX_DATA_LEN];
@@ -2313,7 +2313,7 @@ collect_mru_list(
 	const char *rdata;
 	int limit;
 	int frags;
-	int cap_frags;
+	bool cap_frags;
 	char *tag;
 	char *val;
 	int si;		/* server index in response */
@@ -2323,16 +2323,16 @@ collect_mru_list(
 	l_fp newest;
 	l_fp last_older;
 	sockaddr_u addr_older;
-	int have_now;
-	int have_addr_older; 
-	int have_last_older;
+	bool have_now;
+	bool have_addr_older; 
+	bool have_last_older;
 	u_int restarted_count;
 	u_int nonce_uses;
 	u_short hash;
 	mru *unlinked;
 
 	if (!fetch_nonce(nonce, sizeof(nonce)))
-		return FALSE;
+		return false;
 
 	nonce_uses = 0;
 	restarted_count = 0;
@@ -2342,17 +2342,17 @@ collect_mru_list(
 	NTP_INSIST(NULL == hash_table);
 	hash_table = emalloc_zero(cb);
 
-	c_mru_l_rc = FALSE;
-	list_complete = FALSE;
-	have_now = FALSE;
-	cap_frags = TRUE;
+	c_mru_l_rc = false;
+	list_complete = false;
+	have_now = false;
+	cap_frags = true;
 	got = 0;
 	ri = 0;
 	cb = sizeof(*mon);
 	mon = emalloc_zero(cb);
 	ZERO(*pnow);
 	ZERO(last_older);
-	mrulist_interrupted = FALSE;
+	mrulist_interrupted = false;
 	set_ctrl_c_hook(&mrulist_ctrl_c_hook);
 	fprintf(stderr,
 		"Ctrl-C will stop MRU retrieval and display partial results.\n");
@@ -2365,12 +2365,12 @@ collect_mru_list(
 		 nonce, frags, parms);
 	nonce_uses++;
 
-	while (TRUE) {
+	while (true) {
 		if (debug)
 			fprintf(stderr, "READ_MRU parms: %s\n", req_buf);
 
 		qres = doqueryex(CTL_OP_READ_MRU, 0, 0, strlen(req_buf),
-			         req_buf, &rstatus, &rsize, &rdata, TRUE);
+			         req_buf, &rstatus, &rsize, &rdata, true);
 
 		if (CERR_UNKNOWNVAR == qres && ri > 0) {
 			/*
@@ -2417,7 +2417,7 @@ collect_mru_list(
 			goto cleanup_return;
 		} else if (CERR_BADVALUE == qres) {
 			if (cap_frags) {
-				cap_frags = FALSE;
+				cap_frags = false;
 				if (debug)
 					fprintf(stderr,
 						"Reverted to row limit from fragments limit.\n");
@@ -2465,8 +2465,8 @@ collect_mru_list(
 		if (!qres && rawmode)
 			printvars(rsize, rdata, rstatus, TYPE_SYS, 1, stdout);
 		ci = 0;
-		have_addr_older = FALSE;
-		have_last_older = FALSE;
+		have_addr_older = false;
+		have_last_older = false;
 		while (!qres && nextvar(&rsize, &rdata, &tag, &val)) {
 			if (debug > 1)
 				fprintf(stderr, "nextvar gave: %s = %s\n",
@@ -2511,7 +2511,7 @@ collect_mru_list(
 							recent->last.l_uf);
 						goto cleanup_return;
 					}
-					have_addr_older = TRUE;
+					have_addr_older = true;
 				} else if (1 != sscanf(tag, "addr.%d", &si)
 					   || si != ci)
 					goto nomatch;
@@ -2529,7 +2529,7 @@ collect_mru_list(
 							val);
 						goto cleanup_return;
 					}
-					have_last_older = TRUE;
+					have_last_older = true;
 				} else if (!strcmp(tag, "last.newest")) {
 					if (0 != got) {
 						fprintf(stderr,
@@ -2558,7 +2558,7 @@ collect_mru_list(
 							goto cleanup_return;
 						}
 					}
-					list_complete = TRUE;
+					list_complete = true;
 				} else if (1 != sscanf(tag, "last.%d", &si) ||
 					   si != ci || '0' != val[0] ||
 					   'x' != val[1] ||
@@ -2595,7 +2595,7 @@ collect_mru_list(
 					   'x' != val[1] ||
 					    !hextolfp(val + 2, pnow))
 					goto nomatch;
-				have_now = TRUE;
+				have_now = true;
 				break;
 
 			case 'c':
@@ -2632,7 +2632,7 @@ collect_mru_list(
 			}
 		}
 		if (have_now)
-			list_complete = TRUE;
+			list_complete = true;
 		if (list_complete) {
 			NTP_INSIST(0 == ri || have_addr_older);
 		}
@@ -2726,7 +2726,7 @@ collect_mru_list(
 	}
 
 	set_ctrl_c_hook(NULL);
-	c_mru_l_rc = TRUE;
+	c_mru_l_rc = true;
 	goto retain_hash_table;
 
 cleanup_return:
@@ -2770,8 +2770,8 @@ qcmp_mru_addr(
 
 	if (af1 != af2)
 		return (AF_INET == af1)
-			   ? -1
-			   : 1;
+			   ? COMPARE_LESSTHAN
+			   : COMPARE_GREATERTHAN;
 
 	cmplen = SIZEOF_INADDR(af1);
 	addr_off = (AF_INET == af1)
@@ -2812,10 +2812,10 @@ qcmp_mru_count(
 	pm2 = *ppm2;
 	
 	return (pm1->count < pm2->count)
-		   ? -1
+		   ? COMPARE_LESSTHAN
 		   : ((pm1->count == pm2->count)
-			  ? 0
-			  : 1);
+			  ? COMPARE_EQUAL
+			  : COMPARE_GREATERTHAN);
 }
 
 
@@ -2860,17 +2860,17 @@ qcmp_mru_avgint(
 	avg2 /= pm2->count;
 
 	if (avg1 < avg2)
-		return -1;
+		return COMPARE_LESSTHAN;
 	else if (avg1 > avg2)
-		return 1;
+		return COMPARE_GREATERTHAN;
 
 	/* secondary sort on lstint - rarely tested */
 	if (L_ISEQU(&pm1->last, &pm2->last))
-		return 0;
+		return COMPARE_EQUAL;
 	else if (L_ISGEQ(&pm1->last, &pm2->last))
-		return -1;
+		return COMPARE_LESSTHAN;
 	else
-		return 1;
+		return COMPARE_GREATERTHAN;
 }
 
 
@@ -3179,10 +3179,10 @@ ifstats(
 	int		fields;
 	u_int		ui;
 	ifstats_row	row;
-	int		comprende;
+	bool		comprende;
 	size_t		len;
 
-	qres = doquery(CTL_OP_READ_ORDLIST_A, 0, TRUE, 0, NULL, &rstatus,
+	qres = doquery(CTL_OP_READ_ORDLIST_A, 0, true, 0, NULL, &rstatus,
 		       &dsize, &datap);
 	if (qres)	/* message already displayed */
 		return;
@@ -3202,38 +3202,38 @@ ifstats(
 				(NULL == val)
 				    ? ""
 				    : val);
-		comprende = FALSE;
+		comprende = false;
 		switch(tag[0]) {
 
 		case 'a':
 			if (1 == sscanf(tag, addr_fmt, &ui) &&
 			    decodenetnum(val, &row.addr))
-				comprende = TRUE;
+				comprende = true;
 			break;
 
 		case 'b':
 			if (1 == sscanf(tag, bcast_fmt, &ui) &&
 			    (NULL == val ||
 			     decodenetnum(val, &row.bcast)))
-				comprende = TRUE;
+				comprende = true;
 			break;
 
 		case 'e':
 			if (1 == sscanf(tag, en_fmt, &ui) &&
 			    1 == sscanf(val, "%d", &row.enabled))
-				comprende = TRUE;
+				comprende = true;
 			break;
 
 		case 'f':
 			if (1 == sscanf(tag, flags_fmt, &ui) &&
 			    1 == sscanf(val, "0x%x", &row.flags))
-				comprende = TRUE;
+				comprende = true;
 			break;
 
 		case 'm':
 			if (1 == sscanf(tag, mc_fmt, &ui) &&
 			    1 == sscanf(val, "%d", &row.mcast_count))
-				comprende = TRUE;
+				comprende = true;
 			break;
 
 		case 'n':
@@ -3246,7 +3246,7 @@ ifstats(
 					len -= 2;
 					memcpy(row.name, val + 1, len);
 					row.name[len] = '\0';
-					comprende = TRUE;
+					comprende = true;
 				}
 			}
 			break;
@@ -3254,31 +3254,31 @@ ifstats(
 		case 'p':
 			if (1 == sscanf(tag, pc_fmt, &ui) &&
 			    1 == sscanf(val, "%d", &row.peer_count))
-				comprende = TRUE;
+				comprende = true;
 			break;
 
 		case 'r':
 			if (1 == sscanf(tag, rx_fmt, &ui) &&
 			    1 == sscanf(val, "%d", &row.received))
-				comprende = TRUE;
+				comprende = true;
 			break;
 
 		case 't':
 			if (1 == sscanf(tag, tl_fmt, &ui) &&
 			    1 == sscanf(val, "%d", &row.ttl))
-				comprende = TRUE;
+				comprende = true;
 			else if (1 == sscanf(tag, tx_fmt, &ui) &&
 				 1 == sscanf(val, "%d", &row.sent))
-				comprende = TRUE;
+				comprende = true;
 			else if (1 == sscanf(tag, txerr_fmt, &ui) &&
 				 1 == sscanf(val, "%d", &row.send_errors))
-				comprende = TRUE;
+				comprende = true;
 			break;
 
 		case 'u':
 			if (1 == sscanf(tag, up_fmt, &ui) &&
 			    1 == sscanf(val, "%d", &row.uptime))
-				comprende = TRUE;
+				comprende = true;
 			break;
 		}
 
@@ -3398,7 +3398,7 @@ reslist(
 	int		comprende;
 	size_t		len;
 
-	qres = doquery(CTL_OP_READ_ORDLIST_A, 0, TRUE, qdata_chars,
+	qres = doquery(CTL_OP_READ_ORDLIST_A, 0, true, qdata_chars,
 		       qdata, &rstatus, &dsize, &datap);
 	if (qres)	/* message already displayed */
 		return;
@@ -3418,25 +3418,25 @@ reslist(
 				(NULL == val)
 				    ? ""
 				    : val);
-		comprende = FALSE;
+		comprende = false;
 		switch(tag[0]) {
 
 		case 'a':
 			if (1 == sscanf(tag, addr_fmtu, &ui) &&
 			    decodenetnum(val, &row.addr))
-				comprende = TRUE;
+				comprende = true;
 			break;
 
 		case 'f':
 			if (1 == sscanf(tag, flags_fmt, &ui)) {
 				if (NULL == val) {
 					row.flagstr[0] = '\0';
-					comprende = TRUE;
+					comprende = true;
 				} else {
 					len = strlen(val);
 					memcpy(row.flagstr, val, len);
 					row.flagstr[len] = '\0';
-					comprende = TRUE;
+					comprende = true;
 				}
 			}
 			break;
@@ -3444,13 +3444,13 @@ reslist(
 		case 'h':
 			if (1 == sscanf(tag, hits_fmt, &ui) &&
 			    1 == sscanf(val, "%lu", &row.hits))
-				comprende = TRUE;
+				comprende = true;
 			break;
 
 		case 'm':
 			if (1 == sscanf(tag, mask_fmtu, &ui) &&
 			    decodenetnum(val, &row.mask))
-				comprende = TRUE;
+				comprende = true;
 			break;
 		}
 
@@ -3494,7 +3494,7 @@ collect_display_vdc(
 	char *val;
 	u_int n;
 	size_t len;
-	int match;
+	bool match;
 	u_long ul;
 	int vtype;
 
@@ -3534,11 +3534,11 @@ collect_display_vdc(
 					continue;
 				break;
 			}
-			match = FALSE;
+			match = false;
 			for (n = 0; n < COUNTOF(suf); n++) {
 				if (strcmp(tag + len, suf[n]))
 					continue;
-				match = TRUE;
+				match = true;
 				break;
 			}
 			if (match)
@@ -3666,7 +3666,7 @@ sysstats(
 	VDC_INIT(NULL,			NULL,			  0)
     };
 
-	collect_display_vdc(0, sysstats_vdc, FALSE, fp);
+	collect_display_vdc(0, sysstats_vdc, false, fp);
 }
 
 
@@ -3697,7 +3697,7 @@ sysinfo(
 	VDC_INIT(NULL,			NULL,		      0)
     };
 
-	collect_display_vdc(0, sysinfo_vdc, TRUE, fp);
+	collect_display_vdc(0, sysinfo_vdc, true, fp);
 }
 
 
@@ -3730,7 +3730,7 @@ kerninfo(
 	VDC_INIT(NULL,			NULL,			 0)
     };
 
-	collect_display_vdc(0, kerninfo_vdc, TRUE, fp);
+	collect_display_vdc(0, kerninfo_vdc, true, fp);
 }
 
 
@@ -3755,7 +3755,7 @@ monstats(
 	VDC_INIT(NULL,			NULL,			0)
     };
 
-	collect_display_vdc(0, monstats_vdc, FALSE, fp);
+	collect_display_vdc(0, monstats_vdc, false, fp);
 }
 
 
@@ -3784,7 +3784,7 @@ iostats(
 	VDC_INIT(NULL,			NULL,			  0)
     };
 
-	collect_display_vdc(0, iostats_vdc, FALSE, fp);
+	collect_display_vdc(0, iostats_vdc, false, fp);
 }
 
 
@@ -3804,7 +3804,7 @@ timerstats(
 	VDC_INIT(NULL,			NULL,		       0)
     };
 
-	collect_display_vdc(0, timerstats_vdc, FALSE, fp);
+	collect_display_vdc(0, timerstats_vdc, false, fp);
 }
 
 
@@ -3830,7 +3830,7 @@ authinfo(
 	VDC_INIT(NULL,			NULL,		     0)
     };
 
-	collect_display_vdc(0, authinfo_vdc, FALSE, fp);
+	collect_display_vdc(0, authinfo_vdc, false, fp);
 }
 
 
@@ -3865,5 +3865,5 @@ pstats(
 	if (0 == associd)
 		return;
 
-	collect_display_vdc(associd, pstats_vdc, TRUE, fp);
+	collect_display_vdc(associd, pstats_vdc, true, fp);
 }

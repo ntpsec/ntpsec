@@ -210,7 +210,7 @@ static	void		reload_resolv_conf(dnsworker_ctx *);
 # define		reload_resolv_conf(wc)		\
 	do {						\
 		(void)(wc);				\
-	} while (FALSE)
+	} while (false)
 #endif
 static	void		getaddrinfo_sometime_complete(blocking_work_req,
 						      void *, size_t,
@@ -910,7 +910,7 @@ reserve_dnschild_ctx(void)
 	size_t		new_octets;
 
 	c = 0;
-	while (TRUE) {
+	while (true) {
 		for ( ; c < dnschild_contexts_alloc; c++) {
 			if (NULL == dnschild_contexts[c]) {
 				dnschild_contexts[c] = emalloc_zero(cs);

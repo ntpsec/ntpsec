@@ -579,7 +579,7 @@ struct wwvunit {
 /*
  * Function prototypes
  */
-static	int	wwv_start	(int, struct peer *);
+static	bool	wwv_start	(int, struct peer *);
 static	void	wwv_shutdown	(int, struct peer *);
 static	void	wwv_receive	(struct recvbuf *);
 static	void	wwv_poll	(int, struct peer *);
@@ -626,7 +626,7 @@ struct	refclock refclock_wwv = {
 /*
  * wwv_start - open the devices and initialize data for processing
  */
-static int
+static bool
 wwv_start(
 	int	unit,		/* instance number (used by PCM) */
 	struct peer *peer	/* peer structure pointer */
@@ -650,7 +650,7 @@ wwv_start(
 	 */
 	fd = audio_init(DEVICE_AUDIO, AUDIO_BUFSIZ, unit);
 	if (fd < 0)
-		return (0);
+		return false;
 #ifdef DEBUG
 	if (debug)
 		audio_show();
@@ -668,7 +668,7 @@ wwv_start(
 	if (!io_addclock(&pp->io)) {
 		close(fd);
 		free(up);
-		return (0);
+		return false;
 	}
 	pp->unitptr = up;
 
@@ -744,7 +744,7 @@ wwv_start(
 	 * Let the games begin.
 	 */
 	wwv_newgame(peer);
-	return (1);
+	return true;
 }
 
 
@@ -2398,7 +2398,8 @@ wwv_newchan(
 	struct wwvunit *up;
 	struct sync *sp, *rp;
 	double rank, dtemp;
-	int i, j, rval;
+	int i, j;
+	bool rval;
 
 	pp = peer->procptr;
 	up = pp->unitptr;
@@ -2442,7 +2443,7 @@ wwv_newchan(
 			up->status &= ~METRIC;
 			refclock_report(peer, CEVNT_PROP);
 		}
-		rval = FALSE;
+		rval = false;
 	} else {
 		up->dchan = j;
 		up->sptr = sp;
@@ -2458,7 +2459,7 @@ wwv_newchan(
 		} else {
 			up->pdelay = 0;
 		}
-		rval = TRUE;
+		rval = true;
 	}
 #ifdef ICOM
 	if (up->fd_icom > 0)

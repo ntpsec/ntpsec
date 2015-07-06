@@ -91,7 +91,7 @@ struct pstunit {
 /*
  * Function prototypes
  */
-static	int	pst_start	(int, struct peer *);
+static	bool	pst_start	(int, struct peer *);
 static	void	pst_shutdown	(int, struct peer *);
 static	void	pst_receive	(struct recvbuf *);
 static	void	pst_poll	(int, struct peer *);
@@ -113,7 +113,7 @@ struct	refclock refclock_pst = {
 /*
  * pst_start - open the devices and initialize data for processing
  */
-static int
+static bool
 pst_start(
 	int unit,
 	struct peer *peer
@@ -131,7 +131,7 @@ pst_start(
 	fd = refclock_open(device, SPEED232, LDISC_CLK);
 	if (fd <= 0)
 		/* coverity[leaked_handle] */
-		return (0);
+		return false;
 
 	/*
 	 * Allocate and initialize unit structure
@@ -146,7 +146,7 @@ pst_start(
 		close(fd);
 		pp->io.fd = -1;
 		free(up);
-		return (0);
+		return false;
 	}
 	pp->unitptr = up;
 
@@ -156,7 +156,7 @@ pst_start(
 	peer->precision = PRECISION;
 	pp->clockdesc = DESCRIPTION;
 	memcpy((char *)&pp->refid, WWVREFID, REFIDLEN);
-	return (1);
+	return true;
 }
 
 

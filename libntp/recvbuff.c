@@ -36,8 +36,8 @@ static CRITICAL_SECTION RecvLock;
 # define LOCK()		EnterCriticalSection(&RecvLock)
 # define UNLOCK()	LeaveCriticalSection(&RecvLock)
 #else
-# define LOCK()		do {} while (FALSE)
-# define UNLOCK()	do {} while (FALSE)
+# define LOCK()		do {} while (false)
+# define UNLOCK()	do {} while (false)
 #endif
 
 #ifdef DEBUG

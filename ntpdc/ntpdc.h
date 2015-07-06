@@ -61,7 +61,7 @@ struct xcmd {
 };
 
 extern	int impl_ver;
-extern	int showhostnames;
+extern	bool showhostnames;
 extern	int s_port;
 
 extern	int	doquery	(int, int, int, int, int, char *, int *, int *, char **, int, int);

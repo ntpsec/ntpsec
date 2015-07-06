@@ -147,7 +147,7 @@ write_kod_db(void)
 			    && errno != EEXIST) {
 				msyslog(LOG_ERR, "mkdir(%s) failed: %m",
 					kod_db_file);
-				return FALSE;
+				return false;
 			}
 			*pch = DIR_SEP;
 			pch = strchr(pch + 1, DIR_SEP);
@@ -159,7 +159,7 @@ write_kod_db(void)
 		msyslog(LOG_WARNING, "Can't open KOD db file %s for writing: %m",
 			kod_db_file);
 
-		return FALSE;
+		return false;
 	}
 
 	for (a = 0; a < kod_db_cnt; a++) {
@@ -171,7 +171,7 @@ write_kod_db(void)
 	fflush(db_s);
 	fclose(db_s);
 
-	return TRUE;
+	return true;
 }
 
 

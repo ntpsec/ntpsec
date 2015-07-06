@@ -92,7 +92,7 @@ int	fd;			/* file descr. */
 /*
  * Function prototypes
  */
-static  int     hopfpci_start       (int, struct peer *);
+static  bool    hopfpci_start       (int, struct peer *);
 static  void    hopfpci_shutdown    (int, struct peer *);
 static  void    hopfpci_poll        (int unit, struct peer *);
 
@@ -112,7 +112,7 @@ struct  refclock refclock_hopfpci = {
 /*
  * hopfpci_start - attach to hopf PCI board 6039
  */
-static int
+static bool
 hopfpci_start(
 	int unit,
 	struct peer *peer
@@ -134,7 +134,7 @@ hopfpci_start(
 	if (!OpenHopfDevice()) {
 		msyslog(LOG_ERR, "Start: %s unit: %d failed!", DEVICE, unit);
 		free(up);
-		return (0);
+		return false;
 	}
 #endif
 
@@ -155,7 +155,7 @@ hopfpci_start(
 	pp->clockdesc = DESCRIPTION;
 	up->leap_status = 0;
 	up->unit = (short) unit;
-	return (1);
+	return true;
 }
 
 

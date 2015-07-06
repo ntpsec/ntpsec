@@ -372,9 +372,9 @@ start_blocking_thread_internal(
 {
 	thr_ref	blocking_child_thread;
 	u_int	blocking_thread_id;
-	BOOL	resumed;
+	bool	resumed;
 
-	(*addremove_io_semaphore)(c->blocking_response_ready, FALSE);
+	(*addremove_io_semaphore)(c->blocking_response_ready, false);
 	blocking_child_thread =
 		(HANDLE)_beginthreadex(
 			NULL,
@@ -401,13 +401,13 @@ start_blocking_thread_internal(
 #else	/* pthreads start_blocking_thread_internal() follows */
 {
 # ifdef NEED_PTHREAD_INIT
-	static int	pthread_init_called;
+	static bool	pthread_init_called;
 # endif
 	pthread_attr_t	thr_attr;
 	int		rc;
 	int		saved_errno;
 	int		pipe_ends[2];	/* read then write */
-	int		is_pipe;
+	bool		is_pipe;
 	int		flags;
 	size_t		stacksize;
 	sigset_t	saved_sig_mask;
@@ -419,7 +419,7 @@ start_blocking_thread_internal(
 	 */
 	if (!pthread_init_called) {
 		pthread_init();
-		pthread_init_called = TRUE;
+		pthread_init_called = true;
 	}
 # endif
 
@@ -442,7 +442,7 @@ start_blocking_thread_internal(
 			"start_blocking_thread: fcntl(F_SETFL, O_NONBLOCK) %m");
 		exit(1);
 	}
-	(*addremove_io_fd)(c->resp_read_pipe, c->ispipe, FALSE);
+	(*addremove_io_fd)(c->resp_read_pipe, c->ispipe, false);
 	pthread_attr_init(&thr_attr);
 	pthread_attr_setdetachstate(&thr_attr, PTHREAD_CREATE_DETACHED);
 #if defined(HAVE_PTHREAD_ATTR_GETSTACKSIZE) && \
@@ -551,11 +551,11 @@ prepare_child_sems(
 {
 	if (NULL == c->blocking_req_ready) {
 		/* manual reset using ResetEvent() */
-		/* !!!! c->child_is_blocking = CreateEvent(NULL, TRUE, FALSE, NULL); */
+		/* !!!! c->child_is_blocking = CreateEvent(NULL, true, false, NULL); */
 		/* auto reset - one thread released from wait each set */
-		c->blocking_req_ready = CreateEvent(NULL, FALSE, FALSE, NULL);
-		c->blocking_response_ready = CreateEvent(NULL, FALSE, FALSE, NULL);
-		c->wake_scheduled_sleep = CreateEvent(NULL, FALSE, FALSE, NULL);
+		c->blocking_req_ready = CreateEvent(NULL, false, false, NULL);
+		c->blocking_response_ready = CreateEvent(NULL, false, false, NULL);
+		c->wake_scheduled_sleep = CreateEvent(NULL, false, false, NULL);
 	} else {
 		/* !!!! ResetEvent(c->child_is_blocking); */
 		/* ResetEvent(c->blocking_req_ready); */
@@ -579,9 +579,9 @@ prepare_child_sems(
 		sem_destroy(c->wake_scheduled_sleep);
 		/* !!!! sem_destroy(c->child_is_blocking); */
 	}
-	sem_init(c->blocking_req_ready, FALSE, 0);
-	sem_init(c->wake_scheduled_sleep, FALSE, 0);
-	/* !!!! sem_init(c->child_is_blocking, FALSE, 0); */
+	sem_init(c->blocking_req_ready, false, 0);
+	sem_init(c->wake_scheduled_sleep, false, 0);
+	/* !!!! sem_init(c->child_is_blocking, false, 0); */
 }
 #endif
 
@@ -693,14 +693,14 @@ cleanup_after_child(
 #ifdef WORK_PIPE
 	DEBUG_INSIST(-1 != c->resp_read_pipe);
 	DEBUG_INSIST(-1 != c->resp_write_pipe);
-	(*addremove_io_fd)(c->resp_read_pipe, c->ispipe, TRUE);
+	(*addremove_io_fd)(c->resp_read_pipe, c->ispipe, true);
 	close(c->resp_write_pipe);
 	close(c->resp_read_pipe);
 	c->resp_write_pipe = -1;
 	c->resp_read_pipe = -1;
 #else
 	DEBUG_INSIST(NULL != c->blocking_response_ready);
-	(*addremove_io_semaphore)(c->blocking_response_ready, TRUE);
+	(*addremove_io_semaphore)(c->blocking_response_ready, true);
 #endif
 	for (idx = 0; idx < c->workitems_alloc; idx++)
 		c->workitems[idx] = NULL;
@@ -710,7 +710,7 @@ cleanup_after_child(
 		c->responses[idx] = NULL;
 	c->next_response = 0;
 	c->next_workresp = 0;
-	c->reusable = TRUE;
+	c->reusable = true;
 }
 
 

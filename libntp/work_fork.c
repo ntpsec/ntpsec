@@ -20,9 +20,9 @@
 #include "ntp_worker.h"
 
 /* === variables === */
-	int			worker_process;
-	addremove_io_fd_func	addremove_io_fd;
-static	volatile int		worker_sighup_received;
+bool			worker_process;
+addremove_io_fd_func	addremove_io_fd;
+static	volatile bool		worker_sighup_received;
 
 /* === function prototypes === */
 static	void		fork_blocking_child(blocking_child *);
@@ -61,7 +61,7 @@ worker_sighup(
 	)
 {
 	if (SIGHUP == sig)
-		worker_sighup_received = 1;
+		worker_sighup_received = true;
 }
 
 
@@ -80,7 +80,7 @@ worker_sleep(
 		if (worker_sighup_received) {
 			TRACE(1, ("worker SIGHUP with %us left to sleep",
 				  sleep_remain));
-			worker_sighup_received = 0;
+			worker_sighup_received = false;
 			return -1;
 		}
 	} while (sleep_remain);
@@ -99,7 +99,7 @@ interrupt_worker_sleep(void)
 	for (idx = 0; idx < blocking_children_alloc; idx++) {
 		c = blocking_children[idx];
 
-		if (NULL == c || c->reusable == TRUE)
+		if (NULL == c || c->reusable == true)
 			continue;
 
 		rc = kill(c->pid, SIGHUP);
@@ -141,7 +141,7 @@ cleanup_after_child(
 		c->req_write_pipe = -1;
 	}
 	if (-1 != c->resp_read_pipe) {
-		(*addremove_io_fd)(c->resp_read_pipe, c->ispipe, TRUE);
+		(*addremove_io_fd)(c->resp_read_pipe, c->ispipe, true);
 		close(c->resp_read_pipe);
 		c->resp_read_pipe = -1;
 	}
@@ -149,7 +149,7 @@ cleanup_after_child(
 	c->resp_read_ctx = NULL;
 	DEBUG_INSIST(-1 == c->req_read_pipe);
 	DEBUG_INSIST(-1 == c->resp_write_pipe);
-	c->reusable = TRUE;
+	c->reusable = true;
 }
 
 
@@ -377,7 +377,7 @@ fork_blocking_child(
 	blocking_child *	c
 	)
 {
-	static int	atexit_installed;
+	static bool	atexit_installed;
 	static int	blocking_pipes[4] = { -1, -1, -1, -1 };
 	int		rc;
 	int		was_pipe;
@@ -428,7 +428,7 @@ fork_blocking_child(
 		 */
 		if (!atexit_installed) {
 			atexit(&send_worker_home_atexit);
-			atexit_installed = TRUE;
+			atexit_installed = true;
 		}
 	}
 
@@ -463,7 +463,7 @@ fork_blocking_child(
 		memset(blocking_pipes, -1, sizeof(blocking_pipes));
 
 		/* wire into I/O loop */
-		(*addremove_io_fd)(c->resp_read_pipe, is_pipe, FALSE);
+		(*addremove_io_fd)(c->resp_read_pipe, is_pipe, false);
 
 		return;		/* parent returns */
 	}
@@ -473,7 +473,7 @@ fork_blocking_child(
 	 * The child must work for it.
 	 */
 	c->pid = getpid();
-	worker_process = TRUE;
+	worker_process = true;
 
 	/*
 	 * In the child, close all files except stdin, stdout, stderr,
@@ -489,7 +489,7 @@ fork_blocking_child(
 	if (syslog_file != NULL) {
 		fclose(syslog_file);
 		syslog_file = NULL;
-		syslogit = TRUE;
+		syslogit = true;
 	}
 	keep_fd = max(c->req_read_pipe, c->resp_write_pipe);
 	for (fd = 3; fd < keep_fd; fd++)
@@ -511,7 +511,7 @@ fork_blocking_child(
 	signal_no_reset(SIGPOLL, SIG_DFL);
 #endif
 	signal_no_reset(SIGHUP, worker_sighup);
-	init_logging("ntp_intres", 0, FALSE);
+	init_logging("ntp_intres", 0, false);
 	setup_logfile(NULL);
 
 	/*

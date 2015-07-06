@@ -188,7 +188,7 @@ struct true_unit {
 /*
  * Function prototypes
  */
-static	int	true_start	(int, struct peer *);
+static	bool	true_start	(int, struct peer *);
 static	void	true_shutdown	(int, struct peer *);
 static	void	true_receive	(struct recvbuf *);
 static	void	true_poll	(int, struct peer *);
@@ -263,7 +263,7 @@ true_debug(struct peer *peer, const char *fmt, ...)
 /*
  * true_start - open the devices and initialize data for processing
  */
-static int
+static bool
 true_start(
 	int unit,
 	struct peer *peer
@@ -281,7 +281,7 @@ true_start(
 	fd = refclock_open(device, SPEED232, LDISC_CLK);
 	if (fd <= 0)
 		/* coverity[leaked_handle] */
-		return 0;
+		return false;
 
 	/*
 	 * Allocate and initialize unit structure
@@ -296,7 +296,7 @@ true_start(
 		close(fd);
 		pp->io.fd = -1;
 		free(up);
-		return (0);
+		return false;
 	}
 	pp->unitptr = up;
 
@@ -319,7 +319,7 @@ true_start(
 	
 	true_doevent(peer, e_Init);
 
-	return (1);
+	return true;
 }
 
 
@@ -981,5 +981,5 @@ true_sample720(void)
 #endif
 
 #else
-int refclock_true_bs;
+int refclock_TRUE_bs;
 #endif /* REFCLOCK */

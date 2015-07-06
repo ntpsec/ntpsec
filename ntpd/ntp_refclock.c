@@ -61,14 +61,14 @@
 #define FUDGEFAC	.1	/* fudge correction factor */
 #define LF		0x0a	/* ASCII LF */
 
-int	cal_enable;		/* enable refclock calibrate */
+bool	cal_enable;		/* enable refclock calibrate */
 
 /*
  * Forward declarations
  */
 static int refclock_cmpl_fp (const void *, const void *);
 static int refclock_sample (struct refclockproc *);
-static int refclock_ioctl(int, u_int);
+static bool refclock_ioctl(int, u_int);
 
 
 /*
@@ -151,7 +151,7 @@ init_refclock(void)
  * insufficient resources are available or the driver declares a bum
  * rap.
  */
-int
+bool
 refclock_newpeer(
 	struct peer *peer	/* peer structure pointer */
 	)
@@ -168,7 +168,7 @@ refclock_newpeer(
 		msyslog(LOG_ERR,
 			"refclock_newpeer: clock address %s invalid",
 			stoa(&peer->srcadr));
-		return (0);
+		return false;
 	}
 	clktype = (u_char)REFCLOCKTYPE(&peer->srcadr);
 	unit = REFCLOCKUNIT(&peer->srcadr);
@@ -177,7 +177,7 @@ refclock_newpeer(
 		msyslog(LOG_ERR,
 			"refclock_newpeer: clock type %d invalid\n",
 			clktype);
-		return (0);
+		return false;
 	}
 
 	/*
@@ -219,10 +219,10 @@ refclock_newpeer(
 	 */
 	if (!((refclock_conf[clktype]->clock_start)(unit, peer))) {
 		refclock_unpeer(peer);
-		return (0);
+		return false;
 	}
 	peer->refid = pp->refid;
-	return (1);
+	return true;
 }
 
 
@@ -347,10 +347,10 @@ refclock_cmpl_fp(
 	const double *dp2 = (const double *)p2;
 
 	if (*dp1 < *dp2)
-		return -1;
+		return COMPARE_LESSTHAN;
 	if (*dp1 > *dp2)
-		return 1;
-	return 0;
+		return COMPARE_GREATERTHAN;
+	return COMPARE_EQUAL;
 }
 
 
@@ -396,7 +396,7 @@ refclock_process_offset(
  * nanoseconds). When a PPS offset is available, pp->nsec is forced to
  * zero and the fraction for pp->lastrec is set to the PPS offset.
  */
-int
+bool
 refclock_process_f(
 	struct refclockproc *pp,	/* refclock structure pointer */
 	double fudge
@@ -414,17 +414,17 @@ refclock_process_f(
 	 */
 	if (!clocktime(pp->day, pp->hour, pp->minute, pp->second, GMT,
 		pp->lastrec.l_ui, &pp->yearstart, &offset.l_ui))
-		return (0);
+		return false;
 
 	offset.l_uf = 0;
 	DTOLFP(pp->nsec / 1e9, &ltemp);
 	L_ADD(&offset, &ltemp);
 	refclock_process_offset(pp, offset, pp->lastrec, fudge);
-	return (1);
+	return true;
 }
 
 
-int
+bool
 refclock_process(
 	struct refclockproc *pp		/* refclock structure pointer */
 )
@@ -660,10 +660,10 @@ refclock_gtraw(
  * queuing once a logical unit is assembled).  If it is not so
  * consumed, queue it for the driver's receive entrypoint.
  *
- * The return value is TRUE if the data has been consumed as a fragment
+ * The return value is true if the data has been consumed as a fragment
  * and should not be counted as a received packet.
  */
-int
+bool
 indicate_refclock_packet(
 	struct refclockio *	rio,
 	struct recvbuf *	rb
@@ -677,11 +677,11 @@ indicate_refclock_packet(
 		 */
 		freerecvbuf(rb);
 
-		return TRUE;
+		return true;
 	}
 	add_full_recv_buffer(rb);
 
-	return FALSE;
+	return false;
 }
 
 
@@ -792,7 +792,7 @@ refclock_open(
 /*
  * refclock_setup - initialize terminal interface structure
  */
-int
+bool
 refclock_setup(
 	int	fd,		/* file descriptor */
 	u_int	speed,		/* serial port speed (code) */
@@ -821,7 +821,7 @@ refclock_setup(
 				"refclock_setup fd %d tcgetattr: %m",
 				fd);
 		)
-		return FALSE;
+		return false;
 	}
 
 	/*
@@ -880,7 +880,7 @@ refclock_setup(
 				"refclock_setup fd %d TCSANOW: %m",
 				fd);
 		)
-		return FALSE;
+		return false;
 	}
 
 	/*
@@ -891,7 +891,7 @@ refclock_setup(
 	if (tcflush(fd, TCIOFLUSH) < 0)
 		msyslog(LOG_ERR, "refclock_setup fd %d tcflush(): %m",
 			fd);
-	return(1);
+	return true;
 }
 
 
@@ -901,21 +901,21 @@ refclock_setup(
  * This routine attempts to hide the internal, system-specific details
  * of serial ports. It can handle POSIX (termios), SYSV (termio) and BSD
  * (sgtty) interfaces with varying degrees of success. The routine sets
- * up optional features such as tty_clk. The routine returns TRUE if
+ * up optional features such as tty_clk. The routine returns true if
  * successful.
  */
-int
+bool
 refclock_ioctl(
 	int	fd, 		/* file descriptor */
 	u_int	lflags		/* line discipline flags */
 	)
 {
 	/*
-	 * simply return TRUE if no UNIX line discipline is supported
+	 * simply return true if no UNIX line discipline is supported
 	 */
 	DPRINTF(1, ("refclock_ioctl: fd %d flags 0x%x\n", fd, lflags));
 
-	return TRUE;
+	return true;
 }
 #endif /* !defined(SYS_VXWORKS) && !defined(SYS_WINNT) */
 
@@ -1102,7 +1102,7 @@ refclock_buginfo(
  * This routine is called after the fudge command to open the PPSAPI
  * interface for later parameter setting after the fudge command.
  */
-int
+bool
 refclock_ppsapi(
 	int	fddev,			/* fd device */
 	struct refclock_atom *ap	/* atom structure pointer */
@@ -1112,10 +1112,10 @@ refclock_ppsapi(
 		if (time_pps_create(fddev, &ap->handle) < 0) {
 			msyslog(LOG_ERR,
 			    "refclock_ppsapi: time_pps_create: %m");
-			return (0);
+			return false;
 		}
 	}
-	return (1);
+	return true;
 }
 
 
@@ -1125,7 +1125,7 @@ refclock_ppsapi(
  * This routine is called to set the PPSAPI parameters after the fudge
  * command.
  */
-int
+bool
 refclock_params(
 	int	mode,			/* mode bits */
 	struct refclock_atom *ap	/* atom structure pointer */
@@ -1147,7 +1147,7 @@ refclock_params(
 	if (time_pps_setparams(ap->handle, &ap->pps_params) < 0) {
 		msyslog(LOG_ERR,
 		    "refclock_params: time_pps_setparams: %m");
-		return (0);
+		return false;
 	}
 
 	/*
@@ -1159,11 +1159,11 @@ refclock_params(
 		    PPS_TSFMT_TSPEC) < 0) {
 			msyslog(LOG_ERR,
 			    "refclock_params: time_pps_kcbind: %m");
-			return (0);
+			return false;
 		}
-		hardpps_enable = 1;
+		hardpps_enable = true;
 	}
-	return (1);
+	return true;
 }
 
 
@@ -1174,7 +1174,7 @@ refclock_params(
  * timestamp from the kernel and saves the sign-extended fraction in
  * a circular buffer for processing at the next poll event.
  */
-int
+bool
 refclock_pps(
 	struct peer *peer,		/* peer structure pointer */
 	struct refclock_atom *ap,	/* atom structure pointer */
@@ -1193,11 +1193,11 @@ refclock_pps(
 	 */ 
 	pp = peer->procptr;
 	if (ap->handle == 0)
-		return (0);
+		return false;
 
 	if (ap->pps_params.mode == 0 && sys_leap != LEAP_NOTINSYNC) {
 		if (refclock_params(pp->sloppyclockflag, ap) < 1)
-			return (0);
+			return false;
 	}
 	timeout.tv_sec = 0;
 	timeout.tv_nsec = 0;
@@ -1205,7 +1205,7 @@ refclock_pps(
 	if (time_pps_fetch(ap->handle, PPS_TSFMT_TSPEC, &pps_info,
 	    &timeout) < 0) {
 		refclock_report(peer, CEVNT_FAULT);
-		return (0);
+		return false;
 	}
 	timeout = ap->ts;
 	if (ap->pps_params.mode & PPS_CAPTUREASSERT)
@@ -1213,10 +1213,10 @@ refclock_pps(
 	else if (ap->pps_params.mode & PPS_CAPTURECLEAR)
 		ap->ts = pps_info.clear_timestamp;
 	else
-		return (0);
+		return false;
 
 	if (0 == memcmp(&timeout, &ap->ts, sizeof(timeout)))
-		return (0);
+		return false;
 
 	/*
 	 * Convert to signed fraction offset and stuff in median filter.
@@ -1232,7 +1232,7 @@ refclock_pps(
 		printf("refclock_pps: %lu %f %f\n", current_time,
 		    dtemp, pp->fudgetime1);
 #endif
-	return (1);
+	return true;
 }
 #endif /* HAVE_PPSAPI */
 #endif /* REFCLOCK */

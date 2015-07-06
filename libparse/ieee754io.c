@@ -535,6 +535,8 @@ put_ieee754(
 
 
 #if defined(DEBUG) && defined(LIBDEBUG)
+#include <stdlib.h>
+
 int main(
 	 int argc,
 	 char **argv
@@ -550,7 +552,7 @@ int main(
       if (sscanf(argv[1], "%lf", &f) != 1)
 	{
 	  printf("cannot convert %s to a float\n", argv[1]);
-	  return 1;
+	  return EXIT_FAILURE;
 	}
     }
   
@@ -560,7 +562,7 @@ int main(
   f_p = &f;
   put_ieee754((void *)&f_p, IEEE_DOUBLE, &fp, native_off);
   
-  return 0;
+  return EXIT_SUCCESS;
 }
 
 #endif

@@ -31,10 +31,10 @@ buftvtots(
 	 * and use it
 	 */
 	if (tv.tv_usec > MICROSECONDS - 1)
-		return FALSE;
+		return false;
 
 	*ts = tval_stamp_to_lfp(tv);
 
-	return TRUE;
+	return true;
 }
 #endif	/* !SYS_WINNT */

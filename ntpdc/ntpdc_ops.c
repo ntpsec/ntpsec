@@ -29,9 +29,9 @@
 /*
  * utility functions
  */
-static	int	checkitems	(int, FILE *);
-static	int	checkitemsize	(int, int);
-static	int	check1item	(int, FILE *);
+static	bool	checkitems	(int, FILE *);
+static	bool	checkitemsize	(int, int);
+static	bool	check1item	(int, FILE *);
 
 /*
  * Declarations for command handlers in here
@@ -284,7 +284,7 @@ do {								\
 /*
  * checkitems - utility to print a message if no items were returned
  */
-static int
+static bool
 checkitems(
 	int items,
 	FILE *fp
@@ -292,16 +292,16 @@ checkitems(
 {
 	if (items == 0) {
 		(void) fprintf(fp, "No data returned in response to query\n");
-		return 0;
+		return false;
 	}
-	return 1;
+	return true;
 }
 
 
 /*
  * checkitemsize - utility to print a message if the item size is wrong
  */
-static int
+static bool
 checkitemsize(
 	int itemsize,
 	int expected
@@ -311,16 +311,16 @@ checkitemsize(
 		(void) fprintf(stderr,
 			       "***Incorrect item size returned by remote host (%d should be %d)\n",
 			       itemsize, expected);
-		return 0;
+		return false;
 	}
-	return 1;
+	return true;
 }
 
 
 /*
  * check1item - check to make sure we have exactly one item
  */
-static int
+static bool
 check1item(
 	int items,
 	FILE *fp
@@ -328,14 +328,14 @@ check1item(
 {
 	if (items == 0) {
 		(void) fprintf(fp, "No data returned in response to query\n");
-		return 0;
+		return false;
 	}
 	if (items > 1) {
 		(void) fprintf(fp, "Expected one item in response, got %d\n",
 			       items);
-		return 0;
+		return false;
 	}
-	return 1;
+	return true;
 }
 
 
@@ -695,7 +695,7 @@ again:
 		if (IS_IPV4(&pcmd->argval[qitems].netnum)) {
 			pl->addr = NSRCADR(&pcmd->argval[qitems].netnum);
 			if (impl_ver == IMPL_XNTPD)
-				pl->v6_flag = 0;
+				pl->v6_flag = false;
 		} else {
 			if (impl_ver == IMPL_XNTPD_OLD) {
 				fprintf(stderr,
@@ -771,7 +771,7 @@ again:
 		if (IS_IPV4(&pcmd->argval[qitems].netnum)) {
 			pl->addr = NSRCADR(&pcmd->argval[qitems].netnum);
 			if (impl_ver == IMPL_XNTPD)
-				pl->v6_flag = 0;
+				pl->v6_flag = false;
 		} else {
 			if (impl_ver == IMPL_XNTPD_OLD) {
 				fprintf(stderr,
@@ -1321,7 +1321,7 @@ doconfig(
 	u_char maxpoll;
 	u_int flags;
 	u_char cmode;
-	int res;
+	bool res;
 	int sendsize;
 	int numtyp;
 	long val;
@@ -1330,7 +1330,7 @@ again:
 	keyid = 0;
 	version = 3;
 	flags = 0;
-	res = FALSE;
+	res = false;
 	cmode = 0;
 	minpoll = NTP_MINDPOLL;
 	maxpoll = NTP_MAXDPOLL;
@@ -1391,14 +1391,14 @@ again:
 			default:
 				fprintf(fp, "*** '%s' not understood\n",
 					pcmd->argval[items].string);
-				res = TRUE;
+				res = true;
 				numtyp = 0;
 			}
 			if (val < 0) {
 				fprintf(stderr,
 					"*** Value '%s' should be unsigned\n",
 					pcmd->argval[items].string);
-				res = TRUE;
+				res = true;
 			}
 		}
 		items++;
@@ -1408,14 +1408,14 @@ again:
 	if (version > NTP_VERSION || version < NTP_OLDVERSION) {
 		fprintf(fp, "***invalid version number: %u\n",
 			version);
-		res = TRUE;
+		res = true;
 	}
 	if (minpoll < NTP_MINPOLL || minpoll > NTP_MAXPOLL || 
 	    maxpoll < NTP_MINPOLL || maxpoll > NTP_MAXPOLL || 
 	    minpoll > maxpoll) {
 		fprintf(fp, "***min/max-poll must be within %d..%d\n",
 			NTP_MINPOLL, NTP_MAXPOLL);
-		res = TRUE;
+		res = true;
 	}					
 
 	if (res)
@@ -1506,7 +1506,7 @@ again:
 			}
 			pl->peeraddr6 =
 			    SOCK_ADDR6(&pcmd->argval[qitems].netnum);
-			pl->v6_flag = 1;
+			pl->v6_flag = true;
 		}
 		pl = (void *)((char *)pl + sendsize);
 	}
@@ -1722,7 +1722,7 @@ again:
 				addr = stoa(&resaddr);
 		}
 		mask = stoa(&maskaddr);
-		skip = 1;
+		skip = true;
 		if ((pcmd->nargs == 0) ||
 		    ((pcmd->argval->ival == 6) && (rl->v6_flag != 0)) ||
 		    ((pcmd->argval->ival == 4) && (rl->v6_flag == 0)))
@@ -1832,7 +1832,7 @@ do_restrict(
 	u_long bit;
 	int i;
 	size_t res;
-	int err;
+	bool err;
 	int sendsize;
 
 	/* Initialize cres */
@@ -1864,7 +1864,7 @@ again:
 	}
 	cres.flags = 0;
 	cres.mflags = 0;
-	err = FALSE;
+	err = false;
 	for (res = 2; res < pcmd->nargs; res++) {
 		if (STREQ(pcmd->argval[res].string, "ntpport")) {
 			cres.mflags |= RESM_NTPONLY;
@@ -1880,12 +1880,12 @@ again:
 					fprintf(fp,
 						"Flag %s inappropriate\n",
 						resflagsV3[i].str);
-					err = TRUE;
+					err = true;
 				}
 			} else {
 				fprintf(fp, "Unknown flag %s\n",
 					pcmd->argval[res].string);
-				err = TRUE;
+				err = true;
 			}
 		}
 	}
@@ -1910,7 +1910,7 @@ again:
 			if (bit != 0) {
 				fprintf(fp, "Invalid mask %s\n",
 					numtoa(cres.mask));
-				err = TRUE;
+				err = true;
 			}
 		}
 	} else {
@@ -2740,41 +2740,41 @@ fudge(
 	int res;
 	long val;
 	u_long u_val;
-	int err;
+	bool err;
 
 
-	err = 0;
+	err = false;
 	ZERO(fudgedata);
 	fudgedata.clockadr = NSRCADR(&pcmd->argval[0].netnum);
 
 	if (STREQ(pcmd->argval[1].string, "time1")) {
 		fudgedata.which = htonl(FUDGE_TIME1);
 		if (!atolfp(pcmd->argval[2].string, &ts))
-		    err = 1;
+		    err = true;
 		else
 		    NTOHL_FP(&ts, &fudgedata.fudgetime);
 	} else if (STREQ(pcmd->argval[1].string, "time2")) {
 		fudgedata.which = htonl(FUDGE_TIME2);
 		if (!atolfp(pcmd->argval[2].string, &ts))
-		    err = 1;
+		    err = true;
 		else
 		    NTOHL_FP(&ts, &fudgedata.fudgetime);
 	} else if (STREQ(pcmd->argval[1].string, "val1")) {
 		fudgedata.which = htonl(FUDGE_VAL1);
 		if (!atoint(pcmd->argval[2].string, &val))
-		    err = 1;
+		    err = true;
 		else
 		    fudgedata.fudgeval_flags = htonl(val);
 	} else if (STREQ(pcmd->argval[1].string, "val2")) {
 		fudgedata.which = htonl(FUDGE_VAL2);
 		if (!atoint(pcmd->argval[2].string, &val))
-		    err = 1;
+		    err = true;
 		else
 		    fudgedata.fudgeval_flags = htonl((u_int32)val);
 	} else if (STREQ(pcmd->argval[1].string, "flags")) {
 		fudgedata.which = htonl(FUDGE_FLAGS);
 		if (!hextoint(pcmd->argval[2].string, &u_val))
-		    err = 1;
+		    err = true;
 		else
 		    fudgedata.fudgeval_flags = htonl((u_int32)(u_val & 0xf));
 	} else {

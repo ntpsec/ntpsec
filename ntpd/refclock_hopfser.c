@@ -93,7 +93,7 @@ struct hopfclock_unit {
  * Function prototypes
  */
 
-static	int	hopfserial_start	(int, struct peer *);
+static	bool	hopfserial_start	(int, struct peer *);
 static	void	hopfserial_shutdown	(int, struct peer *);
 static	void	hopfserial_receive	(struct recvbuf *);
 static	void	hopfserial_poll		(int, struct peer *);
@@ -114,7 +114,7 @@ struct refclock refclock_hopfser = {
 /*
  * hopfserial_start - open the devices and initialize data for processing
  */
-static int
+static bool
 hopfserial_start (
 	int unit,
 	struct peer *peer
@@ -136,7 +136,7 @@ hopfserial_start (
 		printf("hopfSerialClock(%d) start: open %s failed\n", unit, gpsdev);
 #endif
 		/* coverity[leaked_handle] */
-		return 0;
+		return false;
 	}
 
 	msyslog(LOG_NOTICE, "hopfSerialClock(%d) fd: %d dev: %s", unit, fd,
@@ -160,7 +160,7 @@ hopfserial_start (
 		pp->io.fd = -1;
 		free(up);
 		pp->unitptr = NULL;
-		return (0);
+		return false;
 	}
 
 	/*
@@ -173,7 +173,7 @@ hopfserial_start (
 	up->leap_status = 0;
 	up->unit = (short) unit;
 
-	return (1);
+	return true;
 }
 
 

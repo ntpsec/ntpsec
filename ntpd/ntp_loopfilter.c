@@ -124,7 +124,7 @@ double	clock_stability;	/* frequency stability (wander) (s/s) */
 double	clock_codec;		/* audio codec frequency (samples/s) */
 static u_long clock_epoch;	/* last update */
 u_int	sys_tai;		/* TAI offset from UTC */
-static int loop_started;	/* TRUE after LOOP_DRIFTINIT */
+static bool loop_started;	/* true after LOOP_DRIFTINIT */
 static void rstclock (int, double); /* transition function */
 static double direct_freq(double); /* direct set frequency */
 static void set_freq(double);	/* set frequency */
@@ -147,16 +147,16 @@ static	void	stop_kern_loop(void);
 /*
  * Clock state machine control flags
  */
-int	ntp_enable = TRUE;	/* clock discipline enabled */
-int	pll_control;		/* kernel support available */
-int	kern_enable = TRUE;	/* kernel support enabled */
-int	hardpps_enable;		/* kernel PPS discipline enabled */
-int	ext_enable;		/* external clock enabled */
+bool	ntp_enable = true;	/* clock discipline enabled */
+bool	pll_control = false;	/* kernel support available */
+bool	kern_enable = true;	/* kernel support enabled */
+bool	hardpps_enable;		/* kernel PPS discipline enabled */
+bool	ext_enable;		/* external clock enabled */
 int	pps_stratum;		/* pps stratum */
 int	kernel_status;		/* from ntp_adjtime */
-int	allow_panic = FALSE;	/* allow panic correction (-g) */
-int	force_step_once = FALSE; /* always step time once at startup (-G) */
-int	mode_ntpdate = FALSE;	/* exit on first clock set (-q) */
+bool	allow_panic = false;	/* allow panic correction (-g) */
+bool	force_step_once = false; /* always step time once at startup (-G) */
+bool	mode_ntpdate = false;	/* exit on first clock set (-q) */
 int	freq_cnt;		/* initial frequency clamp */
 int	freq_set;		/* initial set frequency switch */
 
@@ -241,8 +241,8 @@ ntp_adjtime_error_handler(
 	struct timex *ptimex,	/* pointer to struct timex */
 	int ret,		/* return value from ntp_adjtime */
 	int saved_errno,	/* value of errno when ntp_adjtime returned */
-	int pps_call,		/* ntp_adjtime call was PPS-related */
-	int tai_call,		/* ntp_adjtime call was TAI-related */
+	bool pps_call,		/* ntp_adjtime call was PPS-related */
+	bool tai_call,		/* ntp_adjtime call was TAI-related */
 	int line		/* line number of ntp_adjtime call */
 	)
 {
@@ -478,10 +478,10 @@ local_clock(
 	/*
 	 * If the clock is way off, panic is declared. The clock_panic
 	 * defaults to 1000 s; if set to zero, the panic will never
-	 * occur. The allow_panic defaults to FALSE, so the first panic
-	 * will exit. It can be set TRUE by a command line option, in
+	 * occur. The allow_panic defaults to false, so the first panic
+	 * will exit. It can be set true by a command line option, in
 	 * which case the clock will be set anyway and time marches on.
-	 * But, allow_panic will be set FALSE when the update is less
+	 * But, allow_panic will be set false when the update is less
 	 * than the step threshold; so, subsequent panics will exit.
 	 */
 	if (fabs(fp_offset) > clock_panic && clock_panic > 0 &&
@@ -570,7 +570,7 @@ local_clock(
 	   || (-fp_offset > clock_max_back && clock_max_back > 0)
 	   || force_step_once ) {
 		if (force_step_once) {
-			force_step_once = FALSE;  /* we want this only once after startup */
+			force_step_once = false;  /* we want this only once after startup */
 			msyslog(LOG_NOTICE, "Doing intital time step" );
 		}
 
@@ -694,7 +694,7 @@ local_clock(
 		 * startup until the initial transient has subsided.
 		 */
 		default:
-			allow_panic = FALSE;
+			allow_panic = false;
 			if (freq_cnt == 0) {
 
 				/*
@@ -819,7 +819,7 @@ local_clock(
 		 */
 		if ((0 > ntp_adj_ret) || (ntp_adj_ret != kernel_status)) {
 			kernel_status = ntp_adj_ret;
-			ntp_adjtime_error_handler(__func__, &ntv, ntp_adj_ret, errno, hardpps_enable, 0, __LINE__ - 1);
+			ntp_adjtime_error_handler(__func__, &ntv, ntp_adj_ret, errno, hardpps_enable, false, __LINE__ - 1);
 		}
 		pll_status = ntv.status;
 #ifdef STA_NANO
@@ -849,7 +849,7 @@ local_clock(
 			ntv.modes = MOD_TAI;
 			ntv.constant = sys_tai;
 			if ((ntp_adj_ret = ntp_adjtime(&ntv)) != 0) {
-			    ntp_adjtime_error_handler(__func__, &ntv, ntp_adj_ret, errno, 0, 1, __LINE__ - 1);
+			    ntp_adjtime_error_handler(__func__, &ntv, ntp_adj_ret, errno, false, true, __LINE__ - 1);
 			}
 		}
 #endif /* STA_NANO */
@@ -1086,7 +1086,7 @@ set_freq(
 			ntv.freq = DTOFREQ(drift_comp);
 		}
 		if ((ntp_adj_ret = ntp_adjtime(&ntv)) != 0) {
-		    ntp_adjtime_error_handler(__func__, &ntv, ntp_adj_ret, errno, 0, 0, __LINE__ - 1);
+		    ntp_adjtime_error_handler(__func__, &ntv, ntp_adj_ret, errno, false, false, __LINE__ - 1);
 		}
 	}
 #endif /* KERNEL_PLL */
@@ -1099,10 +1099,10 @@ set_freq(
 static void
 start_kern_loop(void)
 {
-	static int atexit_done;
+	static bool atexit_done;
 	int ntp_adj_ret;
 
-	pll_control = TRUE;
+	pll_control = true;
 	ZERO(ntv);
 	ntv.modes = MOD_BITS;
 	ntv.status = STA_PLL;
@@ -1112,29 +1112,29 @@ start_kern_loop(void)
 #ifdef SIGSYS
 	/*
 	 * Use sigsetjmp() to save state and then call ntp_adjtime(); if
-	 * it fails, then pll_trap() will set pll_control FALSE before
+	 * it fails, then pll_trap() will set pll_control false before
 	 * returning control using siglogjmp().
 	 */
 	newsigsys.sa_handler = pll_trap;
 	newsigsys.sa_flags = 0;
 	if (sigaction(SIGSYS, &newsigsys, &sigsys)) {
 		msyslog(LOG_ERR, "sigaction() trap SIGSYS: %m");
-		pll_control = FALSE;
+		pll_control = false;
 	} else {
 		if (sigsetjmp(env, 1) == 0) {
 			if ((ntp_adj_ret = ntp_adjtime(&ntv)) != 0) {
-			    ntp_adjtime_error_handler(__func__, &ntv, ntp_adj_ret, errno, 0, 0, __LINE__ - 1);
+			    ntp_adjtime_error_handler(__func__, &ntv, ntp_adj_ret, errno, false, false, __LINE__ - 1);
 			}
 		}
 		if (sigaction(SIGSYS, &sigsys, NULL)) {
 			msyslog(LOG_ERR,
 			    "sigaction() restore SIGSYS: %m");
-			pll_control = FALSE;
+			pll_control = false;
 		}
 	}
 #else /* SIGSYS */
 	if ((ntp_adj_ret = ntp_adjtime(&ntv)) != 0) {
-	    ntp_adjtime_error_handler(__func__, &ntv, ntp_adj_ret, errno, 0, 0, __LINE__ - 1);
+	    ntp_adjtime_error_handler(__func__, &ntv, ntp_adj_ret, errno, false, false, __LINE__ - 1);
 	}
 #endif /* SIGSYS */
 
@@ -1145,12 +1145,12 @@ start_kern_loop(void)
 	pll_status = ntv.status;
 	if (pll_control) {
 		if (!atexit_done) {
-			atexit_done = TRUE;
+			atexit_done = true;
 			atexit(&stop_kern_loop);
 		}
 #ifdef STA_NANO
 		if (pll_status & STA_CLK)
-			ext_enable = TRUE;
+			ext_enable = true;
 #endif /* STA_NANO */
 		report_event(EVNT_KERN, NULL,
 	  	    "kernel time sync enabled");
@@ -1270,7 +1270,7 @@ loop_config(
 			rstclock(EVNT_FSET, 0);
 		else
 			rstclock(EVNT_NSET, 0);
-		loop_started = TRUE;
+		loop_started = true;
 #endif /* LOCKCLOCK */
 		break;
 
@@ -1330,7 +1330,7 @@ loop_config(
 	case LOOP_MAX:		/* step threshold (step) */
 		clock_max_fwd = clock_max_back = freq;
 		if (freq == 0 || freq > 0.5)
-			select_loop(FALSE);
+			select_loop(false);
 		break;
 
 	case LOOP_MAX_BACK:	/* step threshold (step) */
@@ -1342,14 +1342,14 @@ loop_config(
 		 */
 		if (  (clock_max_back == 0 || clock_max_back > 0.5)
 		   || (clock_max_fwd  == 0 || clock_max_fwd  > 0.5))
-			select_loop(FALSE);
+			select_loop(false);
 		break;
 
 	case LOOP_MAX_FWD:	/* step threshold (step) */
 		clock_max_fwd = freq;
 		if (  (clock_max_back == 0 || clock_max_back > 0.5)
 		   || (clock_max_fwd  == 0 || clock_max_fwd  > 0.5))
-			select_loop(FALSE);
+			select_loop(false);
 		break;
 
 	case LOOP_MINSTEP:	/* stepout threshold (stepout) */
@@ -1385,7 +1385,7 @@ pll_trap(
 	int arg
 	)
 {
-	pll_control = FALSE;
+	pll_control = false;
 	siglongjmp(env, 1);
 }
 #endif /* KERNEL_PLL && SIGSYS */

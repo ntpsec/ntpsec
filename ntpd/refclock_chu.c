@@ -400,7 +400,7 @@ struct chuunit {
 /*
  * Function prototypes
  */
-static	int	chu_start	(int, struct peer *);
+static	bool	chu_start	(int, struct peer *);
 static	void	chu_shutdown	(int, struct peer *);
 static	void	chu_receive	(struct recvbuf *);
 static	void	chu_second	(int, struct peer *);
@@ -458,7 +458,7 @@ struct	refclock refclock_chu = {
 /*
  * chu_start - open the devices and initialize data for processing
  */
-static int
+static bool
 chu_start(
 	int	unit,		/* instance number (not used) */
 	struct peer *peer	/* peer structure pointer */
@@ -505,7 +505,7 @@ chu_start(
 #endif /* HAVE_AUDIO */
 
 	if (fd < 0)
-		return (0);
+		return false;
 
 	/*
 	 * Allocate and initialize unit structure
@@ -522,7 +522,7 @@ chu_start(
 		pp->io.fd = -1;
 		free(up);
 		pp->unitptr = NULL;
-		return (0);
+		return false;
 	}
 
 	/*
@@ -578,7 +578,7 @@ chu_start(
 		}
 	}
 #endif /* ICOM */
-	return (1);
+	return true;
 }
 
 

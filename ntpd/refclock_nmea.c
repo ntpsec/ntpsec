@@ -224,11 +224,11 @@ typedef struct {
 #ifdef HAVE_PPSAPI
 	struct refclock_atom atom; /* PPSAPI structure */
 	int	ppsapi_fd;	/* fd used with PPSAPI */
-	u_char	ppsapi_tried;	/* attempt PPSAPI once */
-	u_char	ppsapi_lit;	/* time_pps_create() worked */
-	u_char	ppsapi_gate;	/* system is on PPS */
+	bool	ppsapi_tried;	/* attempt PPSAPI once */
+	bool	ppsapi_lit;	/* time_pps_create() worked */
+	bool	ppsapi_gate;	/* system is on PPS */
 #endif /* HAVE_PPSAPI */
-	u_char  gps_time;	/* use GPS time, not UTC */
+	bool	gps_time;	/* use GPS time, not UTC */
 	u_short century_cache;	/* cached current century */
 	l_fp	last_reftime;	/* last processed reference stamp */
 	short 	epoch_warp;	/* last epoch warp, for logging */
@@ -281,7 +281,7 @@ typedef struct {
  * Function prototypes
  */
 static	void	nmea_init	(void);
-static	int	nmea_start	(int, struct peer *);
+static	bool	nmea_start	(int, struct peer *);
 static	void	nmea_shutdown	(int, struct peer *);
 static	void	nmea_receive	(struct recvbuf *);
 static	void	nmea_poll	(int, struct peer *);
@@ -390,12 +390,12 @@ nmea_init(void)
  * -------------------------------------------------------------------
  * nmea_start - open the GPS devices and initialize data for processing
  *
- * return 0 on error, 1 on success. Even on error the peer structures
+ * return false on error, true on success. Even on error the peer structures
  * must be in a state that permits 'nmea_shutdown()' to clean up all
  * resources, because it will be called immediately to do so.
  * -------------------------------------------------------------------
  */
-static int
+static bool
 nmea_start(
 	int		unit,
 	struct peer *	peer
@@ -473,13 +473,13 @@ nmea_start(
 	if (devlen >= sizeof(device)) {
 		msyslog(LOG_ERR, "%s clock device name too long",
 			refnumtoa(&peer->srcadr));
-		return FALSE; /* buffer overflow */
+		return false; /* buffer overflow */
 	}
 	pp->io.fd = refclock_open(device, baudrate, LDISC_CLK);
 	if (0 >= pp->io.fd) {
 		pp->io.fd = nmead_open(device);
 		if (-1 == pp->io.fd)
-			return FALSE;
+			return false;
 	}
 	LOGIF(CLOCKINFO, (LOG_NOTICE, "%s serial %s open at %s bps",
 	      refnumtoa(&peer->srcadr), device, baudtext));
@@ -557,7 +557,7 @@ nmea_control(
 
 	/* Light up the PPSAPI interface if not yet attempted. */
 	if ((CLK_FLAG1 & pp->sloppyclockflag) && !up->ppsapi_tried) {
-		up->ppsapi_tried = TRUE;
+		up->ppsapi_tried = true;
 		devlen = snprintf(device, sizeof(device), PPSDEV, unit);
 		if (devlen < sizeof(device)) {
 			up->ppsapi_fd = open(device, PPSOPENMODE,
@@ -602,9 +602,9 @@ nmea_control(
 		up->ppsapi_fd = -1;
 
 		/* clear markers and peer items */
-		up->ppsapi_gate  = FALSE;
-		up->ppsapi_lit   = FALSE;
-		up->ppsapi_tried = FALSE;
+		up->ppsapi_gate  = false;
+		up->ppsapi_lit   = false;
+		up->ppsapi_tried = false;
 
 		peer->flags &= ~FLAG_PPS;
 		peer->precision = PRECISION;
@@ -1021,7 +1021,7 @@ nmea_receive(
 	if (!up->gps_time && (sentence == NMEA_GPZDG)) {
 		msyslog(LOG_INFO, "%s using GPS time as if it were UTC",
 			refnumtoa(&peer->srcadr));
-		up->gps_time = 1;
+		up->gps_time = true;
 	}
 	
 	/*
@@ -1058,7 +1058,7 @@ nmea_receive(
 				pp->fudgetime1,	&rd_fudge))
 		{
 		case PPS_RELATE_PHASE:
-			up->ppsapi_gate = TRUE;
+			up->ppsapi_gate = true;
 			peer->precision = PPS_PRECISION;
 			peer->flags |= FLAG_PPS;
 			DPRINTF(2, ("%s PPS_RELATE_PHASE\n",
@@ -1067,7 +1067,7 @@ nmea_receive(
 			break;
 			
 		case PPS_RELATE_EDGE:
-			up->ppsapi_gate = TRUE;
+			up->ppsapi_gate = true;
 			peer->precision = PPS_PRECISION;
 			DPRINTF(2, ("%s PPS_RELATE_EDGE\n",
 				    refnumtoa(&peer->srcadr)));
@@ -1123,7 +1123,7 @@ nmea_poll(
 		peer->flags &= ~FLAG_PPS;
 		peer->precision = PRECISION;
 	} else {
-		up->ppsapi_gate = FALSE;
+		up->ppsapi_gate = false;
 	}
 #endif /* HAVE_PPSAPI */
 
@@ -1494,14 +1494,14 @@ parse_time(
 	rc = sscanf(dp, "%2u%2u%2u%n.%3lu%n", &h, &m, &s, &p1, &f, &p2);
 	if (rc < 3 || p1 != 6) {
 		DPRINTF(1, ("nmea: invalid time code: '%.6s'\n", dp));
-		return FALSE;
+		return false;
 	}
 	
 	/* value sanity check */
 	if (h > 23 || m > 59 || s > 60) {
 		DPRINTF(1, ("nmea: invalid time spec %02u:%02u:%02u\n",
 			    h, m, s));
-		return FALSE;
+		return false;
 	}
 
 	jd->hour   = (u_char)h;
@@ -1513,7 +1513,7 @@ parse_time(
 	else
 		*ns = 0;
 
-	return TRUE;
+	return true;
 }
 
 /*
@@ -1549,7 +1549,7 @@ parse_date(
 		if (rc != 3 || p != 6) {
 			DPRINTF(1, ("nmea: invalid date code: '%.6s'\n",
 				    dp));
-			return FALSE;
+			return false;
 		}
 		break;
 
@@ -1558,20 +1558,20 @@ parse_date(
 		if (rc != 3 || p != 10) {
 			DPRINTF(1, ("nmea: invalid date code: '%.10s'\n",
 				    dp));
-			return FALSE;
+			return false;
 		}
 		break;
 
 	default:
 		DPRINTF(1, ("nmea: invalid parse format: %d\n", fmt));
-		return FALSE;
+		return false;
 	}
 
 	/* value sanity check */
 	if (d < 1 || d > 31 || m < 1 || m > 12) {
 		DPRINTF(1, ("nmea: invalid date spec (YMD) %04u:%02u:%02u\n",
 			    y, m, d));
-		return FALSE;
+		return false;
 	}
 	
 	/* store results */
@@ -1579,7 +1579,7 @@ parse_date(
 	jd->month    = (u_char)m;
 	jd->year     = (u_short)y;
 
-	return TRUE;
+	return true;
 }
 
 /*
@@ -1609,11 +1609,11 @@ parse_weekdata(
 	fcnt += sscanf(field_parse(rd, leapidx), "%hd", &wd->wt_leap);
 	if (fcnt != 3 || wd->wt_week >= 1024 || secs >= 7*SECSPERDAY) {
 		DPRINTF(1, ("nmea: parse_weekdata: invalid weektime spec\n"));
-		return FALSE;
+		return false;
 	}
 	wd->wt_time = (u_int32)secs;
 
-	return TRUE;
+	return true;
 }
 
 /*
@@ -1754,11 +1754,11 @@ gpsfix_century(
 		days = ntpcal_date_to_rd(jd) - DAY_GPS_STARTS + doff;
 		week = (days / 7) % 1024;
 		if (days >= 0 && wd->wt_week == week)
-			return TRUE; /* matched... */
+			return true; /* matched... */
 	}
 
 	jd->year = year;
-	return FALSE; /* match failed... */
+	return false; /* match failed... */
 }
 
 /*

@@ -42,7 +42,7 @@ ereallocz(
 
 	mem = EREALLOC_IMPL(ptr, allocsz, file, line);
 	if (NULL == mem) {
-		msyslog_term = TRUE;
+		msyslog_term = true;
 #ifndef EREALLOC_CALLSITE
 		msyslog(LOG_ERR, "fatal out of memory (%lu bytes)",
 			(u_long)newsz);
@@ -75,7 +75,7 @@ estrdup_impl(
 	size_t	bytes;
 
 	bytes = strlen(str) + 1;
-	copy = ereallocz(NULL, bytes, 0, FALSE
+	copy = ereallocz(NULL, bytes, 0, false
 #ifdef EREALLOC_CALLSITE
 			 , file, line
 #endif
@@ -91,7 +91,7 @@ estrdup_impl(
 void *
 emalloc(size_t newsz)
 {
-	return ereallocz(NULL, newsz, 0, FALSE);
+	return ereallocz(NULL, newsz, 0, false);
 }
 #endif
 #endif

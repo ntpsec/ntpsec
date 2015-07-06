@@ -38,7 +38,7 @@
 /*
  * Function prototypes
  */
-static	int 	pcf_start 		(int, struct peer *);
+static	bool 	pcf_start 		(int, struct peer *);
 static	void	pcf_shutdown		(int, struct peer *);
 static	void	pcf_poll		(int, struct peer *);
 
@@ -59,7 +59,7 @@ struct  refclock refclock_pcf = {
 /*
  * pcf_start - open the device and initialize data for processing
  */
-static int
+static bool
 pcf_start(
      	int unit,
 	struct peer *peer
@@ -83,7 +83,7 @@ pcf_start(
 		printf ("starting PCF with device %s\n",device);
 #endif
 	if (fd == -1) {
-		return (0);
+		return false;
 	}
 	
 	pp = peer->procptr;
@@ -102,7 +102,7 @@ pcf_start(
 	pp->fudgetime1 = 0.1725;
 	memcpy((char *)&pp->refid, REFID, REFIDLEN);
 
-	return (1);
+	return true;
 }
 
 

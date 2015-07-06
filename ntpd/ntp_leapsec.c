@@ -81,18 +81,18 @@ struct leap_table {
 
 /* Where we store our tables */
 static leap_table_t _ltab[2], *_lptr;
-static int/*BOOL*/  _electric;
+static bool  _electric;
 
 /* Forward decls of local helpers */
-static int    add_range(leap_table_t*, const leap_info_t*);
+static bool   add_range(leap_table_t*, const leap_info_t*);
 static char * get_line(leapsec_reader, void*, char*, size_t);
 static char * skipws(const char*);
-static int    parsefail(const char * cp, const char * ep);
+static bool   parsefail(const char * cp, const char * ep);
 static void   reload_limits(leap_table_t*, const vint64*);
-static int    betweenu32(uint32_t, uint32_t, uint32_t);
+static bool   betweenu32(uint32_t, uint32_t, uint32_t);
 static void   reset_times(leap_table_t*);
-static int    leapsec_add(leap_table_t*, const vint64*, int);
-static int    leapsec_raw(leap_table_t*, const vint64 *, int, int);
+static bool   leapsec_add(leap_table_t*, const vint64*, int);
+static bool   leapsec_raw(leap_table_t*, const vint64 *, int, int);
 static char * lstostr(const vint64 * ts);
 
 /* =====================================================================
@@ -127,7 +127,7 @@ leapsec_get_table(
 }
 
 /* ------------------------------------------------------------------ */
-int/*BOOL*/
+bool
 leapsec_set_table(
 	leap_table_t * pt)
 {
@@ -137,9 +137,9 @@ leapsec_set_table(
 }
 
 /* ------------------------------------------------------------------ */
-int/*BOOL*/
+bool
 leapsec_electric(
-	int/*BOOL*/ on)
+	bool on)
 {
 	int res = _electric;
 	if (on < 0)
@@ -174,7 +174,7 @@ leapsec_clear(
 /* ---------------------------------------------------------------------
  * Load a leap second file and check expiration on the go
  */
-int/*BOOL*/
+bool
 leapsec_load(
 	leap_table_t * pt  ,
 	leapsec_reader func,
@@ -219,7 +219,7 @@ leapsec_load(
 				goto fail_read;
 			if (ucmpv64(&ttime, &limit) >= 0) {
 				if (!leapsec_raw(pt, &ttime,
-						 taiof, FALSE))
+						 taiof, false))
 					goto fail_insn;
 			} else {
 				pt->head.base_tai = (int16_t)taiof;
@@ -228,13 +228,13 @@ leapsec_load(
 			pt->lsig.taiof = (int16_t)taiof;
 		}
 	}
-	return TRUE;
+	return true;
 
 fail_read:
 	errno = EILSEQ;
 fail_insn:
 	leapsec_clear(pt);
-	return FALSE;
+	return false;
 }
 
 /* ---------------------------------------------------------------------
@@ -274,7 +274,7 @@ leapsec_dump(
  * usecase driven API functions
  */
 
-int/*BOOL*/
+bool
 leapsec_query(
 	leap_result_t * qr   ,
 	uint32_t        ts32 ,
@@ -283,12 +283,12 @@ leapsec_query(
 	leap_table_t *   pt;
 	vint64           ts64, last, next;
 	uint32_t         due32;
-	int              fired;
+	bool             fired;
 
 	/* preset things we use later on... */
-	fired = FALSE;
+	fired = false;
 	ts64  = ntpcal_ntp_to_ntp(ts32, pivot);
-	pt    = leapsec_get_table(FALSE);
+	pt    = leapsec_get_table(false);
 	memset(qr, 0, sizeof(leap_result_t));
 
 	if (ucmpv64(&ts64, &pt->head.ebase) < 0) {
@@ -349,23 +349,23 @@ leapsec_query(
 }
 
 /* ------------------------------------------------------------------ */
-int/*BOOL*/
+bool
 leapsec_frame(
         leap_result_t *qr)
 {
 	const leap_table_t * pt;
 
         memset(qr, 0, sizeof(leap_result_t));
-	pt = leapsec_get_table(FALSE);
+	pt = leapsec_get_table(false);
 	if (ucmpv64(&pt->head.ttime, &pt->head.stime) <= 0)
-                return FALSE;
+                return false;
 
 	qr->tai_offs = pt->head.this_tai;
 	qr->tai_diff = pt->head.next_tai - pt->head.this_tai;
 	qr->ttime    = pt->head.ttime;
 	qr->dynamic  = pt->head.dynls;
 
-        return TRUE;
+        return true;
 }
 
 /* ------------------------------------------------------------------ */
@@ -373,7 +373,7 @@ leapsec_frame(
 void
 leapsec_reset_frame(void)
 {
-	reset_times(leapsec_get_table(FALSE));
+	reset_times(leapsec_get_table(false));
 }
 
 /* ------------------------------------------------------------------ */
@@ -381,11 +381,11 @@ leapsec_reset_frame(void)
  * only after successful signature check. The stream must be seekable
  * or this will fail.
  */
-int/*BOOL*/
+bool
 leapsec_load_stream(
 	FILE       * ifp  ,
 	const char * fname,
-	int/*BOOL*/  logall)
+	bool  logall)
 {
 	leap_table_t *pt;
 	int           rcheck;
@@ -420,11 +420,11 @@ leapsec_load_stream(
 			break;
 		}
 	if (rcheck < 0)
-		return FALSE;
+		return false;
 
 	rewind(ifp);
-	pt = leapsec_get_table(TRUE);
-	if (!leapsec_load(pt, (leapsec_reader)getc, ifp, TRUE)) {
+	pt = leapsec_get_table(true);
+	if (!leapsec_load(pt, (leapsec_reader)getc, ifp, true)) {
 		switch (errno) {
 		case EINVAL:
 			msyslog(LOG_ERR, "%s ('%s'): bad transition time",
@@ -439,7 +439,7 @@ leapsec_load_stream(
 				logPrefix, fname);
 			break;
 		}
-		return FALSE;
+		return false;
 	}
 
 	if (pt->head.size)
@@ -456,12 +456,12 @@ leapsec_load_stream(
 }
 
 /* ------------------------------------------------------------------ */
-int/*BOOL*/
+bool
 leapsec_load_file(
 	const char  * fname,
 	struct stat * sb_old,
-	int/*BOOL*/   force,
-	int/*BOOL*/   logall)
+	bool   force,
+	bool   logall)
 {
 	FILE       * fp;
 	struct stat  sb_new;
@@ -469,14 +469,14 @@ leapsec_load_file(
 
 	/* just do nothing if there is no leap file */
 	if ( !(fname && *fname) )
-		return FALSE;
+		return false;
 	
 	/* try to stat the leapfile */
 	if (0 != stat(fname, &sb_new)) {
 		if (logall)
 			msyslog(LOG_ERR, "%s ('%s'): stat failed: %m",
 				logPrefix, fname);
-		return FALSE;
+		return false;
 	}
 
 	/* silently skip to postcheck if no new file found */
@@ -485,7 +485,7 @@ leapsec_load_file(
 		 && sb_old->st_mtime == sb_new.st_mtime
 		 && sb_old->st_ctime == sb_new.st_ctime
 		   )
-			return FALSE;
+			return false;
 		*sb_old = sb_new;
 	}
 
@@ -511,7 +511,7 @@ leapsec_load_file(
 			msyslog(LOG_ERR,
 				"%s ('%s'): open failed: %m",
 				logPrefix, fname);
-		return FALSE;
+		return false;
 	}
 
 	rc = leapsec_load_stream(fp, fname, logall);
@@ -526,12 +526,12 @@ leapsec_getsig(
 {
 	const leap_table_t * pt;
 
-	pt = leapsec_get_table(FALSE);
+	pt = leapsec_get_table(false);
 	memcpy(psig, &pt->lsig, sizeof(leap_signature_t));
 }
 
 /* ------------------------------------------------------------------ */
-int/*BOOL*/
+bool
 leapsec_expired(
 	uint32_t       when,
 	const time_t * tpiv)
@@ -539,7 +539,7 @@ leapsec_expired(
 	const leap_table_t * pt;
 	vint64 limit;
 
-	pt = leapsec_get_table(FALSE);
+	pt = leapsec_get_table(false);
 	limit = ntpcal_ntp_to_ntp(when, tpiv);
 	return ucmpv64(&limit, &pt->head.expire) >= 0;
 }
@@ -553,14 +553,14 @@ leapsec_daystolive(
 	const leap_table_t * pt;
 	vint64 limit;
 
-	pt = leapsec_get_table(FALSE);
+	pt = leapsec_get_table(false);
 	limit = ntpcal_ntp_to_ntp(when, tpiv);
 	limit = subv64(&pt->head.expire, &limit);
 	return ntpcal_daysplit(&limit).hi;
 }
 
 /* ------------------------------------------------------------------ */
-int/*BOOL*/
+bool
 leapsec_add_fix(
 	int            total,
 	uint32_t       ttime,
@@ -578,11 +578,11 @@ leapsec_add_fix(
 	
 	et64 = ntpcal_ntp_to_ntp(etime, pivot);
 	tt64 = ntpcal_ntp_to_ntp(ttime, pivot);
-	pt   = leapsec_get_table(TRUE);
+	pt   = leapsec_get_table(true);
 
 	if (   ucmpv64(&et64, &pt->head.expire) <= 0
-	   || !leapsec_raw(pt, &tt64, total, FALSE) )
-		return FALSE;
+	   || !leapsec_raw(pt, &tt64, total, false) )
+		return false;
 
 	pt->lsig.etime = etime;
 	pt->lsig.ttime = ttime;
@@ -594,18 +594,18 @@ leapsec_add_fix(
 }
 
 /* ------------------------------------------------------------------ */
-int/*BOOL*/
+bool
 leapsec_add_dyn(
-	int            insert,
+	bool           insert,
 	uint32_t       ntpnow,
 	const time_t * pivot )
 {
 	leap_table_t * pt;
 	vint64         now64;
 
-	pt = leapsec_get_table(TRUE);
+	pt = leapsec_get_table(true);
 	now64 = ntpcal_ntp_to_ntp(ntpnow, pivot);
-	return (   leapsec_add(pt, &now64, (insert != 0))
+	return (   leapsec_add(pt, &now64, insert)
 		&& leapsec_set_table(pt));
 }
 
@@ -633,7 +633,7 @@ reset_times(
 /* [internal] Add raw data to the table, removing old entries on the
  * fly. This cannot fail currently.
  */
-static int/*BOOL*/
+static bool
 add_range(
 	leap_table_t *      pt,
 	const leap_info_t * pi)
@@ -659,7 +659,7 @@ add_range(
 	 * can probably live with that.
 	 */
 	reset_times(pt);
-	return TRUE;
+	return true;
 }
 
 /* [internal] given a reader function, read characters into a buffer
@@ -708,9 +708,9 @@ skipws(
 }
 
 /* [internal] check if a strtoXYZ ended at EOL or whistespace and
- * converted something at all. Return TRUE if something went wrong.
+ * converted something at all. Return true if something went wrong.
  */
-static int/*BOOL*/
+static bool
 parsefail(
 	const char * cp,
 	const char * ep)
@@ -790,7 +790,7 @@ reload_limits(
  * insert a leap second into the current history -- only appending
  * towards the future is allowed!)
  */
-static int/*BOOL*/
+static bool
 leapsec_add(
 	leap_table_t*  pt    ,
 	const vint64 * now64 ,
@@ -807,7 +807,7 @@ leapsec_add(
 	if (   ucmpv64(now64, &pt->head.expire) < 0
 	    || (pt->head.size && ucmpv64(now64, &pt->info[0].ttime) <= 0)) {
 		errno = ERANGE;
-		return FALSE;
+		return false;
 	}
 
 	ntpcal_ntp64_to_date(&fts, now64);
@@ -816,7 +816,7 @@ leapsec_add(
 	 */
 	if (fts.monthday == 1 && fts.hour == 0) {
 		errno = EINVAL;
-		return FALSE;
+		return false;
 	}
 
 	/* Ok, do the remaining calculations */
@@ -841,7 +841,7 @@ leapsec_add(
  * table. This is the work horse for reading a leap file and getting a
  * leap second update via authenticated network packet.
  */
-int/*BOOL*/
+bool
 leapsec_raw(
 	leap_table_t * pt,
 	const vint64 * ttime,
@@ -855,14 +855,14 @@ leapsec_raw(
 	/* Check that we only extend the table. Paranoia rulez! */
 	if (pt->head.size && ucmpv64(ttime, &pt->info[0].ttime) <= 0) {
 		errno = ERANGE;
-		return FALSE;
+		return false;
 	}
 
 	ntpcal_ntp64_to_date(&fts, ttime);
 	/* If this does not match the exact month start, bail out. */
 	if (fts.monthday != 1 || fts.hour || fts.minute || fts.second) {
 		errno = EINVAL;
-		return FALSE;
+		return false;
 	}
 	fts.month--; /* was in range 1..12, no overflow here! */
 	starttime    = ntpcal_date_to_ntp64(&fts);
@@ -874,10 +874,10 @@ leapsec_raw(
 }
 
 /* [internal] Do a wrap-around save range inclusion check.
- * Returns TRUE if x in [lo,hi[ (intervall open on right side) with full
+ * Returns true if x in [lo,hi[ (intervall open on right side) with full
  * handling of an overflow / wrap-around.
  */
-static int/*BOOL*/
+static bool
 betweenu32(
 	uint32_t lo,
 	uint32_t x,
@@ -911,7 +911,7 @@ typedef struct {
  * 'scanf()' and 'strtoul()', including optional signs and '0x'
  * prefixes.
  */
-static int/*BOOL*/
+static bool
 do_leap_hash(
 	sha1_digest * mac,
 	char const  * cp )
@@ -924,7 +924,7 @@ do_leap_hash(
 		     &tmp[0], &tmp[1], &tmp[2], &tmp[3], &tmp[4],
 		     &len);
 	if (num != 5 || cp[len] > ' ')
-		return FALSE;
+		return false;
 
 	/* now do the byte twiddle */
 	for (wi=0; wi < 5; ++wi)
@@ -933,7 +933,7 @@ do_leap_hash(
 				(unsigned char)(tmp[wi] & 0x0FF);
 			tmp[wi] >>= 8;
 		}
-	return TRUE;
+	return true;
 }
 
 /* [internal] add the digits of a data line to the hash, stopping at the

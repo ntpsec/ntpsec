@@ -518,12 +518,12 @@ int	leap = 0;		/* leap indicator */
 int	DstFlag = 0;		/* winter/summer time */
 int	dut1 = 0;		/* DUT1 correction (sign, magnitude) */
 int	utc = 0;		/* option epoch */
-int IrigIncludeYear = FALSE;	/* Whether to send year in first control functions area, between P5 and P6. */
-int IrigIncludeIeee = FALSE;	/* Whether to send IEEE 1344 control functions extensions between P6 and P8. */
+bool IrigIncludeYear = false;	/* Whether to send year in first control functions area, between P5 and P6. */
+bool IrigIncludeIeee = false;	/* Whether to send IEEE 1344 control functions extensions between P6 and P8. */
 int	StraightBinarySeconds = 0;
 int	ControlFunctions = 0;
-int	Debug = FALSE;
-int Verbose = TRUE;
+bool	Debug = false;
+bool	Verbose = true;
 char	*CommandName;
 
 #ifndef  HAVE_SYS_SOUNDCARD_H
@@ -612,8 +612,8 @@ main(
 
 	/* Flags to indicate requested leap second addition or deletion by command line option. */
 	/* Should be mutually exclusive - generally ensured by code which interprets command line option. */
-	int	InsertLeapSecond = FALSE;
-	int	DeleteLeapSecond = FALSE;
+	bool	InsertLeapSecond = false;
+	bool	DeleteLeapSecond = false;
 
 	/* Date and time of requested leap second addition or deletion. */
 	int	LeapYear					= 0;
@@ -628,8 +628,8 @@ main(
 	int	LeapState = LEAPSTATE_NORMAL;
 
 	/* Flags for indication of leap second pending and leap secod polarity in IEEE 1344 */
-	int	LeapSecondPending = FALSE;
-	int	LeapSecondPolarity = FALSE;
+	bool	LeapSecondPending = false;
+	bool	LeapSecondPolarity = false;
 
 	/* Date and time of requested switch into or out of DST by command line option. */
 	int	DstSwitchYear				= 0;
@@ -640,7 +640,7 @@ main(
 	int	DstSwitchDayOfYear			= 0;
 
 	/* Indicate when we have been asked to switch into or out of DST by command line option. */
-	int	DstSwitchFlag = FALSE;
+	bool	DstSwitchFlag = false;
 
 	/* To allow predict for DstPendingFlag in IEEE 1344 */
 	int	DstSwitchPendingYear		= 0;	/* Default value isn't valid, but I don't care. */
@@ -649,11 +649,11 @@ main(
 	int	DstSwitchPendingMinute		= 0;
 
 	/* /Flag for indication of a DST switch pending in IEEE 1344 */
-	int	DstPendingFlag = FALSE;
+	bool	DstPendingFlag = false;
 
 	/* Attempt at unmodulated */
-	int	Unmodulated = FALSE;
-	int UnmodulatedInverted = FALSE;
+	bool	Unmodulated = false;
+	bool	UnmodulatedInverted = false;
 
 	/* Offset to actual time value sent. */
 	float	UseOffsetHoursFloat;
@@ -668,10 +668,10 @@ main(
 	int		CountOfSecondsSent = 0;	/* Counter of seconds */
 	
 	/* Flags to indicate whether to add or remove a cycle for time adjustment. */
-	int		AddCycle = FALSE;	 	// We are ahead, add cycle to slow down and get back in sync.
-	int		RemoveCycle = FALSE;	// We are behind, remove cycle to slow down and get back in sync.
+	bool		AddCycle = false;	 	// We are ahead, add cycle to slow down and get back in sync.
+	bool		RemoveCycle = false;	// We are behind, remove cycle to slow down and get back in sync.
 	int		RateCorrection;			// Aggregate flag for passing to subroutines.
-	int		EnableRateCorrection = TRUE;
+	bool		EnableRateCorrection = true;
 	
 	float	RatioError;
 
@@ -705,8 +705,8 @@ main(
 		case 'b':	/* Remove (delete) a leap second at the end of the specified minute. */
 			sscanf(optarg, "%2d%2d%2d%2d%2d", &LeapYear, &LeapMonth, &LeapDayOfMonth,
 			    &LeapHour, &LeapMinute);
-			InsertLeapSecond = FALSE;
-			DeleteLeapSecond = TRUE;
+			InsertLeapSecond = false;
+			DeleteLeapSecond = true;
 			break;
 			
 		case 'c':	/* specify number of seconds to send output for before exiting, 0 = forever */
@@ -724,7 +724,7 @@ main(
 		case 'g':	/* Date and time to switch back into / out of DST active. */
 			sscanf(optarg, "%2d%2d%2d%2d%2d", &DstSwitchYear, &DstSwitchMonth, &DstSwitchDayOfMonth,
 			    &DstSwitchHour, &DstSwitchMinute);
-			DstSwitchFlag = TRUE;
+			DstSwitchFlag = true;
 			break;
 
 		case 'h':
@@ -737,21 +737,21 @@ main(
 		case 'i':	/* Insert (add) a leap second at the end of the specified minute. */
 			sscanf(optarg, "%2d%2d%2d%2d%2d", &LeapYear, &LeapMonth, &LeapDayOfMonth,
 			    &LeapHour, &LeapMinute);
-			InsertLeapSecond = TRUE;
-			DeleteLeapSecond = FALSE;
+			InsertLeapSecond = true;
+			DeleteLeapSecond = false;
 			break;
 			
 		case 'j':
-			EnableRateCorrection = FALSE;
+			EnableRateCorrection = false;
 			break;
 
 		case 'k':
 			sscanf (optarg, "%d", &RateCorrection);
-			EnableRateCorrection = FALSE;
+			EnableRateCorrection = false;
 			if  (RateCorrection < 0)
 				{
-				RemoveCycle = TRUE;
-				AddCycle = FALSE;
+				RemoveCycle = true;
+				AddCycle = false;
 				
 				if  (Verbose)
 					printf ("\n> Forcing rate correction removal of cycle...\n");
@@ -760,8 +760,8 @@ main(
 				{
 				if  (RateCorrection > 0)
 					{
-					RemoveCycle = FALSE;
-					AddCycle = TRUE;
+					RemoveCycle = false;
+					AddCycle = true;
 				
 					if  (Verbose)
 						printf ("\n> Forcing rate correction addition of cycle...\n");
@@ -846,7 +846,7 @@ main(
 #endif
 
 		case 'x':	/* Turn off verbose output. */
-			Verbose = FALSE;
+			Verbose = false;
 			break;
 
 		case 'y':	/* Set initial date and time */
@@ -856,7 +856,7 @@ main(
 			break;
 
 		case 'z':	/* Turn on Debug output (also turns on Verbose below) */
-			Debug = TRUE;
+			Debug = true;
 			break;
 
 		default:
@@ -867,7 +867,7 @@ main(
 	}
 
 	if  (Debug)
-	    Verbose = TRUE;
+	    Verbose = true;
 
 	if  (InsertLeapSecond || DeleteLeapSecond)
 		{
@@ -918,42 +918,42 @@ main(
 	case 'i':
 		printf ("\nFormat is IRIG-1998 (no year coded)...\n\n");
 		encode = IRIG;
-		IrigIncludeYear = FALSE;
-		IrigIncludeIeee = FALSE;
+		IrigIncludeYear = false;
+		IrigIncludeIeee = false;
 		break;
 
 	case '2':
 		printf ("\nFormat is IRIG-2004 (BCD year coded)...\n\n");
 		encode = IRIG;
-		IrigIncludeYear = TRUE;
-		IrigIncludeIeee = FALSE;
+		IrigIncludeYear = true;
+		IrigIncludeIeee = false;
 		break;
 
 	case '3':
 		printf ("\nFormat is IRIG with IEEE-1344 (BCD year coded, and more control functions)...\n\n");
 		encode = IRIG;
-		IrigIncludeYear = TRUE;
-		IrigIncludeIeee = TRUE;
+		IrigIncludeYear = true;
+		IrigIncludeIeee = true;
 		break;
 
 	case '4':
 		printf ("\nFormat is unmodulated IRIG with IEEE-1344 (BCD year coded, and more control functions)...\n\n");
 		encode = IRIG;
-		IrigIncludeYear = TRUE;
-		IrigIncludeIeee = TRUE;
+		IrigIncludeYear = true;
+		IrigIncludeIeee = true;
 
-		Unmodulated = TRUE;
-		UnmodulatedInverted = FALSE;
+		Unmodulated = true;
+		UnmodulatedInverted = false;
 		break;
 
 	case '5':
 		printf ("\nFormat is inverted unmodulated IRIG with IEEE-1344 (BCD year coded, and more control functions)...\n\n");
 		encode = IRIG;
-		IrigIncludeYear = TRUE;
-		IrigIncludeIeee = TRUE;
+		IrigIncludeYear = true;
+		IrigIncludeIeee = true;
 
-		Unmodulated = TRUE;
-		UnmodulatedInverted = TRUE;
+		Unmodulated = true;
+		UnmodulatedInverted = true;
 		break;
 
 	case 'w':
@@ -1345,7 +1345,7 @@ main(
 							printf ("\n<--- DST de-activated, fall back an hour!...\n");
 						}
 
-					DstSwitchFlag = FALSE;	/* One time deal, not intended to run this program past two switches... */
+					DstSwitchFlag = false;	/* One time deal, not intended to run this program past two switches... */
 					}
 				}
 
@@ -1397,13 +1397,13 @@ main(
 		/* and of the polarity */
 		if  ((Year == LeapYear) && (DayOfYear == LeapDayOfYear) && (Hour == LeapHour) && (Minute == LeapMinute))
 			{
-			LeapSecondPending = TRUE;
+			LeapSecondPending = true;
 			LeapSecondPolarity = DeleteLeapSecond;
 			}
 		else
 			{
-			LeapSecondPending = FALSE;
-			LeapSecondPolarity = FALSE;
+			LeapSecondPending = false;
+			LeapSecondPolarity = false;
 			}
 
 		/* Notification through IEEE 1344 happens during the whole minute previous to the minute specified. */
@@ -1411,11 +1411,11 @@ main(
 		if	((Year == DstSwitchPendingYear) && (DayOfYear == DstSwitchPendingDayOfYear) &&
 					(Hour == DstSwitchPendingHour) && (Minute == DstSwitchPendingMinute))
 			{
-			DstPendingFlag = TRUE;
+			DstPendingFlag = true;
 			}
 		else
 			{
-			DstPendingFlag = FALSE;
+			DstPendingFlag = false;
 			}
 
 
@@ -2102,8 +2102,8 @@ main(
 							if  (Debug)
 								printf ("> Was adding cycles, ExpectedRunningDifference >= SecondsRunningDifference, can stop it now.\n");
 
-							AddCycle = FALSE;
-							RemoveCycle = FALSE;
+							AddCycle = false;
+							RemoveCycle = false;
 							}
 						else
 							{
@@ -2120,8 +2120,8 @@ main(
 								if  (Debug)
 									printf ("> Was removing cycles, ExpectedRunningDifference <= SecondsRunningDifference, can stop it now.\n");
 
-								AddCycle = FALSE;
-								RemoveCycle = FALSE;
+								AddCycle = false;
+								RemoveCycle = false;
 								}
 							else
 								{
@@ -2145,8 +2145,8 @@ main(
 										printf ("> ExpectedRunningDifference > SecondsRunningDifference, running behind real time.\n");
 
 									// Behind real time, have to add a cycle to slow down and get back in sync.
-									AddCycle = FALSE;
-									RemoveCycle = TRUE;
+									AddCycle = false;
+									RemoveCycle = true;
 									}
 								else
 									{	// Else clause of "if  (ExpectedRunningDifference < SecondsRunningDifference)"
@@ -2156,8 +2156,8 @@ main(
 											printf ("> ExpectedRunningDifference < SecondsRunningDifference, running ahead of real time.\n");
 
 										// Ahead of real time, have to remove a cycle to speed up and get back in sync.
-										AddCycle = TRUE;
-										RemoveCycle = FALSE;
+										AddCycle = true;
+										RemoveCycle = false;
 										}
 									else
 										{
@@ -2403,19 +2403,19 @@ ConvertMonthDayToDayOfYear (int YearValue, int MonthValue, int DayOfMonthValue)
 	int DaysInMonth[] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
 
 
-	LeapYear = FALSE;
+	LeapYear = false;
 	if  ((YearValue % 4) == 0)
 		{
 		if  ((YearValue % 100) == 0)
 			{
 			if  ((YearValue % 400) == 0)
 				{
-				LeapYear = TRUE;
+				LeapYear = true;
 				}
 			}
 		else
 			{
-			LeapYear = TRUE;
+			LeapYear = true;
 			}
 		}
 

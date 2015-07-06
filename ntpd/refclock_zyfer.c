@@ -95,7 +95,7 @@ struct zyferunit {
 /*
  * Function prototypes
  */
-static	int	zyfer_start	(int, struct peer *);
+static	bool	zyfer_start	(int, struct peer *);
 static	void	zyfer_shutdown	(int, struct peer *);
 static	void	zyfer_receive	(struct recvbuf *);
 static	void	zyfer_poll	(int, struct peer *);
@@ -117,7 +117,7 @@ struct	refclock refclock_zyfer = {
 /*
  * zyfer_start - open the devices and initialize data for processing
  */
-static int
+static bool
 zyfer_start(
 	int unit,
 	struct peer *peer
@@ -136,7 +136,7 @@ zyfer_start(
 	fd = refclock_open(device, SPEED232, LDISC_RAW);
 	if (fd <= 0)
 		/* coverity[leaked_handle] */
-		return (0);
+		return false;
 
 	msyslog(LOG_NOTICE, "zyfer(%d) fd: %d dev <%s>", unit, fd, device);
 
@@ -154,7 +154,7 @@ zyfer_start(
 		close(fd);
 		pp->io.fd = -1;
 		free(up);
-		return (0);
+		return false;
 	}
 	pp->unitptr = up;
 
@@ -167,7 +167,7 @@ zyfer_start(
 	up->pollcnt = 2;
 	up->polled = 0;		/* May not be needed... */
 
-	return (1);
+	return true;
 }
 
 

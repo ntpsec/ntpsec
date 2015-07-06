@@ -38,7 +38,7 @@
  * for the larger size.  Therefore, we introduce the alternate size to 
  * keep us friendly with older implementations.  A little ugly.
  */
-static int client_v6_capable = 0;   /* the client can handle longer messages */
+static bool client_v6_capable = false;   /* client can handle longer messages */
 
 #define v6sizeof(type)	(client_v6_capable ? sizeof(type) : v4sizeof(type))
 
@@ -218,7 +218,7 @@ static int nitems;
 static int itemsize;
 static int databytes;
 static char exbuf[RESP_DATA_SIZE];
-static int usingexbuf;
+static bool usingexbuf;
 static sockaddr_u *toaddr;
 static endpt *frominter;
 
@@ -300,7 +300,7 @@ prepare_pkt(
 	nitems = 0;
 	itemsize = structsize;
 	databytes = 0;
-	usingexbuf = 0;
+	usingexbuf = false;
 
 	/*
 	 * return the beginning of the packet buffer.
@@ -334,7 +334,7 @@ more_pkt(void)
 		seqno++;
 		databytes = 0;
 		nitems = 0;
-		usingexbuf = 0;
+		usingexbuf = false;
 	}
 
 	databytes += itemsize;
@@ -355,7 +355,7 @@ more_pkt(void)
 		if (seqno == MAXSEQ)
 			return NULL;
 		else {
-			usingexbuf = 1;
+			usingexbuf = true;
 			return exbuf;
 		}
 	}
@@ -521,10 +521,10 @@ process_private(
 
 	switch (inpkt->implementation) {
 	case IMPL_XNTPD:
-		client_v6_capable = 1;
+		client_v6_capable = true;
 		break;
 	case IMPL_XNTPD_OLD:
-		client_v6_capable = 0;
+		client_v6_capable = false;
 		break;
 	default:
 		req_ack(srcadr, inter, inpkt, INFO_ERR_FMT);
@@ -666,7 +666,7 @@ list_peers(
 {
 	struct info_peer_list *ip;
 	struct peer *pp;
-	int skip = 0;
+	bool skip = false;
 
 	ip = (struct info_peer_list *)prepare_pkt(srcadr, inter, inpkt,
 	    v6sizeof(struct info_peer_list));
@@ -675,16 +675,16 @@ list_peers(
 			if (client_v6_capable) {
 				ip->addr6 = SOCK_ADDR6(&pp->srcadr);
 				ip->v6_flag = 1;
-				skip = 0;
+				skip = false;
 			} else {
-				skip = 1;
+				skip = true;
 				break;
 			}
 		} else {
 			ip->addr = NSRCADR(&pp->srcadr);
 			if (client_v6_capable)
 				ip->v6_flag = 0;
-			skip = 0;
+			skip = false;
 		}
 
 		if (!skip) {
@@ -740,9 +740,9 @@ list_peers_sum(
 					ips->dstadr6 = SOCK_ADDR6(&pp->dstadr->sin);
 				else
 					ZERO(ips->dstadr6);
-				skip = 0;
+				skip = false;
 			} else {
-				skip = 1;
+				skip = true;
 				break;
 			}
 		} else {
@@ -765,7 +765,7 @@ list_peers_sum(
 			} else
 				ips->dstadr = 0;
 
-			skip = 0;
+			skip = false;
 		}
 		
 		if (!skip) { 
@@ -1402,7 +1402,7 @@ do_unconf(
 		return;
 	}
 
-	bad = FALSE;
+	bad = false;
 	while (items-- > 0 && !bad) {
 		ZERO(temp_cp);
 		memcpy(&temp_cp, datap, item_sz);
@@ -1418,7 +1418,7 @@ do_unconf(
 #ifdef ISC_PLATFORM_HAVESALEN
 		peeraddr.sa.sa_len = SOCKLEN(&peeraddr);
 #endif
-		found = FALSE;
+		found = false;
 		p = NULL;
 
 		DPRINTF(1, ("searching for %s\n", stoa(&peeraddr)));
@@ -1428,10 +1428,10 @@ do_unconf(
 			if (NULL == p)
 				break;
 			if (FLAG_CONFIG & p->flags)
-				found = TRUE;
+				found = true;
 		}
 		if (!found)
-			bad = TRUE;
+			bad = true;
 
 		datap += item_sz;
 	}
@@ -1463,7 +1463,7 @@ do_unconf(
 #ifdef ISC_PLATFORM_HAVESALEN
 		peeraddr.sa.sa_len = SOCKLEN(&peeraddr);
 #endif
-		found = FALSE;
+		found = false;
 		p = NULL;
 
 		while (!found) {
@@ -1471,7 +1471,7 @@ do_unconf(
 			if (NULL == p)
 				break;
 			if (FLAG_CONFIG & p->flags)
-				found = TRUE;
+				found = true;
 		}
 		INSIST(found);
 		INSIST(NULL != p);
@@ -1726,7 +1726,7 @@ do_restrict(
 		return;
 	}
 
-	bad = FALSE;
+	bad = false;
 	while (items-- > 0 && !bad) {
 		memcpy(&cr, datap, item_sz);
 		cr.flags = ntohs(cr.flags);
@@ -1886,7 +1886,7 @@ reset_peer(
 		return;
 	}
 
-	bad = FALSE;
+	bad = false;
 	while (items-- > 0 && !bad) {
 		ZERO(cp);
 		memcpy(&cp, datap, item_sz);

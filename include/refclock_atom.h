@@ -10,6 +10,6 @@ struct refclock_atom {
 	struct timespec ts;
 };
 
-extern	int	refclock_ppsapi(int, struct refclock_atom *);
-extern	int	refclock_params(int, struct refclock_atom *);
-extern	int	refclock_pps(struct peer *, struct refclock_atom *, int);
+extern	bool	refclock_ppsapi(int, struct refclock_atom *);
+extern	bool	refclock_params(int, struct refclock_atom *);
+extern	bool	refclock_pps(struct peer *, struct refclock_atom *, int);

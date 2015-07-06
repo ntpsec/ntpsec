@@ -79,13 +79,13 @@ typedef u_int32 u_fp;
 	do {							\
 		(hi) = ntohl(ni);				\
 		(hf) = ntohl(nf);				\
-	} while (FALSE)
+	} while (false)
 
 #define	HTONL_MFP(hi, hf, ni, nf)				\
 	do {							\
 		(ni) = htonl(hi);				\
 		(nf) = htonl(hf);				\
-	} while (FALSE)
+	} while (false)
 
 #define HTONL_FP(h, n)						\
 	HTONL_MFP((h)->l_ui, (h)->l_uf, (n)->l_ui, (n)->l_uf)
@@ -98,7 +98,7 @@ typedef u_int32 u_fp;
 	do {							\
 		(nts)->l_ui = 0;				\
 		(nts)->l_uf = htonl(uf);			\
-	} while (FALSE)
+	} while (false)
 
 /*
  * Conversions between the two fixed point types
@@ -124,20 +124,20 @@ typedef u_int32 u_fp;
 	do { \
 		(v_f) = ~(v_f) + 1u; \
 		(v_i) = ~(v_i) + ((v_f) == 0); \
-	} while (FALSE)
+	} while (false)
 
 #define	M_NEGM(r_i, r_f, a_i, a_f)	/* r = -a */ \
 	do { \
 		(r_f) = ~(a_f) + 1u; \
 		(r_i) = ~(a_i) + ((r_f) == 0); \
-	} while (FALSE)
+	} while (false)
 
 #define M_ADD(r_i, r_f, a_i, a_f)	/* r += a */ \
 	do { \
 		u_int32 add_t = (r_f); \
 		(r_f) += (a_f); \
 		(r_i) += (a_i) + ((u_int32)(r_f) < add_t); \
-	} while (FALSE)
+	} while (false)
 
 #define M_ADD3(r_o, r_i, r_f, a_o, a_i, a_f) /* r += a, three word */ \
 	do { \
@@ -151,39 +151,39 @@ typedef u_int32 u_fp;
 		(r_i) += (a_i); \
 		add_c |= ((u_int32)(r_i) < add_t); \
 		(r_o) += (a_o) + add_c; \
-	} while (FALSE)
+	} while (false)
 
 #define M_SUB(r_i, r_f, a_i, a_f)	/* r -= a */ \
 	do { \
 		u_int32 sub_t = (r_f); \
 		(r_f) -= (a_f); \
 		(r_i) -= (a_i) + ((u_int32)(r_f) > sub_t); \
-	} while (FALSE)
+	} while (false)
 
 #define	M_RSHIFTU(v_i, v_f)		/* v >>= 1, v is unsigned */ \
 	do { \
 		(v_f) = ((u_int32)(v_f) >> 1) | ((u_int32)(v_i) << 31);	\
 		(v_i) = ((u_int32)(v_i) >> 1); \
-	} while (FALSE)
+	} while (false)
 
 #define	M_RSHIFT(v_i, v_f)		/* v >>= 1, v is signed */ \
 	do { \
 		(v_f) = ((u_int32)(v_f) >> 1) | ((u_int32)(v_i) << 31);	\
 		(v_i) = ((u_int32)(v_i) >> 1) | ((u_int32)(v_i) & 0x80000000);	\
-	} while (FALSE)
+	} while (false)
 
 #define	M_LSHIFT(v_i, v_f)		/* v <<= 1 */ \
 	do { \
 		(v_i) = ((u_int32)(v_i) << 1) | ((u_int32)(v_f) >> 31);	\
 		(v_f) = ((u_int32)(v_f) << 1); \
-	} while (FALSE)
+	} while (false)
 
 #define	M_LSHIFT3(v_o, v_i, v_f)	/* v <<= 1, with overflow */ \
 	do { \
 		(v_o) = ((u_int32)(v_o) << 1) | ((u_int32)(v_i) >> 31);	\
 		(v_i) = ((u_int32)(v_i) << 1) | ((u_int32)(v_f) >> 31);	\
 		(v_f) = ((u_int32)(v_f) << 1); \
-	} while (FALSE)
+	} while (false)
 
 #define	M_ADDUF(r_i, r_f, uf)		/* r += uf, uf is u_int32 fraction */ \
 	M_ADD((r_i), (r_f), 0, (uf))	/* let optimizer worry about it */
@@ -291,7 +291,7 @@ typedef u_int32 u_fp;
 		}						\
 		(r_uf) = (u_int32)q_tmp;			\
 		(r_ui) = (u_int32)(q_tmp >> 32);		\
-	} while (FALSE)
+	} while (false)
 
 #define M_LFPTOD(r_ui, r_uf, d) 	/* l_fp to double */	\
 	do {							\
@@ -309,7 +309,7 @@ typedef u_int32 u_fp;
 			d_tmp = -d_tmp;				\
 		}						\
 		(d) = d_tmp;					\
-	} while (FALSE)
+	} while (false)
 
 #else /* use only 32 bit unsigned values */
 
@@ -347,13 +347,13 @@ typedef u_int32 u_fp;
 extern	char *	dofptoa		(u_fp, int, short, int);
 extern	char *	dolfptoa	(u_int32, u_int32, int, short, int);
 
-extern	int	atolfp		(const char *, l_fp *);
+extern	bool	atolfp		(const char *, l_fp *);
 extern	int	buftvtots	(const char *, l_fp *);
 extern	char *	fptoa		(s_fp, short);
 extern	char *	fptoms		(s_fp, short);
-extern	int	hextolfp	(const char *, l_fp *);
+extern	bool	hextolfp	(const char *, l_fp *);
 extern  void	gpstolfp	(int, int, unsigned long, l_fp *);
-extern	int	mstolfp		(const char *, l_fp *);
+extern	bool	mstolfp		(const char *, l_fp *);
 extern	char *	prettydate	(l_fp *);
 extern	char *	gmprettydate	(l_fp *);
 extern	char *	uglydate	(l_fp *);
@@ -411,13 +411,13 @@ extern CRITICAL_SECTION get_systime_cs;
 		init_win_precise_time()
 #else	/* !SYS_WINNT follows */
 # define INIT_GET_SYSTIME_CRITSEC()			\
-		do {} while (FALSE)
+		do {} while (false)
 # define ENTER_GET_SYSTIME_CRITSEC()			\
-		do {} while (FALSE)
+		do {} while (false)
 # define LEAVE_GET_SYSTIME_CRITSEC()			\
-		do {} while (FALSE)
+		do {} while (false)
 # define INIT_WIN_PRECISE_TIME()			\
-		do {} while (FALSE)
+		do {} while (false)
 #endif
 
 #endif /* NTP_FP_H */

@@ -8,7 +8,7 @@
 #include "ntp_types.h"
 #include "ntp_stdlib.h"
 
-int
+bool
 atoint(
 	const char *str,
 	long *ival
@@ -31,14 +31,14 @@ atoint(
 	}
 
 	if (*cp == '\0')
-	    return 0;
+	    return false;
 
 	u = 0;
 	while (*cp != '\0') {
 		if (!isdigit((unsigned char)*cp))
-		    return 0;
+		    return false;
 		if (u > 214748364 || (u == 214748364 && *cp > oflow_digit))
-		    return 0;	/* overflow */
+		    return false;	/* overflow */
 		u = (u << 3) + (u << 1);
 		u += *cp++ - '0';	/* ascii dependent */
 	}
@@ -47,5 +47,5 @@ atoint(
 	    *ival = -u;
 	else 
 	    *ival = u;
-	return 1;
+	return true;
 }

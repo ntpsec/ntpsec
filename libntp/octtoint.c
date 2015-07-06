@@ -8,7 +8,7 @@
 
 #include "ntp_stdlib.h"
 
-int
+bool
 octtoint(
 	const char *str,
 	u_long *ival
@@ -20,7 +20,7 @@ octtoint(
 	cp = str;
 
 	if (*cp == '\0')
-	    return 0;
+	    return false;
 
 	u = 0;
 	while (*cp != '\0') {
@@ -32,5 +32,5 @@ octtoint(
 		u += *cp++ - '0';	/* ascii dependent */
 	}
 	*ival = u;
-	return 1;
+	return true;
 }

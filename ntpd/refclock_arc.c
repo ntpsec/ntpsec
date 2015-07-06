@@ -531,7 +531,7 @@ static void   arc_event_handler (struct peer *);
 /*
  * Function prototypes
  */
-static	int	arc_start	(int, struct peer *);
+static	bool	arc_start	(int, struct peer *);
 static	void	arc_shutdown	(int, struct peer *);
 static	void	arc_receive	(struct recvbuf *);
 static	void	arc_poll	(int, struct peer *);
@@ -611,7 +611,7 @@ arc_event_handler(
 /*
  * arc_start - open the devices and initialize data for processing
  */
-static int
+static bool
 arc_start(
 	int unit,
 	struct peer *peer
@@ -636,14 +636,14 @@ arc_start(
 	temp_fd = refclock_open(device, SPEED, LDISC_CLK);
 	if (temp_fd <= 0)
 		/* coverity[leaked_handle] */
-		return 0;
+		return false;
 	DPRINTF(1, ("arc: unit %d using tty_open().\n", unit));
 	fd = tty_open(device, OPEN_FLAGS, 0777);
 	if (fd < 0) {
 		msyslog(LOG_ERR, "MSF_ARCRON(%d): failed second open(%s, 0777): %m.",
 			unit, device);
 		close(temp_fd);
-		return 0;
+		return false;
 	}
 	close(temp_fd);
 	temp_fd = -1;
@@ -660,7 +660,7 @@ arc_start(
 		msyslog(LOG_ERR, "MSF_ARCRON(%d): tcgetattr(%s): %m.",
 			unit, device);
 		close(fd);
-		return 0;
+		return false;
 	}
 
 	arg.c_iflag = IGNBRK | ISTRIP;
@@ -674,7 +674,7 @@ arc_start(
 		msyslog(LOG_ERR, "MSF_ARCRON(%d): tcsetattr(%s): %m.",
 			unit, device);
 		close(fd);
-		return 0;
+		return false;
 	}
 
 	/* Set structure to all zeros... */
@@ -688,7 +688,7 @@ arc_start(
 		close(fd);
 		pp->io.fd = -1;
 		free(up); 
-		return(0); 
+		return false; 
 	}
 	pp->unitptr = up;
 
@@ -700,7 +700,7 @@ arc_start(
 	pp->clockdesc = DESCRIPTION;
 	if (peer->MODE > 3) {
 		msyslog(LOG_NOTICE, "ARCRON: Invalid mode %d", peer->MODE);
-		return 0;
+		return false;
 	}
 #ifdef DEBUG
 	if(debug) { printf("arc: mode = %d.\n", peer->MODE); }
@@ -742,7 +742,7 @@ arc_start(
 
 	ENQUEUE(up);
 
-	return(1);
+	return true;
 }
 
 
@@ -788,9 +788,9 @@ space_left(
 Send command by copying into command buffer as far forward as possible,
 after any pending output.
 
-Indicate an error by returning 0 if there is not space for the command.
+Indicate an error by returning false if there is not space for the command.
 */
-static int
+static bool
 send_slow(
 	register struct arcunit *up,
 	int fd,
@@ -808,30 +808,30 @@ send_slow(
 		msyslog(LOG_NOTICE, "ARCRON: send-buffer overrun (%d/%d)",
 			sl, spaceleft);
 #endif
-		return(0);			/* FAILED! */
+		return false;			/* FAILED! */
 	}
 
 	/* Copy in the command to be sent. */
 	while(*s && spaceleft > 0) { up->cmdqueue[CMDQUEUELEN - spaceleft--] = *s++; }
 
-	return(1);
+	return true;
 }
 
 
-static int
+static bool
 get2(char *p, int *val)
 {
-  if (!isdigit((unsigned char)p[0]) || !isdigit((unsigned char)p[1])) return 0;
+  if (!isdigit((unsigned char)p[0]) || !isdigit((unsigned char)p[1])) return false;
   *val = (p[0] - '0') * 10 + p[1] - '0';
-  return 1;
+  return true;
 }
 
-static int
+static bool
 get1(char *p, int *val)
 {
-  if (!isdigit((unsigned char)p[0])) return 0;
+  if (!isdigit((unsigned char)p[0])) return false;
   *val = p[0] - '0';
-  return 1;
+  return true;
 }
 
 /* Macro indicating action we will take for different quality values. */

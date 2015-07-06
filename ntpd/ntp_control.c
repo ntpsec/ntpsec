@@ -768,18 +768,18 @@ static int	res_offset;	/* offset of payload in response */
 static u_char * datapt;
 static u_char * dataend;
 static int	datalinelen;
-static int	datasent;	/* flag to avoid initial ", " */
-static int	datanotbinflag;
+static bool	datasent;	/* flag to avoid initial ", " */
+static bool	datanotbinflag;
 static sockaddr_u *rmt_addr;
 static struct interface *lcl_inter;
 
-static u_char	res_authenticate;
-static u_char	res_authokay;
+static bool	res_authenticate;
+static bool	res_authokay;
 static keyid_t	res_keyid;
 
 #define MAXDATALINELEN	(72)
 
-static u_char	res_async;	/* sending async trap response? */
+static bool	res_async;	/* sending async trap response? */
 
 /*
  * Pointers for saving state when decoding request packets
@@ -1045,12 +1045,12 @@ process_control(
 	res_frags = 1;
 	res_offset = 0;
 	res_associd = htons(pkt->associd);
-	res_async = FALSE;
-	res_authenticate = FALSE;
+	res_async = false;
+	res_authenticate = false;
 	res_keyid = 0;
-	res_authokay = FALSE;
+	res_authokay = false;
 	req_count = (int)ntohs(pkt->count);
-	datanotbinflag = FALSE;
+	datanotbinflag = false;
 	datalinelen = 0;
 	datasent = 0;
 	datapt = rpkt.u.data;
@@ -1079,7 +1079,7 @@ process_control(
 	if ((rbufp->recv_length & 3) == 0 &&
 	    maclen >= MIN_MAC_LEN && maclen <= MAX_MAC_LEN &&
 	    sys_authenticate) {
-		res_authenticate = TRUE;
+		res_authenticate = true;
 		pkid = (void *)((char *)pkt + properlen);
 		res_keyid = ntohl(*pkid);
 		DPRINTF(3, ("recv_len %d, properlen %d, wants auth with keyid %08x, MAC length=%zu\n",
@@ -1091,7 +1091,7 @@ process_control(
 		else if (authdecrypt(res_keyid, (u_int32 *)pkt,
 				     rbufp->recv_length - maclen,
 				     maclen)) {
-			res_authokay = TRUE;
+			res_authokay = true;
 			DPRINTF(3, ("authenticated okay\n"));
 		} else {
 			res_keyid = 0;
@@ -1310,7 +1310,7 @@ ctl_putdata(
 
 	overhead = 0;
 	if (!bin) {
-		datanotbinflag = TRUE;
+		datanotbinflag = true;
 		overhead = 3;
 		if (datasent) {
 			*datapt++ = ',';
@@ -1348,7 +1348,7 @@ ctl_putdata(
 	memcpy(datapt, dp, dlen);
 	datapt += dlen;
 	datalinelen += dlen;
-	datasent = TRUE;
+	datasent = true;
 }
 
 
@@ -1680,7 +1680,7 @@ ctl_putrefid(
 			*optr = '.';
 	if (!(optr <= oplim))
 		optr = past_eq;
-	ctl_putdata(output, (u_int)(optr - output), FALSE);
+	ctl_putdata(output, (u_int)(optr - output), false);
 }
 
 
@@ -1867,7 +1867,7 @@ ctl_putsys(
 		char buf[CTL_MAX_DATA_LEN];
 		//buffPointer, firstElementPointer, buffEndPointer
 		char *buffp, *buffend;
-		int firstVarName;
+		bool firstVarName;
 		const char *ss1;
 		int len;
 		const struct ctl_var *k;
@@ -1879,7 +1879,7 @@ ctl_putsys(
 
 		snprintf(buffp, sizeof(buf), "%s=\"",sys_var[CS_VARLIST].text);
 		buffp += strlen(buffp);
-		firstVarName = TRUE;
+		firstVarName = true;
 		for (k = sys_var; !(k->flags & EOV); k++) {
 			if (k->flags & PADDING)
 				continue;
@@ -1889,7 +1889,7 @@ ctl_putsys(
 			if (!firstVarName)
 				*buffp++ = ',';
 			else
-				firstVarName = FALSE;
+				firstVarName = false;
 			memcpy(buffp, k->text, len);
 			buffp += len;
 		}
@@ -1908,7 +1908,7 @@ ctl_putsys(
 				break;
 			if (firstVarName) {
 				*buffp++ = ',';
-				firstVarName = FALSE;
+				firstVarName = false;
 			}
 			memcpy(buffp, k->text,(unsigned)len);
 			buffp += len;
@@ -3037,8 +3037,8 @@ read_peervars(void)
 	const u_char *cp;
 	size_t i;
 	char *	valuep;
-	u_char	wants[CP_MAXCODE + 1];
-	u_int	gotvar;
+	bool	wants[CP_MAXCODE + 1];
+	bool	gotvar;
 
 	/*
 	 * Wants info for a particular peer. See if we know
@@ -3266,7 +3266,7 @@ static void configure(
 {
 	size_t data_count;
 	int retval;
-	int replace_nl;
+	bool replace_nl;
 
 	/* I haven't yet implemented changes to an existing association.
 	 * Hence check if the association id is 0
@@ -3320,9 +3320,9 @@ static void configure(
 	if (data_count > 0
 	    && '\n' == remote_config.buffer[data_count - 1]) {
 		remote_config.buffer[data_count - 1] = '\0';
-		replace_nl = TRUE;
+		replace_nl = true;
 	} else {
-		replace_nl = FALSE;
+		replace_nl = false;
 	}
 
 	DPRINTF(1, ("Got Remote Configuration Command: %s\n",
@@ -3428,7 +3428,7 @@ static void generate_nonce(
 /*
  * validate_nonce - validate client-address-specific nonce string.
  *
- * Returns TRUE if the local calculation of the nonce matches the
+ * Returns true if the local calculation of the nonce matches the
  * client-provided value and the timestamp is recent enough.
  */
 static int validate_nonce(
@@ -3444,7 +3444,7 @@ static int validate_nonce(
 	u_int	derived;
 
 	if (3 != sscanf(pnonce, "%08x%08x%08x", &ts_i, &ts_f, &supposed))
-		return FALSE;
+		return false;
 
 	ts.l_ui = (u_int32)ts_i;
 	ts.l_uf = (u_int32)ts_f;
@@ -3508,7 +3508,7 @@ send_mru_entry(
 	const char mv_fmt[] =		"mv.%d";
 	const char rs_fmt[] =		"rs.%d";
 	char	tag[32];
-	u_char	sent[6]; /* 6 tag=value pairs */
+	bool	sent[6]; /* 6 tag=value pairs */
 	u_int32 noise;
 	u_int	which;
 	u_int	remaining;
@@ -3556,7 +3556,7 @@ send_mru_entry(
 			ctl_puthex(tag, mon->flags);
 			break;
 		}
-		sent[which] = TRUE;
+		sent[which] = true;
 		remaining--;
 	}
 }
@@ -4033,7 +4033,7 @@ send_ifstats_entry(
 			ctl_putuint(tag, current_time - la->starttime);
 			break;
 		}
-		sent[which] = TRUE;
+		sent[which] = true;
 		remaining--;
 	}
 	send_random_tag_value((int)ifnum);
@@ -4177,7 +4177,7 @@ send_restrict_entry(
 			ctl_putunqstr(tag, pch, strlen(pch));
 			break;
 		}
-		sent[which] = TRUE;
+		sent[which] = true;
 		remaining--;
 	}
 	send_random_tag_value((int)idx);
@@ -4209,8 +4209,8 @@ read_addr_restrictions(
 	u_int idx;
 
 	idx = 0;
-	send_restrict_list(restrictlist4, FALSE, &idx);
-	send_restrict_list(restrictlist6, TRUE, &idx);
+	send_restrict_list(restrictlist4, false, &idx);
+	send_restrict_list(restrictlist6, true, &idx);
 	ctl_flushpkt(0);
 }
 
@@ -4335,11 +4335,11 @@ read_clockstatus(
 	rpkt.status = htons(ctlclkstatus(&cs));
 	wants_alloc = CC_MAXCODE + 1 + count_var(kv);
 	wants = emalloc_zero(wants_alloc);
-	gotvar = FALSE;
+	gotvar = false;
 	while (NULL != (v = ctl_getitem(clock_var, &valuep))) {
 		if (!(EOV & v->flags)) {
-			wants[v->code] = TRUE;
-			gotvar = TRUE;
+			wants[v->code] = true;
+			gotvar = true;
 		} else {
 			v = ctl_getitem(kv, &valuep);
 			NTP_INSIST(NULL != v);
@@ -4349,28 +4349,28 @@ read_clockstatus(
 				free_varlist(cs.kv_list);
 				return;
 			}
-			wants[CC_MAXCODE + 1 + v->code] = TRUE;
-			gotvar = TRUE;
+			wants[CC_MAXCODE + 1 + v->code] = true;
+			gotvar = true;
 		}
 	}
 
 	if (gotvar) {
 		for (i = 1; i <= CC_MAXCODE; i++)
 			if (wants[i])
-				ctl_putclock(i, &cs, TRUE);
+				ctl_putclock(i, &cs, true);
 		if (kv != NULL)
 			for (i = 0; !(EOV & kv[i].flags); i++)
 				if (wants[i + CC_MAXCODE + 1])
 					ctl_putdata(kv[i].text,
 						    strlen(kv[i].text),
-						    FALSE);
+						    false);
 	} else {
 		for (cc = def_clock_var; *cc != 0; cc++)
-			ctl_putclock((int)*cc, &cs, FALSE);
+			ctl_putclock((int)*cc, &cs, false);
 		for ( ; kv != NULL && !(EOV & kv->flags); kv++)
 			if (DEF & kv->flags)
 				ctl_putdata(kv->text, strlen(kv->text),
-					    FALSE);
+					    false);
 	}
 
 	free(wants);
@@ -4469,7 +4469,7 @@ unset_trap(
 /*
  * ctlsettrap - called to set a trap
  */
-int
+bool
 ctlsettrap(
 	sockaddr_u *raddr,
 	struct interface *linter,
@@ -4494,19 +4494,19 @@ ctlsettrap(
 
 		case TRAP_TYPE_PRIO:
 			if (tp->tr_flags & TRAP_CONFIGURED)
-				return (1); /* don't change anything */
+				return true; /* don't change anything */
 			tp->tr_flags = TRAP_INUSE;
 			break;
 
 		case TRAP_TYPE_NONPRIO:
 			if (tp->tr_flags & TRAP_CONFIGURED)
-				return (1); /* don't change anything */
+				return true; /* don't change anything */
 			tp->tr_flags = TRAP_INUSE|TRAP_NONPRIO;
 			break;
 		}
 		tp->tr_settime = current_time;
 		tp->tr_resets++;
-		return (1);
+		return true;
 	}
 
 	/*
@@ -4568,7 +4568,7 @@ ctlsettrap(
 	 * If we don't have room for him return an error.
 	 */
 	if (tptouse == NULL)
-		return (0);
+		return false;
 
 	/*
 	 * Set up this structure for him.
@@ -4585,14 +4585,14 @@ ctlsettrap(
 	else if (traptype == TRAP_TYPE_NONPRIO)
 		tptouse->tr_flags |= TRAP_NONPRIO;
 	num_ctl_traps++;
-	return (1);
+	return true;
 }
 
 
 /*
  * ctlclrtrap - called to clear a trap
  */
-int
+bool
 ctlclrtrap(
 	sockaddr_u *raddr,
 	struct interface *linter,
@@ -4602,15 +4602,15 @@ ctlclrtrap(
 	register struct ctl_trap *tp;
 
 	if ((tp = ctlfindtrap(raddr, linter)) == NULL)
-		return (0);
+		return false;
 
 	if (tp->tr_flags & TRAP_CONFIGURED
 	    && traptype != TRAP_TYPE_CONFIG)
-		return (0);
+		return false;
 
 	tp->tr_flags = 0;
 	num_ctl_traps--;
-	return (1);
+	return true;
 }
 
 
@@ -4726,8 +4726,8 @@ report_event(
 	 */
 	res_opcode = CTL_OP_ASYNCMSG;
 	res_offset = 0;
-	res_async = TRUE;
-	res_authenticate = FALSE;
+	res_async = true;
+	res_authenticate = false;
 	datapt = rpkt.u.data;
 	dataend = &rpkt.u.data[CTL_MAX_DATA_LEN];
 	if (!(err & PEER_EVENT)) {
@@ -4761,14 +4761,14 @@ report_event(
 				   ctlclkstatus(&cs));
 
 			for (i = 1; i <= CC_MAXCODE; i++)
-				ctl_putclock(i, &cs, FALSE);
+				ctl_putclock(i, &cs, false);
 			for (kv = cs.kv_list;
 			     kv != NULL && !(EOV & kv->flags);
 			     kv++)
 				if (DEF & kv->flags)
 					ctl_putdata(kv->text,
 						    strlen(kv->text),
-						    FALSE);
+						    false);
 			free_varlist(cs.kv_list);
 		}
 #endif /* REFCLOCK */

@@ -18,7 +18,7 @@
 
 void	atexit_ssl_cleanup(void);
 
-int ssl_init_done;
+bool ssl_init_done;
 
 void
 ssl_init(void)
@@ -32,7 +32,7 @@ ssl_init(void)
 	OpenSSL_add_all_algorithms();
 	atexit(&atexit_ssl_cleanup);
 
-	ssl_init_done = TRUE;
+	ssl_init_done = true;
 }
 
 
@@ -42,7 +42,7 @@ atexit_ssl_cleanup(void)
 	if (!ssl_init_done)
 		return;
 
-	ssl_init_done = FALSE;
+	ssl_init_done = false;
 	EVP_cleanup();
 	ERR_free_strings();
 }

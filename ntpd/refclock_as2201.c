@@ -129,7 +129,7 @@ static char stat_command[][30] = {
 /*
  * Function prototypes
  */
-static	int	as2201_start	(int, struct peer *);
+static	bool	as2201_start	(int, struct peer *);
 static	void	as2201_shutdown	(int, struct peer *);
 static	void	as2201_receive	(struct recvbuf *);
 static	void	as2201_poll	(int, struct peer *);
@@ -151,7 +151,7 @@ struct	refclock refclock_as2201 = {
 /*
  * as2201_start - open the devices and initialize data for processing
  */
-static int
+static bool
 as2201_start(
 	int unit,
 	struct peer *peer
@@ -169,7 +169,7 @@ as2201_start(
 	fd = refclock_open(gpsdev, SPEED232, LDISC_CLK);
 	if (fd <= 0)
 		/* coverity[leaked_handle] */
-		return (0);
+		return false;
 
 	/*
 	 * Allocate and initialize unit structure
@@ -184,7 +184,7 @@ as2201_start(
 		close(fd);
 		pp->io.fd = -1;
 		free(up);
-		return (0);
+		return false;
 	}
 	pp->unitptr = up;
 
@@ -196,7 +196,7 @@ as2201_start(
 	memcpy((char *)&pp->refid, REFID, REFIDLEN);
 	up->lastptr = up->stats;
 	up->index = 0;
-	return (1);
+	return true;
 }
 
 

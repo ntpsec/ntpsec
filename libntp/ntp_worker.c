@@ -39,20 +39,20 @@ int			intres_req_pending;
 int
 pipe_socketpair(
 	int	caller_fds[2],
-	int *	is_pipe
+	bool *	is_pipe
 	)
 {
 	int	rc;
 	int	fds[2];
-	int	called_pipe;
+	bool	called_pipe;
 
 	rc = socketpair(AF_UNIX, SOCK_STREAM, 0, &fds[0]);
 
 	if (-1 == rc) {
 		rc = pipe(&fds[0]);
-		called_pipe = TRUE;
+		called_pipe = true;
 	} else {
-		called_pipe = FALSE;
+		called_pipe = false;
 	}
 
 	if (-1 == rc)
@@ -133,7 +133,7 @@ available_blocking_child_slot(void)
 		if (NULL == blocking_children[slot])
 			return slot;
 		if (blocking_children[slot]->reusable) {
-			blocking_children[slot]->reusable = FALSE;
+			blocking_children[slot]->reusable = false;
 			return slot;
 		}
 	}
@@ -266,14 +266,14 @@ blocking_child_common(
 	blocking_child	*c
 	)
 {
-	int say_bye;
+	bool say_bye;
 	blocking_pipe_header *req;
 
-	say_bye = FALSE;
+	say_bye = false;
 	while (!say_bye) {
 		req = receive_blocking_req_internal(c);
 		if (NULL == req) {
-			say_bye = TRUE;
+			say_bye = true;
 			break;
 		}
 
@@ -282,17 +282,17 @@ blocking_child_common(
 		switch (req->rtype) {
 		case BLOCKING_GETADDRINFO:
 			if (blocking_getaddrinfo(c, req))
-				say_bye = TRUE;
+				say_bye = true;
 			break;
 
 		case BLOCKING_GETNAMEINFO:
 			if (blocking_getnameinfo(c, req))
-				say_bye = TRUE;
+				say_bye = true;
 			break;
 
 		default:
 			msyslog(LOG_ERR, "unknown req %d to blocking worker", req->rtype);
-			say_bye = TRUE;
+			say_bye = true;
 		}
 
 		free(req);

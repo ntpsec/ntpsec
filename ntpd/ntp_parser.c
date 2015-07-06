@@ -3222,7 +3222,7 @@ yyreduce:
 			APPEND_G_FIFO(cfgt.sim_details, sn);
 
 			/* Revert from ; to \n for end-of-command */
-			old_config_style = 1;
+			old_config_style = true;
 		}
 #line 3228 "ntp_parser.c" /* yacc.c:1646  */
     break;

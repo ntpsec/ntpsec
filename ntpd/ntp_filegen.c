@@ -351,7 +351,7 @@ filegen_setup(
 	u_int32		now
 	)
 {
-	int	current;
+	bool	current;
 	time_t	pivot;
 
 	if (!(gen->flag & FGEN_FLAG_ENABLED)) {
@@ -366,7 +366,7 @@ filegen_setup(
 
 	default:
 	case FILEGEN_NONE:
-		current = TRUE;
+		current = true;
 		break;
 
 	case FILEGEN_PID:
@@ -410,7 +410,7 @@ filegen_config(
 	u_int		flag
 	)
 {
-	int file_existed;
+	bool file_existed;
 	l_fp now;
 
 
@@ -430,9 +430,9 @@ filegen_config(
 	if (NULL != gen->fp) {
 		fclose(gen->fp);
 		gen->fp = NULL;
-		file_existed = TRUE;
+		file_existed = true;
 	} else {
-		file_existed = FALSE;
+		file_existed = false;
 	}
 
 	DPRINTF(3, ("configuring filegen:\n"
@@ -499,10 +499,10 @@ valid_fileref(
 	 * Just to catch, dumb errors opening up the world...
 	 */
 	if (NULL == dir || '\0' == dir[0])
-		return FALSE;
+		return false;
 
 	if (NULL == fname)
-		return FALSE;
+		return false;
 
 #ifdef SYS_WINNT
 	/*
@@ -513,17 +513,17 @@ valid_fileref(
 		msyslog(LOG_ERR,
 			"filegen filenames must not contain '/': %s",
 			fname);
-		return FALSE;
+		return false;
 	}
 #endif
 
 	for (p = fname; p != NULL; p = strchr(p, DIR_SEP)) {
 		if ('.' == p[0] && '.' == p[1] 
 		    && ('\0' == p[2] || DIR_SEP == p[2]))
-			return FALSE;
+			return false;
 	}
 
-	return TRUE;
+	return true;
 }
 
 

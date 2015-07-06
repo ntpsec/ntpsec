@@ -356,13 +356,13 @@ struct instance {
 #define rcvbuf	instance->Rcvbuf
 #define rcvptr	instance->Rcvptr
 
-static	int	oncore_start	      (int, struct peer *);
+static	bool	oncore_start	      (int, struct peer *);
 static	void	oncore_poll	      (int, struct peer *);
 static	void	oncore_shutdown       (int, struct peer *);
 static	void	oncore_consume	      (struct instance *);
 static	void	oncore_read_config    (struct instance *);
 static	void	oncore_receive	      (struct recvbuf *);
-static	int	oncore_ppsapi	      (struct instance *);
+static	bool	oncore_ppsapi	      (struct instance *);
 static	void	oncore_get_timestamp  (struct instance *, long, long);
 #ifdef ONCORE_SHMEM_STATUS
 static	void	oncore_init_shmem     (struct instance *);
@@ -387,7 +387,7 @@ static	void	oncore_set_posn       (struct instance *);
 static	void	oncore_set_traim      (struct instance *);
 static	void	oncore_shmem_get_3D   (struct instance *);
 static	void	oncore_ss	      (struct instance *);
-static	int	oncore_wait_almanac   (struct instance *);
+static	bool	oncore_wait_almanac   (struct instance *);
 
 static	void	oncore_msg_any	   (struct instance *, u_char *, size_t, int);
 static	void	oncore_msg_Adef    (struct instance *, u_char *, size_t);
@@ -585,7 +585,7 @@ static u_char oncore_cmd_Ia[]  = { 'I', 'a' };					    /* 12	Self Test				*/
  * oncore_start - initialize data for processing
  */
 
-static int
+static bool
 oncore_start(
 	int unit,
 	struct peer *peer
@@ -672,7 +672,7 @@ oncore_start(
 	if (stat(device1, &stat1)) {
 		oncore_log_f(instance, LOG_ERR, "Can't stat fd1 (%s)",
 			     device1);
-		return(0);			/* exit, no file, can't start driver */
+		return false;		/* exit, no file, can't start driver */
 	}
 
 	if (stat(device2, &stat2)) {
@@ -687,7 +687,7 @@ oncore_start(
 		oncore_log_f(instance, LOG_ERR, "Can't open fd1 (%s)",
 			     device1);
 		/* coverity[leaked_storage] */
-		return(0);			/* exit, can't open file, can't start driver */
+		return false;		/* exit, can't open file, can't start driver */
 	}
 
 	/* for LINUX the PPS device is the result of a line discipline.
@@ -706,7 +706,7 @@ oncore_start(
 				     "Can't open fd2 (%s)", device2);
 			close(fd1);
 			free(instance);
-			return(0);		/* exit, can't open PPS file, can't start driver */
+			return false;	/* exit, can't open PPS file, can't start driver */
 		}
 	}
 
@@ -715,7 +715,7 @@ oncore_start(
 	if (time_pps_create(fd2, &instance->pps_h) < 0) {
 		oncore_log(instance, LOG_ERR, "exit, PPSAPI not found in kernel");
 		free(instance);
-		return(0);			/* exit, don't find PPSAPI in kernel */
+		return false;		/* exit, don't find PPSAPI in kernel */
 	}
 
 	/* continue initialization */
@@ -729,7 +729,7 @@ oncore_start(
 
 	if (!oncore_ppsapi(instance)) {
 		free(instance);
-		return(0);
+		return false;
 	}
 
 	pp->io.clock_recv = oncore_receive;
@@ -741,7 +741,7 @@ oncore_start(
 		close(fd1);
 		pp->io.fd = -1;
 		free(instance);
-		return (0);
+		return false;
 	}
 	pp->unitptr = instance;
 
@@ -768,7 +768,7 @@ oncore_start(
 	oncore_sendmsg(instance, oncore_cmd_Cj, sizeof(oncore_cmd_Cj));
 
 	instance->pollcnt = 2;
-	return (1);
+	return true;
 }
 
 
@@ -848,7 +848,7 @@ oncore_poll(
  * Initialize PPSAPI
  */
 
-static int
+static bool
 oncore_ppsapi(
 	struct instance *instance
 	)
@@ -858,12 +858,12 @@ oncore_ppsapi(
 
 	if (time_pps_getcap(instance->pps_h, &cap) < 0) {
 		oncore_log_f(instance, LOG_ERR, "time_pps_getcap failed: %m");
-		return (0);
+		return false;
 	}
 
 	if (time_pps_getparams(instance->pps_h, &instance->pps_p) < 0) {
 		oncore_log_f(instance, LOG_ERR, "time_pps_getparams failed: %m");
-		return (0);
+		return false;
 	}
 
 	/* nb. only turn things on, if someone else has turned something
@@ -885,7 +885,7 @@ oncore_ppsapi(
 	if (!(mode & cap)) {
 		oncore_log_f(instance, LOG_ERR,
 			     "Can't set timing to %s, exiting...", cp);
-		return(0);
+		return false;
 	}
 
 	if (!(mode1 & cap)) {
@@ -901,7 +901,7 @@ oncore_ppsapi(
 
 	if (time_pps_setparams(instance->pps_h, &instance->pps_p) < 0) {
 		oncore_log_f(instance, LOG_ERR, "ONCORE: time_pps_setparams fails %m");
-		return(0);		/* exit, can't do time_pps_setparans on PPS file */
+		return false;	/* exit, can't do time_pps_setparans on PPS file */
 	}
 
 	/* If HARDPPS is on, we tell kernel */
@@ -922,12 +922,12 @@ oncore_ppsapi(
 		    PPS_TSFMT_TSPEC) < 0) {
 			oncore_log_f(instance, LOG_ERR, "time_pps_kcbind failed: %m");
 			oncore_log(instance, LOG_ERR, "HARDPPS failed, abort...");
-			return (0);
+			return false;
 		}
 
-		hardpps_enable = 1;
+		hardpps_enable = true;
 	}
-	return(1);
+	return true;
 }
 
 
@@ -3982,7 +3982,7 @@ oncore_ss(
 
 
 
-static int
+static bool
 oncore_wait_almanac(
 	struct instance *instance
 	)
@@ -4001,7 +4001,7 @@ oncore_wait_almanac(
 			instance->almanac_from_shmem = 1;
 			oncore_load_almanac(instance);
 		}
-		return(1);
+		return true;
 	} else {  /* Here we have the Almanac, we will be starting the @@Bn/@@En/@@Hn
 		     commands, and can finally check for TRAIM.  Again, we set a delay
 		     (5sec) and wait for things to settle down */
@@ -4022,7 +4022,7 @@ oncore_wait_almanac(
 		instance->o_state = ONCORE_RUN;
 		oncore_log(instance, LOG_NOTICE, "state = ONCORE_RUN");
 	}
-	return(0);
+	return false;
 }
 
 

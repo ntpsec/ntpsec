@@ -336,7 +336,7 @@ auth_findkey(
 
 
 /*
- * auth_havekey - return TRUE if the key id is zero or known
+ * auth_havekey - return true if the key id is zero or known
  */
 int
 auth_havekey(
@@ -346,21 +346,21 @@ auth_havekey(
 	symkey *	sk;
 
 	if (0 == id || cache_keyid == id) {
-		return TRUE;
+		return true;
 	}
 
 	for (sk = key_hash[KEYHASH(id)]; sk != NULL; sk = sk->hlink) {
 		if (id == sk->keyid) {
-			return TRUE;
+			return true;
 		}
 	}
 
-	return FALSE;
+	return false;
 }
 
 
 /*
- * authhavekey - return TRUE and cache the key, if zero or both known
+ * authhavekey - return true and cache the key, if zero or both known
  *		 and trusted.
  */
 int
@@ -372,7 +372,7 @@ authhavekey(
 
 	authkeylookups++;
 	if (0 == id || cache_keyid == id) {
-		return TRUE;
+		return true;
 	}
 
 	/*
@@ -385,7 +385,7 @@ authhavekey(
 		if (id == sk->keyid) {
 			if (0 == sk->type) {
 				authkeynotfound++;
-				return FALSE;
+				return false;
 			}
 			break;
 		}
@@ -397,11 +397,11 @@ authhavekey(
 	 */
 	if (NULL == sk) {
 		authkeynotfound++;
-		return FALSE;
+		return false;
 	}
 	if (!(KEY_TRUSTED & sk->flags)) {
 		authnokey++;
-		return FALSE;
+		return false;
 	}
 
 	/*
@@ -413,7 +413,7 @@ authhavekey(
 	cache_secret = sk->secret;
 	cache_secretsize = sk->secretsize;
 
-	return TRUE;
+	return true;
 }
 
 
@@ -506,9 +506,9 @@ authistrusted(
 	}
 	if (NULL == sk || !(KEY_TRUSTED & sk->flags)) {
 		authkeynotfound++;
-		return FALSE;
+		return false;
 	}
-	return TRUE;
+	return true;
 }
 
 
@@ -661,7 +661,7 @@ authencrypt(
 /*
  * authdecrypt - verify message authenticator
  *
- * Returns TRUE if authenticator valid, FALSE if invalid or not found.
+ * Returns true if authenticator valid, false if invalid or not found.
  */
 int
 authdecrypt(
@@ -678,7 +678,7 @@ authdecrypt(
 	 */
 	authdecryptions++;
 	if (0 == keyno || !authhavekey(keyno) || size < 4) {
-		return FALSE;
+		return false;
 	}
 
 	return MD5authdecrypt(cache_type, cache_secret, pkt, length,

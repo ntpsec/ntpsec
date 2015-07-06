@@ -28,11 +28,11 @@ sendpkt (
 	if (cc == SOCKET_ERROR) {
 		msyslog(LOG_ERR, "Send to %s failed, %m",
 			sptoa(dest));
-		return FALSE;
+		return false;
 	}
 	TRACE(1, ("Packet sent.\n"));
 
-	return TRUE;
+	return true;
 }
 
 
@@ -105,7 +105,7 @@ process_pkt (
 {
 	u_int		key_id;
 	struct key *	pkt_key;
-	int		is_authentic;
+	int		is_authentic;	/* tri-valued */
 	int		mac_size;
 	u_int		exten_len;
 	u_int32 *       exten_end;
@@ -186,11 +186,11 @@ process_pkt (
 		mac_size = exten_len << 2;
 		if (!auth_md5((char *)rpkt, pkt_len - mac_size,
 			      mac_size - 4, pkt_key)) {
-			is_authentic = FALSE;
+			is_authentic = 0;
 			break;
 		}
 		/* Yay! Things worked out! */
-		is_authentic = TRUE;
+		is_authentic = 1;
 		TRACE(1, ("sntp %s: packet from %s authenticated using key id %d.\n",
 			  func_name, stoa(sender), key_id));
 		break;

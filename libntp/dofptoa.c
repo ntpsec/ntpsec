@@ -135,7 +135,7 @@ fptoa(
 		plusfp = (u_fp)fpv;
 	}
 
-	return dofptoa(plusfp, neg, ndec, FALSE);
+	return dofptoa(plusfp, neg, ndec, false);
 }
 
 
@@ -155,5 +155,5 @@ fptoms(
 		plusfp = (u_fp)fpv;
 	}
 
-	return dofptoa(plusfp, neg, ndec, TRUE);
+	return dofptoa(plusfp, neg, ndec, true);
 }

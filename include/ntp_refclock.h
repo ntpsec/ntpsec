@@ -102,7 +102,7 @@ struct refclockio {
 	int	datalen;	/* length of data */
 	int	fd;		/* file descriptor */
 	u_long	recvcount;	/* count of receive completions */
-	int	active;		/* nonzero when in use */
+	bool	active;		/* true when in use */
 
 #ifdef HAVE_IO_COMPLETION_PORT
 	void *	device_context;	/* device-related data for i/o subsystem */
@@ -204,7 +204,7 @@ struct refclockproc {
 #define	NOFLAGS	0		/* flag for null flags */
 
 struct refclock {
-	int (*clock_start)	(int, struct peer *);
+	bool (*clock_start)	(int, struct peer *);
 	void (*clock_shutdown)	(int, struct peer *);
 	void (*clock_poll)	(int, struct peer *);
 	void (*clock_control)	(int, const struct refclockstat *,
@@ -217,7 +217,7 @@ struct refclock {
 /*
  * Function prototypes
  */
-extern	int	io_addclock	(struct refclockio *);
+extern	bool	io_addclock	(struct refclockio *);
 extern	void	io_closeclock	(struct refclockio *);
 
 #ifdef REFCLOCK
@@ -227,17 +227,17 @@ extern	void	refclock_control(sockaddr_u *,
 				 const struct refclockstat *,
 				 struct refclockstat *);
 extern	int	refclock_open	(char *, u_int, u_int);
-extern	int	refclock_setup	(int, u_int, u_int);
+extern	bool	refclock_setup	(int, u_int, u_int);
 extern	void	refclock_timer	(struct peer *);
 extern	void	refclock_transmit(struct peer *);
-extern 	int	refclock_process(struct refclockproc *);
-extern 	int	refclock_process_f(struct refclockproc *, double);
+extern 	bool	refclock_process(struct refclockproc *);
+extern 	bool	refclock_process_f(struct refclockproc *, double);
 extern 	void	refclock_process_offset(struct refclockproc *, l_fp,
 					l_fp, double);
 extern	void	refclock_report	(struct peer *, int);
 extern	int	refclock_gtlin	(struct recvbuf *, char *, int, l_fp *);
 extern	int	refclock_gtraw	(struct recvbuf *, char *, int, l_fp *);
-extern	int	indicate_refclock_packet(struct refclockio *,
+extern	bool	indicate_refclock_packet(struct refclockio *,
 					 struct recvbuf *);
 extern	void	process_refclock_packet(struct recvbuf *);
 #endif /* REFCLOCK */

@@ -117,8 +117,8 @@ ntpsim(
 	simulation.end_time = SIM_TIME;
 
 	/* Initialize ntp modules */
-	initializing = TRUE;
-	msyslog_term = TRUE;
+	initializing = true;
+	msyslog_term = true;
 	init_sim_io();
 	init_auth();
 	init_util();
@@ -136,7 +136,7 @@ ntpsim(
 	/* Call getconfig to parse the configuration file */
 	getconfig(argc, argv);
 	loop_config(LOOP_DRIFTINIT, 0);
-	initializing = FALSE;
+	initializing = false;
 
 	/*
 	 * Watch out here, we want the real time, not the silly stuff.
@@ -464,7 +464,7 @@ void sim_event_recv_packet(Event *e)
 void sim_event_beep(Event *e)
 {
 #if 0
-    static int first_time = 1;
+    static bool first_time = true;
     char *dash = "-----------------";
 #endif
 
@@ -476,7 +476,7 @@ void sim_event_beep(Event *e)
 	    printf("\t%4c    T    %4c\t%4c  T+ERR  %3c\t%5cT+ERR+NTP\n", 
 	           ' ', ' ', ' ', ' ',' ');
 	    printf("\t%s\t%s\t%s\n", dash, dash, dash);
-	    first_time = 0;
+	    first_time = false;
 
 	    printf("\t%16.6f\t%16.6f\t%16.6f\n",
 	           n->time, n->clk_time, n->ntp_time);
@@ -545,7 +545,7 @@ get_systime(
  * adj_systime - advance or retard the system clock exactly like the
  * real thng.
  */
-int				/* always succeeds */
+bool				/* always succeeds */
 adj_systime(
     double now		/* time adjustment (s) */
     )
@@ -553,7 +553,7 @@ adj_systime(
     struct timeval adjtv;	/* new adjustment */
     double	dtemp;
     long	ticks;
-    int	isneg = 0;
+    bool	isneg = false;
 
     /*
      * Most Unix adjtime() implementations adjust the system clock
@@ -563,7 +563,7 @@ adj_systime(
      */
     dtemp = now + sys_residual;
     if (dtemp < 0) {
-	isneg = 1;
+	isneg = true;
 	dtemp = -dtemp;
     }
     adjtv.tv_sec = (long)dtemp;
@@ -585,14 +585,14 @@ adj_systime(
     }
     simclock.adj = now;
 /*	ntp_node.adj = now; */
-    return (1);
+    return true;
 }
  
  
 /*
  * step_systime - step the system clock. We are religious here.
  */
-int				/* always succeeds */
+bool				/* always succeeds */
 step_systime(
     double now		/* step adjustment (s) */
     )
@@ -603,7 +603,7 @@ step_systime(
 	       simclock.local_time, now);
 #endif
     simclock.local_time += now;
-    return (1);
+    return true;
 }
  
 /*
