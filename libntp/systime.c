@@ -71,12 +71,12 @@ bool	trunc_os_clock;		/* sys_tick > measured_tick */
 time_stepped_callback	step_callback;
 
 #ifndef SIM
-/* perlinger@ntp.org: As 'get_sysime()' does it's own check for clock
+/* perlinger@ntp.org: As 'get_sysime()' does its own check for clock
  * backstepping, this could probably become a local variable in
  * 'get_systime()' and the cruft associated with communicating via a
  * static value could be removed after the v4.2.8 release.
  */
-static int lamport_violated;	/* clock was stepped back */
+static bool lamport_violated;	/* clock was stepped back */
 #endif	/* !SIM */
 
 #ifdef DEBUG
@@ -177,7 +177,7 @@ get_systime(
          * systems where get_ostime() results in a true syscall.)
          */
         if (cmp_tspec(add_tspec_ns(ts, 50000000), ts_last) < 0)
-                lamport_violated = 1;
+                lamport_violated = true;
         ts_last = ts;
 
 	/*
