@@ -104,7 +104,7 @@ static restrict_u *	alloc_res6(void);
 static void		free_res(restrict_u *, int);
 static void		inc_res_limited(void);
 static void		dec_res_limited(void);
-static restrict_u *	match_restrict4_addr(uint32_t, u_short);
+static restrict_u *	match_restrict4_addr(u_int32, u_short);
 static restrict_u *	match_restrict6_addr(const struct in6_addr *,
 					     u_short);
 static restrict_u *	match_restrict_entry(const restrict_u *, int);
@@ -255,7 +255,7 @@ dec_res_limited(void)
 
 static restrict_u *
 match_restrict4_addr(
-	uint32_t	addr,
+	u_int32	addr,
 	u_short	port
 	)
 {
@@ -510,7 +510,7 @@ hack_restrict(
 		v6 = 0;
 		/*
 		 * Get address and mask in host byte order for easy
-		 * comparison as uint32_t
+		 * comparison as u_int32
 		 */
 		match.u.v4.addr = SRCADR(resaddr);
 		match.u.v4.mask = SRCADR(resmask);

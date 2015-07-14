@@ -65,9 +65,9 @@ static	void	ctl_putuint	(const char *, u_long);
 static	void	ctl_puthex	(const char *, u_long);
 static	void	ctl_putint	(const char *, long);
 static	void	ctl_putts	(const char *, l_fp *);
-static	void	ctl_putadr	(const char *, uint32_t,
+static	void	ctl_putadr	(const char *, u_int32,
 				 sockaddr_u *);
-static	void	ctl_putrefid	(const char *, uint32_t);
+static	void	ctl_putrefid	(const char *, u_int32);
 static	void	ctl_putarray	(const char *, double *, int);
 static	void	ctl_putsys	(int);
 static	void	ctl_putpeer	(int, struct peer *);
@@ -100,7 +100,7 @@ static	void	send_restrict_entry(restrict_u *, int, u_int);
 static	void	send_restrict_list(restrict_u *, int, u_int *);
 static	void	read_addr_restrictions(struct recvbuf *);
 static	void	read_ordlist	(struct recvbuf *, int);
-static	uint32_t	derive_nonce	(sockaddr_u *, uint32_t, uint32_t);
+static	u_int32	derive_nonce	(sockaddr_u *, u_int32, u_int32);
 static	void	generate_nonce	(struct recvbuf *, char *, size_t);
 static	int	validate_nonce	(const char *, struct recvbuf *);
 static	void	req_nonce	(struct recvbuf *, int);
@@ -839,7 +839,7 @@ ctl_error(
 	 * send packet and bump counters
 	 */
 	if (res_authenticate && sys_authenticate) {
-		maclen = authencrypt(res_keyid, (uint32_t *)&rpkt,
+		maclen = authencrypt(res_keyid, (u_int32 *)&rpkt,
 				     CTL_HEADER_LEN);
 		sendpkt(rmt_addr, lcl_inter, -2, (void *)&rpkt,
 			CTL_HEADER_LEN + maclen);
@@ -1088,7 +1088,7 @@ process_control(
 
 		if (!authistrusted(res_keyid))
 			DPRINTF(3, ("invalid keyid %08x\n", res_keyid));
-		else if (authdecrypt(res_keyid, (uint32_t *)pkt,
+		else if (authdecrypt(res_keyid, (u_int32 *)pkt,
 				     rbufp->recv_length - maclen,
 				     maclen)) {
 			res_authokay = true;
@@ -1272,7 +1272,7 @@ ctl_flushpkt(
 			keyid = htonl(res_keyid);
 			memcpy(datapt, &keyid, sizeof(keyid));
 			maclen = authencrypt(res_keyid,
-					     (uint32_t *)&rpkt, totlen);
+					     (u_int32 *)&rpkt, totlen);
 			sendpkt(rmt_addr, lcl_inter, -5,
 				(struct pkt *)&rpkt, totlen + maclen);
 		} else {
@@ -1619,7 +1619,7 @@ ctl_putts(
 static void
 ctl_putadr(
 	const char *tag,
-	uint32_t addr32,
+	u_int32 addr32,
 	sockaddr_u *addr
 	)
 {
@@ -1645,12 +1645,12 @@ ctl_putadr(
 
 
 /*
- * ctl_putrefid - send a uint32_t refid as printable text
+ * ctl_putrefid - send a u_int32 refid as printable text
  */
 static void
 ctl_putrefid(
 	const char *	tag,
-	uint32_t		refid
+	u_int32		refid
 	)
 {
 	char	output[16];
@@ -3365,17 +3365,17 @@ static void configure(
  * derive_nonce - generate client-address-specific nonce value
  *		  associated with a given timestamp.
  */
-static uint32_t derive_nonce(
+static u_int32 derive_nonce(
 	sockaddr_u *	addr,
-	uint32_t		ts_i,
-	uint32_t		ts_f
+	u_int32		ts_i,
+	u_int32		ts_f
 	)
 {
-	static uint32_t	salt[4];
+	static u_int32	salt[4];
 	static u_long	last_salt_update;
 	union d_tag {
 		u_char	digest[EVP_MAX_MD_SIZE];
-		uint32_t extract;
+		u_int32 extract;
 	}		d;
 	EVP_MD_CTX	ctx;
 	u_int		len;
@@ -3415,7 +3415,7 @@ static void generate_nonce(
 	size_t			nonce_octets
 	)
 {
-	uint32_t derived;
+	u_int32 derived;
 
 	derived = derive_nonce(&rbufp->recv_srcadr,
 			       rbufp->recv_time.l_ui,
@@ -3446,8 +3446,8 @@ static int validate_nonce(
 	if (3 != sscanf(pnonce, "%08x%08x%08x", &ts_i, &ts_f, &supposed))
 		return false;
 
-	ts.l_ui = (uint32_t)ts_i;
-	ts.l_uf = (uint32_t)ts_f;
+	ts.l_ui = (u_int32)ts_i;
+	ts.l_uf = (u_int32)ts_f;
 	derived = derive_nonce(&rbufp->recv_srcadr, ts.l_ui, ts.l_uf);
 	get_systime(&now_delta);
 	L_SUB(&now_delta, &ts);
@@ -3509,14 +3509,14 @@ send_mru_entry(
 	const char rs_fmt[] =		"rs.%d";
 	char	tag[32];
 	bool	sent[6]; /* 6 tag=value pairs */
-	uint32_t noise;
+	u_int32 noise;
 	u_int	which;
 	u_int	remaining;
 	const char * pch;
 
 	remaining = COUNTOF(sent);
 	ZERO(sent);
-	noise = (uint32_t)(rand() ^ (rand() << 16));
+	noise = (u_int32)(rand() ^ (rand() << 16));
 	while (remaining > 0) {
 		which = (noise & 7) % COUNTOF(sent);
 		noise >>= 3;
@@ -3945,7 +3945,7 @@ send_ifstats_entry(
 	char	tag[32];
 	u_char	sent[IFSTATS_FIELDS]; /* 12 tag=value pairs */
 	int	noisebits;
-	uint32_t noise;
+	u_int32 noise;
 	u_int	which;
 	u_int	remaining;
 	const char *pch;
@@ -4116,7 +4116,7 @@ send_restrict_entry(
 	char		tag[32];
 	u_char		sent[RESLIST_FIELDS]; /* 4 tag=value pairs */
 	int		noisebits;
-	uint32_t		noise;
+	u_int32		noise;
 	u_int		which;
 	u_int		remaining;
 	sockaddr_u	addr;

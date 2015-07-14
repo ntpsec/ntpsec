@@ -45,7 +45,7 @@ typedef struct filegen_tag {
 	u_char	flag;	/* flags modifying processing of file generation */
 } FILEGEN;
 
-extern	void	filegen_setup	(FILEGEN *, uint32_t);
+extern	void	filegen_setup	(FILEGEN *, u_int32);
 extern	void	filegen_config	(FILEGEN *, const char *, const char *,
 				 u_int, u_int);
 extern	void	filegen_statsdir(void);

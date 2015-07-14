@@ -9,8 +9,8 @@
  * atouint() - convert an ascii string representing a whole base 10
  *	       number to u_long *uval, returning true if successful.
  *	       Does not modify *uval and returns false if str is not
- *	       a positive base10 integer or is too large for a uint32_t.
- *	       this function uses u_long but should use uint32_t, and
+ *	       a positive base10 integer or is too large for a u_int32.
+ *	       this function uses u_long but should use u_int32, and
  *	       probably be renamed.
  */
 bool

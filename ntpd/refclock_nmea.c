@@ -191,7 +191,7 @@
 #define USE_PGRMF		0x00000100u
 
 /* mapping from sentence index to controlling mode bit */
-static const uint32_t sentence_mode[NMEA_ARRAY_SIZE] =
+static const u_int32 sentence_mode[NMEA_ARRAY_SIZE] =
 {
 	USE_GPRMC,
 	USE_GPGGA,
@@ -264,7 +264,7 @@ typedef struct {
  * leap seconds that are the difference between GPS and UTC time scale.
  */
 typedef struct {
-	uint32_t wt_time;	/* seconds since weekstart */
+	u_int32 wt_time;	/* seconds since weekstart */
 	u_short wt_week;	/* week number */
 	short	wt_leap;	/* leap seconds */
 } gps_weektm;
@@ -307,8 +307,8 @@ static int	parse_date	(struct calendar *jd, nmea_data*,
 static int	parse_weekdata	(gps_weektm *, nmea_data *,
 				 int weekidx, int timeidx, int leapidx);
 /* calendar / date helpers */
-static int	unfold_day	(struct calendar * jd, uint32_t rec_ui);
-static int	unfold_century	(struct calendar * jd, uint32_t rec_ui);
+static int	unfold_day	(struct calendar * jd, u_int32 rec_ui);
+static int	unfold_century	(struct calendar * jd, u_int32 rec_ui);
 static int	gpsfix_century	(struct calendar * jd, const gps_weektm * wd,
 				 u_short * ccentury);
 static l_fp     eval_gps_time	(struct peer * peer, const struct calendar * gpst,
@@ -405,7 +405,7 @@ nmea_start(
 	nmea_unit * const		up = emalloc_zero(sizeof(*up));
 	char				device[20];
 	size_t				devlen;
-	uint32_t				rate;
+	u_int32				rate;
 	int				baudrate;
 	const char *			baudtext;
 
@@ -1611,7 +1611,7 @@ parse_weekdata(
 		DPRINTF(1, ("nmea: parse_weekdata: invalid weektime spec\n"));
 		return false;
 	}
-	wd->wt_time = (uint32_t)secs;
+	wd->wt_time = (u_int32)secs;
 
 	return true;
 }
@@ -1640,7 +1640,7 @@ parse_weekdata(
 static int
 unfold_day(
 	struct calendar * jd,
-	uint32_t		  rec_ui
+	u_int32		  rec_ui
 	)
 {
 	vint64	     rec_qw;
@@ -1680,11 +1680,11 @@ unfold_day(
 static int
 unfold_century(
 	struct calendar * jd,
-	uint32_t		  rec_ui
+	u_int32		  rec_ui
 	)
 {
 	struct calendar rec;
-	int32_t		baseyear;
+	int32		baseyear;
 
 	ntpcal_ntp_to_date(&rec, rec_ui, NULL);
 	baseyear = rec.year - 20;
@@ -1728,8 +1728,8 @@ gpsfix_century(
 	u_short          * century
 	) 
 {
-	int32_t	days;
-	int32_t	doff;
+	int32	days;
+	int32	doff;
 	u_short week;
 	u_short year;
 	int     loop;

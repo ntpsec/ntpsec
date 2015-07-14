@@ -13,7 +13,7 @@ refnumtoa(
 	sockaddr_u *num
 	)
 {
-	uint32_t netnum;
+	u_int32 netnum;
 	char *buf;
 	const char *rclock;
 

@@ -113,5 +113,5 @@ get_systime(
 		now->l_i--;
 	}
 	dtemp *= FRAC;
-	now->l_uf = (uint32_t)dtemp;
+	now->l_uf = (u_int32)dtemp;
 }

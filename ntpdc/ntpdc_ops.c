@@ -507,7 +507,7 @@ again:
 /* Convert a refid & stratum (in host order) to a string */
 static char *
 refid_string(
-	uint32_t refid,
+	u_int32 refid,
 	int stratum
 	)
 {
@@ -524,7 +524,7 @@ refid_string(
 static void
 print_pflag(
 	FILE *	fp,
-	uint32_t	flags
+	u_int32	flags
 	)
 {
 	static const char none[] = "";
@@ -915,7 +915,7 @@ again:
 			       "offset %s, frequency %s, time_const %ld, watchdog %ld\n",
 			       lfptoa(&tempts, 6),
 			       lfptoa(&temp2ts, 3),
-			       (long)(int32_t)ntohl((u_long)il->compliance),
+			       (long)(int32)ntohl((u_long)il->compliance),
 			       (u_long)ntohl((u_long)il->watchdog_timer));
 	} else {
 		NTOHL_FP(&il->last_offset, &tempts);
@@ -925,7 +925,7 @@ again:
 		(void) fprintf(fp, "frequency:            %s ppm\n",
 			       lfptoa(&tempts, 3));
 		(void) fprintf(fp, "poll adjust:          %ld\n",
-			       (long)(int32_t)ntohl(il->compliance));
+			       (long)(int32)ntohl(il->compliance));
 		(void) fprintf(fp, "watchdog timer:       %ld s\n",
 			       (u_long)ntohl(il->watchdog_timer));
 	}
@@ -1680,7 +1680,7 @@ reslist(
 	const char *addr;
 	const char *mask;
 	struct resflags *rf;
-	uint32_t count;
+	u_int32 count;
 	u_short flags;
 	u_short mflags;
 	char flagstr[300];
@@ -1716,7 +1716,7 @@ again:
 		if (rl->v6_flag != 0) {
 			addr = nntohost(&resaddr);
 		} else {
-			if (rl->mask == (uint32_t)0xffffffff)
+			if (rl->mask == (u_int32)0xffffffff)
 				addr = nntohost(&resaddr);
 			else
 				addr = stoa(&resaddr);
@@ -1828,7 +1828,7 @@ do_restrict(
 	int items;
 	int itemsize;
 	char *dummy;
-	uint32_t num;
+	u_int32 num;
 	u_long bit;
 	int i;
 	size_t res;
@@ -2549,10 +2549,10 @@ do_changekey(
 	int res;
 
 
-	key = htonl((uint32_t)pcmd->argval[0].uval);
+	key = htonl((u_int32)pcmd->argval[0].uval);
 
 again:
-	res = doquery(impl_ver, req, 1, 1, sizeof(uint32_t),
+	res = doquery(impl_ver, req, 1, 1, sizeof(u_int32),
 		      (char *)&key, &items, &itemsize, &dummy, 0, 
 		      sizeof(dummy));
 	
@@ -2660,7 +2660,7 @@ clockstat(
 
 again:
 	res = doquery(impl_ver, REQ_GET_CLOCKINFO, 0, qitems,
-		      sizeof(uint32_t), (char *)clist, &items,
+		      sizeof(u_int32), (char *)clist, &items,
 		      &itemsize, (void *)&cl, 0, sizeof(struct info_clock));
 	
 	if (res == INFO_ERR_IMPL && impl_ver == IMPL_XNTPD) {
@@ -2770,13 +2770,13 @@ fudge(
 		if (!atoint(pcmd->argval[2].string, &val))
 		    err = true;
 		else
-		    fudgedata.fudgeval_flags = htonl((uint32_t)val);
+		    fudgedata.fudgeval_flags = htonl((u_int32)val);
 	} else if (STREQ(pcmd->argval[1].string, "flags")) {
 		fudgedata.which = htonl(FUDGE_FLAGS);
 		if (!hextoint(pcmd->argval[2].string, &u_val))
 		    err = true;
 		else
-		    fudgedata.fudgeval_flags = htonl((uint32_t)(u_val & 0xf));
+		    fudgedata.fudgeval_flags = htonl((u_int32)(u_val & 0xf));
 	} else {
 		(void) fprintf(stderr, "What fudge is %s?\n",
 			       pcmd->argval[1].string);
@@ -2815,11 +2815,11 @@ clkbug(
 {
 	register int i;
 	register int n;
-	register uint32_t s;
+	register u_int32 s;
 	struct info_clkbug *cl;
 	/* 8 is the maximum number of clocks which will fit in a packet */
 	u_long clist[min(MAXARGS, 8)];
-	uint32_t ltemp;
+	u_int32 ltemp;
 	int qitemlim;
 	int qitems;
 	int items;
@@ -2834,7 +2834,7 @@ clkbug(
 
 again:
 	res = doquery(impl_ver, REQ_GET_CLKBUGINFO, 0, qitems,
-		      sizeof(uint32_t), (char *)clist, &items,
+		      sizeof(u_int32), (char *)clist, &items,
 		      &itemsize, (void *)&cl, 0, sizeof(struct info_clkbug));
 	
 	if (res == INFO_ERR_IMPL && impl_ver == IMPL_XNTPD) {
@@ -2946,7 +2946,7 @@ again:
 		tscale = 1e-9;
 #endif
 	(void)fprintf(fp, "pll offset:           %g s\n",
-	    (int32_t)ntohl(ik->offset) * tscale);
+	    (int32)ntohl(ik->offset) * tscale);
 	(void)fprintf(fp, "pll frequency:        %s ppm\n",
 	    fptoa((s_fp)ntohl(ik->freq), 3));
 	(void)fprintf(fp, "maximum error:        %g s\n",

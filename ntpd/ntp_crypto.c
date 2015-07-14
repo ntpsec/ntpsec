@@ -151,7 +151,7 @@ static int calcomp(struct calendar *pjd1, struct calendar *pjd2)
 /*
  * Global cryptodata in host byte order
  */
-uint32_t	crypto_flags = 0x0;	/* status word */
+u_int32	crypto_flags = 0x0;	/* status word */
 int	crypto_nid = KEY_TYPE_MD5; /* digest nid */
 char	*sys_hostname = NULL;
 char	*sys_groupname = NULL;
@@ -238,7 +238,7 @@ session_key(
 	EVP_MD_CTX ctx;		/* message digest context */
 	u_char dgst[EVP_MAX_MD_SIZE]; /* message digest */
 	keyid_t	keyid;		/* key identifer */
-	uint32_t	header[10];	/* data in network byte order */
+	u_int32	header[10];	/* data in network byte order */
 	u_int	hdlen, len;
 
 	if (!dstadr)
@@ -255,7 +255,7 @@ session_key(
 		header[1] = NSRCADR(dstadr);
 		header[2] = htonl(keyno);
 		header[3] = htonl(private);
-		hdlen = 4 * sizeof(uint32_t);
+		hdlen = 4 * sizeof(u_int32);
 		break;
 
 	case AF_INET6:
@@ -265,7 +265,7 @@ session_key(
 		    sizeof(struct in6_addr));
 		header[8] = htonl(keyno);
 		header[9] = htonl(private);
-		hdlen = 10 * sizeof(uint32_t);
+		hdlen = 10 * sizeof(u_int32);
 		break;
 	}
 	EVP_DigestInit(&ctx, EVP_get_digestbynid(crypto_nid));
@@ -423,7 +423,7 @@ crypto_recv(
 	)
 {
 	const EVP_MD *dp;	/* message digest algorithm */
-	uint32_t	*pkt;		/* receive packet pointer */
+	u_int32	*pkt;		/* receive packet pointer */
 	struct autokey *ap, *bp; /* autokey pointer */
 	struct exten *ep, *fp;	/* extension pointers */
 	struct cert_info *xinfo; /* certificate info pointer */
@@ -440,7 +440,7 @@ crypto_recv(
 	int	hismode;	/* packet mode */
 	int	rval = XEVNT_OK;
 	const u_char *puch;
-	uint32_t temp32;
+	u_int32 temp32;
 
 	/*
 	 * Initialize. Note that the packet has already been checked for
@@ -455,7 +455,7 @@ crypto_recv(
 	authlen = LEN_PKT_NOMAC;
 	hismode = (int)PKT_MODE((&rbufp->recv_pkt)->li_vn_mode);
 	while ((has_mac = rbufp->recv_length - authlen) > (int)MAX_MAC_LEN) {
-		pkt = (uint32_t *)&rbufp->recv_pkt + authlen / 4;
+		pkt = (u_int32 *)&rbufp->recv_pkt + authlen / 4;
 		ep = (struct exten *)pkt;
 		code = ntohl(ep->opcode) & 0xffff0000;
 		len = ntohl(ep->opcode) & 0x0000ffff;
@@ -833,7 +833,7 @@ crypto_recv(
 			 * errors.
 			 */
 			if (vallen == (u_int)EVP_PKEY_size(host_pkey)) {
-				uint32_t *cookiebuf = malloc(
+				u_int32 *cookiebuf = malloc(
 				    RSA_size(host_pkey->pkey.rsa));
 				if (!cookiebuf) {
 					rval = XEVNT_CKY;
@@ -1121,7 +1121,7 @@ crypto_xmit(
 	struct exten *fp;	/* extension pointers */
 	struct cert_info *cp, *xp, *yp; /* cert info/value pointer */
 	sockaddr_u *srcadr_sin; /* source address */
-	uint32_t	*pkt;		/* packet pointer */
+	u_int32	*pkt;		/* packet pointer */
 	u_int	opcode;		/* extension field opcode */
 	char	certname[MAXHOSTNAME + 1]; /* subject name buffer */
 	char	statstr[NTP_MAXSTRLEN]; /* statistics for filegen */
@@ -1139,7 +1139,7 @@ crypto_xmit(
 	 * and association ID. If this is a response and the host is not
 	 * synchronized, light the error bit and go home.
 	 */
-	pkt = (uint32_t *)xpkt + start / 4;
+	pkt = (u_int32 *)xpkt + start / 4;
 	fp = (struct exten *)pkt;
 	opcode = ntohl(ep->opcode);
 	if (peer != NULL) {
@@ -1418,7 +1418,7 @@ crypto_xmit(
 	 * puppy; if a response, return so the sender can flame, too.
 	 */
 	if (rval != XEVNT_OK) {
-		uint32_t	uint32;
+		u_int32	uint32;
 
 		uint32 = CRYPTO_ERROR;
 		opcode |= uint32;
@@ -1610,7 +1610,7 @@ crypto_encrypt(
 	EVP_PKEY *pkey;		/* public key */
 	EVP_MD_CTX ctx;		/* signature context */
 	tstamp_t tstamp;	/* NTP timestamp */
-	uint32_t	temp32;
+	u_int32	temp32;
 	u_char *puch;
 
 	/*
@@ -1862,7 +1862,7 @@ crypto_update(void)
 	EVP_MD_CTX ctx;		/* message digest context */
 	struct cert_info *cp;	/* certificate info/value */
 	char	statstr[NTP_MAXSTRLEN]; /* statistics for filegen */
-	uint32_t	*ptr;
+	u_int32	*ptr;
 	u_int	len;
 	leap_signature_t lsig;
 
@@ -1912,11 +1912,11 @@ crypto_update(void)
 	 */
 	tai_leap.tstamp = hostval.tstamp;
 	tai_leap.fstamp = hostval.fstamp;
-	len = 3 * sizeof(uint32_t);
+	len = 3 * sizeof(u_int32);
 	if (tai_leap.ptr == NULL)
 		tai_leap.ptr = emalloc(len);
 	tai_leap.vallen = htonl(len);
-	ptr = (uint32_t *)tai_leap.ptr;
+	ptr = (u_int32 *)tai_leap.ptr;
 	leapsec_getsig(&lsig);
 	ptr[0] = htonl(lsig.taiof);
 	ptr[1] = htonl(lsig.ttime);

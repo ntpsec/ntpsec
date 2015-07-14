@@ -109,7 +109,7 @@ typedef struct interface_info {
 typedef void	(*interface_receiver_t)	(void *, interface_info_t *);
 
 extern	void	interface_enumerate	(interface_receiver_t, void *);
-extern	endpt *	getinterface		(sockaddr_u *, uint32_t);
+extern	endpt *	getinterface		(sockaddr_u *, u_int32);
 extern	endpt *	select_peerinterface	(struct peer *, sockaddr_u *,
 					 endpt *);
 extern	endpt *	findinterface		(sockaddr_u *);
@@ -174,13 +174,13 @@ extern	struct peer *findpeerbyassoc(associd_t);
 extern  void	set_peerdstadr	(struct peer *, endpt *);
 extern	struct peer *newpeer	(sockaddr_u *, const char *,
 				 endpt *, u_char, u_char,
-				 u_char, u_char, u_int, u_char, uint32_t,
+				 u_char, u_char, u_int, u_char, u_int32,
 				 keyid_t, const char *);
 extern	void	peer_all_reset	(void);
 extern	void	peer_clr_stats	(void);
 extern	struct peer *peer_config(sockaddr_u *, const char *,
 				 endpt *, u_char, u_char,
-				 u_char, u_char, u_int, uint32_t,
+				 u_char, u_char, u_int, u_int32,
 				 keyid_t, const char *);
 extern	void	peer_reset	(struct peer *);
 extern	void	refresh_all_peerinterfaces(void);
@@ -286,8 +286,8 @@ extern	void	record_loop_stats (double, double, double, double, int);
 extern	void	record_clock_stats (sockaddr_u *, const char *);
 extern	int	mprintf_clock_stats(sockaddr_u *, const char *, ...)
 			NTP_PRINTF(2, 3);
-extern	void	record_raw_stats (sockaddr_u *srcadr, sockaddr_u *dstadr, l_fp *t1, l_fp *t2, l_fp *t3, l_fp *t4, int leap, int version, int mode, int stratum, int ppoll, int precision, double root_delay, double root_dispersion, uint32_t refid);
-extern	void	check_leap_file	(int is_daily_check, uint32_t ntptime, const time_t * systime);
+extern	void	record_raw_stats (sockaddr_u *srcadr, sockaddr_u *dstadr, l_fp *t1, l_fp *t2, l_fp *t3, l_fp *t4, int leap, int version, int mode, int stratum, int ppoll, int precision, double root_delay, double root_dispersion, u_int32 refid);
+extern	void	check_leap_file	(int is_daily_check, u_int32 ntptime, const time_t * systime);
 extern	void	record_crypto_stats (sockaddr_u *, const char *);
 #ifdef DEBUG
 extern	void	record_timing_stats (const char *);
@@ -467,7 +467,7 @@ extern u_char	sys_stratum;		/* system stratum */
 extern s_char	sys_precision;		/* local clock precision */
 extern double	sys_rootdelay;		/* roundtrip delay to primary source */
 extern double	sys_rootdisp;		/* dispersion to primary source */
-extern uint32_t	sys_refid;		/* reference id */
+extern u_int32	sys_refid;		/* reference id */
 extern l_fp	sys_reftime;		/* last update time */
 extern struct peer *sys_peer;		/* current peer */
 
@@ -515,7 +515,7 @@ extern int		ntp_minpkt;
 extern u_char		ntp_minpoll;
 
 /* ntp_scanner.c */
-extern uint32_t		conf_file_sum;	/* Simple sum of characters */
+extern u_int32		conf_file_sum;	/* Simple sum of characters */
 
 /* ntp_signd.c */
 #ifdef HAVE_NTP_SIGND

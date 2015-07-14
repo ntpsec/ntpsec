@@ -18,7 +18,7 @@ netof(
 {
 	static sockaddr_u	netofbuf[8];
 	static int		next_netofbuf;
-	uint32_t			netnum;
+	u_int32			netnum;
 	sockaddr_u *		netaddr;
 
 	netaddr = &netofbuf[next_netofbuf];

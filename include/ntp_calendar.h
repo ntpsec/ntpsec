@@ -115,7 +115,7 @@ extern	uint32_t caltontp	(const struct calendar *);
  * Convert between 'time_t' and 'vint64'
  */
 extern vint64 time_to_vint64(const time_t *);
-extern time_t vint64o_time(const vint64 *);
+extern time_t vint64_to_time(const vint64 *);
 
 /*
  * Get the build date & time. ATTENTION: The time zone is not specified!

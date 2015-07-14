@@ -6,7 +6,7 @@
 
 typedef union ctl_pkt_u_tag {
 	u_char data[480 + MAX_MAC_LEN]; /* data + auth */
-	uint32_t u32[(480 + MAX_MAC_LEN) / sizeof(uint32_t)];
+	u_int32 u32[(480 + MAX_MAC_LEN) / sizeof(u_int32)];
 } ctl_pkt_u;
 
 struct ntp_control {

@@ -61,7 +61,7 @@ bool	do_memlock = true;
  */
 struct masks {
 	const char * const	name;
-	const uint32_t		mask;
+	const u_int32		mask;
 };
 
 static struct masks logcfg_class[] = {
@@ -106,7 +106,7 @@ typedef struct peer_resolved_ctx_tag {
 	u_char		version;
 	u_char		minpoll;
 	u_char		maxpoll;
-	uint32_t		ttl;
+	u_int32		ttl;
 	const char *	group;
 } peer_resolved_ctx;
 
@@ -335,9 +335,9 @@ enum gnn_type {
 
 static void ntpd_set_tod_using(const char *);
 static char * normal_dtoa(double);
-static uint32_t get_pfxmatch(const char **, struct masks *);
-static uint32_t get_match(const char *, struct masks *);
-static uint32_t get_logmask(const char *);
+static u_int32 get_pfxmatch(const char **, struct masks *);
+static u_int32 get_match(const char *, struct masks *);
+static u_int32 get_logmask(const char *);
 #ifndef SIM
 static int getnetnum(const char *num, sockaddr_u *addr, int complain,
 		     enum gnn_type a_type);
@@ -4609,7 +4609,7 @@ normal_dtoa(
  * get_pfxmatch - find value for prefixmatch
  * and update char * accordingly
  */
-static uint32_t
+static u_int32
 get_pfxmatch(
 	const char **	pstr,
 	struct masks *	m
@@ -4629,7 +4629,7 @@ get_pfxmatch(
 /*
  * get_match - find logmask value
  */
-static uint32_t
+static u_int32
 get_match(
 	const char *	str,
 	struct masks *	m
@@ -4647,14 +4647,14 @@ get_match(
 /*
  * get_logmask - build bitmask for ntp_syslogmask
  */
-static uint32_t
+static u_int32
 get_logmask(
 	const char *	str
 	)
 {
 	const char *	t;
-	uint32_t		offset;
-	uint32_t		mask;
+	u_int32		offset;
+	u_int32		mask;
 
 	mask = get_match(str, logcfg_noclass_items);
 	if (mask != 0)
