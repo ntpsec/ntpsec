@@ -298,7 +298,7 @@ const int accept_wildcard_if_for_winnt = false;
 
 static void	add_fd_to_list		(SOCKET, enum desc_type);
 static endpt *	find_addr_in_list	(sockaddr_u *);
-static endpt *	find_flagged_addr_in_list(sockaddr_u *, uint32_t);
+static endpt *	find_flagged_addr_in_list(sockaddr_u *, u_int32);
 static void	delete_addr_from_list	(sockaddr_u *);
 static void	delete_interface_from_list(endpt *);
 static void	close_and_delete_fd_from_list(SOCKET);
@@ -309,7 +309,7 @@ static endpt *	findclosestinterface	(sockaddr_u *, int);
 #ifdef DEBUG
 static const char *	action_text	(nic_rule_action);
 #endif
-static nic_rule_action	interface_action(char *, sockaddr_u *, uint32_t);
+static nic_rule_action	interface_action(char *, sockaddr_u *, u_int32);
 static void		convert_isc_if	(isc_interface_t *,
 					 endpt *, u_short);
 static void		calc_addr_distance(sockaddr_u *,
@@ -669,10 +669,10 @@ addr_samesubnet(
 	const sockaddr_u *	b_mask
 	)
 {
-	const uint32_t *	pa;
-	const uint32_t *	pa_limit;
-	const uint32_t *	pb;
-	const uint32_t *	pm;
+	const u_int32 *	pa;
+	const u_int32 *	pa_limit;
+	const u_int32 *	pb;
+	const u_int32 *	pm;
 	size_t		loops;
 
 	NTP_REQUIRE(AF(a) == AF(a_mask));
@@ -1291,7 +1291,7 @@ static nic_rule_action
 interface_action(
 	char *		if_name,
 	sockaddr_u *	if_addr,
-	uint32_t		if_flags
+	u_int32		if_flags
 	)
 {
 	nic_rule *	rule;
@@ -1651,7 +1651,7 @@ static isc_boolean_t
 check_flags6(
 	sockaddr_u *psau,
 	const char *name,
-	uint32_t flags6
+	u_int32 flags6
 	)
 {
 #if defined(INCLUDE_IPV6_SUPPORT) && defined(SIOCGIFAFLAG_IN6)
@@ -1695,7 +1695,7 @@ is_valid(
 	const char *name
 	)
 {
-	uint32_t flags6;
+	u_int32 flags6;
 
 	flags6 = 0;
 #ifdef IN6_IFF_DEPARTED
@@ -3347,7 +3347,7 @@ fetch_timestamp(
 				 * bintime documentation is at http://phk.freebsd.dk/pubs/timecounter.pdf
 				 */
 				nts.l_i = btp->sec + JAN_1970;
-				nts.l_uf = (uint32_t)(btp->frac >> 32);
+				nts.l_uf = (u_int32)(btp->frac >> 32);
 				if (sys_tick > measured_tick &&
 				    sys_tick > 1e-9) {
 					ticks = (unsigned long)(nts.l_uf / (unsigned long)(sys_tick * FRAC));
@@ -4071,9 +4071,9 @@ calc_addr_distance(
 	const sockaddr_u *	a2
 	)
 {
-	uint32_t	a1val;
-	uint32_t	a2val;
-	uint32_t	v4dist;
+	u_int32	a1val;
+	u_int32	a2val;
+	u_int32	v4dist;
 	bool	found_greater;
 	bool	a1_greater;
 	int	i;
@@ -4160,7 +4160,7 @@ cmp_addr_distance(
 endpt *
 getinterface(
 	sockaddr_u *	addr,
-	uint32_t		flags
+	u_int32		flags
 	)
 {
 	endpt *iface;
@@ -4557,7 +4557,7 @@ find_addr_in_list(
 static endpt *
 find_flagged_addr_in_list(
 	sockaddr_u *	addr,
-	uint32_t		flags
+	u_int32		flags
 	)
 {
 	remaddr_t *entry;

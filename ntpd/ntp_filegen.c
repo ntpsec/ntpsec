@@ -44,7 +44,7 @@
  */
 #define SUFFIX_SEP '.'
 
-static	void	filegen_open	(FILEGEN *, uint32_t, const time_t*);
+static	void	filegen_open	(FILEGEN *, u_int32, const time_t*);
 static	int	valid_fileref	(const char *, const char *);
 static	void	filegen_init	(const char *, const char *, FILEGEN *);
 #ifdef	DEBUG
@@ -96,7 +96,7 @@ filegen_uninit(
 static void
 filegen_open(
 	FILEGEN *	gen,
-	uint32_t		stamp,
+	u_int32		stamp,
 	const time_t *	pivot
 	)
 {
@@ -156,7 +156,7 @@ filegen_open(
 			 SUFFIX_SEP, cal.year, cal.month, cal.monthday);
 		cal.hour = cal.minute = cal.second = 0;
 		gen->id_lo = ntpcal_date_to_ntp(&cal); 
-		gen->id_hi = (uint32_t)(gen->id_lo + SECSPERDAY);
+		gen->id_hi = (u_int32)(gen->id_lo + SECSPERDAY);
 		break;
 
 	case FILEGEN_WEEK:
@@ -166,7 +166,7 @@ filegen_open(
 		iso.hour = iso.minute = iso.second = 0;
 		iso.weekday = 1;
 		gen->id_lo = isocal_date_to_ntp(&iso);
-		gen->id_hi = (uint32_t)(gen->id_lo + 7 * SECSPERDAY);
+		gen->id_hi = (u_int32)(gen->id_lo + 7 * SECSPERDAY);
 		break;
 
 	case FILEGEN_MONTH:
@@ -348,7 +348,7 @@ filegen_open(
 void
 filegen_setup(
 	FILEGEN *	gen,
-	uint32_t		now
+	u_int32		now
 	)
 {
 	bool	current;

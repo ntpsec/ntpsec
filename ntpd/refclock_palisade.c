@@ -1209,12 +1209,12 @@ getdbl (
 #else
 	union {
 		u_char ch[8];
-		uint32_t u32[2];
+		u_int32 u32[2];
 	} ui;
 		
 	union {
 		double out;
-		uint32_t u32[2];
+		u_int32 u32[2];
 	} uo;
 
 	memcpy(ui.ch, bp, sizeof(ui.ch));
@@ -1249,10 +1249,10 @@ getlong(
 	u_char *bp
 	)
 {
-	uint32_t u32;
+	u_int32 u32;
 
 	memcpy(&u32, bp, sizeof(u32));
-	return (int32_t)(uint32_t)ntohl(u32);
+	return (int32)(u_int32)ntohl(u32);
 }
 
 #else	/* REFCLOCK && CLOCK_PALISADE*/

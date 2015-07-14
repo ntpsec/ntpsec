@@ -1537,7 +1537,7 @@ mx4200_pps(
 	 */
 
 	pp->lastrec.l_ui = up->pps_i.assert_timestamp.tv_sec +
-			   (uint32_t) JAN_1970;
+			   (u_int32) JAN_1970;
 	pp->lastrec.l_uf = ((double)(up->pps_i.assert_timestamp.tv_nsec) *
 			   4.2949672960) + 0.5;
 

@@ -422,7 +422,7 @@ res_access_flags(
 #ifdef KERNEL_PLL
 const char *
 k_st_flags(
-	uint32_t st
+	u_int32 st
 	)
 {
 	return decode_bitflags(st, " ", k_st_bits, COUNTOF(k_st_bits));

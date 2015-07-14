@@ -21,7 +21,7 @@ int
 MD5authencrypt(
 	int	type,		/* hash algorithm */
 	u_char	*key,		/* key pointer */
-	uint32_t *pkt,		/* packet pointer */
+	u_int32 *pkt,		/* packet pointer */
 	int	length		/* packet length */
 	)
 {
@@ -61,7 +61,7 @@ int
 MD5authdecrypt(
 	int	type,		/* hash algorithm */
 	u_char	*key,		/* key pointer */
-	uint32_t	*pkt,		/* packet pointer */
+	u_int32	*pkt,		/* packet pointer */
 	int	length,	 	/* packet length */
 	int	size		/* MAC size */
 	)
@@ -102,11 +102,11 @@ MD5authdecrypt(
  * it and use the bottom 4 bytes.
  * The result is in network byte order.
  */
-uint32_t
+u_int32
 addr2refid(sockaddr_u *addr)
 {
 	u_char		digest[20];
-	uint32_t		addr_refid;
+	u_int32		addr_refid;
 	EVP_MD_CTX	ctx;
 	u_int		len;
 

@@ -144,7 +144,7 @@ u_long sys_timeout = DEFTIMEOUT; /* timeout time, in TIMER_HZ units */
 struct server *sys_servers;	/* the server list */
 int sys_numservers = 0; 	/* number of servers to poll */
 bool sys_authenticate = false;	/* true when authenticating */
-uint32_t sys_authkey = 0;	/* set to authentication key in use */
+u_int32 sys_authkey = 0;	/* set to authentication key in use */
 u_long sys_authdelay = 0;	/* authentication delay */
 int sys_version = NTP_VERSION;	/* version to poll with */
 
@@ -656,7 +656,7 @@ transmit(
 		get_systime(&server->xmt);
 		L_ADDUF(&server->xmt, sys_authdelay);
 		HTONL_FP(&server->xmt, &xpkt.xmt);
-		len = authencrypt(sys_authkey, (uint32_t *)&xpkt, LEN_PKT_NOMAC);
+		len = authencrypt(sys_authkey, (u_int32 *)&xpkt, LEN_PKT_NOMAC);
 		sendpkt(&server->srcadr, &xpkt, (int)(LEN_PKT_NOMAC + len));
 
 		if (debug > 1)
@@ -761,11 +761,11 @@ receive(
 		if (debug > 3)
 			printf("receive: rpkt keyid=%ld sys_authkey=%ld decrypt=%ld\n",
 			   (long int)ntohl(rpkt->exten[0]), (long int)sys_authkey,
-			   (long int)authdecrypt(sys_authkey, (uint32_t *)rpkt,
+			   (long int)authdecrypt(sys_authkey, (u_int32 *)rpkt,
 				LEN_PKT_NOMAC, (int)(rbufp->recv_length - LEN_PKT_NOMAC)));
 
 		if (has_mac && ntohl(rpkt->exten[0]) == sys_authkey &&
-			authdecrypt(sys_authkey, (uint32_t *)rpkt, LEN_PKT_NOMAC,
+			authdecrypt(sys_authkey, (u_int32 *)rpkt, LEN_PKT_NOMAC,
 			(int)(rbufp->recv_length - LEN_PKT_NOMAC)))
 			is_authentic = true;
 		if (debug)

@@ -747,7 +747,7 @@ ripencc_get_pps_ts(
 
 	tstmp.l_ui = ts.tv_sec + JAN_1970;
 	dtemp = ts.tv_nsec * FRAC / 1e9;
-	tstmp.l_uf = (uint32_t)dtemp;
+	tstmp.l_uf = (u_int32)dtemp;
 
 #ifdef DEBUG_PPS
 	msyslog(LOG_INFO,"ts.tv_sec: %d",(int)ts.tv_sec);

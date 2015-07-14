@@ -16,7 +16,7 @@
 
 char *
 numtohost(
-	uint32_t netnum
+	u_int32 netnum
 	)
 {
 	char *bp;

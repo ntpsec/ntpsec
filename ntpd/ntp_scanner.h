@@ -53,7 +53,7 @@ typedef enum {
  * Define a structure to hold the FSA for the keywords.
  * The structure is actually a trie.
  *
- * To save space, a single uint32_t encodes four fields, and a fifth
+ * To save space, a single u_int32 encodes four fields, and a fifth
  * (the token completed for terminal states) is implied by the index of
  * the rule within the scan state array, taking advantage of the fact
  * there are more scan states than the highest T_ token number.
@@ -71,9 +71,9 @@ typedef enum {
 
 #define S_ST(ch, fb, match_n, other_n) (			\
 	(u_char)((ch) & 0xff) |					\
-	((uint32_t)(fb) << 8) |					\
-	((uint32_t)(match_n) << 10) |				\
-	((uint32_t)(other_n) << 21)				\
+	((u_int32)(fb) << 8) |					\
+	((u_int32)(match_n) << 10) |				\
+	((u_int32)(other_n) << 21)				\
 )
 
 #define SS_CH(ss)	((char)(u_char)((ss) & 0xff))
@@ -81,7 +81,7 @@ typedef enum {
 #define SS_MATCH_N(ss)	(((u_int)(ss) >> 10) & 0x7ff)
 #define SS_OTHER_N(ss)	(((u_int)(ss) >> 21) & 0x7ff)
 
-typedef uint32_t scan_state;
+typedef u_int32 scan_state;
 
 struct LCPOS {
 	int nline;

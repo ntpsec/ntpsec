@@ -50,8 +50,8 @@ static void mbg_time_status_str (char **, unsigned int, int);
 static offsets_t mbg_float  = { 1, 0, 3, 2, 0, 0, 0, 0 }; /* byte order for meinberg floats */
 #endif
 static offsets_t mbg_double = { 1, 0, 3, 2, 5, 4, 7, 6 }; /* byte order for meinberg doubles */
-static int32_t   rad2deg_i = 57;
-static uint32_t rad2deg_f = 0x4BB834C7; /* 57.2957795131 == 180/PI */
+static int32   rad2deg_i = 57;
+static u_int32 rad2deg_f = 0x4BB834C7; /* 57.2957795131 == 180/PI */
 
 void
 put_mbg_header(

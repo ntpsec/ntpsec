@@ -34,8 +34,8 @@
 #include "ntp_types.h"
 #include "ntp_fp.h"
 
-#define LOW_MASK  (uint32_t)((1<<(FRACTION_PREC/2))-1)
-#define HIGH_MASK (uint32_t)(LOW_MASK << (FRACTION_PREC/2))
+#define LOW_MASK  (u_int32)((1<<(FRACTION_PREC/2))-1)
+#define HIGH_MASK (u_int32)(LOW_MASK << (FRACTION_PREC/2))
 
 /*
  * for those who worry about overflows (possibly triggered by static analysis tools):
@@ -51,16 +51,16 @@
 
 void
 mfp_mul(
-	int32_t   *o_i,
-	uint32_t *o_f,
-	int32_t    a_i,
-	uint32_t  a_f,
-	int32_t    b_i,
-	uint32_t  b_f
+	int32   *o_i,
+	u_int32 *o_f,
+	int32    a_i,
+	u_int32  a_f,
+	int32    b_i,
+	u_int32  b_f
 	)
 {
-  int32_t i, j;
-  uint32_t  f;
+  int32 i, j;
+  u_int32  f;
   u_long a[4];			/* operand a */
   u_long b[4];			/* operand b */
   u_long c[5];			/* result c - 5 items for performance - see below */
@@ -118,14 +118,14 @@ mfp_mul(
 	  }
 
 	if (((c[low_index] >> 1) + (result_low >> 1) + ((c[low_index] & result_low & carry) != 0)) &
-	    (uint32_t)((unsigned)1<<(FRACTION_PREC - 1))) {
+	    (u_int32)((unsigned)1<<(FRACTION_PREC - 1))) {
 	  result_high++;	/* propagate overflows */
         }
 
 	c[low_index]   += result_low; /* add up partial products */
 
 	if (((c[mid_index] >> 1) + (result_high >> 1) + ((c[mid_index] & result_high & 1) != 0)) &
-	    (uint32_t)((unsigned)1<<(FRACTION_PREC - 1))) {
+	    (u_int32)((unsigned)1<<(FRACTION_PREC - 1))) {
 	  c[high_index]++;		/* propagate overflows of high word sum */
         }
 

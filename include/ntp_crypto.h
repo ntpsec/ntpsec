@@ -118,7 +118,7 @@ invalidsyntax: AUTOKEY should be defined only if OPENSSL is.
  */
 struct autokey {		/* network byte order */
 	keyid_t	key;		/* key ID */
-	int32_t	seq;		/* key number */
+	int32	seq;		/* key number */
 };
 
 /*
@@ -129,9 +129,9 @@ struct autokey {		/* network byte order */
 struct value {			/* network byte order */
 	tstamp_t tstamp;	/* timestamp */
 	tstamp_t fstamp;	/* filestamp */
-	uint32_t	vallen;		/* value length */
+	u_int32	vallen;		/* value length */
 	void	*ptr;		/* data pointer (various) */
-	uint32_t	siglen;		/* signature length */
+	u_int32	siglen;		/* signature length */
 	u_char	*sig;		/* signature */
 };
 
@@ -140,12 +140,12 @@ struct value {			/* network byte order */
  * and signatures in network byte order.
  */
 struct exten {
-	uint32_t	opcode;		/* opcode */
-	uint32_t	associd;	/* association ID */
-	uint32_t	tstamp;		/* timestamp */
-	uint32_t	fstamp;		/* filestamp */
-	uint32_t	vallen;		/* value length */
-	uint32_t	pkt[1];		/* start of value field */
+	u_int32	opcode;		/* opcode */
+	u_int32	associd;	/* association ID */
+	u_int32	tstamp;		/* timestamp */
+	u_int32	fstamp;		/* filestamp */
+	u_int32	vallen;		/* value length */
+	u_int32	pkt[1];		/* start of value field */
 };
 
 

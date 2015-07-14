@@ -1018,8 +1018,8 @@ getresponse(
 		}
 
 		if (debug >= 3 && shouldbesize > n) {
-			uint32_t key;
-			uint32_t *lpkt;
+			u_int32 key;
+			u_int32 *lpkt;
 			int maclen;
 
 			/*
@@ -1034,20 +1034,20 @@ getresponse(
 				printf(
 					"Packet shows signs of authentication (total %d, data %d, mac %d)\n",
 					n, shouldbesize, maclen);
-				lpkt = (uint32_t *)&rpkt;
+				lpkt = (u_int32 *)&rpkt;
 				printf("%08lx %08lx %08lx %08lx %08lx %08lx\n",
-				       (u_long)ntohl(lpkt[(n - maclen)/sizeof(uint32_t) - 3]),
-				       (u_long)ntohl(lpkt[(n - maclen)/sizeof(uint32_t) - 2]),
-				       (u_long)ntohl(lpkt[(n - maclen)/sizeof(uint32_t) - 1]),
-				       (u_long)ntohl(lpkt[(n - maclen)/sizeof(uint32_t)]),
-				       (u_long)ntohl(lpkt[(n - maclen)/sizeof(uint32_t) + 1]),
-				       (u_long)ntohl(lpkt[(n - maclen)/sizeof(uint32_t) + 2]));
-				key = ntohl(lpkt[(n - maclen) / sizeof(uint32_t)]);
+				       (u_long)ntohl(lpkt[(n - maclen)/sizeof(u_int32) - 3]),
+				       (u_long)ntohl(lpkt[(n - maclen)/sizeof(u_int32) - 2]),
+				       (u_long)ntohl(lpkt[(n - maclen)/sizeof(u_int32) - 1]),
+				       (u_long)ntohl(lpkt[(n - maclen)/sizeof(u_int32)]),
+				       (u_long)ntohl(lpkt[(n - maclen)/sizeof(u_int32) + 1]),
+				       (u_long)ntohl(lpkt[(n - maclen)/sizeof(u_int32) + 2]));
+				key = ntohl(lpkt[(n - maclen) / sizeof(u_int32)]);
 				printf("Authenticated with keyid %lu\n", (u_long)key);
 				if (key != 0 && key != info_auth_keyid) {
 					printf("We don't know that key\n");
 				} else {
-					if (authdecrypt(key, (uint32_t *)&rpkt,
+					if (authdecrypt(key, (u_int32 *)&rpkt,
 					    n - maclen, maclen)) {
 						printf("Auth okay!\n");
 					} else {
@@ -1207,7 +1207,7 @@ sendrequest(
 	if (qsize > 0) {
 		memcpy(&qpkt.u, qdata, (size_t)qsize);
 		pktsize += qsize;
-		while (pktsize & (sizeof(uint32_t) - 1)) {
+		while (pktsize & (sizeof(u_int32) - 1)) {
 			qpkt.u.data[qsize++] = 0;
 			pktsize++;
 		}

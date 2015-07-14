@@ -678,7 +678,7 @@ record_raw_stats(
 	int	precision,
 	double	root_delay,	/* seconds */
 	double	root_dispersion,/* seconds */
-	uint32_t	refid
+	u_int32	refid
 	)
 {
 	l_fp	now;
@@ -989,7 +989,7 @@ char * fstostr(
 	struct calendar tm;
 
 	LIB_GETBUF(buf);
-	if (ntpcal_ntp_to_date(&tm, (uint32_t)ntp_stamp, NULL) < 0)
+	if (ntpcal_ntp_to_date(&tm, (u_int32)ntp_stamp, NULL) < 0)
 		snprintf(buf, LIB_BUFLENGTH, "ntpcal_ntp_to_date: %ld: range error",
 			 (long)ntp_stamp);
 	else

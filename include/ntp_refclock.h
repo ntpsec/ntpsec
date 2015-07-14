@@ -71,16 +71,16 @@ struct refclockstat {
 	u_char	haveflags;	/* bit array of valid flags */
 	u_short	lencode;	/* length of last timecode */
 	const char *p_lastcode;	/* last timecode received */
-	uint32_t	polls;		/* transmit polls */
-	uint32_t	noresponse;	/* no response to poll */
-	uint32_t	badformat;	/* bad format timecode received */
-	uint32_t	baddata;	/* invalid data timecode received */
-	uint32_t	timereset;	/* driver resets */
+	u_int32	polls;		/* transmit polls */
+	u_int32	noresponse;	/* no response to poll */
+	u_int32	badformat;	/* bad format timecode received */
+	u_int32	baddata;	/* invalid data timecode received */
+	u_int32	timereset;	/* driver resets */
 	const char *clockdesc;	/* ASCII description */
 	double	fudgetime1;	/* configure fudge time1 */
 	double	fudgetime2;	/* configure fudge time2 */
-	int32_t	fudgeval1;	/* configure fudge value1 */
-	uint32_t	fudgeval2;	/* configure fudge value2 */
+	int32	fudgeval1;	/* configure fudge value1 */
+	u_int32	fudgeval2;	/* configure fudge value2 */
 	u_char	currentstatus;	/* clock status */
 	u_char	lastevent;	/* last exception event */
 	u_char	leap;		/* leap bits */
@@ -119,8 +119,8 @@ struct refclockbug {
 	u_char	nvalues;	/* values following */
 	u_char	ntimes;		/* times following */
 	u_short	svalues;	/* values format sign array */
-	uint32_t	stimes;		/* times format sign array */
-	uint32_t	values[NCLKBUGVALUES]; /* real values */
+	u_int32	stimes;		/* times format sign array */
+	u_int32	values[NCLKBUGVALUES]; /* real values */
 	l_fp	times[NCLKBUGTIMES]; /* real times */
 };
 
@@ -139,11 +139,11 @@ extern	HANDLE	WaitableIoEventHandle;
 #define MAXDIAL		60	/* max length of modem dial strings */
 
 /*
- * It's ugly that refid is sometimes treated as a  uint32_t and sometimes
+ * It's ugly that refid is sometimes treated as a  u_int32 and sometimes
  * as a string; that should be fixed. Using this in memcpy() at least
  * contains the problem.
  */
-#define REFIDLEN	sizeof(uint32_t)
+#define REFIDLEN	sizeof(u_int32)
 
 struct refclockproc {
 	void *	unitptr;	/* pointer to unit structure */
@@ -182,7 +182,7 @@ struct refclockproc {
 	double	fudgetime1;	/* fudge time1 */
 	double	fudgetime2;	/* fudge time2 */
 	u_char	stratum;	/* server stratum */
-	uint32_t	refid;		/* reference identifier */
+	u_int32	refid;		/* reference identifier */
 	u_char	sloppyclockflag; /* fudge flags */
 
 	/*

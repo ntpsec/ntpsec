@@ -182,8 +182,8 @@ typedef struct pps_params {
 
 #define NTPFP_M_ADD(r_i, r_f, a_i, a_f) 	/* r += a */ \
 	do { \
-		register uint32_t lo_tmp; \
-		register uint32_t hi_tmp; \
+		register u_int32 lo_tmp; \
+		register u_int32 hi_tmp; \
 		\
 		lo_tmp = ((r_f) & 0xffff) + ((a_f) & 0xffff); \
 		hi_tmp = (((r_f) >> 16) & 0xffff) + (((a_f) >> 16) & 0xffff); \

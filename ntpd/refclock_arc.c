@@ -394,7 +394,7 @@ Also note h<cr> command which starts a resync to MSF signal.
 				       (BITSPERCHAR * BITTIME) ) )
 
      /* Allow for UART to accept char half-way through final stop bit. */
-#define INITIALOFFSET ((uint32_t)(-BITTIME/2))
+#define INITIALOFFSET ((u_int32)(-BITTIME/2))
 
      /*
     charoffsets[x] is the time after the start of the second that byte
@@ -407,7 +407,7 @@ Also note h<cr> command which starts a resync to MSF signal.
     the trailing \r, on the assumption that the bytes follow one
     another without gaps.
     */
-     static const uint32_t charoffsets[LENARC+1] = {
+     static const u_int32 charoffsets[LENARC+1] = {
 #if BITSPERCHAR == 11 /* Usual case. */
 	     /* Offsets computed as accurately as possible... */
 	     0,
