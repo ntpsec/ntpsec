@@ -70,7 +70,7 @@ time_to_vint64(
 		res.D_s.lo = (uint32_t)tt;
 	}
 
-#elif defined(HAVE_INT64)
+#elif defined(INT64_MAX)
 
 	res.q_s = tt;
 
@@ -107,7 +107,7 @@ vint64_to_time(
 
 	res = (time_t)tv->D_s.lo;
 
-#elif defined(HAVE_INT64)
+#elif defined(INT64_MAX)
 
 	res = (time_t)tv->q_s;
 
@@ -405,7 +405,7 @@ ntpcal_ntp_to_time(
 {
 	vint64 res;
 
-#ifdef HAVE_INT64
+#ifdef INT64_MAX
 
 	res.q_s = (pivot != NULL)
 		      ? *pivot
@@ -454,7 +454,7 @@ ntpcal_ntp_to_ntp(
 {
 	vint64 res;
 
-#ifdef HAVE_INT64
+#ifdef INT64_MAX
 
 	res.q_s = (pivot)
 		      ? *pivot
@@ -506,7 +506,7 @@ ntpcal_daysplit(
 {
 	ntpcal_split res;
 
-#ifdef HAVE_INT64
+#ifdef INT64_MAX
 
 	/* manual floor division by SECSPERDAY */
 	res.hi = (int32_t)(ts->q_s / SECSPERDAY);
@@ -918,7 +918,7 @@ ntpcal_dayjoin(
 {
 	vint64 res;
 
-#ifdef HAVE_INT64
+#ifdef INT64_MAX
 
 	res.q_s	 = days;
 	res.q_s *= SECSPERDAY;

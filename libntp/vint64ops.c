@@ -93,7 +93,7 @@ strtouv64(
 		if (digit >= base)
 			break;
 		num = 1;
-#if defined(HAVE_INT64)
+#if defined(INT64_MAX)
 		res.Q_s = res.Q_s * base + digit;
 #else
 		/* res *= base, using 16x16->32 bit
@@ -132,7 +132,7 @@ icmpv64(
 {
 	int res;
 
-#if defined(HAVE_INT64)
+#if defined(INT64_MAX)
 	res = (lhs->q_s > rhs->q_s)
 	    - (lhs->q_s < rhs->q_s);
 #else	
@@ -156,7 +156,7 @@ ucmpv64(
 {
 	int res;
 	
-#if defined(HAVE_INT64)
+#if defined(INT64_MAX)
 	res = (lhs->Q_s > rhs->Q_s)
 	    - (lhs->Q_s < rhs->Q_s);
 #else	
@@ -179,7 +179,7 @@ addv64(
 {
 	vint64 res;
 
-#if defined(HAVE_INT64)
+#if defined(INT64_MAX)
 	res.Q_s = lhs->Q_s + rhs->Q_s;
 #else
 	res = *lhs;
@@ -198,7 +198,7 @@ subv64(
 {
 	vint64 res;
 
-#if defined(HAVE_INT64)
+#if defined(INT64_MAX)
 	res.Q_s = lhs->Q_s - rhs->Q_s;
 #else
 	res = *lhs;
@@ -218,7 +218,7 @@ addv64i32(
 	vint64 res;
 
 	res = *lhs;
-#if defined(HAVE_INT64)
+#if defined(INT64_MAX)
 	res.q_s += rhs;
 #else
 	M_ADD(res.D_s.hi, res.D_s.lo,  -(rhs < 0), rhs);
@@ -237,7 +237,7 @@ subv64i32(
 	vint64 res;
 
 	res = *lhs;
-#if defined(HAVE_INT64)
+#if defined(INT64_MAX)
 	res.q_s -= rhs;
 #else
 	M_SUB(res.D_s.hi, res.D_s.lo,  -(rhs < 0), rhs);
@@ -256,7 +256,7 @@ addv64u32(
 	vint64 res;
 
 	res = *lhs;
-#if defined(HAVE_INT64)
+#if defined(INT64_MAX)
 	res.Q_s += rhs;
 #else
 	M_ADD(res.D_s.hi, res.D_s.lo, 0, rhs);
@@ -275,7 +275,7 @@ subv64u32(
 	vint64 res;
 
 	res = *lhs;
-#if defined(HAVE_INT64)
+#if defined(INT64_MAX)
 	res.Q_s -= rhs;
 #else
 	M_SUB(res.D_s.hi, res.D_s.lo, 0, rhs);
