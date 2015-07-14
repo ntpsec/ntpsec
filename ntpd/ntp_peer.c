@@ -560,7 +560,7 @@ peer_config(
 	u_char		minpoll,
 	u_char		maxpoll,
 	u_int		flags,
-	u_int32		ttl,
+	uint32_t		ttl,
 	keyid_t		key,
 	const char *	ident		/* autokey group */
 	)
@@ -738,7 +738,7 @@ newpeer(
 	u_char		maxpoll,
 	u_int		flags,
 	u_char		cast_flags,
-	u_int32		ttl,
+	uint32_t		ttl,
 	keyid_t		key,
 	const char *	ident
 	)

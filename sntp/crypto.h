@@ -12,7 +12,7 @@
 #include "utilities.h"
 #include "sntp-opts.h"
 
-#define LEN_PKT_MAC	LEN_PKT_NOMAC + sizeof(u_int32)
+#define LEN_PKT_MAC	LEN_PKT_NOMAC + sizeof(uint32_t)
 
 /* #include "sntp-opts.h" */
 

@@ -11,8 +11,8 @@
 
 char *
 dolfptoa(
-	u_int32 fpi,
-	u_int32 fpv,
+	uint32_t fpi,
+	uint32_t fpv,
 	int neg,
 	short ndec,
 	int msec
@@ -42,7 +42,7 @@ dolfptoa(
 	cp = cpend = cpdec = &cbuf[10];
 	for (dec = cp - cbuf; dec > 0 && fpi != 0; dec--) {
 		/* can add another digit */
-		u_int32 digit;
+		uint32_t digit;
 		
 		digit  = fpi;
 		fpi   /= 10U;
@@ -68,7 +68,7 @@ dolfptoa(
 	 * If there's a fraction to deal with, do so.
 	 */
 	for (/*NOP*/;  dec > 0 && fpv != 0;  dec--)  {
-		u_int32 digit, tmph, tmpl;
+		uint32_t digit, tmph, tmpl;
 		
 		/*
 		 * The scheme here is to multiply the fraction
@@ -138,8 +138,8 @@ dolfptoa(
 
 char *
 mfptoa(
-	u_int32	fpi,
-	u_int32	fpf,
+	uint32_t	fpi,
+	uint32_t	fpf,
 	short	ndec
 	)
 {
@@ -156,8 +156,8 @@ mfptoa(
 
 char *
 mfptoms(
-	u_int32	fpi,
-	u_int32	fpf,
+	uint32_t	fpi,
+	uint32_t	fpf,
 	short	ndec
 	)
 {

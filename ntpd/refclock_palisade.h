@@ -184,7 +184,7 @@ int 		TSIP_decode		(struct peer *);
 long		HW_poll			(struct refclockproc *);
 static	double	getdbl 			(u_char *);
 static	short	getint 			(u_char *);
-static	int32	getlong			(u_char *);
+static	int32_t	getlong			(u_char *);
 
 
 #ifdef PALISADE_SENDCMD_RESURRECTED

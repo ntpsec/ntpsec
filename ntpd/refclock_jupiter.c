@@ -117,9 +117,9 @@ struct instance {
 	u_int gpos_gweek;		/* Current GPOS GPS week number */
 	u_int gpos_sweek;		/* Current GPOS GPS seconds into week */
 	u_int gweek;			/* current GPS week number */
-	u_int32 lastsweek;		/* last seconds into GPS week */
+	uint32_t lastsweek;		/* last seconds into GPS week */
 	time_t timecode;		/* current ntp timecode */
-	u_int32 stime;			/* used to detect firmware bug */
+	uint32_t stime;			/* used to detect firmware bug */
 	bool wantid;			/* don't reconfig on channel id msg */
 	u_int  moving;			/* mobile platform? */
 	u_char sloppyclockflag;		/* fudge flags */
@@ -419,9 +419,9 @@ jupiter_pps(struct instance *instance)
 		return true;
 	instance->ts = ts;
 
-	tstmp.l_ui = (u_int32)ts.tv_sec + JAN_1970;
+	tstmp.l_ui = (uint32_t)ts.tv_sec + JAN_1970;
 	dtemp = ts.tv_nsec * FRAC / 1e9;
-	tstmp.l_uf = (u_int32)dtemp;
+	tstmp.l_uf = (uint32_t)dtemp;
 	instance->peer->procptr->lastrec = tstmp;
 	return false;
 }
@@ -516,7 +516,7 @@ jupiter_receive(struct recvbuf *rbufp)
 	int cc, size;
 	bool ppsret;
 	time_t last_timecode;
-	u_int32 laststime;
+	uint32_t laststime;
 	const char *cp;
 	u_char *bp;
 	u_short *sp;
@@ -610,7 +610,7 @@ jupiter_receive(struct recvbuf *rbufp)
 				break;
 
 			/* Add the new sample to a median filter */
-			tstamp.l_ui = JAN_1970 + (u_int32)last_timecode;
+			tstamp.l_ui = JAN_1970 + (uint32_t)last_timecode;
 			tstamp.l_uf = 0;
 
 			refclock_process_offset(pp, tstamp, pp->lastrec, pp->fudgetime1);
@@ -712,7 +712,7 @@ jupiter_parse_t(struct instance *instance, u_short *sp)
 	struct tm *tm;
 	char *cp;
 	struct jpulse *jp;
-	u_int32 sweek;
+	uint32_t sweek;
 	time_t last_timecode;
 	u_short flags;
 

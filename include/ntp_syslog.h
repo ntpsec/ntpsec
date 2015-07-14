@@ -5,7 +5,7 @@
 #ifndef NTP_SYSLOG_H
 #define NTP_SYSLOG_H
 
-#include <ntp_types.h>		/* u_int32 type */
+#include <ntp_types.h>		/* uint32_t type */
 
 #ifdef VMS
 extern void msyslog();
@@ -72,7 +72,7 @@ extern char *	syslog_abs_fname;
 #define NLOG_SYNCSTATUS		0x00004000 /* sync status (sync/unsync) */
 #define NLOG_SYNCSTATIST	0x00008000 /* sync statistics output */
 
-extern u_int32 ntp_syslogmask;
+extern uint32_t ntp_syslogmask;
 
 #define NLOG(bits)	if (ntp_syslogmask & (bits))
 

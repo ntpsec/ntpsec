@@ -177,16 +177,16 @@ struct interface {
 	endpt *		mclink;		/* per-AF_* multicast list */
 	SOCKET		fd;		/* socket descriptor */
 	SOCKET		bfd;		/* for receiving broadcasts */
-	u_int32		ifnum;		/* endpt instance count */
+	uint32_t		ifnum;		/* endpt instance count */
 	sockaddr_u	sin;		/* unicast address */
 	sockaddr_u	mask;		/* subnet mask */
 	sockaddr_u	bcast;		/* broadcast address */
 	char		name[32];	/* name of interface */
 	u_short		family;		/* AF_INET/AF_INET6 */
 	u_short		phase;		/* phase in update cycle */
-	u_int32		flags;		/* interface flags */
+	uint32_t		flags;		/* interface flags */
 	int		last_ttl;	/* last TTL specified */
-	u_int32		addr_refid;	/* IPv4 addr or IPv6 hash */
+	uint32_t		addr_refid;	/* IPv4 addr or IPv6 hash */
 	int		num_mcast;	/* mcast addrs enabled */
 	u_long		starttime;	/* current_time at creation */
 	volatile long	received;	/* number of incoming packets */
@@ -266,7 +266,7 @@ struct peer {
 	u_char	cast_flags;	/* additional flags */
 	u_char	last_event;	/* last peer error code */
 	u_char	num_events;	/* number of error events */
-	u_int32	ttl;		/* ttl/refclock mode */
+	uint32_t	ttl;		/* ttl/refclock mode */
 	char	*ident;		/* group identifier name */
 
 	/*
@@ -289,7 +289,7 @@ struct peer {
 	s_char	precision;	/* remote clock precision */
 	double	rootdelay;	/* roundtrip delay to primary source */
 	double	rootdisp;	/* dispersion to primary source */
-	u_int32	refid;		/* remote reference ID */
+	uint32_t	refid;		/* remote reference ID */
 	l_fp	reftime;	/* update epoch */
 
 	/*
@@ -298,9 +298,9 @@ struct peer {
 	keyid_t keyid;		/* current key ID */
 #ifdef AUTOKEY
 #define clear_to_zero opcode
-	u_int32	opcode;		/* last request opcode */
+	uint32_t	opcode;		/* last request opcode */
 	associd_t assoc;	/* peer association ID */
-	u_int32	crypto;		/* peer status word */
+	uint32_t	crypto;		/* peer status word */
 	EVP_PKEY *pkey;		/* public key */
 	const EVP_MD *digest;	/* message digest algorithm */
 	char	*subject;	/* certificate subject name */
@@ -540,16 +540,16 @@ struct pkt {
 	s_char	precision;	/* peer clock precision */
 	u_fp	rootdelay;	/* roundtrip delay to primary source */
 	u_fp	rootdisp;	/* dispersion to primary source*/
-	u_int32	refid;		/* reference id */
+	uint32_t	refid;		/* reference id */
 	l_fp	reftime;	/* last update time */
 	l_fp	org;		/* originate time stamp */
 	l_fp	rec;		/* receive time stamp */
 	l_fp	xmt;		/* transmit time stamp */
 
-#define	LEN_PKT_NOMAC	(12 * sizeof(u_int32)) /* min header length */
-#define MIN_MAC_LEN	(1 * sizeof(u_int32))	/* crypto_NAK */
-#define MAX_MD5_LEN	(5 * sizeof(u_int32))	/* MD5 */
-#define	MAX_MAC_LEN	(6 * sizeof(u_int32))	/* SHA */
+#define	LEN_PKT_NOMAC	(12 * sizeof(uint32_t)) /* min header length */
+#define MIN_MAC_LEN	(1 * sizeof(uint32_t))	/* crypto_NAK */
+#define MAX_MD5_LEN	(5 * sizeof(uint32_t))	/* MD5 */
+#define	MAX_MAC_LEN	(6 * sizeof(uint32_t))	/* SHA */
 
 	/*
 	 * The length of the packet less MAC must be a multiple of 64
@@ -569,9 +569,9 @@ struct pkt {
 	 * fields have to be parsed or skipped.
 	 */
 #ifdef AUTOKEY
-	u_int32	exten[(NTP_MAXEXTEN + MAX_MAC_LEN) / sizeof(u_int32)];
+	uint32_t	exten[(NTP_MAXEXTEN + MAX_MAC_LEN) / sizeof(uint32_t)];
 #else	/* !AUTOKEY follows */
-	u_int32	exten[(MAX_MAC_LEN) / sizeof(u_int32)];
+	uint32_t	exten[(MAX_MAC_LEN) / sizeof(uint32_t)];
 #endif	/* !AUTOKEY */
 };
 
@@ -798,8 +798,8 @@ struct mon_data {
  * Structure used for restrictlist entries
  */
 typedef struct res_addr4_tag {
-	u_int32		addr;		/* IPv4 addr (host order) */
-	u_int32		mask;		/* IPv4 mask (host order) */
+	uint32_t		addr;		/* IPv4 addr (host order) */
+	uint32_t		mask;		/* IPv4 mask (host order) */
 } res_addr4;
 
 typedef struct res_addr6_tag {
@@ -810,7 +810,7 @@ typedef struct res_addr6_tag {
 typedef struct restrict_u_tag	restrict_u;
 struct restrict_u_tag {
 	restrict_u *		link;	/* link to next entry */
-	u_int32			count;	/* number of packets matched */
+	uint32_t			count;	/* number of packets matched */
 	u_short			flags;	/* accesslist flags */
 	u_short			mflags;	/* match flags */
 	u_long			expire;	/* valid until time */

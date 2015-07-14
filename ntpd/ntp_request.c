@@ -167,11 +167,11 @@ static const struct req_proc ntp_codes[] = {
 	{ REQ_GET_KERNEL,	NOAUTH,	0, 0,	get_kernel_info },
 #endif
 #ifdef REFCLOCK
-	{ REQ_GET_CLOCKINFO, NOAUTH, sizeof(u_int32), sizeof(u_int32), 
+	{ REQ_GET_CLOCKINFO, NOAUTH, sizeof(uint32_t), sizeof(uint32_t), 
 				get_clock_info },
 	{ REQ_SET_CLKFUDGE, AUTH, sizeof(struct conf_fudge), 
 				sizeof(struct conf_fudge), set_clock_fudge },
-	{ REQ_GET_CLKBUGINFO, NOAUTH, sizeof(u_int32), sizeof(u_int32),
+	{ REQ_GET_CLKBUGINFO, NOAUTH, sizeof(uint32_t), sizeof(uint32_t),
 				get_clkbug_info },
 #endif
 	{ REQ_IF_STATS,		AUTH, 0, 0,	get_if_stats },
@@ -638,7 +638,7 @@ process_private(
 		/*
 		 * So far so good.  See if decryption works out okay.
 		 */
-		if (!authdecrypt(info_auth_keyid, (u_int32 *)inpkt,
+		if (!authdecrypt(info_auth_keyid, (uint32_t *)inpkt,
 				 recv_len - mac_len, mac_len)) {
 			DPRINTF(5, ("authdecrypt failed\n"));
 			req_ack(srcadr, inter, inpkt, INFO_ERR_AUTH);
@@ -1049,16 +1049,16 @@ peer_stats (
 		if (pp->status >= CTL_PST_SEL_SYSPEER)
 		    ip->flags |= INFO_FLAG_SHORTLIST;
 		ip->flags = htons(ip->flags);
-		ip->timereceived = htonl((u_int32)(current_time - pp->timereceived));
+		ip->timereceived = htonl((uint32_t)(current_time - pp->timereceived));
 		ip->timetosend = htonl(pp->nextdate - current_time);
-		ip->timereachable = htonl((u_int32)(current_time - pp->timereachable));
-		ip->sent = htonl((u_int32)(pp->sent));
-		ip->processed = htonl((u_int32)(pp->processed));
-		ip->badauth = htonl((u_int32)(pp->badauth));
-		ip->bogusorg = htonl((u_int32)(pp->bogusorg));
-		ip->oldpkt = htonl((u_int32)(pp->oldpkt));
-		ip->seldisp = htonl((u_int32)(pp->seldisptoolarge));
-		ip->selbroken = htonl((u_int32)(pp->selbroken));
+		ip->timereachable = htonl((uint32_t)(current_time - pp->timereachable));
+		ip->sent = htonl((uint32_t)(pp->sent));
+		ip->processed = htonl((uint32_t)(pp->processed));
+		ip->badauth = htonl((uint32_t)(pp->badauth));
+		ip->bogusorg = htonl((uint32_t)(pp->bogusorg));
+		ip->oldpkt = htonl((uint32_t)(pp->oldpkt));
+		ip->seldisp = htonl((uint32_t)(pp->seldisptoolarge));
+		ip->selbroken = htonl((uint32_t)(pp->selbroken));
 		ip->candidate = pp->status;
 		ip = (struct info_peer_stats *)more_pkt();
 	}
@@ -1151,17 +1151,17 @@ sys_stats(
 
 	ss = (struct info_sys_stats *)prepare_pkt(srcadr, inter, inpkt,
 		sizeof(struct info_sys_stats));
-	ss->timeup = htonl((u_int32)current_time);
-	ss->timereset = htonl((u_int32)(current_time - sys_stattime));
-	ss->denied = htonl((u_int32)sys_restricted);
-	ss->oldversionpkt = htonl((u_int32)sys_oldversion);
-	ss->newversionpkt = htonl((u_int32)sys_newversion);
-	ss->unknownversion = htonl((u_int32)sys_declined);
-	ss->badlength = htonl((u_int32)sys_badlength);
-	ss->processed = htonl((u_int32)sys_processed);
-	ss->badauth = htonl((u_int32)sys_badauth);
-	ss->limitrejected = htonl((u_int32)sys_limitrejected);
-	ss->received = htonl((u_int32)sys_received);
+	ss->timeup = htonl((uint32_t)current_time);
+	ss->timereset = htonl((uint32_t)(current_time - sys_stattime));
+	ss->denied = htonl((uint32_t)sys_restricted);
+	ss->oldversionpkt = htonl((uint32_t)sys_oldversion);
+	ss->newversionpkt = htonl((uint32_t)sys_newversion);
+	ss->unknownversion = htonl((uint32_t)sys_declined);
+	ss->badlength = htonl((uint32_t)sys_badlength);
+	ss->processed = htonl((uint32_t)sys_processed);
+	ss->badauth = htonl((uint32_t)sys_badauth);
+	ss->limitrejected = htonl((uint32_t)sys_limitrejected);
+	ss->received = htonl((uint32_t)sys_received);
 	(void) more_pkt();
 	flush_pkt();
 }
@@ -1183,12 +1183,12 @@ mem_stats(
 	ms = (struct info_mem_stats *)prepare_pkt(srcadr, inter, inpkt,
 						  sizeof(struct info_mem_stats));
 
-	ms->timereset = htonl((u_int32)(current_time - peer_timereset));
+	ms->timereset = htonl((uint32_t)(current_time - peer_timereset));
 	ms->totalpeermem = htons((u_short)total_peer_structs);
 	ms->freepeermem = htons((u_short)peer_free_count);
-	ms->findpeer_calls = htonl((u_int32)findpeer_calls);
-	ms->allocations = htonl((u_int32)peer_allocations);
-	ms->demobilizations = htonl((u_int32)peer_demobilizations);
+	ms->findpeer_calls = htonl((uint32_t)findpeer_calls);
+	ms->allocations = htonl((uint32_t)peer_allocations);
+	ms->demobilizations = htonl((uint32_t)peer_demobilizations);
 
 	for (i = 0; i < NTP_HASH_SIZE; i++)
 		ms->hashcount[i] = (u_char)
@@ -1214,18 +1214,18 @@ io_stats(
 	io = (struct info_io_stats *)prepare_pkt(srcadr, inter, inpkt,
 						 sizeof(struct info_io_stats));
 
-	io->timereset = htonl((u_int32)(current_time - io_timereset));
+	io->timereset = htonl((uint32_t)(current_time - io_timereset));
 	io->totalrecvbufs = htons((u_short) total_recvbuffs());
 	io->freerecvbufs = htons((u_short) free_recvbuffs());
 	io->fullrecvbufs = htons((u_short) full_recvbuffs());
 	io->lowwater = htons((u_short) lowater_additions());
-	io->dropped = htonl((u_int32)packets_dropped);
-	io->ignored = htonl((u_int32)packets_ignored);
-	io->received = htonl((u_int32)packets_received);
-	io->sent = htonl((u_int32)packets_sent);
-	io->notsent = htonl((u_int32)packets_notsent);
-	io->interrupts = htonl((u_int32)handler_calls);
-	io->int_received = htonl((u_int32)handler_pkts);
+	io->dropped = htonl((uint32_t)packets_dropped);
+	io->ignored = htonl((uint32_t)packets_ignored);
+	io->received = htonl((uint32_t)packets_received);
+	io->sent = htonl((uint32_t)packets_sent);
+	io->notsent = htonl((uint32_t)packets_notsent);
+	io->interrupts = htonl((uint32_t)handler_calls);
+	io->int_received = htonl((uint32_t)handler_pkts);
 
 	(void) more_pkt();
 	flush_pkt();
@@ -1249,10 +1249,10 @@ timer_stats(
 						    inpkt, sizeof(*ts));
 
 	sincereset = current_time - timer_timereset;
-	ts->timereset = htonl((u_int32)sincereset);
+	ts->timereset = htonl((uint32_t)sincereset);
 	ts->alarms = ts->timereset;
-	ts->overflows = htonl((u_int32)alarm_overflow);
-	ts->xmtcalls = htonl((u_int32)timer_xmtcalls);
+	ts->overflows = htonl((uint32_t)alarm_overflow);
+	ts->xmtcalls = htonl((uint32_t)timer_xmtcalls);
 
 	(void) more_pkt();
 	flush_pkt();
@@ -1279,8 +1279,8 @@ loop_info(
 	HTONL_FP(&ltmp, &li->last_offset);
 	DTOLFP(drift_comp * 1e6, &ltmp);
 	HTONL_FP(&ltmp, &li->drift_comp);
-	li->compliance = htonl((u_int32)(tc_counter));
-	li->watchdog_timer = htonl((u_int32)(current_time - sys_epoch));
+	li->compliance = htonl((uint32_t)(tc_counter));
+	li->watchdog_timer = htonl((uint32_t)(current_time - sys_epoch));
 
 	more_pkt();
 	flush_pkt();
@@ -1526,7 +1526,7 @@ setclr_flags(
 	)
 {
 	struct conf_sys_flags *sf;
-	u_int32 flags;
+	uint32_t flags;
 
 	if (INFO_NITEMS(inpkt->err_nitems) > 1) {
 		msyslog(LOG_ERR, "setclr_flags: err_nitems > 1");
@@ -2028,15 +2028,15 @@ get_auth_info(
 	ia = (struct info_auth *)prepare_pkt(srcadr, inter, inpkt,
 					     sizeof(struct info_auth));
 
-	ia->numkeys = htonl((u_int32)authnumkeys);
-	ia->numfreekeys = htonl((u_int32)authnumfreekeys);
-	ia->keylookups = htonl((u_int32)authkeylookups);
-	ia->keynotfound = htonl((u_int32)authkeynotfound);
-	ia->encryptions = htonl((u_int32)authencryptions);
-	ia->decryptions = htonl((u_int32)authdecryptions);
-	ia->keyuncached = htonl((u_int32)authkeyuncached);
-	ia->expired = htonl((u_int32)authkeyexpired);
-	ia->timereset = htonl((u_int32)(current_time - auth_timereset));
+	ia->numkeys = htonl((uint32_t)authnumkeys);
+	ia->numfreekeys = htonl((uint32_t)authnumfreekeys);
+	ia->keylookups = htonl((uint32_t)authkeylookups);
+	ia->keynotfound = htonl((uint32_t)authkeynotfound);
+	ia->encryptions = htonl((uint32_t)authencryptions);
+	ia->decryptions = htonl((uint32_t)authdecryptions);
+	ia->keyuncached = htonl((uint32_t)authkeyuncached);
+	ia->expired = htonl((uint32_t)authkeyexpired);
+	ia->timereset = htonl((uint32_t)(current_time - auth_timereset));
 	
 	(void) more_pkt();
 	flush_pkt();
@@ -2103,10 +2103,10 @@ req_get_traps(
 			}
 			it->trap_port = NSRCPORT(&tr->tr_addr);
 			it->sequence = htons(tr->tr_sequence);
-			it->settime = htonl((u_int32)(current_time - tr->tr_settime));
-			it->origtime = htonl((u_int32)(current_time - tr->tr_origtime));
-			it->resets = htonl((u_int32)tr->tr_resets);
-			it->flags = htonl((u_int32)tr->tr_flags);
+			it->settime = htonl((uint32_t)(current_time - tr->tr_settime));
+			it->origtime = htonl((uint32_t)(current_time - tr->tr_origtime));
+			it->resets = htonl((uint32_t)tr->tr_resets);
+			it->flags = htonl((uint32_t)tr->tr_flags);
 			it = (struct info_trap *)more_pkt();
 		}
 	}
@@ -2292,21 +2292,21 @@ get_ctl_stats(
 	ic = (struct info_control *)prepare_pkt(srcadr, inter, inpkt,
 						sizeof(struct info_control));
 
-	ic->ctltimereset = htonl((u_int32)(current_time - ctltimereset));
-	ic->numctlreq = htonl((u_int32)numctlreq);
-	ic->numctlbadpkts = htonl((u_int32)numctlbadpkts);
-	ic->numctlresponses = htonl((u_int32)numctlresponses);
-	ic->numctlfrags = htonl((u_int32)numctlfrags);
-	ic->numctlerrors = htonl((u_int32)numctlerrors);
-	ic->numctltooshort = htonl((u_int32)numctltooshort);
-	ic->numctlinputresp = htonl((u_int32)numctlinputresp);
-	ic->numctlinputfrag = htonl((u_int32)numctlinputfrag);
-	ic->numctlinputerr = htonl((u_int32)numctlinputerr);
-	ic->numctlbadoffset = htonl((u_int32)numctlbadoffset);
-	ic->numctlbadversion = htonl((u_int32)numctlbadversion);
-	ic->numctldatatooshort = htonl((u_int32)numctldatatooshort);
-	ic->numctlbadop = htonl((u_int32)numctlbadop);
-	ic->numasyncmsgs = htonl((u_int32)numasyncmsgs);
+	ic->ctltimereset = htonl((uint32_t)(current_time - ctltimereset));
+	ic->numctlreq = htonl((uint32_t)numctlreq);
+	ic->numctlbadpkts = htonl((uint32_t)numctlbadpkts);
+	ic->numctlresponses = htonl((uint32_t)numctlresponses);
+	ic->numctlfrags = htonl((uint32_t)numctlfrags);
+	ic->numctlerrors = htonl((uint32_t)numctlerrors);
+	ic->numctltooshort = htonl((uint32_t)numctltooshort);
+	ic->numctlinputresp = htonl((uint32_t)numctlinputresp);
+	ic->numctlinputfrag = htonl((uint32_t)numctlinputfrag);
+	ic->numctlinputerr = htonl((uint32_t)numctlinputerr);
+	ic->numctlbadoffset = htonl((uint32_t)numctlbadoffset);
+	ic->numctlbadversion = htonl((uint32_t)numctlbadversion);
+	ic->numctldatatooshort = htonl((uint32_t)numctldatatooshort);
+	ic->numctlbadop = htonl((uint32_t)numctlbadop);
+	ic->numasyncmsgs = htonl((uint32_t)numasyncmsgs);
 
 	(void) more_pkt();
 	flush_pkt();
@@ -2341,26 +2341,26 @@ get_kernel_info(
 	/*
 	 * pll variables
 	 */
-	ik->offset = htonl((u_int32)ntx.offset);
-	ik->freq = htonl((u_int32)ntx.freq);
-	ik->maxerror = htonl((u_int32)ntx.maxerror);
-	ik->esterror = htonl((u_int32)ntx.esterror);
+	ik->offset = htonl((uint32_t)ntx.offset);
+	ik->freq = htonl((uint32_t)ntx.freq);
+	ik->maxerror = htonl((uint32_t)ntx.maxerror);
+	ik->esterror = htonl((uint32_t)ntx.esterror);
 	ik->status = htons(ntx.status);
-	ik->constant = htonl((u_int32)ntx.constant);
-	ik->precision = htonl((u_int32)ntx.precision);
-	ik->tolerance = htonl((u_int32)ntx.tolerance);
+	ik->constant = htonl((uint32_t)ntx.constant);
+	ik->precision = htonl((uint32_t)ntx.precision);
+	ik->tolerance = htonl((uint32_t)ntx.tolerance);
 
 	/*
 	 * pps variables
 	 */
-	ik->ppsfreq = htonl((u_int32)ntx.ppsfreq);
-	ik->jitter = htonl((u_int32)ntx.jitter);
+	ik->ppsfreq = htonl((uint32_t)ntx.ppsfreq);
+	ik->jitter = htonl((uint32_t)ntx.jitter);
 	ik->shift = htons(ntx.shift);
-	ik->stabil = htonl((u_int32)ntx.stabil);
-	ik->jitcnt = htonl((u_int32)ntx.jitcnt);
-	ik->calcnt = htonl((u_int32)ntx.calcnt);
-	ik->errcnt = htonl((u_int32)ntx.errcnt);
-	ik->stbcnt = htonl((u_int32)ntx.stbcnt);
+	ik->stabil = htonl((uint32_t)ntx.stabil);
+	ik->jitcnt = htonl((uint32_t)ntx.jitcnt);
+	ik->calcnt = htonl((uint32_t)ntx.calcnt);
+	ik->errcnt = htonl((uint32_t)ntx.errcnt);
+	ik->stbcnt = htonl((uint32_t)ntx.stbcnt);
 	
 	(void) more_pkt();
 	flush_pkt();
@@ -2380,7 +2380,7 @@ get_clock_info(
 	)
 {
 	register struct info_clock *ic;
-	register u_int32 *clkaddr;
+	register uint32_t *clkaddr;
 	register int items;
 	struct refclockstat clock_stat;
 	sockaddr_u addr;
@@ -2415,16 +2415,16 @@ get_clock_info(
 		ic->flags = clock_stat.flags;
 		ic->lastevent = clock_stat.lastevent;
 		ic->currentstatus = clock_stat.currentstatus;
-		ic->polls = htonl((u_int32)clock_stat.polls);
-		ic->noresponse = htonl((u_int32)clock_stat.noresponse);
-		ic->badformat = htonl((u_int32)clock_stat.badformat);
-		ic->baddata = htonl((u_int32)clock_stat.baddata);
-		ic->timestarted = htonl((u_int32)clock_stat.timereset);
+		ic->polls = htonl((uint32_t)clock_stat.polls);
+		ic->noresponse = htonl((uint32_t)clock_stat.noresponse);
+		ic->badformat = htonl((uint32_t)clock_stat.badformat);
+		ic->baddata = htonl((uint32_t)clock_stat.baddata);
+		ic->timestarted = htonl((uint32_t)clock_stat.timereset);
 		DTOLFP(clock_stat.fudgetime1, &ltmp);
 		HTONL_FP(&ltmp, &ic->fudgetime1);
 		DTOLFP(clock_stat.fudgetime2, &ltmp);
 		HTONL_FP(&ltmp, &ic->fudgetime2);
-		ic->fudgeval1 = htonl((u_int32)clock_stat.fudgeval1);
+		ic->fudgeval1 = htonl((uint32_t)clock_stat.fudgeval1);
 		ic->fudgeval2 = htonl(clock_stat.fudgeval2);
 
 		free_varlist(clock_stat.kv_list);
@@ -2520,7 +2520,7 @@ get_clkbug_info(
 {
 	register int i;
 	register struct info_clkbug *ic;
-	register u_int32 *clkaddr;
+	register uint32_t *clkaddr;
 	register int items;
 	struct refclockbug bug;
 	sockaddr_u addr;
@@ -2532,7 +2532,7 @@ get_clkbug_info(
 #endif
 	SET_PORT(&addr, NTP_PORT);
 	items = INFO_NITEMS(inpkt->err_nitems);
-	clkaddr = (u_int32 *)&inpkt->u;
+	clkaddr = (uint32_t *)&inpkt->u;
 
 	ic = (struct info_clkbug *)prepare_pkt(srcadr, inter, inpkt,
 					       sizeof(struct info_clkbug));

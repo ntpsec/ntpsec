@@ -28,9 +28,9 @@
  * Convert usec to a time stamp fraction.
  */
 #ifdef USE_TSF_USEC_TABLES
-extern const u_int32 ustotslo[];
-extern const u_int32 ustotsmid[];
-extern const u_int32 ustotshi[];
+extern const uint32_t ustotslo[];
+extern const uint32_t ustotsmid[];
+extern const uint32_t ustotshi[];
 
 # define TVUTOTSF(tvu, tsf)						\
 	 ((tsf) = ustotslo[(tvu) & 0xff]				\
@@ -38,8 +38,8 @@ extern const u_int32 ustotshi[];
 		  + ustotshi[((tvu) >> 16) & 0xf])
 #else
 # define TVUTOTSF(tvu, tsf)						\
-	((tsf) = (u_int32)						\
-		 ((((u_int64)(tvu) << 32) + MICROSECONDS / 2) /		\
+	((tsf) = (uint32_t)						\
+		 ((((uint64_t)(tvu) << 32) + MICROSECONDS / 2) /		\
 		  MICROSECONDS))
 #endif
 
@@ -48,9 +48,9 @@ extern const u_int32 ustotshi[];
  * fraction is assumed to be unsigned.
  */
 #ifdef USE_TSF_USEC_TABLES
-extern const u_int32 tstouslo[256];
-extern const u_int32 tstousmid[256];
-extern const u_int32 tstoushi[128];
+extern const uint32_t tstouslo[256];
+extern const uint32_t tstousmid[256];
+extern const uint32_t tstoushi[128];
 
 /*
  * TV_SHIFT is used to turn the table result into a usec value.  To
@@ -66,8 +66,8 @@ extern const u_int32 tstoushi[128];
 		  + TV_ROUNDBIT) >> TV_SHIFT)
 #else
 # define TSFTOTVU(tsf, tvu)						\
-	 ((tvu) = (int32)						\
-		  (((u_int64)(tsf) * MICROSECONDS + 0x80000000) >> 32))
+	 ((tvu) = (int32_t)						\
+		  (((uint64_t)(tsf) * MICROSECONDS + 0x80000000) >> 32))
 #endif
 
 /*
@@ -355,7 +355,7 @@ tval_intv_to_lfp(
 	
 	v = normalize_tval(x);
 	TVUTOTSF(v.tv_usec, y.l_uf);
-	y.l_i = (int32)v.tv_sec;
+	y.l_i = (int32_t)v.tv_sec;
 
 	return y;
 }

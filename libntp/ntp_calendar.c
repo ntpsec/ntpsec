@@ -97,7 +97,7 @@ time_to_vint64(
 
 
 time_t
-vint64_to_time(
+vint64o_time(
 	const vint64 *tv
 	)
 {
@@ -1267,7 +1267,7 @@ ntpcal_date_to_time(
 	secs = ntpcal_date_to_daysec(jd);
 	join = ntpcal_dayjoin(days, secs);
 
-	return vint64_to_time(&join);
+	return vint64o_time(&join);
 }
 
 
