@@ -41,53 +41,23 @@
  */
 #define COUNTOF(arr)	(sizeof(arr) / sizeof((arr)[0]))
 
-/*
- * Ugly dance to find out if we have 64bit integer type.
- */
-#if !defined(HAVE_INT64)
-
-/* assume best for now, fix if frustrated later. */
-# define HAVE_INT64
-# define HAVE_U_INT64
-
-/* now check the cascade. Feel free to add things. */
-# ifdef INT64_MAX
-
-typedef int64_t int64;
-typedef uint64_t u_int64;
-
-# elif SIZEOF_LONG == 8
-
-typedef long int64;
-typedef unsigned long u_int64;
-
-# elif SIZEOF_LONG_LONG == 8
-
-typedef long long int64;
-typedef unsigned long long u_int64;
-
-# else
-
-/* no 64bit scalar, give it up. */
-#  undef HAVE_INT64
-#  undef HAVE_U_INT64
-
-# endif
-
+#if SIZEOF_SHORT != 2
+# error short is not 2 bytes -- what is 16 bit integer on this target?
 #endif
 
 /*
- * and here the trouble starts: We need a representation with more than
- * 64 bits. If a scalar of that size is not available, we need a struct
+ * If the platform supports a 64-bit scalar, ANSI requires the types
+ * int64_t and uint64_t to exist and INT64_MAX to be defined.  Thus,
+ * here and later in the code we use #ifdef INT64_MAX to conditionalize
+ * code that requires that scalar.
+ *
+ * Even on 32-bit machines we need a representation with 64 or
+ * more bits. If a scalar of that size is not available, we need a struct
  * that holds the value in split representation.
  *
  * To ease the usage a bit, we alwys use a union that is in processor
  * byte order and might or might not contain a 64bit scalar.
  */
-
-#if SIZEOF_SHORT != 2
-# error short is not 2 bytes -- what is 16 bit integer on this target?
-#endif
 
 typedef union {
 #   ifdef WORDS_BIGENDIAN
@@ -101,7 +71,7 @@ typedef union {
 		  int32_t hi; uint32_t lo;
 	} d_s;
 	struct {
-		uint32_t	hi; uint32_t lo;
+		uint32_t hi; uint32_t lo;
 	} D_s;
 #   else
 	struct {
@@ -118,9 +88,9 @@ typedef union {
 	} D_s;
 #   endif
 
-#   ifdef HAVE_INT64
-	int64	q_s;	/*   signed quad scalar */
-	u_int64 Q_s;	/* unsigned quad scalar */
+#   ifdef INT64_MAX
+	int64_t	q_s;	/*   signed quad scalar */
+	uint64_t Q_s;	/* unsigned quad scalar */
 #   endif
 } vint64; /* variant int 64 */
 

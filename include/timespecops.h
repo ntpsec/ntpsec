@@ -57,13 +57,13 @@
 #define timespec_isdenormal(x)	(!timespec_isnormal(x))
 
 /* conversion between l_fp fractions and nanoseconds */
-#ifdef HAVE_U_INT64
+#ifdef INT64_MAX
 # define FTOTVN(tsf)						\
 	((int32_t)						\
-	 (((u_int64)(tsf) * NANOSECONDS + 0x80000000) >> 32))
+	 (((uint64_t)(tsf) * NANOSECONDS + 0x80000000) >> 32))
 # define TVNTOF(tvu)						\
 	((uint32_t)						\
-	 ((((u_int64)(tvu) << 32) + NANOSECONDS / 2) /		\
+	 ((((uint64_t)(tvu) << 32) + NANOSECONDS / 2) /		\
 	  NANOSECONDS))
 #else
 # define NSECFRAC	(FRAC / NANOSECONDS)
@@ -381,7 +381,7 @@ lfp_stamp_to_tspec(
 	/* copying a vint64 to a time_t needs some care... */
 #if SIZEOF_TIME_T <= 4
 	out.tv_sec = (time_t)sec.d_s.lo;
-#elif defined(HAVE_INT64)
+#elif defined(INT64_MAX)
 	out.tv_sec = (time_t)sec.q_s;
 #else
 	out.tv_sec = ((time_t)sec.d_s.hi << 32) | sec.d_s.lo;

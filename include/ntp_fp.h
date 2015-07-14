@@ -267,7 +267,7 @@ typedef uint32_t u_fp;
  * XSCALE also generates bad code for these, at least with GCC 3.3.5.
  * This is unrelated to math.h, but the same solution applies.
  */
-#if defined(HAVE_U_INT64) && \
+#if defined(INT64_MAX) && \
     !(defined(__SVR4) && defined(__sun) && \
       defined(sparc) && defined(__GNUC__) || \
       defined(__arm__) && defined(__XSCALE__) && defined(__GNUC__)) 
@@ -277,7 +277,7 @@ typedef uint32_t u_fp;
 #define M_DTOLFP(d, r_ui, r_uf)		/* double to l_fp */	\
 	do {							\
 		double	d_tmp;					\
-		u_int64	q_tmp;					\
+		uint64_t	q_tmp;					\
 		int	M_isneg;					\
 								\
 		d_tmp = (d);					\
@@ -285,7 +285,7 @@ typedef uint32_t u_fp;
 		if (M_isneg) {					\
 			d_tmp = -d_tmp;				\
 		}						\
-		q_tmp = (u_int64)ldexp(d_tmp, 32);		\
+		q_tmp = (uint64_t)ldexp(d_tmp, 32);		\
 		if (M_isneg) {					\
 			q_tmp = ~q_tmp + 1;			\
 		}						\
@@ -296,10 +296,10 @@ typedef uint32_t u_fp;
 #define M_LFPTOD(r_ui, r_uf, d) 	/* l_fp to double */	\
 	do {							\
 		double	d_tmp;					\
-		u_int64	q_tmp;					\
+		uint64_t	q_tmp;					\
 		int	M_isneg;				\
 								\
-		q_tmp = ((u_int64)(r_ui) << 32) + (r_uf);	\
+		q_tmp = ((uint64_t)(r_ui) << 32) + (r_uf);	\
 		M_isneg = M_ISNEG(r_ui);			\
 		if (M_isneg) {					\
 			q_tmp = ~q_tmp + 1;			\

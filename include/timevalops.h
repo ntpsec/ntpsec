@@ -20,7 +20,7 @@
 /* microseconds per second */
 #define MICROSECONDS 1000000
 
-#ifndef HAVE_U_INT64
+#ifndef INT64_MAX
 # define USE_TSF_USEC_TABLES
 #endif
 
@@ -39,7 +39,7 @@ extern const uint32_t ustotshi[];
 #else
 # define TVUTOTSF(tvu, tsf)						\
 	((tsf) = (uint32_t)						\
-		 ((((u_int64)(tvu) << 32) + MICROSECONDS / 2) /		\
+		 ((((uint64_t)(tvu) << 32) + MICROSECONDS / 2) /		\
 		  MICROSECONDS))
 #endif
 
@@ -67,7 +67,7 @@ extern const uint32_t tstoushi[128];
 #else
 # define TSFTOTVU(tsf, tvu)						\
 	 ((tvu) = (int32_t)						\
-		  (((u_int64)(tsf) * MICROSECONDS + 0x80000000) >> 32))
+		  (((uint64_t)(tsf) * MICROSECONDS + 0x80000000) >> 32))
 #endif
 
 /*
@@ -433,7 +433,7 @@ lfp_stamp_to_tval(
 	/* copying a vint64 to a time_t needs some care... */
 #if SIZEOF_TIME_T <= 4
 	out.tv_sec = (time_t)sec.d_s.lo;
-#elif defined(HAVE_INT64)
+#elif defined(INT64_MAX)
 	out.tv_sec = (time_t)sec.q_s;
 #else
 	out.tv_sec = ((time_t)sec.d_s.hi << 32) | sec.d_s.lo;

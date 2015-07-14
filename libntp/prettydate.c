@@ -68,9 +68,9 @@ get_struct_tm(
 	int32_t	   folds = 0;
 	time_t	   ts;
 
-#ifdef HAVE_INT64
+#ifdef INT64_MAX
 
-	int64 tl;
+	int64_t tl;
 	ts = tl = stamp->q_s;
 
 	/*
