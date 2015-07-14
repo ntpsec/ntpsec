@@ -124,7 +124,7 @@ union addrun {
 #define	MODE7_PAYLOAD_LIM	176
 
 typedef union req_data_u_tag {
-	u_int32	u32[MODE7_PAYLOAD_LIM / sizeof(u_int32)];
+	uint32_t	u32[MODE7_PAYLOAD_LIM / sizeof(uint32_t)];
 	char data[MODE7_PAYLOAD_LIM];	/* data area (176 byte max) */
 } req_data_u;				/* struct conf_peer must fit */
 
@@ -172,7 +172,7 @@ struct req_pkt_tail {
 
 typedef union resp_pkt_u_tag {
 	char data[RESP_DATA_SIZE];
-	u_int32 u32[RESP_DATA_SIZE / sizeof(u_int32)];
+	uint32_t u32[RESP_DATA_SIZE / sizeof(uint32_t)];
 } resp_pkt_u;
 
 struct resp_pkt {
@@ -335,7 +335,7 @@ struct resp_pkt {
  * Well, it *would* have gone without saying, but somebody said it.
  */
 struct info_peer_list {
-	u_int32 addr;		/* address of peer */
+	uint32_t addr;		/* address of peer */
 	u_short port;		/* port number of peer */
 	u_char hmode;		/* mode for this peer */
 	u_char flags;		/* flags (from above) */
@@ -349,8 +349,8 @@ struct info_peer_list {
  * Peer summary structure.  Sort of the info that ntpdc returns by default.
  */
 struct info_peer_summary {
-	u_int32 dstadr;		/* local address (zero for undetermined) */
-	u_int32 srcadr;		/* source address */
+	uint32_t dstadr;		/* local address (zero for undetermined) */
+	uint32_t srcadr;		/* source address */
 	u_short srcport;	/* source port */
 	u_char stratum;		/* stratum of peer */
 	s_char hpoll;		/* host polling interval */
@@ -372,8 +372,8 @@ struct info_peer_summary {
  * Peer information structure.
  */
 struct info_peer {
-	u_int32 dstadr;		/* local address */
-	u_int32	srcadr;		/* source address */
+	uint32_t dstadr;		/* local address */
+	uint32_t	srcadr;		/* source address */
 	u_short srcport;	/* remote port */
 	u_char flags;		/* peer flags */
 	u_char leap;		/* peer.leap */
@@ -392,9 +392,9 @@ struct info_peer {
 	u_short flash2;		/* new peer.flash */
 	associd_t associd;	/* association ID */
 	keyid_t keyid;		/* peer.keyid */
-	u_int32 pkeyid;		/* unused */
-	u_int32 refid;		/* peer.refid */
-	u_int32 timer;		/* peer.timer */
+	uint32_t pkeyid;	/* unused */
+	uint32_t refid;		/* peer.refid */
+	uint32_t timer;		/* peer.timer */
 	s_fp rootdelay;		/* peer.delay */
 	u_fp rootdispersion;	/* peer.dispersion */
 	l_fp reftime;		/* peer.reftime */
@@ -408,13 +408,13 @@ struct info_peer {
 	u_fp dispersion;	/* peer.estdisp */
 	l_fp offset;		/* peer.estoffset */
 	u_fp selectdisp;	/* peer select dispersion */
-	int32 unused1;		/* (obsolete) */
-	int32 unused2;
-	int32 unused3;
-	int32 unused4;
-	int32 unused5;
-	int32 unused6;
-	int32 unused7;
+	int32_t unused1;	/* (obsolete) */
+	int32_t unused2;
+	int32_t unused3;
+	int32_t unused4;
+	int32_t unused5;
+	int32_t unused6;
+	int32_t unused7;
 	s_fp estbdelay;		/* broadcast offset */
 	u_int v6_flag;			/* is this v6 or not */
 	u_int unused9;			/* (unused) padding for dstadr6 */
@@ -427,26 +427,26 @@ struct info_peer {
  * Peer statistics structure
  */
 struct info_peer_stats {
-	u_int32 dstadr;		/* local address */
-	u_int32 srcadr;		/* remote address */
+	uint32_t dstadr;	/* local address */
+	uint32_t srcadr;	/* remote address */
 	u_short srcport;	/* remote port */
 	u_short flags;		/* peer flags */
-	u_int32 timereset;	/* time counters were reset */
-	u_int32 timereceived;	/* time since a packet received */
-	u_int32 timetosend;	/* time until a packet sent */
-	u_int32 timereachable;	/* time peer has been reachable */
-	u_int32 sent;		/* number sent */
-	u_int32 unused1;	/* (unused) */
-	u_int32 processed;	/* number processed */
-	u_int32 unused2;	/* (unused) */
-	u_int32 badauth;	/* bad authentication */
-	u_int32 bogusorg;	/* bogus origin */
-	u_int32 oldpkt;		/* duplicate */
-	u_int32 unused3;	/* (unused) */
-	u_int32 unused4;	/* (unused) */
-	u_int32 seldisp;	/* bad dispersion */
-	u_int32 selbroken;	/* bad reference time */
-	u_int32 unused5;	/* (unused) */
+	uint32_t timereset;	/* time counters were reset */
+	uint32_t timereceived;	/* time since a packet received */
+	uint32_t timetosend;	/* time until a packet sent */
+	uint32_t timereachable;	/* time peer has been reachable */
+	uint32_t sent;		/* number sent */
+	uint32_t unused1;	/* (unused) */
+	uint32_t processed;	/* number processed */
+	uint32_t unused2;	/* (unused) */
+	uint32_t badauth;	/* bad authentication */
+	uint32_t bogusorg;	/* bogus origin */
+	uint32_t oldpkt;	/* duplicate */
+	uint32_t unused3;	/* (unused) */
+	uint32_t unused4;	/* (unused) */
+	uint32_t seldisp;	/* bad dispersion */
+	uint32_t selbroken;	/* bad reference time */
+	uint32_t unused5;	/* (unused) */
 	u_char candidate;	/* select order */
 	u_char unused6;		/* (unused) */
 	u_char unused7;		/* (unused) */
@@ -464,8 +464,8 @@ struct info_peer_stats {
 struct info_loop {
 	l_fp last_offset;
 	l_fp drift_comp;
-	u_int32 compliance;
-	u_int32 watchdog_timer;
+	uint32_t compliance;
+	uint32_t watchdog_timer;
 };
 
 
@@ -474,16 +474,16 @@ struct info_loop {
  * the implementation.
  */
 struct info_sys {
-	u_int32 peer;		/* system peer address (v4) */
+	uint32_t peer;		/* system peer address (v4) */
 	u_char peer_mode;	/* mode we are syncing to peer in */
 	u_char leap;		/* system leap bits */
 	u_char stratum;		/* our stratum */
 	s_char precision;	/* local clock precision */
 	s_fp rootdelay;		/* delay from sync source */
 	u_fp rootdispersion;	/* dispersion from sync source */
-	u_int32 refid;		/* reference ID of sync source */
+	uint32_t refid;		/* reference ID of sync source */
 	l_fp reftime;		/* system reference time */
-	u_int32 poll;		/* system poll interval */
+	uint32_t poll;		/* system poll interval */
 	u_char flags;		/* system flags */
 	u_char unused1;		/* unused */
 	u_char unused2;		/* unused */
@@ -502,17 +502,17 @@ struct info_sys {
  * System stats.  These are collected in the protocol module
  */
 struct info_sys_stats {
-	u_int32 timeup;		/* time since restart */
-	u_int32 timereset;	/* time since reset */
-	u_int32 denied;		/* access denied */
-	u_int32 oldversionpkt;	/* recent version */
-	u_int32 newversionpkt;	/* current version */
-	u_int32 unknownversion;	/* bad version */
-	u_int32 badlength;	/* bad length or format */
-	u_int32 processed;	/* packets processed */
-	u_int32 badauth;	/* bad authentication */
-	u_int32 received;	/* packets received */
-	u_int32 limitrejected;	/* rate exceeded */
+	uint32_t timeup;	/* time since restart */
+	uint32_t timereset;	/* time since reset */
+	uint32_t denied;	/* access denied */
+	uint32_t oldversionpkt;	/* recent version */
+	uint32_t newversionpkt;	/* current version */
+	uint32_t unknownversion;	/* bad version */
+	uint32_t badlength;	/* bad length or format */
+	uint32_t processed;	/* packets processed */
+	uint32_t badauth;	/* bad authentication */
+	uint32_t received;	/* packets received */
+	uint32_t limitrejected;	/* rate exceeded */
 };
 
 
@@ -520,16 +520,16 @@ struct info_sys_stats {
  * System stats - old version
  */
 struct old_info_sys_stats {
-	u_int32 timeup;		/* time since restart */
-	u_int32 timereset;	/* time since reset */
-	u_int32 denied;		/* access denied */
-	u_int32 oldversionpkt;	/* recent version */
-	u_int32 newversionpkt;	/* current version */
-	u_int32 unknownversion;	/* bad version */
-	u_int32 badlength;	/* bad length or format */
-	u_int32 processed;	/* packets processed */
-	u_int32 badauth;	/* bad authentication */
-	u_int32 wanderhold;	/* (not used) */
+	uint32_t timeup;	/* time since restart */
+	uint32_t timereset;	/* time since reset */
+	uint32_t denied;	/* access denied */
+	uint32_t oldversionpkt;	/* recent version */
+	uint32_t newversionpkt;	/* current version */
+	uint32_t unknownversion;	/* bad version */
+	uint32_t badlength;	/* bad length or format */
+	uint32_t processed;	/* packets processed */
+	uint32_t badauth;	/* bad authentication */
+	uint32_t wanderhold;	/* (not used) */
 };
 
 
@@ -537,12 +537,12 @@ struct old_info_sys_stats {
  * Peer memory statistics.  Collected in the peer module.
  */
 struct info_mem_stats {
-	u_int32 timereset;	/* time since reset */
+	uint32_t timereset;	/* time since reset */
 	u_short totalpeermem;
 	u_short freepeermem;
-	u_int32 findpeer_calls;
-	u_int32 allocations;
-	u_int32 demobilizations;
+	uint32_t findpeer_calls;
+	uint32_t allocations;
+	uint32_t demobilizations;
 	u_char hashcount[NTP_HASH_SIZE];
 };
 
@@ -551,18 +551,18 @@ struct info_mem_stats {
  * I/O statistics.  Collected in the I/O module
  */
 struct info_io_stats {
-	u_int32 timereset;	/* time since reset */
+	uint32_t timereset;	/* time since reset */
 	u_short totalrecvbufs;	/* total receive bufs */
 	u_short freerecvbufs;	/* free buffers */
 	u_short fullrecvbufs;	/* full buffers */
 	u_short lowwater;	/* number of times we've added buffers */
-	u_int32 dropped;	/* dropped packets */
-	u_int32 ignored;	/* ignored packets */
-	u_int32 received;	/* received packets */
-	u_int32 sent;		/* packets sent */
-	u_int32 notsent;	/* packets not sent */
-	u_int32 interrupts;	/* interrupts we've handled */
-	u_int32 int_received;	/* received by interrupt handler */
+	uint32_t dropped;	/* dropped packets */
+	uint32_t ignored;	/* ignored packets */
+	uint32_t received;	/* received packets */
+	uint32_t sent;		/* packets sent */
+	uint32_t notsent;	/* packets not sent */
+	uint32_t interrupts;	/* interrupts we've handled */
+	uint32_t int_received;	/* received by interrupt handler */
 };
 
 
@@ -570,10 +570,10 @@ struct info_io_stats {
  * Timer stats.  Guess where from.
  */
 struct info_timer_stats {
-	u_int32 timereset;	/* time since reset */
-	u_int32 alarms;		/* alarms we've handled */
-	u_int32 overflows;	/* timer overflows */
-	u_int32 xmtcalls;	/* calls to xmit */
+	uint32_t timereset;	/* time since reset */
+	uint32_t alarms;	/* alarms we've handled */
+	uint32_t overflows;	/* timer overflows */
+	uint32_t xmtcalls;	/* calls to xmit */
 };
 
 
@@ -581,7 +581,7 @@ struct info_timer_stats {
  * Structure for passing peer configuration information
  */
 struct old_conf_peer {
-	u_int32 peeraddr;	/* address to poll */
+	uint32_t peeraddr;	/* address to poll */
 	u_char hmode;		/* mode, either broadcast, active or client */
 	u_char version;		/* version number to poll with */
 	u_char minpoll;		/* min host poll interval */
@@ -593,7 +593,7 @@ struct old_conf_peer {
 };
 
 struct conf_peer {
-	u_int32 peeraddr;	/* address to poll */
+	uint32_t peeraddr;	/* address to poll */
 	u_char hmode;		/* mode, either broadcast, active or client */
 	u_char version;		/* version number to poll with */
 	u_char minpoll;		/* min host poll interval */
@@ -621,7 +621,7 @@ struct conf_peer {
  * this addess.
  */
 struct conf_unpeer {
-	u_int32 peeraddr;		/* address of peer */
+	uint32_t peeraddr;		/* address of peer */
 	u_int v6_flag;			/* is this v6 or not */
 	struct in6_addr peeraddr6;	/* address of peer (v6) */
 };
@@ -630,7 +630,7 @@ struct conf_unpeer {
  * Structure for carrying system flags.
  */
 struct conf_sys_flags {
-	u_int32 flags;
+	uint32_t flags;
 };
 
 /*
@@ -649,9 +649,9 @@ struct conf_sys_flags {
  * Structure used for returning restrict entries
  */
 struct info_restrict {
-	u_int32 addr;		/* match address */
-	u_int32 mask;		/* match mask */
-	u_int32 count;		/* number of packets matched */
+	uint32_t addr;		/* match address */
+	uint32_t mask;		/* match mask */
+	uint32_t count;		/* number of packets matched */
 	u_short flags;		/* restrict flags */
 	u_short mflags;		/* match flags */
 	u_int v6_flag;		/* is this v6 or not */
@@ -665,8 +665,8 @@ struct info_restrict {
  * Structure used for specifying restrict entries
  */
 struct conf_restrict {
-	u_int32	addr;		/* match address */
-	u_int32 mask;		/* match mask */
+	uint32_t addr;		/* match address */
+	uint32_t mask;		/* match mask */
 	u_short flags;		/* restrict flags */
 	u_short mflags;		/* match flags */
 	u_int v6_flag;		/* is this v6 or not */
@@ -679,13 +679,13 @@ struct conf_restrict {
  * Structure used for returning monitor data
  */
 struct info_monitor_1 {	
-	u_int32 avg_int;	/* avg s between packets from this host */
-	u_int32 last_int;	/* s since we last received a packet */
-	u_int32 restr;		/* restrict bits (was named lastdrop) */
-	u_int32 count;		/* count of packets received */
-	u_int32 addr;		/* host address V4 style */
-	u_int32 daddr;		/* destination host address */
-	u_int32 flags;		/* flags about destination */
+	uint32_t avg_int;	/* avg s between packets from this host */
+	uint32_t last_int;	/* s since we last received a packet */
+	uint32_t restr;		/* restrict bits (was named lastdrop) */
+	uint32_t count;		/* count of packets received */
+	uint32_t addr;		/* host address V4 style */
+	uint32_t daddr;		/* destination host address */
+	uint32_t flags;		/* flags about destination */
 	u_short port;		/* port number of last reception */
 	u_char mode;		/* mode of last packet */
 	u_char version;		/* version number of last packet */
@@ -700,11 +700,11 @@ struct info_monitor_1 {
  * Structure used for returning monitor data
  */
 struct info_monitor {	
-	u_int32 avg_int;	/* avg s between packets from this host */
-	u_int32 last_int;	/* s since we last received a packet */
-	u_int32 restr;		/* restrict bits (was named lastdrop) */
-	u_int32 count;		/* count of packets received */
-	u_int32 addr;		/* host address */
+	uint32_t avg_int;	/* avg s between packets from this host */
+	uint32_t last_int;	/* s since we last received a packet */
+	uint32_t restr;		/* restrict bits (was named lastdrop) */
+	uint32_t count;		/* count of packets received */
+	uint32_t addr;		/* host address */
 	u_short port;		/* port number of last reception */
 	u_char mode;		/* mode of last packet */
 	u_char version;		/* version number of last packet */
@@ -717,10 +717,10 @@ struct info_monitor {
  * Structure used for returning monitor data (old format)
  */
 struct old_info_monitor {	
-	u_int32 lasttime;	/* last packet from this host */
-	u_int32 firsttime;	/* first time we received a packet */
-	u_int32 count;		/* count of packets received */
-	u_int32 addr;		/* host address */
+	uint32_t lasttime;	/* last packet from this host */
+	uint32_t firsttime;	/* first time we received a packet */
+	uint32_t count;		/* count of packets received */
+	uint32_t addr;		/* host address */
 	u_short port;		/* port number of last reception */
 	u_char mode;		/* mode of last packet */
 	u_char version;		/* version number of last packet */
@@ -732,7 +732,7 @@ struct old_info_monitor {
  * Structure used for passing indication of flags to clear
  */
 struct reset_flags {
-	u_int32 flags;
+	uint32_t flags;
 };
 
 #define	RESET_FLAG_ALLPEERS	0x01
@@ -758,15 +758,15 @@ struct reset_flags {
  * module.
  */
 struct info_auth {
-	u_int32 timereset;	/* time counters were reset */
-	u_int32 numkeys;	/* number of keys we know */
-	u_int32 numfreekeys;	/* number of free keys */
-	u_int32 keylookups;	/* calls to authhavekey() */
-	u_int32 keynotfound;	/* requested key unknown */
-	u_int32 encryptions;	/* number of encryptions */
-	u_int32 decryptions;	/* number of decryptions */
-	u_int32 expired;	/* number of expired keys */
-	u_int32 keyuncached;	/* calls to encrypt/decrypt with uncached key */
+	uint32_t timereset;	/* time counters were reset */
+	uint32_t numkeys;	/* number of keys we know */
+	uint32_t numfreekeys;	/* number of free keys */
+	uint32_t keylookups;	/* calls to authhavekey() */
+	uint32_t keynotfound;	/* requested key unknown */
+	uint32_t encryptions;	/* number of encryptions */
+	uint32_t decryptions;	/* number of decryptions */
+	uint32_t expired;	/* number of expired keys */
+	uint32_t keyuncached;	/* calls to encrypt/decrypt with uncached key */
 };
 
 
@@ -774,14 +774,14 @@ struct info_auth {
  * Structure used to pass trap information to the client
  */
 struct info_trap {
-	u_int32 local_address;	/* local interface addres (v4) */
-	u_int32 trap_address;	/* remote client's addres (v4) */
+	uint32_t local_address;	/* local interface addres (v4) */
+	uint32_t trap_address;	/* remote client's addres (v4) */
 	u_short trap_port;	/* remote port number */
 	u_short sequence;	/* sequence number */
-	u_int32 settime;	/* time trap last set */
-	u_int32 origtime;	/* time trap originally set */
-	u_int32 resets;		/* number of resets on this trap */
-	u_int32 flags;		/* trap flags, as defined in ntp_control.h */
+	uint32_t settime;	/* time trap last set */
+	uint32_t origtime;	/* time trap originally set */
+	uint32_t resets;	/* number of resets on this trap */
+	uint32_t flags;		/* trap flags, as defined in ntp_control.h */
 	u_int v6_flag;			/* is this v6 or not */
 	struct in6_addr local_address6;	/* local interface address (v6) */
 	struct in6_addr trap_address6;	/* remote client's address (v6) */
@@ -791,8 +791,8 @@ struct info_trap {
  * Structure used to pass add/clear trap information to the client
  */
 struct conf_trap {
-	u_int32 local_address;	/* remote client's address */
-	u_int32 trap_address;	/* local interface address */
+	uint32_t local_address;	/* remote client's address */
+	uint32_t trap_address;	/* local interface address */
 	u_short trap_port;	/* remote client's port */
 	u_short unused;		/* (unused) */
 	u_int v6_flag;			/* is this v6 or not */
@@ -805,21 +805,21 @@ struct conf_trap {
  * Structure used to return statistics from the control module
  */
 struct info_control {
-	u_int32 ctltimereset;
-	u_int32 numctlreq;	/* number of requests we've received */
-	u_int32 numctlbadpkts;	/* number of bad control packets */
-	u_int32 numctlresponses;	/* # resp packets sent */
-	u_int32 numctlfrags;	/* # of fragments sent */
-	u_int32 numctlerrors;	/* number of error responses sent */
-	u_int32 numctltooshort;	/* number of too short input packets */
-	u_int32 numctlinputresp;	/* number of responses on input */
-	u_int32 numctlinputfrag;	/* number of fragments on input */
-	u_int32 numctlinputerr;	/* # input pkts with err bit set */
-	u_int32 numctlbadoffset;	/* # input pkts with nonzero offset */
-	u_int32 numctlbadversion;	/* # input pkts with unknown version */
-	u_int32 numctldatatooshort;	/* data too short for count */
-	u_int32 numctlbadop;	/* bad op code found in packet */
-	u_int32 numasyncmsgs;		/* # async messages we've sent */
+	uint32_t ctltimereset;
+	uint32_t numctlreq;		/* number of requests we've received */
+	uint32_t numctlbadpkts;		/* number of bad control packets */
+	uint32_t numctlresponses;	/* # resp packets sent */
+	uint32_t numctlfrags;		/* # of fragments sent */
+	uint32_t numctlerrors;		/* number of error responses sent */
+	uint32_t numctltooshort;	/* number of too short input packets */
+	uint32_t numctlinputresp;	/* number of responses on input */
+	uint32_t numctlinputfrag;	/* number of fragments on input */
+	uint32_t numctlinputerr;	/* # input pkts with err bit set */
+	uint32_t numctlbadoffset;	/* # input pkts with nonzero offset */
+	uint32_t numctlbadversion;	/* # input pkts with unknown version */
+	uint32_t numctldatatooshort;	/* data too short for count */
+	uint32_t numctlbadop;		/* bad op code found in packet */
+	uint32_t numasyncmsgs;		/* # async messages we've sent */
 };
 
 
@@ -827,20 +827,20 @@ struct info_control {
  * Structure used to return clock information
  */
 struct info_clock {
-	u_int32 clockadr;
+	uint32_t clockadr;
 	u_char type;
 	u_char flags;
 	u_char lastevent;
 	u_char currentstatus;
-	u_int32 polls;
-	u_int32 noresponse;
-	u_int32 badformat;
-	u_int32 baddata;
-	u_int32 timestarted;
+	uint32_t polls;
+	uint32_t noresponse;
+	uint32_t badformat;
+	uint32_t baddata;
+	uint32_t timestarted;
 	l_fp fudgetime1;
 	l_fp fudgetime2;
-	int32 fudgeval1;
-	u_int32 fudgeval2;
+	int32_t fudgeval1;
+	uint32_t fudgeval2;
 };
 
 
@@ -848,10 +848,10 @@ struct info_clock {
  * Structure used for setting clock fudge factors
  */
 struct conf_fudge {
-	u_int32 clockadr;
-	u_int32 which;
+	uint32_t clockadr;
+	uint32_t which;
 	l_fp fudgetime;
-	u_int32 fudgeval_flags;
+	uint32_t fudgeval_flags;
 };
 
 #define	FUDGE_TIME1	1
@@ -868,12 +868,12 @@ struct conf_fudge {
 #define	NUMCBUGTIMES	32
 
 struct info_clkbug {
-	u_int32 clockadr;
+	uint32_t clockadr;
 	u_char nvalues;
 	u_char ntimes;
 	u_short svalues;
-	u_int32 stimes;
-	u_int32 values[NUMCBUGVALUES];
+	uint32_t stimes;
+	uint32_t values[NUMCBUGVALUES];
 	l_fp times[NUMCBUGTIMES];
 };
 
@@ -881,26 +881,26 @@ struct info_clkbug {
  * Structure used for returning kernel pll/PPS information
  */
 struct info_kernel {
-	int32 offset;
-	int32 freq;
-	int32 maxerror;
-	int32 esterror;
+	int32_t offset;
+	int32_t freq;
+	int32_t maxerror;
+	int32_t esterror;
 	u_short status;
 	u_short shift;
-	int32 constant;
-	int32 precision;
-	int32 tolerance;
+	int32_t constant;
+	int32_t precision;
+	int32_t tolerance;
 
 /*
  * Variables used only if PPS signal discipline is implemented
  */
-	int32 ppsfreq;
-	int32 jitter;
-	int32 stabil;
-	int32 jitcnt;
-	int32 calcnt;
-	int32 errcnt;
-	int32 stbcnt;
+	int32_t ppsfreq;
+	int32_t jitter;
+	int32_t stabil;
+	int32_t jitcnt;
+	int32_t calcnt;
+	int32_t errcnt;
+	int32_t stbcnt;
 };
 
 /*
@@ -910,23 +910,23 @@ struct info_if_stats {
 	union addrun unaddr;		/* address */
 	union addrun unbcast;		/* broadcast */
 	union addrun unmask;		/* mask */
-	u_int32 v6_flag;		/* is this v6 */
+	uint32_t v6_flag;		/* is this v6 */
 	char name[32];			/* name of interface */
-	int32 flags;			/* interface flags */
-	int32 last_ttl;			/* last TTL specified */
-	int32 num_mcast;		/* No. of IP addresses in multicast socket */
-	int32 received;			/* number of incoming packets */
-	int32 sent;			/* number of outgoing packets */
-	int32 notsent;			/* number of send failures */
-	int32 uptime;			/* number of seconds this interface was active */
-	u_int32 scopeid;		/* Scope used for Multicasting */
-	u_int32 ifindex;		/* interface index - from system */
-	u_int32 ifnum;			/* sequential interface number */
-	u_int32 peercnt;		/* number of peers referencinf this interface - informational only */
+	int32_t flags;			/* interface flags */
+	int32_t last_ttl;		/* last TTL specified */
+	int32_t num_mcast;		/* No. of IP addresses in multicast socket */
+	int32_t received;		/* number of incoming packets */
+	int32_t sent;			/* number of outgoing packets */
+	int32_t notsent;		/* number of send failures */
+	int32_t uptime;			/* number of seconds this interface was active */
+	uint32_t scopeid;		/* Scope used for Multicasting */
+	uint32_t ifindex;		/* interface index - from system */
+	uint32_t ifnum;			/* sequential interface number */
+	uint32_t peercnt;		/* number of peers referencinf this interface - informational only */
 	u_short family;			/* Address family */
 	u_char ignore_packets;		/* Specify whether the packet should be ignored */
 	u_char action;			/* reason the item is listed */
-	int32 _filler0;			/* pad to a 64 bit size boundary */
+	int32_t _filler0;		/* pad to a 64 bit size boundary */
 };
 
 #define IFS_EXISTS	1	/* just exists */
@@ -937,9 +937,9 @@ struct info_if_stats {
  * Info returned with IP -> hostname lookup
  */
 /* 144 might need to become 32, matching data[] member of req_pkt */
-#define NTP_MAXHOSTNAME (32 - sizeof(u_int32) - sizeof(u_short))
+#define NTP_MAXHOSTNAME (32 - sizeof(uint32_t) - sizeof(u_short))
 struct info_dns_assoc {
-	u_int32 peeraddr;	/* peer address (HMS: being careful...) */
+	uint32_t peeraddr;	/* peer address (HMS: being careful...) */
 	associd_t associd;	/* association ID */
 	char hostname[NTP_MAXHOSTNAME];	/* hostname */
 };

@@ -23,7 +23,7 @@ struct server {
 	u_char trust;			/* trustability of the filtered data */
 	u_fp rootdelay;			/* distance from primary clock */
 	u_fp rootdisp;			/* peer clock dispersion */
-	u_int32 refid;			/* peer reference ID */
+	uint32_t refid;			/* peer reference ID */
 	l_fp reftime;			/* time of peer's last update */
 	u_long event_time;		/* time for next timeout */
 	u_long last_xmit;		/* time of last transmit */

@@ -138,7 +138,7 @@ private:
 public:
 	// note: (hi,lo) should be a positive normalised timeval;
 	// the constructor does not normalise the values!
-	AssertTimevalClose(time_t hi, int32 lo);
+	AssertTimevalClose(time_t hi, int32_t lo);
 
 	::testing::AssertionResult
 	operator()(const char* m_expr, const char* n_expr,
@@ -161,7 +161,7 @@ private:
 public:
 	// note: (hi,lo) should be a positive normalised timespec;
 	// the constructor does not normalise the values!
-	AssertTimespecClose(time_t hi, int32 lo);
+	AssertTimespecClose(time_t hi, int32_t lo);
 
 	::testing::AssertionResult
 	operator()(const char* m_expr, const char* n_expr,

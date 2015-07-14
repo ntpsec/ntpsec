@@ -14,10 +14,10 @@
 
 char *
 numtoa(
-	u_int32 num
+	uint32_t num
 	)
 {
-	register u_int32 netnum;
+	register uint32_t netnum;
 	register char *buf;
 
 	netnum = ntohl(num);
@@ -34,7 +34,7 @@ numtoa(
 /* Convert a refid & stratum to a string */
 const char *
 refid_str(
-	u_int32	refid,
+	uint32_t	refid,
 	int	stratum
 	)
 {

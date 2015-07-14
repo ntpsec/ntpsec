@@ -59,18 +59,18 @@
 /* conversion between l_fp fractions and nanoseconds */
 #ifdef HAVE_U_INT64
 # define FTOTVN(tsf)						\
-	((int32)						\
+	((int32_t)						\
 	 (((u_int64)(tsf) * NANOSECONDS + 0x80000000) >> 32))
 # define TVNTOF(tvu)						\
-	((u_int32)						\
+	((uint32_t)						\
 	 ((((u_int64)(tvu) << 32) + NANOSECONDS / 2) /		\
 	  NANOSECONDS))
 #else
 # define NSECFRAC	(FRAC / NANOSECONDS)
 # define FTOTVN(tsf)						\
-	((int32)((tsf) / NSECFRAC + 0.5))
+	((int32_t)((tsf) / NSECFRAC + 0.5))
 # define TVNTOF(tvu)						\
-	((u_int32)((tvu) * NSECFRAC + 0.5))
+	((uint32_t)((tvu) * NSECFRAC + 0.5))
 #endif
 
 
@@ -303,7 +303,7 @@ tspec_intv_to_lfp(
 	
 	v = normalize_tspec(x);
 	y.l_uf = TVNTOF(v.tv_nsec);
-	y.l_i = (int32)v.tv_sec;
+	y.l_i = (int32_t)v.tv_sec;
 
 	return y;
 }

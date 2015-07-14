@@ -29,10 +29,10 @@
  */
 typedef struct {
 	union {
-		u_int32 Xl_ui;
-		int32 Xl_i;
+		uint32_t Xl_ui;
+		int32_t Xl_i;
 	} Ul_i;
-	u_int32	l_uf;
+	uint32_t	l_uf;
 } l_fp;
 
 #define l_ui	Ul_i.Xl_ui		/* unsigned integral part */
@@ -61,8 +61,8 @@ typedef struct {
  *   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
  *
  */
-typedef int32 s_fp;
-typedef u_int32 u_fp;
+typedef int32_t s_fp;
+typedef uint32_t u_fp;
 
 /*
  * A unit second in fp format.	Actually 2**(half_the_bits_in_a_long)
@@ -134,66 +134,66 @@ typedef u_int32 u_fp;
 
 #define M_ADD(r_i, r_f, a_i, a_f)	/* r += a */ \
 	do { \
-		u_int32 add_t = (r_f); \
+		uint32_t add_t = (r_f); \
 		(r_f) += (a_f); \
-		(r_i) += (a_i) + ((u_int32)(r_f) < add_t); \
+		(r_i) += (a_i) + ((uint32_t)(r_f) < add_t); \
 	} while (false)
 
 #define M_ADD3(r_o, r_i, r_f, a_o, a_i, a_f) /* r += a, three word */ \
 	do { \
-		u_int32 add_t, add_c; \
+		uint32_t add_t, add_c; \
 		add_t  = (r_f); \
 		(r_f) += (a_f); \
-		add_c  = ((u_int32)(r_f) < add_t); \
+		add_c  = ((uint32_t)(r_f) < add_t); \
 		(r_i) += add_c; \
-		add_c  = ((u_int32)(r_i) < add_c); \
+		add_c  = ((uint32_t)(r_i) < add_c); \
 		add_t  = (r_i); \
 		(r_i) += (a_i); \
-		add_c |= ((u_int32)(r_i) < add_t); \
+		add_c |= ((uint32_t)(r_i) < add_t); \
 		(r_o) += (a_o) + add_c; \
 	} while (false)
 
 #define M_SUB(r_i, r_f, a_i, a_f)	/* r -= a */ \
 	do { \
-		u_int32 sub_t = (r_f); \
+		uint32_t sub_t = (r_f); \
 		(r_f) -= (a_f); \
-		(r_i) -= (a_i) + ((u_int32)(r_f) > sub_t); \
+		(r_i) -= (a_i) + ((uint32_t)(r_f) > sub_t); \
 	} while (false)
 
 #define	M_RSHIFTU(v_i, v_f)		/* v >>= 1, v is unsigned */ \
 	do { \
-		(v_f) = ((u_int32)(v_f) >> 1) | ((u_int32)(v_i) << 31);	\
-		(v_i) = ((u_int32)(v_i) >> 1); \
+		(v_f) = ((uint32_t)(v_f) >> 1) | ((uint32_t)(v_i) << 31);	\
+		(v_i) = ((uint32_t)(v_i) >> 1); \
 	} while (false)
 
 #define	M_RSHIFT(v_i, v_f)		/* v >>= 1, v is signed */ \
 	do { \
-		(v_f) = ((u_int32)(v_f) >> 1) | ((u_int32)(v_i) << 31);	\
-		(v_i) = ((u_int32)(v_i) >> 1) | ((u_int32)(v_i) & 0x80000000);	\
+		(v_f) = ((uint32_t)(v_f) >> 1) | ((uint32_t)(v_i) << 31);	\
+		(v_i) = ((uint32_t)(v_i) >> 1) | ((uint32_t)(v_i) & 0x80000000);	\
 	} while (false)
 
 #define	M_LSHIFT(v_i, v_f)		/* v <<= 1 */ \
 	do { \
-		(v_i) = ((u_int32)(v_i) << 1) | ((u_int32)(v_f) >> 31);	\
-		(v_f) = ((u_int32)(v_f) << 1); \
+		(v_i) = ((uint32_t)(v_i) << 1) | ((uint32_t)(v_f) >> 31);	\
+		(v_f) = ((uint32_t)(v_f) << 1); \
 	} while (false)
 
 #define	M_LSHIFT3(v_o, v_i, v_f)	/* v <<= 1, with overflow */ \
 	do { \
-		(v_o) = ((u_int32)(v_o) << 1) | ((u_int32)(v_i) >> 31);	\
-		(v_i) = ((u_int32)(v_i) << 1) | ((u_int32)(v_f) >> 31);	\
-		(v_f) = ((u_int32)(v_f) << 1); \
+		(v_o) = ((uint32_t)(v_o) << 1) | ((uint32_t)(v_i) >> 31);	\
+		(v_i) = ((uint32_t)(v_i) << 1) | ((uint32_t)(v_f) >> 31);	\
+		(v_f) = ((uint32_t)(v_f) << 1); \
 	} while (false)
 
-#define	M_ADDUF(r_i, r_f, uf)		/* r += uf, uf is u_int32 fraction */ \
+#define	M_ADDUF(r_i, r_f, uf)		/* r += uf, uf is uint32_t fraction */ \
 	M_ADD((r_i), (r_f), 0, (uf))	/* let optimizer worry about it */
 
-#define	M_SUBUF(r_i, r_f, uf)		/* r -= uf, uf is u_int32 fraction */ \
+#define	M_SUBUF(r_i, r_f, uf)		/* r -= uf, uf is uint32_t fraction */ \
 	M_SUB((r_i), (r_f), 0, (uf))	/* let optimizer worry about it */
 
-#define	M_ADDF(r_i, r_f, f)		/* r += f, f is a int32 fraction */ \
+#define	M_ADDF(r_i, r_f, f)		/* r += f, f is a int32_t fraction */ \
 	do { \
-		int32 add_f = (int32)(f); \
+		int32_t add_f = (int32_t)(f); \
 		if (add_f >= 0) \
 			M_ADD((r_i), (r_f), 0, (uint32)( add_f)); \
 		else \
@@ -204,23 +204,23 @@ typedef u_int32 u_fp;
 	(((v_i) & 0x80000000) != 0)
 
 #define	M_ISGT(a_i, a_f, b_i, b_f)	/* a > b signed */ \
-	(((u_int32)((a_i) ^ 0x80000000) > (u_int32)((b_i) ^ 0x80000000)) || \
-	  ((a_i) == (b_i) && ((u_int32)(a_f)) > ((u_int32)(b_f))))
+	(((uint32_t)((a_i) ^ 0x80000000) > (uint32_t)((b_i) ^ 0x80000000)) || \
+	  ((a_i) == (b_i) && ((uint32_t)(a_f)) > ((uint32_t)(b_f))))
 
 #define	M_ISGTU(a_i, a_f, b_i, b_f)	/* a > b unsigned */ \
-	(((u_int32)(a_i)) > ((u_int32)(b_i)) || \
-	  ((a_i) == (b_i) && ((u_int32)(a_f)) > ((u_int32)(b_f))))
+	(((uint32_t)(a_i)) > ((uint32_t)(b_i)) || \
+	  ((a_i) == (b_i) && ((uint32_t)(a_f)) > ((uint32_t)(b_f))))
 
 #define	M_ISHIS(a_i, a_f, b_i, b_f)	/* a >= b unsigned */ \
-	(((u_int32)(a_i)) > ((u_int32)(b_i)) || \
-	  ((a_i) == (b_i) && ((u_int32)(a_f)) >= ((u_int32)(b_f))))
+	(((uint32_t)(a_i)) > ((uint32_t)(b_i)) || \
+	  ((a_i) == (b_i) && ((uint32_t)(a_f)) >= ((uint32_t)(b_f))))
 
 #define	M_ISGEQ(a_i, a_f, b_i, b_f)	/* a >= b signed */ \
-	(((u_int32)((a_i) ^ 0x80000000) > (u_int32)((b_i) ^ 0x80000000)) || \
-	  ((a_i) == (b_i) && (u_int32)(a_f) >= (u_int32)(b_f)))
+	(((uint32_t)((a_i) ^ 0x80000000) > (uint32_t)((b_i) ^ 0x80000000)) || \
+	  ((a_i) == (b_i) && (uint32_t)(a_f) >= (uint32_t)(b_f)))
 
 #define	M_ISEQU(a_i, a_f, b_i, b_f)	/* a == b unsigned */ \
-	((u_int32)(a_i) == (u_int32)(b_i) && (u_int32)(a_f) == (u_int32)(b_f))
+	((uint32_t)(a_i) == (uint32_t)(b_i) && (uint32_t)(a_f) == (uint32_t)(b_f))
 
 /*
  * Operations on the long fp format
@@ -289,8 +289,8 @@ typedef u_int32 u_fp;
 		if (M_isneg) {					\
 			q_tmp = ~q_tmp + 1;			\
 		}						\
-		(r_uf) = (u_int32)q_tmp;			\
-		(r_ui) = (u_int32)(q_tmp >> 32);		\
+		(r_uf) = (uint32_t)q_tmp;			\
+		(r_ui) = (uint32_t)(q_tmp >> 32);		\
 	} while (false)
 
 #define M_LFPTOD(r_ui, r_uf, d) 	/* l_fp to double */	\
@@ -317,17 +317,17 @@ typedef u_int32 u_fp;
 	do { \
 		double d_tmp; \
 		if ((d_tmp = (d)) < 0) { \
-			(r_ui) = (u_int32)(-d_tmp); \
-			(r_uf) = (u_int32)(-(d_tmp + (double)(r_ui)) * FRAC); \
+			(r_ui) = (uint32_t)(-d_tmp); \
+			(r_uf) = (uint32_t)(-(d_tmp + (double)(r_ui)) * FRAC); \
 			M_NEG((r_ui), (r_uf)); \
 		} else { \
-			(r_ui) = (u_int32)d_tmp; \
-			(r_uf) = (u_int32)((d_tmp - (double)(r_ui)) * FRAC); \
+			(r_ui) = (uint32_t)d_tmp; \
+			(r_uf) = (uint32_t)((d_tmp - (double)(r_ui)) * FRAC); \
 		} \
 	} while (0)
 #define M_LFPTOD(r_ui, r_uf, d) 		/* l_fp to double */ \
 	do { \
-		u_int32 l_thi, l_tlo; \
+		uint32_t l_thi, l_tlo; \
 		l_thi = (r_ui); l_tlo = (r_uf); \
 		if (M_ISNEG(l_thi)) { \
 			M_NEG(l_thi, l_tlo); \
@@ -345,7 +345,7 @@ typedef u_int32 u_fp;
  * Prototypes
  */
 extern	char *	dofptoa		(u_fp, int, short, int);
-extern	char *	dolfptoa	(u_int32, u_int32, int, short, int);
+extern	char *	dolfptoa	(uint32_t, uint32_t, int, short, int);
 
 extern	bool	atolfp		(const char *, l_fp *);
 extern	int	buftvtots	(const char *, l_fp *);
@@ -357,7 +357,7 @@ extern	bool	mstolfp		(const char *, l_fp *);
 extern	char *	prettydate	(l_fp *);
 extern	char *	gmprettydate	(l_fp *);
 extern	char *	uglydate	(l_fp *);
-extern  void	mfp_mul		(int32 *, u_int32 *, int32, u_int32, int32, u_int32);
+extern  void	mfp_mul		(int32_t *, uint32_t *, int32_t, uint32_t, int32_t, uint32_t);
 
 extern	void	set_sys_fuzz	(double);
 extern	void	init_systime	(void);
@@ -365,7 +365,7 @@ extern	void	get_systime	(l_fp *);
 extern	int	step_systime	(double);
 extern	int	adj_systime	(double);
 
-extern	struct tm * ntp2unix_tm (u_int32 ntp, int local);
+extern	struct tm * ntp2unix_tm (uint32_t ntp, int local);
 
 #define	lfptoa(fpv, ndec)	mfptoa((fpv)->l_ui, (fpv)->l_uf, (ndec))
 #define	lfptoms(fpv, ndec)	mfptoms((fpv)->l_ui, (fpv)->l_uf, (ndec))
