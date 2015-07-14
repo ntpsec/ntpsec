@@ -28,8 +28,8 @@
 /*
  * local calendar helpers
  */
-static int32   ntp_to_year(u_int32);
-static u_int32 year_to_ntp(int32);
+static int32_t   ntp_to_year(uint32_t);
+static uint32_t year_to_ntp(int32_t);
 
 /*
  * Take a time spec given as day-of-year, hour, minute and second as
@@ -55,23 +55,23 @@ clocktime(
 	int	minute	 ,	/* minute of hour */
 	int	second	 ,	/* second of minute */
 	int	tzoff	 ,	/* hours west of GMT */
-	u_int32 rec_ui	 ,	/* pivot value */
-	u_long *yearstart,	/* cached start-of-year, should be fixed to u_int32 */
-	u_int32 *ts_ui	 )	/* effective time stamp */
+	uint32_t rec_ui	 ,	/* pivot value */
+	u_long *yearstart,	/* cached start-of-year, should be fixed to uint32_t */
+	uint32_t *ts_ui	 )	/* effective time stamp */
 {
-	u_int32 ystt[3];	/* year start */
-	u_int32 test[3];	/* result time stamp */
-	u_int32 diff[3];	/* abs difference to receive */
-	int32 y, tmp, idx, min;
+	uint32_t ystt[3];	/* year start */
+	uint32_t test[3];	/* result time stamp */
+	uint32_t diff[3];	/* abs difference to receive */
+	int32_t y, tmp, idx, min;
 	
 	/*
 	 * Compute the offset into the year in seconds.	 Note that
 	 * this could come out to be a negative number.
 	 */
-	tmp = ((int32)second +
-	       SECSPERMIN * ((int32)minute +
-			     MINSPERHR * ((int32)hour + (int32)tzoff +
-					  HRSPERDAY * ((int32)yday - 1))));
+	tmp = ((int32_t)second +
+	       SECSPERMIN * ((int32_t)minute +
+			     MINSPERHR * ((int32_t)hour + (int32_t)tzoff +
+					  HRSPERDAY * ((int32_t)yday - 1))));
 	/*
 	 * Based on the cached year start, do a first attempt. Be
 	 * happy and return if this gets us better than NEARTIME to
@@ -81,7 +81,7 @@ clocktime(
 	 */
 	if (*yearstart) {
 		/* -- get time stamp of potential solution */
-		test[0] = (u_int32)(*yearstart) + tmp;
+		test[0] = (uint32_t)(*yearstart) + tmp;
 		/* -- calc absolute difference to receive time */
 		diff[0] = test[0] - rec_ui;
 		if (diff[0] >= 0x80000000u)
@@ -128,7 +128,7 @@ clocktime(
 
 static int32
 ntp_to_year(
-	u_int32 ntp)
+	uint32_t ntp)
 {
 	vint64	     t;
 	ntpcal_split s;
@@ -139,11 +139,11 @@ ntp_to_year(
 	return s.hi + 1;
 }
 
-static u_int32
+static uint32_t
 year_to_ntp(
-	int32 year)
+	int32_t year)
 {
-	u_int32 days;
+	uint32_t days;
 	days = ntpcal_days_in_years(year-1) - DAY_NTP_STARTS + 1;
 	return days * SECSPERDAY;
 }

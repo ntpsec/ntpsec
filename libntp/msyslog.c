@@ -33,8 +33,8 @@ char *	syslog_fname;
 char *	syslog_abs_fname;
 
 /* libntp default ntp_syslogmask is all bits lit */
-#define INIT_NTP_SYSLOGMASK	~(u_int32)0
-u_int32 ntp_syslogmask = INIT_NTP_SYSLOGMASK;
+#define INIT_NTP_SYSLOGMASK	~(uint32_t)0
+uint32_t ntp_syslogmask = INIT_NTP_SYSLOGMASK;
 
 extern	char *	progname;
 
@@ -346,7 +346,7 @@ msyslog(
 void
 init_logging(
 	const char *	name,
-	u_int32		def_syslogmask,
+	uint32_t		def_syslogmask,
 	int		is_daemon
 	)
 {

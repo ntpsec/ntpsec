@@ -36,7 +36,7 @@
 #define	TC_ERR	(-1)
 #endif
 
-static void check_leapsec(u_int32, const time_t*, bool);
+static void check_leapsec(uint32_t, const time_t*, bool);
 
 /*
  * These routines provide support for the event timer.  The timer is
@@ -477,7 +477,7 @@ timer_clr_stats(void)
 
 static void
 check_leapsec(
-	u_int32        now  ,
+	uint32_t        now  ,
 	const time_t * tpiv ,
         bool           reset)
 {
@@ -494,7 +494,7 @@ check_leapsec(
 	    "System clock will be inaccurate for a long time.";
 
 	leap_result_t lsdata;
-	u_int32       lsprox;
+	uint32_t       lsprox;
 	
 #ifndef SYS_WINNT  /* WinNT port has its own leap second handling */
 # ifdef KERNEL_PLL

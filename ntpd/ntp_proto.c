@@ -64,7 +64,7 @@ u_char	sys_stratum;		/* system stratum */
 s_char	sys_precision;		/* local clock precision (log2 s) */
 double	sys_rootdelay;		/* roundtrip delay to primary source */
 double	sys_rootdisp;		/* dispersion to primary source */
-u_int32 sys_refid;		/* reference id (network byte order) */
+uint32_t sys_refid;		/* reference id (network byte order) */
 l_fp	sys_reftime;		/* last update time */
 struct	peer *sys_peer;		/* current peer */
 
@@ -201,7 +201,7 @@ transmit(
 			peer_xmit(peer);
 		} else if (sys_survivors < sys_minclock ||
 		    peer_associations < sys_maxclock) {
-			if (peer->ttl < (u_int32)sys_ttlmax)
+			if (peer->ttl < (uint32_t)sys_ttlmax)
 				peer->ttl++;
 			peer_xmit(peer);
 		}
@@ -361,7 +361,7 @@ receive(
 	int	is_authentic = 0;	/* cryptosum ok */
 	int	retcode = AM_NOMATCH;	/* match code */
 	keyid_t	skeyid = 0;		/* key IDs */
-	u_int32	opcode = 0;		/* extension field opcode */
+	uint32_t	opcode = 0;		/* extension field opcode */
 	sockaddr_u *dstadr_sin; 	/* active runway */
 	struct peer *peer2;		/* aux peer structure pointer */
 	endpt *	match_ep;		/* newpeer() local address */
@@ -485,9 +485,9 @@ receive(
 	authlen = LEN_PKT_NOMAC;
 	has_mac = rbufp->recv_length - authlen;
 	while (has_mac > 0) {
-		u_int32	len;
+		uint32_t	len;
 #ifdef AUTOKEY
-		u_int32	hostlen;
+		uint32_t	hostlen;
 		struct exten *ep;
 #endif /*AUTOKEY */
 
@@ -496,11 +496,11 @@ receive(
 			return;			/* bad length */
 		}
 		if (has_mac <= (int)MAX_MAC_LEN) {
-			skeyid = ntohl(((u_int32 *)pkt)[authlen / 4]);
+			skeyid = ntohl(((uint32_t *)pkt)[authlen / 4]);
 			break;
 
 		} else {
-			opcode = ntohl(((u_int32 *)pkt)[authlen / 4]);
+			opcode = ntohl(((uint32_t *)pkt)[authlen / 4]);
 			len = opcode & 0xffff;
 			if (len % 4 != 0 || len < 4 || (int)len +
 			    authlen > rbufp->recv_length) {
@@ -515,7 +515,7 @@ receive(
 			 */
 			if ((opcode & 0x3fff0000) == CRYPTO_ASSOC &&
 			    sys_groupname != NULL) {
-				ep = (struct exten *)&((u_int32 *)pkt)[authlen / 4];
+				ep = (struct exten *)&((uint32_t *)pkt)[authlen / 4];
 				hostlen = ntohl(ep->vallen);
 				if (hostlen >= sizeof(hostname) ||
 				    hostlen > len -
@@ -764,7 +764,7 @@ receive(
 		 * again. If the packet is authentic, it can mobilize an
 		 * association. Note that there is no key zero.
 		 */
-		if (!authdecrypt(skeyid, (u_int32 *)pkt, authlen,
+		if (!authdecrypt(skeyid, (uint32_t *)pkt, authlen,
 		    has_mac))
 			is_authentic = AUTH_ERROR;
 		else
@@ -2475,8 +2475,8 @@ clock_select(void)
 		 * orphan mode in timer().
 		 */
 		if (peer->stratum == sys_orphan) {
-			u_int32	localmet;
-			u_int32 peermet;
+			uint32_t	localmet;
+			uint32_t peermet;
 
 			if (peer->dstadr != NULL)
 				localmet = ntohl(peer->dstadr->addr_refid);
@@ -3296,7 +3296,7 @@ peer_xmit(
 		 * lit in the response.
 		 */
 		if (peer->cmmd != NULL) {
-			u_int32 temp32;
+			uint32_t temp32;
 
 			temp32 = CRYPTO_RESP;
 			peer->cmmd->opcode |= htonl(temp32);
@@ -3350,7 +3350,7 @@ peer_xmit(
 		}
 	}
 	xkeyid = peer->keyid;
-	authlen = authencrypt(xkeyid, (u_int32 *)&xpkt, sendlen);
+	authlen = authencrypt(xkeyid, (uint32_t *)&xpkt, sendlen);
 	if (authlen == 0) {
 		report_event(PEVNT_AUTH, peer, "no key");
 		peer->flash |= TEST5;		/* auth error */
@@ -3422,7 +3422,7 @@ fast_xmit(
 	l_fp	xmt_tx, xmt_ty;
 	int	sendlen;
 #ifdef AUTOKEY
-	u_int32	temp32;
+	uint32_t	temp32;
 #endif
 
 	/*
@@ -3545,7 +3545,7 @@ fast_xmit(
 	}
 #endif	/* AUTOKEY */
 	get_systime(&xmt_tx);
-	sendlen += authencrypt(xkeyid, (u_int32 *)&xpkt, sendlen);
+	sendlen += authencrypt(xkeyid, (uint32_t *)&xpkt, sendlen);
 #ifdef AUTOKEY
 	if (xkeyid > NTP_MAXKEY)
 		authtrust(xkeyid, 0);

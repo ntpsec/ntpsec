@@ -425,7 +425,7 @@ get_ntpEntTimeResolution(
 	)
 {
 	int	precision;
-	u_int32 resolution;
+	uint32_t resolution;
 
 	switch (reqinfo->mode) {
 
@@ -468,7 +468,7 @@ get_ntpEntTimePrecision(
 	)
 {
 	int	precision;
-	int32	precision32;
+	int32_t	precision32;
 
 	switch (reqinfo->mode) {
 
@@ -478,7 +478,7 @@ get_ntpEntTimePrecision(
 			return SNMP_ERR_GENERR;
 		if (1 != sscanf(ntpvalue, "%d", &precision))
 			return SNMP_ERR_GENERR;
-		precision32 = (int32)precision;
+		precision32 = (int32_t)precision;
 		snmp_set_var_typed_value(
 			requests->requestvb,
 			ASN_INTEGER,

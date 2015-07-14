@@ -58,15 +58,15 @@ struct speer {
 	u_char stratum;
 	u_char ppoll;
 	u_char precision;	/* should be s_char */
-	u_int32 refid;
+	uint32_t refid;
 	l_fp reftime;
 	keyid_t keyid;
 
 #ifdef AUTOKEY
 #define clear_to_zero opcode
-	u_int32	opcode;		/* last request opcode */
+	uint32_t	opcode;		/* last request opcode */
 	associd_t assoc;	/* peer association ID */
-	u_int32	crypto;		/* peer status word */
+	uint32_t	crypto;		/* peer status word */
 	EVP_PKEY *pkey;		/* public key */
 	const EVP_MD *digest;	/* message digest algorithm */
 	char	*subject;	/* certificate subject name */

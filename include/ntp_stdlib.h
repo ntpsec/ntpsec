@@ -29,7 +29,7 @@ extern	int	mvsnprintf(char *, size_t, const char *, va_list)
 extern	int	msnprintf(char *, size_t, const char *, ...)
 			NTP_PRINTF(3, 4);
 extern	void	msyslog(int, const char *, ...) NTP_PRINTF(2, 3);
-extern	void	init_logging	(const char *, u_int32, int);
+extern	void	init_logging	(const char *, uint32_t, int);
 extern	int	change_logfile	(const char *, int);
 extern	void	setup_logfile	(const char *);
 #ifndef errno_to_str
@@ -62,8 +62,8 @@ typedef void (*ctrl_c_fn)(void);
 /* authkeys.c */
 extern	void	auth_delkeys	(void);
 extern	int	auth_havekey	(keyid_t);
-extern	int	authdecrypt	(keyid_t, u_int32 *, int, int);
-extern	int	authencrypt	(keyid_t, u_int32 *, int);
+extern	int	authdecrypt	(keyid_t, uint32_t *, int, int);
+extern	int	authencrypt	(keyid_t, uint32_t *, int);
 extern	int	authhavekey	(keyid_t);
 extern	int	authistrusted	(keyid_t);
 extern	bool	authreadkeys	(const char *);
@@ -76,13 +76,13 @@ extern	bool	authusekey	(keyid_t, int, const u_char *);
  * the NTP timestamp properly, or the current system time if the
  * pivot pointer is NULL.
  */
-extern	u_int32	calyearstart	(u_int32 ntptime, const time_t *pivot);
-extern	u_int32	calmonthstart	(u_int32 ntptime, const time_t *pivot);
-extern	u_int32	calweekstart	(u_int32 ntptime, const time_t *pivot);
-extern	u_int32	caldaystart	(u_int32 ntptime, const time_t *pivot);
+extern	uint32_t	calyearstart	(uint32_t ntptime, const time_t *pivot);
+extern	uint32_t	calmonthstart	(uint32_t ntptime, const time_t *pivot);
+extern	uint32_t	calweekstart	(uint32_t ntptime, const time_t *pivot);
+extern	uint32_t	caldaystart	(uint32_t ntptime, const time_t *pivot);
 
 extern	const char *clockname	(int);
-extern	int	clocktime	(int, int, int, int, int, u_int32, u_long *, u_int32 *);
+extern	int	clocktime	(int, int, int, int, int, uint32_t, u_long *, uint32_t *);
 extern	int	ntp_getopt	(int, char **, const char *);
 extern	void	init_auth	(void);
 extern	void	init_lib	(void);
@@ -92,10 +92,10 @@ extern	void	auth_prealloc_symkeys(int);
 extern	int	ymd2yd		(int, int, int);
 
 /* a_md5encrypt.c */
-extern	int	MD5authdecrypt	(int, u_char *, u_int32 *, int, int);
-extern	int	MD5authencrypt	(int, u_char *, u_int32 *, int);
+extern	int	MD5authdecrypt	(int, u_char *, uint32_t *, int, int);
+extern	int	MD5authencrypt	(int, u_char *, uint32_t *, int);
 extern	void	MD5auth_setkey	(keyid_t, int, const u_char *, size_t);
-extern	u_int32	addr2refid	(sockaddr_u *);
+extern	uint32_t	addr2refid	(sockaddr_u *);
 
 /* emalloc.c */
 #ifndef EREALLOC_CALLSITE	/* ntp_malloc.h defines */
@@ -129,20 +129,20 @@ extern	bool	atouint		(const char *, u_long *);
 extern	bool	hextoint	(const char *, u_long *);
 extern	const char *	humanlogtime	(void);
 extern	const char *	humantime	(time_t);
-extern	char *	mfptoa		(u_int32, u_int32, short);
-extern	char *	mfptoms		(u_int32, u_int32, short);
+extern	char *	mfptoa		(uint32_t, uint32_t, short);
+extern	char *	mfptoms		(uint32_t, uint32_t, short);
 extern	const char * modetoa	(size_t);
 extern	const char * eventstr	(int);
 extern	const char * ceventstr	(int);
 extern	const char * res_match_flags(u_short);
 extern	const char * res_access_flags(u_short);
 #ifdef KERNEL_PLL
-extern	const char * k_st_flags	(u_int32);
+extern	const char * k_st_flags	(uint32_t);
 #endif
 extern	char *	statustoa	(int, int);
 extern	sockaddr_u * netof	(sockaddr_u *);
-extern	char *	numtoa		(u_int32);
-extern	char *	numtohost	(u_int32);
+extern	char *	numtoa		(uint32_t);
+extern	char *	numtohost	(uint32_t);
 extern	const char * socktoa	(const sockaddr_u *);
 extern	const char * sockporttoa(const sockaddr_u *);
 extern	u_short	sock_hash	(const sockaddr_u *);
@@ -151,7 +151,7 @@ extern	const char * socktohost	(const sockaddr_u *);
 extern	bool	octtoint	(const char *, u_long *);
 extern	u_long	ranp2		(int);
 extern	const char *refnumtoa	(sockaddr_u *);
-extern	const char *refid_str	(u_int32, int);
+extern	const char *refid_str	(uint32_t, int);
 
 extern	bool	decodenetnum	(const char *, sockaddr_u *);
 
