@@ -47,7 +47,7 @@
 #define CLOCK_PGATE	4.	/* poll-adjust gate */
 #define PPS_MAXAGE	120	/* kernel pps signal timeout (s) */
 #define	FREQTOD(x)	((x) / 65536e6) /* NTP to double */
-#define	DTOFREQ(x)	((int32)((x) * 65536e6)) /* double to NTP */
+#define	DTOFREQ(x)	((int32_t)((x) * 65536e6)) /* double to NTP */
 
 /*
  * Clock discipline state machine. This is used to control the
@@ -770,19 +770,19 @@ local_clock(
 			else
 				dtemp = .5;
 #ifdef STA_NANO
-			ntv.offset = (int32)(clock_offset * 1e9 +
+			ntv.offset = (int32_t)(clock_offset * 1e9 +
 			    dtemp);
 			ntv.constant = sys_poll;
 #else /* STA_NANO */
-			ntv.offset = (int32)(clock_offset * 1e6 +
+			ntv.offset = (int32_t)(clock_offset * 1e6 +
 			    dtemp);
 			ntv.constant = sys_poll - 4;
 #endif /* STA_NANO */
 			if (ntv.constant < 0)
 				ntv.constant = 0;
 
-			ntv.esterror = (u_int32)(clock_jitter * 1e6);
-			ntv.maxerror = (u_int32)((sys_rootdelay / 2 +
+			ntv.esterror = (uint32_t)(clock_jitter * 1e6);
+			ntv.maxerror = (uint32_t)((sys_rootdelay / 2 +
 			    sys_rootdisp) * 1e6);
 			ntv.status = STA_PLL;
 

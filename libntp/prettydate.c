@@ -65,7 +65,7 @@ get_struct_tm(
 	int	      local)
 {
 	struct tm *tm	 = NULL;
-	int32	   folds = 0;
+	int32_t	   folds = 0;
 	time_t	   ts;
 
 #ifdef HAVE_INT64
@@ -95,7 +95,7 @@ get_struct_tm(
 	 * since we do not have 64-bit scalars, it's not likely we have
 	 * 64-bit time_t. Assume 32 bits and properly reduce the value.
 	 */
-	u_int32 hi, lo;
+	uint32_t hi, lo;
 
 	hi = stamp->D_s.hi;
 	lo = stamp->D_s.lo;
@@ -111,7 +111,7 @@ get_struct_tm(
 			M_SUB(hi, lo, 0, SOLAR_CYCLE_SECS);
 		}
 	}
-	ts = (int32)lo;
+	ts = (int32_t)lo;
 
 #endif
 
@@ -165,7 +165,7 @@ common_prettydate(
 	char	    *bp;
 	struct tm   *tm;
 	u_int	     msec;
-	u_int32	     ntps;
+	uint32_t	     ntps;
 	vint64	     sec;
 
 	LIB_GETBUF(bp);
@@ -221,7 +221,7 @@ gmprettydate(
 
 struct tm *
 ntp2unix_tm(
-	u_int32 ntp, int local
+	uint32_t ntp, int local
 	)
 {
 	vint64 vl;

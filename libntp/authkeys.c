@@ -636,7 +636,7 @@ auth_agekeys(void)
 int
 authencrypt(
 	keyid_t		keyno,
-	u_int32 *	pkt,
+	uint32_t *	pkt,
 	int		length
 	)
 {\
@@ -666,7 +666,7 @@ authencrypt(
 int
 authdecrypt(
 	keyid_t		keyno,
-	u_int32 *	pkt,
+	uint32_t *	pkt,
 	int		length,
 	int		size
 	)

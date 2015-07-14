@@ -71,8 +71,8 @@ recvdata(
  */
 static void*
 skip_efields(
-	u_int32 *head,	/* head of extension chain 	*/
-	u_int32 *tail	/* tail/end of extension chain	*/
+	uint32_t *head,	/* head of extension chain 	*/
+	uint32_t *tail	/* tail/end of extension chain	*/
 	)
 {
 	
@@ -108,8 +108,8 @@ process_pkt (
 	int		is_authentic;	/* tri-valued */
 	int		mac_size;
 	u_int		exten_len;
-	u_int32 *       exten_end;
-	u_int32 *       packet_end;
+	uint32_t *       exten_end;
+	uint32_t *       packet_end;
 	l_fp		sent_xmt;
 	l_fp		resp_org;
 
@@ -136,7 +136,7 @@ process_pkt (
 		return PACKET_UNUSEABLE;
 	}
 	/* Note: pkt_len must be a multiple of 4 at this point! */
-	packet_end = (u_int32*)((char*)rpkt + pkt_len);
+	packet_end = (uint32_t*)((char*)rpkt + pkt_len);
 	exten_end = skip_efields(rpkt->exten, packet_end);
 	if (NULL == exten_end) {
 		msyslog(LOG_ERR,

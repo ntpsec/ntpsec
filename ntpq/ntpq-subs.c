@@ -17,7 +17,7 @@ size_t		maxhostlen;
 /*
  * Declarations for command handlers in here
  */
-static	associd_t checkassocid	(u_int32);
+static	associd_t checkassocid	(uint32_t);
 static	struct varlist *findlistvar (struct varlist *, char *);
 static	void	doaddvlist	(struct varlist *, const char *);
 static	void	dormvlist	(struct varlist *, const char *);
@@ -38,7 +38,7 @@ static	void	readvar 	(struct parse *, FILE *);
 static	void	writevar	(struct parse *, FILE *);
 static	void	clocklist	(struct parse *, FILE *);
 static	void	clockvar	(struct parse *, FILE *);
-static	bool	findassidrange	(u_int32, u_int32, int *, int *,
+static	bool	findassidrange	(uint32_t, uint32_t, int *, int *,
 				 FILE *);
 static	void	mreadlist	(struct parse *, FILE *);
 static	void	mreadvar	(struct parse *, FILE *);
@@ -378,7 +378,7 @@ static const qsort_cmp mru_qcmp_table[MRUSORT_MAX] = {
  */
 static associd_t
 checkassocid(
-	u_int32 value
+	uint32_t value
 	)
 {
 	associd_t	associd;
@@ -731,7 +731,7 @@ readlist(
 	if (pcmd->nargs == 0) {
 		associd = 0;
 	} else {
-	  /* HMS: I think we want the u_int32 target here, not the u_long */
+	  /* HMS: I think we want the uint32_t target here, not the u_long */
 		if (pcmd->argval[0].uval == 0)
 			associd = 0;
 		else if ((associd = checkassocid(pcmd->argval[0].uval)) == 0)
@@ -934,8 +934,8 @@ clockvar(
  */
 static bool
 findassidrange(
-	u_int32	assid1,
-	u_int32	assid2,
+	uint32_t	assid1,
+	uint32_t	assid2,
 	int *	from,
 	int *	to,
 	FILE *	fp
@@ -1491,7 +1491,7 @@ decodeaddrtype(
 	)
 {
 	char ch = '-';
-	u_int32 dummy;
+	uint32_t dummy;
 
 	switch(AF(sock)) {
 	case AF_INET:
@@ -1584,7 +1584,7 @@ doprintpeers(
 	sockaddr_u refidadr;
 	long hmode = 0;
 	u_long srcport = 0;
-	u_int32 u32;
+	uint32_t u32;
 	const char *dstadr_refid = "0.0.0.0";
 	const char *serverlocal;
 	size_t drlen;

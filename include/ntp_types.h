@@ -1,19 +1,13 @@
 /*
- *  ntp_types.h - defines how int32 and u_int32 are treated.
+ *  ntp_types.h - NTP basic types and macros.
  *
- * New style: Make sure C99 fixed width integer types are available:
- * intN_t and uintN_t
-
- * Old style: defines how int32 and u_int32 are treated.
- *  For 64 bit systems like the DEC Alpha, they have to be defined
- *  as int and u_int.
- *  For 32 bit systems, define them as long and u_long
+ * Assume C99 fixed width integer types are available: int32_t and uint32_t
  */
 #ifndef NTP_TYPES_H
 #define NTP_TYPES_H
 
 #include <sys/types.h>
-#include <inttypes.h>
+#include <stdint.h>
 #include <stdbool.h>
 
 #include <limits.h>
@@ -46,68 +40,6 @@
  * COUNTOF(array) - size of array in elements
  */
 #define COUNTOF(arr)	(sizeof(arr) / sizeof((arr)[0]))
-
-/*
- * VMS DECC (v4.1), {u_char,u_short,u_long} are only in SOCKET.H,
- *			and u_int isn't defined anywhere
- */
-#if defined(VMS)
-#include <socket.h>
-typedef unsigned int u_int;
-#endif /* VMS */
-
-#ifdef HAVE_UINT32_T
-# ifndef HAVE_INT32
-   typedef	int32_t		int32;
-# endif
-# ifndef HAVE_U_INT32
-   typedef	uint32_t	u_int32;
-#  if defined(UINT32_MAX) && !defined(U_INT32_MAX)
-#   define U_INT32_MAX UINT32_MAX
-#  endif
-# endif
-#elif (SIZEOF_INT == 4)
-# if !defined(HAVE_INT32) && !defined(int32)
-   typedef	int		int32;
-#  ifndef INT32_MIN
-#   define INT32_MIN INT_MIN
-#  endif
-#  ifndef INT32_MAX
-#   define INT32_MAX INT_MAX
-#  endif
-# endif
-# if !defined(HAVE_U_INT32) && !defined(u_int32)
-   typedef	unsigned	u_int32;
-#  if defined(UINT_MAX) && !defined(U_INT32_MAX)
-#   define U_INT32_MAX UINT_MAX
-#  endif
-# endif
-#else	/* SIZEOF_INT != 4 */
-# if (SIZEOF_LONG == 4)
-# if !defined(HAVE_INT32) && !defined(int32)
-    typedef	long		int32;
-#   ifndef INT32_MIN
-#    define INT32_MIN LONG_MIN
-#   endif
-#   ifndef INT32_MAX
-#    define INT32_MAX LONG_MAX
-#   endif
-#  endif
-# if !defined(HAVE_U_INT32) && !defined(u_int32)
-    typedef	unsigned long	u_int32;
-#   if defined(ULONG_MAX) && !defined(U_INT32_MAX)
-#    define U_INT32_MAX ULONG_MAX
-#   endif
-#  endif
-# else	/* SIZEOF_LONG != 4 */
-#  include "Bletch: what's 32 bits on this machine?"
-# endif
-#endif	/* !HAVE_UINT32_T && SIZEOF_INT != 4 */
-
-#ifndef U_INT32_MAX
-# define U_INT32_MAX	0xffffffff
-#endif
-
 
 /*
  * Ugly dance to find out if we have 64bit integer type.
@@ -166,10 +98,10 @@ typedef union {
 		uint16_t hh; uint16_t hl; uint16_t lh; uint16_t ll;
 	} W_s;
 	struct {
-		  int32 hi; u_int32 lo;
+		  int32_t hi; uint32_t lo;
 	} d_s;
 	struct {
-		u_int32	hi; u_int32 lo;
+		uint32_t	hi; uint32_t lo;
 	} D_s;
 #   else
 	struct {
@@ -179,10 +111,10 @@ typedef union {
 		uint16_t ll; uint16_t lh; uint16_t hl; uint16_t hh;
 	} W_s;
 	struct {
-		u_int32 lo;   int32 hi;
+		uint32_t lo;   int32_t hi;
 	} d_s;
 	struct {
-		u_int32 lo; u_int32 hi;
+		uint32_t lo; uint32_t hi;
 	} D_s;
 #   endif
 
@@ -193,17 +125,11 @@ typedef union {
 } vint64; /* variant int 64 */
 
 
-typedef uint8_t		ntp_u_int8_t;
-typedef uint16_t	ntp_u_int16_t;
-typedef uint32_t	ntp_u_int32_t;
-
-typedef struct ntp_uint64_t { u_int32 val[2]; } ntp_uint64_t;
-
 typedef uint16_t	associd_t; /* association ID */
 #define ASSOCID_MAX	USHRT_MAX
-typedef u_int32 keyid_t;	/* cryptographic key ID */
+typedef uint32_t keyid_t;	/* cryptographic key ID */
 #define KEYID_T_MAX	(0xffffffff)
-typedef u_int32 tstamp_t;	/* NTP seconds timestamp */
+typedef uint32_t tstamp_t;	/* NTP seconds timestamp */
 
 /*
  * Cloning malloc()'s behavior of always returning pointers suitably
