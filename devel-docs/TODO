@@ -1,3 +1,18 @@
+= TO DO =
+
+== Relatively new items ==
+
+* Remove the clocktypes array in ntp_control.c, it's a SPOT violation.
+  The clock type should be set in the static init function of the driver.
+
+* Remove libevent from the tree.  There's no reason not to link to a current
+  version of libevent.
+
+* The portability shims for the case where there is no OpenSSL library installed
+  are dodgy.  Get rid of them, it's a safe dependency.  The MD5 implementation
+  in the in-tree copy of the ISC library can probably go with it.
+
+== Old, sometime ancient stuff ==
 
       *** IF YOU CAN HELP FIX ANY OF THESE THINGS, PLEASE DO! ***
 
