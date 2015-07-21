@@ -63,7 +63,7 @@
 /*
  * Function prototypes
  */
-static  int     shm_start       (int unit, struct peer *peer);
+static  bool    shm_start       (int unit, struct peer *peer);
 static  void    shm_shutdown    (int unit, struct peer *peer);
 static  void    shm_poll        (int unit, struct peer *peer);
 static  void    shm_timer       (int unit, struct peer *peer);
