@@ -87,7 +87,7 @@ static bool systime_init_done;
 #endif
 
 #ifdef HAVE_SIGNALED_IO
-int using_sigio;
+bool using_sigio;
 #endif
 
 #ifdef SYS_WINNT
