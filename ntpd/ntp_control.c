@@ -1472,6 +1472,7 @@ ctl_putuint(
 	ctl_putdata(buffer, (unsigned)( cp - buffer ), 0);
 }
 
+#ifdef AUTOKEY
 /*
  * ctl_putcal - write a decoded calendar data into the response
  */
@@ -1498,6 +1499,7 @@ ctl_putcal(
 
 	return;
 }
+#endif	/* AUTOKEY */
 
 /*
  * ctl_putfs - write a decoded filestamp into the response
