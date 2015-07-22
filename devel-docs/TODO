@@ -12,6 +12,8 @@
   are dodgy.  Get rid of them, it's a safe dependency.  The MD5 implementation
   in the in-tree copy of the ISC library can probably go with it.
 
+* Make OpenSSL a required dependenxy and remove the in-tree shims to simulate it.
+
 == Old, sometime ancient stuff ==
 
       *** IF YOU CAN HELP FIX ANY OF THESE THINGS, PLEASE DO! ***
