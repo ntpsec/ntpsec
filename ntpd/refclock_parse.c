@@ -101,7 +101,7 @@
 #include "ntpd.h"
 #include "ntp_refclock.h"
 #include "timevalops.h"		/* includes <sys/time.h> */
-#include "ntp_control.h"
+#include "ntp_control.h"	/* for CTL_* clocktypes */
 
 #include <string.h>
 #include <stdio.h>

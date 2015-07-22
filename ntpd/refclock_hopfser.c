@@ -169,6 +169,7 @@ hopfserial_start (
 	pp->clockdesc = DESCRIPTION;
 	peer->precision = PRECISION;
 	memcpy((char *)&pp->refid, REFID, REFIDLEN);
+	peer->sstclktype = CTL_SST_TS_UHF;
 
 	up->leap_status = 0;
 	up->unit = (short) unit;

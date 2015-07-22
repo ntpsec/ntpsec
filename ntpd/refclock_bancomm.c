@@ -283,7 +283,8 @@ vme_start(
 	 * always zero for this clock.
 	 */
 	peer->precision = VMEPRECISION;
-	memcpy(&pp->refid, USNOREFID,4);
+	memcpy(&pp->refid, USNOREFID, REFIDLEN);
+	peer->sstclktype = CTL_SST_TS_UHF;
 	return true;
 }
 

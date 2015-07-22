@@ -40,13 +40,14 @@
 #include <ctype.h>
 #include <netinet/in.h>
 
-
+#include "ntp.h"
 #include "ntpd.h"
 #include "ntp_io.h"
 #include "ntp_refclock.h"
 #include "ntp_unixtime.h"
 #include "ntp_stdlib.h"
 #include "ntp_calendar.h"
+#include "ntp_control.h"
 
 
 /*******************************************************************************
@@ -351,6 +352,7 @@ static bool tsync_start(int unit, struct peer *peer)
      * what our actual refid is yet.
      */
     memcpy((char *)&pp->refid, TSYNC_REF_LOCAL, REFIDLEN);
+    peer->sstclktype = CTL_SST_TS_UHF;
 
     return true;
 

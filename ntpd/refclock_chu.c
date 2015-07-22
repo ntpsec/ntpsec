@@ -14,6 +14,7 @@
 #include "ntp_refclock.h"
 #include "ntp_calendar.h"
 #include "ntp_stdlib.h"
+#include "ntp_control.h"	/* for CTL_* clocktypes */
 
 #include <stdio.h>
 #include <ctype.h>
@@ -532,6 +533,7 @@ chu_start(
 	pp->clockdesc = DESCRIPTION;
 	strlcpy(up->ident, "CHU", sizeof(up->ident));
 	memcpy(&pp->refid, up->ident, REFIDLEN);
+	peer->sstclktype = CTL_SST_TS_HF;
 	DTOLFP(CHAR, &up->charstamp);
 #ifdef HAVE_AUDIO
 
@@ -1591,6 +1593,7 @@ chu_newchan(
 	snprintf(up->ident, sizeof(up->ident), "CHU%d", up->chan);
 	memcpy(&pp->refid, up->ident, REFIDLEN);
 	memcpy(&peer->refid, up->ident, REFIDLEN);
+	peer->sstclktype = CTL_SST_TS_HF;
 	if (metric == 0 && up->status & METRIC) {
 		up->status &= ~METRIC;
 		refclock_report(peer, CEVNT_PROP);

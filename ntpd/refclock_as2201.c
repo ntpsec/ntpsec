@@ -13,6 +13,7 @@
 #include "ntp_refclock.h"
 #include "ntp_unixtime.h"
 #include "ntp_stdlib.h"
+#include "ntp_control.h"	/* for CTL_* clocktypes */
 
 #include <stdio.h>
 #include <ctype.h>
@@ -194,6 +195,7 @@ as2201_start(
 	peer->precision = PRECISION;
 	pp->clockdesc = DESCRIPTION;
 	memcpy((char *)&pp->refid, REFID, REFIDLEN);
+	peer->sstclktype = CTL_SST_TS_UHF;
 	up->lastptr = up->stats;
 	up->index = 0;
 	return true;

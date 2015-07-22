@@ -101,6 +101,7 @@ tpro_start(
 	peer->precision = PRECISION;
 	pp->clockdesc = DESCRIPTION;
 	memcpy((char *)&pp->refid, REFID, REFIDLEN);
+	peer->sstclktype = CTL_SST_TS_UHF;
 	return true;
 }
 

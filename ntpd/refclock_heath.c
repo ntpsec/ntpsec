@@ -9,10 +9,12 @@
 
 #if defined(REFCLOCK) && defined(CLOCK_HEATH)
 
+#include "ntp.h"
 #include "ntpd.h"
 #include "ntp_io.h"
 #include "ntp_refclock.h"
 #include "ntp_stdlib.h"
+#include "ntp_control.h"	/* for CTL_* clocktypes */
 
 #include <stdio.h>
 #include <ctype.h>
@@ -244,6 +246,7 @@ heath_start(
 	peer->precision = PRECISION;
 	pp->clockdesc = DESCRIPTION;
 	memcpy(&pp->refid, REFID, REFIDLEN);
+	peer->sstclktype = CTL_SST_TS_HF;
 	return true;
 }
 

@@ -18,6 +18,7 @@
 #include "ntp_refclock.h"
 #include "ntp_calendar.h"
 #include "ntp_stdlib.h"
+#include "ntp_control.h"	/* for CTL_* clocktypes */
 
 #include <stdio.h>
 #include <ctype.h>
@@ -138,6 +139,7 @@ chronolog_start(
 	peer->precision = PRECISION;
 	pp->clockdesc = DESCRIPTION;
 	memcpy((char *)&pp->refid, REFID, REFIDLEN);
+	peer->sstclktype = CTL_SST_TS_LF;
 	return true;
 }
 

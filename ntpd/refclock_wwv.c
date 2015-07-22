@@ -7,12 +7,14 @@
 
 #if defined(REFCLOCK) && defined(CLOCK_WWV)
 
+#include "ntp.h"
 #include "ntpd.h"
 #include "ntp_io.h"
 #include "ntp_refclock.h"
 #include "ntp_calendar.h"
 #include "ntp_stdlib.h"
 #include "audio.h"
+#include "ntp_control.h"	/* for CTL_* clocktypes */
 
 #include <stdio.h>
 #include <ctype.h>
@@ -2448,6 +2450,7 @@ wwv_newchan(
 		up->dchan = j;
 		up->sptr = sp;
 		memcpy(&pp->refid, sp->refid, REFIDLEN);
+		peer->sstclktype = CTL_SST_TS_HF;
 		peer->refid = pp->refid;
 		up->status |= METRIC;
 		if (sp->select & SELV) {
