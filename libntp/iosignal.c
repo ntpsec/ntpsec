@@ -315,7 +315,7 @@ set_signal(input_handler_t *input)
 	
 	input_handler_callback = input;
 
-	using_sigio = TRUE;
+	using_sigio = true;
 #  ifdef USE_SIGIO
 	(void) signal_no_reset(SIGIO, sigio_handler);
 # endif
