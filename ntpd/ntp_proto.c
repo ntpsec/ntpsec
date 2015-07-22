@@ -2403,7 +2403,7 @@ clock_select(void)
 	struct peer *typesystem = NULL;
 	struct peer *typeorphan = NULL;
 #ifdef REFCLOCK
-	struct peer *typeacts = NULL;
+	struct peer *typemodem = NULL;
 	struct peer *typelocal = NULL;
 	struct peer *typepps = NULL;
 #endif /* REFCLOCK */
@@ -2505,23 +2505,19 @@ clock_select(void)
 			continue;
 #ifdef REFCLOCK
 		/*
-		 * The following are special cases. We deal
-		 * with them later.
+		 * This is an attempt to set up fallbacks in case falseticker
+		 * elimination leaves no survivors with better service quality.
 		 */
 		if (!(peer->flags & FLAG_PREFER)) {
-			switch (peer->refclktype) {
-			case REFCLK_LOCALCLOCK:
-				if (current_time > orphwait &&
-				    typelocal == NULL)
-					typelocal = peer;
-				continue;
-
-			case REFCLK_ACTS:
-				if (current_time > orphwait &&
-				    typeacts == NULL)
-					typeacts = peer;
-				continue;
-			}
+		    if (peer->sstclktype == CTL_SST_TS_LOCAL) {
+			if (current_time > orphwait && typelocal == NULL)
+				typelocal = peer;
+			continue;
+		    } else if (peer->sstclktype == CTL_SST_TS_TELEPHONE) {
+			if (current_time > orphwait && typemodem == NULL)
+				typemodem = peer;
+			continue;
+		    }
 		}
 #endif /* REFCLOCK */
 
@@ -2673,7 +2669,7 @@ clock_select(void)
 	nlist = j;
 
 	/*
-	 * If no survivors remain at this point, check if the modem
+	 * If no survivors remain at this point, check if we have a modem
 	 * driver, local driver or orphan parent in that order. If so,
 	 * nominate the first one found as the only survivor.
 	 * Otherwise, give up and leave the island to the rats.
@@ -2682,8 +2678,8 @@ clock_select(void)
 		peers[0].error = 0;
 		peers[0].synch = sys_mindisp;
 #ifdef REFCLOCK
-		if (typeacts != NULL) {
-			peers[0].peer = typeacts;
+		if (typemodem != NULL) {
+			peers[0].peer = typemodem;
 			nlist = 1;
 		} else if (typelocal != NULL) {
 			peers[0].peer = typelocal;
