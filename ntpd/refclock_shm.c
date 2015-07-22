@@ -15,6 +15,7 @@
 
 #if defined(REFCLOCK) && defined(CLOCK_SHM)
 
+#include "ntp.h"
 #include "ntpd.h"
 #undef fileno
 #include "ntp_io.h"
@@ -25,6 +26,7 @@
 #undef fileno
 #include "ntp_stdlib.h"
 #include "ntp_assert.h"
+#include "ntp_control.h"
 
 #undef fileno
 #include <ctype.h>
