@@ -11,10 +11,12 @@
 #include <stdio.h>
 #include <ctype.h>
 
+#include "ntp.h"
 #include "ntpd.h"
 #include "ntp_io.h"
 #include "ntp_refclock.h"
 #include "ntp_stdlib.h"
+#include "ntp_control.h"	/* for CTL_* clocktypes */
 
 /* This driver supports ultralink Model 320,325,330,331,332 WWVB radios
  *
@@ -155,6 +157,7 @@ ulink_start(
 	peer->precision = PRECISION;
 	pp->clockdesc = DESCRIPTION;
 	memcpy((char *)&pp->refid, REFID, REFIDLEN);
+	peer->sstclktype = CTL_SST_TS_LF;
 	return true;
 }
 

@@ -14,11 +14,13 @@
 #include <stdio.h>
 #include <ctype.h>
 
+#include "ntp.h"
 #include "ntpd.h"
 #include "ntp_io.h"
 #include "ntp_refclock.h"
 #include "ntp_unixtime.h"
 #include "ntp_stdlib.h"
+#include "ntp_control.h"	/* for CTL_* clocktypes */
 
 #ifdef SYS_WINNT
 extern int async_write(int, const void *, unsigned int);
@@ -306,6 +308,7 @@ true_start(
 	peer->precision = PRECISION;
 	pp->clockdesc = DESCRIPTION;
 	memcpy(&pp->refid, REFID, REFIDLEN);
+	peer->sstclktype = CTL_SST_TS_UHF;
 	up->pollcnt = 2;
 	up->type = t_unknown;
 	up->state = s_Base;

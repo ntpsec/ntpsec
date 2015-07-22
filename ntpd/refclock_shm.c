@@ -234,6 +234,7 @@ shm_start(
 	 * Initialize miscellaneous peer variables
 	 */
 	memcpy((char *)&pp->refid, REFID, REFIDLEN);
+	peer->sstclktype = CTL_SST_TS_UHF;
 	if (up->shm != 0) {
 		pp->unitptr = up;
 		up->shm->precision = PRECISION;

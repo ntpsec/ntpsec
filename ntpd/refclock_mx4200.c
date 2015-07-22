@@ -237,6 +237,7 @@ mx4200_start(
 	peer->precision = PRECISION;
 	pp->clockdesc = DESCRIPTION;
 	memcpy((char *)&pp->refid, REFID, REFIDLEN);
+	peer->sstclktype = CTL_SST_TS_LF;
 
 	/* Ensure the receiver is properly configured */
 	return mx4200_config(peer);

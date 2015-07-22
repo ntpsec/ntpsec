@@ -8,10 +8,12 @@
 
 #if defined(REFCLOCK) && defined(CLOCK_PST)
 
+#include "ntp.h"
 #include "ntpd.h"
 #include "ntp_io.h"
 #include "ntp_refclock.h"
 #include "ntp_stdlib.h"
+#include "ntp_control.h"	/* for CTL_* clocktypes */
 
 #include <stdio.h>
 #include <ctype.h>
@@ -156,6 +158,7 @@ pst_start(
 	peer->precision = PRECISION;
 	pp->clockdesc = DESCRIPTION;
 	memcpy((char *)&pp->refid, WWVREFID, REFIDLEN);
+	peer->sstclktype = CTL_SST_TS_UHF;
 	return true;
 }
 

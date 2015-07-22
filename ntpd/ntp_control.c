@@ -661,66 +661,6 @@ int num_ctl_traps;
 #define TRAP_TYPE_PRIO		1	/* priority trap */
 #define TRAP_TYPE_NONPRIO	2	/* nonpriority trap */
 
-
-/*
- * List relating reference clock types to control message time sources.
- * Index by the reference clock type. This list will only be used iff
- * the reference clock driver doesn't set peer->sstclktype to something
- * different than CTL_SST_TS_UNSPEC.
- */
-#ifdef REFCLOCK
-static const u_char clocktypes[] = {
-	CTL_SST_TS_NTP,		/* REFCLK_NONE (0) */
-	CTL_SST_TS_LOCAL,	/* REFCLK_LOCALCLOCK (1) */
-	CTL_SST_TS_UHF,		/* deprecated REFCLK_GPS_TRAK (2) */
-	CTL_SST_TS_HF,		/* REFCLK_WWV_PST (3) */
-	CTL_SST_TS_LF,		/* REFCLK_WWVB_SPECTRACOM (4) */
-	CTL_SST_TS_UHF,		/* REFCLK_TRUETIME (5) */
-	CTL_SST_TS_UHF,		/* REFCLK_IRIG_AUDIO (6) */
-	CTL_SST_TS_HF,		/* REFCLK_CHU (7) */
-	CTL_SST_TS_LF,		/* REFCLOCK_PARSE (default) (8) */
-	CTL_SST_TS_LF,		/* REFCLK_GPS_MX4200 (9) */
-	CTL_SST_TS_UHF,		/* REFCLK_GPS_AS2201 (10) */
-	CTL_SST_TS_UHF,		/* REFCLK_GPS_ARBITER (11) */
-	CTL_SST_TS_UHF,		/* REFCLK_IRIG_TPRO (12) */
-	CTL_SST_TS_ATOM,	/* REFCLK_ATOM_LEITCH (13) */
-	CTL_SST_TS_LF,		/* not used (14) */
-	CTL_SST_TS_NTP,		/* not used (15) */
-	CTL_SST_TS_UHF,		/* REFCLK_IRIG_BANCOMM (16) */
-	CTL_SST_TS_UHF,		/* REFCLK_GPS_DATU (17) */
-	CTL_SST_TS_TELEPHONE,	/* REFCLK_NIST_ACTS (18) */
-	CTL_SST_TS_HF,		/* REFCLK_WWV_HEATH (19) */
-	CTL_SST_TS_UHF,		/* REFCLK_GPS_NMEA (20) */
-	CTL_SST_TS_UHF,		/* REFCLK_GPS_VME (21) */
-	CTL_SST_TS_ATOM,	/* REFCLK_ATOM_PPS (22) */
-	CTL_SST_TS_NTP,		/* not used (23) */
-	CTL_SST_TS_NTP,		/* not used (24) */
-	CTL_SST_TS_NTP,		/* not used (25) */
-	CTL_SST_TS_UHF,		/* REFCLK_GPS_HP (26) */
-	CTL_SST_TS_LF,		/* REFCLK_ARCRON_MSF (27) */
-	CTL_SST_TS_UHF,		/* REFCLK_SHM (28) */
-	CTL_SST_TS_UHF,		/* REFCLK_PALISADE (29) */
-	CTL_SST_TS_UHF,		/* REFCLK_ONCORE (30) */
-	CTL_SST_TS_UHF,		/* REFCLK_JUPITER (31) */
-	CTL_SST_TS_LF,		/* REFCLK_CHRONOLOG (32) */
-	CTL_SST_TS_LF,		/* REFCLK_DUMBCLOCK (33) */
-	CTL_SST_TS_LF,		/* REFCLK_ULINK (34) */
-	CTL_SST_TS_LF,		/* REFCLK_PCF (35) */
-	CTL_SST_TS_HF,		/* REFCLK_WWV (36) */
-	CTL_SST_TS_LF,		/* REFCLK_FG (37) */
-	CTL_SST_TS_UHF,		/* REFCLK_HOPF_SERIAL (38) */
-	CTL_SST_TS_UHF,		/* REFCLK_HOPF_PCI (39) */
-	CTL_SST_TS_LF,		/* REFCLK_JJY (40) */
-	CTL_SST_TS_UHF,		/* REFCLK_TT560 (41) */
-	CTL_SST_TS_UHF,		/* REFCLK_ZYFER (42) */
-	CTL_SST_TS_UHF,		/* REFCLK_RIPENCC (43) */
-	CTL_SST_TS_UHF,		/* REFCLK_NEOCLOCK4X (44) */
-	CTL_SST_TS_UHF,		/* REFCLK_TSYNCPCI (45) */
-	CTL_SST_TS_UHF		/* REFCLK_GPSDJSON (46) */
-};
-#endif  /* REFCLOCK */
-
-
 /*
  * Keyid used for authenticating write requests.
  */
@@ -1185,8 +1125,6 @@ ctlsysstatus(void)
 	if (sys_peer != NULL) {
 		if (CTL_SST_TS_UNSPEC != sys_peer->sstclktype)
 			this_clock = sys_peer->sstclktype;
-		else if (sys_peer->refclktype < COUNTOF(clocktypes))
-			this_clock = clocktypes[sys_peer->refclktype];
 	}
 #else /* REFCLOCK */
 	if (sys_peer != 0)

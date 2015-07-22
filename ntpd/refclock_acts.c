@@ -13,7 +13,7 @@
 #include "ntp_unixtime.h"
 #include "ntp_refclock.h"
 #include "ntp_stdlib.h"
-#include "ntp_control.h"
+#include "ntp_control.h"	/* for CTL_* clocktypes */
 
 #include <stdio.h>
 #include <ctype.h>
@@ -792,6 +792,7 @@ acts_timecode(
 		else if (leap == 2)
 			pp->leap = LEAP_DELSECOND;
 		memcpy(&pp->refid, REFACTS, REFIDLEN);
+		peer->sstclktype = CTL_SST_TS_TELEPHONE;
 		up->msgcnt++;
 		if (flag != '#' && up->msgcnt < 10)
 			return;
@@ -816,6 +817,7 @@ acts_timecode(
 		 */
 		pp->leap = LEAP_NOWARNING;
 		memcpy(&pp->refid, REFUSNO, REFIDLEN);
+		peer->sstclktype = CTL_SST_TS_TELEPHONE;
 		up->msgcnt++;
 		break;
 
@@ -840,6 +842,7 @@ acts_timecode(
 		}
 		pp->day = ymd2yd(pp->year, month, day);
 		memcpy(&pp->refid, REFPTB, REFIDLEN);
+		peer->sstclktype = CTL_SST_TS_TELEPHONE;
 		up->msgcnt++;
 		break;
 
@@ -858,6 +861,7 @@ acts_timecode(
 		if (synchar != ' ')
 			pp->leap = LEAP_NOTINSYNC;
 		memcpy(&pp->refid, REFTYPE, REFIDLEN);
+		peer->sstclktype = CTL_SST_TS_TELEPHONE;
 		up->msgcnt++;
 		break;
 
@@ -879,6 +883,7 @@ acts_timecode(
 		else if (leapchar == 'L')
 			pp->leap = LEAP_ADDSECOND;
 		memcpy(&pp->refid, REFTYPE, REFIDLEN);
+		peer->sstclktype = CTL_SST_TS_TELEPHONE;
 		up->msgcnt++;
 		break;
 

@@ -31,12 +31,14 @@
 #include <ctype.h>
 #include <sys/socket.h>
 
+#include "ntp.h"
 #include "ntpd.h"
 #include "ntp_io.h"
 #include "ntp_unixtime.h"
 #include "ntp_refclock.h"
 #include "ntp_stdlib.h"
 #include "ntp_calendar.h"
+#include "ntp_control.h"	/* for CTL_* clocktypes */
 #include "timespecops.h"
 
 #ifdef HAVE_PPSAPI
@@ -467,6 +469,7 @@ nmea_start(
 	peer->precision = PRECISION;
 	pp->clockdesc = DESCRIPTION;
 	memcpy(&pp->refid, REFID, REFIDLEN);
+	peer->sstclktype = CTL_SST_TS_UHF;
 
 	/* Open serial port. Use CLK line discipline, if available. */
 	devlen = snprintf(device, sizeof(device), DEVICE, unit);

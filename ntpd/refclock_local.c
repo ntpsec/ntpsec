@@ -10,9 +10,11 @@
 
 #ifdef REFCLOCK
 
+#include "ntp.h"
 #include "ntpd.h"
 #include "ntp_refclock.h"
 #include "ntp_stdlib.h"
+#include "ntp_control.h"	/* for CTL_* clocktypes */
 
 #include <stdio.h>
 #include <ctype.h>
@@ -130,6 +132,7 @@ local_start(
 	pp->stratum = STRATUM;
 	pp->clockdesc = DESCRIPTION;
 	memcpy(&pp->refid, "LOCL", REFIDLEN);
+	peer->sstclktype = CTL_SST_TS_LOCAL;
 	poll_time = current_time;
 	return true;
 }

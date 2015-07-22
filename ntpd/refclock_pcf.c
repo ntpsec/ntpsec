@@ -8,11 +8,13 @@
 
 #if defined(REFCLOCK) && defined(CLOCK_PCF)
 
+#include "ntp.h"
 #include "ntpd.h"
 #include "ntp_io.h"
 #include "ntp_refclock.h"
 #include "ntp_calendar.h"
 #include "ntp_stdlib.h"
+#include "ntp_control.h"	/* for CTL_* clocktypes */
 
 /*
  * This driver supports the parallel port radio clock sold by Conrad
@@ -101,6 +103,7 @@ pcf_start(
 	   transmits 69 bits with a period of 2.5 milliseconds per bit */
 	pp->fudgetime1 = 0.1725;
 	memcpy((char *)&pp->refid, REFID, REFIDLEN);
+	peer->sstclktype = CTL_SST_TS_LF;
 
 	return true;
 }

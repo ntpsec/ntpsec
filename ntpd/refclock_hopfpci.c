@@ -36,11 +36,13 @@
 
 #if defined(REFCLOCK) && defined(CLOCK_HOPF_PCI)
 
+#include "ntp.h"
 #include "ntpd.h"
 #include "ntp_io.h"
 #include "ntp_refclock.h"
 #include "ntp_unixtime.h"
 #include "ntp_stdlib.h"
+#include "ntp_control.h"	/* for CTL_* clocktypes */
 
 #undef fileno
 #include <ctype.h>
@@ -151,6 +153,7 @@ hopfpci_start(
 	 * Initialize miscellaneous peer variables
 	 */
 	memcpy((char *)&pp->refid, REFID, REFIDLEN);
+	peer->sstclktype = CTL_SST_TS_UHF;
 	peer->precision = PRECISION;
 	pp->clockdesc = DESCRIPTION;
 	up->leap_status = 0;

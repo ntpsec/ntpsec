@@ -6,7 +6,9 @@
 #include <config.h>
 #endif
 
+#include "ntp.h"
 #include "ntp_types.h"
+#include "ntp_control.h"	/* for CTL_* clocktypes */
 
 #if defined(REFCLOCK) && defined(CLOCK_ARCRON_MSF)
 
@@ -719,6 +721,7 @@ arc_start(
 		memcpy((char *)&pp->refid, REFID, REFIDLEN);
 		break;
 	}
+	peer->sstclktype = CTL_SST_TS_LF;
 	/* Spread out resyncs so that they should remain separated. */
 	up->next_resync = current_time + INITIAL_RESYNC_DELAY + (67*unit)%1009;
 

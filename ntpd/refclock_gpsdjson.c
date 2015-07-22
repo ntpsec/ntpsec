@@ -79,7 +79,9 @@
 #include <config.h>
 #endif
 
+#include "ntp.h"
 #include "ntp_types.h"
+#include "ntp_control.h"	/* for CTL_* clocktypes */
 
 #if defined(REFCLOCK) && defined(CLOCK_GPSDJSON) && !defined(SYS_WINNT)
 
@@ -544,6 +546,7 @@ gpsd_start(
 	pp->lencode       = 0;
 	pp->clockdesc     = DESCRIPTION;
 	memcpy(&pp->refid, REFID, REFIDLEN);
+	peer->sstclktype = CTL_SST_TS_UHF;
 
 	/* Initialize miscellaneous variables */
 	if (unit >= 128)

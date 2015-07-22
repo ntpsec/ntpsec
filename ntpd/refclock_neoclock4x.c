@@ -282,6 +282,7 @@ neoclock4x_start(int unit,
    */
   peer->precision = -10;
   memcpy((char *)&pp->refid, "neol", REFIDLEN);
+  peer->sstclktype = CTL_SST_TS_UHF;
 
   up->leap_status = 0;
   up->unit = unit;
