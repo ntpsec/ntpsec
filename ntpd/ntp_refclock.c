@@ -146,8 +146,8 @@ init_refclock(void)
  * supports a reference clock in the form of an ordinary NTP peer. A
  * driver-specific support routine completes the initialization, if
  * used. Default peer variables which identify the clock and establish
- * its reference ID and stratum are set here. It returns one if success
- * and zero if the clock address is invalid or already running,
+ * its reference ID and stratum are set here. It returns true if success
+ * and false if the clock address is invalid or already running,
  * insufficient resources are available or the driver declares a bum
  * rap.
  */
