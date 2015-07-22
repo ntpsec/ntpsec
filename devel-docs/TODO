@@ -11,6 +11,17 @@
 
 * Make OpenSSL a required dependenxy and remove the in-tree shims to simulate it.
 
+Hal:
+> I think there is some interaction between when the ACTS driver calls and the 
+> state of other stuff, like the connection to the net.  This is probably a 
+> good candidate to get cleaned up.
+> 
+> There is another possible tangle in this area.  If you set "noselect" on the 
+> server line in the config file, ntpd goes through all the action of 
+> collecting the data and writing log files, but then drops the clock.  I don't 
+> know things well enough to be sure that this sort of logic won't pick one 
+> back up.
+
 == Old, sometime ancient stuff ==
 
       *** IF YOU CAN HELP FIX ANY OF THESE THINGS, PLEASE DO! ***
