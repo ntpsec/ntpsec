@@ -276,7 +276,6 @@ sntp/libevent/test/regress.gen.h
 sntp/libopts/.deps/
 sntp/libopts/Makefile
 sntp/libtool
-sntp/scm-rev
 sntp/scripts/Makefile
 sntp/sntp
 sntp/sntp.1

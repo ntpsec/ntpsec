@@ -29,6 +29,7 @@
 #include <unistd.h>
 #include <sys/stat.h>
 #include <stdio.h>
+#include <stdbool.h>
 #ifdef HAVE_SYS_PARAM_H
 # include <sys/param.h>
 #endif
@@ -215,13 +216,13 @@ parse_cmdline_opts(
 	char ***pargv
 	)
 {
-	static int	parsed;
+	static bool	parsed = false;
 	static int	optct;
 
 	if (!parsed)
 		optct = ntpOptionProcess(&ntpdOptions, *pargc, *pargv);
 
-	parsed = 1;
+	parsed = true;
 	
 	*pargc -= optct;
 	*pargv += optct;

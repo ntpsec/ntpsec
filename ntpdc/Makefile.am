@@ -78,7 +78,7 @@ std_def_list =							\
 
 $(srcdir)/ntpdc-opts.h: $(srcdir)/ntpdc-opts.c
 	@: do-nothing action to avoid default SCCS get, .h built with .c
-	
+
 $(srcdir)/ntpdc-opts.c: $(srcdir)/ntpdc-opts.def $(std_def_list)
 	$(run_ag) ntpdc-opts.def
 
@@ -110,7 +110,7 @@ ntpdc.$(NTPDC_MS): $(srcdir)/ntpdc.$(MANTAGFMT).in $(top_builddir)/config.status
 
 $(srcdir)/invoke-ntpdc.menu: $(srcdir)/invoke-ntpdc.texi
 	@: do-nothing action to avoid default SCCS get, .menu built with .texi
-	
+
 $(srcdir)/invoke-ntpdc.texi: $(srcdir)/ntpdc-opts.def $(std_def_list)
 	$(run_ag) -Tagtexi-cmd.tpl -DLEVEL=section ntpdc-opts.def
 	$(top_srcdir)/scripts/build/check--help $@
@@ -130,12 +130,9 @@ check-layout: ntpdc-layout $(srcdir)/layout.std layout.here
 
 $(PROGRAMS): version.o
 
-$(top_srcdir)/sntp/scm-rev:
-	cd ../sntp && $(MAKE) $(AM_MAKEFLAGS) check-scm-rev
+version.c: $(ntpdc_OBJECTS) ../libntp/libntp.a
+	$(top_builddir)/scripts/build/mkver ntpdc
 
-version.c: $(ntpdc_OBJECTS) ../libntp/libntp.a Makefile $(top_srcdir)/sntp/scm-rev
-	env CSET=`cat $(top_srcdir)/sntp/scm-rev` $(top_builddir)/scripts/build/mkver ntpdc
-	
 version.o: version.c
 	env CCACHE_DISABLE=1 $(COMPILE) -c version.c -o version.o
 
