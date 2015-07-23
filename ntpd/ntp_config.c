@@ -4304,7 +4304,8 @@ config_ntpd(
 	config_trap(ptree);
 	config_vars(ptree);
 
-	io_open_sockets();
+	if (!HAVE_OPT(SAVECONFIGQUIT))
+		io_open_sockets();
 
 	config_other_modes(ptree);
 	config_peers(ptree);
@@ -4438,7 +4439,8 @@ getconfig(
 		) {
 		msyslog(LOG_INFO, "getconfig: Couldn't open <%s>: %m", FindConfig(config_file));
 #ifndef SYS_WINNT
-		io_open_sockets();
+		if (!HAVE_OPT(SAVECONFIGQUIT))
+			io_open_sockets();
 
 		return;
 #else
@@ -4450,7 +4452,8 @@ getconfig(
 			 * a configuration file.
 			 */
 			msyslog(LOG_INFO, "getconfig: Couldn't open <%s>: %m", FindConfig(alt_config_file));
-			io_open_sockets();
+			if (!HAVE_OPT(SAVECONFIGQUIT))
+				io_open_sockets();
 
 			return;
 		}
