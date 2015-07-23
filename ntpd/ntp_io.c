@@ -36,7 +36,6 @@
 #include "ntp_assert.h"
 #include "timevalops.h"
 #include "timespecops.h"
-#include "ntpd-opts.h"
 
 /* Don't include ISC's version of IPv6 variables and structures */
 #define ISC_IPV6_H 1
