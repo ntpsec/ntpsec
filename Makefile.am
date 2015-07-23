@@ -26,26 +26,12 @@ DISTCHECK_CONFIGURE_FLAGS = -C --with-sntp
 
 EXTRA_DIST =			\
 	$(srcdir)/COPYRIGHT	\
-	ChangeLog		\
-	CommitLog		\
-	CommitLog-4.1.0		\
 	NEWS			\
-	NOTES.y2kfixes		\
-	README.hackers		\
-	README.patches		\
-	README.refclocks	\
-	README.versions		\
-	TODO			\
-	WHERE-TO-START		\
 	bootstrap		\
-	build			\
 	config.h.in		\
-	dot.emacs		\
-	flock-build		\
 	packageinfo.sh		\
-	readme.y2kfixes		\
-	results.y2kfixes	\
 	\
+	devel-docs		\
 	conf			\
 	html			\
 	lib/isc			\
@@ -57,28 +43,13 @@ EXTRA_DIST =			\
 	$(NULL)
 
 CLEANFILES =
-DISTCLEANFILES = .gcc-warning
+DISTCLEANFILES = 
 
-# HMS: Keep .gcc-warning first, as that way it gets printed first.
 BUILT_SOURCES =				\
-	.gcc-warning			\
 	libtool				\
 	html/.datecheck			\
 	$(srcdir)/COPYRIGHT		\
-	$(srcdir)/.checkChangeLog	\
 	$(NULL)
-
-.gcc-warning:
-	@echo "Compiling with GCC now generates lots of new warnings."
-	@echo " "
-	@echo "Don't be concerned. They're just warnings."
-	@echo " "
-	@echo "Don't send bug reports about the warnings, either."
-	@echo " "
-	@echo "Feel free to send patches that fix these warnings, though."
-	@echo " "
-	@sleep 1
-	@touch $@
 
 html/.datecheck: FRC.html
 	cd $(srcdir)/html && \
@@ -102,10 +73,6 @@ COPYRIGHT-please: $(srcdir)/COPYRIGHT
 	   configured in $(srcdir) but "make ./COPYRIGHT" succeeds. \
 	   Rather than determine our $(srcdir) from sntp/Makefile.am \
 	   COPYRIGHT-please serves as a fixed target.
-
-$(srcdir)/.checkChangeLog: $(srcdir)/ChangeLog $(srcdir)/scripts/build/checkChangeLog
-	cd $(srcdir) && \
-	./scripts/build/checkChangeLog
 
 dist-hook:
 	@find $(distdir) -type d -name SCCS -print | xargs rm -rf
