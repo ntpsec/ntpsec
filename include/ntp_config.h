@@ -309,6 +309,10 @@ server_info *create_sim_server(address_node *addr, double server_offset,
 extern struct REMOTE_CONFIG_INFO remote_config;
 void config_remotely(sockaddr_u *);
 
+extern bool have_interface_option;
+extern bool saveconfigquit;
+extern const char *saveconfigfile;
+
 #ifdef SAVECONFIG
 int dump_config_tree(config_tree *ptree, FILE *df, int comment);
 int dump_all_config_trees(FILE *df, int comment);

@@ -46,7 +46,6 @@
 #include "ntp_cmdargs.h"
 #include "ntp_scanner.h"
 #include "ntp_parser.h"
-#include "ntpd-opts.h"
 
 
 /* list of servers from command line for config_peers() */
@@ -55,6 +54,16 @@ char **	cmdline_servers;
 
 /* set to false if admin doesn't want memory locked */
 bool	do_memlock = true;
+
+/*
+ * FIXME: ugly globals, only created to avoid wiring in option-parsing cruft.
+ * These are symptoms of deeper factoring issues; the things they're controlling,
+ * deep down inside that configuration parsing, should not be happening where
+ * they are.
+ */
+bool have_interface_option;
+bool saveconfigquit;
+const char *saveconfigfile;
 
 /*
  * "logconfig" building blocks
@@ -2749,8 +2758,7 @@ config_nic_rules(
 
 	curr_node = HEAD_PFIFO(ptree->nic_rules);
 
-	if (curr_node != NULL
-	    && (HAVE_OPT( NOVIRTUALIPS ) || HAVE_OPT( INTERFACE ))) {
+	if (curr_node != NULL && have_interface_option) {
 		msyslog(LOG_ERR,
 			"interface/nic rules are not allowed with --interface (-I) or --novirtualips (-L)%s",
 			(input_from_file) ? ", exiting" : "");
@@ -4304,7 +4312,7 @@ config_ntpd(
 	config_trap(ptree);
 	config_vars(ptree);
 
-	if (!HAVE_OPT(SAVECONFIGQUIT))
+	if (!saveconfigquit)
 		io_open_sockets();
 
 	config_other_modes(ptree);
@@ -4439,7 +4447,7 @@ getconfig(
 		) {
 		msyslog(LOG_INFO, "getconfig: Couldn't open <%s>: %m", FindConfig(config_file));
 #ifndef SYS_WINNT
-		if (!HAVE_OPT(SAVECONFIGQUIT))
+		if (!saveconfigquit)
 			io_open_sockets();
 
 		return;
@@ -4452,7 +4460,7 @@ getconfig(
 			 * a configuration file.
 			 */
 			msyslog(LOG_INFO, "getconfig: Couldn't open <%s>: %m", FindConfig(alt_config_file));
-			if (!HAVE_OPT(SAVECONFIGQUIT))
+			if (!saveconfigquit)
 				io_open_sockets();
 
 			return;
@@ -4504,17 +4512,17 @@ save_and_apply_config_tree(bool input_from_file)
 	LINK_TAIL_SLIST(cfg_tree_history, ptree, link, config_tree);
 
 #ifdef SAVECONFIG
-	if (HAVE_OPT( SAVECONFIGQUIT )) {
+	if (saveconfigquit) {
 		FILE *dumpfile;
 		int err;
 		int dumpfailed;
 
-		dumpfile = fopen(OPT_ARG( SAVECONFIGQUIT ), "w");
+		dumpfile = fopen(saveconfigfile, "w");
 		if (NULL == dumpfile) {
 			err = errno;
 			mfprintf(stderr,
 				 "can not create save file %s, error %d %m\n",
-				 OPT_ARG(SAVECONFIGQUIT), err);
+				 saveconfigfile, err);
 			exit(err);
 		}
 
@@ -4522,12 +4530,12 @@ save_and_apply_config_tree(bool input_from_file)
 		if (dumpfailed)
 			fprintf(stderr,
 				"--saveconfigquit %s error %d\n",
-				OPT_ARG( SAVECONFIGQUIT ),
+				saveconfigfile,
 				dumpfailed);
 		else
 			fprintf(stderr,
 				"configuration saved to %s\n",
-				OPT_ARG( SAVECONFIGQUIT ));
+				saveconfigfile);
 
 		exit(dumpfailed);
 	}
