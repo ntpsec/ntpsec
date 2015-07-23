@@ -21,7 +21,6 @@
 
 #include "crypto.h"
 #include "log.h"
-#include "sntp-opts.h"	
 #include "utilities.h"
 
 /* FIXME To be replaced by the constants in ntp.h */
@@ -39,7 +38,8 @@ int recvdata(SOCKET rsock, sockaddr_u *sender, void *rdata,
 int recvpkt(SOCKET rsock, struct pkt *rpkt, unsigned int rsize,
 	    struct pkt *spkt);
 int process_pkt(struct pkt *rpkt, sockaddr_u *sas, int pkt_len,
-		int mode, struct pkt *spkt, const char *func_name);
+		int mode, struct pkt *spkt, const char *func_name,
+		bool authenticate);
 
 /* Shortened peer structure. Not absolutely necessary yet */
 struct speer {
