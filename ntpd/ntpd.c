@@ -702,6 +702,9 @@ ntpdmain(
 	 * Get the configuration.  This is done in a separate module
 	 * since this will definitely be different for the gizmo board.
 	 */
+	have_interface_option = HAVE_OPT(NOVIRTUALIPS) || HAVE_OPT(INTERFACE);
+	saveconfigquit = HAVE_OPT(SAVECONFIGQUIT);
+	saveconfigfile = OPT_ARG( SAVECONFIGQUIT);
 	getconfig(argc, argv);
 
 	if (do_memlock) {
