@@ -6,7 +6,6 @@ noinst_SCRIPTS = mkver
 NULL=
 EXTRA_DIST =			\
 	check--help		\
-	checkChangeLog		\
 	checkHtmlFileDates	\
 	fixautomakedepsmagic	\
 	genCommitLog		\

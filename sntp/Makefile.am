@@ -122,7 +122,6 @@ EXTRA_DIST =				\
 	sntp.mdoc.in			\
 	sntp.html			\
 	sntp.texi			\
-	$(srcdir)/scm-rev		\
 	$(srcdir)/m4/version.m4		\
 	$(NULL)
 
@@ -131,7 +130,6 @@ BUILT_SOURCES =				\
 	libtool				\
 	$(srcdir)/sntp-opts.c		\
 	$(srcdir)/sntp-opts.h		\
-	check-scm-rev			\
 	$(srcdir)/include/version.def	\
 	$(srcdir)/m4/version.m4		\
 	$(srcdir)/include/version.texi	\
@@ -176,8 +174,8 @@ $(PROGRAMS): version.o
 ## That is probably not possible since LDADD_LIBEVENT may be
 ## non-file "-levent_core".
 
-version.c: $(sntp_OBJECTS) ../libntp/libntp.a Makefile $(srcdir)/scm-rev
-	env CSET=`cat $(srcdir)/scm-rev` $(top_builddir)/../scripts/build/mkver sntp
+version.c: $(sntp_OBJECTS) ../libntp/libntp.a Makefile
+	$(top_builddir)/../scripts/build/mkver sntp
 
 version.o: version.c
 	env CCACHE_DISABLE=1 $(COMPILE) -c version.c -o version.o
@@ -196,20 +194,6 @@ $(srcdir)/autogen-version.def:
 
 built-sources-only: $(BUILT_SOURCES)
 	@: do-nothing action to avoid default SCCS get
-
-## HMS: The next bit is still suboptimal.  We'll get an error if this is
-## a bk repo and srcdir or scm-rev is unwritable.
-
-check-scm-rev: $(srcdir)/scm-rev
-	@: do-nothing
-
-$(srcdir)/scm-rev:
-	-test -r $(srcdir)/../SCCS/s.ChangeSet &&		\
-	    (bk version) >/dev/null 2>&1 &&			\
-	    cd $(srcdir)/.. &&					\
-	    x=`bk -R prs -hr+ -nd:I: ChangeSet` &&		\
-	    y=`cat sntp/scm-rev 2>/dev/null` || true &&		\
-	    case "$$x" in ''|$$y) ;; *) echo $$x > sntp/scm-rev ;; esac
 
 $(srcdir)/m4/version.m4: $(srcdir)/../packageinfo.sh
 	TEMPDIR=`pwd` && export TEMPDIR && cd $(srcdir) && \
