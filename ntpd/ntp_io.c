@@ -475,9 +475,9 @@ ntpd_addremove_io_fd(
 void
 io_open_sockets(void)
 {
-	static int already_opened;
+	static bool already_opened = false;
 
-	if (already_opened || HAVE_OPT( SAVECONFIGQUIT ))
+	if (already_opened)
 		return;
 
 	already_opened = 1;
