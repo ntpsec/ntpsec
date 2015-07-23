@@ -79,19 +79,19 @@ protected:
 TEST_F(packetProcessingTest, TooShortLength) {
 	EXPECT_EQ(PACKET_UNUSEABLE,
 			  process_pkt(&testpkt, &testsock, LEN_PKT_NOMAC - 1,
-						  MODE_SERVER, &testspkt, "UnitTest"));
+						  MODE_SERVER, &testspkt, "UnitTest", true));
 	EXPECT_EQ(PACKET_UNUSEABLE,
 			  process_pkt(&testpkt, &testsock, LEN_PKT_NOMAC - 1,
-						  MODE_BROADCAST, &testspkt, "UnitTest"));
+						  MODE_BROADCAST, &testspkt, "UnitTest", true));
 }
 
 TEST_F(packetProcessingTest, LengthNotMultipleOfFour) {
 	EXPECT_EQ(PACKET_UNUSEABLE,
 			  process_pkt(&testpkt, &testsock, LEN_PKT_NOMAC + 6,
-						  MODE_SERVER, &testspkt, "UnitTest"));
+						  MODE_SERVER, &testspkt, "UnitTest", true));
 	EXPECT_EQ(PACKET_UNUSEABLE,
 			  process_pkt(&testpkt, &testsock, LEN_PKT_NOMAC + 3,
-						  MODE_BROADCAST, &testspkt, "UnitTest"));
+						  MODE_BROADCAST, &testspkt, "UnitTest", true));
 }
 
 TEST_F(packetProcessingTest, TooShortExtensionFieldLength) {
@@ -107,7 +107,7 @@ TEST_F(packetProcessingTest, TooShortExtensionFieldLength) {
 
 	EXPECT_EQ(PACKET_UNUSEABLE,
 			  process_pkt(&testpkt, &testsock, pkt_len,
-						  MODE_SERVER, &testspkt, "UnitTest"));
+						  MODE_SERVER, &testspkt, "UnitTest", true));
 }
 
 TEST_F(packetProcessingTest, UnauthenticatedPacketReject) {
@@ -120,7 +120,7 @@ TEST_F(packetProcessingTest, UnauthenticatedPacketReject) {
 	// We demand authentication, but no MAC header is present.
 	EXPECT_EQ(SERVER_AUTH_FAIL,
 			  process_pkt(&testpkt, &testsock, pkt_len,
-						  MODE_SERVER, &testspkt, "UnitTest"));
+						  MODE_SERVER, &testspkt, "UnitTest", true));
 }
 
 TEST_F(packetProcessingTest, CryptoNAKPacketReject) {
@@ -132,7 +132,7 @@ TEST_F(packetProcessingTest, CryptoNAKPacketReject) {
 
 	EXPECT_EQ(SERVER_AUTH_FAIL,
 			  process_pkt(&testpkt, &testsock, pkt_len,
-						  MODE_SERVER, &testspkt, "UnitTest"));
+						  MODE_SERVER, &testspkt, "UnitTest", true));
 }
 
 TEST_F(packetProcessingTest, AuthenticatedPacketInvalid) {
@@ -155,7 +155,7 @@ TEST_F(packetProcessingTest, AuthenticatedPacketInvalid) {
 
 	EXPECT_EQ(SERVER_AUTH_FAIL,
 			  process_pkt(&testpkt, &testsock, pkt_len,
-						  MODE_SERVER, &testspkt, "UnitTest"));
+						  MODE_SERVER, &testspkt, "UnitTest", true));
 }
 
 TEST_F(packetProcessingTest, AuthenticatedPacketUnknownKey) {
@@ -175,7 +175,7 @@ TEST_F(packetProcessingTest, AuthenticatedPacketUnknownKey) {
 
 	EXPECT_EQ(SERVER_AUTH_FAIL,
 			  process_pkt(&testpkt, &testsock, pkt_len,
-						  MODE_SERVER, &testspkt, "UnitTest"));
+						  MODE_SERVER, &testspkt, "UnitTest", true));
 }
 
 TEST_F(packetProcessingTest, ServerVersionTooOld) {
@@ -190,7 +190,7 @@ TEST_F(packetProcessingTest, ServerVersionTooOld) {
 	
 	EXPECT_EQ(SERVER_UNUSEABLE,
 			  process_pkt(&testpkt, &testsock, pkt_len,
-						  MODE_SERVER, &testspkt, "UnitTest"));
+						  MODE_SERVER, &testspkt, "UnitTest", true));
 }
 
 TEST_F(packetProcessingTest, ServerVersionTooNew) {
@@ -205,7 +205,7 @@ TEST_F(packetProcessingTest, ServerVersionTooNew) {
 
 	EXPECT_EQ(SERVER_UNUSEABLE,
 			  process_pkt(&testpkt, &testsock, pkt_len,
-						  MODE_SERVER, &testspkt, "UnitTest"));
+						  MODE_SERVER, &testspkt, "UnitTest", true));
 }
 
 TEST_F(packetProcessingTest, NonWantedMode) {
@@ -219,7 +219,7 @@ TEST_F(packetProcessingTest, NonWantedMode) {
 
 	EXPECT_EQ(SERVER_UNUSEABLE,
 			  process_pkt(&testpkt, &testsock, LEN_PKT_NOMAC,
-						  MODE_SERVER, &testspkt, "UnitTest"));
+						  MODE_SERVER, &testspkt, "UnitTest", true));
 }
 
 /* Tests bug 1597 */
@@ -231,7 +231,7 @@ TEST_F(packetProcessingTest, KoDRate) {
 
 	EXPECT_EQ(KOD_RATE,
 			  process_pkt(&testpkt, &testsock, LEN_PKT_NOMAC,
-						  MODE_SERVER, &testspkt, "UnitTest"));
+						  MODE_SERVER, &testspkt, "UnitTest", true));
 }
 
 TEST_F(packetProcessingTest, KoDDeny) {
@@ -242,7 +242,7 @@ TEST_F(packetProcessingTest, KoDDeny) {
 
 	EXPECT_EQ(KOD_DEMOBILIZE,
 			  process_pkt(&testpkt, &testsock, LEN_PKT_NOMAC,
-						  MODE_SERVER, &testspkt, "UnitTest"));
+						  MODE_SERVER, &testspkt, "UnitTest", true));
 }
 
 TEST_F(packetProcessingTest, RejectUnsyncedServer) {
@@ -254,7 +254,7 @@ TEST_F(packetProcessingTest, RejectUnsyncedServer) {
 
 	EXPECT_EQ(SERVER_UNUSEABLE,
 			  process_pkt(&testpkt, &testsock, LEN_PKT_NOMAC,
-						  MODE_SERVER, &testspkt, "UnitTest"));
+						  MODE_SERVER, &testspkt, "UnitTest", true));
 }
 
 TEST_F(packetProcessingTest, RejectWrongResponseServerMode) {
@@ -271,7 +271,7 @@ TEST_F(packetProcessingTest, RejectWrongResponseServerMode) {
 
 	EXPECT_EQ(PACKET_UNUSEABLE,
 			  process_pkt(&testpkt, &testsock, LEN_PKT_NOMAC,
-						  MODE_SERVER, &testspkt, "UnitTest"));
+						  MODE_SERVER, &testspkt, "UnitTest", true));
 }
 
 TEST_F(packetProcessingTest, AcceptNoSentPacketBroadcastMode) {
@@ -283,7 +283,7 @@ TEST_F(packetProcessingTest, AcceptNoSentPacketBroadcastMode) {
 
 	EXPECT_EQ(LEN_PKT_NOMAC,
 		  process_pkt(&testpkt, &testsock, LEN_PKT_NOMAC,
-			      MODE_BROADCAST, NULL, "UnitTest"));
+			      MODE_BROADCAST, NULL, "UnitTest", true));
 }
 
 TEST_F(packetProcessingTest, CorrectUnauthenticatedPacket) {
@@ -291,7 +291,7 @@ TEST_F(packetProcessingTest, CorrectUnauthenticatedPacket) {
 
 	EXPECT_EQ(LEN_PKT_NOMAC,
 			  process_pkt(&testpkt, &testsock, LEN_PKT_NOMAC,
-						  MODE_SERVER, &testspkt, "UnitTest"));
+						  MODE_SERVER, &testspkt, "UnitTest", true));
 }
 
 TEST_F(packetProcessingTest, CorrectAuthenticatedPacketMD5) {
@@ -310,7 +310,7 @@ TEST_F(packetProcessingTest, CorrectAuthenticatedPacketMD5) {
 
 	EXPECT_EQ(pkt_len,
 			  process_pkt(&testpkt, &testsock, pkt_len,
-						  MODE_SERVER, &testspkt, "UnitTest"));
+						  MODE_SERVER, &testspkt, "UnitTest", true));
 
 }
 
@@ -330,5 +330,5 @@ TEST_F(packetProcessingTest, CorrectAuthenticatedPacketSHA1) {
 
 	EXPECT_EQ(pkt_len,
 			  process_pkt(&testpkt, &testsock, pkt_len,
-						  MODE_SERVER, &testspkt, "UnitTest"));
+						  MODE_SERVER, &testspkt, "UnitTest", true));
 }

@@ -100,7 +100,8 @@ process_pkt (
 	int pkt_len,
 	int mode,
 	struct pkt *spkt,
-	const char * func_name
+	const char * func_name,
+	bool authenticate
 	)
 {
 	u_int		key_id;
@@ -115,7 +116,7 @@ process_pkt (
 
 	key_id = 0;
 	pkt_key = NULL;
-	is_authentic = (HAVE_OPT(AUTHENTICATION)) ? 0 : -1;
+	is_authentic = authenticate ? 0 : -1;
 
 	/*
 	 * Parse the extension field if present. We figure out whether

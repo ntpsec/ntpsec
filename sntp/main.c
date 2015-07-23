@@ -891,7 +891,7 @@ sock_cb(
 		  sptoa(&sender)));
 
 	rpktl = process_pkt(&r_pkt, &sender, rpktl, MODE_SERVER,
-			    &spkt->x_pkt, "sock_cb");
+			    &spkt->x_pkt, "sock_cb", HAVE_OPT(AUTHENTICATION));
 
 	TRACE(2, ("sock_cb: process_pkt returned %d\n", rpktl));
 
