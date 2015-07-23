@@ -418,11 +418,8 @@ check-saveconfig: complete.conf compsave.conf
 ../libparse/libparse.a:
 	cd ../libparse && $(MAKE) $(AM_MAKEFLAGS) check-libparse
 
-$(top_srcdir)/sntp/scm-rev:
-	cd ../sntp && $(MAKE) $(AM_MAKEFLAGS) check-scm-rev
-
-version.c: $(ntpd_OBJECTS) ../libntp/libntp.a @LIBPARSE@ Makefile $(top_srcdir)/sntp/scm-rev
-	env CSET=`cat $(top_srcdir)/sntp/scm-rev` $(top_builddir)/scripts/build/mkver ntpd
+version.c: $(ntpd_OBJECTS) ../libntp/libntp.a @LIBPARSE@ Makefile
+	$(top_builddir)/scripts/build/mkver ntpd
 
 version.o: version.c
 	env CCACHE_DISABLE=1 $(COMPILE) -c version.c -o version.o

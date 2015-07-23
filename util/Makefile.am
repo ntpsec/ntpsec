@@ -120,11 +120,8 @@ kern.o: kern.c
 
 $(PROGRAMS): version.o
 
-$(top_srcdir)/sntp/scm-rev:
-	cd ../sntp && $(MAKE) $(AM_MAKEFLAGS) check-scm-rev
-
-version.c: $(ntp_keygen_OBJECTS) ../libntp/libntp.a Makefile $(top_srcdir)/sntp/scm-rev
-	env CSET=`cat $(top_srcdir)/sntp/scm-rev` $(top_builddir)/scripts/build/mkver ntp-keygen
+version.c: $(ntp_keygen_OBJECTS) ../libntp/libntp.a Makefile
+	$(top_builddir)/scripts/build/mkver ntp-keygen
 
 version.o: version.c
 	env CCACHE_DISABLE=1 $(COMPILE) -c version.c -o version.o
