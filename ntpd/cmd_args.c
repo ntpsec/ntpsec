@@ -18,7 +18,7 @@
 extern char const *progname;
 
 #ifdef HAVE_NETINFO
-extern int	check_netinfo;
+extern bool	check_netinfo;
 #endif
 
 
@@ -66,7 +66,7 @@ getCmdOpts(
 	if (HAVE_OPT( CONFIGFILE )) {
 		config_file = OPT_ARG( CONFIGFILE );
 #ifdef HAVE_NETINFO
-		check_netinfo = 0;
+		check_netinfo = false;
 #endif
 	}
 
