@@ -10,7 +10,7 @@
 .ds B-Font B
 .ds I-Font I
 .ds R-Font R
-.TH ntp.conf 5 "04 Jun 2015" "@VERSION@" "File Formats"
+.TH ntp.conf 5 "04 Jun 2015" "4.3.34" "File Formats"
 .SH NAME
 \f\*[B-Font]ntp.conf\fP
 \- Network Time Protocol (NTP) daemon configuration file format
