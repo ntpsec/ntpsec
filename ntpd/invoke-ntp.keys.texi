@@ -3,12 +3,6 @@
 @pindex ntp.keys
 @cindex NTP symmetric key file format
 @ignore
-#
-# EDIT THIS FILE WITH CAUTION  (invoke-ntp.keys.texi)
-#
-# It has been AutoGen-ed  June  4, 2015 at 03:36:03 AM by AutoGen 5.18.5
-# From the definitions    ntp.keys.def
-# and the template file   agtexi-file.tpl
 @end ignore
 
 

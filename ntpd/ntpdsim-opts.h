@@ -1,20 +1,4 @@
 /*
- *  EDIT THIS FILE WITH CAUTION  (ntpdsim-opts.h)
- *
- *  It has been AutoGen-ed
- *  From the definitions    ntpdsim-opts.def
- *  and the template file   options
- *
- * Generated from AutoOpts 41:0:16 templates.
- *
- *  AutoOpts is a copyrighted work.  This header file is not encumbered
- *  by AutoOpts licensing, but is provided under the licensing terms chosen
- *  by the ntpdsim author or copyright holder.  AutoOpts is
- *  licensed under the terms of the LGPL.  The redistributable library
- *  (``libopts'') is licensed under the terms of either the LGPL or, at the
- *  users discretion, the BSD license.  See the AutoOpts and/or libopts sources
- *  for details.
- *
  * The ntpdsim program is copyrighted and licensed
  * under the following terms:
  *
