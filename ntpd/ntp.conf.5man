@@ -11,12 +11,6 @@
 .ds I-Font I
 .ds R-Font R
 .TH ntp.conf 5man "04 Jun 2015" "4.3.34" "File Formats"
-.\"
-.\" EDIT THIS FILE WITH CAUTION (/tmp/.ag-H8aWnL/ag-T8aOmL)
-.\"
-.\" It has been AutoGen-ed June 4, 2015 at 03:35:46 AM by AutoGen 5.18.5
-.\" From the definitions ntp.conf.def
-.\" and the template file agman-cmd.tpl
 .SH NAME
 \f\*[B-Font]ntp.conf\fP
 \- Network Time Protocol (NTP) daemon configuration file format

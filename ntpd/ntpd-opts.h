@@ -1,20 +1,4 @@
 /*
- *  EDIT THIS FILE WITH CAUTION  (ntpd-opts.h)
- *
- *  It has been AutoGen-ed  June  4, 2015 at 03:33:17 AM by AutoGen 5.18.5
- *  From the definitions    ntpd-opts.def
- *  and the template file   options
- *
- * Generated from AutoOpts 41:0:16 templates.
- *
- *  AutoOpts is a copyrighted work.  This header file is not encumbered
- *  by AutoOpts licensing, but is provided under the licensing terms chosen
- *  by the ntpd author or copyright holder.  AutoOpts is
- *  licensed under the terms of the LGPL.  The redistributable library
- *  (``libopts'') is licensed under the terms of either the LGPL or, at the
- *  users discretion, the BSD license.  See the AutoOpts and/or libopts sources
- *  for details.
- *
  * The ntpd program is copyrighted and licensed
  * under the following terms:
  *
