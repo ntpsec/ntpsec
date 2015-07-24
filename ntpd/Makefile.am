@@ -180,17 +180,6 @@ noinst_HEADERS =			\
 
 install-data-local: install-html
 
-run_ag=		cd $(srcdir) &&	env PATH="$(abs_builddir):$(PATH)" AUTOGEN_DNE_DATE=-D	\
-		autogen -L ../sntp/include -L ../sntp/ag-tpl --writable
-std_def_list =							\
-	$(top_srcdir)/sntp/include/debug-opt.def		\
-	$(top_srcdir)/sntp/include/autogen-version.def		\
-	$(top_srcdir)/sntp/include/copyright.def		\
-	$(top_srcdir)/sntp/include/homerc.def			\
-	$(top_srcdir)/sntp/include/ntp.lic			\
-	$(top_srcdir)/sntp/include/version.def			\
-	$(NULL)
-
 check-local: $(MAKE_CHECK_Y2K) $(CHECK_SAVECONFIG)
 	test -z "$(MAKE_CHECK_Y2K)" || ./$(MAKE_CHECK_Y2K)
 
@@ -296,22 +285,13 @@ $(srcdir)/ntp_keyword.h: $(srcdir)/keyword-gen-utd
 $(srcdir)/ntpd-opts.h: $(srcdir)/ntpd-opts.c
 	@: do-nothing action to avoid default SCCS get, .h built with .c
 
-$(srcdir)/ntpd-opts.c: $(srcdir)/ntpd-opts.def $(srcdir)/ntpdbase-opts.def $(std_def_list)
-	$(run_ag) ntpd-opts.def
-
 ###
-
-$(srcdir)/ntpd.1ntpdman: $(srcdir)/ntpd-opts.def $(srcdir)/ntpdbase-opts.def $(std_def_list)
-	$(run_ag) -DMAN_SECTION=1ntpdman -Tagman-cmd.tpl ntpd-opts.def
 
 $(srcdir)/ntpd.man.in: $(srcdir)/ntpd.1ntpdman $(top_srcdir)/sntp/scripts/mansec2subst.sed
 	sed -f $(top_srcdir)/sntp/scripts/mansec2subst.sed $(srcdir)/ntpd.1ntpdman > $(srcdir)/ntpd.man.in+
 	mv $(srcdir)/ntpd.man.in+ $(srcdir)/ntpd.man.in
 
 ###
-
-$(srcdir)/ntpd.1ntpdmdoc: $(srcdir)/ntpd-opts.def $(srcdir)/ntpdbase-opts.def $(std_def_list)
-	$(run_ag) -DMAN_SECTION=1ntpdmdoc -Tagmdoc-cmd.tpl ntpd-opts.def
 
 $(srcdir)/ntpd.mdoc.in: $(srcdir)/ntpd.1ntpdmdoc $(top_srcdir)/sntp/scripts/mansec2subst.sed
 	sed -f $(top_srcdir)/sntp/scripts/mansec2subst.sed $(srcdir)/ntpd.1ntpdmdoc > $(srcdir)/ntpd.mdoc.in+
@@ -328,14 +308,8 @@ ntpd.$(NTPD_MS): $(srcdir)/ntpd.$(MANTAGFMT).in $(top_builddir)/config.status
 $(srcdir)/invoke-ntp.conf.menu: $(srcdir)/invoke-ntp.conf.texi
 	@: do-nothing action to avoid default SCCS get, .menu built with .texi
 
-$(srcdir)/invoke-ntp.conf.texi: $(srcdir)/ntp.conf.def $(std_def_list)
-	$(run_ag) -Tagtexi-file.tpl -DLEVEL=section ntp.conf.def
-
 $(srcdir)/invoke-ntp.keys.menu: $(srcdir)/invoke-ntp.keys.texi
 	@: do-nothing action to avoid default SCCS get, .menu built with .texi
-
-$(srcdir)/invoke-ntp.keys.texi: $(srcdir)/ntp.keys.def $(std_def_list)
-	$(run_ag) -Tagtexi-file.tpl -DLEVEL=section ntp.keys.def
 
 $(srcdir)/ntp.conf.html: $(srcdir)/ntp.conf.texi $(top_srcdir)/sntp/include/version.texi
 	cd $(srcdir) && ( makeinfo --force --html --no-split -o ntp.conf.html ntp.conf.texi || true )
@@ -348,17 +322,11 @@ $(srcdir)/ntpd.html: $(srcdir)/ntpd.texi $(top_srcdir)/sntp/include/version.texi
 
 ###
 
-$(srcdir)/ntp.conf.5man: $(srcdir)/ntp.conf.def $(std_def_list)
-	$(run_ag) -DMAN_SECTION=5man -Tagman-cmd.tpl ntp.conf.def
-
 $(srcdir)/ntp.conf.man.in: $(srcdir)/ntp.conf.5man $(top_srcdir)/sntp/scripts/mansec2subst.sed
 	sed -f $(top_srcdir)/sntp/scripts/mansec2subst.sed $(srcdir)/ntp.conf.5man > $(srcdir)/ntp.conf.man.in+
 	mv $(srcdir)/ntp.conf.man.in+ $(srcdir)/ntp.conf.man.in
 
 ###
-
-$(srcdir)/ntp.conf.5mdoc: $(srcdir)/ntp.conf.def $(std_def_list)
-	$(run_ag) -DMAN_SECTION=5mdoc -Tagmdoc-cmd.tpl ntp.conf.def
 
 $(srcdir)/ntp.conf.mdoc.in: $(srcdir)/ntp.conf.5mdoc $(top_srcdir)/sntp/scripts/mansec2subst.sed
 	sed -f $(top_srcdir)/sntp/scripts/mansec2subst.sed $(srcdir)/ntp.conf.5mdoc > $(srcdir)/ntp.conf.mdoc.in+
@@ -372,17 +340,11 @@ ntp.conf.5: $(srcdir)/ntp.conf.$(MANTAGFMT).in $(top_builddir)/config.status
 
 ###
 
-$(srcdir)/ntp.keys.5man: $(srcdir)/ntp.keys.def $(std_def_list)
-	$(run_ag) -DMAN_SECTION=5man -Tagman-file.tpl ntp.keys.def
-
 $(srcdir)/ntp.keys.man.in: $(srcdir)/ntp.keys.5man $(top_srcdir)/sntp/scripts/mansec2subst.sed
 	sed -f $(top_srcdir)/sntp/scripts/mansec2subst.sed $(srcdir)/ntp.keys.5man > $(srcdir)/ntp.keys.man.in+
 	mv $(srcdir)/ntp.keys.man.in+ $(srcdir)/ntp.keys.man.in
 
 ###
-
-$(srcdir)/ntp.keys.5mdoc: $(srcdir)/ntp.keys.def $(std_def_list)
-	$(run_ag) -DMAN_SECTION=5mdoc -Tagmdoc-file.tpl ntp.keys.def
 
 $(srcdir)/ntp.keys.mdoc.in: $(srcdir)/ntp.keys.5mdoc $(top_srcdir)/sntp/scripts/mansec2subst.sed
 	sed -f $(top_srcdir)/sntp/scripts/mansec2subst.sed $(srcdir)/ntp.keys.5mdoc > $(srcdir)/ntp.keys.mdoc.in+
@@ -398,10 +360,6 @@ ntp.keys.5: $(srcdir)/ntp.keys.$(MANTAGFMT).in $(top_builddir)/config.status
 
 $(srcdir)/invoke-ntpd.menu: $(srcdir)/invoke-ntpd.texi
 	@: do-nothing action to avoid default SCCS get, .menu built with .texi
-
-$(srcdir)/invoke-ntpd.texi: $(srcdir)/ntpd-opts.def $(srcdir)/ntpdbase-opts.def $(std_def_list)
-	$(run_ag) -Tagtexi-cmd.tpl -DLEVEL=section ntpd-opts.def
-	$(top_srcdir)/scripts/build/check--help $@
 
 $(PROGRAMS): $(LDADD)
 
