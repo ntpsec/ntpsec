@@ -204,7 +204,6 @@ ntpdsim_SOURCES =		\
 # libntpd_a_SOURCES do not use #ifdef SIM
 
 libntpd_a_SOURCES =		\
-	cmd_args.c		\
 	jupiter.h		\
 	ntp_control.c		\
 	ntp_crypto.c		\

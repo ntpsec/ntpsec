@@ -43,7 +43,6 @@
  * so #include these later.
  */
 #include "ntp_config.h"
-#include "ntp_cmdargs.h"
 #include "ntp_scanner.h"
 #include "ntp_parser.h"
 
