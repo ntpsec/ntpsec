@@ -34,7 +34,7 @@ getCmdOpts(
 	char **	argv
 	)
 {
-	extern const char *config_file;
+	extern const char *explicit_config;
 	int errflg;
 
 	/*
@@ -64,7 +64,7 @@ getCmdOpts(
 		proto_config(PROTO_BROADCLIENT, 1, 0., NULL);
 
 	if (HAVE_OPT( CONFIGFILE )) {
-		config_file = OPT_ARG( CONFIGFILE );
+		explicit_config = OPT_ARG( CONFIGFILE );
 #ifdef HAVE_NETINFO
 		check_netinfo = false;
 #endif

@@ -64,6 +64,7 @@ bool	do_memlock = true;
 bool have_interface_option;
 bool saveconfigquit;
 const char *saveconfigfile;
+const char *explicit_config;
 
 /*
  * "logconfig" building blocks
@@ -4436,7 +4437,9 @@ getconfig(
 	 */
 	set_tod_using = &ntpd_set_tod_using;
 
-	getCmdOpts(argc, argv);
+	if (explicit_config)
+	    config_file = explicit_config;
+
 	init_syntax_tree(&cfgt);
 	if (
 		!lex_init_stack(FindConfig(config_file), "r")

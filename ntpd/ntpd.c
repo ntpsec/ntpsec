@@ -705,6 +705,7 @@ ntpdmain(
 	have_interface_option = HAVE_OPT(NOVIRTUALIPS) || HAVE_OPT(INTERFACE);
 	saveconfigquit = HAVE_OPT(SAVECONFIGQUIT);
 	saveconfigfile = OPT_ARG( SAVECONFIGQUIT);
+	getCmdOpts(argc, argv);
 	getconfig(argc, argv);
 
 	if (do_memlock) {
