@@ -1,3 +1,7 @@
+# NOTE FOR WAF CONVERSION:
+# 1. The productions using autogen for templating are gone.
+# 2. The files cmd_args.c and cmd_args.h are gone.
+
 NULL=
 
 bin_PROGRAMS=	$(NTPD_DB) $(NTPDSIM_DB)
