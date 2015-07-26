@@ -118,6 +118,8 @@ long wait_sync = -1;
 static char *logfilename;
 bool opt_ipv4, opt_ipv6;
 const char *explicit_config;
+static bool explicit_interface;
+bool dumpopts;
 
 /*
  * No-fork flag.  If set, we do not become a background daemon.
@@ -216,7 +218,6 @@ static void	library_unexpected_error(const char *, int,
 					ISC_FORMAT_PRINTF(3, 0);
 #endif	/* !SIM */
 
-static bool explicit_interface;
 
 static void
 parse_cmdline_opts(
@@ -232,7 +233,7 @@ parse_cmdline_opts(
 	int op;
 
 	while ((op = getopt(argc, argv,
-			    "46aAbc:dD:f:gGi:I:k:l:LmMnNpPqQ:r:s:t:u:UvVw:x")) != -1) {
+			    "46aAbc:dD:f:gGi:I:k:l:LmMnNpPqQ:r:Rs:t:u:UvVw:x")) != -1) {
 
 	    switch (op) {
 	    case '4':
@@ -339,16 +340,20 @@ parse_cmdline_opts(
 		break;
 	    case 'r':
 		{
-		double tmp;
-		if (sscanf(optarg, "%lf", &tmp) != 1) {
+		    double tmp;
+		    if (sscanf(optarg, "%lf", &tmp) != 1) {
 			msyslog(LOG_ERR,
 				"command line broadcast delay value %s undecodable",
 				optarg);
 			exit(0);
-		} else {
+		    } else {
 			proto_config(PROTO_BROADDELAY, 0, tmp, NULL);
+		    }
 		}
-		}
+	        break;
+	    case 'R':	/* undocumented -- dump CLI options for testing */
+		dumpopts = true;
+		nofork = true;
 		break;
 	    case 's':
 		stats_config(STATS_STATSDIR, optarg);
@@ -634,15 +639,17 @@ ntpdmain(
 	} else {
 		if (nofork)
 			msyslog_term = true;
-		if (saveconfigquit)
+		if (saveconfigquit || dumpopts)
 			syslogit = false;
 	}
-	msyslog(LOG_NOTICE, "%s: Starting", Version);
 
+	if (!dumpopts)
 	{
 		int i;
 		char buf[1024];	/* Secret knowledge of msyslog buf length */
 		char *cp = buf;
+
+		msyslog(LOG_NOTICE, "%s: Starting", Version);
 
 		/* Note that every arg has an initial space character */
 		snprintf(cp, sizeof(buf), "Command line:");
@@ -667,7 +674,7 @@ ntpdmain(
 	/* MPE lacks the concept of root */
 # if !defined(MPE)
 	uid = getuid();
-	if (uid && !saveconfigquit) {
+	if (uid && !saveconfigquit && !dumpopts) {
 		msyslog_term = true;
 		msyslog(LOG_ERR,
 			"must be run as root, not uid %ld", (long)uid);
@@ -780,17 +787,19 @@ ntpdmain(
 	}
 # endif
 
-	/* Setup stack size in preparation for locking pages in memory. */
-	ntp_rlimit(RLIMIT_STACK, DFLT_RLIMIT_STACK * 4096, 4096, "4k");
+        if (!saveconfigquit && !dumpopts) {
+	    /* Setup stack size in preparation for locking pages in memory. */
+	    ntp_rlimit(RLIMIT_STACK, DFLT_RLIMIT_STACK * 4096, 4096, "4k");
 #ifdef RLIMIT_MEMLOCK
-	/*
-	 * The default RLIMIT_MEMLOCK is very low on Linux systems.
-	 * Unless we increase this limit malloc calls are likely to
-	 * fail if we drop root privilege.  To be useful the value
-	 * has to be larger than the largest ntpd resident set size.
-	 */
-	ntp_rlimit(RLIMIT_MEMLOCK, DFLT_RLIMIT_MEMLOCK * 1024 * 1024, 1024 * 1024, "MB");
+	    /*
+	     * The default RLIMIT_MEMLOCK is very low on Linux systems.
+	     * Unless we increase this limit malloc calls are likely to
+	     * fail if we drop root privilege.  To be useful the value
+	     * has to be larger than the largest ntpd resident set size.
+	     */
+	    ntp_rlimit(RLIMIT_MEMLOCK, DFLT_RLIMIT_MEMLOCK * 1024 * 1024, 1024 * 1024, "MB");
 #endif	/* RLIMIT_MEMLOCK */
+        }
 
 	/*
 	 * Set up signals we pay attention to locally.
@@ -840,11 +849,16 @@ ntpdmain(
 	init_refclock();
 # endif
 	set_process_priority();
-	init_proto();		/* Call at high priority */
+	init_proto(!dumpopts);		/* Call at high priority */
 	init_io();
 	init_loopfilter();
 	mon_start(MON_ON);	/* monitor on by default now	  */
 				/* turn off in config if unwanted */
+
+	if (dumpopts) {
+	    proto_dump(stdout);
+	    exit(0);
+	}
 
 	/*
 	 * Get the configuration.
@@ -856,7 +870,7 @@ ntpdmain(
 		/*
 		 * lock the process into memory
 		 */
-		if (!saveconfigquit &&
+		if (!saveconfigquit && !dumpopts &&
 		    0 != mlockall(MCL_CURRENT|MCL_FUTURE))
 			msyslog(LOG_ERR, "mlockall(): %m");
 	}

@@ -20,6 +20,7 @@
 #include <libscf.h>
 #endif
 #include <unistd.h>
+#include <stdio.h>
 
 /*
  * This macro defines the authentication state. If x is 1 authentication
@@ -136,7 +137,7 @@ static	void	peer_xmit	(struct peer *);
 static	void	fast_xmit	(struct recvbuf *, int, keyid_t, int);
 static	void	pool_xmit	(struct peer *);
 static	void	clock_update	(struct peer *);
-static	void	measure_precision(void);
+static	void	measure_precision(const bool);
 static	double	measure_tick_fuzz(void);
 static	int	local_refid	(struct peer *);
 static	bool	peer_unfit	(struct peer *);
@@ -3855,7 +3856,7 @@ peer_unfit(
  * get_systime() readings always increase and are fuzzed below sys_fuzz.
  */
 void
-measure_precision(void)
+measure_precision(const bool verbose)
 {
 	/*
 	 * With sys_fuzz set to zero, get_systime() fuzzing of low bits
@@ -3866,11 +3867,13 @@ measure_precision(void)
 	trunc_os_clock = false;
 	measured_tick = measure_tick_fuzz();
 	set_sys_tick_precision(measured_tick);
-	msyslog(LOG_INFO, "proto: precision = %.3f usec (%d)",
-		sys_tick * 1e6, sys_precision);
-	if (sys_fuzz < sys_tick) {
-		msyslog(LOG_NOTICE, "proto: fuzz beneath %.3f usec",
-			sys_fuzz * 1e6);
+	if (verbose) {
+		msyslog(LOG_INFO, "proto: precision = %.3f usec (%d)",
+			sys_tick * 1e6, sys_precision);
+		if (sys_fuzz < sys_tick) {
+			msyslog(LOG_NOTICE, "proto: fuzz beneath %.3f usec",
+				sys_fuzz * 1e6);
+		}
 	}
 }
 
@@ -3973,7 +3976,7 @@ set_sys_tick_precision(
  * init_proto - initialize the protocol module's data
  */
 void
-init_proto(void)
+init_proto(const bool verbose)
 {
 	l_fp	dummy;
 	int	i;
@@ -3990,7 +3993,7 @@ init_proto(void)
 	sys_rootdisp = 0;
 	L_CLR(&sys_reftime);
 	sys_jitter = 0;
-	measure_precision();
+	measure_precision(verbose);
 	get_systime(&dummy);
 	sys_survivors = 0;
 	sys_manycastserver = 0;
@@ -4174,4 +4177,10 @@ proto_clr_stats(void)
 	sys_badauth = 0;
 	sys_limitrejected = 0;
 	sys_kodsent = 0;
+}
+
+void proto_dump(FILE *fp)
+{
+    fprintf(fp, "%sable auth;\n", sys_authenticate ? "en" : "dis");
+    fprintf(fp, "%sable bclient;\n", sys_bclient ? "en" : "dis");
 }
