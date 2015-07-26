@@ -1,6 +1,9 @@
-# NOTE FOR WAF CONVERSION:
+# NOTES FOR WAF CONVERSION:
 # 1. The productions using autogen for templating are gone.
 # 2. The files cmd_args.c and cmd_args.h are gone.
+# 3. The files ntpd-opts.c, ntpd-opts.c, ntpdsim-opts.c, and ntpdsim-opts.h are
+#    also gone.
+# 4. compsave.conf uses short options rather than long.
 
 NULL=
 
@@ -68,19 +71,12 @@ vphack_after:
 		ln -s $(srcdir)/ntp_parser.h . \
 		)
 
-# BUILT_SOURCES which should also be in EXTRA_DIST
-B_S_DIST=			\
-	$(srcdir)/ntpd-opts.c	\
-	$(srcdir)/ntpd-opts.h	\
-	$(NULL)
-
 BUILT_SOURCES=		\
 	$(VPHACK)	\
 	$(LIBPARSE)	\
 	ntp_parser.c	\
 	ntp_parser.h	\
 	$(VPHACK_AFTER)	\
-	$(B_S_DIST)	\
 	$(NULL)
 
 man1_MANS=
@@ -88,9 +84,7 @@ man5_MANS=	ntp.conf.5 ntp.keys.5
 man8_MANS=
 man_MANS=	ntpd.$(NTPD_MS)
 
-# ntpdsim.1 is a remnant along with all the ntpdsim-opts.* files, the
-# simulator currently uses ntpd-opts.[ch].  This also means there is no
-# longer a reason to have ntpdbase-opts.def split off of ntpd-opts.def.
+# ntpdsim.1 is a remnant
 
 LDADD_NTPD_COMMON  = $(LDADD_LIBNTP) $(LIBOPTS_LDADD) $(PTHREAD_LIBS)
 LDADD_NTPD_COMMON += $(LIBM) $(LDADD_NTP) $(LSCF)
@@ -140,14 +134,12 @@ EXTRA_DIST =			\
 	ntp.keys.mdoc.in	\
 	ntp.keys.html		\
 	ntp.keys.texi		\
-	ntpd-opts.def		\
 	ntpd.1ntpdman		\
 	ntpd.1ntpdmdoc		\
 	ntpd.man.in		\
 	ntpd.mdoc.in		\
 	ntpd.html		\
 	ntpd.texi		\
-	ntpdbase-opts.def	\
 	refclock_msfees.c	\
 	$(B_S_DIST)		\
 	$(NULL)
@@ -195,8 +187,6 @@ ntpd_SOURCES =			\
 	ntp_scanner.c		\
 	ntp_scanner.h		\
 	ntpd.c			\
-	ntpd-opts.c		\
-	ntpd-opts.h		\
 	$(NULL)
 
 ntpdsim_SOURCES =		\
@@ -285,9 +275,6 @@ $(srcdir)/ntp_keyword.h: $(srcdir)/keyword-gen-utd
 	@: do-nothing action to avoid default SCCS get
 	@: .h updated if needed by k-g-u-submake rule
 
-$(srcdir)/ntpd-opts.h: $(srcdir)/ntpd-opts.c
-	@: do-nothing action to avoid default SCCS get, .h built with .c
-
 ###
 
 $(srcdir)/ntpd.man.in: $(srcdir)/ntpd.1ntpdman $(top_srcdir)/sntp/scripts/mansec2subst.sed
@@ -367,7 +354,7 @@ $(srcdir)/invoke-ntpd.menu: $(srcdir)/invoke-ntpd.texi
 $(PROGRAMS): $(LDADD)
 
 compsave.conf: ntpd complete.conf
-	./ntpd --configfile complete.conf --saveconfigquit $@
+	./ntpd -c complete.conf -Q $@
 
 check-saveconfig: complete.conf compsave.conf
 	-diff -u complete.conf compsave.conf

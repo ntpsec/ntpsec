@@ -23,9 +23,6 @@
 # include "ntpsim.h"
 #endif
 
-#include "ntp_libopts.h"
-#include "ntpd-opts.h"
-
 #include <unistd.h>
 #include <sys/stat.h>
 #include <stdio.h>
@@ -53,6 +50,8 @@
 #include <sys/mman.h>
 
 #include <termios.h>
+
+#include <getopt.h>
 
 #ifdef SYS_DOMAINOS
 # include <apollo/base.h>
@@ -115,6 +114,8 @@ int priority_done = 2;		/* 0 - Set priority */
 				/* 1 and 2 are pretty much the same */
 
 bool listen_to_virtual_ips = true;
+long wait_sync = -1;
+static char *logfilename;
 
 /*
  * No-fork flag.  If set, we do not become a background daemon.
@@ -158,6 +159,8 @@ bool initializing;
  * Version declaration
  */
 extern const char *Version;
+
+extern int config_priority_override, config_priority;
 
 char const *progname;
 
@@ -210,140 +213,170 @@ static void	library_unexpected_error(const char *, int,
 					ISC_FORMAT_PRINTF(3, 0);
 #endif	/* !SIM */
 
+static bool explicit_interface;
 
-
-
-void
+static void
 parse_cmdline_opts(
-	int *	pargc,
-	char ***pargv
+	int argc,
+	char **argv
 	)
 {
 	static bool	parsed = false;
-	static int	optct;
 
-	if (!parsed)
-		optct = ntpOptionProcess(&ntpdOptions, *pargc, *pargv);
+	if (parsed)
+	    return;
 
-	parsed = true;
-	
-	*pargc -= optct;
-	*pargv += optct;
-}
+	int op;
 
+	bool opt_ipv4, opt_ipv6;
 
-/*
- * getCmdOpts - apply most command line options
- *
- * A few options are examined earlier in ntpdmain()
- */
-static void
-getCmdOpts(
-	int	argc,
-	char **	argv
-	)
-{
-	extern const char *explicit_config;
-	int errflg;
+	while ((op = getopt(argc, argv,
+			    "46aAbc:dD:f:gGi:I:k:l:LmMnNpPqQ:r:s:t:u:UvVw:x")) != -1) {
 
-	/*
-	 * Initialize, initialize
-	 */
-	errflg = 0;
-
-	if (ipv4_works && ipv6_works) {
-		if (HAVE_OPT( IPV4 ))
-			ipv6_works = 0;
-		else if (HAVE_OPT( IPV6 ))
-			ipv4_works = 0;
-	} else if (!ipv4_works && !ipv6_works) {
-		msyslog(LOG_ERR, "Neither IPv4 nor IPv6 networking detected, fatal.");
-		exit(1);
-	} else if (HAVE_OPT( IPV4 ) && !ipv4_works)
-		msyslog(LOG_WARNING, "-4/--ipv4 ignored, IPv4 networking not found.");
-	else if (HAVE_OPT( IPV6 ) && !ipv6_works)
-		msyslog(LOG_WARNING, "-6/--ipv6 ignored, IPv6 networking not found.");
-
-	if (HAVE_OPT( AUTHREQ ))
-		proto_config(PROTO_AUTHENTICATE, 1, 0., NULL);
-	else if (HAVE_OPT( AUTHNOREQ ))
-		proto_config(PROTO_AUTHENTICATE, 0, 0., NULL);
-
-	if (HAVE_OPT( BCASTSYNC ))
-		proto_config(PROTO_BROADCLIENT, 1, 0., NULL);
-
-	if (HAVE_OPT( CONFIGFILE )) {
-		explicit_config = OPT_ARG( CONFIGFILE );
+	    switch (op) {
+	    case '4':
+		opt_ipv4 = true;
+		break;
+	    case '6':
+		opt_ipv6 = true;
+		break;
+	    case 'a':
+		proto_config(PROTO_AUTHENTICATE, 1, 0.0, NULL);
+		break;
+	    case 'A':
+		proto_config(PROTO_AUTHENTICATE, 0, 0.0, NULL);
+		break;
+	    case 'b':
+		proto_config(PROTO_BROADCLIENT, 1, 0.0, NULL);
+		break;
+	    case 'c':
+	    {
+		/* FIXME: not proper information-hiding - fix! */
+		extern char *explicit_config;
+		explicit_config = optarg;
 #ifdef HAVE_NETINFO
 		check_netinfo = false;
 #endif
-	}
-
-	if (HAVE_OPT( DRIFTFILE ))
-		stats_config(STATS_FREQ_FILE, OPT_ARG( DRIFTFILE ));
-
-	if (HAVE_OPT( PANICGATE ))
-		allow_panic = true;
-
-	if (HAVE_OPT( FORCE_STEP_ONCE ))
-		force_step_once = true;
-
-#ifdef HAVE_DROPROOT
-	if (HAVE_OPT( JAILDIR )) {
-		droproot = true;
-		chrootdir = OPT_ARG( JAILDIR );
-	}
+		break;
+	    }
+	    case 'd':
+#ifdef DEBUG
+		++debug;
 #endif
-
-	if (HAVE_OPT( KEYFILE ))
-		getauthkeys(OPT_ARG( KEYFILE ));
-
-	if (HAVE_OPT( PIDFILE ))
-		stats_config(STATS_PID_FILE, OPT_ARG( PIDFILE ));
-
-	if (HAVE_OPT( QUIT ))
-		mode_ntpdate = true;
-
-	if (HAVE_OPT( PROPAGATIONDELAY ))
-		do {
-			double tmp;
-			const char *my_ntp_optarg = OPT_ARG( PROPAGATIONDELAY );
-
-			if (sscanf(my_ntp_optarg, "%lf", &tmp) != 1) {
-				msyslog(LOG_ERR,
-					"command line broadcast delay value %s undecodable",
-					my_ntp_optarg);
-			} else {
-				proto_config(PROTO_BROADDELAY, 0, tmp, NULL);
-			}
-		} while (0);
-
-	if (HAVE_OPT( STATSDIR ))
-		stats_config(STATS_STATSDIR, OPT_ARG( STATSDIR ));
-
-	if (HAVE_OPT( TRUSTEDKEY )) {
-		int		ct = STACKCT_OPT(  TRUSTEDKEY );
-		const char**	pp = STACKLST_OPT( TRUSTEDKEY );
-
-		do  {
-			u_long tkey;
-			const char* p = *pp++;
-
-			tkey = (int)atol(p);
-			if (tkey == 0 || tkey > NTP_MAXKEY) {
-				msyslog(LOG_ERR,
-				    "command line trusted key %s is invalid",
-				    p);
-			} else {
-				authtrust(tkey, 1);
-			}
-		} while (--ct > 0);
-	}
-
+		nofork = true;
+		break;
+	    case 'D':
+#ifdef DEBUG
+		debug = atoi(optarg);
+#endif
+		break;
+	    case 'f':
+		stats_config(STATS_FREQ_FILE, optarg);
+		break;
+	    case 'g':
+		allow_panic = true;
+		break;
+	    case 'G':
+		force_step_once = true;
+		break;
+	    case 'i':
 #ifdef HAVE_DROPROOT
-	if (HAVE_OPT( USER )) {
 		droproot = true;
-		user = estrdup(OPT_ARG( USER ));
+		chrootdir = optarg;
+#endif
+		break;
+	    case 'I':
+		/*
+		 * --interface, listen on specified interfaces
+		 */
+		for (; optind < argc; optind++) {
+			sockaddr_u	addr;
+			if (argv[optind][0] == '-')
+			    break;
+		    	add_nic_rule(
+				is_ip_address(argv[optind], AF_UNSPEC, &addr)
+					? MATCH_IFADDR
+					: MATCH_IFNAME,
+				argv[optind], -1, ACTION_LISTEN);
+		}
+		explicit_interface = true;
+		break;
+	    case 'k':
+		getauthkeys(optarg);
+		break;
+	    case 'l':
+		logfilename = optarg;
+		break;
+	    case 'L':
+		listen_to_virtual_ips = false;
+		break;
+	    case 'm':
+#ifdef HAVE_DNSREGISTRATION
+		mdnsreg = true;
+#endif  /* HAVE_DNSREGISTRATION */
+		break;
+	    case 'M':
+# ifdef SYS_WINNT
+		set_mm_timer(MM_TIMER_HIRES);
+# endif
+		break;
+	    case 'n':
+		nofork = true;
+		break;
+	    case 'N':
+		priority_done = 0;
+		break;
+	    case 'p':
+		stats_config(STATS_PID_FILE, optarg);
+		break;
+	    case 'P':
+		config_priority = atoi(optarg);
+		config_priority_override = 1;
+		priority_done = 0;
+		break;
+	    case 'q':
+		mode_ntpdate = true;
+		nofork = true; 
+		break;
+	    case 'Q':	/* savequit - undocumented/disabled(?) in NTO Classic */
+		saveconfigquit = true;
+		saveconfigfile = optarg;
+		nofork = true; 
+		break;
+	    case 'r':
+		{
+		double tmp;
+		if (sscanf(optarg, "%lf", &tmp) != 1) {
+			msyslog(LOG_ERR,
+				"command line broadcast delay value %s undecodable",
+				optarg);
+			exit(0);
+		} else {
+			proto_config(PROTO_BROADDELAY, 0, tmp, NULL);
+		}
+		}
+		break;
+	    case 's':
+		stats_config(STATS_STATSDIR, optarg);
+		break;
+	    case 't':
+		for (; optind < argc; optind++)
+		{
+		    u_long tkey = (int)atol(argv[optind]);
+		    if (tkey == 0 || tkey > NTP_MAXKEY) {
+			msyslog(LOG_ERR,
+				"command line trusted key %s is invalid",
+				argv[optind]);
+			exit(0);
+		    } else {
+			authtrust(tkey, 1);
+		    }
+	        }
+		break;
+	    case 'u':
+#ifdef HAVE_DROPROOT
+		droproot = true;
+		user = estrdup(optarg);
 		group = strrchr(user, ':');
 		if (group != NULL) {
 			size_t	len;
@@ -353,66 +386,80 @@ getCmdOpts(
 			group = estrdup(group);
 			user = erealloc(user, len);
 		}
-	}
 #endif
+		break;
+	    case 'U':
+		{
+		    long val = atol(argv[optind]);
 
-	if (HAVE_OPT( VAR )) {
-		int		ct;
-		const char **	pp;
-		const char *	v_assign;
-
-		ct = STACKCT_OPT(  VAR );
-		pp = STACKLST_OPT( VAR );
-
-		do  {
-			v_assign = *pp++;
-			set_sys_var(v_assign, strlen(v_assign) + 1, RW);
-		} while (--ct > 0);
-	}
-
-	if (HAVE_OPT( DVAR )) {
-		int		ct = STACKCT_OPT(  DVAR );
-		const char**	pp = STACKLST_OPT( DVAR );
-
-		do  {
-			const char* my_ntp_optarg = *pp++;
-
-			set_sys_var(my_ntp_optarg, strlen(my_ntp_optarg)+1,
-			    (u_short) (RW | DEF));
-		} while (--ct > 0);
-	}
-
-	if (HAVE_OPT( SLEW ))
-		loop_config(LOOP_MAX, 600);
-
-	if (HAVE_OPT( UPDATEINTERVAL )) {
-		long val = OPT_VALUE_UPDATEINTERVAL;
-
-		if (val >= 0)
-			interface_interval = val;
-		else {
-			fprintf(stderr,
-				"command line interface update interval %ld must not be negative\n",
-				val);
-			msyslog(LOG_ERR,
-				"command line interface update interval %ld must not be negative",
-				val);
-			errflg++;
+		    if (val >= 0)
+			    interface_interval = val;
+		    else {
+			    fprintf(stderr,
+				    "command line interface update interval %ld must not be negative\n",
+				    val);
+			    msyslog(LOG_ERR,
+				    "command line interface update interval %ld must not be negative",
+				    val);
+			    exit(0);
+		    }
 		}
+		break;
+	    case 'v':
+		for (; optind < argc; optind++) {
+		    if (argv[optind][0] == '-')
+			break;
+		    set_sys_var(argv[optind], strlen(argv[optind]) + 1, RW);
+		}
+		break;
+	    case 'V':
+		for (; optind < argc; optind++) {
+		    if (argv[optind][0] == '-')
+			break;
+		    set_sys_var(argv[optind], strlen(argv[optind])+1,
+				(u_short) (RW | DEF));
+		}
+		break;
+	    case 'w':
+		wait_sync = strtod(optarg, NULL);
+		break;
+	    case 'x':
+		loop_config(LOOP_MAX, 600);
+		break;
+	    default :
+		break;
+	    } /*switch*/
 	}
 
+	/*
+	 * Two port-specific options for Windows (USEPCC and PCCFREQ)
+	 * have been omitted until the Windows port can be beaten back
+	 * into shape.
+	 */
+
+	/*
+	 * Sanity checks and derived options
+	 */
+
+	if (ipv4_works && ipv6_works) {
+		if (opt_ipv4)
+			ipv6_works = 0;
+		else if (opt_ipv6)
+			ipv4_works = 0;
+	} else if (!ipv4_works && !ipv6_works) {
+		msyslog(LOG_ERR, "Neither IPv4 nor IPv6 networking detected, fatal.");
+		exit(1);
+	} else if (opt_ipv4 && !ipv4_works)
+		msyslog(LOG_WARNING, "-4/--ipv4 ignored, IPv4 networking not found.");
+	else if (opt_ipv6 && !ipv6_works)
+		msyslog(LOG_WARNING, "-6/--ipv6 ignored, IPv6 networking not found.");
 
 	/* save list of servers from cmd line for config_peers() use */
-	if (argc > 0) {
-		cmdline_server_count = argc;
-		cmdline_servers = argv;
+	if (optind < argc) {
+		cmdline_server_count = argc - optind;
+		cmdline_servers = argv + optind;
 	}
-
-	/* display usage & exit with any option processing errors */
-	if (errflg)
-		optionUsage(&ntpdOptions, 2);	/* does not return */
 }
-
 
 #ifdef SIM
 int
@@ -422,9 +469,9 @@ main(
 	)
 {
 	progname = argv[0];
-	parse_cmdline_opts(&argc, &argv);
+	parse_cmdline_opts(argc, argv);
+
 #ifdef DEBUG
-	debug = OPT_VALUE_SET_DEBUG_LEVEL;
 	DPRINTF(1, ("%s\n", Version));
 #endif
 
@@ -500,7 +547,6 @@ set_process_priority(void)
 # endif /* DEBUG */
 
 	if (!priority_done) {
-		extern int config_priority_override, config_priority;
 		int pmax, pmin;
 		struct sched_param sched;
 
@@ -569,11 +615,9 @@ ntpdmain(
 {
 	l_fp		now;
 	struct recvbuf *rbuf;
-	const char *	logfilename;
 	mode_t		uv;
 	uid_t		uid;
 # if defined(HAVE_WORKING_FORK)
-	long		wait_sync = 0;
 	int		pipe_fds[2];
 	int		rc;
 	int		exit_code;
@@ -596,30 +640,22 @@ ntpdmain(
 	saved_argv = argv;
 	progname = argv[0];
 	initializing = true;		/* mark that we are initializing */
-	parse_cmdline_opts(&argc, &argv);
+	parse_cmdline_opts(argc, argv);
 # ifdef DEBUG
-	debug = OPT_VALUE_SET_DEBUG_LEVEL;
 	setvbuf(stdout, NULL, _IOLBF, 0);
 # endif
 
-	if (HAVE_OPT(NOFORK) || HAVE_OPT(QUIT)
-# ifdef DEBUG
-	    || debug
-# endif
-	    || HAVE_OPT(SAVECONFIGQUIT))
-		nofork = true;
 
 	init_logging(progname, NLOG_SYNCMASK, true);
 	/* honor -l/--logfile option to log to a file */
-	if (HAVE_OPT(LOGFILE)) {
-		logfilename = OPT_ARG(LOGFILE);
+	if (logfilename != NULL) {
 		syslogit = false;
 		change_logfile(logfilename, false);
 	} else {
 		logfilename = NULL;
 		if (nofork)
 			msyslog_term = true;
-		if (HAVE_OPT(SAVECONFIGQUIT))
+		if (saveconfigquit)
 			syslogit = false;
 	}
 	msyslog(LOG_NOTICE, "%s: Starting", Version);
@@ -652,7 +688,7 @@ ntpdmain(
 	/* MPE lacks the concept of root */
 # if !defined(MPE)
 	uid = getuid();
-	if (uid && !HAVE_OPT( SAVECONFIGQUIT )) {
+	if (uid && !saveconfigquit) {
 		msyslog_term = true;
 		msyslog(LOG_ERR,
 			"must be run as root, not uid %ld", (long)uid);
@@ -660,72 +696,20 @@ ntpdmain(
 	}
 # endif
 
-/*
- * Enable the Multi-Media Timer for Windows?
- */
-# ifdef SYS_WINNT
-	if (HAVE_OPT( MODIFYMMTIMER ))
-		set_mm_timer(MM_TIMER_HIRES);
-# endif
-
-#ifdef HAVE_DNSREGISTRATION
-/*
- * Enable mDNS registrations?
- */
-	if (HAVE_OPT( MDNS )) {
-		mdnsreg = true;
-	}
-#endif  /* HAVE_DNSREGISTRATION */
-
-	if (HAVE_OPT( NOVIRTUALIPS ))
-		listen_to_virtual_ips = 0;
-
-	/*
-	 * --interface, listen on specified interfaces
-	 */
-	if (HAVE_OPT( INTERFACE )) {
-		int		ifacect = STACKCT_OPT( INTERFACE );
-		const char**	ifaces  = STACKLST_OPT( INTERFACE );
-		sockaddr_u	addr;
-
-		while (ifacect-- > 0) {
-			add_nic_rule(
-				is_ip_address(*ifaces, AF_UNSPEC, &addr)
-					? MATCH_IFADDR
-					: MATCH_IFNAME,
-				*ifaces, -1, ACTION_LISTEN);
-			ifaces++;
-		}
-	}
-
-	if (HAVE_OPT( NICE ))
-		priority_done = 0;
-
-	if (HAVE_OPT( PRIORITY )) {
-		config_priority = OPT_VALUE_PRIORITY;
-		config_priority_override = 1;
-		priority_done = 0;
-	}
-
 # ifdef HAVE_WORKING_FORK
-	do {					/* 'loop' once */
-		if (!HAVE_OPT( WAIT_SYNC ))
-			break;
-		wait_sync = OPT_VALUE_WAIT_SYNC;
-		if (wait_sync <= 0) {
-			wait_sync = 0;
-			break;
-		}
-		/* -w requires a fork() even with debug > 0 */
-		nofork = false;
-		if (pipe(pipe_fds)) {
-			exit_code = (errno) ? errno : -1;
-			msyslog(LOG_ERR,
-				"Pipe creation failed for --wait-sync: %m");
-			exit(exit_code);
-		}
-		waitsync_fd_to_close = pipe_fds[1];
-	} while (0);				/* 'loop' once */
+	if (wait_sync <= 0)
+	    wait_sync = 0;
+	else {
+	    /* -w requires a fork() even with debug > 0 */
+	    nofork = false;
+	    if (pipe(pipe_fds)) {
+		exit_code = (errno) ? errno : -1;
+		msyslog(LOG_ERR,
+			"Pipe creation failed for --wait-sync: %m");
+		exit(exit_code);
+	    }
+	    waitsync_fd_to_close = pipe_fds[1];
+	}
 # endif	/* HAVE_WORKING_FORK */
 
 	init_lib();
@@ -884,20 +868,16 @@ ntpdmain(
 				/* turn off in config if unwanted */
 
 	/*
-	 * Get the configuration.  This is done in a separate module
-	 * since this will definitely be different for the gizmo board.
+	 * Get the configuration.
 	 */
-	have_interface_option = HAVE_OPT(NOVIRTUALIPS) || HAVE_OPT(INTERFACE);
-	saveconfigquit = HAVE_OPT(SAVECONFIGQUIT);
-	saveconfigfile = OPT_ARG( SAVECONFIGQUIT);
-	getCmdOpts(argc, argv);
+	have_interface_option = (!listen_to_virtual_ips || explicit_interface);
 	getconfig(argc, argv);
 
 	if (do_memlock) {
 		/*
 		 * lock the process into memory
 		 */
-		if (!HAVE_OPT(SAVECONFIGQUIT) &&
+		if (!saveconfigquit &&
 		    0 != mlockall(MCL_CURRENT|MCL_FUTURE))
 			msyslog(LOG_ERR, "mlockall(): %m");
 	}
