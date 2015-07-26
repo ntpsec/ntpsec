@@ -115,15 +115,16 @@ int priority_done = 2;		/* 0 - Set priority */
 
 bool listen_to_virtual_ips = true;
 long wait_sync = -1;
+
 static char *logfilename;
-bool opt_ipv4, opt_ipv6;
-const char *explicit_config;
+static bool opt_ipv4, opt_ipv6;
+static const char *explicit_config;
 static bool explicit_interface;
-bool dumpopts;
-bool opt_auth = true;
-bool opt_bclient = false;
-double opt_broaddelay = -1;
-bool opt_x = false;
+static bool dumpopts;
+static bool opt_auth = true;
+static bool opt_bclient = false;
+static double opt_broaddelay = -1;
+static bool opt_x = false;
 
 /*
  * No-fork flag.  If set, we do not become a background daemon.
