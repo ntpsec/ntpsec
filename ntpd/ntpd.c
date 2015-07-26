@@ -126,6 +126,7 @@ static bool opt_bclient = false;
 static double opt_broaddelay = -1;
 static bool opt_x = false;
 static const char *driftfile;
+static int opt_I = 0;
 
 /*
  * No-fork flag.  If set, we do not become a background daemon.
@@ -287,19 +288,7 @@ parse_cmdline_opts(
 #endif
 		break;
 	    case 'I':
-		/*
-		 * --interface, listen on specified interfaces
-		 */
-		for (; optind < argc; optind++) {
-			sockaddr_u	addr;
-			if (argv[optind][0] == '-')
-			    break;
-		    	add_nic_rule(
-				is_ip_address(argv[optind], AF_UNSPEC, &addr)
-					? MATCH_IFADDR
-					: MATCH_IFNAME,
-				argv[optind], -1, ACTION_LISTEN);
-		}
+		opt_I = optind-1;
 		explicit_interface = true;
 		break;
 	    case 'k':
@@ -877,8 +866,22 @@ ntpdmain(
 	    loop_config(LOOP_MAX, 600);
 	if (driftfile)
 	    stats_config(STATS_FREQ_FILE, driftfile);
+	/*
+	 * --interface, listen on specified interfaces
+	 */
+	if (explicit_interface)
+		for (optind = opt_I; optind < argc; optind++) {
+			sockaddr_u	addr;
+			if (argv[optind][0] == '-')
+			    break;
+			add_nic_rule(
+				is_ip_address(argv[optind], AF_UNSPEC, &addr)
+					? MATCH_IFADDR
+					: MATCH_IFNAME,
+				argv[optind], -1, ACTION_LISTEN);
+		}
 
-	/* use this to test if option setting gives expected results */
+     	/* use this to test if option setting gives expected results */
 	if (dumpopts) {
 	    proto_dump(stdout);
 	    if (explicit_config)
@@ -896,9 +899,19 @@ ntpdmain(
 	    if (chrootdir)
 		fprintf(stdout, "#chrootdir = \"%s\";\n", chrootdir);
 #endif
+	    if (explicit_interface) {
+	    	fprintf(stdout, "# interfaces =");
+		/* it would be better to inspect the actual rules */
+		for (optind = opt_I; optind < argc; optind++) {
+		    if (argv[optind][0] == '-')
+			break;
+		    fprintf(stdout, " %s", argv[optind]);
+		}
+		fprintf(stdout, "\n");
+	    }
 	    exit(0);
 	}
-
+			
 	/*
 	 * Get the configuration.
 	 */
