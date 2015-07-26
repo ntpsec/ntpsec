@@ -443,9 +443,9 @@ parse_cmdline_opts(
 
 	if (ipv4_works && ipv6_works) {
 		if (opt_ipv4)
-			ipv6_works = 0;
+			ipv6_works = false;
 		else if (opt_ipv6)
-			ipv4_works = 0;
+			ipv4_works = false;
 	} else if (!ipv4_works && !ipv6_works) {
 		msyslog(LOG_ERR, "Neither IPv4 nor IPv6 networking detected, fatal.");
 		exit(1);

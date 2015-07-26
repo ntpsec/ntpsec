@@ -1100,9 +1100,9 @@ create_wildcards(
 	u_short	port
 	)
 {
-	int			v4wild;
+	bool			v4wild;
 #ifdef INCLUDE_IPV6_SUPPORT
-	int			v6wild;
+	bool			v6wild;
 #endif
 	sockaddr_u		wildaddr;
 	nic_rule_action		action;

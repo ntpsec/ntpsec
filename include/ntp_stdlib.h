@@ -193,8 +193,8 @@ extern char *	ntp_optarg;		/* global argument pointer */
 extern int	ntp_optind;		/* global argv index */
 
 /* lib_strbuf.c */
-extern int	ipv4_works;
-extern int	ipv6_works;
+extern bool	ipv4_works;
+extern bool	ipv6_works;
 
 /* machines.c */
 typedef void (*pset_tod_using)(const char *);
