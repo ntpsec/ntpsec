@@ -120,6 +120,8 @@ bool opt_ipv4, opt_ipv6;
 const char *explicit_config;
 static bool explicit_interface;
 bool dumpopts;
+bool opt_auth = true;
+bool opt_bclient = true;
 
 /*
  * No-fork flag.  If set, we do not become a background daemon.
@@ -243,13 +245,13 @@ parse_cmdline_opts(
 		opt_ipv6 = true;
 		break;
 	    case 'a':
-		proto_config(PROTO_AUTHENTICATE, 1, 0.0, NULL);
+		opt_auth = true;
 		break;
 	    case 'A':
-		proto_config(PROTO_AUTHENTICATE, 0, 0.0, NULL);
+		opt_auth = false;
 		break;
 	    case 'b':
-		proto_config(PROTO_BROADCLIENT, 1, 0.0, NULL);
+		opt_bclient = true;
 		break;
 	    case 'c':
 		explicit_config = optarg;
@@ -854,6 +856,17 @@ ntpdmain(
 	init_loopfilter();
 	mon_start(MON_ON);	/* monitor on by default now	  */
 				/* turn off in config if unwanted */
+
+	/*
+	 * Most option settings have to be deferred until after
+	 * the initualization seequence.
+	 */
+	if (opt_auth)
+	    proto_config(PROTO_AUTHENTICATE, 1, 0.0, NULL);
+	else
+	    proto_config(PROTO_AUTHENTICATE, 0, 0.0, NULL);
+	if (opt_bclient)
+	    proto_config(PROTO_BROADCLIENT, 1, 0.0, NULL);
 
 	if (dumpopts) {
 	    proto_dump(stdout);
