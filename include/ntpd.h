@@ -294,8 +294,6 @@ extern	void	record_timing_stats (const char *);
 #endif
 extern	char *	fstostr(time_t);	/* NTP timescale seconds */
 
-/* ntpd.c */
-extern	void	parse_cmdline_opts(int *, char ***);
 /*
  * Signals we catch for debugging.
  */
