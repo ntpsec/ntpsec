@@ -121,7 +121,7 @@ const char *explicit_config;
 static bool explicit_interface;
 bool dumpopts;
 bool opt_auth = true;
-bool opt_bclient = true;
+bool opt_bclient = false;
 
 /*
  * No-fork flag.  If set, we do not become a background daemon.
@@ -870,6 +870,8 @@ ntpdmain(
 
 	if (dumpopts) {
 	    proto_dump(stdout);
+	    if (logfilename)
+		printf("logfile \"%s\";\n", logfilename);
 	    exit(0);
 	}
 
