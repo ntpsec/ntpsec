@@ -125,6 +125,7 @@ static bool opt_auth = true;
 static bool opt_bclient = false;
 static double opt_broaddelay = -1;
 static bool opt_x = false;
+static const char *driftfile;
 
 /*
  * No-fork flag.  If set, we do not become a background daemon.
@@ -271,7 +272,7 @@ parse_cmdline_opts(
 #endif
 		break;
 	    case 'f':
-		stats_config(STATS_FREQ_FILE, optarg);
+		driftfile = optarg;
 		break;
 	    case 'g':
 		allow_panic = true;
@@ -874,15 +875,27 @@ ntpdmain(
 	    proto_config(PROTO_BROADDELAY, 0, opt_broaddelay, NULL);
 	if (opt_x)
 	    loop_config(LOOP_MAX, 600);
+	if (driftfile)
+	    stats_config(STATS_FREQ_FILE, driftfile);
 
 	/* use this to test if option setting gives expected results */
 	if (dumpopts) {
 	    proto_dump(stdout);
 	    if (explicit_config)
-		fprintf(stdout, "#configfile = %s\n", explicit_config);
+		fprintf(stdout, "conffile \"%s\";\n", explicit_config);
 	    fprintf(stdout, "#debug = %d\n", debug);
 	    if (logfilename)
 		fprintf(stdout, "logfile \"%s\";\n", logfilename);
+	    if (driftfile)
+		fprintf(stdout, "driftfile \"%s\";\n", driftfile);
+	    fprintf(stdout, "#allow_panic = %s\n",
+		    allow_panic?"true":"false");
+	    fprintf(stdout, "#force_step_once = %s\n",
+		    force_step_once?"true":"false");
+#ifdef HAVE_DROPROOT
+	    if (chrootdir)
+		fprintf(stdout, "#chrootdir = \"%s\";\n", chrootdir);
+#endif
 	    exit(0);
 	}
 
