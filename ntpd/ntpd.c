@@ -116,6 +116,8 @@ int priority_done = 2;		/* 0 - Set priority */
 bool listen_to_virtual_ips = true;
 long wait_sync = -1;
 static char *logfilename;
+bool opt_ipv4, opt_ipv6;
+
 
 /*
  * No-fork flag.  If set, we do not become a background daemon.
@@ -228,8 +230,6 @@ parse_cmdline_opts(
 
 	int op;
 
-	bool opt_ipv4, opt_ipv6;
-
 	while ((op = getopt(argc, argv,
 			    "46aAbc:dD:f:gGi:I:k:l:LmMnNpPqQ:r:s:t:u:UvVw:x")) != -1) {
 
@@ -250,15 +250,15 @@ parse_cmdline_opts(
 		proto_config(PROTO_BROADCLIENT, 1, 0.0, NULL);
 		break;
 	    case 'c':
-	    {
-		/* FIXME: not proper information-hiding - fix! */
-		extern char *explicit_config;
-		explicit_config = optarg;
+	        {
+		    /* FIXME: not proper information-hiding - fix! */
+		    extern char *explicit_config;
+		    explicit_config = optarg;
 #ifdef HAVE_NETINFO
-		check_netinfo = false;
+		    check_netinfo = false;
 #endif
+	        }
 		break;
-	    }
 	    case 'd':
 #ifdef DEBUG
 		++debug;
@@ -338,7 +338,7 @@ parse_cmdline_opts(
 		mode_ntpdate = true;
 		nofork = true; 
 		break;
-	    case 'Q':	/* savequit - undocumented/disabled(?) in NTO Classic */
+	    case 'Q':	/* savequit - undocumented/disabled(?) in NTP Classic */
 		saveconfigquit = true;
 		saveconfigfile = optarg;
 		nofork = true; 
@@ -350,6 +350,7 @@ parse_cmdline_opts(
 			msyslog(LOG_ERR,
 				"command line broadcast delay value %s undecodable",
 				optarg);
+			printf("Bailout1\n");	
 			exit(0);
 		} else {
 			proto_config(PROTO_BROADDELAY, 0, tmp, NULL);
@@ -367,6 +368,7 @@ parse_cmdline_opts(
 			msyslog(LOG_ERR,
 				"command line trusted key %s is invalid",
 				argv[optind]);
+			printf("Bailout2\n");	
 			exit(0);
 		    } else {
 			authtrust(tkey, 1);
@@ -401,6 +403,7 @@ parse_cmdline_opts(
 			    msyslog(LOG_ERR,
 				    "command line interface update interval %ld must not be negative",
 				    val);
+			    printf("Bailout3\n");	
 			    exit(0);
 		    }
 		}
@@ -440,19 +443,6 @@ parse_cmdline_opts(
 	/*
 	 * Sanity checks and derived options
 	 */
-
-	if (ipv4_works && ipv6_works) {
-		if (opt_ipv4)
-			ipv6_works = false;
-		else if (opt_ipv6)
-			ipv4_works = false;
-	} else if (!ipv4_works && !ipv6_works) {
-		msyslog(LOG_ERR, "Neither IPv4 nor IPv6 networking detected, fatal.");
-		exit(1);
-	} else if (opt_ipv4 && !ipv4_works)
-		msyslog(LOG_WARNING, "-4/--ipv4 ignored, IPv4 networking not found.");
-	else if (opt_ipv6 && !ipv6_works)
-		msyslog(LOG_WARNING, "-6/--ipv6 ignored, IPv6 networking not found.");
 
 	/* save list of servers from cmd line for config_peers() use */
 	if (optind < argc) {
@@ -644,7 +634,6 @@ ntpdmain(
 # ifdef DEBUG
 	setvbuf(stdout, NULL, _IOLBF, 0);
 # endif
-
 
 	init_logging(progname, NLOG_SYNCMASK, true);
 	/* honor -l/--logfile option to log to a file */
@@ -885,6 +874,21 @@ ntpdmain(
 	loop_config(LOOP_DRIFTINIT, 0);
 	report_event(EVNT_SYSRESTART, NULL, NULL);
 	initializing = false;
+
+	if (ipv4_works && ipv6_works) {
+		if (opt_ipv4)
+			ipv6_works = false;
+		else if (opt_ipv6)
+			ipv4_works = false;
+	} else if (!ipv4_works && !ipv6_works) {
+		msyslog(LOG_ERR, "Neither IPv4 nor IPv6 networking detected, fatal.");
+		exit(1);
+	} else if (opt_ipv4 && !ipv4_works)
+		msyslog(LOG_WARNING, "-4/--ipv4 ignored, IPv4 networking not found.");
+	else if (opt_ipv6 && !ipv6_works)
+		msyslog(LOG_WARNING, "-6/--ipv6 ignored, IPv6 networking not found.");
+
+
 
 # ifdef HAVE_DROPROOT
 	if (droproot) {
