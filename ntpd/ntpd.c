@@ -122,6 +122,8 @@ static bool explicit_interface;
 bool dumpopts;
 bool opt_auth = true;
 bool opt_bclient = false;
+double opt_broaddelay = -1;
+bool opt_x = false;
 
 /*
  * No-fork flag.  If set, we do not become a background daemon.
@@ -349,7 +351,7 @@ parse_cmdline_opts(
 				optarg);
 			exit(0);
 		    } else {
-			proto_config(PROTO_BROADDELAY, 0, tmp, NULL);
+			opt_broaddelay = tmp;
 		    }
 		}
 	        break;
@@ -425,7 +427,7 @@ parse_cmdline_opts(
 		wait_sync = strtod(optarg, NULL);
 		break;
 	    case 'x':
-		loop_config(LOOP_MAX, 600);
+		opt_x = true;
 		break;
 	    default :
 		break;
@@ -858,8 +860,8 @@ ntpdmain(
 				/* turn off in config if unwanted */
 
 	/*
-	 * Most option settings have to be deferred until after
-	 * the initualization seequence.
+	 * Some option settings have to be deferred until after
+	 * the library initialization sequence.
 	 */
 	if (opt_auth)
 	    proto_config(PROTO_AUTHENTICATE, 1, 0.0, NULL);
@@ -867,7 +869,12 @@ ntpdmain(
 	    proto_config(PROTO_AUTHENTICATE, 0, 0.0, NULL);
 	if (opt_bclient)
 	    proto_config(PROTO_BROADCLIENT, 1, 0.0, NULL);
+	if (opt_broaddelay != -1)
+	    proto_config(PROTO_BROADDELAY, 0, opt_broaddelay, NULL);
+	if (opt_x)
+	    loop_config(LOOP_MAX, 600);
 
+	/* use this to test if option setting gives expected results */
 	if (dumpopts) {
 	    proto_dump(stdout);
 	    if (logfilename)

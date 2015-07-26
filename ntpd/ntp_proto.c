@@ -4183,4 +4183,5 @@ void proto_dump(FILE *fp)
 {
     fprintf(fp, "%sable auth;\n", sys_authenticate ? "en" : "dis");
     fprintf(fp, "%sable bclient;\n", sys_bclient ? "en" : "dis");
+    fprintf(fp, "broadcastdelay %f;\n", sys_bdelay);
 }
