@@ -878,8 +878,11 @@ ntpdmain(
 	/* use this to test if option setting gives expected results */
 	if (dumpopts) {
 	    proto_dump(stdout);
+	    if (explicit_config)
+		fprintf(stdout, "#configfile = %s\n", explicit_config);
+	    fprintf(stdout, "#debug = %d\n", debug);
 	    if (logfilename)
-		printf("logfile \"%s\";\n", logfilename);
+		fprintf(stdout, "logfile \"%s\";\n", logfilename);
 	    exit(0);
 	}
 
