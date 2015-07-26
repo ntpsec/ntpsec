@@ -122,13 +122,14 @@ const char *explicit_config;
 /*
  * No-fork flag.  If set, we do not become a background daemon.
  */
-bool nofork;			/* Fork by default */
+bool nofork = false;		/* Fork by default */
 
 #ifdef HAVE_DNSREGISTRATION
 /*
- * mDNS registration flag. If set, we attempt to register with the mDNS system, but only
- * after we have synched the first time. If the attempt fails, then try again once per 
- * minute for up to 5 times. After all, we may be starting before mDNS.
+ * mDNS registration flag. If set, we attempt to register with the
+ * mDNS system, but only after we have synched the first time. If the
+ * attempt fails, then try again once per minute for up to 5
+ * times. After all, we may be starting before mDNS.
  */
 bool mdnsreg = false;
 int mdnstries = 5;
@@ -634,7 +635,6 @@ ntpdmain(
 		syslogit = false;
 		change_logfile(logfilename, false);
 	} else {
-		logfilename = NULL;
 		if (nofork)
 			msyslog_term = true;
 		if (saveconfigquit)
