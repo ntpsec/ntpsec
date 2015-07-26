@@ -220,7 +220,7 @@ TEST_F(mainTest, HandleKodDemobilize) {
 	host.sa4.sin_addr.s_addr = inet_addr(HOSTNAME);
 
 	// Test that the KOD-entry is added to the database.
-	kod_init_kod_db("/dev/null", TRUE);
+	kod_init_kod_db("/dev/null", true);
 
 	EXPECT_EQ(1, handle_pkt(rpktl, &rpkt, &host, HOSTNAME));
 

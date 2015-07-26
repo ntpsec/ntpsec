@@ -26,13 +26,13 @@ protected:
 };
 
 TEST_F(kodFileTest, ReadEmptyFile) {
-	kod_init_kod_db(CreatePath("kod-test-empty", INPUT_DIR).c_str(), TRUE);
+	kod_init_kod_db(CreatePath("kod-test-empty", INPUT_DIR).c_str(), true);
 
 	EXPECT_EQ(0, kod_db_cnt);
 }
 
 TEST_F(kodFileTest, ReadCorrectFile) {
-	kod_init_kod_db(CreatePath("kod-test-correct", INPUT_DIR).c_str(), TRUE);
+	kod_init_kod_db(CreatePath("kod-test-correct", INPUT_DIR).c_str(), true);
 	
 	EXPECT_EQ(2, kod_db_cnt);
 
@@ -50,7 +50,7 @@ TEST_F(kodFileTest, ReadCorrectFile) {
 }
 
 TEST_F(kodFileTest, ReadFileWithBlankLines) {
-	kod_init_kod_db(CreatePath("kod-test-blanks", INPUT_DIR).c_str(), TRUE);
+	kod_init_kod_db(CreatePath("kod-test-blanks", INPUT_DIR).c_str(), true);
 
 	EXPECT_EQ(3, kod_db_cnt);
 

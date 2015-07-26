@@ -7,7 +7,7 @@ extern "C" {
 class kodDatabaseTest : public sntptest {
 protected:
 	virtual void SetUp() {
-		kod_init_kod_db("/dev/null", TRUE);
+		kod_init_kod_db("/dev/null", true);
 	}
 };
 
