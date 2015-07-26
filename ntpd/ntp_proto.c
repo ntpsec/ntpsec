@@ -4181,6 +4181,7 @@ proto_clr_stats(void)
 
 void proto_dump(FILE *fp)
 {
+    /* must cover at least anything that can be set on the command line */
     fprintf(fp, "%sable auth;\n", sys_authenticate ? "en" : "dis");
     fprintf(fp, "%sable bclient;\n", sys_bclient ? "en" : "dis");
     fprintf(fp, "broadcastdelay %f;\n", sys_bdelay);
