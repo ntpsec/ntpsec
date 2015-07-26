@@ -344,7 +344,6 @@ parse_cmdline_opts(
 			msyslog(LOG_ERR,
 				"command line broadcast delay value %s undecodable",
 				optarg);
-			printf("Bailout1\n");	
 			exit(0);
 		} else {
 			proto_config(PROTO_BROADDELAY, 0, tmp, NULL);
@@ -362,7 +361,6 @@ parse_cmdline_opts(
 			msyslog(LOG_ERR,
 				"command line trusted key %s is invalid",
 				argv[optind]);
-			printf("Bailout2\n");	
 			exit(0);
 		    } else {
 			authtrust(tkey, 1);
@@ -397,7 +395,6 @@ parse_cmdline_opts(
 			    msyslog(LOG_ERR,
 				    "command line interface update interval %ld must not be negative",
 				    val);
-			    printf("Bailout3\n");	
 			    exit(0);
 		    }
 		}
