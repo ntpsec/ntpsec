@@ -19,8 +19,8 @@
 int		debug;
 libbufstr	lib_stringbuf[LIB_NUMBUF];
 int		lib_nextbuf;
-int		ipv4_works;
-int		ipv6_works;
+bool		ipv4_works;
+bool		ipv6_works;
 bool		lib_inited;
 
 
