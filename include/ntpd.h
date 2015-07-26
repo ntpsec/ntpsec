@@ -58,7 +58,7 @@ extern	void	win_time_stepped(void);
 extern	char	*keysdir;	/* crypto keys and leaptable directory */
 extern	char *	saveconfigdir;	/* ntpq saveconfig output directory */
 
-extern	void	getconfig	(int, char **);
+extern	void	getconfig	(const char *);
 extern	void	ctl_clr_stats	(void);
 extern	bool	ctlclrtrap	(sockaddr_u *, struct interface *, int);
 extern	u_short ctlpeerstatus	(struct peer *);

@@ -63,7 +63,6 @@ bool	do_memlock = true;
 bool have_interface_option;
 bool saveconfigquit;
 const char *saveconfigfile;
-const char *explicit_config;
 
 /*
  * "logconfig" building blocks
@@ -4394,10 +4393,7 @@ config_remotely(
  * getconfig() - process startup configuration file e.g /etc/ntp.conf
  */
 void
-getconfig(
-	int	argc,
-	char **	argv
-	)
+getconfig(const char *explicit_config)
 {
 	char	line[256];
 
@@ -4436,8 +4432,12 @@ getconfig(
 	 */
 	set_tod_using = &ntpd_set_tod_using;
 
-	if (explicit_config)
+	if (explicit_config) {
+#ifdef HAVE_NETINFO
+	    check_netinfo = false;
+#endif
 	    config_file = explicit_config;
+	}
 
 	init_syntax_tree(&cfgt);
 	if (

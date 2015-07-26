@@ -117,7 +117,7 @@ bool listen_to_virtual_ips = true;
 long wait_sync = -1;
 static char *logfilename;
 bool opt_ipv4, opt_ipv6;
-
+const char *explicit_config;
 
 /*
  * No-fork flag.  If set, we do not become a background daemon.
@@ -250,14 +250,7 @@ parse_cmdline_opts(
 		proto_config(PROTO_BROADCLIENT, 1, 0.0, NULL);
 		break;
 	    case 'c':
-	        {
-		    /* FIXME: not proper information-hiding - fix! */
-		    extern char *explicit_config;
-		    explicit_config = optarg;
-#ifdef HAVE_NETINFO
-		    check_netinfo = false;
-#endif
-	        }
+		explicit_config = optarg;
 		break;
 	    case 'd':
 #ifdef DEBUG
@@ -860,7 +853,7 @@ ntpdmain(
 	 * Get the configuration.
 	 */
 	have_interface_option = (!listen_to_virtual_ips || explicit_interface);
-	getconfig(argc, argv);
+	getconfig(explicit_config);
 
 	if (do_memlock) {
 		/*
