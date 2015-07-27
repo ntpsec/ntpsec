@@ -140,7 +140,7 @@ char	*sys_phone[MAXPHONE] = {NULL};	/* ACTS phone numbers */
 char	default_keysdir[] = NTP_KEYSDIR;
 char	*keysdir = default_keysdir;	/* crypto keys directory */
 char *	saveconfigdir;
-int	config_priority_override = 0;
+bool	config_priority_override = false;
 int	config_priority;
 
 const char *config_file;
