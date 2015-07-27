@@ -8,17 +8,21 @@ following kinds:
 
 1. Startup or termination.
 
-2. Time reports from reference clocks.
+2. Configuration read (including option state).  (TODO)
 
-3. Time calls to the host system clock.
+3. Time reports from reference clocks.
 
-4. Calls to the host's random-number generator.
+4. Time calls to the host system clock.
 
-5. Packets incoming from peer NTP daemons
+5. Reads and write of the system drift file.  (TODO)
 
-6. Calls to adjtime/adjtimex to set the system clock.
+6. Calls to the host's random-number generator.
 
-7. Packets outgoing to peer NTP daemons.
+7. Packets incoming from NTP daemons.  (TODO)
+
+8. Calls to adjtime/adjtimex to set the system clock.  (TODO)
+
+9. Packets outgoing to NTP daemons.  (TODO)
 
 We must support two modes of operation.  In "capture" mode, ntpd
 operates normally, logging all events.  In "replay" mode, ntpd accepts
@@ -134,19 +138,52 @@ shutdown::
 #include "ntp_intercept.h"
 #include "ntp_fp.h"
 
+static enum {none, capture, replay} mode = none;
+
+void intercept_argparse(int *argc, char ***argv)
+{
+    int i;
+    for (i = 1; i < *argc; i++)
+	if (strcmp((*argv)[i], "-y") == 0)
+	    mode = capture;
+	else if  (strcmp((*argv)[i], "-Y") == 0)
+	    mode = replay;
+
+    if (mode == capture)
+    {
+	printf("event argparse");
+	for (i = 1; i < *argc; i++)
+	    if (strcmp((*argv)[i], "-y") != 0 && strcmp((*argv)[i], "-Y") != 0)
+		printf(" %s", (*argv)[i]);
+	putchar('\n');
+    }
+}
+
 void intercept_log(const char *legend, ...)
 {
+    if (mode == capture) {
+	/* FIXME: extended form not yet supported (or used) */
+	printf("event log %s\n", legend);
+    }
 }
 
 void intercept_get_systime(const char *legend, l_fp *now)
 {
-	struct timespec ts;	/* seconds and nanoseconds */
-	get_ostime(&ts);
-	/* logging and replay goes here */
-	normalize_time(ts, intercept_ntp_random(__func__), now);
+    struct timespec ts;	/* seconds and nanoseconds */
+    get_ostime(&ts);
+	
+    if (mode == capture)
+	printf("event systime %s %zd %zd\n", legend, ts.tv_sec, ts.tv_nsec);
+	
+    normalize_time(ts, intercept_ntp_random(__func__), now);
 }
 
 long intercept_ntp_random(const char *legend)
 {
-    return ntp_random();
+    long rand = ntp_random();
+ 
+    if (mode == capture)
+	printf("event random %s %ld\n", legend, rand);
+    
+    return rand;
 }

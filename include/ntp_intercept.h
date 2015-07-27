@@ -18,6 +18,7 @@
 #define PRINTF_FUNC(format_index, arg_indx)
 #endif
 
+void intercept_argparse(int *, char ***);
 PRINTF_FUNC(1, 2) void intercept_log(const char *, ...);
 void intercept_get_systime(const char *, l_fp *);
 long intercept_ntp_random(const char *);
