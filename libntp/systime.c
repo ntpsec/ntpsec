@@ -118,7 +118,7 @@ init_systime(void)
 
 #ifndef SIM	/* ntpsim.c has get_systime() and friends for sim */
 
-static inline void
+void
 get_ostime(
 	struct timespec *	tsp
 	)
@@ -150,11 +150,21 @@ get_systime(
 	l_fp *now		/* system time */
 	)
 {
+	struct timespec ts;	/* seconds and nanoseconds */
+	get_ostime(&ts);
+	normalize_time(ts, now);
+}
+
+void
+normalize_time(
+	struct timespec ts,		/* seconds and nanoseconds */
+	l_fp *now		/* system time */
+	)
+{
         static struct timespec  ts_last;        /* last sampled os time */
 	static struct timespec	ts_prev;	/* prior os time */
 	static l_fp		lfp_prev;	/* prior result */
 	static double		dfuzz_prev;	/* prior fuzz */
-	struct timespec ts;	/* seconds and nanoseconds */
 	struct timespec ts_min;	/* earliest permissible */
 	struct timespec ts_lam;	/* lamport fictional increment */
 	struct timespec ts_prev_log;	/* for msyslog only */
@@ -164,7 +174,6 @@ get_systime(
 	l_fp	lfpfuzz;
 	l_fp	lfpdelta;
 
-	get_ostime(&ts);
 	DEBUG_REQUIRE(systime_init_done);
 	ENTER_GET_SYSTIME_CRITSEC();
 

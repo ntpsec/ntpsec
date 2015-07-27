@@ -25,6 +25,7 @@
 #include "ntp_assert.h"
 #include "ntp_leapsec.h"
 #include "ntp_md5.h"	/* provides OpenSSL digest API */
+#include "ntp_intercept.h"
 #include "lib_strbuf.h"
 #ifdef KERNEL_PLL
 # include "ntp_syscall.h"
@@ -3389,7 +3390,7 @@ static int validate_nonce(
 	ts.l_ui = (uint32_t)ts_i;
 	ts.l_uf = (uint32_t)ts_f;
 	derived = derive_nonce(&rbufp->recv_srcadr, ts.l_ui, ts.l_uf);
-	get_systime(&now_delta);
+	intercept_get_systime(__func__, &now_delta);
 	L_SUB(&now_delta, &ts);
 
 	return (supposed == derived && now_delta.l_ui < 16);
@@ -3813,7 +3814,7 @@ static void read_mru_list(
 	/*
 	 * send up to limit= entries in up to frags= datagrams
 	 */
-	get_systime(&now);
+	intercept_get_systime(__func__, &now);
 	generate_nonce(rbufp, buf, sizeof(buf));
 	ctl_putunqstr("nonce", buf, strlen(buf));
 	prior_mon = NULL;

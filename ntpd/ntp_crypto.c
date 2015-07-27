@@ -21,6 +21,7 @@
 #include "ntp_assert.h"
 #include "ntp_calendar.h"
 #include "ntp_leapsec.h"
+#include "ntp_intercept.h"
 
 #include "openssl/asn1_mac.h"
 #include "openssl/bn.h"
@@ -1970,7 +1971,7 @@ crypto_time()
 
 	L_CLR(&tstamp);
 	if (sys_leap != LEAP_NOTINSYNC)
-		get_systime(&tstamp);
+	    intercept_get_systime(__func__, &tstamp);
 	return (tstamp.l_ui);
 }
 
@@ -3823,7 +3824,7 @@ crypto_setup(void)
 			    randfile);
 			exit (-1);
 		}
-		get_systime(&seed);
+		intercept_get_systime(&seed);
 		RAND_seed(&seed, sizeof(l_fp));
 		RAND_write_file(randfile);
 #ifdef DEBUG
