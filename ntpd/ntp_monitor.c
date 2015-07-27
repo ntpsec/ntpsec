@@ -9,7 +9,8 @@
 #include "ntp_io.h"
 #include "ntp_lists.h"
 #include "ntp_stdlib.h"
-#include <ntp_random.h>
+#include "ntp_random.h"
+#include "ntp_intercept.h"
 
 #include <stdio.h>
 #include <signal.h>
@@ -457,7 +458,7 @@ ntp_monitor(
 				mon_getmoremem();
 			UNLINK_HEAD_SLIST(mon, mon_free, hash_next);
 		/* Preempt from the MRU list if old enough. */
-		} else if (ntp_random() / (2. * FRAC) >
+		} else if (intercept_ntp_random(__func__) / (2. * FRAC) >
 			   (double)oldest_age / mon_age) {
 			return ~(RES_LIMITED | RES_KOD) & flags;
 		} else {

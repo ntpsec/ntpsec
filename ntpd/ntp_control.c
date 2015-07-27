@@ -3322,10 +3322,10 @@ static uint32_t derive_nonce(
 	u_int		len;
 
 	while (!salt[0] || current_time - last_salt_update >= 3600) {
-		salt[0] = ntp_random();
-		salt[1] = ntp_random();
-		salt[2] = ntp_random();
-		salt[3] = ntp_random();
+		salt[0] = intercept_ntp_random("nonce1");
+		salt[1] = intercept_ntp_random("nonce2");
+		salt[2] = intercept_ntp_random("nonce3");
+		salt[3] = intercept_ntp_random("nonce4");
 		last_salt_update = current_time;
 	}
 

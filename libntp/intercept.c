@@ -143,5 +143,10 @@ void intercept_get_systime(const char *legend, l_fp *now)
 	struct timespec ts;	/* seconds and nanoseconds */
 	get_ostime(&ts);
 	/* logging and replay goes here */
-	normalize_time(ts, now);
+	normalize_time(ts, intercept_ntp_random(__func__), now);
+}
+
+long intercept_ntp_random(const char *legend)
+{
+    return ntp_random();
 }

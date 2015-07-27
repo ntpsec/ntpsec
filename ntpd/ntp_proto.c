@@ -437,7 +437,7 @@ receive(
 	 * surviving packets.
 	 */
 	if (restrict_mask & RES_FLAKE) {
-		if ((double)ntp_random() / 0x7fffffff < .1) {
+		if ((double)intercept_ntp_random(__func__) / 0x7fffffff < .1) {
 			sys_restricted++;
 			return;			/* no flakeway */
 		}
@@ -2078,7 +2078,7 @@ poll_update(
 			next = 1 << hpoll;
 		else
 #endif /* REFCLOCK */
-			next = ((0x1000UL | (ntp_random() & 0x0ff)) <<
+			next = ((0x1000UL | (intercept_ntp_random(__func__) & 0x0ff)) <<
 			    hpoll) >> 12;
 		next += peer->outdate;
 		if (next > utemp)
@@ -2176,7 +2176,7 @@ peer_clear(
 	} else if (MODE_PASSIVE == peer->hmode) {
 		peer->nextdate += ntp_minpkt;
 	} else {
-		peer->nextdate += ntp_random() % peer->minpoll;
+		peer->nextdate += intercept_ntp_random(__func__) % peer->minpoll;
 	}
 #ifdef AUTOKEY
 	peer->refresh = current_time + (1 << NTP_REFRESH);
