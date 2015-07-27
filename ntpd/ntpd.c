@@ -220,7 +220,7 @@ static void	library_unexpected_error(const char *, int,
 #endif	/* !SIM */
 
 
-#define ALL_OPTIONS "46aAbc:dD:f:gGi:I:k:l:LmMnNp:PqQ:r:Rs:t:u:UvVw:x"
+#define ALL_OPTIONS "46aAbc:dD:f:gGi:I:k:l:LmMnNp:PqQ:r:Rs:t:u:UvVw:xyY"
 
 static void
 parse_cmdline_opts(
@@ -390,6 +390,12 @@ parse_cmdline_opts(
 	    case 'x':
 		/* defer */
 		break;
+	    case 'y':
+		/* processed by interception code */
+		break;
+	    case 'Y':
+		/* processed by interception code */
+		break;
 	    default :
 		break;
 	    } /*switch*/
@@ -420,6 +426,7 @@ main(
 	)
 {
 	progname = argv[0];
+	intercept_argparse(&argc, &argv);
 	parse_cmdline_opts(argc, argv);
 
 #ifdef DEBUG
@@ -592,6 +599,7 @@ ntpdmain(
 	saved_argv = argv;
 	progname = argv[0];
 	initializing = true;		/* mark that we are initializing */
+	intercept_argparse(&argc, &argv);
 	parse_cmdline_opts(argc, argv);
 # ifdef DEBUG
 	setvbuf(stdout, NULL, _IOLBF, 0);
