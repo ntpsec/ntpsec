@@ -108,24 +108,20 @@ static priv_set_t *highprivs = NULL;
  */
 #define NTPD_PRIO	(-12)
 
-int priority_done = 2;		/* 0 - Set priority */
+static int priority_done = 2;	/* 0 - Set priority */
 				/* 1 - priority is OK where it is */
 				/* 2 - Don't set priority */
 				/* 1 and 2 are pretty much the same */
 
 bool listen_to_virtual_ips = true;
-long wait_sync = -1;
 
 static char *logfilename;
 static bool opt_ipv4, opt_ipv6;
 static const char *explicit_config;
 static bool explicit_interface;
+static bool nofork = false;		/* Fork by default */
 static bool dumpopts;
-
-/*
- * No-fork flag.  If set, we do not become a background daemon.
- */
-bool nofork = false;		/* Fork by default */
+static long wait_sync = -1;
 
 #ifdef HAVE_DNSREGISTRATION
 /*
@@ -300,9 +296,7 @@ parse_cmdline_opts(
 #endif  /* HAVE_DNSREGISTRATION */
 		break;
 	    case 'M':
-# ifdef SYS_WINNT
-		set_mm_timer(MM_TIMER_HIRES);
-# endif
+		/* defer */
 		break;
 	    case 'n':
 		nofork = true;
@@ -855,6 +849,11 @@ ntpdmain(
 	    case 'k':
 		getauthkeys(optarg);
 		break;
+	    case 'M':
+# ifdef SYS_WINNT
+		set_mm_timer(MM_TIMER_HIRES);
+# endif
+		break;
 	    case 'p':
 		stats_config(STATS_PID_FILE, optarg);
 		break;
@@ -903,6 +902,10 @@ ntpdmain(
 #ifdef HAVE_DROPROOT
 	    if (chrootdir)
 		fprintf(stdout, "#chrootdir = \"%s\";\n", chrootdir);
+	    if (user)
+		fprintf(stdout, "#user = %s\n", user);
+	    if (group)
+		fprintf(stdout, "#group = %s\n", group);
 #endif
 	    /* FIXME: inspect interfaces */
 	    /* FIXME: inspect authkeys */
@@ -914,6 +917,9 @@ ntpdmain(
 	    fprintf(stdout, "#mdnsreg = %s\n",
 		    mdnsreg ? "true" : "false");
 #endif  /* HAVE_DNSREGISTRATION */
+# ifdef SYS_WINNT
+	    /* FIXME: inspect the timer state? */
+# endif
 	    exit(0);
 	}
 			

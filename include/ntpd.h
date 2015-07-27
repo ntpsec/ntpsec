@@ -541,7 +541,6 @@ extern	double	stats_write_tolerance;
 extern	double	wander_threshold;
 
 /* ntpd.c */
-extern	bool	nofork;		/* no-fork flag */
 extern	bool	initializing;	/* initializing flag */
 #ifdef HAVE_DROPROOT
 extern	bool	droproot;	/* flag: try to drop root privileges after startup */
