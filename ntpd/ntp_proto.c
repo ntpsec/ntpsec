@@ -3052,7 +3052,7 @@ peer_xmit(
 			}
 		}
 		peer->t21_bytes = sendlen;
-		sendpkt(&peer->srcadr, peer->dstadr, sys_ttl[peer->ttl],
+		intercept_sendpkt(__func__, &peer->srcadr, peer->dstadr, sys_ttl[peer->ttl],
 		    &xpkt, sendlen);
 		peer->sent++;
 		peer->throttle += (1 << peer->minpoll) - 2;
@@ -3365,7 +3365,7 @@ peer_xmit(
 		exit (-1);
 	}
 	peer->t21_bytes = sendlen;
-	sendpkt(&peer->srcadr, peer->dstadr, sys_ttl[peer->ttl], &xpkt,
+	intercept_sendpkt(__func__, &peer->srcadr, peer->dstadr, sys_ttl[peer->ttl], &xpkt,
 	    sendlen);
 	peer->sent++;
 	peer->throttle += (1 << peer->minpoll) - 2;
@@ -3493,7 +3493,7 @@ fast_xmit(
 	 */
 	sendlen = LEN_PKT_NOMAC;
 	if (rbufp->recv_length == sendlen) {
-		sendpkt(&rbufp->recv_srcadr, rbufp->dstadr, 0, &xpkt,
+		intercept_sendpkt(__func__, &rbufp->recv_srcadr, rbufp->dstadr, 0, &xpkt,
 		    sendlen);
 #ifdef DEBUG
 		if (debug)
@@ -3548,7 +3548,7 @@ fast_xmit(
 	if (xkeyid > NTP_MAXKEY)
 		authtrust(xkeyid, 0);
 #endif	/* AUTOKEY */
-	sendpkt(&rbufp->recv_srcadr, rbufp->dstadr, 0, &xpkt, sendlen);
+	intercept_sendpkt(__func__, &rbufp->recv_srcadr, rbufp->dstadr, 0, &xpkt, sendlen);
 	intercept_get_systime(__func__, &xmt_ty);
 	L_SUB(&xmt_ty, &xmt_tx);
 	sys_authdelay = xmt_ty;
@@ -3634,8 +3634,9 @@ pool_xmit(
 	intercept_get_systime(__func__, &xmt_tx);
 	pool->aorg = xmt_tx;
 	HTONL_FP(&xmt_tx, &xpkt.xmt);
-	sendpkt(rmtadr, lcladr,	sys_ttl[pool->ttl], &xpkt,
-		LEN_PKT_NOMAC);
+	intercept_sendpkt(__func__,
+			  rmtadr, lcladr, sys_ttl[pool->ttl], &xpkt,
+			  LEN_PKT_NOMAC);
 	pool->sent++;
 	pool->throttle += (1 << pool->minpoll) - 2;
 #ifdef DEBUG

@@ -782,11 +782,13 @@ ctl_error(
 	if (res_authenticate && sys_authenticate) {
 		maclen = authencrypt(res_keyid, (uint32_t *)&rpkt,
 				     CTL_HEADER_LEN);
-		sendpkt(rmt_addr, lcl_inter, -2, (void *)&rpkt,
-			CTL_HEADER_LEN + maclen);
+		intercept_sendpkt(__func__,
+				  rmt_addr, lcl_inter, -2, (void *)&rpkt,
+				  CTL_HEADER_LEN + maclen);
 	} else
-		sendpkt(rmt_addr, lcl_inter, -3, (void *)&rpkt,
-			CTL_HEADER_LEN);
+		intercept_sendpkt(__func__,
+			      rmt_addr, lcl_inter, -3, (void *)&rpkt,
+			      CTL_HEADER_LEN);
 }
 
 /*
@@ -1188,9 +1190,10 @@ ctl_flushpkt(
 					MODE_CONTROL);
 				rpkt.sequence =
 				    htons(ctl_traps[i].tr_sequence);
-				sendpkt(&ctl_traps[i].tr_addr,
-					ctl_traps[i].tr_localaddr, -4,
-					(struct pkt *)&rpkt, sendlen);
+				intercept_sendpkt(__func__,
+				    &ctl_traps[i].tr_addr,
+				    ctl_traps[i].tr_localaddr, -4,
+				    (struct pkt *)&rpkt, sendlen);
 				if (!more)
 					ctl_traps[i].tr_sequence++;
 				numasyncmsgs++;
@@ -1212,10 +1215,10 @@ ctl_flushpkt(
 			memcpy(datapt, &keyid, sizeof(keyid));
 			maclen = authencrypt(res_keyid,
 					     (uint32_t *)&rpkt, totlen);
-			sendpkt(rmt_addr, lcl_inter, -5,
+			intercept_sendpkt(__func__, rmt_addr, lcl_inter, -5,
 				(struct pkt *)&rpkt, totlen + maclen);
 		} else {
-			sendpkt(rmt_addr, lcl_inter, -6,
+			intercept_sendpkt(__func__, rmt_addr, lcl_inter, -6,
 				(struct pkt *)&rpkt, sendlen);
 		}
 		if (more)

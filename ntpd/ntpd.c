@@ -636,7 +636,6 @@ ntpdmain(
 		}
 		msyslog(LOG_INFO, "%s", buf);
 	}
-	intercept_log("startup");
 
 	/*
 	 * Install trap handlers to log errors and assertion failures.
@@ -950,7 +949,7 @@ ntpdmain(
 	 * Get the configuration.
 	 */
 	have_interface_option = (!listen_to_virtual_ips || explicit_interface);
-	getconfig(explicit_config);
+	intercept_getconfig(explicit_config);
 
 	if (do_memlock) {
 		/*
@@ -1403,7 +1402,7 @@ finish(
 {
 	const char *sig_desc;
 
-	intercept_log("shutdown");
+	intercept_log("shutdown 0\n");
 	sig_desc = NULL;
 	sig_desc = strsignal(sig);
 	if (sig_desc == NULL)

@@ -314,8 +314,8 @@ extern bool saveconfigquit;
 extern const char *saveconfigfile;
 
 #ifdef SAVECONFIG
-int dump_config_tree(config_tree *ptree, FILE *df, int comment);
-int dump_all_config_trees(FILE *df, int comment);
+int dump_config_tree(config_tree *ptree, FILE *df, bool comment);
+int dump_all_config_trees(FILE *df, bool comment);
 #endif
 
 void ntp_rlimit(int, rlim_t, int, const char *);
