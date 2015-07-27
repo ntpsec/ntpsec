@@ -264,7 +264,9 @@ req_ack(
 	/*
 	 * send packet and bump counters
 	 */
-	sendpkt(srcadr, inter, -1, (struct pkt *)&rpkt, RESP_HEADER_SIZE);
+	intercept_sendpkt(__func__,
+			  srcadr, inter, -1,
+			  (struct pkt *)&rpkt, RESP_HEADER_SIZE);
 	errorcounter[errcode]++;
 }
 
@@ -323,8 +325,9 @@ more_pkt(void)
 		rpkt.rm_vn_mode = RM_VN_MODE(RESP_BIT, MORE_BIT, reqver);
 		rpkt.auth_seq = AUTH_SEQ(0, seqno);
 		rpkt.err_nitems = htons((u_short)nitems);
-		sendpkt(toaddr, frominter, -1, (struct pkt *)&rpkt,
-			RESP_HEADER_SIZE + databytes);
+		intercept_sendpkt(__func__,
+				  toaddr, frominter, -1,
+				  (struct pkt *)&rpkt, RESP_HEADER_SIZE + databytes);
 		numresppkts++;
 
 		/*
@@ -380,8 +383,9 @@ flush_pkt(void)
 		rpkt.rm_vn_mode = RM_VN_MODE(RESP_BIT, 0, reqver);
 		rpkt.auth_seq = AUTH_SEQ(0, seqno);
 		rpkt.err_nitems = htons((u_short)nitems);
-		sendpkt(toaddr, frominter, -1, (struct pkt *)&rpkt,
-			RESP_HEADER_SIZE+databytes);
+		intercept_sendpkt(__func__,
+				  toaddr, frominter, -1, (struct pkt *)&rpkt,
+				  RESP_HEADER_SIZE+databytes);
 		numresppkts++;
 	}
 }

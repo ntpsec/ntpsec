@@ -8,7 +8,7 @@ following kinds:
 
 1. Startup or termination.
 
-2. Configuration read (including option state).  (TODO)
+2. Configuration read (including option state).
 
 3. Time reports from reference clocks.
 
@@ -76,7 +76,7 @@ verb optionally followed by argument fields (or is a comment, or
 whitespace).  The verbs look like:
 
 startup::
-	Initialization event.  No argument fields.
+	Initialization event.  Command-line arguments follow.
 
 refclock::
 	Report from a reference clock.  Fields should be all possible data
@@ -151,11 +151,25 @@ void intercept_argparse(int *argc, char ***argv)
 
     if (mode == capture)
     {
-	printf("event argparse");
+	printf("event startup");
 	for (i = 1; i < *argc; i++)
 	    if (strcmp((*argv)[i], "-y") != 0 && strcmp((*argv)[i], "-Y") != 0)
 		printf(" %s", (*argv)[i]);
 	putchar('\n');
+    }
+}
+
+void intercept_getconfig(const char *configfile)
+{
+    if (mode != replay)
+	getconfig(configfile);
+    if (mode == capture) {
+	fputs("startconfig\n", stdout);
+#ifdef SAVECONFIG
+	dump_all_config_trees(stdout, false);
+#endif
+	fputs("endconfig\n", stdout);
+
     }
 }
 
@@ -186,4 +200,18 @@ long intercept_ntp_random(const char *legend)
 	printf("event random %s %ld\n", legend, rand);
     
     return rand;
+}
+
+void
+intercept_sendpkt(const char *legend,
+		  sockaddr_u *dest, struct interface *ep, int ttl,
+		  struct pkt *pkt, int len)
+{
+    if (mode == none)
+	sendpkt(dest, ep, ttl, pkt, len);
+    else if (mode == capture) {
+	fputs("event sendpkt ", stdout);
+	/* FIXME: dump the destination and the guts of the packet */
+	fputs("\n", stdout);
+    }	
 }

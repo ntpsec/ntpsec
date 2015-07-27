@@ -458,7 +458,7 @@ free_config_tree(
 int
 dump_all_config_trees(
 	FILE *df,
-	int comment
+	bool comment
 	)
 {
 	config_tree *	cfg_ptr;
@@ -479,7 +479,7 @@ int
 dump_config_tree(
 	config_tree *ptree,
 	FILE *df,
-	int comment
+	bool comment
 	)
 {
 	peer_node *peern;
