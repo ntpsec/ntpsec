@@ -911,8 +911,8 @@ ntpdmain(
 	    if (group)
 		fprintf(stdout, "#group = %s\n", group);
 #endif
-	    /* FIXME: inspect interfaces */
-	    /* FIXME: inspect authkeys */
+	    /* FIXME: dump interfaces */
+	    /* FIXME: dump authkeys */
 	    if (logfilename)
 		fprintf(stdout, "logfile \"%s\";\n", logfilename);
 	    fprintf(stdout, "#listen_to_virtual_ips = %s\n",
@@ -922,12 +922,17 @@ ntpdmain(
 		    mdnsreg ? "true" : "false");
 #endif  /* HAVE_DNSREGISTRATION */
 # ifdef SYS_WINNT
-	    /* FIXME: inspect the timer state? */
+	    /* FIXME: dump the timer state */
 # endif
 	    if (pidfile)
 		fprintf(stdout, "pidfile \"%s\";\n", pidfile);
+	    /* FIXME: dump priority */
+	    fprintf(stdout, "#mode_ntpdate = %s\n",
+		    mode_ntpdate ? "true" : "false");
 	    if (statsdir[0])
 		fprintf(stdout, "statsdir \"%s\";\n", statsdir);
+	    fprintf(stdout, "#interface_interval = %d\n", interface_interval);
+	    /* FIXME: dump variable settings */
 	    exit(0);
 	}
 			
