@@ -163,7 +163,8 @@ bool initializing;
  */
 extern const char *Version;
 
-extern int config_priority_override, config_priority;
+extern bool config_priority_override;
+static int config_priority;
 
 char const *progname;
 
@@ -310,7 +311,7 @@ parse_cmdline_opts(
 		break;
 	    case 'P':
 		config_priority = atoi(optarg);
-		config_priority_override = 1;
+		config_priority_override = true;
 		priority_done = PRIORITY_UNSET;
 		break;
 	    case 'q':
