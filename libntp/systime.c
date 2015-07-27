@@ -152,12 +152,13 @@ get_systime(
 {
 	struct timespec ts;	/* seconds and nanoseconds */
 	get_ostime(&ts);
-	normalize_time(ts, now);
+	normalize_time(ts, ntp_random(), now);
 }
 
 void
 normalize_time(
 	struct timespec ts,		/* seconds and nanoseconds */
+	long rand,
 	l_fp *now		/* system time */
 	)
 {
@@ -226,7 +227,7 @@ normalize_time(
 	/*
 	 * Add in the fuzz.
 	 */
-	dfuzz = ntp_random() * 2. / FRAC * sys_fuzz;
+	dfuzz = rand * 2. / FRAC * sys_fuzz;
 	DTOLFP(dfuzz, &lfpfuzz);
 	L_ADD(&result, &lfpfuzz);
 

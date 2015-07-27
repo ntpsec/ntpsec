@@ -19,5 +19,5 @@
 #endif
 
 PRINTF_FUNC(1, 2) void intercept_log(const char *, ...);
-
 void intercept_get_systime(const char *, l_fp *);
+long intercept_ntp_random(const char *);

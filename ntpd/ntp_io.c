@@ -3388,7 +3388,7 @@ fetch_timestamp(
 				break;
 #endif  /* HAVE_TIMESTAMP */
 			}
-			fuzz = ntp_random() * 2. / FRAC * sys_fuzz;
+			fuzz = intercept_ntp_random(__func__) * 2. / FRAC * sys_fuzz;
 			DTOLFP(fuzz, &lfpfuzz);
 			L_ADD(&nts, &lfpfuzz);
 #ifdef DEBUG_TIMING

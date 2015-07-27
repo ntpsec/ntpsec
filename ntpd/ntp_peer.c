@@ -12,7 +12,8 @@
 #include "ntp_lists.h"
 #include "ntp_stdlib.h"
 #include "ntp_control.h"
-#include <ntp_random.h>
+#include "ntp_random.h"
+#include "ntp_intercept.h"
 
 /*
  *		    Table of valid association combinations
@@ -146,7 +147,7 @@ init_peer(void)
 	 * Initialize our first association ID
 	 */
 	do
-		current_association_ID = ntp_random() & ASSOCID_MAX;
+		current_association_ID = intercept_ntp_random(__func__) & ASSOCID_MAX;
 	while (!current_association_ID);
 	initial_association_ID = current_association_ID;
 }

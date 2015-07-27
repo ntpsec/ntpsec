@@ -331,7 +331,7 @@ make_keylist(
 	 * NTP_MAXKEY.
 	 */
 	while (1) {
-		keyid = ntp_random() & 0xffffffff;
+		keyid = intercept_ntp_random(__func__) & 0xffffffff;
 		if (keyid <= NTP_MAXKEY)
 			continue;
 
@@ -3824,7 +3824,7 @@ crypto_setup(void)
 			    randfile);
 			exit (-1);
 		}
-		intercept_get_systime(&seed);
+		intercept_get_systime(__func__, &seed);
 		RAND_seed(&seed, sizeof(l_fp));
 		RAND_write_file(randfile);
 #ifdef DEBUG
