@@ -123,6 +123,7 @@ static bool explicit_interface;
 static bool nofork = false;		/* Fork by default */
 static bool dumpopts;
 static long wait_sync = -1;
+static const char *driftfile, *pidfile;
 
 #ifdef HAVE_DNSREGISTRATION
 /*
@@ -218,7 +219,7 @@ static void	library_unexpected_error(const char *, int,
 #endif	/* !SIM */
 
 
-#define ALL_OPTIONS "46aAbc:dD:f:gGi:I:k:l:LmMnNpPqQ:r:Rs:t:u:UvVw:x"
+#define ALL_OPTIONS "46aAbc:dD:f:gGi:I:k:l:LmMnNp:PqQ:r:Rs:t:u:UvVw:x"
 
 static void
 parse_cmdline_opts(
@@ -265,7 +266,7 @@ parse_cmdline_opts(
 #endif
 		break;
 	    case 'f':
-		/* defer */
+		driftfile = optarg;
 		break;
 	    case 'g':
 		allow_panic = true;
@@ -307,7 +308,7 @@ parse_cmdline_opts(
 		priority_done = PRIORITY_UNSET;
 		break;
 	    case 'p':
-		/* defer */
+		pidfile = optarg;
 		break;
 	    case 'P':
 		config_priority = atoi(optarg);
@@ -339,7 +340,7 @@ parse_cmdline_opts(
 		nofork = true;
 		break;
 	    case 's':
-		/* defer */
+		strlcpy(statsdir, optarg, sizeof(statsdir));
 		break;
 	    case 't':
 		/* defer */
@@ -836,7 +837,7 @@ ntpdmain(
 		proto_config(PROTO_BROADCLIENT, 1, 0.0, NULL);
 		break;
 	    case 'f':
-		stats_config(STATS_FREQ_FILE, optarg);
+		stats_config(STATS_FREQ_FILE, driftfile);
 		break;
 	    case 'I':
 	        {
@@ -857,13 +858,13 @@ ntpdmain(
 # endif
 		break;
 	    case 'p':
-		stats_config(STATS_PID_FILE, optarg);
+		stats_config(STATS_PID_FILE, pidfile);
 		break;
 	    case 'r':
 		proto_config(PROTO_BROADDELAY, 0, atof(optarg), NULL);
 		break;
 	    case 's':
-		stats_config(STATS_STATSDIR, optarg);
+		stats_config(STATS_STATSDIR, statsdir);
 		break;
 	    case 't':
 		{
@@ -896,7 +897,8 @@ ntpdmain(
 	    if (explicit_config)
 		fprintf(stdout, "conffile \"%s\";\n", explicit_config);
 	    fprintf(stdout, "#debug = %d\n", debug);
-	    /* FIXME: can we dump the drift file after the fact? */
+	    if (driftfile)
+		fprintf(stdout, "driftfile \"%s\";\n", driftfile);
 	    fprintf(stdout, "#allow_panic = %s\n",
 		    allow_panic ? "true" : "false");
 	    fprintf(stdout, "#force_step_once = %s\n",
@@ -922,6 +924,10 @@ ntpdmain(
 # ifdef SYS_WINNT
 	    /* FIXME: inspect the timer state? */
 # endif
+	    if (pidfile)
+		fprintf(stdout, "pidfile \"%s\";\n", pidfile);
+	    if (statsdir[0])
+		fprintf(stdout, "statsdir \"%s\";\n", statsdir);
 	    exit(0);
 	}
 			
