@@ -108,10 +108,11 @@ static priv_set_t *highprivs = NULL;
  */
 #define NTPD_PRIO	(-12)
 
-static int priority_done = 2;	/* 0 - Set priority */
-				/* 1 - priority is OK where it is */
-				/* 2 - Don't set priority */
-				/* 1 and 2 are pretty much the same */
+static  enum {PRIORITY_UNSET,	/* Set priority */
+	      PRIORITY_OK,	/* Priority is OK where it is */
+	      PRIORITY_NOSET,	/* Don't set priority */
+				/* Latter two are pretty much the same */
+} priority_done = PRIORITY_NOSET;
 
 bool listen_to_virtual_ips = true;
 
@@ -302,7 +303,7 @@ parse_cmdline_opts(
 		nofork = true;
 		break;
 	    case 'N':
-		priority_done = 0;
+		priority_done = PRIORITY_UNSET;
 		break;
 	    case 'p':
 		/* defer */
@@ -310,7 +311,7 @@ parse_cmdline_opts(
 	    case 'P':
 		config_priority = atoi(optarg);
 		config_priority_override = 1;
-		priority_done = 0;
+		priority_done = PRIORITY_UNSET;
 		break;
 	    case 'q':
 		mode_ntpdate = true;
@@ -493,7 +494,7 @@ set_process_priority(void)
 			priority_done);
 # endif /* DEBUG */
 
-	if (!priority_done) {
+	if (priority_done == PRIORITY_UNSET) {
 		int pmax, pmin;
 		struct sched_param sched;
 
@@ -511,11 +512,11 @@ set_process_priority(void)
 		if ( sched_setscheduler(0, SCHED_FIFO, &sched) == -1 )
 			msyslog(LOG_ERR, "sched_setscheduler(): %m");
 		else
-			++priority_done;
+			priority_done = PRIORITY_OK;
 	}
 # ifdef HAVE_RTPRIO
 #  ifdef RTP_SET
-	if (!priority_done) {
+	if (priority_done == PRIORITY_UNSET) {
 		struct rtprio srtp;
 
 		srtp.type = RTP_PRIO_REALTIME;	/* was: RTP_PRIO_NORMAL */
@@ -524,26 +525,26 @@ set_process_priority(void)
 		if (rtprio(RTP_SET, getpid(), &srtp) < 0)
 			msyslog(LOG_ERR, "rtprio() error: %m");
 		else
-			++priority_done;
+			priority_done = PRIORITY_OK;
 	}
 #  else	/* !RTP_SET follows */
-	if (!priority_done) {
+	if (priority_done == oriority_set) {
 		if (rtprio(0, 120) < 0)
 			msyslog(LOG_ERR, "rtprio() error: %m");
 		else
-			++priority_done;
+			priority_done = PRIORITY_OK;
 	}
 #  endif	/* !RTP_SET */
 # endif	/* HAVE_RTPRIO */
 # if defined(NTPD_PRIO) && NTPD_PRIO != 0
-	if (!priority_done) {
+	if (priority_done == PRIORITY_UNSET) {
 		if (-1 == setpriority(PRIO_PROCESS, 0, NTPD_PRIO))
 			msyslog(LOG_ERR, "setpriority() error: %m");
 		else
-			++priority_done;
+			priority_done = PRIORITY_OK;
 	}
 # endif	/* NTPD_PRIO && NTPD_PRIO != 0 */
-	if (!priority_done)
+	if (priority_done == PRIORITY_UNSET)
 		msyslog(LOG_ERR, "set_process_priority: No way found to improve our priority");
 }
 #endif	/* !SIM */
