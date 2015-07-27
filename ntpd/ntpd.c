@@ -121,12 +121,6 @@ static bool opt_ipv4, opt_ipv6;
 static const char *explicit_config;
 static bool explicit_interface;
 static bool dumpopts;
-static bool opt_auth = true;
-static bool opt_bclient = false;
-static double opt_broaddelay = -1;
-static bool opt_x = false;
-static const char *driftfile;
-static int opt_I = 0;
 
 /*
  * No-fork flag.  If set, we do not become a background daemon.
@@ -226,6 +220,8 @@ static void	library_unexpected_error(const char *, int,
 #endif	/* !SIM */
 
 
+#define ALL_OPTIONS "46aAbc:dD:f:gGi:I:k:l:LmMnNpPqQ:r:Rs:t:u:UvVw:x"
+
 static void
 parse_cmdline_opts(
 	int argc,
@@ -239,8 +235,7 @@ parse_cmdline_opts(
 
 	int op;
 
-	while ((op = getopt(argc, argv,
-			    "46aAbc:dD:f:gGi:I:k:l:LmMnNpPqQ:r:Rs:t:u:UvVw:x")) != -1) {
+	while ((op = getopt(argc, argv, ALL_OPTIONS)) != -1) {
 
 	    switch (op) {
 	    case '4':
@@ -250,13 +245,12 @@ parse_cmdline_opts(
 		opt_ipv6 = true;
 		break;
 	    case 'a':
-		opt_auth = true;
+		/* defer */
 		break;
 	    case 'A':
-		opt_auth = false;
+		/* defer */
 		break;
 	    case 'b':
-		opt_bclient = true;
 		break;
 	    case 'c':
 		explicit_config = optarg;
@@ -273,7 +267,7 @@ parse_cmdline_opts(
 #endif
 		break;
 	    case 'f':
-		driftfile = optarg;
+		/* defer */
 		break;
 	    case 'g':
 		allow_panic = true;
@@ -288,11 +282,11 @@ parse_cmdline_opts(
 #endif
 		break;
 	    case 'I':
-		opt_I = optind-1;
 		explicit_interface = true;
+		/* processing deferred */
 		break;
 	    case 'k':
-		getauthkeys(optarg);
+		/* defer */
 		break;
 	    case 'l':
 		logfilename = optarg;
@@ -317,7 +311,7 @@ parse_cmdline_opts(
 		priority_done = 0;
 		break;
 	    case 'p':
-		stats_config(STATS_PID_FILE, optarg);
+		/* defer */
 		break;
 	    case 'P':
 		config_priority = atoi(optarg);
@@ -341,8 +335,6 @@ parse_cmdline_opts(
 				"command line broadcast delay value %s undecodable",
 				optarg);
 			exit(0);
-		    } else {
-			opt_broaddelay = tmp;
 		    }
 		}
 	        break;
@@ -351,21 +343,10 @@ parse_cmdline_opts(
 		nofork = true;
 		break;
 	    case 's':
-		stats_config(STATS_STATSDIR, optarg);
+		/* defer */
 		break;
 	    case 't':
-		for (; optind < argc; optind++)
-		{
-		    u_long tkey = (int)atol(argv[optind]);
-		    if (tkey == 0 || tkey > NTP_MAXKEY) {
-			msyslog(LOG_ERR,
-				"command line trusted key %s is invalid",
-				argv[optind]);
-			exit(0);
-		    } else {
-			authtrust(tkey, 1);
-		    }
-	        }
+		/* defer */
 		break;
 	    case 'u':
 #ifdef HAVE_DROPROOT
@@ -400,25 +381,16 @@ parse_cmdline_opts(
 		}
 		break;
 	    case 'v':
-		for (; optind < argc; optind++) {
-		    if (argv[optind][0] == '-')
-			break;
-		    set_sys_var(argv[optind], strlen(argv[optind]) + 1, RW);
-		}
+		/* defer */
 		break;
 	    case 'V':
-		for (; optind < argc; optind++) {
-		    if (argv[optind][0] == '-')
-			break;
-		    set_sys_var(argv[optind], strlen(argv[optind])+1,
-				(u_short) (RW | DEF));
-		}
+		/* defer */
 		break;
 	    case 'w':
 		wait_sync = strtod(optarg, NULL);
 		break;
 	    case 'x':
-		opt_x = true;
+		/* defer */
 		break;
 	    default :
 		break;
@@ -611,6 +583,7 @@ ntpdmain(
 	int		fd;
 	int		zero;
 # endif
+	int op;
 
 	uv = umask(0);
 	if (uv)
@@ -854,32 +827,67 @@ ntpdmain(
 	 * Some option settings have to be deferred until after
 	 * the library initialization sequence.
 	 */
-	if (opt_auth)
-	    proto_config(PROTO_AUTHENTICATE, 1, 0.0, NULL);
-	else
-	    proto_config(PROTO_AUTHENTICATE, 0, 0.0, NULL);
-	if (opt_bclient)
-	    proto_config(PROTO_BROADCLIENT, 1, 0.0, NULL);
-	if (opt_broaddelay != -1)
-	    proto_config(PROTO_BROADDELAY, 0, opt_broaddelay, NULL);
-	if (opt_x)
-	    loop_config(LOOP_MAX, 600);
-	if (driftfile)
-	    stats_config(STATS_FREQ_FILE, driftfile);
-	/*
-	 * --interface, listen on specified interfaces
-	 */
-	if (explicit_interface)
-		for (optind = opt_I; optind < argc; optind++) {
-			sockaddr_u	addr;
-			if (argv[optind][0] == '-')
-			    break;
-			add_nic_rule(
-				is_ip_address(argv[optind], AF_UNSPEC, &addr)
-					? MATCH_IFADDR
-					: MATCH_IFNAME,
-				argv[optind], -1, ACTION_LISTEN);
-		}
+	optind = 1;
+	while ((op = getopt(argc, argv, ALL_OPTIONS)) != -1) {
+	    switch (op) {
+	    case 'a':
+		proto_config(PROTO_AUTHENTICATE, 1, 0.0, NULL);
+		break;
+	    case 'A':
+		proto_config(PROTO_AUTHENTICATE, 0, 0.0, NULL);
+		break;
+	    case 'b':
+		proto_config(PROTO_BROADCLIENT, 1, 0.0, NULL);
+		break;
+	    case 'f':
+		stats_config(STATS_FREQ_FILE, optarg);
+		break;
+	    case 'I':
+	        {
+		    sockaddr_u	addr;
+		    add_nic_rule(
+			is_ip_address(optarg, AF_UNSPEC, &addr)
+			? MATCH_IFADDR
+			: MATCH_IFNAME,
+			optarg, -1, ACTION_LISTEN);
+	        }
+		break;
+	    case 'k':
+		getauthkeys(optarg);
+		break;
+	    case 'p':
+		stats_config(STATS_PID_FILE, optarg);
+		break;
+	    case 'r':
+		proto_config(PROTO_BROADDELAY, 0, atof(optarg), NULL);
+		break;
+	    case 's':
+		stats_config(STATS_STATSDIR, optarg);
+		break;
+	    case 't':
+		{
+		    u_long tkey = (int)atol(optarg);
+		    if (tkey == 0 || tkey > NTP_MAXKEY) {
+			msyslog(LOG_ERR,
+				"command line trusted key %s is invalid",
+				optarg);
+			exit(0);
+		    } else {
+			authtrust(tkey, 1);
+		    }
+	        }
+		break;
+	    case 'v':
+		set_sys_var(optarg, strlen(optarg) + 1, RW);
+		break;
+	    case 'V':
+		set_sys_var(optarg, strlen(optarg) + 1, (u_short) (RW | DEF));
+		break;
+	    case 'x':
+		loop_config(LOOP_MAX, 600);
+		break;
+	    }
+	}
 
      	/* use this to test if option setting gives expected results */
 	if (dumpopts) {
@@ -887,28 +895,25 @@ ntpdmain(
 	    if (explicit_config)
 		fprintf(stdout, "conffile \"%s\";\n", explicit_config);
 	    fprintf(stdout, "#debug = %d\n", debug);
-	    if (logfilename)
-		fprintf(stdout, "logfile \"%s\";\n", logfilename);
-	    if (driftfile)
-		fprintf(stdout, "driftfile \"%s\";\n", driftfile);
+	    /* FIXME: can we dump the drift file after the fact? */
 	    fprintf(stdout, "#allow_panic = %s\n",
-		    allow_panic?"true":"false");
+		    allow_panic ? "true" : "false");
 	    fprintf(stdout, "#force_step_once = %s\n",
-		    force_step_once?"true":"false");
+		    force_step_once ? "true" : "false");
 #ifdef HAVE_DROPROOT
 	    if (chrootdir)
 		fprintf(stdout, "#chrootdir = \"%s\";\n", chrootdir);
 #endif
-	    if (explicit_interface) {
-	    	fprintf(stdout, "# interfaces =");
-		/* it would be better to inspect the actual rules */
-		for (optind = opt_I; optind < argc; optind++) {
-		    if (argv[optind][0] == '-')
-			break;
-		    fprintf(stdout, " %s", argv[optind]);
-		}
-		fprintf(stdout, "\n");
-	    }
+	    /* FIXME: inspect interfaces */
+	    /* FIXME: inspect authkeys */
+	    if (logfilename)
+		fprintf(stdout, "logfile \"%s\";\n", logfilename);
+	    fprintf(stdout, "#listen_to_virtual_ips = %s\n",
+		    listen_to_virtual_ips ? "true" : "false");
+#ifdef HAVE_DNSREGISTRATION
+	    fprintf(stdout, "#mdnsreg = %s\n",
+		    mdnsreg ? "true" : "false");
+#endif  /* HAVE_DNSREGISTRATION */
 	    exit(0);
 	}
 			
