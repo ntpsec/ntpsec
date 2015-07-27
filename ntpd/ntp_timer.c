@@ -10,6 +10,7 @@
 #include "ntp_stdlib.h"
 #include "ntp_calendar.h"
 #include "ntp_leapsec.h"
+#include "ntp_intercept.h"
 
 #if defined(HAVE_IO_COMPLETION_PORT)
 # include "ntp_iocompletionport.h"
@@ -336,7 +337,7 @@ timer(void)
 		sys_rootdisp = 0;
 	}
 
-	get_systime(&now);
+	intercept_get_systime(__func__, &now);
 	time(&tnow);
 
 	/*

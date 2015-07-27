@@ -80,13 +80,19 @@ refclock::
 	refid, unit number, system time of measurement, refclock at time
         of measurement, precision, leap notify, etc.
 
-sysclock::
+systime::
 	Report from the system clock: seconds part of time, fractional part of
 	time.
 
 random::
 	Call to a random-number generator. One field, the number
 	returned.
+
+driftread:
+	Read the drift file
+
+driftwrite:
+	Write the drift file.
 
 receive::
 	Receive packet. Field is some sort of textual packet dump.
@@ -103,8 +109,39 @@ shutdown::
 
 *****************************************************************************/
 
-#include <ntp_intercept.h>
+#include <time.h>
+#include <sys/time.h>
+
+#ifdef HAVE_CONFIG_H
+# include <config.h>
+#endif
+
+#include <stdio.h>
+#include <ctype.h>
+#include <signal.h>
+#include <sys/stat.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+
+#include "ntpd.h"
+#include "ntp_io.h"
+#include "ntp_control.h"
+#include "ntp_unixtime.h"
+#include "ntp_stdlib.h"
+#include "ntp_config.h"
+#include "ntp_crypto.h"
+#include "ntp_assert.h"
+#include "ntp_intercept.h"
+#include "ntp_fp.h"
 
 void intercept_log(const char *legend, ...)
 {
+}
+
+void intercept_get_systime(const char *legend, l_fp *now)
+{
+	struct timespec ts;	/* seconds and nanoseconds */
+	get_ostime(&ts);
+	/* logging and replay goes here */
+	normalize_time(ts, now);
 }

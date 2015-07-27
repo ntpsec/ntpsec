@@ -34,6 +34,7 @@
 #include "ntp_worker.h"
 #include "ntp_request.h"
 #include "ntp_assert.h"
+#include "ntp_intercept.h"
 #include "timevalops.h"
 #include "timespecops.h"
 
@@ -3593,7 +3594,7 @@ io_handler(void)
 	if (nfound > 0) {
 		l_fp ts;
 
-		get_systime(&ts);
+		intercept_get_systime(__func__, &ts);
 
 		input_handler(&ts);
 	} else if (nfound == -1 && errno != EINTR) {
@@ -3809,7 +3810,7 @@ input_handler(
 	}
 	/* We've done our work */
 #ifdef DEBUG_TIMING
-	get_systime(&ts_e);
+	intercept_get_systime(__func__, &ts_e);
 	/*
 	 * (ts_e - ts) is the amount of time we spent
 	 * processing this gob of file descriptors.  Log

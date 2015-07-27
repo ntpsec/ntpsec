@@ -361,6 +361,8 @@ extern  void	mfp_mul		(int32_t *, uint32_t *, int32_t, uint32_t, int32_t, uint32
 
 extern	void	set_sys_fuzz	(double);
 extern	void	init_systime	(void);
+extern  void	get_ostime	(struct timespec *tsp);
+extern	void	normalize_time	(struct timespec, l_fp *);
 extern	void	get_systime	(l_fp *);
 extern	int	step_systime	(double);
 extern	int	adj_systime	(double);

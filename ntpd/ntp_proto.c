@@ -13,6 +13,7 @@
 #include "ntp_unixtime.h"
 #include "ntp_control.h"
 #include "ntp_leapsec.h"
+#include "ntp_intercept.h"
 
 #include <string.h>
 #include <stdio.h>
@@ -1959,12 +1960,12 @@ clock_update(
 		if (leapsec == LSPROX_NOWARN) {
 			if (leap_vote_ins > leap_vote_del
 			    && leap_vote_ins > sys_survivors / 2) {
-				get_systime(&now);
+				intercept_get_systime(__func__, &now);
 				leapsec_add_dyn(true, now.l_ui, NULL);
 			}
 			if (leap_vote_del > leap_vote_ins
 			    && leap_vote_del > sys_survivors / 2) {
-				get_systime(&now);
+				intercept_get_systime(__func__, &now);
 				leapsec_add_dyn(false, now.l_ui, NULL);
 			}
 		}
@@ -3028,7 +3029,7 @@ peer_xmit(
 		/*
 		 * Transmit a-priori timestamps
 		 */
-		get_systime(&xmt_tx);
+		intercept_get_systime(__func__, &xmt_tx);
 		if (peer->flip == 0) {	/* basic mode */
 			peer->aorg = xmt_tx;
 			HTONL_FP(&xmt_tx, &xpkt.xmt);
@@ -3059,7 +3060,7 @@ peer_xmit(
 		/*
 		 * Capture a-posteriori timestamps
 		 */
-		get_systime(&xmt_ty);
+		intercept_get_systime(__func__, &xmt_ty);
 		if (peer->flip != 0) {		/* interleaved modes */
 			if (peer->flip > 0)
 				peer->aorg = xmt_ty;
@@ -3328,7 +3329,7 @@ peer_xmit(
 	/*
 	 * Transmit a-priori timestamps
 	 */
-	get_systime(&xmt_tx);
+	intercept_get_systime(__func__, &xmt_tx);
 	if (peer->flip == 0) {		/* basic mode */
 		peer->aorg = xmt_tx;
 		HTONL_FP(&xmt_tx, &xpkt.xmt);
@@ -3372,7 +3373,7 @@ peer_xmit(
 	/*
 	 * Capture a-posteriori timestamps
 	 */
-	get_systime(&xmt_ty);
+	intercept_get_systime(__func__, &xmt_ty);
 	if (peer->flip != 0) {			/* interleaved modes */
 		if (peer->flip > 0)
 			peer->aorg = xmt_ty;
@@ -3474,7 +3475,7 @@ fast_xmit(
 		HTONL_FP(&sys_reftime, &xpkt.reftime);
 		xpkt.org = rpkt->xmt;
 		HTONL_FP(&rbufp->recv_time, &xpkt.rec);
-		get_systime(&xmt_tx);
+		intercept_get_systime(__func__, &xmt_tx);
 		HTONL_FP(&xmt_tx, &xpkt.xmt);
 	}
 
@@ -3541,14 +3542,14 @@ fast_xmit(
 		}
 	}
 #endif	/* AUTOKEY */
-	get_systime(&xmt_tx);
+	intercept_get_systime(__func__, &xmt_tx);
 	sendlen += authencrypt(xkeyid, (uint32_t *)&xpkt, sendlen);
 #ifdef AUTOKEY
 	if (xkeyid > NTP_MAXKEY)
 		authtrust(xkeyid, 0);
 #endif	/* AUTOKEY */
 	sendpkt(&rbufp->recv_srcadr, rbufp->dstadr, 0, &xpkt, sendlen);
-	get_systime(&xmt_ty);
+	intercept_get_systime(__func__, &xmt_ty);
 	L_SUB(&xmt_ty, &xmt_tx);
 	sys_authdelay = xmt_ty;
 #ifdef DEBUG
@@ -3630,7 +3631,7 @@ pool_xmit(
 	xpkt.rootdelay = HTONS_FP(DTOFP(sys_rootdelay));
 	xpkt.rootdisp = HTONS_FP(DTOUFP(sys_rootdisp));
 	HTONL_FP(&sys_reftime, &xpkt.reftime);
-	get_systime(&xmt_tx);
+	intercept_get_systime(__func__, &xmt_tx);
 	pool->aorg = xmt_tx;
 	HTONL_FP(&xmt_tx, &xpkt.xmt);
 	sendpkt(rmtadr, lcladr,	sys_ttl[pool->ttl], &xpkt,
@@ -3904,9 +3905,9 @@ measure_tick_fuzz(void)
 	repeats = 0;
 	changes = 0;
 	DTOLFP(MINSTEP, &minstep);
-	get_systime(&last);
+	intercept_get_systime(__func__, &last);
 	for (i = 0; i < MAXLOOPS && changes < MINCHANGES; i++) {
-		get_systime(&val);
+		intercept_get_systime(__func__, &val);
 		ldiff = val;
 		L_SUB(&ldiff, &last);
 		last = val;
@@ -3994,7 +3995,7 @@ init_proto(const bool verbose)
 	L_CLR(&sys_reftime);
 	sys_jitter = 0;
 	measure_precision(verbose);
-	get_systime(&dummy);
+	intercept_get_systime(__func__, &dummy);
 	sys_survivors = 0;
 	sys_manycastserver = 0;
 	sys_bclient = 0;

@@ -676,7 +676,7 @@ ntpdmain(
 	/*
 	 * Initialize random generator and public key pair
 	 */
-	get_systime(&now);
+	intercept_get_systime(__func__, &now);
 
 	ntp_srandom((int)(now.l_i * now.l_uf));
 
@@ -1305,7 +1305,7 @@ int scmp_sc[] = {
 			l_fp tsa, tsb;
 			int bufcount = 0;
 
-			get_systime(&pts);
+			intercept_get_systime(__func__, &pts);
 			tsa = pts;
 # endif
 			rbuf = get_full_recv_buffer();
@@ -1346,7 +1346,7 @@ int scmp_sc[] = {
 				rbuf = get_full_recv_buffer();
 			}
 # ifdef DEBUG_TIMING
-			get_systime(&tsb);
+			intercept_get_systime(__func__, &tsb);
 			L_SUB(&tsb, &tsa);
 			if (bufcount) {
 				collect_timing(NULL, "processing", bufcount, &tsb);

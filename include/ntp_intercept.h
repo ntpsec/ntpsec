@@ -1,6 +1,14 @@
 /*
- * intercept.h =
+ * ntp_intercept.h - interecept/replay support for environment calls
  */
+
+#if __STDC_VERSION__ < 199901L
+# if __GNUC__ >= 2
+#  define __func__ __FUNCTION__
+# else
+#  define __func__ "<unknown>"
+# endif
+#endif
 
 /* Macro for declaring function with printf-like arguments. */
 # if __GNUC__ >= 3 || (__GNUC__ == 2 && __GNUC_MINOR__ >= 7)
@@ -11,3 +19,5 @@
 #endif
 
 PRINTF_FUNC(1, 2) void intercept_log(const char *, ...);
+
+void intercept_get_systime(const char *, l_fp *);
