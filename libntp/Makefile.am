@@ -61,6 +61,7 @@ libntp_a_SRCS =						\
 	hextolfp.c					\
 	humandate.c					\
 	icom.c						\
+	intercept.c					\
 	iosignal.c					\
 	lib_strbuf.c					\
 	machines.c					\

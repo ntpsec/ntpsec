@@ -15,6 +15,7 @@
 #include "ntp_config.h"
 #include "ntp_syslog.h"
 #include "ntp_assert.h"
+#include "ntp_intercept.h"
 #include "isc/error.h"
 #include "isc/formatcheck.h"
 #include "iosignal.h"
@@ -627,6 +628,7 @@ ntpdmain(
 		}
 		msyslog(LOG_INFO, "%s", buf);
 	}
+	intercept_log("startup");
 
 	/*
 	 * Install trap handlers to log errors and assertion failures.
@@ -1393,6 +1395,7 @@ finish(
 {
 	const char *sig_desc;
 
+	intercept_log("shutdown");
 	sig_desc = NULL;
 	sig_desc = strsignal(sig);
 	if (sig_desc == NULL)
