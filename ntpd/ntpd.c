@@ -52,8 +52,6 @@
 
 #include <termios.h>
 
-#include <getopt.h>
-
 #ifdef SYS_DOMAINOS
 # include <apollo/base.h>
 #endif /* SYS_DOMAINOS */
@@ -221,6 +219,40 @@ static void	library_unexpected_error(const char *, int,
 
 
 #define ALL_OPTIONS "46aAbc:dD:f:gGi:I:k:l:LmMnNp:PqQ:r:Rs:t:u:UvVw:xyY"
+static const struct option longoptions[] = {
+    { "ipv4",		    0, 0, '4' },
+    { "ipv6",		    0, 0, '6' },
+    { "authreq",	    0, 0, 'a' },
+    { "noauthreq",	    0, 0, 'A' },
+    { "bcastsync",	    0, 0, 'b' },
+    { "configfile",	    1, 0, 'c' },
+    { "debug",		    0, 0, 'd' },
+    { "set-debug-level",    1, 0, 'D' },
+    { "ipv4",		    0, 0, '4' },
+    { "driftile",	    1, 0, 'f' },
+    { "panicgate",	    0, 0, 'g' },
+    { "jaildir",	    1, 0, 'i' },
+    { "interface",	    1, 0, 'I' },
+    { "keyfile",	    1, 0, 'k' },
+    { "logfile",	    1, 0, 'l' },
+    { "novirtualips",	    0, 0, 'L' },
+    { "nofork",		    0, 0, 'n' },
+    { "nice",		    0, 0, 'N' },
+    { "quit",		    0, 0, 'q' },
+    { "propagationdelay",   1, 0, 'r' },
+    { "dumpopts",	    0, 0, 'R' },
+    { "saveconfigquit",	    1, 0, 'Q' },
+    { "statsdir",	    1, 0, 's' },
+    { "trustedkey",	    1, 0, 't' },
+    { "user",		    1, 0, 'u' },
+    { "updateinterval",	    1, 0, 'U' },
+    { "var",		    1, 0, 'z' },
+    { "dvar",		    1, 0, 'Z' },
+    { "slew",		    0, 0, 'x' },
+    { "version",	    0, 0, 'V' },
+    { NULL,                 0, 0, '\0'}, 
+};
+
 
 static void
 parse_cmdline_opts(
@@ -235,7 +267,8 @@ parse_cmdline_opts(
 
 	int op;
 
-	while ((op = getopt(argc, argv, ALL_OPTIONS)) != -1) {
+	while ((op = ntp_getopt_long(argc, argv,
+				     ALL_OPTIONS, longoptions, NULL)) != -1) {
 
 	    switch (op) {
 	    case '4':
@@ -253,7 +286,7 @@ parse_cmdline_opts(
 	    case 'b':
 		break;
 	    case 'c':
-		explicit_config = optarg;
+		explicit_config = ntp_optarg;
 		break;
 	    case 'd':
 #ifdef DEBUG
@@ -263,11 +296,11 @@ parse_cmdline_opts(
 		break;
 	    case 'D':
 #ifdef DEBUG
-		debug = atoi(optarg);
+		debug = atoi(ntp_optarg);
 #endif
 		break;
 	    case 'f':
-		driftfile = optarg;
+		driftfile = ntp_optarg;
 		break;
 	    case 'g':
 		allow_panic = true;
@@ -278,7 +311,7 @@ parse_cmdline_opts(
 	    case 'i':
 #ifdef HAVE_DROPROOT
 		droproot = true;
-		chrootdir = optarg;
+		chrootdir = ntp_optarg;
 #endif
 		break;
 	    case 'I':
@@ -289,7 +322,7 @@ parse_cmdline_opts(
 		/* defer */
 		break;
 	    case 'l':
-		logfilename = optarg;
+		logfilename = ntp_optarg;
 		break;
 	    case 'L':
 		listen_to_virtual_ips = false;
@@ -309,10 +342,10 @@ parse_cmdline_opts(
 		priority_done = PRIORITY_UNSET;
 		break;
 	    case 'p':
-		pidfile = optarg;
+		pidfile = ntp_optarg;
 		break;
 	    case 'P':
-		config_priority = atoi(optarg);
+		config_priority = atoi(ntp_optarg);
 		config_priority_override = true;
 		priority_done = PRIORITY_UNSET;
 		break;
@@ -322,16 +355,16 @@ parse_cmdline_opts(
 		break;
 	    case 'Q':	/* savequit - undocumented/disabled(?) in NTP Classic */
 		saveconfigquit = true;
-		saveconfigfile = optarg;
+		saveconfigfile = ntp_optarg;
 		nofork = true; 
 		break;
 	    case 'r':
 		{
 		    double tmp;
-		    if (sscanf(optarg, "%lf", &tmp) != 1) {
+		    if (sscanf(ntp_optarg, "%lf", &tmp) != 1) {
 			msyslog(LOG_ERR,
 				"command line broadcast delay value %s undecodable",
-				optarg);
+				ntp_optarg);
 			exit(0);
 		    }
 		}
@@ -341,7 +374,7 @@ parse_cmdline_opts(
 		nofork = true;
 		break;
 	    case 's':
-		strlcpy(statsdir, optarg, sizeof(statsdir));
+		strlcpy(statsdir, ntp_optarg, sizeof(statsdir));
 		break;
 	    case 't':
 		/* defer */
@@ -349,7 +382,7 @@ parse_cmdline_opts(
 	    case 'u':
 #ifdef HAVE_DROPROOT
 		droproot = true;
-		user = estrdup(optarg);
+		user = estrdup(ntp_optarg);
 		group = strrchr(user, ':');
 		if (group != NULL) {
 			size_t	len;
@@ -363,7 +396,7 @@ parse_cmdline_opts(
 		break;
 	    case 'U':
 		{
-		    long val = atol(argv[optind]);
+		    long val = atol(argv[ntp_optind]);
 
 		    if (val >= 0)
 			    interface_interval = val;
@@ -378,14 +411,12 @@ parse_cmdline_opts(
 		    }
 		}
 		break;
-	    case 'v':
-		/* defer */
-		break;
 	    case 'V':
-		/* defer */
-		break;
+		/* FIXME: report real version whe new build system lands */
+		printf("ntpd\n");
+		exit(0);
 	    case 'w':
-		wait_sync = strtod(optarg, NULL);
+		wait_sync = strtod(ntp_optarg, NULL);
 		break;
 	    case 'x':
 		/* defer */
@@ -395,6 +426,12 @@ parse_cmdline_opts(
 		break;
 	    case 'Y':
 		/* processed by interception code */
+		break;
+	    case 'z':
+		/* defer */
+		break;
+	    case 'Z':
+		/* defer */
 		break;
 	    default :
 		break;
@@ -412,9 +449,9 @@ parse_cmdline_opts(
 	 */
 
 	/* save list of servers from cmd line for config_peers() use */
-	if (optind < argc) {
-		cmdline_server_count = argc - optind;
-		cmdline_servers = argv + optind;
+	if (ntp_optind < argc) {
+		cmdline_server_count = argc - ntp_optind;
+		cmdline_servers = argv + ntp_optind;
 	}
 }
 
@@ -833,8 +870,9 @@ ntpdmain(
 	 * Some option settings have to be deferred until after
 	 * the library initialization sequence.
 	 */
-	optind = 1;
-	while ((op = getopt(argc, argv, ALL_OPTIONS)) != -1) {
+	ntp_optind = 1;
+	while ((op = ntp_getopt_long(argc, argv, ALL_OPTIONS,
+				     longoptions, NULL)) != -1) {
 	    switch (op) {
 	    case 'a':
 		proto_config(PROTO_AUTHENTICATE, 1, 0.0, NULL);
@@ -852,14 +890,14 @@ ntpdmain(
 	        {
 		    sockaddr_u	addr;
 		    add_nic_rule(
-			is_ip_address(optarg, AF_UNSPEC, &addr)
+			is_ip_address(ntp_optarg, AF_UNSPEC, &addr)
 			? MATCH_IFADDR
 			: MATCH_IFNAME,
-			optarg, -1, ACTION_LISTEN);
+			ntp_optarg, -1, ACTION_LISTEN);
 	        }
 		break;
 	    case 'k':
-		getauthkeys(optarg);
+		getauthkeys(ntp_optarg);
 		break;
 	    case 'M':
 # ifdef SYS_WINNT
@@ -870,32 +908,32 @@ ntpdmain(
 		stats_config(STATS_PID_FILE, pidfile);
 		break;
 	    case 'r':
-		proto_config(PROTO_BROADDELAY, 0, atof(optarg), NULL);
+		proto_config(PROTO_BROADDELAY, 0, atof(ntp_optarg), NULL);
 		break;
 	    case 's':
 		stats_config(STATS_STATSDIR, statsdir);
 		break;
 	    case 't':
 		{
-		    u_long tkey = (int)atol(optarg);
+		    u_long tkey = (int)atol(ntp_optarg);
 		    if (tkey == 0 || tkey > NTP_MAXKEY) {
 			msyslog(LOG_ERR,
 				"command line trusted key %s is invalid",
-				optarg);
+				ntp_optarg);
 			exit(0);
 		    } else {
 			authtrust(tkey, 1);
 		    }
 	        }
 		break;
-	    case 'v':
-		set_sys_var(optarg, strlen(optarg) + 1, RW);
-		break;
-	    case 'V':
-		set_sys_var(optarg, strlen(optarg) + 1, (u_short) (RW | DEF));
-		break;
 	    case 'x':
 		loop_config(LOOP_MAX, 600);
+		break;
+	    case 'z':
+		set_sys_var(ntp_optarg, strlen(ntp_optarg) + 1, RW);
+		break;
+	    case 'Z':
+		set_sys_var(ntp_optarg, strlen(ntp_optarg) + 1, (u_short) (RW | DEF));
 		break;
 	    }
 	}

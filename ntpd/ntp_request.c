@@ -13,6 +13,7 @@
 #include "ntp_refclock.h"
 #include "ntp_stdlib.h"
 #include "ntp_assert.h"
+#include "ntp_intercept.h"
 
 #include <stdio.h>
 #include <stddef.h>
