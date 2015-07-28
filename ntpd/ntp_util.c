@@ -272,48 +272,7 @@ write_stats(void)
 		}
 		prev_drift_comp = drift_comp;
 		wander_resid = wander_threshold;
-		if ((fp = fopen(stats_temp_file, "w")) == NULL) {
-			msyslog(LOG_ERR, "frequency file %s: %m",
-			    stats_temp_file);
-			return;
-		}
-		fprintf(fp, "%.3f\n", drift_comp * 1e6);
-		(void)fclose(fp);
-		/* atomic */
-#ifdef SYS_WINNT
-		if (_unlink(stats_drift_file)) /* rename semantics differ under NT */
-			msyslog(LOG_WARNING, 
-				"Unable to remove prior drift file %s, %m", 
-				stats_drift_file);
-#endif /* SYS_WINNT */
-
-#ifndef NO_RENAME
-		if (rename(stats_temp_file, stats_drift_file))
-			msyslog(LOG_WARNING, 
-				"Unable to rename temp drift file %s to %s, %m", 
-				stats_temp_file, stats_drift_file);
-#else
-		/* we have no rename NFS of ftp in use */
-		if ((fp = fopen(stats_drift_file, "w")) ==
-		    NULL) {
-			msyslog(LOG_ERR,
-			    "frequency file %s: %m",
-			    stats_drift_file);
-			return;
-		}
-#endif
-
-#if defined(VMS)
-		/* PURGE */
-		{
-			$DESCRIPTOR(oldvers,";-1");
-			struct dsc$descriptor driftdsc = {
-				strlen(stats_drift_file), 0, 0,
-				    stats_drift_file };
-			while(lib$delete_file(&oldvers,
-			    &driftdsc) & 1);
-		}
-#endif
+		intercept_drift_write(stats_drift_file, drift_comp * 1e6);
 	}
 }
 
@@ -330,7 +289,7 @@ stats_config(
 	FILE	*fp;
 	const char *value;
 	int	len;
-	double	old_drift;
+	double	old_drift, new_drift;
 	l_fp	now;
 	time_t  ttnow;
 #ifndef VMS
@@ -404,18 +363,8 @@ stats_config(
 		 * Open drift file and read frequency. If the file is
 		 * missing or contains errors, tell the loop to reset.
 		 */
-		if ((fp = fopen(stats_drift_file, "r")) == NULL)
-			break;
-
-		if (fscanf(fp, "%lf", &old_drift) != 1) {
-			msyslog(LOG_ERR,
-				"format error frequency file %s", 
-				stats_drift_file);
-			fclose(fp);
-			break;
-
-		}
-		fclose(fp);
+		if ((new_drift = intercept_drift_read(stats_drift_file)) > 0)
+		    old_drift = new_drift;
 		loop_config(LOOP_FREQ, old_drift);
 		prev_drift_comp = drift_comp;
 		break;
