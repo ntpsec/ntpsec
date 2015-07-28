@@ -26,6 +26,8 @@ following kinds:
 
 10. Packets outgoing to NTP daemons.  (TODO)
 
+11. Read of authkey file  (TODO)
+
 We must support two modes of operation.  In "capture" mode, ntpd
 operates normally, logging all events.  In "replay" mode, ntpd accepts
 an event-capture log and replays it, processing all input events in a
@@ -89,6 +91,9 @@ refclock::
 systime::
 	Report from the system clock: seconds part of time, fractional part of
 	time.
+
+seed::
+	Set the seed for the random-number generator
 
 random::
 	Call to a random-number generator. One field, the number
@@ -185,11 +190,13 @@ void intercept_getconfig(const char *configfile)
     }
 }
 
-void intercept_log(const char *legend, ...)
+void intercept_log(const char *fmt, ...)
 {
     if (mode != none) {
-	/* FIXME: extended form not yet supported (or used) */
-	printf("event log %s\n", legend);
+	va_list ap;
+	va_start(ap, fmt);
+	vfprintf(stdout, fmt, ap);
+	va_end(ap);
     }
 }
 
@@ -201,7 +208,7 @@ void intercept_get_systime(const char *legend, l_fp *now)
     if (mode == capture)
 	printf("event systime %s %zd %zd\n", legend, ts.tv_sec, ts.tv_nsec);
 	
-    normalize_time(ts, intercept_ntp_random(__func__), now);
+    normalize_time(ts, ntp_random(), now);
 }
 
 long intercept_ntp_random(const char *legend)

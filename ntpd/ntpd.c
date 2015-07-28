@@ -218,7 +218,7 @@ static void	library_unexpected_error(const char *, int,
 #endif	/* !SIM */
 
 
-#define ALL_OPTIONS "46aAbc:dD:f:gGi:I:k:l:LmMnNp:PqQ:r:Rs:t:u:UvVw:xyY"
+#define ALL_OPTIONS "46aAbc:dD:f:gGi:I:k:l:LmMnNp:PqQ:r:Rs:t:u:UVw:xyYzZ"
 static const struct option longoptions[] = {
     { "ipv4",		    0, 0, '4' },
     { "ipv6",		    0, 0, '6' },
@@ -246,6 +246,8 @@ static const struct option longoptions[] = {
     { "trustedkey",	    1, 0, 't' },
     { "user",		    1, 0, 'u' },
     { "updateinterval",	    1, 0, 'U' },
+    { "capture",	    1, 0, 'y' },
+    { "replay",		    1, 0, 'Y' },
     { "var",		    1, 0, 'z' },
     { "dvar",		    1, 0, 'Z' },
     { "slew",		    0, 0, 'x' },
@@ -412,7 +414,7 @@ parse_cmdline_opts(
 		}
 		break;
 	    case 'V':
-		/* FIXME: report real version whe new build system lands */
+		/* FIXME: report real version when new build system lands */
 		printf("ntpd\n");
 		exit(0);
 	    case 'w':
@@ -612,6 +614,7 @@ ntpdmain(
 	struct recvbuf *rbuf;
 	mode_t		uv;
 	uid_t		uid;
+	int    		seed;
 # if defined(HAVE_WORKING_FORK)
 	int		pipe_fds[2];
 	int		rc;
@@ -720,9 +723,10 @@ ntpdmain(
 	/*
 	 * Initialize random generator and public key pair
 	 */
-	intercept_get_systime(__func__, &now);
-
-	ntp_srandom((int)(now.l_i * now.l_uf));
+	get_systime(&now);
+	seed = (int)(now.l_i * now.l_uf);
+	ntp_srandom(seed);
+	intercept_log("event seed %d\n", seed);
 
 	/*
 	 * Detach us from the terminal.  May need an #ifndef GIZMO.
@@ -1440,7 +1444,7 @@ finish(
 {
 	const char *sig_desc;
 
-	intercept_log("shutdown 0\n");
+	intercept_log("event shutdown 0\n");
 	sig_desc = NULL;
 	sig_desc = strsignal(sig);
 	if (sig_desc == NULL)
