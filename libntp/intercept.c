@@ -14,7 +14,7 @@ following kinds:
 
 4. Time calls to the host system clock.
 
-5. Reads and write of the system drift file.  (TODO)
+5. Reads and write of the system drift file.
 
 6. Calls to the host's random-number generator.
 
@@ -33,7 +33,7 @@ We say that test performance is *stable* when replay mode is
 idempotent - that is, replaying an event-capture log produces an exact
 copy of itself by duplicating the same output events.
 
-When test performance is stable, we know two things: (1) we have  
+When test performance is stable, we know two things: (1) we have
 successfully captured all inputs of the system, and (2) the code
 has experienced no functional regressions since the event capture.
 
@@ -126,6 +126,7 @@ shutdown::
 #include <sys/stat.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#include <libgen.h>
 
 #include "ntpd.h"
 #include "ntp_io.h"
@@ -161,9 +162,9 @@ void intercept_argparse(int *argc, char ***argv)
 
 void intercept_getconfig(const char *configfile)
 {
-    if (mode != replay)
+    if (mode == none)
 	getconfig(configfile);
-    if (mode == capture) {
+    else {
 	fputs("startconfig\n", stdout);
 #ifdef SAVECONFIG
 	dump_all_config_trees(stdout, false);
@@ -171,11 +172,15 @@ void intercept_getconfig(const char *configfile)
 	fputs("endconfig\n", stdout);
 
     }
+
+    if (mode == replay) {
+	stats_control = false;	/* suppress writing stats files */
+    }
 }
 
 void intercept_log(const char *legend, ...)
 {
-    if (mode == capture) {
+    if (mode != none) {
 	/* FIXME: extended form not yet supported (or used) */
 	printf("event log %s\n", legend);
     }
@@ -195,11 +200,66 @@ void intercept_get_systime(const char *legend, l_fp *now)
 long intercept_ntp_random(const char *legend)
 {
     long rand = ntp_random();
- 
-    if (mode == capture)
+
+    /* FIXME: replay logic goes here */
+
+    if (mode != none)
 	printf("event random %s %ld\n", legend, rand);
-    
+
     return rand;
+}
+
+double intercept_drift_read(const char *drift_file)
+{
+    FILE *fp;
+    double drift;
+
+    if ((fp = fopen(drift_file, "r")) == NULL)
+	return -1;
+
+    if (fscanf(fp, "%lf", &drift) != 1) {
+	msyslog(LOG_ERR,
+		"format error frequency file %s",
+		drift_file);
+	fclose(fp);
+	return -1;
+
+    }
+    fclose(fp);
+    return drift;
+}
+
+void intercept_drift_write(char *driftfile, double drift)
+{
+    if (mode == capture || mode == replay)
+	printf("event drift %.3f\n", drift);
+    else
+    {
+	int fd;
+	char tmpfile[PATH_MAX];
+	char driftval[32];
+
+	strlcpy(tmpfile, dirname(driftfile), sizeof(tmpfile));
+	strlcat(tmpfile, "/driftXXXXXX", sizeof(tmpfile));
+	if ((fd = mkstemp(tmpfile)) < 0) {
+	    msyslog(LOG_ERR, "frequency file %s: %m", tmpfile);
+	    return;
+	}
+	snprintf(driftval, sizeof(driftval), "%.3f\n", drift_comp);
+	IGNORE(write(fd, driftval, strlen(driftval)));
+	(void)close(fd);
+	/* atomic */
+#ifdef SYS_WINNT
+	if (_unlink(stats_drift_file)) /* rename semantics differ under NT */
+	    msyslog(LOG_WARNING,
+		    "Unable to remove prior drift file %s, %m",
+		    driftfile);
+#endif /* SYS_WINNT */
+	if (rename(tmpfile, driftfile))
+	    msyslog(LOG_WARNING,
+		    "Unable to rename temp drift file %s to %s, %m",
+		    tmpfile, driftfile);
+    }
 }
 
 void
@@ -209,7 +269,7 @@ intercept_sendpkt(const char *legend,
 {
     if (mode == none)
 	sendpkt(dest, ep, ttl, pkt, len);
-    else if (mode == capture) {
+    else {
 	fputs("event sendpkt ", stdout);
 	/* FIXME: dump the destination and the guts of the packet */
 	fputs("\n", stdout);
