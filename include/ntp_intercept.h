@@ -18,6 +18,8 @@
 #define PRINTF_FUNC(format_index, arg_indx)
 #endif
 
+bool replay_mode(void);
+
 PRINTF_FUNC(1, 2) void intercept_log(const char *, ...);
 void intercept_argparse(int *, char ***);
 void intercept_getconfig(const char *);

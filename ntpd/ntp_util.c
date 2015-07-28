@@ -12,6 +12,7 @@
 #include "ntp_assert.h"
 #include "ntp_calendar.h"
 #include "ntp_leapsec.h"
+#include "ntp_intercept.h"
 #include "lib_strbuf.h"
 
 #include <stdio.h>
@@ -176,7 +177,6 @@ init_util(void)
 void
 write_stats(void)
 {
-	FILE	*fp;
 #ifdef DOSYNCTODR
 	struct timeval tv;
 #if !defined(VMS)
@@ -405,6 +405,8 @@ stats_config(
 	 * Open pid file.
 	 */
 	case STATS_PID_FILE:
+		if (replay_mode())
+		    break;
 		if ((fp = fopen(value, "w")) == NULL) {
 			msyslog(LOG_ERR, "pid file %s: %m",
 			    value);

@@ -18,11 +18,13 @@ following kinds:
 
 6. Calls to the host's random-number generator.
 
-7. Packets incoming from NTP daemons.  (TODO)
+7. Calls to adjtime/adjtimex to set the system clock.  (TODO)
 
-8. Calls to adjtime/adjtimex to set the system clock.  (TODO)
+8. Read of the system leapsecond file.  (TODO)
 
-9. Packets outgoing to NTP daemons.  (TODO)
+9. Packets incoming from NTP daemons.  (TODO)
+
+10. Packets outgoing to NTP daemons.  (TODO)
 
 We must support two modes of operation.  In "capture" mode, ntpd
 operates normally, logging all events.  In "replay" mode, ntpd accepts
@@ -140,6 +142,11 @@ shutdown::
 #include "ntp_fp.h"
 
 static enum {none, capture, replay} mode = none;
+
+bool replay_mode(void)
+{
+    return mode == replay;
+}
 
 void intercept_argparse(int *argc, char ***argv)
 {
