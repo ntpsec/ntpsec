@@ -83,13 +83,32 @@ extern	uint32_t	caldaystart	(uint32_t ntptime, const time_t *pivot);
 
 extern	const char *clockname	(int);
 extern	int	clocktime	(int, int, int, int, int, uint32_t, u_long *, uint32_t *);
-extern	int	ntp_getopt	(int, char **, const char *);
 extern	void	init_auth	(void);
 extern	void	init_lib	(void);
 extern	struct savekey *auth_findkey (keyid_t);
 extern	void	auth_moremem	(int);
 extern	void	auth_prealloc_symkeys(int);
 extern	int	ymd2yd		(int, int, int);
+
+/* getopt.c */
+extern const int no_argument;
+extern const int required_argument;
+extern const int optional_argument;
+
+extern char* ntp_optarg;
+extern int ntp_optind, ntp_opterr, ntp_optopt;
+
+struct option {
+    const char* name;
+    int has_arg;
+    int* flag;
+    int val;
+};
+
+int ntp_getopt(int argc, char *const argv[], const char *optstring);
+
+int ntp_getopt_long(int argc, char* const argv[], const char *optstring,
+		    const struct option *longopts, int *longindex);
 
 /* a_md5encrypt.c */
 extern	int	MD5authdecrypt	(int, u_char *, uint32_t *, int, int);
