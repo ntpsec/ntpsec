@@ -41,10 +41,6 @@
  */
 #define COUNTOF(arr)	(sizeof(arr) / sizeof((arr)[0]))
 
-#if SIZEOF_SHORT != 2
-# error short is not 2 bytes -- what is 16 bit integer on this target?
-#endif
-
 /*
  * If the platform supports a 64-bit scalar, ANSI requires the types
  * int64_t and uint64_t to exist and INT64_MAX to be defined.  Thus,
