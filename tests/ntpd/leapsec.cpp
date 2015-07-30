@@ -234,22 +234,22 @@ int stringreader(void* farg)
 		return EOF;
 }
 
-static int/*BOOL*/
+static bool
 setup_load_table(
 	const char * cp,
-	int          blim=FALSE)
+	bool          blim=false)
 {
-	int            rc;
+	bool            rc;
 	leap_table_t * pt = leapsec_get_table(0);
 	rc = (pt != NULL) && leapsec_load(pt, stringreader, &cp, blim);
 	rc = rc && leapsec_set_table(pt);
 	return rc;
 }
 
-static int/*BOOL*/
+static bool
 setup_clear_table()
 {
-	int            rc;
+	bool            rc;
 	leap_table_t * pt = leapsec_get_table(0);
 	if (pt)
 		leapsec_clear(pt);
@@ -392,7 +392,7 @@ TEST_F(leapsecTest, loadFileExpire) {
 	int rc;
 	leap_table_t * pt = leapsec_get_table(0);
 
-	rc =   leapsec_load(pt, stringreader, &cp, FALSE)
+	rc =   leapsec_load(pt, stringreader, &cp, false)
 	    && leapsec_set_table(pt);
 	EXPECT_EQ(1, rc);
 	rc = leapsec_expired(3439756800, NULL);
@@ -411,7 +411,7 @@ TEST_F(leapsecTest, loadFileTTL) {
 
 	const uint32_t limit = 3610569600u;
 
-	rc =   leapsec_load(pt, stringreader, &cp, FALSE)
+	rc =   leapsec_load(pt, stringreader, &cp, false)
 	    && leapsec_set_table(pt);
 	ASSERT_EQ(1, rc);
 
@@ -436,7 +436,7 @@ TEST_F(leapsecTest, lsQueryPristineState) {
 	leap_result_t  qr;
 	
 	rc = leapsec_query(&qr, lsec2012, NULL);
-	EXPECT_EQ(FALSE, rc);
+	EXPECT_FALSE(rc);
 	EXPECT_EQ(0,             qr.warped   );
 	EXPECT_EQ(LSPROX_NOWARN, qr.proximity);
 }
@@ -444,7 +444,7 @@ TEST_F(leapsecTest, lsQueryPristineState) {
 // ----------------------------------------------------------------------
 // ad-hoc jump: leap second at 2009.01.01 -60days
 TEST_F(leapsecTest, ls2009faraway) {
-	int            rc;
+  	bool           rc;
 	leap_result_t  qr;
 
 	rc = setup_load_table(leap1);
@@ -452,7 +452,7 @@ TEST_F(leapsecTest, ls2009faraway) {
 
 	// test 60 days before leap. Nothing scheduled or indicated.
 	rc = leapsec_query(&qr, lsec2009 - 60*SECSPERDAY, NULL);
-	EXPECT_EQ(FALSE, rc);
+	EXPECT_FALSE(rc);
 	EXPECT_EQ(33, qr.tai_offs);
 	EXPECT_EQ(0,  qr.tai_diff);
 	EXPECT_EQ(LSPROX_NOWARN, qr.proximity);
@@ -461,7 +461,7 @@ TEST_F(leapsecTest, ls2009faraway) {
 // ----------------------------------------------------------------------
 // ad-hoc jump: leap second at 2009.01.01 -1week
 TEST_F(leapsecTest, ls2009weekaway) {
-	int            rc;
+	bool           rc;
 	leap_result_t  qr;
 
 	rc = setup_load_table(leap1);
@@ -469,7 +469,7 @@ TEST_F(leapsecTest, ls2009weekaway) {
 
 	// test 7 days before leap. Leap scheduled, but not yet indicated.
 	rc = leapsec_query(&qr, lsec2009 - 7*SECSPERDAY, NULL);
-	EXPECT_EQ(FALSE, rc);
+	EXPECT_FALSE(rc);
 	EXPECT_EQ(33, qr.tai_offs);
 	EXPECT_EQ(1,  qr.tai_diff);
 	EXPECT_EQ(LSPROX_SCHEDULE, qr.proximity);
@@ -478,7 +478,7 @@ TEST_F(leapsecTest, ls2009weekaway) {
 // ----------------------------------------------------------------------
 // ad-hoc jump: leap second at 2009.01.01 -1hr
 TEST_F(leapsecTest, ls2009houraway) {
-	int            rc;
+	bool           rc;
 	leap_result_t  qr;
 
 	rc = setup_load_table(leap1);
@@ -486,7 +486,7 @@ TEST_F(leapsecTest, ls2009houraway) {
 
 	// test 1 hour before leap. 61 true seconds to go.
 	rc = leapsec_query(&qr, lsec2009 - SECSPERHR, NULL);
-	EXPECT_EQ(FALSE, rc);
+	EXPECT_FALSE(rc);
 	EXPECT_EQ(33, qr.tai_offs);
 	EXPECT_EQ(1,  qr.tai_diff);
 	EXPECT_EQ(LSPROX_ANNOUNCE, qr.proximity);
@@ -495,15 +495,15 @@ TEST_F(leapsecTest, ls2009houraway) {
 // ----------------------------------------------------------------------
 // ad-hoc jump: leap second at 2009.01.01 -1sec
 TEST_F(leapsecTest, ls2009secaway) {
-	int            rc;
+	bool           rc;
 	leap_result_t  qr;
 
 	rc = setup_load_table(leap1);
-	EXPECT_EQ(1, rc);
+	EXPECT_TRUE(rc);
 
 	// test 1 second before leap (last boundary...) 2 true seconds to go.
 	rc = leapsec_query(&qr, lsec2009 - 1, NULL);
-	EXPECT_EQ(FALSE, rc);
+	EXPECT_FALSE(rc);
 	EXPECT_EQ(33, qr.tai_offs);
 	EXPECT_EQ(1,  qr.tai_diff);
 	EXPECT_EQ(LSPROX_ALERT, qr.proximity);
@@ -512,15 +512,15 @@ TEST_F(leapsecTest, ls2009secaway) {
 // ----------------------------------------------------------------------
 // ad-hoc jump to leap second at 2009.01.01
 TEST_F(leapsecTest, ls2009onspot) {
-	int            rc;
+	bool           rc;
 	leap_result_t  qr;
 
 	rc = setup_load_table(leap1);
-	EXPECT_EQ(1, rc);
+	EXPECT_TRUE(rc);
 
 	// test on-spot: treat leap second as already gone.
 	rc = leapsec_query(&qr, lsec2009, NULL);
-	EXPECT_EQ(FALSE, rc);
+	EXPECT_FALSE(rc);
 	EXPECT_EQ(34, qr.tai_offs);
 	EXPECT_EQ(0,  qr.tai_diff);
 	EXPECT_EQ(LSPROX_NOWARN, qr.proximity);
@@ -529,15 +529,15 @@ TEST_F(leapsecTest, ls2009onspot) {
 // ----------------------------------------------------------------------
 // test handling of the leap second at 2009.01.01 without table
 TEST_F(leapsecTest, ls2009nodata) {
-	int            rc;
+	bool           rc;
 	leap_result_t  qr;
 
 	rc = setup_clear_table();
-	EXPECT_EQ(1, rc);
+	EXPECT_TRUE(rc);
 
 	// test on-spot with empty table
 	rc = leapsec_query(&qr, lsec2009, NULL);
-	EXPECT_EQ(FALSE, rc);
+	EXPECT_FALSE(rc);
 	EXPECT_EQ(0,  qr.tai_offs);
 	EXPECT_EQ(0,  qr.tai_diff);
 	EXPECT_EQ(LSPROX_NOWARN, qr.proximity);
@@ -546,15 +546,15 @@ TEST_F(leapsecTest, ls2009nodata) {
 // ----------------------------------------------------------------------
 // test handling of the leap second at 2009.01.01 with culled data
 TEST_F(leapsecTest, ls2009limdata) {
-	int            rc;
+	bool           rc;
 	leap_result_t  qr;
 
 	rc = setup_load_table(leap1, TRUE);
-	EXPECT_EQ(1, rc);
+	EXPECT_TRUE(rc);
 
 	// test on-spot with limted table - does not work if build before 2013!
 	rc = leapsec_query(&qr, lsec2009, NULL);
-	EXPECT_EQ(FALSE, rc);
+	EXPECT_FALSE(rc);
 	EXPECT_EQ(35, qr.tai_offs);
 	EXPECT_EQ(0,  qr.tai_diff);
 	EXPECT_EQ(LSPROX_NOWARN, qr.proximity);
@@ -563,7 +563,7 @@ TEST_F(leapsecTest, ls2009limdata) {
 // ----------------------------------------------------------------------
 // add dynamic leap second (like from peer/clock)
 TEST_F(leapsecTest, addDynamic) {
-	int            rc;
+	bool           rc;
 	leap_result_t  qr;
 
 	static const uint32_t insns[] = {
@@ -577,24 +577,24 @@ TEST_F(leapsecTest, addDynamic) {
 		0 // sentinel
 	};
 
-	rc = setup_load_table(leap2, FALSE);
-	EXPECT_EQ(1, rc);
+	rc = setup_load_table(leap2, false);
+	EXPECT_TRUE(rc);
 
 	leap_table_t * pt = leapsec_get_table(0);
 	for (int idx=1; insns[idx]; ++idx) {
-	    rc = leapsec_add_dyn(TRUE, insns[idx] - 20*SECSPERDAY - 100, NULL);
-		EXPECT_EQ(TRUE, rc);
+	    rc = leapsec_add_dyn(true, insns[idx] - 20*SECSPERDAY - 100, NULL);
+		EXPECT_TRUE(rc);
 	}
 	// try to slip in a previous entry
-	rc = leapsec_add_dyn(TRUE, insns[0] - 20*SECSPERDAY - 100, NULL);
-	EXPECT_EQ(FALSE, rc);
+	rc = leapsec_add_dyn(true, insns[0] - 20*SECSPERDAY - 100, NULL);
+	EXPECT_FALSE(rc);
 	//leapsec_dump(pt, (leapsec_dumper)fprintf, stdout);
 }
 
 // ----------------------------------------------------------------------
 // add fixed leap seconds (like from network packet)
 TEST_F(leapsecTest, addFixed) {
-	int            rc;
+	bool           rc;
 	leap_result_t  qr;
 
 	static const struct { uint32_t tt; int of; } insns[] = {
@@ -608,8 +608,8 @@ TEST_F(leapsecTest, addFixed) {
 		{0,0} // sentinel
 	};
 
-	rc = setup_load_table(leap2, FALSE);
-	EXPECT_EQ(1, rc);
+	rc = setup_load_table(leap2, false);
+	EXPECT_TRUE(rc);
 
 	leap_table_t * pt = leapsec_get_table(0);
 	// try to get in BAD time stamps...
@@ -619,7 +619,7 @@ TEST_F(leapsecTest, addFixed) {
 		insns[idx].tt - 20*SECSPERDAY - 100,
 		insns[idx].tt + SECSPERDAY,
 		NULL);
-		EXPECT_EQ(FALSE, rc);
+		EXPECT_FALSE(rc);
 	}
 	// no do it right
 	for (int idx=0; insns[idx].tt; ++idx) {
@@ -628,7 +628,7 @@ TEST_F(leapsecTest, addFixed) {
 		    insns[idx].tt,
 		    insns[idx].tt + SECSPERDAY,
 		    NULL);
-		EXPECT_EQ(TRUE, rc);
+		EXPECT_TRUE(rc);
 	}
 	// try to slip in a previous entry
 	rc = leapsec_add_fix(
@@ -636,7 +636,7 @@ TEST_F(leapsecTest, addFixed) {
 	    insns[0].tt,
 	    insns[0].tt + SECSPERDAY,
 	    NULL);
-	EXPECT_EQ(FALSE, rc);
+	EXPECT_FALSE(rc);
 	//leapsec_dump(pt, (leapsec_dumper)fprintf, stdout);
 }
 
@@ -647,42 +647,42 @@ TEST_F(leapsecTest, addFixed) {
 // ----------------------------------------------------------------------
 // leap second insert at 2009.01.01, electric mode
 TEST_F(leapsecTest, ls2009seqInsElectric) {
-	int            rc;
+	bool           rc;
 	leap_result_t  qr;
 
 	rc = setup_load_table(leap1);
-	EXPECT_EQ(1, rc);
+	EXPECT_TRUE(rc);
 	leapsec_electric(1);
-	EXPECT_EQ(1, leapsec_electric(-1));
+	EXPECT_TRUE(leapsec_electric(-1));
 
 	rc = leapsec_query(&qr, lsec2009 - 60*SECSPERDAY, NULL);
-	EXPECT_EQ(FALSE, rc);
+	EXPECT_FALSE(rc);
 	EXPECT_EQ(0,             qr.warped   );
 	EXPECT_EQ(LSPROX_NOWARN, qr.proximity);
 
 	rc = leapsec_query(&qr, lsec2009 - 7*SECSPERDAY, NULL);
-	EXPECT_EQ(FALSE, rc);
+	EXPECT_FALSE(rc);
 	EXPECT_EQ(0,               qr.warped   );
 	EXPECT_EQ(LSPROX_SCHEDULE, qr.proximity);
 
 	rc = leapsec_query(&qr, lsec2009 - SECSPERHR, NULL);
-	EXPECT_EQ(FALSE, rc);
+	EXPECT_FALSE(rc);
 	EXPECT_EQ(0,               qr.warped   );
 	EXPECT_EQ(LSPROX_ANNOUNCE, qr.proximity);
 
 	rc = leapsec_query(&qr, lsec2009 - 1, NULL);
-	EXPECT_EQ(FALSE, rc);
+	EXPECT_FALSE(rc);
 	EXPECT_EQ(0,               qr.warped   );
 	EXPECT_EQ(LSPROX_ALERT,    qr.proximity);
 
 	rc = leapsec_query(&qr, lsec2009, NULL);
-	EXPECT_EQ(TRUE, rc);
+	EXPECT_TRUE(rc);
 	EXPECT_EQ(0,             qr.warped   );
 	EXPECT_EQ(LSPROX_NOWARN, qr.proximity);
 
 	// second call, same time frame: no trigger!
 	rc = leapsec_query(&qr, lsec2009, NULL);
-	EXPECT_EQ(FALSE, rc);
+	EXPECT_FALSE(rc);
 	EXPECT_EQ(0,             qr.warped   );
 	EXPECT_EQ(LSPROX_NOWARN, qr.proximity);
 }
@@ -690,46 +690,46 @@ TEST_F(leapsecTest, ls2009seqInsElectric) {
 // ----------------------------------------------------------------------
 // leap second insert at 2009.01.01, dumb mode
 TEST_F(leapsecTest, ls2009seqInsDumb) {
-	int            rc;
+	bool           rc;
 	leap_result_t  qr;
 
 	rc = setup_load_table(leap1);
-	EXPECT_EQ(1, rc);
+	EXPECT_TRUE(rc);
 	EXPECT_EQ(0, leapsec_electric(-1));
 
 	rc = leapsec_query(&qr, lsec2009 - 60*SECSPERDAY, NULL);
-	EXPECT_EQ(FALSE, rc);
+	EXPECT_FALSE(rc);
 	EXPECT_EQ(0,             qr.warped   );
 	EXPECT_EQ(LSPROX_NOWARN, qr.proximity);
 
 	rc = leapsec_query(&qr, lsec2009 - 7*SECSPERDAY, NULL);
-	EXPECT_EQ(FALSE, rc);
+	EXPECT_FALSE(rc);
 	EXPECT_EQ(0,               qr.warped   );
 	EXPECT_EQ(LSPROX_SCHEDULE, qr.proximity);
 
 	rc = leapsec_query(&qr, lsec2009 - SECSPERHR, NULL);
-	EXPECT_EQ(FALSE, rc);
+	EXPECT_FALSE(rc);
 	EXPECT_EQ(0,               qr.warped   );
 	EXPECT_EQ(LSPROX_ANNOUNCE, qr.proximity);
 
 	rc = leapsec_query(&qr, lsec2009 - 1, NULL);
-	EXPECT_EQ(FALSE, rc);
+	EXPECT_FALSE(rc);
 	EXPECT_EQ(0,               qr.warped   );
 	EXPECT_EQ(LSPROX_ALERT,    qr.proximity);
 
 	rc = leapsec_query(&qr, lsec2009, NULL);
-	EXPECT_EQ(FALSE, rc);
+	EXPECT_FALSE(rc);
 	EXPECT_EQ(0,               qr.warped   );
 	EXPECT_EQ(LSPROX_ALERT,    qr.proximity);
 
 	rc = leapsec_query(&qr, lsec2009+1, NULL);
-	EXPECT_EQ(TRUE, rc);
+	EXPECT_TRUE(rc)
 	EXPECT_EQ(-1,             qr.warped   );
 	EXPECT_EQ(LSPROX_NOWARN, qr.proximity);
 
 	// second call, same time frame: no trigger!
 	rc = leapsec_query(&qr, lsec2009, NULL);
-	EXPECT_EQ(FALSE, rc);
+	EXPECT_FALSE(rc);
 	EXPECT_EQ(0,             qr.warped   );
 	EXPECT_EQ(LSPROX_NOWARN, qr.proximity);
 }
@@ -738,42 +738,42 @@ TEST_F(leapsecTest, ls2009seqInsDumb) {
 // ----------------------------------------------------------------------
 // fake leap second remove at 2009.01.01, electric mode
 TEST_F(leapsecTest, ls2009seqDelElectric) {
-	int            rc;
+	bool           rc;
 	leap_result_t  qr;
 
 	rc = setup_load_table(leap3);
-	EXPECT_EQ(1, rc);
+	EXPECT_TRUE(rc);
 	leapsec_electric(1);
-	EXPECT_EQ(1, leapsec_electric(-1));
+	EXPECT_TRUE(leapsec_electric(-1));
 
 	rc = leapsec_query(&qr, lsec2009 - 60*SECSPERDAY, NULL);
-	EXPECT_EQ(FALSE, rc);
+	EXPECT_FALSE(rc);
 	EXPECT_EQ(0,             qr.warped   );
 	EXPECT_EQ(LSPROX_NOWARN, qr.proximity);
 
 	rc = leapsec_query(&qr, lsec2009 - 7*SECSPERDAY, NULL);
-	EXPECT_EQ(FALSE, rc);
+	EXPECT_FALSE(rc);
 	EXPECT_EQ(0,               qr.warped   );
 	EXPECT_EQ(LSPROX_SCHEDULE, qr.proximity);
 
 	rc = leapsec_query(&qr, lsec2009 - SECSPERHR, NULL);
-	EXPECT_EQ(FALSE, rc);
+	EXPECT_FALSE(rc);
 	EXPECT_EQ(0,               qr.warped   );
 	EXPECT_EQ(LSPROX_ANNOUNCE, qr.proximity);
 
 	rc = leapsec_query(&qr, lsec2009 - 1, NULL);
-	EXPECT_EQ(FALSE, rc);
+	EXPECT_FALSE(rc);
 	EXPECT_EQ(0,               qr.warped   );
 	EXPECT_EQ(LSPROX_ALERT,    qr.proximity);
 
 	rc = leapsec_query(&qr, lsec2009, NULL);
-	EXPECT_EQ(TRUE, rc);
+	EXPECT_TRUE(rc);
 	EXPECT_EQ(0,             qr.warped   );
 	EXPECT_EQ(LSPROX_NOWARN, qr.proximity);
 
 	// second call, same time frame: no trigger!
 	rc = leapsec_query(&qr, lsec2009, NULL);
-	EXPECT_EQ(FALSE, rc);
+	EXPECT_FALSE(rc);
 	EXPECT_EQ(0,             qr.warped   );
 	EXPECT_EQ(LSPROX_NOWARN, qr.proximity);
 }
@@ -781,41 +781,41 @@ TEST_F(leapsecTest, ls2009seqDelElectric) {
 // ----------------------------------------------------------------------
 // fake leap second remove at 2009.01.01. dumb mode
 TEST_F(leapsecTest, ls2009seqDelDumb) {
-	int            rc;
+	bool           rc;
 	leap_result_t  qr;
 
 	rc = setup_load_table(leap3);
-	EXPECT_EQ(1, rc);
+	EXPECT_TRUE(rc);
 	EXPECT_EQ(0, leapsec_electric(-1));
 
 	rc = leapsec_query(&qr, lsec2009 - 60*SECSPERDAY, NULL);
-	EXPECT_EQ(FALSE, rc);
+	EXPECT_FALSE(rc);
 	EXPECT_EQ(0,             qr.warped   );
 	EXPECT_EQ(LSPROX_NOWARN, qr.proximity);
 
 	rc = leapsec_query(&qr, lsec2009 - 7*SECSPERDAY, NULL);
-	EXPECT_EQ(FALSE, rc);
+	EXPECT_FALSE(rc);
 	EXPECT_EQ(0,               qr.warped   );
 	EXPECT_EQ(LSPROX_SCHEDULE, qr.proximity);
 
 	rc = leapsec_query(&qr, lsec2009 - SECSPERHR, NULL);
-	EXPECT_EQ(FALSE, rc);
+	EXPECT_FALSE(rc);
 	EXPECT_EQ(0,               qr.warped   );
 	EXPECT_EQ(LSPROX_ANNOUNCE, qr.proximity);
 
 	rc = leapsec_query(&qr, lsec2009 - 2, NULL);
-	EXPECT_EQ(FALSE, rc);
+	EXPECT_FALSE(rc);
 	EXPECT_EQ(0,               qr.warped   );
 	EXPECT_EQ(LSPROX_ALERT,    qr.proximity);
 
 	rc = leapsec_query(&qr, lsec2009 - 1, NULL);
-	EXPECT_EQ(TRUE, rc);
-	EXPECT_EQ(1,             qr.warped   );
+	EXPECT_TRUE(rc);
+	EXPECT_EQ(1              qr.warped   );
 	EXPECT_EQ(LSPROX_NOWARN, qr.proximity);
 
 	// second call, same time frame: no trigger!
 	rc = leapsec_query(&qr, lsec2009, NULL);
-	EXPECT_EQ(FALSE, rc);
+	EXPECT_FALSE(rc);
 	EXPECT_EQ(0,             qr.warped   );
 	EXPECT_EQ(LSPROX_NOWARN, qr.proximity);
 }
@@ -823,42 +823,42 @@ TEST_F(leapsecTest, ls2009seqDelDumb) {
 // ----------------------------------------------------------------------
 // leap second insert at 2012.07.01, electric mode
 TEST_F(leapsecTest, ls2012seqInsElectric) {
-	int            rc;
+	bool           rc;
 	leap_result_t  qr;
 
 	rc = setup_load_table(leap1);
-	EXPECT_EQ(1, rc);
+	EXPECT_TRUE(rc);
 	leapsec_electric(1);
-	EXPECT_EQ(1, leapsec_electric(-1));
+	EXPECT_TRUE(leapsec_electric(-1));
 
 	rc = leapsec_query(&qr, lsec2012 - 60*SECSPERDAY, NULL);
-	EXPECT_EQ(FALSE, rc);
+	EXPECT_FALSE(rc);
 	EXPECT_EQ(0,             qr.warped   );
 	EXPECT_EQ(LSPROX_NOWARN, qr.proximity);
 
 	rc = leapsec_query(&qr, lsec2012 - 7*SECSPERDAY, NULL);
-	EXPECT_EQ(FALSE, rc);
+	EXPECT_FALSE(rc);
 	EXPECT_EQ(0,               qr.warped   );
 	EXPECT_EQ(LSPROX_SCHEDULE, qr.proximity);
 
 	rc = leapsec_query(&qr, lsec2012 - SECSPERHR, NULL);
-	EXPECT_EQ(FALSE, rc);
+	EXPECT_FALSE(rc);
 	EXPECT_EQ(0,               qr.warped   );
 	EXPECT_EQ(LSPROX_ANNOUNCE, qr.proximity);
 
 	rc = leapsec_query(&qr, lsec2012 - 1, NULL);
-	EXPECT_EQ(FALSE, rc);
+	EXPECT_FALSE(rc);
 	EXPECT_EQ(0,               qr.warped   );
 	EXPECT_EQ(LSPROX_ALERT,    qr.proximity);
 
 	rc = leapsec_query(&qr, lsec2012, NULL);
-	EXPECT_EQ(TRUE, rc);
+	EXPECT_TRUE(rc);
 	EXPECT_EQ(0,            qr.warped   );
 	EXPECT_EQ(LSPROX_NOWARN, qr.proximity);
 
 	// second call, same time frame: no trigger!
 	rc = leapsec_query(&qr, lsec2012, NULL);
-	EXPECT_EQ(FALSE, rc);
+	EXPECT_FALSE(rc);
 	EXPECT_EQ(0,             qr.warped   );
 	EXPECT_EQ(LSPROX_NOWARN, qr.proximity);
 }
@@ -866,48 +866,48 @@ TEST_F(leapsecTest, ls2012seqInsElectric) {
 // ----------------------------------------------------------------------
 // leap second insert at 2012.07.01, dumb mode
 TEST_F(leapsecTest, ls2012seqInsDumb) {
-	int            rc;
+	bool           rc;
 	leap_result_t  qr;
 
 	rc = setup_load_table(leap1);
-	EXPECT_EQ(1, rc);
+	EXPECT_TRUE(rc);
 	EXPECT_EQ(0, leapsec_electric(-1));
 
 	rc = leapsec_query(&qr, lsec2012 - 60*SECSPERDAY, NULL);
-	EXPECT_EQ(FALSE, rc);
+	EXPECT_FALSE(rc);
 	EXPECT_EQ(0,             qr.warped   );
 	EXPECT_EQ(LSPROX_NOWARN, qr.proximity);
 
 	rc = leapsec_query(&qr, lsec2012 - 7*SECSPERDAY, NULL);
-	EXPECT_EQ(FALSE, rc);
+	EXPECT_FALSE(rc);
 	EXPECT_EQ(0,               qr.warped   );
 	EXPECT_EQ(LSPROX_SCHEDULE, qr.proximity);
 
 	rc = leapsec_query(&qr, lsec2012 - SECSPERHR, NULL);
-	EXPECT_EQ(FALSE, rc);
+	EXPECT_FALSE(rc);
 	EXPECT_EQ(0,               qr.warped   );
 	EXPECT_EQ(LSPROX_ANNOUNCE, qr.proximity);
 
 	rc = leapsec_query(&qr, lsec2012 - 1, NULL);
-	EXPECT_EQ(FALSE, rc);
+	EXPECT_FALSE(rc);
 	EXPECT_EQ(0,               qr.warped   );
 	EXPECT_EQ(LSPROX_ALERT,    qr.proximity);
 
 	// This is just 1 sec before transition!
 	rc = leapsec_query(&qr, lsec2012, NULL);
-	EXPECT_EQ(FALSE, rc);
+	EXPECT_FALSE(rc);
 	EXPECT_EQ(0,            qr.warped   );
 	EXPECT_EQ(LSPROX_ALERT, qr.proximity);
 
 	// NOW the insert/backwarp must happen
 	rc = leapsec_query(&qr, lsec2012+1, NULL);
-	EXPECT_EQ(TRUE, rc);
+	EXPECT_TRUE(rc);
 	EXPECT_EQ(-1,            qr.warped   );
 	EXPECT_EQ(LSPROX_NOWARN, qr.proximity);
 
 	// second call with transition time: no trigger!
 	rc = leapsec_query(&qr, lsec2012, NULL);
-	EXPECT_EQ(FALSE, rc);
+	EXPECT_FALSE(rc);
 	EXPECT_EQ(0,             qr.warped   );
 	EXPECT_EQ(LSPROX_NOWARN, qr.proximity);
 }
@@ -915,7 +915,7 @@ TEST_F(leapsecTest, ls2012seqInsDumb) {
 // ----------------------------------------------------------------------
 // test repeated query on empty table in dumb mode
 TEST_F(leapsecTest, lsEmptyTableDumb) {
-	int            rc;
+	bool           rc;
 	leap_result_t  qr;
 
 	const time_t   pivot(lsec2012);	
@@ -926,7 +926,7 @@ TEST_F(leapsecTest, lsEmptyTableDumb) {
 
 	for (uint32_t t = t0; t != tE; ++t) {
 		rc = leapsec_query(&qr, t, &pivot);
-		EXPECT_EQ(FALSE, rc);
+		EXPECT_FALSE(rc);
 		EXPECT_EQ(0,             qr.warped   );
 		EXPECT_EQ(LSPROX_NOWARN, qr.proximity);
 	}
@@ -935,11 +935,11 @@ TEST_F(leapsecTest, lsEmptyTableDumb) {
 // ----------------------------------------------------------------------
 // test repeated query on empty table in electric mode
 TEST_F(leapsecTest, lsEmptyTableElectric) {
-	int            rc;
+	bool           rc;
 	leap_result_t  qr;
 	
 	leapsec_electric(1);
-	EXPECT_EQ(1, leapsec_electric(-1));
+	EXPECT_TRUE(leapsec_electric(-1));
 
 	const time_t   pivot(lsec2012);	
 	const uint32_t t0   (lsec2012 - 10);
@@ -947,7 +947,7 @@ TEST_F(leapsecTest, lsEmptyTableElectric) {
 
 	for (time_t t = t0; t != tE; ++t) {
 		rc = leapsec_query(&qr, t, &pivot);
-		EXPECT_EQ(FALSE, rc);
+		EXPECT_FALSE(rc);
 		EXPECT_EQ(0,             qr.warped   );
 		EXPECT_EQ(LSPROX_NOWARN, qr.proximity);
 	}
