@@ -69,6 +69,10 @@ noinst_HEADERS =	\
 	timetoa.h	\
 	timevalops.h	\
 	trimble.h	\
+	unity.h		\
+	unity_fixture.h	\
+	unity_fixture_internals.h	\
+	unity_internals.h		\
 	vint64ops.h	\
 	$(NULL)
 
