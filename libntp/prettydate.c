@@ -68,8 +68,6 @@ get_struct_tm(
 	int32_t	   folds = 0;
 	time_t	   ts;
 
-#ifdef INT64_MAX
-
 	int64_t tl;
 	ts = tl = stamp->q_s;
 
@@ -89,31 +87,6 @@ get_struct_tm(
 		}
 		ts = tl; /* next try... */
 	}
-#else
-
-	/*
-	 * since we do not have 64-bit scalars, it's not likely we have
-	 * 64-bit time_t. Assume 32 bits and properly reduce the value.
-	 */
-	uint32_t hi, lo;
-
-	hi = stamp->D_s.hi;
-	lo = stamp->D_s.lo;
-
-	while ((hi && ~hi) || ((hi ^ lo) & 0x80000000u)) {
-		if (M_ISNEG(hi, lo)) {
-			if (--folds < MINFOLD)
-				return NULL;
-			M_ADD(hi, lo, 0, SOLAR_CYCLE_SECS);
-		} else {
-			if (++folds > MAXFOLD)
-				return NULL;
-			M_SUB(hi, lo, 0, SOLAR_CYCLE_SECS);
-		}
-	}
-	ts = (int32_t)lo;
-
-#endif
 
 	/*
 	 * 'ts' should be a suitable value by now. Just go ahead, but

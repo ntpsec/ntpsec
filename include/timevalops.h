@@ -20,10 +20,6 @@
 /* microseconds per second */
 #define MICROSECONDS 1000000
 
-#ifndef INT64_MAX
-# define USE_TSF_USEC_TABLES
-#endif
-
 /*
  * Convert usec to a time stamp fraction.
  */
@@ -433,10 +429,8 @@ lfp_stamp_to_tval(
 	/* copying a vint64 to a time_t needs some care... */
 #if SIZEOF_TIME_T <= 4
 	out.tv_sec = (time_t)sec.d_s.lo;
-#elif defined(INT64_MAX)
-	out.tv_sec = (time_t)sec.q_s;
 #else
-	out.tv_sec = ((time_t)sec.d_s.hi << 32) | sec.d_s.lo;
+	out.tv_sec = (time_t)sec.q_s;
 #endif
 	out = normalize_tval(out);
 
