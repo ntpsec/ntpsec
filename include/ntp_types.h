@@ -42,40 +42,21 @@
 #define COUNTOF(arr)	(sizeof(arr) / sizeof((arr)[0]))
 
 /*
- * If the platform supports a 64-bit scalar, ANSI requires the types
- * int64_t and uint64_t to exist and INT64_MAX to be defined.  Thus,
- * here and later in the code we use #ifdef INT64_MAX to conditionalize
- * code that requires that scalar.
- *
- * Even on 32-bit machines we need a representation with 64 or
- * more bits. If a scalar of that size is not available, we need a struct
- * that holds the value in split representation.
- *
- * To ease the usage a bit, we alwys use a union that is in processor
- * byte order and might or might not contain a 64bit scalar.
+ * We now assume the platform supports a 64-bit scalar type (the ISC
+ * library wouldn't compile otherwise). Sadly, getting rid of vint64
+ * is not as simple as turning it into a scalar due to same strange
+ * code in the calendar calculations.
  */
 
 typedef union {
 #   ifdef WORDS_BIGENDIAN
 	struct {
-		int16_t	hh; uint16_t hl; uint16_t lh; uint16_t ll;
-	} w_s;
-	struct {
-		uint16_t hh; uint16_t hl; uint16_t lh; uint16_t ll;
-	} W_s;
-	struct {
-		  int32_t hi; uint32_t lo;
+	        int32_t hi; uint32_t lo;
 	} d_s;
 	struct {
 		uint32_t hi; uint32_t lo;
 	} D_s;
 #   else
-	struct {
-		uint16_t ll; uint16_t lh; uint16_t hl;   int16_t hh;
-	} w_s;
-	struct {
-		uint16_t ll; uint16_t lh; uint16_t hl; uint16_t hh;
-	} W_s;
 	struct {
 		uint32_t lo;   int32_t hi;
 	} d_s;
@@ -84,10 +65,8 @@ typedef union {
 	} D_s;
 #   endif
 
-#   ifdef INT64_MAX
 	int64_t	q_s;	/*   signed quad scalar */
 	uint64_t Q_s;	/* unsigned quad scalar */
-#   endif
 } vint64; /* variant int 64 */
 
 

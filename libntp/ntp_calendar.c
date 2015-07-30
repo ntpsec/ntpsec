@@ -70,25 +70,9 @@ time_to_vint64(
 		res.D_s.lo = (uint32_t)tt;
 	}
 
-#elif defined(INT64_MAX)
+#else
 
 	res.q_s = tt;
-
-#else
-	/*
-	 * shifting negative signed quantities is compiler-dependent, so
-	 * we better avoid it and do it all manually. And shifting more
-	 * than the width of a quantity is undefined. Also a don't do!
-	 */
-	if (tt < 0) {
-		tt = -tt;
-		res.D_s.lo = (uint32_t)tt;
-		res.D_s.hi = (uint32_t)(tt >> 32);
-		M_NEG(res.D_s.hi, res.D_s.lo);
-	} else {
-		res.D_s.lo = (uint32_t)tt;
-		res.D_s.hi = (uint32_t)(tt >> 32);
-	}
 
 #endif
 
@@ -107,13 +91,9 @@ vint64_to_time(
 
 	res = (time_t)tv->D_s.lo;
 
-#elif defined(INT64_MAX)
-
-	res = (time_t)tv->q_s;
-
 #else
 
-	res = ((time_t)tv->d_s.hi << 32) | tv->D_s.lo;
+	res = (time_t)tv->q_s;
 
 #endif
 
@@ -405,8 +385,6 @@ ntpcal_ntp_to_time(
 {
 	vint64 res;
 
-#ifdef INT64_MAX
-
 	res.q_s = (pivot != NULL)
 		      ? *pivot
 		      : now();
@@ -414,21 +392,6 @@ ntpcal_ntp_to_time(
 	ntp	-= (uint32_t)JAN_1970;	/* warp into UN*X domain */
 	ntp	-= res.D_s.lo;		/* cycle difference	 */
 	res.Q_s += (uint64_t)ntp;	/* get expanded time	 */
-
-#else /* no 64bit scalars */
-
-	time_t tmp;
-
-	tmp = (pivot != NULL)
-		  ? *pivot
-		  : now();
-	res = time_to_vint64(&tmp);
-	M_SUB(res.D_s.hi, res.D_s.lo, 0, 0x80000000);
-	ntp -= (uint32_t)JAN_1970;	/* warp into UN*X domain */
-	ntp -= res.D_s.lo;		/* cycle difference	 */
-	M_ADD(res.D_s.hi, res.D_s.lo, 0, ntp);
-
-#endif /* no 64bit scalars */
 
 	return res;
 }
@@ -454,8 +417,6 @@ ntpcal_ntp_to_ntp(
 {
 	vint64 res;
 
-#ifdef INT64_MAX
-
 	res.q_s = (pivot)
 		      ? *pivot
 		      : now();
@@ -463,21 +424,6 @@ ntpcal_ntp_to_ntp(
 	res.Q_s += (uint32_t)JAN_1970;	/* warp into NTP domain	 */
 	ntp	-= res.D_s.lo;		/* cycle difference	 */
 	res.Q_s += (uint64_t)ntp;	/* get expanded time	 */
-
-#else /* no 64bit scalars */
-
-	time_t tmp;
-
-	tmp = (pivot)
-		  ? *pivot
-		  : now();
-	res = time_to_vint64(&tmp);
-	M_SUB(res.D_s.hi, res.D_s.lo, 0, 0x80000000u);
-	M_ADD(res.D_s.hi, res.D_s.lo, 0, (uint32_t)JAN_1970);/*into NTP */
-	ntp -= res.D_s.lo;		/* cycle difference	 */
-	M_ADD(res.D_s.hi, res.D_s.lo, 0, ntp);
-
-#endif /* no 64bit scalars */
 
 	return res;
 }
@@ -506,8 +452,6 @@ ntpcal_daysplit(
 {
 	ntpcal_split res;
 
-#ifdef INT64_MAX
-
 	/* manual floor division by SECSPERDAY */
 	res.hi = (int32_t)(ts->q_s / SECSPERDAY);
 	res.lo = (int32_t)(ts->q_s % SECSPERDAY);
@@ -516,67 +460,6 @@ ntpcal_daysplit(
 		res.lo += SECSPERDAY;
 	}
 
-#else
-
-	/*
-	 * since we do not have 64bit ops, we have to this by hand.
-	 * Luckily SECSPERDAY is 86400 is 675*128, so we do the division
-	 * using chained 32/16 bit divisions and shifts.
-	 */
-	vint64	 op;
-	uint32_t q, r, a;
-	int	 isneg;
-
-	memcpy(&op, ts, sizeof(op));
-	/* fix sign */
-	isneg = M_ISNEG(op.D_s.hi);
-	if (isneg)
-		M_NEG(op.D_s.hi, op.D_s.lo);
-
-	/* save remainder of DIV 128, shift for divide */
-	r  = op.D_s.lo & 127; /* save remainder bits */
-	op.D_s.lo = (op.D_s.lo >> 7) | (op.D_s.hi << 25);
-	op.D_s.hi = (op.D_s.hi >> 7);
-
-	/* now do a mnual division, trying to remove as many ops as
-	 * possible -- division is always slow! An since we do not have
-	 * the advantage of a specific 64/32 bit or even a specific 32/16
-	 * bit division op, but must use the general 32/32bit division
-	 * even if we *know* the divider fits into unsigned 16 bits, the
-	 * exra code pathes should pay off.
-	 */
-	a = op.D_s.hi;
-	if (a > 675u)
-		a = a % 675u;
-	if (a) {
-		a = (a << 16) | op.W_s.lh;
-		q = a / 675u;
-		a = a % 675u;
-
-		a = (a << 16) | op.W_s.ll;
-		q = (q << 16) | (a / 675u);
-	} else {
-		a = op.D_s.lo;
-		q = a / 675u;
-	}
-	a = a % 675u;
-
-	/* assemble remainder */
-	r |= a << 7;
-
-	/* fix sign of result */
-	if (isneg) {
-		if (r) {
-			r = SECSPERDAY - r;
-			q = ~q;
-		} else
-			q = ~q + 1;
-	}
-
-	res.hi = q;
-	res.lo = r;
-
-#endif
 	return res;
 }
 
@@ -918,52 +801,9 @@ ntpcal_dayjoin(
 {
 	vint64 res;
 
-#ifdef INT64_MAX
-
 	res.q_s	 = days;
 	res.q_s *= SECSPERDAY;
 	res.q_s += secs;
-
-#else
-
-	uint32_t p1, p2;
-	int	 isneg;
-
-	/*
-	 * res = days *86400 + secs, using manual 16/32 bit
-	 * multiplications and shifts.
-	 */
-	isneg = (days < 0);
-	if (isneg)
-		days = -days;
-
-	/* assemble days * 675 */
-	res.D_s.lo = (days & 0xFFFF) * 675u;
-	res.D_s.hi = 0;
-	p1 = (days >> 16) * 675u;
-	p2 = p1 >> 16;
-	p1 = p1 << 16;
-	M_ADD(res.D_s.hi, res.D_s.lo, p2, p1);
-
-	/* mul by 128, using shift */
-	res.D_s.hi = (res.D_s.hi << 7) | (res.D_s.lo >> 25);
-	res.D_s.lo = (res.D_s.lo << 7);
-
-	/* fix sign */
-	if (isneg)
-		M_NEG(res.D_s.hi, res.D_s.lo);
-
-	/* properly add seconds */
-	p2 = 0;
-	if (secs < 0) {
-		p1 = (uint32_t)-secs;
-		M_NEG(p2, p1);
-	} else {
-		p1 = (uint32_t)secs;
-	}
-	M_ADD(res.D_s.hi, res.D_s.lo, p2, p1);
-
-#endif
 
 	return res;
 }

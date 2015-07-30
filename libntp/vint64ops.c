@@ -93,24 +93,7 @@ strtouv64(
 		if (digit >= base)
 			break;
 		num = 1;
-#if defined(INT64_MAX)
 		res.Q_s = res.Q_s * base + digit;
-#else
-		/* res *= base, using 16x16->32 bit
-		 * multiplication. Slow but portable.
-		 */ 
-		{
-			uint32_t accu;
-			accu       = (uint32_t)res.W_s.ll * base;
-			res.W_s.ll = (uint16_t)accu;
-			accu       = (accu >> 16)
-			           + (uint32_t)res.W_s.lh * base;
-			res.W_s.lh = (uint16_t)accu;
-			/* the upper bits can be done in one step: */
-			res.D_s.hi = res.D_s.hi * base + (accu >> 16);
-		}
-		M_ADD(res.D_s.hi, res.D_s.lo, 0, digit);
-#endif
 		src++;
 	}
 	if (!num)
@@ -132,16 +115,8 @@ icmpv64(
 {
 	int res;
 
-#if defined(INT64_MAX)
 	res = (lhs->q_s > rhs->q_s)
 	    - (lhs->q_s < rhs->q_s);
-#else	
-	res = (lhs->d_s.hi > rhs->d_s.hi)
-	    - (lhs->d_s.hi < rhs->d_s.hi);
-	if ( ! res )
-		res = (lhs->D_s.lo > rhs->D_s.lo)
-		    - (lhs->D_s.lo < rhs->D_s.lo);
-#endif
 
 	return res;
 }
@@ -156,16 +131,9 @@ ucmpv64(
 {
 	int res;
 	
-#if defined(INT64_MAX)
 	res = (lhs->Q_s > rhs->Q_s)
 	    - (lhs->Q_s < rhs->Q_s);
-#else	
-	res = (lhs->D_s.hi > rhs->D_s.hi)
-	    - (lhs->D_s.hi < rhs->D_s.hi);
-	if ( ! res )
-		res = (lhs->D_s.lo > rhs->D_s.lo)
-		    - (lhs->D_s.lo < rhs->D_s.lo);
-#endif
+
 	return res;
 }
 
@@ -179,12 +147,8 @@ addv64(
 {
 	vint64 res;
 
-#if defined(INT64_MAX)
 	res.Q_s = lhs->Q_s + rhs->Q_s;
-#else
-	res = *lhs;
-	M_ADD(res.D_s.hi, res.D_s.lo, rhs->D_s.hi, rhs->D_s.lo);
-#endif
+
 	return res;
 }
 
@@ -198,12 +162,8 @@ subv64(
 {
 	vint64 res;
 
-#if defined(INT64_MAX)
 	res.Q_s = lhs->Q_s - rhs->Q_s;
-#else
-	res = *lhs;
-	M_SUB(res.D_s.hi, res.D_s.lo, rhs->D_s.hi, rhs->D_s.lo);
-#endif
+
 	return res;
 }
 
@@ -218,11 +178,8 @@ addv64i32(
 	vint64 res;
 
 	res = *lhs;
-#if defined(INT64_MAX)
 	res.q_s += rhs;
-#else
-	M_ADD(res.D_s.hi, res.D_s.lo,  -(rhs < 0), rhs);
-#endif
+
 	return res;
 }
 
@@ -237,11 +194,8 @@ subv64i32(
 	vint64 res;
 
 	res = *lhs;
-#if defined(INT64_MAX)
 	res.q_s -= rhs;
-#else
-	M_SUB(res.D_s.hi, res.D_s.lo,  -(rhs < 0), rhs);
-#endif
+
 	return res;
 }
 
@@ -256,11 +210,8 @@ addv64u32(
 	vint64 res;
 
 	res = *lhs;
-#if defined(INT64_MAX)
 	res.Q_s += rhs;
-#else
-	M_ADD(res.D_s.hi, res.D_s.lo, 0, rhs);
-#endif
+
 	return res;
 }
 
@@ -275,10 +226,7 @@ subv64u32(
 	vint64 res;
 
 	res = *lhs;
-#if defined(INT64_MAX)
 	res.Q_s -= rhs;
-#else
-	M_SUB(res.D_s.hi, res.D_s.lo, 0, rhs);
-#endif
+
 	return res;
 }

@@ -267,8 +267,7 @@ typedef uint32_t u_fp;
  * XSCALE also generates bad code for these, at least with GCC 3.3.5.
  * This is unrelated to math.h, but the same solution applies.
  */
-#if defined(INT64_MAX) && \
-    !(defined(__SVR4) && defined(__sun) && \
+#if !(defined(__SVR4) && defined(__sun) && \
       defined(sparc) && defined(__GNUC__) || \
       defined(__arm__) && defined(__XSCALE__) && defined(__GNUC__)) 
 
