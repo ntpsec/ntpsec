@@ -1,3 +1,14 @@
+extern "C" {
+#include "unity.h"
+#include "unity_fixture.h"
+}
+
+TEST_GROUP(recvbuff);
+
+TEST_SETUP(recvbuff) {}
+
+TEST_TEAR_DOWN(recvbuff) {}
+
 #include "libntptest.h"
 
 extern "C" {
@@ -11,28 +22,28 @@ protected:
 	}
 };
 
-TEST_F(recvbuffTest, Initialization) {
-	EXPECT_EQ(RECV_INIT, free_recvbuffs());
-	EXPECT_EQ(0, full_recvbuffs());
-	EXPECT_FALSE(has_full_recv_buffer());
-	EXPECT_TRUE(get_full_recv_buffer() == NULL);
+TEST(recvbuff, Initialization) {
+	TEST_ASSERT_EQUAL(RECV_INIT, free_recvbuffs());
+	TEST_ASSERT_EQUAL(0, full_recvbuffs());
+	TEST_ASSERT_FALSE(has_full_recv_buffer());
+	TEST_ASSERT_TRUE(get_full_recv_buffer() == NULL);
 }
 
-TEST_F(recvbuffTest, GetAndFree) {
+TEST(recvbuff, GetAndFree) {
 	int initial = free_recvbuffs();
 	recvbuf_t* buf = get_free_recv_buffer();
 
-	EXPECT_EQ(initial-1, free_recvbuffs());
+	TEST_ASSERT_EQUAL(initial-1, free_recvbuffs());
 	freerecvbuf(buf);
-	EXPECT_EQ(initial, free_recvbuffs());
+	TEST_ASSERT_EQUAL(initial, free_recvbuffs());
 }
 
-TEST_F(recvbuffTest, GetAndFill) {
+TEST(recvbuff, GetAndFill) {
 	int initial = free_recvbuffs();
 	recvbuf_t* buf = get_free_recv_buffer();
 
 	add_full_recv_buffer(buf);
-	EXPECT_EQ(1, full_recvbuffs());
-	EXPECT_TRUE(has_full_recv_buffer());
-	EXPECT_EQ(buf, get_full_recv_buffer());
+	TEST_ASSERT_EQUAL(1, full_recvbuffs());
+	TEST_ASSERT_TRUE(has_full_recv_buffer());
+	TEST_ASSERT_EQUAL(buf, get_full_recv_buffer());
 }

@@ -1,3 +1,14 @@
+extern "C" {
+#include "unity.h"
+#include "unity_fixture.h"
+}
+
+TEST_GROUP(utilities);
+
+TEST_SETUP(utilities) {}
+
+TEST_TEAR_DOWN(utilities) {}
+
 #include "sntptest.h"
 #include "fileHandlingTest.h"
 
@@ -40,7 +51,7 @@ protected:
 		// Clear the contents of the current file.
 		// Open the output file
 		outputFile = fopen(filename.c_str(), "w+");
-		ASSERT_TRUE(outputFile != NULL);
+		TEST_ASSERT_TRUE(outputFile != NULL);
 		outputFileOpened = true;
 	}
 
@@ -52,8 +63,8 @@ protected:
 
 		ifstream e(expected.c_str());
 		ifstream a(actual.c_str());
-		ASSERT_TRUE(e.good());
-		ASSERT_TRUE(a.good());
+		TEST_ASSERT_TRUE(e.good());
+		TEST_ASSERT_TRUE(a.good());
 
 		CompareFileContent(e, a);
 	}
@@ -65,17 +76,17 @@ protected:
  * tests can be removed.
  */
 
-TEST_F(utilitiesTest, IPv4Address) {
+TEST(utilities, IPv4Address) {
 	const char* ADDR = "192.0.2.10";
 
 	sockaddr_u input = CreateSockaddr4(ADDR);
 	addrinfo inputA = CreateAddrinfo(&input);
 
-	EXPECT_STREQ(ADDR, ss_to_str(&input));
-	EXPECT_STREQ(ADDR, addrinfo_to_str(&inputA));
+	TEST_ASSERT_EQUAL_STRING(ADDR, ss_to_str(&input));
+	TEST_ASSERT_EQUAL_STRING(ADDR, addrinfo_to_str(&inputA));
 }
 
-TEST_F(utilitiesTest, IPv6Address) {
+TEST(utilities, IPv6Address) {
 	const struct in6_addr address = {
 						0x20, 0x01, 0x0d, 0xb8,
 						0x85, 0xa3, 0x08, 0xd3, 
@@ -89,13 +100,13 @@ TEST_F(utilitiesTest, IPv6Address) {
 	memset(&input, 0, sizeof(input));
 	input.sa6.sin6_family = AF_INET6;
 	input.sa6.sin6_addr = address;
-	EXPECT_STREQ(expected, ss_to_str(&input));
+	TEST_ASSERT_EQUAL_STRING(expected, ss_to_str(&input));
 
 	inputA = CreateAddrinfo(&input);
-	EXPECT_STREQ(expected, addrinfo_to_str(&inputA));
+	TEST_ASSERT_EQUAL_STRING(expected, addrinfo_to_str(&inputA));
 }
 
-TEST_F(utilitiesTest, SetLiVnMode1) {
+TEST(utilities, SetLiVnMode1) {
 	pkt expected;
 	expected.li_vn_mode = PKT_LI_VN_MODE(LEAP_NOWARNING,
 					     NTP_VERSION,
@@ -105,10 +116,10 @@ TEST_F(utilitiesTest, SetLiVnMode1) {
 	set_li_vn_mode(&actual, LEAP_NOWARNING, NTP_VERSION,
 				   MODE_SERVER);
 
-	EXPECT_EQ(expected.li_vn_mode, actual.li_vn_mode);
+	TEST_ASSERT_EQUAL(expected.li_vn_mode, actual.li_vn_mode);
 }
 
-TEST_F(utilitiesTest, SetLiVnMode2) {
+TEST(utilities, SetLiVnMode2) {
 	pkt expected;
 	expected.li_vn_mode = PKT_LI_VN_MODE(LEAP_NOTINSYNC,
 										 NTP_OLDVERSION,
@@ -118,12 +129,12 @@ TEST_F(utilitiesTest, SetLiVnMode2) {
 	set_li_vn_mode(&actual, LEAP_NOTINSYNC, NTP_OLDVERSION,
 				   MODE_BROADCAST);
 
-	EXPECT_EQ(expected.li_vn_mode, actual.li_vn_mode);
+	TEST_ASSERT_EQUAL(expected.li_vn_mode, actual.li_vn_mode);
 }
 
 /* Debug utilities tests */
 
-TEST_F(debugUtilitiesTest, PktOutput) {
+TEST(debugUtilities, PktOutput) {
 	string filename = CreatePath("debug-output-pkt", OUTPUT_DIR);
 	InitDebugTest(filename);
 
@@ -143,7 +154,7 @@ TEST_F(debugUtilitiesTest, PktOutput) {
 	FinishDebugTest(CreatePath("debug-input-pkt", INPUT_DIR), filename);
 }
 
-TEST_F(debugUtilitiesTest, LfpOutputBinaryFormat) {
+TEST(debugUtilities, LfpOutputBinaryFormat) {
 	string filename = CreatePath("debug-output-lfp-bin", OUTPUT_DIR);
 	InitDebugTest(filename);
 
@@ -159,7 +170,7 @@ TEST_F(debugUtilitiesTest, LfpOutputBinaryFormat) {
 	FinishDebugTest(CreatePath("debug-input-lfp-bin", INPUT_DIR), filename);
 }
 
-TEST_F(debugUtilitiesTest, LfpOutputDecimalFormat) {
+TEST(debugUtilities, LfpOutputDecimalFormat) {
 	string filename = CreatePath("debug-output-lfp-dec", OUTPUT_DIR);
 	InitDebugTest(filename);
 

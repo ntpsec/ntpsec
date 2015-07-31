@@ -1,3 +1,14 @@
+extern "C" {
+#include "unity.h"
+#include "unity_fixture.h"
+}
+
+TEST_GROUP(packetProcessing);
+
+TEST_SETUP(packetProcessing) {}
+
+TEST_TEAR_DOWN(packetProcessing) {}
+
 #include "sntptest.h"
 
 extern "C" {
@@ -35,7 +46,7 @@ protected:
 		key_ptr->key_len = key_len;
 		memcpy(key_ptr->type, "MD5", 3);
 
-		ASSERT_TRUE(key_len < sizeof(key_ptr->key_seq));
+		TEST_ASSERT_TRUE(key_len < sizeof(key_ptr->key_seq));
 
 		memcpy(key_ptr->key_seq, key_seq, key_ptr->key_len);
 		restoreKeyDb = true;
@@ -76,25 +87,25 @@ protected:
 	}
 };
 
-TEST_F(packetProcessingTest, TooShortLength) {
-	EXPECT_EQ(PACKET_UNUSEABLE,
+TEST(packetProcessing, TooShortLength) {
+	TEST_ASSERT_EQUAL(PACKET_UNUSEABLE,
 			  process_pkt(&testpkt, &testsock, LEN_PKT_NOMAC - 1,
 						  MODE_SERVER, &testspkt, "UnitTest", true));
-	EXPECT_EQ(PACKET_UNUSEABLE,
+	TEST_ASSERT_EQUAL(PACKET_UNUSEABLE,
 			  process_pkt(&testpkt, &testsock, LEN_PKT_NOMAC - 1,
 						  MODE_BROADCAST, &testspkt, "UnitTest", true));
 }
 
-TEST_F(packetProcessingTest, LengthNotMultipleOfFour) {
-	EXPECT_EQ(PACKET_UNUSEABLE,
+TEST(packetProcessing, LengthNotMultipleOfFour) {
+	TEST_ASSERT_EQUAL(PACKET_UNUSEABLE,
 			  process_pkt(&testpkt, &testsock, LEN_PKT_NOMAC + 6,
 						  MODE_SERVER, &testspkt, "UnitTest", true));
-	EXPECT_EQ(PACKET_UNUSEABLE,
+	TEST_ASSERT_EQUAL(PACKET_UNUSEABLE,
 			  process_pkt(&testpkt, &testsock, LEN_PKT_NOMAC + 3,
 						  MODE_BROADCAST, &testspkt, "UnitTest", true));
 }
 
-TEST_F(packetProcessingTest, TooShortExtensionFieldLength) {
+TEST(packetProcessing, TooShortExtensionFieldLength) {
 	/* The lower 16-bits are the length of the extension field.
 	 * This lengths must be multiples of 4 bytes, which gives
 	 * a minimum of 4 byte extension field length. */
@@ -105,41 +116,41 @@ TEST_F(packetProcessingTest, TooShortExtensionFieldLength) {
 	 * be caught at an earlier stage */
 	int pkt_len = LEN_PKT_NOMAC + 4 + 24;
 
-	EXPECT_EQ(PACKET_UNUSEABLE,
+	TEST_ASSERT_EQUAL(PACKET_UNUSEABLE,
 			  process_pkt(&testpkt, &testsock, pkt_len,
 						  MODE_SERVER, &testspkt, "UnitTest", true));
 }
 
-TEST_F(packetProcessingTest, UnauthenticatedPacketReject) {
+TEST(packetProcessing, UnauthenticatedPacketReject) {
 	// Activate authentication option
 	ActivateOption("-a", "123");
-	ASSERT_TRUE(ENABLED_OPT(AUTHENTICATION));
+	TEST_ASSERT_TRUE(ENABLED_OPT(AUTHENTICATION));
 
 	int pkt_len = LEN_PKT_NOMAC;
 
 	// We demand authentication, but no MAC header is present.
-	EXPECT_EQ(SERVER_AUTH_FAIL,
+	TEST_ASSERT_EQUAL(SERVER_AUTH_FAIL,
 			  process_pkt(&testpkt, &testsock, pkt_len,
 						  MODE_SERVER, &testspkt, "UnitTest", true));
 }
 
-TEST_F(packetProcessingTest, CryptoNAKPacketReject) {
+TEST(packetProcessing, CryptoNAKPacketReject) {
 	// Activate authentication option
 	ActivateOption("-a", "123");
-	ASSERT_TRUE(ENABLED_OPT(AUTHENTICATION));
+	TEST_ASSERT_TRUE(ENABLED_OPT(AUTHENTICATION));
 
 	int pkt_len = LEN_PKT_NOMAC + 4; // + 4 byte MAC = Crypto-NAK
 
-	EXPECT_EQ(SERVER_AUTH_FAIL,
+	TEST_ASSERT_EQUAL(SERVER_AUTH_FAIL,
 			  process_pkt(&testpkt, &testsock, pkt_len,
 						  MODE_SERVER, &testspkt, "UnitTest", true));
 }
 
-TEST_F(packetProcessingTest, AuthenticatedPacketInvalid) {
+TEST(packetProcessing, AuthenticatedPacketInvalid) {
 	// Activate authentication option
 	PrepareAuthenticationTest(50, 9, "123456789");
-	ASSERT_TRUE(ENABLED_OPT(AUTHENTICATION));
-	
+	TEST_ASSERT_TRUE(ENABLED_OPT(AUTHENTICATION));
+
 	// Prepare the packet.
 	int pkt_len = LEN_PKT_NOMAC;
 
@@ -153,16 +164,16 @@ TEST_F(packetProcessingTest, AuthenticatedPacketInvalid) {
 	// Now, alter the MAC so it becomes invalid.
 	testpkt.exten[1] += 1;
 
-	EXPECT_EQ(SERVER_AUTH_FAIL,
+	TEST_ASSERT_EQUAL(SERVER_AUTH_FAIL,
 			  process_pkt(&testpkt, &testsock, pkt_len,
 						  MODE_SERVER, &testspkt, "UnitTest", true));
 }
 
-TEST_F(packetProcessingTest, AuthenticatedPacketUnknownKey) {
+TEST(packetProcessing, AuthenticatedPacketUnknownKey) {
 	// Activate authentication option
 	PrepareAuthenticationTest(30, 9, "123456789");
-	ASSERT_TRUE(ENABLED_OPT(AUTHENTICATION));
-	
+	TEST_ASSERT_TRUE(ENABLED_OPT(AUTHENTICATION));
+
 	// Prepare the packet. Observe that the Key-ID expected is 30,
 	// but the packet has a key id of 50.
 	int pkt_len = LEN_PKT_NOMAC;
@@ -173,43 +184,43 @@ TEST_F(packetProcessingTest, AuthenticatedPacketUnknownKey) {
 						   (char*)&testpkt.exten[1]);
 	pkt_len += 4 + mac_len;
 
-	EXPECT_EQ(SERVER_AUTH_FAIL,
+	TEST_ASSERT_EQUAL(SERVER_AUTH_FAIL,
 			  process_pkt(&testpkt, &testsock, pkt_len,
 						  MODE_SERVER, &testspkt, "UnitTest", true));
 }
 
-TEST_F(packetProcessingTest, ServerVersionTooOld) {
-	ASSERT_FALSE(ENABLED_OPT(AUTHENTICATION));
+TEST(packetProcessing, ServerVersionTooOld) {
+	TEST_ASSERT_FALSE(ENABLED_OPT(AUTHENTICATION));
 
 	testpkt.li_vn_mode = PKT_LI_VN_MODE(LEAP_NOWARNING,
 										NTP_OLDVERSION - 1,
 										MODE_CLIENT);
-	ASSERT_LT(PKT_VERSION(testpkt.li_vn_mode), NTP_OLDVERSION);
+	TEST_ASSERT_LESS_THAN(PKT_VERSION(testpkt.li_vn_mode), NTP_OLDVERSION);
 
 	int pkt_len = LEN_PKT_NOMAC;
-	
-	EXPECT_EQ(SERVER_UNUSEABLE,
+
+	TEST_ASSERT_EQUAL(SERVER_UNUSEABLE,
 			  process_pkt(&testpkt, &testsock, pkt_len,
 						  MODE_SERVER, &testspkt, "UnitTest", true));
 }
 
-TEST_F(packetProcessingTest, ServerVersionTooNew) {
-	ASSERT_FALSE(ENABLED_OPT(AUTHENTICATION));
+TEST(packetProcessing, ServerVersionTooNew) {
+	TEST_ASSERT_FALSE(ENABLED_OPT(AUTHENTICATION));
 
 	testpkt.li_vn_mode = PKT_LI_VN_MODE(LEAP_NOWARNING,
 										NTP_VERSION + 1,
 										MODE_CLIENT);
-	ASSERT_GT(PKT_VERSION(testpkt.li_vn_mode), NTP_VERSION);
+	TEST_ASSERT_GREATER_THAN(PKT_VERSION(testpkt.li_vn_mode), NTP_VERSION);
 
 	int pkt_len = LEN_PKT_NOMAC;
 
-	EXPECT_EQ(SERVER_UNUSEABLE,
+	TEST_ASSERT_EQUAL(SERVER_UNUSEABLE,
 			  process_pkt(&testpkt, &testsock, pkt_len,
 						  MODE_SERVER, &testspkt, "UnitTest", true));
 }
 
-TEST_F(packetProcessingTest, NonWantedMode) {
-	ASSERT_FALSE(ENABLED_OPT(AUTHENTICATION));
+TEST(packetProcessing, NonWantedMode) {
+	TEST_ASSERT_FALSE(ENABLED_OPT(AUTHENTICATION));
 
 	testpkt.li_vn_mode = PKT_LI_VN_MODE(LEAP_NOWARNING,
 										NTP_VERSION,
@@ -217,48 +228,48 @@ TEST_F(packetProcessingTest, NonWantedMode) {
 
 	// The packet has a mode of MODE_CLIENT, but process_pkt expects MODE_SERVER
 
-	EXPECT_EQ(SERVER_UNUSEABLE,
+	TEST_ASSERT_EQUAL(SERVER_UNUSEABLE,
 			  process_pkt(&testpkt, &testsock, LEN_PKT_NOMAC,
 						  MODE_SERVER, &testspkt, "UnitTest", true));
 }
 
 /* Tests bug 1597 */
-TEST_F(packetProcessingTest, KoDRate) {
-	ASSERT_FALSE(ENABLED_OPT(AUTHENTICATION));
+TEST(packetProcessing, KoDRate) {
+	TEST_ASSERT_FALSE(ENABLED_OPT(AUTHENTICATION));
 
 	testpkt.stratum = STRATUM_PKT_UNSPEC;
 	memcpy(&testpkt.refid, "RATE", 4);
 
-	EXPECT_EQ(KOD_RATE,
+	TEST_ASSERT_EQUAL(KOD_RATE,
 			  process_pkt(&testpkt, &testsock, LEN_PKT_NOMAC,
 						  MODE_SERVER, &testspkt, "UnitTest", true));
 }
 
-TEST_F(packetProcessingTest, KoDDeny) {
-	ASSERT_FALSE(ENABLED_OPT(AUTHENTICATION));
+TEST(packetProcessing, KoDDeny) {
+	TEST_ASSERT_FALSE(ENABLED_OPT(AUTHENTICATION));
 
 	testpkt.stratum = STRATUM_PKT_UNSPEC;
 	memcpy(&testpkt.refid, "DENY", 4);
 
-	EXPECT_EQ(KOD_DEMOBILIZE,
+	TEST_ASSERT_EQUAL(KOD_DEMOBILIZE,
 			  process_pkt(&testpkt, &testsock, LEN_PKT_NOMAC,
 						  MODE_SERVER, &testspkt, "UnitTest", true));
 }
 
-TEST_F(packetProcessingTest, RejectUnsyncedServer) {
-	ASSERT_FALSE(ENABLED_OPT(AUTHENTICATION));
+TEST(packetProcessing, RejectUnsyncedServer) {
+	TEST_ASSERT_FALSE(ENABLED_OPT(AUTHENTICATION));
 
 	testpkt.li_vn_mode = PKT_LI_VN_MODE(LEAP_NOTINSYNC,
 										NTP_VERSION,
 										MODE_SERVER);
 
-	EXPECT_EQ(SERVER_UNUSEABLE,
+	TEST_ASSERT_EQUAL(SERVER_UNUSEABLE,
 			  process_pkt(&testpkt, &testsock, LEN_PKT_NOMAC,
 						  MODE_SERVER, &testspkt, "UnitTest", true));
 }
 
-TEST_F(packetProcessingTest, RejectWrongResponseServerMode) {
-	ASSERT_FALSE(ENABLED_OPT(AUTHENTICATION));
+TEST(packetProcessing, RejectWrongResponseServerMode) {
+	TEST_ASSERT_FALSE(ENABLED_OPT(AUTHENTICATION));
 
 	l_fp tmp;
 	tmp.l_ui = 1000UL;
@@ -269,34 +280,34 @@ TEST_F(packetProcessingTest, RejectWrongResponseServerMode) {
 	tmp.l_uf = 0UL;
 	HTONL_FP(&tmp, &testspkt.xmt);
 
-	EXPECT_EQ(PACKET_UNUSEABLE,
+	TEST_ASSERT_EQUAL(PACKET_UNUSEABLE,
 			  process_pkt(&testpkt, &testsock, LEN_PKT_NOMAC,
 						  MODE_SERVER, &testspkt, "UnitTest", true));
 }
 
-TEST_F(packetProcessingTest, AcceptNoSentPacketBroadcastMode) {
-	ASSERT_FALSE(ENABLED_OPT(AUTHENTICATION));
+TEST(packetProcessing, AcceptNoSentPacketBroadcastMode) {
+	TEST_ASSERT_FALSE(ENABLED_OPT(AUTHENTICATION));
 
 	testpkt.li_vn_mode = PKT_LI_VN_MODE(LEAP_NOWARNING,
 					    NTP_VERSION,
 					    MODE_BROADCAST);
 
-	EXPECT_EQ(LEN_PKT_NOMAC,
+	TEST_ASSERT_EQUAL(LEN_PKT_NOMAC,
 		  process_pkt(&testpkt, &testsock, LEN_PKT_NOMAC,
 			      MODE_BROADCAST, NULL, "UnitTest", true));
 }
 
-TEST_F(packetProcessingTest, CorrectUnauthenticatedPacket) {
-	ASSERT_FALSE(ENABLED_OPT(AUTHENTICATION));
+TEST(packetProcessing, CorrectUnauthenticatedPacket) {
+	TEST_ASSERT_FALSE(ENABLED_OPT(AUTHENTICATION));
 
-	EXPECT_EQ(LEN_PKT_NOMAC,
+	TEST_ASSERT_EQUAL(LEN_PKT_NOMAC,
 			  process_pkt(&testpkt, &testsock, LEN_PKT_NOMAC,
 						  MODE_SERVER, &testspkt, "UnitTest", true));
 }
 
-TEST_F(packetProcessingTest, CorrectAuthenticatedPacketMD5) {
+TEST(packetProcessing, CorrectAuthenticatedPacketMD5) {
 	PrepareAuthenticationTest(10, 15, "123456789abcdef");
-	ASSERT_TRUE(ENABLED_OPT(AUTHENTICATION));
+	TEST_ASSERT_TRUE(ENABLED_OPT(AUTHENTICATION));
 
 	int pkt_len = LEN_PKT_NOMAC;
 
@@ -308,15 +319,15 @@ TEST_F(packetProcessingTest, CorrectAuthenticatedPacketMD5) {
 
 	pkt_len += 4 + mac_len;
 
-	EXPECT_EQ(pkt_len,
+	TEST_ASSERT_EQUAL(pkt_len,
 			  process_pkt(&testpkt, &testsock, pkt_len,
 						  MODE_SERVER, &testspkt, "UnitTest", true));
 
 }
 
-TEST_F(packetProcessingTest, CorrectAuthenticatedPacketSHA1) {
+TEST(packetProcessing, CorrectAuthenticatedPacketSHA1) {
 	PrepareAuthenticationTest(20, 15, "SHA1", "abcdefghijklmno");
-	ASSERT_TRUE(ENABLED_OPT(AUTHENTICATION));
+	TEST_ASSERT_TRUE(ENABLED_OPT(AUTHENTICATION));
 
 	int pkt_len = LEN_PKT_NOMAC;
 
@@ -328,7 +339,7 @@ TEST_F(packetProcessingTest, CorrectAuthenticatedPacketSHA1) {
 
 	pkt_len += 4 + mac_len;
 
-	EXPECT_EQ(pkt_len,
+	TEST_ASSERT_EQUAL(pkt_len,
 			  process_pkt(&testpkt, &testsock, pkt_len,
 						  MODE_SERVER, &testspkt, "UnitTest", true));
 }

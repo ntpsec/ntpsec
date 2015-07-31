@@ -1,3 +1,14 @@
+extern "C" {
+#include "unity.h"
+#include "unity_fixture.h"
+}
+
+TEST_GROUP(buftvtots);
+
+TEST_SETUP(buftvtots) {}
+
+TEST_TEAR_DOWN(buftvtots) {}
+
 #include "lfptest.h"
 
 extern "C" {
@@ -11,51 +22,51 @@ class buftvtotsTest : public lfptest {
 };
 
 #ifndef SYS_WINNT
-TEST_F(buftvtotsTest, ZeroBuffer) {
+TEST(buftvtots, ZeroBuffer) {
 	const timeval input = {0, 0};
 	const l_fp expected = {0 + JAN_1970, 0};
 
 	l_fp actual;
 
-	ASSERT_TRUE(buftvtots((const char*)(&input), &actual));
-	EXPECT_TRUE(IsEqual(expected, actual));
+	TEST_ASSERT_TRUE(buftvtots((const char*)(&input), &actual));
+	TEST_ASSERT_TRUE(IsEqual(expected, actual));
 }
 
-TEST_F(buftvtotsTest, IntegerAndFractionalBuffer) {
+TEST(buftvtots, IntegerAndFractionalBuffer) {
 	const timeval input = {5, 500000}; // 5.5
 	const l_fp expected = {5 + JAN_1970, HALF};
 
 	l_fp actual;
 
-	ASSERT_TRUE(buftvtots((const char*)(&input), &actual));
+	TEST_ASSERT_TRUE(buftvtots((const char*)(&input), &actual));
 
 	// Compare the fractional part with an absolute error given.
-	EXPECT_EQ(expected.l_ui, actual.l_ui);
+	TEST_ASSERT_EQUAL(expected.l_ui, actual.l_ui);
 
 	double expectedDouble, actualDouble;
 	M_LFPTOD(0, expected.l_uf, expectedDouble);
 	M_LFPTOD(0, actual.l_uf, actualDouble);
 
 	// The error should be less than 0.5 us
-	EXPECT_NEAR(expectedDouble, actualDouble, 0.0000005);
+	TEST_ASSERT_FLOAT_WITHIN(0.0000005, expectedDouble, actualDouble);
 }
 
-TEST_F(buftvtotsTest, IllegalMicroseconds) {
+TEST(buftvtots, IllegalMicroseconds) {
 	const timeval input = {0, 1100000}; // > 999 999 microseconds.
-	
+
 	l_fp actual;
 
-	ASSERT_FALSE(buftvtots((const char*)(&input), &actual));
+	TEST_ASSERT_FALSE(buftvtots((const char*)(&input), &actual));
 }
 
 #else
-TEST_F(buftvtotsTest, AlwaysFalseOnWindows) {
+TEST(buftvtots, AlwaysFalseOnWindows) {
 	/*
 	 * Under Windows, buftvtots will just return
 	 * 0 (false).
 	 */
 	l_fp actual;
-	ASSERT_FALSE(buftvtots("", &actual));
+	TEST_ASSERT_FALSE(buftvtots("", &actual));
 }
 
 #endif

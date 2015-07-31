@@ -1,3 +1,14 @@
+extern "C" {
+#include "unity.h"
+#include "unity_fixture.h"
+}
+
+TEST_GROUP(lfpfunc);
+
+TEST_SETUP(lfpfunc) {}
+
+TEST_TEAR_DOWN(lfpfunc) {}
+
 #include "libntptest.h"
 #include "timestructs.h"
 
@@ -60,21 +71,21 @@ public:
 
 	int  ucmp(const LFP & rhs) const;
 	int  scmp(const LFP & rhs) const;
-	
+
 	std::string   toString() const;
 	std::ostream& toStream(std::ostream &oo) const;
-	
+
 	operator double() const;
 	explicit LFP(double);
-	
+
 protected:
 	LFP(const l_fp &rhs);
 
 	static int cmp_work(u_int32 a[3], u_int32 b[3]);
-	
+
 	l_fp _v;
 };
-	
+
 static std::ostream& operator<<(std::ostream &oo, const LFP& rhs)
 {
 	return rhs.toStream(oo);
@@ -90,7 +101,7 @@ int  LFP::scmp(const LFP & rhs) const
 {
 	u_int32 a[3], b[3];
 	const l_fp &op1(_v), &op2(rhs._v);
-	
+
 	a[0] = op1.l_uf; a[1] = op1.l_ui; a[2] = 0;
 	b[0] = op2.l_uf; b[1] = op2.l_ui; b[2] = 0;
 
@@ -104,7 +115,7 @@ int  LFP::ucmp(const LFP & rhs) const
 {
 	u_int32 a[3], b[3];
 	const l_fp &op1(_v), &op2(rhs._v);
-	
+
 	a[0] = op1.l_uf; a[1] = op1.l_ui; a[2] = 0;
 	b[0] = op2.l_uf; b[1] = op2.l_ui; b[2] = 0;
 
@@ -364,81 +375,81 @@ double eps(double d)
 //----------------------------------------------------------------------
 // test addition
 //----------------------------------------------------------------------
-TEST_F(lfpTest, AdditionLR) {
+TEST(lfp, AdditionLR) {
 	for (size_t idx=0; idx < addsub_cnt; ++idx) {
 		LFP op1(addsub_tab[idx][0].h, addsub_tab[idx][0].l);
 		LFP op2(addsub_tab[idx][1].h, addsub_tab[idx][1].l);
 		LFP exp(addsub_tab[idx][2].h, addsub_tab[idx][2].l);
 		LFP res(op1 + op2);
 
-		ASSERT_EQ(exp, res);
-	}	
+		TEST_ASSERT_EQUAL(exp, res);
+	}
 }
 
-TEST_F(lfpTest, AdditionRL) {
+TEST(lfp, AdditionRL) {
 	for (size_t idx=0; idx < addsub_cnt; ++idx) {
 		LFP op2(addsub_tab[idx][0].h, addsub_tab[idx][0].l);
 		LFP op1(addsub_tab[idx][1].h, addsub_tab[idx][1].l);
 		LFP exp(addsub_tab[idx][2].h, addsub_tab[idx][2].l);
 		LFP res(op1 + op2);
 
-		ASSERT_EQ(exp, res);
-	}	
+		TEST_ASSERT_EQUAL(exp, res);
+	}
 }
 
 //----------------------------------------------------------------------
 // test subtraction
 //----------------------------------------------------------------------
-TEST_F(lfpTest, SubtractionLR) {
+TEST(lfp, SubtractionLR) {
 	for (size_t idx=0; idx < addsub_cnt; ++idx) {
 		LFP op2(addsub_tab[idx][0].h, addsub_tab[idx][0].l);
 		LFP exp(addsub_tab[idx][1].h, addsub_tab[idx][1].l);
 		LFP op1(addsub_tab[idx][2].h, addsub_tab[idx][2].l);
 		LFP res(op1 - op2);
 
-		ASSERT_EQ(exp, res);
-	}	
+		TEST_ASSERT_EQUAL(exp, res);
+	}
 }
 
-TEST_F(lfpTest, SubtractionRL) {
+TEST(lfp, SubtractionRL) {
 	for (size_t idx=0; idx < addsub_cnt; ++idx) {
 		LFP exp(addsub_tab[idx][0].h, addsub_tab[idx][0].l);
 		LFP op2(addsub_tab[idx][1].h, addsub_tab[idx][1].l);
 		LFP op1(addsub_tab[idx][2].h, addsub_tab[idx][2].l);
 		LFP res(op1 - op2);
 
-		ASSERT_EQ(exp, res);
-	}	
+		TEST_ASSERT_EQUAL(exp, res);
+	}
 }
 
 //----------------------------------------------------------------------
 // test negation
 //----------------------------------------------------------------------
-TEST_F(lfpTest, Negation) {
+TEST(lfp, Negation) {
 	for (size_t idx=0; idx < addsub_cnt; ++idx) {
 		LFP op1(addsub_tab[idx][0].h, addsub_tab[idx][0].l);
 		LFP op2(-op1);
 		LFP sum(op1 + op2);
 
-		ASSERT_EQ(LFP(0,0), sum);
-	}	
+		TEST_ASSERT_EQUAL(LFP(0,0), sum);
+	}
 }
 
 //----------------------------------------------------------------------
 // test absolute value
 //----------------------------------------------------------------------
-TEST_F(lfpTest, Absolute) {
+TEST(lfp, Absolute) {
 	for (size_t idx=0; idx < addsub_cnt; ++idx) {
 		LFP op1(addsub_tab[idx][0].h, addsub_tab[idx][0].l);
 		LFP op2(op1.abs());
 
-		ASSERT_TRUE(op2.signum() >= 0);
+		TEST_ASSERT_TRUE(op2.signum() >= 0);
 
 		if (op1.signum() >= 0)
 			op1 -= op2;
 		else
 			op1 += op2;
-		ASSERT_EQ(LFP(0,0), op1);
+		TEST_ASSERT_EQUAL(LFP(0,0), op1);
 	}
 
 	// There is one special case we have to check: the minimum
@@ -446,14 +457,14 @@ TEST_F(lfpTest, Absolute) {
 	// negation reproduces the original pattern.
 	LFP minVal(0x80000000, 0x00000000);
 	LFP minAbs(minVal.abs());
-	ASSERT_EQ(-1, minVal.signum());
-	ASSERT_EQ(minVal, minAbs);
+	TEST_ASSERT_EQUAL(-1, minVal.signum());
+	TEST_ASSERT_EQUAL(minVal, minAbs);
 }
 
 //----------------------------------------------------------------------
 // fp -> double -> fp rountrip test
 //----------------------------------------------------------------------
-TEST_F(lfpTest, FDF_RoundTrip) {
+TEST(lfp, FDF_RoundTrip) {
 	// since a l_fp has 64 bits in it's mantissa and a double has
 	// only 54 bits available (including the hidden '1') we have to
 	// make a few concessions on the roundtrip precision. The 'eps()'
@@ -466,8 +477,8 @@ TEST_F(lfpTest, FDF_RoundTrip) {
 		LFP    op3(op2);
 		// for manual checks only:
 		// std::cout << std::setprecision(16) << op2 << std::endl;
-		ASSERT_LE(fabs(op1-op3), eps(op2));
-	}	
+		TEST_ASSERT_LESS_THAN_OR_EQUAL(fabs(op1-op3), eps(op2));
+	}
 }
 
 //----------------------------------------------------------------------
@@ -476,7 +487,7 @@ TEST_F(lfpTest, FDF_RoundTrip) {
 // This uses the local compare and checks if the operations using the
 // macros in 'ntp_fp.h' produce mathing results.
 // ----------------------------------------------------------------------
-TEST_F(lfpTest, SignedRelOps) {
+TEST(lfp, SignedRelOps) {
 	const lfp_hl * tv(&addsub_tab[0][0]);
 	for (size_t lc=addsub_tot-1; lc; --lc,++tv) {
 		LFP op1(tv[0].h,tv[0].l);
@@ -487,24 +498,24 @@ TEST_F(lfpTest, SignedRelOps) {
 		case -1:
 			std::swap(op1, op2);
 		case 1:
-			EXPECT_TRUE (isgt_p(op1,op2));
-			EXPECT_FALSE(isgt_p(op2,op1));
+			TEST_ASSERT_TRUE (isgt_p(op1,op2));
+			TEST_ASSERT_FALSE(isgt_p(op2,op1));
 
-			EXPECT_TRUE (isgeq_p(op1,op2));
-			EXPECT_FALSE(isgeq_p(op2,op1));
+			TEST_ASSERT_TRUE (isgeq_p(op1,op2));
+			TEST_ASSERT_FALSE(isgeq_p(op2,op1));
 
-			EXPECT_FALSE(isequ_p(op1,op2));
-			EXPECT_FALSE(isequ_p(op2,op1));
+			TEST_ASSERT_FALSE(isequ_p(op1,op2));
+			TEST_ASSERT_FALSE(isequ_p(op2,op1));
 			break;
 		case 0:
-			EXPECT_FALSE(isgt_p(op1,op2));
-			EXPECT_FALSE(isgt_p(op2,op1));
+			TEST_ASSERT_FALSE(isgt_p(op1,op2));
+			TEST_ASSERT_FALSE(isgt_p(op2,op1));
 
-			EXPECT_TRUE (isgeq_p(op1,op2));
-			EXPECT_TRUE (isgeq_p(op2,op1));
+			TEST_ASSERT_TRUE (isgeq_p(op1,op2));
+			TEST_ASSERT_TRUE (isgeq_p(op2,op1));
 
-			EXPECT_TRUE (isequ_p(op1,op2));
-			EXPECT_TRUE (isequ_p(op2,op1));
+			TEST_ASSERT_TRUE (isequ_p(op1,op2));
+			TEST_ASSERT_TRUE (isequ_p(op2,op1));
 			break;
 		default:
 			FAIL() << "unexpected SCMP result: " << cmp;
@@ -512,7 +523,7 @@ TEST_F(lfpTest, SignedRelOps) {
 	}
 }
 
-TEST_F(lfpTest, UnsignedRelOps) {
+TEST(lfp, UnsignedRelOps) {
 	const lfp_hl * tv(&addsub_tab[0][0]);
 	for (size_t lc=addsub_tot-1; lc; --lc,++tv) {
 		LFP op1(tv[0].h,tv[0].l);
@@ -523,18 +534,18 @@ TEST_F(lfpTest, UnsignedRelOps) {
 		case -1:
 			std::swap(op1, op2);
 		case 1:
-			EXPECT_TRUE (isgtu_p(op1,op2));
-			EXPECT_FALSE(isgtu_p(op2,op1));
+			TEST_ASSERT_TRUE (isgtu_p(op1,op2));
+			TEST_ASSERT_FALSE(isgtu_p(op2,op1));
 
-			EXPECT_TRUE (ishis_p(op1,op2));
-			EXPECT_FALSE(ishis_p(op2,op1));
+			TEST_ASSERT_TRUE (ishis_p(op1,op2));
+			TEST_ASSERT_FALSE(ishis_p(op2,op1));
 			break;
 		case 0:
-			EXPECT_FALSE(isgtu_p(op1,op2));
-			EXPECT_FALSE(isgtu_p(op2,op1));
+			TEST_ASSERT_FALSE(isgtu_p(op1,op2));
+			TEST_ASSERT_FALSE(isgtu_p(op2,op1));
 
-			EXPECT_TRUE (ishis_p(op1,op2));
-			EXPECT_TRUE (ishis_p(op2,op1));
+			TEST_ASSERT_TRUE (ishis_p(op1,op2));
+			TEST_ASSERT_TRUE (ishis_p(op2,op1));
 			break;
 		default:
 			FAIL() << "unexpected UCMP result: " << cmp;

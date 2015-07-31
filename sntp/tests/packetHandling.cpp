@@ -1,3 +1,14 @@
+extern "C" {
+#include "unity.h"
+#include "unity_fixture.h"
+}
+
+TEST_GROUP(packetHandling);
+
+TEST_SETUP(packetHandling) {}
+
+TEST_TEAR_DOWN(packetHandling) {}
+
 #include "sntptest.h"
 
 extern "C" {
@@ -9,11 +20,11 @@ extern "C" {
 
 class mainTest : public sntptest {
 protected:
-	::testing::AssertionResult LfpEquality(const l_fp &expected, const l_fp &actual) {
+	bool LfpEquality(const l_fp &expected, const l_fp &actual) {
 		if (L_ISEQU(&expected, &actual)) {
-			return ::testing::AssertionSuccess();
+			return true;
 		} else {
-			return ::testing::AssertionFailure()
+			return false
 				<< " expected: " << lfptoa(&expected, FRACTION_PREC)
 				<< " (" << expected.l_ui << "." << expected.l_uf << ")"
 				<< " but was: " << lfptoa(&actual, FRACTION_PREC)
@@ -22,30 +33,30 @@ protected:
 	}
 };
 
-TEST_F(mainTest, GenerateUnauthenticatedPacket) {
+TEST(main, GenerateUnauthenticatedPacket) {
 	pkt testpkt;
 
 	timeval xmt;
 	GETTIMEOFDAY(&xmt, NULL);
 	xmt.tv_sec += JAN_1970;
 
-	EXPECT_EQ(LEN_PKT_NOMAC,
+	TEST_ASSERT_EQUAL(LEN_PKT_NOMAC,
 			  generate_pkt(&testpkt, &xmt, 0, NULL));
 
-	EXPECT_EQ(LEAP_NOTINSYNC, PKT_LEAP(testpkt.li_vn_mode));
-	EXPECT_EQ(NTP_VERSION, PKT_VERSION(testpkt.li_vn_mode));
-	EXPECT_EQ(MODE_CLIENT, PKT_MODE(testpkt.li_vn_mode));
+	TEST_ASSERT_EQUAL(LEAP_NOTINSYNC, PKT_LEAP(testpkt.li_vn_mode));
+	TEST_ASSERT_EQUAL(NTP_VERSION, PKT_VERSION(testpkt.li_vn_mode));
+	TEST_ASSERT_EQUAL(MODE_CLIENT, PKT_MODE(testpkt.li_vn_mode));
 
-	EXPECT_EQ(STRATUM_UNSPEC, PKT_TO_STRATUM(testpkt.stratum));
-	EXPECT_EQ(8, testpkt.ppoll);
+	TEST_ASSERT_EQUAL(STRATUM_UNSPEC, PKT_TO_STRATUM(testpkt.stratum));
+	TEST_ASSERT_EQUAL(8, testpkt.ppoll);
 
 	l_fp expected_xmt, actual_xmt;
 	TVTOTS(&xmt, &expected_xmt);
 	NTOHL_FP(&testpkt.xmt, &actual_xmt);
-	EXPECT_TRUE(LfpEquality(expected_xmt, actual_xmt));
+	TEST_ASSERT_TRUE(LfpEquality(expected_xmt, actual_xmt));
 }
 
-TEST_F(mainTest, GenerateAuthenticatedPacket) {
+TEST(main, GenerateAuthenticatedPacket) {
 	key testkey;
 	testkey.next = NULL;
 	testkey.key_id = 30;
@@ -61,30 +72,30 @@ TEST_F(mainTest, GenerateAuthenticatedPacket) {
 
 	const int EXPECTED_PKTLEN = LEN_PKT_NOMAC + MAX_MD5_LEN;
 
-	EXPECT_EQ(EXPECTED_PKTLEN,
+	TEST_ASSERT_EQUAL(EXPECTED_PKTLEN,
 			  generate_pkt(&testpkt, &xmt, testkey.key_id, &testkey));
 
-	EXPECT_EQ(LEAP_NOTINSYNC, PKT_LEAP(testpkt.li_vn_mode));
-	EXPECT_EQ(NTP_VERSION, PKT_VERSION(testpkt.li_vn_mode));
-	EXPECT_EQ(MODE_CLIENT, PKT_MODE(testpkt.li_vn_mode));
+	TEST_ASSERT_EQUAL(LEAP_NOTINSYNC, PKT_LEAP(testpkt.li_vn_mode));
+	TEST_ASSERT_EQUAL(NTP_VERSION, PKT_VERSION(testpkt.li_vn_mode));
+	TEST_ASSERT_EQUAL(MODE_CLIENT, PKT_MODE(testpkt.li_vn_mode));
 
-	EXPECT_EQ(STRATUM_UNSPEC, PKT_TO_STRATUM(testpkt.stratum));
-	EXPECT_EQ(8, testpkt.ppoll);
+	TEST_ASSERT_EQUAL(STRATUM_UNSPEC, PKT_TO_STRATUM(testpkt.stratum));
+	TEST_ASSERT_EQUAL(8, testpkt.ppoll);
 
 	l_fp expected_xmt, actual_xmt;
 	TVTOTS(&xmt, &expected_xmt);
 	NTOHL_FP(&testpkt.xmt, &actual_xmt);
-	EXPECT_TRUE(LfpEquality(expected_xmt, actual_xmt));
+	TEST_ASSERT_TRUE(LfpEquality(expected_xmt, actual_xmt));
 
-	EXPECT_EQ(testkey.key_id, ntohl(testpkt.exten[0]));
-	
+	TEST_ASSERT_EQUAL(testkey.key_id, ntohl(testpkt.exten[0]));
+
 	char expected_mac[MAX_MD5_LEN];
-	ASSERT_EQ(MAX_MD5_LEN - 4, // Remove the key_id, only keep the mac.
+	TEST_ASSERT_EQUAL(MAX_MD5_LEN - 4, // Remove the key_id, only keep the mac.
 			  make_mac((char*)&testpkt, LEN_PKT_NOMAC, MAX_MD5_LEN, &testkey, expected_mac));
-	EXPECT_TRUE(memcmp(expected_mac, (char*)&testpkt.exten[1], MAX_MD5_LEN -4) == 0);
+	TEST_ASSERT_TRUE(memcmp(expected_mac, (char*)&testpkt.exten[1], MAX_MD5_LEN -4) == 0);
 }
 
-TEST_F(mainTest, OffsetCalculationPositiveOffset) {
+TEST(main, OffsetCalculationPositiveOffset) {
 	pkt rpkt;
 
 	rpkt.precision = -16; // 0,000015259
@@ -128,7 +139,7 @@ TEST_F(mainTest, OffsetCalculationPositiveOffset) {
 	EXPECT_DOUBLE_EQ(1.125015, synch_distance);
 }
 
-TEST_F(mainTest, OffsetCalculationNegativeOffset) {
+TEST(main, OffsetCalculationNegativeOffset) {
 	pkt rpkt;
 
 	rpkt.precision = -1;
@@ -171,7 +182,7 @@ TEST_F(mainTest, OffsetCalculationNegativeOffset) {
 	EXPECT_DOUBLE_EQ(1.3333483333333334, synch_distance);
 }
 
-TEST_F(mainTest, HandleUnusableServer) {
+TEST(main, HandleUnusableServer) {
 	pkt		rpkt;
 	sockaddr_u	host;
 	int		rpktl;
@@ -179,10 +190,10 @@ TEST_F(mainTest, HandleUnusableServer) {
 	ZERO(rpkt);
 	ZERO(host);
 	rpktl = SERVER_UNUSEABLE;
-	EXPECT_EQ(-1, handle_pkt(rpktl, &rpkt, &host, ""));
+	TEST_ASSERT_EQUAL(-1, handle_pkt(rpktl, &rpkt, &host, ""));
 }
 
-TEST_F(mainTest, HandleUnusablePacket) {
+TEST(main, HandleUnusablePacket) {
 	pkt		rpkt;
 	sockaddr_u	host;
 	int		rpktl;
@@ -190,10 +201,10 @@ TEST_F(mainTest, HandleUnusablePacket) {
 	ZERO(rpkt);
 	ZERO(host);
 	rpktl = PACKET_UNUSEABLE;
-	EXPECT_EQ(1, handle_pkt(rpktl, &rpkt, &host, ""));
+	TEST_ASSERT_EQUAL(1, handle_pkt(rpktl, &rpkt, &host, ""));
 }
 
-TEST_F(mainTest, HandleServerAuthenticationFailure) {
+TEST(main, HandleServerAuthenticationFailure) {
 	pkt		rpkt;
 	sockaddr_u	host;
 	int		rpktl;
@@ -201,10 +212,10 @@ TEST_F(mainTest, HandleServerAuthenticationFailure) {
 	ZERO(rpkt);
 	ZERO(host);
 	rpktl = SERVER_AUTH_FAIL;
-	EXPECT_EQ(1, handle_pkt(rpktl, &rpkt, &host, ""));
+	TEST_ASSERT_EQUAL(1, handle_pkt(rpktl, &rpkt, &host, ""));
 }
 
-TEST_F(mainTest, HandleKodDemobilize) {
+TEST(main, HandleKodDemobilize) {
 	const char *	HOSTNAME = "192.0.2.1";
 	const char *	REASON = "DENY";
 	pkt		rpkt;
@@ -222,13 +233,13 @@ TEST_F(mainTest, HandleKodDemobilize) {
 	// Test that the KOD-entry is added to the database.
 	kod_init_kod_db("/dev/null", true);
 
-	EXPECT_EQ(1, handle_pkt(rpktl, &rpkt, &host, HOSTNAME));
+	TEST_ASSERT_EQUAL(1, handle_pkt(rpktl, &rpkt, &host, HOSTNAME));
 
-	ASSERT_EQ(1, search_entry(HOSTNAME, &entry));
-	EXPECT_TRUE(memcmp(REASON, entry->type, 4) == 0);
+	TEST_ASSERT_EQUAL(1, search_entry(HOSTNAME, &entry));
+	TEST_ASSERT_TRUE(memcmp(REASON, entry->type, 4) == 0);
 }
 
-TEST_F(mainTest, HandleKodRate) {
+TEST(main, HandleKodRate) {
 	pkt		rpkt;
 	sockaddr_u	host;
 	int		rpktl;
@@ -236,18 +247,18 @@ TEST_F(mainTest, HandleKodRate) {
 	ZERO(rpkt);
 	ZERO(host);
 	rpktl = KOD_RATE;
-	EXPECT_EQ(1, handle_pkt(rpktl, &rpkt, &host, ""));
+	TEST_ASSERT_EQUAL(1, handle_pkt(rpktl, &rpkt, &host, ""));
 }
 
-TEST_F(mainTest, HandleCorrectPacket) {
+TEST(main, HandleCorrectPacket) {
 	pkt		rpkt;
 	sockaddr_u	host;
 	int		rpktl;
 	l_fp		now;
 
 	// We don't want our testing code to actually change the system clock.
-	ASSERT_FALSE(ENABLED_OPT(STEP));
-	ASSERT_FALSE(ENABLED_OPT(SLEW));
+	TEST_ASSERT_FALSE(ENABLED_OPT(STEP));
+	TEST_ASSERT_FALSE(ENABLED_OPT(SLEW));
 
 	get_systime(&now);
 	HTONL_FP(&now, &rpkt.reftime);
@@ -258,7 +269,7 @@ TEST_F(mainTest, HandleCorrectPacket) {
 	ZERO(host);
 	AF(&host) = AF_INET;
 
-	EXPECT_EQ(0, handle_pkt(rpktl, &rpkt, &host, ""));
+	TEST_ASSERT_EQUAL(0, handle_pkt(rpktl, &rpkt, &host, ""));
 }
 
 /* packetHandling.cpp */

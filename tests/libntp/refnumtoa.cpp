@@ -1,3 +1,14 @@
+extern "C" {
+#include "unity.h"
+#include "unity_fixture.h"
+}
+
+TEST_GROUP(refnumtoa);
+
+TEST_SETUP(refnumtoa) {}
+
+TEST_TEAR_DOWN(refnumtoa) {}
+
 #include "libntptest.h"
 
 #include "ntp_net.h"
@@ -12,7 +23,7 @@ protected:
 };
 
 #ifdef REFCLOCK		/* clockname() is useless otherwise */
-TEST_F(refnumtoaTest, LocalClock) {
+TEST(refnumtoa, LocalClock) {
 	/* We test with a refclock address of type LOCALCLOCK.
 	 * with id 8
 	 */
@@ -28,12 +39,12 @@ TEST_F(refnumtoaTest, LocalClock) {
 	expected << clockname(REFCLK_LOCALCLOCK)
 			 << "(8)";
 
-	EXPECT_STREQ(expected.str().c_str(), refnumtoa(&address));
+	TEST_ASSERT_EQUAL_STRING(expected.str().c_str(), refnumtoa(&address));
 }
 #endif	/* REFCLOCK */
 
 #ifdef REFCLOCK		/* refnumtoa() is useless otherwise */
-TEST_F(refnumtoaTest, UnknownId) {
+TEST(refnumtoa, UnknownId) {
 	/* We test with a currently unused refclock ID */
 	u_int32 addr = REFCLOCK_ADDR;
 	addr |= UNUSED_REFCLOCK_ID << 8;
@@ -47,6 +58,6 @@ TEST_F(refnumtoaTest, UnknownId) {
 	expected << "REFCLK(" << UNUSED_REFCLOCK_ID
 			 << ",4)";
 
-	EXPECT_STREQ(expected.str().c_str(), refnumtoa(&address));
+	TEST_ASSERT_EQUAL_STRING(expected.str().c_str(), refnumtoa(&address));
 }
 #endif	/* REFCLOCK */

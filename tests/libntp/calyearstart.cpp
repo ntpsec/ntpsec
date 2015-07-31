@@ -1,3 +1,14 @@
+extern "C" {
+#include "unity.h"
+#include "unity_fixture.h"
+}
+
+TEST_GROUP(calyearstart);
+
+TEST_SETUP(calyearstart) {}
+
+TEST_TEAR_DOWN(calyearstart) {}
+
 #include "libntptest.h"
 
 class calyearstartTest : public libntptest {
@@ -18,26 +29,26 @@ void calyearstartTest::TearDown()
 }
 
 
-TEST_F(calyearstartTest, NoWrapInDateRange) {
+TEST(calyearstart, NoWrapInDateRange) {
 	const u_int32 input = 3486372600UL; // 2010-06-24 12:50:00.
 	const u_int32 expected = 3471292800UL; // 2010-01-01 00:00:00
 
-	EXPECT_EQ(expected, calyearstart(input, &nowtime));
-	EXPECT_EQ(expected, calyearstart(input, NULL));
+	TEST_ASSERT_EQUAL(expected, calyearstart(input, &nowtime));
+	TEST_ASSERT_EQUAL(expected, calyearstart(input, NULL));
 }
 
-TEST_F(calyearstartTest, NoWrapInDateRangeLeapYear) {
+TEST(calyearstart, NoWrapInDateRangeLeapYear) {
 	const u_int32 input = 3549528000UL; // 2012-06-24 12:00:00
 	const u_int32 expected = 3534364800UL; // 2012-01-01 00:00:00
 
-	EXPECT_EQ(expected, calyearstart(input, &nowtime));
-	EXPECT_EQ(expected, calyearstart(input, NULL));
+	TEST_ASSERT_EQUAL(expected, calyearstart(input, &nowtime));
+	TEST_ASSERT_EQUAL(expected, calyearstart(input, NULL));
 }
 
-TEST_F(calyearstartTest, WrapInDateRange) {
+TEST(calyearstart, WrapInDateRange) {
 	const u_int32 input = 19904UL; // 2036-02-07 12:00:00
 	const u_int32 expected = 4291747200UL; // 2036-01-01 00:00:00
 
-	EXPECT_EQ(expected, calyearstart(input, &nowtime));
-	EXPECT_EQ(expected, calyearstart(input, NULL));
+	TEST_ASSERT_EQUAL(expected, calyearstart(input, &nowtime));
+	TEST_ASSERT_EQUAL(expected, calyearstart(input, NULL));
 }

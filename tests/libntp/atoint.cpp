@@ -1,48 +1,59 @@
+extern "C" {
+#include "unity.h"
+#include "unity_fixture.h"
+}
+
+TEST_GROUP(atoint);
+
+TEST_SETUP(atoint) {}
+
+TEST_TEAR_DOWN(atoint) {}
+
 #include "libntptest.h"
 
 class atointTest : public libntptest {
 };
 
-TEST_F(atointTest, RegularPositive) {
+TEST(atoint, RegularPositive) {
 	const char *str = "17";
 	long val;
 
-	ASSERT_TRUE(atoint(str, &val));
-	EXPECT_EQ(17, val);
+	TEST_ASSERT_TRUE(atoint(str, &val));
+	TEST_ASSERT_EQUAL(17, val);
 }
 
-TEST_F(atointTest, RegularNegative) {
+TEST(atoint, RegularNegative) {
 	const char *str = "-20";
 	long val;
 
-	ASSERT_TRUE(atoint(str, &val));
-	EXPECT_EQ(-20, val);
+	TEST_ASSERT_TRUE(atoint(str, &val));
+	TEST_ASSERT_EQUAL(-20, val);
 }
 
-TEST_F(atointTest, PositiveOverflowBoundary) {
+TEST(atoint, PositiveOverflowBoundary) {
 	const char *str = "2147483648";
 	long val;
 
-	EXPECT_FALSE(atoint(str, &val));
+	TEST_ASSERT_FALSE(atoint(str, &val));
 }
 
-TEST_F(atointTest, NegativeOverflowBoundary) {
+TEST(atoint, NegativeOverflowBoundary) {
 	const char *str = "-2147483649";
 	long val;
 
-	EXPECT_FALSE(atoint(str, &val));
+	TEST_ASSERT_FALSE(atoint(str, &val));
 }
 
-TEST_F(atointTest, PositiveOverflowBig) {
+TEST(atoint, PositiveOverflowBig) {
 	const char *str = "2300000000";
 	long val;
 
-	EXPECT_FALSE(atoint(str, &val));
+	TEST_ASSERT_FALSE(atoint(str, &val));
 }
 
-TEST_F(atointTest, IllegalCharacter) {
+TEST(atoint, IllegalCharacter) {
 	const char *str = "4500l";
 	long val;
 
-	EXPECT_FALSE(atoint(str, &val));
+	TEST_ASSERT_FALSE(atoint(str, &val));
 }

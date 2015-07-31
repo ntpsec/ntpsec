@@ -26,7 +26,7 @@ namespace timeStruct {
 class l_fp_wrap {
   public:
 	l_fp V;
-	
+
 	l_fp_wrap()
 		{ ZERO(V); }
 	l_fp_wrap(u_int32 hi, u_int32 lo)
@@ -44,7 +44,7 @@ class l_fp_wrap {
 	l_fp_wrap& operator = (const l_fp& rhs)
 		{ V = rhs; return *this; }
 	};
-	
+
 // wrap a 'struct timeval' with common operations
 class timeval_wrap {
 public:
@@ -114,7 +114,7 @@ private:
 public:
 	AssertFpClose(u_int32 hi, u_int32 lo);
 
-	::testing::AssertionResult
+	bool
 	operator()(const char* m_expr, const char* n_expr,
 		   const l_fp & m, const l_fp & n);
 };
@@ -140,7 +140,7 @@ public:
 	// the constructor does not normalise the values!
 	AssertTimevalClose(time_t hi, int32_t lo);
 
-	::testing::AssertionResult
+	bool
 	operator()(const char* m_expr, const char* n_expr,
 		   const struct timeval & m, const struct timeval & n);
 };
@@ -163,7 +163,7 @@ public:
 	// the constructor does not normalise the values!
 	AssertTimespecClose(time_t hi, int32_t lo);
 
-	::testing::AssertionResult
+	bool
 	operator()(const char* m_expr, const char* n_expr,
 		   const struct timespec & m, const struct timespec & n);
 };

@@ -48,15 +48,15 @@ protected:
 			string actualLine, expectedLine;
 			getline(actual, actualLine);
 			getline(expected, expectedLine);
-			
-			EXPECT_EQ(expectedLine, actualLine) << "Comparision failed on line " << currentLine;
+
+			TEST_ASSERT_EQUAL(expectedLine, actualLine) << "Comparision failed on line " << currentLine;
 			currentLine++;
 		}
 	}
 
 	void ClearFile(const std::string& filename) {
 		std::ofstream clear(filename.c_str(), ios::trunc);
-		ASSERT_TRUE(clear.good());
+		TEST_ASSERT_TRUE(clear.good());
 		clear.close();
 	}
 };

@@ -1,40 +1,51 @@
+extern "C" {
+#include "unity.h"
+#include "unity_fixture.h"
+}
+
+TEST_GROUP(atouint);
+
+TEST_SETUP(atouint) {}
+
+TEST_TEAR_DOWN(atouint) {}
+
 #include "libntptest.h"
 
 class atouintTest : public libntptest {
 };
 
-TEST_F(atouintTest, RegularPositive) {
+TEST(atouint, RegularPositive) {
 	const char *str = "305";
 	u_long actual;
 
-	ASSERT_TRUE(atouint(str, &actual));
-	EXPECT_EQ(305, actual);
+	TEST_ASSERT_TRUE(atouint(str, &actual));
+	TEST_ASSERT_EQUAL(305, actual);
 }
 
-TEST_F(atouintTest, PositiveOverflowBoundary) {
+TEST(atouint, PositiveOverflowBoundary) {
 	const char *str = "4294967296";
 	u_long actual;
 
-	ASSERT_FALSE(atouint(str, &actual));
+	TEST_ASSERT_FALSE(atouint(str, &actual));
 }
 
-TEST_F(atouintTest, PositiveOverflowBig) {
+TEST(atouint, PositiveOverflowBig) {
 	const char *str = "8000000000";
 	u_long actual;
 
-	ASSERT_FALSE(atouint(str, &actual));
+	TEST_ASSERT_FALSE(atouint(str, &actual));
 }
 
-TEST_F(atouintTest, Negative) {
+TEST(atouint, Negative) {
 	const char *str = "-1";
 	u_long actual;
 
-	ASSERT_FALSE(atouint(str, &actual));
+	TEST_ASSERT_FALSE(atouint(str, &actual));
 }
 
-TEST_F(atouintTest, IllegalChar) {
+TEST(atouint, IllegalChar) {
 	const char *str = "50c3";
 	u_long actual;
 
-	ASSERT_FALSE(atouint(str, &actual));
+	TEST_ASSERT_FALSE(atouint(str, &actual));
 }

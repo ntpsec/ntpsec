@@ -1,3 +1,14 @@
+extern "C" {
+#include "unity.h"
+#include "unity_fixture.h"
+}
+
+TEST_GROUP(uglydate);
+
+TEST_SETUP(uglydate) {}
+
+TEST_TEAR_DOWN(uglydate) {}
+
 #include "libntptest.h"
 
 extern "C" {
@@ -9,10 +20,10 @@ protected:
 	static const u_int32 HALF = 2147483648UL;
 };
 
-TEST_F(uglydateTest, ConstantDateTime) {
+TEST(uglydate, ConstantDateTime) {
 	l_fp time = {3485080800UL, HALF}; // 2010-06-09 14:00:00.5
 
-	EXPECT_STREQ("3485080800.500000 10:159:14:00:00.500",
+	TEST_ASSERT_EQUAL_STRING("3485080800.500000 10:159:14:00:00.500",
 				 uglydate(&time));
 }
 

@@ -1,3 +1,14 @@
+extern "C" {
+#include "unity.h"
+#include "unity_fixture.h"
+}
+
+TEST_GROUP(a_md5encrypt);
+
+TEST_SETUP(a_md5encrypt) {}
+
+TEST_TEAR_DOWN(a_md5encrypt) {}
+
 #include "libntptest.h"
 
 extern "C" {
@@ -27,7 +38,7 @@ const int digestLength = 16;
 const int totalLength = packetLength + keyIdLength + digestLength;
 const char *expectedPacket = "ijklmnopqrstuvwx\0\0\0\0\x0c\x0e\x84\xcf\x0b\xb7\xa8\x68\x8e\x52\x38\xdb\xbc\x1c\x39\x53";
 
-TEST_F(a_md5encryptTest, Encrypt) {
+TEST(a_md5encrypt, Encrypt) {
 	char *packetPtr = new char[totalLength];
 	memset(packetPtr+packetLength, 0, keyIdLength);
 	memcpy(packetPtr, packet, packetLength);
@@ -36,29 +47,29 @@ TEST_F(a_md5encryptTest, Encrypt) {
 
 	int length =  MD5authencrypt(keytype, (u_char*)key, (u_int32*)packetPtr, packetLength);
 
-	EXPECT_TRUE(MD5authdecrypt(keytype, (u_char*)key, (u_int32*)packetPtr, packetLength, length));
-	
-	EXPECT_EQ(20, length);
-	EXPECT_TRUE(memcmp(expectedPacket, packetPtr, totalLength) == 0);
+	TEST_ASSERT_TRUE(MD5authdecrypt(keytype, (u_char*)key, (u_int32*)packetPtr, packetLength, length));
+
+	TEST_ASSERT_EQUAL(20, length);
+	TEST_ASSERT_TRUE(memcmp(expectedPacket, packetPtr, totalLength) == 0);
 
 	delete[] packetPtr;
 }
 
-TEST_F(a_md5encryptTest, DecryptValid) {
+TEST(a_md5encrypt, DecryptValid) {
 	cache_secretsize = keyLength;
 
-	EXPECT_TRUE(MD5authdecrypt(keytype, (u_char*)key, (u_int32*)expectedPacket, packetLength, 20));
+	TEST_ASSERT_TRUE(MD5authdecrypt(keytype, (u_char*)key, (u_int32*)expectedPacket, packetLength, 20));
 }
 
-TEST_F(a_md5encryptTest, DecryptInvalid) {
+TEST(a_md5encrypt, DecryptInvalid) {
 	cache_secretsize = keyLength;
 
 	const char *invalidPacket = "ijklmnopqrstuvwx\0\0\0\0\x0c\x0e\x84\xcf\x0b\xb7\xa8\x68\x8e\x52\x38\xdb\xbc\x1c\x39\x54";
-	
-	EXPECT_FALSE(MD5authdecrypt(keytype, (u_char*)key, (u_int32*)invalidPacket, packetLength, 20));
+
+	TEST_ASSERT_FALSE(MD5authdecrypt(keytype, (u_char*)key, (u_int32*)invalidPacket, packetLength, 20));
 }
 
-TEST_F(a_md5encryptTest, IPv4AddressToRefId) {
+TEST(a_md5encrypt, IPv4AddressToRefId) {
 	sockaddr_u addr;
 	addr.sa4.sin_family = AF_INET;
 	addr.sa4.sin_port = htons(80);
@@ -66,10 +77,10 @@ TEST_F(a_md5encryptTest, IPv4AddressToRefId) {
 	u_int32 address = inet_addr("192.0.2.1");
 	addr.sa4.sin_addr.s_addr = address;
 
-	EXPECT_EQ(address, addr2refid(&addr));
+	TEST_ASSERT_EQUAL(address, addr2refid(&addr));
 }
 
-TEST_F(a_md5encryptTest, IPv6AddressToRefId) {
+TEST(a_md5encrypt, IPv6AddressToRefId) {
 	const struct in6_addr address = {
 		0x20, 0x01, 0x0d, 0xb8,
         0x85, 0xa3, 0x08, 0xd3, 
@@ -80,10 +91,10 @@ TEST_F(a_md5encryptTest, IPv6AddressToRefId) {
 
 	sockaddr_u addr;
 	addr.sa6.sin6_family = AF_INET6;
-	
+
 	addr.sa6.sin6_addr = address;
 
 	const int expected = 0x75cffd52;
 
-	EXPECT_EQ(expected, addr2refid(&addr));
+	TEST_ASSERT_EQUAL(expected, addr2refid(&addr));
 }

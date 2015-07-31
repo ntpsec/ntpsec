@@ -1,3 +1,14 @@
+extern "C" {
+#include "unity.h"
+#include "unity_fixture.h"
+}
+
+TEST_GROUP(authkeys);
+
+TEST_SETUP(authkeys) {}
+
+TEST_TEAR_DOWN(authkeys) {}
+
 /* This file contains test for both libntp/authkeys.c and libntp/authusekey.c */
 
 #include "libntptest.h"
@@ -49,52 +60,52 @@ protected:
 	}
 };
 
-TEST_F(authkeysTest, AddTrustedKeys) {
+TEST(authkeys, AddTrustedKeys) {
 	const keyid_t KEYNO1 = 5;
 	const keyid_t KEYNO2 = 8;
 
 	AddTrustedKey(KEYNO1);
 	AddTrustedKey(KEYNO2);
 
-	EXPECT_TRUE(authistrusted(KEYNO1));
-	EXPECT_TRUE(authistrusted(KEYNO2));
+	TEST_ASSERT_TRUE(authistrusted(KEYNO1));
+	TEST_ASSERT_TRUE(authistrusted(KEYNO2));
 }
 
-TEST_F(authkeysTest, AddUntrustedKey) {
+TEST(authkeys, AddUntrustedKey) {
 	const keyid_t KEYNO = 3;
    
 	AddUntrustedKey(KEYNO);
 
-	EXPECT_FALSE(authistrusted(KEYNO));
+	TEST_ASSERT_FALSE(authistrusted(KEYNO));
 }
 
-TEST_F(authkeysTest, HaveKeyCorrect) {
+TEST(authkeys, HaveKeyCorrect) {
 	const keyid_t KEYNO = 3;
 
 	AddTrustedKey(KEYNO);
 
-	EXPECT_TRUE(auth_havekey(KEYNO));
-	EXPECT_TRUE(authhavekey(KEYNO));
+	TEST_ASSERT_TRUE(auth_havekey(KEYNO));
+	TEST_ASSERT_TRUE(authhavekey(KEYNO));
 }
 
-TEST_F(authkeysTest, HaveKeyIncorrect) {
+TEST(authkeys, HaveKeyIncorrect) {
 	const keyid_t KEYNO = 2;
 
-	EXPECT_FALSE(auth_havekey(KEYNO));
-	EXPECT_FALSE(authhavekey(KEYNO));
+	TEST_ASSERT_FALSE(auth_havekey(KEYNO));
+	TEST_ASSERT_FALSE(authhavekey(KEYNO));
 }
 
-TEST_F(authkeysTest, AddWithAuthUseKey) {
+TEST(authkeys, AddWithAuthUseKey) {
 	const keyid_t KEYNO = 5;
 	const char* KEY = "52a";
 
-	EXPECT_TRUE(authusekey(KEYNO, KEYTYPE, (u_char*)KEY));	
+	TEST_ASSERT_TRUE(authusekey(KEYNO, KEYTYPE, (u_char*)KEY));
 }
 
-TEST_F(authkeysTest, EmptyKey) {
+TEST(authkeys, EmptyKey) {
 	const keyid_t KEYNO = 3;
 	const char* KEY = "";
 
 
-	EXPECT_FALSE(authusekey(KEYNO, KEYTYPE, (u_char*)KEY));
+	TEST_ASSERT_FALSE(authusekey(KEYNO, KEYTYPE, (u_char*)KEY));
 }
