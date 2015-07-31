@@ -1,58 +1,69 @@
+extern "C" {
+#include "unity.h"
+#include "unity_fixture.h"
+}
+
+TEST_GROUP(hextolfp);
+
+TEST_SETUP(hextolfp) {}
+
+TEST_TEAR_DOWN(hextolfp) {}
+
 #include "lfptest.h"
 
 class hextolfpTest : public lfptest {
 };
 
-TEST_F(hextolfpTest, PositiveInteger) {
+TEST(hextolfp, PositiveInteger) {
 	const char *str = "00001000.00000000";
 	l_fp actual;
 
 	l_fp expected = {4096, 0}; // 16^3, no fraction part.
 
-	ASSERT_TRUE(hextolfp(str, &actual));
-	EXPECT_TRUE(IsEqual(expected, actual));
+	TEST_ASSERT_TRUE(hextolfp(str, &actual));
+	TEST_ASSERT_TRUE(IsEqual(expected, actual));
 }
 
-TEST_F(hextolfpTest, NegativeInteger) {
+TEST(hextolfp, NegativeInteger) {
 	const char *str = "ffffffff.00000000"; // -1 decimal
 	l_fp actual;
 
 	l_fp expected = {-1, 0};
 
-	ASSERT_TRUE(hextolfp(str, &actual));
-	EXPECT_TRUE(IsEqual(expected, actual));
+	TEST_ASSERT_TRUE(hextolfp(str, &actual));
+	TEST_ASSERT_TRUE(IsEqual(expected, actual));
 }
 
-TEST_F(hextolfpTest, PositiveFraction) {
+TEST(hextolfp, PositiveFraction) {
 	const char *str = "00002000.80000000"; // 8196.5 decimal
 	l_fp actual;
 
 	l_fp expected = {8192, HALF};
 
-	ASSERT_TRUE(hextolfp(str, &actual));
-	EXPECT_TRUE(IsEqual(expected, actual));
+	TEST_ASSERT_TRUE(hextolfp(str, &actual));
+	TEST_ASSERT_TRUE(IsEqual(expected, actual));
 }
 
-TEST_F(hextolfpTest, NegativeFraction) {
+TEST(hextolfp, NegativeFraction) {
 	const char *str = "ffffffff.40000000"; // -1 + 0.25 decimal
 	l_fp actual;
 
 	l_fp expected = {-1, QUARTER}; //-1 + 0.25
 
-	ASSERT_TRUE(hextolfp(str, &actual));
-	EXPECT_TRUE(IsEqual(expected, actual));
+	TEST_ASSERT_TRUE(hextolfp(str, &actual));
+	TEST_ASSERT_TRUE(IsEqual(expected, actual));
 }
 
-TEST_F(hextolfpTest, IllegalNumberOfInteger) {
+TEST(hextolfp, IllegalNumberOfInteger) {
 	const char *str = "1000000.00000000"; // Missing one digit in integral part.
 	l_fp actual;
 
-	ASSERT_FALSE(hextolfp(str, &actual));
+	TEST_ASSERT_FALSE(hextolfp(str, &actual));
 }
 
-TEST_F(hextolfpTest, IllegalChar) {
+TEST(hextolfp, IllegalChar) {
 	const char *str = "10000000.0000h000"; // Illegal character h.
 	l_fp actual;
 
-	ASSERT_FALSE(hextolfp(str, &actual));
+	TEST_ASSERT_FALSE(hextolfp(str, &actual));
 }

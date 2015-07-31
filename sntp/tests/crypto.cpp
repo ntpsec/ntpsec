@@ -1,3 +1,14 @@
+extern "C" {
+#include "unity.h"
+#include "unity_fixture.h"
+}
+
+TEST_GROUP(crypto);
+
+TEST_SETUP(crypto) {}
+
+TEST_TEAR_DOWN(crypto) {}
+
 #include "sntptest.h"
 
 extern "C" {
@@ -10,7 +21,7 @@ class cryptoTest : public sntptest {
 #define MD5_LENGTH 16
 #define SHA1_LENGTH 20
 
-TEST_F(cryptoTest, MakeMd5Mac) {
+TEST(crypto, MakeMd5Mac) {
 
 	const char* PKT_DATA = "abcdefgh0123";
 	const int PKT_LEN = strlen(PKT_DATA);
@@ -25,14 +36,14 @@ TEST_F(cryptoTest, MakeMd5Mac) {
 	memcpy(&md5.key_seq, "md5seq", md5.key_len);
 	memcpy(&md5.type, "MD5", 4);
 
-	EXPECT_EQ(MD5_LENGTH,
+	TEST_ASSERT_EQUAL(MD5_LENGTH,
 			  make_mac((char*)PKT_DATA, PKT_LEN, MD5_LENGTH, &md5, actual));
 
-	EXPECT_TRUE(memcmp(EXPECTED_DIGEST, actual, MD5_LENGTH) == 0);
+	TEST_ASSERT_TRUE(memcmp(EXPECTED_DIGEST, actual, MD5_LENGTH) == 0);
 }
 
 #ifdef OPENSSL
-TEST_F(cryptoTest, MakeSHA1Mac) {
+TEST(crypto, MakeSHA1Mac) {
 	const char* PKT_DATA = "abcdefgh0123";
 	const int PKT_LEN = strlen(PKT_DATA);
 	const char* EXPECTED_DIGEST =
@@ -47,14 +58,14 @@ TEST_F(cryptoTest, MakeSHA1Mac) {
 	memcpy(&sha1.key_seq, "sha1seq", sha1.key_len);
 	memcpy(&sha1.type, "SHA1", 5);
 
-	EXPECT_EQ(SHA1_LENGTH,
+	TEST_ASSERT_EQUAL(SHA1_LENGTH,
 			  make_mac((char*)PKT_DATA, PKT_LEN, SHA1_LENGTH, &sha1, actual));
 
-	EXPECT_TRUE(memcmp(EXPECTED_DIGEST, actual, SHA1_LENGTH) == 0);
+	TEST_ASSERT_TRUE(memcmp(EXPECTED_DIGEST, actual, SHA1_LENGTH) == 0);
 }
 #endif	/* OPENSSL */
 
-TEST_F(cryptoTest, VerifyCorrectMD5) {
+TEST(crypto, VerifyCorrectMD5) {
 	const char* PKT_DATA =
 		"sometestdata"		// Data
 		"\0\0\0\0"			// Key-ID (unused)
@@ -69,11 +80,11 @@ TEST_F(cryptoTest, VerifyCorrectMD5) {
 	memcpy(&md5.key_seq, "md5key", md5.key_len);
 	memcpy(&md5.type, "MD5", 4);
 
-	EXPECT_TRUE(auth_md5((char*)PKT_DATA, PKT_LEN, MD5_LENGTH, &md5));
+	TEST_ASSERT_TRUE(auth_md5((char*)PKT_DATA, PKT_LEN, MD5_LENGTH, &md5));
 }
 
 #ifdef OPENSSL
-TEST_F(cryptoTest, VerifySHA1) {
+TEST(crypto, VerifySHA1) {
 	const char* PKT_DATA =
 		"sometestdata"		// Data
 		"\0\0\0\0"			// Key-ID (unused)
@@ -88,11 +99,11 @@ TEST_F(cryptoTest, VerifySHA1) {
 	memcpy(&sha1.key_seq, "sha1key", sha1.key_len);
 	memcpy(&sha1.type, "SHA1", 5);
 
-	EXPECT_TRUE(auth_md5((char*)PKT_DATA, PKT_LEN, SHA1_LENGTH, &sha1));
+	TEST_ASSERT_TRUE(auth_md5((char*)PKT_DATA, PKT_LEN, SHA1_LENGTH, &sha1));
 }
 #endif	/* OPENSSL */
 
-TEST_F(cryptoTest, VerifyFailure) {
+TEST(crypto, VerifyFailure) {
 	/* We use a copy of the MD5 verification code, but modify
 	 * the last bit to make sure verification fails. */
 	const char* PKT_DATA =
@@ -109,10 +120,10 @@ TEST_F(cryptoTest, VerifyFailure) {
 	memcpy(&md5.key_seq, "md5key", md5.key_len);
 	memcpy(&md5.type, "MD5", 4);
 
-	EXPECT_FALSE(auth_md5((char*)PKT_DATA, PKT_LEN, MD5_LENGTH, &md5));
+	TEST_ASSERT_FALSE(auth_md5((char*)PKT_DATA, PKT_LEN, MD5_LENGTH, &md5));
 }
 
-TEST_F(cryptoTest, PacketSizeNotMultipleOfFourBytes) {
+TEST(crypto, PacketSizeNotMultipleOfFourBytes) {
 	const char* PKT_DATA = "123456";
 	const int PKT_LEN = 6;
 	char actual[MD5_LENGTH];
@@ -124,6 +135,6 @@ TEST_F(cryptoTest, PacketSizeNotMultipleOfFourBytes) {
 	memcpy(&md5.key_seq, "md5seq", md5.key_len);
 	memcpy(&md5.type, "MD5", 4);
 
-	EXPECT_EQ(0, make_mac((char*)PKT_DATA, PKT_LEN, MD5_LENGTH, &md5, actual));
+	TEST_ASSERT_EQUAL(0, make_mac((char*)PKT_DATA, PKT_LEN, MD5_LENGTH, &md5, actual));
 }
 

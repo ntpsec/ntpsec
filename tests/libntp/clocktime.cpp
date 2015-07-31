@@ -1,3 +1,14 @@
+extern "C" {
+#include "unity.h"
+#include "unity_fixture.h"
+}
+
+TEST_GROUP(clocktime);
+
+TEST_SETUP(clocktime) {}
+
+TEST_TEAR_DOWN(clocktime) {}
+
 #include "libntptest.h"
 
 // ---------------------------------------------------------------------
@@ -26,7 +37,7 @@ void clocktimeTest::TearDown()
 // ---------------------------------------------------------------------
 // test cases
 
-TEST_F(clocktimeTest, CurrentYear) {
+TEST(clocktime, CurrentYear) {
 	// Timestamp: 2010-06-24 12:50:00Z
 	const u_int32 timestamp = 3486372600UL;
 	const u_int32 expected	= timestamp; // exactly the same.
@@ -36,12 +47,12 @@ TEST_F(clocktimeTest, CurrentYear) {
 	u_long yearstart=0;
 	u_int32 actual;
 
-	ASSERT_TRUE(clocktime(yday, hour, minute, second, tzoff, timestamp,
+	TEST_ASSERT_TRUE(clocktime(yday, hour, minute, second, tzoff, timestamp,
 						  &yearstart, &actual));
-	EXPECT_EQ(expected, actual);
+	TEST_ASSERT_EQUAL(expected, actual);
 }
 
-TEST_F(clocktimeTest, CurrentYearFuzz) {
+TEST(clocktime, CurrentYearFuzz) {
 	/* 
 	 * Timestamp (rec_ui) is: 2010-06-24 12:50:00
 	 * Time sent into function is 12:00:00.
@@ -58,12 +69,12 @@ TEST_F(clocktimeTest, CurrentYearFuzz) {
 	u_long yearstart=0;
 	u_int32 actual;
 
-	ASSERT_TRUE(clocktime(yday, hour, minute, second, tzoff, timestamp,
+	TEST_ASSERT_TRUE(clocktime(yday, hour, minute, second, tzoff, timestamp,
 						  &yearstart, &actual));
-	EXPECT_EQ(expected, actual);
+	TEST_ASSERT_EQUAL(expected, actual);
 }
 
-TEST_F(clocktimeTest, TimeZoneOffset) {
+TEST(clocktime, TimeZoneOffset) {
 	/*
 	 * Timestamp (rec_ui) is: 2010-06-24 12:00:00 +0800
 	 * (which is 2010-06-24 04:00:00Z)
@@ -78,12 +89,12 @@ TEST_F(clocktimeTest, TimeZoneOffset) {
 	u_long yearstart=0;
 	u_int32 actual;
 
-	ASSERT_TRUE(clocktime(yday, hour, minute, second, tzoff, timestamp,
+	TEST_ASSERT_TRUE(clocktime(yday, hour, minute, second, tzoff, timestamp,
 						  &yearstart, &actual));
-	EXPECT_EQ(expected, actual);
+	TEST_ASSERT_EQUAL(expected, actual);
 }
 
-TEST_F(clocktimeTest, WrongYearStart) {
+TEST(clocktime, WrongYearStart) {
 	/* 
 	 * Timestamp (rec_ui) is: 2010-01-02 11:00:00Z
 	 * Time sent into function is 11:00:00.
@@ -97,12 +108,12 @@ TEST_F(clocktimeTest, WrongYearStart) {
 	u_long yearstart = 302024100UL; // Yearstart of 2009.
 	u_int32 actual;
 
-	ASSERT_TRUE(clocktime(yday, hour, minute, second, tzoff, timestamp,
+	TEST_ASSERT_TRUE(clocktime(yday, hour, minute, second, tzoff, timestamp,
 						  &yearstart, &actual));
-	EXPECT_EQ(expected, actual);
+	TEST_ASSERT_EQUAL(expected, actual);
 }
 
-TEST_F(clocktimeTest, PreviousYear) {
+TEST(clocktime, PreviousYear) {
 	/*
 	 * Timestamp is: 2010-01-01 01:00:00Z
 	 * Time sent into function is 23:00:00
@@ -116,12 +127,12 @@ TEST_F(clocktimeTest, PreviousYear) {
 	u_long yearstart = 0;
 	u_int32 actual;
 
-	ASSERT_TRUE(clocktime(yday, hour, minute, second, tzoff, timestamp,
+	TEST_ASSERT_TRUE(clocktime(yday, hour, minute, second, tzoff, timestamp,
 						  &yearstart, &actual));
-	EXPECT_EQ(expected, actual);
+	TEST_ASSERT_EQUAL(expected, actual);
 }
 
-TEST_F(clocktimeTest, NextYear) {
+TEST(clocktime, NextYear) {
 	/*
 	 * Timestamp is: 2009-12-31 23:00:00Z
 	 * Time sent into function is 01:00:00
@@ -134,24 +145,24 @@ TEST_F(clocktimeTest, NextYear) {
 	u_long yearstart = 0;
 	u_int32 actual;
 
-	ASSERT_TRUE(clocktime(yday, hour, minute, second, tzoff, timestamp,
+	TEST_ASSERT_TRUE(clocktime(yday, hour, minute, second, tzoff, timestamp,
 						  &yearstart, &actual));
-	EXPECT_EQ(expected, actual);
+	TEST_ASSERT_EQUAL(expected, actual);
 }
 
-TEST_F(clocktimeTest, NoReasonableConversion) {
+TEST(clocktime, NoReasonableConversion) {
 	/* Timestamp is: 2010-01-02 11:00:00Z */
 	const u_int32 timestamp = 3471418800UL;
-	
+
 	const int yday=100, hour=12, minute=0, second=0, tzoff=0;
 	u_long yearstart = 0;
 	u_int32 actual;
 
-	ASSERT_FALSE(clocktime(yday, hour, minute, second, tzoff, timestamp,
+	TEST_ASSERT_FALSE(clocktime(yday, hour, minute, second, tzoff, timestamp,
 						   &yearstart, &actual));
 }
 
-TEST_F(clocktimeTest, AlwaysInLimit) {
+TEST(clocktime, AlwaysInLimit) {
 	/* Timestamp is: 2010-01-02 11:00:00Z */
 	const u_int32 timestamp = 3471418800UL;
 	const u_short prime_incs[] = { 127, 151, 163, 179 };
@@ -179,7 +190,7 @@ TEST_F(clocktimeTest, AlwaysInLimit) {
 					diff = actual - timestamp;
 					if (diff >= 0x80000000UL)
 						diff = ~diff + 1;
-					ASSERT_LE(diff, (183u * SECSPERDAY));
+					TEST_ASSERT_LESS_THAN_OR_EQUAL(diff, (183u * SECSPERDAY));
 				}
 			}
 		}

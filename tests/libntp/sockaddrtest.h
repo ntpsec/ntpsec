@@ -9,9 +9,9 @@ extern "C" {
 
 class sockaddrtest : public libntptest {
 protected:
-	::testing::AssertionResult IsEqual(const sockaddr_u &expected, const sockaddr_u &actual) {
+	bool IsEqual(const sockaddr_u &expected, const sockaddr_u &actual) {
 		if (expected.sa.sa_family != actual.sa.sa_family) {
-			return ::testing::AssertionFailure()
+			return false
 				<< "Expected sa_family: " << expected.sa.sa_family
 				<< " but got: " << actual.sa.sa_family;
 		}
@@ -20,9 +20,9 @@ protected:
 			if (expected.sa4.sin_port == actual.sa4.sin_port &&
 				memcmp(&expected.sa4.sin_addr, &actual.sa4.sin_addr,
 					   sizeof(in_addr)) == 0) {
-				return ::testing::AssertionSuccess();
+				return true;
 			} else {
-				return ::testing::AssertionFailure()
+				return false
 					<< "IPv4 comparision failed, expected: "
 					<< expected.sa4.sin_addr.s_addr
 					<< "(" << socktoa(&expected) << ")"
@@ -34,13 +34,13 @@ protected:
 			if (expected.sa6.sin6_port == actual.sa6.sin6_port &&
 				memcmp(&expected.sa6.sin6_addr, &actual.sa6.sin6_addr,
 					   sizeof(in6_addr)) == 0) {
-				return ::testing::AssertionSuccess();
+				return true;
 			} else {
-				return ::testing::AssertionFailure()
+				return false
 					<< "IPv6 comparision failed";
 			}
 		} else { // Unknown family
-			return ::testing::AssertionFailure()
+			return false
 				<< "Unknown sa_family: " << actual.sa.sa_family;
 		}
 	}

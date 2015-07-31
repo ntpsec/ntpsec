@@ -1,3 +1,14 @@
+extern "C" {
+#include "unity.h"
+#include "unity_fixture.h"
+}
+
+TEST_GROUP(kodDatabase);
+
+TEST_SETUP(kodDatabase) {}
+
+TEST_TEAR_DOWN(kodDatabase) {}
+
 #include "sntptest.h"
 
 extern "C" {
@@ -11,7 +22,7 @@ protected:
 	}
 };
 
-TEST_F(kodDatabaseTest, SingleEntryHandling) {
+TEST(kodDatabase, SingleEntryHandling) {
 	char HOST[] = "192.0.2.5";
 	char REASON[] = "DENY";
 
@@ -19,12 +30,12 @@ TEST_F(kodDatabaseTest, SingleEntryHandling) {
 
 	kod_entry* result;
 
-	EXPECT_EQ(1, search_entry(HOST, &result));
-	EXPECT_STREQ(HOST, result->hostname);
-	EXPECT_STREQ(REASON, result->type);
+	TEST_ASSERT_EQUAL(1, search_entry(HOST, &result));
+	TEST_ASSERT_EQUAL_STRING(HOST, result->hostname);
+	TEST_ASSERT_EQUAL_STRING(REASON, result->type);
 }
 
-TEST_F(kodDatabaseTest, MultipleEntryHandling) {
+TEST(kodDatabase, MultipleEntryHandling) {
 	char HOST1[] = "192.0.2.3";
 	char REASON1[] = "DENY";
 
@@ -40,22 +51,22 @@ TEST_F(kodDatabaseTest, MultipleEntryHandling) {
 
 	kod_entry* result;
 
-	EXPECT_EQ(1, search_entry(HOST1, &result));
-	EXPECT_STREQ(HOST1, result->hostname);
-	EXPECT_STREQ(REASON1, result->type);
+	TEST_ASSERT_EQUAL(1, search_entry(HOST1, &result));
+	TEST_ASSERT_EQUAL_STRING(HOST1, result->hostname);
+	TEST_ASSERT_EQUAL_STRING(REASON1, result->type);
 
-	EXPECT_EQ(1, search_entry(HOST2, &result));
-	EXPECT_STREQ(HOST2, result->hostname);
-	EXPECT_STREQ(REASON2, result->type);
+	TEST_ASSERT_EQUAL(1, search_entry(HOST2, &result));
+	TEST_ASSERT_EQUAL_STRING(HOST2, result->hostname);
+	TEST_ASSERT_EQUAL_STRING(REASON2, result->type);
 
-	EXPECT_EQ(1, search_entry(HOST3, &result));
-	EXPECT_STREQ(HOST3, result->hostname);
-	EXPECT_STREQ(REASON3, result->type);
+	TEST_ASSERT_EQUAL(1, search_entry(HOST3, &result));
+	TEST_ASSERT_EQUAL_STRING(HOST3, result->hostname);
+	TEST_ASSERT_EQUAL_STRING(REASON3, result->type);
 
 	free(result);
 }
 
-TEST_F(kodDatabaseTest, NoMatchInSearch) {
+TEST(kodDatabase, NoMatchInSearch) {
 	char HOST_ADD[] = "192.0.2.6";
 	char HOST_NOTADD[] = "192.0.6.1";
 	char REASON[] = "DENY";
@@ -64,18 +75,18 @@ TEST_F(kodDatabaseTest, NoMatchInSearch) {
 
 	kod_entry* result;
 
-	EXPECT_EQ(0, search_entry(HOST_NOTADD, &result));
-	EXPECT_TRUE(result == NULL);
+	TEST_ASSERT_EQUAL(0, search_entry(HOST_NOTADD, &result));
+	TEST_ASSERT_TRUE(result == NULL);
 }
 
-TEST_F(kodDatabaseTest, AddDuplicate) {
+TEST(kodDatabase, AddDuplicate) {
 	char HOST[] = "192.0.2.3";
 	char REASON1[] = "RATE";
 	char REASON2[] = "DENY";
 
 	add_entry(HOST, REASON1);
 	kod_entry* result1;
-	ASSERT_EQ(1, search_entry(HOST, &result1));
+	TEST_ASSERT_EQUAL(1, search_entry(HOST, &result1));
 
 	/* 
 	 * Sleeps for two seconds since we want to ensure that
@@ -85,15 +96,15 @@ TEST_F(kodDatabaseTest, AddDuplicate) {
 
 	add_entry(HOST, REASON2);
 	kod_entry* result2;
-	ASSERT_EQ(1, search_entry(HOST, &result2));
+	TEST_ASSERT_EQUAL(1, search_entry(HOST, &result2));
 
-	EXPECT_NE(result1->timestamp, result2->timestamp);
+	TEST_ASSERT_NOT_EQUAL(result1->timestamp, result2->timestamp);
 
 	free(result1);
 	free(result2);
 }
 
-TEST_F(kodDatabaseTest, DeleteEntry) {
+TEST(kodDatabase, DeleteEntry) {
 	char HOST1[] = "192.0.2.1";
 	char HOST2[] = "192.0.2.2";
 	char HOST3[] = "192.0.2.3";
@@ -104,15 +115,15 @@ TEST_F(kodDatabaseTest, DeleteEntry) {
 	add_entry(HOST3, REASON);
 
 	kod_entry* result;
-	
-	ASSERT_EQ(1, search_entry(HOST2, &result));
+
+	TEST_ASSERT_EQUAL(1, search_entry(HOST2, &result));
 	free(result);
 
 	delete_entry(HOST2, REASON);
 
-	EXPECT_EQ(0, search_entry(HOST2, &result));
+	TEST_ASSERT_EQUAL(0, search_entry(HOST2, &result));
 
 	// Ensure that the other entry is still there.
-	EXPECT_EQ(1, search_entry(HOST1, &result));
+	TEST_ASSERT_EQUAL(1, search_entry(HOST1, &result));
 	free(result);
 }

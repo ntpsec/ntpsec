@@ -1,3 +1,14 @@
+extern "C" {
+#include "unity.h"
+#include "unity_fixture.h"
+}
+
+TEST_GROUP(msyslog);
+
+TEST_SETUP(msyslog) {}
+
+TEST_TEAR_DOWN(msyslog) {}
+
 #include "libntptest.h"
 
 extern "C" {
@@ -14,7 +25,7 @@ class msyslogTest : public libntptest {
 };
 
 // msnprintf()
-TEST_F(msyslogTest, msnprintf)
+TEST(msyslog, msnprintf)
 {
 #define FMT_PREFIX "msyslog.cpp ENOENT: "
 	char	exp_buf[512];
@@ -26,11 +37,11 @@ TEST_F(msyslogTest, msnprintf)
 			   strerror(ENOENT));
 	errno = ENOENT;
 	act_cnt = msnprintf(act_buf, sizeof(act_buf), FMT_PREFIX "%m");
-	EXPECT_EQ(exp_cnt, act_cnt);
-	EXPECT_STREQ(exp_buf, act_buf);
+	TEST_ASSERT_EQUAL(exp_cnt, act_cnt);
+	TEST_ASSERT_EQUAL_STRING(exp_buf, act_buf);
 }
 
-TEST_F(msyslogTest, msnprintfLiteralPercentm)
+TEST(msyslog, msnprintfLiteralPercentm)
 {
 	char	exp_buf[32];
 	char	act_buf[32];
@@ -40,11 +51,11 @@ TEST_F(msyslogTest, msnprintfLiteralPercentm)
 	exp_cnt = snprintf(exp_buf, sizeof(exp_buf), "%%m");
 	errno = ENOENT;
 	act_cnt = msnprintf(act_buf, sizeof(act_buf), "%%m");
-	EXPECT_EQ(exp_cnt, act_cnt);
-	EXPECT_STREQ(exp_buf, act_buf);
+	TEST_ASSERT_EQUAL(exp_cnt, act_cnt);
+	TEST_ASSERT_EQUAL_STRING(exp_buf, act_buf);
 }
 
-TEST_F(msyslogTest, msnprintfBackslashLiteralPercentm)
+TEST(msyslog, msnprintfBackslashLiteralPercentm)
 {
 	char	exp_buf[32];
 	char	act_buf[32];
@@ -54,11 +65,11 @@ TEST_F(msyslogTest, msnprintfBackslashLiteralPercentm)
 	exp_cnt = snprintf(exp_buf, sizeof(exp_buf), "\%%m");
 	errno = ENOENT;
 	act_cnt = msnprintf(act_buf, sizeof(act_buf), "\%%m");
-	EXPECT_EQ(exp_cnt, act_cnt);
-	EXPECT_STREQ(exp_buf, act_buf);
+	TEST_ASSERT_EQUAL(exp_cnt, act_cnt);
+	TEST_ASSERT_EQUAL_STRING(exp_buf, act_buf);
 }
 
-TEST_F(msyslogTest, msnprintfBackslashPercent)
+TEST(msyslog, msnprintfBackslashPercent)
 {
 	char	exp_buf[32];
 	char	act_buf[32];
@@ -69,11 +80,11 @@ TEST_F(msyslogTest, msnprintfBackslashPercent)
 			   strerror(ENOENT));
 	errno = ENOENT;
 	act_cnt = msnprintf(act_buf, sizeof(act_buf), "\%m");
-	EXPECT_EQ(exp_cnt, act_cnt);
-	EXPECT_STREQ(exp_buf, act_buf);
+	TEST_ASSERT_EQUAL(exp_cnt, act_cnt);
+	TEST_ASSERT_EQUAL_STRING(exp_buf, act_buf);
 }
 
-TEST_F(msyslogTest, msnprintfHangingPercent)
+TEST(msyslog, msnprintfHangingPercent)
 {
 	static char fmt[] = "percent then nul term then non-nul %\0oops!";
 	char exp_buf[64];
@@ -85,25 +96,25 @@ TEST_F(msyslogTest, msnprintfHangingPercent)
 	ZERO(act_buf);
 	exp_cnt = snprintf(exp_buf, sizeof(exp_buf), fmt);
 	act_cnt = msnprintf(act_buf, sizeof(act_buf), fmt);
-	EXPECT_EQ(exp_cnt, act_cnt);
-	EXPECT_STREQ(exp_buf, act_buf);
-	EXPECT_STREQ("", act_buf + 1 + strlen(act_buf));
+	TEST_ASSERT_EQUAL(exp_cnt, act_cnt);
+	TEST_ASSERT_EQUAL_STRING(exp_buf, act_buf);
+	TEST_ASSERT_EQUAL_STRING("", act_buf + 1 + strlen(act_buf));
 }
 
 #ifndef VSNPRINTF_PERCENT_M
-TEST_F(msyslogTest, format_errmsgHangingPercent)
+TEST(msyslog, format_errmsgHangingPercent)
 {
 	static char fmt[] = "percent then nul term then non-nul %\0oops!";
 	char act_buf[64];
 
 	ZERO(act_buf);
 	format_errmsg(act_buf, sizeof(act_buf), fmt, ENOENT);
-	EXPECT_STREQ(fmt, act_buf);
-	EXPECT_STREQ("", act_buf + 1 + strlen(act_buf));
+	TEST_ASSERT_EQUAL_STRING(fmt, act_buf);
+	TEST_ASSERT_EQUAL_STRING("", act_buf + 1 + strlen(act_buf));
 }
 #endif
 
-TEST_F(msyslogTest, msnprintfNullTarget)
+TEST(msyslog, msnprintfNullTarget)
 {
 	int	exp_cnt;
 	int	act_cnt;
@@ -111,10 +122,10 @@ TEST_F(msyslogTest, msnprintfNullTarget)
 	exp_cnt = snprintf(NULL, 0, "%d", 123);
 	errno = ENOENT;
 	act_cnt = msnprintf(NULL, 0, "%d", 123);
-	EXPECT_EQ(exp_cnt, act_cnt);
+	TEST_ASSERT_EQUAL(exp_cnt, act_cnt);
 }
 
-TEST_F(msyslogTest, msnprintfTruncate)
+TEST(msyslog, msnprintfTruncate)
 {
 	char	undist[] = "undisturbed";
 	char	exp_buf[512];
@@ -127,11 +138,11 @@ TEST_F(msyslogTest, msnprintfTruncate)
 	exp_cnt = snprintf(exp_buf, 3, "%s", strerror(ENOENT));
 	errno = ENOENT;
 	act_cnt = msnprintf(act_buf, 3, "%m");
-	EXPECT_EQ('\0', exp_buf[2]);
-	EXPECT_EQ('\0', act_buf[2]);
-	EXPECT_TRUE(act_cnt > 0);
-	EXPECT_EQ(exp_cnt, act_cnt);
-	EXPECT_STREQ(exp_buf, act_buf);
-	EXPECT_STREQ(exp_buf + 3, undist);
-	EXPECT_STREQ(act_buf + 3, undist);
+	TEST_ASSERT_EQUAL('\0', exp_buf[2]);
+	TEST_ASSERT_EQUAL('\0', act_buf[2]);
+	TEST_ASSERT_TRUE(act_cnt > 0);
+	TEST_ASSERT_EQUAL(exp_cnt, act_cnt);
+	TEST_ASSERT_EQUAL_STRING(exp_buf, act_buf);
+	TEST_ASSERT_EQUAL_STRING(exp_buf + 3, undist);
+	TEST_ASSERT_EQUAL_STRING(act_buf + 3, undist);
 }

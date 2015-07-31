@@ -22,7 +22,7 @@ protected:
 		const int ARGV_SIZE = 4;
 
 		char* opts[ARGV_SIZE];
-		
+
 		opts[0] = estrdup("sntpopts");
 		opts[1] = estrdup(option);
 		opts[2] = estrdup(argument);

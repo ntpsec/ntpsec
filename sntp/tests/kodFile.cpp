@@ -1,3 +1,14 @@
+extern "C" {
+#include "unity.h"
+#include "unity_fixture.h"
+}
+
+TEST_GROUP(kodFile);
+
+TEST_SETUP(kodFile) {}
+
+TEST_TEAR_DOWN(kodFile) {}
+
 #include "fileHandlingTest.h"
 
 extern "C" {
@@ -25,68 +36,68 @@ protected:
 	}
 };
 
-TEST_F(kodFileTest, ReadEmptyFile) {
+TEST(kodFile, ReadEmptyFile) {
 	kod_init_kod_db(CreatePath("kod-test-empty", INPUT_DIR).c_str(), true);
 
-	EXPECT_EQ(0, kod_db_cnt);
+	TEST_ASSERT_EQUAL(0, kod_db_cnt);
 }
 
-TEST_F(kodFileTest, ReadCorrectFile) {
+TEST(kodFile, ReadCorrectFile) {
 	kod_init_kod_db(CreatePath("kod-test-correct", INPUT_DIR).c_str(), true);
-	
-	EXPECT_EQ(2, kod_db_cnt);
+
+	TEST_ASSERT_EQUAL(2, kod_db_cnt);
 
 	kod_entry* res;
 
-	ASSERT_EQ(1, search_entry("192.0.2.5", &res));
-	EXPECT_STREQ("DENY", res->type);
-	EXPECT_STREQ("192.0.2.5", res->hostname);
-	EXPECT_EQ(0x12345678, res->timestamp);
+	TEST_ASSERT_EQUAL(1, search_entry("192.0.2.5", &res));
+	TEST_ASSERT_EQUAL_STRING("DENY", res->type);
+	TEST_ASSERT_EQUAL_STRING("192.0.2.5", res->hostname);
+	TEST_ASSERT_EQUAL(0x12345678, res->timestamp);
 
-	ASSERT_EQ(1, search_entry("192.0.2.100", &res));
-	EXPECT_STREQ("RSTR", res->type);
-	EXPECT_STREQ("192.0.2.100", res->hostname);
-	EXPECT_EQ(0xfff, res->timestamp);
+	TEST_ASSERT_EQUAL(1, search_entry("192.0.2.100", &res));
+	TEST_ASSERT_EQUAL_STRING("RSTR", res->type);
+	TEST_ASSERT_EQUAL_STRING("192.0.2.100", res->hostname);
+	TEST_ASSERT_EQUAL(0xfff, res->timestamp);
 }
 
-TEST_F(kodFileTest, ReadFileWithBlankLines) {
+TEST(kodFile, ReadFileWithBlankLines) {
 	kod_init_kod_db(CreatePath("kod-test-blanks", INPUT_DIR).c_str(), true);
 
-	EXPECT_EQ(3, kod_db_cnt);
+	TEST_ASSERT_EQUAL(3, kod_db_cnt);
 
 	kod_entry* res;
 
-	ASSERT_EQ(1, search_entry("192.0.2.5", &res));
-	EXPECT_STREQ("DENY", res->type);
-	EXPECT_STREQ("192.0.2.5", res->hostname);
-	EXPECT_EQ(0x12345678, res->timestamp);
+	TEST_ASSERT_EQUAL(1, search_entry("192.0.2.5", &res));
+	TEST_ASSERT_EQUAL_STRING("DENY", res->type);
+	TEST_ASSERT_EQUAL_STRING("192.0.2.5", res->hostname);
+	TEST_ASSERT_EQUAL(0x12345678, res->timestamp);
 
-	ASSERT_EQ(1, search_entry("192.0.2.100", &res));
-	EXPECT_STREQ("RSTR", res->type);
-	EXPECT_STREQ("192.0.2.100", res->hostname);
-	EXPECT_EQ(0xfff, res->timestamp);
+	TEST_ASSERT_EQUAL(1, search_entry("192.0.2.100", &res));
+	TEST_ASSERT_EQUAL_STRING("RSTR", res->type);
+	TEST_ASSERT_EQUAL_STRING("192.0.2.100", res->hostname);
+	TEST_ASSERT_EQUAL(0xfff, res->timestamp);
 
-	ASSERT_EQ(1, search_entry("example.com", &res));
-	EXPECT_STREQ("DENY", res->type);
-	EXPECT_STREQ("example.com", res->hostname);
-	EXPECT_EQ(0xabcd, res->timestamp);
+	TEST_ASSERT_EQUAL(1, search_entry("example.com", &res));
+	TEST_ASSERT_EQUAL_STRING("DENY", res->type);
+	TEST_ASSERT_EQUAL_STRING("example.com", res->hostname);
+	TEST_ASSERT_EQUAL(0xabcd, res->timestamp);
 }
 
-TEST_F(kodFileTest, WriteEmptyFile) {
+TEST(kodFile, WriteEmptyFile) {
 	kod_db_file = estrdup(CreatePath("kod-output-blank", OUTPUT_DIR).c_str());
 
 	write_kod_db();
 
 	// Open file and ensure that the filesize is 0 bytes.
 	std::ifstream is(kod_db_file, std::ios::binary);
-	ASSERT_FALSE(is.fail());
-	
-	EXPECT_EQ(0, GetFileSize(is));
+	TEST_ASSERT_FALSE(is.fail());
+
+	TEST_ASSERT_EQUAL(0, GetFileSize(is));
 
 	is.close();
 }
 
-TEST_F(kodFileTest, WriteFileWithSingleEntry) {
+TEST(kodFile, WriteFileWithSingleEntry) {
 	kod_db_file = estrdup(CreatePath("kod-output-single", OUTPUT_DIR).c_str());
 
 	add_entry("host1", "DENY");
@@ -101,15 +112,15 @@ TEST_F(kodFileTest, WriteFileWithSingleEntry) {
 	// Open file and compare sizes.
 	ifstream actual(kod_db_file, ios::binary);
 	ifstream expected(CreatePath("kod-expected-single", INPUT_DIR).c_str());
-	ASSERT_TRUE(actual.good());
-	ASSERT_TRUE(expected.good());
+	TEST_ASSERT_TRUE(actual.good());
+	TEST_ASSERT_TRUE(expected.good());
 
-	ASSERT_EQ(GetFileSize(expected), GetFileSize(actual));
+	TEST_ASSERT_EQUAL(GetFileSize(expected), GetFileSize(actual));
 
 	CompareFileContent(expected, actual);
 }
 
-TEST_F(kodFileTest, WriteFileWithMultipleEntries) {
+TEST(kodFile, WriteFileWithMultipleEntries) {
 	kod_db_file = estrdup(CreatePath("kod-output-multiple", OUTPUT_DIR).c_str());
 
 	add_entry("example.com", "RATE");
@@ -129,10 +140,10 @@ TEST_F(kodFileTest, WriteFileWithMultipleEntries) {
 	// Open file and compare sizes and content.
 	ifstream actual(kod_db_file, ios::binary);
 	ifstream expected(CreatePath("kod-expected-multiple", INPUT_DIR).c_str());
-	ASSERT_TRUE(actual.good());
-	ASSERT_TRUE(expected.good());
-	
-	ASSERT_EQ(GetFileSize(expected), GetFileSize(actual));
+	TEST_ASSERT_TRUE(actual.good());
+	TEST_ASSERT_TRUE(expected.good());
+
+	TEST_ASSERT_EQUAL(GetFileSize(expected), GetFileSize(actual));
 
 	CompareFileContent(expected, actual);
 }

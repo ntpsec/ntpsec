@@ -1,16 +1,27 @@
+extern "C" {
+#include "unity.h"
+#include "unity_fixture.h"
+}
+
+TEST_GROUP(socktoa);
+
+TEST_SETUP(socktoa) {}
+
+TEST_TEAR_DOWN(socktoa) {}
+
 #include "sockaddrtest.h"
 
 class socktoaTest : public sockaddrtest {
 };
 
-TEST_F(socktoaTest, IPv4AddressWithPort) {
+TEST(socktoa, IPv4AddressWithPort) {
 	sockaddr_u input = CreateSockaddr4("192.0.2.10", 123);
 
-	EXPECT_STREQ("192.0.2.10", socktoa(&input));
-	EXPECT_STREQ("192.0.2.10:123", sockporttoa(&input));
+	TEST_ASSERT_EQUAL_STRING("192.0.2.10", socktoa(&input));
+	TEST_ASSERT_EQUAL_STRING("192.0.2.10:123", sockporttoa(&input));
 }
 
-TEST_F(socktoaTest, IPv6AddressWithPort) {
+TEST(socktoa, IPv6AddressWithPort) {
 	const struct in6_addr address = {
 		0x20, 0x01, 0x0d, 0xb8,
 		0x85, 0xa3, 0x08, 0xd3, 
@@ -29,12 +40,12 @@ TEST_F(socktoaTest, IPv6AddressWithPort) {
 	SET_ADDR6N(&input, address);
 	SET_PORT(&input, 123);
 
-	EXPECT_STREQ(expected, socktoa(&input));
-	EXPECT_STREQ(expected_port, sockporttoa(&input));
+	TEST_ASSERT_EQUAL_STRING(expected, socktoa(&input));
+	TEST_ASSERT_EQUAL_STRING(expected_port, sockporttoa(&input));
 }
 
 #ifdef ISC_PLATFORM_HAVESCOPEID
-TEST_F(socktoaTest, ScopedIPv6AddressWithPort) {
+TEST(socktoa, ScopedIPv6AddressWithPort) {
 	const struct in6_addr address = {
 		0xfe, 0x80, 0x00, 0x00,
 		0x00, 0x00, 0x00, 0x00,
@@ -54,29 +65,29 @@ TEST_F(socktoaTest, ScopedIPv6AddressWithPort) {
 	SET_PORT(&input, 123);
 	SCOPE_VAR(&input) = 5;
 
-	EXPECT_STREQ(expected, socktoa(&input));
-	EXPECT_STREQ(expected_port, sockporttoa(&input));
+	TEST_ASSERT_EQUAL_STRING(expected, socktoa(&input));
+	TEST_ASSERT_EQUAL_STRING(expected_port, sockporttoa(&input));
 }
 #endif	/* ISC_PLATFORM_HAVESCOPEID */
 
-TEST_F(socktoaTest, HashEqual) {
+TEST(socktoa, HashEqual) {
 	sockaddr_u input1 = CreateSockaddr4("192.00.2.2", 123);
 	sockaddr_u input2 = CreateSockaddr4("192.0.2.2", 123);
 
-	ASSERT_TRUE(IsEqual(input1, input2));
-	EXPECT_EQ(sock_hash(&input1), sock_hash(&input2));
+	TEST_ASSERT_TRUE(IsEqual(input1, input2));
+	TEST_ASSERT_EQUAL(sock_hash(&input1), sock_hash(&input2));
 }
 
-TEST_F(socktoaTest, HashNotEqual) {
+TEST(socktoa, HashNotEqual) {
 	/* These two addresses should not generate the same hash. */
 	sockaddr_u input1 = CreateSockaddr4("192.0.2.1", 123);
 	sockaddr_u input2 = CreateSockaddr4("192.0.2.2", 123);
 
-	ASSERT_FALSE(IsEqual(input1, input2));
-	EXPECT_NE(sock_hash(&input1), sock_hash(&input2));
+	TEST_ASSERT_FALSE(IsEqual(input1, input2));
+	TEST_ASSERT_NOT_EQUAL(sock_hash(&input1), sock_hash(&input2));
 }
 
-TEST_F(socktoaTest, IgnoreIPv6Fields) {
+TEST(socktoa, IgnoreIPv6Fields) {
 	const struct in6_addr address = {
 		0x20, 0x01, 0x0d, 0xb8,
         0x85, 0xa3, 0x08, 0xd3, 
@@ -96,5 +107,5 @@ TEST_F(socktoaTest, IgnoreIPv6Fields) {
 	input2.sa6.sin6_flowinfo = 10L; // This value differs from input1.
 	SET_PORT(&input2, NTP_PORT);
 
-	EXPECT_EQ(sock_hash(&input1), sock_hash(&input2));
+	TEST_ASSERT_EQUAL(sock_hash(&input1), sock_hash(&input2));
 }

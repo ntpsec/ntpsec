@@ -1,3 +1,14 @@
+extern "C" {
+#include "unity.h"
+#include "unity_fixture.h"
+}
+
+TEST_GROUP(caljulian);
+
+TEST_SETUP(caljulian) {}
+
+TEST_TEAR_DOWN(caljulian) {}
+
 #include "libntptest.h"
 
 extern "C" {
@@ -20,7 +31,7 @@ protected:
 		return ss.str();
 	}
 
-	::testing::AssertionResult IsEqual(const calendar &expected, const calendar &actual) {
+	bool IsEqual(const calendar &expected, const calendar &actual) {
 		if (expected.year == actual.year &&
 			(expected.yearday == actual.yearday ||
 			 (expected.month == actual.month &&
@@ -28,9 +39,9 @@ protected:
 			expected.hour == actual.hour &&
 			expected.minute == actual.minute &&
 			expected.second == actual.second) {
-			return ::testing::AssertionSuccess();
+			return true;
 		} else {
-			return ::testing::AssertionFailure()
+			return false
 				<< "expected: " << CalendarToString(expected) << " but was "
 				<< CalendarToString(actual);
 		}
@@ -49,7 +60,7 @@ void caljulianTest::TearDown()
 }
 
 
-TEST_F(caljulianTest, RegularTime) {
+TEST(caljulian, RegularTime) {
 	u_long testDate = 3485080800UL; // 2010-06-09 14:00:00
 	calendar expected = {2010,160,6,9,14,0,0};
 
@@ -57,10 +68,10 @@ TEST_F(caljulianTest, RegularTime) {
 
 	caljulian(testDate, &actual);
 
-	EXPECT_TRUE(IsEqual(expected, actual));
+	TEST_ASSERT_TRUE(IsEqual(expected, actual));
 }
 
-TEST_F(caljulianTest, LeapYear) {
+TEST(caljulian, LeapYear) {
 	u_long input = 3549902400UL; // 2012-06-28 20:00:00Z
 	calendar expected = {2012, 179, 6, 28, 20, 0, 0};
 
@@ -68,10 +79,10 @@ TEST_F(caljulianTest, LeapYear) {
 
 	caljulian(input, &actual);
 
-	EXPECT_TRUE(IsEqual(expected, actual));
+	TEST_ASSERT_TRUE(IsEqual(expected, actual));
 }
 
-TEST_F(caljulianTest, uLongBoundary) {
+TEST(caljulian, uLongBoundary) {
 	u_long time = 4294967295UL; // 2036-02-07 6:28:15
 	calendar expected = {2036,0,2,7,6,28,15};
 
@@ -79,10 +90,10 @@ TEST_F(caljulianTest, uLongBoundary) {
 
 	caljulian(time, &actual);
 
-	EXPECT_TRUE(IsEqual(expected, actual));
+	TEST_ASSERT_TRUE(IsEqual(expected, actual));
 }
 
-TEST_F(caljulianTest, uLongWrapped) {
+TEST(caljulian, uLongWrapped) {
 	u_long time = 0;
 	calendar expected = {2036,0,2,7,6,28,16};
 
@@ -90,5 +101,5 @@ TEST_F(caljulianTest, uLongWrapped) {
 
 	caljulian(time, &actual);
 
-	EXPECT_TRUE(IsEqual(expected, actual));
+	TEST_ASSERT_TRUE(IsEqual(expected, actual));
 }

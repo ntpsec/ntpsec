@@ -1,29 +1,40 @@
+extern "C" {
+#include "unity.h"
+#include "unity_fixture.h"
+}
+
+TEST_GROUP(netof);
+
+TEST_SETUP(netof) {}
+
+TEST_TEAR_DOWN(netof) {}
+
 #include "sockaddrtest.h"
 
 class netofTest : public sockaddrtest  {
 };
 
-TEST_F(netofTest, ClassBAddress) {
+TEST(netof, ClassBAddress) {
 	sockaddr_u input = CreateSockaddr4("172.16.2.1", NTP_PORT);
 	sockaddr_u expected = CreateSockaddr4("172.16.0.0", NTP_PORT);
 
 	sockaddr_u* actual = netof(&input);
 
-	ASSERT_TRUE(actual != NULL);
-	EXPECT_TRUE(IsEqual(expected, *actual));
+	TEST_ASSERT_TRUE(actual != NULL);
+	TEST_ASSERT_TRUE(IsEqual(expected, *actual));
 }
 
-TEST_F(netofTest, ClassCAddress) {
+TEST(netof, ClassCAddress) {
 	sockaddr_u input = CreateSockaddr4("192.0.2.255", NTP_PORT);
 	sockaddr_u expected = CreateSockaddr4("192.0.2.0", NTP_PORT);
 
 	sockaddr_u* actual = netof(&input);
 
-	ASSERT_TRUE(actual != NULL);
-	EXPECT_TRUE(IsEqual(expected, *actual));
+	TEST_ASSERT_TRUE(actual != NULL);
+	TEST_ASSERT_TRUE(IsEqual(expected, *actual));
 }
 
-TEST_F(netofTest, ClassAAddress) {
+TEST(netof, ClassAAddress) {
 	/* Class A addresses are assumed to be classless,
 	 * thus the same address should be returned.
 	 */
@@ -32,11 +43,11 @@ TEST_F(netofTest, ClassAAddress) {
 
 	sockaddr_u* actual = netof(&input);
 
-	ASSERT_TRUE(actual != NULL);
-	EXPECT_TRUE(IsEqual(expected, *actual));
+	TEST_ASSERT_TRUE(actual != NULL);
+	TEST_ASSERT_TRUE(IsEqual(expected, *actual));
 }
 
-TEST_F(netofTest, IPv6Address) {
+TEST(netof, IPv6Address) {
 	/* IPv6 addresses are assumed to have 64-bit host- and 64-bit network parts. */
 	const struct in6_addr input_address = {
 		0x20, 0x01, 0x0d, 0xb8,
@@ -51,7 +62,7 @@ TEST_F(netofTest, IPv6Address) {
         0x00, 0x00, 0x00, 0x00,
         0x00, 0x00, 0x00, 0x00
 	}; // 2001:0db8:85a3:08d3:0000:0000:0000:0000
-	
+
 	sockaddr_u input;
 	input.sa6.sin6_family = AF_INET6;
 	input.sa6.sin6_addr = input_address;
@@ -64,6 +75,6 @@ TEST_F(netofTest, IPv6Address) {
 
 	sockaddr_u* actual = netof(&input);
 
-	ASSERT_TRUE(actual != NULL);
-	EXPECT_TRUE(IsEqual(expected, *actual));
+	TEST_ASSERT_TRUE(actual != NULL);
+	TEST_ASSERT_TRUE(IsEqual(expected, *actual));
 }

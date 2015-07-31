@@ -9,11 +9,11 @@ extern "C" {
 
 class lfptest : public libntptest {
 protected:
-	::testing::AssertionResult IsEqual(const l_fp &expected, const l_fp &actual) {
+	bool IsEqual(const l_fp &expected, const l_fp &actual) {
 		if (L_ISEQU(&expected, &actual)) {
-			return ::testing::AssertionSuccess();
+			return true;
 		} else {
-			return ::testing::AssertionFailure()
+			return false
 				<< " expected: " << lfptoa(&expected, FRACTION_PREC)
 				<< " (" << expected.l_ui << "." << expected.l_uf << ")"
 				<< " but was: " << lfptoa(&actual, FRACTION_PREC)
