@@ -127,7 +127,7 @@ That was then, this is now.
 === How to refer to previous commits ===
 
 The best (most human-friendly) way to reference a commit is by quoting its
-summary line.  If you need to disambiguate, give is date and author.
+summary line.  If you need to disambiguate, give its date and author.
 
 The worst way is to quote its git hash, because humans are not good at
 keeping random strings of hex digits in working memory.  Besides, hashes
