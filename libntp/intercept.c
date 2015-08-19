@@ -204,7 +204,7 @@ void intercept_get_systime(const char *legend, l_fp *now)
 {
     struct timespec ts;	/* seconds and nanoseconds */
     get_ostime(&ts);
-	
+
     if (mode == capture)
 	printf("event systime %s %zd %zd\n", legend, ts.tv_sec, ts.tv_nsec);
 	
@@ -250,10 +250,11 @@ void intercept_drift_write(char *driftfile, double drift)
     else
     {
 	int fd;
-	char tmpfile[PATH_MAX];
+	char tmpfile[PATH_MAX], driftcopy[PATH_MAX];
 	char driftval[32];
-
-	strlcpy(tmpfile, dirname(driftfile), sizeof(tmpfile));
+	
+	strlcpy(driftcopy, driftfile, PATH_MAX);
+	strlcpy(tmpfile, dirname(driftcopy), sizeof(tmpfile));
 	strlcat(tmpfile, "/driftXXXXXX", sizeof(tmpfile));
 	if ((fd = mkstemp(tmpfile)) < 0) {
 	    msyslog(LOG_ERR, "frequency file %s: %m", tmpfile);
@@ -264,7 +265,7 @@ void intercept_drift_write(char *driftfile, double drift)
 	(void)close(fd);
 	/* atomic */
 #ifdef SYS_WINNT
-	if (_unlink(stats_drift_file)) /* rename semantics differ under NT */
+	if (_unlink(driftfile)) /* rename semantics differ under NT */
 	    msyslog(LOG_WARNING,
 		    "Unable to remove prior drift file %s, %m",
 		    driftfile);
