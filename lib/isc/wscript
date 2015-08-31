@@ -1,0 +1,88 @@
+def configure(ctx):
+	ctx.define("ISC_PLATFORM_NORETURN_PRE", "", quote=False)
+	ctx.define("ISC_PLATFORM_NORETURN_POST", "__attribute__((__noreturn__))", quote=False)
+
+
+	ctx.define("ISC_PLATFORM_HAVEIFNAMETOINDEX", 1)
+	ctx.define("ISC_PLATFORM_HAVEIN6PKTINFO", 1)
+	ctx.define("ISC_PLATFORM_HAVEIPV6", 1)
+	ctx.define("ISC_PLATFORM_HAVESALEN", 1)
+	ctx.define("ISC_PLATFORM_HAVESCOPEID", 1)
+	ctx.define("ISC_PLATFORM_USETHREADS", 1)
+
+	ctx.define("HAVE_GETIFADDRS", 1)
+	ctx.define("HAVE_IFLIST_SYSCTL", 1)
+
+
+#/* #undef ISC_PLATFORM_BRACEPTHREADONCEINIT */
+#/* #undef ISC_PLATFORM_FIXIN6ISADDR */
+#/* #undef ISC_PLATFORM_HAVEIF_LADDRCONF */
+#/* #undef ISC_PLATFORM_HAVEIF_LADDRREQ */
+#/* #undef ISC_PLATFORM_NEEDIN6ADDRANY */
+#/* #undef ISC_PLATFORM_NEEDNETINET6IN6H */
+#/* #undef ISC_PLATFORM_NEEDNTOP */
+#/* #undef ISC_PLATFORM_NEEDPORTT */
+#/* #undef ISC_PLATFORM_NEEDPTON */
+
+
+
+
+def build(ctx):
+
+	libisc_source = [
+		"assertions.c",
+		"backtrace-emptytbl.c",
+		"backtrace.c",
+		"buffer.c",
+		"error.c",
+		"event.c",
+		"inet_ntop.c",
+		"inet_pton.c",
+		"lib.c",
+		"log.c",
+		"md5.c",
+		"netaddr.c",
+		"netscope.c",
+		"nls/msgcat.c",
+		"ondestroy.c",
+		"random.c",
+		"result.c",
+		"sha1.c",
+		"sockaddr.c",
+		"task.c",
+		"unix/dir.c",
+		"unix/errno2result.c",
+		"unix/file.c",
+		"unix/interfaceiter.c",
+		"unix/net.c",
+		"unix/stdio.c",
+		"unix/stdtime.c",
+		"unix/strerror.c",
+		"unix/time.c"
+	]
+
+	libisc_source_thread = [
+		"pthreads/condition.c",
+		"pthreads/thread.c",
+		"pthreads/mutex.c" # XXX: some kind of conditional?
+	]
+
+
+	ctx(
+		target		= "libisc_obj",
+		features	= "c bld_include src_include",
+		source		= libisc_source + libisc_source_thread,
+		includes	= [
+						"%s/lib/isc/include/" % ctx.srcnode.abspath(),
+						"%s/lib/isc/unix/include/" % ctx.srcnode.abspath(), # XXX: platform: requires unix/win32 switch.
+						"%s/lib/isc/pthreads/include/" % ctx.srcnode.abspath() # XXX: platform: requires thread switch
+					],
+
+	)
+
+
+	ctx(
+		target		= "isc",
+		features	= "c cstlib bld_include src_include",
+		use			= "libisc_obj"
+	)

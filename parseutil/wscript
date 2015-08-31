@@ -1,0 +1,27 @@
+from waflib.Task import Task
+
+def build(ctx):
+	srcnode = ctx.srcnode.abspath()
+	bldnode = ctx.bldnode.abspath()
+
+	dcfd_source = [
+		"dcfd.c",
+	]
+
+	ctx(
+		target		= "dcfd",
+		features	= "c cprogram bld_include src_include libisc_include",
+		source		= dcfd_source,
+		defines		= ["HAVE_CONFIG_H=1"],
+	)
+
+	testdcf_source = [
+		"testdcf.c",
+	]
+
+	ctx(
+		target		= "testdcf",
+		features	= "c cprogram bld_include src_include libisc_include",
+		source		= dcfd_source,
+		defines		= ["HAVE_CONFIG_H=1"],
+	)
