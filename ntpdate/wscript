@@ -1,0 +1,21 @@
+def build(ctx):
+	srcnode = ctx.srcnode.abspath()
+	bldnode = ctx.bldnode.abspath()
+
+	ntpdate_source = [
+		"ntpdate.c"
+	]
+
+	ctx(
+		target		= "ntpdate",
+		features	= "c cprogram bld_include src_include libisc_include libisc_pthread_include ntp_version",
+		source		= ntpdate_source,
+		defines		= ["HAVE_CONFIG_H=1"],
+		use			= "ntp opts isc M RT",
+		includes	= [
+ 						"%s/sntp/libopts/" % srcnode,
+						"%s/ntpdate/" % bldnode
+					],
+
+	)
+

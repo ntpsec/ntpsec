@@ -12,7 +12,7 @@
 #include <ntp_debug.h>
 #include <timevalops.h>
 
-#include <sntp-opts.h>
+#include "sntp-opts.h"
 
 #include "crypto.h"
 

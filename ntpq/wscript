@@ -1,0 +1,37 @@
+from waflib.Task import Task
+
+def build(ctx):
+	srcnode = ctx.srcnode.abspath()
+	bldnode = ctx.bldnode.abspath()
+
+
+	libntpq_source = [
+		"libntpq.c",		#XXX why
+		"libntpq_subs.c",	#XXX why
+	]
+
+	ctx(
+		target		= "libntpq",
+		features	= "c bld_include src_include libisc_include libopts_include",
+		source		= libntpq_source,
+		defines		= ["HAVE_CONFIG_H=1"],
+	)
+
+
+	ntpq_source = [
+		"ntpq.c",
+		"ntpq-subs.c",
+		"ntpq-opts.c"
+	]
+
+	ctx(
+		target		= "ntpq",
+		features	= "c cprogram bld_include src_include libisc_include libopts_include ntp_version",
+		source		= ntpq_source,
+		defines		= ["HAVE_CONFIG_H=1"],
+		use			= "ntp opts isc M",
+		includes	= [
+						"%s/ntpq/" % bldnode
+		]
+	)
+

@@ -314,3 +314,5 @@ util/tickadj
 util/version.c
 version
 version.m4
+.lock-waf*
+b
