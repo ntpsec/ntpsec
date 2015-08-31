@@ -26,6 +26,8 @@ static char RCSid[] = "adjtimed.c,v 3.1 1993/07/06 01:04:45 jbj Exp";
  * it will no longer be needed in HPUX 10.01 and later.
  */
 
+#include "config.h"
+
 #include <sys/param.h>
 #include <sys/types.h>
 #include <sys/ipc.h>
