@@ -18,7 +18,6 @@ def build(ctx):
 	)
 
 	libntpd_source = [
-		"cmd_args.c",
 		"ntp_control.c",
 		"ntp_crypto.c",
 		"ntp_filegen.c",
@@ -42,11 +41,9 @@ def build(ctx):
 		"refclock_chronolog.c",
 		"refclock_chu.c",
 		"refclock_conf.c",
-		"refclock_datum.c",
 		"refclock_dumbclock.c",
 		"refclock_fg.c",
 		"refclock_gpsdjson.c",
-		"refclock_gpsvme.c",
 		"refclock_heath.c",
 		"refclock_hopfpci.c",
 		"refclock_hopfser.c",
@@ -54,7 +51,6 @@ def build(ctx):
 		"refclock_irig.c",
 		"refclock_jjy.c",
 		"refclock_jupiter.c",
-		"refclock_leitch.c",
 		"refclock_local.c",
 		"refclock_mx4200.c",
 		"refclock_neoclock4x.c",
@@ -69,10 +65,8 @@ def build(ctx):
 		"refclock_tpro.c",
 		"refclock_true.c",
 		"refclock_tsyncpci.c",
-		"refclock_tt560.c",
 		"refclock_ulink.c",
 		"refclock_wwv.c",
-		"refclock_wwvb.c",
 		"refclock_zyfer.c",
 	]
 
@@ -99,7 +93,6 @@ def build(ctx):
 	ntpd_source = [
 		"ntp_config.c",
 		"ntp_io.c",
-		"ntpd-opts.c",
 		"ntp_scanner.c",
 		"ntpd.c",
 	]
