@@ -1,0 +1,124 @@
+
+def build(ctx):
+	srcnode = ctx.srcnode.abspath()
+	bldnode = ctx.bldnode.abspath()
+
+	bison_source = [
+		"ntp_parser.y"
+	]
+
+	ctx(
+		target		= "bison_obj",
+		features	= "c src_include bld_include libisc_include",
+		defines		= ["HAVE_CONFIG_H=1"],
+		source		= bison_source,
+		includes    = [
+						"%s/ntpd/" % srcnode
+		]
+	)
+
+	libntpd_source = [
+		"cmd_args.c",
+		"ntp_control.c",
+		"ntp_crypto.c",
+		"ntp_filegen.c",
+		"ntp_leapsec.c",
+		"ntp_loopfilter.c",
+		"ntp_monitor.c",
+		"ntp_peer.c",
+		"ntp_proto.c",
+		"ntp_refclock.c",
+		"ntp_request.c",
+		"ntp_restrict.c",
+		"ntp_signd.c",
+		"ntp_timer.c",
+		"ntp_util.c",
+		"refclock_acts.c",
+		"refclock_arbiter.c",
+		"refclock_arc.c",
+		"refclock_as2201.c",
+		"refclock_atom.c",
+		"refclock_bancomm.c",
+		"refclock_chronolog.c",
+		"refclock_chu.c",
+		"refclock_conf.c",
+		"refclock_datum.c",
+		"refclock_dumbclock.c",
+		"refclock_fg.c",
+		"refclock_gpsdjson.c",
+		"refclock_gpsvme.c",
+		"refclock_heath.c",
+		"refclock_hopfpci.c",
+		"refclock_hopfser.c",
+		"refclock_hpgps.c",
+		"refclock_irig.c",
+		"refclock_jjy.c",
+		"refclock_jupiter.c",
+		"refclock_leitch.c",
+		"refclock_local.c",
+		"refclock_mx4200.c",
+		"refclock_neoclock4x.c",
+		"refclock_nmea.c",
+		"refclock_oncore.c",
+		"refclock_palisade.c",
+		"refclock_parse.c",
+		"refclock_pcf.c",
+		"refclock_pst.c",
+		"refclock_ripencc.c",
+		"refclock_shm.c",
+		"refclock_tpro.c",
+		"refclock_true.c",
+		"refclock_tsyncpci.c",
+		"refclock_tt560.c",
+		"refclock_ulink.c",
+		"refclock_wwv.c",
+		"refclock_wwvb.c",
+		"refclock_zyfer.c",
+	]
+
+	ctx(
+		target		= "libntpd_obj",
+		features	= "c bld_include src_include libisc_include",
+		source		= libntpd_source,
+		defines		= ["HAVE_CONFIG_H=1"],
+		includes	= [
+						"%s/sntp/libopts/" % srcnode
+					],
+
+	)
+
+	ctx(
+		target		= "ntpd_lib",
+		features	= "c cstlib",
+		use			= "libntpd_obj bison_obj",
+	)
+
+
+
+
+	ntpd_source = [
+		"ntp_config.c",
+		"ntp_io.c",
+		"ntpd-opts.c",
+		"ntp_scanner.c",
+		"ntpd.c",
+	]
+
+	ctx(
+		target		= "ntpd",
+		features	= "c cprogram bld_include src_include libisc_include libisc_pthread_include ntp_version",
+		source		= ntpd_source,
+		defines		= ["HAVE_CONFIG_H=1"],
+		use			= "libntpd_obj bison_obj isc ntp opts M parse RT THR",
+		includes	= [
+ 						"%s/sntp/libopts/" % srcnode,
+ 						"%s/ntpd/" % bldnode
+					],
+
+	)
+
+	ntpdsim_source = [
+		"ntp_prio_q.c",
+		"ntpsim.c"
+	]
+

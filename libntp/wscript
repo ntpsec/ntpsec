@@ -1,0 +1,97 @@
+def configure(ctx):
+	ctx.check_cc(header_name="semaphore.h", mandatory=False)
+	ctx.define("DIR_SEP", "/") # XXX: platform win/unix
+#	semaphore.h
+
+
+def build(ctx):
+	srcnode = ctx.srcnode.abspath()
+
+	libntp_source = [
+		"a_md5encrypt.c",
+		"adjtime.c",
+		"atoint.c",
+		"atolfp.c",
+		"atouint.c",
+		"audio.c",
+		"authkeys.c",
+		"authreadkeys.c",
+		"authusekey.c",
+		"buftvtots.c",
+		"caljulian.c",
+		"caltontp.c",
+		"calyearstart.c",
+		"clocktime.c",
+		"clocktypes.c",
+		"decodenetnum.c",
+		"dofptoa.c",
+		"dolfptoa.c",
+		"emalloc.c",
+		"findconfig.c",
+		"getopt.c",
+		"hextoint.c",
+		"hextolfp.c",
+		"humandate.c",
+		"icom.c",
+		"iosignal.c",
+		"lib_strbuf.c",
+		"machines.c",
+		"mktime.c",
+		"modetoa.c",
+		"mstolfp.c",
+		"msyslog.c",
+		"netof.c",
+		"ntp_calendar.c",
+		"ntp_crypto_rnd.c",
+		"ntp_intres.c",
+		"ntp_libopts.c",
+		"ntp_lineedit.c",
+		"ntp_random.c",
+		"ntp_rfc2553.c",
+		"ntp_worker.c",
+		"numtoa.c",
+		"numtohost.c",
+		"octtoint.c",
+		"prettydate.c",
+		"recvbuff.c",
+		"refnumtoa.c",
+		"snprintf.c",
+		"socket.c",
+		"socktoa.c",
+		"socktohost.c",
+		"ssl_init.c",
+		"statestr.c",
+		"strdup.c",
+		"strl_obsd.c",
+		"syssignal.c",
+		"timetoa.c",
+		"timevalops.c",
+		"uglydate.c",
+		"vint64ops.c",
+		"work_fork.c",
+		"work_thread.c",
+		"ymd2yd.c",
+	]
+
+
+	source_libntpsim = [
+		"systime_s.c"
+	]
+
+
+	libntp_source_systime = [
+		"systime.c"
+	]
+
+	ctx(
+		target		= "ntp",
+		features	= "c cstlib bld_include src_include",
+		source		= libntp_source + libntp_source_systime,
+		defines		= ["HAVE_CONFIG_H=1"],
+		includes	= [
+						"%s/lib/isc/include/" % srcnode,
+						"%s/lib/isc/unix/include/" % srcnode, # XXX: platform: requires unix/win32 switch.
+						"%s/sntp/libopts/" % srcnode
+					],
+
+	)
