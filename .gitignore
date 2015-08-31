@@ -315,4 +315,4 @@ util/version.c
 version
 version.m4
 .lock-waf*
-b
+build
