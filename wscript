@@ -3,7 +3,7 @@ VERSION_MINOR = "0"
 VERSION_REV   = "0"
 
 
-out="b"
+out="build"
 from waflib.Configure import conf
 from waflib.TaskGen import feature, before, after, extension, after_method, before_method
 from waflib.Task import Task
