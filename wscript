@@ -205,6 +205,22 @@ struct sockaddr_storage n;
 		mandatory	= False
 	)
 
+	ctx.check_cc(
+		fragment	= """
+#include <sys/types.h>
+#include <sys/socket.h>
+int main () {
+  extern struct sockaddr *ps;
+  return ps->sa_len;
+}
+""",
+		define_name = "ISC_PLATFORM_HAVESALEN",
+		features	= "c",
+		msg         = "Checking for sockaddr->sa_len",
+		mandatory	= False
+	)
+
+
 	ctx.start_msg("Writing configuration header:")
 	ctx.write_config_header("config.h")
 	ctx.end_msg("config.h", "PINK")
