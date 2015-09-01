@@ -111,12 +111,9 @@ def check_sizeof(ctx, header, sizeof, mandatory=True):
 		execute     = True,
 		define_ret  = True,
 		quote		= False,
-#		msg         = "Checking sizeof %s" % (type),
-		mandatory	= mandatory
+		mandatory	= mandatory,
 	)
-
-	ctx.end_msg("TO_BE_FIXED")
-
+	ctx.end_msg(ctx.get_define(name))
 
 def configure(ctx):
 	ctx.env.VERSION_FULL = "%s.%s.%s" % (VERSION_MAJOR, VERSION_MINOR, VERSION_REV)
