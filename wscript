@@ -152,8 +152,8 @@ def configure(ctx):
 		ctx.check_type(type)
 
 	# XXX: hack
-	PLATFORM_INCLUDES = ["/usr/local/include"]
-	PLATFORM_LIBPATH = ["/usr/local/lib"]
+	ctx.env.PLATFORM_INCLUDES = ["/usr/local/include"]
+	ctx.env.PLATFORM_LIBPATH = ["/usr/local/lib"]
 
 	sizeofs = [
 		("time.h",		"time_t"),
@@ -190,8 +190,8 @@ def configure(ctx):
 	ctx.check_cc(lib="rt")
 	ctx.check_cc(lib="thr", mandatory=False)
 
-	ctx.check_cc(header_name="event2/event.h", includes=PLATFORM_INCLUDES)
-	ctx.check_cc(feature="c cshlib", lib="event", libpath=PLATFORM_LIBPATH, uselib_store="LIBEVENT")
+	ctx.check_cc(header_name="event2/event.h", includes=ctx.env.PLATFORM_INCLUDES)
+	ctx.check_cc(feature="c cshlib", lib="event", libpath=ctx.env.PLATFORM_LIBPATH, uselib_store="LIBEVENT")
 
 
 	ctx.check_cc(
