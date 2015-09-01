@@ -39,9 +39,8 @@ def build(ctx):
 		source		= libsntp_source,
 		defines		= ["HAVE_CONFIG_H=1"],
 		includes	= [
-						"/usr/local/include",
 						"%s/sntp/" % bldnode
-					],
+					] + ctx.env.PLATFORM_INCLUDES,
 	)
 
 
@@ -59,9 +58,7 @@ def build(ctx):
 	ctx(
 		target		= "sntp",
 		features	= "c cprogram bld_include src_include libisc_include libopts_include",
-		use			= "ntp isc opts M PTHREAD sntp_obj",
+		use			= "ntp isc opts M PTHREAD sntp_obj LIBEVENT LIBEVENT_CORE LIBEVENT_PTHREADS",
 		source		= sntp_source,
-		stlib		= ["event", "event_pthreads", "event_core"],			# XXX: hardcoded do we use system or internal (strictly)
-		stlibpath	= ["/usr/local/lib"],	# XXX: hardcoded do we use system or internal (strictly)
 		defines		= ["HAVE_CONFIG_H=1"]
 	)
