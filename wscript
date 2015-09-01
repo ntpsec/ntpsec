@@ -191,7 +191,19 @@ def configure(ctx):
 	ctx.check_cc(lib="thr")
 
 
-	ctx.define("HAVE_STRUCT_SOCKADDR_STORAGE", 1)
+	ctx.check_cc(
+		fragment	= """
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+
+struct sockaddr_storage n;
+""",
+		define_name = "HAVE_STRUCT_SOCKADDR_STORAGE",
+		execute     = False,
+		msg         = "Checking for type sockaddr_storage",
+		mandatory	= False
+	)
 
 	ctx.start_msg("Writing configuration header:")
 	ctx.write_config_header("config.h")
