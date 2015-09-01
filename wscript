@@ -83,6 +83,41 @@ def check_type(ctx, type, mandatory=False):
 	)
 #        conf.check(features='c', fragment='int main(){return 0;}') 7
 
+
+SIZE_FRAG = """
+%s
+#include <stdio.h>
+int main () {
+	printf("%%lu", sizeof(%s));
+	return 0;
+}
+"""
+
+@conf
+def check_sizeof(ctx, header, sizeof, mandatory=True):
+	sizeof_ns = sizeof.replace(" ", "_")
+	name = "SIZEOF_%s" % sizeof_ns.upper()
+
+	header_snippet = ""
+	if header:
+		ctx.start_msg("Checking sizeof %s (%s)" % (sizeof, header))
+		header_snippet = "#include <%s>" % header
+	else:
+		ctx.start_msg("Checking sizeof %s" % (sizeof))
+
+	ctx.check_cc(
+		fragment	= SIZE_FRAG % (header_snippet, sizeof),
+		define_name = name,
+		execute     = True,
+		define_ret  = True,
+		quote		= False,
+#		msg         = "Checking sizeof %s" % (type),
+		mandatory	= mandatory
+	)
+
+	ctx.end_msg("TO_BE_FIXED")
+
+
 def configure(ctx):
 	ctx.env.VERSION_FULL = "%s.%s.%s" % (VERSION_MAJOR, VERSION_MINOR, VERSION_REV)
 
@@ -114,23 +149,28 @@ def configure(ctx):
 	ctx.recurse("libntp")
 	ctx.recurse("sntp")
 
-	types = ["int32", "int32_t", "uint32_t", "uint_t", "size_t", "wint_t", "pid_t"]
+	types = ["int32", "int32_t", "uint32_t", "uint_t", "size_t", "wint_t", "pid_t", "intptr_t", "uintptr_t"]
 
 	for type in sorted(types):
 		ctx.check_type(type)
 
 
-	ctx.define("SIZEOF_SHORT", 2)
-#	ctx.define("SIZEOF_LONG", 8)
-#	ctx.define("SIZEOF_LONG_LONG", 8)
+	sizeofs = [
+		("time.h",		"time_t"),
+		(None,			"int"),
+		(None,			"short"),
+		(None,			"long"),
+		(None,			"long long"),
+		("pthread.h",	"pthread_t"),
+		(None,			"signed char"),
+	]
 
-#	ctx.define("SIZEOF_CHAR_P", 8)
-	ctx.define("SIZEOF_INT", 8)
-#	ctx.define("SIZEOF_PTHREAD_T", 8)
+	for header, sizeof in sorted(sizeofs):
+		ctx.check_sizeof(header, sizeof)
+
+
 	ctx.define("NEED_S_CHAR_TYPEDEF", 1)
-	ctx.define("SIZEOF_SIGNED_CHAR", 1)
-	ctx.define("SIZEOF_TIME_T", 8)
-	ctx.define("HAVE_SYSCONF", 1)
+
 	ctx.define("NTP_KEYSDIR", "%s/etc" % ctx.env.PREFIX)
 	ctx.define("GETSOCKNAME_SOCKLEN_TYPE", "socklen_t", quote=False)
 	ctx.define("DFLT_RLIMIT_STACK", 50)
