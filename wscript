@@ -200,7 +200,7 @@ def configure(ctx):
 struct sockaddr_storage n;
 """,
 		define_name = "HAVE_STRUCT_SOCKADDR_STORAGE",
-		execute     = False,
+		features	= "c",
 		msg         = "Checking for type sockaddr_storage",
 		mandatory	= False
 	)
