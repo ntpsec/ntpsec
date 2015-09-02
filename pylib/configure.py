@@ -1,6 +1,8 @@
 from waflib.Configure import conf
 from util import msg, msg_setting
 
+from posix_thread import posix_thread_version
+
 TYPE_FRAG = """
 #include <stdint.h>
 #include <sys/types.h>
@@ -173,6 +175,8 @@ int main () {
 		msg         = "Checking for sockaddr->sa_len",
 		mandatory	= False
 	)
+
+	posix_thread_version(ctx)
 
 
 	ctx.start_msg("Writing configuration header:")
