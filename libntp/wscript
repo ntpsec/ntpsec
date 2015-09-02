@@ -1,6 +1,6 @@
 def configure(ctx):
 	ctx.check_cc(header_name="semaphore.h", mandatory=False)
-	ctx.define("DIR_SEP", "/") # XXX: platform win/unix
+	ctx.define("DIR_SEP", "'/'", quote=False) # XXX: platform win/unix
 #	semaphore.h
 
 
