@@ -2,6 +2,7 @@ from waflib.Configure import conf
 from util import msg, msg_setting
 
 TYPE_FRAG = """
+#include <stdint.h>
 #include <sys/types.h>
 int main () {
 	if (sizeof (%s))
