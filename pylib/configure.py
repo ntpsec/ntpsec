@@ -10,9 +10,6 @@ int main () {
 }
 """
 
-def options(ctx):
-	ctx.load("compiler_c")
-
 @conf
 def check_type(ctx, type, mandatory=False):
 	name = "HAVE_%s" % type.upper()
