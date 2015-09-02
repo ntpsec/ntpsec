@@ -177,7 +177,7 @@ int main () {
 	)
 
 	posix_thread_version(ctx)
-
+	ctx.define('HAVE_PTHREADS', ctx.env.POSIX_THREAD_VERISON)
 
 	ctx.start_msg("Writing configuration header:")
 	ctx.write_config_header("config.h")
