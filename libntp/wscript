@@ -1,7 +1,12 @@
 def configure(ctx):
 	ctx.check_cc(header_name="semaphore.h", mandatory=False)
-	ctx.define("DIR_SEP", "'/'", quote=False) # XXX: platform win/unix
-#	semaphore.h
+
+	# Check for directory separator
+	if ctx.env.TARGET_PLATFORM == "win":
+		sep = "\\"
+	else:
+		sep = "/"
+	ctx.define("DIR_SEP", "'%s'" % sep, quote=False)
 
 
 def build(ctx):

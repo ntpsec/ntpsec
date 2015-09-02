@@ -125,6 +125,16 @@ def configure(ctx):
 	ctx.find_program("awk", var="BIN_AWK")
 	ctx.find_program("perl", var="BIN_PERL")
 
+
+	ctx.start_msg("Checking build target")
+	from sys import platform
+	if platform == "win32":
+		ctx.env.PLATFORM_TARGET = "win"
+	else:
+		ctx.env.PLATFORM_TARGET = "unix"
+	ctx.end_msg(ctx.env.PLATFORM_TARGET	)
+
+
 	from os.path import exists
 	from waflib.Utils import subprocess
 	if exists(".git"):
