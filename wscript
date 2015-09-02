@@ -2,11 +2,21 @@ VERSION_MAJOR = "1"
 VERSION_MINOR = "0"
 VERSION_REV   = "0"
 
-
 out="build"
+
 from waflib.Configure import conf
 from waflib.TaskGen import feature, before, after, extension, after_method, before_method
 from waflib.Task import Task
+from waflib.Logs import pprint
+
+def msg(str):
+	pprint("YELLOW", str)
+
+def msg_setting(name, val):
+	pprint("NORMAL", "  %-30s: " % name, sep="")
+	pprint("YELLOW", val)
+
+
 
 @after_method('apply_incpaths')
 @feature('bld_include')
@@ -241,6 +251,13 @@ int main () {
 	ctx.end_msg("config.h", "PINK")
 
 
+	msg("")
+	msg("Build Options")
+	msg_setting("CC", " ".join(ctx.env.CC))
+	msg_setting("CFLAGS", " ".join(ctx.env.CFLAGS))
+	msg_setting("LDFLAGS", " ".join(ctx.env.LDFLAGS))
+	msg_setting("PREFIX", ctx.env.PREFIX)
+	msg("")
 
 
 
