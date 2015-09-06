@@ -1,9 +1,7 @@
 /*
  * audio.c - audio interface for reference clock audio drivers
  */
-#ifdef HAVE_CONFIG_H
 # include <config.h>
-#endif
 
 #include <string.h>
 
