@@ -18,7 +18,6 @@ def build(ctx):
 		"atoint.c",
 		"atolfp.c",
 		"atouint.c",
-		"audio.c",
 		"authkeys.c",
 		"authreadkeys.c",
 		"authusekey.c",
@@ -76,6 +75,14 @@ def build(ctx):
 		"work_thread.c",
 		"ymd2yd.c",
 	]
+
+	if ctx.env.REFCLOCK_CHU == True \
+		or ctx.env.REFCLOCK_IRIG == True \
+		or ctx.env.REFCLOCK_WWV == True:
+
+		libntp_source += [
+			"audio.c"
+		]
 
 
 	source_libntpsim = [
