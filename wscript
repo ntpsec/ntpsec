@@ -10,6 +10,10 @@ from pylib.configure import cmd_configure
 def options(ctx):
 	ctx.load("compiler_c")
 
+	grp = ctx.add_option_group("Refclock options")
+	grp.add_option('--refclock', dest='refclocks', help="Comma seperated list of Refclock IDs to build", type='string')
+	grp.add_option('--list', action='store_true', default=False, help="List available Refclocks")
+
 
 def configure(ctx):
 	ctx.env.VERSION_MAJOR = VERSION_MAJOR

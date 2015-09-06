@@ -59,7 +59,44 @@ def check_sizeof(ctx, header, sizeof, mandatory=True):
 	ctx.end_msg(ctx.get_define(name))
 
 
+
+def refclock_config(ctx):
+	from refclock import refclock_map
+
+	ids = ctx.options.refclocks.split(",") # XXX: better error checking
+
+	ctx.env.REFCLOCK_DEFINES = []
+	ctx.env.REFCLOCK_SOURCE = []
+
+	for id in ids:
+		ctx.start_msg("Enabling Refclock %s:" % id)
+		rc = refclock_map[int(id)] # XXX: not a good idea?
+		ctx.env.REFCLOCK_SOURCE.append((rc["file"], rc["define"]))
+		ctx.end_msg(rc["descr"])
+		ctx.env["REFCLOCK_%s" % rc["file"].upper()] = True
+
+	ctx.env.REFCLOCK_ENABLE = True
+
+#ctx.env.REFCLOCK_DEFINES
+#ctx.env.REFCLOCK_SOURCE
+
+
+
+
+
+
 def cmd_configure(ctx):
+
+	if ctx.options.list:
+		from refclock import refclock_map
+		print "ID    Description"
+		print "~~    ~~~~~~~~~~~"
+		for id in refclock_map:
+			print "%-5s %s" % (id, refclock_map[id]["descr"])
+
+		return
+
+
 	ctx.load('compiler_c')
 	ctx.load('bison')
 	ctx.find_program("yacc", var="BIN_YACC")
@@ -135,6 +172,25 @@ def cmd_configure(ctx):
 	ctx.check_cc(function_name='arc4random_buf', header_name="stdlib.h", mandatory=False)
 	ctx.check_cc(function_name='sysconf', header_name="unistd.h", mandatory=False)
 	ctx.check_cc(header_name="stdbool.h", mandatory=False)
+	ctx.check_cc(header_name="sys/soundcard.h", mandatory=False) #XXX: check for others in libntp/audio.c
+
+	# XXX: This needs fixing.
+	for header in ["timepps.h", "sys/timepps.h"]:
+		ctx.check_cc(
+			fragment="""
+#include <inttypes.h>
+#include <%s>
+int main() { return 0; }
+""" % header,
+					define_name="HAVE_%s" % header.replace(".","_").replace("/","_").upper(),
+					msg = "Checking for %s" % header,
+					mandatory = False
+		)
+
+	if ctx.get_define("HAVE_TIMEPPS_H") or ctx.get_define("HAVE_SYS_TIMEPPS_H"):
+		ctx.define("HAVE_PPSAPI", 1)
+
+
 
 	ctx.check_cc(lib="m")
 	ctx.check_cc(lib="pthread")
@@ -179,6 +235,10 @@ int main () {
 	posix_thread_version(ctx)
 	ctx.define('HAVE_PTHREADS', ctx.env.POSIX_THREAD_VERISON)
 
+
+	if ctx.options.refclocks:
+		refclock_config(ctx)
+
 	ctx.start_msg("Writing configuration header:")
 	ctx.write_config_header("config.h")
 	ctx.end_msg("config.h", "PINK")
@@ -190,6 +250,4 @@ int main () {
 	msg_setting("CFLAGS", " ".join(ctx.env.CFLAGS))
 	msg_setting("LDFLAGS", " ".join(ctx.env.LDFLAGS))
 	msg_setting("PREFIX", ctx.env.PREFIX)
-	msg("")
-
-
+	msg_setting("Refclocks", ctx.options.refclocks)
