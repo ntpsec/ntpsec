@@ -58,7 +58,7 @@ def build(ctx):
 	ctx(
 		target		= "sntp",
 		features	= "c cprogram bld_include src_include libisc_include libopts_include",
-		use			= "ntp isc opts M PTHREAD sntp_obj LIBEVENT LIBEVENT_CORE LIBEVENT_PTHREADS",
+		use			= "ntp isc opts M PTHREAD sntp_obj LIBEVENT LIBEVENT_CORE LIBEVENT_PTHREADS RT",
 		source		= sntp_source,
 		defines		= ["HAVE_CONFIG_H=1"]
 	)
