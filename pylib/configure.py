@@ -248,6 +248,14 @@ int main () {
 	if ctx.options.refclocks:
 		refclock_config(ctx)
 
+	if ctx.options.enable_debug:
+		ctx.env.CFLAGS += ["-g"]
+		ctx.define("DEBUG", 1)
+
+	if ctx.options.enable_ipv6:
+		ctx.define("INCLUDE_IPV6_SUPPORT", 1)
+
+
 	ctx.start_msg("Writing configuration header:")
 	ctx.write_config_header("config.h")
 	ctx.end_msg("config.h", "PINK")
@@ -259,4 +267,6 @@ int main () {
 	msg_setting("CFLAGS", " ".join(ctx.env.CFLAGS))
 	msg_setting("LDFLAGS", " ".join(ctx.env.LDFLAGS))
 	msg_setting("PREFIX", ctx.env.PREFIX)
+	msg_setting("Debug Support", ctx.options.enable_debug)
+	msg_setting("IPv6 Support", ctx.options.enable_ipv6)
 	msg_setting("Refclocks", ctx.options.refclocks)
