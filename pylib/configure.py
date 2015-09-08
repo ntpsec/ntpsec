@@ -69,8 +69,17 @@ def refclock_config(ctx):
 	ctx.env.REFCLOCK_SOURCE = []
 
 	for id in ids:
+		try:
+			id = int(id)
+		except ValueError:
+			ctx.fatal("'%s' is not an integer." % id)
+
+		if id not in refclock_map:
+			ctx.fatal("'%s' is not a valid Refclock ID" % id)
+
+		rc = refclock_map[id]
+
 		ctx.start_msg("Enabling Refclock %s:" % id)
-		rc = refclock_map[int(id)] # XXX: not a good idea?
 		ctx.env.REFCLOCK_SOURCE.append((rc["file"], rc["define"]))
 		ctx.end_msg(rc["descr"])
 		ctx.env["REFCLOCK_%s" % rc["file"].upper()] = True
