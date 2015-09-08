@@ -7,9 +7,8 @@ CommitLog-4.1.0::
 	Changes from 1997 to 2001.
 
 ChangeLog::
-	Changes from 2001 to mid-2015.  (Temporarily moved back to
-	the root directory until we fix the build to not care where
-	it lives.)
+	Changes from 2001 to mid-2015.  Mortrrecently, consult the version-
+	control comment log.
 
 hacking.txt::
 	Notes to folks who want to hack on the code.
