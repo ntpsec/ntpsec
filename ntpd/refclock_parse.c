@@ -1713,7 +1713,7 @@ static void stream_receive  (struct recvbuf *);
 
 static int  local_init     (struct parseunit *);
 static void local_end      (struct parseunit *);
-static int  local_nop      (struct parseunit *);
+static bool local_nop      (struct parseunit *);
 static int  local_setcs    (struct parseunit *, parsectl_t *);
 static int  local_getfmt   (struct parseunit *, parsectl_t *);
 static int  local_setfmt   (struct parseunit *, parsectl_t *);
