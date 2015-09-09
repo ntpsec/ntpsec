@@ -429,8 +429,8 @@ static	char *	show_time	(float time_of_week);
 /* RIPE NCC functions */
 static	void	ripencc_control	(int, const struct refclockstat *,
 				 struct refclockstat *, struct peer *);
-static	bool	ripencc_ppsapi	(struct peer *, int, int);
-static	int	ripencc_get_pps_ts	(struct ripencc_unit *, l_fp *);
+static	bool	ripencc_ppsapi	(struct peer *, bool, bool);
+static	bool	ripencc_get_pps_ts	(struct ripencc_unit *, l_fp *);
 static	bool	ripencc_start	(int, struct peer *);
 static 	void	ripencc_shutdown	(int, struct peer *);
 static 	void	ripencc_poll	(int, struct peer *);
