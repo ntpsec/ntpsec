@@ -23,9 +23,7 @@
 # include <sun/audioio.h>
 #endif /* HAVE_SUN_AUDIOIO_H */
 
-#ifdef HAVE_SYS_IOCTL_H
-# include <sys/ioctl.h>
-#endif /* HAVE_SYS_IOCTL_H */
+#include <sys/ioctl.h>
 
 #include <fcntl.h>
 
