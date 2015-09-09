@@ -205,7 +205,7 @@ struct	refclock refclock_parse = {
 	parse_control,
 	noentry,
 	noentry,
-	NOFLAGS
+	noentry
 };
 
 /*

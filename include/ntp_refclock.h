@@ -201,7 +201,6 @@ struct refclockproc {
  * structure defined in the driver.
  */
 #define	noentry	0		/* flag for null routine */
-#define	NOFLAGS	0		/* flag for null flags */
 
 struct refclock {
 	bool (*clock_start)	(int, struct peer *);

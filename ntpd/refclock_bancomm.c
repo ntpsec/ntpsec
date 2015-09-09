@@ -187,7 +187,7 @@ struct  refclock refclock_bancomm = {
 	noentry,		/* not used (old vme_control) */
 	noentry,		/* initialize driver */ 
 	noentry,		/* not used (old vme_buginfo) */ 
-	NOFLAGS			/* not used */
+	noentry			/* not used */
 };
 
 int fd_vme;  /* file descriptor for ioctls */

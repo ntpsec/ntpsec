@@ -26,8 +26,6 @@ typedef unsigned int	u_int;
 #include <ntp_random.h>
 #include <ntp_net.h>
 
-#include <isc/boolean.h>
-
 /*
  * Calendar arithmetic - contributed by G. Healton
  */

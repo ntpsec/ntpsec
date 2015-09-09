@@ -420,7 +420,7 @@ struct	refclock refclock_oncore = {
 	noentry,		/* not used */
 	noentry,		/* not used */
 	noentry,		/* not used */
-	NOFLAGS 		/* not used */
+	noentry 		/* not used */
 };
 
 /*

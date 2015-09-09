@@ -621,7 +621,7 @@ struct	refclock refclock_wwv = {
 	noentry,		/* not used (old wwv_control) */
 	noentry,		/* initialize driver (not used) */
 	noentry,		/* not used (old wwv_buginfo) */
-	NOFLAGS			/* not used */
+	noentry			/* not used */
 };
 
 
