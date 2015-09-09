@@ -35,13 +35,13 @@ barf.
 The documentation is a stale, untidy, duplicative mess only partway
 converted to asciidoc.
 
-* Check plass completiion on the conversion of the HTML docs.
+* Check completion on the conversion of the HTML docs.
 
 * The rest of the in-tree documentation must be lifted to asciidoc
 
 * We need to land the whole document conversion in the main repo.
 
-* A serious ccontent-editing and update pass on the documents.  
+* A serious content-editing and update pass on the documents.  
 
 * Part of d) is the ntp -> ntps name change.
 
@@ -51,7 +51,7 @@ converted to asciidoc.
 * Website needs to be integrated (with a contacts and services page,
   among other things) and published.
 
-* Decent build and packsge-dependency documentation.
+* Decent build and package-dependency documentation.
 
 === Remaining procedural issues ===
 
@@ -63,9 +63,6 @@ reviewed, and if necessary fixed.
 * We need a release checklist.
 
 == Relatively new items ==
-
-* Remove libevent from the tree.  There's no reason not to link to a current
-  version of libevent.
 
 * The portability shims for the case where there is no OpenSSL library installed
   are dodgy.  Get rid of them, it's a safe dependency.  The MD5 implementation
