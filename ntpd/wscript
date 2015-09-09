@@ -17,6 +17,40 @@ def build(ctx):
 		]
 	)
 
+	ctx.add_group() # Generate Bison files first.
+
+
+	keyword_gen_source = [
+		"keyword-gen.c",
+    ]
+
+	ctx(
+		target      = "keyword-gen",
+		features    = "c cprogram bld_include src_include libisc_include",
+# src_include libisc_include",
+        source      = keyword_gen_source,
+		use			= ["ntp", "isc"],
+		includes    = [
+						"%s/ntpd/" % bldnode
+		],
+	)
+
+	# XXX: needs a dependency to rebuild ntp_keyword.h when keyword-gen is rebuilt
+
+	ctx.add_group() # Make sure keyword-gen is created next.
+
+	ctx(
+		rule        = "%s/ntpd/keyword-gen ${SRC} > ${TGT}" % bldnode,
+		features    = "c bld_include src_include",
+		source      = "ntp_parser.tab.h",
+		target      = "ntp_keyword.h"
+	)
+
+
+	ctx.add_group() # Make sure ntp_keyword.h is created last.
+
+
+
 	libntpd_source = [
 		"ntp_control.c",
 		"ntp_crypto.c",
@@ -109,7 +143,8 @@ def build(ctx):
 		use			= "libntpd_obj bison_obj isc ntp opts M parse RT THR PTHREAD %s" % use_refclock,
 		includes	= [
  						"%s/sntp/libopts/" % srcnode,
- 						"%s/ntpd/" % bldnode
+						"%s/ntpd/" % bldnode,
+						"%s/ntpd/" % srcnode
 					],
 
 	)

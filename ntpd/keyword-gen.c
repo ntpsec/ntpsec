@@ -3,18 +3,6 @@
  *		    keyword_text array.
  *
  * This program is run to generate ntp_keyword.h
- * After making a change here, two output files should be committed at
- * the same time as keyword-gen.c:
- *	ntp_keyword.h
- *	keyword-gen-utd
- *
- * keyword-gen-utd is a sentinel used by Makefile.am to avoid compiling
- * keyword_gen.c and generating ntp_keyword.h if the input keyword-gen.c
- * has not changed.  This is not solely an optimization, it also breaks
- * a dependency chain that otherwise would cause programs to be compiled
- * when running "make dist" or "make distdir".  We want these to package
- * the existing source without building anything but a tarball.  See
- * [Bug 1470].
  */
 #include <config.h>
 #include <stdio.h>
@@ -25,7 +13,7 @@
 #include <ntp_config.h>
 #include <lib_strbuf.h>
 #include "ntp_scanner.h"
-#include "ntp_parser.h"
+#include "ntp_parser.tab.h"
 
 
 /* Define a structure to hold a (keyword, token) pair */
@@ -311,7 +299,7 @@ generate_preamble(void)
 " *\n"
 " */\n"
 "#include \"ntp_scanner.h\"\n"
-"#include \"ntp_parser.h\"\n"
+"#include \"ntp_parser.tab.h\"\n"
 "\n";
 
 	time(&now);
@@ -428,9 +416,7 @@ generate_fsm(void)
 		/*
 		 * Determine the keyword prefix that leads to this
 		 * state.  This is expensive but keyword-gen is run
-		 * only when it changes.  Distributing keyword-gen-utd
-		 * achieves that, which is why it must be committed
-		 * at the same time as keyword-gen.c and ntp_keyword.h.
+		 * only when it changes.
 		 *
 		 * Scan the state array iteratively looking for a state
 		 * which leads to the current one, collecting matching

@@ -44,7 +44,7 @@
  */
 #include "ntp_config.h"
 #include "ntp_scanner.h"
-#include "ntp_parser.h"
+#include "ntp_parser.tab.h"
 
 
 /* list of servers from command line for config_peers() */
