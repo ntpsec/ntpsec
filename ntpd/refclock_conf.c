@@ -72,12 +72,6 @@ extern  struct refclock refclock_arbiter;
 #define refclock_arbiter refclock_none
 #endif
 
-#ifdef CLOCK_TPRO
-extern	struct refclock	refclock_tpro;
-#else
-#define	refclock_tpro	refclock_none
-#endif
-
 #ifdef CLOCK_IRIG
 extern	struct refclock	refclock_irig;
 #else
@@ -252,7 +246,7 @@ struct refclock * const refclock_conf[] = {
 	&refclock_mx4200,	/* 9 REFCLK_GPS_MX4200 */
 	&refclock_as2201,	/* 10 REFCLK_GPS_AS2201 */
 	&refclock_arbiter,	/* 11 REFCLK_GPS_ARBITER */
-	&refclock_tpro,		/* 12 REFCLK_IRIG_TPRO */
+	&refclock_none,		/* 12 was: REFCLK_IRIG_TPRO */
 	&refclock_none,		/* 13 was: REFCLK_ATOM_LEITCH */
 	&refclock_none,		/* 14 was: REFCLOCK_MSF_EES */
 	&refclock_none,		/* 15 was: OLD TrueTime GPS/TM-TMD Receiver */
