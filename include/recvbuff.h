@@ -50,7 +50,7 @@ struct recvbuf {
 	recvbuf_t *	link;	/* next in list */
 	union {
 		sockaddr_u	X_recv_srcadr;
-		caddr_t		X_recv_srcclock;
+		void *		X_recv_srcclock;
 		struct peer *	X_recv_peer;
 	} X_from_where;
 #define recv_srcadr		X_from_where.X_recv_srcadr
