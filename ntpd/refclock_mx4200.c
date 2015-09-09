@@ -187,7 +187,7 @@ struct	refclock refclock_mx4200 = {
 	noentry,		/* not used (old mx4200_control) */
 	noentry,		/* initialize driver (not used) */
 	noentry,		/* not used (old mx4200_buginfo) */
-	NOFLAGS			/* not used */
+	noentry			/* not used */
 };
 
 

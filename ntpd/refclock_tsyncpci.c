@@ -274,7 +274,7 @@ struct refclock refclock_tsyncpci = {
     noentry,        /* not used (old tsync_control) */
     noentry,        /* initialize driver (not used) */
     noentry,        /* not used (old tsync_buginfo) */
-    NOFLAGS         /* not used */
+    noentry         /* not used */
 };
 
 /*

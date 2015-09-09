@@ -166,7 +166,7 @@ struct	refclock refclock_jupiter = {
 	jupiter_control,	/* (clock control) */
 	noentry,		/* (clock init) */
 	noentry,		/* (clock buginfo) */
-	NOFLAGS			/* not used */
+	noentry			/* not used */
 };
 
 /*

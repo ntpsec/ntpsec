@@ -145,7 +145,7 @@ struct	refclock refclock_as2201 = {
 	noentry,		/* not used (old as2201_control) */
 	noentry,		/* initialize driver (not used) */
 	noentry,		/* not used (old as2201_buginfo) */
-	NOFLAGS			/* not used */
+	noentry			/* not used */
 };
 
 
