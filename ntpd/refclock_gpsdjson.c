@@ -79,6 +79,12 @@
 #include <config.h>
 #endif
 
+/* The strptime prototype is not provided unless explicitly requested.
+ * See the POSIX spec for more info:
+ * http://pubs.opengroup.org/onlinepubs/9699919799/functions/V2_chap02.html#tag_15_02_01_02
+ */
+#define _XOPEN_SOURCE 600
+
 #include "ntp.h"
 #include "ntp_types.h"
 #include "ntp_control.h"	/* for CTL_* clocktypes */
@@ -537,7 +543,7 @@ gpsd_start(
 	}
 	
 	/* setup refclock processing */
-	pp->unitptr = (caddr_t)up;
+	pp->unitptr       = (void *)up;
 	pp->io.fd         = -1;
 	pp->io.clock_recv = gpsd_receive;
 	pp->io.srcclock   = peer;
@@ -583,7 +589,7 @@ dev_fail:
 		free(up);
 	}
 
-	pp->unitptr = (caddr_t)NULL;
+	pp->unitptr = NULL;
 	return false;
 }
 
@@ -627,7 +633,7 @@ gpsd_shutdown(
 		free(up->device);
 		free(up);
 	}
-	pp->unitptr = (caddr_t)NULL;
+	pp->unitptr = NULL;
 	LOGIF(CLOCKINFO,
 	      (LOG_NOTICE, "%s: shutdown", refnumtoa(&peer->srcadr)));
 }
