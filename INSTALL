@@ -1,6 +1,8 @@
 Quick Start
 ===========
 
+Be sure Python >= 2.5 and libevent 2.x are installed on your system.
+
 Go to the directory where you found this file and do this:
 
 ----------------------------------------------------------------------
@@ -10,7 +12,6 @@ $ ./waf build
 
 "waf" is a build engine written in Python that runs faster and is
 far less painful to maintain than an equivalent autoconf build.
-You will need Python 2.5 or later installed to make it work.
 
 Basic Installation
 ==================
