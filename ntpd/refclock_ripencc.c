@@ -445,7 +445,7 @@ struct refclock refclock_ripencc = {
 	ripencc_control,	/* control function */
 	noentry,		/* initialize driver */
 	noentry,		/* debug info */
-	NOFLAGS			/* clock flags */
+	noentry			/* clock flags */
 };
 
 /*

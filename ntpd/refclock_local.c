@@ -106,7 +106,7 @@ struct	refclock refclock_local = {
 	noentry,		/* not used (old lcl_control) */
 	noentry,		/* initialize driver (not used) */
 	noentry,		/* not used (old lcl_buginfo) */
-	NOFLAGS 		/* not used */
+	noentry 		/* not used */
 };
 
 

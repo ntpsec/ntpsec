@@ -108,7 +108,7 @@ struct	refclock refclock_pst = {
 	noentry,		/* not used (old pst_control) */
 	noentry,		/* initialize driver */
 	noentry,		/* not used (old pst_buginfo) */
-	NOFLAGS			/* not used */
+	noentry			/* not used */
 };
 
 

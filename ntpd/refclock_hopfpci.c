@@ -108,7 +108,7 @@ struct  refclock refclock_hopfpci = {
 	noentry,                /* not used */
 	noentry,                /* initialize driver (not used) */
 	noentry,                /* not used */
-	NOFLAGS                 /* not used */
+	noentry                 /* not used */
 };
 
 /*

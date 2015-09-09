@@ -548,7 +548,7 @@ struct  refclock refclock_arc = {
 	noentry,		/* not used (old arc_control) */
 	noentry,		/* initialize driver (not used) */
 	noentry,		/* not used (old arc_buginfo) */
-	NOFLAGS			/* not used */
+	noentry			/* not used */
 };
 
 /* Queue us up for the next tick. */

@@ -211,7 +211,7 @@ struct	refclock refclock_true = {
 	noentry,		/* not used (old true_control) */
 	noentry,		/* initialize driver (not used) */
 	noentry,		/* not used (old true_buginfo) */
-	NOFLAGS			/* not used */
+	noentry			/* not used */
 };
 
 

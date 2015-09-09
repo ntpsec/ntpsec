@@ -203,7 +203,7 @@ struct	refclock refclock_heath = {
 	noentry,		/* not used (old heath_control) */
 	noentry,		/* initialize driver */
 	noentry,		/* not used (old heath_buginfo) */
-	NOFLAGS			/* not used */
+	noentry			/* not used */
 };
 
 

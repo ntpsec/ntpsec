@@ -112,7 +112,7 @@ struct	refclock refclock_zyfer = {
 	noentry,		/* not used (old zyfer_control) */
 	noentry,		/* initialize driver (not used) */
 	noentry,		/* not used (old zyfer_buginfo) */
-	NOFLAGS			/* not used */
+	noentry			/* not used */
 };
 
 

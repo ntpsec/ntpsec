@@ -142,7 +142,7 @@ struct	refclock refclock_arbiter = {
 	noentry,		/* not used (old arb_control) */
 	noentry,		/* initialize driver (not used) */
 	noentry,		/* not used (old arb_buginfo) */
-	NOFLAGS			/* not used */
+	noentry			/* not used */
 };
 
 

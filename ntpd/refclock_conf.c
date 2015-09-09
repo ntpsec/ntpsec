@@ -15,7 +15,7 @@
 #ifdef REFCLOCK
 
 static struct refclock refclock_none = {
-	noentry, noentry, noentry, noentry, noentry, noentry, NOFLAGS
+	noentry, noentry, noentry, noentry, noentry, noentry, noentry
 };
 
 #ifdef CLOCK_LOCAL
