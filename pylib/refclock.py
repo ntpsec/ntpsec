@@ -37,7 +37,7 @@ refclock_map = {
 	},
 
 	8: {
-		"descr":	"Generic Reference Driver",
+		"descr":	"Generic Reference Driver (Parse)",
 		"define":	"CLOCK_PARSE",
 		"require":	["parse"],
 		"file":		"parse"
@@ -63,7 +63,7 @@ refclock_map = {
 	},
 
 	12: {
-		"descr":	"KSI/Odetics TPRO/S IRIG Interface",
+		"descr":	"KSI/Odetics TPRO/S IRIG Interface (SUN)",
 		"define":	"CLOCK_TPRO",
 		"file":		"tpro"
 	},
@@ -118,7 +118,7 @@ refclock_map = {
 	},
 
 	29: {
-		"descr":	"RIPE NCC interface for Trimble Palisade",
+		"descr":	"Trimble Navigation Palisade GPS",
 		"define":	"CLOCK_PALISADE",
 		"file":		"palisade"
 	},
@@ -197,7 +197,7 @@ refclock_map = {
 	},
 
 	43: {
-		"descr":	"Radio WWV/H Audio Demodulator/Decoder",
+		"descr":	"RIPE NCC interface for Trimble Palisade",
 		"define":	"CLOCK_RIPENCC",
 		"file":		"ripencc"
 	},
