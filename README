@@ -11,12 +11,8 @@ A complete explanation of the configure, compile and install process, as
 well as setting up an NTP subnet, is in the HTML pages in the ./html/
 directory.
 
-The base directory ./ contains the autoconfiguration files, source
+The base directory ./ contains the configuration files, source
 directories and related stuff:
-
-COPYRIGHT::	Excerpt from the HTML file ./html/copyright.html. This file
-		specifies copyright conditions, together with a list of
-		major authors and electric addresses.
 
 INSTALL::	Generic installation instructions for autoconf-based programs.
 		Unless you really know what you are doing, you should read the
@@ -27,82 +23,86 @@ NEWS::		What's new in this release.
 
 README::	This file.
 
-devel-docs::	Documentation aimed at developers.
+devel-docs/::	Documentation aimed at developers.
 
-adjtimed::	Directory containing the sources for the adjtime daemon
+adjtimed/::	Directory containing the sources for the adjtime daemon
 		for HP/UX systems prior to HP-UX 10.0.
 
-clockstuff::	Directory containing sources for miscellaneous programs
+clockstuff/::	Directory containing sources for miscellaneous programs
 		to test certain auxiliary programs used with some kernel
 		configurations, together with a program to calculate
 		propagation delays for use with radio clocks and
 		national time dissemination services such as WWV/WWVH,
 		WWVB and CHU.
 
-conf::		Directory containing a motley collection of
+conf/::		Directory containing a motley collection of
 		configuration files for various systems. For example only.
 
-html::		Directory containing a complete set of documentation on
+html/::		Directory containing a complete set of documentation on
 		building and configuring a NTP server or client. The
 		documentation is in the form of HTML files suitable for
 		browsing and contains links to additional documentation
 		at various web sites. If a browser is unavailable, an
 		ordinary text editor can be used.
 
-include::	Directory containing include header files used by most
+include/::	Directory containing include header files used by most
 		programs in the distribution.
 
-lib::		Source code for third-party libraries included in the
-		distribution.  Xurrently juat onme: isc, utilty code
-		from Interactive Sytems Corporation.
+lib/::		Source code for third-party libraries included in the
+		distribution.  Currently just one: isc, utilty code
+		from Internet Systems Consortium.
 
-libjsmn::	A minimal JSON library used by the GPSD-JSON driver.
+libjsmn/::	A minimal JSON library used by the GPSD-JSON driver.
 
-libparse:: 	This directory contains the files making up the parser for
+libntp/::	Directory containing library source code used by most
+		programs in the distribution.
+
+libparse/:: 	This directory contains the files making up the parser for
 		the parse refclock driver. For reasonably sane clocks
 		this refclock drivers allows a refclock implementation
 		by just providing a conversion routine and the
 		appropriate NTP parameters
 
-libntp::	Directory containing library source code used by most
-		programs in the distribution.
+ntpd/::		Sources for the main time-synchronization daemon.
 
-ntpdate::	Directory containing sources for a program to set the
+ntpdate/::	Directory containing sources for a program to set the
 		local machine time from one or more remote machines
 		running NTP.  Operates like rdate, but much more accurate.
 
-ntpq::		Directory containing sources for a utility program to
+ntpq/::		Directory containing sources for a utility program to
 		query local and remote NTP peers for state variables and
 		related timekeeping information. This program conforms
 		to Appendix A of the NTP Version 3 Specification RFC 1305.
 
-ntptrace::	Directory containing sources for a utility program that
+ntptrace/::	Directory containing sources for a utility program that
 		can be used to reveal the chain of NTP peers from a
 		designated peer to the primary server at the root of the
 		timekeeping subnet.
 
-ntpsnmpd::	NTP SNMP subagent for Net-SNMP.
+ntpsnmpd/::	NTP SNMP subagent for Net-SNMP.
 
-parseutil::	Some utilities for DCF77 clocks.  Obsolete - working only
+parseutil/::	Some utilities for DCF77 clocks.  Obsolete - working only
 		on SunOS 4.x, which went out of support in December 2003.
 
-ports::		Subdirectories of this contain code for non-Unix operating
+ports/::	Subdirectories of this contain code for non-Unix operating
 		systems.  At present there is just one, for Windows.
 
-scripts::	Directory containing scripts to build the configuration
+scripts/::	Directory containing scripts to build the configuration
 		files in this directory and then the makefiles used in
 		various dependent directories. the subdirectories
 		monitoring and support hold various perl and shell
 		scripts for visualizing synchronization and daemon startup.
 
-sntp::		Query an NTP or SNTP server to report or set the time.
+sntp/::		Query an NTP or SNTP server to report or set the time.
 
-tests::		Self-test code.
+tests/::	Self-test code.
 
-util::		Directory containing sources for various utility and
+util/::		Directory containing sources for various utility and
 		testing programs.
 
 waf::		A copy of the waf builder.  This is the engine used to configure
 		and build the codebase.
+
+wscript::	NTP-specific weaf rules.
 
 // end

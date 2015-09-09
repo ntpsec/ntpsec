@@ -8,6 +8,10 @@ $ ./waf configure
 $ ./waf build
 ----------------------------------------------------------------------
 
+"waf" is a build engine written in Python that runs faster and is
+far less painful to maintain than an equivalent autoconf build.
+You will need Python 2.5 or later installed to make it work.
+
 Basic Installation
 ==================
 
@@ -18,23 +22,21 @@ For Windows/NT, please see ports/winnt and html/build/hints/winnt.html.
 active Windows port maintainer and the build will be fixed when we
 have one.)
 
-You will need Python 2.5 or later installed to make the build work.
-
 Under Unix, the simplest way to compile this package is:
 
   1. `cd' to the directory containing the package's source code and
 
-  2. Run `waf configure' to configure the package for your system.  
+  2. Run `./waf configure' to configure the package for your system.  
 
-  3. Type `waf build' to compile the package.
+  3. Type `./waf build' to compile the package.
 
-  4. Type `waf install' to install the programs and any data files and
+  4. Type `./waf install' to install the programs and any data files and
      documentation.
 
   5. You can remove the program binaries and object files from the
-     source code directory by typing `waf clean'.  To also remove the
+     source code directory by typing `./waf clean'.  To also remove the
      files that `waf configure' created (so you can compile the package for
-     a different kind of computer), type `waf distclean'.
+     a different kind of computer), type `./waf distclean'.
 
 Installation Names
 ==================
@@ -61,7 +63,7 @@ operates.
      Print a summary of the options to `waf configure', and exit.
 
 `--version'
-     Print the version of Autoconf used to generate the `configure'
+     Print the version of waf used to generate the `configure'
      script, and exit.
 
 // end

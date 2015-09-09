@@ -19,6 +19,8 @@ caused many problems. The waf script is embedded in the top level of
 the distribution; run "./waf --help" or consult INSTALL for basic
 instructions.
 
+Full waf documentatiion is at: https://waf.io/
+
 === C API standards ===
 
 The baseline C standard to write to is ISO/IEC 9899:1999, also known
