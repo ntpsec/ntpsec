@@ -108,6 +108,10 @@ def cmd_configure(ctx):
 
 	ctx.load('compiler_c')
 	ctx.load('bison')
+
+	if ctx.options.enable_debug:
+		ctx.env.BISONFLAGS += ["--debug"]
+
 	ctx.find_program("yacc", var="BIN_YACC")
 	ctx.find_program("awk", var="BIN_AWK")
 	ctx.find_program("perl", var="BIN_PERL")

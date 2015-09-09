@@ -23,7 +23,7 @@
 #include "ntp_config.h"
 #include "ntpsim.h"
 #include "ntp_scanner.h"
-#include "ntp_parser.h"
+#include "ntp_parser.tab.h"
 
 /* ntp_keyword.h declares finite state machine and token text */
 #include "ntp_keyword.h"
