@@ -92,7 +92,7 @@ struct	refclock refclock_dumbclock = {
 	noentry,			     /* not used */
 	noentry,			     /* not used */
 	noentry,			     /* not used */
-	NOFLAGS				     /* not used */
+	noentry				     /* not used */
 };
 
 

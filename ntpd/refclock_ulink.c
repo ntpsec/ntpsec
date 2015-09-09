@@ -106,7 +106,7 @@ struct	refclock refclock_ulink = {
 	noentry,		/* not used  */
 	noentry,		/* not used  */
 	noentry,		/* not used  */
-	NOFLAGS
+	noentry
 };
 
 

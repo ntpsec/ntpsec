@@ -152,7 +152,7 @@ struct refclock refclock_neoclock4x = {
   neoclock4x_control,
   noentry,		/* initialize driver (not used) */
   noentry,		/* not used */
-  NOFLAGS			/* not used */
+  noentry			/* not used */
 };
 
 static bool

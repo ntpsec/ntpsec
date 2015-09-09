@@ -104,7 +104,7 @@ struct refclock refclock_palisade = {
 	noentry,		/* not used  */
 	noentry,		/* initialize driver (not used) */
 	noentry,		/* not used */
-	NOFLAGS			/* not used */
+	noentry			/* not used */
 };
 
 int day_of_year (char *dt);
