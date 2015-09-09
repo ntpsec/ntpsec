@@ -19,7 +19,7 @@ caused many problems. The waf script is embedded in the top level of
 the distribution; run "./waf --help" or consult INSTALL for basic
 instructions.
 
-Full waf documentatiion is at: https://waf.io/
+Full waf documentation is at: https://waf.io/
 
 === C API standards ===
 
@@ -83,7 +83,7 @@ scripting language and not one of these, you would be doing us a
 favor by translating it into Python or sh.
 
 The reason for this policy is not that we hate all other scripting
-languages, it's to reduce the complexity of maintainance and testing
+languages, it's to reduce the complexity of maintenance and testing
 due to multiple languages.
 
 == Patch and change-comment conventions ==
@@ -127,7 +127,7 @@ the files a multi-file commit touches in the comment for it.  The
 this information to users who want it.  It is still appropriate
 to list a file path if you have something specific to say about that
 individual file, or if it's the only one touched in a single-file
-change and you can easily fit it in the summary line alonmg with your
+change and you can easily fit it in the summary line along with your
 summary.
 
 Yes, we know the pre-git portions of the history violate some of these.
