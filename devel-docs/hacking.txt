@@ -12,6 +12,13 @@ documented here.
 
 == General notes ==
 
+=== Build system ===
+
+The build uses waf, replacing a huge ancient autoconf hairball that
+caused many problems. The waf script is embedded in the top level of
+the distribution; run "./waf --help" or consult INSTALL for basic
+instructions.
+
 === C API standards ===
 
 The baseline C standard to write to is ISO/IEC 9899:1999, also known
@@ -44,7 +51,7 @@ cause buffer overruns and (all too often) exploitable security holes:
 === Cross-platform portability ===
 
 Do not bake in any assumptions about 32-vs-64-bit word size.  It is OK
-to assume the code will never run on a 16-bit machine.  Wen in doubt,
+to assume the code will never run on a 16-bit machine.  When in doubt,
 use the fixed-width integral types from <stdint.h>.
 
 Do not assume any particular endianness. When in doubt, use
