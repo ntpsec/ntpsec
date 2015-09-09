@@ -29,7 +29,7 @@ def build(ctx):
 		features    = "c cprogram bld_include src_include libisc_include",
 # src_include libisc_include",
         source      = keyword_gen_source,
-		use			= ["ntp", "isc"],
+		use			= "ntp isc RT THR PTHREAD",
 		includes    = [
 						"%s/ntpd/" % bldnode
 		],
