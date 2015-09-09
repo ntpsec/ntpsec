@@ -62,12 +62,6 @@ refclock_map = {
 		"file":		"arbiter"
 	},
 
-	12: {
-		"descr":	"KSI/Odetics TPRO/S IRIG Interface (SUN)",
-		"define":	"CLOCK_TPRO",
-		"file":		"tpro"
-	},
-
 	16: {
 		"descr":	"Bancomm GPS/IRIG Receiver",
 		"define":	"CLOCK_BANC",
