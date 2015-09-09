@@ -20,7 +20,6 @@
 # include "win32_io.h"
 #endif
 
-#include <isc/boolean.h>
 #include <isc/netaddr.h>
 
 #include <netinet/in.h>

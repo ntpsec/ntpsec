@@ -22,6 +22,7 @@
 
 /*! \file isc/netaddr.h */
 
+#include <isc/boolean.h>
 #include <isc/lang.h>
 #include <isc/net.h>
 #include <isc/types.h>
