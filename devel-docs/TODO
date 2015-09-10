@@ -19,6 +19,9 @@ the rest of the way - not a hard task, really, but a messy one that
 is interwined with some ill-scoped documentation and build issues.
 (It also involves writing tests for the new option-processing logic.)
 
+* The u_* types in ntp.h are GCCisms that should be replaced with
+POSIX types.
+
 === Testing ===
 
 * Unit testing.  "make check" needs to run all the unit tests.
