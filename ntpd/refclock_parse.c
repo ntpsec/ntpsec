@@ -188,7 +188,7 @@ static char rcsid[] = "refclock_parse.c,v 4.81 2009/05/01 10:15:29 kardel RELEAS
  ** external interface to ntp mechanism
  **/
 
-static	int	parse_start	(int, struct peer *);
+static	bool	parse_start	(int, struct peer *);
 static	void	parse_shutdown	(int, struct peer *);
 static	void	parse_poll	(int, struct peer *);
 static	void	parse_control	(int, const struct refclockstat *, struct refclockstat *, struct peer *);
@@ -417,7 +417,7 @@ struct parseunit
 
 static	void	poll_dpoll	(struct parseunit *);
 static	void	poll_poll	(struct peer *);
-static	int	poll_init	(struct parseunit *);
+static	bool	poll_init	(struct parseunit *);
 
 typedef struct poll_info
 {
@@ -529,7 +529,7 @@ typedef struct poll_info
  * Meinberg GPS receivers
  */
 static	void	gps16x_message	 (struct parseunit *, parsetime_t *);
-static  int     gps16x_poll_init (struct parseunit *);
+static  bool    gps16x_poll_init (struct parseunit *);
 
 #define	GPS16X_ROOTDELAY	0.0         /* nothing here */
 #define	GPS16X_BASEDELAY	0.001968         /* XXX to be fixed ! 1.968ms +- 104us (oscilloscope) - relative to start (end of STX) */
@@ -694,14 +694,14 @@ static	int	rawdcf_init_2	(struct parseunit *);
 #define TRIM_TAIPCMDSIZE	(sizeof(TRIM_TAIPPOLLCMD)-1)
 
 static poll_info_t trimbletaip_pollinfo = { TRIM_POLLRATE, TRIM_TAIPPOLLCMD, TRIM_TAIPCMDSIZE };
-static	int	trimbletaip_init	(struct parseunit *);
+static	bool	trimbletaip_init	(struct parseunit *);
 static	void	trimbletaip_event	(struct parseunit *, int);
 
 /* query time & UTC correction data */
 static char tsipquery[] = { DLE, 0x21, DLE, ETX, DLE, 0x2F, DLE, ETX };
 
 static poll_info_t trimbletsip_pollinfo = { TRIM_POLLRATE, tsipquery, sizeof(tsipquery) };
-static	int	trimbletsip_init	(struct parseunit *);
+static	bool	trimbletsip_init	(struct parseunit *);
 static	void	trimbletsip_end   	(struct parseunit *);
 static	void	trimbletsip_message	(struct parseunit *, parsetime_t *);
 static	void	trimbletsip_event	(struct parseunit *, int);
@@ -1709,12 +1709,12 @@ static void stream_receive  (struct recvbuf *);
 static int  local_init     (struct parseunit *);
 static void local_end      (struct parseunit *);
 static bool local_nop      (struct parseunit *);
-static int  local_setcs    (struct parseunit *, parsectl_t *);
+static bool local_setcs    (struct parseunit *, parsectl_t *);
 static int  local_getfmt   (struct parseunit *, parsectl_t *);
 static int  local_setfmt   (struct parseunit *, parsectl_t *);
 static int  local_timecode (struct parseunit *, parsectl_t *);
 static void local_receive  (struct recvbuf *);
-static int  local_input    (struct recvbuf *);
+static bool local_input    (struct recvbuf *);
 
 static bind_t io_bindings[] =
 {
@@ -4785,7 +4785,7 @@ poll_init(
 /*-------------------------------------------------------------
  * trimble TAIP init routine - setup EOL and then do poll_init.
  */
-static int
+static bool
 trimbletaip_init(
 	struct parseunit *parse
 	)
