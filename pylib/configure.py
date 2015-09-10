@@ -314,6 +314,12 @@ int main () {
 	if ctx.options.enable_ipv6:
 		ctx.define("INCLUDE_IPV6_SUPPORT", 1)
 
+	if ctx.options.enable_leap_smear:
+		ctx.define("ENABLE_LEAP_SMEAR", 1)
+
+	if ctx.options.enable_mssntp:
+		ctx.define("ENABLE_MSSNTP", 1)
+
 	# Won't be true under Windows, but is under every Unix-like OS.
 	ctx.define("HAVE_WORKING_FORK", 1)
 
