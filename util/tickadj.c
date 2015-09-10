@@ -14,7 +14,6 @@
 #endif
 
 #include "ntp_types.h"
-#include "l_stdlib.h"
 
 #include <stdio.h>
 #include <unistd.h>

@@ -37,7 +37,6 @@
 #include <unistd.h>
 #include <stdio.h>
 
-#include <l_stdlib.h>
 #include <ntp_random.h>
 #include <ntp_unixtime.h>
 
