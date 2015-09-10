@@ -414,8 +414,7 @@ parse_cmdline_opts(
 		}
 		break;
 	    case 'V':
-		/* FIXME: report real version when new build system lands */
-		printf("ntpd\n");
+		printf("%s\n", Version);
 		exit(0);
 	    case 'w':
 		wait_sync = strtod(ntp_optarg, NULL);
