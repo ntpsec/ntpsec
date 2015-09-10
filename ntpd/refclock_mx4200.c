@@ -153,7 +153,7 @@ static char pmvxg[] = "PMVXG";
 /*
  * Function prototypes
  */
-static	int	mx4200_start	(int, struct peer *);
+static	bool	mx4200_start	(int, struct peer *);
 static	void	mx4200_shutdown	(int, struct peer *);
 static	void	mx4200_receive	(struct recvbuf *);
 static	void	mx4200_poll	(int, struct peer *);
@@ -170,7 +170,7 @@ static	u_char	mx4200_cksum	(char *, int);
 static	int	mx4200_jday	(int, int, int);
 static	void	mx4200_debug	(struct peer *, char *, ...)
     __attribute__ ((format (printf, 2, 3)));
-static	int	mx4200_pps	(struct peer *);
+static	bool	mx4200_pps	(struct peer *);
 
 /*
  * Transfer vector
@@ -826,7 +826,7 @@ mx4200_receive(
 		 * Capture the last PPS signal.
 		 * Precision timestamp is returned in pp->lastrec
 		 */
-		if (0 != mx4200_pps(peer)) {
+		if (mx4200_pps(peer)) {
 			mx4200_debug(peer, "mx4200_receive: pps failure\n");
 			refclock_report(peer, CEVNT_FAULT);
 			return;
