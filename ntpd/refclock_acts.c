@@ -2,7 +2,8 @@
  * refclock_acts - clock driver for the NIST/USNO/PTB/NPL Computer Time
  *	Services
  */
-#include <config.h>
+#include "config.h"
+
 #include "ntpd.h"
 #include "ntp_io.h"
 #include "ntp_unixtime.h"

@@ -3,7 +3,8 @@
  * (but no longer the GC-1001 Model II, which apparently never worked)
  */
 
-#include <config.h>
+#include "config.h"
+
 #include "ntp.h"
 #include "ntpd.h"
 #include "ntp_io.h"
