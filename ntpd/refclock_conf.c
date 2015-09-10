@@ -200,12 +200,6 @@ extern	struct refclock	refclock_zyfer;
 #define	refclock_zyfer refclock_none
 #endif
 
-#ifdef CLOCK_RIPENCC
-extern struct refclock refclock_ripencc;
-#else
-#define refclock_ripencc refclock_none
-#endif
-
 #ifdef CLOCK_NEOCLOCK4X
 extern	struct refclock	refclock_neoclock4x;
 #else
@@ -273,7 +267,7 @@ struct refclock * const refclock_conf[] = {
 	&refclock_jjy,		/* 40 REFCLK_JJY */
 	&refclock_none,		/* 41 was: REFCLK_TT560 */
 	&refclock_zyfer,	/* 42 REFCLK_ZYFER */
-	&refclock_ripencc,	/* 43 REFCLK_RIPENCC */
+	&refclock_none,		/* 43 was: REFCLK_RIPENCC */
 	&refclock_neoclock4x,	/* 44 REFCLK_NEOCLOCK4X */
 	&refclock_tsyncpci,	/* 45 REFCLK_TSYNCPCI */
 	&refclock_gpsdjson	/* 46 REFCLK_GPSDJSON */

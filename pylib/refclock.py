@@ -190,12 +190,6 @@ refclock_map = {
 		"file":		"zyfer"
 	},
 
-	43: {
-		"descr":	"RIPE NCC interface for Trimble Palisade",
-		"define":	"CLOCK_RIPENCC",
-		"file":		"ripencc"
-	},
-
 	44: {
 		"descr":	"NeoClock4X - DCF77 / TDF serial line",
 		"define":	"CLOCK_NEOCLOCK4X",
