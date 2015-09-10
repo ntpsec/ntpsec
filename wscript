@@ -16,7 +16,7 @@ def options(ctx):
 
 
 	grp = ctx.add_option_group("Refclock options")
-	grp.add_option('--refclock', dest='refclocks', help="Comma seperated list of Refclock IDs to build", type='string')
+	grp.add_option('--refclock', dest='refclocks', help="Comma-separated list of Refclock IDs to build (or \"all\")", type='string')
 	grp.add_option('--list', action='store_true', default=False, help="List available Refclocks")
 
 
