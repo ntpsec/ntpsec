@@ -332,9 +332,6 @@
     <ClInclude Include="..\..\..\..\ntpd\jupiter.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\l_stdlib.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\..\include\mbg_gps166.h">
       <Filter>Header Files</Filter>
     </ClInclude>

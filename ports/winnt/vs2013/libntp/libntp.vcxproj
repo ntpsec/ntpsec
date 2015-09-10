@@ -323,7 +323,6 @@
     <ClInclude Include="..\..\..\..\include\iosignal.h" />
     <ClInclude Include="..\..\..\..\include\isc\mem.h" />
     <ClInclude Include="..\..\..\..\include\lib_strbuf.h" />
-    <ClInclude Include="..\..\..\..\include\l_stdlib.h" />
     <ClInclude Include="..\..\..\..\include\ntp.h" />
     <ClInclude Include="..\..\..\..\include\ntpd.h" />
     <ClInclude Include="..\..\..\..\include\ntp_assert.h" />

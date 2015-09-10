@@ -334,7 +334,6 @@
     <ClInclude Include="..\..\..\..\include\binio.h" />
     <ClInclude Include="..\..\..\..\include\ieee754io.h" />
     <ClInclude Include="..\..\..\..\include\iosignal.h" />
-    <ClInclude Include="..\..\..\..\include\l_stdlib.h" />
     <ClInclude Include="..\..\..\..\include\mbg_gps166.h" />
     <ClInclude Include="..\..\..\..\include\ntp.h" />
     <ClInclude Include="..\..\..\..\include\ntpd.h" />
