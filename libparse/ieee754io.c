@@ -34,7 +34,6 @@
 #endif
 
 #include <stdio.h>
-#include "l_stdlib.h"
 #include "ntp_stdlib.h"
 #include "ntp_fp.h"
 #include "ieee754io.h"

@@ -8,11 +8,10 @@
  */
 
 #include "config.h"
+
 #include <sys/types.h>
 #include <unistd.h>
 #include <stdio.h>
-
-#include <l_stdlib.h>
 #include <ntp_random.h>
 
 #ifdef USE_OPENSSL_CRYPTO_RAND

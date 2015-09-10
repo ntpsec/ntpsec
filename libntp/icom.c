@@ -13,7 +13,6 @@
 #include <errno.h>
 
 #include "ntp_tty.h"
-#include "l_stdlib.h"
 
 #ifdef SYS_WINNT
 #undef write	/* ports/winnt/include/config.h: #define write _write */

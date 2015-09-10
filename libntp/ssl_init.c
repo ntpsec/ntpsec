@@ -7,6 +7,7 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
+#include <unistd.h>
 #include <ctype.h>
 #include <ntp.h>
 #include <ntp_debug.h>
