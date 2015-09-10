@@ -24,18 +24,6 @@ struct timeval;
 extern	int	adjtime		(struct timeval *, struct timeval *);
 #endif
 
-#ifdef DECL_BCOPY_0
-#ifndef bcopy
-extern	void	bcopy		(const char *, char *, int);
-#endif
-#endif
-
-#ifdef DECL_BZERO_0
-#ifndef bzero
-extern	void	bzero		(char *, int);
-#endif
-#endif
-
 #ifdef DECL_CFSETISPEED_0
 struct termios;
 extern	int	cfsetispeed	(struct termios *, speed_t);

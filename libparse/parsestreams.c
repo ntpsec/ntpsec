@@ -508,7 +508,7 @@ parseopen(
 	WR(q)->q_ptr = q->q_ptr;
 
 	parse = (parsestream_t *)(void *)q->q_ptr;
-	bzero((caddr_t)parse, sizeof(*parse));
+	memset(parse, '\0', sizeof(*parse));
 	parse->parse_queue     = q;
 	parse->parse_status    = PARSE_ENABLE;
 	parse->parse_ppsclockev.tv.tv_sec  = 0;
@@ -836,7 +836,7 @@ parserput(
 							    nmp = (mblk_t *)NULL;
 							    if (canput(parse->parse_queue->q_next) && (nmp = allocb(sizeof(parsetime_t), BPRI_MED)))
 							    {
-								    bcopy((caddr_t)&parse->parse_io.parse_dtime, (caddr_t)nmp->b_rptr, sizeof(parsetime_t));
+								    memcpy(nmp->b_rptr, &parse->parse_io.parse_dtime, sizeof(parsetime_t));
 								    nmp->b_wptr += sizeof(parsetime_t);
 								    putnext(parse->parse_queue, nmp);
 							    }
@@ -857,7 +857,7 @@ parserput(
 						    nmp = (mblk_t *)NULL;
 						    if (canput(parse->parse_queue->q_next) && (nmp = allocb(sizeof(parsetime_t), BPRI_MED)))
 						    {
-							    bcopy((caddr_t)&parse->parse_io.parse_dtime, (caddr_t)nmp->b_rptr, sizeof(parsetime_t));
+							    memcpy((caddr_t)nmp->b_rptr, &parse->parse_io.parse_dtime, sizeof(parsetime_t));
 							    nmp->b_wptr += sizeof(parsetime_t);
 							    putnext(parse->parse_queue, nmp);
 						    }
@@ -892,7 +892,7 @@ parserput(
 				    nmp = (mblk_t *)NULL;
 				    if (canput(parse->parse_queue->q_next) && (nmp = allocb(sizeof(parsetime_t), BPRI_MED)))
 				    {
-					    bcopy((caddr_t)&parse->parse_io.parse_dtime, (caddr_t)nmp->b_rptr, sizeof(parsetime_t));
+					    memcpy(nmp->b_rptr, &parse->parse_io.parse_dtime, sizeof(parsetime_t));
 					    nmp->b_wptr += sizeof(parsetime_t);
 					    putnext(parse->parse_queue, nmp);
 				    }
