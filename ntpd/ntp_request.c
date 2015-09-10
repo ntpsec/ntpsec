@@ -109,8 +109,6 @@ static	void	get_kernel_info (sockaddr_u *, endpt *, struct req_pkt *);
 #ifdef REFCLOCK
 static	void	get_clock_info (sockaddr_u *, endpt *, struct req_pkt *);
 static	void	set_clock_fudge (sockaddr_u *, endpt *, struct req_pkt *);
-#endif	/* REFCLOCK */
-#ifdef REFCLOCK
 static	void	get_clkbug_info (sockaddr_u *, endpt *, struct req_pkt *);
 #endif	/* REFCLOCK */
 
