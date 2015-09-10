@@ -227,7 +227,7 @@ typedef struct bind
   const char *bd_description;	                                /* name of type of binding */
   int	(*bd_init)     (struct parseunit *);			/* initialize */
   void	(*bd_end)      (struct parseunit *);			/* end */
-  int   (*bd_setcs)    (struct parseunit *, parsectl_t *);	/* set character size */
+  bool  (*bd_setcs)    (struct parseunit *, parsectl_t *);	/* set character size */
   int	(*bd_disable)  (struct parseunit *);			/* disable */
   int	(*bd_enable)   (struct parseunit *);			/* enable */
   int	(*bd_getfmt)   (struct parseunit *, parsectl_t *);	/* get format */
@@ -669,7 +669,7 @@ static poll_info_t wsdcf_pollinfo = { WS_POLLRATE, WS_POLLCMD, WS_CMDSIZE };
  * RAWDCF receivers that need to be powered from DTR
  * (like Expert mouse clock)
  */
-static	int	rawdcf_init_1	(struct parseunit *);
+static	bool	rawdcf_init_1	(struct parseunit *);
 #define RAWDCFDTRSET_DESCRIPTION	"RAW DCF77 CODE (DTR SET/RTS CLR)"
 #define RAWDCFDTRSET75_DESCRIPTION	"RAW DCF77 CODE (DTR SET/RTS CLR @ 75 baud)"
 #define RAWDCFDTRSET_INIT 		rawdcf_init_1
@@ -678,7 +678,7 @@ static	int	rawdcf_init_1	(struct parseunit *);
  * RAWDCF receivers that need to be powered from
  * DTR CLR and RTS SET
  */
-static	int	rawdcf_init_2	(struct parseunit *);
+static	bool	rawdcf_init_2	(struct parseunit *);
 #define RAWDCFDTRCLRRTSSET_DESCRIPTION	"RAW DCF77 CODE (DTR CLR/RTS SET)"
 #define RAWDCFDTRCLRRTSSET75_DESCRIPTION "RAW DCF77 CODE (DTR CLR/RTS SET @ 75 baud)"
 #define RAWDCFDTRCLRRTSSET_INIT	rawdcf_init_2
@@ -882,7 +882,7 @@ static struct parse_clockinfo
 {
 	u_long  cl_flags;		/* operation flags (PPS interpretation, trust handling) */
   void  (*cl_poll)    (struct parseunit *);			/* active poll routine */
-  int   (*cl_init)    (struct parseunit *);			/* active poll init routine */
+  bool  (*cl_init)    (struct parseunit *);			/* active poll init routine */
   void  (*cl_event)   (struct parseunit *, int);		/* special event handling (e.g. reset clock) */
   void  (*cl_end)     (struct parseunit *);			/* active poll end routine */
   void  (*cl_message) (struct parseunit *, parsetime_t *);	/* process a lower layer message */
@@ -1708,13 +1708,13 @@ static void stream_receive  (struct recvbuf *);
 
 static int  local_init     (struct parseunit *);
 static void local_end      (struct parseunit *);
-static bool local_nop      (struct parseunit *);
+static int  local_nop      (struct parseunit *);
 static bool local_setcs    (struct parseunit *, parsectl_t *);
 static int  local_getfmt   (struct parseunit *, parsectl_t *);
 static int  local_setfmt   (struct parseunit *, parsectl_t *);
 static int  local_timecode (struct parseunit *, parsectl_t *);
 static void local_receive  (struct recvbuf *);
-static bool local_input    (struct recvbuf *);
+static int  local_input    (struct recvbuf *);
 
 static bind_t io_bindings[] =
 {
@@ -2103,7 +2103,7 @@ local_end(
 /*--------------------------------------------------
  * local nop
  */
-static bool
+static int
 local_nop(
 	struct parseunit *parse
 	)
@@ -2163,7 +2163,7 @@ local_timecode(
 /*--------------------------------------------------
  * local input
  */
-static bool
+static int
 local_input(
 	struct recvbuf *rbufp
 	)
@@ -5760,7 +5760,7 @@ trimbletsip_message(
  * SET DTR line
  */
 #if defined(TIOCMSET) && (defined(TIOCM_DTR) || defined(CIOCM_DTR))
-static int
+static bool
 rawdcf_init_1(
 	struct parseunit *parse
 	)
@@ -5807,7 +5807,7 @@ rawdcfdtr_init_1(
  * CLR DTR line, SET RTS line
  */
 #if defined(TIOCMSET) &&  (defined(TIOCM_RTS) || defined(CIOCM_RTS))
-static int
+static bool
 rawdcf_init_2(
 	struct parseunit *parse
 	)
