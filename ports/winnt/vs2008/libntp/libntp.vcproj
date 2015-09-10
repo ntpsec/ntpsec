@@ -753,10 +753,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\..\include\l_stdlib.h"
-				>
-			</File>
-			<File
 				RelativePath="..\..\..\..\include\lib_strbuf.h"
 				>
 			</File>

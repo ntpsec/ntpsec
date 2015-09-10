@@ -762,10 +762,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\include\l_stdlib.h"
-				>
-			</File>
-			<File
 				RelativePath="..\..\..\libntp\log.h"
 				>
 			</File>

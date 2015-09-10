@@ -477,10 +477,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\..\include\l_stdlib.h"
-				>
-			</File>
-			<File
 				RelativePath="..\..\..\..\lib\isc\include\isc\log.h"
 				>
 			</File>
