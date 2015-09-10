@@ -233,7 +233,6 @@ def cmd_configure(ctx):
 		"sys/syssgi.h",
 		"sys/systune.h",
 		"sys/timex.h",
-		"timepps.h",
 		"timex.h",
 		"utime.h",
 	)
