@@ -9,6 +9,7 @@
 * clock_gettime() is a minor porting issue that may need a shim on
 some target platforms.  Gary Miller removed a little too quickly some 
 shims present in NTP classic; these may need to be reverted back in.
+Drop -lrt when not needed by old glibc.
 
 * ntpdc should get dropped.  This has ramifications not so much in
 other code as in the documentation, which is going to need minor but
@@ -26,12 +27,14 @@ POSIX types.
 
 * Unit testing.  "make check" needs to run all the unit tests.
 
-* Build testing.  The build/CI farm beeds to be fully operational.
+* Build testing.  The build/CI farm needs to be fully operational.
 
-* Live testing.  Somebody configuration than needs to take the
-development branch, build it on a real machine, and live-test it to
-make sure that it issues sane corrections and doesn't core-dump or
-barf.
+* Live testing.  Somebody needs to take the development branch,
+build it on a real machines, and live-test it to make sure that
+it issues sane corrections and doesn't core-dump or barf.
+We need to do that on various platforms.  We also need to
+live test various refclocks.
+
 
 === Documentation ===
 
