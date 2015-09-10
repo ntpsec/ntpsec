@@ -159,7 +159,7 @@ static  void    vme_shutdown    (int, struct peer *);
 static  void    vme_receive     (struct recvbuf *);
 static  void    vme_poll        (int unit, struct peer *);
 struct vmedate *get_datumtime(struct vmedate *);	
-void	tvme_fill(struct vmedate *, uint32_t btm[2]);
+void	tvme_fill(struct vmedate *, time_t btm[2]);
 void	stfp_time2tvme(struct vmedate *time_vme, struct stfp_time *stfp);
 inline const char *DEVICE_NAME(int n);
 
@@ -169,7 +169,7 @@ inline const char *DEVICE_NAME(int n);
  * Only clients with the card will have the proprietary vendor device driver
  * and interface library needed for use on Linux/Windows platforms.
  */
-extern uint32_t __attribute__ ((weak)) bcReadBinTime(SYMMT_PCI_HANDLE, uint32_t *, uint32_t*, uint8_t*);
+extern uint32_t __attribute__ ((weak)) bcReadBinTime(SYMMT_PCI_HANDLE, time_t *, time_t*, uint8_t*);
 extern SYMMT_PCI_HANDLE __attribute__ ((weak)) bcStartPci(void);
 extern void __attribute__ ((weak)) bcStopPci(SYMMT_PCI_HANDLE);
 
@@ -413,7 +413,7 @@ get_datumtime(struct vmedate *time_vme)
 {
 	char cbuf[7];
 	struct btfp_time vts;
-	uint32_t btm[2];
+	time_t btm[2];
 	uint8_t dmy;
 	struct stfp_time stfpm;
 	
@@ -506,10 +506,10 @@ get_datumtime(struct vmedate *time_vme)
 }
 /* Assign values to time_vme struct. Mostly for readability */
 void
-tvme_fill(struct vmedate *time_vme, uint32_t btm[2])
+tvme_fill(struct vmedate *time_vme, time_t btm[2])
 {
 	struct tm maj;
-	uint32_t dmaj, dmin;
+	time_t dmaj, dmin;
 
 	dmaj = btm[1];			/* syntax sugar */
 	dmin = btm[0];
