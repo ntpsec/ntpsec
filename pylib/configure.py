@@ -263,6 +263,10 @@ int main () {
 	if ctx.options.enable_ipv6:
 		ctx.define("INCLUDE_IPV6_SUPPORT", 1)
 
+	# In practice, the ioctls we use are usually serial stuff that
+	# is de facto if not de jure portable.  The exception is some of
+	# the audio files.
+	ctx.define("HAVE_SYS_IOCTL_H", 1)
 
 	ctx.start_msg("Writing configuration header:")
 	ctx.write_config_header("config.h")

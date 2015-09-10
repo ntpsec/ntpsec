@@ -3,15 +3,16 @@
 //        Schweitzer Engineering Laboratories, Inc. <opensource@selinc.com>
 //////////////////////////////////////////////////////////////////////////////
 
-// Need to have _XOPEN_SOURCE defined for time.h to give the
+// Need to have _XOPEN_SOURCE properly defined for time.h to give the
 // correct strptime signature.  As per feature_test_macros(7),
 // define this before including any header files.
 
-// #ifndef _XOPEN_SOURCE
-// #define _XOPEN_SOURCE
-// #endif
+#ifndef _XOPEN_SOURCE
+#define _XOPEN_SOURCE	600
+#endif
 
 #include <config.h>
+#include "ntp.h"	/* only for the u_* typedefs from GCC; remove someday */
 #include "ntp_syslog.h"
 #include "ntp_types.h"
 #include "ntp_fp.h"
@@ -128,7 +129,7 @@ cvt_sel240x( unsigned char *buffer,
 	{
 		struct tm ptime;
 		buffer++;
-		buffer = (unsigned char *) strptime(
+		buffer = strptime(
 			(const char *)buffer, "%Y:%j:%H:%M:%S", &ptime );
 		if( *(buffer+1) != '\x0d' )
 		{
