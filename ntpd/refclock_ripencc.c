@@ -264,77 +264,77 @@ struct ripencc_unit {
 /*******************        PROTOYPES            *****************/
 
 /*  prototypes for report parsing primitives */
-short rpt_0x3D (TSIPPKT *rpt, unsigned char *tx_baud_index,
+bool rpt_0x3D (TSIPPKT *rpt, unsigned char *tx_baud_index,
 		unsigned char *rx_baud_index, unsigned char *char_format_index,
 		unsigned char *stop_bits, unsigned char *tx_mode_index,
 		unsigned char *rx_mode_index);
-short rpt_0x40 (TSIPPKT *rpt, unsigned char *sv_prn, short *week_num,
+bool rpt_0x40 (TSIPPKT *rpt, unsigned char *sv_prn, short *week_num,
 		float *t_zc, float *eccentricity, float *t_oa, float *i_0,
 		float *OMEGA_dot, float *sqrt_A, float *OMEGA_0, float *omega,
 		float *M_0);
-short rpt_0x41 (TSIPPKT *rpt, float *time_of_week, float *UTC_offset,
+bool rpt_0x41 (TSIPPKT *rpt, float *time_of_week, float *UTC_offset,
 		short *week_num);
-short rpt_0x42 (TSIPPKT *rpt, float ECEF_pos[3], float *time_of_fix);
-short rpt_0x43 (TSIPPKT *rpt, float ECEF_vel[3], float *freq_offset,
+bool rpt_0x42 (TSIPPKT *rpt, float ECEF_pos[3], float *time_of_fix);
+bool rpt_0x43 (TSIPPKT *rpt, float ECEF_vel[3], float *freq_offset,
 		float *time_of_fix);
-short rpt_0x45 (TSIPPKT *rpt, unsigned char *major_nav_version,
+bool rpt_0x45 (TSIPPKT *rpt, unsigned char *major_nav_version,
 		unsigned char *minor_nav_version, unsigned char *nav_day,
 		unsigned char *nav_month, unsigned char *nav_year,
 		unsigned char *major_dsp_version, unsigned char *minor_dsp_version,
 		unsigned char *dsp_day, unsigned char *dsp_month,
 		unsigned char *dsp_year);
-short rpt_0x46 (TSIPPKT *rpt, unsigned char *status1, unsigned char *status2);
-short rpt_0x47 (TSIPPKT *rpt, unsigned char *nsvs, unsigned char *sv_prn,
+bool rpt_0x46 (TSIPPKT *rpt, unsigned char *status1, unsigned char *status2);
+bool rpt_0x47 (TSIPPKT *rpt, unsigned char *nsvs, unsigned char *sv_prn,
 		float *snr);
-short rpt_0x48 (TSIPPKT *rpt, unsigned char *message);
-short rpt_0x49 (TSIPPKT *rpt, unsigned char *sv_health);
-short rpt_0x4A (TSIPPKT *rpt, float *lat, float *lon, float *alt,
+bool rpt_0x48 (TSIPPKT *rpt, unsigned char *message);
+bool rpt_0x49 (TSIPPKT *rpt, unsigned char *sv_health);
+bool rpt_0x4A (TSIPPKT *rpt, float *lat, float *lon, float *alt,
 		float *clock_bias, float *time_of_fix);
-short rpt_0x4A_2 (TSIPPKT *rpt, float *alt, float *dummy,
+bool rpt_0x4A_2 (TSIPPKT *rpt, float *alt, float *dummy,
 		  unsigned char *alt_flag);
-short rpt_0x4B (TSIPPKT *rpt, unsigned char *machine_id,
+bool rpt_0x4B (TSIPPKT *rpt, unsigned char *machine_id,
 		unsigned char *status3, unsigned char *status4);
-short rpt_0x4C (TSIPPKT *rpt, unsigned char *dyn_code, float *el_mask,
+bool rpt_0x4C (TSIPPKT *rpt, unsigned char *dyn_code, float *el_mask,
 		float *snr_mask, float *dop_mask, float *dop_switch);
-short rpt_0x4D (TSIPPKT *rpt, float *osc_offset);
-short rpt_0x4E (TSIPPKT *rpt, unsigned char *response);
-short rpt_0x4F (TSIPPKT *rpt, double *a0, float *a1, float *time_of_data,
+bool rpt_0x4D (TSIPPKT *rpt, float *osc_offset);
+bool rpt_0x4E (TSIPPKT *rpt, unsigned char *response);
+bool rpt_0x4F (TSIPPKT *rpt, double *a0, float *a1, float *time_of_data,
 		short *dt_ls, short *wn_t, short *wn_lsf, short *dn, short *dt_lsf);
-short rpt_0x54 (TSIPPKT *rpt, float *clock_bias, float *freq_offset,
+bool rpt_0x54 (TSIPPKT *rpt, float *clock_bias, float *freq_offset,
 		float *time_of_fix);
-short rpt_0x55 (TSIPPKT *rpt, unsigned char *pos_code, unsigned char *vel_code,
+bool rpt_0x55 (TSIPPKT *rpt, unsigned char *pos_code, unsigned char *vel_code,
 		unsigned char *time_code, unsigned char *aux_code);
-short rpt_0x56 (TSIPPKT *rpt, float vel_ENU[3], float *freq_offset,
+bool rpt_0x56 (TSIPPKT *rpt, float vel_ENU[3], float *freq_offset,
 		float *time_of_fix);
-short rpt_0x57 (TSIPPKT *rpt, unsigned char *source_code,
+bool rpt_0x57 (TSIPPKT *rpt, unsigned char *source_code,
 		unsigned char *diag_code, short *week_num, float *time_of_fix);
-short rpt_0x58 (TSIPPKT *rpt, unsigned char *op_code, unsigned char *data_type,
+bool rpt_0x58 (TSIPPKT *rpt, unsigned char *op_code, unsigned char *data_type,
 		unsigned char *sv_prn, unsigned char *data_length,
 		unsigned char *data_packet);
-short rpt_0x59 (TSIPPKT *rpt, unsigned char *code_type,
+bool rpt_0x59 (TSIPPKT *rpt, unsigned char *code_type,
 		unsigned char status_code[32]);
-short rpt_0x5A (TSIPPKT *rpt, unsigned char *sv_prn, float *sample_length,
+bool rpt_0x5A (TSIPPKT *rpt, unsigned char *sv_prn, float *sample_length,
 		float *signal_level, float *code_phase, float *Doppler,
 		double *time_of_fix);
-short rpt_0x5B (TSIPPKT *rpt, unsigned char *sv_prn, unsigned char *sv_health,
+bool rpt_0x5B (TSIPPKT *rpt, unsigned char *sv_prn, unsigned char *sv_health,
 		unsigned char *sv_iode, unsigned char *fit_interval_flag,
 		float *time_of_collection, float *time_of_eph, float *sv_accy);
-short rpt_0x5C (TSIPPKT *rpt, unsigned char *sv_prn, unsigned char *slot,
+bool rpt_0x5C (TSIPPKT *rpt, unsigned char *sv_prn, unsigned char *slot,
 		unsigned char *chan, unsigned char *acq_flag, unsigned char *eph_flag,
 		float *signal_level, float *time_of_last_msmt, float *elev,
 		float *azim, unsigned char *old_msmt_flag,
 		unsigned char *integer_msec_flag, unsigned char *bad_data_flag,
 		unsigned char *data_collect_flag);
-short rpt_0x6D (TSIPPKT *rpt, unsigned char *manual_mode, unsigned char *nsvs,
+bool rpt_0x6D (TSIPPKT *rpt, unsigned char *manual_mode, unsigned char *nsvs,
 		unsigned char *ndim, unsigned char sv_prn[], float *pdop,
 		float *hdop, float *vdop, float *tdop);
-short rpt_0x82 (TSIPPKT *rpt, unsigned char *diff_mode);
-short rpt_0x83 (TSIPPKT *rpt, double ECEF_pos[3], double *clock_bias,
+bool rpt_0x82 (TSIPPKT *rpt, unsigned char *diff_mode);
+bool rpt_0x83 (TSIPPKT *rpt, double ECEF_pos[3], double *clock_bias,
 		float *time_of_fix);
-short rpt_0x84 (TSIPPKT *rpt, double *lat, double *lon, double *alt,
+bool rpt_0x84 (TSIPPKT *rpt, double *lat, double *lon, double *alt,
 		double *clock_bias, float *time_of_fix);
-short rpt_Paly0xBB(TSIPPKT *rpt, TSIP_RCVR_CFG *TsipxBB);
-short rpt_0xBC   (TSIPPKT *rpt, unsigned char *port_num,
+bool rpt_Paly0xBB(TSIPPKT *rpt, TSIP_RCVR_CFG *TsipxBB);
+bool rpt_0xBC   (TSIPPKT *rpt, unsigned char *port_num,
 		  unsigned char *in_baud, unsigned char *out_baud,
 		  unsigned char *data_bits, unsigned char *parity,
 		  unsigned char *stop_bits, unsigned char *flow_control,
@@ -343,35 +343,35 @@ short rpt_0xBC   (TSIPPKT *rpt, unsigned char *port_num,
 
 /* prototypes for superpacket parsers */
 
-short rpt_0x8F0B (TSIPPKT *rpt, unsigned short *event, double *tow,
+bool rpt_0x8F0B (TSIPPKT *rpt, unsigned short *event, double *tow,
 		  unsigned char *date, unsigned char *month, short *year,
 		  unsigned char *dim_mode, short *utc_offset, double *bias, double *drift,
 		  float *bias_unc, float *dr_unc, double *lat, double *lon, double *alt,
 		  char sv_id[8]);
-short rpt_0x8F14 (TSIPPKT *rpt, short *datum_idx, double datum_coeffs[5]);
-short rpt_0x8F15 (TSIPPKT *rpt, short *datum_idx, double datum_coeffs[5]);
-short rpt_0x8F20 (TSIPPKT *rpt, unsigned char *info, double *lat,
+bool rpt_0x8F14 (TSIPPKT *rpt, short *datum_idx, double datum_coeffs[5]);
+bool rpt_0x8F15 (TSIPPKT *rpt, short *datum_idx, double datum_coeffs[5]);
+bool rpt_0x8F20 (TSIPPKT *rpt, unsigned char *info, double *lat,
 		  double *lon, double *alt, double vel_enu[], double *time_of_fix,
 		  short *week_num, unsigned char *nsvs, unsigned char sv_prn[], 
 		  short sv_IODC[], short *datum_index);
-short rpt_0x8F41 (TSIPPKT *rpt, unsigned char *bSearchRange,
+bool rpt_0x8F41 (TSIPPKT *rpt, unsigned char *bSearchRange,
 		  unsigned char *bBoardOptions, unsigned long *iiSerialNumber,
 		  unsigned char *bBuildYear, unsigned char *bBuildMonth,
 		  unsigned char *bBuildDay, unsigned char *bBuildHour,
 		  float *fOscOffset, unsigned short *iTestCodeId);
-short rpt_0x8F42 (TSIPPKT *rpt, unsigned char *bProdOptionsPre,
+bool rpt_0x8F42 (TSIPPKT *rpt, unsigned char *bProdOptionsPre,
 		  unsigned char *bProdNumberExt, unsigned short *iCaseSerialNumberPre,
 		  unsigned long *iiCaseSerialNumber, unsigned long *iiProdNumber,
 		  unsigned short *iPremiumOptions, unsigned short *iMachineID,
 		  unsigned short *iKey);
-short rpt_0x8F45 (TSIPPKT *rpt, unsigned char *bSegMask);
-short rpt_0x8F4A_16 (TSIPPKT *rpt, unsigned char *pps_enabled,
+bool rpt_0x8F45 (TSIPPKT *rpt, unsigned char *bSegMask);
+bool rpt_0x8F4A_16 (TSIPPKT *rpt, unsigned char *pps_enabled,
 		     unsigned char *pps_timebase, unsigned char *pos_polarity,
 		     double *pps_offset, float *bias_unc_threshold);
-short rpt_0x8F4B (TSIPPKT *rpt, unsigned long *decorr_max);
-short rpt_0x8F4D (TSIPPKT *rpt, unsigned long *event_mask);
-short rpt_0x8FA5 (TSIPPKT *rpt, unsigned char *spktmask);
-short rpt_0x8FAD (TSIPPKT *rpt, unsigned short *COUNT, double *FracSec,
+bool rpt_0x8F4B (TSIPPKT *rpt, unsigned long *decorr_max);
+bool rpt_0x8F4D (TSIPPKT *rpt, unsigned long *event_mask);
+bool rpt_0x8FA5 (TSIPPKT *rpt, unsigned char *spktmask);
+bool rpt_0x8FAD (TSIPPKT *rpt, unsigned short *COUNT, double *FracSec,
 		  unsigned char *Hour, unsigned char *Minute, unsigned char *Second,
 		  unsigned char *Day, unsigned char *Month, unsigned short *Year,
 		  unsigned char *Status, unsigned char *Flags);
@@ -2197,7 +2197,7 @@ rpt_0x49(
 }
 
 /* position in lat-lon-alt, single precision */
-short
+bool
 rpt_0x4A(
 	 TSIPPKT *rpt,
 	 float *lat,
