@@ -367,15 +367,15 @@ typedef struct clockformat clockformat_t;
 /*
  * parse interface
  */
-extern int  parse_ioinit (parse_t *);
+extern bool  parse_ioinit (parse_t *);
 extern void parse_ioend (parse_t *);
 extern int  parse_ioread (parse_t *, char, timestamp_t *);
 extern int  parse_iopps (parse_t *, int, timestamp_t *);
 extern void parse_iodone (parse_t *);
-extern int  parse_timecode (parsectl_t *, parse_t *);
+extern bool  parse_timecode (parsectl_t *, parse_t *);
 extern int  parse_getfmt (parsectl_t *, parse_t *);
-extern int  parse_setfmt (parsectl_t *, parse_t *);
-extern int  parse_setcs (parsectl_t *, parse_t *);
+extern bool  parse_setfmt (parsectl_t *, parse_t *);
+extern bool  parse_setcs (parsectl_t *, parse_t *);
 
 extern unsigned int parse_restart (parse_t *, char);
 extern unsigned int parse_addchar (parse_t *, char);
@@ -390,7 +390,7 @@ extern void syn_simple (parse_t *, timestamp_t *, struct format *, u_long);
 extern parse_pps_fnc_t pps_simple;
 extern parse_pps_fnc_t pps_one;
 extern parse_pps_fnc_t pps_zero;
-extern int parse_timedout (parse_t *, timestamp_t *, struct timeval *);
+extern bool parse_timedout (parse_t *, timestamp_t *, struct timeval *);
 
 #endif
 
