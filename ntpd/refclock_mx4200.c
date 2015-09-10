@@ -1572,16 +1572,8 @@ mx4200_debug(struct peer *peer, char *fmt, ...)
 /*
  * Send a character string to the receiver.  Checksum is appended here.
  */
-#if defined(__STDC__)
 static void
 mx4200_send(struct peer *peer, char *fmt, ...)
-#else
-static void
-mx4200_send(peer, fmt, va_alist)
-     struct peer *peer;
-     char *fmt;
-     va_dcl
-#endif /* __STDC__ */
 {
 	struct refclockproc *pp;
 	struct mx4200unit *up;
@@ -1592,22 +1584,18 @@ mx4200_send(peer, fmt, va_alist)
 	char buf[1024];
 	u_char ck;
 
-#if defined(__STDC__)
 	va_start(ap, fmt);
-#else
-	va_start(ap);
-#endif /* __STDC__ */
 
 	pp = peer->procptr;
 	up = pp->unitptr;
 
 	cp = buf;
 	*cp++ = '$';
-	n = VSNPRINTF((cp, sizeof(buf) - 1, fmt, ap));
+	n = vsnprintf(cp, sizeof(buf) - 1, fmt, ap);
 	ck = mx4200_cksum(cp, n);
 	cp += n;
 	++n;
-	n += SNPRINTF((cp, sizeof(buf) - n - 5, "*%02X\r\n", ck));
+	n += snprintf(cp, sizeof(buf) - n - 5, "*%02X\r\n", ck);
 
 	m = write(pp->io.fd, buf, (unsigned)n);
 	if (m < 0)
