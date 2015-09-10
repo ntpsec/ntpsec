@@ -14,6 +14,10 @@ def options(ctx):
 	grp.add_option('--enable-debug', action='store_true', default=False, help="Enable debugging code")
 	grp.add_option('--enable-ipv6', action='store_true', default=False, help="Enable IPv6")
 
+	grp = ctx.add_option_group("NTP features")
+	grp.add_option('--enable-leap-smear', action='store_true', default=False, help="Enable Leap Smearing.")
+	grp.add_option('--enable-mssntp', action='store_true', default=False, help="Enable Samba MSS NTP support.")
+
 
 	grp = ctx.add_option_group("Refclock options")
 	grp.add_option('--refclock', dest='refclocks', help="Comma-separated list of Refclock IDs to build (or \"all\")", type='string')
