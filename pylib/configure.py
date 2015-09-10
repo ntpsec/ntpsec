@@ -63,7 +63,11 @@ def check_sizeof(ctx, header, sizeof, mandatory=True):
 def refclock_config(ctx):
 	from refclock import refclock_map
 
-	ids = ctx.options.refclocks.split(",") # XXX: better error checking
+	if ctx.options.refclocks == "all":
+		ids = refclock_map.keys()
+	else:
+		# XXX: better error checking
+		ids = ctx.options.refclocks.split(",")
 
 	ctx.env.REFCLOCK_DEFINES = []
 	ctx.env.REFCLOCK_SOURCE = []
