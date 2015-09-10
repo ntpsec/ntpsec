@@ -16,12 +16,7 @@
  *
  */
 
-#ifdef HAVE_CONFIG_H
-# include <config.h>
-#endif
-
-#if defined(REFCLOCK) && defined(CLOCK_PARSE) && defined(CLOCK_HOPF6021)
-
+#include <config.h>
 #include "ntp_fp.h"
 #include "ntp_unixtime.h"
 #include "ntp_calendar.h"
@@ -243,10 +238,6 @@ inp_hopf6021(
 		return parse_addchar(parseio, ch);
 	}
 }
-
-#else /* not (REFCLOCK && CLOCK_PARSE && CLOCK_HOPF6021) */
-int clk_hopf6021_bs;
-#endif /* not (REFCLOCK && CLOCK_PARSE && CLOCK_HOPF6021) */
 
 /*
  * History:

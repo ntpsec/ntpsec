@@ -1,8 +1,3 @@
-#ifdef HAVE_CONFIG_H
-# include <config.h>
-#endif
-
-#if defined(REFCLOCK) && defined(CLOCK_PARSE) && defined(CLOCK_VARITEXT)
 /*
  * /src/NTP/ntp4-dev/libparse/clk_varitext.c,v 1.5 2005/04/16 17:32:10 kardel RELEASE_20050508_A
  *
@@ -44,6 +39,7 @@
  *
  */
 
+#include <config.h>
 #include "ntp_fp.h"
 #include "ntp_unixtime.h"
 #include "ntp_calendar.h"
@@ -250,10 +246,6 @@ inp_varitext(
 
   return PARSE_INP_SKIP;
 }
-
-#else /* not (REFCLOCK && CLOCK_PARSE && CLOCK_VARITEXT) */
-int clk_varitext_bs;
-#endif /* not (REFCLOCK && CLOCK_PARSE && CLOCK_VARITEXT) */
 
 /*
  * History:

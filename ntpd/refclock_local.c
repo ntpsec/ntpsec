@@ -4,12 +4,7 @@
  *
  * wjm 17-aug-1995: add a hook for special treatment of VMS_LOCALUNIT
  */
-#ifdef HAVE_CONFIG_H
 #include <config.h>
-#endif
-
-#ifdef REFCLOCK
-
 #include "ntp.h"
 #include "ntpd.h"
 #include "ntp_refclock.h"
@@ -228,6 +223,4 @@ local_poll(
 	pp->lastref = pp->lastrec;
 	refclock_receive(peer);
 }
-#else
-int refclock_local_bs;
-#endif /* REFCLOCK */
+

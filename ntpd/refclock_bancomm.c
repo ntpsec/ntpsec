@@ -45,12 +45,7 @@
  *		be installed and running.
  */
 
-#ifdef HAVE_CONFIG_H
 #include <config.h>
-#endif
-
-#if defined(REFCLOCK) && defined(CLOCK_BANC) 
-
 #include "ntpd.h"
 #include "ntp_io.h"
 #include "ntp_refclock.h"
@@ -544,6 +539,4 @@ stfp_time2tvme(struct vmedate *time_vme, struct stfp_time *stfp)
 	time_vme->status = stfp->status;
 	return;
 }
-#else
-int refclock_bancomm_bs;
-#endif /* REFCLOCK */
+

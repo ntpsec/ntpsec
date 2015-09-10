@@ -34,12 +34,7 @@
  *
  */
 
-#ifdef HAVE_CONFIG_H
-# include <config.h>
-#endif
-
-#if defined(REFCLOCK) && defined(CLOCK_PARSE) && defined(CLOCK_MEINBERG)
-
+#include <config.h>
 #include "ntp_fp.h"
 #include "ntp_unixtime.h"
 #include "ntp_calendar.h"
@@ -731,10 +726,6 @@ gps_input(
   msg_buf->phase = MBG_NONE;	      /* back to hunting mode */
   return PARSE_INP_DATA;              /* message complete, must be evaluated */
 }
-
-#else /* not (REFCLOCK && CLOCK_PARSE && CLOCK_MEINBERG) */
-int clk_meinberg_bs;
-#endif /* not (REFCLOCK && CLOCK_PARSE && CLOCK_MEINBERG) */
 
 /*
  * History:

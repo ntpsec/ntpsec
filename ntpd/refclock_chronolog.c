@@ -7,12 +7,7 @@
  */
 #define GET_LOCALTIME
 
-#ifdef HAVE_CONFIG_H
 #include <config.h>
-#endif
-
-#if defined(REFCLOCK) && defined(CLOCK_CHRONOLOG)
-
 #include "ntpd.h"
 #include "ntp_io.h"
 #include "ntp_refclock.h"
@@ -341,6 +336,3 @@ chronolog_poll(
 #endif
 }
 
-#else
-int refclock_chronolog_bs;
-#endif /* REFCLOCK */

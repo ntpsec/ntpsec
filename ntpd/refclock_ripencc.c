@@ -30,12 +30,7 @@
  *
  */
 
-#ifdef HAVE_CONFIG_H
 #include <config.h>
-#endif /* HAVE_CONFIG_H */
-
-#if defined(REFCLOCK) && defined(CLOCK_RIPENCC)
-
 #include "ntp_stdlib.h"
 #include "ntpd.h"
 #include "ntp_refclock.h"
@@ -5252,8 +5247,4 @@ TranslateTSIPReportToText(
 }
 
 #endif /* TRIMBLE_OUTPUT_FUNC */
-
-#else  /* defined(REFCLOCK) && defined(CLOCK_RIPENCC) */
-int refclock_ripencc_bs;
-#endif /* defined(REFCLOCK) && defined(CLOCK_RIPENCC) */
 

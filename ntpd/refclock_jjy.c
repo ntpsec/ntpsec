@@ -108,12 +108,7 @@
 /*								      */
 /**********************************************************************/
 
-#ifdef HAVE_CONFIG_H
 #include <config.h>
-#endif
-
-#if defined(REFCLOCK) && defined(CLOCK_JJY)
-
 #include <stdio.h>
 #include <ctype.h>
 #include <string.h>
@@ -4434,6 +4429,3 @@ printableString ( char *sOutput, int iOutputLen, const char *sInput, int iInputL
 
 /**************************************************************************************************/
 
-#else
-int refclock_jjy_bs ;
-#endif /* REFCLOCK */

@@ -1,10 +1,7 @@
 /*
  * refclock_atom - clock driver for 1-pps signals
  */
-#ifdef HAVE_CONFIG_H
 #include <config.h>
-#endif
-
 #include <stdio.h>
 #include <ctype.h>
 
@@ -18,7 +15,6 @@
 /*
  * This driver requires the PPSAPI interface (RFC 2783)
  */
-#if defined(REFCLOCK) && defined(CLOCK_ATOM) && defined(HAVE_PPSAPI)
 #include "ppsapi_timepps.h"
 #include "refclock_atom.h"
 
@@ -236,6 +232,3 @@ atom_poll(
 	pp->lastref = pp->lastrec;
 	refclock_receive(peer);
 }
-#else
-int refclock_atom_bs;
-#endif /* REFCLOCK */

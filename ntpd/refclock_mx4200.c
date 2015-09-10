@@ -43,12 +43,7 @@
  */
 
 
-#ifdef HAVE_CONFIG_H
-# include <config.h>
-#endif
-
-#if defined(REFCLOCK) && defined(CLOCK_MX4200) && defined(HAVE_PPSAPI)
-
+#include <config.h>
 #include "ntpd.h"
 #include "ntp_io.h"
 #include "ntp_refclock.h"
@@ -1620,6 +1615,3 @@ mx4200_send(peer, fmt, va_alist)
 	va_end(ap);
 }
 
-#else
-int refclock_mx4200_bs;
-#endif /* REFCLOCK */

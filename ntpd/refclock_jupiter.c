@@ -31,12 +31,7 @@
  * SUCH DAMAGE.
  */
 
-#ifdef HAVE_CONFIG_H
-# include <config.h>
-#endif
-
-#if defined(REFCLOCK) && defined(CLOCK_JUPITER) && defined(HAVE_PPSAPI)
-
+#include <config.h>
 #include "ntp.h"
 #include "ntpd.h"
 #include "ntp_io.h"
@@ -1120,6 +1115,3 @@ jupiter_recv(struct instance *instance)
 	return (cc);
 }
 
-#else /* not (REFCLOCK && CLOCK_JUPITER && HAVE_PPSAPI) */
-int refclock_jupiter_bs;
-#endif /* not (REFCLOCK && CLOCK_JUPITER && HAVE_PPSAPI) */

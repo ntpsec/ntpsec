@@ -3,12 +3,7 @@
  * (but no longer the GC-1001 Model II, which apparently never worked)
  */
 
-#ifdef HAVE_CONFIG_H
-# include <config.h>
-#endif
-
-#if defined(REFCLOCK) && defined(CLOCK_HEATH)
-
+#include <config.h>
 #include "ntp.h"
 #include "ntpd.h"
 #include "ntp_io.h"
@@ -449,6 +444,3 @@ heath_poll(
 	pp->polls++;
 }
 
-#else
-int refclock_heath_bs;
-#endif /* REFCLOCK */

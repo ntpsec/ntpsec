@@ -151,12 +151,7 @@
  * See separate HTML documentation for this option.
  */
 
-#ifdef HAVE_CONFIG_H
 #include <config.h>
-#endif
-
-#if defined(REFCLOCK) && defined(CLOCK_ONCORE)
-
 #include "ntpd.h"
 #include "ntp_io.h"
 #include "ntp_unixtime.h"
@@ -4068,6 +4063,3 @@ oncore_log_f(
 	return rc;
 }
 
-#else
-int refclock_oncore_bs;
-#endif	/* REFCLOCK && CLOCK_ONCORE */

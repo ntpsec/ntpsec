@@ -1,12 +1,7 @@
 /*
  * refclock_irig - audio IRIG-B/E demodulator/decoder
  */
-#ifdef HAVE_CONFIG_H
 #include <config.h>
-#endif
-
-#if defined(REFCLOCK) && defined(CLOCK_IRIG)
-
 #include "ntp.h"
 #include "ntpd.h"
 #include "ntp_io.h"
@@ -1040,7 +1035,3 @@ irig_gain(
 	audio_gain(up->gain, up->mongain, up->port);
 }
 
-
-#else
-int refclock_irig_bs;
-#endif /* REFCLOCK */

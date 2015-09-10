@@ -30,12 +30,7 @@
  *
  */
 
-#ifdef HAVE_CONFIG_H
-# include <config.h>
-#endif
-
-#if defined(REFCLOCK) && defined(CLOCK_HOPF_PCI)
-
+#include <config.h>
 #include "ntp.h"
 #include "ntpd.h"
 #include "ntp_io.h"
@@ -256,6 +251,3 @@ hopfpci_poll(
 	return;
 }
 
-#else
-int refclock_hopfpci_bs;
-#endif /* REFCLOCK */

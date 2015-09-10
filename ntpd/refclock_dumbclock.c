@@ -8,12 +8,7 @@
  */
 #define GET_LOCALTIME
 
-#ifdef HAVE_CONFIG_H
 #include <config.h>
-#endif
-
-#if defined(REFCLOCK) && defined(CLOCK_DUMBCLOCK)
-
 #include "ntpd.h"
 #include "ntp_io.h"
 #include "ntp_refclock.h"
@@ -380,7 +375,3 @@ dumbclock_poll(
 #endif
 }
 #endif
-
-#else
-int refclock_dumbclock_bs;
-#endif	/* defined(REFCLOCK) && defined(CLOCK_DUMBCLOCK) */

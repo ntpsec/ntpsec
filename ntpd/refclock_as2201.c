@@ -2,12 +2,8 @@
  * refclock_as2201 - clock driver for the Austron 2201A GPS
  *	Timing Receiver
  */
-#ifdef HAVE_CONFIG_H
+
 #include <config.h>
-#endif
-
-#if defined(REFCLOCK) && defined(CLOCK_AS2201)
-
 #include "ntpd.h"
 #include "ntp_io.h"
 #include "ntp_refclock.h"
@@ -386,6 +382,3 @@ as2201_poll(
         refclock_receive(peer);
 }
 
-#else
-int refclock_as2201_bs;
-#endif /* REFCLOCK */

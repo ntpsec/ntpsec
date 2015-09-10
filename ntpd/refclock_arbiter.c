@@ -3,12 +3,7 @@
  *	Controlled Clock
  */
 
-#ifdef HAVE_CONFIG_H
 #include <config.h>
-#endif
-
-#if defined(REFCLOCK) && defined(CLOCK_ARBITER)
-
 #include "ntpd.h"
 #include "ntp_io.h"
 #include "ntp_refclock.h"
@@ -477,6 +472,3 @@ arb_poll(
 #endif
 }
 
-#else
-int refclock_arbiter_bs;
-#endif /* REFCLOCK */

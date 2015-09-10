@@ -11,12 +11,7 @@
 // #define _XOPEN_SOURCE
 // #endif
 
-#ifdef HAVE_CONFIG_H
-# include <config.h>
-#endif
-
-#if defined(REFCLOCK) && defined(CLOCK_PARSE) && defined(CLOCK_SEL240X)
-
+#include <config.h>
 #include "ntp_syslog.h"
 #include "ntp_types.h"
 #include "ntp_fp.h"
@@ -167,6 +162,3 @@ cvt_sel240x( unsigned char *buffer,
 	return rc;
 }
 
-#else  /* not (REFCLOCK && CLOCK_PARSE && CLOCK_SEL240X) */
-int clk_sel240x_bs;
-#endif /* not (REFCLOCK && CLOCK_PARSE && CLOCK_SEL240X) */

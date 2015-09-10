@@ -34,12 +34,7 @@
  *
  */
 
-#ifdef HAVE_CONFIG_H
-# include <config.h>
-#endif
-
-#if defined(REFCLOCK) && defined(CLOCK_PARSE) && defined(CLOCK_RAWDCF)
-
+#include <config.h>
 #include "ntp_fp.h"
 #include "ntp_unixtime.h"
 #include "ntp_calendar.h"
@@ -595,10 +590,6 @@ inp_rawdcf(
 		return rtc;
 	}
 }
-
-#else /* not (REFCLOCK && CLOCK_PARSE && CLOCK_RAWDCF) */
-int clk_rawdcf_bs;
-#endif /* not (REFCLOCK && CLOCK_PARSE && CLOCK_RAWDCF) */
 
 /*
  * History:

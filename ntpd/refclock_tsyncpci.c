@@ -25,11 +25,8 @@
 *  and license contained in html/copyright.html of NTP source.
 *
 *******************************************************************************/
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
 
-#if defined(REFCLOCK) && defined(CLOCK_TSYNCPCI)
+#include <config.h>
 
 #include <asm/ioctl.h>
 #ifdef HAVE_SYS_IOCTL_H
@@ -908,6 +905,3 @@ void DoyTimeFromSecTime(DoyTimeObj* pDt, SecTimeObj* pSt)
 
 } // End DoyTimeFromSecTime
 
-#else
-int refclock_tsyncpci_bs;
-#endif /* REFCLOCK */

@@ -1,14 +1,8 @@
 /*
  * refclock_chu - clock driver for Canadian CHU time/frequency station
  */
-#ifdef HAVE_CONFIG_H
 #include <config.h>
-#endif
-
 #include "ntp_types.h"
-
-#if defined(REFCLOCK) && defined(CLOCK_CHU)
-
 #include "ntpd.h"
 #include "ntp_io.h"
 #include "ntp_refclock.h"
@@ -1676,7 +1670,3 @@ chu_gain(
 }
 #endif /* HAVE_AUDIO */
 
-
-#else
-NONEMPTY_TRANSLATION_UNIT
-#endif /* REFCLOCK */

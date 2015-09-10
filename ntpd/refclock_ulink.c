@@ -2,12 +2,7 @@
  * refclock_ulink - clock driver for Ultralink  WWVB receiver
  */
 
-#ifdef HAVE_CONFIG_H
 #include <config.h>
-#endif
-
-#if defined(REFCLOCK) && defined(CLOCK_ULINK)
-
 #include <stdio.h>
 #include <ctype.h>
 
@@ -567,6 +562,3 @@ ulink_poll(
 
 }
 
-#else
-int refclock_ulink_bs;
-#endif /* REFCLOCK */

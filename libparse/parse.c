@@ -40,12 +40,7 @@
  *
  */
 
-#ifdef HAVE_CONFIG_H
-# include <config.h>
-#endif
-
-#if defined(REFCLOCK) && defined(CLOCK_PARSE)
-
+#include <config.h>
 #include "ntp_fp.h"
 #include "timevalops.h"
 #include "ntp_calendar.h"
@@ -869,10 +864,6 @@ parse_setcs(
 	parse->parse_ioflags |= (int) (dct->parsesetcs.parse_cs & PARSE_IO_CSIZE);
 	return true;
 }
-
-#else /* not (REFCLOCK && CLOCK_PARSE) */
-int parse_bs;
-#endif /* not (REFCLOCK && CLOCK_PARSE) */
 
 /*
  * History:

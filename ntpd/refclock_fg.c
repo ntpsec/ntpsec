@@ -2,12 +2,7 @@
  * refclock_fg - clock driver for the Forum Graphic GPS datating station
  */
 
-#ifdef HAVE_CONFIG_H
-# include <config.h>
-#endif
-
-#if defined(REFCLOCK) && defined(CLOCK_FG)
-
+#include <config.h>
 #include "ntpd.h"
 #include "ntp_io.h"
 #include "ntp_refclock.h"
@@ -330,7 +325,3 @@ fg_receive(
 	return;
 }
 
-
-#else
-int refclock_fg_bs;
-#endif /* REFCLOCK */

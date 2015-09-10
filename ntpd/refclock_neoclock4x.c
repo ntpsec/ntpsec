@@ -10,12 +10,7 @@
  *
  */
 
-#ifdef HAVE_CONFIG_H
-# include "config.h"
-#endif
-
-#if defined(REFCLOCK) && (defined(CLOCK_NEOCLOCK4X))
-
+#include "config.h"
 #include <unistd.h>
 #include <sys/time.h>
 #include <sys/types.h>
@@ -1025,10 +1020,6 @@ neol_check_firmware(int unit,
   return true;
 }
 #endif
-
-#else
-int refclock_neoclock4x_bs;
-#endif /* REFCLOCK */
 
 /*
  * History:

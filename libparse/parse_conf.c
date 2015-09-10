@@ -40,12 +40,7 @@
  *
  */
 
-#ifdef HAVE_CONFIG_H
-# include <config.h>
-#endif
-
-#if defined(REFCLOCK) && defined(CLOCK_PARSE)
-
+#include <config.h>
 #include "ntp_fp.h"
 #include "ntp_unixtime.h"
 #include "ntp_calendar.h"
@@ -147,9 +142,6 @@ clockformat_t *clockformats[] =
 
 unsigned short nformats = sizeof(clockformats) / sizeof(clockformats[0]) - 1;
 
-#else /* not (REFCLOCK && CLOCK_PARSE) */
-int parse_conf_bs;
-#endif /* not (REFCLOCK && CLOCK_PARSE) */
 
 /*
  * History:

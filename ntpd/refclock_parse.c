@@ -44,13 +44,8 @@
  *
  */
 
-#ifdef HAVE_CONFIG_H
-# include "config.h"
-#endif
-
+#include "config.h"
 #include "ntp_types.h"
-
-#if defined(REFCLOCK) && defined(CLOCK_PARSE)
 
 /*
  * This driver currently provides the support for
@@ -5853,10 +5848,6 @@ rawdcf_init_2(
 	return 0;
 }
 #endif  /* DTR initialisation type */
-
-#else	/* defined(REFCLOCK) && defined(PARSE) */
-NONEMPTY_TRANSLATION_UNIT
-#endif	/* defined(REFCLOCK) && defined(PARSE) */
 
 /*
  * History:

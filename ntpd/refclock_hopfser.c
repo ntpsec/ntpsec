@@ -10,12 +10,7 @@
  *
  */
 
-#ifdef HAVE_CONFIG_H
-# include "config.h"
-#endif
-
-#if defined(REFCLOCK) && (defined(CLOCK_HOPF_SERIAL))
-
+#include "config.h"
 #include "ntpd.h"
 #include "ntp_io.h"
 #include "ntp_control.h"
@@ -367,6 +362,3 @@ hopfserial_poll (
 	return;
 }
 
-#else
-int refclock_hopfser_bs;
-#endif /* REFCLOCK */

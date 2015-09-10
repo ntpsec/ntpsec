@@ -2,12 +2,7 @@
  * refclock_pcf - clock driver for the Conrad parallel port radio clock
  */
 
-#ifdef HAVE_CONFIG_H
 # include <config.h>
-#endif
-
-#if defined(REFCLOCK) && defined(CLOCK_PCF)
-
 #include "ntp.h"
 #include "ntpd.h"
 #include "ntp_io.h"
@@ -225,6 +220,4 @@ pcf_poll(
 	pp->lastref = pp->lastrec;
 	refclock_receive(peer);
 }
-#else
-int refclock_pcf_bs;
-#endif /* REFCLOCK */
+
