@@ -268,6 +268,9 @@ int main () {
 	# the audio files.
 	ctx.define("HAVE_SYS_IOCTL_H", 1)
 
+	# Won't be true under Windows, but is under every Unix-like OS.
+	ctx.define("HAVE_WORKING_FORK", 1)
+
 	ctx.start_msg("Writing configuration header:")
 	ctx.write_config_header("config.h")
 	ctx.end_msg("config.h", "PINK")
