@@ -3,6 +3,8 @@ from util import msg, msg_setting
 
 from posix_thread import posix_thread_version
 
+import os
+
 TYPE_FRAG = """
 #include <stdint.h>
 #include <sys/types.h>
@@ -188,8 +190,58 @@ def cmd_configure(ctx):
 
 	ctx.check_cc(function_name='arc4random_buf', header_name="stdlib.h", mandatory=False)
 	ctx.check_cc(function_name='sysconf', header_name="unistd.h", mandatory=False)
-	ctx.check_cc(header_name="stdbool.h", mandatory=False)
-	ctx.check_cc(header_name="sys/soundcard.h", mandatory=False) #XXX: check for others in libntp/audio.c
+	ctx.check_cc(header_name="stdbool.h", mandatory=True)
+
+	# This is a list of every optional include header in the
+	# codebase that is guarded by a directly corresponding HAVE_*_H symbol.
+	#
+	# In some cases one HAVE symbol controls inclusion of more than one
+	# header; there is an example of this in ntp/audio.c.  In these cases
+	# only the one header name matching the pattern of the HAVE_*_H symbol
+	# name is listed here, so we can invert the relationship to generate
+	# tests for all the symbols.
+	#
+	# Some of these are cruft from ancient big-iron systems and should
+	# be removed.
+	optional_headers = (
+		"alloca.h",
+		"ieeefp.h",
+		"libgen.h",
+		"libintl.h",
+		"libscf.h",
+		"linux/if_addr.h",
+		"machine/soundcard.h",
+		"net/if6.h",
+		"net/if_var.h",
+		"netinet/in_var.h",
+		"netinet/ip.h",
+		"priv.h",
+		"resolv.h",
+		"stdatomic.h",
+		"stropts.h",
+		"sys/audioio.h",
+		"sys/ioctl.h",
+		"sys/modem.h",
+		"sys/param.h",
+		"sys/ppsclock.h",
+		"sys/procset.h",
+		"sys/sockio.h",
+		"sys/soundcard.h",
+		"sys/stream.h",
+		"sys/stropts.h",
+		"sys/sysctl.h",
+		"sys/syssgi.h",
+		"sys/systune.h",
+		"sys/timex.h",
+		"timepps.h",
+		"timex.h",
+		"utime.h",
+	)
+	for hdr in optional_headers:
+		if not ctx.check_cc(header_name=hdr, mandatory=False) \
+		   and os.path.exists("/usr/include/" + hdr):
+			# Sanity check...
+			print "Compilation check failed but include exists!"
 
 	# XXX: This needs fixing.
 	for header in ["timepps.h", "sys/timepps.h"]:
@@ -262,11 +314,6 @@ int main () {
 
 	if ctx.options.enable_ipv6:
 		ctx.define("INCLUDE_IPV6_SUPPORT", 1)
-
-	# In practice, the ioctls we use are usually serial stuff that
-	# is de facto if not de jure portable.  The exception is some of
-	# the audio files.
-	ctx.define("HAVE_SYS_IOCTL_H", 1)
 
 	# Won't be true under Windows, but is under every Unix-like OS.
 	ctx.define("HAVE_WORKING_FORK", 1)
