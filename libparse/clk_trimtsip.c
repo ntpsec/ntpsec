@@ -35,12 +35,7 @@
  *
  */
 
-#ifdef HAVE_CONFIG_H
-# include <config.h>
-#endif
-
-#if defined(REFCLOCK) && defined(CLOCK_PARSE) && defined(CLOCK_TRIMTSIP)
-
+#include <config.h>
 #include "ntp_syslog.h"
 #include "ntp_types.h"
 #include "ntp_fp.h"
@@ -390,10 +385,6 @@ cvt_trimtsip(
 	}
 	return CVT_SKIP;
 }
-
-#else /* not (REFCLOCK && CLOCK_PARSE && CLOCK_TRIMTSIP && !PARSESTREAM) */
-int clk_trimtsip_bs;
-#endif /* not (REFCLOCK && CLOCK_PARSE && CLOCK_TRIMTSIP && !PARSESTREAM) */
 
 /*
  * History:

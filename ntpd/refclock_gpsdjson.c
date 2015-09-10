@@ -75,21 +75,16 @@
  */
 
 
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
-
 /* The strptime prototype is not provided unless explicitly requested.
  * See the POSIX spec for more info:
  * http://pubs.opengroup.org/onlinepubs/9699919799/functions/V2_chap02.html#tag_15_02_01_02
  */
 #define _XOPEN_SOURCE 600
 
+#include <config.h>
 #include "ntp.h"
 #include "ntp_types.h"
 #include "ntp_control.h"	/* for CTL_* clocktypes */
-
-#if defined(REFCLOCK) && defined(CLOCK_GPSDJSON) && !defined(SYS_WINNT)
 
 /* =====================================================================
  * Get the little JSMN library directly into our guts. Use the 'parent
@@ -2176,6 +2171,3 @@ log_data(
 	}
 }
 
-#else
-NONEMPTY_TRANSLATION_UNIT
-#endif /* REFCLOCK && CLOCK_GPSDJSON */

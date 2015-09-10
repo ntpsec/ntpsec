@@ -1,12 +1,7 @@
 /*
  * refclock_wwv - clock driver for NIST WWV/H time/frequency station
  */
-#ifdef HAVE_CONFIG_H
 #include <config.h>
-#endif
-
-#if defined(REFCLOCK) && defined(CLOCK_WWV)
-
 #include "ntp.h"
 #include "ntpd.h"
 #include "ntp_io.h"
@@ -2707,7 +2702,3 @@ wwv_gain(
 #endif
 }
 
-
-#else
-int refclock_wwv_bs;
-#endif /* REFCLOCK */

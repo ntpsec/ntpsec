@@ -4,12 +4,7 @@
  * Harlan Stenn, Jan 2002
  */
 
-#ifdef HAVE_CONFIG_H
 #include <config.h>
-#endif
-
-#if defined(REFCLOCK) && defined(CLOCK_ZYFER)
-
 #include "ntp.h"
 #include "ntpd.h"
 #include "ntp_io.h"
@@ -326,6 +321,3 @@ zyfer_poll(
 	up->polled = 1;
 }
 
-#else
-int refclock_zyfer_bs;
-#endif /* REFCLOCK */

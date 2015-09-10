@@ -67,11 +67,7 @@
  *	     Fernando P. Hauscarriaga (fernandoph@iar.unlp.edu.ar)
  */
 
-#ifdef HAVE_CONFIG_H
-# include "config.h"
-#endif
-
-#if defined(REFCLOCK) && defined(CLOCK_PALISADE)
+#include "config.h"
 
 #ifdef SYS_WINNT
 extern int async_write(int, const void *, unsigned int);
@@ -1255,6 +1251,3 @@ getlong(
 	return (int32_t)(uint32_t)ntohl(u32);
 }
 
-#else	/* REFCLOCK && CLOCK_PALISADE*/
-int refclock_palisade_c_notempty;
-#endif

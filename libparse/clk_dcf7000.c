@@ -34,12 +34,7 @@
  *
  */
 
-#ifdef HAVE_CONFIG_H
-# include <config.h>
-#endif
-
-#if defined(REFCLOCK) && defined(CLOCK_PARSE) && defined(CLOCK_DCF7000)
-
+#include <config.h>
 #include "ntp_fp.h"
 #include "ntp_unixtime.h"
 #include "ntp_calendar.h"
@@ -174,10 +169,6 @@ inp_dcf7000(
 		return parse_addchar(parseio, ch);
 	}
 }
-
-#else /* not (REFCLOCK && CLOCK_PARSE && CLOCK_DCF7000) */
-int clk_dcf7000_bs;
-#endif /* not (REFCLOCK && CLOCK_PARSE && CLOCK_DCF7000) */
 
 /*
  * History:

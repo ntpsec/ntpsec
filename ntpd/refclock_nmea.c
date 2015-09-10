@@ -16,16 +16,10 @@
  *		hart@ntp.org, davehart@davehart.com
  */
 
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
-
-#include "ntp_types.h"
-
-#if defined(REFCLOCK) && defined(CLOCK_NMEA)
-
 #define NMEA_WRITE_SUPPORT 0 /* no write support at the moment */
 
+#include <config.h>
+#include "ntp_types.h"
 #include <sys/stat.h>
 #include <stdio.h>
 #include <ctype.h>
@@ -1951,6 +1945,3 @@ nmead_open(
 
 	return fd;
 }
-#else
-NONEMPTY_TRANSLATION_UNIT
-#endif /* REFCLOCK && CLOCK_NMEA */

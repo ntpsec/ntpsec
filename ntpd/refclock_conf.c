@@ -1,9 +1,7 @@
 /*
  * refclock_conf.c - reference clock configuration
  */
-#ifdef HAVE_CONFIG_H
 #include <config.h>
-#endif
 
 #include <stdio.h>
 #include <sys/types.h>
@@ -11,8 +9,6 @@
 #include "ntpd.h"
 #include "ntp_refclock.h"
 #include "ntp_stdlib.h"
-
-#ifdef REFCLOCK
 
 static struct refclock refclock_none = {
 	noentry, noentry, noentry, noentry, noentry, noentry, noentry
@@ -284,7 +280,3 @@ struct refclock * const refclock_conf[] = {
 };
 
 u_char num_refclock_conf = sizeof(refclock_conf)/sizeof(struct refclock *);
-
-#else
-int refclock_conf_bs;
-#endif

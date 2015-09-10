@@ -5,11 +5,7 @@
  *
  * From Philippe De Muyter <phdm@macqel.be>, 1999
  */
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
 
-#if defined(REFCLOCK) && defined(CLOCK_PARSE) && defined(CLOCK_WHARTON_400A)
 /*
  * Support for WHARTON 400A Series clock + 404.2 serial interface.
  *
@@ -21,6 +17,7 @@
  * 
  */
 
+#include <config.h>
 #include "ntp_fp.h"
 #include "ascii.h"
 #include "parse.h"
@@ -171,10 +168,6 @@ clockformat_t   clock_wharton_400a =
 	15,			/* string buffer */
 	0			/* no private data (complete packets) */
 };
-
-#else /* not (REFCLOCK && CLOCK_PARSE && CLOCK_WHARTON_400A) */
-int clk_wharton_400a_bs;
-#endif /* not (REFCLOCK && CLOCK_PARSE && CLOCK_WHARTON_400A) */
 
 /*
  * clk_wharton.c,v

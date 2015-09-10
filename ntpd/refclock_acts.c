@@ -2,12 +2,7 @@
  * refclock_acts - clock driver for the NIST/USNO/PTB/NPL Computer Time
  *	Services
  */
-#ifdef HAVE_CONFIG_H
 #include <config.h>
-#endif
-
-#if defined(REFCLOCK) && defined(CLOCK_ACTS)
-
 #include "ntpd.h"
 #include "ntp_io.h"
 #include "ntp_unixtime.h"
@@ -914,6 +909,4 @@ acts_timecode(
 	}
 	pp->lastref = pp->lastrec;
 }
-#else
-int refclock_acts_bs;
-#endif /* REFCLOCK */
+

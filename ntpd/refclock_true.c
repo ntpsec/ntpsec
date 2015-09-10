@@ -5,12 +5,7 @@
  *      - Support TL-3 WWV TOD receiver
  */
 
-#ifdef HAVE_CONFIG_H
 #include <config.h>
-#endif
-
-#if defined(REFCLOCK) && defined(CLOCK_TRUETIME)
-
 #include <stdio.h>
 #include <ctype.h>
 
@@ -983,6 +978,3 @@ true_sample720(void)
 }
 #endif
 
-#else
-int refclock_TRUE_bs;
-#endif /* REFCLOCK */

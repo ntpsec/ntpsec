@@ -1,8 +1,5 @@
-#ifdef HAVE_CONFIG_H
-# include <config.h>
-#endif
+#include <config.h>
 
-#if defined(REFCLOCK) && defined(CLOCK_PARSE) && defined(CLOCK_COMPUTIME)
 /*
  * /src/NTP/ntp4-dev/libparse/clk_computime.c,v 4.10 2005/04/16 17:32:10 kardel RELEASE_20050508_A
  *
@@ -180,10 +177,6 @@ inp_computime(
 		return parse_addchar(parseio, ch);
 	}
 }
-
-#else /* not (REFCLOCK && CLOCK_PARSE && CLOCK_COMPUTIME) */
-int clk_computime_bs;
-#endif /* not (REFCLOCK && CLOCK_PARSE && CLOCK_COMPUTIME) */
 
 /*
  * clk_computime.c,v

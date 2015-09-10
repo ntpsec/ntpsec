@@ -34,12 +34,7 @@
  *
  */
 
-#ifdef HAVE_CONFIG_H
-# include <config.h>
-#endif
-
-#if defined(REFCLOCK) && defined(CLOCK_PARSE) && defined(CLOCK_TRIMTAIP)
-
+#include <config.h>
 #include "ntp_fp.h"
 #include "ntp_unixtime.h"
 #include "ntp_calendar.h"
@@ -179,10 +174,6 @@ inp_trimtaip(
 		return parse_addchar(parseio, ch);
 	}
 }
-
-#else /* not (REFCLOCK && CLOCK_PARSE && CLOCK_TRIMTAIP) */
-int clk_trimtaip_bs;
-#endif /* not (REFCLOCK && CLOCK_PARSE && CLOCK_TRIMTAIP) */
 
 /*
  * History:

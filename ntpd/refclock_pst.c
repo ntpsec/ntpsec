@@ -2,12 +2,7 @@
  * refclock_pst - clock driver for PSTI/Traconex WWV/WWVH receivers
  */
 
-#ifdef HAVE_CONFIG_H
 #include <config.h>
-#endif
-
-#if defined(REFCLOCK) && defined(CLOCK_PST)
-
 #include "ntp.h"
 #include "ntpd.h"
 #include "ntp_io.h"
@@ -317,6 +312,3 @@ pst_poll(
 	pp->polls++;
 }
 
-#else
-int refclock_pst_int;
-#endif /* REFCLOCK */

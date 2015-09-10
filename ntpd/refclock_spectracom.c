@@ -2,12 +2,7 @@
  * refclock_spectracom.c - clock driver for Spectracom GPS receivers
  */
 
-#ifdef HAVE_CONFIG_H
 #include <config.h>
-#endif
-
-#if defined(REFCLOCK) && defined(CLOCK_SPECTRACOM)
-
 #include "ntp.h"
 #include "ntpd.h"
 #include "ntp_io.h"
@@ -588,6 +583,3 @@ spectracom_control(
 }
 #endif	/* HAVE_PPSAPI */
 
-#else
-int refclock_spectracom_bs;
-#endif /* REFCLOCK */

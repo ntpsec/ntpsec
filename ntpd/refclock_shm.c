@@ -7,14 +7,8 @@
  * PB 18.3.97
  */
 
-#ifdef HAVE_CONFIG_H
-# include <config.h>
-#endif
-
+#include <config.h>
 #include "ntp_types.h"
-
-#if defined(REFCLOCK) && defined(CLOCK_SHM)
-
 #include "ntp.h"
 #include "ntpd.h"
 #undef fileno
@@ -660,6 +654,3 @@ static void shm_clockstats(
 	up->ticks = up->good = up->notready = up->bad = up->clash = 0;
 }
 
-#else
-NONEMPTY_TRANSLATION_UNIT
-#endif /* REFCLOCK */
