@@ -1,8 +1,8 @@
 /*
  * Not all machines define FD_SET in sys/types.h
  */ 
-#ifndef NTP_SELECT_H
-#define NTP_SELECT_H	/* note: tested by include/l_stdlib.h */
+#ifndef GUARD_NTP_SELECT_H
+#define GUARD_NTP_SELECT_H	/* note: tested by include/l_stdlib.h */
 
 /* Was: (defined(RS6000)||defined(SYS_PTX))&&!defined(_BSD) */
 /* Could say: !defined(FD_SET) && defined(HAVE_SYS_SELECT_H) */
@@ -30,4 +30,4 @@ typedef struct {
 } fd_set;
 #endif
 
-#endif	/* NTP_SELECT_H */
+#endif	/* GUARD_NTP_SELECT_H */

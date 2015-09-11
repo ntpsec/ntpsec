@@ -32,8 +32,8 @@
  *
  */
 
-#ifndef __PARSE_H__
-#define __PARSE_H__
+#ifndef GUARD__PARSE_H
+#define GUARD__PARSE_H
 
 #include "ntp_types.h"
 

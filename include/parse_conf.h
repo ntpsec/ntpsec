@@ -32,8 +32,8 @@
  *
  */
 
-#ifndef __PARSE_CONF_H__
-#define __PARSE_CONF_H__
+#ifndef GUARD_PARSE_CONF_H
+#define GUARD_PARSE_CONF_H
 
 
 /*

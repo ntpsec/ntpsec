@@ -2,8 +2,8 @@
  * ntp_net.h - definitions for NTP network stuff
  */
 
-#ifndef NTP_NET_H
-#define NTP_NET_H
+#ifndef GUARD_NTP_NET_H
+#define GUARD_NTP_NET_H
 
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -229,4 +229,4 @@ typedef union {
 	 && SRCADR(srcadr) != LOOPBACKADR)
 
 
-#endif /* NTP_NET_H */
+#endif /* GUARD_NTP_NET_H */

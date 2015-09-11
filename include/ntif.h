@@ -7,8 +7,8 @@
  * specifies the terms and conditions for redistribution.
  */
 
-#ifndef	_NET_IF_H
-#define	_NET_IF_H
+#ifndef	GUARD_NET_IF_H
+#define	GUARD_NET_IF_H
 
 
 /* #pragma ident	"@(#)if.h	1.3	93/06/30 SMI"
@@ -94,5 +94,5 @@ struct	ifconf {
 }
 #endif
 
-#endif	/* _NET_IF_H */
+#endif	/* GUARD_NET_IF_H */
 

@@ -1,8 +1,8 @@
 /*
  * lib_strbuf.h - definitions for routines which use the common string buffers
  */
-#ifndef LIB_STRBUF_H
-#define LIB_STRBUF_H
+#ifndef GUARD_LIB_STRBUF_H
+#define GUARD_LIB_STRBUF_H
 
 #include <ntp_types.h>
 #include <ntp_malloc.h>			/* for ZERO() */
@@ -29,4 +29,4 @@ extern bool lib_inited;
 		lib_nextbuf %= COUNTOF(lib_stringbuf);		\
 	} while (false)
 
-#endif	/* LIB_STRBUF_H */
+#endif	/* GUARD_LIB_STRBUF_H */

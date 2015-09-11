@@ -28,8 +28,8 @@
  * SUCH DAMAGE.
  *
  */
-#ifndef BINIO_H
-#define BINIO_H
+#ifndef GUARD_BINIO_H
+#define GUARD_BINIO_H
 
 #include "ntp_stdlib.h"
 

@@ -1,5 +1,5 @@
-#ifndef IOSIGNAL_H
-#define IOSIGNAL_H
+#ifndef GUARD_IOSIGNAL_H
+#define GUARD_IOSIGNAL_H
 
 #include "ntp_refclock.h"
 
@@ -55,4 +55,4 @@ extern void		set_signal	(input_handler_t *);
 # define USING_SIGIO()	false
 #endif
 
-#endif	/* IOSIGNAL_H */
+#endif	/* GUARD_IOSIGNAL_H */

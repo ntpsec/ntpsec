@@ -1,8 +1,8 @@
 /*
  * ntp_workimpl.h - selects worker child implementation
  */
-#ifndef NTP_WORKIMPL_H
-#define NTP_WORKIMPL_H
+#ifndef GUARD_NTP_WORKIMPL_H
+#define GUARD_NTP_WORKIMPL_H
 
 /*
  * Some systems do not support fork() and don't have an alternate
@@ -20,4 +20,4 @@
 # define WORKER
 #endif
 
-#endif	/* !NTP_WORKIMPL_H */
+#endif	/* GUARD_!NTP_WORKIMPL_H */

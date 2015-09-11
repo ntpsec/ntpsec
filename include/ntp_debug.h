@@ -3,8 +3,8 @@
  *
  * Copyright (C) 2005 by Frank Kardel
  */
-#ifndef NTP_DEBUG_H
-#define NTP_DEBUG_H
+#ifndef GUARD_NTP_DEBUG_H
+#define GUARD_NTP_DEBUG_H
 
 /*
  * macro for debugging output - cut down on #ifdef pollution.
@@ -22,4 +22,4 @@
 			mprintf arg;			\
 	} while (0)
 
-#endif	/* NTP_DEBUG_H */
+#endif	/* GUARD_NTP_DEBUG_H */

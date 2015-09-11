@@ -9,8 +9,8 @@
  * Copyright (c) 2006
  */
 
-#ifndef NTP_PRIO_Q_H
-#define NTP_PRIO_Q_H
+#ifndef GUARD_NTP_PRIO_Q_H
+#define GUARD_NTP_PRIO_Q_H
 
 #include <stddef.h>		/* size_t */
 
@@ -80,4 +80,4 @@ void *debug_get_node(
 #endif
 	);
 
-#endif	/* NTP_PRIO_Q_H */
+#endif	/* GUARD_NTP_PRIO_Q_H */

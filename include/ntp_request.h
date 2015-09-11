@@ -2,8 +2,8 @@
  * ntp_request.h - definitions for the ntpd remote query facility
  */
 
-#ifndef NTP_REQUEST_H
-#define NTP_REQUEST_H
+#ifndef GUARD_NTP_REQUEST_H
+#define GUARD_NTP_REQUEST_H
 
 #include "stddef.h"
 #include "ntp_types.h"
@@ -949,4 +949,4 @@ struct info_dns_assoc {
  */
 int get_packet_mode(struct recvbuf *rbufp); /* Return packet mode */
 
-#endif /* NTP_REQUEST_H */
+#endif /* GUARD_NTP_REQUEST_H */

@@ -2,8 +2,8 @@
  * A hack for platforms which require specially built syslog facilities
  */
 
-#ifndef NTP_SYSLOG_H
-#define NTP_SYSLOG_H
+#ifndef GUARD_NTP_SYSLOG_H
+#define GUARD_NTP_SYSLOG_H
 
 #include <ntp_types.h>		/* uint32_t type */
 
@@ -82,4 +82,4 @@ do {								\
 		msyslog msl_args;				\
 } while (false)
 
-#endif /* NTP_SYSLOG_H */
+#endif /* GUARD_NTP_SYSLOG_H */

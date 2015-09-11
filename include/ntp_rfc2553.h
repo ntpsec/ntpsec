@@ -65,8 +65,8 @@
 /*
  * Compatability shims with the rfc2553 API to simplify ntp.
  */
-#ifndef NTP_RFC2553_H
-#define NTP_RFC2553_H
+#ifndef GUARD_NTP_RFC2553_H
+#define GUARD_NTP_RFC2553_H
 
 #include <netdb.h>
 #include <isc/net.h>
@@ -231,4 +231,4 @@ char	*gai_strerror (int);
 # endif	/* IPV6 Multicast Support */
 #endif  /* IPv6 Support */
 
-#endif /* !NTP_RFC2553_H */
+#endif /* GUARD_!NTP_RFC2553_H */

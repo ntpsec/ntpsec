@@ -7,8 +7,8 @@
  * For a rationale look at 'timespecops.h'; we do the same here, but the
  * normalisation keeps the microseconds in [0 .. 10^6[, of course.
  */
-#ifndef TIMEVALOPS_H
-#define TIMEVALOPS_H
+#ifndef GUARD_TIMEVALOPS_H
+#define GUARD_TIMEVALOPS_H
 
 #include <sys/types.h>
 #include <stdio.h>
@@ -437,4 +437,4 @@ lfp_stamp_to_tval(
 	return out;
 }
 
-#endif	/* TIMEVALOPS_H */
+#endif	/* GUARD_TIMEVALOPS_H */

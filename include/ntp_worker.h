@@ -2,8 +2,8 @@
  * ntp_worker.h
  */
 
-#ifndef NTP_WORKER_H
-#define NTP_WORKER_H
+#ifndef GUARD_NTP_WORKER_H
+#define GUARD_NTP_WORKER_H
 
 #include "ntp_workimpl.h"
 
@@ -159,4 +159,4 @@ extern void	fork_deferred_worker(void);
 # define	fork_deferred_worker()	do {} while (0)
 #endif
 
-#endif	/* !NTP_WORKER_H */
+#endif	/* GUARD_!NTP_WORKER_H */

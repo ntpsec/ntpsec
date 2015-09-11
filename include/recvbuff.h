@@ -1,5 +1,5 @@
-#ifndef RECVBUFF_H
-#define RECVBUFF_H
+#ifndef GUARD_RECVBUFF_H
+#define GUARD_RECVBUFF_H
 
 #include "ntp.h"
 #include "ntp_net.h"
@@ -120,4 +120,4 @@ extern	void purge_recv_buffers_for_fd(SOCKET);
  */
 extern isc_boolean_t has_full_recv_buffer(void);
 
-#endif	/* RECVBUFF_H */
+#endif	/* GUARD_RECVBUFF_H */

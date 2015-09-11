@@ -7,8 +7,8 @@
  * Autoconf these days.
  */
 
-#ifndef NTP_MACHINE_H
-#define NTP_MACHINE_H
+#ifndef GUARD_NTP_MACHINE_H
+#define GUARD_NTP_MACHINE_H
 
 #include <sys/time.h>
 #include <time.h>
@@ -268,4 +268,4 @@ extern time_t	timegm		(struct tm *);
 #endif
 
 
-#endif	/* NTP_MACHINE_H */
+#endif	/* GUARD_NTP_MACHINE_H */

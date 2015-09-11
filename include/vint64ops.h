@@ -6,8 +6,8 @@
  * ----------------------------------------------------------------------
  * This is an attempt to get the vint64 calculations stuff centralised.
  */
-#ifndef VINT64OPS_H
-#define VINT64OPS_H
+#ifndef GUARD_VINT64OPS_H
+#define GUARD_VINT64OPS_H
 
 /* signed/unsigned compare. returns 1/0/-1 if lhs >/=/< rhs */
 extern int icmpv64(const vint64 * lhs,	const vint64 * rhs);
@@ -25,4 +25,4 @@ extern vint64 subv64u32(const vint64 * lhs, uint32_t rhs);
 /* parsing. works like strtoul() or strtoull() */
 extern vint64 strtouv64(const char * begp, char ** endp, int base);
 
-#endif /*!defined(VINT64OPS_H)*/
+#endif /* GUARD_VINT64OPS_H */

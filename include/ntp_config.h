@@ -1,5 +1,5 @@
-#ifndef NTP_CONFIG_H
-#define NTP_CONFIG_H
+#ifndef GUARD_NTP_CONFIG_H
+#define GUARD_NTP_CONFIG_H
 
 #include <sys/resource.h>
 
@@ -320,4 +320,4 @@ int dump_all_config_trees(FILE *df, bool comment);
 
 void ntp_rlimit(int, rlim_t, int, const char *);
 
-#endif	/* !defined(NTP_CONFIG_H) */
+#endif	/* GUARD_!defined(NTP_CONFIG_H) */

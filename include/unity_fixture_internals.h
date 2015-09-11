@@ -5,8 +5,8 @@
     [Released under MIT License. Please refer to license.txt for details]
 ========================================== */
 
-#ifndef UNITY_FIXTURE_INTERNALS_H_
-#define UNITY_FIXTURE_INTERNALS_H_
+#ifndef GUARD_UNITY_FIXTURE_INTERNALS_H
+#define GUARD_UNITY_FIXTURE_INTERNALS_H
 
 typedef struct _UNITY_FIXTURE_T
 {
@@ -43,4 +43,4 @@ void UnityAssertEqualPointer(const void * expected,
                             const char* msg,
                             const UNITY_LINE_TYPE lineNumber);
 
-#endif /* UNITY_FIXTURE_INTERNALS_H_ */
+#endif /* GUARD_UNITY_FIXTURE_INTERNALS_H */

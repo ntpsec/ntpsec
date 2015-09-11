@@ -1,8 +1,8 @@
 /*
  * ntp.h - NTP definitions for the masses
  */
-#ifndef NTP_H
-#define NTP_H
+#ifndef GUARD_NTP_H
+#define GUARD_NTP_H
 
 #include <stddef.h>
 #include <math.h>
@@ -907,4 +907,4 @@ struct endpoint {
 #define MRU_ROW_LIMIT	256
 /* similar datagrams per response limit for ntpd */
 #define MRU_FRAGS_LIMIT	128
-#endif /* NTP_H */
+#endif /* GUARD_NTP_H */

@@ -3,8 +3,8 @@
  * 		   system calls.
  */
 
-#ifndef NTP_SYSCALL_H
-#define NTP_SYSCALL_H
+#ifndef GUARD_NTP_SYSCALL_H
+#define GUARD_NTP_SYSCALL_H
 
 #ifdef HAVE_SYS_TIMEX_H
 # include <sys/timex.h>
@@ -53,4 +53,4 @@ ntp_gettime(
 # endif	/* !NTP_SYSCALLS_STD */
 #endif	/* !NTP_SYSCALLS_LIBC */
 
-#endif	/* NTP_SYSCALL_H */
+#endif	/* GUARD_NTP_SYSCALL_H */

@@ -35,8 +35,8 @@
  * Input and output operands may overlap; all input is consumed before
  * the output is written to.
  */
-#ifndef TIMESPECOPS_H
-#define TIMESPECOPS_H
+#ifndef GUARD_TIMESPECOPS_H
+#define GUARD_TIMESPECOPS_H
 
 #include <sys/types.h>
 #include <stdio.h>
@@ -380,4 +380,4 @@ lfp_stamp_to_tspec(
 	return out;
 }
 
-#endif	/* TIMESPECOPS_H */
+#endif	/* GUARD_TIMESPECOPS_H */

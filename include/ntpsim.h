@@ -8,8 +8,8 @@
  * Copyright (c) 2006
  */
 
-#ifndef NTPSIM_H
-#define NTPSIM_H
+#ifndef GUARD_NTPSIM_H
+#define GUARD_NTPSIM_H
 
 #include <stdio.h>
 #include <math.h>
@@ -141,4 +141,4 @@ double	 gauss			(double, double);
 double	 poisson		(double, double);
 void     create_server_associations(void);
 
-#endif	/* NTPSIM_H */
+#endif	/* GUARD_NTPSIM_H */

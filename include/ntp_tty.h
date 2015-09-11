@@ -1,8 +1,8 @@
 /*
  * ntp_tty.h - header file for serial lines handling
  */
-#ifndef NTP_TTY_H
-#define NTP_TTY_H
+#ifndef GUARD_NTP_TTY_H
+#define GUARD_NTP_TTY_H
 
 /*
  * use only one tty model - no use in initialising
@@ -47,4 +47,4 @@ extern	int	ntp_tty_setup(int, u_int, u_int);
 extern	int	ntp_tty_ioctl(int, u_int);
 #endif
 
-#endif /* NTP_TTY_H */
+#endif /* GUARD_NTP_TTY_H */
