@@ -118,17 +118,7 @@
 #endif
 
 #include <unistd.h>
-
-#ifdef HAVE_STDBOOL_H
-#  include <stdbool.h>
-#else
-   typedef enum { false = 0, true = 1 } _Bool;
-#  define bool _Bool
-
-   /* The other macros must be usable in preprocessor directives.  */
-#  define false 0
-#  define true 1
-#endif
+#include <stdbool.h>
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  *
