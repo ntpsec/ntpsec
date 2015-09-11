@@ -1,0 +1,12 @@
+== Server Commands and Options ==
+* link:confopt.html#server[server - configure client association]
+* link:confopt.html#peer[peer - configure symmetric peer association]
+* link:confopt.html#broadcast[broadcast - configure broadcast server association]
+* link:confopt.html#manycastclient[manycastclient - configure manycast client  association]
+* link:confopt.html#pool[pool - configure pool association]
+* link:confopt.html#unpeer[unpeer - remove association]
+* link:confopt.html#broadcastclient[broadcastclient - enable broadcast client]
+* link:confopt.html#manycastserver[manycastserver - enable manycast server]
+* link:confopt.html#multicastclient[multicastclient - enable multicast client]
+* link:comdex.html[Command Index]
+

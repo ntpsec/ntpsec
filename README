@@ -38,12 +38,10 @@ clockstuff/::	Directory containing sources for miscellaneous programs
 conf/::		Directory containing a motley collection of
 		configuration files for various systems. For example only.
 
-html/::		Directory containing a complete set of documentation on
-		building and configuring a NTP server or client. The
-		documentation is in the form of HTML files suitable for
-		browsing and contains links to additional documentation
-		at various web sites. If a browser is unavailable, an
-		ordinary text editor can be used.
+docs/::		Directory containing a complete set of documentation on
+		building and configuring a NTP server or client. The files
+		are in asciidoc markup.  This replaces the 'html' directory
+		of precious versions, but html can be generated from it.
 
 include/::	Directory containing include header files used by most
 		programs in the distribution.

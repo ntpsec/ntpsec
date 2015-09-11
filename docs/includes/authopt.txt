@@ -1,0 +1,12 @@
+== Authentication Commands and Options ==
+* link:authopt.html#automax[automax - specify Autokey regeneration interval]
+* link:authopt.html#controlkey[controlkey - specify control key ID]
+* link:authopt.html#crypto[crypto - configure Autokey parameters]
+* link:authopt.html#ident[ident - specify Autokey ephemeral group name]
+* link:authopt.html#keys[keys - specify symmetric keys filename]
+* link:authopt.html#keysdir[keysdir - specify Autokey key directory]
+* link:authopt.html#requestkey[requestkey - specify request key ID]
+* link:authopt.html#revoke[revoke - specify Autokey randomization interval]
+* link:authopt.html#trustedkey[trustedkey - specify trusted key IDs]
+* link:comdex.html[Command Index]
+

@@ -1,0 +1,28 @@
+= Spectracom TSYNC PCI =
+
+Last update: 26-Mar-2012 05:10 UTC
+
+'''''
+
+== Synopsis ==
+
+//ERROR: 'Features' usually on a new line
+["literal",subs="normal"]
+Address: 127.127.45.'u'
+Reference ID: one of `GPS`, `IRIG`, `HVQ`, `FREQ`, `ACTS`, `PPS`,`PTP`, `ACT`, `USR`, `LOCL`
+Driver ID: Spectracom TSYNC PCI
+Driver Port: `/dev/tsyncpci`'u' Features: `(none)`
+
+== Description ==
+
+This driver supports the
+http://www.spectracomcorp.com/ProductsServices/TimingSynchronization/BuslevelTiming[Spectracom
+TSYNC PCI] receiver.
+
+== Additional Information ==
+
+link:refclock.html[Reference Clock Drivers]
+
+'''''
+
+include::includes/footer.txt[]

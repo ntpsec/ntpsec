@@ -4,8 +4,6 @@
 
 === Code ===
 
-* The waf build needs to be landed and solid.
-
 * clock_gettime() is a minor porting issue that may need a shim on
 some target platforms.  Gary Miller removed a little too quickly some 
 shims present in NTP classic; these may need to be reverted back in.
@@ -33,31 +31,36 @@ POSIX types.
 build it on a real machines, and live-test it to make sure that
 it issues sane corrections and doesn't core-dump or barf.
 We need to do that on various platforms.  We also need to
-live test various refclocks.
-
+live-test various refclocks.
 
 === Documentation ===
 
-The documentation is a stale, untidy, duplicative mess only partway
-converted to asciidoc.
+The documentation is a stale, untidy, duplicative mess only most of
+the way converted to asciidoc.
 
-* Check completion on the conversion of the HTML docs.
+* In the docs subdirectory, include/command.txt is an HTML passthrough
+  in a not entirely successful attempt to emulate the look of the
+  Mills HTML documentation this directory was made from. It should be
+  cleaned up ore replaced.
+
+* Similarly, includes/footer.txt is a tabular hack made to resemble the
+  old HTML and should be cleaned up.
+
+* HTML build from docs/ needs to be part of the stock waf build.
 
 * The rest of the in-tree documentation must be lifted to asciidoc
-
-* We need to land the whole document conversion in the main repo.
 
 * A serious content-editing and update pass on the documents.  
 
 * Part of d) is the ntp -> ntps name change.
+
+* The format and organization of the NEWS file needs a rethink.
 
 * Phabricator-centered workflow needs to be written up and integrated
   with the website content I wrote for us.
 
 * Website needs to be integrated (with a contacts and services page,
   among other things) and published.
-
-* Decent build and package-dependency documentation.
 
 === Remaining procedural issues ===
 
