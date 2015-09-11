@@ -1,8 +1,8 @@
 /*
  * Define malloc and friends.
  */
-#ifndef NTP_MALLOC_H
-#define NTP_MALLOC_H
+#ifndef GUARD_NTP_MALLOC_H
+#define GUARD_NTP_MALLOC_H
 
 #include <stdlib.h>
 
@@ -48,4 +48,4 @@ void * alloca(size_t);
 
 #define ZERO(var)		zero_mem(&(var), sizeof(var))
 
-#endif	/* NTP_MALLOC_H */
+#endif	/* GUARD_NTP_MALLOC_H */

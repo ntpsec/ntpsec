@@ -2,8 +2,8 @@
  * ntp_refclock.h - definitions for reference clock support
  */
 
-#ifndef NTP_REFCLOCK_H
-#define NTP_REFCLOCK_H
+#ifndef GUARD_NTP_REFCLOCK_H
+#define GUARD_NTP_REFCLOCK_H
 
 #if defined(HAVE_SYS_MODEM_H)
 #include <sys/modem.h>
@@ -241,4 +241,4 @@ extern	bool	indicate_refclock_packet(struct refclockio *,
 extern	void	process_refclock_packet(struct recvbuf *);
 #endif /* REFCLOCK */
 
-#endif /* NTP_REFCLOCK_H */
+#endif /* GUARD_NTP_REFCLOCK_H */

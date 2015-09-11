@@ -24,8 +24,8 @@
  * DEBUG_INVARIANT().
  */
 
-#ifndef NTP_ASSERT_H
-#define NTP_ASSERT_H
+#ifndef GUARD_NTP_ASSERT_H
+#define GUARD_NTP_ASSERT_H
 
 # ifdef CALYSTO 
 /* see: http://www.domagoj-babic.com/index.php/ResearchProjects/Calysto */
@@ -105,4 +105,4 @@ extern void calysto_assert(unsigned char cnd); /* check whether this holds */
 #define	DEBUG_ENSURE(x)		do {} while (false)
 # endif
 
-#endif	/* NTP_ASSERT_H */
+#endif	/* GUARD_NTP_ASSERT_H */

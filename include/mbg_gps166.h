@@ -31,8 +31,8 @@
  * SUCH DAMAGE.
  *
  */
-#ifndef MBG_GPS166_H
-#define MBG_GPS166_H
+#ifndef GUARD_MBG_GPS166_H
+#define GUARD_MBG_GPS166_H
 
 
 /***************************************************************************

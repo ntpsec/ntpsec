@@ -28,8 +28,8 @@
  * SUCH DAMAGE.
  *
  */
-#ifndef TRIMBLE_H
-#define TRIMBLE_H
+#ifndef GUARD_TRIMBLE_H
+#define GUARD_TRIMBLE_H
 
 /*
  * Trimble packet command codes - commands being sent/received

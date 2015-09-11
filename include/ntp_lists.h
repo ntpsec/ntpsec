@@ -103,8 +103,8 @@
  *
  *
  */
-#ifndef NTP_LISTS_H
-#define NTP_LISTS_H
+#ifndef GUARD_NTP_LISTS_H
+#define GUARD_NTP_LISTS_H
 
 #include "ntp_types.h"		/* true and false */
 #include "ntp_assert.h"
@@ -440,4 +440,4 @@ do {								\
 	}							\
 }
 
-#endif	/* NTP_LISTS_H */
+#endif	/* GUARD_NTP_LISTS_H */

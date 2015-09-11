@@ -1,8 +1,8 @@
 /*
  * ntp_calendar.h - definitions for the calendar time-of-day routine
  */
-#ifndef NTP_CALENDAR_H
-#define NTP_CALENDAR_H
+#ifndef GUARD_NTP_CALENDAR_H
+#define GUARD_NTP_CALENDAR_H
 
 #include <time.h>
 

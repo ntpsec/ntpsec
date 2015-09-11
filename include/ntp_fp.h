@@ -2,8 +2,8 @@
  * ntp_fp.h - definitions for NTP fixed/floating-point arithmetic
  */
 
-#ifndef NTP_FP_H
-#define NTP_FP_H
+#ifndef GUARD_NTP_FP_H
+#define GUARD_NTP_FP_H
 
 #include "ntp_types.h"
 
@@ -421,4 +421,4 @@ extern CRITICAL_SECTION get_systime_cs;
 		do {} while (false)
 #endif
 
-#endif /* NTP_FP_H */
+#endif /* GUARD_NTP_FP_H */

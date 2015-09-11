@@ -19,8 +19,8 @@
  * guessing the right output format specifier is a bit troublesome and
  * best done with the help of the preprocessor and "config.h".
  */
-#ifndef TIMETOA_H
-#define TIMETOA_H
+#ifndef GUARD_TIMETOA_H
+#define GUARD_TIMETOA_H
 
 #include "ntp_fp.h"
 #include "ntp_stdlib.h"
@@ -80,4 +80,4 @@ typedef unsigned long long u_time;
 extern const char *
 format_time_fraction(time_t secs, long frac, int prec);
 
-#endif /* !defined(TIMETOA_H) */
+#endif /* GUARD_!defined(TIMETOA_H) */

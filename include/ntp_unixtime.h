@@ -2,8 +2,8 @@
  * ntp_unixtime.h - much of what was here is now in timevalops.h
  */
 
-#ifndef NTP_UNIXTIME_H
-#define NTP_UNIXTIME_H
+#ifndef GUARD_NTP_UNIXTIME_H
+#define GUARD_NTP_UNIXTIME_H
 
 #include "ntp_types.h"	/* picks up time.h via ntp_machine.h */
 #include "ntp_calendar.h"
@@ -44,4 +44,4 @@ int getclock (int clock_type, struct timespec *tp);
  */
 #define	JAN_1970 ((u_int)NTP_TO_UNIX_DAYS * (u_int)SECSPERDAY)
 
-#endif /* !defined(NTP_UNIXTIME_H) */
+#endif /* GUARD_!defined(NTP_UNIXTIME_H) */

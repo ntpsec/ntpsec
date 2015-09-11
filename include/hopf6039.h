@@ -6,8 +6,8 @@
 /*      History:                                                            */
 /****************************************************************************/
 
-#ifndef _hopf6039_H_
-#define _hopf6039_H_
+#ifndef GUARD_HOPF6039_H
+#define GUARD_HOPF6039_H
 
 #define HOPF_MAXVERSION			8
 #define	HOPF_CNTR_MEM_LEN		0x7f
@@ -141,4 +141,4 @@ typedef struct cardparams {
 #define WRITE_REGISTER		0x00
 #define READ_REGISTER		0x01
 
-#endif /* _hopf6039_H_ */
+#endif /* GUARD_HOPF6039_H */

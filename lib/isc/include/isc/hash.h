@@ -17,8 +17,8 @@
 
 /* $Id: hash.h,v 1.12 2009/01/17 23:47:43 tbox Exp $ */
 
-#ifndef ISC_HASH_H
-#define ISC_HASH_H 1
+#ifndef GUARD_ISC_HASH_H
+#define GUARD_ISC_HASH_H 1
 
 /*****
  ***** Module Info
@@ -182,4 +182,4 @@ isc_hash_calc(const unsigned char *key, unsigned int keylen,
 
 ISC_LANG_ENDDECLS
 
-#endif /* ISC_HASH_H */
+#endif /* GUARD_ISC_HASH_H */

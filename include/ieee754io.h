@@ -28,8 +28,8 @@
  * SUCH DAMAGE.
  *
  */
-#ifndef IEEE754IO_H
-#define IEEE754IO_H
+#ifndef GUARD_IEEE754IO_H
+#define GUARD_IEEE754IO_H
 
 #define IEEE_SINGLE 1
 #define IEEE_DOUBLE 2

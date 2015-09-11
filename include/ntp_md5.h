@@ -3,8 +3,8 @@
  *
  * Use the system MD5 if available, otherwise libisc's.
  */
-#ifndef NTP_MD5_H
-#define NTP_MD5_H
+#ifndef GUARD_NTP_MD5_H
+#define GUARD_NTP_MD5_H
 
 #ifdef OPENSSL
 # include "openssl/evp.h"
@@ -37,4 +37,4 @@
 		*(pdl) = 16;		\
 	} while (0)
 # endif	/* !OPENSSL */
-#endif	/* NTP_MD5_H */
+#endif	/* GUARD_NTP_MD5_H */

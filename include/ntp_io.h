@@ -1,5 +1,5 @@
-#ifndef NTP_IO_H
-#define NTP_IO_H
+#ifndef GUARD_NTP_IO_H
+#define GUARD_NTP_IO_H
 
 #include "ntp_workimpl.h"
 
@@ -90,4 +90,4 @@ extern	void	maintain_activefds(int fd, int closing);
 /* hack to ignore GCC Unused Result */
 #define IGNORE(r) do{if(r);}while(0) 
 
-#endif	/* NTP_IO_H */
+#endif	/* GUARD_NTP_IO_H */

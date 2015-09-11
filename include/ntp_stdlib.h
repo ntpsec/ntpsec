@@ -1,8 +1,8 @@
 /*
  * ntp_stdlib.h - Prototypes for NTP lib.
  */
-#ifndef NTP_STDLIB_H
-#define NTP_STDLIB_H
+#ifndef GUARD_NTP_STDLIB_H
+#define GUARD_NTP_STDLIB_H
 
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -287,4 +287,4 @@ extern const char *Version;		/* version declaration */
 #define COMPARE_EQUAL		0
 #define COMPARE_LESSTHAN	-1
 
-#endif	/* NTP_STDLIB_H */
+#endif	/* GUARD_NTP_STDLIB_H */

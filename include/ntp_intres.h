@@ -1,8 +1,8 @@
 /*
  * ntp_intres.h - client interface to blocking-worker name resolution.
  */
-#ifndef NTP_INTRES_H
-#define NTP_INTRES_H
+#ifndef GUARD_NTP_INTRES_H
+#define GUARD_NTP_INTRES_H
 
 #include <ntp_worker.h>
 
@@ -42,4 +42,4 @@ extern int getnameinfo_sometime(sockaddr_u *, size_t, size_t, int,
 /* intres_timeout_req() is provided by the client, ntpd or sntp. */
 extern void intres_timeout_req(u_int);
 
-#endif	/* NTP_INTRES_H */
+#endif	/* GUARD_NTP_INTRES_H */

@@ -1,8 +1,8 @@
 /*
  * ntp_crypto.h - definitions for cryptographic operations
  */
-#ifndef NTP_CRYPTO_H
-#define NTP_CRYPTO_H
+#ifndef GUARD_NTP_CRYPTO_H
+#define GUARD_NTP_CRYPTO_H
 
 /*
  * Configuration codes (also needed for parser without AUTOKEY)
@@ -187,4 +187,4 @@ extern	struct value hostval;	/* host name/value */
 extern	struct cert_info *cinfo; /* host certificate information */
 extern	struct value tai_leap;	/* leapseconds table */
 #endif /* AUTOKEY */
-#endif /* NTP_CRYPTO_H */
+#endif /* GUARD_NTP_CRYPTO_H */

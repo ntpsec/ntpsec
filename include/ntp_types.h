@@ -3,8 +3,8 @@
  *
  * Assume C99 fixed width integer types are available: int32_t and uint32_t
  */
-#ifndef NTP_TYPES_H
-#define NTP_TYPES_H
+#ifndef GUARD_NTP_TYPES_H
+#define GUARD_NTP_TYPES_H
 
 #include <sys/types.h>
 #include <stdint.h>
@@ -147,4 +147,4 @@ typedef int SOCKET;
 
 
 
-#endif	/* NTP_TYPES_H */
+#endif	/* GUARD_NTP_TYPES_H */

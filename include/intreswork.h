@@ -1,8 +1,8 @@
 /*
  * intreswork.h -- declarations private to ntp_intres.c, ntp_worker.c.
  */
-#ifndef INTRESWORK_H
-#define INTRESWORK_H
+#ifndef GUARD_INTRESWORK_H
+#define GUARD_INTRESWORK_H
 
 #include "ntp_worker.h"
 
@@ -26,4 +26,4 @@ extern void gni_test_callback(int rescode, int gni_errno,
 #endif	/* TEST_BLOCKING_WORKER */
 #endif	/* WORKER */
 
-#endif	/* INTRESWORK_H */
+#endif	/* GUARD_INTRESWORK_H */

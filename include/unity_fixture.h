@@ -5,8 +5,8 @@
     [Released under MIT License. Please refer to license.txt for details]
 ========================================== */
 
-#ifndef UNITY_FIXTURE_H_
-#define UNITY_FIXTURE_H_
+#ifndef GUARD_UNITY_FIXTURE_H
+#define GUARD_UNITY_FIXTURE_H
 
 #include "unity.h"
 #include "unity_internals.h"
@@ -83,4 +83,4 @@ int UnityMain(int argc, const char* argv[], void (*runAllTests)(void));
 
 void UnityMalloc_MakeMallocFailAfterCount(int count);
 
-#endif /* UNITY_FIXTURE_H_ */
+#endif /* GUARD_UNITY_FIXTURE_H */

@@ -28,8 +28,8 @@
 
 /* $Id: mem.h,v 1.78.120.3 2009/02/11 03:07:01 jinmei Exp $ */
 
-#ifndef ISC_MEM_H
-#define ISC_MEM_H 1
+#ifndef GUARD_ISC_MEM_H
+#define GUARD_ISC_MEM_H
 
 #include <stdio.h>
 
@@ -64,4 +64,4 @@
 #define isc__mem_printallactive(s)	fprintf((s), \
 					"isc_mem_printallactive() stubbed.\n")
 
-#endif /* ISC_MEM_H */
+#endif /* GUARD_ISC_MEM_H */

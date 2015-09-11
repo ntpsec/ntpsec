@@ -48,8 +48,8 @@
 
 /*SCO UNIX version, TIOCDCDTIMESTAMP assumed to exist. */
 
-#ifndef _SYS_TIMEPPS_H_
-#define _SYS_TIMEPPS_H_
+#ifndef GUARD_SYS_TIMEPPS_H
+#define GUARD_SYS_TIMEPPS_H
 
 #include <termios.h>	/* to get TIOCDCDTIMESTAMP */
 
@@ -500,4 +500,4 @@ time_pps_kcbind(
 	return(-1);
 }
 
-#endif /* _SYS_TIMEPPS_H_ */
+#endif /* GUARD_SYS_TIMEPPS_H */
