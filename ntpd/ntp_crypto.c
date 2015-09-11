@@ -5,7 +5,7 @@
 #include <config.h>
 #endif
 
-#ifdef AUTOKEY
+#ifdef ENABLE_AUTOKEY
 #include <stdio.h>
 #include <stdlib.h>	/* strtoul */
 #include <sys/types.h>
@@ -4034,6 +4034,6 @@ crypto_config(
 		break;
 	}
 }
-# else	/* !AUTOKEY follows */
+# else	/* !ENABLE_AUTOKEY follows */
 int ntp_crypto_bs_pubkey;
-# endif	/* !AUTOKEY */
+# endif	/* !ENABLE_AUTOKEY */

@@ -191,7 +191,7 @@ extern	struct peer *findmanycastpeer(struct recvbuf *);
 extern	void	peer_cleanup	(void);
 
 /* ntp_crypto.c */
-#ifdef AUTOKEY
+#ifdef ENABLE_AUTOKEY
 extern	int	crypto_recv	(struct peer *, struct recvbuf *);
 extern	int	crypto_xmit	(struct peer *, struct pkt *,
 				    struct recvbuf *, int,
@@ -214,7 +214,7 @@ extern	EVP_PKEY *gqpar_pkey;
 extern	char	*mvpar_file;
 extern	EVP_PKEY *mvpar_pkey;
 extern struct value tai_leap;
-#endif	/* AUTOKEY */
+#endif	/* ENABLE_AUTOKEY */
 
 /* ntp_proto.c */
 extern	void	transmit	(struct peer *);
@@ -269,13 +269,13 @@ extern	void	timer_clr_stats (void);
 extern	void	timer_interfacetimeout (u_long);
 extern	volatile int interface_interval;
 extern	u_long	orphwait;		/* orphan wait time */
-#ifdef AUTOKEY
+#ifdef ENABLE_AUTOKEY
 extern	char	*sys_hostname;	/* host name */
 extern	char	*sys_groupname;	/* group name */
 extern	char	*group_name;	/* group name */
 extern	u_long	sys_revoke;	/* keys revoke timeout */
 extern	u_long	sys_automax;	/* session key timeout */
-#endif	/* AUTOKEY */
+#endif	/* ENABLE_AUTOKEY */
 
 /* ntp_util.c */
 extern	void	init_util	(void);

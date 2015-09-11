@@ -305,7 +305,7 @@ struct peer {
 	 * Variables used by authenticated client
 	 */
 	keyid_t keyid;		/* current key ID */
-#ifdef AUTOKEY
+#ifdef ENABLE_AUTOKEY
 #define clear_to_zero opcode
 	uint32_t	opcode;		/* last request opcode */
 	associd_t assoc;	/* peer association ID */
@@ -333,9 +333,9 @@ struct peer {
 	int	keynumber;	/* current key number */
 	struct value encrypt;	/* send encrypt values */
 	struct value sndval;	/* send autokey values */
-#else	/* !AUTOKEY follows */
+#else	/* !ENABLE_AUTOKEY follows */
 #define clear_to_zero status
-#endif	/* !AUTOKEY */
+#endif	/* !ENABLE_AUTOKEY */
 
 	/*
 	 * Ephemeral state variables
@@ -572,16 +572,16 @@ struct pkt {
 	 *
 	 * The different definitions of the 'exten' field are here for
 	 * the benefit of applications that want to send a packet from
-	 * an auto variable in the stack - not using the AUTOKEY version
+	 * an auto variable in the stack - not using the ENABLE_AUTOKEY version
 	 * saves 2KB of stack space. The receive buffer should ALWAYS be
 	 * big enough to hold a full extended packet if the extension
 	 * fields have to be parsed or skipped.
 	 */
-#ifdef AUTOKEY
+#ifdef ENABLE_AUTOKEY
 	uint32_t	exten[(NTP_MAXEXTEN + MAX_MAC_LEN) / sizeof(uint32_t)];
-#else	/* !AUTOKEY follows */
+#else	/* !ENABLE_AUTOKEY follows */
 	uint32_t	exten[(MAX_MAC_LEN) / sizeof(uint32_t)];
-#endif	/* !AUTOKEY */
+#endif	/* !ENABLE_AUTOKEY */
 };
 
 /*

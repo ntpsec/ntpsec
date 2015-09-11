@@ -176,7 +176,7 @@ static char const ntp_keygen_opt_strs[2416] =
 /**
  *  imbits option description:
  */
-#ifdef AUTOKEY
+#ifdef ENABLE_AUTOKEY
 /** Descriptive text for the imbits option */
 #define IMBITS_DESC      (ntp_keygen_opt_strs+1019)
 /** Upper-cased name for the imbits option */
@@ -192,12 +192,12 @@ static char const ntp_keygen_opt_strs[2416] =
 #define IMBITS_NAME      NULL
 #define IMBITS_DESC      NULL
 #define IMBITS_name      NULL
-#endif  /* AUTOKEY */
+#endif  /* ENABLE_AUTOKEY */
 
 /**
  *  certificate option description:
  */
-#ifdef AUTOKEY
+#ifdef ENABLE_AUTOKEY
 /** Descriptive text for the certificate option */
 #define CERTIFICATE_DESC      (ntp_keygen_opt_strs+1055)
 /** Upper-cased name for the certificate option */
@@ -213,12 +213,12 @@ static char const ntp_keygen_opt_strs[2416] =
 #define CERTIFICATE_NAME      NULL
 #define CERTIFICATE_DESC      NULL
 #define CERTIFICATE_name      NULL
-#endif  /* AUTOKEY */
+#endif  /* ENABLE_AUTOKEY */
 
 /**
  *  cipher option description:
  */
-#ifdef AUTOKEY
+#ifdef ENABLE_AUTOKEY
 /** Descriptive text for the cipher option */
 #define CIPHER_DESC      (ntp_keygen_opt_strs+1098)
 /** Upper-cased name for the cipher option */
@@ -234,7 +234,7 @@ static char const ntp_keygen_opt_strs[2416] =
 #define CIPHER_NAME      NULL
 #define CIPHER_DESC      NULL
 #define CIPHER_name      NULL
-#endif  /* AUTOKEY */
+#endif  /* ENABLE_AUTOKEY */
 
 /**
  *  debug-level option description:
@@ -264,7 +264,7 @@ static char const ntp_keygen_opt_strs[2416] =
 /**
  *  id-key option description:
  */
-#ifdef AUTOKEY
+#ifdef ENABLE_AUTOKEY
 /** Descriptive text for the id-key option */
 #define ID_KEY_DESC      (ntp_keygen_opt_strs+1247)
 /** Upper-cased name for the id-key option */
@@ -279,12 +279,12 @@ static char const ntp_keygen_opt_strs[2416] =
 #define ID_KEY_NAME      NULL
 #define ID_KEY_DESC      NULL
 #define ID_KEY_name      NULL
-#endif  /* AUTOKEY */
+#endif  /* ENABLE_AUTOKEY */
 
 /**
  *  gq-params option description:
  */
-#ifdef AUTOKEY
+#ifdef ENABLE_AUTOKEY
 /** Descriptive text for the gq-params option */
 #define GQ_PARAMS_DESC      (ntp_keygen_opt_strs+1291)
 /** Upper-cased name for the gq-params option */
@@ -299,12 +299,12 @@ static char const ntp_keygen_opt_strs[2416] =
 #define GQ_PARAMS_NAME      NULL
 #define GQ_PARAMS_DESC      NULL
 #define GQ_PARAMS_name      NULL
-#endif  /* AUTOKEY */
+#endif  /* ENABLE_AUTOKEY */
 
 /**
  *  host-key option description:
  */
-#ifdef AUTOKEY
+#ifdef ENABLE_AUTOKEY
 /** Descriptive text for the host-key option */
 #define HOST_KEY_DESC      (ntp_keygen_opt_strs+1343)
 /** Upper-cased name for the host-key option */
@@ -319,12 +319,12 @@ static char const ntp_keygen_opt_strs[2416] =
 #define HOST_KEY_NAME      NULL
 #define HOST_KEY_DESC      NULL
 #define HOST_KEY_name      NULL
-#endif  /* AUTOKEY */
+#endif  /* ENABLE_AUTOKEY */
 
 /**
  *  iffkey option description:
  */
-#ifdef AUTOKEY
+#ifdef ENABLE_AUTOKEY
 /** Descriptive text for the iffkey option */
 #define IFFKEY_DESC      (ntp_keygen_opt_strs+1383)
 /** Upper-cased name for the iffkey option */
@@ -339,12 +339,12 @@ static char const ntp_keygen_opt_strs[2416] =
 #define IFFKEY_NAME      NULL
 #define IFFKEY_DESC      NULL
 #define IFFKEY_name      NULL
-#endif  /* AUTOKEY */
+#endif  /* ENABLE_AUTOKEY */
 
 /**
  *  ident option description:
  */
-#ifdef AUTOKEY
+#ifdef ENABLE_AUTOKEY
 /** Descriptive text for the ident option */
 #define IDENT_DESC      (ntp_keygen_opt_strs+1421)
 /** Upper-cased name for the ident option */
@@ -360,12 +360,12 @@ static char const ntp_keygen_opt_strs[2416] =
 #define IDENT_NAME      NULL
 #define IDENT_DESC      NULL
 #define IDENT_name      NULL
-#endif  /* AUTOKEY */
+#endif  /* ENABLE_AUTOKEY */
 
 /**
  *  lifetime option description:
  */
-#ifdef AUTOKEY
+#ifdef ENABLE_AUTOKEY
 /** Descriptive text for the lifetime option */
 #define LIFETIME_DESC      (ntp_keygen_opt_strs+1456)
 /** Upper-cased name for the lifetime option */
@@ -381,7 +381,7 @@ static char const ntp_keygen_opt_strs[2416] =
 #define LIFETIME_NAME      NULL
 #define LIFETIME_DESC      NULL
 #define LIFETIME_name      NULL
-#endif  /* AUTOKEY */
+#endif  /* ENABLE_AUTOKEY */
 
 /**
  *  md5key option description:
@@ -398,7 +398,7 @@ static char const ntp_keygen_opt_strs[2416] =
 /**
  *  modulus option description:
  */
-#ifdef AUTOKEY
+#ifdef ENABLE_AUTOKEY
 /** Descriptive text for the modulus option */
 #define MODULUS_DESC      (ntp_keygen_opt_strs+1531)
 /** Upper-cased name for the modulus option */
@@ -414,12 +414,12 @@ static char const ntp_keygen_opt_strs[2416] =
 #define MODULUS_NAME      NULL
 #define MODULUS_DESC      NULL
 #define MODULUS_name      NULL
-#endif  /* AUTOKEY */
+#endif  /* ENABLE_AUTOKEY */
 
 /**
  *  pvt-cert option description:
  */
-#ifdef AUTOKEY
+#ifdef ENABLE_AUTOKEY
 /** Descriptive text for the pvt-cert option */
 #define PVT_CERT_DESC      (ntp_keygen_opt_strs+1547)
 /** Upper-cased name for the pvt-cert option */
@@ -434,12 +434,12 @@ static char const ntp_keygen_opt_strs[2416] =
 #define PVT_CERT_NAME      NULL
 #define PVT_CERT_DESC      NULL
 #define PVT_CERT_name      NULL
-#endif  /* AUTOKEY */
+#endif  /* ENABLE_AUTOKEY */
 
 /**
  *  password option description:
  */
-#ifdef AUTOKEY
+#ifdef ENABLE_AUTOKEY
 /** Descriptive text for the password option */
 #define PASSWORD_DESC      (ntp_keygen_opt_strs+1597)
 /** Upper-cased name for the password option */
@@ -455,12 +455,12 @@ static char const ntp_keygen_opt_strs[2416] =
 #define PASSWORD_NAME      NULL
 #define PASSWORD_DESC      NULL
 #define PASSWORD_name      NULL
-#endif  /* AUTOKEY */
+#endif  /* ENABLE_AUTOKEY */
 
 /**
  *  export-passwd option description:
  */
-#ifdef AUTOKEY
+#ifdef ENABLE_AUTOKEY
 /** Descriptive text for the export-passwd option */
 #define EXPORT_PASSWD_DESC      (ntp_keygen_opt_strs+1638)
 /** Upper-cased name for the export-passwd option */
@@ -476,12 +476,12 @@ static char const ntp_keygen_opt_strs[2416] =
 #define EXPORT_PASSWD_NAME      NULL
 #define EXPORT_PASSWD_DESC      NULL
 #define EXPORT_PASSWD_name      NULL
-#endif  /* AUTOKEY */
+#endif  /* ENABLE_AUTOKEY */
 
 /**
  *  sign-key option description:
  */
-#ifdef AUTOKEY
+#ifdef ENABLE_AUTOKEY
 /** Descriptive text for the sign-key option */
 #define SIGN_KEY_DESC      (ntp_keygen_opt_strs+1708)
 /** Upper-cased name for the sign-key option */
@@ -497,12 +497,12 @@ static char const ntp_keygen_opt_strs[2416] =
 #define SIGN_KEY_NAME      NULL
 #define SIGN_KEY_DESC      NULL
 #define SIGN_KEY_name      NULL
-#endif  /* AUTOKEY */
+#endif  /* ENABLE_AUTOKEY */
 
 /**
  *  subject-name option description:
  */
-#ifdef AUTOKEY
+#ifdef ENABLE_AUTOKEY
 /** Descriptive text for the subject-name option */
 #define SUBJECT_NAME_DESC      (ntp_keygen_opt_strs+1757)
 /** Upper-cased name for the subject-name option */
@@ -518,12 +518,12 @@ static char const ntp_keygen_opt_strs[2416] =
 #define SUBJECT_NAME_NAME      NULL
 #define SUBJECT_NAME_DESC      NULL
 #define SUBJECT_NAME_name      NULL
-#endif  /* AUTOKEY */
+#endif  /* ENABLE_AUTOKEY */
 
 /**
  *  trusted-cert option description:
  */
-#ifdef AUTOKEY
+#ifdef ENABLE_AUTOKEY
 /** Descriptive text for the trusted-cert option */
 #define TRUSTED_CERT_DESC      (ntp_keygen_opt_strs+1818)
 /** Upper-cased name for the trusted-cert option */
@@ -538,12 +538,12 @@ static char const ntp_keygen_opt_strs[2416] =
 #define TRUSTED_CERT_NAME      NULL
 #define TRUSTED_CERT_DESC      NULL
 #define TRUSTED_CERT_name      NULL
-#endif  /* AUTOKEY */
+#endif  /* ENABLE_AUTOKEY */
 
 /**
  *  mv-params option description:
  */
-#ifdef AUTOKEY
+#ifdef ENABLE_AUTOKEY
 /** Descriptive text for the mv-params option */
 #define MV_PARAMS_DESC      (ntp_keygen_opt_strs+1876)
 /** Upper-cased name for the mv-params option */
@@ -559,12 +559,12 @@ static char const ntp_keygen_opt_strs[2416] =
 #define MV_PARAMS_NAME      NULL
 #define MV_PARAMS_DESC      NULL
 #define MV_PARAMS_name      NULL
-#endif  /* AUTOKEY */
+#endif  /* ENABLE_AUTOKEY */
 
 /**
  *  mv-keys option description:
  */
-#ifdef AUTOKEY
+#ifdef ENABLE_AUTOKEY
 /** Descriptive text for the mv-keys option */
 #define MV_KEYS_DESC      (ntp_keygen_opt_strs+1925)
 /** Upper-cased name for the mv-keys option */
@@ -580,7 +580,7 @@ static char const ntp_keygen_opt_strs[2416] =
 #define MV_KEYS_NAME      NULL
 #define MV_KEYS_DESC      NULL
 #define MV_KEYS_name      NULL
-#endif  /* AUTOKEY */
+#endif  /* ENABLE_AUTOKEY */
 
 /*
  *  Help/More_Help/Version option descriptions:
@@ -614,16 +614,16 @@ static char const ntp_keygen_opt_strs[2416] =
 /**
  *  Declare option callback procedures
  */
-#ifdef AUTOKEY
+#ifdef ENABLE_AUTOKEY
   static tOptProc doOptImbits;
-#else /* not AUTOKEY */
+#else /* not ENABLE_AUTOKEY */
 # define doOptImbits NULL
-#endif /* def/not AUTOKEY */
-#ifdef AUTOKEY
+#endif /* def/not ENABLE_AUTOKEY */
+#ifdef ENABLE_AUTOKEY
   static tOptProc doOptModulus;
-#else /* not AUTOKEY */
+#else /* not ENABLE_AUTOKEY */
 # define doOptModulus NULL
-#endif /* def/not AUTOKEY */
+#endif /* def/not ENABLE_AUTOKEY */
 extern tOptProc
     ntpOptionPrintVersion, optionBooleanVal,      optionNestedVal,
     optionNumericVal,      optionPagedUsage,      optionResetOpt,
@@ -1017,12 +1017,12 @@ doUsageOpt(tOptions * opts, tOptDesc * od)
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 /**
- * Code to handle the imbits option, when AUTOKEY is #define-d.
+ * Code to handle the imbits option, when ENABLE_AUTOKEY is #define-d.
  * The number of bits in the identity modulus.  The default is 256.
  * @param[in] pOptions the ntp-keygen options data structure
  * @param[in,out] pOptDesc the option descriptor for this option.
  */
-#ifdef AUTOKEY
+#ifdef ENABLE_AUTOKEY
 static void
 doOptImbits(tOptions* pOptions, tOptDesc* pOptDesc)
 {
@@ -1050,7 +1050,7 @@ doOptImbits(tOptions* pOptions, tOptDesc* pOptDesc)
  emit_ranges:
 optionShowRange(pOptions, pOptDesc, VOIDP(rng), 1);
 }
-#endif /* defined AUTOKEY */
+#endif /* defined ENABLE_AUTOKEY */
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 /**
@@ -1076,12 +1076,12 @@ OPT_VALUE_SET_DEBUG_LEVEL++;
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 /**
- * Code to handle the modulus option, when AUTOKEY is #define-d.
+ * Code to handle the modulus option, when ENABLE_AUTOKEY is #define-d.
  * The number of bits in the prime modulus.  The default is 512.
  * @param[in] pOptions the ntp-keygen options data structure
  * @param[in,out] pOptDesc the option descriptor for this option.
  */
-#ifdef AUTOKEY
+#ifdef ENABLE_AUTOKEY
 static void
 doOptModulus(tOptions* pOptions, tOptDesc* pOptDesc)
 {
@@ -1109,7 +1109,7 @@ doOptModulus(tOptions* pOptions, tOptDesc* pOptDesc)
  emit_ranges:
 optionShowRange(pOptions, pOptDesc, VOIDP(rng), 1);
 }
-#endif /* defined AUTOKEY */
+#endif /* defined ENABLE_AUTOKEY */
 /* extracted from optmain.tlib near line 1250 */
 
 /**

@@ -948,7 +948,7 @@ This option takes a number argument @file{imbits}.
 This option has some usage constraints.  It:
 @itemize @bullet
 @item
-must be compiled in by defining @code{AUTOKEY} during the compilation.
+must be compiled in by defining @code{ENABLE_AUTOKEY} during the compilation.
 @end itemize
 
 The number of bits in the identity modulus.  The default is 256.
@@ -963,7 +963,7 @@ This option takes a string argument @file{scheme}.
 This option has some usage constraints.  It:
 @itemize @bullet
 @item
-must be compiled in by defining @code{AUTOKEY} during the compilation.
+must be compiled in by defining @code{ENABLE_AUTOKEY} during the compilation.
 @end itemize
 
 scheme is one of
@@ -985,7 +985,7 @@ This option takes a string argument @file{cipher}.
 This option has some usage constraints.  It:
 @itemize @bullet
 @item
-must be compiled in by defining @code{AUTOKEY} during the compilation.
+must be compiled in by defining @code{ENABLE_AUTOKEY} during the compilation.
 @end itemize
 
 Select the cipher which is used to encrypt the files containing
@@ -1002,7 +1002,7 @@ This is the ``write iff or gq identity keys'' option.
 This option has some usage constraints.  It:
 @itemize @bullet
 @item
-must be compiled in by defining @code{AUTOKEY} during the compilation.
+must be compiled in by defining @code{ENABLE_AUTOKEY} during the compilation.
 @end itemize
 
 Write the IFF or GQ client keys to the standard output.  This is
@@ -1017,7 +1017,7 @@ This is the ``generate gq parameters and keys'' option.
 This option has some usage constraints.  It:
 @itemize @bullet
 @item
-must be compiled in by defining @code{AUTOKEY} during the compilation.
+must be compiled in by defining @code{ENABLE_AUTOKEY} during the compilation.
 @end itemize
 
 Generate parameters and keys for the GQ identification scheme,
@@ -1032,7 +1032,7 @@ This is the ``generate rsa host key'' option.
 This option has some usage constraints.  It:
 @itemize @bullet
 @item
-must be compiled in by defining @code{AUTOKEY} during the compilation.
+must be compiled in by defining @code{ENABLE_AUTOKEY} during the compilation.
 @end itemize
 
 Generate new host keys, obsoleting any that may exist.
@@ -1046,7 +1046,7 @@ This is the ``generate iff parameters'' option.
 This option has some usage constraints.  It:
 @itemize @bullet
 @item
-must be compiled in by defining @code{AUTOKEY} during the compilation.
+must be compiled in by defining @code{ENABLE_AUTOKEY} during the compilation.
 @end itemize
 
 Generate parameters for the IFF identification scheme, obsoleting
@@ -1062,7 +1062,7 @@ This option takes a string argument @file{group}.
 This option has some usage constraints.  It:
 @itemize @bullet
 @item
-must be compiled in by defining @code{AUTOKEY} during the compilation.
+must be compiled in by defining @code{ENABLE_AUTOKEY} during the compilation.
 @end itemize
 
 Set the optional Autokey group name to name.  This is used in
@@ -1085,7 +1085,7 @@ This option takes a number argument @file{lifetime}.
 This option has some usage constraints.  It:
 @itemize @bullet
 @item
-must be compiled in by defining @code{AUTOKEY} during the compilation.
+must be compiled in by defining @code{ENABLE_AUTOKEY} during the compilation.
 @end itemize
 
 Set the certificate expiration to lifetime days from now.
@@ -1106,7 +1106,7 @@ This option takes a number argument @file{modulus}.
 This option has some usage constraints.  It:
 @itemize @bullet
 @item
-must be compiled in by defining @code{AUTOKEY} during the compilation.
+must be compiled in by defining @code{ENABLE_AUTOKEY} during the compilation.
 @end itemize
 
 The number of bits in the prime modulus.  The default is 512.
@@ -1120,7 +1120,7 @@ This is the ``generate pc private certificate'' option.
 This option has some usage constraints.  It:
 @itemize @bullet
 @item
-must be compiled in by defining @code{AUTOKEY} during the compilation.
+must be compiled in by defining @code{ENABLE_AUTOKEY} during the compilation.
 @end itemize
 
 Generate a private certificate.  By default, the program generates
@@ -1136,7 +1136,7 @@ This option takes a string argument @file{passwd}.
 This option has some usage constraints.  It:
 @itemize @bullet
 @item
-must be compiled in by defining @code{AUTOKEY} during the compilation.
+must be compiled in by defining @code{ENABLE_AUTOKEY} during the compilation.
 @end itemize
 
 Local files containing private data are encrypted with the
@@ -1155,7 +1155,7 @@ This option takes a string argument @file{passwd}.
 This option has some usage constraints.  It:
 @itemize @bullet
 @item
-must be compiled in by defining @code{AUTOKEY} during the compilation.
+must be compiled in by defining @code{ENABLE_AUTOKEY} during the compilation.
 @end itemize
 
 Export IFF or GQ identity group keys to the standard output,
@@ -1174,7 +1174,7 @@ This option takes a string argument @file{sign}.
 This option has some usage constraints.  It:
 @itemize @bullet
 @item
-must be compiled in by defining @code{AUTOKEY} during the compilation.
+must be compiled in by defining @code{ENABLE_AUTOKEY} during the compilation.
 @end itemize
 
 Generate a new sign key of the designated type, obsoleting any
@@ -1191,7 +1191,7 @@ This option takes a string argument @file{host@@group}.
 This option has some usage constraints.  It:
 @itemize @bullet
 @item
-must be compiled in by defining @code{AUTOKEY} during the compilation.
+must be compiled in by defining @code{ENABLE_AUTOKEY} during the compilation.
 @end itemize
 
 Set the Autokey host name, and optionally, group name specified
@@ -1214,7 +1214,7 @@ This is the ``trusted certificate (tc scheme)'' option.
 This option has some usage constraints.  It:
 @itemize @bullet
 @item
-must be compiled in by defining @code{AUTOKEY} during the compilation.
+must be compiled in by defining @code{ENABLE_AUTOKEY} during the compilation.
 @end itemize
 
 Generate a trusted certificate.  By default, the program generates
@@ -1230,7 +1230,7 @@ This option takes a number argument @file{num}.
 This option has some usage constraints.  It:
 @itemize @bullet
 @item
-must be compiled in by defining @code{AUTOKEY} during the compilation.
+must be compiled in by defining @code{ENABLE_AUTOKEY} during the compilation.
 @end itemize
 
 Generate parameters and keys for the Mu-Varadharajan (MV)
@@ -1246,7 +1246,7 @@ This option takes a number argument @file{num}.
 This option has some usage constraints.  It:
 @itemize @bullet
 @item
-must be compiled in by defining @code{AUTOKEY} during the compilation.
+must be compiled in by defining @code{ENABLE_AUTOKEY} during the compilation.
 @end itemize
 
 This option has no @samp{doc} documentation.

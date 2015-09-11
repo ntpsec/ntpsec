@@ -221,7 +221,7 @@ static const struct ctl_proc control_codes[] = {
 #define	CS_FUZZ			88
 #define	CS_WANDER_THRESH	89
 #define	CS_MAX_NOAUTOKEY	CS_WANDER_THRESH
-#ifdef AUTOKEY
+#ifdef ENABLE_AUTOKEY
 #define	CS_FLAGS		(1 + CS_MAX_NOAUTOKEY)
 #define	CS_HOST			(2 + CS_MAX_NOAUTOKEY)
 #define	CS_PUBLIC		(3 + CS_MAX_NOAUTOKEY)
@@ -231,9 +231,9 @@ static const struct ctl_proc control_codes[] = {
 #define	CS_IDENT		(7 + CS_MAX_NOAUTOKEY)
 #define	CS_DIGEST		(8 + CS_MAX_NOAUTOKEY)
 #define	CS_MAXCODE		CS_DIGEST
-#else	/* !AUTOKEY follows */
+#else	/* !ENABLE_AUTOKEY follows */
 #define	CS_MAXCODE		CS_MAX_NOAUTOKEY
-#endif	/* !AUTOKEY */
+#endif	/* !ENABLE_AUTOKEY */
 
 /*
  * Peer variables we understand
@@ -289,7 +289,7 @@ static const struct ctl_proc control_codes[] = {
 #define	CP_SELBROKEN		49
 #define	CP_CANDIDATE		50
 #define	CP_MAX_NOAUTOKEY	CP_CANDIDATE
-#ifdef AUTOKEY
+#ifdef ENABLE_AUTOKEY
 #define	CP_FLAGS		(1 + CP_MAX_NOAUTOKEY)
 #define	CP_HOST			(2 + CP_MAX_NOAUTOKEY)
 #define	CP_VALID		(3 + CP_MAX_NOAUTOKEY)
@@ -299,9 +299,9 @@ static const struct ctl_proc control_codes[] = {
 #define	CP_SIGNATURE		(7 + CP_MAX_NOAUTOKEY)
 #define	CP_IDENT		(8 + CP_MAX_NOAUTOKEY)
 #define	CP_MAXCODE		CP_IDENT
-#else	/* !AUTOKEY follows */
+#else	/* !ENABLE_AUTOKEY follows */
 #define	CP_MAXCODE		CP_MAX_NOAUTOKEY
-#endif	/* !AUTOKEY */
+#endif	/* !ENABLE_AUTOKEY */
 
 /*
  * Clock variables we understand
@@ -416,7 +416,7 @@ static const struct ctl_var sys_var[] = {
 	{ CS_TIMER_XMTS,	RO, "timer_xmts" },	/* 87 */
 	{ CS_FUZZ,		RO, "fuzz" },		/* 88 */
 	{ CS_WANDER_THRESH,	RO, "clk_wander_threshold" }, /* 89 */
-#ifdef AUTOKEY
+#ifdef ENABLE_AUTOKEY
 	{ CS_FLAGS,	RO, "flags" },		/* 1 + CS_MAX_NOAUTOKEY */
 	{ CS_HOST,	RO, "host" },		/* 2 + CS_MAX_NOAUTOKEY */
 	{ CS_PUBLIC,	RO, "update" },		/* 3 + CS_MAX_NOAUTOKEY */
@@ -425,7 +425,7 @@ static const struct ctl_var sys_var[] = {
 	{ CS_REVTIME,	RO, "until" },		/* 6 + CS_MAX_NOAUTOKEY */
 	{ CS_IDENT,	RO, "ident" },		/* 7 + CS_MAX_NOAUTOKEY */
 	{ CS_DIGEST,	RO, "digest" },		/* 8 + CS_MAX_NOAUTOKEY */
-#endif	/* AUTOKEY */
+#endif	/* ENABLE_AUTOKEY */
 	{ 0,		EOV, "" }		/* 87/95 */
 };
 
@@ -458,7 +458,7 @@ static const u_char def_sys_var[] = {
 	CS_TAI,
 	CS_LEAPTAB,
 	CS_LEAPEND,
-#ifdef AUTOKEY
+#ifdef ENABLE_AUTOKEY
 	CS_HOST,
 	CS_IDENT,
 	CS_FLAGS,
@@ -466,7 +466,7 @@ static const u_char def_sys_var[] = {
 	CS_SIGNATURE,
 	CS_PUBLIC,
 	CS_CERTIF,
-#endif	/* AUTOKEY */
+#endif	/* ENABLE_AUTOKEY */
 	0
 };
 
@@ -526,7 +526,7 @@ static const struct ctl_var peer_var[] = {
 	{ CP_SELDISP,	RO, "seldisp" },	/* 48 */
 	{ CP_SELBROKEN,	RO, "selbroken" },	/* 49 */
 	{ CP_CANDIDATE, RO, "candidate" },	/* 50 */
-#ifdef AUTOKEY
+#ifdef ENABLE_AUTOKEY
 	{ CP_FLAGS,	RO, "flags" },		/* 1 + CP_MAX_NOAUTOKEY */
 	{ CP_HOST,	RO, "host" },		/* 2 + CP_MAX_NOAUTOKEY */
 	{ CP_VALID,	RO, "valid" },		/* 3 + CP_MAX_NOAUTOKEY */
@@ -535,7 +535,7 @@ static const struct ctl_var peer_var[] = {
 	{ CP_INITTSP,	RO, "timestamp" },	/* 6 + CP_MAX_NOAUTOKEY */
 	{ CP_SIGNATURE,	RO, "signature" },	/* 7 + CP_MAX_NOAUTOKEY */
 	{ CP_IDENT,	RO, "ident" },		/* 8 + CP_MAX_NOAUTOKEY */
-#endif	/* AUTOKEY */
+#endif	/* ENABLE_AUTOKEY */
 	{ 0,		EOV, "" }		/* 50/58 */
 };
 
@@ -578,14 +578,14 @@ static const u_char def_peer_var[] = {
 	CP_FILTDELAY,
 	CP_FILTOFFSET,
 	CP_FILTERROR,
-#ifdef AUTOKEY
+#ifdef ENABLE_AUTOKEY
 	CP_HOST,
 	CP_FLAGS,
 	CP_SIGNATURE,
 	CP_VALID,
 	CP_INITSEQ,
 	CP_IDENT,
-#endif	/* AUTOKEY */
+#endif	/* ENABLE_AUTOKEY */
 	0
 };
 
@@ -1414,7 +1414,7 @@ ctl_putuint(
 	ctl_putdata(buffer, (unsigned)( cp - buffer ), 0);
 }
 
-#ifdef AUTOKEY
+#ifdef ENABLE_AUTOKEY
 /*
  * ctl_putcal - write a decoded calendar data into the response
  */
@@ -1441,7 +1441,7 @@ ctl_putcal(
 
 	return;
 }
-#endif	/* AUTOKEY */
+#endif	/* ENABLE_AUTOKEY */
 
 /*
  * ctl_putfs - write a decoded filestamp into the response
@@ -1675,9 +1675,9 @@ ctl_putsys(
 	double kb;
 	double dtemp;
 	const char *ss;
-#ifdef AUTOKEY
+#ifdef ENABLE_AUTOKEY
 	struct cert_info *cp;
-#endif	/* AUTOKEY */
+#endif	/* ENABLE_AUTOKEY */
 #ifdef KERNEL_PLL
 	static struct timex ntx;
 	static u_long ntp_adjtime_time;
@@ -2242,7 +2242,7 @@ ctl_putsys(
 	case CS_WANDER_THRESH:
 		ctl_putdbl(sys_var[varid].text, wander_threshold * 1e6);
 		break;
-#ifdef AUTOKEY
+#ifdef ENABLE_AUTOKEY
 	case CS_FLAGS:
 		if (crypto_flags)
 			ctl_puthex(sys_var[CS_FLAGS].text,
@@ -2297,7 +2297,7 @@ ctl_putsys(
 			ctl_putfs(sys_var[CS_PUBLIC].text,
 			    ntohl(hostval.tstamp));
 		break;
-#endif	/* AUTOKEY */
+#endif	/* ENABLE_AUTOKEY */
 	}
 }
 
@@ -2317,11 +2317,11 @@ ctl_putpeer(
 	char *be;
 	int i;
 	const struct ctl_var *k;
-#ifdef AUTOKEY
+#ifdef ENABLE_AUTOKEY
 	struct autokey *ap;
 	const EVP_MD *dp;
 	const char *str;
-#endif	/* AUTOKEY */
+#endif	/* ENABLE_AUTOKEY */
 
 	switch (id) {
 
@@ -2588,7 +2588,7 @@ ctl_putpeer(
 	case CP_CANDIDATE:
 		ctl_putuint(peer_var[id].text, p->status);
 		break;
-#ifdef AUTOKEY
+#ifdef ENABLE_AUTOKEY
 	case CP_FLAGS:
 		if (p->crypto)
 			ctl_puthex(peer_var[id].text, p->crypto);
@@ -2628,7 +2628,7 @@ ctl_putpeer(
 		break;
 
 
-#endif	/* AUTOKEY */
+#endif	/* ENABLE_AUTOKEY */
 	}
 }
 

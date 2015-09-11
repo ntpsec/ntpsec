@@ -114,7 +114,7 @@
  */
 #define	MD5KEYS		10	/* number of keys generated of each type */
 #define	MD5SIZE		20	/* maximum key size */
-#ifdef AUTOKEY
+#ifdef ENABLE_AUTOKEY
 #define	PLEN		512	/* default prime modulus size (bits) */
 #define	ILEN		256	/* default identity modulus size (bits) */
 #define	MVMAX		100	/* max MV parameters */
@@ -126,7 +126,7 @@
 #define BASIC_CONSTRAINTS	"critical,CA:TRUE"
 #define EXT_KEY_PRIVATE		"private"
 #define EXT_KEY_TRUST		"trustRoot"
-#endif	/* AUTOKEY */
+#endif	/* ENABLE_AUTOKEY */
 
 /*
  * Prototypes
@@ -134,7 +134,7 @@
 FILE	*fheader	(const char *, const char *, const char *);
 bool	gen_md5		(const char *);
 void	followlink	(char *, size_t);
-#ifdef AUTOKEY
+#ifdef ENABLE_AUTOKEY
 EVP_PKEY *gen_rsa	(const char *);
 EVP_PKEY *gen_dsa	(const char *);
 EVP_PKEY *gen_iffkey	(const char *);
@@ -148,7 +148,7 @@ EVP_PKEY *genkey	(const char *, const char *);
 EVP_PKEY *readkey	(char *, char *, u_int *, EVP_PKEY **);
 void	writekey	(char *, char *, u_int *, EVP_PKEY **);
 u_long	asn2ntp		(ASN1_TIME *);
-#endif	/* AUTOKEY */
+#endif	/* ENABLE_AUTOKEY */
 
 /*
  * Program variables
@@ -167,12 +167,12 @@ char	*certname = NULL;	/* certificate subject/issuer name */
 char	*passwd1 = NULL;	/* input private key password */
 char	*passwd2 = NULL;	/* output private key password */
 char	filename[MAXFILENAME + 1]; /* file name */
-#ifdef AUTOKEY
+#ifdef ENABLE_AUTOKEY
 u_int	modulus = PLEN;		/* prime modulus size (bits) */
 u_int	modulus2 = ILEN;	/* identity modulus size (bits) */
 long	d0, d1, d2, d3;		/* callback counters */
 const EVP_CIPHER * cipher = NULL;
-#endif	/* AUTOKEY */
+#endif	/* ENABLE_AUTOKEY */
 
 #ifdef SYS_WINNT
 BOOL init_randfile();
@@ -292,7 +292,7 @@ main(
 	struct timeval tv;	/* initialization vector */
 	int	md5key = 0;	/* generate MD5 keys */
 	int	optct;		/* option count */
-#ifdef AUTOKEY
+#ifdef ENABLE_AUTOKEY
 	X509	*cert = NULL;	/* X509 certificate */
 	X509_EXTENSION *ext;	/* X509v3 extension */
 	EVP_PKEY *pkey_host = NULL; /* host key */
@@ -321,7 +321,7 @@ main(
 	BIO *	bp;
 	int	i, cnt;
 	char *	ptr;
-#endif	/* AUTOKEY */
+#endif	/* ENABLE_AUTOKEY */
 
 	progname = argv[0];
 
@@ -371,7 +371,7 @@ main(
 
 	if (HAVE_OPT( MD5KEY ))
 		md5key++;
-#ifdef AUTOKEY
+#ifdef ENABLE_AUTOKEY
 	if (HAVE_OPT( PASSWORD ))
 		passwd1 = estrdup(OPT_ARG( PASSWORD ));
 
@@ -479,7 +479,7 @@ main(
 		    "Random seed file %s %u bytes\n", pathbuf, temp);
 		RAND_add(&epoch, sizeof(epoch), 4.0);
 	}
-#endif	/* AUTOKEY */
+#endif	/* ENABLE_AUTOKEY */
 
 	/*
 	 * Create new unencrypted MD5 keys file if requested. If this
@@ -490,7 +490,7 @@ main(
 		exit (0);
 	}
 
-#ifdef AUTOKEY
+#ifdef ENABLE_AUTOKEY
 	/*
 	 * Load previous certificate if available.
 	 */
@@ -800,7 +800,7 @@ main(
 			exit (-1);
 	}
 	x509(pkey_sign, ectx, grpkey, exten, certname);
-#endif	/* AUTOKEY */
+#endif	/* ENABLE_AUTOKEY */
 	exit(0);
 }
 
@@ -867,7 +867,7 @@ gen_md5(
 }
 
 
-#ifdef AUTOKEY
+#ifdef ENABLE_AUTOKEY
 /*
  * readkey - load cryptographic parameters and keys
  *
@@ -2154,7 +2154,7 @@ genkey(
 	fprintf(stderr, "Invalid %s key type %s\n", id, type);
 	return (NULL);
 }
-#endif	/* AUTOKEY */
+#endif	/* ENABLE_AUTOKEY */
 
 
 /*

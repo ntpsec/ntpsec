@@ -1332,10 +1332,10 @@ do_conf(
 			fl |= FLAG_BURST;
 		if (temp_cp.flags & CONF_FLAG_IBURST)
 			fl |= FLAG_IBURST;
-#ifdef AUTOKEY
+#ifdef ENABLE_AUTOKEY
 		if (temp_cp.flags & CONF_FLAG_SKEY)
 			fl |= FLAG_SKEY;
-#endif	/* AUTOKEY */
+#endif	/* ENABLE_AUTOKEY */
 		if (client_v6_capable && temp_cp.v6_flag) {
 			AF(&peeraddr) = AF_INET6;
 			SOCK_ADDR6(&peeraddr) = temp_cp.peeraddr6; 
