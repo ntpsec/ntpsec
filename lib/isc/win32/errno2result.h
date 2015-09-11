@@ -17,8 +17,8 @@
 
 /* $Id: errno2result.h,v 1.10 2007/06/19 23:47:19 tbox Exp $ */
 
-#ifndef UNIX_ERRNO2RESULT_H
-#define UNIX_ERRNO2RESULT_H 1
+#ifndef GUARD_UNIX_ERRNO2RESULT_H
+#define GUARD_UNIX_ERRNO2RESULT_H 1
 
 /* XXXDCL this should be moved to lib/isc/include/isc/errno2result.h. */
 
@@ -37,4 +37,4 @@ isc__errno2resultx(int posixerrno, const char *file, int line);
 
 ISC_LANG_ENDDECLS
 
-#endif /* UNIX_ERRNO2RESULT_H */
+#endif /* GUARD_UNIX_ERRNO2RESULT_H */

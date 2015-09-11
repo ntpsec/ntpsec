@@ -1,5 +1,5 @@
-#ifndef KOD_MANAGEMENT_H
-#define KOD_MANAGEMENT_H
+#ifndef GUARD_KOD_MANAGEMENT_H
+#define GUARD_KOD_MANAGEMENT_H
 
 #include <time.h>
 

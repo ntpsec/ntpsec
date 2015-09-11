@@ -1,5 +1,5 @@
-#ifndef TESTS_MAIN_H
-#define TESTS_MAIN_H
+#ifndef GUARD_TESTS_MAIN_H
+#define GUARD_TESTS_MAIN_H
 
 #include "config.h"
 
@@ -19,4 +19,4 @@ protected:
 	static std::vector<std::string> m_params;
 };
 
-#endif // TESTS_MAIN_H
+#endif // GUARD_TESTS_MAIN_H

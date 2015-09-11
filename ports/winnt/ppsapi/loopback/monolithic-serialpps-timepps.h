@@ -46,8 +46,8 @@
  *								       *
  **********************************************************************/
 
-#ifndef _SYS_TIMEPPS_H_
-#define _SYS_TIMEPPS_H_
+#ifndef GUARD_SYS_TIMEPPS_H
+#define GUARD_SYS_TIMEPPS_H
 
 /* Implementation note: the logical states ``assert'' and ``clear''
  * are implemented in terms of the UART register, i.e. ``assert''
@@ -711,4 +711,4 @@ time_pps_kcbind(
 
 
 
-#endif /* _SYS_TIMEPPS_H_ */
+#endif /* GUARD_SYS_TIMEPPS_H */
