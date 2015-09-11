@@ -1,0 +1,191 @@
+= Reference Clock Support =
+
+image:pic/stack1a.jpg[gif]Master Time Facility at the
+http://www.eecis.udel.edu/%7emills/lab.html[UDel Internet Research
+Laboratory]
+
+Last update: 10-Mar-2014 05:20 UTC
+
+
+== Related Links ==
+
+include::includes/hand.txt[]
+include::includes/refclock.txt[]
+include::includes/audio.txt[]
+
+== Table of Contents ==
+
+* link:#intro[Introduction]
+* link:#spec[Special Considerations]
+* link:#list[List of Reference Clock Drivers]
+
+'''''
+
+[[intro]]
+== Introduction ==
+
+NTP Version 4 supports almost four dozen satellite, radio and telephone
+modem reference clocks plus several audio devices for instrumentation
+signals. A general description of the reference clock support is on this
+page. Additional information about each reference clock driver can be
+found via links from this page. Additional information is on the
+link:rdebug.html[Debugging Hints for Reference Clock Drivers] and
+link:howto.html[How To Write a Reference Clock Driver] pages.
+Information on how to support pulse-per-second (PPS) signals produced by
+some devices is on the link:pps.html[Pulse-per-second (PPS) Signal
+Interfacing] page. All reference clock drivers require that the
+reference clock use only Coordinated Universal Time (UTC). Timezone and
+standard/daylight adjustments are performed by the operating system
+kernel.
+
+A reference clock will generally (though not always) be a radio timecode
+receiver synchronized to standard time as provided by NIST and USNO in
+the US, NRC in Canada and their counterparts elsewhere in the world. A
+device driver specific to each reference clock must be compiled in the
+distribution; however, most common radio, satellite and telephone modem
+clocks are included by default and are activated by configuration
+commands.
+
+Reference clocks are supported in the same way as ordinary NTP clients
+and use the same filter, select, cluster and combine algorithms. Drivers
+have addresses in the form 127.127._t.u_, where _t_ is the driver type
+and _u_ is a unit number in the range 0-3 to distinguish multiple
+instances of the same driver. The connection to the computer is device
+dependent, usually a serial port, parallel port or special bus
+peripheral, but some can work directly from an audio codec or sound
+card. The particular device is specified by adding a soft link from the
+name used by the driver to the particular device name.
+
+The `server` command is used to configure a reference clock. Only the
+`mode`, `minpoll`, `maxpoll`, and `prefer` options are supported for
+reference clocks, as described on the link:clockopt.html[Reference Clock
+Commands] page. The `prefer` option is discussed on the
+link:prefer.html[Mitigation Rules and the `prefer` Keyword] page. Some
+of these options have meaning only for selected clock drivers.
+
+The `fudge` command can be used to provide additional information for
+individual drivers and normally follows immediately after the `server`
+command. The reference clock stratum is by default 0, so that the server
+stratum appears to clients as 1. The `stratum` option can be used to set
+the stratum to any value in the range 0 through 15. The `refid` option
+can be used to change the reference identifier, as might in the case
+when the driver is disciplined by a pulse-per-second (PPS) source. The
+device-dependent `mode`, `time` and `flag` options can provide
+additional driver customization.
+
+[[spec]]
+== Special Considerations ==
+
+The link:audio.html[Audio Drivers] page describes three software drivers
+that process audio signals from an audio codec or sound card. One is for
+the NIST time and frequency stations WWV and WWVH, another for the
+Canadian time and frequency station CHU. These require an external
+shortwave radio and antenna. A third is for the generic IRIG signal
+produced by some timing devices. Currently, these are supported in
+FreeBSD, Solaris and SunOS and likely in other system as well.
+
+The link:driver1.html[Undisciplined Local Clock] driver can
+simulate a reference clock when no external synchronization sources are
+available. If a server with this driver is connected directly or
+indirectly to the public Internet, there is some danger that it can
+destabilize other clients. It is not recommended that the local clock
+driver be used in this way, as the orphan mode described on the
+link:assoc.html[Association Management] page provides a generic backup
+capability.
+
+The local clock driver can also be used when an external synchronization
+source such as the IEEE 1588 Precision Time Protocol or NIST Lockclock
+directly synchronizes the computer time. Further information is on the
+link:extern.html[External Clock Discipline and the Local Clock Driver]
+page.
+
+Several drivers make use of the pulse-per-second (PPS) signal
+discipline, which is part of the generic driver interface, so require no
+specific configuration. For those drivers that do not use this
+interface, the link:driver22.html[PPS Clock Discipline] driver
+can be can provide this function. It normally works in conjunction with
+the reference clock that produces the timecode signal, but can work with
+another driver or remote server. When PPS kernel features are present,
+the driver can redirect the PPS signal to the kernel.
+
+Some drivers depending on longwave or shortwave radio services need to
+know the radio propagation time from the transmitter to the receiver.
+This must be calculated for each specific receiver location and requires
+the geographic coordinates of both the transmitter and receiver. The
+transmitter coordinates for various radio services are given in the
+http://www.eecis.udel.edu/%7emills/ntp/qth.html[Time and Frequency
+Standard Station Information] page. Receiver coordinates can be obtained
+locally or from Google Earth. The actual calculations are beyond the
+scope of this document.
+
+Depending on interface type, port speed, etc., a reference clock can
+have a small residual offset relative to another. To reduce the effects
+of jitter when switching from one driver to the another, it is useful to
+calibrate the drivers to a common ensemble offset. The
+`enable calibrate` configuration command described on the
+link:miscopt.html[Miscellaneous Options] page activates a special
+feature which automatically calculates a correction factor for each
+driver relative to an association designated the prefer peer.
+
+[[list]]
+== List of Reference Clock Drivers ==
+
+Following is a list showing the type and title of each driver currently
+implemented. The compile-time identifier for each is shown in
+parentheses. Click on a selected type for specific description and
+configuration documentation, including the clock address, reference ID,
+driver ID, device name and serial line speed. For those drivers without
+specific documentation, please contact the author listed in the
+link:copyright.html[Copyright Notice] page.
+
+//FIXME: Either add symbols to all entries or remove all
+* link:driver1.html[Type 1] Undisciplined Local Clock (`LOCAL`)
+* Type 2 reserved
+* link:driver3.html[Type 3] PSTI/Traconex 1020 WWV/WWVH Receiver (`WWV_PST`)
+* link:driver4.html[Type 4] Generic Spectracom Receivers (`SPECTRACOM`)
+* link:driver5.html[Type 5] TrueTime GPS/GOES/OMEGA Receivers (`TRUETIME`)
+* link:driver6.html[Type 6] IRIG Audio Decoder (`IRIG_AUDIO`)
+* link:driver7.html[Type 7] Radio CHU Audio Demodulator/Decoder (`CHU`)
+* link:driver8.html[Type 8] Generic Reference Driver (`PARSE`)
+* link:driver9.html[Type 9] Magnavox MX4200 GPS Receiver (`GPS_MX4200`)
+* link:driver10.html[Type 10] Austron 2200A/2201A GPS Receivers (`GPS_AS2201`)
+* link:driver11.html[Type 11] Arbiter 1088A/B GPS Receiver (`GPS_ARBITER`)
+* Type 12 reserved
+* Type 13 reserved
+* Type 14 reserved
+* Type 15 reserved
+* link:driver16.html[Type 16] Bancomm GPS/IRIG Receiver (`GPS_BANCOMM`)
+* Type 17 reserved
+* link:driver18.html[Type 18] NIST/USNO/PTB Modem Time Services (`ACTS_MODEM`)
+* link:driver19.html[Type 19] Heath WWV/WWVH Receiver (`WWV_HEATH`)
+* link:driver20.html[Type 20] Generic NMEA GPS Receiver (`NMEA`)
+* Type 21 reserved
+* link:driver22.html[Type 22] PPS Clock Discipline (`PPS`)
+* Type 23 reserved
+* Type 24 reserved
+* Type 25 reserved
+* link:driver26.html[Type 26] Hewlett Packard 58503A GPS Receiver (`GPS_HP`)
+* link:driver27.html[Type 27] Arcron MSF Receiver (`MSF_ARCRON`)
+* link:driver28.html[Type 28] Shared Memory Driver (`SHM`)
+* link:driver29.html[Type 29] Trimble Navigation Palisade GPS (`GPS_PALISADE`)
+* link:driver30.html[Type 30] Motorola UT Oncore GPS (`GPS_ONCORE`)
+* link:driver31.html[Type 31] Rockwell Jupiter GPS (`GPS_JUPITER`)
+* link:driver32.html[Type 32] Chrono-log K-series WWVB receiver (`CHRONOLOG`)
+* link:driver33.html[Type 33] Dumb Clock (`DUMBCLOCK`)
+* link:driver34.html[Type 34] Ultralink WWVB Receivers (`ULINK`)
+* link:driver35.html[Type 35] Conrad Parallel Port Radio Clock (`PCF`)
+* link:driver36.html[Type 36] Radio WWV/H Audio Demodulator/Decoder (`WWV`)
+* link:driver37.html[Type 37] Forum Graphic GPS Dating station (`FG`)
+* link:driver38.html[Type 38] hopf GPS/DCF77 6021/komp for Serial Line (`HOPF_S`)
+* link:driver39.html[Type 39] hopf GPS/DCF77 6039 for PCI-Bus (`HOPF_P`)
+* link:driver40.html[Type 40] JJY Receivers (`JJY`)
+* Type 41 reserved
+* link:driver42.html[Type 42] Zyfer GPStarplus Receiver
+* Type 43 reserved
+* link:driver44.html[Type 44] NeoClock4X - DCF77 / TDF serial line
+* link:driver45.html[Type 45] Spectracom TSYNC PCI
+* link:driver46.html[Type 46] GPSD NG client protocol
+
+'''''
+
+include::includes/footer.txt[]

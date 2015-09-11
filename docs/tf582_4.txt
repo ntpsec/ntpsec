@@ -1,0 +1,52 @@
+= European Automated Computer Time Services =
+
+Last update: 21-Oct-2010 23:44 UTC
+
+'''''
+
+Several European countries use the following message data format:
+
+
+0000000000111111111122222222223333333333444444444455555555556666666666777777777
+
+0123456789012345678901234567890123456789012345678901234567890123456789012345678
+
+This format is an ITU-R Recommendation (ITU-R TF583.4) and is now
+available from the primary timing centres of the following countries:
+Austria, Belgium, Germany, Italy, The Netherlands, Poland, Portugal,
+Romania, Spain, Sweden, Switzerland, Turkey and United Kingdom. Some
+examples are:
+
+* In Germany by Physikalisch-Technische Bundesanstalt (PTB)'s timecode
+service. Phone number: +49 5 31 51 20 38.
++
+For more detail, see
+http://www.ptb.de/english/org/4/43/433/disse.html[http://www.ptb.de/english/org/4/43/433/disse.htm]
+* In the UK by National Physical Laboratory (NPL)'s TRUETIME service.
+Phone number: 0891 516 333
++
+For more detail, see http://www.npl.co.uk/npl/ctm/truetime.html
+
+* In Italy by Istituto Elettrotecnico Nazionale "Galileo Ferrais"
+(IEN)'s CTD service. Phone number: 166 11 46 15
++
+For more detail, see http://www.ien.it/tf/time/Pagina42.html
+
+* In Switzerland by Swiss Federal Office of Metrology's timecode
+service. Phone number: 031 323 32 25
++
+For more detail, see
+http://www.metas.ch/en/labors/official-time/modem/index.html[http://www.ofmet.admin.ch/de/labors/4/Zeitvert.html]
+
+* In Sweden by SP Swedish National Testing and Research Institute 's
+timecode service. Phone number: +46 33 415783.
++
+For more detail, see http://www.sp.se/metrology/timefreq/eng/tandf.htm
+
+== Additional Information ==
+
+link:refclock.html[Reference Clock Drivers]
+
+'''''
+
+include::includes/footer.txt[]

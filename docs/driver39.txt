@@ -1,0 +1,77 @@
+= _hopf_ PCI-Bus Receiver (6039 GPS/DCF77) =
+
+Last update: 21-Oct-2010 23:44 UTC
+
+'''''
+
+== Synopsis ==
+
+[width="50%",cols="<50%,<50%",frame="none",grid="none"]
+|=============================
+| `Address:`      | *127.127.39._X_*
+|[[REFID]] `Reference ID:` | *.hopf.* (default)*, GPS, DCF*
+| `Driver ID:`    | *HOPF_P*
+|=============================
+
+image:pic/fg6039.jpg[]
+
+'''''
+
+== Description ==
+
+The *refclock_hopf_pci* driver supports the http://www.hopf.com[hopf] PCI-bus interface 6039 GPS/DCF77. +
+Additional software and information about the software drivers maybe available from: link:http://www.ATLSoft.de/ntp[]. +
+Latest NTP driver source, executables and documentation is maintained
+at: link:http://www.ATLSoft.de/ntp[]
+
+'''''
+
+== Operating System Compatibility ==
+
+The hopf clock driver has been tested on the following software and
+hardware platforms:
+
+[width="25%",cols="<50%,<50%",frame="none",grid="none"]
+|=============================
+|*Platform* | *Operating System*
+| i386 (PC) | Linux
+| i386 (PC) | Windows NT
+| i386 (PC) | Windows 2000
+|=============================
+
+'''''
+
+== O/S System Configuration ==
+
+.*UNIX*
+The driver attempts to open the device link:#REFID[*`/dev/hopf6039`*] . The device entry will be made by the installation process of the kernel module for the PCI-bus board. The driver sources belongs to the deliver equipment of the PCI-board.
+
+.*Windows NT/2000*
+The driver attempts to open the device by calling the function
+"OpenHopfDevice()". This function will be installed by the Device Driver
+for the PCI-bus board. The driver belongs to the delivery equipment of
+the PCI-board.
+
+'''''
+
+== Fudge Factors ==
+
+//ERROR: Typos need fixing.
+
+link:#REFID[*`refid` __string__*]::
+   Specifies the driver reference identifier, *GPS* _or_ *DCF*.
+
+*`flag1 0 | 1`*::
+   When set to 1, driver sync's even if only crystal driven.
+
+'''''
+
+== Questions or Comments: ==
+
+[verse]
+mailto:altmeier@atlsoft.de[Bernd Altmeier]
+http://www.atlsoft.de/[Ing.-Büro für Software www.ATLSoft.de]
+
+'''''
+
+include::includes/footer.txt[]

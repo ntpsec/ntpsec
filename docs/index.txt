@@ -1,0 +1,150 @@
+= The Network Time Protocol (NTP) Distribution =
+
+[cols="10%,90%",frame="none",grid="none",style="verse"]
+|==============================
+|image:pic/barnstable.gif[]|
+http://www.eecis.udel.edu/%7emills/pictures.html['P.T. Bridgeport Bear'; from 'Pogo', Walt Kelly]
+
+Pleased to meet you.
+
+Last update: 31-Mar-2014 05:41
+|==============================
+
+== Related Links ==
+
+* A list of all links is on the link:sitemap.html[Site Map] page.
+
+'''''
+
+== Table of Contents ==
+
+* link:#intro[Introduction]
+* link:#hand[The Handbook]
+* link:#build[Building and Installing NTP]
+* link:#prob[Resolving Problems]
+* link:#info[Further Information]
+
+[[intro]]
+== Introduction ==
+
+Note: The NTP Version 4 software contained in this distribution is
+available without charge under the conditions set forth in the
+link:copyright.html[Copyright Notice].
+//FIXME: Using a quote block here is dodgy, should be an admonition.
+_____
+It is very important that readers understand that the NTP document
+collection began 25 years ago and remains today a work in progress. It
+has evolved as new features were invented and old features retired. It
+has been widely copied, cached and morphed to other formats, including
+man pages, with varying loss of fidelity. However, these HTML pages are
+the ONLY authoritative and definitive reference. Readers should always
+use the collection that comes with the distribution they use. A copy of
+the online collection at {project-weblink} is normally included in the most
+recent snapshot, but might not agree with an earlier snapshot or
+release version.
+
+_____
+
+This distribution is an implementation of RFC-5905 "Network Time Protocol Version 4: Protocol and Algorithms Specification". +
+NTP is widely used to synchronize a computer to Internet time servers
+or other sources, such as a radio or satellite receiver or telephone
+modem service. It can also be used as a server for dependent clients. It
+provides accuracies typically less than a millisecond on LANs and up to
+a few milliseconds on WANs. Typical NTP configurations utilize multiple
+redundant servers and diverse network paths in order to achieve high
+accuracy and reliability.
+
+This distribution includes a simulation framework in which substantially
+all the runtime NTP operations and most features can be tested and
+evaluated. This has been very useful in exploring in vitro response to
+unusual circumstances or over time periods impractical in vivo. Details
+are on the link:ntpdsim.html[Network Time Protocol (NTP) Simulator]
+page.
+
+[[hand]]
+== The Handbook ==
+
+A good deal of tutorial and directive information is available on the
+handbook pages. These should be read in conjunction with the command and
+option information available on the pages listed on the sitemap page.
+
+link:release.html[NTP Version 4 Release Notes]::
+  Lists recent changes and new features in the current distribution.
+link:assoc.html[Association Management]::
+  Describes how to configure servers and peers and manage the various
+  options. Includes automatic server discovery schemes.
+link:discover.html[Automatic Server Discovery Schemes]::
+  Describes automatic server discovery using broadcast, multicast,
+  manycast and server pool scheme.
+link:access.html[Access Control Support]::
+  Describes the access control mechanisms that can be used to limit
+  client access to various time and management functions.
+link:authentic.html[Authentication Support]::
+  Describes the authentication mechanisms for symmetric-key and
+  public-key cryptography.
+link:rate.html[Rate Management]::
+  Describes the principles of rate management to minimize network load
+  and defend against DoS attacks.
+link:refclock.html[Reference Clock Support]::
+  Describes the collection of radio clocks used to synchronize primary
+  servers.
+link:warp.html[How NTP Works]::
+  Gives an overview of the NTP daemon architecture and how it works.
+
+[[build]]
+== Building and Installing NTP ==
+
+NTP supports Unix, VMS and Windows (2000 and later) systems. The
+link:build.html[Building and Installing the Distribution] page details
+the procedures for building and installing on a typical system. This
+distribution includes drivers for many radio and satellite receivers and
+telephone modem services in the US, Canada and Europe. A list of
+supported drivers is on the link:refclock.html[Reference Clock Drivers]
+page. The default build includes the debugging options and all drivers
+that run on the target machine; however, options and drivers can be
+included or excluded using options on the link:config.html[Configuration
+Options] page.
+
+[[prob]]
+== Resolving Problems ==
+
+Like other things in modern Internet life, NTP problems can be
+devilishly intricate. This distribution includes a number of utilities
+designed to identify and repair problems using an integrated management
+protocol supported by the link:ntpq.html[`ntpq`] utility program.
+
+The link:debug.html[NTP Debugging Techniques] and link:hints.html[Hints
+and Kinks] pages contain useful information for identifying problems and
+devising solutions. Additional information on reference clock driver
+construction and debugging is in the link:rdebug.html[Debugging Hints
+for Reference Clock Drivers] page.
+
+Users are invited to report bugs and offer suggestions via the
+link:bugs.html[NTP Bug Reporting Procedures] page.
+
+[[info]]
+== Further Information ==
+
+The link:sitemap.html[Site Map] page contains a list of document
+collections arranged by topic. The Program Manual Pages collection may
+be the best place to start. The link:comdex.html[Command Index]
+collection contains a list of all configuration file commands together
+with a short function description. A great wealth of additional
+information is available via the External Links collection, including a
+book and numerous background papers and briefing presentations.
+
+Background information on computer network time synchronization is on
+the http://www.eecis.udel.edu/%7emills/exec.html[Executive Summary -
+Computer Network Time Synchronization] page. Discussion on new features
+and interoperability with previous NTP versions is on the
+link:release.html[NTP Version 4 Release Notes] page. Background
+information, bibliography and briefing slides suitable for presentations
+are on the http://www.eecis.udel.edu/%7emills/ntp.html[Network Time
+Synchronization Research Project] page. Additional information is at the
+{project-shortname} web site {project-weblink}.
+
+'''''
+
+image::pic/pogo1a.gif[align="center"]
+
+include::includes/footer.txt[]

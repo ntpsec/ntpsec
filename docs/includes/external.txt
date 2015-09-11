@@ -1,0 +1,21 @@
+== External Links ==
+* link:http://www.eecis.udel.edu/~mills/book.html[Computer Network Time Synchronization - The Network Time Protocol (book)]
+* link:{project-website}/index.html[{project-fullname} (home page)]
+* link:{millshome}/ntp.html[NTP Research Project (home page)]
+* link:{millshome}/exec.html[Executive Summary: Computer Network Time Synchronization]
+* link:{millshome}/leap.html[The NTP Timescale and Leap Seconds]
+* link:{millshome}/time.html[NTP Timestamp Calculations]
+* link:{millshome}/y2k.html[The NTP Era and Era Numbering]
+* link:{millshome}/stamp.html[Timestamp Capture Principles]
+* link:{millshome}/onwire.html[Analysis and Simulation of the NTP
+On-Wire Protocols]
+//ERROR: Typo 'Synchroization'
+* link:{millshome}/proximity.html[Time Synchroization for Space Data Links]
+* link:{millshome}/security.html[NTP Security Analysis]
+* link:{millshome}/ptp.html[IEEE 1588 Precision Time Protocol (PTP)]
+* link:{millshome}/autocfg.html[Autonomous Configuration]
+* link:{millshome}/autokey.html[Autonomous Authentication]
+* link:{millshome}/proto.html[Autokey Protocol]
+* link:{millshome}/ident.html[Autokey Identity Schemes]
+* link:sitemap.html[Site Map]
+

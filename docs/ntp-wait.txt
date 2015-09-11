@@ -1,0 +1,28 @@
+= `ntp-wait` - waits until ntpd is in synchronized state =
+
+Last update: 12-Jul-2011 22:03 UTC
+
+'''''
+
+== Synopsis ==
+
+`ntp-wait` [ `-v` ] [ `-n` 'tries' ] [ `-s` 'seconds' ]
+
+== Description ==
+
+The `ntp-wait` program blocks until ntpd is in synchronized state. This
+can be useful at boot time, to delay the boot sequence until after "ntpd
+-g" has set the time.
+
+== Command Line Options ==
+
+`-n` 'tries'::
+Number of tries before giving up. The default is 1000.
+
+`-s` 'seconds'::
+Seconds to sleep between tries. The default is 6 seconds.
+
+`-v`::
+Be verbose.
+
+include::includes/footer.txt[]

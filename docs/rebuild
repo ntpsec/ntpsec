@@ -1,0 +1,13 @@
+#!/bin/sh
+#
+# Remake all html from asciidoc
+#
+for master in *.txt hints/*.txt;
+do
+    html=`echo $master | sed -e '/txt$/s//html/'`
+    if [ ! -f $html -o $html -ot $master ]
+    then
+	echo "Rebuilding $html"
+	asciidoc -b html5 -a linkcss -a stylesdir=$PWD $master
+    fi
+done
