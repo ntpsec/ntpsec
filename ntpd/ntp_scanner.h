@@ -8,8 +8,8 @@
  * Copyright (c) 2006
  */
 
-#ifndef NTP_SCANNER_H
-#define NTP_SCANNER_H
+#ifndef GUARD_NTP_SCANNER_H
+#define GUARD_NTP_SCANNER_H
 
 #include "ntp_config.h"
 
@@ -139,4 +139,4 @@ extern size_t      lex_level(void);
 extern bool lex_from_file(void);
 extern struct FILE_INFO * lex_current(void);
 
-#endif	/* NTP_SCANNER_H */
+#endif	/* GUARD_NTP_SCANNER_H */

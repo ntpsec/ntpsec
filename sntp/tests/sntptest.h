@@ -1,5 +1,5 @@
-#ifndef SNTPTEST_H
-#define SNTPTEST_H
+#ifndef GUARD_SNTPTEST_H
+#define GUARD_SNTPTEST_H
 
 #include "tests_main.h"
 
@@ -32,4 +32,4 @@ protected:
 	}
 };
 
-#endif // SNTPTEST_H
+#endif // GUARD_SNTPTEST_H

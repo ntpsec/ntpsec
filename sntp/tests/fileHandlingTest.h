@@ -1,5 +1,5 @@
-#ifndef FILE_HANDLING_TEST_H
-#define FILE_HANDLING_TEST_H
+#ifndef GUARD_FILE_HANDLING_TEST_H
+#define GUARD_FILE_HANDLING_TEST_H
 
 #include "sntptest.h"
 
@@ -61,4 +61,4 @@ protected:
 	}
 };
 
-#endif // FILE_HANDLING_TEST_H
+#endif // GUARD_FILE_HANDLING_TEST_H
