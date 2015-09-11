@@ -320,6 +320,10 @@ int main () {
 	if ctx.options.enable_mssntp:
 		ctx.define("ENABLE_MSSNTP", 1)
 
+	# There is an ENABLE_AUTOKEY as well, but as that feature
+	# is not working and likely to be replaced it's not exposed
+	# and can't be enabled.
+
 	# Won't be true under Windows, but is under every Unix-like OS.
 	ctx.define("HAVE_WORKING_FORK", 1)
 

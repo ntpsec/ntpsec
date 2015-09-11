@@ -747,7 +747,7 @@ newpeer(
 	struct peer *	peer;
 	u_int		hash;
 
-#ifdef AUTOKEY
+#ifdef ENABLE_AUTOKEY
 	/*
 	 * If Autokey is requested but not configured, complain loudly.
 	 */
@@ -760,7 +760,7 @@ newpeer(
 			return (NULL);
 		} 
 	}
-#endif	/* AUTOKEY */
+#endif	/* ENABLE_AUTOKEY */
 
 	/*
 	 * For now only pool associations have a hostname.
@@ -878,10 +878,10 @@ newpeer(
 	if ((MDF_MCAST & cast_flags) && peer->dstadr != NULL)
 		enable_multicast_if(peer->dstadr, srcadr);
 
-#ifdef AUTOKEY
+#ifdef ENABLE_AUTOKEY
 	if (key > NTP_MAXKEY)
 		peer->flags |= FLAG_SKEY;
-#endif	/* AUTOKEY */
+#endif	/* ENABLE_AUTOKEY */
 	peer->ttl = ttl;
 	peer->keyid = key;
 	if (ident != NULL)

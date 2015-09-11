@@ -25,9 +25,9 @@
 #include "ntp_syscall.h"
 #endif /* KERNEL_PLL */
 
-#ifdef AUTOKEY
+#ifdef ENABLE_AUTOKEY
 #include <openssl/rand.h>
-#endif	/* AUTOKEY */
+#endif	/* ENABLE_AUTOKEY */
 
 
 /* TC_ERR represents the timer_create() error return value. */
@@ -68,12 +68,12 @@ static	u_long worker_idle_timer;/* next check for idle intres */
 u_long	leapsec;	        /* seconds to next leap (proximity class) */
 int     leapdif;                /* TAI difference step at next leap second*/
 u_long	orphwait; 		/* orphan wait time */
-#ifdef AUTOKEY
+#ifdef ENABLE_AUTOKEY
 static	u_long revoke_timer;	/* keys revoke timer */
 static	u_long keys_timer;	/* session key timer */
 u_long	sys_revoke = KEY_REVOKE; /* keys revoke timeout (log2 s) */
 u_long	sys_automax = NTP_AUTOMAX; /* key list timeout (log2 s) */
-#endif	/* AUTOKEY */
+#endif	/* ENABLE_AUTOKEY */
 
 /*
  * Statistics counter for the interested.
@@ -322,10 +322,10 @@ timer(void)
 	    current_time > orphwait) {
 		if (sys_leap == LEAP_NOTINSYNC) {
 			sys_leap = LEAP_NOWARNING;
-#ifdef AUTOKEY
+#ifdef ENABLE_AUTOKEY
 			if (crypto_flags)	
 				crypto_update();
-#endif	/* AUTOKEY */
+#endif	/* ENABLE_AUTOKEY */
 		}
 		sys_stratum = (u_char)sys_orphan;
 		if (sys_stratum > 1)
@@ -366,7 +366,7 @@ timer(void)
 		huffpuff();
 	}
 
-#ifdef AUTOKEY
+#ifdef ENABLE_AUTOKEY
 	/*
 	 * Garbage collect expired keys.
 	 */
@@ -383,7 +383,7 @@ timer(void)
 		revoke_timer += 1 << sys_revoke;
 		RAND_bytes((u_char *)&sys_private, 4);
 	}
-#endif	/* AUTOKEY */
+#endif	/* ENABLE_AUTOKEY */
 
 	/*
 	 * Interface update timer

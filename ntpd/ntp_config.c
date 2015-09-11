@@ -1821,12 +1821,12 @@ config_auth(
 	int		last;
 	int		i;
 	int		count;
-#ifdef AUTOKEY
+#ifdef ENABLE_AUTOKEY
 	int		item;
 #endif
 
 	/* Crypto Command */
-#ifdef AUTOKEY
+#ifdef ENABLE_AUTOKEY
 	item = -1;	/* quiet warning */
 	my_val = HEAD_PFIFO(ptree->auth.crypto_cmd_list);
 	for (; my_val != NULL; my_val = my_val->link) {
@@ -1858,7 +1858,7 @@ config_auth(
 		}
 		crypto_config(item, my_val->value.s);
 	}
-#endif	/* AUTOKEY */
+#endif	/* ENABLE_AUTOKEY */
 
 	/* Keysdir Command */
 	if (ptree->auth.keysdir) {
@@ -1875,12 +1875,12 @@ config_auth(
 		ntp_signd_socket = estrdup(ptree->auth.ntp_signd_socket);
 	}
 
-#ifdef AUTOKEY
+#ifdef ENABLE_AUTOKEY
 	if (ptree->auth.cryptosw && !cryptosw) {
 		crypto_setup();
 		cryptosw = 1;
 	}
-#endif	/* AUTOKEY */
+#endif	/* ENABLE_AUTOKEY */
 
 	/*
 	 * Count the number of trusted keys to preallocate storage and
@@ -1948,11 +1948,11 @@ config_auth(
 		}
 	}
 
-#ifdef AUTOKEY
+#ifdef ENABLE_AUTOKEY
 	/* crypto revoke command */
 	if (ptree->auth.revoke)
 		sys_revoke = 1UL << ptree->auth.revoke;
-#endif	/* AUTOKEY */
+#endif	/* ENABLE_AUTOKEY */
 }
 #endif	/* !SIM */
 
@@ -3546,7 +3546,7 @@ config_vars(
 			break;
 
 		case T_Automax:
-#ifdef AUTOKEY
+#ifdef ENABLE_AUTOKEY
 			sys_automax = curr_var->value.i;
 #endif
 			break;

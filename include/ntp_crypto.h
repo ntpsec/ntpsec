@@ -5,7 +5,7 @@
 #define GUARD_NTP_CRYPTO_H
 
 /*
- * Configuration codes (also needed for parser without AUTOKEY)
+ * Configuration codes (also needed for parser without ENABLE_AUTOKEY)
  */
 #define CRYPTO_CONF_NONE  0	/* nothing doing */
 #define CRYPTO_CONF_PRIV  1	/* host name */
@@ -18,10 +18,10 @@
 #define CRYPTO_CONF_PW	  8	/* private key password */
 #define	CRYPTO_CONF_NID   9	/* specify digest name */
 
-#ifdef AUTOKEY
+#ifdef ENABLE_AUTOKEY
 #ifndef OPENSSL
-#error AUTOKEY should be defined only if OPENSSL is.
-invalidsyntax: AUTOKEY should be defined only if OPENSSL is.
+#error ENABLE_AUTOKEY should be defined only if OPENSSL is.
+invalidsyntax: ENABLE_AUTOKEY should be defined only if OPENSSL is.
 #endif
 
 #include "openssl/evp.h"
@@ -186,5 +186,5 @@ extern	int	crypto_nid;	/* digest nid */
 extern	struct value hostval;	/* host name/value */
 extern	struct cert_info *cinfo; /* host certificate information */
 extern	struct value tai_leap;	/* leapseconds table */
-#endif /* AUTOKEY */
+#endif /* ENABLE_AUTOKEY */
 #endif /* GUARD_NTP_CRYPTO_H */

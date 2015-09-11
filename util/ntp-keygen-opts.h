@@ -262,9 +262,9 @@ typedef enum {
  * @{
  */
 #define VALUE_OPT_IMBITS         'b'
-#ifdef AUTOKEY
+#ifdef ENABLE_AUTOKEY
 #define OPT_VALUE_IMBITS         (DESC(IMBITS).optArg.argInt)
-#endif /* AUTOKEY */
+#endif /* ENABLE_AUTOKEY */
 #define VALUE_OPT_CERTIFICATE    'c'
 #define VALUE_OPT_CIPHER         'C'
 #define VALUE_OPT_DEBUG_LEVEL    'd'
@@ -277,14 +277,14 @@ typedef enum {
 #define VALUE_OPT_IFFKEY         'I'
 #define VALUE_OPT_IDENT          'i'
 #define VALUE_OPT_LIFETIME       'l'
-#ifdef AUTOKEY
+#ifdef ENABLE_AUTOKEY
 #define OPT_VALUE_LIFETIME       (DESC(LIFETIME).optArg.argInt)
-#endif /* AUTOKEY */
+#endif /* ENABLE_AUTOKEY */
 #define VALUE_OPT_MD5KEY         'M'
 #define VALUE_OPT_MODULUS        'm'
-#ifdef AUTOKEY
+#ifdef ENABLE_AUTOKEY
 #define OPT_VALUE_MODULUS        (DESC(MODULUS).optArg.argInt)
-#endif /* AUTOKEY */
+#endif /* ENABLE_AUTOKEY */
 #define VALUE_OPT_PVT_CERT       'P'
 #define VALUE_OPT_PASSWORD       'p'
 #define VALUE_OPT_EXPORT_PASSWD  'q'
@@ -292,13 +292,13 @@ typedef enum {
 #define VALUE_OPT_SUBJECT_NAME   's'
 #define VALUE_OPT_TRUSTED_CERT   'T'
 #define VALUE_OPT_MV_PARAMS      'V'
-#ifdef AUTOKEY
+#ifdef ENABLE_AUTOKEY
 #define OPT_VALUE_MV_PARAMS      (DESC(MV_PARAMS).optArg.argInt)
-#endif /* AUTOKEY */
+#endif /* ENABLE_AUTOKEY */
 #define VALUE_OPT_MV_KEYS        'v'
-#ifdef AUTOKEY
+#ifdef ENABLE_AUTOKEY
 #define OPT_VALUE_MV_KEYS        (DESC(MV_KEYS).optArg.argInt)
-#endif /* AUTOKEY */
+#endif /* ENABLE_AUTOKEY */
 /** option flag (value) for help-value option */
 #define VALUE_OPT_HELP          '?'
 /** option flag (value) for more-help-value option */

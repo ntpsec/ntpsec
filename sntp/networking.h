@@ -62,7 +62,7 @@ struct speer {
 	l_fp reftime;
 	keyid_t keyid;
 
-#ifdef AUTOKEY
+#ifdef ENABLE_AUTOKEY
 #define clear_to_zero opcode
 	uint32_t	opcode;		/* last request opcode */
 	associd_t assoc;	/* peer association ID */
@@ -90,9 +90,9 @@ struct speer {
 	int	keynumber;	/* current key number */
 	struct value encrypt;	/* send encrypt values */
 	struct value sndval;	/* send autokey values */
-#else	/* !AUTOKEY follows */
+#else	/* !ENABLE_AUTOKEY follows */
 #define clear_to_zero status
-#endif	/* !AUTOKEY */
+#endif	/* !ENABLE_AUTOKEY */
 	
 	l_fp	rec;		/* receive time stamp */
 	l_fp	xmt;		/* transmit time stamp */

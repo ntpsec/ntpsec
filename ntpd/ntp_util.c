@@ -132,9 +132,9 @@ uninit_util(void)
 	filegen_unregister("rawstats");
 	filegen_unregister("sysstats");
 	filegen_unregister("protostats");
-#ifdef AUTOKEY
+#ifdef ENABLE_AUTOKEY
 	filegen_unregister("cryptostats");
-#endif	/* AUTOKEY */
+#endif	/* ENABLE_AUTOKEY */
 #ifdef DEBUG_TIMING
 	filegen_unregister("timingstats");
 #endif	/* DEBUG_TIMING */
@@ -731,7 +731,7 @@ record_proto_stats(
 }
 
 
-#ifdef AUTOKEY
+#ifdef ENABLE_AUTOKEY
 /*
  * record_crypto_stats - write crypto statistics to file
  *
@@ -767,7 +767,7 @@ record_crypto_stats(
 		fflush(cryptostats.fp);
 	}
 }
-#endif	/* AUTOKEY */
+#endif	/* ENABLE_AUTOKEY */
 
 
 #ifdef DEBUG_TIMING

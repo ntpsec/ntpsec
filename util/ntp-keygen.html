@@ -1150,7 +1150,7 @@ This option takes a number argument <span class="file">imbits</span>.
 
 <p class="noindent">This option has some usage constraints.  It:
      <ul>
-<li>must be compiled in by defining <code>AUTOKEY</code> during the compilation. 
+<li>must be compiled in by defining <code>ENABLE_AUTOKEY</code> during the compilation. 
 </ul>
 
   <p>The number of bits in the identity modulus.  The default is 256. 
@@ -1170,7 +1170,7 @@ This option takes a string argument <span class="file">scheme</span>.
 
 <p class="noindent">This option has some usage constraints.  It:
      <ul>
-<li>must be compiled in by defining <code>AUTOKEY</code> during the compilation. 
+<li>must be compiled in by defining <code>ENABLE_AUTOKEY</code> during the compilation. 
 </ul>
 
   <p>scheme is one of
@@ -1197,7 +1197,7 @@ This option takes a string argument <span class="file">cipher</span>.
 
 <p class="noindent">This option has some usage constraints.  It:
      <ul>
-<li>must be compiled in by defining <code>AUTOKEY</code> during the compilation. 
+<li>must be compiled in by defining <code>ENABLE_AUTOKEY</code> during the compilation. 
 </ul>
 
   <p>Select the cipher which is used to encrypt the files containing
@@ -1219,7 +1219,7 @@ This is the &ldquo;write iff or gq identity keys&rdquo; option.
 
 <p class="noindent">This option has some usage constraints.  It:
      <ul>
-<li>must be compiled in by defining <code>AUTOKEY</code> during the compilation. 
+<li>must be compiled in by defining <code>ENABLE_AUTOKEY</code> during the compilation. 
 </ul>
 
   <p>Write the IFF or GQ client keys to the standard output.  This is
@@ -1239,7 +1239,7 @@ This is the &ldquo;generate gq parameters and keys&rdquo; option.
 
 <p class="noindent">This option has some usage constraints.  It:
      <ul>
-<li>must be compiled in by defining <code>AUTOKEY</code> during the compilation. 
+<li>must be compiled in by defining <code>ENABLE_AUTOKEY</code> during the compilation. 
 </ul>
 
   <p>Generate parameters and keys for the GQ identification scheme,
@@ -1259,7 +1259,7 @@ This is the &ldquo;generate rsa host key&rdquo; option.
 
 <p class="noindent">This option has some usage constraints.  It:
      <ul>
-<li>must be compiled in by defining <code>AUTOKEY</code> during the compilation. 
+<li>must be compiled in by defining <code>ENABLE_AUTOKEY</code> during the compilation. 
 </ul>
 
   <p>Generate new host keys, obsoleting any that may exist. 
@@ -1278,7 +1278,7 @@ This is the &ldquo;generate iff parameters&rdquo; option.
 
 <p class="noindent">This option has some usage constraints.  It:
      <ul>
-<li>must be compiled in by defining <code>AUTOKEY</code> during the compilation. 
+<li>must be compiled in by defining <code>ENABLE_AUTOKEY</code> during the compilation. 
 </ul>
 
   <p>Generate parameters for the IFF identification scheme, obsoleting
@@ -1299,7 +1299,7 @@ This option takes a string argument <span class="file">group</span>.
 
 <p class="noindent">This option has some usage constraints.  It:
      <ul>
-<li>must be compiled in by defining <code>AUTOKEY</code> during the compilation. 
+<li>must be compiled in by defining <code>ENABLE_AUTOKEY</code> during the compilation. 
 </ul>
 
   <p>Set the optional Autokey group name to name.  This is used in
@@ -1327,7 +1327,7 @@ This option takes a number argument <span class="file">lifetime</span>.
 
 <p class="noindent">This option has some usage constraints.  It:
      <ul>
-<li>must be compiled in by defining <code>AUTOKEY</code> during the compilation. 
+<li>must be compiled in by defining <code>ENABLE_AUTOKEY</code> during the compilation. 
 </ul>
 
   <p>Set the certificate expiration to lifetime days from now. 
@@ -1360,7 +1360,7 @@ This option takes a number argument <span class="file">modulus</span>.
 
 <p class="noindent">This option has some usage constraints.  It:
      <ul>
-<li>must be compiled in by defining <code>AUTOKEY</code> during the compilation. 
+<li>must be compiled in by defining <code>ENABLE_AUTOKEY</code> during the compilation. 
 </ul>
 
   <p>The number of bits in the prime modulus.  The default is 512. 
@@ -1379,7 +1379,7 @@ This is the ``generate pc private certificate'' option.
 
 <p class="noindent">This option has some usage constraints.  It:
      <ul>
-<li>must be compiled in by defining <code>AUTOKEY</code> during the compilation. 
+<li>must be compiled in by defining <code>ENABLE_AUTOKEY</code> during the compilation. 
 </ul>
 
   <p>Generate a private certificate.  By default, the program generates
@@ -1400,7 +1400,7 @@ This option takes a string argument <span class="file">passwd</span>.
 
 <p class="noindent">This option has some usage constraints.  It:
      <ul>
-<li>must be compiled in by defining <code>AUTOKEY</code> during the compilation. 
+<li>must be compiled in by defining <code>ENABLE_AUTOKEY</code> during the compilation. 
 </ul>
 
   <p>Local files containing private data are encrypted with the
@@ -1424,7 +1424,7 @@ This option takes a string argument <span class="file">passwd</span>.
 
 <p class="noindent">This option has some usage constraints.  It:
      <ul>
-<li>must be compiled in by defining <code>AUTOKEY</code> during the compilation. 
+<li>must be compiled in by defining <code>ENABLE_AUTOKEY</code> during the compilation. 
 </ul>
 
   <p>Export IFF or GQ identity group keys to the standard output,
@@ -1448,7 +1448,7 @@ This option takes a string argument <span class="file">sign</span>.
 
 <p class="noindent">This option has some usage constraints.  It:
      <ul>
-<li>must be compiled in by defining <code>AUTOKEY</code> during the compilation. 
+<li>must be compiled in by defining <code>ENABLE_AUTOKEY</code> during the compilation. 
 </ul>
 
   <p>Generate a new sign key of the designated type, obsoleting any
@@ -1470,7 +1470,7 @@ This option takes a string argument <span class="file">host@group</span>.
 
 <p class="noindent">This option has some usage constraints.  It:
      <ul>
-<li>must be compiled in by defining <code>AUTOKEY</code> during the compilation. 
+<li>must be compiled in by defining <code>ENABLE_AUTOKEY</code> during the compilation. 
 </ul>
 
   <p>Set the Autokey host name, and optionally, group name specified
@@ -1498,7 +1498,7 @@ This is the ``trusted certificate (tc scheme)'' option.
 
 <p class="noindent">This option has some usage constraints.  It:
      <ul>
-<li>must be compiled in by defining <code>AUTOKEY</code> during the compilation. 
+<li>must be compiled in by defining <code>ENABLE_AUTOKEY</code> during the compilation. 
 </ul>
 
   <p>Generate a trusted certificate.  By default, the program generates
@@ -1519,7 +1519,7 @@ This option takes a number argument <span class="file">num</span>.
 
 <p class="noindent">This option has some usage constraints.  It:
      <ul>
-<li>must be compiled in by defining <code>AUTOKEY</code> during the compilation. 
+<li>must be compiled in by defining <code>ENABLE_AUTOKEY</code> during the compilation. 
 </ul>
 
   <p>Generate parameters and keys for the Mu-Varadharajan (MV)
@@ -1540,7 +1540,7 @@ This option takes a number argument <span class="file">num</span>.
 
 <p class="noindent">This option has some usage constraints.  It:
      <ul>
-<li>must be compiled in by defining <code>AUTOKEY</code> during the compilation. 
+<li>must be compiled in by defining <code>ENABLE_AUTOKEY</code> during the compilation. 
 </ul>
 
   <p>This option has no <span class="samp">doc</span> documentation.

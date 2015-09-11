@@ -194,7 +194,7 @@ static const struct codestring res_access_bits[] = {
 	/* not used with getcode(), no terminating entry needed */
 };
 
-#ifdef AUTOKEY
+#ifdef ENABLE_AUTOKEY
 /*
  * Crypto events (cryp)
  */
@@ -217,7 +217,7 @@ static const struct codestring crypto_codes[] = {
 	{ XEVNT_ERR & ~CRPT_EVENT,	"protocol_error" },
 	{ -1,				"" }
 };
-#endif	/* AUTOKEY */
+#endif	/* ENABLE_AUTOKEY */
 
 #ifdef KERNEL_PLL
 /*
@@ -486,10 +486,10 @@ eventstr(
 {
 	if (num & PEER_EVENT)
 		return (getcode(num & ~PEER_EVENT, peer_codes));
-#ifdef AUTOKEY
+#ifdef ENABLE_AUTOKEY
 	else if (num & CRPT_EVENT)
 		return (getcode(num & ~CRPT_EVENT, crypto_codes));
-#endif	/* AUTOKEY */
+#endif	/* ENABLE_AUTOKEY */
 	else
 		return (getcode(num, sys_codes));
 }
