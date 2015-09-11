@@ -1,5 +1,5 @@
-#ifndef NETWORKING_H
-#define NETWORKING_H
+#ifndef GUARD_NETWORKING_H
+#define GUARD_NETWORKING_H
 
 #include <arpa/inet.h>
 #include <netinet/in.h>

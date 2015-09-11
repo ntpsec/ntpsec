@@ -28,8 +28,8 @@
  * SUCH DAMAGE.
  *
  */
-#ifndef ASCII_H
-#define ASCII_H
+#ifndef GUARD_ASCII_H
+#define GUARD_ASCII_H
 
 /*
  * just name the common ASCII control codes

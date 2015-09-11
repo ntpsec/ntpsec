@@ -1,5 +1,5 @@
-#ifndef LOG_H
-#define LOG_H
+#ifndef GUARD_LOG_H
+#define GUARD_LOG_H
 
 #include "ntp.h"
 #include "ntp_stdlib.h"

@@ -4,8 +4,8 @@
  * This header allows systems without a recent-enough SDK to build NTP
  * which can use GetAdaptersAddresses(), related functions and macros.
  */
-#ifndef GAA_COMPAT_H
-#define GAA_COMPAT_H
+#ifndef GUARD_GAA_COMPAT_H
+#define GUARD_GAA_COMPAT_H
 
 #ifdef _W64
 # include <iphlpapi.h>
@@ -768,4 +768,4 @@ GetAdaptersAddresses(
 
 #pragma warning(pop)
 #endif	/* !_W64 */
-#endif	/* GAA_COMPAT_H */
+#endif	/* GUARD_GAA_COMPAT_H */

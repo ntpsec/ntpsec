@@ -4,8 +4,8 @@
  * ports/winnt/include/sys/time.h in ntpd.
  */
 
-#ifndef SYS_TIME_H
-#define SYS_TIME_H
+#ifndef GUARD_SYS_TIME_H
+#define GUARD_SYS_TIME_H
 
 #include <windows.h>
 #include <time.h>
@@ -15,4 +15,4 @@ typedef struct timespec {
 	long	tv_nsec;
 } timespec_t;
 
-#endif /* SYS_TIME_H */
+#endif /* GUARD_SYS_TIME_H */
