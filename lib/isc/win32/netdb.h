@@ -17,8 +17,8 @@
 
 /* $Id: netdb.h,v 1.9 2009/01/18 23:48:14 tbox Exp $ */
 
-#ifndef NETDB_H
-#define NETDB_H 1
+#ifndef GUARD_NETDB_H
+#define GUARD_NETDB_H 1
 
 #include <stddef.h>
 #include <winsock2.h>
@@ -184,4 +184,4 @@ struct rrsetinfo {
 #define ERRSET_INVAL		3
 
 
-#endif /* NETDB_H */
+#endif /* GUARD_NETDB_H */

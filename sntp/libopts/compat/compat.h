@@ -26,8 +26,8 @@
  * \file compat.h
  *  fake the preprocessor into handlng stuff portability
  */
-#ifndef COMPAT_H_GUARD
-#define COMPAT_H_GUARD 1
+#ifndef GUARD_COMPAT_H
+#define GUARD_COMPAT_H 1
 
 #if defined(HAVE_CONFIG_H)
 #  include <config.h>
@@ -324,7 +324,7 @@ extern	size_t	strlcat(char *dst, const char *src, size_t siz);
    #define WORD_MIN  INT_MIN
 #endif
 
-#endif /* COMPAT_H_GUARD */
+#endif /* GUARD_COMPAT_H */
 
 /*
  * Local Variables:

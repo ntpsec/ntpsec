@@ -4,8 +4,8 @@
  * routines declared in Unix systems' sys/time.h
  */
 
-#ifndef SYS_TIME_H
-#define SYS_TIME_H
+#ifndef GUARD_SYS_TIME_H
+#define GUARD_SYS_TIME_H
 
 #include "ntp_types.h"
 #include <time.h>
@@ -22,4 +22,4 @@ extern int gettimeofday(struct timeval *, void *);
 extern int settimeofday(struct timeval *);
 extern void init_win_precise_time(void);
 
-#endif /* SYS_TIME_H */
+#endif /* GUARD_SYS_TIME_H */

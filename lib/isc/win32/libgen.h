@@ -16,8 +16,8 @@
 
 /* $Id: libgen.h,v 1.3 2009/07/17 23:47:41 tbox Exp $ */
 
-#ifndef LIBGEN_H
-#define LIBGEN_H 1
+#ifndef GUARD_LIBGEN_H
+#define GUARD_LIBGEN_H 1
 
 char *basename(const char *);
 char *dirname(const char *);
