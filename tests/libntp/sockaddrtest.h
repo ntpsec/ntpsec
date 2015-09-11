@@ -1,5 +1,5 @@
-#ifndef TESTS_SOCKADDRTEST_H
-#define TESTS_SOCKADDRTEST_H
+#ifndef GUARD_TESTS_SOCKADDRTEST_H
+#define GUARD_TESTS_SOCKADDRTEST_H
 
 #include "libntptest.h"
 
@@ -55,4 +55,4 @@ protected:
 	}
 };
 
-#endif // TESTS_SOCKADDRTEST_H
+#endif // GUARD_TESTS_SOCKADDRTEST_H

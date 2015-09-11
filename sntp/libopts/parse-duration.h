@@ -74,8 +74,8 @@
   *  The terms must appear in this order.
 
  */
-#ifndef GNULIB_PARSE_DURATION_H
-#define GNULIB_PARSE_DURATION_H
+#ifndef GUARD_GNULIB_PARSE_DURATION_H
+#define GUARD_GNULIB_PARSE_DURATION_H
 
 #include <time.h>
 
@@ -87,4 +87,4 @@
    and errno is set to either EINVAL (bad syntax) or ERANGE (out of range).  */
 extern time_t parse_duration (char const * in_pz);
 
-#endif /* GNULIB_PARSE_DURATION_H */
+#endif /* GUARD_GNULIB_PARSE_DURATION_H */

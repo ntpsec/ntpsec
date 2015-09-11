@@ -16,8 +16,8 @@
 
 /* $Id$ */
 
-#ifndef ISCAPI_NAMESPACE_H
-#define ISCAPI_NAMESPACE_H 1
+#ifndef GUARD_ISCAPI_NAMESPACE_H
+#define GUARD_ISCAPI_NAMESPACE_H 1
 
 /*%
  * name space conversions
@@ -168,4 +168,4 @@
 
 #endif /* BIND9 */
 
-#endif /* ISCAPI_NAMESPACE_H */
+#endif /* GUARD_ISCAPI_NAMESPACE_H */

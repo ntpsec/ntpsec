@@ -13,8 +13,8 @@
  * HRVs (human readable values) but we might also be interested in the
  * machine representation for diagnostic purposes.
  */
-#ifndef TIMESTRUCTS_H
-#define TIMESTRUCTS_H
+#ifndef GUARD_TIMESTRUCTS_H
+#define GUARD_TIMESTRUCTS_H
 
 extern "C" {
 #include "ntp_fp.h"
@@ -182,4 +182,4 @@ extern std::ostream& operator << (std::ostream& os,
 
 } // namespace timeStruct
 
-#endif // TIMESTRUCTS_H
+#endif // GUARD_TIMESTRUCTS_H

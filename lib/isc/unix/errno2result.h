@@ -17,8 +17,8 @@
 
 /* $Id$ */
 
-#ifndef UNIX_ERRNO2RESULT_H
-#define UNIX_ERRNO2RESULT_H 1
+#ifndef GUARD_UNIX_ERRNO2RESULT_H
+#define GUARD_UNIX_ERRNO2RESULT_H 1
 
 /*! \file */
 
@@ -38,4 +38,4 @@ isc___errno2result(int posixerrno, const char *file, unsigned int line);
 
 ISC_LANG_ENDDECLS
 
-#endif /* UNIX_ERRNO2RESULT_H */
+#endif /* GUARD_UNIX_ERRNO2RESULT_H */

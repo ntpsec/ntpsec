@@ -1,5 +1,5 @@
-#ifndef UTILITIES_H
-#define UTILITIES_H
+#ifndef GUARD_UTILITIES_H
+#define GUARD_UTILITIES_H
 
 #include <math.h>
 #include <stdio.h>
@@ -24,4 +24,4 @@ char *ss_to_str(sockaddr_u *saddr);
 char *tv_to_str(const struct timeval *tv);
 const char * hostnameaddr(const char *, const sockaddr_u *);
 
-#endif	/* UTILITIES_H */
+#endif	/* GUARD_UTILITIES_H */

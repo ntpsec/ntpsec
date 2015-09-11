@@ -1,5 +1,5 @@
-#ifndef MAIN_H
-#define MAIN_H
+#ifndef GUARD_MAIN_H
+#define GUARD_MAIN_H
 
 #include <stdio.h>
 #include <isc/result.h>
@@ -28,4 +28,4 @@ void	offset_calculation(struct pkt *rpkt, int rpktl,
 int	on_wire(struct addrinfo *host, struct addrinfo *bcastaddr);
 int	set_time(double offset);
 
-#endif /* MAIN_H */
+#endif /* GUARD_MAIN_H */

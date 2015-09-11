@@ -1,5 +1,5 @@
-#ifndef CRYPTO_H
-#define CRYPTO_H
+#ifndef GUARD_CRYPTO_H
+#define GUARD_CRYPTO_H
 
 #include <string.h>
 #include <stdio.h>

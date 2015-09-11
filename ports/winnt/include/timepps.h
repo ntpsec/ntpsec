@@ -44,8 +44,8 @@
  *								       *
  **********************************************************************/
 
-#ifndef TIMEPPS_H
-#define TIMEPPS_H
+#ifndef GUARD_TIMEPPS_H
+#define GUARD_TIMEPPS_H
 
 #include "sys/time.h"	/* in ntp ref source declares struct timespec */
 
@@ -808,4 +808,4 @@ time_pps_kcbind(
 }
 
 
-#endif /* TIMEPPS_H */
+#endif /* GUARD_TIMEPPS_H */

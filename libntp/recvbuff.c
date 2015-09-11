@@ -302,7 +302,7 @@ isc_boolean_t has_full_recv_buffer(void)
 }
 
 
-#ifdef NTP_DEBUG_LISTS_H
+#ifdef NTP_DEBUG_LISTS
 void
 check_gen_fifo_consistency(void *fifo)
 {
@@ -323,4 +323,4 @@ check_gen_fifo_consistency(void *fifo)
 
 	REQUIRE(NULL == pf->pptail || pptail == pf->pptail);
 }
-#endif	/* NTP_DEBUG_LISTS_H */
+#endif	/* NTP_DEBUG_LISTS */

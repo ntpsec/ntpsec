@@ -110,7 +110,7 @@
 #include "ntp_assert.h"
 
 #ifdef DEBUG
-# define NTP_DEBUG_LISTS_H
+# define NTP_DEBUG_LISTS
 #endif
 
 /*
@@ -119,7 +119,7 @@
  * is harmless as long as it is ignored when the entry is not in a
  * list.
  */
-#ifndef NTP_DEBUG_LISTS_H
+#ifndef NTP_DEBUG_LISTS
 #define MAYBE_Z_LISTS(p)	do { } while (false)
 #else
 #define MAYBE_Z_LISTS(p)	(p) = NULL
@@ -240,7 +240,7 @@ struct {							\
  * For DEBUG builds only, verify both or neither of the anchor pointers
  * are NULL with each operation.
  */
-#if !defined(NTP_DEBUG_LISTS_H)
+#if !defined(NTP_DEBUG_LISTS)
 #define	CHECK_FIFO_CONSISTENCY(anchor)	do { } while (false)
 #else
 #define	CHECK_FIFO_CONSISTENCY(anchor)				\
