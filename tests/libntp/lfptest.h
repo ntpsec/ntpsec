@@ -1,5 +1,5 @@
-#ifndef NTP_TESTS_LFPTEST_H
-#define NTP_TESTS_LFPTEST_H
+#ifndef GUARD_NTP_TESTS_LFPTEST_H
+#define GUARD_NTP_TESTS_LFPTEST_H
 
 #include "libntptest.h"
 
@@ -28,4 +28,4 @@ protected:
 	static const int32_t QUARTER_PROMILLE_APPRX = 1073742L;
 };
 
-#endif /* NTP_TESTS_LFPTEST_H */
+#endif /* GUARD_NTP_TESTS_LFPTEST_H */

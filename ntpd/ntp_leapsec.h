@@ -8,8 +8,8 @@
  * module to make the somewhat convoluted logic testable.
  */
 
-#ifndef NTP_LEAPSEC_H
-#define NTP_LEAPSEC_H
+#ifndef GUARD_NTP_LEAPSEC_H
+#define GUARD_NTP_LEAPSEC_H
 
 struct stat;
 
@@ -218,4 +218,4 @@ extern bool leapsec_frame(leap_result_t *qr);
 /* reset global state for unit tests */
 extern void leapsec_ut_pristine(void);
 
-#endif /* !defined(NTP_LEAPSEC_H) */
+#endif /* GUARD_NTP_LEAPSEC_H */

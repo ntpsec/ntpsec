@@ -1,5 +1,5 @@
-#ifndef NTP_WIN_TERMIOS_H
-#define NTP_WIN_TERMIOS_H
+#ifndef GUARD_NTP_WIN_TERMIOS_H
+#define GUARD_NTP_WIN_TERMIOS_H
 
 /*  Flag definitions for compatibility
  *  ==================================
@@ -211,4 +211,4 @@ extern	int	tcgetattr	(int, struct termios *);
 extern	int	tcflush		(int, int);
 extern	int	isserialhandle	(HANDLE);
 
-#endif	/* NTP_WIN_TERMIOS_H */
+#endif	/* GUARD_NTP_WIN_TERMIOS_H */

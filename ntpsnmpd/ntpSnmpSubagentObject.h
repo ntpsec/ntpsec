@@ -7,8 +7,8 @@
  ****************************************************************************/
 
 
-#ifndef NTPSNMPSUBAGENTOBJECT_H
-#define NTPSNMPSUBAGENTOBJECT_H
+#ifndef GUARD_NTPSNMPSUBAGENTOBJECT_H
+#define GUARD_NTPSNMPSUBAGENTOBJECT_H
 
 /* Function Prototypes */
 size_t ntpsnmpd_parse_string(const char *string, char *field, size_t

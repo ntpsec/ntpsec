@@ -50,8 +50,8 @@
  *
  */
 
-#ifndef REFCLOCK_PALISADE_H
-#define REFCLOCK_PALISADE_H
+#ifndef GUARD_REFCLOCK_PALISADE_H
+#define GUARD_REFCLOCK_PALISADE_H
 
 #if defined HAVE_SYS_MODEM_H
 #include <sys/modem.h>
@@ -197,4 +197,4 @@ static  int	sendetx			(struct packettx *buffer, int fd);
 static  void	init_thunderbolt	(int fd);
 static  void	init_acutime		(int fd);
 
-#endif /* REFCLOCK_PALISADE_H */
+#endif /* GUARD_REFCLOCK_PALISADE_H */
