@@ -13,6 +13,7 @@ def options(ctx):
 	grp = ctx.add_option_group("NTP build options")
 	grp.add_option('--enable-debug', action='store_true', default=False, help="Enable debugging code")
 	grp.add_option('--enable-ipv6', action='store_true', default=False, help="Enable IPv6")
+	grp.add_option('--enable-doc', action='store_true', default=False, help="Build NTP documentation")
 
 	grp = ctx.add_option_group("NTP features")
 	grp.add_option('--enable-leap-smear', action='store_true', default=False, help="Enable Leap Smearing.")
@@ -40,6 +41,12 @@ def configure(ctx):
 def build(ctx):
 	ctx.load('waf', tooldir='pylib/')
 	ctx.load('bison')
+
+	if ctx.env.ENABLE_DOC:
+		print "hi"
+		ctx.load('asciidoc', tooldir='pylib/')
+		ctx.recurse("docs")
+
 
 	ctx.recurse("lib/isc")
 	ctx.recurse("libparse")

@@ -121,6 +121,13 @@ def cmd_configure(ctx):
 	ctx.find_program("yacc", var="BIN_YACC")
 	ctx.find_program("awk", var="BIN_AWK")
 	ctx.find_program("perl", var="BIN_PERL")
+	ctx.find_program("asciidoc", var="BIN_ASCIIDOC", mandatory=False)
+
+	if ctx.options.enable_doc and not ctx.env.BIN_ASCIIDOC:
+		ctx.fatal("asciidoc is required in order to build documentation")
+	elif ctx.options.enable_doc:
+		ctx.env.ASCIIDOC_FLAGS = ["-f", "%s/docs/asciidoc.conf" % ctx.srcnode.abspath(), "-a", "stylesdir=%s/docs/" % ctx.srcnode.abspath()]
+		ctx.env.ENABLE_DOC = True
 
 
 	ctx.start_msg("Checking build target")
