@@ -5,7 +5,6 @@
 
 #include "kod_management.h"
 #include "log.h"
-#include "sntp-opts.h"
 #include "ntp_stdlib.h"
 #include "ntp_worker.h"
 #include "ntp_debug.h"
