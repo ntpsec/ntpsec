@@ -29,7 +29,6 @@ def build(ctx):
 		"log.c",
 		"main.c",
 		"networking.c",
-		"sntp-opts.c",
 		"utilities.c"
 	]
 

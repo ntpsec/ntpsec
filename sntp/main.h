@@ -12,8 +12,6 @@
 #include <ntp_debug.h>
 #include <timevalops.h>
 
-#include "sntp-opts.h"
-
 #include "crypto.h"
 
 void	set_li_vn_mode(struct pkt *spkt, char leap, char version, char mode); 

@@ -10,7 +10,6 @@
 #include <ntp_stdlib.h>
 #include <ntp_md5.h>	/* provides OpenSSL digest API */
 #include "utilities.h"
-#include "sntp-opts.h"
 
 #define LEN_PKT_MAC	LEN_PKT_NOMAC + sizeof(uint32_t)
 

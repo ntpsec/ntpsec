@@ -179,7 +179,8 @@ sntp_main (
 	sntp_init_logging(argv[0]);
 
 	if (!libevent_version_ok())
-		exit(EX_SOFTWARE);
+		/* this used to return a value distinct from general failure */
+		exit(EXIT_FAILURE);
 
 	init_lib();
 	init_auth();
@@ -284,7 +285,8 @@ sntp_main (
 	if (0 == argc && !opt_broadcast && !opt_concurrent) {
 		printf("%s: Must supply at least one of -b hostname, -c hostname, or hostname.\n",
 		       progname);
-		exit(EX_USAGE);
+		/* this used to return a distinct calue, should it still? */
+		exit(EXIT_FAILURE);
 	}
 
 
@@ -1377,12 +1379,12 @@ handle_pkt(
 		free(ts_str);
 
 		if (p_SNTP_PRETEND_TIME)
-			return 0;
+			return EXIT_SUCCESS;
 
 		if (!time_adjusted && (opt_step || opt_slew))
 			return set_time(offset);
 
-		return EX_OK;
+		return EXIT_SUCCESS;
 	}
 
 	return 1;
@@ -1530,7 +1532,7 @@ set_time(
 	int rc;
 
 	if (time_adjusted)
-		return EX_OK;
+		return EXIT_SUCCESS;
 
 	/*
 	** If we can step but we cannot slew, then step.
@@ -1546,8 +1548,8 @@ set_time(
 		if (1 == rc)
 			time_adjusted = true;
 		return (time_adjusted)
-			   ? EX_OK 
-			   : 1;
+			   ? EXIT_SUCCESS
+			   : EXIT_FAILURE;
 		/*
 		** In case of error, what should we use?
 		** EX_UNAVAILABLE?
@@ -1563,8 +1565,8 @@ set_time(
 		if (1 == rc)
 			time_adjusted = true;
 		return (time_adjusted)
-			   ? EX_OK 
-			   : 1;
+			   ? EXIT_SUCCESS
+		           : EXIT_FAILURE;
 		/*
 		** In case of error, what should we use?
 		** EX_UNAVAILABLE?
@@ -1573,7 +1575,8 @@ set_time(
 		*/
 	}
 
-	return EX_SOFTWARE;
+	/* this used to return a nz value distinct from general failure */
+	return EXIT_FAILURE;
 }
 
 
