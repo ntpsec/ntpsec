@@ -9,7 +9,6 @@
 #endif
 
 #include "main.h"
-#include "ntp_libopts.h"
 #include "kod_management.h"
 #include "networking.h"
 #include "utilities.h"
@@ -121,6 +120,45 @@ bool libevent_version_ok(void);
 int  gettimeofday_cached(struct event_base *b, struct timeval *tv);
 
 
+#define ALL_OPTIONS "46a:b:c:dD:g:K:k:l:M:o:rSst:VwW"
+static const struct option longoptions[] = {
+    { "ipv4",		    0, 0, '4' },
+    { "ipv6",		    0, 0, '6' },
+    { "authentication",     1, 0, 'a' },
+    { "broadcast",	    1, 0, 'b' },
+    { "concurrent",	    1, 0, 'c' },
+    { "debug",		    0, 0, 'd' },
+    { "set-debug-level",    1, 0, 'D' },
+    { "gap",                1, 0, 'g' },
+    { "kod",                1, 0, 'K' },
+    { "keyfile",            1, 0, 'k' },
+    { "logfile",            1, 0, 'l' },
+    { "steplimit",          1, 0, 'M' },
+    { "ntpversion",         1, 0, 'o' },
+    { "usereservedport",    0, 0, 'r' },
+    { "step",               0, 0, 'S' },
+    { "slew",               0, 0, 's' },
+    { "timeout",            0, 0, 't' },
+    { "wait",               0, 0, 'w' },
+    { "nowait",             0, 0, 'W' },
+    { NULL,                 0, 0, '\0'},
+};
+
+static bool opt_ipv4 = false, opt_ipv6 = false;
+static char *opt_authkey = NULL;
+static char *opt_broadcast = NULL;
+static char *opt_concurrent = NULL;
+static int opt_gap;
+static char *opt_kodfile = "/var/db/ntp-kod";
+static char *opt_keyfile = NULL;
+static char *opt_logfile = NULL;
+static int opt_steplimit;
+static int opt_ntpversion = 4;
+static bool opt_usereservedport;
+static bool opt_step =false, opt_slew = false;
+static int opt_timeout = 555;
+static int opt_wait = false;
+
 /*
  * The actual main function.
  */
@@ -134,6 +172,7 @@ sntp_main (
 	int			i;
 	int			exitcode;
 	int			optct;
+	int			op;
 	struct event_config *	evcfg;
 
 	/* Initialize logging system - sets up progname */
@@ -145,12 +184,85 @@ sntp_main (
 	init_lib();
 	init_auth();
 
-	optct = ntpOptionProcess(&sntpOptions, argc, argv);
+	while ((op = ntp_getopt_long(argc, argv,
+				     ALL_OPTIONS, longoptions, NULL)) != -1) {
+
+	    switch (op) {
+	    case '4':
+		opt_ipv4 = true;
+		break;
+	    case 'a':
+		opt_authkey = ntp_optarg;
+		break;
+	    case 'b':
+		opt_broadcast = ntp_optarg;
+		break;
+	    case 'c':
+		opt_concurrent = ntp_optarg;
+		break;
+	    case 'd':
+#ifdef DEBUG
+		++debug;
+#endif
+		break;
+	    case 'D':
+#ifdef DEBUG
+		debug = atoi(ntp_optarg);
+#endif
+		break;
+	    case 'g':
+		opt_gap = atoi(optarg);
+		if (opt_gap <= 0) {
+			printf("%s: invalid gap value!\n", progname);
+			exit(1);
+		}
+		break;
+	    case 'K':
+		opt_kodfile = ntp_optarg;
+		break;
+	    case 'k':
+		opt_keyfile = ntp_optarg;
+		break;
+	    case 'l':
+		opt_logfile = ntp_optarg;
+		break;
+	    case 'M':
+		opt_ntpversion = atoi(optarg);
+		if (opt_steplimit <= 0) {
+			printf("%s: invalid steplimit value!\n", progname);
+			exit(1);
+		}
+		break;
+	    case 'r':
+		opt_usereservedport = true;
+		break;
+	    case 'S':
+		opt_step = true;
+		break;
+	    case 's':
+		opt_slew = true;
+		break;
+	    case 't':
+		opt_timeout = atoi(ntp_optarg);
+		break;
+	    case 'V':
+		printf("%s\n", sntpVersion);
+		exit(0);
+	    case 'w':
+		opt_wait = true;
+		break;
+	    case 'W':
+		opt_wait = false;
+		break;
+	    default :
+		break;
+	    } /*switch*/
+	}
+
+	optct = ntp_optind;
+
 	argc -= optct;
 	argv += optct;
-
-
-	debug = OPT_VALUE_SET_DEBUG_LEVEL;
 
 	TRACE(2, ("init_lib() done, %s%s\n",
 		  (ipv4_works)
@@ -159,17 +271,17 @@ sntp_main (
 		  (ipv6_works)
 		      ? "ipv6_works "
 		      : ""));
-	ntpver = OPT_VALUE_NTPVERSION;
-	steplimit = OPT_VALUE_STEPLIMIT / 1e3;
-	gap.tv_usec = max(0, OPT_VALUE_GAP * 1000);
+	ntpver = opt_ntpversion;
+	steplimit = opt_steplimit / 1e3;
+	gap.tv_usec = max(0, opt_gap * 1000);
 	gap.tv_usec = min(gap.tv_usec, 999999);
 
-	if (HAVE_OPT(LOGFILE))
-		open_logfile(OPT_ARG(LOGFILE));
+	if (opt_logfile)
+		open_logfile(opt_logfile);
 
 	msyslog(LOG_INFO, "%s", sntpVersion);
 
-	if (0 == argc && !HAVE_OPT(BROADCAST) && !HAVE_OPT(CONCURRENT)) {
+	if (0 == argc && !opt_broadcast && !opt_concurrent) {
 		printf("%s: Must supply at least one of -b hostname, -c hostname, or hostname.\n",
 		       progname);
 		exit(EX_USAGE);
@@ -182,7 +294,7 @@ sntp_main (
 	** - multiple --timeout values in the commandline
 	*/
 
-	response_timeout = OPT_VALUE_TIMEOUT;
+	response_timeout = opt_timeout;
 	response_tv.tv_sec = response_timeout;
 	response_tv.tv_usec = 0;
 
@@ -192,9 +304,9 @@ sntp_main (
 		TRACE(1, ("No ipv6 support available, forcing ipv4\n"));
 	} else {
 		/* Check for options -4 and -6 */
-		if (HAVE_OPT(IPV4))
+		if (opt_ipv4)
 			ai_fam_pref = AF_INET;
-		else if (HAVE_OPT(IPV6))
+		else if (opt_ipv6)
 			ai_fam_pref = AF_INET6;
 	}
 
@@ -205,11 +317,11 @@ sntp_main (
 	** For embedded systems with no writable filesystem,
 	** -K /dev/null can be used to disable KoD storage.
 	*/
-	kod_init_kod_db(OPT_ARG(KOD), false);
+	kod_init_kod_db(opt_kodfile, false);
 
 	// HMS: Should we use arg-defalt for this too?
-	if (HAVE_OPT(KEYFILE))
-		auth_init(OPT_ARG(KEYFILE), &keys);
+	if (opt_keyfile)
+		auth_init(opt_keyfile, &keys);
 
 	/*
 	** Considering employing a variable that prevents functions of doing
@@ -246,35 +358,22 @@ sntp_main (
 
 	open_sockets();
 
-	if (HAVE_OPT(BROADCAST)) {
-		int		cn = STACKCT_OPT(  BROADCAST );
-		const char **	cp = STACKLST_OPT( BROADCAST );
-
-		while (cn-- > 0) {
-			handle_lookup(*cp, CTX_BCST);
-			cp++;
-		}
+	if (opt_broadcast != NULL) {
+		handle_lookup(opt_broadcast, CTX_BCST);
 	}
 
-	if (HAVE_OPT(CONCURRENT)) {
-		int		cn = STACKCT_OPT( CONCURRENT );
-		const char **	cp = STACKLST_OPT( CONCURRENT );
-
-		while (cn-- > 0) {
-			handle_lookup(*cp, CTX_UCST | CTX_CONC);
-			cp++;
-		}
+	if (opt_concurrent != NULL) {
+		handle_lookup(opt_concurrent, CTX_UCST | CTX_CONC);
 	}
 
-	for (i = 0; i < argc; ++i)
+	for (i = ntp_optind; i < argc; ++i)
 		handle_lookup(argv[i], CTX_UCST);
 
 	gettimeofday_cached(base, &start_tv);
 	event_base_dispatch(base);
 	event_base_free(base);
 
-	if (!time_adjusted &&
-	    (ENABLED_OPT(STEP) || ENABLED_OPT(SLEW)))
+	if (!time_adjusted && (opt_step || opt_slew))
 		exitcode = 1;
 	else
 		exitcode = 0;
@@ -307,7 +406,7 @@ open_sockets(
 		ZERO(name);
 		AF(&name) = AF_INET;
 		SET_ADDR4N(&name, INADDR_ANY);
-		SET_PORT(&name, (HAVE_OPT(USERESERVEDPORT) ? 123 : 0));
+		SET_PORT(&name, (opt_usereservedport ? 123 : 0));
 
 		if (-1 == bind(sock4, &name.sa,
 			       SOCKLEN(&name))) {
@@ -342,7 +441,7 @@ open_sockets(
 		ZERO(name);
 		AF(&name) = AF_INET6;
 		SET_ADDR6N(&name, in6addr_any);
-		SET_PORT(&name, (HAVE_OPT(USERESERVEDPORT) ? 123 : 0));
+		SET_PORT(&name, (opt_usereservedport ? 123 : 0));
 
 		if (-1 == bind(sock6, &name.sa,
 			       SOCKLEN(&name))) {
@@ -404,8 +503,7 @@ handle_lookup(
 	ctx->timeout = response_tv;
 
 	/* The following should arguably be passed in... */
-	if (ENABLED_OPT(AUTHENTICATION) &&
-	    atoint(OPT_ARG(AUTHENTICATION), &l)) {
+	if (opt_authkey != NULL && atoint(opt_authkey, &l)) {
 		ctx->key_id = l;
 		get_key(ctx->key_id, &ctx->key);
 	} else {
@@ -891,7 +989,7 @@ sock_cb(
 		  sptoa(&sender)));
 
 	rpktl = process_pkt(&r_pkt, &sender, rpktl, MODE_SERVER,
-			    &spkt->x_pkt, "sock_cb", HAVE_OPT(AUTHENTICATION));
+			    &spkt->x_pkt, "sock_cb", opt_authkey != NULL);
 
 	TRACE(2, ("sock_cb: process_pkt returned %d\n", rpktl));
 
@@ -920,7 +1018,7 @@ void
 check_exit_conditions(void)
 {
 	if ((0 == n_pending_ntp && 0 == n_pending_dns) ||
-	    (time_derived && !HAVE_OPT(WAIT))) {
+	    (time_derived && !opt_wait)) {
 		event_base_loopexit(base, NULL);
 		shutting_down = true;
 	} else {
@@ -1281,8 +1379,7 @@ handle_pkt(
 		if (p_SNTP_PRETEND_TIME)
 			return 0;
 
-		if (!time_adjusted &&
-		    (ENABLED_OPT(STEP) || ENABLED_OPT(SLEW)))
+		if (!time_adjusted && (opt_step || opt_slew))
 			return set_time(offset);
 
 		return EX_OK;
@@ -1439,9 +1536,9 @@ set_time(
 	** If we can step but we cannot slew, then step.
 	** If we can step or slew and and |offset| > steplimit, then step.
 	*/
-	if (ENABLED_OPT(STEP) &&
-	    (   !ENABLED_OPT(SLEW)
-	     || (ENABLED_OPT(SLEW) && (fabs(offset) > steplimit))
+	if (opt_step &&
+	    (   !opt_slew
+	     || (opt_slew && (fabs(offset) > steplimit))
 	    )) {
 		rc = step_systime(offset);
 
@@ -1459,7 +1556,7 @@ set_time(
 		*/
 	}
 
-	if (ENABLED_OPT(SLEW)) {
+	if (opt_slew) {
 		rc = adj_systime(offset);
 
 		/* If there was a problem, can we rely on errno? */
