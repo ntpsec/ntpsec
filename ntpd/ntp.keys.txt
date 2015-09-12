@@ -1,0 +1,75 @@
+= ntp.keys(5) =
+:doctype: manpage
+
+== NAME ==
+ntp.keys - NTP symmetric key file format configuration file
+
+== DESCRIPTION ==
+
+This document describes the format of an NTP symmetric key file. For a
+description of the use of this type of file, see the "Authentication
+Support" section of the ntp.conf(5) page.
+
+ntpd(8) reads its keys from a file specified using the -k command line
+option or the 'keys' statement in the configuration file. While key
+number 0 is fixed by the NTP standard (as 56 zero bits) and may not be
+changed, one or more keys numbered between 1 and 65534 may be
+arbitrarily set in the keys file.
+
+The key file uses the same comment conventions as the configuration
+file. Key entries use a fixed format of the form
+
+--------------
+keyno type key
+--------------
+
+where `keyno` is a positive integer (between 1 and 65534),
+`type` is the message digest algorithm, and
+`key` is the key itself.
+
+The `key` may be given in a format controlled by the `type` field. The
+`type` MD5 is always supported.  If ntpd was built with the OpenSSL
+library then any digest library supported by that library may be
+specified. However, if compliance with FIPS 140-2 is required the
+`type` must be either 'SHA' or 'SHA1'.
+
+What follows are some key types, and corresponding formats:
+
+_MD5_::
+  The key is 1 to 16 printable characters terminated by an EOL,
+  whitespace, or a _#_ (which is the "start of comment" character).
+_SHA_; _SHA1_; _RMD160_::
+  The key is a hex-encoded ASCII string of 40 characters, which is
+  truncated as necessary.
++
+Note that the keys used by the ntpq(8) and ntpdc(8) programs are
+checked against passwords requested by the programs and entered by
+hand, so it is generally appropriate to specify these keys in ASCII
+format.
+
+== FILES ==
+
+`/etc/ntp.keys`::
+  the default name of the configuration file
+
+== SEE ALSO ==
+
+ntp.conf(5), ntpd(1ntpdmdoc), ntpdate(1ntpdatemdoc),
+ntpdc(1ntpdcmdoc), sntp(1sntpmdoc).
+
+== AUTHORS ==
+
+//FIXME: ntp.org reference
+The University of Delaware and Network Time Foundation
+
+== COPYRIGHT ==
+
+//FIXME: NTF reference
+Copyright (C) 1992-2015 The University of Delaware and Network Time
+Foundation all rights reserved. This program is released under the terms
+of the NTP license, <http://ntp.org/license>.
+
+== BUGS ==
+
+//FIXME: ntp.org reference
+Please send bug reports to: http://bugs.ntp.org, bugs@ntp.org
