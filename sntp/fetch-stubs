@@ -1,8 +1,0 @@
-#! /bin/sh
-
-set -x
-
-test -f bincheck.mf		|| cp ../bincheck.mf .
-test -f autogen-version.def	|| cp ../include/autogen-version.def .
-test -f version.def		|| cp ../include/version.def .
-test -f version.m4		|| cp ../version.m4 .
