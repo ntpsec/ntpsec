@@ -559,7 +559,11 @@ authentication_command
 	|	T_Keysdir T_String
 			{ cfgt.auth.keysdir = $2; }
 	|	T_Requestkey T_Integer
-			{ cfgt.auth.request_key = $2; }
+			{
+			    msyslog(LOG_WARNING,
+				    "requestkey is a no-op because "
+				    "ntpdc has been removed.");
+			}
 	|	T_Revoke T_Integer
 			{ cfgt.auth.revoke = $2; }
 	|	T_Trustedkey integer_list_range

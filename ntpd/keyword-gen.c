@@ -74,7 +74,6 @@ struct key_tok ntp_keywords[] = {
 { "keys",		T_Keys,			FOLLBY_STRING },
 { "keysdir",		T_Keysdir,		FOLLBY_STRING },
 { "ntpsigndsocket",	T_NtpSignDsocket,	FOLLBY_STRING },
-{ "requestkey",		T_Requestkey,		FOLLBY_TOKEN },
 { "revoke",		T_Revoke,		FOLLBY_TOKEN },
 { "trustedkey",		T_Trustedkey,		FOLLBY_TOKEN },
 /* IPv4/IPv6 protocol override flag */

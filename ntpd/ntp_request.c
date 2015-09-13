@@ -98,7 +98,6 @@ static	void	req_get_traps	(sockaddr_u *, endpt *, struct req_pkt *);
 static	void	req_set_trap	(sockaddr_u *, endpt *, struct req_pkt *);
 static	void	req_clr_trap	(sockaddr_u *, endpt *, struct req_pkt *);
 static	void	do_setclr_trap	(sockaddr_u *, endpt *, struct req_pkt *, int);
-static	void	set_request_keyid (sockaddr_u *, endpt *, struct req_pkt *);
 static	void	set_control_keyid (sockaddr_u *, endpt *, struct req_pkt *);
 static	void	get_ctl_stats   (sockaddr_u *, endpt *, struct req_pkt *);
 static	void	get_if_stats    (sockaddr_u *, endpt *, struct req_pkt *);
@@ -157,8 +156,6 @@ static const struct req_proc ntp_codes[] = {
 				sizeof(struct conf_trap), req_set_trap },
 	{ REQ_CLR_TRAP,	AUTH, v4sizeof(struct conf_trap),
 				sizeof(struct conf_trap), req_clr_trap },
-	{ REQ_REQUEST_KEY, AUTH, sizeof(u_long), sizeof(u_long), 
-				set_request_keyid },
 	{ REQ_CONTROL_KEY, AUTH, sizeof(u_long), sizeof(u_long), 
 				set_control_keyid },
 	{ REQ_GET_CTLSTATS,	NOAUTH,	0, 0,	get_ctl_stats },
@@ -2220,34 +2217,6 @@ do_setclr_trap(
 		req_ack(srcadr, inter, inpkt, INFO_OKAY);
 	}
 	return;
-}
-
-
-
-/*
- * set_request_keyid - set the keyid used to authenticate requests
- */
-static void
-set_request_keyid(
-	sockaddr_u *srcadr,
-	endpt *inter,
-	struct req_pkt *inpkt
-	)
-{
-	keyid_t *pkeyid;
-
-	/*
-	 * Restrict ourselves to one item only.
-	 */
-	if (INFO_NITEMS(inpkt->err_nitems) > 1) {
-		msyslog(LOG_ERR, "set_request_keyid: err_nitems > 1");
-		req_ack(srcadr, inter, inpkt, INFO_ERR_FMT);
-		return;
-	}
-
-	pkeyid = (keyid_t *)&inpkt->u;
-	info_auth_keyid = ntohl(*pkeyid);
-	req_ack(srcadr, inter, inpkt, INFO_OKAY);
 }
 
 

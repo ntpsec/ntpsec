@@ -138,7 +138,6 @@ struct auth_node_tag {
 	attr_val_fifo *	crypto_cmd_list;
 	char *		keys;
 	char *		keysdir;
-	int		request_key;
 	int		revoke;
 	attr_val_fifo *	trusted_key_list;
 	char *		ntp_signd_socket;
