@@ -287,7 +287,7 @@ struct resp_pkt {
 #define REQ_TRAPS		29	/* return currently set traps */
 #define	REQ_ADD_TRAP		30	/* add a trap */
 #define	REQ_CLR_TRAP		31	/* clear a trap */
-#define	REQ_REQUEST_KEY		32	/* define a new request keyid */
+#define	REQ_REQUEST_KEY		32	/* define new request keyid (not used) */
 #define	REQ_CONTROL_KEY		33	/* define a new control keyid */
 #define	REQ_GET_CTLSTATS	34	/* get stats from the control module */
 #define	REQ_GET_LEAPINFO	35	/* (not used) */

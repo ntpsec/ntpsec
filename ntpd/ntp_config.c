@@ -656,9 +656,6 @@ dump_config_tree(
 	if (ptree->auth.control_key)
 		fprintf(df, "controlkey %d\n", ptree->auth.control_key);
 
-	if (ptree->auth.request_key)
-		fprintf(df, "requestkey %d\n", ptree->auth.request_key);
-
 	/* dump enable list, then disable list */
 	for (enable = 1; enable >= 0; enable--) {
 		atrv = (enable)
@@ -1912,13 +1909,6 @@ config_auth(
 	/* Control Key Command */
 	if (ptree->auth.control_key)
 		ctl_auth_keyid = (keyid_t)ptree->auth.control_key;
-
-	/* Requested Key Command */
-	if (ptree->auth.request_key) {
-		DPRINTF(4, ("set info_auth_keyid to %08lx\n",
-			    (u_long) ptree->auth.request_key));
-		info_auth_keyid = (keyid_t)ptree->auth.request_key;
-	}
 
 	/* Trusted Key Command */
 	my_val = HEAD_PFIFO(ptree->auth.trusted_key_list);
