@@ -1,4 +1,4 @@
-= ntpd(1) =
+= ntpd(8) =
 :doctype: manpage
 
 == NAME ==
@@ -313,26 +313,10 @@ frequency (in Hz).
 Registers as an NTP server with the local mDNS server which allows the
 server to be discovered via mDNS client lookup.
 
-`-?`, `--help`::
-  Display usage information and exit.
-
-`-!`, `--more-help`::
-  Pass the extended usage information through a pager.
-
-`--version` [\{_v|c|n_}]::
+`--version`::
   Output version of program and exit. The default mode is `v', a simple
   version. The `c' mode will print copyright information and `n' will
   print the full copyright notice.
-
-= OPTION PRESETS
-
-//FIXME: This is incorrect
-Any option that is not marked as _not presettable_ may be preset by
-loading values from environment variables named:
-
-------
-NTPD_<option-name>_ or NTPD
-------
 
 = USAGE
 
