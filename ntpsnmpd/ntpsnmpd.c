@@ -21,6 +21,7 @@
  ****************************************************************************/
 
 #include <ntp_snmp.h>
+
 #include <signal.h>
 #include <sys/time.h>
 
@@ -29,7 +30,8 @@
 #endif
 
 #include <libntpq.h>
-#include <ntpsnmpd-opts.h>
+
+#include "ntp_stdlib.h"	/* for getopt_long() */
 
 static bool keep_running;
 void stop_server(int);
@@ -39,9 +41,23 @@ stop_server(int a) {
     keep_running = false;
 }
 
-/* The main function just sets up a few things and then enters a loop in which it will 
- * wait for SNMP requests coming from the master agent 
+/* The main function just sets up a few things and then enters a loop
+ * in which it will wait for SNMP requests coming from the master
+ * agent
  */
+
+static bool opt_nofork;
+static bool opt_syslog;
+static char opt_agentxsocket = "unix:/var/agentx/master";
+
+#define ALL_OPTIONS "npx:"
+static const struct option longoptions[] = {
+    { "nofork",		    0, 0, 'n' },
+    { "syslog",		    0, 0, 'p' },
+    { "agentXSocket",	    0, 0, 'x' },
+    { NULL,                 0, 0, '\0'},
+};
+
 
 int
 main (int argc, char **argv) {
@@ -49,15 +65,31 @@ main (int argc, char **argv) {
 	bool use_syslog = true; /* use syslog for logging */
 
 	{
-		int optct = optionProcess(&ntpsnmpdOptions, argc, argv);
-		argc -= optct;
-		argv += optct;
+		int optcnt;
+
+		while ((op = ntp_getopt_long(argc, argv,
+				     ALL_OPTIONS, longoptions, NULL)) != -1) {
+
+		switch (op) {
+		case 'n':
+		    opt_nofork = true;
+		    break;
+		case 'p':
+		    opt_syslog = true;
+		    break;
+		case 'x':
+		    opt_argentxsocket = ntp_optarg;
+		    break;
+		}
+
+		argc -= ntp_optind;
+		argv += ntp_optinf;
 	}
 
-	if (!HAVE_OPT(NOFORK))
+	if (!opt_nofork)
 		background = true;
 
-	if (!HAVE_OPT(SYSLOG))
+	if (!opt_syslog)
 	    use_syslog = false;
 
   /* using the net-snmp syslog facility */
@@ -80,7 +112,7 @@ main (int argc, char **argv) {
 
   /* Set AgentX socket interface */
   netsnmp_ds_set_string(NETSNMP_DS_APPLICATION_ID,
-                            NETSNMP_DS_AGENT_X_SOCKET, OPT_ARG( AGENTXSOCKET ));
+                            NETSNMP_DS_AGENT_X_SOCKET, opt_agentxsocket);
 
   init_agent("ntpsnmpd");
 
