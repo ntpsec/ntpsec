@@ -60,7 +60,7 @@ def build(ctx):
 #	ctx.recurse("adjtimed")
 #	ctx.recurse("clockstuff") - 
 #	ctx.recurse("kernel")
-#	ctx.recurse("util") - 
+	ctx.recurse("util") 
 #	ctx.recurse("unity")
 #	ctx.recurse("tests")
 
