@@ -18,10 +18,6 @@ interrupt, usually in the range 10 us-1 ms.  For those systems with
 microsecond counters, such as recent Sun and certain HP and DEC systems,
 the jitter is dominated only by the operating system.
 
-The timetrim.c program can be used with SGI machines to implement a
-scheme to discipline the hardware clock frequency.  See the source code
-for further information.
-
 The testrs6000.c program is used for testing purposes with the IBM
 RS/6000 AIX machines. Bill Jones <jones@chpc.utexas.edu> reports:
 "I could not get a tickadj of less than 40 us to work on a RS6000.

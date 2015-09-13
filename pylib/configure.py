@@ -237,7 +237,6 @@ def cmd_configure(ctx):
 		"sys/stream.h",
 		"sys/stropts.h",
 		"sys/sysctl.h",
-		"sys/syssgi.h",
 		"sys/systune.h",
 		"sys/timex.h",
 		"timex.h",
