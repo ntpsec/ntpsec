@@ -20,12 +20,6 @@ extern	struct refclock	refclock_local;
 #define	refclock_local	refclock_none
 #endif
 
-#ifdef CLOCK_PST
-extern	struct refclock	refclock_pst;
-#else
-#define	refclock_pst	refclock_none
-#endif
-
 #ifdef CLOCK_CHU
 extern	struct refclock	refclock_chu;
 #else
@@ -227,7 +221,7 @@ struct refclock * const refclock_conf[] = {
 	&refclock_none,		/* 0 REFCLK_NONE */
 	&refclock_local,	/* 1 REFCLK_LOCAL */
 	&refclock_none,		/* 2 was: REFCLK_GPS_TRAK */
-	&refclock_pst,		/* 3 REFCLK_WWV_PST */
+	&refclock_none,		/* 3 was: REFCLK_WWV_PST */
 	&refclock_spectracom, 	/* 4 REFCLK_SPECTRACOM */
 	&refclock_true,		/* 5 REFCLK_TRUETIME */
 	&refclock_irig,		/* 6 REFCLK_IRIG_AUDIO */
