@@ -1,8 +1,8 @@
 = The ntp distribution base directory =
 
 This directory and its subdirectories contain the Network Time Protocol
-Version 4 (NTP) distribution for Unix and Windows/NT systems.  This release
-may still work on VxWorks, too.
+Version 4 (NTP) distribution for Unix systems.  This release may still
+work on VxWorks, too.
 
 The contents of the base directory are given in this file. The contents of
 subdirectories are usually given in the README files in each subdirectory.
@@ -92,6 +92,6 @@ util/::		Directory containing sources for various utility and
 waf::		A copy of the waf builder.  This is the engine used to configure
 		and build the codebase.
 
-wscript::	NTP-specific weaf rules.
+wscript::	NTP-specific waf rules.
 
 // end
