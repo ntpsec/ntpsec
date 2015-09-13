@@ -25,9 +25,6 @@ README::	This file.
 
 devel-docs/::	Documentation aimed at developers.
 
-adjtimed/::	Directory containing the sources for the adjtime daemon
-		for HP/UX systems prior to HP-UX 10.0.
-
 clockstuff/::	Directory containing sources for miscellaneous programs
 		to test certain auxiliary programs used with some kernel
 		configurations, together with a program to calculate
