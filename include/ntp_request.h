@@ -253,7 +253,7 @@ struct resp_pkt {
  */
 
 /*
- * ntpdc -> ntpd request codes go here.
+ * ntpdc -> ntpq request codes go here.
  */
 #define	REQ_PEER_LIST		0	/* return list of peers */
 #define	REQ_PEER_LIST_SUM	1	/* return summary info for all peers */
@@ -346,7 +346,7 @@ struct info_peer_list {
 
 
 /*
- * Peer summary structure.  Sort of the info that ntpdc returns by default.
+ * Peer summary structure.
  */
 struct info_peer_summary {
 	uint32_t dstadr;		/* local address (zero for undetermined) */

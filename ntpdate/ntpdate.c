@@ -1865,7 +1865,7 @@ input_handler(void)
 #else
 			/* NT's _read does not operate on nonblocking sockets
 			 * either recvfrom or ReadFile() has to be used here.
-			 * ReadFile is used in [ntpd]ntp_intres() and ntpdc,
+			 * ReadFile is used in [ntpd]ntp_intres(),
 			 * just to be different use recvfrom() here
 			 */
 			recvfrom(fdc, buf, sizeof(buf), 0, (struct sockaddr *)0, NULL);

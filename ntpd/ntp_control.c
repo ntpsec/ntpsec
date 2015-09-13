@@ -3509,11 +3509,6 @@ send_mru_entry(
 /*
  * read_mru_list - supports ntpq's mrulist command.
  *
- * The challenge here is to match ntpdc's monlist functionality without
- * being limited to hundreds of entries returned total, and without
- * requiring state on the server.  If state were required, ntpq's
- * mrulist command would require authentication.
- *
  * The approach was suggested by Ry Jones.  A finite and variable number
  * of entries are retrieved per request, to avoid having responses with
  * such large numbers of packets that socket buffers are overflowed and

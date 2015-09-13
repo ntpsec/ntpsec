@@ -42,7 +42,7 @@ extern int async_write(int, const void *, unsigned int);
  * so on. The phone number is specified by the Hayes ATDT prefix
  * followed by the number itself, including the long-distance prefix
  * and delay code, if necessary. The calling program is enabled
- * when (a) fudge flag1 is set by ntpdc, (b) at each poll interval
+ * when (a) fudge flag1 is set by ntpq, (b) at each poll interval
  * when no other synchronization sources are present, and (c) at each
  * poll interval whether or not other synchronization sources are 
  * present. The calling program disconnects if (a) the called party
@@ -653,7 +653,7 @@ acts_poll(
 	switch (peer->ttl) {
 
 	/*
-	 * In manual mode the calling program is activated by the ntpdc
+	 * In manual mode the calling program is activated by the ntpq
 	 * program using the enable flag (fudge flag1), either manually
 	 * or by a cron job.
 	 */

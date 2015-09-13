@@ -474,7 +474,7 @@ ntp_set_tod(
 #endif /* not SYS_WINNT */
 
 #if defined (SYS_WINNT) || defined (SYS_VXWORKS) || defined(MPE)
-/* getpass is used in ntpq.c and ntpdc.c */
+/* getpass is used in ntpq.c */
 
 char *
 getpass(const char * prompt)

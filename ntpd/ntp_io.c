@@ -869,7 +869,7 @@ add_interface(
 
 	/* Calculate the refid */
 	ep->addr_refid = addr2refid(&ep->sin);
-	/* link at tail so ntpdc -c ifstats index increases each row */
+	/* link at tail so ntpq -c ifstats index increases each row */
 	LINK_TAIL_SLIST(ep_list, ep, elink, endpt);
 	ninterfaces++;
 #ifdef MCAST
@@ -1381,7 +1381,7 @@ interface_action(
 
 	/*
 	 * Unless explicitly disabled such as with "nic ignore ::1"
-	 * listen on loopback addresses.  Since ntpq and ntpdc query
+	 * listen on loopback addresses.  Since ntpq query
 	 * "localhost" by default, which typically resolves to ::1 and
 	 * 127.0.0.1, it's useful to default to listening on both.
 	 */
@@ -3097,7 +3097,7 @@ open_socket(
 	io_completion_port_sendto(fd, buf, len, (sockaddr_u *)(dest))
 #endif
 
-/* XXX ELIMINATE sendpkt similar in ntpq.c, ntpdc.c, ntp_io.c, ntptrace.c */
+/* XXX ELIMINATE sendpkt similar in ntpq.c, ntp_io.c, ntptrace.c */
 /*
  * sendpkt - send a packet to the specified destination. Maintain a
  * send error cache so that only the first consecutive error for a

@@ -302,7 +302,7 @@ mon_clearinterface(
  * and if so, possible KoD response.  This implies you can not tell
  * whether a given address is eligible for rate limiting/KoD from the
  * monlist restrict bits, only whether or not the last packet triggered
- * such responses.  ntpdc -c reslist lets you see whether RES_LIMITED
+ * such responses.  ntpq -c reslist lets you see whether RES_LIMITED
  * or RES_KOD is lit for a particular address before ntp_monitor()'s
  * typical dousing.
  */

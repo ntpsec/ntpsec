@@ -925,7 +925,7 @@ refclock_ioctl(
  *
  * This routine is used mainly for debugging. It returns designated
  * values from the interface structure that can be displayed using
- * ntpdc and the clockstat command. It can also be used to initialize
+ * ntpq and the clockstat command. It can also be used to initialize
  * configuration variables, such as fudgetimes, fudgevalues, reference
  * ID and stratum.
  */
@@ -1038,7 +1038,7 @@ refclock_control(
  *
  * This routine is used mainly for debugging. It returns designated
  * values from the interface structure that can be displayed using
- * ntpdc and the clkbug command.
+ * ntpq and the clkbug command.
  */
 void
 refclock_buginfo(

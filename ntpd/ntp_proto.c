@@ -4073,7 +4073,7 @@ proto_config(
 		ntp_enable = (bool)value;
 		break;
 
-	case PROTO_MODE7:	/* mode7 management (ntpdc) */
+	case PROTO_MODE7:	/* mode7 management (formerly ntpdc) */
 		ntp_mode7 = (bool)value;
 		break;
 

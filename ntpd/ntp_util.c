@@ -83,7 +83,7 @@ static FILEGEN timingstats;
 
 /*
  * This controls whether stats are written to the fileset. Provided
- * so that ntpdc can turn off stats when the file system fills up. 
+ * so that ntpq can turn off stats when the file system fills up. 
  */
 bool stats_control;
 
