@@ -140,12 +140,6 @@ extern	struct refclock refclock_jupiter;
 #define refclock_jupiter refclock_none
 #endif
 
-#if defined(CLOCK_CHRONOLOG)
-extern struct refclock refclock_chronolog;
-#else
-#define refclock_chronolog refclock_none
-#endif
-
 #if defined(CLOCK_DUMBCLOCK)
 extern struct refclock refclock_dumbclock;
 #else
@@ -250,7 +244,7 @@ struct refclock * const refclock_conf[] = {
 	&refclock_palisade,	/* 29 REFCLK_PALISADE */
 	&refclock_oncore,	/* 30 REFCLK_ONCORE */
 	&refclock_jupiter,	/* 31 REFCLK_GPS_JUPITER */
-	&refclock_chronolog,	/* 32 REFCLK_CHRONOLOG */
+	&refclock_none,		/* 32 was: REFCLK_CHRONOLOG */
 	&refclock_dumbclock,	/* 33 REFCLK_DUMBCLOCK */
 	&refclock_ulink,	/* 34 REFCLOCK_ULINK */
 	&refclock_pcf,		/* 35 REFCLOCK_PCF */

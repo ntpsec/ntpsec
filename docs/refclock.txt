@@ -175,7 +175,7 @@ entries than you expected.  Support for some very ancient drivers
 * link:driver29.html[Type 29] Trimble Navigation Palisade GPS (`GPS_PALISADE`)
 * link:driver30.html[Type 30] Motorola UT Oncore GPS (`GPS_ONCORE`)
 * link:driver31.html[Type 31] Rockwell Jupiter GPS (`GPS_JUPITER`)
-* link:driver32.html[Type 32] Chrono-log K-series WWVB receiver (`CHRONOLOG`)
+* Type 32 reserved
 * link:driver33.html[Type 33] Dumb Clock (`DUMBCLOCK`)
 * link:driver34.html[Type 34] Ultralink WWVB Receivers (`ULINK`)
 * link:driver35.html[Type 35] Conrad Parallel Port Radio Clock (`PCF`)

@@ -1,6 +1,6 @@
-# Note: When you change this list. also check the followung files:
+# Note: When you change this list. also check the following files:
 # ntpd/refclock_conf.c
-# ntplib/clocktypes.c
+# libntp/clocktypes.c
 # doc/recflock.txt
 # include/ntp.h
 
@@ -128,12 +128,6 @@ refclock_map = {
 		"define":	"CLOCK_JUPITER",
 		"require":	["ppsapi"],
 		"file":		"jupiter"
-	},
-
-	32: {
-		"descr":	"Chrono-log K-series WWVB receiver",
-		"define":	"CLOCKCHRONOLOG",
-		"file":		"chronolog"
 	},
 
 	33: {
