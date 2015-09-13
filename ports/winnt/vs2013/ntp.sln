@@ -11,8 +11,6 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libntp", "libntp\libntp.vcx
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ntpdate", "ntpdate\ntpdate.vcxproj", "{2789A62E-3F46-44F1-AAF0-816CD23C2911}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ntpdc", "ntpdc\ntpdc.vcxproj", "{8011C820-B3D5-4034-86EA-FFC30AE6764B}"
-EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ntp-keygen", "ntp-keygen\ntp-keygen.vcxproj", "{C88C1FBF-59D2-447F-BF57-0BCA8889028F}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ntpq", "ntpq\ntpq.vcxproj", "{6A92BF14-8931-48B1-A571-DEBE9F190616}"
