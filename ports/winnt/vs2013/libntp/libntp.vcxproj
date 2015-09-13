@@ -248,7 +248,6 @@
     <ClCompile Include="..\..\..\..\libntp\ntp_calendar.c" />
     <ClCompile Include="..\..\..\..\libntp\ntp_crypto_rnd.c" />
     <ClCompile Include="..\..\..\..\libntp\ntp_intres.c" />
-    <ClCompile Include="..\..\..\..\libntp\ntp_libopts.c" />
     <ClCompile Include="..\..\..\..\libntp\ntp_lineedit.c" />
     <ClCompile Include="..\..\..\..\libntp\ntp_random.c" />
     <ClCompile Include="..\..\..\..\libntp\ntp_rfc2553.c" />
@@ -304,7 +303,6 @@
     <ClCompile Include="..\..\..\..\lib\isc\win32\thread.c" />
     <ClCompile Include="..\..\..\..\lib\isc\win32\time.c" />
     <ClCompile Include="..\..\..\..\lib\isc\win32\win32os.c" />
-    <ClCompile Include="..\..\..\..\sntp\libopts\libopts.c" />
     <ClCompile Include="..\..\libntp\arc4wrap.c" />
     <ClCompile Include="..\..\libntp\getclock.c" />
     <ClCompile Include="..\..\libntp\randfile.c" />
@@ -332,7 +330,6 @@
     <ClInclude Include="..\..\..\..\include\ntp_fp.h" />
     <ClInclude Include="..\..\..\..\include\ntp_intres.h" />
     <ClInclude Include="..\..\..\..\include\ntp_io.h" />
-    <ClInclude Include="..\..\..\..\include\ntp_libopts.h" />
     <ClInclude Include="..\..\..\..\include\ntp_lineedit.h" />
     <ClInclude Include="..\..\..\..\include\ntp_lists.h" />
     <ClInclude Include="..\..\..\..\include\ntp_machine.h" />
@@ -375,7 +372,6 @@
     <ClInclude Include="..\..\..\..\lib\isc\win32\include\isc\thread.h" />
     <ClInclude Include="..\..\..\..\lib\isc\win32\include\isc\time.h" />
     <ClInclude Include="..\..\..\..\lib\isc\win32\include\isc\win32os.h" />
-    <ClInclude Include="..\..\..\..\sntp\libopts\ag-char-map.h" />
     <ClInclude Include="..\..\include\arpa\inet.h" />
     <ClInclude Include="..\..\include\clockstuff.h" />
     <ClInclude Include="..\..\include\config.h" />

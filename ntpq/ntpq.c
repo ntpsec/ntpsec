@@ -38,11 +38,6 @@
 # define SERVER_PORT_NUM     123
 #endif
 
-/* we use COMMAND as an autogen keyword */
-#ifdef COMMAND
-# undef COMMAND
-#endif
-
 /*
  * Because we potentially understand a lot of commands we will run
  * interactive if connected to a terminal.

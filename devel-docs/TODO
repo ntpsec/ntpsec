@@ -9,15 +9,6 @@ some target platforms.  Gary Miller removed a little too quickly some
 shims present in NTP classic; these may need to be reverted back in.
 Drop -lrt when not needed by old glibc.
 
-* ntpdc should get dropped.  This has ramifications not so much in
-other code as in the documentation, which is going to need minor but
-widespread edits to reflect reality when it's gone.
-
-* autogen has only been partway removed.  It needs to be ripped out
-the rest of the way - not a hard task, really, but a messy one that
-is interwined with some ill-scoped documentation and build issues.
-(It also involves writing tests for the new option-processing logic.)
-
 * The u_* types in ntp.h are GCCisms that should be replaced with
 POSIX types.
 
@@ -33,10 +24,15 @@ it issues sane corrections and doesn't core-dump or barf.
 We need to do that on various platforms.  We also need to
 live-test various refclocks.
 
+* Option testing.  The new, non-autogen option-processing logic
+is not yet tested anywhere but in ntpd itself.
+
 === Documentation ===
 
 The documentation is a stale, untidy, duplicative mess only most of
 the way converted to asciidoc.
+
+* Some documentation under the scripts directory is not yet converted.
 
 * In the docs subdirectory, include/command.txt is an HTML passthrough
   in a not entirely successful attempt to emulate the look of the
@@ -47,8 +43,6 @@ the way converted to asciidoc.
   old HTML and should be cleaned up.
 
 * HTML build from docs/ needs to be part of the stock waf build.
-
-* The rest of the in-tree documentation must be lifted to asciidoc
 
 * A serious content-editing and update pass on the documents.  
 

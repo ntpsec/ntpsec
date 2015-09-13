@@ -718,9 +718,6 @@ One of the following exit values will be returned:
   Successful program execution.
 1 (EXIT_FAILURE)::
   The operation failed or the command syntax was not valid.
-//FIXME: must be removed with autogen
-66 (EX_NOINPUT)::
-  A specified configuration file could not be loaded.
 
 
 == AUTHORS ==
