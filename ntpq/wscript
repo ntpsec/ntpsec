@@ -21,7 +21,6 @@ def build(ctx):
 	ntpq_source = [
 		"ntpq.c",
 		"ntpq-subs.c",
-		"ntpq-opts.c"
 	]
 
 	ctx(
