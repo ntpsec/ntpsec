@@ -8,7 +8,6 @@
 #include <sys/time.h>
 
 #include "ntpq.h"
-#include "ntpq-opts.h"
 
 extern char	currenthost[];
 extern int	currenthostisnum;

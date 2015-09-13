@@ -33,9 +33,6 @@
 #endif
 #include <ssl_applink.c>
 
-#include "ntp_libopts.h"
-#include "ntpq-opts.h"
-
 #ifdef SYS_VXWORKS		/* vxWorks needs mode flag -casey*/
 # define open(name, flags)   open(name, flags, 0777)
 # define SERVER_PORT_NUM     123
@@ -212,8 +209,6 @@ static	void	endoutput	(FILE *);
 static	void	outputarr	(FILE *, char *, int, l_fp *);
 static	int	assoccmp	(const void *, const void *);
 	u_short	varfmt		(const char *);
-
-void	ntpq_custom_opt_handler	(tOptions *, tOptDesc *);
 
 #ifdef OPENSSL
 # ifdef HAVE_EVP_MD_DO_ALL_SORTED
@@ -421,6 +416,28 @@ void clear_globals(void)
 #endif /* !BUILD_AS_LIB */
 #endif /* NO_MAIN_ALLOWED */
 
+#define ALL_OPTIONS "46c:dD:inOp"
+static const struct option longoptions[] = {
+    { "ipv4",		    0, 0, '4' },
+    { "ipv6",		    0, 0, '6' },
+    { "command",	    1, 0, 'c' },
+    { "debug",		    0, 0, 'd' },
+    { "set-debug-level",    1, 0, 'D' },
+    { "interactive",        1, 0, 'i' },
+    { "numeric",            1, 0, 'n' },
+    { "old-rv",             1, 0, 'O' },
+    { "peers",              1, 0, 'p' },
+    { NULL,                 0, 0, '\0'},
+};
+
+static bool opt_ipv4 = false, opt_ipv6 = false;
+static char *opt_command = NULL;
+static bool opt_interactive = false;
+static bool opt_numeric = false;
+static bool opt_old_rv = false;
+static bool opt_peers = false;
+static bool opt_wide = false;
+
 /*
  * main - parse arguments and handle options
  */
@@ -495,35 +512,83 @@ ntpqmain(
 	progname = argv[0];
 
 	{
-		int optct = ntpOptionProcess(&ntpqOptions, argc, argv);
-		argc -= optct;
-		argv += optct;
+		int op;
+
+		while ((op = ntp_getopt_long(argc, argv,
+					     ALL_OPTIONS, longoptions, NULL)) != -1) {
+
+		    switch (op) {
+		    case '4':
+			opt_ipv4 = true;
+			break;
+		    case '6':
+			opt_ipv6 = true;
+			break;
+		    case 'c':
+			opt_command = ntp_optarg;
+			break;
+		    case 'd':
+#ifdef DEBUG
+			++debug;
+#endif
+			break;
+		    case 'D':
+#ifdef DEBUG
+			debug = atoi(ntp_optarg);
+#endif
+			break;
+		    case 'i':
+			opt_interactive = true;
+			break;
+		    case 'n':
+			opt_numeric = true;
+			break;
+		    case 'O':
+			opt_old_rv = true;
+			break;
+		    case 'p':
+			opt_peers = true;
+			break;
+		    case 'w':
+			opt_wide = true;
+			break;
+		    default :
+			break;
+		    } /*switch*/
+		}
+
+		argc -= ntp_optind;
+		argv += ntp_optind;
 	}
 
-	/*
-	 * Process options other than -c and -p, which are specially
-	 * handled by ntpq_custom_opt_handler().
-	 */
+	if (opt_interactive && (opt_command || opt_peers)) {
+	    fprintf(stderr, "%s: invalid option combination.\n", progname);
+	    exit(EXIT_FAILURE);
+	}
 
-	debug = OPT_VALUE_SET_DEBUG_LEVEL;
-
-	if (HAVE_OPT(IPV4))
+	if (opt_ipv4)
 		ai_fam_templ = AF_INET;
-	else if (HAVE_OPT(IPV6))
+	else if (opt_ipv6)
 		ai_fam_templ = AF_INET6;
 	else
 		ai_fam_templ = ai_fam_default;
 
-	if (HAVE_OPT(INTERACTIVE))
+	if (opt_command != NULL)
+		ADDCMD(opt_command);
+
+	if (opt_peers)
+		ADDCMD("peers");
+
+	if (opt_interactive)
 		interactive = true;
 
-	if (HAVE_OPT(NUMERIC))
+	if (opt_numeric)
 		showhostnames = false;
 
-	if (HAVE_OPT(WIDE))
+	if (opt_wide)
 		wideremote = true;
 
-	old_rv = HAVE_OPT(OLD_RV);
+	old_rv = opt_old_rv;
 
 	if (0 == argc) {
 		ADDHOST(DEFHOST);
@@ -3430,37 +3495,8 @@ grow_assoc_cache(void)
 }
 
 
-/*
- * ntpq_custom_opt_handler - autoopts handler for -c and -p
- *
- * By default, autoopts loses the relative order of -c and -p options
- * on the command line.  This routine replaces the default handler for
- * those routines and builds a list of commands to execute preserving
- * the order.
- */
-void
-ntpq_custom_opt_handler(
-	tOptions *pOptions,
-	tOptDesc *pOptDesc
-	)
-{
-	switch (pOptDesc->optValue) {
 
-	default:
-		fprintf(stderr,
-			"ntpq_custom_opt_handler unexpected option '%c' (%d)\n",
-			pOptDesc->optValue, pOptDesc->optValue);
-		exit(1);
 
-	case 'c':
-		ADDCMD(pOptDesc->pzLastArg);
-		break;
-
-	case 'p':
-		ADDCMD("peers");
-		break;
-	}
-}
 /*
  * Obtain list of digest names
  */
