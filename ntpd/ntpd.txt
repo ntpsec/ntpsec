@@ -556,10 +556,6 @@ sign of the offset.
 The filter is activated by the _tinker_ command and _huffpuff_ keyword,
 as described in _ntp.conf_(5)_._
 
-= ENVIRONMENT
-
-See _OPTION PRESETS_ for configuration environment variables.
-
 = FILES
 
 `/etc/ntp.conf`::
@@ -578,10 +574,6 @@ One of the following exit values will be returned:
 
 1 (EXIT_FAILURE)::
   The operation failed or the command syntax was not valid.
-
-70 (EX_SOFTWARE)::
-  libopts had an internal operational error. Please report it to
-  autogen-users@lists.sourceforge.net. Thank you.
 
 == SEE ALSO ==
 
