@@ -119,6 +119,7 @@ void dec_pending_ntp(const char *, sockaddr_u *);
 bool libevent_version_ok(void);
 int  gettimeofday_cached(struct event_base *b, struct timeval *tv);
 
+#define EXIT_SOFTWARE	70
 
 #define ALL_OPTIONS "46a:b:c:dD:g:K:k:l:M:o:rSst:VwW"
 static const struct option longoptions[] = {
@@ -179,8 +180,7 @@ sntp_main (
 	sntp_init_logging(argv[0]);
 
 	if (!libevent_version_ok())
-		/* this used to return a value distinct from general failure */
-		exit(EXIT_FAILURE);
+		exit(EXIT_SOFTWARE);
 
 	init_lib();
 	init_auth();
@@ -285,8 +285,7 @@ sntp_main (
 	if (0 == argc && !opt_broadcast && !opt_concurrent) {
 		printf("%s: Must supply at least one of -b hostname, -c hostname, or hostname.\n",
 		       progname);
-		/* this used to return a distinct calue, should it still? */
-		exit(EXIT_FAILURE);
+		exit(EXIT_SOFTWARE);
 	}
 
 
@@ -1575,8 +1574,7 @@ set_time(
 		*/
 	}
 
-	/* this used to return a nz value distinct from general failure */
-	return EXIT_FAILURE;
+	return EXIT_SOFTWARE;
 }
 
 

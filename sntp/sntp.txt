@@ -260,8 +260,6 @@ One of the following exit values will be returned:
   Successful program execution.
 1 (EXIT_FAILURE)::
   The operation failed or the command syntax was not valid.
-66 (EX_NOINPUT)::
-  A specified configuration file could not be loaded.
 70 (EX_SOFTWARE)::
   libopts had an internal operational error. Please report it to
   autogen-users@lists.sourceforge.net. Thank you.
