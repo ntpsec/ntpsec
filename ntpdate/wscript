@@ -13,7 +13,6 @@ def build(ctx):
 		defines		= ["HAVE_CONFIG_H=1"],
 		use			= "ntp opts isc M RT PTHREAD",
 		includes	= [
- 						"%s/sntp/libopts/" % srcnode,
 						"%s/ntpdate/" % bldnode
 					],
 
