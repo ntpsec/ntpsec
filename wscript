@@ -54,7 +54,6 @@ def build(ctx):
 	ctx.recurse("sntp")
 	ctx.recurse("ntpd")
 	ctx.recurse("ntpdate")
-	ctx.recurse("ntpdc")
 	ctx.recurse("ntpq")
 #	ctx.recurse("ntpsnmpd")
 	ctx.recurse("parseutil")
