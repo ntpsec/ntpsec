@@ -187,43 +187,8 @@ a longer timeout is likely needed.
 +
 If we are not setting the time, wait for all pending responses.
 
-`-?`, `--help`::
-  Display usage information and exit.
-
-`-!`, `--more-help`::
-  Pass the extended usage information through a pager.
-
-//FIXME: This no longer work.
-`->` cfgfile, `--save-opts` [=_cfgfile_]::
-  Save the option state to _cfgfile_. The default is the _last_
-  configuration file listed in the _OPTION PRESETS_ section, below. The
-  command will exit after updating the config file.
-
-`-<` cfgfile, `--load-opts`=_cfgfile_, `--no-load-opts`::
-  Load options from _cfgfile_. The _no-load-opts_ form will disable the
-  loading of earlier config/rc/ini files. `--no-load-opts` is handled
-  early, out of order.
-
-`--version` [\{_v|c|n_}]::
-  Output version of program and exit. The default mode is `v', a simple
-  version. The `c' mode will print copyright information and `n' will
-  print the full copyright notice.
-
-== OPTION PRESETS ==
-
-// FIXME: garbled and obsolete
-Any option that is not marked as _not presettable_ may be preset by
-loading values from configuration ("RC" or ".INI") file(s) and values
-from environment variables named:
-
-------
-SNTP <option-name> or SNTP
-------
-
-The environmental presets take precedence (are processed later than) the
-configuration files. The _homerc_ files are "_$HOME_", and "`.`". If any
-of these are directories, then the file `.ntprc` is searched for within
-those directories.
+`--version`
+  Output version of program and exit.
 
 == USAGE ==
 
@@ -242,15 +207,6 @@ _sntp -S ntpserver.somewhere_::
   `sntp -S ntpserver.somewhere` will set (step) the local clock from a
   synchronized specified server, like the (deprecated)
   _ntpdate_(@NTPDATE_MS@), or _rdate_(8) commands.
-
-== ENVIRONMENT ==
-
-//FIXME: Obsolere
-See _OPTION PRESETS_ for configuration environment variables.
-
-== FILES ==
-
-See _OPTION PRESETS_ for configuration files.
 
 == EXIT STATUS ==
 
