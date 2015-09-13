@@ -58,8 +58,6 @@ WILL IOCTL(SIOCGIFCONF) WORK ON A SOCKET
 MISC
 
   DOSYNCTODR		- Resync TODR clock  every hour.
-  NO_SIGNED_CHAR_DECL - No "signed char" see include/ntp.h
-  LOCK_PROCESS		- Have plock.
 */
 
 int ntp_set_tod (struct timeval *tvp, void *tzp);
