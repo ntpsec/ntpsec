@@ -684,8 +684,6 @@ ntpdmain(
 	isc_error_setfatal(library_fatal_error);
 	isc_error_setunexpected(library_unexpected_error);
 
-	/* MPE lacks the concept of root */
-# if !defined(MPE)
 	uid = getuid();
 	if (uid && !saveconfigquit && !dumpopts) {
 		msyslog_term = true;
@@ -693,7 +691,6 @@ ntpdmain(
 			"must be run as root, not uid %ld", (long)uid);
 		exit(1);
 	}
-# endif
 
 # ifdef HAVE_WORKING_FORK
 	if (wait_sync <= 0)
