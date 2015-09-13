@@ -187,7 +187,7 @@ a longer timeout is likely needed.
 +
 If we are not setting the time, wait for all pending responses.
 
-`--version`
+`--version`::
   Output version of program and exit.
 
 == USAGE ==
