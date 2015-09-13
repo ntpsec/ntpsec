@@ -74,8 +74,7 @@ modern Unix systems have included NTP and UDP port 123 defined in the
 services file, this should be checked if `ntpd` fails to come up at all.
 
 The best way to confirm NTP is working is using the
-link:ntpq.html[`ntpq`] utility, although the link:ntpdc.html[`ntpdc`]
-utility may be useful in extreme cases. See the documentation pages for
+link:ntpq.html[`ntpq`] utility. See the documentation pages for
 further information. Don't forget to check for link:msyslog.html[system
 log messages]. In the most extreme cases the `-d` option on the `ntpd`
 command line results in a blow-by-blow trace of the daemon operations.

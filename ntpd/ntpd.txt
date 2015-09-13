@@ -45,7 +45,7 @@ the `-c` option.
 
 Various internal `ntpd` variables can be displayed and configuration
 options altered while the `ntpd` is running using the
-ntpq(1ntpqmdoc) and ntpdc(1ntpdcmdoc) utility programs.
+ntpq(1ntpqmdoc) and ntq(1ntpqmdoc) utility programs.
 
 When `ntpd` starts it looks at the value of umask(2), and if
 zero `ntpd` will set the umask(2) to 022.
@@ -577,7 +577,7 @@ One of the following exit values will be returned:
 
 == SEE ALSO ==
 
-ntp.conf(5), ntpdate(1), ntpdc(1), ntpq(1), sntp(1)
+ntp.conf(5), ntpdate(1), ntpq(1), sntp(1)
 
 In addition to the manual pages provided, comprehensive documentation is
 available on the world wide web at http://www.ntp.org/. A snapshot of

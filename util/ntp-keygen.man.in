@@ -64,9 +64,7 @@ using secure means beyond the scope of NTP itself.
 Besides the keys used for ordinary NTP associations, additional keys
 can be defined as passwords for the
 \fCntpq\fR(@NTPQ_MS@)\f[]
-and
-\fCntpdc\fR(@NTPDC_MS@)\f[]
-utility programs.
+utility program.
 .sp \n(Ppu
 .ne 2
 
@@ -922,9 +920,7 @@ character.
 
 Note that the keys used by the
 \fCntpq\fR(@NTPQ_MS@)\f[]
-and
-\fCntpdc\fR(@NTPDC_MS@)\f[]
-programs
+program
 are checked against passwords requested by the programs
 and entered by hand, so it is generally appropriate to specify these keys
 in human readable ASCII format.
@@ -949,9 +945,7 @@ While this file is not used with the Autokey Version 2 protocol,
 it is needed to authenticate some remote configuration commands
 used by the
 \fCntpq\fR(@NTPQ_MS@)\f[]
-and
-\fCntpdc\fR(@NTPDC_MS@)\f[]
-utilities.
+utilitiy.
 .SH "OPTIONS"
 .TP
 .NOP \f\*[B-Font]\-b\f[] \f\*[I-Font]imbits\f[], \f\*[B-Font]\-\-imbits\f[]=\f\*[I-Font]imbits\f[]

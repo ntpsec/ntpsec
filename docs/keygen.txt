@@ -52,7 +52,7 @@ random bit strings suitable for the SHA1 and other message digest
 algorithms. The message digest keys file must be distributed and stored
 using secure means beyond the scope of NTP itself. Besides the keys used
 for ordinary NTP associations, additional keys can be defined as
-passwords for the link:ntpq.html[`ntpq`] and link:ntpdc.html[`ntpdc`] utility programs.
+passwords for the link:ntpq.html[`ntpq`] utility program.
 
 The remaining generated files are compatible with other OpenSSL
 applications and other Public Key Infrastructure (PKI) resources.
@@ -300,7 +300,7 @@ characters and terminated by whitespace or a # character. An OpenSSL key
 consists of a hex-encoded ASCII string of 40 characters, which is
 truncated as necessary.
 
-Note that the keys used by the `ntpq` and `ntpdc` programs are checked
+Note that the keys used by the `ntpq` program are checked
 against passwords requested by the programs and entered by hand, so it
 is generally appropriate to specify these keys in human readable ASCII
 format.
@@ -313,8 +313,7 @@ so `ntp-keygen` installs a soft link from this name to the generated
 file. Subsequently, similar soft links must be installed by manual or
 automated means on the other subnet hosts. While this file is not used
 with the Autokey Version 2 protocol, it is needed to authenticate some
-remote configuration commands used by the link:ntpq.html[`ntpq`] and
-link:ntpdc.html[`ntpdc`] utilities.
+remote configuration commands used by the link:ntpq.html[`ntpq`] utility.
 
 [[bug]]
 == Bugs ==

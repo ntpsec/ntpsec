@@ -87,7 +87,7 @@ than to change the cryptographic media file names.#
   information.
 `keys` 'path'::
   Specifies the complete directory path for the key file containing the
-  key IDs, key types and keys used by `ntpd`, `ntpq` and `ntpdc` when
+  key IDs, key types and keys used by `ntpd` and `ntpq` when
   operating with symmetric key cryptography. The format of the keyfile
   is described on the link:keygen.html[`ntp-keygen` page]. This is the
   same operation as the `-k` command line option. Note that the
@@ -98,11 +98,6 @@ than to change the cryptographic media file names.#
   keys, parameters and certificates. The default is `/usr/local/etc/`.
   Note that the path for the symmetric keys file is specified by the
   `keys` command.
-`requestkey` 'keyid'::
-  Specifies the key ID for the link:ntpdc.html[`ntpdc`] utility program,
-  which uses a proprietary protocol specific to this implementation of
-  `ntpd`. The `keyid` argument is a key ID for a
-  link:#trustedkey[trusted key], in the range 1 to 65534, inclusive.
 `revoke` ['logsec']::
   Specifies the interval between re-randomization of certain
   cryptographic values used by the Autokey scheme, as a power of 2 in
@@ -111,7 +106,7 @@ than to change the cryptographic media file names.#
 `trustedkey` ['keyid' | ('lowid' ... 'highid')] [...]::
   Specifies the key ID(s) which are trusted for the purposes of
   authenticating peers with symmetric key cryptography. Key IDs used to
-  authenticate `ntpq` and `ntpdc` operations must be listed here and
+  authenticate `ntpq` operations must be listed here and
   additionally be enabled with link:#controlkey[controlkey] and/or
   link:#requestkey[requestkey]. The authentication procedure for time
   transfer requires that both the local and remote NTP servers employ

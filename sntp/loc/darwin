@@ -4,7 +4,6 @@ ntp-keygen,bin,8
 ntp-wait,sbin,8
 ntpd,sbin,8
 ntpdate,sbin,8
-ntpdc,sbin,8
 ntpdsim,sbin,8
 ntpq,bin,8
 ntpsnmpd,sbin,8

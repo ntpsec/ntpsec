@@ -17,7 +17,7 @@ include::includes/install.txt[]
 
 '''''
 
-The link:ntpq.html[`ntpq`] and link:ntpdc.html[`ntpdc`] utility programs
+The link:ntpq.html[`ntpq`] utility program
 can be used to debug reference clocks, either on the server itself or
 from another machine elsewhere in the network. The server is compiled,
 installed and started using the configuration file described in the
@@ -63,7 +63,7 @@ timecode to be sure it matches what the driver expects. This may require
 consulting the clock hardware reference manual, which is probably pretty
 dusty at this stage.
 
-The `ntpdc` utility program can be used for detailed inspection of the
+The `ntpq` utility program can be used for detailed inspection of the
 clock driver status. The most useful are the `clockstat` and `clkbug`
 commands described in the document page. While these commands permit
 getting quite personal with the particular driver involved, their use is
