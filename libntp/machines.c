@@ -107,24 +107,6 @@ void alarm (int seconds)
 
 #endif /* SYS_VXWORKS */
 
-#ifdef SYS_PTX			/* Does PTX still need this? */
-/*#include <sys/types.h>	*/
-#include <sys/procstats.h>
-
-int
-gettimeofday(
-	struct timeval *tvp
-	)
-{
-	/*
-	 * hi, this is Sequents sneak path to get to a clock
-	 * this is also the most logical syscall for such a function
-	 */
-	return (get_process_stats(tvp, PS_SELF, (struct procstats *) 0,
-				  (struct procstats *) 0));
-}
-#endif /* SYS_PTX */
-
 #ifdef MPE
 /* This is a substitute for bind() that if called for an AF_INET socket
 port less than 1024, GETPRIVMODE() and GETUSERMODE() calls will be done. */

@@ -128,9 +128,6 @@ Problems that need to be fixed:
    ntpdate/ntpdate.c
    ntptrace/ntptrace.c
 
-  SYS_PTX:
-   libntp/machines.c
-
   SYS_SOLARIS:
    libparse/parse.c
    libparse/clk_trimtsip.c
