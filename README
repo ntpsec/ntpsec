@@ -44,8 +44,9 @@ include/::	Directory containing include header files used by most
 		programs in the distribution.
 
 lib/::		Source code for third-party libraries included in the
-		distribution.  Currently just one: isc, utilty code
-		from Internet Systems Consortium.
+		distribution.  Currently just one: isc, utility code
+		from Internet Systems Consortium.  The local copy has
+		been significantly modified.
 
 libjsmn/::	A minimal JSON library used by the GPSD-JSON driver.
 
