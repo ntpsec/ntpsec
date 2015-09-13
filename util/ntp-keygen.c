@@ -93,9 +93,7 @@
 #include "ntp_random.h"
 #include "ntp_stdlib.h"
 #include "ntp_assert.h"
-#include "ntp_libopts.h"
 #include "ntp_unixtime.h"
-#include "ntp-keygen-opts.h"
 
 #ifdef OPENSSL
 #include "openssl/bn.h"
@@ -279,6 +277,62 @@ followlink(
 	fname[len] = '\0';
 }
 
+#define ALL_OPTIONS "b:c:dD:e:G:h:I:i:l:M:m:P:p:q:S:s:T:V:x:"
+static const struct option longoptions[] = {
+    { "imbits",		    1, 0, 'i' },
+#ifdef ENABLE_AUTOKEY
+    { "certificate",	    1, 0, 'c' },
+#endif /* ENABLE_AUTOKEY */
+    { "cipher",		    1, 0, 'C' },
+    { "debug",		    0, 0, 'd' },
+    { "set-debug-level",    1, 0, 'D' },
+#ifdef ENABLE_AUTOKEY
+    { "id-key",		    1, 0, 'e' },
+    { "gq-params",	    1, 0, 'G' },
+    { "hostkey",	    1, 0, 'h' },
+    { "iffkey",		    1, 0, 'I' },
+    { "ident",		    1, 0, 'i' },
+    { "lifetime",	    1, 0, 'l' },
+#endif /* ENABLE_AUTOKEY */
+    { "md5key",		    1, 0, 'M' },
+    { "modulus",	    1, 0, 'm' },
+#ifdef ENABLE_AUTOKEY
+    { "pvt-cert",	    1, 0, 'P' },
+    { "password",	    1, 0, 'p' },
+    { "export-passwd",	    1, 0, 'q' },
+    { "sign-key",	    1, 0, 'S' },
+    { "subject-name",	    1, 0, 's' },
+    { "trusted-cert",	    1, 0, 'T' },
+    { "mv-params",	    1, 0, 'V' },
+    { "mv-keys",	    1, 0, 'x' },
+#endif /* ENABLE_AUTOKEY */
+    { NULL,                 0, 0, '\0'},
+};
+
+static char *opt_imbits = NULL;
+static char *opt_certificate = NULL;
+static char *opt_cipher = NULL;
+#ifdef ENABLE_AUTOKEY
+static char *opt_id_key = NULL;
+static char *opt_gq_params = NULL;
+static char *opt_hostkey = NULL;
+static char *opt_iffkey = NULL;
+static char *opt_ident = NULL;
+static char *opt_lifetime = NULL;
+#endif /* ENABLE_AUTOKEY */
+static char *opt_md5key = NULL;
+static int opt_modulus = -1;
+#ifdef ENABLE_AUTOKEY
+static char *opt_pvt_cert = NULL;
+static char *opt_passwd = NULL;
+static char *opt_export_passwd = NULL;
+static char *opt_sign_key = NULL;
+static char *opt_subject_name = NULL;
+static char *opt_trusted_cert = NULL;
+static char *opt_mv_params = NULL;
+static char *opt_mv_keys = NULL;
+#endif /* ENABLE_AUTOKEY */
+
 
 /*
  * Main program
@@ -322,6 +376,7 @@ main(
 	int	i, cnt;
 	char *	ptr;
 #endif	/* ENABLE_AUTOKEY */
+	int     op;
 
 	progname = argv[0];
 
@@ -354,9 +409,85 @@ main(
 	epoch = tv.tv_sec;
 	fstamp = (u_int)(epoch + JAN_1970);
 
-	optct = ntpOptionProcess(&ntp_keygenOptions, argc, argv);
-	argc -= optct;
-	argv += optct;
+	while ((op = ntp_getopt_long(argc, argv,
+				     ALL_OPTIONS, longoptions, NULL)) != -1) {
+
+	    switch (op) {
+	    case 'b':
+		opt_imbits = ntp_optarg;
+		break;
+#ifdef ENABLE_AUTOKEY
+	    case 'c':
+		opt_certificate = ntp_optarg;
+		break;
+#endif /* ENABLE_AUTOKEY */
+	    case 'd':
+#ifdef DEBUG
+		++debug;
+#endif
+		break;
+	    case 'D':
+#ifdef DEBUG
+		debug = atoi(ntp_optarg);
+#endif
+		break;
+	    case 'C':
+		opt_cipher = ntp_optarg;
+		break;
+#ifdef ENABLE_AUTOKEY
+	    case 'G':
+		opt_gq_params = ntp_optarg;
+		break;
+	    case 'h':
+		opt_hostkey = ntp_optarg;
+		break;
+	    case 'I':
+		opt_iffkey = ntp_optarg;
+		break;
+	    case 'i':
+		opt_ident = ntp_optarg;
+		break;
+	    case 'l':
+		opt_lifetime = ntp_optarg;
+		break;
+#endif /* ENABLE_AUTOKEY */
+	    case 'M':
+		opt_md5key = ntp_optarg;
+		break;
+	    case 'm':
+		opt_modulus = atoi(ntp_optarg);
+		break;
+#ifdef ENABLE_AUTOKEY
+	    case 'P':
+		opt_pvt_cert = ntp_optarg;
+		break;
+	    case 'p':
+		opt_passwd = ntp_optarg;
+		break;
+	    case 'q':
+		opt_export_passwd = ntp_optarg;
+		break;
+	    case 'S':
+		opt_sign_key = ntp_optarg;
+		break;
+	    case 's':
+		opt_certificate = ntp_optarg;
+		break;
+	    case 'T':
+		opt_trusted_cert = ntp_optarg;
+		break;
+	    case 'V':
+		opt_mv_params = ntp_optarg;
+		break;
+	    case 'x':
+		opt_mv_keys = ntp_optarg;
+		break;
+#endif /* ENABLE_AUTOKEY */
+	    }
+	}
+		
+	argc -= optind;
+	argv += optind;
 
 #ifdef OPENSSL
 	if (SSLeay() == SSLEAY_VERSION_NUMBER)
@@ -367,63 +498,62 @@ main(
 			OPENSSL_VERSION_TEXT, SSLeay_version(SSLEAY_VERSION));
 #endif /* OPENSSL */
 
-	debug = OPT_VALUE_SET_DEBUG_LEVEL;
-
-	if (HAVE_OPT( MD5KEY ))
+	if (opt_md5key != NULL)
 		md5key++;
+
 #ifdef ENABLE_AUTOKEY
-	if (HAVE_OPT( PASSWORD ))
-		passwd1 = estrdup(OPT_ARG( PASSWORD ));
+	if (opt_certificate != NULL)
+		scheme = certificate;
 
-	if (HAVE_OPT( EXPORT_PASSWD ))
-		passwd2 = estrdup(OPT_ARG( EXPORT_PASSWD ));
+	if (opt_passwd != NULL)
+		passwd1 = estrdup(opt_passwd);
 
-	if (HAVE_OPT( HOST_KEY ))
+	if (opt_export_passwd != NULL)
+		passwd2 = estrdup(opt_export_passwd);
+
+	if (opt_hostkey != NULL)
 		hostkey++;
 
-	if (HAVE_OPT( SIGN_KEY ))
-		sign = estrdup(OPT_ARG( SIGN_KEY ));
+	if (opt_sign_key != NULL)
+		sign = estrdup(opt_sign_key);
 
-	if (HAVE_OPT( GQ_PARAMS ))
+	if (opt_gq_params != NULL)
 		gqkey++;
 
-	if (HAVE_OPT( IFFKEY ))
+	if (opt_iffkey != NULL)
 		iffkey++;
 
-	if (HAVE_OPT( MV_PARAMS )) {
+	if (opt_mv_params != NULL) {
 		mvkey++;
-		nkeys = OPT_VALUE_MV_PARAMS;
+		nkeys = atoi(opt_mv_params)
 	}
-	if (HAVE_OPT( MV_KEYS )) {
+	if (opt_mv_keys != NULL) {
 		mvpar++;
-		nkeys = OPT_VALUE_MV_KEYS;
+		nkeys = atoi(opt_mv_keys);
 	}
 
-	if (HAVE_OPT( IMBITS ))
-		modulus2 = OPT_VALUE_IMBITS;
+	if (opt_imbits != NULL)
+	    modulus2 = atoi(opt_imbits);
 
-	if (HAVE_OPT( MODULUS ))
-		modulus = OPT_VALUE_MODULUS;
+	if (opt_modulus != -1)
+	    modulus = opt_modulus;
 
-	if (HAVE_OPT( CERTIFICATE ))
-		scheme = OPT_ARG( CERTIFICATE );
+	if (opt_cipher != NULL)
+		ciphername = opt_cipher;
 
-	if (HAVE_OPT( CIPHER ))
-		ciphername = OPT_ARG( CIPHER );
+	if (opt_subject_name != NULL)
+		hostname = estrdup(opt_subject_name);
 
-	if (HAVE_OPT( SUBJECT_NAME ))
-		hostname = estrdup(OPT_ARG( SUBJECT_NAME ));
+	if (opt_ident != NULL)
+		groupname = estrdup(opt_ident);
 
-	if (HAVE_OPT( IDENT ))
-		groupname = estrdup(OPT_ARG( IDENT ));
+	if (opt_lifetime != NULL)
+		lifetime = opt_lifetime;
 
-	if (HAVE_OPT( LIFETIME ))
-		lifetime = OPT_VALUE_LIFETIME;
-
-	if (HAVE_OPT( PVT_CERT ))
+	if (opt_pvt_cert != NULL)
 		exten = EXT_KEY_PRIVATE;
 
-	if (HAVE_OPT( TRUSTED_CERT ))
+	if (opt_trusted_cert != NULL)
 		exten = EXT_KEY_TRUST;
 
 	/*
@@ -625,7 +755,7 @@ main(
 	 * stream. The parameter file is the server key file with the
 	 * private key obscured.
 	 */
-	if (pkey_gqkey != NULL && HAVE_OPT(ID_KEY)) {
+	if (pkey_gqkey != NULL && opt_id_key != NULL)) {
 		RSA	*rsa;
 
 		snprintf(filename, sizeof(filename),
@@ -690,7 +820,7 @@ main(
 	 * stream. The parameter file is the server key file with the
 	 * private key obscured.
 	 */
-	if (pkey_iffkey != NULL && HAVE_OPT(ID_KEY)) {
+	if (pkey_iffkey != NULL && opt_id_key != NULL) {
 		DSA	*dsa;
 
 		snprintf(filename, sizeof(filename),
@@ -755,7 +885,7 @@ main(
 	 * stream. For the moment, we always use the client parameters
 	 * associated with client key 1.
 	 */
-	if (pkey_mvkey != NULL && HAVE_OPT(ID_KEY)) {
+	if (pkey_mvkey != NULL && ot_id_key != NULL) {
 		snprintf(filename, sizeof(filename),
 		    "ntpkey_mvpar_%s.%u", groupname, fstamp);
 		fprintf(stderr, "Writing MV parameters %s to stdout\n",
