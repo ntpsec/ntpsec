@@ -83,7 +83,7 @@ if set to zero or the line-in port if set to one. It does not seem
 useful to specify the compact disc player port. The `fudge flag 3`
 command enables the input signal monitor using the previously selected
 output port and output gain. Both of these flags can be set in the
-configuration file or remotely using the `ntpdc` utility program.
+configuration file or remotely using the `ntpq` utility program.
 
 [[short]]
 == Shortwave Radio Drivers ==

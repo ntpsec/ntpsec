@@ -57,7 +57,7 @@ unit numbers must be unique.
   This command can be used to configure reference clocks in special
   ways. It must immediately follow the `server` command which configures
   the driver. Note that the same capability is possible at run time
-  using the link:ntpdc.html[`ntpdc`] program. The options are interpreted as follows:
+  using the link:ntpq.html[`ntpq`] program. The options are interpreted as follows:
   `time1` 'sec';;
     Specifies a constant to be added to the time offset produced by the
     driver, a fixed-point decimal number in seconds. This is used as a

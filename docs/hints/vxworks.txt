@@ -101,7 +101,7 @@ The variable `arch` is the target architecture (e.g. i486)
 Options I normally use are the
 `--disable-all-clocks --enable-LOCAL-CLOCK` flags. The program should
 proceed to compile without problem. The daemon ntpd, ntpdate, ntptrace,
-ntpdc, ntpq programs and of course the libraries are all fully ported.
+ntpq programs and of course the libraries are all fully ported.
 The other utilities are not, but they should be easy to port.
 
 == Running the software ==
@@ -115,10 +115,9 @@ information.
             ld < ntpd/ntpd
             ld < ntptrace/ntptrace
             ld < ntpq/ntpq
-            ld < ntpdc/ntpdc
             ntpdate ("-b", "192.168.0.245")
             sp(ntpd, "-c", "/export/home/casey/ntp/ntp.conf")
-            ntpdc("-c", "monlist", "192.168.0.244")
+            ntpq("-c", "monlist", "192.168.0.244")
             ntpq("-c", "peers", "192.168.0.244")
             ntptrace("192.168.0.244")
         

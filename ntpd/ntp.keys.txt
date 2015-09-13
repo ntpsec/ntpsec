@@ -42,7 +42,7 @@ _SHA_; _SHA1_; _RMD160_::
   The key is a hex-encoded ASCII string of 40 characters, which is
   truncated as necessary.
 +
-Note that the keys used by the ntpq(8) and ntpdc(8) programs are
+Note that the keys used by the ntpq(8) programs are
 checked against passwords requested by the programs and entered by
 hand, so it is generally appropriate to specify these keys in ASCII
 format.
@@ -55,7 +55,7 @@ format.
 == SEE ALSO ==
 
 ntp.conf(5), ntpd(1ntpdmdoc), ntpdate(1ntpdatemdoc),
-ntpdc(1ntpdcmdoc), sntp(1sntpmdoc).
+ntpq(1ntpqmdoc), sntp(1sntpmdoc).
 
 == AUTHORS ==
 

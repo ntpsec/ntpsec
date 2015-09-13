@@ -22,7 +22,7 @@ ntptime [ -chr ] [ -e 'est_error' ] [ -f 'frequency' ] [ -m 'max_error' ] [ -o '
 This program is useful only with special kernels described in the
 link:kern.html[A Kernel Model for Precision Timekeeping] page. It reads
 and displays time-related kernel variables using the `ntp_gettime()`
-system call. A similar display can be obtained using the `ntpdc` program
+system call. A similar display can be obtained using the `ntpq` program
 and `kerninfo` command.
 
 == Options ==

@@ -20,9 +20,7 @@ include::includes/install.txt[]
 
 This page discusses `ntpd` program monitoring and debugging techniques
 using the link:ntpq.html[`ntpq` - standard NTP query program], either on
-the local server or from a remote machine. In special circumstances the
-link:ntpdc.html[`ntpdc` - special NTP query program], can be useful, but
-its use is not covered here. The `ntpq` program implements the
+the local server or from a remote machine. The `ntpq` program implements the
 management functions specified in the NTP specification
 http://www.eecis.udel.edu/%7emills/database/rfc/rfc1305/rfc1305c.ps[RFC-1305,
 Appendix A]. It is used to read and write the variables defined in the
@@ -263,7 +261,7 @@ extension field to show the host name, status word and association ID.
 
 == Debugging Checklist ==
 
-If the `ntpq` or `ntpdc` programs do not show that messages are being
+If the `ntpq` or program does not show that messages are being
 received by the daemon or that received messages do not result in
 correct synchronization, verify the following:
 
@@ -281,7 +279,7 @@ other utility that the DNS server names do exist and resolve to valid
 Internet addresses.
 4.  Check that the remote NTP server is up and running. The usual
 evidence that it is not is a `Connection refused` message.
-5.  Using the `ntpdc` program, verify that the packets received and
+5.  Using the `ntpq` program, verify that the packets received and
 packets sent counters are incrementing. If the sent counter does not
 increment and the configuration file includes configured servers,
 something may be wrong in the host network or interface configuration.

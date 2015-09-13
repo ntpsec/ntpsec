@@ -71,10 +71,10 @@ to replace the old version.
     this flag is enable if support is available, otherwise disable.
   `mode7`;;
     Enables processing of NTP mode 7 implementation-specific requests
-    which are used by the deprecated `ntpdc` program. The default for
+    which were formerly used by the `ntpdc` program. The default for
     this flag is disable. This flag is excluded from runtime
     configuration using `ntpq`. The `ntpq` program provides the same
-    capabilities as `ntpdc` using standard mode 6 requests.
+    capabilities as `ntpdc` did using standard mode 6 requests.
   `monitor`;;
     Enables the monitoring facility. See the link:ntpq.html[`ntpq`
     program] and the `monstats` and `mrulist` commands, as well as the
@@ -213,7 +213,7 @@ and so on is suppressed.
   modem control codes as well.
 `reset [allpeers] [auth] [ctl] [io] [mem] [sys] [timer]`::
   Reset one or more groups of counters maintained by ntpd and exposed by
-  `ntpq` and `ntpdc`.
+  `ntpq`.
 `saveconfigdir` 'directory_path'::
   Specify the directory in which to write configuration snapshots
   requested with `ntpq`'s link:ntpq.html#saveconfig[saveconfig] command.

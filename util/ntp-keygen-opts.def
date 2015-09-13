@@ -304,9 +304,7 @@ using secure means beyond the scope of NTP itself.
 Besides the keys used for ordinary NTP associations, additional keys
 can be defined as passwords for the
 .Xr ntpq 1ntpqmdoc
-and
-.Xr ntpdc 1ntpdcmdoc
-utility programs.
+utility program.
 .Pp
 The remaining generated files are compatible with other OpenSSL
 applications and other Public Key Infrastructure (PKI) resources.
@@ -1072,9 +1070,7 @@ character.
 .Pp
 Note that the keys used by the
 .Xr ntpq 1ntpqmdoc
-and
-.Xr ntpdc 1ntpdcmdoc
-programs
+program
 are checked against passwords requested by the programs
 and entered by hand, so it is generally appropriate to specify these keys
 in human readable ASCII format.
@@ -1097,8 +1093,6 @@ While this file is not used with the Autokey Version 2 protocol,
 it is needed to authenticate some remote configuration commands
 used by the
 .Xr ntpq 1ntpqmdoc
-and
-.Xr ntpdc 1ntpdcmdoc
 utilities.
 	_END_PROG_MDOC_DESCRIP;
 };

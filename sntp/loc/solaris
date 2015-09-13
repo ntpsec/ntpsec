@@ -5,7 +5,6 @@ ntp-keygen,sbin,1m
 ntp-wait,libexec,1m
 ntpd,libexec,1m
 ntpdate,sbin,1m
-ntpdc,sbin,1m
 ntpdsim,sbin,1m
 ntpq,sbin,1m
 ntpsnmpd,libexec,1m

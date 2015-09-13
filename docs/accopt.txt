@@ -70,7 +70,7 @@ the link:accopt.html[Access Control Support] page.
     The name comes from Bob Braden's _flakeway_, which once did a
     similar thing for early Internet testing.
   `ignore`;;
-    Deny packets of all kinds, including `ntpq` and `ntpdc` queries.
+    Deny packets of all kinds, including `ntpq` queries.
   `kod`;;
     Send a kiss-o'-death (KoD) packet if the `limited` flag is present
     and a packet violates the rate limits established by the `discard`
@@ -79,7 +79,7 @@ the link:accopt.html[Access Control Support] page.
     does not have the `limited` flag, no KoD responses will result.
   `limited`;;
     Deny time service if the packet violates the rate limits established
-    by the `discard` command. This does not apply to `ntpq` and `ntpdc`
+    by the `discard` command. This does not apply to `ntpq`
     queries.
   `lowpriotrap`;;
     Declare traps set by matching hosts to be low priority. The number
@@ -96,11 +96,11 @@ the link:accopt.html[Access Control Support] page.
     this flag should be used only for a dedicated server with no clients
     other than MS-SNTP.*
   `nomodify`;;
-    Deny `ntpq` and `ntpdc` queries which attempt to modify the state of
+    Deny `ntpq` queries which attempt to modify the state of
     the server (i.e., run time reconfiguration). Queries which return
     information are permitted.
   `noquery`;;
-    Deny `ntpq` and `ntpdc` queries. Time service is not affected.
+    Deny `ntpq` queries. Time service is not affected.
   `nopeer`;;
     Deny packets that might mobilize an association unless
     authenticated. This includes broadcast, symmetric-active and
@@ -111,10 +111,10 @@ the link:accopt.html[Access Control Support] page.
     does _not_ include the `nopeer` directive. Note that this flag does
     not apply to packets that do not attempt to mobilize an association.
   `noserve`;;
-    Deny all packets except `ntpq` and `ntpdc` queries.
+    Deny all packets except `ntpq` queries.
   `notrap`;;
     Decline to provide mode 6 control message trap service to matching
-    hosts. The trap service is a subsystem of the `ntpdc` control
+    hosts. The trap service is a subsystem of the `ntpq` control
     message protocol which is intended for use by remote event logging
     programs.
   `notrust`;;

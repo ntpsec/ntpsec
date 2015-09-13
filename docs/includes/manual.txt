@@ -1,7 +1,6 @@
 == Program Manual Pages ==
 * link:ntpd.html[`ntpd` - Network Time Protocol (NTP) daemon]
 * link:ntpq.html[`ntpq` - standard NTP query program]
-* link:ntpdc.html[`ntpdc` - special NTP query program]
 * link:ntpdate.html[`ntpdate` - set the date and time via NTP]
 * link:sntp.html[`sntp` - Simple Network Time Protocol (SNTP) client]
 * link:ntptrace.html[`ntptrace` - trace a chain of NTP servers back to the primary source]
