@@ -4185,7 +4185,7 @@ findbcastinter(
 	endpt *	iface;
 
 	iface = NULL;
-#if !defined(MPE) && (defined(SIOCGIFCONF) || defined(SYS_WINNT))
+#if (defined(SIOCGIFCONF) || defined(SYS_WINNT))
 	DPRINTF(4, ("Finding broadcast/multicast interface for addr %s in list of addresses\n",
 		    stoa(addr)));
 
