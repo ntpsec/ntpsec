@@ -12,7 +12,7 @@ def build(ctx):
 
 	ctx(
 		target		= "libntpq",
-		features	= "c bld_include src_include libisc_include libopts_include",
+		features	= "c bld_include src_include libisc_include",
 		source		= libntpq_source,
 		defines		= ["HAVE_CONFIG_H=1"],
 	)
@@ -25,7 +25,7 @@ def build(ctx):
 
 	ctx(
 		target		= "ntpq",
-		features	= "c cprogram bld_include src_include libisc_include libopts_include ntp_version",
+		features	= "c cprogram bld_include src_include libisc_include ntp_version",
 		source		= ntpq_source,
 		defines		= ["HAVE_CONFIG_H=1"],
 		use			= "ntp opts isc M RT PTHREAD",

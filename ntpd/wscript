@@ -72,10 +72,6 @@ def build(ctx):
 		features	= "c bld_include src_include libisc_include",
 		source		= libntpd_source,
 		defines		= ["HAVE_CONFIG_H=1"],
-		includes	= [
-						"%s/sntp/libopts/" % srcnode
-					],
-
 	)
 
 	ctx(
@@ -98,9 +94,6 @@ def build(ctx):
 			features	= "c bld_include src_include libisc_include",
 			source		= refclock_source,
 			defines		= ["HAVE_CONFIG_H=1", "REFCLOCK=1"],
-			includes	= [
-							"%s/sntp/libopts/" % srcnode
-						],
 		)
 		use_refclock += "refclock"
 
@@ -111,9 +104,6 @@ def build(ctx):
 				features	= "c bld_include src_include libisc_include",
 				source		= "refclock_%s.c" % file,
 				defines		= ["HAVE_CONFIG_H=1", "REFCLOCK=1", "%s=1" % define],
-				includes	= [
-								"%s/sntp/libopts/" % srcnode
-							],
 			)
 			use_refclock += " refclock_%s" % file
 
@@ -142,7 +132,6 @@ def build(ctx):
 		defines		= ["HAVE_CONFIG_H=1"] + refclock_define,
 		use			= "libntpd_obj bison_obj isc ntp opts M parse RT THR PTHREAD %s" % use_refclock,
 		includes	= [
- 						"%s/sntp/libopts/" % srcnode,
 						"%s/ntpd/" % bldnode,
 						"%s/ntpd/" % srcnode
 					],
