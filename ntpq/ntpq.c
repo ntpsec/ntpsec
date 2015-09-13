@@ -392,7 +392,7 @@ jmp_buf interrupt_buf;
 FILE *current_output;
 
 /*
- * Command table imported from ntpdc_ops.c
+ * Command table
  */
 extern struct xcmd opcmds[];
 
@@ -851,7 +851,7 @@ dump_hex_printable(
 }
 
 
-/* XXX ELIMINATE sendpkt similar in ntpq.c, ntpdc.c, ntp_io.c, ntptrace.c */
+/* XXX ELIMINATE sendpkt similar in ntpq.c, ntp_io.c, ntptrace.c */
 /*
  * sendpkt - send a packet to the remote host
  */

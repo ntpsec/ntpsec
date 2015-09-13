@@ -77,7 +77,7 @@
  *
  * If kernel support for the ntp_adjtime() system call is available, the
  * ntp_control flag is set. The ntp_enable and kern_enable flags can be
- * set at configuration time or run time using ntpdc. If ntp_enable is
+ * set at configuration time or run time using ntpq. If ntp_enable is
  * false, the discipline loop is unlocked and no corrections of any kind
  * are made. If both ntp_control and kern_enable are set, the kernel
  * support is used as described above; if false, the kernel is bypassed

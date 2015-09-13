@@ -94,7 +94,7 @@ keyword(
  * fgetc and ungetc functions in order to include positional
  * bookkeeping. Alas, this is no longer a good solution with nested
  * input files and the possibility to send configuration commands via
- * 'ntpdc' and 'ntpq'.
+ * 'ntpq'.
  *
  * Now there are a few functions to maintain a stack of nested input
  * sources (though nesting is only allowd for disk files) and from the

@@ -726,7 +726,7 @@ isc_interfaceiter_first(isc_interfaceiter_t *iter) {
 	 * SIO_ADDRESS_LIST_QUERY (used to query IPv6 addresses)
 	 * intentionally omits localhost addresses [::1] and [::fe80] in
 	 * some cases.  ntpd depends on enumerating [::1] to listen on
-	 * it, and ntpq and ntpdc default to "localhost" as the target,
+	 * it, and ntpq defaults to "localhost" as the target,
 	 * so they will attempt to talk to [::1]:123 and fail. This
 	 * means we need to synthesize ::1, which we will do first,
 	 * hence iAddressCount + 1.  internal_next6() will decrement

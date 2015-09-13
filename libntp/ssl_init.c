@@ -70,7 +70,7 @@ ssl_check_version(void)
  * keytype_from_text	returns OpenSSL NID for digest by name, and
  *			optionally the associated digest length.
  *
- * Used by ntpd authreadkeys(), ntpq and ntpdc keytype()
+ * Used by ntpd authreadkeys(), ntpq keytype()
  */
 int
 keytype_from_text(
@@ -137,7 +137,7 @@ keytype_from_text(
 /*
  * keytype_name		returns OpenSSL short name for digest by NID.
  *
- * Used by ntpq and ntpdc keytype()
+ * Used by ntpq keytype()
  */
 const char *
 keytype_name(
@@ -171,8 +171,7 @@ keytype_name(
 #endif
 
 /*
- * getpass_keytype() -- shared between ntpq and ntpdc, only vaguely
- *			related to the rest of ssl_init.c.
+ * getpass_keytype() -- only vaguely related to the rest of ssl_init.c.
  */
 char *
 getpass_keytype(

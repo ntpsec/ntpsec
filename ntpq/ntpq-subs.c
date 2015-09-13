@@ -2887,10 +2887,6 @@ qcmp_mru_r_avgint(
  * mrulist - ntpq's mrulist command to fetch an arbitrarily large Most
  *	     Recently Used (seen) remote address list from ntpd.
  *
- * Similar to ntpdc's monlist command, but not limited to a single
- * request/response, and thereby not limited to a few hundred remote
- * addresses.
- *
  * See ntpd/ntp_control.c read_mru_list() for comments on the way
  * CTL_OP_READ_MRU is designed to be used.
  *
@@ -3149,7 +3145,7 @@ another_ifstats_field(
 
 
 /*
- * ifstats - ntpq -c ifstats modeled on ntpdc -c ifstats.
+ * ifstats - ntpq -c ifstats
  */
 static void 
 ifstats(
@@ -3371,7 +3367,7 @@ another_reslist_field(
 
 
 /*
- * reslist - ntpq -c reslist modeled on ntpdc -c reslist.
+ * reslist - ntpq -c reslist
  */
 static void 
 reslist(
@@ -3641,7 +3637,7 @@ collect_display_vdc(
 
 
 /*
- * sysstats - implements ntpq -c sysstats modeled on ntpdc -c sysstats
+ * sysstats - implements ntpq -c sysstats
  */
 static void
 sysstats(
@@ -3670,7 +3666,7 @@ sysstats(
 
 
 /*
- * sysinfo - modeled on ntpdc's sysinfo
+ * sysinfo
  */
 static void
 sysinfo(
@@ -3701,7 +3697,7 @@ sysinfo(
 
 
 /*
- * kerninfo - modeled on ntpdc's kerninfo
+ * kerninfo
  */
 static void
 kerninfo(

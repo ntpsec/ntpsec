@@ -83,7 +83,7 @@ struct parse {
 };
 
 /*
- * ntpdc includes a command parser which could charitably be called
+ * ntpq includes a command parser which could charitably be called
  * crude.  The following structure is used to define the command
  * syntax.
  */
