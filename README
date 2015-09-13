@@ -25,13 +25,6 @@ README::	This file.
 
 devel-docs/::	Documentation aimed at developers.
 
-clockstuff/::	Directory containing sources for miscellaneous programs
-		to test certain auxiliary programs used with some kernel
-		configurations, together with a program to calculate
-		propagation delays for use with radio clocks and
-		national time dissemination services such as WWV/WWVH,
-		WWVB and CHU.
-
 conf/::		Directory containing a motley collection of
 		configuration files for various systems. For example only.
 
