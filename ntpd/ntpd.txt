@@ -1,5 +1,10 @@
 = ntpd(8) =
 :doctype: manpage
+:ntpdman: ntpd(8)
+:ntpdate: ntpdate(8)
+:ntpqman: ntpq(1)
+:sntpman: sntp(1)
+:ntpwait: ntp-wait(1)
 
 == NAME ==
 ntpd - Network Time Protocol service daemon
@@ -45,7 +50,7 @@ the `-c` option.
 
 Various internal `ntpd` variables can be displayed and configuration
 options altered while the `ntpd` is running using the
-ntpq(1ntpqmdoc) and ntq(1ntpqmdoc) utility programs.
+{ntpqman} utility program.
 
 When `ntpd` starts it looks at the value of umask(2), and if
 zero `ntpd` will set the umask(2) to 022.
@@ -400,14 +405,14 @@ keyword when configuring the server, but ONLY when you have permission
 to do so from the owner of the target host.
 
 Finally, in the past many startup scripts would run
-ntpdate(1ntpdatemdoc) to get the system clock close to correct before
-starting ntpd(1ntpdmdoc), but this was never more than a mediocre hack
+{ntpdate} to get the system clock close to correct before
+starting {ntpdman}, but this was never more than a mediocre hack
 and is no longer needed. If you are following the instructions
 in <<starting>> and you still need to set the
 system time before starting_ ntpd`, please open a bug report and
-document what is going on, and then look at using sntp_(1sntpmdoc)_._
+document what is going on, and then look at using {sntpman}.
 
-There is a way to start ntpd(1ntpdmdoc) that often addresses all of
+There is a way to start {ntpdman} that often addresses all of
 the problems mentioned above.
 
 [[starting]]
@@ -415,20 +420,20 @@ the problems mentioned above.
 
 First, use the _iburst_ option on your _server_ entries.
 
-If you can also keep a good _ntp.drift_ file then ntpd(1ntpdmdoc) will
+If you can also keep a good _ntp.drift_ file then {ntpdman} will
 effectively "warm-start" and your system's clock will be stable in under
 11 seconds' time.
 
 As soon as possible in the startup sequence, start
-ntpd(1ntpdmdoc) with at least the `-g` and perhaps the `-N` options.
+{ntpdman} with at least the `-g` and perhaps the `-N` options.
 Then, start the rest of your "normal" processes. This will give
-ntpd(1ntpdmdoc) as much time as possible to get the system's clock
+{ntpdman} as much time as possible to get the system's clock
 synchronized and stable.
 
 Finally, if you have processes like _dovecot_ or database servers that
-require monotonically-increasing time, run ntp-wait(1ntp-waitmdoc) as
+require monotonically-increasing time, run {ntpwait} as
 late as possible in the boot sequence (perhaps with the_`-v`_flag) and
-after ntp-wait(1ntp-waitmdoc) exits successfully it is as safe as it
+after {ntpwait} exits successfully it is as safe as it
 will ever be to start any process that require stable time.
 
 === Frequency Discipline ===
@@ -476,8 +481,8 @@ the poll interval is increased in steps to 1024s in order to reduce
 network overhead.
 
 In some cases it may not be practical for `ntpd` to run continuously. A
-common workaround has been to run the ntpdate(1ntpdatemdoc)_or
-sntp(1sntpmdoc) programs from a cron(8) job at designated times.
+common workaround has been to run the {ntpdate} or
+{sntpman} programs from a cron(8) job at designated times.
 However, these programs do not have the crafted signal processing, error
 checking or mitigation algorithms of `ntpd` . The `-q` option is
 intended for this purpose. Setting this option will cause `ntpd` to exit
@@ -488,7 +493,7 @@ the _server_ configuration command. With this keyword a volley of messages
 are exchanged to groom the data and the clock is set in about 10 s. If
 nothing is heard after a couple of minutes, the daemon times out and
 exits. After a suitable period of mourning, the
-ntpdate_(1ntpdatemdoc)_program will be retired.
+{ntpdate} program will be retired.
 
 When kernel support is available to discipline the clock frequency,
 which is the case for stock Solaris, Tru64, Linux and FreeBSD, a useful
@@ -577,7 +582,7 @@ One of the following exit values will be returned:
 
 == SEE ALSO ==
 
-ntp.conf(5), ntpdate(1), ntpq(1), sntp(1)
+ntp.conf(5), {ntpdate}, {ntpqman}, {sntpman}.
 
 In addition to the manual pages provided, comprehensive documentation is
 available on the world wide web at http://www.ntp.org/. A snapshot of

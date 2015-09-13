@@ -54,8 +54,7 @@ format.
 
 == SEE ALSO ==
 
-ntp.conf(5), ntpd(1ntpdmdoc), ntpdate(1ntpdatemdoc),
-ntpq(1ntpqmdoc), sntp(1sntpmdoc).
+ntp.conf(5), ntpd(1), ntpdate(1), ntpq(1), sntp(1).
 
 == AUTHORS ==
 

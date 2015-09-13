@@ -303,7 +303,7 @@ The message digest keys file must be distributed and stored
 using secure means beyond the scope of NTP itself.
 Besides the keys used for ordinary NTP associations, additional keys
 can be defined as passwords for the
-.Xr ntpq 1ntpqmdoc
+.Xr ntpq 1
 utility program.
 .Pp
 The remaining generated files are compatible with other OpenSSL
@@ -1069,7 +1069,7 @@ in the range 0x21 through 0x7f excluding space and the
 character.
 .Pp
 Note that the keys used by the
-.Xr ntpq 1ntpqmdoc
+.Xr ntpq 1
 program
 are checked against passwords requested by the programs
 and entered by hand, so it is generally appropriate to specify these keys
@@ -1092,7 +1092,7 @@ or automated means on the other subnet hosts.
 While this file is not used with the Autokey Version 2 protocol,
 it is needed to authenticate some remote configuration commands
 used by the
-.Xr ntpq 1ntpqmdoc
+.Xr ntpq 1
 utilities.
 	_END_PROG_MDOC_DESCRIP;
 };
