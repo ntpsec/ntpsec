@@ -22,10 +22,6 @@ The timetrim.c program can be used with SGI machines to implement a
 scheme to discipline the hardware clock frequency.  See the source code
 for further information.
 
-The byteorder.c and longsize.c programs are used during the configuration
-process to determine the byte order (little or big endian) and longword
-size (32 or 64 bits).  See the configure scripts for further details.
-
 The testrs6000.c program is used for testing purposes with the IBM
 RS/6000 AIX machines. Bill Jones <jones@chpc.utexas.edu> reports:
 "I could not get a tickadj of less than 40 us to work on a RS6000.
