@@ -30,13 +30,6 @@ def insert_libiscpthreaddir(self):
 	self.includes += ["%s/lib/isc/pthreads/include/" % srcnode]
 
 
-@before_method('apply_incpaths')
-@feature('libopts_include')
-def insert_libopts(self):
-	srcnode = self.bld.srcnode.abspath()
-	self.includes += ["%s/sntp/libopts/" % srcnode]
-
-
 class version(Task):
 	vars = ['VERSION_FULL', 'TARGET']
 	def run(self):

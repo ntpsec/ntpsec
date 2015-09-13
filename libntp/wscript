@@ -49,7 +49,6 @@ def build(ctx):
 		"ntp_calendar.c",
 		"ntp_crypto_rnd.c",
 		"ntp_intres.c",
-		"ntp_libopts.c",
 		"ntp_lineedit.c",
 		"ntp_random.c",
 		"ntp_rfc2553.c",
@@ -102,7 +101,6 @@ def build(ctx):
 		includes	= [
 						"%s/lib/isc/include/" % srcnode,
 						"%s/lib/isc/unix/include/" % srcnode, # XXX: platform: requires unix/win32 switch.
-						"%s/sntp/libopts/" % srcnode
 					],
 
 	)

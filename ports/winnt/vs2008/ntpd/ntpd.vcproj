@@ -549,10 +549,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\..\include\ntp_libopts.h"
-				>
-			</File>
-			<File
 				RelativePath="..\..\..\..\include\ntp_lists.h"
 				>
 			</File>
@@ -698,10 +694,6 @@
 			</File>
 			<File
 				RelativePath="..\..\..\..\lib\isc\win32\include\isc\offset.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\..\..\sntp\libopts\autoopts\options.h"
 				>
 			</File>
 			<File

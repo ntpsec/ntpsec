@@ -436,10 +436,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\..\sntp\libopts\libopts.c"
-				>
-			</File>
-			<File
 				RelativePath="..\..\..\..\lib\isc\log.c"
 				>
 			</File>
@@ -497,10 +493,6 @@
 			</File>
 			<File
 				RelativePath="..\..\..\..\libntp\ntp_intres.c"
-				>
-			</File>
-			<File
-				RelativePath="..\..\..\..\libntp\ntp_libopts.c"
 				>
 			</File>
 			<File
@@ -685,10 +677,6 @@
 			Filter="h;hpp;hxx;hm;inl"
 			>
 			<File
-				RelativePath="..\..\..\..\sntp\libopts\ag-char-map.h"
-				>
-			</File>
-			<File
 				RelativePath="..\..\..\..\include\binio.h"
 				>
 			</File>
@@ -822,10 +810,6 @@
 			</File>
 			<File
 				RelativePath="..\..\include\ntp_iocompletionport.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\..\..\include\ntp_libopts.h"
 				>
 			</File>
 			<File
