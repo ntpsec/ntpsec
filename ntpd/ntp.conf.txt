@@ -1,8 +1,8 @@
 = ntp.conf(5) =
 :doctype: manpage
-:ntpdman: ntpd(1ntpdmdoc)
-:ntpqman: ntpq(1ntpdmdoc)
-:keygenman: ntp-keygen(1ntpkeygenmdoc)
+:ntpdman: ntpd(1)
+:ntpqman: ntpq(1)
+:keygenman: ntp-keygen(1)
 
 == NAME ==
 ntp.conf - Network Time Protocol (NTP) daemon configuration file format
@@ -530,7 +530,7 @@ contain the value _trustRoot_;. Other extension fields are ignored.
 
 `controlkey` _key_::
   Specifies the key identifier to use with the
-  ntpq_(1ntpqmdoc) utility, which uses the standard protocol defined in
+  {ntpqman} utility, which uses the standard protocol defined in
   RFC-1305. Thekeyargument is the key identifier for a trusted key,
   where the value can be in the range 1 to 65,534, inclusive.
 
@@ -1211,11 +1211,11 @@ and other clients will time out the corresponding association and
 re-associate accordingly.
 
 Some administrators prefer to avoid running
-{ntpdman} continuously and run either ntpdate_8)_or
-ntpd_(1ntpdmdoc) `-q` as a cron job. In either case the servers must be
+{ntpdman} continuously and run either {ntpdate} or
+{ntpdman} `-q` as a cron job. In either case the servers must be
 configured in advance and the program fails if none are available when
 the cron job runs. A really slick application of manycast is with
-ntpd_(1ntpdmdoc) `-q`. The program wakes up, scans the local landscape
+{ntpd} `-q`. The program wakes up, scans the local landscape
 looking for the usual suspects, selects the best from among the rascals,
 sets the clock and then departs. Servers do not have to be configured in
 advance and all clients throughout the network can have the same
@@ -1542,7 +1542,7 @@ logconfig =syncstatus +sysevents
 --------------------------------
 +
 This would just list the synchronizations state of
-_ntpd_(1ntpdmdoc)_and the major system events. For a simple reference
+{ntpdman} and the major system events. For a simple reference
 server, the following minimum message configuration could be useful:_
 +
 ----------------------------
@@ -1563,7 +1563,7 @@ and so on is suppressed.
   be used to distribute additional information such as the access
   policy. If the variable of the form _name=value_ is followed by the
   `default` keyword, the variable will be listed as part of the default
-  system variables (ntpq (1ntpqmdoc) rvcommand). These additional
+  system variables ({ntpqman} rv command). These additional
   variables serve informational purposes only. They are not related to
   the protocol other that they can be listed. The known protocol
   variables will always override any variables defined via
