@@ -192,6 +192,9 @@ sntp_main (
 	    case '4':
 		opt_ipv4 = true;
 		break;
+	    case '6':
+		opt_ipv6 = true;
+		break;
 	    case 'a':
 		opt_authkey = ntp_optarg;
 		break;
