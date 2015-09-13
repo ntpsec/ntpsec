@@ -1,15 +1,15 @@
+# Note: When you change this list. also check the followung files:
+# ntpd/refclock_conf.c
+# ntplib/clocktypes.c
+# doc/recflock.txt
+# include/ntp.h
+
 refclock_map = {
 
 	1: {
 		"descr":	"Undisciplined Local Clock",
 		"define":	"CLOCK_LOCAL",
 		"file":		"local"
-	},
-
-	3: {
-		"descr":	"PSTI/Traconex 1020 WWV/WWVH Receiver",
-		"define":	"CLOCK_PST",
-		"file":		"pst"
 	},
 
 	4: {

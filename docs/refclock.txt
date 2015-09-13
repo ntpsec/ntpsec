@@ -138,10 +138,15 @@ driver ID, device name and serial line speed. For those drivers without
 specific documentation, please contact the author listed in the
 link:copyright.html[Copyright Notice] page.
 
+If you have seen older versions of NTP, this list may have fewer
+entries than you expected.  Support for some very ancient drivers
+(notably, those rendered obsolete by the WWVB modulation change in
+2013) has been dropped in order to reduce our maintainance load.
+
 //FIXME: Either add symbols to all entries or remove all
 * link:driver1.html[Type 1] Undisciplined Local Clock (`LOCAL`)
 * Type 2 reserved
-* link:driver3.html[Type 3] PSTI/Traconex 1020 WWV/WWVH Receiver (`WWV_PST`)
+* Type 3 reserved
 * link:driver4.html[Type 4] Generic Spectracom Receivers (`SPECTRACOM`)
 * link:driver5.html[Type 5] TrueTime GPS/GOES/OMEGA Receivers (`TRUETIME`)
 * link:driver6.html[Type 6] IRIG Audio Decoder (`IRIG_AUDIO`)
