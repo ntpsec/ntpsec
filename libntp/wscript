@@ -14,7 +14,6 @@ def build(ctx):
 
 	libntp_source = [
 		"a_md5encrypt.c",
-		"adjtime.c",
 		"atoint.c",
 		"atolfp.c",
 		"atouint.c",
