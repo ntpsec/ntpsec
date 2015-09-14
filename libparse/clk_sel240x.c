@@ -129,7 +129,7 @@ cvt_sel240x( unsigned char *buffer,
 	{
 		struct tm ptime;
 		buffer++;
-		buffer = strptime(
+		buffer = (unsigned char *)strptime(
 			(const char *)buffer, "%Y:%j:%H:%M:%S", &ptime );
 		if( *(buffer+1) != '\x0d' )
 		{
