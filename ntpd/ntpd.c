@@ -621,7 +621,6 @@ ntpdmain(
 #  ifdef _AIX
 	struct sigaction sa;
 #  endif
-	int		fid;
 # endif	/* HAVE_WORKING_FORK*/
 # ifdef SCO5_CLOCK
 	int		fd;
