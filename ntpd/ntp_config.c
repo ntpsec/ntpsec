@@ -4389,7 +4389,7 @@ getconfig(const char *explicit_config)
 {
 	char	line[256];
 
-#ifdef DEBUG
+#ifdef FREE_CFG_T
 	atexit(free_all_config_trees);
 #endif
 #ifndef SYS_WINNT
