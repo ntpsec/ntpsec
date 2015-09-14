@@ -23,9 +23,9 @@
 #include <signal.h>
 #include <setjmp.h>
 
-#ifdef KERNEL_PLL
+#ifdef HAVE_KERNEL_PLL
 #include "ntp_syscall.h"
-#endif /* KERNEL_PLL */
+#endif /* HAVE_KERNEL_PLL */
 
 /*
  * This is an implementation of the clock discipline algorithm described
@@ -134,7 +134,7 @@ static void set_freq(double);	/* set frequency */
 static char relative_path[PATH_MAX + 1]; /* relative path per recursive make */
 static char *this_file = NULL;
 
-#ifdef KERNEL_PLL
+#ifdef HAVE_KERNEL_PLL
 static struct timex ntv;	/* ntp_adjtime() parameters */
 int	pll_status;		/* last kernel status bits */
 #if defined(STA_NANO) && NTP_API == 4
@@ -142,7 +142,7 @@ static u_int loop_tai;		/* last TAI offset */
 #endif /* STA_NANO */
 static	void	start_kern_loop(void);
 static	void	stop_kern_loop(void);
-#endif /* KERNEL_PLL */
+#endif /* HAVE_KERNEL_PLL */
 
 /*
  * Clock state machine control flags
@@ -176,7 +176,7 @@ static int sys_hufflen;		/* huff-n'-puff filter stages */
 static int sys_huffptr;		/* huff-n'-puff filter pointer */
 static double sys_mindly;	/* huff-n'-puff filter min delay */
 
-#if defined(KERNEL_PLL)
+#if defined(HAVE_KERNEL_PLL)
 /* Emacs cc-mode goes nuts if we split the next line... */
 #define MOD_BITS (MOD_OFFSET | MOD_MAXERROR | MOD_ESTERROR | \
     MOD_STATUS | MOD_TIMECONST)
@@ -186,7 +186,7 @@ static struct sigaction sigsys;	/* current sigaction status */
 static struct sigaction newsigsys; /* new sigaction status */
 static sigjmp_buf env;		/* environment var. for pll_trap() */
 #endif /* SIGSYS */
-#endif /* KERNEL_PLL */
+#endif /* HAVE_KERNEL_PLL */
 
 static void
 sync_status(const char *what, int ostatus, int nstatus)
@@ -231,7 +231,7 @@ init_loopfilter(void)
 	freq_cnt = (int)clock_minstep;
 }
 
-#ifdef KERNEL_PLL
+#ifdef HAVE_KERNEL_PLL
 /*
  * ntp_adjtime_error_handler - process errors from ntp_adjtime
  */
@@ -727,7 +727,7 @@ local_clock(
 		}
 	}
 
-#ifdef KERNEL_PLL
+#ifdef HAVE_KERNEL_PLL
 	/*
 	 * This code segment works when clock adjustments are made using
 	 * precision time kernel support and the ntp_adjtime() system
@@ -854,7 +854,7 @@ local_clock(
 		}
 #endif /* STA_NANO */
 	}
-#endif /* KERNEL_PLL */
+#endif /* HAVE_KERNEL_PLL */
 
 	/*
 	 * Clamp the frequency within the tolerance range and calculate
@@ -970,10 +970,10 @@ adj_host_clock(
 	} else if (freq_cnt > 0) {
 		offset_adj = clock_offset / (CLOCK_PLL * ULOGTOD(1));
 		freq_cnt--;
-#ifdef KERNEL_PLL
+#ifdef HAVE_KERNEL_PLL
 	} else if (pll_control && kern_enable) {
 		offset_adj = 0.;
-#endif /* KERNEL_PLL */
+#endif /* HAVE_KERNEL_PLL */
 	} else {
 		offset_adj = clock_offset / (CLOCK_PLL * ULOGTOD(sys_poll));
 	}
@@ -984,11 +984,11 @@ adj_host_clock(
 	 * set_freq().  Otherwise it is a component of the adj_systime()
 	 * offset.
 	 */
-#ifdef KERNEL_PLL
+#ifdef HAVE_KERNEL_PLL
 	if (pll_control && kern_enable)
 		freq_adj = 0.;
 	else
-#endif /* KERNEL_PLL */
+#endif /* HAVE_KERNEL_PLL */
 		freq_adj = drift_comp;
 
 	/* Bound absolute value of total adjustment to NTP_MAXFREQ. */
@@ -1077,7 +1077,7 @@ set_freq(
 
 	drift_comp = freq;
 	loop_desc = "ntpd";
-#ifdef KERNEL_PLL
+#ifdef HAVE_KERNEL_PLL
 	if (pll_control) {
 		ZERO(ntv);
 		ntv.modes = MOD_FREQUENCY;
@@ -1089,13 +1089,13 @@ set_freq(
 		    ntp_adjtime_error_handler(__func__, &ntv, ntp_adj_ret, errno, false, false, __LINE__ - 1);
 		}
 	}
-#endif /* KERNEL_PLL */
+#endif /* HAVE_KERNEL_PLL */
 	mprintf_event(EVNT_FSET, NULL, "%s %.3f PPM", loop_desc,
 	    drift_comp * 1e6);
 }
 
 
-#ifdef KERNEL_PLL
+#ifdef HAVE_KERNEL_PLL
 static void
 start_kern_loop(void)
 {
@@ -1156,10 +1156,10 @@ start_kern_loop(void)
 	  	    "kernel time sync enabled");
 	}
 }
-#endif	/* KERNEL_PLL */
+#endif	/* HAVE_KERNEL_PLL */
 
 
-#ifdef KERNEL_PLL
+#ifdef HAVE_KERNEL_PLL
 static void
 stop_kern_loop(void)
 {
@@ -1167,7 +1167,7 @@ stop_kern_loop(void)
 		report_event(EVNT_KERN, NULL,
 		    "kernel time sync disabled");
 }
-#endif	/* KERNEL_PLL */
+#endif	/* HAVE_KERNEL_PLL */
 
 
 /*
@@ -1180,12 +1180,12 @@ select_loop(
 {
 	if (kern_enable == use_kern_loop)
 		return;
-#ifdef KERNEL_PLL
+#ifdef HAVE_KERNEL_PLL
 	if (pll_control && !use_kern_loop)
 		stop_kern_loop();
 #endif
 	kern_enable = use_kern_loop;
-#ifdef KERNEL_PLL
+#ifdef HAVE_KERNEL_PLL
 	if (pll_control && use_kern_loop)
 		start_kern_loop();
 #endif
@@ -1194,7 +1194,7 @@ select_loop(
 	 * call set_freq() to switch the frequency compensation to or
 	 * from the kernel loop.
 	 */
-#ifdef KERNEL_PLL
+#ifdef HAVE_KERNEL_PLL
 	if (pll_control && loop_started)
 		set_freq(drift_comp);
 #endif
@@ -1249,12 +1249,12 @@ loop_config(
 	 */
 	case LOOP_DRIFTINIT:
 #ifndef LOCKCLOCK
-#ifdef KERNEL_PLL
+#ifdef HAVE_KERNEL_PLL
 		if (mode_ntpdate)
 			break;
 
 		start_kern_loop();
-#endif /* KERNEL_PLL */
+#endif /* HAVE_KERNEL_PLL */
 
 		/*
 		 * Initialize frequency if given; otherwise, begin frequency
@@ -1277,7 +1277,7 @@ loop_config(
 	case LOOP_KERN_CLEAR:
 #if 0		/* XXX: needs more review, and how can we get here? */
 #ifndef LOCKCLOCK
-# ifdef KERNEL_PLL
+# ifdef HAVE_KERNEL_PLL
 		if (pll_control && kern_enable) {
 			memset((char *)&ntv, 0, sizeof(ntv));
 			ntv.modes = MOD_STATUS;
@@ -1287,7 +1287,7 @@ loop_config(
 				pll_status,
 				ntv.status);
 		   }
-# endif /* KERNEL_PLL */
+# endif /* HAVE_KERNEL_PLL */
 #endif /* LOCKCLOCK */
 #endif
 		break;
@@ -1371,7 +1371,7 @@ loop_config(
 }
 
 
-#if defined(KERNEL_PLL) && defined(SIGSYS)
+#if defined(HAVE_KERNEL_PLL) && defined(SIGSYS)
 /*
  * _trap - trap processor for undefined syscalls
  *
@@ -1388,4 +1388,4 @@ pll_trap(
 	pll_control = false;
 	siglongjmp(env, 1);
 }
-#endif /* KERNEL_PLL && SIGSYS */
+#endif /* HAVE_KERNEL_PLL && SIGSYS */

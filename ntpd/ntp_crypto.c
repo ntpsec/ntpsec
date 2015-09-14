@@ -31,9 +31,9 @@
 #include "openssl/rand.h"
 #include "openssl/x509v3.h"
 
-#ifdef KERNEL_PLL
+#ifdef HAVE_KERNEL_PLL
 #include "ntp_syscall.h"
-#endif /* KERNEL_PLL */
+#endif /* HAVE_KERNEL_PLL */
 
 /*
  * calcomp - compare two calendar structures, ignoring yearday and weekday; like strcmp

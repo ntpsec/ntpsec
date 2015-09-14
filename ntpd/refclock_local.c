@@ -14,7 +14,7 @@
 #include <stdio.h>
 #include <ctype.h>
 
-#ifdef KERNEL_PLL
+#ifdef HAVE_KERNEL_PLL
 #include "ntp_syscall.h"
 #endif
 
@@ -151,9 +151,9 @@ local_poll(
 	struct peer *peer
 	)
 {
-#if defined(KERNEL_PLL) && defined(LOCKCLOCK)
+#if defined(HAVE_KERNEL_PLL) && defined(LOCKCLOCK)
 	struct timex ntv;
-#endif /* KERNEL_PLL LOCKCLOCK */
+#endif /* HAVE_KERNEL_PLL LOCKCLOCK */
 	struct refclockproc *pp;
 
 	/*
@@ -188,7 +188,7 @@ local_poll(
 	 * If another process is disciplining the system clock, we set
 	 * the leap bits and quality indicators from the kernel.
 	 */
-#if defined(KERNEL_PLL) && defined(LOCKCLOCK)
+#if defined(HAVE_KERNEL_PLL) && defined(LOCKCLOCK)
 	memset(&ntv,  0, sizeof ntv);
 	switch (ntp_adjtime(&ntv)) {
 	case TIME_OK:
@@ -212,14 +212,14 @@ local_poll(
 	}
 	pp->disp = 0;
 	pp->jitter = 0;
-#else /* KERNEL_PLL LOCKCLOCK */
+#else /* HAVE_KERNEL_PLL LOCKCLOCK */
 	if (pp->sloppyclockflag & CLK_FLAG1)
 		pp->leap = LEAP_ADDSECOND;
 	else
 		pp->leap = LEAP_NOWARNING;
 	pp->disp = DISPERSION;
 	pp->jitter = 0;
-#endif /* KERNEL_PLL LOCKCLOCK */
+#endif /* HAVE_KERNEL_PLL LOCKCLOCK */
 	pp->lastref = pp->lastrec;
 	refclock_receive(peer);
 }

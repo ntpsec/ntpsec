@@ -156,7 +156,7 @@ extern	const char * eventstr	(int);
 extern	const char * ceventstr	(int);
 extern	const char * res_match_flags(u_short);
 extern	const char * res_access_flags(u_short);
-#ifdef KERNEL_PLL
+#ifdef HAVE_KERNEL_PLL
 extern	const char * k_st_flags	(uint32_t);
 #endif
 extern	char *	statustoa	(int, int);

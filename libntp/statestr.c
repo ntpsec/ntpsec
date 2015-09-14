@@ -14,7 +14,7 @@
 #include "lib_strbuf.h"
 #include "ntp_refclock.h"
 #include "ntp_control.h"
-#ifdef KERNEL_PLL
+#ifdef HAVE_KERNEL_PLL
 # include "ntp_syscall.h"
 #endif
 
@@ -219,7 +219,7 @@ static const struct codestring crypto_codes[] = {
 };
 #endif	/* ENABLE_AUTOKEY */
 
-#ifdef KERNEL_PLL
+#ifdef HAVE_KERNEL_PLL
 /*
  * kernel discipline status bits
  */
@@ -274,7 +274,7 @@ static const struct codestring k_st_bits[] = {
 # endif
 	/* not used with getcode(), no terminating entry needed */
 };
-#endif	/* KERNEL_PLL */
+#endif	/* HAVE_KERNEL_PLL */
 
 /* Forwards */
 static const char *	getcode(int, const struct codestring *);
@@ -376,7 +376,7 @@ decode_bitflags(
 		 (tab == peer_st_bits)
 		     ? "peer_st"
 		     : 
-#ifdef KERNEL_PLL
+#ifdef HAVE_KERNEL_PLL
 		       (tab == k_st_bits)
 			   ? "kern_st"
 			   :
@@ -419,7 +419,7 @@ res_access_flags(
 }
 
 
-#ifdef KERNEL_PLL
+#ifdef HAVE_KERNEL_PLL
 const char *
 k_st_flags(
 	uint32_t st
@@ -427,7 +427,7 @@ k_st_flags(
 {
 	return decode_bitflags(st, " ", k_st_bits, COUNTOF(k_st_bits));
 }
-#endif	/* KERNEL_PLL */
+#endif	/* HAVE_KERNEL_PLL */
 
 
 /*

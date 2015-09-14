@@ -27,7 +27,7 @@
 #include "ntp_md5.h"	/* provides OpenSSL digest API */
 #include "ntp_intercept.h"
 #include "lib_strbuf.h"
-#ifdef KERNEL_PLL
+#ifdef HAVE_KERNEL_PLL
 # include "ntp_syscall.h"
 #endif
 
@@ -1678,7 +1678,7 @@ ctl_putsys(
 #ifdef ENABLE_AUTOKEY
 	struct cert_info *cp;
 #endif	/* ENABLE_AUTOKEY */
-#ifdef KERNEL_PLL
+#ifdef HAVE_KERNEL_PLL
 	static struct timex ntx;
 	static u_long ntp_adjtime_time;
 
@@ -1700,7 +1700,7 @@ ctl_putsys(
 		else
 			ntp_adjtime_time = current_time;
 	}
-#endif	/* KERNEL_PLL */
+#endif	/* HAVE_KERNEL_PLL */
 
 	switch (varid) {
 
@@ -2033,7 +2033,7 @@ ctl_putsys(
 		 * CTL_IF_KERNLOOP() puts a zero if the kernel loop is
 		 * unavailable, otherwise calls putfunc with args.
 		 */
-#ifndef KERNEL_PLL
+#ifndef HAVE_KERNEL_PLL
 # define	CTL_IF_KERNLOOP(putfunc, args)	\
 		ctl_putint(sys_var[varid].text, 0)
 #else
@@ -2046,7 +2046,7 @@ ctl_putsys(
 		 * loop is unavailable, or kernel hard PPS is not
 		 * active, otherwise calls putfunc with args.
 		 */
-#ifndef KERNEL_PLL
+#ifndef HAVE_KERNEL_PLL
 # define	CTL_IF_KERNPPS(putfunc, args)	\
 		ctl_putint(sys_var[varid].text, 0)
 #else
@@ -2088,7 +2088,7 @@ ctl_putsys(
 		break;
 
 	case CS_K_STFLAGS:
-#ifndef KERNEL_PLL
+#ifndef HAVE_KERNEL_PLL
 		ss = "";
 #else
 		ss = k_st_flags(ntx.status);
