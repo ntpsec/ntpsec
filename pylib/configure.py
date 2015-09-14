@@ -339,8 +339,15 @@ int main () {
 	# Won't be true under Windows, but is under every Unix-like OS.
 	ctx.define("HAVE_WORKING_FORK", 1)
 
-	# Dies the kernel implement a phase-locked loop for timing?
-	# All modern Unixes (in particular Linux and *BSD hsve this).
+	# Does the kernel implement a phase-locked loop for timing?
+	# All modern Unixes (in particular Linux and *BSD have this).
+	#
+	# The README for the (now deleted) kernel directory says this:
+	# "If the precision-time kernel (KERNEL_PLL define) is
+	# configured, the installation process requires the header
+	# file /usr/include/sys/timex.h for the particular
+	# architecture to be in place."
+	#
 	ctx.define("HAVE_KERNEL_PLL", 1)
 
 	ctx.start_msg("Writing configuration header:")
