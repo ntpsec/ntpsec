@@ -4,13 +4,78 @@
 
 === Code ===
 
-* clock_gettime() is a minor porting issue that may need a shim on
-some target platforms.  Gary Miller removed a little too quickly some 
-shims present in NTP classic; these may need to be reverted back in.
-Drop -lrt when not needed by old glibc.
+* -lrt needs to be ined when present, for clock_gettime() wnen glibc < 2.17.
 
 * The u_* types in ntp.h are GCCisms that should be replaced with
 POSIX types.
+
+* scripts/ntptrace.in needs to be expanded into the actual ntptrace script
+by substituting in @-cookies.  There may be other cases of this under scripts/.
+
+* The following symbols need to be investigated to determine under what
+circumstances configuration should set them.
+
+BIG_ENDIAN
+BIND9
+BYTE_ORDER
+DOSYNCTODR
+HAVE_ADJTIMEX	
+HAVE_ARC4RANDOM
+HAVE_ATOMIC_THREAD_FENCE
+HAVE_AUDIO
+HAVE_BINTIME
+HAVE_CATGETS
+HAVE_CIOGETEV
+HAVE_DNSREGISTRATION
+HAVE_DROPROOT
+HAVE_GETBOOTFILE
+HAVE_GETBOOTFILE		
+HAVE_GETCLOCK
+HAVE_GETIFADDRS
+HAVE_GETPASSPHRASE
+HAVE_IO_COMPLETION_PORT
+HAVE_KVM_OPEN
+HAVE_LIBCTRACE
+HAVE_LIBXML2
+HAVE_LINUX_CAPABILITIES
+HAVE_NETINFO
+HAVE_NTP_SIGND
+HAVE_PACKET_TIMESTAMP
+HAVE_PPSAPI
+HAVE_PTHREAD_ATTR_GETSTACKSIZE
+HAVE_PTHREADS
+HAVE_RES_INIT
+HAVE_RTNETLINK
+HAVE_RTPRIO
+HAVE_SETPGRP_0
+HAVE_SIGNALED_IO
+HAVE_SOLARIS_PRIVS
+HAVE_STRUCT_PPSCLOCKEV
+HAVE_TIOCGPPSEV
+HAVE_SYSCTLBYNAME
+HAVE_TIMEGM
+HAVE_TIMESTAMP
+HAVE_TIMESTAMPNS
+HAVE_TIOCGPPSEV
+HAVE_TIOCSPPS			
+HAVE_TIO_SERIAL_STUFF		
+HAVE_TRUCLUSTER
+HAVE_WORKING_FORK
+LITTLE_ENDIAN
+NEED_HPUX_ADJTIME
+NEED_HPUX_FINDCONFIG
+NEED_NETSNMP_DAEMONIZE
+NEED_RCVBUF_SLOP
+NEED_S_CHAR_TYPEDEF
+NEED_SRANDOMDEV
+OPENSSL
+OPENSSL_LEAKS
+SIM
+TM_IN_SYS_TIME
+TRIM_POLLRATE
+
+* Relatedly, the ntpd initializartion sequence is still full of platform-
+specific crud.
 
 === Testing ===
 
@@ -42,8 +107,6 @@ the way converted to asciidoc.
 * Similarly, includes/footer.txt is a tabular hack made to resemble the
   old HTML and should be cleaned up.
 
-* HTML build from docs/ needs to be part of the stock waf build.
-
 * A serious content-editing and update pass on the documents.  
 
 * Part of d) is the ntp -> ntps name change.
@@ -64,14 +127,6 @@ reviewed, and if necessary fixed.
 * Version-numbering policy needs to be decided and written up.
 
 * We need a release checklist.
-
-== Relatively new items ==
-
-* The portability shims for the case where there is no OpenSSL library installed
-  are dodgy.  Get rid of them, it's a safe dependency.  The MD5 implementation
-  in the in-tree copy of the ISC library can probably go with it.
-
-* Make OpenSSL a required dependenxy and remove the in-tree shims to simulate it.
 
 Hal:
 > I think there is some interaction between when the ACTS driver calls and the 
