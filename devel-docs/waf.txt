@@ -1,0 +1,15 @@
+= TODO list for waf build =
+
+
+== Platform Support ==
+ * Fix support for Windows native builds.
+
+
+== General ==
+ * Document build files
+ * Cleanup and separate features in pylib/*
+  * Add 'snapshot' feature to dump config status into a JSON file for collecting 
+    build + platform information
+
+
+== Developer Options ==
