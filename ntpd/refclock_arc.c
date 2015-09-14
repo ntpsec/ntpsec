@@ -855,7 +855,7 @@ arc_receive(
 	struct refclockproc *pp;
 	struct peer *peer;
 	char c;
-	int i, n, wday, month, flags, status;
+	int i, wday, month, flags, status;
 	int arc_last_offset;
 	static int quality_average = 0;
 	static int quality_sum = 0;
@@ -1164,7 +1164,6 @@ arc_receive(
 #ifdef DEBUG
 	if(debug) { printf("arc: status 0x%.2x flags 0x%.2x\n", flags, status); }
 #endif
-	n = 9;
 
 	/*
 	  Validate received values at least enough to prevent internal
@@ -1211,8 +1210,7 @@ arc_receive(
 	}
 #ifdef DEBUG
 	if(debug) {
-		printf("arc: n=%d %02d:%02d:%02d %02d/%02d/%04d %1d %1d\n",
-		       n,
+		printf("arc: %02d:%02d:%02d %02d/%02d/%04d %1d %1d\n",
 		       pp->hour, pp->minute, pp->second,
 		       pp->day, month, pp->year, flags, status);
 	}
