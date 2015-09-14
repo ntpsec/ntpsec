@@ -13,7 +13,7 @@
 #include <ntp_debug.h>
 #include <lib_strbuf.h>
 
-#ifdef OPENSSL
+#ifdef HAVE_OPENSSL
 #include "openssl/err.h"
 #include "openssl/evp.h"
 
@@ -63,7 +63,7 @@ ssl_check_version(void)
 
 	INIT_SSL();
 }
-#endif	/* OPENSSL */
+#endif	/* HAVE_OPENSSL */
 
 
 /*
@@ -80,7 +80,7 @@ keytype_from_text(
 {
 	int		key_type;
 	u_int		digest_len;
-#ifdef OPENSSL
+#ifdef HAVE_OPENSSL
 	const u_long	max_digest_len = MAX_MAC_LEN - sizeof(keyid_t);
 	u_char		digest[EVP_MAX_MD_SIZE];
 	char *		upcased;
@@ -110,7 +110,7 @@ keytype_from_text(
 		return 0;
 
 	if (NULL != pdigest_len) {
-#ifdef OPENSSL
+#ifdef HAVE_OPENSSL
 		EVP_DigestInit(&ctx, EVP_get_digestbynid(key_type));
 		EVP_DigestFinal(&ctx, digest, &digest_len);
 		if (digest_len > max_digest_len) {
@@ -147,12 +147,12 @@ keytype_name(
 	static const char unknown_type[] = "(unknown key type)";
 	const char *name;
 
-#ifdef OPENSSL
+#ifdef HAVE_OPENSSL
 	INIT_SSL();
 	name = OBJ_nid2sn(nid);
 	if (NULL == name)
 		name = unknown_type;
-#else	/* !OPENSSL follows */
+#else	/* !HAVE_OPENSSL follows */
 	if (NID_md5 == nid)
 		name = "MD5";
 	else

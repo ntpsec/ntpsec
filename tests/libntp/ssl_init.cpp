@@ -12,7 +12,7 @@ TEST_TEAR_DOWN(ssl_init) {}
 #include "libntptest.h"
 
 extern "C" {
-#ifdef OPENSSL
+#ifdef HAVE_OPENSSL
 # include "openssl/err.h"
 # include "openssl/rand.h"
 # include "openssl/evp.h"
@@ -39,7 +39,7 @@ TEST(ssl_init, MD5KeyTypeWithDigestLength) {
 	TEST_ASSERT_EQUAL(expected, digestLength);
 }
 
-#ifdef OPENSSL
+#ifdef HAVE_OPENSSL
 TEST(ssl_init, SHA1KeyTypeWithDigestLength) {
 	size_t digestLength;
 	size_t expected = TEST_SHA1_DIGEST_LENGTH;
@@ -47,15 +47,15 @@ TEST(ssl_init, SHA1KeyTypeWithDigestLength) {
 	TEST_ASSERT_EQUAL(NID_sha, keytype_from_text("SHA", &digestLength));
 	TEST_ASSERT_EQUAL(expected, digestLength);
 }
-#endif	/* OPENSSL */
+#endif	/* HAVE_OPENSSL */
 
 // keytype_name()
 TEST(ssl_init, MD5KeyName) {
 	TEST_ASSERT_EQUAL_STRING("MD5", keytype_name(KEY_TYPE_MD5));
 }
 
-#ifdef OPENSSL
+#ifdef HAVE_OPENSSL
 TEST(ssl_init, SHA1KeyName) {
 	TEST_ASSERT_EQUAL_STRING("SHA", keytype_name(NID_sha));
 }
-#endif	/* OPENSSL */
+#endif	/* HAVE_OPENSSL */

@@ -42,7 +42,7 @@ TEST(crypto, MakeMd5Mac) {
 	TEST_ASSERT_TRUE(memcmp(EXPECTED_DIGEST, actual, MD5_LENGTH) == 0);
 }
 
-#ifdef OPENSSL
+#ifdef HAVE_OPENSSL
 TEST(crypto, MakeSHA1Mac) {
 	const char* PKT_DATA = "abcdefgh0123";
 	const int PKT_LEN = strlen(PKT_DATA);
@@ -63,7 +63,7 @@ TEST(crypto, MakeSHA1Mac) {
 
 	TEST_ASSERT_TRUE(memcmp(EXPECTED_DIGEST, actual, SHA1_LENGTH) == 0);
 }
-#endif	/* OPENSSL */
+#endif	/* HAVE_OPENSSL */
 
 TEST(crypto, VerifyCorrectMD5) {
 	const char* PKT_DATA =
@@ -83,7 +83,7 @@ TEST(crypto, VerifyCorrectMD5) {
 	TEST_ASSERT_TRUE(auth_md5((char*)PKT_DATA, PKT_LEN, MD5_LENGTH, &md5));
 }
 
-#ifdef OPENSSL
+#ifdef HAVE_OPENSSL
 TEST(crypto, VerifySHA1) {
 	const char* PKT_DATA =
 		"sometestdata"		// Data
@@ -101,7 +101,7 @@ TEST(crypto, VerifySHA1) {
 
 	TEST_ASSERT_TRUE(auth_md5((char*)PKT_DATA, PKT_LEN, SHA1_LENGTH, &sha1));
 }
-#endif	/* OPENSSL */
+#endif	/* HAVE_OPENSSL */
 
 TEST(crypto, VerifyFailure) {
 	/* We use a copy of the MD5 verification code, but modify

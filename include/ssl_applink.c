@@ -6,7 +6,7 @@
  * functions.
  */
 
-#if defined(OPENSSL) && defined(SYS_WINNT)
+#if defined(HAVE_OPENSSL) && defined(SYS_WINNT)
 # ifdef _MSC_VER
 #  pragma warning(push)
 #  pragma warning(disable: 4152)
@@ -17,7 +17,7 @@
 # endif
 #endif
 
-#if defined(OPENSSL) && defined(_MSC_VER) && defined(_DEBUG)
+#if defined(HAVE_OPENSSL) && defined(_MSC_VER) && defined(_DEBUG)
 #define WRAP_DBG_MALLOC
 #endif
 
@@ -28,7 +28,7 @@ void wrap_dbg_free(void *p);
 #endif
 
 
-#if defined(OPENSSL) && defined(SYS_WINNT)
+#if defined(HAVE_OPENSSL) && defined(SYS_WINNT)
 void ssl_applink(void);
 
 void
@@ -40,7 +40,7 @@ ssl_applink(void)
 	CRYPTO_malloc_init();
 #endif
 }
-#else	/* !OPENSSL || !SYS_WINNT */
+#else	/* !HAVE_OPENSSL || !SYS_WINNT */
 #define ssl_applink()	do {} while (0)
 #endif
 

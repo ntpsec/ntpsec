@@ -41,7 +41,7 @@ extern	void	errno_to_str(int, char *, size_t);
  * When building without OpenSSL, use a few macros of theirs to
  * minimize source differences in NTP.
  */
-#ifndef OPENSSL
+#ifndef HAVE_OPENSSL
 #define NID_md5	4	/* from openssl/objects.h */
 /* from openssl/evp.h */
 #define EVP_MAX_MD_SIZE	64	/* longest known is SHA512 */
@@ -221,7 +221,7 @@ typedef void (*pset_tod_using)(const char *);
 extern pset_tod_using	set_tod_using;
 
 /* ssl_init.c */
-#ifdef OPENSSL
+#ifdef HAVE_OPENSSL
 extern	void	ssl_init		(void);
 extern	void	ssl_check_version	(void);
 extern	bool	ssl_init_done;
@@ -230,7 +230,7 @@ extern	bool	ssl_init_done;
 		if (!ssl_init_done)		\
 			ssl_init();		\
 	} while (0)
-#else	/* !OPENSSL follows */
+#else	/* !HAVE_OPENSSL follows */
 #define	INIT_SSL()		do {} while (0)
 #endif
 extern	int	keytype_from_text	(const char *,	size_t *);

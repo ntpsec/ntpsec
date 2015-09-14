@@ -6,9 +6,9 @@
 #ifndef GUARD_NTP_MD5_H
 #define GUARD_NTP_MD5_H
 
-#ifdef OPENSSL
+#ifdef HAVE_OPENSSL
 # include "openssl/evp.h"
-#else	/* !OPENSSL follows */
+#else	/* !HAVE_OPENSSL follows */
 /*
  * Provide OpenSSL-alike MD5 API if we're not using OpenSSL
  */
@@ -36,5 +36,5 @@
 		MD5Final((d), (c));	\
 		*(pdl) = 16;		\
 	} while (0)
-# endif	/* !OPENSSL */
+# endif	/* !HAVE_OPENSSL */
 #endif	/* GUARD_NTP_MD5_H */
