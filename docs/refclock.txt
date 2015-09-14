@@ -162,7 +162,7 @@ entries than you expected.  Support for some very ancient drivers
 * link:driver16.html[Type 16] Bancomm GPS/IRIG Receiver (`GPS_BANCOMM`)
 * Type 17 reserved
 * link:driver18.html[Type 18] NIST/USNO/PTB Modem Time Services (`ACTS_MODEM`)
-* link:driver19.html[Type 19] Heath WWV/WWVH Receiver (`WWV_HEATH`)
+* Type 19 reserved
 * link:driver20.html[Type 20] Generic NMEA GPS Receiver (`NMEA`)
 * Type 21 reserved
 * link:driver22.html[Type 22] PPS Clock Discipline (`PPS`)

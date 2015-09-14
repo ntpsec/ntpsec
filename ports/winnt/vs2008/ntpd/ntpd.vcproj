@@ -834,10 +834,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\..\ntpd\refclock_heath.c"
-				>
-			</File>
-			<File
 				RelativePath="..\..\..\..\ntpd\refclock_hopfpci.c"
 				>
 			</File>
