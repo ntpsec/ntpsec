@@ -485,7 +485,6 @@ TSIP_decode (
 	
 		switch (mb(0) & 0xff) {
 			int GPS_UTC_Offset;
-			long tow;
 
 		    case PACKET_8F0B: 
 
@@ -753,9 +752,9 @@ TSIP_decode (
 
 			if ((pp->day = day_of_year(&mb(13))) < 0)
 				break;
-			tow = getlong((u_char *) &mb(1));
 #ifdef DEBUG		
 			if (debug > 1) {
+				long tow = getlong((u_char *) &mb(1));
 				printf("pp->day: %d\n", pp->day); 
 				printf("TOW: %ld\n", tow);
 				printf("DAY: %d\n", mb(13));
@@ -1241,6 +1240,7 @@ getint (
 	return (short)ntohs(us);
 }
 
+#ifdef DEBUG		
 /*
  * copy/swap a big-endian palisade 32-bit int into a host 32-bit int
  */
@@ -1254,4 +1254,5 @@ getlong(
 	memcpy(&u32, bp, sizeof(u32));
 	return (int32_t)(uint32_t)ntohl(u32);
 }
+#endif
 
