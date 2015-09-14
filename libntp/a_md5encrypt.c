@@ -35,7 +35,7 @@ MD5authencrypt(
 	 * was creaded.
 	 */
 	INIT_SSL();
-#if defined(OPENSSL) && OPENSSL_VERSION_NUMBER >= 0x0090700fL
+#if defined(HAVE_OPENSSL) && OPENSSL_VERSION_NUMBER >= 0x0090700fL
 	if (!EVP_DigestInit(&ctx, EVP_get_digestbynid(type))) {
 		msyslog(LOG_ERR,
 		    "MAC encrypt: digest init failed");
@@ -76,7 +76,7 @@ MD5authdecrypt(
 	 * was created.
 	 */
 	INIT_SSL();
-#if defined(OPENSSL) && OPENSSL_VERSION_NUMBER >= 0x0090700fL
+#if defined(HAVE_OPENSSL) && OPENSSL_VERSION_NUMBER >= 0x0090700fL
 	if (!EVP_DigestInit(&ctx, EVP_get_digestbynid(type))) {
 		msyslog(LOG_ERR,
 		    "MAC decrypt: digest init failed");
@@ -115,7 +115,7 @@ addr2refid(sockaddr_u *addr)
 
 	INIT_SSL();
 
-#if defined(OPENSSL) && OPENSSL_VERSION_NUMBER >= 0x0090700fL
+#if defined(HAVE_OPENSSL) && OPENSSL_VERSION_NUMBER >= 0x0090700fL
 	EVP_MD_CTX_init(&ctx);
 #ifdef EVP_MD_CTX_FLAG_NON_FIPS_ALLOW
 	/* MD5 is not used as a crypto hash here. */

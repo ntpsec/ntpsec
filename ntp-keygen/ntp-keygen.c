@@ -95,7 +95,7 @@
 #include "ntp_assert.h"
 #include "ntp_unixtime.h"
 
-#ifdef OPENSSL
+#ifdef HAVE_OPENSSL
 #include "openssl/bn.h"
 #include "openssl/evp.h"
 #include "openssl/err.h"
@@ -103,7 +103,7 @@
 #include "openssl/pem.h"
 #include "openssl/x509v3.h"
 #include <openssl/objects.h>
-#endif	/* OPENSSL */
+#endif	/* HAVE_OPENSSL */
 #include <ssl_applink.c>
 
 #define _UC(str)	((char *)(intptr_t)(str))
@@ -385,9 +385,9 @@ main(
 	ssl_applink();
 #endif
 
-#ifdef OPENSSL
+#ifdef HAVE_OPENSSL
 	ssl_check_version();
-#endif	/* OPENSSL */
+#endif	/* HAVE_OPENSSL */
 
 	ntp_crypto_srandom();
 
@@ -486,14 +486,14 @@ main(
 	argc -= optind;
 	argv += optind;
 
-#ifdef OPENSSL
+#ifdef HAVE_OPENSSL
 	if (SSLeay() == SSLEAY_VERSION_NUMBER)
 		fprintf(stderr, "Using OpenSSL version %s\n",
 			SSLeay_version(SSLEAY_VERSION));
 	else
 		fprintf(stderr, "Built against OpenSSL %s, using version %s\n",
-			OPENSSL_VERSION_TEXT, SSLeay_version(SSLEAY_VERSION));
-#endif /* OPENSSL */
+			HAVE_OPENSSL_VERSION_TEXT, SSLeay_version(SSLEAY_VERSION));
+#endif /* HAVE_OPENSSL */
 
 	if (opt_md5key != NULL)
 		md5key++;
@@ -945,11 +945,11 @@ gen_md5(
 	u_char	md5key[MD5SIZE + 1];	/* MD5 key */
 	FILE	*str;
 	int	i, j;
-#ifdef OPENSSL
+#ifdef HAVE_OPENSSL
 	u_char	keystr[MD5SIZE];
 	u_char	hexstr[2 * MD5SIZE + 1];
 	u_char	hex[] = "0123456789abcdef";
-#endif	/* OPENSSL */
+#endif	/* HAVE_OPENSSL */
 
 	str = fheader("MD5key", id, groupname);
 	for (i = 1; i <= MD5KEYS; i++) {
@@ -977,7 +977,7 @@ gen_md5(
 		fprintf(str, "%2d MD5 %s  # MD5 key\n", i,
 		    md5key);
 	}
-#ifdef OPENSSL
+#ifdef HAVE_OPENSSL
 	for (i = 1; i <= MD5KEYS; i++) {
 		RAND_bytes(keystr, 20);
 		for (j = 0; j < MD5SIZE; j++) {
@@ -988,7 +988,7 @@ gen_md5(
 		fprintf(str, "%2d SHA1 %s  # SHA1 key\n", i + MD5KEYS,
 		    hexstr);
 	}
-#endif	/* OPENSSL */
+#endif	/* HAVE_OPENSSL */
 	fclose(str);
 	return true;
 }

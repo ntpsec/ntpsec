@@ -26,7 +26,7 @@
 #include "lib_strbuf.h"
 #include "ntp_lineedit.h"
 #include "ntp_debug.h"
-#ifdef OPENSSL
+#ifdef HAVE_OPENSSL
 #include "openssl/evp.h"
 #include "openssl/objects.h"
 #include "openssl/err.h"
@@ -205,7 +205,7 @@ static	void	outputarr	(FILE *, char *, int, l_fp *);
 static	int	assoccmp	(const void *, const void *);
 	u_short	varfmt		(const char *);
 
-#ifdef OPENSSL
+#ifdef HAVE_OPENSSL
 # ifdef HAVE_EVP_MD_DO_ALL_SORTED
 static void list_md_fn(const EVP_MD *m, const char *from,
 		       const char *to, void *arg );
@@ -490,7 +490,7 @@ ntpqmain(
 	    /* This should only "trip" if "keytype" is removed from builtins */
 	    INSIST(icmd < sizeof(builtins)/sizeof(builtins[0]));
 
-#ifdef OPENSSL
+#ifdef HAVE_OPENSSL
 	    builtins[icmd].desc[0] = "digest-name";
 	    fmt = "set key type to use for authenticated requests, one of:%s";
 #else
@@ -2503,7 +2503,7 @@ keytype(
 
 	if (!key_type) {
 		fprintf(fp, "keytype is not valid. "
-#ifdef OPENSSL
+#ifdef HAVE_OPENSSL
 			"Type \"help keytype\" for the available digest types.\n");
 #else
 			"Only \"md5\" is available.\n");
@@ -3496,7 +3496,7 @@ grow_assoc_cache(void)
  * Obtain list of digest names
  */
 
-#ifdef OPENSSL
+#ifdef HAVE_OPENSSL
 # ifdef HAVE_EVP_MD_DO_ALL_SORTED
 struct hstate {
    char *list;
@@ -3573,7 +3573,7 @@ static char *list_digest_names(void)
 {
     char *list = NULL;
 
-#ifdef OPENSSL
+#ifdef HAVE_OPENSSL
 # ifdef HAVE_EVP_MD_DO_ALL_SORTED
     struct hstate hstate = { NULL, NULL, K_PER_LINE+1 };
 

@@ -19,9 +19,9 @@
 #define	CRYPTO_CONF_NID   9	/* specify digest name */
 
 #ifdef ENABLE_AUTOKEY
-#ifndef OPENSSL
-#error ENABLE_AUTOKEY should be defined only if OPENSSL is.
-invalidsyntax: ENABLE_AUTOKEY should be defined only if OPENSSL is.
+#ifndef HAVE_OPENSSL
+#error ENABLE_AUTOKEY should be defined only if HAVE_OPENSSL is.
+invalidsyntax: ENABLE_AUTOKEY should be defined only if HAVE_OPENSSL is.
 #endif
 
 #include "openssl/evp.h"

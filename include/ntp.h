@@ -461,9 +461,9 @@ struct peer {
 #define	FLAG_XLEAVE	0x1000	/* interleaved protocol */
 #define	FLAG_XB		0x2000	/* interleaved broadcast */
 #define	FLAG_XBOGUS	0x4000	/* interleaved bogus packet */
-#ifdef	OPENSSL
+#ifdef	HAVE_OPENSSL
 # define FLAG_ASSOC	0x8000	/* autokey request */
-#endif /* OPENSSL */
+#endif /* HAVE_OPENSSL */
 #define FLAG_TSTAMP_PPS	0x10000	/* PPS source provides absolute timestamp */
 
 /*

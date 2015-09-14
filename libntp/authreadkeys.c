@@ -10,10 +10,10 @@
 #include "ntp_syslog.h"
 #include "ntp_stdlib.h"
 
-#ifdef OPENSSL
+#ifdef HAVE_OPENSSL
 #include "openssl/objects.h"
 #include "openssl/evp.h"
-#endif	/* OPENSSL */
+#endif	/* HAVE_OPENSSL */
 
 /* Forwards */
 static char *nexttok (char **);
@@ -130,7 +130,7 @@ authreadkeys(
 			    "authreadkeys: no key type for key %d", keyno);
 			continue;
 		}
-#ifdef OPENSSL
+#ifdef HAVE_OPENSSL
 		/*
 		 * The key type is the NID used by the message digest 
 		 * algorithm. There are a number of inconsistencies in
@@ -148,7 +148,7 @@ authreadkeys(
 			    "authreadkeys: no algorithm for key %d", keyno);
 			continue;
 		}
-#else	/* !OPENSSL follows */
+#else	/* !HAVE_OPENSSL follows */
 
 		/*
 		 * The key type is unused, but is required to be 'M' or
@@ -160,7 +160,7 @@ authreadkeys(
 			continue;
 		}
 		keytype = KEY_TYPE_MD5;
-#endif	/* !OPENSSL */
+#endif	/* !HAVE_OPENSSL */
 
 		/*
 		 * Finally, get key and insert it. If it is longer than 20
