@@ -69,9 +69,6 @@ ntpq/::		Directory containing sources for a utility program to
 
 ntpsnmpd/::	NTP SNMP subagent for Net-SNMP.
 
-parseutil/::	Some utilities for DCF77 clocks.  Obsolete - working only
-		on SunOS 4.x, which went out of support in December 2003.
-
 ports/::	Subdirectories of this contain code for non-Unix operating
 		systems.  At present there is just one, for Windows.
 

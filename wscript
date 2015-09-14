@@ -56,7 +56,6 @@ def build(ctx):
 	ctx.recurse("ntpdate")
 	ctx.recurse("ntpq")
 #	ctx.recurse("ntpsnmpd")
-	ctx.recurse("parseutil")
 #	ctx.recurse("clockstuff") - 
 #	ctx.recurse("kernel")
 	ctx.recurse("ntp-keygen") 
