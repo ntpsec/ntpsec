@@ -1240,6 +1240,7 @@ getint (
 	return (short)ntohs(us);
 }
 
+#ifdef DEBUG		
 /*
  * copy/swap a big-endian palisade 32-bit int into a host 32-bit int
  */
@@ -1253,4 +1254,5 @@ getlong(
 	memcpy(&u32, bp, sizeof(u32));
 	return (int32_t)(uint32_t)ntohl(u32);
 }
+#endif
 
