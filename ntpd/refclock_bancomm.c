@@ -54,6 +54,7 @@
 #include "ntp_stdlib.h"
 
 #include <stdio.h>
+#include <sys/ioctl.h>
 #include <syslog.h>
 #include <ctype.h>
 
@@ -161,7 +162,7 @@ static  void    vme_poll        (int unit, struct peer *);
 struct vmedate *get_datumtime(struct vmedate *);	
 void	tvme_fill(struct vmedate *, time_t btm[2]);
 void	stfp_time2tvme(struct vmedate *time_vme, struct stfp_time *stfp);
-inline const char *DEVICE_NAME(int n);
+char *DEVICE_NAME(int n);
 
 
 /*
@@ -196,9 +197,9 @@ SYMMT_PCI_HANDLE stfp_handle;
  * the platform we are running on and the device number
  */
 #if defined(__sun__)
-inline const char *DEVICE_NAME(int n) {static char s[20]={0}; snprintf(s,19,"/dev/stfp%d",n);return s;}
+char *DEVICE_NAME(int n) {static char s[20]={0}; snprintf(s,19,"/dev/stfp%d",n);return s;}
 #else
-inline const char* DEVICE_NAME(int n) {static char s[20]={0}; snprintf(s,19,"/dev/btfp%d",n);return s;}
+char* DEVICE_NAME(int n) {static char s[20]={0}; snprintf(s,19,"/dev/btfp%d",n);return s;}
 #endif /**__sun__**/
 
 /*
