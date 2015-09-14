@@ -25,6 +25,7 @@ void intercept_argparse(int *, char ***);
 void intercept_getconfig(const char *);
 void intercept_get_systime(const char *, l_fp *);
 long intercept_ntp_random(const char *);
+void intercept_alarm(void);
 void intercept_sendpkt(const char *,
 		       sockaddr_u *, struct interface *, int, struct pkt *, int);
 bool intercept_drift_read(const char *, double *);

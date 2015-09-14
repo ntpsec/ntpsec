@@ -14,19 +14,23 @@ following kinds:
 
 4. Time calls to the host system clock.
 
-5. Reads and write of the system drift file.
+5. Read and write of the system drift file.
 
 6. Calls to the host's random-number generator.
 
-7. Calls to adjtime/adjtimex to set the system clock.  (TODO)
+7. Alarm events.
 
-8. Read of the system leapsecond file.  (TODO)
+8. Calls to adjtime/adjtimex to set the system clock.  (TODO)
 
-9. Packets incoming from NTP daemons.  (TODO)
+9. Read of the system leapsecond file.  (TODO)
 
-10. Packets outgoing to NTP daemons.  (TODO)
+10. Packets incoming from NTP daemons.  (TODO)
 
-11. Read of authkey file  (TODO)
+11. Packets outgoing to NTP daemons.  (TODO)
+
+12. Read of authkey file  (TODO)
+
+13. Termination.
 
 We must support two modes of operation.  In "capture" mode, ntpd
 operates normally, logging all events.  In "replay" mode, ntpd accepts
@@ -75,12 +79,15 @@ no mismatches.
 
 == Event file format ==
 
-Simple is best.  Textual, one event per line.  Each line consists of a
-verb optionally followed by argument fields (or is a comment, or
-whitespace).  The verbs look like:
+Simple is best.  Textual, usually one event per line.  Each line
+consists of a verb optionally followed by argument fields (or is a
+comment, or whitespace).  The verbs look like:
 
 startup::
 	Initialization event.  Command-line arguments follow.
+
+config::
+	Read the configuration file. Must have multiline syntax.
 
 refclock::
 	Report from a reference clock.  Fields should be all possible data
@@ -99,11 +106,17 @@ random::
 	Call to a random-number generator. One field, the number
 	returned.
 
-driftread:
-	Read the drift file
+alarm::
+	Alarm timer went off.
 
-driftwrite:
+driftread::
+	Read the drift file.
+
+driftwrite::
 	Write the drift file.
+
+leapsec::
+	Get the leapsecond value.
 
 receive::
 	Receive packet. Field is some sort of textual packet dump.
@@ -223,6 +236,14 @@ long intercept_ntp_random(const char *legend)
     return rand;
 }
 
+void intercept_alarm(void)
+{
+    /* FIXME: replay mode, calling timer(), goes here */
+
+    if (mode != none)
+	printf("event tick\n");
+}
+
 bool intercept_drift_read(const char *drift_file, double *drift)
 {
     FILE *fp;
@@ -275,8 +296,7 @@ void intercept_drift_write(char *driftfile, double drift)
     }
 }
 
-void
-intercept_sendpkt(const char *legend,
+void intercept_sendpkt(const char *legend,
 		  sockaddr_u *dest, struct interface *ep, int ttl,
 		  struct pkt *pkt, int len)
 {

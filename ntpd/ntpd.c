@@ -1331,6 +1331,7 @@ int scmp_sc[] = {
 		}
 
 		if (was_alarmed) {
+			intercept_alarm();
 			UNBLOCK_IO_AND_ALARM();
 			/*
 			 * Out here, signals are unblocked.  Call timer routine
