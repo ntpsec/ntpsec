@@ -242,7 +242,6 @@ def cmd_configure(ctx):
 		"sys/stropts.h",
 		"sys/sysctl.h",
 		"sys/systune.h",
-		"sys/timex.h",
 		"timex.h",
 		"utime.h",
 	)
@@ -348,7 +347,8 @@ int main () {
 	# file /usr/include/sys/timex.h for the particular
 	# architecture to be in place."
 	#
-	ctx.define("HAVE_KERNEL_PLL", 1)
+	if ctx.check_cc(header_name="sys/timex.h", mandatory=False):
+		ctx.define("HAVE_KERNEL_PLL", 1)
 
 	ctx.start_msg("Writing configuration header:")
 	ctx.write_config_header("config.h")
