@@ -342,7 +342,9 @@ enum gnn_type {
 };
 
 static void ntpd_set_tod_using(const char *);
+#ifdef SAVECONFIG
 static char * normal_dtoa(double);
+#endif
 static uint32_t get_pfxmatch(const char **, struct masks *);
 static uint32_t get_match(const char *, struct masks *);
 static uint32_t get_logmask(const char *);
@@ -4569,6 +4571,7 @@ ntpd_set_tod_using(
 }
 
 
+#ifdef SAVECONFIG
 static char *
 normal_dtoa(
 	double d
@@ -4601,6 +4604,7 @@ normal_dtoa(
 
 	return buf;
 }
+#endif /* SAVECONFIG */
 
 
 /* FUNCTIONS COPIED FROM THE OLDER ntp_config.c
