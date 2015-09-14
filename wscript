@@ -59,7 +59,7 @@ def build(ctx):
 	ctx.recurse("parseutil")
 #	ctx.recurse("clockstuff") - 
 #	ctx.recurse("kernel")
-	ctx.recurse("util") 
+	ctx.recurse("ntp-keygen") 
 #	ctx.recurse("unity")
 #	ctx.recurse("tests")
 
