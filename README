@@ -67,11 +67,6 @@ ntpq/::		Directory containing sources for a utility program to
 		related timekeeping information. This program conforms
 		to Appendix A of the NTP Version 3 Specification RFC 1305.
 
-ntptrace/::	Directory containing sources for a utility program that
-		can be used to reveal the chain of NTP peers from a
-		designated peer to the primary server at the root of the
-		timekeeping subnet.
-
 ntpsnmpd/::	NTP SNMP subagent for Net-SNMP.
 
 parseutil/::	Some utilities for DCF77 clocks.  Obsolete - working only
