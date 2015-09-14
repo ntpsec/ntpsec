@@ -310,19 +310,17 @@ static const struct option longoptions[] = {
 };
 
 static char *opt_imbits = NULL;
-static char *opt_certificate = NULL;
 static char *opt_cipher = NULL;
+static char *opt_md5key = NULL;
+static int opt_modulus = -1;
 #ifdef ENABLE_AUTOKEY
+static char *opt_certificate = NULL;
 static char *opt_id_key = NULL;
 static char *opt_gq_params = NULL;
 static char *opt_hostkey = NULL;
 static char *opt_iffkey = NULL;
 static char *opt_ident = NULL;
 static char *opt_lifetime = NULL;
-#endif /* ENABLE_AUTOKEY */
-static char *opt_md5key = NULL;
-static int opt_modulus = -1;
-#ifdef ENABLE_AUTOKEY
 static char *opt_pvt_cert = NULL;
 static char *opt_passwd = NULL;
 static char *opt_export_passwd = NULL;
@@ -345,7 +343,6 @@ main(
 {
 	struct timeval tv;	/* initialization vector */
 	int	md5key = 0;	/* generate MD5 keys */
-	int	optct;		/* option count */
 #ifdef ENABLE_AUTOKEY
 	X509	*cert = NULL;	/* X509 certificate */
 	X509_EXTENSION *ext;	/* X509v3 extension */
