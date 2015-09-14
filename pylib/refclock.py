@@ -136,12 +136,6 @@ refclock_map = {
 		"file":		"dumbclock"
 	},
 
-	34: {
-		"descr":	"Ultralink WWVB Receivers",
-		"define":	"CLOCK_ULINK",
-		"file":		"ulink"
-	},
-
 	35: {
 		"descr":	"Conrad Parallel Port Radio Clock",
 		"define":	"CLOCK__PCF",
