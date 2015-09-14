@@ -1,40 +1,83 @@
-README file for directory ./util of the NTP Version 4 distribution
+= README file for directory ./util of the NTP Version 4 distribution =
 
 This directory contains the sources for the various utility programs.
 See the README and RELNOTES files in the parent directory for directions
 on how to make and install these programs.
 
-The ntptime.c program checks the kernel configuration for the NTP user
-interface syscalls ntp_gettime() and ntp_adjtime().  If present, the
-current timekeeping data are displayed.  If not, a dissapointment is
-displayed.  See the kernel page file in the HTML documentation in
-distribution for further details. ntptime will be built be if configure
-believes your system can use it.
+Not much documentation, alas.  Read the header comments.
 
-The jitter.c program can be used to determine the timing jitter due to
-the operating system in a gettimeofday() call.  For most systems the
-dominant contribution to the jitter budget is the period of the hardware
-interrupt, usually in the range 10 us-1 ms.  For those systems with
-microsecond counters, such as recent Sun and certain HP and DEC systems,
-the jitter is dominated only by the operating system.
+audio-pcm.c::
+    Probe the capabilities of your sound card.  If anyone can pin the
+    ioctls in this code to a specific OS or standard, we'd like to
+    know so this can bwe better documented.
 
-The testrs6000.c program is used for testing purposes with the IBM
-RS/6000 AIX machines. Bill Jones <jones@chpc.utexas.edu> reports:
-"I could not get a tickadj of less than 40 us to work on a RS6000.
-If you set it less than 40 us do so at your own risk!"
+hist.c::
+    This program can be used to calibrate the clock reading jitter of a
+    particular CPU and operating system. It first tickles every element
+    of an array, in order to force pages into memory, then repeatedly calls
+    gettimeofday() and, finally, writes out the time values for later
+    analysis. From this you can determine the jitter and if the clock ever
+    runs backwards.
 
-The tickadj.c program can be used to read and set various kernel
-parameters affecting NTP operations. See the tickadj page in the HTML
-documentation for further details.  tickadj will be built if configure
-believes your system can use it.
+jitter.c::
+    Can be used to determine the timing jitter due to
+    the operating system in a gettimeofday() call.  For most systems the
+    dominant contribution to the jitter budget is the period of the hardware
+    interrupt, usually in the range 10 us-1 ms.  For those systems with
+    microsecond counters, such as recent Sun and certain HP and DEC systems,
+    the jitter is dominated only by the operating system.
 
-tg.c and tg2.c are tone generators.  They make audio signals
-that emulate WWV or IRIG (-B and -E).  tg runs on Solaris.
-tg2 is a clone that runs on Linux, FreeBSD, and NetBSD.
-Read the source for the fine print.  tg2 has a help option
-available via -h.
+kern.c::
+   Header comment from deep in the mists of past time says: "This
+   program simulates a first-order, type-II phase-lock loop using
+   actual code segments from modified kernel distributions for SunOS,
+   Ultrix and OSF/1 kernels. These segments do not use any licensed
+   code."  Anybody who has a clue *why* it is doing this and what it's
+   supposed to be used for should explain it to us, please.
 
-Propdelay computes high frequency propagation delays, given the
-longitude and latitude of the transmitter and receiver.  Use
-this for WWV/H and CHU.  Don't use it for WWVB (the computation
-is easier for that).
+ntptime.c::
+    Checks the kernel configuration for the NTP user
+    interface syscalls ntp_gettime() and ntp_adjtime().  If present, the
+    current timekeeping data are displayed.  If not, a dissapointment is
+    displayed.  See the kernel page file in the HTML documentation in
+    distribution for further details. ntptime will be built be if configure
+    believes your system can use it.
+
+propdelay.c::
+   Computes high frequency propagation delays, given the
+   longitude and latitude of the transmitter and receiver.  Use
+   this for WWV/H and CHU.  Don't use it for WWVB (the computation
+   is easier for that).
+
+pps-api.c:
+   Try to run this program to see what the PPS-API (RFC 2783 kernel
+   PPS interface) finds. You give it the device as argument and you
+   may have to modify the pp.mode = BLA assignment.
+
+precision.c::
+   Measure the resolution of the system clock watching how the current time
+   changes as we read it repeatedly.
+
+sht.c::
+    Test program for shared memory refclock.
+
+testrs6000.c::
+    The testrs6000.c program is used for testing purposes with the IBM
+    RS/6000 AIX machines. Bill Jones <jones@chpc.utexas.edu> reports:
+    "I could not get a tickadj of less than 40 us to work on a RS6000.
+    If you set it less than 40 us do so at your own risk!" The RS6000
+    is dead, but this is kept around as a way to bogon-test other kernels.
+
+tickadj.c::
+    Can be used to read and set various kernel parameters affecting NTP
+    operations. See the tickadj page in the HTML documentation for further
+    details.  tickadj will be built if configure believes your system can
+    use it.
+
+tg.c and tg2.c::
+    These are tone generators.  They make audio signals that emulate WWV
+    or IRIG (-B and -E).  tg runs on Solaris.  tg2 is a clone that runs on
+    Linux, FreeBSD, and NetBSD.  Read the source for the fine print.  tg2
+    has a help option available via -h.
+
+// end
