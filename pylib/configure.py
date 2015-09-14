@@ -199,6 +199,7 @@ def cmd_configure(ctx):
 	ctx.check_cc(function_name='sysconf', header_name="unistd.h", mandatory=False)
 	ctx.check_cc(function_name='strlcpy', header_name="string.h", mandatory=False)
 	ctx.check_cc(function_name='strlcat', header_name="string.h", mandatory=False)
+	ctx.check_cc(function_name='clock_gettime', header_name="time.h", mandatory=False)
 
 	ctx.check_cc(header_name="stdbool.h", mandatory=True)
 

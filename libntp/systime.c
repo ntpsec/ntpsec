@@ -118,6 +118,32 @@ init_systime(void)
 
 #ifndef SIM	/* ntpsim.c has get_systime() and friends for sim */
 
+/*
+ * Simulate ANSI/POSIX conformance on platforms that don't have it
+ */
+#ifndef HAVE_CLOCK_GETTIME
+#ifdef __MACH__
+#include <mach/clock.h>
+#include <mach/mach.h>
+#endif
+
+int clock_gettime(clockid_t clk_id UNUSED, struct timespec *tp)
+{
+#ifdef __MACH__ // OS X does not have clock_gettime, use clock_get_time
+    clock_serv_t cclock;
+    mach_timespec_t mts;
+    host_get_clock_service(mach_host_self(), CALENDAR_CLOCK, &cclock);
+    clock_get_time(cclock, &mts);
+    mach_port_deallocate(mach_task_self(), cclock);
+    tp->tv_sec = mts.tv_sec;
+    tp->tv_nsec = mts.tv_nsec;
+#else
+    return -1;
+#endif /* __MACH__ */
+    return 0;
+}
+#endif /* HAVE_CLOCK_GETTIME */
+
 void
 get_ostime(
 	struct timespec *	tsp
