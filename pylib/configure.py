@@ -339,6 +339,10 @@ int main () {
 	# Won't be true under Windows, but is under every Unix-like OS.
 	ctx.define("HAVE_WORKING_FORK", 1)
 
+	# Dies the kernel implement a phase-locked loop for timing?
+	# All modern Unixes (in particular Linux and *BSD hsve this).
+	ctx.define("HAVE_KERNEL_PLL", 1)
+
 	ctx.start_msg("Writing configuration header:")
 	ctx.write_config_header("config.h")
 	ctx.end_msg("config.h", "PINK")

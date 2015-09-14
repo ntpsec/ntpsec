@@ -388,9 +388,9 @@ extern double	clock_panic;		/* max offset before panic (s) */
 extern double	clock_phi;		/* dispersion rate (s/s) */
 extern double	clock_minstep;		/* step timeout (s) */
 extern double	clock_codec;		/* codec frequency */
-#ifdef KERNEL_PLL
+#ifdef HAVE_KERNEL_PLL
 extern int	pll_status;		/* status bits for kernel pll */
-#endif /* KERNEL_PLL */
+#endif /* HAVE_KERNEL_PLL */
 
 /*
  * Clock state machine control flags

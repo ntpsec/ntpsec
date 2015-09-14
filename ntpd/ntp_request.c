@@ -23,9 +23,9 @@
 
 #include "recvbuff.h"
 
-#ifdef KERNEL_PLL
+#ifdef HAVE_KERNEL_PLL
 #include "ntp_syscall.h"
-#endif /* KERNEL_PLL */
+#endif /* HAVE_KERNEL_PLL */
 
 /*
  * Structure to hold request procedure information
@@ -102,9 +102,9 @@ static	void	set_control_keyid (sockaddr_u *, endpt *, struct req_pkt *);
 static	void	get_ctl_stats   (sockaddr_u *, endpt *, struct req_pkt *);
 static	void	get_if_stats    (sockaddr_u *, endpt *, struct req_pkt *);
 static	void	do_if_reload    (sockaddr_u *, endpt *, struct req_pkt *);
-#ifdef KERNEL_PLL
+#ifdef HAVE_KERNEL_PLL
 static	void	get_kernel_info (sockaddr_u *, endpt *, struct req_pkt *);
-#endif /* KERNEL_PLL */
+#endif /* HAVE_KERNEL_PLL */
 #ifdef REFCLOCK
 static	void	get_clock_info (sockaddr_u *, endpt *, struct req_pkt *);
 static	void	set_clock_fudge (sockaddr_u *, endpt *, struct req_pkt *);
@@ -159,7 +159,7 @@ static const struct req_proc ntp_codes[] = {
 	{ REQ_CONTROL_KEY, AUTH, sizeof(u_long), sizeof(u_long), 
 				set_control_keyid },
 	{ REQ_GET_CTLSTATS,	NOAUTH,	0, 0,	get_ctl_stats },
-#ifdef KERNEL_PLL
+#ifdef HAVE_KERNEL_PLL
 	{ REQ_GET_KERNEL,	NOAUTH,	0, 0,	get_kernel_info },
 #endif
 #ifdef REFCLOCK
@@ -2285,7 +2285,7 @@ get_ctl_stats(
 }
 
 
-#ifdef KERNEL_PLL
+#ifdef HAVE_KERNEL_PLL
 /*
  * get_kernel_info - get kernel pll/pps information
  */
@@ -2337,7 +2337,7 @@ get_kernel_info(
 	(void) more_pkt();
 	flush_pkt();
 }
-#endif /* KERNEL_PLL */
+#endif /* HAVE_KERNEL_PLL */
 
 
 #ifdef REFCLOCK

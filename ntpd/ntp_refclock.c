@@ -21,9 +21,9 @@
 
 #ifdef REFCLOCK
 
-#ifdef KERNEL_PLL
+#ifdef HAVE_KERNEL_PLL
 #include "ntp_syscall.h"
-#endif /* KERNEL_PLL */
+#endif /* HAVE_KERNEL_PLL */
 
 #ifdef HAVE_PPSAPI
 #include "ppsapi_timepps.h"

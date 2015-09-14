@@ -21,9 +21,9 @@
 #include <signal.h>
 #include <unistd.h>
 
-#ifdef KERNEL_PLL
+#ifdef HAVE_KERNEL_PLL
 #include "ntp_syscall.h"
-#endif /* KERNEL_PLL */
+#endif /* HAVE_KERNEL_PLL */
 
 #ifdef ENABLE_AUTOKEY
 #include <openssl/rand.h>
@@ -498,7 +498,7 @@ check_leapsec(
 	uint32_t       lsprox;
 	
 #ifndef SYS_WINNT  /* WinNT port has its own leap second handling */
-# ifdef KERNEL_PLL
+# ifdef HAVE_KERNEL_PLL
 	leapsec_electric(pll_control && kern_enable);
 # else
 	leapsec_electric(0);
