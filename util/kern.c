@@ -13,8 +13,8 @@
 #include <math.h>
 #include <sys/time.h>
 
-#ifdef HAVE_TIMEX_H
-# include "timex.h"
+#ifdef HAVE_SYS_TIMEX_H
+# include "sys/timex.h"
 #endif
 
 /*

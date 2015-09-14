@@ -242,7 +242,6 @@ def cmd_configure(ctx):
 		"sys/stropts.h",
 		"sys/sysctl.h",
 		"sys/systune.h",
-		"timex.h",
 		"utime.h",
 	)
 	for hdr in optional_headers:
