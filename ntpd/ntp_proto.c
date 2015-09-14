@@ -364,7 +364,9 @@ receive(
 	int	retcode = AM_NOMATCH;	/* match code */
 	keyid_t	skeyid = 0;		/* key IDs */
 	uint32_t	opcode = 0;		/* extension field opcode */
+#if defined(DEBUG) || defined(ENABLE_AUTOKEY)
 	sockaddr_u *dstadr_sin; 	/* active runway */
+#endif
 	struct peer *peer2;		/* aux peer structure pointer */
 	endpt *	match_ep;		/* newpeer() local address */
 	l_fp	p_org;			/* origin timestamp */
@@ -602,7 +604,9 @@ receive(
 	 * unicast address anyway. Don't ask.
 	 */
 	peer = findpeer(rbufp,  hismode, &retcode);
+#ifdef DEBUG
 	dstadr_sin = &rbufp->dstadr->sin;
+#endif
 	NTOHL_FP(&pkt->org, &p_org);
 	NTOHL_FP(&pkt->rec, &p_rec);
 	NTOHL_FP(&pkt->xmt, &p_xmt);
