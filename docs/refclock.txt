@@ -179,7 +179,7 @@ entries than you expected.  Support for some very ancient drivers
 * link:driver33.html[Type 33] Dumb Clock (`DUMBCLOCK`)
 * Type 34 reserved
 * link:driver35.html[Type 35] Conrad Parallel Port Radio Clock (`PCF`)
-* link:driver36.html[Type 36] Radio WWV/H Audio Demodulator/Decoder (`WWV`)
+* Type 36 reserved
 * link:driver37.html[Type 37] Forum Graphic GPS Dating station (`FG`)
 * link:driver38.html[Type 38] hopf GPS/DCF77 6021/komp for Serial Line (`HOPF_S`)
 * link:driver39.html[Type 39] hopf GPS/DCF77 6039 for PCI-Bus (`HOPF_P`)
