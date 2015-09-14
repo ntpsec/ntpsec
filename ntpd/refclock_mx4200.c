@@ -1442,11 +1442,9 @@ mx4200_parse_s(
 	)
 {
 	struct refclockproc *pp;
-	struct mx4200unit *up;
 	int sentence_type;
 
 	pp = peer->procptr;
-	up = pp->unitptr;
 
         sscanf ( pp->a_lastcode, "$PMVXG,%d", &sentence_type);
 
@@ -1550,19 +1548,17 @@ mx4200_debug(struct peer *peer, char *fmt, ...)
 #ifdef DEBUG
 	va_list ap;
 	struct refclockproc *pp;
-	struct mx4200unit *up;
 
 	if (debug) {
 		va_start(ap, fmt);
 
 		pp = peer->procptr;
-		up = pp->unitptr;
 
 		/*
 		 * Print debug message to stdout
 		 * In the future, we may want to get get more creative...
 		 */
-		mvprintf(fmt, ap);
+		vprintf(fmt, ap);
 
 		va_end(ap);
 	}
@@ -1576,7 +1572,6 @@ static void
 mx4200_send(struct peer *peer, char *fmt, ...)
 {
 	struct refclockproc *pp;
-	struct mx4200unit *up;
 
 	register char *cp;
 	register int n, m;
@@ -1587,7 +1582,6 @@ mx4200_send(struct peer *peer, char *fmt, ...)
 	va_start(ap, fmt);
 
 	pp = peer->procptr;
-	up = pp->unitptr;
 
 	cp = buf;
 	*cp++ = '$';
