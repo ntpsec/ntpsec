@@ -316,6 +316,8 @@ int main () {
 	if ctx.options.refclocks:
 		refclock_config(ctx)
 
+	ctx.env.CFLAGS += ["-Wall"]	# Default CFLAGS.
+
 	if ctx.options.enable_debug:
 		ctx.env.CFLAGS += ["-g"]
 		ctx.define("DEBUG", 1)
