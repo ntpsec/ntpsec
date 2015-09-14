@@ -26,12 +26,6 @@ extern	struct refclock	refclock_chu;
 #define	refclock_chu	refclock_none
 #endif
 
-#ifdef CLOCK_WWV
-extern  struct refclock refclock_wwv;
-#else
-#define refclock_wwv    refclock_none
-#endif
-
 #ifdef CLOCK_SPECTRACOM
 extern	struct refclock	refclock_spectracom;
 #else
@@ -236,7 +230,7 @@ struct refclock * const refclock_conf[] = {
 	&refclock_dumbclock,	/* 33 REFCLK_DUMBCLOCK */
 	&refclock_none,		/* 34 was: REFCLOCK_ULINK */
 	&refclock_pcf,		/* 35 REFCLOCK_PCF */
-	&refclock_wwv,		/* 36 REFCLOCK_WWV_AUDIO */
+	&refclock_none,		/* 36 was: REFCLOCK_WWV_AUDIO */
 	&refclock_fg,		/* 37 REFCLOCK_FG */
 	&refclock_hopfser,	/* 38 REFCLK_HOPF_SERIAL */
 	&refclock_hopfpci,	/* 39 REFCLK_HOPF_PCI */

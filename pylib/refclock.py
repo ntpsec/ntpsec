@@ -136,12 +136,6 @@ refclock_map = {
 		"file":		"pcf"
 	},
 
-	36: {
-		"descr":	"NIST WWV/H time/frequency station",
-		"define":	"CLOCK_WWV",
-		"file":		"wwv"
-	},
-
 	37: {
 		"descr":	"Forum Graphic GPS Dating station",
 		"define":	"CLOCK_FG",
