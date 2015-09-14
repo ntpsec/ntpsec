@@ -289,7 +289,7 @@ stats_config(
 	FILE	*fp;
 	const char *value;
 	int	len;
-	double	old_drift, new_drift;
+	double	new_drift;
 	l_fp	now;
 	time_t  ttnow;
 #ifndef VMS
@@ -363,10 +363,10 @@ stats_config(
 		 * Open drift file and read frequency. If the file is
 		 * missing or contains errors, tell the loop to reset.
 		 */
-		if ((new_drift = intercept_drift_read(stats_drift_file)) > 0)
-		    old_drift = new_drift;
-		loop_config(LOOP_FREQ, old_drift);
-		prev_drift_comp = drift_comp;
+		if (intercept_drift_read(stats_drift_file, &new_drift)) {
+		    loop_config(LOOP_FREQ, new_drift);
+		    prev_drift_comp = drift_comp;
+		}
 		break;
 
 	/*
