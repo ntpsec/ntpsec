@@ -177,7 +177,7 @@ entries than you expected.  Support for some very ancient drivers
 * link:driver31.html[Type 31] Rockwell Jupiter GPS (`GPS_JUPITER`)
 * Type 32 reserved
 * link:driver33.html[Type 33] Dumb Clock (`DUMBCLOCK`)
-* link:driver34.html[Type 34] Ultralink WWVB Receivers (`ULINK`)
+* Type 34 reserved
 * link:driver35.html[Type 35] Conrad Parallel Port Radio Clock (`PCF`)
 * link:driver36.html[Type 36] Radio WWV/H Audio Demodulator/Decoder (`WWV`)
 * link:driver37.html[Type 37] Forum Graphic GPS Dating station (`FG`)
