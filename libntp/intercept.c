@@ -223,24 +223,22 @@ long intercept_ntp_random(const char *legend)
     return rand;
 }
 
-double intercept_drift_read(const char *drift_file)
+bool intercept_drift_read(const char *drift_file, double *drift)
 {
     FILE *fp;
-    double drift;
 
     if ((fp = fopen(drift_file, "r")) == NULL)
-	return -1;
+	return false;
 
-    if (fscanf(fp, "%lf", &drift) != 1) {
+    if (fscanf(fp, "%lf", drift) != 1) {
 	msyslog(LOG_ERR,
 		"format error frequency file %s",
 		drift_file);
 	fclose(fp);
-	return -1;
-
+	return false;
     }
     fclose(fp);
-    return drift;
+    return true;
 }
 
 void intercept_drift_write(char *driftfile, double drift)
