@@ -86,12 +86,6 @@ extern	struct refclock	refclock_acts;
 #define refclock_acts	refclock_none
 #endif
 
-#ifdef CLOCK_HEATH
-extern	struct refclock	refclock_heath;
-#else
-#define refclock_heath	refclock_none
-#endif
-
 #ifdef CLOCK_NMEA
 extern	struct refclock refclock_nmea;
 #else
@@ -225,7 +219,7 @@ struct refclock * const refclock_conf[] = {
 	&refclock_bancomm,	/* 16 REFCLK_IRIG_BANCOMM */
 	&refclock_none,		/* 17 was: REFCLK_GPS_DATUM */
 	&refclock_acts,		/* 18 REFCLK_ACTS */
-	&refclock_heath,	/* 19 REFCLK_WWV_HEATH */
+	&refclock_none,		/* 19 was: REFCLK_WWV_HEATH */
 	&refclock_nmea,		/* 20 REFCLK_GPS_NMEA */
 	&refclock_none,		/* 21 was: REFCLK_GPS_VME */
 	&refclock_atom,		/* 22 REFCLK_ATOM_PPS */

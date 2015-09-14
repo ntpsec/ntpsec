@@ -141,9 +141,6 @@
     <ClCompile Include="..\..\..\..\ntpd\refclock_gpsvme.c">
       <Filter>Reference Clock</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\ntpd\refclock_heath.c">
-      <Filter>Reference Clock</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\ntpd\refclock_hopfpci.c">
       <Filter>Reference Clock</Filter>
     </ClCompile>

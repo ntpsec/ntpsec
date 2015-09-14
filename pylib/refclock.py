@@ -74,12 +74,6 @@ refclock_map = {
 		"file":		"acts"
 	},
 
-	19: {
-		"descr":	"Heath WWV/WWVH Receiver",
-		"define":	"CLOCK_HEATH",
-		"file":		"heath"
-	},
-
 	20: {
 		"descr":	"Generic NMEA GPS Receiver",
 		"define":	"CLOCK_NMEA",
