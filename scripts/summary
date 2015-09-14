@@ -422,3 +422,6 @@ USAGE
 }
 
 END { close STDOUT };
+
+1;
+__END__
