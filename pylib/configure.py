@@ -197,6 +197,9 @@ def cmd_configure(ctx):
 
 	ctx.check_cc(function_name='arc4random_buf', header_name="stdlib.h", mandatory=False)
 	ctx.check_cc(function_name='sysconf', header_name="unistd.h", mandatory=False)
+	ctx.check_cc(function_name='strlcpy', header_name="string.h", mandatory=False)
+	ctx.check_cc(function_name='strlcat', header_name="string.h", mandatory=False)
+
 	ctx.check_cc(header_name="stdbool.h", mandatory=True)
 
 	# This is a list of every optional include header in the
@@ -268,7 +271,7 @@ int main() { return 0; }
 
 	ctx.check_cc(lib="m")
 	ctx.check_cc(lib="pthread")
-	ctx.check_cc(lib="rt")
+	ctx.check_cc(lib="rt", mandatory=False)
 	ctx.check_cc(lib="thr", mandatory=False)
 
 	ctx.check_cc(header_name="event2/event.h", includes=ctx.env.PLATFORM_INCLUDES)
