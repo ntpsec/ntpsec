@@ -33,7 +33,10 @@ isc_thread_create(isc_threadfunc_t func, isc_threadarg_t arg,
 		  isc_thread_t *thread)
 {
 	pthread_attr_t attr;
+#if defined(HAVE_PTHREAD_ATTR_GETSTACKSIZE) && \
+    defined(HAVE_PTHREAD_ATTR_SETSTACKSIZE)
 	size_t stacksize;
+#endif
 	int ret;
 
 	pthread_attr_init(&attr);
