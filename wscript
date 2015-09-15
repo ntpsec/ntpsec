@@ -19,10 +19,12 @@ def options(ctx):
 	grp.add_option('--enable-leap-smear', action='store_true', default=False, help="Enable Leap Smearing.")
 	grp.add_option('--enable-mssntp', action='store_true', default=False, help="Enable Samba MSS NTP support.")
 
-
 	grp = ctx.add_option_group("Refclock options")
 	grp.add_option('--refclock', dest='refclocks', help="Comma-separated list of Refclock IDs to build (or \"all\")", type='string')
 	grp.add_option('--list', action='store_true', default=False, help="List available Refclocks")
+
+	grp = ctx.add_option_group("NTP developer options")
+	grp.add_option('--enable-saveconfig', action='store_true', help="Enable configuration saving on exit.")
 
 
 
