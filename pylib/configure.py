@@ -3,7 +3,7 @@ from util import msg, msg_setting
 
 from posix_thread import posix_thread_version
 
-import os
+import sys, os
 
 TYPE_FRAG = """
 #include <stdint.h>
@@ -359,6 +359,16 @@ int main () {
 	#
 	if ctx.check_cc(header_name="sys/timex.h", mandatory=False):
 		ctx.define("HAVE_KERNEL_PLL", 1)
+
+	# These are required by the SHA2 code
+	ctx.define("LITTLE_ENDIAN", 1234)
+	ctx.define("BIG_ENDIAN", 4321)
+	if sys.byteorder == "little":
+		ctx.define("BYTE_ORDER", 1234)
+	elif sys.byteorder == "big":
+		ctx.define("BYTE_ORDER", 4321)
+	else:
+		print "Can't determine byte order!"
 
 	from check_openssl import configure_ssl
 	configure_ssl(ctx)
