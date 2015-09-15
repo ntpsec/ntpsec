@@ -360,6 +360,9 @@ int main () {
 	if ctx.check_cc(header_name="sys/timex.h", mandatory=False):
 		ctx.define("HAVE_KERNEL_PLL", 1)
 
+	from check_openssl import configure_ssl
+	configure_ssl(ctx)
+
 	ctx.start_msg("Writing configuration header:")
 	ctx.write_config_header("config.h")
 	ctx.end_msg("config.h", "PINK")
