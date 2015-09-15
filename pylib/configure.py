@@ -118,6 +118,10 @@ def cmd_configure(ctx):
 	if ctx.options.enable_debug:
 		ctx.env.BISONFLAGS += ["--debug"]
 
+	if ctx.options.enable_saveconfig:
+		ctx.define("SAVECONFIG", 1)
+
+
 	ctx.find_program("yacc", var="BIN_YACC")
 	ctx.find_program("awk", var="BIN_AWK")
 	ctx.find_program("perl", var="BIN_PERL")
