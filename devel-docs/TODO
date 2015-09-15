@@ -16,9 +16,7 @@ this under scripts/.
 * The following symbols need to be investigated to determine under what
 circumstances configuration should set them.
 
-BIG_ENDIAN
 BIND9
-BYTE_ORDER
 DOSYNCTODR
 HAVE_ADJTIMEX	
 HAVE_ARC4RANDOM
@@ -62,7 +60,6 @@ HAVE_TIOCSPPS
 HAVE_TIO_SERIAL_STUFF		
 HAVE_TRUCLUSTER
 HAVE_WORKING_FORK
-LITTLE_ENDIAN
 NEED_HPUX_ADJTIME
 NEED_HPUX_FINDCONFIG
 NEED_NETSNMP_DAEMONIZE
