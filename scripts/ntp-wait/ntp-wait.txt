@@ -1,0 +1,55 @@
+== ntp-wait(1) ==
+:doctype: manpage
+
+== NAME ==
+ntp-wait - Wait for ntpd to stabilize the system clock
+
+== SYNOPSIS ==
+ntp-wait [-v] [-n 'number'] [-s 'secs']
+
+== DESCRIPTION ==
+
+`ntp-wait` will send at most _num-tries_ queries to _ntpd_(8)_, sleeping
+forsecs-between-triesafter each status return that says ntpd_(8)_has not
+yet produced a synchronized and stable system clock._
+
+`ntp-wait` will do this quietly, unless the `-v` flag is provided. This
+can be useful at boot time, to delay the boot sequence until after
+_ntpd_ `-g` has set the time.
+
+== OPTIONS ==
+
+`-n` number, `--tries`=_number_::
+  Number of times to check ntpd. This option takes an integer number as
+  its argument. The default _number_ for this option is: 100.
++
+The maximum number of times we will check _ntpd_ to see if it has been
+able to synchronize and stabilize the system clock.
+
+`-s` secs-between-tries, `--sleep`=_secs-between-tries_::
+  How long to sleep between tries. This option takes an integer number
+  as its argument. The default _secs-between-tries_ for this option
+  is: 6.
++
+We will sleep for _secs-between-tries_ after each query of _ntpd_ that
+returns "the time is not yet stable".
+
+`-v`, `--verbose`::
+  Be verbose.
++
+By default, `ntp-wait` is silent. With this option, `ntp-wait` will
+provide status information.
+
+== EXIT STATUS ==
+
+One of the following exit values will be returned:
+
+0 (EXIT_SUCCESS)::
+  Successful program execution.
+1 (EXIT_FAILURE)::
+  The operation failed or the command syntax was not valid.
+
+== AUTHORS ==
+
+Harlan Stenn.
+
