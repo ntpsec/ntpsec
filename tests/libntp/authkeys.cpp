@@ -14,7 +14,7 @@ TEST_TEAR_DOWN(authkeys) {}
 #include "libntptest.h"
 
 extern "C" {
-#ifdef OPENSSL
+#ifdef HAVE_OPENSSL
 # include "openssl/err.h"
 # include "openssl/rand.h"
 # include "openssl/evp.h"
