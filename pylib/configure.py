@@ -207,6 +207,7 @@ def cmd_configure(ctx):
 	ctx.define("DFLT_RLIMIT_MEMLOCK", 32)
 	ctx.define("POSIX_SHELL", "/bin/sh")
 
+	ctx.define("OPENSSL_VERSION_TEXT", "#XXX: Fixme")
 	ctx.define("MCAST", 1) # XXX: check for mcast support
 	ctx.define("TYPEOF_IP_MULTICAST_LOOP", "u_char", quote=False) #XXX: check for mcast type
 	ctx.define("OPEN_BCAST_SOCKET", 1)
@@ -238,6 +239,7 @@ def cmd_configure(ctx):
 		"libscf.h",
 		"linux/if_addr.h",
 		"machine/soundcard.h",
+		"md5.h",
 		"net/if6.h",
 		"net/if_var.h",
 		"netinet/in_var.h",
