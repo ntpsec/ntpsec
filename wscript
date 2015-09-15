@@ -20,8 +20,6 @@ def options(ctx):
 	grp.add_option('--enable-debug-gdb', action='store_true', default=False, help="Enable GDB debugging symbols")
 	grp.add_option('--enable-ipv6', action='store_true', default=False, help="Enable IPv6")
 	grp.add_option('--enable-doc', action='store_true', default=False, help="Build NTP documentation")
-	grp.add_option('--cflags', type='string', action="callback", callback=callback_flags, help="This overrides any internal or environment settings can be used multiple times.")
-	grp.add_option('--ldflags', type='string', action="callback", callback=callback_flags, help="This overrides any internal or environment settings can be used multiple times.")
 
 
 	grp = ctx.add_option_group("NTP features")
@@ -34,6 +32,8 @@ def options(ctx):
 
 	grp = ctx.add_option_group("NTP developer options")
 	grp.add_option('--enable-saveconfig', action='store_true', help="Enable configuration saving on exit.")
+	grp.add_option('--cflags', type='string', action="callback", callback=callback_flags, help="Users should use CFLAGS in their environment.")
+	grp.add_option('--ldflags', type='string', action="callback", callback=callback_flags, help="Users should use LDFLAGS in their environment.")
 
 
 
