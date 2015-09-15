@@ -3,6 +3,9 @@ Quick Start
 
 Be sure Python >= 2.5 and libevent 2.x are installed on your system.
 
+You will also want OpenSSL installed.  If you are using a package manager,
+the one you want may be called openssl-devel or libssl-dev.
+
 Go to the directory where you found this file and do this:
 
 ----------------------------------------------------------------------
@@ -27,7 +30,9 @@ Under Unix, the simplest way to compile this package is:
 
   1. `cd' to the directory containing the package's source code and
 
-  2. Run `./waf configure' to configure the package for your system.  
+  2. Run `./waf configure' to configure the package for your system.
+  You may want to add configuration options after the verb 'configure';
+  see below.
 
   3. Type `./waf build' to compile the package.
 
@@ -35,9 +40,11 @@ Under Unix, the simplest way to compile this package is:
      documentation.
 
   5. You can remove the program binaries and object files from the
-     source code directory by typing `./waf clean'.  To also remove the
-     files that `waf configure' created (so you can compile the package for
-     a different kind of computer), type `./waf distclean'.
+     source code directory by typing `./waf clean'.
+
+  6. To also remove the files that `waf configure' created (so you can
+     configure and compile the package for a different kind of
+     computer), type `./waf distclean'.
 
 Installation Names
 ==================
