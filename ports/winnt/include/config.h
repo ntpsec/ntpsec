@@ -254,7 +254,7 @@ typedef int socklen_t;
 #define USE_MM_TIMER
 
 /* check for OpenSSL */
-#ifdef OPENSSL
+#ifdef HAVE_OPENSSL
 # define USE_OPENSSL_CRYPTO_RAND 1
 # define ENABLE_AUTOKEY
 #endif
