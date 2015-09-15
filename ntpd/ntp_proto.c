@@ -379,9 +379,9 @@ receive(
 	int	rval;			/* cookie snatcher */
 	keyid_t	pkeyid = 0, tkeyid = 0;	/* key IDs */
 #endif	/* ENABLE_AUTOKEY */
-#ifdef HAVE_NTP_SIGND
+#ifdef ENABLE_MSSNTP
 	static unsigned char zero_key[16];
-#endif /* HAVE_NTP_SIGND */
+#endif /* ENABLE_MSSNTP */
 
 	/*
 	 * Monitor the packet and get restrictions. Note that the packet
@@ -658,7 +658,7 @@ receive(
 			    authlen + has_mac, is_authentic);
 #endif
 
-#ifdef HAVE_NTP_SIGND
+#ifdef ENABLE_MSSNTP
 		/*
 		 * If the signature is 20 bytes long, the last 16 of
 		 * which are zero, then this is a Microsoft client
@@ -673,7 +673,7 @@ receive(
 	   (memcmp(zero_key, (char *)pkt + authlen + 4, MAX_MD5_LEN - 4) ==
 	   0)) {
 		is_authentic = AUTH_NONE;
-#endif /* HAVE_NTP_SIGND */
+#endif /* ENABLE_MSSNTP */
 
 	} else {
 		restrict_mask &= ~RES_MSSNTP;
@@ -3483,12 +3483,12 @@ fast_xmit(
 		HTONL_FP(&xmt_tx, &xpkt.xmt);
 	}
 
-#ifdef HAVE_NTP_SIGND
+#ifdef ENABLE_MSSNTP
 	if (flags & RES_MSSNTP) {
 		send_via_ntp_signd(rbufp, xmode, xkeyid, flags, &xpkt);
 		return;
 	}
-#endif /* HAVE_NTP_SIGND */
+#endif /* ENABLE_MSSNTP */
 
 	/*
 	 * If the received packet contains a MAC, the transmitted packet
