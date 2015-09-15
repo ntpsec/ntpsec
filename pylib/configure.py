@@ -122,6 +122,14 @@ def cmd_configure(ctx):
 	if ctx.options.enable_saveconfig:
 		ctx.define("SAVECONFIG", 1)
 
+	ctx.env.CFLAGS += ["-Wall"]	# Default CFLAGS.
+
+
+	# Wipe out and override flags with those from the commandline
+	for flag in ctx.env.OPT_STORE:
+		opt = flag.replace("--", "").upper() # XXX: find a better way.
+		ctx.env[opt] = ctx.env.OPT_STORE[flag]
+
 
 	ctx.find_program("yacc", var="BIN_YACC")
 	ctx.find_program("awk", var="BIN_AWK")
@@ -320,7 +328,6 @@ int main () {
 	if ctx.options.refclocks:
 		refclock_config(ctx)
 
-	ctx.env.CFLAGS += ["-Wall"]	# Default CFLAGS.
 
 	if ctx.options.enable_debug:
 		ctx.define("DEBUG", 1)
