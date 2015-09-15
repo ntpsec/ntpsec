@@ -6,15 +6,23 @@ out="build"
 
 from pylib.configure import cmd_configure
 
+OPT_STORE = {} # Storage for options to pass into configure
+
 
 def options(ctx):
 	ctx.load("compiler_c")
+
+	def callback_flags(option, opt, value, parser):
+		OPT_STORE.setdefault(opt, []).append(value)
 
 	grp = ctx.add_option_group("NTP build options")
 	grp.add_option('--enable-debug', action='store_true', default=False, help="Enable debugging code")
 	grp.add_option('--enable-debug-gdb', action='store_true', default=False, help="Enable GDB debugging symbols")
 	grp.add_option('--enable-ipv6', action='store_true', default=False, help="Enable IPv6")
 	grp.add_option('--enable-doc', action='store_true', default=False, help="Build NTP documentation")
+	grp.add_option('--cflags', type='string', action="callback", callback=callback_flags, help="This overrides any internal or environment settings can be used multiple times.")
+	grp.add_option('--ldflags', type='string', action="callback", callback=callback_flags, help="This overrides any internal or environment settings can be used multiple times.")
+
 
 	grp = ctx.add_option_group("NTP features")
 	grp.add_option('--enable-leap-smear', action='store_true', default=False, help="Enable Leap Smearing.")
@@ -37,6 +45,8 @@ def configure(ctx):
 
 
 	ctx.load('waf', tooldir='pylib/')
+
+	ctx.env.OPT_STORE = OPT_STORE
 
 	cmd_configure(ctx)
 
