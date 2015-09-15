@@ -11,7 +11,7 @@ def build(ctx):
 		features	= "c cprogram bld_include src_include libisc_include libisc_pthread_include ntp_version",
 		source		= ntpdate_source,
 		defines		= ["HAVE_CONFIG_H=1"],
-		use			= "ntp opts isc M RT PTHREAD",
+		use			= "ntp opts isc M RT PTHREAD CRYPTO SSL",
 		includes	= [
 						"%s/ntpdate/" % bldnode
 					],
