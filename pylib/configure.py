@@ -116,11 +116,14 @@ def cmd_configure(ctx):
 	ctx.load('bison')
 
 	if ctx.options.enable_debug_gdb:
-		ctx.env.BISONFLAGS += ["--debug"]
 		ctx.env.CFLAGS += ["-g"]
 
 	if ctx.options.enable_saveconfig:
 		ctx.define("SAVECONFIG", 1)
+
+	if ctx.options.enable_debug:
+		ctx.define("DEBUG", 1)
+		ctx.env.BISONFLAGS += ["--debug"]
 
 	ctx.env.CFLAGS += ["-Wall"]	# Default CFLAGS.
 
@@ -328,9 +331,6 @@ int main () {
 	if ctx.options.refclocks:
 		refclock_config(ctx)
 
-
-	if ctx.options.enable_debug:
-		ctx.define("DEBUG", 1)
 
 	if ctx.options.enable_ipv6:
 		ctx.define("INCLUDE_IPV6_SUPPORT", 1)
