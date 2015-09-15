@@ -6,7 +6,7 @@
 #include <config.h>
 #endif
 
-#ifdef HAVE_NTP_SIGND
+#ifdef ENABLE_MSSNTP
 
 #include "ntpd.h"
 #include "ntp_io.h"

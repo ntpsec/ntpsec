@@ -145,8 +145,8 @@ int	config_priority;
 
 const char *config_file;
 static char default_ntp_signd_socket[] =
-#ifdef NTP_SIGND_PATH
-					NTP_SIGND_PATH;
+#ifdef MSSNTP_PATH
+					MSSNTP_PATH;
 #else
 					"";
 #endif
@@ -2242,7 +2242,7 @@ config_access(
 	u_short			mflags;
 	bool			range_err;
 	const char *		signd_warning =
-#ifdef HAVE_NTP_SIGND
+#ifdef ENABLE_MSSNTP
 	    "MS-SNTP signd operations currently block ntpd degrading service to all clients.";
 #else
 	    "mssntp restrict bit ignored, this ntpd was configured without --enable-ntp-signd.";
