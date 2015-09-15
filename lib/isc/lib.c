@@ -79,22 +79,3 @@ isc_lib_initmsgcat(void) {
 		abort();
 	}
 }
-
-#ifndef BIND9
-static isc_once_t		register_once = ISC_ONCE_INIT;
-
-static void
-do_register(void) {
-	RUNTIME_CHECK(isc__mem_register() == ISC_R_SUCCESS);
-	RUNTIME_CHECK(isc__app_register() == ISC_R_SUCCESS);
-	RUNTIME_CHECK(isc__task_register() == ISC_R_SUCCESS);
-	RUNTIME_CHECK(isc__socket_register() == ISC_R_SUCCESS);
-	RUNTIME_CHECK(isc__timer_register() == ISC_R_SUCCESS);
-}
-
-void
-isc_lib_register() {
-	RUNTIME_CHECK(isc_once_do(&register_once, do_register)
-		      == ISC_R_SUCCESS);
-}
-#endif

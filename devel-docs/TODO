@@ -16,7 +16,6 @@ this under scripts/.
 * The following symbols need to be investigated to determine under what
 circumstances configuration should set them.
 
-BIND9
 DOSYNCTODR
 HAVE_ADJTIMEX	
 HAVE_ARC4RANDOM

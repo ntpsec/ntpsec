@@ -14,16 +14,12 @@
  * PERFORMANCE OF THIS SOFTWARE.
  */
 
-/* $Id$ */
-
 #ifndef GUARD_ISCAPI_NAMESPACE_H
 #define GUARD_ISCAPI_NAMESPACE_H 1
 
 /*%
  * name space conversions
  */
-
-#ifdef BIND9
 
 #define isc_app_start isc__app_start
 #define isc_app_ctxstart isc__app_ctxstart
@@ -165,7 +161,5 @@
 #define isc_timermgr_create isc__timermgr_create
 #define isc_timermgr_poke isc__timermgr_poke
 #define isc_timermgr_destroy isc__timermgr_destroy
-
-#endif /* BIND9 */
 
 #endif /* GUARD_ISCAPI_NAMESPACE_H */
