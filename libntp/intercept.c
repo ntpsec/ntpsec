@@ -30,7 +30,9 @@ following kinds:
 
 12. Read of authkey file  (TODO)
 
-13. Termination.
+13. getaddrinfo() calls (TODO)
+
+14. Termination.
 
 We must support two modes of operation.  In "capture" mode, ntpd
 operates normally, logging all events.  In "replay" mode, ntpd accepts
@@ -128,6 +130,9 @@ adjtime::
 send::
 	Send packet. Field is some sort of textual packet dump.
 
+getaddrinfo::
+	A DNS name and its lookup result.
+
 shutdown::
 	Termination. The single argument field is a return status.
 
@@ -159,11 +164,18 @@ shutdown::
 #include "ntp_intercept.h"
 #include "ntp_fp.h"
 
-static enum {none, capture, replay} mode = none;
+static intercept_mode mode = none;
 
-bool replay_mode(void)
+intercept_mode intercept_get_mode(void)
 {
-    return mode == replay;
+    return mode;
+}
+
+void intercept_set_mode(intercept_mode newmode)
+{
+    mode = newmode;
+    if (newmode == replay)
+	syslogit = false;
 }
 
 void intercept_argparse(int *argc, char ***argv)

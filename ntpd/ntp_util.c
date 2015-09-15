@@ -405,7 +405,7 @@ stats_config(
 	 * Open pid file.
 	 */
 	case STATS_PID_FILE:
-		if (replay_mode())
+		if (intercept_get_mode() == replay)
 		    break;
 		if ((fp = fopen(value, "w")) == NULL) {
 			msyslog(LOG_ERR, "pid file %s: %m",

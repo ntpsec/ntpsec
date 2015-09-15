@@ -18,7 +18,10 @@
 #define PRINTF_FUNC(format_index, arg_indx)
 #endif
 
-bool replay_mode(void);
+typedef enum {none, capture, replay} intercept_mode;
+    
+intercept_mode intercept_get_mode(void);
+void intercept_set_mode(intercept_mode);
 
 PRINTF_FUNC(1, 2) void intercept_log(const char *, ...);
 void intercept_argparse(int *, char ***);
