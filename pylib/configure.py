@@ -214,11 +214,15 @@ def cmd_configure(ctx):
 
 	# Optional functions.
 	functions = (
+		('adjtimex', "sys/timex.h"),
+		('arc4random', "stdlib.h"),
 		('arc4random_buf', "stdlib.h"),
-		('sysconf', "unistd.h"),
+		('clock_gettime', "time.h"),
+		('getpassphrase', "stdlib.h"), # Sun systems
 		('strlcpy', "string.h"),
 		('strlcat', "string.h"),
-		('clock_gettime', "time.h"),
+		('sysconf', "unistd.h"),
+		('timegm', "time.h"),
 		)
 	for (n, h) in functions:
 		ctx.check_cc(function_name=n, header_name=h, mandatory=False)
