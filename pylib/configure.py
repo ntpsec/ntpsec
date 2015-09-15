@@ -212,11 +212,16 @@ def cmd_configure(ctx):
 	ctx.define("TYPEOF_IP_MULTICAST_LOOP", "u_char", quote=False) #XXX: check for mcast type
 	ctx.define("OPEN_BCAST_SOCKET", 1)
 
-	ctx.check_cc(function_name='arc4random_buf', header_name="stdlib.h", mandatory=False)
-	ctx.check_cc(function_name='sysconf', header_name="unistd.h", mandatory=False)
-	ctx.check_cc(function_name='strlcpy', header_name="string.h", mandatory=False)
-	ctx.check_cc(function_name='strlcat', header_name="string.h", mandatory=False)
-	ctx.check_cc(function_name='clock_gettime', header_name="time.h", mandatory=False)
+	# Optional functions.
+	functions = (
+		('arc4random_buf', "stdlib.h"),
+		('sysconf', "unistd.h"),
+		('strlcpy', "string.h"),
+		('strlcat', "string.h"),
+		('clock_gettime', "time.h"),
+		)
+	for (n, h) in functions:
+		ctx.check_cc(function_name=n, header_name=h, mandatory=False)
 
 	ctx.check_cc(header_name="stdbool.h", mandatory=True)
 
