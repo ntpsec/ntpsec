@@ -370,8 +370,9 @@ int main () {
 	else:
 		print "Can't determine byte order!"
 
-	from check_openssl import configure_ssl
-	configure_ssl(ctx)
+	if ctx.options.enable_crypto:
+		from check_openssl import configure_ssl
+		configure_ssl(ctx)
 
 	ctx.start_msg("Writing configuration header:")
 	ctx.write_config_header("config.h")

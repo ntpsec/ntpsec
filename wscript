@@ -20,6 +20,7 @@ def options(ctx):
 	grp.add_option('--enable-debug-gdb', action='store_true', default=False, help="Enable GDB debugging symbols")
 	grp.add_option('--enable-ipv6', action='store_true', default=False, help="Enable IPv6")
 	grp.add_option('--enable-doc', action='store_true', default=False, help="Build NTP documentation")
+	grp.add_option('--enable-crypto', action='store_true', default=False, help="Enable OpenSSL.")
 
 
 	grp = ctx.add_option_group("NTP features")
