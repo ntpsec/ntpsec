@@ -9,8 +9,9 @@
 * The u_* types in ntp.h are GCCisms that should be replaced with
 POSIX types.
 
-* scripts/ntptrace.in needs to be expanded into the actual ntptrace script
-by substituting in @-cookies.  There may be other cases of this under scripts/.
+* scripts/ntptrace.in and scriots/ntpsweep.in need to be expanded into the
+actual cripts by substituting in @-cookies.  There may be other cases of
+this under scripts/.
 
 * The following symbols need to be investigated to determine under what
 circumstances configuration should set them.
@@ -74,7 +75,7 @@ SIM
 TM_IN_SYS_TIME
 TRIM_POLLRATE
 
-* Relatedly, the ntpd initializartion sequence is still full of platform-
+* Relatedly, the ntpd initialization sequence is still full of platform-
 specific crud.
 
 === Testing ===
@@ -97,6 +98,9 @@ is not yet tested anywhere but in ntpd itself.
 The documentation is a stale, untidy, duplicative mess only most of
 the way converted to asciidoc.
 
+* man pages outside of docs/ need to be paired with the Mills manpages
+  inside it, with duplications removed.
+
 * Some documentation under the scripts directory is not yet converted.
 
 * In the docs subdirectory, include/command.txt is an HTML passthrough
@@ -107,7 +111,9 @@ the way converted to asciidoc.
 * Similarly, includes/footer.txt is a tabular hack made to resemble the
   old HTML and should be cleaned up.
 
-* A serious content-editing and update pass on the documents.  
+* A serious content-editing and update pass on the documents is needed.
+  Various pieces (such as near --version and exit values) are often lies
+  produced by autogen.
 
 * Part of d) is the ntp -> ntps name change.
 
