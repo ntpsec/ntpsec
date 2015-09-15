@@ -492,7 +492,7 @@ main(
 			SSLeay_version(SSLEAY_VERSION));
 	else
 		fprintf(stderr, "Built against OpenSSL %s, using version %s\n",
-			HAVE_OPENSSL_VERSION_TEXT, SSLeay_version(SSLEAY_VERSION));
+			OPENSSL_VERSION_TEXT, SSLeay_version(SSLEAY_VERSION));
 #endif /* HAVE_OPENSSL */
 
 	if (opt_md5key != NULL)
