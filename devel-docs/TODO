@@ -95,13 +95,10 @@ is not yet tested anywhere but in ntpd itself.
 
 === Documentation ===
 
-The documentation is a stale, untidy, duplicative mess only most of
-the way converted to asciidoc.
+The documentation is a stale, untidy, duplicative mess.
 
 * man pages outside of docs/ need to be paired with the Mills manpages
   inside it, with duplications removed.
-
-* Some documentation under the scripts directory is not yet converted.
 
 * In the docs subdirectory, include/command.txt is an HTML passthrough
   in a not entirely successful attempt to emulate the look of the
