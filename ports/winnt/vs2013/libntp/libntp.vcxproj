@@ -298,7 +298,6 @@
     <ClCompile Include="..\..\..\..\lib\isc\win32\interfaceiter.c" />
     <ClCompile Include="..\..\..\..\lib\isc\win32\net.c" />
     <ClCompile Include="..\..\..\..\lib\isc\win32\once.c" />
-    <ClCompile Include="..\..\..\..\lib\isc\win32\stdtime.c" />
     <ClCompile Include="..\..\..\..\lib\isc\win32\strerror.c" />
     <ClCompile Include="..\..\..\..\lib\isc\win32\thread.c" />
     <ClCompile Include="..\..\..\..\lib\isc\win32\time.c" />
@@ -368,7 +367,6 @@
     <ClInclude Include="..\..\..\..\lib\isc\win32\include\isc\net.h" />
     <ClInclude Include="..\..\..\..\lib\isc\win32\include\isc\platform.h" />
     <ClInclude Include="..\..\..\..\lib\isc\win32\include\isc\stat.h" />
-    <ClInclude Include="..\..\..\..\lib\isc\win32\include\isc\stdtime.h" />
     <ClInclude Include="..\..\..\..\lib\isc\win32\include\isc\thread.h" />
     <ClInclude Include="..\..\..\..\lib\isc\win32\include\isc\time.h" />
     <ClInclude Include="..\..\..\..\lib\isc\win32\include\isc\win32os.h" />

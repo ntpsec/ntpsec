@@ -477,10 +477,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\lib\isc\win32\stdtime.c"
-				>
-			</File>
-			<File
 				RelativePath="..\..\..\lib\isc\win32\strerror.c"
 				>
 			</File>
@@ -771,10 +767,6 @@
 			</File>
 			<File
 				RelativePath="..\..\..\lib\isc\win32\include\isc\stat.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\..\lib\isc\win32\include\isc\stdtime.h"
 				>
 			</File>
 			<File

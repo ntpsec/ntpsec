@@ -107,7 +107,7 @@ struct isc__task {
 	isc_eventlist_t			on_shutdown;
 	unsigned int			quantum;
 	unsigned int			flags;
-	isc_stdtime_t			now;
+	time_t				now;
 	char				name[16];
 	void *				tag;
 	/* Locked by task manager lock. */
@@ -211,7 +211,7 @@ isc__task_getname(isc_task_t *task0);
 ISC_TASKFUNC_SCOPE void *
 isc__task_gettag(isc_task_t *task0);
 ISC_TASKFUNC_SCOPE void
-isc__task_getcurrenttime(isc_task_t *task0, isc_stdtime_t *t);
+isc__task_getcurrenttime(isc_task_t *task0, time_t *t);
 ISC_TASKFUNC_SCOPE isc_result_t
 isc__taskmgr_create(isc_mem_t *mctx, unsigned int workers,
 		    unsigned int default_quantum, isc_taskmgr_t **managerp);
@@ -882,7 +882,7 @@ isc__task_gettag(isc_task_t *task0) {
 }
 
 ISC_TASKFUNC_SCOPE void
-isc__task_getcurrenttime(isc_task_t *task0, isc_stdtime_t *t) {
+isc__task_getcurrenttime(isc_task_t *task0, time_t *t) {
 	isc__task_t *task = (isc__task_t *)task0;
 
 	REQUIRE(VALID_TASK(task));
@@ -1078,7 +1078,7 @@ dispatch(isc__taskmgr_t *manager) {
 			task->state = task_state_running;
 			XTRACE(isc_msgcat_get(isc_msgcat, ISC_MSGSET_GENERAL,
 					      ISC_MSG_RUNNING, "running"));
-			isc_stdtime_get(&task->now);
+			time(&task->now);
 			do {
 				if (!EMPTY(task->events)) {
 					event = HEAD(task->events);
