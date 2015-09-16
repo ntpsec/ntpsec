@@ -1,7 +1,5 @@
-extern "C" {
 #include "unity.h"
 #include "unity_fixture.h"
-}
 
 TEST_GROUP(crypto);
 
@@ -11,12 +9,7 @@ TEST_TEAR_DOWN(crypto) {}
 
 #include "sntptest.h"
 
-extern "C" {
 #include "crypto.h"
-};
-
-class cryptoTest : public sntptest {
-};
 
 #define MD5_LENGTH 16
 #define SHA1_LENGTH 20
@@ -29,7 +22,7 @@ TEST(crypto, MakeMd5Mac) {
 		"\x52\x6c\xb8\x38\xaf\x06\x5a\xfb\x6c\x98\xbb\xc0\x9b\x0a\x7a\x1b";
 	char actual[MD5_LENGTH];
 
-	key md5;
+	struct key md5;
 	md5.next = NULL;
 	md5.key_id = 10;
 	md5.key_len = 6;
@@ -37,12 +30,12 @@ TEST(crypto, MakeMd5Mac) {
 	memcpy(&md5.type, "MD5", 4);
 
 	TEST_ASSERT_EQUAL(MD5_LENGTH,
-			  make_mac((char*)PKT_DATA, PKT_LEN, MD5_LENGTH, &md5, actual));
+			make_mac((char*)PKT_DATA, PKT_LEN, MD5_LENGTH, &md5, actual));
 
 	TEST_ASSERT_TRUE(memcmp(EXPECTED_DIGEST, actual, MD5_LENGTH) == 0);
 }
 
-#ifdef HAVE_OPENSSL
+#ifdef OPENSSL
 TEST(crypto, MakeSHA1Mac) {
 	const char* PKT_DATA = "abcdefgh0123";
 	const int PKT_LEN = strlen(PKT_DATA);
@@ -51,7 +44,7 @@ TEST(crypto, MakeSHA1Mac) {
 		"\x63\x85\xb4\xce\xbe\x94\xa0\x97\x16\x1d";
 	char actual[SHA1_LENGTH];
 
-	key sha1;
+	struct key sha1;
 	sha1.next = NULL;
 	sha1.key_id = 20;
 	sha1.key_len = 7;
@@ -63,7 +56,7 @@ TEST(crypto, MakeSHA1Mac) {
 
 	TEST_ASSERT_TRUE(memcmp(EXPECTED_DIGEST, actual, SHA1_LENGTH) == 0);
 }
-#endif	/* HAVE_OPENSSL */
+#endif	/* OPENSSL */
 
 TEST(crypto, VerifyCorrectMD5) {
 	const char* PKT_DATA =
@@ -73,7 +66,7 @@ TEST(crypto, VerifyCorrectMD5) {
 		"\x2b\x7b\xfe\x4f\xa2\x32\xcf\xac";
 	const int PKT_LEN = 12;
 
-	key md5;
+	struct key md5;
 	md5.next = NULL;
 	md5.key_id = 0;
 	md5.key_len = 6;
@@ -83,7 +76,7 @@ TEST(crypto, VerifyCorrectMD5) {
 	TEST_ASSERT_TRUE(auth_md5((char*)PKT_DATA, PKT_LEN, MD5_LENGTH, &md5));
 }
 
-#ifdef HAVE_OPENSSL
+#ifdef OPENSSL
 TEST(crypto, VerifySHA1) {
 	const char* PKT_DATA =
 		"sometestdata"		// Data
@@ -92,7 +85,7 @@ TEST(crypto, VerifySHA1) {
 		"\x2d\x8a\x7d\x06\x96\xe6\x0c\xbc\xed\xe1";
 	const int PKT_LEN = 12;
 
-	key sha1;
+	struct key sha1;
 	sha1.next = NULL;
 	sha1.key_id = 0;
 	sha1.key_len = 7;
@@ -101,7 +94,7 @@ TEST(crypto, VerifySHA1) {
 
 	TEST_ASSERT_TRUE(auth_md5((char*)PKT_DATA, PKT_LEN, SHA1_LENGTH, &sha1));
 }
-#endif	/* HAVE_OPENSSL */
+#endif	/* OPENSSL */
 
 TEST(crypto, VerifyFailure) {
 	/* We use a copy of the MD5 verification code, but modify
@@ -113,7 +106,7 @@ TEST(crypto, VerifyFailure) {
 		"\x2b\x7b\xfe\x4f\xa2\x32\xcf\x00"; // Last byte is wrong!
 	const int PKT_LEN = 12;
 
-	key md5;
+	struct key md5;
 	md5.next = NULL;
 	md5.key_id = 0;
 	md5.key_len = 6;
@@ -128,7 +121,7 @@ TEST(crypto, PacketSizeNotMultipleOfFourBytes) {
 	const int PKT_LEN = 6;
 	char actual[MD5_LENGTH];
 
-	key md5;
+	struct key md5;
 	md5.next = NULL;
 	md5.key_id = 10;
 	md5.key_len = 6;

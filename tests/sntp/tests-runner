@@ -10,4 +10,3 @@ mkdir -p $builddir/data
 
 # Test executable expects two arguments: test_input_dir and test_output_dir.
 ./tests $srcdir/data $builddir/data
-

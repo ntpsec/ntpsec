@@ -3,11 +3,10 @@
 
 #include "tests_main.h"
 
-extern "C" {
 #include "ntp_stdlib.h"
 #include "sntp-opts.h"
-};
 
+#if 0
 class sntptest : public ntptest {
 protected:
 	sntptest() {
@@ -31,5 +30,6 @@ protected:
 		optionProcess(&sntpOptions, ARGV_SIZE, opts);
 	}
 };
+#endif
 
 #endif // GUARD_SNTPTEST_H
