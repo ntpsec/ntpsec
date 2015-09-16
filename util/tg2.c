@@ -550,7 +550,7 @@ main(
 	int	rval;           /* For IOCTL calls */
 #endif
 
-	struct	timeval	 TimeValue;				/* System clock at startup */
+	struct	timespec	 TimeValue;				/* System clock at startup */
 	time_t			 SecondsPartOfTime;		/* Sent to gmtime() for calculation of TimeStructure (can apply offset). */
 	time_t			 BaseRealTime;			/* Base realtime so can determine seconds since starting. */
 	time_t			 NowRealTime;			/* New realtime to can determine seconds as of now. */
@@ -1051,7 +1051,7 @@ main(
 	 * Unless specified otherwise, read the system clock and
 	 * initialize the time.
 	 */
-	gettimeofday(&TimeValue, NULL);		// Now always read the system time to keep "real time" of operation.
+	clock_gettime(CLOCK_REALTIME, &TimeValue);		// Now always read the system time to keep "real time" of operation.
 	NowRealTime = BaseRealTime = SecondsPartOfTime = TimeValue.tv_sec;
 	SecondsRunningSimulationTime = 0;	// Just starting simulation, running zero seconds as of now.
 	StabilityCount = 0;					// No stability yet.
@@ -1080,7 +1080,7 @@ main(
 		 * aligned with the system clock within one sample (125
 		 * microseconds ).
 		 */
-		delay(SECOND - TimeValue.tv_usec * 8 / 1000);
+		delay(SECOND - TimeValue.tv_nsec * 8 / 1000000);
 		}
 
 	StraightBinarySeconds = Second + (Minute * SECONDS_PER_MINUTE) + (Hour * SECONDS_PER_HOUR);
@@ -2049,7 +2049,7 @@ main(
 		{
 		SecondsRunningSimulationTime++;
 
-		gettimeofday(&TimeValue, NULL);
+		clock_gettime(CLOCK_REALTIME, &TimeValue);
 		NowRealTime = TimeValue.tv_sec;
 
 		if  (NowRealTime >= BaseRealTime)		// Just in case system time corrects backwards, do not blow up.
