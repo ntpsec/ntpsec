@@ -49,7 +49,6 @@ def build(ctx):
 		"unix/file.c",
 		"unix/interfaceiter.c",
 		"unix/net.c",
-		"unix/stdio.c",
 		"unix/time.c"
 	]
 

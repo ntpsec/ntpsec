@@ -968,38 +968,6 @@ SOURCE=.\socket.c
 
 !ENDIF 
 
-SOURCE=.\stdio.c
-
-!IF  "$(CFG)" == "libisc - Win32 Release"
-
-
-"$(INTDIR)\stdio.obj" : $(SOURCE) "$(INTDIR)"
-
-
-!ELSEIF  "$(CFG)" == "libisc - Win32 Debug"
-
-
-"$(INTDIR)\stdio.obj"	"$(INTDIR)\stdio.sbr" : $(SOURCE) "$(INTDIR)"
-
-
-!ENDIF 
-
-SOURCE=.\stdtime.c
-
-!IF  "$(CFG)" == "libisc - Win32 Release"
-
-
-"$(INTDIR)\stdtime.obj" : $(SOURCE) "$(INTDIR)"
-
-
-!ELSEIF  "$(CFG)" == "libisc - Win32 Debug"
-
-
-"$(INTDIR)\stdtime.obj"	"$(INTDIR)\stdtime.sbr" : $(SOURCE) "$(INTDIR)"
-
-
-!ENDIF 
-
 SOURCE=.\strerror.c
 
 !IF  "$(CFG)" == "libisc - Win32 Release"

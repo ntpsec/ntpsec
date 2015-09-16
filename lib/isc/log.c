@@ -27,6 +27,7 @@
 #include <limits.h>
 #include <time.h>
 #include <dirent.h>
+#include <stdio.h>
 
 #include <sys/types.h>	/* dev_t FreeBSD 2.1 */
 
@@ -36,9 +37,9 @@
 #include <isc/mem.h>
 #include <isc/msgs.h>
 #include <isc/stat.h>
-#include <isc/stdio.h>
 #include <isc/time.h>
 #include <isc/util.h>
+
 #include "ntp_stdlib.h"		/* NTP change for strlcpy, strlcat */
 
 #define LCTX_MAGIC		ISC_MAGIC('L', 'c', 't', 'x')
@@ -46,6 +47,8 @@
 
 #define LCFG_MAGIC		ISC_MAGIC('L', 'c', 'f', 'g')
 #define VALID_CONFIG(lcfg)	ISC_MAGIC_VALID(lcfg, LCFG_MAGIC)
+
+#include "unix/errno2result.h"
 
 /*
  * XXXDCL make dynamic?
@@ -1367,9 +1370,11 @@ isc_log_open(isc_logchannel_t *channel) {
 		}
 	}
 
-	result = isc_stdio_open(path, "a", &FILE_STREAM(channel));
-
-	return (result);
+	/* assumes we have POSIX underneath */
+	FILE_STREAM(channel) = fopen(path, "a");
+	if (FILE_STREAM(channel) == NULL)
+		return (isc__errno2result(errno));
+	return (ISC_R_SUCCESS);
 }
 
 isc_boolean_t
