@@ -5,12 +5,12 @@
     [Released under MIT License. Please refer to license.txt for details]
 ========================================== */
 
-#ifndef GUARD_UNITY_FIXTURE_H
-#define GUARD_UNITY_FIXTURE_H
+#ifndef UNITY_FIXTURE_H_
+#define UNITY_FIXTURE_H_
 
 #include "unity.h"
 #include "unity_internals.h"
-//#include "unity_fixture_malloc_overrides.h"
+#include "unity_fixture_malloc_overrides.h"
 #include "unity_fixture_internals.h"
 
 int UnityMain(int argc, const char* argv[], void (*runAllTests)(void));
@@ -75,7 +75,7 @@ int UnityMain(int argc, const char* argv[], void (*runAllTests)(void));
 #define UT_PTR_SET(ptr, newPointerValue)               UnityPointer_Set((void**)&ptr, (void*)newPointerValue)
 #define TEST_ASSERT_POINTERS_EQUAL(expected, actual)   TEST_ASSERT_EQUAL_PTR(expected, actual)
 #define TEST_ASSERT_BYTES_EQUAL(expected, actual)      TEST_ASSERT_EQUAL_HEX8(0xff & (expected), 0xff & (actual))
-#define FAIL(message)                                  TEST_FAIL((message))
+#define FAIL(message)                                  TEST_FAIL_MESSAGE((message))
 #define CHECK(condition)                               TEST_ASSERT_TRUE((condition))
 #define LONGS_EQUAL(expected, actual)                  TEST_ASSERT_EQUAL_INT((expected), (actual))
 #define STRCMP_EQUAL(expected, actual)                 TEST_ASSERT_EQUAL_STRING((expected), (actual))
@@ -83,4 +83,4 @@ int UnityMain(int argc, const char* argv[], void (*runAllTests)(void));
 
 void UnityMalloc_MakeMallocFailAfterCount(int count);
 
-#endif /* GUARD_UNITY_FIXTURE_H */
+#endif /* UNITY_FIXTURE_H_ */
