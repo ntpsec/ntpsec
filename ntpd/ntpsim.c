@@ -103,7 +103,7 @@ ntpsim(
 	)
 {
 	Event *		curr_event;
-	struct timeval	seed;
+	struct timespec	seed;
 
 	/* Initialize the local Clock */
 	simclock.local_time = 0;
@@ -141,8 +141,8 @@ ntpsim(
 	/*
 	 * Watch out here, we want the real time, not the silly stuff.
 	 */
-	gettimeofday(&seed, NULL);
-	ntp_srandom(seed.tv_usec);
+	clock_gettime(CLOCK_REALTIME, &seed);
+	ntp_srandom(seed.tv_nsec);
 
 	/* Initialize the event queue */
 	event_queue = create_priority_queue((q_order_func)
