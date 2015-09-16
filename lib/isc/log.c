@@ -31,7 +31,6 @@
 
 #include <sys/types.h>	/* dev_t FreeBSD 2.1 */
 
-#include <isc/file.h>
 #include <isc/log.h>
 #include <isc/magic.h>
 #include <isc/mem.h>
@@ -1265,7 +1264,7 @@ roll_log(isc_logchannel_t *channel) {
 			if (n >= (int)sizeof(current) || n < 0)
 				result = ISC_R_NOSPACE;
 			else
-				result = isc_file_remove(current);
+				result = isc__errno2result(remove(current));
 			if (result != ISC_R_SUCCESS &&
 			    result != ISC_R_FILENOTFOUND)
 				syslog(LOG_ERR,
@@ -1285,7 +1284,7 @@ roll_log(isc_logchannel_t *channel) {
 				result = ISC_R_NOSPACE;
 		}
 		if (result == ISC_R_SUCCESS)
-			result = isc_file_rename(current, new);
+		    result = isc__errno2result(rename(current, new));
 		if (result != ISC_R_SUCCESS &&
 		    result != ISC_R_FILENOTFOUND)
 			syslog(LOG_ERR,
@@ -1299,14 +1298,14 @@ roll_log(isc_logchannel_t *channel) {
 		if (n >= (int)sizeof(new) || n < 0)
 			result = ISC_R_NOSPACE;
 		else
-			result = isc_file_rename(path, new);
+			result = isc__errno2result(rename(path, new));
 		if (result != ISC_R_SUCCESS &&
 		    result != ISC_R_FILENOTFOUND)
 			syslog(LOG_ERR,
 			       "unable to rename log file '%s' to '%s.0': %s",
 			       path, path, isc_result_totext(result));
 	} else {
-		result = isc_file_remove(path);
+	    result = isc__errno2result(remove(path));
 		if (result != ISC_R_SUCCESS &&
 		    result != ISC_R_FILENOTFOUND)
 			syslog(LOG_ERR, "unable to remove log file '%s': %s",
