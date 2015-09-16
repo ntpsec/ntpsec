@@ -16,7 +16,6 @@ this under scripts/.
 * The following symbols need to be investigated to determine under what
 circumstances configuration should set them.
 
-HAVE_ATOMIC_THREAD_FENCE
 HAVE_AUDIO
 HAVE_BINTIME
 HAVE_CATGETS
