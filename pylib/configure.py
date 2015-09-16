@@ -219,13 +219,14 @@ def cmd_configure(ctx):
 		('atomic_thread_fence', "stdatomic.h"),
 		('arc4random_buf', "stdlib.h"),
 		('clock_gettime', "time.h"),
-		('getclock' "sys/timers.h"),
+		('getclock', "sys/timers.h"),
 		('getpassphrase', "stdlib.h"), # Sun systems
 		('strlcpy', "string.h"),
 		('strlcat', "string.h"),
 		('sysconf', "unistd.h"),
 		('timegm', "time.h"),
 		)
+	print functions
 	for (n, h) in functions:
 		ctx.check_cc(function_name=n, header_name=h, mandatory=False)
 
