@@ -171,10 +171,6 @@ SOURCE=.\strerror.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\stdio.c
-# End Source File
-# Begin Source File
-
 SOURCE=.\stdtime.c
 # End Source File
 # Begin Source File
