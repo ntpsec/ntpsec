@@ -218,7 +218,6 @@ def cmd_configure(ctx):
 		('arc4random', "stdlib.h"),
 		('atomic_thread_fence', "stdatomic.h"),
 		('arc4random_buf', "stdlib.h"),
-		('clock_gettime', "time.h"),
 		('getclock', "sys/timers.h"),
 		('getpassphrase', "stdlib.h"), # Sun systems
 		('strlcpy', "string.h"),
@@ -306,6 +305,14 @@ int main() { return 0; }
 	ctx.check_cc(feature="c cshlib", lib="event", libpath=ctx.env.PLATFORM_LIBPATH, uselib_store="LIBEVENT")
 	ctx.check_cc(feature="c cshlib", lib="event_core", libpath=ctx.env.PLATFORM_LIBPATH, uselib_store="LIBEVENT_CORE")
 	ctx.check_cc(feature="c cshlib", lib="event_pthreads", libpath=ctx.env.PLATFORM_LIBPATH, uselib_store="LIBEVENT_PTHREADS", use="LIBEVENT")
+
+
+	ctx.check_cc(
+		function_name="clock_gettime",
+		header_name="time.h",
+		use="RT",
+		mandatory=False
+	)
 
 
 	ctx.check_cc(
