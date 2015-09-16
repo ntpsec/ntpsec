@@ -1897,20 +1897,14 @@ oncore_msg_any(
 	const char *p;
 	char *q;
 	char *qlim;
-#ifdef HAVE_GETCLOCK
 	struct timespec ts;
-#endif
 	struct timeval tv;
 	char	Msg[120], Msg2[10];
 
 	if (debug > 3) {
-# ifdef HAVE_GETCLOCK
-		(void) getclock(TIMEOFDAY, &ts);
+		(void) clock_gettime(CLOCK_REALTIME, &ts);
 		tv.tv_sec = ts.tv_sec;
 		tv.tv_usec = ts.tv_nsec / 1000;
-# else
-		GETTIMEOFDAY(&tv, 0);
-# endif
 		oncore_log(instance, LOG_DEBUG, "%ld.%06ld",
 			   (long)tv.tv_sec, (long)tv.tv_usec);
 
@@ -3504,7 +3498,7 @@ oncore_load_almanac(
 {
 	u_char	*cp, Cmd[20];
 	int	n;
-	struct timeval tv;
+	struct timespec ts;
 	struct tm *tm;
 
 	if (!instance->shmem)
@@ -3572,8 +3566,8 @@ oncore_load_almanac(
 
 	/* and set time to time from Computer clock */
 
-	GETTIMEOFDAY(&tv, 0);
-	tm = gmtime((const time_t *) &tv.tv_sec);
+	clock_gettime(CLOCK_REALTIME, &ts);
+	tm = gmtime((const time_t *) &ts.tv_sec);
 
 #ifdef ONCORE_VERBOSE_LOAD_ALMANAC
 	oncore_log_f(instance, LOG_DEBUG, "DATE %d %d %d, %d %d %d",

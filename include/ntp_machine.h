@@ -74,7 +74,6 @@ int ntp_set_tod (struct timeval *tvp, void *tzp);
 /* end my new defines */
 
 #define TIMEOFDAY		0x0 	/* system wide realtime clock */
-#define HAVE_GETCLOCK		1	/* configure does not set this ... */
 #define HAVE_NO_NICE		1	/* configure does not set this ... */
 #define HAVE_RANDOM		1	/* configure does not set this ...  */
 #define HAVE_SRANDOM		1	/* configure does not set this ... */

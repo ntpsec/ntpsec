@@ -119,9 +119,7 @@ default_get_precision(void)
 {
 	struct timeval tp;
 	struct timezone tzp;
-#ifdef HAVE_GETCLOCK
 	struct timespec ts;
-#endif
 	long last;
 	int i;
 	long diff;
@@ -130,22 +128,14 @@ default_get_precision(void)
 
 	usec = 0;
 	val = MAXSTEP;
-#ifdef HAVE_GETCLOCK
-	(void) getclock(TIMEOFDAY, &ts);
+	(void) clock_gettime(CLOCK_GETTIME, &ts);
 	tp.tv_sec = ts.tv_sec;
 	tp.tv_usec = ts.tv_nsec / 1000;
-#else /*  not HAVE_GETCLOCK */
-	GETTIMEOFDAY(&tp, &tzp);
-#endif /* not HAVE_GETCLOCK */
 	last = tp.tv_usec;
 	for (i = 0; i < MINLOOPS && usec < HUSECS;) {
-#ifdef HAVE_GETCLOCK
-		(void) getclock(TIMEOFDAY, &ts);
+		(void) clock_gettime(CLOCK_REALTIME, &ts);
 		tp.tv_sec = ts.tv_sec;
 		tp.tv_usec = ts.tv_nsec / 1000;
-#else /*  not HAVE_GETCLOCK */
-		GETTIMEOFDAY(&tp, &tzp);
-#endif /* not HAVE_GETCLOCK */
 		diff = tp.tv_usec - last;
 		last = tp.tv_usec;
 		if (diff < 0)
