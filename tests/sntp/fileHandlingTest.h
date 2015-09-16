@@ -3,62 +3,14 @@
 
 #include "sntptest.h"
 
-#include <fstream>
-#include <string>
+typedef enum {
+	INPUT_DIR = 0,
+	OUTPUT_DIR = 1
+}  DirectoryType;
 
-using std::ifstream;
-using std::string;
-using std::ios;
-
-class fileHandlingTest : public sntptest {
-protected:
-	enum DirectoryType {
-		INPUT_DIR = 0,
-		OUTPUT_DIR = 1
-	};
-
-	std::string CreatePath(const char* filename, DirectoryType argument) {
-		std::string path;
-
-		if (m_params.size() >= argument + 1) {
-			path = m_params[argument];
-		}
-
-		if (path[path.size()-1] != DIR_SEP && !path.empty()) {
-			path.append(1, DIR_SEP);
-		}
-		path.append(filename);
-
-		return path;
-	}
-
-	int GetFileSize(ifstream& file) {
-		int initial = file.tellg();
-
-		file.seekg(0, ios::end);
-		int length = file.tellg();
-		file.seekg(initial);
-
-		return length;
-	}
-
-	void CompareFileContent(ifstream& expected, ifstream& actual) {
-		int currentLine = 1;
-		while (actual.good() && expected.good()) {
-			string actualLine, expectedLine;
-			getline(actual, actualLine);
-			getline(expected, expectedLine);
-
-			TEST_ASSERT_EQUAL(expectedLine, actualLine) << "Comparision failed on line " << currentLine;
-			currentLine++;
-		}
-	}
-
-	void ClearFile(const std::string& filename) {
-		std::ofstream clear(filename.c_str(), ios::trunc);
-		TEST_ASSERT_TRUE(clear.good());
-		clear.close();
-	}
-};
+const char* CreatePath(const char* filename, DirectoryType argument);
+ssize_t GetFileSize(FILE* file);
+void CompareFileContent(FILE* expected, FILE* actual);
+void ClearFile(const char* filename);
 
 #endif // GUARD_FILE_HANDLING_TEST_H

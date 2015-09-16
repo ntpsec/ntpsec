@@ -17,7 +17,7 @@ make_mac(
 	u_int		len = mac_size;
 	int		key_type;
 	EVP_MD_CTX	ctx;
-	
+
 	if (cmp_key->key_len > 64)
 		return 0;
 	if (pkt_size % 4 != 0)
@@ -34,9 +34,9 @@ make_mac(
 }
 
 
-/* Generates a md5 digest of the key specified in keyid concatinated with the 
+/* Generates a md5 digest of the key specified in keyid concatinated with the
  * ntp packet (exluding the MAC) and compares this digest to the digest in
- * the packet's MAC. If they're equal this function returns 1 (packet is 
+ * the packet's MAC. If they're equal this function returns 1 (packet is
  * authentic) or else 0 (not authentic).
  */
 bool
@@ -83,7 +83,7 @@ hex_val(
 }
 
 /* Load keys from the specified keyfile into the key structures.
- * Returns -1 if the reading failed, otherwise it returns the 
+ * Returns -1 if the reading failed, otherwise it returns the
  * number of keys it read
  */
 int
@@ -92,19 +92,19 @@ auth_init(
 	struct key **keys
 	)
 {
-	FILE *keyf = fopen(keyfile, "r"); 
+	FILE *keyf = fopen(keyfile, "r");
 	struct key *prev = NULL;
 	int scan_cnt, line_cnt = 0;
 	char kbuf[200];
 	char keystring[129];
 
 	if (keyf == NULL) {
-		if (debug)
+		if (1 || debug)
 			printf("sntp auth_init: Couldn't open key file %s for reading!\n", keyfile);
 		return -1;
 	}
 	if (feof(keyf)) {
-		if (debug)
+		if (1 || debug)
 			printf("sntp auth_init: Key file %s is empty!\n", keyfile);
 		fclose(keyf);
 		return -1;
@@ -164,12 +164,12 @@ auth_init(
 		line_cnt++;
 	}
 	fclose(keyf);
-	
+
 	key_ptr = *keys;
 	return key_cnt;
 }
 
-/* Looks for the key with keyid key_id and sets the d_key pointer to the 
+/* Looks for the key with keyid key_id and sets the d_key pointer to the
  * address of the key. If no matching key is found the pointer is not touched.
  */
 void

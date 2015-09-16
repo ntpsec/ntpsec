@@ -3,6 +3,8 @@ extern "C" {
 #include "unity_fixture.h"
 }
 
+#include <iostream>
+
 TEST_GROUP(keyFile);
 
 TEST_SETUP(keyFile) {}
@@ -18,21 +20,25 @@ extern "C" {
 class keyFileTest : public fileHandlingTest {
 protected:
 	bool CompareKeys(key& expected, key& actual) {
-		if (expected.key_id != actual.key_id)
-			return false
-				<< "Expected key_id: " << expected.key_id
-				<< " but was: " << actual.key_id;
-		if (expected.key_len != actual.key_len)
-			return false
-				<< "Expected key_len: " << expected.key_len
-				<< " but was: " << actual.key_len;
-		if (strcmp(expected.type, actual.type) != 0)
-			return false
-				<< "Expected key_type: " << expected.type
-				<< " but was: " << actual.type;
-		if (memcmp(expected.key_seq, actual.key_seq, expected.key_len) != 0)
-			return false
-				<< "Key mismatch!";
+		if (expected.key_id != actual.key_id) {
+			std::cout << "Expected key_id: " << expected.key_id
+				<< " but was: " << actual.key_id << std::endl;
+			return false;
+		}
+		if (expected.key_len != actual.key_len) {
+			std::cout << "Expected key_len: " << expected.key_len
+				<< " but was: " << actual.key_len << std::endl;
+			return false;
+		}
+		if (strcmp(expected.type, actual.type) != 0) {
+			std::cout << "Expected key_type: " << expected.type
+				<< " but was: " << actual.type << std::endl;
+			return false;
+		}
+		if (memcmp(expected.key_seq, actual.key_seq, expected.key_len) != 0) {
+			std::cout << "Key mismatch!" << std::endl;
+			return false;
+		}
 		return true;
 	}
 

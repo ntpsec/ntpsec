@@ -10,7 +10,7 @@
 
 #include "unity.h"
 #include "unity_internals.h"
-#include "unity_fixture_malloc_overrides.h"
+//#include "unity_fixture_malloc_overrides.h"
 #include "unity_fixture_internals.h"
 
 int UnityMain(int argc, const char* argv[], void (*runAllTests)(void));

@@ -3,20 +3,11 @@
 
 #include "config.h"
 
-#include <string>
-#include <vector>
+#include "unity.h"
+#include "unity_fixture.h"
 
-#include <gtest/gtest.h>
-
-extern "C" {
 #include "ntp_stdlib.h"
-}
 
-class ntptest : public ::testing::Test {
-public:
-	static void SetExtraParams(int start, int count, char** argv);
-protected:
-	static std::vector<std::string> m_params;
-};
+const char* tests_main_args(int arg);
 
 #endif // GUARD_TESTS_MAIN_H
