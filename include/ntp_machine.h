@@ -54,10 +54,6 @@ WILL IOCTL(SIOCGIFCONF) WORK ON A SOCKET
   of the streams device instead.
 
   USE_STREAMS_DEVICE_FOR_IF_CONFIG - use the /dev/ip device for configuration
-
-MISC
-
-  DOSYNCTODR		- Resync TODR clock  every hour.
 */
 
 int ntp_set_tod (struct timeval *tvp, void *tzp);
