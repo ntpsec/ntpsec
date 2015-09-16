@@ -27,18 +27,18 @@
 #include <limits.h>
 #include <time.h>
 #include <dirent.h>
+#include <stdio.h>
 
 #include <sys/types.h>	/* dev_t FreeBSD 2.1 */
 
-#include <isc/file.h>
 #include <isc/log.h>
 #include <isc/magic.h>
 #include <isc/mem.h>
 #include <isc/msgs.h>
 #include <isc/stat.h>
-#include <isc/stdio.h>
 #include <isc/time.h>
 #include <isc/util.h>
+
 #include "ntp_stdlib.h"		/* NTP change for strlcpy, strlcat */
 
 #define LCTX_MAGIC		ISC_MAGIC('L', 'c', 't', 'x')
@@ -46,6 +46,8 @@
 
 #define LCFG_MAGIC		ISC_MAGIC('L', 'c', 'f', 'g')
 #define VALID_CONFIG(lcfg)	ISC_MAGIC_VALID(lcfg, LCFG_MAGIC)
+
+#include "unix/errno2result.h"
 
 /*
  * XXXDCL make dynamic?
@@ -1262,7 +1264,7 @@ roll_log(isc_logchannel_t *channel) {
 			if (n >= (int)sizeof(current) || n < 0)
 				result = ISC_R_NOSPACE;
 			else
-				result = isc_file_remove(current);
+				result = isc__errno2result(remove(current));
 			if (result != ISC_R_SUCCESS &&
 			    result != ISC_R_FILENOTFOUND)
 				syslog(LOG_ERR,
@@ -1282,7 +1284,7 @@ roll_log(isc_logchannel_t *channel) {
 				result = ISC_R_NOSPACE;
 		}
 		if (result == ISC_R_SUCCESS)
-			result = isc_file_rename(current, new);
+		    result = isc__errno2result(rename(current, new));
 		if (result != ISC_R_SUCCESS &&
 		    result != ISC_R_FILENOTFOUND)
 			syslog(LOG_ERR,
@@ -1296,14 +1298,14 @@ roll_log(isc_logchannel_t *channel) {
 		if (n >= (int)sizeof(new) || n < 0)
 			result = ISC_R_NOSPACE;
 		else
-			result = isc_file_rename(path, new);
+			result = isc__errno2result(rename(path, new));
 		if (result != ISC_R_SUCCESS &&
 		    result != ISC_R_FILENOTFOUND)
 			syslog(LOG_ERR,
 			       "unable to rename log file '%s' to '%s.0': %s",
 			       path, path, isc_result_totext(result));
 	} else {
-		result = isc_file_remove(path);
+	    result = isc__errno2result(remove(path));
 		if (result != ISC_R_SUCCESS &&
 		    result != ISC_R_FILENOTFOUND)
 			syslog(LOG_ERR, "unable to remove log file '%s': %s",
@@ -1367,9 +1369,11 @@ isc_log_open(isc_logchannel_t *channel) {
 		}
 	}
 
-	result = isc_stdio_open(path, "a", &FILE_STREAM(channel));
-
-	return (result);
+	/* assumes we have POSIX underneath */
+	FILE_STREAM(channel) = fopen(path, "a");
+	if (FILE_STREAM(channel) == NULL)
+		return (isc__errno2result(errno));
+	return (ISC_R_SUCCESS);
 }
 
 isc_boolean_t

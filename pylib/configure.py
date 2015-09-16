@@ -226,7 +226,6 @@ def cmd_configure(ctx):
 		('sysconf', "unistd.h"),
 		('timegm', "time.h"),
 		)
-	print functions
 	for (n, h) in functions:
 		ctx.check_cc(function_name=n, header_name=h, mandatory=False)
 
