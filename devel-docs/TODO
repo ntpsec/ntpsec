@@ -4,7 +4,7 @@
 
 === Code ===
 
-* -lrt needs to be ined when present, for clock_gettime() wnen glibc < 2.17.
+* -lrt needs to be linked when present, for clock_gettime() wnen glibc < 2.17.
 
 * The u_* types in ntp.h are GCCisms that should be replaced with
 POSIX types.
@@ -23,10 +23,7 @@ HAVE_CIOGETEV
 HAVE_DNSREGISTRATION
 HAVE_DROPROOT
 HAVE_GETBOOTFILE
-HAVE_GETBOOTFILE		
-HAVE_GETCLOCK
 HAVE_GETIFADDRS
-HAVE_GETPASSPHRASE
 HAVE_IO_COMPLETION_PORT
 HAVE_KVM_OPEN
 HAVE_LIBCTRACE

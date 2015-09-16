@@ -219,6 +219,7 @@ def cmd_configure(ctx):
 		('atomic_thread_fence', "stdatomic.h"),
 		('arc4random_buf', "stdlib.h"),
 		('clock_gettime', "time.h"),
+		('getclock' "sys/timers.h"),
 		('getpassphrase', "stdlib.h"), # Sun systems
 		('strlcpy', "string.h"),
 		('strlcat', "string.h"),

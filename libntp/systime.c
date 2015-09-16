@@ -125,6 +125,8 @@ init_systime(void)
 #ifdef __MACH__
 #include <mach/clock.h>
 #include <mach/mach.h>
+#elsif HAVE_GETCLOCK
+#include <sys/timers.h>
 #endif
 
 int clock_gettime(clockid_t clk_id UNUSED, struct timespec *tp)
@@ -137,9 +139,19 @@ int clock_gettime(clockid_t clk_id UNUSED, struct timespec *tp)
     mach_port_deallocate(mach_task_self(), cclock);
     tp->tv_sec = mts.tv_sec;
     tp->tv_nsec = mts.tv_nsec;
+#elsif HAVE_GETCLOCK
+    (void) getclock(TIMEOFDAY, &tp);
 #else
-    return -1;
-#endif /* __MACH__ */
+#error Either POSIX clock_gettime(2) or Tru64/HP-UX getclock(2) is required
+/*
+ * Note: as a result of the refactoring of time handing, the aupport for
+ * compiling ntpdsim is currently broken.  It used to have an intercept point
+ * in unixtime.h, these definitions:
+   #define GETTIMEOFDAY(a, b) (node_gettime(&ntp_node, a))
+   #define SETTIMEOFDAY(a, b) (node_settime(&ntp_node, a))
+   #define ADJTIMEOFDAY(a, b) (node_adjtime(&ntp_node, a, b))
+*/
+#endif
     return 0;
 }
 #endif /* HAVE_CLOCK_GETTIME */

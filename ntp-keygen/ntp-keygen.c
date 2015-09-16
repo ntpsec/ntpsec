@@ -341,7 +341,7 @@ main(
 	char	**argv
 	)
 {
-	struct timeval tv;	/* initialization vector */
+	struct timespec ts;	/* initialization vector */
 	int	md5key = 0;	/* generate MD5 keys */
 #ifdef ENABLE_AUTOKEY
 	X509	*cert = NULL;	/* X509 certificate */
@@ -402,8 +402,8 @@ main(
 	groupname = hostbuf;
 	passwd1 = hostbuf;
 	passwd2 = NULL;
-	GETTIMEOFDAY(&tv, NULL);
-	epoch = tv.tv_sec;
+	clock_gettime(CLOCK_REALTIME, &ts);
+	epoch = ts.tv_sec;
 	fstamp = (u_int)(epoch + JAN_1970);
 
 	while ((op = ntp_getopt_long(argc, argv,
