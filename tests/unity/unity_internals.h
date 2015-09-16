@@ -4,8 +4,8 @@
     [Released under MIT License. Please refer to license.txt for details]
 ========================================== */
 
-#ifndef GUARD_UNITY_INTERNALS_H
-#define GUARD_UNITY_INTERNALS_H
+#ifndef UNITY_INTERNALS_H
+#define UNITY_INTERNALS_H
 
 #ifdef UNITY_INCLUDE_CONFIG_H
 #include "unity_config.h"
@@ -697,5 +697,5 @@ extern const char UnityStrErr64[];
 #define UNITY_TEST_ASSERT_DOUBLE_IS_NOT_DETERMINATE(actual, line, message)                       UnityAssertDoubleSpecial((_UD)(actual), (message), (UNITY_LINE_TYPE)line, UNITY_FLOAT_IS_NOT_DET)
 #endif
 
-//End of GUARD_UNITY_INTERNALS_H
+//End of UNITY_INTERNALS_H
 #endif

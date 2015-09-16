@@ -1,14 +1,11 @@
 /* ==========================================
     Unity Project - A Test Framework for C
     Copyright (c) 2007-14 Mike Karlesky, Mark VanderVoord, Greg Williams
-    [Released under MIT License. Please refer to license.txt in the 
-    Unity distribution for details]
-    This copy has a couple of local additions; look for LOCAL EXTENSIONS BEGIN
-    and preserve these if you update it.
+    [Released under MIT License. Please refer to license.txt for details]
 ========================================== */
 
-#ifndef GUARD_UNITY_FRAMEWORK_H
-#define GUARD_UNITY_FRAMEWORK_H
+#ifndef UNITY_FRAMEWORK_H
+#define UNITY_FRAMEWORK_H
 #define UNITY
 
 #include "unity_internals.h"
@@ -83,12 +80,6 @@
 #define TEST_ASSERT_EQUAL_INT64(expected, actual)                                                  UNITY_TEST_ASSERT_EQUAL_INT64((expected), (actual), __LINE__, NULL)
 #define TEST_ASSERT_EQUAL(expected, actual)                                                        UNITY_TEST_ASSERT_EQUAL_INT((expected), (actual), __LINE__, NULL)
 #define TEST_ASSERT_NOT_EQUAL(expected, actual)                                                    UNITY_TEST_ASSERT(((expected) !=  (actual)), __LINE__, " Expected Not-Equal")
-/* LOCAL EXTENSIONS BEGIN */
-#define TEST_ASSERT_LESS_THAN(expected, actual)                                                    UNITY_TEST_ASSERT(((expected) <  (actual)), __LINE__, " Expected Less-Than")
-#define TEST_ASSERT_GREATER_THAN(expected, actual)                                                    UNITY_TEST_ASSERT(((expected) >  (actual)), __LINE__, " Expected Greater-Than")
-#define TEST_ASSERT_LESS_THAN_OR_EQUAL(expected, actual)                                                    UNITY_TEST_ASSERT(((expected) <=  (actual)), __LINE__, " Expected Less-Than-or-Equal")
-#define TEST_ASSERT_GREATER_THAN_OR_EQUAL(expected, actual)                                                    UNITY_TEST_ASSERT(((expected) >=  (actual)), __LINE__, " Expected Greater-Than-or-Equal")
-/* LOCAL EXTENSIONS END */
 #define TEST_ASSERT_EQUAL_UINT(expected, actual)                                                   UNITY_TEST_ASSERT_EQUAL_UINT( (expected), (actual), __LINE__, NULL)
 #define TEST_ASSERT_EQUAL_UINT8(expected, actual)                                                  UNITY_TEST_ASSERT_EQUAL_UINT8( (expected), (actual), __LINE__, NULL)
 #define TEST_ASSERT_EQUAL_UINT16(expected, actual)                                                 UNITY_TEST_ASSERT_EQUAL_UINT16( (expected), (actual), __LINE__, NULL)
@@ -279,5 +270,5 @@
 #define TEST_ASSERT_DOUBLE_IS_NOT_NAN_MESSAGE(actual, message)                                     UNITY_TEST_ASSERT_DOUBLE_IS_NOT_NAN(actual, __LINE__, message)
 #define TEST_ASSERT_DOUBLE_IS_NOT_DETERMINATE_MESSAGE(actual, message)                             UNITY_TEST_ASSERT_DOUBLE_IS_NOT_DETERMINATE(actual, __LINE__, message)
 
-//end of GUARD_UNITY_FRAMEWORK_H
+//end of UNITY_FRAMEWORK_H
 #endif
