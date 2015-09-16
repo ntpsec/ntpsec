@@ -82,7 +82,6 @@
 
 #include <isc/eventclass.h>
 #include <isc/lang.h>
-#include <isc/stdtime.h>
 #include <isc/types.h>
 
 #define ISC_TASKEVENT_FIRSTEVENT	(ISC_EVENTCLASS_TASK + 0)
@@ -598,7 +597,7 @@ isc_task_endexclusive(isc_task_t *task);
  */
 
 void
-isc_task_getcurrenttime(isc_task_t *task, isc_stdtime_t *t);
+isc_task_getcurrenttime(isc_task_t *task, time_t *t);
 /*%<
  * Provide the most recent timestamp on the task.  The timestamp is considered
  * as the "current time" in the second-order granularity.
