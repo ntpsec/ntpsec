@@ -129,13 +129,13 @@ init_systime(void)
 #include <sys/timers.h>
 #endif
 
-int clock_gettime(clockid_t clk_id clocktype, struct timespec *tp)
+int clock_gettime(clockid_t clk_id, struct timespec *tp)
 {
 #ifdef __MACH__ // OS X does not have clock_gettime, use clock_get_time
     clock_serv_t cclock;
     mach_timespec_t mts;
     int mode;
-    switch (clocktype) {
+    switch (clk_id) {
     case CLOCK_REALTIME:
 	mode = CALENDAR_CLOCK;
 	break;
