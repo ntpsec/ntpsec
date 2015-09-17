@@ -16,6 +16,7 @@
  * notably Mac OS X.
  */
 #define CLOCK_REALTIME	0
+typedef int clockid_t;
 #endif
 
 /*
