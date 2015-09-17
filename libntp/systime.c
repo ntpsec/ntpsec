@@ -125,7 +125,7 @@ init_systime(void)
 #ifdef __MACH__
 #include <mach/clock.h>
 #include <mach/mach.h>
-#elsif HAVE_GETCLOCK
+#elif HAVE_GETCLOCK
 #include <sys/timers.h>
 #endif
 
