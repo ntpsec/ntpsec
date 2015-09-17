@@ -223,7 +223,6 @@ def cmd_configure(ctx):
 	functions = (
 		('adjtimex', "sys/timex.h"),
 		('arc4random', "stdlib.h"),
-		('atomic_thread_fence', "stdatomic.h"),
 		('arc4random_buf', "stdlib.h"),
 		('getclock', "sys/timers.h"),
 		('getpassphrase', "stdlib.h"), # Sun systems
