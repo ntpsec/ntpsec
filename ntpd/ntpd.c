@@ -91,12 +91,6 @@
 DNSServiceRef mdns;
 #endif
 
-#ifdef HAVE_SETPGRP_0
-# define ntp_setpgrp(x, y)	setpgrp()
-#else
-# define ntp_setpgrp(x, y)	setpgrp(x, y)
-#endif
-
 #ifdef HAVE_SOLARIS_PRIVS
 # define LOWPRIVS "basic,sys_time,net_privaddr,proc_setid,!proc_info,!proc_session,!proc_exec"
 static priv_set_t *lowprivs = NULL;
