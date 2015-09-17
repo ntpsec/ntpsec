@@ -250,7 +250,7 @@ sntp_main (
 		opt_timeout = atoi(ntp_optarg);
 		break;
 	    case 'V':
-		printf("%s\n", sntpVersion);
+		printf("sntp %s\n", sntpVersion);
 		exit(0);
 	    case 'w':
 		opt_wait = true;
@@ -283,7 +283,7 @@ sntp_main (
 	if (opt_logfile)
 		open_logfile(opt_logfile);
 
-	msyslog(LOG_INFO, "%s", sntpVersion);
+	msyslog(LOG_INFO, "sntp %s", sntpVersion);
 
 	if (0 == argc && !opt_broadcast && !opt_concurrent) {
 		printf("%s: Must supply at least one of -b hostname, -c hostname, or hostname.\n",

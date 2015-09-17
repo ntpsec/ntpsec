@@ -152,11 +152,6 @@ int	waitsync_fd_to_close = -1;	/* -w/--wait-sync */
  */
 bool initializing;
 
-/*
- * Version declaration
- */
-extern const char *Version;
-
 extern bool config_priority_override;
 static int config_priority;
 
@@ -408,7 +403,7 @@ parse_cmdline_opts(
 		}
 		break;
 	    case 'V':
-		printf("%s\n", Version);
+		printf("ntpd %s\n", NTPS_VERSION_STRING);
 		exit(0);
 	    case 'w':
 		wait_sync = strtod(ntp_optarg, NULL);
@@ -462,7 +457,7 @@ main(
 	parse_cmdline_opts(argc, argv);
 
 #ifdef DEBUG
-	DPRINTF(1, ("%s\n", Version));
+	DPRINTF(1, ("ntpd %s\n", NTPS_VERSION_STRING));
 #endif
 
 	return ntpsim(argc, argv);
@@ -655,7 +650,7 @@ ntpdmain(
 		char buf[1024];	/* Secret knowledge of msyslog buf length */
 		char *cp = buf;
 
-		msyslog(LOG_NOTICE, "%s: Starting", Version);
+		msyslog(LOG_NOTICE, "ntpd %s: Starting", NTPS_VERSION_STRING);
 
 		/* Note that every arg has an initial space character */
 		snprintf(cp, sizeof(buf), "Command line:");
