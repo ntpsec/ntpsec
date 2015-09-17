@@ -156,13 +156,14 @@ int clock_gettime(clockid_t clk_id, struct timespec *tp)
 #else
 #error Either POSIX clock_gettime(2) or Tru64/HP-UX getclock(2) is required
 /*
- * Note: as a result of the refactoring of time handing, the aupport for
+ * Note: as a result of the refactoring of time handing, the support for
  * compiling ntpdsim is currently broken.  It used to have an intercept point
  * in unixtime.h, these definitions:
    #define GETTIMEOFDAY(a, b) (node_gettime(&ntp_node, a))
    #define SETTIMEOFDAY(a, b) (node_settime(&ntp_node, a))
    #define ADJTIMEOFDAY(a, b) (node_adjtime(&ntp_node, a, b))
-*/
+ * To work again it will need one here. 
+ */
 #endif
     return 0;
 }
