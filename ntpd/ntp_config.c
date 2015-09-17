@@ -4415,7 +4415,8 @@ getconfig(const char *explicit_config)
 	/*
 	 * install a non default variable with this daemon version
 	 */
-	snprintf(line, sizeof(line), "daemon_version=\"%s\"", Version);
+	snprintf(line, sizeof(line),
+		"daemon_version=\"ntpd %s\"", NTPS_VERSION_STRING);
 	set_sys_var(line, strlen(line) + 1, RO);
 
 	/*

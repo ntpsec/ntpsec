@@ -2629,7 +2629,7 @@ version(
 	)
 {
 
-	(void) fprintf(fp, "%s\n", Version);
+	(void) fprintf(fp, "ntpq %s\n", NTPS_VERSION_STRING);
 	return;
 }
 

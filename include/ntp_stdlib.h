@@ -279,9 +279,6 @@ extern double	measured_tick;		/* non-overridable sys_tick */
 extern double	sys_fuzz;		/* min clock read latency */
 extern bool	trunc_os_clock;		/* sys_tick > measured_tick */
 
-/* version.c */
-extern const char *Version;		/* version declaration */
-
 /* use these as return values for sort-comparison functions */
 #define COMPARE_GREATERTHAN	1
 #define COMPARE_EQUAL		0

@@ -449,7 +449,7 @@ ntpdatemain (
 	}
 
 	if (debug || verbose)
-		msyslog(LOG_NOTICE, "%s", Version);
+		msyslog(LOG_NOTICE, "ntpdate %s", NTPS_VERSION_STRING);
 
 	/*
 	 * Add servers we are going to be polling
