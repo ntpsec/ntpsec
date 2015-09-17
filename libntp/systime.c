@@ -129,12 +129,24 @@ init_systime(void)
 #include <sys/timers.h>
 #endif
 
-int clock_gettime(clockid_t clk_id UNUSED, struct timespec *tp)
+int clock_gettime(clockid_t clk_id clocktype, struct timespec *tp)
 {
 #ifdef __MACH__ // OS X does not have clock_gettime, use clock_get_time
     clock_serv_t cclock;
     mach_timespec_t mts;
-    host_get_clock_service(mach_host_self(), CALENDAR_CLOCK, &cclock);
+    int mode;
+    switch (clocktype) {
+    case CLOCK_REALTIME:
+	mode = CALENDAR_CLOCK;
+	break;
+    case CLOCK_MONOTONIC:
+	/* http://stackoverflow.com/questions/11680461/monotonic-clock-on-osx */
+	mode = SYSTEM_CLOCK;
+	break;
+    default:
+	return -1;
+    }
+    host_get_clock_service(mach_host_self(), mode, &cclock);
     clock_get_time(cclock, &mts);
     mach_port_deallocate(mach_task_self(), cclock);
     tp->tv_sec = mts.tv_sec;
