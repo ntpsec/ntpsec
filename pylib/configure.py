@@ -401,6 +401,10 @@ int main () {
 		from check_openssl import configure_ssl
 		configure_ssl(ctx)
 
+
+	ctx.define("NTPS_CFLAGS", " ".join(ctx.env.CFLAGS).replace("\"", "\\\""))
+	ctx.define("NTPS_LDFLAGS", " ".join(ctx.env.LDFLAGS).replace("\"", "\\\""))
+
 	ctx.start_msg("Writing configuration header:")
 	ctx.write_config_header("config.h")
 	ctx.end_msg("config.h", "PINK")
