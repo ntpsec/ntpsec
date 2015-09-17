@@ -168,8 +168,13 @@ def cmd_configure(ctx):
 
 	ctx.start_msg("Building version")
 	ctx.env.NTPS_VERSION_STRING = ctx.env.NTPS_VERSION
+
 	if ctx.env.NTPS_REVISION:
 		ctx.env.NTPS_VERSION_STRING += "-%s" % ctx.env.NTPS_REVISION[:7]
+
+	if ctx.options.build_version_tag:
+		ctx.env.NTPS_VERSION_STRING += "-%s" % ctx.options.build_version_tag
+
 	ctx.define("NTPS_VERSION_STRING", ctx.env.NTPS_VERSION_STRING)
 	ctx.end_msg(ctx.env.NTPS_VERSION_STRING)
 
