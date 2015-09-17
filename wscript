@@ -1,6 +1,9 @@
-VERSION_MAJOR = "1"
-VERSION_MINOR = "0"
-VERSION_REV   = "0"
+config = {
+	# "NTPS for NTPSec this avoids any naming collissions
+	"NTPS_VERSION_MAJOR": 1,
+	"NTPS_VERSION_MINOR": 0,
+	"NTPS_VERSION_REV":	 0
+}
 
 out="build"
 
@@ -39,10 +42,16 @@ def options(ctx):
 
 
 def configure(ctx):
-	ctx.env.VERSION_MAJOR = VERSION_MAJOR
-	ctx.env.VERSION_MINOR = VERSION_MINOR
-	ctx.env.VERSION_REV = VERSION_REV
-	ctx.env.VERSION_FULL = "%s.%s.%s" % (VERSION_MAJOR, VERSION_MINOR, VERSION_REV)
+	ctx.env.NTPS_VERSION_MAJOR = config["NTPS_VERSION_MAJOR"]
+	ctx.env.NTPS_VERSION_MINOR = config["NTPS_VERSION_MINOR"]
+	ctx.env.NTPS_VERSION_REV = config["NTPS_VERSION_REV"]
+
+	ctx.env.NTPS_VERSION = "%s.%s.%s" % (ctx.env.NTPS_VERSION_MAJOR, ctx.env.NTPS_VERSION_MINOR, ctx.env.NTPS_VERSION_REV)
+	ctx.define("NTPS_VERSION_MAJOR", ctx.env.NTPS_VERSION_MAJOR)
+	ctx.define("NTPS_VERSION_MINOR", ctx.env.NTPS_VERSION_REV)
+	ctx.define("NTPS_VERSION_REV", ctx.env.NTPS_VERSION_REV)
+
+
 
 
 	ctx.load('waf', tooldir='pylib/')

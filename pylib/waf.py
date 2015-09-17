@@ -31,9 +31,9 @@ def insert_libiscpthreaddir(self):
 
 
 class version(Task):
-	vars = ['VERSION_FULL', 'TARGET']
+	vars = ['NTPS_VERSION_STRING', 'TARGET']
 	def run(self):
-		self.outputs[0].write("const char *Version = \"%s %s\";" % (self.env.TARGET, self.env.VERSION_FULL))
+		self.outputs[0].write("const char *Version = \"%s %s\";" % (self.env.TARGET, self.env.NTPS_VERSION_STRING))
 
 @before_method('process_source')
 @feature('ntp_version')
