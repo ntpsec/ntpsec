@@ -1547,12 +1547,9 @@ mx4200_debug(struct peer *peer, char *fmt, ...)
 {
 #ifdef DEBUG
 	va_list ap;
-	struct refclockproc *pp;
 
 	if (debug) {
 		va_start(ap, fmt);
-
-		pp = peer->procptr;
 
 		/*
 		 * Print debug message to stdout
