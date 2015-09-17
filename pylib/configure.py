@@ -162,14 +162,16 @@ def cmd_configure(ctx):
 		ctx.start_msg("DEVEL: Getting revision")
 		cmd = ["git", "log", "-1", "--format=%H"]
 		p = subprocess.Popen(cmd, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=None)
-		ctx.env.REVISION, stderr = p.communicate()
-		ctx.env.REVISION = ctx.env.REVISION.replace("\n", "")
-		ctx.end_msg(ctx.env.REVISION)
+		ctx.env.NTPS_REVISION, stderr = p.communicate()
+		ctx.env.NTPS_REVISION = ctx.env.NTPS_REVISION.replace("\n", "")
+		ctx.end_msg(ctx.env.NTPS_REVISION)
 
 	ctx.start_msg("Building version")
-	if ctx.env.REVISION:
-		ctx.env.VERSION_FULL = "%s-%s" % (ctx.env.VERSION_FULL, ctx.env.REVISION[:7])
-	ctx.end_msg(ctx.env.VERSION_FULL)
+	ctx.env.NTPS_VERSION_STRING = ctx.env.NTPS_VERSION
+	if ctx.env.NTPS_REVISION:
+		ctx.env.NTPS_VERSION_STRING += "-%s" % ctx.env.NTPS_REVISION[:7]
+	ctx.define("NTPS_VERSION_STRING", ctx.env.NTPS_VERSION_STRING)
+	ctx.end_msg(ctx.env.NTPS_VERSION_STRING)
 
 
 	ctx.recurse("lib/isc")
