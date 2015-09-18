@@ -58,7 +58,7 @@ int	old_rv = 1;
 /*
  * for get_systime()
  */
-s_char	sys_precision;		/* local clock precision (log2 s) */
+int8_t	sys_precision;		/* local clock precision (log2 s) */
 
 /*
  * Keyid used for authenticated requests.  Obtained on the fly.
@@ -82,7 +82,7 @@ bool rawmode = false;
 /*
  * Packet version number we use
  */
-u_char pktversion = NTP_OLDVERSION + 1;
+uint8_t pktversion = NTP_OLDVERSION + 1;
 
 /*
  * Don't jump if no set jmp.
@@ -821,7 +821,7 @@ dump_hex_printable(
 	const char *	rowstart;
 	size_t		idx;
 	size_t		rowlen;
-	u_char		uch;
+	uint8_t		uch;
 
 	cdata = data;
 	while (len > 0) {
@@ -1252,7 +1252,7 @@ sendrequest(
 	 * Fill in the packet
 	 */
 	qpkt.li_vn_mode = PKT_LI_VN_MODE(0, pktversion, MODE_CONTROL);
-	qpkt.r_m_e_op = (u_char)(opcode & CTL_OP_MASK);
+	qpkt.r_m_e_op = (uint8_t)(opcode & CTL_OP_MASK);
 	qpkt.sequence = htons(sequence);
 	qpkt.status = 0;
 	qpkt.associd = htons((u_short)associd);
@@ -1309,7 +1309,7 @@ sendrequest(
 			return 1;
 		}
 		authusekey(info_auth_keyid, info_auth_keytype,
-			   (u_char *)pass);
+			   (uint8_t *)pass);
 		authtrust(info_auth_keyid, 1);
 	}
 
@@ -2010,10 +2010,10 @@ rtdatetolfp(
 		return false;
 	}
 
-	cal.monthday = (u_char) (*cp++ - '0');	/* ascii dependent */
+	cal.monthday = (uint8_t) (*cp++ - '0');	/* ascii dependent */
 	if (isdigit((int)*cp)) {
-		cal.monthday = (u_char)((cal.monthday << 3) + (cal.monthday << 1));
-		cal.monthday = (u_char)(cal.monthday + *cp++ - '0');
+		cal.monthday = (uint8_t)((cal.monthday << 3) + (cal.monthday << 1));
+		cal.monthday = (uint8_t)(cal.monthday + *cp++ - '0');
 	}
 
 	if (*cp++ != '-')
@@ -2028,7 +2028,7 @@ rtdatetolfp(
 		break;
 	if (i == 12)
 	    return false;
-	cal.month = (u_char)(i + 1);
+	cal.month = (uint8_t)(i + 1);
 
 	if (*cp++ != '-')
 	    return false;
@@ -2059,26 +2059,26 @@ rtdatetolfp(
 
 	if (*cp++ != ' ' || !isdigit((int)*cp))
 	    return false;
-	cal.hour = (u_char)(*cp++ - '0');
+	cal.hour = (uint8_t)(*cp++ - '0');
 	if (isdigit((int)*cp)) {
-		cal.hour = (u_char)((cal.hour << 3) + (cal.hour << 1));
-		cal.hour = (u_char)(cal.hour + *cp++ - '0');
+		cal.hour = (uint8_t)((cal.hour << 3) + (cal.hour << 1));
+		cal.hour = (uint8_t)(cal.hour + *cp++ - '0');
 	}
 
 	if (*cp++ != ':' || !isdigit((int)*cp))
 	    return false;
-	cal.minute = (u_char)(*cp++ - '0');
+	cal.minute = (uint8_t)(*cp++ - '0');
 	if (isdigit((int)*cp)) {
-		cal.minute = (u_char)((cal.minute << 3) + (cal.minute << 1));
-		cal.minute = (u_char)(cal.minute + *cp++ - '0');
+		cal.minute = (uint8_t)((cal.minute << 3) + (cal.minute << 1));
+		cal.minute = (uint8_t)(cal.minute + *cp++ - '0');
 	}
 
 	if (*cp++ != ':' || !isdigit((int)*cp))
 	    return false;
-	cal.second = (u_char)(*cp++ - '0');
+	cal.second = (uint8_t)(*cp++ - '0');
 	if (isdigit((int)*cp)) {
-		cal.second = (u_char)((cal.second << 3) + (cal.second << 1));
-		cal.second = (u_char)(cal.second + *cp++ - '0');
+		cal.second = (uint8_t)((cal.second << 3) + (cal.second << 1));
+		cal.second = (uint8_t)(cal.second + *cp++ - '0');
 	}
 
 	/*
@@ -2545,7 +2545,7 @@ passwd(
 		}
 	}
 	authusekey(info_auth_keyid, info_auth_keytype,
-		   (const u_char *)pass);
+		   (const uint8_t *)pass);
 	authtrust(info_auth_keyid, 1);
 }
 
@@ -2710,7 +2710,7 @@ ntpversion(
 			(void) fprintf(stderr, "versions %d to %d, please\n",
 				       NTP_OLDVERSION, NTP_VERSION);
 		} else {
-			pktversion = (u_char) pcmd->argval[0].uval;
+			pktversion = (uint8_t) pcmd->argval[0].uval;
 		}
 	}
 }
@@ -2806,14 +2806,14 @@ atoascii(
 	size_t out_octets
 	)
 {
-	const u_char *	pchIn;
-	const u_char *	pchInLimit;
-	u_char *	pchOut;
-	u_char		c;
+	const uint8_t *	pchIn;
+	const uint8_t *	pchInLimit;
+	uint8_t *	pchOut;
+	uint8_t		c;
 
-	pchIn = (const u_char *)in;
+	pchIn = (const uint8_t *)in;
 	pchInLimit = pchIn + in_octets;
-	pchOut = (u_char *)out;
+	pchOut = (uint8_t *)out;
 
 	if (NULL == pchIn) {
 		if (0 < out_octets)
@@ -2841,7 +2841,7 @@ do {							\
 		}
 		if (c < ' ') {
 			ONEOUT('^');
-			ONEOUT((u_char)(c + '@'));
+			ONEOUT((uint8_t)(c + '@'));
 		} else if (0x7f == c) {
 			ONEOUT('^');
 			ONEOUT('?');
@@ -2865,13 +2865,13 @@ makeascii(
 	FILE *fp
 	)
 {
-	const u_char *data_u_char;
-	const u_char *cp;
+	const uint8_t *data_uint8_t;
+	const uint8_t *cp;
 	int c;
 
-	data_u_char = (const u_char *)data;
+	data_uint8_t = (const uint8_t *)data;
 
-	for (cp = data_u_char; cp < data_u_char + length; cp++) {
+	for (cp = data_uint8_t; cp < data_uint8_t + length; cp++) {
 		c = (int)*cp;
 		if (c & 0x80) {
 			putc('M', fp);
@@ -3513,7 +3513,7 @@ static void list_md_fn(const EVP_MD *m, const char *from, const char *to, void *
     struct hstate *hstate = arg;
     EVP_MD_CTX ctx;
     u_int digest_len;
-    u_char digest[EVP_MAX_MD_SIZE];
+    uint8_t digest[EVP_MAX_MD_SIZE];
 
     if (!m)
         return; /* Ignore aliases */

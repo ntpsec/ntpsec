@@ -61,9 +61,9 @@ typedef struct peer_select_tag {
  * System variables are declared here. Unless specified otherwise, all
  * times are in seconds.
  */
-u_char	sys_leap;		/* system leap indicator */
-u_char	sys_stratum;		/* system stratum */
-s_char	sys_precision;		/* local clock precision (log2 s) */
+uint8_t	sys_leap;		/* system leap indicator */
+uint8_t	sys_stratum;		/* system stratum */
+int8_t	sys_precision;		/* local clock precision (log2 s) */
 double	sys_rootdelay;		/* roundtrip delay to primary source */
 double	sys_rootdisp;		/* dispersion to primary source */
 uint32_t sys_refid;		/* reference id (network byte order) */
@@ -115,7 +115,7 @@ int	sys_orphan = STRATUM_UNSPEC + 1; /* orphan stratum */
 int	sys_orphwait = NTP_ORPHWAIT; /* orphan wait */
 int	sys_beacon = BEACON;	/* manycast beacon interval */
 int	sys_ttlmax;		/* max ttl mapping vector index */
-u_char	sys_ttl[MAX_TTL];	/* ttl mapping vector */
+uint8_t	sys_ttl[MAX_TTL];	/* ttl mapping vector */
 
 /*
  * Statistics counters - first the good, then the bad
@@ -160,7 +160,7 @@ transmit(
 	struct peer *peer	/* peer structure pointer */
 	)
 {
-	u_char	hpoll;
+	uint8_t	hpoll;
 
 	/*
 	 * The polling state machine. There are two kinds of machines,
@@ -240,7 +240,7 @@ transmit(
 	 * traffic.
 	 */
 	if (peer->burst == 0) {
-		u_char oreach;
+		uint8_t oreach;
 
 		/*
 		 * Update the reachability status. If not heard for
@@ -353,10 +353,10 @@ receive(
 {
 	register struct peer *peer;	/* peer structure pointer */
 	register struct pkt *pkt;	/* receive packet pointer */
-	u_char	hisversion;		/* packet version */
-	u_char	hisleap;		/* packet leap indicator */
-	u_char	hismode;		/* packet mode */
-	u_char	hisstratum;		/* packet stratum */
+	uint8_t	hisversion;		/* packet version */
+	uint8_t	hisleap;		/* packet leap indicator */
+	uint8_t	hismode;		/* packet mode */
+	uint8_t	hisstratum;		/* packet stratum */
 	u_short	restrict_mask;		/* restrict bits */
 	int	has_mac;		/* length of MAC field */
 	int	authlen;		/* offset of MAC field */
@@ -1508,7 +1508,7 @@ process_packet(
 	double	t34, t21;
 	double	p_offset, p_del, p_disp;
 	l_fp	p_rec, p_xmt, p_org, p_reftime, ci;
-	u_char	pmode, pleap, pversion, pstratum;
+	uint8_t	pmode, pleap, pversion, pstratum;
 	char	statstr[NTP_MAXSTRLEN];
 #ifdef ASSYM
 	int	itemp;
@@ -1999,11 +1999,11 @@ clock_update(
 void
 poll_update(
 	struct peer *peer,	/* peer structure pointer */
-	u_char	mpoll
+	uint8_t	mpoll
 	)
 {
 	u_long	next, utemp;
-	u_char	hpoll;
+	uint8_t	hpoll;
 
 	/*
 	 * This routine figures out when the next poll should be sent.
@@ -2118,7 +2118,7 @@ peer_clear(
 	const char *ident		/* tally lights */
 	)
 {
-	u_char	u;
+	uint8_t	u;
 
 #ifdef ENABLE_AUTOKEY
 	/*
@@ -2297,7 +2297,7 @@ clock_filter(
 	 */
 	m = 0;
 	for (i = 0; i < NTP_SHIFT; i++) {
-		peer->filter_order[i] = (u_char) ord[i];
+		peer->filter_order[i] = (uint8_t) ord[i];
 		if (dst[i] >= MAXDISPERSE || (m >= 2 && dst[i] >=
 		    sys_maxdist))
 			continue;
@@ -3982,7 +3982,7 @@ set_sys_tick_precision(
 	if (tick - 1 > 1 - tick / 2)
 		i++;
 
-	sys_precision = (s_char)i;
+	sys_precision = (int8_t)i;
 }
 
 
@@ -4018,7 +4018,7 @@ init_proto(const bool verbose)
 	orphwait = current_time + sys_orphwait;
 	proto_clr_stats();
 	for (i = 0; i < MAX_TTL; i++) {
-		sys_ttl[i] = (u_char)((i * 256) / MAX_TTL);
+		sys_ttl[i] = (uint8_t)((i * 256) / MAX_TTL);
 		sys_ttlmax = i;
 	}
 	hardpps_enable = true;

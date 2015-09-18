@@ -110,8 +110,8 @@ struct addrinfo *copy_addrinfo_list_impl(const struct addrinfo *
 # define	_SS_MAXSIZE	128
 # define	_SS_ALIGNSIZE	(sizeof(ntp_uint64_t))
 # ifdef ISC_PLATFORM_HAVESALEN
-#  define	_SS_PAD1SIZE	(_SS_ALIGNSIZE - sizeof(u_char) - sizeof(ntp_u_int8_t))
-#  define	_SS_PAD2SIZE	(_SS_MAXSIZE - sizeof(u_char) - sizeof(ntp_u_int8_t) - \
+#  define	_SS_PAD1SIZE	(_SS_ALIGNSIZE - sizeof(uint8_t) - sizeof(ntp_u_int8_t))
+#  define	_SS_PAD2SIZE	(_SS_MAXSIZE - sizeof(uint8_t) - sizeof(ntp_u_int8_t) - \
 				_SS_PAD1SIZE - _SS_ALIGNSIZE)
 # else
 #  define	_SS_PAD1SIZE	(_SS_ALIGNSIZE - sizeof(short))

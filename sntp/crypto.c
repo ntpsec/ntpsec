@@ -26,9 +26,9 @@ make_mac(
 	INIT_SSL();
 	key_type = keytype_from_text(cmp_key->type, NULL);
 	EVP_DigestInit(&ctx, EVP_get_digestbynid(key_type));
-	EVP_DigestUpdate(&ctx, (u_char *)cmp_key->key_seq, (u_int)cmp_key->key_len);
-	EVP_DigestUpdate(&ctx, (u_char *)pkt_data, (u_int)pkt_size);
-	EVP_DigestFinal(&ctx, (u_char *)digest, &len);
+	EVP_DigestUpdate(&ctx, (uint8_t *)cmp_key->key_seq, (u_int)cmp_key->key_len);
+	EVP_DigestUpdate(&ctx, (uint8_t *)pkt_data, (u_int)pkt_size);
+	EVP_DigestFinal(&ctx, (uint8_t *)digest, &len);
 
 	return (int)len;
 }

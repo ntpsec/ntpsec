@@ -103,7 +103,7 @@ extern	const char *	get_ext_sys_var(const char *tag);
 /* ntp_io.c */
 typedef struct interface_info {
 	endpt *	ep;
-	u_char	action;
+	uint8_t	action;
 } interface_info_t;
 
 typedef void	(*interface_receiver_t)	(void *, interface_info_t *);
@@ -168,19 +168,19 @@ extern	void	mon_clearinterface(endpt *interface);
 /* ntp_peer.c */
 extern	void	init_peer	(void);
 extern	struct peer *findexistingpeer(sockaddr_u *, const char *,
-				      struct peer *, int, u_char);
+				      struct peer *, int, uint8_t);
 extern	struct peer *findpeer	(struct recvbuf *, int, int *);
 extern	struct peer *findpeerbyassoc(associd_t);
 extern  void	set_peerdstadr	(struct peer *, endpt *);
 extern	struct peer *newpeer	(sockaddr_u *, const char *,
-				 endpt *, u_char, u_char,
-				 u_char, u_char, u_int, u_char, uint32_t,
+				 endpt *, uint8_t, uint8_t,
+				 uint8_t, uint8_t, u_int, uint8_t, uint32_t,
 				 keyid_t, const char *);
 extern	void	peer_all_reset	(void);
 extern	void	peer_clr_stats	(void);
 extern	struct peer *peer_config(sockaddr_u *, const char *,
-				 endpt *, u_char, u_char,
-				 u_char, u_char, u_int, uint32_t,
+				 endpt *, uint8_t, uint8_t,
+				 uint8_t, uint8_t, u_int, uint32_t,
 				 keyid_t, const char *);
 extern	void	peer_reset	(struct peer *);
 extern	void	refresh_all_peerinterfaces(void);
@@ -205,7 +205,7 @@ extern	void	crypto_config	(int, char *);
 extern	void	crypto_setup	(void);
 extern	u_int	crypto_ident	(struct peer *);
 extern	struct exten *crypto_args (struct peer *, u_int, associd_t, char *);
-extern	int	crypto_public	(struct peer *, u_char *, u_int);
+extern	int	crypto_public	(struct peer *, uint8_t *, u_int);
 extern	void	value_free	(struct value *);
 extern	char	*iffpar_file;
 extern	EVP_PKEY *iffpar_pkey;
@@ -230,7 +230,7 @@ extern	double	sys_mindisp;
 extern	double	sys_maxdist;
 
 extern	char	*sys_ident;	/* identity scheme */
-extern	void	poll_update	(struct peer *, u_char);
+extern	void	poll_update	(struct peer *, uint8_t);
 
 extern	void	clear		(struct peer *);
 extern	void	clock_filter	(struct peer *, double, double, double);
@@ -409,18 +409,18 @@ extern int	peer_ntpdate;		/* count of ntpdate peers */
 /*
  * Clock state machine variables
  */
-extern u_char	sys_poll;		/* system poll interval (log2 s) */
+extern uint8_t	sys_poll;		/* system poll interval (log2 s) */
 extern int	state;			/* clock discipline state */
 extern int	tc_counter;		/* poll-adjust counter */
 extern u_long	last_time;		/* time of last clock update (s) */
 extern double	last_offset;		/* last clock offset (s) */
-extern u_char	allan_xpt;		/* Allan intercept (log2 s) */
+extern uint8_t	allan_xpt;		/* Allan intercept (log2 s) */
 extern double	clock_jitter;		/* clock jitter (s) */
 extern double	sys_offset;		/* system offset (s) */
 extern double	sys_jitter;		/* system jitter (s) */
 
 /* ntp_monitor.c */
-extern u_char	mon_hash_bits;		/* log2 size of hash table */
+extern uint8_t	mon_hash_bits;		/* log2 size of hash table */
 extern mon_entry ** mon_hash;		/* MRU hash table */
 extern mon_entry mon_mru_list;		/* mru listhead */
 extern u_int	mon_enabled;		/* MON_OFF (0) or other MON_* */
@@ -460,9 +460,9 @@ extern int	peer_preempt;		/* preemptable associations */
  * System variables are declared here.	See Section 3.2 of the
  * specification.
  */
-extern u_char	sys_leap;		/* system leap indicator */
-extern u_char	sys_stratum;		/* system stratum */
-extern s_char	sys_precision;		/* local clock precision */
+extern uint8_t	sys_leap;		/* system leap indicator */
+extern uint8_t	sys_stratum;		/* system stratum */
+extern int8_t	sys_precision;		/* local clock precision */
 extern double	sys_rootdelay;		/* roundtrip delay to primary source */
 extern double	sys_rootdisp;		/* dispersion to primary source */
 extern uint32_t	sys_refid;		/* reference id */
@@ -483,7 +483,7 @@ extern int	sys_minclock;		/* minimum survivors */
 extern int	sys_minsane;		/* minimum candidates */
 extern int	sys_floor;		/* cluster stratum floor */
 extern int	sys_ceiling;		/* cluster stratum ceiling */
-extern u_char	sys_ttl[MAX_TTL];	/* ttl mapping vector */
+extern uint8_t	sys_ttl[MAX_TTL];	/* ttl mapping vector */
 extern int	sys_ttlmax;		/* max ttl mapping vector index */
 
 /*
@@ -510,7 +510,7 @@ extern u_long	auth_timereset;
 extern restrict_u *	restrictlist4;	/* IPv4 restriction list */
 extern restrict_u *	restrictlist6;	/* IPv6 restriction list */
 extern int		ntp_minpkt;
-extern u_char		ntp_minpoll;
+extern uint8_t		ntp_minpoll;
 
 /* ntp_scanner.c */
 extern uint32_t		conf_file_sum;	/* Simple sum of characters */
@@ -561,6 +561,6 @@ extern int accept_wildcard_if_for_winnt;
 #ifdef REFCLOCK
 /* refclock configuration table */
 extern struct refclock * const refclock_conf[];
-extern u_char	num_refclock_conf;
+extern uint8_t	num_refclock_conf;
 #endif
 

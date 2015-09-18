@@ -18,9 +18,9 @@ dolfptoa(
 	int msec
 	)
 {
-	u_char *cp, *cpend, *cpdec;
+	uint8_t *cp, *cpend, *cpdec;
 	int dec;
-	u_char cbuf[24];
+	uint8_t cbuf[24];
 	char *buf, *bp;
 
 	/*
@@ -47,7 +47,7 @@ dolfptoa(
 		digit  = fpi;
 		fpi   /= 10U;
 		digit -= (fpi << 3) + (fpi << 1); /* i*10 */
-		*--cp  = (u_char)digit;
+		*--cp  = (uint8_t)digit;
 	}
 
 	/*
@@ -83,7 +83,7 @@ dolfptoa(
 		M_LSHIFT(digit, fpv);
 		M_LSHIFT(digit, fpv);
 		M_ADD(digit, fpv, tmph, tmpl);
-		*cpend++ = (u_char)digit;
+		*cpend++ = (uint8_t)digit;
 	}
 
 	/* decide whether to round or simply extend by zeros */
@@ -92,7 +92,7 @@ dolfptoa(
 		cpend += dec; 
 	} else {
 		/* some bits remain in 'fpv'; do round */
-		u_char *tp    = cpend;
+		uint8_t *tp    = cpend;
 		int     carry = ((fpv & 0x80000000) != 0);
 
 		for (dec = tp - cbuf;  carry && dec > 0;  dec--) {

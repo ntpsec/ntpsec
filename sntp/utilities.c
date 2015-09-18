@@ -13,9 +13,9 @@ pkt_output (
 	   )
 {
 	register int a;
-	u_char *pkt;
+	uint8_t *pkt;
 
-	pkt = (u_char *)dpkg;
+	pkt = (uint8_t *)dpkg;
 
 	fprintf(output, HLINE);
 

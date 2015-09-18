@@ -119,7 +119,7 @@ struct instance {
 	uint32_t stime;			/* used to detect firmware bug */
 	bool wantid;			/* don't reconfig on channel id msg */
 	u_int  moving;			/* mobile platform? */
-	u_char sloppyclockflag;		/* fudge flags */
+	uint8_t sloppyclockflag;		/* fudge flags */
 	u_short sbuf[512];		/* local input buffer */
 	int ssize;			/* space used in sbuf */
 };
@@ -477,7 +477,7 @@ jupiter_control(
 {
 	struct refclockproc *pp;
 	struct instance *instance;
-	u_char sloppyclockflag;
+	uint8_t sloppyclockflag;
 
 	pp = peer->procptr;
 	instance = pp->unitptr;
@@ -516,7 +516,7 @@ jupiter_receive(struct recvbuf *rbufp)
 	time_t last_timecode;
 	uint32_t laststime;
 	const char *cp;
-	u_char *bp;
+	uint8_t *bp;
 	u_short *sp;
 	struct jid *ip;
 	struct jheader *hp;
@@ -530,7 +530,7 @@ jupiter_receive(struct recvbuf *rbufp)
 	pp = peer->procptr;
 	instance = pp->unitptr;
 
-	bp = (u_char *)rbufp->recv_buffer;
+	bp = (uint8_t *)rbufp->recv_buffer;
 	bpcnt = rbufp->recv_length;
 
 	/* This shouldn't happen */
@@ -538,7 +538,7 @@ jupiter_receive(struct recvbuf *rbufp)
 		bpcnt = sizeof(instance->sbuf) - instance->ssize;
 
 	/* Append to input buffer */
-	memcpy((u_char *)instance->sbuf + instance->ssize, bp, bpcnt);
+	memcpy((uint8_t *)instance->sbuf + instance->ssize, bp, bpcnt);
 	instance->ssize += bpcnt;
 
 	/* While there's at least a header and we parse an intact message */
@@ -700,7 +700,7 @@ jupiter_receive(struct recvbuf *rbufp)
 			fprintf(stderr, "jupiter_recv: negative ssize!\n");
 			abort();
 		} else if (instance->ssize > 0)
-			memcpy(instance->sbuf, (u_char *)instance->sbuf + cc, instance->ssize);
+			memcpy(instance->sbuf, (uint8_t *)instance->sbuf + cc, instance->ssize);
 	}
 }
 
@@ -1037,7 +1037,7 @@ jupiter_recv(struct instance *instance)
 {
 	int n, len, size, cc;
 	struct jheader *hp;
-	u_char *bp;
+	uint8_t *bp;
 	u_short *sp;
 
 	/* Must have at least a header's worth */
@@ -1052,7 +1052,7 @@ jupiter_recv(struct instance *instance)
 	if (getshort(hp->sync) != JUPITER_SYNC) {
 		/* Wasn't at the front, sync up */
 		jupiter_debug(instance->peer, __func__, "syncing");
-		bp = (u_char *)sp;
+		bp = (uint8_t *)sp;
 		n = size;
 		while (n >= 2) {
 			if (bp[0] != (JUPITER_SYNC & 0xff)) {

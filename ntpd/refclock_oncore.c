@@ -166,7 +166,7 @@
 #ifdef ONCORE_SHMEM_STATUS
 #  include <sys/mman.h>
 #  ifndef MAP_FAILED
-#   define MAP_FAILED ((u_char *) -1)
+#   define MAP_FAILED ((uint8_t *) -1)
 #  endif  /* MAP_FAILED */
 #endif /* ONCORE_SHMEM_STATUS */
 
@@ -238,11 +238,11 @@ enum oncore_model {
  */
 
 struct RSM {
-	u_char	posn0D;
-	u_char	posn2D;
-	u_char	posn3D;
-	u_char	bad_almanac;
-	u_char	bad_fix;
+	uint8_t	posn0D;
+	uint8_t	posn2D;
+	uint8_t	posn3D;
+	uint8_t	bad_almanac;
+	uint8_t	bad_fix;
 };
 
 /* It is possible to test the VP/UT each cycle (@@Ea or equivalent) to
@@ -277,75 +277,75 @@ struct instance {
 	u_long	delay;		/* ns */
 	long	offset; 	/* ns */
 
-	u_char	*shmem;
+	uint8_t	*shmem;
 	char	*shmem_fname;
 	u_int	shmem_Cb;
 	u_int	shmem_Ba;
 	u_int	shmem_Ea;
 	u_int	shmem_Ha;
-	u_char	shmem_reset;
-	u_char	shmem_Posn;
-	u_char	shmem_bad_Ea;
-	u_char	almanac_from_shmem;
+	uint8_t	shmem_reset;
+	uint8_t	shmem_Posn;
+	uint8_t	shmem_bad_Ea;
+	uint8_t	almanac_from_shmem;
 
 	double	ss_lat;
 	double	ss_long;
 	double	ss_ht;
 	double	dH;
 	int	ss_count;
-	u_char	posn_set;
+	uint8_t	posn_set;
 
 	enum oncore_model model;
 	u_int	version;
 	u_int	revision;
 
-	u_char	chan;		/* 6 for PVT6 or BASIC, 8 for UT/VP, 12 for m12, 0 if unknown */
-	s_char	traim;		/* do we have traim? yes UT/VP, M12+T, no BASIC, GT, M12, -1 unknown, 0 no, +1 yes */
+	uint8_t	chan;		/* 6 for PVT6 or BASIC, 8 for UT/VP, 12 for m12, 0 if unknown */
+	int8_t	traim;		/* do we have traim? yes UT/VP, M12+T, no BASIC, GT, M12, -1 unknown, 0 no, +1 yes */
 				/* the following 7 are all timing counters */
-	u_char	traim_delay;	/* seconds counter, waiting for reply */
-	u_char	count;		/* cycles thru Ea before starting */
-	u_char	count1; 	/* cycles thru Ea after SS_TESTING, waiting for SS_HW */
-	u_char	count2; 	/* cycles thru Ea after count, to check for @@Ea */
-	u_char	count3; 	/* cycles thru Ea checking for # channels */
-	u_char	count4; 	/* cycles thru leap after Gj to issue Bj */
-	u_char	count5; 	/* cycles thru get_timestamp waiting for valid UTC correction */
-	u_char	count5_set;	/* only set count5 once */
-	u_char	counta; 	/* count for waiting on almanac message */
-	u_char	pollcnt;
-	u_char	timeout;	/* count to retry Cj after Fa self-test */
-	u_char	max_len;	/* max length message seen by oncore_log, for debugging */
-	u_char	max_count;	/* count for message statistics */
+	uint8_t	traim_delay;	/* seconds counter, waiting for reply */
+	uint8_t	count;		/* cycles thru Ea before starting */
+	uint8_t	count1; 	/* cycles thru Ea after SS_TESTING, waiting for SS_HW */
+	uint8_t	count2; 	/* cycles thru Ea after count, to check for @@Ea */
+	uint8_t	count3; 	/* cycles thru Ea checking for # channels */
+	uint8_t	count4; 	/* cycles thru leap after Gj to issue Bj */
+	uint8_t	count5; 	/* cycles thru get_timestamp waiting for valid UTC correction */
+	uint8_t	count5_set;	/* only set count5 once */
+	uint8_t	counta; 	/* count for waiting on almanac message */
+	uint8_t	pollcnt;
+	uint8_t	timeout;	/* count to retry Cj after Fa self-test */
+	uint8_t	max_len;	/* max length message seen by oncore_log, for debugging */
+	uint8_t	max_count;	/* count for message statistics */
 
 	struct	RSM rsm;	/* bits extracted from Receiver Status Msg in @@Ea */
 	struct	Bl Bl;		/* Satellite Broadcast Data Message */
-	u_char	printed;
-	u_char	polled;
+	uint8_t	printed;
+	uint8_t	polled;
 	u_long	ev_serial;
 	unsigned	Rcvptr;
-	u_char	Rcvbuf[500];
-	u_char	BEHa[160];	/* Ba, Ea or Ha */
-	u_char	BEHn[80];	/* Bn , En , or Hn */
-	u_char	Cj[300];
-	u_char	Ag;		/* Satellite mask angle */
-	u_char	saw_At;
-	u_char	saw_Ay;
-	u_char	saw_Az;
-	s_char	saw_Bj;
-	s_char	saw_Gj;
-	u_char	have_dH;
-	u_char	init_type;
-	s_char	saw_tooth;
-	s_char	chan_in;	/* chan number from INPUT, will always use it */
-	u_char	chan_id;	/* chan number determined from part number */
-	u_char	chan_ck;	/* chan number determined by sending commands to hardware */
-	s_char	traim_in;	/* TRAIM from INPUT, will always use ON/OFF specified */
-	s_char	traim_id;	/* TRAIM determined from part number */
-	u_char	traim_ck;	/* TRAIM determined by sending commands to hardware */
-	u_char	once;		/* one pass code at top of BaEaHa */
-	s_char	assert;
-	u_char	hardpps;
-	s_char	pps_control;	/* PPS control, M12 only */
-	s_char	pps_control_msg_seen;
+	uint8_t	Rcvbuf[500];
+	uint8_t	BEHa[160];	/* Ba, Ea or Ha */
+	uint8_t	BEHn[80];	/* Bn , En , or Hn */
+	uint8_t	Cj[300];
+	uint8_t	Ag;		/* Satellite mask angle */
+	uint8_t	saw_At;
+	uint8_t	saw_Ay;
+	uint8_t	saw_Az;
+	int8_t	saw_Bj;
+	int8_t	saw_Gj;
+	uint8_t	have_dH;
+	uint8_t	init_type;
+	int8_t	saw_tooth;
+	int8_t	chan_in;	/* chan number from INPUT, will always use it */
+	uint8_t	chan_id;	/* chan number determined from part number */
+	uint8_t	chan_ck;	/* chan number determined by sending commands to hardware */
+	int8_t	traim_in;	/* TRAIM from INPUT, will always use ON/OFF specified */
+	int8_t	traim_id;	/* TRAIM determined from part number */
+	uint8_t	traim_ck;	/* TRAIM determined by sending commands to hardware */
+	uint8_t	once;		/* one pass code at top of BaEaHa */
+	int8_t	assert;
+	uint8_t	hardpps;
+	int8_t	pps_control;	/* PPS control, M12 only */
+	int8_t	pps_control_msg_seen;
 };
 
 #define rcvbuf	instance->Rcvbuf
@@ -368,45 +368,45 @@ static	void	oncore_chan_test      (struct instance *);
 static	void	oncore_check_almanac  (struct instance *);
 static	void	oncore_check_antenna  (struct instance *);
 static	void	oncore_check_leap_sec (struct instance *);
-static	int	oncore_checksum_ok    (u_char *, int);
+static	int	oncore_checksum_ok    (uint8_t *, int);
 static	void	oncore_compute_dH     (struct instance *);
 static	void	oncore_load_almanac   (struct instance *);
 static	void	oncore_log	      (struct instance *, int, const char *);
 static	int	oncore_log_f	      (struct instance *, int, const char *, ...)
 		NTP_PRINTF(3, 4);
-static	void	oncore_print_Cb       (struct instance *, u_char *);
-/* static  void    oncore_print_array	 (u_char *, int);	*/
+static	void	oncore_print_Cb       (struct instance *, uint8_t *);
+/* static  void    oncore_print_array	 (uint8_t *, int);	*/
 static	void	oncore_print_posn     (struct instance *);
-static	void	oncore_sendmsg	      (struct instance *, u_char *, size_t);
+static	void	oncore_sendmsg	      (struct instance *, uint8_t *, size_t);
 static	void	oncore_set_posn       (struct instance *);
 static	void	oncore_set_traim      (struct instance *);
 static	void	oncore_shmem_get_3D   (struct instance *);
 static	void	oncore_ss	      (struct instance *);
 static	bool	oncore_wait_almanac   (struct instance *);
 
-static	void	oncore_msg_any	   (struct instance *, u_char *, size_t, int);
-static	void	oncore_msg_Adef    (struct instance *, u_char *, size_t);
-static	void	oncore_msg_Ag	   (struct instance *, u_char *, size_t);
-static	void	oncore_msg_As	   (struct instance *, u_char *, size_t);
-static	void	oncore_msg_At	   (struct instance *, u_char *, size_t);
-static	void	oncore_msg_Ay	   (struct instance *, u_char *, size_t);
-static	void	oncore_msg_Az	   (struct instance *, u_char *, size_t);
-static	void	oncore_msg_BaEaHa  (struct instance *, u_char *, size_t);
-static	void	oncore_msg_Bd	   (struct instance *, u_char *, size_t);
-static	void	oncore_msg_Bj	   (struct instance *, u_char *, size_t);
-static	void	oncore_msg_Bl	   (struct instance *, u_char *, size_t);
-static	void	oncore_msg_BnEnHn  (struct instance *, u_char *, size_t);
-static	void	oncore_msg_CaFaIa  (struct instance *, u_char *, size_t);
-static	void	oncore_msg_Cb	   (struct instance *, u_char *, size_t);
-static	void	oncore_msg_Cf	   (struct instance *, u_char *, size_t);
-static	void	oncore_msg_Cj	   (struct instance *, u_char *, size_t);
-static	void	oncore_msg_Cj_id   (struct instance *, u_char *, size_t);
-static	void	oncore_msg_Cj_init (struct instance *, u_char *, size_t);
-static	void	oncore_msg_Ga	   (struct instance *, u_char *, size_t);
-static	void	oncore_msg_Gb	   (struct instance *, u_char *, size_t);
-static	void	oncore_msg_Gc	   (struct instance *, u_char *, size_t);
-static	void	oncore_msg_Gj	   (struct instance *, u_char *, size_t);
-static	void	oncore_msg_Sz	   (struct instance *, u_char *, size_t);
+static	void	oncore_msg_any	   (struct instance *, uint8_t *, size_t, int);
+static	void	oncore_msg_Adef    (struct instance *, uint8_t *, size_t);
+static	void	oncore_msg_Ag	   (struct instance *, uint8_t *, size_t);
+static	void	oncore_msg_As	   (struct instance *, uint8_t *, size_t);
+static	void	oncore_msg_At	   (struct instance *, uint8_t *, size_t);
+static	void	oncore_msg_Ay	   (struct instance *, uint8_t *, size_t);
+static	void	oncore_msg_Az	   (struct instance *, uint8_t *, size_t);
+static	void	oncore_msg_BaEaHa  (struct instance *, uint8_t *, size_t);
+static	void	oncore_msg_Bd	   (struct instance *, uint8_t *, size_t);
+static	void	oncore_msg_Bj	   (struct instance *, uint8_t *, size_t);
+static	void	oncore_msg_Bl	   (struct instance *, uint8_t *, size_t);
+static	void	oncore_msg_BnEnHn  (struct instance *, uint8_t *, size_t);
+static	void	oncore_msg_CaFaIa  (struct instance *, uint8_t *, size_t);
+static	void	oncore_msg_Cb	   (struct instance *, uint8_t *, size_t);
+static	void	oncore_msg_Cf	   (struct instance *, uint8_t *, size_t);
+static	void	oncore_msg_Cj	   (struct instance *, uint8_t *, size_t);
+static	void	oncore_msg_Cj_id   (struct instance *, uint8_t *, size_t);
+static	void	oncore_msg_Cj_init (struct instance *, uint8_t *, size_t);
+static	void	oncore_msg_Ga	   (struct instance *, uint8_t *, size_t);
+static	void	oncore_msg_Gb	   (struct instance *, uint8_t *, size_t);
+static	void	oncore_msg_Gc	   (struct instance *, uint8_t *, size_t);
+static	void	oncore_msg_Gj	   (struct instance *, uint8_t *, size_t);
+static	void	oncore_msg_Sz	   (struct instance *, uint8_t *, size_t);
 
 struct	refclock refclock_oncore = {
 	oncore_start,		/* start up driver */
@@ -426,7 +426,7 @@ struct	refclock refclock_oncore = {
 static struct msg_desc {
 	const char	flag[3];
 	const int	len;
-	void		(*handler) (struct instance *, u_char *, size_t);
+	void		(*handler) (struct instance *, uint8_t *, size_t);
 	const char	*fmt;
 	int		shmem;
 } oncore_messages[] = {
@@ -475,70 +475,70 @@ static struct msg_desc {
 };
 
 
-static u_char oncore_cmd_Aa[]  = { 'A', 'a', 0, 0, 0 }; 			    /* 6/8	Time of Day				*/
-static u_char oncore_cmd_Ab[]  = { 'A', 'b', 0, 0, 0 }; 			    /* 6/8	GMT Correction				*/
-static u_char oncore_cmd_AB[]  = { 'A', 'B', 4 };				    /* VP	Application Type: Static		*/
-static u_char oncore_cmd_Ac[]  = { 'A', 'c', 0, 0, 0, 0 };			    /* 6/8	Date					*/
-static u_char oncore_cmd_Ad[]  = { 'A', 'd', 0,0,0,0 }; 			    /* 6/8	Latitude				*/
-static u_char oncore_cmd_Ae[]  = { 'A', 'e', 0,0,0,0 }; 			    /* 6/8	Longitude				*/
-static u_char oncore_cmd_Af[]  = { 'A', 'f', 0,0,0,0, 0 };			    /* 6/8	Height					*/
-static u_char oncore_cmd_Ag[]  = { 'A', 'g', 0 };				    /* 6/8/12	Satellite Mask Angle			*/
-static u_char oncore_cmd_Agx[] = { 'A', 'g', 0xff };				    /* 6/8/12	Satellite Mask Angle: read		*/
-static u_char oncore_cmd_As[]  = { 'A', 's', 0,0,0,0, 0,0,0,0, 0,0,0,0, 0 };	    /* 6/8/12	Posn Hold Parameters			*/
-static u_char oncore_cmd_Asx[] = { 'A', 's', 0x7f,0xff,0xff,0xff,		    /* 6/8/12	Posn Hold Readback			*/
+static uint8_t oncore_cmd_Aa[]  = { 'A', 'a', 0, 0, 0 }; 			    /* 6/8	Time of Day				*/
+static uint8_t oncore_cmd_Ab[]  = { 'A', 'b', 0, 0, 0 }; 			    /* 6/8	GMT Correction				*/
+static uint8_t oncore_cmd_AB[]  = { 'A', 'B', 4 };				    /* VP	Application Type: Static		*/
+static uint8_t oncore_cmd_Ac[]  = { 'A', 'c', 0, 0, 0, 0 };			    /* 6/8	Date					*/
+static uint8_t oncore_cmd_Ad[]  = { 'A', 'd', 0,0,0,0 }; 			    /* 6/8	Latitude				*/
+static uint8_t oncore_cmd_Ae[]  = { 'A', 'e', 0,0,0,0 }; 			    /* 6/8	Longitude				*/
+static uint8_t oncore_cmd_Af[]  = { 'A', 'f', 0,0,0,0, 0 };			    /* 6/8	Height					*/
+static uint8_t oncore_cmd_Ag[]  = { 'A', 'g', 0 };				    /* 6/8/12	Satellite Mask Angle			*/
+static uint8_t oncore_cmd_Agx[] = { 'A', 'g', 0xff };				    /* 6/8/12	Satellite Mask Angle: read		*/
+static uint8_t oncore_cmd_As[]  = { 'A', 's', 0,0,0,0, 0,0,0,0, 0,0,0,0, 0 };	    /* 6/8/12	Posn Hold Parameters			*/
+static uint8_t oncore_cmd_Asx[] = { 'A', 's', 0x7f,0xff,0xff,0xff,		    /* 6/8/12	Posn Hold Readback			*/
 					     0x7f,0xff,0xff,0xff,		    /*		 on UT+ this doesnt work with 0xff	*/
 					     0x7f,0xff,0xff,0xff, 0xff };	    /*		 but does work with 0x7f (sigh).	*/
-static u_char oncore_cmd_At0[] = { 'A', 't', 0 };				    /* 6/8	Posn Hold: off				*/
-static u_char oncore_cmd_At1[] = { 'A', 't', 1 };				    /* 6/8	Posn Hold: on				*/
-static u_char oncore_cmd_At2[] = { 'A', 't', 2 };				    /* 6/8	Posn Hold: Start Site Survey		*/
-static u_char oncore_cmd_Atx[] = { 'A', 't', 0xff };				    /* 6/8	Posn Hold: Read Back			*/
-static u_char oncore_cmd_Au[]  = { 'A', 'u', 0,0,0,0, 0 };			    /* GT/M12	Altitude Hold Ht.			*/
-static u_char oncore_cmd_Av0[] = { 'A', 'v', 0 };				    /* VP/GT	Altitude Hold: off			*/
-static u_char oncore_cmd_Av1[] = { 'A', 'v', 1 };				    /* VP/GT	Altitude Hold: on			*/
-static u_char oncore_cmd_Aw[]  = { 'A', 'w', 1 };				    /* 6/8/12	UTC/GPS time selection			*/
-static u_char oncore_cmd_Ay[]  = { 'A', 'y', 0, 0, 0, 0 };			    /* Timing	1PPS time offset: set			*/
-static u_char oncore_cmd_Ayx[] = { 'A', 'y', 0xff, 0xff, 0xff, 0xff };		    /* Timing	1PPS time offset: Read			*/
-static u_char oncore_cmd_Az[]  = { 'A', 'z', 0, 0, 0, 0 };			    /* 6/8UT/12 1PPS Cable Delay: set			*/
-static u_char oncore_cmd_Azx[] = { 'A', 'z', 0xff, 0xff, 0xff, 0xff };		    /* 6/8UT/12 1PPS Cable Delay: Read			*/
-static u_char oncore_cmd_Ba0[] = { 'B', 'a', 0 };				    /* 6	Position/Data/Status: off		*/
-static u_char oncore_cmd_Ba[]  = { 'B', 'a', 1 };				    /* 6	Position/Data/Status: on		*/
-static u_char oncore_cmd_Bb[]  = { 'B', 'b', 1 };				    /* 6/8/12	Visible Satellites			*/
-static u_char oncore_cmd_Bd[]  = { 'B', 'd', 1 };				    /* 6/8/12?	Almanac Status Msg.			*/
-static u_char oncore_cmd_Be[]  = { 'B', 'e', 1 };				    /* 6/8/12	Request Almanac Data			*/
-static u_char oncore_cmd_Bj[]  = { 'B', 'j', 0 };				    /* 6/8	Leap Second Pending			*/
-static u_char oncore_cmd_Bl[]  = { 'B', 'l', 1 };				    /* VP	Satellite Broadcast Data Msg		*/
-static u_char oncore_cmd_Bn0[] = { 'B', 'n', 0, 1, 0,10, 2, 0,0,0, 0,0,0,0,0,0,0 }; /* 6	TRAIM setup/status: msg off, traim on	*/
-static u_char oncore_cmd_Bn[]  = { 'B', 'n', 1, 1, 0,10, 2, 0,0,0, 0,0,0,0,0,0,0 }; /* 6	TRAIM setup/status: msg on,  traim on	*/
-static u_char oncore_cmd_Bnx[] = { 'B', 'n', 0, 0, 0,10, 2, 0,0,0, 0,0,0,0,0,0,0 }; /* 6	TRAIM setup/status: msg off, traim off	*/
-static u_char oncore_cmd_Ca[]  = { 'C', 'a' };					    /* 6	Self Test				*/
-static u_char oncore_cmd_Cf[]  = { 'C', 'f' };					    /* 6/8/12	Set to Defaults 			*/
-static u_char oncore_cmd_Cg[]  = { 'C', 'g', 1 };				    /* VP	Posn Fix/Idle Mode			*/
-static u_char oncore_cmd_Cj[]  = { 'C', 'j' };					    /* 6/8/12	Receiver ID				*/
-static u_char oncore_cmd_Ea0[] = { 'E', 'a', 0 };				    /* 8	Position/Data/Status: off		*/
-static u_char oncore_cmd_Ea[]  = { 'E', 'a', 1 };				    /* 8	Position/Data/Status: on		*/
-static u_char oncore_cmd_Ek[]  = { 'E', 'k', 0 }; /* just turn off */		    /* 8	Posn/Status/Data - extension		*/
-static u_char oncore_cmd_En0[] = { 'E', 'n', 0, 1, 0,10, 2, 0,0,0, 0,0,0,0,0,0,0 }; /* 8/GT	TRAIM setup/status: msg off, traim on	*/
-static u_char oncore_cmd_En[]  = { 'E', 'n', 1, 1, 0,10, 2, 0,0,0, 0,0,0,0,0,0,0 }; /* 8/GT	TRAIM setup/status: msg on,  traim on	*/
-static u_char oncore_cmd_Enx[] = { 'E', 'n', 0, 0, 0,10, 2, 0,0,0, 0,0,0,0,0,0,0 }; /* 8/GT	TRAIM setup/status: msg off, traim off	*/
-static u_char oncore_cmd_Fa[]  = { 'F', 'a' };					    /* 8	Self Test				*/
-static u_char oncore_cmd_Ga[]  = { 'G', 'a', 0,0,0,0, 0,0,0,0, 0,0,0,0, 0 };	    /* 12	Position Set				*/
-static u_char oncore_cmd_Gax[] = { 'G', 'a', 0xff, 0xff, 0xff, 0xff,		    /* 12	Position Set: Read			*/
+static uint8_t oncore_cmd_At0[] = { 'A', 't', 0 };				    /* 6/8	Posn Hold: off				*/
+static uint8_t oncore_cmd_At1[] = { 'A', 't', 1 };				    /* 6/8	Posn Hold: on				*/
+static uint8_t oncore_cmd_At2[] = { 'A', 't', 2 };				    /* 6/8	Posn Hold: Start Site Survey		*/
+static uint8_t oncore_cmd_Atx[] = { 'A', 't', 0xff };				    /* 6/8	Posn Hold: Read Back			*/
+static uint8_t oncore_cmd_Au[]  = { 'A', 'u', 0,0,0,0, 0 };			    /* GT/M12	Altitude Hold Ht.			*/
+static uint8_t oncore_cmd_Av0[] = { 'A', 'v', 0 };				    /* VP/GT	Altitude Hold: off			*/
+static uint8_t oncore_cmd_Av1[] = { 'A', 'v', 1 };				    /* VP/GT	Altitude Hold: on			*/
+static uint8_t oncore_cmd_Aw[]  = { 'A', 'w', 1 };				    /* 6/8/12	UTC/GPS time selection			*/
+static uint8_t oncore_cmd_Ay[]  = { 'A', 'y', 0, 0, 0, 0 };			    /* Timing	1PPS time offset: set			*/
+static uint8_t oncore_cmd_Ayx[] = { 'A', 'y', 0xff, 0xff, 0xff, 0xff };		    /* Timing	1PPS time offset: Read			*/
+static uint8_t oncore_cmd_Az[]  = { 'A', 'z', 0, 0, 0, 0 };			    /* 6/8UT/12 1PPS Cable Delay: set			*/
+static uint8_t oncore_cmd_Azx[] = { 'A', 'z', 0xff, 0xff, 0xff, 0xff };		    /* 6/8UT/12 1PPS Cable Delay: Read			*/
+static uint8_t oncore_cmd_Ba0[] = { 'B', 'a', 0 };				    /* 6	Position/Data/Status: off		*/
+static uint8_t oncore_cmd_Ba[]  = { 'B', 'a', 1 };				    /* 6	Position/Data/Status: on		*/
+static uint8_t oncore_cmd_Bb[]  = { 'B', 'b', 1 };				    /* 6/8/12	Visible Satellites			*/
+static uint8_t oncore_cmd_Bd[]  = { 'B', 'd', 1 };				    /* 6/8/12?	Almanac Status Msg.			*/
+static uint8_t oncore_cmd_Be[]  = { 'B', 'e', 1 };				    /* 6/8/12	Request Almanac Data			*/
+static uint8_t oncore_cmd_Bj[]  = { 'B', 'j', 0 };				    /* 6/8	Leap Second Pending			*/
+static uint8_t oncore_cmd_Bl[]  = { 'B', 'l', 1 };				    /* VP	Satellite Broadcast Data Msg		*/
+static uint8_t oncore_cmd_Bn0[] = { 'B', 'n', 0, 1, 0,10, 2, 0,0,0, 0,0,0,0,0,0,0 }; /* 6	TRAIM setup/status: msg off, traim on	*/
+static uint8_t oncore_cmd_Bn[]  = { 'B', 'n', 1, 1, 0,10, 2, 0,0,0, 0,0,0,0,0,0,0 }; /* 6	TRAIM setup/status: msg on,  traim on	*/
+static uint8_t oncore_cmd_Bnx[] = { 'B', 'n', 0, 0, 0,10, 2, 0,0,0, 0,0,0,0,0,0,0 }; /* 6	TRAIM setup/status: msg off, traim off	*/
+static uint8_t oncore_cmd_Ca[]  = { 'C', 'a' };					    /* 6	Self Test				*/
+static uint8_t oncore_cmd_Cf[]  = { 'C', 'f' };					    /* 6/8/12	Set to Defaults 			*/
+static uint8_t oncore_cmd_Cg[]  = { 'C', 'g', 1 };				    /* VP	Posn Fix/Idle Mode			*/
+static uint8_t oncore_cmd_Cj[]  = { 'C', 'j' };					    /* 6/8/12	Receiver ID				*/
+static uint8_t oncore_cmd_Ea0[] = { 'E', 'a', 0 };				    /* 8	Position/Data/Status: off		*/
+static uint8_t oncore_cmd_Ea[]  = { 'E', 'a', 1 };				    /* 8	Position/Data/Status: on		*/
+static uint8_t oncore_cmd_Ek[]  = { 'E', 'k', 0 }; /* just turn off */		    /* 8	Posn/Status/Data - extension		*/
+static uint8_t oncore_cmd_En0[] = { 'E', 'n', 0, 1, 0,10, 2, 0,0,0, 0,0,0,0,0,0,0 }; /* 8/GT	TRAIM setup/status: msg off, traim on	*/
+static uint8_t oncore_cmd_En[]  = { 'E', 'n', 1, 1, 0,10, 2, 0,0,0, 0,0,0,0,0,0,0 }; /* 8/GT	TRAIM setup/status: msg on,  traim on	*/
+static uint8_t oncore_cmd_Enx[] = { 'E', 'n', 0, 0, 0,10, 2, 0,0,0, 0,0,0,0,0,0,0 }; /* 8/GT	TRAIM setup/status: msg off, traim off	*/
+static uint8_t oncore_cmd_Fa[]  = { 'F', 'a' };					    /* 8	Self Test				*/
+static uint8_t oncore_cmd_Ga[]  = { 'G', 'a', 0,0,0,0, 0,0,0,0, 0,0,0,0, 0 };	    /* 12	Position Set				*/
+static uint8_t oncore_cmd_Gax[] = { 'G', 'a', 0xff, 0xff, 0xff, 0xff,		    /* 12	Position Set: Read			*/
 					     0xff, 0xff, 0xff, 0xff,		    /*							*/
 					     0xff, 0xff, 0xff, 0xff, 0xff };	    /*							*/
-static u_char oncore_cmd_Gb[]  = { 'G', 'b', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };	    /* 12	set Date/Time				*/
-static u_char oncore_cmd_Gc[]  = { 'G', 'c', 0 };				    /* 12	PPS Control: Off, On, 1+satellite,TRAIM */
-static u_char oncore_cmd_Gd0[] = { 'G', 'd', 0 };				    /* 12	Position Control: 3D (no hold)		*/
-static u_char oncore_cmd_Gd1[] = { 'G', 'd', 1 };				    /* 12	Position Control: 0D (3D hold)		*/
-static u_char oncore_cmd_Gd2[] = { 'G', 'd', 2 };				    /* 12	Position Control: 2D (Alt Hold) 	*/
-static u_char oncore_cmd_Gd3[] = { 'G', 'd', 3 };				    /* 12	Position Coltrol: Start Site Survey	*/
-static u_char oncore_cmd_Ge0[] = { 'G', 'e', 0 };				    /* M12+T	TRAIM: off				*/
-static u_char oncore_cmd_Ge[]  = { 'G', 'e', 1 };				    /* M12+T	TRAIM: on				*/
-static u_char oncore_cmd_Gj[]  = { 'G', 'j' };					    /* 8?/12	Leap Second Pending			*/
-static u_char oncore_cmd_Ha0[] = { 'H', 'a', 0 };				    /* 12	Position/Data/Status: off		*/
-static u_char oncore_cmd_Ha[]  = { 'H', 'a', 1 };				    /* 12	Position/Data/Status: on		*/
-static u_char oncore_cmd_Hn0[] = { 'H', 'n', 0 };				    /* 12	TRAIM Status: off			*/
-static u_char oncore_cmd_Hn[]  = { 'H', 'n', 1 };				    /* 12	TRAIM Status: on			*/
-static u_char oncore_cmd_Ia[]  = { 'I', 'a' };					    /* 12	Self Test				*/
+static uint8_t oncore_cmd_Gb[]  = { 'G', 'b', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };	    /* 12	set Date/Time				*/
+static uint8_t oncore_cmd_Gc[]  = { 'G', 'c', 0 };				    /* 12	PPS Control: Off, On, 1+satellite,TRAIM */
+static uint8_t oncore_cmd_Gd0[] = { 'G', 'd', 0 };				    /* 12	Position Control: 3D (no hold)		*/
+static uint8_t oncore_cmd_Gd1[] = { 'G', 'd', 1 };				    /* 12	Position Control: 0D (3D hold)		*/
+static uint8_t oncore_cmd_Gd2[] = { 'G', 'd', 2 };				    /* 12	Position Control: 2D (Alt Hold) 	*/
+static uint8_t oncore_cmd_Gd3[] = { 'G', 'd', 3 };				    /* 12	Position Coltrol: Start Site Survey	*/
+static uint8_t oncore_cmd_Ge0[] = { 'G', 'e', 0 };				    /* M12+T	TRAIM: off				*/
+static uint8_t oncore_cmd_Ge[]  = { 'G', 'e', 1 };				    /* M12+T	TRAIM: on				*/
+static uint8_t oncore_cmd_Gj[]  = { 'G', 'j' };					    /* 8?/12	Leap Second Pending			*/
+static uint8_t oncore_cmd_Ha0[] = { 'H', 'a', 0 };				    /* 12	Position/Data/Status: off		*/
+static uint8_t oncore_cmd_Ha[]  = { 'H', 'a', 1 };				    /* 12	Position/Data/Status: on		*/
+static uint8_t oncore_cmd_Hn0[] = { 'H', 'n', 0 };				    /* 12	TRAIM Status: off			*/
+static uint8_t oncore_cmd_Hn[]  = { 'H', 'n', 1 };				    /* 12	TRAIM Status: on			*/
+static uint8_t oncore_cmd_Ia[]  = { 'I', 'a' };					    /* 12	Self Test				*/
 
 /* it appears that as of 1997/1998, the UT had As,At, but not Au,Av
  *				    the GT had Au,Av, but not As,At
@@ -558,7 +558,7 @@ static u_char oncore_cmd_Ia[]  = { 'I', 'a' };					    /* 12	Self Test				*/
  *
  */
 
-	/* to buffer, int w, u_char *buf */
+	/* to buffer, int w, uint8_t *buf */
 #define w32_buf(buf,w)	{ u_int i_tmp;			   \
 			  i_tmp = (w<0) ? (~(-w)+1) : (w); \
 			  (buf)[0] = (i_tmp >> 24) & 0xff; \
@@ -934,7 +934,7 @@ oncore_init_shmem(
 	)
 {
 	int l, fd;
-	u_char *cp, *cp1, *buf, *shmem_old;
+	uint8_t *cp, *cp1, *buf, *shmem_old;
 	struct msg_desc *mp;
 	struct stat sbuf;
 	size_t i, n, n1, shmem_length, shmem_old_size;
@@ -1055,14 +1055,14 @@ oncore_init_shmem(
 		return;
 	}
 
-	instance->shmem = (u_char *) mmap(0, shmem_length,
+	instance->shmem = (uint8_t *) mmap(0, shmem_length,
 		PROT_READ | PROT_WRITE,
 #ifdef MAP_HASSEMAPHORE
 		MAP_HASSEMAPHORE |
 #endif
 		MAP_SHARED, instance->shmemfd, (off_t)0);
 
-	if (instance->shmem == (u_char *)MAP_FAILED) {
+	if (instance->shmem == (uint8_t *)MAP_FAILED) {
 		instance->shmem = 0;
 		close(instance->shmemfd);
 		return;
@@ -1430,13 +1430,13 @@ oncore_receive(
 	)
 {
 	size_t i;
-	u_char *p;
+	uint8_t *p;
 	struct peer *peer;
 	struct instance *instance;
 
 	peer = rbufp->recv_peer;
 	instance = peer->procptr->unitptr;
-	p = (u_char *) &rbufp->recv_space;
+	p = (uint8_t *) &rbufp->recv_space;
 
 #ifdef ONCORE_VERBOSE_RECEIVE
 	if (debug > 4) {
@@ -1797,7 +1797,7 @@ oncore_get_timestamp(
 				 instance->BEHn[23] * 256 +
 				     instance->BEHn[24]);
 			snprintf(f4, sizeof(f4), "%3d",
-				 (s_char)instance->BEHn[25]);
+				 (int8_t)instance->BEHn[25]);
 		} else {
 			strlcpy(f1, "x", sizeof(f1));
 			strlcpy(f2, "x", sizeof(f2));
@@ -1830,7 +1830,7 @@ oncore_get_timestamp(
 				 instance->BEHn[12] * 256 +
 				     instance->BEHn[13]);
 			snprintf(f4, sizeof(f4), "%3d",
-				 (s_char)instance->BEHn[14]);
+				 (int8_t)instance->BEHn[14]);
 		} else {
 			strlcpy(f1, "x", sizeof(f1));
 			strlcpy(f2, "x", sizeof(f2));
@@ -1886,7 +1886,7 @@ oncore_get_timestamp(
 static void
 oncore_msg_any(
 	struct instance *instance,
-	u_char *buf,
+	uint8_t *buf,
 	size_t len,
 	int idx
 	)
@@ -1947,7 +1947,7 @@ oncore_msg_any(
 static void
 oncore_msg_Adef(
 	struct instance *instance,
-	u_char *buf,
+	uint8_t *buf,
 	size_t len
 	)
 {
@@ -1960,7 +1960,7 @@ oncore_msg_Adef(
 static void
 oncore_msg_Ag(
 	struct instance *instance,
-	u_char *buf,
+	uint8_t *buf,
 	size_t len
 	)
 {
@@ -1985,7 +1985,7 @@ oncore_msg_Ag(
 static void
 oncore_msg_As(
 	struct instance *instance,
-	u_char *buf,
+	uint8_t *buf,
 	size_t len
 	)
 {
@@ -2007,7 +2007,7 @@ oncore_msg_As(
 static void
 oncore_msg_At(
 	struct instance *instance,
-	u_char *buf,
+	uint8_t *buf,
 	size_t len
 	)
 {
@@ -2033,7 +2033,7 @@ oncore_msg_At(
 static void
 oncore_msg_Ay(
 	struct instance *instance,
-	u_char *buf,
+	uint8_t *buf,
 	size_t len
 	)
 {
@@ -2057,7 +2057,7 @@ oncore_msg_Ay(
 static void
 oncore_msg_Az(
 	struct instance *instance,
-	u_char *buf,
+	uint8_t *buf,
 	size_t len
 	)
 {
@@ -2079,7 +2079,7 @@ oncore_msg_Az(
 static void
 oncore_msg_BaEaHa(
 	struct instance *instance,
-	u_char *buf,
+	uint8_t *buf,
 	size_t len
 	)
 {
@@ -2318,13 +2318,13 @@ oncore_msg_BaEaHa(
 
 	if (instance->shmem) {
 		int	i;
-		u_char	*smp;	 /* pointer to start of shared mem for Ba/Ea/Ha */
+		uint8_t	*smp;	 /* pointer to start of shared mem for Ba/Ea/Ha */
 
 		switch(instance->chan) {
 		case 6:   smp = &instance->shmem[instance->shmem_Ba]; break;
 		case 8:   smp = &instance->shmem[instance->shmem_Ea]; break;
 		case 12:  smp = &instance->shmem[instance->shmem_Ha]; break;
-		default:  smp = (u_char *) NULL;		      break;
+		default:  smp = (uint8_t *) NULL;		      break;
 		}
 
 		switch (instance->mode) {
@@ -2422,7 +2422,7 @@ oncore_msg_BaEaHa(
 static void
 oncore_msg_Bd(
 	struct instance *instance,
-	u_char *buf,
+	uint8_t *buf,
 	size_t len
 	)
 {
@@ -2448,7 +2448,7 @@ oncore_msg_Bd(
 static void
 oncore_msg_Bj(
 	struct instance *instance,
-	u_char *buf,
+	uint8_t *buf,
 	size_t len
 	)
 {
@@ -2479,7 +2479,7 @@ oncore_msg_Bj(
 static void
 oncore_msg_Bl(
 	struct instance *instance,
-	u_char *buf,
+	uint8_t *buf,
 	size_t	len
 	)
 {
@@ -2601,7 +2601,7 @@ oncore_msg_Bl(
 static void
 oncore_msg_BnEnHn(
 	struct instance *instance,
-	u_char *buf,
+	uint8_t *buf,
 	size_t	len
 	)
 {
@@ -2632,14 +2632,14 @@ oncore_msg_BnEnHn(
 		}
 
 		dt1 = instance->saw_tooth + instance->offset;	 /* dt this time step */
-		instance->saw_tooth = (s_char) instance->BEHn[14]; /* update for next time Hn[14] */
+		instance->saw_tooth = (int8_t) instance->BEHn[14]; /* update for next time Hn[14] */
 		dt2 = instance->saw_tooth + instance->offset;	 /* dt next time step */
 	} else {
 		if (instance->BEHn[21]) /* bad TRAIM */
 			return;
 
 		dt1 = instance->saw_tooth + instance->offset;	 /* dt this time step */
-		instance->saw_tooth = (s_char) instance->BEHn[25]; /* update for next time Bn[25], En[25] */
+		instance->saw_tooth = (int8_t) instance->BEHn[25]; /* update for next time Bn[25], En[25] */
 		dt2 = instance->saw_tooth + instance->offset;	 /* dt next time step */
 	}
 
@@ -2667,7 +2667,7 @@ oncore_msg_BnEnHn(
 static void
 oncore_msg_CaFaIa(
 	struct instance *instance,
-	u_char *buf,
+	uint8_t *buf,
 	size_t len
 	)
 {
@@ -2735,7 +2735,7 @@ oncore_msg_CaFaIa(
 static void
 oncore_msg_Cb(
 	struct instance *instance,
-	u_char *buf,
+	uint8_t *buf,
 	size_t len
 	)
 {
@@ -2777,7 +2777,7 @@ oncore_msg_Cb(
 static void
 oncore_msg_Cf(
 	struct instance *instance,
-	u_char *buf,
+	uint8_t *buf,
 	size_t len
 	)
 {
@@ -2811,7 +2811,7 @@ oncore_msg_Cf(
 static void
 oncore_msg_Cj(
 	struct instance *instance,
-	u_char *buf,
+	uint8_t *buf,
 	size_t len
 	)
 {
@@ -2863,7 +2863,7 @@ oncore_msg_Cj(
 static void
 oncore_msg_Cj_id(
 	struct instance *instance,
-	u_char *buf,
+	uint8_t *buf,
 	size_t len
 	)
 {
@@ -2979,11 +2979,11 @@ oncore_msg_Cj_id(
 static void
 oncore_msg_Cj_init(
 	struct instance *instance,
-	u_char *buf,
+	uint8_t *buf,
 	size_t len
 	)
 {
-	u_char	Cmd[20];
+	uint8_t	Cmd[20];
 	int	mode;
 
 
@@ -3083,7 +3083,7 @@ oncore_msg_Cj_init(
 static void
 oncore_msg_Ga(
 	struct instance *instance,
-	u_char *buf,
+	uint8_t *buf,
 	size_t len
 	)
 {
@@ -3121,7 +3121,7 @@ oncore_msg_Ga(
 static void
 oncore_msg_Gb(
 	struct instance *instance,
-	u_char *buf,
+	uint8_t *buf,
 	size_t len
 	)
 {
@@ -3152,7 +3152,7 @@ oncore_msg_Gb(
 static void
 oncore_msg_Gc(
 	struct instance *instance,
-	u_char *buf,
+	uint8_t *buf,
 	size_t len
 	)
 {
@@ -3171,7 +3171,7 @@ oncore_msg_Gc(
 static void
 oncore_msg_Gj(
 	struct instance *instance,
-	u_char *buf,
+	uint8_t *buf,
 	size_t len
 	)
 {
@@ -3243,7 +3243,7 @@ oncore_msg_Gj(
 static void
 oncore_msg_Sz(
 	struct instance *instance,
-	u_char *buf,
+	uint8_t *buf,
 	size_t len
 	)
 {
@@ -3442,7 +3442,7 @@ oncore_check_leap_sec(
 
 static int
 oncore_checksum_ok(
-	u_char *buf,
+	uint8_t *buf,
 	int	len
 	)
 {
@@ -3496,7 +3496,7 @@ oncore_load_almanac(
 	struct instance *instance
 	)
 {
-	u_char	*cp, Cmd[20];
+	uint8_t	*cp, Cmd[20];
 	int	n;
 	struct timespec ts;
 	struct tm *tm;
@@ -3616,7 +3616,7 @@ oncore_load_almanac(
 static void
 oncore_print_Cb(
 	struct instance *instance,
-	u_char *cp
+	uint8_t *cp
 	)
 {
 #ifdef ONCORE_VERBOSE_CB
@@ -3643,7 +3643,7 @@ oncore_print_Cb(
 #if 0
 static void
 oncore_print_array(
-	u_char *cp,
+	uint8_t *cp,
 	int	n
 	)
 {
@@ -3727,12 +3727,12 @@ oncore_print_posn(
 static void
 oncore_sendmsg(
 	struct	instance *instance,
-	u_char *ptr,
+	uint8_t *ptr,
 	size_t len
 	)
 {
 	int	fd;
-	u_char cs = 0;
+	uint8_t cs = 0;
 
 	fd = instance->ttyfd;
 #ifdef ONCORE_VERBOSE_SENDMSG
@@ -3757,7 +3757,7 @@ oncore_set_posn(
 	)
 {
 	int	mode;
-	u_char	  Cmd[20];
+	uint8_t	  Cmd[20];
 
 	/* Turn OFF position hold, it needs to be off to set position (for some units),
 	   will get set ON in @@Ea later */

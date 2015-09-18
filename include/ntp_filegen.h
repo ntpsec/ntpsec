@@ -41,8 +41,8 @@ typedef struct filegen_tag {
 			/* must be malloced, will be fed to free() */
 	u_long	id_lo;	/* lower bound of ident value */
 	u_long	id_hi;	/* upper bound of ident value */
-	u_char	type;	/* type of file generation */
-	u_char	flag;	/* flags modifying processing of file generation */
+	uint8_t	type;	/* type of file generation */
+	uint8_t	flag;	/* flags modifying processing of file generation */
 } FILEGEN;
 
 extern	void	filegen_setup	(FILEGEN *, uint32_t);

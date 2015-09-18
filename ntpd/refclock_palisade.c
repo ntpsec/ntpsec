@@ -218,7 +218,7 @@ init_thunderbolt (
 	struct packettx tx;
 	
 	tx.size = 0;
-	tx.data = (u_char *) malloc(100);
+	tx.data = (uint8_t *) malloc(100);
 
 	/* set UTC time */
 	sendsupercmd (&tx, 0x8E, 0xA2);
@@ -246,7 +246,7 @@ init_acutime (
 	struct packettx tx;
 
 	tx.size = 0;
-	tx.data = (u_char *) malloc(100);
+	tx.data = (uint8_t *) malloc(100);
 
 	sendsupercmd(&tx, 0x8E, 0xA5);
 	sendbyte(&tx, 0x02);
@@ -418,7 +418,7 @@ day_of_year (
 		return -1;
 
 	day = dt[0] + days_of_year[mon - 1];
-	year = getint((u_char *) (dt + 2)); 
+	year = getint((uint8_t *) (dt + 2)); 
 
 	if ( !(year % 4) && ((year % 100) || 
 			     (!(year % 100) && !(year%400)))
@@ -472,13 +472,13 @@ TSIP_decode (
 	}
 
 	/*
-	 * We cast both to u_char to as 0x8f uses the sign bit on a char
+	 * We cast both to uint8_t to as 0x8f uses the sign bit on a char
 	 */
-	if ((u_char) up->rpt_buf[0] == (u_char) 0x8f) {
+	if ((uint8_t) up->rpt_buf[0] == (uint8_t) 0x8f) {
 		/* 
 		 * Superpackets
 		 */
-		event = (unsigned short) (getint((u_char *) &mb(1)) & 0xffff);
+		event = (unsigned short) (getint((uint8_t *) &mb(1)) & 0xffff);
 		if (!((pp->sloppyclockflag & CLK_FLAG2) || event)) 
 			/* Ignore Packet */
 			return 0;	   
@@ -498,9 +498,9 @@ TSIP_decode (
 			if (debug > 1) {
 				int ts;
 				double lat, lon, alt;
-				lat = getdbl((u_char *) &mb(42)) * R2D;
-				lon = getdbl((u_char *) &mb(50)) * R2D;
-				alt = getdbl((u_char *) &mb(58));
+				lat = getdbl((uint8_t *) &mb(42)) * R2D;
+				lon = getdbl((uint8_t *) &mb(50)) * R2D;
+				alt = getdbl((uint8_t *) &mb(58));
 
 				printf("TSIP_decode: unit %d: Latitude: %03.4f Longitude: %03.4f Alt: %05.2f m\n",
 				       up->unit, lat,lon,alt);
@@ -515,7 +515,7 @@ TSIP_decode (
 			}
 #endif
 
-			GPS_UTC_Offset = getint((u_char *) &mb(16));  
+			GPS_UTC_Offset = getint((uint8_t *) &mb(16));  
 			if (GPS_UTC_Offset == 0) { /* Check UTC offset */ 
 #ifdef DEBUG
 				printf("TSIP_decode: UTC Offset Unknown\n");
@@ -523,7 +523,7 @@ TSIP_decode (
 				break;
 			}
 
-			secs = getdbl((u_char *) &mb(3));
+			secs = getdbl((uint8_t *) &mb(3));
 			secint = (long) secs;
 			secfrac = secs - secint; /* 0.0 <= secfrac < 1.0 */
 
@@ -538,7 +538,7 @@ TSIP_decode (
 		
 			if ((pp->day = day_of_year(&mb(11))) < 0) break;
 
-			pp->year = getint((u_char *) &mb(13)); 
+			pp->year = getint((uint8_t *) &mb(13)); 
 
 #ifdef DEBUG
 			if (debug > 1)
@@ -609,12 +609,12 @@ TSIP_decode (
 				return 0;
 			}
 
-			pp->nsec = (long) (getdbl((u_char *) &mb(3))
+			pp->nsec = (long) (getdbl((uint8_t *) &mb(3))
 					   * 1000000000);
 
 			if ((pp->day = day_of_year(&mb(14))) < 0) 
 				break;
-			pp->year = getint((u_char *) &mb(16)); 
+			pp->year = getint((uint8_t *) &mb(16)); 
 			pp->hour = mb(11);
 			pp->minute = mb(12);
 			pp->second = mb(13);
@@ -640,16 +640,16 @@ TSIP_decode (
 #ifdef DEBUG
 			if (debug > 1) {
 				double lat, lon, alt;
-				lat = getdbl((u_char *) &mb(36)) * R2D;
-				lon = getdbl((u_char *) &mb(44)) * R2D;
-				alt = getdbl((u_char *) &mb(52));
+				lat = getdbl((uint8_t *) &mb(36)) * R2D;
+				lon = getdbl((uint8_t *) &mb(44)) * R2D;
+				alt = getdbl((uint8_t *) &mb(52));
 
 				printf("TSIP_decode: unit %d: Latitude: %03.4f Longitude: %03.4f Alt: %05.2f m\n",
 				       up->unit, lat,lon,alt);
 				printf("TSIP_decode: unit %d\n", up->unit);
 			}
 #endif
-			if ( (getint((u_char *) &mb(10)) & 0x80) &&
+			if ( (getint((uint8_t *) &mb(10)) & 0x80) &&
 			/* Avoid early announce: https://bugs.ntp.org/2773 */
 			    (6 == up->month || 12 == up->month) )
 				pp->leap = LEAP_ADDSECOND;  /* we ASSUME addsecond */
@@ -661,7 +661,7 @@ TSIP_decode (
 				printf("TSIP_decode: unit %d: 0x%02x leap %d\n",
 				       up->unit, mb(0) & 0xff, pp->leap);
 			if (debug > 1) {
-				printf("Receiver MODE: 0x%02X\n", (u_char)mb(1));
+				printf("Receiver MODE: 0x%02X\n", (uint8_t)mb(1));
 				if (mb(1) == 0x00)
 					printf("                AUTOMATIC\n");
 				if (mb(1) == 0x01)
@@ -677,7 +677,7 @@ TSIP_decode (
 				if (mb(1) == 0x07)
 					printf("                OVERDETERMINED CLOCK\n");
 
-				printf("\n** Disciplining MODE 0x%02X:\n", (u_char)mb(2));
+				printf("\n** Disciplining MODE 0x%02X:\n", (uint8_t)mb(2));
 				if (mb(2) == 0x00)
 					printf("                NORMAL\n");
 				if (mb(2) == 0x01)
@@ -704,7 +704,7 @@ TSIP_decode (
 			if (up->polled  <= 0)
 				return 0;
 
-			GPS_UTC_Offset = getint((u_char *) &mb(7));
+			GPS_UTC_Offset = getint((uint8_t *) &mb(7));
 
 			if (GPS_UTC_Offset == 0){ /* Check UTC Offset */
 #ifdef DEBUG
@@ -754,13 +754,13 @@ TSIP_decode (
 				break;
 #ifdef DEBUG		
 			if (debug > 1) {
-				long tow = getlong((u_char *) &mb(1));
+				long tow = getlong((uint8_t *) &mb(1));
 				printf("pp->day: %d\n", pp->day); 
 				printf("TOW: %ld\n", tow);
 				printf("DAY: %d\n", mb(13));
 			}
 #endif
-			pp->year = getint((u_char *) &mb(15));
+			pp->year = getint((uint8_t *) &mb(15));
 			pp->hour = mb(12);
 			pp->minute = mb(11);
 			pp->second = mb(10);
@@ -779,11 +779,11 @@ TSIP_decode (
 		} /* switch */
 	} /* if 8F packets */
 
-	else if (up->rpt_buf[0] == (u_char)0x42) {
+	else if (up->rpt_buf[0] == (uint8_t)0x42) {
 		printf("0x42\n");
 		return 0;
 	}
-	else if (up->rpt_buf[0] == (u_char)0x43) {
+	else if (up->rpt_buf[0] == (uint8_t)0x43) {
 		printf("0x43\n");
 		return 0;
 	}
@@ -793,9 +793,9 @@ TSIP_decode (
 	}
 	else if ((up->rpt_buf[0] == PACKET_41A) & (up->type == CLK_ACUTIME)) {
 #ifdef DEBUG
-		printf("GPS TOW: %ld\n", (long)getlong((u_char *) &mb(0)));
-		printf("GPS WN: %d\n", getint((u_char *) &mb(4)));
-		printf("GPS UTC-GPS Offser: %ld\n", (long)getlong((u_char *) &mb(6)));
+		printf("GPS TOW: %ld\n", (long)getlong((uint8_t *) &mb(0)));
+		printf("GPS WN: %d\n", getint((uint8_t *) &mb(4)));
+		printf("GPS UTC-GPS Offser: %ld\n", (long)getlong((uint8_t *) &mb(6)));
 #endif
 		return 0;
 	}
@@ -1197,7 +1197,7 @@ HW_poll (
  */
 static double
 getdbl (
-	u_char *bp
+	uint8_t *bp
 	)
 {
 #ifdef WORDS_BIGENDIAN
@@ -1207,7 +1207,7 @@ getdbl (
 	return out;
 #else
 	union {
-		u_char ch[8];
+		uint8_t ch[8];
 		uint32_t u32[2];
 	} ui;
 		
@@ -1231,7 +1231,7 @@ getdbl (
  */
 static short
 getint (
-	u_char *bp
+	uint8_t *bp
 	)
 {
 	u_short us;
@@ -1246,7 +1246,7 @@ getint (
  */
 static int32_t
 getlong(
-	u_char *bp
+	uint8_t *bp
 	)
 {
 	uint32_t u32;

@@ -62,8 +62,8 @@ extern int async_write(int, const void *, unsigned int);
 struct dumbclock_unit {
 	bool	  tcswitch;	/* timecode switch */
 	l_fp	  laststamp;	/* last receive timestamp */
-	u_char	  lasthour;	/* last hour (for monitor) */
-	u_char	  linect;	/* count ignored lines (for monitor */
+	uint8_t	  lasthour;	/* last hour (for monitor) */
+	uint8_t	  linect;	/* count ignored lines (for monitor */
 	struct tm ymd;		/* struct tm for y/m/d only */
 };
 
@@ -334,7 +334,7 @@ dumbclock_receive(
 	pp->lastref = pp->lastrec;
 	refclock_receive(peer);
 	record_clock_stats(&peer->srcadr, pp->a_lastcode);
-	up->lasthour = (u_char)pp->hour;
+	up->lasthour = (uint8_t)pp->hour;
 }
 
 #if 0

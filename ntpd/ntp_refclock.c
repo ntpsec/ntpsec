@@ -115,7 +115,7 @@ refclock_report(
 	if (pp->lastevent < 15)
 		pp->lastevent++;
 	if (pp->currentstatus != code) {
-		pp->currentstatus = (u_char)code;
+		pp->currentstatus = (uint8_t)code;
 		report_event(PEVNT_CLOCK, peer, ceventstr(code));
 	}
 }
@@ -157,7 +157,7 @@ refclock_newpeer(
 	)
 {
 	struct refclockproc *pp;
-	u_char clktype;
+	uint8_t clktype;
 	int unit;
 
 	/*
@@ -170,7 +170,7 @@ refclock_newpeer(
 			stoa(&peer->srcadr));
 		return false;
 	}
-	clktype = (u_char)REFCLOCKTYPE(&peer->srcadr);
+	clktype = (uint8_t)REFCLOCKTYPE(&peer->srcadr);
 	unit = REFCLOCKUNIT(&peer->srcadr);
 	if (clktype >= num_refclock_conf ||
 		refclock_conf[clktype]->clock_start == noentry) {
@@ -190,7 +190,7 @@ refclock_newpeer(
 	 * Initialize structures
 	 */
 	peer->refclktype = clktype;
-	peer->refclkunit = (u_char)unit;
+	peer->refclkunit = (uint8_t)unit;
 	peer->flags |= FLAG_REFCLOCK;
 	peer->leap = LEAP_NOTINSYNC;
 	peer->stratum = STRATUM_REFCLOCK;
@@ -234,7 +234,7 @@ refclock_unpeer(
 	struct peer *peer	/* peer structure pointer */
 	)
 {
-	u_char clktype;
+	uint8_t clktype;
 	int unit;
 
 	/*
@@ -286,7 +286,7 @@ refclock_transmit(
 	struct peer *peer	/* peer structure pointer */
 	)
 {
-	u_char clktype;
+	uint8_t clktype;
 	int unit;
 
 	clktype = peer->refclktype;
@@ -300,7 +300,7 @@ refclock_transmit(
 	 * protocol here and call the driver-specific transmit routine.
 	 */
 	if (peer->burst == 0) {
-		u_char oreach;
+		uint8_t oreach;
 #ifdef DEBUG
 		if (debug)
 			printf("refclock_transmit: at %ld %s\n",
@@ -938,7 +938,7 @@ refclock_control(
 {
 	struct peer *peer;
 	struct refclockproc *pp;
-	u_char clktype;
+	uint8_t clktype;
 	int unit;
 
 	/*
@@ -947,7 +947,7 @@ refclock_control(
 	if (!ISREFCLOCKADR(srcadr))
 		return;
 
-	clktype = (u_char)REFCLOCKTYPE(srcadr);
+	clktype = (uint8_t)REFCLOCKTYPE(srcadr);
 	unit = REFCLOCKUNIT(srcadr);
 
 	peer = findexistingpeer(srcadr, NULL, NULL, -1, 0);
@@ -967,7 +967,7 @@ refclock_control(
 		if (in->haveflags & CLK_HAVETIME2)
 			pp->fudgetime2 = in->fudgetime2;
 		if (in->haveflags & CLK_HAVEVAL1)
-			peer->stratum = pp->stratum = (u_char)in->fudgeval1;
+			peer->stratum = pp->stratum = (uint8_t)in->fudgeval1;
 		if (in->haveflags & CLK_HAVEVAL2)
 			peer->refid = pp->refid = in->fudgeval2;
 		if (in->haveflags & CLK_HAVEFLAG1) {
@@ -1001,7 +1001,7 @@ refclock_control(
 		out->fudgetime2 = pp->fudgetime2;
 		if (0.0 != out->fudgetime2)
 			out->haveflags |= CLK_HAVETIME2;
-		out->flags = (u_char) pp->sloppyclockflag;
+		out->flags = (uint8_t) pp->sloppyclockflag;
 		if (CLK_FLAG1 & out->flags)
 			out->haveflags |= CLK_HAVEFLAG1;
 		if (CLK_FLAG2 & out->flags)
@@ -1058,7 +1058,7 @@ refclock_buginfo(
 	if (!ISREFCLOCKADR(srcadr))
 		return;
 
-	clktype = (u_char) REFCLOCKTYPE(srcadr);
+	clktype = (uint8_t) REFCLOCKTYPE(srcadr);
 	unit = REFCLOCKUNIT(srcadr);
 
 	peer = findexistingpeer(srcadr, NULL, NULL, -1, 0);

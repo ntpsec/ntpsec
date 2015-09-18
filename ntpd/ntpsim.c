@@ -296,7 +296,7 @@ int simulate_server(
      */
     xpkt.li_vn_mode = PKT_LI_VN_MODE(LEAP_NOWARNING, NTP_VERSION,
 				     MODE_SERVER);
-    xpkt.stratum = STRATUM_TO_PKT(((u_char)1));
+    xpkt.stratum = STRATUM_TO_PKT(((uint8_t)1));
     memcpy(&xpkt.refid, "GPS", 4);
     xpkt.ppoll = rpkt->ppoll;
     xpkt.precision = rpkt->precision;

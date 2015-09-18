@@ -66,9 +66,9 @@ extern struct clktype clktypes[];
  * Structure for returning clock status
  */
 struct refclockstat {
-	u_char	type;		/* clock type */
-	u_char	flags;		/* clock flags */
-	u_char	haveflags;	/* bit array of valid flags */
+	uint8_t	type;		/* clock type */
+	uint8_t	flags;		/* clock flags */
+	uint8_t	haveflags;	/* bit array of valid flags */
 	u_short	lencode;	/* length of last timecode */
 	const char *p_lastcode;	/* last timecode received */
 	uint32_t	polls;		/* transmit polls */
@@ -81,9 +81,9 @@ struct refclockstat {
 	double	fudgetime2;	/* configure fudge time2 */
 	int32_t	fudgeval1;	/* configure fudge value1 */
 	uint32_t	fudgeval2;	/* configure fudge value2 */
-	u_char	currentstatus;	/* clock status */
-	u_char	lastevent;	/* last exception event */
-	u_char	leap;		/* leap bits */
+	uint8_t	currentstatus;	/* clock status */
+	uint8_t	lastevent;	/* last exception event */
+	uint8_t	leap;		/* leap bits */
 	struct	ctl_var *kv_list; /* additional variables */
 };
 
@@ -116,8 +116,8 @@ struct refclockio {
 #define	NCLKBUGTIMES	32
 
 struct refclockbug {
-	u_char	nvalues;	/* values following */
-	u_char	ntimes;		/* times following */
+	uint8_t	nvalues;	/* values following */
+	uint8_t	ntimes;		/* times following */
 	u_short	svalues;	/* values format sign array */
 	uint32_t	stimes;		/* times format sign array */
 	uint32_t	values[NCLKBUGVALUES]; /* real values */
@@ -149,10 +149,10 @@ struct refclockproc {
 	void *	unitptr;	/* pointer to unit structure */
 	struct refclock * conf;	/* refclock_conf[type] */
 	struct refclockio io;	/* I/O handler structure */
-	u_char	leap;		/* leap/synchronization code */
-	u_char	currentstatus;	/* clock status */
-	u_char	lastevent;	/* last exception event */
-	u_char	type;		/* clock type */
+	uint8_t	leap;		/* leap/synchronization code */
+	uint8_t	currentstatus;	/* clock status */
+	uint8_t	lastevent;	/* last exception event */
+	uint8_t	type;		/* clock type */
 	const char *clockdesc;	/* clock description */
 	u_long	nextaction;	/* local activity timeout */
 	void	(*action)(struct peer *); /* timeout callback */
@@ -181,9 +181,9 @@ struct refclockproc {
 	 */
 	double	fudgetime1;	/* fudge time1 */
 	double	fudgetime2;	/* fudge time2 */
-	u_char	stratum;	/* server stratum */
+	uint8_t	stratum;	/* server stratum */
 	uint32_t	refid;		/* reference identifier */
-	u_char	sloppyclockflag; /* fudge flags */
+	uint8_t	sloppyclockflag; /* fudge flags */
 
 	/*
 	 * Status tallies

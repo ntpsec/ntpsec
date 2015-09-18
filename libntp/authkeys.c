@@ -24,7 +24,7 @@ typedef struct savekey symkey;
 struct savekey {
 	symkey *	hlink;		/* next in hash bucket */
 	DECL_DLIST_LINK(symkey, llink);	/* for overall & free lists */
-	u_char *	secret;		/* shared secret */
+	uint8_t *	secret;		/* shared secret */
 	u_long		lifetime;	/* remaining lifetime */
 	keyid_t		keyid;		/* key identifier */
 	u_short		type;		/* OpenSSL digest NID */
@@ -51,7 +51,7 @@ symkey_alloc *	authallocs;
 static inline u_short	auth_log2(double x);
 static void		auth_resize_hashtable(void);
 static void		allocsymkey(symkey **, keyid_t,	u_short,
-				    u_short, u_long, u_short, u_char *);
+				    u_short, u_long, u_short, uint8_t *);
 static void		freesymkey(symkey *, symkey **);
 #ifdef DEBUG
 static void		free_auth_mem(void);
@@ -93,7 +93,7 @@ int authnumfreekeys;
  * The key cache. We cache the last key we looked at here.
  */
 keyid_t	cache_keyid;		/* key identifier */
-u_char *cache_secret;		/* secret */
+uint8_t *cache_secret;		/* secret */
 u_short	cache_secretsize;	/* secret length */
 int	cache_type;		/* OpenSSL digest NID */
 u_short cache_flags;		/* flags that wave */
@@ -267,7 +267,7 @@ allocsymkey(
 	u_short		type,
 	u_long		lifetime,
 	u_short		secretsize,
-	u_char *	secret
+	uint8_t *	secret
 	)
 {
 	symkey *	sk;
@@ -516,13 +516,13 @@ void
 MD5auth_setkey(
 	keyid_t keyno,
 	int	keytype,
-	const u_char *key,
+	const uint8_t *key,
 	size_t len
 	)
 {
 	symkey *	sk;
 	symkey **	bucket;
-	u_char *	secret;
+	uint8_t *	secret;
 	size_t		secretsize;
 	
 	DEBUG_ENSURE(keytype <= USHRT_MAX);
