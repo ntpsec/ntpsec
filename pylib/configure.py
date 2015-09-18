@@ -250,6 +250,7 @@ def cmd_configure(ctx):
 	optional_headers = (
 		"alloca.h",
 		"ieeefp.h",
+		"ifaddrs.h",
 		"libgen.h",
 		"libintl.h",
 		"libscf.h",
