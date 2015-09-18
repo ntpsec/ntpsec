@@ -344,11 +344,17 @@ parse_cmdline_opts(
 		mode_ntpdate = true;
 		nofork = true; 
 		break;
-	    case 'Q':	/* savequit - undocumented/disabled(?) in NTP Classic */
+	    case 'Q':	/* saveconfigquit - undocumented(?) in NTP Classic */
+		syslogit = false;
+#ifdef SAVECONFIG
 		saveconfigquit = true;
 		saveconfigfile = ntp_optarg;
 		nofork = true; 
 		break;
+#else
+		msyslog(LOG_ERR, "-Q/--saveconfigquit requires SAVECONFIG/--enable-saveconfig");
+		exit(1);
+#endif
 	    case 'r':
 		{
 		    double tmp;
