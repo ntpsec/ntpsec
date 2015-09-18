@@ -515,8 +515,8 @@ extern u_char		ntp_minpoll;
 /* ntp_scanner.c */
 extern uint32_t		conf_file_sum;	/* Simple sum of characters */
 
+#ifdef ENABLE_MSSNTP
 /* ntp_signd.c */
-#ifdef HAVE_NTP_SIGND
 extern void send_via_ntp_signd(struct recvbuf *, int, keyid_t, int,
 			       struct pkt *);
 #endif
