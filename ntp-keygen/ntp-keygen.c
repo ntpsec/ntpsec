@@ -942,19 +942,19 @@ gen_md5(
 	const char *id		/* file name id */
 	)
 {
-	u_char	md5key[MD5SIZE + 1];	/* MD5 key */
+	uint8_t	md5key[MD5SIZE + 1];	/* MD5 key */
 	FILE	*str;
 	int	i, j;
 #ifdef HAVE_OPENSSL
-	u_char	keystr[MD5SIZE];
-	u_char	hexstr[2 * MD5SIZE + 1];
-	u_char	hex[] = "0123456789abcdef";
+	uint8_t	keystr[MD5SIZE];
+	uint8_t	hexstr[2 * MD5SIZE + 1];
+	uint8_t	hex[] = "0123456789abcdef";
 #endif	/* HAVE_OPENSSL */
 
 	str = fheader("MD5key", id, groupname);
 	for (i = 1; i <= MD5KEYS; i++) {
 		for (j = 0; j < MD5SIZE; j++) {
-			u_char temp;
+			uint8_t temp;
 
 			while (1) {
 				int rc;
@@ -1144,7 +1144,7 @@ gen_dsa(
 {
 	EVP_PKEY *pkey;		/* private key */
 	DSA	*dsa;		/* DSA parameters */
-	u_char	seed[20];	/* seed for parameters */
+	uint8_t	seed[20];	/* seed for parameters */
 	FILE	*str;
 
 	/*
@@ -1246,7 +1246,7 @@ gen_iffkey(
 {
 	EVP_PKEY *pkey;		/* private key */
 	DSA	*dsa;		/* DSA parameters */
-	u_char	seed[20];	/* seed for parameters */
+	uint8_t	seed[20];	/* seed for parameters */
 	BN_CTX	*ctx;		/* BN working space */
 	BIGNUM	*b, *r, *k, *u, *v, *w; /* BN temp */
 	FILE	*str;
@@ -2084,10 +2084,10 @@ x509	(
 	X509_time_adj(X509_get_notAfter(cert), lifetime * SECSPERDAY, &epoch);
 	subj = X509_get_subject_name(cert);
 	X509_NAME_add_entry_by_txt(subj, "commonName", MBSTRING_ASC,
-	    (u_char *)name, strlen(name), -1, 0);
+	    (uint8_t *)name, strlen(name), -1, 0);
 	subj = X509_get_issuer_name(cert);
 	X509_NAME_add_entry_by_txt(subj, "commonName", MBSTRING_ASC,
-	    (u_char *)name, strlen(name), -1, 0);
+	    (uint8_t *)name, strlen(name), -1, 0);
 	if (!X509_set_pubkey(cert, pkey)) {
 		fprintf(stderr, "Assign certificate signing key fails\n%s\n",
 		    ERR_error_string(ERR_get_error(), NULL));

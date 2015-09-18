@@ -240,7 +240,7 @@ typedef struct {
 	}	
 		tally;
 	/* per sentence checksum seen flag */
-	u_char	cksum_type[NMEA_ARRAY_SIZE];
+	uint8_t	cksum_type[NMEA_ARRAY_SIZE];
 } nmea_unit;
 
 /*
@@ -294,7 +294,7 @@ static	void	nmea_timer	(int, struct peer *);
 static int	field_init	(nmea_data * data, char * cp, int len);
 static char *	field_parse	(nmea_data * data, int fn);
 static void	field_wipe	(nmea_data * data, ...);
-static u_char	parse_qual	(nmea_data * data, int idx,
+static uint8_t	parse_qual	(nmea_data * data, int idx,
 				 char tag, int inv);
 static int	parse_time	(struct calendar * jd, long * nsec,
 				 nmea_data *, int idx);
@@ -795,7 +795,7 @@ nmea_receive(
 	struct timespec tofs;	/* offset to full-second reftime */
 	gps_weektm      gpsw;	/* week time storage */
 	/* results of sentence/date/time parsing */
-	u_char		sentence;	/* sentence tag */
+	uint8_t		sentence;	/* sentence tag */
 	int		checkres;
 	char *		cp;
 	int		rc_date;
@@ -893,8 +893,8 @@ nmea_receive(
 	 * 'nmea_start()' to enforce checksums for $GPRMC right from the
 	 * start.)
 	 */
-	if (up->cksum_type[sentence] <= (u_char)checkres) {
-		up->cksum_type[sentence] = (u_char)checkres;
+	if (up->cksum_type[sentence] <= (uint8_t)checkres) {
+		up->cksum_type[sentence] = (uint8_t)checkres;
 	} else {
 		DPRINTF(1, ("%s checksum missing: '%s'\n",
 			refnumtoa(&peer->srcadr), rd_lastcode));
@@ -1205,12 +1205,12 @@ gps_send(
 	/* $...*xy<CR><LF><NUL> add 7 */
 	char	      buf[NMEA_PROTO_MAXLEN + 7];
 	int	      len;
-	u_char	      dcs;
-	const u_char *beg, *end;
+	uint8_t	      dcs;
+	const uint8_t *beg, *end;
 
 	if (*cmd != '$') {
 		/* get checksum and length */
-		beg = end = (const u_char*)cmd;
+		beg = end = (const uint8_t*)cmd;
 		dcs = 0;
 		while (*end >= ' ' && *end != '*')
 			dcs ^= *end++;
@@ -1277,8 +1277,8 @@ field_init(
 	int	    dlen	/* data len, not counting trailing NUL */
 	)
 {
-	u_char cs_l;	/* checksum local computed	*/
-	u_char cs_r;	/* checksum remote given	*/
+	uint8_t cs_l;	/* checksum local computed	*/
+	uint8_t cs_r;	/* checksum remote given	*/
 	char * eptr;	/* buffer end end pointer	*/
 	char   tmp;	/* char buffer 			*/
 	
@@ -1442,7 +1442,7 @@ field_wipe(
  * data field (*cp points to the NUL byte) the result is LEAP_NOTINSYNC.
  * -------------------------------------------------------------------
  */
-static u_char
+static uint8_t
 parse_qual(
 	nmea_data * rd,
 	int         idx,
@@ -1450,7 +1450,7 @@ parse_qual(
 	int         inv
 	)
 {
-	static const u_char table[2] =
+	static const uint8_t table[2] =
 				{ LEAP_NOTINSYNC, LEAP_NOWARNING };
 	char * dp;
 
@@ -1501,9 +1501,9 @@ parse_time(
 		return false;
 	}
 
-	jd->hour   = (u_char)h;
-	jd->minute = (u_char)m;
-	jd->second = (u_char)s;
+	jd->hour   = (uint8_t)h;
+	jd->minute = (uint8_t)m;
+	jd->second = (uint8_t)s;
 	/* if we have a fraction, scale it up to nanoseconds. */
 	if (rc == 4)
 		*ns = f * weight[p2 - p1 - 1];
@@ -1572,8 +1572,8 @@ parse_date(
 	}
 	
 	/* store results */
-	jd->monthday = (u_char)d;
-	jd->month    = (u_char)m;
+	jd->monthday = (uint8_t)d;
+	jd->month    = (uint8_t)m;
 	jd->year     = (u_short)y;
 
 	return true;

@@ -70,13 +70,13 @@ typedef enum {
  */
 
 #define S_ST(ch, fb, match_n, other_n) (			\
-	(u_char)((ch) & 0xff) |					\
+	(uint8_t)((ch) & 0xff) |					\
 	((uint32_t)(fb) << 8) |					\
 	((uint32_t)(match_n) << 10) |				\
 	((uint32_t)(other_n) << 21)				\
 )
 
-#define SS_CH(ss)	((char)(u_char)((ss) & 0xff))
+#define SS_CH(ss)	((char)(uint8_t)((ss) & 0xff))
 #define SS_FB(ss)	(((u_int)(ss) >>  8) & 0x3)
 #define SS_MATCH_N(ss)	(((u_int)(ss) >> 10) & 0x7ff)
 #define SS_OTHER_N(ss)	(((u_int)(ss) >> 21) & 0x7ff)

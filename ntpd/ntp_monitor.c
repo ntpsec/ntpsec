@@ -55,7 +55,7 @@
 /*
  * Hashing stuff
  */
-u_char	mon_hash_bits;
+uint8_t	mon_hash_bits;
 
 /*
  * Pointers to the hash table and the MRU list.  Memory for the hash
@@ -83,7 +83,7 @@ static	u_int mon_mem_increments;	/* times called malloc() */
  * is less than eight times the increment.
  */
 int	ntp_minpkt = NTP_MINPKT;	/* minimum (log 2 s) */
-u_char	ntp_minpoll = NTP_MINPOLL;	/* increment (log 2 s) */
+uint8_t	ntp_minpoll = NTP_MINPOLL;	/* increment (log 2 s) */
 
 /*
  * Initialization state.  We may be monitoring, we may not.  If
@@ -319,8 +319,8 @@ ntp_monitor(
 	int		oldest_age;
 	u_int		hash;
 	u_short		restrict_mask;
-	u_char		mode;
-	u_char		version;
+	uint8_t		mode;
+	uint8_t		version;
 	int		interval;
 	int		head;		/* headway increment */
 	int		leak;		/* new headway */
@@ -480,7 +480,7 @@ ntp_monitor(
 	memcpy(&mon->rmtadr, &rbufp->recv_srcadr, sizeof(mon->rmtadr));
 	mon->vn_mode = VN_MODE(version, mode);
 	mon->lcladr = rbufp->dstadr;
-	mon->cast_flags = (u_char)(((rbufp->dstadr->flags &
+	mon->cast_flags = (uint8_t)(((rbufp->dstadr->flags &
 	    INT_MCASTOPEN) && rbufp->fd == mon->lcladr->fd) ? MDF_MCAST
 	    : rbufp->fd == mon->lcladr->bfd ? MDF_BCAST : MDF_UCAST);
 

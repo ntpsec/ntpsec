@@ -208,7 +208,7 @@ leapsec_load(
 				if (parsefail(cp, ep))
 					goto fail_read;
 			}		    
-		} else if (isdigit((u_char)*cp)) {
+		} else if (isdigit((uint8_t)*cp)) {
 			ttime = strtouv64(cp, &ep, 10);
 			if (parsefail(cp, ep))
 				goto fail_read;
@@ -691,7 +691,7 @@ get_line(
 			*ptr++ = (char)ch;
 		}
 	/* discard trailing whitespace */
-	while (ptr != buff && isspace((u_char)ptr[-1]))
+	while (ptr != buff && isspace((uint8_t)ptr[-1]))
 		ptr--;
 	*ptr = '\0';
 	return (ptr == buff && ch == EOF) ? NULL : buff;
@@ -702,7 +702,7 @@ static char *
 skipws(
 	const char *ptr)
 {
-	while (isspace((u_char)*ptr))
+	while (isspace((uint8_t)*ptr))
 		ptr++;
 	return (char*)noconst(ptr);
 }
@@ -716,7 +716,7 @@ parsefail(
 	const char * ep)
 {
 	return (cp == ep)
-	    || (*ep && *ep != '#' && !isspace((u_char)*ep));
+	    || (*ep && *ep != '#' && !isspace((uint8_t)*ep));
 }
 
 /* [internal] reload the table limits around the given time stamp. This

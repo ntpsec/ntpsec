@@ -258,7 +258,7 @@ int get_ntpEntSoftwareName (netsnmp_mib_handler *handler,
 	if ( read_ntp_value("product", ntpvalue, NTPQ_BUFLEN) )
        {
 	snmp_set_var_typed_value(requests->requestvb, ASN_OCTET_STR,
-                             (u_char *)ntpvalue,
+                             (uint8_t *)ntpvalue,
                              strlen(ntpvalue)
                             );
        } 
@@ -266,12 +266,12 @@ int get_ntpEntSoftwareName (netsnmp_mib_handler *handler,
     {
 	ntpsnmpd_cut_string(ntpvalue, ntp_softwarename, ' ', 0, sizeof(ntp_softwarename)-1);
 	snmp_set_var_typed_value(requests->requestvb, ASN_OCTET_STR,
-                             (u_char *)ntp_softwarename,
+                             (uint8_t *)ntp_softwarename,
                              strlen(ntp_softwarename)
                             );
     } else {
 	snmp_set_var_typed_value(requests->requestvb, ASN_OCTET_STR,
-                             (u_char *)"N/A",
+                             (uint8_t *)"N/A",
                              3
                             );
     }
@@ -302,12 +302,12 @@ int get_ntpEntSoftwareVersion (netsnmp_mib_handler *handler,
     if ( read_ntp_value("version", ntpvalue, NTPQ_BUFLEN) )
     {
 	snmp_set_var_typed_value(requests->requestvb, ASN_OCTET_STR,
-                             (u_char *)ntpvalue,
+                             (uint8_t *)ntpvalue,
                              strlen(ntpvalue)
                             );
     } else {
 	snmp_set_var_typed_value(requests->requestvb, ASN_OCTET_STR,
-                             (u_char *)"N/A",
+                             (uint8_t *)"N/A",
                              3
                             );
     }
@@ -338,12 +338,12 @@ int get_ntpEntSoftwareVendor (netsnmp_mib_handler *handler,
     if ( read_ntp_value("vendor", ntpvalue, NTPQ_BUFLEN) )
     {
 	snmp_set_var_typed_value(requests->requestvb, ASN_OCTET_STR,
-                             (u_char *)ntpvalue,
+                             (uint8_t *)ntpvalue,
                              strlen(ntpvalue)
                             );
     } else {
 	snmp_set_var_typed_value(requests->requestvb, ASN_OCTET_STR,
-                             (u_char *)"N/A",
+                             (uint8_t *)"N/A",
                              3
                             );
     }
@@ -371,7 +371,7 @@ int get_ntpEntSystemType (netsnmp_mib_handler *handler,
     if ( read_ntp_value("systemtype", ntpvalue, NTPQ_BUFLEN) )
     {
 	snmp_set_var_typed_value(requests->requestvb, ASN_OCTET_STR,
-                             (u_char *)ntpvalue,
+                             (uint8_t *)ntpvalue,
                              strlen(ntpvalue)
                             );
     }
@@ -379,12 +379,12 @@ int get_ntpEntSystemType (netsnmp_mib_handler *handler,
     if ( read_ntp_value("system", ntpvalue, NTPQ_BUFLEN) )
     {
 	snmp_set_var_typed_value(requests->requestvb, ASN_OCTET_STR,
-                             (u_char *)ntpvalue,
+                             (uint8_t *)ntpvalue,
                              strlen(ntpvalue)
                             );
     } else {
 	snmp_set_var_typed_value(requests->requestvb, ASN_OCTET_STR,
-                             (u_char *)"N/A",
+                             (uint8_t *)"N/A",
                              3
                             );
     }
@@ -506,12 +506,12 @@ int get_ntpEntTimeDistance (netsnmp_mib_handler *handler,
     if ( read_ntp_value("rootdelay", ntpvalue, NTPQ_BUFLEN) )
     {
 	snmp_set_var_typed_value(requests->requestvb, ASN_OCTET_STR,
-                             (u_char *)ntpvalue,
+                             (uint8_t *)ntpvalue,
                              strlen(ntpvalue)
                             );
     } else {
 	snmp_set_var_typed_value(requests->requestvb, ASN_OCTET_STR,
-                             (u_char *)"N/A",
+                             (uint8_t *)"N/A",
                              3
                             );
     }

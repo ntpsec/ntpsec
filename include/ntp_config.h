@@ -112,10 +112,10 @@ struct peer_node_tag {
 	int		host_mode;
 	address_node *	addr;
 	attr_val_fifo *	peerflags;
-	u_char		minpoll;
-	u_char		maxpoll;
+	uint8_t		minpoll;
+	uint8_t		maxpoll;
 	uint32_t		ttl;
-	u_char		peerversion;
+	uint8_t		peerversion;
 	keyid_t		peerkey;
 	char *		group;
 };

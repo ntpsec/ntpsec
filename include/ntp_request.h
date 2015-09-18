@@ -132,10 +132,10 @@ typedef union req_data_u_tag {
  * A request packet.  These are almost a fixed length.
  */
 struct req_pkt {
-	u_char rm_vn_mode;		/* response, more, version, mode */
-	u_char auth_seq;		/* key, sequence number */
-	u_char implementation;		/* implementation number */
-	u_char request;			/* request number */
+	uint8_t rm_vn_mode;		/* response, more, version, mode */
+	uint8_t auth_seq;		/* key, sequence number */
+	uint8_t implementation;		/* implementation number */
+	uint8_t request;			/* request number */
 	u_short err_nitems;		/* error code/number of data items */
 	u_short mbz_itemsize;		/* item size */
 	req_data_u u;			/* data area */
@@ -176,10 +176,10 @@ typedef union resp_pkt_u_tag {
 } resp_pkt_u;
 
 struct resp_pkt {
-	u_char rm_vn_mode;		/* response, more, version, mode */
-	u_char auth_seq;		/* key, sequence number */
-	u_char implementation;		/* implementation number */
-	u_char request;			/* request number */
+	uint8_t rm_vn_mode;		/* response, more, version, mode */
+	uint8_t auth_seq;		/* key, sequence number */
+	uint8_t implementation;		/* implementation number */
+	uint8_t request;			/* request number */
 	u_short err_nitems;		/* error code/number of data items */
 	u_short mbz_itemsize;		/* item size */
 	resp_pkt_u u;			/* data area */
@@ -211,18 +211,18 @@ struct resp_pkt {
 
 #define	ISRESPONSE(rm_vn_mode)	(((rm_vn_mode)&RESP_BIT)!=0)
 #define	ISMORE(rm_vn_mode)	(((rm_vn_mode)&MORE_BIT)!=0)
-#define INFO_VERSION(rm_vn_mode) ((u_char)(((rm_vn_mode)>>3)&0x7))
+#define INFO_VERSION(rm_vn_mode) ((uint8_t)(((rm_vn_mode)>>3)&0x7))
 #define	INFO_MODE(rm_vn_mode)	((rm_vn_mode)&0x7)
 
 #define	RM_VN_MODE(resp, more, version)		\
-				((u_char)(((resp)?RESP_BIT:0)\
+				((uint8_t)(((resp)?RESP_BIT:0)\
 				|((more)?MORE_BIT:0)\
 				|((version?version:(NTP_OLDVERSION+1))<<3)\
 				|(MODE_PRIVATE)))
 
 #define	INFO_IS_AUTH(auth_seq)	(((auth_seq) & 0x80) != 0)
 #define	INFO_SEQ(auth_seq)	((auth_seq)&0x7f)
-#define	AUTH_SEQ(auth, seq)	((u_char)((((auth)!=0)?0x80:0)|((seq)&0x7f)))
+#define	AUTH_SEQ(auth, seq)	((uint8_t)((((auth)!=0)?0x80:0)|((seq)&0x7f)))
 
 #define	INFO_ERR(err_nitems)	((u_short)((ntohs(err_nitems)>>12)&0xf))
 #define	INFO_NITEMS(err_nitems)	((u_short)(ntohs(err_nitems)&0xfff))
@@ -337,8 +337,8 @@ struct resp_pkt {
 struct info_peer_list {
 	uint32_t addr;		/* address of peer */
 	u_short port;		/* port number of peer */
-	u_char hmode;		/* mode for this peer */
-	u_char flags;		/* flags (from above) */
+	uint8_t hmode;		/* mode for this peer */
+	uint8_t flags;		/* flags (from above) */
 	u_int v6_flag;		/* is this v6 or not */
 	u_int unused1;		/* (unused) padding for addr6 */
 	struct in6_addr addr6;	/* v6 address of peer */
@@ -352,12 +352,12 @@ struct info_peer_summary {
 	uint32_t dstadr;		/* local address (zero for undetermined) */
 	uint32_t srcadr;		/* source address */
 	u_short srcport;	/* source port */
-	u_char stratum;		/* stratum of peer */
-	s_char hpoll;		/* host polling interval */
-	s_char ppoll;		/* peer polling interval */
-	u_char reach;		/* reachability register */
-	u_char flags;		/* flags, from above */
-	u_char hmode;		/* peer mode */
+	uint8_t stratum;		/* stratum of peer */
+	int8_t hpoll;		/* host polling interval */
+	int8_t ppoll;		/* peer polling interval */
+	uint8_t reach;		/* reachability register */
+	uint8_t flags;		/* flags, from above */
+	uint8_t hmode;		/* peer mode */
 	s_fp delay;		/* peer.estdelay */
 	l_fp offset;		/* peer.estoffset */
 	u_fp dispersion;	/* peer.estdisp */
@@ -375,20 +375,20 @@ struct info_peer {
 	uint32_t dstadr;		/* local address */
 	uint32_t	srcadr;		/* source address */
 	u_short srcport;	/* remote port */
-	u_char flags;		/* peer flags */
-	u_char leap;		/* peer.leap */
-	u_char hmode;		/* peer.hmode */
-	u_char pmode;		/* peer.pmode */
-	u_char stratum;		/* peer.stratum */
-	u_char ppoll;		/* peer.ppoll */
-	u_char hpoll;		/* peer.hpoll */
-	s_char precision;	/* peer.precision */
-	u_char version;		/* peer.version */
-	u_char unused8;
-	u_char reach;		/* peer.reach */
-	u_char unreach;		/* peer.unreach */
-	u_char flash;		/* old peer.flash */
-	u_char ttl;		/* peer.ttl */
+	uint8_t flags;		/* peer flags */
+	uint8_t leap;		/* peer.leap */
+	uint8_t hmode;		/* peer.hmode */
+	uint8_t pmode;		/* peer.pmode */
+	uint8_t stratum;		/* peer.stratum */
+	uint8_t ppoll;		/* peer.ppoll */
+	uint8_t hpoll;		/* peer.hpoll */
+	int8_t precision;	/* peer.precision */
+	uint8_t version;		/* peer.version */
+	uint8_t unused8;
+	uint8_t reach;		/* peer.reach */
+	uint8_t unreach;		/* peer.unreach */
+	uint8_t flash;		/* old peer.flash */
+	uint8_t ttl;		/* peer.ttl */
 	u_short flash2;		/* new peer.flash */
 	associd_t associd;	/* association ID */
 	keyid_t keyid;		/* peer.keyid */
@@ -403,7 +403,7 @@ struct info_peer {
 	l_fp xmt;		/* peer.xmt */
 	s_fp filtdelay[NTP_SHIFT];	/* delay shift register */
 	l_fp filtoffset[NTP_SHIFT];	/* offset shift register */
-	u_char order[NTP_SHIFT];	/* order of peers from last filter */
+	uint8_t order[NTP_SHIFT];	/* order of peers from last filter */
 	s_fp delay;		/* peer.estdelay */
 	u_fp dispersion;	/* peer.estdisp */
 	l_fp offset;		/* peer.estoffset */
@@ -447,10 +447,10 @@ struct info_peer_stats {
 	uint32_t seldisp;	/* bad dispersion */
 	uint32_t selbroken;	/* bad reference time */
 	uint32_t unused5;	/* (unused) */
-	u_char candidate;	/* select order */
-	u_char unused6;		/* (unused) */
-	u_char unused7;		/* (unused) */
-	u_char unused8;		/* (unused) */
+	uint8_t candidate;	/* select order */
+	uint8_t unused6;		/* (unused) */
+	uint8_t unused7;		/* (unused) */
+	uint8_t unused8;		/* (unused) */
 	u_int v6_flag;			/* is this v6 or not */
 	u_int unused9;			/* (unused) padding for dstadr6 */
 	struct in6_addr dstadr6;	/* local address */
@@ -475,19 +475,19 @@ struct info_loop {
  */
 struct info_sys {
 	uint32_t peer;		/* system peer address (v4) */
-	u_char peer_mode;	/* mode we are syncing to peer in */
-	u_char leap;		/* system leap bits */
-	u_char stratum;		/* our stratum */
-	s_char precision;	/* local clock precision */
+	uint8_t peer_mode;	/* mode we are syncing to peer in */
+	uint8_t leap;		/* system leap bits */
+	uint8_t stratum;		/* our stratum */
+	int8_t precision;	/* local clock precision */
 	s_fp rootdelay;		/* delay from sync source */
 	u_fp rootdispersion;	/* dispersion from sync source */
 	uint32_t refid;		/* reference ID of sync source */
 	l_fp reftime;		/* system reference time */
 	uint32_t poll;		/* system poll interval */
-	u_char flags;		/* system flags */
-	u_char unused1;		/* unused */
-	u_char unused2;		/* unused */
-	u_char unused3;		/* unused */
+	uint8_t flags;		/* system flags */
+	uint8_t unused1;		/* unused */
+	uint8_t unused2;		/* unused */
+	uint8_t unused3;		/* unused */
 	s_fp bdelay;		/* default broadcast offset */
 	s_fp frequency;		/* frequency residual (scaled ppm)  */
 	l_fp authdelay;		/* default authentication delay */
@@ -543,7 +543,7 @@ struct info_mem_stats {
 	uint32_t findpeer_calls;
 	uint32_t allocations;
 	uint32_t demobilizations;
-	u_char hashcount[NTP_HASH_SIZE];
+	uint8_t hashcount[NTP_HASH_SIZE];
 };
 
 
@@ -582,24 +582,24 @@ struct info_timer_stats {
  */
 struct old_conf_peer {
 	uint32_t peeraddr;	/* address to poll */
-	u_char hmode;		/* mode, either broadcast, active or client */
-	u_char version;		/* version number to poll with */
-	u_char minpoll;		/* min host poll interval */
-	u_char maxpoll;		/* max host poll interval */
-	u_char flags;		/* flags for this request */
-	u_char ttl;		/* time to live (multicast) or refclock mode */
+	uint8_t hmode;		/* mode, either broadcast, active or client */
+	uint8_t version;		/* version number to poll with */
+	uint8_t minpoll;		/* min host poll interval */
+	uint8_t maxpoll;		/* max host poll interval */
+	uint8_t flags;		/* flags for this request */
+	uint8_t ttl;		/* time to live (multicast) or refclock mode */
 	u_short unused;		/* unused */
 	keyid_t keyid;		/* key to use for this association */
 };
 
 struct conf_peer {
 	uint32_t peeraddr;	/* address to poll */
-	u_char hmode;		/* mode, either broadcast, active or client */
-	u_char version;		/* version number to poll with */
-	u_char minpoll;		/* min host poll interval */
-	u_char maxpoll;		/* max host poll interval */
-	u_char flags;		/* flags for this request */
-	u_char ttl;		/* time to live (multicast) or refclock mode */
+	uint8_t hmode;		/* mode, either broadcast, active or client */
+	uint8_t version;		/* version number to poll with */
+	uint8_t minpoll;		/* min host poll interval */
+	uint8_t maxpoll;		/* max host poll interval */
+	uint8_t flags;		/* flags for this request */
+	uint8_t ttl;		/* time to live (multicast) or refclock mode */
 	u_short unused1;	/* unused */
 	keyid_t keyid;		/* key to use for this association */
 	char keystr[128];	/* public key file name */
@@ -687,8 +687,8 @@ struct info_monitor_1 {
 	uint32_t daddr;		/* destination host address */
 	uint32_t flags;		/* flags about destination */
 	u_short port;		/* port number of last reception */
-	u_char mode;		/* mode of last packet */
-	u_char version;		/* version number of last packet */
+	uint8_t mode;		/* mode of last packet */
+	uint8_t version;		/* version number of last packet */
 	u_int v6_flag;		/* is this v6 or not */
 	u_int unused1;		/* unused, padding for addr6 */
 	struct in6_addr addr6;	/* host address V6 style */
@@ -706,8 +706,8 @@ struct info_monitor {
 	uint32_t count;		/* count of packets received */
 	uint32_t addr;		/* host address */
 	u_short port;		/* port number of last reception */
-	u_char mode;		/* mode of last packet */
-	u_char version;		/* version number of last packet */
+	uint8_t mode;		/* mode of last packet */
+	uint8_t version;		/* version number of last packet */
 	u_int v6_flag;		/* is this v6 or not */
 	u_int unused1;		/* unused, padding for addr6 */
 	struct in6_addr addr6;	/* host v6 address */
@@ -722,8 +722,8 @@ struct old_info_monitor {
 	uint32_t count;		/* count of packets received */
 	uint32_t addr;		/* host address */
 	u_short port;		/* port number of last reception */
-	u_char mode;		/* mode of last packet */
-	u_char version;		/* version number of last packet */
+	uint8_t mode;		/* mode of last packet */
+	uint8_t version;		/* version number of last packet */
 	u_int v6_flag;		/* is this v6 or not */
 	struct in6_addr addr6;	/* host address  (v6)*/
 };
@@ -828,10 +828,10 @@ struct info_control {
  */
 struct info_clock {
 	uint32_t clockadr;
-	u_char type;
-	u_char flags;
-	u_char lastevent;
-	u_char currentstatus;
+	uint8_t type;
+	uint8_t flags;
+	uint8_t lastevent;
+	uint8_t currentstatus;
 	uint32_t polls;
 	uint32_t noresponse;
 	uint32_t badformat;
@@ -869,8 +869,8 @@ struct conf_fudge {
 
 struct info_clkbug {
 	uint32_t clockadr;
-	u_char nvalues;
-	u_char ntimes;
+	uint8_t nvalues;
+	uint8_t ntimes;
 	u_short svalues;
 	uint32_t stimes;
 	uint32_t values[NUMCBUGVALUES];
@@ -924,8 +924,8 @@ struct info_if_stats {
 	uint32_t ifnum;			/* sequential interface number */
 	uint32_t peercnt;		/* number of peers referencinf this interface - informational only */
 	u_short family;			/* Address family */
-	u_char ignore_packets;		/* Specify whether the packet should be ignored */
-	u_char action;			/* reason the item is listed */
+	uint8_t ignore_packets;		/* Specify whether the packet should be ignored */
+	uint8_t action;			/* reason the item is listed */
 	int32_t _filler0;		/* pad to a 64 bit size boundary */
 };
 

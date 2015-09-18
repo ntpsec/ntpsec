@@ -153,7 +153,7 @@
 struct packettx
 {
 	short	size;
-	u_char *data;
+	uint8_t *data;
 };
 
 /*
@@ -182,10 +182,10 @@ static	void 	palisade_io		(struct recvbuf *);
 int 		palisade_configure	(int, struct peer *);
 int 		TSIP_decode		(struct peer *);
 long		HW_poll			(struct refclockproc *);
-static	double	getdbl 			(u_char *);
-static	short	getint 			(u_char *);
+static	double	getdbl 			(uint8_t *);
+static	short	getint 			(uint8_t *);
 #ifdef DEBUG		
-static	int32_t	getlong			(u_char *);
+static	int32_t	getlong			(uint8_t *);
 #endif
 
 #ifdef PALISADE_SENDCMD_RESURRECTED

@@ -107,7 +107,7 @@ sock_hash(
 	u_int hashVal;
 	u_int j;
 	size_t len;
-	const u_char *pch;
+	const uint8_t *pch;
 
 	hashVal = 0;
 	len = 0;

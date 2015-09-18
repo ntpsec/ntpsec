@@ -179,7 +179,7 @@ lex_getch(
 		/* fetch next 7-bit ASCII char from buffer */
 		const char * scan;
 		scan = &remote_config.buffer[remote_config.pos];
-		while ((ch = (u_char)*scan) > SCHAR_MAX) {
+		while ((ch = (uint8_t)*scan) > SCHAR_MAX) {
 			scan++;
 			stream->curpos.ncol++;
 		}
@@ -226,7 +226,7 @@ lex_ungetch(
 		return EOF;
 
 	/* keep for later reference and update checksum */
-	stream->backch = (u_char)ch;
+	stream->backch = (uint8_t)ch;
 	if (stream->fpi)
 		conf_file_sum -= stream->backch;
 
@@ -487,7 +487,7 @@ is_integer(
 
 	/* Check that all the remaining characters are digits */
 	for (; lexeme[i] != '\0'; i++) {
-		if (!isdigit((u_char)lexeme[i]))
+		if (!isdigit((uint8_t)lexeme[i]))
 			return false;
 	}
 
@@ -512,7 +512,7 @@ is_u_int(
 	int	is_hex;
 	
 	i = 0;
-	if ('0' == lexeme[i] && 'x' == tolower((u_char)lexeme[i + 1])) {
+	if ('0' == lexeme[i] && 'x' == tolower((uint8_t)lexeme[i + 1])) {
 		i += 2;
 		is_hex = true;
 	} else {
@@ -521,9 +521,9 @@ is_u_int(
 
 	/* Check that all the remaining characters are digits */
 	for (; lexeme[i] != '\0'; i++) {
-		if (is_hex && !isxdigit((u_char)lexeme[i]))
+		if (is_hex && !isxdigit((uint8_t)lexeme[i]))
 			return false;
-		if (!is_hex && !isdigit((u_char)lexeme[i]))
+		if (!is_hex && !isdigit((uint8_t)lexeme[i]))
 			return false;
 	}
 
@@ -547,14 +547,14 @@ is_double(
 		i++;
 
 	/* Read the integer part */
-	for (; lexeme[i] && isdigit((u_char)lexeme[i]); i++)
+	for (; lexeme[i] && isdigit((uint8_t)lexeme[i]); i++)
 		num_digits++;
 
 	/* Check for the optional decimal point */
 	if ('.' == lexeme[i]) {
 		i++;
 		/* Check for any digits after the decimal point */
-		for (; lexeme[i] && isdigit((u_char)lexeme[i]); i++)
+		for (; lexeme[i] && isdigit((uint8_t)lexeme[i]); i++)
 			num_digits++;
 	}
 
@@ -570,7 +570,7 @@ is_double(
 		return true;
 
 	/* There is still more input, read the exponent */
-	if ('e' == tolower((u_char)lexeme[i]))
+	if ('e' == tolower((uint8_t)lexeme[i]))
 		i++;
 	else
 		return false;
@@ -580,7 +580,7 @@ is_double(
 		i++;
 
 	/* Now read the exponent part */
-	while (lexeme[i] && isdigit((u_char)lexeme[i]))
+	while (lexeme[i] && isdigit((uint8_t)lexeme[i]))
 		i++;
 
 	/* Check if we are done */
@@ -645,7 +645,7 @@ create_string_token(
 	 * ignore end of line whitespace
 	 */
 	pch = lexeme;
-	while (*pch && isspace((u_char)*pch))
+	while (*pch && isspace((uint8_t)*pch))
 		pch++;
 
 	if (!*pch) {

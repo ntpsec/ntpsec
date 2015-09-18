@@ -2161,7 +2161,7 @@ log_data(
 				*dptr++ = *sptr;
 			} else {
 				char fbuf[6];
-				snprintf(fbuf, sizeof(fbuf), "\\%03o", *(const u_char*)sptr);
+				snprintf(fbuf, sizeof(fbuf), "\\%03o", *(const uint8_t*)sptr);
 				dptr = add_string(dptr, dtop, fbuf);
 			}
 			sptr++;

@@ -20,7 +20,7 @@ bool
 authusekey(
 	keyid_t keyno,
 	int keytype,
-	const u_char *str
+	const uint8_t *str
 	)
 {
 	int len;

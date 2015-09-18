@@ -5,13 +5,13 @@
 #include "ntp_types.h"
 
 typedef union ctl_pkt_u_tag {
-	u_char data[480 + MAX_MAC_LEN]; /* data + auth */
+	uint8_t data[480 + MAX_MAC_LEN]; /* data + auth */
 	uint32_t u32[(480 + MAX_MAC_LEN) / sizeof(uint32_t)];
 } ctl_pkt_u;
 
 struct ntp_control {
-	u_char li_vn_mode;		/* leap, version, mode */
-	u_char r_m_e_op;		/* response, more, error, opcode */
+	uint8_t li_vn_mode;		/* leap, version, mode */
+	uint8_t r_m_e_op;		/* response, more, error, opcode */
 	u_short sequence;		/* sequence number of request */
 	u_short status;			/* status word for association */
 	associd_t associd;		/* association ID */
@@ -163,8 +163,8 @@ struct ctl_trap {
 	u_long tr_origtime;		/* time trap was originally set */
 	u_long tr_resets;		/* count of resets for this trap */
 	u_short tr_sequence;		/* trap sequence id */
-	u_char tr_flags;		/* trap flags */
-	u_char tr_version;		/* version number of trapper */
+	uint8_t tr_flags;		/* trap flags */
+	uint8_t tr_version;		/* version number of trapper */
 };
 extern struct ctl_trap ctl_traps[CTL_MAXTRAPS];
 

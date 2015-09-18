@@ -54,12 +54,12 @@
 extern int printf (const char *, ...);
 #endif
 
-static const u_char VT_INITIALISED      = 0x01;
-static const u_char VT_SYNCHRONISED     = 0x02;
-static const u_char VT_ALARM_STATE      = 0x04;
-static const u_char VT_BST              = 0x08;
-static const u_char VT_SEASON_CHANGE    = 0x10;
-static const u_char VT_LAST_TELEGRAM_OK = 0x20;
+static const uint8_t VT_INITIALISED      = 0x01;
+static const uint8_t VT_SYNCHRONISED     = 0x02;
+static const uint8_t VT_ALARM_STATE      = 0x04;
+static const uint8_t VT_BST              = 0x08;
+static const uint8_t VT_SEASON_CHANGE    = 0x10;
+static const uint8_t VT_LAST_TELEGRAM_OK = 0x20;
 
 /*
  * The Varitext receiver sends a datagram in the following format every minute
@@ -155,7 +155,7 @@ cvt_varitext(
 	     format->field_offsets[O_SEC].length)) {
       return CVT_FAIL | CVT_BADFMT;
     } else {
-      u_char *f = (u_char*) &buffer[format->field_offsets[O_FLAGS].offset];
+      uint8_t *f = (uint8_t*) &buffer[format->field_offsets[O_FLAGS].offset];
 
       clock_time->flags = 0;
       clock_time->utcoffset = 0;

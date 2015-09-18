@@ -454,8 +454,8 @@ filegen_config(
 		free(gen->fname);
 		gen->fname = estrdup(fname);
 	}
-	gen->type = (u_char)type;
-	gen->flag = (u_char)flag;
+	gen->type = (uint8_t)type;
+	gen->flag = (uint8_t)flag;
 
 	/*
 	 * make filegen use the new settings

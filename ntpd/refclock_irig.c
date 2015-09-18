@@ -203,7 +203,7 @@ static	char	hexchar[] = "0123456789abcdef";
  * IRIG unit control structure
  */
 struct irigunit {
-	u_char	timecode[2 * SUBFLD + 1]; /* timecode string */
+	uint8_t	timecode[2 * SUBFLD + 1]; /* timecode string */
 	l_fp	timestamp;	/* audio sample timestamp */
 	l_fp	tick;		/* audio sample increment */
 	l_fp	refstamp;	/* reference timestamp */
@@ -413,7 +413,7 @@ irig_receive(
 	 * Local variables
 	 */
 	double	sample;		/* codec sample */
-	u_char	*dpt;		/* buffer pointer */
+	uint8_t	*dpt;		/* buffer pointer */
 	int	bufcnt;		/* buffer counter */
 	l_fp	ltemp;		/* l_fp temp */
 

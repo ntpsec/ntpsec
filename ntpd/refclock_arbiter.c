@@ -237,7 +237,7 @@ arb_receive(
 	struct peer *peer;
 	l_fp trtmp;
 	int temp;
-	u_char	syncchar;		/* synch indicator */
+	uint8_t	syncchar;		/* synch indicator */
 	char	tbuf[BMAX];		/* temp buffer */
 
 	/*
