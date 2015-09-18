@@ -352,7 +352,7 @@ receive_blocking_resp_internal(
 }
 
 
-#if defined(HAVE_DROPROOT) && defined(WORK_FORK)
+#if defined(ENABLE_DROPROOT) && defined(WORK_FORK)
 void
 fork_deferred_worker(void)
 {
@@ -432,7 +432,7 @@ fork_blocking_child(
 		}
 	}
 
-#ifdef HAVE_DROPROOT
+#ifdef ENABLE_DROPROOT
 	/* defer the fork until after root is dropped */
 	if (droproot && !root_dropped)
 		return;

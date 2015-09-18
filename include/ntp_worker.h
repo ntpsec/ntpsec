@@ -153,7 +153,7 @@ extern	int				worker_process;
 
 #endif	/* WORKER */
 
-#if defined(HAVE_DROPROOT) && defined(WORK_FORK)
+#if defined(ENABLE_DROPROOT) && defined(WORK_FORK)
 extern void	fork_deferred_worker(void);
 #else
 # define	fork_deferred_worker()	do {} while (0)

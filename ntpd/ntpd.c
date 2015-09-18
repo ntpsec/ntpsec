@@ -67,7 +67,7 @@
 # include <sys/ci/ciioctl.h>
 #endif
 
-#ifdef HAVE_DROPROOT
+#ifdef ENABLE_DROPROOT
 # include <ctype.h>
 # include <grp.h>
 # include <pwd.h>
@@ -78,7 +78,7 @@
 #if defined(HAVE_PRIV_H) && defined(HAVE_SOLARIS_PRIVS)
 # include <priv.h>
 #endif /* HAVE_PRIV_H */
-#endif /* HAVE_DROPROOT */
+#endif /* ENABLE_DROPROOT */
 
 #if defined (LIBSECCOMP) && (KERN_SECCOMP)
 /* # include <sys/types.h> */
@@ -129,7 +129,7 @@ bool mdnsreg = false;
 int mdnstries = 5;
 #endif  /* HAVE_DNSREGISTRATION */
 
-#ifdef HAVE_DROPROOT
+#ifdef ENABLE_DROPROOT
 bool droproot;
 bool root_dropped;
 char *user;		/* User to switch to */
@@ -140,7 +140,7 @@ gid_t sw_gid;
 char *endp;
 struct group *gr;
 struct passwd *pw;
-#endif /* HAVE_DROPROOT */
+#endif /* ENABLE_DROPROOT */
 
 #ifdef HAVE_WORKING_FORK
 int	waitsync_fd_to_close = -1;	/* -w/--wait-sync */
@@ -300,7 +300,7 @@ parse_cmdline_opts(
 		force_step_once = true;
 		break;
 	    case 'i':
-#ifdef HAVE_DROPROOT
+#ifdef ENABLE_DROPROOT
 		droproot = true;
 		chrootdir = ntp_optarg;
 #endif
@@ -377,7 +377,7 @@ parse_cmdline_opts(
 		/* defer */
 		break;
 	    case 'u':
-#ifdef HAVE_DROPROOT
+#ifdef ENABLE_DROPROOT
 		droproot = true;
 		user = estrdup(ntp_optarg);
 		group = strrchr(user, ':');
@@ -944,7 +944,7 @@ ntpdmain(
 		    allow_panic ? "true" : "false");
 	    fprintf(stdout, "#force_step_once = %s\n",
 		    force_step_once ? "true" : "false");
-#ifdef HAVE_DROPROOT
+#ifdef ENABLE_DROPROOT
 	    if (chrootdir)
 		fprintf(stdout, "#chrootdir = \"%s\";\n", chrootdir);
 	    if (user)
@@ -1011,7 +1011,7 @@ ntpdmain(
 
 
 
-# ifdef HAVE_DROPROOT
+# ifdef ENABLE_DROPROOT
 	if (droproot) {
 		/* Drop super-user privileges and chroot now if the OS supports this */
 
@@ -1192,7 +1192,7 @@ getgroup:
 		root_dropped = true;
 		fork_deferred_worker();
 	}	/* if (droproot) */
-# endif	/* HAVE_DROPROOT */
+# endif	/* ENABLE_DROPROOT */
 
 /* libssecomp sandboxing */
 #if defined (LIBSECCOMP) && (KERN_SECCOMP)
