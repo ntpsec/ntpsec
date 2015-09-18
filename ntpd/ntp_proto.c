@@ -382,6 +382,7 @@ receive(
 #ifdef ENABLE_MSSNTP
 	static unsigned char zero_key[16];
 #endif /* ENABLE_MSSNTP */
+	bool is_kod;
 
 	/*
 	 * Monitor the packet and get restrictions. Note that the packet
@@ -1315,6 +1316,14 @@ receive(
 	}
 	peer->xmt = p_xmt;
 
+
+	/* Ruthlessly reject KoDs from any source with invalid timestamps. */
+	is_kod = (hisleap == LEAP_NOTINSYNC && hisstratum == STRATUM_UNSPEC);
+	if (is_kod && (peer->flags & (TEST1|TEST2|TEST3))) {
+		sys_declined++;
+		return;
+	}
+
 	/*
 	 * Set the peer ppoll to the maximum of the packet ppoll and the
 	 * peer minpoll. If a kiss-o'-death, set the peer minpoll to
@@ -1322,9 +1331,8 @@ receive(
 	 * headroom. Very intricate.
 	 */
 	peer->ppoll = max(peer->minpoll, pkt->ppoll);
-	if (hismode == MODE_SERVER && hisleap == LEAP_NOTINSYNC &&
-	    hisstratum == STRATUM_UNSPEC && memcmp(&pkt->refid,
-	    "RATE", 4) == 0) {
+	if (hismode == MODE_SERVER &&
+		  is_kod && memcmp(&pkt->refid, "RATE", 4) == 0) {
 		peer->selbroken++;
 		report_event(PEVNT_RATE, peer, NULL);
 		if (pkt->ppoll > peer->minpoll)
