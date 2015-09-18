@@ -89,7 +89,7 @@ static union {
 
 #define r_pkt  rbuf.pkt
 
-#ifdef HAVE_DROPROOT
+#ifdef ENABLE_DROPROOT
 bool droproot;			/* intres imports these */
 bool root_dropped;
 #endif
