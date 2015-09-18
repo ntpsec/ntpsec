@@ -154,7 +154,7 @@ static isc_result_t linux_if_inet6_current(isc_interfaceiter_t *);
 static void linux_if_inet6_first(isc_interfaceiter_t *iter);
 #endif
 
-#if HAVE_GETIFADDRS
+#if HAVE_IFADDRS_H
 #include "ifiter_getifaddrs.c"
 #elif HAVE_IFLIST_SYSCTL
 #include "ifiter_sysctl.c"

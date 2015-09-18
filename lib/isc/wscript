@@ -10,7 +10,6 @@ def configure(ctx):
 	ctx.define("ISC_PLATFORM_HAVESCOPEID", 1)
 	ctx.define("ISC_PLATFORM_USETHREADS", 1)
 
-	ctx.define("HAVE_GETIFADDRS", 1)
 	ctx.define("HAVE_IFLIST_SYSCTL", 1)
 
 
