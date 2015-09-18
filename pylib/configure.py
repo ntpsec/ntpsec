@@ -375,6 +375,11 @@ int main () {
 	# Won't be true under Windows, but is under every Unix-like OS.
 	ctx.define("HAVE_WORKING_FORK", 1)
 
+	# Do we want to support root dropping?  I can't imagine why not,
+	# but we'll keep this guard because we'll probably want to condition
+	# the support out someday for a Windows or hypothetical RTOS build.
+	ctx.define("ENABLE_DROPROOT", 1)
+
 	# Does the kernel implement a phase-locked loop for timing?
 	# All modern Unixes (in particular Linux and *BSD have this).
 	#

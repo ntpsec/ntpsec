@@ -541,7 +541,7 @@ extern	double	wander_threshold;
 
 /* ntpd.c */
 extern	bool	initializing;	/* initializing flag */
-#ifdef HAVE_DROPROOT
+#ifdef ENABLE_DROPROOT
 extern	bool	droproot;	/* flag: try to drop root privileges after startup */
 extern	bool	root_dropped;	/* root has been dropped */
 extern char *user;		/* user to switch to */
