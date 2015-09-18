@@ -69,8 +69,16 @@ specific crud.
 * Live testing.  Somebody needs to take the development branch,
 build it on a real machines, and live-test it to make sure that
 it issues sane corrections and doesn't core-dump or barf.
-We need to do that on various platforms.  We also need to
-live-test various refclocks.
+We need to do that on various platforms.
+
+We also need to live-test various refclocks.  It would be nice
+to test the full matrix of refclock x platform, but that's too
+much work.  We should probably test as many refclocks as we can
+on at least one platform and test the NMEA, Atom, and SHM drivers
+on most platforms.
+
+We need to live-test leap seconds, both getting them from
+a file and getting them from other NTP servers.
 
 * Option testing.  The new, non-autogen option-processing logic
 is not yet tested anywhere but in ntpd itself.
