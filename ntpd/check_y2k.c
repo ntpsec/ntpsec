@@ -72,10 +72,6 @@
 
 #include <termios.h>
 
-#ifdef SYS_DOMAINOS
-# include <apollo/base.h>
-#endif /* SYS_DOMAINOS */
-
 /* } end definitions lifted from ntpd.c */
 
 #include "ntp_calendar.h"
