@@ -885,7 +885,7 @@ struct endpoint {
 #define AM_POSSBCL	7		/* discard broadcast */
 
 /* NetInfo configuration locations */
-#ifdef HAVE_NETINFO
+#ifdef HAVE_NETINFO_NI_H
 #define NETINFO_CONFIG_DIR "/config/ntp"
 #endif
 

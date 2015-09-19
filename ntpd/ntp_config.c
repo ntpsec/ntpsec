@@ -13,7 +13,7 @@
 # include <config.h>
 #endif
 
-#ifdef HAVE_NETINFO
+#ifdef HAVE_NETINFO_NI_H
 # include <netinfo/ni.h>
 #endif
 
@@ -151,10 +151,10 @@ static char default_ntp_signd_socket[] =
 					"";
 #endif
 char *ntp_signd_socket = default_ntp_signd_socket;
-#ifdef HAVE_NETINFO
+#ifdef HAVE_NETINFO_NI_H
 struct netinfo_config_state *config_netinfo = NULL;
 int check_netinfo = true;
-#endif /* HAVE_NETINFO */
+#endif /* HAVE_NETINFO_NI_H */
 #ifdef SYS_WINNT
 char *alt_config_file;
 LPTSTR temp;
@@ -162,7 +162,7 @@ char config_file_storage[MAX_PATH];
 char alt_config_file_storage[MAX_PATH];
 #endif /* SYS_WINNT */
 
-#ifdef HAVE_NETINFO
+#ifdef HAVE_NETINFO_NI_H
 /*
  * NetInfo configuration state
  */
@@ -4426,7 +4426,7 @@ getconfig(const char *explicit_config)
 	set_tod_using = &ntpd_set_tod_using;
 
 	if (explicit_config) {
-#ifdef HAVE_NETINFO
+#ifdef HAVE_NETINFO_NI_H
 	    check_netinfo = false;
 #endif
 	    config_file = explicit_config;
@@ -4435,10 +4435,10 @@ getconfig(const char *explicit_config)
 	init_syntax_tree(&cfgt);
 	if (
 		!lex_init_stack(FindConfig(config_file), "r")
-#ifdef HAVE_NETINFO
+#ifdef HAVE_NETINFO_NI_H
 		/* If there is no config_file, try NetInfo. */
 		&& check_netinfo && !(config_netinfo = get_netinfo_config())
-#endif /* HAVE_NETINFO */
+#endif /* HAVE_NETINFO_NI_H */
 		) {
 		msyslog(LOG_INFO, "getconfig: Couldn't open <%s>: %m", FindConfig(config_file));
 #ifndef SYS_WINNT
@@ -4480,10 +4480,10 @@ getconfig(const char *explicit_config)
 
 	save_and_apply_config_tree(true);
 
-#ifdef HAVE_NETINFO
+#ifdef HAVE_NETINFO_NI_H
 	if (config_netinfo)
 		free_netinfo_config(config_netinfo);
-#endif /* HAVE_NETINFO */
+#endif /* HAVE_NETINFO_NI_H */
 }
 
 
@@ -4682,7 +4682,7 @@ get_logmask(
 }
 
 
-#ifdef HAVE_NETINFO
+#ifdef HAVE_NETINFO_NI_H
 
 /*
  * get_netinfo_config - find the nearest NetInfo domain with an ntp
@@ -4855,7 +4855,7 @@ gettokens_netinfo (
 
 	goto again;
 }
-#endif /* HAVE_NETINFO */
+#endif /* HAVE_NETINFO_NI_H */
 
 
 /*

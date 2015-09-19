@@ -157,7 +157,7 @@ static int config_priority;
 
 char const *progname;
 
-#ifdef HAVE_NETINFO
+#ifdef HAVE_NETINFO_NI_H
 extern bool	check_netinfo;
 #endif
 

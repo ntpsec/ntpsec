@@ -260,6 +260,7 @@ def cmd_configure(ctx):
 		"net/if6.h",
 		"net/if_var.h",
 		"netinet/in_var.h",
+		"netinfo/ni.h",
 		"netinet/ip.h",
 		"priv.h",
 		"resolv.h",
