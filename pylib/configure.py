@@ -230,34 +230,9 @@ int main() { return 0; }
 	)
 
 
-	ctx.check_cc(
-		fragment	= """
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
+	from check_sockaddr import check_sockaddr
+	check_sockaddr(ctx)
 
-struct sockaddr_storage n;
-""",
-		define_name = "HAVE_STRUCT_SOCKADDR_STORAGE",
-		features	= "c",
-		msg         = "Checking for type sockaddr_storage",
-		mandatory	= False
-	)
-
-	ctx.check_cc(
-		fragment	= """
-#include <sys/types.h>
-#include <sys/socket.h>
-int main () {
-  extern struct sockaddr *ps;
-  return ps->sa_len;
-}
-""",
-		define_name = "ISC_PLATFORM_HAVESALEN",
-		features	= "c",
-		msg         = "Checking for sockaddr->sa_len",
-		mandatory	= False
-	)
 
 	posix_thread_version(ctx)
 	ctx.define('HAVE_PTHREADS', ctx.env.POSIX_THREAD_VERISON)
