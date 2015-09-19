@@ -653,30 +653,6 @@ parsewput(
 			putnext(q, mp);
 			break;
 
-		    case CIOGETEV:
-			/*
-			 * taken from Craig Leres ppsclock module (and modified)
-			 */
-			datap = allocb(sizeof(struct ppsclockev), BPRI_MED);
-			if (datap == NULL || mp->b_cont)
-			{
-				mp->b_datap->db_type = M_IOCNAK;
-				iocp->ioc_error = (datap == NULL) ? ENOMEM : EINVAL;
-				if (datap != NULL)
-				    freeb(datap);
-				qreply(q, mp);
-				break;
-			}
-
-			mp->b_cont = datap;
-			*(struct ppsclockev *)(void *)datap->b_wptr = parse->parse_ppsclockev;
-			datap->b_wptr +=
-				sizeof(struct ppsclockev) / sizeof(*datap->b_wptr);
-			mp->b_datap->db_type = M_IOCACK;
-			iocp->ioc_count = sizeof(struct ppsclockev);
-			qreply(q, mp);
-			break;
-
 		    case PARSEIOC_ENABLE:
 		    case PARSEIOC_DISABLE:
 			    {
