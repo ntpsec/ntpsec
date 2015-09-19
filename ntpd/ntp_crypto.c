@@ -187,7 +187,7 @@ static char *rand_file = NULL;	/* random seed file */
  */
 static	int	crypto_verify	(struct exten *, struct value *,
 				    struct peer *);
-static	int	crypto_encrypt	(const u_char *, u_int, keyid_t *,
+static	int	crypto_encrypt	(const uint8_t *, u_int, keyid_t *,
 				    struct value *);
 static	int	crypto_alice	(struct peer *, struct value *);
 static	int	crypto_alice2	(struct peer *, struct value *);
@@ -201,7 +201,7 @@ static	int	crypto_mv	(struct exten *, struct peer *);
 static	int	crypto_send	(struct exten *, struct value *, int);
 static	tstamp_t crypto_time	(void);
 static	void	asn_to_calendar		(ASN1_TIME *, struct calendar*);
-static	struct cert_info *cert_parse (const u_char *, long, tstamp_t);
+static	struct cert_info *cert_parse (const uint8_t *, long, tstamp_t);
 static	int	cert_sign	(struct exten *, struct value *);
 static	struct cert_info *cert_install (struct exten *, struct peer *);
 static	int	cert_hike	(struct peer *, struct cert_info *);
@@ -237,7 +237,7 @@ session_key(
 	)
 {
 	EVP_MD_CTX ctx;		/* message digest context */
-	u_char dgst[EVP_MAX_MD_SIZE]; /* message digest */
+	uint8_t dgst[EVP_MAX_MD_SIZE]; /* message digest */
 	keyid_t	keyid;		/* key identifer */
 	uint32_t	header[10];	/* data in network byte order */
 	u_int	hdlen, len;
@@ -270,7 +270,7 @@ session_key(
 		break;
 	}
 	EVP_DigestInit(&ctx, EVP_get_digestbynid(crypto_nid));
-	EVP_DigestUpdate(&ctx, (u_char *)header, hdlen);
+	EVP_DigestUpdate(&ctx, (uint8_t *)header, hdlen);
 	EVP_DigestFinal(&ctx, dgst, &len);
 	memcpy(&keyid, dgst, 4);
 	keyid = ntohl(keyid);
@@ -384,7 +384,7 @@ make_keylist(
 		if (vp->sig == NULL)
 			vp->sig = emalloc(sign_siglen);
 		EVP_SignInit(&ctx, sign_digest);
-		EVP_SignUpdate(&ctx, (u_char *)vp, 12);
+		EVP_SignUpdate(&ctx, (uint8_t *)vp, 12);
 		EVP_SignUpdate(&ctx, vp->ptr, sizeof(struct autokey));
 		if (EVP_SignFinal(&ctx, vp->sig, &len, sign_pkey)) {
 			vp->siglen = htonl(sign_siglen);
@@ -440,7 +440,7 @@ crypto_recv(
 	keyid_t	cookie;		/* crumbles */
 	int	hismode;	/* packet mode */
 	int	rval = XEVNT_OK;
-	const u_char *puch;
+	const uint8_t *puch;
 	uint32_t temp32;
 
 	/*
@@ -608,7 +608,7 @@ crypto_recv(
 				fstamp |= CRYPTO_FLAG_AUTO;
 			if (!(fstamp & CRYPTO_FLAG_TAI))
 				fstamp |= CRYPTO_FLAG_LEAP;
-			RAND_bytes((u_char *)&peer->hcookie, 4);
+			RAND_bytes((uint8_t *)&peer->hcookie, 4);
 			peer->crypto = fstamp;
 			peer->digest = dp;
 			if (peer->subject != NULL)
@@ -842,8 +842,8 @@ crypto_recv(
 				}
 
 				if (RSA_private_decrypt(vallen,
-				    (u_char *)ep->pkt,
-				    (u_char *)cookiebuf,
+				    (uint8_t *)ep->pkt,
+				    (uint8_t *)cookiebuf,
 				    host_pkey->pkey.rsa,
 				    RSA_PKCS1_OAEP_PADDING) != 4) {
 					rval = XEVNT_CKY;
@@ -1178,7 +1178,7 @@ crypto_xmit(
 		vtemp.tstamp = ep->tstamp;
 		vtemp.fstamp = ep->fstamp;
 		vtemp.vallen = ep->vallen;
-		vtemp.ptr = (u_char *)ep->pkt;
+		vtemp.ptr = (uint8_t *)ep->pkt;
 		len = crypto_send(fp, &vtemp, start);
 		break;
 
@@ -1371,7 +1371,7 @@ crypto_xmit(
 			tcookie = cookie;
 		else
 			tcookie = peer->hcookie;
-		if ((rval = crypto_encrypt((const u_char *)ep->pkt, vallen, &tcookie, &vtemp))
+		if ((rval = crypto_encrypt((const uint8_t *)ep->pkt, vallen, &tcookie, &vtemp))
 		    == XEVNT_OK) {
 			len = crypto_send(fp, &vtemp, start);
 			value_free(&vtemp);
@@ -1580,8 +1580,8 @@ crypto_verify(
 	 */
 	EVP_VerifyInit(&ctx, peer->digest);
 	/* XXX: the "+ 12" needs to be at least documented... */
-	EVP_VerifyUpdate(&ctx, (u_char *)&ep->tstamp, vallen + 12);
-	if (EVP_VerifyFinal(&ctx, (u_char *)&ep->pkt[i], siglen,
+	EVP_VerifyUpdate(&ctx, (uint8_t *)&ep->tstamp, vallen + 12);
+	if (EVP_VerifyFinal(&ctx, (uint8_t *)&ep->pkt[i], siglen,
 	    pkey) <= 0)
 		return (XEVNT_SIG);
 
@@ -1602,7 +1602,7 @@ crypto_verify(
  */
 static int
 crypto_encrypt(
-	const u_char *ptr,	/* Public Key */
+	const uint8_t *ptr,	/* Public Key */
 	u_int	vallen,		/* Length of Public Key */
 	keyid_t	*cookie,	/* server cookie */
 	struct value *vp	/* value pointer */
@@ -1612,7 +1612,7 @@ crypto_encrypt(
 	EVP_MD_CTX ctx;		/* signature context */
 	tstamp_t tstamp;	/* NTP timestamp */
 	uint32_t	temp32;
-	u_char *puch;
+	uint8_t *puch;
 
 	/*
 	 * Extract the public key from the request.
@@ -1636,7 +1636,7 @@ crypto_encrypt(
 	vp->ptr = emalloc(vallen);
 	puch = vp->ptr;
 	temp32 = htonl(*cookie);
-	if (RSA_public_encrypt(4, (u_char *)&temp32, puch,
+	if (RSA_public_encrypt(4, (uint8_t *)&temp32, puch,
 	    pkey->pkey.rsa, RSA_PKCS1_OAEP_PADDING) <= 0) {
 		msyslog(LOG_ERR, "crypto_encrypt: %s",
 		    ERR_error_string(ERR_get_error(), NULL));
@@ -1650,7 +1650,7 @@ crypto_encrypt(
 
 	vp->sig = emalloc(sign_siglen);
 	EVP_SignInit(&ctx, sign_digest);
-	EVP_SignUpdate(&ctx, (u_char *)&vp->tstamp, 12);
+	EVP_SignUpdate(&ctx, (uint8_t *)&vp->tstamp, 12);
 	EVP_SignUpdate(&ctx, vp->ptr, vallen);
 	if (EVP_SignFinal(&ctx, vp->sig, &vallen, sign_pkey))
 		vp->siglen = htonl(sign_siglen);
@@ -1882,7 +1882,7 @@ crypto_update(void)
 		if (pubkey.sig == NULL)
 			pubkey.sig = emalloc(sign_siglen);
 		EVP_SignInit(&ctx, sign_digest);
-		EVP_SignUpdate(&ctx, (u_char *)&pubkey, 12);
+		EVP_SignUpdate(&ctx, (uint8_t *)&pubkey, 12);
 		EVP_SignUpdate(&ctx, pubkey.ptr, ntohl(pubkey.vallen));
 		if (EVP_SignFinal(&ctx, pubkey.sig, &len, sign_pkey))
 			pubkey.siglen = htonl(sign_siglen);
@@ -1900,7 +1900,7 @@ crypto_update(void)
 		if (cp->cert.sig == NULL)
 			cp->cert.sig = emalloc(sign_siglen);
 		EVP_SignInit(&ctx, sign_digest);
-		EVP_SignUpdate(&ctx, (u_char *)&cp->cert, 12);
+		EVP_SignUpdate(&ctx, (uint8_t *)&cp->cert, 12);
 		EVP_SignUpdate(&ctx, cp->cert.ptr,
 		    ntohl(cp->cert.vallen));
 		if (EVP_SignFinal(&ctx, cp->cert.sig, &len, sign_pkey))
@@ -1925,7 +1925,7 @@ crypto_update(void)
 	if (tai_leap.sig == NULL)
 		tai_leap.sig = emalloc(sign_siglen);
 	EVP_SignInit(&ctx, sign_digest);
-	EVP_SignUpdate(&ctx, (u_char *)&tai_leap, 12);
+	EVP_SignUpdate(&ctx, (uint8_t *)&tai_leap, 12);
 	EVP_SignUpdate(&ctx, tai_leap.ptr, len);
 	if (EVP_SignFinal(&ctx, tai_leap.sig, &len, sign_pkey))
 		tai_leap.siglen = htonl(sign_siglen);
@@ -2048,8 +2048,8 @@ bighash(
 	)
 {
 	EVP_MD_CTX ctx;		/* message digest context */
-	u_char dgst[EVP_MAX_MD_SIZE]; /* message digest */
-	u_char	*ptr;		/* a BIGNUM as binary string */
+	uint8_t dgst[EVP_MAX_MD_SIZE]; /* message digest */
+	uint8_t	*ptr;		/* a BIGNUM as binary string */
 	u_int	len;
 
 	len = BN_num_bytes(bn);
@@ -2169,7 +2169,7 @@ crypto_alice(
 
 	vp->sig = emalloc(sign_siglen);
 	EVP_SignInit(&ctx, sign_digest);
-	EVP_SignUpdate(&ctx, (u_char *)&vp->tstamp, 12);
+	EVP_SignUpdate(&ctx, (uint8_t *)&vp->tstamp, 12);
 	EVP_SignUpdate(&ctx, vp->ptr, len);
 	if (EVP_SignFinal(&ctx, vp->sig, &len, sign_pkey))
 		vp->siglen = htonl(sign_siglen);
@@ -2197,7 +2197,7 @@ crypto_bob(
 	EVP_MD_CTX ctx;		/* signature context */
 	tstamp_t tstamp;	/* NTP timestamp */
 	BIGNUM	*bn, *bk, *r;
-	u_char	*ptr;
+	uint8_t	*ptr;
 	u_int	len;		/* extension field length */
 	u_int	vallen = 0;	/* value length */
 
@@ -2218,7 +2218,7 @@ crypto_bob(
 	len = ntohl(ep->opcode) & 0x0000ffff;
 	if (vallen == 0 || len < VALUE_LEN || len - VALUE_LEN < vallen)
 		return XEVNT_LEN;
-	if ((r = BN_bin2bn((u_char *)ep->pkt, vallen, NULL)) == NULL) {
+	if ((r = BN_bin2bn((uint8_t *)ep->pkt, vallen, NULL)) == NULL) {
 		msyslog(LOG_ERR, "crypto_bob: %s",
 		    ERR_error_string(ERR_get_error(), NULL));
 		return (XEVNT_ERR);
@@ -2277,7 +2277,7 @@ crypto_bob(
 	/* XXX: more validation to make sure the sign fits... */
 	vp->sig = emalloc(sign_siglen);
 	EVP_SignInit(&ctx, sign_digest);
-	EVP_SignUpdate(&ctx, (u_char *)&vp->tstamp, 12);
+	EVP_SignUpdate(&ctx, (uint8_t *)&vp->tstamp, 12);
 	EVP_SignUpdate(&ctx, vp->ptr, vallen);
 	if (EVP_SignFinal(&ctx, vp->sig, &vallen, sign_pkey))
 		vp->siglen = htonl(sign_siglen);
@@ -2305,7 +2305,7 @@ crypto_iff(
 	DSA_SIG	*sdsa;		/* DSA parameters */
 	BIGNUM	*bn, *bk;
 	u_int	len;
-	const u_char *ptr;
+	const uint8_t *ptr;
 	int	temp;
 
 	/*
@@ -2335,7 +2335,7 @@ crypto_iff(
 	 */
 	bctx = BN_CTX_new(); bk = BN_new(); bn = BN_new();
 	len = ntohl(ep->vallen);
-	ptr = (u_char *)ep->pkt;
+	ptr = (uint8_t *)ep->pkt;
 	if ((sdsa = d2i_DSA_SIG(NULL, &ptr, len)) == NULL) {
 		BN_free(bn); BN_free(bk); BN_CTX_free(bctx);
 		msyslog(LOG_ERR, "crypto_iff: %s",
@@ -2482,7 +2482,7 @@ crypto_alice2(
 
 	vp->sig = emalloc(sign_siglen);
 	EVP_SignInit(&ctx, sign_digest);
-	EVP_SignUpdate(&ctx, (u_char *)&vp->tstamp, 12);
+	EVP_SignUpdate(&ctx, (uint8_t *)&vp->tstamp, 12);
 	EVP_SignUpdate(&ctx, vp->ptr, len);
 	if (EVP_SignFinal(&ctx, vp->sig, &len, sign_pkey))
 		vp->siglen = htonl(sign_siglen);
@@ -2510,7 +2510,7 @@ crypto_bob2(
 	EVP_MD_CTX ctx;		/* signature context */
 	tstamp_t tstamp;	/* NTP timestamp */
 	BIGNUM	*r, *k, *g, *y;
-	u_char	*ptr;
+	uint8_t	*ptr;
 	u_int	len;
 	int	s_len;
 
@@ -2528,7 +2528,7 @@ crypto_bob2(
 	 * Extract r from the challenge.
 	 */
 	len = ntohl(ep->vallen);
-	if ((r = BN_bin2bn((u_char *)ep->pkt, len, NULL)) == NULL) {
+	if ((r = BN_bin2bn((uint8_t *)ep->pkt, len, NULL)) == NULL) {
 		msyslog(LOG_ERR, "crypto_bob2: %s",
 		    ERR_error_string(ERR_get_error(), NULL));
 		return (XEVNT_ERR);
@@ -2580,7 +2580,7 @@ crypto_bob2(
 
 	vp->sig = emalloc(sign_siglen);
 	EVP_SignInit(&ctx, sign_digest);
-	EVP_SignUpdate(&ctx, (u_char *)&vp->tstamp, 12);
+	EVP_SignUpdate(&ctx, (uint8_t *)&vp->tstamp, 12);
 	EVP_SignUpdate(&ctx, vp->ptr, len);
 	if (EVP_SignFinal(&ctx, vp->sig, &len, sign_pkey))
 		vp->siglen = htonl(sign_siglen);
@@ -2608,7 +2608,7 @@ crypto_gq(
 	BN_CTX	*bctx;		/* BIGNUM context */
 	DSA_SIG	*sdsa;		/* RSA signature context fake */
 	BIGNUM	*y, *v;
-	const u_char *ptr;
+	const uint8_t *ptr;
 	long	len;
 	u_int	temp;
 
@@ -2642,7 +2642,7 @@ crypto_gq(
 	 */
 	bctx = BN_CTX_new(); y = BN_new(); v = BN_new();
 	len = ntohl(ep->vallen);
-	ptr = (u_char *)ep->pkt;
+	ptr = (uint8_t *)ep->pkt;
 	if ((sdsa = d2i_DSA_SIG(NULL, &ptr, len)) == NULL) {
 		BN_CTX_free(bctx); BN_free(y); BN_free(v);
 		msyslog(LOG_ERR, "crypto_gq: %s",
@@ -2809,7 +2809,7 @@ crypto_alice3(
 
 	vp->sig = emalloc(sign_siglen);
 	EVP_SignInit(&ctx, sign_digest);
-	EVP_SignUpdate(&ctx, (u_char *)&vp->tstamp, 12);
+	EVP_SignUpdate(&ctx, (uint8_t *)&vp->tstamp, 12);
 	EVP_SignUpdate(&ctx, vp->ptr, len);
 	if (EVP_SignFinal(&ctx, vp->sig, &len, sign_pkey))
 		vp->siglen = htonl(sign_siglen);
@@ -2836,7 +2836,7 @@ crypto_bob3(
 	EVP_MD_CTX ctx;		/* signature context */
 	tstamp_t tstamp;	/* NTP timestamp */
 	BIGNUM	*r, *k, *u;
-	u_char	*ptr;
+	uint8_t	*ptr;
 	u_int	len;
 
 	/*
@@ -2853,7 +2853,7 @@ crypto_bob3(
 	 * Extract r from the challenge.
 	 */
 	len = ntohl(ep->vallen);
-	if ((r = BN_bin2bn((u_char *)ep->pkt, len, NULL)) == NULL) {
+	if ((r = BN_bin2bn((uint8_t *)ep->pkt, len, NULL)) == NULL) {
 		msyslog(LOG_ERR, "crypto_bob3: %s",
 		    ERR_error_string(ERR_get_error(), NULL));
 		return (XEVNT_ERR);
@@ -2909,7 +2909,7 @@ crypto_bob3(
 
 	vp->sig = emalloc(sign_siglen);
 	EVP_SignInit(&ctx, sign_digest);
-	EVP_SignUpdate(&ctx, (u_char *)&vp->tstamp, 12);
+	EVP_SignUpdate(&ctx, (uint8_t *)&vp->tstamp, 12);
 	EVP_SignUpdate(&ctx, vp->ptr, len);
 	if (EVP_SignFinal(&ctx, vp->sig, &len, sign_pkey))
 		vp->siglen = htonl(sign_siglen);
@@ -2938,7 +2938,7 @@ crypto_mv(
 	BN_CTX	*bctx;		/* BIGNUM context */
 	BIGNUM	*k, *u, *v;
 	u_int	len;
-	const u_char *ptr;
+	const uint8_t *ptr;
 	int	temp;
 
 	/*
@@ -2968,7 +2968,7 @@ crypto_mv(
 	 */
 	bctx = BN_CTX_new(); k = BN_new(); u = BN_new(); v = BN_new();
 	len = ntohl(ep->vallen);
-	ptr = (u_char *)ep->pkt;
+	ptr = (uint8_t *)ep->pkt;
 	if ((sdsa = d2i_DSAparams(NULL, &ptr, len)) == NULL) {
 		msyslog(LOG_ERR, "crypto_mv: %s",
 		    ERR_error_string(ERR_get_error(), NULL));
@@ -3056,8 +3056,8 @@ cert_sign(
 	tstamp_t tstamp;	/* NTP timestamp */
 	struct calendar tscal;
 	u_int	len;
-	const u_char *cptr;
-	u_char *ptr;
+	const uint8_t *cptr;
+	uint8_t *ptr;
 	int	i, temp;
 
 	/*
@@ -3146,7 +3146,7 @@ cert_sign(
 	if (tstamp != 0) {
 		vp->sig = emalloc(sign_siglen);
 		EVP_SignInit(&ctx, sign_digest);
-		EVP_SignUpdate(&ctx, (u_char *)vp, 12);
+		EVP_SignUpdate(&ctx, (uint8_t *)vp, 12);
 		EVP_SignUpdate(&ctx, vp->ptr, len);
 		if (EVP_SignFinal(&ctx, vp->sig, &len, sign_pkey))
 			vp->siglen = htonl(sign_siglen);
@@ -3183,7 +3183,7 @@ cert_install(
 	 * construct the info/value structure; otherwise, scamper home
 	 * empty handed.
 	 */
-	if ((cp = cert_parse((u_char *)ep->pkt, (long)ntohl(ep->vallen),
+	if ((cp = cert_parse((uint8_t *)ep->pkt, (long)ntohl(ep->vallen),
 	    (tstamp_t)ntohl(ep->fstamp))) == NULL)
 		return (NULL);
 
@@ -3244,7 +3244,7 @@ cert_hike(
 {
 	struct cert_info *xp;	/* subject certificate */
 	X509	*cert;		/* X509 certificate */
-	const u_char *ptr;
+	const uint8_t *ptr;
 
 	/*
 	 * Save the issuer on the new certificate, but remember the old
@@ -3287,7 +3287,7 @@ cert_hike(
 	if (xp == NULL)
 		return (XEVNT_OK);
 
-	ptr = (u_char *)xp->cert.ptr;
+	ptr = (uint8_t *)xp->cert.ptr;
 	cert = d2i_X509(NULL, &ptr, ntohl(xp->cert.vallen));
 	if (cert == NULL) {
 		xp->flags |= CERT_ERROR;
@@ -3329,7 +3329,7 @@ cert_hike(
  */
 struct cert_info *		/* certificate information structure */
 cert_parse(
-	const u_char *asn1cert,	/* X509 certificate */
+	const uint8_t *asn1cert,	/* X509 certificate */
 	long	len,		/* certificate length */
 	tstamp_t fstamp		/* filestamp */
 	)
@@ -3339,7 +3339,7 @@ cert_parse(
 	struct cert_info *ret;	/* certificate info/value */
 	BIO	*bp;
 	char	pathbuf[MAXFILENAME];
-	const u_char *ptr;
+	const uint8_t *ptr;
 	char	*pch;
 	int	temp, cnt, i;
 	struct calendar fscal;
@@ -3682,7 +3682,7 @@ crypto_cert(
 	long	len;
 	char	*ptr;
 	char	*name, *header;
-	u_char	*data;
+	uint8_t	*data;
 
 	/*
 	 * Open the certificate file. If the first character of the file
@@ -3787,7 +3787,7 @@ crypto_setup(void)
 	l_fp	seed;		/* crypto PRNG seed as NTP timestamp */
 	u_int	len;
 	int	bytes;
-	u_char	*ptr;
+	uint8_t	*ptr;
 
 	/*
 	 * Check for correct OpenSSL version and avoid initialization in
@@ -3918,7 +3918,7 @@ crypto_setup(void)
 	hostval.ptr = estrdup(cinfo->subject);
 	hostval.vallen = htonl(strlen(cinfo->subject));
 	sys_hostname = hostval.ptr;
-	ptr = (u_char *)strchr(sys_hostname, '@');
+	ptr = (uint8_t *)strchr(sys_hostname, '@');
 	if (ptr != NULL)
 		sys_groupname = estrdup((char *)++ptr);
 	if (ident_filename != NULL)

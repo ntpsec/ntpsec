@@ -20,12 +20,12 @@
 int
 MD5authencrypt(
 	int	type,		/* hash algorithm */
-	u_char	*key,		/* key pointer */
+	uint8_t	*key,		/* key pointer */
 	uint32_t *pkt,		/* packet pointer */
 	int	length		/* packet length */
 	)
 {
-	u_char	digest[EVP_MAX_MD_SIZE];
+	uint8_t	digest[EVP_MAX_MD_SIZE];
 	u_int	len;
 	EVP_MD_CTX ctx;
 
@@ -45,9 +45,9 @@ MD5authencrypt(
 	EVP_DigestInit(&ctx, EVP_get_digestbynid(type));
 #endif
 	EVP_DigestUpdate(&ctx, key, cache_secretsize);
-	EVP_DigestUpdate(&ctx, (u_char *)pkt, (u_int)length);
+	EVP_DigestUpdate(&ctx, (uint8_t *)pkt, (u_int)length);
 	EVP_DigestFinal(&ctx, digest, &len);
-	memmove((u_char *)pkt + length + 4, digest, len);
+	memmove((uint8_t *)pkt + length + 4, digest, len);
 	return (len + 4);
 }
 
@@ -60,13 +60,13 @@ MD5authencrypt(
 int
 MD5authdecrypt(
 	int	type,		/* hash algorithm */
-	u_char	*key,		/* key pointer */
+	uint8_t	*key,		/* key pointer */
 	uint32_t	*pkt,		/* packet pointer */
 	int	length,	 	/* packet length */
 	int	size		/* MAC size */
 	)
 {
-	u_char	digest[EVP_MAX_MD_SIZE];
+	uint8_t	digest[EVP_MAX_MD_SIZE];
 	u_int	len;
 	EVP_MD_CTX ctx;
 
@@ -86,7 +86,7 @@ MD5authdecrypt(
 	EVP_DigestInit(&ctx, EVP_get_digestbynid(type));
 #endif
 	EVP_DigestUpdate(&ctx, key, cache_secretsize);
-	EVP_DigestUpdate(&ctx, (u_char *)pkt, (u_int)length);
+	EVP_DigestUpdate(&ctx, (uint8_t *)pkt, (u_int)length);
 	EVP_DigestFinal(&ctx, digest, &len);
 	if ((u_int)size != len + 4) {
 		msyslog(LOG_ERR,
@@ -105,7 +105,7 @@ MD5authdecrypt(
 uint32_t
 addr2refid(sockaddr_u *addr)
 {
-	u_char		digest[20];
+	uint8_t		digest[20];
 	uint32_t		addr_refid;
 	EVP_MD_CTX	ctx;
 	u_int		len;
@@ -130,7 +130,7 @@ addr2refid(sockaddr_u *addr)
 	EVP_DigestInit(&ctx, EVP_md5());
 #endif
 
-	EVP_DigestUpdate(&ctx, (u_char *)PSOCK_ADDR6(addr),
+	EVP_DigestUpdate(&ctx, (uint8_t *)PSOCK_ADDR6(addr),
 	    sizeof(struct in6_addr));
 	EVP_DigestFinal(&ctx, digest, &len);
 	memcpy(&addr_refid, digest, sizeof(addr_refid));

@@ -16,11 +16,11 @@ extern void	loadservers	(char *cfgpath);
 struct server {
 	struct server *next_server;	/* next server in build list */
 	sockaddr_u srcadr;		/* address of remote host */
-	u_char version;			/* version to use */
-	u_char leap;			/* leap indicator */
-	u_char stratum;			/* stratum of remote server */
-	s_char precision;		/* server's clock precision */
-	u_char trust;			/* trustability of the filtered data */
+	uint8_t version;			/* version to use */
+	uint8_t leap;			/* leap indicator */
+	uint8_t stratum;			/* stratum of remote server */
+	int8_t precision;		/* server's clock precision */
+	uint8_t trust;			/* trustability of the filtered data */
 	u_fp rootdelay;			/* distance from primary clock */
 	u_fp rootdisp;			/* peer clock dispersion */
 	uint32_t refid;			/* peer reference ID */
@@ -29,7 +29,7 @@ struct server {
 	u_long last_xmit;		/* time of last transmit */
 	u_short xmtcnt;			/* number of packets transmitted */
 	u_short rcvcnt;			/* number of packets received */
-	u_char reach;			/* reachability, NTP_WINDOW bits */
+	uint8_t reach;			/* reachability, NTP_WINDOW bits */
 	u_short filter_nextpt;		/* index into filter shift register */
 	s_fp filter_delay[NTP_SHIFT];	/* delay part of shift register */
 	l_fp filter_offset[NTP_SHIFT];	/* offset part of shift register */

@@ -243,4 +243,4 @@ struct refclock * const refclock_conf[] = {
 	&refclock_gpsdjson	/* 46 REFCLK_GPSDJSON */
 };
 
-u_char num_refclock_conf = sizeof(refclock_conf)/sizeof(struct refclock *);
+uint8_t num_refclock_conf = sizeof(refclock_conf)/sizeof(struct refclock *);

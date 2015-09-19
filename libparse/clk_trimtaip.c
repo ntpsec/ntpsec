@@ -98,7 +98,7 @@ cvt_trimtaip(
 	     )
 {
 	long gpsfix;
-	u_char calc_csum = 0;
+	uint8_t calc_csum = 0;
 	long   recv_csum;
 	int	 i;
 
@@ -123,7 +123,7 @@ cvt_trimtaip(
 	recv_csum =	(hexval(buffer[OFFS(O_CHKSUM)]) << 4) |
 		hexval(buffer[OFFS(O_CHKSUM)+1]);
 	if (recv_csum < 0) return CVT_FAIL|CVT_BADTIME;
-	if (((u_char) recv_csum) != calc_csum) return CVT_FAIL|CVT_BADTIME;
+	if (((uint8_t) recv_csum) != calc_csum) return CVT_FAIL|CVT_BADTIME;
 
 	clock_time->utcoffset = 0;
 

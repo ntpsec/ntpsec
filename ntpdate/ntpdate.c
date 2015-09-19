@@ -97,7 +97,7 @@ static timer_t ntpdate_timerid;
 /*
  * for get_systime()
  */
-s_char	sys_precision;		/* local clock precision (log2 s) */
+int8_t	sys_precision;		/* local clock precision (log2 s) */
 
 /*
  * File descriptor masks etc. for call to select

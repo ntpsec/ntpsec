@@ -50,11 +50,11 @@ struct ctl_proc {
 /*
  * Request processing routines
  */
-static	void	ctl_error	(u_char);
+static	void	ctl_error	(uint8_t);
 #ifdef REFCLOCK
 static	u_short ctlclkstatus	(struct refclockstat *);
 #endif
-static	void	ctl_flushpkt	(u_char);
+static	void	ctl_flushpkt	(uint8_t);
 static	void	ctl_putdata	(const char *, unsigned int, int);
 static	void	ctl_putstr	(const char *, const char *, size_t);
 static	void	ctl_putdblf	(const char *, int, int, double);
@@ -435,7 +435,7 @@ static struct ctl_var *ext_sys_var = NULL;
  * System variables we print by default (in fuzzball order,
  * more-or-less)
  */
-static const u_char def_sys_var[] = {
+static const uint8_t def_sys_var[] = {
 	CS_VERSION,
 	CS_PROCESSOR,
 	CS_SYSTEM,
@@ -543,7 +543,7 @@ static const struct ctl_var peer_var[] = {
 /*
  * Peer variables we print by default
  */
-static const u_char def_peer_var[] = {
+static const uint8_t def_peer_var[] = {
 	CP_SRCADR,
 	CP_SRCPORT,
 	CP_SRCHOST,
@@ -616,7 +616,7 @@ static const struct ctl_var clock_var[] = {
 /*
  * Clock variables printed by default
  */
-static const u_char def_clock_var[] = {
+static const uint8_t def_clock_var[] = {
 	CC_DEVICE,
 	CC_TYPE,	/* won't be output if device = known */
 	CC_TIMECODE,
@@ -670,8 +670,8 @@ keyid_t ctl_auth_keyid;
 /*
  * We keep track of the last error reported by the system internally
  */
-static	u_char ctl_sys_last_event;
-static	u_char ctl_sys_num_events;
+static	uint8_t ctl_sys_last_event;
+static	uint8_t ctl_sys_num_events;
 
 
 /*
@@ -701,13 +701,13 @@ u_long numasyncmsgs;		/* number of async messages we've sent */
  * use the extra buffer and copy.
  */
 static struct ntp_control rpkt;
-static u_char	res_version;
-static u_char	res_opcode;
+static uint8_t	res_version;
+static uint8_t	res_opcode;
 static associd_t res_associd;
 static u_short	res_frags;	/* datagrams in this response */
 static int	res_offset;	/* offset of payload in response */
-static u_char * datapt;
-static u_char * dataend;
+static uint8_t * datapt;
+static uint8_t * dataend;
 static int	datalinelen;
 static bool	datasent;	/* flag to avoid initial ", " */
 static bool	datanotbinflag;
@@ -759,7 +759,7 @@ init_control(void)
  */
 static void
 ctl_error(
-	u_char errcode
+	uint8_t errcode
 	)
 {
 	int		maclen;
@@ -771,7 +771,7 @@ ctl_error(
 	 * Fill in the fields. We assume rpkt.sequence and rpkt.associd
 	 * have already been filled in.
 	 */
-	rpkt.r_m_e_op = (u_char)CTL_RESPONSE | CTL_ERROR |
+	rpkt.r_m_e_op = (uint8_t)CTL_RESPONSE | CTL_ERROR |
 			(res_opcode & CTL_OP_MASK);
 	rpkt.status = htons((u_short)(errcode << 8) & 0xff00);
 	rpkt.count = 0;
@@ -1121,7 +1121,7 @@ ctlclkstatus(
 u_short
 ctlsysstatus(void)
 {
-	register u_char this_clock;
+	register uint8_t this_clock;
 
 	this_clock = CTL_SST_TS_UNSPEC;
 #ifdef REFCLOCK
@@ -1144,7 +1144,7 @@ ctlsysstatus(void)
  */
 static void
 ctl_flushpkt(
-	u_char more
+	uint8_t more
 	)
 {
 	size_t i;
@@ -2833,7 +2833,7 @@ ctl_getitem(
 				pch++;
 			}
 			if ('\0' == *pch || '=' == *pch) {
-				while (cp < reqend && isspace((u_char)*cp))
+				while (cp < reqend && isspace((uint8_t)*cp))
 					cp++;
 				if (cp == reqend || ',' == *cp) {
 					buf[0] = '\0';
@@ -2846,7 +2846,7 @@ ctl_getitem(
 				if ('=' == *cp) {
 					cp++;
 					tp = buf;
-					while (cp < reqend && isspace((u_char)*cp))
+					while (cp < reqend && isspace((uint8_t)*cp))
 						cp++;
 					while (cp < reqend && *cp != ',') {
 						*tp++ = *cp++;
@@ -2865,7 +2865,7 @@ ctl_getitem(
 					if (cp < reqend)
 						cp++;
 					*tp-- = '\0';
-					while (tp >= buf && isspace((u_char)*tp))
+					while (tp >= buf && isspace((uint8_t)*tp))
 						*tp-- = '\0';
 					reqpt = cp;
 					*data = buf;
@@ -2921,7 +2921,7 @@ read_status(
 	)
 {
 	struct peer *peer;
-	const u_char *cp;
+	const uint8_t *cp;
 	size_t n;
 	/* a_st holds association ID, status pairs alternating */
 	u_short a_st[CTL_MAX_DATA_LEN / sizeof(u_short)];
@@ -2979,7 +2979,7 @@ read_peervars(void)
 {
 	const struct ctl_var *v;
 	struct peer *peer;
-	const u_char *cp;
+	const uint8_t *cp;
 	size_t i;
 	char *	valuep;
 	bool	wants[CP_MAXCODE + 1];
@@ -3029,10 +3029,10 @@ read_sysvars(void)
 	struct ctl_var *kv;
 	u_int	n;
 	u_int	gotvar;
-	const u_char *cs;
+	const uint8_t *cs;
 	char *	valuep;
 	const char * pch;
-	u_char *wants;
+	uint8_t *wants;
 	size_t	wants_count;
 
 	/*
@@ -3319,7 +3319,7 @@ static uint32_t derive_nonce(
 	static uint32_t	salt[4];
 	static u_long	last_salt_update;
 	union d_tag {
-		u_char	digest[EVP_MAX_MD_SIZE];
+		uint8_t	digest[EVP_MAX_MD_SIZE];
 		uint32_t extract;
 	}		d;
 	EVP_MD_CTX	ctx;
@@ -3883,7 +3883,7 @@ send_ifstats_entry(
 	const char pc_fmt[] =		"pc.%u";	/* peer count */
 	const char up_fmt[] =		"up.%u";	/* uptime */
 	char	tag[32];
-	u_char	sent[IFSTATS_FIELDS]; /* 12 tag=value pairs */
+	uint8_t	sent[IFSTATS_FIELDS]; /* 12 tag=value pairs */
 	int	noisebits;
 	uint32_t noise;
 	u_int	which;
@@ -4054,7 +4054,7 @@ send_restrict_entry(
 	const char hits_fmt[] =		"hits.%u";
 	const char flags_fmt[] =	"flags.%u";
 	char		tag[32];
-	u_char		sent[RESLIST_FIELDS]; /* 4 tag=value pairs */
+	uint8_t		sent[RESLIST_FIELDS]; /* 4 tag=value pairs */
 	int		noisebits;
 	uint32_t		noise;
 	u_int		which;
@@ -4165,7 +4165,7 @@ read_ordlist(
 	)
 {
 	const char ifstats_s[] = "ifstats";
-	const size_t ifstats_chars = COUNTOF(ifstats_s) - 1;
+	const size_t ifstatint8_ts = COUNTOF(ifstats_s) - 1;
 	const char addr_rst_s[] = "addr_restrictions";
 	const size_t a_r_chars = COUNTOF(addr_rst_s) - 1;
 	struct ntp_control *	cpkt;
@@ -4184,8 +4184,8 @@ read_ordlist(
 	 */
 	cpkt = (struct ntp_control *)&rbufp->recv_pkt;
 	qdata_octets = ntohs(cpkt->count);
-	if (0 == qdata_octets || (ifstats_chars == qdata_octets &&
-	    !memcmp(ifstats_s, cpkt->u.data, ifstats_chars))) {
+	if (0 == qdata_octets || (ifstatint8_ts == qdata_octets &&
+	    !memcmp(ifstats_s, cpkt->u.data, ifstatint8_ts))) {
 		read_ifstats(rbufp);
 		return;
 	}
@@ -4234,10 +4234,10 @@ read_clockstatus(
 	int			i;
 	struct peer *		peer;
 	char *			valuep;
-	u_char *		wants;
+	uint8_t *		wants;
 	size_t			wants_alloc;
 	int			gotvar;
-	const u_char *		cc;
+	const uint8_t *		cc;
 	struct ctl_var *	kv;
 	struct refclockstat	cs;
 
@@ -4518,7 +4518,7 @@ ctlsettrap(
 	tptouse->tr_sequence = 1;
 	tptouse->tr_addr = *raddr;
 	tptouse->tr_localaddr = linter;
-	tptouse->tr_version = (u_char) version;
+	tptouse->tr_version = (uint8_t) version;
 	tptouse->tr_flags = TRAP_INUSE;
 	if (traptype == TRAP_TYPE_CONFIG)
 		tptouse->tr_flags |= TRAP_CONFIGURED;
@@ -4599,12 +4599,12 @@ report_event(
 		 * Discard a system report if the number of reports of
 		 * the same type exceeds the maximum.
 		 */
-		if (ctl_sys_last_event != (u_char)err)
+		if (ctl_sys_last_event != (uint8_t)err)
 			ctl_sys_num_events= 0;
 		if (ctl_sys_num_events >= CTL_SYS_MAXEVENTS)
 			return;
 
-		ctl_sys_last_event = (u_char)err;
+		ctl_sys_last_event = (uint8_t)err;
 		ctl_sys_num_events++;
 		snprintf(statstr, sizeof(statstr),
 		    "0.0.0.0 %04x %02x %s",
@@ -4623,9 +4623,9 @@ report_event(
 		 * the same type exceeds the maximum for that peer.
 		 */
 		const char *	src;
-		u_char		errlast;
+		uint8_t		errlast;
 
-		errlast = (u_char)err & ~PEER_EVENT;
+		errlast = (uint8_t)err & ~PEER_EVENT;
 		if (peer->last_event == errlast)
 			peer->num_events = 0;
 		if (peer->num_events >= CTL_PEER_MAXEVENTS)

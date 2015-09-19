@@ -54,7 +54,7 @@ extern int async_write(int, const void *, unsigned int);
 /*
  * Local function prototypes
  */
-static void doublefreq		(double, u_char *, int);
+static void doublefreq		(double, uint8_t *, int);
 
 
 /*
@@ -67,7 +67,7 @@ icom_freq(			/* returns 0 (ok), EIO (error) */
 	double freq		/* frequency (MHz) */
 	)
 {
-	u_char cmd[] = {PAD, PR, PR, 0, TX, V_SFREQ, 0, 0, 0, 0, FI,
+	uint8_t cmd[] = {PAD, PR, PR, 0, TX, V_SFREQ, 0, 0, 0, 0, FI,
 	    FI};
 	int temp;
 
@@ -89,7 +89,7 @@ icom_freq(			/* returns 0 (ok), EIO (error) */
 static void
 doublefreq(			/* returns void */
 	double freq,		/* frequency */
-	u_char *x,		/* radio frequency */
+	uint8_t *x,		/* radio frequency */
 	int len			/* length (octets) */
 	)
 {

@@ -327,7 +327,7 @@ timer(void)
 				crypto_update();
 #endif	/* ENABLE_AUTOKEY */
 		}
-		sys_stratum = (u_char)sys_orphan;
+		sys_stratum = (uint8_t)sys_orphan;
 		if (sys_stratum > 1)
 			sys_refid = htonl(LOOPBACKADR);
 		else
@@ -381,7 +381,7 @@ timer(void)
 	 */
 	if (revoke_timer && revoke_timer <= current_time) {
 		revoke_timer += 1 << sys_revoke;
-		RAND_bytes((u_char *)&sys_private, 4);
+		RAND_bytes((uint8_t *)&sys_private, 4);
 	}
 #endif	/* ENABLE_AUTOKEY */
 

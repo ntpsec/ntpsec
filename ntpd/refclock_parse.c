@@ -386,7 +386,7 @@ struct parseunit
 	/*
 	 * clock state handling/reporting
 	 */
-	u_char	      flags;	        /* flags (leap_control) */
+	uint8_t	      flags;	        /* flags (leap_control) */
 	u_long	      lastchange;       /* time (ntp) when last state change accured */
 	u_long	      statetime[CEVNT_MAX+1]; /* accumulated time of clock states */
 	u_long        pollneeddata; 	/* current_time(!=0) for receive sample expected in PPS mode */
@@ -893,7 +893,7 @@ static struct parse_clockinfo
 	const char *cl_id;		/* ID code */
 	const char *cl_description;		/* device name */
 	const char *cl_format;		/* fixed format */
-	u_char  cl_type;		/* clock type (ntp control) */
+	uint8_t  cl_type;		/* clock type (ntp control) */
 	u_long  cl_maxunsync;		/* time to trust oscillator after losing synch */
 	u_long  cl_speed;		/* terminal input & output baudrate */
 	u_long  cl_cflag;             /* terminal control flags */
@@ -2875,7 +2875,7 @@ parse_ppsapi(
 	int cap, mode_ppsoffset;
 	const char *cp;
 
-	parse->flags &= (u_char) (~PARSE_PPSCLOCK);
+	parse->flags &= (uint8_t) (~PARSE_PPSCLOCK);
 
 	/*
 	 * collect PPSAPI offset capability - should move into generic handling
@@ -3336,8 +3336,8 @@ parse_ctl(
 	{
 		if (in->haveflags & (CLK_HAVEFLAG1|CLK_HAVEFLAG2|CLK_HAVEFLAG3|CLK_HAVEFLAG4))
 		{
-		  u_char mask = CLK_FLAG1|CLK_FLAG2|CLK_FLAG3|CLK_FLAG4;
-		  parse->flags = (parse->flags & (u_char)(~mask)) | (in->flags & mask);
+		  uint8_t mask = CLK_FLAG1|CLK_FLAG2|CLK_FLAG3|CLK_FLAG4;
+		  parse->flags = (parse->flags & (uint8_t)(~mask)) | (in->flags & mask);
 #if defined(HAVE_PPSAPI)
 		  if (CLK_PPS(parse->peer))
 		    {
@@ -3671,7 +3671,7 @@ parse_event(
 	int event
 	)
 {
-	if (parse->generic->currentstatus != (u_char) event)
+	if (parse->generic->currentstatus != (uint8_t) event)
 	{
 		parse->statetime[parse->generic->currentstatus] += current_time - parse->lastchange;
 		parse->lastchange              = current_time;
@@ -4955,13 +4955,13 @@ typedef struct trimble
 {
 	u_long last_msg;	/* last message received */
 	u_long last_reset;	/* last time a reset was issued */
-	u_char qtracking;	/* query tracking status */
+	uint8_t qtracking;	/* query tracking status */
 	u_long ctrack;		/* current tracking set */
 	u_long ltrack;		/* last tracking set */
 } trimble_t;
 
 union uval {
-	u_char  bd[8];
+	uint8_t  bd[8];
 	int     iv;
 	float   fv;
 	double  dv;
@@ -4970,7 +4970,7 @@ union uval {
 struct txbuf
 {
 	short idx;			/* index to first unused byte */
-	u_char *txt;			/* pointer to actual data buffer */
+	uint8_t *txt;			/* pointer to actual data buffer */
 };
 
 void	sendcmd		(struct txbuf *buf, int c);
@@ -4986,7 +4986,7 @@ sendcmd(
 	)
 {
 	buf->txt[0] = DLE;
-	buf->txt[1] = (u_char)c;
+	buf->txt[1] = (uint8_t)c;
 	buf->idx = 2;
 }
 
@@ -5004,7 +5004,7 @@ sendbyte(
 {
 	if (b == DLE)
 	    buf->txt[buf->idx++] = DLE;
-	buf->txt[buf->idx++] = (u_char)b;
+	buf->txt[buf->idx++] = (uint8_t)b;
 }
 
 void
@@ -5045,8 +5045,8 @@ sendint(
 	)
 {
 	/* send 16bit int, msbyte first */
-	sendbyte(buf, (u_char)((a>>8) & 0xff));
-	sendbyte(buf, (u_char)(a & 0xff));
+	sendbyte(buf, (uint8_t)((a>>8) & 0xff));
+	sendbyte(buf, (uint8_t)(a & 0xff));
 }
 
 void
@@ -5079,7 +5079,7 @@ trimbletsip_setup(
 		  const char *reason
 		  )
 {
-	u_char buffer[256];
+	uint8_t buffer[256];
 	struct txbuf buf;
 	trimble_t *t = parse->localdata;
 
@@ -5142,7 +5142,7 @@ trimble_check(
 {
 	struct parseunit *parse = peer->procptr->unitptr;
 	trimble_t *t = parse->localdata;
-	u_char buffer[256];
+	uint8_t buffer[256];
 	struct txbuf buf;
 	buf.txt = buffer;
 
@@ -5294,7 +5294,7 @@ trimbletsip_event(
 
 static float
 getflt(
-	u_char *bp
+	uint8_t *bp
 	)
 {
 	union uval uval;
@@ -5315,7 +5315,7 @@ getflt(
 
 static double
 getdbl(
-	u_char *bp
+	uint8_t *bp
 	)
 {
 	union uval uval;

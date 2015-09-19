@@ -45,19 +45,19 @@ int process_pkt(struct pkt *rpkt, sockaddr_u *sas, int pkt_len,
 struct speer {
 	struct speer *next;
 	sockaddr_u srcadr;
-	u_char version;
-	u_char hmode;
-	u_char hpoll;
-	u_char minpoll;
-	u_char maxpoll;
+	uint8_t version;
+	uint8_t hmode;
+	uint8_t hpoll;
+	uint8_t minpoll;
+	uint8_t maxpoll;
 	u_int flags;
-	u_char num_events;
-	u_char ttl;
-	u_char leap;
-	u_char pmode;
-	u_char stratum;
-	u_char ppoll;
-	u_char precision;	/* should be s_char */
+	uint8_t num_events;
+	uint8_t ttl;
+	uint8_t leap;
+	uint8_t pmode;
+	uint8_t stratum;
+	uint8_t ppoll;
+	uint8_t precision;	/* should be int8_t */
 	uint32_t refid;
 	l_fp reftime;
 	keyid_t keyid;

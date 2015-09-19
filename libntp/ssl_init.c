@@ -82,7 +82,7 @@ keytype_from_text(
 	u_int		digest_len;
 #ifdef HAVE_OPENSSL
 	const u_long	max_digest_len = MAX_MAC_LEN - sizeof(keyid_t);
-	u_char		digest[EVP_MAX_MD_SIZE];
+	uint8_t		digest[EVP_MAX_MD_SIZE];
 	char *		upcased;
 	char *		pch;
 	EVP_MD_CTX	ctx;

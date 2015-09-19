@@ -46,12 +46,12 @@ strtouv64(
 	)
 {
 	vint64  res;
-	u_char  digit;
+	uint8_t  digit;
 	int     sig, num;
-	const u_char *src;
+	const uint8_t *src;
 	
 	num = sig = 0;
-	src = (const u_char*)begp;
+	src = (const uint8_t*)begp;
 	while (isspace(*src))
 		src++;
 

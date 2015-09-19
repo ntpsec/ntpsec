@@ -13,7 +13,6 @@
  * prototype for strptime(3).
  */
 typedef unsigned long	u_long;
-typedef unsigned char	u_char;
 typedef unsigned short	u_short;
 typedef unsigned int	u_int;
 #endif
@@ -81,29 +80,16 @@ typedef unsigned int	u_int;
  *		year += 1900;
  */
 
-/*
- * How to get signed characters.  On machines where signed char works,
- * use it. On machines where signed char doesn't work, char had better
- * be signed.
- */
-#ifdef NEED_S_CHAR_TYPEDEF
-# if SIZEOF_SIGNED_CHAR
-typedef signed char s_char;
-# else
-typedef char s_char;
-# endif
-  /* XXX: Why is this sequent bit INSIDE this test? */
 # ifdef sequent
 #  undef SO_RCVBUF
 #  undef SO_SNDBUF
 # endif
-#endif
 
 /*
  * NTP protocol parameters.  See section 3.2.6 of the specification.
  */
-#define	NTP_VERSION	((u_char)4) /* current version number */
-#define	NTP_OLDVERSION	((u_char)1) /* oldest credible version */
+#define	NTP_VERSION	((uint8_t)4) /* current version number */
+#define	NTP_OLDVERSION	((uint8_t)1) /* oldest credible version */
 #define	NTP_PORT	123	/* included for non-unix machines */
 
 /*
@@ -266,15 +252,15 @@ struct peer {
 	struct addrinfo *ai;	/* position within addrs */
 	endpt *	dstadr;		/* local address */
 	associd_t associd;	/* association ID */
-	u_char	version;	/* version number */
-	u_char	hmode;		/* local association mode */
-	u_char	hpoll;		/* local poll interval */
-	u_char	minpoll;	/* min poll interval */
-	u_char	maxpoll;	/* max poll interval */
+	uint8_t	version;	/* version number */
+	uint8_t	hmode;		/* local association mode */
+	uint8_t	hpoll;		/* local poll interval */
+	uint8_t	minpoll;	/* min poll interval */
+	uint8_t	maxpoll;	/* max poll interval */
 	u_int	flags;		/* association flags */
-	u_char	cast_flags;	/* additional flags */
-	u_char	last_event;	/* last peer error code */
-	u_char	num_events;	/* number of error events */
+	uint8_t	cast_flags;	/* additional flags */
+	uint8_t	last_event;	/* last peer error code */
+	uint8_t	num_events;	/* number of error events */
 	uint32_t	ttl;	/* ttl/refclock mode */
 	char	*ident;		/* group identifier name */
 
@@ -283,19 +269,19 @@ struct peer {
 	 */
 #ifdef REFCLOCK
 	struct refclockproc *procptr; /* refclock structure pointer */
-	u_char	refclktype;	/* reference clock type */
-	u_char	refclkunit;	/* reference clock unit number */
-	u_char	sstclktype;	/* clock type for system status word */
+	uint8_t	refclktype;	/* reference clock type */
+	uint8_t	refclkunit;	/* reference clock unit number */
+	uint8_t	sstclktype;	/* clock type for system status word */
 #endif /* REFCLOCK */
 
 	/*
 	 * Variables set by received packet
 	 */
-	u_char	leap;		/* local leap indicator */
-	u_char	pmode;		/* remote association mode */
-	u_char	stratum;	/* remote stratum */
-	u_char	ppoll;		/* remote poll interval */
-	s_char	precision;	/* remote clock precision */
+	uint8_t	leap;		/* local leap indicator */
+	uint8_t	pmode;		/* remote association mode */
+	uint8_t	stratum;	/* remote stratum */
+	uint8_t	ppoll;		/* remote poll interval */
+	int8_t	precision;	/* remote clock precision */
 	double	rootdelay;	/* roundtrip delay to primary source */
 	double	rootdisp;	/* dispersion to primary source */
 	uint32_t	refid;	/* remote reference ID */
@@ -340,9 +326,9 @@ struct peer {
 	/*
 	 * Ephemeral state variables
 	 */
-	u_char	status;		/* peer status */
-	u_char	new_status;	/* under-construction status */
-	u_char	reach;		/* reachability register */
+	uint8_t	status;		/* peer status */
+	uint8_t	new_status;	/* under-construction status */
+	uint8_t	reach;		/* reachability register */
 	int	flash;		/* protocol error test tally bits */
 	u_long	epoch;		/* reference epoch */
 	int	burst;		/* packets remaining in burst */
@@ -353,7 +339,7 @@ struct peer {
 	double	filter_offset[NTP_SHIFT]; /* offset shift register */
 	double	filter_disp[NTP_SHIFT]; /* dispersion shift register */
 	u_long	filter_epoch[NTP_SHIFT]; /* epoch shift register */
-	u_char	filter_order[NTP_SHIFT]; /* filter sort index */
+	uint8_t	filter_order[NTP_SHIFT]; /* filter sort index */
 	l_fp	rec;		/* receive time stamp */
 	l_fp	xmt;		/* transmit time stamp */
 	l_fp	dst;		/* destination timestamp */
@@ -438,10 +424,10 @@ struct peer {
 /*
  * Values for peer.stratum, sys_stratum
  */
-#define	STRATUM_REFCLOCK ((u_char)0) /* default stratum */
+#define	STRATUM_REFCLOCK ((uint8_t)0) /* default stratum */
 /* A stratum of 0 in the packet is mapped to 16 internally */
-#define	STRATUM_PKT_UNSPEC ((u_char)0) /* unspecified in packet */
-#define	STRATUM_UNSPEC	((u_char)16) /* unspecified */
+#define	STRATUM_PKT_UNSPEC ((uint8_t)0) /* unspecified in packet */
+#define	STRATUM_UNSPEC	((uint8_t)16) /* unspecified */
 
 /*
  * Values for peer.flags (u_int)
@@ -543,10 +529,10 @@ struct peer {
  * and must be converted (except the mac, which isn't, really).
  */
 struct pkt {
-	u_char	li_vn_mode;	/* peer leap indicator */
-	u_char	stratum;	/* peer stratum */
-	u_char	ppoll;		/* peer poll interval */
-	s_char	precision;	/* peer clock precision */
+	uint8_t	li_vn_mode;	/* peer leap indicator */
+	uint8_t	stratum;	/* peer stratum */
+	uint8_t	ppoll;		/* peer poll interval */
+	int8_t	precision;	/* peer clock precision */
 	u_fp	rootdelay;	/* roundtrip delay to primary source */
 	u_fp	rootdisp;	/* dispersion to primary source*/
 	uint32_t	refid;		/* reference id */
@@ -587,9 +573,9 @@ struct pkt {
 /*
  * Stuff for extracting things from li_vn_mode
  */
-#define	PKT_MODE(li_vn_mode)	((u_char)((li_vn_mode) & 0x7))
-#define	PKT_VERSION(li_vn_mode)	((u_char)(((li_vn_mode) >> 3) & 0x7))
-#define	PKT_LEAP(li_vn_mode)	((u_char)(((li_vn_mode) >> 6) & 0x3))
+#define	PKT_MODE(li_vn_mode)	((uint8_t)((li_vn_mode) & 0x7))
+#define	PKT_VERSION(li_vn_mode)	((uint8_t)(((li_vn_mode) >> 3) & 0x7))
+#define	PKT_LEAP(li_vn_mode)	((uint8_t)(((li_vn_mode) >> 6) & 0x3))
 
 /*
  * Stuff for putting things back into li_vn_mode in packets and vn_mode
@@ -603,10 +589,10 @@ struct pkt {
  * Dealing with stratum.  0 gets mapped to 16 incoming, and back to 0
  * on output.
  */
-#define	PKT_TO_STRATUM(s)	((u_char)(((s) == (STRATUM_PKT_UNSPEC)) ?\
+#define	PKT_TO_STRATUM(s)	((uint8_t)(((s) == (STRATUM_PKT_UNSPEC)) ?\
 				(STRATUM_UNSPEC) : (s)))
 
-#define	STRATUM_TO_PKT(s)	((u_char)(((s) == (STRATUM_UNSPEC)) ?\
+#define	STRATUM_TO_PKT(s)	((uint8_t)(((s) == (STRATUM_UNSPEC)) ?\
 				(STRATUM_PKT_UNSPEC) : (s)))
 
 /*
@@ -768,8 +754,8 @@ struct mon_data {
 	int		leak;		/* leaky bucket accumulator */
 	int		count;		/* total packet count */
 	u_short		flags;		/* restrict flags */
-	u_char		vn_mode;	/* packet mode & version */
-	u_char		cast_flags;	/* flags MDF_?CAST */
+	uint8_t		vn_mode;	/* packet mode & version */
+	uint8_t		cast_flags;	/* flags MDF_?CAST */
 	sockaddr_u	rmtadr;		/* address of remote host */
 };
 

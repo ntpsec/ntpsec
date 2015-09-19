@@ -110,10 +110,10 @@ typedef struct peer_resolved_ctx_tag {
 	int		host_mode;	/* T_* token identifier */
 	u_short		family;
 	keyid_t		keyid;
-	u_char		hmode;		/* MODE_* */
-	u_char		version;
-	u_char		minpoll;
-	u_char		maxpoll;
+	uint8_t		hmode;		/* MODE_* */
+	uint8_t		version;
+	uint8_t		minpoll;
+	uint8_t		maxpoll;
 	uint32_t		ttl;
 	const char *	group;
 } peer_resolved_ctx;
@@ -319,7 +319,7 @@ static void config_peers(config_tree *);
 static void config_unpeers(config_tree *);
 static void config_nic_rules(config_tree *, bool input_from_file);
 static void config_reset_counters(config_tree *);
-static u_char get_correct_host_mode(int token);
+static uint8_t get_correct_host_mode(int token);
 static int peerflag_bits(peer_node *);
 #endif	/* !SIM */
 
@@ -1233,7 +1233,7 @@ create_peer_node(
 				my_node->minpoll = NTP_MINPOLL;
 			} else {
 				my_node->minpoll =
-					(u_char)option->value.u;
+					(uint8_t)option->value.u;
 			}
 			break;
 
@@ -1246,7 +1246,7 @@ create_peer_node(
 				my_node->maxpoll = NTP_MAXPOLL;
 			} else {
 				my_node->maxpoll =
-					(u_char)option->value.u;
+					(uint8_t)option->value.u;
 			}
 			break;
 
@@ -1255,7 +1255,7 @@ create_peer_node(
 				msyslog(LOG_ERR, "ttl: invalid argument");
 				errflag = 1;
 			} else {
-				my_node->ttl = (u_char)option->value.u;
+				my_node->ttl = (uint8_t)option->value.u;
 			}
 			break;
 
@@ -1279,7 +1279,7 @@ create_peer_node(
 				errflag = 1;
 			} else {
 				my_node->peerversion =
-					(u_char)option->value.u;
+					(uint8_t)option->value.u;
 			}
 			break;
 
@@ -2333,7 +2333,7 @@ config_access(
 		case T_Average:
 			if (0 <= my_opt->value.i &&
 			    my_opt->value.i <= UCHAR_MAX)
-				ntp_minpoll = (u_char)my_opt->value.u;
+				ntp_minpoll = (uint8_t)my_opt->value.u;
 			else
 				msyslog(LOG_ERR,
 					"discard average %d out of range, ignored.",
@@ -3122,7 +3122,7 @@ config_ttl(
 	curr_ttl = HEAD_PFIFO(ptree->ttl);
 	for (; curr_ttl != NULL; curr_ttl = curr_ttl->link) {
 		if (i < COUNTOF(sys_ttl))
-			sys_ttl[i++] = (u_char)curr_ttl->i;
+			sys_ttl[i++] = (uint8_t)curr_ttl->i;
 		else
 			msyslog(LOG_INFO,
 				"ttl: Number of TTL entries exceeds %zu. Ignoring TTL %d...",
@@ -3606,7 +3606,7 @@ is_sane_resolved_address(
 
 
 #ifndef SIM
-static u_char
+static uint8_t
 get_correct_host_mode(
 	int token
 	)
@@ -3699,7 +3699,7 @@ config_peers(
 	struct addrinfo		hints;
 	peer_node *		curr_peer;
 	peer_resolved_ctx *	ctx;
-	u_char			hmode;
+	uint8_t			hmode;
 
 	/* add servers named on the command line with iburst implied */
 	for (;

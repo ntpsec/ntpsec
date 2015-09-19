@@ -82,8 +82,8 @@
  * Unit control structure
  */
 struct zyferunit {
-	u_char	Rcvbuf[LENZYFER + 1];
-	u_char	polled;		/* poll message flag */
+	uint8_t	Rcvbuf[LENZYFER + 1];
+	uint8_t	polled;		/* poll message flag */
 	int	pollcnt;
 	l_fp    tstamp;         /* timestamp of last poll */
 	int	Rcvptr;
@@ -204,12 +204,12 @@ zyfer_receive(
 	int tmode;		/* Time mode */
 	int tfom;		/* Time Figure Of Merit */
 	int omode;		/* Operation mode */
-	u_char *p;
+	uint8_t *p;
 
 	peer = rbufp->recv_peer;
 	pp = peer->procptr;
 	up = pp->unitptr;
-	p = (u_char *) &rbufp->recv_space;
+	p = (uint8_t *) &rbufp->recv_space;
 	/*
 	 * If lencode is 0:
 	 * - if *rbufp->recv_space is !

@@ -111,7 +111,7 @@ double	clock_max_fwd =  CLOCK_MAX;	/* step threshold */
 double	clock_minstep = CLOCK_MINSTEP; /* stepout threshold */
 double	clock_panic = CLOCK_PANIC; /* panic threshold */
 double	clock_phi = CLOCK_PHI;	/* dispersion rate (s/s) */
-u_char	allan_xpt = CLOCK_ALLAN; /* Allan intercept (log2 s) */
+uint8_t	allan_xpt = CLOCK_ALLAN; /* Allan intercept (log2 s) */
 
 /*
  * Program variables
@@ -164,7 +164,7 @@ int	freq_set;		/* initial set frequency switch */
  * Clock state machine variables
  */
 int	state = 0;		/* clock discipline state */
-u_char	sys_poll;		/* time constant/poll (log2 s) */
+uint8_t	sys_poll;		/* time constant/poll (log2 s) */
 int	tc_counter;		/* jiggle counter */
 double	last_offset;		/* last offset (s) */
 
@@ -1296,7 +1296,7 @@ loop_config(
 	 * Tinker command variables for Ulrich Windl. Very dangerous.
 	 */
 	case LOOP_ALLAN:	/* Allan intercept (log2) (allan) */
-		allan_xpt = (u_char)freq;
+		allan_xpt = (uint8_t)freq;
 		break;
 
 	case LOOP_CODEC:	/* audio codec frequency (codec) */

@@ -69,7 +69,7 @@ struct recvbuf {
 	int		recv_length;	/* number of octets received */
 	union {
 		struct pkt	X_recv_pkt;
-		u_char		X_recv_buffer[RX_BUFF_SIZE];
+		uint8_t		X_recv_buffer[RX_BUFF_SIZE];
 	} recv_space;
 #define	recv_pkt		recv_space.X_recv_pkt
 #define	recv_buffer		recv_space.X_recv_buffer

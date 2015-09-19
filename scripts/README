@@ -24,6 +24,7 @@ ntptrace::	Directory containing sources for a utility program that
 		designated peer to the primary server at the root of the
 		timekeeping subnet.
 
+ntpver::	Simple script using ntpq to print out the suite version.
 
 stats::		directory containing awk and shell scripts useful for
 		maintaining statistics summaries of clockstats, loopstats

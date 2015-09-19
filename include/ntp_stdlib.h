@@ -69,7 +69,7 @@ extern	int	authhavekey	(keyid_t);
 extern	int	authistrusted	(keyid_t);
 extern	bool	authreadkeys	(const char *);
 extern	void	authtrust	(keyid_t, u_long);
-extern	bool	authusekey	(keyid_t, int, const u_char *);
+extern	bool	authusekey	(keyid_t, int, const uint8_t *);
 
 /*
  * Based on the NTP timestamp, calculate the NTP timestamp of
@@ -112,9 +112,9 @@ int ntp_getopt_long(int argc, char* const argv[], const char *optstring,
 		    const struct option *longopts, int *longindex);
 
 /* a_md5encrypt.c */
-extern	int	MD5authdecrypt	(int, u_char *, uint32_t *, int, int);
-extern	int	MD5authencrypt	(int, u_char *, uint32_t *, int);
-extern	void	MD5auth_setkey	(keyid_t, int, const u_char *, size_t);
+extern	int	MD5authdecrypt	(int, uint8_t *, uint32_t *, int, int);
+extern	int	MD5authencrypt	(int, uint8_t *, uint32_t *, int);
+extern	void	MD5auth_setkey	(keyid_t, int, const uint8_t *, size_t);
 extern	uint32_t	addr2refid	(sockaddr_u *);
 
 /* emalloc.c */
@@ -204,7 +204,7 @@ extern int	authnumfreekeys;
  */
 extern keyid_t	cache_keyid;		/* key identifier */
 extern int	cache_type;		/* key type */
-extern u_char *	cache_secret;		/* secret */
+extern uint8_t *	cache_secret;		/* secret */
 extern u_short	cache_secretsize;	/* secret octets */
 extern u_short	cache_flags;		/* KEY_ bit flags */
 
