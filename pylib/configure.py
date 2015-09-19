@@ -161,6 +161,7 @@ def cmd_configure(ctx):
 		"libscf.h",
 		"linux/if_addr.h",
 		"linux/rtnetlink.h",
+		"linux/serial.h",
 		"machine/soundcard.h",
 		"md5.h",
 		"net/if6.h",
