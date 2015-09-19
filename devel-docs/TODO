@@ -46,6 +46,9 @@ TRIM_POLLRATE
 * Relatedly, the ntpd initialization sequence is still full of platform-
 specific crud.
 
+* Better ANSI/POSIX conformance in MinGW and Visual Studui 2013 might
+enable us to get rid of the SYS_WINNT code. Should be tried...
+
 === Testing ===
 
 * Unit testing.  "make check" needs to run all the unit tests.
@@ -141,42 +144,6 @@ Problems that need to be fixed:
 
   SYS_DECOSF1:
    util/ntptime.c
-
-0  SYS_WINNT:
-   include/ntp.h
-   include/ntp_fp.h
-   include/ntp_machine.h
-   include/ntp_select.h
-   include/ntp_syslog.h
-   include/ntp_unixtime.h
-   include/ntpd.h
-   libntp/libntp.mak
-   libntp/machines.c
-   libntp/mexit.c
-   libntp/msyslog.c
-   libntp/systime.c
-   ntpdate/ntpdate.c
-   ntpdate/ntpdate.mak
-   ntpq/ntpq.c
-   ntpq/ntpq.mak
-   ntpq/ntpq_ops.c
-   ntptrace/ntptrace.c
-   ntptrace/ntptrace.mak
-   xntpd/ntp_config.c
-   xntpd/ntp_filegen.c
-   xntpd/ntp_intres.c
-   xntpd/ntp_io.c
-   xntpd/ntp_loopfilter.c
-   xntpd/ntp_peer.c
-   xntpd/ntp_proto.c
-   xntpd/ntp_refclock.c
-   xntpd/ntp_timer.c
-   xntpd/ntp_unixclock.c
-   xntpd/ntp_util.c
-   xntpd/ntpd.c
-   xntpd/xntpd.mak
-   xntpdc/ntpdc.c
-   xntpdc/xntpdc.mak
 
 - Combine enable-step-slew and enable-ntpdate-step
 
