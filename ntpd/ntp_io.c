@@ -3074,10 +3074,10 @@ open_socket(
 
 	add_fd_to_list(fd, FD_TYPE_SOCKET);
 
-#if !defined(SYS_WINNT) && !defined(VMS)
-	DPRINTF(4, ("flags for fd %d: 0x%x\n", fd,
-		    fcntl(fd, F_GETFL, 0)));
-#endif /* SYS_WINNT || VMS */
+#ifdef F_GETFL
+	/* F_GETFL may not be defined if the underlying OS isn't really Unix */
+	DPRINTF(4, ("flags for fd %d: 0x%x\n", fd, fcntl(fd, F_GETFL, 0)));
+#endif
 
 #if defined (HAVE_IO_COMPLETION_PORT)
 /*
