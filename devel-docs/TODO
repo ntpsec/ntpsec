@@ -135,15 +135,12 @@ Hal:
 
 970301: Implement the utmp/wtmp timestamping on time steps.
 
-Problems that need to be fixed:
-
 - Get rid of the old SYS_* macros:
   (It's worth noting that any code that would have been "enabled" by any
   of these macros has not been used since 5.83, and there have been very
   few complaints...)
 
-  SYS_DECOSF1:
-   util/ntptime.c
+Problems that need to be fixed:
 
 - Combine enable-step-slew and enable-ntpdate-step
 

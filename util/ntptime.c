@@ -24,12 +24,6 @@
 #include <signal.h>
 #include <setjmp.h>
 
-#ifdef NTP_SYSCALLS_STD
-# ifndef SYS_DECOSF1
-#  define BADCALL -1		/* this is supposed to be a bad syscall */
-# endif /* SYS_DECOSF1 */
-#endif
-
 #ifdef HAVE_STRUCT_NTPTIMEVAL_TIME_TV_NSEC
 #define tv_frac_sec tv_nsec
 #else
@@ -219,24 +213,6 @@ main(
 		exit(1);
 	}
 #endif /* SIGSYS */
-
-#ifdef	BADCALL
-	/*
-	 * Make sure the trapcatcher works.
-	 */
-	pll_control = 1;
-#ifdef SIGSYS
-	if (sigsetjmp(env, 1) == 0) {
-#endif
-		status = syscall(BADCALL, &ntv); /* dummy parameter */
-		if ((status < 0) && (errno == ENOSYS))
-			--pll_control;
-#ifdef SIGSYS
-	}
-#endif
-	if (pll_control)
-	    printf("sigaction() failed to catch an invalid syscall\n");
-#endif /* BADCALL */
 
 	if (cost) {
 #ifdef SIGSYS
