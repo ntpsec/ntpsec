@@ -3,41 +3,6 @@ from util import msg, msg_setting
 from posix_thread import posix_thread_version
 import sys, os
 
-def refclock_config(ctx):
-	from refclock import refclock_map
-
-	if ctx.options.refclocks == "all":
-		ids = refclock_map.keys()
-	else:
-		# XXX: better error checking
-		ids = ctx.options.refclocks.split(",")
-
-	ctx.env.REFCLOCK_DEFINES = []
-	ctx.env.REFCLOCK_SOURCE = []
-
-	for id in ids:
-		try:
-			id = int(id)
-		except ValueError:
-			ctx.fatal("'%s' is not an integer." % id)
-
-		if id not in refclock_map:
-			ctx.fatal("'%s' is not a valid Refclock ID" % id)
-
-		rc = refclock_map[id]
-
-		ctx.start_msg("Enabling Refclock %s:" % id)
-		ctx.env.REFCLOCK_SOURCE.append((rc["file"], rc["define"]))
-		ctx.end_msg(rc["descr"])
-		ctx.env["REFCLOCK_%s" % rc["file"].upper()] = True
-
-	ctx.env.REFCLOCK_ENABLE = True
-
-#ctx.env.REFCLOCK_DEFINES
-#ctx.env.REFCLOCK_SOURCE
-
-
-
 
 def cmd_configure(ctx):
 	from check_type import check_type
@@ -299,6 +264,7 @@ int main () {
 
 
 	if ctx.options.refclocks:
+		from refclock import refclock_config
 		refclock_config(ctx)
 
 
