@@ -52,7 +52,7 @@
 
 #ifdef HAS_ROUTING_SOCKET
 # include <net/route.h>
-# ifdef HAVE_RTNETLINK
+# ifdef HAVE_LINUX_RTNETLINK_H
 #  include <linux/rtnetlink.h>
 # endif
 #endif
@@ -4602,7 +4602,7 @@ process_routing_msgs(struct asyncio_reader *reader)
 {
 	char buffer[5120];
 	int cnt, msg_type;
-#ifdef HAVE_RTNETLINK
+#ifdef HAVE_LINUX_RTNETLINK_H
 	struct nlmsghdr *nh;
 #else
 	struct rt_msghdr rtm;
@@ -4632,7 +4632,7 @@ process_routing_msgs(struct asyncio_reader *reader)
 	/*
 	 * process routing message
 	 */
-#ifdef HAVE_RTNETLINK
+#ifdef HAVE_LINUX_RTNETLINK_H
 	for (nh = (struct nlmsghdr *)buffer;
 	     NLMSG_OK(nh, cnt);
 	     nh = NLMSG_NEXT(nh, cnt)) {
@@ -4702,7 +4702,7 @@ process_routing_msgs(struct asyncio_reader *reader)
 				    msg_type));
 			timer_interfacetimeout(current_time + UPDATE_GRACE);
 			break;
-#ifdef HAVE_RTNETLINK
+#ifdef HAVE_LINUX_RTNETLINK_H
 		case NLMSG_DONE:
 			/* end of multipart message */
 			return;
@@ -4725,7 +4725,7 @@ static void
 init_async_notifications()
 {
 	struct asyncio_reader *reader;
-#ifdef HAVE_RTNETLINK
+#ifdef HAVE_LINUX_RTNETLINK_H
 	int fd = socket(PF_NETLINK, SOCK_RAW, NETLINK_ROUTE);
 	struct sockaddr_nl sa;
 #else
@@ -4738,7 +4738,7 @@ init_async_notifications()
 	}
 
 	fd = move_fd(fd);
-#ifdef HAVE_RTNETLINK
+#ifdef HAVE_LINUX_RTNETLINK_H
 	ZERO(sa);
 	sa.nl_family = PF_NETLINK;
 	sa.nl_groups = RTMGRP_LINK | RTMGRP_IPV4_IFADDR
