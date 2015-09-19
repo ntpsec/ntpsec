@@ -17,11 +17,11 @@ dofptoa(
 	int msec
 	)
 {
-	register u_char *cp, *cpend;
+	register uint8_t *cp, *cpend;
 	register u_long val;
 	register short dec;
-	u_char cbuf[12];
-	u_char *cpdec;
+	uint8_t cbuf[12];
+	uint8_t *cpdec;
 	char *buf;
 	char *bp;
 
@@ -55,7 +55,7 @@ dofptoa(
 		do {
 			tmp = sv;
 			sv = (u_short) (sv/ten);
-			*(--cp) = (u_char)(tmp - ((sv<<3) + (sv<<1)));
+			*(--cp) = (uint8_t)(tmp - ((sv<<3) + (sv<<1)));
 		} while (sv != 0);
 	}
 
@@ -79,12 +79,12 @@ dofptoa(
 		do {
 			val &= 0xffff;
 			val = (val << 3) + (val << 1);
-			*cpend++ = (u_char)(val >> 16);
+			*cpend++ = (uint8_t)(val >> 16);
 		} while (--dec > 0);
 	}
 
 	if (val & 0x8000) {
-		register u_char *tp;
+		register uint8_t *tp;
 		/*
 		 * Round it. Ick.
 		 */

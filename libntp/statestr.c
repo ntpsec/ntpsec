@@ -279,7 +279,7 @@ static const struct codestring k_st_bits[] = {
 /* Forwards */
 static const char *	getcode(int, const struct codestring *);
 static const char *	getevents(int);
-static const char *	peer_st_flags(u_char pst);
+static const char *	peer_st_flags(uint8_t pst);
 
 /*
  * getcode - return string corresponding to code
@@ -391,7 +391,7 @@ decode_bitflags(
 
 static const char *
 peer_st_flags(
-	u_char pst
+	uint8_t pst
 	)
 {
 	return decode_bitflags(pst, ", ", peer_st_bits,
@@ -441,7 +441,7 @@ statustoa(
 {
 	char *	cb;
 	char *	cc;
-	u_char	pst;
+	uint8_t	pst;
 
 	LIB_GETBUF(cb);
 
@@ -456,7 +456,7 @@ statustoa(
 		break;
 	
 	case TYPE_PEER:
-		pst = (u_char)CTL_PEER_STATVAL(st);
+		pst = (uint8_t)CTL_PEER_STATVAL(st);
 		snprintf(cb, LIB_BUFLENGTH, "%s, %s, %s",
 			 peer_st_flags(pst),
 			 getcode(pst & 0x7, select_codes),

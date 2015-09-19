@@ -76,7 +76,7 @@ authreadkeys(
 	keyid_t	keyno;
 	int	keytype;
 	char	buf[512];		/* lots of room for line */
-	u_char	keystr[32];		/* Bug 2537 */
+	uint8_t	keystr[32];		/* Bug 2537 */
 	size_t	len;
 	size_t	j;
 
@@ -176,10 +176,10 @@ authreadkeys(
 		}
 		len = strlen(token);
 		if (len <= 20) {	/* Bug 2537 */
-			MD5auth_setkey(keyno, keytype, (u_char *)token, len);
+			MD5auth_setkey(keyno, keytype, (uint8_t *)token, len);
 		} else {
 			char	hex[] = "0123456789abcdef";
-			u_char	temp;
+			uint8_t	temp;
 			char	*ptr;
 			size_t	jlim;
 
@@ -188,7 +188,7 @@ authreadkeys(
 				ptr = strchr(hex, tolower((unsigned char)token[j]));
 				if (ptr == NULL)
 					break;	/* abort decoding */
-				temp = (u_char)(ptr - hex);
+				temp = (uint8_t)(ptr - hex);
 				if (j & 1)
 					keystr[j / 2] |= temp;
 				else

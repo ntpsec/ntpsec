@@ -322,7 +322,7 @@ struct xmtr {
  * CHU unit control structure
  */
 struct chuunit {
-	u_char	decode[20][16];	/* maximum-likelihood decoding matrix */
+	uint8_t	decode[20][16];	/* maximum-likelihood decoding matrix */
 	l_fp	cstamp[BURST];	/* character timestamps */
 	l_fp	tstamp[MAXSTAGE]; /* timestamp samples */
 	l_fp	timestamp;	/* current buffer timestamp */
@@ -653,7 +653,7 @@ chu_audio_receive(
 	struct peer *peer;
 
 	double	sample;		/* codec sample */
-	u_char	*dpt;		/* buffer pointer */
+	uint8_t	*dpt;		/* buffer pointer */
 	int	bufcnt;		/* buffer counter */
 	l_fp	ltemp;		/* l_fp temp */
 
@@ -965,11 +965,11 @@ chu_serial_receive(
 {
 	struct peer *peer;
 
-	u_char	*dpt;		/* receive buffer pointer */
+	uint8_t	*dpt;		/* receive buffer pointer */
 
 	peer = rbufp->recv_peer;
 
-	dpt = (u_char *)&rbufp->recv_space;
+	dpt = (uint8_t *)&rbufp->recv_space;
 	chu_decode(peer, *dpt, rbufp->recv_time);
 }
 
@@ -1094,7 +1094,7 @@ chu_b(
 	struct	refclockproc *pp;
 	struct	chuunit *up;
 
-	u_char	code[11];	/* decoded timecode */
+	uint8_t	code[11];	/* decoded timecode */
 	char	tbuf[80];	/* trace buffer */
 	char *	p;
 	size_t	chars;
@@ -1428,7 +1428,7 @@ chu_major(
 	struct refclockproc *pp;
 	struct chuunit *up;
 
-	u_char	code[11];	/* decoded timecode */
+	uint8_t	code[11];	/* decoded timecode */
 	int	metric;		/* distance metric */
 	int	val1;		/* maximum distance */
 	int	synchar;	/* stray cat */

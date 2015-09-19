@@ -113,10 +113,6 @@ delete_entry(
 void
 atexit_write_kod_db(void)
 {
-#ifdef WORK_FORK
-	if (worker_process)
-		return;
-#endif
 	write_kod_db();
 }
 

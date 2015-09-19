@@ -120,8 +120,8 @@ struct spectracomunit {
 #endif /* HAVE_PPSAPI */
 	l_fp	laststamp;	/* last <CR> timestamp */
 	bool	prev_eol_cr;	/* was last EOL <CR> (not <LF>)? */
-	u_char	lasthour;	/* last hour (for monitor) */
-	u_char	linect;		/* count ignored lines (for monitor */
+	uint8_t	lasthour;	/* last hour (for monitor) */
+	uint8_t	linect;		/* count ignored lines (for monitor */
 };
 
 /*
@@ -502,7 +502,7 @@ spectracom_poll(
 	if (pp->sloppyclockflag & CLK_FLAG4 && pp->hour <
 	    (int)up->lasthour)
 		up->linect = MONLIN;
-	up->lasthour = (u_char)pp->hour;
+	up->lasthour = (uint8_t)pp->hour;
 
 	/*
 	 * Process median filter samples. If none received, declare a

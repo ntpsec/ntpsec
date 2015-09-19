@@ -908,11 +908,11 @@ peer_info (
 		ip->precision = pp->precision;
 		ip->version = pp->version;
 		ip->reach = pp->reach;
-		ip->unreach = (u_char)pp->unreach;
-		ip->flash = (u_char)pp->flash;
+		ip->unreach = (uint8_t)pp->unreach;
+		ip->flash = (uint8_t)pp->flash;
 		ip->flash2 = (u_short)pp->flash;
 		ip->estbdelay = HTONS_FP(DTOFP(pp->delay));
-		ip->ttl = (u_char)pp->ttl;
+		ip->ttl = (uint8_t)pp->ttl;
 		ip->associd = htons(pp->associd);
 		ip->rootdelay = HTONS_FP(DTOUFP(pp->rootdelay));
 		ip->rootdispersion = HTONS_FP(DTOUFP(pp->rootdisp));
@@ -928,7 +928,7 @@ peer_info (
 			ip->filtdelay[i] = HTONS_FP(DTOFP(pp->filter_delay[j]));
 			DTOLFP(pp->filter_offset[j], &ltmp);
 			HTONL_FP(&ltmp, &ip->filtoffset[i]);
-			ip->order[i] = (u_char)((pp->filter_nextpt +
+			ip->order[i] = (uint8_t)((pp->filter_nextpt +
 						 NTP_SHIFT - 1) -
 						pp->filter_order[i]);
 			if (ip->order[i] >= NTP_SHIFT)
@@ -1191,7 +1191,7 @@ mem_stats(
 	ms->demobilizations = htonl((uint32_t)peer_demobilizations);
 
 	for (i = 0; i < NTP_HASH_SIZE; i++)
-		ms->hashcount[i] = (u_char)
+		ms->hashcount[i] = (uint8_t)
 		    max((u_int)peer_hash_count[i], UCHAR_MAX);
 
 	more_pkt();
@@ -2462,7 +2462,7 @@ set_clock_fudge(
 			clock_stat.haveflags = CLK_HAVEVAL2;
 			break;
 		    case FUDGE_FLAGS:
-			clock_stat.flags = (u_char) (ntohl(cf->fudgeval_flags) & 0xf);
+			clock_stat.flags = (uint8_t) (ntohl(cf->fudgeval_flags) & 0xf);
 			clock_stat.haveflags =
 				(CLK_HAVEFLAG1|CLK_HAVEFLAG2|CLK_HAVEFLAG3|CLK_HAVEFLAG4);
 			break;
@@ -2528,7 +2528,7 @@ get_clkbug_info(
 		i = bug.nvalues;
 		if (i > NUMCBUGVALUES)
 		    i = NUMCBUGVALUES;
-		ic->nvalues = (u_char)i;
+		ic->nvalues = (uint8_t)i;
 		ic->svalues = htons((u_short) (bug.svalues & ((1<<i)-1)));
 		while (--i >= 0)
 		    ic->values[i] = htonl(bug.values[i]);
@@ -2536,7 +2536,7 @@ get_clkbug_info(
 		i = bug.ntimes;
 		if (i > NUMCBUGTIMES)
 		    i = NUMCBUGTIMES;
-		ic->ntimes = (u_char)i;
+		ic->ntimes = (uint8_t)i;
 		ic->stimes = htonl(bug.stimes);
 		while (--i >= 0) {
 			HTONL_FP(&bug.times[i], &ic->times[i]);

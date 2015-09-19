@@ -78,7 +78,7 @@ extern u_long current_time;
 /*
  * Imported from ntp_proto
  */
-extern s_char sys_precision;
+extern int8_t sys_precision;
 
 /*
  * Function prototypes

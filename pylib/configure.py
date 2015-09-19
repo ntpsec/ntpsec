@@ -392,6 +392,21 @@ int main () {
 	if ctx.check_cc(header_name="sys/timex.h", mandatory=False):
 		ctx.define("HAVE_KERNEL_PLL", 1)
 
+	# SO_REUSEADDR socket option is needed to open a socket on an
+	# interface when the port number is already in use on another
+	# interface. Linux needs this, NetBSD does not, status on
+	# other platforms is unknown.  It is probably harmless to
+	# have it on everywhere.
+	ctx.define("OS_NEEDS_REUSEADDR_FOR_IFADDRBIND", 1)
+
+	# Fine-grained capabilities allow NTP to set the time after
+	# dropping root.  Needs libcap to be linked.
+	#if sys.platform_startswith("linux"):
+	#	ctx.define("HAVE_LINUX_CAPABILITIES", 1)
+
+	# HAVE_SOLARIS_PRIVS needs to be defined for the same effect
+	# under Solaris.
+
 	# These are required by the SHA2 code
 	ctx.define("LITTLE_ENDIAN", 1234)
 	ctx.define("BIG_ENDIAN", 4321)

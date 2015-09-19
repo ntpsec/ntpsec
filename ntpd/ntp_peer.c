@@ -118,7 +118,7 @@ static struct peer *	findexistingpeer_name(const char *, u_short,
 					      struct peer *, int);
 static struct peer *	findexistingpeer_addr(sockaddr_u *,
 					      struct peer *, int,
-					      u_char);
+					      uint8_t);
 static void		free_peer(struct peer *, int);
 static void		getmorepeermem(void);
 static int		score(struct peer *);
@@ -204,7 +204,7 @@ findexistingpeer_addr(
 	sockaddr_u *	addr,
 	struct peer *	start_peer,
 	int		mode,
-	u_char		cast_flags
+	uint8_t		cast_flags
 	)
 {
 	struct peer *peer;
@@ -259,7 +259,7 @@ findexistingpeer(
 	const char *	hostname,
 	struct peer *	start_peer,
 	int		mode,
-	u_char		cast_flags
+	uint8_t		cast_flags
 	)
 {
 	if (hostname != NULL)
@@ -556,17 +556,17 @@ peer_config(
 	sockaddr_u *	srcadr,
 	const char *	hostname,
 	endpt *		dstadr,
-	u_char		hmode,
-	u_char		version,
-	u_char		minpoll,
-	u_char		maxpoll,
+	uint8_t		hmode,
+	uint8_t		version,
+	uint8_t		minpoll,
+	uint8_t		maxpoll,
 	u_int		flags,
 	uint32_t		ttl,
 	keyid_t		key,
 	const char *	ident		/* autokey group */
 	)
 {
-	u_char cast_flags;
+	uint8_t cast_flags;
 
 	/*
 	 * We do a dirty little jig to figure the cast flags. This is
@@ -733,12 +733,12 @@ newpeer(
 	sockaddr_u *	srcadr,
 	const char *	hostname,
 	endpt *		dstadr,
-	u_char		hmode,
-	u_char		version,
-	u_char		minpoll,
-	u_char		maxpoll,
+	uint8_t		hmode,
+	uint8_t		version,
+	uint8_t		minpoll,
+	uint8_t		maxpoll,
 	u_int		flags,
-	u_char		cast_flags,
+	uint8_t		cast_flags,
 	uint32_t		ttl,
 	keyid_t		key,
 	const char *	ident

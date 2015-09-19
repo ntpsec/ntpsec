@@ -533,7 +533,7 @@ sockaddr_dump(const sockaddr_u *psau)
 {
 	/* Limit the size of the sockaddr_in6 hex dump */
 	const int maxsize = min(32, sizeof(psau->sa6));
-	const u_char *	cp;
+	const uint8_t *	cp;
 	int		i;
 
 	/* XXX: Should we limit maxsize based on psau->saX.sin_family? */
@@ -1438,7 +1438,7 @@ convert_isc_if(
 	u_short port
 	)
 {
-	const u_char v6loop[16] = {0, 0, 0, 0, 0, 0, 0, 0,
+	const uint8_t v6loop[16] = {0, 0, 0, 0, 0, 0, 0, 0,
 				   0, 0, 0, 0, 0, 0, 0, 1};
 
 	strlcpy(itf->name, isc_if->name, sizeof(itf->name));
@@ -3116,7 +3116,7 @@ sendpkt(
 	int	ismcast;
 	int	cc;
 	int	rc;
-	u_char	cttl;
+	uint8_t	cttl;
 
 	ismcast = IS_MCAST(dest);
 	if (!ismcast)
@@ -3152,7 +3152,7 @@ sendpkt(
 			switch (AF(&src->sin)) {
 
 			case AF_INET :
-				cttl = (u_char)ttl;
+				cttl = (uint8_t)ttl;
 				rc = setsockopt(src->fd, IPPROTO_IP,
 						IP_MULTICAST_TTL,
 						(void *)&cttl,

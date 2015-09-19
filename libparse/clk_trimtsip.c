@@ -94,17 +94,17 @@ static offsets_t trim_offsets = { 0, 1, 2, 3, 4, 5, 6, 7 };
 
 struct trimble
 {
-	u_char  t_in_pkt;	/* first DLE received */
-	u_char  t_dle;		/* subsequent DLE received */
+	uint8_t  t_in_pkt;	/* first DLE received */
+	uint8_t  t_dle;		/* subsequent DLE received */
 	u_short t_week;		/* GPS week */
 	u_short t_weekleap;	/* GPS week of next/last week */
 	u_short t_dayleap;	/* day in week */
 	u_short t_gpsutc;	/* GPS - UTC offset */
 	u_short t_gpsutcleap;	/* offset at next/last leap */
-	u_char  t_operable;	/* receiver feels OK */
-	u_char  t_mode;		/* actual operating mode */
-	u_char  t_leap;		/* possible leap warning */
-        u_char  t_utcknown;	/* utc offset known */
+	uint8_t  t_operable;	/* receiver feels OK */
+	uint8_t  t_mode;		/* actual operating mode */
+	uint8_t  t_leap;		/* possible leap warning */
+        uint8_t  t_utcknown;	/* utc offset known */
 };
 
 #define STATUS_BAD    0		/* BAD or UNINITIALIZED receiver status */
@@ -220,7 +220,7 @@ cvt_trimtsip(
 {
         register struct trimble *t = (struct trimble *)local; /* get local data space */
 #define mb(_X_) (buffer[2+(_X_)]) /* shortcut for buffer access */
-	register u_char cmd;
+	register uint8_t cmd;
 
 	clock_time->flags = 0;
 
@@ -315,7 +315,7 @@ cvt_trimtsip(
 		    case CMD_RRECVHEALTH:
 			    {
 				    /* TRIMBLE health */
-				    u_char status = mb(0);
+				    uint8_t status = mb(0);
 
 				    switch (status)
 				    {

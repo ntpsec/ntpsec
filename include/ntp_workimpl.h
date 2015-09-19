@@ -16,7 +16,7 @@
 # define WORK_PIPE
 #endif
 
-#if defined(WORK_FORK) || defined(WORK_THREAD)
+#if defined(WORK_THREAD)
 # define WORKER
 #endif
 

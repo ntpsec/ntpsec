@@ -132,7 +132,7 @@ struct value {			/* network byte order */
 	uint32_t	vallen;		/* value length */
 	void	*ptr;		/* data pointer (various) */
 	uint32_t	siglen;		/* signature length */
-	u_char	*sig;		/* signature */
+	uint8_t	*sig;		/* signature */
 };
 
 /*

@@ -167,7 +167,7 @@ static	bool	mx4200_config	(struct peer *);
 static	void	mx4200_ref	(struct peer *);
 static	void	mx4200_send	(struct peer *, char *, ...)
     __attribute__ ((format (printf, 2, 3)));
-static	u_char	mx4200_cksum	(char *, int);
+static	uint8_t	mx4200_cksum	(char *, int);
 static	int	mx4200_jday	(int, int, int);
 static	void	mx4200_debug	(struct peer *, char *, ...)
     __attribute__ ((format (printf, 2, 3)));
@@ -656,7 +656,7 @@ mx4200_receive(
 	struct peer *peer;
 	char *cp;
 	int sentence_type;
-	u_char ck;
+	uint8_t ck;
 
 	/*
 	 * Initialize pointers and read the timecode and timestamp.
@@ -1099,13 +1099,13 @@ mx4200_parse_t(
 /*
  * Calculate the checksum
  */
-static u_char
+static uint8_t
 mx4200_cksum(
 	register char *cp,
 	register int n
 	)
 {
-	register u_char ck;
+	register uint8_t ck;
 
 	for (ck = 0; n-- > 0; cp++)
 		ck ^= *cp;
@@ -1574,7 +1574,7 @@ mx4200_send(struct peer *peer, char *fmt, ...)
 	register int n, m;
 	va_list ap;
 	char buf[1024];
-	u_char ck;
+	uint8_t ck;
 
 	va_start(ap, fmt);
 

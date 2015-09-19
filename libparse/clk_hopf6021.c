@@ -158,8 +158,8 @@ cvt_hopf6021(
 	clock_time->usecond   = 0;
 	clock_time->utcoffset = 0;
 
-	status = (u_char) hexval(buffer[OFFS(O_FLAGS)]);
-	weekday= (u_char) hexval(buffer[OFFS(O_WDAY)]);
+	status = (uint8_t) hexval(buffer[OFFS(O_FLAGS)]);
+	weekday= (uint8_t) hexval(buffer[OFFS(O_WDAY)]);
 
 	if ((status == 0xFF) || (weekday == 0xFF))
 	{

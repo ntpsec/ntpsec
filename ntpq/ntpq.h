@@ -90,7 +90,7 @@ struct parse {
 struct xcmd {
   const char *keyword;		/* command key word */
 	void (*handler)	(struct parse *, FILE *);	/* command handler */
-	u_char arg[MAXARGS];	/* descriptors for arguments */
+	uint8_t arg[MAXARGS];	/* descriptors for arguments */
   const char *desc[MAXARGS];	/* descriptions for arguments */
   const char *comment;
 };

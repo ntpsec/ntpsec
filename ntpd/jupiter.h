@@ -46,8 +46,8 @@ struct jheader {
 	u_short sync;		/* (JUPITER_SYNC) */
 	u_short id;		/* message id */
 	u_short len;		/* number of data short wordss (w/o cksum) */
-	u_char reqid;		/* JUPITER_REQID_MASK bits available as id */
-	u_char flags;		/* flags */
+	uint8_t reqid;		/* JUPITER_REQID_MASK bits available as id */
+	uint8_t flags;		/* flags */
 	u_short hsum;		/* header cksum */
 };
 
@@ -197,8 +197,8 @@ struct jpulse {
 struct jeup {
 	u_short stime[2];		/* set time (10 ms ticks) */
 	u_short seq;			/* sequence number */
-	u_char dataid;			/* data id */
-	u_char prn;			/* satellite PRN */
+	uint8_t dataid;			/* data id */
+	uint8_t prn;			/* satellite PRN */
 	u_short dsum;			/* checksum */
 };
 

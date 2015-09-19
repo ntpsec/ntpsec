@@ -1083,33 +1083,6 @@ void sntp_addremove_fd(
 }
 
 
-/* called by forked intres child to close open descriptors */
-#ifdef WORK_FORK
-void
-kill_asyncio(
-	int	startfd
-	)
-{
-	if (INVALID_SOCKET != sock4) {
-		closesocket(sock4);
-		sock4 = INVALID_SOCKET;
-	}
-	if (INVALID_SOCKET != sock6) {
-		closesocket(sock6);
-		sock6 = INVALID_SOCKET;
-	}
-	if (INVALID_SOCKET != bsock4) {
-		closesocket(sock4);
-		sock4 = INVALID_SOCKET;
-	}
-	if (INVALID_SOCKET != bsock6) {
-		closesocket(sock6);
-		sock6 = INVALID_SOCKET;
-	}
-}
-#endif
-
-
 /*
  * worker_resp_cb() is invoked when resp_read_pipe is readable.
  */

@@ -280,7 +280,7 @@ extern int wideremote;
 extern int rawmode;
 extern struct servent *server_entry;
 extern struct association *assoc_cache;
-extern u_char pktversion;
+extern uint8_t pktversion;
 
 typedef struct mru_tag mru;
 struct mru_tag {
@@ -289,8 +289,8 @@ struct mru_tag {
 	int		count;
 	l_fp		last;
 	l_fp		first;
-	u_char		mode;
-	u_char		ver;
+	uint8_t		mode;
+	uint8_t		ver;
 	u_short		rs;
 	sockaddr_u	addr;
 };
@@ -322,7 +322,7 @@ typedef struct reslist_row_tag {
 typedef struct var_display_collection_tag {
 	const char * const tag;		/* system variable */
 	const char * const display;	/* descriptive text */
-	u_char type;			/* NTP_STR, etc */
+	uint8_t type;			/* NTP_STR, etc */
 	union {
 		char *		str;
 		sockaddr_u	sau;	/* NTP_ADD */
@@ -1124,7 +1124,7 @@ printassoc(
 {
 	register char *bp;
 	u_int i;
-	u_char statval;
+	uint8_t statval;
 	int event;
 	u_long event_count;
 	const char *conf;
@@ -1147,7 +1147,7 @@ printassoc(
 	(void) fprintf(fp,
 			   "===========================================================\n");
 	for (i = 0; i < numassoc; i++) {
-		statval = (u_char) CTL_PEER_STATVAL(assoc_cache[i].status);
+		statval = (uint8_t) CTL_PEER_STATVAL(assoc_cache[i].status);
 		if (!showall && !(statval & (CTL_PST_CONFIG|CTL_PST_REACH)))
 			continue;
 		event = CTL_PEER_EVENT(assoc_cache[i].status);
@@ -2293,7 +2293,7 @@ collect_mru_list(
 	const u_int sleep_msecs = 5;
 	static int ntpd_row_limit = MRU_ROW_LIMIT;
 	bool c_mru_l_rc;		/* this function's return code */
-	u_char got;		/* MRU_GOT_* bits */
+	uint8_t got;		/* MRU_GOT_* bits */
 	time_t next_report;
 	size_t cb;
 	mru *mon;
