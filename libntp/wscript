@@ -69,7 +69,6 @@ def build(ctx):
 		"timevalops.c",
 		"uglydate.c",
 		"vint64ops.c",
-		"work_fork.c",
 		"work_thread.c",
 		"ymd2yd.c",
 	]

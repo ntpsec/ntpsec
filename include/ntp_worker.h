@@ -52,21 +52,7 @@ typedef HANDLE		sem_ref;
 #  endif
 # endif
 
-/*
- *
- */
-#ifdef WORK_FORK
-typedef struct blocking_child_tag {
-	bool	reusable;
-	int	pid;
-	int	req_write_pipe;		/* parent */
-	int	resp_read_pipe;
-	void *	resp_read_ctx;
-	int	req_read_pipe;		/* child */
-	int	resp_write_pipe;
-	bool	ispipe;
-} blocking_child;
-#elif defined(WORK_THREAD)
+#ifdef WORK_THREAD
 typedef struct blocking_child_tag {
 /*
  * blocking workitems and blocking_responses are dynamically-sized
@@ -147,16 +133,6 @@ typedef	void	(*addremove_io_semaphore_func)(sem_ref, int);
 extern	addremove_io_semaphore_func	addremove_io_semaphore;
 # endif
 
-# ifdef WORK_FORK
-extern	int				worker_process;
-# endif
-
 #endif	/* WORKER */
-
-#if defined(ENABLE_DROPROOT) && defined(WORK_FORK)
-extern void	fork_deferred_worker(void);
-#else
-# define	fork_deferred_worker()	do {} while (0)
-#endif
 
 #endif	/* GUARD_!NTP_WORKER_H */
