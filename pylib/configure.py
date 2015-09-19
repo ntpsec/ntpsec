@@ -1,66 +1,7 @@
 from waflib.Configure import conf
 from util import msg, msg_setting
-
 from posix_thread import posix_thread_version
-
 import sys, os
-
-TYPE_FRAG = """
-#include <stdint.h>
-#include <sys/types.h>
-int main () {
-	if (sizeof (%s))
-		return 0;
-	return 0;
-}
-"""
-
-@conf
-def check_type(ctx, type, mandatory=False):
-	name = "HAVE_%s" % type.upper()
-
-	ctx.check_cc(
-		fragment	= TYPE_FRAG % (type),
-		define_name = name,
-		execute     = False,
-		msg         = "Checking for type %s" % (type),
-		mandatory	= mandatory
-	)
-#        conf.check(features='c', fragment='int main(){return 0;}') 7
-
-
-SIZE_FRAG = """
-%s
-#include <stdio.h>
-int main () {
-	printf("%%lu", sizeof(%s));
-	return 0;
-}
-"""
-
-@conf
-def check_sizeof(ctx, header, sizeof, mandatory=True):
-	sizeof_ns = sizeof.replace(" ", "_")
-	name = "SIZEOF_%s" % sizeof_ns.upper()
-
-	header_snippet = ""
-	if header:
-		ctx.start_msg("Checking sizeof %s (%s)" % (sizeof, header))
-		header_snippet = "#include <%s>" % header
-	else:
-		ctx.start_msg("Checking sizeof %s" % (sizeof))
-
-	ctx.check_cc(
-		fragment	= SIZE_FRAG % (header_snippet, sizeof),
-		define_name = name,
-		execute     = True,
-		define_ret  = True,
-		quote		= False,
-		mandatory	= mandatory,
-	)
-	ctx.end_msg(ctx.get_define(name))
-
-
 
 def refclock_config(ctx):
 	from refclock import refclock_map
@@ -98,9 +39,9 @@ def refclock_config(ctx):
 
 
 
-
-
 def cmd_configure(ctx):
+	from check_type import check_type
+	from check_sizeof import check_sizeof
 
 	if ctx.options.list:
 		from refclock import refclock_map
