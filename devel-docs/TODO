@@ -142,11 +142,7 @@ Problems that need to be fixed:
   SYS_DECOSF1:
    util/ntptime.c
 
-  SYS_DOMAINOS:
-   parseutil/dcfd.c
-   xntpd/ntpd.c
-
-  SYS_WINNT:
+0  SYS_WINNT:
    include/ntp.h
    include/ntp_fp.h
    include/ntp_machine.h
