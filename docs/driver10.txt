@@ -39,7 +39,6 @@ collection process can be enabled or disabled using the flag4 flag. If
 set, collection is enabled; if not, which is the default, it is
 disabled. A comprehensive suite of data reduction and summary scripts is
 in the ./scripts/stats directory
-//ERROR: Spurious blank line was here.
 of the ntp3 distribution.
 
 == Monitor Data ==

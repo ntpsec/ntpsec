@@ -85,8 +85,6 @@ No user initialization of the receiver is required. This driver is compatible wi
 Note: When using Palisade 26664-00, you must set fudge flag2 to 1 in
 *ntp.conf*. See link:#Configuration[configuration].
 
-//ERROR: HTML original has a wrong indent of the next two sections
-
 == GPS Installation ==
 
 A location with unobstructed view of the horizon is recommended.
@@ -125,9 +123,7 @@ ln -s /dev/ttyS0 /dev/palisade0
 
 Windows NT does not support symbolic links to device files. COM**x**: is
 used by the driver, based on the refclock unit number, where unit 1
-corresponds to COM**1**: and unit 3 corresponds to COM3:
-
-//ERROR: Last 'graf ends with :
+corresponds to COM**1**: and unit 3 corresponds to COM3:.
 
 [[Configuration]]
 == NTP Configuration ==
@@ -156,9 +152,6 @@ link:#flag2[fudge 127.127.29.0 flag2 1]
 #------------------------------------------------------------------------------
 
 == Thunderbolt NTP Configuration file ==
-
-//ERROR: Original has a spurious delimiter line comment here
-//It's been moved to where it belongs at the end of the next listing
 
 Configuration without event polling:
 

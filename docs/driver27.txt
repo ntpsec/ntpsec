@@ -378,9 +378,8 @@ There are a few `#defineS` in the code that you might wish to play with:
 
 == Monitor Data ==
 
-//ERROR: backticks not recognized around 'clockstats'
 Each timecode is written to the `clockstats` file with a signal quality
-value appended (`0'--`5' as reported by the clock, or `6' for unknown).
+value appended ("0"--"5" as reported by the clock, or "6" for unknown).
 
 Each resync and result (plus gaining or losing MSF sync) is logged to
 the system log at level `LOG_NOTICE`; note that each resync drains the

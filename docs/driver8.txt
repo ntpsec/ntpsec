@@ -327,7 +327,6 @@ specific clock association as shown below.
 
 First let ntpq display the table of associations:
 
-//ERROR: table has EOLs smashed out in the HTML original
 -------------------------------------------------------------
   ntpq> as
   ind assID status  conf reach auth  condition last_event cnt

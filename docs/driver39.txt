@@ -56,13 +56,11 @@ the PCI-board.
 
 == Fudge Factors ==
 
-//ERROR: Typos need fixing.
-
 link:#REFID[*`refid` __string__*]::
    Specifies the driver reference identifier, *GPS* _or_ *DCF*.
 
 *`flag1 0 | 1`*::
-   When set to 1, driver sync's even if only crystal driven.
+   When set to 1, driver syncs even if only crystal driven.
 
 '''''
 

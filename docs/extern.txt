@@ -53,9 +53,7 @@ clock driver and the external clock driver. This is implemented using
 Boolean variables and certain bits in the kernel clock status word. The
 Boolean variables include the following:
 
-//ERROR: Typos need fixing.
-
-`ntp_enable`. set/reset by the `enable` command. enables ntpd clock
+`ntp_enable`. set/reset by the `enable` command. Enables ntpd clock
 discipline
 
 `ntp_control`. set during initial configuration if kernel support is

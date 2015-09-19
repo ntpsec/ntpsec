@@ -18,7 +18,6 @@ First, a number of sanity checks is performed to sift the selectable
 candidate from among the source population. The sanity checks are
 sumarized as follows:.
 
-//ERROR: Typo 'ad'
 1.  A _stratum error_ occurs if (1) the source had never been
 synchronized or (2) the stratum of the source is below the `floor`
 option or not below the `ceiling` option of the
@@ -26,7 +25,7 @@ link:miscopt.html#tos[`tos`] command. The default values for these
 options are 0 and 15, respectively. Note that 15 is a valid stratum, but
 a server operating at that stratum cannot synchronize clients.
 2.  A _distance error_ occurs for a source if the root distance (also
-known ad synchronization distance) of the source is not below the
+known as synchronization distance) of the source is not below the
 distance threshold `maxdist` option of the link:miscopt.html#tos[`tos`]
 command. The default value for this option is 1.5 s for networks
 including only the Earth, but this should be increased to 2.5 s for

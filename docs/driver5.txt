@@ -25,10 +25,12 @@ Most of this code is originally from refclock_wwvb.c (now
 refclock_spectracom.c) with thanks. It has been so mangled that wwvb is
 not a recognizable ancestor.
 
-//ERROR: Typo 'Timcode'
 [literal]
-Timcode format: ADDD:HH:MM:SSQCL
-A - control A (this is stripped before we see it) Q - Quality indication (see below) C - Carriage return L - Line feed
+Timecode format: ADDD:HH:MM:SSQCL
+A - control A (this is stripped before we see it)
+Q - Quality indication (see below)
+C - Carriage return
+L - Line feed
 
 
 Quality codes indicate possible error of:

@@ -112,8 +112,7 @@ thresholds, throw switches and change limits.
 link:ntpd.html[`ntpd` - Network Time Protocol (NTP) daemon] page for the
 new features.
 * A number of white papers have been added to the library on the NTP
-//ERROR: typo 'Reseatch'
-Reseatch Project Page, including:
+Research Project Page, including:
 
 include::includes/external.txt[]
 
