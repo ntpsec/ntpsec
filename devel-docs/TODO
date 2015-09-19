@@ -32,7 +32,6 @@ HAVE_SIGNALED_IO
 HAVE_SYSCTLBYNAME
 HAVE_TIMESTAMP
 HAVE_TIMESTAMPNS
-HAVE_TIO_SERIAL_STUFF		
 HAVE_TRUCLUSTER
 NEED_HPUX_ADJTIME
 NEED_HPUX_FINDCONFIG
@@ -140,34 +139,12 @@ Problems that need to be fixed:
   of these macros has not been used since 5.83, and there have been very
   few complaints...)
 
-  SYS_44BSD:
-   authstuff/md5driver.c
-
-  SYS_BSDI:
-   authstuff/md5driver.c
-
   SYS_DECOSF1:
    util/ntptime.c
 
   SYS_DOMAINOS:
    parseutil/dcfd.c
    xntpd/ntpd.c
-
-  SYS_HPUX:
-   kernel/sys/ppsclock.h
-   ntpdate/ntpdate.c
-   ntptrace/ntptrace.c
-
-  SYS_SOLARIS:
-   libparse/parse.c
-   libparse/clk_trimtsip.c
-   xntpd/ntp_io.c
-   xntpd/ntp_refclock.c
-   xntpd/ntpd.c
-
-  SYS_SUNOS4:
-   libparse/parse.c
-   libparse/clk_trimsip.c
 
   SYS_WINNT:
    include/ntp.h
