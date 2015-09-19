@@ -132,7 +132,7 @@ int main() {}
 	)
 
 
-def posix_thread_version(ctx):
+def check_posix_thread_version(ctx):
 	try:
 		posix_thread_version_10(ctx)
 	except ConfigurationError:

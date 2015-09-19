@@ -1,6 +1,5 @@
 from waflib.Configure import conf
 from util import msg, msg_setting
-from posix_thread import posix_thread_version
 import sys, os
 
 
@@ -234,7 +233,9 @@ int main() { return 0; }
 	check_sockaddr(ctx)
 
 
-	posix_thread_version(ctx)
+	from check_posix_thread_version import check_posix_thread_version
+
+	check_posix_thread_version(ctx)
 	ctx.define('HAVE_PTHREADS', ctx.env.POSIX_THREAD_VERISON)
 
 
