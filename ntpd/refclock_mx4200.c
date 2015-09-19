@@ -60,12 +60,10 @@
 # include <sys/ppsclock.h>
 #endif
 
-#ifndef HAVE_STRUCT_PPSCLOCKEV
 struct ppsclockev {
 	struct timespec tv;
 	u_int serial;
 };
-#endif /* ! HAVE_STRUCT_PPSCLOCKEV */
 
 #ifdef HAVE_PPSAPI
 # include "ppsapi_timepps.h"

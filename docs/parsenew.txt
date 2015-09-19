@@ -144,7 +144,7 @@ clocks for example)
    struct clockinfo
      {
       u_long  cl_flags;             /* operation flags (io modes) */
-         PARSE_F_PPSPPS       use loopfilter PPS code (CIOGETEV)
+         PARSE_F_PPSPPS       use loopfilter PPS code
          PARSE_F_PPSONSECOND  PPS pulses are on second
          usually flags stay 0 as they are used only for special setups
 

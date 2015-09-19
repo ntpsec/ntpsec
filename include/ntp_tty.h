@@ -10,13 +10,7 @@
  * only use HAVE_TERMIOS as it is POSIX-1:2001
  */
 
-#ifdef TERMIOS_NEEDS__SVID3
-# define _SVID3
-#endif
 #include <termios.h>
-#ifdef TERMIOS_NEEDS__SVID3
-# undef _SVID3
-#endif
 #define TTY	struct termios
 
 #if defined(HAVE_SYS_MODEM_H)

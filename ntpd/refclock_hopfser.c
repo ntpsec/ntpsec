@@ -27,13 +27,7 @@
 # endif
 #endif
 
-#ifdef TERMIOS_NEEDS__SVID3
-# define _SVID3
-#endif
 #include <termios.h>
-#ifdef TERMIOS_NEEDS__SVID3
-# undef _SVID3
-#endif
 
 #ifdef HAVE_SYS_IOCTL_H
 # include <sys/ioctl.h>
