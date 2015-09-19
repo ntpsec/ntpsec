@@ -153,7 +153,6 @@ this program, this might be one using a command in the system startup
 file.
 
 == Access Controls ==
-//ERROR: backticks being treated as literal around 'ntpd' below
 Provisions are included in `ntpd` for access controls which deflect
 unwanted traffic from selected hosts or networks. The controls described
 on the link:accopt.html[Access Control Options] include detailed packet

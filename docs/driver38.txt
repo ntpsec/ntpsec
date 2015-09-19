@@ -67,8 +67,6 @@ Windows NT does not support symbolic links to device files.
 
 == Fudge Factors ==
 
-//ERROR: Typos need fixing.
-
 *`time1` __time__*::
    Specifies the time offset calibration factor, in seconds and fraction,
    with default 0.0. Should be set to 20 milliseconds to correct serial
@@ -77,7 +75,7 @@ Windows NT does not support symbolic links to device files.
 link:#REFID[*`refid` __string__]*::
    Specifies the driver reference identifier, *GPS* _or_ *DCF*.
 *`flag1 0 | 1`*::
-   When set to 1, driver sync's even if only crystal driven.
+   When set to 1, driver syncs even if only crystal driven.
 
 '''''
 

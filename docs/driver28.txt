@@ -187,23 +187,20 @@ depending on the unit number. This identifier (which can be a numeric
 value or a string) clearly depends on the method used, which in turn
 depends on the host operating system:
 
-* \`Windows` uses a file mapping to the page file with the name
+* Windows uses a file mapping to the page file with the name
 \'\`Global\NTP`'u'' for public accessible mappings, where _u_ is the clock
 unit. Private / non-public mappings are created as \'\`Local\NTP`'u''.
 +
 Public access assigns a NULL DACL to the memory mapping, while private
 access just uses the default DACL of the process creating the mapping.
 
-* \`SYSV IPC` creates a shared memory segment with a key value of
+* Unix creates a shared memory segment with a key value of
 \`0x4E545030` + _u_, where _u_ is again the clock unit. (This value could
 be hex-decoded as \'NTP0', \'NTP1',..., with funny characters for units >
 9.)
 +
 Public access means a permission set of 0666, while private access
 creates the mapping with a permission set of 0600.
-
-//ERROR: POSIX shared memory is supported
-There's no support for POSIX shared memory yet.
 
 _NTPD_ is started as root on most POSIX-like operating systems and uses
 the setuid/setgid system API to run under reduced rights once the

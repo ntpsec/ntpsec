@@ -47,10 +47,9 @@ where this abuse has persisted for days at a time. These scenarios are
 the most damaging, as they can threaten not only the victim server but
 the network infrastructure as well.
 
-//ERROR: Spurious `` pairs
-There are several features in the reference implementation`` designed to
+There are several features in the reference implementation designed to
 defend the servers and network against accidental or intentional flood
-attack. Other features are used to insure that the client `` is a good
+attack. Other features are used to insure that the client is a good
 citizen, even if configured in unfriendly ways. The ground rules are:
 
 * Send at the lowest rate consistent with the expected accuracy

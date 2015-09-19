@@ -25,9 +25,8 @@ http://www.catb.org/gpsd/[the _GPSD_ project page].
 *It is important to understand that this driver works best using a GPS
 device with PPS support.*
 
-//ERROR: Rewrite 'in <the> form of JSON objects'
 The GPSD-NG protocol is text based, using JSON notation to transfer
-records in form of JSON objects. The driver uses a TCP/IP connection to
+records in the form of JSON objects. The driver uses a TCP/IP connection to
 `localhost:gpsd` to connect to the daemon and then requests the GPS
 device `/dev/gpsu` to be watched. (Different clock units use different
 devices, and _GPSD_ is able to give only the relevant information to a
@@ -229,8 +228,7 @@ since the last poll.
 
 '''''
 
-//ERROR:Typo 'Data transmission <and> decoding'
-[[fn1]]link:#fn1bl[^1^)]Data transmission an decoding is done only once by the
+[[fn1]]link:#fn1bl[^1^)]Data transmission and decoding is done only once by the
 primary unit. The decoded data is then processed independently in both
 clock units. This avoids double transmission over two sockets and
 decoding the same data twice, but the primary unit is always needed as a

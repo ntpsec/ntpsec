@@ -166,9 +166,8 @@ contain both terminal and non-terminal symbols, while the optional
 action can consist of any arbitrary C code.
 3.  The epilogue: This section is left empty on purpose. It is
 traditionally used to code the support functions needed to build the
-ASTs Since, we have moved all the support functions to *ntp_config.c*,
+ASTs. Since we have moved all the support functions to *ntp_config.c*,
 this section is left empty.
-//ERROR: Rewrite run-on sentence above.
 
 == Prologue and Bison Declarations ==
 

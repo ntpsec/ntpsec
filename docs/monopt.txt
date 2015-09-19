@@ -26,25 +26,23 @@ include::includes/monopt.txt[]
 [[intro]]
 == Naming Conventions ==
 
-//ERROR: The ntpd
-The `ntpd` includes a comprehensive monitoring facility which collects
-statistical data of various types and writes the data to files
-associated with each type at defined events or intervals. The files
-associated with a particular type are collectively called the generation
-file set for that type. The files in the file set are the members of
-that set.
+The `ntpd` daemon includes a comprehensive monitoring facility which
+collects statistical data of various types and writes the data to
+files associated with each type at defined events or intervals. The
+files associated with a particular type are collectively called the
+generation file set for that type. The files in the file set are the
+members of that set.
 
 File sets have names specific to the type and generation epoch. The
 names are constructed from three concatenated elements _prefix_,
 _filename_ and _suffix_:
 
-//ERROR: bdginning
 _prefix_::
   The directory path specified in the `statsdir` command.
 _name_::
   The name specified by the `file` option of the `filegen` command.
 _suffix_::
-  A string of elements bdginning with . (dot) followed by a number of
+  A string of elements beginning with . (dot) followed by a number of
   elements depending on the file set type.
 
 Statistics files can be managed using scripts, examples of which are in

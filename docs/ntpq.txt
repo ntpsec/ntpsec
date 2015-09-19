@@ -454,13 +454,11 @@ the preceding packet.
 When the NTPv4 daemon is compiled with the OpenSSL software library,
 additional peer variables are displayed, including the following:
 
-//ERROR: 'flags' variable listed twice in the table below
 [width="100%",cols="<20%,<80%"]
 |=====================================
 |Variable      |Description
 |`flags`       |peer flags (see Autokey specification)
 |`host`        |Autokey server name
-|`flags`       |peer flags (see Autokey specification)
 |`signature`   |OpenSSL digest/signature scheme
 |`initsequence`|initial key ID
 |`initkey`     |initial key index

@@ -9,8 +9,7 @@
 * link:{millshome}/stamp.html[Timestamp Capture Principles]
 * link:{millshome}/onwire.html[Analysis and Simulation of the NTP
 On-Wire Protocols]
-//ERROR: Typo 'Synchroization'
-* link:{millshome}/proximity.html[Time Synchroization for Space Data Links]
+* link:{millshome}/proximity.html[Time Synchronization for Space Data Links]
 * link:{millshome}/security.html[NTP Security Analysis]
 * link:{millshome}/ptp.html[IEEE 1588 Precision Time Protocol (PTP)]
 * link:{millshome}/autocfg.html[Autonomous Configuration]

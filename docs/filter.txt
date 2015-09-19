@@ -61,14 +61,13 @@ all shift register stages is set to a large number "infinity" equal to
 numbered _i_ = 1, is 2^-_i_^, which means the peer dispersion is
 approximately 16 s.
 
-//ERROR: typo 'statistacl'
 As samples enter the register, the peer dispersion drops from 16 s to 8
 s, 4 s, 2 s, and so forth. In practice, the synchronization distance,
 which is equal to one-half the delay plus the dispersion, falls below
 the select threshold of 1.5 s in about four updates. This gives some
 time for meaningful comparison between sources, if more than one are
 available. The dispersion continues to grow at the same rate as the
-sample dispersion. For additional information on statistacl principles
+sample dispersion. For additional information on statistcal principles
 and performance metrics, see the link:stats.html[Performance Metrics]
 page.
 

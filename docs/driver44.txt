@@ -30,14 +30,12 @@ NeoClock4X receiver please visit http://www.linux-funkuhr.de.
 
 == Fudge Factors ==
 
-//ERROR: Typo: is 'off' supposed to be 'of'?
-//ERROR: Rewrite sentence 'This is necessary to compensate...'
 *link:clockopt.html[time1 time]*::
-   Specifies the time offset calibration factor with the default value off
+   Specifies the time offset calibration factor with the default value of
    0.16958333 seconds. This offset is used  to correct serial line and
    operating system delays incurred in capturing time stamps. If you want
    to fudge the time1 offset *ALWAYS* add a value off 0.16958333. This is
-   neccessary to compensate to delay that is caused by transmit the
+   necessary to compensate for the delay that is caused by transmitting the
    timestamp at 2400 Baud. If you want to compensate the delay that the
    DCF77 or TDF radio signal takes to travel to your site simply add the
    needed millisecond delay to the given value. Note that the time here is

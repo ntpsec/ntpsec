@@ -1675,20 +1675,6 @@ started.
   version. The `c' mode will print copyright information and `n' will
   print the full copyright notice.
 
-== OPTION PRESETS ==
-
-Any option that is not marked as _not presettable_ may be preset by
-loading values from environment variables named:
-
-//ERROR:: This is garbled and obsolete.
-------
-NTPD_<option-name>_ or NTPD
-------
-
-== ENVIRONMENT ==
-
-See _OPTION PRESETS_ for configuration environment variables.
-
 == FILES ==
 
 `/etc/ntp.conf`::
