@@ -1,3 +1,5 @@
+from waflib.Configure import conf
+
 # Note: When you change this list. also check the following files:
 # ntpd/refclock_conf.c
 # libntp/clocktypes.c
@@ -184,3 +186,36 @@ refclock_map = {
 		"file":		"gpsdjson"
 	}
 }
+
+
+
+@conf
+def refclock_config(ctx):
+	from refclock import refclock_map
+
+	if ctx.options.refclocks == "all":
+		ids = refclock_map.keys()
+	else:
+		# XXX: better error checking
+		ids = ctx.options.refclocks.split(",")
+
+	ctx.env.REFCLOCK_DEFINES = []
+	ctx.env.REFCLOCK_SOURCE = []
+
+	for id in ids:
+		try:
+			id = int(id)
+		except ValueError:
+			ctx.fatal("'%s' is not an integer." % id)
+
+		if id not in refclock_map:
+			ctx.fatal("'%s' is not a valid Refclock ID" % id)
+
+		rc = refclock_map[id]
+
+		ctx.start_msg("Enabling Refclock %s:" % id)
+		ctx.env.REFCLOCK_SOURCE.append((rc["file"], rc["define"]))
+		ctx.end_msg(rc["descr"])
+		ctx.env["REFCLOCK_%s" % rc["file"].upper()] = True
+
+	ctx.env.REFCLOCK_ENABLE = True
