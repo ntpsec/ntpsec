@@ -125,13 +125,11 @@
 # include "refclock_atom.h"
 #endif
 
-#ifdef PPS
-# ifdef HAVE_SYS_PPSCLOCK_H
+#ifdef HAVE_SYS_PPSCLOCK_H
 #  include <sys/ppsclock.h>
-# endif
-# ifdef HAVE_TIO_SERIAL_STUFF
+#endif
+#ifdef HAVE_LINUX_SERIAL_H
 #  include <linux/serial.h>
-# endif
 #endif
 
 # define BUFFER_SIZE(_BUF, _PTR)       ((int)((_BUF) + sizeof(_BUF) - (_PTR)))
@@ -3038,7 +3036,7 @@ parse_start(
 /*
  * Linux PPS - the old way
  */
-#if defined(HAVE_TIO_SERIAL_STUFF)		/* Linux hack: define PPS interface */
+#if defined(HAVE_LINUX_SERIAL_H)		/* Linux hack: define PPS interface */
 		{
 			struct serial_struct	ss;
 			if (ioctl(parse->ppsfd, TIOCGSERIAL, &ss) < 0 ||
