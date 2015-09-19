@@ -187,10 +187,6 @@ queue_blocking_request(
 	c = blocking_children[child_slot];
 	if (NULL == c) {
 		c = emalloc_zero(sizeof(*c));
-#ifdef WORK_FORK
-		c->req_read_pipe = -1;
-		c->req_write_pipe = -1;
-#endif
 #ifdef WORK_PIPE
 		c->resp_read_pipe = -1;
 		c->resp_write_pipe = -1;

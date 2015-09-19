@@ -1190,7 +1190,6 @@ getgroup:
 		priv_freeset(highprivs);
 #  endif /* HAVE_SOLARIS_PRIVS */
 		root_dropped = true;
-		fork_deferred_worker();
 	}	/* if (droproot) */
 # endif	/* ENABLE_DROPROOT */
 
