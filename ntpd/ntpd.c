@@ -52,11 +52,6 @@
 
 #include <termios.h>
 
-#ifdef SYS_DOMAINOS
-# include <apollo/base.h>
-#endif /* SYS_DOMAINOS */
-
-
 #include "recvbuff.h"
 
 #ifdef _AIX
@@ -157,7 +152,7 @@ static int config_priority;
 
 char const *progname;
 
-#ifdef HAVE_NETINFO
+#ifdef HAVE_NETINFO_NI_H
 extern bool	check_netinfo;
 #endif
 
@@ -756,15 +751,6 @@ ntpdmain(
 		/* we lost our logfile (if any) daemonizing */
 		setup_logfile(logfilename);
 
-#  ifdef SYS_DOMAINOS
-		{
-			uid_$t puid;
-			status_$t st;
-
-			proc2_$who_am_i(&puid);
-			proc2_$make_server(&puid, &st);
-		}
-#  endif	/* SYS_DOMAINOS */
 		if (setsid() == (pid_t)-1)
 			msyslog(LOG_ERR, "setsid(): %m");
 #  ifdef _AIX

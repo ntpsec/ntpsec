@@ -296,7 +296,7 @@ also need a special tty mode setup (EOL='<').
 Special flags are:
 
 ---------------------------------------------------------------
-       PARSE_F_PPSPPS      - use CIOGETEV for PPS time stamping
+       PARSE_F_PPSPPS      - use PPS time stamping
         PARSE_F_PPSONSECOND - the time code is not related to
                       the PPS pulse (so use the time code
                       only for the second epoch)

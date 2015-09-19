@@ -138,28 +138,6 @@
 # define BUFFER_SIZES(_BUF, _PTR, _SZ) ((int)((_BUF) + (_SZ) - (_PTR)))
 
 /*
- * document type of PPS interfacing - copy of ifdef mechanism in local_input()
- */
-#undef PPS_METHOD
-
-#ifdef HAVE_PPSAPI
-#define PPS_METHOD "PPS API"
-#else
-#ifdef TIOCDCDTIMESTAMP
-#define PPS_METHOD "TIOCDCDTIMESTAMP"
-#else /* TIOCDCDTIMESTAMP */
-#if defined(HAVE_STRUCT_PPSCLOCKEV) && (defined(HAVE_CIOGETEV) || defined(HAVE_TIOCGPPSEV))
-#ifdef HAVE_CIOGETEV
-#define PPS_METHOD "CIOGETEV"
-#endif
-#ifdef HAVE_TIOCGPPSEV
-#define PPS_METHOD "TIOCGPPSEV"
-#endif
-#endif
-#endif /* TIOCDCDTIMESTAMP */
-#endif /* HAVE_PPSAPI */
-
-/*
  * COND_DEF can be conditionally defined as DEF or 0. If defined as DEF
  * then some more parse-specific variables are flagged to be printed with
  * "ntpq -c cv <assid>". This can be lengthy, so by default COND_DEF
@@ -2274,70 +2252,6 @@ local_input(
 					}
 #endif
 				}
-#else
-#ifdef TIOCDCDTIMESTAMP
-				struct timeval dcd_time;
-
-				if (ioctl(parse->ppsfd, TIOCDCDTIMESTAMP, &dcd_time) != -1)
-				{
-					l_fp tstmp;
-
-					TVTOTS(&dcd_time, &tstmp);
-					tstmp.l_ui += JAN_1970;
-					L_SUB(&ts.fp, &tstmp);
-					if (ts.fp.l_ui == 0)
-					{
-#ifdef DEBUG
-						if (debug)
-						{
-							printf(
-							       "parse: local_receive: fd %d DCDTIMESTAMP %s\n",
-							       parse->ppsfd,
-							       lfptoa(&tstmp, 6));
-							printf(" sigio %s\n",
-							       lfptoa(&ts.fp, 6));
-						}
-#endif
-						parse->parseio.parse_dtime.parse_ptime.fp = tstmp;
-						parse->parseio.parse_dtime.parse_state |= PARSEB_PPS|PARSEB_S_PPS;
-					}
-				}
-#else /* TIOCDCDTIMESTAMP */
-#if defined(HAVE_STRUCT_PPSCLOCKEV) && (defined(HAVE_CIOGETEV) || defined(HAVE_TIOCGPPSEV))
-				if (parse->flags & PARSE_PPSCLOCK)
-				  {
-				    l_fp tts;
-				    struct ppsclockev ev;
-
-#ifdef HAVE_CIOGETEV
-				    if (ioctl(parse->ppsfd, CIOGETEV, (caddr_t)&ev) == 0)
-#endif
-#ifdef HAVE_TIOCGPPSEV
-				    if (ioctl(parse->ppsfd, TIOCGPPSEV, (caddr_t)&ev) == 0)
-#endif
-					{
-					  if (ev.serial != parse->ppsserial)
-					    {
-					      /*
-					       * add PPS time stamp if available via ppsclock module
-					       * and not supplied already.
-					       */
-					      if (!buftvtots((const char *)&ev.tv, &tts))
-						{
-						  ERR(ERR_BADDATA)
-						    msyslog(LOG_ERR,"parse: local_receive: timestamp conversion error (buftvtots) (ppsclockev.tv)");
-						}
-					      else
-						{
-						  parse->parseio.parse_dtime.parse_ptime.fp = tts;
-						  parse->parseio.parse_dtime.parse_state |= PARSEB_PPS|PARSEB_S_PPS;
-						}
-					    }
-					  parse->ppsserial = ev.serial;
-					}
-				  }
-#endif
-#endif /* TIOCDCDTIMESTAMP */
 #endif /* !HAVE_PPSAPI */
 			}
 			if (count)
@@ -3153,21 +3067,6 @@ parse_start(
 #endif
 
 /*
- * SUN the Solaris way
- */
-#ifdef HAVE_TIOCSPPS			/* SUN PPS support */
-		if (CLK_PPS(parse->peer))
-		    {
-			int i = 1;
-
-			if (ioctl(parse->ppsfd, TIOCSPPS, (caddr_t)&i) == 0)
-			    {
-				parse->flags |= PARSE_PPSCLOCK;
-			    }
-		    }
-#endif
-
-/*
  * PPS via PPSAPI
  */
 #if defined(HAVE_PPSAPI)
@@ -3308,16 +3207,9 @@ parse_start(
 
 			msyslog(LOG_INFO, "PARSE receiver #%d: Format recognition: %s", CLK_UNIT(parse->peer),
 				parse->parse_type->cl_format);
-                        msyslog(LOG_INFO, "PARSE receiver #%d: %sPPS support%s", CLK_UNIT(parse->peer),
-				CLK_PPS(parse->peer) ? "" : "NO ",
-				CLK_PPS(parse->peer) ?
-#ifdef PPS_METHOD
-				" (implementation " PPS_METHOD ")"
-#else
-				""
-#endif
-				: ""
-				);
+                        msyslog(LOG_INFO, "PARSE receiver #%d: %sPPS support",
+				CLK_UNIT(parse->peer),
+				CLK_PPS(parse->peer) ? "" : "NO ");
 		}
 
 	return true;

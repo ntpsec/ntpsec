@@ -6,7 +6,7 @@
 # include <config.h>
 #endif
 
-#ifdef HAVE_NETINFO
+#ifdef HAVE_NETINFO_NI_H
 #include <netinfo/ni.h>
 #endif
 
@@ -57,7 +57,7 @@ struct sock_timeval timeout = {0,1000000/TIMER_HZ};
 struct timeval timeout = {60,0};
 #endif
 
-#ifdef HAVE_NETINFO
+#ifdef HAVE_NETINFO_NI_H
 #include <netinfo/ni.h>
 #endif
 
@@ -269,7 +269,7 @@ void clear_globals()
 }
 #endif
 
-#ifdef HAVE_NETINFO
+#ifdef HAVE_NETINFO_NI_H
 static ni_namelist *getnetinfoservers (void);
 #endif
 
@@ -302,7 +302,7 @@ ntpdatemain (
 	int c;
 	int nfound;
 
-#ifdef HAVE_NETINFO
+#ifdef HAVE_NETINFO_NI_H
 	ni_namelist *netinfoservers;
 #endif
 #ifdef SYS_WINNT
@@ -454,14 +454,14 @@ ntpdatemain (
 	/*
 	 * Add servers we are going to be polling
 	 */
-#ifdef HAVE_NETINFO
+#ifdef HAVE_NETINFO_NI_H
 	netinfoservers = getnetinfoservers();
 #endif
 
 	for ( ; ntp_optind < argc; ntp_optind++)
 		addserver(argv[ntp_optind]);
 
-#ifdef HAVE_NETINFO
+#ifdef HAVE_NETINFO_NI_H
 	if (netinfoservers) {
 		if ( netinfoservers->ni_namelist_len &&
 		    *netinfoservers->ni_namelist_val ) {
@@ -2087,7 +2087,7 @@ printserver(
 }
 
 
-#ifdef HAVE_NETINFO
+#ifdef HAVE_NETINFO_NI_H
 static ni_namelist *
 getnetinfoservers(void)
 {
