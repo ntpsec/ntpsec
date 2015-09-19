@@ -1,7 +1,7 @@
 from waflib.Configure import conf
 from util import msg, msg_setting
 
-from posix_thread import posix_thread_version
+from check_posix_thread_version import check_posix_thread_version
 
 import os
 
