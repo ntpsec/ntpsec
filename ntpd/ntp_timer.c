@@ -31,11 +31,7 @@
 
 
 /* TC_ERR represents the timer_create() error return value. */
-#ifdef SYS_VXWORKS
-#define	TC_ERR	ERROR
-#else
 #define	TC_ERR	(-1)
-#endif
 
 static void check_leapsec(uint32_t, const time_t*, bool);
 
@@ -89,32 +85,25 @@ u_long timer_timereset;
 u_long timer_overflows;
 u_long timer_xmtcalls;
 
-#if defined(VMS)
-static int vmstimer[2]; 	/* time for next timer AST */
-static int vmsinc[2];		/* timer increment */
-#endif /* VMS */
-
 #ifdef SYS_WINNT
 HANDLE WaitableTimerHandle;
 #else
 static	void alarming (int);
 #endif /* SYS_WINNT */
 
-#if !defined(VMS)
-# if !defined SYS_WINNT || defined(SYS_CYGWIN32)
+#if !defined SYS_WINNT || defined(SYS_CYGWIN32)
 static timer_t timer_id;
 typedef struct itimerspec intervaltimer;
-#   define	itv_frac	tv_nsec
+#  define	itv_frac	tv_nsec
 intervaltimer itimer;
-# endif
 #endif
 
-#if !defined(SYS_WINNT) && !defined(VMS)
+#if !defined(SYS_WINNT)
 void	set_timer_or_die(const intervaltimer *);
 #endif
 
 
-#if !defined(SYS_WINNT) && !defined(VMS)
+#if !defined(SYS_WINNT)
 void
 set_timer_or_die(
 	const intervaltimer *	ptimer
@@ -131,7 +120,7 @@ set_timer_or_die(
 		exit(1);
 	}
 }
-#endif	/* !SYS_WINNT && !VMS */
+#endif	/* !SYS_WINNT */
 
 
 /*
@@ -140,7 +129,7 @@ set_timer_or_die(
 void 
 reinit_timer(void)
 {
-#if !defined(SYS_WINNT) && !defined(VMS)
+#if !defined(SYS_WINNT)
 	ZERO(itimer);
 	timer_gettime(timer_id, &itimer);
 	if (itimer.it_value.tv_sec < 0 ||
@@ -154,7 +143,7 @@ reinit_timer(void)
 	itimer.it_interval.tv_sec = (1 << EVENT_TIMEOUT);
 	itimer.it_interval.itv_frac = 0;
 	set_timer_or_die(&itimer);
-# endif /* VMS */
+# endif
 }
 
 
@@ -185,7 +174,6 @@ init_timer(void)
 	 * seconds from now and they continue on every 2**EVENT_TIMEOUT
 	 * seconds.
 	 */
-# ifndef VMS
 	if (TC_ERR == timer_create(CLOCK_REALTIME, NULL, &timer_id)) {
 		msyslog(LOG_ERR, "timer_create failed, %m");
 		exit(1);
@@ -195,16 +183,6 @@ init_timer(void)
 		itimer.it_value.tv_sec = (1 << EVENT_TIMEOUT);
 	itimer.it_interval.itv_frac = itimer.it_value.itv_frac = 0;
 	set_timer_or_die(&itimer);
-# else	/* VMS follows */
-	vmsinc[0] = 10000000;		/* 1 sec */
-	vmsinc[1] = 0;
-	lib$emul(&(1<<EVENT_TIMEOUT), &vmsinc, &0, &vmsinc);
-
-	sys$gettim(&vmstimer);	/* that's "now" as abstime */
-
-	lib$addx(&vmsinc, &vmstimer, &vmstimer);
-	sys$setimr(0, &vmstimer, alarming, alarming, 0);
-# endif	/* VMS */
 #else	/* SYS_WINNT follows */
 	/*
 	 * Set up timer interrupts for every 2**EVENT_TIMEOUT seconds
@@ -435,27 +413,18 @@ alarming(
 			msg = "alarming: overflow\n";
 # endif
 		} else {
-# ifndef VMS
 			alarm_flag++;
-# else
-			/* VMS AST routine, increment is no good */
-			alarm_flag = true;
-# endif
 # ifdef DEBUG
 			msg = "alarming: normal\n";
 # endif
 		}
 	}
-# ifdef VMS
-	lib$addx(&vmsinc, &vmstimer, &vmstimer);
-	sys$setimr(0, &vmstimer, alarming, alarming, 0);
-# endif
 # ifdef DEBUG
 	if (debug >= 4)
 		(void)(-1 == write(1, msg, strlen(msg)));
 # endif
 }
-#endif /* SYS_WINNT */
+#endif /* !SYS_WINNT */
 
 
 void

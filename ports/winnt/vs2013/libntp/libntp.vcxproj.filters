@@ -439,9 +439,6 @@
     <ClInclude Include="..\..\..\..\include\ntp_rfc2553.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\ntp_select.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\..\include\ntp_stdlib.h">
       <Filter>Header Files</Filter>
     </ClInclude>

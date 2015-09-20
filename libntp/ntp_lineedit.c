@@ -199,14 +199,6 @@ ntp_readline(
 #ifdef LE_NONE
 					/* stone hammers */
 	if (lineedit_prompt) {
-# ifdef VMS
-			/*
-			 * work around problem mixing
-			 * stdout & stderr
-			 */
-			fputs("", stdout);
-# endif	/* VMS */
-
 		fputs(lineedit_prompt, stderr);
 		fflush(stderr);
 	}

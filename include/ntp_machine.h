@@ -17,19 +17,6 @@
 
 /*
 
-			 HEY!  CHECK THIS OUT!
-
-  The per-system SYS_* #defins ARE NO LONGER USED, with the temporary
-  exception of SYS_WINNT.
-
-  If you find a hunk of code that is bracketed by a SYS_* macro and you
-  *know* that it is still needed, please let us know.  In many cases the
-  code fragment is now handled somewhere else by autoconf choices.
-
-*/
-
-/*
-
 HOW TO GET IP INTERFACE INFORMATION
 
   Some UNIX V.4 machines implement a sockets library on top of
@@ -57,97 +44,6 @@ WILL IOCTL(SIOCGIFCONF) WORK ON A SOCKET
 */
 
 int ntp_set_tod (struct timeval *tvp, void *tzp);
-
-/*casey Tue May 27 15:45:25 SAT 1997*/
-#ifdef SYS_VXWORKS
-
-/* casey's new defines */
-#define NO_MAIN_ALLOWED 	1
-#define NO_NETDB			1
-#define NO_RENAME			1
-
-/* in vxWorks we use FIONBIO, but the others are defined for old systems, so
- * all hell breaks loose if we leave them defined we define USE_FIONBIO to
- * undefine O_NONBLOCK FNDELAY O_NDELAY where necessary.
- */
-#define USE_FIONBIO 		1
-/* end my new defines */
-
-#define TIMEOFDAY		0x0 	/* system wide realtime clock */
-#define HAVE_NO_NICE		1	/* configure does not set this ... */
-#define HAVE_RANDOM		1	/* configure does not set this ...  */
-#define HAVE_SRANDOM		1	/* configure does not set this ... */
-
-/* vxWorks specific additions to take care of its
- * unix (non)complicance
- */
-
-#include "vxWorks.h"
-#include "ioLib.h"
-#include "taskLib.h"
-#include "time.h"
-
-extern int sysClkRateGet ();
-
-/* usrtime.h
- * Bob Herlien's excellent time code find it at:
- * ftp://ftp.atd.ucar.edu/pub/vxworks/vx/usrTime.shar
- * I would recommend this instead of clock_[g|s]ettime() plus you get
- * adjtime() too ... casey
- */
-/*
-extern int	  gettimeofday ( struct timeval *tp, struct timezone *tzp );
-extern int	  settimeofday (struct timeval *, struct timezone *);
-extern int	  adjtime ( struct timeval *delta, struct timeval *olddelta );
- */
-
-/* in  machines.c */
-extern void sleep (int seconds);
-extern void alarm (int seconds);
-/* machines.c */
-
-
-/*		this is really this 	*/
-#define getpid		taskIdSelf
-#define getclock	clock_gettime
-#define fcntl		ioctl
-#define _getch		getchar
-
-/* define this away for vxWorks */
-#define openlog(x,y)
-/* use local defines for these */
-#undef min
-#undef max
-
-#endif /* SYS_VXWORKS */
-
-#ifdef NO_NETDB
-/* These structures are needed for gethostbyname() etc... */
-/* structures used by netdb.h */
-struct	hostent {
-	char	*h_name;				/* official name of host */
-	char	**h_aliases;			/* alias list */
-	int h_addrtype; 				/* host address type */
-	int h_length;					/* length of address */
-	char	**h_addr_list;			/* list of addresses from name server */
-#define 	h_addr h_addr_list[0]	/* address, for backward compatibility */
-};
-
-struct	servent {
-	char	*s_name;				/* official service name */
-	char	**s_aliases;			/* alias list */
-	int s_port; 					/* port # */
-	char	*s_proto;				/* protocol to use */
-};
-extern int h_errno;
-
-#define TRY_AGAIN	2
-
-struct hostent *gethostbyname (char * netnum);
-struct hostent *gethostbyaddr (char * netnum, int size, int addr_type);
-/* type is the protocol */
-struct servent *getservbyname (char *name, char *type);
-#endif	/* NO_NETDB */
 
 #ifdef NO_MAIN_ALLOWED
 /* we have no main routines so lets make a plan */
@@ -192,7 +88,6 @@ struct servent *getservbyname (char *name, char *type);
 	 callmain(argc,argv);  \
 	}
 #endif /* NO_MAIN_ALLOWED */
-/*casey Tue May 27 15:45:25 SAT 1997*/
 
 /*
  * Here's where autoconfig starts to take over

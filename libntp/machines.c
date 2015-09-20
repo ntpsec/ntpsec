@@ -21,93 +21,6 @@
 int _getch(void);	/* Declare the one function rather than include conio.h */
 #else
 
-#ifdef SYS_VXWORKS
-#include "taskLib.h"
-#include "sysLib.h"
-#include "time.h"
-#include "ntp_syslog.h"
-
-/*	some translations to the world of vxWorkings -casey */
-/* first some netdb type things */
-#include "ioLib.h"
-#include <socket.h>
-int h_errno;
-
-struct hostent *gethostbyname(char *name)
-	{
-	struct hostent *host1;
-	h_errno = 0;					/* we are always successful!!! */
-	host1 = (struct hostent *) malloc (sizeof(struct hostent));
-	host1->h_name = name;
-	host1->h_addrtype = AF_INET;
-	host1->h_aliases = name;
-	host1->h_length = 4;
-	host1->h_addr_list[0] = (char *)hostGetByName (name);
-	host1->h_addr_list[1] = NULL;
-	return host1;
-	}
-
-struct hostent *gethostbyaddr(char *name, int size, int addr_type)
-	{
-	struct hostent *host1;
-	h_errno = 0;  /* we are always successful!!! */
-	host1 = (struct hostent *) malloc (sizeof(struct hostent));
-	host1->h_name = name;
-	host1->h_addrtype = AF_INET;
-	host1->h_aliases = name;
-	host1->h_length = 4;
-	host1->h_addr_list = NULL;
-	return host1;
-	}
-
-struct servent *getservbyname (char *name, char *type)
-	{
-	struct servent *serv1;
-	serv1 = (struct servent *) malloc (sizeof(struct servent));
-	serv1->s_name = "ntp";      /* official service name */
-	serv1->s_aliases = NULL;	/* alias list */
-	serv1->s_port = 123;		/* port # */
-	serv1->s_proto = "udp";     /* protocol to use */
-	return serv1;
-	}
-
-/* second
- * vxworks thinks it has insomnia
- * we have to sleep for number of seconds
- */
-
-#define CLKRATE 	sysClkRateGet()
-
-/* I am not sure how valid the granularity is - it is from G. Eger's port */
-#define CLK_GRANULARITY  1		/* Granularity of system clock in usec	*/
-								/* Used to round down # usecs/tick		*/
-								/* On a VCOM-100, PIT gets 8 MHz clk,	*/
-								/*	& it prescales by 32, thus 4 usec	*/
-								/* on mv167, granularity is 1usec anyway*/
-								/* To defeat rounding, set to 1 		*/
-#define USECS_PER_SEC		MILLION		/* Microseconds per second	*/
-#define TICK (((USECS_PER_SEC / CLKRATE) / CLK_GRANULARITY) * CLK_GRANULARITY)
-
-/* emulate unix sleep
- * casey
- */
-void sleep(int seconds)
-	{
-	taskDelay(seconds*TICK);
-	}
-/* emulate unix alarm
- * that pauses and calls SIGALRM after the seconds are up...
- * so ... taskDelay() fudged for seconds should amount to the same thing.
- * casey
- */
-void alarm (int seconds)
-	{
-	sleep(seconds);
-	}
-
-#endif /* SYS_VXWORKS */
-
-
 #define SET_TOD_UNDETERMINED	0
 #define SET_TOD_CLOCK_SETTIME	1
 #define SET_TOD_SETTIMEOFDAY	2
@@ -172,7 +85,7 @@ ntp_set_tod(
 
 #endif /* not SYS_WINNT */
 
-#if defined (SYS_WINNT) || defined (SYS_VXWORKS)
+#if defined (SYS_WINNT)
 /* getpass is used in ntpq.c */
 
 char *

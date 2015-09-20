@@ -805,15 +805,13 @@ ntpdmain(
 	signal_no_reset(SIGBUS, finish);
 # endif
 
-# if !defined(SYS_WINNT) && !defined(VMS)
-#  ifdef DEBUG
+# ifdef DEBUG
 	(void) signal_no_reset(MOREDEBUGSIG, moredebug);
 	(void) signal_no_reset(LESSDEBUGSIG, lessdebug);
-#  else
+# else
 	(void) signal_no_reset(MOREDEBUGSIG, no_debug);
 	(void) signal_no_reset(LESSDEBUGSIG, no_debug);
-#  endif	/* DEBUG */
-# endif	/* !SYS_WINNT && !VMS */
+# endif	/* DEBUG */
 
 	/*
 	 * Set up signals we should never pay attention to.

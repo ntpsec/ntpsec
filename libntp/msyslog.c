@@ -148,11 +148,9 @@ addto_syslog(
 
 	log_to_term = msyslog_term;
 	log_to_file = false;
-#if !defined(VMS) && !defined(SYS_VXWORKS)
 	if (syslogit)
 		syslog(level, "%s", msg);
 	else
-#endif
 		if (syslog_file != NULL)
 			log_to_file = true;
 		else
@@ -385,8 +383,6 @@ init_logging(
 		progname[cp - progname] = '\0';
 #endif
 
-#if !defined(VMS)
-
 	if (is_daemon)
 		was_daemon = true;
 # ifndef LOG_DAEMON
@@ -406,7 +402,6 @@ init_logging(
 #  endif /* DEBUG */
 		setlogmask(LOG_UPTO(LOG_DEBUG)); /* @@@ was INFO */
 # endif /* LOG_DAEMON */
-#endif	/* !VMS */
 }
 
 
@@ -428,11 +423,9 @@ change_logfile(
 	FILE *		new_file;
 	const char *	log_fname;
 	char *		abs_fname;
-#if !defined(SYS_WINNT) && !defined(SYS_VXWORKS) && !defined(VMS)
 	char		curdir[512];
 	size_t		cd_octets;
 	size_t		octets;
-#endif	/* POSIX */
 
 	NTP_REQUIRE(fname != NULL);
 	log_fname = fname;
@@ -458,7 +451,6 @@ change_logfile(
 		if (syslog_fname != NULL &&
 		    0 == strcmp(log_fname, syslog_fname))
 			log_fname = syslog_abs_fname;
-#if !defined(SYS_WINNT) && !defined(SYS_VXWORKS) && !defined(VMS)
 		if (log_fname != syslog_abs_fname &&
 		    DIR_SEP != log_fname[0] &&
 		    0 != strcmp(log_fname, "stderr") &&
@@ -478,7 +470,6 @@ change_logfile(
 				 (int)cd_octets, curdir, DIR_SEP,
 				 log_fname);
 		} else
-#endif
 			abs_fname = estrdup(log_fname);
 		TRACE(1, ("attempting to open log %s\n", abs_fname));
 		new_file = fopen(abs_fname, "a");

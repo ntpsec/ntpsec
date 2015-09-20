@@ -5,16 +5,10 @@
 #ifndef GUARD_NTP_SYSLOG_H
 #define GUARD_NTP_SYSLOG_H
 
-#include <ntp_types.h>		/* uint32_t type */
-
-#ifdef VMS
-extern void msyslog();
-#else
-# ifndef SYS_VXWORKS
-#  include <syslog.h>
-# endif
-#endif /* VMS */
 #include <stdio.h>
+#include <syslog.h>
+
+#include "ntp_types.h"		/* uint32_t type */
 
 extern bool	syslogit;
 extern bool	msyslog_term;	/* duplicate to stdout/err */
@@ -24,17 +18,6 @@ extern FILE *	syslog_file;	/* if syslogit is false, log to
 				   this file and not syslog */
 extern char *	syslog_fname;
 extern char *	syslog_abs_fname;
-
-#if defined(VMS) || defined (SYS_VXWORKS)
-#define	LOG_EMERG	0	/* system is unusable */
-#define	LOG_ALERT	1	/* action must be taken immediately */
-#define	LOG_CRIT	2	/* critical conditions */
-#define	LOG_ERR		3	/* error conditions */
-#define	LOG_WARNING	4	/* warning conditions */
-#define	LOG_NOTICE	5	/* normal but signification condition */
-#define	LOG_INFO	6	/* informational */
-#define	LOG_DEBUG	7	/* debug-level messages */
-#endif /* VMS || VXWORKS */
 
 /*
  * syslog output control

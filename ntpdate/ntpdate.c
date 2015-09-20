@@ -10,6 +10,8 @@
 #include <netinfo/ni.h>
 #endif
 
+#include <sys/select.h>
+
 #include "ntp_machine.h"
 #include "ntp_fp.h"
 #include "ntp.h"
@@ -17,7 +19,6 @@
 #include "timevalops.h"
 #include "ntpdate.h"
 #include "ntp_syslog.h"
-#include "ntp_select.h"
 #include "ntp_stdlib.h"
 #include <ssl_applink.c>
 
@@ -40,14 +41,7 @@
 
 #include <arpa/inet.h>
 
-#ifdef SYS_VXWORKS
-# include "ioLib.h"
-# include "sockLib.h"
-# include "timers.h"
-
-/* select wants a zero structure ... */
-struct timeval timeout = {0,0};
-#elif defined(SYS_WINNT)
+#ifdef SYS_WINNT
 /*
  * Windows does not abort a select select call if SIGALRM goes off
  * so a 200 ms timeout is needed (TIMER_HZ is 5).
@@ -80,7 +74,6 @@ UINT wTimerRes;
 # define	NTPDATE_PRIO	(100)
 #endif
 
-/* POSIX TIMERS - vxWorks doesn't have itimer - casey */
 static timer_t ntpdate_timerid;
 
 /*
@@ -431,7 +424,7 @@ ntpdatemain (
 	 * Logging.  Open the syslog if we have to
 	 */
 	if (syslogit) {
-#if !defined (SYS_WINNT) && !defined (SYS_VXWORKS) && !defined SYS_CYGWIN32
+#if !defined (SYS_WINNT) && !defined SYS_CYGWIN32
 # ifndef	LOG_DAEMON
 		openlog("ntpdate", LOG_PID);
 # else
@@ -539,11 +532,9 @@ ntpdatemain (
 						"poll() error: %m"
 						);
 			} else if (errno != 0) {
-#ifndef SYS_VXWORKS
 				msyslog(LOG_DEBUG,
 					"poll(): nfound = %d, error: %m",
 					nfound);
-#endif
 			}
 			if (alarm_flag) {		/* alarmed? */
 				was_alarmed = 1;
@@ -584,11 +575,6 @@ ntpdatemain (
 #ifdef SYS_WINNT
 	WSACleanup();
 #endif
-#ifdef SYS_VXWORKS
-	close (fd);
-	timer_delete(ntpdate_timerid);
-#endif
-
 	return clock_adjust();
 }
 
@@ -1510,13 +1496,7 @@ init_alarm(void)
 	 * POSIX "equivalents" setup - casey
 	 */
 	/* ntpdate_timerid is global - so we can kill timer later */
-	if (timer_create (CLOCK_REALTIME, NULL, &ntpdate_timerid) ==
-#  ifdef SYS_VXWORKS
-		ERROR
-#  else
-		-1
-#  endif
-		)
+	if (timer_create (CLOCK_REALTIME, NULL, &ntpdate_timerid) == -1)
 	{
 		fprintf (stderr, "init_alarm(): timer_create (...) FAILED\n");
 		return;
@@ -1714,16 +1694,6 @@ init_io(void)
 		 * set non-blocking,
 		 */
 #ifndef SYS_WINNT
-# ifdef SYS_VXWORKS
-		{
-			bool on = true;
-
-			if (ioctl(fd[nbsock],FIONBIO, &on) == ERROR) {
-				msyslog(LOG_ERR, "ioctl(FIONBIO) fails: %m");
-				exit(1);
-			}
-		}
-# else /* not SYS_VXWORKS */
 #  if defined(O_NONBLOCK)
 		if (fcntl(fd[nbsock], F_SETFL, O_NONBLOCK) < 0) {
 			msyslog(LOG_ERR, "fcntl(FNDELAY|FASYNC) fails: %m");
@@ -1741,7 +1711,6 @@ init_io(void)
 #	 include "Bletch: Need non blocking I/O"
 #	endif /* FNDELAY */
 #  endif /* not O_NONBLOCK */
-# endif /* SYS_VXWORKS */
 #else /* SYS_WINNT */
 		if (ioctlsocket(fd[nbsock], FIONBIO, (u_long *) &on) == SOCKET_ERROR) {
 			msyslog(LOG_ERR, "ioctlsocket(FIONBIO) fails: %m");

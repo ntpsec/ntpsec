@@ -849,10 +849,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\..\include\ntp_select.h"
-				>
-			</File>
-			<File
 				RelativePath="..\..\..\..\include\ntp_stdlib.h"
 				>
 			</File>

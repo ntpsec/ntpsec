@@ -29,10 +29,6 @@
 #endif
 #include <math.h>
 
-#if defined(VMS)
-# include <descrip.h>
-#endif /* VMS */
-
 /*
  * Defines used by the leapseconds stuff
  */
@@ -221,11 +217,7 @@ stats_config(
 	double	new_drift;
 	l_fp	now;
 	time_t  ttnow;
-#ifndef VMS
 	const char temp_ext[] = ".TEMP";
-#else
-	const char temp_ext[] = "-TEMP";
-#endif
 
 	/*
 	 * Expand environment strings under Windows NT, since the
