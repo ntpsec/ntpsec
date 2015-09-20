@@ -15,6 +15,8 @@ $ ./waf build
 
 "waf" is a build engine written in Python that runs faster and is
 far less painful to maintain than an equivalent autoconf build.
+By count of lines, the waf build recipe is a factor of *35* smaller
+than what it replaced.
 
 Basic Installation
 ==================
@@ -45,6 +47,22 @@ Under Unix, the simplest way to compile this package is:
   6. To also remove the files that `waf configure' created (so you can
      configure and compile the package for a different kind of
      computer), type `./waf distclean'.
+
+Bugs
+====
+
+The configuration system is a work in progress, and occasionally acts
+up during builds on new platforms.  If you see the message
+"Compilation check failed but include exists!" this means that an attempt
+to compile a small test program using the include header mentioned on
+the previous line failed, but waf configure then found that despite
+this the header file exists on your system.
+
+When this happens, it is likely that the header has prererquisites
+on your system that waf configure doesn't know about - that is,
+others headers always need to be included before in C programs.
+
+Please report this as a bug, along with your platform details.
 
 Installation Names
 ==================
