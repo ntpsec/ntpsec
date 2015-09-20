@@ -7,7 +7,7 @@ http://www.eecis.udel.edu/%7emills/pictures.html[from 'Pogo', Walt Kelly]
 
 For putting out compiler fires.
 
-Last update: 1-Apr-2015 02:57
+Last update: 20-Sep-2015 02:05 UTC
 |==============================
 
 == Related Links ==
@@ -16,40 +16,41 @@ include::includes/install.txt[]
 
 == Table of Contents ==
 
+* link:#waf[Autoconf has been replaced with waf]
 * link:#build[Building and Installing the Distribution]
 * link:#unix[Building and Installing for Unix]
 * link:#win[Building and Installing for Windows]
 * link:#conf[Configuration]
 * link:#prob[If You Have Problems]
-* link:#make[Additional `make` Commands]
+* link:#additional[Additional `waf` Commands]
 
 '''''
+
+[[waf]]
+=== Autoconf has been replaced with waf ===
+
+The autoconf build system used in NTP Classic has been replaced with
+waf, a more modern and much faster build engine.  It is not necessary
+to install any separate waf package; the build engine is a Python
+script included in your {project-shortname} distribution.
 
 [[build]]
 == Building and Installing the Distribution ==
 
 It is not possible in a software distribution such as this to support
-every individual computer and operating system with a common executable,
-even with the same system but different versions and options. Therefore,
-it is necessary to configure, build and install for each system and
-version. In almost all cases, these procedures are completely automatic,
-The user types `./configure`, and `make install` in that order and the
-autoconfigure system does the rest. There are some exceptions, as noted
-below and on the link:hints.html[Hints and Kinks] pages.
+every individual computer and operating system with a common
+executable, even with the same system but different versions and
+options. Therefore, it is necessary to configure, build and install
+for each system and version. In almost all cases, these procedures are
+completely automatic, The user types `./waf configure`, `./waf build`,
+and `./waf install` in that order and the build system does the
+rest. There are some exceptions, as noted below and on the
+link:hints.html[Hints and Kinks] pages.
 
-If available, the OpenSSL library from http://www.openssl.org is used to
-support public key cryptography. The library must be built and installed
-prior to building NTP. The procedures for doing that are included in the
-OpenSSL documentation. The library is found during the normal NTP
-configure phase and the interface routines compiled automatically. Only
-the `libcrypto.a` library file and `openssl` header files are needed. If
-the library is not available or disabled, this step is not required.
-
-The link:config.html[Build Options] page describes a number of options
-that determine whether debug support is included, whether and which
-reference clock drivers are included and the locations of the
-executables and library files, if not the default. By default debugging
-options and all reference clock drivers are included.
+This page provides only a general introduction to building the code.
+Please consult the INSTALL file in the distribution root for the
+most detailed information on build-time dependencies and configuration
+options.
 
 [[unix]]
 == Building and Installing for Unix ==
@@ -63,9 +64,9 @@ build, all of these tools should be accessible via the current path.
 
 The first thing to do is uncompress the distribution and extract the
 source tree. In the distribution base directory use the
-`./configure `command to perform an automatic configuration procedure.
+`./waf configure` command to perform an automatic configuration procedure.
 This command inspects the hardware and software environment and
-configures the build process accordingly. Use the `make` command to
+configures the build process accordingly. Use the `waf` command to
 compile and link the distribution and the `install` command to install
 the executables by default in `/usr/local/bin`.
 
@@ -81,9 +82,10 @@ in the subdirectory.
 [[win]]
 == Building and Installing for Windows ==
 
-NTP supports Windows 2000 and later. See the link:hints/winnt.html[NTP
-4.x for Windows NT] page for directions to compile the sources and
-install the executables. A precompiled executable is available.
+Building for Windows is not presently supported.  This may change in a
+future release.  If you have a requirement for this, you may be able
+to accelerate the process by contributing either skilled technical
+help or money so we can hire skilled technical help.
 
 [[conf]]
 == Configuration ==
@@ -114,17 +116,15 @@ comp.protocols.time.ntp.
 Users are invited to report bugs and offer suggestions via the
 link:bugs.html[NTP Bug Reporting Procedures] page.
 
-[[make]]
-== Additional `make` commands ==
+[[additional]]
+== Additional `waf` commands ==
 
-`make clean`::
+`./waf clean`::
   Cleans out object files, programs and temporary files.
-`make distclean`::
+`./waf distclean`::
   Does the work of `clean`, but cleans out all directories in
   preparation for a new distribution release.
-`make dist`::
-  Does the work of `make distclean`, but constructs compressed tar files
-  for distribution. You must have GNU automake to perform this function.
+
 
 '''''
 
