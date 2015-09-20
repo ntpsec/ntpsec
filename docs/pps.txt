@@ -17,7 +17,6 @@ include::includes/misc.txt[]
 == Table of Contents ==
 
 * link:#intro[Introduction]
-* link:#gadget[Gadget Box]
 * link:#opsys[Operating System Support]
 * link:#use[Using the Pulse-per-Second (PPS) Signal]
 
@@ -44,27 +43,6 @@ connected via the DCD pin of a serial port. However, the PPS signal
 levels are usually incompatible with the serial port interface signals.
 Note that NTP no longer supports connection via the RD pin of a serial
 port.
-
-image:pic/gadget.jpg[gif]
-
-A Gadget Box built by Chuck Hanavin
-
-[[gadget]]
-== Gadget Box ==
-
-The gadget box shown above is assembled in a 5"x3"x2" aluminum minibox
-containing the the circuitry, serial connector and optional 12-V power
-connector. A complete set of schematics, PCB artwork, drill templates
-can be obtained via the web from ftp.udel.edu as
-ftp://ftp.udel.edu/pub/ntp/hardware/gadget.tar.Z[gadget.tar.Z].
-
-The gadget box includes two subcircuits. One of these converts a TTL
-positive edge into a fixed-width pulse at EIA levels and is for use with
-a timecode receiver or precision oscillator with a TTL PPS output. The
-other converts the timecode modulation broadcast by Canadian
-time/frequency standard station CHU into a 300-bps serial character
-stream at EIA levels and is for use with the
-link:driver7.html[Radio CHU Audio Demodulator/Decoder] driver.
 
 [[opsys]]
 == Operating System Support ==
