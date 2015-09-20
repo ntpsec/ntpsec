@@ -59,7 +59,7 @@ Hal:
 * The ntpd initialization sequence is still full of platform-
 specific crud.
 
-* Better ANSI/POSIX conformance in MinGW and Visual Studui 2013 might
+* Better ANSI/POSIX conformance in MinGW and Visual Studio 2013 might
 enable us to get rid of the SYS_WINNT code. Should be tried...
 
 * Other than SYS_WIN, SYS_VXWORXS is the only explicit port macro left.
@@ -91,20 +91,30 @@ is not yet tested anywhere but in ntpd itself.
 
 === Documentation ===
 
-The documentation is a stale, untidy, duplicative mess.
+* man pages outside of docs/ need to be merged with the
+  Mills manpages inside it, with duplications removed.  In the
+  list below, the original docs content is on the left and
+  the man page on the right.  Where there is no second entry
+  the external man page is missing.
 
-* man pages outside of docs/ need to be paired with the Mills manpages
-  inside it, with duplications removed.
+  docs/keygen.txt -> ntp-keygen/ntp-keygen.txt
+  docs/ntpdsim.txt -> docs/ntpdsim_new.txt
+  docs/ntpd.txt -> ntpd/ntpd.txt
+  docs/ntpq.txt -> ntpq/ntpq.txt
+  docs/ntpdate.txt
+  docs/ntptime.txt
+  docs/ntptrace.txt -> scripts/ntptrace/ntptrace.txt
+  docs/ntp-wait.txt -> scripts/ntp-wait/ntp-wait.txt
 
 * In the docs subdirectory, include/command.txt is an HTML passthrough
   in a not entirely successful attempt to emulate the look of the
   Mills HTML documentation this directory was made from. It should be
-  cleaned up ore replaced.
+  cleaned up or replaced.
 
 * Similarly, includes/footer.txt is a tabular hack made to resemble the
   old HTML and should be cleaned up.
 
-* A serious content-editing and update pass on the documents is needed.
+* A serious content-editing and update pass on the exterior documents is needed.
   Various pieces (such as near --version and exit values) are often lies
   produced by autogen.
 
