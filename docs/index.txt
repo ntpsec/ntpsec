@@ -30,8 +30,8 @@ Last update: 31-Mar-2014 05:41
 Note: The NTP Version 4 software contained in this distribution is
 available without charge under the conditions set forth in the
 link:copyright.html[Copyright Notice].
-//FIXME: Using a quote block here is dodgy, should be an admonition.
-_____
+
+[note]
 It is very important that readers understand that the NTP document
 collection began 25 years ago and remains today a work in progress. It
 has evolved as new features were invented and old features retired. It
@@ -43,16 +43,15 @@ the online collection at {project-weblink} is normally included in the most
 recent snapshot, but might not agree with an earlier snapshot or
 release version.
 
-_____
-
-This distribution is an implementation of RFC-5905 "Network Time Protocol Version 4: Protocol and Algorithms Specification". +
-NTP is widely used to synchronize a computer to Internet time servers
-or other sources, such as a radio or satellite receiver or telephone
-modem service. It can also be used as a server for dependent clients. It
-provides accuracies typically less than a millisecond on LANs and up to
-a few milliseconds on WANs. Typical NTP configurations utilize multiple
-redundant servers and diverse network paths in order to achieve high
-accuracy and reliability.
+This distribution is an implementation of RFC-5905 "Network Time
+Protocol Version 4: Protocol and Algorithms Specification".  NTP is
+widely used to synchronize a computer to Internet time servers or
+other sources, such as a radio or satellite receiver or telephone
+modem service. It can also be used as a server for dependent
+clients. It provides accuracies typically less than a millisecond on
+LANs and up to a few milliseconds on WANs. Typical NTP configurations
+utilize multiple redundant servers and diverse network paths in order
+to achieve high accuracy and reliability.
 
 This distribution includes a simulation framework in which substantially
 all the runtime NTP operations and most features can be tested and

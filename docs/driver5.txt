@@ -112,7 +112,6 @@ written as-is to the `clockstats` file.
 `time1` 'time'::
    Specifies the time offset calibration factor, in seconds and fraction,
    to be used for the West satellite, with default 0.0.
-//FIXME: Not sure how to put '. ' before Specifies under stratum w/o creating a list
 `time2 time`::
    Specifies the time offset calibration factor, in seconds and fraction,
    to be used for the East satellite, with default 0.0.

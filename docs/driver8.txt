@@ -406,10 +406,9 @@ time1 _time_ ::
   The default value depends on the clock type.
 time2 _time_ ::
   If flag1 is 0, time2 specifies the offset of the PPS signal from the
-  actual time (PPS fine tuning).
-//FIXME: Description should be on two lines
-  If flag1 is 1, time2 specifies the number of seconds a receiver with a
-  premium local oscillator can be trusted after losing synchronisation.
+  actual time (PPS fine tuning).  If flag1 is 1, time2 specifies the
+  number of seconds a receiver with a premium local oscillator can be
+  trusted after losing synchronisation.
 stratum _stratum_ ::
   The stratum for this reference clock.
 refid _refid_ ::
