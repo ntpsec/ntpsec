@@ -17,11 +17,26 @@ include::includes/manual.txt[]
 
 == Table of Contents ==
 
+* link:#caveat[Caveat Emptor]
 * link:#description[Description]
 * link:#configuration[Configuration]
 * link:#sample[Sample Configuration File]
 
 '''''
+
+[[caveat]]
+== Caveat Emptor ==
+
+At present, if you attempt to build `ntpsdsim` it probably won't, and
+if built it would probably fail.  Its code has been dusty and
+neglected for a long time.  This documentation is retained mainly as a
+matter of historical interest.
+
+The {project-shortname} maintainers have an internal project
+code-named TESTFRAME that intends to create the capability 
+for replicable end-to-end testing of `ntpd`.  It is likely
+that some version of thius code will replace or merge in ntpdsim's
+capabilities.
 
 [[description]]
 == Description ==
