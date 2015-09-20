@@ -19,6 +19,7 @@ Last update: 20-Mar-2015 05:30
 == Table of Contents ==
 
 * link:#intro[Introduction]
+* link:#intro[Differences from NTP Classic]
 * link:#hand[The Handbook]
 * link:#build[Building and Installing NTP]
 * link:#prob[Resolving Problems]
@@ -52,6 +53,16 @@ clients. It provides accuracies typically less than a millisecond on
 LANs and up to a few milliseconds on WANs. Typical NTP configurations
 utilize multiple redundant servers and diverse network paths in order
 to achieve high accuracy and reliability.
+
+[[differences]]
+== Differences from NTP Classic ==
+
+The design objectives of this distribution, {project-fullname}, are in
+many ways a break with NTP's past.  We have deliberately jettisoned
+support for ancient legacy hardware and operating systems in order to
+ship code that is security-hardened, simpler, drastically less bulky
+(the KLOC count of the suite has been cut by a factor of two!), easier
+to understand, and easier to maintain.
 
 [[hand]]
 == The Handbook ==
