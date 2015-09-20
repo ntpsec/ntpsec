@@ -4434,13 +4434,13 @@ getconfig(const char *explicit_config)
 
 	init_syntax_tree(&cfgt);
 	if (
-		!lex_init_stack(FindConfig(config_file), "r")
+		!lex_init_stack(config_file, "r")
 #ifdef HAVE_NETINFO_NI_H
 		/* If there is no config_file, try NetInfo. */
 		&& check_netinfo && !(config_netinfo = get_netinfo_config())
 #endif /* HAVE_NETINFO_NI_H */
 		) {
-		msyslog(LOG_INFO, "getconfig: Couldn't open <%s>: %m", FindConfig(config_file));
+		msyslog(LOG_INFO, "getconfig: Couldn't open <%s>: %m", config_file);
 #ifndef SYS_WINNT
 		if (!saveconfigquit)
 			io_open_sockets();
@@ -4449,12 +4449,12 @@ getconfig(const char *explicit_config)
 #else
 		/* Under WinNT try alternate_config_file name, first NTP.CONF, then NTP.INI */
 
-		if (!lex_init_stack(FindConfig(alt_config_file), "r"))  {
+		if (!lex_init_stack(alt_config_file, "r"))  {
 			/*
 			 * Broadcast clients can sometimes run without
 			 * a configuration file.
 			 */
-			msyslog(LOG_INFO, "getconfig: Couldn't open <%s>: %m", FindConfig(alt_config_file));
+			msyslog(LOG_INFO, "getconfig: Couldn't open <%s>: %m", alt_config_file);
 			if (!saveconfigquit)
 				io_open_sockets();
 

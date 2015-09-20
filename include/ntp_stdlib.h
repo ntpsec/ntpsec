@@ -175,8 +175,6 @@ extern	const char *refid_str	(uint32_t, int);
 
 extern	bool	decodenetnum	(const char *, sockaddr_u *);
 
-extern	const char * FindConfig	(const char *);
-
 extern	void	signal_no_reset (int, void (*func)(int));
 extern	void	set_ctrl_c_hook (ctrl_c_fn);
 
