@@ -1,7 +1,13 @@
-Quick Start
-===========
+= Installation instructions =
 
-Be sure Python >= 2.5 and libevent 2.x are installed on your system.
+== Quick Start ==
+
+This software should build on any operating system conformant to
+POSIX.1-2001 and ISO/IEC 9899:1999 (C99).  The primary development
+platforms are Linux and FreeBSD/NetBSD.
+
+Be sure Python >= 2.5 and the libevent 2.x libraries and headers are
+installed on your system.
 
 You will also want OpenSSL installed.  If you are using a package manager,
 the one you want may be called openssl-devel or libssl-dev.
@@ -18,15 +24,9 @@ far less painful to maintain than an equivalent autoconf build.
 By count of lines, the waf build recipe is a factor of *35* smaller
 than what it replaced.
 
-Basic Installation
-==================
+== Basic Installation ==
 
 These are generic Unix installation instructions.
-
-For Windows/NT, please see ports/winnt and html/build/hints/winnt.html.
-(Note: The Windows build may be broken.  If so, we do not yet have an
-active Windows port maintainer and the build will be fixed when we
-have one.)
 
 Under Unix, the simplest way to compile this package is:
 
@@ -48,8 +48,7 @@ Under Unix, the simplest way to compile this package is:
      configure and compile the package for a different kind of
      computer), type `./waf distclean'.
 
-Bugs
-====
+== Bugs ==
 
 The configuration system is a work in progress, and occasionally acts
 up during builds on new platforms.  If you see the message
@@ -60,27 +59,24 @@ this the header file exists on your system.
 
 When this happens, it is likely that the header has prererquisites
 on your system that waf configure doesn't know about - that is,
-others headers always need to be included before in C programs.
+others headers always need to be included before it in C programs.
 
 Please report this as a bug, along with your platform details.
 
-Installation Names
-==================
+== Installation Names ==
 
 By default, `make install' will install the package's files in
 `/usr/local/bin', `/usr/local/man', etc.  You can specify an
 installation prefix other than `/usr/local' by giving waf the
 option `--prefix=PATH'.
 
-Optional Features
-=================
+== Optional Features ==
 
 The waf builder accepts `--enable-FEATURE' options to where FEATURE
 indicates an optional part of the package.  Do `waf --help' for a list
 of options.
 
-Operation Controls
-==================
+== Operation Controls ==
 
 The waf builder recognizes the following options to control how it
 operates.
