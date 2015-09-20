@@ -22,7 +22,6 @@ include::includes/manual.txt[]
 * link:#cmd[Command Line Options]
 * link:#rand[Random Seed File]
 * link:#fmt[Cryptographic Data Files]
-* link:#bug[Bugs]
 
 '''''
 
@@ -314,15 +313,6 @@ file. Subsequently, similar soft links must be installed by manual or
 automated means on the other subnet hosts. While this file is not used
 with the Autokey Version 2 protocol, it is needed to authenticate some
 remote configuration commands used by the link:ntpq.html[`ntpq`] utility.
-
-[[bug]]
-== Bugs ==
-
-//FIXME: This caveat is obsolete.
-It can take quite a while to generate some cryptographic values, from
-one to several minutes with modern architectures such as UltraSPARC and
-up to tens of minutes to an hour with older architectures such as SPARC
-IPC.
 
 '''''
 
