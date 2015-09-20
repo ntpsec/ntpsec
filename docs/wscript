@@ -15,7 +15,6 @@ def build(ctx):
 		"clockopt.txt",
 		"cluster.txt",
 		"comdex.txt",
-		"config.txt",
 		"confopt.txt",
 		"copyright.txt",
 		"debug.txt",
