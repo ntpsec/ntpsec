@@ -1,6 +1,6 @@
 = Conrad parallel port radio clock =
 
-Last update: 21-Oct-2010 23:44 UTC
+Last update: 20-Sep-201p 04:44 UTC
 
 '''''
 
@@ -11,6 +11,12 @@ Address: 127.127.35.'u'
 Reference ID: PCF
 Driver ID: PCF
 Parallel Port: `/dev/pcfclocks/`__u__ or `/dev/pcfclocku`
+
+== Deprecation warning ==
+
+This refclock is deprecated and obsolete. The {project-shortname}
+maintainers plan to remove it in a future release.  If you have a
+requirement for it, please make this known to us.
 
 == Description ==
 

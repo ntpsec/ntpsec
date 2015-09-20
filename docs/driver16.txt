@@ -1,6 +1,6 @@
 = bc635VME/bc350VXI Time and Frequency Processor =
 
-Last update: 21-Oct-2010 23:44 UTC
+Last update: 20-Sep-2016 04:44 UTC
 
 '''''
 
@@ -12,6 +12,12 @@ Reference ID: BTFP
 Driver ID: GPS_BANCOMM
 Bancomm Device /dev/btfp0
 Requires: Bancomm bc635 TFP device module driver for SunOS 4.x/SunOS 5.x
+
+== Deprecation warning ==
+
+This refclock is deprecated and obsolete. The {project-shortname}
+maintainers plan to remove it in a future release.  If you have a
+requirement for it, please make this known to us.
 
 == Description ==
 

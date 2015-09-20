@@ -1,7 +1,7 @@
 = Radio CHU Audio Demodulator/Decoder =
  
  Author: David L. Mills (mills@udel.edu)
- Last update: 17-Jul-2014 02:17 UTC
+ Last update: 20-Sep-2015 04:44 UTC
 
 '''''
 
@@ -14,6 +14,12 @@ Driver ID: `CHU`
 Modem Port: `/dev/chuu`; 300 baud, 8-bits, no parity
 Autotune Port: `/dev/icom`; 1200/9600 baud, 8-bits, no parity
 Audio Device: `/dev/audio` and `/dev/audioctl`
+
+== Deprecation warning ==
+
+This refclock is deprecated and obsolete. The {project-shortname}
+maintainers plan to remove it in a future release.  If you have a
+requirement for it, please make this known to us.
 
 == Description ==
 

@@ -1,6 +1,6 @@
 = Rockwell Jupiter GPS receiver =
 
-Last update: 21-Oct-2010 23:44 UTC
+Last update: 20-Sep-2015 03:44 UTC
 
 '''''
 
@@ -11,6 +11,16 @@ Address: 127.127.31.'u'
 Reference ID: GPS
 Driver ID: JUPITER
 Serial Port: `/dev/gps`__u__; 9600 baud, 8-bits, no parity.
+
+== Deprecation warning ==
+
+As of 2015 Rockwell Jupiter chips are no longer generally available
+and have not been manufactured for many years; they will be found only
+in remaindered and legacy equipment.
+
+This refclock is deprecated and obsolete. The {project-shortname}
+maintainers plan to remove it in a future release.  If you have a
+requirement for it, please make this known to us.
 
 == Description ==
 
@@ -69,12 +79,12 @@ available `PPSAPI` implementation, at least not to my knowledge.
 However, there has been one success report using Linux 2.4.20 and PPSkit
 2.1.1.
 
-//FIXME: SiRF has not sold any Rockwells since at least 2006
-The Jupiter receivers seem to have quite a few names. They are referred
-to at least as Rockwell receivers, Navman receivers, Zodiac receivers,
-Conexant receivers and SiRF Technology receivers. Rockwell seems to be
-the original and most commonly used name and Navman seems to be the
-current supplier.
+The Jupiter receivers seem to have quite a few names. They are
+referred to at least as Rockwell receivers, Navman receivers, Zodiac
+receivers, Conexant receivers and (formerly) SiRF Technology receivers
+(SiRF has since noved to selling a very suvccessful line of
+consumer-grade GPS chips based on its own designs). Rockwell seems to
+be the original and most commonly used name.
 
 === Configuration ===
 
