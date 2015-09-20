@@ -13,7 +13,6 @@ Last update: 10-Mar-2014 05:04 UTC
 == Related Links ==
 
 include::includes/hand.txt[]
-include::includes/config.txt[]
 
 == Table of Contents ==
 
