@@ -34,7 +34,7 @@ You can download the C99 standard for free from here:
 Only POSIX-1.2001/SuSv3 library functions should be used.  If a library
 function not in POSIX 2001 is required, then a wrapper function for back
 compatibility must be provided.  One notable case is clock_gettime()
-which is used, when available, for increased accuracy, and must have a
+which is used, when available, for increased accuracy, and has a
 fallback implementation using native time calls.
 
 You can view POSIX-1.2001, with 2004 Corrigendum, online for free here:
@@ -47,8 +47,45 @@ cause buffer overruns and (all too often) exploitable security holes:
 
 * strcpy, strncpy, strcat:  Use strlcpy and strlcat instead.
 * sprintf, vsprintf: use snprintf and vsnprintf instead.
-* strtok: unroll this into the obvious loop.
+* strtok: use strtok_r() or unroll this into the obvious loop.
 * gets: Use fgets instead. 
+
+=== Conventions for #ifdef guard names ===
+
+Parts of this code are a thicket of C preprocessor conditionals.
+In an attempt to make these halfway comprehensible, we use the
+following conventions to distinguish classes of macro names:
+
+GUARD_*::
+	Symbols with thie GUARD_ prefix are idempotency guards - that is,
+	they're used to nullify inclusions of a header file
+	after the first. They don't interact with the build system's
+	configuration logic in any way at all.
+
+HAVE_*_H::
+	Guard symbol derived by configuration logic from checking
+	for the presence of a system header.  For example, the symbol
+	HAVE_SYS_FOOBAR_H gets defined only if waf configure detects
+	the presence of a sys/foobar.h in the system include directory.
+
+HAVE_*::
+	Without an H suffix, a HAVE symbol is set on the availability
+	of a specified function in the system libraries.
+
+NEED_*::
+	Need symbols conditionalize porting hacks the need for which
+	cannot be detected by checking for a system header or
+	function, but instead have to be probed for by some ad-hoc
+	test in waf configure.
+
+USE_*::
+	Use symbols are set internally within other conditionals to
+	gate use of sections of code that must be conditionally
+	compiled deoending on *combinations* of HAVE and NEED symbols.
+
+FEATURE_*::
+	Gates the code for an optional feature.  Set by a switch on
+	the "waf configure" invocation.
 
 === Cross-platform portability ===
 
