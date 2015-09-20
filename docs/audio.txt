@@ -21,7 +21,7 @@ include::includes/audio.txt[]
 * link:#setup[Setup and Debugging Aids]
 
 '''''
-[[deprecation note]]
+[[deprecation]]
 == Deprecation note ==
 
 As of 2015 the technologies descried on this page are obsolete and the
