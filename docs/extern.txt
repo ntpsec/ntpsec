@@ -53,13 +53,14 @@ clock driver and the external clock driver. This is implemented using
 Boolean variables and certain bits in the kernel clock status word. The
 Boolean variables include the following:
 
-`ntp_enable`. set/reset by the `enable` command. Enables ntpd clock
-discipline
+`ntp_enable`::
+	Set/reset by the `enable` command. Enables ntpd clock discipline
 
-`ntp_control`. set during initial configuration if kernel support is
-available
+`ntp_control`::
+	Set during initial configuration if kernel support is available
 
-`kern_enable` Set/reset by the `enable` command
+`kern_enable`::
+	Set/reset by the `enable` command
 
 If the `kern_enable` switch is set, the daemon computes the offset,
 frequency, maximum error, estimated error, time constant and status
