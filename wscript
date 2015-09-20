@@ -5,6 +5,8 @@ config = {
 	"NTPS_VERSION_REV":	 0
 }
 
+from waflib import Utils
+
 out="build"
 
 from pylib.configure import cmd_configure
@@ -86,4 +88,21 @@ def build(ctx):
 	ctx.recurse("ntp-keygen") 
 #	ctx.recurse("unity")
 #	ctx.recurse("tests")
+
+
+	subst_source = [
+		"ntpd/complete.conf.in",
+		"scripts/deprecated/freq_adj.in",
+		"scripts/ntp-wait/ntp-wait.in",
+		"scripts/ntpsweep/ntpsweep.in",
+		"scripts/ntptrace/ntptrace.in",
+		"scripts/update-leap/update-leap.in"
+	]
+
+	ctx(
+		features    = "subst",
+		source      = subst_source,
+		target		= [x.replace(".in", "") for x in subst_source],
+		chmod		= Utils.O755
+	)
 
