@@ -9,8 +9,8 @@ Last update: 13-Oct-2010 00:33 UTC
 
 Prerequisites:
 
-* Does the system you want the clock connect to have the include files
-termio.h or termios.h ? (You need that for the parse driver)
+* Does the system you want the clock connect to have the include file
+termios.h? (You need that for the parse driver)
 
 What to do:
 
