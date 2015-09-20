@@ -236,21 +236,24 @@ It consists of a number of bits coded in hexadecimal as follows:
 
 [width="100%",cols="<25%,<25%,<25%,<25%",]
 |==============================================================================
-| Code   | Tag    | Message        | Description
-| `0001` | TEST1  | `pkt_dup`      | duplicate packet
-| `0002` | TEST2  | `pkt_bogus`    | bogus packet
-| `0004` | TEST3  | `pkt_unsync`   | server not synchronized
-| `0008` | TEST4  | `pkt_denied`   | access denied
-| `0010` | TEST5  | `pkt_auth`     | authentication failure
-| `0020` | TEST6  | `pkt_stratum`  | invalid leap or stratum
-| `0040` | TEST7  | `pkt_header`   | header distance exceeded
-| `0080` | TEST8  | `pkt_autokey`  | Autokey sequence error
-| `0100` | TEST9  | `pkt_crypto`   | Autokey protocol error
-| `0200` | TEST10 | `peer_stratum` | invalid header or stratum
-| `0400` | TEST11 | `peer_dist`    | distance threshold exceeded
-| `0800` | TEST12 | `peer_loop`    | synchronization loop
-| `1000` | TEST13 | `peer_unreach` | unreachable or nonselect
+| Code   | Tag     | Message        | Description
+| `0001` | BOGON1  | `pkt_dup`      | duplicate packet
+| `0002` | BOGON2  | `pkt_bogus`    | bogus packet
+| `0004` | BOGON3  | `pkt_unsync`   | server not synchronized
+| `0008` | BOGON4  | `pkt_denied`   | access denied
+| `0010` | BOGON5  | `pkt_auth`     | authentication failure
+| `0020` | BOGON6  | `pkt_stratum`  | invalid leap or stratum
+| `0040` | BOGON7  | `pkt_header`   | header distance exceeded
+| `0080` | BOGON8  | `pkt_autokey`  | Autokey sequence error
+| `0100` | BOGON9  | `pkt_crypto`   | Autokey protocol error
+| `0200` | BOGON10 | `peer_stratum` | invalid header or stratum
+| `0400` | BOGON11 | `peer_dist`    | distance threshold exceeded
+| `0800` | BOGON12 | `peer_loop`    | synchronization loop
+| `1000` | BOGON13 | `peer_unreach` | unreachable or nonselect
 |==============================================================================
+
+The "Tag" field is the name the source code uses for the status bit.
+Not all bits are in use, but have been kept for backwards compatibility. 
 
 [[kiss]]
 == Kiss Codes ==

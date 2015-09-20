@@ -216,25 +216,25 @@ struct interface {
  *
  * Packet errors
  */
-#define TEST1		0X0001	/* duplicate packet */
-#define TEST2		0x0002	/* bogus packet */
-#define TEST3		0x0004	/* protocol unsynchronized */
-#define TEST4		0x0008	/* access denied */
-#define TEST5		0x0010	/* bad authentication */
-#define TEST6		0x0020	/* bad synch or stratum */
-#define TEST7		0x0040	/* bad header */
-#define TEST8		0x0080  /* bad autokey */
-#define TEST9		0x0100	/* bad crypto */
-#define	PKT_TEST_MASK	(TEST1 | TEST2 | TEST3 | TEST4 | TEST5 |\
-			TEST6 | TEST7 | TEST8 | TEST9)
+#define BOGON1		0X0001	/* duplicate packet */
+#define BOGON2		0x0002	/* bogus packet */
+#define BOGON3		0x0004	/* protocol unsynchronized */
+#define BOGON4		0x0008	/* access denied */
+#define BOGON5		0x0010	/* bad authentication */
+#define BOGON6		0x0020	/* bad synch or stratum */
+#define BOGON7		0x0040	/* bad header */
+#define BOGON8		0x0080  /* bad autokey */
+#define BOGON9		0x0100	/* bad crypto */
+#define	PKT_BOGON_MASK	(BOGON1 | BOGON2 | BOGON3 | BOGON4 | BOGON5 |\
+			BOGON6 | BOGON7 | BOGON8 | BOGON9)
 /*
  * Peer errors
  */
-#define TEST10		0x0200	/* peer bad synch or stratum */
-#define	TEST11		0x0400	/* peer distance exceeded */
-#define TEST12		0x0800	/* peer synchronization loop */
-#define TEST13		0x1000	/* peer unreacable */
-#define	PEER_TEST_MASK	(TEST10 | TEST11 | TEST12 | TEST13)
+#define BOGON10		0x0200	/* peer bad synch or stratum */
+#define	BOGON11		0x0400	/* peer distance exceeded */
+#define BOGON12		0x0800	/* peer synchronization loop */
+#define BOGON13		0x1000	/* peer unreacable */
+#define	PEER_BOGON_MASK	(BOGON10 | BOGON11 | BOGON12 | BOGON13)
 
 /*
  * The peer structure. Holds state information relating to the guys
@@ -383,10 +383,10 @@ struct peer {
 	u_long	sent;		/* packets sent */
 	u_long	received;	/* packets received */
 	u_long	processed;	/* packets processed */
-	u_long	badauth;	/* bad authentication (TEST5) */
-	u_long	bogusorg;	/* bogus origin (TEST2, TEST3) */
-	u_long	oldpkt;		/* old duplicate (TEST1) */
-	u_long	seldisptoolarge; /* bad header (TEST6, TEST7) */
+	u_long	badauth;	/* bad authentication (BOGON5) */
+	u_long	bogusorg;	/* bogus origin (BOGON2, BOGON3) */
+	u_long	oldpkt;		/* old duplicate (BOGON1) */
+	u_long	seldisptoolarge; /* bad header (BOGON6, BOGON7) */
 	u_long	selbroken;	/* KoD received */
 };
 
