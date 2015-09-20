@@ -164,9 +164,8 @@ a residual frequency error less than 1 PPM. The measurement interval can
 be changed using the `stepout` option of the
 link:miscopt.html#tinker[`tinker`] command.
 
-//FIXME:2 lines down 'mext'
 In order to reduce the clock offset error at restart, the reference
-implementation mext disables oscillator frequency discipline and enables
+implementation next disables oscillator frequency discipline and enables
 clock offset discipline with a small time constant. This is designed to
 quickly reduce the clock offset error without causing a frequency surge.
 This configuration is continued for an interval of five-min, after which

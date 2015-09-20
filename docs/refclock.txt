@@ -143,47 +143,46 @@ entries than you expected.  Support for some very ancient drivers
 (notably, those rendered obsolete by the WWVB modulation change in
 2013) has been dropped in order to reduce our maintainance load.
 
-//FIXME: Either add symbols to all entries or remove all
-* link:driver1.html[Type 1] Undisciplined Local Clock (`LOCAL`)
+* link:driver1.html[Type 1] Undisciplined Local Clock
 * Type 2 reserved
 * Type 3 reserved
-* link:driver4.html[Type 4] Generic Spectracom Receivers (`SPECTRACOM`)
-* link:driver5.html[Type 5] TrueTime GPS/GOES/OMEGA Receivers (`TRUETIME`)
-* link:driver6.html[Type 6] IRIG Audio Decoder (`IRIG_AUDIO`)
-* link:driver7.html[Type 7] Radio CHU Audio Demodulator/Decoder (`CHU`)
-* link:driver8.html[Type 8] Generic Reference Driver (`PARSE`)
-* link:driver9.html[Type 9] Magnavox MX4200 GPS Receiver (`GPS_MX4200`)
-* link:driver10.html[Type 10] Austron 2200A/2201A GPS Receivers (`GPS_AS2201`)
-* link:driver11.html[Type 11] Arbiter 1088A/B GPS Receiver (`GPS_ARBITER`)
+* link:driver4.html[Type 4] Generic Spectracom Receivers
+* link:driver5.html[Type 5] TrueTime GPS/GOES/OMEGA Receivers
+* link:driver6.html[Type 6] IRIG Audio Decoder
+* link:driver7.html[Type 7] Radio CHU Audio Demodulator/Decoder
+* link:driver8.html[Type 8] Generic Reference Driver
+* link:driver9.html[Type 9] Magnavox MX4200 GPS Receiver
+* link:driver10.html[Type 10] Austron 2200A/2201A GPS Receivers
+* link:driver11.html[Type 11] Arbiter 1088A/B GPS Receiver
 * Type 12 reserved
 * Type 13 reserved
 * Type 14 reserved
 * Type 15 reserved
-* link:driver16.html[Type 16] Bancomm GPS/IRIG Receiver (`GPS_BANCOMM`)
+* link:driver16.html[Type 16] Bancomm GPS/IRIG Receiver
 * Type 17 reserved
-* link:driver18.html[Type 18] NIST/USNO/PTB Modem Time Services (`ACTS_MODEM`)
+* link:driver18.html[Type 18] NIST/USNO/PTB Modem Time Services
 * Type 19 reserved
-* link:driver20.html[Type 20] Generic NMEA GPS Receiver (`NMEA`)
+* link:driver20.html[Type 20] Generic NMEA GPS Receiver
 * Type 21 reserved
-* link:driver22.html[Type 22] PPS Clock Discipline (`PPS`)
+* link:driver22.html[Type 22] PPS Clock Discipline
 * Type 23 reserved
 * Type 24 reserved
 * Type 25 reserved
-* link:driver26.html[Type 26] Hewlett Packard 58503A GPS Receiver (`GPS_HP`)
-* link:driver27.html[Type 27] Arcron MSF Receiver (`MSF_ARCRON`)
-* link:driver28.html[Type 28] Shared Memory Driver (`SHM`)
-* link:driver29.html[Type 29] Trimble Navigation Palisade GPS (`GPS_PALISADE`)
-* link:driver30.html[Type 30] Motorola UT Oncore GPS (`GPS_ONCORE`)
-* link:driver31.html[Type 31] Rockwell Jupiter GPS (`GPS_JUPITER`)
+* link:driver26.html[Type 26] Hewlett Packard 58503A GPS Receiver
+* link:driver27.html[Type 27] Arcron MSF Receiver
+* link:driver28.html[Type 28] Shared Memory Driver
+* link:driver29.html[Type 29] Trimble Navigation Palisade GPS
+* link:driver30.html[Type 30] Motorola UT Oncore GPS
+* link:driver31.html[Type 31] Rockwell Jupiter GPS
 * Type 32 reserved
-* link:driver33.html[Type 33] Dumb Clock (`DUMBCLOCK`)
+* link:driver33.html[Type 33] Dumb Clock
 * Type 34 reserved
-* link:driver35.html[Type 35] Conrad Parallel Port Radio Clock (`PCF`)
+* link:driver35.html[Type 35] Conrad Parallel Port Radio Clock
 * Type 36 reserved
-* link:driver37.html[Type 37] Forum Graphic GPS Dating station (`FG`)
-* link:driver38.html[Type 38] hopf GPS/DCF77 6021/komp for Serial Line (`HOPF_S`)
-* link:driver39.html[Type 39] hopf GPS/DCF77 6039 for PCI-Bus (`HOPF_P`)
-* link:driver40.html[Type 40] JJY Receivers (`JJY`)
+* link:driver37.html[Type 37] Forum Graphic GPS Dating station
+* link:driver38.html[Type 38] hopf GPS/DCF77 6021/komp for Serial Line
+* link:driver39.html[Type 39] hopf GPS/DCF77 6039 for PCI-Bus
+* link:driver40.html[Type 40] JJY Receivers
 * Type 41 reserved
 * link:driver42.html[Type 42] Zyfer GPStarplus Receiver
 * Type 43 reserved

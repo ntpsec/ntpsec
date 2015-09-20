@@ -78,8 +78,7 @@ current supplier.
 
 === Configuration ===
 
-//FIXME: Backticks and quotes not rendering properly
-The edge of the `PPS` signal that is `on-time' can be set with `flag2`.
+The edge of the PPS signal that is on-time can be set with `flag2`.
 There is currently no way to cause the `PPS` signal to control the
 kernel `PLL`.
 
