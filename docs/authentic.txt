@@ -17,12 +17,33 @@ include::includes/authopt.txt[]
 
 == Table of Contents ==
 
+* link:#noauto[Problems with Autokey]
 * link:#auth[Introduction]
 * link:#symm[Symmetric Key Cryptography]
 * link:#windows[Microsoft Windows Authentication]
 * link:#pub[Public Key Cryptography]
 
 '''''
+
+[[noauto]]
+== Autokey is disabled ==
+
+The Autokey feature described here and elsewhere is not presently
+enabled in production builds of {project-shortname}.  It has a history
+of instability, and of interoperability problems, and has even been
+exploited as an attack vector against time servers and clients.  These
+problems are not known to have affected symmetric-key authentication,
+only Autokey itself.
+
+The maintainers have not been able to identify anyone using Autokey
+successfully in production. If you are such a person, please inform
+us.  It is still possible to enable Autokey with a relatively trivial
+tweak to the build system.
+
+Autokey will remain disabled by default until the maintainers have
+confidence that its deficiencies have been repaired. We would welcome
+any assistance in that repair.
+
 
 [[auth]]
 == Introduction ==
@@ -161,7 +182,7 @@ for the `ntpq` utility.
 [[windows]]
 == Microsoft Windows Authentication ==
 
-In addition to the above means, `ntpd` now supports Microsoft Windows
+In addition to the above means, `ntpd` supports Microsoft Windows
 MS-SNTP authentication using Active Directory services. This support was
 contributed by the Samba Team and is still in development. It is enabled
 using the `mssntp` flag of the `restrict` command described on the
@@ -169,7 +190,7 @@ link:accopt.html#restrict[Access Control Options] page. [red]#Note: Potential
 users should be aware that these services involve a TCP connection to
 another process that could potentially block, denying services to other
 users. Therefore, this flag should be used only for a dedicated server
-with no clients other than MS-SNTP.#
+with no clients other than MS-SNTP.
 
 [[pub]]
 == Public Key Cryptography ==
