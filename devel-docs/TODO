@@ -82,9 +82,15 @@ SIM
 TM_IN_SYS_TIME
 TRIM_POLLRATE
 
+* The waf rules for invoking asciidoc need to use docs/asciidoc.conf
+  even when it's being run on *.txt files in other directories.
+
 === Code ===
 
 * The u_* types in ntp.h are GCCisms that should be replaced with POSIX types.
+
+* We should audit scripts/ and utils/ to see which of those programs can
+  be thrown out.  One prime candidate is ntpdate.
 
 === Porting ===
 
