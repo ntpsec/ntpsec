@@ -1,6 +1,6 @@
 = Magnavox MX4200 GPS Receiver =
 
-Last update: 21-Oct-2010 23:44 UTC
+Last update: 20-Sep-2015 04:44 UTC
 
 '''''
 
@@ -12,6 +12,12 @@ Reference ID: GPS
 Driver ID: GPS_MX4200
 Serial Port: /dev/gps__u__; 4800 baud, 8-bits, no parity
 Features: `ppsclock` (required)
+
+== Deprecation warning ==
+
+This refclock is deprecated and obsolete. The {project-shortname}
+maintainers plan to remove it in a future release.  If you have a
+requirement for it, please make this known to us.
 
 == Description ==
 

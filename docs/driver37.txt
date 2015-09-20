@@ -1,6 +1,6 @@
 = Forum Graphic GPS Dating station =
 
-Last update: 21-Oct-2010 23:44 UTC
+Last update: 20-Sep-2015 04:44 UTC
 
 '''''
 
@@ -11,6 +11,12 @@ Address: 127.127.37.'u'
 Reference ID: GPS
 Driver ID: GPS
 Parallel Port: `/dev/fgclock`__u__
+
+== Deprecation warning ==
+
+This refclock is deprecated and obsolete. The {project-shortname}
+maintainers plan to remove it in a future release.  If you have a
+requirement for it, please make this known to us.
 
 == Description ==
 

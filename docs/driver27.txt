@@ -1,6 +1,6 @@
 = Arcron MSF Receiver =
 
-Last update: 21-Oct-2010 23:44 UTC
+Last update: 20-Sep-2010 04:04 UTC
 
 '''''
 
@@ -12,6 +12,15 @@ Reference ID: MSFa / MSF / DCF / WWVB
 Driver ID: MSF_ARCRON
 Serial Port: /dev/arc__u__; 300 baud, 8-bits, 2-stop, no parity
 Features: `tty_clk`
+
+== Deprecation warning ==
+
+This refclock is deprecated and obsolete. The {project-shortname}
+maintainers plan to remove it in a future release.  If you have a
+requirement for it, please make this known to us.
+
+The "WWVB" functionality of thus driver has been inoperable since the
+NIST modulation change in 2013.
 
 == Description ==
 

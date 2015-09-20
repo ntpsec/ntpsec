@@ -2,7 +2,7 @@
 
 [literal]
 Author: David L. Mills (mills@udel.edu)
-Last update: 11-Sep-2010 05:56 UTC
+Last update: 20-Sep-2010 04:17 UTC
 
 '''''
 
@@ -14,6 +14,12 @@ Reference ID: GPS
 Driver ID: GPS_AS2201
 Serial Port: /dev/gps__u__; 9600 baud, 8-bits, no parity
 Features: `tty_clk`
+
+== Deprecation warning ==
+
+This refclock is deprecated and obsolete. The {project-shortname}
+maintainers plan to remove it in a future release.  If you have a
+requirement for it, please make this known to us.
 
 == Description ==
 

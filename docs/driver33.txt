@@ -1,6 +1,6 @@
 = Dumb Clock =
 
-Last update: 21-Oct-2010 23:44 UTC
+Last update: 20-Seo-2015 04:44 UTC
 
 '''''
 
@@ -12,6 +12,12 @@ Reference ID: DUMBCLOCK
 Driver ID: DUMBCLOCK
 Serial Port: /dev/dumbclock_u_; 9600 bps, 8-bits, no parity
 Features: (none)
+
+== Deprecation warning ==
+
+This refclock is deprecated and obsolete. The {project-shortname}
+maintainers plan to remove it in a future release.  If you have a
+requirement for it, please make this known to us.
 
 == Description ==
 
