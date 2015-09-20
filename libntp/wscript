@@ -30,7 +30,6 @@ def build(ctx):
 		"dofptoa.c",
 		"dolfptoa.c",
 		"emalloc.c",
-		"findconfig.c",
 		"getopt.c",
 		"hextoint.c",
 		"hextolfp.c",
