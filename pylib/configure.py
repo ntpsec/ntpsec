@@ -132,6 +132,7 @@ def cmd_configure(ctx):
 		('arc4random_buf', "stdlib.h"),
 		('getclock', "sys/timers.h"),
 		('getpassphrase', "stdlib.h"), # Sun systems
+		('res_init', "resolv.h"),
 		('strlcpy', "string.h"),
 		('strlcat', "string.h"),
 		('sysconf', "unistd.h"),
@@ -155,6 +156,7 @@ def cmd_configure(ctx):
 	# be removed.
 	optional_headers = (
 		"alloca.h",
+		"arpa/nameser.h",
 		"ieeefp.h",
 		"ifaddrs.h",
 		"libgen.h",
@@ -293,6 +295,32 @@ int main() { return 0; }
 
 	# HAVE_SOLARIS_PRIVS needs to be defined for the same effect
 	# under Solaris.
+
+	# Not yet known how to detect HP-UX at version < 8, but that needs this.
+	# Shouldn't be an issue as 8.x shipped in January 1991!
+	# ctx.define("NEED_RCVBUF_SLOP", 1)
+
+	# Some Unixes allow use of signalled I/O for TCP and UDP I/O.
+	# The following systems, notably including Linux and FreeBSD,
+	# do *not* allow this:
+	#
+	# alpha*-dec-osf4*|alpha*-dec-osf5*)
+	# *-convex-*)
+	# *-dec-*)
+	# *-pc-cygwin*)
+	# *-sni-sysv*)
+	# *-stratus-vos)
+	# *-univel-sysv*)
+	# *-*-irix6*)
+	# *-*-freebsd*)
+	# *-*-*linux*)
+	# *-*-unicosmp*)
+	# *-*-kfreebsd*)
+	# m68k-*-mint*)
+	#
+	# Until we can test for system type better, don't enable this/
+	#
+	# ctx.define("HAVE_SIGNALED_IO", 1)
 
 	# These are required by the SHA2 code
 	ctx.define("LITTLE_ENDIAN", 1234)
