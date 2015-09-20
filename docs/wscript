@@ -1,8 +1,7 @@
-import glob
-
 def build(ctx):
 
-	doc_source = glob.glob("*.txt") + glob.glob("hints/*.txt")
+	doc_source = ctx.path.ant_glob("*.txt") + \
+		     ctx.path.ant_glob("hints/*.txt")
 
 	ctx(
 		target	= "doc",
