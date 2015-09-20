@@ -595,26 +595,8 @@ some configurations.
   than 15 characters, display the full value, emit a newline, and
   continue the data display properly indented on the next line.
 
-`-?`, `--help`::
-  Display usage information and exit.
-
-`-!`, `--more-help`::
-  Pass the extended usage information through a pager.
-
-`->` cfgfile, `--save-opts` [=_cfgfile_]::
-  Save the option state to _cfgfile_. The default is the _last_
-  configuration file listed in the _OPTION PRESETS_ section, below. The
-
-command will exit after updating the config file.
-`-<` cfgfile, `--load-opts`=_cfgfile_, `--no-load-opts`::
-  Load options from _cfgfile_. The _no-load-opts_ form will disable the
-  loading of earlier config/rc/ini files. `--no-load-opts` is handled
-  early, out of order.
-
-`--version` [\{_v|c|n_}]::
-  Output version of program and exit. The default mode is `v', a simple
-  version. The `c' mode will print copyright information and `n' will
-  print the full copyright notice.
+`--version`::
+  Output version of program and exit.
 
 == EXIT STATUS ==
 

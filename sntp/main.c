@@ -140,6 +140,7 @@ static const struct option longoptions[] = {
     { "step",               0, 0, 'S' },
     { "slew",               0, 0, 's' },
     { "timeout",            0, 0, 't' },
+    { "version",            0, 0, 'V' },
     { "wait",               0, 0, 'w' },
     { "nowait",             0, 0, 'W' },
     { NULL,                 0, 0, '\0'},

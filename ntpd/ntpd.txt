@@ -319,9 +319,7 @@ Registers as an NTP server with the local mDNS server which allows the
 server to be discovered via mDNS client lookup.
 
 `--version`::
-  Output version of program and exit. The default mode is `v', a simple
-  version. The `c' mode will print copyright information and `n' will
-  print the full copyright notice.
+  Output version of program and exit.
 
 = USAGE
 

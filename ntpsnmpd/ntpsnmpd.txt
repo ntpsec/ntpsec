@@ -59,6 +59,7 @@ Heiko Gerstung
 
 == COPYRIGHT ==
 
+//FIXME: NTF reference
 Copyright (C) 1992-2015 The University of Delaware and Network Time
 Foundation all rights reserved. This program is released under the terms
 of the NTP license, <http://ntp.org/license>.

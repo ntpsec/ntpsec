@@ -158,7 +158,7 @@ received and non-zero otherwise.
 
 This `sntp` was originally developed by Johannes Maximilian Kuehn.
 Harlan Stenn and Dave Hart modified it to query more than one server at
-a time. See the file `ChangeLog` in the distribution for details.
+a time.
 
 '''''
 

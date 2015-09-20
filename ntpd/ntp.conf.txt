@@ -1664,17 +1664,6 @@ started.
   turn in an expanding-ring search. The default is eight multiples of 32
   starting at 31.
 
-== OPTIONS ==
-
-`--help`::
-  Display usage information and exit.
-`--more-help`::
-  Pass the extended usage information through a pager.
-`--version` [\{_v|c|n_}]::
-  Output version of program and exit. The default mode is `v', a simple
-  version. The `c' mode will print copyright information and `n' will
-  print the full copyright notice.
-
 == FILES ==
 
 `/etc/ntp.conf`::
@@ -1708,6 +1697,7 @@ David L. Mills, _Network Time Protocol (Version 4)_, RFC5905
 
 == AUTHORS ==
 
+//FIXME: NTF reference
 The University of Delaware and Network Time Foundation
 
 == COPYRIGHT ==
