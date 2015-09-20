@@ -1184,10 +1184,10 @@ receive(
 	}
 #endif	/* ENABLE_AUTOKEY */
 	peer->received++;
-	peer->flash &= ~PKT_TEST_MASK;
+	peer->flash &= ~PKT_BOGON_MASK;
 	if (peer->flags & FLAG_XBOGUS) {
 		peer->flags &= ~FLAG_XBOGUS;
-		peer->flash |= TEST3;
+		peer->flash |= BOGON3;
 	}
 
 	/*
@@ -1196,7 +1196,7 @@ receive(
 	 * interleaved modes or is horribly broken.
 	 */
 	if (L_ISZERO(&p_xmt)) {
-		peer->flash |= TEST3;			/* unsynch */
+		peer->flash |= BOGON3;			/* unsynch */
 
 	/*
 	 * If the transmit timestamp duplicates a previous one, the
@@ -1204,7 +1204,7 @@ receive(
 	 * the most recent packet, authenticated or not.
 	 */
 	} else if (L_ISEQU(&peer->xmt, &p_xmt)) {
-		peer->flash |= TEST1;			/* duplicate */
+		peer->flash |= BOGON1;			/* duplicate */
 		peer->oldpkt++;
 		return;
 
@@ -1231,7 +1231,7 @@ receive(
 	} else if (peer->flip == 0) {
 		if (!L_ISEQU(&p_org, &peer->aorg)) {
 			peer->bogusorg++;
-			peer->flash |= TEST2;	/* bogus */
+			peer->flash |= BOGON2;	/* bogus */
 			if (!L_ISZERO(&peer->dst) && L_ISEQU(&p_org,
 			    &peer->dst)) {
 				peer->flip = 1;
@@ -1246,7 +1246,7 @@ receive(
 	 */
 	} else if (L_ISZERO(&p_org) || L_ISZERO(&p_rec) ||
 	    L_ISZERO(&peer->dst)) {
-		peer->flash |= TEST3;		/* unsynch */
+		peer->flash |= BOGON3;		/* unsynch */
 
 	/*
 	 * Check for bogus packet in interleaved symmetric mode. This
@@ -1257,7 +1257,7 @@ receive(
 	    &peer->dst)) {
 		peer->bogusorg++;
 		peer->flags |= FLAG_XBOGUS;
-		peer->flash |= TEST2;		/* bogus */
+		peer->flash |= BOGON2;		/* bogus */
 	}
 
 	/*
@@ -1267,7 +1267,7 @@ receive(
 	 */
 	if (is_authentic == AUTH_CRYPTO) {
 		report_event(PEVNT_AUTH, peer, "crypto_NAK");
-		peer->flash |= TEST5;		/* bad auth */
+		peer->flash |= BOGON5;		/* bad auth */
 		peer->badauth++;
 		if (peer->flags & FLAG_PREEMPT) {
 			unpeer(peer);
@@ -1290,7 +1290,7 @@ receive(
 	} else if (!AUTH(peer->keyid || has_mac ||
 			 (restrict_mask & RES_DONTTRUST), is_authentic)) {
 		report_event(PEVNT_AUTH, peer, "digest");
-		peer->flash |= TEST5;		/* bad auth */
+		peer->flash |= BOGON5;		/* bad auth */
 		peer->badauth++;
 		if (has_mac &&
 		    (hismode == MODE_ACTIVE || hismode == MODE_PASSIVE))
@@ -1319,7 +1319,7 @@ receive(
 
 	/* Ruthlessly reject KoDs from any source with invalid timestamps. */
 	is_kod = (hisleap == LEAP_NOTINSYNC && hisstratum == STRATUM_UNSPEC);
-	if (is_kod && (peer->flags & (TEST1|TEST2|TEST3))) {
+	if (is_kod && (peer->flags & (BOGON1|BOGON2|BOGON3))) {
 		sys_declined++;
 		return;
 	}
@@ -1387,7 +1387,7 @@ receive(
 			if (ap->seq > 0)
 				ap->seq--;
 		}
-		peer->flash |= TEST8;
+		peer->flash |= BOGON8;
 		rval = crypto_recv(peer, rbufp);
 		if (rval == XEVNT_OK) {
 			peer->unreach = 0;
@@ -1396,7 +1396,7 @@ receive(
 				report_event(PEVNT_RESTART, peer,
 				    "crypto error");
 				peer_clear(peer, "CRYP");
-				peer->flash |= TEST9;	/* bad crypt */
+				peer->flash |= BOGON9;	/* bad crypt */
 				if (peer->flags & FLAG_PREEMPT)
 					unpeer(peer);
 			}
@@ -1409,14 +1409,14 @@ receive(
 		 */
 		if (hismode == MODE_SERVER) {
 			if (skeyid == peer->keyid)
-				peer->flash &= ~TEST8;
+				peer->flash &= ~BOGON8;
 
 		/*
 		 * If an extension field is present, verify only that it
 		 * has been correctly signed. We don't need a sequence
 		 * check here, but the sequence continues.
 		 */
-		} else if (!(peer->flash & TEST8)) {
+		} else if (!(peer->flash & BOGON8)) {
 			peer->pkeyid = skeyid;
 
 		/*
@@ -1435,7 +1435,7 @@ receive(
 			for (i = 0; ; i++) {
 				if (tkeyid == peer->pkeyid ||
 				    tkeyid == ap->key) {
-					peer->flash &= ~TEST8;
+					peer->flash &= ~BOGON8;
 					peer->pkeyid = skeyid;
 					ap->seq -= i;
 					break;
@@ -1449,11 +1449,11 @@ receive(
 				    &rbufp->recv_srcadr, dstadr_sin,
 				    tkeyid, pkeyid, 0);
 			}
-			if (peer->flash & TEST8)
+			if (peer->flash & BOGON8)
 				report_event(PEVNT_AUTH, peer, "keylist");
 		}
 		if (!(peer->crypto & CRYPTO_FLAG_PROV)) /* test 9 */
-			peer->flash |= TEST8;	/* bad autokey */
+			peer->flash |= BOGON8;	/* bad autokey */
 
 		/*
 		 * The maximum lifetime of the protocol is about one
@@ -1569,16 +1569,16 @@ process_packet(
 	 */
 	if (pleap == LEAP_NOTINSYNC ||		/* test 6 */
 	    pstratum < sys_floor || pstratum >= sys_ceiling)
-		peer->flash |= TEST6;		/* bad synch or strat */
+		peer->flash |= BOGON6;		/* bad synch or strat */
 	if (p_del / 2 + p_disp >= MAXDISPERSE)	/* test 7 */
-		peer->flash |= TEST7;		/* bad header */
+		peer->flash |= BOGON7;		/* bad header */
 
 	/*
 	 * If any tests fail at this point, the packet is discarded.
 	 * Note that some flashers may have already been set in the
 	 * receive() routine.
 	 */
-	if (peer->flash & PKT_TEST_MASK) {
+	if (peer->flash & PKT_BOGON_MASK) {
 		peer->seldisptoolarge++;
 #ifdef DEBUG
 		if (debug)
@@ -1802,7 +1802,7 @@ process_packet(
 	 * complete.
 	 */
 	if ((FLAG_BC_VOL & peer->flags) && MODE_CLIENT == peer->hmode &&
-	    !(TEST11 & peer_unfit(peer))) {	/* distance exceeded */
+	    !(BOGON11 & peer_unfit(peer))) {	/* distance exceeded */
 #ifdef ENABLE_AUTOKEY
 		if (peer->flags & FLAG_SKEY) {
 			if (!(~peer->crypto & CRYPTO_FLAG_ALL))
@@ -3363,7 +3363,7 @@ peer_xmit(
 	authlen = authencrypt(xkeyid, (uint32_t *)&xpkt, sendlen);
 	if (authlen == 0) {
 		report_event(PEVNT_AUTH, peer, "no key");
-		peer->flash |= TEST5;		/* auth error */
+		peer->flash |= BOGON5;		/* auth error */
 		peer->badauth++;
 		return;
 	}
@@ -3789,10 +3789,10 @@ local_refid(
  * Determine if the peer is unfit for synchronization
  *
  * A peer is unfit for synchronization if
- * > TEST10 bad leap or stratum below floor or at or above ceiling
- * > TEST11 root distance exceeded for remote peer
- * > TEST12 a direct or indirect synchronization loop would form
- * > TEST13 unreachable or noselect
+ * > BOGON10 bad leap or stratum below floor or at or above ceiling
+ * > BOGON11 root distance exceeded for remote peer
+ * > BOGON12 a direct or indirect synchronization loop would form
+ * > BOGON13 unreachable or noselect
  */
 bool				/* false if fit, true if unfit */
 peer_unfit(
@@ -3808,7 +3808,7 @@ peer_unfit(
 	 */
 	if (peer->leap == LEAP_NOTINSYNC || peer->stratum < sys_floor ||
 	    peer->stratum >= sys_ceiling)
-		rval |= TEST10;		/* bad synch or stratum */
+		rval |= BOGON10;		/* bad synch or stratum */
 
 	/*
 	 * A distance error for a remote peer occurs if the root
@@ -3817,7 +3817,7 @@ peer_unfit(
 	 */
 	if (!(peer->flags & FLAG_REFCLOCK) && root_distance(peer) >=
 	    sys_maxdist + clock_phi * ULOGTOD(peer->hpoll))
-		rval |= TEST11;		/* distance exceeded */
+		rval |= BOGON11;		/* distance exceeded */
 
 	/*
 	 * A loop error occurs if the remote peer is synchronized to the
@@ -3826,16 +3826,16 @@ peer_unfit(
 	 * neither a reference clock nor an orphan.
 	 */
 	if (peer->stratum > 1 && local_refid(peer))
-		rval |= TEST12;		/* synchronization loop */
+		rval |= BOGON12;		/* synchronization loop */
 
 	/*
 	 * An unreachable error occurs if the server is unreachable or
 	 * the noselect bit is set.
 	 */
 	if (!peer->reach || (peer->flags & FLAG_NOSELECT))
-		rval |= TEST13;		/* unreachable */
+		rval |= BOGON13;		/* unreachable */
 
-	peer->flash &= ~PEER_TEST_MASK;
+	peer->flash &= ~PEER_BOGON_MASK;
 	peer->flash |= rval;
 	return (rval);
 }

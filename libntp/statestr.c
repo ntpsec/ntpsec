@@ -90,19 +90,19 @@ static const struct codestring clock_codes[] = {
  * Flash bits -- see ntpq.c tstflags & tstflagnames
  */
 static const struct codestring flash_codes[] = {
-	{ TEST1,		"pkt_dup" },
-	{ TEST2,		"pkt_bogus" },
-	{ TEST3,		"pkt_unsync" },
-	{ TEST4,		"pkt_denied" },
-	{ TEST5,		"pkt_auth" },
-	{ TEST6,		"pkt_stratum" },
-	{ TEST7,		"pkt_header" },
-	{ TEST8,		"pkt_autokey" },
-	{ TEST9,		"pkt_crypto" },
-	{ TEST10,		"peer_stratum" },
-	{ TEST11,		"peer_dist" },
-	{ TEST12,		"peer_loop" },
-	{ TEST13,		"peer_unreach" },
+	{ BOGON1,		"pkt_dup" },
+	{ BOGON2,		"pkt_bogus" },
+	{ BOGON3,		"pkt_unsync" },
+	{ BOGON4,		"pkt_denied" },
+	{ BOGON5,		"pkt_auth" },
+	{ BOGON6,		"pkt_stratum" },
+	{ BOGON7,		"pkt_header" },
+	{ BOGON8,		"pkt_autokey" },
+	{ BOGON9,		"pkt_crypto" },
+	{ BOGON10,		"peer_stratum" },
+	{ BOGON11,		"peer_dist" },
+	{ BOGON12,		"peer_loop" },
+	{ BOGON13,		"peer_unreach" },
 	{ -1,			"flash" }
 };
 #endif

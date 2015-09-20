@@ -677,7 +677,7 @@ crypto_recv(
 				peer->pkey = X509_get_pubkey(cert);
 				X509_free(cert);
 			}
-			peer->flash &= ~TEST8;
+			peer->flash &= ~BOGON8;
 			temp32 = xinfo->nid;
 			snprintf(statstr, sizeof(statstr),
 			    "cert %s %s 0x%x %s (%u) fs %u",
@@ -721,7 +721,7 @@ crypto_recv(
 				break;
 
 			peer->crypto |= CRYPTO_FLAG_VRFY;
-			peer->flash &= ~TEST8;
+			peer->flash &= ~BOGON8;
 			snprintf(statstr, sizeof(statstr), "iff %s fs %u",
 			    peer->issuer, ntohl(ep->fstamp));
 			record_crypto_stats(&peer->srcadr, statstr);
@@ -762,7 +762,7 @@ crypto_recv(
 				break;
 
 			peer->crypto |= CRYPTO_FLAG_VRFY;
-			peer->flash &= ~TEST8;
+			peer->flash &= ~BOGON8;
 			snprintf(statstr, sizeof(statstr), "gq %s fs %u",
 			    peer->issuer, ntohl(ep->fstamp));
 			record_crypto_stats(&peer->srcadr, statstr);
@@ -802,7 +802,7 @@ crypto_recv(
 				break;
 
 			peer->crypto |= CRYPTO_FLAG_VRFY;
-			peer->flash &= ~TEST8;
+			peer->flash &= ~BOGON8;
 			snprintf(statstr, sizeof(statstr), "mv %s fs %u",
 			    peer->issuer, ntohl(ep->fstamp));
 			record_crypto_stats(&peer->srcadr, statstr);
@@ -870,7 +870,7 @@ crypto_recv(
 			else
 				peer->pcookie = cookie;
 			peer->crypto |= CRYPTO_FLAG_COOK;
-			peer->flash &= ~TEST8;
+			peer->flash &= ~BOGON8;
 			snprintf(statstr, sizeof(statstr),
 			    "cook %x ts %u fs %u", peer->pcookie,
 			    ntohl(ep->tstamp), ntohl(ep->fstamp));
@@ -931,7 +931,7 @@ crypto_recv(
 			bp->key = ntohl(ap->key);
 			peer->pkeyid = bp->key;
 			peer->crypto |= CRYPTO_FLAG_AUTO;
-			peer->flash &= ~TEST8;
+			peer->flash &= ~BOGON8;
 			snprintf(statstr, sizeof(statstr), 
 			    "auto seq %d key %x ts %u fs %u", bp->seq,
 			    bp->key, ntohl(ep->tstamp),
@@ -969,7 +969,7 @@ crypto_recv(
 				break;
 			}
 			peer->crypto |= CRYPTO_FLAG_SIGN;
-			peer->flash &= ~TEST8;
+			peer->flash &= ~BOGON8;
 			temp32 = xinfo->nid;
 			snprintf(statstr, sizeof(statstr),
 			    "sign %s %s 0x%x %s (%u) fs %u",
@@ -1022,7 +1022,7 @@ crypto_recv(
 				    fstostr(lsig.etime));
 			}
 			peer->crypto |= CRYPTO_FLAG_LEAP;
-			peer->flash &= ~TEST8;
+			peer->flash &= ~BOGON8;
 			snprintf(statstr, sizeof(statstr),
 			    "leap TAI offset %d at %u expire %u fs %u",
 			    ntohl(ep->pkt[0]), ntohl(ep->pkt[1]),

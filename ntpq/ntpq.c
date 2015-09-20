@@ -133,19 +133,19 @@ const var_format cookedvars[] = {
  * flasher bits
  */
 static const char *tstflagnames[] = {
-	"pkt_dup",		/* TEST1 */
-	"pkt_bogus",		/* TEST2 */
-	"pkt_unsync",		/* TEST3 */
-	"pkt_denied",		/* TEST4 */
-	"pkt_auth",		/* TEST5 */
-	"pkt_stratum",		/* TEST6 */
-	"pkt_header",		/* TEST7 */
-	"pkt_autokey",		/* TEST8 */
-	"pkt_crypto",		/* TEST9 */
-	"peer_stratum",		/* TEST10 */
-	"peer_dist",		/* TEST11 */
-	"peer_loop",		/* TEST12 */
-	"peer_unreach"		/* TEST13 */
+	"pkt_dup",		/* BOGON1 */
+	"pkt_bogus",		/* BOGON2 */
+	"pkt_unsync",		/* BOGON3 */
+	"pkt_denied",		/* BOGON4 */
+	"pkt_auth",		/* BOGON5 */
+	"pkt_stratum",		/* BOGON6 */
+	"pkt_header",		/* BOGON7 */
+	"pkt_autokey",		/* BOGON8 */
+	"pkt_crypto",		/* BOGON9 */
+	"peer_stratum",		/* BOGON10 */
+	"peer_dist",		/* BOGON11 */
+	"peer_loop",		/* BOGON12 */
+	"peer_unreach"		/* BOGON13 */
 };
 
 

@@ -440,13 +440,13 @@ score(
 	 * error bits and status. Increasing values are more cherished.
 	 */
 	temp = 0;
-	if (!(peer->flash & TEST10))
+	if (!(peer->flash & BOGON10))
 		temp++;			/* 1 good synch and stratum */
-	if (!(peer->flash & TEST13))
+	if (!(peer->flash & BOGON13))
 		temp++;			/* 2 reachable */
-	if (!(peer->flash & TEST12))
+	if (!(peer->flash & BOGON12))
 		temp++;			/* 3 no loop */
-	if (!(peer->flash & TEST11))
+	if (!(peer->flash & BOGON11))
 		temp++;			/* 4 good distance */
 	if (peer->status >= CTL_PST_SEL_SELCAND)
 		temp++;			/* 5 in the hunt */

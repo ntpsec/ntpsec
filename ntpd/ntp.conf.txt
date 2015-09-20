@@ -950,8 +950,8 @@ of the matching restrict list entry is set, the code is "DENY"; if the
 
 A client receiving a KoD performs a set of sanity checks to minimize
 security exposure, then updates the stratum and reference identifier
-peer variables, sets the access denied (TEST4) bit in the peer flash
-variable and sends a message to the log. As long as the TEST4 bit is
+peer variables, sets the access denied (BOGON4) bit in the peer flash
+variable and sends a message to the log. As long as the BOGON4 bit is
 set, the client will send no further packets to the server. The only way
 at present to recover from this condition is to restart the protocol at
 both the client and server. This happens automatically at the client
