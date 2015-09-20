@@ -25,11 +25,12 @@ include::includes/authopt.txt[]
 
 '''''
 
+//This warning is duplicated on the autokey page
 [[noauto]]
 == Autokey is disabled ==
 
-The Autokey feature described here and elsewhere is not presently
-enabled in production builds of {project-shortname}.  It has a history
+The Autokey feature described here and elsewhere cannot presently
+be enabled in production builds of {project-shortname}.  It has a history
 of instability, and of interoperability problems, and has even been
 exploited as an attack vector against time servers and clients.  These
 problems are not known to have affected symmetric-key authentication,
@@ -38,7 +39,7 @@ only Autokey itself.
 The maintainers have not been able to identify anyone using Autokey
 successfully in production. If you are such a person, please inform
 us.  It is still possible to enable Autokey with a relatively trivial
-tweak to the build system.
+custom tweak to the build system.
 
 Autokey will remain disabled by default until the maintainers have
 confidence that its deficiencies have been repaired. We would welcome
