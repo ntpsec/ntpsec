@@ -5,7 +5,7 @@
 |image:pic/radio2.jpg[ICOM R-72 shortwave receiver and Sure audio mixer]|
 ICOM R-72 shortwave receiver and Sure audio mixer
 
-Last update: 11-Sep-2010 05:55 UTC
+Last update: 20-Sep-2015 02:00 UTC
 |==============================
 
 == Related Links ==
@@ -15,11 +15,30 @@ include::includes/audio.txt[]
 
 == Table of Contents ==
 
+* link:#deprecation[Deprecation note]
 * link:#sound[Sound Card Drivers]
 * link:#short[Shortwave Radio Drivers]
 * link:#setup[Setup and Debugging Aids]
 
 '''''
+[[deprecation note]]
+== Deprecation note ==
+
+As of 2015 the technologies descried on this page are obsolete and the
+{project-shortname} maintainers no longer recommend them.  Compared to
+an inexpensive GPS with 1PPS capability, audio time is both
+substantially less accurate and less reliably available, for reasons
+ranging from longer atmospheric path to intrinsic jitter in the
+receiving devices.  Reflecting this, no precision time radios have been
+manufactured in the U.S. since NIST's incompatible WWV modulation
+change in 2013.
+
+Audio drivers for the NIST time stations WWV and WWVH have already
+been removed from the distribution because they pre-dated the 2013
+modulation change.  The remaining CHU and IRIG drivers are a
+significant maintainance problem, are deprecated, and are likely to be
+removed in a future release unless a significant user constituency for
+them makes itself known.
 
 [[sound]]
 == Sound Card Drivers ==
@@ -30,19 +49,20 @@ communications port or special purpose bus peripheral. This is useful in
 such cases where the audio signal is sent over a telephone circuit, for
 example, or received directly from a shortwave receiver. In such cases
 the audio signal can be connected via an ordinary sound card or
-baseboard audio codec. The suite of NTP reference clock drivers
-currently includes three drivers suitable for these applications. They
-include a driver for the Inter Range Instrumentation Group (IRIG)
-signals produced by many radio clocks and timing devices, another for
-the Canadian time/frequency radio station CHU and a third for the NIST
-time/frequency radio stations WWV and WWVH. The radio drivers are
-designed to work with ordinary inexpensive shortwave radios and may be
-one of the least expensive ways to build a good primary time server.
+baseboard audio codec.
 
-All three drivers make ample use of sophisticated digital signal
+The suite of NTP reference clock drivers currently includes two
+drivers suitable for these applications. They include a driver for the
+Inter Range Instrumentation Group (IRIG) signals produced by many
+radio clocks and timing devices, and another for the Canadian
+time/frequency radio station CHU.  There was formerly a third audio
+driver for the NIST time & frequency radio stations WWV and WWVH, but
+it was obsolesced by the 2013 modulation change and has been removed.
+
+These drivers make ample use of sophisticated digital signal
 processing algorithms designed to efficiently extract timing signals
-from noise and interference. The radio station drivers in particular
-implement optimum linear demodulation and decoding techniques, including
+from noise and interference. The radio station driver in particular
+implements optimum linear demodulation and decoding techniques, including
 maximum-likelihood and soft-decision methods. The documentation page for
 each driver contains an in-depth discussion on the algorithms and
 performance expectations. In some cases the algorithms are further
@@ -66,12 +86,12 @@ the input signal level must be such as to cause the AGC to set the gain
 somewhere in the middle of the range from 0 to 255, as indicated in the
 timecode displayed by the `ntpq` program.
 
-The IRIG and WWV drivers operate by disciplining a logical clock based
+The IRIG driver operates by disciplining a logical clock based
 on the codec sample clock to the audio signal as received. This is done
 by stuffing or slipping samples as required to maintain exact frequency
 to the order of 0.1 PPM. In order for the driver to reliably lock on the
 audio signal, the sample clock frequency tolerance must be less than 250
-PPM (.025 percent) for the IRIG driver and half that for the WWV driver.
+PPM (.025 percent) for the IRIG driver.
 The largest error observed so far is about 60 PPM, but it is possible
 some sound cards or codecs may exceed that value. In any case, the
 configuration file command `tinker codec` command can be used to change
@@ -88,7 +108,7 @@ configuration file or remotely using the `ntpq` utility program.
 [[short]]
 == Shortwave Radio Drivers ==
 
-The WWV/H and CHU audio drivers require an external shortwave radio with
+The CHU audio driver requires an external shortwave radio with
 the radio output - speaker or headphone jack - connected to either the
 microphone or line-in port on the computer. There is some degree of art
 in setting up the radio and antenna and getting the setup to work. While
@@ -111,7 +131,7 @@ couple of center-tapped audio transformers will minimize noise pickup
 and provide phantom power to the radio with return via the building
 ground.
 
-The WWV/H and CHU transmitters operate on several frequencies
+The CHU transmitter operates on several frequencies
 simultaneously, so that in most parts of North America at least one
 frequency supports propagation to the receiver location at any given
 hour. While both drivers support the ICOM CI-V radio interface and can
@@ -132,8 +152,7 @@ thunderstorm season, so is higher on summer afternoons and evenings.
 * The lower frequency bands are best for shorter distances, while the
 higher bands are best for longer distances.
 * The optimum frequencies are higher at the peak of the 11-year sunspot
-cycle and lower at the trough. The current sunspot cycle began at the
-minimum in late 2006 and should reach its peak in 2012.
+cycle and lower at the trough.
 
 The best way to choose a frequency is to listen at various times over
 the day and determine the highest (daytime) and lowest (nighttime)
