@@ -5,13 +5,15 @@ image:pic/alice35.gif[image]http://www.eecis.udel.edu/%7emills/pictures.html[fro
 
 Mother in law has all the answers.
 
-Last update: 10-Mar-2014 05:06 UTC
+Last update: 20-Sep-2015 05:11 UTC
 
 
 '''''
 
+file:./hints/[Hint Index]
+
 This is an index for a set of troubleshooting notes contained in
-individual text files in the `./hints` directory. They were supplied by
+individual files in the `./hints` directory. They were supplied by
 various volunteers in the form of mail messages, patches or just plain
 word of mouth. Each note applies to a specific computer and operating
 system and gives information found useful in setting up the NTP
@@ -26,6 +28,12 @@ operating system (specific version(s) where appropriate), problem
 description, problem solution and submitter's name and electric address.
 If the submitter is willing to continue debate on the problem, please so
 advise. See the link:hints/[directory listing].
+
+This list is cleaned up by removing obsolete notes or, when possible,
+routinizing the hints into the standard build and install procedure.
+Thus, you might find it empty, and if you do that is probably a good
+thing.
+
 
 '''''
 
