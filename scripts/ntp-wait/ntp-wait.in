@@ -1,4 +1,4 @@
-#! @PATH_PERL@
+#! @BIN_PERL@
 
 package ntp_wait;
 use 5.006_000;

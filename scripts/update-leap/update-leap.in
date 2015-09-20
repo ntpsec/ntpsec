@@ -1,4 +1,4 @@
-#! @PATH_PERL@ -w
+#! @BIN_PERL@ -w
 
 # Copyright (C) 2015 Network Time Foundation
 # Author: Harlan Stenn

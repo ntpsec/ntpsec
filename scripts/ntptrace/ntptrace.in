@@ -1,4 +1,4 @@
-#! @PATH_PERL@ -w
+#! @BIN_PERL@ -w
 # John Hay -- John.Hay@icomtek.csir.co.za / jhay@FreeBSD.org
 
 package ntptrace;
