@@ -355,7 +355,6 @@
     <ClInclude Include="..\..\..\..\include\ntp_refclock.h" />
     <ClInclude Include="..\..\..\..\include\ntp_request.h" />
     <ClInclude Include="..\..\..\..\include\ntp_rfc2553.h" />
-    <ClInclude Include="..\..\..\..\include\ntp_select.h" />
     <ClInclude Include="..\..\..\..\include\ntp_stdlib.h" />
     <ClInclude Include="..\..\..\..\include\ntp_string.h" />
     <ClInclude Include="..\..\..\..\include\ntp_syslog.h" />

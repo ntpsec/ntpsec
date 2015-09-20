@@ -36,7 +36,7 @@
 #define	LDISC_7O1	0x100	/* 7-bit, odd parity for Z3801A */
 
 /* function prototypes for ntp_tty.c */
-#if !defined(SYS_VXWORKS) && !defined(SYS_WINNT)
+#if !defined(SYS_WINNT)
 extern	int	ntp_tty_setup(int, u_int, u_int);
 extern	int	ntp_tty_ioctl(int, u_int);
 #endif

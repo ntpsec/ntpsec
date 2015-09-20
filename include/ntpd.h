@@ -13,7 +13,6 @@
 #include "ntp_syslog.h"
 #include "ntp_debug.h"
 #include "ntp_syslog.h"
-#include "ntp_select.h"
 #include "ntp_malloc.h"
 #include "ntp_refclock.h"
 #include "ntp_intres.h"

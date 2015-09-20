@@ -239,9 +239,6 @@ filegen_open(
 							filename);
 					free(savename);
 				} else {
-#if defined(VMS)
-#define unlink delete
-#endif
 					/*
 					 * there is at least a second link to
 					 * this file.
@@ -252,9 +249,6 @@ filegen_open(
 						msyslog(LOG_ERR, 
 							"couldn't unlink %s: %m",
 							filename);
-#if defined(VMS)
-#undef unlink
-#endif
 				}
 			} else {
 				/*
@@ -318,17 +312,15 @@ filegen_open(
 
 			/* Windows NT does not support file links -Greg Schueman 1/18/97 */
 
-#if defined(SYS_WINNT) || defined(SYS_VXWORKS)
+#if defined(SYS_WINNT)
 			SetLastError(0); /* On WinNT, don't support FGEN_FLAG_LINK */
-#elif defined(VMS)
-			errno = 0; /* On VMS, don't support FGEN_FLAG_LINK */
-#else  /* not (VMS) / VXWORKS / WINNT ; DO THE LINK) */
+#else  /* not WINNT ; DO THE LINK) */
 			if (link(fullname, filename) != 0)
 				if (EEXIST != errno)
 					msyslog(LOG_ERR, 
 						"can't link(%s, %s): %m",
 						fullname, filename);
-#endif /* SYS_WINNT || VXWORKS */
+#endif /* SYS_WINNT */
 		}		/* flags & FGEN_FLAG_LINK */
 	}			/* else fp == NULL */
 	

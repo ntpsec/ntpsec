@@ -10,6 +10,7 @@
 #include <sys/time.h>
 #include <unistd.h>
 #include <fcntl.h>
+#include <sys/select.h>
 #ifdef SYS_WINNT
 # include <mswsock.h>
 #endif
@@ -21,7 +22,6 @@
 #include "ntp_stdlib.h"
 #include "ntp_unixtime.h"
 #include "ntp_calendar.h"
-#include "ntp_select.h"
 #include "ntp_assert.h"
 #include "lib_strbuf.h"
 #include "ntp_lineedit.h"
@@ -32,11 +32,6 @@
 #include "openssl/err.h"
 #endif
 #include <ssl_applink.c>
-
-#ifdef SYS_VXWORKS		/* vxWorks needs mode flag -casey*/
-# define open(name, flags)   open(name, flags, 0777)
-# define SERVER_PORT_NUM     123
-#endif
 
 /*
  * Because we potentially understand a lot of commands we will run
@@ -459,11 +454,6 @@ ntpqmain(
 	int icmd;
 	int msglen;
 
-#ifdef SYS_VXWORKS
-	clear_globals();
-	taskPrioritySet(taskIdSelf(), 100 );
-#endif
-
 	delay_time.l_ui = 0;
 	delay_time.l_uf = DEFDELAY;
 
@@ -748,16 +738,6 @@ openhost(
 
 	/* port maps to the same location in both families */
 	s_port = NSRCPORT(&addr);
-#ifdef SYS_VXWORKS
-	((struct sockaddr_in6 *)&hostaddr)->sin6_port = htons(SERVER_PORT_NUM);
-	if (ai->ai_family == AF_INET)
-		*(struct sockaddr_in *)&hostaddr=
-			*((struct sockaddr_in *)ai->ai_addr);
-	else
-		*(struct sockaddr_in6 *)&hostaddr=
-			*((struct sockaddr_in6 *)ai->ai_addr);
-#endif /* SYS_VXWORKS */
-
 #ifdef SYS_WINNT
 	{
 		int optionValue = SO_SYNCHRONOUS_NONALERT;
@@ -794,15 +774,8 @@ openhost(
 # endif
 #endif
 
-	if
-#ifdef SYS_VXWORKS
-	   (connect(sockfd, (struct sockaddr *)&hostaddr,
-		    sizeof(hostaddr)) == -1)
-#else
-	   (connect(sockfd, (struct sockaddr *)ai->ai_addr,
-		    ai->ai_addrlen) == -1)
-#endif /* SYS_VXWORKS */
-	    {
+	if (connect(sockfd, (struct sockaddr *)ai->ai_addr, ai->ai_addrlen)==-1)
+	{
 		error("connect");
 		freeaddrinfo(ai);
 		return false;

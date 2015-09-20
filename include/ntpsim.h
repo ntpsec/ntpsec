@@ -15,10 +15,11 @@
 #include <math.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>
+#include <sys/select.h>
+
 #include "ntp_syslog.h"
 #include "ntp_fp.h"
 #include "ntp.h"
-#include "ntp_select.h"
 #include "ntp_malloc.h"
 #include "ntp_refclock.h"
 #include "recvbuff.h"

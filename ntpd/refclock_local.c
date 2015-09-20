@@ -1,8 +1,6 @@
 
 /*
  * refclock_local - local pseudo-clock driver
- *
- * wjm 17-aug-1995: add a hook for special treatment of VMS_LOCALUNIT
  */
 #include <config.h>
 #include "ntp.h"
@@ -161,15 +159,6 @@ local_poll(
 	 */
 	if (!(sys_peer == NULL || sys_peer == peer))
 		return;
-
-#if defined(VMS) && defined(VMS_LOCALUNIT)
-	if (unit == VMS_LOCALUNIT) {
-		extern void vms_local_poll(struct peer *);
-
-		vms_local_poll(peer);
-		return;
-	}
-#endif /* VMS && VMS_LOCALUNIT */
 
 	pp = peer->procptr;
 	pp->polls++;

@@ -3567,30 +3567,9 @@ io_handler(void)
 	 * between checking for alarms and doing the select().
 	 * Mostly harmless, I think.
 	 */
-	/*
-	 * On VMS, I suspect that select() can't be interrupted
-	 * by a "signal" either, so I take the easy way out and
-	 * have select() time out after one second.
-	 * System clock updates really aren't time-critical,
-	 * and - lacking a hardware reference clock - I have
-	 * yet to learn about anything else that is.
-	 */
 	rdfdes = activefds;
-#   if !defined(VMS) && !defined(SYS_VXWORKS)
 	nfound = select(maxactivefd + 1, &rdfdes, NULL,
 			NULL, NULL);
-#   else	/* VMS, VxWorks */
-	/* make select() wake up after one second */
-	{
-		struct timeval t1;
-
-		t1.tv_sec = 1;
-		t1.tv_usec = 0;
-		nfound = select(maxactivefd + 1,
-				&rdfdes, NULL, NULL,
-				&t1);
-	}
-#   endif	/* VMS, VxWorks */
 	if (nfound > 0) {
 		l_fp ts;
 

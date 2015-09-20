@@ -718,11 +718,6 @@ process_refclock_packet(
 
 
 /*
- * The following code does not apply to WINNT & VMS ...
- */
-#if !defined(SYS_VXWORKS) && !defined(SYS_WINNT)
-
-/*
  * refclock_open - open serial port for reference clock
  *
  * This routine opens a serial port for I/O and sets default options. It
@@ -917,7 +912,6 @@ refclock_ioctl(
 
 	return true;
 }
-#endif /* !defined(SYS_VXWORKS) && !defined(SYS_WINNT) */
 
 
 /*
