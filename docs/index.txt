@@ -7,7 +7,7 @@ http://www.eecis.udel.edu/%7emills/pictures.html['P.T. Bridgeport Bear'; from 'P
 
 Pleased to meet you.
 
-Last update: 31-Mar-2014 05:41
+Last update: 20-Mar-2015 05:30
 |==============================
 
 == Related Links ==
@@ -27,9 +27,9 @@ Last update: 31-Mar-2014 05:41
 [[intro]]
 == Introduction ==
 
-Note: The NTP Version 4 software contained in this distribution is
-available without charge under the conditions set forth in the
-link:copyright.html[Copyright Notice].
+Note: The Network Time Protocol software contained in this
+distribution is available without charge under the conditions set
+forth in the link:copyright.html[Copyright Notice].
 
 [note]
 It is very important that readers understand that the NTP document
@@ -52,13 +52,6 @@ clients. It provides accuracies typically less than a millisecond on
 LANs and up to a few milliseconds on WANs. Typical NTP configurations
 utilize multiple redundant servers and diverse network paths in order
 to achieve high accuracy and reliability.
-
-This distribution includes a simulation framework in which substantially
-all the runtime NTP operations and most features can be tested and
-evaluated. This has been very useful in exploring in vitro response to
-unusual circumstances or over time periods impractical in vivo. Details
-are on the link:ntpdsim.html[Network Time Protocol (NTP) Simulator]
-page.
 
 [[hand]]
 == The Handbook ==
@@ -93,16 +86,15 @@ link:warp.html[How NTP Works]::
 [[build]]
 == Building and Installing NTP ==
 
-NTP supports Unix, VMS and Windows (2000 and later) systems. The
-link:build.html[Building and Installing the Distribution] page details
-the procedures for building and installing on a typical system. This
-distribution includes drivers for many radio and satellite receivers and
-telephone modem services in the US, Canada and Europe. A list of
-supported drivers is on the link:refclock.html[Reference Clock Drivers]
-page. The default build includes the debugging options and all drivers
-that run on the target machine; however, options and drivers can be
-included or excluded using options on the link:config.html[Configuration
-Options] page.
+{project-shortname} supports all operating systems conforming to
+POSIX.1-2001 and ISO/IEC 9899:1999 (aka C99).  Primary platforms
+include Linux and the *BSD family; any reasonably modern proprietary
+Unix will also serve
+
+The link:build.html[Building and Installing the Distribution] page
+gives and overview of the procedures for building and installing
+on a typical system.  For more details, see the INSTALL file in the
+distribution root.
 
 [[prob]]
 == Resolving Problems ==
