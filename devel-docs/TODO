@@ -2,7 +2,50 @@
 
 == Checklist for a quality first release ==
 
+=== Blocker bugs ===
+
+* Hal reports that in the loopsts file jitter is always being reported
+  as zero.
+
+* dfranke reports:
++
+| Bad news: In testing it, I lost several hours today trying to
+| work around a bug in how ntpsec is choosing what interfaces to
+| bind to.
+| If I don't put anything special in the configuration file, it
+| binds to 0.0.0.0, then *also* tries to bind to individual
+| interface IPs, logs some errors, then keeps running but doesn't
+| respond on the network.
+| If I put "interface ignore wildcard" in the configuration file,
+| it binds to 127.0.0.1 but nothing else.
+| I was only able to getting it working by putting in "interface
+| ignore wildcard" and also "interface listen <ip>" for every
+| network interface.
+| Giving just "interface listen wildcard" makes it properly bind on
+| 0.0.0.0 and nowhere else, but then it fails to emit any requests
+| to the configured servers; they all sit in "reject" status..
+| This is a regression from NTP classic which does the right thing
+| with no configuration.
+
+Hal:
+> I think there is some interaction between when the ACTS driver calls and the 
+> state of other stuff, like the connection to the net.  This is probably a 
+> good candidate to get cleaned up.
+> 
+> There is another possible tangle in this area.  If you set "noselect" on the 
+> server line in the config file, ntpd goes through all the action of 
+> collecting the data and writing log files, but then drops the clock.  I don't 
+> know things well enough to be sure that this sort of logic won't pick one 
+> back up.
+
 === Build system ===
+
+* Document build files.
+
+* Cleanup and separate features in pylib/*
+
+* Add 'snapshot' feature to dump config status into a JSON file for collecting 
+  build + platform information
 
 * scripts/*/*.in and scripts/ntpsweep.in need to be expanded into the
 actual scripts by substituting in @-cookies.
@@ -43,17 +86,6 @@ TRIM_POLLRATE
 
 * The u_* types in ntp.h are GCCisms that should be replaced with POSIX types.
 
-Hal:
-> I think there is some interaction between when the ACTS driver calls and the 
-> state of other stuff, like the connection to the net.  This is probably a 
-> good candidate to get cleaned up.
-> 
-> There is another possible tangle in this area.  If you set "noselect" on the 
-> server line in the config file, ntpd goes through all the action of 
-> collecting the data and writing log files, but then drops the clock.  I don't 
-> know things well enough to be sure that this sort of logic won't pick one 
-> back up.
-
 === Porting ===
 
 * The ntpd initialization sequence is still full of platform-
@@ -61,10 +93,6 @@ specific crud.
 
 * Better ANSI/POSIX conformance in MinGW and Visual Studio 2013 might
 enable us to get rid of the SYS_WINNT code. Should be tried...
-
-* Other than SYS_WIN, SYS_VXWORXS is the only explicit port macro left.
-The support code looks very old and seems likely to have bitrotted.
-Should we drop it pending an active maintainer and a re-port?
 
 === Testing ===
 
