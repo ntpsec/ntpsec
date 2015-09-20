@@ -94,17 +94,30 @@ is not yet tested anywhere but in ntpd itself.
 * man pages outside of docs/ need to be merged with the
   Mills manpages inside it, with duplications removed.  In the
   list below, the original docs content is on the left and
-  the man page on the right.  Where there is no second entry
-  the external man page is missing.
-
-  docs/keygen.txt -> ntp-keygen/ntp-keygen.txt
-  docs/ntpdsim.txt -> docs/ntpdsim_new.txt
-  docs/ntpd.txt -> ntpd/ntpd.txt
-  docs/ntpq.txt -> ntpq/ntpq.txt
-  docs/ntpdate.txt
-  docs/ntptime.txt
-  docs/ntptrace.txt -> scripts/ntptrace/ntptrace.txt
-  docs/ntp-wait.txt -> scripts/ntp-wait/ntp-wait.txt
+  the external man pages are on the right.
++
+[options="header"]
+|===========================================================
+| Inside docs       | Outside docs
+| docs/keygen.txt   | ntp-keygen/ntp-keygen.txt
+| docs/ntp_conf.txt | ntpd/ntp.conf.txt
+| docs/ntpdsim.txt  | docs/ntpdsim_new.txt
+| docs/ntpd.txt     | ntpd/ntpd.txt
+| docs/ntpq.txt     | ntpq/ntpq.txt
+| docs/ntpdate.txt  | -
+| docs/ntptime.txt  | -
+| docs/ntptrace.txt | scripts/ntptrace/ntptrace.txt
+| docs/ntpwait.txt  | scripts/ntp-wait/ntp-wait.txt
+| docs/sntp.txt     | sntp/sntp.txt
+| docs/tickadj.txt  | -
+| -                 | ntpsnmpd/ntpsnmpd.txt
+| -                 | ntpd/ntp.keys.txt
+| -                 | scripts/calc_tickadj/calc_tickadj.txt
+| -                 | scripts/summary.txt
+| -                 | scripts/ntpsweep/ntpsweep.txt
+| -                 | scripts/plot_summary.txt
+| -                 | scripts/update-leap/update-leap.txt
+|===========================================================
 
 * In the docs subdirectory, include/command.txt is an HTML passthrough
   in a not entirely successful attempt to emulate the look of the
