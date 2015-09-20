@@ -411,7 +411,7 @@ void clear_globals(void)
 #endif /* !BUILD_AS_LIB */
 #endif /* NO_MAIN_ALLOWED */
 
-#define ALL_OPTIONS "46c:dD:inOp"
+#define ALL_OPTIONS "46c:dD:inOpV"
 static const struct option longoptions[] = {
     { "ipv4",		    0, 0, '4' },
     { "ipv6",		    0, 0, '6' },
@@ -422,6 +422,7 @@ static const struct option longoptions[] = {
     { "numeric",            1, 0, 'n' },
     { "old-rv",             1, 0, 'O' },
     { "peers",              1, 0, 'p' },
+    { "version",	    0, 0, 'V' },
     { NULL,                 0, 0, '\0'},
 };
 
@@ -544,6 +545,9 @@ ntpqmain(
 		    case 'p':
 			opt_peers = true;
 			break;
+		    case 'V':
+			printf("ntpd %s\n", NTPS_VERSION_STRING);
+			exit(0);
 		    case 'w':
 			opt_wide = true;
 			break;

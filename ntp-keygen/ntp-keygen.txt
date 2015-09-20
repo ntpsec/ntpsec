@@ -696,11 +696,6 @@ identification scheme.
 +
 This option has not been fully documented.
 
-`--version` [\{_v|c|n_}]::
-  Output version of program and exit. The default mode is `v', a simple
-  version. The `c' mode will print copyright information and `n' will
-  print the full copyright notice.
-
 == USAGE ==
 
 The `-p` password option specifies the write password and `-q` password

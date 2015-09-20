@@ -119,6 +119,10 @@ is not yet tested anywhere but in ntpd itself.
 | -                 | scripts/update-leap/update-leap.txt
 |===========================================================
 
+* Also, any exterior documents retained need to be parametrized
+  with the macros in docs/asciidoc.conf. and the asciidoc build rules
+  need to use that.
+
 * In the docs subdirectory, include/command.txt is an HTML passthrough
   in a not entirely successful attempt to emulate the look of the
   Mills HTML documentation this directory was made from. It should be
@@ -128,8 +132,6 @@ is not yet tested anywhere but in ntpd itself.
   old HTML and should be cleaned up.
 
 * A serious content-editing and update pass on the exterior documents is needed.
-  Various pieces (such as near --version and exit values) are often lies
-  produced by autogen.
 
 * Part of d) is the ntp -> ntps name change.
 
