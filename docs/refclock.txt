@@ -143,52 +143,51 @@ entries than you expected.  Support for some very ancient drivers
 (notably, those rendered obsolete by the WWVB modulation change in
 2013) has been dropped in order to reduce our maintainance load.
 
-* link:driver1.html[Type 1] Undisciplined Local Clock
-* Type 2 reserved
-* Type 3 reserved
-* link:driver4.html[Type 4] Generic Spectracom Receivers
-* link:driver5.html[Type 5] TrueTime GPS/GOES/OMEGA Receivers
-* link:driver6.html[Type 6] IRIG Audio Decoder
-* link:driver7.html[Type 7] Radio CHU Audio Demodulator/Decoder
-* link:driver8.html[Type 8] Generic Reference Driver
-* link:driver9.html[Type 9] Magnavox MX4200 GPS Receiver
-* link:driver10.html[Type 10] Austron 2200A/2201A GPS Receivers
-* link:driver11.html[Type 11] Arbiter 1088A/B GPS Receiver
-* Type 12 reserved
-* Type 13 reserved
-* Type 14 reserved
-* Type 15 reserved
-* link:driver16.html[Type 16] Bancomm GPS/IRIG Receiver
-* Type 17 reserved
-* link:driver18.html[Type 18] NIST/USNO/PTB Modem Time Services
-* Type 19 reserved
-* link:driver20.html[Type 20] Generic NMEA GPS Receiver
-* Type 21 reserved
-* link:driver22.html[Type 22] PPS Clock Discipline
-* Type 23 reserved
-* Type 24 reserved
-* Type 25 reserved
-* link:driver26.html[Type 26] Hewlett Packard 58503A GPS Receiver
-* link:driver27.html[Type 27] Arcron MSF Receiver
-* link:driver28.html[Type 28] Shared Memory Driver
-* link:driver29.html[Type 29] Trimble Navigation Palisade GPS
-* link:driver30.html[Type 30] Motorola UT Oncore GPS
-* link:driver31.html[Type 31] Rockwell Jupiter GPS
-* Type 32 reserved
-* link:driver33.html[Type 33] Dumb Clock
-* Type 34 reserved
-* link:driver35.html[Type 35] Conrad Parallel Port Radio Clock
-* Type 36 reserved
-* link:driver37.html[Type 37] Forum Graphic GPS Dating station
-* link:driver38.html[Type 38] hopf GPS/DCF77 6021/komp for Serial Line
-* link:driver39.html[Type 39] hopf GPS/DCF77 6039 for PCI-Bus
-* link:driver40.html[Type 40] JJY Receivers
-* Type 41 reserved
-* link:driver42.html[Type 42] Zyfer GPStarplus Receiver
-* Type 43 reserved
-* link:driver44.html[Type 44] NeoClock4X - DCF77 / TDF serial line
-* link:driver45.html[Type 45] Spectracom TSYNC PCI
-* link:driver46.html[Type 46] GPSD NG client protocol
+[options="header"]
+|====================================================================
+| Number                      | Flags | Driver
+| link:driver1.html[Type 1]   | D     | Undisciplined Local Clock
+| link:driver4.html[Type 4]   | -     | Generic Spectracom Receivers
+| link:driver5.html[Type 5]   | D     | TrueTime GPS/GOES/OMEGA Receivers
+| link:driver6.html[Type 6]   | D     | IRIG Audio Decoder
+| link:driver7.html[Type 7]   | D     | Radio CHU Audio Demodulator/Decoder
+| link:driver8.html[Type 8]   | T     | Generic Reference Driver
+| link:driver9.html[Type 9]   | D     | Magnavox MX4200 GPS Receiver
+| link:driver10.html[Type 10] | D     | Austron 2200A/2201A GPS Receivers
+| link:driver11.html[Type 11] | D     | Arbiter 1088A/B GPS Receiver
+| link:driver16.html[Type 16] | D     | Bancomm GPS/IRIG Receiver
+| link:driver18.html[Type 18] | -     | NIST/USNO/PTB Modem Time Services
+| link:driver20.html[Type 20] | T     | Generic NMEA GPS Receiver
+| link:driver22.html[Type 22] | -     | PPS Clock Discipline
+| link:driver26.html[Type 26] | T     | Hewlett Packard 58503A GPS Receiver
+| link:driver27.html[Type 27] | D     | Arcron MSF Receiver
+| link:driver28.html[Type 28] | T     | Shared Memory Driver
+| link:driver29.html[Type 29] | -     | Trimble Navigation Palisade GPS
+| link:driver30.html[Type 30] | -     | Motorola UT Oncore GPS
+| link:driver31.html[Type 31] | D     | Rockwell Jupiter GPS
+| link:driver33.html[Type 33] | D     | Dumb Clock
+| link:driver35.html[Type 35] | D     | Conrad Parallel Port Radio Clock
+| link:driver37.html[Type 37] | D     | Forum Graphic GPS Dating station
+| link:driver38.html[Type 38] | D     | hopf GPS/DCF77 6021/komp for Serial Line
+| link:driver39.html[Type 39] | -     | hopf GPS/DCF77 6039 for PCI-Bus
+| link:driver40.html[Type 40] | T     | JJY Receivers
+| link:driver42.html[Type 42] | -     | Zyfer GPStarplus Receiver
+| link:driver44.html[Type 44] | -     | NeoClock4X - DCF77 / TDF serial line
+| link:driver45.html[Type 45] | -     | Spectracom TSYNC PCI
+| link:driver46.html[Type 46] | T     | GPSD NG client protocol
+|====================================================================
+
+The flags field should be interpreted as follows:
+
+|====================================================================
+| D | Depreacated.  Mat be removed in a future release
+| T | Regularly tested by a maintainer
+|====================================================================
+
+Driver numbers 2, 3, 12, 13, 14, 15, 17, 19, 21, 23, 24, 25, 32, 34,
+36, 41, and 43 (all unused numbers below 45). Some if these were
+used by refclock types (now obsolete) in older NTP versions
+
 
 '''''
 
