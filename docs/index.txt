@@ -20,6 +20,7 @@ Last update: 20-Mar-2015 05:30
 
 * link:#intro[Introduction]
 * link:#intro[Differences from NTP Classic]
+* link:#platforms[Supported Platforms]
 * link:#hand[The Handbook]
 * link:#build[Building and Installing NTP]
 * link:#prob[Resolving Problems]
@@ -64,6 +65,26 @@ ship code that is security-hardened, simpler, drastically less bulky
 (the KLOC count of the suite has been cut by a factor of two!), easier
 to understand, and easier to maintain.
 
+This project began as an effort to address serious security issues
+with NTP Classic, and we intend to keep a particularly strong focus on
+code security and code verifiability.
+
+[[platforms]]
+== Supported platforms ==
+
+{project-shortname} supports all operating systems conforming to
+POSIX.1-2001 and ISO/IEC 9899:1999 (aka C99).  Primary platforms
+include Linux and the *BSD family; any reasonably modern proprietary
+Unix will also serve
+
+If you have a requirement for time service on an OS we don't support,
+and its API is reasonably close to our POSIX/C99 conformance baseline,
+we'll try to meet you halfway. We're open to development partnerships
+with individuals and organizations who have special needs and can
+contribute either engineering time or money to meet our costs of
+development; our only hard condition is that all joint results must be
+redistributable as open source.
+
 [[hand]]
 == The Handbook ==
 
@@ -96,11 +117,6 @@ link:warp.html[How NTP Works]::
 
 [[build]]
 == Building and Installing NTP ==
-
-{project-shortname} supports all operating systems conforming to
-POSIX.1-2001 and ISO/IEC 9899:1999 (aka C99).  Primary platforms
-include Linux and the *BSD family; any reasonably modern proprietary
-Unix will also serve
 
 The link:build.html[Building and Installing the Distribution] page
 gives and overview of the procedures for building and installing
