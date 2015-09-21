@@ -69,7 +69,6 @@ def build(ctx):
 	ctx.load('bison')
 
 	if ctx.env.ENABLE_DOC:
-		print "hi"
 		ctx.load('asciidoc', tooldir='pylib/')
 		ctx.recurse("docs")
 
