@@ -5,7 +5,7 @@
  * the program will print an occasional "result=nnnnnn" (the residual
  * slew from adjtime()).
  *
- * Compile this with bsdcc and run it as root!
+ * Run this as root!
  */
 #include <signal.h>
 #include <sys/time.h>
