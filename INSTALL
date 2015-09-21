@@ -70,6 +70,19 @@ By default, `make install' will install the package's files in
 installation prefix other than `/usr/local' by giving waf the
 option `--prefix=PATH'.
 
+== Replacing ntpdate ==
+
+The "ntpdate" program, long since deprecated but sometimes used in OS
+boot scripts to set time before launching ntpd, has been removed.  It is
+no longer necessary to set the time before calling ntpd; instead, pass
+ntpd the -g option and remove the ntpdate call. 
+
+If you need the ntpdate functionality of setting the time quickly but
+not necessarily super-accurately, the command "sntp -sS" will do that.
+Follow the "-sS" with a list of server names, or "-c" and a pool name.
+This ill do about as good a job of setting the clock as ntpdate did -
+it will set the time to that of the server that responds soonest.
+
 == Optional Features ==
 
 The waf builder accepts `--enable-FEATURE' options to where FEATURE
