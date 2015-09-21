@@ -138,7 +138,7 @@ make_socket_nonblocking(
 	 * systems, so all hell breaks loose if we leave them defined
 	 */
 #undef O_NONBLOCK
-#undef FNDELAY
+#undef O_NONBLOCK
 #undef O_NDELAY
 #endif
 
@@ -148,13 +148,13 @@ make_socket_nonblocking(
 			"fcntl(O_NONBLOCK) fails on fd #%d: %m", fd);
 		exit(1);
 	}
-#elif defined(FNDELAY)
-	if (fcntl(fd, F_SETFL, FNDELAY) < 0) {
-		msyslog(LOG_ERR, "fcntl(FNDELAY) fails on fd #%d: %m",
+#elif defined(O_NONBLOCK)
+	if (fcntl(fd, F_SETFL, O_NONBLOCK) < 0) {
+		msyslog(LOG_ERR, "fcntl(O_NONBLOCK) fails on fd #%d: %m",
 			fd);
 		exit(1);
 	}
-#elif defined(O_NDELAY) /* generally the same as FNDELAY */
+#elif defined(O_NDELAY) /* generally the same as O_NONBLOCK */
 	if (fcntl(fd, F_SETFL, O_NDELAY) < 0) {
 		msyslog(LOG_ERR, "fcntl(O_NDELAY) fails on fd #%d: %m",
 			fd);

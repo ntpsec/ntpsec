@@ -1696,20 +1696,20 @@ init_io(void)
 #ifndef SYS_WINNT
 #  if defined(O_NONBLOCK)
 		if (fcntl(fd[nbsock], F_SETFL, O_NONBLOCK) < 0) {
-			msyslog(LOG_ERR, "fcntl(FNDELAY|FASYNC) fails: %m");
+			msyslog(LOG_ERR, "fcntl(O_NONBLOCK|O_ASYNC) fails: %m");
 			exit(1);
 			/*NOTREACHED*/
 		}
 #  else /* not O_NONBLOCK */
-#	if defined(FNDELAY)
-		if (fcntl(fd[nbsock], F_SETFL, FNDELAY) < 0) {
-			msyslog(LOG_ERR, "fcntl(FNDELAY|FASYNC) fails: %m");
+#	if defined(O_NONBLOCK)
+		if (fcntl(fd[nbsock], F_SETFL, O_NONBLOCK) < 0) {
+			msyslog(LOG_ERR, "fcntl(O_NONBLOCK|O_ASYNC) fails: %m");
 			exit(1);
 			/*NOTREACHED*/
 		}
-#	else /* FNDELAY */
+#	else /* O_NONBLOCK */
 #	 include "Bletch: Need non blocking I/O"
-#	endif /* FNDELAY */
+#	endif /* O_NONBLOCK */
 #  endif /* not O_NONBLOCK */
 #else /* SYS_WINNT */
 		if (ioctlsocket(fd[nbsock], FIONBIO, (u_long *) &on) == SOCKET_ERROR) {
