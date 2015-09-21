@@ -1,7 +1,7 @@
 = Kernel Model for Precision Timekeeping =
 
 image:pic/alice61.gif[]
-http://www.eecis.udel.edu/~mills/pictures.html[from 'Pogo', Walt Kelly]
+{millshome}pictures.html[from 'Pogo', Walt Kelly]
 
 Alice finds the kernel a house of cards.
 

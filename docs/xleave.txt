@@ -50,12 +50,12 @@ symmetric active peer automatically switches to ordinary symmetric mode
 if the other peer is not capable of operation in interleaved mode.
 
 As demonstrated in the white paper
-http://www.eecis.udel.edu/~mills/onwire.html[Analysis and Simulation of
+{millshome}onwire.html[Analysis and Simulation of
 the NTP On-Wire Protocols], the interleaved modes have the same
 resistance to lost packets, duplicate packets, packets crossed in flight
 and protocol restarts as the ordinary modes. An application of the
 interleaved symmetric mode in space missions is presented in the white
-paper http://www.eecis.udel.edu/~mills/proximity.html[Time
+paper {millshome}proximity.html[Time
 Synchronization for Space Data Links].
 
 '''''

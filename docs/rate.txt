@@ -179,10 +179,10 @@ in order to defend against flood attacks.
 overload on the Network Time Protocol public servers. _Proc. Precision
 Time and Time Interval (PTTI) Applications and Planning Meeting_
 (Washington DC, December 2004), 5-16. Paper:
-http://www.eecis.udel.edu/~mills/database/papers/ptti/ptti04a.pdf[PDF],
-Slides:http://www.eecis.udel.edu/~mills/database/brief/ptti/ptti04.pdf[PDF]
+{millshome}database/papers/ptti/ptti04a.pdf[PDF],
+Slides:{millshome}database/brief/ptti/ptti04.pdf[PDF]
 |
-http://www.eecis.udel.edu/~mills/database/brief/ptti/ptti04.ppt[PowerPoint]
+{millshome}database/brief/ptti/ptti04.ppt[PowerPoint]
 
 '''''
 

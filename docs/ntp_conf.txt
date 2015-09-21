@@ -3,7 +3,7 @@
 [cols="10%,90%",frame="none",grid="none",style="verse"]
 |==============================
 |image:pic/pogo7.gif[]|
-http://www.eecis.udel.edu/~mills/pictures.html[from 'Pogo', Walt Kelly]
+{millshome}pictures.html[from 'Pogo', Walt Kelly]
 
 Racoon is shooting configuration bugs.
 

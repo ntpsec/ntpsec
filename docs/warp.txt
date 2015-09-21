@@ -22,16 +22,16 @@ This page and its dependencies contain a technical description of the
 Network Time Protocol (NTP) architecture and operation. It is intended
 for administrators, operators and monitoring personnel. Additional
 information for nontechnical readers can be found in the white paper
-http://www.eecis.udel.edu/~mills/exec.html[Executive Summary: Computer
+{millshome}exec.html[Executive Summary: Computer
 Network Time Synchronization]. While this page and its dependencies are
 primarily concerned with NTP, additional information on related
 protocols can be found in the white papers
-http://www.eecis.udel.edu/~mills/ptp.html[IEEE 1588 Precision Time
-Protocol (PTP)] and http://www.eecis.udel.edu/~mills/proximity.html[Time
+{millshome}ptp.html[IEEE 1588 Precision Time
+Protocol (PTP)] and {millshome}proximity.html[Time
 Synchronization for Space Data Links]. Note that reference to a page in
 this document collection is to a page in the collection, while reference
 to a _white paper_ is to a document at the
-http://www.eecis.udel.edu/~mills/ntp.html[Network Time Synchronization
+{millshome}ntp.html[Network Time Synchronization
 Research Project] web site.
 
 
@@ -60,10 +60,10 @@ this software distribution. We refer to this implementation as the
 _reference implementation_ only because it was used to test and validate
 the NTPv4 specification RFC-5905. It is best read in conjunction with
 the briefings and white papers on the
-http://www.eecis.udel.edu/~mills/ntp.html[Network Time Synchronization
+{millshome}ntp.html[Network Time Synchronization
 Research Project] page. An executive summary suitable for management and
 planning purposes is in the white paper
-http://www.eecis.udel.edu/~mills/exec.html[Executive Summary: Computer
+{millshome}exec.html[Executive Summary: Computer
 Network Time Synchronization].
 
 [[scale]]
@@ -83,7 +83,7 @@ rationalize UTC with respect to TAI, a leap second is inserted at
 intervals of about 18 months, as determined by the International Earth
 Rotation Service (IERS). Reckoning with leap seconds in the NTP
 timescale is described in the white paper
-http://www.eecis.udel.edu/~mills/leap.html[The NTP Timescale and Leap
+{millshome}leap.html[The NTP Timescale and Leap
 Seconds].
 
 The historic insertions are documented in the `leap-seconds.list` file,
@@ -93,7 +93,7 @@ disseminated by the national laboratories in the broadcast timecode
 format. These warnings are propagated from the NTP primary servers via
 other server to the clients by the NTP on-wire protocol. The leap second
 is implemented by the operating system kernel, as described in the white
-paper http://www.eecis.udel.edu/~mills/leap.html[The NTP Timescale and
+paper {millshome}leap.html[The NTP Timescale and
 Leap Seconds]. Implementation details are described on the
 link:leap.html[Leap Second Processing] page.
 
@@ -107,12 +107,12 @@ while the timestamp format is used in packet headers exchanged between
 clients and servers. The timestamp format spans 136 years, called an
 _era_. The current era began on 1 January 1900, while the next one
 begins in 2036. Details on these formats and conversions between them
-are in the white paper http://www.eecis.udel.edu/~mills/y2k.html[The NTP
+are in the white paper {millshome}y2k.html[The NTP
 Era and Era Numbering]. However, the NTP protocol will synchronize
 correctly, regardless of era, as long as the system clock is set
 initially within 68 years of the correct time. Further discussion on
 this issue is in the white paper
-http://www.eecis.udel.edu/~mills/time.html[NTP Timestamp Calculations].
+{millshome}time.html[NTP Timestamp Calculations].
 Ordinarily, these formats are not seen by application programs, which
 convert these NTP formats to native Unix or Windows formats.
 
@@ -130,7 +130,7 @@ downstream (higher stratum) clients. It includes a pair of peer/poll
 processes for each reference clock or remote server used as a
 synchronization source. Packets are exchanged between the client and
 server using the _on-wire protocol_ described in the white paper
-http://www.eecis.udel.edu/~mills/onwire.html[Analysis and Simulation of
+{millshome}onwire.html[Analysis and Simulation of
 the NTP On-Wire Protocols]. The protocol is resistant to lost, replayed
 or spoofed packets.
 
@@ -142,7 +142,7 @@ described on the link:decode.html[Event Messages and Status Words] page
 and link:decode.html#flash[flash status word]. The flash status word
 reports in addition the results of various access control and security
 checks described in the white paper
-http://www.eecis.udel.edu/~mills/security.html[NTP Security Analysis]. A
+{millshome}security.html[NTP Security Analysis]. A
 sophisticated traffic monitoring facility described on the
 link:rate.html[Rate Management and the Kiss-o'-Death Packet] page
 protects against denial-of-service (DoS) attacks.
@@ -165,7 +165,7 @@ _softstamps_ measured by the inline code. Softstamps are subject to
 various queuing and processing delays. A more accurate measurement uses
 _drivestamps_, as described on the link:xleave.html[NTP Interleaved
 Modes] page. These issues along with mathematical models are discussed
-in the white paper http://www.eecis.udel.edu/~mills/time.html[NTP
+in the white paper {millshome}time.html[NTP
 Timestamp Calculations].
 
 The offset and delay statistics for one or more peer processes are
@@ -188,7 +188,7 @@ Algorithm] page to adjust the system clock time and frequency. The clock
 offset and frequency, are recorded by the `loopstats` option of the
 link:monopt.html#filegen[`filegen`] command. For additional details
 about these algorithms, see the Architecture Briefing on the
-http://www.eecis.udel.edu/~mills/ntp.html[Network Time Synchronization
+{millshome}ntp.html[Network Time Synchronization
 Research Project] page. For additional information on statistacl
 principles and performance metrics, see the link:stats.html[Performance
 Metrics] page.
