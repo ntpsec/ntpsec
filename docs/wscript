@@ -8,7 +8,7 @@ def build(ctx):
 		source	= doc_source
 	)
 
-
+	ctx.path.get_bld().make_node("hints").mkdir() # create 'hints' directory
 	for dir in ["icons", "pic"]:
 
 		files = ctx.path.ant_glob('%s/*' % dir) # Find images
