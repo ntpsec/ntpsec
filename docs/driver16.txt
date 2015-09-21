@@ -1,6 +1,6 @@
-= bc635VME/bc350VXI Time and Frequency Processor =
+= Symmetricom bc600-series GPS/IRIG Receiver =
 
-Last update: 20-Sep-2016 04:44 UTC
+Last update: 20-Sep-2015 04:44 UTC
 
 '''''
 
@@ -10,8 +10,7 @@ Last update: 20-Sep-2016 04:44 UTC
 Address: 127.127.16.'u'
 Reference ID: BTFP
 Driver ID: GPS_BANCOMM
-Bancomm Device /dev/btfp0
-Requires: Bancomm bc635 TFP device module driver for SunOS 4.x/SunOS 5.x
+Bancomm Device: /dev/btfp0
 
 == Deprecation warning ==
 
@@ -21,13 +20,18 @@ requirement for it, please make this known to us.
 
 == Description ==
 
-This is the clock driver for the Bancomm bc635VME Time and Frequency
-Processor. It requires the BANCOMM bc635VME bc350VXI Time and Frequency
-Processor Module Driver for SunOS 4.x/SunOS 5.x UNIX Systems.
+This is the clock driver for Symmetricom bc600 series of Time and
+Frequency Processors (formerly sold under the brands Datum and
+Bancomm).
 
-Most of this code is originally from refclock_bancomm.c with thanks. It
-has been modified and tested on an UltraSparc IIi-cEngine running
-Solaris 2.6. A port for HPUX is not available henceforth.
+It directly supports the bc637PCI-U on FreeBSD, but requires
+installation of a Symmetricom proprietary driver under Linux and
+Solaris.
+
+It might also support the bc635VME on SunOS 4.x/SunOS 5.x, though
+this has not been confirmed since 2003 and {project-shortname} may no
+longer build in that environment without modifications.  The bc635VME
+use also requires the Symmetricom proprietary driver.
 
 == Additional Information ==
 
