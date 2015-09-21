@@ -155,7 +155,7 @@ entries than you expected.  Support for some very ancient drivers
 | link:driver9.html[Type 9]   | D     | Magnavox MX4200 GPS Receiver
 | link:driver10.html[Type 10] | D     | Austron 2200A/2201A GPS Receivers
 | link:driver11.html[Type 11] | D     | Arbiter 1088A/B GPS Receiver
-| link:driver16.html[Type 16] | D     | Bancomm GPS/IRIG Receiver
+| link:driver16.html[Type 16] | D     | Symmetricom bc600-series GPS/IRIG Receiver
 | link:driver18.html[Type 18] | -     | NIST/USNO/PTB Modem Time Services
 | link:driver20.html[Type 20] | T     | Generic NMEA GPS Receiver
 | link:driver22.html[Type 22] | -     | PPS Clock Discipline
@@ -180,8 +180,8 @@ entries than you expected.  Support for some very ancient drivers
 The flags field should be interpreted as follows:
 
 |====================================================================
-| D | Depreacated.  Mat be removed in a future release
-| T | Regularly tested by a maintainer
+| D | Deprecated.  May be removed in a future release
+| T | Regularly tested by an active maintainer
 |====================================================================
 
 Driver numbers 2, 3, 12, 13, 14, 15, 17, 19, 21, 23, 24, 25, 32, 34,
