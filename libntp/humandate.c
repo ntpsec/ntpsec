@@ -47,7 +47,7 @@ humantime(
 	char *		bp;
 	struct tm	tmbuf, *tm;
 	
-	tm = localtime(&cursec);
+	tm = localtime_r(&cursec, &tmbuf);
 	if (!tm)
 		return "--:--:--";
 
