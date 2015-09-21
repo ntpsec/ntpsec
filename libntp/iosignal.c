@@ -28,16 +28,6 @@
 #include <arpa/inet.h>
 #include <net/if.h>
 
-#if _BSDI_VERSION >= 199510
-# include <ifaddrs.h>
-#endif
-
-# ifdef __QNXNTO__
-#  include <fcntl.h>
-#  include <unix.h>
-#  define O_NONBLOCK O_NDELAY
-# endif
-
 #include "ntp_machine.h"
 #include "ntpd.h"
 #include "ntp_io.h"
