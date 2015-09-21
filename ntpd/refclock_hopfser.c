@@ -18,20 +18,7 @@
 #include "ntp_unixtime.h"
 #include "ntp_stdlib.h"
 
-#if defined HAVE_SYS_MODEM_H
-# include <sys/modem.h>
-# ifndef __QNXNTO__
-#  define TIOCMSET MCSETA
-#  define TIOCMGET MCGETA
-#  define TIOCM_RTS MRTS
-# endif
-#endif
-
 #include <termios.h>
-
-#ifdef HAVE_SYS_IOCTL_H
-# include <sys/ioctl.h>
-#endif
 
 #ifdef SYS_WINNT
 extern int async_write(int, const void *, unsigned int);

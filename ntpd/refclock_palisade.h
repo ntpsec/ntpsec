@@ -55,11 +55,6 @@
 
 #if defined HAVE_SYS_MODEM_H
 #include <sys/modem.h>
-#ifndef __QNXNTO__
-#define TIOCMSET MCSETA
-#define TIOCMGET MCGETA
-#define TIOCM_RTS MRTS
-#endif
 #endif
 
 #include <termios.h>
