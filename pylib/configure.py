@@ -213,7 +213,6 @@ int main() { return 0; }
 		ctx.define("HAVE_PPSAPI", 1)
 
 
-
 	ctx.check_cc(lib="m")
 	ctx.check_cc(lib="pthread")
 	ctx.check_cc(lib="rt", mandatory=False)
@@ -224,6 +223,15 @@ int main() { return 0; }
 	ctx.check_cc(feature="c cshlib", lib="event_core", libpath=ctx.env.PLATFORM_LIBPATH, uselib_store="LIBEVENT_CORE")
 	ctx.check_cc(feature="c cshlib", lib="event_pthreads", libpath=ctx.env.PLATFORM_LIBPATH, uselib_store="LIBEVENT_PTHREADS", use="LIBEVENT")
 
+
+	ctx.check_cc(header_name="sys/prctl.h", mandatory=False)
+	ctx.check_cc(header_name="sys/capability.h", mandatory=False)
+
+	ctx.check_cc(lib="cap", mandatory=False)
+
+	if ctx.env.LIB_CAP:
+		from check_cap import check_cap
+		check_cap(ctx)
 
 	ctx.check_cc(
 		function_name="clock_gettime",
