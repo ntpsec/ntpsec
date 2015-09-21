@@ -25,31 +25,7 @@
 #include "ntp_unixtime.h"
 #include "ntp_stdlib.h"
 
-#if defined HAVE_SYS_MODEM_H
-# include <sys/modem.h>
-# ifndef __QNXNTO__
-#  define TIOCMSET MCSETA
-#  define TIOCMGET MCGETA
-#  define TIOCM_RTS MRTS
-# endif
-#endif
-
 #include <termios.h>
-
-#ifdef HAVE_SYS_IOCTL_H
-# include <sys/ioctl.h>
-#endif
-
-/*
- * NTP version 4.20 change the pp->msec field to pp->nsec.
- * To allow to support older ntp versions with this sourcefile
- * you can define NTP_PRE_420 to allow this driver to compile
- * with ntp version back to 4.1.2.
- *
- */
-#if 0
-#define NTP_PRE_420
-#endif
 
 /*
  * If you want the driver for whatever reason to not use
