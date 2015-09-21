@@ -20,9 +20,10 @@ class humandateTest : public libntptest {
 TEST(humandate, RegularTime) {
 	time_t sample = 1276601278;
 	std::ostringstream expected;
+	struct tm;
 
 	tm* time;
-	time = localtime(&sample);
+	time = localtime_r(&sample, &tmbuf);
 	TEST_ASSERT_TRUE(time != NULL);
 
 	expected << std::setfill('0')
@@ -36,11 +37,12 @@ TEST(humandate, RegularTime) {
 TEST(humandate, CurrentTime) {
 	time_t sample;
 	std::ostringstream expected;
+	struct tm;
 
 	time(&sample);
 
 	tm* time;
-	time = localtime(&sample);
+	time = localtime_r(&sample, &tmbuf);
 	TEST_ASSERT_TRUE(time != NULL);
 
 	expected << std::setfill('0')
