@@ -185,8 +185,8 @@ The flags field should be interpreted as follows:
 |====================================================================
 
 Driver numbers 2, 3, 12, 13, 14, 15, 17, 19, 21, 23, 24, 25, 32, 34,
-36, 41, and 43 (all unused numbers below 45). Some if these were
-used by refclock types (now obsolete) in older NTP versions
+36, 41, and 43 (all unused numbers below 45) are reserved. Some of
+these were used by refclock types (now obsolete) in older NTP versions
 
 
 '''''
