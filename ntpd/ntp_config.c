@@ -505,13 +505,14 @@ dump_config_tree(
 	char *s2;
 	char timestamp[80];
 	int enable;
+	struct tm tmbuf;
 
 	DPRINTF(1, ("dump_config_tree(%p)\n", ptree));
 
 	if (comment) {
 		if (!strftime(timestamp, sizeof(timestamp),
 			      "%Y-%m-%d %H:%M:%S",
-			      localtime(&ptree->timestamp)))
+			      localtime_r(&ptree->timestamp, &tmbuf)))
 			timestamp[0] = '\0';
 
 		fprintf(df, "# %s %s %s\n",

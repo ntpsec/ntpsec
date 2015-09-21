@@ -18,10 +18,10 @@ humanlogtime(void)
 {
 	char *		bp;
 	time_t		cursec;
-	struct tm *	tm;
+	struct tm	tmbuf, *tm;
 	
 	cursec = time(NULL);
-	tm = localtime(&cursec);
+	tm = localtime_r(&cursec, &tmbuf);
 	if (!tm)
 		return "-- --- --:--:--";
 
@@ -45,7 +45,7 @@ humantime(
 	)
 {
 	char *		bp;
-	struct tm *	tm;
+	struct tm	tmbuf, *tm;
 	
 	tm = localtime(&cursec);
 	if (!tm)

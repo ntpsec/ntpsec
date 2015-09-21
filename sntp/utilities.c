@@ -140,7 +140,7 @@ tv_to_str(
 	const size_t bufsize = 48;
 	char *buf;
 	time_t gmt_time, local_time;
-	struct tm *p_tm_local;
+	struct tm tmbuf, tmbuf2, *p_tm_local;
 	int hh, mm, lto;
 
 	/*
@@ -149,8 +149,8 @@ tv_to_str(
 	 * derive the offset from UTC to local time.
 	 */
 	gmt_time = tv->tv_sec;
-	local_time = mktime(gmtime(&gmt_time));
-	p_tm_local = localtime(&gmt_time);
+	local_time = mktime(gmtime_r(&gmt_time, &tmbuf));
+	p_tm_local = localtime_r(&gmt_time, &tmbuf2);
 
 	/* Local timezone offsets should never cause an overflow.  Yeah. */
 	lto = difftime(local_time, gmt_time);

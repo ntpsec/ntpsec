@@ -104,7 +104,7 @@ dumbclock_start(
 	struct refclockproc *pp;
 	int fd;
 	char device[20];
-	struct tm *tm_time_p;
+	struct tm *tm_time_p, tm;
 	time_t     now;
 
 	/*
@@ -142,9 +142,9 @@ dumbclock_start(
 
 	time(&now);
 #ifdef GET_LOCALTIME
-	tm_time_p = localtime(&now);
+	tm_time_p = localtime_r(&now, &tm);
 #else
-	tm_time_p = gmtime(&now);
+	tm_time_p = gmtime_r(&now, &tm);
 #endif
 	if (tm_time_p)
 		up->ymd = *tm_time_p;
@@ -238,6 +238,7 @@ dumbclock_receive(
 	{
 	    struct tm *gmtp;
 	    struct tm *lt_p;
+	    struct tm tmbuf;
 	    time_t     asserted_time;	     /* the SPM time based on the composite time+date */
 	    struct tm  asserted_tm;	     /* the struct tm of the same */
 	    int        adjyear;
@@ -282,7 +283,7 @@ dumbclock_receive(
 	    {
 		asserted_time += SECSPERDAY; /* local clock ahead of real time */
 	    }
-	    lt_p = localtime(&asserted_time);
+	    lt_p = localtime_r(&asserted_time, &tmbuf);
 	    if (lt_p)
 	    {
 		up->ymd = *lt_p;

@@ -31,7 +31,7 @@ const char * const daynames[7] = {
  * Works by periodic extension of the ntp time stamp in the UN*X epoch.
  * If the 'time_t' is 32 bit, use solar cycle warping to get the value
  * in a suitable range. Also uses solar cycle warping to work around
- * really buggy implementations of 'gmtime()' / 'localtime()' that
+ * really buggy implementations of 'gmtime_r()' / 'localtime_r()' that
  * cannot work with a negative time value, that is, times before
  * 1970-01-01. (MSVCRT...)
  *
@@ -43,10 +43,10 @@ const char * const daynames[7] = {
  * called a 'solar cycle'. The gregorian calendar does the same as
  * long as no centennial year (divisible by 100, but not 400) goes in
  * the way. So between 1901 and 2099 (inclusive) we can warp time
- * stamps by 28 years to make them suitable for localtime() and
- * gmtime() if we have trouble. Of course this will play hubbubb with
+ * stamps by 28 years to make them suitable for localtime_r() and
+ * gmtime_r() if we have trouble. Of course this will play hubbubb with
  * the DST zone switches, so we should do it only if necessary; but as
- * we NEED a proper conversion to dates via gmtime() we should try to
+ * we NEED a proper conversion to dates via gmtime_r() we should try to
  * cope with as many idiosyncrasies as possible.
  *
  */
@@ -92,13 +92,13 @@ get_struct_tm(
 	 * 'ts' should be a suitable value by now. Just go ahead, but
 	 * with care:
 	 *
-	 * There are some pathological implementations of 'gmtime()'
-	 * and 'localtime()' out there. No matter if we have 32-bit or
+	 * There are some pathological implementations of 'gmtime_r()'
+	 * and 'localtime_r()' out there. No matter if we have 32-bit or
 	 * 64-bit 'time_t', try to fix this by solar cycle warping
 	 * again...
 	 *
 	 * At least the MSDN says that the (Microsoft) Windoze
-	 * versions of 'gmtime()' and 'localtime()' will bark on time
+	 * versions of 'gmtime_r()' and 'localtime_r()' will bark on time
 	 * stamps < 0.
 	 */
 	while ((tm = (*(local ? localtime : gmtime))(&ts)) == NULL)

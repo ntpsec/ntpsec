@@ -115,13 +115,14 @@ main( void )
     int Fatals;
     int Warnings;
     int  year;
+    struct tm tmbuf;
 
     Time = time( (time_t *)NULL )
 #ifdef TESTTIMEOFFSET
 		+ test_time_offset
 #endif
 	;
-    LocalTime = *localtime( &Time );
+    LocalTime = *localtime_r( &Time, &tmbuf);
 
     year = ( sizeof( u_long ) > 4 ) 	/* save max span using year as temp */
 		? ( 400 * 3 ) 		/* three greater gregorian cycles */

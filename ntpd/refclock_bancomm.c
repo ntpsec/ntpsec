@@ -339,7 +339,7 @@ vme_poll(
 	struct vmeunit *vme;
 	struct refclockproc *pp;
 	time_t tloc;
-	struct tm *tadr;
+	struct tm *tadr, tm;
         
 	pp = peer->procptr;	 
 	vme = pp->unitptr;        /* Here is the structure */
@@ -360,7 +360,7 @@ vme_poll(
 	 */
 	
 	  time(&tloc);
-	  tadr = gmtime(&tloc);
+	  tadr = gmtime_r(&tloc, &tm);
 	  tptr->year = (unsigned short)(tadr->tm_year + 1900);
 
 	snprintf(pp->a_lastcode,

@@ -4089,7 +4089,7 @@ mk_utcinfo(
 	if ( dtlsf != dtls )
 	{
 		time_t t_ls;
-		struct tm *tm;
+		struct tm tmbuf, *tm;
 		int n = 0;
 
 		if (wnlsf < GPSWRAP)
@@ -4102,10 +4102,10 @@ mk_utcinfo(
 			+ (time_t) dn * SECSPERDAY
 			+ GPS_SEC_BIAS - 1;
 
-		tm = gmtime( &t_ls );
-		if (tm == NULL)  // gmtime() failed
+		tm = gmtime_r( &t_ls, &tmbuf );
+		if (tm == NULL)  // gmtime_r() failed
 		{
-			snprintf( t, size, "** (gmtime() failed in mk_utcinfo())" );
+			snprintf( t, size, "** (gmtime_r() failed in mk_utcinfo())" );
 			return;
 		}
 
