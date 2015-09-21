@@ -289,6 +289,7 @@ generate_preamble(void)
 {
 	time_t now;
 	char timestamp[128];
+	struct tm tmbuf;
 	char preamble[] =
 "/*\n"
 " * ntp_keyword.h\n"
@@ -303,7 +304,7 @@ generate_preamble(void)
 
 	time(&now);
 	if (!strftime(timestamp, sizeof(timestamp),
-		      "%Y-%m-%d %H:%M:%S", gmtime(&now)))
+		      "%Y-%m-%d %H:%M:%S", gmtime_r(&now, &tmbuf)))
 		timestamp[0] = '\0';
 
 	printf(preamble, timestamp);

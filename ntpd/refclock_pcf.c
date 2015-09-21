@@ -180,11 +180,7 @@ pcf_poll(
 
 	pp->lencode = strftime(pp->a_lastcode, BMAX, "%Y %m %d %H %M %S", &tm);
 
-#if defined(_REENTRANT) || defined(_THREAD_SAFE)
 	tp = gmtime_r(&t, &tm);
-#else
-	tp = gmtime(&t);
-#endif
 	if (!tp) {
 		refclock_report(peer, CEVNT_FAULT);
 		return;

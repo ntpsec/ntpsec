@@ -2315,6 +2315,7 @@ jjy_receive_seiko_tsys_tdc_300 ( struct recvbuf *rbufp )
 	int	rc, iWeekday ;
 	time_t	now ;
 	struct	tm	*pTime ;
+	struct	tm	tmbuf;
 
 	/* Initialize pointers */
 
@@ -2370,7 +2371,7 @@ jjy_receive_seiko_tsys_tdc_300 ( struct recvbuf *rbufp )
 		}
 
 		time( &now ) ;
-		pTime = localtime( &now ) ;
+		pTime = localtime_r( &now, &tmbuf ) ;
 		up->year  = pTime->tm_year ;
 		up->month = pTime->tm_mon + 1 ;
 		up->day   = pTime->tm_mday ;

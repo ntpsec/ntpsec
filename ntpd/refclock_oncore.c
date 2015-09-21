@@ -3499,7 +3499,7 @@ oncore_load_almanac(
 	uint8_t	*cp, Cmd[20];
 	int	n;
 	struct timespec ts;
-	struct tm *tm;
+	struct tm tmbuf, *tm;
 
 	if (!instance->shmem)
 		return;
@@ -3567,7 +3567,7 @@ oncore_load_almanac(
 	/* and set time to time from Computer clock */
 
 	clock_gettime(CLOCK_REALTIME, &ts);
-	tm = gmtime((const time_t *) &ts.tv_sec);
+	tm = gmtime_r((const time_t *) &ts.tv_sec, &tmbuf);
 
 #ifdef ONCORE_VERBOSE_LOAD_ALMANAC
 	oncore_log_f(instance, LOG_DEBUG, "DATE %d %d %d, %d %d %d",

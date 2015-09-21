@@ -707,7 +707,7 @@ jupiter_receive(struct recvbuf *rbufp)
 static const char *
 jupiter_parse_t(struct instance *instance, u_short *sp)
 {
-	struct tm *tm;
+	struct tm *tm, tmbuf;
 	char *cp;
 	struct jpulse *jp;
 	uint32_t sweek;
@@ -793,9 +793,10 @@ jupiter_parse_t(struct instance *instance, u_short *sp)
 		    "UTC <none> (gweek/sweek %u/%u)",
 		    instance->gweek, sweek);
 	else {
+		char ascbuf[BUFSIZ];
 		/* XXX debugging */
-		tm = gmtime(&last_timecode);
-		cp = asctime(tm);
+		tm = gmtime_r(&last_timecode, &tmbuf);
+		cp = asctime_r(tm, ascbuf);
 
 		jupiter_debug(instance->peer, __func__,
 		    "UTC %.24s (gweek/sweek %u/%u)",
@@ -831,8 +832,9 @@ jupiter_parse_gpos(struct instance *instance, u_short *sp)
 {
 	struct jgpos *jg;
 	time_t t;
-	struct tm *tm;
+	struct tm *tm, tmbuf;
 	char *cp;
+	char ascbuf[BUFSIZ];
 
 	jg = (struct jgpos *)sp;
 
@@ -855,8 +857,8 @@ jupiter_parse_gpos(struct instance *instance, u_short *sp)
 	instance->gweek = 0;
 
 	t = GPS_EPOCH + (instance->gpos_gweek * WEEKSECS) + instance->gpos_sweek;
-	tm = gmtime(&t);
-	cp = asctime(tm);
+	tm = gmtime_r(&t, &tmbuf);
+	cp = asctime_r(tm, ascbuf);
 
 	jupiter_debug(instance->peer, __func__,
 		"GPS %.24s (gweek/sweek %u/%u)",

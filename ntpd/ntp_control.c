@@ -812,6 +812,7 @@ save_config(
 	time_t now;
 	int fd;
 	FILE *fptr;
+	struct tm tmbuf;
 #endif
 
 	if (RES_NOMODIFY & restrict_mask) {
@@ -853,7 +854,7 @@ save_config(
 	 * XXX: Nice feature, but not too safe.
 	 */
 	if (0 == strftime(filename, sizeof(filename), filespec,
-			       localtime(&now)))
+			  localtime(&now, &tmbuf)))
 		strlcpy(filename, filespec, sizeof(filename));
 
 	/*
@@ -1455,7 +1456,7 @@ ctl_putfs(
 	register char *cp;
 	register const char *cq;
 	char buffer[200];
-	struct tm *tm = NULL;
+	struct tm tmbuf, *tm = NULL;
 	time_t fstamp;
 
 	cp = buffer;
@@ -1465,7 +1466,7 @@ ctl_putfs(
 
 	*cp++ = '=';
 	fstamp = uval - JAN_1970;
-	tm = gmtime(&fstamp);
+	tm = gmtime_r(&fstamp, &tmbuf);
 	if (NULL ==  tm)
 		return;
 	NTP_INSIST((cp - buffer) < (int)sizeof(buffer));

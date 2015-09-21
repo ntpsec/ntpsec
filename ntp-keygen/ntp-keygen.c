@@ -760,7 +760,7 @@ main(
 		fprintf(stderr, "Writing GQ parameters %s to stdout\n",
 		    filename);
 		fprintf(stdout, "# %s\n# %s\n", filename,
-		    ctime(&epoch));
+		    ctime_r(&epoch, ascbuf));
 		rsa = pkey_gqkey->pkey.rsa;
 		BN_copy(rsa->p, BN_value_one());
 		BN_copy(rsa->q, BN_value_one());
@@ -784,7 +784,7 @@ main(
 		fprintf(stderr, "Writing GQ keys %s to stdout\n",
 		    filename);
 		fprintf(stdout, "# %s\n# %s\n", filename,
-		    ctime(&epoch));
+		    ctime_r(&epoch, ascbuf));
 		rsa = pkey_gqkey->pkey.rsa;
 		pkey = EVP_PKEY_new();
 		EVP_PKEY_assign_RSA(pkey, rsa);
@@ -825,7 +825,7 @@ main(
 		fprintf(stderr, "Writing IFF parameters %s to stdout\n",
 		    filename);
 		fprintf(stdout, "# %s\n# %s\n", filename,
-		    ctime(&epoch));
+		    ctime_r(&epoch, ascbuf));
 		dsa = pkey_iffkey->pkey.dsa;
 		BN_copy(dsa->priv_key, BN_value_one());
 		pkey = EVP_PKEY_new();
@@ -848,7 +848,7 @@ main(
 		fprintf(stderr, "Writing IFF keys %s to stdout\n",
 		    filename);
 		fprintf(stdout, "# %s\n# %s\n", filename,
-		    ctime(&epoch));
+		    ctime_r(&epoch, ascbuf));
 		dsa = pkey_iffkey->pkey.dsa;
 		pkey = EVP_PKEY_new();
 		EVP_PKEY_assign_DSA(pkey, dsa);
@@ -888,7 +888,7 @@ main(
 		fprintf(stderr, "Writing MV parameters %s to stdout\n",
 		    filename);
 		fprintf(stdout, "# %s\n# %s\n", filename,
-		    ctime(&epoch));
+		    ctime_r(&epoch, ascbuf));
 		pkey = pkey_mvpar[2];
 		PEM_write_PKCS8PrivateKey(stdout, pkey, NULL, NULL, 0,
 		    NULL, NULL);
@@ -906,7 +906,7 @@ main(
 		fprintf(stderr, "Writing MV keys %s to stdout\n",
 		    filename);
 		fprintf(stdout, "# %s\n# %s\n", filename,
-		    ctime(&epoch));
+			ctime_r(&epoch, ascbuf));
 		pkey = pkey_mvpar[1];
 		PEM_write_PKCS8PrivateKey(stdout, pkey, cipher, NULL, 0,
 		    NULL, passwd2);
@@ -2298,6 +2298,7 @@ fheader	(
 	char	linkname[MAXFILENAME]; /* link name */
 	int	temp;
         mode_t  orig_umask;
+	char ascbuf[BUFSIZ];
         
 	snprintf(filename, sizeof(filename), "ntpkey_%s_%s.%u", file,
 	    owner, fstamp); 
@@ -2320,6 +2321,6 @@ fheader	(
 		perror(file);
 	fprintf(stderr, "Generating new %s file and link\n", ulink);
 	fprintf(stderr, "%s->%s\n", linkname, filename);
-	fprintf(str, "# %s\n# %s\n", filename, ctime(&epoch));
+	fprintf(str, "# %s\n# %s\n", filename, ctime_r(&epoch, ascbuf));
 	return (str);
 }

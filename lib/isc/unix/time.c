@@ -380,11 +380,12 @@ void
 isc_time_formattimestamp(const isc_time_t *t, char *buf, unsigned int len) {
 	time_t now;
 	unsigned int flen;
+	struct tm tmbuf;
 
 	REQUIRE(len > 0);
 
 	now = (time_t) t->seconds;
-	flen = strftime(buf, len, "%d-%b-%Y %X", localtime(&now));
+	flen = strftime(buf, len, "%d-%b-%Y %X", localtime_r(&now, &tmbuf));
 	INSIST(flen < len);
 	if (flen != 0)
 		snprintf(buf + flen, len - flen,
@@ -397,11 +398,13 @@ void
 isc_time_formathttptimestamp(const isc_time_t *t, char *buf, unsigned int len) {
 	time_t now;
 	unsigned int flen;
+	struct tm tmbuf;
 
 	REQUIRE(len > 0);
 
 	now = (time_t)t->seconds;
-	flen = strftime(buf, len, "%a, %d %b %Y %H:%M:%S GMT", gmtime(&now));
+	flen = strftime(buf, len, "%a, %d %b %Y %H:%M:%S GMT",
+			gmtime_r(&now, &tmbuf));
 	INSIST(flen < len);
 }
 
@@ -409,10 +412,11 @@ void
 isc_time_formatISO8601(const isc_time_t *t, char *buf, unsigned int len) {
 	time_t now;
 	unsigned int flen;
+	struct tm tmbuf;
 
 	REQUIRE(len > 0);
 
 	now = (time_t)t->seconds;
-	flen = strftime(buf, len, "%Y-%m-%dT%H:%M:%SZ", gmtime(&now));
+	flen = strftime(buf, len, "%Y-%m-%dT%H:%M:%SZ", gmtime_r(&now, &tmbuf));
 	INSIST(flen < len);
 }

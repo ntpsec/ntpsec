@@ -49,6 +49,11 @@ cause buffer overruns and (all too often) exploitable security holes:
 * sprintf, vsprintf: use snprintf and vsnprintf instead.
 * strtok: use strtok_r() or unroll this into the obvious loop.
 * gets: Use fgets instead. 
+* gmtime(), localtime(), asctime(), ctime(): use the reentrant *_r variants.
+* tmpnam() - use mkstemp() or tmpfile() instead.
+
+In general, avoid functions that are non-reentrant.  When in doubtm see
+http://www.unix.org/whitepapers/reentrant.html[Thread-safety and POSIX.1]
 
 === Conventions for #ifdef guard names ===
 

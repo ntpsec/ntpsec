@@ -97,6 +97,7 @@ main(
 	int errflg	= 0;
 	int cost	= 0;
 	volatile int rawtime	= 0;
+	char ascbuf[BUFSIZ];
 
 	ZERO(ntx);
 	progname = argv[0];
@@ -294,7 +295,7 @@ main(
 			       (u_int)ts.l_ui, (u_int)ts.l_uf,
 			       (int)ntv.time.tv_sec, fdigits,
 			       (int)time_frac,
-			       ctime((time_t *)&ntv.time.tv_sec));
+			       ctime_r((time_t *)&ntv.time.tv_sec, ascbuf));
 #if NTP_API > 3
 		printf(", TAI offset %ld\n", (long)ntv.tai);
 #else

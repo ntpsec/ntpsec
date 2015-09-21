@@ -551,7 +551,7 @@ main(
 #endif
 
 	struct	timespec	 TimeValue;				/* System clock at startup */
-	time_t			 SecondsPartOfTime;		/* Sent to gmtime() for calculation of TimeStructure (can apply offset). */
+	time_t			 SecondsPartOfTime;		/* Sent to gmtime_r() for calculation of TimeStructure (can apply offset). */
 	time_t			 BaseRealTime;			/* Base realtime so can determine seconds since starting. */
 	time_t			 NowRealTime;			/* New realtime to can determine seconds as of now. */
 	unsigned		 SecondsRunningRealTime;	/* Difference between NowRealTime and BaseRealTime. */
@@ -1062,13 +1062,14 @@ main(
 		}
 	else
 		{
+		struct tm tmbuf;
 		/* Apply offset to time. */
 		if	(UseOffsetSecondsInt >= 0)
 			SecondsPartOfTime += (time_t)   UseOffsetSecondsInt;
 		else
 			SecondsPartOfTime -= (time_t) (-UseOffsetSecondsInt);
 
-		TimeStructure = gmtime(&SecondsPartOfTime);
+		TimeStructure = gmtime_r(&SecondsPartOfTime, &tmbuf);
 		Minute = TimeStructure->tm_min;
 		Hour = TimeStructure->tm_hour;
 		DayOfYear = TimeStructure->tm_yday + 1;

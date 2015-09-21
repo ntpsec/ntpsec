@@ -24,9 +24,10 @@ main (
 	struct itimerval value, oldvalue;
 	int i;
 	time_t curtime;
+	char ascbuf[BUFSIZ];
 
 	curtime = time(0);
-	printf("Starting: %s", ctime(&curtime));
+	printf("Starting: %s", ctime_r(&curtime));
 	value.it_interval.tv_sec = value.it_value.tv_sec = 1;
 	value.it_interval.tv_usec = value.it_value.tv_usec = 0;
 	adjustment.tv_sec = 0;

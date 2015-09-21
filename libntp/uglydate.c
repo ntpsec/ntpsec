@@ -18,7 +18,7 @@ uglydate(
 {
 	char *bp;
 	char *timep;
-	struct tm *tm;
+	struct tm tmbuf, *tm;
 	time_t sec;
 	long msec;
 	int year;
@@ -27,7 +27,7 @@ uglydate(
 	LIB_GETBUF(bp);
 	sec = ts->l_ui - JAN_1970;
 	msec = ts->l_uf / 4294967;	/* fract / (2**32/1000) */
-	tm = gmtime(&sec);
+	tm = gmtime_r(&sec, &tmbuf);
 	if (ts->l_ui == 0) {
 		/*
 		 * Probably not a real good thing to do.  Oh, well.

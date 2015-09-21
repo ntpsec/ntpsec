@@ -349,8 +349,9 @@ main(
 	 * initialize the time.
 	 */
 	if (!utc) {
+		struct tm tmbuf;
 		gettimeofday(&tv, NULL);
-		tm = gmtime(&tv.tv_sec);
+		tm = gmtime_r(&tv.tv_sec, &tmbuf);
 		minute = tm->tm_min;
 		hour = tm->tm_hour;
 		day = tm->tm_yday + 1;

@@ -42,7 +42,7 @@
  * it to mktime.
  *
  * It just does as well as it can at normalizing the tm input, then does a
- * binary search of the time space using the system's localtime() function.
+ * binary search of the time space using the system's localtime_r() function.
  *
  * The original binary search was defective in that it didn't consider the
  * setting of tm_isdst when comparing tm values, causing the search to be
@@ -225,10 +225,11 @@ time2(
 	*/
 	t = (t < 0) ? 0 : ((time_t) 1 << bits);
 	for ( ; ; ) {
+		struct tm tmbuf;
 		if (usezn)
-			mytm = *localtime(&t);
+		    mytm = *localtime(&t, &tmbuf);
 		else
-			mytm = *gmtime(&t);
+		    mytm = *gmtime_r(&t, &tmbuf);
 		dir = tmcomp(&mytm, &yourtm);
 		if (dir != 0) {
 			if (bits-- < 0)
@@ -247,9 +248,9 @@ time2(
 	}
 	t += saved_seconds;
 	if (usezn)
-		*tmp = *localtime(&t);
+	    *tmp = *localtime_r(&t, &tmbuf);
 	else
-		*tmp = *gmtime(&t);
+	    *tmp = *gmtime_r(&t, &tmbuf);
 	*okayp = true;
 	return t;
 }
