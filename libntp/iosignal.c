@@ -35,7 +35,7 @@
 # ifdef __QNXNTO__
 #  include <fcntl.h>
 #  include <unix.h>
-#  define FNDELAY O_NDELAY
+#  define O_NONBLOCK O_NDELAY
 # endif
 
 #include "ntp_machine.h"
@@ -150,9 +150,9 @@ init_clock_sig(
 			return true;
 		}
 
-		if (fcntl(rio->fd, F_SETFL, FNDELAY|FASYNC) < 0)
+		if (fcntl(rio->fd, F_SETFL, O_NONBLOCK|O_ASYNC) < 0)
 		{
-			msyslog(LOG_ERR, "fcntl(FNDELAY|FASYNC) fails for clock I/O: %m");
+			msyslog(LOG_ERR, "fcntl(O_NONBLOCK|O_ASYNC) fails for clock I/O: %m");
 			return true;
 		}
 		return false;
@@ -184,10 +184,10 @@ init_clock_sig(
 			return true;
 		}
 
-		if (fcntl(rio->fd, F_SETFL, FNDELAY|FASYNC) < 0)
+		if (fcntl(rio->fd, F_SETFL, O_NONBLOCK|O_ASYNC) < 0)
 		{
 			msyslog(LOG_ERR,
-				"fcntl(FNDELAY|FASYNC) fails for clock I/O: %m");
+				"fcntl(O_NONBLOCK|O_ASYNC) fails for clock I/O: %m");
 			return true;
 		}
 		return false;
@@ -226,7 +226,7 @@ init_socket_sig(
 			exit(1);
 			/*NOTREACHED*/
 		}
-#  elif defined(FASYNC)
+#  elif defined(O_ASYNC)
 		{
 			int flags;
 
@@ -236,9 +236,9 @@ init_socket_sig(
 				exit(1);
 				/*NOTREACHED*/
 			}
-			if (fcntl(fd, F_SETFL, flags|FASYNC) < 0)
+			if (fcntl(fd, F_SETFL, flags|O_ASYNC) < 0)
 			{
-				msyslog(LOG_ERR, "fcntl(...|FASYNC) fails: %m - EXITING");
+				msyslog(LOG_ERR, "fcntl(...|O_ASYNC) fails: %m - EXITING");
 				exit(1);
 				/*NOTREACHED*/
 			}

@@ -34,24 +34,6 @@
 #include "libntp.h"	/* This needs Something above for GETDTABLESIZE */
 
 /*
- * Define FNDELAY and FASYNC using O_NONBLOCK and O_ASYNC if we need
- * to (and can).  This is here initially for QNX, but may help for
- * others as well...
- */
-#ifndef FNDELAY
-# ifdef O_NONBLOCK
-#  define FNDELAY O_NONBLOCK
-# endif
-#endif
-
-#ifndef FASYNC
-# ifdef O_ASYNC
-#  define FASYNC O_ASYNC
-# endif
-#endif
-
-
-/*
  * NIC rule match types
  */
 typedef enum {
