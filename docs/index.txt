@@ -33,7 +33,7 @@ Note: The Network Time Protocol software contained in this
 distribution is available without charge under the conditions set
 forth in the link:copyright.html[Copyright Notice].
 
-[note]
+[NOTE]
 It is very important that readers understand that the NTP document
 collection began 25 years ago and remains today a work in progress. It
 has evolved as new features were invented and old features retired. It
@@ -68,6 +68,15 @@ to understand, and easier to maintain.
 This project began as an effort to address serious security issues
 with NTP Classic, and we intend to keep a particularly strong focus on
 code security and code verifiability.
+
+Most of the changes are under the hood, internal to the codebase.  A
+few will be user-visible:
+
+* The documentation has been extensively updated and revised.
+
+* The ntpdc utility, long since replaced by ntpq, has been removed.
+
+* A number of obsolete refclocks have been removed.
 
 [[platforms]]
 == Supported platforms ==
