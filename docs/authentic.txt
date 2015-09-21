@@ -55,7 +55,7 @@ servers are in fact known and trusted and not intruders intending
 accidentally or intentionally to masquerade as a legitimate server. A
 detailed discussion of the NTP multi-layer security model and
 vulnerability analysis is in the white paper
-http://www.eecis.udel.edu/~mills/security.html[NTP Security Analysis].
+{millshome}security.html[NTP Security Analysis].
 
 The NTPv3 specification (RFC-1305) defined an authentication scheme
 properly described as _symmetric key cryptography_. It used the Data

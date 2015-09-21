@@ -3,7 +3,7 @@
 [cols="10%,90%",frame="none",grid="none",style="verse"]
 |==============================
 |image:pic/wingdorothy.gif[]|
-http://www.eecis.udel.edu/~mills/pictures.html[from 'The Wizard of Oz', L. Frank Baum]
+{millshome}pictures.html[from 'The Wizard of Oz', L. Frank Baum]
 
 You need help from the monkeys.
 

@@ -3,7 +3,7 @@
 [cols="10%,90%",frame="none",grid="none",style="verse"]
 |==============================
 |image:pic/oz2.gif[]|
-http://www.eecis.udel.edu/~mills/pictures.html[from 'The Wizard of Oz', L. Frank Baum]
+{millshome}pictures.html[from 'The Wizard of Oz', L. Frank Baum]
 
 Call the girls and they'll sweep your bugs.
 

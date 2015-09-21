@@ -59,7 +59,7 @@ crude hack by setting the clock back one second using the Unix
 Note however that in any case setting the time backwards by one second
 does not actually set the system clock backwards, but effectively stalls
 the clock for one second. These points are expanded in the white paper
-http://www.eecis.udel.edu/~mills/leap.html[The NTP Timescale and Leap
+{millshome}leap.html[The NTP Timescale and Leap
 Seconds]. If the leap timer is less than one day, the leap bits are set
 for dependent servers and clients.
 
