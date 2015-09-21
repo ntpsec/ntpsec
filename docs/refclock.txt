@@ -148,7 +148,7 @@ entries than you expected.  Support for some very ancient drivers
 | Number                      | Flags | Driver
 | link:driver1.html[Type 1]   | D     | Undisciplined Local Clock
 | link:driver4.html[Type 4]   | -     | Generic Spectracom Receivers
-| link:driver5.html[Type 5]   | D     | TrueTime GPS/GOES/OMEGA Receivers
+| link:driver5.html[Type 5]   | D     | TrueTime GPS/GOES Receivers
 | link:driver6.html[Type 6]   | D     | IRIG Audio Decoder
 | link:driver7.html[Type 7]   | D     | Radio CHU Audio Demodulator/Decoder
 | link:driver8.html[Type 8]   | T     | Generic Reference Driver

@@ -1,8 +1,6 @@
 /*
  * refclock_true - clock driver for the Kinemetrics/TrueTime receivers
  *	Receiver Version 3.0C - tested plain, with CLKLDISC
- *	Development work being done:
- *      - Support TL-3 WWV TOD receiver
  */
 
 #include <config.h>
@@ -50,8 +48,6 @@ extern int async_write(int, const void *, unsigned int);
  *	GPS/TM-TMD:	
  *	XL-DC:		(a 151-602-210, reported by the driver as a GPS/TM-TMD)
  *	GPS-800 TCU:	(an 805-957 with the RS232 Talker/Listener module)
- *      TL-3:           3 channel WWV/H receiver w/ IRIG and RS-232 outputs
- *	OM-DC:		getting stale ("OMEGA")
  *
  * Most of this code is originally from refclock_wwvb.c (now 
  * refclock_spectracom.c) with thanks.
@@ -72,22 +68,13 @@ extern int async_write(int, const void *, unsigned int);
  *   TL-3 Receiver: (default quality codes for TL-3)
  *       ?     unknown quality (receiver is unlocked)
  *     space   +/- 5 milliseconds
- *   OM-DC OMEGA Receiver: (default quality codes for OMEGA)
- *   WARNING OMEGA navigation system is no longer existent
- *       >     >+- 5 seconds
- *       ?     >+/- 500 milliseconds    #     >+/- 50 milliseconds
- *       *     >+/- 5 milliseconds      .     >+/- 1 millisecond
- *      A-H    less than 1 millisecond.  Character indicates which station
- *	       is being received as follows:
- *	       A = Norway, B = Liberia, C = Hawaii, D = North Dakota,
- *	       E = La Reunion, F = Argentina, G = Australia, H = Japan.
  *
  * The carriage return start bit begins on 0 seconds and extends to 1 bit time.
  *
- * Notes on 468-DC and OMEGA receiver:
+ * Notes on the 468-DC receiver:
  *
  * Send the clock a 'R' or 'C' and once per second a timestamp will
- * appear.  Send a 'P' to get the satellite position once (GOES only.)
+ * appear.  Send a 'P' to get the satellite position once.
  *
  * Notes on the 468-DC receiver:
  *
@@ -104,27 +91,6 @@ extern int async_write(int, const void *, unsigned int);
  * This corrects the 4 milliseconds advance and 8 milliseconds retard
  * needed. The software will ask the clock which satellite it sees.
  *
- * Notes on the TrueTime TimeLink TL-3 WWV TOD receiver:
- * 
- * This clock may be polled, or send one timecode per second.
- * That mode may be toggled via the front panel ("C" mode), or controlled
- * from the RS-232 port.  Send the receiver "ST1" to turn it on, and
- * "ST0" to turn it off.  Send "QV" to get the firmware revision (useful
- * for identifying this model.)
- * 
- * Note that it can take several polling cycles, especially if the receiver
- * was in the continuous timecode mode.  (It can be slow to leave that mode.)
- * 
- * ntp.conf parameters:
- * time1   - offset applied to samples when reading WEST satellite (default = 0)
- * time2   - offset applied to samples when reading EAST satellite (default = 0)
- * stratum - stratum to assign to this clock (default = 0)
- * refid   - refid assigned to this clock (default = "TRUE", see below)
- * flag1   - will silence the clock side of ntpd, just reading the clock
- *	     without trying to write to it.  (default = 0)
- * flag2   - generate a debug file /tmp/true%d.
- * flag3   - enable ppsclock streams module
- * flag4   - use the PCL-720 (BSD/OS only)
  */
 
 
@@ -151,15 +117,15 @@ extern int async_write(int, const void *, unsigned int);
  * used by the state machine
  */
 enum true_event	{e_Init, e_Huh, e_F18, e_F50, e_F51, e_Satellite,
-		 e_TL3, e_Poll, e_Location, e_TS, e_Max};
+		 e_Poll, e_Location, e_TS, e_Max};
 const char *events[] = {"Init", "Huh", "F18", "F50", "F51", "Satellite",
-			"TL3", "Poll", "Location", "TS"};
+			"Poll", "Location", "TS"};
 #define eventStr(x) (((int)x<(int)e_Max) ? events[(int)x] : "?")
 
-enum true_state	{s_Base, s_InqTM, s_InqTCU, s_InqOmega, s_InqGOES,
-		 s_InqTL3, s_Init, s_F18, s_F50, s_Start, s_Auto, s_Max};
-const char *states[] = {"Base", "InqTM", "InqTCU", "InqOmega", "InqGOES",
-			"InqTL3", "Init", "F18", "F50", "Start", "Auto"};
+enum true_state	{s_Base, s_InqTM, s_InqTCU, s_InqGOES,
+		 s_Init, s_F18, s_F50, s_Start, s_Auto, s_Max};
+const char *states[] = {"Base", "InqTM", "InqTCU", "InqGOES",
+			"Init", "F18", "F50", "Start", "Auto"};
 #define stateStr(x) (((int)x<(int)s_Max) ? states[(int)x] : "?")
 
 enum true_type	{t_unknown, t_goes, t_tm, t_tcu, t_omega, t_tl3, t_Max};
@@ -467,19 +433,6 @@ true_receive(
 		}
 		return;
 	}
-
-        /*
-         * Timecode: "VER xx.xx"
-         * (from a TL3 when sent "QV", so id's it during initialization.)
-         */
-        if (pp->a_lastcode[0] == 'V' && pp->a_lastcode[1] == 'E' &&
-            pp->a_lastcode[2] == 'R' && pp->a_lastcode[6] == '.') {
-                true_doevent(peer, e_TL3);
-                NLOG(NLOG_CLOCKSTATUS) {
-                        msyslog(LOG_INFO, "TL3: %s", pp->a_lastcode);
-                }
-                return;
-        }
 
 	/*
 	 * Timecode: " TRUETIME Mk III" or " TRUETIME XL"
@@ -798,53 +751,12 @@ true_doevent(
 				break;
 			case e_Init:	/*FALLTHROUGH*/
 			case e_Huh:
-			case e_TS:
-                                true_send(peer, "ST0"); /* turn off TL3 auto */
                                 sleep(1);               /* wait for it */
-                                up->state = s_InqTL3;
-                                true_send(peer, "QV");  /* see if its a TL3 */
                                 break;
-                            default:
+                        default:
                                 abort();
                         }
                         break;
-                    case s_InqTL3:
-                        switch (event) {
-                            case e_TL3:
-                                up->type = t_tl3;
-                                up->state = s_Auto;     /* Inq side-effect. */
-                                true_send(peer, "ST1"); /* Turn on 1/sec data */
-                                break;
-                            case e_Init:        /*FALLTHROUGH*/
-                            case e_Huh:
-				up->state = s_InqOmega;
-				true_send(peer, "C\r");
-				break;
-                            case e_TS:
-                                 up->type = t_tl3;    /* Already sending data */
-                                 up->state = s_Auto;
-                                 break;
-			    default:
-                                msyslog(LOG_INFO, 
-                                        "TRUE: TL3 init fellthrough! (%d)", event);
-                                break; 
-			}
-			break;
-		case s_InqOmega:
-			switch (event) {
-			case e_TS:
-				up->type = t_omega;
-				up->state = s_Auto;	/* Inq side-effect. */
-				break;
-			case e_Init:	/*FALLTHROUGH*/
-			case e_Huh:
-				up->state = s_InqTM;
-				true_send(peer, "F18\r");
-				break;
-			default:
-				abort();
-			}
-			break;
 		case s_InqTM:
 			switch (event) {
 			case e_F18:
