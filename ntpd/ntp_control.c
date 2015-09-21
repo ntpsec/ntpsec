@@ -854,7 +854,7 @@ save_config(
 	 * XXX: Nice feature, but not too safe.
 	 */
 	if (0 == strftime(filename, sizeof(filename), filespec,
-			  localtime(&now, &tmbuf)))
+			  localtime_r(&now, &tmbuf)))
 		strlcpy(filename, filespec, sizeof(filename));
 
 	/*

@@ -227,7 +227,7 @@ time2(
 	for ( ; ; ) {
 		struct tm tmbuf;
 		if (usezn)
-		    mytm = *localtime(&t, &tmbuf);
+		    mytm = *localtime_r(&t, &tmbuf);
 		else
 		    mytm = *gmtime_r(&t, &tmbuf);
 		dir = tmcomp(&mytm, &yourtm);
