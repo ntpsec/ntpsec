@@ -74,9 +74,11 @@ few will be user-visible:
 
 * The documentation has been extensively updated and revised.
 
-* The ntpdc utility, long since replaced by ntpq, has been removed.
+* The deprecated ntpdc utility, long since replaced by ntpq, has been removed.
 
 * A number of obsolete refclocks have been removed.
+
+* The deprecated ntpdate program has been removed.
 
 [[platforms]]
 == Supported platforms ==
