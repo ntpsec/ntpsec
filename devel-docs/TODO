@@ -7,26 +7,6 @@
 * Hal reports that in the loopsts file jitter is always being reported
   as zero.
 
-* dfranke reports:
-+
-| Bad news: In testing it, I lost several hours today trying to
-| work around a bug in how ntpsec is choosing what interfaces to
-| bind to.
-| If I don't put anything special in the configuration file, it
-| binds to 0.0.0.0, then *also* tries to bind to individual
-| interface IPs, logs some errors, then keeps running but doesn't
-| respond on the network.
-| If I put "interface ignore wildcard" in the configuration file,
-| it binds to 127.0.0.1 but nothing else.
-| I was only able to getting it working by putting in "interface
-| ignore wildcard" and also "interface listen <ip>" for every
-| network interface.
-| Giving just "interface listen wildcard" makes it properly bind on
-| 0.0.0.0 and nowhere else, but then it fails to emit any requests
-| to the configured servers; they all sit in "reject" status..
-| This is a regression from NTP classic which does the right thing
-| with no configuration.
-
 Hal:
 > On FreeBSD, the DNS lookup and thread stuff seems to work OK.
 > 
