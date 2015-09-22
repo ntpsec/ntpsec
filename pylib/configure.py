@@ -63,8 +63,7 @@ def cmd_configure(ctx):
 
 	from os.path import exists
 	from waflib.Utils import subprocess
-	if exists(".git"):
-		ctx.find_program("git", var="BIN_GIT")
+	if exists(".git") and ctx.find_program("git", var="BIN_GIT", mandatory=False):
 		ctx.start_msg("DEVEL: Getting revision")
 		cmd = ["git", "log", "-1", "--format=%H"]
 		p = subprocess.Popen(cmd, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=None)
@@ -268,6 +267,11 @@ int main() { return 0; }
 	# There is an ENABLE_AUTOKEY as well, but as that feature
 	# is not working and likely to be replaced it's not exposed
 	# and can't be enabled.
+
+	# There is an ENABLE_ASYMMETRIC that enables a section of the
+	# protocol code having to do with handling very long asymmetric
+	# delays, as in space communications. Likely this code has never
+	# been enabled for production.
 
 	# Won't be true under Windows, but is under every Unix-like OS.
 	ctx.define("HAVE_WORKING_FORK", 1)
