@@ -1,10 +1,3 @@
-config = {
-	# "NTPS for NTPSec this avoids any naming collissions
-	"NTPS_VERSION_MAJOR": 1,
-	"NTPS_VERSION_MINOR": 0,
-	"NTPS_VERSION_REV":	 0
-}
-
 from waflib import Utils
 
 out="build"
@@ -13,6 +6,18 @@ from pylib.configure import cmd_configure
 
 OPT_STORE = {} # Storage for options to pass into configure
 
+def parse_version():
+        with open("VERSION", "r") as f:
+                version_string = f.read().strip()
+        [major,minor,rev] = version_string.split(".")
+        return {
+                # "NTPS" for NTPSec -- this avoids any naming collisions
+                "NTPS_VERSION_MAJOR" : int(major),
+                "NTPS_VERSION_MINOR" : int(minor),
+                "NTPS_VERSION_REV" : int(rev)
+        }
+
+config = parse_version()
 
 def options(ctx):
 	ctx.load("compiler_c")
@@ -104,3 +109,11 @@ def build(ctx):
 		chmod		= Utils.O755
 	)
 
+def dist(ctx):
+        ctx.base_name = "ntpsec-%d.%d.%d" % \
+                        (config["NTPS_VERSION_MAJOR"], \
+                         config["NTPS_VERSION_MINOR"], \
+                         config["NTPS_VERSION_REV"])
+        if ctx.options.build_version_tag:
+                ctx.base_name = ctx.base_name + "-" + \
+                                ctx.options.build_version_tag
