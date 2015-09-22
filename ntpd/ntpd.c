@@ -66,13 +66,17 @@
 # include <ctype.h>
 # include <grp.h>
 # include <pwd.h>
-#ifdef HAVE_LINUX_CAPABILITIES
-# include <sys/capability.h>
-# include <sys/prctl.h>
-#endif /* HAVE_LINUX_CAPABILITIES */
-#if defined(HAVE_PRIV_H) && defined(HAVE_SOLARIS_PRIVS)
-# include <priv.h>
-#endif /* HAVE_PRIV_H */
+# ifdef HAVE_CAPABILITY
+#  ifdef HAVE_SYS_CAPABILITY_H
+#   include <sys/capability.h>
+#  endif
+#  ifdef HAVE_SYS_PRCTL_H
+#   include <sys/prctl.h>
+#  endif
+# endif /* HAVE_CAPABILITY */
+# if defined(HAVE_PRIV_H) && defined(HAVE_SOLARIS_PRIVS)
+#  include <priv.h>
+# endif /* HAVE_PRIV_H */
 #endif /* ENABLE_DROPROOT */
 
 #if defined (LIBSECCOMP) && (KERN_SECCOMP)
@@ -999,7 +1003,7 @@ ntpdmain(
 	if (droproot) {
 		/* Drop super-user privileges and chroot now if the OS supports this */
 
-#  ifdef HAVE_LINUX_CAPABILITIES
+#  ifdef HAVE_CAPABILITY
 		/* set flag: keep privileges accross setuid() call (we only really need cap_sys_time): */
 		if (prctl( PR_SET_KEEPCAPS, 1L, 0L, 0L, 0L ) == -1) {
 			msyslog( LOG_ERR, "prctl( PR_SET_KEEPCAPS, 1L ) failed: %m" );
@@ -1013,7 +1017,7 @@ ntpdmain(
 			msyslog(LOG_ERR, "Need user name to drop root privileges (see -u flag!)" );
 			exit(-1);
 		}
-#  endif	/* HAVE_LINUX_CAPABILITIES || HAVE_SOLARIS_PRIVS */
+#  endif	/* HAVE_CAPABILITY || HAVE_SOLARIS_PRIVS */
 
 		if (user != NULL) {
 			if (isdigit((unsigned char)*user)) {
@@ -1119,21 +1123,21 @@ getgroup:
 			exit (-1);
 		}
 
-#  if !defined(HAVE_LINUX_CAPABILITIES) && !defined(HAVE_SOLARIS_PRIVS)
+#  if !defined(HAVE_CAPABILITY) && !defined(HAVE_SOLARIS_PRIVS)
 		/*
 		 * for now assume that the privilege to bind to privileged ports
 		 * is associated with running with uid 0 - should be refined on
 		 * ports that allow binding to NTP_PORT with uid != 0
 		 */
 		disable_dynamic_updates |= (sw_uid != 0);  /* also notifies routing message listener */
-#  endif /* !HAVE_LINUX_CAPABILITIES && !HAVE_SOLARIS_PRIVS */
+#  endif /* !HAVE_CAPABILITY && !HAVE_SOLARIS_PRIVS */
 
 		if (disable_dynamic_updates && interface_interval) {
 			interface_interval = 0;
 			msyslog(LOG_INFO, "running as non-root disables dynamic interface tracking");
 		}
 
-#  ifdef HAVE_LINUX_CAPABILITIES
+#  ifdef HAVE_CAPABILITY
 		{
 			/*
 			 *  We may be running under non-root uid now, but we still hold full root privileges!
@@ -1160,7 +1164,7 @@ getgroup:
 			}
 			cap_free(caps);
 		}
-#  endif	/* HAVE_LINUX_CAPABILITIES */
+#  endif	/* HAVE_CAPABILITY */
 #  ifdef HAVE_SOLARIS_PRIVS
 		if (priv_delset(lowprivs, "proc_setid") == -1) {
 			msyslog(LOG_ERR, "priv_delset() failed:%m");
