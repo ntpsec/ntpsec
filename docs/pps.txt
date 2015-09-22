@@ -7,7 +7,7 @@
 
 Alice is trying to find the PPS signal connector.
 
-Last update: 10-Mar-2014 05:17 UTC
+Last update: 22-MSep-2015 05:12 UTC
 |==============================
 
 == Related Links ==
@@ -25,54 +25,56 @@ include::includes/misc.txt[]
 [[intro]]
 == Introduction ==
 
-Most radio clocks are connected using a serial port operating at speeds
-of 9600 bps. The accuracy using typical timecode formats, where the
-on-time epoch is indicated by a designated ASCII character such as
-carriage-return `<cr>`, is normally limited to 100 μs. Using carefully
-crafted averaging techniques, the NTP algorithms can whittle this down
-to a few tens of microseconds. However, some radios produce a
-pulse-per-second (PPS) signal which can be used to improve the accuracy
-to a few microseconds. This page describes the hardware and software
-necessary for NTP to use the PPS signal.
+Most conventional time sources (radio clocks and GPSes) are connected
+using a serial or USB port operating at speeds of 9600 bps. The
+accuracy using typical clock-radio timecode formats, where the on-time
+epoch is indicated by a designated ASCII character such as
+carriage-return `<cr>`, is normally limited to 100 &mu;s; NMEA streams
+from GPSes have a similar limit.  Some are worse; the SiRF line of
+consumer-grade GPSes, for example, has a long-period wander of about
+170&mu;s.
 
-The PPS signal can be connected in either of two ways. On FreeBSD
-systems (with the PPS_SYNC and pps kernel options) it can be connected
-directly to the ACK pin of a parallel port. This is the preferred way,
-as it requires no additional hardware. Alternatively, it can be
-connected via the DCD pin of a serial port. However, the PPS signal
-levels are usually incompatible with the serial port interface signals.
-Note that NTP no longer supports connection via the RD pin of a serial
-port.
+Using carefully crafted averaging techniques, the {project-shortname}
+algorithms can whittle this down to a few tens of
+microseconds. However, some time sources produce a pulse-per-second
+(PPS) signal which can be used to improve the accuracy to a few
+microseconds. This page describes the hardware and software necessary
+for NTP to use the PPS signal.
+
+The simplest way to collect a PPS signal is from a GPS over a serial
+handshake pin, typically DCD; Linux supports this.  On FreeBSD systems
+(with the PPS_SYNC and pps kernel options) it can be connected
+directly to the ACK pin of a parallel port. Clock radios are more
+complicated; their PPS signal levels are usually incompatible with
+serial port interface signals.  Note that {project-shortname} no
+longer supports connection via the RD pin of a serial port.
 
 [[opsys]]
 == Operating System Support ==
 
 Both the serial and parallel port connection require operating system
 support, which is available in a few operating systems, including
-FreeBSD, Linux (with PPSkit patch) and Solaris. Support on an
-experimental basis is available for several other systems, including
-SunOS and HP/Compaq/Digital Tru64. The kernel interface described on the
+FreeBSD, Linux, and Solaris.  The kernel interface described on the
 link:kernpps.html[PPSAPI Interface for Precision Time Signals] page is
 the only interface currently supported. Older PPS interfaces based on
 the `ppsclock` and `tty_clk` streams modules are no longer supported.
-The interface consists of the `timepps.h` header file which is specific
-to each system. It is included automatically when the distribution is
-built.
+The interface consists of the `timepps.h` header file, which should be
+in the /usr/include/ or /usr/include/sys directory of your file
+system.
 
 == PPS Driver ==
 
-PPS support requires is built into some drivers, in particular the WWVB
-and NMEA drivers, and may be added to other drivers in future.
-Alternatively, the PPS driver described on the
-link:driver22.html[Type 22 PPS Clock Discipline] page can be
-used. It operates in conjunction with another source that provides
-seconds numbering. The selected source is designate a prefer peer, as
-using the `prefer` option, as described on the
-link:prefer.html[Mitigation Rules and the `prefer` Keyword] page. The
-prefer peer is ordinarily the radio clock that provides the PPS signal,
-but in principle another radio clock or even a remote Internet server
-could be designated preferred Note that the `pps` configuration command
-has been obsoleted by this driver.
+PPS support is built into some drivers, in particular the NMEA
+driver, and may be added to other drivers in future.  Alternatively,
+the PPS driver described on the link:driver22.html[Type 22 PPS Clock
+Discipline] page can be used. It operates in conjunction with another
+source that provides seconds numbering. The selected source is
+designate a prefer peer, as using the `prefer` option, as described on
+the link:prefer.html[Mitigation Rules and the `prefer` Keyword]
+page. The prefer peer is ordinarily the radio clock that provides the
+PPS signal, but in principle another radio clock or even a remote
+Internet server could be designated preferred Note that the `pps`
+configuration command has been obsoleted by this driver.
 
 [[use]]
 == Using the Pulse-per-Second (PPS) Signal ==
@@ -96,7 +98,7 @@ An option flag in the driver determines whether the NTP algorithms or
 kernel support is enabled (if available). For historical reasons, the
 NTP algorithms are selected by by default, since performance is
 generally better using older, slower systems. However, performance is
-generally better with kernl support using newer, faster systems.
+generally better with kernel support using newer, faster systems.
 
 '''''
 
