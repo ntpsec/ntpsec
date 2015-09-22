@@ -1510,10 +1510,10 @@ process_packet(
 	l_fp	p_rec, p_xmt, p_org, p_reftime, ci;
 	uint8_t	pmode, pleap, pversion, pstratum;
 	char	statstr[NTP_MAXSTRLEN];
-#ifdef ENABLE_ASYMMETRIC
+#ifdef ASSYM
 	int	itemp;
 	double	etemp, ftemp, td;
-#endif /* ENABLE_ASYMMETRIC */
+#endif /* ASSYM */
 
 	sys_processed++;
 	peer->processed++;
@@ -1721,7 +1721,7 @@ process_packet(
 	p_disp = LOGTOD(sys_precision) + LOGTOD(peer->precision) +
 	    clock_phi * p_del;
 
-#if ENABLE_ASYMMETRIC
+#if ASSYM
 	/*
 	 * This code calculates the outbound and inbound data rates by
 	 * measuring the differences between timestamps at different
@@ -1789,7 +1789,7 @@ process_packet(
 			    td);
 #endif
 	}
-#endif /* ENABLE_ASYMMETRIC */
+#endif /* ASSYM */
 
 	/*
 	 * That was awesome. Now hand off to the clock filter.
@@ -4021,7 +4021,7 @@ init_proto(const bool verbose)
 		sys_ttl[i] = (uint8_t)((i * 256) / MAX_TTL);
 		sys_ttlmax = i;
 	}
-	hardpps_enable = true;
+	hardpps_enable = false;
 	stats_control = true;
 }
 
