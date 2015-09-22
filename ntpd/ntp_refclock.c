@@ -838,8 +838,7 @@ refclock_setup(
 		for (i = 0; i < NCCS; ++i)
 			ttyp->c_cc[i] = '\0';
 
-#if defined(TIOCMGET) && !defined(SCO5_CLOCK)
-
+#ifdef TIOCMGET
 		/*
 		 * If we have modem control, check to see if modem leads
 		 * are active; if so, set remote connection. This is

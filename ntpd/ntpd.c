@@ -58,10 +58,6 @@
 # include <ulimit.h>
 #endif /* _AIX */
 
-#ifdef SCO5_CLOCK
-# include <sys/ci/ciioctl.h>
-#endif
-
 #ifdef ENABLE_DROPROOT
 # include <ctype.h>
 # include <grp.h>
@@ -616,10 +612,6 @@ ntpdmain(
 	struct sigaction sa;
 #  endif
 # endif	/* HAVE_WORKING_FORK*/
-# ifdef SCO5_CLOCK
-	int		fd;
-	int		zero;
-# endif
 	int op;
 
 	uv = umask(0);
@@ -766,21 +758,6 @@ ntpdmain(
 #  endif	/* _AIX */
 # endif		/* HAVE_WORKING_FORK */
 	}
-
-# ifdef SCO5_CLOCK
-	/*
-	 * SCO OpenServer's system clock offers much more precise timekeeping
-	 * on the base CPU than the other CPUs (for multiprocessor systems),
-	 * so we must lock to the base CPU.
-	 */
-	fd = open("/dev/at1", O_RDONLY);		
-	if (fd >= 0) {
-		zero = 0;
-		if (ioctl(fd, ACPU_LOCK, &zero) < 0)
-			msyslog(LOG_ERR, "cannot lock to base CPU: %m");
-		close(fd);
-	}
-# endif
 
         if (!saveconfigquit && !dumpopts) {
 	    /* Setup stack size in preparation for locking pages in memory. */
