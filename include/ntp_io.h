@@ -11,9 +11,6 @@
 #include <unistd.h>
 #include <stdio.h>
 #include <fcntl.h>
-#if !defined(SEEK_SET) && defined(L_SET)
-# define SEEK_SET L_SET
-#endif
 
 #ifdef SYS_WINNT
 # include <io.h>
