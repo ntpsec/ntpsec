@@ -10,7 +10,7 @@
 #include "ntp_types.h"
 #include "ntp_control.h"	/* for CTL_* clocktypes */
 
-#if defined(REFCLOCK) && defined(CLOCK_ARCRON_MSF)
+#if defined(ENABLE_REFCLOCKS) && defined(CLOCK_ARCRON_MSF)
 
 static const char arc_version[] = { "V1.3 2003/02/21" };
 
