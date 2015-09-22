@@ -171,13 +171,13 @@ int ninterfaces;			/* Total number of interfaces */
 
 int disable_dynamic_updates;		/* scan interfaces once only */
 
-#ifdef ENABLE_REFCLOCKS
+#ifdef REFCLOCK
 /*
  * Refclock stuff.	We keep a chain of structures with data concerning
  * the guys we are doing I/O for.
  */
 static	struct refclockio *refio;
-#endif /* ENABLE_REFCLOCKS */
+#endif /* REFCLOCK */
 
 /*
  * File descriptor masks etc. for call to select
@@ -325,7 +325,7 @@ static int		cmp_addr_distance(const sockaddr_u *,
 static inline int	read_network_packet	(SOCKET, struct interface *, l_fp);
 static void		ntpd_addremove_io_fd	(int, int, int);
 static input_handler_t  input_handler;
-#ifdef ENABLE_REFCLOCKS
+#ifdef REFCLOCK
 static inline int	read_refclock_packet	(SOCKET, struct refclockio *, l_fp);
 #endif
 #endif
@@ -3226,7 +3226,7 @@ fdbits(
 }
 
 
-#ifdef ENABLE_REFCLOCKS
+#ifdef REFCLOCK
 /*
  * Routine to read the refclock packets for a specific interface
  * Return the number of bytes read. That way we know if we should
@@ -3292,7 +3292,7 @@ read_refclock_packet(
 
 	return buflen;
 }
-#endif	/* ENABLE_REFCLOCKS */
+#endif	/* REFCLOCK */
 
 
 #ifdef HAVE_PACKET_TIMESTAMP
@@ -3613,7 +3613,7 @@ input_handler(
 	fd_set		fds;
 	size_t		select_count;
 	endpt *		ep;
-#ifdef ENABLE_REFCLOCKS
+#ifdef REFCLOCK
 	struct refclockio *rp;
 	int		saved_errno;
 	const char *	clk;
@@ -3679,7 +3679,7 @@ input_handler(
 
 	++handler_pkts;
 
-#ifdef ENABLE_REFCLOCKS
+#ifdef REFCLOCK
 	/*
 	 * Check out the reference clocks first, if any
 	 */
@@ -3719,7 +3719,7 @@ input_handler(
 			}
 		}
 	}
-#endif /* ENABLE_REFCLOCKS */
+#endif /* REFCLOCK */
 
 	/*
 	 * Loop through the interfaces looking for data to read.
@@ -4274,7 +4274,7 @@ io_clr_stats(void)
 }
 
 
-#ifdef ENABLE_REFCLOCKS
+#ifdef REFCLOCK
 /*
  * io_addclock - add a reference clock to the list and arrange that we
  *				 get SIGIO interrupts from it.
@@ -4347,7 +4347,7 @@ io_closeclock(
 
 	UNBLOCKIO();
 }
-#endif	/* ENABLE_REFCLOCKS */
+#endif	/* REFCLOCK */
 
 
 /*

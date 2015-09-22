@@ -219,7 +219,7 @@ struct refclock {
 extern	bool	io_addclock	(struct refclockio *);
 extern	void	io_closeclock	(struct refclockio *);
 
-#ifdef ENABLE_REFCLOCKS
+#ifdef REFCLOCK
 extern	void	refclock_buginfo(sockaddr_u *,
 				 struct refclockbug *);
 extern	void	refclock_control(sockaddr_u *,
@@ -239,6 +239,6 @@ extern	int	refclock_gtraw	(struct recvbuf *, char *, int, l_fp *);
 extern	bool	indicate_refclock_packet(struct refclockio *,
 					 struct recvbuf *);
 extern	void	process_refclock_packet(struct recvbuf *);
-#endif /* ENABLE_REFCLOCKS */
+#endif /* REFCLOCK */
 
 #endif /* GUARD_NTP_REFCLOCK_H */

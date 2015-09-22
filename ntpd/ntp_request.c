@@ -105,11 +105,11 @@ static	void	do_if_reload    (sockaddr_u *, endpt *, struct req_pkt *);
 #ifdef HAVE_KERNEL_PLL
 static	void	get_kernel_info (sockaddr_u *, endpt *, struct req_pkt *);
 #endif /* HAVE_KERNEL_PLL */
-#ifdef ENABLE_REFCLOCKS
+#ifdef REFCLOCK
 static	void	get_clock_info (sockaddr_u *, endpt *, struct req_pkt *);
 static	void	set_clock_fudge (sockaddr_u *, endpt *, struct req_pkt *);
 static	void	get_clkbug_info (sockaddr_u *, endpt *, struct req_pkt *);
-#endif	/* ENABLE_REFCLOCKS */
+#endif	/* REFCLOCK */
 
 /*
  * ntpd request codes
@@ -162,7 +162,7 @@ static const struct req_proc ntp_codes[] = {
 #ifdef HAVE_KERNEL_PLL
 	{ REQ_GET_KERNEL,	NOAUTH,	0, 0,	get_kernel_info },
 #endif
-#ifdef ENABLE_REFCLOCKS
+#ifdef REFCLOCK
 	{ REQ_GET_CLOCKINFO, NOAUTH, sizeof(uint32_t), sizeof(uint32_t), 
 				get_clock_info },
 	{ REQ_SET_CLKFUDGE, AUTH, sizeof(struct conf_fudge), 
@@ -1116,10 +1116,10 @@ sys_info(
 		is->flags |= INFO_FLAG_AUTHENTICATE;
 	if (sys_bclient)
 		is->flags |= INFO_FLAG_BCLIENT;
-#ifdef ENABLE_REFCLOCKS
+#ifdef REFCLOCK
 	if (cal_enable)
 		is->flags |= INFO_FLAG_CAL;
-#endif /* ENABLE_REFCLOCKS */
+#endif /* REFCLOCK */
 	if (kern_enable)
 		is->flags |= INFO_FLAG_KERNEL;
 	if (mon_enabled != MON_OFF)
@@ -2340,7 +2340,7 @@ get_kernel_info(
 #endif /* HAVE_KERNEL_PLL */
 
 
-#ifdef ENABLE_REFCLOCKS
+#ifdef REFCLOCK
 /*
  * get_clock_info - get info about a clock
  */
@@ -2479,7 +2479,7 @@ set_clock_fudge(
 }
 #endif
 
-#ifdef ENABLE_REFCLOCKS
+#ifdef REFCLOCK
 /*
  * get_clkbug_info - get debugging info about a clock
  */

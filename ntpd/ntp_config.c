@@ -3437,7 +3437,7 @@ config_fudge(
 				exit(curr_opt->attr ? curr_opt->attr : 1);
 			}
 		}
-# ifdef ENABLE_REFCLOCKS
+# ifdef REFCLOCK
 		if (!err_flag)
 			refclock_control(&addr_sock, &clock_stat, NULL);
 # endif

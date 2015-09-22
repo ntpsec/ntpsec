@@ -122,7 +122,7 @@ def build(ctx):
 	#      defines littered everywhere and segment it to their own source files.
 	refclock_define = []
 	if ctx.env.REFCLOCK_ENABLE:
-		refclock_define = ["ENABLE_REFCLOCKS=1"]
+		refclock_define = ["REFCLOCK=1"]
 
 
 	ctx(

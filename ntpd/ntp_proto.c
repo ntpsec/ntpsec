@@ -2049,10 +2049,10 @@ poll_update(
 	if (peer->burst > 0) {
 		if (peer->nextdate > current_time)
 			return;
-#ifdef ENABLE_REFCLOCKS
+#ifdef REFCLOCK
 		else if (peer->flags & FLAG_REFCLOCK)
 			peer->nextdate = current_time + RESP_DELAY;
-#endif /* ENABLE_REFCLOCKS */
+#endif /* REFCLOCK */
 		else
 			peer->nextdate = utemp;
 
@@ -2085,11 +2085,11 @@ poll_update(
 			hpoll = peer->hpoll;
 		else
 			hpoll = min(peer->ppoll, peer->hpoll);
-#ifdef ENABLE_REFCLOCKS
+#ifdef REFCLOCK
 		if (peer->flags & FLAG_REFCLOCK)
 			next = 1 << hpoll;
 		else
-#endif /* ENABLE_REFCLOCKS */
+#endif /* REFCLOCK */
 			next = ((0x1000UL | (intercept_ntp_random(__func__) & 0x0ff)) <<
 			    hpoll) >> 12;
 		next += peer->outdate;
@@ -2164,13 +2164,13 @@ peer_clear(
 		peer->filter_order[u] = u;
 		peer->filter_disp[u] = MAXDISPERSE;
 	}
-#ifdef ENABLE_REFCLOCKS
+#ifdef REFCLOCK
 	if (!(peer->flags & FLAG_REFCLOCK)) {
 #endif
 		peer->leap = LEAP_NOTINSYNC;
 		peer->stratum = STRATUM_UNSPEC;
 		memcpy(&peer->refid, ident, 4);
-#ifdef ENABLE_REFCLOCKS
+#ifdef REFCLOCK
 	}
 #endif
 
@@ -2416,11 +2416,11 @@ clock_select(void)
 	struct peer *sys_prefer = NULL;	/* prefer peer */
 	struct peer *typesystem = NULL;
 	struct peer *typeorphan = NULL;
-#ifdef ENABLE_REFCLOCKS
+#ifdef REFCLOCK
 	struct peer *typemodem = NULL;
 	struct peer *typelocal = NULL;
 	struct peer *typepps = NULL;
-#endif /* ENABLE_REFCLOCKS */
+#endif /* REFCLOCK */
 	static struct endpoint *endpoint = NULL;
 	static int *indx = NULL;
 	static peer_select *peers = NULL;
@@ -2517,7 +2517,7 @@ clock_select(void)
 		 */
 		if (peer->stratum > sys_orphan)
 			continue;
-#ifdef ENABLE_REFCLOCKS
+#ifdef REFCLOCK
 		/*
 		 * This is an attempt to set up fallbacks in case falseticker
 		 * elimination leaves no survivors with better service quality.
@@ -2533,7 +2533,7 @@ clock_select(void)
 			continue;
 		    }
 		}
-#endif /* ENABLE_REFCLOCKS */
+#endif /* REFCLOCK */
 
 		/*
 		 * If we get this far, the peer can stay on the
@@ -2662,7 +2662,7 @@ clock_select(void)
 		    peer->offset - h > high) && !(peer->flags & FLAG_TRUE))
 			continue;
 
-#ifdef ENABLE_REFCLOCKS
+#ifdef REFCLOCK
 		/*
 		 * Eligible PPS peers must survive the intersection
 		 * algorithm. Use the first one found, but don't
@@ -2674,7 +2674,7 @@ clock_select(void)
 			if (!(peer->flags & FLAG_TSTAMP_PPS))
 				continue;
 		}
-#endif /* ENABLE_REFCLOCKS */
+#endif /* REFCLOCK */
 
 		if (j != i)
 			peers[j] = peers[i];
@@ -2691,7 +2691,7 @@ clock_select(void)
 	if (nlist == 0) {
 		peers[0].error = 0;
 		peers[0].synch = sys_mindisp;
-#ifdef ENABLE_REFCLOCKS
+#ifdef REFCLOCK
 		if (typemodem != NULL) {
 			peers[0].peer = typemodem;
 			nlist = 1;
@@ -2699,7 +2699,7 @@ clock_select(void)
 			peers[0].peer = typelocal;
 			nlist = 1;
 		} else
-#endif /* ENABLE_REFCLOCKS */
+#endif /* REFCLOCK */
 		if (typeorphan != NULL) {
 			peers[0].peer = typeorphan;
 			nlist = 1;
@@ -2864,7 +2864,7 @@ clock_select(void)
 		DPRINTF(1, ("select: combine offset %.9f jitter %.9f\n",
 			sys_offset, sys_jitter));
 	}
-#ifdef ENABLE_REFCLOCKS
+#ifdef REFCLOCK
 	/*
 	 * If a PPS driver is lit and the combined offset is less than
 	 * 0.4 s, select the driver as the PPS peer and use its offset
@@ -2884,7 +2884,7 @@ clock_select(void)
 		DPRINTF(1, ("select: pps offset %.9f jitter %.9f\n",
 			sys_offset, sys_jitter));
 	}
-#endif /* ENABLE_REFCLOCKS */
+#endif /* REFCLOCK */
 
 	/*
 	 * If there are no survivors at this point, there is no
@@ -4060,11 +4060,11 @@ proto_config(
 			io_setbclient();
 		break;
 
-#ifdef ENABLE_REFCLOCKS
+#ifdef REFCLOCK
 	case PROTO_CAL:		/* refclock calibrate (calibrate) */
 		cal_enable = value;
 		break;
-#endif /* ENABLE_REFCLOCKS */
+#endif /* REFCLOCK */
 
 	case PROTO_KERNEL:	/* kernel discipline (kernel) */
 		select_loop(value);
