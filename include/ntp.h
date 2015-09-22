@@ -267,12 +267,12 @@ struct peer {
 	/*
 	 * Variables used by reference clock support
 	 */
-#ifdef REFCLOCK
+#ifdef ENABLE_REFCLOCKS
 	struct refclockproc *procptr; /* refclock structure pointer */
 	uint8_t	refclktype;	/* reference clock type */
 	uint8_t	refclkunit;	/* reference clock unit number */
 	uint8_t	sstclktype;	/* clock type for system status word */
-#endif /* REFCLOCK */
+#endif /* ENABLE_REFCLOCKS */
 
 	/*
 	 * Variables set by received packet

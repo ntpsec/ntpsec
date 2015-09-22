@@ -255,13 +255,13 @@ timer(void)
 	if (adjust_timer <= current_time) {
 		adjust_timer += 1;
 		adj_host_clock();
-#ifdef REFCLOCK
+#ifdef ENABLE_REFCLOCKS
 		for (p = peer_list; p != NULL; p = next_peer) {
 			next_peer = p->p_link;
 			if (FLAG_REFCLOCK & p->flags)
 				refclock_timer(p);
 		}
-#endif /* REFCLOCK */
+#endif /* ENABLE_REFCLOCKS */
 	}
 
 	/*
@@ -281,11 +281,11 @@ timer(void)
 		if (p->throttle > 0)
 			p->throttle--;
 		if (p->nextdate <= current_time) {
-#ifdef REFCLOCK
+#ifdef ENABLE_REFCLOCKS
 			if (FLAG_REFCLOCK & p->flags)
 				refclock_transmit(p);
 			else
-#endif	/* REFCLOCK */
+#endif	/* ENABLE_REFCLOCKS */
 				transmit(p);
 		}
 	}
