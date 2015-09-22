@@ -4,11 +4,6 @@
 
 === Blocker bugs ===
 
-* Hal reports that in the loopsts file jitter is always being reported
-  as zero.
-I think that's tangled up with the kernel PPS processing.  I'm seeing
-strange startup messages.  It happens on FreeBSD and Linux.
-
 Hal:
 > On FreeBSD, the DNS lookup and thread stuff seems to work OK.
 > 
