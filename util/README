@@ -7,9 +7,10 @@ on how to make and install these programs.
 Not much documentation, alas.  Read the header comments.
 
 audio-pcm.c::
-    Probe the capabilities of your sound card.  If anyone can pin the
-    ioctls in this code to a specific OS or standard, we'd like to
-    know so this can bwe better documented.
+    Probe the capabilities of your sound card.  Assumes the SADA
+    (Sun Audio Driver) interface from SunOS/Solaris, also implemented
+    by *BSD and in the old OSS Linux sound layer.  Note: OpenSolaris
+    changed its sound API away from SADA.
 
 hist.c::
     This program can be used to calibrate the clock reading jitter of a
