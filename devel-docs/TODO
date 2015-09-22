@@ -26,6 +26,8 @@ Hal:
 * scripts/*/*.in and scripts/ntpsweep.in need to be expanded into the
 actual scripts by substituting in @-cookies.
 
+* The install production needs to warn of stale ntpdc and ntpdate binaries.
+
 * The following symbols need to be investigated to determine under what
 circumstances configuration should set them.
 
