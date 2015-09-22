@@ -264,6 +264,9 @@ int main() { return 0; }
 	if ctx.options.enable_mssntp:
 		ctx.define("ENABLE_MSSNTP", 1)
 
+	if ctx.options.enable_lockclock:
+		ctx.define("ENABLE_LOCKCLOCK", 1)
+
 	# There is an ENABLE_AUTOKEY as well, but as that feature
 	# is not working and likely to be replaced it's not exposed
 	# and can't be enabled.

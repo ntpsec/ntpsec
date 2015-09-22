@@ -2393,7 +2393,7 @@ clock_filter(
 /*
  * clock_select - find the pick-of-the-litter clock
  *
- * LOCKCLOCK: (1) If the local clock is the prefer peer, it will always
+ * ENABLE_LOCKCLOCK: (1) If the local clock is the prefer peer, it will always
  * be enabled, even if declared falseticker, (2) only the prefer peer
  * can be selected as the system peer, (3) if the external source is
  * down, the system leap bits are set to 11 and the stratum set to
@@ -2435,11 +2435,11 @@ clock_select(void)
 	 */
 	osys_peer = sys_peer;
 	sys_survivors = 0;
-#ifdef LOCKCLOCK
+#ifdef ENABLE_LOCKCLOCK
 	sys_leap = LEAP_NOTINSYNC;
 	sys_stratum = STRATUM_UNSPEC;
 	memcpy(&sys_refid, "DOWN", 4);
-#endif /* LOCKCLOCK */
+#endif /* ENABLE_LOCKCLOCK */
 
 	/*
 	 * Allocate dynamic space depending on the number of

@@ -36,6 +36,7 @@ def options(ctx):
 	grp = ctx.add_option_group("NTP features")
 	grp.add_option('--enable-leap-smear', action='store_true', default=False, help="Enable Leap Smearing.")
 	grp.add_option('--enable-mssntp', action='store_true', default=False, help="Enable Samba MSS NTP support.")
+	grp.add_option('--enable-lockclock', action='store_true', default=False, help="Enable NIST lockclock scheme.")
 
 	grp = ctx.add_option_group("Refclock options")
 	grp.add_option('--refclock', dest='refclocks', help="Comma-separated list of Refclock IDs to build (or \"all\")", type='string')
