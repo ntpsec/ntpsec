@@ -14,17 +14,6 @@ Hal:
 > error message doesn't catch this case.  So ntpd silently crashes with no 
 > evidence in the log files.
 
-Hal:
-> I think there is some interaction between when the ACTS driver calls and the 
-> state of other stuff, like the connection to the net.  This is probably a 
-> good candidate to get cleaned up.
-> 
-> There is another possible tangle in this area.  If you set "noselect" on the 
-> server line in the config file, ntpd goes through all the action of 
-> collecting the data and writing log files, but then drops the clock.  I don't 
-> know things well enough to be sure that this sort of logic won't pick one 
-> back up.
-
 === Build system ===
 
 * Document build files.
@@ -63,15 +52,23 @@ OPENSSL_LEAKS
 TM_IN_SYS_TIME
 TRIM_POLLRATE
 
-* The waf rules for invoking asciidoc need to use docs/asciidoc.conf
-  even when it's being run on *.txt files in other directories.
-
 === Code ===
 
 * The u_* types in ntp.h are GCCisms that should be replaced with POSIX types.
 
 * We should audit scripts/ and utils/ to see which of those programs can
-  be thrown out.  One prime candidate is ntpdate.
+  be thrown out.
+
+Hal:
+> I think there is some interaction between when the ACTS driver calls and the 
+> state of other stuff, like the connection to the net.  This is probably a 
+> good candidate to get cleaned up.
+> 
+> There is another possible tangle in this area.  If you set "noselect" on the 
+> server line in the config file, ntpd goes through all the action of 
+> collecting the data and writing log files, but then drops the clock.  I don't 
+> know things well enough to be sure that this sort of logic won't pick one 
+> back up.
 
 === Porting ===
 
@@ -122,7 +119,6 @@ is not yet tested anywhere but in ntpd itself.
 | docs/ntpdsim.txt  | docs/ntpdsim_new.txt
 | docs/ntpd.txt     | ntpd/ntpd.txt
 | docs/ntpq.txt     | ntpq/ntpq.txt
-| docs/ntpdate.txt  | -
 | docs/ntptime.txt  | -
 | docs/ntptrace.txt | scripts/ntptrace/ntptrace.txt
 | docs/ntpwait.txt  | scripts/ntp-wait/ntp-wait.txt
