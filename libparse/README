@@ -4,30 +4,7 @@ This directory contains the files making up the parser for
 the parse refclock driver. For reasonably sane clocks this refclock
 drivers allows a refclock implementation by just providing a
 conversion routine and the appropriate NTP parameters. Refclock
-support can run as low a 3k code with the parse refclock driver.
-
-The modules in here are designed to live in two worlds. In userlevel
-as part of the xntp daemon and in kernel land as part of a STREAMS module
-or, if someone gets to it, as part of a line discipline. Currently only
-SunOS4.x/SunOS5.x STREAMS are supported (volunteers for other vendors like HP?).
-This structure means, that refclock_parse can work with or without kernel
-support. Kernelsupport increases accuracy tremendingly. The current restriction
-of the parse driver is that it only supports SYSV type ttys and that kernel
-support is only available for Suns right now.
-
-Three kernel modules are part of this directory. These work only on
-SunOS (SunOS4 and SunOS5).
-
-	SunOS4 (aka Solaris 1.x):
-		parsestreams.loadable_module.o	- standard parse module for SunOS 4
-
-		Both modules can be loaded via modload <modulename>.
-
-	SunOS5 (aka Solaris 2.x):
-		parse		- auto loadable streams module
-
-		To install just drop "parse" into /kernel/strmod and
-		start the daemon (SunOS5 will do the rest).
+support can run as low as 3k code with the parse refclock driver.
 
 The structure of the parse reference clock driver is as follows:
 
@@ -82,7 +59,7 @@ The structure of the parse reference clock driver is as follows:
 		    stream. Usually these routines should not require
 		    modification.
 
-	   clk_*.c  These files hole the conversion code for the time stamps
+	   clk_*.c  These files hold the conversion code for the time stamps
 		    and the description how the time code can be parsed and
 		    where the time stamps are to be taken.
 		    If you want to add a new clock type this is the file
@@ -90,7 +67,6 @@ The structure of the parse reference clock driver is as follows:
 		    parse_conf.c and setting up the NTP and TTY parameters
 		    in refclock_parse.c.
 
-Further information can be found in parse/README.parse and the various source
-files.
+Further information can be found in the various source files.
 
 Frank Kardel

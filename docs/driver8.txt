@@ -425,15 +425,6 @@ flag4 \{ 0 | 1 } ::
   Delete next leap second instead of adding it. (You'll need to wait a
   bit for that to happen 8-)
 
-Note about auxiliary Sun STREAMS modules (SunOS and Solaris):
-
-The timecode of these receivers can be sampled via a STREAMS module in
-the kernel. (The STREAMS module has been designed for use with Sun
-systems under SunOS 4.1.x or Solaris 2.3 - 2.8. It can be linked
-directly into the kernel or loaded via the loadable driver mechanism.)
-This STREAMS module can be adapted to convert different time code
-formats. Nowadays the PPSAPI mechanism is usually used.
-
 == Making your own PARSE clocks ==
 
 The parse clock mechanism deviates from the way other NTP reference
