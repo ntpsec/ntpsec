@@ -51,7 +51,7 @@ struct ctl_proc {
  * Request processing routines
  */
 static	void	ctl_error	(uint8_t);
-#ifdef ENABLE_REFCLOCKS
+#ifdef REFCLOCK
 static	u_short ctlclkstatus	(struct refclockstat *);
 #endif
 static	void	ctl_flushpkt	(uint8_t);
@@ -73,9 +73,9 @@ static	void	ctl_putarray	(const char *, double *, int);
 static	void	ctl_putsys	(int);
 static	void	ctl_putpeer	(int, struct peer *);
 static	void	ctl_putfs	(const char *, tstamp_t);
-#ifdef ENABLE_REFCLOCKS
+#ifdef REFCLOCK
 static	void	ctl_putclock	(int, struct refclockstat *, int);
-#endif	/* ENABLE_REFCLOCKS */
+#endif	/* REFCLOCK */
 static	const struct ctl_var *ctl_getitem(const struct ctl_var *,
 					  char **);
 static	u_short	count_var	(const struct ctl_var *);
@@ -590,7 +590,7 @@ static const uint8_t def_peer_var[] = {
 };
 
 
-#ifdef ENABLE_REFCLOCKS
+#ifdef REFCLOCK
 /*
  * Clock variable list
  */
@@ -1105,7 +1105,7 @@ ctlpeerstatus(
 /*
  * ctlclkstatus - return a status word for this clock
  */
-#ifdef ENABLE_REFCLOCKS
+#ifdef REFCLOCK
 static u_short
 ctlclkstatus(
 	struct refclockstat *pcs
@@ -1125,15 +1125,15 @@ ctlsysstatus(void)
 	register uint8_t this_clock;
 
 	this_clock = CTL_SST_TS_UNSPEC;
-#ifdef ENABLE_REFCLOCKS
+#ifdef REFCLOCK
 	if (sys_peer != NULL) {
 		if (CTL_SST_TS_UNSPEC != sys_peer->sstclktype)
 			this_clock = sys_peer->sstclktype;
 	}
-#else /* ENABLE_REFCLOCKS */
+#else /* REFCLOCK */
 	if (sys_peer != 0)
 		this_clock = CTL_SST_TS_NTP;
-#endif /* ENABLE_REFCLOCKS */
+#endif /* REFCLOCK */
 	return CTL_SYS_STATUS(sys_leap, this_clock, ctl_sys_num_events,
 			      ctl_sys_last_event);
 }
@@ -2416,7 +2416,7 @@ ctl_putpeer(
 		break;
 
 	case CP_REFID:
-#ifdef ENABLE_REFCLOCKS
+#ifdef REFCLOCK
 		if (p->flags & FLAG_REFCLOCK) {
 			ctl_putrefid(peer_var[id].text, p->refid);
 			break;
@@ -2460,7 +2460,7 @@ ctl_putpeer(
 		break;
 
 	case CP_TTL:
-#ifdef ENABLE_REFCLOCKS
+#ifdef REFCLOCK
 		if (p->flags & FLAG_REFCLOCK) {
 			ctl_putuint(peer_var[id].text, p->ttl);
 			break;
@@ -2635,7 +2635,7 @@ ctl_putpeer(
 }
 
 
-#ifdef ENABLE_REFCLOCKS
+#ifdef REFCLOCK
 /*
  * ctl_putclock - output clock variables
  */
@@ -4225,7 +4225,7 @@ read_clockstatus(
 	int restrict_mask
 	)
 {
-#ifndef ENABLE_REFCLOCKS
+#ifndef REFCLOCK
 	/*
 	 * If no refclock support, no data to return
 	 */
@@ -4686,7 +4686,7 @@ report_event(
 		/* Dump it all. Later, maybe less. */
 		for (i = 1; i <= CP_MAX_NOAUTOKEY; i++)
 			ctl_putpeer(i, peer);
-#ifdef ENABLE_REFCLOCKS
+#ifdef REFCLOCK
 		/*
 		 * for clock exception events: add clock variables to
 		 * reflect info on exception
@@ -4712,7 +4712,7 @@ report_event(
 						    false);
 			free_varlist(cs.kv_list);
 		}
-#endif /* ENABLE_REFCLOCKS */
+#endif /* REFCLOCK */
 	}
 
 	/*

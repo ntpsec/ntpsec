@@ -240,13 +240,13 @@ extern	void	proto_clr_stats (void);
 extern  void    proto_dump(FILE *);
 
 /* ntp_refclock.c */
-#ifdef	ENABLE_REFCLOCKS
+#ifdef	REFCLOCK
 extern	bool	refclock_newpeer (struct peer *);
 extern	void	refclock_unpeer (struct peer *);
 extern	void	refclock_receive (struct peer *);
 extern	void	refclock_transmit (struct peer *);
 extern	void	init_refclock	(void);
-#endif	/* ENABLE_REFCLOCKS */
+#endif	/* REFCLOCK */
 
 /* ntp_request.c */
 extern	void	init_request	(void);
@@ -557,7 +557,7 @@ extern int accept_wildcard_if_for_winnt;
 #endif
 
 /* refclock_conf.c */
-#ifdef ENABLE_REFCLOCKS
+#ifdef REFCLOCK
 /* refclock configuration table */
 extern struct refclock * const refclock_conf[];
 extern uint8_t	num_refclock_conf;

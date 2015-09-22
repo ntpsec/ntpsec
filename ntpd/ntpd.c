@@ -838,7 +838,7 @@ ntpdmain(
 	init_request();
 	init_control();
 	init_peer();
-# ifdef ENABLE_REFCLOCKS
+# ifdef REFCLOCK
 	init_refclock();
 # endif
 	set_process_priority();

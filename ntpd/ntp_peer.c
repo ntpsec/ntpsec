@@ -536,7 +536,7 @@ unpeer(
 	peer_associations--;
 	if (FLAG_PREEMPT & peer->flags)
 		peer_preempt--;
-#ifdef ENABLE_REFCLOCKS
+#ifdef REFCLOCK
 	/*
 	 * If this peer is actually a clock, shut it down first
 	 */
@@ -909,7 +909,7 @@ newpeer(
 	peer->timereceived = current_time;
 
 	if (ISREFCLOCKADR(&peer->srcadr)) {
-#ifdef ENABLE_REFCLOCKS
+#ifdef REFCLOCK
 		/*
 		 * We let the reference clock support do clock
 		 * dependent initialization.  This includes setting
@@ -926,13 +926,13 @@ newpeer(
 			free_peer(peer, 0);
 			return NULL;
 		}
-#else /* ENABLE_REFCLOCKS */
+#else /* REFCLOCK */
 		msyslog(LOG_ERR, "refclock %s isn't supported. ntpd was compiled without refclock support.",
 			stoa(&peer->srcadr));
 		set_peerdstadr(peer, NULL);
 		free_peer(peer, 0);
 		return NULL;
-#endif /* ENABLE_REFCLOCKS */
+#endif /* REFCLOCK */
 	}
 
 	/*

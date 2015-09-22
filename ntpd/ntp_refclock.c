@@ -19,7 +19,7 @@
 # include <sys/ioctl.h>
 #endif /* HAVE_SYS_IOCTL_H */
 
-#ifdef ENABLE_REFCLOCKS
+#ifdef REFCLOCK
 
 #ifdef HAVE_KERNEL_PLL
 #include "ntp_syscall.h"
