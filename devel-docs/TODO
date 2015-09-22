@@ -6,6 +6,8 @@
 
 * Hal reports that in the loopsts file jitter is always being reported
   as zero.
+I think that's tangled up with the kernel PPS processing.  I'm seeing
+strange startup messages.  It happens on FreeBSD and Linux.
 
 Hal:
 > On FreeBSD, the DNS lookup and thread stuff seems to work OK.
@@ -80,6 +82,9 @@ TRIM_POLLRATE
 
 * The ntpd initialization sequence is still full of platform-
 specific crud.
+
+** We might be able to eliminate a lot of the Linux runtime
+droproot code by using file capabilities.
 
 * Better ANSI/POSIX conformance in MinGW and Visual Studio 2013 might
 enable us to get rid of the SYS_WINNT code. Should be tried...
