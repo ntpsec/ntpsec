@@ -1575,9 +1575,6 @@ list_err(
  * embedded quotes so that the ntpq protocol isn't
  * fooled
  */
-#ifndef isprint
-#define isprint(_X_) (((_X_) > 0x1F) && ((_X_) < 0x7F))
-#endif
 
 static char *
 mkreadable(
