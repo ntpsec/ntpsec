@@ -78,7 +78,8 @@ few will be user-visible:
 
 * A number of obsolete refclocks have been removed.
 
-* The deprecated ntpdate program has been removed.
+* The deprecated ntpdate program has been replaced with a shell
+  wrapper around sntp.
 
 [[platforms]]
 == Supported platforms ==

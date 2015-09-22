@@ -1,0 +1,73 @@
+#!/bin/sh
+#
+# ntpdate - emulate the crufty old ntpdate utility from NTP Classic
+#
+# Not documented, as this is strictly a backward-compatibility shim. It's
+# based on the recipes at
+#           http://support.ntp.org/bin/view/Dev/DeprecatingNtpdate
+# wuth corrections for modern snto options/
+#
+# This emulation is only suited for use in init and cron scripts (not
+# interactively) as sntp always logs to syslog rather than stdout/stderr.
+#
+# ntpdate sntp    ntpd    What it does
+# -4      -4      -q -4   Resolve DNS lookups to A records         
+# -6      -6      -q -6   Resolve DNS lookups to AAAA records      
+# -a N    -a N    -q      Authentication   
+# -b      -s      -q      step time adjustments
+# -B      -j      -q      slew time adjustments
+# -d      -d      -d      debugging mode (implies -q)
+# -e N.N          -q      authdelay        
+# -k file -k file -k file key file         
+# -o N    -o N    -q      NTP Protocol version
+# -p N            -q      sys_samples
+# -q      default -q      query/report only, don't set clock
+#                         (implies -u for ntpdate)
+# -r N                    rate
+# -s       -p             log to syslog (always enabled)
+# -t N.N  -g ms           transmit inter-packet gap        
+# -u      default         unpriv port      
+# -v                      verbose (ntpd is always more verbose than ntpdate)
+#         -B secs         Broadcast timeout        
+#         -b addr         Listen on addr for broadcasts    
+#         -c name         Send concurrent requests to resolved IPs for name      #   
+#         -K file         KoD history filename     
+#         -l file         Log to file - is this really useful?     
+#         -M msec         Slew adjustments less than msec,
+#                         step adjustments larger than msec.       
+
+PASSTHROUGH=""
+setclock=yes
+echo=""
+while getopts 46a:bBe:k:no:p:qr:st:uv opt
+do
+    case $opt in
+	4) PASSTHROUGH="$PASSTHROUGH -4";;
+	6) PASSTHROUGH="$PASSTHROUGH -6";;
+	a) PASSTHROUGH="$PASSTHROUGH -a $OPTARG";;
+	b) ADJUST="$ADJUST -S";;
+	B) ADJUST="$ADJUST -s";;
+	d) PASSTHROUGH="$PASSTHROUGH -d";;
+	e) echo "ntpdate: -e is no longer supported.";;
+	k) PASSTHROUGH="$PASSTHROUGH -k $OPTARG";;
+	n) echo=echo ;;			# Echo generared command, don't execute
+	p) echo "ntpdate: -p is no longer supported.";;
+	q) setclock=no;;
+	r) echo "ntpdate: -r is no longer supported.";;
+	s) PASSTHROUGH="$PASSTHROUGH -p";;
+	t) echo "ntpdate: -t is no longer supported.";;
+	u) ;;
+	v) ;;
+    esac
+done
+shift $(($OPTIND - 1))
+
+if [ "$setclock" = yes -a -z "$ADJUST" ]
+then
+    ADJUST="-s -j"
+fi
+
+$echo sntp $ADJUST $PASSTHROUGH $*
+
+#end
+
