@@ -442,7 +442,7 @@ or, from ntp_adjtime():
  * 1	clock was slewed
  * 2	clock was stepped
  *
- * LOCKCLOCK: The only thing this routine does is set the
+ * ENABLE_LOCKCLOCK: The only thing this routine does is set the
  * sys_rootdisp variable equal to the peer dispersion.
  */
 int
@@ -460,21 +460,21 @@ local_clock(
 	char	tbuf[80];	/* report buffer */
 
 	/*
-	 * If the loop is opened or the NIST LOCKCLOCK is in use,
+	 * If the loop is opened or the NIST lockclock scheme is in use,
 	 * monitor and record the offsets anyway in order to determine
 	 * the open-loop response and then go home.
 	 */
-#ifdef LOCKCLOCK
+#ifdef ENABLE_LOCKCLOCK
 	{
 #else
 	if (!ntp_enable) {
-#endif /* LOCKCLOCK */
+#endif /* ENABLE_LOCKCLOCK */
 		record_loop_stats(fp_offset, drift_comp, clock_jitter,
 		    clock_stability, sys_poll);
 		return (0);
 	}
 
-#ifndef LOCKCLOCK
+#ifndef ENABLE_LOCKCLOCK
 	/*
 	 * If the clock is way off, panic is declared. The clock_panic
 	 * defaults to 1000 s; if set to zero, the panic will never
@@ -929,14 +929,14 @@ local_clock(
 		    clock_stability * 1e6, sys_poll);
 #endif /* DEBUG */
 	return (rval);
-#endif /* LOCKCLOCK */
+#endif /* ENABLE_LOCKCLOCK */
 }
 
 
 /*
  * adj_host_clock - Called once every second to update the local clock.
  *
- * LOCKCLOCK: The only thing this routine does is increment the
+ * ENABLE_LOCKCLOCK: The only thing this routine does is increment the
  * sys_rootdisp variable.
  */
 void
@@ -956,7 +956,7 @@ adj_host_clock(
 	 * time constant is clamped at 2.
 	 */
 	sys_rootdisp += clock_phi;
-#ifndef LOCKCLOCK
+#ifndef ENABLE_LOCKCLOCK
 	if (!ntp_enable || mode_ntpdate)
 		return;
 	/*
@@ -1006,7 +1006,7 @@ adj_host_clock(
 	 * has decayed to zero.
 	 */
 	adj_systime(offset_adj + freq_adj);
-#endif /* LOCKCLOCK */
+#endif /* ENABLE_LOCKCLOCK */
 }
 
 
@@ -1225,7 +1225,7 @@ huffpuff(void)
 /*
  * loop_config - configure the loop filter
  *
- * LOCKCLOCK: The LOOP_DRIFTINIT and LOOP_DRIFTCOMP cases are no-ops.
+ * ENABLE_LOCKCLOCK: The LOOP_DRIFTINIT and LOOP_DRIFTCOMP cases are no-ops.
  */
 void
 loop_config(
@@ -1248,7 +1248,7 @@ loop_config(
 	 * variables. Otherwise, continue leaving no harm behind.
 	 */
 	case LOOP_DRIFTINIT:
-#ifndef LOCKCLOCK
+#ifndef ENABLE_LOCKCLOCK
 #ifdef HAVE_KERNEL_PLL
 		if (mode_ntpdate)
 			break;
@@ -1271,12 +1271,12 @@ loop_config(
 		else
 			rstclock(EVNT_NSET, 0);
 		loop_started = true;
-#endif /* LOCKCLOCK */
+#endif /* ENABLE_LOCKCLOCK */
 		break;
 
 	case LOOP_KERN_CLEAR:
 #if 0		/* XXX: needs more review, and how can we get here? */
-#ifndef LOCKCLOCK
+#ifndef ENABLE_LOCKCLOCK
 # ifdef HAVE_KERNEL_PLL
 		if (pll_control && kern_enable) {
 			memset((char *)&ntv, 0, sizeof(ntv));
@@ -1288,7 +1288,7 @@ loop_config(
 				ntv.status);
 		   }
 # endif /* HAVE_KERNEL_PLL */
-#endif /* LOCKCLOCK */
+#endif /* ENABLE_LOCKCLOCK */
 #endif
 		break;
 
