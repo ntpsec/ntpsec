@@ -201,6 +201,8 @@ static void	library_unexpected_error(const char *, int,
 					ISC_FORMAT_PRINTF(3, 0);
 #endif	/* !SIM */
 
+const char* Version = NTPS_VERSION_STRING " " __DATE__ " " __TIME__;
+
 
 #define ALL_OPTIONS "46aAbc:dD:f:gGi:I:k:l:LmMnNp:PqQ:r:Rs:t:u:UVw:xyYzZ"
 static const struct option longoptions[] = {
@@ -404,7 +406,7 @@ parse_cmdline_opts(
 		}
 		break;
 	    case 'V':
-		printf("ntpd %s\n", NTPS_VERSION_STRING);
+		printf("ntpd %s\n", Version);
 		exit(0);
 	    case 'w':
 		wait_sync = strtod(ntp_optarg, NULL);
@@ -458,7 +460,7 @@ main(
 	parse_cmdline_opts(argc, argv);
 
 #ifdef DEBUG
-	DPRINTF(1, ("ntpd %s\n", NTPS_VERSION_STRING));
+	DPRINTF(1, ("ntpd %s\n", Version);
 #endif
 
 	return ntpsim(argc, argv);
@@ -647,7 +649,7 @@ ntpdmain(
 		char buf[1024];	/* Secret knowledge of msyslog buf length */
 		char *cp = buf;
 
-		msyslog(LOG_NOTICE, "ntpd %s: Starting", NTPS_VERSION_STRING);
+		msyslog(LOG_NOTICE, "ntpd %s: Starting", Version);
 
 		/* Note that every arg has an initial space character */
 		snprintf(cp, sizeof(buf), "Command line:");
