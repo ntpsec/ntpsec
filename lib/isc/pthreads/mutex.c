@@ -91,7 +91,7 @@ struct isc_mutexstats {
 #endif
 static isc_mutexstats_t stats[ISC_MUTEX_PROFTABLESIZE];
 static int stats_next = 0;
-static isc_boolean_t stats_init = ISC_FALSE;
+static bool stats_init = false;
 static pthread_mutex_t statslock = PTHREAD_MUTEX_INITIALIZER;
 
 
@@ -107,8 +107,8 @@ isc_mutex_init_profile(isc_mutex_t *mp, const char *file, int line) {
 
 	RUNTIME_CHECK(pthread_mutex_lock(&statslock) == 0);
 
-	if (stats_init == ISC_FALSE)
-		stats_init = ISC_TRUE;
+	if (stats_init == false)
+		stats_init = true;
 
 	/*
 	 * If all statistics entries have been used, give up and trigger an

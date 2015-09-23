@@ -293,12 +293,12 @@ purge_recv_buffers_for_fd(
 /*
  * Checks to see if there are buffers to process
  */
-isc_boolean_t has_full_recv_buffer(void)
+bool has_full_recv_buffer(void)
 {
 	if (HEAD_FIFO(full_recv_fifo) != NULL)
-		return (ISC_TRUE);
+		return (true);
 	else
-		return (ISC_FALSE);
+		return (false);
 }
 
 
