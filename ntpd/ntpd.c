@@ -978,7 +978,7 @@ ntpdmain(
 	if (droproot) {
 		/* Drop super-user privileges and chroot now if the OS supports this */
 
-#  ifdef HAVE_LINUX CAPABILITY
+#  ifdef HAVE_LINUX_CAPABILITY
 		/* set flag: keep privileges accross setuid() call (we only really need cap_sys_time): */
 		if (prctl( PR_SET_KEEPCAPS, 1L, 0L, 0L, 0L ) == -1) {
 			msyslog( LOG_ERR, "prctl( PR_SET_KEEPCAPS, 1L ) failed: %m" );
