@@ -125,6 +125,12 @@ def build(ctx):
 		refclock_define = ["REFCLOCK=1"]
 
 
+	# Note carefully: At least as of September 2015 you must link with 
+	# libgcc_s.so under Linux, otherwise the threaded getaddrinfo(3) call
+	# used to look up hostnames will SIGABRT and take ntpd down with it.
+	# That may only happen when mlockall() is used with not-enough-memory,
+	# but it has caused a long legacy of hard to diagnose problems.
+
 	ctx(
 		target		= "ntpd",
 		features	= "c cprogram bld_include src_include libisc_include libisc_pthread_include",
