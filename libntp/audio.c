@@ -1,5 +1,11 @@
 /*
  * audio.c - audio interface for reference clock audio drivers
+ *
+ * Assumes the Sun Audio Driver API (SADA) interface used by SunOS,
+ * Solaris, and OpenSolaris, supported in the Linux OSS sound layer,
+ * and still used by the *BSD operating systems. In particular it
+ * should work for FreeBSD from version 4.1 on with compatible sound
+ * card.
  */
 # include <config.h>
 
