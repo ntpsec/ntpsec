@@ -22,13 +22,8 @@
 #include "ascii.h"
 #include "parse.h"
 
-#ifndef PARSESTREAM
 #include "ntp_stdlib.h"
 #include <stdio.h>
-#else
-#include "sys/parsestreams.h"
-extern void printf (const char *, ...);
-#endif
 
 /*
  * In private e-mail alastair@wharton.co.uk said :

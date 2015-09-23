@@ -40,13 +40,7 @@
 #include "ntp_calendar.h"
 
 #include "parse.h"
-#ifdef PARSESTREAM
-# include <sys/parsestreams.h>
-#endif
-
-#ifndef PARSEKERNEL
-# include "ntp_stdlib.h"
-#endif
+#include "ntp_stdlib.h"
 
 /*
  * DCF77 raw time code
@@ -229,9 +223,7 @@ convert_rawdcf(
 
 	if (size < 57)
 	{
-#ifndef PARSEKERNEL
 		msyslog(LOG_ERR, "parse: convert_rawdcf: INCOMPLETE DATA - time code only has %d bits", size);
-#endif
 		return CVT_NONE;
 	}
 
@@ -242,9 +234,7 @@ convert_rawdcf(
 			/*
 			 * we only have two types of bytes (ones and zeros)
 			 */
-#ifndef PARSEKERNEL
 			msyslog(LOG_ERR, "parse: convert_rawdcf: BAD DATA - no conversion");
-#endif
 			return CVT_NONE;
 		}
 		if (*b) b++;
@@ -315,9 +305,7 @@ convert_rawdcf(
 		/*
 		 * bad format - not for us
 		 */
-#ifndef PARSEKERNEL
 		msyslog(LOG_ERR, "parse: convert_rawdcf: parity check FAILED for \"%s\"", buffer);
-#endif
 		return CVT_FAIL|CVT_BADFMT;
 	}
 }
@@ -538,11 +526,7 @@ snt_rawdcf(
 	{
 		parseio->parse_dtime.parse_stime = *ptime;
 
-#ifdef PARSEKERNEL
-		parseio->parse_dtime.parse_time.tv.tv_sec++;
-#else
 		parseio->parse_dtime.parse_time.fp.l_ui++;
-#endif
 
 		parseprintf(DD_RAWDCF,("parse: snt_rawdcf: time stamp synthesized offset %d seconds\n", parseio->parse_index - 1));
 
