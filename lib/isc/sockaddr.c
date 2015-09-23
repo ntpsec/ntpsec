@@ -27,31 +27,30 @@
 #include <isc/hash.h>
 #include <isc/msgs.h>
 #include <isc/netaddr.h>
-#include <isc/region.h>
 #include <isc/sockaddr.h>
 #include <isc/util.h>
 
-isc_boolean_t
+bool
 isc_sockaddr_equal(const isc_sockaddr_t *a, const isc_sockaddr_t *b) {
 	return (isc_sockaddr_compare(a, b, ISC_SOCKADDR_CMPADDR|
 					   ISC_SOCKADDR_CMPPORT|
 					   ISC_SOCKADDR_CMPSCOPE));
 }
 
-isc_boolean_t
+bool
 isc_sockaddr_eqaddr(const isc_sockaddr_t *a, const isc_sockaddr_t *b) {
 	return (isc_sockaddr_compare(a, b, ISC_SOCKADDR_CMPADDR|
 					   ISC_SOCKADDR_CMPSCOPE));
 }
 
-isc_boolean_t
+bool
 isc_sockaddr_compare(const isc_sockaddr_t *a, const isc_sockaddr_t *b,
 		     unsigned int flags)
 {
 	REQUIRE(a != NULL && b != NULL);
 
 	if (a->length != b->length)
-		return (ISC_FALSE);
+		return (false);
 
 	/*
 	 * We don't just memcmp because the sin_zero field isn't always
@@ -59,47 +58,47 @@ isc_sockaddr_compare(const isc_sockaddr_t *a, const isc_sockaddr_t *b,
 	 */
 
 	if (a->type.sa.sa_family != b->type.sa.sa_family)
-		return (ISC_FALSE);
+		return (false);
 	switch (a->type.sa.sa_family) {
 	case AF_INET:
 		if ((flags & ISC_SOCKADDR_CMPADDR) != 0 &&
 		    memcmp(&a->type.sin.sin_addr, &b->type.sin.sin_addr,
 			   sizeof(a->type.sin.sin_addr)) != 0)
-			return (ISC_FALSE);
+			return (false);
 		if ((flags & ISC_SOCKADDR_CMPPORT) != 0 &&
 		    a->type.sin.sin_port != b->type.sin.sin_port)
-			return (ISC_FALSE);
+			return (false);
 		break;
 	case AF_INET6:
 		if ((flags & ISC_SOCKADDR_CMPADDR) != 0 &&
 		    memcmp(&a->type.sin6.sin6_addr, &b->type.sin6.sin6_addr,
 			   sizeof(a->type.sin6.sin6_addr)) != 0)
-			return (ISC_FALSE);
+			return (false);
 #ifdef ISC_PLATFORM_HAVESCOPEID
 		/*
 		 * If ISC_SOCKADDR_CMPSCOPEZERO is set then don't return
-		 * ISC_FALSE if one of the scopes in zero.
+		 * false if one of the scopes in zero.
 		 */
 		if ((flags & ISC_SOCKADDR_CMPSCOPE) != 0 &&
 		    a->type.sin6.sin6_scope_id != b->type.sin6.sin6_scope_id &&
 		    ((flags & ISC_SOCKADDR_CMPSCOPEZERO) == 0 ||
 		      (a->type.sin6.sin6_scope_id != 0 &&
 		       b->type.sin6.sin6_scope_id != 0)))
-			return (ISC_FALSE);
+			return (false);
 #endif
 		if ((flags & ISC_SOCKADDR_CMPPORT) != 0 &&
 		    a->type.sin6.sin6_port != b->type.sin6.sin6_port)
-			return (ISC_FALSE);
+			return (false);
 		break;
 	default:
 		if (memcmp(&a->type, &b->type, a->length) != 0)
-			return (ISC_FALSE);
+			return (false);
 	}
-	return (ISC_TRUE);
+	return (true);
 }
 
 unsigned int
-isc_sockaddr_hash(const isc_sockaddr_t *sockaddr, isc_boolean_t address_only) {
+isc_sockaddr_hash(const isc_sockaddr_t *sockaddr, bool address_only) {
 	unsigned int length = 0;
 	const unsigned char *s = NULL;
 	unsigned int h = 0;
@@ -139,10 +138,10 @@ isc_sockaddr_hash(const isc_sockaddr_t *sockaddr, isc_boolean_t address_only) {
 		p = 0;
 	}
 
-	h = isc_hash_calc(s, length, ISC_TRUE);
+	h = isc_hash_calc(s, length, true);
 	if (!address_only) {
 		g = isc_hash_calc((const unsigned char *)&p, sizeof(p),
-				  ISC_TRUE);
+				  true);
 		h = h ^ g; /* XXX: we should concatenate h and p first */
 	}
 
@@ -340,7 +339,7 @@ isc_sockaddr_getport(const isc_sockaddr_t *sockaddr) {
 	return (port);
 }
 
-isc_boolean_t
+bool
 isc_sockaddr_ismulticast(const isc_sockaddr_t *sockaddr) {
 	isc_netaddr_t netaddr;
 
@@ -349,10 +348,10 @@ isc_sockaddr_ismulticast(const isc_sockaddr_t *sockaddr) {
 		isc_netaddr_fromsockaddr(&netaddr, sockaddr);
 		return (isc_netaddr_ismulticast(&netaddr));
 	}
-	return (ISC_FALSE);
+	return (false);
 }
 
-isc_boolean_t
+bool
 isc_sockaddr_isexperimental(const isc_sockaddr_t *sockaddr) {
 	isc_netaddr_t netaddr;
 
@@ -360,10 +359,10 @@ isc_sockaddr_isexperimental(const isc_sockaddr_t *sockaddr) {
 		isc_netaddr_fromsockaddr(&netaddr, sockaddr);
 		return (isc_netaddr_isexperimental(&netaddr));
 	}
-	return (ISC_FALSE);
+	return (false);
 }
 
-isc_boolean_t
+bool
 isc_sockaddr_issitelocal(const isc_sockaddr_t *sockaddr) {
 	isc_netaddr_t netaddr;
 
@@ -371,10 +370,10 @@ isc_sockaddr_issitelocal(const isc_sockaddr_t *sockaddr) {
 		isc_netaddr_fromsockaddr(&netaddr, sockaddr);
 		return (isc_netaddr_issitelocal(&netaddr));
 	}
-	return (ISC_FALSE);
+	return (false);
 }
 
-isc_boolean_t
+bool
 isc_sockaddr_islinklocal(const isc_sockaddr_t *sockaddr) {
 	isc_netaddr_t netaddr;
 
@@ -382,7 +381,7 @@ isc_sockaddr_islinklocal(const isc_sockaddr_t *sockaddr) {
 		isc_netaddr_fromsockaddr(&netaddr, sockaddr);
 		return (isc_netaddr_islinklocal(&netaddr));
 	}
-	return (ISC_FALSE);
+	return (false);
 }
 
 isc_result_t

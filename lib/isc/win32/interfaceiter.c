@@ -75,8 +75,8 @@ typedef ULONG (WINAPI *PGETADAPTERSADDRESSES)(
     PULONG SizePointer
 );
 
-static	isc_boolean_t		use_GAA;
-static	isc_boolean_t		use_GAA_determined;
+static	bool		use_GAA;
+static	bool		use_GAA_determined;
 static	HMODULE			hmod_iphlpapi;
 static	PGETADAPTERSADDRESSES	pGAA;
 
@@ -170,9 +170,9 @@ isc_interfaceiter_create(isc_mem_t *mctx, isc_interfaceiter_t **iterp) {
 					hmod_iphlpapi,
 					"GetAdaptersAddresses");
 			if (NULL != pGAA)
-				use_GAA = ISC_TRUE;
+				use_GAA = true;
 		}
-		use_GAA_determined = ISC_TRUE;
+		use_GAA_determined = true;
 	}
 
 	if (!use_GAA)

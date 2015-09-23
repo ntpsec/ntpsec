@@ -118,6 +118,6 @@ extern	void purge_recv_buffers_for_fd(SOCKET);
 /*
  * Checks to see if there are buffers to process
  */
-extern isc_boolean_t has_full_recv_buffer(void);
+extern bool has_full_recv_buffer(void);
 
 #endif	/* GUARD_RECVBUFF_H */

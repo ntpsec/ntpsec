@@ -156,10 +156,10 @@ isc_hash_init(void);
 /*@{*/
 unsigned int
 isc_hash_ctxcalc(isc_hash_t *hctx, const unsigned char *key,
-		 unsigned int keylen, isc_boolean_t case_sensitive);
+		 unsigned int keylen, bool case_sensitive);
 unsigned int
 isc_hash_calc(const unsigned char *key, unsigned int keylen,
-	      isc_boolean_t case_sensitive);
+	      bool case_sensitive);
 /*!<
  * \brief Calculate a hash value.
  *
@@ -175,7 +175,7 @@ isc_hash_calc(const unsigned char *key, unsigned int keylen,
  * specified for the corresponding hash object.
  *
  * 'case_sensitive' specifies whether the hash key should be treated as
- * case_sensitive values.  It should typically be ISC_FALSE if the hash key
+ * case_sensitive values.  It should typically be false if the hash key
  * is a DNS name.
  */
 /*@}*/

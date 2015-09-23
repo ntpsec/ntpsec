@@ -319,9 +319,6 @@
     <ClInclude Include="..\..\..\..\include\binio.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\lib\isc\include\isc\buffer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\include\clockstuff.h">
       <Filter>Header Files</Filter>
     </ClInclude>

@@ -349,7 +349,6 @@
     <ClInclude Include="..\..\..\..\include\timetoa.h" />
     <ClInclude Include="..\..\..\..\include\timevalops.h" />
     <ClInclude Include="..\..\..\..\include\vint64ops.h" />
-    <ClInclude Include="..\..\..\..\lib\isc\include\isc\buffer.h" />
     <ClInclude Include="..\..\..\..\lib\isc\include\isc\event.h" />
     <ClInclude Include="..\..\..\..\lib\isc\include\isc\hash.h" />
     <ClInclude Include="..\..\..\..\lib\isc\include\isc\interfaceiter.h" />
