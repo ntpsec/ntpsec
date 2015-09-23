@@ -41,13 +41,7 @@
 
 #include "parse.h"
 
-#ifndef PARSESTREAM
 #include "ntp_stdlib.h"
-#include <stdio.h>
-#else
-#include "sys/parsestreams.h"
-extern int printf (const char *, ...);
-#endif
 
 /*	0000000000111111111122222222223333333	/ char
  *	0123456789012345678901234567890123456	\ posn

@@ -42,13 +42,8 @@
 
 #include "parse.h"
 
-#ifndef PARSESTREAM
 #include "ntp_stdlib.h"
 #include <stdio.h>
-#else
-#include "sys/parsestreams.h"
-extern int printf (const char *, ...);
-#endif
 
 /*
  * Description courtesy of Adam W. Feigin et. al (Swisstime iis.ethz.ch)

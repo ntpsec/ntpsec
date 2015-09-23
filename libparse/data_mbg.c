@@ -30,11 +30,7 @@
  */
 
 #include <config.h>
-#ifdef PARSESTREAM
-#include <string.h>
-#else
 #include <stdio.h>
-#endif
 #include "ntp_types.h"
 #include "ntp_stdlib.h"
 #include "ntp_fp.h"
