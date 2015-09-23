@@ -1,6 +1,10 @@
 /*
  * audio-pcm.c - Scope out the PCM audio stuff
  *
+ * Assumes the Sun Audio Driver API (SADA) interface used by SunOS and Solaris,
+ * (but not OpenSolaris), supported in the Linux OSS sound layer, 
+ * and still used by the *BSD operating systems. In particular it should work
+ * for FreeBSD from version 4.1 on with compatible sound card.
  */
 #ifdef HAVE_CONFIG_H
 # include <config.h>
