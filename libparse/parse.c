@@ -245,6 +245,9 @@ parse_ioread(
 	/*
 	 * within STREAMS CSx (x < 8) chars still have the upper bits set
 	 * so we normalize the characters by masking unecessary bits off.
+	 *
+	 * (ESR, 2015: Probably not necessary since STREAMS support has
+	 * been removed, but harmless.)
 	 */
 	switch (parseio->parse_ioflags & PARSE_IO_CSIZE)
 	{

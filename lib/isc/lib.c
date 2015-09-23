@@ -28,7 +28,6 @@
 #include <isc/mem.h>
 #include <isc/msgs.h>
 #include <isc/once.h>
-#include <isc/task.h>
 #include <isc/util.h>
 
 /***
