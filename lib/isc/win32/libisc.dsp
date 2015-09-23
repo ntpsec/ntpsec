@@ -319,10 +319,6 @@ SOURCE=..\include\isc\iterated_hash.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\include\isc\keyboard.h
-# End Source File
-# Begin Source File
-
 SOURCE=..\include\isc\lang.h
 # End Source File
 # Begin Source File
@@ -393,11 +389,7 @@ SOURCE=.\include\isc\netdb.h
 
 SOURCE=.\include\isc\ntpaths.h
 # End Source File
-# Begin Source File
-
-SOURCE=.\include\isc\offset.h
-# End Source File
-# Begin Source File
+0# Begin Source File
 
 SOURCE=.\include\isc\once.h
 # End Source File

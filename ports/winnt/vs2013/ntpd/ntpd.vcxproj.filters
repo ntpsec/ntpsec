@@ -482,9 +482,6 @@
     <ClInclude Include="..\..\..\..\lib\isc\win32\include\isc\platform.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\lib\isc\win32\include\isc\offset.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\..\lib\isc\win32\include\isc\netdb.h">
       <Filter>Header Files</Filter>
     </ClInclude>

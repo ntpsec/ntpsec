@@ -685,10 +685,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\..\lib\isc\win32\include\isc\offset.h"
-				>
-			</File>
-			<File
 				RelativePath="..\..\include\sys\param.h"
 				>
 			</File>
