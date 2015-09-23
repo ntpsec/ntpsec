@@ -49,6 +49,8 @@ def options(ctx):
 	grp.add_option('--build-version-tag', type='string', help="Append a tag to the version string.")
 	grp.add_option('--cflags', type='string', action="callback", callback=callback_flags, help="Users should use CFLAGS in their environment.")
 	grp.add_option('--ldflags', type='string', action="callback", callback=callback_flags, help="Users should use LDFLAGS in their environment.")
+	grp.add_option('--enable-fortify', action='store_true', help="Enable HP Fortify.")
+	grp.add_option('--fortify-flags', type='string', action='store', help="Fortify flags.")
 
 
 

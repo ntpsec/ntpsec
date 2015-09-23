@@ -20,6 +20,12 @@ def cmd_configure(ctx):
 	ctx.load('compiler_c')
 	ctx.load('bison')
 
+	# This needs to be at the top since it modifies CC and AR
+	if ctx.options.enable_fortify:
+		from check_fortify import check_fortify
+		check_fortify(ctx)
+
+
 	if ctx.options.enable_debug_gdb:
 		ctx.env.CFLAGS += ["-g"]
 
