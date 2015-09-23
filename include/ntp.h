@@ -188,7 +188,7 @@ struct interface {
 	long		sent;		/* number of outgoing packets */
 	long		notsent;	/* number of send failures */
 	u_int		ifindex;	/* for IPV6_MULTICAST_IF */
-	isc_boolean_t	ignore_packets; /* listen-read-drop this? */
+	bool	ignore_packets; /* listen-read-drop this? */
 	struct peer *	peers;		/* list of peers using endpt */
 	u_int		peercnt;	/* count of same */
 };

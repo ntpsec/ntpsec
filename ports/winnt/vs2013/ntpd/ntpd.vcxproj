@@ -367,7 +367,6 @@
     <ClInclude Include="..\..\..\..\include\timespecops.h" />
     <ClInclude Include="..\..\..\..\include\timevalops.h" />
     <ClInclude Include="..\..\..\..\lib\isc\include\isc\assertions.h" />
-    <ClInclude Include="..\..\..\..\lib\isc\include\isc\boolean.h" />
     <ClInclude Include="..\..\..\..\lib\isc\include\isc\interfaceiter.h" />
     <ClInclude Include="..\..\..\..\lib\isc\include\isc\log.h" />
     <ClInclude Include="..\..\..\..\lib\isc\include\isc\netaddr.h" />

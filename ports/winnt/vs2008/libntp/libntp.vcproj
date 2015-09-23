@@ -677,10 +677,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\..\lib\isc\include\isc\buffer.h"
-				>
-			</File>
-			<File
 				RelativePath="..\..\include\clockstuff.h"
 				>
 			</File>
