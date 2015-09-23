@@ -72,7 +72,7 @@ struct xmt_ctx_tag {
 struct timeval	gap;
 xmt_ctx *	xmt_q;
 struct key *	keys = NULL;
-int		response_timeout;
+float		response_timeout;
 struct timeval	response_tv;
 struct timeval	start_tv;
 /* check the timeout at least once per second */
@@ -158,7 +158,7 @@ static int opt_steplimit;
 static int opt_ntpversion = 4;
 static bool opt_usereservedport;
 static bool opt_step =false, opt_slew = false;
-static int opt_timeout = 555;
+static float opt_timeout = 5.0;
 static int opt_wait = false;
 
 /*
@@ -248,7 +248,7 @@ sntp_main (
 		opt_slew = true;
 		break;
 	    case 't':
-		opt_timeout = atoi(ntp_optarg);
+		opt_timeout = atof(ntp_optarg);
 		break;
 	    case 'V':
 		printf("sntp %s\n", sntpVersion);
@@ -300,8 +300,8 @@ sntp_main (
 	*/
 
 	response_timeout = opt_timeout;
-	response_tv.tv_sec = response_timeout;
-	response_tv.tv_usec = 0;
+	response_tv.tv_sec = (int)response_timeout;
+	response_tv.tv_usec = (response_timeout - (int)response_timeout) * MICROSECONDS;
 
 	/* IPv6 available? */
 	if (isc_net_probeipv6() != ISC_R_SUCCESS) {
@@ -888,7 +888,7 @@ void timeout_query(
 	}
 	spkt->done = true;
 	server = &spkt->addr;
-	msyslog(LOG_INFO, "%s no %cCST response after %d seconds",
+	msyslog(LOG_INFO, "%s no %cCST response after %f seconds",
 		hostnameaddr(spkt->dctx->name, server), xcst,
 		response_timeout);
 	dec_pending_ntp(spkt->dctx->name, server);

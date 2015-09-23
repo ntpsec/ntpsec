@@ -170,11 +170,7 @@ communications.
 `-t` seconds, `--timeout`=_seconds_::
   The number of seconds to wait for responses. This option takes an
   integer number as its argument. The default _seconds_ for this option
-  is:
-+
-_
-5
-_
+  is: 5.
 +
 When waiting for a reply, `sntp` will wait the number of seconds
 specified before giving up. The default should be more than enough for
