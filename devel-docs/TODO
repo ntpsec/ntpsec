@@ -4,15 +4,8 @@
 
 === Blocker bugs ===
 
-Hal:
-> On FreeBSD, the DNS lookup and thread stuff seems to work OK.
-> 
-> On Linux, it works until the thread times out and self-destructs.  (or 
-> something like that)  Then it calls pthread_exit which ends up with a SIGABRT.
-> 
-> A secondary problem is that the normal trap handler that writes a helpful 
-> error message doesn't catch this case.  So ntpd silently crashes with no 
-> evidence in the log files.
+None right now. (Sep-22 2015)
+
 
 === Build system ===
 
