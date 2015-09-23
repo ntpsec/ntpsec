@@ -15,8 +15,6 @@
 # endif
 #include "ntp_stdlib.h"
 
-/* #define TEST_BLOCKING_WORKER */	/* ntp_config.c ntp_intres.c */
-
 typedef enum blocking_work_req_tag {
 	BLOCKING_GETNAMEINFO,
 	BLOCKING_GETADDRINFO,

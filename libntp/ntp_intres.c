@@ -576,43 +576,6 @@ getaddrinfo_sometime_complete(
 }
 
 
-#ifdef TEST_BLOCKING_WORKER
-void gai_test_callback(int rescode, int gai_errno, void *context, const char *name, const char *service, const struct addrinfo *hints, const struct addrinfo *ai_res)
-{
-	sockaddr_u addr;
-
-	if (rescode) {
-		TRACE(1, ("gai_test_callback context %p error rescode %d %s serv %s\n",
-			  context, rescode, name, service));
-		return;
-	}
-	while (!rescode && NULL != ai_res) {
-		ZERO_SOCK(&addr);
-		memcpy(&addr, ai_res->ai_addr, ai_res->ai_addrlen);
-		TRACE(1, ("ctx %p fam %d addr %s canon '%s' type %s at %p ai_addr %p ai_next %p\n", 
-			  context,
-			  AF(&addr),
-			  stoa(&addr), 
-			  (ai_res->ai_canonname)
-			      ? ai_res->ai_canonname
-			      : "",
-			  (SOCK_DGRAM == ai_res->ai_socktype) 
-			      ? "DGRAM" 
-			      : (SOCK_STREAM == ai_res->ai_socktype) 
-				    ? "STREAM" 
-				    : "(other)",
-			  ai_res,
-			  ai_res->ai_addr,
-			  ai_res->ai_next));
-
-		getnameinfo_sometime((sockaddr_u *)ai_res->ai_addr, 128, 32, 0, gni_test_callback, context);
-
-		ai_res = ai_res->ai_next;
-	}
-}
-#endif	/* TEST_BLOCKING_WORKER */
-
-
 int
 getnameinfo_sometime(
 	sockaddr_u *		psau,
@@ -854,19 +817,6 @@ getnameinfo_sometime_complete(
 	free(gni_req);
 	/* gni_resp is part of block freed by process_blocking_resp() */
 }
-
-
-#ifdef TEST_BLOCKING_WORKER
-void gni_test_callback(int rescode, int gni_errno, sockaddr_u *psau, int flags, const char *host, const char *service, void *context)
-{
-	if (!rescode)
-		TRACE(1, ("gni_test_callback got host '%s' serv '%s' for addr %s context %p\n", 
-			  host, service, stoa(psau), context));
-	else
-		TRACE(1, ("gni_test_callback context %p rescode %d gni_errno %d flags 0x%x addr %s\n",
-			  context, rescode, gni_errno, flags, stoa(psau)));
-}
-#endif	/* TEST_BLOCKING_WORKER */
 
 
 #ifdef HAVE_RES_INIT
