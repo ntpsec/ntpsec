@@ -141,11 +141,7 @@ dumbclock_start(
 
 
 	time(&now);
-#ifdef GET_LOCALTIME
 	tm_time_p = localtime_r(&now, &tm);
-#else
-	tm_time_p = gmtime_r(&now, &tm);
-#endif
 	if (tm_time_p)
 		up->ymd = *tm_time_p;
 	else
@@ -263,12 +259,8 @@ dumbclock_receive(
 	    asserted_tm.tm_sec   = seconds;
 	    asserted_tm.tm_isdst = -1;
 
-#ifdef GET_LOCALTIME
 	    asserted_time = mktime (&asserted_tm);
 	    time(&now);
-#else
-#include "GMT unsupported for dumbclock!"
-#endif
 	    reality_delta = asserted_time - now;
 
 	    /*

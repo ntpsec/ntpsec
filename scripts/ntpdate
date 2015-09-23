@@ -5,10 +5,13 @@
 # Not documented, as this is strictly a backward-compatibility shim. It's
 # based on the recipes at
 #           http://support.ntp.org/bin/view/Dev/DeprecatingNtpdate
-# wuth corrections for modern snto options/
+# with corrections for modern sntp options.
 #
-# This emulation is only suited for use in init and cron scripts (not
-# interactively) as sntp always logs to syslog rather than stdout/stderr.
+# Debug this by giving the -n option, which causes it to echo the
+# generated sntp command rather than executing it.
+#
+# Known bug: without an explicit -t option, the defauly timeout is
+# sntp's 5 seconds rather than old ntpdate's 1. 
 #
 # ntpdate sntp    ntpd    What it does
 # -4      -4      -q -4   Resolve DNS lookups to A records         
@@ -20,12 +23,12 @@
 # -e N.N          -q      authdelay        
 # -k file -k file -k file key file         
 # -o N    -o N    -q      NTP Protocol version
-# -p N            -q      sys_samples
+# -p N            -q      How many samples to take
 # -q      default -q      query/report only, don't set clock
 #                         (implies -u for ntpdate)
 # -r N                    rate
-# -s       -p             log to syslog (always enabled)
-# -t N.N  -g ms           transmit inter-packet gap        
+# -s      -p              log to syslog (always enabled in ntpd)
+# -t N.N  -t N.N          request timeout
 # -u      default         unpriv port      
 # -v                      verbose (ntpd is always more verbose than ntpdate)
 #         -B secs         Broadcast timeout        
@@ -46,16 +49,16 @@ do
 	6) PASSTHROUGH="$PASSTHROUGH -6";;
 	a) PASSTHROUGH="$PASSTHROUGH -a $OPTARG";;
 	b) ADJUST="$ADJUST -S";;
-	B) ADJUST="$ADJUST -s";;
+	B) ADJUST="$ADJUST -j";;
 	d) PASSTHROUGH="$PASSTHROUGH -d";;
 	e) echo "ntpdate: -e is no longer supported.";;
 	k) PASSTHROUGH="$PASSTHROUGH -k $OPTARG";;
-	n) echo=echo ;;			# Echo generared command, don't execute
+	n) echo=echo ;;			# Echo generated command, don't execute
 	p) echo "ntpdate: -p is no longer supported.";;
 	q) setclock=no;;
 	r) echo "ntpdate: -r is no longer supported.";;
 	s) PASSTHROUGH="$PASSTHROUGH -p";;
-	t) echo "ntpdate: -t is no longer supported.";;
+	t) PASSTHROUGH="$PASSTHROUGH -t $OPTARG";;
 	u) ;;
 	v) ;;
     esac
