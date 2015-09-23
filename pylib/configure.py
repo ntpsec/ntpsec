@@ -183,8 +183,6 @@ def cmd_configure(ctx):
 		"sys/procset.h",
 		"sys/sockio.h",
 		"sys/soundcard.h",
-		"sys/stream.h",
-		"sys/stropts.h",
 		"sys/sysctl.h",
 		"sys/systune.h",
 		"utime.h",

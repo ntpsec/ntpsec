@@ -43,11 +43,7 @@
 
 #include "parse.h"
 
-#ifndef PARSESTREAM
 #include <stdio.h>
-#else
-#include "sys/parsestreams.h"
-#endif
 
 #include "ntp_stdlib.h"
 
