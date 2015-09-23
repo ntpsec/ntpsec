@@ -33,6 +33,9 @@
 #endif
 #include <ssl_applink.c>
 
+/* Version declared in libntpq */
+const char* VVersion = NTPS_VERSION_STRING " " __DATE__ " " __TIME__;
+
 /*
  * Because we potentially understand a lot of commands we will run
  * interactive if connected to a terminal.
@@ -536,7 +539,7 @@ ntpqmain(
 			opt_peers = true;
 			break;
 		    case 'V':
-			printf("ntpd %s\n", NTPS_VERSION_STRING);
+			printf("ntpd %s\n", VVersion);
 			exit(0);
 		    case 'w':
 			opt_wide = true;
@@ -2606,7 +2609,7 @@ version(
 	)
 {
 
-	(void) fprintf(fp, "ntpq %s\n", NTPS_VERSION_STRING);
+	(void) fprintf(fp, "ntpq %s\n", VVersion);
 	return;
 }
 
