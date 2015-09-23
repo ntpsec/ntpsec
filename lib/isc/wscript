@@ -43,7 +43,6 @@ def build(ctx):
 		"result.c",
 		"sha1.c",
 		"sockaddr.c",
-		"task.c",
 		"unix/errno2result.c",
 		"unix/interfaceiter.c",
 		"unix/net.c",
