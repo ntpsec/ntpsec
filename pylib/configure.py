@@ -239,6 +239,20 @@ int main() { return 0; }
 		mandatory=False
 	)
 
+	ctx.check_cc(
+		function_name="clock_settime",
+		header_name="time.h",
+		use="RT",
+		mandatory=False
+	)
+
+	ctx.check_cc(
+		function_name="settimeofday",
+		header_name="sys/time.h",
+		use="RT",
+		mandatory=False
+	)
+
 
 	from check_sockaddr import check_sockaddr
 	check_sockaddr(ctx)
