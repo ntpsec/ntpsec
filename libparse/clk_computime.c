@@ -47,12 +47,7 @@
 
 #include "parse.h"
 
-#ifndef PARSESTREAM
 #include <stdio.h>
-#else
-#include "sys/parsestreams.h"
-extern int printf (const char *, ...);
-#endif
 
 /*
  * The Computime receiver sends a datagram in the following format every minute

@@ -39,43 +39,6 @@
 
 #include "parse_conf.h"
 
-/*
- * we use the following datastructures in two modes
- * either in the NTP itself where we use NTP time stamps at some places
- * or in the kernel, where only struct timeval will be used.
- */
-#undef PARSEKERNEL
-#if defined(KERNEL) || defined(_KERNEL)
-#ifndef PARSESTREAM
-#define PARSESTREAM
-#endif
-#endif
-#if defined(PARSESTREAM) && defined(HAVE_SYS_STREAM_H)
-#define PARSEKERNEL
-#endif
-#ifdef PARSEKERNEL
-#ifndef _KERNEL
-extern caddr_t kmem_alloc (unsigned int);
-extern caddr_t kmem_free (caddr_t, unsigned int);
-extern unsigned int splx (unsigned int);
-extern unsigned int splhigh (void);
-extern unsigned int splclock (void);
-#define MALLOC(_X_) (char *)kmem_alloc(_X_)
-#define FREE(_X_, _Y_) kmem_free((caddr_t)_X_, _Y_)
-#else
-#include <sys/kmem.h>
-#define MALLOC(_X_) (char *)kmem_alloc(_X_, KM_SLEEP)
-#define FREE(_X_, _Y_) kmem_free((caddr_t)_X_, _Y_)
-#endif
-#else
-#define MALLOC(_X_) malloc(_X_)
-#define FREE(_X_, _Y_) free(_X_)
-#endif
-
-#if defined(PARSESTREAM) && defined(HAVE_SYS_STREAM_H)
-#include <sys/stream.h>
-#include <sys/stropts.h>
-#else	/* STREAM */
 #include <stdio.h>
 #include "ntp_syslog.h"
 #ifdef	DEBUG
@@ -85,7 +48,6 @@ extern unsigned int splclock (void);
 #else	/* DEBUG */
 #define parseprintf(LEVEL, ARGS)
 #endif	/* DEBUG */
-#endif	/* PARSESTREAM */
 
 #if defined(timercmp) && defined(__GNUC__)
 #undef timercmp
@@ -212,21 +174,6 @@ struct parsetime
 };
 
 typedef struct parsetime parsetime_t;
-
-/*---------- STREAMS interface ----------*/
-
-#ifdef HAVE_SYS_STREAM_H
-/*
- * ioctls
- */
-#define PARSEIOC_ENABLE		(('D'<<8) + 'E')
-#define PARSEIOC_DISABLE	(('D'<<8) + 'D')
-#define PARSEIOC_SETFMT         (('D'<<8) + 'f')
-#define PARSEIOC_GETFMT	        (('D'<<8) + 'F')
-#define PARSEIOC_SETCS	        (('D'<<8) + 'C')
-#define PARSEIOC_TIMECODE	(('D'<<8) + 'T')
-
-#endif
 
 /*------ IO handling flags (sorry) ------*/
 

@@ -20,13 +20,8 @@
 
 #include "parse.h"
 
-#ifndef PARSESTREAM
 #include "ntp_stdlib.h"
 #include <stdio.h>
-#else
-#include "sys/parsestreams.h"
-extern int printf (const char *, ...);
-#endif
 
 /* Type II Serial Output format
  *

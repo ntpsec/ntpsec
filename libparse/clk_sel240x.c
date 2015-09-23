@@ -23,11 +23,7 @@
 
 #include "parse.h"
 
-#ifndef PARSESTREAM
-# include <stdio.h>
-#else
-# include "sys/parsestreams.h"
-#endif
+#include <stdio.h>
 
 #include <time.h>
 

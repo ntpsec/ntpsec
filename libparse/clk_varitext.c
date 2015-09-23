@@ -46,13 +46,8 @@
 
 #include "parse.h"
 
-#ifndef PARSESTREAM
 # include "ntp_stdlib.h"
 # include <stdio.h>
-#else
-# include "sys/parsestreams.h"
-extern int printf (const char *, ...);
-#endif
 
 static const uint8_t VT_INITIALISED      = 0x01;
 static const uint8_t VT_SYNCHRONISED     = 0x02;

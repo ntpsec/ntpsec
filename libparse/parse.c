@@ -50,11 +50,7 @@
 
 #include "parse.h"
 
-#ifndef PARSESTREAM
 # include <stdio.h>
-#else
-# include "sys/parsestreams.h"
-#endif
 
 extern clockformat_t *clockformats[];
 extern unsigned short nformats;
@@ -110,21 +106,11 @@ parse_timedout(
 {
 	struct timeval delta;
 
-#ifdef PARSEKERNEL
-	delta.tv_sec = tstamp->tv.tv_sec - parseio->parse_lastchar.tv.tv_sec;
-	delta.tv_usec = tstamp->tv.tv_usec - parseio->parse_lastchar.tv.tv_usec;
-	if (delta.tv_usec < 0)
-	{
-		delta.tv_sec  -= 1;
-		delta.tv_usec += 1000000;
-	}
-#else
 	l_fp delt;
 
 	delt = tstamp->fp;
 	L_SUB(&delt, &parseio->parse_lastchar.fp);
 	TSTOTV(&delt, &delta);
-#endif
 
 	if (timercmp(&delta, del, >))
 	{
@@ -170,10 +156,10 @@ parse_ioend(
 	parseprintf(DD_PARSE, ("parse_ioend\n"));
 
 	if (parseio->parse_pdata)
-	    FREE(parseio->parse_pdata, parseio->parse_plen);
+	    free(parseio->parse_pdata);
 
 	if (parseio->parse_data)
-	    FREE(parseio->parse_data, (unsigned)(parseio->parse_dsize * 2 + 2));
+	    free(parseio->parse_data);
 }
 
 unsigned int
@@ -560,28 +546,13 @@ updatetimeinfo(
 	       register u_long   flags
 	       )
 {
-#ifdef PARSEKERNEL
-	{
-		int s = splhigh();
-#endif
-
 		parseio->parse_lstate          = parseio->parse_dtime.parse_state | flags | PARSEB_TIMECODE;
 
 		parseio->parse_dtime.parse_state = parseio->parse_lstate;
 
-#ifdef PARSEKERNEL
-		(void)splx((unsigned int)s);
-	}
-#endif
-
-
-#ifdef PARSEKERNEL
-	parseprintf(DD_PARSE, ("updatetimeinfo status=0x%x, time=%x\n", parseio->parse_dtime.parse_state,
-			       parseio->parse_dtime.parse_time.tv.tv_sec));
-#else
-	parseprintf(DD_PARSE, ("updatetimeinfo status=0x%lx, time=%x\n", (long)parseio->parse_dtime.parse_state,
+	parseprintf(DD_PARSE, ("updatetimeinfo status=0x%lx, time=%x\n",
+			       (long)parseio->parse_dtime.parse_state,
 	                       parseio->parse_dtime.parse_time.fp.l_ui));
-#endif
 
 	return CVT_OK;		/* everything fine and dandy... */
 }
@@ -705,9 +676,7 @@ timepacket(
 
 	default:
 		/* shouldn't happen */
-#ifndef PARSEKERNEL
 		msyslog(LOG_WARNING, "parse: INTERNAL error: bad return code of convert routine \"%s\"", clockformats[format]->name);
-#endif
 		return CVT_FAIL|cvtrtc;
 	}
 
@@ -719,13 +688,8 @@ timepacket(
 	/*
 	 * time stamp
 	 */
-#ifdef PARSEKERNEL
-	parseio->parse_dtime.parse_time.tv.tv_sec  = t;
-	parseio->parse_dtime.parse_time.tv.tv_usec = clock_time.usecond;
-#else
 	parseio->parse_dtime.parse_time.fp.l_ui = (uint32_t) (t + JAN_1970);
 	TVUTOTSF(clock_time.usecond, parseio->parse_dtime.parse_time.fp.l_uf);
-#endif
 
 	parseio->parse_dtime.parse_format       = format;
 
@@ -781,14 +745,14 @@ parse_setfmt(
 				if (!Strcmp(dct->parseformat.parse_buffer, clockformats[i]->name))
 				{
 					if (parse->parse_pdata)
-						FREE(parse->parse_pdata, parse->parse_plen);
+						free(parse->parse_pdata);
 					parse->parse_pdata = 0;
 
 					parse->parse_plen = clockformats[i]->plen;
 
 					if (parse->parse_plen)
 					{
-						parse->parse_pdata = MALLOC(parse->parse_plen);
+						parse->parse_pdata = malloc(parse->parse_plen);
 						if (!parse->parse_pdata)
 						{
 							parseprintf(DD_PARSE, ("set format failed: malloc for private data area failed\n"));
@@ -798,18 +762,18 @@ parse_setfmt(
 					}
 
 					if (parse->parse_data)
-						FREE(parse->parse_data, (unsigned)(parse->parse_dsize * 2 + 2));
+						free(parse->parse_data);
 					parse->parse_ldata = parse->parse_data = 0;
 
 					parse->parse_dsize = clockformats[i]->length;
 
 					if (parse->parse_dsize)
 					{
-						parse->parse_data = (char*)MALLOC((unsigned)(parse->parse_dsize * 2 + 2));
+						parse->parse_data = (char*)malloc((unsigned)(parse->parse_dsize * 2 + 2));
 						if (!parse->parse_data)
 						{
 							if (parse->parse_pdata)
-								FREE(parse->parse_pdata, parse->parse_plen);
+								free(parse->parse_pdata);
 							parse->parse_pdata = 0;
 
 							parseprintf(DD_PARSE, ("init failed: malloc for data area failed\n"));
