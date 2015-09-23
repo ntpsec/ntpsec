@@ -1,6 +1,6 @@
 = Dumb Clock =
 
-Last update: 20-Seo-2015 04:44 UTC
+Last update: 20-Sep-2015 04:44 UTC
 
 '''''
 
