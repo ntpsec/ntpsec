@@ -68,12 +68,11 @@ each driver contains an in-depth discussion on the algorithms and
 performance expectations. In some cases the algorithms are further
 analyzed, modeled and evaluated in a technical report.
 
-Currently, the audio drivers work with with Sun operating systems and
-audio codecs, including SunOS 4.1.3 and Solaris from 2.6 and probably
-all others in between. They also work with FreeBSD from 4.1 with
-compatible sound card. In fact, the interface is quite generic and
-support for other systems, in particular the various Unix generics,
-should not be difficult. Volunteers are solicited.
+The audio drivers assume the Sun Audio Driver API (SADA) interface
+used by SunOS, Solaris, and OpenSolaris, supported in the
+Linux OSS sound layer, and still used by the *BSD operating systems.
+In particular they are known to work with FreeBSD from 4.1 with any
+compatible sound card.
 
 The audio drivers include a number of common features designed to groom
 input signals, suppress spikes and normalize signal levels. An automatic

@@ -49,6 +49,11 @@
  * 10, but not yet with other machines. It uses no special features and
  * should be readily portable to other hardware and operating systems.
  *
+ * Assumes the Sun Audio Driver API (SADA) interface used by SunOS, Solaris,
+ * and OpenSolaris, supported in the Linux OSS sound layer, 
+ * and still used by the *BSD operating systems. In particular it should work
+ * for FreeBSD from version 4.1 on with compatible sound card.
+ *
  * Revision 1.28  2007/02/12 23:57:45  dmw
  * v0.23 2007-02-12 dmw:
  * - Changed statistics to include calculated error

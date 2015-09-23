@@ -1,5 +1,6 @@
 /*
  * audio-pcm.c - Scope out the PCM audio stuff
+ *
  */
 #ifdef HAVE_CONFIG_H
 # include <config.h>
