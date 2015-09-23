@@ -96,7 +96,6 @@ def build(ctx):
 
 	subst_source = [
 		"ntpd/complete.conf.in",
-		"scripts/deprecated/freq_adj.in",
 		"scripts/ntp-wait/ntp-wait.in",
 		"scripts/ntpsweep/ntpsweep.in",
 		"scripts/ntptrace/ntptrace.in",
