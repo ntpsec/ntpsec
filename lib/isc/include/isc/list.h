@@ -19,7 +19,7 @@
 
 #ifndef ISC_LIST_H
 #define ISC_LIST_H 1
-#include <isc/boolean.h>
+#include <stdbool.h>
 #include <isc/assertions.h>
 
 #ifdef ISC_LIST_CHECKINIT

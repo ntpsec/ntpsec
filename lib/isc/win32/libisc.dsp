@@ -231,14 +231,6 @@ SOURCE=..\include\isc\bitstring.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\include\isc\boolean.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\isc\buffer.h
-# End Source File
-# Begin Source File
-
 SOURCE=..\include\isc\bufferlist.h
 # End Source File
 # Begin Source File
@@ -272,10 +264,6 @@ SOURCE=..\include\isc\error.h
 # Begin Source File
 
 SOURCE=..\include\isc\event.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\isc\eventclass.h
 # End Source File
 # Begin Source File
 
@@ -459,10 +447,6 @@ SOURCE=..\include\isc\refcount.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\include\isc\region.h
-# End Source File
-# Begin Source File
-
 SOURCE=..\include\isc\resource.h
 # End Source File
 # Begin Source File
@@ -484,10 +468,6 @@ SOURCE=..\include\isc\serial.h
 # Begin Source File
 
 SOURCE=..\include\isc\sha1.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\isc\sha2.h
 # End Source File
 # Begin Source File
 

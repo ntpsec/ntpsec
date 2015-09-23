@@ -165,7 +165,7 @@ endpt *	any_interface;		/* wildcard ipv4 interface */
 endpt *	any6_interface;		/* wildcard ipv6 interface */
 endpt *	loopback_interface;	/* loopback ipv4 interface */
 
-isc_boolean_t broadcast_client_enabled;	/* is broadcast client enabled */
+bool broadcast_client_enabled;	/* is broadcast client enabled */
 u_int sys_ifnum;			/* next .ifnum to assign */
 int ninterfaces;			/* Total number of interfaces */
 
@@ -203,16 +203,16 @@ static bool	is_wildcard_addr	(const sockaddr_u *);
 /*
  * Multicast functions
  */
-static	isc_boolean_t	addr_ismulticast	(sockaddr_u *);
-static	isc_boolean_t	is_anycast		(sockaddr_u *,
+static	bool	addr_ismulticast	(sockaddr_u *);
+static	bool	is_anycast		(sockaddr_u *,
 						 const char *);
 
 /*
  * Not all platforms support multicast
  */
 #ifdef MCAST
-static	isc_boolean_t	socket_multicast_enable	(endpt *, sockaddr_u *);
-static	isc_boolean_t	socket_multicast_disable(endpt *, sockaddr_u *);
+static	bool	socket_multicast_enable	(endpt *, sockaddr_u *);
+static	bool	socket_multicast_disable(endpt *, sockaddr_u *);
 #endif
 
 #ifdef DEBUG
@@ -269,9 +269,9 @@ static	int	create_sockets	(u_short);
 static	SOCKET	open_socket	(sockaddr_u *, int, int, endpt *);
 static	char *	fdbits		(int, fd_set *);
 static	void	set_reuseaddr	(int);
-static	isc_boolean_t	socket_broadcast_enable	 (struct interface *, SOCKET, sockaddr_u *);
+static	bool	socket_broadcast_enable	 (struct interface *, SOCKET, sockaddr_u *);
 #ifdef  OS_MISSES_SPECIFIC_ROUTE_UPDATES
-static	isc_boolean_t	socket_broadcast_disable (struct interface *, sockaddr_u *);
+static	bool	socket_broadcast_disable (struct interface *, sockaddr_u *);
 #endif
 
 typedef struct remaddr remaddr_t;
@@ -1230,7 +1230,7 @@ add_nic_rule(
 	)
 {
 	nic_rule *	rule;
-	isc_boolean_t	is_ip;
+	bool	is_ip;
 
 	rule = emalloc_zero(sizeof(*rule));
 	rule->match_type = match_type;
@@ -1647,7 +1647,7 @@ set_wildcard_reuse(
 #endif /* OS_NEEDS_REUSEADDR_FOR_IFADDRBIND */
 
 
-static isc_boolean_t
+static bool
 check_flags6(
 	sockaddr_u *psau,
 	const char *name,
@@ -1659,24 +1659,24 @@ check_flags6(
 	int fd;
 
 	if (psau->sa.sa_family != AF_INET6)
-		return ISC_FALSE;
+		return false;
 	if ((fd = socket(AF_INET6, SOCK_DGRAM, 0)) < 0)
-		return ISC_FALSE;
+		return false;
 	ZERO(ifr6);
 	memcpy(&ifr6.ifr_addr, &psau->sa6, sizeof(ifr6.ifr_addr));
 	strlcpy(ifr6.ifr_name, name, sizeof(ifr6.ifr_name));
 	if (ioctl(fd, SIOCGIFAFLAG_IN6, &ifr6) < 0) {
 		close(fd);
-		return ISC_FALSE;
+		return false;
 	}
 	close(fd);
 	if ((ifr6.ifr_ifru.ifru_flags6 & flags6) != 0)
-		return ISC_TRUE;
+		return true;
 #endif	/* INCLUDE_IPV6_SUPPORT && SIOCGIFAFLAG_IN6 */
-	return ISC_FALSE;
+	return false;
 }
 
-static isc_boolean_t
+static bool
 is_anycast(
 	sockaddr_u *psau,
 	const char *name
@@ -1685,11 +1685,11 @@ is_anycast(
 #ifdef IN6_IFF_ANYCAST
 	return check_flags6(psau, name, IN6_IFF_ANYCAST);
 #else
-	return ISC_FALSE;
+	return false;
 #endif
 }
 
-static isc_boolean_t
+static bool
 is_valid(
 	sockaddr_u *psau,
 	const char *name
@@ -1707,7 +1707,7 @@ is_valid(
 #ifdef IN6_IFF_TENTATIVE
 	flags6 |= IN6_IFF_TENTATIVE;
 #endif
-	return check_flags6(psau, name, flags6) ? ISC_FALSE : ISC_TRUE;
+	return check_flags6(psau, name, flags6) ? false : true;
 }
 
 /*
@@ -1813,13 +1813,13 @@ update_interfaces(
 		case ACTION_LISTEN:
 			DPRINTF(4, ("listen interface %s (%s) - by nic rules\n",
 				    enumep.name, stoa(&enumep.sin)));
-			enumep.ignore_packets = ISC_FALSE;
+			enumep.ignore_packets = false;
 			break;
 
 		case ACTION_DROP:
 			DPRINTF(4, ("drop on interface %s (%s) - by nic rules\n",
 				    enumep.name, stoa(&enumep.sin)));
-			enumep.ignore_packets = ISC_TRUE;
+			enumep.ignore_packets = true;
 			break;
 		}
 
@@ -1910,7 +1910,7 @@ update_interfaces(
 					enumep.name, ep->name,
 					stoa(&enumep.sin));
 
-				ep->ignore_packets = ISC_TRUE;
+				ep->ignore_packets = true;
 			}
 
 			ep->phase = sys_interphase;
@@ -2272,7 +2272,7 @@ enable_broadcast(
  * The socket is in the ep_list all we need to do is enable
  * broadcasting. It is not this function's job to select the socket
  */
-static isc_boolean_t
+static bool
 socket_broadcast_enable(
 	struct interface *	iface,
 	SOCKET			fd,
@@ -2294,9 +2294,9 @@ socket_broadcast_enable(
 				    fd, stoa(baddr)));
 	}
 	iface->flags |= INT_BCASTXMIT;
-	return ISC_TRUE;
+	return true;
 #else
-	return ISC_FALSE;
+	return false;
 #endif /* SO_BROADCAST */
 }
 
@@ -2306,7 +2306,7 @@ socket_broadcast_enable(
  * The socket is in the ep_list all we need to do is disable
  * broadcasting. It is not this function's job to select the socket
  */
-static isc_boolean_t
+static bool
 socket_broadcast_disable(
 	struct interface *	iface,
 	sockaddr_u *		baddr
@@ -2322,9 +2322,9 @@ socket_broadcast_disable(
 			stoa(baddr));
 
 	iface->flags &= ~INT_BCASTXMIT;
-	return ISC_TRUE;
+	return true;
 #else
-	return ISC_FALSE;
+	return false;
 #endif /* SO_BROADCAST */
 }
 #endif /* OS_MISSES_SPECIFIC_ROUTE_UPDATES */
@@ -2334,7 +2334,7 @@ socket_broadcast_disable(
 /*
  * return the broadcast client flag value
  */
-isc_boolean_t
+bool
 get_broadcastclient_flag(void)
 {
 	return (broadcast_client_enabled);
@@ -2342,19 +2342,19 @@ get_broadcastclient_flag(void)
 /*
  * Check to see if the address is a multicast address
  */
-static isc_boolean_t
+static bool
 addr_ismulticast(
 	sockaddr_u *maddr
 	)
 {
-	isc_boolean_t result;
+	bool result;
 
 #ifndef INCLUDE_IPV6_MULTICAST_SUPPORT
 	/*
 	 * If we don't have IPV6 support any IPV6 addr is not multicast
 	 */
 	if (IS_IPV6(maddr))
-		result = ISC_FALSE;
+		result = false;
 	else
 #endif
 		result = IS_MCAST(maddr);
@@ -2440,7 +2440,7 @@ enable_multicast_if(
  * multicasting. It is not this function's job to select the socket
  */
 #if defined(MCAST)
-static isc_boolean_t
+static bool
 socket_multicast_enable(
 	endpt *		iface,
 	sockaddr_u *	maddr
@@ -2469,7 +2469,7 @@ socket_multicast_enable(
 				mreq.imr_interface.s_addr,
 				stoa(maddr)));
 #endif /* __COVERTY__ */
-			return ISC_FALSE;
+			return false;
 		}
 		DPRINTF(4, ("Added IPv4 multicast membership on socket %d, addr %s for %x / %x (%s)\n",
 			    iface->fd, stoa(&iface->sin),
@@ -2499,19 +2499,19 @@ socket_multicast_enable(
 				iface->fd, stoa(&iface->sin),
 				mreq6.ipv6mr_interface, stoa(maddr)));
 #endif /* __COVERITY__ */
-			return ISC_FALSE;
+			return false;
 		}
 		DPRINTF(4, ("Added IPv6 multicast group on socket %d, addr %s for interface %u (%s)\n",
 			    iface->fd, stoa(&iface->sin),
 			    mreq6.ipv6mr_interface, stoa(maddr)));
 #else
-		return ISC_FALSE;
+		return false;
 #endif	/* INCLUDE_IPV6_MULTICAST_SUPPORT */
 	}
 	iface->flags |= INT_MCASTOPEN;
 	iface->num_mcast++;
 
-	return ISC_TRUE;
+	return true;
 }
 #endif	/* MCAST */
 
@@ -2522,7 +2522,7 @@ socket_multicast_enable(
  * multicasting. It is not this function's job to select the socket
  */
 #ifdef MCAST
-static isc_boolean_t
+static bool
 socket_multicast_disable(
 	struct interface *	iface,
 	sockaddr_u *		maddr
@@ -2538,7 +2538,7 @@ socket_multicast_disable(
 	if (find_addr_in_list(maddr) == NULL) {
 		DPRINTF(4, ("socket_multicast_disable(%s): not found\n",
 			    stoa(maddr)));
-		return ISC_TRUE;
+		return true;
 	}
 
 	switch (AF(maddr)) {
@@ -2556,7 +2556,7 @@ socket_multicast_disable(
 				iface->fd, stoa(&iface->sin),
 				SRCADR(maddr), SRCADR(&iface->sin),
 				stoa(maddr));
-			return ISC_FALSE;
+			return false;
 #endif /* __COVERITY__ */
 		}
 		break;
@@ -2581,11 +2581,11 @@ socket_multicast_disable(
 				iface->fd, stoa(&iface->sin),
 				iface->ifindex, stoa(maddr));
 #endif /* __COVERITY__ */
-			return ISC_FALSE;
+			return false;
 		}
 		break;
 #else
-		return ISC_FALSE;
+		return false;
 #endif	/* INCLUDE_IPV6_MULTICAST_SUPPORT */
 	}
 
@@ -2593,7 +2593,7 @@ socket_multicast_disable(
 	if (!iface->num_mcast)
 		iface->flags &= ~INT_MCASTOPEN;
 
-	return ISC_TRUE;
+	return true;
 }
 #endif	/* MCAST */
 
@@ -2665,11 +2665,11 @@ io_setbclient(void)
 	}
 	set_reuseaddr(0);
 	if (nif > 0) {
-		broadcast_client_enabled = ISC_TRUE;
+		broadcast_client_enabled = true;
 		DPRINTF(1, ("io_setbclient: listening to %d broadcast addresses\n", nif));
 	}
 	else if (!nif) {
-		broadcast_client_enabled = ISC_FALSE;
+		broadcast_client_enabled = false;
 		msyslog(LOG_ERR,
 			"Unable to listen for broadcasts, no broadcast interfaces available");
 	}
@@ -2703,7 +2703,7 @@ io_unsetbclient(void)
 			ep->flags &= ~INT_BCASTOPEN;
 		}
 	}
-	broadcast_client_enabled = ISC_FALSE;
+	broadcast_client_enabled = false;
 }
 
 /*
@@ -2748,7 +2748,7 @@ io_multicast_add(
 	ep->bfd = INVALID_SOCKET;
 	ep->fd = open_socket(&ep->sin, 0, 0, ep);
 	if (ep->fd != INVALID_SOCKET) {
-		ep->ignore_packets = ISC_FALSE;
+		ep->ignore_packets = false;
 		ep->flags |= INT_MCASTIF;
 
 		strlcpy(ep->name, "multicast", sizeof(ep->name));
