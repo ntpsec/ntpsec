@@ -179,6 +179,7 @@ def cmd_configure(ctx):
 		"sys/ioctl.h",
 		"sys/modem.h",
 		"sys/param.h",
+		"sys/prctl.h",
 		"sys/ppsclock.h",
 		"sys/procset.h",
 		"sys/sockio.h",
@@ -224,14 +225,18 @@ int main() { return 0; }
 	ctx.check_cc(feature="c cshlib", lib="event_pthreads", libpath=ctx.env.PLATFORM_LIBPATH, uselib_store="LIBEVENT_PTHREADS", use="LIBEVENT")
 
 
-	ctx.check_cc(header_name="sys/prctl.h", mandatory=False)
-	ctx.check_cc(header_name="sys/capability.h", mandatory=False)
 
+	# Check for Linux capability.
+	ctx.check_cc(header_name="sys/capability.h", mandatory=False)
 	ctx.check_cc(lib="cap", mandatory=False)
 
 	if ctx.env.LIB_CAP:
 		from check_cap import check_cap
 		check_cap(ctx)
+
+	if ctx.get_define("HAVE_CAPABILITY") and ctx.get_define("HAVE_SYS_CAPABILITY_H") and ctx.get_define("HAVE_SYS_PRCTL_H"):
+		ctx.define("HAVE_LINUX_CAPABILITY", 1)
+
 
 	ctx.check_cc(
 		function_name="clock_gettime",
