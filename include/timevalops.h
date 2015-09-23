@@ -100,7 +100,7 @@ extern const uint32_t tstoushi[128];
 	do { \
 		(tv)->tv_sec = (ts)->l_ui; \
 		TSFTOTVU((ts)->l_uf, (tv)->tv_usec); \
-		if ((tv)->tv_usec == 1000000) { \
+		if ((tv)->tv_usec == MICROSECONDS) { \
 			(tv)->tv_sec++; \
 			(tv)->tv_usec = 0; \
 		} \
