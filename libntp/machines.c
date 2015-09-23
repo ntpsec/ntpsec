@@ -50,6 +50,7 @@ ntp_set_tod(
 	rc = -1;
 	saved_errno = 0;
 
+#ifdef HAVE_CLOCK_SETTIME
 	if (rc && (SET_TOD_CLOCK_SETTIME == tod || !tod)) {
 		struct timespec ts;
 
@@ -65,7 +66,25 @@ ntp_set_tod(
 			tod = SET_TOD_CLOCK_SETTIME;
 
 	}
+#endif /* HAVE_CLOCK_SETTIME */
+#ifdef HAVE_SETTIMEOFDAY
+	if (rc && (SET_TOD_SETTIMEOFDAY == tod || !tod)) {
+		struct timeval adjtv;
 
+		/*
+		 * Some broken systems don't reset adjtime() when the
+		 * clock is stepped.
+		 */
+		adjtv.tv_sec = adjtv.tv_usec = 0;
+		adjtime(&adjtv, NULL);
+		errno = 0;
+		rc = settimeofday(tvp, tzp);
+		saved_errno = errno;
+		TRACE(1, ("ntp_set_tod: settimeofday: %d %m\n", rc));
+		if (!tod && !rc)
+			tod = SET_TOD_SETTIMEOFDAY;
+	}
+#endif /* HAVE_SETTIMEOFDAY */
 	errno = saved_errno;	/* for %m below */
 	TRACE(1, ("ntp_set_tod: Final result: %s: %d %m\n",
 		  set_tod_used[tod], rc));
