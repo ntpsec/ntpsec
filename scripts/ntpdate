@@ -10,8 +10,9 @@
 # Debug this by giving the -n option, which causes it to echo the
 # generated sntp command rather than executing it.
 #
-# Known bug: without an explicit -t option, the defauly timeout is
-# sntp's 5 seconds rather than old ntpdate's 1. 
+# Known bugs: (1) Without an explicit -t option, the default timeout is
+# sntp's 5 seconds rather than old ntpdate's 1. (2) The -e and -p options
+# of ntpdate are not yet implemented.  These things could be fixed.
 #
 # ntpdate sntp    ntpd    What it does
 # -4      -4      -q -4   Resolve DNS lookups to A records         
@@ -26,7 +27,6 @@
 # -p N            -q      How many samples to take
 # -q      default -q      query/report only, don't set clock
 #                         (implies -u for ntpdate)
-# -r N                    rate
 # -s      -p              log to syslog (always enabled in ntpd)
 # -t N.N  -t N.N          request timeout
 # -u      default         unpriv port      
@@ -42,7 +42,7 @@
 PASSTHROUGH=""
 setclock=yes
 echo=""
-while getopts 46a:bBe:k:no:p:qr:st:uv opt
+while getopts 46a:bBe:k:no:p:qst:uv opt
 do
     case $opt in
 	4) PASSTHROUGH="$PASSTHROUGH -4";;
@@ -51,12 +51,12 @@ do
 	b) ADJUST="$ADJUST -S";;
 	B) ADJUST="$ADJUST -j";;
 	d) PASSTHROUGH="$PASSTHROUGH -d";;
-	e) echo "ntpdate: -e is no longer supported.";;
+	e) echo "ntpdate: -e is no longer supported." >&2;;
 	k) PASSTHROUGH="$PASSTHROUGH -k $OPTARG";;
 	n) echo=echo ;;			# Echo generated command, don't execute
-	p) echo "ntpdate: -p is no longer supported.";;
+	o) PASSTHROUGH="$PASSTHROUGH -o $OPTARG";;
+	p) echo "ntpdate: -p is no longer supported." >&2;;
 	q) setclock=no;;
-	r) echo "ntpdate: -r is no longer supported.";;
 	s) PASSTHROUGH="$PASSTHROUGH -p";;
 	t) PASSTHROUGH="$PASSTHROUGH -t $OPTARG";;
 	u) ;;
