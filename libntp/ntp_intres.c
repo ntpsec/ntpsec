@@ -347,8 +347,13 @@ blocking_getaddrinfo(
 					&ai_res);
 	gai_resp->retry = gai_req->retry;
 #ifdef EAI_SYSTEM
-	if (EAI_SYSTEM == gai_resp->retcode)
-		gai_resp->gai_errno = errno;
+	if (EAI_SYSTEM == gai_resp->retcode) {
+	    if (EAGAIN == errno) {
+		msyslog(LOG_ERR, "EAI_SYSTEM/EAGAIN from getaddrinfo, probably out of (locked) memory");
+		exit(1);
+	    }
+	    gai_resp->gai_errno = errno;
+	}
 #endif
 	canons_octets = 0;
 
