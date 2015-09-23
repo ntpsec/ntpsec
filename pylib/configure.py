@@ -216,6 +216,7 @@ int main() { return 0; }
 	ctx.check_cc(lib="pthread")
 	ctx.check_cc(lib="rt", mandatory=False)
 	ctx.check_cc(lib="thr", mandatory=False)
+	ctx.check_cc(lib="gcc_s", mandatory=False)
 
 	ctx.check_cc(header_name="event2/event.h", includes=ctx.env.PLATFORM_INCLUDES)
 	ctx.check_cc(feature="c cshlib", lib="event", libpath=ctx.env.PLATFORM_LIBPATH, uselib_store="LIBEVENT")
