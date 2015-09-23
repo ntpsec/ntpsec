@@ -1798,12 +1798,14 @@ ctl_putsys(
 		break;
 
 	case CS_VERSION:
-		snprintf(str, sizeof(str), "ntpd %s", Version);
+		snprintf(str, sizeof(str), "%s %s",
+			"ntpd", NTPS_VERSION_STRING);
 		ctl_putstr(sys_var[CS_VERSION].text, str, strlen(str));
 		break;
 
 	case CS_STABIL:
-		ctl_putdbl(sys_var[CS_STABIL].text, clock_stability * 1e6);
+		ctl_putdbl(sys_var[CS_STABIL].text, clock_stability *
+			   1e6);
 		break;
 
 	case CS_VARLIST:
