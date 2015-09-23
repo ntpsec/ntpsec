@@ -163,12 +163,12 @@
 #include <stdarg.h>
 #include <ctype.h>
 #include <sys/stat.h>
-#ifdef ONCORE_SHMEM_STATUS
+#ifdef ENABLE_ONCORE_SHMEM
 #  include <sys/mman.h>
 #  ifndef MAP_FAILED
 #   define MAP_FAILED ((uint8_t *) -1)
 #  endif  /* MAP_FAILED */
-#endif /* ONCORE_SHMEM_STATUS */
+#endif /* ENABLE_ONCORE_SHMEM */
 
 #ifdef HAVE_PPSAPI
 # include "ppsapi_timepps.h"
@@ -359,7 +359,7 @@ static	void	oncore_read_config    (struct instance *);
 static	void	oncore_receive	      (struct recvbuf *);
 static	bool	oncore_ppsapi	      (struct instance *);
 static	void	oncore_get_timestamp  (struct instance *, long, long);
-#ifdef ONCORE_SHMEM_STATUS
+#ifdef ENABLE_ONCORE_SHMEM
 static	void	oncore_init_shmem     (struct instance *);
 #endif
 
@@ -740,7 +740,7 @@ oncore_start(
 	}
 	pp->unitptr = instance;
 
-#ifdef ONCORE_SHMEM_STATUS
+#ifdef ENABLE_ONCORE_SHMEM
 	/*
 	 * Before starting ONCORE, lets setup SHMEM
 	 * This will include merging an old SHMEM into the new one if
@@ -927,7 +927,7 @@ oncore_ppsapi(
 
 
 
-#ifdef ONCORE_SHMEM_STATUS
+#ifdef ENABLE_ONCORE_SHMEM
 static void
 oncore_init_shmem(
 	struct instance *instance
@@ -1072,7 +1072,7 @@ oncore_init_shmem(
 		     "SHMEM (size = %ld) is CONFIGURED and available as %s",
 		     (u_long) shmem_length, instance->shmem_fname);
 }
-#endif /* ONCORE_SHMEM_STATUS */
+#endif /* ENABLE_ONCORE_SHMEM */
 
 
 
