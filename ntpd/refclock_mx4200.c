@@ -678,7 +678,7 @@ mx4200_receive(
 	up->sloppyclockflag = pp->sloppyclockflag;
 
 	/*
-	 * Read clock output.  Automatically handles STREAMS, CLKLDISC.
+	 * Read clock output.  Automatically handles CLKLDISC.
 	 */
 	pp->lencode = refclock_gtlin(rbufp, pp->a_lastcode, BMAX, &pp->lastrec);
 

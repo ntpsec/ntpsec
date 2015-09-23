@@ -174,7 +174,6 @@ def cmd_configure(ctx):
 		"priv.h",
 		"resolv.h",
 		"stdatomic.h",
-		"stropts.h",
 		"sys/audioio.h",
 		"sys/ioctl.h",
 		"sys/modem.h",
