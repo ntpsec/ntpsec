@@ -336,7 +336,7 @@ true_receive(
 	up = pp->unitptr;
 
 	/*
-	 * Read clock output.  Automatically handles STREAMS, CLKLDISC.
+	 * Read clock output.  Automatically handles CLKLDISC.
 	 */
 	rd_lencode = refclock_gtlin(rbufp, rd_lastcode, BMAX, &rd_tmp);
 	rd_lastcode[rd_lencode] = '\0';
