@@ -31,6 +31,8 @@ def options(ctx):
 	grp.add_option('--enable-ipv6', action='store_true', default=False, help="Enable IPv6")
 	grp.add_option('--enable-doc', action='store_true', default=False, help="Build NTP documentation")
 	grp.add_option('--enable-crypto', action='store_true', default=False, help="Enable OpenSSL.")
+	grp.add_option('--disable-droproot', action='store_true', default=False, help="Disable dropping root.")
+	grp.add_option('--disable-dns-lookup', action='store_true', default=False, help="Disable DNS lookups.")
 
 
 	grp = ctx.add_option_group("NTP features")

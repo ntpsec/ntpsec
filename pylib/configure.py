@@ -285,6 +285,13 @@ int main() { return 0; }
 	if ctx.options.enable_lockclock:
 		ctx.define("ENABLE_LOCKCLOCK", 1)
 
+	if not ctx.options.disable_droproot:
+		ctx.define("ENABLE_DROPROOT", 1)
+
+	if not ctx.options.disable_dns_lookup:
+		ctx.define("ENABLE_DNS_LOOKUP", 1)
+
+
 	# There is an ENABLE_AUTOKEY as well, but as that feature
 	# is not working and likely to be replaced it's not exposed
 	# and can't be enabled.
@@ -296,11 +303,6 @@ int main() { return 0; }
 
 	# Won't be true under Windows, but is under every Unix-like OS.
 	ctx.define("HAVE_WORKING_FORK", 1)
-
-	# Do we want to support root dropping?  I can't imagine why not,
-	# but we'll keep this guard because we'll probably want to condition
-	# the support out someday for a Windows or hypothetical RTOS build.
-	ctx.define("ENABLE_DROPROOT", 1)
 
 	# Does the kernel implement a phase-locked loop for timing?
 	# All modern Unixes (in particular Linux and *BSD have this).
