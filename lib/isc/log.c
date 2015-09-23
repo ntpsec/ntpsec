@@ -30,12 +30,12 @@
 #include <stdio.h>
 
 #include <sys/types.h>	/* dev_t FreeBSD 2.1 */
+#include <sys/stat.h>
 
 #include <isc/log.h>
 #include <isc/magic.h>
 #include <isc/mem.h>
 #include <isc/msgs.h>
-#include <isc/stat.h>
 #include <isc/time.h>
 #include <isc/util.h>
 

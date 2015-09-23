@@ -27,7 +27,6 @@
  * OS-specific types, from the OS-specific include directories.
  */
 #include <isc/int.h>
-#include <isc/offset.h>
 
 #include <stdbool.h>
 /*

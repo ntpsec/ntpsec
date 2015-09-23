@@ -24,6 +24,7 @@
 
 #include <stdio.h>
 #include <stdarg.h>
+#include <sys/types.h>
 #include <syslog.h> /* XXXDCL NT */
 
 #include <isc/formatcheck.h>
@@ -127,7 +128,7 @@ typedef struct isc_logfile {
 	 * anyone would want).  st_size returned by fstat should be typedef'd
 	 * to a size large enough for the largest possible file on a system.
 	 */
-	isc_offset_t maximum_size;
+	off_t maximum_size;
 	bool maximum_reached; /*%< Private. */
 } isc_logfile_t;
 
