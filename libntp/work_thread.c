@@ -405,7 +405,6 @@ start_blocking_thread_internal(
 # endif
 	pthread_attr_t	thr_attr;
 	int		rc;
-	int		saved_errno;
 	int		pipe_ends[2];	/* read then write */
 	bool		is_pipe;
 	int		flags;
@@ -470,14 +469,16 @@ start_blocking_thread_internal(
 	block_thread_signals(&saved_sig_mask);
 	rc = pthread_create(c->thread_ref, &thr_attr,
 			    &blocking_thread, c);
-	saved_errno = errno;
+	if (0 != rc) {
+	    if (EAGAIN == errno) {
+	        msyslog(LOG_ERR, "EAGAIN from pthread_create(), probably out of (locked) memory");
+	    } else {
+	        msyslog(LOG_ERR, "pthread_create() blocking child: %m");
+	    }
+	    exit(1);
+	}
 	pthread_sigmask(SIG_SETMASK, &saved_sig_mask, NULL);
 	pthread_attr_destroy(&thr_attr);
-	if (0 != rc) {
-		errno = saved_errno;
-		msyslog(LOG_ERR, "pthread_create() blocking child: %m");
-		exit(1);
-	}
 }
 #endif
 
