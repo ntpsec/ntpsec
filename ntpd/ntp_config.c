@@ -4312,23 +4312,6 @@ config_ntpd(
 	config_unpeers(ptree);
 	config_fudge(ptree);
 	config_reset_counters(ptree);
-
-#ifdef TEST_BLOCKING_WORKER
-	{
-		struct addrinfo hints;
-
-		ZERO(hints);
-		hints.ai_socktype = SOCK_STREAM;
-		hints.ai_protocol = IPPROTO_TCP;
-		getaddrinfo_sometime("www.cnn.com", "ntp", &hints,
-				     INITIAL_DNS_RETRY,
-				     gai_test_callback, (void *)1);
-		hints.ai_family = AF_INET6;
-		getaddrinfo_sometime("ipv6.google.com", "ntp", &hints,
-				     INITIAL_DNS_RETRY,
-				     gai_test_callback, (void *)0x600);
-	}
-#endif
 }
 #endif	/* !SIM */
 
