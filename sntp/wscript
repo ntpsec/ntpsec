@@ -42,7 +42,7 @@ def build(ctx):
 
 	ctx(
 		target		= "sntp",
-		features	= "c cprogram bld_include src_include libisc_include",
+		features	= "c cprogram bld_include src_include libisc_include ntp_version",
 		use			= "ntp isc opts M PTHREAD sntp_obj LIBEVENT LIBEVENT_CORE LIBEVENT_PTHREADS RT CRYPTO",
 		source		= sntp_source,
 		defines		= ["HAVE_CONFIG_H=1"]
