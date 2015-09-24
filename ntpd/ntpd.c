@@ -243,6 +243,7 @@ parse_cmdline_opts(
 	)
 {
 	static bool	parsed = false;
+	int sawV = 0;
 
 	if (parsed)
 	    return;
@@ -400,8 +401,19 @@ parse_cmdline_opts(
 		}
 		break;
 	    case 'V':
-		printf("ntpd %s\n", Version);
-		exit(0);
+		sawV++;
+		switch (sawV) {
+		  case 1:
+			printf("ntpd %s\n", Version);
+			break;
+		  case 2:
+			printf("ntpd %s\n", VVersion);
+			break;
+		  default:
+			printf("ntpd no-more\n");
+			break;
+		}
+		break;
 	    case 'w':
 		wait_sync = strtod(ntp_optarg, NULL);
 		break;
@@ -440,6 +452,9 @@ parse_cmdline_opts(
 		cmdline_server_count = argc - ntp_optind;
 		cmdline_servers = argv + ntp_optind;
 	}
+
+	if (sawV > 0)
+		exit(0);
 }
 
 #ifdef SIM

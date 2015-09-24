@@ -34,7 +34,8 @@ class version(Task):
 	def run(self):
 		self.outputs[0].write("""
 const char *Version = "%s " __DATE__ " " __TIME__;
-""" % self.env.NTPS_VERSION_STRING)
+const char *VVersion = "CFLAGS=%s LDFLAGS=%s";
+""" % (self.env.NTPS_VERSION_STRING, "Need-CFLAGS", "Need-LDFLAGS"))
 
 @before_method('process_source')
 @feature('ntp_version')
