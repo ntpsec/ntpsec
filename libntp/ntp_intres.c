@@ -53,7 +53,7 @@
 
 #include "ntp_workimpl.h"
 
-#ifdef WORKER
+#ifdef USE_WORKER
 
 #include <stdio.h>
 #include <ctype.h>
@@ -839,14 +839,14 @@ reload_resolv_conf(
 	 * only once per minute process-wide.
 	 */
 	time_now = time(NULL);
-# ifdef WORK_THREAD
+# ifdef USE_WORK_THREAD
 	worker_ctx->next_res_init = next_res_init;
 # endif
 	if (worker_ctx->next_res_init <= time_now) {
 		if (worker_ctx->next_res_init != 0)
 			res_init();
 		worker_ctx->next_res_init = time_now + 60;
-# ifdef WORK_THREAD
+# ifdef USE_WORK_THREAD
 		next_res_init = worker_ctx->next_res_init;
 # endif
 	}
@@ -1072,6 +1072,6 @@ should_retry_dns(
 	return again;
 }
 
-#else	/* !WORKER follows */
+#else	/* !USE_WORKER follows */
 int ntp_intres_nonempty_compilation_unit;
 #endif

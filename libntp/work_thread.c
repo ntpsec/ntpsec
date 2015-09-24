@@ -4,7 +4,7 @@
 #include <config.h>
 #include "ntp_workimpl.h"
 
-#ifdef WORK_THREAD
+#ifdef USE_WORK_THREAD
 
 #include <stdio.h>
 #include <ctype.h>
@@ -44,7 +44,7 @@
 # define tickle_sem	sem_post
 #endif
 
-#ifdef WORK_PIPE
+#ifdef USE_WORK_PIPE
 addremove_io_fd_func		addremove_io_fd;
 #else
 addremove_io_semaphore_func	addremove_io_semaphore;
@@ -286,7 +286,7 @@ send_blocking_resp_internal(
 	c->responses[c->next_response] = resp;
 	c->next_response = (1 + c->next_response) % c->responses_alloc;
 
-#ifdef WORK_PIPE
+#ifdef USE_WORK_PIPE
 	IGNORE(write(c->resp_write_pipe, "", 1));
 #else
 	tickle_sem(c->blocking_response_ready);
@@ -296,7 +296,7 @@ send_blocking_resp_internal(
 }
 
 
-#ifndef WORK_PIPE
+#ifndef USE_WORK_PIPE
 void
 handle_blocking_resp_sem(
 	void *	context
@@ -317,7 +317,7 @@ handle_blocking_resp_sem(
 	if (idx < blocking_children_alloc)
 		process_blocking_resp(c);
 }
-#endif	/* !WORK_PIPE */
+#endif	/* !USE_WORK_PIPE */
 
 
 blocking_pipe_header *
@@ -326,7 +326,7 @@ receive_blocking_resp_internal(
 	)
 {
 	blocking_pipe_header *	removed;
-#ifdef WORK_PIPE
+#ifdef USE_WORK_PIPE
 	int			rc;
 	char			scratch[32];
 
@@ -691,7 +691,7 @@ cleanup_after_child(
 #endif
 	c->thread_ref = NULL;
 	c->thread_id = 0;
-#ifdef WORK_PIPE
+#ifdef USE_WORK_PIPE
 	DEBUG_INSIST(-1 != c->resp_read_pipe);
 	DEBUG_INSIST(-1 != c->resp_write_pipe);
 	(*addremove_io_fd)(c->resp_read_pipe, c->ispipe, true);
@@ -715,6 +715,6 @@ cleanup_after_child(
 }
 
 
-#else	/* !WORK_THREAD follows */
+#else	/* !USE_WORK_THREAD follows */
 char work_thread_nonempty_compilation_unit;
 #endif

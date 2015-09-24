@@ -4,7 +4,7 @@
 #include <event2/event.h>
 
 #include "ntp_workimpl.h"
-#ifdef WORK_THREAD
+#ifdef USE_WORK_THREAD
 # include <event2/thread.h>
 #endif
 
@@ -337,7 +337,7 @@ sntp_main (
 	event_set_log_callback(&sntp_libevent_log_cb);
 	if (debug > 0)
 		event_enable_debug_mode();
-#ifdef WORK_THREAD
+#ifdef USE_WORK_THREAD
 	evthread_use_pthreads();
 	/* we use libevent from main thread only, locks should be academic */
 	if (debug > 0)

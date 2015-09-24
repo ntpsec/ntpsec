@@ -145,11 +145,11 @@ static	bool	peer_unfit	(struct peer *);
 #ifdef ENABLE_AUTOKEY
 static	bool	group_test	(char *, char *);
 #endif /* ENABLE_AUTOKEY */
-#ifdef WORKER
+#ifdef USE_WORKER
 void	pool_name_resolved	(int, int, void *, const char *,
 				 const char *, const struct addrinfo *,
 				 const struct addrinfo *);
-#endif /* WORKER */
+#endif /* USE_WORKER */
 
 
 /*
@@ -3582,7 +3582,7 @@ pool_xmit(
 	struct peer *pool	/* pool solicitor association */
 	)
 {
-#ifdef WORKER
+#ifdef USE_WORKER
 	struct pkt		xpkt;	/* transmit packet structure */
 	struct addrinfo		hints;
 	int			rc;
@@ -3657,7 +3657,7 @@ pool_xmit(
 		    current_time, latoa(lcladr), stoa(rmtadr));
 #endif
 	msyslog(LOG_INFO, "Soliciting pool server %s", stoa(rmtadr));
-#endif	/* WORKER */
+#endif	/* USE_WORKER */
 }
 
 
@@ -3694,7 +3694,7 @@ bool group_test(
 }
 #endif /* ENABLE_AUTOKEY */
 
-#ifdef WORKER
+#ifdef USE_WORKER
 void
 pool_name_resolved(
 	int			rescode,
@@ -3730,7 +3730,7 @@ pool_name_resolved(
 	pool_xmit(pool);
 
 }
-#endif	/* WORKER */
+#endif	/* USE_WORKER */
 
 
 #ifdef ENABLE_AUTOKEY

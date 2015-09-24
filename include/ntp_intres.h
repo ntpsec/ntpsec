@@ -6,7 +6,7 @@
 
 #include <ntp_worker.h>
 
-#ifdef WORKER
+#ifdef USE_WORKER
 #define	INITIAL_DNS_RETRY	2	/* seconds between queries */
 
 /*
@@ -37,7 +37,7 @@ typedef void	(*gni_sometime_callback)
 		     const char *, void *);
 extern int getnameinfo_sometime(sockaddr_u *, size_t, size_t, int,
 				gni_sometime_callback, void *);
-#endif	/* WORKER */
+#endif	/* USE_WORKER */
 
 /* intres_timeout_req() is provided by the client, ntpd or sntp. */
 extern void intres_timeout_req(u_int);
