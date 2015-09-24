@@ -117,8 +117,6 @@ def cmd_configure(ctx):
 		ctx.check_sizeof(header, sizeof)
 
 
-	ctx.define("NEED_S_CHAR_TYPEDEF", 1)
-
 	ctx.define("NTP_KEYSDIR", "%s/etc" % ctx.env.PREFIX)
 	ctx.define("GETSOCKNAME_SOCKLEN_TYPE", "socklen_t", quote=False)
 	ctx.define("DFLT_RLIMIT_STACK", 50)
@@ -136,8 +134,9 @@ def cmd_configure(ctx):
 		('arc4random', "stdlib.h"),
 		('arc4random_buf', "stdlib.h"),
 		('getclock', "sys/timers.h"),
-		('getpassphrase', "stdlib.h"), # Sun systems
+		('getpassphrase', "stdlib.h"),	# Sun systems
 		('res_init', "resolv.h"),
+		("rtprio", "sys/rtprio.h"),	# Sun/BSD
 		('strlcpy', "string.h"),
 		('strlcat', "string.h"),
 		('sysconf', "unistd.h"),
@@ -182,6 +181,7 @@ def cmd_configure(ctx):
 		"stdatomic.h",
 		"sys/audioio.h",
 		"sys/ioctl.h",
+		"sys/lock.h",
 		"sys/modem.h",
 		"sys/param.h",
 		"sys/prctl.h",
