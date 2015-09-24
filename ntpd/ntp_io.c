@@ -2944,13 +2944,11 @@ open_socket(
 	 * IPv4 specific options go here
 	 */
 	if (IS_IPV4(addr)) {
-#if defined(IPPROTO_IP) && defined(IP_TOS)
 		if (setsockopt(fd, IPPROTO_IP, IP_TOS, (char*)&qos,
 			       sizeof(qos)))
 			msyslog(LOG_ERR,
 				"setsockopt IP_TOS (%02x) fails on address %s: %m",
 				qos, stoa(addr));
-#endif /* IPPROTO_IP && IP_TOS */
 		if (bcast)
 			socket_broadcast_enable(interf, fd, addr);
 	}
