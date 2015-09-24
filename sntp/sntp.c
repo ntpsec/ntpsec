@@ -8,5 +8,5 @@ main (
 	char **	argv
 	) 
 {
-	return sntp_main(argc, argv, NTPS_VERSION_STRING);
+	return sntp_main(argc, argv, Version);
 }
