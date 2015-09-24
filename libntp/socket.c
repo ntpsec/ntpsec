@@ -133,53 +133,11 @@ make_socket_nonblocking(
 	 * set non-blocking,
 	 */
 
-#ifdef USE_FIONBIO
-	/* in vxWorks we use FIONBIO, but the others are defined for old
-	 * systems, so all hell breaks loose if we leave them defined
-	 */
-#undef O_NONBLOCK
-#undef O_NONBLOCK
-#undef O_NDELAY
-#endif
-
-#if defined(O_NONBLOCK) /* POSIX */
 	if (fcntl(fd, F_SETFL, O_NONBLOCK) < 0) {
 		msyslog(LOG_ERR,
 			"fcntl(O_NONBLOCK) fails on fd #%d: %m", fd);
 		exit(1);
 	}
-#elif defined(O_NONBLOCK)
-	if (fcntl(fd, F_SETFL, O_NONBLOCK) < 0) {
-		msyslog(LOG_ERR, "fcntl(O_NONBLOCK) fails on fd #%d: %m",
-			fd);
-		exit(1);
-	}
-#elif defined(O_NDELAY) /* generally the same as O_NONBLOCK */
-	if (fcntl(fd, F_SETFL, O_NDELAY) < 0) {
-		msyslog(LOG_ERR, "fcntl(O_NDELAY) fails on fd #%d: %m",
-			fd);
-		exit(1);
-	}
-#elif defined(FIONBIO)
-	{
-		int on = 1;
-
-		if (ioctl(fd, FIONBIO, &on) < 0) {
-			msyslog(LOG_ERR,
-				"ioctl(FIONBIO) fails on fd #%d: %m",
-				fd);
-			exit(1);
-		}
-	}
-#elif defined(FIOSNBIO)
-	if (ioctl(fd, FIOSNBIO, &on) < 0) {
-		msyslog(LOG_ERR,
-			"ioctl(FIOSNBIO) fails on fd #%d: %m", fd);
-		exit(1);
-	}
-#else
-# include "Bletch: Need non-blocking I/O!"
-#endif
 }
 
 #if 0
