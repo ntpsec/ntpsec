@@ -326,7 +326,7 @@ int main() { return 0; }
 	# interface. Linux needs this, NetBSD does not, status on
 	# other platforms is unknown.  It is probably harmless to
 	# have it on everywhere.
-	ctx.define("OS_NEEDS_REUSEADDR_FOR_IFADDRBIND", 1)
+	ctx.define("NEED_REUSEADDR_FOR_IFADDRBIND", 1)
 
 	# Fine-grained capabilities allow NTP to set the time after
 	# dropping root.  Needs libcap to be linked.
