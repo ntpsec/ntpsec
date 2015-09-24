@@ -40,9 +40,7 @@
  * INC_MONLIST is the default allocation granularity in entries.
  * INIT_MONLIST is the default initial allocation in entries.
  */
-#ifdef MONMEMINC		/* old name */
-# define	INC_MONLIST	MONMEMINC
-#elif !defined(INC_MONLIST)
+#ifndef INC_MONLIST
 # define	INC_MONLIST	(4 * 1024 / sizeof(mon_entry))
 #endif
 #ifndef INIT_MONLIST
