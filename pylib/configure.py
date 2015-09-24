@@ -362,16 +362,6 @@ int main() { return 0; }
 	#
 	# ctx.define("HAVE_SIGNALED_IO", 1)
 
-	# These are required by the SHA2 code
-	ctx.define("LITTLE_ENDIAN", 1234)
-	ctx.define("BIG_ENDIAN", 4321)
-	if sys.byteorder == "little":
-		ctx.define("BYTE_ORDER", 1234)
-	elif sys.byteorder == "big":
-		ctx.define("BYTE_ORDER", 4321)
-	else:
-		print "Can't determine byte order!"
-
 	if ctx.options.enable_crypto:
 		from check_openssl import configure_ssl
 		configure_ssl(ctx)
