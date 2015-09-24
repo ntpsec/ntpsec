@@ -536,7 +536,7 @@ ntpqmain(
 			opt_peers = true;
 			break;
 		    case 'V':
-			printf("ntpd %s\n", NTPS_VERSION_STRING);
+			printf("ntpd %s\n", Version);
 			exit(0);
 		    case 'w':
 			opt_wide = true;
@@ -2606,10 +2606,9 @@ version(
 	)
 {
 
-	(void) fprintf(fp, "ntpq %s\n", NTPS_VERSION_STRING);
+	(void) fprintf(fp, "ntpq %s\n", Version);
 	return;
 }
-
 
 /*
  * raw - set raw mode output

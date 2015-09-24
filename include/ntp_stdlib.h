@@ -22,6 +22,8 @@
 #define NTP_PRINTF(fmt, args)
 #endif
 
+extern const char *Version;
+
 extern	int	mprintf(const char *, ...) NTP_PRINTF(1, 2);
 extern	int	mfprintf(FILE *, const char *, ...) NTP_PRINTF(2, 3);
 extern	int	mvfprintf(FILE *, const char *, va_list) NTP_PRINTF(2, 0);
