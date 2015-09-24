@@ -1615,7 +1615,7 @@ is_wildcard_addr(
 }
 
 
-#ifdef OS_NEEDS_REUSEADDR_FOR_IFADDRBIND
+#ifdef NEED_REUSEADDR_FOR_IFADDRBIND
 /*
  * enable/disable re-use of wildcard address socket
  */
@@ -1644,7 +1644,7 @@ set_wildcard_reuse(
 			    stoa(&any->sin)));
 	}
 }
-#endif /* OS_NEEDS_REUSEADDR_FOR_IFADDRBIND */
+#endif /* NEED_REUSEADDR_FOR_IFADDRBIND */
 
 
 static bool
@@ -2981,7 +2981,7 @@ open_socket(
 #endif
 	}
 
-#ifdef OS_NEEDS_REUSEADDR_FOR_IFADDRBIND
+#ifdef NEED_REUSEADDR_FOR_IFADDRBIND
 	/*
 	 * some OSes don't allow binding to more specific
 	 * addresses if a wildcard address already bound
@@ -2996,7 +2996,7 @@ open_socket(
 	 */
 	errval = bind(fd, &addr->sa, SOCKLEN(addr));
 
-#ifdef OS_NEEDS_REUSEADDR_FOR_IFADDRBIND
+#ifdef NEED_REUSEADDR_FOR_IFADDRBIND
 	if (!is_wildcard_addr(addr))
 		set_wildcard_reuse(AF(addr), 0);
 #endif
