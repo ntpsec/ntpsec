@@ -11,8 +11,9 @@
 
 #include <string.h>
 
-#if defined(HAVE_SYS_AUDIOIO_H) || defined(HAVE_SUN_AUDIOIO_H) || \
-    defined(HAVE_SYS_SOUNDCARD_H) || defined(HAVE_MACHINE_SOUNDCARD_H)
+#if defined(HAVE_SYS_AUDIOIO_H) || \
+    defined(HAVE_SYS_SOUNDCARD_H) || \
+    defined(HAVE_MACHINE_SOUNDCARD_H)
 
 #include "audio.h"
 #include "ntp_stdlib.h"
@@ -23,11 +24,6 @@
 #ifdef HAVE_SYS_AUDIOIO_H
 # include <sys/audioio.h>
 #endif /* HAVE_SYS_AUDIOIO_H */
-
-#ifdef HAVE_SUN_AUDIOIO_H
-# include <sys/ioccom.h>
-# include <sun/audioio.h>
-#endif /* HAVE_SUN_AUDIOIO_H */
 
 #include <sys/ioctl.h>
 
