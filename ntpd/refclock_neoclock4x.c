@@ -491,11 +491,7 @@ neoclock4x_receive(struct recvbuf *rbufp)
   neol_atoi_len(&pp->a_lastcode[NEOCLOCK4X_OFFSET_MINUTE], &pp->minute, 2);
   neol_atoi_len(&pp->a_lastcode[NEOCLOCK4X_OFFSET_SECOND], &pp->second, 2);
   neol_atoi_len(&pp->a_lastcode[NEOCLOCK4X_OFFSET_HSEC], &dsec, 2);
-#if defined(NTP_PRE_420)
-  pp->msec = dsec * 10; /* convert 1/100s from neoclock to real miliseconds */
-#else
   pp->nsec = dsec * 10 * NSEC_TO_MILLI; /* convert 1/100s from neoclock to nanoseconds */
-#endif
 
   memcpy(up->radiosignal, &pp->a_lastcode[NEOCLOCK4X_OFFSET_RADIOSIGNAL], 3);
   up->radiosignal[3] = 0;
@@ -555,11 +551,7 @@ neoclock4x_receive(struct recvbuf *rbufp)
 	      up->unit,
 	      pp->year, month, day,
 	      pp->hour, pp->minute, pp->second,
-#if defined(NTP_PRE_420)
-              pp->msec
-#else
               pp->nsec/NSEC_TO_MILLI
-#endif
               );
     }
 
@@ -569,11 +561,7 @@ neoclock4x_receive(struct recvbuf *rbufp)
   up->utc_hour   = pp->hour;
   up->utc_minute = pp->minute;
   up->utc_second = pp->second;
-#if defined(NTP_PRE_420)
-  up->utc_msec   = pp->msec;
-#else
   up->utc_msec   = pp->nsec/NSEC_TO_MILLI;
-#endif
 
   if(!refclock_process(pp))
     {
