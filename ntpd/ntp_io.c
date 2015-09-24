@@ -438,7 +438,7 @@ init_io(void)
 	/* update interface every 5 minutes as default */
 	interface_interval = 300;
 
-#ifdef WORK_PIPE
+#ifdef USE_WORK_PIPE
 	addremove_io_fd = &ntpd_addremove_io_fd;
 #endif
 

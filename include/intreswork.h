@@ -6,13 +6,13 @@
 
 #include "ntp_worker.h"
 
-#ifdef WORKER
+#ifdef USE_WORKER
 
 extern int blocking_getaddrinfo(blocking_child *,
 				blocking_pipe_header *);
 extern int blocking_getnameinfo(blocking_child *,
 				blocking_pipe_header *);
 
-#endif	/* WORKER */
+#endif	/* USE_WORKER */
 
 #endif	/* GUARD_INTRESWORK_H */

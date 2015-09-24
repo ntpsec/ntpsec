@@ -7,8 +7,8 @@
 
 #include "ntp_workimpl.h"
 
-#ifdef WORKER
-# if defined(WORK_THREAD) && defined(WORK_PIPE)
+#ifdef USE_WORKER
+# if defined(USE_WORK_THREAD) && defined(USE_WORK_PIPE)
 #  ifdef HAVE_SEMAPHORE_H
 #   include <semaphore.h>
 #  endif
@@ -40,8 +40,8 @@ typedef struct blocking_pipe_header_tag {
 	void *			context;
 } blocking_pipe_header;
 
-# ifdef WORK_THREAD
-#  ifdef WORK_PIPE
+# ifdef USE_WORK_THREAD
+#  ifdef USE_WORK_PIPE
 typedef pthread_t *	thr_ref;
 typedef sem_t *		sem_ref;
 #  else
@@ -50,7 +50,7 @@ typedef HANDLE		sem_ref;
 #  endif
 # endif
 
-#ifdef WORK_THREAD
+#ifdef USE_WORK_THREAD
 typedef struct blocking_child_tag {
 /*
  * blocking workitems and blocking_responses are dynamically-sized
@@ -74,7 +74,7 @@ typedef struct blocking_child_tag {
 	/* sem_ref		child_is_blocking; */
 	sem_ref			blocking_req_ready;
 	sem_ref			wake_scheduled_sleep;
-#ifdef WORK_PIPE
+#ifdef USE_WORK_PIPE
 	int			resp_read_pipe;	/* parent */
 	int			resp_write_pipe;/* child */
 	int			ispipe;
@@ -84,7 +84,7 @@ typedef struct blocking_child_tag {
 #endif
 } blocking_child;
 
-#endif	/* WORK_THREAD */
+#endif	/* USE_WORK_THREAD */
 
 extern	blocking_child **	blocking_children;
 extern	size_t			blocking_children_alloc;
@@ -122,7 +122,7 @@ extern	void	close_all_except(int);
 extern	void	kill_asyncio	(int);
 #endif
 
-# ifdef WORK_PIPE
+# ifdef USE_WORK_PIPE
 typedef	void	(*addremove_io_fd_func)(int, int, int);
 extern	addremove_io_fd_func		addremove_io_fd;
 # else
@@ -131,6 +131,6 @@ typedef	void	(*addremove_io_semaphore_func)(sem_ref, int);
 extern	addremove_io_semaphore_func	addremove_io_semaphore;
 # endif
 
-#endif	/* WORKER */
+#endif	/* USE_WORKER */
 
-#endif	/* GUARD_!NTP_WORKER_H */
+#endif	/* GUARD_NTP_WORKER_H */

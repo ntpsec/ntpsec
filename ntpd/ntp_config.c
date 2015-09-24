@@ -323,7 +323,7 @@ static uint8_t get_correct_host_mode(int token);
 static int peerflag_bits(peer_node *);
 #endif	/* !SIM */
 
-#ifdef WORKER
+#ifdef USE_WORKER
 static void peer_name_resolved(int, int, void *, const char *, const char *,
 			const struct addrinfo *,
 			const struct addrinfo *);
@@ -3215,11 +3215,11 @@ config_trap(
 			rc = getnetnum(curr_trap->addr->address,
 				       &peeraddr, 1, t_UNK);
 			if (1 != rc) {
-#ifndef WORKER
+#ifndef USE_WORKER
 				msyslog(LOG_ERR,
 					"trap: unable to use IP address %s.",
 					curr_trap->addr->address);
-#else	/* WORKER follows */
+#else	/* USE_WORKER follows */
 				/*
 				 * save context and hand it off
 				 * for name resolution.
@@ -3249,7 +3249,7 @@ config_trap(
 						"config_trap: getaddrinfo_sometime(%s,%s): %m",
 						curr_trap->addr->address,
 						port_text);
-#endif	/* WORKER */
+#endif	/* USE_WORKER */
 				continue;
 			}
 			/* port is at same location for v4 and v6 */
@@ -3276,7 +3276,7 @@ config_trap(
  *
  * Callback invoked when config_trap()'s DNS lookup completes.
  */
-# ifdef WORKER
+# ifdef USE_WORKER
 static void
 trap_name_resolved(
 	int			rescode,
@@ -3316,7 +3316,7 @@ trap_name_resolved(
 			latoa(localaddr), stoa(&peeraddr));
 	free(pstp);
 }
-# endif	/* WORKER */
+# endif	/* USE_WORKER */
 #endif	/* !SIM */
 
 
@@ -3733,7 +3733,7 @@ config_peers(
 					NULL);
 		} else {
 			/* we have a hostname to resolve */
-# ifdef WORKER
+# ifdef USE_WORKER
 			ctx = emalloc_zero(sizeof(*ctx));
 			ctx->family = AF_UNSPEC;
 			ctx->host_mode = T_Server;
@@ -3751,7 +3751,7 @@ config_peers(
 					     INITIAL_DNS_RETRY,
 					     &peer_name_resolved,
 					     (void *)ctx);
-# else	/* !WORKER follows */
+# else	/* !USE_WORKER follows */
 			msyslog(LOG_ERR,
 				"hostname %s can not be used, please use IP address instead.",
 				curr_peer->addr->address);
@@ -3806,7 +3806,7 @@ config_peers(
 					curr_peer->group);
 		} else {
 			/* we have a hostname to resolve */
-# ifdef WORKER
+# ifdef USE_WORKER
 			ctx = emalloc_zero(sizeof(*ctx));
 			ctx->family = curr_peer->addr->type;
 			ctx->host_mode = curr_peer->host_mode;
@@ -3828,7 +3828,7 @@ config_peers(
 					     "ntp", &hints,
 					     INITIAL_DNS_RETRY,
 					     &peer_name_resolved, ctx);
-# else	/* !WORKER follows */
+# else	/* !USE_WORKER follows */
 			msyslog(LOG_ERR,
 				"hostname %s can not be used, please use IP address instead.",
 				curr_peer->addr->address);
@@ -3843,7 +3843,7 @@ config_peers(
  *
  * Callback invoked when config_peers()'s DNS lookup completes.
  */
-#ifdef WORKER
+#ifdef USE_WORKER
 static void
 peer_name_resolved(
 	int			rescode,
@@ -3914,7 +3914,7 @@ peer_name_resolved(
 	}
 	free(ctx);
 }
-#endif	/* WORKER */
+#endif	/* USE_WORKER */
 
 
 #ifdef FREE_CFG_T
@@ -4004,7 +4004,7 @@ config_unpeers(
 			unpeer(p);
 		}
 		/* Resolve the hostname to address(es). */
-# ifdef WORKER
+# ifdef USE_WORKER
 		ZERO(hints);
 		hints.ai_family = curr_unpeer->addr->type;
 		hints.ai_socktype = SOCK_DGRAM;
@@ -4012,7 +4012,7 @@ config_unpeers(
 		getaddrinfo_sometime(name, "ntp", &hints,
 				     INITIAL_DNS_RETRY,
 				     &unpeer_name_resolved, NULL);
-# else	/* !WORKER follows */
+# else	/* !USE_WORKER follows */
 		msyslog(LOG_ERR,
 			"hostname %s can not be used, please use IP address instead.",
 			name);
@@ -4027,7 +4027,7 @@ config_unpeers(
  *
  * Callback invoked when config_unpeers()'s DNS lookup completes.
  */
-#ifdef WORKER
+#ifdef USE_WORKER
 static void
 unpeer_name_resolved(
 	int			rescode,
@@ -4076,7 +4076,7 @@ unpeer_name_resolved(
 		}
 	}
 }
-#endif	/* WORKER */
+#endif	/* USE_WORKER */
 
 
 #ifdef FREE_CFG_T

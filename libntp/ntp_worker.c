@@ -4,7 +4,7 @@
 #include <config.h>
 #include "ntp_workimpl.h"
 
-#ifdef WORKER
+#ifdef USE_WORKER
 
 #include <stdio.h>
 #include <ctype.h>
@@ -187,7 +187,7 @@ queue_blocking_request(
 	c = blocking_children[child_slot];
 	if (NULL == c) {
 		c = emalloc_zero(sizeof(*c));
-#ifdef WORK_PIPE
+#ifdef USE_WORK_PIPE
 		c->resp_read_pipe = -1;
 		c->resp_write_pipe = -1;
 #endif
@@ -230,7 +230,7 @@ process_blocking_resp(
 	 * processing a response, so always consume all available
 	 * responses before returning to test the event again.
 	 */
-#ifdef WORK_THREAD
+#ifdef USE_WORK_THREAD
 	do {
 #endif
 		resp = receive_blocking_resp_internal(c);
@@ -244,7 +244,7 @@ process_blocking_resp(
 					   data);
 			free(resp);
 		}
-#ifdef WORK_THREAD
+#ifdef USE_WORK_THREAD
 	} while (NULL != resp);
 #endif
 	if (!worker_per_query && 0 == intres_req_pending)
@@ -327,6 +327,6 @@ worker_idle_timer_fired(void)
 }
 
 
-#else	/* !WORKER follows */
+#else	/* !USE_WORKER follows */
 int ntp_worker_nonempty_compilation_unit;
 #endif
