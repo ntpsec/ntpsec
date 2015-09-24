@@ -23,6 +23,7 @@
 #endif
 
 extern const char *Version;
+extern const char *VVersion;
 
 extern	int	mprintf(const char *, ...) NTP_PRINTF(1, 2);
 extern	int	mfprintf(FILE *, const char *, ...) NTP_PRINTF(2, 3);
