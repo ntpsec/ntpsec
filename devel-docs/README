@@ -7,7 +7,7 @@ CommitLog-4.1.0::
 	Changes from 1997 to 2001.
 
 ChangeLog::
-	Changes from 2001 to mid-2015.  Mortrrecently, consult the version-
+	Changes from 2001 to mid-2015.  More recently, consult the version-
 	control comment log.
 
 hacking.txt::
@@ -29,5 +29,8 @@ HISTORIC-VERSIONS::
 
 y2k.txt::
 	Notes on Y2K conformance.
+
+release.nix::
+	NixOS build recipe.
 
 //end

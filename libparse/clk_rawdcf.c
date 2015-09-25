@@ -250,6 +250,8 @@ convert_rawdcf(
 	    pcheck(buffer, DCF_P_P2, dcfprm->zerobits) &&
 	    pcheck(buffer, DCF_P_P3, dcfprm->zerobits))
 	{
+#define TIMES10(_X_)	(((_X_) << 3) + ((_X_) << 1))
+
 		/*
 		 * buffer OK
 		 */
@@ -269,6 +271,7 @@ convert_rawdcf(
 		clock_time->month  = TIMES10(clock_time->month) + ext_bf(buffer, DCF_MO, dcfprm->zerobits);
 		clock_time->year   = ext_bf(buffer, DCF_Y10, dcfprm->zerobits);
 		clock_time->year   = TIMES10(clock_time->year) + ext_bf(buffer, DCF_Y1, dcfprm->zerobits);
+#undef TIMES10
 
 		switch (ext_bf(buffer, DCF_Z, dcfprm->zerobits))
 		{
