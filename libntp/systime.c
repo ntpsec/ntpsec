@@ -496,102 +496,57 @@ step_systime(
 	 * and appends line="{", name="date", host="", time for the NEW
 	 * to _PATH_WTMP .
 	 *
-	 * Some OSes have utmp, some have utmpx.
+	 * Some OSes have utmp, some have utmpx. POSIX.1-2001 standardizes
+	 * utmpx, so we'll support that.
 	 */
 
 	/*
 	 * Write old and new time entries in utmp and wtmp if step
 	 * adjustment is greater than one second.
 	 *
-	 * This might become even Uglier...
+	 * This might become even uglier...
 	 */
 	tvdiff = abs_tval(sub_tval(timetv, tvlast));
 	if (tvdiff.tv_sec > 0) {
+#define OTIME_MSG	"Old NTP time"
+#define NTIME_MSG	"New NTP time"
 		struct utmpx utx;
 
 		ZERO(utx);
 
-		/* UTMP */
-
-#ifdef UPDATE_UTMP
-# ifdef HAVE_PUTUTLINE
-#  ifndef _PATH_UTMP
-#   define _PATH_UTMP UTMP_FILE
-#  endif
-		utmpname(_PATH_UTMP);
-		ut.ut_type = OLD_TIME;
-		strlcpy(ut.ut_line, OTIME_MSG, sizeof(ut.ut_line));
-		ut.ut_time = tvlast.tv_sec;
-		setutent();
-		pututline(&ut);
-		ut.ut_type = NEW_TIME;
-		strlcpy(ut.ut_line, NTIME_MSG, sizeof(ut.ut_line));
-		ut.ut_time = timetv.tv_sec;
-		setutent();
-		pututline(&ut);
-		endutent();
-# else /* not HAVE_PUTUTLINE */
-# endif /* not HAVE_PUTUTLINE */
-#endif /* UPDATE_UTMP */
-
-		/* UTMPX */
-
-#ifdef UPDATE_UTMPX
+		/* UTMPX - this is POSIX-conformant */
 		utx.ut_type = OLD_TIME;
 		strlcpy(utx.ut_line, OTIME_MSG, sizeof(utx.ut_line));
-		utx.ut_tv = tvlast;
+		utx.ut_tv.tv_sec = tvlast.tv_sec;
+		utx.ut_tv.tv_usec = tvlast.tv_usec;
 		setutxent();
 		pututxline(&utx);
 		utx.ut_type = NEW_TIME;
 		strlcpy(utx.ut_line, NTIME_MSG, sizeof(utx.ut_line));
-		utx.ut_tv = timetv;
+		utx.ut_tv.tv_sec = timetv.tv_sec;
+		utx.ut_tv.tv_usec = timetv.tv_usec;
 		setutxent();
 		pututxline(&utx);
 		endutxent();
-#endif /* UPDATE_UTMPX */
 
-		/* WTMP */
-
-#ifdef UPDATE_WTMP
-# ifdef HAVE_PUTUTLINE
-#  ifndef _PATH_WTMP
-#   define _PATH_WTMP WTMP_FILE
-#  endif
-		utmpname(_PATH_WTMP);
-		ut.ut_type = OLD_TIME;
-		strlcpy(ut.ut_line, OTIME_MSG, sizeof(ut.ut_line));
-		ut.ut_time = tvlast.tv_sec;
-		setutent();
-		pututline(&ut);
-		ut.ut_type = NEW_TIME;
-		strlcpy(ut.ut_line, NTIME_MSG, sizeof(ut.ut_line));
-		ut.ut_time = timetv.tv_sec;
-		setutent();
-		pututline(&ut);
-		endutent();
-# else /* not HAVE_PUTUTLINE */
-# endif /* not HAVE_PUTUTLINE */
-#endif /* UPDATE_WTMP */
-
+		/* Not POSIX - gllibc extension */
+#ifdef HAVE_UPDWTMPX
+#define WTMPX_FILE "/var/log/wtmp"
 		/* WTMPX */
-
-#ifdef UPDATE_WTMPX
 		utx.ut_type = OLD_TIME;
-		utx.ut_tv = tvlast;
+		utx.ut_tv.sec = tvlast.sec;
+		utx.ut_tv.msec = tvlast.msec;
 		strlcpy(utx.ut_line, OTIME_MSG, sizeof(utx.ut_line));
-#  ifdef HAVE_UPDWTMPX
 		updwtmpx(WTMPX_FILE, &utx);
-#  else /* not HAVE_UPDWTMPX */
-#  endif /* not HAVE_UPDWTMPX */
 		utx.ut_type = NEW_TIME;
-		utx.ut_tv = timetv;
+		utx.ut_tv.sec = timetv.sec;
+		utx.ut_tv.msec = timetv.msec;
 		strlcpy(utx.ut_line, NTIME_MSG, sizeof(utx.ut_line));
-#  ifdef HAVE_UPDWTMPX
 		updwtmpx(WTMPX_FILE, &utx);
-#  else /* not HAVE_UPDWTMPX */
-#  endif /* not HAVE_UPDWTMPX */
-#endif /* UPDATE_WTMPX */
-
+#undef WTMPX_FILE
+#endif /* HAVE_UPDWTMPX */
+#undef OTIME_MSG
+#undef NTIME_MSG
 	}
 	return true;
 }

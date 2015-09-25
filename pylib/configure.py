@@ -168,6 +168,7 @@ def cmd_configure(ctx):
 		('strlcat', "string.h"),
 		('sysconf', "unistd.h"),
 		('timegm', "time.h"),
+		('updwtmpx', "utmpx.h"),	# glibc
 		)
 	for (n, h) in functions:
 		ctx.check_cc(function_name=n, header_name=h, mandatory=False)
