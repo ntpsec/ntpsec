@@ -1,8 +1,8 @@
-= The ntp distribution base directory =
+= The NTPsec distribution base directory =
 
-This directory and its subdirectories contain the Network Time Protocol
-Version 4 (NTP) distribution for Unix systems.  This release may still
-work on VxWorks, too.
+This directory and its subdirectories contain NTPSec, a
+security-hardened implementation of Network Time Protocol Version 4
+(NTP) for Unix systems.
 
 The contents of the base directory are given in this file. The contents of
 subdirectories are usually given in the README files in each subdirectory.
