@@ -17,8 +17,8 @@
 
 /* From BIND 9 lib/isc/include/isc/: syslog.h,v 1.4 2002/08/01 03:43:31 mayer */
 
-#ifndef _SYSLOG_H
-#define _SYSLOG_H
+#ifndef GUARD_SYSLOG_H
+#define GUARD_SYSLOG_H
 
 #include <stdio.h>
 
