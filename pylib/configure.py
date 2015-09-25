@@ -116,6 +116,8 @@ def cmd_configure(ctx):
 	for header, sizeof in sorted(sizeofs):
 		ctx.check_sizeof(header, sizeof)
 
+	# The protocol major number
+	ctx.define("NTP_API",	4)
 
 	ctx.define("NTP_KEYSDIR", "%s/etc" % ctx.env.PREFIX)
 	ctx.define("GETSOCKNAME_SOCKLEN_TYPE", "socklen_t", quote=False)
@@ -124,8 +126,28 @@ def cmd_configure(ctx):
 	ctx.define("POSIX_SHELL", "/bin/sh")
 
 	ctx.define("OPENSSL_VERSION_TEXT", "#XXX: Fixme")
+
+	# Checking for multicast capability:
+	#
+	#    AC_COMPILE_IFELSE(
+	#	[AC_LANG_PROGRAM(
+	#	    [[
+	#		#ifdef HAVE_NETINET_IN_H
+	#		# include <netinet/in.h>
+	#		#endif
+	#	    ]],
+	#	    [[
+	#		struct ip_mreq ipmr;
+	#		ipmr.imr_interface.s_addr = 0;
+	#	    ]]
+	#	)],
+	#	[ntp_cv_multicast=yes],
+	#	[]
+	#   )
 	ctx.define("MCAST", 1) # XXX: check for mcast support
+
 	ctx.define("TYPEOF_IP_MULTICAST_LOOP", "u_char", quote=False) #XXX: check for mcast type
+
 	ctx.define("OPEN_BCAST_SOCKET", 1)
 
 	# Optional functions.
@@ -134,6 +156,7 @@ def cmd_configure(ctx):
 		('arc4random', "stdlib.h"),
 		('arc4random_buf', "stdlib.h"),
 		('getclock', "sys/timers.h"),
+		('getdtablesize', "unistd.h"),	# Not POSIX; SVr4, 4.2BSD
 		('getpassphrase', "stdlib.h"),	# Sun systems
 		('res_init', "resolv.h"),
 		("rtprio", "sys/rtprio.h"),	# Sun/BSD
