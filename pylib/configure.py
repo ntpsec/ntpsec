@@ -155,11 +155,14 @@ def cmd_configure(ctx):
 		('adjtimex', "sys/timex.h"),
 		('arc4random', "stdlib.h"),
 		('arc4random_buf', "stdlib.h"),
+		('clock_gettime', "time.h"),
+		('clock_settime', "time.h"),
 		('getclock', "sys/timers.h"),
 		('getdtablesize', "unistd.h"),	# Not POSIX; SVr4, 4.2BSD
 		('getpassphrase', "stdlib.h"),	# Sun systems
 		('res_init', "resolv.h"),
 		("rtprio", "sys/rtprio.h"),	# Sun/BSD
+		('settimeofday', "sys/time.h"),	# BSD - remove as nonstandard?
 		('strlcpy', "string.h"),
 		('strlcat', "string.h"),
 		('sysconf', "unistd.h"),
