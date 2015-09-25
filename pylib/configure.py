@@ -160,6 +160,7 @@ def cmd_configure(ctx):
 		('getclock', "sys/timers.h"),
 		('getdtablesize', "unistd.h"),	# Not POSIX; SVr4, 4.2BSD
 		('getpassphrase', "stdlib.h"),	# Sun systems
+		('plock', "sys/lock.h"),	# OSF/1, SVID2, SVID3, XPG2
 		('res_init', "resolv.h"),
 		("rtprio", "sys/rtprio.h"),	# Sun/BSD
 		('settimeofday', "sys/time.h"),	# BSD - remove as nonstandard?
@@ -196,6 +197,7 @@ def cmd_configure(ctx):
 		"linux/rtnetlink.h",
 		"linux/serial.h",
 		"machine/soundcard.h",
+		"netinet/in_systm.h",
 		"md5.h",
 		"net/if6.h",
 		"net/if_var.h",
