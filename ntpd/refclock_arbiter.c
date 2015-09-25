@@ -99,14 +99,8 @@ extern int async_write(int, const void *, unsigned int);
 #define MAXSTA		40	/* max length of status string */
 #define MAXPOS		80	/* max length of position string */
 
-#ifdef PRE_NTP420
-#define MODE ttlmax
-#else
-#define MODE ttl
-#endif
-
-#define COMMAND_HALT_BCAST ( (peer->MODE % 2) ? "O0" : "B0" )
-#define COMMAND_START_BCAST ( (peer->MODE % 2) ? "O5" : "B5" )
+#define COMMAND_HALT_BCAST ( (peer->ttl % 2) ? "O0" : "B0" )
+#define COMMAND_START_BCAST ( (peer->ttl % 2) ? "O5" : "B5" )
 
 /*
  * ARB unit control structure
@@ -188,15 +182,15 @@ arb_start(
 	pp->clockdesc = DESCRIPTION;
 	memcpy((char *)&pp->refid, REFID, REFIDLEN);
 	peer->sstclktype = CTL_SST_TS_UHF;
-	if (peer->MODE > 1) {
-		msyslog(LOG_NOTICE, "ARBITER: Invalid mode %d", peer->MODE);
+	if (peer->ttl > 1) {
+		msyslog(LOG_NOTICE, "ARBITER: Invalid mode %d", peer->ttl);
 		close(fd);
 		pp->io.fd = -1;
 		free(up);
 		return false;
 	}
 #ifdef DEBUG
-	if(debug) { printf("arbiter: mode = %d.\n", peer->MODE); }
+	if(debug) { printf("arbiter: mode = %d.\n", peer->ttl); }
 #endif
 	IGNORE(write(pp->io.fd, COMMAND_HALT_BCAST, 2));
 	return true;
