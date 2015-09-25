@@ -59,10 +59,6 @@
 	 ((tvp)->tv_sec == (uvp)->tv_sec && (tvp)->tv_usec cmp (uvp)->tv_usec))
 #endif
 
-#ifndef TIMES10
-#define TIMES10(_X_)	(((_X_) << 3) + ((_X_) << 1))
-#endif
-
 /*
  * some constants useful for GPS time conversion
  */
