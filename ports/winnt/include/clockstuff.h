@@ -1,5 +1,5 @@
-#ifndef _CLOCKSTUFF_H
-#define _CLOCKSTUFF_H
+#ifndef GUARD_CLOCKSTUFF_H
+#define GUARD_CLOCKSTUFF_H
 
 #include <time.h>
 #include <sys\timeb.h>

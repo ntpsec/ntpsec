@@ -14,10 +14,6 @@
 
 static const char arc_version[] = { "V1.3 2003/02/21" };
 
-/* define PRE_NTP420 for compatibility to previous versions of NTP (at least
-   to 4.1.0 */
-#undef PRE_NTP420
-
 #ifndef ARCRON_NOT_KEEN
 #define ARCRON_KEEN 1 /* Be keen, and trusting of the clock, if defined. */
 #endif
@@ -379,11 +375,6 @@ Also note h<cr> command which starts a resync to MSF signal.
 #define REFID_WWVB	"WWVB"		/* Reference ID. */
 #define DESCRIPTION	"ARCRON MSF/DCF/WWVB Receiver"
 
-#ifdef PRE_NTP420
-#define MODE ttlmax
-#else
-#define MODE ttl
-#endif
 
 #define LENARC		16		/* Format `o' timecode length. */
 
@@ -700,14 +691,14 @@ arc_start(
 	peer->precision = PRECISION;
 	peer->stratum = 2;              /* Default to stratum 2 not 0. */
 	pp->clockdesc = DESCRIPTION;
-	if (peer->MODE > 3) {
-		msyslog(LOG_NOTICE, "ARCRON: Invalid mode %d", peer->MODE);
+	if (peer->ttl > 3) {
+		msyslog(LOG_NOTICE, "ARCRON: Invalid mode %d", peer->ttl);
 		return false;
 	}
 #ifdef DEBUG
-	if(debug) { printf("arc: mode = %d.\n", peer->MODE); }
+	if(debug) { printf("arc: mode = %d.\n", peer->ttl); }
 #endif
-	switch (peer->MODE) {
+	switch (peer->ttl) {
 	    case 1:
 		memcpy((char *)&pp->refid, REFID_MSF, REFIDLEN);
 		break;
@@ -1134,14 +1125,9 @@ arc_receive(
 				       '6' : ('0' + up->quality));
 	pp->a_lastcode[pp->lencode + 1] = '\0'; /* Terminate for printf(). */
 
-#ifdef PRE_NTP420
-	/* We don't use the micro-/milli- second part... */
-	pp->usec = 0;
-	pp->msec = 0;
-#else
 	/* We don't use the nano-second part... */
 	pp->nsec = 0;
-#endif	
+
 	/* Validate format and numbers. */
 	if (pp->a_lastcode[0] != 'o'
 		|| !get2(pp->a_lastcode + 1, &pp->hour)
@@ -1183,7 +1169,7 @@ arc_receive(
 	}
 
 
-	if(peer->MODE == 0) { /* compatiblity to original version */
+	if(peer->ttl == 0) { /* compatiblity to original version */
 		int bst = flags;
 		/* Check that BST/UTC bits are the complement of one another. */
 		if(!(bst & 2) == !(bst & 4)) {
@@ -1239,7 +1225,7 @@ arc_receive(
 	}
 	up->status = status;
 
-	if (peer->MODE == 0) { /* compatiblity to original version */
+	if (peer->ttl == 0) { /* compatiblity to original version */
 		int bst = flags;
 
 		pp->day += moff[month - 1];
@@ -1263,7 +1249,7 @@ arc_receive(
 		}
 	}
 
-	if(peer->MODE > 0) {
+	if(peer->ttl > 0) {
 		if(pp->sloppyclockflag & CLK_FLAG1) {
 			struct tm  local;
 			struct tm *gmtp;
@@ -1283,7 +1269,7 @@ arc_receive(
 			local.tm_hour  = pp->hour;
 			local.tm_min   = pp->minute;
 			local.tm_sec   = pp->second;
-			switch (peer->MODE) {
+			switch (peer->ttl) {
 			    case 1:
 				local.tm_isdst = (flags & 2);
 				break;
@@ -1328,7 +1314,7 @@ arc_receive(
 				break;
 			    default:
 				msyslog(LOG_NOTICE, "ARCRON: Invalid mode %d",
-					peer->MODE);
+					peer->ttl);
 				return;
 				break;
 			}
@@ -1363,7 +1349,7 @@ arc_receive(
 		}
 	}
 
-	if (peer->MODE == 0) { /* compatiblity to original version */
+	if (peer->ttl == 0) { /* compatiblity to original version */
 				/* If clock signal quality is 
 				 * unknown, revert to default PRECISION...*/
 		if(up->quality == QUALITY_UNKNOWN) { 

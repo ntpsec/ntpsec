@@ -14,15 +14,15 @@
 #include <ctype.h>
 #include <math.h>
 
-#ifdef HAVE_AUDIO
+#ifdef ENABLE_CHU_AUDIO
 #include "audio.h"
-#endif /* HAVE_AUDIO */
+#endif /* ENABLE_CHU_AUDIO */
 
-#define ICOM 	1		/* undefine to suppress ICOM code */
+#define USE_ICOM_RADIO 	1	/* undefine to suppress ICOM code */
 
-#ifdef ICOM
+#ifdef USE_ICOM_RADIO
 #include "icom.h"
-#endif /* ICOM */
+#endif /* USE_ICOM_RADIO */
 /*
  * Audio CHU demodulator/decoder
  *
@@ -180,12 +180,12 @@
  * set to a default value.
  *
  * The audio codec code is normally compiled in the driver if the
- * architecture supports it (HAVE_AUDIO defined), but is used only if
+ * architecture supports it (ENABLE_CHU_AUDIO defined), but is used only if
  * the link /dev/chu_audio is defined and valid. The serial port code is
  * always compiled in the driver, but is used only if the autdio codec
  * is not available and the link /dev/chu%d is defined and valid.
  *
- * The ICOM code is normally compiled in the driver if selected (ICOM
+ * The ICOM code is normally compiled in the driver if selected (USE_ICOM_RADIO
  * defined), but is used only if the link /dev/icom%d is defined and
  * valid and the mode keyword on the server configuration command
  * specifies a nonzero mode (ICOM ID select code). The C-IV speed is
@@ -206,14 +206,14 @@
 #define	REFID		"CHU"	/* reference ID */
 #define	DEVICE		"/dev/chu%d" /* device name and unit */
 #define	SPEED232	B300	/* UART speed (300 baud) */
-#ifdef ICOM
+#ifdef USE_ICOM_RADIO
 #define TUNE		.001	/* offset for narrow filter (MHz) */
 #define DWELL		5	/* minutes in a dwell */
 #define NCHAN		3	/* number of channels */
 #define ISTAGE		3	/* number of integrator stages */
-#endif /* ICOM */
+#endif /* USE_ICOM_RADIO */
 
-#ifdef HAVE_AUDIO
+#ifdef ENABLE_CHU_AUDIO
 /*
  * Audio demodulator definitions
  */
@@ -232,7 +232,7 @@
 #define	AUDIO_BUFSIZ	240	/* audio buffer size (30 ms) */
 #else
 #define	DESCRIPTION	"CHU Modem Receiver" /* WRU */
-#endif /* HAVE_AUDIO */
+#endif /* ENABLE_CHU_AUDIO */
 
 /*
  * Decoder definitions
@@ -291,7 +291,7 @@
 #define DECERR		0x04	/* data decoding error */
 #define TSPERR		0x08	/* insufficient data */
 
-#ifdef HAVE_AUDIO
+#ifdef ENABLE_CHU_AUDIO
 /*
  * Maximum-likelihood UART structure. There are eight of these
  * corresponding to the number of phases.
@@ -303,9 +303,9 @@ struct surv {
 	double	dist;		/* sample distance */
 	int	uart;		/* decoded character */
 };
-#endif /* HAVE_AUDIO */
+#endif /* ENABLE_CHU_AUDIO */
 
-#ifdef ICOM
+#ifdef USE_ICOM_RADIO
 /*
  * CHU station structure. There are three of these corresponding to the
  * three frequencies.
@@ -316,7 +316,7 @@ struct xmtr {
 	int	iptr;		/* integrator pointer */
 	int	probe;		/* dwells since last probe */
 };
-#endif /* ICOM */
+#endif /* USE_ICOM_RADIO */
 
 /*
  * CHU unit control structure
@@ -332,12 +332,12 @@ struct chuunit {
 	int	errflg;		/* error flags */
 	int	status;		/* status bits */
 	char	ident[5];	/* station ID and channel */
-#ifdef ICOM
+#ifdef USE_ICOM_RADIO
 	int	fd_icom;	/* ICOM file descriptor */
 	int	chan;		/* radio channel */
 	int	dwell;		/* dwell cycle */
 	struct xmtr xmtr[NCHAN]; /* station metric */
-#endif /* ICOM */
+#endif /* USE_ICOM_RADIO */
 
 	/*
 	 * Character burst variables
@@ -360,7 +360,7 @@ struct chuunit {
 	int	tai;		/* TAI - UTC correction */
 	int	dst;		/* Canadian DST code */
 
-#ifdef HAVE_AUDIO
+#ifdef ENABLE_CHU_AUDIO
 	/*
 	 * Audio codec variables
 	 */
@@ -389,7 +389,7 @@ struct chuunit {
 	int	decptr;		/* decode pointer */
 	int	decpha;		/* decode phase */
 	int	dbrk;		/* holdoff counter */
-#endif /* HAVE_AUDIO */
+#endif /* ENABLE_CHU_AUDIO */
 };
 
 /*
@@ -411,15 +411,15 @@ static	void	chu_a		(struct peer *, int);
 static	void	chu_b		(struct peer *, int);
 static	int	chu_dist	(int, int);
 static	double	chu_major	(struct peer *);
-#ifdef HAVE_AUDIO
+#ifdef ENABLE_CHU_AUDIO
 static	void	chu_uart	(struct surv *, double);
 static	void	chu_rf		(struct peer *, double);
 static	void	chu_gain	(struct peer *);
 static	void	chu_audio_receive (struct recvbuf *rbufp);
-#endif /* HAVE_AUDIO */
-#ifdef ICOM
+#endif /* ENABLE_CHU_AUDIO */
+#ifdef USE_ICOM_RADIO
 static	int	chu_newchan	(struct peer *, double);
-#endif /* ICOM */
+#endif /* USE_ICOM_RADIO */
 static	void	chu_serial_receive (struct recvbuf *rbufp);
 
 /*
@@ -427,14 +427,14 @@ static	void	chu_serial_receive (struct recvbuf *rbufp);
  */
 static char hexchar[] = "0123456789abcdef_*=";
 
-#ifdef ICOM
+#ifdef USE_ICOM_RADIO
 /*
  * Note the tuned frequencies are 1 kHz higher than the carrier. CHU
  * transmits on USB with carrier so we can use AM and the narrow SSB
  * filter.
  */
 static double qsy[NCHAN] = {3.330, 7.850, 14.670}; /* freq (MHz) */
-#endif /* ICOM */
+#endif /* USE_ICOM_RADIO */
 
 /*
  * Transfer vector
@@ -463,10 +463,10 @@ chu_start(
 	struct refclockproc *pp;
 	char device[20];	/* device name */
 	int	fd;		/* file descriptor */
-#ifdef ICOM
+#ifdef USE_ICOM_RADIO
 	int	temp;
-#endif /* ICOM */
-#ifdef HAVE_AUDIO
+#endif /* USE_ICOM_RADIO */
+#ifdef ENABLE_CHU_AUDIO
 	int	fd_audio;	/* audio port file descriptor */
 	int	i;		/* index */
 	double	step;		/* codec adjustment */
@@ -490,14 +490,14 @@ chu_start(
 		snprintf(device, sizeof(device), DEVICE, unit);
 		fd = refclock_open(device, SPEED232, LDISC_RAW);
 	}
-#else /* HAVE_AUDIO */
+#else /* ENABLE_CHU_AUDIO */
 
 	/*
 	 * Open serial port in raw mode.
 	 */
 	snprintf(device, sizeof(device), DEVICE, unit);
 	fd = refclock_open(device, SPEED232, LDISC_RAW);
-#endif /* HAVE_AUDIO */
+#endif /* ENABLE_CHU_AUDIO */
 
 	if (fd < 0)
 		return false;
@@ -529,7 +529,7 @@ chu_start(
 	memcpy(&pp->refid, up->ident, REFIDLEN);
 	peer->sstclktype = CTL_SST_TS_HF;
 	DTOLFP(CHAR, &up->charstamp);
-#ifdef HAVE_AUDIO
+#ifdef ENABLE_CHU_AUDIO
 
 	/*
 	 * The companded samples are encoded sign-magnitude. The table
@@ -549,8 +549,8 @@ chu_start(
                 	step *= 2.;
 	}
 	DTOLFP(1. / SECOND, &up->tick);
-#endif /* HAVE_AUDIO */
-#ifdef ICOM
+#endif /* ENABLE_CHU_AUDIO */
+#ifdef USE_ICOM_RADIO
 	temp = 0;
 #ifdef DEBUG
 	if (debug > 1)
@@ -573,7 +573,7 @@ chu_start(
 			msyslog(LOG_NOTICE, "icom: autotune enabled");
 		}
 	}
-#endif /* ICOM */
+#endif /* USE_ICOM_RADIO */
 	return true;
 }
 
@@ -596,10 +596,10 @@ chu_shutdown(
 		return;
 
 	io_closeclock(&pp->io);
-#ifdef ICOM
+#ifdef USE_ICOM_RADIO
 	if (up->fd_icom > 0)
 		close(up->fd_icom);
-#endif /* ICOM */
+#endif /* USE_ICOM_RADIO */
 	free(up);
 }
 
@@ -612,7 +612,7 @@ chu_receive(
 	struct recvbuf *rbufp	/* receive buffer structure pointer */
 	)
 {
-#ifdef HAVE_AUDIO
+#ifdef ENABLE_CHU_AUDIO
 	struct chuunit *up;
 	struct refclockproc *pp;
 	struct peer *peer;
@@ -635,11 +635,11 @@ chu_receive(
 		chu_serial_receive(rbufp);
 #else
 	chu_serial_receive(rbufp);
-#endif /* HAVE_AUDIO */
+#endif /* ENABLE_CHU_AUDIO */
 }
 
 
-#ifdef HAVE_AUDIO
+#ifdef ENABLE_CHU_AUDIO
 /*
  * chu_audio_receive - receive data from the audio device
  */
@@ -952,7 +952,7 @@ chu_uart(
 	}
 	sp->dist = dist / (11 * sp->span);
 }
-#endif /* HAVE_AUDIO */
+#endif /* ENABLE_CHU_AUDIO */
 
 
 /*
@@ -1407,9 +1407,9 @@ chu_second(
 		printf("chu: timecode %d %s\n", pp->lencode,
 		    pp->a_lastcode);
 #endif
-#ifdef ICOM
+#ifdef USE_ICOM_RADIO
 	chu_newchan(peer, dtemp);
-#endif /* ICOM */
+#endif /* USE_ICOM_RADIO */
 	chu_clear(peer);
 	if (up->errflg)
 		refclock_report(peer, up->errflg);
@@ -1511,7 +1511,7 @@ chu_clear(
 	}
 }
 
-#ifdef ICOM
+#ifdef USE_ICOM_RADIO
 /*
  * chu_newchan - called once per minute to find the best channel;
  * returns zero on success, nonzero if ICOM error.
@@ -1594,7 +1594,7 @@ chu_newchan(
 	} 
 	return (rval);
 }
-#endif /* ICOM */
+#endif /* USE_ICOM_RADIO */
 
 
 /*
@@ -1629,7 +1629,7 @@ chu_dist(
 }
 
 
-#ifdef HAVE_AUDIO
+#ifdef ENABLE_CHU_AUDIO
 /*
  * chu_gain - adjust codec gain
  *
@@ -1668,5 +1668,5 @@ chu_gain(
 	audio_gain(up->gain, up->mongain, up->port);
 	up->clipcnt = 0;
 }
-#endif /* HAVE_AUDIO */
+#endif /* ENABLE_CHU_AUDIO */
 

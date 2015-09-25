@@ -90,7 +90,9 @@ close_all_except(
  * close_all_beyond()
  *
  * Close all file descriptors after the given keep_fd, which is the
- * highest fd to keep open.
+ * highest fd to keep open.  See
+ *
+ * http://stackoverflow.com/questions/899038/getting-the-highest-allocated-file-descriptor
  */
 void
 close_all_beyond(
@@ -111,6 +113,7 @@ close_all_beyond(
 	int fd;
 	int max_fd;
 
+	/* includes POSIX case */
 	max_fd = GETDTABLESIZE();
 	for (fd = keep_fd + 1; fd < max_fd; fd++)
 		close(fd);

@@ -46,7 +46,7 @@ sub processOptions {
         'help|?', 'more-help'));
 
     $usage = <<'USAGE';
-update-leap - leap-seconds file manager/updater - Ver. 4.3.34
+update-leap - leap-seconds file manager/updater.
 USAGE: update-leap [ -<flag> [<val>] | --<name>[{=| }<val>] ]... 
 
     -s, --source-url=str         The URL of the master copy of the leapseconds file

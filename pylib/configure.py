@@ -116,6 +116,8 @@ def cmd_configure(ctx):
 	for header, sizeof in sorted(sizeofs):
 		ctx.check_sizeof(header, sizeof)
 
+	# The protocol major number
+	ctx.define("NTP_API",	4)
 
 	ctx.define("NTP_KEYSDIR", "%s/etc" % ctx.env.PREFIX)
 	ctx.define("GETSOCKNAME_SOCKLEN_TYPE", "socklen_t", quote=False)
@@ -124,8 +126,28 @@ def cmd_configure(ctx):
 	ctx.define("POSIX_SHELL", "/bin/sh")
 
 	ctx.define("OPENSSL_VERSION_TEXT", "#XXX: Fixme")
+
+	# Checking for multicast capability:
+	#
+	#    AC_COMPILE_IFELSE(
+	#	[AC_LANG_PROGRAM(
+	#	    [[
+	#		#ifdef HAVE_NETINET_IN_H
+	#		# include <netinet/in.h>
+	#		#endif
+	#	    ]],
+	#	    [[
+	#		struct ip_mreq ipmr;
+	#		ipmr.imr_interface.s_addr = 0;
+	#	    ]]
+	#	)],
+	#	[ntp_cv_multicast=yes],
+	#	[]
+	#   )
 	ctx.define("MCAST", 1) # XXX: check for mcast support
+
 	ctx.define("TYPEOF_IP_MULTICAST_LOOP", "u_char", quote=False) #XXX: check for mcast type
+
 	ctx.define("OPEN_BCAST_SOCKET", 1)
 
 	# Optional functions.
@@ -133,14 +155,20 @@ def cmd_configure(ctx):
 		('adjtimex', "sys/timex.h"),
 		('arc4random', "stdlib.h"),
 		('arc4random_buf', "stdlib.h"),
+		('clock_gettime', "time.h"),
+		('clock_settime', "time.h"),
 		('getclock', "sys/timers.h"),
+		('getdtablesize', "unistd.h"),	# Not POSIX; SVr4, 4.2BSD
 		('getpassphrase', "stdlib.h"),	# Sun systems
+		('plock', "sys/lock.h"),	# OSF/1, SVID2, SVID3, XPG2
 		('res_init', "resolv.h"),
 		("rtprio", "sys/rtprio.h"),	# Sun/BSD
+		('settimeofday', "sys/time.h"),	# BSD - remove as nonstandard?
 		('strlcpy', "string.h"),
 		('strlcat', "string.h"),
 		('sysconf', "unistd.h"),
 		('timegm', "time.h"),
+		('updwtmpx', "utmpx.h"),	# glibc
 		)
 	for (n, h) in functions:
 		ctx.check_cc(function_name=n, header_name=h, mandatory=False)
@@ -170,6 +198,7 @@ def cmd_configure(ctx):
 		"linux/rtnetlink.h",
 		"linux/serial.h",
 		"machine/soundcard.h",
+		"netinet/in_systm.h",
 		"md5.h",
 		"net/if6.h",
 		"net/if_var.h",

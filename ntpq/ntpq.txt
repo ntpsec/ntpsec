@@ -531,24 +531,24 @@ some configurations.
 `-4`, `--ipv4`::
   Force IPv4 DNS name resolution. This option must not appear in
   combination with any of the following options: ipv6.
-  +
-  Force DNS resolution of following host names on the command line to
-  the IPv4 namespace.
++
+Force DNS resolution of following host names on the command line to
+the IPv4 namespace.
 
 `-6`, `--ipv6`::
   Force IPv6 DNS name resolution. This option must not appear in
   combination with any of the following options: ipv4.
-  +
-  Force DNS resolution of following host names on the command line to
-  the IPv6 namespace.
++
+Force DNS resolution of following host names on the command line to
+the IPv6 namespace.
 
 `-c` cmd, `--command`=_cmd_::
   run a command and exit. This option may appear an unlimited number of
   times.
-  +
-  The following argument is interpreted as an interactive format command
-  and is added to the list of commands to be executed on the specified
-  host(s).
++
+The following argument is interpreted as an interactive format command
+and is added to the list of commands to be executed on the specified
+host(s).
 
 `-d`, `--debug-level`::
   Increase debug verbosity level. This option may appear an unlimited
@@ -561,39 +561,39 @@ some configurations.
 `-i`, `--interactive`::
   Force ntpq to operate in interactive mode. This option must not appear
   in combination with any of the following options: command, peers.
-  +
-  Force `ntpq` to operate in interactive mode. Prompts will be written
-  to the standard output and commands read from the standard input.
++
+Force `ntpq` to operate in interactive mode. Prompts will be written
+to the standard output and commands read from the standard input.
 
 `-n`, `--numeric`::
   numeric host addresses.
-  +
-  Output all host addresses in dotted-quad numeric format rather than
-  converting to the canonical host names.
++
+Output all host addresses in dotted-quad numeric format rather than
+converting to the canonical host names.
 
 `--old-rv`::
   Always output status line with readvar.
-  +
-  By default, `ntpq` now suppresses the _associd=..._ line that precedes
-  the output of _readvar_ (alias _rv_) when a single variable is
-  requested, such as `ntpq -c "rv 0 offset"`. This option causes `ntpq`
-  to include both lines of output for a single-variable _readvar_. Using
-  an environment variable to preset this option in a script will enable
-  both older and newer `ntpq` to behave identically in this regard.
++
+By default, `ntpq` now suppresses the _associd=..._ line that precedes
+the output of _readvar_ (alias _rv_) when a single variable is
+requested, such as `ntpq -c "rv 0 offset"`. This option causes `ntpq`
+to include both lines of output for a single-variable _readvar_. Using
+an environment variable to preset this option in a script will enable
+both older and newer `ntpq` to behave identically in this regard.
 
 `-p`, `--peers`::
   Print a list of the peers. This option must not appear in combination
   with any of the following options: interactive.
-  +
-  Print a list of the peers known to the server as well as a summary of
-  their state. This is equivalent to the 'peers' interactive command.
++
+Print a list of the peers known to the server as well as a summary of
+their state. This is equivalent to the 'peers' interactive command.
 
 `-w`, `--wide`::
   Display the full 'remote' value.
-  +
-  Display the full value of the 'remote' value. If this requires more
-  than 15 characters, display the full value, emit a newline, and
-  continue the data display properly indented on the next line.
++
+Display the full value of the 'remote' value. If this requires more
+than 15 characters, display the full value, emit a newline, and
+continue the data display properly indented on the next line.
 
 `--version`::
   Output version of program and exit.
