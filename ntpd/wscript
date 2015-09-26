@@ -94,7 +94,7 @@ def build(ctx):
 			target		= "refclock",
 			features	= "c bld_include src_include libisc_include",
 			source		= refclock_source,
-			defines		= ["HAVE_CONFIG_H=1", "REFCLOCK=1"],
+			defines		= ["HAVE_CONFIG_H=1"],
 		)
 		use_refclock += "refclock"
 
