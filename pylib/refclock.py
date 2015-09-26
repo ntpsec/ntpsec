@@ -202,6 +202,7 @@ def refclock_config(ctx):
 	ctx.env.REFCLOCK_DEFINES = []
 	ctx.env.REFCLOCK_SOURCE = []
 
+	refclock = False
 	for id in ids:
 		try:
 			id = int(id)
@@ -218,4 +219,8 @@ def refclock_config(ctx):
 		ctx.end_msg(rc["descr"])
 		ctx.env["REFCLOCK_%s" % rc["file"].upper()] = True
 
-	ctx.env.REFCLOCK_ENABLE = True
+		refclock = True
+
+	if refclock:
+		ctx.env.REFCLOCK_ENABLE = True
+		ctx.define("REFCLOCK", 1)
