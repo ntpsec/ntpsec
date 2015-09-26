@@ -17,5 +17,6 @@ def build(ctx):
 				],
 		defines		= ["HAVE_CONFIG_H=1"],
 		use		= "ntp opts isc M RT LIBEVENT LIBEVENT_CORE LIBEVENT_PTHREADS PTHREAD CRYPTO",
+		install_path= "${PREFIX}/sbin/"
 	)
 

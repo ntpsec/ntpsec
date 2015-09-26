@@ -33,6 +33,7 @@ def build(ctx):
 		includes    = [
 						"%s/ntpd/" % bldnode
 		],
+		install_path= False
 	)
 
 	# XXX: needs a dependency to rebuild ntp_keyword.h when keyword-gen is rebuilt
@@ -141,7 +142,7 @@ def build(ctx):
 						"%s/ntpd/" % bldnode,
 						"%s/ntpd/" % srcnode
 					],
-
+		install_path= "${PREFIX}/sbin/",
 	)
 
 	ntpdsim_source = [
