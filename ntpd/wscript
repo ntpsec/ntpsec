@@ -105,6 +105,8 @@ def build(ctx):
 				features	= "c bld_include src_include libisc_include",
 				source		= "refclock_%s.c" % file,
 				# defines		= ["HAVE_CONFIG_H=1", "%s=1" % define],
+				# XXX: These need to go into config.h rather than the command line for the individual drivers
+				defines		= ["%s=1" % define],
 			)
 			use_refclock += " refclock_%s" % file
 

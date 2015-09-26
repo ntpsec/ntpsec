@@ -2,3 +2,12 @@
 .waf*
 *.pyc
 build
+
+configure.*
+all-*.sh
+do-*.sh
+push-to-all.sh
+push-to-backup.sh
+glypnod
+A-*
+
