@@ -308,7 +308,10 @@ int main() { return 0; }
 
 
 	if ctx.options.enable_ipv6:
-		ctx.define("INCLUDE_IPV6_SUPPORT", 1)
+		# ctx.define("INCLUDE_IPV6_SUPPORT", 1)
+		ctx.define("ISC_PLATFORM_HAVEIPV6", 1)
+		ctx.define("WANT_IPV6", 1)
+		ctx.define("ISC_PLATFORM_HAVEIN6PKTINFO", 1)
 
 	if ctx.options.enable_leap_smear:
 		ctx.define("ENABLE_LEAP_SMEAR", 1)
