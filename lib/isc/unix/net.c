@@ -101,12 +101,12 @@ const struct in6_addr isc_net_in6addrany = IN6ADDR_ANY_INIT;
 const struct in6_addr isc_net_in6addrloop = IN6ADDR_LOOPBACK_INIT;
 # endif
 
-# if defined(WANT_IPV6)
+# if defined(ENABLE_IPV6)
 static isc_once_t 	once_ipv6only = ISC_ONCE_INIT;
 # endif
 
 # if defined(ISC_PLATFORM_HAVEIPV6) && \
-     defined(WANT_IPV6) && defined(ISC_PLATFORM_HAVEIN6PKTINFO)
+     defined(ENABLE_IPV6) && defined(ISC_PLATFORM_HAVEIN6PKTINFO)
 static isc_once_t 	once_ipv6pktinfo = ISC_ONCE_INIT;
 # endif
 #endif /* ISC_PLATFORM_HAVEIPV6 */
@@ -152,7 +152,7 @@ try_proto(int domain) {
 	}
 
 #ifdef ISC_PLATFORM_HAVEIPV6
-#ifdef WANT_IPV6
+#ifdef ENABLE_IPV6
 #ifdef ISC_PLATFORM_HAVEIN6PKTINFO
 	if (domain == PF_INET6) {
 		struct sockaddr_in6 sin6;
@@ -204,7 +204,7 @@ static void
 initialize_action(void) {
 	ipv4_result = try_proto(PF_INET);
 #ifdef ISC_PLATFORM_HAVEIPV6
-#ifdef WANT_IPV6
+#ifdef ENABLE_IPV6
 #ifdef ISC_PLATFORM_HAVEIN6PKTINFO
 	ipv6_result = try_proto(PF_INET6);
 #endif
@@ -239,7 +239,7 @@ isc_net_probeunix(void) {
 }
 
 #ifdef ISC_PLATFORM_HAVEIPV6
-#ifdef WANT_IPV6
+#ifdef ENABLE_IPV6
 static void
 try_ipv6only(void) {
 #ifdef IPV6_V6ONLY
@@ -369,13 +369,13 @@ initialize_ipv6pktinfo(void) {
 				  try_ipv6pktinfo) == ISC_R_SUCCESS);
 }
 #endif /* ISC_PLATFORM_HAVEIN6PKTINFO */
-#endif /* WANT_IPV6 */
+#endif /* ENABLE_IPV6 */
 #endif /* ISC_PLATFORM_HAVEIPV6 */
 
 isc_result_t
 isc_net_probe_ipv6only(void) {
 #ifdef ISC_PLATFORM_HAVEIPV6
-#ifdef WANT_IPV6
+#ifdef ENABLE_IPV6
 	initialize_ipv6only();
 #else
 	ipv6only_result = ISC_R_NOTFOUND;
@@ -388,7 +388,7 @@ isc_result_t
 isc_net_probe_ipv6pktinfo(void) {
 #ifdef ISC_PLATFORM_HAVEIPV6
 #ifdef ISC_PLATFORM_HAVEIN6PKTINFO
-#ifdef WANT_IPV6
+#ifdef ENABLE_IPV6
 	initialize_ipv6pktinfo();
 #else
 	ipv6pktinfo_result = ISC_R_NOTFOUND;

@@ -308,9 +308,12 @@ int main() { return 0; }
 
 
 	if ctx.options.enable_ipv6:
-		# ctx.define("INCLUDE_IPV6_SUPPORT", 1)
+		ctx.define("ENABLE_IPV6", 1)
+		# These other things should be derived,
+		# but the fate of the SYS_WINNT code
+		# needs to be decided before that will
+		# make sense.
 		ctx.define("ISC_PLATFORM_HAVEIPV6", 1)
-		ctx.define("WANT_IPV6", 1)
 		ctx.define("ISC_PLATFORM_HAVEIN6PKTINFO", 1)
 
 	if ctx.options.enable_leap_smear:
