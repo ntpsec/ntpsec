@@ -150,28 +150,37 @@ def cmd_configure(ctx):
 
 	ctx.define("OPEN_BCAST_SOCKET", 1)
 
-	# Optional functions.
+	# Optional functions.  Do all function checks here, otherwise
+	# we're likely to duplicate them.
 	functions = (
 		('adjtimex', "sys/timex.h"),
 		('arc4random', "stdlib.h"),
 		('arc4random_buf', "stdlib.h"),
-		('clock_gettime', "time.h"),
-		('clock_settime', "time.h"),
+		('clock_gettime', "time.h", "RT"),
+		('clock_settime', "time.h", "RT"),
 		('getclock', "sys/timers.h"),
-		('getdtablesize', "unistd.h"),	# Not POSIX; SVr4, 4.2BSD
-		('getpassphrase', "stdlib.h"),	# Sun systems
-		('plock', "sys/lock.h"),	# OSF/1, SVID2, SVID3, XPG2
+		('getdtablesize', "unistd.h"),		# SVr4, 4.2BSD
+		('getpassphrase', "stdlib.h"),		# Sun systems
+		('plock', "sys/lock.h"),		# OSF/1, SVID[23], XPG2
 		('res_init', "resolv.h"),
-		("rtprio", "sys/rtprio.h"),	# Sun/BSD
-		('settimeofday', "sys/time.h"),	# BSD - remove as nonstandard?
+		("rtprio", "sys/rtprio.h"),		# Sun/BSD
+		('settimeofday', "sys/time.h", "RT"),	# BSD - remove?
 		('strlcpy', "string.h"),
 		('strlcat', "string.h"),
 		('sysconf', "unistd.h"),
 		('timegm', "time.h"),
-		('updwtmpx', "utmpx.h"),	# glibc
+		('updwtmpx', "utmpx.h"),		# glibc
 		)
-	for (n, h) in functions:
-		ctx.check_cc(function_name=n, header_name=h, mandatory=False)
+	for ft in functions:
+		if len(ft) == 2:
+			ctx.check_cc(function_name=ft[0],
+				     header_name=ft[1],
+				     mandatory=False)
+		else:
+			ctx.check_cc(function_name=ft[0],
+				     header_name=ft[1],
+				     use=ft[2],
+				     mandatory=False)
 
 	ctx.check_cc(header_name="stdbool.h", mandatory=True)
 
@@ -270,31 +279,8 @@ int main() { return 0; }
 	if ctx.get_define("HAVE_PRIV_H") and sys.platform == "Solaris":
 		ctx.define("HAVE_SOLARIS_PRIVS", 1)
 
-	ctx.check_cc(
-		function_name="clock_gettime",
-		header_name="time.h",
-		use="RT",
-		mandatory=False
-	)
-
-	ctx.check_cc(
-		function_name="clock_settime",
-		header_name="time.h",
-		use="RT",
-		mandatory=False
-	)
-
-	ctx.check_cc(
-		function_name="settimeofday",
-		header_name="sys/time.h",
-		use="RT",
-		mandatory=False
-	)
-
-
 	from check_sockaddr import check_sockaddr
 	check_sockaddr(ctx)
-
 
 	from check_posix_thread_version import check_posix_thread_version
 
