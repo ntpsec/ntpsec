@@ -4,9 +4,7 @@
  * ATTENTION: Get approval from Dave Mills on all changes to this file!
  *
  */
-#ifdef HAVE_CONFIG_H
-# include <config.h>
-#endif
+#include <config.h>
 
 #ifdef USE_SNPRINTB
 # include <util.h>

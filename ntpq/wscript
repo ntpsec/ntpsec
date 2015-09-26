@@ -14,7 +14,7 @@ def build(ctx):
 		target		= "libntpq",
 		features	= "c bld_include src_include libisc_include",
 		source		= libntpq_source,
-		defines		= ["HAVE_CONFIG_H=1"],
+		# defines		= ["HAVE_CONFIG_H=1"],
 	)
 
 

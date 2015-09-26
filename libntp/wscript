@@ -94,7 +94,7 @@ def build(ctx):
 		target		= "ntp",
 		features	= "c cstlib bld_include src_include",
 		source		= libntp_source + libntp_source_systime,
-		defines		= ["HAVE_CONFIG_H=1"],
+		# defines		= ["HAVE_CONFIG_H=1"],
 		includes	= [
 						"%s/lib/isc/include/" % srcnode,
 						"%s/lib/isc/unix/include/" % srcnode, # XXX: platform: requires unix/win32 switch.

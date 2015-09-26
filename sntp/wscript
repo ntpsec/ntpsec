@@ -22,7 +22,7 @@ def build(ctx):
 		target		= "sntp_obj", # XXX: to avoid target clash lookup how to fix this.
 		features	= "c bld_include src_include libisc_include",
 		source		= libsntp_source,
-		defines		= ["HAVE_CONFIG_H=1"],
+		# defines		= ["HAVE_CONFIG_H=1"],
 		includes	= [
 						"%s/sntp/" % bldnode
 					] + ctx.env.PLATFORM_INCLUDES,

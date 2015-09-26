@@ -27,9 +27,7 @@
 /* { definitions lifted from ntpd.c to allow us to complie with 
      "#include ntp.h".  I have not taken the time to reduce the clutter. */
 
-#ifdef HAVE_CONFIG_H
-# include <config.h>
-#endif
+#include <config.h>
 
 #include "ntpd.h"
 

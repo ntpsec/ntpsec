@@ -10,9 +10,7 @@
  * of the xntp3 distribution.
  */
 
-#ifdef HAVE_CONFIG_H
-# include <config.h>
-#endif /* HAVE_CONFIG_H */
+#include <config.h>
 
 #include "ntp_fp.h"
 #include "timevalops.h"

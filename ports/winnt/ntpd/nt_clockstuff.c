@@ -14,10 +14,7 @@
  * August 2011, all MS C runtime routines also understand %lld and %llu.
  */
 
-
-#ifdef HAVE_CONFIG_H
 #include "config.h"
-#endif
 
 #include <sys/resource.h>	/* our private version */
 

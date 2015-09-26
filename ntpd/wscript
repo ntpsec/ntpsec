@@ -10,7 +10,7 @@ def build(ctx):
 	ctx(
 		target		= "bison_obj",
 		features	= "c src_include bld_include libisc_include",
-		defines		= ["HAVE_CONFIG_H=1"],
+		# defines		= ["HAVE_CONFIG_H=1"],
 		source		= bison_source,
 		includes    = [
 						"%s/ntpd/" % srcnode
@@ -72,7 +72,7 @@ def build(ctx):
 		target		= "libntpd_obj",
 		features	= "c bld_include src_include libisc_include",
 		source		= libntpd_source,
-		defines		= ["HAVE_CONFIG_H=1"],
+		# defines		= ["HAVE_CONFIG_H=1"],
 	)
 
 	ctx(

@@ -2,9 +2,7 @@
  * refclock_arc - clock driver for ARCRON MSF/DCF/WWVB receivers
  */
 
-#ifdef HAVE_CONFIG_H
 #include <config.h>
-#endif
 
 #include "ntp.h"
 #include "ntp_types.h"
