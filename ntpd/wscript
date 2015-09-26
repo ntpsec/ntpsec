@@ -94,7 +94,7 @@ def build(ctx):
 			target		= "refclock",
 			features	= "c bld_include src_include libisc_include",
 			source		= refclock_source,
-			defines		= ["HAVE_CONFIG_H=1"],
+			# defines		= ["HAVE_CONFIG_H=1"],
 		)
 		use_refclock += "refclock"
 
@@ -104,7 +104,7 @@ def build(ctx):
 				target		= "refclock_%s" % file,
 				features	= "c bld_include src_include libisc_include",
 				source		= "refclock_%s.c" % file,
-				defines		= ["HAVE_CONFIG_H=1", "%s=1" % define],
+				# defines		= ["HAVE_CONFIG_H=1", "%s=1" % define],
 			)
 			use_refclock += " refclock_%s" % file
 
@@ -136,7 +136,7 @@ def build(ctx):
 		target		= "ntpd",
 		features	= "c cprogram bld_include src_include libisc_include libisc_pthread_include ntp_version",
 		source		= ntpd_source,
-		defines		= ["HAVE_CONFIG_H=1"] + refclock_define,
+		# defines		= ["HAVE_CONFIG_H=1"] + refclock_define,
 		use			= "libntpd_obj bison_obj isc ntp opts M parse GCC_S RT CAP THR PTHREAD CRYPTO %s" % use_refclock,
 		includes	= [
 						"%s/ntpd/" % bldnode,
