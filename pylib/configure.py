@@ -257,18 +257,18 @@ int main() { return 0; }
 	ctx.check_cc(feature="c cshlib", lib="event_pthreads", libpath=ctx.env.PLATFORM_LIBPATH, uselib_store="LIBEVENT_PTHREADS", use="LIBEVENT")
 
 
-
 	# Check for Linux capability.
 	ctx.check_cc(header_name="sys/capability.h", mandatory=False)
 	ctx.check_cc(lib="cap", mandatory=False)
-
 	if ctx.env.LIB_CAP:
 		from check_cap import check_cap
 		check_cap(ctx)
-
 	if ctx.get_define("HAVE_CAPABILITY") and ctx.get_define("HAVE_SYS_CAPABILITY_H") and ctx.get_define("HAVE_SYS_PRCTL_H"):
 		ctx.define("HAVE_LINUX_CAPABILITY", 1)
 
+	# Check for Solaris capabilities
+	if ctx.get_define("HAVE_PRIV_H") and sys.platform == "Solaris":
+		ctx.define("HAVE_SOLARIS_PRIVS", 1)
 
 	ctx.check_cc(
 		function_name="clock_gettime",
