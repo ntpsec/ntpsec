@@ -202,8 +202,13 @@ def refclock_config(ctx):
 	ctx.env.REFCLOCK_DEFINES = []
 	ctx.env.REFCLOCK_SOURCE = []
 
+	# Remove duplicate IDs while preserving order.
+	unique_id = []
+	[unique_id.append(x) for x in ids if x not in unique_id]
+
+
 	refclock = False
-	for id in ids:
+	for id in unique_id:
 		try:
 			id = int(id)
 		except ValueError:
