@@ -207,10 +207,8 @@
 #include <stdlib.h>
 #include <time.h>
 
-#ifdef  HAVE_CONFIG_H
 #include "config.h"
 #undef VERSION		/* avoid conflict below */
-#endif
 
 #ifdef  HAVE_SYS_SOUNDCARD_H
 #include <sys/soundcard.h>

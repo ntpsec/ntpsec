@@ -4,9 +4,7 @@
  *	       This is useful when using the clock line discipline.
  */
 
-#ifdef HAVE_CONFIG_H
 #include "config.h"
-#endif
 
 #include <string.h>
 

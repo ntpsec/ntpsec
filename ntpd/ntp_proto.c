@@ -4,9 +4,7 @@
  * ATTENTION: Get approval from Dave Mills on all changes to this file!
  *
  */
-#ifdef HAVE_CONFIG_H
 #include <config.h>
-#endif
 
 #include "ntpd.h"
 #include "ntp_stdlib.h"

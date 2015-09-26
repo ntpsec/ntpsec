@@ -78,9 +78,9 @@
  * first the RANDFILE environment variable in the user's home directory
  * and then .rnd in the user's home directory.
  */
-#ifdef HAVE_CONFIG_H
-# include <config.h>
-#endif
+
+#include <config.h>
+
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>

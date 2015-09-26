@@ -47,9 +47,7 @@
  * much of the same code used for Windows initially.
  *
  */
-#ifdef HAVE_CONFIG_H
-# include <config.h>
-#endif
+#include <config.h>
 
 #include "ntp_workimpl.h"
 

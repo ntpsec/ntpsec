@@ -1,9 +1,7 @@
 /*
  * authkeys.c - routines to manage the storage of authentication keys
  */
-#ifdef HAVE_CONFIG_H
-# include <config.h>
-#endif
+#include <config.h>
 
 #include <math.h>
 #include <stdio.h>

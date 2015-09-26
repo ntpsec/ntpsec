@@ -1,9 +1,7 @@
 /*
  * ntp_util.c - stuff I didn't have any other place for
  */
-#ifdef HAVE_CONFIG_H
-# include <config.h>
-#endif
+#include <config.h>
 
 #include "ntpd.h"
 #include "ntp_unixtime.h"

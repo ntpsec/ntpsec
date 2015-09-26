@@ -8,9 +8,7 @@
  *		Newark, DE 19711
  * Copyright (c) 2006
  */
-#ifdef HAVE_CONFIG_H
-# include <config.h>
-#endif
+#include <config.h>
 
 #include <ntp_stdlib.h>
 #include <ntp_prio_q.h>

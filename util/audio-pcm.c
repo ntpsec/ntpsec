@@ -6,9 +6,7 @@
  * and still used by the *BSD operating systems. In particular it should work
  * for FreeBSD from version 4.1 on with compatible sound card.
  */
-#ifdef HAVE_CONFIG_H
-# include <config.h>
-#endif
+#include <config.h>
 
 #if defined(HAVE_MACHINE_SOUNDCARD_H) || defined(HAVE_SYS_SOUNDCARD_H)
 

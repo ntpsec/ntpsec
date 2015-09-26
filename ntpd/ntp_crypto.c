@@ -1,9 +1,7 @@
 /*
  * ntp_crypto.c - NTP version 4 public key routines
  */
-#ifdef HAVE_CONFIG_H
 #include <config.h>
-#endif
 
 #ifdef ENABLE_AUTOKEY
 #include <stdio.h>

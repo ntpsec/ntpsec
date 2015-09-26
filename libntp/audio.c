@@ -7,7 +7,7 @@
  * should work for FreeBSD from version 4.1 on with compatible sound
  * card.
  */
-# include <config.h>
+#include <config.h>
 
 #include <string.h>
 

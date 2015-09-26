@@ -1,9 +1,7 @@
 /*
  * ntp_peer.c - management of data maintained for peer associations
  */
-#ifdef HAVE_CONFIG_H
 #include <config.h>
-#endif
 
 #include <stdio.h>
 #include <sys/types.h>
