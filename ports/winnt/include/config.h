@@ -171,10 +171,10 @@ extern int tty_open(char *, int, int);
  * the RFC2553-compliant newer headers because they have
  *   #define in_addr6 in6_addr
  * for backward compatibility.  With the newer headers,
- * we define ISC_PLATFORM_HAVEIPV6 and disable the cruft.
+ * we define ISC_PLATFORM_0HAVEIPV6 and disable the cruft.
  */
 #ifdef in_addr6
-#define WANT_IPV6
+#define ENABLE_IPV6
 #define ISC_PLATFORM_HAVEIPV6
 #define ISC_PLATFORM_HAVESCOPEID
 #define HAVE_STRUCT_SOCKADDR_STORAGE
