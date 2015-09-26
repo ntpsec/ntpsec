@@ -4,10 +4,16 @@
 
 This software should build on any operating system conformant to
 POSIX.1-2001 and ISO/IEC 9899:1999 (C99).  The primary development
-platforms are Linux and FreeBSD/NetBSD.
+platforms are Linux and FreeBSD.
 
 Be sure Python >= 2.5 and the libevent 2.x libraries and headers are
 installed on your system.
+
+If you are building to supply Stratum 1 time service (that is, with
+refclocks linked in) you will probably need the sys/timepps.h file to
+be installed. If you are using a package manager, the package
+'pps-tools' may do.  This is not necessary for client (Stratum 2 or
+higher) installations.
 
 You will also want OpenSSL installed.  If you are using a package manager,
 the one you want may be called openssl-devel or libssl-dev.
@@ -69,19 +75,6 @@ By default, `make install' will install the package's files in
 `/usr/local/bin', `/usr/local/man', etc.  You can specify an
 installation prefix other than `/usr/local' by giving waf the
 option `--prefix=PATH'.
-
-== Replacing ntpdate ==
-
-The "ntpdate" program, long since deprecated but sometimes used in OS
-boot scripts to set time before launching ntpd, has been removed.  It is
-no longer necessary to set the time before calling ntpd; instead, pass
-ntpd the -g option and remove the ntpdate call. 
-
-If you need the ntpdate functionality of setting the time quickly but
-not necessarily super-accurately, the command "sntp -sS" will do that.
-Follow the "-sS" with a list of server names, or "-c" and a pool name.
-This ill do about as good a job of setting the clock as ntpdate did -
-it will set the time to that of the server that responds soonest.
 
 == Optional Features ==
 
