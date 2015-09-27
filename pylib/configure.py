@@ -150,6 +150,12 @@ def cmd_configure(ctx):
 
 	ctx.define("OPEN_BCAST_SOCKET", 1)
 
+	ctx.check_cc(lib="m")
+	ctx.check_cc(lib="pthread")
+	ctx.check_cc(lib="rt", mandatory=False)
+	ctx.check_cc(lib="thr", mandatory=False)
+	ctx.check_cc(lib="gcc_s", mandatory=False)
+
 	# Optional functions.  Do all function checks here, otherwise
 	# we're likely to duplicate them.
 	functions = (
@@ -253,12 +259,6 @@ int main() { return 0; }
 	if ctx.get_define("HAVE_TIMEPPS_H") or ctx.get_define("HAVE_SYS_TIMEPPS_H"):
 		ctx.define("HAVE_PPSAPI", 1)
 
-
-	ctx.check_cc(lib="m")
-	ctx.check_cc(lib="pthread")
-	ctx.check_cc(lib="rt", mandatory=False)
-	ctx.check_cc(lib="thr", mandatory=False)
-	ctx.check_cc(lib="gcc_s", mandatory=False)
 
 	ctx.check_cc(header_name="event2/event.h", includes=ctx.env.PLATFORM_INCLUDES)
 	ctx.check_cc(feature="c cshlib", lib="event", libpath=ctx.env.PLATFORM_LIBPATH, uselib_store="LIBEVENT")
