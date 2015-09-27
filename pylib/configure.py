@@ -158,9 +158,11 @@ def cmd_configure(ctx):
 
 	ctx.define("OPEN_BCAST_SOCKET", 1)
 
+	ctx.check_cc(lib="edit", mandatory=False)
 	ctx.check_cc(lib="m")
 	ctx.check_cc(lib="pthread")
 	ctx.check_cc(lib="rt", mandatory=False)
+	ctx.check_cc(lib="readline", mandatory=False)
 	ctx.check_cc(lib="thr", mandatory=False)
 	ctx.check_cc(lib="gcc_s", mandatory=False)
 
@@ -212,6 +214,7 @@ def cmd_configure(ctx):
 	optional_headers = (
 		"alloca.h",
 		"arpa/nameser.h",
+		"histedit.h",
 		"ieeefp.h",
 		"ifaddrs.h",
 		"libgen.h",
@@ -229,6 +232,8 @@ def cmd_configure(ctx):
 		"netinfo/ni.h",
 		"netinet/ip.h",
 		"priv.h",
+		"readline/readline.h",
+		"readline/history.h",
 		"resolv.h",
 		"stdatomic.h",
 		"sys/audioio.h",

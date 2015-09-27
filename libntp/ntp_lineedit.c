@@ -8,20 +8,15 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#if defined(HAVE_READLINE_HISTORY) &&		\
-    (!defined(HAVE_READLINE_HISTORY_H) ||	\
-     !defined(HAVE_READLINE_READLINE_H))
-# undef HAVE_READLINE_HISTORY
-#endif
-#if defined(HAVE_READLINE_HISTORY)
+#if defined(HAVE_READLINE_HISTORY_H) &&	defined(HAVE_READLINE_READLINE_H)
 # include <readline/readline.h>
 # include <readline/history.h>
-# define LE_READLINE
+# define USE_LE_READLINE
 #elif defined(HAVE_HISTEDIT_H)
 # include <histedit.h>
-# define LE_EDITLINE
+# define USE_LE_EDITLINE
 #else
-# define LE_NONE
+# define USE_LE_NONE
 #endif
 
 #include "ntp.h"
@@ -44,7 +39,7 @@ static int	ntp_readline_initted;
 static char *	lineedit_prompt;
 
 
-#ifdef LE_EDITLINE
+#ifdef USE_LE_EDITLINE
 # ifndef H_SETSIZE
 #  define H_SETSIZE H_EVENT
 # endif
@@ -53,7 +48,7 @@ static History *	ntp_hist;
 static HistEvent	hev;
 
 char *	ntp_prompt_callback(EditLine *);
-#endif	/* LE_EDITLINE */
+#endif	/* USE_LE_EDITLINE */
 
 
 /*
@@ -74,14 +69,11 @@ ntp_readline_init(
 		lineedit_prompt = estrdup(prompt);
 	}
 
-#ifdef LE_EDITLINE
+#ifdef USE_LE_EDITLINE
 	if (NULL == ntp_el) {
 
-# if 4 == EL_INIT_ARGS
+		/* Some older versions have only 3 args. */
 		ntp_el = el_init(progname, stdin, stdout, stderr);
-# else
-		ntp_el = el_init(progname, stdin, stdout);
-# endif
 		if (ntp_el) {
 
 			el_set(ntp_el, EL_PROMPT, ntp_prompt_callback);
@@ -112,7 +104,7 @@ ntp_readline_init(
 		} else
 			success = 0;
 	}
-#endif	/* LE_EDITLINE */
+#endif	/* USE_LE_EDITLINE */
 
 	ntp_readline_initted = success;
 
@@ -128,7 +120,7 @@ ntp_readline_uninit(
 	void
 	)
 {
-#ifdef LE_EDITLINE
+#ifdef USE_LE_EDITLINE
 	if (ntp_el) {
 		el_end(ntp_el);
 		ntp_el = NULL;
@@ -136,7 +128,7 @@ ntp_readline_uninit(
 		history_end(ntp_hist);
 		ntp_hist = NULL;
 	}
-#endif	/* LE_EDITLINE */
+#endif	/* USE_LE_EDITLINE */
 
 	if (lineedit_prompt) {
 		free(lineedit_prompt);
@@ -159,10 +151,10 @@ ntp_readline(
 	)
 {
 	char *		line;
-#ifdef LE_NONE
+#ifdef USE_LE_NONE
 	char		line_buf[MAXEDITLINE];
 #endif
-#ifdef LE_EDITLINE
+#ifdef USE_LE_EDITLINE
 	const char *	cline;
 #endif
 
@@ -171,7 +163,7 @@ ntp_readline(
 
 	*pcount = 0;
 
-#ifdef LE_READLINE
+#ifdef USE_LE_READLINE
 	line = readline(lineedit_prompt ? lineedit_prompt : "");
 	if (NULL != line) {
 		if (*line) {
@@ -179,9 +171,9 @@ ntp_readline(
 		}
 		*pcount = strlen(line);
 	}
-#endif	/* LE_READLINE */
+#endif	/* USE_LE_READLINE */
 
-#ifdef LE_EDITLINE
+#ifdef USE_LE_EDITLINE
 	cline = el_gets(ntp_el, pcount);
 
 	if (NULL != cline) {
@@ -192,9 +184,9 @@ ntp_readline(
 	} else {
 		line = estrdup("");
 	}
-#endif	/* LE_EDITLINE */
+#endif	/* USE_LE_EDITLINE */
 
-#ifdef LE_NONE
+#ifdef USE_LE_NONE
 					/* stone hammers */
 	if (lineedit_prompt) {
 		fputs(lineedit_prompt, stderr);
@@ -208,7 +200,7 @@ ntp_readline(
 	} else
 		line = NULL;
 
-#endif	/* LE_NONE */
+#endif	/* USE_LE_NONE */
 
 
 	if (!line)			/* EOF */
@@ -218,7 +210,7 @@ ntp_readline(
 }
 
 
-#ifdef LE_EDITLINE
+#ifdef USE_LE_EDITLINE
 /*
  * ntp_prompt_callback - return prompt string to el_gets()
  */
@@ -231,5 +223,5 @@ ntp_prompt_callback(
 
 	return lineedit_prompt;
 }
-#endif /* LE_EDITLINE */
+#endif /* USE_LE_EDITLINE */
 
