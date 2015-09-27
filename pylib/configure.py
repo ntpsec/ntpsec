@@ -6,6 +6,7 @@ import sys, os
 def cmd_configure(ctx):
 	from check_type import check_type
 	from check_sizeof import check_sizeof
+	from check_structfield import check_structfield
 
 	if ctx.options.list:
 		from refclock import refclock_map
@@ -98,6 +99,13 @@ def cmd_configure(ctx):
 
 	for type in sorted(types):
 		ctx.check_type(type)
+
+	structure_fields = (
+		("time_tick", "timex", "sys/timex.h"),
+		("modes", "timex", "sys/timex.h"),
+		)
+	for (f, s, h) in structure_fields:
+		ctx.check_structfield(f, s, h)
 
 	# XXX: hack
 	ctx.env.PLATFORM_INCLUDES = ["/usr/local/include"]

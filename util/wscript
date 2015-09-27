@@ -1,0 +1,22 @@
+from waflib import Utils
+
+def build(ctx):
+	srcnode = ctx.srcnode.abspath()
+	bldnode = ctx.bldnode.abspath()
+
+	ntp_keygen_source = [
+		"tickadj.c",
+	]
+
+	ctx(
+		target		= "tickadj",
+		features	= "c cprogram bld_include src_include",
+		source		= ntp_keygen_source,
+		includes	= [
+					"%s/tickadj/" % bldnode
+				],
+		# defines		= ["HAVE_CONFIG_H=1"],
+		use		= "ntp opts isc M RT",
+		install_path= "${PREFIX}/sbin/"
+	)
+

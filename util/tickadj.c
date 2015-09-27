@@ -33,7 +33,7 @@ int main(
 	}
 	else if (argc == 2)
 	{
-#ifdef ADJ_TIMETICK
+#ifdef STRUCT_TIMEX_HAS_TIME_TICK
 		if ( (txc.time_tick = atoi(argv[1])) < 1 )
 #else
 		if ( (txc.tick = atoi(argv[1])) < 1 )
@@ -45,7 +45,7 @@ int main(
 #ifdef ADJ_TIMETICK
 		txc.modes = ADJ_TIMETICK;
 #else
-#ifdef MOD_OFFSET
+#ifdef STRUCT_TIMEX_HAS_MODES
 		txc.modes = ADJ_TICK;
 #else
 		txc.mode = ADJ_TICK;
@@ -57,7 +57,7 @@ int main(
 #ifdef ADJ_TIMETICK
 		txc.modes = 0;
 #else
-#ifdef MOD_OFFSET
+#ifdef STRUCT_TIMEX_HAS_MODES
 		txc.modes = 0;
 #else
 		txc.mode = 0;
@@ -71,7 +71,7 @@ int main(
 	}
 	else
 	{
-#ifdef ADJ_TIMETICK
+#ifdef STRUCT_TIMEX_HAS_TIME_TICK
 		printf("tick     = %ld\ntick_adj = %ld\n", txc.time_tick, txc.tickadj);
 #else
 		printf("tick = %ld\n", txc.tick);
