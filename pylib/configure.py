@@ -383,6 +383,15 @@ int main() { return 0; }
 	#
 	# ctx.define("HAVE_SIGNALED_IO", 1)
 
+        # These are required by the SHA2 code and various refclocks
+        if sys.byteorder == "little":
+                pass
+        elif sys.byteorder == "big":
+                ctx.define("WORDS_BIGENDIAN", 1)
+        else:
+                print "Can't determine byte order!"
+
+
 	if ctx.options.enable_crypto:
 		from check_openssl import configure_ssl
 		configure_ssl(ctx)
