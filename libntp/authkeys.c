@@ -549,11 +549,7 @@ MD5auth_setkey(
 	 */
 	secretsize = len;
 	secret = emalloc(secretsize);
-#ifndef DISABLE_BUG1243_FIX
 	memcpy(secret, key, secretsize);
-#else
-	strlcpy((char *)secret, (const char *)key, secretsize);
-#endif
 	allocsymkey(bucket, keyno, 0, (u_short)keytype, 0,
 		    (u_short)secretsize, secret);
 #ifdef DEBUG
