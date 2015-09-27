@@ -6,8 +6,8 @@ This software should build on any operating system conformant to
 POSIX.1-2001 and ISO/IEC 9899:1999 (C99).  The primary development
 platforms are Linux and FreeBSD.
 
-There are some prerequisites.  Libraries need both
-the library and the development headers installed.
+There are some prerequisites.  Libraries need both the library and the
+development headers installed.
 
 Python >= 2.5::
    Required.
@@ -20,8 +20,13 @@ OpenSSL::
    may call this openssl-devel or libssl-dev.
 
 GNU readline::
-   Optional. Enhances ntpq's interactive mode. Your package manager
-   may call this libreadline-dev.
+   Optional. Enhances ntpq's interactive mode by enabling line
+   editing. Your package manager may call this libreadline-dev.
+
+BSD libedit::
+   Optional. Enhances ntpq's interactive mode by enabling line
+   editing. Used as a fallback if it is installed and GNU readline
+   is not.
 
 sys/timepps.h::
    If you are building to supply Stratum 1 time service (that is, with
