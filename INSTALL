@@ -6,17 +6,30 @@ This software should build on any operating system conformant to
 POSIX.1-2001 and ISO/IEC 9899:1999 (C99).  The primary development
 platforms are Linux and FreeBSD.
 
-Be sure Python >= 2.5 and the libevent 2.x libraries and headers are
-installed on your system.
+There are some prerequisites.  Libraries need both
+the library and the development headers installed.
 
-If you are building to supply Stratum 1 time service (that is, with
-refclocks linked in) you will probably need the sys/timepps.h file to
-be installed. If you are using a package manager, the package
-'pps-tools' may do.  This is not necessary for client (Stratum 2 or
-higher) installations.
+Python >= 2.5::
+   Required.
 
-You will also want OpenSSL installed.  If you are using a package manager,
-the one you want may be called openssl-devel or libssl-dev.
+libevent 2.x::
+   Required. Your package manager might call this "libevent-dev".
+
+OpenSSL::
+   Optional; enables encryption and authentication. Your package manager
+   may call this openssl-devel or libssl-dev.
+
+GNU readline::
+   Optional. Enhances ntpq's interactive mode. Your package manager
+   may call this libreadline-dev.
+
+sys/timepps.h::
+   If you are building to supply Stratum 1 time service (that is, with
+   refclocks linked in) you may find that you need the sys/timepps.h
+   file to be installed, depending on which refclocks you enable. If
+   you are using a package manager, the package 'pps-tools' may do.
+   This won't be necessary for pure client (Stratum 2 or higher)
+   installations.
 
 Go to the directory where you found this file and do this:
 
