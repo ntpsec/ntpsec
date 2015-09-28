@@ -508,8 +508,12 @@ step_systime(
 	 */
 	tvdiff = abs_tval(sub_tval(timetv, tvlast));
 	if (tvdiff.tv_sec > 0) {
-#define OTIME_MSG	"Old NTP time"
-#define NTIME_MSG	"New NTP time"
+#ifndef OTIME_MSG
+# define OTIME_MSG	"Old NTP time"
+#endif
+#ifndef NTIME_MSG
+# define NTIME_MSG	"New NTP time"
+#endif
 		struct utmpx utx;
 
 		ZERO(utx);
@@ -534,13 +538,13 @@ step_systime(
 #define WTMPX_FILE "/var/log/wtmp"
 		/* WTMPX */
 		utx.ut_type = OLD_TIME;
-		utx.ut_tv.sec = tvlast.sec;
-		utx.ut_tv.msec = tvlast.msec;
+		utx.ut_tv.tv_sec = tvlast.tv_sec;
+		utx.ut_tv.tv_usec = tvlast.tv_usec;
 		strlcpy(utx.ut_line, OTIME_MSG, sizeof(utx.ut_line));
 		updwtmpx(WTMPX_FILE, &utx);
 		utx.ut_type = NEW_TIME;
-		utx.ut_tv.sec = timetv.sec;
-		utx.ut_tv.msec = timetv.msec;
+		utx.ut_tv.tv_sec = timetv.tv_sec;
+		utx.ut_tv.tv_usec = timetv.tv_usec;
 		strlcpy(utx.ut_line, NTIME_MSG, sizeof(utx.ut_line));
 		updwtmpx(WTMPX_FILE, &utx);
 #undef WTMPX_FILE
