@@ -3014,10 +3014,10 @@ config_mdnstries(
 	config_tree *ptree
 	)
 {
-#ifdef HAVE_DNSREGISTRATION
+#ifdef ENABLE_MDNS_REGISTRATION
 	extern int mdnstries;
 	mdnstries = ptree->mdnstries;
-#endif  /* HAVE_DNSREGISTRATION */
+#endif  /* ENABLE_MDNS_REGISTRATION */
 }
 
 #ifdef FREE_CFG_T

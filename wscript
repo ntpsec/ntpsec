@@ -33,6 +33,7 @@ def options(ctx):
 	grp.add_option('--enable-crypto', action='store_true', default=False, help="Enable OpenSSL.")
 	grp.add_option('--disable-droproot', action='store_true', default=False, help="Disable dropping root.")
 	grp.add_option('--disable-dns-lookup', action='store_true', default=False, help="Disable DNS lookups.")
+	grp.add_option('--disable-mdns-registration', action='store_true', default=False, help="Disable DNS lookups.")
 
 
 	grp = ctx.add_option_group("NTP features")

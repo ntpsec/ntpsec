@@ -95,7 +95,7 @@ def cmd_configure(ctx):
 	ctx.recurse("libntp")
 	ctx.recurse("sntp")
 
-	types = ["int32", "int32_t", "uint32_t", "uint_t", "size_t", "wint_t", "pid_t", "intptr_t", "uintptr_t"]
+	types = ["int32", "int32_t", "uint32_t", "int64_t", "uint64_t", "uint_t", "size_t", "wint_t", "pid_t", "intptr_t", "uintptr_t"]
 
 	for type in sorted(types):
 		ctx.check_type(type)
@@ -330,6 +330,8 @@ int main() { return 0; }
 	if not ctx.options.disable_dns_lookup:
 		ctx.define("ENABLE_DNS_LOOKUP", 1)
 
+	if not ctx.options.disable_mdns_registration:
+		ctx.define("ENABLE_MDNS_REGISTRATION", 1)
 
 	# There is an ENABLE_AUTOKEY as well, but as that feature
 	# is not working and likely to be replaced it's not exposed
