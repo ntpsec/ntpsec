@@ -15,10 +15,8 @@
  * PERFORMANCE OF THIS SOFTWARE.
  */
 
-/* $Id: magic.h,v 1.18 2007/06/19 23:47:18 tbox Exp $ */
-
-#ifndef ISC_MAGIC_H
-#define ISC_MAGIC_H 1
+#ifndef GUARD_ISC_MAGIC_H
+#define GUARD_ISC_MAGIC_H 1
 
 /*! \file isc/magic.h */
 
@@ -38,4 +36,4 @@ typedef struct {
 
 #define ISC_MAGIC(a, b, c, d)	((a) << 24 | (b) << 16 | (c) << 8 | (d))
 
-#endif /* ISC_MAGIC_H */
+#endif /* GUARD_ISC_MAGIC_H */

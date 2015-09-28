@@ -15,12 +15,8 @@
  * PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef ISC_SHA1_H
-#define ISC_SHA1_H 1
-
-/* $Id: sha1.h,v 1.19 2009/02/06 23:47:42 tbox Exp $ */
-
-/*	$NetBSD: sha1.h,v 1.2 1998/05/29 22:55:44 thorpej Exp $	*/
+#ifndef GUARD_ISC_SHA1_H
+#define GUARD_ISC_SHA1_H 1
 
 /*! \file isc/sha1.h
  * \brief SHA-1 in C
@@ -65,4 +61,4 @@ isc_sha1_final(isc_sha1_t *ctx, unsigned char *digest);
 
 ISC_LANG_ENDDECLS
 
-#endif /* ISC_SHA1_H */
+#endif /* GUARD_ISC_SHA1_H */

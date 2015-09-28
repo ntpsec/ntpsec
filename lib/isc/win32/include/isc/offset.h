@@ -15,10 +15,8 @@
  * PERFORMANCE OF THIS SOFTWARE.
  */
 
-/* $Id: offset.h,v 1.6 2007/06/19 23:47:20 tbox Exp $ */
-
-#ifndef ISC_OFFSET_H
-#define ISC_OFFSET_H 1
+#ifndef GUARD_ISC_OFFSET_H
+#define GUARD_ISC_OFFSET_H 1
 
 /*
  * File offsets are operating-system dependent.
@@ -41,4 +39,4 @@ typedef _off_t isc_offset_t;
 	(~(((off_t)-1 >> (sizeof(off_t) * CHAR_BIT - 1)) \
 		      << (sizeof(off_t) * CHAR_BIT - 1)))
 
-#endif /* ISC_OFFSET_H */
+#endif /* GUARD_ISC_OFFSET_H */

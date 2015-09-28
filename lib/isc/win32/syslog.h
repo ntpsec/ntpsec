@@ -15,10 +15,8 @@
  * PERFORMANCE OF THIS SOFTWARE.
  */
 
-/* $Id: syslog.h,v 1.7 2007/06/19 23:47:19 tbox Exp $ */
-
-#ifndef _SYSLOG_H
-#define _SYSLOG_H
+#ifndef GIARD_SYSLOG_H
+#define GUARD_SYSLOG_H
 
 #include <stdio.h>
 

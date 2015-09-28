@@ -15,10 +15,8 @@
  * PERFORMANCE OF THIS SOFTWARE.
  */
 
-/* $Id: bind_registry.h,v 1.8 2007/06/19 23:47:20 tbox Exp $ */
-
-#ifndef ISC_BINDREGISTRY_H
-#define ISC_BINDREGISTRY_H
+#ifndef GUARD_ISC_BINDREGISTRY_H
+#define GUARD_ISC_BINDREGISTRY_H
 
 /*
  * BIND makes use of the following Registry keys in various places, especially
@@ -47,4 +45,4 @@
 #define BIND_FOREGROUND		3
 #define BIND_PORT		4
 
-#endif /* ISC_BINDREGISTRY_H */
+#endif /* GUARD_ISC_BINDREGISTRY_H */

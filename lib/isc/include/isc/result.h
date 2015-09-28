@@ -15,10 +15,8 @@
  * PERFORMANCE OF THIS SOFTWARE.
  */
 
-/* $Id$ */
-
-#ifndef ISC_RESULT_H
-#define ISC_RESULT_H 1
+#ifndef GUARD_ISC_RESULT_H
+#define GUARD_ISC_RESULT_H 1
 
 /*! \file isc/result.h */
 
@@ -106,4 +104,4 @@ isc_result_register(unsigned int base, unsigned int nresults,
 
 ISC_LANG_ENDDECLS
 
-#endif /* ISC_RESULT_H */
+#endif /* GUARD_ISC_RESULT_H */

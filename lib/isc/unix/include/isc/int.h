@@ -15,10 +15,8 @@
  * PERFORMANCE OF THIS SOFTWARE.
  */
 
-/* $Id: int.h,v 1.16 2007/06/19 23:47:19 tbox Exp $ */
-
-#ifndef ISC_INT_H
-#define ISC_INT_H 1
+#ifndef GUARD_ISC_INT_H
+#define GUARD_ISC_INT_H 1
 
 /*! \file */
 
@@ -52,4 +50,4 @@ typedef unsigned long long		isc_uint64_t;
 #define ISC_INT64_MAX	9223372036854775807LL
 #define ISC_UINT64_MAX	18446744073709551615ULL
 
-#endif /* ISC_INT_H */
+#endif /* GUARD_ISC_INT_H */

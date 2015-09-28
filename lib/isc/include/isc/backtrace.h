@@ -37,8 +37,8 @@
  * non-error-handling context and validates arguments with assertion checks.
  */
 
-#ifndef ISC_BACKTRACE_H
-#define ISC_BACKTRACE_H 1
+#ifndef GUARD_ISC_BACKTRACE_H
+#define GUARD_ISC_BACKTRACE_H 1
 
 /***
  ***	Imports
@@ -128,4 +128,4 @@ isc_backtrace_getsymbol(const void *addr, const char **symbolp,
  */
 ISC_LANG_ENDDECLS
 
-#endif	/* ISC_BACKTRACE_H */
+#endif	/* GUARD_ISC_BACKTRACE_H */

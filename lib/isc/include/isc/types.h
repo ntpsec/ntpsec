@@ -15,10 +15,8 @@
  * PERFORMANCE OF THIS SOFTWARE.
  */
 
-/* $Id$ */
-
-#ifndef ISC_TYPES_H
-#define ISC_TYPES_H 1
+#ifndef GUARD_ISC_TYPES_H
+#define GUARD_ISC_TYPES_H 1
 
 #include <isc/namespace.h>
 
@@ -120,4 +118,4 @@ typedef enum {
 	isc_resource_stacksize
 } isc_resource_t;
 
-#endif /* ISC_TYPES_H */
+#endif /* GUARD_ISC_TYPES_H */

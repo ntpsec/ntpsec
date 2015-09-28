@@ -15,10 +15,8 @@
  * PERFORMANCE OF THIS SOFTWARE.
  */
 
-/* $Id: once.h,v 1.13 2007/06/19 23:47:18 tbox Exp $ */
-
-#ifndef ISC_ONCE_H
-#define ISC_ONCE_H 1
+#ifndef GUARD_ISC_ONCE_H
+#define GUARD_ISC_ONCE_H 1
 
 /*! \file */
 
@@ -47,4 +45,4 @@ typedef pthread_once_t isc_once_t;
 	((pthread_once((op), (f)) == 0) ? \
 	 ISC_R_SUCCESS : ISC_R_UNEXPECTED)
 
-#endif /* ISC_ONCE_H */
+#endif /* GUARD_ISC_ONCE_H */

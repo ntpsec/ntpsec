@@ -15,10 +15,8 @@
  * PERFORMANCE OF THIS SOFTWARE.
  */
 
-/* $Id: log.h,v 1.59 2009/02/16 02:01:16 marka Exp $ */
-
-#ifndef ISC_LOG_H
-#define ISC_LOG_H 1
+#ifndef GUARD_ISC_LOG_H
+#define GUARD_ISC_LOG_H 1
 
 /*! \file isc/log.h */
 
@@ -912,4 +910,4 @@ isc_log_setcontext(isc_log_t *lctx);
 
 ISC_LANG_ENDDECLS
 
-#endif /* ISC_LOG_H */
+#endif /* GUARD_ISC_LOG_H */

@@ -15,10 +15,8 @@
  * PERFORMANCE OF THIS SOFTWARE.
  */
 
-/* $Id$ */
-
-#ifndef ISC_IPV6_H
-#define ISC_IPV6_H 1
+#ifndef GUARD_ISC_IPV6_H
+#define GUARD_ISC_IPV6_H 1
 
 /*****
  ***** Module Info
@@ -51,4 +49,4 @@
 LIBISC_EXTERNAL_DATA extern const struct in6_addr isc_net_in6addrany;
 LIBISC_EXTERNAL_DATA extern const struct in6_addr isc_net_in6addrloop;
 
-#endif /* ISC_IPV6_H */
+#endif /* GUARD_ISC_IPV6_H */

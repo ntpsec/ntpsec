@@ -15,10 +15,8 @@
  * PERFORMANCE OF THIS SOFTWARE.
  */
 
-/* $Id: lang.h,v 1.13 2007/06/19 23:47:18 tbox Exp $ */
-
-#ifndef ISC_LANG_H
-#define ISC_LANG_H 1
+#ifndef GUARD_ISC_LANG_H
+#define GUARD_ISC_LANG_H 1
 
 /*! \file isc/lang.h */
 
@@ -30,4 +28,4 @@
 #define ISC_LANG_ENDDECLS
 #endif
 
-#endif /* ISC_LANG_H */
+#endif /* GUARD_ISC_LANG_H */

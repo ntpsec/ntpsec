@@ -15,10 +15,8 @@
  * PERFORMANCE OF THIS SOFTWARE.
  */
 
-/* $Id: bindevt.h,v 1.6 2007/06/19 23:47:20 tbox Exp $ */
-
-#ifndef ISC_BINDEVT_H
-#define ISC_BINDEVT_H 1
+#ifndef GUARD_ISC_BINDEVT_H
+#define GUARD_ISC_BINDEVT_H 1
 
 /*
  * This is used for the event log for both logging the messages and
@@ -88,4 +86,4 @@
  */
 #define BIND_INFO_MSG		((DWORD)0x40000003L)
 
-#endif /* ISC_BINDEVT_H */
+#endif /* GUARD_ISC_BINDEVT_H */

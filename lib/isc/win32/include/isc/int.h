@@ -15,10 +15,8 @@
  * PERFORMANCE OF THIS SOFTWARE.
  */
 
-/* $Id: int.h,v 1.13 2007/06/19 23:47:20 tbox Exp $ */
-
-#ifndef ISC_INT_H
-#define ISC_INT_H 1
+#ifndef GUARD_ISC_INT_H
+#define GUARD_ISC_INT_H 1
 
 #define _INTEGRAL_MAX_BITS 64
 #include <limits.h>
@@ -53,4 +51,4 @@ typedef unsigned __int64		isc_uint64_t;
 #define ISC_INT64_MAX	_I64_MAX
 #define ISC_UINT64_MAX	_UI64_MAX
 
-#endif /* ISC_INT_H */
+#endif /* GUARD_ISC_INT_H */

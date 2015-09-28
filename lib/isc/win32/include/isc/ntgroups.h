@@ -15,10 +15,8 @@
  * PERFORMANCE OF THIS SOFTWARE.
  */
 
-/* $Id: ntgroups.h,v 1.5 2007/06/19 23:47:20 tbox Exp $ */
-
-#ifndef ISC_NTGROUPS_H
-#define ISC_NTGROUPS_H 1
+#ifndef GUARD_ISC_NTGROUPS_H
+#define GUARD_ISC_NTGROUPS_H 1
 
 #include <isc/lang.h>
 #include <isc/result.h>
@@ -32,4 +30,4 @@ isc_ntsecurity_getaccountgroups(char *name, char **Groups, unsigned int maxgroup
 
 ISC_LANG_ENDDECLS
 
-#endif /* ISC_NTGROUPS_H */
+#endif /* GUARD_ISC_NTGROUPS_H */

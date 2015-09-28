@@ -15,10 +15,8 @@
  * PERFORMANCE OF THIS SOFTWARE.
  */
 
-/* $Id: netaddr.h,v 1.37 2009/01/17 23:47:43 tbox Exp $ */
-
-#ifndef ISC_NETADDR_H
-#define ISC_NETADDR_H 1
+#ifndef GUARD_ISC_NETADDR_H
+#define GUARD_ISC_NETADDR_H 1
 
 /*! \file isc/netaddr.h */
 
@@ -178,4 +176,4 @@ isc_netaddr_prefixok(const isc_netaddr_t *na, unsigned int prefixlen);
 
 ISC_LANG_ENDDECLS
 
-#endif /* ISC_NETADDR_H */
+#endif /* GUARD_ISC_NETADDR_H */

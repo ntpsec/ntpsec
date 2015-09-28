@@ -15,10 +15,8 @@
  * PERFORMANCE OF THIS SOFTWARE.
  */
 
-/* $Id$ */
-
-#ifndef ISC_NET_H
-#define ISC_NET_H 1
+#ifndef GUARD_ISC_NET_H
+#define GUARD_ISC_NET_H 1
 
 #include <errno.h>
 
@@ -370,4 +368,4 @@ isc_net_aton(const char *cp, struct in_addr *addr);
 
 ISC_LANG_ENDDECLS
 
-#endif /* ISC_NET_H */
+#endif /* GUARD_ISC_NET_H */

@@ -40,8 +40,8 @@
  * Still in the public domain.
  */
 
-#ifndef ISC_MD5_H
-#define ISC_MD5_H 1
+#ifndef GUARD_ISC_MD5_H
+#define GUARD_ISC_MD5_H 1
 
 #include <isc/lang.h>
 #include <isc/platform.h>
@@ -80,4 +80,4 @@ isc_md5_final(isc_md5_t *ctx, unsigned char *digest);
 
 ISC_LANG_ENDDECLS
 
-#endif /* ISC_MD5_H */
+#endif /* GUARD_ISC_MD5_H */

@@ -15,10 +15,8 @@
  * PERFORMANCE OF THIS SOFTWARE.
  */
 
-/* $Id: lib.h,v 1.16 2009/09/02 23:48:03 tbox Exp $ */
-
-#ifndef ISC_LIB_H
-#define ISC_LIB_H 1
+#ifndef GUARD_ISC_LIB_H
+#define GUARD_ISC_LIB_H 1
 
 /*! \file isc/lib.h */
 
@@ -47,4 +45,4 @@ isc_lib_register(void);
 
 ISC_LANG_ENDDECLS
 
-#endif /* ISC_LIB_H */
+#endif /* GUARD_ISC_LIB_H */

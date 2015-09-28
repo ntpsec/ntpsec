@@ -15,10 +15,8 @@
  * PERFORMANCE OF THIS SOFTWARE.
  */
 
-/* $Id$ */
-
-#ifndef ISC_LIST_H
-#define ISC_LIST_H 1
+#ifndef GUARD_ISC_LIST_H
+#define GUARD_ISC_LIST_H 1
 #include <stdbool.h>
 #include <isc/assertions.h>
 
@@ -194,4 +192,4 @@
 #define __ISC_LIST_DEQUEUEUNSAFE_TYPE(list, elt, link, type) \
 	__ISC_LIST_UNLINKUNSAFE_TYPE(list, elt, link, type)
 
-#endif /* ISC_LIST_H */
+#endif /* GUARD_ISC_LIST_H */

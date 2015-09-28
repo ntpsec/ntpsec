@@ -15,16 +15,14 @@
  * PERFORMANCE OF THIS SOFTWARE.
  */
 
-/* $Id: ntpaths.h,v 1.20 2009/07/14 22:54:57 each Exp $ */
-
 /*
  * Windows-specific path definitions
  * These routines are used to set up and return system-specific path
  * information about the files enumerated in NtPaths
  */
 
-#ifndef ISC_NTPATHS_H
-#define ISC_NTPATHS_H
+#ifndef GUARD_ISC_NTPATHS_H
+#define GUARD_ISC_NTPATHS_H
 
 #include <isc/lang.h>
 
@@ -69,4 +67,4 @@ isc_ntpaths_get(int);
 
 ISC_LANG_ENDDECLS
 
-#endif /* ISC_NTPATHS_H */
+#endif /* GUARD_ISC_NTPATHS_H */
