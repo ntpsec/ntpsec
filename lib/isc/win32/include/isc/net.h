@@ -100,7 +100,6 @@
 #include <isc/types.h>
 
 #include <ws2tcpip.h>
-#include <isc/ipv6.h>
 
 /*
  * This is here because named client, interfacemgr.c, etc. use the name as

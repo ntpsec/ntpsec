@@ -373,7 +373,6 @@
     <ClInclude Include="..\..\..\..\lib\isc\include\isc\result.h" />
     <ClInclude Include="..\..\..\..\lib\isc\include\isc\socket.h" />
     <ClInclude Include="..\..\..\..\lib\isc\win32\include\isc\int.h" />
-    <ClInclude Include="..\..\..\..\lib\isc\win32\include\isc\ipv6.h" />
     <ClInclude Include="..\..\..\..\lib\isc\win32\include\isc\net.h" />
     <ClInclude Include="..\..\..\..\lib\isc\win32\include\isc\netdb.h" />
     <ClInclude Include="..\..\..\..\lib\isc\win32\include\isc\platform.h" />

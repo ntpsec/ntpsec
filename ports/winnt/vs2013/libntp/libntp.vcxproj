@@ -360,7 +360,6 @@
     <ClInclude Include="..\..\..\..\lib\isc\include\isc\socket.h" />
     <ClInclude Include="..\..\..\..\lib\isc\include\isc\task.h" />
     <ClInclude Include="..\..\..\..\lib\isc\win32\include\isc\condition.h" />
-    <ClInclude Include="..\..\..\..\lib\isc\win32\include\isc\ipv6.h" />
     <ClInclude Include="..\..\..\..\lib\isc\win32\include\isc\mutex.h" />
     <ClInclude Include="..\..\..\..\lib\isc\win32\include\isc\net.h" />
     <ClInclude Include="..\..\..\..\lib\isc\win32\include\isc\platform.h" />

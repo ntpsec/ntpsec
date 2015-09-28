@@ -311,10 +311,6 @@ SOURCE=..\include\isc\interfaceiter.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\include\isc\ipv6.h
-# End Source File
-# Begin Source File
-
 SOURCE=..\include\isc\iterated_hash.h
 # End Source File
 # Begin Source File

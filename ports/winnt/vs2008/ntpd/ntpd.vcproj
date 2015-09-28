@@ -465,10 +465,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\..\lib\isc\win32\include\isc\ipv6.h"
-				>
-			</File>
-			<File
 				RelativePath="..\..\..\..\ntpd\jupiter.h"
 				>
 			</File>

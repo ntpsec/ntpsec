@@ -37,7 +37,7 @@
 #include "ieee754io.h"
 
 static unsigned char get_byte (unsigned char *, offsets_t, int *);
-#ifdef __not_yet__
+#ifdef __UNUSED__
 static void put_byte (unsigned char *, offsets_t, int *, unsigned char);
 #endif
 
@@ -133,7 +133,7 @@ get_byte(
   return val;
 }
 
-#ifdef __not_yet__
+#ifdef __UNUSED__
 static void
 put_byte(
 	 unsigned char *bufp,

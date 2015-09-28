@@ -18,14 +18,12 @@
 #  ifdef HAVE_NTP_ADJTIME
 extern	int	ntp_adjtime	(struct timex *);
 
-#   ifndef HAVE_STRUCT_NTPTIMEVAL
 struct ntptimeval
 {
 	struct timeval	time;		/* current time (ro) */
 	long int	maxerror;	/* maximum error (us) (ro) */
 	long int	esterror;	/* estimated error (us) (ro) */
 };
-#   endif
 
 #   ifndef HAVE_NTP_GETTIME
 static inline int

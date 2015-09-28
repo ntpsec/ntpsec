@@ -320,9 +320,6 @@
     <ClInclude Include="..\..\..\..\include\iosignal.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\lib\isc\win32\include\isc\ipv6.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\..\ntpd\jupiter.h">
       <Filter>Header Files</Filter>
     </ClInclude>

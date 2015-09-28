@@ -85,10 +85,6 @@
 #include <netinet6/in6.h>	/* Required on BSD/OS for in6_pktinfo. */
 #endif
 
-#ifndef ISC_PLATFORM_HAVEIPV6
-#include <isc/ipv6.h>		/* Contractual promise. */
-#endif
-
 #include <isc/lang.h>
 #include <isc/types.h>
 
