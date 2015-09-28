@@ -1473,7 +1473,7 @@ to replace the old version. This implies that {ntpdman} must
 have write permission for the directory the drift file is located in,
 and that file system links, symbolic or otherwise, should be avoided.
 
-`enable` [`auth` | `bclient` | `calibrate` | `kernel` | `mode7` | `monitor` | `ntp` | `stats`]; `disable` [`auth` | `bclient` | `calibrate` | `kernel` | `mode7` | `monitor` | `ntp` | `stats`]::
+`enable` [`auth` | `bclient` | `calibrate` | `kernel` | `monitor` | `ntp` | `stats`]; `disable` [`auth` | `bclient` | `calibrate` | `kernel` | `monitor` | `ntp` | `stats`]::
   Provides a way to enable or disable various server options. Flags not
   mentioned are unaffected. Note that all of these flags can be
   controlled remotely using the {ntpqman} utility program.
@@ -1492,16 +1492,9 @@ and that file system links, symbolic or otherwise, should be avoided.
   `kernel`;;
     Enables the kernel time discipline, if available. The default for
     this flag is `enable` if support is available, otherwise `disable`.
-  `mode7`;;
-    Enables processing of NTP mode 7 implementation-specific requests,
-    formerly used by the ntpdc program. The
-    default for this flag is disable. This flag is excluded from runtime
-    configuration using {ntpqman}. The {ntpqman} program
-    provides the same capabilities as ntpdc did, using standard
-    mode 6 requests.
   `monitor`;;
     Enables the monitoring facility. See the {ntpqman} program
-    and themonlistcommand or further information. The default for this
+    and the monlist command for further information. The default for this
     flag is `enable`.
   `ntp`;;
     Enables time and frequency discipline. In effect, this switch opens
