@@ -75,7 +75,7 @@
 # include <seccomp.h>
 #endif /* LIBSECCOMP and KERN_SECCOMP */
 
-#ifdef ENABLE_MDNS_REGISTRATION
+#if defined(HAVE_DNS_SD_H) && defined(ENABLE_MDNS_REGISTRATION)
 # include <dns_sd.h>
 DNSServiceRef mdns;
 #endif
@@ -107,7 +107,7 @@ static bool dumpopts;
 static long wait_sync = -1;
 static const char *driftfile, *pidfile;
 
-#ifdef ENABLE_MDNS_REGISTRATION
+#if defined(HAVE_DNS_SD_H) && defined(ENABLE_MDNS_REGISTRATION)
 /*
  * mDNS registration flag. If set, we attempt to register with the
  * mDNS system, but only after we have synched the first time. If the
@@ -309,7 +309,7 @@ parse_cmdline_opts(
 		listen_to_virtual_ips = false;
 		break;
 	    case 'm':
-#ifdef ENABLE_MDNS_REGISTRATION
+#if defined(HAVE_DNS_SD_H) && defined(ENABLE_MDNS_REGISTRATION)
 		mdnsreg = true;
 #endif  /* ENABLE_MDNS_REGISTRATION */
 		break;
@@ -931,7 +931,7 @@ ntpdmain(
 		fprintf(stdout, "logfile \"%s\";\n", logfilename);
 	    fprintf(stdout, "#listen_to_virtual_ips = %s\n",
 		    listen_to_virtual_ips ? "true" : "false");
-#ifdef ENABLE_MDNS_REGISTRATION
+#if defined(HAVE_DNS_SD_H) && defined(ENABLE_MDNS_REGISTRATION)
 	    fprintf(stdout, "#mdnsreg = %s\n",
 		    mdnsreg ? "true" : "false");
 #endif  /* ENABLE_MDNS_REGISTRATION */
@@ -1371,7 +1371,7 @@ int scmp_sc[] = {
 		 * Go around again
 		 */
 
-# ifdef ENABLE_MDNS_REGISTRATION
+# if defined(HAVE_DNS_SD_H) && defined(ENABLE_MDNS_REGISTRATION)
 		if (mdnsreg && (current_time - mdnsreg ) > 60 && mdnstries && sys_leap != LEAP_NOTINSYNC) {
 			mdnsreg = current_time;
 			msyslog(LOG_INFO, "Attempting to register mDNS");
@@ -1415,7 +1415,7 @@ finish(
 	msyslog(LOG_NOTICE, "%s exiting on signal %d (%s)", progname,
 		sig, sig_desc);
 	/* See Bug 2513 and Bug 2522 re the unlink of PIDFILE */
-# ifdef ENABLE_MDNS_REGISTRATION
+# if defined(HAVE_DNS_SD_H) && defined(ENABLE_MDNS_REGISTRATION)
 	if (mdns != NULL)
 		DNSServiceRefDeallocate(mdns);
 # endif

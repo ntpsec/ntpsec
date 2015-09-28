@@ -17,42 +17,21 @@ None right now. (Sep-22 2015)
   build + platform information
 
 * scripts/*/*.in and scripts/ntpsweep.in need to be expanded into the
-actual scripts by substituting in @-cookies.
+actual scripts by substituting in @-cookies.  So do all files in the tree
+with extension *.txt.in.
 
 * The install production needs to warn of stale ntpdc and ntpdate binaries.
 
-* The following symbols need to be investigated to determine under what
-circumstances configuration should set them.
-
-HAVE_AUDIO
-HAVE_BINTIME
-HAVE_CATGETS
-HAVE_DNSREGISTRATION
-HAVE_IO_COMPLETION_PORT
-HAVE_KVM_OPEN
-HAVE_LIBCTRACE
-HAVE_LIBXML2
-HAVE_LINUX_CAPABILITIES
-HAVE_PACKET_TIMESTAMP
-HAVE_PTHREAD_ATTR_GETSTACKSIZE
-HAVE_RTPRIO
-HAVE_SYSCTLBYNAME
-HAVE_TIMESTAMP
-HAVE_TIMESTAMPNS
-HAVE_TRUCLUSTER
-NEED_HPUX_ADJTIME
-NEED_NETSNMP_DAEMONIZE
-NEED_SRANDOMDEV
-OPENSSL_LEAKS
-TM_IN_SYS_TIME
-TRIM_POLLRATE
+* There are still around 270 conditional symbols in the build that have
+  not been audited.
 
 === Code ===
 
 * The u_* types in ntp.h are GCCisms that should be replaced with POSIX types.
 
 * We should audit scripts/ and utils/ to see which of those programs can
-  be thrown out.
+  be thrown out.  Some (such as ntptrace) need to be translated into Python
+  and supported.
 
 Hal:
 > I think there is some interaction between when the ACTS driver calls and the 
@@ -109,13 +88,11 @@ is not yet tested anywhere but in ntpd itself.
 [options="header"]
 |===========================================================
 | Inside docs       | Outside docs
-| docs/keygen.txt   | ntp-keygen/ntp-keygen.txt
 | docs/ntp_conf.txt | ntpd/ntp.conf.txt
 | docs/ntpdsim.txt  | docs/ntpdsim_new.txt
 | docs/ntpd.txt     | ntpd/ntpd.txt
 | docs/ntpq.txt     | ntpq/ntpq.txt
 | docs/ntptime.txt  | -
-| docs/ntptrace.txt | scripts/ntptrace/ntptrace.txt
 | docs/ntpwait.txt  | scripts/ntp-wait/ntp-wait.txt
 | docs/sntp.txt     | sntp/sntp.txt
 | docs/tickadj.txt  | -

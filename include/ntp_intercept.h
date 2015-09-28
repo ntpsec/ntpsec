@@ -2,14 +2,6 @@
  * ntp_intercept.h - intercept/replay support for environment calls
  */
 
-#if __STDC_VERSION__ < 199901L
-# if __GNUC__ >= 2
-#  define __func__ __FUNCTION__
-# else
-#  define __func__ "<unknown>"
-# endif
-#endif
-
 /* Macro for declaring function with printf-like arguments. */
 # if __GNUC__ >= 3 || (__GNUC__ == 2 && __GNUC_MINOR__ >= 7)
 #define PRINTF_FUNC(format_index, arg_index) \
