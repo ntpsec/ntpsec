@@ -214,6 +214,7 @@ def cmd_configure(ctx):
 	optional_headers = (
 		"alloca.h",
 		"arpa/nameser.h",
+		"dns_sd.h",
 		"histedit.h",
 		"ieeefp.h",
 		"ifaddrs.h",

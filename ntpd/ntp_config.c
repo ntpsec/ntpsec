@@ -3010,7 +3010,7 @@ config_mdnstries(
 	config_tree *ptree
 	)
 {
-#ifdef ENABLE_MDNS_REGISTRATION
+#if defined(HAVE_DNS_SD_H) && defined(ENABLE_MDNS_REGISTRATION)
 	extern int mdnstries;
 	mdnstries = ptree->mdnstries;
 #endif  /* ENABLE_MDNS_REGISTRATION */
