@@ -1,0 +1,20 @@
+= ntptime(1) =
+:doctype: manpage
+
+== NAME ==
+ntptime - read and set kernel time variables
+
+@../docs/ntptime-body.txt@
+
+== EXIT STATUS ==
+
+One of the following exit values will be returned:
+
+0 (EXIT_SUCCESS)::
+  Successful program execution.
+1 (EXIT_FAILURE)::
+  The operation failed or the command syntax was not valid.
+66 (EX_NOINPUT)::
+  A specified configuration file could not be loaded.
+
+// end
