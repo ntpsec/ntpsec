@@ -138,7 +138,7 @@ def build(ctx):
 		features	= "c cprogram bld_include src_include libisc_include libisc_pthread_include ntp_version",
 		source		= ntpd_source,
 		# defines		= ["HAVE_CONFIG_H=1"] + refclock_define,
-		use			= "libntpd_obj bison_obj isc ntp opts M parse GCC_S RT CAP THR PTHREAD CRYPTO %s" % use_refclock,
+		use			= "libntpd_obj bison_obj isc ntp opts M parse GCC_S RT CAP THR PTHREAD CRYPTO DNS_SD DNS_SD_INCLUDES %s" % use_refclock,
 		includes	= [
 						"%s/ntpd/" % bldnode,
 						"%s/ntpd/" % srcnode
