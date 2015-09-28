@@ -1,0 +1,16 @@
+= ntptrace(1) =
+:doctype: manpage
+
+== NAME ==
+ntptrace - trace peers of an NTP server
+
+@../../docs/ntptrace-body.txt@
+
+== EXIT STATUS ==
+
+One of the following exit values will be returned:
+
+0 (EXIT_SUCCESS)::
+  Successful program execution.
+1 (EXIT_FAILURE)::
+  The operation failed or the command syntax was not valid.

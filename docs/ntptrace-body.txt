@@ -1,8 +1,6 @@
-= ntpq(1) =
-:doctype: manpage
-
-== NAME ==
-ntptrace - trace peers of an NTP server
+// This is the body of the manual page for ntptrace.
+// It's included in two places: once for the docs/ HTML
+// tree, and once to make an individual man page.
 
 == SYNOPSIS ==
 
@@ -23,9 +21,10 @@ If given no arguments, ntptrace starts with localhost. Here is an
 example of the output from ntptrace:
 
 -------------------------------------------------------------------------------
-% ntptrace localhost: stratum 4, offset 0.0019529, synch distance 0.144135
-server2ozo.com: stratum 2, offset 0.0124263, synch distance 0.115784 usndh.edu:
-stratum 1, offset 0.0019298, synch distance 0.011993, refid 'WWVB'
+% ntptrace
+localhost: stratum 4, offset 0.0019529, synch distance 0.144135
+server2ozo.com: stratum 2, offset 0.0124263, synch distance 0.115784
+usndh.edu: stratum 1, offset 0.0019298, synch distance 0.011993, refid 'WWVB'
 -------------------------------------------------------------------------------
 
 On each line, the fields are (left to right): the host name, the host
@@ -47,28 +46,9 @@ the canonical host names.
 
 `-m` number, `--max-hosts`=_number_::
   Maximum number of peers to trace. This option takes an integer number
-  as its argument. The default _number_ for this option is:
-+
-__
-99
-__
-+
-This option has not been fully documented.
+  as its argument. The default _number_ for this option is 99.
 
-`-r` string, `--host`=_string_::
-Single remote host. The default _string_ for this option is:
-+
-_________
-127.0.0.1
-_________
-+
-This option has not been fully documented.
+`-r` string, `--host`=_string_
+  Trace a single remote host.
 
-== EXIT STATUS ==
-
-One of the following exit values will be returned:
-
-0 (EXIT_SUCCESS)::
-  Successful program execution.
-1 (EXIT_FAILURE)::
-  The operation failed or the command syntax was not valid.
+// end
