@@ -331,7 +331,9 @@ int main() { return 0; }
 		ctx.define("ENABLE_DNS_LOOKUP", 1)
 
 	if not ctx.options.disable_mdns_registration:
-		ctx.define("ENABLE_MDNS_REGISTRATION", 1)
+		from check_mdns import check_mdns
+		check_mdns(ctx)
+
 
 	# There is an ENABLE_AUTOKEY as well, but as that feature
 	# is not working and likely to be replaced it's not exposed
