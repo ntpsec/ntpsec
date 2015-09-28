@@ -48,9 +48,9 @@ parts-per-million (PPM). The file is updated by first writing the
 current drift value into a temporary file and then renaming this file
 to replace the old version.
 
-`enable [auth | bclient | calibrate | kernel | mode7 | monitor | ntp | stats]`::
+`enable [auth | bclient | calibrate | kernel | monitor | ntp | stats]`::
 
-`disable [auth | bclient | calibrate | kernel | mode7 | monitor | ntp | stats]`::
+`disable [auth | bclient | calibrate | kernel | monitor | ntp | stats]`::
   Provides a way to enable or disable various system options. Flags not
   mentioned are unaffected. Note that most of these flags can be
   modified remotely using link:ntpq.html[`ntpq`] utility program's
@@ -69,12 +69,6 @@ to replace the old version.
   `kernel`;;
     Enables the kernel time discipline, if available. The default for
     this flag is enable if support is available, otherwise disable.
-  `mode7`;;
-    Enables processing of NTP mode 7 implementation-specific requests
-    which were formerly used by the `ntpdc` program. The default for
-    this flag is disable. This flag is excluded from runtime
-    configuration using `ntpq`. The `ntpq` program provides the same
-    capabilities as `ntpdc` did using standard mode 6 requests.
   `monitor`;;
     Enables the monitoring facility. See the link:ntpq.html[`ntpq`
     program] and the `monstats` and `mrulist` commands, as well as the
