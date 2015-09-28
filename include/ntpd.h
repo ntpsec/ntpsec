@@ -249,9 +249,9 @@ extern	void	init_refclock	(void);
 #endif	/* REFCLOCK */
 
 /* ntp_request.c */
-extern	void	init_request	(void);
-extern	void	process_private (struct recvbuf *, int);
 extern	void	reset_auth_stats(void);
+extern u_long	auth_timereset;
+
 
 /* ntp_restrict.c */
 extern	void	init_restrict	(void);
@@ -321,18 +321,6 @@ extern char	*sys_phone[];		/* ACTS phone numbers */
 extern bool	config_priority_override;
 extern char *ntp_signd_socket;
 extern struct config_tree_tag *cfg_tree_history;
-
-#ifdef BC_LIST_FRAMEWORK_NOT_YET_USED
-/*
- * backwards compatibility flags
- */
-typedef struct bc_entry_tag {
-	int	token;
-	int	enabled;
-} bc_entry;
-
-extern bc_entry bc_list[];
-#endif
 
 /* ntp_control.c */
 extern int	num_ctl_traps;
@@ -500,10 +488,6 @@ extern u_long	sys_badauth;		/* bad authentication */
 extern u_long	sys_declined;		/* declined */
 extern u_long	sys_limitrejected;	/* rate exceeded */
 extern u_long	sys_kodsent;		/* KoD sent */
-
-/* ntp_request.c */
-extern keyid_t	info_auth_keyid;	/* keyid used to authenticate requests */
-extern u_long	auth_timereset;
 
 /* ntp_restrict.c */
 extern restrict_u *	restrictlist4;	/* IPv4 restriction list */

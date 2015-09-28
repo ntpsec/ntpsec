@@ -30,7 +30,6 @@
 #include "ntp_refclock.h"
 #include "ntp_stdlib.h"
 #include "ntp_worker.h"
-#include "ntp_request.h"
 #include "ntp_assert.h"
 #include "ntp_intercept.h"
 #include "timevalops.h"
@@ -54,6 +53,12 @@
 #  include <linux/rtnetlink.h>
 # endif
 #endif
+
+/* From ntp_request.h - after nuking ntpdc */
+#define IFS_EXISTS      1       /* just exists */
+#define IFS_CREATED     2       /* was just created */
+#define IFS_DELETED     3       /* was just delete */
+
 
 
 /*

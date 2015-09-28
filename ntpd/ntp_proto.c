@@ -95,7 +95,6 @@ static int leap_vote_ins;	/* leap consensus for insert */
 static int leap_vote_del;	/* leap consensus for delete */
 keyid_t	sys_private;		/* private value for session seed */
 int	sys_manycastserver;	/* respond to manycast client pkts */
-bool	ntp_mode7;		/* respond to ntpdc (mode7) */
 int	peer_ntpdate;		/* active peers in ntpdate mode */
 int	sys_survivors;		/* truest of the truechimers */
 char	*sys_ident = NULL;	/* identity scheme */
@@ -412,13 +411,9 @@ receive(
 		return;				/* ignore everything */
 	}
 	if (hismode == MODE_PRIVATE) {
-		if (!ntp_mode7 || (restrict_mask & RES_NOQUERY)) {
-			sys_restricted++;
-			return;			/* no query private */
-		}
-		process_private(rbufp, ((restrict_mask &
-		    RES_NOMODIFY) == 0));
-		return;
+		/* Old ntpdc packets.  monlist was DDoS amplifier. */
+		sys_restricted++;
+		return;				/* no query private */
 	}
 	if (hismode == MODE_CONTROL) {
 		if (restrict_mask & RES_NOQUERY) {
@@ -4081,10 +4076,6 @@ proto_config(
 
 	case PROTO_NTP:		/* NTP discipline (ntp) */
 		ntp_enable = (bool)value;
-		break;
-
-	case PROTO_MODE7:	/* mode7 management (formerly ntpdc) */
-		ntp_mode7 = (bool)value;
 		break;
 
 	case PROTO_PPS:		/* PPS discipline (pps) */

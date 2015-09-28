@@ -165,7 +165,6 @@
 %token	<Integer>	T_Minpoll
 %token	<Integer>	T_Minsane
 %token	<Integer>	T_Mode
-%token	<Integer>	T_Mode7
 %token	<Integer>	T_Monitor
 %token	<Integer>	T_Month
 %token	<Integer>	T_Mru
@@ -1075,8 +1074,7 @@ system_option_flag_keyword
 	;
 
 system_option_local_flag_keyword
-	:	T_Mode7
-	|	T_Stats
+	:	T_Stats
 	;
 
 /* Tinker Commands

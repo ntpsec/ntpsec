@@ -184,24 +184,6 @@ int	cryptosw;		/* crypto command called */
 
 extern char *stats_drift_file;	/* name of the driftfile */
 
-#ifdef BC_LIST_FRAMEWORK_NOT_YET_USED
-/*
- * backwards compatibility flags
- */
-bc_entry bc_list[] = {
-	{ T_Bc_bugXXXX,		1	}	/* default enabled */
-};
-
-/*
- * declare an int pointer for each flag for quick testing without
- * walking bc_list.  If the pointer is consumed by libntp rather
- * than ntpd, declare it in a libntp source file pointing to storage
- * initialized with the appropriate value for other libntp clients, and
- * redirect it to point into bc_list during ntpd startup.
- */
-int *p_bcXXXX_enabled = &bc_list[0].enabled;
-#endif
-
 /* FUNCTION PROTOTYPES */
 
 static void init_syntax_tree(config_tree *);
@@ -2888,9 +2870,6 @@ apply_enable_disable(
 {
 	attr_val *curr_flag;
 	int option;
-#ifdef BC_LIST_FRAMEWORK_NOT_YET_USED
-	bc_entry *pentry;
-#endif
 
 	for (curr_flag = HEAD_PFIFO(fifo);
 	     curr_flag != NULL;
@@ -2929,31 +2908,10 @@ apply_enable_disable(
 			proto_config(PROTO_NTP, enable, 0., NULL);
 			break;
 
-		case T_Mode7:
-			proto_config(PROTO_MODE7, enable, 0., NULL);
-			break;
-
 		case T_Stats:
 			proto_config(PROTO_FILEGEN, enable, 0., NULL);
 			break;
 
-#ifdef BC_LIST_FRAMEWORK_NOT_YET_USED
-		case T_Bc_bugXXXX:
-			pentry = bc_list;
-			while (pentry->token) {
-				if (pentry->token == option)
-					break;
-				pentry++;
-			}
-			if (!pentry->token) {
-				msyslog(LOG_ERR,
-					"compat token %d not in bc_list[]",
-					option);
-				continue;
-			}
-			pentry->enabled = enable;
-			break;
-#endif
 		}
 	}
 }

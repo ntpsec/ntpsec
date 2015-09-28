@@ -4913,3 +4913,28 @@ free_varlist(
 		free((void *)kv);
 	}
 }
+
+
+/* from ntp_request.c when ntpdc was nuked */
+
+/*
+ *  * A hack.  To keep the authentication module clear of ntp-ism's, we
+ *   * include a time reset variable for its stats here.
+ *    */
+u_long auth_timereset;
+
+/*
+ *  * reset_auth_stats - reset the authentication stat counters.  Done here
+ *   *                    to keep ntp-isms out of the authentication module
+ *    */
+void
+reset_auth_stats(void)
+{
+        authkeylookups = 0;
+        authkeynotfound = 0;
+        authencryptions = 0;
+        authdecryptions = 0;
+        authkeyuncached = 0;
+        auth_timereset = current_time;
+}
+

@@ -821,7 +821,6 @@ ntpdmain(
 	init_restrict();
 	init_mon();
 	init_timer();
-	init_request();
 	init_control();
 	init_peer();
 # ifdef REFCLOCK
