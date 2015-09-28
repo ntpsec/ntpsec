@@ -47,9 +47,9 @@ static	void	lassociations	(struct parse *, FILE *);
 static	void	passociations	(struct parse *, FILE *);
 static	void	lpassociations	(struct parse *, FILE *);
 
-#ifdef	UNUSED
+#ifdef	__UNUSED__
 static	void	radiostatus (struct parse *, FILE *);
-#endif	/* UNUSED */
+#endif	/* __UNUSED__ */
 
 static	void	authinfo	(struct parse *, FILE *);
 static	void	pstats	 	(struct parse *, FILE *);
@@ -1390,7 +1390,7 @@ saveconfig(
 }
 
 
-#ifdef	UNUSED
+#ifdef __UNUSED__
 /*
  * radiostatus - print the radio status returned by the server
  */

@@ -71,9 +71,5 @@ isc_thread_create(isc_threadfunc_t func, isc_threadarg_t arg,
 
 void
 isc_thread_setconcurrency(unsigned int level) {
-#if defined(CALL_PTHREAD_SETCONCURRENCY)
 	(void)pthread_setconcurrency(level);
-#else
-	UNUSED(level);
-#endif
 }

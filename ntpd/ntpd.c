@@ -75,7 +75,7 @@
 # include <seccomp.h>
 #endif /* LIBSECCOMP and KERN_SECCOMP */
 
-#ifdef HAVE_DNSREGISTRATION
+#ifdef ENABLE_MDNS_REGISTRATION
 # include <dns_sd.h>
 DNSServiceRef mdns;
 #endif
@@ -107,7 +107,7 @@ static bool dumpopts;
 static long wait_sync = -1;
 static const char *driftfile, *pidfile;
 
-#ifdef HAVE_DNSREGISTRATION
+#ifdef ENABLE_MDNS_REGISTRATION
 /*
  * mDNS registration flag. If set, we attempt to register with the
  * mDNS system, but only after we have synched the first time. If the
@@ -116,7 +116,7 @@ static const char *driftfile, *pidfile;
  */
 bool mdnsreg = false;
 int mdnstries = 5;
-#endif  /* HAVE_DNSREGISTRATION */
+#endif  /* ENABLE_MDNS_REGISTRATION */
 
 #ifdef ENABLE_DROPROOT
 bool droproot;
@@ -309,9 +309,9 @@ parse_cmdline_opts(
 		listen_to_virtual_ips = false;
 		break;
 	    case 'm':
-#ifdef HAVE_DNSREGISTRATION
+#ifdef ENABLE_MDNS_REGISTRATION
 		mdnsreg = true;
-#endif  /* HAVE_DNSREGISTRATION */
+#endif  /* ENABLE_MDNS_REGISTRATION */
 		break;
 	    case 'M':
 		/* defer */
@@ -931,10 +931,10 @@ ntpdmain(
 		fprintf(stdout, "logfile \"%s\";\n", logfilename);
 	    fprintf(stdout, "#listen_to_virtual_ips = %s\n",
 		    listen_to_virtual_ips ? "true" : "false");
-#ifdef HAVE_DNSREGISTRATION
+#ifdef ENABLE_MDNS_REGISTRATION
 	    fprintf(stdout, "#mdnsreg = %s\n",
 		    mdnsreg ? "true" : "false");
-#endif  /* HAVE_DNSREGISTRATION */
+#endif  /* ENABLE_MDNS_REGISTRATION */
 # ifdef SYS_WINNT
 	    /* FIXME: dump the timer state */
 # endif
@@ -1371,7 +1371,7 @@ int scmp_sc[] = {
 		 * Go around again
 		 */
 
-# ifdef HAVE_DNSREGISTRATION
+# ifdef ENABLE_MDNS_REGISTRATION
 		if (mdnsreg && (current_time - mdnsreg ) > 60 && mdnstries && sys_leap != LEAP_NOTINSYNC) {
 			mdnsreg = current_time;
 			msyslog(LOG_INFO, "Attempting to register mDNS");
@@ -1387,7 +1387,7 @@ int scmp_sc[] = {
 				mdnsreg = false;
 			}
 		}
-# endif /* HAVE_DNSREGISTRATION */
+# endif /* ENABLE_MDNS_REGISTRATION */
 
 	}
 	UNBLOCK_IO_AND_ALARM();
@@ -1415,7 +1415,7 @@ finish(
 	msyslog(LOG_NOTICE, "%s exiting on signal %d (%s)", progname,
 		sig, sig_desc);
 	/* See Bug 2513 and Bug 2522 re the unlink of PIDFILE */
-# ifdef HAVE_DNSREGISTRATION
+# ifdef ENABLE_MDNS_REGISTRATION
 	if (mdns != NULL)
 		DNSServiceRefDeallocate(mdns);
 # endif

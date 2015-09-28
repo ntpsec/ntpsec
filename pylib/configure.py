@@ -6,6 +6,7 @@ import sys, os
 def cmd_configure(ctx):
 	from check_type import check_type
 	from check_sizeof import check_sizeof
+	from check_structfield import check_structfield
 
 	if ctx.options.list:
 		from refclock import refclock_map
@@ -94,10 +95,17 @@ def cmd_configure(ctx):
 	ctx.recurse("libntp")
 	ctx.recurse("sntp")
 
-	types = ["int32", "int32_t", "uint32_t", "uint_t", "size_t", "wint_t", "pid_t", "intptr_t", "uintptr_t"]
+	types = ["int32", "int32_t", "uint32_t", "int64_t", "uint64_t", "uint_t", "size_t", "wint_t", "pid_t", "intptr_t", "uintptr_t"]
 
 	for type in sorted(types):
 		ctx.check_type(type)
+
+	structure_fields = (
+		("time_tick", "timex", "sys/timex.h"),
+		("modes", "timex", "sys/timex.h"),
+		)
+	for (f, s, h) in structure_fields:
+		ctx.check_structfield(f, s, h)
 
 	# XXX: hack
 	ctx.env.PLATFORM_INCLUDES = ["/usr/local/include"]
@@ -150,9 +158,11 @@ def cmd_configure(ctx):
 
 	ctx.define("OPEN_BCAST_SOCKET", 1)
 
+	ctx.check_cc(lib="edit", mandatory=False)
 	ctx.check_cc(lib="m")
 	ctx.check_cc(lib="pthread")
 	ctx.check_cc(lib="rt", mandatory=False)
+	ctx.check_cc(lib="readline", mandatory=False)
 	ctx.check_cc(lib="thr", mandatory=False)
 	ctx.check_cc(lib="gcc_s", mandatory=False)
 
@@ -204,6 +214,7 @@ def cmd_configure(ctx):
 	optional_headers = (
 		"alloca.h",
 		"arpa/nameser.h",
+		"histedit.h",
 		"ieeefp.h",
 		"ifaddrs.h",
 		"libgen.h",
@@ -221,6 +232,8 @@ def cmd_configure(ctx):
 		"netinfo/ni.h",
 		"netinet/ip.h",
 		"priv.h",
+		"readline/readline.h",
+		"readline/history.h",
 		"resolv.h",
 		"stdatomic.h",
 		"sys/audioio.h",
@@ -317,6 +330,8 @@ int main() { return 0; }
 	if not ctx.options.disable_dns_lookup:
 		ctx.define("ENABLE_DNS_LOOKUP", 1)
 
+	if not ctx.options.disable_mdns_registration:
+		ctx.define("ENABLE_MDNS_REGISTRATION", 1)
 
 	# There is an ENABLE_AUTOKEY as well, but as that feature
 	# is not working and likely to be replaced it's not exposed
