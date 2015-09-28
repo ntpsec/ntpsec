@@ -114,7 +114,6 @@ is not yet tested anywhere but in ntpd itself.
 | docs/ntpd.txt     | ntpd/ntpd.txt
 | docs/ntpq.txt     | ntpq/ntpq.txt
 | docs/ntptime.txt  | -
-| docs/ntptrace.txt | scripts/ntptrace/ntptrace.txt
 | docs/ntpwait.txt  | scripts/ntp-wait/ntp-wait.txt
 | docs/sntp.txt     | sntp/sntp.txt
 | docs/tickadj.txt  | -
