@@ -20,7 +20,7 @@ def insert_srcdir(self):
 @feature('libisc_include')
 def insert_libiscdir(self):
 	srcnode = self.bld.srcnode.abspath()
-	self.includes += ["%s/lib/isc/include/" % srcnode, "%s/lib/isc/unix/include/" % srcnode]
+	self.includes += ["%s/lib/isc/include/" % srcnode, "%s/lib/isc/unix/include/" % srcnode] # XXX: Must be fixed for Windows
 
 
 @before_method('apply_incpaths')
