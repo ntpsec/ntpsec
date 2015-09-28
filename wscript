@@ -19,6 +19,16 @@ def parse_version():
 
 config = parse_version()
 
+
+def dist(ctx):
+        ctx.base_name = "ntpsec-%d.%d.%d" % \
+                        (config["NTPS_VERSION_MAJOR"], \
+                         config["NTPS_VERSION_MINOR"], \
+                         config["NTPS_VERSION_REV"])
+        if ctx.options.build_version_tag:
+                ctx.base_name = ctx.base_name + "-" + \
+                                ctx.options.build_version_tag
+
 def options(ctx):
 	ctx.load("compiler_c")
 
@@ -115,11 +125,3 @@ def build(ctx):
 		chmod		= Utils.O755
 	)
 
-def dist(ctx):
-        ctx.base_name = "ntpsec-%d.%d.%d" % \
-                        (config["NTPS_VERSION_MAJOR"], \
-                         config["NTPS_VERSION_MINOR"], \
-                         config["NTPS_VERSION_REV"])
-        if ctx.options.build_version_tag:
-                ctx.base_name = ctx.base_name + "-" + \
-                                ctx.options.build_version_tag
