@@ -15,10 +15,8 @@
  * PERFORMANCE OF THIS SOFTWARE.
  */
 
-/* $Id: resultclass.h,v 1.20 2009/09/02 23:48:03 tbox Exp $ */
-
-#ifndef ISC_RESULTCLASS_H
-#define ISC_RESULTCLASS_H 1
+#ifndef GUARD_ISC_RESULTCLASS_H
+#define GUARD_ISC_RESULTCLASS_H 1
 
 
 /*! \file isc/resultclass.h
@@ -48,4 +46,4 @@
 #define	ISC_RESULTCLASS_DHCP		ISC_RESULTCLASS_FROMNUM(6)
 
 
-#endif /* ISC_RESULTCLASS_H */
+#endif /* GUARD_ISC_RESULTCLASS_H */

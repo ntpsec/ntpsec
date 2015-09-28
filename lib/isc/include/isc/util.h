@@ -15,10 +15,8 @@
  * PERFORMANCE OF THIS SOFTWARE.
  */
 
-/* $Id$ */
-
-#ifndef ISC_UTIL_H
-#define ISC_UTIL_H 1
+#ifndef GUARD_ISC_UTIL_H
+#define GUARD_ISC_UTIL_H 1
 
 /*! \file isc/util.h
  * NOTE:
@@ -238,4 +236,4 @@
  */
 #define TIME_NOW(tp) 	RUNTIME_CHECK(isc_time_now((tp)) == ISC_R_SUCCESS)
 
-#endif /* ISC_UTIL_H */
+#endif /* GUARD_ISC_UTIL_H */

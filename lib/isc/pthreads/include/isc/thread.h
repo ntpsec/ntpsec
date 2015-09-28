@@ -15,10 +15,8 @@
  * PERFORMANCE OF THIS SOFTWARE.
  */
 
-/* $Id: thread.h,v 1.26 2007/06/19 23:47:18 tbox Exp $ */
-
-#ifndef ISC_THREAD_H
-#define ISC_THREAD_H 1
+#ifndef GUARD_ISC_THREAD_H
+#define GUARD_ISC_THREAD_H 1
 
 /*! \file */
 
@@ -54,4 +52,4 @@ isc_thread_create(isc_threadfunc_t, isc_threadarg_t, isc_thread_t *);
 
 ISC_LANG_ENDDECLS
 
-#endif /* ISC_THREAD_H */
+#endif /* GUARD_ISC_THREAD_H */

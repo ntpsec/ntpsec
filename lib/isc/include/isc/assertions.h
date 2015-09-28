@@ -15,14 +15,11 @@
  * PERFORMANCE OF THIS SOFTWARE.
  */
 
-/*
- * $Id: assertions.h,v 1.28 2009/09/29 23:48:04 tbox Exp $
- */
 /*! \file isc/assertions.h
  */
 
-#ifndef ISC_ASSERTIONS_H
-#define ISC_ASSERTIONS_H 1
+#ifndef GUARD_ISC_ASSERTIONS_H
+#define GUARD_ISC_ASSERTIONS_H 1
 
 #include <isc/lang.h>
 #include <isc/platform.h>
@@ -123,4 +120,4 @@ isc_assertion_typetotext(isc_assertiontype_t type);
 
 ISC_LANG_ENDDECLS
 
-#endif /* ISC_ASSERTIONS_H */
+#endif /* GUARD_ISC_ASSERTIONS_H */

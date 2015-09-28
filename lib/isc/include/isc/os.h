@@ -15,10 +15,8 @@
  * PERFORMANCE OF THIS SOFTWARE.
  */
 
-/* $Id: os.h,v 1.12 2007/06/19 23:47:18 tbox Exp $ */
-
-#ifndef ISC_OS_H
-#define ISC_OS_H 1
+#ifndef GUARD_ISC_OS_H
+#define GUARD_ISC_OS_H 1
 
 /*! \file isc/os.h */
 
@@ -35,4 +33,4 @@ isc_os_ncpus(void);
 
 ISC_LANG_ENDDECLS
 
-#endif /* ISC_OS_H */
+#endif /* GUARD_ISC_OS_H */

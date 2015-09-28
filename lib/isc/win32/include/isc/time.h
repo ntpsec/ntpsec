@@ -15,10 +15,8 @@
  * PERFORMANCE OF THIS SOFTWARE.
  */
 
-/* $Id: time.h,v 1.35 2009/01/05 23:47:54 tbox Exp $ */
-
-#ifndef ISC_TIME_H
-#define ISC_TIME_H 1
+#ifndef GUARD_ISC_TIME_H
+#define GUARD_ISC_TIME_H 1
 
 #include <windows.h>
 
@@ -288,4 +286,4 @@ isc_time_seconds(const isc_time_t *t);
 
 ISC_LANG_ENDDECLS
 
-#endif /* ISC_TIME_H */
+#endif /* GUARD_ISC_TIME_H */

@@ -15,10 +15,8 @@
  * PERFORMANCE OF THIS SOFTWARE.
  */
 
-/* $Id: msgcat.h,v 1.13 2007/06/19 23:47:18 tbox Exp $ */
-
-#ifndef ISC_MSGCAT_H
-#define ISC_MSGCAT_H 1
+#ifndef GUARD_ISC_MSGCAT_H
+#define GUARD_ISC_MSGCAT_H 1
 
 /*****
  ***** Module Info
@@ -128,4 +126,4 @@ isc_msgcat_get(isc_msgcat_t *msgcat, int set, int message,
 
 ISC_LANG_ENDDECLS
 
-#endif /* ISC_MSGCAT_H */
+#endif /* GUARD_ISC_MSGCAT_H */

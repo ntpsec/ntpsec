@@ -15,10 +15,8 @@
  * WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-/* $Id: platform.h.in,v 1.28 2001/11/19 03:08:26 mayer Exp $ */
-
-#ifndef ISC_PLATFORM_H
-#define ISC_PLATFORM_H 1
+#ifndef GUARD_ISC_PLATFORM_H
+#define GUARD_ISC_PLATFORM_H 1
 
 
 #ifndef ISC_PLATFORM_USEDECLSPEC
@@ -37,4 +35,4 @@
  * End:
  */
 
-#endif /* ISC_PLATFORM_H */
+#endif /* GUARD_ISC_PLATFORM_H */

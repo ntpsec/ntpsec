@@ -15,10 +15,8 @@
  * PERFORMANCE OF THIS SOFTWARE.
  */
 
-/* $Id: condition.h,v 1.17 2007/06/18 23:47:49 tbox Exp $ */
-
-#ifndef ISC_CONDITION_H
-#define ISC_CONDITION_H 1
+#ifndef GUARD_ISC_CONDITION_H
+#define GUARD_ISC_CONDITION_H 1
 
 #include <windows.h>
 
@@ -64,4 +62,4 @@ isc_condition_waituntil(isc_condition_t *, isc_mutex_t *, isc_time_t *);
 
 ISC_LANG_ENDDECLS
 
-#endif /* ISC_CONDITION_H */
+#endif /* GUARD_ISC_CONDITION_H */

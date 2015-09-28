@@ -15,10 +15,8 @@
  * PERFORMANCE OF THIS SOFTWARE.
  */
 
-/* $Id: win32os.h,v 1.7 2009/06/25 23:48:02 tbox Exp $ */
-
-#ifndef ISC_WIN32OS_H
-#define ISC_WIN32OS_H 1
+#ifndef GUARD_ISC_WIN32OS_H
+#define GUARD_ISC_WIN32OS_H 1
 
 #include <isc/lang.h>
 
@@ -68,4 +66,4 @@ isc_win32os_versioncheck(unsigned int major, unsigned int minor,
 
 ISC_LANG_ENDDECLS
 
-#endif /* ISC_WIN32OS_H */
+#endif /* GUARD_ISC_WIN32OS_H */

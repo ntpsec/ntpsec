@@ -15,10 +15,8 @@
  * PERFORMANCE OF THIS SOFTWARE.
  */
 
-/* $Id: mutex.h,v 1.30 2007/06/19 23:47:18 tbox Exp $ */
-
-#ifndef ISC_MUTEX_H
-#define ISC_MUTEX_H 1
+#ifndef GUARD_ISC_MUTEX_H
+#define GUARD_ISC_MUTEX_H 1
 
 /*! \file */
 
@@ -142,4 +140,4 @@ isc_mutex_init_errcheck(isc_mutex_t *mp);
 #endif /* ISC_MUTEX_PROFILE */
 
 ISC_LANG_ENDDECLS
-#endif /* ISC_MUTEX_H */
+#endif /* GUARD_ISC_MUTEX_H */

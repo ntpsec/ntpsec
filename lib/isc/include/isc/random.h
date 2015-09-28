@@ -15,10 +15,8 @@
  * PERFORMANCE OF THIS SOFTWARE.
  */
 
-/* $Id: random.h,v 1.20 2009/01/17 23:47:43 tbox Exp $ */
-
-#ifndef ISC_RANDOM_H
-#define ISC_RANDOM_H 1
+#ifndef GUARD_ISC_RANDOM_H
+#define GUARD_ISC_RANDOM_H 1
 
 #include <isc/lang.h>
 #include <isc/types.h>
@@ -59,4 +57,4 @@ isc_random_jitter(isc_uint32_t max, isc_uint32_t jitter);
 
 ISC_LANG_ENDDECLS
 
-#endif /* ISC_RANDOM_H */
+#endif /* GUARD_ISC_RANDOM_H */

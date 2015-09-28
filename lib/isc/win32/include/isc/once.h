@@ -15,10 +15,8 @@
  * PERFORMANCE OF THIS SOFTWARE.
  */
 
-/* $Id: once.h,v 1.9 2007/06/19 23:47:20 tbox Exp $ */
-
-#ifndef ISC_ONCE_H
-#define ISC_ONCE_H 1
+#ifndef GUARD_ISC_ONCE_H
+#define GUARD_ISC_ONCE_H 1
 
 #include <isc/lang.h>
 #include <isc/result.h>
@@ -40,4 +38,4 @@ isc_once_do(isc_once_t *controller, void(*function)(void));
 
 ISC_LANG_ENDDECLS
 
-#endif /* ISC_ONCE_H */
+#endif /* GUARD_ISC_ONCE_H */

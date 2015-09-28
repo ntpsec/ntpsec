@@ -15,10 +15,8 @@
  * PERFORMANCE OF THIS SOFTWARE.
  */
 
-/* $Id: mutex.h,v 1.22 2009/01/18 23:48:14 tbox Exp $ */
-
-#ifndef ISC_MUTEX_H
-#define ISC_MUTEX_H 1
+#ifndef GUARD_ISC_MUTEX_H
+#define GUARD_ISC_MUTEX_H 1
 
 #include <isc/net.h>
 #include <windows.h>
@@ -52,4 +50,4 @@ TryEnterCriticalSection(LPCRITICAL_SECTION lpCriticalSection);
  */
 #define isc_mutex_stats(fp) do {} while (0)
 
-#endif /* ISC_MUTEX_H */
+#endif /* GUARD_ISC_MUTEX_H */

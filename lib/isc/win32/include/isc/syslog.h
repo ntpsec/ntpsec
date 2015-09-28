@@ -15,10 +15,8 @@
  * PERFORMANCE OF THIS SOFTWARE.
  */
 
-/* $Id: syslog.h,v 1.5 2007/06/19 23:47:20 tbox Exp $ */
-
-#ifndef ISC_SYSLOG_H
-#define ISC_SYSLOG_H 1
+#ifndef GUARD_ISC_SYSLOG_H
+#define GUARD_ISC_SYSLOG_H 1
 
 #include <isc/lang.h>
 #include <isc/types.h>
@@ -42,4 +40,4 @@ isc_syslog_facilityfromstring(const char *str, int *facilityp);
 
 ISC_LANG_ENDDECLS
 
-#endif /* ISC_SYSLOG_H */
+#endif /* GUARD_ISC_SYSLOG_H */

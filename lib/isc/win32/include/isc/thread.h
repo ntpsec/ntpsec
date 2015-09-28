@@ -15,10 +15,8 @@
  * PERFORMANCE OF THIS SOFTWARE.
  */
 
-/* $Id: thread.h,v 1.25 2009/09/29 04:37:08 marka Exp $ */
-
-#ifndef ISC_THREAD_H
-#define ISC_THREAD_H 1
+#ifndef GUARD_ISC_THREAD_H
+#define GUARD_ISC_THREAD_H 1
 
 #include <windows.h>
 
@@ -94,4 +92,4 @@ isc_thread_key_setspecific(isc_thread_key_t key, void *value);
 
 ISC_LANG_ENDDECLS
 
-#endif /* ISC_THREAD_H */
+#endif /* GUARD_ISC_THREAD_H */

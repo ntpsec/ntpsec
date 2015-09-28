@@ -15,10 +15,8 @@
  * PERFORMANCE OF THIS SOFTWARE.
  */
 
-/* $Id: netdb.h,v 1.9 2007/06/19 23:47:20 tbox Exp $ */
-
-#ifndef ISC_NETDB_H
-#define ISC_NETDB_H 1
+#ifndef GUARD_ISC_NETDB_H
+#define GUARD_ISC_NETDB_H 1
 
 /*****
  ***** Module Info
@@ -51,4 +49,4 @@
 
 #include <isc/net.h>
 
-#endif /* ISC_NETDB_H */
+#endif /* GUARD_ISC_NETDB_H */

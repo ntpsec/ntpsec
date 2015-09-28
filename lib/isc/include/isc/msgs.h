@@ -15,10 +15,8 @@
  * PERFORMANCE OF THIS SOFTWARE.
  */
 
-/* $Id: msgs.h,v 1.19 2009/10/01 23:48:08 tbox Exp $ */
-
-#ifndef ISC_MSGS_H
-#define ISC_MSGS_H 1
+#ifndef GUARD_ISC_MSGS_H
+#define GUARD_ISC_MSGS_H 1
 
 /*! \file isc/msgs.h */
 
@@ -192,4 +190,4 @@
 
 /*@}*/
 
-#endif /* ISC_MSGS_H */
+#endif /* GUARD_ISC_MSGS_H */

@@ -15,10 +15,8 @@
  * PERFORMANCE OF THIS SOFTWARE.
  */
 
-/* $Id: sockaddr.h,v 1.57 2009/01/18 23:48:14 tbox Exp $ */
-
-#ifndef ISC_SOCKADDR_H
-#define ISC_SOCKADDR_H 1
+#ifndef GUARD_ISC_SOCKADDR_H
+#define GUARD_ISC_SOCKADDR_H 1
 
 /*! \file isc/sockaddr.h */
 
@@ -238,4 +236,4 @@ isc_sockaddr_frompath(isc_sockaddr_t *sockaddr, const char *path);
 
 ISC_LANG_ENDDECLS
 
-#endif /* ISC_SOCKADDR_H */
+#endif /* GUARD_ISC_SOCKADDR_H */
