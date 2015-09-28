@@ -90,8 +90,6 @@ is not yet tested anywhere but in ntpd itself.
 | Inside docs       | Outside docs
 | docs/ntp_conf.txt | ntpd/ntp.conf.txt
 | docs/ntpdsim.txt  | docs/ntpdsim_new.txt
-| docs/ntpd.txt     | ntpd/ntpd.txt
-| docs/ntpq.txt     | ntpq/ntpq.txt
 | docs/ntptime.txt  | -
 | docs/ntpwait.txt  | scripts/ntp-wait/ntp-wait.txt
 | docs/sntp.txt     | sntp/sntp.txt
