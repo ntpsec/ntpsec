@@ -614,10 +614,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\lib\isc\win32\include\isc\ipv6.h"
-				>
-			</File>
-			<File
 				RelativePath="..\..\..\include\lib_strbuf.h"
 				>
 			</File>

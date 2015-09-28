@@ -177,7 +177,7 @@ static	short	getint 			(uint8_t *);
 static	int32_t	getlong			(uint8_t *);
 #endif
 
-#ifdef PALISADE_SENDCMD_RESURRECTED
+#ifdef __UNUSED__
 static  void	sendcmd			(struct packettx *buffer, int c);
 #endif
 static  void	sendsupercmd		(struct packettx *buffer, int c1, int c2);

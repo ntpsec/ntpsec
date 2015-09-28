@@ -750,10 +750,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\include\isc\ipv6.h"
-				>
-			</File>
-			<File
 				RelativePath="..\..\..\ntpd\jupiter.h"
 				>
 			</File>

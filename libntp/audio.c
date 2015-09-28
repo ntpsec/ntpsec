@@ -31,15 +31,15 @@
 
 #ifdef HAVE_MACHINE_SOUNDCARD_H
 # include <machine/soundcard.h>
-# define PCM_STYLE_SOUND
+# define USE_PCM_STYLE_SOUND
 #else
 # ifdef HAVE_SYS_SOUNDCARD_H
 #  include <sys/soundcard.h>
-#  define PCM_STYLE_SOUND
+#  define USE_PCM_STYLE_SOUND
 # endif
 #endif
 
-#ifdef PCM_STYLE_SOUND
+#ifdef USE_PCM_STYLE_SOUND
 # include <ctype.h>
 #endif
 
@@ -49,7 +49,7 @@
 #ifdef HAVE_SYS_AUDIOIO_H
 static struct audio_device device; /* audio device ident */
 #endif /* HAVE_SYS_AUDIOIO_H */
-#ifdef PCM_STYLE_SOUND
+#ifdef USE_PCM_STYLE_SOUND
 # define INIT_FILE "/etc/ntp.audio"
 int agc =	SOUND_MIXER_WRITE_RECLEV; /* or IGAIN or LINE */
 int monitor =	SOUND_MIXER_WRITE_VOLUME; /* or OGAIN */
@@ -58,12 +58,12 @@ int recmask = 0;
 char cf_c_dev[100], cf_i_dev[100], cf_agc[100], cf_monitor[100];
 
 const char *m_names[SOUND_MIXER_NRDEVICES] = SOUND_DEVICE_NAMES;
-#else /* not PCM_STYLE_SOUND */
+#else /* not USE_PCM_STYLE_SOUND */
 static struct audio_info info;	/* audio device info */
-#endif /* not PCM_STYLE_SOUND */
+#endif /* not USE_PCM_STYLE_SOUND */
 static int ctl_fd;		/* audio control file descriptor */
 
-#ifdef PCM_STYLE_SOUND
+#ifdef USE_PCM_STYLE_SOUND
 static void audio_config_read (int, const char **, const char **);
 static int  mixer_name (const char *, int);
 
@@ -192,7 +192,7 @@ audio_config_read(
 	fclose(fd);
 	return;
 }
-#endif /* PCM_STYLE_SOUND */
+#endif /* USE_PCM_STYLE_SOUND */
 
 /*
  * audio_init - open and initialize audio device
@@ -212,7 +212,7 @@ audio_init(
 	int	unit		/* device unit (0-3) */
 	)
 {
-#ifdef PCM_STYLE_SOUND
+#ifdef USE_PCM_STYLE_SOUND
 # define ACTL_DEV	"/dev/mixer%d"
 	char actl_dev[30];
 # ifdef HAVE_STRUCT_SND_SIZE
@@ -225,14 +225,14 @@ audio_init(
 	int fd;
 	int rval;
 	const char *actl =
-#ifdef PCM_STYLE_SOUND
+#ifdef USE_PCM_STYLE_SOUND
 		actl_dev
 #else
 		"/dev/audioctl"
 #endif
 		;
 
-#ifdef PCM_STYLE_SOUND
+#ifdef USE_PCM_STYLE_SOUND
 	snprintf(actl_dev, sizeof(actl_dev), ACTL_DEV, unit);
 
 	audio_config_read(unit, &actl, &dname);
@@ -266,7 +266,7 @@ audio_init(
 	/*
 	 * Set audio device parameters.
 	 */
-#ifdef PCM_STYLE_SOUND
+#ifdef USE_PCM_STYLE_SOUND
 	printf("audio_init: <%s> bufsiz %d\n", dname, bufsiz);
 	rval = fd;
 
@@ -337,7 +337,7 @@ audio_init(
 			       cf_monitor, devmask);
 	}
 
-#else /* not PCM_STYLE_SOUND */
+#else /* not USE_PCM_STYLE_SOUND */
 	AUDIO_INITINFO(&info);
 	info.play.gain = AUDIO_MAX_GAIN;
 	info.play.port = AUDIO_SPEAKER;
@@ -352,7 +352,7 @@ audio_init(
 		return(rval);
 	}
 	rval = fd;
-#endif /* not PCM_STYLE_SOUND */
+#endif /* not USE_PCM_STYLE_SOUND */
 	return (rval);
 }
 
@@ -371,7 +371,7 @@ audio_gain(
 	static int o_mongain = -1;
 	static int o_port = -1;
 
-#ifdef PCM_STYLE_SOUND
+#ifdef USE_PCM_STYLE_SOUND
 	int l, r;
 
 	rval = 0;
@@ -441,7 +441,7 @@ audio_gain(
 # endif
 		o_port = port;
 	}
-#else /* not PCM_STYLE_SOUND */
+#else /* not USE_PCM_STYLE_SOUND */
 	ioctl(ctl_fd, (int)AUDIO_GETINFO, (char *)&info);
 	info.record.encoding = AUDIO_ENCODING_ULAW;
 	info.record.error = 0;
@@ -456,7 +456,7 @@ audio_gain(
 		return (rval);
 	}
 	rval = info.record.error;
-#endif /* not PCM_STYLE_SOUND */
+#endif /* not USE_PCM_STYLE_SOUND */
 	return (rval);
 }
 
@@ -470,14 +470,14 @@ audio_gain(
 void
 audio_show(void)
 {
-#ifdef PCM_STYLE_SOUND
+#ifdef USE_PCM_STYLE_SOUND
 	int recsrc = 0;
 
 	printf("audio_show: ctl_fd %d\n", ctl_fd);
 	if (ioctl(ctl_fd, SOUND_MIXER_READ_RECSRC, &recsrc) == -1)
 	    printf("SOUND_MIXER_READ_RECSRC: %s\n", strerror(errno));
 
-#else /* not PCM_STYLE_SOUND */
+#else /* not USE_PCM_STYLE_SOUND */
 # ifdef HAVE_SYS_AUDIOIO_H
 	ioctl(ctl_fd, (int)AUDIO_GETDEV, &device);
 	printf("audio: name %s, version %s, config %s\n",
@@ -494,7 +494,7 @@ audio_show(void)
 	    info.record.samples, info.record.eof,
 	    info.record.pause, info.record.error,
 	    info.record.waiting, info.record.balance);
-#endif /* not PCM_STYLE_SOUND */
+#endif /* not USE_PCM_STYLE_SOUND */
 }
 #else
 int audio_bs;

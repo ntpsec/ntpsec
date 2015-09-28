@@ -126,7 +126,7 @@ static void praecis_parse(struct recvbuf *rbufp, struct peer *peer);
  * They are taken from Markus Prosch
  */
 
-#ifdef PALISADE_SENDCMD_RESURRECTED
+#ifdef __UNUSED__
 /*
  * sendcmd - Build data packet for sending
  */
@@ -140,7 +140,7 @@ sendcmd (
 	*(buffer->data + 1) = (unsigned char)c;
 	buffer->size = 2;
 }
-#endif	/* PALISADE_SENDCMD_RESURRECTED */
+#endif	/* __UNUSED_ */
 
 /*
  * sendsupercmd - Build super data packet for sending

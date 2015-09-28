@@ -44,7 +44,7 @@ timespecTest::my_tick_to_tsf(
 	// precision float calculations or, if available, 64bit integer
 	// arithmetic. This should give the precise fraction, rounded to
 	// the nearest representation.
-#ifdef HAVE_U_INT64
+#ifdef HAVE_UINT64_T
 	return u_int32(((u_int64(ticks) << 32) + 500000000) / 1000000000);
 #else
 	return u_int32(double(ticks) * 4.294967296 + 0.5);
@@ -59,7 +59,7 @@ timespecTest::my_tsf_to_tick(
 	)
 {
 	// Inverse operation: converts fraction to microseconds.
-#ifdef HAVE_U_INT64
+#ifdef HAVE_UINT64_T
 	return u_int32((u_int64(tsf) * 1000000000 + 0x80000000) >> 32);
 #else
 	return u_int32(double(tsf) / 4.294967296 + 0.5);
