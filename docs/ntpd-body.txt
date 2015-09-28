@@ -1,14 +1,8 @@
-= ntpd(8) =
-:doctype: manpage
-:ntpdman: ntpd(8)
-:ntpdate: ntpdate(8)
-:ntpqman: ntpq(1)
-:sntpman: sntp(1)
-:ntpwait: ntp-wait(1)
+// This is the body of the manual page for ntpd.
+// It's included in two places: once for the docs/ HTML
+// tree, and once to make an individual man page.
 
-== NAME ==
-ntpd - Network Time Protocol service daemon
-
+[[synop]]
 == SYNOPSIS ==
 *ntpd*
     [-46aAbgLmnNqx ] [ -c 'conffile' ] [ -f 'driftfile' ] [ -i 'jaildir' ]
@@ -17,8 +11,7 @@ ntpd - Network Time Protocol service daemon
     [ -u 'user'[:'group'] ] [ -U 'interface_update_interval' ]
     [ -v 'variable' ] [ -V 'variable' ]
 
-//FIXME: Contains unresolved attributes and a reference to the NTPD license.
-
+[[descr]]
 == DESCRIPTION ==
 
 The `ntpd` utility is an operating system daemon which sets and
@@ -35,7 +28,7 @@ picoseconds. While the ultimate precision is not achievable with
 ordinary workstations and networks of today, it may be required with
 future gigahertz CPU clocks and gigabit LANs.
 
-Ordinarily, `ntpd` reads the ntp.conf(5) configuration file at startup
+Ordinarily, `ntpd` reads the {ntpconf} configuration file at startup
 time in order to determine the synchronization sources and operating
 modes. It is also possible to specify a working, although limited,
 configuration entirely on the command line, obviating the need for a
@@ -43,9 +36,19 @@ configuration file. This may be particularly useful when the local host
 is to be configured as a broadcast/multicast client, with all peers
 being determined by listening to broadcasts at run time.
 
+The `ntpd` program normally operates continuously while adjusting the
+system time and frequency, but in some cases this might not be
+practical. With the `-q` option `ntpd` operates as in continuous mode,
+but exits just after setting the clock for the first time. Most
+applications will probably want to specify the `iburst` option with the
+`server` command. With this option a volley of messages is exchanged to
+groom the data and set the clock in about ten seconds. If nothing is
+heard after a few minutes, the daemon times out and exits without
+setting the clock.
+
 If NetInfo support is built into `ntpd`, then `ntpd` will attempt to
 read its configuration from the NetInfo if the default
-ntp.conf(5) file cannot be read and no file is specified by
+{ntpconf} file cannot be read and no file is specified by
 the `-c` option.
 
 Various internal `ntpd` variables can be displayed and configuration
@@ -55,6 +58,7 @@ options altered while the `ntpd` is running using the
 When `ntpd` starts it looks at the value of umask(2), and if
 zero `ntpd` will set the umask(2) to 022.
 
+[[cmd]]
 == OPTIONS ==
 
 `-4`, `--ipv4`::
@@ -175,6 +179,12 @@ Do not listen to virtual interfaces, defined as those with names
 containing a colon. This option is deprecated. Please consider using
 the configuration file `interface` command, which is more versatile.
 
+`-m`, `--mdns`::
+  Register with mDNS as a NTP server.
++
+Registers as an NTP server with the local mDNS server which allows the
+server to be discovered via mDNS client lookup.
+
 `-M`, `--modifymmtimer`::
   Modify Multimedia Timer (Windows only).
 +
@@ -210,17 +220,10 @@ specified _sched_setscheduler(SCHED_FIFO)_ priority.
   any of the following options: saveconfigquit, wait-sync.
 +
 `ntpd` will not daemonize and will exit after the clock is first
-synchronized. This behavior mimics that of the _ntpdate_ program,
-which will soon be replaced with a shell script. The `-g` and `-x`
-options can be used with this option. Note: The kernel time discipline
-is disabled with this option.
-
-`-r` string, `--propagationdelay`=_string_::
-  Broadcast/propagation delay.
-+
-Specify the default propagation delay from the broadcast/multicast
-server to this client. This is necessary only if the delay cannot be
-computed automatically by the protocol.
+synchronized. This behavior mimics that of the _ntpdate_ program, has
+been replaced with a shell script. The `-g` and `-x` options can be
+used with this option. Note: The kernel time discipline is disabled
+with this option.
 
 `-Q`, `--saveconfigquit`=_string_::
   Save parsed configuration and quit. This option must not appear in
@@ -229,6 +232,13 @@ computed automatically by the protocol.
 Cause `ntpd` to parse its startup configuration file and save an
 equivalent to the given filename and exit. This option was designed
 for automated testing.
+
+`-r` string, `--propagationdelay`=_string_::
+  Broadcast/propagation delay.
++
+Specify the default propagation delay from the broadcast/multicast
+server to this client. This is necessary only if the delay cannot be
+computed automatically by the protocol.
 
 `-s` string, `--statsdir`=_string_::
   Statistics file location.
@@ -262,14 +272,6 @@ performed shortly after the interface change has been detected by the
 system. Use 0 to disable scanning. 60 seconds is the minimum time
 between scans.
 
-`--var`=_nvar_::
-  make ARG an ntp variable (RW). This option may appear an unlimited
-  number of times.
-
-`--dvar`=_ndvar_::
-  make ARG an ntp variable (RW|DEF). This option may appear an unlimited
-  number of times.
-
 `-w` number, `--wait-sync`=_number_::
   Seconds to wait for first clock sync. This option must not appear in
   combination with any of the following options: nofork, quit,
@@ -297,31 +299,35 @@ option can be used with the `-g` and `-q` options. See the _tinker_
 configuration file directive for other options. Note: The kernel time
 discipline is disabled with this option.
 
-`--usepcc`::
-  Use CPU cycle counter (Windows only).
-+
-Attempt to substitute the CPU counter for _QueryPerformanceCounter_.
-The CPU counter and _QueryPerformanceCounter_ are compared, and if
-they have the same frequency, the CPU counter (RDTSC on x86) is used
-directly, saving the overhead of a system call.
+`-z` _nvar_, --var`=_nvar_::
+  make ARG an ntp variable (RW). This option may appear an unlimited
+  number of times.
 
-`--pccfreq`=_string_::
-  Force CPU cycle counter use (Windows only).
-+
-Force substitution the CPU counter for _QueryPerformanceCounter_. The
-CPU counter (RDTSC on x86) is used unconditionally with the given
-frequency (in Hz).
+`-Z` _nvar_, --dvar`=_ndvar_::
+  make ARG an ntp variable (RW|DEF). This option may appear an unlimited
+  number of times.
 
-`-m`, `--mdns`::
-  Register with mDNS as a NTP server.
-+
-Registers as an NTP server with the local mDNS server which allows the
-server to be discovered via mDNS client lookup.
+//`--usepcc`::
+//  Use CPU cycle counter (Windows only).
+//+
+//Attempt to substitute the CPU counter for _QueryPerformanceCounter_.
+//The CPU counter and _QueryPerformanceCounter_ are compared, and if
+//they have the same frequency, the CPU counter (RDTSC on x86) is used
+//directly, saving the overhead of a system call.
 
-`--version`::
-  Output version of program and exit.
+//`--pccfreq`=_string_::
+//  Force CPU cycle counter use (Windows only).
+//+
+//Force substitution the CPU counter for _QueryPerformanceCounter_. The
+//CPU counter (RDTSC on x86) is used unconditionally with the given
+//frequency (in Hz).
 
-= USAGE
+`-V, --version`::
+  Output version of program and exit. -VV gives more detailed version
+  information.
+
+[[usage]]
+== USAGE ==
 
 === How NTP Operates ===
 
@@ -336,7 +342,7 @@ over a few seconds. At the default initial poll interval of 64s, several
 minutes can elapse before the clock is set. This initial delay to set
 the clock can be safely and dramatically reduced using the _iburst_
 keyword with the _server_ configuration command, as described in
-ntp.conf(5).
+{ntpconf}.
 
 Most operating systems and hardware of today incorporate a time-of-year
 (TOY) chip to maintain the time during periods when the power is off.
@@ -559,32 +565,35 @@ sign of the offset.
 The filter is activated by the _tinker_ command and _huffpuff_ keyword,
 as described in _ntp.conf_(5)_._
 
-= FILES
+[[files]]
+== FILES ==
 
-`/etc/ntp.conf`::
-  the default name of the configuration file
-`/etc/ntp.drift`::
-  the default name of the drift file
-`/etc/ntp.keys`::
-  the default name of the key file
+[options="header"]
+|================================================================
+|File               |Default         |Option      |Option
+|configuration file |`/etc/ntp.conf` |`-c`        |`conffile`
+|frequency file     |none            |`-f`        |`driftfile`
+|leapseconds file   |none            |            |`leapfile`
+|process ID file    |none            |`-p`        |`pidfile`
+|log file           |system log      |`-l`        |`logfile`
+|include file       |none            |none        |`includefile`
+|statistics path    |`/var/NTP`      |`-s`        |`statsdir`
+|keys path          |`/usr/local/etc`|none        |`keysdir`
+|================================================================
 
-== EXIT STATUS ==
+[[bugs]]
+== BUGS ==
 
-One of the following exit values will be returned:
+The '-V' option is not backward-compatible with its use (as the
+equivalent of -Z) in older versions.
 
-0 (EXIT_SUCCESS)::
-  Successful program execution.
+The `ntpd` utility has gotten rather fat. While not huge, it has gotten
+larger than might be desirable for an elevated-priority `ntpd` running
+on a workstation, particularly since many of the fancy features which
+consume the space were designed more with a busy primary server, rather
+than a high stratum workstation in mind.
 
-1 (EXIT_FAILURE)::
-  The operation failed or the command syntax was not valid.
-
-== SEE ALSO ==
-
-ntp.conf(5), {ntpdate}, {ntpqman}, {sntpman}.
-
-In addition to the manual pages provided, comprehensive documentation is
-available on the world wide web at http://www.ntp.org/. A snapshot of
-this documentation is available in HTML format in `/usr/share/doc/ntp`.
+== STANDARDS ==
 
 RFC1059::
   David L. Mills, _Network Time Protocol (Version 1)_, RFC1059
@@ -611,23 +620,4 @@ RFC5908::
   R&#x2e; Gayraud and B. Lourdelet, _Network Time Protocol (NTP) Server Option
   for DHCPv6_, RFC5908
 
-== COPYRIGHT ==
-
-//FIXME: NTF reference
-Copyright (C) 1992-2015 The University of Delaware and Network Time
-Foundation all rights reserved. This program is released under the terms
-of the NTP license, <http://ntp.org/license>.
-
-== BUGS ==
-
-The `ntpd` utility has gotten rather fat. While not huge, it has gotten
-larger than might be desirable for an elevated-priority `ntpd` running
-on a workstation, particularly since many of the fancy features which
-consume the space were designed more with a busy primary server, rather
-than a high stratum workstation in mind.
-
-Please send bug reports to: {project-bugsite}, {project-buglist}
-
-== NOTES ==
-
-Portions of this document came from FreeBSD.
+//end
