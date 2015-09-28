@@ -109,7 +109,6 @@ is not yet tested anywhere but in ntpd itself.
 [options="header"]
 |===========================================================
 | Inside docs       | Outside docs
-| docs/keygen.txt   | ntp-keygen/ntp-keygen.txt
 | docs/ntp_conf.txt | ntpd/ntp.conf.txt
 | docs/ntpdsim.txt  | docs/ntpdsim_new.txt
 | docs/ntpd.txt     | ntpd/ntpd.txt
