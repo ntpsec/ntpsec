@@ -69,7 +69,3 @@ isc_thread_create(isc_threadfunc_t func, isc_threadarg_t arg,
 	return (ISC_R_SUCCESS);
 }
 
-void
-isc_thread_setconcurrency(unsigned int level) {
-	(void)pthread_setconcurrency(level);
-}
