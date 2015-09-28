@@ -12,7 +12,7 @@ Last update: 31-Jan-2014 06:54 UTC
 
 '''''
 
-include::ntptrace-man.txt
+include::ntptrace-body.txt
 
 == Bugs ==
 

@@ -1,10 +1,10 @@
-= ntptrace(1) =
+= ntp-keygen(1) =
 :doctype: manpage
 
 == NAME ==
-ntptrace - trace peers of an NTP server
+ntp-keygen - create and manage NTP host keys
 
-include::../../docs/keygen-man.txt
+@../docs/keygen-body.txt@
 
 == EXIT STATUS ==
 
@@ -14,3 +14,6 @@ One of the following exit values will be returned:
   Successful program execution.
 1 (EXIT_FAILURE)::
   The operation failed or the command syntax was not valid.
+
+// end
+

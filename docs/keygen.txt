@@ -25,7 +25,7 @@ include::includes/manual.txt[]
 
 '''''
 
-includes::keygen-man.txt
+includes::keygen-body.txt
 
 // The end of "Cryptographic Data Files" runs into this following text. 
 
