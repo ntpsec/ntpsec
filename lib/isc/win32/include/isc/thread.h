@@ -80,9 +80,6 @@ isc_thread_create(isc_threadfunc_t, isc_threadarg_t, isc_thread_t *);
 isc_result_t
 isc_thread_join(isc_thread_t, isc_threadresult_t *);
 
-void
-isc_thread_setconcurrency(unsigned int level);
-
 int
 isc_thread_key_create(isc_thread_key_t *key, void (*func)(void *));
 

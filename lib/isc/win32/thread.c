@@ -63,14 +63,6 @@ isc_thread_join(isc_thread_t thread, isc_threadresult_t *rp) {
 	return (ISC_R_SUCCESS);
 }
 
-void
-isc_thread_setconcurrency(unsigned int level) {
-	/*
-	 * This is unnecessary on Win32 systems, but is here so that the
-	 * call exists
-	 */
-}
-
 void *
 isc_thread_key_getspecific(isc_thread_key_t key) {
 	return(TlsGetValue(key));
