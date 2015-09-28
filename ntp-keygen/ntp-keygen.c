@@ -277,7 +277,7 @@ followlink(
 	fname[len] = '\0';
 }
 
-#define ALL_OPTIONS "b:c:dD:e:G:h:I:i:l:M:m:P:p:q:S:s:T:V:x:"
+#define ALL_OPTIONS "b:c:dD:e:G:HI:i:l:M:m:P:p:q:S:s:T:V:x:"
 static const struct option longoptions[] = {
     { "imbits",		    1, 0, 'i' },
 #ifdef ENABLE_AUTOKEY
@@ -289,7 +289,7 @@ static const struct option longoptions[] = {
 #ifdef ENABLE_AUTOKEY
     { "id-key",		    1, 0, 'e' },
     { "gq-params",	    1, 0, 'G' },
-    { "hostkey",	    1, 0, 'h' },
+    { "host-key",	    0, 0, 'H' },
     { "iffkey",		    1, 0, 'I' },
     { "ident",		    1, 0, 'i' },
     { "lifetime",	    1, 0, 'l' },
@@ -310,14 +310,14 @@ static const struct option longoptions[] = {
 };
 
 static char *opt_imbits = NULL;
-static char *opt_cipher = NULL;
 static char *opt_md5key = NULL;
 static int opt_modulus = -1;
 #ifdef ENABLE_AUTOKEY
+static char *opt_cipher = NULL;
 static char *opt_certificate = NULL;
-static char *opt_id_key = NULL;
+static bool opt_id_key = false;
 static char *opt_gq_params = NULL;
-static char *opt_hostkey = NULL;
+static bool opt_host_key = false;
 static char *opt_iffkey = NULL;
 static char *opt_ident = NULL;
 static char *opt_lifetime = NULL;
@@ -417,6 +417,9 @@ main(
 	    case 'c':
 		opt_certificate = ntp_optarg;
 		break;
+	    case 'C':
+		opt_cipher = ntp_optarg;
+		break;
 #endif /* ENABLE_AUTOKEY */
 	    case 'd':
 #ifdef DEBUG
@@ -428,15 +431,17 @@ main(
 		debug = atoi(ntp_optarg);
 #endif
 		break;
-	    case 'C':
-		opt_cipher = ntp_optarg;
-		break;
 #ifdef ENABLE_AUTOKEY
+	    case 'e':
+		opt_id_key = true;		
+		break;
 	    case 'G':
 		opt_gq_params = ntp_optarg;
 		break;
-	    case 'h':
-		opt_hostkey = ntp_optarg;
+	    case 'H':
+		opt_host_key = true;
+		break;
+	    case 'H':
 		break;
 	    case 'I':
 		opt_iffkey = ntp_optarg;
@@ -508,7 +513,7 @@ main(
 	if (opt_export_passwd != NULL)
 		passwd2 = estrdup(opt_export_passwd);
 
-	if (opt_hostkey != NULL)
+	if (opt_host_key != NULL)
 		hostkey++;
 
 	if (opt_sign_key != NULL)
@@ -752,7 +757,7 @@ main(
 	 * stream. The parameter file is the server key file with the
 	 * private key obscured.
 	 */
-	if (pkey_gqkey != NULL && opt_id_key != NULL)) {
+	if (pkey_gqkey != NULL && opt_id_key)) {
 		RSA	*rsa;
 
 		snprintf(filename, sizeof(filename),
@@ -817,7 +822,7 @@ main(
 	 * stream. The parameter file is the server key file with the
 	 * private key obscured.
 	 */
-	if (pkey_iffkey != NULL && opt_id_key != NULL) {
+	if (pkey_iffkey != NULL && opt_id_key) {
 		DSA	*dsa;
 
 		snprintf(filename, sizeof(filename),
@@ -882,7 +887,7 @@ main(
 	 * stream. For the moment, we always use the client parameters
 	 * associated with client key 1.
 	 */
-	if (pkey_mvkey != NULL && ot_id_key != NULL) {
+	if (pkey_mvkey != NULL && opt_id_key) {
 		snprintf(filename, sizeof(filename),
 		    "ntpkey_mvpar_%s.%u", groupname, fstamp);
 		fprintf(stderr, "Writing MV parameters %s to stdout\n",
