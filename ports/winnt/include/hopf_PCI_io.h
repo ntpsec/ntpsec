@@ -12,8 +12,8 @@
 extern "C"{
 #endif
 
-#ifndef __inpREAD_H
-#define __inpREAD_H
+#ifndef GUARD_HOPF_PCI_IO_H
+#define GUARD_HOPF_PCI_IO_H
 
 
 typedef struct _CLOCKVER {    
@@ -87,5 +87,5 @@ VOID  GetDCFAntenne(LPDCFANTENNE Data);
 }
 #endif 
 
-#endif /* inpREAD_H */
+#endif /* GUARD_HOPF_PCI_IO_H */
 

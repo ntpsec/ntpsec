@@ -15,8 +15,6 @@
  * PERFORMANCE OF THIS SOFTWARE.
  */
 
-/* $Id: condition.c,v 1.36 2007/06/19 23:47:18 tbox Exp $ */
-
 /*! \file */
 
 #include <config.h>
@@ -52,11 +50,7 @@ isc_condition_waituntil(isc_condition_t *c, isc_mutex_t *m, isc_time_t *t) {
 	ts.tv_nsec = (long)isc_time_nanoseconds(t);
 
 	do {
-#if ISC_MUTEX_PROFILE
-		presult = pthread_cond_timedwait(c, &m->mutex, &ts);
-#else
 		presult = pthread_cond_timedwait(c, m, &ts);
-#endif
 		if (presult == 0)
 			return (ISC_R_SUCCESS);
 		if (presult == ETIMEDOUT)

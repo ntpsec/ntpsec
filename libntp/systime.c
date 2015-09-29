@@ -508,12 +508,8 @@ step_systime(
 	 */
 	tvdiff = abs_tval(sub_tval(timetv, tvlast));
 	if (tvdiff.tv_sec > 0) {
-#ifndef OTIME_MSG
 # define OTIME_MSG	"Old NTP time"
-#endif
-#ifndef NTIME_MSG
 # define NTIME_MSG	"New NTP time"
-#endif
 		struct utmpx utx;
 
 		ZERO(utx);

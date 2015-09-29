@@ -90,7 +90,6 @@ format_errmsg(
  *		    For Windows, we have:
  *			#define errno_to_str isc_strerror
  */
-#ifndef errno_to_str
 void
 errno_to_str(
 	int	err,
@@ -109,7 +108,6 @@ errno_to_str(
 		snprintf(buf, bufsiz, "strerror_r(%d): errno %d",
 			 err, errno);
 }
-#endif	/* errno_to_str */
 
 
 /*

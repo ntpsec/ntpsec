@@ -15,7 +15,7 @@
  * PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef GIARD_SYSLOG_H
+#ifndef GUARD_SYSLOG_H
 #define GUARD_SYSLOG_H
 
 #include <stdio.h>
