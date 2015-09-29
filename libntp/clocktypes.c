@@ -4,11 +4,8 @@
 #include <config.h>
 #include <stdio.h>
 
-#include "ntp_fp.h"
 #include "ntp.h"
-#include "lib_strbuf.h"
 #include "ntp_refclock.h"
-#include "ntp_stdlib.h"
 
 struct clktype clktypes[] = {
 	{ REFCLK_NONE,		"unspecified type (0)",
