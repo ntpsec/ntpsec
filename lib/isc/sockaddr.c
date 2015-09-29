@@ -25,7 +25,6 @@
 #include <string.h>
 
 #include <isc/hash.h>
-#include <isc/msgs.h>
 #include <isc/netaddr.h>
 #include <isc/sockaddr.h>
 #include <isc/util.h>
@@ -127,12 +126,8 @@ isc_sockaddr_hash(const isc_sockaddr_t *sockaddr, bool address_only) {
 		break;
 	default:
 		UNEXPECTED_ERROR(__FILE__, __LINE__,
-				 "%s: %d",
-				 isc_msgcat_get(isc_msgcat,
-						ISC_MSGSET_SOCKADDR,
-						ISC_MSG_UNKNOWNFAMILY,
-						"unknown address family"),
-					     (int)sockaddr->type.sa.sa_family);
+				 "unknown address family: %d",
+				 (int)sockaddr->type.sa.sa_family);
 		s = (const unsigned char *)&sockaddr->type;
 		length = sockaddr->length;
 		p = 0;
@@ -257,9 +252,7 @@ isc_sockaddr_pf(const isc_sockaddr_t *sockaddr) {
 		return (PF_INET6);
 	default:
 		FATAL_ERROR(__FILE__, __LINE__,
-			    isc_msgcat_get(isc_msgcat, ISC_MSGSET_SOCKADDR,
-					   ISC_MSG_UNKNOWNFAMILY,
-					   "unknown address family: %d"),
+			    "unknown address family: %d",
 			    (int)sockaddr->type.sa.sa_family);
 	}
 #endif
@@ -308,10 +301,7 @@ isc_sockaddr_setport(isc_sockaddr_t *sockaddr, in_port_t port) {
 		break;
 	default:
 		FATAL_ERROR(__FILE__, __LINE__,
-			    "%s: %d",
-			    isc_msgcat_get(isc_msgcat, ISC_MSGSET_SOCKADDR,
-					   ISC_MSG_UNKNOWNFAMILY,
-					   "unknown address family"),
+			    "unknown address family: %d",
 			    (int)sockaddr->type.sa.sa_family);
 	}
 }
@@ -329,10 +319,7 @@ isc_sockaddr_getport(const isc_sockaddr_t *sockaddr) {
 		break;
 	default:
 		FATAL_ERROR(__FILE__, __LINE__,
-			    "%s: %d",
-			    isc_msgcat_get(isc_msgcat, ISC_MSGSET_SOCKADDR,
-					   ISC_MSG_UNKNOWNFAMILY,
-					   "unknown address family"),
+			    "unknown address family: %d",
 			    (int)sockaddr->type.sa.sa_family);
 	}
 

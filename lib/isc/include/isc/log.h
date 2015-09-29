@@ -638,10 +638,7 @@ ISC_FORMAT_PRINTF(5, 0);
  *
  * The only difference is that they take arguments for a message
  * catalog, message set, and message number, all immediately preceding the
- * format argument.  The format argument becomes the default text, a la
- * isc_msgcat_get.  If the message catalog is NULL, no lookup is attempted
- * for a message -- which makes the message set and message number irrelevant,
- * and the non-internationalized call should have probably been used instead.
+ * format argument.  The format argument becomes the default text.
  *
  * Yes, that means there are now *eight* interfaces to logging a message.
  * Sheesh.   Make the madness stop!
@@ -650,30 +647,30 @@ ISC_FORMAT_PRINTF(5, 0);
 void
 isc_log_iwrite(isc_log_t *lctx, isc_logcategory_t *category,
 	      isc_logmodule_t *module, int level,
-	      isc_msgcat_t *msgcat, int msgset, int message,
+	      int msgset, int message,
 	      const char *format, ...)
-ISC_FORMAT_PRINTF(8, 9);
+ISC_FORMAT_PRINTF(7, 8);
 
 void
 isc_log_ivwrite(isc_log_t *lctx, isc_logcategory_t *category,
 		isc_logmodule_t *module, int level,
-		isc_msgcat_t *msgcat, int msgset, int message,
+	        int msgset, int message,
 		const char *format, va_list args)
-ISC_FORMAT_PRINTF(8, 0);
+ISC_FORMAT_PRINTF(7, 0);
 
 void
 isc_log_iwrite1(isc_log_t *lctx, isc_logcategory_t *category,
 		isc_logmodule_t *module, int level,
-		isc_msgcat_t *msgcat, int msgset, int message,
+		int msgset, int message,
 		const char *format, ...)
-ISC_FORMAT_PRINTF(8, 9);
+ISC_FORMAT_PRINTF(7, 8);
 
 void
 isc_log_ivwrite1(isc_log_t *lctx, isc_logcategory_t *category,
 		 isc_logmodule_t *module, int level,
-		 isc_msgcat_t *msgcat, int msgset, int message,
+		 int msgset, int message,
 		 const char *format, va_list args)
-ISC_FORMAT_PRINTF(8, 0);
+ISC_FORMAT_PRINTF(7, 0);
 /*@}*/
 
 void

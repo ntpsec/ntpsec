@@ -344,7 +344,6 @@ isc_md5_invalidate
 isc_md5_update
 isc_mem_renderxml
 isc_msgcat_close
-isc_msgcat_get
 isc_msgcat_open
 isc_net_aton
 isc_net_disableipv4
