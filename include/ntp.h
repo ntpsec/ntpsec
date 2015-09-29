@@ -80,11 +80,6 @@ typedef unsigned int	u_int;
  *		year += 1900;
  */
 
-# ifdef sequent
-#  undef SO_RCVBUF
-#  undef SO_SNDBUF
-# endif
-
 /*
  * NTP protocol parameters.  See section 3.2.6 of the specification.
  */
