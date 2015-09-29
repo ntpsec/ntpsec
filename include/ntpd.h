@@ -130,7 +130,7 @@ extern	void	sendpkt 	(sockaddr_u *, struct interface *, int, struct pkt *, int);
 #ifdef DEBUG
 extern	void	collect_timing  (struct recvbuf *, const char *, int, l_fp *);
 #endif
-#ifdef HAVE_SIGNALED_IO
+#ifdef ENABLE_SIGNALED_IO
 extern	void	wait_for_signal		(void);
 extern	void	unblock_io_and_alarm	(void);
 extern	void	block_io_and_alarm	(void);

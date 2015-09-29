@@ -86,7 +86,7 @@ static bool systime_init_done;
 # define DONE_SYSTIME_INIT()	do {} while (false)
 #endif
 
-#ifdef HAVE_SIGNALED_IO
+#ifdef ENABLE_SIGNALED_IO
 bool using_sigio;
 #endif
 
