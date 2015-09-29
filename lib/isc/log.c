@@ -28,6 +28,7 @@
 #include <time.h>
 #include <dirent.h>
 #include <stdio.h>
+#include <pthread.h>
 
 #include <sys/types.h>	/* dev_t FreeBSD 2.1 */
 #include <sys/stat.h>
@@ -153,7 +154,7 @@ struct isc_log {
 	isc_logmodule_t *		modules;
 	unsigned int			module_count;
 	int				debug_level;
-	isc_mutex_t			lock;
+	pthread_mutex_t			lock;
 	/* Locked by isc_log lock. */
 	isc_logconfig_t * 		logconfig;
 	char 				buffer[LOG_BUFFER_SIZE];
@@ -270,7 +271,7 @@ isc_result_t
 isc_log_create(isc_mem_t *mctx, isc_log_t **lctxp, isc_logconfig_t **lcfgp) {
 	isc_log_t *lctx;
 	isc_logconfig_t *lcfg = NULL;
-	isc_result_t result;
+	int result;
 
 	REQUIRE(mctx != NULL);
 	REQUIRE(lctxp != NULL && *lctxp == NULL);
@@ -287,8 +288,8 @@ isc_log_create(isc_mem_t *mctx, isc_log_t **lctxp, isc_logconfig_t **lcfgp) {
 
 		ISC_LIST_INIT(lctx->messages);
 
-		result = isc_mutex_init(&lctx->lock);
-		if (result != ISC_R_SUCCESS) {
+		result = pthread_mutex_init(&lctx->lock, NULL);
+		if (result != 0) {
 			isc_mem_put(mctx, lctx, sizeof(*lctx));
 			return (result);
 		}

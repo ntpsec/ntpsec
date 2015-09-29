@@ -51,7 +51,6 @@ def build(ctx):
 	libisc_source_thread = [
 		"pthreads/condition.c",
 		"pthreads/thread.c",
-		"pthreads/mutex.c" # XXX: some kind of conditional?
 	]
 
 

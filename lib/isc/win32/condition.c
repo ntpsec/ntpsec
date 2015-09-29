@@ -203,7 +203,7 @@ isc_condition_destroy(isc_condition_t *cond) {
  * the mutex.
  */
 static isc_result_t
-wait(isc_condition_t *cond, isc_mutex_t *mutex, DWORD milliseconds) {
+wait(isc_condition_t *cond, pthread_mutex_t *mutex, DWORD milliseconds) {
 	DWORD result;
 	isc_result_t tresult;
 	isc_condition_thread_t *threadcond = NULL;
@@ -232,12 +232,12 @@ wait(isc_condition_t *cond, isc_mutex_t *mutex, DWORD milliseconds) {
 }
 
 isc_result_t
-isc_condition_wait(isc_condition_t *cond, isc_mutex_t *mutex) {
+isc_condition_wait(isc_condition_t *cond, pthread_mutex_t *mutex) {
 	return (wait(cond, mutex, INFINITE));
 }
 
 isc_result_t
-isc_condition_waituntil(isc_condition_t *cond, isc_mutex_t *mutex,
+isc_condition_waituntil(isc_condition_t *cond, pthread_mutex_t *mutex,
 			isc_time_t *t) {
 	DWORD milliseconds;
 	isc_uint64_t microseconds;

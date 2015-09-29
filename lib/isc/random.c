@@ -26,7 +26,6 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-#include <isc/mutex.h>
 #include <isc/once.h>
 #include <isc/random.h>
 #include <isc/util.h>

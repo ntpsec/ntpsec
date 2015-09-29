@@ -20,6 +20,8 @@
 
 /*! \file */
 
+#include <time.h>
+
 #include <isc/lang.h>
 #include <isc/types.h>
 
