@@ -886,68 +886,6 @@ isc_log_vwrite1(isc_log_t *lctx, isc_logcategory_t *category,
 }
 
 void
-isc_log_iwrite(isc_log_t *lctx, isc_logcategory_t *category,
-	       isc_logmodule_t *module, int level,
-	       int msgset, int msg,
-	       const char *format, ...)
-{
-	va_list args;
-
-	/*
-	 * Contract checking is done in isc_log_doit().
-	 */
-
-	va_start(args, format);
-	isc_log_doit(lctx, category, module, level, false,
-		     msgset, msg, format, args);
-	va_end(args);
-}
-
-void
-isc_log_ivwrite(isc_log_t *lctx, isc_logcategory_t *category,
-	       isc_logmodule_t *module, int level,
-	       int msgset, int msg,
-	       const char *format, va_list args)
-{
-	/*
-	 * Contract checking is done in isc_log_doit().
-	 */
-	isc_log_doit(lctx, category, module, level, false,
-		     msgset, msg, format, args);
-}
-
-void
-isc_log_iwrite1(isc_log_t *lctx, isc_logcategory_t *category,
-		isc_logmodule_t *module, int level,
-		int msgset, int msg,
-		const char *format, ...)
-{
-	va_list args;
-
-	/*
-	 * Contract checking is done in isc_log_doit().
-	 */
-
-	va_start(args, format);
-	isc_log_doit(lctx, category, module, level, true,
-		     msgset, msg, format, args);
-	va_end(args);
-}
-
-void
-isc_log_ivwrite1(isc_log_t *lctx, isc_logcategory_t *category,
-		 isc_logmodule_t *module, int level,
-		 int msgset, int msg,
-		 const char *format, va_list args)
-{
-	/*
-	 * Contract checking is done in isc_log_doit().
-	 */
-	isc_log_doit(lctx, category, module, level, true,
-		     msgset, msg, format, args);
-}
-
-void
 isc_log_setcontext(isc_log_t *lctx) {
 	isc_lctx = lctx;
 }
