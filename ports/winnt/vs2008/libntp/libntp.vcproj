@@ -745,10 +745,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\..\lib\isc\win32\include\isc\mutex.h"
-				>
-			</File>
-			<File
 				RelativePath="..\..\..\..\lib\isc\win32\include\isc\net.h"
 				>
 			</File>

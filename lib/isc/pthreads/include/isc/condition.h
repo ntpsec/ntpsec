@@ -20,8 +20,9 @@
 
 /*! \file */
 
+#include <pthread.h>
+
 #include <isc/lang.h>
-#include <isc/mutex.h>
 #include <isc/result.h>
 #include <isc/types.h>
 
@@ -50,7 +51,7 @@ typedef pthread_cond_t isc_condition_t;
 ISC_LANG_BEGINDECLS
 
 isc_result_t
-isc_condition_waituntil(isc_condition_t *, isc_mutex_t *, isc_time_t *);
+isc_condition_waituntil(isc_condition_t *, pthread_mutex_t *, isc_time_t *);
 
 ISC_LANG_ENDDECLS
 

@@ -346,8 +346,6 @@ isc_mem_renderxml
 isc_msgcat_close
 isc_msgcat_get
 isc_msgcat_open
-isc_mutexblock_destroy
-isc_mutexblock_init
 isc_net_aton
 isc_net_disableipv4
 isc_net_disableipv6

@@ -15,8 +15,6 @@
  * PERFORMANCE OF THIS SOFTWARE.
  */
 
-/* $Id$ */
-
 /*! \file */
 
 #include <config.h>
@@ -26,7 +24,6 @@
 
 #include <isc/lib.h>
 #include <isc/msgs.h>
-#include <isc/mutex.h>
 #include <isc/once.h>
 #include <isc/resultclass.h>
 #include <isc/util.h>
@@ -110,7 +107,7 @@ static const char *text[ISC_R_NRESULTS] = {
 
 static isc_once_t 				once = ISC_ONCE_INIT;
 static ISC_LIST(resulttable)			tables;
-static isc_mutex_t				lock;
+static pthread_mutex_t				lock;
 
 static isc_result_t
 register_table(unsigned int base, unsigned int nresults, const char **txt,
@@ -149,7 +146,7 @@ static void
 initialize_action(void) {
 	isc_result_t result;
 
-	RUNTIME_CHECK(isc_mutex_init(&lock) == ISC_R_SUCCESS);
+	RUNTIME_CHECK(pthread_mutex_init(&lock, NULL) == 0);
 	ISC_LIST_INIT(tables);
 
 	result = register_table(ISC_RESULTCLASS_ISC, ISC_R_NRESULTS, text,

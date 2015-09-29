@@ -359,10 +359,6 @@ SOURCE=.\include\isc\msioctl.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\include\isc\mutex.h
-# End Source File
-# Begin Source File
-
 SOURCE=..\include\isc\mutexblock.h
 # End Source File
 # Begin Source File
