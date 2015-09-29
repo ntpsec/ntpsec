@@ -400,9 +400,6 @@ start_blocking_thread_internal(
 }
 #else	/* pthreads start_blocking_thread_internal() follows */
 {
-# ifdef NEED_PTHREAD_INIT
-	static bool	pthread_init_called;
-# endif
 	pthread_attr_t	thr_attr;
 	int		rc;
 	int		pipe_ends[2];	/* read then write */
@@ -410,17 +407,6 @@ start_blocking_thread_internal(
 	int		flags;
 	size_t		stacksize;
 	sigset_t	saved_sig_mask;
-
-# ifdef NEED_PTHREAD_INIT
-	/*
-	 * from lib/isc/unix/app.c:
-	 * BSDI 3.1 seg faults in pthread_sigmask() if we don't do this.
-	 */
-	if (!pthread_init_called) {
-		pthread_init();
-		pthread_init_called = true;
-	}
-# endif
 
 	rc = pipe_socketpair(&pipe_ends[0], &is_pipe);
 	if (0 != rc) {
