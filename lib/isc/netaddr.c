@@ -15,8 +15,6 @@
  * PERFORMANCE OF THIS SOFTWARE.
  */
 
-/* $Id$ */
-
 /*! \file */
 
 #include <config.h>
@@ -279,42 +277,6 @@ isc_netaddr_fromsockaddr(isc_netaddr_t *t, const isc_sockaddr_t *s) {
 	}
 }
 
-void
-isc_netaddr_any(isc_netaddr_t *netaddr) {
-	memset(netaddr, 0, sizeof(*netaddr));
-	netaddr->family = AF_INET;
-	netaddr->type.in.s_addr = INADDR_ANY;
-}
-
-void
-isc_netaddr_any6(isc_netaddr_t *netaddr) {
-	memset(netaddr, 0, sizeof(*netaddr));
-	netaddr->family = AF_INET6;
-	netaddr->type.in6 = in6addr_any;
-}
-
-bool
-isc_netaddr_ismulticast(isc_netaddr_t *na) {
-	switch (na->family) {
-	case AF_INET:
-		return (ISC_TF(ISC_IPADDR_ISMULTICAST(na->type.in.s_addr)));
-	case AF_INET6:
-		return (ISC_TF(IN6_IS_ADDR_MULTICAST(&na->type.in6)));
-	default:
-		return (false);  /* XXXMLG ? */
-	}
-}
-
-bool
-isc_netaddr_isexperimental(isc_netaddr_t *na) {
-	switch (na->family) {
-	case AF_INET:
-		return (ISC_TF(ISC_IPADDR_ISEXPERIMENTAL(na->type.in.s_addr)));
-	default:
-		return (false);  /* XXXMLG ? */
-	}
-}
-
 bool
 isc_netaddr_islinklocal(isc_netaddr_t *na) {
 	switch (na->family) {
@@ -327,29 +289,3 @@ isc_netaddr_islinklocal(isc_netaddr_t *na) {
 	}
 }
 
-bool
-isc_netaddr_issitelocal(isc_netaddr_t *na) {
-	switch (na->family) {
-	case AF_INET:
-		return (false);
-	case AF_INET6:
-		return (ISC_TF(IN6_IS_ADDR_SITELOCAL(&na->type.in6)));
-	default:
-		return (false);
-	}
-}
-
-void
-isc_netaddr_fromv4mapped(isc_netaddr_t *t, const isc_netaddr_t *s) {
-	isc_netaddr_t *src;
-
-	DE_CONST(s, src);	/* Must come before IN6_IS_ADDR_V4MAPPED. */
-
-	REQUIRE(s->family == AF_INET6);
-	REQUIRE(IN6_IS_ADDR_V4MAPPED(&src->type.in6));
-
-	memset(t, 0, sizeof(*t));
-	t->family = AF_INET;
-	memcpy(&t->type.in, (char *)&src->type.in6 + 12, 4);
-	return;
-}
