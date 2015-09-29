@@ -141,7 +141,7 @@
 #include "ieee754io.h"
 #include "recvbuff.h"
 
-static char rcsid[] = "refclock_parse.c,v 4.81 2009/05/01 10:15:29 kardel RELEASE_20090105_A+POWERUPTRUST";
+#define VERSION "4.81 2009/05/01 10:15:29"
 
 /**===========================================================================
  ** external interface to ntp mechanism
@@ -3140,7 +3140,7 @@ parse_control(
 		snprintf(tt, 80,  "refclock_iomode=\"%s\"", parse->binding->bd_description);
 
 		tt = add_var(&out->kv_list, 128, RO);
-		snprintf(tt, 128, "refclock_driver_version=\"%s\"", rcsid);
+		snprintf(tt, 128, "refclock_driver_version=\"%s\"", VERSION);
 
 		{
 			struct ctl_var *k;
