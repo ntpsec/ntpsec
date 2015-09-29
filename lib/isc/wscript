@@ -48,16 +48,10 @@ def build(ctx):
 		"unix/time.c"
 	]
 
-	libisc_source_thread = [
-		"pthreads/condition.c",
-		"pthreads/thread.c",
-	]
-
-
 	ctx(
 		target		= "libisc_obj",
 		features	= "c bld_include src_include",
-		source		= libisc_source + libisc_source_thread,
+		source		= libisc_source,
 		includes	= [
 						"%s/lib/isc/include/" % ctx.srcnode.abspath(),
 						"%s/lib/isc/unix/include/" % ctx.srcnode.abspath(), # XXX: platform: requires unix/win32 switch.
