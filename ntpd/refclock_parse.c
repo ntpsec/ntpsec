@@ -91,9 +91,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <ctype.h>
-#ifndef TM_IN_SYS_TIME
-# include <time.h>
-#endif
+#include <time.h>
 
 #include <unistd.h>
 
@@ -578,17 +576,8 @@ static poll_info_t wsdcf_pollinfo = { WS_POLLRATE, WS_POLLCMD, WS_CMDSIZE };
 #define RAWDCF_FORMAT		"RAW DCF77 Timecode"
 #define RAWDCF_MAXUNSYNC	(0) /* sorry - its a true receiver - no signal - no time */
 #define RAWDCF_SPEED		(B50)
-#ifdef NO_PARENB_IGNPAR /* Was: defined(SYS_IRIX4) || defined(SYS_IRIX5) */
-/* somehow doesn't grok PARENB & IGNPAR (mj) */
-# define RAWDCF_CFLAG            (CS8|CREAD|CLOCAL)
-#else
-# define RAWDCF_CFLAG            (CS8|CREAD|CLOCAL|PARENB)
-#endif
-#ifdef RAWDCF_NO_IGNPAR /* Was: defined(SYS_LINUX) && defined(CLOCK_RAWDCF) */
-# define RAWDCF_IFLAG		0
-#else
-# define RAWDCF_IFLAG		(IGNPAR)
-#endif
+#define RAWDCF_CFLAG            (CS8|CREAD|CLOCAL|PARENB)
+#define RAWDCF_IFLAG		(IGNPAR)
 #define RAWDCF_OFLAG		0
 #define RAWDCF_LFLAG		0
 #define RAWDCF_SAMPLES		20
@@ -2536,13 +2525,6 @@ parse_start(
 	(void) snprintf(parsedev, sizeof(parsedev), PARSEDEVICE, unit);
 	(void) snprintf(parseppsdev, sizeof(parsedev), PARSEPPSDEVICE, unit);
 
-#ifndef O_NOCTTY
-#define O_NOCTTY 0
-#endif
-#ifndef O_NONBLOCK
-#define O_NONBLOCK 0
-#endif
-
 	fd232 = tty_open(parsedev, O_RDWR | O_NOCTTY | O_NONBLOCK, 0777);
 
 	if (fd232 == -1)
@@ -2630,17 +2612,11 @@ parse_start(
 			memset((char *)tio.c_cc, disablec, sizeof(tio.c_cc));
 #endif
 
-#if defined (VMIN) || defined(VTIME)
 		if ((parse_clockinfo[type].cl_lflag & ICANON) == 0)
 		{
-#ifdef VMIN
 			tio.c_cc[VMIN]   = 1;
-#endif
-#ifdef VTIME
 			tio.c_cc[VTIME]  = 0;
-#endif
 		}
-#endif
 
 		tio.c_cflag = (tcflag_t) parse_clockinfo[type].cl_cflag;
 		tio.c_iflag = (tcflag_t) parse_clockinfo[type].cl_iflag;
@@ -2671,7 +2647,7 @@ parse_start(
 /*
  * Linux PPS - the old way
  */
-#if defined(HAVE_LINUX_SERIAL_H)		/* Linux hack: define PPS interface */
+#if defined(HAVE_LINUX_SERIAL_H)	/* Linux hack: define PPS interface */
 		{
 			struct serial_struct	ss;
 			if (ioctl(parse->ppsfd, TIOCGSERIAL, &ss) < 0 ||
