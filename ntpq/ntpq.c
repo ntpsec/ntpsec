@@ -288,7 +288,6 @@ struct xcmd builtins[] = {
  * "mrulist", so the cumulative timeouts are even longer for those.
  */
 #define	DEFDELAY	0x51EB852	/* 20 milliseconds, l_fp fraction */
-#define	LENHOSTNAME	256		/* host name is 256 characters long */
 #define	MAXCMDS		100		/* maximum commands on cmd line */
 #define	MAXHOSTS	200		/* maximum hosts on cmd line */
 #define	MAXLINE		512		/* maximum line length */
@@ -304,7 +303,7 @@ struct xcmd builtins[] = {
 struct sock_timeval tvout = { DEFTIMEOUT, 0 };	/* time out for reads */
 struct sock_timeval tvsout = { DEFSTIMEOUT, 0 };/* secondary time out */
 l_fp delay_time;				/* delay time */
-char currenthost[LENHOSTNAME];			/* current host name */
+char currenthost[NI_MAXHOST];			/* current host name */
 bool currenthostisnum;				/* is prior text from IP? */
 struct sockaddr_in hostaddr;			/* host address */
 bool showhostnames = true;			/* show host names by default */
@@ -641,13 +640,13 @@ openhost(
 	)
 {
 	const char svc[] = "ntp";
-	char temphost[LENHOSTNAME];
+	char temphost[NI_MAXHOST];
 	int a_info, i;
 	struct addrinfo hints, *ai;
 	sockaddr_u addr;
 	size_t octets;
 	register const char *cp;
-	char name[LENHOSTNAME];
+	char name[NI_MAXHOST];
 
 	/*
 	 * We need to get by the [] if they were entered
@@ -1860,7 +1859,7 @@ getnetnum(
 	if (decodenetnum(hname, num)) {
 		if (fullhost != NULL)
 			getnameinfo(&num->sa, SOCKLEN(num), fullhost,
-				    LENHOSTNAME, NULL, 0, 0);
+				    NI_MAXHOST, NULL, 0, 0);
 		return 1;
 	} else if (getaddrinfo(hname, "ntp", &hints, &ai) == 0) {
 		INSIST(sizeof(*num) >= ai->ai_addrlen);
@@ -1868,10 +1867,10 @@ getnetnum(
 		if (fullhost != NULL) {
 			if (ai->ai_canonname != NULL)
 				strlcpy(fullhost, ai->ai_canonname,
-					LENHOSTNAME);
+					NI_MAXHOST);
 			else
 				getnameinfo(&num->sa, SOCKLEN(num),
-					    fullhost, LENHOSTNAME, NULL,
+					    fullhost, NI_MAXHOST, NULL,
 					    0, 0);
 		}
 		freeaddrinfo(ai);

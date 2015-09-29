@@ -706,7 +706,7 @@ ntpq_get_assoc_clocktype(
 	int		i;
 	int		rc;
 	sockaddr_u	dum_store;
-	char		dstadr[LENHOSTNAME];
+	char		dstadr[NI_MAXHOST];
 	char		resultbuf[NTPQ_BUFLEN];
 
 	if (assoc_index < 0 || assoc_index >= numassoc)

@@ -210,7 +210,6 @@ struct xcmd opcmds[] = {
  */
 #define MAXLINE		512	/* maximum length of a line */
 #define MAXLIST		128	/* maximum variables in list */
-#define LENHOSTNAME	256	/* host name limit */
 
 #define MRU_GOT_COUNT	0x1
 #define MRU_GOT_LAST	0x2
@@ -1601,7 +1600,7 @@ doprintpeers(
 	u_long poll_sec;
 	char type = '?';
 	char whenbuf[8], pollbuf[8];
-	char clock_name[LENHOSTNAME];
+	char clock_name[NI_MAXHOST];
 
 	get_systime(&ts);
 	
@@ -1855,7 +1854,7 @@ dopeers(
 	)
 {
 	u_int		u;
-	char		fullname[LENHOSTNAME];
+	char		fullname[NI_MAXHOST];
 	sockaddr_u	netnum;
 	const char *	name_or_num;
 	size_t		sl;
@@ -1953,7 +1952,7 @@ doopeers(
 	)
 {
 	u_int i;
-	char fullname[LENHOSTNAME];
+	char fullname[NI_MAXHOST];
 	sockaddr_u netnum;
 
 	if (!dogetassoc(fp))
