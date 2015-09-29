@@ -62,12 +62,6 @@ extern	struct refclock	refclock_irig;
 #define refclock_irig	refclock_none
 #endif
 
-#ifdef CLOCK_BANC
-extern	struct refclock refclock_bancomm;
-#else
-#define refclock_bancomm refclock_none
-#endif
-
 #ifdef CLOCK_TRUETIME
 extern	struct refclock	refclock_true;
 #else
@@ -210,7 +204,7 @@ struct refclock * const refclock_conf[] = {
 	&refclock_none,		/* 13 was: REFCLK_ATOM_LEITCH */
 	&refclock_none,		/* 14 was: REFCLOCK_MSF_EES */
 	&refclock_none,		/* 15 was: OLD TrueTime GPS/TM-TMD Receiver */
-	&refclock_bancomm,	/* 16 REFCLK_IRIG_BANCOMM */
+	&refclock_none,		/* 16 was: REFCLK_IRIG_BANCOMM */
 	&refclock_none,		/* 17 was: REFCLK_GPS_DATUM */
 	&refclock_acts,		/* 18 REFCLK_ACTS */
 	&refclock_none,		/* 19 was: REFCLK_WWV_HEATH */

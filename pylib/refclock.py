@@ -64,12 +64,6 @@ refclock_map = {
 		"file":		"arbiter"
 	},
 
-	16: {
-		"descr":	"Bancomm GPS/IRIG Receiver",
-		"define":	"CLOCK_BANC",
-		"file":		"bancomm"
-	},
-
 	18: {
 		"descr":	"NIST/USNO/PTB Modem Time Services",
 		"define":	"CLOCK_ACTS",
