@@ -28,10 +28,6 @@
 #define MAXLIST 64
 #endif
 
-#ifndef LENHOSTNAME
-#define LENHOSTNAME 256     /* host name is max. 256 characters long */
-#endif
-
 /* NTP Status codes */
 #define NTP_STATUS_INVALID      0
 #define NTP_STATUS_FALSETICKER  1
