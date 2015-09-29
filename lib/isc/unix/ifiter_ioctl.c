@@ -139,11 +139,8 @@ getbuf4(isc_interfaceiter_t *iter) {
 			if (errno != EINVAL) {
 				strerror_r(errno, strbuf, sizeof(strbuf));
 				UNEXPECTED_ERROR(__FILE__, __LINE__,
-						 isc_msgcat_get(isc_msgcat,
-							ISC_MSGSET_IFITERIOCTL,
-							ISC_MSG_GETIFCONFIG,
 							"get interface "
-							"configuration: %s"),
+							"configuration: %s",
 						 strbuf);
 				goto unexpected;
 			}
@@ -166,13 +163,8 @@ getbuf4(isc_interfaceiter_t *iter) {
 		}
 		if (iter->bufsize >= IFCONF_BUFSIZE_MAX) {
 			UNEXPECTED_ERROR(__FILE__, __LINE__,
-					 isc_msgcat_get(isc_msgcat,
-							ISC_MSGSET_IFITERIOCTL,
-							ISC_MSG_BUFFERMAX,
-							"get interface "
-							"configuration: "
-							"maximum buffer "
-							"size exceeded"));
+					 "get interface configuration: "
+					 "maximum buffer size exceeded");
 			goto unexpected;
 		}
 		isc_mem_put(iter->mctx, iter->buf, iter->bufsize);
@@ -226,11 +218,8 @@ getbuf6(isc_interfaceiter_t *iter) {
 				isc_log_write(isc_lctx, ISC_LOGCATEGORY_GENERAL,
 					      ISC_LOGMODULE_INTERFACE,
 					      ISC_LOG_DEBUG(1),
-					      isc_msgcat_get(isc_msgcat,
-							ISC_MSGSET_IFITERIOCTL,
-							ISC_MSG_GETIFCONFIG,
 							"get interface "
-							"configuration: %s"),
+							"configuration: %s",
 					       strbuf);
 				result = ISC_R_FAILURE;
 				goto cleanup;
@@ -239,11 +228,8 @@ getbuf6(isc_interfaceiter_t *iter) {
 			if (errno != EINVAL) {
 				strerror_r(errno, strbuf, sizeof(strbuf));
 				UNEXPECTED_ERROR(__FILE__, __LINE__,
-						 isc_msgcat_get(isc_msgcat,
-							ISC_MSGSET_IFITERIOCTL,
-							ISC_MSG_GETIFCONFIG,
 							"get interface "
-							"configuration: %s"),
+							"configuration: %s",
 						 strbuf);
 				result = ISC_R_UNEXPECTED;
 				goto cleanup;
@@ -267,13 +253,8 @@ getbuf6(isc_interfaceiter_t *iter) {
 		}
 		if (iter->bufsize6 >= IFCONF_BUFSIZE_MAX) {
 			UNEXPECTED_ERROR(__FILE__, __LINE__,
-					 isc_msgcat_get(isc_msgcat,
-							ISC_MSGSET_IFITERIOCTL,
-							ISC_MSG_BUFFERMAX,
-							"get interface "
-							"configuration: "
-							"maximum buffer "
-							"size exceeded"));
+					 "get interface configuration: "
+					 "maximum buffer size exceeded");
 			result = ISC_R_UNEXPECTED;
 			goto cleanup;
 		}
@@ -335,11 +316,7 @@ isc_interfaceiter_create(isc_mem_t *mctx, isc_interfaceiter_t **iterp) {
 		if ((iter->socket6 = socket(AF_INET6, SOCK_DGRAM, 0)) < 0) {
 			strerror_r(errno, strbuf, sizeof(strbuf));
 			UNEXPECTED_ERROR(__FILE__, __LINE__,
-					 isc_msgcat_get(isc_msgcat,
-							ISC_MSGSET_IFITERIOCTL,
-							ISC_MSG_MAKESCANSOCKET,
-							"making interface "
-							"scan socket: %s"),
+					 "making interface scan socket: %s",
 					 strbuf);
 			result = ISC_R_UNEXPECTED;
 			goto socket6_failure;
@@ -352,11 +329,7 @@ isc_interfaceiter_create(isc_mem_t *mctx, isc_interfaceiter_t **iterp) {
 	if ((iter->socket = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
 		strerror_r(errno, strbuf, sizeof(strbuf));
 		UNEXPECTED_ERROR(__FILE__, __LINE__,
-				 isc_msgcat_get(isc_msgcat,
-						ISC_MSGSET_IFITERIOCTL,
-						ISC_MSG_MAKESCANSOCKET,
-						"making interface "
-						"scan socket: %s"),
+				 "making interface scan socket: %s",
 				 strbuf);
 		result = ISC_R_UNEXPECTED;
 		goto socket_failure;
@@ -530,11 +503,7 @@ internal_current4(isc_interfaceiter_t *iter) {
 	isc_log_write(isc_lctx, ISC_LOGCATEGORY_GENERAL,
 		      ISC_LOGMODULE_INTERFACE,
 		      ISC_LOG_INFO,
-		      isc_msgcat_get(isc_msgcat,
-				     ISC_MSGSET_IFITERIOCTL,
-				     ISC_MSG_GETIFCONFIG,
-				     "prefix length for %s is unknown "
-				     "(assume 128)"), sabuf);
+		     "prefix length for %s is unknown (assume 128)", sabuf);
 	prefixlen = 128;
 #endif
 
@@ -574,11 +543,7 @@ internal_current4(isc_interfaceiter_t *iter) {
 		    < 0) {
 			strerror_r(errno, strbuf, sizeof(strbuf));
 			UNEXPECTED_ERROR(__FILE__, __LINE__,
-				isc_msgcat_get(isc_msgcat,
-					       ISC_MSGSET_IFITERIOCTL,
-					       ISC_MSG_GETDESTADDR,
-					       "%s: getting "
-					       "destination address: %s"),
+					 "%s: getting destination address: %s",
 					 ifreq.ifr_name, strbuf);
 			return (ISC_R_IGNORE);
 		}
@@ -597,11 +562,7 @@ internal_current4(isc_interfaceiter_t *iter) {
 		    < 0) {
 			strerror_r(errno, strbuf, sizeof(strbuf));
 			UNEXPECTED_ERROR(__FILE__, __LINE__,
-				isc_msgcat_get(isc_msgcat,
-					       ISC_MSGSET_IFITERIOCTL,
-					       ISC_MSG_GETBCSTADDR,
-					       "%s: getting "
-					       "broadcast address: %s"),
+					 "%s: getting broadcast address: %s",
 					 ifreq.ifr_name, strbuf);
 			return (ISC_R_IGNORE);
 		}
@@ -622,11 +583,8 @@ internal_current4(isc_interfaceiter_t *iter) {
 	if (isc_ioctl(iter->socket, SIOCGIFNETMASK, (char *)&ifreq) < 0) {
 		strerror_r(errno, strbuf, sizeof(strbuf));
 		UNEXPECTED_ERROR(__FILE__, __LINE__,
-			isc_msgcat_get(isc_msgcat,
-				       ISC_MSGSET_IFITERIOCTL,
-				       ISC_MSG_GETNETMASK,
-				       "%s: getting netmask: %s"),
-				       ifreq.ifr_name, strbuf);
+				 "%s: getting netmask: %s",
+				 ifreq.ifr_name, strbuf);
 		return (ISC_R_IGNORE);
 	}
 	get_addr(family, &iter->current.netmask,
@@ -752,11 +710,7 @@ internal_current6(isc_interfaceiter_t *iter) {
 		    < 0) {
 			strerror_r(errno, strbuf, sizeof(strbuf));
 			UNEXPECTED_ERROR(__FILE__, __LINE__,
-				isc_msgcat_get(isc_msgcat,
-					       ISC_MSGSET_IFITERIOCTL,
-					       ISC_MSG_GETDESTADDR,
-					       "%s: getting "
-					       "destination address: %s"),
+					 "%s: getting destination address: %s",
 					 lifreq.lifr_name, strbuf);
 			return (ISC_R_IGNORE);
 		}
@@ -777,11 +731,7 @@ internal_current6(isc_interfaceiter_t *iter) {
 		    < 0) {
 			strerror_r(errno, strbuf, sizeof(strbuf));
 			UNEXPECTED_ERROR(__FILE__, __LINE__,
-				isc_msgcat_get(isc_msgcat,
-					       ISC_MSGSET_IFITERIOCTL,
-					       ISC_MSG_GETBCSTADDR,
-					       "%s: getting "
-					       "broadcast address: %s"),
+					 "%s: getting broadcast address: %s",
 					 lifreq.lifr_name, strbuf);
 			return (ISC_R_IGNORE);
 		}
@@ -828,10 +778,7 @@ internal_current6(isc_interfaceiter_t *iter) {
 	if (isc_ioctl(fd, SIOCGLIFNETMASK, (char *)&lifreq) < 0) {
 		strerror_r(errno, strbuf, sizeof(strbuf));
 		UNEXPECTED_ERROR(__FILE__, __LINE__,
-				 isc_msgcat_get(isc_msgcat,
-						ISC_MSGSET_IFITERIOCTL,
-						ISC_MSG_GETNETMASK,
-						"%s: getting netmask: %s"),
+				 "%s: getting netmask: %s",
 				 lifreq.lifr_name, strbuf);
 		return (ISC_R_IGNORE);
 	}

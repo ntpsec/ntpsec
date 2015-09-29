@@ -33,7 +33,6 @@
 #include <string.h>
 
 #include <isc/log.h>
-#include <isc/msgs.h>
 #include <isc/net.h>
 #include <isc/once.h>
 #include <isc/util.h>
@@ -141,12 +140,7 @@ try_proto(int domain) {
 		default:
 			ISC_IGNORE(strerror_r(errno, strbuf, sizeof(strbuf)));
 			UNEXPECTED_ERROR(__FILE__, __LINE__,
-					 "socket() %s: %s",
-					 isc_msgcat_get(isc_msgcat,
-							ISC_MSGSET_GENERAL,
-							ISC_MSG_FAILED,
-							"failed"),
-					 strbuf);
+					 "socket() failed: %s", strbuf);
 			return (ISC_R_UNEXPECTED);
 		}
 	}
@@ -263,12 +257,7 @@ try_ipv6only(void) {
 	if (s == -1) {
 		ISC_IGNORE(strerror_r(errno, strbuf, sizeof(strbuf)));
 		UNEXPECTED_ERROR(__FILE__, __LINE__,
-				 "socket() %s: %s",
-				 isc_msgcat_get(isc_msgcat,
-						ISC_MSGSET_GENERAL,
-						ISC_MSG_FAILED,
-						"failed"),
-				 strbuf);
+				 "socket() failed: %s", strbuf);
 		ipv6only_result = ISC_R_UNEXPECTED;
 		return;
 	}
@@ -286,12 +275,7 @@ try_ipv6only(void) {
 	if (s == -1) {
 		ISC_IGNORE(strerror_r(errno, strbuf, sizeof(strbuf)));
 		UNEXPECTED_ERROR(__FILE__, __LINE__,
-				 "socket() %s: %s",
-				 isc_msgcat_get(isc_msgcat,
-						ISC_MSGSET_GENERAL,
-						ISC_MSG_FAILED,
-						"failed"),
-				 strbuf);
+				 "socket() failed: %s", strbuf);
 		ipv6only_result = ISC_R_UNEXPECTED;
 		return;
 	}
@@ -335,12 +319,7 @@ try_ipv6pktinfo(void) {
 	if (s == -1) {
 		ISC_IGNORE(strerror_r(errno, strbuf, sizeof(strbuf)));
 		UNEXPECTED_ERROR(__FILE__, __LINE__,
-				 "socket() %s: %s",
-				 isc_msgcat_get(isc_msgcat,
-						ISC_MSGSET_GENERAL,
-						ISC_MSG_FAILED,
-						"failed"),
-				 strbuf);
+				 "socket() failed: %s", strbuf);
 		ipv6pktinfo_result = ISC_R_UNEXPECTED;
 		return;
 	}

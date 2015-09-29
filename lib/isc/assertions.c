@@ -26,7 +26,6 @@
 
 #include <isc/assertions.h>
 #include <isc/backtrace.h>
-#include <isc/msgs.h>
 #include <isc/result.h>
 
 /*
@@ -115,10 +114,8 @@ default_callback(const char *file, int line, isc_assertiontype_t type,
 		if (result == ISC_R_SUCCESS && nframes > 0)
 			logsuffix = ", back trace";
 
-	fprintf(stderr, "%s:%d: %s(%s) %s%s\n",
-		file, line, isc_assertion_typetotext(type), cond,
-		isc_msgcat_get(isc_msgcat, ISC_MSGSET_GENERAL,
-			       ISC_MSG_FAILED, "failed"), logsuffix);
+	fprintf(stderr, "%s:%d: %s(%s) failed%s\n",
+		file, line, isc_assertion_typetotext(type), cond, logsuffix);
 	if (result == ISC_R_SUCCESS) {
 		for (i = 0; i < nframes; i++) {
 			unsigned long offset;

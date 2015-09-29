@@ -23,7 +23,6 @@
 #include <stdlib.h>
 
 #include <isc/lib.h>
-#include <isc/msgs.h>
 #include <isc/once.h>
 #include <isc/resultclass.h>
 #include <isc/util.h>
@@ -32,7 +31,6 @@ typedef struct resulttable {
 	unsigned int				base;
 	unsigned int				last;
 	const char **				text;
-	isc_msgcat_t *				msgcat;
 	int					set;
 	ISC_LINK(struct resulttable)		link;
 } resulttable;
@@ -111,7 +109,7 @@ static pthread_mutex_t				lock;
 
 static isc_result_t
 register_table(unsigned int base, unsigned int nresults, const char **txt,
-	       isc_msgcat_t *msgcat, int set)
+	       int set)
 {
 	resulttable *table;
 
@@ -129,7 +127,6 @@ register_table(unsigned int base, unsigned int nresults, const char **txt,
 	table->base = base;
 	table->last = base + nresults - 1;
 	table->text = txt;
-	table->msgcat = msgcat;
 	table->set = set;
 	ISC_LINK_INIT(table, link);
 
@@ -150,25 +147,21 @@ initialize_action(void) {
 	ISC_LIST_INIT(tables);
 
 	result = register_table(ISC_RESULTCLASS_ISC, ISC_R_NRESULTS, text,
-				isc_msgcat, ISC_RESULT_RESULTSET);
+				ISC_RESULT_RESULTSET);
 	if (result != ISC_R_SUCCESS)
 		UNEXPECTED_ERROR(__FILE__, __LINE__,
-				 "register_table() %s: %u",
-				 isc_msgcat_get(isc_msgcat, ISC_MSGSET_GENERAL,
-						ISC_MSG_FAILED, "failed"),
-				 result);
+				 "register_table() failed: %u", result);
 }
 
 static void
 initialize(void) {
-	isc_lib_initmsgcat();
 	RUNTIME_CHECK(isc_once_do(&once, initialize_action) == ISC_R_SUCCESS);
 }
 
 const char *
 isc_result_totext(isc_result_t result) {
 	resulttable *table;
-	const char *txt, *default_text;
+	const char *txt;
 	int idx;
 
 	initialize();
@@ -181,20 +174,12 @@ isc_result_totext(isc_result_t result) {
 	     table = ISC_LIST_NEXT(table, link)) {
 		if (result >= table->base && result <= table->last) {
 			idx = (int)(result - table->base);
-			default_text = table->text[idx];
-			/*
-			 * Note: we use 'idx + 1' as the message number
-			 * instead of idx because isc_msgcat_get() requires
-			 * the message number to be > 0.
-			 */
-			txt = isc_msgcat_get(table->msgcat, table->set,
-					     idx + 1, default_text);
+			txt = table->text[idx];
 			break;
 		}
 	}
 	if (txt == NULL)
-		txt = isc_msgcat_get(isc_msgcat, ISC_RESULT_UNAVAILABLESET,
-				     1, "(result code text not available)");
+		txt = "(result code text not available)";
 
 	UNLOCK(&lock);
 
@@ -203,9 +188,9 @@ isc_result_totext(isc_result_t result) {
 
 isc_result_t
 isc_result_register(unsigned int base, unsigned int nresults,
-		    const char **txt, isc_msgcat_t *msgcat, int set)
+		    const char **txt, int set)
 {
 	initialize();
 
-	return (register_table(base, nresults, txt, msgcat, set));
+	return (register_table(base, nresults, txt, set));
 }

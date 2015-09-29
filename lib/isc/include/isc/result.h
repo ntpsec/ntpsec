@@ -100,7 +100,7 @@ isc_result_totext(isc_result_t);
 
 isc_result_t
 isc_result_register(unsigned int base, unsigned int nresults,
-		    const char **text, isc_msgcat_t *msgcat, int set);
+		    const char **text, int set);
 
 ISC_LANG_ENDDECLS
 

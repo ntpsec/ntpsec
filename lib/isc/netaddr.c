@@ -21,7 +21,6 @@
 
 #include <stdio.h>
 
-#include <isc/msgs.h>
 #include <isc/net.h>
 #include <isc/netaddr.h>
 #include <isc/sockaddr.h>
