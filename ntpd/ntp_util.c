@@ -836,7 +836,7 @@ rereadkeys(void)
 }
 
 
-#if notyet
+#if __UNUSED__
 /*
  * ntp_exit - document explicitly that ntpd has exited
  */

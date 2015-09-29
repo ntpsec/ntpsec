@@ -1816,7 +1816,7 @@ dogetpeers(
 	int dsize;
 	u_short rstatus;
 
-#ifdef notdef
+#ifdef __UNUSED__
 	res = doquerylist(pvl, CTL_OP_READVAR, associd, 0, &rstatus,
 			  &dsize, &datap);
 #else
