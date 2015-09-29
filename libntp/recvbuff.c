@@ -227,7 +227,7 @@ get_full_recv_buffer(void)
 
 	LOCK();
 	
-#ifdef HAVE_SIGNALED_IO
+#ifdef ENABLE_SIGNALED_IO
 	/*
 	 * make sure there are free buffers when we
 	 * wander off to do lengthy packet processing with

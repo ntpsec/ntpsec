@@ -486,14 +486,14 @@ block_thread_signals(
 	sigset_t	block;
 
 	sigemptyset(&block);
-# ifdef HAVE_SIGNALED_IO
+# ifdef ENABLE_SIGNALED_IO
 #  ifdef SIGIO
 	sigaddset(&block, SIGIO);
 #  endif
 #  ifdef SIGPOLL
 	sigaddset(&block, SIGPOLL);
 #  endif
-# endif	/* HAVE_SIGNALED_IO */
+# endif	/* ENABLE_SIGNALED_IO */
 	sigaddset(&block, SIGALRM);
 	sigaddset(&block, MOREDEBUGSIG);
 	sigaddset(&block, LESSDEBUGSIG);

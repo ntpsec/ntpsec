@@ -449,7 +449,7 @@ init_io(void)
 	init_io_completion_port();
 #endif
 
-#if defined(HAVE_SIGNALED_IO)
+#if defined(ENABLE_SIGNALED_IO)
 	(void) set_signal(input_handler);
 #endif
 }
@@ -464,9 +464,9 @@ ntpd_addremove_io_fd(
 {
 	UNUSED_ARG(is_pipe);
 
-#ifdef HAVE_SIGNALED_IO
+#ifdef ENABLE_SIGNALED_IO
 	init_socket_sig(fd);
-#endif /* not HAVE_SIGNALED_IO */
+#endif /* not ENABLE_SIGNALED_IO */
 
 	maintain_activefds(fd, remove_it);
 }
@@ -3069,9 +3069,9 @@ open_socket(
 
 	make_socket_nonblocking(fd);
 
-#ifdef HAVE_SIGNALED_IO
+#ifdef ENABLE_SIGNALED_IO
 	init_socket_sig(fd);
-#endif /* not HAVE_SIGNALED_IO */
+#endif /* not ENABLE_SIGNALED_IO */
 
 	add_fd_to_list(fd, FD_TYPE_SOCKET);
 
@@ -3556,7 +3556,7 @@ read_network_packet(
 void
 io_handler(void)
 {
-#  ifndef HAVE_SIGNALED_IO
+#  ifndef ENABLE_SIGNALED_IO
 	fd_set rdfdes;
 	int nfound;
 
@@ -3587,9 +3587,9 @@ io_handler(void)
 		DPRINTF(1, ("select() returned %d: %m\n", nfound));
 	}
 #   endif /* DEBUG */
-#  else /* HAVE_SIGNALED_IO */
+#  else /* ENABLE_SIGNALED_IO */
 	wait_for_signal();
-#  endif /* HAVE_SIGNALED_IO */
+#  endif /* ENABLE_SIGNALED_IO */
 }
 
 /*
@@ -4293,7 +4293,7 @@ io_addclock(
 	 */
 	rio->active = true;
 
-# ifdef HAVE_SIGNALED_IO
+# ifdef ENABLE_SIGNALED_IO
 	if (init_clock_sig(rio)) {
 		UNBLOCKIO();
 		return false;
@@ -4732,9 +4732,9 @@ init_async_notifications()
 	}
 #endif
 	make_socket_nonblocking(fd);
-#if defined(HAVE_SIGNALED_IO)
+#if defined(ENABLE_SIGNALED_IO)
 	init_socket_sig(fd);
-#endif /* HAVE_SIGNALED_IO */
+#endif /* ENABLE_SIGNALED_IO */
 
 	reader = new_asyncio_reader();
 
