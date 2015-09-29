@@ -316,10 +316,6 @@ isc_log_destroy
 isc_log_getdebuglevel
 isc_log_getduplicateinterval
 isc_log_gettag
-isc_log_ivwrite
-isc_log_ivwrite1
-isc_log_iwrite
-isc_log_iwrite1
 isc_log_modulebyname
 isc_log_opensyslog
 isc_log_registercategories
