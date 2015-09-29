@@ -143,6 +143,10 @@ entries than you expected.  Support for some very ancient drivers
 (notably, those rendered obsolete by the WWVB modulation change in
 2013) has been dropped in order to reduce our maintainance load.
 
+For security reasons, we will no longer support any refclock that requires
+a closed-source driver to run.  This filtered out the
+Datum/Bancomm/Symmetricom bc600-series GPS/IRIG Receiver.
+
 [options="header"]
 |====================================================================
 | Number                      | Flags | Driver
@@ -155,7 +159,6 @@ entries than you expected.  Support for some very ancient drivers
 | link:driver9.html[Type 9]   | D     | Magnavox MX4200 GPS Receiver
 | link:driver10.html[Type 10] | D     | Austron 2200A/2201A GPS Receivers
 | link:driver11.html[Type 11] | D     | Arbiter 1088A/B GPS Receiver
-| link:driver16.html[Type 16] | D     | Symmetricom bc600-series GPS/IRIG Receiver
 | link:driver18.html[Type 18] | -     | NIST/USNO/PTB Modem Time Services
 | link:driver20.html[Type 20] | T     | Generic NMEA GPS Receiver
 | link:driver22.html[Type 22] | -     | PPS Clock Discipline
@@ -184,7 +187,7 @@ The flags field should be interpreted as follows:
 | T | Regularly tested by an active maintainer
 |====================================================================
 
-Driver numbers 2, 3, 12, 13, 14, 15, 17, 19, 21, 23, 24, 25, 32, 34,
+Driver numbers 2, 3, 12, 13, 14, 15, 16, 17, 19, 21, 23, 24, 25, 32, 34,
 36, 41, and 43 (all unused numbers below 45) are reserved. Some of
 these were used by refclock types (now obsolete) in older NTP versions
 

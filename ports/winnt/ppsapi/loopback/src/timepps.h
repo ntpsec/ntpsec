@@ -226,10 +226,6 @@ typedef struct pps_params {
 
 typedef UINT_PTR pps_handle_t;	/* pps handlebars */
 
-#ifndef inline
-#define inline __inline
-#endif
-
 /*
  * ntpd on Windows is typically distributed as a binary as few users
  * have the tools needed to build from source.  Rather than build
