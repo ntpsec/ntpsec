@@ -367,14 +367,6 @@ int main() { return 0; }
 	# have it on everywhere.
 	ctx.define("NEED_REUSEADDR_FOR_IFADDRBIND", 1)
 
-	# Fine-grained capabilities allow NTP to set the time after
-	# dropping root.  Needs libcap to be linked.
-	#if sys.platform_startswith("linux"):
-	#	ctx.define("HAVE_LINUX_CAPABILITIES", 1)
-
-	# HAVE_SOLARIS_PRIVS needs to be defined for the same effect
-	# under Solaris.
-
 	# Not yet known how to detect HP-UX at version < 8, but that needs this.
 	# Shouldn't be an issue as 8.x shipped in January 1991!
 	# ctx.define("NEED_RCVBUF_SLOP", 1)
