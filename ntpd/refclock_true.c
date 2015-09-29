@@ -176,9 +176,6 @@ struct	refclock refclock_true = {
 };
 
 
-#if !defined(__STDC__)
-# define true_debug (void)
-#else
 NTP_PRINTF(2, 3)
 static void
 true_debug(struct peer *peer, const char *fmt, ...)
@@ -221,7 +218,6 @@ true_debug(struct peer *peer, const char *fmt, ...)
 	}
 	va_end(ap);
 }
-#endif /*STDC*/
 
 /*
  * true_start - open the devices and initialize data for processing

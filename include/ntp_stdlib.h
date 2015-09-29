@@ -36,9 +36,7 @@ extern	void	msyslog(int, const char *, ...) NTP_PRINTF(2, 3);
 extern	void	init_logging	(const char *, uint32_t, int);
 extern	int	change_logfile	(const char *, int);
 extern	void	setup_logfile	(const char *);
-#ifndef errno_to_str
 extern	void	errno_to_str(int, char *, size_t);
-#endif
 
 /*
  * When building without OpenSSL, use a few macros of theirs to

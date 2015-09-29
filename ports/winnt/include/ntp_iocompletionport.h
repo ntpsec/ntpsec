@@ -1,5 +1,5 @@
-#if !defined __ntp_iocompletionport_h
-# define __ntp_iocompletionport_h
+#if !defined GUARD_NTP_IOCOMPLETIONPORT_H
+# define GUARD_NTP_IOCOMPLETIONPORT_H
 
 #include "ntp_fp.h"
 #include "ntp.h"

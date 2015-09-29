@@ -105,10 +105,6 @@
  */
 #undef interface
 
-#ifndef INADDR_LOOPBACK
-#define INADDR_LOOPBACK 0x7f000001UL
-#endif
-
 #ifndef ISC_PLATFORM_HAVEIN6PKTINFO
 struct in6_pktinfo {
 	struct in6_addr ipi6_addr;    /* src/dst IPv6 address */
