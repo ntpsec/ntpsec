@@ -144,8 +144,6 @@ Hal:
 
 == Old, sometime ancient stuff ==
 
-      *** IF YOU CAN HELP FIX ANY OF THESE THINGS, PLEASE DO! ***
-
 970711: Look Real Hard at changing the key stuff from u_long to u_int32.
 
 970711: Make sure it's safe to convert proto_config's 2nd argument from
@@ -153,11 +151,3 @@ Hal:
 
 970318: in hourly_stats(?), squawk if the magnitude of the drift is,
 	say, >400.
-
-970301: Implement the utmp/wtmp timestamping on time steps.
-
-Problems that need to be fixed:
-
-- Combine enable-step-slew and enable-ntpdate-step
-
-- Check dcfd.c for variables that need to be volatile.
