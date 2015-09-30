@@ -115,11 +115,7 @@ main( void )
     int  year;
     struct tm tmbuf;
 
-    Time = time( (time_t *)NULL )
-#ifdef TESTTIMEOFFSET
-		+ test_time_offset
-#endif
-	;
+    Time = time( (time_t *)NULL );
     LocalTime = *localtime_r( &Time, &tmbuf);
 
     year = ( sizeof( u_long ) > 4 ) 	/* save max span using year as temp */
