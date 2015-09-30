@@ -7,10 +7,10 @@ Poul-Henning
 
 */
 
+#include <stdlib.h>
 #include <stdio.h>
 #include <errno.h>
 #include <fcntl.h>
-#include <err.h>
 #include <sys/types.h>
 #include <time.h>
 #include <sys/timepps.h>
@@ -29,11 +29,10 @@ Poul-Henning
 void
 Chew(struct timespec *tsa, struct timespec *tsc, unsigned sa, unsigned sc)
 {
-	static int idx;
 	struct timespec ts;
 
-	printf("%d.%09d ", tsa->tv_sec, tsa->tv_nsec);
-	printf("%d.%09d ", tsc->tv_sec, tsc->tv_nsec);
+	printf("%ld.%09ld ", tsa->tv_sec, tsa->tv_nsec);
+	printf("%ld.%09ld ", tsc->tv_sec, tsc->tv_nsec);
 	printf("%u %u ", sa, sc);
 
 	ts = *tsc;
@@ -41,6 +40,12 @@ Chew(struct timespec *tsa, struct timespec *tsc, unsigned sa, unsigned sc)
 	printf("%.9f ", ts.tv_sec + ts.tv_nsec / 1e9);
 	printf("\n");
 	fflush(stdout);
+}
+
+static int err(int out, const char *legend)
+{
+    fprintf(stderr, "pps-api: %s\n", legend);
+    exit(out);
 }
 
 int
@@ -52,7 +57,6 @@ main(int argc, char **argv)
 	pps_handle_t ph;
 	int i, mode;
 	u_int olda, oldc;
-	double d = 0;
 	struct timespec to;
 
 	if (argc < 2)
