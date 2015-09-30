@@ -268,7 +268,7 @@ internal_current(isc_interfaceiter_t *iter) {
 
 		return (ISC_R_SUCCESS);
 	} else {
-		printf("warning: unexpected interface list message type\n"));
+		printf("warning: unexpected interface list message type\n");
 		return (ISC_R_IGNORE);
 	}
 }
