@@ -15,34 +15,6 @@
 
 #include "ntp_proto.h"
 
-/*
-
-HOW TO GET IP INTERFACE INFORMATION
-
-  Some UNIX V.4 machines implement a sockets library on top of
-  streams. For these systems, you must use send the SIOCGIFCONF down
-  the stream in an I_STR ioctl. This ususally also implies
-  USE_STREAMS_DEVICE FOR IF_CONFIG. Dell UNIX is a notable exception.
-
-WHAT DOES IOCTL(SIOCGIFCONF) RETURN IN THE BUFFER
-
-  UNIX V.4 machines implement a sockets library on top of streams.
-  When requesting the IP interface configuration with an ioctl(2) calll,
-  an array of ifreq structures are placed in the provided buffer.  Some
-  implementations also place the length of the buffer information in
-  the first integer position of the buffer.
-
-  SIZE_RETURNED_IN_BUFFER - size integer is in the buffer
-
-WILL IOCTL(SIOCGIFCONF) WORK ON A SOCKET
-
-  Some UNIX V.4 machines do not appear to support ioctl() requests for the
-  IP interface configuration on a socket.  They appear to require the use
-  of the streams device instead.
-
-  USE_STREAMS_DEVICE_FOR_IF_CONFIG - use the /dev/ip device for configuration
-*/
-
 int ntp_set_tod (struct timeval *tvp, void *tzp);
 
 #ifdef NO_MAIN_ALLOWED
@@ -88,15 +60,6 @@ int ntp_set_tod (struct timeval *tvp, void *tzp);
 	 callmain(argc,argv);  \
 	}
 #endif /* NO_MAIN_ALLOWED */
-
-/*
- * Here's where autoconfig starts to take over
- */
-#ifdef HAVE_SYS_STROPTS_H
-# ifdef HAVE_SYS_STREAM_H
-#  define STREAM
-# endif
-#endif
 
 #ifdef	NTP_SYSCALLS_STD
 # ifndef	NTP_SYSCALL_GET
