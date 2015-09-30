@@ -35,8 +35,6 @@
 #include "timevalops.h"
 #include "timespecops.h"
 
-/* Don't include ISC's version of IPv6 variables and structures */
-#define ISC_IPV6_H 1
 #include <isc/mem.h>
 #include <isc/interfaceiter.h>
 #include <isc/netaddr.h>
