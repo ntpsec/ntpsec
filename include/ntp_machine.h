@@ -61,15 +61,6 @@ int ntp_set_tod (struct timeval *tvp, void *tzp);
 	}
 #endif /* NO_MAIN_ALLOWED */
 
-#ifdef	NTP_SYSCALLS_STD
-# ifndef	NTP_SYSCALL_GET
-#  define	NTP_SYSCALL_GET 235
-# endif
-# ifndef	NTP_SYSCALL_ADJ
-#  define	NTP_SYSCALL_ADJ 236
-# endif
-#endif	/* NTP_SYSCALLS_STD */
-
 #ifdef HAVE_RTPRIO
 # define HAVE_NO_NICE
 #endif
