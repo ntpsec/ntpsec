@@ -226,6 +226,7 @@ def cmd_configure(ctx):
 		"linux/if_addr.h",
 		"linux/rtnetlink.h",
 		"linux/serial.h",
+		#"linux/seccomp.h",	- Doesn't build yet, investigate
 		"machine/soundcard.h",
 		"netinet/in_systm.h",
 		"md5.h",

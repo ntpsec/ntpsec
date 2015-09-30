@@ -69,6 +69,12 @@
 # endif /* HAVE_PRIV_H */
 #endif /* ENABLE_DROPROOT */
 
+#ifdef HAVE_LINUX_SECCOMP_H
+# include <linux/seccomp.h>
+# include <linux/filter.h>
+# include <linux/audit.h>
+#endif /* HAVE_LINUX_SECCOMP_H */
+
 #if defined(HAVE_DNS_SD_H) && defined(ENABLE_MDNS_REGISTRATION)
 # include <dns_sd.h>
 DNSServiceRef mdns;
@@ -1161,7 +1167,7 @@ getgroup:
 # endif	/* ENABLE_DROPROOT */
 
 /* libssecomp sandboxing */
-#if defined (LIBSECCOMP) && (KERN_SECCOMP)
+#if defined(HAVE_LINUX_SECCOMP_H) && (defined(__x86_64__) || defined(__i386__))
 	scmp_filter_ctx ctx;
 
 	if ((ctx = seccomp_init(SCMP_ACT_KILL)) < 0)
@@ -1262,7 +1268,7 @@ int scmp_sc[] = {
 	else {
 		msyslog(LOG_DEBUG, "%s: seccomp_load() succeeded", __func__);
 	}
-#endif /* LIBSECCOMP and KERN_SECCOMP */
+#endif /* HAVE_LINUX_SECCOMP_H */
 
 # ifdef HAVE_IO_COMPLETION_PORT
 
