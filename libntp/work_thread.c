@@ -448,9 +448,7 @@ start_blocking_thread_internal(
 #else
 	UNUSED_ARG(stacksize);
 #endif
-#if defined(PTHREAD_SCOPE_SYSTEM) && defined(NEED_PTHREAD_SCOPE_SYSTEM)
 	pthread_attr_setscope(&thr_attr, PTHREAD_SCOPE_SYSTEM);
-#endif
 	c->thread_ref = emalloc_zero(sizeof(*c->thread_ref));
 	block_thread_signals(&saved_sig_mask);
 	rc = pthread_create(c->thread_ref, &thr_attr,
