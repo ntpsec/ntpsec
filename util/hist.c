@@ -26,7 +26,7 @@ main(
 	char *argv[]
 	)
 {
-	struct timeval ts, tr, tp;
+	struct timeval ts, tr;
 	struct timezone tzp;
 	int i, j, n;
 	long t, u, v, w, gtod[NBUF], ovfl[NSRT];
@@ -73,24 +73,24 @@ main(
 	 */
 	for (i = 0; i < NBUF - 1; i++) {
 		if (gtod[i] > 0)
-			printf("%ld %ld\n", i, gtod[i]);
+			printf("%d %ld\n", i, gtod[i]);
 	}
 	if (n == 0)
-		return;
+		exit(0);
 	qsort(&ovfl, (size_t)n, sizeof(ovfl[0]), col);
 	w = 0;
 	j = 0;
 	for (i = 0; i < n; i++) {
 		if (ovfl[i] != w) {
 			if (j > 0)
-				printf("%ld %ld\n", w, j);
+				printf("%ld %d\n", w, j);
 			w = ovfl[i];
 			j = 1;
 		} else
 			j++;
 	}
 	if (j > 0)
-		printf("%ld %ld\n", w, j);
+		printf("%ld %d\n", w, j);
  
 	exit(0);
 }
