@@ -97,24 +97,24 @@ nic_rule *nic_rule_list;
 
 
 #if defined(SO_BINTIME) && defined(SCM_BINTIME) && defined(CMSG_FIRSTHDR)
-#  define HAVE_PACKET_TIMESTAMP
-#  define HAVE_BINTIME
+#  define USE_PACKET_TIMESTAMP
+#  define USE_SCM_BINTIME
 #  ifdef BINTIME_CTLMSGBUF_SIZE
 #   define CMSG_BUFSIZE BINTIME_CTLMSGBUF_SIZE
 #  else
 #   define CMSG_BUFSIZE  1536 /* moderate default */
 #  endif
 #elif defined(SO_TIMESTAMPNS) && defined(SCM_TIMESTAMPNS) && defined(CMSG_FIRSTHDR)
-#  define HAVE_PACKET_TIMESTAMP
-#  define HAVE_TIMESTAMPNS
+#  define USE_PACKET_TIMESTAMP
+#  define USE_SCM_TIMESTAMPNS
 #  ifdef TIMESTAMPNS_CTLMSGBUF_SIZE
 #   define CMSG_BUFSIZE TIMESTAMPNS_CTLMSGBUF_SIZE
 #  else
 #   define CMSG_BUFSIZE  1536 /* moderate default */
 #  endif
 #elif defined(SO_TIMESTAMP) && defined(SCM_TIMESTAMP) && defined(CMSG_FIRSTHDR)
-#  define HAVE_PACKET_TIMESTAMP
-#  define HAVE_TIMESTAMP
+#  define USE_PACKET_TIMESTAMP
+#  define USE_SCM_TIMESTAMP
 #  ifdef TIMESTAMP_CTLMSGBUF_SIZE
 #   define CMSG_BUFSIZE TIMESTAMP_CTLMSGBUF_SIZE
 #  else
@@ -3015,7 +3015,7 @@ open_socket(
 		return INVALID_SOCKET;
 	}
 
-#ifdef HAVE_TIMESTAMP
+#ifdef USE_SCM_TIMESTAMP
 	{
 		if (setsockopt(fd, SOL_SOCKET, SO_TIMESTAMP,
 			       (char*)&on, sizeof(on)))
@@ -3027,7 +3027,7 @@ open_socket(
 				    fd, stoa(addr)));
 	}
 #endif
-#ifdef HAVE_TIMESTAMPNS
+#ifdef USE_SCM_TIMESTAMPNS
 	{
 		if (setsockopt(fd, SOL_SOCKET, SO_TIMESTAMPNS,
 			       (char*)&on, sizeof(on)))
@@ -3039,7 +3039,7 @@ open_socket(
 				    fd, stoa(addr)));
 	}
 #endif
-#ifdef HAVE_BINTIME
+#ifdef USE_SCM_BINTIME
 	{
 		if (setsockopt(fd, SOL_SOCKET, SO_BINTIME,
 			       (char*)&on, sizeof(on)))
@@ -3285,7 +3285,7 @@ read_refclock_packet(
 #endif	/* REFCLOCK */
 
 
-#ifdef HAVE_PACKET_TIMESTAMP
+#ifdef USE_PACKET_TIMESTAMP
 /*
  * extract timestamps from control message buffer
  */
@@ -3297,13 +3297,13 @@ fetch_timestamp(
 	)
 {
 	struct cmsghdr *	cmsghdr;
-#ifdef HAVE_BINTIME
+#ifdef USE_SCM_BINTIME
 	struct bintime *	btp;
 #endif
-#ifdef HAVE_TIMESTAMPNS
+#ifdef USE_SCM_TIMESTAMPNS
 	struct timespec *	tsp;
 #endif
-#ifdef HAVE_TIMESTAMP
+#ifdef USE_SCM_TIMESTAMP
 	struct timeval *	tvp;
 #endif
 	unsigned long		ticks;
@@ -3318,19 +3318,19 @@ fetch_timestamp(
 	while (cmsghdr != NULL) {
 		switch (cmsghdr->cmsg_type)
 		{
-#ifdef HAVE_BINTIME
+#ifdef USE_SCM_BINTIME
 		case SCM_BINTIME:
-#endif  /* HAVE_BINTIME */
-#ifdef HAVE_TIMESTAMPNS
+#endif  /* USE_SCM_BINTIME */
+#ifdef USE_SCM_TIMESTAMPNS
 		case SCM_TIMESTAMPNS:
-#endif	/* HAVE_TIMESTAMPNS */
-#ifdef HAVE_TIMESTAMP
+#endif	/* USE_SCM_TIMESTAMPNS */
+#ifdef USE_SCM_TIMESTAMP
 		case SCM_TIMESTAMP:
-#endif	/* HAVE_TIMESTAMP */
-#if defined(HAVE_BINTIME) || defined (HAVE_TIMESTAMPNS) || defined(HAVE_TIMESTAMP)
+#endif	/* USE_SCM_TIMESTAMP */
+#if defined(USE_SCM_BINTIME) || defined (USE_SCM_TIMESTAMPNS) || defined(USE_SCM_TIMESTAMP)
 			switch (cmsghdr->cmsg_type)
 			{
-#ifdef HAVE_BINTIME
+#ifdef USE_SCM_BINTIME
 			case SCM_BINTIME:
 				btp = (struct bintime *)CMSG_DATA(cmsghdr);
 				/*
@@ -3346,8 +3346,8 @@ fetch_timestamp(
                                 DPRINTF(4, ("fetch_timestamp: system bintime network time stamp: %ld.%09lu\n",
                                             btp->sec, (unsigned long)((nts.l_uf / FRAC) * 1e9)));
 				break;
-#endif  /* HAVE_BINTIME */
-#ifdef HAVE_TIMESTAMPNS
+#endif  /* USE_SCM_BINTIME */
+#ifdef USE_SCM_TIMESTAMPNS
 			case SCM_TIMESTAMPNS:
 				tsp = (struct timespec *)CMSG_DATA(cmsghdr);
 				if (sys_tick > measured_tick &&
@@ -3361,8 +3361,8 @@ fetch_timestamp(
 					    tsp->tv_sec, tsp->tv_nsec));
 				nts = tspec_stamp_to_lfp(*tsp);
 				break;
-#endif	/* HAVE_TIMESTAMPNS */
-#ifdef HAVE_TIMESTAMP
+#endif	/* USE_SCM_TIMESTAMPNS */
+#ifdef USE_SCM_TIMESTAMP
 			case SCM_TIMESTAMP:
 				tvp = (struct timeval *)CMSG_DATA(cmsghdr);
 				if (sys_tick > measured_tick &&
@@ -3376,7 +3376,7 @@ fetch_timestamp(
 					    (intmax_t)tvp->tv_sec, (long)tvp->tv_usec));
 				nts = tval_stamp_to_lfp(*tvp);
 				break;
-#endif  /* HAVE_TIMESTAMP */
+#endif  /* USE_SCM_TIMESTAMP */
 			}
 			fuzz = intercept_ntp_random(__func__) * 2. / FRAC * sys_fuzz;
 			DTOLFP(fuzz, &lfpfuzz);
@@ -3391,7 +3391,7 @@ fetch_timestamp(
 #endif	/* DEBUG_TIMING */
 			ts = nts;  /* network time stamp */
 			break;
-#endif	/* HAVE_BINTIME || HAVE_TIMESTAMPNS || HAVE_TIMESTAMP */
+#endif	/* USE_SCM_BINTIME || USE_SCM_TIMESTAMPNS || USE_SCM_TIMESTAMP */
 
 		default:
 			DPRINTF(4, ("fetch_timestamp: skipping control message 0x%x\n",
@@ -3401,7 +3401,7 @@ fetch_timestamp(
 	}
 	return ts;
 }
-#endif	/* HAVE_PACKET_TIMESTAMP */
+#endif	/* USE_PACKET_TIMESTAMP */
 
 
 /*
@@ -3419,7 +3419,7 @@ read_network_packet(
 	GETSOCKNAME_SOCKLEN_TYPE fromlen;
 	int buflen;
 	register struct recvbuf *rb;
-#ifdef HAVE_PACKET_TIMESTAMP
+#ifdef USE_PACKET_TIMESTAMP
 	struct msghdr msghdr;
 	struct iovec iovec;
 	char control[CMSG_BUFSIZE];
@@ -3457,7 +3457,7 @@ read_network_packet(
 
 	fromlen = sizeof(rb->recv_srcadr);
 
-#ifndef HAVE_PACKET_TIMESTAMP
+#ifndef USE_PACKET_TIMESTAMP
 	rb->recv_length = recvfrom(fd, (char *)&rb->recv_space,
 				   sizeof(rb->recv_space), 0,
 				   &rb->recv_srcadr.sa, &fromlen);
@@ -3525,7 +3525,7 @@ read_network_packet(
 	 */
 	rb->dstadr = itf;
 	rb->fd = fd;
-#ifdef HAVE_PACKET_TIMESTAMP
+#ifdef USE_PACKET_TIMESTAMP
 	/* pick up a network time stamp if possible */
 	ts = fetch_timestamp(rb, &msghdr, ts);
 #endif
