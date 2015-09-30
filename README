@@ -67,8 +67,6 @@ ntpq/::		Directory containing sources for a utility program to
 		related timekeeping information. This program conforms
 		to Appendix A of the NTP Version 3 Specification RFC 1305.
 
-ntpsnmpd/::	NTP SNMP subagent for Net-SNMP.
-
 ports/::	Subdirectories of this contain code for non-Unix operating
 		systems.  At present there is just one, for Windows.
 
