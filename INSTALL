@@ -3,8 +3,9 @@
 == Quick Start ==
 
 This software should build on any operating system conformant to
-POSIX.1-2001 and ISO/IEC 9899:1999 (C99).  The primary development
-platforms are Linux and FreeBSD.
+POSIX.1-2001 and ISO/IEC 9899:1999 (C99).  In addition, the
+operating system must have either a Linux-like adjtimex(2) call
+or a BSD-like ntp_adjtime(2) call.
 
 There are some prerequisites.  Libraries need both the library and the
 development headers installed.

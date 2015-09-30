@@ -11,12 +11,7 @@
 # include <sys/timex.h>
 #endif
 
-#ifndef NTP_SYSCALLS_LIBC
-# ifdef NTP_SYSCALLS_STD
-#  define ntp_adjtime(t)	syscall(SYS_ntp_adjtime, (t))
-#  define ntp_gettime(t)	syscall(SYS_ntp_gettime, (t))
-# else /* !NTP_SYSCALLS_STD */
-#  ifdef HAVE_NTP_ADJTIME
+#ifdef HAVE_NTP_ADJTIME
 extern	int	ntp_adjtime	(struct timex *);
 
 struct ntptimeval
@@ -26,7 +21,7 @@ struct ntptimeval
 	long int	esterror;	/* estimated error (us) (ro) */
 };
 
-#   ifndef HAVE_NTP_GETTIME
+# ifndef HAVE_NTP_GETTIME
 static inline int
 ntp_gettime(
 	struct ntptimeval *ntv
@@ -40,16 +35,14 @@ ntp_gettime(
 	ntv->time = tntx.time;
 	ntv->maxerror = tntx.maxerror;
 	ntv->esterror = tntx.esterror;
-#    ifdef NTP_API
-#     if NTP_API > 3
+#  ifdef NTP_API
+#   if NTP_API > 3
 	ntv->tai = tntx.tai;
-#     endif
-#    endif
+#   endif
+#  endif
 	return result;
 }
-#   endif	/* !HAVE_NTP_GETTIME */
-#  endif	/* !HAVE_NTP_ADJTIME */
-# endif	/* !NTP_SYSCALLS_STD */
-#endif	/* !NTP_SYSCALLS_LIBC */
+# endif	/* !HAVE_NTP_GETTIME */
+#endif	/* !HAVE_NTP_ADJTIME */
 
 #endif	/* GUARD_NTP_SYSCALL_H */
