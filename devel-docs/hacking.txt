@@ -61,6 +61,10 @@ Parts of this code are a thicket of C preprocessor conditionals.
 In an attempt to make these halfway comprehensible, we use the
 following conventions to distinguish classes of macro names:
 
+ENABLE_*::
+	Gates the code for an optional feature.  Set by a switch on
+	the "waf configure" invocation.
+
 GUARD_*::
 	Symbols with thie GUARD_ prefix are idempotency guards - that is,
 	they're used to nullify inclusions of a header file
@@ -83,14 +87,15 @@ NEED_*::
 	function, but instead have to be probed for by some ad-hoc
 	test in waf configure.
 
+OVERRIDE_*::
+	Override a default for debugging purposes. These are values
+	(buffer lengths and the like) which waf is not expected to
+	normally override but which might need to be forced.
+
 USE_*::
 	Use symbols are set internally within other conditionals to
 	gate use of sections of code that must be conditionally
 	compiled deoending on *combinations* of HAVE and NEED symbols.
-
-FEATURE_*::
-	Gates the code for an optional feature.  Set by a switch on
-	the "waf configure" invocation.
 
 === Cross-platform portability ===
 

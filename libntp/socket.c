@@ -54,12 +54,12 @@ move_fd(
 	)
 {
 #if !defined(SYS_WINNT) && defined(F_DUPFD)
-#ifndef FD_CHUNK
+#ifdef OVERRIDE_FD_CHUNK
+#define FD_CHUNK	OVERRIDE_FD_CHUNK
+#else
 #define FD_CHUNK	10
 #endif
-#ifndef FOPEN_MAX
-#define FOPEN_MAX	20
-#endif
+
 /*
  * number of fds we would like to have for
  * stdio FILE* available.
@@ -69,7 +69,9 @@ move_fd(
  * we don't keep the other FILE* open beyond the
  * scope of the function that opened it.
  */
-#ifndef FD_PREFERRED_SOCKBOUNDARY
+#ifdef OVERRIDE_FD_PREFERRED_SOCKBOUNDARY
+#define FD_PREFERRED_SOCKBOUNDARY OVERRIDE_FD_PREFERRED_SOCKBOUNDARY
+#else
 #define FD_PREFERRED_SOCKBOUNDARY 48
 #endif
 
