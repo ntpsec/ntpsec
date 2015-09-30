@@ -13,11 +13,32 @@
 #include "ntp_unixtime.h"
 #include "lib_strbuf.h"
 #include "ntp_debug.h"
+#include "ntp_syscall.h"
 #include <unistd.h>
 
 #ifdef SYS_WINNT
 int _getch(void);	/* Declare the one function rather than include conio.h */
 #else
+
+#ifndef HAVE_NTP_GETTIME
+int ntp_gettime(struct ntptimeval *ntv)
+{
+	struct timex tntx;
+	int result;
+
+	ZERO(tntx);
+	result = ntp_adjtime(&tntx);
+	ntv->time = tntx.time;
+	ntv->maxerror = tntx.maxerror;
+	ntv->esterror = tntx.esterror;
+#  ifdef NTP_API
+#   if NTP_API > 3
+	ntv->tai = tntx.tai;
+#   endif
+#  endif
+	return result;
+}
+#endif	/* !HAVE_NTP_GETTIME */
 
 #define SET_TOD_UNDETERMINED	0
 #define SET_TOD_CLOCK_SETTIME	1

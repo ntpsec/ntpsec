@@ -177,6 +177,8 @@ def cmd_configure(ctx):
 		('getclock', "sys/timers.h"),
 		('getdtablesize', "unistd.h"),		# SVr4, 4.2BSD
 		('getpassphrase', "stdlib.h"),		# Sun systems
+		('ntp_adjtime', "sys/timex.h"),		# BSD
+		('ntp_gettime', "sys/timex.h"),		# BSD
 		('plock', "sys/lock.h"),		# OSF/1, SVID[23], XPG2
 		('pthread_attr_getstacksize', "pthread.h", "PTHREAD"),
 		('pthread_attr_setstacksize', "pthread.h", "PTHREAD"),

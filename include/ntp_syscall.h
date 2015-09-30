@@ -1,6 +1,11 @@
 /*
  * ntp_syscall.h - various ways to perform the ntp_adjtime() and ntp_gettime()
  * 		   system calls.
+ *
+ * On most systems including <sys/timex.h> will bring in declarations
+ * for the BSD functions ntp_gettime(2) and ntp_adjtime(2). (Linux
+ * using glibc has these, though they're not visible in the manual
+ * pages.)
  */
 
 #ifndef GUARD_NTP_SYSCALL_H
@@ -11,9 +16,7 @@
 # include <sys/timex.h>
 #endif
 
-#ifdef HAVE_NTP_ADJTIME
-extern	int	ntp_adjtime	(struct timex *);
-
+#ifndef HAVE_NTP_GETTIME
 struct ntptimeval
 {
 	struct timeval	time;		/* current time (ro) */
@@ -21,28 +24,7 @@ struct ntptimeval
 	long int	esterror;	/* estimated error (us) (ro) */
 };
 
-# ifndef HAVE_NTP_GETTIME
-static inline int
-ntp_gettime(
-	struct ntptimeval *ntv
-	)
-{
-	struct timex tntx;
-	int result;
-
-	ZERO(tntx);
-	result = ntp_adjtime(&tntx);
-	ntv->time = tntx.time;
-	ntv->maxerror = tntx.maxerror;
-	ntv->esterror = tntx.esterror;
-#  ifdef NTP_API
-#   if NTP_API > 3
-	ntv->tai = tntx.tai;
-#   endif
-#  endif
-	return result;
-}
-# endif	/* !HAVE_NTP_GETTIME */
-#endif	/* !HAVE_NTP_ADJTIME */
+int ntp_gettime(struct ntptimeval *);
+#endif	/* !HAVE_NTP_GETTIME */
 
 #endif	/* GUARD_NTP_SYSCALL_H */
