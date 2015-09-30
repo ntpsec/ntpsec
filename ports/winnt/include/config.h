@@ -325,7 +325,8 @@ typedef int ssize_t;	/* ssize is an int */
  * both use the lowest values differently, but particularly for ntpd,
  * it's not a problem.
  */
-#define NTP_REDEFINE_STRERROR
+#define	strerror(e)	ntp_strerror(e)
+extern char *	ntp_strerror	(int e);
 
 #define MCAST				/* Enable Multicast Support */
 #define MULTICAST_NONEWSOCKET		/* Don't create a new socket for mcast address */
