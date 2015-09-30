@@ -2973,13 +2973,6 @@ open_socket(
 				"setsockopt IPV6_V6ONLY on fails on address %s: %m",
 				stoa(addr));
 #endif
-#ifdef IPV6_BINDV6ONLY
-		if (setsockopt(fd, IPPROTO_IPV6, IPV6_BINDV6ONLY,
-		    (char*)&on, sizeof(on)))
-			msyslog(LOG_ERR,
-				"setsockopt IPV6_BINDV6ONLY on fails on address %s: %m",
-				stoa(addr));
-#endif
 	}
 
 #ifdef NEED_REUSEADDR_FOR_IFADDRBIND
