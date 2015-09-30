@@ -16,7 +16,7 @@
  * is useful when searching for bugs and testing for correct response to
  * a leap second in UTC. Note however, the ultimate accuracy is limited
  * by the intrinsic frequency error of the codec sample clock, which can
- # reach well over 100 PPM.
+ * reach well over 100 PPM.
  *
  * The default is to route generated signals to the line output
  * jack; the s option on the command line routes these signals to the
