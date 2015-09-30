@@ -69,12 +69,6 @@
 # endif /* HAVE_PRIV_H */
 #endif /* ENABLE_DROPROOT */
 
-#if defined (LIBSECCOMP) && (KERN_SECCOMP)
-/* # include <sys/types.h> */
-# include <sys/resource.h>
-# include <seccomp.h>
-#endif /* LIBSECCOMP and KERN_SECCOMP */
-
 #if defined(HAVE_DNS_SD_H) && defined(ENABLE_MDNS_REGISTRATION)
 # include <dns_sd.h>
 DNSServiceRef mdns;
