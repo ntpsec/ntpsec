@@ -2958,21 +2958,19 @@ open_socket(
 	 * IPv6 specific options go here
 	 */
 	if (IS_IPV6(addr)) {
-#if defined(IPPROTO_IPV6) && defined(IPV6_TCLASS)
+#ifdef IPV6_TCLASS
 		if (setsockopt(fd, IPPROTO_IPV6, IPV6_TCLASS, (char*)&qos,
 			       sizeof(qos)))
 			msyslog(LOG_ERR,
 				"setsockopt IPV6_TCLASS (%02x) fails on address %s: %m",
 				qos, stoa(addr));
-#endif /* IPPROTO_IPV6 && IPV6_TCLASS */
-#ifdef IPV6_V6ONLY
+#endif /* IPV6_TCLASS */
 		if (isc_net_probe_ipv6only() == ISC_R_SUCCESS
 		    && setsockopt(fd, IPPROTO_IPV6, IPV6_V6ONLY,
 		    (char*)&on, sizeof(on)))
 			msyslog(LOG_ERR,
 				"setsockopt IPV6_V6ONLY on fails on address %s: %m",
 				stoa(addr));
-#endif
 	}
 
 #ifdef NEED_REUSEADDR_FOR_IFADDRBIND
