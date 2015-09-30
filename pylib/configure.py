@@ -1,5 +1,6 @@
 from waflib.Configure import conf
 from util import msg, msg_setting
+from probes import *
 import sys, os
 
 
@@ -135,18 +136,7 @@ def cmd_configure(ctx):
 
 	ctx.define("OPENSSL_VERSION_TEXT", "#XXX: Fixme")
 
-	ctx.check_cc(
-		fragment="""
-#include <netinet/in.h>
-int main() {
-	struct ip_mreq ipmr;
-	ipmr.imr_interface.s_addr = 0;
-	return 0;
-}
-""",
-		define_name="MCAST",
-		msg = "Checking for multicast capability",
-		mandatory = False)
+	probe_multicast(ctx, "MCAST", "Checking for multicast capability")
 
 	ctx.define("TYPEOF_IP_MULTICAST_LOOP", "u_char", quote=False) #XXX: check for mcast type
 
@@ -256,18 +246,8 @@ int main() {
 			# Sanity check...
 			print "Compilation check failed but include exists!"
 
-	# XXX: This needs fixing.
 	for header in ["timepps.h", "sys/timepps.h"]:
-		ctx.check_cc(
-			fragment="""
-#include <inttypes.h>
-#include <%s>
-int main() { return 0; }
-""" % header,
-					define_name="HAVE_%s" % header.replace(".","_").replace("/","_").upper(),
-					msg = "Checking for %s" % header,
-					mandatory = False
-		)
+		probe_header_with_prerequisites(ctx, header, ["inttypes.h"])
 
 	if ctx.get_define("HAVE_TIMEPPS_H") or ctx.get_define("HAVE_SYS_TIMEPPS_H"):
 		ctx.define("HAVE_PPSAPI", 1)
