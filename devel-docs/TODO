@@ -6,7 +6,6 @@
 
 None right now. (Sep-22 2015)
 
-
 === Build system ===
 
 * Document build files.
@@ -32,17 +31,6 @@ with extension *.txt.in.
 * We should audit scripts/ and utils/ to see which of those programs can
   be thrown out.  Some (such as ntptrace) need to be translated into Python
   and supported.
-
-Hal:
-> I think there is some interaction between when the ACTS driver calls and the 
-> state of other stuff, like the connection to the net.  This is probably a 
-> good candidate to get cleaned up.
-> 
-> There is another possible tangle in this area.  If you set "noselect" on the 
-> server line in the config file, ntpd goes through all the action of 
-> collecting the data and writing log files, but then drops the clock.  I don't 
-> know things well enough to be sure that this sort of logic won't pick one 
-> back up.
 
 === Porting ===
 
@@ -134,6 +122,22 @@ reviewed, and if necessary fixed.
 * Version-numbering policy needs to be decided and written up.
 
 * We need a release checklist.
+
+== After first release ==
+
+* seccomp sandboxing fails to build under Ubuntu due to some confusion
+  in the Linux headers.  Investigate.
+
+Hal:
+> I think there is some interaction between when the ACTS driver calls and the 
+> state of other stuff, like the connection to the net.  This is probably a 
+> good candidate to get cleaned up.
+> 
+> There is another possible tangle in this area.  If you set "noselect" on the 
+> server line in the config file, ntpd goes through all the action of 
+> collecting the data and writing log files, but then drops the clock.  I don't 
+> know things well enough to be sure that this sort of logic won't pick one 
+> back up.
 
 == Old, sometime ancient stuff ==
 
