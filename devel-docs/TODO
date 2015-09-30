@@ -84,7 +84,6 @@ is not yet tested anywhere but in ntpd itself.
 | docs/ntpwait.txt  | scripts/ntp-wait/ntp-wait.txt
 | docs/sntp.txt     | sntp/sntp.txt
 | docs/tickadj.txt  | -
-| -                 | ntpsnmpd/ntpsnmpd.txt
 | -                 | ntpd/ntp.keys.txt
 | -                 | scripts/calc_tickadj/calc_tickadj.txt
 | -                 | scripts/summary.txt
@@ -107,7 +106,8 @@ is not yet tested anywhere but in ntpd itself.
 
 * A serious content-editing and update pass on the exterior documents is needed.
 
-* Part of d) is the ntp -> ntps name change.
+* Part of d) is the ntp -> ntps name change.  Note: ntp-keygen -> ntpskeygen,
+  and perhaps sntp -> ntpss (so *all* programs have the ntps prefix).
 
 * The format and organization of the NEWS file needs a rethink.
 
@@ -130,6 +130,8 @@ is not yet tested anywhere but in ntpd itself.
 
 * seccomp sandboxing fails to build under Ubuntu due to some confusion
   in the Linux headers.  Investigate.
+
+* Should tickadj and ntptime merge? ntpstune, anyone? 
 
 Hal:
 > I think there is some interaction between when the ACTS driver calls and the 
