@@ -178,6 +178,8 @@ def cmd_configure(ctx):
 		('getdtablesize', "unistd.h"),		# SVr4, 4.2BSD
 		('getpassphrase', "stdlib.h"),		# Sun systems
 		('plock', "sys/lock.h"),		# OSF/1, SVID[23], XPG2
+		('pthread_attr_getstacksize', "pthread.h", "PTHREAD"),
+		('pthread_attr_setstacksize', "pthread.h", "PTHREAD"),
 		('res_init', "resolv.h"),
 		("rtprio", "sys/rtprio.h"),		# Sun/BSD
 		('settimeofday', "sys/time.h", "RT"),	# BSD - remove?
