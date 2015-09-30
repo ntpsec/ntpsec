@@ -10,7 +10,6 @@ def build(ctx):
 	ctx(
 		target		= "bison_obj",
 		features	= "c src_include bld_include libisc_include",
-		# defines		= ["HAVE_CONFIG_H=1"],
 		source		= bison_source,
 		includes    = [
 						"%s/ntpd/" % srcnode
@@ -71,7 +70,6 @@ def build(ctx):
 		target		= "libntpd_obj",
 		features	= "c bld_include src_include libisc_include",
 		source		= libntpd_source,
-		# defines		= ["HAVE_CONFIG_H=1"],
 	)
 
 	ctx(
@@ -93,7 +91,6 @@ def build(ctx):
 			target		= "refclock",
 			features	= "c bld_include src_include libisc_include",
 			source		= refclock_source,
-			# defines		= ["HAVE_CONFIG_H=1"],
 		)
 		use_refclock += "refclock"
 
@@ -103,7 +100,6 @@ def build(ctx):
 				target		= "refclock_%s" % file,
 				features	= "c bld_include src_include libisc_include",
 				source		= "refclock_%s.c" % file,
-				# defines		= ["HAVE_CONFIG_H=1", "%s=1" % define],
 				# XXX: These need to go into config.h rather than the command line for the individual drivers
 				defines		= ["%s=1" % define],
 			)
@@ -137,7 +133,6 @@ def build(ctx):
 		target		= "ntpd",
 		features	= "c cprogram bld_include src_include libisc_include libisc_pthread_include ntp_version",
 		source		= ntpd_source,
-		# defines		= ["HAVE_CONFIG_H=1"] + refclock_define,
 		use			= "libntpd_obj bison_obj isc ntp opts M parse GCC_S RT CAP THR PTHREAD CRYPTO DNS_SD DNS_SD_INCLUDES %s" % use_refclock,
 		includes	= [
 						"%s/ntpd/" % bldnode,
