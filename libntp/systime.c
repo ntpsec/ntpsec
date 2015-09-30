@@ -508,10 +508,14 @@ step_systime(
 	 */
 	tvdiff = abs_tval(sub_tval(timetv, tvlast));
 	if (tvdiff.tv_sec > 0) {
-#ifndef OTIME_MSG
+#ifdef OVERRIDE_OTIME_MSG
+# define OTIME_MSG OVERRIDE_OTIME_MSG
+#else
 # define OTIME_MSG	"Old NTP time"
 #endif
-#ifndef NTIME_MSG
+#ifdef OVERRIDE_NTIME_MSG
+# define NTIME_MSG OVERRIDE_NTIME_MSG
+#else
 # define NTIME_MSG	"New NTP time"
 #endif
 		struct utmpx utx;
@@ -533,7 +537,7 @@ step_systime(
 		pututxline(&utx);
 		endutxent();
 
-		/* Not POSIX - gllibc extension */
+		/* Not POSIX - glibc extension */
 #ifdef HAVE_UPDWTMPX
 #define WTMPX_FILE "/var/log/wtmp"
 		/* WTMPX */
