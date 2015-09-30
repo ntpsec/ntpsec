@@ -20,7 +20,40 @@
 char progname[10];
 double sys_residual;
 double average;
-void sys_gettime(l_fp *);
+
+/*
+ * get_clocktime - return system time in NTP timestamp format.
+ */
+void
+get_clocktime(
+	l_fp *now		/* system time */
+	)
+{
+	double dtemp;
+
+	struct timespec ts;	/* seconds and nanoseconds */
+
+	/*
+	 * Convert Unix clock from seconds and nanoseconds to seconds.
+	 */
+	clock_gettime(CLOCK_REALTIME, &ts);
+	now->l_i = ts.tv_sec + JAN_1970;
+	dtemp = ts.tv_nsec / 1e9;
+
+	/*
+	 * Renormalize to seconds past 1900 and fraction.
+	 */
+	dtemp += sys_residual;
+	if (dtemp >= 1) {
+		dtemp -= 1;
+		now->l_i++;
+	} else if (dtemp < -1) {
+		dtemp += 1;
+		now->l_i--;
+	}
+	dtemp *= FRAC;
+	now->l_uf = (uint32_t)dtemp;
+}
 
 int
 main(
@@ -42,7 +75,7 @@ main(
 	 * Construct gtod array
 	 */
 	for (i = 0; i < NBUF; i ++) {
-		get_systime(&tr);
+		get_clocktime(&tr);
 		LFPTOD(&tr, gtod[i]);
 	}
 
@@ -79,37 +112,4 @@ main(
 	exit(0);
 }
 
-
-/*
- * get_systime - return system time in NTP timestamp format.
- */
-void
-get_systime(
-	l_fp *now		/* system time */
-	)
-{
-	double dtemp;
-
-	struct timespec ts;	/* seconds and nanoseconds */
-
-	/*
-	 * Convert Unix clock from seconds and nanoseconds to seconds.
-	 */
-	clock_gettime(CLOCK_REALTIME, &ts);
-	now->l_i = ts.tv_sec + JAN_1970;
-	dtemp = ts.tv_nsec / 1e9;
-
-	/*
-	 * Renormalize to seconds past 1900 and fraction.
-	 */
-	dtemp += sys_residual;
-	if (dtemp >= 1) {
-		dtemp -= 1;
-		now->l_i++;
-	} else if (dtemp < -1) {
-		dtemp += 1;
-		now->l_i--;
-	}
-	dtemp *= FRAC;
-	now->l_uf = (uint32_t)dtemp;
-}
+/* end */
