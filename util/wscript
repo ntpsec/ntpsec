@@ -26,7 +26,8 @@ def build(ctx):
 		install_path= "${PREFIX}/sbin/"
 	)
 
-	for name in ['hist', 'jitter', 'pps-api', 'precision', 'sht', 'testrs6000']:
+	for name in ['hist', 'jitter', 'pps-api', 'precision',
+	    	    	     'propdelay', 'sht', 'testrs6000', 'tg2']:
 		ctx(
 			target		= name,
 			features	= "c cprogram bld_include src_include libisc_include",
