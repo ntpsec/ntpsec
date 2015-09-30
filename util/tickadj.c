@@ -17,6 +17,7 @@
 #ifndef HAVE_ADJTIMEX
 #error This program requires the adjtimex(2) system call.
 #else
+# include <sys/time.h>	/* prerequisite on NetBSD */
 # include <sys/timex.h>
 
 static struct timex txc;
