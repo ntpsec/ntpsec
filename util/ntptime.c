@@ -5,9 +5,6 @@
  * ntp_gettime() and ntp_adjtime() have been implemented in the kernel.
  * If so, each of these routines is called to display current timekeeping
  * data.
- *
- * For more information, see the README.kern file in the doc directory
- * of the xntp3 distribution.
  */
 
 #include <config.h>
@@ -76,11 +73,7 @@ main(
 {
 	extern int ntp_optind;
 	extern char *ntp_optarg;
-#ifdef SUBST_ADJTIMEX
-	struct timex ntv;
-#else
 	struct ntptimeval ntv;
-#endif
 	struct timeval tv;
 	struct timex ntx, _ntx;
 	int	times[20];
