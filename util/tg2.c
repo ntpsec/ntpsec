@@ -598,7 +598,6 @@ main(
 	char FormatCharacter = '3';		/* Default is IRIG-B with IEEE 1344 extensions */
 	char AsciiValue;
 	int	HexValue;
-	int	OldPtr = 0;
 	int FrameNumber = 0;
 
 	/* Time offset for IEEE 1344 indication. */
@@ -1526,7 +1525,6 @@ main(
 				printf("\nCode string: %s, ParityString = %s, ParitySum = 0x%2.2X, ParityValue = %d, DstFlag = %d...\n", code, ParityString, ParitySum, ParityValue, DstFlag);
 
 			ptr = strlen(code)-1;
-			OldPtr = 0;
 		}
 
 		/*
