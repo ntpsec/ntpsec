@@ -135,24 +135,18 @@ def cmd_configure(ctx):
 
 	ctx.define("OPENSSL_VERSION_TEXT", "#XXX: Fixme")
 
-	# Checking for multicast capability:
-	#
-	#    AC_COMPILE_IFELSE(
-	#	[AC_LANG_PROGRAM(
-	#	    [[
-	#		#ifdef HAVE_NETINET_IN_H
-	#		# include <netinet/in.h>
-	#		#endif
-	#	    ]],
-	#	    [[
-	#		struct ip_mreq ipmr;
-	#		ipmr.imr_interface.s_addr = 0;
-	#	    ]]
-	#	)],
-	#	[ntp_cv_multicast=yes],
-	#	[]
-	#   )
-	ctx.define("MCAST", 1) # XXX: check for mcast support
+	ctx.check_cc(
+		fragment="""
+#include <netinet/in.h>
+int main() {
+	struct ip_mreq ipmr;
+	ipmr.imr_interface.s_addr = 0;
+	return 0;
+}
+""",
+		define_name="MCAST",
+		msg = "Checking for multicast capability",
+		mandatory = False)
 
 	ctx.define("TYPEOF_IP_MULTICAST_LOOP", "u_char", quote=False) #XXX: check for mcast type
 
@@ -382,6 +376,21 @@ int main() { return 0; }
 	# it might not work reliably on all platforms.  Enable cautiously
 	# and test carefully.
 	# ctx.define("ENABLE_SIGNALED_IO", 1)
+
+	# Used in libntp/audio.c:
+	#	[[
+	#	    #ifdef HAVE_MACHINE_SOUNDCARD_H
+	#	    # include <machine/soundcard.h>
+	#	    #endif
+	#	    #ifdef HAVE_SYS_SOUNDCARD_H
+	#	    # include <sys/soundcard.h>
+	#	    #endif
+	#	]],
+	#	[[
+	#	    extern struct snd_size *ss;
+	#	    return ss->rec_size;
+	#	]]
+	# ctx.define("HAVE_STRUCT_SND_SIZE", 1)
 
         # These are required by the SHA2 code and various refclocks
         if sys.byteorder == "little":
