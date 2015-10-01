@@ -218,6 +218,8 @@ def refclock_config(ctx):
 		ctx.end_msg(rc["descr"])
 		ctx.env["REFCLOCK_%s" % rc["file"].upper()] = True
 
+		ctx.define(rc["define"], 1)
+
 		refclock = True
 
 	if refclock:
