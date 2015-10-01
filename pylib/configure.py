@@ -219,6 +219,7 @@ def cmd_configure(ctx):
 		"md5.h",
 		"net/if6.h",
 		"net/if_var.h",
+		"net/route.h",
 		"netinet/in_var.h",
 		"netinfo/ni.h",
 		"netinet/ip.h",
