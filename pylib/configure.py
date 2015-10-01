@@ -386,6 +386,8 @@ def cmd_configure(ctx):
 	if ctx.options.enable_crypto:
 		from check_openssl import configure_ssl
 		configure_ssl(ctx)
+		ctx.define("USE_OPENSSL_CRYPTO_RAND", 1)
+		ctx.define("ISC_PLATFORM_OPENSSLHASH", 1)
 
 	probe_vsprintfm(ctx, "VSNPRINTF_PERCENT_M",
 			    "Checking for %m expansion in vsnprintf(3)")
