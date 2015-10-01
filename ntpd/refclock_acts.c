@@ -315,7 +315,7 @@ acts_receive(
 	struct peer *peer;
 	char	tbuf[sizeof(up->buf)];
 	char *	tptr;
-	int	octets;
+	u_int	octets;
 
 	/*
 	 * Initialize pointers and read the timecode and timestamp. Note

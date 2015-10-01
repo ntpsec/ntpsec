@@ -151,6 +151,13 @@ def cmd_configure(ctx):
 	ctx.check_cc(lib="thr", mandatory=False)
 	ctx.check_cc(lib="gcc_s", mandatory=False)
 
+	# Find OpenSSL. Must happen before function checks
+	if ctx.options.enable_crypto:
+		from check_openssl import configure_ssl
+		configure_ssl(ctx)
+		ctx.define("USE_OPENSSL_CRYPTO_RAND", 1)
+		ctx.define("ISC_PLATFORM_OPENSSLHASH", 1)
+
 	# Optional functions.  Do all function checks here, otherwise
 	# we're likely to duplicate them.
 	functions = (
@@ -159,6 +166,7 @@ def cmd_configure(ctx):
 		('arc4random_buf', "stdlib.h"),
 		('clock_gettime', "time.h", "RT"),
 		('clock_settime', "time.h", "RT"),
+		('EVP_MD_do_all_sorted', "openssl/evp.h", "CRYPTO"),
 		('getclock', "sys/timers.h"),
 		('getdtablesize', "unistd.h"),		# SVr4, 4.2BSD
 		('getpassphrase', "stdlib.h"),		# Sun systems
@@ -381,13 +389,6 @@ def cmd_configure(ctx):
                 ctx.define("WORDS_BIGENDIAN", 1)
         else:
                 print "Can't determine byte order!"
-
-
-	if ctx.options.enable_crypto:
-		from check_openssl import configure_ssl
-		configure_ssl(ctx)
-		ctx.define("USE_OPENSSL_CRYPTO_RAND", 1)
-		ctx.define("ISC_PLATFORM_OPENSSLHASH", 1)
 
 	probe_vsprintfm(ctx, "VSNPRINTF_PERCENT_M",
 			    "Checking for %m expansion in vsnprintf(3)")

@@ -3250,8 +3250,8 @@ read_refclock_packet(
 	}
 
 	i = (rp->datalen == 0
-	     || rp->datalen > (int)sizeof(rb->recv_space))
-		? (int)sizeof(rb->recv_space)
+	     || rp->datalen > sizeof(rb->recv_space))
+	        ? (int)sizeof(rb->recv_space)
 		: rp->datalen;
 	do {
 		buflen = read(fd, (char *)&rb->recv_space, (u_int)i);
