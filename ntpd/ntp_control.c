@@ -856,14 +856,17 @@ save_config(
 		strlcpy(filename, filespec, sizeof(filename));
 
 	/*
-	 * Conceptually we should be searching for DIRSEP in filename,
+	 * Conceptually we should be searching for DIR_SEP in filename,
 	 * however Windows actually recognizes both forward and
 	 * backslashes as equivalent directory separators at the API
 	 * level.  On POSIX systems we could allow '\\' but such
 	 * filenames are tricky to manipulate from a shell, so just
-	 * reject both types of slashes on all platforms.
+	 * reject both types of slashes on all platforms.  We add 
+	 * DIR_SEP anyway so we don't have a vulnerability pop up
+	 * in case the code is ported to OpenVMS or Stratus VOS or
+	 * something.
 	 */
-	if (strchr(filename, '\\') || strchr(filename, '/')) {
+	if (strchr(filename, DIR_SEP) || strchr(filename, '\\') || strchr(filename, '/')) {
 		snprintf(reply, sizeof(reply),
 			 "saveconfig does not allow directory in filename");
 		ctl_putdata(reply, strlen(reply), 0);
