@@ -45,7 +45,8 @@
 #include "ntpsim.h"
 #endif
 
-#ifdef HAS_ROUTING_SOCKET
+#ifdef HAVE_NET_ROUTE_H
+# define USE_ROUTING_SOCKET
 # include <net/route.h>
 # ifdef HAVE_LINUX_RTNETLINK_H
 #  include <linux/rtnetlink.h>
@@ -236,7 +237,7 @@ struct vsock {
 
 vsock_t	*fd_list;
 
-#if !defined(HAVE_IO_COMPLETION_PORT) && defined(HAS_ROUTING_SOCKET)
+#if !defined(HAVE_IO_COMPLETION_PORT) && defined(USE_ROUTING_SOCKET)
 /*
  * async notification processing (e. g. routing sockets)
  */
@@ -258,7 +259,7 @@ static struct asyncio_reader *new_asyncio_reader (void);
 static void add_asyncio_reader (struct asyncio_reader *, enum desc_type);
 static void remove_asyncio_reader (struct asyncio_reader *);
 
-#endif /* !defined(HAVE_IO_COMPLETION_PORT) && defined(HAS_ROUTING_SOCKET) */
+#endif /* !defined(HAVE_IO_COMPLETION_PORT) && defined(USE_ROUTING_SOCKET) */
 
 static void init_async_notifications (void);
 
@@ -578,7 +579,7 @@ print_interface(const endpt *iface, const char *pfx, const char *sfx)
 }
 #endif
 
-#if !defined(HAVE_IO_COMPLETION_PORT) && defined(HAS_ROUTING_SOCKET)
+#if !defined(HAVE_IO_COMPLETION_PORT) && defined(USE_ROUTING_SOCKET)
 /*
  * create an asyncio_reader structure
  */
@@ -634,7 +635,7 @@ remove_asyncio_reader(
 
 	reader->fd = INVALID_SOCKET;
 }
-#endif /* !defined(HAVE_IO_COMPLETION_PORT) && defined(HAS_ROUTING_SOCKET) */
+#endif /* !defined(HAVE_IO_COMPLETION_PORT) && defined(USE_ROUTING_SOCKET) */
 
 
 /* compare two sockaddr prefixes */
@@ -3608,7 +3609,7 @@ input_handler(
 	int		saved_errno;
 	const char *	clk;
 #endif
-#ifdef HAS_ROUTING_SOCKET
+#ifdef USE_ROUTING_SOCKET
 	struct asyncio_reader *	asyncio_reader;
 	struct asyncio_reader *	next_asyncio_reader;
 #endif
@@ -3735,7 +3736,7 @@ input_handler(
 		}
 	}
 
-#ifdef HAS_ROUTING_SOCKET
+#ifdef USE_ROUTING_SOCKET
 	/*
 	 * scan list of asyncio readers - currently only used for routing sockets
 	 */
@@ -3750,7 +3751,7 @@ input_handler(
 		}
 		asyncio_reader = next_asyncio_reader;
 	}
-#endif /* HAS_ROUTING_SOCKET */
+#endif /* USE_ROUTING_SOCKET */
 
 	/*
 	 * Check for a response from a blocking child
@@ -4561,7 +4562,7 @@ localaddrtoa(
 }
 
 
-#ifdef HAS_ROUTING_SOCKET
+#ifdef USE_ROUTING_SOCKET
 # ifndef UPDATE_GRACE
 #  define UPDATE_GRACE	2	/* wait UPDATE_GRACE seconds before scanning */
 # endif
@@ -4736,7 +4737,7 @@ init_async_notifications()
 		fd);
 }
 #else
-/* HAS_ROUTING_SOCKET not defined */
+/* USE_ROUTING_SOCKET not defined */
 static void
 init_async_notifications(void)
 {
