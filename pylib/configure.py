@@ -164,6 +164,7 @@ def cmd_configure(ctx):
 		('adjtimex', "sys/timex.h"),
 		('arc4random', "stdlib.h"),
 		('arc4random_buf', "stdlib.h"),
+		('closefrom', "stdlib.h"),
 		('clock_gettime', "time.h", "RT"),
 		('clock_settime', "time.h", "RT"),
 		('EVP_MD_do_all_sorted', "openssl/evp.h", "CRYPTO"),
