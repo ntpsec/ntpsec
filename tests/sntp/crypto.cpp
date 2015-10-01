@@ -140,13 +140,13 @@ TEST(crypto, PacketSizeNotMultipleOfFourBytes) {
 
 TEST_GROUP_RUNNER(crypto) {
 	RUN_TEST_CASE(crypto, MakeMd5Mac);
-#ifdef ENABLE_CRYPTO
+#ifdef HAVE_OPENSSL
 	RUN_TEST_CASE(crypto, MakeSHA1Mac);
-#endif	/* ENABLE_CRYPTO */
+#endif	/* HAVE_OPENSSL */
 	RUN_TEST_CASE(crypto, VerifyCorrectMD5);
-#ifdef ENABLE_CRYPTO
+#ifdef HAVE_OPENSSL
 	RUN_TEST_CASE(crypto, VerifySHA1);
-#endif	/* ENABLE_CRYPTO */
+#endif	/* HAVE_OPENSSL */
 	RUN_TEST_CASE(crypto, VerifyFailure);
 	RUN_TEST_CASE(crypto, PacketSizeNotMultipleOfFourBytes);
 }

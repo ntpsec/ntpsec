@@ -99,7 +99,7 @@ struct refclockio {
 				due to small bursts
 				of refclock input data */
 	struct peer *srcclock;	/* refclock peer */
-	int	datalen;	/* length of data */
+	u_int	datalen;	/* length of data */
 	int	fd;		/* file descriptor */
 	u_long	recvcount;	/* count of receive completions */
 	bool	active;		/* true when in use */

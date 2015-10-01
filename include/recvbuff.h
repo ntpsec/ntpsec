@@ -66,7 +66,7 @@ struct recvbuf {
 	int		msg_flags;	/* Flags received about the packet */
 	l_fp		recv_time;	/* time of arrival */
 	void		(*receiver)(struct recvbuf *); /* callback */
-	int		recv_length;	/* number of octets received */
+	u_int		recv_length;	/* number of octets received */
 	union {
 		struct pkt	X_recv_pkt;
 		uint8_t		X_recv_buffer[RX_BUFF_SIZE];
