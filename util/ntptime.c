@@ -19,7 +19,7 @@
 #include <signal.h>
 #include <setjmp.h>
 
-#ifdef HAVE_STRUCT_NTPTIMEVAL_TIME_TV_NSEC
+#ifdef STRUCT_NTP_TIMEVAL_HAS_TV_NSEC
 #define tv_frac_sec tv_nsec
 #else
 #define tv_frac_sec tv_usec

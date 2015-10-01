@@ -104,6 +104,7 @@ def cmd_configure(ctx):
 	structure_fields = (
 		("time_tick", "timex", "sys/timex.h"),
 		("modes", "timex", "sys/timex.h"),
+		("tv_nsec", "ntp_timeval", "sys/timex.h"),
 		)
 	for (f, s, h) in structure_fields:
 		ctx.check_structfield(f, s, h)
@@ -385,6 +386,8 @@ def cmd_configure(ctx):
 		from check_openssl import configure_ssl
 		configure_ssl(ctx)
 
+	probe_vsprintfm(ctx, "VSNPRINTF_PERCENT_M",
+			    "Checking for %m expansion in vsnprintf(3)")
 
 	ctx.define("NTPS_CFLAGS", " ".join(ctx.env.CFLAGS).replace("\"", "\\\""))
 	ctx.define("NTPS_LDFLAGS", " ".join(ctx.env.LDFLAGS).replace("\"", "\\\""))
