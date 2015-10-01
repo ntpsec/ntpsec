@@ -5,9 +5,13 @@ from check_posix_thread_version import check_posix_thread_version
 
 import os
 
+# Versions older than 0.9.7d were deemed incompatible in NTP Classic.
 OPENSSL_FRAG = """
 %s
 int main () {
+#if OPENSSL_VERSION_NUMBER < 0x0090704fL
+#error OpenSSL is too old.
+#endif
 	ERR_load_BIO_strings();
 	OpenSSL_add_all_algorithms();
 	return 0;
@@ -28,6 +32,7 @@ def configure_ssl(ctx):
 		"openssl/rand.h",
 		"openssl/objects.h",
 		"openssl/x509v3.h",
+		"openssl/ssl.h",
 	)
 
 	for hdr in headers:
