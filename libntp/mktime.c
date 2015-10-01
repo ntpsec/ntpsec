@@ -101,9 +101,7 @@ static int	year_lengths[2] = {
 **	would still be very reasonable).
 */
 
-#ifndef WRONG
 #define WRONG	(-1)
-#endif /* !defined WRONG */
 
 static void
 normalize(
