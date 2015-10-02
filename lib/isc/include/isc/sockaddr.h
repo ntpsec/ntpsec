@@ -23,18 +23,12 @@
 #include <isc/lang.h>
 #include <isc/net.h>
 #include <isc/types.h>
-#ifdef ISC_PLATFORM_HAVESYSUNH
-#include <sys/un.h>
-#endif
 
 struct isc_sockaddr {
 	union {
 		struct sockaddr		sa;
 		struct sockaddr_in	sin;
 		struct sockaddr_in6	sin6;
-#ifdef ISC_PLATFORM_HAVESYSUNH
-		struct sockaddr_un	sunix;
-#endif
 	}				type;
 	unsigned int			length;		/* XXXRTH beginning? */
 	ISC_LINK(struct isc_sockaddr)	link;
