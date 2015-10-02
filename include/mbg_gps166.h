@@ -80,42 +80,35 @@
 #define GPS_SEC_BIAS   315964800UL     // ( ( ( 10UL * 365UL ) + 2 + 5 ) * SECS_PER_DAY )
 
 
-#ifndef _COM_HS_DEFINED
-  /**
-   * @brief Enumeration of handshake modes
-   */
-  enum COM_HANSHAKE_MODES { HS_NONE, HS_XONXOFF, HS_RTSCTS, N_COM_HS };
-  #define _COM_HS_DEFINED
-#endif
+/**
+ * @brief Enumeration of handshake modes
+ */
+enum COM_HANSHAKE_MODES { HS_NONE, HS_XONXOFF, HS_RTSCTS, N_COM_HS };
 
-#ifndef _COM_PARM_DEFINED
-  /**
-   * @brief A data type to configure a serial port's baud rate
-   *
-   * @see ::MBG_BAUD_RATES
-   */
-  typedef int32_t BAUD_RATE;
+/**
+ * @brief A data type to configure a serial port's baud rate
+ *
+ * @see ::MBG_BAUD_RATES
+ */
+typedef int32_t BAUD_RATE;
 
-  /**
-   * @brief Indices used to identify a parameter in the framing string
-   *
-   * @see ::MBG_FRAMING_STRS
-   */
-  enum MBG_FRAMING_STR_IDXS { F_DBITS, F_PRTY, F_STBITS };
+/**
+ * @brief Indices used to identify a parameter in the framing string
+ *
+ * @see ::MBG_FRAMING_STRS
+ */
+enum MBG_FRAMING_STR_IDXS { F_DBITS, F_PRTY, F_STBITS };
 
-  /**
-   * @brief A structure to store the configuration of a serial port
-   */
-  typedef struct
-  {
-    BAUD_RATE baud_rate;  ///< transmission speed, e.g. 19200L, see ::MBG_BAUD_RATES
-    char framing[4];      ///< ASCIIZ framing string, e.g. "8N1" or "7E2", see ::MBG_FRAMING_STRS
-    int16_t handshake;    ///< handshake mode, yet only ::HS_NONE supported
+/**
+ * @brief A structure to store the configuration of a serial port
+ */
+typedef struct
+{
+  BAUD_RATE baud_rate;  ///< transmission speed, e.g. 19200L, see ::MBG_BAUD_RATES
+  char framing[4];      ///< ASCIIZ framing string, e.g. "8N1" or "7E2", see ::MBG_FRAMING_STRS
+  int16_t handshake;    ///< handshake mode, yet only ::HS_NONE supported
 
-  } COM_PARM;
-
-  #define _COM_PARM_DEFINED
-#endif
+} COM_PARM;
 
 
 /**
@@ -233,11 +226,8 @@ enum GPS_CMD_CODES
 };
 
 
-#ifndef _CSUM_DEFINED
-  typedef uint16_t CSUM;  /* checksum used by some structures stored in non-volatile memory */
-  #define _CSUM_DEFINED
-#endif
-
+/* checksum used by some structures stored in non-volatile memory */
+typedef uint16_t CSUM;
 
 /**
  * @brief The header of a binary message.
