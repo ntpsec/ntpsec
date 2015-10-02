@@ -92,10 +92,6 @@ def cmd_configure(ctx):
 	ctx.end_msg(ctx.env.NTPS_VERSION_STRING)
 
 
-	ctx.recurse("lib/isc")
-	ctx.recurse("libntp")
-	ctx.recurse("sntp")
-
 	types = ["int32", "int32_t", "uint32_t", "int64_t", "uint64_t", "uint_t", "size_t", "wint_t", "pid_t", "intptr_t", "uintptr_t"]
 
 	for type in sorted(types):
@@ -213,6 +209,7 @@ def cmd_configure(ctx):
 	optional_headers = (
 		"alloca.h",
 		"arpa/nameser.h",
+		"dirent.h",
 		"dns_sd.h",
 		"histedit.h",
 		"ieeefp.h",
@@ -237,6 +234,7 @@ def cmd_configure(ctx):
 		"readline/readline.h",
 		"readline/history.h",
 		"resolv.h",
+		"semaphore.h",
 		"stdatomic.h",
 		"sys/audioio.h",
 		"sys/ioctl.h",
@@ -250,6 +248,7 @@ def cmd_configure(ctx):
 		"sys/soundcard.h",
 		"sys/sysctl.h",
 		"sys/systune.h",
+		"sysexits.h",
 		"utime.h",
 	)
 	for hdr in optional_headers:
@@ -397,6 +396,30 @@ def cmd_configure(ctx):
 
 	ctx.define("NTPS_CFLAGS", " ".join(ctx.env.CFLAGS).replace("\"", "\\\""))
 	ctx.define("NTPS_LDFLAGS", " ".join(ctx.env.LDFLAGS).replace("\"", "\\\""))
+
+
+	# Check for directory separator
+	if ctx.env.TARGET_PLATFORM == "win":
+		sep = "\\"
+	else:
+		sep = "/"
+
+	ctx.define("DIR_SEP", "'%s'" % sep, quote=False)
+
+
+	# lib/isc/
+	# XXX: Hack that needs to be fixed properly for all platforms
+	ctx.define("ISC_PLATFORM_NORETURN_PRE", "", quote=False)
+	ctx.define("ISC_PLATFORM_NORETURN_POST", "__attribute__((__noreturn__))", quote=False)
+	ctx.define("ISC_PLATFORM_HAVEIFNAMETOINDEX", 1)
+	ctx.define("ISC_PLATFORM_HAVEIN6PKTINFO", 1)
+	ctx.define("ISC_PLATFORM_HAVEIPV6", 1)
+	ctx.define("ISC_PLATFORM_HAVESALEN", 1)
+	ctx.define("ISC_PLATFORM_HAVESCOPEID", 1)
+	ctx.define("ISC_PLATFORM_USETHREADS", 1)
+	ctx.define("HAVE_IFLIST_SYSCTL", 1)
+
+
 
 	ctx.start_msg("Writing configuration header:")
 	ctx.write_config_header("config.h")
