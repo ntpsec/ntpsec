@@ -13,9 +13,6 @@
 #ifdef LOG_NTP
 # define OPENLOG_FAC	LOG_NTP
 #else
-# ifndef LOG_DAEMON
-#  define LOG_DAEMON	0
-# endif
 # define OPENLOG_FAC	LOG_DAEMON
 #endif
 
