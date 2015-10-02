@@ -31,15 +31,13 @@ int main() {
 		mandatory = False)
 
 # What we really want to do here is test to see if the following program
-# compiles *and exits with 9 status*.  Because we don;t know how to check
-# the return status we must seettle for a simpler tesl
+# compiles *and exits with 9 status*.  Because we don't know how to check
+# the return status we must settle for a simpler test.
 '''
 #include <stdarg.h>
 #include <errno.h>
 #include <stdio.h>
 #include <string.h>
-
-int call_vsnprintf(char *dst, size_t sz, const char *fmt, ...);
 
 int call_vsnprintf(char *dst, size_t sz, const char *fmt,...)
 {
