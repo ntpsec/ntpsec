@@ -6,9 +6,6 @@
  */
 #include <config.h>
 
-#ifdef USE_SNPRINTB
-# include <util.h>
-#endif
 #include "ntpd.h"
 #include "ntp_io.h"
 #include "ntp_unixtime.h"
@@ -190,13 +187,8 @@ static void
 sync_status(const char *what, int ostatus, int nstatus)
 {
 	char obuf[256], nbuf[256], tbuf[1024];
-#if defined(USE_SNPRINTB) && defined (STA_FMT)
-	snprintb(obuf, sizeof(obuf), STA_FMT, ostatus);
-	snprintb(nbuf, sizeof(nbuf), STA_FMT, nstatus);
-#else
 	snprintf(obuf, sizeof(obuf), "%04x", ostatus);
 	snprintf(nbuf, sizeof(nbuf), "%04x", nstatus);
-#endif
 	snprintf(tbuf, sizeof(tbuf), "%s status: %s -> %s", what, obuf, nbuf);
 	report_event(EVNT_KERN, NULL, tbuf);
 }

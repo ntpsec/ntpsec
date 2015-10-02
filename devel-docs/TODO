@@ -143,6 +143,10 @@ is not yet tested anywhere but in ntpd itself.
 
 * Should tickadj and ntptime merge? ntpstune, anyone? 
 
+* Adapt BSD snprintb into a better dumper for flag words like flash
+codes (throwing out the old-format support) and use it
+systematically to make reports more readable.
+
 Hal:
 > I think there is some interaction between when the ACTS driver calls and the 
 > state of other stuff, like the connection to the net.  This is probably a 
