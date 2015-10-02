@@ -4,27 +4,28 @@ def build(ctx):
 	srcnode = ctx.srcnode.abspath()
 	bldnode = ctx.bldnode.abspath()
 
-	ctx(
-		target		= "tickadj",
-		features	= "c cprogram bld_include src_include",
-		source		= ["tickadj.c"],
-		includes	= [
-					"%s/tickadj/" % bldnode
-				],
-		use		= "ntp opts isc M RT",
-		install_path= "${PREFIX}/sbin/"
-	)
+	if ctx.get_define("HAVE_TICKADJ"):
+		ctx(
+			target		= "tickadj",
+			features	= "c cprogram bld_include src_include",
+			source		= ["tickadj.c"],
+			includes	= [
+						"%s/tickadj/" % bldnode
+					],
+			use		= "ntp opts isc M RT",
+			install_path= "${PREFIX}/sbin/"
+		)
 
-	ctx(
-		target		= "ntptime",
-		features	= "c cprogram bld_include src_include libisc_include",
-		source		= ["ntptime.c"],
-		includes	= [
-					"%s/ntptime/" % bldnode
-				],
-		use		= "ntp opts isc M RT PTHREAD",
-		install_path= "${PREFIX}/sbin/"
-	)
+		ctx(
+			target		= "ntptime",
+			features	= "c cprogram bld_include src_include libisc_include",
+			source		= ["ntptime.c"],
+			includes	= [
+						"%s/ntptime/" % bldnode
+					],
+			use		= "ntp opts isc M RT PTHREAD",
+			install_path= "${PREFIX}/sbin/"
+		)
 
 	for name in ['hist', 'jitter', 'pps-api', 'precision',
 	    	    	     'propdelay', 'sht', 'testrs6000', 'tg2']:
