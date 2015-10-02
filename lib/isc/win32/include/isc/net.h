@@ -50,7 +50,7 @@
  *
  * It declares ntoh[sl]() and hton[sl]().
  *
- * It declares inet_aton(), inet_ntop(), and inet_pton().
+ * It declares inet_aton().
  *
  * It ensures that INADDR_ANY, IN6ADDR_ANY_INIT, in6addr_any, and
  * in6addr_loopback are available.
@@ -345,18 +345,6 @@ isc_net_getudpportrange(int af, in_port_t *low, in_port_t *high);
  *\li	*low and *high will be the ports specifying the low and high ends of
  *	the range.
  */
-
-#ifdef ISC_PLATFORM_NEEDNTOP
-const char *
-isc_net_ntop(int af, const void *src, char *dst, size_t size);
-#define inet_ntop isc_net_ntop
-#endif
-
-#ifdef ISC_PLATFORM_NEEDPTON
-int
-isc_net_pton(int af, const char *src, void *dst);
-#define inet_pton isc_net_pton
-#endif
 
 int
 isc_net_aton(const char *cp, struct in_addr *addr);

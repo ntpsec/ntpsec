@@ -611,14 +611,6 @@ SOURCE=..\inet_aton.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\inet_ntop.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\inet_pton.c
-# End Source File
-# Begin Source File
-
 SOURCE=..\lex.c
 # End Source File
 # Begin Source File

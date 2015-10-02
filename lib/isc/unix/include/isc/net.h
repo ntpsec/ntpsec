@@ -37,17 +37,9 @@
  *\li		struct sockaddr_in6
  *\li		in_port_t
  *
- * It ensures that the AF_ and PF_ macros are defined.
- *
  * It declares ntoh[sl]() and hton[sl]().
  *
- * It declares inet_aton(), inet_ntop(), and inet_pton().
- *
- * It ensures that #INADDR_LOOPBACK, #INADDR_ANY, #IN6ADDR_ANY_INIT,
- * in6addr_any, and in6addr_loopback are available.
- *
- * It ensures that IN_MULTICAST() is available to check for multicast
- * addresses.
+ * It declares inet_aton()
  *
  * MP:
  *\li	No impact.
@@ -191,19 +183,6 @@ isc_net_getudpportrange(int af, in_port_t *low, in_port_t *high);
  *\li	*low and *high will be the ports specifying the low and high ends of
  *	the range.
  */
-
-#ifdef ISC_PLATFORM_NEEDNTOP
-const char *
-isc_net_ntop(int af, const void *src, char *dst, size_t size);
-#define inet_ntop isc_net_ntop
-#endif
-
-#ifdef ISC_PLATFORM_NEEDPTON
-int
-isc_net_pton(int af, const char *src, void *dst);
-#undef inet_pton
-#define inet_pton isc_net_pton
-#endif
 
 int
 isc_net_aton(const char *cp, struct in_addr *addr);

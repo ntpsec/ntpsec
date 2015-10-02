@@ -140,8 +140,6 @@ CLEAN :
 	-@erase "$(INTDIR)\hmacsha.obj"
 	-@erase "$(INTDIR)\httpd.obj"
 	-@erase "$(INTDIR)\inet_aton.obj"
-	-@erase "$(INTDIR)\inet_ntop.obj"
-	-@erase "$(INTDIR)\inet_pton.obj"
 	-@erase "$(INTDIR)\interfaceiter.obj"
 	-@erase "$(INTDIR)\ipv6.obj"
 	-@erase "$(INTDIR)\iterated_hash.obj"
@@ -255,8 +253,6 @@ LINK32_OBJS= \
 	"$(INTDIR)\hmacsha.obj" \
 	"$(INTDIR)\httpd.obj" \
 	"$(INTDIR)\inet_aton.obj" \
-	"$(INTDIR)\inet_ntop.obj" \
-	"$(INTDIR)\inet_pton.obj" \
 	"$(INTDIR)\lex.obj" \
 	"$(INTDIR)\lfsr.obj" \
 	"$(INTDIR)\lib.obj" \
@@ -359,10 +355,6 @@ CLEAN :
 	-@erase "$(INTDIR)\httpd.sbr"
 	-@erase "$(INTDIR)\inet_aton.obj"
 	-@erase "$(INTDIR)\inet_aton.sbr"
-	-@erase "$(INTDIR)\inet_ntop.obj"
-	-@erase "$(INTDIR)\inet_ntop.sbr"
-	-@erase "$(INTDIR)\inet_pton.obj"
-	-@erase "$(INTDIR)\inet_pton.sbr"
 	-@erase "$(INTDIR)\interfaceiter.obj"
 	-@erase "$(INTDIR)\interfaceiter.sbr"
 	-@erase "$(INTDIR)\ipv6.obj"
