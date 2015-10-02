@@ -38,6 +38,10 @@ None right now. (Sep-22 2015)
   can be thrown out (some, like util/kern.c, don't even build).  Some
   (such as ntptrace) need to be translated into Python and supported.
 
+* We need a build time option to disable all dangerous operations
+  that ntpq can produce.
+
+
 === Porting ===
 
 * The ntpd initialization sequence is still full of platform-
