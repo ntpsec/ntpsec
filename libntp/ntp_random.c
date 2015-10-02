@@ -150,23 +150,12 @@
 
 static unsigned long randtbl[DEG_3 + 1] = {
 	TYPE_3,
-#ifdef  USE_WEAK_SEEDING
-/* Historic implementation compatibility */
-/* The random sequences do not vary much with the seed */
-	0x9a319039, 0x32d9c024, 0x9b663182, 0x5da1f342, 0xde3b81e0, 0xdf0a6fb5,
-	0xf103bc02, 0x48f340fb, 0x7449e56b, 0xbeb1dbb0, 0xab5c5918, 0x946554fd,
-	0x8c2e680f, 0xeb3d799f, 0xb11ee0b7, 0x2d436b86, 0xda672e2a, 0x1588ca88,
-	0xe369735d, 0x904f35f7, 0xd7158fd6, 0x6fa6f051, 0x616e6b96, 0xac94efdc,
-	0x36413f93, 0xc622c298, 0xf5a42ab8, 0x8a88d77b, 0xf5ad9d0e, 0x8999220b,
-	0x27fb47b9,
-#else   /* !USE_WEAK_SEEDING */
 	0x991539b1, 0x16a5bce3, 0x6774a4cd, 0x3e01511e, 0x4e508aaa, 0x61048c05,
 	0xf5500617, 0x846b7115, 0x6a19892c, 0x896a97af, 0xdb48f936, 0x14898454,
 	0x37ffd106, 0xb58bff9c, 0x59e17104, 0xcf918a49, 0x09378c83, 0x52c7a471,
 	0x8d293ea9, 0x1f4fc301, 0xc3db71be, 0x39b44e1c, 0xf8a44ef9, 0x4c8b80b1,
 	0x19edc328, 0x87bf4bdd, 0xc9b240e5, 0xe9ee4b1b, 0x4382aee7, 0x535b6b41,
 	0xf3bec5da
-#endif  /* !USE_WEAK_SEEDING */
 };
 
 /*
@@ -209,14 +198,6 @@ good_rand (
 	register long x
 	)
 {
-#ifdef  USE_WEAK_SEEDING
-/*
- * Historic implementation compatibility.
- * The random sequences do not vary much with the seed,
- * even with overflowing.
- */
-	return (1103515245 * x + 12345);
-#else   /* !USE_WEAK_SEEDING */
 /*
  * Compute x = (7^5 * x) mod (2^31 - 1)
  * wihout overflowing 31 bits:
@@ -233,7 +214,6 @@ good_rand (
 	if (x <= 0)
 		x += 0x7fffffff;
 	return (x);
-#endif  /* !USE_WEAK_SEEDING */
 }
 
 /*
