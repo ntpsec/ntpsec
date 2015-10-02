@@ -122,12 +122,6 @@
     <ClCompile Include="..\..\..\..\lib\isc\inet_aton.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\lib\isc\inet_ntop.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\lib\isc\inet_pton.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\lib\isc\win32\interfaceiter.c">
       <Filter>Source Files</Filter>
     </ClCompile>

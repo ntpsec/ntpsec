@@ -282,8 +282,6 @@
     <ClCompile Include="..\..\..\..\lib\isc\error.c" />
     <ClCompile Include="..\..\..\..\lib\isc\event.c" />
     <ClCompile Include="..\..\..\..\lib\isc\inet_aton.c" />
-    <ClCompile Include="..\..\..\..\lib\isc\inet_ntop.c" />
-    <ClCompile Include="..\..\..\..\lib\isc\inet_pton.c" />
     <ClCompile Include="..\..\..\..\lib\isc\lib.c" />
     <ClCompile Include="..\..\..\..\lib\isc\log.c" />
     <ClCompile Include="..\..\..\..\lib\isc\md5.c" />
