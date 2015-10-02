@@ -414,7 +414,6 @@ def cmd_configure(ctx):
 	ctx.define("ISC_PLATFORM_HAVEIFNAMETOINDEX", 1)
 	ctx.define("ISC_PLATFORM_HAVEIN6PKTINFO", 1)
 	ctx.define("ISC_PLATFORM_HAVEIPV6", 1)
-	ctx.define("ISC_PLATFORM_HAVESALEN", 1)
 	ctx.define("ISC_PLATFORM_HAVESCOPEID", 1)
 	ctx.define("ISC_PLATFORM_USETHREADS", 1)
 	ctx.define("HAVE_IFLIST_SYSCTL", 1)
