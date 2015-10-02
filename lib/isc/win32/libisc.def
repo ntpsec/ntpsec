@@ -359,7 +359,6 @@ isc_netaddr_equal
 isc_netaddr_format
 isc_netaddr_fromin
 isc_netaddr_fromin6
-isc_netaddr_frompath
 isc_netaddr_fromsockaddr
 isc_netaddr_fromv4mapped
 isc_netaddr_getzone
@@ -463,7 +462,6 @@ isc_sockaddr_format
 isc_sockaddr_fromin
 isc_sockaddr_fromin6
 isc_sockaddr_fromnetaddr
-isc_sockaddr_frompath
 isc_sockaddr_getport
 isc_sockaddr_hash
 isc_sockaddr_isexperimental

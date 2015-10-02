@@ -50,12 +50,6 @@ isc_netaddr_equal(const isc_netaddr_t *a, const isc_netaddr_t *b) {
 		    a->zone != b->zone)
 			return (false);
 		break;
-#ifdef ISC_PLATFORM_HAVESYSUNH
-	case AF_UNIX:
-		if (strcmp(a->type.un, b->type.un) != 0)
-			return (false);
-		break;
-#endif
 	default:
 		return (false);
 	}
@@ -216,25 +210,6 @@ isc_netaddr_fromin6(isc_netaddr_t *netaddr, const struct in6_addr *ina6) {
 	netaddr->type.in6 = *ina6;
 }
 
-isc_result_t
-isc_netaddr_frompath(isc_netaddr_t *netaddr, const char *path) {
-#ifdef ISC_PLATFORM_HAVESYSUNH
-	if (strlen(path) > sizeof(netaddr->type.un) - 1)
-		return (ISC_R_NOSPACE);
-
-        memset(netaddr, 0, sizeof(*netaddr));
-        netaddr->family = AF_UNIX;
-	strlcpy(netaddr->type.un, path, sizeof(netaddr->type.un));
-        netaddr->zone = 0;
-        return (ISC_R_SUCCESS);
-#else 
-	UNUSED(netaddr);
-	UNUSED(path);
-	return (ISC_R_NOTIMPLEMENTED);
-#endif
-}
-
-
 void
 isc_netaddr_setzone(isc_netaddr_t *netaddr, isc_uint32_t zone) {
 	/* we currently only support AF_INET6. */
@@ -265,12 +240,6 @@ isc_netaddr_fromsockaddr(isc_netaddr_t *t, const isc_sockaddr_t *s) {
 		t->zone = 0;
 #endif
 		break;
-#ifdef ISC_PLATFORM_HAVESYSUNH
-	case AF_UNIX:
-		memcpy(t->type.un, s->type.sunix.sun_path, sizeof(t->type.un));
-		t->zone = 0;
-		break;
-#endif
 	default:
 		INSIST(0);
 	}

@@ -217,23 +217,6 @@ isc_sockaddr_issitelocal(const isc_sockaddr_t *sa);
  * Returns true if the address is a sitelocal address.
  */
 
-isc_result_t
-isc_sockaddr_frompath(isc_sockaddr_t *sockaddr, const char *path);
-/*
- *  Create a UNIX domain sockaddr that refers to path.
- *
- * Returns:
- * \li	ISC_R_NOSPACE
- * \li	ISC_R_NOTIMPLEMENTED
- * \li	ISC_R_SUCCESS
- */
-
-#define ISC_SOCKADDR_FORMATSIZE \
-	sizeof("xxxx:xxxx:xxxx:xxxx:xxxx:xxxx:XXX.XXX.XXX.XXX%SSSSSSSSSS#YYYYY")
-/*%<
- * Minimum size of array to pass to isc_sockaddr_format().
- */
-
 ISC_LANG_ENDDECLS
 
 #endif /* GUARD_ISC_SOCKADDR_H */

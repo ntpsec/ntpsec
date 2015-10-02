@@ -371,23 +371,3 @@ isc_sockaddr_islinklocal(const isc_sockaddr_t *sockaddr) {
 	return (false);
 }
 
-isc_result_t
-isc_sockaddr_frompath(isc_sockaddr_t *sockaddr, const char *path) {
-#ifdef ISC_PLATFORM_HAVESYSUNH
-	if (strlen(path) >= sizeof(sockaddr->type.sunix.sun_path))
-		return (ISC_R_NOSPACE);
-	memset(sockaddr, 0, sizeof(*sockaddr));
-	sockaddr->length = sizeof(sockaddr->type.sunix);
-	sockaddr->type.sunix.sun_family = AF_UNIX;
-#ifdef ISC_PLATFORM_HAVESALEN
-	sockaddr->type.sunix.sun_len =
-			(unsigned char)sizeof(sockaddr->type.sunix);
-#endif
-	strlcpy(sockaddr->type.sunix.sun_path, path, sizeof(sockaddr->type.sunix.sun_path));
-	return (ISC_R_SUCCESS);
-#else
-	UNUSED(sockaddr);
-	UNUSED(path);
-	return (ISC_R_NOTIMPLEMENTED);
-#endif
-}
