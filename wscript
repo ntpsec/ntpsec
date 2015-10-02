@@ -76,8 +76,6 @@ def configure(ctx):
 	ctx.define("NTPS_VERSION_REV", ctx.env.NTPS_VERSION_REV)
 
 
-
-
 	ctx.load('waf', tooldir='pylib/')
 
 	ctx.env.OPT_STORE = OPT_STORE
