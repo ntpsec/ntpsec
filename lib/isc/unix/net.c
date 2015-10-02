@@ -204,9 +204,6 @@ initialize_action(void) {
 #endif
 #endif
 #endif
-#ifdef ISC_PLATFORM_HAVESYSUNH
-	unix_result = try_proto(PF_UNIX);
-#endif
 }
 
 static void
