@@ -477,13 +477,6 @@ step_systime(
 	if (step_callback)
 		(*step_callback)();
 
-#ifdef NEED_HPUX_ADJTIME
-	/*
-	 * CHECKME: is this correct when called by ntpdate?????
-	 */
-	_clear_adjtime();
-#endif
-
 	/*
 	 * FreeBSD, for example, has:
 	 * struct utmp {
