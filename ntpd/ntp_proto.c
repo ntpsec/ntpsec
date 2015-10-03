@@ -1916,7 +1916,7 @@ clock_update(
 		clear_all();
 		sys_leap = LEAP_NOTINSYNC;
 		sys_stratum = STRATUM_UNSPEC;
-		memcpy(&sys_refid, "STEP", 4);
+		memcpy(&sys_refid, "STEP", REFIDLEN);
 		sys_rootdelay = 0;
 		sys_rootdisp = 0;
 		L_CLR(&sys_reftime);
@@ -2162,7 +2162,7 @@ peer_clear(
 #endif
 		peer->leap = LEAP_NOTINSYNC;
 		peer->stratum = STRATUM_UNSPEC;
-		memcpy(&peer->refid, ident, 4);
+		memcpy(&peer->refid, ident, REFIDLEN);
 #ifdef REFCLOCK
 	}
 #endif
@@ -2431,7 +2431,7 @@ clock_select(void)
 #ifdef ENABLE_LOCKCLOCK
 	sys_leap = LEAP_NOTINSYNC;
 	sys_stratum = STRATUM_UNSPEC;
-	memcpy(&sys_refid, "DOWN", 4);
+	memcpy(&sys_refid, "DOWN", REFIDLEN);
 #endif /* ENABLE_LOCKCLOCK */
 
 	/*
@@ -3457,7 +3457,7 @@ fast_xmit(
 		xpkt.stratum = STRATUM_PKT_UNSPEC;
 		xpkt.ppoll = max(rpkt->ppoll, ntp_minpoll);
 		xpkt.precision = rpkt->precision;
-		memcpy(&xpkt.refid, "RATE", 4);
+		memcpy(&xpkt.refid, "RATE", REFIDLEN);
 		xpkt.rootdelay = rpkt->rootdelay;
 		xpkt.rootdisp = rpkt->rootdisp;
 		xpkt.reftime = rpkt->reftime;
@@ -3994,7 +3994,7 @@ init_proto(const bool verbose)
 	 */
 	sys_leap = LEAP_NOTINSYNC;
 	sys_stratum = STRATUM_UNSPEC;
-	memcpy(&sys_refid, "INIT", 4);
+	memcpy(&sys_refid, "INIT", REFIDLEN);
 	sys_peer = NULL;
 	sys_rootdelay = 0;
 	sys_rootdisp = 0;
