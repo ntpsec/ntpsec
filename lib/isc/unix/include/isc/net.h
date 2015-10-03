@@ -70,7 +70,6 @@
 
 #include <netinet/in.h>		/* Contractual promise. */
 #include <arpa/inet.h>		/* Contractual promise. */
-#include <netinet/in6.h>
 
 #include <isc/lang.h>
 #include <isc/types.h>
