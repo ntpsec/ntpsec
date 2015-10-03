@@ -32,7 +32,7 @@ extern int async_write(int, const void *, unsigned int);
  * to find out if the counter has wrapped around (this happens if more than
  * 65535us (65ms) elapses between the PPS event and our being called.)
  */
-#ifdef CLOCK_PPS720
+#ifdef ENABLE_PPS720
 # undef min	/* XXX */
 # undef max	/* XXX */
 # include <machine/inline.h>
@@ -143,7 +143,7 @@ struct true_unit {
 	enum true_type	type;		/* what kind of clock is it? */
 	int		unit;		/* save an extra copy of this */
 	FILE		*debug;		/* debug logging file */
-#ifdef CLOCK_PPS720
+#ifdef ENABLE_PPS720
 	int		pcl720init;	/* init flag for PCL 720 */
 #endif
 };
@@ -158,7 +158,7 @@ static	void	true_poll	(int, struct peer *);
 static	void	true_send	(struct peer *, const char *);
 static	void	true_doevent	(struct peer *, enum true_event);
 
-#ifdef CLOCK_PPS720
+#ifdef ENABLE_PPS720
 static	u_long	true_sample720	(void);
 #endif
 
@@ -483,7 +483,7 @@ true_receive(
 
 		true_doevent(peer, e_TS);
 
-#ifdef CLOCK_PPS720
+#ifdef ENABLE_PPS720
 		/* If it's taken more than 65ms to get here, we'll lose. */
 		if ((pp->sloppyclockflag & CLK_FLAG4) && up->pcl720init) {
 			l_fp   off;
@@ -807,7 +807,7 @@ true_doevent(
 		/* NOTREACHED */
 	}
 
-#ifdef CLOCK_PPS720
+#ifdef ENABLE_PPS720
 	if ((pp->sloppyclockflag & CLK_FLAG4) && !up->pcl720init) {
 		/* Make counter trigger on gate0, count down from 65535. */
 		pcl720_load(PCL720_IOB, PCL720_CTR, i8253_oneshot, 65535);
@@ -859,7 +859,7 @@ true_poll(
 	pp->polls++;
 }
 
-#ifdef CLOCK_PPS720
+#ifdef ENABLE_PPS720
 /*
  * true_sample720 - sample the PCL-720
  */

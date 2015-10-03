@@ -128,7 +128,7 @@ refclock_map = {
 
 	35: {
 		"descr":	"Conrad Parallel Port Radio Clock",
-		"define":	"CLOCK__PCF",
+		"define":	"CLOCK_PCF",
 		"file":		"pcf"
 	},
 
@@ -170,7 +170,7 @@ refclock_map = {
 
 	45: {
 		"descr":	"Spectracom TSYNC",
-		"define":	"CLOCK_TSYNPCI",
+		"define":	"CLOCK_TSYNCPCI",
 		"file":		"tsyncpci"
 	},
 
@@ -222,6 +222,7 @@ def refclock_config(ctx):
 				"CLOCK_RAWDCF",
 				"CLOCK_RCC8000",
 				"CLOCK_SCHMID",
+				"CLOCK_SEL240X",
 				"CLOCK_TRIMTAIP",
 				"CLOCK_TRIMTSIP",
 				"CLOCK_VARITEXT",
