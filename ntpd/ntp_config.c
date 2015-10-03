@@ -3824,12 +3824,12 @@ peer_name_resolved(
 	DPRINTF(1, ("peer_name_resolved(%s) rescode %d\n", name, rescode));
 
 	if (rescode) {
-#ifndef IGNORE_DNS_ERRORS
+#ifndef ENABLE_DNS_RETRY
 		free(ctx);
 		msyslog(LOG_ERR,
 			"giving up resolving host %s: %s (%d)",
 			name, gai_strerror(rescode), rescode);
-#else	/* IGNORE_DNS_ERRORS follows */
+#else	/* ENABLE_DNS_RETRY follows */
 		getaddrinfo_sometime(name, service, hints,
 				     INITIAL_DNS_RETRY,
 				     &peer_name_resolved, context);
