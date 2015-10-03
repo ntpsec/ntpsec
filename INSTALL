@@ -7,22 +7,28 @@ POSIX.1-2001 and ISO/IEC 9899:1999 (C99).  In addition, the
 operating system must have either a Linux-like adjtimex(2) call
 or a BSD-like ntp_adjtime(2) call.
 
-There are some prerequisites.  Libraries need both the library and the
-development headers installed.
+There are some prerequisites.  Libraries need the library installed
+to run and in addition, the development headers installed to build.
 
 Python >= 2.5::
    Required.
 
 libevent 2.x::
-   Required. Your package manager might call this "libevent-dev".
+   Required.
+   Fedora: libevent and libevent-devel
+   Debian: libevent and libevent-dev
 
 OpenSSL::
-   Optional; enables encryption and authentication. Your package manager
-   may call this openssl-devel or libssl-dev.
+   Optional, required for --enable-crypto.
+   Enables encryption and authentication.
+   Fedora: openssl-libs and openssl-devel
+   Debian: ?? libssl-dev
 
 GNU readline::
    Optional. Enhances ntpq's interactive mode by enabling line
-   editing. Your package manager may call this libreadline-dev.
+   editing.
+   Fedora: readline and readline-devel
+   Debian: ??? libreadline-dev
 
 BSD libedit::
    Optional. Enhances ntpq's interactive mode by enabling line
@@ -32,10 +38,11 @@ BSD libedit::
 sys/timepps.h::
    If you are building to supply Stratum 1 time service (that is, with
    refclocks linked in) you may find that you need the sys/timepps.h
-   file to be installed, depending on which refclocks you enable. If
-   you are using a package manager, the package 'pps-tools' may do.
+   file to be installed, depending on which refclocks you enable.
    This won't be necessary for pure client (Stratum 2 or higher)
    installations.
+   Fedora: pps-tools-devel (pps-tools may be useful for debugging)
+   Debian: pps-tools
 
 Go to the directory where you found this file and do this:
 
