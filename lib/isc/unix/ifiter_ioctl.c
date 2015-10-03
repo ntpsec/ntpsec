@@ -28,8 +28,8 @@
 #define lifc_req iflc_req
 #define LIFCONF if_laddrconf
 #else
-#define ISC_HAVE_LIFC_FAMILY 1
-#define ISC_HAVE_LIFC_FLAGS 1
+#define USE_LIFC_FAMILY 1
+#define USE_LIFC_FLAGS 1
 #define LIFCONF lifconf
 #endif
 
@@ -193,10 +193,10 @@ getbuf6(isc_interfaceiter_t *iter) {
 			return (ISC_R_NOMEMORY);
 
 		memset(&iter->lifc, 0, sizeof(iter->lifc));
-#ifdef ISC_HAVE_LIFC_FAMILY
+#ifdef USE_LIFC_FAMILY
 		iter->lifc.lifc_family = AF_INET6;
 #endif
-#ifdef ISC_HAVE_LIFC_FLAGS
+#ifdef USE_LIFC_FLAGS
 		iter->lifc.lifc_flags = 0;
 #endif
 		iter->lifc.lifc_len = iter->bufsize6;
