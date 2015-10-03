@@ -112,11 +112,6 @@ struct in6_pktinfo {
 };
 #endif
 
-#if _MSC_VER < 1300
-#define in6addr_any isc_net_in6addrany
-#define in6addr_loopback isc_net_in6addrloop
-#endif
-
 #define ISC__IPADDR(x)	((isc_uint32_t)htonl((isc_uint32_t)(x)))
 
 #define ISC_IPADDR_ISMULTICAST(i) \
