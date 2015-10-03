@@ -16,6 +16,9 @@ hacking.txt::
 dot.emacs::
 	C-mode indentation rules for code "Just the way Dave likes it".
 
+ifdex-ignores::
+	Lists and explains a large number of internal configuration symbols.	
+
 TODO::
 	List of items the NTP developers are working on.
 
