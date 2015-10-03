@@ -308,6 +308,12 @@ def cmd_configure(ctx):
 		ctx.define("ISC_PLATFORM_HAVEIPV6", 1)
 		ctx.define("ISC_PLATFORM_HAVEIN6PKTINFO", 1)
 
+	# NetBSD (used to) need to recreate sockets on changed routing.
+	# Perhaps it still does. If so, this should be set.  The autoconf
+	# build set it "if the OS clears cached routes when more specifics
+	# become available".
+	# ctx.define("OS_MISSES_SPECIFIC_ROUTE_UPDATES", 1)
+
 	if ctx.options.enable_leap_smear:
 		ctx.define("ENABLE_LEAP_SMEAR", 1)
 

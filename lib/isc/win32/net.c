@@ -46,15 +46,6 @@
 #define ISC_NET_PORTRANGEHIGH 65535
 #endif	/* ISC_NET_PORTRANGEHIGH */
 
-#if defined(ISC_PLATFORM_NEEDIN6ADDRANY)
-const struct in6_addr isc_net_in6addrany = IN6ADDR_ANY_INIT;
-#endif
-
-#if defined(ISC_PLATFORM_NEEDIN6ADDRLOOPBACK)
-const struct in6_addr isc_net_in6addrloop = IN6ADDR_LOOPBACK_INIT;
-#endif
-
-
 static isc_once_t 	once = ISC_ONCE_INIT;
 static isc_once_t 	once_ipv6only = ISC_ONCE_INIT;
 static isc_once_t 	once_ipv6pktinfo = ISC_ONCE_INIT;

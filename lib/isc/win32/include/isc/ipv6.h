@@ -45,8 +45,4 @@
 #define in6_addr in_addr6
 #endif
 
-
-LIBISC_EXTERNAL_DATA extern const struct in6_addr isc_net_in6addrany;
-LIBISC_EXTERNAL_DATA extern const struct in6_addr isc_net_in6addrloop;
-
 #endif /* GUARD_ISC_IPV6_H */
