@@ -94,8 +94,8 @@ def cmd_configure(ctx):
 
 	types = ["int32", "int32_t", "uint32_t", "int64_t", "uint64_t", "uint_t", "size_t", "wint_t", "pid_t", "intptr_t", "uintptr_t"]
 
-	for type in sorted(types):
-		ctx.check_type(type, ["stdint.h", "sys/types.h"])
+	for inttype in sorted(types):
+		ctx.check_type(inttype, ["stdint.h", "sys/types.h"])
 
 	net_types = (
 		("struct if_laddrconf", ["sys/types.h", "net/if6.h"]),
@@ -304,7 +304,6 @@ def cmd_configure(ctx):
 	if ctx.options.refclocks:
 		from refclock import refclock_config
 		refclock_config(ctx)
-
 
 	if ctx.options.enable_ipv6:
 		ctx.define("ENABLE_IPV6", 1)
