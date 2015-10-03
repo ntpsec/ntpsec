@@ -323,6 +323,9 @@ def cmd_configure(ctx):
 	if not ctx.options.disable_dns_lookup:
 		ctx.define("ENABLE_DNS_LOOKUP", 1)
 
+	if not ctx.options.disable_dns_retry:
+		ctx.define("ENABLE_DNS_RETRY", 1)
+
 	if not ctx.options.disable_mdns_registration:
 		from check_mdns import check_mdns
 		check_mdns(ctx)
