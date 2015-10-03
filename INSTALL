@@ -108,6 +108,9 @@ The waf builder accepts `--enable-FEATURE' options to where FEATURE
 indicates an optional part of the package.  Do `waf --help' for a list
 of options.
 
+refclocks are enabled with `--refclock=<n1,n2,n3..>'
+`waf configure --list' will print a list of available refclocks.
+
 == Operation Controls ==
 
 The waf builder recognizes the following options to control how it
