@@ -41,7 +41,7 @@ static unsigned char get_byte (unsigned char *, offsets_t, int *);
 static void put_byte (unsigned char *, offsets_t, int *, unsigned char);
 #endif
 
-#ifdef LIBDEBUG
+#ifdef DEBUG_PARSELIB
 
 #include "lib_strbuf.h"
 
@@ -125,7 +125,7 @@ get_byte(
   unsigned char val;
 
   val     = *(bufp + offset[*fieldindex]);
-#ifdef LIBDEBUG
+#ifdef DEBUG_PARSELIB
   if (debug > 4)
     printf("fetchieee754: getbyte(0x%08x, %d) = 0x%02x\n", (unsigned int)(bufp)+offset[*fieldindex], *fieldindex, val);
 #endif
@@ -168,7 +168,7 @@ fetch_ieee754(
   u_long mantissa_high;
   u_long characteristic;
   long exponent;
-#ifdef LIBDEBUG
+#ifdef DEBUG_PARSELIB
   int length;
 #endif
   unsigned char val;
@@ -177,7 +177,7 @@ fetch_ieee754(
   switch (size)
     {
     case IEEE_DOUBLE:
-#ifdef LIBDEBUG
+#ifdef DEBUG_PARSELIB
       length = 8;
 #endif
       mbits  = 52;
@@ -186,7 +186,7 @@ fetch_ieee754(
       break;
 
     case IEEE_SINGLE:
-#ifdef LIBDEBUG
+#ifdef DEBUG_PARSELIB
       length = 4;
 #endif
       mbits  = 23;
@@ -235,7 +235,7 @@ fetch_ieee754(
     default:
       return IEEE_BADCALL;
     }
-#ifdef LIBDEBUG
+#ifdef DEBUG_PARSELIB
   if (debug > 4)
   {
     double d;
@@ -399,7 +399,7 @@ put_ieee754(
 	    )
 {
   l_fp outlfp;
-#ifdef LIBDEBUG
+#ifdef DEBUG_PARSELIB
   unsigned int sign;
   unsigned int bias;
 #endif
@@ -408,7 +408,7 @@ put_ieee754(
   int msb;
   u_long mantissa_low = 0;
   u_long mantissa_high = 0;
-#ifdef LIBDEBUG
+#ifdef DEBUG_PARSELIB
   u_long characteristic = 0;
   long exponent;
 #endif
@@ -422,7 +422,7 @@ put_ieee754(
     case IEEE_DOUBLE:
     /*length = 8;*/
       mbits  = 52;
-#ifdef LIBDEBUG
+#ifdef DEBUG_PARSELIB
       bias   = 1023;
 #endif
     /*maxexp = 2047;*/
@@ -431,7 +431,7 @@ put_ieee754(
     case IEEE_SINGLE:
     /*length = 4;*/
       mbits  = 23;
-#ifdef LIBDEBUG
+#ifdef DEBUG_PARSELIB
       bias   = 127;
 #endif
     /*maxexp = 255;*/
@@ -447,20 +447,20 @@ put_ieee754(
   if (L_ISNEG(&outlfp))
     {
       L_NEG(&outlfp);
-#ifdef LIBDEBUG
+#ifdef DEBUG_PARSELIB
       sign = 1;
 #endif
     }
   else
     {
-#ifdef LIBDEBUG
+#ifdef DEBUG_PARSELIB
       sign = 0;
 #endif
     }
 
   if (L_ISZERO(&outlfp))
     {
-#ifdef LIBDEBUG
+#ifdef DEBUG_PARSELIB
       exponent = mantissa_high = mantissa_low = 0; /* true zero */
 #endif
     }
@@ -519,7 +519,7 @@ put_ieee754(
 	    }
 	}
 
-#ifdef LIBDEBUG
+#ifdef DEBUG_PARSELIB
       exponent = msb - 32;
       characteristic = exponent + bias;
 
@@ -531,7 +531,7 @@ put_ieee754(
 }
 
 
-#if defined(DEBUG) && defined(LIBDEBUG)
+#if defined(DEBUG) && defined(DEBUG_PARSELIB)
 #include <stdlib.h>
 
 int main(

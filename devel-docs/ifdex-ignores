@@ -56,10 +56,10 @@ ISC_LIST_CHECKINIT	# Debugging flag
 ISC_PLATFORM_USEBACKTRACE	# Use the ISC backtrace code on assertions
 ISC_UTIL_TRACEON	# Enables trace code in ISC service routines.
 HAVE_LIBCTRACE		# Some random C tracing lib - NTP Classic never sets this
-LIBDEBUG		# Enable debugging in the parse library.
+DEBUG_PARSELIB		# Enable debugging in the parse library.
 MKREPRO_DATE		# Force the build date used for time stepping
 NTP_DEBUG_LISTS		# Debug list handling
-PPS720_DEBUG		# Only in refclock_true.c
+DEBUG_PPS720		# Only in refclock_true.c
 
 # AIX and Solaris had at one time a bug in the way they declared
 # PTHREAD_ONCE_INIT.  This enables a workaround.  It may no longer be
