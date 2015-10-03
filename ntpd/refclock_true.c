@@ -879,7 +879,7 @@ true_sample720(void)
 		return (0);
 	}
 	f = (65536 - pcl720_read(PCL720_IOB, PCL720_CTR));
-#ifdef PPS720_DEBUG
+#ifdef DEBUG_PPS720
 	msyslog(LOG_DEBUG, "PCL-720: %luus", f);
 #endif
 	return (f);
