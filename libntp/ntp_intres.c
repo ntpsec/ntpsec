@@ -66,10 +66,6 @@
 # include <sys/param.h>
 #endif
 
-#if !defined(HAVE_RES_INIT) && defined(HAVE___RES_INIT)
-# define HAVE_RES_INIT
-#endif
-
 #if defined(HAVE_RESOLV_H) && defined(HAVE_RES_INIT)
 # ifdef HAVE_ARPA_NAMESER_H
 #  include <arpa/nameser.h> /* DNS HEADER struct */
