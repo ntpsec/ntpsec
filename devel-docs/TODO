@@ -138,6 +138,10 @@ is not yet tested anywhere but in ntpd itself.
 
 == After first release ==
 
+* There is a mess around the symbols NO_MAIN_ALLOWED, BUILD_AS_LIB, and
+  LIBNTP_C that needs to be refactored.  ntpd should *always* be built as
+  a library linked to a main module, these guard symbols should go away.
+
 * seccomp sandboxing fails to build under Ubuntu due to some confusion
   in the Linux headers.  Investigate.
 
