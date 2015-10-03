@@ -70,12 +70,7 @@
 
 #include <netinet/in.h>		/* Contractual promise. */
 #include <arpa/inet.h>		/* Contractual promise. */
-#ifdef ISC_PLATFORM_NEEDNETINETIN6H
-#include <netinet/in6.h>	/* Required on UnixWare. */
-#endif
-#ifdef ISC_PLATFORM_NEEDNETINET6IN6H
-#include <netinet6/in6.h>	/* Required on BSD/OS for in6_pktinfo. */
-#endif
+#include <netinet/in6.h>
 
 #include <isc/lang.h>
 #include <isc/types.h>
