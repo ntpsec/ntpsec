@@ -137,7 +137,9 @@ def cmd_configure(ctx):
 
 	ctx.define("TYPEOF_IP_MULTICAST_LOOP", "u_char", quote=False) #XXX: check for mcast type
 
+	# These are helpful and don't break Linux or *BSD
 	ctx.define("OPEN_BCAST_SOCKET", 1)
+	ctx.define("HAS_ROUTING_SOCKET", 1)
 
 	ctx.check_cc(lib="edit", mandatory=False)
 	ctx.check_cc(lib="m")
