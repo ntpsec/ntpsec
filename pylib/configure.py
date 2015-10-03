@@ -91,8 +91,11 @@ def cmd_configure(ctx):
 	ctx.define("NTPS_VERSION_STRING", ctx.env.NTPS_VERSION_STRING)
 	ctx.end_msg(ctx.env.NTPS_VERSION_STRING)
 
-
-	types = ["int32", "int32_t", "uint32_t", "int64_t", "uint64_t", "uint_t", "size_t", "wint_t", "pid_t", "intptr_t", "uintptr_t"]
+	# int32_t and uint32_t probes aren't really needed, POSIX guarantees
+	# them.  But int64_t and uint64_t are not guaranteed to exist on 32-bit
+	# machines.
+	types = ["int32_t", "uint32_t", "int64_t", "uint64_t",
+		 "uint_t", "size_t", "wint_t", "pid_t", "intptr_t", "uintptr_t"]
 
 	for inttype in sorted(types):
 		ctx.check_type(inttype, ["stdint.h", "sys/types.h"])
