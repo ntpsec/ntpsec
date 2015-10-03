@@ -13,9 +13,10 @@ Last update: 16-Sep-2015
 The `tickadj` program reads, and optionally modifies, several
 timekeeping-related variables.  It uses the adjtimex(2) system call.
 
-These tweaks are almost never necessary on hardware new enough
-to have a fully POSIX.1-2001-conformant Unix. This utility exists
-mainly for backward compatibility to old scripts.
+These tweaks are almost never necessary on hardware new enough to have
+a fully POSIX.1-2001-conformant Unix. This utility is deprecated and
+exists mainly for backward compatibility to old scripts. In the future
+it may be removed or merged into a more general tuning tool.
 
 The particular variables that can be changed with `tickadj` include
 `tick`, which is the number of microseconds added to the system time
