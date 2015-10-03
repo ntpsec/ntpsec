@@ -95,7 +95,14 @@ def cmd_configure(ctx):
 	types = ["int32", "int32_t", "uint32_t", "int64_t", "uint64_t", "uint_t", "size_t", "wint_t", "pid_t", "intptr_t", "uintptr_t"]
 
 	for type in sorted(types):
-		ctx.check_type(type)
+		ctx.check_type(type, ["stdint.h", "sys/types.h"])
+
+	net_types = (
+		("struct if_laddrconf", ["sys/types.h", "net/if6.h"]),
+		("struct if_laddrreq", ["sys/types.h", "net/if6.h"]),
+		)
+	for (f, h) in net_types:
+		ctx.check_type(f, h)
 
 	structure_fields = (
 		("time_tick", "timex", "sys/timex.h"),

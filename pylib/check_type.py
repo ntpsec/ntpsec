@@ -1,8 +1,6 @@
 from waflib.Configure import conf
 
 TYPE_FRAG = """
-#include <stdint.h>
-#include <sys/types.h>
 int main () {
 	if (sizeof (%s))
 		return 0;
@@ -11,13 +9,16 @@ int main () {
 """
 
 @conf
-def check_type(ctx, type, mandatory=False):
-	name = "HAVE_%s" % type.upper()
-
+def check_type(ctx, typename, headers=[], mandatory=False):
+	import os
+	name = "HAVE_%s" % typename.upper().replace(" ", "_")
+	src = ""
+        for hdr in headers:
+		src += "#include <%s>\n" % hdr
 	ctx.check_cc(
-		fragment	= TYPE_FRAG % (type),
+		fragment	= src + TYPE_FRAG % (typename),
 		define_name = name,
 		execute     = False,
-		msg         = "Checking for type %s" % (type),
+		msg         = "Checking for type %s" % (typename),
 		mandatory	= mandatory
 	)

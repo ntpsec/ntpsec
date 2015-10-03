@@ -22,7 +22,7 @@
  */
 
 #if defined(SIOCGLIFCONF) && defined(SIOCGLIFADDR)
-#ifdef ISC_PLATFORM_HAVEIF_LADDRCONF
+#ifdef HAVE_STRUCT_IF_LADDRCONF
 #define lifc_len iflc_len
 #define lifc_buf iflc_buf
 #define lifc_req iflc_req
@@ -33,7 +33,7 @@
 #define LIFCONF lifconf
 #endif
 
-#ifdef ISC_PLATFORM_HAVEIF_LADDRREQ
+#ifdef HAVE_STRUCT_IF_LADDRREQ
 #define lifr_addr iflr_addr
 #define lifr_name iflr_name
 #define lifr_dstaddr iflr_dstaddr
@@ -385,7 +385,7 @@ internal_current4(isc_interfaceiter_t *iter) {
 	struct ifreq ifreq;
 	int family;
 	char strbuf[BUFSIZ];
-#if !defined(ISC_PLATFORM_HAVEIF_LADDRREQ) && defined(SIOCGLIFADDR)
+#if !defined(HAVE_STRUCT_IF_LADDRREQ) && defined(SIOCGLIFADDR)
 	struct lifreq lifreq;
 #else
 	char sabuf[256];
@@ -484,7 +484,7 @@ internal_current4(isc_interfaceiter_t *iter) {
 	if (family == AF_INET)
 		goto inet;
 
-#if !defined(ISC_PLATFORM_HAVEIF_LADDRREQ) && defined(SIOCGLIFADDR)
+#if !defined(HAVE_STRUCT_IF_LADDRREQ) && defined(SIOCGLIFADDR)
 	memset(&lifreq, 0, sizeof(lifreq));
 	memcpy(lifreq.lifr_name, iter->current.name, sizeof(lifreq.lifr_name));
 	memcpy(&lifreq.lifr_addr, &iter->current.address.type.in6,
