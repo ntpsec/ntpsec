@@ -151,6 +151,11 @@ is not yet tested anywhere but in ntpd itself.
 codes (throwing out the old-format support) and use it
 systematically to make reports more readable.
 
+* Timer events need, as much as possible, to be eliminated - they eat
+  power on laptops and mobile devices, usually unnecessarily.  At least
+  one, the /etc/resolv.conf reload, would be better handled under Linux
+  by asynchronous file-change notifications.
+
 Hal:
 > I think there is some interaction between when the ACTS driver calls and the 
 > state of other stuff, like the connection to the net.  This is probably a 

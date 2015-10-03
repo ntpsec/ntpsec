@@ -879,7 +879,7 @@ add_interface(
 	if (ep->ignore_packets || !(INT_MULTICAST & ep->flags) ||
 	    INT_LOOPBACK & ep->flags)
 		return;
-# ifndef INCLUDE_IPV6_MULTICAST_SUPPORT
+# ifndef USE_IPV6_MULTICAST_SUPPORT
 	if (AF_INET6 == ep->family)
 		return;
 # endif
@@ -1001,7 +1001,7 @@ add_interface(
 				stoa(&ep->sin));
 		break;
 
-# ifdef INCLUDE_IPV6_MULTICAST_SUPPORT
+# ifdef USE_IPV6_MULTICAST_SUPPORT
 	case AF_INET6 :
 		rc = setsockopt(ep->fd, IPPROTO_IPV6,
 				 IPV6_MULTICAST_IF,
@@ -1104,7 +1104,7 @@ create_wildcards(
 	)
 {
 	bool			v4wild;
-#ifdef INCLUDE_IPV6_SUPPORT
+#ifdef USE_IPV6_SUPPORT
 	bool			v6wild;
 #endif
 	sockaddr_u		wildaddr;
@@ -1120,7 +1120,7 @@ create_wildcards(
 	action = ACTION_LISTEN;
 	ZERO(wildaddr);
 
-#ifdef INCLUDE_IPV6_SUPPORT
+#ifdef USE_IPV6_SUPPORT
 	/*
 	 * create pseudo-interface with wildcard IPv6 address
 	 */
@@ -1463,14 +1463,14 @@ convert_isc_if(
 			    isc_if->broadcast.type.in.s_addr;
 		}
 	}
-#ifdef INCLUDE_IPV6_SUPPORT
+#ifdef USE_IPV6_SUPPORT
 	else if (IS_IPV6(&itf->sin)) {
 		SET_ADDR6N(&itf->sin, isc_if->address.type.in6);
 		SET_ADDR6N(&itf->mask, isc_if->netmask.type.in6);
 
 		SET_SCOPE(&itf->sin, isc_if->address.zone);
 	}
-#endif /* INCLUDE_IPV6_SUPPORT */
+#endif /* USE_IPV6_SUPPORT */
 
 
 	/* Process the rest of the flags */
@@ -1608,7 +1608,7 @@ is_wildcard_addr(
 	if (IS_IPV4(psau) && !NSRCADR(psau))
 		return true;
 
-#ifdef INCLUDE_IPV6_SUPPORT
+#ifdef USE_IPV6_SUPPORT
 	if (IS_IPV6(psau) && S_ADDR6_EQ(psau, &in6addr_any))
 		return true;
 #endif
@@ -1656,7 +1656,7 @@ check_flags6(
 	uint32_t flags6
 	)
 {
-#if defined(INCLUDE_IPV6_SUPPORT) && defined(SIOCGIFAFLAG_IN6)
+#if defined(USE_IPV6_SUPPORT) && defined(SIOCGIFAFLAG_IN6)
 	struct in6_ifreq ifr6;
 	int fd;
 
@@ -1674,7 +1674,7 @@ check_flags6(
 	close(fd);
 	if ((ifr6.ifr_ifru.ifru_flags6 & flags6) != 0)
 		return true;
-#endif	/* INCLUDE_IPV6_SUPPORT && SIOCGIFAFLAG_IN6 */
+#endif	/* USE_IPV6_SUPPORT && SIOCGIFAFLAG_IN6 */
 	return false;
 }
 
@@ -2351,7 +2351,7 @@ addr_ismulticast(
 {
 	bool result;
 
-#ifndef INCLUDE_IPV6_MULTICAST_SUPPORT
+#ifndef USE_IPV6_MULTICAST_SUPPORT
 	/*
 	 * If we don't have IPV6 support any IPV6 addr is not multicast
 	 */
@@ -2383,7 +2383,7 @@ enable_multicast_if(
 #ifdef IP_MULTICAST_LOOP
 	TYPEOF_IP_MULTICAST_LOOP off = 0;
 #endif
-#if defined(INCLUDE_IPV6_MULTICAST_SUPPORT) && defined(IPV6_MULTICAST_LOOP)
+#if defined(USE_IPV6_MULTICAST_SUPPORT) && defined(IPV6_MULTICAST_LOOP)
 	u_int off6 = 0;
 #endif
 
@@ -2411,7 +2411,7 @@ enable_multicast_if(
 		break;
 
 	case AF_INET6:
-#ifdef INCLUDE_IPV6_MULTICAST_SUPPORT
+#ifdef USE_IPV6_MULTICAST_SUPPORT
 #ifdef IPV6_MULTICAST_LOOP
 		/*
 		 * Don't send back to itself, but allow failure to set
@@ -2430,7 +2430,7 @@ enable_multicast_if(
 		break;
 #else
 		return;
-#endif	/* INCLUDE_IPV6_MULTICAST_SUPPORT */
+#endif	/* USE_IPV6_MULTICAST_SUPPORT */
 	}
 	return;
 #endif
@@ -2449,7 +2449,7 @@ socket_multicast_enable(
 	)
 {
 	struct ip_mreq		mreq;
-#ifdef INCLUDE_IPV6_MULTICAST_SUPPORT
+#ifdef USE_IPV6_MULTICAST_SUPPORT
 	struct ipv6_mreq	mreq6;
 #endif
 	switch (AF(maddr)) {
@@ -2480,7 +2480,7 @@ socket_multicast_enable(
 		break;
 
 	case AF_INET6:
-#ifdef INCLUDE_IPV6_MULTICAST_SUPPORT
+#ifdef USE_IPV6_MULTICAST_SUPPORT
 		/*
 		 * Enable reception of multicast packets.
 		 * If the address is link-local we can get the
@@ -2508,7 +2508,7 @@ socket_multicast_enable(
 			    mreq6.ipv6mr_interface, stoa(maddr)));
 #else
 		return false;
-#endif	/* INCLUDE_IPV6_MULTICAST_SUPPORT */
+#endif	/* USE_IPV6_MULTICAST_SUPPORT */
 	}
 	iface->flags |= INT_MCASTOPEN;
 	iface->num_mcast++;
@@ -2530,7 +2530,7 @@ socket_multicast_disable(
 	sockaddr_u *		maddr
 	)
 {
-#ifdef INCLUDE_IPV6_MULTICAST_SUPPORT
+#ifdef USE_IPV6_MULTICAST_SUPPORT
 	struct ipv6_mreq mreq6;
 #endif
 	struct ip_mreq mreq;
@@ -2563,7 +2563,7 @@ socket_multicast_disable(
 		}
 		break;
 	case AF_INET6:
-#ifdef INCLUDE_IPV6_MULTICAST_SUPPORT
+#ifdef USE_IPV6_MULTICAST_SUPPORT
 		/*
 		 * Disable reception of multicast packets
 		 * If the address is link-local we can get the
@@ -2588,7 +2588,7 @@ socket_multicast_disable(
 		break;
 #else
 		return false;
-#endif	/* INCLUDE_IPV6_MULTICAST_SUPPORT */
+#endif	/* USE_IPV6_MULTICAST_SUPPORT */
 	}
 
 	iface->num_mcast--;
@@ -3150,14 +3150,14 @@ sendpkt(
 						sizeof(cttl));
 				break;
 
-# ifdef INCLUDE_IPV6_SUPPORT
+# ifdef USE_IPV6_SUPPORT
 			case AF_INET6 :
 				rc = setsockopt(src->fd, IPPROTO_IPV6,
 						 IPV6_MULTICAST_HOPS,
 						 (void *)&ttl,
 						 sizeof(ttl));
 				break;
-# endif	/* INCLUDE_IPV6_SUPPORT */
+# endif	/* USE_IPV6_SUPPORT */
 
 			default:
 				rc = 0;
@@ -4195,7 +4195,7 @@ findbcastinter(
 		 */
 		if (addr_ismulticast(addr)
 		    && (iface->flags & INT_MULTICAST)) {
-#ifdef INCLUDE_IPV6_SUPPORT
+#ifdef USE_IPV6_SUPPORT
 			/*
 			 * ...it is the winner unless we're looking for
 			 * an interface to use for link-local multicast
@@ -4223,7 +4223,7 @@ findbcastinter(
 			    == (NSRCADR(addr)	  & NSRCADR(&iface->mask)))
 				break;
 		}
-#ifdef INCLUDE_IPV6_SUPPORT
+#ifdef USE_IPV6_SUPPORT
 		else if (IS_IPV6(addr)) {
 			if (SOCK_EQ(&iface->bcast, addr))
 				break;
