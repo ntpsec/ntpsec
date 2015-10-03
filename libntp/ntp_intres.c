@@ -76,12 +76,6 @@
 # endif
 # include <netdb.h>
 # include <resolv.h>
-# ifdef HAVE_INT32_ONLY_WITH_DNS
-#  define HAVE_INT32
-# endif
-# ifdef HAVE_U_INT32_ONLY_WITH_DNS
-#  define HAVE_U_INT32
-# endif
 #endif
 
 #include "ntp.h"
