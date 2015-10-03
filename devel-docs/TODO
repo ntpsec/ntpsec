@@ -21,18 +21,12 @@ None right now. (Sep-22 2015)
 
 * The install production needs to warn of stale ntpdc and ntpdate binaries.
 
-* There are still around 90 conditional symbols in the build that have
-  not been audited.
-
-* Add support for enabling all condtional checks to ensure none are broken.
+* Add support for enabling all conditional checks to ensure none are broken.
 
 * Add support for disabling specific conditional tests to ensure nothing is 
   compiled into the base in a surprising fashion.
 
-
 === Code ===
-
-* The u_* types in ntp.h are GCCisms that should be replaced with POSIX types.
 
 * We should audit scripts/ and utils/ to see which of those programs
   can be thrown out (some, like util/kern.c, don't even build).  Some
@@ -148,8 +142,8 @@ is not yet tested anywhere but in ntpd itself.
 * Should tickadj and ntptime merge? ntpstune, anyone? 
 
 * Adapt BSD snprintb into a better dumper for flag words like flash
-codes (throwing out the old-format support) and use it
-systematically to make reports more readable.
+  codes (throwing out the old-format support) and use it
+  systematically to make reports more readable.
 
 * Timer events need, as much as possible, to be eliminated - they eat
   power on laptops and mobile devices, usually unnecessarily.  At least
