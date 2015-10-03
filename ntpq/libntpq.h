@@ -18,18 +18,14 @@
 /* general purpose buffer size */
 #define NTPQ_BUFLEN 2048
 
-/* max. number of associations */
-#ifdef OVERRIDE_MAXASSOC
-#define MAXASSOC	OVERRIDE_MAXASSOC
-#else
-#define MAXASSOC	1024
+/* Max. number of associations */
+#ifndef MAXASSOC
+#define MAXASSOC    1024
 #endif
 
 /* general purpose max array size definition */
-#ifdef OVERRIDE_MAXLIST
-#define MAXLIST	OVERRIDE_MAXLIST
-#else
-#define MAXLIST	64
+#ifndef MAXLIST
+#define MAXLIST 64
 #endif
 
 /* NTP Status codes */
