@@ -213,6 +213,23 @@ def refclock_config(ctx):
 
 		rc = refclock_map[id]
 
+		if rc['define'] == "CLOCK_PARSE":
+			parse_clocks = (
+				"CLOCK_COMPUTIME",
+				"CLOCK_DCF7000",
+				"CLOCK_HOPF6021",
+				"CLOCK_MEINBERG",
+				"CLOCK_RAWDCF",
+				"CLOCK_RCC8000",
+				"CLOCK_SCHMID",
+				"CLOCK_TRIMTAIP",
+				"CLOCK_TRIMTSIP",
+				"CLOCK_VARITEXT",
+				"CLOCK_WHARTON_400A",
+				)
+			for subtype in parse_clocks:
+				ctx.define(subtype, 1)
+
 		ctx.start_msg("Enabling Refclock %s:" % id)
 		ctx.env.REFCLOCK_SOURCE.append((rc["file"], rc["define"]))
 		ctx.end_msg(rc["descr"])
