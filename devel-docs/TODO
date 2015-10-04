@@ -35,6 +35,9 @@ None right now. (Sep-22 2015)
 * We need a build time option to disable all dangerous operations
   that ntpq can produce.
 
+* Make sure we do the right thing with KoD and rate limiting.
+  (Forged requests can use rate limiting to block service to a site.)
+
 
 === Porting ===
 
@@ -127,10 +130,6 @@ is not yet tested anywhere but in ntpd itself.
   should be split out.  3 examples: Autokey, contents of log files,
   multicast/broadcase/manycast.
 
-* We need a page on security/DDos issues encountered by NTP, both
-  as applied to attacking our system and using our system to attack
-  other systems.
-
 
 === Remaining procedural issues ===
 
@@ -160,6 +159,10 @@ is not yet tested anywhere but in ntpd itself.
   power on laptops and mobile devices, usually unnecessarily.  At least
   one, the /etc/resolv.conf reload, would be better handled under Linux
   by asynchronous file-change notifications.
+
+* Take another look at SHM.  I think we can make a version that is
+  read-only and solid.  Maybe write a support package that does all the
+  work if you call it with the date/time.
 
 Hal:
 > I think there is some interaction between when the ACTS driver calls and the 
