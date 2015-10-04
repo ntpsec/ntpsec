@@ -49,12 +49,14 @@
 # include "ntp_stdlib.h"
 # include <stdio.h>
 
+/* Not used.  Comment out to avoid warnings
 static const uint8_t VT_INITIALISED      = 0x01;
 static const uint8_t VT_SYNCHRONISED     = 0x02;
 static const uint8_t VT_ALARM_STATE      = 0x04;
-static const uint8_t VT_BST              = 0x08;
 static const uint8_t VT_SEASON_CHANGE    = 0x10;
 static const uint8_t VT_LAST_TELEGRAM_OK = 0x20;
+*/
+static const uint8_t VT_BST              = 0x08;
 
 /*
  * The Varitext receiver sends a datagram in the following format every minute
