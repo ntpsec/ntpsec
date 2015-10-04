@@ -44,6 +44,11 @@
 #include "ntp_scanner.h"
 #include "ntp_parser.tab.h"
 
+/* Bug is Bison 2.5 */
+#ifndef yyparse
+  int yyparse (void);
+#endif
+
 
 /* list of servers from command line for config_peers() */
 int	cmdline_server_count;

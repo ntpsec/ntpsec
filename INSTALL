@@ -15,9 +15,6 @@ Python >= 2.5::
 
 bison::
    Required to build.
-   bison version 2.5 generates a compiler warning about yyparse.
-   It's used on Debian 7/wheezy and those distros derived from it which
-   include Raspbian and BeagleBone Black.
    Fedora: bison
    Debian: bison
 
