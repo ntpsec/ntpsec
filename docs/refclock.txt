@@ -170,7 +170,6 @@ Datum/Bancomm/Symmetricom bc600-series GPS/IRIG Receiver.
 | link:driver31.html[Type 31] | D     | Rockwell Jupiter GPS
 | link:driver33.html[Type 33] | D     | Dumb Clock
 | link:driver35.html[Type 35] | D     | Conrad Parallel Port Radio Clock
-| link:driver37.html[Type 37] | D     | Forum Graphic GPS Dating station
 | link:driver38.html[Type 38] | D     | hopf GPS/DCF77 6021/komp for Serial Line
 | link:driver39.html[Type 39] | -     | hopf GPS/DCF77 6039 for PCI-Bus
 | link:driver40.html[Type 40] | T     | JJY Receivers
@@ -188,7 +187,7 @@ The flags field should be interpreted as follows:
 |====================================================================
 
 Driver numbers 2, 3, 12, 13, 14, 15, 16, 17, 19, 21, 23, 24, 25, 32, 34,
-36, 41, and 43 (all unused numbers below 46) are reserved. Some of
+36, 37, 41, and 43 (all unused numbers below 46) are reserved. Some of
 these were used by refclock types (now obsolete) in older NTP versions
 
 
