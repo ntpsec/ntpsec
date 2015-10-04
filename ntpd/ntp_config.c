@@ -3294,6 +3294,7 @@ config_fudge(
 	)
 {
 	addr_opts_node *curr_fudge;
+# ifdef REFCLOCK
 	attr_val *curr_opt;
 	sockaddr_u addr_sock;
 	address_node *addr_node;
@@ -3393,11 +3394,14 @@ config_fudge(
 				exit(curr_opt->attr ? curr_opt->attr : 1);
 			}
 		}
-# ifdef REFCLOCK
 		if (!err_flag)
 			refclock_control(&addr_sock, &clock_stat, NULL);
-# endif
 	}
+# else
+	curr_fudge = HEAD_PFIFO(ptree->fudge);
+	if (curr_fudge != NULL)
+		msyslog(LOG_ERR, "Fudge commands not supported: built without refclocks");
+# endif
 }
 #endif	/* !SIM */
 
