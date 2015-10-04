@@ -229,7 +229,7 @@ void intercept_get_systime(const char *legend, l_fp *now)
     get_ostime(&ts);
 
     if (mode == capture)
-	printf("event systime %s %zd %zd\n", legend, ts.tv_sec, ts.tv_nsec);
+	printf("event systime %s %ld %ld\n", legend, ts.tv_sec, ts.tv_nsec);
 	
     normalize_time(ts, ntp_random(), now);
 }
