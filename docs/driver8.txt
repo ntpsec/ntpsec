@@ -1,24 +1,22 @@
 = Generic Reference Driver =
 
-Last update: 27-Jan-2014 05:31 UTC
+== Name ==
 
-'''''
+refclock_parse - multidevice parse driver for generic time radios and GPSDOs.
 
 == Synopsis ==
 
-["literal",subs="normal"]
-Address: 127.127.8.u
-Reference ID: PARSE
-Driver ID: GENERIC
-Serial Port: /dev/refclock-u; TTY mode according to clock type
-PPS device: /dev/refclockpps-_u_; alternate PPS device (if not
-available via the serial port)
+["verse",subs="normal"]
+Address: 127.127.8.'u'
+Reference ID: DCF | DCFa | DCFp | GPS | MSF
+Serial Port: /dev/refclock-'u'; TTY mode according to clock type
+PPS device: /dev/refclockpps-'u'; alternate PPS device
 
 == Description ==
 
-The PARSE driver supports 20 different clock types/configurations. PARSE is actually a multi-clock driver.
+The PARSE driver supports 20 different clock
+types/configurations. PARSE is actually a multi-clock driver.
 
-//ERROR: The (see list below) ref that used to live here was to a dead IMAP URL.
 The actual receiver status is mapped into various synchronization states
 generally used by receivers. The driver is configured to interpret the
 time codes of Meinberg DCF77 AM receivers, DCF77 FM receivers, Meinberg
@@ -303,7 +301,7 @@ the mode parameter is the mode value as above plus 128. If 128 is not
 added to the mode value, PPS will be detected to be available but will
 not be used.
 
-== Hardware PPS support + ==
+== Hardware PPS support ==
 
 For PPS to be used, add 128 to the mode parameter.
 
@@ -316,8 +314,9 @@ via the serial port.
 
 == Monitor Data ==
 
-Clock state statistics are written hourly to the syslog service. Online
-information can be found by examining the clock variables via the ntpq cv command.
+Clock state statistics are written hourly to the syslog
+service. Online information can be found by examining the clock
+variables via the ntpq cv command.
 
 Some devices have quite extensive additional information
 (GPS16x/GPS17x, Trimble). The driver reads out much of the internal GPS

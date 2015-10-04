@@ -1,17 +1,12 @@
 = Radio CHU Audio Demodulator/Decoder =
- 
- Author: David L. Mills (mills@udel.edu)
- Last update: 20-Sep-2015 04:44 UTC
-
-'''''
 
 == Synopsis ==
 
-["literal",subs="normal"]
+["verse",subs="normal"]
 Address: 127.127.7.'u'
 Reference ID: `CHU`
 Driver ID: `CHU`
-Modem Port: `/dev/chuu`; 300 baud, 8-bits, no parity
+Modem Port: `/dev/chu`'u'; 300 baud, 8-bits, no parity
 Autotune Port: `/dev/icom`; 1200/9600 baud, 8-bits, no parity
 Audio Device: `/dev/audio` and `/dev/audioctl`
 
@@ -389,6 +384,10 @@ alarm are nonfatal; only the data in the burst are discarded.
   before the driver is started.
 `flag4 0 | 1`::
   Enable verbose `clockstats` recording if set.
+
+== Author ==
+
+David L. Mills <mills@udel.edu>
 
 '''''
 

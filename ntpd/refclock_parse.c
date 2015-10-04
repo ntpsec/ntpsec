@@ -398,6 +398,7 @@ typedef struct poll_info
 #define DCF_A_ID	"DCFa"	/* AM demodulation */
 #define DCF_P_ID	"DCFp"	/* psuedo random phase shift */
 #define GPS_ID		"GPS"	/* GPS receiver */
+#define MSF_ID		"MSF"	/* MSF receiver */
 
 #define NOCLOCK_ROOTDELAY       0.0
 #define NOCLOCK_BASEDELAY       0.0
@@ -731,7 +732,7 @@ static poll_info_t rcc8000_pollinfo = { RCC_POLLRATE, RCC_POLLCMD, RCC_CMDSIZE }
 #define RCC8000_DATA            ((void *)(&rcc8000_pollinfo))
 #define RCC8000_ROOTDELAY       0.0
 #define RCC8000_BASEDELAY       0.0
-#define RCC8000_ID              "MSF"
+#define RCC8000_ID              MSF_ID
 #define RCC8000_DESCRIPTION     "RCC 8000 MSF Receiver"
 #define RCC8000_FORMAT          "Radiocode RCC8000"
 #define RCC8000_MAXUNSYNC       (60*60) /* should be ok for an hour */
@@ -786,7 +787,7 @@ static poll_info_t rcc8000_pollinfo = { RCC_POLLRATE, RCC_POLLCMD, RCC_CMDSIZE }
 #define VARITEXT_FLAGS       0
 #define VARITEXT_ROOTDELAY   0.0
 #define VARITEXT_BASEDELAY   0.0
-#define VARITEXT_ID          "MSF"
+#define VARITEXT_ID          MSF_ID
 #define VARITEXT_DESCRIPTION "Varitext receiver"
 #define VARITEXT_FORMAT      "Varitext Radio Clock"
 #define VARITEXT_TYPE        DCF_TYPE

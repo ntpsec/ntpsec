@@ -45,14 +45,15 @@ extern int async_write(int, const void *, unsigned int);
 #define	DEVICE		"/dev/dumbclock%d" /* device name and unit */
 #define	SPEED232	B9600	/* uart speed (9600 baud) */
 #define	PRECISION	(-13)	/* precision assumed (about 100 us) */
-#define	REFID		"dumbclock"	/* reference ID */
+#define	REFID		"DUMB"	/* reference ID */
 #define	DESCRIPTION	"Dumb clock" /* WRU */
 
 
 /*
- * Insanity check.  Since the time is local, we need to make sure that during midnight
- * transitions, we can convert back to Unix time.  If the conversion results in some number
- * worse than this number of seconds away, assume the next day and retry.
+ * Insanity check.  Since the time is local, we need to make sure that
+ * during midnight transitions, we can convert back to Unix time.  If
+ * the conversion results in some number worse than this number of
+ * seconds away, assume the next day and retry.
  */
 #define INSANE_SECONDS 3600
 
