@@ -1,22 +1,13 @@
 = NeoClock4X - DCF77 / TDF serial line receiver + =
 
-Last update: 21-Oct-2010 23:44 UTC
-
-'''''
-
 == Synopsis ==
 
+["verse",subs="normal"]
+Address: 127.127.44.'u'
+Reference ID: neol
+Serial Port: /dev/neoclock4x-u
+
 image:pic/neoclock4x.gif[float="right",link="http://www.linum.com"]
-
-[width="25%",cols="<50%,<50%",frame="none",grid="none",align="left"]
-|==================
-|Adress      |127.127.44.u
-|Reference ID|neol
-|Driver ID   |NEOCLK4X
-|Serial Port |/dev/neoclock4x-u
-|==================
-
-'''''
 
 == Description ==
 
@@ -25,8 +16,6 @@ available from http://www.linum.com[Linum Software GmbH]. The receiver
 is available as a http://www.dcf77.de[DCF77] or TDF receiver. Both
 receivers have the same output string. For more information about the
 NeoClock4X receiver please visit http://www.linux-funkuhr.de.  
-
-'''''
 
 == Fudge Factors ==
 
@@ -74,7 +63,7 @@ link:clockopt.html[*flag4 0 | 1*]::
 +
 Default setting is 0 = don't log received data and converted utc time.
 
-'''''
+Author:
 
 Please send any comments or question to
 mailto:neoclock4@linum.com[neoclock4x@linum.com].

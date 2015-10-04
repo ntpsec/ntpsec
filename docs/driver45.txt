@@ -1,14 +1,10 @@
 = Spectracom TSYNC PCI =
 
-Last update: 26-Mar-2012 05:10 UTC
-
-'''''
-
 == Synopsis ==
 
-["literal",subs="normal"]
+["verse",subs="normal"]
 Address: 127.127.45.'u'
-Reference ID: one of `GPS`, `IRIG`, `HVQ`, `FREQ`, `ACTS`, `PPS`,`PTP`, `ACT`, `USR`, `LOCL`
+Reference ID: GPS | IRIG | HVQ | FREQ | ACTS | PPS,PTP | ACT | USR | LOCL
 Driver ID: Spectracom TSYNC PCI
 Driver Port: `/dev/tsyncpci`'u'
 Features: `(none)`

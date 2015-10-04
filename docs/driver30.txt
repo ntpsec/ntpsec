@@ -1,19 +1,12 @@
 = Motorola Oncore GPS receiver =
 
-Last update: 21-Oct-2010 23:44 UTC
-
-'''''
-
 == Synopsis ==
 
-["literal",subs="normal"]
+["verse",subs="normal"]
 Address: 127.127.30._u_
 Reference ID: GPS
-Driver ID: ONCORE
-Serial Port: /dev/oncore.serial._u_; 9600 baud, 8-bits, no parity.
-PPS Port: /dev/oncore.pps._u_; PPS_CAPTUREASSERT required,
-Configuration File: ntp.oncore, or ntp.oncore._u_, or
-ntp.oncore_u_, in /etc/ntp or /etc.
+Serial Port: /dev/oncore.serial._u_; 9600bps 8N1.
+PPS Port: /dev/oncore.pps._u_
 
 == Description ==
 
@@ -30,7 +23,6 @@ using the serial (DCD) or parallel port for PPS input and packs the
 receiver in a nice and sturdy box. Less expensive interface kits are
 available from http://www.tapr.org[TAPR] and
  
-
 [width="100%",cols="<34%,<33%,<33%",align="center",frame="none",grid="none"]
 |==========================================================================
 |image:pic/oncore_utplusbig.gif[]|image:pic/oncore_evalbig.gif[]|image:pic/oncore_remoteant.jpg[gif]

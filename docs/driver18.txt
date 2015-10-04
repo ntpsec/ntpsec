@@ -1,21 +1,13 @@
 = NIST/USNO/PTB Modem Time Services =
 
-[literal]
-Author: David L. Mills (mills@udel.edu)
-Last update: 1-Dec-2012 10:44 UTC
-
-
-'''''
-
 == Synopsis ==
 
-["literal",subs="normal"]
+["verse",subs="normal"]
 Address: 127.127.18.'u'
 Reference ID: NIST | USNO | PTB | WWVB
-Driver ID: ACTS_MODEM
-Serial Port: /dev/acts__u__; 9600 baud, 8-bits, no parity
+xSerial Port: /dev/acts__u__; 9600 8N1
 Features: tty_clk
-Requires: /usr/include/sys/termios.h header file with modem control and a dial-out (cua) device.
+Requires: a dial-out device.
 
 == Description ==
 
@@ -156,6 +148,11 @@ with the Hayes connection and hang-up commands and result codes.
   Not used by this driver.
 `flag4 0 | 1`::
   Not used by this driver.
+
+
+== Author ==
+
+David L. Mills <mills@udel.edu>
 
 == Additional Information ==
 

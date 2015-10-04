@@ -1,23 +1,13 @@
-= _hopf_ Serial Line Receivers (6021 and  kompatible) =
-
-Last update: 20-Sep-2015 04:44 UTC
-
-'''''
+= Hopf Serial Line Receivers (6021 and  compatible) =
 
 == Synopsis ==
 
-[width="25%",cols="<50%,<50%",frame="none",grid="none"]
-|=====================================================
-|Address:     | *127.127.38.__X__*
-|[[REFID]]Reference ID:| *.hopf.* (default), *GPS, DCF*
-|Driver ID:   | *HOPF_S*
-|Serial Port: | */dev/hopfclockX*
-|Serial I/O:  | *9600 baud, 8-bits, 1-stop, no parity*
-|=====================================================
+["verse",subs="normal"]
+Address: 127.127.38.__u__
+Reference ID: hopf
+Serial Port: /dev/hopfclock'u'; 9600 8N1
 
 image:pic/fg6021.gif[]
-
-'''''
 
 == Deprecation warning ==
 
@@ -27,14 +17,15 @@ requirement for it, please make this known to us.
 
 == Description ==
 
-The *refclock_hopf_serial* driver supports link:http://www.hopf.com[hopf electronic receivers] with serial Interface kompatibel 6021.
+The *refclock_hopf_serial* driver supports
+link:http://www.hopf.com[hopf electronic receivers] with serial
+Interface compatible with the 6021.
 
-Additional software and information about the software drivers is available from: link:http://www.ATLSoft.de/ntp[].
+Additional software and information about the software drivers is
+available from: link:http://www.ATLSoft.de/ntp[].
 
 Latest NTP driver source, executables and documentation is maintained
 at: link:http://www.ATLSoft.de/ntp[]
-
-'''''
 
 == Operating System Compatibility ==
 
@@ -49,11 +40,9 @@ The hopf clock driver has been tested on the following software and
 | i386 (PC) | Windows 2000
 |=====================================================
 
-'''''
-
 == O/S Serial Port Configuration ==
 
-The driver attempts to open the device link:#REFID[`/dev/hopfclockX`] where _**X**_
+The driver attempts to open the device /dev/hopfclockX` where *X*
 is the NTP refclock unit number as defined by the LSB of the refclock
 address.  Valid refclock unit numbers are 0 - 3.
 
@@ -64,12 +53,9 @@ port device.  This is typically performed by a command such as:
 ln -s /dev/ttyS0 /dev/hopfclock0
 ----------------------------------
 
-Windows NT does not support symbolic links to device files.
-*COMx*: is used by the driver, based on the refclock unit number, where *unit 1* corresponds to *COM1*: and *unit 3* corresponds to *COM3*:
-
-
-
-'''''
+//Windows NT does not support symbolic links to device files.  *COMx*:
+//is used by the driver, based on the refclock unit number, where *unit
+//1* corresponds to *COM1*: and *unit 3* corresponds to *COM3*:
 
 == Fudge Factors ==
 
@@ -83,18 +69,15 @@ link:#REFID[*`refid` __string__]*::
 *`flag1 0 | 1`*::
    When set to 1, driver syncs even if only crystal driven.
 
-'''''
-
 == Data Format ==
 
-as specified in clock manual under pt. [underline]#[ *Data String for NTP* (*_Network Time Protocol_*) ]#
-
-'''''
+As specified in clock manual under pt. [underline]#[ *Data String for
+NTP* (*_Network Time Protocol_*) ]#
 
 == Questions or Comments: ==
 
-[verse]
 mailto:altmeier@atlsoft.de[Bernd Altmeier]
+
 http://www.atlsoft.de/[Ing.-Büro für Software www.ATLSoft.de]
 
 '''''
