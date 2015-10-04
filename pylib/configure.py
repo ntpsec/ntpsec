@@ -267,7 +267,7 @@ def cmd_configure(ctx):
 		if not ctx.check_cc(header_name=hdr, mandatory=False) \
 		   and os.path.exists("/usr/include/" + hdr):
 			# Sanity check...
-			print "Compilation check failed but include exists!"
+			print "Compilation check failed but include exists %s" % hdr
 
 	for header in ["timepps.h", "sys/timepps.h"]:
 		probe_header_with_prerequisites(ctx, header, ["inttypes.h"])
