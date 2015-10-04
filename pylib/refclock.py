@@ -132,12 +132,6 @@ refclock_map = {
 		"file":		"pcf"
 	},
 
-	37: {
-		"descr":	"Forum Graphic GPS Dating station",
-		"define":	"CLOCK_FG",
-		"file":		"fg"
-	},
-
 	38: {
 		"descr":	"hopf GPS/DCF77 6021/komp for Serial Line",
 		"define":	"CLOCK_HOPF_SERIAL",
