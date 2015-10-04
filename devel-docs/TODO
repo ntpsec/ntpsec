@@ -35,8 +35,6 @@ None right now. (Sep-22 2015)
 * We need a build time option to disable all dangerous operations
   that ntpq can produce.
 
-* Make sure we default to rate limiting on.  (anti-DDoS)
-
 
 === Porting ===
 
@@ -128,6 +126,10 @@ is not yet tested anywhere but in ntpd itself.
 * The man page for ntp.conf contains a lot of descriptive text that
   should be split out.  3 examples: Autokey, contents of log files,
   multicast/broadcase/manycast.
+
+* We need a page on security/DDos issues encountered by NTP, both
+  as applied to attacking our system and using our system to attack
+  other systems.
 
 
 === Remaining procedural issues ===
