@@ -1,14 +1,8 @@
 = PPS Clock Discipline =
 
-[literal]
-Author: David L. Mills (mills@udel.edu)
-Last change: 31-Mar-2014 07:46 UTC
-
-'''''
-
 == Synopsis ==
 
-["literal",subs="normal"]
+["verse",subs="normal"]
 Address: 127.127.22.'u'
 Reference ID: PPS
 Driver ID: PPS
@@ -139,6 +133,11 @@ link:refclock.html[Reference Clock Drivers]
 Pulse-per-second API for Unix-like operating systems, version 1. Request
 for Comments RFC-2783, Internet Engineering Task Force, March 2000, 31
 pp.
+
+== Author ==
+
+David L. Mills <mills@udel.edu>
+
 
 '''''
 

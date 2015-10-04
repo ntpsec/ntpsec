@@ -1,16 +1,12 @@
 = Arcron MSF Receiver =
 
-Last update: 20-Sep-2010 04:04 UTC
-
-'''''
-
 == Synopsis ==
 
-["literal",subs="normal"]
+["verse",subs="normal"]
 Address: 127.127.27.'u'
-Reference ID: MSFa / MSF / DCF / WWVB
+Reference ID: MSFa | MSF | DCF
 Driver ID: MSF_ARCRON
-Serial Port: /dev/arc__u__; 300 baud, 8-bits, 2-stop, no parity
+Serial Port: /dev/arc__u__; 300bps, 8N2
 Features: `tty_clk`
 
 == Deprecation warning ==
@@ -19,13 +15,13 @@ This refclock is deprecated and obsolete. The {project-shortname}
 maintainers plan to remove it in a future release.  If you have a
 requirement for it, please make this known to us.
 
-The "WWVB" functionality of thus driver has been inoperable since the
+The "WWVB" functionality of this driver has been inoperable since the
 NIST modulation change in 2013.
 
 == Description ==
 
 This driver supports the Arcron MSF, DCF and WWVB receivers. The clock
-reports its ID as `"MSFa''`, `"MSF''`, `"DCF''` or `"WWVB''` to indicate
+reports its ID as `"MSFa"`, `"MSF"`, `"DCF"` to indicate
 the time source.
 
 This documentation describes v1.3 (2003/2/21) of the source and has been

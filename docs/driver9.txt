@@ -1,16 +1,11 @@
 = Magnavox MX4200 GPS Receiver =
 
-Last update: 20-Sep-2015 04:44 UTC
-
-'''''
-
 == Synopsis ==
 
-["literal",subs="normal"]
+["verse",subs="normal"]
 Address: 127.127.9.'u'
 Reference ID: GPS
-Driver ID: GPS_MX4200
-Serial Port: /dev/gps__u__; 4800 baud, 8-bits, no parity
+Serial Port: /dev/gps__u__; 4800bps 8N1
 Features: `ppsclock` (required)
 
 == Deprecation warning ==

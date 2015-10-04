@@ -1,18 +1,11 @@
 = Austron 2200A/2201A GPS Receivers =
 
-[literal]
-Author: David L. Mills (mills@udel.edu)
-Last update: 20-Sep-2010 04:17 UTC
-
-'''''
-
 == Synopsis ==
 
-["literal",subs="normal"]
+["verse",subs="normal"]
 Address: 127.127.10.'u'
 Reference ID: GPS
-Driver ID: GPS_AS2201
-Serial Port: /dev/gps__u__; 9600 baud, 8-bits, no parity
+Serial Port: /dev/gps__u__; 9600bps 8N1
 Features: `tty_clk`
 
 == Deprecation warning ==
@@ -45,7 +38,7 @@ collection process can be enabled or disabled using the flag4 flag. If
 set, collection is enabled; if not, which is the default, it is
 disabled. A comprehensive suite of data reduction and summary scripts is
 in the ./scripts/stats directory
-of the ntp3 distribution.
+of the distribution.
 
 == Monitor Data ==
 
@@ -72,6 +65,10 @@ written as-is to the `clockstats` file.
   Not used by this driver.
 `flag4 0 | 1`::
   Enable verbose `clockstats` recording if set.
+
+== Author ==
+
+David L. Mills <mills@udel.edu>
 
 == Additional Information ==
 

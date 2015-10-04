@@ -1,15 +1,10 @@
 = Shared Memory Driver =
 
-Last update: 8-Aug-2014 19:17 UTC
-
-'''''
-
 == Synopsis ==
 
-["literal",subs="normal"]
+["verse",subs="normal"]
 Address: 127.127.28.'u'
 Reference ID: SHM
-Driver ID: `SHM`
 
 == Description ==
 
@@ -202,14 +197,14 @@ be hex-decoded as \'NTP0', \'NTP1',..., with funny characters for units >
 Public access means a permission set of 0666, while private access
 creates the mapping with a permission set of 0600.
 
-_NTPD_ is started as root on most POSIX-like operating systems and uses
+{daemon} is started as root on most POSIX-like operating systems and uses
 the setuid/setgid system API to run under reduced rights once the
 initial setup of the process is done. One consequence out of this is
 that the allocation of SHM segments must be done early during the clock
 setup. The actual polling of the clock is done as the run-time user;
 deferring the creation of the SHM segment to this point will create a
 SHM segment owned by the runtime-user account. The internal structure of
-_NTPD_ does not permit the use of a fudge flag if this is to be avoided;
+{daemon} does not permit the use of a fudge flag if this is to be avoided;
 this is the reason why a mode bit is used for the configuration of a
 public segment.
 

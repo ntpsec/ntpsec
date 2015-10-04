@@ -1,16 +1,12 @@
 = Rockwell Jupiter GPS receiver =
 
-Last update: 20-Sep-2015 03:44 UTC
-
-'''''
-
 == Synopsis ==
 
-["literal",subs="normal"]
+["verse",subs="normal"]
 Address: 127.127.31.'u'
 Reference ID: GPS
 Driver ID: JUPITER
-Serial Port: `/dev/gps`__u__; 9600 baud, 8-bits, no parity.
+Serial Port: `/dev/gps`__u__; 9600bps 8N1
 
 == Deprecation warning ==
 

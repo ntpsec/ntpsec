@@ -1,17 +1,11 @@
 = Zyfer GPStarplus Receiver =
 
-Last update: 21-Oct-2010 23:44 UTC
-
-'''''
-
 == Synopsis ==
 
-["literal",subs="normal"]
+["verse",subs="normal"]
 Address: 127.127.42.'u'
 Reference ID: GPS
-Driver ID: Zyfer GPStarplus
-Serial Port: /dev/zyfer__u__; 9600 baud, 8-bits, no parity
-Features: `(none)`
+Serial Port: /dev/zyfer__u__; 9600bps 8N1
 
 == Description ==
 

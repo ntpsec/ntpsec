@@ -1,15 +1,10 @@
 = Conrad parallel port radio clock =
 
-Last update: 20-Sep-201p 04:44 UTC
-
-'''''
-
 == Synopsis ==
 
-["literal",subs="normal"]
+["verse",subs="normal"]
 Address: 127.127.35.'u'
 Reference ID: PCF
-Driver ID: PCF
 Parallel Port: `/dev/pcfclocks/`__u__ or `/dev/pcfclocku`
 
 == Deprecation warning ==

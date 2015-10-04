@@ -1,20 +1,13 @@
 = Spectracom =
 
- Author: David L. Mills (mills@udel.edu)
- Last update: 25-Jun-2015 13:32 UTC
-
-'''''
-
 == Synopsis ==
 
-["literal",subs="normal"]
-Address: 127.127.4.'u'
+["verse",subs="normal"]
+Address: 127.127.4._u_
 Reference ID: `SPECTRACOM`
-Driver ID: `SPECTRACOM`
-Serial Port: `/dev/spectracomu`; 9600 baud, 8-bits, no parity
+Serial Port: `/dev/spectracom`'u'; 9600bps 8N1
 Features: Optional PPS signal processing, `tty_clk`
-Requires: Optional PPS signal processing requires the PPSAPI signal
-interface.
+Requires: Optional PPS signal processing requires the PPSAPI signal interface.
 
 == Description ==
 
@@ -114,6 +107,10 @@ received.
   if 0 (default); use the kernel discipline if 1.
 `flag4 0 | 1`::
   Enable verbose `clockstats` recording if set.
+
+== Author ==
+
+David L. Mills <mills@udel.edu>
 
 '''''
 
