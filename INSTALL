@@ -11,7 +11,12 @@ There are some prerequisites.  Libraries need the library installed
 to run and in addition, the development headers installed to build.
 
 Python >= 2.5::
-   Required.
+   Required to build.  May be needed by some utilities.
+
+bison::
+   Required to build.
+   Fedora: bison
+   Debian: bison
 
 libevent 2.x::
    Required.
