@@ -77,6 +77,8 @@ is not yet tested anywhere but in ntpd itself.
 
 === Documentation ===
 
+* Run everything through a spell checker.
+
 * man pages outside of docs/ need to be merged with the
   Mills manpages inside it, with duplications removed.  In the
   list below, the original docs content is on the left and
@@ -122,6 +124,11 @@ is not yet tested anywhere but in ntpd itself.
 
 * Website needs to be integrated (with a contacts and services page,
   among other things) and published.
+
+* The man page for ntp.conf contains a lot of descriptive text that
+  should be split out.  3 examples: Autokey, contents of log files,
+  multicast/broadcase/manycast.
+
 
 === Remaining procedural issues ===
 
