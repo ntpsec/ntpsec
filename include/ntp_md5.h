@@ -27,8 +27,8 @@
 # define EVP_md5()			NULL
 # define EVP_MD_CTX_init(c)
 # define EVP_MD_CTX_set_flags(c, f)
-# define EVP_DigestInit(c, dt)		(MD5Init(c), 1)
-# define EVP_DigestInit_ex(c, dt, i)	(MD5Init(c), 1)
+# define EVP_DigestInit(c, dt)		MD5Init(c)
+# define EVP_DigestInit_ex(c, dt, i)	MD5Init(c)
 # define EVP_DigestUpdate(c, p, s)	MD5Update(c, (const void *)(p), \
 						  s)
 # define EVP_DigestFinal(c, d, pdl)	\

@@ -3399,7 +3399,7 @@ peer_xmit(
 #else	/* !ENABLE_AUTOKEY follows */
 #ifdef DEBUG
 	if (debug)
-		printf("transmit: at %ld %s->%s mode %d keyid %08x len %d\n",
+		printf("transmit: at %ld %s->%s mode %d keyid %08x len %zd\n",
 		    current_time, peer->dstadr ?
 		    ntoa(&peer->dstadr->sin) : "-",
 		    ntoa(&peer->srcadr), peer->hmode, xkeyid, sendlen);

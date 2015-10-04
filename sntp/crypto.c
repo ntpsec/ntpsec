@@ -15,7 +15,9 @@ make_mac(
 	)
 {
 	u_int		len = mac_size;
+#ifdef HAVE_OPENSSL
 	int		key_type;
+#endif
 	EVP_MD_CTX	ctx;
 
 	if (cmp_key->key_len > 64)
@@ -24,7 +26,9 @@ make_mac(
 		return 0;
 
 	INIT_SSL();
+#ifdef HAVE_OPENSSL
 	key_type = keytype_from_text(cmp_key->type, NULL);
+#endif
 	EVP_DigestInit(&ctx, EVP_get_digestbynid(key_type));
 	EVP_DigestUpdate(&ctx, (uint8_t *)cmp_key->key_seq, (u_int)cmp_key->key_len);
 	EVP_DigestUpdate(&ctx, (uint8_t *)pkt_data, (u_int)pkt_size);
