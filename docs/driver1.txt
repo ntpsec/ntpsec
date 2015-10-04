@@ -1,17 +1,10 @@
 = Undisciplined Local Clock =
 
-[literal]
-Author: David L. Mills (mills@udel.edu)
-Last update: 9-May-2014 08:34 UTC
-
-'''''
-
 == Synopsis ==
 
-["literal",subs="normal"]
-Address: 127.127.1.'u'
+["verse",subs="normal"]
+Address: 127.127.1._u_
 Reference ID: LOCL
-Driver ID: `LOCAL`
 
 == Description ==
 
@@ -67,6 +60,10 @@ No `filegen clockstats` monitor data are produced by this driver.
 == Additional Information ==
 
 link:refclock.html[Reference Clock Drivers]
+
+== Authors ==
+
+David L. Mills <mills@udel.edu>
 
 '''''
 

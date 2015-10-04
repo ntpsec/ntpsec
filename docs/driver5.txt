@@ -1,14 +1,11 @@
 = TrueTime GPS/GOES Receivers =
 
-'''''
-
 == Synopsis ==
 
-["literal",subs="normal"]
+["verse",subs="normal"]
 Address: 127.127.5.'u'
-Reference ID: GPS, GOES
-Driver ID: TRUETIME
-Serial Port: /dev/true__u__; 9600 baud, 8-bits, no parity
+Reference ID: TRUE
+Serial Port: `/dev/true`'u'; 9600bps 8N1
 Features: `tty_clk`
 
 == Deprecation warning ==

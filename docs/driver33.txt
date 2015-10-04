@@ -1,17 +1,11 @@
 = Dumb Clock =
 
-Last update: 20-Sep-2015 04:44 UTC
-
-'''''
-
 == Synopsis ==
 
-["literal",subs="normal"]
+["verse",subs="normal"]
 Address: 127.127.33._u_
-Reference ID: DUMBCLOCK
-Driver ID: DUMBCLOCK
-Serial Port: /dev/dumbclock_u_; 9600 bps, 8-bits, no parity
-Features: (none)
+Reference ID: DUMB
+Serial Port: /dev/dumbclock_u_; 9600bps 8N1
 
 == Deprecation warning ==
 

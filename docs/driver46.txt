@@ -1,17 +1,12 @@
 = GPSD NG client driver =
 
-Last update: 30-Apr-2015 05:53 UTC
-
-'''''
 
 == Synopsis ==
 
-["literal",subs="normal"]
+["verse",subs="normal"]
 Address: 127.127.46.'u'
 Reference ID: GPSD
-Driver ID: GPSD_JSON
-Serial Port: /dev/gps__u__ as symlink to the true device (not used directly; see below)
-Features: 
+Serial Port: /dev/gps__u__ 
 
 == Description ==
 
@@ -53,10 +48,9 @@ of _GPSD_!) Running without TOFF objects has a negative impact on the
 jitter and offset of the serial timing information; if possible, a
 version of _GPSD_ with support for TOFF objects should be used.
 
-The acronym [underline]#STI# is used here as a synonym for _serial time information_
-from the data channel of the receiver, no matter what objects were used
-to obtain it.
-
+The acronym [underline]#STI# is used here as a synonym for _serial
+time information_ from the data channel of the receiver, no matter
+what objects were used to obtain it.
 
 == Naming a Device ==
 
@@ -123,7 +117,6 @@ use STI alone over not getting synchronised at all.
 | 2..31 2+|'(reserved for future extension, do not use)'
 |===========================================================================
 
-
 == Syslog flood throttle ==
 
 This driver can create a lot of syslog messages when things go wrong,
@@ -163,7 +156,6 @@ use of stale PPS data.
 *Attention:* This unit uses its own PPS fudge value which must be set as
 fudge `time1`. Only the fudge values `time1` and `flag1` have an impact
 on secondary units.
-
 
 == Clockstats ==
 
@@ -225,8 +217,6 @@ since the last poll.
   hunts.
 `flag4 0 | 1`::
   _[Primary Unit]_ If set, write a clock stats line on every poll cycle.
-
-'''''
 
 [[fn1]]link:#fn1bl[^1^)]Data transmission and decoding is done only once by the
 primary unit. The decoded data is then processed independently in both

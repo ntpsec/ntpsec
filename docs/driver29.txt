@@ -1,26 +1,15 @@
 = Trimble Palisade and Thunderbolt Receivers =
 
-Last update: 21-Oct-2010 23:44 UTC
-
-'''''
-
 [width="100%",cols="<50%,<50%",frame="none",grid="none"]
 |======================================================
 | image:pic/driver29.gif[] | image:pic/thunderbolt.jpg[]
 |======================================================
 
 == Synopsis ==
-[[refid]]
-//ERROR: grid parameter ignored
-[width="100%",cols="<50%m,<50%s",frame="none",grid="none"]
-|=================================================================
-| Address:                  | 127.127.29._u_ 
-| Reference ID:             | GPS
-| Driver ID:                | GPS PALISADE
-| Serial Port:              | /dev/palisade__u__
-| Serial I/O:               | 9600 baud, 8-bits, 1-stop, odd parity
-| Serial I/O (Thunderbolt): | 9600 baud, 8-bits, 1-stop, no parity
-|=================================================================
+["verse",subs="normal"]
+Address: 127.127.29._u_ 
+Reference ID: GPS
+Serial Port: `/dev/palisade`__u__; 9600bps 8N1/8O1
 
 == Description ==
 
@@ -124,6 +113,9 @@ ln -s /dev/ttyS0 /dev/palisade0
 Windows NT does not support symbolic links to device files. COM**x**: is
 used by the driver, based on the refclock unit number, where unit 1
 corresponds to COM**1**: and unit 3 corresponds to COM3:.
+
+The Palisade ships 8N1 (no parity).  The Thunderbolt ships 8O1 (odd
+parity).
 
 [[Configuration]]
 == NTP Configuration ==
@@ -497,11 +489,14 @@ the situation:*
 
 *link:https://lists.ntp.isc.org/pipermail/hackers/2006-April/002216.html[]*
 
-'''''
-[verse]
+== Authors ==
+
 link:https://lists.ntp.isc.org/pipermail/hackers/2006-April/002216.html[*Questions or Comments:*]
+
 mailto:sven_dietrich@trimble.com[*Sven Dietrich*]
+
 http://www.trimble.com/[*Trimble Navigation Ltd.*]
+
 mailto:fernandoph@iar.unlp.edu.ar[*Fernando P. Hauscarriaga*]
 
 *(last updated January 15, 2007)*

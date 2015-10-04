@@ -307,7 +307,7 @@ timer(void)
 		if (sys_stratum > 1)
 			sys_refid = htonl(LOOPBACKADR);
 		else
-			memcpy(&sys_refid, "LOOP", 4);
+			memcpy(&sys_refid, "LOOP", REFIDLEN);
 		sys_offset = 0;
 		sys_rootdelay = 0;
 		sys_rootdisp = 0;

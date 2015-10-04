@@ -1,16 +1,10 @@
 = JJY Receivers =
 
-Last update: 15-May-2015 00:00 UTC
-//ERROR: No Japanese translation for link
-
-'''''
-
 == Synopsis ==
 
-["literal",subs="normal"]
+["verse",subs="normal"]
 Address: 127.127.40.'u'
 Reference ID: JJY
-Driver ID: JJY
 Serial Port: `/dev/jjyu`; See corresponding receiver
 
 == Description ==
