@@ -67,6 +67,7 @@ applicable to each command are listed below. Use of options not listed
 may not be caught as an error, but may result in some weird and even
 destructive behavior.
 
+FIXME: --enable-ipv6 ??
 If the Basic Socket Interface Extensions for IPv6 (RFC-2553) is
 detected, support for the IPv6 address family is generated in addition
 to the default support of the IPv4 address family. In a few cases,
@@ -283,6 +284,7 @@ storage. Public key management is based on X.509 certificates, which can
 be provided by commercial services or produced by utility programs in
 the OpenSSL software library or the NTPv4 distribution.
 
+//FIXME: page reference may be invalid
 While the algorithms for symmetric key cryptography are included in the
 NTPv4 distribution, public key cryptography requires the OpenSSL
 software library to be installed before building the NTP distribution.
@@ -353,12 +355,12 @@ additional keys can be used as passwords for the {ntpqman}
 utility program.
 
 When {ntpdman} is first started, it reads the key file specified
-in thekeysconfiguration command and installs the keys in the key cache.
-However, individual keys must be activated with thetrustedcommand before
+in the keys configuration command and installs the keys in the key cache.
+However, individual keys must be activated with the trusted command before
 use. This allows, for instance, the installation of possibly several
 batches of keys and then activating or deactivating each batch remotely
 using {ntpqman}. This also provides a revocation capability
-that can be used if a key becomes compromised. The controlkeycommand
+that can be used if a key becomes compromised. The controlkey command
 selects the key used as the password for the {ntpqman} utility.
 
 === Public Key Cryptography ===
@@ -391,7 +393,7 @@ file, required certificate file and optional sign key file, leapsecond
 file and identity scheme files. The digest/signature scheme is specified
 in the X.509 certificate along with the matching sign key. There are
 several schemes available in the OpenSSL software library, each
-identified by a specific string such asmd5WithRSAEncryption, which
+identified by a specific string such as md5WithRSAEncryption, which
 stands for the MD5 message digest with RSA encryption scheme. The
 current NTP distribution supports all the schemes in the OpenSSL
 library, including those based on RSA and DSA digital signatures.
@@ -531,7 +533,7 @@ contain the value _trustRoot_;. Other extension fields are ignored.
 `controlkey` _key_::
   Specifies the key identifier to use with the
   {ntpqman} utility, which uses the standard protocol defined in
-  RFC-1305. Thekeyargument is the key identifier for a trusted key,
+  RFC-1305. The _key_ argument is the key identifier for a trusted key,
   where the value can be in the range 1 to 65,534, inclusive.
 
 `crypto` [`cert` _file_] [`leap` _file_] [`randfile` _file_] [`host` _file_] [`sign` _file_] [`gq` _file_] [`gqpar` _file_] [`iffpar` _file_] [`mvpar` _file_] [`pw` _password_]::
@@ -602,7 +604,7 @@ contain the value _trustRoot_;. Other extension fields are ignored.
   authentication procedures require that both the local and remote
   servers share the same key and key identifier for this purpose,
   although different keys can be used with different servers.
-  Thekeyarguments are 32-bit unsigned integers with values from 1 to
+  The _key_ arguments are 32-bit unsigned integers with values from 1 to
   65,534.
 
 === Error Codes ===
@@ -881,8 +883,6 @@ Note that this command can be sent from the
         suffix consists of a dot, the letter _a_, and an 8-digit number.
         This number is taken to be the number of seconds the server is
         running at the start of the corresponding 24-hour period.
-        Information is only written to a file generation by specifying
-        `enable`; output is prevented by specifying `disable`.
 
    _link_ | _nolink_::
       It is convenient to be able to access the current element of a
@@ -898,6 +898,8 @@ Note that this command can be sent from the
 
   `enable` | `disable`::
       Enables or disables the recording function.
+      Information is only written to a file generation by specifying
+      `enable`; output is prevented by specifying `disable`.
 
 == Access Control Support ==
 
@@ -1001,7 +1003,7 @@ server operator cooperates.
     specified in the discard command. A history of clients is kept using
     the monitoring capability of {ntpdman}. Thus, monitoring is
     always active as long as there is a restriction entry with
-    thelimitedflag.
+    the limited flag.
   `lowpriotrap`;;
     Declare traps set by matching hosts to be low priority. The number
     of traps a server can maintain is limited (the current limit is 3).
@@ -1125,7 +1127,7 @@ specified in the _manycastclient_, command and, under normal
 circumstances, increments to the _maxpolll_ value specified in this
 command. Initially, the TTL is set at the minimum hops specified by the
 ttl command. At each retransmission the TTL is increased until reaching
-the maximum hops specified by this command or a sufficient number client
+the maximum hops specified by this command or a sufficient number of client
 associations have been found. Further retransmissions use the same TTL.
 
 The quality and reliability of the suite of associations discovered by
@@ -1146,7 +1148,7 @@ manycast poll interval is doubled. For each transmission after that, the
 poll interval is doubled again until reaching the maximum of eight times
 _maxpoll_. Further transmissions use the same poll interval and TTL
 values. Note that while all this is going on, each client/server
-association found is operating normally it the system poll interval.
+association found is operating normally at the system poll interval.
 
 Administratively scoped multicast boundaries are normally specified by
 the network router configuration and, in the case of IPv6, the link/site
@@ -1157,7 +1159,7 @@ values to match the scope rules.
 It is often useful to narrow the range of acceptable servers which can
 be found by manycast client associations. Because manycast servers
 respond only when the client stratum is equal to or greater than the
-server stratum, primary (stratum 1) servers fill find only primary
+server stratum, primary (stratum 1) servers will find only primary
 servers in TTL range, which is probably the most common objective.
 However, unless configured otherwise, all manycast clients in TTL range
 will eventually find all primary servers in TTL range, which is probably
@@ -1287,7 +1289,7 @@ collecting all servers in scope.
 
 == Reference Clock Support ==
 
-The NTP Version 4 daemon supports some three dozen different radio,
+The NTP Version 4 daemon supports some two dozen different radio,
 satellite and modem reference clocks plus a special pseudo-clock used
 for backup or when no other clock source is available. Detailed
 descriptions of individual device drivers and options can be found in
@@ -1322,8 +1324,8 @@ clocks in a manner analogous to normal NTP peers as much as possible.
 Reference clocks are identified by a syntactically correct but invalid
 IP address, in order to distinguish them from normal NTP peers.
 Reference clock addresses are of the form 127.127.t_._u_, where _t_ is
-an integer denoting the clock type and _u_ indicates the unit number in
-the range 0-3. While it may seem overkill, it is in fact sometimes
+an integer denoting the clock type and _u_ indicates the unit number.
+While it may seem overkill, it is in fact sometimes
 useful to configure multiple reference clocks of the same type, in which
 case the unit numbers must be unique.
 
@@ -1351,11 +1353,11 @@ The stratum number of a reference clock is by default zero. Since the
 {ntpdman} daemon adds one to the stratum of each peer, a primary
 server ordinarily displays an external stratum of one. In order to
 provide engineered backups, it is often useful to specify the reference
-clock stratum as greater than zero. Thestratumoption is used for this
+clock stratum as greater than zero. The stratum option is used for this
 purpose. Also, in cases involving both a reference clock and a
 pulse-per-second (PPS) discipline signal, it is useful to specify the
 reference clock identifier as other than the default, depending on the
-driver. Therefidoption is used for this purpose. Except where noted,
+driver. The refid option is used for this purpose. Except where noted,
 these options apply to all clock drivers.
 
 == Reference Clock Commands
@@ -1515,11 +1517,11 @@ and that file system links, symbolic or otherwise, should be avoided.
 
 `logconfig` _configkeyword_::
   This command controls the amount and type of output written to the
-  system _syslog(3) facility or the alternate log file. By
-  default, all output is turned on. Allconfigkeywordkeywords can be
+  system _syslog(3)_ facility or the alternate log file. By
+  default, all output is turned on. All _configkeyword_ keywords can be
   prefixed with ‘=’, ‘+’ and ‘-’, where ‘=’ sets the syslog(3) priority
   mask, ‘+’ adds and ‘-’ removes messages. syslog(3) messages can be
-  controlled in four classes (clock,peer,sysandsync). Within these
+  controlled in four classes (clock,peer,sys and sync). Within these
   classes four types of messages can be controlled: informational
   messages (info), event messages (events), statistics messages
   (statistics) and status messages (status).
@@ -1528,7 +1530,7 @@ Configuration keywords are formed by concatenating the message class
 with the event class. The _all_ prefix can be used instead of a
 message class. A message class may also be followed by the _all_
 keyword to enable/disable all messages of the respective message
-class.Thus, a minimal log configuration could look like this:
+class. Thus, a minimal log configuration could look like this:
 +
 --------------------------------
 logconfig =syncstatus +sysevents
@@ -1548,7 +1550,7 @@ and so on is suppressed.
 
 `logfile` _logfile_::
   This command specifies the location of an alternate log file to be
-  used instead of the default system _syslog_(3)_facility. This is the
+  used instead of the default system _syslog_(3)_ facility. This is the
   same operation as the -l command line option.
 
 `setvar` _variable_ [_default_]::
@@ -1631,10 +1633,10 @@ The variables operate as follows:
     Setting this to zero will prevent any attemp to lock memory.
   `stacksize` _4kPages_;;
     Specifies the maximum size of the process stack on systems with the
+    mlockall()_function. Defaults to 50 4k pages (200 4k pages in OpenBSD).
   `filenum` _filedescriptors_;;
     Specifies the maximum number of file descriptors ntpd may have open
-    at once. Defaults to the system default. mlockall()_function.
-    Defaults to 50 4k pages (200 4k pages in OpenBSD).
+    at once. Defaults to the system default.
 
 `trap` _host_address_ [`port` _port_number_] [`interface` _interface_address_]::
   This command configures a trap receiver at the given host address and
@@ -1709,6 +1711,7 @@ The _ntpkey_host_ files are really digital certificates. These should be
 obtained via secure directory services when they become universally
 available.
 
+//FIXME: ntp.org reference
 Please send bug reports to: http://bugs.ntp.org, bugs@ntp.org
 
 == NOTES ==
