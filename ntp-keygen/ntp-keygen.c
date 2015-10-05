@@ -277,7 +277,7 @@ followlink(
 	fname[len] = '\0';
 }
 
-#define ALL_OPTIONS "b:c:dD:e:G:HI:i:l:M:m:P:p:q:S:s:T:V:x:"
+#define ALL_OPTIONS "b:c:dD:e:G:HI:i:l:Mm:P:p:q:S:s:T:V:x:"
 static const struct option longoptions[] = {
     { "imbits",		    1, 0, 'i' },
 #ifdef ENABLE_AUTOKEY
@@ -294,7 +294,7 @@ static const struct option longoptions[] = {
     { "ident",		    1, 0, 'i' },
     { "lifetime",	    1, 0, 'l' },
 #endif /* ENABLE_AUTOKEY */
-    { "md5key",		    1, 0, 'M' },
+    { "md5key",		    0, 0, 'M' },
     { "modulus",	    1, 0, 'm' },
 #ifdef ENABLE_AUTOKEY
     { "pvt-cert",	    1, 0, 'P' },
@@ -310,7 +310,7 @@ static const struct option longoptions[] = {
 };
 
 static char *opt_imbits = NULL;
-static char *opt_md5key = NULL;
+static bool opt_md5key = false;
 static int opt_modulus = -1;
 #ifdef ENABLE_AUTOKEY
 static char *opt_cipher = NULL;
@@ -454,7 +454,7 @@ main(
 		break;
 #endif /* ENABLE_AUTOKEY */
 	    case 'M':
-		opt_md5key = ntp_optarg;
+		opt_md5key = true;
 		break;
 	    case 'm':
 		opt_modulus = atoi(ntp_optarg);
@@ -500,7 +500,7 @@ main(
 			OPENSSL_VERSION_TEXT, SSLeay_version(SSLEAY_VERSION));
 #endif /* HAVE_OPENSSL */
 
-	if (opt_md5key != NULL)
+	if (opt_md5key)
 		md5key++;
 
 #ifdef ENABLE_AUTOKEY
