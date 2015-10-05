@@ -41,7 +41,7 @@ displayed. Otherwise, only the _IP_ is displayed. Finally, the
 _stratum_ of the host is reported and the leap indicator is decoded
 and displayed.
 
-= OPTIONS
+== OPTIONS ==
 
 //`-?, --help`::
 //  displays usage information. The short form typically requires shell

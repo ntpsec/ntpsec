@@ -1289,7 +1289,7 @@ collecting all servers in scope.
 
 == Reference Clock Support ==
 
-The NTP Version 4 daemon supports some two dozen different radio,
+The NTP daemon supports some two dozen different radio,
 satellite and modem reference clocks plus a special pseudo-clock used
 for backup or when no other clock source is available. Detailed
 descriptions of individual device drivers and options can be found in
