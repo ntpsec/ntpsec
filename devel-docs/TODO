@@ -28,6 +28,9 @@ None right now. (Sep-22 2015)
 
 === Code ===
 
+* Clock stepping should use ANSI clock_settime() when possible, for
+  the additional precision.
+
 * We should audit scripts/ and utils/ to see which of those programs
   can be thrown out (some, like util/kern.c, don't even build).  Some
   (such as ntptrace) need to be translated into Python and supported.
@@ -91,7 +94,6 @@ is not yet tested anywhere but in ntpd itself.
 | docs/ntp_conf.txt | ntpd/ntp.conf.txt
 | docs/ntpdsim.txt  | docs/ntpdsim_new.txt
 | docs/ntpwait.txt  | scripts/ntp-wait/ntp-wait.txt
-| docs/sntp.txt     | sntp/sntp.txt
 | docs/tickadj.txt  | -
 | -                 | ntpd/ntp.keys.txt
 | -                 | scripts/calc_tickadj/calc_tickadj.txt
