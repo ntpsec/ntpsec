@@ -504,12 +504,17 @@ step_systime(
 #ifdef OVERRIDE_OTIME_MSG
 # define OTIME_MSG OVERRIDE_OTIME_MSG
 #else
-# define OTIME_MSG	"Old NTP time"
+/* Already defined on NetBSD */
+# ifndef OTIME_MSG
+#  define OTIME_MSG	"Old NTP time"
+# endif
 #endif
 #ifdef OVERRIDE_NTIME_MSG
 # define NTIME_MSG OVERRIDE_NTIME_MSG
 #else
-# define NTIME_MSG	"New NTP time"
+# ifndef NTIME_MSG
+#  define NTIME_MSG	"New NTP time"
+# endif
 #endif
 		struct utmpx utx;
 
