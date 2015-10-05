@@ -41,6 +41,10 @@ None right now. (Sep-22 2015)
 * Make sure we do the right thing with KoD and rate limiting.
   (Forged requests can use rate limiting to block service to a site.)
 
+* We need a way to inspect/debug bits on the wire. `ntpdate -du' 
+  is the traditional approach.  My straw man is a new program
+  rather than trying to make sntp do this. It might be appropriate
+  to reference wireshark in the documentation.
 
 === Porting ===
 
