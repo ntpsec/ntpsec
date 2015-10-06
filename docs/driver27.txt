@@ -7,7 +7,6 @@ Address: 127.127.27.'u'
 Reference ID: MSFa | MSF | DCF
 Driver ID: MSF_ARCRON
 Serial Port: /dev/arc__u__; 300bps, 8N2
-Features: `tty_clk`
 
 == Deprecation warning ==
 
@@ -24,35 +23,14 @@ This driver supports the Arcron MSF, DCF and WWVB receivers. The clock
 reports its ID as `"MSFa"`, `"MSF"`, `"DCF"` to indicate
 the time source.
 
-This documentation describes v1.3 (2003/2/21) of the source and has been
-tested against ntpd 4.1.0 on linux x86. Changes from v1.1 and v1.2
-include patches to work with the new ntp-4 code, clock support for DCF
-and WWVB configurable via mode flag, an option to ignore resync request
-(for those of us at the fringes of the WWVB signal, for instance),
-averaging of the signal quality poll and several bug fixes, code cleanup
-and standardizations. In all other respects, the driver works as per
-v1.1 if a mode is not specified.
-
 To use the alternate modes, the mode flag must be specified. If the mode
 flag is 0, or unspecified, the original MSF version is assumed. This
 should assure backwards compatibility and should not break existing
 setups.
 
-This code has been significantly slimmed down since the V1.0 version,
-roughly halving the memory footprint of its code and data.
-
 This driver is designed to allow the unit to run from batteries as
 designed, for something approaching the 2.5 years expected in the usual
 stand-alone mode, but no battery-life measurements have been taken.
-
-Much of this code is originally from the other refclock driver files
-with thanks. The code was originally made to work with the clock by
-mailto:derek@toybox.demon.co.uk[Derek Mulcahy], with modifications by
-mailto:d@hd.org[Damon Hart-Davis]. Thanks also to
-mailto:lyndond@sentinet.co.uk[Lyndon David] for some of the
-specifications of the clock. mailto:palfille@partners.org[Paul Alfille]
-added support for the WWVB clock. mailto:cprice@cs-home.com[Christopher
-Price] added enhanced support for the MSF, DCF and WWVB clocks.
 
 There is support for a Tcl/Tk monitor written by Derek Mulcahy that
 examines the output stats; see the
@@ -64,12 +42,12 @@ http://www.atomictime.com/Product17.html[Atomic Time PC].
 Look at the notes at the start of the code for further information; some
 of the more important details follow.
 
-The driver interrogates the clock at each poll (ie every 64s by default)
+The driver interrogates the clock at each poll (ie every 64sec by default)
 for a timestamp. The clock responds at the start of the next second
 (with the start bit of the first byte being on-time). In the default or
 original MSF mode, the time is in `local' format, including the daylight
 savings adjustment when it is in effect. The driver code converts the
-time back to UTC. In modes 1-3 the driver can be configured for UTC or
+time back to UTC. In modes 1-2 the driver can be configured for UTC or
 local time depending on the setting of flag1.
 
 The clock claims to be accurate to within about 20ms of the broadcast
@@ -129,7 +107,7 @@ unsuccessful, so the initial timestamps will be close to reality, even
 if with up to a day's clock drift in the worst case (the clock by
 default resyncs to MSF once per day).
 
-When alternate modes 1-3 are selected, the driver can be configured to
+When alternate modes 1 or 2 are selected, the driver can be configured to
 ignore the resync requests by setting `flag2` to 1. This allows clocks
 at the fringe of the signal to resync at night when signals are
 stronger.
@@ -396,7 +374,7 @@ May 10 12:41:34 oolong ntpd[615]: ARCRON: sync finished, signal quality 3: OK, w
 
 == Fudge Factors ==
 
-`mode 0 | 1 | 2 | 3`::
+`mode 0 | 1 | 2`::
    Specifies the clock hardware model. This parameter is optional, it
    defaults to the original mode of operation.
 +
@@ -407,8 +385,6 @@ Supported modes of operation:
 1 - Updated MSF
 +
 2 - New DCF77
-+
-3 - New WWVB
 
 `time1` 'time'::
    Specifies the time offset calibration factor, in seconds and fraction,
@@ -435,8 +411,19 @@ Supported modes of operation:
 `flag3 0 | 1`::
    If set to 1, better precision is reported (and thus lower dispersion)
    while clock's received signal quality is known to be good.
-`flag4 0 | 1`
+`flag4 0 | 1`::
    Not used by this driver.
+
+== Authors ==
+
+Much of this code is originally from the other refclock driver files
+with thanks. The code was originally made to work with the clock by
+mailto:derek@toybox.demon.co.uk[Derek Mulcahy], with modifications by
+mailto:d@hd.org[Damon Hart-Davis]. Thanks also to
+mailto:lyndond@sentinet.co.uk[Lyndon David] for some of the
+specifications of the clock. mailto:palfille@partners.org[Paul Alfille]
+added support for the WWVB clock. mailto:cprice@cs-home.com[Christopher
+Price] added enhanced support for the MSF, DCF and WWVB clocks.
 
 == Additional Information ==
 

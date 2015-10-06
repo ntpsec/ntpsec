@@ -22,7 +22,7 @@ infrastructure.
 
 The `-p` password option specifies the write password and `-q` password
 option the read password for previously encrypted files. The
-`ntp-keygen` program prompts for the password if it reads an encrypted
+`{ntpkeygen}` program prompts for the password if it reads an encrypted
 file and the password is missing or incorrect. If an encrypted file is
 read successfully and no write password is specified, the read password
 is used as the write password by default.
@@ -82,14 +82,14 @@ described in the link:#fmt[Cryptographic Data Files] section below
 To test and gain experience with Autokey concepts, log in as root and
 change to the keys directory, usually `/usr/local/etc`. When run for the
 first time, or if all files with names beginning `ntpkey` have been
-removed, use the `ntp-keygen` command without arguments to generate a
+removed, use the `{ntpkeygen}` command without arguments to generate a
 default RSA host key and matching RSA-MD5 certificate with expiration
 date one year hence. If run again without options, the program uses the
 existing keys and parameters and generates only a new certificate with
 new expiration date one year hence.
 
 Run the command on as many hosts as necessary. Designate one of them as
-the trusted host (TH) using `ntp-keygen` with the `-T` option and
+the trusted host (TH) using `{ntpkeygen}` with the `-T` option and
 configure it to synchronize from reliable Internet servers. Then
 configure the other hosts to synchronize to the TH directly or
 indirectly. A certificate trail is created when Autokey asks the
@@ -225,7 +225,7 @@ link:autokey.html[Autokey Public-Key Authentication] page.
 [[run]]
 == Running the program ==
 
-The safest way to run the `ntp-keygen` program is logged in directly as
+The safest way to run the `{ntpkeygen}` program is logged in directly as
 root. The recommended procedure is change to the keys directory, usually
 `/usr/local/etc`, then run the program. When run for the first time, or
 if all _ntpkey_ files have been removed, the program generates a RSA
@@ -326,7 +326,7 @@ file generations to be activated simply by changing the link. If a link
 is present, {ntpd} follows it to the file name to extract the filestamp.
 If a link is not present, {ntpdman} extracts the filestamp from
 the file itself. This allows clients to verify that the file and
-generation times are always current. The `ntp-keygen` program uses the
+generation times are always current. The `{ntpkeygen}` program uses the
 same timestamp extension for all files generated at one time, so each
 generation is distinct and can be readily recognized in monitoring data.
 
@@ -335,7 +335,7 @@ generation is distinct and can be readily recognized in monitoring data.
 
 Each cryptographic configuration involves selection of
 a signature scheme and identification scheme, called a cryptotype, as
-explained in the _Authentication_ _Options_ section of _ntp.conf_(5).
+explained in the _Authentication Options_ section of {ntpconfman}.
 The default cryptotype uses RSA encryption, MD5 message digest and TC
 identification. First, configure a NTP subnet including one or more
 low-stratum trusted hosts from which all other hosts derive
@@ -346,7 +346,7 @@ trails to one or more trusted hosts. A trusted group is the set of all
 hosts that have, directly or indirectly, a certificate trail ending at a
 trusted host. The trail is defined by static configuration file entries
 or dynamic means described on the _Automatic_ _NTP_ _Configuration_
-_Options_ section of _ntp.conf_(5).
+_Options_ section of {ntpconfman}.
 
 On each trusted host as root, change to the keys directory. To insure a
 fresh fileset, remove all _ntpkey_ files. Then run `ntp-keygen` `-T` to
@@ -358,17 +358,17 @@ Autokey to instantiate the certificate trails throughout the subnet, but
 setting up the environment is completely automatic.
 
 If it is necessary to use a different sign key or different
-digest/signature scheme than the default, run `ntp-keygen` with the `-S`
+digest/signature scheme than the default, run `{ntpkeygen}` with the `-S`
 type option, where _type_ is either _RSA_ or _DSA_. The most often need
 to do this is when a DSA-signed certificate is used. If it is necessary
-to use a different certificate scheme than the default, run `ntp-keygen`
+to use a different certificate scheme than the default, run `{ntpkeygen}`
 with the `-c` scheme option and selected _scheme_ as needed. f
-`ntp-keygen` is run again without these options, it generates a new
+`{ntpkeygen}` is run again without these options, it generates a new
 certificate using the same scheme and sign key.
 
 After setting up the environment it is advisable to update certificates
 from time to time, if only to extend the validity interval. Simply run
-`ntp-keygen` with the same flags as before to generate new certificates
+`{ntpkeygen}` with the same flags as before to generate new certificates
 using existing keys. However, if the host or sign key is changed,
 {ntpdman} should be restarted. When {ntpdman} is
 restarted, it loads any new files and restarts the protocol. Other
@@ -399,7 +399,7 @@ contain both server and client keys. Hosts that operate only as clients
 have key files that contain only client keys.
 
 The PC scheme supports only one trusted host in the group. On trusted
-host alice run `ntp-keygen` `-P` `-p` password to generate the host key
+host alice run `{ntpkeygen}` `-P` `-p` password to generate the host key
 file _ntpkey_RSAkey_alice.filestamp_ and trusted private certificate
 file _ntpkey_RSA-MD5_cert_alice.filestamp_. Copy both files to all group
 hosts; they replace the files which would be generated in other schemes.
@@ -413,7 +413,7 @@ to all other hosts in the group.
 For the IFF scheme proceed as in the TC scheme to generate keys and
 certificates for all group hosts, then for every trusted host in the
 group, generate the IFF parameter file. On trusted host alice run
-`ntp-keygen` `-T` `-I` `-p` password to produce her parameter file
+`{ntpkeygen}` `-T` `-I` `-p` password to produce her parameter file
 _ntpkey_IFFpar_alice.filestamp_, which includes both server and client
 keys. Copy this file to all group hosts that operate as both servers and
 clients and install a soft link from the generic _ntpkey_iff_alice_ to
@@ -425,7 +425,7 @@ If a rogue client has the parameter file, it could masquerade as a
 legitimate server and present a middleman threat. To eliminate this
 threat, the client keys can be extracted from the parameter file and
 distributed to all restricted clients. After generating the parameter
-file, on alice run `ntp-keygen` `-e` and pipe the output to a file or
+file, on alice run `{ntpkeygen} -e` and pipe the output to a file or
 mail program. Copy or mail this file to all restricted clients. On these
 clients install a soft link from the generic _ntpkey_iff_alice_ to this
 file. To further protect the integrity of the keys, each file can be
@@ -434,7 +434,7 @@ encrypted with a secret password.
 For the GQ scheme proceed as in the TC scheme to generate keys and
 certificates for all group hosts, then for every trusted host in the
 group, generate the IFF parameter file. On trusted host alice run
-`ntp-keygen` `-T` `-G` `-p` password to produce her parameter file
+`{ntpkeygen} -T -G -p` password to produce her parameter file
 _ntpkey_GQpar_alice.filestamp_, which includes both server and client
 keys. Copy this file to all group hosts and install a soft link from the
 generic _ntpkey_gq_alice_ to this file. In addition, on each host bob
@@ -445,7 +445,7 @@ keys and certificates can be regenerated as needed.
 For the MV scheme, proceed as in the TC scheme to generate keys and
 certificates for all group hosts. For illustration assume trish is the
 TA, alice one of several trusted hosts and bob one of her clients. On TA
-trish run `ntp-keygen` `-V` n `-p` password, where _n_ is the number of
+trish run `{ntpkeygen} -V n -p` password, where _n_ is the number of
 revokable keys (typically 5) to produce the parameter file
 _ntpkeys_MVpar_trish.filestamp_ and client key files
 _ntpkeys_MVkeyd_trish.filestamp_ where _d_ is the key number (0 < _d_ <
@@ -465,7 +465,7 @@ All cryptographically sound key generation schemes must have means to
 randomize the entropy seed used to initialize the internal pseudo-random
 number generator used by the library routines. The OpenSSL library uses
 a designated random seed file for this purpose. The file must be
-available when starting the NTP daemon and `ntp-keygen` program. If a
+available when starting the NTP daemon and `{ntpkeygen}` program. If a
 site supports OpenSSL or its companion OpenSSH, it is very likely that
 means to do this are already available.
 
@@ -478,10 +478,10 @@ software documentation, but are outside the scope of this page.
 
 The entropy seed used by the OpenSSL library is contained in a file,
 usually called `.rnd`, which must be available when starting the NTP
-daemon or the `ntp-keygen` program. The NTP daemon will first look for
+daemon or the `{ntpkeygen}` program. The NTP daemon will first look for
 the file using the path specified by the _randfile_ subcommand of the
 _crypto_ configuration command. If not specified in this way, or when
-starting the `ntp-keygen` program, the OpenSSL library will look for the
+starting the `{ntpkeygen}` program, the OpenSSL library will look for the
 file using the path specified by the RANDFILE environment variable in
 the user home directory, whether root or some other user. If the
 RANDFILE environment variable is not present, the library will look for
@@ -510,7 +510,7 @@ the GQ response `GQkey`.
 All other file formats begin with two lines. The first contains the file
 name, including the generated host name and filestamp. The second
 contains the datestamp in conventional Unix date format. Lines beginning
-with # are considered comments and ignored by the `ntp-keygen` program
+with # are considered comments and ignored by the `{ntpkeygen}` program
 and {ntpdman} daemon. Cryptographic values are encoded first
 using ASN.1 rules, then encrypted if necessary, and finally written
 PEM-encoded printable ASCII format preceded and followed by MIME content
@@ -521,11 +521,11 @@ against passwords requested by the programs and entered by hand, so it
 is generally appropriate to specify these keys in human readable ASCII
 format.
 
-The `ntp-keygen` program generates a MD5 symmetric keys file
+The `{ntpkeygen}` program generates a MD5 symmetric keys file
 _ntpkey_MD5key_hostname.filestamp_. Since the file contains private
 shared keys, it should be visible only to root and distributed by secure
 means to other subnet hosts. The NTP daemon loads the file _{ntpkeys}_,
-so `ntp-keygen` installs a soft link from this name to the generated
+so `{ntpkeygen}` installs a soft link from this name to the generated
 file. Subsequently, similar soft links must be installed by manual or
 automated means on the other subnet hosts. While this file is not used
 with the Autokey Version 2 protocol, it is needed to authenticate some

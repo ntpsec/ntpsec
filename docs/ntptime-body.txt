@@ -5,7 +5,7 @@
 == Synopsis ==
 
 ["literal",subs="normal"]
-ntptime [ -chr ] [ -e 'est_error' ] [ -f 'frequency' ] [ -m 'max_error' ] [ -o 'offset' ] [ -s 'status' ] [ -t 'time_constant']
+{ntptime} [ -chr ] [ -e 'est_error' ] [ -f 'frequency' ] [ -m 'max_error' ] [ -o 'offset' ] [ -s 'status' ] [ -t 'time_constant']
 
 == Description ==
 
@@ -18,7 +18,7 @@ and `kerninfo` command.
 == Options ==
 
 `-c`::
-  Display the execution time of `ntptime` itself.
+  Display the execution time of `{ntptime}` itself.
 `-e` 'est_error'::
   Specify estimated error, in microseconds.
 `-f` 'frequency'::

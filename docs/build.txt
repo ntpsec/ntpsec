@@ -90,7 +90,7 @@ help or money so we can hire skilled technical help.
 == Configuration ==
 
 You are now ready to configure the daemon. You will need to create a NTP
-configuration file by default in `/etc/ntp.conf.` Newbies should see the
+configuration file by default in `/etc/{ntpconf}.` Newbies should see the
 link:quick.html[Quick Start] page for orientation. Seasoned veterans can
 start with the link:ntpd.html[`{ntpd}` - Network Time Protocol (NTP)
 daemon] page and move on to the specific configuration option pages from

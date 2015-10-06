@@ -72,13 +72,13 @@ than to change the cryptographic media file names.#
 
 `pw` 'password';;
     Specifies the password to decrypt files previously encrypted by the
-    `ntp-keygen` program with the `-p` option. If this option is not
+    `{ntpkeygen}` program with the `-p` option. If this option is not
     specified, the default password is the string returned by the Unix
     `gethostname()` routine.
 `randfile` 'file';;
     Specifies the location of the random seed file used by the OpenSSL
     library. The defaults are described on the
-    link:keygen.html[`ntp-keygen` page].
+    link:keygen.html[`{ntpkeygen}` page].
 `ident` 'group'::
   Specifies the group name for ephemeral associations mobilized by
   broadcast and symmetric passive modes. See the
@@ -88,7 +88,7 @@ than to change the cryptographic media file names.#
   Specifies the complete directory path for the key file containing the
   key IDs, key types and keys used by `{ntpd}` and `{ntpq}` when
   operating with symmetric key cryptography. The format of the keyfile
-  is described on the link:keygen.html[`ntp-keygen` page]. This is the
+  is described on the link:keygen.html[`{ntpkeygen}` page]. This is the
   same operation as the `-k` command line option. Note that the
   directory path for Autokey cryptographic media is specified by the
   `keysdir` command.

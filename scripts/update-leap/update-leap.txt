@@ -13,7 +13,7 @@ update-leap [-flags | -flag 'value' | --option-name='value']
 if necessary, updates leap-second definition file.
 
 Ordinarily, the file is found using the "leapfile" directive in
-_ntp.conf_(5). However, an alternate location can be specified on the
+_{ntpconfman}_. However, an alternate location can be specified on the
 command line.
 
 If the file does not exist, is not valid, has expired, or is expiring
@@ -59,10 +59,10 @@ are required, e.g. "-e 60 days" Note that larger values imply more
 frequent refreshes.
 
 `-f` string, `--ntp-conf-file`=_string_::
-  Location of the ntp.conf file.
+  Location of the {ntpconf} file.
 +
-Specify location of ntp.conf (used to make sure leapfile directive is
-present and to default leapfile) /etc/ntp.conf
+Specify location of {ntpconf} (used to make sure leapfile directive is
+present and to default leapfile) /etc/{ntpconf}
 
 `-F`, `--force-update`::
   Force update of the leapfile.

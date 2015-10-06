@@ -88,7 +88,7 @@ symmetric key or public key cryptography.
 
 Autokey uses industry standard X.509 public certificates, which can be
 produced by commercial services, utility programs in the OpenSSL
-software library, and the link:keygen.html[`ntp-keygen`] utility program
+software library, and the link:keygen.html[{ntpkeygen}] utility program
 in the NTP software distribution. A certificate includes the subject
 name of the client, the issuer name of the server, the public key of the
 client and the time period over which the the public and private keys
@@ -190,7 +190,7 @@ In some configurations where more than one subnet shares an Ethernet or
 when multiple subnets exist in a manycast or pool configuration, it is
 useful to isolate one subnet from another. In Autokey this can be done
 using group names. An Autokey host name is specified by the
-`-s`` host@group` option of the `ntp-keygen` program, where _`host`_ is
+`-s`` host@group` option of the  {ntpkeygen} program, where _`host`_ is
 the host name and _`group`_ is the group name. If _`host`_ is omitted,
 the name defaults to the string returned by the Unix `gethostname()`
 routine, ordinarily the DNS name of the host. Thus, for host
@@ -212,7 +212,7 @@ applies to all hosts sharing a common broadcast, manycast or symmetric
 passive modes, while the latter case applies to each individual
 client/server or symmetric active mode association. In either case the
 host listens to the specified group name in addition to the group name
-specified in the `-s` option of the `ntp-keygen` program.
+specified in the `-s` option of the `{ntpkeygen}` program.
 
 [[secure]]
 == Secure Groups ==
@@ -264,7 +264,7 @@ which usually contains a subset of the keys file.
 Figure 2 shows how keys and parameters are distributed to servers and
 clients. A TA constructs the encrypted keys file and the nonencrypted
 parameters file. Hosts with no dependent clients can retrieve client
-parameter files from an archive or web page. The `ntp-keygen` program
+parameter files from an archive or web page. The `{ntpkeygen}` program
 can export parameter files using the `-e` option. By convention, the
 file name is the name of the secure group and must match the `ident`
 option of the `crypto` command or the `ident` option of the `server`
@@ -272,9 +272,9 @@ command.
 
 When more than one TH Is involved in the secure group, it is convenient
 for the TAs and THs to use the same encrypted key files. To do this, one
-of the parent TAs includes the `-i group` option on the `ntp-keygen`
+of the parent TAs includes the `-i group` option on the `{ntpkeygen}`
 command line, where _`group`_ is the name of the child secure group. The
-`ntp-keygen` program can export server keys files using the `-q` option
+`{ntpkeygen}` program can export server keys files using the `-q` option
 and a chosen remote password. The files are installed on the TAs and
 then renamed using the name given as the first line in the file, but
 without the filestamp. The secure group name must match the `ident`
@@ -314,14 +314,14 @@ Referring to Figure 1, for each TH, A, B, R and X, as root:
 
 ["literal",subs="normal"]
 `# cd /usr/local/etc`   
-`# ntp-keygen -T`
+`# {ntpkeygen} -T`
 
 and for the other hosts the same commands without the `-T` option. This
 generates an RSA private/public host key file and a self-signed
 certificate file for the RSA digital signature algorithm with the MD5
 message digest algorithm. For the THs a trusted certificate is
 generated; for the others a nontreusted certificate is generated.
-Include in the `ntp.conf` configuration file for all hosts other than
+Include in the `{ntpconf}` configuration file for all hosts other than
 the primary servers, A, B and R, something like
 
 ["literal",subs="normal"]
@@ -338,12 +338,12 @@ returned by the Unix `gethostname()` routine, ordinarily the DNS name of
 the host. This name is used as the subject and issuer names on the
 certificate, as well as the default password for the encrypted keys
 file. The host name can be changed using the `-s` option of the
-`ntp-keygen` program. The default password can be changed using the `-p`
-option of the `ntp-keygen` program and the `pw` option of the `crypto`
+`{ntpkeygen}` program. The default password can be changed using the `-p`
+option of the `{ntpkeygen}` program and the `pw` option of the `crypto`
 configuration command.
 
 Group names can be added to this configuration by including the
-`-s host@group` option with the `ntp-keygen` program. For the purpose of
+`-s host@group` option with the `{ntpkeygen}` program. For the purpose of
 illustration, the `host` string is empty, signifying the default host
 name. For example, @`yellow` can be used for the Alice group, @`orange`
 for the Helen group and @`blue` for the Carol group. In addition, for TH
@@ -361,19 +361,19 @@ with the subnets of Figure 1 configured as in the previous section.
 Recall that the parent subnet TA for Alice is C and for Helen is S. Each
 of the TAs generates an encrypted server keys file and nonencrypted
 client parameters file for the IFF identity scheme using the `-I` option
-of the `ntp-keygen` program. Note the TAs are not necessarily trusted
+of the `{ntpkeygen}` program. Note the TAs are not necessarily trusted
 hosts, so may not need the `-T` option.
 
 The nonencrypted client parameters can be exported using the command
 
-`ntp-keygen -e >file`,
+`{ntpkeygen} -e >file`,
 
 where the `-e` option redirects the client parameters to _`file`_ via
 the standard output stream for a mail application or stored locally for
 later distribution to one or more THs. In a similar fashion the
 encrypted keys file can be exported using the command
 
-`ntp-keygen -q passw2 >file`,
+`{ntpkeygen} -q passw2 >file`,
 
 where _`passwd2`_ is the read password for another TA. We won't need
 this file here.
@@ -454,7 +454,7 @@ digest schemes or identity schemes and must be corrected by installing
 the correct media and/or correcting the configuration file. One of the
 most common errors is expired certificates, which must be regenerated
 and signed at least once per year using the
-link:keygen.html[`ntp-keygen` - generate public and private keys]
+link:keygen.html[`{ntpkeygen}` - generate public and private keys]
 program.
 
 The following error codes are reported via the NTP control and
@@ -501,7 +501,7 @@ file if configured.
 [[files]]
 == Files ==
 
-See the link:keygen.html[`ntp-keygen`] page. Note that provisions to
+See the link:keygen.html[`{ntpkeygen}`] page. Note that provisions to
 load leap second values from the NIST files have been removed. These
 provisions are now available whether or not the OpenSSL library is
 available. However, the functions that can download these values from

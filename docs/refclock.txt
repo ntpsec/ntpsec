@@ -115,7 +115,7 @@ know the radio propagation time from the transmitter to the receiver.
 This must be calculated for each specific receiver location and requires
 the geographic coordinates of both the transmitter and receiver. The
 transmitter coordinates for various radio services are given in the
-http://www.eecis.udel.edu/%7emills/ntp/qth.html[Time and Frequency
+{millshome}ntp/qth.html[Time and Frequency
 Standard Station Information] page. Receiver coordinates can be obtained
 locally or from Google Earth. The actual calculations are beyond the
 scope of this document.

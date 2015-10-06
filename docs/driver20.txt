@@ -184,6 +184,7 @@ example:
 Sentences like $GPGSV that don't contain the time will get counted in
 the total but otherwise ignored.
 
+//FIXME: ntp.org reference
 https://support.ntp.org/bin/view/Support/ConfiguringNMEARefclocks[Configuring
 NMEA Refclocks] might give further useful hints for specific hardware
 devices that exhibit strange or curious behaviour.
