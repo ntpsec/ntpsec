@@ -104,9 +104,7 @@ randombytes_sysrandom_random_dev_open(void)
 /* LCOV_EXCL_START */
     struct stat        st;
     static const char *devices[] = {
-# ifndef USE_BLOCKING_RANDOM
         "/dev/urandom",
-# endif
         "/dev/random", NULL
     };
     const char **      device = devices;
