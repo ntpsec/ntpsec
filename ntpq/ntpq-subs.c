@@ -274,9 +274,9 @@ struct varlist {
 /*
  * Imported from ntpq.c
  */
-extern int showhostnames;
-extern int wideremote;
-extern int rawmode;
+extern bool showhostnames;
+extern bool wideremote;
+extern bool rawmode;
 extern struct servent *server_entry;
 extern struct association *assoc_cache;
 extern uint8_t pktversion;
