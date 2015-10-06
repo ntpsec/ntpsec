@@ -53,7 +53,7 @@ to replace the old version.
 `disable [auth | bclient | calibrate | kernel | monitor | ntp | stats]`::
   Provides a way to enable or disable various system options. Flags not
   mentioned are unaffected. Note that most of these flags can be
-  modified remotely using link:ntpq.html[`ntpq`] utility program's
+  modified remotely using link:ntpq.html[`{ntpq}`] utility program's
   `:config` and `config-from-file` commands.
   `auth`;;
     Enables the server to synchronize with unconfigured peers only if
@@ -70,7 +70,7 @@ to replace the old version.
     Enables the kernel time discipline, if available. The default for
     this flag is enable if support is available, otherwise disable.
   `monitor`;;
-    Enables the monitoring facility. See the link:ntpq.html[`ntpq`
+    Enables the monitoring facility. See the link:ntpq.html[`{ntpq}`
     program] and the `monstats` and `mrulist` commands, as well as the
     link:accopt.html#discard[Access Control Options] for details. The
     monitoring facility is also enabled by the presence of
@@ -84,22 +84,22 @@ to replace the old version.
     Enables the statistics facility. See the link:monopt.html[Monitoring
     Options] page for further information. The default for this flag is
     enabled. This flag is excluded from runtime configuration using
-    `ntpq`.
+    `{ntpq}`.
 `includefile` 'includefile'::
   This command allows additional configuration commands to be included
   from a separate file. Include files may be nested to a depth of five;
   upon reaching the end of any include file, command processing resumes
   in the previous configuration file. This option is useful for sites
-  that run `ntpd` on multiple hosts, with (mostly) common options (e.g.,
+  that run `{ntpd}` on multiple hosts, with (mostly) common options (e.g.,
   a restriction list).
 `interface` [`listen | ignore | drop] [all | ipv4 | ipv6 | wildcard` | 'name' | 'address'[/'prefixlen']]::
-  This command controls which network addresses `ntpd` opens, and
+  This command controls which network addresses `{ntpd}` opens, and
   whether input is dropped without processing. The first parameter
   determines the action for addresses which match the second parameter.
   That parameter specifies a class of addresses, or a specific interface
   name, or an address. In the address case, _`prefixlen`_ determines how
   many bits must match for this rule to apply. `ignore` prevents opening
-  matching addresses, `drop` causes `ntpd` to open the address and drop
+  matching addresses, `drop` causes `{ntpd}` to open the address and drop
   all received packets without examination. Multiple `interface`
   commands can be used. The last rule which matches a particular address
   determines the action for it. `interface` commands are disabled if any
@@ -116,8 +116,8 @@ to replace the old version.
   TAI offset. The file can be obtained directly from NIST national time
   servers using `ftp` as the ASCII file `pub/leap-seconds`.
 +
-The _leapfile_ is scanned when `ntpd` processes the `leapfile`
-directive or when `ntpd` detects that _leapfile_ has changed. `ntpd`
+The _leapfile_ is scanned when `{ntpd}` processes the `leapfile`
+directive or when `{ntpd}` detects that _leapfile_ has changed. `{ntpd}`
 checks once a day to see if the _leapfile_ has changed.
 +
 While not strictly a security function, the Autokey protocol provides
@@ -145,7 +145,7 @@ Thus, a minimal log configuration could look like this:
 + 
 `logconfig=syncstatus +sysevents`
 + 
-This would just list the synchronizations state of `ntpd` and the
+This would just list the synchronizations state of `{ntpd}` and the
 major system events. For a simple reference server, the following
 minimum message configuration could be useful:
 + 
@@ -206,19 +206,19 @@ and so on is suppressed.
   ATDT is normally prepended to the number, which can contain other
   modem control codes as well.
 `reset [allpeers] [auth] [ctl] [io] [mem] [sys] [timer]`::
-  Reset one or more groups of counters maintained by ntpd and exposed by
-  `ntpq`.
+  Reset one or more groups of counters maintained by {ntpd} and exposed by
+  `{ntpq}`.
 `saveconfigdir` 'directory_path'::
   Specify the directory in which to write configuration snapshots
-  requested with `ntpq`'s link:ntpq.html#saveconfig[saveconfig] command.
+  requested with `{ntpq}`'s link:ntpq.html#saveconfig[saveconfig] command.
   If `saveconfigdir` does not appear in the configuration file,
-  saveconfig requests are rejected by ntpd.
+  saveconfig requests are rejected by {ntpd}.
 `setvar` 'variable' [`default`]::
   This command adds an additional system variable. These variables can
   be used to distribute additional information such as the access
   policy. If the variable of the form `name = value` is followed by the
   `default` keyword, the variable will be listed as part of the default
-  system variables (`ntpq rv` command). These additional variables serve
+  system variables (`{ntpq} rv` command). These additional variables serve
   informational purposes only. They are not related to the protocol
   other that they can be listed. The known protocol variables will
   always override any variables defined via the `setvar` mechanism.

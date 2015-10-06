@@ -1,8 +1,8 @@
-= sntp(1) =
+= {sntpman} =
 :doctype: manpage
 
 == NAME ==
-sntp - standard Simple Network Time Protocol client program
+{sntp} - standard Simple Network Time Protocol client program
 
 @../docs/sntp-body.txt@
 

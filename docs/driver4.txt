@@ -103,7 +103,7 @@ received.
   If PPS signal processing is enabled, capture the pulse on the rising
   edge if 0 (default); capture on the falling edge if 1.
 `flag3 0 | 1`::
-  If PPS signal processing is enabled, use the `ntpd` clock discipline
+  If PPS signal processing is enabled, use the `{ntpd}` clock discipline
   if 0 (default); use the kernel discipline if 1.
 `flag4 0 | 1`::
   Enable verbose `clockstats` recording if set.

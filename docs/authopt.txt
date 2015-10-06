@@ -33,7 +33,7 @@ the link:authentic.html[Authentication Support] page.
   See the link:autokey.html[Autokey Public Key Authentication] page for
   further information.
 `controlkey` 'keyid'::
-  Specifies the key ID for the link:ntpq.html[`ntpq`] utility, which
+  Specifies the key ID for the link:ntpq.html[`{ntpq}`] utility, which
   uses the standard protocol defined in RFC-1305. The `keyid` argument
   is the key ID for a link:#trustedkey[trusted key], where the value can
   be in the range 1 to 65534, inclusive.
@@ -87,7 +87,7 @@ than to change the cryptographic media file names.#
   information.
 `keys` 'path'::
   Specifies the complete directory path for the key file containing the
-  key IDs, key types and keys used by `ntpd` and `ntpq` when
+  key IDs, key types and keys used by `{ntpd}` and `{ntpq}` when
   operating with symmetric key cryptography. The format of the keyfile
   is described on the link:keygen.html[`ntp-keygen` page]. This is the
   same operation as the `-k` command line option. Note that the
@@ -106,7 +106,7 @@ than to change the cryptographic media file names.#
 `trustedkey` ['keyid' | ('lowid' ... 'highid')] [...]::
   Specifies the key ID(s) which are trusted for the purposes of
   authenticating peers with symmetric key cryptography. Key IDs used to
-  authenticate `ntpq` operations must be listed here and
+  authenticate `{ntpq}` operations must be listed here and
   additionally be enabled with link:#controlkey[controlkey] and/or
   link:#requestkey[requestkey]. The authentication procedure for time
   transfer requires that both the local and remote NTP servers employ

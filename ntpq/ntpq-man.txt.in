@@ -1,8 +1,8 @@
-= ntpq(1) =
+= {ntpqman} =
 :doctype: manpage
 
 == NAME ==
-ntpq - standard NTP query program
+{ntpq} - standard NTP query program
 
 @../docs/ntpq-body.txt@
 
