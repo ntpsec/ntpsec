@@ -1,7 +1,5 @@
 = Clock Discipline Algorithm =
 
-Last update: 10-Mar-2014 05:03 UTC
-
 == Table of Contents ==
 
 * link:#intro[General Overview]

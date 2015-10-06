@@ -1,10 +1,6 @@
 = Clock Select Algorithm =
 
-Last update: 10-Mar-2014 05:22 UTC
-
-'''''
-
-The clock select algorithm determines from a set of sources , which are
+The clock select algorithm determines from a set of sources, which are
 correct (_truechimers_) and which are not (_falsetickers_) according to
 a set of formal correctness assertions. The principles are based on the
 observation that the maximum error in determining the offset of a

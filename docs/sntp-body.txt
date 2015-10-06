@@ -124,7 +124,7 @@ message will be displayed. The file will not be created.
   Look in this file for the key specified with `-a`.
 +
 This option specifies the keyfile. `sntp` will search for the key
-specified with `-a` keyno in this file. See _ntp.keys(5)_ for more
+specified with `-a` keyno in this file. See _{ntpkeysman}_ for more
 information.
 
 `-l` file-name, `--logfile`=_file-name_::

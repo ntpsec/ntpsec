@@ -5,9 +5,6 @@ image:pic/alice61.gif[]
 
 Alice finds the kernel a house of cards.
 
-Last update: 10-Mar-2014 05:10 UTC
-
-
 == Related Links ==
 
 include::includes/misc.txt[]
@@ -49,27 +46,27 @@ signal from a GPS receiver and a modern computer are in the 3 μs range.
 1.  Mills, D.L., and P.-H. Kamp. The nanokernel. _Proc. Precision Time
 and Time Interval (PTTI) Applications and Planning Meeting_ (Reston VA,
 November 2000). Paper:
-http://www.eecis.udel.edu/%7emills/database/papers/nano/nano2.ps[PostScript]
+{millshome}database/papers/nano/nano2.ps[PostScript]
 |
-http://www.eecis.udel.edu/%7emills/database/papers/nano/nano2.pdf[PDF],
+{millshome}database/papers/nano/nano2.pdf[PDF],
 Slides:
-http://www.eecis.udel.edu/%7emills/database/brief/nano/nano.html[HTML] |
-http://www.eecis.udel.edu/%7emills/database/brief/nano/nano.ps[PostScript]
-| http://www.eecis.udel.edu/%7emills/database/brief/nano/nano.pdf[PDF] |
-http://www.eecis.udel.edu/%7emills/database/brief/nano/nano.ppt[PowerPoint]
+{millshome}database/brief/nano/nano.html[HTML] |
+{millshome}database/brief/nano/nano.ps[PostScript]
+| {millshome}database/brief/nano/nano.pdf[PDF] |
+{millshome}database/brief/nano/nano.ppt[PowerPoint]
 2.  Mills, D.L. Unix kernel modifications for precision time
 synchronization. Electrical Engineering Department Report 94-10-1,
 University of Delaware, October 1994, 24 pp. Abstract:
-http://www.eecis.udel.edu/%7emills/database/reports/kern/kerna.ps[PostScript]
+{millshome}database/reports/kern/kerna.ps[PostScript]
 |
-http://www.eecis.udel.edu/%7emills/database/reports/kern/kerna.pdf[PDF],
+{millshome}database/reports/kern/kerna.pdf[PDF],
 Body:
-http://www.eecis.udel.edu/%7emills/database/reports/kern/kernb.ps[PostScript]
+{millshome}database/reports/kern/kernb.ps[PostScript]
 |
-http://www.eecis.udel.edu/%7emills/database/reports/kern/kernb.pdf[PDF]
+{millshome}database/reports/kern/kernb.pdf[PDF]
 3.  Mills, D.L. A kernel model for precision timekeeping. Network
 Working Group Report RFC-1589, University of Delaware, March 1994. 31
-pp. http://www.eecis.udel.edu/%7emills/database/rfc/rfc1589.txt[ASCII]
+pp. {millshome}database/rfc/rfc1589.txt[ASCII]
 
 '''''
 

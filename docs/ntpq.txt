@@ -7,7 +7,6 @@
 
 A typical NTP monitoring packet
 
-Last update: 31-Jan-2014 06:54 UTC
 |==============================
 
 == More Help ==

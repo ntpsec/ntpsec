@@ -1,9 +1,5 @@
 = The Huff-n'-Puff Filter =
 
-Last update: 10-Mar-2014 05:09 UTC
-
-'''''
-
 In scenarios where a considerable amount of data are downloaded or
 uploaded using DSL or telephone modem lines, timekeeping quality can be
 seriously degraded. This occurs because the traffic volume, and thus the

@@ -7,7 +7,6 @@
 
 The turtle has been swimming in the kernel.
 
-Last update: 11-Sep-2010 05:55 UTC
 |==============================
 
 '''''

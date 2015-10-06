@@ -1,9 +1,5 @@
 = `tickadj` - set time-related kernel variables =
 
-Last update: 16-Sep-2015
-
-'''''
-
 == Synopsis ==
 
 `tickadj [ -Aqs ] [ -a tickadj ] [ -t tick ]`

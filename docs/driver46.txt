@@ -10,8 +10,8 @@ Serial Port: /dev/gps__u__
 
 == Description ==
 
-This driver is a client driver to the _GPSD_ daemon, which over the time
-became increasingly popular for UN*Xish platforms. _GPSD_ can manage
+This driver is a client driver to the _GPSD_ daemon, which over time has
+become increasingly popular for UN*Xish platforms. _GPSD_ can manage
 several devices in parallel, aggregate information, and acts as a data
 hub for client applications. _GPSD_ can also auto-detect and handle PPS
 hardware signals on serial ports. Have a look at
@@ -211,7 +211,7 @@ since the last poll.
   using automatic mode (mode 2).
 `flag3 0 | 1`::
   _[Primary Unit]_ If set, [underline]#disables# the log throttle. Useful when
-  tracking problems in the interaction between _GPSD_ and _NTPD_, since
+  tracking problems in the interaction between _GPSD_ and _{ntpd}_, since
   now all error events are logged. Persistent/recurrent errors can
   easily fill up the log, so this should only be enabled during bug
   hunts.

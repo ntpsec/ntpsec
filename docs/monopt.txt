@@ -7,7 +7,6 @@ from 'Pogo', Walt Kelly
 
 Pig was hired to watch the logs.
 
-Last update: 31-Jan-2014 06:54 UTC
 |==============================
 
 == Related Links ==

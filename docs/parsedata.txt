@@ -6,8 +6,6 @@ clock you might want to integrate into parse. I'll sum up the major
 features of the clocks (this information is distributed in the
 parse/clk_*.c and {ntpd}/refclock_parse.c files).
 
-Last update: 21-Oct-2010 23:44 UTC
-
 '''''
 
 == Meinberg clocks ==

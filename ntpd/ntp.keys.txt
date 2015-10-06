@@ -2,7 +2,7 @@
 :doctype: manpage
 
 == NAME ==
-ntp.keys - NTP symmetric key file format configuration file
+{ntpkeys} - NTP symmetric key file format configuration file
 
 == DESCRIPTION ==
 
@@ -10,7 +10,7 @@ This document describes the format of an NTP symmetric key file. For a
 description of the use of this type of file, see the "Authentication
 Support" section of the ntp.conf(5) page.
 
-ntpd(8) reads its keys from a file specified using the -k command line
+{ntpdman} reads its keys from a file specified using the -k command line
 option or the 'keys' statement in the configuration file. While key
 number 0 is fixed by the NTP standard (as 56 zero bits) and may not be
 changed, one or more keys numbered between 1 and 65534 may be
@@ -49,26 +49,11 @@ format.
 
 == FILES ==
 
-`/etc/ntp.keys`::
+`/etc/{ntpkeys}`::
   the default name of the configuration file
 
 == SEE ALSO ==
 
-ntp.conf(5), ntpd(1), ntpdate(1), ntpq(1), sntp(1).
+{ntpconfman}, {ntpdman}, {ntpqman}, {sntpman}.
 
-== AUTHORS ==
-
-//FIXME: ntp.org reference
-The University of Delaware and Network Time Foundation
-
-== COPYRIGHT ==
-
-//FIXME: NTF reference
-Copyright (C) 1992-2015 The University of Delaware and Network Time
-Foundation all rights reserved. This program is released under the terms
-of the NTP license, <http://ntp.org/license>.
-
-== BUGS ==
-
-//FIXME: ntp.org reference
-Please send bug reports to: http://bugs.ntp.org, bugs@ntp.org
+// end

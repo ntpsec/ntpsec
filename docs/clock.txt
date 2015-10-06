@@ -1,7 +1,5 @@
 = Clock State Machine =
 
-Last update: 4-Aug-2011 23:40 UTC
-
 == Table of Contents ==
 
 * link:#intro[General Overview]

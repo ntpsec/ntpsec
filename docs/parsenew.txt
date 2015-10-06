@@ -5,8 +5,6 @@ another clock to the parse driver: Currently the implementation is being
 cleaned up - so not all information in here is completely correct. Refer
 to the included code where in doubt.
 
-Last update: 13-Oct-2010 00:33 UTC
-
 Prerequisites:
 
 * Does the system you want the clock connect to have the include file

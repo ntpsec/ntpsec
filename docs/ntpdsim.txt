@@ -7,7 +7,6 @@ http://www.eecis.udel.edu/%7emills/pictures.html[from 'The Wizard of Oz', L. Fra
 
 All in a row.
 
-Last update: 11-Sep-2010 05:55 UTC
 |==============================
 
 == Related Links ==
@@ -102,6 +101,7 @@ options apply also to `ntpdsim`. In addition, the following command line
 
 [[files]]
 == Files ==
+//NAMECHANGE
 `/etc/ntp.conf` - the default name of the configuration file +
 `/etc/ntp.drift` - the default name of the drift file +
 `/etc/ntp.keys` - the default name of the key file

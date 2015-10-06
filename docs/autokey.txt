@@ -1,9 +1,5 @@
 = Autokey Public-Key Authentication =
 
-Last update: 20-Sep-2015 01:45 UTC
-
-'''''
-
 == Table of Contents ==
 
 * link:#noauto[Problems with Autokey]

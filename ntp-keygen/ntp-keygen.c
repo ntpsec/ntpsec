@@ -2314,6 +2314,7 @@ fheader	(
 		perror("Write");
 		exit (-1);
 	}
+	/* NAMECHANGE */
         if (strcmp(ulink, "md5") == 0) {
 		strlcpy(linkname,"ntp.keys",sizeof(linkname));
         } else {

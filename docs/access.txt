@@ -7,7 +7,6 @@
 
 The skunk watches for intruders and sprays.
 
-Last update: 11-Sep-2010 05:53 UTC
 |==============================
 
 == Related Links ==
