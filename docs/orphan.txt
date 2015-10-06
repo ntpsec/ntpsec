@@ -1,9 +1,5 @@
 = Orphan Mode =
 
-Last update: 4-Aug-2011 23:40 UTC
-
-'''''
-
 Sometimes an NTP subnet becomes isolated from all UTC sources such as
 local reference clocks or Internet time servers. In such cases it may be
 necessary that the subnet servers and clients remain synchronized to a

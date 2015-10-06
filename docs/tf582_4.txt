@@ -1,9 +1,5 @@
 = European Automated Computer Time Services =
 
-Last update: 21-Oct-2010 23:44 UTC
-
-'''''
-
 Several European countries use the following message data format:
 
 

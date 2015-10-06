@@ -1,9 +1,5 @@
 = Clock Cluster Algorithm =
 
-Last update: 15-Nov-2012 06:02 UTC
-
-'''''
-
 The clock cluster algorithm processes the truechimers produced by the
 clock select algorithm to produce a list of _survivors_. These survivors
 are used by the mitigation algorithms to discipline the system clock.

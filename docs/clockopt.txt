@@ -5,7 +5,6 @@
 |image:pic/stack1a.jpg[]|
 Master Time Facility at the http://www.eecis.udel.edu/%7emills/lab.html[UDel Internet Research Laboratory]
 
-Last update: 11-Sep-2010 05:55 UTC
 |==============================
 
 == Related Links ==

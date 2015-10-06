@@ -8,7 +8,6 @@
 
 The log can be shrill at times.
 
-Last update: 10-Mar-2014 05:12 UTC
 |==============================
 
 == Related Links ==
@@ -78,8 +77,7 @@ meaning should be clear from context.
 
 `sigaction() fails to save SIGSYS trap: ?`::
 `sigaction() fails to restore SIGSYS trap: ?`::
-//ERROR: I suspect this program error line should be indented
-Program error. Bugs can be reported link:bugs.html[here].::
+    Program error. Bugs can be reported link:bugs.html[here].::
 --
 
 === LOG_NOTICE ===

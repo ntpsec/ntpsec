@@ -5,7 +5,6 @@
 |image:pic/sheepb.jpg[]|
 "Clone me," says Dolly sheepishly.
 
-Last update: 17-Jan-2015 00:16 UTC
 |==============================
 
 '''''

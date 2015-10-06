@@ -5,7 +5,6 @@
 |image:pic/radio2.jpg[ICOM R-72 shortwave receiver and Sure audio mixer]|
 ICOM R-72 shortwave receiver and Sure audio mixer
 
-Last update: 20-Sep-2015 02:00 UTC
 |==============================
 
 == Related Links ==

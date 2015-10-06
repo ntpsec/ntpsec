@@ -172,7 +172,6 @@ link:imap://mills@mail.eecis.udel.edu:993/fetch%3EUID%3E.INBOX%3E67132?part=1.3&
 18] should be used if the device is accessed by a multidrop connection.
 +
 *Note:* mode 7 must not be used with Meinberg PCI cards; use mode 2 instead.
-//ERROR: The (see list below) ref that used to live here was to a dead IMAP URL.
 
 * *server 127.127.8.0-3 mode 8*
 +

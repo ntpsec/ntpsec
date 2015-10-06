@@ -1,9 +1,5 @@
 = External Clock Discipline and the Local Clock Driver =
 
-Last update: 9-May-2014 04:46 UTC
-
-'''''
-
 The NTPv4 implementation includes provisions for an external clock,
 where the system clock is implemented by some external hardware device.
 One implementation might take the form of a bus peripheral with a high

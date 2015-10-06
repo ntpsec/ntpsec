@@ -7,7 +7,6 @@
 
 Alice is trying to find the PPS signal connector.
 
-Last update: 22-MSep-2015 05:12 UTC
 |==============================
 
 == Related Links ==
@@ -39,7 +38,7 @@ algorithms can whittle this down to a few tens of
 microseconds. However, some time sources produce a pulse-per-second
 (PPS) signal which can be used to improve the accuracy to a few
 microseconds. This page describes the hardware and software necessary
-for NTP to use the PPS signal.
+for {ntpd} to use the PPS signal.
 
 The simplest way to collect a PPS signal is from a GPS over a serial
 handshake pin, typically DCD; Linux supports this.  On FreeBSD systems

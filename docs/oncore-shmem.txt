@@ -1,9 +1,5 @@
 = Motorola ONCORE - The Shared Memory Interface =
 
-Last update: 21-Oct-2010 23:44 UTC
-
-'''''
-
 == Introduction ==
 
 In NMEA mode, the Oncore GPS receiver provides the user with the same
@@ -18,7 +14,7 @@ can see the raw satellite data messages themselves.
 
 When using the Oncore GPS receiver with NTP, this additional information
 is usually not available since the receiver is only talking to the
-oncore driver in NTPD. To make this information available for use in
+oncore driver in _{ntpd}_. To make this information available for use in
 other programs, (say graphic displays of satellites positions, plots of
 SA, etc.), a shared memory interface (SHMEM) has been added to the
 refclock_oncore driver on those operating systems that support shared

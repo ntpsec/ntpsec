@@ -1,7 +1,5 @@
 = Performance Metrics =
 
-Last update: 10-Mar-2014 05:23 UTC
-
 == Related Links ==
 
 include::includes/special.txt[]

@@ -446,7 +446,7 @@ The jitter and wander statistics are exponentially-weighted RMS
 averages. The system jitter is defined in the NTPv4 specification; the
 clock jitter statistic is computed by the clock discipline module.
 
-When the NTPv4 daemon is compiled with the OpenSSL software library,
+When {ntpd} is compiled with the OpenSSL software library,
 additional system variables are displayed, including some or all of the
 following, depending on the particular Autokey dance:
 
@@ -508,7 +508,7 @@ appears only the interleaved symmetric and interleaved modes. It
 represents the internal queuing, buffering and transmission delays for
 the preceding packet.
 
-When the NTPv4 daemon is compiled with the OpenSSL software library,
+When {ntpd} is compiled with the OpenSSL software library,
 additional peer variables are displayed, including the following:
 
 [width="100%",cols="<20%,<80%"]

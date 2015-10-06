@@ -1,9 +1,5 @@
 = MX4200 Receiver Data Format =
 
-Last update: 21-Oct-2010 23:44 UTC
-
-'''''
-
 == Table of Contents ==
 * link:#control[Control Port Sentences]
 * link:#input[Control Port Input Sentences]

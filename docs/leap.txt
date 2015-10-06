@@ -1,9 +1,5 @@
 = Leap Second Processing =
 
-Last update: 10-Mar-2014 05:11 UTC
-
-'''''
-
 About every eighteen months the International Earth Rotation Service
 (IERS) issues a bulletin announcing the insertion of a leap second in
 the Universal Coordinated Time (UTC) timescale. Ordinarily, this happens

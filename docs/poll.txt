@@ -1,9 +1,5 @@
 = Poll Process =
 
-Last update: 10-Mar-2014 05:17 UTC
-
-'''''
-
 The poll process sends NTP packets at intervals determined by the clock
 discipline algorithm. The process is designed to provide a sufficient
 update rate to maximize accuracy while minimizing network overhead. The

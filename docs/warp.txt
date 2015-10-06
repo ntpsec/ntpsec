@@ -1,7 +1,5 @@
 = How NTP Works =
 
-Last update: 10-Mar-2014 05:24 UTC
-
 == Related Links ==
 
 include::includes/special.txt[]
