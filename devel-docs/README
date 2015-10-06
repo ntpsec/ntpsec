@@ -22,6 +22,9 @@ ifdex-ignores::
 TODO::
 	List of items the NTP developers are working on.
 
+HISTORIC-NEWS::
+	NTP Classic news file up to 4.2.8p3 (May 2015).
+
 HISTORIC-README::
 	Dave Mills's original README; the ftp location and some other
 	things are wrong but it maintains some historical interest.
