@@ -7,7 +7,6 @@ http://www.eecis.udel.edu/%7emills/pictures.html['P.T. Bridgeport Bear'; from 'P
 
 Pleased to meet you.
 
-Last update: 20-Mar-2015 05:30
 |==============================
 
 == Related Links ==
@@ -65,6 +64,13 @@ ship code that is security-hardened, simpler, drastically less bulky
 (the KLOC count of the suite has been cut by a factor of two!), easier
 to understand, and easier to maintain.
 
+We retain, however, almost full compatibility and interoperation with
+NTP Classic.  The qualification "almost" is required because we do not
+support the Autokey public-key encryption scheme. It had
+interoperability and exploitable vulnerability issues too severe to
+be patched. It will need redesign and reimplementation before it
+can be fielded again.
+
 This project began as an effort to address serious security issues
 with NTP Classic, and we intend to keep a particularly strong focus on
 code security and code verifiability.
@@ -80,6 +86,8 @@ few will be user-visible:
 
 * The deprecated ntpdate program has been replaced with a shell
   wrapper around sntp.
+
+* As noted above, Autokey support has been removed.
 
 [[platforms]]
 == Supported platforms ==
@@ -165,13 +173,11 @@ book and numerous background papers and briefing presentations.
 
 Background information on computer network time synchronization is on
 the http://www.eecis.udel.edu/%7emills/exec.html[Executive Summary -
-Computer Network Time Synchronization] page. Discussion on new features
-and interoperability with previous NTP versions is on the
-link:release.html[NTP Version 4 Release Notes] page. Background
-information, bibliography and briefing slides suitable for presentations
-are on the http://www.eecis.udel.edu/%7emills/ntp.html[Network Time
-Synchronization Research Project] page. Additional information is at the
-{project-shortname} web site {project-weblink}.
+Computer Network Time Synchronization] page. Background information,
+bibliography and briefing slides suitable for presentations are on the
+http://www.eecis.udel.edu/%7emills/ntp.html[Network Time
+Synchronization Research Project] page. Additional information is at
+the {project-shortname} web site {project-weblink}.
 
 '''''
 
