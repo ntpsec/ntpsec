@@ -99,6 +99,7 @@ def build(ctx):
 		ctx.recurse("libparse")
 	ctx.recurse("libntp")
 	ctx.recurse("ntpdig")
+	ctx.recurse("libsodium")
 	ctx.recurse("ntpd")
 	ctx.recurse("ntpfrob")
 	ctx.recurse("ntpq")
