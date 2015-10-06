@@ -85,7 +85,7 @@ few will be user-visible:
 * A number of obsolete refclocks have been removed.
 
 * The deprecated ntpdate program has been replaced with a shell
-  wrapper around sntp.
+  wrapper around {sntp}.
 
 * As noted above, Autokey support has been removed.
 
@@ -170,10 +170,10 @@ information is available via the External Links collection, including a
 book and numerous background papers and briefing presentations.
 
 Background information on computer network time synchronization is on
-the http://www.eecis.udel.edu/%7emills/exec.html[Executive Summary -
+the {millshome}exec.html[Executive Summary -
 Computer Network Time Synchronization] page. Background information,
 bibliography and briefing slides suitable for presentations are on the
-http://www.eecis.udel.edu/%7emills/ntp.html[Network Time
+{millshome}ntp.html[Network Time
 Synchronization Research Project] page. Additional information is at
 the {project-shortname} web site {project-weblink}.
 

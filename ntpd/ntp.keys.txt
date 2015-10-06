@@ -8,7 +8,7 @@
 
 This document describes the format of an NTP symmetric key file. For a
 description of the use of this type of file, see the "Authentication
-Support" section of the ntp.conf(5) page.
+Support" page of the Web documentation.
 
 {ntpdman} reads its keys from a file specified using the -k command line
 option or the 'keys' statement in the configuration file. While key
@@ -28,7 +28,7 @@ where `keyno` is a positive integer (between 1 and 65534),
 `key` is the key itself.
 
 The `key` may be given in a format controlled by the `type` field. The
-`type` MD5 is always supported.  If ntpd was built with the OpenSSL
+`type` MD5 is always supported.  If {ntpd} was built with the OpenSSL
 library then any digest library supported by that library may be
 specified. However, if compliance with FIPS 140-2 is required the
 `type` must be either 'SHA' or 'SHA1'.
@@ -42,7 +42,7 @@ _SHA_; _SHA1_; _RMD160_::
   The key is a hex-encoded ASCII string of 40 characters, which is
   truncated as necessary.
 +
-Note that the keys used by the ntpq(8) programs are
+Note that the keys used by the {ntpqman} programs are
 checked against passwords requested by the programs and entered by
 hand, so it is generally appropriate to specify these keys in ASCII
 format.

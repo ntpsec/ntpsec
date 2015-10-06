@@ -277,7 +277,7 @@ and so on is suppressed.
     `mlockall()` function. Defaults to 50 4k pages (200 4k pages in
     OpenBSD).
   `filenum` 'Nfiledescriptors';;
-    Specifies the maximum number of file descriptors ntp may have open
+    Specifies the maximum number of file descriptors {ntpd} may have open
     at the same time. Defaults to system default.
 `tos` [`beacon` 'beacon' | `ceiling` 'ceiling' | `cohort` {`0` | `1`} | `floor` 'floor' | `maxclock` 'maxclock' | `maxdist` 'maxdist' | `minclock` 'minclock' | `mindist` 'mindist' | `minsane` 'minsane' | `orphan` 'stratum' | `orphanwait` 'delay']::
   This command alters certain system variables used by the the clock

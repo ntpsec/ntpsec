@@ -29,7 +29,7 @@ distribution
 
 Ordinarily, the kernel clock discipline function is used with the NTP
 daemon, but could be used for other purposes. The
-link:ntptime.html[`ntptime`] utility program can be used to control it
+link:ntptime.html[{ntptime}] utility program can be used to control it
 manually.
 
 The kernel model also provides support for an external precision timing

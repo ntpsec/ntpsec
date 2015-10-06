@@ -201,7 +201,7 @@ cryptography servers and clients share session keys contained in a
 secret key file In public key cryptography, which requires the OpenSSL
 software library, the server has a private key, never shared, and a
 public key with unrestricted distribution. The cryptographic media
-required are produced by the link:keygen.html[`ntp-keygen`] program.
+required are produced by the link:keygen.html[`{ntpkeygen}`] program.
 
 Problems with symmetric key authentication are usually due to mismatched
 keys or improper use of the `trustedkey` command. A simple way to check

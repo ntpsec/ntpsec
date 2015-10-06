@@ -1,4 +1,4 @@
-= `ntp-keygen` - generate public and private keys =
+= {ntpkeygen} - generate public and private keys =
 
 [cols="10%,90%",frame="none",grid="none",style="verse"]
 |==============================

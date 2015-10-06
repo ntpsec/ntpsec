@@ -50,20 +50,20 @@ Poisson distribution, while the wander generator produces samples from a
 Guassian distribution.
 
 The easiest way to use this program is to create a `ntpstats` directory,
-configuration file `ntp.conf` and frequency file `ntp.drift` and test
+configuration file `{ntpconf}` and frequency file `ntp.drift` and test
 shell `test.sh` in the base directory. The `ntp.drift` file and
 `ntpstats` directory can be empty to start. The `test.sh` script can
 contain something like
 
 -------------------------------------------------
 rm ./ntpstats/*
-ntpdsim -O 0.1 -C .001 -T 400 -W 1 -c ./ntp.conf,
+ntpdsim -O 0.1 -C .001 -T 400 -W 1 -c ./{ntpconf},
 -------------------------------------------------
 
 which starts the simulator with a time offset 100 ms, network jitter 1
 ms, frequency offset 400 PPM and oscillator wander 1 PPM/s. These
 parameters represent typical conditions with modern workstations on a
-Ethernet LAN. The ntp.conf file should contain something like
+Ethernet LAN. The {ntpconf} file should contain something like
 
 ---------------------------------
 disable kernel

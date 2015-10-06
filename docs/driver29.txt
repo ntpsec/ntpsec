@@ -72,7 +72,7 @@ No user initialization of the receiver is required. This driver is compatible wi
 |======================================================
 
 Note: When using Palisade 26664-00, you must set fudge flag2 to 1 in
-*ntp.conf*. See link:#Configuration[configuration].
+*{ntpconf}*. See link:#Configuration[configuration].
 
 == GPS Installation ==
 
@@ -120,7 +120,7 @@ parity).
 [[Configuration]]
 == NTP Configuration ==
 
-Palisade NTP configuration file "ntp.conf" with event polling:
+Palisade NTP configuration file "{ntpconf}" with event polling:
 
 ["literal",subs="normal"]
 #------------------------------------------------------------------------------
@@ -188,7 +188,7 @@ UTC almanac.
 the interface module. It should flash once per second.
 3.  Connect Palisade's port A to the NTP host.
 4.  Configure NTP and the serial I/O port on the host system.
-5.  Initially use link:#flag2[`fudge flag2`] in *link:#Configuration[ntp.conf],* to disable event polling (see configuration).
+5.  Initially use link:#flag2[`fudge flag2`] in *link:#Configuration[{ntpconf}],* to disable event polling (see configuration).
 6.  Run NTP in debug mode (-d -d), to observe Palisade_receive events.
 7.  The driver reports the link:#TrackingStatus[tracking status of the
 receiver]. Make sure it is tracking several satellites.

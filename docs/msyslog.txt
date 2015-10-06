@@ -138,7 +138,7 @@ meaning should be clear from context.
 `cert_parse: invalid subject ?`::
   There is a problem with a certificate. Operation cannot proceed untill
   the problem is fixed. If the certificate is local, it can be
-  regenerated using the `ntp-keygen` program. If it is held somewhere
+  regenerated using the {ntpkeygen} program. If it is held somewhere
   else, it must be fixed by the holder.
 
 `crypto_?: defective key`::

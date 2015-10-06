@@ -23,7 +23,7 @@ sold in Japan, and the time service through a telephone line.
 
 * [[mode-1]]Tristate Ltd.   TS-JJY01, TS-JJY02 link:http://www.tristate.ne.jp/[] (Japanese only)
 +
-NTP configuration ( ntp.conf )::
+NTP configuration ( {ntpconf} )::
 +
 --
 server   127.127.40.X mode 1;;
@@ -63,7 +63,7 @@ whether it's before or after midnight.
 
 * [[mode-2]]C-DEX Co.,Ltd. JST2000 link:http://www.c-dex.co.jp/[] (Japanese only)
 +
-NTP configuration ( ntp.conf )::
+NTP configuration ( {ntpconf} )::
 +
 --
 server 127.127.40.X mode 2;;
@@ -81,7 +81,7 @@ Command        -\-> Reply +
 
 * [[mode-3]]Echo Keisokuki Co.,Ltd. LT-2000 link:http://www.clock.co.jp/[] (Japanese only)
 +
-NTP configuration ( ntp.conf )::
+NTP configuration ( {ntpconf} )::
 +
 --
 server 127.127.40.X mode 3;;
@@ -104,7 +104,7 @@ Time code format::
 
 * [[mode-4]]CITIZEN T.I.C. CO.,LTD. JJY-200 link:http://www.tic-citizen.co.jp/[] (Japanese only)
 +
-NTP configuration ( ntp.conf )::
+NTP configuration ( {ntpconf} )::
 +
 --
 server 127.127.40.X mode 4;;
@@ -132,7 +132,7 @@ the onboard switches, the TS-GPSclock-01 should be set to command/response mode 
 Besides this driver ( Type 40 ), link:driver20.html[the generic NMEA
 GPS driver ( Type 20 )] supports the TS-GPSclock-01 in NMEA mode.
 +
-NTP configuration ( ntp.conf )::
+NTP configuration ( {ntpconf} )::
 +
 --
 server 127.127.40.X mode 5;;
@@ -174,7 +174,7 @@ whether it's before or after midnight.
 The TDC-300 must be set to the type 3 data format using the front panel
 menu display and the switches.
 +
-NTP configuration ( ntp.conf )::
+NTP configuration ( {ntpconf} )::
 +
 --
 server 127.127.40.X mode 6;;
@@ -202,12 +202,12 @@ Communications Technology in Japan.
 +
 ATTENTION; This mode, the telephone JJY, can not be used with the
 refclock_acts ( type 18 ) at the same time. Because the "phone"
-statement in the ntp configuration file is not involved with the
+statement in the configuration file is not involved with the
 "server" statement, so the both the refclock_acts ( type 18 ) and this
 refclock_jjy ( type 40, mode 100 to 180 ) can not recognize the
 appropriate "phone" statement among the "phone" statements.
 +
-NTP configuration ( ntp.conf )::
+NTP configuration ( {ntpconf} )::
 +
 --
 server 127.127.40.X mode (100, 101 to 180) minpoll N;;

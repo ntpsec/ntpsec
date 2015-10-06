@@ -96,7 +96,7 @@ never a good idea.
 `-c` string, `--configfile`=_string_::
   configuration file name.
 +
-The name and path of the configuration file, `/etc/ntp.conf` by
+The name and path of the configuration file, `/etc/{ntpconf}` by
 default.
 
 `-d`, `--debug-level`::
@@ -112,7 +112,7 @@ default.
 +
 The name and path of the frequency file, `/etc/ntp.drift` by default.
 This is the same operation as the _driftfile_
-configuration specification in the `/etc/ntp.conf` file.
+configuration specification in the `/etc/{ntpconf}` file.
 
 `-g`, `--panicgate`::
   Allow the first adjustment to be Big. This option may appear an
@@ -220,7 +220,7 @@ specified _sched_setscheduler(SCHED_FIFO)_ priority.
   any of the following options: saveconfigquit, wait-sync.
 +
 `{ntpd}` will not daemonize and will exit after the clock is first
-synchronized. This behavior mimics that of the _ntpdate_ program,
+synchronized. This behavior mimics that of the old _ntpdate_ program,
 which has been replaced with a shell script. The `-g` and `-x` options can be
 used with this option. Note: The kernel time discipline is disabled
 with this option.
@@ -461,7 +461,7 @@ file at hourly intervals.
 The `{ntpd}` utility can operate in any of several modes, including
 symmetric active/passive, client/server broadcast/multicast and
 manycast, as described in the "Association Management" page (available
-as part of the HTML documentation provided in `/usr/share/doc/ntp`). It
+as part of the HTML documentation provided in `/usr/share/doc/{ntp}`). It
 normally operates continuously while monitoring for small changes in
 frequency and trimming the clock for the ultimate precision. However, it
 can operate in a one-time mode where the time is set from an external
@@ -559,7 +559,7 @@ the negative (huff) and positive (puff) correction, which depends on the
 sign of the offset.
 
 The filter is activated by the _tinker_ command and _huffpuff_ keyword,
-as described in _ntp.conf_(5)_._
+as described in {ntpconfman}.
 
 [[files]]
 == FILES ==
@@ -567,7 +567,7 @@ as described in _ntp.conf_(5)_._
 [options="header"]
 |================================================================
 |File               |Default         |Option      |Option
-|configuration file |`/etc/ntp.conf` |`-c`        |`conffile`
+|configuration file |`/etc/{ntpconf}`|`-c`        |`conffile`
 |frequency file     |none            |`-f`        |`driftfile`
 |leapseconds file   |none            |            |`leapfile`
 |process ID file    |none            |`-p`        |`pidfile`

@@ -29,7 +29,7 @@ Distribution] page describes how to do this.
 
 While it is possible that certain configurations do not need a
 configuration file, most do. The file, called by default
-`/etc/ntp.conf`, need only contain one command specifying a remote
+`/etc/{ntpconf}`, need only contain one command specifying a remote
 server, for instance
 
 `server foo.bar.com`
