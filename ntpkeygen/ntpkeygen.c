@@ -90,7 +90,6 @@
 #include <sys/types.h>
 
 #include "ntp.h"
-#include "ntp_random.h"
 #include "ntp_stdlib.h"
 #include "ntp_assert.h"
 #include "ntp_unixtime.h"
@@ -104,6 +103,7 @@
 #include "openssl/x509v3.h"
 #include <openssl/objects.h>
 #endif	/* HAVE_OPENSSL */
+#include <sodium.h>
 #include <ssl_applink.c>
 
 #define _UC(str)	((char *)(intptr_t)(str))
@@ -389,7 +389,7 @@ main(
 	ssl_check_version();
 #endif	/* HAVE_OPENSSL */
 
-	ntp_crypto_srandom();
+	sodium_init();
 
 	/*
 	 * Process options, initialize host name and timestamp.
@@ -962,14 +962,8 @@ gen_md5(
 			uint8_t temp;
 
 			while (1) {
-				int rc;
-
-				rc = ntp_crypto_random_buf(
+				randombytes_buf(
 				    &temp, sizeof(temp));
-				if (-1 == rc) {
-					fprintf(stderr, "ntp_crypto_random_buf() failed.\n");
-					exit (-1);
-				}
 				if (temp == '#')
 					continue;
 

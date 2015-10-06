@@ -13,9 +13,10 @@ def build(ctx):
 		features	= "c cprogram bld_include src_include libisc_include",
 		source		= ntp_keygen_source,
 		includes	= [
-					"%s/ntpkeygen/" % bldnode
-				],
-		use		= "ntp opts isc M RT LIBEVENT LIBEVENT_CORE LIBEVENT_PTHREADS PTHREAD CRYPTO",
+			"%s/ntpkeygen/" % bldnode,
+			"%s/libsodium/include/" % srcnode
+		],
+		use		= "ntp opts isc sodium M RT LIBEVENT LIBEVENT_CORE LIBEVENT_PTHREADS PTHREAD CRYPTO",
 		install_path= "${PREFIX}/bin/"
 	)
 
