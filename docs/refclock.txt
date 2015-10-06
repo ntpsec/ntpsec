@@ -4,9 +4,6 @@ image:pic/stack1a.jpg[gif]Master Time Facility at the
 http://www.eecis.udel.edu/%7emills/lab.html[UDel Internet Research
 Laboratory]
 
-Last update: 10-Mar-2014 05:20 UTC
-
-
 == Related Links ==
 
 include::includes/hand.txt[]
@@ -24,7 +21,7 @@ include::includes/audio.txt[]
 [[intro]]
 == Introduction ==
 
-NTP Version 4 supports almost four dozen satellite, radio and telephone
+{project-shortname} supports almost four dozen satellite, radio and telephone
 modem reference clocks plus several audio devices for instrumentation
 signals. A general description of the reference clock support is on this
 page. Additional information about each reference clock driver can be
@@ -38,13 +35,18 @@ reference clock use only Coordinated Universal Time (UTC). Timezone and
 standard/daylight adjustments are performed by the operating system
 kernel.
 
-A reference clock will generally (though not always) be a radio timecode
+Nowadays a reference clock will generally (though not always) be a GPS or GPSDO
+(GPS-conditioned oscillator). In former times it was often a radio timecode
 receiver synchronized to standard time as provided by NIST and USNO in
-the US, NRC in Canada and their counterparts elsewhere in the world. A
-device driver specific to each reference clock must be compiled in the
-distribution; however, most common radio, satellite and telephone modem
-clocks are included by default and are activated by configuration
-commands.
+the US, NRC in Canada and their counterparts elsewhere in the world.
+Precision time radios have been extinct in the U.S. since NIST changed their
+signal modulation in 2013; elsewhere they still exist but usage is
+declining under pressure from GPS technology.
+
+A device driver specific to each reference clock must be compiled in
+the distribution; however, most common GPS, radio, satellite and
+telephone modem clocks are included by default and are activated by
+configuration commands.
 
 Reference clocks are supported in the same way as ordinary NTP clients
 and use the same filter, select, cluster and combine algorithms. Drivers

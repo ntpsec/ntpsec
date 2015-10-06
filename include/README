@@ -1,4 +1,4 @@
-README file for directory ./include of the NTP Version 4 distribution
+= README file for directory include =
 
 This directory contains the include files used by most programs in this
 distribution.

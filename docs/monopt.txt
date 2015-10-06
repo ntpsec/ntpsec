@@ -26,7 +26,7 @@ include::includes/monopt.txt[]
 [[intro]]
 == Naming Conventions ==
 
-The `ntpd` daemon includes a comprehensive monitoring facility which
+The `{ntpd}` daemon includes a comprehensive monitoring facility which
 collects statistical data of various types and writes the data to
 files associated with each type at defined events or intervals. The
 files associated with a particular type are collectively called the
@@ -75,9 +75,9 @@ page.
   The file set is actually a single plain file.
 
 `pid`::
-  One file set member is created for every incarnation of `ntpd`.
+  One file set member is created for every incarnation of `{ntpd}`.
   The file name suffix is the string .`n`, where `n` is the process
-  ID of the `ntpd` server process.
+  ID of the `{ntpd}` server process.
 
 `day`::
   One file set member is created per day. A day is defined as the
@@ -105,9 +105,9 @@ page.
   member created on 1 January 1992 would have suffix `.1992`.
 
 `age`::
-  One file set member is generated every 24 hours of `ntpd`
+  One file set member is generated every 24 hours of `{ntpd}`
   operation. The filename suffix is the string `.adddddddd`, where
-  `a` stands for itself and `dddddddd` is the `ntpd` running time in
+  `a` stands for itself and `dddddddd` is the `{ntpd}` running time in
   seconds at the start of the corresponding 24-hour period.
 --
 +
@@ -118,7 +118,7 @@ page.
     hard link from the current file set member to a file without suffix
     is created. When there is already a file with this name and the
     number of links to this file is one, it is renamed by appending a
-    dot, the letter `C`, and the pid of the `ntpd` server process. When
+    dot, the letter `C`, and the pid of the `{ntpd}` server process. When
     the number of links is greater than one, the file is unlinked. This
     allows the current file to be accessed by a constant name.
 

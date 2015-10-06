@@ -41,7 +41,7 @@ displayed. Otherwise, only the _IP_ is displayed. Finally, the
 _stratum_ of the host is reported and the leap indicator is decoded
 and displayed.
 
-= OPTIONS
+== OPTIONS ==
 
 //`-?, --help`::
 //  displays usage information. The short form typically requires shell
@@ -84,7 +84,7 @@ modified with `-t`.
 +
 Requests from an NTP "client" to a "server" should never be sent more
 rapidly than one every 2 seconds. By default, any IPs returned as part
-of a DNS lookup are assumed to be for a single instance of _ntpd_, and
+of a DNS lookup are assumed to be for a single instance of {ntpd}, and
 therefore `sntp` will send queries to these IPs one after another,
 with a 2-second gap in between each query.
 +
@@ -153,7 +153,7 @@ situations demand different values.
   operating system. When this option is used, the reserved NTP port 123
   is used, which most often requires `sntp` be invoked as the superuser
   (commonly "root"). This can help identify connectivity failures due to
-  port-based firewalling which affect `ntpd`, which always uses source
+  port-based firewalling which affect `{ntpd}`, which always uses source
   port 123.
 
 `-S`, `--step`::

@@ -83,7 +83,7 @@ order to assure reliable operation, the signal level must be in the
 range where the audio gain control is effective. In general, this means
 the input signal level must be such as to cause the AGC to set the gain
 somewhere in the middle of the range from 0 to 255, as indicated in the
-timecode displayed by the `ntpq` program.
+timecode displayed by the `{ntpq}` program.
 
 The IRIG driver operates by disciplining a logical clock based
 on the codec sample clock to the audio signal as received. This is done
@@ -102,7 +102,7 @@ if set to zero or the line-in port if set to one. It does not seem
 useful to specify the compact disc player port. The `fudge flag 3`
 command enables the input signal monitor using the previously selected
 output port and output gain. Both of these flags can be set in the
-configuration file or remotely using the `ntpq` utility program.
+configuration file or remotely using the `{ntpq}` utility program.
 
 [[short]]
 == Shortwave Radio Drivers ==

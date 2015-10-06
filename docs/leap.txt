@@ -38,7 +38,7 @@ clock or downstratum server, a leapseconds file can be downloaded from
 time.nist.gov and installed using the
 link:miscopt.html#leapfile[leapfile] command. The file includes a list
 of historic leap seconds and the NTP time of insertion. It is parsed by
-the `ntpd` daemon at startup and the latest leap time saved for future
+the `{ntpd}` daemon at startup and the latest leap time saved for future
 reference. Each time the clock is set, the current time is compared with
 the last leap time. If the current time is later than the last leap
 time, nothing further is done. If earlier, the leap timer is initialized

@@ -31,12 +31,12 @@ include::includes/manual.txt[]
 [[descr]]
 == Description ==
 
-The `ntpdsim` program is an adaptation of the `ntpd` operating system
+The `ntpdsim` program is an adaptation of the `{ntpd}` operating system
 daemon. The program operates as a discrete time simulator using
 specified systematic and random driving sources. It includes all the
 mitigation and discipline algorithms of the actual daemon, but with the
 packet I/O and system clock algorithms driven by simulation. Most
-functions of the real `ntpd` remain intact, including the monitoring,
+functions of the real `{ntpd}` remain intact, including the monitoring,
 statistics recording, trace and host name resolution features. Further
 information on the simulator is on the
 http://www.eecis.udel.edu/%7emills/ntpsim.html[NTP Discrete Event
@@ -80,7 +80,7 @@ filegen peerstats type day enable
 
 Note: The NTP development team is moving to the use of a syntax-directed
 configuration file design. When complete these options will be replaced
-by a link:ntpdsim_new.html[new one]. Most of the `ntpd` command line
+by a link:ntpdsim_new.html[new one]. Most of the `{ntpd}` command line
 options apply also to `ntpdsim`. In addition, the following command line
 
 `-B` 'bdly'::

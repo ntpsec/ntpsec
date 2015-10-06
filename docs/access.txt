@@ -20,7 +20,7 @@ include::includes/accopt.txt[]
 
 == Access Control Support ==
 
-The `ntpd` daemon implements a general purpose access control list (ACL)
+The `{ntpd}` daemon implements a general purpose access control list (ACL)
 containing address/match entries sorted first by increasing address
 values and then by increasing mask values. A match occurs when the
 bitwise AND of the mask and the packet source address is equal to the

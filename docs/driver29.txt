@@ -192,7 +192,7 @@ the interface module. It should flash once per second.
 6.  Run NTP in debug mode (-d -d), to observe Palisade_receive events.
 7.  The driver reports the link:#TrackingStatus[tracking status of the
 receiver]. Make sure it is tracking several satellites.
-8.  Remove fudge flag2 and restart *ntpd* in debug mode to observe
+8.  Remove fudge flag2 and restart the daemon in debug mode to observe
 palisade_receive events.
 9.  If event polling fails, verify the link:#Pinouts[connections] and
 that the host hardware supports RTS control.
