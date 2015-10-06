@@ -34,7 +34,7 @@ matter of historical interest.
 
 The {project-shortname} maintainers have an internal project
 code-named TESTFRAME that intends to create the capability 
-for replicable end-to-end testing of `ntpd`.  It is likely
+for replicable end-to-end testing of `{ntpd}`.  It is likely
 that some version of thius code will replace or merge in ntpdsim's
 capabilities.
 

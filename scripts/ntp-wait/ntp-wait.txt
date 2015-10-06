@@ -1,11 +1,11 @@
-== ntp-wait(1) ==
+== {ntpwaitman} ==
 :doctype: manpage
 
 == NAME ==
-ntp-wait - Wait for ntpd to stabilize the system clock
+{ntpwait} - Wait for ntpd to stabilize the system clock
 
 == SYNOPSIS ==
-ntp-wait [-v] [-n 'number'] [-s 'secs']
+{ntpwait} [-v] [-n 'number'] [-s 'secs']
 
 == DESCRIPTION ==
 

@@ -111,15 +111,15 @@ reported precision (and thus increase reported dispersion).
 
 If we force resyncs to MSF too often we will needlessly exhaust the
 batteries the unit runs from. During clock resync this driver tries to
-take enough time samples to avoid `ntpd` losing sync in case this clock
+take enough time samples to avoid the NTP daemon losing sync in case this clock
 is the current peer. By default the clock would only resync to MSF about
 once per day, which would almost certainly not be acceptable for NTP
 purposes.
 
 The driver does not force an immediate resync of the clock to MSF when
-it starts up to avoid excessive battery drain in case `ntpd` is going to
+it starts up to avoid excessive battery drain in case `{ntpd}` is going to
 be repeatedly restarted for any reason, and also to allow enough samples
-of the clock to be taken for `ntpd` to sync immediately to this clock
+of the clock to be taken for `{ntpd}` to sync immediately to this clock
 (and not remain unsynchronised or to sync briefly to another configured
 peer, only to hop back in a few poll times, causing unnecessary
 disturbance). This behaviour should not cause problems because the
@@ -343,7 +343,7 @@ There are a few `#defineS` in the code that you might wish to play with:
    With this defined, the code is relatively trusting of the clock, and
    assumes that you will have the clock as one of a few time sources, so
    will bend over backwards to use the time from the clock when available
-   and avoid `ntpd` dropping sync from the clock where possible. You may
+   and avoid `{ntpd}` dropping sync from the clock where possible. You may
    wish to undefine this, especially if you have better sources of time or
    your reception is ropey. However, there are many checks built in even
    with this flag defined.

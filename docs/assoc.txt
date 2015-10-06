@@ -159,7 +159,7 @@ link:discover.html[Automatic Server Discovery Schemes] page.
 NTP uses an intricate heuristic algorithm to automatically control the
 poll interval for maximum accuracy consistent with minimum network
 overhead. The algorithm measures the incidental offset and jitter to
-determine the best poll interval. When `ntpd` starts, the interval is
+determine the best poll interval. When `{ntpd}` starts, the interval is
 the default minimum 64 s. Under normal conditions when the clock
 discipline has stabilized, the interval increases in steps to the
 default maximum 1024 s. In addition, should a server become unreachable

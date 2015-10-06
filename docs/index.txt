@@ -80,7 +80,7 @@ few will be user-visible:
 
 * The documentation has been extensively updated and revised.
 
-* The deprecated ntpdc utility, long since replaced by ntpq, has been removed.
+* The deprecated ntpdc utility, long since replaced by {ntpq}, has been removed.
 
 * A number of obsolete refclocks have been removed.
 
@@ -112,8 +112,6 @@ A good deal of tutorial and directive information is available on the
 handbook pages. These should be read in conjunction with the command and
 option information available on the pages listed on the sitemap page.
 
-link:release.html[NTP Version 4 Release Notes]::
-  Lists recent changes and new features in the current distribution.
 link:assoc.html[Association Management]::
   Describes how to configure servers and peers and manage the various
   options. Includes automatic server discovery schemes.
@@ -149,7 +147,7 @@ distribution root.
 Like other things in modern Internet life, NTP problems can be
 devilishly intricate. This distribution includes a number of utilities
 designed to identify and repair problems using an integrated management
-protocol supported by the link:ntpq.html[`ntpq`] utility program.
+protocol supported by the link:ntpq.html[`{ntpq}`] utility program.
 
 The link:debug.html[NTP Debugging Techniques] and link:hints.html[Hints
 and Kinks] pages contain useful information for identifying problems and

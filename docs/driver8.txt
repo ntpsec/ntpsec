@@ -31,16 +31,16 @@ the receiver-generated time stamps for feeding the PPS loopfilter
 control for much finer clock synchronization.
 
 CAUTION: The PPS configuration option is different from the hardware PPS
-signal, which is also supported (see below), as it controls the way ntpd
+signal, which is also supported (see below), as it controls the way {ntpd}
 is synchronized to the reference clock, while the hardware PPS signal
 controls the way time offsets are determined.
 
 The use of the PPS option requires receivers with an accuracy of better
 than 1ms.
 
-== Timecode variables listed by ntpq (8) ==
+== Timecode variables listed by {ntpqman} ==
 
-The ntpq program can read and display several clock variables. These
+The {ntpq} program can read and display several clock variables. These
 hold the following information:
 
 refclock_format::
@@ -133,7 +133,7 @@ http://www.meinberg.de/english/products/gps-pcicard.htm[the GPS PCI
 card] or http://www.meinberg.de/english/products/dcf-pcicard.htm[the
 DCF77 PCI card]. Please note the
 http://www.meinberg.de/english/sw/#linux[Meinberg Linux driver] must be
-installed. That driver emulates a refclock device in order to allow ntpd
+installed. That driver emulates a refclock device in order to allow {ntpd}
 to access those cards. For details, please refer to the README file
 that comes with the Meinberg driver package.
 
@@ -316,7 +316,7 @@ via the serial port.
 
 Clock state statistics are written hourly to the syslog
 service. Online information can be found by examining the clock
-variables via the ntpq cv command.
+variables via the {ntpq} cv command.
 
 Some devices have quite extensive additional information
 (GPS16x/GPS17x, Trimble). The driver reads out much of the internal GPS
@@ -324,10 +324,10 @@ data and makes it accessible via clock variables. To find out about
 additional variable names, query for the clock_var_list variable on a
 specific clock association as shown below.
 
-First let ntpq display the table of associations:
+First let {ntpq} display the table of associations:
 
 -------------------------------------------------------------
-  ntpq> as
+  {ntpq}> as
   ind assID status  conf reach auth  condition last_event cnt
   ===========================================================
   1   19556  9154   yes   yes  none  falsetick reachable   5
@@ -337,11 +337,11 @@ First let ntpq display the table of associations:
 
 
 Then switch to raw output. This may be required because of display
-limitations in ntpq/ntpd - so large lists need to be retrieved in
+limitations in {ntpq}/{ntpd} - so large lists need to be retrieved in
 several queries.
 
 ----------------------------------------
-  ntpq> raw
+  {ntpq}> raw
   Output set to raw        
 ----------------------------------------
 
@@ -349,7 +349,7 @@ Use the cv command to read the list of clock variables of a selected
 association:
 
 ----------------------------------------
-  ntpq> cv 19557 clock_var_list         
+  {ntpq}> cv 19557 clock_var_list         
 ----------------------------------------
 
 The long output of the command above looks similar to:
@@ -368,7 +368,7 @@ Then use the cv command again to list selected clock variables. The
 following command must be entered as a single line:
 
 ----------------------------------------
-  ntpq> cv 19557 refclock_status,refclock_format,refclock_states,refclock_id,    refclock_iomode,refclock_driver_version,meinberg_gps_status,gps_utc_correction,    gps_message,meinberg_antenna_status,gps_tot_51,gps_tot_63,gps_t0a,gps_cfg[1],    gps_health[1],gps_cfg[2],gps_health[2],gps_cfg[3],gps_health[3],gps_cfg[4],    gps_health[4],gps_cfg[5]        
+  {ntpq}> cv 19557 refclock_status,refclock_format,refclock_states,refclock_id,    refclock_iomode,refclock_driver_version,meinberg_gps_status,gps_utc_correction,    gps_message,meinberg_antenna_status,gps_tot_51,gps_tot_63,gps_t0a,gps_cfg[1],    gps_health[1],gps_cfg[2],gps_health[2],gps_cfg[3],gps_health[3],gps_cfg[4],    gps_health[4],gps_cfg[5]        
 ----------------------------------------
 
 The output of the command above is wrapped around depending on the

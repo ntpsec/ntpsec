@@ -24,7 +24,7 @@ include::includes/install.txt[]
 '''''
 
 For the rank amateur the sheer volume of the documentation collection
-must be intimidating. However, it doesn't take much to fly the `ntpd`
+must be intimidating. However, it doesn't take much to fly the `{ntpd}`
 daemon with a simple configuration where a workstation needs to
 synchronize to some server elsewhere in the Internet. The first thing is
 to build the distribution for the particular workstation and install in
@@ -54,13 +54,13 @@ case of the US, by state. Usually, the best choice is the nearest in
 geographical terms, but the terms of engagement specified in each list
 entry should be carefully respected.
 
-During operation `ntpd` measures and corrects for incidental clock
+During operation `{ntpd}` measures and corrects for incidental clock
 frequency error and occasionally writes the current value to a file
 specified by the
 
 `driftfile /etc/ntp.drift`
 
-configuration command. If `ntpd` is stopped and restarted, it
+configuration command. If `{ntpd}` is stopped and restarted, it
 initializes the frequency from this file and avoids the potentially
 lengthy interval to relearn the correction.
 
@@ -71,12 +71,12 @@ administrators should understand NTP uses UDP port 123 as both the
 source and destination port and that NTP does not involve any operating
 system interaction other than to set the system clock. While almost all
 modern Unix systems have included NTP and UDP port 123 defined in the
-services file, this should be checked if `ntpd` fails to come up at all.
+services file, this should be checked if `{ntpd}` fails to come up at all.
 
 The best way to confirm NTP is working is using the
-link:ntpq.html[`ntpq`] utility. See the documentation pages for
+link:ntpq.html[`{ntpq}`] utility. See the documentation pages for
 further information. Don't forget to check for link:msyslog.html[system
-log messages]. In the most extreme cases the `-d` option on the `ntpd`
+log messages]. In the most extreme cases the `-d` option on the `{ntpd}`
 command line results in a blow-by-blow trace of the daemon operations.
 While the trace output can be cryptic, to say the least, it gives a
 general idea of what the program is doing and, in particular, details

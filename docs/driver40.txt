@@ -355,7 +355,7 @@ The driver writes sent and received data to/from the JJY receivers, GPS
 clock, and the modem into the `clockstats` file.
 
 ----------------------------------------------------------------
-statsdir /var/log/ntpd/
+statsdir /var/log/{ntpd}/
 filegen clockstats file clockstats type day enable         `
 ----------------------------------------------------------------
 

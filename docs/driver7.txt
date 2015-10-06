@@ -227,11 +227,11 @@ two stations in turn in order to measure the metric.
 
 == Debugging Aids ==
 
-The most convenient way to track the program status is using the `ntpq`
+The most convenient way to track the program status is using the `{ntpq}`
 program and the `clockvar` command. This displays the last determined
 timecode and related status and error counters, even when the program is
 not discipline the system clock. If the debugging trace feature (`-d` on
-the `ntpd` command line) is enabled, the program produces detailed
+the `{ntpd}` command line) is enabled, the program produces detailed
 status messages as it operates. If the `fudge flag 4` is set, these
 messages are written to the `clockstats` file. All messages produced by
 this driver have the prefix `chu` for convenient filtering with the Unix

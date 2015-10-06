@@ -138,12 +138,12 @@ decidedly beyond the scope of this page.
   The `./libntp/clktype` array is used by certain display functions. A
   unique short-form name of the driver should be entered together with
   its assigned identification code.
-`./ntpd/ntp_control.c`::
+`./{ntpd}/ntp_control.c`::
   The `clocktypes` array is used for certain control message displays
   functions. It should be initialized with the reference clock class
   assigned to the driver, as per the NTP specification RFC-1305. See the
   `./include/ntp_control.h` header file for the assigned classes.
-`./ntpd/refclock_conf.c`::
+`./{ntpd}/refclock_conf.c`::
   This file contains a list of external structure definitions which are
   conditionally defined. A new set of entries should be installed
   similar to those already in the table. The `refclock_conf` array is a

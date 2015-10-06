@@ -1,6 +1,4 @@
-= `ntp-wait` - waits until ntpd is in synchronized state =
-
-Last update: 12-Jul-2011 22:03 UTC
+= `ntp-wait` - waits until {ntpd} is in synchronized state =
 
 '''''
 
@@ -10,8 +8,8 @@ Last update: 12-Jul-2011 22:03 UTC
 
 == Description ==
 
-The `ntp-wait` program blocks until ntpd is in synchronized state. This
-can be useful at boot time, to delay the boot sequence until after "ntpd
+The `ntp-wait` program blocks until {ntpd} is in synchronized state. This
+can be useful at boot time, to delay the boot sequence until after "{ntpd}
 -g" has set the time.
 
 == Command Line Options ==

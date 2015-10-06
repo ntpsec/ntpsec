@@ -27,11 +27,11 @@ be members of the `struct timex` that adjtimex(2) operates on.
 By default, with no arguments, `tickadj` reads the `struct timex`
 variable(s) of interest and displays them. At the same time, it
 determines an "optimal" value for the value of the `tickadj` variable
-if the intent is to run the `ntpd` Network Time Protocol (NTP) daemon,
+if the intent is to run the `{ntpd}` Network Time Protocol (NTP) daemon,
 and prints this as well. Since the operation of `tickadj` when reading
-the kernel mimics the operation of similar parts of the `ntpd` program
+the kernel mimics the operation of similar parts of the `{ntpd}` program
 fairly closely, this can be useful when debugging problems with
-`ntpd`.
+`{ntpd}`.
 
 Note: The support this program formerly had for directly reading and
 writing '/dev/kmem' dated from the last century; it has been removed
@@ -80,7 +80,7 @@ many cases they will substantially improve the general accuracy of the
 time service.
 
 Unfortunately, the value of `tickadj` set by default is almost always
-too large for `ntpd`. NTP operates by continuously making small
+too large for `{ntpd}`. NTP operates by continuously making small
 adjustments to the clock, usually at one-second intervals. If `tickadj`
 is set too large, the adjustments will disappear in the roundoff; while,
 if `tickadj` is too small, NTP will have difficulty if it needs to make
@@ -93,7 +93,7 @@ optimal value of `tickadj` for NTP use based on the kernel's value of
 `tick`.
 
 In order to maintain reasonable correctness bounds, as well as
-reasonably good accuracy with acceptable polling intervals, `ntpd` will
+reasonably good accuracy with acceptable polling intervals, `{ntpd}` will
 complain if the frequency error is greater than 500 PPM. For machines
 with a value of `tick` in the 10-ms range, a change of one in the value
 of `tick` will change the frequency by about 100 PPM.

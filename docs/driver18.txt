@@ -37,7 +37,7 @@ changes for nonstandard modems or special circumstances.
 There are three modes of operation selected by the `mode` keyword in the
 `server` configuration command. In manual mode (2) the calling program
 is initiated by setting fudge `flag1`. This can be done manually using
-`ntpq`, or by a cron job. In auto mode (0) `flag1` is set at each poll
+`{ntpq}`, or by a cron job. In auto mode (0) `flag1` is set at each poll
 event. In backup mode (1) `flag1` is set at each poll event, but only if
 no other synchronization sources are available.
 
@@ -49,7 +49,7 @@ including the prefix and long-distance digits and delay code, if
 necessary. The `flag1` is reset and the calling program terminated if
 (a) valid clock update has been determined, (b) no more numbers remain
 in the list, (c) a device fault or timeout occurs or (d) fudge `flag1`
-is reset manually using `ntpq`.
+is reset manually using `{ntpq}`.
 
 The driver automatically recognizes the message format of each modem
 time service. It selects the parsing algorithm depending on the message

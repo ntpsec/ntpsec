@@ -1,5 +1,4 @@
 == Handbook Pages ==
-* link:release.html[NTP Version 4 Release Notes]
 * link:comdex.html[Command Index]
 * link:access.html[Access Control Support]
 * link:assoc.html[Association Management]

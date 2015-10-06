@@ -1,4 +1,4 @@
-= ntpd(8) =
+= {ntpdman} =
 :doctype: manpage
 
 == NAME ==
@@ -18,4 +18,4 @@ One of the following exit values will be returned:
 
 == SEE ALSO ==
 
-{ntpconf}, {ntpdate}, {ntpqman}, {sntpman}.
+{ntpconfman}, {ntpqman}, {sntpman}.

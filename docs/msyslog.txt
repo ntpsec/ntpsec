@@ -1,4 +1,4 @@
-= `ntpd` System Log Messages =
+= `{ntpd}` System Log Messages =
 
 [cols="10%,90%",frame="none",grid="none",style="verse"]
 |==============================
@@ -23,7 +23,7 @@ new ones come and old ones go. Generally, however, the most common ones
 will be found here. They are listed by program module and log severity
 code in bold: *`LOG_ERR`*, *`LOG_NOTICE`* and *`LOG_INFO`*.
 
-Most of the time *`LOG_ERR`* messages are fatal, but often `ntpd` limps
+Most of the time *`LOG_ERR`* messages are fatal, but often `{ntpd}` limps
 onward in the hopes of discovering more errors. The *`LOG_NOTICE`*
 messages usually mean the time has changed or some other condition that
 probably should be noticed. The *`LOG_INFO`* messages usually say
@@ -42,7 +42,7 @@ meaning should be clear from context.
 === LOG_NOTICE ===
 
 `no reply; clock not set`::
-  In `ntpdate` mode no servers have been found. The server(s) and/or
+  No servers have been found. The server(s) and/or
   network may be down. Standard debugging procedures apply.
 
 === LOG_INFO ===
@@ -93,7 +93,7 @@ Program error. Bugs can be reported link:bugs.html[here].::
 `time reset ? s`::
   The time error exceeds the step threshold and has been reset to the
   correct time. Computer scientists don't like this, but they can set
-  the `ntpd -x` option and wait forever.
+  the `{ntpd} -x` option and wait forever.
 `kernel time sync disabled ?`::
   The kernel reports an error. See the codes in the `timex.h` file.
 `pps sync disabled`::
@@ -149,7 +149,7 @@ Program error. Bugs can be reported link:bugs.html[here].::
 `crypto_?: scheme unavailable`::
   There is a problem with the identity scheme. Operation cannot proceed
   untill the problem is fixed. Usually errors are due to
-  misconfiguration or an orphan association. If the latter, `ntpd` will
+  misconfiguration or an orphan association. If the latter, `{ntpd}` will
   usually time out and recover by itself.
 `crypto_cert: wrong PEM type ?`::
   The certificate does not have MIME type `CERTIFICATE`. You are

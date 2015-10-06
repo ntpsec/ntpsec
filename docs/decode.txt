@@ -32,13 +32,13 @@ include::includes/install.txt[]
 == Introduction ==
 
 This page lists the status words, event messages and error codes used
-for `ntpd` reporting and monitoring. Status words are used to display
+for `{ntpd}` reporting and monitoring. Status words are used to display
 the current status of the running program. There is one system status
 word and a peer status word for each association. There is a clock
 status word for each association that supports a reference clock. There
 is a flash code for each association which shows errors found in the
 last packet received (pkt) and during protocol processing (peer). These
-are commonly viewed using the `ntpq` program.
+are commonly viewed using the `{ntpq}` program.
 
 Significant changes in program state are reported as events. There is
 one set of system events and a set of peer events for each association.
@@ -63,7 +63,7 @@ error diagnosis and performance assessment.
 
 The system status word consists of four fields LI (0-1), Source (2-7),
 Count (8-11) and Event (12-15). It is reported in the first line of the
-`rv` display produced by the `ntpq` program.
+`rv` display produced by the `{ntpq}` program.
 
 [width="50%"]
 |=======================
@@ -131,7 +131,7 @@ The Event Field displays the most recent event message coded as follows:
 
 The peer status word consists of four fields: Status (0-4), Select
 (5-7), Count (8-11) and Code (12-15). It is reported in the first line
-of the `rv associd` display produced by the `ntpq` program.
+of the `rv associd` display produced by the `{ntpq}` program.
 
 [width="50%"]
 |===============================
@@ -156,7 +156,7 @@ Field is listed in the following table:
 
 The Select Field displays the current selection status. (The T Field in
 the following table gives the corresponding tally codes used in the
-`ntpq peers` display.) The values are coded as follows:
+`{ntpq} peers` display.) The values are coded as follows:
 
 [width="100%",cols="<25%,<25%,<25%,<25%",]
 |================================================================================
@@ -185,7 +185,7 @@ The Event Field displays the most recent event message coded as follows:
 | `03` | `unreachable`      | server unreachable
 | `04` | `reachable`        | server reachable
 | `05` | `restart`          | association restart
-| `06` | `no_reply`         | no server found (`ntpdate` mode)
+| `06` | `no_reply`         | no server found
 | `07` | `rate_exceeded`    | rate exceeded (kiss code `RATE`)
 | `08` | `access_denied`    | access denied (kiss code `DENY`)
 | `09` | `leap_armed`       | leap armed from server LI code
@@ -202,7 +202,7 @@ The Event Field displays the most recent event message coded as follows:
 
 The clock status word consists of four fields: Unused (0-7), Count
 (8-11) and Code (12-15). It is reported in the first line of the
-`clockvar associd` display produced by the `ntpq` program.
+`clockvar associd` display produced by the `{ntpq}` program.
 
 [width="50%"]
 |=========================
@@ -231,7 +231,7 @@ peer event is reported.
 [[flash]]
 == Flash Status Word ==
 
-The flash status word is displayed by the `ntpq` program `rv` command.
+The flash status word is displayed by the `{ntpq}` program `rv` command.
 It consists of a number of bits coded in hexadecimal as follows:
 
 [width="100%",cols="<25%,<25%,<25%,<25%",]
@@ -262,7 +262,7 @@ Kiss codes are used in kiss-o'-death (KoD) packets, billboard displays
 and log messages. They consist of a string of four zero-padded ASCII
 charactes. In practice they are informal and tend to change with time
 and implementation. Some of these codes can appear in the reference
-identifier field in `ntpq` billboards. Following is the current list:
+identifier field in `{ntpq}` billboards. Following is the current list:
 
 [width="100%",cols="<50%,<50%",]
 |==================================================================
