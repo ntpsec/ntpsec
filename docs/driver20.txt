@@ -151,7 +151,7 @@ be configured to transmit the relevant data only, e.g. one `$GPRMC` or
 == Monitor Data ==
 
 The last GPS sentence that is accepted or rejected is written to the
-clockstats file and available with `ntpq -c clockvar`. (Logging the
+clockstats file and available with `{ntpq} -c clockvar`. (Logging the
 rejected sentences lets you see/debug why they were rejected.) Filtered
 sentences are not logged.
 
@@ -233,7 +233,7 @@ switched on by sending the following string.
   If PPS signal processing is enabled, capture the pulse on the rising
   edge if 0 (default); capture on the falling edge if 1.
 `flag3 0 | 1`::
-  If PPS signal processing is enabled, use the `ntpd` clock discipline
+  If PPS signal processing is enabled, use the `{ntpd}` clock discipline
   if 0 (default); use the kernel discipline if 1.
 `flag4 0 | 1`::
   Obscures location in timecode: 0 for disable (default), 1 for enable.

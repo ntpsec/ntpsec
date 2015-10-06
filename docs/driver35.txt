@@ -31,7 +31,7 @@ http://schumann.cx/pcfclock/[FreeBSD] are available.
 This driver uses C library functions to convert the received timecode to
 UTC and thus requires that the local timezone be CET or CEST. If your
 server is not located in Central Europe you have to set the environment
-variable TZ to CET before starting `ntpd`.
+variable TZ to CET before starting `{ntpd}`.
 
 == Monitor Data ==
 

@@ -1,8 +1,8 @@
-= ntp-keygen(1) =
+= {ntpkeygenman} =
 :doctype: manpage
 
 == NAME ==
-ntp-keygen - create and manage NTP host keys
+{ntpkeygen} - create and manage NTP host keys
 
 @../docs/keygen-body.txt@
 

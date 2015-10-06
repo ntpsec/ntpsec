@@ -93,7 +93,7 @@ help or money so we can hire skilled technical help.
 You are now ready to configure the daemon. You will need to create a NTP
 configuration file by default in `/etc/ntp.conf.` Newbies should see the
 link:quick.html[Quick Start] page for orientation. Seasoned veterans can
-start with the link:ntpd.html[`ntpd` - Network Time Protocol (NTP)
+start with the link:ntpd.html[`{ntpd}` - Network Time Protocol (NTP)
 daemon] page and move on to the specific configuration option pages from
 there.
 
@@ -104,7 +104,7 @@ If you have problems with your hardware and software environment (e.g.
 operating system-specific issues), browse the link:hints.html[Hints and
 Kinks] pages. For other problems a tutorial on debugging technique is in
 the link:debug.html[NTP Debugging Technique] page. A list of important
-system log messages is on the link:msyslog.html[`ntpd` System Log
+system log messages is on the link:msyslog.html[`{ntpd}` System Log
 Messages] page.
 
 The first line of general assistance is the {project-shortname} web site

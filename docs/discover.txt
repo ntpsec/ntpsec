@@ -238,8 +238,8 @@ principle, it is possible to use a configuration file containing a
 single line `pool   pool.ntp.org`. The
 http://www.pool.ntp.org/en/use.html[NTP Pool Project] offers
 instructions on using the pool with the `server` command, which is
-suboptimal but works with older versions of `ntpd` predating the `pool`
-command. With recent ntpd, consider replacing the multiple `server`
+suboptimal but works with older versions of `{ntpd}` predating the `pool`
+command. Consider replacing the multiple `server`
 commands in their example with a single `pool` command.
 
 '''''

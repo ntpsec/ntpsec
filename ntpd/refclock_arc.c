@@ -226,22 +226,17 @@ GENERAL
     MSF---thus we should never end up syncing to completely the wrong
     time.
 
- 8) If the flag ARCRON_OWN_FILTER is defined, use own versions of
-    refclock median-filter routines to get round small bug in 3-5.90
-    code which does not return the median offset. XXX Removed this
-    bit due NTP Version 4 upgrade - dlm.
-
- 9) We would appear to have a year-2000 problem with this clock since
+ 8) We would appear to have a year-2000 problem with this clock since
     it returns only the two least-significant digits of the year.  But
     ntpd ignores the year and uses the local-system year instead, so
     this is in fact not a problem.  Nevertheless, we attempt to do a
     sensible thing with the dates, wrapping them into a 100-year
     window.
 
- 10)Logs stats information that can be used by Derek's Tcl/Tk utility
+ 9) Logs stats information that can be used by Derek's Tcl/Tk utility
     to show the status of the clock.
 
- 11)The clock documentation insists that the number of bits per
+ 10)The clock documentation insists that the number of bits per
     character to be sent to the clock, and sent by it, is 11, including
     one start bit and two stop bits.  The data format is either 7+even
     or 8+none.

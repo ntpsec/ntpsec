@@ -1,8 +1,8 @@
-= ntptime(1) =
+= {ntptimeman} =
 :doctype: manpage
 
 == NAME ==
-ntptime - read and set kernel time variables
+{ntptime} - read and set kernel time variables
 
 @../docs/ntptime-body.txt@
 

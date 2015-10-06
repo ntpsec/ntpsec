@@ -17,7 +17,7 @@ protocol, such as the `Lockclock` algorithm used with NIST Automated
 Computer Time Service (ACTS) modem synchronized time.
 
 When external clocks are used in conjunction with NTP service, some way
-needs to be provided for the external clock driver and NTP daemon `ntpd`
+needs to be provided for the external clock driver and NTP daemon `{ntpd}`
 to communicate and determine which discipline is in control. This is
 necessary in order to provide backup, for instance if the external clock
 or protocol were to fail and synchronization service fall back to other
@@ -37,10 +37,10 @@ information, as well as error statistics, to the kernel. Besides
 disciplining the system time, the same interface can be used by other
 applications to determine the operating parameters of the discipline.
 
-When the external clock is enabled, `ntpd` does not discipline the
+When the external clock is enabled, `{ntpd}` does not discipline the
 system clock, nor does it maintain the error statistics. In this case,
 the external clock and driver do this using mechanisms unknown to
-`ntpd`; however, in this case the kernel state variables are retrieved
+`{ntpd}`; however, in this case the kernel state variables are retrieved
 at 64-s intervals by the Local Clock driver and used by the clock
 selection and mitigation algorithms to determine the system variables
 presented to other NTP clients and peers. In this way, downstream
@@ -54,7 +54,7 @@ Boolean variables and certain bits in the kernel clock status word. The
 Boolean variables include the following:
 
 `ntp_enable`::
-	Set/reset by the `enable` command. Enables ntpd clock discipline
+	Set/reset by the `enable` command. Enables {ntpd} clock discipline
 
 `ntp_control`::
 	Set during initial configuration if kernel support is available

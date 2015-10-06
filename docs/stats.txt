@@ -81,7 +81,7 @@ determined as the RMS differences between the offset samples in the
 window relative to the selected offset sample. The peer statistics are
 recorded by the `peerstats` option of the
 link:monopt.html#filegen[`filegen`] command. Peer variables are
-displayed by the `rv` command of the link:ntpq.html#peer[`ntpq`]
+displayed by the `rv` command of the link:ntpq.html#peer[`{ntpq}`]
 program.
 
 The clock filter algorithm continues to process updates in this way
@@ -104,7 +104,7 @@ variables of the same name and the system stratum set one greater than
 the system peer stratum. The system statistics are recorded by the
 `loopstats` option of the link:monopt.html#filegen[`filegen`] command.
 System variables are displayed by the `rv` command of the
-link:ntpq.html#system[`ntpq`] program.
+link:ntpq.html#system[`{ntpq}`] program.
 
 Although it might seem counterintuitive, a cardinal rule in the
 selection process is, once a sample has been selected by the clock
