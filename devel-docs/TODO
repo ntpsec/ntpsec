@@ -38,9 +38,6 @@ None right now. (Sep-22 2015)
 * We need a build time option to disable all dangerous operations
   that ntpq can produce.
 
-* Make sure we do the right thing with KoD and rate limiting.
-  (Forged requests can use rate limiting to block service to a site.)
-
 * We need a way to inspect/debug bits on the wire. `ntpdate -du' 
   is the traditional approach.  My straw man is a new program
   rather than trying to make sntp do this. It might be appropriate
@@ -84,6 +81,14 @@ is not yet tested anywhere but in ntpd itself.
   they are salvageable.
 
 === Documentation ===
+
+* Write up best current practices on starting ntpd.  If it's already
+  there, make it easy to find.
+
+* Write a glossary of Mills-speak.
+
+* Short doc on how to tell your ntpd is running correctly.
+  Perhaps lifted from GPSD Time Service HOWTO?
 
 * Run everything through a spell checker.
 
