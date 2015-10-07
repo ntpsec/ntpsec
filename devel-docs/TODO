@@ -19,6 +19,8 @@ None right now. (Sep-22 2015)
   actual scripts by substituting in @-cookies.  So do all files in the tree
   with extension *.txt.in.
 
+* The doc target should build manual pages.
+
 * The install production needs to warn of stale ntpdc and ntpdate binaries.
 
 * Add support for enabling all conditional checks to ensure none are broken.
@@ -40,11 +42,6 @@ None right now. (Sep-22 2015)
 
 * We need a build time option to disable all dangerous operations
   that ntpq can produce.
-
-* We need a way to inspect/debug bits on the wire. `ntpdate -du' 
-  is the traditional approach.  My straw man is a new program
-  rather than trying to make sntp do this. It might be appropriate
-  to reference wireshark in the documentation.
 
 === Porting ===
 
@@ -115,10 +112,6 @@ is not yet tested anywhere but in ntpd itself.
 | -                 | scripts/update-leap/update-leap.txt
 |===========================================================
 
-* Also, any exterior documents retained need to be parametrized
-  with the macros in docs/asciidoc.conf. and the asciidoc build rules
-  need to use that.
-
 * In the docs subdirectory, include/command.txt is an HTML passthrough
   in a not entirely successful attempt to emulate the look of the
   Mills HTML documentation this directory was made from. It should be
@@ -127,9 +120,7 @@ is not yet tested anywhere but in ntpd itself.
 * Similarly, includes/footer.txt is a tabular hack made to resemble the
   old HTML and should be cleaned up.
 
-* A serious content-editing and update pass on the exterior documents is needed.
-
-* Part of d) is the ntp -> ntps name change.  Note: ntp-keygen -> ntpskeygen,
+* Do the ntp -> ntps name change.  Note: ntp-keygen -> ntpskeygen,
   and perhaps sntp -> ntpss (so *all* programs have the ntps prefix).
 
 * The format and organization of the NEWS file needs a rethink.
@@ -150,11 +141,30 @@ is not yet tested anywhere but in ntpd itself.
 * The dev changes need to be fed through through Phabricator,
   reviewed, and if necessary fixed.
 
-* Version-numbering policy needs to be decided and written up.
+* Version-numbering policy needs to be decided and written up.  Are
+  we going to go with the original 1.x/2.x split?  The website draft
+  still assumes this.
 
 * We need a release checklist.
 
-== After first release ==
+== After beta release ==
+
+* ntpproto.py - a Python library that knows the NTP wire protocol and
+  can be used to generate and interpret packets.  Daniel has speculated
+  about writing this in order to test possible exploits, but there are
+  other uses.
+
+* Deploy ntpproto.py to replace the Perl library under scripts/lib/.  Then
+  use that to translate the Perl stuff under scripts/ to Python.
+
+* Hal says "We need a way to inspect/debug bits on the wire. `ntpdate
+  -du' is the traditional approach."  Hal's straw man is a new program
+  rather than trying to make sntp do this.  Eric's prposed answer:
+  ntpshark, a command interpreter written around ntpproto.py and
+  loosely modeled on wireshark.
+
+* Bigger game: can a Python front end to ntpproto.py replace sntp?
+  Or even ntpq?
 
 * There is a mess around the symbols NO_MAIN_ALLOWED, BUILD_AS_LIB, and
   LIBNTP_C that needs to be refactored.  ntpd should *always* be built as
