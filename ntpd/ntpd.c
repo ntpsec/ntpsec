@@ -54,6 +54,8 @@ extern bool sandbox(const bool droproot,
 DNSServiceRef mdns;
 #endif
 
+#include <sodium.h>
+
 /*
  * Scheduling priority we run at
  */
@@ -542,11 +544,9 @@ ntpdmain(
 	char *argv[]
 	)
 {
-	l_fp		now;
 	struct recvbuf *rbuf;
 	mode_t		uv;
 	uid_t		uid;
-	int    		seed;
 # if defined(HAVE_WORKING_FORK)
 	int		pipe_fds[2];
 	int		rc;
@@ -645,12 +645,9 @@ ntpdmain(
 	init_winnt_time();
 # endif
 	/*
-	 * Initialize random generator and public key pair
+	 * Initialize libsodium and its RNG
 	 */
-	get_systime(&now);
-	seed = (int)(now.l_i * now.l_uf);
-	ntp_srandom(seed);
-	intercept_log("event seed %d\n", seed);
+	sodium_init();
 
 	/*
 	 * Detach us from the terminal.  May need an #ifndef GIZMO.
