@@ -27,6 +27,8 @@
 #ifndef GUARD_NTP_ASSERT_H
 #define GUARD_NTP_ASSERT_H
 
+#include <stdbool.h>
+
 # ifdef CALYSTO 
 /* see: http://www.domagoj-babic.com/index.php/ResearchProjects/Calysto */
 
