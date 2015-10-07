@@ -26,6 +26,9 @@ None right now. (Sep-22 2015)
 * Add support for disabling specific conditional tests to ensure nothing is 
   compiled into the base in a surprising fashion.
 
+* Add monkeypatch for rmdir, rmtree under Windows.
+
+
 === Code ===
 
 * Clock stepping should use ANSI clock_settime() when possible, for
