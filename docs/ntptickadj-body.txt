@@ -1,0 +1,112 @@
+// This is the body of the manual page for ntptickadj.
+// It's included in two places: once for the docs/ HTML
+// tree, and once to make an individual man page.
+
+== Synopsis ==
+
+`{ntptickadj} [ -Aqs ] [ -a tickadj ] [ -t tick ]`
+
+== Description ==
+
+The `{ntptickadj}` program (formerly named just `tickadj`) reads, and
+optionally modifies, several timekeeping-related variables.  It relies
+on the adjtimex(2) or ntp_adjtime(2) system calls.
+
+These tweaks are almost never necessary on hardware new enough to have
+a fully POSIX.1-2001-conformant Unix. This utility is deprecated and
+exists mainly for backward compatibility to old scripts. In the future
+it may be removed or merged into a more general tuning tool.
+
+The particular variables that can be changed with `{ntptickadj}` include
+`tick`, which is the number of microseconds added to the system time
+for a clock interrupt, and possibly `tickadj`, which sets the slew
+rate and resolution used by the `adjtime` system call.  These should
+be members of the `struct timex` that adjtimex(2) operates on.
+
+By default, with no arguments, `{ntptickadj}` reads the `struct timex`
+variable(s) of interest and displays them. At the same time, it
+determines an "optimal" value for the value of the `tickadj` variable
+if the intent is to run the Network Time Protocol (NTP) daemon,
+and prints this as well. Since the operation of `{ntptickadj}` when reading
+the kernel mimics the operation of similar parts of the `{ntpd}` program
+fairly closely, this can be useful when debugging problems with
+`{ntpd}`.
+
+Note: The support this program formerly had for directly reading and
+writing '/dev/kmem' dated from the last century; it has been removed
+as unsafe and probably bitrotted.
+
+== Theory of Operation ==
+
+(This section was adapted from some configuration notes for very old Solaris
+systems.  Some portions, notably the claim about `tickadj` being too
+large for NTP use, are probably no longer true.)
+
+The NTP Version 4 specification calls for a maximum oscillator
+frequency tolerance of +-500 parts-per-million (PPM).  
+
+In the rare case that this tolerance is violated, the performance may
+be improved by adjusting the values of certain kernel variables; in
+particular, `tick` and `tickadj`.
+
+The variable `tick` is the increment in microseconds added to the system
+time on each interval-timer interrupt, while the variable `tickadj` is
+used by the time adjustment code as a slew rate, in microseconds per
+tick. When the time is being adjusted via a call to the system routine
+`adjtime()`, the kernel increases or reduces tick by `tickadj`
+microseconds per tick until the specified adjustment has been completed.
+
+Unfortunately, in most Unix implementations the tick increment must be
+either zero or plus/minus exactly `tickadj` microseconds, meaning that
+adjustments are truncated to be an integral multiple of `tickadj` (this
+latter behaviour is a misfeature, and is the only reason the `{ntptickadj}`
+code needs to concern itself with the internal implementation of
+`tickadj` at all). In addition, the stock Unix implementation considers
+it an error to request another adjustment before a prior one has
+completed.
+
+Thus, to make very sure it avoids problems related to the roundoff, the
+`{ntptickadj}` program can be used to adjust the values of `tick` and
+`tickadj`. This ensures that all adjustments given to `adjtime()` are an
+even multiple of `tickadj` microseconds and computes the largest
+adjustment that can be completed in the adjustment interval (using both
+the value of `tick` and the value of `tickadj`) so it can avoid
+exceeding this limit. It is important to note that not all systems will
+allow inspection or modification of kernel variables other than at
+system build time. It is also important to know that, with the current
+NTP tolerances, it is rarely necessary to make these changes, but in
+many cases they will substantially improve the general accuracy of the
+time service.
+
+Unfortunately, the value of `tickadj` set by default is almost always
+too large for `{ntpd}`. NTP operates by continuously making small
+adjustments to the clock, usually at one-second intervals. If `tickadj`
+is set too large, the adjustments will disappear in the roundoff; while,
+if `tickadj` is too small, NTP will have difficulty if it needs to make
+an occasional large adjustment. While the daemon itself will read the
+kernel's values of these variables, it will not change the values, even
+if they are unsuitable. You must do this yourself before the daemon is
+started using the `{ntptickadj}` program. Note that the latter program
+will also compute an optimal value of `tickadj` for NTP use based on
+the kernel's value of `tick`.
+
+In order to maintain reasonable correctness bounds, as well as
+reasonably good accuracy with acceptable polling intervals, `{ntpd}` will
+complain if the frequency error is greater than 500 PPM. For machines
+with a value of `tick` in the 10-ms range, a change of one in the value
+of `tick` will change the frequency by about 100 PPM.
+
+== Command Line Options ==
+
+`-a` 'tickadj'::
+  Set the kernel variable `tickadj` to the value _tickadj_ specifies.
+`-A`::
+  Set the kernel variable `tickadj` to an internally computed "optimal"
+  value.
+`-t` 'tick'::
+  Set the kernel variable `tick` to the value _`tick`_ specified.
+`-q`::
+  Normally, `{ntptickadj}` is quite verbose about what it is doing. The `-q`
+  flag tells it to shut up about everything except errors.
+
+// end
