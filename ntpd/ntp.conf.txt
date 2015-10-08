@@ -64,7 +64,6 @@ applicable to each command are listed below. Use of options not listed
 may not be caught as an error, but may result in some weird and even
 destructive behavior.
 
-FIXME: --enable-ipv6 ??
 If the Basic Socket Interface Extensions for IPv6 (RFC-2553) is
 detected, support for the IPv6 address family is generated in addition
 to the default support of the IPv4 address family. In a few cases,
@@ -74,10 +73,11 @@ presence of colons ":" in the address field. IPv6 addresses can
 be used almost everywhere where IPv4 addresses can be used, with the
 exception of reference clock addresses, which are always IPv4.
 
-Note that in contexts where a host name is expected, a `-4` qualifier
-preceding the host name forces DNS resolution to the IPv4 namespace,
-while a `-6` qualifier forces DNS resolution to the IPv6 namespace. See
-IPv6 references for the equivalent classes for that address family.
+Note that in contexts where a host name is expected, a `-4`or `--ipv4`
+qualifier preceding the host name forces DNS resolution to the IPv4
+namespace, while a `-6` or `--ipv6' qualifier forces DNS resolution to
+the IPv6 namespace. See IPv6 references for the equivalent classes for
+that address family.
 
 `pool` _address_ [`burst`] [`iburst`] [`version` _version_] [`prefer`] [`minpoll` _minpoll_] [`maxpoll` _maxpoll_]::
 `server` _address_ [`key` _key_ | `autokey`] [`burst`] [`iburst`] [`version` _version_] [`prefer`] [`minpoll` _minpoll_] [`maxpoll` _maxpoll_]::
