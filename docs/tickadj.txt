@@ -7,7 +7,8 @@
 == Description ==
 
 The `tickadj` program reads, and optionally modifies, several
-timekeeping-related variables.  It uses the adjtimex(2) system call.
+timekeeping-related variables.  It relies on the adjtimex(2) or
+ntp_adjtime(2) system calls.
 
 These tweaks are almost never necessary on hardware new enough to have
 a fully POSIX.1-2001-conformant Unix. This utility is deprecated and
@@ -23,7 +24,7 @@ be members of the `struct timex` that adjtimex(2) operates on.
 By default, with no arguments, `tickadj` reads the `struct timex`
 variable(s) of interest and displays them. At the same time, it
 determines an "optimal" value for the value of the `tickadj` variable
-if the intent is to run the `{ntpd}` Network Time Protocol (NTP) daemon,
+if the intent is to run the Network Time Protocol (NTP) daemon,
 and prints this as well. Since the operation of `tickadj` when reading
 the kernel mimics the operation of similar parts of the `{ntpd}` program
 fairly closely, this can be useful when debugging problems with
