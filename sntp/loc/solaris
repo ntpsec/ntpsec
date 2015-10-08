@@ -12,5 +12,5 @@ ntpsweep,noinst,1m
 ntptime,sbin,1m
 ntptrace,sbin,1m
 sntp,sbin,1m
-tickadj,sbin,1m
+ntptickadj,sbin,1m
 update-leap,sbin,1m

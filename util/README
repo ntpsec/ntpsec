@@ -65,7 +65,7 @@ testrs6000.c::
     If you set it less than 40 us do so at your own risk!" The RS6000
     is dead, but this is kept around as a way to bogon-test other kernels.
 
-tickadj.c::
+ntptickadj.c::
     Can be used to read and set various kernel parameters affecting NTP
     operations. See the tickadj page in the HTML documentation for further
     details.

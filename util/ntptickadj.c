@@ -1,5 +1,5 @@
 /*
- * tickadj - read, and possibly modify, the kernel `tick' and
+ * ntptickadj - read, and possibly modify, the kernel `tick' and
  *	     `tickadj' variables', using adjtimex(2) or
  *	     ntp_adjtime(2).  This is included only for compatibility
  *	     with old scripts.  and its former support for unsafe

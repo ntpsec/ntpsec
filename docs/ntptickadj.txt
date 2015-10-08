@@ -1,31 +1,31 @@
-= `tickadj` - set time-related kernel variables =
+= `ntptickadj` - set time-related kernel variables =
 
 == Synopsis ==
 
-`tickadj [ -Aqs ] [ -a tickadj ] [ -t tick ]`
+`{ntptickadj} [ -Aqs ] [ -a tickadj ] [ -t tick ]`
 
 == Description ==
 
-The `tickadj` program reads, and optionally modifies, several
-timekeeping-related variables.  It relies on the adjtimex(2) or
-ntp_adjtime(2) system calls.
+The `{ntptickadj}` program (formerly named just `tickadj`) reads, and
+optionally modifies, several timekeeping-related variables.  It relies
+on the adjtimex(2) or ntp_adjtime(2) system calls.
 
 These tweaks are almost never necessary on hardware new enough to have
 a fully POSIX.1-2001-conformant Unix. This utility is deprecated and
 exists mainly for backward compatibility to old scripts. In the future
 it may be removed or merged into a more general tuning tool.
 
-The particular variables that can be changed with `tickadj` include
+The particular variables that can be changed with `{ntptickadj}` include
 `tick`, which is the number of microseconds added to the system time
 for a clock interrupt, and possibly `tickadj`, which sets the slew
 rate and resolution used by the `adjtime` system call.  These should
 be members of the `struct timex` that adjtimex(2) operates on.
 
-By default, with no arguments, `tickadj` reads the `struct timex`
+By default, with no arguments, `{ntptickadj}` reads the `struct timex`
 variable(s) of interest and displays them. At the same time, it
 determines an "optimal" value for the value of the `tickadj` variable
 if the intent is to run the Network Time Protocol (NTP) daemon,
-and prints this as well. Since the operation of `tickadj` when reading
+and prints this as well. Since the operation of `{ntptickadj}` when reading
 the kernel mimics the operation of similar parts of the `{ntpd}` program
 fairly closely, this can be useful when debugging problems with
 `{ntpd}`.
@@ -57,14 +57,14 @@ microseconds per tick until the specified adjustment has been completed.
 Unfortunately, in most Unix implementations the tick increment must be
 either zero or plus/minus exactly `tickadj` microseconds, meaning that
 adjustments are truncated to be an integral multiple of `tickadj` (this
-latter behaviour is a misfeature, and is the only reason the `tickadj`
+latter behaviour is a misfeature, and is the only reason the `{ntptickadj}`
 code needs to concern itself with the internal implementation of
 `tickadj` at all). In addition, the stock Unix implementation considers
 it an error to request another adjustment before a prior one has
 completed.
 
 Thus, to make very sure it avoids problems related to the roundoff, the
-`tickadj` program can be used to adjust the values of `tick` and
+`{ntptickadj}` program can be used to adjust the values of `tick` and
 `tickadj`. This ensures that all adjustments given to `adjtime()` are an
 even multiple of `tickadj` microseconds and computes the largest
 adjustment that can be completed in the adjustment interval (using both
@@ -84,10 +84,9 @@ if `tickadj` is too small, NTP will have difficulty if it needs to make
 an occasional large adjustment. While the daemon itself will read the
 kernel's values of these variables, it will not change the values, even
 if they are unsuitable. You must do this yourself before the daemon is
-started using the `tickadj` program included in the `./util` directory
-of the distribution. Note that the latter program will also compute an
-optimal value of `tickadj` for NTP use based on the kernel's value of
-`tick`.
+started using the `{ntptickadj}` program. Note that the latter program
+will also compute an optimal value of `tickadj` for NTP use based on
+the kernel's value of `tick`.
 
 In order to maintain reasonable correctness bounds, as well as
 reasonably good accuracy with acceptable polling intervals, `{ntpd}` will
@@ -105,7 +104,7 @@ of `tick` will change the frequency by about 100 PPM.
 `-t` 'tick'::
   Set the kernel variable `tick` to the value _`tick`_ specified.
 `-q`::
-  Normally, `tickadj` is quite verbose about what it is doing. The `-q`
+  Normally, `{ntptickadj}` is quite verbose about what it is doing. The `-q`
   flag tells it to shut up about everything except errors.
 
 '''''
