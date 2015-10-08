@@ -17,7 +17,7 @@ sub run {
     my $tick       = $opts->{'tick'};
 
     if (!$tick) {
-        my ($fl) = `tickadj`;
+        my ($fl) = `ntptickadj`;
         if (defined $fl && $fl =~ /(?:KERNEL|PRESET)?\s*tick\s+=\s+(\d+)/) {
             $tick = $1;
         }

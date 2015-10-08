@@ -12,6 +12,6 @@ ntpsweep,bin,1
 ntptime,sbin,8
 ntptrace,bin,1
 sntp,bin,1
-tickadj,sbin,8
+ntptickadj,sbin,8
 timetrim,sbin,8
 update-leap,sbin,8

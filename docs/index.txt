@@ -82,6 +82,9 @@ few will be user-visible:
 
 * The deprecated ntpdc utility, long since replaced by {ntpq}, has been removed.
 
+* The `tickadj` utility has been rebamed `ntptickadj` and is now fully
+  portable.
+
 * A number of obsolete refclocks have been removed.
 
 * The deprecated ntpdate program has been replaced with a shell
