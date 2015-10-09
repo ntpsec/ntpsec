@@ -423,7 +423,7 @@ def cmd_configure(ctx):
 
 
 	# Check for directory separator
-	if ctx.env.TARGET_PLATFORM == "win":
+	if ctx.env.PLATFORM_TARGET == "win":
 		sep = "\\"
 	else:
 		sep = "/"
