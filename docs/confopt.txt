@@ -17,7 +17,7 @@ include::includes/confopt.txt[]
 == Table of Contents ==
 
 * link:#address[Server and Peer Addresses]
-* link:#command[Server Commands]
+* link:#association[Association Commands]
 * link:#option[Server Command Options]
 
 '''''
@@ -51,8 +51,8 @@ in contexts where a host name is expected, a `-4` qualifier preceding
 the host name forces DNS resolution to the IPv4 namespace, while a `-6`
 qualifier forces DNS resolution to the IPv6 namespace.
 
-[[command]]
-== Server Commands ==
+[[association]]
+== Association Commands ==
 
 Unless noted otherwise, further information about these commands is on
 the link:assoc.html[Association Management] page.

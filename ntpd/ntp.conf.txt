@@ -46,23 +46,26 @@ option is one or more `pool`, `server`, `peer`, `broadcast` or
 
 == Configuration Support ==
 
-Following is a description of the configuration commands in NTPv4. These
-commands have the same basic functions as in NTPv3 and in some cases new
-functions and new arguments. There are two classes of commands,
-configuration commands that configure a persistent association with a
-remote server or peer or reference clock, and auxiliary commands that
-specify environmental variables that control various related operations.
+Following is a description of the configuration commands in
+NTPv4. There are two classes of commands, association commands that
+configure a persistent association with a remote server or peer or
+reference clock, and auxiliary commands that specify environmental
+variables that control various related operations.
 
-=== Configuration Commands ===
+=== Association Commands ===
 
 The various modes are determined by the command keyword and the type of
 the required IP address. Addresses are classed by type as (s) a remote
 server or peer (IPv4 class A, B and C), (b) the broadcast address of a
 local interface, (m) a multicast address (IPv4 class D), or (r) a
-reference clock address (127.127.x.x). Note that only those options
-applicable to each command are listed below. Use of options not listed
-may not be caught as an error, but may result in some weird and even
-destructive behavior.
+reference clock address (127.127.x.x). For type m addresses the
+IANA has assigned the multicast group address IPv4 224.0.1.1 and IPv6
+ff05::101 (site local) exclusively to NTP, but other nonconflicting
+addresses can be used.
+
+Note that only those options applicable to each command are listed
+below. Use of options not listed may not be caught as an error, but
+may result in some weird and even destructive behavior.
 
 If the Basic Socket Interface Extensions for IPv6 (RFC-2553) is
 detected, support for the IPv6 address family is generated in addition
@@ -84,7 +87,8 @@ that address family.
 `peer` _address_ [`key` _key_ | `autokey`] [`version` _version_] [`prefer`] [`minpoll` _minpoll_] [`maxpoll` _maxpoll_]::
 `broadcast` _address_ [`key` _key_ | `autokey`] [`version` _version_] [`prefer`] [`minpoll` _minpoll_] [`ttl` _ttl_]::
 `manycastclient` _address_ [`key` _key_ | `autokey`] [`version` _version_] [`prefer`] [`minpoll` _minpoll_] [`maxpoll` _maxpoll_] [`ttl` _ttl_]::
-  These five commands specify the time server name or address to be used
+`unpeer` ['address' | 'associd']::
+These six commands specify the time server name or address to be used
   and the mode in which to operate. The _address_ can be either a DNS
   name or an IP address in dotted-quad notation. Additional information
   on association behavior can be found in the "Association Management"
@@ -148,7 +152,14 @@ that address family.
   _server_ command. The remaining servers are discarded as if never
   heard.
 
-Options:
+`unpeer`::
+  This command removes a previously configured association. An address
+  or association ID can be used to identify the association. Either an
+  IP address or DNS name can be used. This command is most useful when
+  supplied via `{ntpq}` runtime configuration commands `:config` and
+  `config-from-file`.
+
+=== Association Options ===
 
 `autokey`::
   All packets sent to and received from the server or peer are to
@@ -171,6 +182,10 @@ Options:
   complete. This is designed to speed the initial synchronization
   acquisition with the `server` command and s addresses and when
   {ntpdman} is started with the `-q` option.
+
+`ident` 'group'::
+  Specify the group name for the association. See the "Autokey
+  Public-Key Authentication" page for further information.
 
 `key` _key_::
   All packets sent to and received from the server or peer are to
@@ -209,6 +224,10 @@ Options:
 `version` _version_::
   Specifies the version number to be used for outgoing NTP packets.
   Versions 1-4 are the choices, with version 4 the default.
+
+`xleave`::
+  Operate in interleaved mode (symmetric and broadcast modes only).
+  Further information is on the "NTP Interleaved Modes" page.
 
 === Auxiliary Commands ===
 
