@@ -71,7 +71,6 @@ def cmd_configure(ctx):
 		ctx.env[opt] = ctx.env.OPT_STORE[flag]
 
 
-	ctx.find_program("yacc", var="BIN_YACC")
 	ctx.find_program("awk", var="BIN_AWK")
 	ctx.find_program("perl", var="BIN_PERL")
 	ctx.find_program("sh", var="BIN_SH")
