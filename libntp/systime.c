@@ -455,17 +455,15 @@ step_systime(
 	/* get the current time as l_fp (without fuzz) and as struct timeval */
 	get_ostime(&timets);
 	fp_sys = tspec_stamp_to_lfp(timets);
-	tvlast.tv_sec = timets.tv_sec;
-	tvlast.tv_usec = (timets.tv_nsec + 500) / 1000;
 
 	/* get the target time as l_fp */
 	L_ADD(&fp_sys, &fp_ofs);
 
 	/* unfold the new system time */
-	timetv = lfp_stamp_to_tval(fp_sys, &pivot);
+	timets = lfp_stamp_to_tspec(fp_sys, &pivot);
 
 	/* now set new system time */
-	if (ntp_set_tod(&timetv, NULL) != 0) {
+	if (ntp_set_tod(&timets, NULL) != 0) {
 		msyslog(LOG_ERR, "step-systime: %m");
 		return false;
 	}

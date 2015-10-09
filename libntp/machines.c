@@ -57,7 +57,7 @@ pset_tod_using	set_tod_using = NULL;
 
 int
 ntp_set_tod(
-	struct timeval *tvp,
+	struct timespec *tvs,
 	void *tzp
 	)
 {
@@ -71,14 +71,8 @@ ntp_set_tod(
 
 #ifdef HAVE_CLOCK_SETTIME
 	if (rc && (SET_TOD_CLOCK_SETTIME == tod || !tod)) {
-		struct timespec ts;
-
-		/* Convert timeval to timespec */
-		ts.tv_sec = tvp->tv_sec;
-		ts.tv_nsec = 1000 *  tvp->tv_usec;
-
 		errno = 0;
-		rc = clock_settime(CLOCK_REALTIME, &ts);
+		rc = clock_settime(CLOCK_REALTIME, tvs);
 		saved_errno = errno;
 		TRACE(1, ("ntp_set_tod: clock_settime: %d %m\n", rc));
 		if (!tod && !rc)
@@ -97,7 +91,10 @@ ntp_set_tod(
 		adjtv.tv_sec = adjtv.tv_usec = 0;
 		adjtime(&adjtv, NULL);
 		errno = 0;
-		rc = settimeofday(tvp, tzp);
+
+		adjtv.tv_sec = tvs->tv_sec;
+		adjtv.tv_usec = (tvs->tv_nsec + 500) / 1000;
+		rc = settimeofday(&adjtv, tzp);
 		saved_errno = errno;
 		TRACE(1, ("ntp_set_tod: settimeofday: %d %m\n", rc));
 		if (!tod && !rc)

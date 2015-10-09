@@ -9,7 +9,7 @@ pset_tod_using		set_tod_using = NULL;
 
 int
 ntp_set_tod(
-	struct timeval *tv,
+	struct timespec *tp,
 	void *tzp
 	)
 {
@@ -23,7 +23,7 @@ ntp_set_tod(
 
 	t.ull = FILETIME_1970 +
 		(ULONGLONG)tv->tv_sec * 10 * 1000 * 1000 +
-		(ULONGLONG)tv->tv_usec * 10;
+		(ULONGLONG)tv->tv_nsec / 100;
 
 	if (!FileTimeToSystemTime(&t.ft, &st) || !SetSystemTime(&st)) {
 		msyslog(LOG_ERR, "SetSystemTime failed: %m");
