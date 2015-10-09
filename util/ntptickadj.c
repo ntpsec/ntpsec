@@ -1,9 +1,9 @@
 /*
  * ntptickadj - read, and possibly modify, the kernel `tick' and
- *	     `tickadj' variables', using adjtimex(2) or
- *	     ntp_adjtime(2).  This is included only for compatibility
- *	     with old scripts.  and its former support for unsafe
- *	     /dev/kmem operations has been removed.
+ *	     `tickadj' variables', using adjtimex(2).  This is
+ *	     included only for compatibility with old scripts.
+ *	     and its former support for unsafe /dev/kmem operations
+ *	     has been removed.
  */
 
 #include <config.h>
@@ -66,19 +66,10 @@ int main(
 #endif
 	}
 
-#ifdef HAVE_ADJTIMEX
 	if (adjtimex(&txc) < 0)
 	{
 		perror("adjtimex");
 	}
-#elif HAVE_NTP_ADJTIME
-	if (ntp_adjtime(&txc) < 0)
-	{
-		perror("ntp_adjtime");
-	}
-#else
-#error Either adjtimex or ntp_adjtime(2) is required.
-#endif
 	else
 	{
 #ifdef STRUCT_TIMEX_HAS_TIME_TICK

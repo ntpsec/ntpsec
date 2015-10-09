@@ -10,7 +10,7 @@
 
 The `{ntptickadj}` program (formerly named just `tickadj`) reads, and
 optionally modifies, several timekeeping-related variables.  It relies
-on the adjtimex(2) or ntp_adjtime(2) system calls.
+on the adjtimex(2) system call.
 
 These tweaks are almost never necessary on hardware new enough to have
 a fully POSIX.1-2001-conformant Unix. This utility is deprecated and

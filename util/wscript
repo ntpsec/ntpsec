@@ -4,10 +4,14 @@ def build(ctx):
 	srcnode = ctx.srcnode.abspath()
 	bldnode = ctx.bldnode.abspath()
 
-	util = ['hist', 'jitter', 'ntptickadj', 'precision', 'propdelay', 'ntptime', 'sht', 'testrs6000', 'tg2']
+	util = ['hist', 'jitter', 'precision', 'propdelay',
+		'ntptime', 'sht', 'testrs6000', 'tg2']
 
 	if ctx.get_define("HAVE_SYS_TIMEPPS_H"):
 		util += ["pps-api"]
+
+	if ctx.get_define("HAVE_ADJTIMEX"):
+		util += ["ntptickadj"]
 
 	for name in util:
 		ctx(
