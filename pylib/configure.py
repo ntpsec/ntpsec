@@ -46,6 +46,8 @@ def cmd_configure(ctx):
 	from sys import platform
 	if platform == "win32":
 		ctx.env.PLATFORM_TARGET = "win"
+	if platform == "darwin":
+		ctx.env.PLATFORM_TARGET = "osx"
 	else:
 		ctx.env.PLATFORM_TARGET = "unix"
 	ctx.end_msg(ctx.env.PLATFORM_TARGET	)
