@@ -62,7 +62,8 @@ def cmd_configure(ctx):
 	elif ctx.env.PLATFORM_TARGET == "osx":
 		ctx.env.PLATFORM_INCLUDES = ["/opt/local/include"]
 		ctx.env.PLATFORM_LIBPATH = ["/opt/local/lib"]
-
+	elif ctx.env.PLATFORM_TARGET == "win":
+		ctx.load("msvc")
 
 	# Wipe out and override flags with those from the commandline
 	for flag in ctx.env.OPT_STORE:

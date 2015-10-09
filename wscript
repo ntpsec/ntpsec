@@ -31,6 +31,7 @@ def dist(ctx):
 
 def options(ctx):
 	ctx.load("compiler_c")
+	ctx.load("msvc")
 
 	def callback_flags(option, opt, value, parser):
 		OPT_STORE.setdefault(opt, []).append(value)
