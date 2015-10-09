@@ -41,6 +41,17 @@ def cmd_configure(ctx):
 	ctx.env.CFLAGS += ["-Wall"]	# Default CFLAGS.
 
 
+	# Check target platform.
+	ctx.start_msg("Checking build target")
+	from sys import platform
+	if platform == "win32":
+		ctx.env.PLATFORM_TARGET = "win"
+	else:
+		ctx.env.PLATFORM_TARGET = "unix"
+	ctx.end_msg(ctx.env.PLATFORM_TARGET	)
+
+
+
 	# Wipe out and override flags with those from the commandline
 	for flag in ctx.env.OPT_STORE:
 		opt = flag.replace("--", "").upper() # XXX: find a better way.
@@ -58,15 +69,6 @@ def cmd_configure(ctx):
 	elif ctx.options.enable_doc:
 		ctx.env.ASCIIDOC_FLAGS = ["-f", "%s/docs/asciidoc.conf" % ctx.srcnode.abspath(), "-a", "stylesdir=%s/docs/" % ctx.srcnode.abspath()]
 		ctx.env.ENABLE_DOC = True
-
-
-	ctx.start_msg("Checking build target")
-	from sys import platform
-	if platform == "win32":
-		ctx.env.PLATFORM_TARGET = "win"
-	else:
-		ctx.env.PLATFORM_TARGET = "unix"
-	ctx.end_msg(ctx.env.PLATFORM_TARGET	)
 
 
 	from os.path import exists
