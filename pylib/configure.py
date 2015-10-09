@@ -46,12 +46,22 @@ def cmd_configure(ctx):
 	from sys import platform
 	if platform == "win32":
 		ctx.env.PLATFORM_TARGET = "win"
-	if platform == "darwin":
+	elif platform == "darwin":
 		ctx.env.PLATFORM_TARGET = "osx"
+	elif platform.startswith("freebsd"):
+		ctx.env.PLATFORM_TARGET = "freebsd"
 	else:
 		ctx.env.PLATFORM_TARGET = "unix"
 	ctx.end_msg(ctx.env.PLATFORM_TARGET	)
 
+
+	# XXX: hack
+	if ctx.env.PLATFORM_TARGET == "freebsd":
+		ctx.env.PLATFORM_INCLUDES = ["/usr/local/include"]
+		ctx.env.PLATFORM_LIBPATH = ["/usr/local/lib"]
+	elif ctx.env.PLATFORM_TARGET == "osx":
+		ctx.env.PLATFORM_INCLUDES = ["/opt/local/include"]
+		ctx.env.PLATFORM_LIBPATH = ["/opt/local/lib"]
 
 
 	# Wipe out and override flags with those from the commandline
@@ -118,10 +128,6 @@ def cmd_configure(ctx):
 		)
 	for (f, s, h) in structure_fields:
 		ctx.check_structfield(f, s, h)
-
-	# XXX: hack
-	ctx.env.PLATFORM_INCLUDES = ["/usr/local/include"]
-	ctx.env.PLATFORM_LIBPATH = ["/usr/local/lib"]
 
 	sizeofs = [
 		("time.h",		"time_t"),
