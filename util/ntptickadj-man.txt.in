@@ -1,0 +1,19 @@
+= {ntptickadjman} =
+:doctype: manpage
+
+== NAME ==
+{ntptickadj} - read and set kernel ticlk and tickadj variables
+
+@../docs/ntptickadj-body.txt@
+
+== EXIT STATUS ==
+
+One of the following exit values will be returned:
+
+0 (EXIT_SUCCESS)::
+  Successful program execution.
+1 (EXIT_FAILURE)::
+  The operation failed or the command syntax was not valid.
+
+
+// end
