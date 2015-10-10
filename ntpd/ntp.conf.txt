@@ -1,4 +1,4 @@
-= {ntpconfman} =
+= ntp.conf(5) =
 :doctype: manpage
 
 == NAME ==
@@ -82,82 +82,7 @@ namespace, while a `-6` or `--ipv6' qualifier forces DNS resolution to
 the IPv6 namespace. See IPv6 references for the equivalent classes for
 that address family.
 
-`pool` _address_ [`burst`] [`iburst`] [`version` _version_] [`prefer`] [`minpoll` _minpoll_] [`maxpoll` _maxpoll_]::
-`server` _address_ [`key` _key_ | `autokey`] [`burst`] [`iburst`] [`version` _version_] [`prefer`] [`minpoll` _minpoll_] [`maxpoll` _maxpoll_]::
-`peer` _address_ [`key` _key_ | `autokey`] [`version` _version_] [`prefer`] [`minpoll` _minpoll_] [`maxpoll` _maxpoll_] [`xleave`]::
-`broadcast` _address_ [`key` _key_ | `autokey`] [`version` _version_] [`prefer`] [`minpoll` _minpoll_] [`ttl` _ttl_] [`xleave`]::
-`manycastclient` _address_ [`key` _key_ | `autokey`] [`version` _version_] [`prefer`] [`minpoll` _minpoll_] [`maxpoll` _maxpoll_] [`ttl` _ttl_]::
-`unpeer` ['address' | 'associd']::
-These six commands specify the time server name or address to be used
-  and the mode in which to operate. The _address_ can be either a DNS
-  name or an IP address in dotted-quad notation. Additional information
-  on association behavior can be found in the "Association Management"
-  page (available as part of the HTML documentation provided in
-  `/usr/share/doc/{ntp}`).
-
-`pool`::
-  For type s addresses, this command mobilizes a persistent client mode
-  association with a number of remote servers. In this mode the local
-  clock can synchronized to the remote server, but the remote server can
-  never be synchronized to the local clock.
-
-`server`::
-  For type s and r addresses, this command mobilizes a persistent client
-  mode association with the specified remote server or local radio
-  clock. In this mode the local clock can synchronized to the remote
-  server, but the remote server can never be synchronized to the local
-  clock. This command should _not_ be used for type b or m addresses.
-
-`peer`::
-  For type s addresses (only), this command mobilizes a persistent
-  symmetric-active mode association with the specified remote peer. In
-  this mode the local clock can be synchronized to the remote peer or
-  the remote peer can be synchronized to the local clock. This is useful
-  in a network of servers where, depending on various failure scenarios,
-  either the local or remote peer may be the better source of time. This
-  command should NOT be used for type b, m or r addresses.
-
-`broadcast`::
-  For type b and m addresses (only), this command mobilizes a persistent
-  broadcast mode association. Multiple commands can be used to specify
-  multiple local broadcast interfaces (subnets) and/or multiple
-  multicast groups. Note that local broadcast messages go only to the
-  interface associated with the subnet specified, but multicast messages
-  go to all interfaces. In broadcast mode the local server sends
-  periodic broadcast messages to a client population at the _address_
-  specified, which is usually the broadcast address on (one of) the
-  local network(s) or a multicast address assigned to NTP. The IANA has
-  assigned the multicast group address IPv4 224.0.1.1 and IPv6 ff05::101
-  (site local) exclusively to NTP, but other nonconflicting addresses
-  can be used to contain the messages within administrative boundaries.
-  Ordinarily, this specification applies only to the local server
-  operating as a sender; for operation as a broadcast client, see the
-  _broadcastclient_ or _multicastclient_ commands below.
-
-`manycastclient`::
-  For type m addresses (only), this command mobilizes a manycast client
-  mode association for the multicast address specified. In this case a
-  specific address must be supplied which matches the address used on
-  the _manycastserver_ command for the designated manycast servers. The
-  NTP multicast address 224.0.1.1 assigned by the IANA should NOT be
-  used, unless specific means are taken to avoid spraying large areas of
-  the Internet with these messages and causing a possibly massive
-  implosion of replies at the sender. The _manycastserver_ command
-  specifies that the local server is to operate in client mode with the
-  remote servers that are discovered as the result of
-  broadcast/multicast messages. The client broadcasts a request message
-  to the group address associated with the specified _address_ and
-  specifically enabled servers respond to these messages. The client
-  selects the servers providing the best time and continues as with the
-  _server_ command. The remaining servers are discarded as if never
-  heard.
-
-`unpeer`::
-  This command removes a previously configured association. An address
-  or association ID can be used to identify the association. Either an
-  IP address or DNS name can be used. This command is most useful when
-  supplied via `{ntpq}` runtime configuration commands `:config` and
-  `config-from-file`.
+include::../docs/assoc-commands.txt[]
 
 === Association Options ===
 
@@ -206,6 +131,11 @@ These six commands specify the time server name or address to be used
 `noselect`::
   Marks the server as unused, except for display purposes. The server is
   discarded by the selection algroithm.
+
+`preempt`::
+  Specifies the association as preemptable rather than the default
+  persistent. This option is ignored with the `broadcast` command and is
+  most useful with the `manycastclient` and `pool` commands.
 
 `prefer`::
   Marks the server as preferred. All other things being equal, this host

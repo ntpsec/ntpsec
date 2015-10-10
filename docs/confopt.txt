@@ -54,54 +54,14 @@ qualifier forces DNS resolution to the IPv6 namespace.
 [[association]]
 == Association Commands ==
 
-Unless noted otherwise, further information about these commands is on
-the link:assoc.html[Association Management] page.
+Unless noted otherwise, further information about these commands is at
+link:discover.html#pool[Automatic Server Discovery].
 
-`server` 'address' ['options' ...]::
-`peer` 'address' ['options' ...]::
-`broadcast` 'address' ['options' ...]::
-`manycastclient` 'address' ['options' ...]::
-`pool` 'address' ['options' ...]::
-`unpeer` ['address' | 'associd']::
-  These commands specify the remote server name or address to be used
-  and the mode in which to operate. The _address_ can be either a DNS
-  name or a IPv4 or IPv6 address in standard notation. In general,
-  multiple commands of each type can be used for different server and
-  peer addresses or multicast groups.
-  `server`;;
-    For type s and r addresses (only), this command mobilizes a
-    persistent client mode association with the specified remote server
-    or local reference clock. If the `preempt` flag is specified, a
-    preemptable client mode association is mobilized instead.
-  `peer`;;
-    For type s addresses (only), this command mobilizes a persistent
-    symmetric-active mode association with the specified remote peer.
-  `broadcast`;;
-    For type b and m addressees (only), this command mobilizes a
-    broadcast or multicast server mode association. Note that type b
-    messages go only to the interface specified, but type m messages go
-    to all interfaces.
-  `manycastclient`;;
-    For type m addresses (only), this command mobilizes a preemptable
-    manycast client mode association for the multicast group address
-    specified. In this mode the address must match the address specified
-    on the `manycastserver` command of one or more designated manycast
-    servers. Additional information about this command is on the
-    link:discover.html#mcst[Automatic Server Discovery] page.
-  `pool`;;
-    For type s addresses (only) this command mobilizes a preemptable
-    pool client mode association for the DNS name specified. The DNS
-    name must resolve to one or more IPv4 or IPv6 addresses. Additional
-    information about this command is on the
-    link:discover.html#pool[Automatic Server Discovery] page. The
-    http://www.pool.ntp.org/[www.pool.ntp.org] page describes a
-    compatible pool of public NTP servers.
-  `unpeer`;;
-    This command removes a previously configured association. An address
-    or association ID can be used to identify the association. Either an
-    IP address or DNS name can be used. This command is most useful when
-    supplied via `{ntpq}` runtime configuration commands `:config` and
-    `config-from-file`.
+Additional information about this command is on at
+{server-discovery}. The http://www.pool.ntp.org/[www.pool.ntp.org]
+page describes a compatible pool of public NTP servers.
+
+include::assoc-commands.txt[]
 
 [[option]]
 == Server Command Options ==
