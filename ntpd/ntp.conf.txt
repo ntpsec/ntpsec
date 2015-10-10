@@ -84,8 +84,8 @@ that address family.
 
 `pool` _address_ [`burst`] [`iburst`] [`version` _version_] [`prefer`] [`minpoll` _minpoll_] [`maxpoll` _maxpoll_]::
 `server` _address_ [`key` _key_ | `autokey`] [`burst`] [`iburst`] [`version` _version_] [`prefer`] [`minpoll` _minpoll_] [`maxpoll` _maxpoll_]::
-`peer` _address_ [`key` _key_ | `autokey`] [`version` _version_] [`prefer`] [`minpoll` _minpoll_] [`maxpoll` _maxpoll_]::
-`broadcast` _address_ [`key` _key_ | `autokey`] [`version` _version_] [`prefer`] [`minpoll` _minpoll_] [`ttl` _ttl_]::
+`peer` _address_ [`key` _key_ | `autokey`] [`version` _version_] [`prefer`] [`minpoll` _minpoll_] [`maxpoll` _maxpoll_] [`xleave`]::
+`broadcast` _address_ [`key` _key_ | `autokey`] [`version` _version_] [`prefer`] [`minpoll` _minpoll_] [`ttl` _ttl_] [`xleave`]::
 `manycastclient` _address_ [`key` _key_ | `autokey`] [`version` _version_] [`prefer`] [`minpoll` _minpoll_] [`maxpoll` _maxpoll_] [`ttl` _ttl_]::
 `unpeer` ['address' | 'associd']::
 These six commands specify the time server name or address to be used
@@ -183,9 +183,10 @@ These six commands specify the time server name or address to be used
   acquisition with the `server` command and s addresses and when
   {ntpdman} is started with the `-q` option.
 
-`ident` 'group'::
-  Specify the group name for the association. See the "Autokey
-  Public-Key Authentication" page for further information.
+// Uncomment this when and if autokey works.
+//`ident` 'group'::
+//  Specify the group name for the association. See the "Autokey
+//  Public-Key Authentication" page for further information.
 
 `key` _key_::
   All packets sent to and received from the server or peer are to
