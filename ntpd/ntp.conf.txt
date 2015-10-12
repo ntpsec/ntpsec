@@ -184,6 +184,10 @@ in `/usr/share/doc/{ntp}`).
 
 === Manycast Options ===
 
+// This is a subset of the tos options applicable to manycast.
+// It omits the more general tinkering options.  If you change this,
+// be very sure to keep docs/miscopt.txt synchronized.
+
 `tos` [`ceiling` _ceiling_ | `cohort` \{ `0` | `1` } | `floor` _floor_ | `minclock` _minclock_ | `minsane` _minsane_]::
   This command affects the clock selection and clustering algorithms. It
   can be used to select the quality and quantity of peers used to
