@@ -4,7 +4,7 @@
 == NAME ==
 {ntptime} - read and set kernel time variables
 
-@../docs/ntptime-body.txt@
+@../docs/includes/ntptime-body.txt@
 
 == EXIT STATUS ==
 

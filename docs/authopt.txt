@@ -22,7 +22,7 @@ include::includes/authopt.txt[]
 Unless noted otherwise, further information about these commands is on
 the link:authentic.html[Authentication Support] page.
 
-include::auth-commands.txt[]
+include::includes/auth-commands.txt[]
 
 '''''
 

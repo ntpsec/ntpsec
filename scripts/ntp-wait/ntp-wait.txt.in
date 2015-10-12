@@ -4,7 +4,7 @@
 == NAME ==
 {ntpwait} - Wait for {ntpd} to stabilize the system clock
 
-@../../docs/ntp-wait-body.txt@
+@../../docs/includes/ntp-wait-body.txt@
 
 == EXIT STATUS ==
 

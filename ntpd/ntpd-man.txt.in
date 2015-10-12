@@ -4,7 +4,7 @@
 == NAME ==
 ntpd - Network Time Protocol service daemon
 
-@../doc/ntpd-body.txt@
+@../docs/includes/ntpd-body.txt@
 
 == EXIT STATUS ==
 

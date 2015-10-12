@@ -82,19 +82,19 @@ namespace, while a `-6` or `--ipv6' qualifier forces DNS resolution to
 the IPv6 namespace. See IPv6 references for the equivalent classes for
 that address family.
 
-include::../docs/assoc-commands.txt[]
+include::../docs/includes/assoc-commands.txt[]
 
 === Association Options ===
 
-include::../docs/assoc-options.txt[]
+include::../docs/includes/assoc-options.txt[]
 
 === Association Auxiliary Commands ===
 
-include::../docs/assoc-auxcommands.txt[]
+include::../docs/includes/assoc-auxcommands.txt[]
 
 == Authentication Commands ==
 
-include::../docs/auth-commands.txt[]
+include::../docs/includes/auth-commands.txt[]
 
 == Monitoring Support ==
 
@@ -109,7 +109,7 @@ analysis.
 
 === Monitoring Commands ===
 
-include::../docs/mon-commands.txt[]
+include::../docs/includes/mon-commands.txt[]
 
 == Access Control Support ==
 
@@ -172,7 +172,7 @@ server operator cooperates.
 
 == Access Control Commands ==
 
-include::../docs/access-commands.txt[]
+include::../docs/includes/access-commands.txt[]
 
 == Automatic NTP Configuration Options ==
 

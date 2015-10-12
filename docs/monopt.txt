@@ -55,7 +55,7 @@ retrospective analysis.
 Unless noted otherwise, further information about these commands is on
 the link:decode.html[Event Messages and Status Codes] page.
 
-include::mon-commands.txt[]
+include::includes/mon-commands.txt[]
 
 '''''
 

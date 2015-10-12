@@ -62,12 +62,12 @@ compatible pool of public NTP servers, which are probably what you
 want to define associations with unless you specifically know
 otherwise.
 
-include::assoc-commands.txt[]
+include::includes/assoc-commands.txt[]
 
 [[option]]
 == Server Command Options ==
 
-include::assoc-options.txt[]
+include::includes/assoc-options.txt[]
 
 [[aux]]
 == Auxiliary Commands ==
@@ -75,7 +75,7 @@ include::assoc-options.txt[]
 Information on authentication for broadcast, manycast, and
 manycat options can be found at link:authopt.html[Authentication Options].
 
-include::assoc-auxcommands.txt[]
+include::includes/assoc-auxcommands.txt[]
 
 '''''
 

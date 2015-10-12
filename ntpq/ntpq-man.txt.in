@@ -4,7 +4,7 @@
 == NAME ==
 {ntpq} - standard NTP query program
 
-@../docs/ntpq-body.txt@
+@../docs/includes/ntpq-body.txt@
 
 == EXIT STATUS ==
 

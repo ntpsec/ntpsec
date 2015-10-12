@@ -11,7 +11,7 @@ The turtle has been swimming in the kernel.
 
 '''''
 
-include::ntptime-body.txt
+include::includes/ntptime-body.txt
 
 '''''
 
