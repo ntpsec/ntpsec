@@ -279,6 +279,10 @@ and so on is suppressed.
   `filenum` 'Nfiledescriptors';;
     Specifies the maximum number of file descriptors {ntpd} may have open
     at the same time. Defaults to system default.
+
+// A subset of the tos options is described on the ntp.conf manual page.
+// If you change this, be very sure to keep that syncronized.
+
 `tos` [`beacon` 'beacon' | `ceiling` 'ceiling' | `cohort` {`0` | `1`} | `floor` 'floor' | `maxclock` 'maxclock' | `maxdist` 'maxdist' | `minclock` 'minclock' | `mindist` 'mindist' | `minsane` 'minsane' | `orphan` 'stratum' | `orphanwait` 'delay']::
   This command alters certain system variables used by the the clock
   selection and clustering algorithms. The default values of these
