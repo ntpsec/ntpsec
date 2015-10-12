@@ -142,10 +142,10 @@ broadcast or multicast message is actually received.
 == Manycast and Pool Modes ==
 
 Manycast and pool modes are automatic discovery and configuration
-paradigms new to NTPv4. They are intended as a means for a client to
-troll the nearby network neighborhood to find cooperating willing
-servers, validate them using cryptographic means and evaluate their time
-values with respect to other servers that might be lurking in the
+paradigms. They are intended as a means for a client to troll the
+nearby network neighborhood to find cooperating willing servers,
+validate them using cryptographic means and evaluate their time values
+with respect to other servers that might be lurking in the
 vicinity. The intended result is that each client mobilizes ephemeral
 client associations with some number of the "best" of the nearby
 servers, yet automatically reconfigures to sustain this number of

@@ -159,11 +159,11 @@ link:autokey.html[Autokey Public Key Authentication] page.
 [[mcst]]
 == Manycast Scheme ==
 
-Manycast is an automatic server discovery and configuration paradigm
-new to NTPv4. It is intended as a means for a client to troll the
-nearby network neighborhood to find cooperating servers, validate them
-using cryptographic means and evaluate their time values with respect
-to other servers that might be lurking in the vicinity. It uses the
+Manycast is an automatic server discovery and configuration paradigm.
+It is intended as a means for a client to troll the nearby network
+neighborhood to find cooperating servers, validate them using
+cryptographic means and evaluate their time values with respect to
+other servers that might be lurking in the vicinity. It uses the
 grab-n'-drop paradigm with the additional feature that active means
 are used to grab additional servers should the number of associations
 fall below the `maxclock` option of the `tos` command. The intended
