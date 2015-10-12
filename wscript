@@ -109,8 +109,7 @@ def build(ctx):
 #	ctx.recurse("tests")
 
 
-	subst_source = [
-		"ntpd/complete.conf.in",
+	subst_scripts = [
 		"scripts/ntp-wait/ntp-wait.in",
 		"scripts/ntpsweep/ntpsweep.in",
 		"scripts/ntptrace/ntptrace.in",
@@ -119,8 +118,26 @@ def build(ctx):
 
 	ctx(
 		features    = "subst",
-		source      = subst_source,
-		target		= [x.replace(".in", "") for x in subst_source],
-		chmod		= Utils.O755
+		source      = subst_scripts,
+		target	    = [x.replace(".in", "") for x in subst_scripts],
+		chmod	    = Utils.O755
+	)
+
+	subst_files = [
+		"ntp-keygen/ntp-keygen-man.txt.in",
+		"ntpd/complete.conf.in",
+		"ntpd/ntpd-man.txt.in",
+		"ntpq/ntpq-man.txt.in",
+		"scripts/ntp-wait/ntp-wait-man.txt.in",
+		"scripts/ntptrace/ntptrace-man.txt.in",
+		"sntp/sntp-man.txt.in",
+		"util/ntptickadj-man.txt.in",
+		"util/ntptime-man.txt.in",
+	]
+
+	ctx(
+		features    = "subst",
+		source      = subst_files,
+		target	    = [x.replace(".in", "") for x in subst_files],
 	)
 
