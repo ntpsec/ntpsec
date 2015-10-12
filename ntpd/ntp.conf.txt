@@ -178,8 +178,9 @@ include::../docs/access-commands.txt[]
 
 === Manycasting ===
 
-For a detailed description of manycast operation, see the "Servery
-Discovery" page in the web documentation.
+For a detailed description of manycast operation, see the "Server
+Discovery" page (available as part of the HTML documentation provided
+in `/usr/share/doc/{ntp}`).
 
 === Manycast Options ===
 
@@ -224,78 +225,15 @@ Discovery" page in the web documentation.
 
 == Reference Clock Support ==
 
-The NTP daemon supports some two dozen different radio,
-satellite and modem reference clocks plus a special pseudo-clock used
-for backup or when no other clock source is available. Detailed
-descriptions of individual device drivers and options can be found in
-the "Reference Clock Drivers" page (available as part of the HTML
-documentation provided in `/usr/share/doc/{ntp}`). Additional information
-can be found in the pages linked there, including the "Debugging Hints
-for Reference Clock Drivers" and "How To Write a Reference Clock Driver"
-pages (available as part of the HTML documentation provided in
-`/usr/share/doc/{ntp}`). In addition, support for a PPS signal is
-available as described in the "Pulse-per-second (PPS) Signal
-Interfacing" page (available as part of the HTML documentation provided
-in `/usr/share/doc/{ntp}`). Many drivers support special line
-discipline/streams modules which can significantly improve the accuracy
-using the driver. These are described in the "Line Disciplines and
-Streams Drivers" page (available as part of the HTML documentation
-provided in `/usr/share/doc/{ntp}`).
-
-A reference clock will generally (though not always) be a radio timecode
-receiver which is synchronized to a source of standard time such as the
-services offered by the NRC in Canada and NIST and USNO in the US. The
-interface between the computer and the timecode receiver is device
-dependent, but is usually a serial port. A device driver specific to
-each reference clock must be selected and compiled in the distribution;
-however, most common radio, satellite and modem clocks are included by
-default. Note that an attempt to configure a reference clock when the
-driver has not been compiled or the hardware port has not been
-appropriately configured results in a scalding remark to the system log
-file, but is otherwise non hazardous.
-
-For the purposes of configuration, {ntpdman} treats reference
-clocks in a manner analogous to normal NTP peers as much as possible.
-Reference clocks are identified by a syntactically correct but invalid
-IP address, in order to distinguish them from normal NTP peers.
-Reference clock addresses are of the form 127.127.t_._u_, where _t_ is
-an integer denoting the clock type and _u_ indicates the unit number.
-While it may seem overkill, it is in fact sometimes
-useful to configure multiple reference clocks of the same type, in which
-case the unit numbers must be unique.
-
-The `server` command is used to configure a reference clock, where the
-_address_ argument in that command is the clock address. The `key`,
-`version` and `ttl` options are not used for reference clock support.
-The `mode` option is added for reference clock support, as described
-below. The `prefer` option can be useful to persuade the server to
-cherish a reference clock with somewhat more enthusiasm than other
-reference clocks or peers. Further information on this option can be
-found in the "Mitigation Rules and the prefer Keyword" (available as
-part of the HTML documentation provided in `/usr/share/doc/{ntp}`) page.
-The `minpoll` and `maxpoll` options have meaning only for selected clock
-drivers. See the individual clock driver document pages for additional
-information.
-
-The `fudge` command is used to provide additional information for
-individual clock drivers and normally follows immediately after the
-`server` command. The `address` argument specifies the clock address.
-The `refid` and `stratum` options can be used to override the defaults
-for the device. There are two optional device-dependent time offsets and
-four flags that can be included in the `fudge` command as well.
-
-The stratum number of a reference clock is by default zero. Since the
-{ntpdman} daemon adds one to the stratum of each peer, a primary
-server ordinarily displays an external stratum of one. In order to
-provide engineered backups, it is often useful to specify the reference
-clock stratum as greater than zero. The stratum option is used for this
-purpose. Also, in cases involving both a reference clock and a
-pulse-per-second (PPS) discipline signal, it is useful to specify the
-reference clock identifier as other than the default, depending on the
-driver. The refid option is used for this purpose. Except where noted,
-these options apply to all clock drivers.
+For a detailed description of reference-clock configuration, see the
+"Reference Clock Drivers" page (available as part of the HTML
+documentation provided in `/usr/share/doc/{ntp}`).
 
 == Reference Clock Commands
+
+// This can't be merged with the master description of association
+// options (included above) because the cited options have different
+// and more specific semantics when used with refclocks.
 
 `server` _127.127.t_._u_ [`prefer`] [`mode` _int_] [`minpoll` _int_]
 [`maxpoll` _int_]::
@@ -342,10 +280,9 @@ these options apply to all clock drivers.
     facilitate calibration when more than one radio clock or PPS signal
     is supported, a special calibration feature is available. It takes
     the form of an argument to the `enable` command described in
-    "Miscellaneous` Options" page and operates as described in the
+    "Miscellaneous Options" page and operates as described in the
     "Reference Clock Drivers" page (available as part of the HTML
     documentation provided in `/usr/share/doc/{ntp}`).
-//FIXME: page reference may be invalid
   `time2` _secs_;;
     Specifies a fixed-point decimal number in seconds, which is
     interpreted in a driver-dependent way. See the descriptions of
