@@ -1,6 +1,6 @@
 // Syntax and usage of association commands.  This is included
 // twice, one in generating the Web documentation tree and one when
-// generating the munual page describing the daemon config file.
+// generating the manual page describing the daemon config file.
 
 `pool` _address_ [`burst`] [`iburst`] [`version` _version_] [`prefer`] [`minpoll` _minpoll_] [`maxpoll` _maxpoll_] [`preempt`]::
 `server` _address_ [`key` _key_ | `autokey`] [`burst`] [`iburst`] [`version` _version_] [`prefer`] [`minpoll` _minpoll_] [`maxpoll` _maxpoll_]::
