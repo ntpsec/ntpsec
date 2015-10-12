@@ -4,7 +4,7 @@
 == NAME ==
 ntptrace - trace peers of an NTP server
 
-@../../docs/ntptrace-body.txt@
+@../../docs/includes/ntptrace-body.txt@
 
 == EXIT STATUS ==
 

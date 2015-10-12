@@ -1,6 +1,6 @@
 = `ntptickadj` - set time-related kernel variables =
 
-include::ntptickadj-body.txt
+include::includes/ntptickadj-body.txt
 
 '''''
 

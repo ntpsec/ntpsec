@@ -4,7 +4,7 @@
 == NAME ==
 {ntptickadj} - read and set kernel ticlk and tickadj variables
 
-@../docs/ntptickadj-body.txt@
+@../docs/includes/ntptickadj-body.txt@
 
 == EXIT STATUS ==
 

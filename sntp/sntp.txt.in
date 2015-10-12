@@ -4,7 +4,7 @@
 == NAME ==
 {sntp} - standard Simple Network Time Protocol client program
 
-@../docs/sntp-body.txt@
+@../docs/includes/sntp-body.txt@
 
 == EXIT STATUS ==
 

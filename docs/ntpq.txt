@@ -15,7 +15,7 @@ include::includes/manual.txt[]
 
 '''''
 
-includes::ntpq-body.txt[]
+include::includes/ntpq-body.txt[]
 
 '''''
 

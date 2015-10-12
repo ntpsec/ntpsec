@@ -11,7 +11,7 @@ S is for snakeoil.
 
 '''''
 
-include::sntp-body.txt[]
+include::includes/sntp-body.txt[]
 
 '''''
 

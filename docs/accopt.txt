@@ -21,7 +21,7 @@ include::includes/accopt.txt[]
 Unless noted otherwise, further information about these ccommands is on
 the link:accopt.html[Access Control Support] page.
 
-include::../docs/access-commands.txt[]
+include::includes/access-commands.txt[]
 
 '''''
 
