@@ -1,0 +1,117 @@
+// Access control commands. Is included twice.
+
+`discard` [`average` _avg_] [`minimum` _min_] [`monitor` _prob_]::
+  Set the parameters of the `limited` facility which protects the server
+  from client abuse. The `average` subcommand specifies the minimum
+  average packet spacing, while the `minimum` subcommand specifies the
+  minimum packet spacing. Packets that violate these minima are
+  discarded and a kiss-o'-death packet returned if enabled. The default
+  minimum average and minimum are 5 and 2, respectively. The monitor
+  subcommand specifies the probability of discard for packets that
+  overflow the rate-control window. The options are:
+  `average` 'avg';;
+    Specify the minimum average interpacket spacing (minimum average
+    headway time) in log~2~ s with default 3.
+  `minimum` 'min';;
+    Specify the minimum interpacket spacing (guard time) in seconds with
+    default 2.
+  `monitor`;;
+    Specify the probability of being recorded for packets that overflow
+    the MRU list size limit set by `mru maxmem` or `mru maxdepth`. This
+    is a performance optimization for servers with aggregate arrivals of
+    1000 packets per second or more.
+
+`restrict` _address_ [`mask` _mask_] [`flag` `...`]::
+  The _address_ argument expressed in dotted-quad form is the address of
+  a host or network. Alternatively, the _address_ argument can be a
+  valid host DNS name. The _mask_ argument expressed in dotted-quad form
+  defaults to `255.255.255.255`, meaning that the _address_ is treated
+  as the address of an individual host. A default entry (address
+  `0.0.0.0`, mask `0.0.0.0`) is always included and is always the first
+  entry in the list. Note that text string _default_, with no mask
+  option, may be used to indicate the default entry. In the current
+  implementation, _flag_ always restricts access, i.e., an entry with no
+  flags indicates that free access to the server is to be given. The
+  flags are not orthogonal, in that more restrictive flags will often
+  make less restrictive ones redundant. The flags can generally be
+  classed into two categories, those which restrict time service and
+  those which restrict informational queries and attempts to do run-time
+  reconfiguration of the server. One or more of the following flags may
+  be specified:
++
+--
+  `flake`;;
+    Discard received NTP packets with probability 0.1; that is, on
+    average drop one packet in ten. This is for testing and amusement.
+    The name comes from Bob Braden's _flakeway_, which once did a
+    similar thing for early Internet testing.
+  `ignore`;;
+    Deny packets of all kinds, including {ntpqman} queries.
+  `kod`;;
+    If this flag is set when an access violation occurs, a kiss-o'-death
+    (KoD) packet is sent. KoD packets are rate limited to no more than
+    one per second. If another KoD packet occurs within one second after
+    the last one, the packet is dropped.
+  `limited`;;
+    Deny service if the packet spacing violates the lower limits
+    specified in the discard command. A history of clients is kept using
+    the monitoring capability of {ntpdman}. Thus, monitoring is
+    always active as long as there is a restriction entry with
+    the limited flag.
+  `lowpriotrap`;;
+    Declare traps set by matching hosts to be low priority. The number
+    of traps a server can maintain is limited (the current limit is 3).
+    Traps are usually assigned on a first come, first served basis, with
+    later trap requestors being denied service. This flag modifies the
+    assignment algorithm by allowing low priority traps to be overridden
+    by later requests for normal priority traps.
+//  `mssntp`;;
+//    Enable Microsoft Windows MS-SNTP authentication using Active
+//    Directory services. *Note: Potential users should be aware that
+//    these services involve a TCP connection to another process that
+//    could potentially block, denying services to other users. Therefore,
+//    this flag should be used only for a dedicated server with no clients
+//    other than MS-SNTP.*
+  `nomodify`;;
+    Deny {ntpqman} queries which attempt
+    to modify the state of the server (i.e., run time reconfiguration).
+    Queries which return information are permitted.
+  `noquery`;;
+    Deny {ntpqman} queries. Time service is not affected.
+  `nopeer`;;
+    Deny packets which would result in mobilizing a new association.
+    This includes broadcast and symmetric active packets when a
+    configured association does not exist. It also includes _pool_
+    associations, so if you want to use servers from a `pool` directive
+    and also want to use `nopeer` by default, you'll want a `restrict
+    source ...` line as well that does
+  `not`;;
+    include the `nopeer` directive.
+  `noserve`;;
+    Deny all packets except {ntpqman} and queries.
+  `notrap`;;
+    Decline to provide mode 6 control message trap service to matching
+    hosts. The trap service is a subsystem of the {ntpq} control message
+    protocol which is intended for use by remote event logging programs.
+  `notrust`;;
+    Deny service unless the packet is cryptographically authenticated.
+  `ntpport`;;
+    This is actually a match algorithm modifier, rather than a
+    restriction flag. Its presence causes the restriction entry to be
+    matched only if the source port in the packet is the standard NTP
+    UDP port (123). Both `ntpport` and `non-ntpport` may be specified.
+    The `ntpport` is considered more specific and is sorted later in the
+    list.
+  `version`;;
+    Deny packets that do not match the current NTP version.
+--
++
+Default restriction list entries with the flags ignore, interface,
+ntpport, for each of the local host's interface addresses are inserted
+into the table at startup to prevent the server from attempting to
+synchronize to its own time. A default entry is also always present,
+though if it is otherwise unconfigured; no flags are associated with
+the default entry (i.e., everything besides your own NTP server is
+unrestricted).
+
+// end
