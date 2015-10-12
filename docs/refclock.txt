@@ -21,9 +21,12 @@ include::includes/audio.txt[]
 [[intro]]
 == Introduction ==
 
-{project-shortname} supports almost four dozen satellite, radio and telephone
-modem reference clocks plus several audio devices for instrumentation
-signals. A general description of the reference clock support is on this
+{project-shortname} supports a large numberr of satellite, radio and
+telephone modem reference clocks plus several audio devices for
+instrumentation signals.plus a special pseudo-clock used for backup or
+when no other clock source is available.
+
+A general description of the reference clock support is on this
 page. Additional information about each reference clock driver can be
 found via links from this page. Additional information is on the
 link:rdebug.html[Debugging Hints for Reference Clock Drivers] and
@@ -46,12 +49,15 @@ declining under pressure from GPS technology.
 A device driver specific to each reference clock must be compiled in
 the distribution; however, most common GPS, radio, satellite and
 telephone modem clocks are included by default and are activated by
-configuration commands.
+configuration commands.  Note that an attempt to configure a reference
+clock when the driver has not been compiled or the hardware port has
+not been appropriately configured results in a scalding remark to the
+system log file, but is otherwise non hazardous.
 
 Reference clocks are supported in the same way as ordinary NTP clients
 and use the same filter, select, cluster and combine algorithms. Drivers
 have addresses in the form 127.127._t.u_, where _t_ is the driver type
-and _u_ is a unit number in the range 0-3 to distinguish multiple
+and _u_ is a unit number to distinguish multiple
 instances of the same driver. The connection to the computer is device
 dependent, usually a serial port, parallel port or special bus
 peripheral, but some can work directly from an audio codec or sound
@@ -60,20 +66,32 @@ name used by the driver to the particular device name.
 
 The `server` command is used to configure a reference clock. Only the
 `mode`, `minpoll`, `maxpoll`, and `prefer` options are supported for
-reference clocks, as described on the link:clockopt.html[Reference Clock
-Commands] page. The `prefer` option is discussed on the
-link:prefer.html[Mitigation Rules and the `prefer` Keyword] page. Some
-of these options have meaning only for selected clock drivers.
+reference clocks, as described on the link:clockopt.html[Reference
+Clock Commands] page. The `prefer` option can be useful to persuade
+the server to cherish a reference clock with somewhat more enthusiasm
+than other reference clocks or peers. It is further discussed on the
+link:prefer.html[Mitigation Rules and the `prefer` Keyword] page. The
+`minpoll` and `maxpoll` options have meaning only for selected clock
+drivers.
 
-The `fudge` command can be used to provide additional information for
-individual drivers and normally follows immediately after the `server`
-command. The reference clock stratum is by default 0, so that the server
-stratum appears to clients as 1. The `stratum` option can be used to set
-the stratum to any value in the range 0 through 15. The `refid` option
-can be used to change the reference identifier, as might in the case
-when the driver is disciplined by a pulse-per-second (PPS) source. The
-device-dependent `mode`, `time` and `flag` options can provide
-additional driver customization.
+The `fudge` command is used to provide additional information for
+individual clock drivers and normally follows immediately after the
+`server` command. The `address` argument specifies the clock address.
+The `refid` and `stratum` options can be used to override the defaults
+for the device. There are two optional device-dependent time offsets and
+four flags that can be included in the `fudge` command as well.
+
+The stratum number of a reference clock is by default zero. Since the
+{ntpdman} daemon adds one to the stratum of each peer, a primary
+server ordinarily displays an external stratum of one. In order to
+provide engineered backups, it is often useful to specify the reference
+clock stratum as greater than zero. The stratum option is used for this
+purpose. Also, in cases involving both a reference clock and a
+pulse-per-second (PPS) discipline signal, it is useful to specify the
+reference clock identifier as other than the default, depending on the
+driver. The refid option is used for this purpose. Except where noted,
+these options apply to all clock drivers.
+
 
 [[spec]]
 == Special Considerations ==

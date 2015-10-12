@@ -1,4 +1,7 @@
 // Association options - included twice.
+//
+// Note, some of these options are described with special refclock
+// semantics on the ntp.conf manual page.
 
 `autokey`::
   All packets sent to and received from the server or peer are to
