@@ -1505,7 +1505,7 @@ set_time(
 	double offset
 	)
 {
-	int rc;
+	bool rc;
 
 	if (time_adjusted)
 		return EXIT_SUCCESS;
@@ -1538,7 +1538,7 @@ set_time(
 		rc = adj_systime(offset);
 
 		/* If there was a problem, can we rely on errno? */
-		if (1 == rc)
+		if (rc)
 			time_adjusted = true;
 		return (time_adjusted)
 			   ? EXIT_SUCCESS

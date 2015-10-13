@@ -355,8 +355,8 @@ extern	void	init_systime	(void);
 extern  void	get_ostime	(struct timespec *tsp);
 extern	void	normalize_time	(struct timespec, long, l_fp *);
 extern	void	get_systime	(l_fp *);
-extern	int	step_systime	(double);
-extern	int	adj_systime	(double);
+extern	bool	step_systime	(double);
+extern	bool	adj_systime	(double);
 
 extern	struct tm * ntp2unix_tm (uint32_t ntp, int local);
 
