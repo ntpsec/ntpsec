@@ -126,15 +126,15 @@ ntpsim(
 	init_mon();
 	init_timer();
 	init_lib();
-	init_request();
+	//init_request();
 	init_control();
 	init_peer();
-	init_proto();
+	init_proto(false);
 	init_loopfilter();
 	mon_start(MON_OFF);
 
 	/* Call getconfig to parse the configuration file */
-	getconfig(argc, argv);
+	getconfig(NULL);
 	loop_config(LOOP_DRIFTINIT, 0);
 	initializing = false;
 
