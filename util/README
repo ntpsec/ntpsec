@@ -46,7 +46,7 @@ propdelay.c::
    this for WWV/H and CHU.  Don't use it for WWVB (the computation
    is easier for that).
 
-pps-api.c:
+pps-api.c::
    Try to run this program to see what the PPS-API (RFC 2783 kernel
    PPS interface) finds. You give it the device as argument and you
    may have to modify the pp.mode = BLA assignment.
