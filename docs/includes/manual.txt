@@ -6,6 +6,6 @@
 * link:ntptickadj.html[`{ntptickadj}` - set time-related kernel variables]
 * link:ntptime.html[`{ntptime}` - read and set kernel time variables]
 * link:keygen.html[`{ntpkeygen}` - generate public and private keys]
-* link:ntpdsim_new.html[`ntpdsim` - Network Time Protocol (NTP) simulator]
+* link:ntpdsim.html[`ntpdsim` - Network Time Protocol (NTP) simulator]
 * link:sitemap.html[Site Map]
 
