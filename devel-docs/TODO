@@ -95,23 +95,16 @@ is not yet tested anywhere but in ntpd itself.
 
 * Run everything through a spell checker.
 
-* man pages outside of docs/ need to be merged with the
-  Mills manpages inside it, with duplications removed.  In the
-  list below, the original docs content is on the left and
-  the external man pages are on the right.
-+
-[options="header"]
-|===========================================================
-| Inside docs       | Outside docs
-| docs/ntp_conf.txt | ntpd/ntp.conf.txt
-| docs/ntpdsim.txt  | docs/ntpdsim_new.txt
-| -                 | ntpd/ntp.keys.txt
-| -                 | scripts/calc_tickadj/calc_tickadj.txt
-| -                 | scripts/summary.txt
-| -                 | scripts/ntpsweep/ntpsweep.txt
-| -                 | scripts/plot_summary.txt
-| -                 | scripts/update-leap/update-leap.txt
-|===========================================================
+* docs/ntpdsim.txt and docs/ntpdsim_new.txt need to be merged.
+
+* These manpages have no corresponding material inside docs/.  Is that OK?
+
+  ntpd/ntp.keys.txt,
+  scripts/calc_tickadj/calc_tickadj.txt,
+  scripts/summary.txt,
+  scripts/ntpsweep/ntpsweep.txt,
+  scripts/plot_summary.txt,
+  scripts/update-leap/update-leap.txt,
 
 * In the docs subdirectory, include/command.txt is an HTML passthrough
   in a not entirely successful attempt to emulate the look of the
@@ -131,11 +124,6 @@ is not yet tested anywhere but in ntpd itself.
 
 * Website needs to be integrated (with a contacts and services page,
   among other things) and published.
-
-* The man page for ntp.conf contains a lot of descriptive text that
-  should be split out.  3 examples: Autokey, contents of log files,
-  multicast/broadcase/manycast.
-
 
 === Remaining procedural issues ===
 
