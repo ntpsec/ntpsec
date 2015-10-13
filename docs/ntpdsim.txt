@@ -1,4 +1,4 @@
-= `ntpdsim` - Network Time Protocol (NTP) simulator =
+= `ntpdsim` - Network Time Protocol (NTP) Simulator =
 
 [cols="10%,90%",frame="none",grid="none",style="verse"]
 |==============================
@@ -9,37 +9,69 @@ All in a row.
 
 |==============================
 
+
 == Related Links ==
 
 include::includes/manual.txt[]
 
 == Table of Contents ==
 
-* link:#synop[Synopsis]
-* link:#descr[Description]
-* link:#cmd[Command Line Oprionts]
-* link:#files[Files]
+* link:#caveat[Caveat Emptor]
+* link:#description[Description]
+* link:#configuration[Configuration]
+* link:#sample[Sample Configuration File]
 
 '''''
 
-[[synop]]
-== Synopsis ==
+[[caveat]]
+== Caveat Emptor ==
 
-`ntpdsim` [ `-B` 'bdly' ] [ `-C` 'snse' ] [ `-O` 'clk_time' ] [ `-S` 'sim_time' ] [ `-T` 'ferr' ] [ `-W` 'fsne' ] [ `-Y` 'ndly' ] [ `-X` 'pdly' ]
+At present, if you attempt to build `ntpsdsim` it probably won't, and
+if built it would probably fail.  Its code has been dusty and
+neglected for a long time.  This documentation is retained mainly as a
+matter of historical interest.
 
-[[descr]]
+The {project-shortname} maintainers have an internal project
+code-named TESTFRAME that intends to create the capability 
+for replicable end-to-end testing of `{ntpd}`.  It is likely
+that some version of this code will replace or merge in ntpdsim's
+capabilities.
+
+[[description]]
 == Description ==
 
-The `ntpdsim` program is an adaptation of the `{ntpd}` operating system
-daemon. The program operates as a discrete time simulator using
-specified systematic and random driving sources. It includes all the
-mitigation and discipline algorithms of the actual daemon, but with the
-packet I/O and system clock algorithms driven by simulation. Most
-functions of the real `{ntpd}` remain intact, including the monitoring,
-statistics recording, trace and host name resolution features. Further
+The ntpdsim program is used to simulate and study the behavior of an NTP
+daemon that derives its time from a number of different simulated time
+sources (servers). Each simulated server can be configured to have a
+different time offset, frequency offset, propagation delay, processing
+delay, network jitter and oscillator wander.
+
+The program operates as a discrete time simulator using specified
+systematic and random driving sources. Most functions of the real
+`{ntpd}` remain intact, including the monitoring, statistics
+recording, trace and host name resolution features. Further
 information on the simulator is on the
 http://www.eecis.udel.edu/%7emills/ntpsim.html[NTP Discrete Event
 Simulator] page.
+
+The ntpdsim program runs all the same selection, mitigation, and
+discipline algorithms as the actual ntpd daemon at the client. (It
+actually uses the same code). However, the input/output routines and
+servers are simulated. That is, instead of sending the client messages
+over the network to the actual servers, the client messages are
+intercepted by the ntpdsim program, which then generates the replies to
+those messages. The reply messages are carefully "inserted" into the
+input queue of the client at the right time according to the specified
+server properties (like propagation delay).
+
+Each simulated server runs according to a specified script that
+describes the server properties at a particular time. Each script
+consists of a series of consecutive acts. Each act runs for a particular
+duration and specifies the frequency offset, propagation delay,
+processing delay, network jitter and oscillator wander of the server for
+that duration. Once the duration of an act expires, the simulated server
+reconfigures itself according to the properties specified in the next
+act.
 
 The simulator is most useful to study NTP behavior in response to time
 and/or frequency transients under specific conditions of network jitter
@@ -49,63 +81,96 @@ networks and oscillators. The jitter generator produces samples from a
 Poisson distribution, while the wander generator produces samples from a
 Guassian distribution.
 
-The easiest way to use this program is to create a `ntpstats` directory,
-configuration file `{ntpconf}` and frequency file `ntp.drift` and test
-shell `test.sh` in the base directory. The `ntp.drift` file and
-`ntpstats` directory can be empty to start. The `test.sh` script can
-contain something like
+[[configuration]]
+== Configuration ==
 
--------------------------------------------------
-rm ./ntpstats/*
-ntpdsim -O 0.1 -C .001 -T 400 -W 1 -c ./{ntpconf},
--------------------------------------------------
+The ntpdsim program is configured by providing a configuration file at
+startup. The crux of the simulator configuration is specified using a
+`simulate` command, the syntax of which is given below. Note that all
+time quantities are in seconds and all frequency quantities are in parts
+per million (PPM):
 
-which starts the simulator with a time offset 100 ms, network jitter 1
-ms, frequency offset 400 PPM and oscillator wander 1 PPM/s. These
-parameters represent typical conditions with modern workstations on a
-Ethernet LAN. The {ntpconf} file should contain something like
+'<simulate_command>' ::= `simulate` { '<init_statement_list> <server_list>' } +
+'<init_statement_list>' ::= <init_statement_list> <init_statement> ; | <init_statement> ; +
+'<init_statement>' ::= `beep_delay` = <number> | `simulation_duration` = <number> + 
+'<server_list>' ::= '<server_list>' <server> | <server> +
+'<server_list>' ::= `server` = <address> { `server_offset` = <number> ; <act_list> } +
+'<act_list>' ::= '<act_list> <act>' | '<act>' +
+'<act>' ::= `duration` = <number> { '<act_stmt_list>' } +
+'<act_stmt_list>' ::= '<act_stmt_list> <act_stmt>' ; | '<act_stmt>' ; +
+'<act_stmt>' ::= `freq_offset` = <number> | `wander` = <number> | `jitter` = <number> | `prop_delay` = <number> | `proc_delay` = <number> +
 
----------------------------------
-disable kernel
-server pogo
-driftfile ./ntp.drift
-statsdir ./ntpstats/
-filegen loopstats type day enable
-filegen peerstats type day enable
----------------------------------
+In addition to the `simulate` command, other standard NTP configuration
+commands can be specified. These commands have the same meaning as in
+the ntpd configuration. Note that newlines are *not* significant within
+the `simulate` command even though they are used to mark the end of a
+normal NTP configuration command. While a newline is an "end of command"
+terminator for other configuration commands, in the `simulate` stanza
+`;` (the semicolon) is the "end of command" terminator.
 
-[[cmd]]
-== Command Line Options ==
+[[sample]]
+== Sample Configuration File ==
 
-Note: The NTP development team is moving to the use of a syntax-directed
-configuration file design. When complete these options will be replaced
-by a link:ntpdsim_new.html[new one]. Most of the `{ntpd}` command line
-options apply also to `ntpdsim`. In addition, the following command line
+A sample ntpdsim configuration file is given below. It specifies two
+simulated servers, each of which has two acts.
 
-`-B` 'bdly'::
-  Specify beep delay (3600) s.
-`-C` 'snse'::
-  Specify network jitter parameter (0) s.
-`-O` 'clk_time'::
-  Specify initial time offset (0) s.
-`-S` 'sim_time'::
-  Specify simulation duration (86400) s.
-`-T` 'ferr'::
-  Specify initial frequency offset (0) PPM.
-`-W` 'fnse'::
-  Specify oscillator wander parameter (0) PPM/s.
-`-Y` 'ndly'::
-  Specify network propagation delay (.001) s.
-`-Z` 'pdly'::
-  Specify server processing delay (.001) s.
+-------------------------------------
+    # Client configuration 
+    disable kernel
+    server pogo
+    driftfile ./ntp.drift
+    statsdir ./ntpstats/
+    filegen loopstats type day enable
+    filegen peerstats type day enable
 
-[[files]]
-== Files ==
-//NAMECHANGE
-`/etc/ntp.conf` - the default name of the configuration file +
-`/etc/ntp.drift` - the default name of the drift file +
-`/etc/ntp.keys` - the default name of the key file
+    # Simulation configuration
+    simulate {
+        simulation_duration = 86400;
+        beep_delay = 3600;
+
+        # Server 1
+        server = louie.udel.edu {
+            server_offset = 0;
+            duration = 50000 {
+                freq_offset = 400;
+                wander = 1.0;
+                jitter = 0.001;
+                prop_delay = 0.001;
+                proc_delay = 0.001;
+            }
+            duration = 6400 {
+                freq_offset = 200;
+                wander = 1.0;
+                jitter = 0.001;
+                prop_delay = 0.001;
+                proc_delay = 0.001;
+            }
+        }
+
+        # Server 2
+        server = baldwin.udel.edu {
+            server_offset = 0.02;
+            duration = 10000 {
+                freq_offset = 400;
+                wander = 1.0;
+                jitter = 0.001;
+                prop_delay = 0.5;
+                proc_delay = 0.001;
+            }
+            duration = 60000 {
+                freq_offset = 200;
+                wander = 1.0;
+                jitter = 0.05;
+                prop_delay = 0.005;
+                proc_delay = 0.001;
+            }
+        }
+ }
+  
+-------------------------------------
 
 '''''
+
+mailto:skamboj@udel.edu['Sachin Kamboj']
 
 include::includes/footer.txt[]
