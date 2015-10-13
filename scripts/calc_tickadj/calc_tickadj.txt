@@ -1,4 +1,4 @@
-= calc_tickadj(1) =
+= calc_tickadj(8) =
 :doctype: manpage
 
 == NAME ==

@@ -31,7 +31,7 @@ need not be run more frequently than about once every three weeks.
 
 For cron-friendly behavior, define CRONJOB=1 in the crontab.
 
-= OPTIONS
+== OPTIONS ==
 
 `-s` string, `--source-url`=_string_::
   The URL of the master copy of the leapseconds file.
@@ -72,11 +72,11 @@ Force update even if current file is OK and not close to expiring.
 `--dont-wait`::
   Don't wait for keystroke between plots.
 
-= USAGE
+== USAGE ==
 
 Usage stuff
 
-= EXIT STATUS
+== EXIT STATUS ==
 
 One of the following exit values will be returned:
 
@@ -85,7 +85,7 @@ One of the following exit values will be returned:
 1 (EXIT_FAILURE)::
   The operation failed or the command syntax was not valid.
 
-= AUTHORS
+== AUTHORS ==
 
 Timothe Litt
 

@@ -16,6 +16,6 @@ def build(ctx):
 					"%s/ntp-keygen/" % bldnode
 				],
 		use		= "ntp opts isc M RT LIBEVENT LIBEVENT_CORE LIBEVENT_PTHREADS PTHREAD CRYPTO",
-		install_path= "${PREFIX}/sbin/"
+		install_path= "${PREFIX}/bin/"
 	)
 

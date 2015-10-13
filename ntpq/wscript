@@ -30,6 +30,6 @@ def build(ctx):
 		includes	= [
 						"%s/ntpq/" % bldnode
 		],
-		install_path= "${PREFIX}/sbin/",
+		install_path= "${PREFIX}/bin/",
 	)
 
