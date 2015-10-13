@@ -1,4 +1,4 @@
-= {ntpkeysman} =
+= ntp.keys(5) =
 :doctype: manpage
 
 == NAME ==

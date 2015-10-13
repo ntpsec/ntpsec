@@ -20,5 +20,5 @@ def build(ctx):
 		includes	= [
 						"%s/sntp/" % bldnode
 					] + ctx.env.PLATFORM_INCLUDES, # XXX: Hack needs to use libevent_inc or something else.
-		install_path= "${PREFIX}/sbin/",
+		install_path= "${PREFIX}/bin/",
 	)
