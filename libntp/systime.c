@@ -322,7 +322,7 @@ normalize_time(
  * adj_systime - adjust system time by the argument.
  */
 #if !defined SYS_WINNT
-int				/* 0 okay, 1 error */
+bool				/* true on okay, false on error */
 adj_systime(
 	double now		/* adjustment (s) */
 	)
@@ -393,7 +393,7 @@ adj_systime(
  * step_systime - step the system clock.
  */
 
-int
+bool
 step_systime(
 	double step
 	)

@@ -454,9 +454,9 @@ set_mm_timer(
  * threshold, 128 msec by default.  For the remainder of the frequency
  * training interval, adj_systime is called with 0 offset each second
  * and slew the large offset at 500 PPM (500 usec/sec).
- * Returns 1 if okay, 0 if trouble.
+ * Returns true if okay, false if trouble.
  */
-int
+bool
 adj_systime(
 	double now
 	)
@@ -632,7 +632,7 @@ adj_systime(
 		rc = TRUE;
 	}
 
-	return rc;
+	return (bool)rc;
 }
 
 
