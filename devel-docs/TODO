@@ -54,6 +54,11 @@ None right now. (Sep-22 2015)
 * We need a build time option to disable all dangerous operations
   that ntpq can produce.
 
+* Fixup copyright notices.
+  See Mark's message of Oct-13th.
+  Subject: FLOSS license policy and copyright marking policy
+  Note help messages need copyright too.
+
 === Porting ===
 
 * The ntpd initialization sequence is still full of platform-
