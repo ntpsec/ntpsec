@@ -6,7 +6,7 @@ def build(ctx):
 
 	frob_sources = ['main.c', 'jitter.c', 'precision.c', 'stepback.c']
 
-	# FIXME: These guards do not currebtly work
+	# FIXME: These guards do not currently work
 	if ctx.get_define("HAVE_SYS_TIMEPPS_H"):
 		frob_sources += ["pps-api.c"]
 
