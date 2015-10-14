@@ -7,7 +7,7 @@ TEST_SETUP(crypto) {}
 
 TEST_TEAR_DOWN(crypto) {}
 
-#include "sntptest.h"
+#include "ntpdigtest.h"
 
 #include "crypto.h"
 

@@ -97,10 +97,10 @@ u_long current_time;		/* libntp/authkeys.c */
 
 void open_sockets(void);
 void handle_lookup(const char *name, int flags);
-void sntp_addremove_fd(int fd, int is_pipe, int remove_it);
+void ntpdig_addremove_fd(int fd, int is_pipe, int remove_it);
 void worker_timeout(evutil_socket_t, short, void *);
 void worker_resp_cb(evutil_socket_t, short, void *);
-void sntp_name_resolved(int, int, void *, const char *, const char *,
+void ntpdig_name_resolved(int, int, void *, const char *, const char *,
 			const struct addrinfo *,
 			const struct addrinfo *);
 void queue_xmt(SOCKET sock, struct dns_ctx *dctx, sent_pkt *spkt,
@@ -112,7 +112,7 @@ void timeout_query(sent_pkt *);
 void timeout_queries(void);
 void sock_cb(evutil_socket_t, short, void *);
 void check_exit_conditions(void);
-void sntp_libevent_log_cb(int, const char *);
+void ntpdig_libevent_log_cb(int, const char *);
 void set_li_vn_mode(struct pkt *spkt, char leap, char version, char mode);
 int  set_time(double offset);
 void dec_pending_ntp(const char *, sockaddr_u *);
@@ -165,10 +165,10 @@ static int opt_wait = false;
  * The actual main function.
  */
 int
-sntp_main (
+ntpdig_main (
 	int argc,
 	char **argv,
-	const char *sntpVersion
+	const char *ntpdigVersion
 	)
 {
 	int			i;
@@ -178,7 +178,7 @@ sntp_main (
 	struct event_config *	evcfg;
 
 	/* Initialize logging system - sets up progname */
-	sntp_init_logging(argv[0]);
+	ntpdig_init_logging(argv[0]);
 
 	if (!libevent_version_ok())
 		exit(EXIT_SOFTWARE);
@@ -251,7 +251,7 @@ sntp_main (
 		opt_timeout = atof(ntp_optarg);
 		break;
 	    case 'V':
-		printf("sntp %s\n", sntpVersion);
+		printf("ntpdig %s\n", ntpdigVersion);
 		exit(0);
 	    case 'w':
 		opt_wait = true;
@@ -284,7 +284,7 @@ sntp_main (
 	if (opt_logfile)
 		open_logfile(opt_logfile);
 
-	msyslog(LOG_INFO, "sntp %s", sntpVersion);
+	msyslog(LOG_INFO, "ntpdig %s", ntpdigVersion);
 
 	if (0 == argc && !opt_broadcast && !opt_concurrent) {
 		printf("%s: Must supply at least one of -b hostname, -c hostname, or hostname.\n",
@@ -334,7 +334,7 @@ sntp_main (
 	**
 	** HMS: What exactly does the above mean?
 	*/
-	event_set_log_callback(&sntp_libevent_log_cb);
+	event_set_log_callback(&ntpdig_libevent_log_cb);
 	if (debug > 0)
 		event_enable_debug_mode();
 #ifdef USE_WORK_THREAD
@@ -359,7 +359,7 @@ sntp_main (
 
 	/* wire into intres resolver */
 	worker_per_query = true;
-	addremove_io_fd = &sntp_addremove_fd;
+	addremove_io_fd = &ntpdig_addremove_fd;
 
 	open_sockets();
 
@@ -518,7 +518,7 @@ handle_lookup(
 
 	++n_pending_dns;
 	getaddrinfo_sometime(name, "123", &hints, 0,
-			     &sntp_name_resolved, ctx);
+			     &ntpdig_name_resolved, ctx);
 }
 
 
@@ -532,7 +532,7 @@ handle_lookup(
 ** - decrement n_pending_dns
 */
 void
-sntp_name_resolved(
+ntpdig_name_resolved(
 	int			rescode,
 	int			gai_errno,
 	void *			context,
@@ -593,7 +593,7 @@ sntp_name_resolved(
 				break;
 
 			default:
-				msyslog(LOG_ERR, "sntp_name_resolved: unexpected ai_family: %d",
+				msyslog(LOG_ERR, "ntpdig_name_resolved: unexpected ai_family: %d",
 					ai->ai_family);
 				exit(1);
 				break;
@@ -1016,7 +1016,7 @@ sock_cb(
 /*
  * check_exit_conditions()
  *
- * If sntp has a reply, ask the event loop to stop after this round of
+ * If ntpdig has a reply, ask the event loop to stop after this round of
  * callbacks, unless --wait was used.
  */
 void
@@ -1034,10 +1034,10 @@ check_exit_conditions(void)
 
 
 /*
- * sntp_addremove_fd() is invoked by the intres blocking worker code
+ * ntpdig_addremove_fd() is invoked by the intres blocking worker code
  * to read from a pipe, or to stop same.
  */
-void sntp_addremove_fd(
+void ntpdig_addremove_fd(
 	int	fd,
 	int	is_pipe,
 	int	remove_it
@@ -1076,7 +1076,7 @@ void sntp_addremove_fd(
 		       &worker_resp_cb, c);
 	if (NULL == ev) {
 		msyslog(LOG_ERR,
-			"sntp_addremove_fd: event_new(base, fd) failed!");
+			"ntpdig_addremove_fd: event_new(base, fd) failed!");
 		return;
 	}
 	c->resp_read_ctx = ev;
@@ -1110,7 +1110,7 @@ worker_resp_cb(
  * timeout expires, worker_idle_timer_fired() is invoked (again, in the
  * parent).
  *
- * sntp and ntpd each provide implementations adapted to their timers.
+ * ntpdig and ntpd each provide implementations adapted to their timers.
  */
 void
 intres_timeout_req(
@@ -1151,7 +1151,7 @@ worker_timeout(
 
 
 void
-sntp_libevent_log_cb(
+ntpdig_libevent_log_cb(
 	int		severity,
 	const char *	msg
 	)
@@ -1235,7 +1235,7 @@ handle_pkt(
 	double		offset;
 	double		precision;
 	double		synch_distance;
-	char *		p_SNTP_PRETEND_TIME;
+	char *		p_NTPDIG_PRETEND_TIME;
 	time_t		pretend_time;
 #if SIZEOF_TIME_T == 8
 	long long	ll;
@@ -1286,14 +1286,14 @@ handle_pkt(
 
 		gettimeofday_cached(base, &tv_dst);
 
-		p_SNTP_PRETEND_TIME = getenv("SNTP_PRETEND_TIME");
-		if (p_SNTP_PRETEND_TIME) {
+		p_NTPDIG_PRETEND_TIME = getenv("NTPDIG_PRETEND_TIME");
+		if (p_NTPDIG_PRETEND_TIME) {
 			pretend_time = 0;
 #if SIZEOF_TIME_T == 4
-			if (1 == sscanf(p_SNTP_PRETEND_TIME, "%ld", &l))
+			if (1 == sscanf(p_NTPDIG_PRETEND_TIME, "%ld", &l))
 				pretend_time = (time_t)l;
 #elif SIZEOF_TIME_T == 8
-			if (1 == sscanf(p_SNTP_PRETEND_TIME, "%lld", &ll))
+			if (1 == sscanf(p_NTPDIG_PRETEND_TIME, "%lld", &ll))
 				pretend_time = (time_t)ll;
 #else
 # include "GRONK: unexpected value for SIZEOF_TIME_T"
@@ -1354,7 +1354,7 @@ handle_pkt(
 			    : "");
 		free(ts_str);
 
-		if (p_SNTP_PRETEND_TIME)
+		if (p_NTPDIG_PRETEND_TIME)
 			return EXIT_SUCCESS;
 
 		if (!time_adjusted && (opt_step || opt_slew))
@@ -1441,24 +1441,24 @@ offset_calculation(
 
 #ifdef DEBUG
 	if (debug > 3) {
-		printf("sntp rootdelay: %f\n", FPTOD(p_rdly));
-		printf("sntp rootdisp: %f\n", FPTOD(p_rdsp));
-		printf("sntp syncdist: %f\n", *synch_distance);
+		printf("ntpdig rootdelay: %f\n", FPTOD(p_rdly));
+		printf("ntpdig rootdisp: %f\n", FPTOD(p_rdsp));
+		printf("ntpdig syncdist: %f\n", *synch_distance);
 
 		pkt_output(rpkt, rpktl, stdout);
 
-		printf("sntp offset_calculation: rpkt->reftime:\n");
+		printf("ntpdig offset_calculation: rpkt->reftime:\n");
 		l_fp_output(&p_ref, stdout);
-		printf("sntp offset_calculation: rpkt->org:\n");
+		printf("ntpdig offset_calculation: rpkt->org:\n");
 		l_fp_output(&p_org, stdout);
-		printf("sntp offset_calculation: rpkt->rec:\n");
+		printf("ntpdig offset_calculation: rpkt->rec:\n");
 		l_fp_output(&p_rec, stdout);
-		printf("sntp offset_calculation: rpkt->xmt:\n");
+		printf("ntpdig offset_calculation: rpkt->xmt:\n");
 		l_fp_output(&p_xmt, stdout);
 	}
 #endif
 
-	TRACE(3, ("sntp offset_calculation:\trec - org t21: %.6f\n"
+	TRACE(3, ("ntpdig offset_calculation:\trec - org t21: %.6f\n"
 		  "\txmt - dst t34: %.6f\tdelta: %.6f\toffset: %.6f\n",
 		  t21, t34, delta, *offset));
 

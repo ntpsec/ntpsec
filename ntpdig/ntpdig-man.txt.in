@@ -1,10 +1,10 @@
-= sntp(1) =
+= ntpdig(1) =
 :doctype: manpage
 
 == NAME ==
-{sntp} - standard Simple Network Time Protocol client program
+{ntpdig} - standard Simple Network Time Protocol client program
 
-@../docs/includes/sntp-body.txt@
+@../docs/includes/ntpdig-body.txt@
 
 == EXIT STATUS ==
 

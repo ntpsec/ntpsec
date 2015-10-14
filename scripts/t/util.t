@@ -25,10 +25,10 @@ BEGIN {
         ntp_peers(@{ delete $opts{opts} || []});
     }
 
-    sub test_sntp_line {
+    sub test_ntpdig_line {
         my (%opts) = @_;
         _parse_opts(%opts);
-        ntp_sntp_line(@{ delete $opts{opts} || []});
+        ntp_ntpdig_line(@{ delete $opts{opts} || []});
     }
 
     sub _parse_opts {
@@ -40,7 +40,7 @@ BEGIN {
 }
 
 require_ok 'NTP::Util';
-NTP::Util->import(qw(ntp_read_vars ntp_peers ntp_sntp_line));
+NTP::Util->import(qw(ntp_read_vars ntp_peers ntp_ntpdig_line));
 
 eval {
     test_read_vars(opts => [0, []], fail_open => 1,
@@ -161,19 +161,19 @@ PEER_END
 );
 
 eval {
-    test_sntp_line(opts => ['localhost'], fail_open => 1,
-        open_str => "sntp localhost |");
+    test_ntpdig_line(opts => ['localhost'], fail_open => 1,
+        open_str => "ntpdig localhost |");
 } or do {
-    like($@, qr/Could not start sntp: /, 'ntp_sntp_line dies on failed execution');
+    like($@, qr/Could not start ntpdig: /, 'ntp_ntpdig_line dies on failed execution');
 };
 
 is_deeply(
-    [test_sntp_line(opts => ['localhost'], 
-        output => <<'SNTP_END')],
-sntp 4.2.7p379@1.2946-o Tue Aug 27 18:55:18 UTC 2013 (4)
+    [test_ntpdig_line(opts => ['localhost'], 
+        output => <<'NTPDIG_END')],
+ntpdig 4.2.7p379@1.2946-o Tue Aug 27 18:55:18 UTC 2013 (4)
 Can't open KOD db file /var/db/ntp-kod for writing: Permission denied
 2013-09-19 22:49:29.381062 (-0100) +0.000007 +/- 0.077138 localhost 127.0.0.1 s4
-SNTP_END
+NTPDIG_END
     ['+0.000007', '4'],
     'stratum and offset parsed'
 );

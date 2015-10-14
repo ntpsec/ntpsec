@@ -5,10 +5,10 @@ use Exporter 'import';
 use Carp;
 use version 0.77;
 
-our @EXPORT_OK = qw(ntp_read_vars do_dns ntp_peers ntp_sntp_line);
+our @EXPORT_OK = qw(ntp_read_vars do_dns ntp_peers ntp_ntpdig_line);
 
 my $ntpq_path = 'ntpq';
-my $sntp_path = 'sntp';
+my $ntpdig_path = 'ntpdig';
 
 our $IP_AGNOSTIC;
 
@@ -126,11 +126,11 @@ sub ntp_peers {
 }
 
 # TODO: we don't need this but it would be nice to have all the line parsed
-sub ntp_sntp_line {
+sub ntp_ntpdig_line {
     my ($host) = @_;
 
-    my $cmd = "$sntp_path $host |";
-    open my $fh, $cmd or croak "Could not start sntp: $!";
+    my $cmd = "$ntpdig_path $host |";
+    open my $fh, $cmd or croak "Could not start ntpdig: $!";
 
     my ($offset, $stratum);
     while (<$fh>) {
@@ -141,7 +141,7 @@ sub ntp_sntp_line {
         $offset = $output[3];
         ($stratum = $output[7]) =~ s/s(\d{1,2})/$1/;
     }
-    close $fh or croak "running sntp failed: $! (exit status $?)";
+    close $fh or croak "running ntpdig failed: $! (exit status $?)";
     return ($offset, $stratum);
 }
 

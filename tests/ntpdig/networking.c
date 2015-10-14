@@ -1,3 +1,3 @@
-#include "sntptest.h"
+#include "ntpdigtest.h"
 
 #include "networking.h"

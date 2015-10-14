@@ -81,4 +81,4 @@ private_unlock_(void)
 }
 
 #pragma warning(disable : 4244)
-#include "../../../sntp/libevent/arc4random.c"
+#include "../../../ntpdig/libevent/arc4random.c"

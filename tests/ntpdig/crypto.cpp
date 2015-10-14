@@ -9,13 +9,13 @@ TEST_SETUP(crypto) {}
 
 TEST_TEAR_DOWN(crypto) {}
 
-#include "sntptest.h"
+#include "ntpdigtest.h"
 
 extern "C" {
 #include "crypto.h"
 };
 
-class cryptoTest : public sntptest {
+class cryptoTest : public ntpdigtest {
 };
 
 #define MD5_LENGTH 16

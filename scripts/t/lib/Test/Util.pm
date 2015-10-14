@@ -78,12 +78,12 @@ my $override = Sub::Override->new;
                 return shift @hosts 
             }) if exists $mock{dns};
 
-        $override->replace($package.'::ntp_sntp_line' => sub { 
+        $override->replace($package.'::ntp_ntpdig_line' => sub { 
                 return () if !@offset_stratums;
                 croak 'offset_stratums elements should be ARRAY refs' 
                     if ref $offset_stratums[0] ne 'ARRAY';
                 return @{ shift @offset_stratums };
-            }) if exists $mock{sntp_line};
+            }) if exists $mock{ntpdig_line};
     }
 
     sub run_mocked {

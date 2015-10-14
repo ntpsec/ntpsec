@@ -1,7 +1,7 @@
 #include "unity.h"
 #include "unity_fixture.h"
 
-#include "sntptest.h"
+#include "ntpdigtest.h"
 
 #include "kod_management.h"
 

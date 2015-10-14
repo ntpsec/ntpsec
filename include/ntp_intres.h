@@ -39,7 +39,7 @@ extern int getnameinfo_sometime(sockaddr_u *, size_t, size_t, int,
 				gni_sometime_callback, void *);
 #endif	/* USE_WORKER */
 
-/* intres_timeout_req() is provided by the client, ntpd or sntp. */
+/* intres_timeout_req() is provided by the client, ntpd or ntpdig. */
 extern void intres_timeout_req(u_int);
 
 #endif	/* GUARD_NTP_INTRES_H */

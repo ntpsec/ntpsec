@@ -76,7 +76,8 @@ scripts/::	Directory containing scripts to build the configuration
 		monitoring and support hold various perl and shell
 		scripts for visualizing synchronization and daemon startup.
 
-sntp/::		Query an NTP or SNTP server to report or set the time.
+ntpdig/::	Query an NTP or SNTP server to report or set the time.
+		(This tool was formerly sntp).
 
 tests/::	Self-test code.
 

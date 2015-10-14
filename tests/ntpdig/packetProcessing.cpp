@@ -9,7 +9,7 @@ TEST_SETUP(packetProcessing) {}
 
 TEST_TEAR_DOWN(packetProcessing) {}
 
-#include "sntptest.h"
+#include "ntpdigtest.h"
 
 extern "C" {
 #include "networking.h"
@@ -23,7 +23,7 @@ extern "C" {
 extern key* key_ptr;
 extern int key_cnt;
 
-class packetProcessingTest : public sntptest {
+class packetProcessingTest : public ntpdigtest {
 protected:
 	pkt testpkt;
 	pkt testspkt;

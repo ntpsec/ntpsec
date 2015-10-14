@@ -9,13 +9,13 @@ TEST_SETUP(nameresolution) {}
 
 TEST_TEAR_DOWN(nameresolution) {}
 
-#include "sntptest.h"
+#include "ntpdigtest.h"
 
 extern "C" {
 #include "networking.h"
 };
 
-class networkingTest : public sntptest {
+class networkingTest : public ntpdigtest {
 protected:
 	bool CompareAddrinfo(const char* host,
 											   int family, int flags,
