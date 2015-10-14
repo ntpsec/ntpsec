@@ -5,6 +5,9 @@
  * reads the system clock and, finally, writes out the time values for
  * later analysis. From this you can determine the jitter and if the
  * clock ever runs backwards.
+ *
+ * Copyright 2015 by the NTPsec project contributors
+ * SPDX-License-Identifier: BSD-2-Clause
  */
 
 #include <config.h>
@@ -55,11 +58,7 @@ get_clocktime(
 	now->l_uf = (uint32_t)dtemp;
 }
 
-int
-main(
-	int argc,
-	char *argv[]
-	)
+void jitter(void)
 {
 	l_fp tr;
 	int i, j;
@@ -109,7 +108,6 @@ main(
 	fprintf(stderr, "Last rank\n");
 	for (i = NBUF - 12; i < NBUF - 2; i++)
 		fprintf(stderr, "%2d %13.9f\n", i, gtod[i]);
-	exit(0);
 }
 
 /* end */

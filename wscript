@@ -100,6 +100,7 @@ def build(ctx):
 	ctx.recurse("libntp")
 	ctx.recurse("ntpdig")
 	ctx.recurse("ntpd")
+	ctx.recurse("ntpfrob")
 	ctx.recurse("ntpq")
 #	ctx.recurse("clockstuff") - 
 #	ctx.recurse("kernel")
@@ -131,7 +132,7 @@ def build(ctx):
 		"scripts/ntpwait/ntpwait-man.txt.in",
 		"scripts/ntptrace/ntptrace-man.txt.in",
 		"ntpdig/ntpdig-man.txt.in",
-		"util/ntptickadj-man.txt.in",
+		"ntpfrob/ntpfrob-man.txt.in",
 		"util/ntptime-man.txt.in",
 	]
 

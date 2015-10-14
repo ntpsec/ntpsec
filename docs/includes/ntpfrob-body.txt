@@ -1,0 +1,73 @@
+// This is the body of the manual page for ntpfrob.
+// It's included in two places: once for the docs/ HTML
+// tree, and once to make an individual man page.
+
+== Synopsis ==
+
+`{ntpfrob} [ -A ] [ -a tick ] [ -p ppsdev ] [-c] [-e] [-s]`
+
+== Description ==
+
+The {ntpfrob} program frobs the local clock hardware.  It collects
+several small diagnostic functions into a set that will differ
+depending on your platform and underlying system calls.
+Portions of it formerly traveled as `tickadj` and `ntptime`.  
+
+== Command Line Options ==
+
+`-a` 'tick'::
+  Set the kernel variable `tick` to the value _tick_ specifies.
+`-A`::
+  Display the kernel variable `tick`.
+`-p` 'ppsdev'::
+  Look for PPS pulses on a specified device
+`-c`::
+  Compute and display clock jitter.
+`-e`::
+  Measure clock precision.
+`-s`::
+  Check for stepback bug.
+
+== Modes of operation ==
+
+Documentation for some of these functions is scanty. If you suspect
+you may need to use them, reading the source code may be wise.
+
+=== Clock tick adjustment ===
+
+The -A function reads your clock's tick rate in microseconds.  The -a
+function sets it. Both rely on the adjtimex(2) system call.
+
+Tweaking your tick rate is almost never necessary on hardware new
+enough to have a fully POSIX.1-2001-conformant Unix.
+
+=== Clock jitter measurement ===
+
+The -c option can be used to determine the timing jitter due to the
+operating system in a gettimeofday() call.  For most systems the
+dominant contribution to the jitter budget is the period of the
+hardware interrupt, usually in the range 10 us-1 ms. For those systems
+with microsecond counters the jitter is dominated only by the
+operating system.
+
+=== Pulse-per-second check ==
+
+The -p option shows whether the  PPS-API (RFC 2783 kernel
+PPS interface) finds PPS on a specified device.
+
+=== Measure clock precision ===
+
+The -e option measure the resolution of the system clock, watching how
+the current time changes as we read it repeatedly.
+
+=== Stepback bug check ===
+
+The -s option checks for a bug originally seen on IBM RS/6000 AIX
+machines. If a negative offset is given, the system gets messed up and
+never completes the adjustment.  If the problem is fixed, this program
+will print the time, sit there for 10 seconds, and exit.  If the
+problem isn't fixed, the program will print an occasional
+"result=nnnnnn" (the residual slew from adjtime()).
+
+
+// end
