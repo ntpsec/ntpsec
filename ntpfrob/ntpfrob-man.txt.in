@@ -1,10 +1,10 @@
-= ntptickadj(8) =
+= ntprob(8) =
 :doctype: manpage
 
 == NAME ==
-{ntptickadj} - read and set kernel ticlk and tickadj variables
+{ntpfrob} - frob the clock hardware
 
-@../docs/includes/ntptickadj-body.txt@
+@../docs/includes/ntpfrob-body.txt@
 
 == EXIT STATUS ==
 

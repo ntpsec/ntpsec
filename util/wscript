@@ -4,14 +4,10 @@ def build(ctx):
 	srcnode = ctx.srcnode.abspath()
 	bldnode = ctx.bldnode.abspath()
 
-	util = ['hist', 'jitter', 'precision', 'propdelay',
-		'sht', 'testrs6000', 'tg2']
+	util = ['hist', 'propdelay', 'sht', 'tg2']
 
 	if ctx.env.PLATFORM_TARGET != "freebsd": # XXX: fix this using a test in configure().
-		util += ["pps-api", "ntptime"]
-
-	if ctx.env.HAVE_ADJTIMEX:
-		util += ["ntptickadj"]
+		util += ["ntptime"]
 
 	for name in util:
 		ctx(

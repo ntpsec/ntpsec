@@ -9,6 +9,9 @@
  * the RS6000's day.
  *
  * Run this as root!
+ *
+ * Copyright 2015 by the NTPsec project contributors
+ * SPDX-License-Identifier: BSD-2-Clause
  */
 #include <stdlib.h>
 #include <unistd.h>
@@ -31,11 +34,7 @@ timeout(int sig)
 	}
 }
 
-int
-main (
-	int argc,
-	char *argv[]
-	)
+void stepback(void)
 {
 	struct itimerval value, oldvalue;
 	int i;
@@ -57,7 +56,5 @@ main (
 	for (i=0; i<10; i++) {
 		pause();
 	}
-
-	exit(0);
 }
 

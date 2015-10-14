@@ -1,3 +1,8 @@
+/*
+ * Copyright 2015 by the NTPsec project contributors
+ * SPDX-License-Identifier: BSD-2-Clause
+ */
+
 #include "ntp_unixtime.h"
 
 #include <stdio.h>
@@ -7,16 +12,11 @@
 int default_get_resolution();
 int default_get_precision();
 
-int
-main(
-	int argc,
-	char *argv[]
-	)
+void precision(void)
 {
 	printf("log2(resolution) = %d, log2(precision) = %d\n",
 	       default_get_resolution(),
 	       default_get_precision());
-	return 0;
 }
 
 /* Find the resolution of the system clock by watching how the current time
@@ -169,3 +169,5 @@ default_get_precision(void)
 	    diff >>= 1;
 	return (i);
 }
+
+/* end */
