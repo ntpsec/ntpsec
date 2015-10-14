@@ -82,13 +82,16 @@ few will be user-visible:
 
 * The deprecated ntpdc utility, long since replaced by {ntpq}, has been removed.
 
-* The `tickadj` utility has been rebamed `ntptickadj` and is now fully
-  portable.
+* The `tickadj` utility has been renamed `ntptickadj`.
 
 * A number of obsolete refclocks have been removed.
 
+* The sntp program has been renamed {ntpdig} in order to make
+  NTP installables have a uniform name prefix and take up less
+  namespace.
+
 * The deprecated ntpdate program has been replaced with a shell
-  wrapper around {sntp}.
+  wrapper around {ntpdig}.
 
 * As noted above, Autokey support has been removed.
 

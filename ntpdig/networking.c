@@ -16,11 +16,11 @@ sendpkt (
 
 #ifdef DEBUG
 	if (debug > 2) {
-		printf("sntp sendpkt: Packet data:\n");
+		printf("ntpdig sendpkt: Packet data:\n");
 		pkt_output(pkt, len, stdout);
 	}
 #endif
-	TRACE(1, ("sntp sendpkt: Sending packet to %s ...\n",
+	TRACE(1, ("ntpdig sendpkt: Sending packet to %s ...\n",
 		  sptoa(dest)));
 
 	cc = sendto(rsock, (void *)pkt, len, 0, &dest->sa, 
@@ -192,7 +192,7 @@ process_pkt (
 		}
 		/* Yay! Things worked out! */
 		is_authentic = 1;
-		TRACE(1, ("sntp %s: packet from %s authenticated using key id %d.\n",
+		TRACE(1, ("ntpdig %s: packet from %s authenticated using key id %d.\n",
 			  func_name, stoa(sender), key_id));
 		break;
 

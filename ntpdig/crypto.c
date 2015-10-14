@@ -104,12 +104,12 @@ auth_init(
 
 	if (keyf == NULL) {
 		if (1 || debug)
-			printf("sntp auth_init: Couldn't open key file %s for reading!\n", keyfile);
+			printf("ntpdig auth_init: Couldn't open key file %s for reading!\n", keyfile);
 		return -1;
 	}
 	if (feof(keyf)) {
 		if (1 || debug)
-			printf("sntp auth_init: Key file %s is empty!\n", keyfile);
+			printf("ntpdig auth_init: Key file %s is empty!\n", keyfile);
 		fclose(keyf);
 		return -1;
 	}

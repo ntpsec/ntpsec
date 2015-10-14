@@ -22,7 +22,7 @@ package ntpsweep;
 use 5.006_000;
 use strict;
 use lib "@PERLLIBDIR@";
-use NTP::Util qw(do_dns ntp_read_vars ntp_peers ntp_sntp_line);
+use NTP::Util qw(do_dns ntp_read_vars ntp_peers ntp_ntpdig_line);
 
 (my $program = $0) =~ s%.*/(.+?)(.pl)?$%$1%;
 my ($showpeers, $maxlevel, $strip);
@@ -109,7 +109,7 @@ sub scan_host {
         $known_host = 1;
     }
     else {
-        ($offset, $stratum) = ntp_sntp_line($host);
+        ($offset, $stratum) = ntp_ntpdig_line($host);
 
         # got answers ? If so, go on.
         if ($stratum) {

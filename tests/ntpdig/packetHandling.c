@@ -1,6 +1,24 @@
-extern "C" {
 #include "unity.h"
 #include "unity_fixture.h"
+
+#include "ntpdigtest.h"
+
+#include "kod_management.h"
+#include "main.h"
+#include "networking.h"
+#include "ntp.h"
+
+static bool LfpEquality(const l_fp* expected, const l_fp* actual) {
+	if (L_ISEQU(expected, actual)) {
+		return true;
+	} else {
+		printf(" expected: %s (%u.%u) but was %s (%u.%u)",
+			   lfptoa(expected, FRACTION_PREC),
+			   expected->l_ui, expected->l_uf,
+			   lfptoa(actual, FRACTION_PREC),
+			   actual->l_ui, actual->l_uf);
+		return false;
+	}
 }
 
 TEST_GROUP(packetHandling);
@@ -9,34 +27,11 @@ TEST_SETUP(packetHandling) {}
 
 TEST_TEAR_DOWN(packetHandling) {}
 
-#include "sntptest.h"
+TEST(packetHandling, GenerateUnauthenticatedPacket) {
+	struct pkt testpkt;
+	struct timeval xmt;
+	l_fp expected_xmt, actual_xmt;
 
-extern "C" {
-#include "kod_management.h"
-#include "main.h"
-#include "networking.h"
-#include "ntp.h"
-};
-
-class mainTest : public sntptest {
-protected:
-	bool LfpEquality(const l_fp &expected, const l_fp &actual) {
-		if (L_ISEQU(&expected, &actual)) {
-			return true;
-		} else {
-			return false
-				<< " expected: " << lfptoa(&expected, FRACTION_PREC)
-				<< " (" << expected.l_ui << "." << expected.l_uf << ")"
-				<< " but was: " << lfptoa(&actual, FRACTION_PREC)
-				<< " (" << actual.l_ui << "." << actual.l_uf << ")";
-		}
-	}
-};
-
-TEST(main, GenerateUnauthenticatedPacket) {
-	pkt testpkt;
-
-	timeval xmt;
 	GETTIMEOFDAY(&xmt, NULL);
 	xmt.tv_sec += JAN_1970;
 
@@ -50,27 +45,27 @@ TEST(main, GenerateUnauthenticatedPacket) {
 	TEST_ASSERT_EQUAL(STRATUM_UNSPEC, PKT_TO_STRATUM(testpkt.stratum));
 	TEST_ASSERT_EQUAL(8, testpkt.ppoll);
 
-	l_fp expected_xmt, actual_xmt;
 	TVTOTS(&xmt, &expected_xmt);
 	NTOHL_FP(&testpkt.xmt, &actual_xmt);
-	TEST_ASSERT_TRUE(LfpEquality(expected_xmt, actual_xmt));
+	TEST_ASSERT_TRUE(LfpEquality(&expected_xmt, &actual_xmt));
 }
 
-TEST(main, GenerateAuthenticatedPacket) {
-	key testkey;
+TEST(packetHandling, GenerateAuthenticatedPacket) {
+	struct key testkey;
+	struct pkt testpkt;
+	struct timeval xmt;
+	const int EXPECTED_PKTLEN = LEN_PKT_NOMAC + MAX_MD5_LEN;
+	l_fp expected_xmt, actual_xmt;
+	char expected_mac[MAX_MD5_LEN];
+
 	testkey.next = NULL;
 	testkey.key_id = 30;
 	testkey.key_len = 9;
 	memcpy(testkey.key_seq, "123456789", testkey.key_len);
 	memcpy(testkey.type, "MD5", 3);
 
-	pkt testpkt;
-
-	timeval xmt;
 	GETTIMEOFDAY(&xmt, NULL);
 	xmt.tv_sec += JAN_1970;
-
-	const int EXPECTED_PKTLEN = LEN_PKT_NOMAC + MAX_MD5_LEN;
 
 	TEST_ASSERT_EQUAL(EXPECTED_PKTLEN,
 			  generate_pkt(&testpkt, &xmt, testkey.key_id, &testkey));
@@ -82,60 +77,57 @@ TEST(main, GenerateAuthenticatedPacket) {
 	TEST_ASSERT_EQUAL(STRATUM_UNSPEC, PKT_TO_STRATUM(testpkt.stratum));
 	TEST_ASSERT_EQUAL(8, testpkt.ppoll);
 
-	l_fp expected_xmt, actual_xmt;
 	TVTOTS(&xmt, &expected_xmt);
 	NTOHL_FP(&testpkt.xmt, &actual_xmt);
-	TEST_ASSERT_TRUE(LfpEquality(expected_xmt, actual_xmt));
+	TEST_ASSERT_TRUE(LfpEquality(&expected_xmt, &actual_xmt));
 
 	TEST_ASSERT_EQUAL(testkey.key_id, ntohl(testpkt.exten[0]));
 
-	char expected_mac[MAX_MD5_LEN];
 	TEST_ASSERT_EQUAL(MAX_MD5_LEN - 4, // Remove the key_id, only keep the mac.
 			  make_mac((char*)&testpkt, LEN_PKT_NOMAC, MAX_MD5_LEN, &testkey, expected_mac));
 	TEST_ASSERT_TRUE(memcmp(expected_mac, (char*)&testpkt.exten[1], MAX_MD5_LEN -4) == 0);
 }
 
-TEST(main, OffsetCalculationPositiveOffset) {
-	pkt rpkt;
+TEST(packetHandling, OffsetCalculationPositiveOffset) {
+	struct pkt rpkt;
+	l_fp reftime;
+	l_fp tmp;
+	struct timeval dst;
+	double offset, precision, synch_distance;
 
 	rpkt.precision = -16; // 0,000015259
 	rpkt.rootdelay = HTONS_FP(DTOUFP(0.125));
 	rpkt.rootdisp = HTONS_FP(DTOUFP(0.25));
-	// Synch Distance: (0.125+0.25)/2.0 == 0.1875
-	l_fp reftime;
+	/* Synch Distance: (0.125+0.25)/2.0 == 0.1875 */
 	get_systime(&reftime);
 	HTONL_FP(&reftime, &rpkt.reftime);
 
-	l_fp tmp;
-
-	// T1 - Originate timestamp
+	/* T1 - Originate timestamp */
 	tmp.l_ui = 1000000000UL;
 	tmp.l_uf = 0UL;
 	HTONL_FP(&tmp, &rpkt.org);
 
-	// T2 - Receive timestamp
+	/* T2 - Receive timestamp */
 	tmp.l_ui = 1000000001UL;
 	tmp.l_uf = 2147483648UL;
 	HTONL_FP(&tmp, &rpkt.rec);
 
-	// T3 - Transmit timestamp
+	/* T3 - Transmit timestamp */
 	tmp.l_ui = 1000000002UL;
 	tmp.l_uf = 0UL;
 	HTONL_FP(&tmp, &rpkt.xmt);
 
-	// T4 - Destination timestamp as standard timeval
+	/* T4 - Destination timestamp as standard timeval */
 	tmp.l_ui = 1000000001UL;
 	tmp.l_uf = 0UL;
-	timeval dst;
 	TSTOTV(&tmp, &dst);
 	dst.tv_sec -= JAN_1970;
 
-	double offset, precision, synch_distance;
 	offset_calculation(&rpkt, LEN_PKT_NOMAC, &dst, &offset, &precision, &synch_distance);
 
 	EXPECT_DOUBLE_EQ(1.25, offset);
 	EXPECT_DOUBLE_EQ(1. / ULOGTOD(16), precision);
-	// 1.1250150000000001 ?
+	/* 1.1250150000000001 ? */
 	EXPECT_DOUBLE_EQ(1.125015, synch_distance);
 }
 

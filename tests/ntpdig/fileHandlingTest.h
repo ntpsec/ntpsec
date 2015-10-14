@@ -1,7 +1,7 @@
 #ifndef GUARD_FILE_HANDLING_TEST_H
 #define GUARD_FILE_HANDLING_TEST_H
 
-#include "sntptest.h"
+#include "ntpdigtest.h"
 
 typedef enum {
 	INPUT_DIR = 0,

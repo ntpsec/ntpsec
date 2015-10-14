@@ -5,15 +5,15 @@
 # Not documented, as this is strictly a backward-compatibility shim. It's
 # based on the recipes at
 #           http://support.ntp.org/bin/view/Dev/DeprecatingNtpdate
-# with corrections for modern sntp options.
+# with corrections for modern ntpdig options.
 #
 # Debug this by giving the -n option, which causes it to echo the
-# generated sntp command rather than executing it.
+# generated ntpdig command rather than executing it.
 #
 # Known bug: The -e and -p options of ntpdate are not yet
 # implemented.
 #
-# ntpdate sntp    ntpd    What it does
+# ntpdate ntpdig  ntpd    What it does
 # -4      -4      -q -4   Resolve DNS lookups to A records         
 # -6      -6      -q -6   Resolve DNS lookups to AAAA records      
 # -a N    -a N    -q      Authentication   
@@ -71,7 +71,7 @@ then
     ADJUST="-s -j"
 fi
 
-$echo sntp $ADJUST $TIMEOUT $PASSTHROUGH $*
+$echo ntpdig $ADJUST $TIMEOUT $PASSTHROUGH $*
 
 #end
 

@@ -414,7 +414,7 @@ starting {ntpdman}, but this was never more than a mediocre hack
 and is no longer needed. If you are following the instructions
 in <<starting>> and you still need to set the
 system time before starting {ntpd}, please open a bug report and
-document what is going on, and then look at using {sntpman}.
+document what is going on, and then look at using {ntpdigman}.
 
 There is a way to start {ntpdman} that often addresses all of
 the problems mentioned above.

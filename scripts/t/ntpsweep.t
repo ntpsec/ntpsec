@@ -18,7 +18,7 @@ require "./$script_name";
 
 check_help("./$script_name", @options);
 
-mock_ntp_util('ntpsweep', read_vars => 1, peers => 1, sntp_line => 1, dns => 1);
+mock_ntp_util('ntpsweep', read_vars => 1, peers => 1, ntpdig_line => 1, dns => 1);
 
 my $header = <<'HEADER';
 Host                             st offset(s) version     system       processor

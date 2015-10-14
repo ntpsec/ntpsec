@@ -1,10 +1,10 @@
-// This is the body of the manual page for sntp.
+// This is the body of the manual page for ntpdig.
 // It's included in two places: once for the docs/ HTML
 // tree, and once to make an individual man page.
 
 == SYNOPSIS ==
 
-{sntp}
+{ntpdig}
     [--help | -?] [-4 | -6] [-a keynum] [-b bcaddress] [-B bctimeout]
     [-c] [-d] [-D debug-level] [-g delay] [-K kodfile] [-k keyfile]
     [-l logfile] [-M steplimit] [-o ntpver] [-r] [-S] [-s]
@@ -12,7 +12,7 @@
 
 == DESCRIPTION ==
 
-{sntp} can be used as an SNTP client to query a NTP or SNTP server and
+{ntpdig} can be used as an SNTP client to query a NTP or SNTP server and
 either display the time or set the local system's time (given suitable
 privilege). It can be run as an interactive command or from a _cron_
 job. NTP (the Network Time Protocol) and SNTP (the Simple Network Time
@@ -74,7 +74,7 @@ option (`-k`) for more details.
   Listen to the address specified for broadcast time sync. This option
   may appear an unlimited number of times.
 +
-If specified `{sntp}` will listen to the specified address for NTP
+If specified `{ntpdig}` will listen to the specified address for NTP
 broadcasts. The default maximum wait time can (and probably should) be
 modified with `-t`.
 
@@ -85,7 +85,7 @@ modified with `-t`.
 Requests from an NTP "client" to a "server" should never be sent more
 rapidly than one every 2 seconds. By default, any IPs returned as part
 of a DNS lookup are assumed to be for a single instance of {ntpd}, and
-therefore `{sntp}` will send queries to these IPs one after another,
+therefore `{ntpdig}` will send queries to these IPs one after another,
 with a 2-second gap in between each query.
 +
 The `-c` or `--concurrent` flag says that any IPs returned for the DNS
@@ -123,7 +123,7 @@ message will be displayed. The file will not be created.
 `-k` file-name, `--keyfile`=_file-name_::
   Look in this file for the key specified with `-a`.
 +
-This option specifies the keyfile. `{sntp}` will search for the key
+This option specifies the keyfile. `{ntpdig}` will search for the key
 specified with `-a` keyno in this file. See _{ntpkeysman}_ for more
 information.
 
@@ -149,34 +149,34 @@ situations demand different values.
   number as its argument.  Defaults to 4.  Seldom useful.
 
 `-r`, `--usereservedport`::
-  By default, `{sntp}` uses a UDP source port number selected by the
+  By default, `{ntpdig}` uses a UDP source port number selected by the
   operating system. When this option is used, the reserved NTP port 123
-  is used, which most often requires `{sntp}` be invoked as the superuser
+  is used, which most often requires `{ntpdig}` be invoked as the superuser
   (commonly "root"). This can help identify connectivity failures due to
   port-based firewalling which affect `{ntpd}`, which always uses source
   port 123.
 
 `-S`, `--step`::
-  By default, `{sntp}` displays the clock offset but does not attempt to
+  By default, `{ntpdig}` displays the clock offset but does not attempt to
   correct it. This option enables offset correction by stepping, that
   is, directly setting the clock to the corrected time. This typically
-  requires `{sntp}` be invoked as the superuser ("root").
+  requires `{ntpdig}` be invoked as the superuser ("root").
 
 `-s`, `--slew`::
-  By default, `{sntp}` displays the clock offset but does not attempt to
+  By default, `{ntpdig}` displays the clock offset but does not attempt to
   correct it. This option enables offset correction by slewing using
   adjtime(), which changes the rate of the clock for a period long
   enough to accomplish the required offset (phase) correction. This
-  typically requires `{sntp}` be invoked as the superuser ("root").
+  typically requires `{ntpdig}` be invoked as the superuser ("root").
 
 `-t` seconds, `--timeout`=_seconds_::
   The number of seconds to wait for responses. This option takes an
   integer number as its argument. The default _seconds_ for this option
   is: 5.
 +
-When waiting for a reply, `{sntp}` will wait the number of seconds
+When waiting for a reply, `{ntpdig}` will wait the number of seconds
 specified before giving up. The default should be more than enough for
-a unicast response. If `{sntp}` is only waiting for a broadcast response
+a unicast response. If `{ntpdig}` is only waiting for a broadcast response
 a longer timeout is likely needed.
 
 `--wait`, `--no-wait`::
@@ -190,19 +190,19 @@ If we are not setting the time, wait for all pending responses.
 
 == USAGE ==
 
-`{sntp} ntpserver.somewhere`::
+`{ntpdig} ntpserver.somewhere`::
   is the simplest use of this program and can be run as an unprivileged
   command to check the current time and error in the local clock.
-`{sntp} -Ss -M 128 ntpserver.somewhere`::
+`{ntpdig} -Ss -M 128 ntpserver.somewhere`::
   With suitable privilege, run as a command or from a _cron_(8) job,
-  `{sntp} -Ss -M 128 ntpserver.somewhere` will request the time from the
+  `{ntpdig} -Ss -M 128 ntpserver.somewhere` will request the time from the
   server, and if that server reports that it is synchronized then if the
   offset adjustment is less than 128 milliseconds the correction will be
   slewed, and if the correction is more than 128 milliseconds the
   correction will be stepped.
-`{sntp} -S ntpserver.somewhere`::
+`{ntpdig} -S ntpserver.somewhere`::
   With suitable privilege, run as a command or from a _cron_(8) job,
-  `{sntp} -S ntpserver.somewhere` will set (step) the local clock from a
+  `{ntpdig} -S ntpserver.somewhere` will set (step) the local clock from a
   synchronized specified server, like the `ntpdate` utility from older
   NTP implementations.
 

@@ -243,13 +243,13 @@ REM ****************************************************************************
 
 :NOBK
 	REM ** If that was not successful, we'll take a look into a version file, if available
-	IF EXIST ..\..\..\..\sntp\scm-rev (
-		IF "%CSET%"=="" FOR /F "TOKENS=1" %%a IN ('type ..\..\..\..\sntp\scm-rev') DO @SET CSET=%%a
+	IF EXIST ..\..\..\..\ntpdig\scm-rev (
+		IF "%CSET%"=="" FOR /F "TOKENS=1" %%a IN ('type ..\..\..\..\ntpdig\scm-rev') DO @SET CSET=%%a
 	)
 	REM next if block can go away once all windows compilers are building in
 	REM ports\winnt\<compiler dir>\<binary name dir> (ports\winnt\vs2008\ntpd)
-	IF EXIST ..\..\..\sntp\scm-rev (
-		IF "%CSET%"=="" FOR /F "TOKENS=1" %%a IN ('type ..\..\..\sntp\scm-rev') DO @SET CSET=%%a
+	IF EXIST ..\..\..\ntpdig\scm-rev (
+		IF "%CSET%"=="" FOR /F "TOKENS=1" %%a IN ('type ..\..\..\ntpdig\scm-rev') DO @SET CSET=%%a
 	)
 
 	REM ** Now, expand our version number with the CSet revision, if we managed to get one

@@ -54,6 +54,6 @@ format.
 
 == SEE ALSO ==
 
-{ntpconfman}, {ntpdman}, {ntpqman}, {sntpman}.
+{ntpconfman}, {ntpdman}, {ntpqman}, {ntpdigman}.
 
 // end

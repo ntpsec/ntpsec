@@ -98,7 +98,7 @@ def build(ctx):
 	if ctx.env.REFCLOCK_PARSE: # Only required by the parse refclock
 		ctx.recurse("libparse")
 	ctx.recurse("libntp")
-	ctx.recurse("sntp")
+	ctx.recurse("ntpdig")
 	ctx.recurse("ntpd")
 	ctx.recurse("ntpq")
 #	ctx.recurse("clockstuff") - 
@@ -130,7 +130,7 @@ def build(ctx):
 		"ntpq/ntpq-man.txt.in",
 		"scripts/ntp-wait/ntp-wait-man.txt.in",
 		"scripts/ntptrace/ntptrace-man.txt.in",
-		"sntp/sntp-man.txt.in",
+		"ntpdig/ntpdig-man.txt.in",
 		"util/ntptickadj-man.txt.in",
 		"util/ntptime-man.txt.in",
 	]

@@ -7,7 +7,7 @@ char *progname;		/* for msyslog use too */
 static void cleanup_log(void);
 
 void
-sntp_init_logging(
+ntpdig_init_logging(
 	const char *prog
 	)
 {

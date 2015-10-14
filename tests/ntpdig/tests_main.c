@@ -1,6 +1,6 @@
 #include "tests_main.h"
 
-const char *progname = "sntptest";
+const char *progname = "ntpdigtest";
 
 static const char** args_argv;
 static int args_argc;

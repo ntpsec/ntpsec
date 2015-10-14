@@ -9,13 +9,13 @@ TEST_SETUP(kodDatabase) {}
 
 TEST_TEAR_DOWN(kodDatabase) {}
 
-#include "sntptest.h"
+#include "ntpdigtest.h"
 
 extern "C" {
 #include "kod_management.h"
 };
 
-class kodDatabaseTest : public sntptest {
+class kodDatabaseTest : public ntpdigtest {
 protected:
 	virtual void SetUp() {
 		kod_init_kod_db("/dev/null", true);

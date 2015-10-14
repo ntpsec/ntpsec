@@ -218,7 +218,7 @@ init_timer(void)
  * timeout expires, worker_idle_timer_fired() is invoked (again, in the
  * parent).
  *
- * sntp and ntpd each provide implementations adapted to their timers.
+ * ntpdig and ntpd each provide implementations adapted to their timers.
  */
 void
 intres_timeout_req(

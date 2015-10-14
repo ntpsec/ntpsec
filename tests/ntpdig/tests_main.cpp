@@ -1,6 +1,6 @@
 #include "tests_main.h"
 
-const char *progname = "sntptest";
+const char *progname = "ntpdigtest";
 
 static void RunAllTests(void) {
 	RUN_TEST_GROUP(crypto);

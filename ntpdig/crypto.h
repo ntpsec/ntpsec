@@ -13,8 +13,6 @@
 
 #define LEN_PKT_MAC	LEN_PKT_NOMAC + sizeof(uint32_t)
 
-/* #include "sntp-opts.h" */
-
 struct key {
 	struct key *next;
 	int key_id;

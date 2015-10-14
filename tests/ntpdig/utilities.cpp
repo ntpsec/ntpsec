@@ -9,7 +9,7 @@ TEST_SETUP(utilities) {}
 
 TEST_TEAR_DOWN(utilities) {}
 
-#include "sntptest.h"
+#include "ntpdigtest.h"
 #include "fileHandlingTest.h"
 
 extern "C" {
@@ -20,7 +20,7 @@ const char * Version = "stub unit test Version string";
 
 using std::string;
 
-class utilitiesTest : public sntptest {
+class utilitiesTest : public ntpdigtest {
 protected:
 	sockaddr_u CreateSockaddr4(const char* address) {
 		sockaddr_u s;
@@ -72,7 +72,7 @@ protected:
 
 /* 
  * These tests are essentially a copy of the tests for socktoa()
- * in libntp. If sntp switches to using that functions, these
+ * in libntp. If ntpdig switches to using that functions, these
  * tests can be removed.
  */
 
