@@ -121,7 +121,7 @@ int  gettimeofday_cached(struct event_base *b, struct timeval *tv);
 
 #define EXIT_SOFTWARE	70
 
-#define ALL_OPTIONS "46a:b:c:dD:g:K:k:l:M:o:rSst:VwW"
+#define ALL_OPTIONS "46a:b:c:dD:g:jK:k:l:M:o:rSst:VwW"
 static const struct option longoptions[] = {
     { "ipv4",		    0, 0, '4' },
     { "ipv6",		    0, 0, '6' },
@@ -132,6 +132,7 @@ static const struct option longoptions[] = {
     { "set-debug-level",    1, 0, 'D' },
     { "gap",                1, 0, 'g' },
     { "kod",                1, 0, 'K' },
+    { "json",               1, 0, 'j' },
     { "keyfile",            1, 0, 'k' },
     { "logfile",            1, 0, 'l' },
     { "steplimit",          1, 0, 'M' },
@@ -151,6 +152,7 @@ static char *opt_authkey = NULL;
 static char *opt_broadcast = NULL;
 static char *opt_concurrent = NULL;
 static int opt_gap;
+static bool opt_json;
 static char *opt_kodfile = "/var/db/ntp-kod";
 static char *opt_keyfile = NULL;
 static char *opt_logfile = NULL;
@@ -222,6 +224,10 @@ ntpdig_main (
 			exit(1);
 		}
 		break;
+	    case 'j':
+		opt_json = true;
+		syslogit = false;
+		break;
 	    case 'K':
 		opt_kodfile = ntp_optarg;
 		break;
@@ -284,7 +290,7 @@ ntpdig_main (
 	if (opt_logfile)
 		open_logfile(opt_logfile);
 
-	msyslog(LOG_INFO, "ntpdig %s", ntpdigVersion);
+	//msyslog(LOG_INFO, "ntpdig %s", ntpdigVersion);
 
 	if (0 == argc && !opt_broadcast && !opt_concurrent) {
 		printf("%s: Must supply at least one of -b hostname, -c hostname, or hostname.\n",
@@ -1007,7 +1013,7 @@ sock_cb(
 
 	/* If the packet is good, set the time and we're all done */
 	rc = handle_pkt(rpktl, &r_pkt, &spkt->addr, spkt->dctx->name);
-	if (0 != rc)
+	if (EXIT_SUCCESS != rc)
 		TRACE(1, ("sock_cb: handle_pkt() returned %d\n", rc));
 	check_exit_conditions();
 }
@@ -1311,7 +1317,7 @@ handle_pkt(
 		if (digits > 6)
 			digits = 6;
 
-		ts_str = tv_to_str(&tv_dst);
+		ts_str = tv_to_str(&tv_dst, opt_json);
 		stratum = rpkt->stratum;
 		if (0 == stratum)
 				stratum = 16;
@@ -1345,13 +1351,22 @@ handle_pkt(
 			break;
 		}
 
-		msyslog(LOG_INFO, "%s %+.*f%s %s s%d %s%s", ts_str,
-			digits, offset, disptxt,
-			hostnameaddr(hostname, host), stratum,
-			leaptxt,
-			(time_adjusted)
-			    ? " [excess]"
-			    : "");
+		if (opt_json) {
+		    printf("{\"time\"\"%s\",\"offset\":%f,\"precision\":%f,",
+		    	ts_str, offset, synch_distance);
+		    printf("\"host\":\"%s\",\"ip\":\"%s\",",
+			   hostname, stoa(host));
+		    printf("\"stratum\":%d,\"leap\":\"%s\",\"adjusted\":%s}\n",
+			   stratum,
+		    	   leaptxt,
+		    	   time_adjusted ? "true" : "false");
+		}
+		else
+		    msyslog(LOG_INFO, "%s %+.*f%s %s s%d %s%s", ts_str,
+			    digits, offset, disptxt,
+			    hostnameaddr(hostname, host), stratum,
+			    leaptxt,
+			    time_adjusted ? " [excess]" : "");
 		free(ts_str);
 
 		if (p_NTPDIG_PRETEND_TIME)
@@ -1363,7 +1378,7 @@ handle_pkt(
 		return EXIT_SUCCESS;
 	}
 
-	return 1;
+	return EXIT_FAILURE;
 }
 
 

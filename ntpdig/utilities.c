@@ -134,7 +134,8 @@ ss_to_str(
  */
 char *
 tv_to_str(
-	const struct timeval *tv
+	const struct timeval *tv,
+	const bool json
 	)
 {
 	const size_t bufsize = 48;
@@ -142,6 +143,8 @@ tv_to_str(
 	time_t gmt_time, local_time;
 	struct tm tmbuf, tmbuf2, *p_tm_local;
 	int hh, mm, lto;
+	const char *oldstyle = "%d-%.2d-%.2d %.2d:%.2d:%.2d.%.6d (%+03d%02d)";
+	const char *jsonstyle = "%d-%.2d-%.2dT%.2d:%.2d:%.2d.%.6d%+03d%02d";
 
 	/*
 	 * convert to struct tm in UTC, then intentionally feed
@@ -160,7 +163,7 @@ tv_to_str(
 
 	buf = emalloc(bufsize);
 	snprintf(buf, bufsize,
-		 "%d-%.2d-%.2d %.2d:%.2d:%.2d.%.6d (%+03d%02d)",
+		 json ? jsonstyle : oldstyle,
 		 p_tm_local->tm_year + 1900,
 		 p_tm_local->tm_mon + 1,
 		 p_tm_local->tm_mday,

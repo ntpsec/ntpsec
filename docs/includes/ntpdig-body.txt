@@ -6,7 +6,7 @@
 
 {ntpdig}
     [--help | -?] [-4 | -6] [-a keynum] [-b bcaddress] [-B bctimeout]
-    [-c] [-d] [-D debug-level] [-g delay] [-K kodfile] [-k keyfile]
+    [-c] [-d] [-D debug-level] [-g delay] [-j] [-K kodfile] [-k keyfile]
     [-l logfile] [-M steplimit] [-o ntpver] [-r] [-S] [-s]
     [-u uctimeout] [--wait] [--version] [address...]`
 
@@ -22,15 +22,15 @@ The default is to write the estimated correct local date and time (i.e.
 not UTC) to the standard output in a format like:
 
 -----------------------------------------------------
-1996-10-15 20:17:25.123 (+0800) +4.567 +/- 0.089 secs
+2015-10-14 13:46:04.534916 (+0500) -0.000007 +/- 0.084075 localhost 127.0.0.1 s2 no-leap
 -----------------------------------------------------
 
-where the `(+0800)` means that to get to UTC from the reported local
-time one must add 8 hours and 0 minutes, the `4.567` indicates the
-local clock is 4.567 seconds behind the correct time (so 4.567 seconds
-must be added to the local clock to get it to be correct). Note that
+where the `(+0500)` means that to get to UTC from the reported local
+time one must add 5 hours and 0 minutes, the `-0.000007` indicates the
+local clock is 0.000007 seconds ahead of correct time (so 0.000007 seconds
+must be subtracted from the local clock to get it to be correct). Note that
 the number of decimals printed for this value will change based on the
-reported precision of the server.`+/- 0.089` is the reported
+reported precision of the server.`+/- 0.084075` is the reported
 _synchronization_ _distance_ (in seconds), which represents the
 maximum error due to all causes. If the server does not report valid
 data needed to calculate the synchronization distance, this will be
@@ -40,6 +40,21 @@ If the _host_ is different from the _IP_, both will be
 displayed. Otherwise, only the _IP_ is displayed. Finally, the
 _stratum_ of the host is reported and the leap indicator is decoded
 and displayed.
+
+With the -j (JSON) option, the output format becomes a self-describing
+JSON record:
+
+---------------------------------------------------------------------------------
+{"time":"2015-10-14T13:46:04.534916+0500",
+         "offset":-0.000007,"precision":"0.084075",
+	 "host":"localhost",ip:"127.0.0.1",
+	 "stratum":2,"leap":"noleap","adjusted":false}
+---------------------------------------------------------------------------------
+
+In the JSON format, time is in ISO8601 format; precision is the synch
+distance, with an unknown synch distance is reported as 0.  Host and
+IP are always emitted even if duplicate. The "adjusted" boolean
+reports whether ntpdig adusted the time.
 
 == OPTIONS ==
 
@@ -111,6 +126,9 @@ separate the queries we send out by the specified number of
 milliseconds. A larger _delay_ reduces the query load on the time
 sources, iat the cost of ncreasing the time to receive a valid
 response if the first source attempted is slow or unreachable.
+
+`-j`::
+  Output to stdout in JSON, suppressing syslog messages.
 
 `-K` file-name, `--kod`=_file-name_::
   KoD history filename. The default _file-name_ for this option is:
