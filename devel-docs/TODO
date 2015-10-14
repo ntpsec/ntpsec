@@ -52,6 +52,9 @@ None right now. (Sep-22 2015)
 
 * systime.c needs patching to put ntpdsim's hook back in place.
 
+* ntpfrob -c behaves mysteriously.  Someone with domain knowledge (probably Hal)
+  should review the code.
+
 * Fixup copyright notices.
   See Mark's message of Oct-13th.
   Subject: FLOSS license policy and copyright marking policy
