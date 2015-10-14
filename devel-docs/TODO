@@ -42,14 +42,10 @@ None right now. (Sep-22 2015)
 * Add monkeypatch for rmdir, rmtree under Windows.
 
 * ntpdsim does not quite build.  There is something wrong with the way waf is
-  setting up the linkage.  To reproduce, remove the "if 0" near the snd of
-  mtpd/wscript.
+  setting up the linkage.  To reproduce, remove the "if 0" near the end of
+  ntpd/wscript.
 
 === Code ===
-
-* We should audit scripts/ and utils/ to see which of those programs
-  can be thrown out (some, like util/kern.c, don't even build).  Some
-  (such as ntptrace) need to be translated into Python and supported.
 
 * We need a build time option to disable all dangerous operations
   that ntpq can produce.  First we need to enumerate them.
@@ -60,16 +56,6 @@ None right now. (Sep-22 2015)
   See Mark's message of Oct-13th.
   Subject: FLOSS license policy and copyright marking policy
   Note help messages need copyright too.
-
-=== Porting ===
-
-* The ntpd initialization sequence is still full of platform-specific crud.
-
-** We might be able to eliminate a lot of the Linux runtime
-droproot code by using file capabilities.
-
-* Better ANSI/POSIX conformance in MinGW and Visual Studio 2013 might
-enable us to get rid of the SYS_WINNT code. Should be tried...
 
 === Testing ===
 
@@ -92,7 +78,7 @@ on most platforms.
 a file and getting them from other NTP servers.
 
 * The script tests in scripts/t should be investigated, perhaps
-  they are salvageable.
+they are salvageable.
 
 === Documentation ===
 
@@ -123,7 +109,7 @@ a file and getting them from other NTP servers.
 * Similarly, includes/footer.txt is a tabular hack made to resemble the
   old HTML and should be cleaned up.
 
-0* The format and organization of the NEWS file needs a rethink.
+* The format and organization of the NEWS file needs a rethink.
 
 * Phabricator-centered workflow needs to be written up and integrated
   with the website content I wrote for us.
@@ -147,10 +133,9 @@ a file and getting them from other NTP servers.
 * ntpproto.py - a Python library that knows the NTP wire protocol and
   can be used to generate and interpret packets.  Daniel has speculated
   about writing this in order to test possible exploits, but there are
-  other uses.
+  other uses.  Translate it from the Perl protcol library under scripts/lib.
 
-* Deploy ntpproto.py to replace the Perl library under scripts/lib/.  Then
-  use that to translate the Perl stuff under scripts/ to Python.
+* Use ntpproto.py to translate the Perl stuff under scripts/ to Python.
 
 * Hal says "We need a way to inspect/debug bits on the wire. `ntpdate
   -du' is the traditional approach."  Hal's straw man is a new program
@@ -160,14 +145,18 @@ a file and getting them from other NTP servers.
 
 * Replace ntpq with a Python wrapper around ntpproto.py.
 
+* We might be able to eliminate a lot of the Linux runtime
+  droproot code by using file capabilities.
+
+* Better ANSI/POSIX conformance in MinGW and Visual Studio 2013 might
+  enable us to get rid of the SYS_WINNT code. Should be tried...
+
 * There is a mess around the symbols NO_MAIN_ALLOWED, BUILD_AS_LIB, and
   LIBNTP_C that needs to be refactored.  ntpd should *always* be built as
   a library linked to a main module, these guard symbols should go away.
 
 * seccomp sandboxing fails to build under Ubuntu due to some confusion
   in the Linux headers.  Investigate.
-
-* Should tickadj and ntptime merge? ntpstune, anyone? 
 
 * Adapt BSD snprintb into a better dumper for flag words like flash
   codes (throwing out the old-format support) and use it
@@ -178,7 +167,7 @@ a file and getting them from other NTP servers.
   one, the /etc/resolv.conf reload, would be better handled under Linux
   by asynchronous file-change notifications.
 
-* Take another look at SHM.  I think we can make a version that is
+* Take another look at SHM.  Hal thinks we can make a version that is
   read-only and solid.  Maybe write a support package that does all the
   work if you call it with the date/time.
 
