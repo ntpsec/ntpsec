@@ -1,10 +1,10 @@
-== ntp-wait(8) ==
+== ntpwait(8) ==
 :doctype: manpage
 
 == NAME ==
 {ntpwait} - Wait for {ntpd} to stabilize the system clock
 
-@../../docs/includes/ntp-wait-body.txt@
+@../../docs/includes/ntpwait-body.txt@
 
 == EXIT STATUS ==
 

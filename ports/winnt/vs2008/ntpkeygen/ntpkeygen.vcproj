@@ -2,9 +2,9 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="9,00"
-	Name="ntp-keygen"
+	Name="ntpkeygen"
 	ProjectGUID="{C88C1FBF-59D2-447F-BF57-0BCA8889028F}"
-	RootNamespace="ntp-keygen"
+	RootNamespace="ntpkeygen"
 	TargetFrameworkVersion="0"
 	>
 	<Platforms>
@@ -37,12 +37,12 @@
 			/>
 			<Tool
 				Name="VCMIDLTool"
-				TypeLibraryName="$(IntDir)ntp-keygen.tlb"
+				TypeLibraryName="$(IntDir)ntpkeygen.tlb"
 				HeaderFileName=""
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalIncludeDirectories="..\..\ntp-keygen;..\..\..\..\ntp-keygen"
+				AdditionalIncludeDirectories="..\..\ntpkeygen;..\..\..\..\ntpkeygen"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -105,12 +105,12 @@
 			/>
 			<Tool
 				Name="VCMIDLTool"
-				TypeLibraryName="$(IntDir)ntp-keygen.tlb"
+				TypeLibraryName="$(IntDir)ntpkeygen.tlb"
 				HeaderFileName=""
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalIncludeDirectories="..\..\ntp-keygen;..\..\..\..\ntp-keygen"
+				AdditionalIncludeDirectories="..\..\ntpkeygen;..\..\..\..\ntpkeygen"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -171,12 +171,12 @@
 			<Tool
 				Name="VCMIDLTool"
 				TargetEnvironment="3"
-				TypeLibraryName="$(IntDir)ntp-keygen.tlb"
+				TypeLibraryName="$(IntDir)ntpkeygen.tlb"
 				HeaderFileName=""
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalIncludeDirectories="..\..\ntp-keygen;..\..\..\..\ntp-keygen"
+				AdditionalIncludeDirectories="..\..\ntpkeygen;..\..\..\..\ntpkeygen"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -240,12 +240,12 @@
 			<Tool
 				Name="VCMIDLTool"
 				TargetEnvironment="3"
-				TypeLibraryName="$(IntDir)ntp-keygen.tlb"
+				TypeLibraryName="$(IntDir)ntpkeygen.tlb"
 				HeaderFileName=""
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalIncludeDirectories="..\..\ntp-keygen;..\..\..\..\ntp-keygen"
+				AdditionalIncludeDirectories="..\..\ntpkeygen;..\..\..\..\ntpkeygen"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -295,11 +295,11 @@
 			Filter="cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
 			>
 			<File
-				RelativePath="..\..\..\..\util\ntp-keygen-opts.c"
+				RelativePath="..\..\..\..\util\ntpkeygen-opts.c"
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\..\util\ntp-keygen.c"
+				RelativePath="..\..\..\..\util\ntpkeygen.c"
 				>
 			</File>
 			<File

@@ -5,7 +5,7 @@ use Test::Command;
 use Test::Output;
 use Test::Util qw(check_help mock_ntp_util run_mocked override);
 
-my $script_name = 'ntp-wait/ntp-wait';
+my $script_name = 'ntpwait/ntpwait';
 
 require_ok($script_name);
 

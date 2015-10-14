@@ -1,6 +1,6 @@
 = `{ntpwait}` - wait until {ntpd} is in synchronized state =
 
-include::includes/ntp-wait-body.txt[]
+include::includes/ntpwait-body.txt[]
 
 '''''
 

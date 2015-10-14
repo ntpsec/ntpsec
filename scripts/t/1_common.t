@@ -5,7 +5,7 @@ use Test::Command;
 use List::MoreUtils qw(any);
 
 my @script_list = qw(
-    calc_tickadj/calc_tickadj ntp-wait/ntp-wait ntpsweep/ntpsweep
+    calc_tickadj/calc_tickadj ntpwait/ntpwait ntpsweep/ntpsweep
     ntptrace/ntptrace summary plot_summary
 );
 

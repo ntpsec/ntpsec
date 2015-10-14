@@ -1,5 +1,5 @@
 #!/bin/sh
-# This script, when run, runs ntp-wait if ntpd is enabled.
+# This script, when run, runs ntpwait if ntpd is enabled.
 
 # PROVIDE: ntpwait
 
@@ -8,7 +8,7 @@
 name="ntpwait"
 rcvar="ntpwait_enable"
 start_cmd="ntpwait_start"
-ntp_wait="/usr/sbin/ntp-wait"
+ntp_wait="/usr/sbin/ntpwait"
 
 load_rc_config "$name"
 

@@ -15,10 +15,10 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\..\util\ntp-keygen-opts.c">
+    <ClCompile Include="..\..\..\..\util\ntpkeygen-opts.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\util\ntp-keygen.c">
+    <ClCompile Include="..\..\..\..\util\ntpkeygen.c">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="version.c">

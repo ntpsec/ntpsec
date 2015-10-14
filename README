@@ -58,7 +58,7 @@ ntpdate/::	Directory containing sources for a program to set the
 		local machine time from one or more remote machines
 		running NTP.  Operates like rdate, but much more accurate.
 
-ntp-keygen::
+ntpkeygen::
 		Directory containing the utility program used to generate
 		NTP authentication keys.
 
