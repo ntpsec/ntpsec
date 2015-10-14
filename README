@@ -1,8 +1,7 @@
 = The NTPsec distribution base directory =
 
 This directory and its subdirectories contain NTPSec, a
-security-hardened implementation of Network Time Protocol Version 4
-(NTP) for Unix systems.
+security-hardened implementation of Network Time Protocol Version 4.
 
 The contents of the base directory are given in this file. The contents of
 subdirectories are usually given in the README files in each subdirectory.
@@ -57,6 +56,11 @@ ntpd/::		Sources for the main time-synchronization daemon.
 ntpdate/::	Directory containing sources for a program to set the
 		local machine time from one or more remote machines
 		running NTP.  Operates like rdate, but much more accurate.
+
+ntpfrob::       The ntpfrob utility collects several small diagnostic
+		functions for reading and tweaking the local clock
+		hardware, including reading the clock tick rate,
+		precision, and jitter.
 
 ntpkeygen::
 		Directory containing the utility program used to generate
