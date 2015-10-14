@@ -11,7 +11,7 @@ lib::		NTP interface package required to query Mode 6 packets
 monitoring::	Directory containing perl scripts useful for monitoring
                 operations
 
-ntp-wait::	Blocks until ntpd is in state 4 (synchronized).
+ntpwait::	Blocks until ntpd is in state 4 (synchronized).
 		Useful at boot time, to delay the boot sequence
 		until after "ntpd -g" has set the time.
 

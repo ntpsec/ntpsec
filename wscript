@@ -103,14 +103,14 @@ def build(ctx):
 	ctx.recurse("ntpq")
 #	ctx.recurse("clockstuff") - 
 #	ctx.recurse("kernel")
-	ctx.recurse("ntp-keygen") 
+	ctx.recurse("ntpkeygen") 
 	ctx.recurse("util")
 #	ctx.recurse("unity")
 #	ctx.recurse("tests")
 
 
 	subst_scripts = [
-		"scripts/ntp-wait/ntp-wait.in",
+		"scripts/ntpwait/ntpwait.in",
 		"scripts/ntpsweep/ntpsweep.in",
 		"scripts/ntptrace/ntptrace.in",
 		"scripts/update-leap/update-leap.in"
@@ -124,11 +124,11 @@ def build(ctx):
 	)
 
 	subst_files = [
-		"ntp-keygen/ntp-keygen-man.txt.in",
+		"ntpkeygen/ntpkeygen-man.txt.in",
 		"ntpd/complete.conf.in",
 		"ntpd/ntpd-man.txt.in",
 		"ntpq/ntpq-man.txt.in",
-		"scripts/ntp-wait/ntp-wait-man.txt.in",
+		"scripts/ntpwait/ntpwait-man.txt.in",
 		"scripts/ntptrace/ntptrace-man.txt.in",
 		"ntpdig/ntpdig-man.txt.in",
 		"util/ntptickadj-man.txt.in",

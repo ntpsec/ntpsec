@@ -193,7 +193,7 @@ readlink(
  * Vista and later only.  Instead, if CreateHardLink is available (XP
  * and later), hardlink the linkname to the original filename.  On
  * earlier systems, user must rename file to match expected link for
- * ntpd to find it.  To allow building a ntp-keygen.exe which loads on
+ * ntpd to find it.  To allow building a ntpkeygen.exe which loads on
  * Windows pre-XP, runtime link to CreateHardLinkA().
  */
 int

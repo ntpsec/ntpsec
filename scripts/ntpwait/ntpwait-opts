@@ -1,7 +1,7 @@
-# EDIT THIS FILE WITH CAUTION  (ntp-wait-opts)
+# EDIT THIS FILE WITH CAUTION  (ntpwait-opts)
 #
 # It has been AutoGen-ed  June  3, 2015 at 11:53:09 AM by AutoGen 5.18.5
-# From the definitions    ntp-wait-opts.def
+# From the definitions    ntpwait-opts.def
 # and the template file   perlopt
 
 use Getopt::Long qw(GetOptionsFromArray);
@@ -40,8 +40,8 @@ sub processOptions {
         'help|?', 'more-help'));
 
     $usage = <<'USAGE';
-ntp-wait - Wait for ntpd to stabilize the system clock.
-USAGE: ntp-wait [ -<flag> [<val>] | --<name>[{=| }<val>] ]... 
+ntpwait - Wait for ntpd to stabilize the system clock.
+USAGE: ntpwait [ -<flag> [<val>] | --<name>[{=| }<val>] ]... 
 
     -n, --tries=num              Number of times to check ntpd
     -s, --sleep=num              How long to sleep between tries

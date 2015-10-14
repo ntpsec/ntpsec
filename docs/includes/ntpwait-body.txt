@@ -33,7 +33,7 @@ returns "the time is not yet stable".
 `-v`, `--verbose`::
   Be verbose.
 +
-By default, `{ntpwait}` is silent. With this option, `ntp-wait` will
+By default, `{ntpwait}` is silent. With this option, `{ntpwait}` will
 provide status information.
 
 == AUTHOR ==
