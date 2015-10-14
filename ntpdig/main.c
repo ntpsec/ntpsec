@@ -371,7 +371,7 @@ ntpdig_main (
 		handle_lookup(opt_concurrent, CTX_UCST | CTX_CONC);
 	}
 
-	for (i = ntp_optind; i < argc; ++i)
+	for (i = 0; i < argc; ++i)
 		handle_lookup(argv[i], CTX_UCST);
 
 	gettimeofday_cached(base, &start_tv);
