@@ -25,7 +25,7 @@
 
 static struct timex txc;
 
-void tickadj(const int newtick)
+void tickadj(const bool json, const int newtick)
 {
 	if (newtick != 0)
 	{
@@ -68,9 +68,17 @@ void tickadj(const int newtick)
 	else
 	{
 #ifdef STRUCT_TIMEX_HAS_TIME_TICK
-		printf("tick     = %ld\ntick_adj = %ld\n", txc.time_tick, txc.tickadj);
+		if (json)
+			printf("{\"tick\":%ld,\"tick_adj\":%ld}\n",
+			       txc.time_tick, txc.tickadj);
+		else
+			printf("tick = %ld\ntick_adj = %ld\n",
+			       txc.time_tick, txc.tickadj);
 #else
-		printf("tick = %ld\n", txc.tick);
+		if (json)
+			printf("{\"tick\":%ld}\n", txc.tick);
+		else
+			printf("tick = %ld\n", txc.tick);
 #endif
 	}
 

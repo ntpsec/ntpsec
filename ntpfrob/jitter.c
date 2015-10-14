@@ -15,10 +15,13 @@
 #include <stdio.h>
 #include <sys/time.h>
 #include <stdlib.h>
+#include <stdbool.h>
+
 #include "ntp_fp.h"
 
 #define NBUF	800002
 #define JAN_1970 2208988800UL		/* Unix base epoch */
+#define NSAMPLES 10
 
 char progname[10];
 double sys_residual;
@@ -58,7 +61,7 @@ get_clocktime(
 	now->l_uf = (uint32_t)dtemp;
 }
 
-void jitter(void)
+void jitter(const bool json)
 {
 	l_fp tr;
 	int i, j;
@@ -101,13 +104,33 @@ void jitter(void)
 		}
 	}
 	average = average / (NBUF - 2);
-	fprintf(stderr, "Average %13.9f\n", average);
-	fprintf(stderr, "First rank\n");
-	for (i = 0; i < 10; i++)
-		fprintf(stderr, "%2d %13.9f\n", i, gtod[i]);
-	fprintf(stderr, "Last rank\n");
-	for (i = NBUF - 12; i < NBUF - 2; i++)
-		fprintf(stderr, "%2d %13.9f\n", i, gtod[i]);
+	if (json) {
+		fprintf(stdout, "{\"Average\":%13.9f,", average);
+		fprintf(stdout, "\"First rank\":[");
+		for (i = 0; i < NSAMPLES; i++) {
+		    fprintf(stdout, "%13.9f", gtod[i]);
+		    if (i < NSAMPLES - 1)
+			fputc(',', stdout);
+		    fputs("],", stdout);
+		}
+		fprintf(stdout, "\"Last rank\":");
+		for (i = NBUF - 12; i < NBUF - 2; i++) {
+		    fprintf(stdout, "%13.9f\n", gtod[i]);
+		    if (i < NSAMPLES - 1)
+			fputc(',', stdout);
+		    fputs("]}\n", stdout);
+		}
+	}
+	else
+	{
+		fprintf(stdout, "Average %13.9f\n", average);
+		fprintf(stdout, "First rank\n");
+		for (i = 0; i < NSAMPLES; i++)
+		    fprintf(stdout, "%2d %13.9f\n", i, gtod[i]);
+		fprintf(stdout, "Last rank\n");
+		for (i = NBUF - 12; i < NBUF - 2; i++)
+		    fprintf(stdout, "%2d %13.9f\n", i, gtod[i]);
+	}
 }
 
 /* end */
