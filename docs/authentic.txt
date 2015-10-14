@@ -79,8 +79,8 @@ vulnerability analysis is in the white paper
 //Directions for doing that are on the "Building and Installing the
 //Distribution page."
 
+//"or `autokey`" should be appended to the next line when it works 
 Authentication is configured separately for each association using the `key`
-//or `autokey`
 subcommand on the `peer`, `server`, `broadcast` and `manycastclient`
 configuration commands. The authentication options described below
 specify the locations of the key files, if other than default, which
@@ -240,7 +240,8 @@ message of appropriate cryptotype arrives. When mobilized by a `server`
 or `peer` configuration command and no `key` or `autokey` subcommands
 are present, the association is not authenticated; if the `key`
 subcommand is present, the association is authenticated using the
-symmetric key ID specified. I
+symmetric key ID specified.
+
 //If the `autokey` subcommand is present, the
 //association is authenticated using Autokey.
 //
