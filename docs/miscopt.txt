@@ -18,7 +18,7 @@ include::includes/miscopt.txt[]
 
 == Commands and Options ==
 
-include::includes/misc-opts.txt[]
+include::includes/misc-options.txt[]
 
 // A subset of the tos options is described on the ntp.conf manual page.
 // If you change this, be very sure to keep that syncronized.
