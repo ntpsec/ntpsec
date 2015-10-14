@@ -100,7 +100,7 @@ def build(ctx):
 	ctx.recurse("libntp")
 	ctx.recurse("ntpdig")
 	ctx.recurse("ntpd")
-	ctx.recurse("ntpfrob")
+#	ctx.recurse("ntpfrob")
 	ctx.recurse("ntpq")
 #	ctx.recurse("clockstuff") - 
 #	ctx.recurse("kernel")
