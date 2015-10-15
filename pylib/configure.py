@@ -425,6 +425,7 @@ def cmd_configure(ctx):
 	probe_vsprintfm(ctx, "VSNPRINTF_PERCENT_M",
 			    "Checking for %m expansion in vsnprintf(3)")
 
+	# Define CFLAGS/LDCFLAGS for -vv support.
 	ctx.define("NTPS_CFLAGS", " ".join(ctx.env.CFLAGS).replace("\"", "\\\""))
 	ctx.define("NTPS_LDFLAGS", " ".join(ctx.env.LDFLAGS).replace("\"", "\\\""))
 
