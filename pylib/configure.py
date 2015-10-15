@@ -75,6 +75,7 @@ def cmd_configure(ctx):
 	ctx.find_program("perl", var="BIN_PERL")
 	ctx.find_program("sh", var="BIN_SH")
 	ctx.find_program("asciidoc", var="BIN_ASCIIDOC", mandatory=False)
+	ctx.find_program("a2x", var="BIN_ASCIIDOC", mandatory=False)
 
 	if ctx.options.enable_doc and not ctx.env.BIN_ASCIIDOC:
 		ctx.fatal("asciidoc is required in order to build documentation")
