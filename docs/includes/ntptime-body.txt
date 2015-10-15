@@ -5,7 +5,9 @@
 == Synopsis ==
 
 ["literal",subs="normal"]
-{ntptime} [ -chr ] [ -e 'est_error' ] [ -f 'frequency' ] [ -m 'max_error' ] [ -o 'offset' ] [ -s 'status' ] [ -t 'time_constant']
+{ntptime} [ -chr ] [ -e 'est_error' ] [ -f 'frequency' ] [-j]
+        [ -m 'max_error' ] [ -o 'offset' ] [ -s 'status' ]
+	[ -t 'time_constant']
 
 == Description ==
 
@@ -38,5 +40,9 @@ and `kerninfo` command.
   Specify clock status. Better know what you are doing.
 `-t` 'time_constant'::
   Specify time constant, an integer in the range 0-10.
+
+== Bugs ==
+
+The format for modes and status in the JSON report is less than ideal.
 
 //end

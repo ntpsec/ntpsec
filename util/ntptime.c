@@ -303,7 +303,8 @@ main(
 		ts.l_ui += JAN_1970;
 		ts.l_uf += ts_roundbit;
 		ts.l_uf &= ts_mask;
-		printf(json ? jfmt2 : ofmt2,  prettydate(&ts), fdigits, (int)time_frac);
+		/* FIXME: ugly hack - we shouldn't use prettydate() here */
+		printf(json ? jfmt2 : ofmt2,  prettydate(&ts) + (json?18:0), fdigits, (int)time_frac);
 		printf(json ? jfmt3 : ofmt3,  (u_long)ntv.maxerror, (u_long)ntv.esterror);
 		if (rawtime)
 			printf(json ? jfmt4 : ofmt4,
@@ -382,7 +383,8 @@ main(
 			    (u_long)ntx.stbcnt, (u_long)ntx.errcnt);
 		}
 		if (json)
-			fputs("}\n", stdout);
+		    /* hack to avoid trailing comma - not semabtically needed */ 
+		    fputs("\"version\":\""  NTPS_VERSION_STRING "\"}\n", stdout);
 		exit(EXIT_SUCCESS);
 	}
 
