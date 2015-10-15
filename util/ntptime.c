@@ -278,12 +278,12 @@ main(
 		const char *ofmt6 = "\n";
 #endif /* NTP_API */
 		/* JSON formats */
-		const char *jfmt1 = "{\"gettime-code\":%d,\"gettime-status\":%s,";
-		const char *jfmt2 = "\"time\":\"%s\",\"fractional time\":\".%0*d\",";
-		const char *jfmt3 = "\"maximum error\":%lu,\"estimated error\":%lu,";
-		const char *jfmt4 = "\"raw ntp time\":\"%x.%x\",\"raw unix time\":\"%x.%0*d %s\",";
+		const char *jfmt1 = "{\"gettime-code\":%d,\"gettime-status\":\"%s\",";
+		const char *jfmt2 = "\"time\":\"%s\",\"fractional-time\":\".%0*d\",";
+		const char *jfmt3 = "\"maximum-error\":%lu,\"estimated-error\":%lu,";
+		const char *jfmt4 = "\"raw-ntp-time\":\"%x.%x\",\"raw-unix-time\":\"%x.%0*d %s\",";
 #if NTP_API > 3
-		const char *jfmt5 = "\"TAI offset\":%d,";
+		const char *jfmt5 = "\"TAI-offset\":%d,";
 #else
 		const char *jfmt6 = "";
 #endif /* NTP_API */
@@ -334,15 +334,15 @@ main(
 		char *ofmt14 = "  pps frequency %.3f ppm, stability %.3f ppm, jitter %.3f us,\n";
 		char *ofmt15 = "  intervals %lu, jitter exceeded %lu, stability exceeded %lu, errors %lu.\n";
 		/* JSON formats */
-		char *jfmt7 = "\"adjtime-code\":%d,\"adjtime-status\":%s,";
+		char *jfmt7 = "\"adjtime-code\":%d,\"adjtime-status\":\"%s\",";
 		char *jfmt8 = "\"modes\":\"%s\",";
 		char *jfmt9 = "\"offset\":%.3f,";
 		char *jfmt10 = "\"frequency\":%.3f,\"interval\":%d,";
-		char *jfmt11 = "\"maximum error\":%lu,\"estimated error\":%lu,";
+		char *jfmt11 = "\"maximum-error\":%lu,\"estimated-error\":%lu,";
 		char *jfmt12 = "\"status\":\"%s\",";
-		char *jfmt13 = "\"time constant\":%lu,\"precision\":%.3f,\"tolerance\":%.0f,";
-		char *jfmt14 = "\"pps frequency\":%.3f,\"stability\":%.3f,\"jitter\":%.3f,";
-		char *jfmt15 = "\"intervals\":%lu,\"jitter exceeded\":%lu,\"stability exceeded\":%lu,\"errors:%lu\n";
+		char *jfmt13 = "\"time-constant\":%lu,\"precision\":%.3f,\"tolerance\":%.0f,";
+		char *jfmt14 = "\"pps-frequency\":%.3f,\"stability\":%.3f,\"jitter\":%.3f,";
+		char *jfmt15 = "\"intervals\":%lu,\"jitter-exceeded\":%lu,\"stability-exceeded\":%lu,\"errors:%lu\n";
 
 		flash = ntx.status;
 		printf(json ? jfmt7 : ofmt7, status, timex_state(status));
