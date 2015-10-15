@@ -450,6 +450,7 @@ def cmd_configure(ctx):
 
 
 	# Build settings for util/
+	# Required in order to access this in build()
 	if ctx.get_define("HAVE_SYS_TIMEPPS_H"):
 		ctx.env.HAVE_TIMEPPS = True
 
