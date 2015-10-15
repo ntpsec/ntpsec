@@ -3,6 +3,7 @@
  */
 #include <config.h>
 #include <stdio.h>
+#include <stdbool.h>
 
 #include "ntp_fp.h"
 #include "ntp_unixtime.h"	/* includes <sys/time.h> */
@@ -15,7 +16,7 @@
 # error sizeof(time_t) < 4 -- this will not work!
 #endif
 
-static char *common_prettydate(l_fp *, int);
+static char *common_prettydate(l_fp *, bool);
 
 const char * const months[12] = {
   "Jan", "Feb", "Mar", "Apr", "May", "Jun",
@@ -127,7 +128,7 @@ get_struct_tm(
 static char *
 common_prettydate(
 	l_fp *ts,
-	int local
+	bool local
 	)
 {
 	static const char pfmt0[] =
@@ -179,7 +180,7 @@ prettydate(
 	l_fp *ts
 	)
 {
-	return common_prettydate(ts, 1);
+	return common_prettydate(ts, true);
 }
 
 
@@ -188,7 +189,7 @@ gmprettydate(
 	l_fp *ts
 	)
 {
-	return common_prettydate(ts, 0);
+	return common_prettydate(ts, false);
 }
 
 
