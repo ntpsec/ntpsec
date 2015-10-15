@@ -93,7 +93,7 @@ object.  You can read about JSON at
 	 http://www.json.org/
 
 Be aware that if you present a tool design with a messy output format
-abd no JSON option it is quite likely to be rejected.
+and no JSON option it is quite likely to be rejected.
 
 === Copyrights and licenses ===
 

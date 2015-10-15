@@ -18,6 +18,7 @@
 #include <ctype.h>
 #include <signal.h>
 #include <setjmp.h>
+#include <stdbool.h>
 
 #ifdef STRUCT_NTP_TIMEVAL_HAS_TV_NSEC
 #define tv_frac_sec tv_nsec
@@ -63,7 +64,7 @@ static volatile int pll_control; /* (0) daemon, (1) kernel loop */
 static volatile int status;	/* most recent status bits */
 static volatile int flash;	/* most recent ntp_adjtime() bits */
 char* progname;
-static char optargs[] = "MNT:cde:f:hm:o:rs:t:";
+static char optargs[] = "MNT:cde:f:hjm:o:rs:t:";
 
 int
 main(
@@ -87,6 +88,7 @@ main(
 	int ch;
 	int errflg	= 0;
 	int cost	= 0;
+	bool json       = false;
 	volatile int rawtime	= 0;
 	char ascbuf[BUFSIZ];
 
@@ -124,6 +126,10 @@ main(
 		case 'f':
 			ntx.modes |= MOD_FREQUENCY;
 			ntx.freq = (long)(atof(ntp_optarg) * SCALE_FREQ);
+			break;
+
+		case 'j':
+			json = true;
 			break;
 
 		case 'm':
@@ -164,6 +170,7 @@ main(
 -e esterror	estimate of the error (us)\n\
 -f frequency	Frequency error (-500 .. 500) (ppm)\n\
 -h		display this help info\n\
+-j              report in JSON\n\
 -m maxerror	max possible error (us)\n\
 -o offset	current offset (ms)\n\
 -r		print the unix and NTP time raw\n\
@@ -260,8 +267,27 @@ main(
 	if (status < 0) {
 		perror("ntp_gettime() call fails");
 	} else {
-		printf("ntp_gettime() returns code %d (%s)\n",
-		    status, timex_state(status));
+		/* oldstyle formats */
+		const char *ofmt1 = "ntp_gettime() returns code %d (%s)\n";
+		const char *ofmt2 = "  time %s, (.%0*d),\n";
+		const char *ofmt3 = "  maximum error %lu us, estimated error %lu us";
+		const char *ofmt4 = "  ntptime=%x.%x unixtime=%x.%0*d %s";
+#if NTP_API > 3
+		const char *ofmt5 = ", TAI offset %ld\n";
+#else
+		const char *ofmt6 = "\n";
+#endif /* NTP_API */
+		/* JSON formats */
+		const char *jfmt1 = "{\"gettime-code\":%d,\"gettime-status\":%s,";
+		const char *jfmt2 = "\"time\":\"%s\",\"fractional time\":\".%0*d\",";
+		const char *jfmt3 = "\"maximum error\":%lu,\"estimated error\":%lu,";
+		const char *jfmt4 = "\"raw ntp time\":\"%x.%x\",\"raw unix time\":\"%x.%0*d %s\",";
+#if NTP_API > 3
+		const char *jfmt5 = "\"TAI offset\":%d,";
+#else
+		const char *jfmt6 = "";
+#endif /* NTP_API */
+		printf(json ? jfmt1 : ofmt1, status, timex_state(status));
 		time_frac = ntv.time.tv_frac_sec;
 #ifdef STA_NANO
 		if (flash & STA_NANO) {
@@ -277,20 +303,18 @@ main(
 		ts.l_ui += JAN_1970;
 		ts.l_uf += ts_roundbit;
 		ts.l_uf &= ts_mask;
-		printf("  time %s, (.%0*d),\n",
-		       prettydate(&ts), fdigits, (int)time_frac);
-		printf("  maximum error %lu us, estimated error %lu us",
-		       (u_long)ntv.maxerror, (u_long)ntv.esterror);
+		printf(json ? jfmt2 : ofmt2,  prettydate(&ts), fdigits, (int)time_frac);
+		printf(json ? jfmt3 : ofmt3,  (u_long)ntv.maxerror, (u_long)ntv.esterror);
 		if (rawtime)
-			printf("  ntptime=%x.%x unixtime=%x.%0*d %s",
+			printf(json ? jfmt4 : ofmt4,
 			       (u_int)ts.l_ui, (u_int)ts.l_uf,
 			       (int)ntv.time.tv_sec, fdigits,
 			       (int)time_frac,
 			       ctime_r((time_t *)&ntv.time.tv_sec, ascbuf));
 #if NTP_API > 3
-		printf(", TAI offset %ld\n", (long)ntv.tai);
+		printf(json ? jfmt5 : ofmt5, (long)ntv.tai);
 #else
-		printf("\n");
+		printf(json ? jfmt6 : ofmt6);
 #endif /* NTP_API */
 	}
 	status = ntp_adjtime(&ntx);
@@ -299,47 +323,67 @@ main(
 		   "Must be root to set kernel values\nntp_adjtime() call fails" :
 		   "ntp_adjtime() call fails");
 	} else {
+		/* oldstyle formats */
+		char *ofmt7 = "ntp_adjtime() returns code %d (%s)\n";
+		char *ofmt8 = "  modes %s,\n";
+		char *ofmt9 = "  offset %.3f";
+		char *ofmt10 = " us, frequency %.3f ppm, interval %d s,\n";
+		char *ofmt11 = "  maximum error %lu us, estimated error %lu us,\n";
+		char *ofmt12 = "  status %s,\n";
+		char *ofmt13 = "  time constant %lu, precision %.3f us, tolerance %.0f ppm,\n";
+		char *ofmt14 = "  pps frequency %.3f ppm, stability %.3f ppm, jitter %.3f us,\n";
+		char *ofmt15 = "  intervals %lu, jitter exceeded %lu, stability exceeded %lu, errors %lu.\n";
+		/* JSON formats */
+		char *jfmt7 = "\"adjtime-code\":%d,\"adjtime-status\":%s,";
+		char *jfmt8 = "\"modes\":\"%s\",";
+		char *jfmt9 = "\"offset\":%.3f,";
+		char *jfmt10 = "\"frequency\":%.3f,\"interval\":%d,";
+		char *jfmt11 = "\"maximum error\":%lu,\"estimated error\":%lu,";
+		char *jfmt12 = "\"status\":\"%s\",";
+		char *jfmt13 = "\"time constant\":%lu,\"precision\":%.3f,\"tolerance\":%.0f,";
+		char *jfmt14 = "\"pps frequency\":%.3f,\"stability\":%.3f,\"jitter\":%.3f,";
+		char *jfmt15 = "\"intervals\":%lu,\"jitter exceeded\":%lu,\"stability exceeded\":%lu,\"errors:%lu\n";
+
 		flash = ntx.status;
-		printf("ntp_adjtime() returns code %d (%s)\n",
-		     status, timex_state(status));
-		printf("  modes %s,\n", sprintb(ntx.modes, TIMEX_MOD_BITS));
+		printf(json ? jfmt7 : ofmt7, status, timex_state(status));
+		printf(json ? jfmt8 : ofmt8, sprintb(ntx.modes, TIMEX_MOD_BITS));
 		ftemp = (double)ntx.offset;
 #ifdef STA_NANO
 		if (flash & STA_NANO)
 			ftemp /= 1000.0;
 #endif
-		printf("  offset %.3f", ftemp);
+		printf(json ? jfmt9 : ofmt9, ftemp);
 		ftemp = (double)ntx.freq / SCALE_FREQ;
-		printf(" us, frequency %.3f ppm, interval %d s,\n",
-		     ftemp, 1 << ntx.shift);
-		printf("  maximum error %lu us, estimated error %lu us,\n",
+		printf(json ? jfmt10 : ofmt10, ftemp, 1 << ntx.shift);
+		printf(json ? jfmt11 : ofmt11,
 		     (u_long)ntx.maxerror, (u_long)ntx.esterror);
-		printf("  status %s,\n", sprintb((u_int)ntx.status, TIMEX_STA_BITS));
+		printf(json ? jfmt12 : ofmt12,
+		       sprintb((u_int)ntx.status, TIMEX_STA_BITS));
 		ftemp = (double)ntx.tolerance / SCALE_FREQ;
 		gtemp = (double)ntx.precision;
 #ifdef STA_NANO
 		if (flash & STA_NANO)
 			gtemp /= 1000.0;
 #endif
-		printf(
-		    "  time constant %lu, precision %.3f us, tolerance %.0f ppm,\n",
-		    (u_long)ntx.constant, gtemp, ftemp);
-		if (ntx.shift == 0)
-			exit(0);
-		ftemp = (double)ntx.ppsfreq / SCALE_FREQ;
-		gtemp = (double)ntx.stabil / SCALE_FREQ;
-		htemp = (double)ntx.jitter;
+		printf(json ? jfmt13 : ofmt13,
+			(u_long)ntx.constant, gtemp, ftemp);
+		if (ntx.shift != 0) {
+			ftemp = (double)ntx.ppsfreq / SCALE_FREQ;
+			gtemp = (double)ntx.stabil / SCALE_FREQ;
+			htemp = (double)ntx.jitter;
 #ifdef STA_NANO
-		if (flash & STA_NANO)
-			htemp /= 1000.0;
+			if (flash & STA_NANO)
+				htemp /= 1000.0;
 #endif
-		printf(
-		    "  pps frequency %.3f ppm, stability %.3f ppm, jitter %.3f us,\n",
-		    ftemp, gtemp, htemp);
-		printf("  intervals %lu, jitter exceeded %lu, stability exceeded %lu, errors %lu.\n",
-		    (u_long)ntx.calcnt, (u_long)ntx.jitcnt,
-		    (u_long)ntx.stbcnt, (u_long)ntx.errcnt);
-		return 0;
+			printf(json ? jfmt14 : ofmt14,
+			    ftemp, gtemp, htemp);
+			printf(json ? jfmt15 : ofmt15,
+			    (u_long)ntx.calcnt, (u_long)ntx.jitcnt,
+			    (u_long)ntx.stbcnt, (u_long)ntx.errcnt);
+		}
+		if (json)
+			fputs("}\n", stdout);
+		exit(EXIT_SUCCESS);
 	}
 
 	/*
@@ -352,7 +396,9 @@ main(
 		exit(1);
 	}
 #endif
-	exit(0);
+	if (json)
+	    fputs("}\n", stdout);
+	exit(status < 0 ? EXIT_FAILURE : EXIT_SUCCESS);
 }
 
 #ifdef SIGSYS
