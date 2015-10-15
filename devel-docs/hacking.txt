@@ -131,7 +131,7 @@ For documentation:
 // SPDX-License-Identifier: CC-BY-4.0
 ------------------------------------------------
 
-Modify as needed for whatever comment syntax the languge or markup uses.
+Modify as needed for whatever comment syntax the language or markup uses.
 Good places for these markings are at the end of an extended
 header comment, or at the very top of the file.
 
@@ -140,7 +140,7 @@ especially all references to Dr. Dave Mills, to Mr Harlan Stenn, and
 to the Network Time Foundation.
 
 You *may* add a project copyright and replace the inline license
-with an SPDX tag. For exmple:
+with an SPDX tag. For example:
 
 ------------------------------------------------
 /* Copyright 2015 by the NTPsec project contributors
@@ -152,6 +152,37 @@ We recognize that occasionally a file may have changed so much that
 the historic copyright is no longer appropriate, but such decisions
 cannot be made casually. Discuss it with the project management
 before moving.
+
+=== Documentation format and structure ===
+
+All our documentation is mastered in asciidoc.  That includes internal
+documentation like this file. We do this because asciidoc is easy to
+edit and gives us good options for rendering to multiple formats,
+including both HTML and Unix manual pages
+
+If you're going to write in anything else you need to have a good
+reason, and the bar for "good" will be set high.  "I like Markdown",
+in particular, does not qualify - it doesn't have good enough table
+support for our needs.  ReST does, but the hassle costs of supporting
+two different master markups are too high.
+
+The NTP Classic documentation had a terrible problem with duplicative
+documentation gradually diverging as the duplicates mutated and
+bitrotted. Therefore one of our house rules is to have a *single point
+of truth* for everything.
+
+Accordingly, the way we handle pairs of manual and Web pages that
+need to have the same content is to have both be thin wrappers around
+a large common include file. These includes live in docs/includes
+and are probably what you need to edit if you're updating anything
+that appears on a man page.
+
+Most manual-page masters actually have the extension *.txt.in.  The
+.in part is a convention for files that need to be macroexpanded as a
+first stage for processing.  The reason for this is that asciidoc
+becomes syntactically confused if inclusion directives collide with
+its parser's idea of where the next section header should be.  We use
+the build system to patch around this problem.
 
 === Conventions for #ifdef guard names ===
 
