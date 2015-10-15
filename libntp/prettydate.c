@@ -18,15 +18,6 @@
 
 static char *common_prettydate(l_fp *, bool);
 
-const char * const months[12] = {
-  "Jan", "Feb", "Mar", "Apr", "May", "Jun",
-  "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
-};
-
-const char * const daynames[7] = {
-  "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"
-};
-
 /* Helper function to handle possible wraparound of the ntp epoch.
  *
  * Works by periodic extension of the ntp time stamp in the UN*X epoch.
@@ -132,9 +123,9 @@ common_prettydate(
 	)
 {
 	static const char pfmt0[] =
-	    "%08lx.%08lx  %s, %s %2d %4d %2d:%02d:%02d.%03u";
+	    "%08lx.%08lx %04d-%02d-%02dT%02d:%02d:%02d.%03u";
 	static const char pfmt1[] =
-	    "%08lx.%08lx [%s, %s %2d %4d %2d:%02d:%02d.%03u UTC]";
+	    "%08lx.%08lx %04d-%02d-%02dT02d:%02d:%02d.%03uZ";
 
 	char	    *bp;
 	struct tm   *tm;
@@ -162,15 +153,13 @@ common_prettydate(
 		ntpcal_time_to_date(&jd, &sec);
 		snprintf(bp, LIB_BUFLENGTH, local ? pfmt1 : pfmt0,
 			 (u_long)ts->l_ui, (u_long)ts->l_uf,
-			 daynames[jd.weekday], months[jd.month-1],
-			 jd.monthday, jd.year, jd.hour,
-			 jd.minute, jd.second, msec);
+			 jd.year, jd.month, jd.monthday,
+			 jd.hour, jd.minute, jd.second, msec);
 	} else		
 		snprintf(bp, LIB_BUFLENGTH, pfmt0,
 			 (u_long)ts->l_ui, (u_long)ts->l_uf,
-			 daynames[tm->tm_wday], months[tm->tm_mon],
-			 tm->tm_mday, 1900 + tm->tm_year, tm->tm_hour,
-			 tm->tm_min, tm->tm_sec, msec);
+			 1900 + tm->tm_year, tm->tm_mon+1, tm->tm_mday,
+			 tm->tm_hour, tm->tm_min, tm->tm_sec, msec);
 	return bp;
 }
 

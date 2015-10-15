@@ -3723,8 +3723,8 @@ mk_utcinfo(
 
 		n += snprintf( t, size, "UTC offset transition from %is to %is due to leap second %s",
 				dtls, dtlsf, ( dtls < dtlsf ) ? "insertion" : "deletion" );
-		n += snprintf( t + n, size - n, " at UTC midnight at the end of %s, %04i-%02i-%02i",
-				daynames[tm->tm_wday], tm->tm_year + 1900, tm->tm_mon + 1, tm->tm_mday );
+		n += snprintf( t + n, size - n, " at UTC midnight at the end of %04i-%02i-%02i",
+				tm->tm_year + 1900, tm->tm_mon + 1, tm->tm_mday );
 	}
 	else
 		snprintf( t, size, "UTC offset parameter: %is, no leap second announced.\n", dtls );

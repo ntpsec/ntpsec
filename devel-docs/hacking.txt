@@ -95,6 +95,11 @@ object.  You can read about JSON at
 Be aware that if you present a tool design with a messy output format
 and no JSON option it is quite likely to be rejected.
 
+Our preferred format for dates is RFC3339 (a version of ISO8601 for
+UTC with some options frozen; full year required, medial T required,
+explicit Zulu timezone). Local times should be expressed in ISO8601,
+always with full years and timezone offset.
+
 === Copyrights and licenses ===
 
 Much of the historic code in this distribution is under an "NTP
