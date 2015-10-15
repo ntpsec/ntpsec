@@ -102,11 +102,8 @@ def build(ctx):
 	ctx.recurse("ntpd")
 #	ctx.recurse("ntpfrob")
 	ctx.recurse("ntpq")
-#	ctx.recurse("clockstuff") - 
-#	ctx.recurse("kernel")
 	ctx.recurse("ntpkeygen") 
 	ctx.recurse("util")
-#	ctx.recurse("unity")
 #	ctx.recurse("tests")
 
 
