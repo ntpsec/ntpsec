@@ -57,6 +57,97 @@ cause buffer overruns and (all too often) exploitable security holes:
 In general, avoid functions that are non-reentrant.  When in doubt, see
 http://www.unix.org/whitepapers/reentrant.html[Thread-safety and POSIX.1]
 
+=== Naming conventions ===
+
+Every binary and script we install has an "ntp" prefix on the name,
+because namespace pollution is rude.  If you write a new tool that you
+want us to install, follow this convention.
+
+Generally we favor "ntp" rather than "ntp-" for consistency and to
+reduce the amount people have to type. Choose tastefully.
+
+=== Well-tempered output ===
+
+We are devotees of the Unix rule that programs should play nicely
+with other programs.  We like output formats that are simple,
+regular, and machine-parseable without ambiguity. The practical
+goal to aim at, given our choice of scripting languages, is
+is to make writing script wrappers in Python easy.
+
+There is more than one way to arrange this.  If you can design a
+simple tabular output format, or something resembling an RF2822 header
+that's easy for both human eyes and programs to parse, do that.
+Besides being simple, formats like these are easily handled by either
+Python or shellscripts.
+
+Such simplicity is often difficult or impractical for heterogenous
+data that needs to be both grouped and labeled, so we have another
+convention for those cases. Here it is:
+
+Wherever it is reasonable, tools that generate complex reports to
+standard output should be able to emit two formats. The default can be
+relatively unstructured multiline text for human eyeballs. There
+should also be a -j/--json option that emits a self-describing JSON
+object.  You can read about JSON at
+
+	 http://www.json.org/
+
+Be aware that if you present a tool design with a messy output format
+abd no JSON option it is quite likely to be rejected.
+
+=== Copyrights and licenses ===
+
+Much of the historic code in this distribution is under an "NTP
+License" resembling BSD-2-clause.  Our favored licenses are
+BSD-2-clause for code and Creative Commons Attribute 4.0 License for
+documentation.
+
+Please do *not* submit code under GPL or other licenses which place
+conditions on derived works; we cannot accept such code.
+
+We use the SPDX convention for inclusion by reference  You can read
+about this at
+
+      http://spdx.org/licenses
+
+When you create a new file, mark it as follows (updating the year)
+as required:
+
+------------------------------------------------
+/* Copyright 2015 by the NTPsec project contributors
+ * SPDX-License-Identifier: BSD-2-Clause
+ */
+------------------------------------------------
+
+For documentation:
+
+------------------------------------------------
+// Copyright 2015 by the NTPsec project contributors
+// SPDX-License-Identifier: CC-BY-4.0
+------------------------------------------------
+
+Modify as needed for whatever comment syntax the languge or markup uses.
+Good places for these markings are at the end of an extended
+header comment, or at the very top of the file.
+
+When you modify a file, leave existing copyrights in place -
+especially all references to Dr. Dave Mills, to Mr Harlan Stenn, and
+to the Network Time Foundation.
+
+You *may* add a project copyright and replace the inline license
+with an SPDX tag. For exmple:
+
+------------------------------------------------
+/* Copyright 2015 by the NTPsec project contributors
+ * SPDX-License-Identifier: NTP
+ */
+------------------------------------------------
+
+We recognize that occasionally a file may have changed so much that
+the historic copyright is no longer appropriate, but such decisions
+cannot be made casually. Discuss it with the project management
+before moving.
+
 === Conventions for #ifdef guard names ===
 
 Parts of this code are a thicket of C preprocessor conditionals.
