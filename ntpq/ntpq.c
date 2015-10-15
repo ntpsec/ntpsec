@@ -165,7 +165,6 @@ static	bool	getarg		(const char *, int, arg_v *);
 #endif	/* BUILD_AS_LIB */
 static	int	findcmd		(const char *, struct xcmd *,
 				 struct xcmd *, struct xcmd **);
-static	bool	rtdatetolfp	(char *, l_fp *);
 static	bool	decodearr	(char *, int *, l_fp *);
 static	void	help		(struct parse *, FILE *);
 static	int	helpsort	(const void *, const void *);
@@ -1951,130 +1950,7 @@ nntohostp(
 }
 
 /*
- * rtdatetolfp - decode an RT-11 date into an l_fp
- */
-static bool
-rtdatetolfp(
-	char *str,
-	l_fp *lfp
-	)
-{
-	register char *cp;
-	register int i;
-	struct calendar cal;
-	char buf[4];
-
-	cal.yearday = 0;
-
-	/*
-	 * An RT-11 date looks like:
-	 *
-	 * d[d]-Mth-y[y] hh:mm:ss
-	 *
-	 * (No docs, but assume 4-digit years are also legal...)
-	 *
-	 * d[d]-Mth-y[y[y[y]]] hh:mm:ss
-	 */
-	cp = str;
-	if (!isdigit((int)*cp)) {
-		if (*cp == '-') {
-			/*
-			 * Catch special case
-			 */
-			L_CLR(lfp);
-			return true;
-		}
-		return false;
-	}
-
-	cal.monthday = (uint8_t) (*cp++ - '0');	/* ascii dependent */
-	if (isdigit((int)*cp)) {
-		cal.monthday = (uint8_t)((cal.monthday << 3) + (cal.monthday << 1));
-		cal.monthday = (uint8_t)(cal.monthday + *cp++ - '0');
-	}
-
-	if (*cp++ != '-')
-	    return false;
-
-	for (i = 0; i < 3; i++)
-	    buf[i] = *cp++;
-	buf[3] = '\0';
-
-	for (i = 0; i < 12; i++)
-	    if (STREQ(buf, months[i]))
-		break;
-	if (i == 12)
-	    return false;
-	cal.month = (uint8_t)(i + 1);
-
-	if (*cp++ != '-')
-	    return false;
-
-	if (!isdigit((int)*cp))
-	    return false;
-	cal.year = (u_short)(*cp++ - '0');
-	if (isdigit((int)*cp)) {
-		cal.year = (u_short)((cal.year << 3) + (cal.year << 1));
-		cal.year = (u_short)(*cp++ - '0');
-	}
-	if (isdigit((int)*cp)) {
-		cal.year = (u_short)((cal.year << 3) + (cal.year << 1));
-		cal.year = (u_short)(cal.year + *cp++ - '0');
-	}
-	if (isdigit((int)*cp)) {
-		cal.year = (u_short)((cal.year << 3) + (cal.year << 1));
-		cal.year = (u_short)(cal.year + *cp++ - '0');
-	}
-
-	/*
-	 * Catch special case.  If cal.year == 0 this is a zero timestamp.
-	 */
-	if (cal.year == 0) {
-		L_CLR(lfp);
-		return true;
-	}
-
-	if (*cp++ != ' ' || !isdigit((int)*cp))
-	    return false;
-	cal.hour = (uint8_t)(*cp++ - '0');
-	if (isdigit((int)*cp)) {
-		cal.hour = (uint8_t)((cal.hour << 3) + (cal.hour << 1));
-		cal.hour = (uint8_t)(cal.hour + *cp++ - '0');
-	}
-
-	if (*cp++ != ':' || !isdigit((int)*cp))
-	    return false;
-	cal.minute = (uint8_t)(*cp++ - '0');
-	if (isdigit((int)*cp)) {
-		cal.minute = (uint8_t)((cal.minute << 3) + (cal.minute << 1));
-		cal.minute = (uint8_t)(cal.minute + *cp++ - '0');
-	}
-
-	if (*cp++ != ':' || !isdigit((int)*cp))
-	    return false;
-	cal.second = (uint8_t)(*cp++ - '0');
-	if (isdigit((int)*cp)) {
-		cal.second = (uint8_t)((cal.second << 3) + (cal.second << 1));
-		cal.second = (uint8_t)(cal.second + *cp++ - '0');
-	}
-
-	/*
-	 * For RT-11, 1972 seems to be the pivot year
-	 */
-	if (cal.year < 72)
-		cal.year += 2000;
-	if (cal.year < 100)
-		cal.year += 1900;
-
-	lfp->l_ui = caltontp(&cal);
-	lfp->l_uf = false;
-	return true;
-}
-
-
-/*
- * decodets - decode a timestamp into an l_fp format number, with
- *	      consideration of fuzzball formats.
+ * decodets - decode a hex or decimal timestamp into an l_fp format number
  */
 bool
 decodets(
@@ -2082,28 +1958,11 @@ decodets(
 	l_fp *lfp
 	)
 {
-	char *cp;
-	char buf[30];
-	size_t b;
-
 	/*
 	 * If it starts with a 0x, decode as hex.
 	 */
 	if (*str == '0' && (*(str+1) == 'x' || *(str+1) == 'X'))
 		return hextolfp(str+2, lfp);
-
-	/*
-	 * If it starts with a '"', try it as an RT-11 date.
-	 */
-	if (*str == '"') {
-		cp = str + 1;
-		b = 0;
-		while ('"' != *cp && '\0' != *cp &&
-		       b < COUNTOF(buf) - 1)
-			buf[b++] = *cp++;
-		buf[b] = '\0';
-		return rtdatetolfp(buf, lfp);
-	}
 
 	/*
 	 * Might still be hex.  Check out the first character.  Talk
@@ -2119,7 +1978,7 @@ decodets(
 	if (atolfp(str, lfp))
 		return true;
 
-	return rtdatetolfp(str, lfp);
+	return false;
 }
 
 

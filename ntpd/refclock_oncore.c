@@ -3141,8 +3141,8 @@ oncore_msg_Gb(
 	gmtm = buf[13];
 
 	oncore_log_f(instance, LOG_NOTICE,
-		     "Date/Time set to: %d%s%d %2d:%02d:%02d GMT (GMT offset is %s%02d:%02d)",
-		     d, months[mo-1], y, h, m, s, gmts, gmth, gmtm);
+		     "Date/Time set to: %02d-%02d-%02dT%2d:%02d:%02d%s%02d%02d",
+		     y, mo, d, h, m, s, gmts, gmth, gmtm);
 }
 
 
