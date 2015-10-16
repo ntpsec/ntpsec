@@ -5,6 +5,8 @@
  * Date: 21.03.2000 Revision: 01.10 
  *
  * Copyright (C) 1999, 2000 by Bernd Altmeier altmeier@ATLSoft.de
+ * Copyright 2015 by the NTPsec project contributors
+ * SPDX-License-Identifier: BSD-2-Clause
  * 
  */
 

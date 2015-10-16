@@ -1,11 +1,14 @@
 /*
  * ntp_leapsec.h - leap second processing for NTPD
  *
- * Written by Juergen Perlinger (perlinger@ntp.org) for the NTP project.
- * The contents of 'html/copyright.html' apply.
+ * Written by Juergen Perlinger <perlinger@ntp.org> for the NTP project.
+ *
  * ----------------------------------------------------------------------
  * This is an attempt to get the leap second handling into a dedicated
  * module to make the somewhat convoluted logic testable.
+ *
+ * Copyright 2015 by the NTPsec project contributors
+ * SPDX-License-Identifier: NTP
  */
 
 #ifndef GUARD_NTP_LEAPSEC_H

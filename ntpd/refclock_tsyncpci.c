@@ -8,6 +8,7 @@
 *            source.
 *
 *  (C) Copyright 2008 Spectracom Corporation
+*  Copyright 2015 by the NTPsec project contributors
 *
 *  This software is provided by Spectracom Corporation 'as is' and
 *  any express or implied warranties, including, but not limited to, the
@@ -21,8 +22,7 @@
 *  out of the use of this software, even if advised of the possibility of
 *  such damage.
 *
-*  This software is released for distribution according to the NTP copyright
-*  and license contained in html/copyright.html of NTP source.
+* SPDX-License-Identifier: NTP
 *
 *******************************************************************************/
 
