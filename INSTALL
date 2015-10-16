@@ -54,6 +54,11 @@ sys/timepps.h::
    Fedora: pps-tools-devel (pps-tools may be useful for debugging)
    Debian: pps-tools
 
+asciidoc, a2x::
+   You will need asciidoc to make HTML and a2x to make manual pages from the
+   documentation masters.  Only required if you configured with --enable-doc.
+   Fedora: asciidoc
+   Debian: asciidoc
 
 Go to the directory where you found this file and do this:
 
