@@ -1,6 +1,7 @@
 /*
  * Copyright (C) 2004, 2007  Internet Systems Consortium, Inc. ("ISC")
  * Copyright (C) 2002  Internet Software Consortium.
+ * SPDX-License-Identifier: ISC
  */
 
 #include <windows.h>
