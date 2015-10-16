@@ -69,7 +69,7 @@ $ ./waf build
 
 "waf" is a build engine written in Python that runs faster and is
 far less painful to maintain than an equivalent autoconf build.
-By count of lines, the waf build recipe is a factor of *35* smaller
+By count of lines, the waf build recipe is a factor of *30* smaller
 than what it replaced.
 
 == Basic Installation ==
@@ -124,7 +124,7 @@ The waf builder accepts `--enable-FEATURE' options to where FEATURE
 indicates an optional part of the package.  Do `waf --help' for a list
 of options.
 
-refclocks are enabled with `--refclock=<n1,n2,n3..>'
+refclocks are enabled with `--refclock=<n1,n2,n3..> or --refclock=all'
 `waf configure --list' will print a list of available refclocks.
 
 == Operation Controls ==
