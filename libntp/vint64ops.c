@@ -2,7 +2,8 @@
  * vint64ops.c - operations on 'vint64' values
  *
  * Written by Juergen Perlinger (perlinger@ntp.org) for the NTP project.
- * The contents of 'html/copyright.html' apply.
+ * Copyright 2015 by the NTPsec project contributors
+ * SPDX-License-Identifier: NTP
  * ----------------------------------------------------------------------
  * This is an attempt to get the vint64 calculations stuff centralised.
  */

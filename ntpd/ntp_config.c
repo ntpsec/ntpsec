@@ -7,7 +7,9 @@
  *		Newark, DE 19711
  * Some parts borrowed from the older ntp_config.c
  * Copyright (c) 2006
- */
+ * Copyright 2015 by the NTPsec project contributors
+ * SPDX-License-Identifier: BSD-2-clause
+*/
 
 #include <config.h>
 

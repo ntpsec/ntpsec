@@ -1,23 +1,4 @@
 /*
- * Copyright (C) 2004, 2006, 2007, 2009  Internet Systems Consortium, Inc. ("ISC")
- * Copyright (C) 2001  Internet Software Consortium.
- *
- * Permission to use, copy, modify, and/or distribute this software for any
- * purpose with or without fee is hereby granted, provided that the above
- * copyright notice and this permission notice appear in all copies.
- *
- * THE SOFTWARE IS PROVIDED "AS IS" AND ISC DISCLAIMS ALL WARRANTIES WITH
- * REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY
- * AND FITNESS.  IN NO EVENT SHALL ISC BE LIABLE FOR ANY SPECIAL, DIRECT,
- * INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM
- * LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE
- * OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
- * PERFORMANCE OF THIS SOFTWARE.
- */
-
-/* $Id: ntgroups.c,v 1.12 2009/09/29 23:48:04 tbox Exp $ */
-
-/*
  * The NT Groups have two groups that are not well documented and are
  * not normally seen: None and Everyone.  A user account belongs to
  * any number of groups, but if it is not a member of any group then
@@ -27,6 +8,11 @@
  * Everyone group.  All accounts, no matter how many groups that they
  * belong to, also belong to the Everyone group. You cannot remove an
  * account from the Everyone group.
+ *
+ * Copyright (C) 2004, 2006, 2007, 2009  Internet Systems Consortium, Inc. ("ISC")
+ * Copyright (C) 2001  Internet Software Consortium.
+ * Copyright 2015 by the NTPsec project contributors
+ * SPDX-License-Identifier: ISC
  */
 
 #ifndef UNICODE

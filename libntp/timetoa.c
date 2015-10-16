@@ -1,8 +1,7 @@
 /*
  * timetoa.c -- time_t related string formatting
  *
- * Written by Juergen Perlinger (perlinger@ntp.org) for the NTP project.
- * The contents of 'html/copyright.html' apply.
+ * Written by Juergen Perlinger <perlinger@ntp.org> for the NTP project.
  *
  * Printing a 'time_t' has a lot of portability pitfalls, due to it's
  * opaque base type. The only requirement imposed by the standard is
@@ -16,6 +15,9 @@
  * As the printf() family has no standardised type specifier for time_t,
  * guessing the right output format specifier is a bit troublesome and
  * best done with the help of the preprocessor and "config.h".
+ *
+ * Copyright 2015 by the NTPsec project contributors
+ * SPDX-License-Identifier: NTP
  */
 
 #include "config.h"

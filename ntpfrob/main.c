@@ -1,5 +1,5 @@
 /* Copyright 2015 by the NTPsec project contributors
-   SPDX-License-Identifier: BSD-2-Clause
+ * SPDX-License-Identifier: BSD-2-Clause
  */
 
 #include <stdlib.h>

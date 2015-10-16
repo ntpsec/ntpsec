@@ -1,6 +1,4 @@
 /*
- * ntp_filegen.c,v 3.12 1994/01/25 19:06:11 kardel Exp
- *
  *  implements file generations support for NTP
  *  logfiles and statistic files
  *

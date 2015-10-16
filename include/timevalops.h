@@ -1,11 +1,13 @@
 /*
  * timevalops.h -- calculations on 'struct timeval' values
  *
- * Written by Juergen Perlinger (perlinger@ntp.org) for the NTP project.
- * The contents of 'html/copyright.html' apply.
+ * Written by Juergen Perlinger <perlinger@ntp.org> for the NTP project.
  *
  * For a rationale look at 'timespecops.h'; we do the same here, but the
  * normalisation keeps the microseconds in [0 .. 10^6[, of course.
+ *
+ * Copyright 2015 by the NTPsec project contributors
+ * SPDX-License-Identifier: NTP
  */
 #ifndef GUARD_TIMEVALOPS_H
 #define GUARD_TIMEVALOPS_H
