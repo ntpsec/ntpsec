@@ -29,8 +29,9 @@ None right now. (Sep-22 2015)
   is right if we're trying to install a test setup to userspace but wrong
   in the normal case - we want /sbin, not /usr/sbin.
 
-* There's no installation yet for the Perl executables under scripts/, or
-  their support library under scripts/lib/.
+* There's no installation yet for ntpleapfetch, or the Perl
+  executables under scripts/, or their support library under
+  scripts/lib/.
 
 * The install production needs to warn of stale ntpdc and ntpdate binaries.
 
@@ -77,8 +78,8 @@ much work.  We should probably test as many refclocks as we can
 on at least one platform and test the NMEA, Atom, and SHM drivers
 on most platforms.
 
-* We need to live-test leap seconds, both getting them from
-a file and getting them from other NTP servers.
+* We need to live-test leap seconds, both getting them from a file
+with ntpleapfetch and getting them from other NTP servers.
 
 * The script tests in scripts/t should be investigated, perhaps
 they are salvageable.
