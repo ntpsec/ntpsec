@@ -1,4 +1,4 @@
-= The Network Time Protocol (NTP) Distribution =
+= The Secure Network Time Protocol (NTPsec) Distribution =
 
 [cols="10%,90%",frame="none",grid="none",style="verse"]
 |==============================

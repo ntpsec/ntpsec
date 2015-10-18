@@ -12,7 +12,6 @@ The skunk watches for intruders and sprays.
 == Related Links ==
 
 include::includes/hand.txt[]
-include::includes/command.txt[]
 include::includes/accopt.txt[]
 
 '''''
