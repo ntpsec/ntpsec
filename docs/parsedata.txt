@@ -313,7 +313,7 @@ Special flags are:
 ELV DCF7000: end='\r', pattern=" - - - - - - - \r"
 
 The ELV DCF7000 is a cheap DCF77 receiver sending each second a time
-code (though not very precise!) delimited by '`r'
+code (though not very precise!) delimited by '\r'
 
 ------------------------------------
     Timecode

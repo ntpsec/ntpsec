@@ -4,30 +4,30 @@
 
 == Synopsis ==
 
-`{ntpfrob} [ -A ] [ -a tick ] [ -p ppsdev ] [-c] [-e] [-s]`
++{ntpfrob}+ [ +-A+] [ +-a+ 'tick' ] [ +-p+ 'ppsdev' ] [+-c+] [+-e+] [+-s+]
 
 == Description ==
 
 The {ntpfrob} program frobs the local clock hardware.  It collects
 several small diagnostic functions into a set that will differ
 depending on your platform and underlying system calls.
-Portions of it formerly traveled as `tickadj` and `ntptime`.  
+Portions of it formerly traveled as +tickadj+ and +ntptime+.  
 
 == Command Line Options ==
 
-`-a` 'tick'::
-  Set the kernel variable `tick` to the value _tick_ specifies.
-`-A`::
-  Display the kernel variable `tick`.
-`-p` 'ppsdev'::
++-a+ 'tick'::
+  Set the kernel variable +tick+ to the value _tick_ specifies.
++-A+::
+  Display the kernel variable +tick+.
++-p+ 'ppsdev'::
   Look for PPS pulses on a specified device
-`-c`::
++-c+::
   Compute and display clock jitter.
-`-e`::
++-e+::
   Measure clock precision.
-`-s`::
++-s+::
   Check for stepback bug.
-`-j`::
++-j+::
   Report in self-describing JSON.
 
 == Modes of operation ==

@@ -139,7 +139,7 @@ mailto:kardel%28at%29ntp%28dot%29org[<kardel (at) ntp
 modules for PARSE, support scripts, syslog cleanup, dynamic interface
 handling
 29. mailto:kuehn@ntp.org[Johannes Maximilian Kuehn <kuehn@ntp.org>]
-Rewrote `sntp` to comply with NTPv4 specification, `ntpq saveconfig`
+Rewrote +sntp+ to comply with NTPv4 specification, +ntpq saveconfig+
 30. mailto:jones@hermes.chpc.utexas.edu[William L. Jones
 <jones@hermes.chpc.utexas.edu>] RS/6000 AIX modifications, HPUX
 modifications

@@ -33,7 +33,7 @@ matter of historical interest.
 
 The {project-shortname} maintainers have an internal project
 code-named TESTFRAME that intends to create the capability 
-for replicable end-to-end testing of `{ntpd}`.  It is likely
+for replicable end-to-end testing of +{ntpd}+.  It is likely
 that some version of this code will replace or merge in ntpdsim's
 capabilities.
 
@@ -48,7 +48,7 @@ delay, network jitter and oscillator wander.
 
 The program operates as a discrete time simulator using specified
 systematic and random driving sources. Most functions of the real
-`{ntpd}` remain intact, including the monitoring, statistics
++{ntpd}+ remain intact, including the monitoring, statistics
 recording, trace and host name resolution features. Further
 information on the simulator is on the
 http://www.eecis.udel.edu/%7emills/ntpsim.html[NTP Discrete Event

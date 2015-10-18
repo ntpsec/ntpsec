@@ -19,7 +19,7 @@ include::includes/accopt.txt[]
 
 == Access Control Support ==
 
-The `{ntpd}` daemon implements a general purpose access control list (ACL)
+The +{ntpd}+ daemon implements a general purpose access control list (ACL)
 containing address/match entries sorted first by increasing address
 values and then by increasing mask values. A match occurs when the
 bitwise AND of the mask and the packet source address is equal to the
@@ -27,19 +27,19 @@ bitwise AND of the mask and address in the list. The list is searched in
 order with the last match found defining the restriction flags
 associated with the entry.
 
-The ACL is specified as a list of `restrict` commands in the following
+The ACL is specified as a list of +restrict+ commands in the following
 format:
 
-`restrict address [mask mask] [flag][...]`
++restrict address [mask mask] [flag][...]+
 
-The `address` argument expressed in dotted-quad form is the address of a
-host or network. Alternatively, the `address` argument can be a valid
-host DNS name. The `mask` argument expressed in IPv4 or IPv6 numeric
-address form defaults to all mask bits on, meaning that the `address` is
+The +address+ argument expressed in dotted-quad form is the address of a
+host or network. Alternatively, the +address+ argument can be a valid
+host DNS name. The +mask+ argument expressed in IPv4 or IPv6 numeric
+address form defaults to all mask bits on, meaning that the +address+ is
 treated as the address of an individual host. A default entry (address
 0.0.0.0, mask 0.0.0.0 for IPv4 and address :: mask :: for IPv6) is
-always the first entry in the list. `restrict default`, with no mask
-option, modifies both IPv4 and IPv6 default entries. `restrict source`
+always the first entry in the list. +restrict default+, with no mask
+option, modifies both IPv4 and IPv6 default entries. +restrict source+
 configures a template restriction automatically added at runtime for
 each association, whether configured, ephemeral, or preemptable, and
 removed when the association is demobilized.
@@ -72,7 +72,7 @@ considered an alternative to the NTP authentication facilities. Source
 address based restrictions are easily circumvented by a determined
 cracker.
 
-Default restriction list entries with the flags `ignore, ntpport`, for
+Default restriction list entries with the flags +ignore, ntpport+, for
 each of the local host's interface addresses are inserted into the table
 at startup to prevent the server from attempting to synchronize to its
 own time. A default entry is also always present, though if it is
