@@ -126,6 +126,7 @@ def build(ctx):
 		"ntpd/complete.conf.in",
 		"ntpd/ntpd-man.txt.in",
 		"ntpq/ntpq-man.txt.in",
+		"ntpleapfetch/ntpleapfetch.txt.in",
 		"scripts/ntpwait/ntpwait-man.txt.in",
 		"scripts/ntptrace/ntptrace-man.txt.in",
 		"ntpdig/ntpdig-man.txt.in",

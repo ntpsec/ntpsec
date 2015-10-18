@@ -95,7 +95,6 @@ they are salvageable.
   scripts/summary.txt
   scripts/ntpsweep/ntpsweep.txt
   scripts/plot_summary.txt
-  scripts/ntpleapfetch/ntpleapfetch.txt
 
 * The format and organization of the NEWS file needs a rethink.
 
