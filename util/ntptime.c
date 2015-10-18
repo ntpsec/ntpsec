@@ -49,7 +49,7 @@
 /*
  * Function prototypes
  */
-const char *	sprintb		(u_int, const char *);
+const char *	snprintb	(size_t, char *, u_int, const char *);
 const char *	timex_state	(int);
 
 #ifdef SIGSYS
@@ -324,6 +324,7 @@ main(
 		   "Must be root to set kernel values\nntp_adjtime() call fails" :
 		   "ntp_adjtime() call fails");
 	} else {
+		char binbuf[132];
 		/* oldstyle formats */
 		char *ofmt7 = "ntp_adjtime() returns code %d (%s)\n";
 		char *ofmt8 = "  modes %s,\n";
@@ -347,7 +348,8 @@ main(
 
 		flash = ntx.status;
 		printf(json ? jfmt7 : ofmt7, status, timex_state(status));
-		printf(json ? jfmt8 : ofmt8, sprintb(ntx.modes, TIMEX_MOD_BITS));
+		printf(json ? jfmt8 : ofmt8,
+		       snprintb(sizeof(binbuf), binbuf, ntx.modes, TIMEX_MOD_BITS));
 		ftemp = (double)ntx.offset;
 #ifdef STA_NANO
 		if (flash & STA_NANO)
@@ -359,7 +361,8 @@ main(
 		printf(json ? jfmt11 : ofmt11,
 		     (u_long)ntx.maxerror, (u_long)ntx.esterror);
 		printf(json ? jfmt12 : ofmt12,
-		       sprintb((u_int)ntx.status, TIMEX_STA_BITS));
+		       snprintb(sizeof(binbuf), binbuf,
+			       (u_int)ntx.status, TIMEX_STA_BITS));
 		ftemp = (double)ntx.tolerance / SCALE_FREQ;
 		gtemp = (double)ntx.precision;
 #ifdef STA_NANO
@@ -421,7 +424,9 @@ pll_trap(
  * Print a value a la the %b format of the kernel's printf
  */
 const char *
-sprintb(
+snprintb(
+	size_t		buflen,
+	char *		buf,
 	u_int		v,
 	const char *	bits
 	)
@@ -431,12 +436,11 @@ sprintb(
 	int i;
 	bool any;
 	char c;
-	static char buf[132];
 
 	if (bits != NULL && *bits == 8)
-		snprintf(buf, sizeof(buf), "0%o", v);
+		snprintf(buf, buflen, "0%o", v);
 	else
-		snprintf(buf, sizeof(buf), "0x%x", v);
+		snprintf(buf, buflen, "0x%x", v);
 	cp = buf + strlen(buf);
 	cplim = buf + sizeof(buf);
 	if (bits != NULL) {
