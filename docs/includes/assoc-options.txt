@@ -3,41 +3,41 @@
 // Note, some of these options are described with special refclock
 // semantics in includes/clock-options.txt.
 
-`autokey`::
++autokey+::
   All packets sent to and received from the server or peer are to
   include authentication fields encrypted using the autokey scheme
   described on the "Authentication Options" page.
 
-`burst`::
++burst+::
   when the server is reachable, send a burst of eight packets instead of
   the usual one. The packet spacing is normally 2 s; however, the
   spacing between the first and second packets can be changed with the
   calldelay command to allow additional time for a modem or ISDN call to
   complete. This is designed to improve timekeeping quality with the
-  `server` command and s addresses.
+  +server+ command and s addresses.
 
-`iburst`::
++iburst+::
   When the server is unreachable, send a burst of eight packets instead
   of the usual one. The packet spacing is normally 2 s; however, the
   spacing between the first two packets can be changed with the
   calldelay command to allow additional time for a modem or ISDN call to
   complete. This is designed to speed the initial synchronization
-  acquisition with the `server` command and s addresses and when
-  {ntpdman} is started with the `-q` option.
+  acquisition with the +server+ command and s addresses and when
+  {ntpdman} is started with the +-q+ option.
 
 // Uncomment this when and if autokey works.
-//`ident` 'group'::
+//+ident+ 'group'::
 //  Specify the group name for the association. See the "Autokey
 //  Public-Key Authentication" page for further information.
 
-`key` _key_::
++key+ _key_::
   All packets sent to and received from the server or peer are to
   include authentication fields encrypted using the specified _key_
   identifier with values from 1 to 65534, inclusive. The default is to
   include no encryption field.
 
-`minpoll` _minpoll_::
-`maxpoll` _maxpoll_::
++minpoll+ _minpoll_::
++maxpoll+ _maxpoll_::
   These options specify the minimum and maximum poll intervals for NTP
   messages, as a power of 2 in seconds. The maximum poll interval
   defaults to 10 (1,024 s), but can be increased by the _maxpoll_ option
@@ -45,27 +45,27 @@
   to 6 (64 s), but can be decreased by the _minpoll_ option to a lower
   limit of 4 (16 s).
 
-`mode` 'option'::
-  Pass the `option` to a reference clock driver, where `option` is an
++mode+ 'option'::
+  Pass the +option+ to a reference clock driver, where +option+ is an
   integer in the range from 0 to 255, inclusive. This option is valid
   only with type r addresses.
 
-`noselect`::
++noselect+::
   Marks the server as unused, except for display purposes. The server is
   discarded by the selection algroithm.
 
-`preempt`::
++preempt+::
   Specifies the association as preemptable rather than the default
-  persistent. This option is ignored with the `broadcast` command and is
-  most useful with the `manycastclient` and `pool` commands.
+  persistent. This option is ignored with the +broadcast+ command and is
+  most useful with the +manycastclient+ and +pool+ commands.
 
-`prefer`::
++prefer+::
   Marks the server as preferred. All other things being equal, this host
   will be chosen for synchronization among a set of correctly operating
   hosts. See the "Mitigation Rules and the prefer Keyword" page
   for further information.
 
-`ttl` _ttl_::
++ttl+ _ttl_::
   This option is used only with broadcast server and manycast client
   modes. It specifies the time-to-live _ttl_ to use on broadcast server
   and multicast server and the maximum _ttl_ for the expanding ring
@@ -73,20 +73,20 @@
   which defaults to 127, is something of a black art and should be
   coordinated with the network administrator.
 
-`true`::
++true+::
   Mark the association to assume truechimer status; that is, always
   survive the selection and clustering algorithms. This option can be
   used with any association, but is most useful for reference clocks
   with large jitter on the serial port and precision pulse-per-second
   (PPS) signals. Caution: this option defeats the algorithms designed to
   cast out falsetickers and can allow these sources to set the system
-  clock. This option is valid only with the `server` and `peer` commands.
+  clock. This option is valid only with the +server+ and +peer+ commands.
 
-`version` _version_::
++version+ _version_::
   Specifies the version number to be used for outgoing NTP packets.
   Versions 1-4 are the choices, with version 4 the default.
 
-`xleave`::
++xleave+::
   Operate in interleaved mode (symmetric and broadcast modes only).
   Further information is on the "NTP Interleaved Modes" page.
 

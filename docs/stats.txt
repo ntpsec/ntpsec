@@ -77,9 +77,9 @@ Between updates, both the sample dispersion and peer dispersion continue
 to grow at the same rate, 15 μs/s. Finally, the _peer jitter_ φ is
 determined as the RMS differences between the offset samples in the
 window relative to the selected offset sample. The peer statistics are
-recorded by the `peerstats` option of the
-link:monopt.html#filegen[`filegen`] command. Peer variables are
-displayed by the `rv` command of the link:ntpq.html#peer[`{ntpq}`]
+recorded by the +peerstats+ option of the
+link:monopt.html#filegen[+filegen+] command. Peer variables are
+displayed by the +rv+ command of the link:ntpq.html#peer[+{ntpq}+]
 program.
 
 The clock filter algorithm continues to process updates in this way
@@ -96,13 +96,13 @@ the peer dispersion to increase eventually to infinity.
 The composition of the source population and the system peer selection
 is redetermined as each update from each source is received. The system
 peer and system variables are determined as described on the
-link:prefer.html[Mitigation Rules and the `prefer` Keyword] page. The
+link:prefer.html[Mitigation Rules and the +prefer+ Keyword] page. The
 system variables Θ, Δ, Ε and Φ are updated from the system peer
 variables of the same name and the system stratum set one greater than
 the system peer stratum. The system statistics are recorded by the
-`loopstats` option of the link:monopt.html#filegen[`filegen`] command.
-System variables are displayed by the `rv` command of the
-link:ntpq.html#system[`{ntpq}`] program.
++loopstats+ option of the link:monopt.html#filegen[+filegen+] command.
+System variables are displayed by the +rv+ command of the
+link:ntpq.html#system[+{ntpq}+] program.
 
 Although it might seem counterintuitive, a cardinal rule in the
 selection process is, once a sample has been selected by the clock
@@ -144,13 +144,13 @@ dispersion in the packet plus the peer dispersion.
 In order to avoid timing loops, the root distance is adjusted to
 the maximum of the above computation and a _minimum threshold._ The
 minimum threshold defaults to 1 ms, but can be changed according to
-client preference using the `mindist` option of the
-link:miscopt.html#tos[`tos`] command.
+client preference using the +mindist+ option of the
+link:miscopt.html#tos[+tos+] command.
 
 A source is considered selectable only if its root distance is less than
 the _select threshold_, by default 1.5 s, but can be changed according
-to client preference using the `maxdist` option of the
-link:miscopt.html#tos[`tos`] command. When an upstream server loses all
+to client preference using the +maxdist+ option of the
+link:miscopt.html#tos[+tos+] command. When an upstream server loses all
 sources, its root distance apparent to dependent clients continues to
 increase. The clients are not aware of this condition and continue to
 accept synchronization as long as the root distance is less than the
@@ -186,7 +186,7 @@ from which the system root delay and system root dispersion are
 inherited.
 
 The algorithms described on the link:prefer.html[Mitigation Rules and
-the `prefer` Keyword] page deliver several important statistics. The
+the +prefer+ Keyword] page deliver several important statistics. The
 _system offset_ and _system jitter_ are weighted averages computed by
 the clock combine algorithm. System offset is best interpreted as the
 maximum-likelihood estimate of the system clock offset, while system
@@ -200,7 +200,7 @@ the system delay plus the system dispersion. In order to simplify
 discussion, certain minor contributions to the maximum error statistic
 are ignored. If the precision time kernel support is available, both the
 estimated error and maximum error are reported to user programs via the
-`ntp_adjtime()` kernel system call. See the link:kern.html[Kernel Model
++ntp_adjtime()+ kernel system call. See the link:kern.html[Kernel Model
 for Precision Timekeeping] page for further information.
 
 '''''

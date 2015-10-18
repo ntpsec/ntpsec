@@ -33,7 +33,7 @@ hardware platforms:
 == O/S System Configuration ==
 
 *UNIX*::
-   The driver attempts to open the device link:#REFID[*`/dev/hopf6039`*].
+   The driver attempts to open the device link:#REFID[+/dev/hopf6039+].
    The device entry will be made by the installation process of the
    kernel module for the PCI-bus board. The driver sources belongs to the
    deliver equipment of the PCI-board.
@@ -46,10 +46,10 @@ hardware platforms:
 
 == Fudge Factors ==
 
-`refid` __string__::
++refid+ __string__::
    Specifies the driver reference identifier.
 
-`flag1 0 | 1`::
++flag1 {0 | 1}+::
    When set to 1, driver syncs even if only crystal driven.
 
 == Questions or Comments: ==

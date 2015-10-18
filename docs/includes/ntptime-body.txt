@@ -3,42 +3,41 @@
 // tree, and once to make an individual man page.
 
 == Synopsis ==
-
-["literal",subs="normal"]
-{ntptime} [ -chr ] [ -e 'est_error' ] [ -f 'frequency' ] [-j]
-        [ -m 'max_error' ] [ -o 'offset' ] [ -s 'status' ]
-	[ -t 'time_constant']
+[verse]
+{ntptime} [ +-chr+ ] [ +-e+ 'est_error' ] [ +-f+ 'frequency' ] [-j]
+        [ +-m+ 'max_error' ] [ +-o+ 'offset' ] [ +-s+ 'status' ]
+	[ +-t+ 'time_constant']
 
 == Description ==
 
 //FIXME: Is this all modern Unix kernels?  Probably.
 This program is useful only with special kernels described in the
 link:kern.html[A Kernel Model for Precision Timekeeping] page. It reads
-and displays time-related kernel variables using the `ntp_gettime()`
-system call. A similar display can be obtained using the `{ntpq}` program
-and `kerninfo` command.
+and displays time-related kernel variables using the +ntp_gettime()+
+system call. A similar display can be obtained using the +{ntpq}+ program
+and +kerninfo+ command.
 
 == Options ==
 
-`-c`::
-  Display the execution time of `{ntptime}` itself.
-`-e` 'est_error'::
++-c+::
+  Display the execution time of +{ntptime}+ itself.
++-e+ 'est_error'::
   Specify estimated error, in microseconds.
-`-f` 'frequency'::
++-f+ 'frequency'::
   Specify frequency offset, in parts per million.
-`-h`::
++-h+::
   Display help information.
-`-j`::
++-j+::
   Report in JSON rather than plain text.
-`-m` 'max_error'::
++-m+ 'max_error'::
   Specify max possible errors, in microseconds.
-`-o` 'offset'::
++-o+ 'offset'::
   Specify clock offset, in microseconds.
-`-r`::
++-r+::
   Display Unix and NTP times in raw format.
-`-s` 'status'::
++-s+ 'status'::
   Specify clock status. Better know what you are doing.
-`-t` 'time_constant'::
++-t+ 'time_constant'::
   Specify time constant, an integer in the range 0-10.
 
 == Bugs ==

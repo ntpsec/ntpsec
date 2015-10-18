@@ -90,7 +90,7 @@ few will be user-visible:
 
 * The sntp program has been renamed {ntpdig} in order to make
   NTP installables have a uniform name prefix and take up less
-  namespace. Also, `ntp-keygen` is now {ntpkeygen} and `ntp-wait`
+  namespace. Also, +ntp-keygen+ is now {ntpkeygen} and +ntp-wait+
   is {ntpwait}.
 
 * The deprecated ntpdate program has been replaced with a shell
@@ -156,7 +156,7 @@ distribution root.
 Like other things in modern Internet life, NTP problems can be
 devilishly intricate. This distribution includes a number of utilities
 designed to identify and repair problems using an integrated management
-protocol supported by the link:ntpq.html[`{ntpq}`] utility program.
+protocol supported by the link:ntpq.html[+{ntpq}+] utility program.
 
 The link:debug.html[NTP Debugging Techniques] and link:hints.html[Hints
 and Kinks] pages contain useful information for identifying problems and

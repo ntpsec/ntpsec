@@ -42,7 +42,7 @@ The hopf clock driver has been tested on the following software and
 
 == O/S Serial Port Configuration ==
 
-The driver attempts to open the device /dev/hopfclockX` where *X*
+The driver attempts to open the device +/dev/hopfclockX+ where *X*
 is the NTP refclock unit number as defined by the LSB of the refclock
 address.  Valid refclock unit numbers are 0 - 3.
 
@@ -59,14 +59,14 @@ ln -s /dev/ttyS0 /dev/hopfclock0
 
 == Fudge Factors ==
 
-*`time1` __time__*::
+*+time1+ __time__*::
    Specifies the time offset calibration factor, in seconds and fraction,
    with default 0.0. Should be set to 20 milliseconds to correct serial
    line and operating system delays incurred in capturing time stamps from
    the synchronous packets.
-link:#REFID[*`refid` __string__]*::
+link:#REFID[*+refid+ __string__]*::
    Specifies the driver reference identifier, *GPS* _or_ *DCF*.
-*`flag1 0 | 1`*::
+*+flag1 {0 | 1}+*::
    When set to 1, driver syncs even if only crystal driven.
 
 == Data Format ==

@@ -34,7 +34,7 @@ There are three types of associations in NTP: _persistent_,
 _preemptable_ and _ephemeral_. Persistent associations are mobilized by
 a configuration command and never demobilized. Preemptable associations
 are mobilized by a configuration command which
-includes the `preempt` option or upon arrival of an automatic server
+includes the +preempt+ option or upon arrival of an automatic server
 discovery packet. They are are demobilized by timeout or when preempted
 by a "better" server, as described on the link:discover.html[Automatic
 Server Discovery Schemes] page. Ephemeral associations are mobilized
@@ -69,16 +69,16 @@ client (mode 3) request to the specified server and expects a server
 described as a "pull" operation, in that the host pulls the time and
 related values from the server.
 
-A host is configured in client mode using the `server` (sic) command and
+A host is configured in client mode using the +server+ (sic) command and
 specifying the server DNS name or IPv4 or IPv6 address; the server
-requires no prior configuration. The `iburst` option described later on
+requires no prior configuration. The +iburst+ option described later on
 this page is recommended for clients, as this speeds up initial
-synchronization from several minutes to several seconds. The `burst`
+synchronization from several minutes to several seconds. The +burst+
 option described later on this page can be useful to reduce jitter on
 very noisy dial-up or ISDN network links.
 
 Ordinarily, the program automatically manages the poll interval between
-the default minimum and maximum values. The `minpoll` and `maxpoll`
+the default minimum and maximum values. The +minpoll+ and +maxpoll+
 options can be used to bracket the range. Unless noted otherwise, these
 options should not be used with reference clock drivers.
 
@@ -106,16 +106,16 @@ message. Since an intruder can impersonate a symmetric active peer and
 cause a spurious symmetric passive association to be mobilized,
 symmetric passive mode should always be cryptographically validated.
 
-A peer is configured in symmetric active mode using the `peer` command
+A peer is configured in symmetric active mode using the +peer+ command
 and specifying the other peer DNS name or IPv4 or IPv6 address. The
-`burst` and `iburst` options should not be used in symmetric modes, as
++burst+ and +iburst+ options should not be used in symmetric modes, as
 this can upset the intended symmetry of the protocol and result in
 spurious duplicate or dropped messages.
 
 As symmetric modes are most often used as root servers for moderate to
 large subnets where rapid response is required, it is generally best to
 set the minimum and maximum poll intervals of each root server to the
-same value using the `minpoll` and `maxpoll` options.
+same value using the +minpoll+ and +maxpoll+ options.
 
 [[broad]]
 == Broadcast/Multicast Modes ==
@@ -129,11 +129,11 @@ a level-3 router, multicast mode can be used. Additional information is
 on the link:discover.html[Automatic NTP Configuration Options] page.
 
 A server is configured to send broadcast or multicast messages using the
-`broadcast` command and specifying the subnet address for broadcast or
++broadcast+ command and specifying the subnet address for broadcast or
 the multicast group address for multicast. A broadcast client is enabled
-using the link:confopt.html#broadcastclient[`broadcastclient`] command,
+using the link:confopt.html#broadcastclient[+broadcastclient+] command,
 while a multicast client is enabled using the
-link:confopt.html#multicastclient[`multicastclient`] command and
+link:confopt.html#multicastclient[+multicastclient+] command and
 specifying the multicast group address. Multiple commands of either type
 can be used. However, the association is not mobilized until the first
 broadcast or multicast message is actually received.
@@ -158,7 +158,7 @@ link:discover.html[Automatic Server Discovery Schemes] page.
 NTP uses an intricate heuristic algorithm to automatically control the
 poll interval for maximum accuracy consistent with minimum network
 overhead. The algorithm measures the incidental offset and jitter to
-determine the best poll interval. When `{ntpd}` starts, the interval is
+determine the best poll interval. When +{ntpd}+ starts, the interval is
 the default minimum 64 sec. Under normal conditions when the clock
 discipline has stabilized, the interval increases in steps to the
 default maximum 1024 sec. In addition, should a server become unreachable
@@ -177,8 +177,8 @@ interval, for example, the capture range is only 0.24 PPM.
 
 In the NTPv4 specification and reference implementation, the poll
 interval is expressed in log~2~ units, properly called the _poll
-exponent._ It is constrained by the lower limit `minpoll` and upper
-limit `maxpoll` options of the link:confopt.html[`server`] command. The
+exponent._ It is constrained by the lower limit +minpoll+ and upper
+limit +maxpoll+ options of the link:confopt.html[+server+] command. The
 limits default to 6 (64 sec) and 10 (1024 sec), respectively, which are
 appropriate for the vast majority of cases.
 
@@ -209,8 +209,8 @@ hr), respectively.
 == Burst Options ==
 
 Occasionally it is necessary to send packets temporarily at intervals
-less than the poll interval. For instance, with the `burst` and `iburst`
-options of the link:confopt.html[`server`] command, the poll program
+less than the poll interval. For instance, with the +burst+ and +iburst+
+options of the link:confopt.html[+server+] command, the poll program
 sends a burst of several packets at 2-sec intervals. In either case the
 poll program avoids sending needless packets if the server is not
 responding. The client begins a burst with a single packet. When the
@@ -222,23 +222,23 @@ is not responding. Additional details are on the link:poll.html[Poll
 Program] page.
 
 There are two burst options where a single poll event triggers a burst.
-They should be used only with the `server` and `pool` commands, but not
+They should be used only with the +server+ and +pool+ commands, but not
 with reference clock drivers nor symmetric mode peers. In both modes,
 received server packets update the clock filter, which selects the best
 (most accurate) time values. When the last packet in the burst is sent,
 the next received packet updates the system variables and adjusts the
 system clock as if only a single packet exchange had occurred.
 
-The `iburst` option is useful where the system clock must be set quickly
+The +iburst+ option is useful where the system clock must be set quickly
 or when the network attachment requires an initial calling or training
 sequence, as in PPP or ISDN services. In general, this option is
-recommended for `server` and `pool` commands. A burst is sent only when
+recommended for +server+ and +pool+ commands. A burst is sent only when
 the server is unreachable; in particular, when first starting up.
 Ordinarily, the clock is set within a few seconds after the first
 received packet. See the link:clock.html[Clock State Machine] page for
 further details about the startup behavior.
 
-The `burst` option is useful in cases of severe network jitter or when
+The +burst+ option is useful in cases of severe network jitter or when
 the network attachment requires an initial calling or training sequence.
 This option is recommended when the minimum poll exponent is larger than
 10 (1024 sec). A burst is sent only when the server is reachable. The

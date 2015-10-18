@@ -47,9 +47,9 @@ to the default IPv4 address family. IPv6 addresses can be identified by
 the presence of colons ":" in the address field. IPv6 addresses can be
 used almost everywhere where IPv4 addresses can be used, with the
 exception of reference clock addresses, which are always IPv4. Note that
-in contexts where a host name is expected, a `-4` qualifier preceding
-the host name forces DNS resolution to the IPv4 namespace, while a `-6`
-qualifier forces DNS resolution to the IPv6 namespace.
+in contexts where a host name is expected, a +-4+ qualifier preceding
+the host name forces DNS resolution to the IPv4 namespace, while a
++-6+ qualifier forces DNS resolution to the IPv6 namespace.
 
 [[association]]
 == Association Commands ==

@@ -1,4 +1,4 @@
-= Mitigation Rules and the `prefer` Keyword =
+= Mitigation Rules and the +prefer+ Keyword =
 
 [cols="10%,90%",frame="none",grid="none",style="verse"]
 |==============================
@@ -19,9 +19,9 @@ include::includes/misc.txt[]
 * link:#combine[2. Combine Algorithm]
 * link:#clockhop[3. Anti-Clockhop Algorithm]
 * link:#peer[4. Peer Classification]
-* link:#prefer[5. 5. The `prefer` Peer]
+* link:#prefer[5. 5. The +prefer+ Peer]
 * link:#miti[6. Mitigation Rules]
-* link:#mins[7. The `minsane` Option]
+* link:#mins[7. The +minsane+ Option]
 
 '''''
 
@@ -49,7 +49,7 @@ Phase two selects the _candidates_ from among the sources by excluding
 those sources showing one or more of the errors summarized on the
 link:select.html[Clock Select Algorithm] page and to determine the
 _truechimers_ from among the candidates, leaving behind the
-_falsetickers_. A server or peer configured with the `true` option is
+_falsetickers_. A server or peer configured with the +true+ option is
 declared a truechimer independent of this algorithm. Phase four uses the
 algorithm described on the link:cluster.html[Clock Cluster Algorithm]
 page to prune the statistical outliers from the truechimers, leaving the
@@ -98,7 +98,7 @@ system peer the _old peer_, and the currently selected source the
 _candidate peer_. At each update, the candidate peer is selected as the
 first peer on the survivor list sorted by increasing root distance. The
 algorithm initializes the -_clockhop threshold_ with the value of
-`mindist`, by default 1 ms.
++mindist+, by default 1 ms.
 
 The anti-clockhop algorithm is called immediately after the combine
 algorithm. If there was no old peer or the old and candidate peers are
@@ -127,8 +127,8 @@ are classified as _device driver associations_ of one kind or another.
 In general, one or more sources of either type will be available in each
 installation.
 2.  If all sources have been lost and one or more hosts on a common DMZ
-network have specified the orphan stratum in the `orphan` option of the
-link:miscopt.html#tos[`tos`] command, each of them can become an _orphan
+network have specified the orphan stratum in the +orphan+ option of the
+link:miscopt.html#tos[+tos+] command, each of them can become an _orphan
 parent_. Dependent orphan children on the same DMZ network will see the
 orphan parents as if synchronized to a server at the orphan stratum.
 Note that, as described on the link:orphan.html[Orphan Mode] page, all
@@ -144,22 +144,22 @@ another source or sources that provide the seconds numbering function.
 is designated the _local driver_. It can be used either as a backup
 source (stratum greater than zero) should all sources fail, or as the
 primary source (stratum zero) whether or not other sources are available
-if the `prefer` option is present. The local driver can be used when the
+if the +prefer+ option is present. The local driver can be used when the
 kernel time is disciplined by some other means of synchronization, such
-as the NIST `lock clock` scheme, or another synchronization protocol
+as the NIST +lock clock+ scheme, or another synchronization protocol
 such as the IEEE 1588 Precision Time Protocol (PTP) or Digital Time
 Synchronization Service (DTSS).
 5.  When the Automated Computer Time Service driver (type 18) is
 configured, it is designated the _modem driver_. It is used either as a
 backup source, should all other sources fail, or as the primary source
-if the `prefer` option is present.
+if the +prefer+ option is present.
 
 [[prefer]]
-== 5. The `prefer` Peer ==
+== 5. The +prefer+ Peer ==
 
 The mitigation rules are designed to provide an intelligent selection of
 the system peer from among the selectable sources of different types.
-When used with the `server` or `peer` commands, the `prefer` option
+When used with the +server+ or +peer+ commands, the +prefer+ option
 designates one or more sources as preferred over all others. While the
 rules do not forbid it, it is usually not useful to designate more than
 one source as preferred; however, if more than one source is so
@@ -221,9 +221,9 @@ The mitigation algorithm proceeds in three steps in turn.
 survivor if there is one. If not, the local driver becomes the only
 survivor if there is one. If not, the orphan parent becomes the only
 survivor if there is one. If the number of survivors at this point is
-less than the `minsane` option of the link:miscopt.html#tos[`tos`]
+less than the +minsane+ option of the link:miscopt.html#tos[+tos+]
 command, the algorithm is terminated and the system variables remain
-unchanged. Note that `minsane` is by default 1, but can be set at any
+unchanged. Note that +minsane+ is by default 1, but can be set at any
 value including 0.
 2.  If the prefer peer is among the survivors, it becomes the system
 peer and its offset and jitter are inherited by the corresponding system
@@ -241,15 +241,15 @@ If none of the above is the case, the data are disregarded and the
 system variables remain as they are.
 
 [[mins]]
-== 7. The `minsane` Option ==
+== 7. The +minsane+ Option ==
 
-The `minsane` option of the link:miscopt.html#tos[`tos`] command, the
-`prefer` option of the `server` and `peer` commands and the `flag`
-option of the `fudge` command for a selected driver can be used with the
-mitigation rules to provide many useful configurations. The `minsane`
+The +minsane+ option of the link:miscopt.html#tos[+tos+] command, the
++prefer+ option of the +server+ and +peer+ commands and the +flag+
+option of the +fudge+ command for a selected driver can be used with the
+mitigation rules to provide many useful configurations. The +minsane+
 option specifies the minimum number of survivors required to synchronize
-the system clock. The `prefer` option operates as described in previous
-sections. The `flag` option enables the PPS signal for the selected
+the system clock. The +prefer+ option operates as described in previous
+sections. The +flag+ option enables the PPS signal for the selected
 driver.
 
 A common scenario is a GPS driver with a serial timecode and PPS signal.
@@ -265,7 +265,7 @@ Whether or not the GPS driver disables the PPS signal when the timecode
 becomes unreliable is at the discretion of the driver. Ordinarily, the
 PPS signal is disabled in this case; however, when the GPS receiver has
 a precision holdover oscillator, the driver may elect to continue PPS
-discipline . In this case, `minsane` can be set to zero so the PPS
+discipline . In this case, +minsane+ can be set to zero so the PPS
 signal continues to discipline the system clock.
 
 '''''

@@ -64,22 +64,22 @@ peripheral, but some can work directly from an audio codec or sound
 card. The particular device is specified by adding a soft link from the
 name used by the driver to the particular device name.
 
-The `server` command is used to configure a reference clock. Only the
-`mode`, `minpoll`, `maxpoll`, and `prefer` options are supported for
+The +server+ command is used to configure a reference clock. Only the
++mode+, +minpoll+, +maxpoll+, and +prefer+ options are supported for
 reference clocks, as described on the link:clockopt.html[Reference
-Clock Commands] page. The `prefer` option can be useful to persuade
+Clock Commands] page. The +prefer+ option can be useful to persuade
 the server to cherish a reference clock with somewhat more enthusiasm
 than other reference clocks or peers. It is further discussed on the
-link:prefer.html[Mitigation Rules and the `prefer` Keyword] page. The
-`minpoll` and `maxpoll` options have meaning only for selected clock
+link:prefer.html[Mitigation Rules and the +prefer+ Keyword] page. The
++minpoll+ and +maxpoll+ options have meaning only for selected clock
 drivers.
 
-The `fudge` command is used to provide additional information for
+The +fudge+ command is used to provide additional information for
 individual clock drivers and normally follows immediately after the
-`server` command. The `address` argument specifies the clock address.
-The `refid` and `stratum` options can be used to override the defaults
++server+ command. The +address+ argument specifies the clock address.
+The +refid+ and +stratum+ options can be used to override the defaults
 for the device. There are two optional device-dependent time offsets and
-four flags that can be included in the `fudge` command as well.
+four flags that can be included in the +fudge+ command as well.
 
 The stratum number of a reference clock is by default zero. Since the
 {ntpdman} daemon adds one to the stratum of each peer, a primary
@@ -142,7 +142,7 @@ Depending on interface type, port speed, etc., a reference clock can
 have a small residual offset relative to another. To reduce the effects
 of jitter when switching from one driver to the another, it is useful to
 calibrate the drivers to a common ensemble offset. The
-`enable calibrate` configuration command described on the
++enable calibrate+ configuration command described on the
 link:miscopt.html[Miscellaneous Options] page activates a special
 feature which automatically calculates a correction factor for each
 driver relative to an association designated the prefer peer.

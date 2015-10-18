@@ -2,30 +2,30 @@
 // twice, one in generating the Web documentation tree and one when
 // generating the manual page describing the daemon config file.
 
-`pool` _address_ [`burst`] [`iburst`] [`version` _version_] [`prefer`] [`minpoll` _minpoll_] [`maxpoll` _maxpoll_] [`preempt`]::
-`server` _address_ [`key` _key_ | `autokey`] [`burst`] [`iburst`] [`version` _version_] [`prefer`] [`minpoll` _minpoll_] [`maxpoll` _maxpoll_]::
-`peer` _address_ [`key` _key_ | `autokey`] [`version` _version_] [`prefer`] [`minpoll` _minpoll_] [`maxpoll` _maxpoll_] [`xleave`]::
-`broadcast` _address_ [`key` _key_ | `autokey`] [`version` _version_] [`prefer`] [`minpoll` _minpoll_] [`ttl` _ttl_] [`xleave`]::
-`manycastclient` _address_ [`key` _key_ | `autokey`] [`version` _version_] [`prefer`] [`minpoll` _minpoll_] [`maxpoll` _maxpoll_] [`ttl` _ttl_] [`preempt`]::
-`unpeer` ['address' | 'associd']::
++pool+ _address_ [+burst+] [+iburst+] [+version+ _version_] [+prefer+] [+minpoll+ _minpoll_] [+maxpoll+ _maxpoll_] [+preempt+]::
++server+ _address_ [+key+ _key_ | +autokey+] [+burst+] [+iburst+] [+version+ _version_] [+prefer+] [+minpoll+ _minpoll_] [+maxpoll+ _maxpoll_]::
++peer+ _address_ [+key+ _key_ | +autokey+] [+version+ _version_] [+prefer+] [+minpoll+ _minpoll_] [+maxpoll+ _maxpoll_] [+xleave+]::
++broadcast+ _address_ [+key+ _key_ | +autokey+] [+version+ _version_] [+prefer+] [+minpoll+ _minpoll_] [+ttl+ _ttl_] [+xleave+]::
++manycastclient+ _address_ [+key+ _key_ | +autokey+] [+version+ _version_] [+prefer+] [+minpoll+ _minpoll_] [+maxpoll+ _maxpoll_] [+ttl+ _ttl_] [+preempt+]::
++unpeer+ ['address' | 'associd']::
   These six commands specify the time server name or address to be used
   and the mode in which to operate. The _address_ can be either a DNS
   name or an IP address in dotted-quad notation.
 
-`pool`::
++pool+::
   For type s addresses, this command mobilizes a persistent client mode
   association with a number of remote servers. In this mode the local
   clock can synchronized to the remote server, but the remote server can
   never be synchronized to the local clock.
 
-`server`::
++server+::
   For type s and r addresses, this command mobilizes a persistent client
   mode association with the specified remote server or local radio
   clock. In this mode the local clock can synchronized to the remote
   server, but the remote server can never be synchronized to the local
   clock. This command should _not_ be used for type b or m addresses.
 
-`peer`::
++peer+::
   For type s addresses (only), this command mobilizes a persistent
   symmetric-active mode association with the specified remote peer. In
   this mode the local clock can be synchronized to the remote peer or
@@ -34,7 +34,7 @@
   either the local or remote peer may be the better source of time. This
   command should NOT be used for type b, m or r addresses.
 
-`broadcast`::
++broadcast+::
   For type b and m addresses (only), this command mobilizes a persistent
   broadcast mode association. Multiple commands can be used to specify
   multiple local broadcast interfaces (subnets) and/or multiple
@@ -51,7 +51,7 @@
   operating as a sender; for operation as a broadcast client, see the
   _broadcastclient_ or _multicastclient_ commands below.
 
-`manycastclient`::
++manycastclient+::
   For type m addresses (only), this command mobilizes a manycast client
   mode association for the multicast address specified. In this case a
   specific address must be supplied which matches the address used on
@@ -69,11 +69,11 @@
   _server_ command. The remaining servers are discarded as if never
   heard.
 
-`unpeer`::
++unpeer+::
   This command removes a previously configured association. An address
   or association ID can be used to identify the association. Either an
   IP address or DNS name can be used. This command is most useful when
-  supplied via `{ntpq}` runtime configuration commands `:config` and
-  `config-from-file`.
+  supplied via +{ntpq}+ runtime configuration commands +:config+ and
+  +config-from-file+.
 
 // end
