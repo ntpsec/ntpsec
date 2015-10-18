@@ -161,7 +161,7 @@ link:copyright.html[Copyright Notice] page.
 If you have seen older versions of NTP, this list may have fewer
 entries than you expected.  Support for some very ancient drivers
 (notably, those rendered obsolete by the WWVB modulation change in
-2013) has been dropped in order to reduce our maintainance load.
+2013) has been dropped in order to reduce our maintainence load.
 
 For security reasons, we will no longer support any refclock that requires
 a closed-source driver to run.  This filtered out the

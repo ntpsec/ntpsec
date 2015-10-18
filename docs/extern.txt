@@ -76,7 +76,7 @@ The +ntp_enable+ and +kern_enable+ are set by the configuration module.
 Normally, both switches default on, so the daemon can control the time
 and the kernel discipline can be used, if available. The +pps_update+
 switch is set by the protocol module when it believes the PPS provider
-source is legitimate and operating within nominals. The +ntp_control+
+source is legitimate and operating nominally. The +ntp_control+
 switch is set during configuration by interrogating the kernel. If both
 the +kern_enable+ and +ntp_control+ switches are set, the daemon
 disciplines the clock via the kernel and the internal daemon discipline

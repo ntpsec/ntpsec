@@ -78,7 +78,7 @@ However, there has been one success report using Linux 2.4.20 and PPSkit
 The Jupiter receivers seem to have quite a few names. They are
 referred to at least as Rockwell receivers, Navman receivers, Zodiac
 receivers, Conexant receivers and (formerly) SiRF Technology receivers
-(SiRF has since noved to selling a very suvccessful line of
+(SiRF has since moved to selling a very successful line of
 consumer-grade GPS chips based on its own designs). Rockwell seems to
 be the original and most commonly used name.
 

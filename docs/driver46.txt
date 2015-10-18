@@ -107,7 +107,7 @@ cannot be fudge-compensated.
 it reverts to STI-only operation until the PPS is stable again for
 40s, when strict mode is engaged again.
 
-*Important Notice: This is an expiremental feature!*
+*Important Notice: This is an experimental feature!*
 
 Switching between strict and STI-only mode will cause changes in offset
 and jitter. Use this mode only if STI-only works fairly well with your
@@ -149,9 +149,10 @@ absolute.
 If fudge flag +flag1+ is set for the secondary unit, the unit asserts
 the PPS flag on the clock as long as PPS data is available. This makes
 the unit eligible as PPS peer and should only be used if the GPS
-receiver can be trusted for the quality of its PPS signal^link:#fn2[2]^. [[fn2bl]] The PPS flag gets cleared if no PPS records can be aquired for some
-time. The unit also flushes the sample buffer at this point to avoid the
-use of stale PPS data.
+receiver can be trusted for the quality of its PPS
+signal^link:#fn2[2]^. [[fn2bl]] The PPS flag gets cleared if no PPS
+records can be acquired for some time. The unit also flushes the
+sample buffer at this point to avoid the use of stale PPS data.
 
 *Attention:* This unit uses its own PPS fudge value which must be set as
 fudge +time1+. Only the fudge values +time1+ and +flag1+ have an impact

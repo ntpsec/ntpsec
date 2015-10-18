@@ -315,7 +315,7 @@ restrict 11.22.33.9 nomodify
 restrict 127.0.0.1
 -------------------------------------------------------------------------------
 
-There are a few +#defineS+ in the code that you might wish to play with:
+There are a few +#defines+ in the code that you might wish to play with:
 
 +ARCRON_KEEN+::
    With this defined, the code is relatively trusting of the clock, and

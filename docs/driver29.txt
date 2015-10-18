@@ -48,7 +48,7 @@ hardware platforms:
 |=============================================================================
 
 *Attention*: Thunderbolt Receiver has not being tested on the previous
-software and hardware plataforms.
+software and hardware platforms.
 
 == GPS Receiver ==
 
@@ -422,7 +422,7 @@ Thunderbolt can output 2 synchronous packets.
 | 36-43|     | Latitude             |Double    |          |radians
 | 44-51|     | Longitude            |Double    |          |radians
 | 52-59|     | Altitude             |Double    |          |Meters
-| 60-67|     | Spare                |          |          |For Future Expantion
+| 60-67|     | Spare                |          |          |For Future Expansion
 |=================================================================================
 
 

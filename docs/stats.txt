@@ -29,7 +29,7 @@ This is call _roundtrip delay_ symbolized by the Greek letter δ.
 clock frequency error. This is called _dispersion_ symbolized by the
 Greek letter ε.
 * Expected error, consisting of the root mean square (RMS) nominal clock
-offset sample differencess in a sliding window of several samples. This
+offset sample differences in a sliding window of several samples. This
 is called _jitter_ symbolized by the Greek letter φ.
 
 Figure 1 shows how the various measured statistics are collected and
@@ -169,7 +169,7 @@ possibly several sources. The clock select algorithm computes the
 intersection of the correctness intervals to determine the truechimers
 from the selectable source population.
 * Root distance is used by the clock cluster algorithm as a weight
-factor when pruning outlyers from the truechimer population.
+factor when pruning outliers from the truechimer population.
 * The (normalized) reciprocal of the root distance is used as a weight
 factor by the combine algorithm when computing the system clock offset
 and system jitter.

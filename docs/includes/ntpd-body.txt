@@ -8,7 +8,7 @@
 {ntpd}
     [-46aAbgLmnNqx ] [ -c 'conffile' ] [ -f 'driftfile' ] [ -i 'jaildir' ]
     [ -k 'keyfile' ] [ -l 'logfile' ] [ -p 'pidfile' ] [ -P 'priority' ]
-    [ -r 'broadcast‐delay' ]  [ -s 'statsdir' ]  [ -t  'key' ]
+    [ -r 'broadcast-delay' ]  [ -s 'statsdir' ]  [ -t  'key' ]
     [ -u 'user'[:'group'] ] [ -U 'interface_update_interval' ]
     [ -v 'variable' ] [ -V 'variable' ]
 

@@ -54,7 +54,7 @@ JSON record:
 In the JSON format, time is in ISO8601 format; precision is the synch
 distance, with an unknown synch distance is reported as 0.  Host and
 IP are always emitted even if duplicate. The "adjusted" boolean
-reports whether ntpdig adusted the time.
+reports whether ntpdig adjusted the time.
 
 == OPTIONS ==
 

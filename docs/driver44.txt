@@ -45,7 +45,7 @@ Default setting is 0 = don't synchronize to CMOS clock.
 
 link:clockopt.html[+flag2 {0 | 1}+]::
    You can allow the NeoClock4X driver to use the quartz clock even if it
-   is never synchronized to a radio clock. This is usally not a good idea
+   is never synchronized to a radio clock. This is usually not a good idea
    if you want preceise timestamps since the CMOS clock is maybe not
    adjusted to a dst status change. So *PLEASE* switch this only on if you
    now what you're doing.

@@ -43,7 +43,7 @@
     error or bias due to serial port or operating system latencies,
     different cable lengths or receiver internal delay. The specified
     offset is in addition to the propagation delay provided by other
-    means, such as internal DIPswitches. Where a calibration for an
+    means, such as internal DIP switches. Where a calibration for an
     individual system and driver is available, an approximate correction
     is noted in the driver documentation pages. Note: in order to
     facilitate calibration when more than one radio clock or PPS signal

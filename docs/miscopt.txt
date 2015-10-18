@@ -21,7 +21,7 @@ include::includes/miscopt.txt[]
 include::includes/misc-options.txt[]
 
 // A subset of the tos options is described on the ntp.conf manual page.
-// If you change this, be very sure to keep that syncronized.
+// If you change this, be very sure to keep that synchronized.
 
 +tos+ [+beacon+ 'beacon' | +ceiling+ 'ceiling' | +cohort+ {+0+ | +1+} | +floor+ 'floor' | +maxclock+ 'maxclock' | +maxdist+ 'maxdist' | +minclock+ 'minclock' | +mindist+ 'mindist' | +minsane+ 'minsane' | +orphan+ 'stratum' | +orphanwait+ 'delay']::
   This command alters certain system variables used by the the clock
@@ -91,7 +91,7 @@ include::includes/misc-options.txt[]
     This allows time for one or more primary sources to become reachable
     and selectable before using backup sources, and avoids transient use
     of the backup sources at startup.
-+trap+ 'host_address' [+port+ 'port_number'] [+interface+ 'interfSace_address']::
++trap+ 'host_address' [+port+ 'port_number'] [+interface+ 'interface_address']::
   This command configures a trap receiver at the given host address and
   port number for sending messages with the specified local interface
   address. If the port number is unspecified, a value of 18447 is used.

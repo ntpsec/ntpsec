@@ -8,9 +8,6 @@ plot_summary [--option-name | --option-name 'value' ]
 
 There is no description for this command.
 
-oThis page was generated from an autogen template describing the
-command-line options.  It needs updating.
-
 == OPTIONS ==
 
 `--directory`=_string_::

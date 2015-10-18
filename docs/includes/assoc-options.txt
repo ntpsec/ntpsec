@@ -52,7 +52,7 @@
 
 +noselect+::
   Marks the server as unused, except for display purposes. The server is
-  discarded by the selection algroithm.
+  discarded by the selection algorithm.
 
 +preempt+::
   Specifies the association as preemptable rather than the default
