@@ -14,7 +14,6 @@ Welcome to the tea party.
 include::includes/install.txt[]
 include::includes/manual.txt[]
 include::includes/hand.txt[]
-include::includes/command.txt[]
 include::includes/refclock.txt[]
 include::includes/audio.txt[]
 include::includes/misc.txt[]

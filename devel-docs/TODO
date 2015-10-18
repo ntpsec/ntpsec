@@ -99,11 +99,6 @@ they are salvageable.
   scripts/plot_summary.txt
   scripts/update-leap/update-leap.txt
 
-* In the docs subdirectory, include/command.txt is an HTML passthrough
-  in a not entirely successful attempt to emulate the look of the
-  Mills HTML documentation this directory was made from. It should be
-  cleaned up or replaced.
-
 * Similarly, includes/footer.txt is a tabular hack made to resemble the
   old HTML and should be cleaned up.
 

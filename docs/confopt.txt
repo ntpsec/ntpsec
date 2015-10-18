@@ -11,7 +11,6 @@ The chicken is getting configuration advice.
 
 == Related Links ==
 
-include::includes/command.txt[]
 include::includes/confopt.txt[]
 
 == Table of Contents ==

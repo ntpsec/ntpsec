@@ -1,6 +1,6 @@
 = `ntpfrob` - frob the local clock hardware =
 
-include::includes/ntpfrob-body.txt
+include::includes/ntpfrob-body.txt[]
 
 '''''
 

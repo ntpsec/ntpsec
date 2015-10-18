@@ -1,4 +1,4 @@
-[cols="3",grid="none",frame="none"]
+[cols="3",grid="none",frame="none",width="40%"]
 |=========================================================
 |image:icons/home.gif[float="left"]link:index.html[Home Page]|
 image:icons/sitemap.png[float="left"]link::sitemap.html[Site Map]|
