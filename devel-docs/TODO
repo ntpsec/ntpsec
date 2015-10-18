@@ -85,9 +85,6 @@ they are salvageable.
 
 === Documentation ===
 
-* Write up best current practices on starting ntpd.  If it's already
-  there, make it easy to find.
-
 * Write a glossary of Mills-speak.
 
 * Short doc on how to tell your ntpd is running correctly.
