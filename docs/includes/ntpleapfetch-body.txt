@@ -1,11 +1,15 @@
-== ntpleapfetch(1) ==
-:doctype: manpage
+// This is the body of the manual page for ntpleapfetch.
+// It's included in two places: once for the docs/ HTML
+// tree, and once to make an individual man page.
 
-== NAME == 
-ntpleapfetch - leap-seconds file manager/updater
-
+[[synop]]
 == SYNOPSIS ==
-ntpleapfetch [-flags | -flag 'value' | --option-name='value']
+[verse]
++ntpleapfetch+
+    [+-46+] [+-d+ 'localfile'] [+-e+ 'expiry'] [+-f+ 'config']
+    [+-F+] [+-i+ 'interval'] [+-l+] [+L+] [+-p+ {4|6}] [+-P+ 'loglevel']
+    [+-q+] [+r+ 'retries'] [+-s+ 'source-url'] [-t 'path'] [-v]
+    [+-z+ 'path'] [+-Z+]
 
 == DESCRIPTION ==
 
@@ -33,60 +37,75 @@ For cron-friendly behavior, define CRONJOB=1 in the crontab.
 
 == OPTIONS ==
 
-`-s` string, `--source-url`=_string_::
-  The URL of the master copy of the leapseconds file.
-  +
-Specify the URL of the master copy to download $LEAPSRC
-
-`-4`, `--ipv4`::
++-4+::
   Use only IPv4 addresses for DNS name resolution. This option must not
   appear in combination with any of the following options: --ipv6.
 
-`-6`, `--ipv6`::
++-6+::
   Use only IPv6 addresses for DNS name resolution. This option must not
   appear in combination with any of the following options: --ipv4.
 
-`-d` float, `--destination`=_float_::
++-c+::
+  Command to restart {ntpd} after installing a new file. Without such a
+  command. {ntpd} checks the file daily.
+
++-d+ localfile::
   Filename on the local system.
 +
 The name to use to store the leapfile on the local system. $LEAPFILE
 
-`-e` string, `--expiration`=_string_::
++-e+ string::
   Refresh the leapfile this long before it expires.
 +
 Specify how long before expiration the file is to be refreshed Units
 are required, e.g. "-e 60 days" Note that larger values imply more
 frequent refreshes.
 
-`-f` string, `--ntp-conf-file`=_string_::
++-f+ string::
   Location of the {ntpconf} file.
 +
 Specify location of {ntpconf} (used to make sure leapfile directive is
 present and to default leapfile) /etc/{ntpconf}
 
-`-F`, `--force-update`::
++-F+::
   Force update of the leapfile.
 +
 Force update even if current file is OK and not close to expiring.
 
-`--dont-wait`::
-  Don't wait for keystroke between plots.
++-i 'interval'+::
+  Number of retries.
 
-== USAGE ==
++-l+::
+  Use syslog for output (Implied if CRONJOB is set).
 
-Usage stuff
++-L+::
+  Don't use syslog for output
 
-== EXIT STATUS ==
++-p+ {+4+|+6+}::
+  Prefer IPv4 or IPv6 (as specified) addresses, but use either.
 
-One of the following exit values will be returned:
++-P+ 'loglevel'::
+  Specify the syslog facility for logging
+  
++-q+::
+  Only report errors to stdout
 
-0 (EXIT_SUCCESS)::
-  Successful program execution.
-1 (EXIT_FAILURE)::
-  The operation failed or the command syntax was not valid.
++-r 'retries'+::
+  Number of retries.
 
-== AUTHORS ==
++-s+ string, +--source-url+=_string_::
+  The URL of the master copy of the leapseconds file.
 
-Timothe Litt
++-t+ 'path'::
+  Name of temporary file used in validation.
+
++-v+::
+  Verbose output.
+
++-z+ 'path'::
+  Specify path for utilities.
+
++-Z+::
+  Use system path only.
 
 // end
