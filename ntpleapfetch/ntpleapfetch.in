@@ -62,7 +62,7 @@ my $LOGFAC="daemon";
 
 # ###########################################
 
-=item update-leap
+=item ntpleapfetch
 
 Usage: $0 [options] [leapfile]
 
