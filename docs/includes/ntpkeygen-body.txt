@@ -112,13 +112,15 @@ message digest type supported by the OpenSSL library can be specified
 using the +-c+ option.
 
 The rules say cryptographic media should be generated with proventic
-filestamps, which means the host should already be synchronized before
-this program is run. This of course creates a chicken-and-egg problem
-when the host is started for the first time. Accordingly, the host time
-should be set by some other means, such as eyeball-and-wristwatch, at
-least so that the certificate lifetime is within the current year. After
-that and when the host is synchronized to a proventic source, the
-certificate should be re-generated.
+filestamps (that is, with file timestamps derived from a chain of
+timeservers authenticated back to Stratum 1). This means the host
+should already be synchronized before this program is run. This of
+course creates a chicken-and-egg problem when the host is started for
+the first time. Accordingly, the host time should be set by some other
+means, such as eyeball-and-wristwatch, at least so that the
+certificate lifetime is within the current year. After that and when
+the host is synchronized to a proventic source, the certificate should
+be re-generated.
 
 Additional information on trusted groups and identity schemes is on the
 link:autokey.html[Autokey Public-Key Authentication] page.
