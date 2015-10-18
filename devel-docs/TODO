@@ -146,9 +146,8 @@ they are salvageable.
 * seccomp sandboxing fails to build under Ubuntu due to some confusion
   in the Linux headers.  Investigate.
 
-* Adapt BSD snprintb into a better dumper for flag words like flash
-  codes (throwing out the old-format support) and use it
-  systematically to make reports more readable.
+* Use the snprintb in util/ntptime for flag words like flash
+  codes and use it systematically to make reports more readable.
 
 * Timer events need, as much as possible, to be eliminated - they eat
   power on laptops and mobile devices, usually unnecessarily.  At least
