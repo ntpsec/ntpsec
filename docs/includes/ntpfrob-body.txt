@@ -2,17 +2,21 @@
 // It's included in two places: once for the docs/ HTML
 // tree, and once to make an individual man page.
 
+[[synop]]
 == Synopsis ==
 
 +{ntpfrob}+ [ +-A+] [ +-a+ 'tick' ] [ +-p+ 'ppsdev' ] [+-c+] [+-e+] [+-s+]
 
+[[descr]]
 == Description ==
 
 The {ntpfrob} program frobs the local clock hardware.  It collects
 several small diagnostic functions into a set that will differ
-depending on your platform and underlying system calls.
-Portions of it formerly traveled as +tickadj+ and +ntptime+.  
+depending on your platform and underlying system calls.  Portions of
+it formerly traveled as +tickadj+ and some undocumented small
+utilities.
 
+[[cmd]]
 == Command Line Options ==
 
 +-a+ 'tick'::
@@ -30,7 +34,8 @@ Portions of it formerly traveled as +tickadj+ and +ntptime+.
 +-j+::
   Report in self-describing JSON.
 
-== Modes of operation ==
+[[usage]]
+== Usage ==
 
 Documentation for some of these functions is scanty; this is a problem
 inherited from ancient days along with their code. If you suspect
