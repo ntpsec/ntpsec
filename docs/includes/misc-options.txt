@@ -281,7 +281,7 @@ The variables operate as follows:
     Specify the number of megabytes of memory that can be allocated.
     Probably only available under Linux, this option is useful when
     dropping root (the +-i+ option). The default is 32 megabytes.
-    Setting this to zero will prevent any attemp to lock memory.
+    Setting this to zero will prevent any attempt to lock memory.
   +stacksize+ _4kPages_;;
     Specifies the maximum size of the process stack on systems with the
     mlockall()_function. Defaults to 50 4k pages (200 4k pages in OpenBSD).

@@ -90,8 +90,6 @@ they are salvageable.
 * Short doc on how to tell your ntpd is running correctly.
   Perhaps lifted from GPSD Time Service HOWTO?
 
-* Run everything through a spell checker.
-
 * These manpages have no corresponding material inside docs/.  Is that OK?
 
   ntpd/ntp.keys.txt

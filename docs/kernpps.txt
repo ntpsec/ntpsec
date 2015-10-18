@@ -32,7 +32,7 @@ supported in NTP Version 4. The PPSAPI is supported in stock FreeBSD
 and, with the addition of the +PPSkit+ kernel module, in Linux.
 
 The special header file +/usr/include/sys/timepps.h+ implements the
-PPSAPI using whatever primitives are available in each archeticture and
+PPSAPI using whatever primitives are available in each architecture and
 operating system. It obsoletes previous APIs based on the +tty_clock+
 and +ppsclock+ line disciplines and streams modules, which are no longer
 supported.

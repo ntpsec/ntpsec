@@ -27,7 +27,7 @@ are not reciprocal, or where the transmission delays on the two
 directions are traffic dependent, this may not be the case. A common
 case with DSL links is when downloading or uploading a large file.
 During the download or upload process, the delays may be significantly
-different resulting in large errrors. However, these errors can be
+different resulting in large errors. However, these errors can be
 largely eliminated using samples near the limb lines, as described on
 the link:huffpuff.html[Huff-n'-Puff Filter] page.
 

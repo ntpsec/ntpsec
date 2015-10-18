@@ -2709,7 +2709,7 @@ clock_select(void)
 	}
 
 	/*
-	 * Now, vote outlyers off the island by select jitter weighted
+	 * Now, vote outliers off the island by select jitter weighted
 	 * by root distance. Continue voting as long as there are more
 	 * than sys_minclock survivors and the select jitter of the peer
 	 * with the worst metric is greater than the minimum peer

@@ -332,7 +332,7 @@ configuration file.
 The use of cryptographic authentication is always a good idea in any
 server discovery scheme. Both symmetric key and public key cryptography
 can be used in the same scenarios as described above for the
-broadast/multicast scheme.
+broadcast/multicast scheme.
 
 //=== Manycast Interactions with Autokey ===
 //

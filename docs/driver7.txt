@@ -311,8 +311,8 @@ variable-length format.
 --
 +
 The timestamp and decoder alarms are fatal; the data accumulated
-during the minute are not used to set the clock. The format and fram
-alarm are nonfatal; only the data in the burst are discarded.
+during the minute are not used to set the clock. The format and frame
+alarms are nonfatal; only the data in the burst are discarded.
 
 +yyyy ddd hh:mm:ss+::
   The timecode format itself is self explanatory. Note that the
@@ -356,7 +356,7 @@ alarm are nonfatal; only the data in the burst are discarded.
 +tsmp+::
   The number of timestamps determined during the most recent minute
   bursts were received. The values range from 0 to 60, with the higher
-  values indicating better signals. The decoding algoriths require at
+  values indicating better signals. The decoding algorithms require at
   least 20 timestamps in the minute; otherwise all data in the minute
   are discarded.
 

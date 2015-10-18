@@ -35,7 +35,7 @@ change in 2013.
 Audio drivers for the NIST time stations WWV and WWVH have already
 been removed from the distribution because they pre-dated the 2013
 modulation change.  The remaining CHU and IRIG drivers are a
-significant maintainance problem, are deprecated, and are likely to be
+significant maintainence problem, are deprecated, and are likely to be
 removed in a future release unless a significant user constituency for
 them makes itself known.
 

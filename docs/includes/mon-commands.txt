@@ -231,7 +231,7 @@ generated line.
     element of the set is being written to. The type given specifies
     when and how data will be directed to a new element of the set. This
     way, information stored in elements of a file set that are currently
-    unused are available for administrational operations without the
+    unused are available for administrative operations without the
     risk of disturbing the operation of {ntpd}. (Most important: they can
     be removed to free space for new data produced.)
 +

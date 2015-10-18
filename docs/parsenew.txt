@@ -129,7 +129,7 @@ closest to yours and tweak the code to match your clock.
 +
 In order to make your clk_*.c file usable a reference to the clockformat
 structure must be put into parse_conf.c.
-2.  TTY setup and initialisation/configuration will be done in
+2.  TTY setup and initialization/configuration will be done in
 ntpd/refclock_parse.c.
 * Find out the exact tty settings for your clock (baud rate, parity,
 stop bits, character size, ...) and note them in terms of termio*.h
@@ -157,7 +157,7 @@ clocks for example)
          What to do, when an event happens - used to re-initialize clocks on timeout.
 
     void  (*cl_end)();            /* active poll end routine */
-         The routine to call to undo any special initialisation (free memory/timers)
+         The routine to call to undo any special initialization (free memory/timers)
 
     void   *cl_data;              /* local data area for "poll" mechanism */
          local data for polling routines
@@ -220,7 +220,7 @@ that need a command sent to them in order to reply with a time code
 For questions: mailto:%20kardel%20AT%20acm.org[kardel@acm.org].
 
 Please include an exact description on how your clock works.
-(initialisation, TTY modes, strings to be sent to it, responses received
+(initialization, TTY modes, strings to be sent to it, responses received
 from the clock).
 
 '''''

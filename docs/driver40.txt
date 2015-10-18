@@ -31,8 +31,8 @@ server   127.127.40.X mode 1;;
 fudge   127.127.40.X time1 0.NNN flag1 {0|1};;
   Time1 may specify a constant to be added to the time offset for the
   time from the receiver, a fixed-point decimal number in seconds. You
-  may specify the time offset from several tens of milli-seconds (
-  0.0NN seconds ) to a hundred and several tens of milli-seconds (
+  may specify the time offset from several tens of milliseconds (
+  0.0NN seconds ) to a hundred and several tens of milliseconds (
   0.1NN seconds ) for this clock. + 
   Flag1 has no effect for time synchronization. When flag1 is set to
   1, status commands are issued before DATE and STIM commands, and
@@ -221,7 +221,7 @@ command and measures the delay of the telephone line and the system processing t
 +
 The round trip time through the Telphone JJY loopback circuit is
 measured 5 times, and each delay time is greater than 700
-milli-seconds, that delay time is ignored during average delay time
+milliseconds, that delay time is ignored during average delay time
 calculation. Also, if the valid delay time ( <= 700 mS. ) is
 measured more than 3 times, the maximum delay time among the valid
 delay times is ignored, and if the valid delay time is measured more
@@ -230,10 +230,10 @@ marking/grading sports judgment.
 +
 The adjustment time is calculated by the formula, multiply ( the
 measured round trip time ) by ( ( the mode number ) - 100 ) %,
-and the adjustment delay time is added to the syncronizing time.
+and the adjustment delay time is added to the synchronizing time.
 +
-If you choose the automatic delay ajustment, in other words, the mode
-101 to 180 is specifed, the recommended mode number is 145 to 165.
+If you choose the automatic delay adjustment, in other words, the mode
+101 to 180 is specified, the recommended mode number is 145 to 165.
 +
 The default polling interval 6 ( 64 seconds ) is too short for this
 mode. The "minpoll" should be set to greater than or equal to 8 ( 256
@@ -363,11 +363,11 @@ filegen clockstats file clockstats type day enable
 .Mark of the clockstats record
 [width="100%",cols="<50%,<50%",]
 |============================================================
-|+JJY+ | Infomation message ( This refclock starts or stops. )
+|+JJY+ | Information message ( This refclock starts or stops. )
 |+-->+ | Sent data
 |+<--+ | Received data
-|+---+ | Infomation message
-|+===+ | Infomation message ( Start of each polling, and sync. time. )
+|+---+ | Information message
+|+===+ | Information message ( Start of each polling, and sync. time. )
 |+-W-+ | Warning message
 |+-X-+ | Error message
 |============================================================

@@ -50,7 +50,7 @@ meaning should be clear from context.
   Program error. Bugs can be reported link:bugs.html[here].
 +receive: autokey requires two-way communication+::
   Configuration error on the +broadcastclient+ command.
-+receive: server server maaximum rate exceeded+::
++receive: server server maximum rate exceeded+::
   A kiss-o'death packet has been received. The transmit rate is
   automatically reduced.
 +pps sync enabled+::

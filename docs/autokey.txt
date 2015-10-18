@@ -195,7 +195,7 @@ the host name and +group+ is the group name. If +host+ is omitted,
 the name defaults to the string returned by the Unix +gethostname()+
 routine, ordinarily the DNS name of the host. Thus, for host
 +beauregard.udel.edu+ the option +-s @red+ specifies the Autokey host
-name +beauegard.udel.edu@red+.
+name +beauregard.udel.edu@red+.
 
 A subnet host with a given group name will discard ASSOC packets from
 all subnets with a different group name. This effectively disables the
@@ -320,7 +320,7 @@ and for the other hosts the same commands without the +-T+ option. This
 generates an RSA private/public host key file and a self-signed
 certificate file for the RSA digital signature algorithm with the MD5
 message digest algorithm. For the THs a trusted certificate is
-generated; for the others a nontreusted certificate is generated.
+generated; for the others a nontrusted certificate is generated.
 Include in the +{ntpconf}+ configuration file for all hosts other than
 the primary servers, A, B and R, something like
 

@@ -163,7 +163,7 @@ the following table gives the corresponding tally codes used in the
 | +0+ | +sel_reject+    |     | discarded as not valid (TEST10-TEST13)
 | +1+ | +sel_falsetick+ | +x+ | discarded by intersection algorithm
 | +2+ | +sel_excess+    | +.+ | discarded by table overflow (not used)
-| +3+ | +sel_outlyer+   | +-+ | discarded by the cluster algorithm
+| +3+ | +sel_outlier+   | +-+ | discarded by the cluster algorithm
 | +4+ | +sel_candidate+ | +++ | included by the combine algorithm
 | +5+ | +sel_backup+    | +#+ | backup (more than +tos maxclock+ sources)
 | +6+ | +sel_sys.peer+  | +*+ | system peer
