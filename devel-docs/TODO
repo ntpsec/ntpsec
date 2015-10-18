@@ -85,8 +85,6 @@ they are salvageable.
 
 === Documentation ===
 
-* Write a glossary of Mills-speak.
-
 * Short doc on how to tell your ntpd is running correctly.
   Perhaps lifted from GPSD Time Service HOWTO?
 
@@ -98,9 +96,6 @@ they are salvageable.
   scripts/ntpsweep/ntpsweep.txt
   scripts/plot_summary.txt
   scripts/update-leap/update-leap.txt
-
-* Similarly, includes/footer.txt is a tabular hack made to resemble the
-  old HTML and should be cleaned up.
 
 * The format and organization of the NEWS file needs a rethink.
 

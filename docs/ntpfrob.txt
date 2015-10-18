@@ -1,5 +1,21 @@
 = `ntpfrob` - frob the local clock hardware =
 
+[cols="10%,90%",frame="none",grid="none",style="verse"]
+|==============================
+|image:pic/pogo3a.gif[]|
+{millshome}pictures.html[from 'Pogo', Walt Kelly]
+
+Assorted doohickeys for clock-frobbing are in the backpack.
+
+|==============================
+
+== Table of Contents ==
+
+* link:#synop[Synopsis]
+* link:#descr[Description]
+* link:#cmd[Command Line Options]
+* link:#usage[Usage]
+
 include::includes/ntpfrob-body.txt[]
 
 '''''
