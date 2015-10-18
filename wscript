@@ -111,7 +111,7 @@ def build(ctx):
 		"scripts/ntpwait/ntpwait.in",
 		"scripts/ntpsweep/ntpsweep.in",
 		"scripts/ntptrace/ntptrace.in",
-		"scripts/update-leap/update-leap.in"
+		"ntpleapfetch/ntpleapfetch.in"
 	]
 
 	ctx(

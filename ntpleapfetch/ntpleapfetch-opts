@@ -1,7 +1,7 @@
-# EDIT THIS FILE WITH CAUTION  (update-leap-opts)
+# EDIT THIS FILE WITH CAUTION  (ntpleapfetch-opts)
 #
 # It has been AutoGen-ed  June  3, 2015 at 11:53:37 AM by AutoGen 5.18.5
-# From the definitions    update-leap-opts.def
+# From the definitions    ntpleapfetch-opts.def
 # and the template file   perlopt
 
 use Getopt::Long qw(GetOptionsFromArray);
@@ -46,8 +46,8 @@ sub processOptions {
         'help|?', 'more-help'));
 
     $usage = <<'USAGE';
-update-leap - leap-seconds file manager/updater.
-USAGE: update-leap [ -<flag> [<val>] | --<name>[{=| }<val>] ]... 
+ntpleapfetch - leap-seconds file manager/updater.
+USAGE: ntpleapfetch [ -<flag> [<val>] | --<name>[{=| }<val>] ]... 
 
     -s, --source-url=str         The URL of the master copy of the leapseconds file
     -4, --ipv4                   Use only IPv4 addresses for DNS name resolution

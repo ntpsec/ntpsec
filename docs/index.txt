@@ -84,15 +84,15 @@ few will be user-visible:
 
 * A number of obsolete refclocks have been removed.
 
-* The sntp program has been renamed {ntpdig} in order to make
+* The +sntp+ program has been renamed +{ntpdig}+ in order to make
   NTP installables have a uniform name prefix and take up less
-  namespace. Also, +ntp-keygen+ is now {ntpkeygen} and +ntp-wait+
-  is {ntpwait}.
+  namespace. Also, +ntp-keygen+ is now +{ntpkeygen}+, +ntp-wait+
+  is {ntpwait}, and +update-leap+ is now +ntpleapfetch+.
 
 * A new utility, {ntpfrob}, collects several small diagnostic functions
   for reading and tweaking the local clock hardware, including reading
-  the clock tick rate, precision, and jitter. Part of it was formerly
-  trsveled as +tickadj+.
+  the clock tick rate, precision, and jitter. Part of it formerly
+  traveled as +tickadj+.
 
 * The deprecated ntpdate program has been replaced with a shell
   wrapper around {ntpdig}.
