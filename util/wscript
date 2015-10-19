@@ -15,7 +15,7 @@ def build(ctx):
 						"%s/%s/" % (bldnode, name)
 					],
 			use		= "ntp opts isc M RT PTHREAD",
-			install_path = "${PREFIX}/bin/"
+			install_path    = False
 		)
 
 
