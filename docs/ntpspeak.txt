@@ -1,0 +1,189 @@
+= A Glossary of NTP-speak =
+
+[cols="10%,90%",frame="none",grid="none",style="verse"]
+|==============================
+|image:pic/howland.jpg[]|
+{millshome}pictures.html[from 'Pogo', Walt Kelly]
+|==============================
+[glossary]
+
+//association::
+
+[[drift]]
+drift::
+  In an NTP context, refers to the frequency drift of a clock crystal
+  in an NTP host, expressed in a parts-per-million offset from its
+  nominal frequency. Changes, slowly, in response to environmental
+  factors (mainly ambient temperature). {ntpd} measures this by
+  sampling the clock and performing clock recovery against a
+  phase-locked loop.  The drift measurement is occasionally stored
+  locally to a drift file so that when {ntpd} is stopped and restarted
+  it doesn't have to go through the entire resampling and resynchronization
+  process before providing reliable time.
+
+[[falseticker]]
+falseticker::
+  <<Mills-speak>> for a timeserver identified as not
+  reliable by statistical filtering.  Usually this does not imply any
+  problem with the timeserver itself but rather with highly variable
+  and asymmetric network delays between server and client/
+
+[[fudge]]
+fudge::
+  Can have one of two senses.  Either (1) an offset configured for
+  a <<refclock>> or server to correct its time, reversing a fixed or
+  nearly-fixed propagation delay, or (2) a "fudge bit" set in
+  a configuration file to change the refclock's behavior in some
+  driver-dependent way.
+
+[[fuzzball]]
+fuzzball::
+   Historical. An
+   https://www.eecis.udel.edu/~mills/database/papers/fuzz.pdf[operating
+   system] running on PDP-11s used for early time-service and Internet
+   routing experiments. Metonymously, a PDP-11 running the suite.
+   While some of these remained in service as late as 1988 they are
+   now long gone, but have left a few traces in the NTP codebase.
+
+[[GPSDO]]
+GPSDO::
+   GPS-constrained Oscillator. A very high-precision atomic clock,
+   usually a rubidium or cesium crystal oscillator, periodically
+   resynchronized to <<USNO>> time via <<PPS>>. The most accurate time
+   source generally available; the only better ones are the
+   custom-built atomic clocks maintained by national time authorities.
+   Only cost-effective for time service when intrinsic variability in
+   network delays is well under GPSDO accuracy; thus, unsuitable for
+   use on a WAN, for which plain GPSes with <<PPS>> are cheaper and
+   generally good enough.
+
+[[GPSD]]
+GPSD::
+   The http://www.catb.org/gpsd/[GPS Daemon], an open-source device
+   manager for GPSes and other geodetic sensors. Frequently used as
+   a clock source by Stratum 1 sites via the SHM
+   link:driver28.html[(Type 28)] interface.
+
+[[leapfile]]
+leapfile::
+   A local file containing the current leap-second offset, typically
+   fetched from <<USNO>> or <<NIST>> and potentially needing updates
+   near the very beginning or end of each quarter. Normally retrieved
+   by a cron(1) job, but some varieties of <<refclock>> (notably
+   GPses) update it themselves suring normal operation.
+
+[[Mills-speak]]
+Mills-speak::
+   Dr. David Mills, the original architect of NTP and its standards,
+   wrote in a vivid and idiosyncratic style which is still preserved in
+   much of NTP's documentation.  He coined many neologisms which
+   connoisseurs refer to as "Mills-speak"; examples in this glossary
+   include <<falseticker>>, <<proventic>>, and <<truechimer>>.
+
+[[NIST]]
+NIST::
+   http://www.nist.gov/[National Institute of Standards and
+   Technology].  The civilian national time authority of the USA;
+   runs <<WWVB>>.  Responsible for keeping U.S. civil time
+   coordinated with international UTC time.  NIST time tracks <<USNO>>
+   time to within a few nanoseconds.
+
+[[NTP-classic]]
+NTP Classic::
+   The original reference implementation of NTP by Dave Mills, later
+   maintained by the Network Time Foundation.  NTPsec forked from it
+   on June 6th, 2015.
+
+[[nonce]]
+nonce::
+  An arbitrary number that may only be used once. a random or
+  pseudo-random number issued in an authentication protocol (such as
+  NTP's) to ensure that old communications cannot be reused in replay
+  attacks.
+
+[[parse-driver]]
+parse driver::
+  A refclock link:driver8.html[(type 8)] which, uniquely, handles
+  multiple <<time radio>> protocols - two dozen mostly European
+  precision time radios mostly using DCF, the broadcast time from the
+  German national authority. Each clock type is internally represented
+  as a few parse methods and table entries in a table-driven parser.
+
+[[PPS]]
+PPS::
+  (Also as "1PPS") Pulse Per Second. A top-of-second pulse emitted
+  over RS232 handshake lines by some GPSes that, along with in-band
+  time delivered to 1-second accuracy, represents U.S. military time
+  (a very close approximation of UTC) to 50-nanosecond accuracy.
+  Nowadays the single most important time reference for most NTP
+  servers en outside the U.S.A.
+
+[[proventic]]
+proventic::
+  <<Mills-speak>> for "the transitive completion of the
+  authentication relstionship", defined in RFC5906. Time is proventic
+  if it is provided by a chain of time servers between which packets
+  are authenticated and the chain reaches back to Stratum 1.
+
+[[refclock]]
+refclock::
+  Shorthand for a "reference clock", a primary time source. A computer
+  with a refclock is implicitly Stratum 1.
+
+[[SADA]]
+SADA::
+   Sun Audio Driver API, a software interface to audio devices
+   directly supported by NTP and used by the Irig Audio Decoder (type
+   6) and IRIG (type 7) refclocks. Originating in SunOS, it was later
+   implemented in Solaris and OpenSolaris, supported in the Linux OSS
+   sound layer, and is still used by the *BSD family of open-source
+   operating systems.
+
+[[stratum]]
+stratum::
+  A "stratum" is a layer in the hieratchy of time servers.  a
+  <<refclock>> is considered stratum 0; a computer directly attached to
+  a refclock is stratum 1; and a client served by a stratum N is
+  stratum N+1. Often capitalized, especially when referring to all
+  members of a stratum. While strata up to 15 are defined, it is
+  unusual to see a public timeserver with stratum > 3, and thus
+  almost all NTP clients are at Stratum 4 or lower.
+
+[[time-radio]]
+time radio::
+  A radio receiver specialized for picking up accurate time reference
+  signals broadcast over the air by a national time authority; notable
+  ones include <<WWVB>> (U.S.), CHU (Canada), DCF (Germany), and MSF
+  (United Kingdom).  Usable as a Stratum 1 time source; may be
+  qualified by "precision time radio" to distinguish from
+  consumer-grade "atomic clocks", which are time radios that normally
+  take radio synchronization just once a day and are _not_ accurate
+  enough to be used for Stratum 1.  Precision time radios used to be
+  important time sources, but (especially in the U.S.) have been
+  largely obsolesced by GPS and <<GPSDO>>-based clocks.
+
+[[truechimer]]
+truechimer::
+  <<Mills-speak>> for a timeserver that provides time believed good,
+  that is with low jitter with respect to UTC.  As with a
+  link#falseticker[falseticker], this is usually less a property of
+  the server itself than it is of favorable network topology.
+
+[[USNO]]
+USNO::
+  http://www.usno.navy.mil/USNO[The United States Naval Observatory],
+  one of tthe two U.S. national time authorities and the source of the
+  U.S. military time reference, now delivered primarily by GPS
+  signals. U.S. civil and military time agree to within nanoseconds.
+
+[[WWVB]]
+WWVB::
+  The U.S. national time radio station, run by <<NIST>> and
+  broadcasting a highly accurate U.S. civil-time reference.  Formerly
+  an important primary time source, until NIST changed its modulation
+  in 2013 and obsolesced all then-existing U.S. precision time radios. No
+  WWVB-compatible precision time radios have been manufactured since,
+  though consumer-grade "atomic clocks" unaffected by the modulation
+  change are still made.
+
+// end
