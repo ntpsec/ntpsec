@@ -1,18 +1,16 @@
 == README file for directory scripts/ ==
 
 This directory contains shell and perl script files for the configuration,
-monitoring and support of NTP installations.
+monitoring and support of NTP installations.  Not all of these are
+installed in a normal setup
 
 calc_tickadj::	Calculates "optimal" value for tick given ntp.drift file
 
 lib::		NTP interface package required to query Mode 6 packets
-		from the daemon.
+		from the daemon from Perl scripts.
 
 monitoring::	Directory containing perl scripts useful for monitoring
                 operations
-
-ntpleapfetch::	Script to update the leap-second from the NIST leapsecond file.
-		Meant to be run from a cron job.
 
 ntpwait::	Blocks until ntpd is in state 4 (synchronized).
 		Useful at boot time, to delay the boot sequence
