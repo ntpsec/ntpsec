@@ -187,7 +187,7 @@ offset and frequency, are recorded by the +loopstats+ option of the
 link:monopt.html#filegen[+filegen+] command. For additional details
 about these algorithms, see the Architecture Briefing on the
 {millshome}ntp.html[Network Time Synchronization
-Research Project] page. For additional information on statistacl
+Research Project] page. For additional information on statistical
 principles and performance metrics, see the link:stats.html[Performance
 Metrics] page.
 

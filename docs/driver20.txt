@@ -111,7 +111,7 @@ Specific GPS sentences and bitrates may be selected by setting bits of the \'mod
 |       |80       |0x50 |linespeed 115200 bps
 |7      |128      |0x80 |
 Write the sub-second fraction of the receive time stamp to the clockstat
-file for all recognised NMEA sentences. This can be used to get a useful
+file for all recognized NMEA sentences. This can be used to get a useful
 *Caveat:* This will fill your clockstat file rather fast. Use it only
 temporarily to get the numbers for the NMEA sentence of your choice.
 |8      |256      |0x100|process +$PGRMF+
@@ -122,8 +122,8 @@ temporarily to get the numbers for the NMEA sentence of your choice.
 
 The default (mode 0) is to process all supported sentences at a
 linespeed of 4800 bps, which results in the first one received and
-recognised in each cycle being used.  If only specific sentences should
-be recognised, then the mode byte must be chosen to enable only the
+recognized in each cycle being used.  If only specific sentences should
+be recognized, then the mode byte must be chosen to enable only the
 selected ones.  Multiple sentences may be selected by adding their mode
 bit values, but of those enabled still only the first received sentence
 in a cycle will be used.  Using more than one sentence per cycle is
