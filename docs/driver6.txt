@@ -35,7 +35,7 @@ used to bracket the codec frequency to this range.
 
 For proper operation the IRIG signal source should be configured for
 analog signal levels, not digital TTL levels. In most radios the IRIG
-signal is driven ±10 V behind 50 Ohms. In such cases the cable should be
+signal is driven &plusmn;10 V behind 50 Ohms. In such cases the cable should be
 terminated at the line-in port with a 50-Ohm resistor to avoid
 overloading the codec. Where feasible, the IRIG signal source should be
 operated with signature control so that, if the signal is lost or
@@ -128,7 +128,7 @@ If clockstats is enabled, the most recent line is written to the
 clockstats file every 64 s. If verbose recording is enabled (fudge flag
 4) each line is written as generated.
 
-The first field containes the error flags in hex, where the hex bits are
+The first field contains the error flags in hex, where the hex bits are
 interpreted as below. This is followed by the year of century, day of
 year and time of day. Note that the time of day is for the previous
 minute, not the current time. The status indicator and year are not
