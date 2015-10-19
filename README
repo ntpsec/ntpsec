@@ -62,9 +62,11 @@ ntpfrob::       The ntpfrob utility collects several small diagnostic
 		hardware, including reading the clock tick rate,
 		precision, and jitter.
 
-ntpkeygen::
-		Directory containing the utility program used to generate
+ntpkeygen::	Directory containing the utility program used to generate
 		NTP authentication keys.
+
+mtpleapfetch::	Directory containing a script ro be run from a cron job
+		to keep your local leap-second file properly updated.
 
 ntpq/::		Directory containing sources for a utility program to
 		query local and remote NTP peers for state variables and
