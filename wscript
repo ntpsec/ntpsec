@@ -103,6 +103,8 @@ def build(ctx):
 #	ctx.recurse("ntpfrob")
 	ctx.recurse("ntpq")
 	ctx.recurse("ntpkeygen") 
+	#if ctx.env.PLATFORM_TARGET != "freebsd": # XXX: fix this using a test in configure().
+	#	ctx.recurse("ntptime")
 	ctx.recurse("util")
 #	ctx.recurse("tests")
 
@@ -121,22 +123,22 @@ def build(ctx):
 	)
 
 	man_sources = [
-		"ntpkeygen/ntpkeygen-man.txt",
 		"ntpd/ntpd-man.txt",
-		"ntpq/ntpq-man.txt",
-		"ntpleapfetch/ntpleapfetch-man.txt",
-		"scripts/ntpwait/ntpwait-man.txt",
-		"scripts/ntpsweep/ntpsweep-man.txt",
-		"scripts/ntptrace/ntptrace-man.txt",
 		"ntpdig/ntpdig-man.txt",
 		"ntpfrob/ntpfrob-man.txt",
-		"util/ntptime-man.txt",
+		"ntpkeygen/ntpkeygen-man.txt",
+		"ntpleapfetch/ntpleapfetch-man.txt",
+		"ntpq/ntpq-man.txt",
+		"ntptime/ntptime-man.txt",
+		"scripts/ntpsweep/ntpsweep-man.txt",
+		"scripts/ntptrace/ntptrace-man.txt",
+		"scripts/ntpwait/ntpwait-man.txt",
 	]
 
-	//ctx(
-	//	features    = "subst",
-	//	source      = subst_files,
-	//	target	    = [x.replace(".in", "") for x in subst_files],
-	//)
+	#ctx(
+	#	features    = "subst",
+	#	source      = subst_files,
+	#	target	    = [x.replace(".in", "") for x in subst_files],
+	#)
 
 # end
