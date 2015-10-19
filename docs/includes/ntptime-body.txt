@@ -10,12 +10,20 @@
 
 == Description ==
 
+Checks the kernel configuration for the NTP user interface
+syscalls +ntp_gettime()+ and +ntp_adjtime()+.  If present, the current
+timekeeping data are displayed.  If not, a disappointment is
+displayed.  See the kernel page file in the HTML documentation in
+distribution for further details. {ntptime} will be built if the
+configuration system believes your platform can use it.
+
+A similar display can be obtained using the +{ntpq}+ program
+and +kerninfo+ command.
+
 //FIXME: Is this all modern Unix kernels?  Probably.
 This program is useful only with special kernels described in the
-link:kern.html[A Kernel Model for Precision Timekeeping] page. It reads
-and displays time-related kernel variables using the +ntp_gettime()+
-system call. A similar display can be obtained using the +{ntpq}+ program
-and +kerninfo+ command.
+link:kern.html[A Kernel Model for Precision Timekeeping] page. 
+system call.
 
 == Options ==
 

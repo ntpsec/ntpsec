@@ -1,7 +1,8 @@
 = README file for directory util/ =
 
 This directory contains the sources for the various utility programs.
-Not much documentation, alas.  Read the header comments.
+They are not installed by default. Not much documentation, alas.  Read
+the header comments.
 
 audio-pcm.c::
     Probe the capabilities of your sound card.  Assumes the SADA (Sun
@@ -23,14 +24,6 @@ kern.c::
    Ultrix and OSF/1 kernels. These segments do not use any licensed
    code."  Anybody who has a clue *why* it is doing this and what it's
    supposed to be used for should explain it to us, please.
-
-ntptime.c::
-    Checks the kernel configuration for the NTP user interface
-    syscalls ntp_gettime() and ntp_adjtime().  If present, the current
-    timekeeping data are displayed.  If not, a disappointment is
-    displayed.  See the kernel page file in the HTML documentation in
-    distribution for further details. ntptime will be built if the
-    configuration system believes your platform can use it.
 
 propdelay.c::
    Computes high frequency propagation delays, given the
