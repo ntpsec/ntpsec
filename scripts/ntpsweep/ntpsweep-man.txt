@@ -1,11 +1,11 @@
-== ntpsweep(1) ==
+= ntpsweep(1) =
 :doctype: manpage
 
 == NAME ==
 ntpsweep - print various informations about given NTP servers
 
 == SYNOPSIS ==
-ntpsweep [-l 'host']... [-p] [-m 'number'] [-s 'prefix'] [-h 'string']
++ntpsweep+ [+-l+ 'host']... [-p] [+-m+ 'number'] [+-s+ 'prefix'] [+-h+ 'string']
 
 == DESCRIPTION ==
 
@@ -15,24 +15,24 @@ Optionally recursing through all peers.
 
 == OPTIONS ==
 
-`-l` string, `--host-list`=_string_::
++-l+ string, +--host-list+=_string_::
   Host to execute actions on. This option may appear an unlimited number
   of times.
 +
 Use this option to specify the host on which this script operates. May
 appear multiple times.
 
-`-p`, `--peers`::
++-p+, +--peers+::
   Recursively list all peers a host synchronizes to.
 
-`-m` number, `--maxlevel`=_number_::
++-m+ number, +--maxlevel+=_number_::
   Traverse peers up to this level (4 is a reasonable number). This
   option takes an integer number as its argument.
 
-`-s` string, `--strip`=_string_::
++-s+ string, +--strip+=_string_::
   Strip this string from hostnames.
 
-`-h` string, `--host`=_string_::
++-h+ string, +--host+=_string_::
   Specify a single host.
 +
 _NOTE: THIS OPTION IS DEPRECATED_

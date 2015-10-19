@@ -1,10 +1,10 @@
-= ntoq(1) =
+= ntpwait(8) =
 :doctype: manpage
 
 == NAME ==
-{ntpq} - standard NTP query program
+ntpwait - Wait for ntpd to stabilize the system clock
 
-@../docs/includes/ntpq-body.txt@
+include::../../docs/includes/ntpwait-body.txt[]
 
 == EXIT STATUS ==
 
@@ -14,7 +14,6 @@ One of the following exit values will be returned:
   Successful program execution.
 1 (EXIT_FAILURE)::
   The operation failed or the command syntax was not valid.
-66 (EX_NOINPUT)::
-  A specified configuration file could not be loaded.
 
 // end
+
