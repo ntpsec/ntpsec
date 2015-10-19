@@ -1,10 +1,10 @@
-= ntpdig(1) =
+= ntpleapfetch(8) =
 :doctype: manpage
 
-== NAME ==
-{ntpdig} - standard Simple Network Time Protocol client program
+== NAME == 
+ntpleapfetch - leap-seconds file manager/updater
 
-@../docs/includes/ntpdig-body.txt@
+include::../docs/includes/ntpleapfetch-body.txt[]
 
 == EXIT STATUS ==
 
@@ -15,5 +15,8 @@ One of the following exit values will be returned:
 1 (EXIT_FAILURE)::
   The operation failed or the command syntax was not valid.
 
-// end
+== AUTHORS ==
 
+Timothe Litt
+
+// end

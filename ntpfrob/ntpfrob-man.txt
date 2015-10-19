@@ -2,9 +2,9 @@
 :doctype: manpage
 
 == NAME ==
-{ntpfrob} - frob the clock hardware
+ntpfrob - frob the clock hardware
 
-@../docs/includes/ntpfrob-body.txt@
+include::../docs/includes/ntpfrob-body.txt[]
 
 == EXIT STATUS ==
 
@@ -13,7 +13,7 @@ One of the following exit values will be returned:
 0 (EXIT_SUCCESS)::
   Successful program execution.
 1 (EXIT_FAILURE)::
-  The operation failed or the command syntax was not valid.
+  The operation failed or the command invocation was not valid.
 
 
 // end

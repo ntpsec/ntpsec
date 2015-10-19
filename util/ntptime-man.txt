@@ -1,10 +1,10 @@
-= ntpkeygen(8) =
+= ntptime(8) =
 :doctype: manpage
 
 == NAME ==
-{ntpkeygen} - create and manage NTP host keys
+ntptime - read and set kernel time variables
 
-@../docs/includes/ntpkeygen-body.txt@
+include::../docs/includes/ntptime-body.txt[]
 
 == EXIT STATUS ==
 
@@ -13,7 +13,6 @@ One of the following exit values will be returned:
 0 (EXIT_SUCCESS)::
   Successful program execution.
 1 (EXIT_FAILURE)::
-  The operation failed or the command syntax was not valid.
+  The operation failed or the command invocation was not valid.
 
 // end
-

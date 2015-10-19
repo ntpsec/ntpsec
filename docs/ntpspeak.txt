@@ -7,7 +7,16 @@
 |==============================
 [glossary]
 
-//association::
+[[association]]
+association::
+  An association is the relationship that an NTP client and server have
+  when the server is computing and shipping time updates to the server
+  and the server is expecting them.  There are several different kinds
+  of associations including unicast, manycast, and broadcast modes;
+  another variable is whether the association is authenticated or
+  unauthenticated.  A significant amount of NTP's complexity is means
+  for discovering association partners, creating and maintaining
+  associations, and preventing attackers from forming associations.
 
 [[drift]]
 drift::
@@ -121,7 +130,7 @@ PPS::
 [[proventic]]
 proventic::
   <<Mills-speak>> for "the transitive completion of the
-  authentication relstionship", defined in RFC5906. Time is proventic
+  authentication relationship", defined in RFC5906. Time is proventic
   if it is provided by a chain of time servers between which packets
   are authenticated and the chain reaches back to Stratum 1.
 

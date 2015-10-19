@@ -1,10 +1,10 @@
-== ntpwait(8) ==
+= ntpkeygen(8) =
 :doctype: manpage
 
 == NAME ==
-{ntpwait} - Wait for {ntpd} to stabilize the system clock
+ntpkeygen - create and manage NTP host keys
 
-@../../docs/includes/ntpwait-body.txt@
+include::../docs/includes/ntpkeygen-body.txt[]
 
 == EXIT STATUS ==
 

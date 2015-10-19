@@ -68,11 +68,9 @@ Specify location of {ntpconf} (used to make sure leapfile directive is
 present and to default leapfile) /etc/{ntpconf}
 
 +-F+::
-  Force update of the leapfile.
-+
-Force update even if current file is OK and not close to expiring.
+  Force update even if current file is OK and not close to expiring.
 
-+-i 'interval'+::
++-i+ 'interval::
   Number of retries.
 
 +-l+::
@@ -90,7 +88,7 @@ Force update even if current file is OK and not close to expiring.
 +-q+::
   Only report errors to stdout
 
-+-r 'retries'+::
++-r+ 'retries'::
   Number of retries.
 
 +-s+ string, +--source-url+=_string_::

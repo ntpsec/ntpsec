@@ -120,22 +120,23 @@ def build(ctx):
 		chmod	    = Utils.O755
 	)
 
-	subst_files = [
-		"ntpkeygen/ntpkeygen-man.txt.in",
-		"ntpd/complete.conf.in",
-		"ntpd/ntpd-man.txt.in",
-		"ntpq/ntpq-man.txt.in",
-		"ntpleapfetch/ntpleapfetch.txt.in",
-		"scripts/ntpwait/ntpwait-man.txt.in",
-		"scripts/ntptrace/ntptrace-man.txt.in",
-		"ntpdig/ntpdig-man.txt.in",
-		"ntpfrob/ntpfrob-man.txt.in",
-		"util/ntptime-man.txt.in",
+	man_sources = [
+		"ntpkeygen/ntpkeygen-man.txt",
+		"ntpd/ntpd-man.txt",
+		"ntpq/ntpq-man.txt",
+		"ntpleapfetch/ntpleapfetch-man.txt",
+		"scripts/ntpwait/ntpwait-man.txt",
+		"scripts/ntpsweep/ntpsweep-man.txt",
+		"scripts/ntptrace/ntptrace-man.txt",
+		"ntpdig/ntpdig-man.txt",
+		"ntpfrob/ntpfrob-man.txt",
+		"util/ntptime-man.txt",
 	]
 
-	ctx(
-		features    = "subst",
-		source      = subst_files,
-		target	    = [x.replace(".in", "") for x in subst_files],
-	)
+	//ctx(
+	//	features    = "subst",
+	//	source      = subst_files,
+	//	target	    = [x.replace(".in", "") for x in subst_files],
+	//)
 
+# end

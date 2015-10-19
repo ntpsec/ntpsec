@@ -15,14 +15,8 @@ None right now. (Sep-22 2015)
 * Add 'snapshot' feature to dump config status into a JSON file for collecting 
   build + platform information
 
-* @ expansion needs to be made to work fully for *.txt.in files. They
-  are not yet doing file inclusions properly - for example, in
-  ntpdig/ntpdig-man.txt.in the @../docs/includes/ntpdig-body.txt@ is not
-  interpreted.
-
-* The doc target should build manual pages. Previous item about @-expansion
-  is a prerequisite for this, then the *-man.txt files need to be passed
-  through asciidoc to make generated man pages.
+* The doc target should build manual pages. Model command is
+  a2x --format manpage --asciidoc-opts=--conf-file=../docs/asciidoc.conf foo.txt
 
 * An issue with the install productions as presently written is that
   they're written to install to ${PREFIX}/bin and {PREFIX}/sbin.  This

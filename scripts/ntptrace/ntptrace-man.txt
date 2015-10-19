@@ -1,10 +1,10 @@
-= ntptime(8) =
+= ntptrace(1) =
 :doctype: manpage
 
 == NAME ==
-{ntptime} - read and set kernel time variables
+ntptrace - trace peers of an NTP server
 
-@../docs/includes/ntptime-body.txt@
+include::../../docs/includes/ntptrace-body.txt[]
 
 == EXIT STATUS ==
 
@@ -13,6 +13,4 @@ One of the following exit values will be returned:
 0 (EXIT_SUCCESS)::
   Successful program execution.
 1 (EXIT_FAILURE)::
-  The operation failed or the command syntax was not valid.
-
-// end
+  The operation failed or the invocation was not valid.

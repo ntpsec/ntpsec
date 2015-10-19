@@ -177,13 +177,6 @@ a large common include file. These includes live in docs/includes
 and are probably what you need to edit if you're updating anything
 that appears on a man page.
 
-Most manual-page masters actually have the extension *.txt.in.  The
-.in part is a convention for files that need to be macroexpanded as a
-first stage for processing.  The reason for this is that asciidoc
-becomes syntactically confused if inclusion directives collide with
-its parser's idea of where the next section header should be.  We use
-the build system to patch around this problem.
-
 === Conventions for #ifdef guard names ===
 
 Parts of this code are a thicket of C preprocessor conditionals.

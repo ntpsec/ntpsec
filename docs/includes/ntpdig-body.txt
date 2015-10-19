@@ -2,7 +2,7 @@
 // It's included in two places: once for the docs/ HTML
 // tree, and once to make an individual man page.
 
-== SYNOPSIS =
+== SYNOPSIS ==
 [verse]
 {ntpdig}
     [--help | -?] [-4 | -6] [-a keynum] [-b bcaddress] [-B bctimeout]
@@ -30,7 +30,7 @@ time one must add 5 hours and 0 minutes, the +-0.000007+ indicates the
 local clock is 0.000007 seconds ahead of correct time (so 0.000007 seconds
 must be subtracted from the local clock to get it to be correct). Note that
 the number of decimals printed for this value will change based on the
-reported precision of the server.++/- 0.084075+ is the reported
+reported precision of the server. `+/- 0.084075` is the reported
 _synchronization_ _distance_ (in seconds), which represents the
 maximum error due to all causes. If the server does not report valid
 data needed to calculate the synchronization distance, this will be
