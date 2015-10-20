@@ -85,7 +85,7 @@ void tickadj(const bool json, const int newtick)
 #endif /* STRUCT_TIMEX_HAS_TIME_TICK */
 	}
 
-}
 #endif /* HAVE_ADJTIMEX */
+}
 
 /* end */
