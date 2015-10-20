@@ -4,7 +4,7 @@
 == NAME ==
 ntpwait - Wait for ntpd to stabilize the system clock
 
-include::../../docs/includes/ntpwait-body.txt[]
+include::../docs/includes/ntpwait-body.txt[]
 
 == EXIT STATUS ==
 
