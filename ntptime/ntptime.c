@@ -20,7 +20,7 @@
 #include <setjmp.h>
 #include <stdbool.h>
 
-#ifdef STRUCT_NTP_TIMEVAL_HAS_TV_NSEC
+#ifdef STRUCT_NTPTIMEVAL_HAS_TIME_TV_NSEC
 #define tv_frac_sec tv_nsec
 #else
 #define tv_frac_sec tv_usec

@@ -14,8 +14,7 @@ Checks the kernel configuration for the NTP user interface
 syscalls +ntp_gettime()+ and +ntp_adjtime()+.  If present, the current
 timekeeping data are displayed.  If not, a disappointment is
 displayed.  See the kernel page file in the HTML documentation in
-distribution for further details. {ntptime} will be built if the
-configuration system believes your platform can use it.
+distribution for further details.
 
 A similar display can be obtained using the +{ntpq}+ program
 and +kerninfo+ command.

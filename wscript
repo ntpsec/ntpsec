@@ -104,7 +104,7 @@ def build(ctx):
 	ctx.recurse("ntpq")
 	ctx.recurse("ntpkeygen") 
 	#if ctx.env.PLATFORM_TARGET != "freebsd": # XXX: fix this using a test in configure().
-	#	ctx.recurse("ntptime")
+	ctx.recurse("ntptime")
 	ctx.recurse("util")
 #	ctx.recurse("tests")
 
