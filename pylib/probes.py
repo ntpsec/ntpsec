@@ -9,11 +9,13 @@ def probe_header_with_prerequisites(ctx, header, prerequisites):
         for hdr in prerequisites + [header]:
         	src += "#include <%s>\n" % hdr
         src += "int main() { return 0; }\n"
+	have_name = "HAVE_%s" % header.replace(".","_").replace("/","_").upper()
 	ctx.check_cc(
 		fragment=src,
-		define_name="HAVE_%s" % header.replace(".","_").replace("/","_").upper(),
+		define_name=have_name,
 		msg = "Checking for %s" % header,
 		mandatory = False)
+	return ctx.get_define(have_name)
 
 def probe_multicast(ctx, symbol, legend):
 	"Probe for IP multicast capability."

@@ -246,7 +246,7 @@ def cmd_configure(ctx):
 		#"linux/seccomp.h",	- Doesn't build yet, investigate
 		"machine/soundcard.h",
 		"netinet/in_systm.h",
-		"md5.h",
+		("md5.h", ["sys/types.h"]),
 		"net/if6.h",
 		"net/if_var.h",
 		"net/route.h",
@@ -272,16 +272,21 @@ def cmd_configure(ctx):
 		"sys/sysctl.h",
 		"sys/systune.h",
 		"sysexits.h",
+		("timepps.h", ["inttypes.h"]),
+		("sys/timepps.h", ["inttypes.h"]),
 		"utime.h",
 	)
 	for hdr in optional_headers:
-		if not ctx.check_cc(header_name=hdr, mandatory=False) \
-		   and os.path.exists("/usr/include/" + hdr):
+		if type(hdr) == type(""):
+			if ctx.check_cc(header_name=hdr, mandatory=False):
+				continue
+		else:
+			(hdr, prereqs) = hdr
+			if probe_header_with_prerequisites(ctx, hdr, prereqs):
+				continue
+		if os.path.exists("/usr/include/" + hdr):
 			# Sanity check...
 			print "Compilation check failed but include exists %s" % hdr
-
-	for header in ["timepps.h", "sys/timepps.h"]:
-		probe_header_with_prerequisites(ctx, header, ["inttypes.h"])
 
 	if ctx.get_define("HAVE_TIMEPPS_H") or ctx.get_define("HAVE_SYS_TIMEPPS_H"):
 		ctx.define("HAVE_PPSAPI", 1)
