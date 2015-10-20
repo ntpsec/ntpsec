@@ -66,7 +66,7 @@ void ppscheck(char *device)
 	pps_params_t pp;
 	pps_handle_t ph;
 	int i, mode;
-	u_int olda, oldc;
+	u_int olda = 0, oldc = 0;
 	struct timespec to;
 
 	if (device == NULL)
