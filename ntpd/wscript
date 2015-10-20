@@ -61,6 +61,7 @@ def build(ctx):
 		"ntp_peer.c",
 		"ntp_proto.c",
 		"ntp_restrict.c",
+		"ntp_sandbox.c",
 		"ntp_signd.c",
 		"ntp_timer.c",
 		"ntp_util.c",
