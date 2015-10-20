@@ -11,6 +11,7 @@
 #include <unistd.h>
 #include <stdio.h>
 #include <fcntl.h>
+#include <netinet/in.h>
 
 #ifdef SYS_WINNT
 # include <io.h>
@@ -18,15 +19,6 @@
 #endif
 
 #include <isc/netaddr.h>
-
-#include <netinet/in.h>
-
-#if defined(HAVE_NETINET_IP_H)
-# ifdef HAVE_NETINET_IN_SYSTM_H
-#  include <netinet/in_systm.h>
-# endif
-# include <netinet/ip.h>
-#endif
 
 #include "libntp.h"	/* This needs Something above for GETDTABLESIZE */
 
