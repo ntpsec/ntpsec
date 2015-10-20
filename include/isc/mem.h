@@ -1,12 +1,12 @@
 /*
  * libntp local override of isc/mem.h to stub it out.
  *
- * include/isc is searched before any of the lib/isc include
+ * include/isc is searched before any of the libisc include
  * directories and should be used only for replacement NTP headers
- * overriding headers of the same name under lib/isc.
+ * overriding headers of the same name under libisc.
  *
  * NOTE: this assumes the system malloc is thread-safe and does
- *	 not use any normal lib/isc locking.
+ *	 not use any normal libisc locking.
  *
  * Copyright 2015 by the NTPsec project contributors
  * SPDX-License-Identifier: ISC

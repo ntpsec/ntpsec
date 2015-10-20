@@ -94,7 +94,7 @@ def build(ctx):
 		ctx.recurse("docs")
 
 
-	ctx.recurse("lib/isc")
+	ctx.recurse("libisc")
 	if ctx.env.REFCLOCK_PARSE: # Only required by the parse refclock
 		ctx.recurse("libparse")
 	ctx.recurse("libntp")

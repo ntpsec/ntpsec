@@ -20,14 +20,14 @@ def insert_srcdir(self):
 @feature('libisc_include')
 def insert_libiscdir(self):
 	srcnode = self.bld.srcnode.abspath()
-	self.includes += ["%s/lib/isc/include/" % srcnode, "%s/lib/isc/unix/include/" % srcnode] # XXX: Must be fixed for Windows
+	self.includes += ["%s/libisc/include/" % srcnode, "%s/libisc/unix/include/" % srcnode] # XXX: Must be fixed for Windows
 
 
 @before_method('apply_incpaths')
 @feature('libisc_pthread_include')
 def insert_libiscpthreaddir(self):
 	srcnode = self.bld.srcnode.abspath()
-	self.includes += ["%s/lib/isc/pthreads/include/" % srcnode]
+	self.includes += ["%s/libisc/pthreads/include/" % srcnode]
 
 
 # Create version.c

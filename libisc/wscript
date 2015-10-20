@@ -23,9 +23,9 @@ def build(ctx):
 		features	= "c bld_include src_include",
 		source		= libisc_source,
 		includes	= [
-						"%s/lib/isc/include/" % ctx.srcnode.abspath(),
-						"%s/lib/isc/unix/include/" % ctx.srcnode.abspath(), # XXX: platform: requires unix/win32 switch.
-						"%s/lib/isc/pthreads/include/" % ctx.srcnode.abspath() # XXX: platform: requires thread switch
+						"%s/libisc/include/" % ctx.srcnode.abspath(),
+						"%s/libisc/unix/include/" % ctx.srcnode.abspath(), # XXX: platform: requires unix/win32 switch.
+						"%s/libisc/pthreads/include/" % ctx.srcnode.abspath() # XXX: platform: requires thread switch
 					],
 
 	)

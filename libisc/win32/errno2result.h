@@ -8,7 +8,7 @@
 #ifndef GUARD_UNIX_ERRNO2RESULT_H
 #define GUARD_UNIX_ERRNO2RESULT_H 1
 
-/* XXXDCL this should be moved to lib/isc/include/isc/errno2result.h. */
+/* XXXDCL this should be moved to libisc/include/isc/errno2result.h. */
 
 #include <errno.h>		/* Provides errno. */
 
