@@ -14,7 +14,7 @@ int main () {
 
 @conf
 def check_structfield(ctx, fld, type, hdr, mandatory=False):
-	name = "STRUCT_%s_HAS_%s" % (type.upper(), fld.upper())
+	name = "STRUCT_%s_HAS_%s" % (type.upper(), fld.upper().replace('.','_'))
 
 	ctx.check_cc(
 		fragment    = TYPE_FRAG % (hdr, type, fld),
