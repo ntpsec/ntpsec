@@ -193,7 +193,6 @@ def cmd_configure(ctx):
 		('MD5Init', "md5.h", "CRYPTO"),
 		('ntp_adjtime', "sys/timex.h"),		# BSD
 		('ntp_gettime', "sys/timex.h"),		# BSD
-		('plock', "sys/lock.h"),		# OSF/1, SVID[23], XPG2
 		('pthread_attr_getstacksize', "pthread.h", "PTHREAD"),
 		('pthread_attr_setstacksize', "pthread.h", "PTHREAD"),
 		('res_init', "resolv.h"),
@@ -261,7 +260,6 @@ def cmd_configure(ctx):
 		"stdatomic.h",
 		"sys/audioio.h",
 		"sys/ioctl.h",
-		"sys/lock.h",
 		"sys/modem.h",
 		"sys/param.h",
 		"sys/prctl.h",

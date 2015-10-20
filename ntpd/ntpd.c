@@ -34,16 +34,7 @@
 # include <sys/ioctl.h>
 #endif /* HAVE_SYS_IOCTL_H */
 #if defined(HAVE_RTPRIO)
-# ifdef HAVE_SYS_LOCK_H
-#  include <sys/lock.h>
-# endif
 # include <sys/rtprio.h>
-#else
-# ifdef HAVE_PLOCK
-#  ifdef HAVE_SYS_LOCK_H
-#	include <sys/lock.h>
-#  endif
-# endif
 #endif
 #include <sched.h>
 #include <sys/mman.h>
@@ -52,9 +43,9 @@
 
 #include "recvbuff.h"
 
-#ifdef _AIX
+#ifdef SIGDANGER
 # include <ulimit.h>
-#endif /* _AIX */
+#endif /* SIGDANGER */
 
 #ifdef ENABLE_DROPROOT
 # include <ctype.h>
@@ -481,30 +472,9 @@ main(
 #endif /* !NO_MAIN_ALLOWED */
 #endif /* !SIM */
 
-#ifdef _AIX
+#ifdef SIGDANGER
 /*
- * OK. AIX is different than solaris in how it implements plock().
- * If you do NOT adjust the stack limit, you will get the MAXIMUM
- * stack size allocated and PINNED with you program. To check the
- * value, use ulimit -a.
- *
- * To fix this, we create an automatic variable and set our stack limit
- * to that PLUS 32KB of extra space (we need some headroom).
- *
- * This subroutine gets the stack address.
- *
- * Grover Davidson and Matt Ladendorf
- *
- */
-static char *
-get_aix_stack(void)
-{
-	char ch;
-	return (&ch);
-}
-
-/*
- * Signal handler for SIGDANGER.
+ * Signal handler for SIGDANGER. (AIX)
  */
 static void
 catch_danger(int signo)
@@ -513,7 +483,7 @@ catch_danger(int signo)
 	/* Make the system believe we'll free something, but don't do it! */
 	return;
 }
-#endif /* _AIX */
+#endif /* SIGDANGER */
 
 /*
  * Set the process priority
@@ -609,7 +579,7 @@ ntpdmain(
 	int		pipe_fds[2];
 	int		rc;
 	int		exit_code;
-#  ifdef _AIX
+#  ifdef SIGDANGER
 	struct sigaction sa;
 #  endif
 # endif	/* HAVE_WORKING_FORK*/
@@ -750,13 +720,13 @@ ntpdmain(
 
 		if (setsid() == (pid_t)-1)
 			msyslog(LOG_ERR, "setsid(): %m");
-#  ifdef _AIX
+#  ifdef SIGDANGER
 		/* Don't get killed by low-on-memory signal. */
 		sa.sa_handler = catch_danger;
 		sigemptyset(&sa.sa_mask);
 		sa.sa_flags = SA_RESTART;
 		sigaction(SIGDANGER, &sa, NULL);
-#  endif	/* _AIX */
+#  endif	/* SIGDANGER */
 # endif		/* HAVE_WORKING_FORK */
 	}
 
