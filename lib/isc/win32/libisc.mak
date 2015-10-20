@@ -1866,24 +1866,6 @@ SOURCE=..\sha2.c
 
 !ENDIF 
 
-SOURCE=..\sockaddr.c
-
-!IF  "$(CFG)" == "libisc - Win32 Release"
-
-
-"$(INTDIR)\sockaddr.obj" : $(SOURCE) "$(INTDIR)"
-	$(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-!ELSEIF  "$(CFG)" == "libisc - Win32 Debug"
-
-
-"$(INTDIR)\sockaddr.obj"	"$(INTDIR)\sockaddr.sbr" : $(SOURCE) "$(INTDIR)"
-	$(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-!ENDIF 
-
 SOURCE=..\stats.c
 
 !IF  "$(CFG)" == "libisc - Win32 Release"
