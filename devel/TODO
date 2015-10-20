@@ -45,7 +45,8 @@ None right now. (Sep-22 2015)
 * We need a build time option to disable all dangerous operations
   that ntpq can produce.  First we need to enumerate them.
 
-* systime.c needs patching to put ntpdsim's hook back in place.
+* systime.c needs patching to put ntpdsim's hook back in place. Deferred
+  until the ntpdsim build is fixed.
 
 * ntpfrob -c behaves mysteriously.  Someone with domain knowledge (probably Hal)
   should review the code.
@@ -61,35 +62,22 @@ None right now. (Sep-22 2015)
 
 * Build testing.  The build/CI farm needs to be fully operational.
 
-* Live testing.  Somebody needs to take the development branch,
-build it on a real machines, and live-test it to make sure that
-it issues sane corrections and doesn't core-dump or barf.
-We need to do that on various platforms.
-
-* We also need to live-test various refclocks.  It would be nice
-to test the full matrix of refclock x platform, but that's too
-much work.  We should probably test as many refclocks as we can
-on at least one platform and test the NMEA, Atom, and SHM drivers
-on most platforms.
+* We need to live-test various refclocks.  It would be nice
+  to test the full matrix of refclock x platform, but that's too
+  much work.  We should probably test as many refclocks as we can
+  on at least one platform and test the NMEA, Atom, and SHM drivers
+  on most platforms.
 
 * We need to live-test leap seconds, both getting them from a file
-with ntpleapfetch and getting them from other NTP servers.
+  with ntpleapfetch and getting them from other NTP servers.
 
 * The script tests in scripts/t should be investigated, perhaps
-they are salvageable.
+  they are salvageable.
 
 === Documentation ===
 
 * Short doc on how to tell your ntpd is running correctly.
   Perhaps lifted from GPSD Time Service HOWTO?
-
-* These manpages have no corresponding material inside docs/.  Is that OK?
-
-  ntpd/ntp.keys.txt
-  scripts/calc_tickadj/calc_tickadj.txt
-  scripts/summary.txt
-  scripts/ntpsweep/ntpsweep.txt
-  scripts/plot_summary.txt
 
 * The format and organization of the NEWS file needs a rethink.
 
