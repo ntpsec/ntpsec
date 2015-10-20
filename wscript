@@ -129,9 +129,9 @@ def build(ctx):
 		"ntpleapfetch/ntpleapfetch-man.txt",
 		"ntpq/ntpq-man.txt",
 		"ntptime/ntptime-man.txt",
+		"ntptrace/ntptrace-man.txt",
+		"ntpwait/ntpwait-man.txt",
 		"scripts/ntpsweep/ntpsweep-man.txt",
-		"scripts/ntptrace/ntptrace-man.txt",
-		"scripts/ntpwait/ntpwait-man.txt",
 	]
 
 	#ctx(
