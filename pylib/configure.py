@@ -231,12 +231,10 @@ def cmd_configure(ctx):
 	optional_headers = (
 		"alloca.h",
 		"arpa/nameser.h",
-		"dirent.h",
 		"dns_sd.h",
 		"histedit.h",
 		"ieeefp.h",
 		"ifaddrs.h",
-		"libgen.h",
 		"libintl.h",
 		"libscf.h",
 		"linux/if_addr.h",
@@ -265,10 +263,8 @@ def cmd_configure(ctx):
 		"sys/soundcard.h",
 		("sys/sysctl.h", ["sys/types.h"]),
 		"sys/systune.h",
-		"sysexits.h",
 		("timepps.h", ["inttypes.h"]),
 		("sys/timepps.h", ["inttypes.h"]),
-		"utime.h",
 	)
 	for hdr in optional_headers:
 		if type(hdr) == type(""):
