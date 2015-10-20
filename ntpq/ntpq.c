@@ -3258,7 +3258,7 @@ cookedprint(
 
 		if (output_raw != 0) {
 			atoascii(name, MAXVARLEN, bn, sizeof(bn));
-			atoascii(value, MAXVALLEN, bv, sizeof(bv));
+			atoascii(value, MAXVALLEN, bv, sizeof(bv)-1);
 			if (output_raw != '*') {
 				len = strlen(bv);
 				bv[len] = output_raw;
