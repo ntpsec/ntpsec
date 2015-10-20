@@ -201,7 +201,7 @@ getgroup:
 			cap_t caps;
 			char *captext;
 			
-			captext = want_dynanic_interface_tracking
+			captext = want_dynamic_interface_tracking
 				      ? "cap_sys_time,cap_net_bind_service=pe"
 				      : "cap_sys_time=pe";
 			caps = cap_from_text(captext);
