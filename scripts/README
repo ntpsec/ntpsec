@@ -12,18 +12,9 @@ lib::		NTP interface package required to query Mode 6 packets
 monitoring::	Directory containing perl scripts useful for monitoring
                 operations
 
-ntpwait::	Blocks until ntpd is in state 4 (synchronized).
-		Useful at boot time, to delay the boot sequence
-		until after "ntpd -g" has set the time.
-
 ntpsweep::	prints per host given in <file> the NTP stratum level, the
 		clock offset in seconds, the daemon version, the operating
 		system and the processor.
-
-ntptrace::	Directory containing sources for a utility program that
-		can be used to reveal the chain of NTP peers from a
-		designated peer to the primary server at the root of the
-		timekeeping subnet.
 
 ntpver::	Simple script using ntpq to print out the suite version.
 
