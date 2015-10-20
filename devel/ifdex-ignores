@@ -6,7 +6,7 @@
 # interpret to exclude most of its config symbols. Thus, from the toplevel
 # directory:
 #
-# ifdex -X build/config.h devel-docs/ifdex-ignores .
+# ifdex -X build/config.h devel/ifdex-ignores .
 #
 # No output from this command means all symbols are accounted for
 

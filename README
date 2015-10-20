@@ -22,7 +22,7 @@ NEWS::		What's new in this release.
 
 README::	This file.
 
-devel-docs/::	Documentation aimed at developers.
+devel/::	Documentation aimed at developers.
 
 docs/::		Directory containing a complete set of documentation on
 		building and configuring a NTP server or client. The files
@@ -99,16 +99,13 @@ pylib/::	A library of Python procedures used by the build sytem.
 
 README::	This file
 
-scripts/::	Directory containing scripts to build the configuration
-		files in this directory and then the makefiles used in
-		various dependent directories. the subdirectories
-		monitoring and support hold various perl and shell
-		scripts for visualizing synchronization and daemon startup.
-
 tests/::	Self-test code.
 
-util/::		Directory containing sources for various utility and
-		testing programs that are *not* part of a normal installation.
+util/:: 	Directory containing sources for various utility and testing
+		programs that are *not* part of a normal installation.
+		The subdirectories monitoring/ and support/ hold
+		various perl and shell scripts for visualizing
+		synchronization and daemon startup.
 
 VERSION::	The version stamp, to be used by scripts and programs.
 

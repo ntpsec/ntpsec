@@ -1,5 +1,5 @@
 # NTPsec derivation for Nix (https://nixos.org). To hack NTPsec on
-# NixOS, use `nix-shell -A build.x86_64-linux devel-docs/release.nix`.
+# NixOS, use `nix-shell -A build.x86_64-linux devel/release.nix`.
 {
   ntpsecSrc ? { outPath = ../.; revCount = 1234; shortRev = "abcdef"; },
   officialRelease ? false
