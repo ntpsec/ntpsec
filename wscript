@@ -109,9 +109,9 @@ def build(ctx):
 
 
 	subst_scripts = [
-		"scripts/ntpwait/ntpwait.in",
-		"scripts/ntpsweep/ntpsweep.in",
-		"scripts/ntptrace/ntptrace.in",
+		"ntpwait/ntpwait.in",
+		"ntptrace/ntptrace.in",
+		"util/ntpsweep/ntpsweep.in",
 	]
 
 	ctx(
