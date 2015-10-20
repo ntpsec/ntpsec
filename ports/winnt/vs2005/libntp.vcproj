@@ -566,10 +566,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\lib\isc\include\isc\hash.h"
-				>
-			</File>
-			<File
 				RelativePath="..\..\..\include\ieee754io.h"
 				>
 			</File>

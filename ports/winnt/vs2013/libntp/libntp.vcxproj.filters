@@ -328,9 +328,6 @@
     <ClInclude Include="..\..\include\gaa_compat.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\lib\isc\include\isc\hash.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\..\include\ieee754io.h">
       <Filter>Header Files</Filter>
     </ClInclude>
