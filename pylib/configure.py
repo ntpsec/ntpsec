@@ -255,7 +255,6 @@ def cmd_configure(ctx):
 		"sys/audioio.h",
 		"sys/ioctl.h",
 		"sys/modem.h",
-		"sys/param.h",
 		"sys/prctl.h",
 		"sys/ppsclock.h",
 		"sys/procset.h",

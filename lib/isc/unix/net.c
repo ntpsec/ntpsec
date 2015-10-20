@@ -10,9 +10,6 @@
 #include <sys/types.h>
 
 #if defined(HAVE_SYS_SYSCTL_H)
-#if defined(HAVE_SYS_PARAM_H)
-#include <sys/param.h>
-#endif
 #include <sys/sysctl.h>
 #endif
 

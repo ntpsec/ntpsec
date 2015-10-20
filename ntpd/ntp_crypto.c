@@ -7,7 +7,6 @@
 #include <stdio.h>
 #include <stdlib.h>	/* strtoul */
 #include <sys/types.h>
-#include <sys/param.h>
 #include <unistd.h>
 #include <fcntl.h>
 #include <string.h>

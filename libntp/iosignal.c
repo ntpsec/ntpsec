@@ -4,10 +4,6 @@
  */
 
 /*
- * [Bug 158]
- * Do the #includes differently, as under some versions of Linux
- * sys/param.h has a #undef CONFIG_PHONE line in it.
- *
  * As we have ~40 CONFIG_ variables, I don't feel like renaming them
  * every time somebody adds a new macro to some system header.
  */
