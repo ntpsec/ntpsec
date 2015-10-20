@@ -433,7 +433,7 @@ def cmd_configure(ctx):
 	ctx.define("DIR_SEP", "'%s'" % sep, quote=False)
 
 
-	# lib/isc/
+	# libisc/
 	# XXX: Hack that needs to be fixed properly for all platforms
 	ctx.define("ISC_PLATFORM_NORETURN_PRE", "", quote=False)
 	ctx.define("ISC_PLATFORM_NORETURN_POST", "__attribute__((__noreturn__))", quote=False)
