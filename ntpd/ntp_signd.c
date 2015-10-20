@@ -15,10 +15,6 @@
 #include <string.h>
 #include <stdio.h>
 #include <stddef.h>
-#ifdef HAVE_LIBSCF_H
-#include <libscf.h>
-#include <unistd.h>
-#endif /* HAVE_LIBSCF_H */
 
 #include <sys/un.h>
 
