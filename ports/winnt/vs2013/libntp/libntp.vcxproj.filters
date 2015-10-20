@@ -230,9 +230,6 @@
     <ClCompile Include="..\..\..\..\libntp\snprintf.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\lib\isc\sockaddr.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\libntp\socket.c">
       <Filter>Source Files</Filter>
     </ClCompile>

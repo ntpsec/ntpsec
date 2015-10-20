@@ -12,7 +12,6 @@ def build(ctx):
 		"random.c",
 		"result.c",
 		"sha1.c",
-		"sockaddr.c",
 		"unix/errno2result.c",
 		"unix/interfaceiter.c",
 		"unix/net.c",
