@@ -279,10 +279,6 @@ SOURCE=..\include\isc\fsaccess.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\include\isc\hash.h
-# End Source File
-# Begin Source File
-
 SOURCE=..\include\isc\heap.h
 # End Source File
 # Begin Source File
