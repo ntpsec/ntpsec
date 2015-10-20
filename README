@@ -79,14 +79,17 @@ ntpq/::		Directory containing sources for a utility program to
 ntptime/:: 	Directory containing a utility for reading and modifying
 		kernel parameters related to the local clock.
 
-ntptrace::	Directory containing source for a utility program that
+ntptrace/::	Directory containing source for a utility program that
 		can be used to reveal the chain of NTP peers from a
 		designated peer to the primary server at the root of the
 		timekeeping subnet.
 
-ntpwait::	Directory contsining a script that nlocks until ntpd is
+ntpwait/::	Directory contsining a script that nlocks until ntpd is
 		in state 4 (synchronized). Useful at boot time, to delay
 		the boot sequence until after "ntpd -g" has set the time.
+
+perllib/::	NTP interface package required to query Mode 6 packets
+		from the daemon from Perl scripts.
 
 ports/::	Subdirectories of this contain code for non-Unix operating
 		systems.  At present there is just one, for Windows.

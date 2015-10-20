@@ -1,13 +1,10 @@
 == README file for directory scripts/ ==
 
 This directory contains shell and perl script files for the configuration,
-monitoring and support of NTP installations.  Not all of these are
-installed in a normal setup
+monitoring and support of NTP installations.  These are not installed in
+a normal setup
 
 calc_tickadj::	Calculates "optimal" value for tick given ntp.drift file
-
-lib::		NTP interface package required to query Mode 6 packets
-		from the daemon from Perl scripts.
 
 monitoring::	Directory containing perl scripts useful for monitoring
                 operations
@@ -29,6 +26,5 @@ stats::		directory containing awk and shell scripts useful for
 summary::	Generate summary files out of stat files produced by NTP
                 daemon.
 
-t::		Tests for the scripts.
 
 // end
