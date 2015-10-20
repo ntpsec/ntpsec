@@ -34,10 +34,10 @@ propdelay.c::
 sht.c::
     Test program for shared memory refclock.
 
-tg.c and tg2.c::
-    These are tone generators.  They make audio signals that emulate WWV
-    or IRIG (-B and -E).  tg runs on Solaris.  tg2 is a clone that runs on
-    Linux, FreeBSD, and NetBSD.  Read the source for the fine print.  tg2
-    has a help option available via -h.
+tg2.c::
+    A tone generator; makes audio signals that emulate WWV/H or
+    IRIG. Should run on Solaris, FreeBSD, NetBSD and Linux provised
+    the platform supports the SADA API.  Read the source for the fine
+    print.  Has a help option available via -h.
 
 // end
