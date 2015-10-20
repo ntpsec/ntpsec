@@ -8,8 +8,6 @@
 #ifndef GUARD_ISC_TYPES_H
 #define GUARD_ISC_TYPES_H 1
 
-#include <isc/namespace.h>
-
 /*! \file isc/types.h
  * \brief
  * OS-specific types, from the OS-specific include directories.
