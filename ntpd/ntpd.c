@@ -42,7 +42,8 @@
 
 extern bool sandbox(const bool droproot,
 		    const char *user, const char *group,
-		    const char *chrootdir);
+		    const char *chrootdir,
+		    bool want_dynamic_interface_tracking);
 
 #ifdef SIGDANGER
 # include <ulimit.h>
@@ -916,7 +917,7 @@ ntpdmain(
 		msyslog(LOG_WARNING, "-6/--ipv6 ignored, IPv6 networking not found.");
 
 	/* drop root privileges */
-	if (sandbox(droproot, user, group, chrootdir) && interface_interval) {
+	if (sandbox(droproot, user, group, chrootdir, interface_interval!=0) && interface_interval) {
 		interface_interval = 0;
 		msyslog(LOG_INFO, "running as non-root disables dynamic interface tracking");
 	}

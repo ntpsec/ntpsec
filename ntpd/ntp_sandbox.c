@@ -51,7 +51,8 @@ struct passwd *pw;
 
 bool sandbox(const bool droproot,
 	     const char *user, const char *group,
-	     const char *chrootdir)
+	     const char *chrootdir,
+	     bool want_dynamic_interface_tracking)
 {
 	bool nonroot = false;
 # ifdef ENABLE_DROPROOT
@@ -190,14 +191,17 @@ getgroup:
 #  ifdef HAVE_LINUX_CAPABILITY
 		{
 			/*
-			 *  We may be running under non-root uid now, but we still hold full root privileges!
-			 *  We drop all of them, except for the crucial one or two: cap_sys_time and
-			 *  cap_net_bind_service if doing dynamic interface tracking.
+			 *  We may be running under non-root uid now,
+			 *  but we still hold full root privileges!
+			 *  We drop all of them, except for the
+			 *  crucial one or two: cap_sys_time and
+			 *  cap_net_bind_service for doing dynamic
+			 *  interface tracking.
 			 */
 			cap_t caps;
 			char *captext;
 			
-			captext = (0 != interface_interval)
+			captext = want_dynanic_interface_tracking
 				      ? "cap_sys_time,cap_net_bind_service=pe"
 				      : "cap_sys_time=pe";
 			caps = cap_from_text(captext);
