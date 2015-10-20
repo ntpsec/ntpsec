@@ -26,9 +26,6 @@
 #include <sys/stat.h>
 #include <stdio.h>
 #include <stdbool.h>
-#ifdef HAVE_SYS_PARAM_H
-# include <sys/param.h>
-#endif
 #include <signal.h>
 #ifdef HAVE_SYS_IOCTL_H
 # include <sys/ioctl.h>

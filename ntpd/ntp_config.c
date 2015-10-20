@@ -19,9 +19,6 @@
 
 #include <stdio.h>
 #include <ctype.h>
-#ifdef HAVE_SYS_PARAM_H
-# include <sys/param.h>
-#endif
 #include <signal.h>
 #include <sys/wait.h>
 

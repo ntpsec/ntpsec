@@ -11,9 +11,6 @@
 #if !defined(FNM_CASEFOLD) && defined(FNM_IGNORECASE)
 # define FNM_CASEFOLD FNM_IGNORECASE
 #endif
-#ifdef HAVE_SYS_PARAM_H
-# include <sys/param.h>
-#endif
 #ifdef HAVE_SYS_IOCTL_H
 # include <sys/ioctl.h>
 #endif
