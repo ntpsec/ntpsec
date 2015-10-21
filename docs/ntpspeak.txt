@@ -64,7 +64,8 @@ fuzzball::
    While some of these remained in service as late as 1988 they are
    now long gone, but have left a few traces in the NTP codebase.
 
-[[GPS]]::
+[[GPS]]
+GPS::
    Global Positioning System; also, "a GPS" is a radio receiver
    designed to get position and time fixes from the system. GPS fixes
    are derived from spherical trigonometry using the precisely known
@@ -165,7 +166,7 @@ PTP::
 pool::
    In an NTP context, "the pool" is usually the
    http://www.pool.ntp.org/en/[NTP Pool Project], a collection of
-   thousands of NTP servers accessible through hub servers that hand
+   thousands of NTP servers accessible through distribution servers that hand
    out service addresses at random from the pool.
 
 [[proventic]]
