@@ -189,7 +189,7 @@ isc_time_subtract(const isc_time_t *t, const isc_interval_t *i,
 	return (ISC_R_SUCCESS);
 }
 
-isc_uint64_t
+uint64_t
 isc_time_microdiff(const isc_time_t *t1, const isc_time_t *t2) {
 	ULARGE_INTEGER i1, i2;
 	LONGLONG i3;
@@ -212,7 +212,7 @@ isc_time_microdiff(const isc_time_t *t1, const isc_time_t *t2) {
 	return (i3);
 }
 
-isc_uint32_t
+uint32_t
 isc_time_seconds(const isc_time_t *t) {
 	SYSTEMTIME epoch = { 1970, 1, 4, 1, 0, 0, 0, 0 };
 	FILETIME temp;
@@ -228,16 +228,16 @@ isc_time_seconds(const isc_time_t *t) {
 
 	i3 = (i1.QuadPart - i2.QuadPart) / 10000000;
 
-	return ((isc_uint32_t)i3);
+	return ((uint32_t)i3);
 }
 
-isc_uint32_t
+uint32_t
 isc_time_nanoseconds(const isc_time_t *t) {
 	ULARGE_INTEGER i;
 
 	i.LowPart  = t->absolute.dwLowDateTime;
 	i.HighPart = t->absolute.dwHighDateTime;
-	return ((isc_uint32_t)(i.QuadPart % 10000000) * 100);
+	return ((uint32_t)(i.QuadPart % 10000000) * 100);
 }
 
 void

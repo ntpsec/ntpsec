@@ -117,8 +117,8 @@ typedef union {
  * Hash a single 512-bit block. This is the core of the algorithm.
  */
 static void
-transform(isc_uint32_t state[5], const unsigned char buffer[64]) {
-	isc_uint32_t a, b, c, d, e;
+transform(uint32_t state[5], const unsigned char buffer[64]) {
+	uint32_t a, b, c, d, e;
 	CHAR64LONG16 *block;
 	CHAR64LONG16 workspace;
 

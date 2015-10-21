@@ -89,12 +89,12 @@ static	PGETADAPTERSADDRESSES	pGAA;
 static void
 get_broadcastaddr(isc_netaddr_t *bcastaddr, isc_netaddr_t *addr, isc_netaddr_t *netmask) {
 
-	isc_uint32_t *	b;
-	isc_uint32_t	a, n;
+	uint32_t *	b;
+	uint32_t	a, n;
 
-	b = (isc_uint32_t *)&bcastaddr->type.in;
-	a = *(isc_uint32_t *)&addr->type.in;
-	n = *(isc_uint32_t *)&netmask->type.in;
+	b = (uint32_t *)&bcastaddr->type.in;
+	a = *(uint32_t *)&addr->type.in;
+	n = *(uint32_t *)&netmask->type.in;
 
 	*b = a | ~n;
 }

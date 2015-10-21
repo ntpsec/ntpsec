@@ -43,7 +43,7 @@ struct isc_interface {
 	isc_netaddr_t netmask;		/*%< Network mask. */
 	isc_netaddr_t broadcast;	/*&< Broadcast address. */
 	isc_netaddr_t dstaddress; 	/*%< Destination address (point-to-point only). */
-	isc_uint32_t flags;		/*%< Flags; see INTERFACE flags. */
+	uint32_t flags;		/*%< Flags; see INTERFACE flags. */
 	unsigned int ifindex;		/*%< Interface index for IP(V6)_MULTICAST_IF. */
 };
 
