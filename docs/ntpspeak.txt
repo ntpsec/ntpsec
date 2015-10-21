@@ -79,7 +79,7 @@ GPSDO::
    usually a rubidium or cesium crystal oscillator, periodically
    resynchronized to <<USNO>> time via <<PPS>>. The most accurate time
    source generally available; the only better ones are the
-   custom-built atomic clocks maintained by national time authorities.
+   atomic clocks maintained by national time authorities.
    Only cost-effective for time service when intrinsic variability in
    network delays is well under GPSDO accuracy; thus, unsuitable for
    use on a WAN, for which plain GPSes with <<PPS>> are cheaper and
