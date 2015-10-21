@@ -98,6 +98,9 @@ void jitter(const iomode mode)
 			printf("%13.9f\n", gtod[i]);
 		average += gtod[i];
 	}
+
+	if (mode == raw)
+	    exit(0);
 	
 	/*
 	 * Sort the gtod array and display deciles
@@ -131,6 +134,8 @@ void jitter(const iomode mode)
 		for (i = NBUF - 12; i < NBUF - 2; i++)
 		    fprintf(stdout, "%2d %13.9f\n", i, gtod[i]);
 	}
+
+	exit(0);
 }
 
 /* end */
