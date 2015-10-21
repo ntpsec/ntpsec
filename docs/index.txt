@@ -56,7 +56,11 @@ paths in order to achieve high accuracy and reliability.
 
 For background on the problem NTP solves, see
 link:http://www.catb.org/gpsd/time-service-intro.html[Introduction to
-Time Service].
+Time Service].  This white paper discusses time source types, relative
+accuracy, relative cost, and how those figures of merit have changed
+in recent decades
+
+The link:ntpspeak.html[Glossary of NTP-speak] might also be helpful. 
 
 [[differences]]
 == Differences from NTP Classic ==
