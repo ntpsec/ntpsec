@@ -28,7 +28,7 @@ Pleased to meet you.
 [[intro]]
 == Introduction ==
 
-Note: The Network Time Protocol software contained in this
+The Network Time Protocol software contained in this
 distribution is available without charge under the conditions set
 forth in the link:copyright.html[Copyright Notice].
 
@@ -50,9 +50,9 @@ widely used to synchronize a computer to Internet time servers or
 other sources, such as a radio or satellite receiver or telephone
 modem service. It can also be used as a server for dependent
 clients. It provides accuracies typically less than a millisecond on
-LANs and up to a few milliseconds on WANs. Typical NTP configurations
-utilize multiple redundant servers and diverse network paths in order
-to achieve high accuracy and reliability.
+LANs and up to a few tens of milliseconds on WANs. Typical NTP
+configurations utilize multiple redundant servers and diverse network
+paths in order to achieve high accuracy and reliability.
 
 [[differences]]
 == Differences from NTP Classic ==
@@ -61,8 +61,8 @@ The design objectives of this distribution, {project-fullname}, are in
 many ways a break with NTP's past.  We have deliberately jettisoned
 support for ancient legacy hardware and operating systems in order to
 ship code that is security-hardened, simpler, drastically less bulky
-(the KLOC count of the suite has been cut by a factor of two!), easier
-to understand, and easier to maintain.
+(the KLOC count of the suite has been cut by more than a factor of
+two!), easier to understand, and easier to maintain.
 
 We retain, however, almost full compatibility and interoperation with
 NTP Classic.  The qualification "almost" is required because we do not
@@ -78,7 +78,10 @@ code security and code verifiability.
 Most of the changes are under the hood, internal to the codebase.  A
 few will be user-visible:
 
-* The documentation has been extensively updated and revised.
+* The documentation has been extensively updated and revised.  One
+  important change is that manual pages are now generated from the
+  same masters as this web documentation, so the two will no longer
+  drift out of synchronization.  
 
 * The deprecated ntpdc utility, long since replaced by {ntpq}, has been removed.
 
@@ -96,6 +99,8 @@ few will be user-visible:
 
 * The deprecated ntpdate program has been replaced with a shell
   wrapper around {ntpdig}.
+
+* Log timestamps look a little different; they are now in ISO8601 format.
 
 * As noted above, Autokey is not supported.
 
