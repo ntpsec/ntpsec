@@ -125,7 +125,7 @@ common_prettydate(
 	static const char pfmt0[] =
 	    "%08lx.%08lx %04d-%02d-%02dT%02d:%02d:%02d.%03u";
 	static const char pfmt1[] =
-	    "%08lx.%08lx %04d-%02d-%02dT02d:%02d:%02d.%03uZ";
+	    "%08lx.%08lx %04d-%02d-%02dT%02d:%02d:%02d.%03uZ";
 
 	char	    *bp;
 	struct tm   *tm;
@@ -151,7 +151,7 @@ common_prettydate(
 		 */
 		struct calendar jd;
 		ntpcal_time_to_date(&jd, &sec);
-		snprintf(bp, LIB_BUFLENGTH, local ? pfmt1 : pfmt0,
+		snprintf(bp, LIB_BUFLENGTH, local ? pfmt0 : pfmt1,
 			 (u_long)ts->l_ui, (u_long)ts->l_uf,
 			 jd.year, jd.month, jd.monthday,
 			 jd.hour, jd.minute, jd.second, msec);
@@ -170,6 +170,15 @@ prettydate(
 	)
 {
 	return common_prettydate(ts, true);
+}
+
+
+char *
+rfc3339date(
+	l_fp *ts
+	)
+{
+    return common_prettydate(ts, false) + 18; /* skip past hex time */
 }
 
 

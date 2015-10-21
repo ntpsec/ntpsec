@@ -303,8 +303,7 @@ main(
 		ts.l_ui += JAN_1970;
 		ts.l_uf += ts_roundbit;
 		ts.l_uf &= ts_mask;
-		/* FIXME: ugly hack - we shouldn't use prettydate() here */
-		printf(json ? jfmt2 : ofmt2,  prettydate(&ts) + (json?18:0), fdigits, (int)time_frac);
+		printf(json ? jfmt2 : ofmt2,  json ? rfc3339date(&ts) : prettydate(&ts), fdigits, (int)time_frac);
 		printf(json ? jfmt3 : ofmt3,  (u_long)ntv.maxerror, (u_long)ntv.esterror);
 		if (rawtime)
 			printf(json ? jfmt4 : ofmt4,

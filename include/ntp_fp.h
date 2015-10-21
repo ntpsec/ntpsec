@@ -347,6 +347,8 @@ extern  void	gpstolfp	(int, int, unsigned long, l_fp *);
 extern	bool	mstolfp		(const char *, l_fp *);
 extern	char *	prettydate	(l_fp *);
 extern	char *	gmprettydate	(l_fp *);
+extern	char *	gmprettydate	(l_fp *);
+extern	char *	rfc3339date	(l_fp *);
 extern	char *	uglydate	(l_fp *);
 extern  void	mfp_mul		(int32_t *, uint32_t *, int32_t, uint32_t, int32_t, uint32_t);
 
