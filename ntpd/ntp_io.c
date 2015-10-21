@@ -3227,8 +3227,8 @@ read_refclock_packet(
 	l_fp			ts
 	)
 {
-	int			i;
-	int			buflen;
+	size_t			i;
+	ssize_t			buflen;
 	int			saved_errno;
 	int			consumed;
 	struct recvbuf *	rb;
@@ -3248,10 +3248,10 @@ read_refclock_packet(
 
 	i = (rp->datalen == 0
 	     || rp->datalen > sizeof(rb->recv_space))
-	        ? (int)sizeof(rb->recv_space)
+	        ? sizeof(rb->recv_space)
 		: rp->datalen;
 	do {
-		buflen = read(fd, (char *)&rb->recv_space, (u_int)i);
+		buflen = read(fd, (char *)&rb->recv_space, i);
 	} while (buflen < 0 && EINTR == errno);
 
 	if (buflen <= 0) {
