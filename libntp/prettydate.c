@@ -122,10 +122,8 @@ common_prettydate(
 	bool local
 	)
 {
-	static const char pfmt0[] =
+	static const char pfmt[] =
 	    "%08lx.%08lx %04d-%02d-%02dT%02d:%02d:%02d.%03u";
-	static const char pfmt1[] =
-	    "%08lx.%08lx %04d-%02d-%02dT%02d:%02d:%02d.%03uZ";
 
 	char	    *bp;
 	struct tm   *tm;
@@ -151,15 +149,19 @@ common_prettydate(
 		 */
 		struct calendar jd;
 		ntpcal_time_to_date(&jd, &sec);
-		snprintf(bp, LIB_BUFLENGTH, local ? pfmt0 : pfmt1,
+		snprintf(bp, LIB_BUFLENGTH, pfmt,
 			 (u_long)ts->l_ui, (u_long)ts->l_uf,
 			 jd.year, jd.month, jd.monthday,
 			 jd.hour, jd.minute, jd.second, msec);
-	} else		
-		snprintf(bp, LIB_BUFLENGTH, pfmt0,
+		strncat(bp, "Z",  LIB_BUFLENGTH);
+	} else {
+		snprintf(bp, LIB_BUFLENGTH, pfmt,
 			 (u_long)ts->l_ui, (u_long)ts->l_uf,
 			 1900 + tm->tm_year, tm->tm_mon+1, tm->tm_mday,
 			 tm->tm_hour, tm->tm_min, tm->tm_sec, msec);
+		if (!local)
+			strncat(bp, "Z", LIB_BUFLENGTH);
+	}
 	return bp;
 }
 
@@ -178,7 +180,7 @@ rfc3339date(
 	l_fp *ts
 	)
 {
-    return common_prettydate(ts, false) + 18; /* skip past hex time */
+	return common_prettydate(ts, false) + 18; /* skip past hex time */
 }
 
 
