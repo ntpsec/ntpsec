@@ -54,6 +54,10 @@ LANs and up to a few tens of milliseconds on WANs. Typical NTP
 configurations utilize multiple redundant servers and diverse network
 paths in order to achieve high accuracy and reliability.
 
+For background on the problem NTP solves, see
+link:http://www.catb.org/gpsd/time-service-intro.html[Introduction to
+Time Service].
+
 [[differences]]
 == Differences from NTP Classic ==
 
