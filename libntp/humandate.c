@@ -27,7 +27,7 @@ humanlogtime(void)
 
 	LIB_GETBUF(bp);
 	
-	snprintf(bp, LIB_BUFLENGTH, "%02d-%02d%02d:%02d:%02d",
+	snprintf(bp, LIB_BUFLENGTH, "%02d-%02dT%02d:%02d:%02d",
 		 tm->tm_mon+1, tm->tm_mday,
 		 tm->tm_hour, tm->tm_min, tm->tm_sec);
 		
