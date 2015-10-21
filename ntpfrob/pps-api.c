@@ -11,7 +11,6 @@
 
 #include "config.h"
 
-#ifdef HAVE_SYS_TIMEPPS_H
 #include <stdlib.h>
 #include <stdio.h>
 #include <errno.h>
@@ -19,6 +18,7 @@
 #include <sys/types.h>
 #include <time.h>
 #include <unistd.h>
+#ifdef HAVE_SYS_TIMEPPS_H
 #include <sys/timepps.h>
 
 #define timespecsub(vvp, uvp)                                           \
