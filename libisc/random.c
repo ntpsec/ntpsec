@@ -43,19 +43,19 @@ initialize(void)
 }
 
 void
-isc_random_seed(isc_uint32_t seed)
+isc_random_seed(uint32_t seed)
 {
 	initialize();
 
 #ifndef HAVE_ARC4RANDOM
 	srand(seed);
 #else
-	arc4random_addrandom((u_char *) &seed, sizeof(isc_uint32_t));
+	arc4random_addrandom((u_char *) &seed, sizeof(uint32_t));
 #endif
 }
 
 void
-isc_random_get(isc_uint32_t *val)
+isc_random_get(uint32_t *val)
 {
 	REQUIRE(val != NULL);
 
@@ -81,9 +81,9 @@ isc_random_get(isc_uint32_t *val)
 #endif
 }
 
-isc_uint32_t
-isc_random_jitter(isc_uint32_t max, isc_uint32_t jitter) {
-	isc_uint32_t rnd;
+uint32_t
+isc_random_jitter(uint32_t max, uint32_t jitter) {
+	uint32_t rnd;
 
 	REQUIRE(jitter < max || (jitter == 0 && max == 0));
 

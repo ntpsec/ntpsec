@@ -24,13 +24,13 @@
 ISC_LANG_BEGINDECLS
 
 void
-isc_random_seed(isc_uint32_t seed);
+isc_random_seed(uint32_t seed);
 /*%<
  * Set the initial seed of the random state.
  */
 
 void
-isc_random_get(isc_uint32_t *val);
+isc_random_get(uint32_t *val);
 /*%<
  * Get a random value.
  *
@@ -38,8 +38,8 @@ isc_random_get(isc_uint32_t *val);
  *	val != NULL.
  */
 
-isc_uint32_t
-isc_random_jitter(isc_uint32_t max, isc_uint32_t jitter);
+uint32_t
+isc_random_jitter(uint32_t max, uint32_t jitter);
 /*%<
  * Get a random value between (max - jitter) and (max).
  * This is useful for jittering timer values.

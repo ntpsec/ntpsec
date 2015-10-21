@@ -624,7 +624,7 @@ internal_current6(isc_interfaceiter_t *iter) {
 
 	if (isc_netaddr_islinklocal(&iter->current.address))
 		isc_netaddr_setzone(&iter->current.address, 
-				    (isc_uint32_t)lifreq.lifr_index);
+				    (uint32_t)lifreq.lifr_index);
 
 	/*
 	 * If the interface does not have a address ignore it.

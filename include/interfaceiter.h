@@ -44,7 +44,7 @@ struct isc_interface {
 	isc_netaddr_t netmask;		/* Network mask. */
 	isc_netaddr_t dstaddress; 	/* Destination address
 					   (point-to-point only). */
-	isc_uint32_t flags;		/* Flags; see below. */
+	uint32_t flags;		/* Flags; see below. */
 };
 
 /* Interface flags. */

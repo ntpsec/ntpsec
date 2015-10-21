@@ -23,7 +23,7 @@ struct isc_netaddr {
 		struct in_addr in;
 		struct in6_addr in6;
 	} type;
-	isc_uint32_t zone;
+	uint32_t zone;
 };
 
 bool
@@ -95,9 +95,9 @@ isc_result_t
 isc_netaddr_frompath(isc_netaddr_t *netaddr, const char *path);
 
 void
-isc_netaddr_setzone(isc_netaddr_t *netaddr, isc_uint32_t zone);
+isc_netaddr_setzone(isc_netaddr_t *netaddr, uint32_t zone);
 
-isc_uint32_t
+uint32_t
 isc_netaddr_getzone(const isc_netaddr_t *netaddr);
 
 void

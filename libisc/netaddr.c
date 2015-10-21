@@ -201,14 +201,14 @@ isc_netaddr_fromin6(isc_netaddr_t *netaddr, const struct in6_addr *ina6) {
 }
 
 void
-isc_netaddr_setzone(isc_netaddr_t *netaddr, isc_uint32_t zone) {
+isc_netaddr_setzone(isc_netaddr_t *netaddr, uint32_t zone) {
 	/* we currently only support AF_INET6. */
 	REQUIRE(netaddr->family == AF_INET6);
 
 	netaddr->zone = zone;
 }
 
-isc_uint32_t
+uint32_t
 isc_netaddr_getzone(const isc_netaddr_t *netaddr) {
 	return (netaddr->zone);
 }
