@@ -17,6 +17,8 @@
 #include <unistd.h>
 #include <stdlib.h>
 
+#include "ntpfrob.h"
+
 #ifdef HAVE_ADJTIMEX
 # include <sys/time.h>	/* prerequisite on NetBSD */
 # include <sys/timex.h>
@@ -24,7 +26,7 @@
 static struct timex txc;
 #endif /* HAVE_ADJTIMEX */
 
-void tickadj(const bool json, const int newtick)
+void tickadj(const iomode mode, const int newtick)
 {
 #ifndef HAVE_ADJTIMEX
 	fputs("ntpfrob: \n", stderr);

@@ -5,7 +5,7 @@
 [[synop]]
 == Synopsis ==
 
-+{ntpfrob}+ [ +-A+] [ +-a+ 'tick' ] [ +-p+ 'ppsdev' ] [+-c+] [+-e+] [+-s+]
++{ntpfrob}+ [ +-A+] [ +-a+ 'tick' ] [ +-p+ 'ppsdev' ] [+-c+] [+-e+] [+-r+] [+-s+]
 
 [[descr]]
 == Description ==
@@ -23,16 +23,19 @@ utilities.
   Set the kernel variable +tick+ to the value _tick_ specifies.
 +-A+::
   Display the kernel variable +tick+.
-+-p+ 'ppsdev'::
-  Look for PPS pulses on a specified device
 +-c+::
   Compute and display clock jitter.
 +-e+::
   Measure clock precision.
-+-s+::
-  Check for stepback bug.
 +-j+::
   Report in self-describing JSON.
++-p+ 'ppsdev'::
+  Look for PPS pulses on a specified device
++-r+::
+  Raw mode.  Only applies to the jitter mode, and means the raw
+  clock samples should be emitted to stdout for postanalysis.
++-s+::
+  Check for stepback bug.
 
 [[usage]]
 == Usage ==
@@ -73,7 +76,9 @@ hardware interrupt, usually in the range 10 us-1 ms. For those systems
 with microsecond counters the jitter is dominated only by the
 operating system.
 
-The -j option is applicable to this mode.
+The -j option is applicable to this mode.  With the -r option, write
+the raw unsorted clock samples to standard output for post-analysis.
+All but the last -j or -r option before the -c mode flag is ignored
 
 === Pulse-per-second check ==
 

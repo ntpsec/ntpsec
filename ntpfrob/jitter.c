@@ -19,6 +19,8 @@
 
 #include "ntp_fp.h"
 
+#include "ntpfrob.h"
+
 #define NBUF	800002
 #define JAN_1970 2208988800UL		/* Unix base epoch */
 #define NSAMPLES 10
@@ -61,11 +63,16 @@ get_clocktime(
 	now->l_uf = (uint32_t)dtemp;
 }
 
-void jitter(const bool json)
+static int doublecmp(const void *a, const void *b)
+{
+    return (int)(*((double *)a) - *((double *)b));
+}
+
+void jitter(const iomode mode)
 {
 	l_fp tr;
-	int i, j;
-	double dtemp, gtod[NBUF];
+	int i;
+	double gtod[NBUF];
 
 	/*
 	 * Force pages into memory
@@ -87,24 +94,17 @@ void jitter(const bool json)
 	average = 0;
 	for (i = 0; i < NBUF - 2; i++) {
 		gtod[i] = gtod[i + 1] - gtod[i];
-		printf("%13.9f\n", gtod[i]);
+		if (mode == raw)
+			printf("%13.9f\n", gtod[i]);
 		average += gtod[i];
 	}
-
+	
 	/*
 	 * Sort the gtod array and display deciles
 	 */
-	for (i = 0; i < NBUF - 2; i++) {
-		for (j = 0; j <= i; j++) {
-			if (gtod[j] > gtod[i]) {
-				dtemp = gtod[j];
-				gtod[j] = gtod[i];
-				gtod[i] = dtemp;
-			}
-		}
-	}
+	qsort(gtod, NBUF, sizeof(gtod[0]), doublecmp);
 	average = average / (NBUF - 2);
-	if (json) {
+	if (mode == json) {
 		fprintf(stdout, "{\"Average\":%13.9f,", average);
 		fprintf(stdout, "\"First rank\":[");
 		for (i = 0; i < NSAMPLES; i++) {
@@ -121,7 +121,7 @@ void jitter(const bool json)
 		    fputs("]}\n", stdout);
 		}
 	}
-	else
+	else if (mode != raw)
 	{
 		fprintf(stdout, "Average %13.9f\n", average);
 		fprintf(stdout, "First rank\n");
