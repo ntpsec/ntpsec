@@ -4177,7 +4177,7 @@ config_sim(
 	serv_info = HEAD_PFIFO(sim_n->servers);
 	for (; serv_info != NULL; serv_info = serv_info->link)
 		simulation.num_of_servers++;
-	simulation.servers = emalloc(simulation.num_of_servers *
+	simulation.servers = eallocarray(simulation.num_of_servers,
 				     sizeof(simulation.servers[0]));
 
 	i = 0;
@@ -4723,8 +4723,9 @@ gettokens_netinfo (
 				if (namelist.ni_namelist_len == 0) continue;
 
 				config->val_list =
-				    emalloc(sizeof(char*) *
-				    (namelist.ni_namelist_len + 1));
+				    eallocarray(
+					(namelist.ni_namelist_len + 1),
+					sizeof(char*));
 				val_list = config->val_list;
 
 				for (index = 0;

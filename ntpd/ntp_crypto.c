@@ -320,8 +320,8 @@ make_keylist(
 	 */
 	tstamp = crypto_time();
 	if (peer->keylist == NULL)
-		peer->keylist = emalloc(sizeof(keyid_t) *
-		    NTP_MAXSESSION);
+		peer->keylist = eallocarray(NTP_MAXSESSION,
+					    sizeof(keyid_t));
 
 	/*
 	 * Generate an initial key ID which is unique and greater than

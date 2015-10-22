@@ -2990,7 +2990,7 @@ mrulist(
 		goto cleanup_return;
 
 	/* construct an array of entry pointers in default order */
-	sorted = emalloc(mru_count * sizeof(*sorted));
+	sorted = eallocarray(mru_count, sizeof(*sorted));
 	ppentry = sorted;
 	if (MRUSORT_R_DEF != order) {
 		ITER_DLIST_BEGIN(mru_list, recent, mlink, mru)
