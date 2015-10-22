@@ -55,7 +55,6 @@ def build(ctx):
 		"syssignal.c",
 		"timetoa.c",
 		"timevalops.c",
-		"uglydate.c",
 		"vint64ops.c",
 		"work_thread.c",
 		"ymd2yd.c",

@@ -628,10 +628,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\..\libntp\uglydate.c"
-				>
-			</File>
-			<File
 				RelativePath="..\..\libntp\util_clockstuff.c"
 				>
 			</File>

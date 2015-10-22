@@ -270,7 +270,6 @@
     <ClCompile Include="..\..\..\..\libntp\systime.c" />
     <ClCompile Include="..\..\..\..\libntp\timetoa.c" />
     <ClCompile Include="..\..\..\..\libntp\timevalops.c" />
-    <ClCompile Include="..\..\..\..\libntp\uglydate.c" />
     <ClCompile Include="..\..\..\..\libntp\vint64ops.c" />
     <ClCompile Include="..\..\..\..\libntp\work_fork.c" />
     <ClCompile Include="..\..\..\..\libntp\work_thread.c" />

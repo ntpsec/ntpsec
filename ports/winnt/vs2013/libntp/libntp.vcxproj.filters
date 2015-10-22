@@ -281,9 +281,6 @@
     <ClCompile Include="..\..\..\..\libntp\timevalops.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\libntp\uglydate.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\libntp\util_clockstuff.c">
       <Filter>Source Files</Filter>
     </ClCompile>
