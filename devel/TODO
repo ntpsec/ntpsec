@@ -143,6 +143,9 @@ Hal:
 > know things well enough to be sure that this sort of logic won't pick one 
 > back up.
 
+* Forward-port NTP Classic fix for [Bug 2830] just in case we want to
+  revive Autokey someday.
+
 == Old, sometime ancient stuff ==
 
 970711: Look Real Hard at changing the key stuff from u_long to u_int32.
