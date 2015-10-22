@@ -1,19 +1,9 @@
 /*
- * /src/NTP/ntp4-dev/libparse/clk_wharton.c,v 4.2 2004/11/14 15:29:41 kardel RELEASE_20050508_A
- *  
- * clk_wharton.c,v 4.2 2004/11/14 15:29:41 kardel RELEASE_20050508_A
- *
- * From Philippe De Muyter <phdm@macqel.be>, 1999
- */
-
-/*
  * Support for WHARTON 400A Series clock + 404.2 serial interface.
  *
  * Copyright (C) 1999, 2000 by Philippe De Muyter <phdm@macqel.be>
  * 
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE.
+ * SPDX-License-Identifier: BSD-2-clause
  * 
  */
 
