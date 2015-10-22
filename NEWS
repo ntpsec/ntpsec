@@ -16,5 +16,6 @@ on user-visible changes.
 * [Bug 2855] Implement conditional leap smear feature; includes
   later fixes for parser support and reporting leap smear in the REFID.
 * [Bug 2859] Improve raw DCF77 robustness decoding.  Frank Kardel.
+* [Bug 2860] ntpq ifstats sanity check is too stringent.  Frank Kardel.
 
 // end
