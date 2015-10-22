@@ -3217,6 +3217,8 @@ parse_process(
 					msyslog(LOG_WARNING, "PARSE receiver #%d: FAILED TIMECODE: \"%s\" (check receiver configuration / wiring)",
 						CLK_UNIT(parse->peer), mkascii(buffer, sizeof buffer, tmpctl.parsegettc.parse_buffer, (unsigned)(tmpctl.parsegettc.parse_count - 1)));
 			}
+			/* copy status to show only changes in case of failures */
+			parse->timedata.parse_status = parsetime->parse_status;
 		}
 	}
 

@@ -196,7 +196,7 @@ convert_rawdcf(
 	if (size < 57)
 	{
 		msyslog(LOG_ERR, "parse: convert_rawdcf: INCOMPLETE DATA - time code only has %d bits", size);
-		return CVT_NONE;
+		return CVT_FAIL|CVT_BADFMT;
 	}
 
 	for (i = 0; i < size; i++)
@@ -454,11 +454,13 @@ cvt_rawdcf(
 			{
 				if ((newtime - t->tcode) == 60) /* guard against multi bit errors */
 				{
+					parseprintf(DD_RAWDCF,("parse: cvt_rawdcf: minute delta check OK\n"));
 					clock_time->utctime = newtime;
 				}
 				else
 				{
-					rtc = CVT_FAIL|CVT_BADTIME;
+					parseprintf(DD_RAWDCF,("parse: cvt_rawdcf: minute delta check FAIL - ignore timestamp\n"));
+					rtc = CVT_SKIP;
 				}
 				t->tcode            = newtime;
 			}
