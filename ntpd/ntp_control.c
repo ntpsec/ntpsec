@@ -2646,9 +2646,9 @@ ctl_putpeer(
 			ctl_putstr(peer_var[id].text, p->ident,
 			    strlen(p->ident));
 		break;
-
-
 #endif	/* ENABLE_AUTOKEY */
+	default:
+		break;
 	}
 }
 
