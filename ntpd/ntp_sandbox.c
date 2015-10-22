@@ -166,10 +166,17 @@ getgroup:
 			msyslog(LOG_ERR, "Cannot setegid() to group `%s': %m", group);
 			exit (-1);
 		}
-		if (group)
-			setgroups(1, &sw_gid);
-		else
-			initgroups(pw->pw_name, pw->pw_gid);
+		if (group) {
+			if (0 != setgroups(1, &sw_gid)) {
+				msyslog(LOG_ERR, "setgroups(1, %d) failed: %m", sw_gid);
+				exit (-1);
+			}
+		}
+		else if (pw)
+			if (0 != initgroups(pw->pw_name, pw->pw_gid)) {
+				msyslog(LOG_ERR, "initgroups(<%s>, %d) filed: %m", pw->pw_name, pw->pw_gid);
+				exit (-1);
+			}
 		if (user && setuid(sw_uid)) {
 			msyslog(LOG_ERR, "Cannot setuid() to user `%s': %m", user);
 			exit (-1);
