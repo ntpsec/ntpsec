@@ -5,7 +5,7 @@
  *   On systems that support PPSAPI (RFC2783) PPSAPI is the
  *   preferred interface.
  *
- * Copyright (c) 1989-2009 by Frank Kardel <kardel@ntp.org>
+ * Copyright (c) 1989-2015 by Frank Kardel <kardel@ntp.org>
  * Copyright 2015 by the NTPsec project contributors
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -2029,7 +2029,7 @@ parsestate(
 	  {
 		  { PARSEB_S_LEAP,     "LEAP INDICATION" },
 		  { PARSEB_S_PPS,      "PPS SIGNAL" },
-		  { PARSEB_S_ANTENNA,  "ANTENNA" },
+		  { PARSEB_S_CALLBIT,  "CALLBIT" },
 		  { PARSEB_S_POSITION, "POSITION" },
 		  { 0,		       NULL }
 	  };
@@ -2051,7 +2051,7 @@ parsestate(
 		i++;
 	}
 
-	if (lstate & (PARSEB_S_LEAP|PARSEB_S_ANTENNA|PARSEB_S_PPS|PARSEB_S_POSITION))
+	if (lstate & (PARSEB_S_LEAP|PARSEB_S_CALLBIT|PARSEB_S_PPS|PARSEB_S_POSITION))
 	{
 		if (s != t)
 			t = ap(buffer, size, t, "; ");
@@ -2482,7 +2482,7 @@ parse_start(
 	if (!notice)
         {
 		NLOG(NLOG_CLOCKINFO) /* conditional if clause for conditional syslog */
-			msyslog(LOG_INFO, "NTP PARSE support: Copyright (c) 1989-2009, Frank Kardel");
+			msyslog(LOG_INFO, "NTP PARSE support: Copyright (c) 1989-2015, Frank Kardel");
 		notice = 1;
 	}
 
