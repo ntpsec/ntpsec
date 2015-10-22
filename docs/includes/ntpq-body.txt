@@ -342,6 +342,17 @@ server, +B+: broadcast server, +M+: multicast server
 |+jitter+        |jitter
 |=======================================================================
 
++apeers+::
+  Display a list of peers in the form:
++
+-------------------------------------------------------------------
+[tally]remote refid assid st t when pool reach delay offset jitter
+-------------------------------------------------------------------
++
+where the output is just like the +peers+ command except that the
++refid+ is displayed in hex format and the association number is also
+displayed.
+
 +pstats+ _assocID_::
   Show the statistics for the peer with the given _assocID_.
 
