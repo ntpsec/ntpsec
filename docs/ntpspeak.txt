@@ -20,19 +20,20 @@ ACTS::
 [[association]]
 association::
   An association is the relationship that an NTP client and server have
-  when the server is computing and shipping time updates to the server
-  and the server is expecting them.  There are several different kinds
+  when the server is computing and shipping time updates to the client
+  and the client is expecting them.  There are several different kinds
   of associations including unicast, manycast, and broadcast modes;
   another variable is whether the association is authenticated or
-  unauthenticated.  A significant amount of NTP's complexity is means
+  unauthenticated.  A significant amount of NTP's complexity is the means
   for discovering association partners, creating and maintaining
   associations, and preventing attackers from forming associations.
 
 [[drift]]
 drift::
-  In an NTP context, refers to the frequency drift of a clock crystal
-  in an NTP host, expressed in a parts-per-million offset from its
-  nominal frequency. Changes, slowly, in response to environmental
+  In an NTP context, drift refers to the frequency offset of a clock crystal
+  in an NTP host that causes the system time to slowly drift.  It is
+  usually  expressed in a parts-per-million (PPM) offset from its
+  nominal frequency. It changes, slowly, in response to environmental
   factors (mainly ambient temperature). {ntpd} measures drift by
   sampling the clock and performing clock recovery against a
   phase-locked loop.  The drift measurement is occasionally stored
@@ -45,7 +46,8 @@ falseticker::
   <<Mills-speak>> for a timeserver identified as not
   reliable by statistical filtering.  Usually this does not imply any
   problem with the timeserver itself but rather with highly variable
-  and asymmetric network delays between server and client.
+  and asymmetric network delays between server and client, but firmware
+  bugs in GPS receivers have produced falsetickers.
 
 [[fudge]]
 fudge::
@@ -75,15 +77,12 @@ GPS::
 
 [[GPSDO]]
 GPSDO::
-   GPS-constrained Oscillator. A very high-precision atomic clock,
-   usually a rubidium or cesium crystal oscillator, periodically
-   resynchronized to <<USNO>> time via <<PPS>>. The most accurate time
-   source generally available; the only better ones are the
-   atomic clocks maintained by national time authorities.
-   Only cost-effective for time service when intrinsic variability in
-   network delays is well under GPSDO accuracy; thus, unsuitable for
-   use on a WAN, for which plain GPSes with <<PPS>> are cheaper and
-   generally good enough.
+   GPS Disciplined Oscillator. A good crystal is synchronized to
+   time from a GPS receiver.  The combination gets the short term
+   stability of the crystal and the long term stability of GPS.
+   With appropriate firmware, the crystal can be used when the
+   GPS receiver stops working.  Most cell towers have GPSDOs.
+   You can usually spot the conical GPS antenna.
 
 [[GPSD]]
 GPSD::
@@ -104,9 +103,9 @@ holdover::
 leapfile::
    A local file containing the current leap-second offset, typically
    fetched from <<USNO>> or <<NIST>> and potentially needing updates
-   near the very beginning or end of each quarter. Normally retrieved
+   near the very beginning of each half year. Normally retrieved
    by a cron(1) job, but some varieties of <<refclock>> (notably
-   GPses) update it themselves suring normal operation.
+   GPSes) provide the same information during normal operation.
 
 [[Mills-speak]]
 Mills-speak::
@@ -148,11 +147,15 @@ parse driver::
 [[PPS]]
 PPS::
   (Also as "1PPS") Pulse Per Second. A top-of-second pulse emitted
-  over RS232 handshake lines by some GPSes that, along with in-band
-  time delivered to 1-second accuracy, represents U.S. military time
-  (a very close approximation of UTC) to 50-nanosecond accuracy.
-  Nowadays the single most important time reference for most NTP
-  servers even outside the U.S.A.
+  by time sources, typically a GPS receiver or atomic clocks.  It
+  is often connected to a RS-232 modem control signal pin.
+  A PPS signal doesn't tell you which second a pulse corresponds to
+  so it must be used with an ancillary signal, typically text over
+  the same RS-232 connector.
+  The advantage of a PPS signal is improved accuracy.  Most OSes have
+  provisions to grab a timestamp at interrupt time.  The API is described
+  in RFC-2783.
+
 
 [[PTP]]
 PTP::
@@ -166,7 +169,7 @@ PTP::
 pool::
    In an NTP context, "the pool" is usually the
    http://www.pool.ntp.org/en/[NTP Pool Project], a collection of
-   thousands of NTP servers accessible through distribution servers that hand
+   thousands of NTP servers accessible through DNS servers that hand
    out service addresses at random from the pool.
 
 [[proventic]]
