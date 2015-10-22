@@ -17,5 +17,6 @@ on user-visible changes.
   later fixes for parser support and reporting leap smear in the REFID.
 * [Bug 2859] Improve raw DCF77 robustness decoding.  Frank Kardel.
 * [Bug 2860] ntpq ifstats sanity check is too stringent.  Frank Kardel.
+* [Bug 2867] ntpd with autokey active crashed by 'ntpq -crv'
 
 // end
