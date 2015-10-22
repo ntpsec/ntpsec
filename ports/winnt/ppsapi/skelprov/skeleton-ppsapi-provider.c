@@ -6,20 +6,6 @@
  *								       *
  * Copyright (c) David L. Mills 1999-2009			       *
  *								       *
- * Permission to use, copy, modify, and distribute this software and   *
- * its documentation for any purpose and without fee is hereby	       *
- * granted, provided that the above copyright notice appears in all    *
- * copies and that both the copyright notice and this permission       *
- * notice appear in supporting documentation, and that the name        *
- * University of Delaware not be used in advertising or publicity      *
- * pertaining to distribution of the software without specific,        *
- * written prior permission. The University of Delaware makes no       *
- * representations about the suitability this software for any	       *
- * purpose. It is provided "as is" without express or implied          *
- * warranty.							       *
- *								       *
- ***********************************************************************
- *								       *
  * This header file complies with "Pulse-Per-Second API for UNIX-like  *
  * Operating Systems, Version 1.0", rfc2783. Credit is due Jeff Mogul  *
  * and Marc Brett, from whom much of this code was shamelessly stolen. *
@@ -29,20 +15,13 @@
  * derived from serialpps-ppsapi-provider.c which was derived from     *
  * David L. Mills' timepps.h for Solaris.			       *
  *								       *
- ***********************************************************************
- *								       *
  * Some of this include file					       *
  * Copyright (c) 1999 by Ulrich Windl,				       *
  *	based on code by Reg Clemens <reg@dwf.com>		       *
  *		based on code by Poul-Henning Kamp <phk@FreeBSD.org>   *
- *								       *
- ***********************************************************************
- *								       *
- * "THE BEER-WARE LICENSE" (Revision 42):			       *
- * <phk@FreeBSD.org> wrote this file.  As long as you retain this      *
- * notice you can do whatever you want with this stuff. If we meet some*
- * day, and you think this stuff is worth it, you can buy me a beer    *
- * in return.	Poul-Henning Kamp				       *
+ *						       		       *
+ * SPDX-License-Identifier: NTP					       *
+ * SPDX-License-Identifier: Beerware				       *
  *								       *
  **********************************************************************/
 
