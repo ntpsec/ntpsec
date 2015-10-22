@@ -46,6 +46,7 @@ def build(ctx):
 		"prettydate.c",
 		"recvbuff.c",
 		"refnumtoa.c",
+		"refidsmear.c",
 		"socket.c",
 		"socktoa.c",
 		"socktohost.c",

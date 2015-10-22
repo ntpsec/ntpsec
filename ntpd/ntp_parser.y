@@ -141,6 +141,7 @@
 %token	<Integer>	T_Kod
 %token	<Integer>	T_Mssntp
 %token	<Integer>	T_Leapfile
+%token	<Integer>	T_Leapsmearinterval
 %token	<Integer>	T_Limited
 %token	<Integer>	T_Link
 %token	<Integer>	T_Listen
@@ -1212,6 +1213,15 @@ misc_cmd_dbl_keyword
 
 misc_cmd_int_keyword
 	:	T_Dscp
+	;
+
+misc_cmd_int_keyword
+	:	T_Leapsmearinterval
+		{
+#ifndef LEAP_SMEAR
+			yyerror("Built without LEAP_SMEAR support.");
+#endif
+		}
 	;
 
 misc_cmd_str_keyword

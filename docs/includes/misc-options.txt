@@ -105,6 +105,14 @@ While not strictly a security function, the Autokey protocol provides
 means to securely retrieve the current or updated leapsecond values
 from a server.
 
++leapsmearinterval+ 'interval'::
+  This *experimental* option is only available if {ntpd} was built
+  with the +--enable-leap-smear+ option, It specifies the interval
+  over which a leap second correction will be applied.  Recommended
+  values for this option are between 7200 (2 hours) and 86400 (24
+  hours).  DO NOT USE THIS OPTION ON PUBLIC-ACCESS SERVERS!  See
+  http://bugs.ntp.org/2855 for more information.
+
 +logconfig+ _configkeyword_::
   This command controls the amount and type of output written to the
   system _syslog(3)_ facility or the alternate log file. By
