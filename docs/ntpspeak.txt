@@ -99,13 +99,26 @@ holdover::
    <<drift>> in the oscillator, accuracy drops as holdover time (time
    since last signal lock) increases.
 
+[[leap second]]
+leap second::
+   Because the earth's rotation varies in irregular ways (gradually
+   slowing due to tidal drag) and the second is now defined in
+   absolute terms rather than as a fraction of day length, keeping
+   time of day synchronized with mean solar time requires occasional,
+   unpredictable insertions of a standard second in the calendar. Leap
+   second notifications are issued by IERS
+   (http://www.iers.org/IERS/EN/Home/home_node.html[International
+   Earth Rotation Service] when required, and obeyed by national time
+   authorities.  The current leap-second offset is automatically
+   propagated through the <<GPS>> system.
+
 [[leapfile]]
 leapfile::
-   A local file containing the current leap-second offset, typically
+   A local file containing the current <<leap second>> offset, typically
    fetched from <<USNO>> or <<NIST>> and potentially needing updates
    near the very beginning of each half year. Normally retrieved
    by a cron(1) job, but some varieties of <<refclock>> (notably
-   GPSes) provide the same information during normal operation.
+   GPSes) update the same information during normal operation.
 
 [[Mills-speak]]
 Mills-speak::
