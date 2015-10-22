@@ -6,30 +6,7 @@
 /*								      */
 /*  Copyright (C) 2001-2015, Takao Abe.  All rights reserved.	      */
 /*								      */
-/*  Permission to use, copy, modify, and distribute this software     */
-/*  and its documentation for any purpose is hereby granted	      */
-/*  without fee, provided that the following conditions are met:      */
-/*								      */
-/*  One retains the entire copyright notice properly, and both the    */
-/*  copyright notice and this license. in the documentation and/or    */
-/*  other materials provided with the distribution.		      */
-/*								      */
-/*  This software and the name of the author must not be used to      */
-/*  endorse or promote products derived from this software without    */
-/*  prior written permission.					      */
-/*								      */
-/*  THIS SOFTWARE IS PROVIDED "AS IS" WITHOUT EXPRESSED OR IMPLIED    */
-/*  WARRANTIES OF ANY KIND, INCLUDING, BUT NOT LIMITED TO, THE	      */
-/*  IMPLIED WARRANTIES OF MERCHANTABLILITY AND FITNESS FOR A	      */
-/*  PARTICULAR PURPOSE.						      */
-/*  IN NO EVENT SHALL THE AUTHOR TAKAO ABE BE LIABLE FOR ANY DIRECT,  */
-/*  INDIRECT, GENERAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES   */
-/*  ( INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE	      */
-/*  GOODS OR SERVICES; LOSS OF USE, DATA OR PROFITS; OR BUSINESS      */
-/*  INTERRUPTION ) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,     */
-/*  WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT ( INCLUDING	      */
-/*  NEGLIGENCE OR OTHERWISE ) ARISING IN ANY WAY OUT OF THE USE OF    */
-/*  THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. */
+/* SPDX-License-Identifier: BSD-3-clause				*/
 /*								      */
 /*  This driver is developed in my private time, and is opened as     */
 /*  voluntary contributions for the NTP.			      */
