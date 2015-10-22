@@ -12,5 +12,7 @@ on user-visible changes.
   robust, and require 2 consecutive timestamps to be consistent.
 * [Bug 2845] Harden memory allocation in ntpd; implement and
   use 'eallocarray(...)' where appropriate.
+* [Bug 2855] Implement conditional leap smear feature; includes
+  later fixes for parser support and reporting leap smear in the REFID.
 
 // end
