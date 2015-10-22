@@ -48,11 +48,6 @@ None right now. (Sep-22 2015)
 * systime.c needs patching to put ntpdsim's hook back in place. Deferred
   until the ntpdsim build is fixed.
 
-* Fixup copyright notices.
-  See Mark's message of Oct-13th.
-  Subject: FLOSS license policy and copyright marking policy
-  Note help messages need copyright too.
-
 === Testing ===
 
 * Unit testing.  "make check" needs to run all the unit tests.
