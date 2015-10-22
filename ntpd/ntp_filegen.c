@@ -6,8 +6,7 @@
  * Copyright (C) 1992, 1996 by Rainer Pruy
  * Friedrich-Alexander Universitaet Erlangen-Nuernberg, Germany
  *
- * This code may be modified and used freely
- * provided credits remain intact.
+ * SPDX-License-Identifier: BSD-2-clause
  */
 
 #include <config.h>
