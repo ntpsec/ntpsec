@@ -4,7 +4,7 @@
  * Author: Harlan Stenn, 2014
  *
  * This file is Copyright (c) 2014 by Network Time Foundation.
- * BSD terms apply: see the file COPYRIGHT in the distribution root for details.
+ * SPDX-License-Identifier: BSD-2-clause
  */
 
 #include "config.h"
