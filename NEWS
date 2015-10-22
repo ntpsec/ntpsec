@@ -12,7 +12,9 @@ on user-visible changes.
   robust, and require 2 consecutive timestamps to be consistent.
 * [Bug 2845] Harden memory allocation in ntpd; implement and
   use 'eallocarray(...)' where appropriate.
+* [Bug 2846] Report 'unsynchronized' status during the leap second.
 * [Bug 2855] Implement conditional leap smear feature; includes
   later fixes for parser support and reporting leap smear in the REFID.
+* [Bug 2859] Improve raw DCF77 robustness decoding.  Frank Kardel.
 
 // end

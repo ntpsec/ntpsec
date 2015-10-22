@@ -6,7 +6,7 @@
  * Schmid clock support
  * based on information and testing from Adam W. Feigin et. al (Swisstime iis.ethz.ch)
  *
- * Copyright (c) 1989-2005 by Frank Kardel <kardel@ntp.org>
+ * Copyright (c) 1989-2015 by Frank Kardel <kardel@ntp.org>
  * Copyright 2015 by the NTPsec project contributors
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -150,7 +150,7 @@ cvt_schmid(
 				    }
 			    }
 
-			    clock_time->flags |= PARSEB_S_LEAP|PARSEB_S_ANTENNA;
+			    clock_time->flags |= PARSEB_S_LEAP|PARSEB_S_CALLBIT;
 
 			    return CVT_OK;
 		    }

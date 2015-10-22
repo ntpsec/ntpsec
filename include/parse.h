@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1989-2005 by Frank Kardel <kardel@ntp.org>
+ * Copyright (c) 1989-2015 by Frank Kardel <kardel@ntp.org>
  * Copyright 2015 by the NTPsec project contributors
  * SPDX-License-Identifier: BSD-3-clause
  */
@@ -68,7 +68,7 @@
  * feature information
  */
 #define PARSEB_S_LEAP		  0x00010000 /* supports LEAP */
-#define PARSEB_S_ANTENNA	  0x00020000 /* supports antenna information */
+#define PARSEB_S_CALLBIT	  0x00020000 /* supports callbit information */
 #define PARSEB_S_PPS     	  0x00040000 /* supports PPS time stamping */
 #define PARSEB_S_POSITION	  0x00080000 /* supports position information (GPS) */
 
@@ -94,7 +94,7 @@
 #define PARSE_LEAPSECOND(x)	(PARSE_SYNC(x) && ((x) & PARSEB_LEAP_SECOND))
 
 #define PARSE_S_LEAP(x)		((x) & PARSEB_S_LEAP)
-#define PARSE_S_ANTENNA(x)	((x) & PARSEB_S_ANTENNA)
+#define PARSE_S_CALLBIT(x)	((x) & PARSEB_S_CALLBIT)
 #define PARSE_S_PPS(x)		((x) & PARSEB_S_PPS)
 #define PARSE_S_POSITION(x)	((x) & PARSEB_S_POSITION)
 

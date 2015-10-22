@@ -1,13 +1,7 @@
 /*
  * Parser module for reference clock
  *
- * PARSEKERNEL define switches between two personalities of the module
- * if PARSEKERNEL is defined this module can be used
- * as kernel module. In this case the time stamps will be
- * a struct timeval.
- * when PARSEKERNEL is not defined NTP time stamps will be used.
- *
- * Copyright (c) 1989-2005 by Frank Kardel <kardel@ntp.org>
+ * Copyright (c) 1989-2015 by Frank Kardel <kardel@ntp.org>
  * Copyright 2015 by the NTPsec project contributors
  * SPDX-License-Identifier: BSD-3-Clause
  *
