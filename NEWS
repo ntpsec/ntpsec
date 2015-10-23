@@ -24,5 +24,6 @@ on user-visible changes.
 * [Bug 2860] ntpq ifstats sanity check is too stringent.  Frank Kardel.
 * [Bug 2866] segmentation fault at initgroups().  Harlan Stenn.
 * [Bug 2867] ntpd with autokey active crashed by 'ntpq -crv'
+* [Bug 2883] ntpd crashes on exit with empty driftfile.  Miroslav Lichvar.
 
 // end

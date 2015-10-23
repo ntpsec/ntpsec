@@ -1256,7 +1256,7 @@ drift_parm
 		{
 			attr_val *av;
 			
-			av = create_attr_sval(T_Driftfile, "");
+			av = create_attr_sval(T_Driftfile, estrdup(""));
 			APPEND_G_FIFO(cfgt.vars, av);
 		}
 	;
