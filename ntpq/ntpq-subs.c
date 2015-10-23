@@ -1971,7 +1971,7 @@ doapeers(
 	)
 {
 	u_int		u;
-	char		fullname[HOST_NAME_MAX];
+	char		fullname[MAXHOSTNAME];
 	sockaddr_u	netnum;
 	const char *	name_or_num;
 	size_t		sl;
