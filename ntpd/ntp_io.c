@@ -4597,10 +4597,15 @@ process_routing_msgs(struct asyncio_reader *reader)
 	cnt = read(reader->fd, buffer, sizeof(buffer));
 
 	if (cnt < 0) {
-		msyslog(LOG_ERR,
-			"i/o error on routing socket %m - disabling");
-		remove_asyncio_reader(reader);
-		delete_asyncio_reader(reader);
+		if (errno == ENOBUFS) {
+			msyslog(LOG_ERR,
+				"routing socket reports: %m");
+		} else {
+			msyslog(LOG_ERR,
+				"routing socket reports: %m - disabling");
+			remove_asyncio_reader(reader);
+			delete_asyncio_reader(reader);
+		}
 		return;
 	}
 
