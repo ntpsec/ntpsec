@@ -717,9 +717,13 @@ refresh_all_peerinterfaces(void)
 	/*
 	 * this is called when the interface list has changed
 	 * give all peers a chance to find a better interface
+	 * but only if either they don't have an address already
+	 * or if the one they have hasn't worked for a while.
 	 */
-	for (p = peer_list; p != NULL; p = p->p_link)
-		peer_refresh_interface(p);
+	for (p = peer_list; p != NULL; p = p->p_link) {
+		if (!(p->dstadr && (p->reach & 0x3)))	// Bug 2849 XOR 2043
+			peer_refresh_interface(p);
+	}
 }
 
 
