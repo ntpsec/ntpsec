@@ -1713,7 +1713,9 @@ getarg(
 
 	case NTP_UINT:
 		if ('&' == str[0]) {
-			if (!atouint(&str[1], &ul)) {
+			errno = 0;
+			ul = strtoul(&str[1], NULL, 10);
+			if (errno == EINVAL || errno == ERANGE) {
 				fprintf(stderr,
 					"***Association index `%s' invalid/undecodable\n",
 					str);
@@ -1732,7 +1734,9 @@ getarg(
 			argp->uval = assoc_cache[ul - 1].assid;
 			break;
 		}
-		if (!atouint(str, &argp->uval)) {
+		errno = 0;
+		argp->uval = strtoul(str, NULL, 10);
+		if (errno == EINVAL || errno == ERANGE) {
 			fprintf(stderr, "***Illegal unsigned value %s\n",
 				str);
 			return false;
@@ -1740,7 +1744,9 @@ getarg(
 		break;
 
 	case NTP_INT:
-		if (!atoint(str, &argp->ival)) {
+		errno = 0;
+		argp->ival = strtol(str, NULL, 10);
+		if (errno == EINVAL || errno == ERANGE) {
 			fprintf(stderr, "***Illegal integer value %s\n",
 				str);
 			return false;

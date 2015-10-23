@@ -3,9 +3,7 @@ def build(ctx):
 
 	libntp_source = [
 		"a_md5encrypt.c",
-		"atoint.c",
 		"atolfp.c",
-		"atouint.c",
 		"authkeys.c",
 		"authreadkeys.c",
 		"authusekey.c",
@@ -20,7 +18,6 @@ def build(ctx):
 		"dolfptoa.c",
 		"emalloc.c",
 		"getopt.c",
-		"hextoint.c",
 		"hextolfp.c",
 		"humandate.c",
 		"icom.c",

@@ -3713,7 +3713,8 @@ collect_display_vdc(
 						"malformed %s=%s\n",
 						pvdc->tag, val);
 			} else {	/* port */
-				if (atouint(val, &ul))
+				errno = 0;
+				if (ul = strtoul(val, NULL, 10), errno == 0)
 					SET_PORT(&pvdc->v.sau, 
 						 (u_short)ul);
 			}
@@ -3754,13 +3755,13 @@ collect_display_vdc(
 			break;
 
 		case NTP_MODE:
-			atouint(pvdc->v.str, &ul);
+			ul = strtoul(pvdc->v.str, NULL, 10);
 			fprintf(fp, "%s  %s\n", pvdc->display,
 				modetoa((int)ul));
 			break;
 
 		case NTP_2BIT:
-			atouint(pvdc->v.str, &ul);
+			ul = strtoul(pvdc->v.str, NULL, 10);
 			fprintf(fp, "%s  %s\n", pvdc->display,
 				leapbits[ul & 0x3]);
 			break;

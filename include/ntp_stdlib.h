@@ -154,9 +154,6 @@ extern	char *	estrdup_impl(const char *, const char *, int);
 #endif
 
 
-extern	bool	atoint		(const char *, long *);
-extern	bool	atouint		(const char *, u_long *);
-extern	bool	hextoint	(const char *, u_long *);
 extern	const char *	humanlogtime	(void);
 extern	const char *	humantime	(time_t);
 extern	char *	mfptoa		(uint32_t, uint32_t, short);

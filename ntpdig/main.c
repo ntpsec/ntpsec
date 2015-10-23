@@ -514,7 +514,8 @@ handle_lookup(
 	ctx->timeout = response_tv;
 
 	/* The following should arguably be passed in... */
-	if (opt_authkey != NULL && atoint(opt_authkey, &l)) {
+	errno = 0;
+	if (opt_authkey != NULL && (l = strtol(opt_authkey, NULL, 10), errno == 0)) {
 		ctx->key_id = l;
 		get_key(ctx->key_id, &ctx->key);
 	} else {
