@@ -27,6 +27,6 @@ on user-visible changes.
 * [Bug 2867] ntpd with autokey active crashed by 'ntpq -crv'
 * [Bug 2883] ntpd crashes on exit with empty driftfile.  Miroslav Lichvar.
 * [Bug 2886] Misspelling: "outlyer" should be "outlier"
-
+* [Bug 2890] Ignore ENOBUFS on routing netlink socket.  Konstantin Khlebnikov.
 
 // end
