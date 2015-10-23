@@ -2012,7 +2012,7 @@ decodeint(
 {
 	errno = 0;
 	/* magic 0 enables hex/octal recognition */
-	*val = strtoll(str, NULL, 0);
+	*val = strtol(str, NULL, 0);
 	return !(errno == EINVAL || errno == ERANGE);
 }
 
