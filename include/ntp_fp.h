@@ -339,7 +339,6 @@ extern	char *	dofptoa		(u_fp, int, short, int);
 extern	char *	dolfptoa	(uint32_t, uint32_t, int, short, int);
 
 extern	bool	atolfp		(const char *, l_fp *);
-extern	int	buftvtots	(const char *, l_fp *);
 extern	char *	fptoa		(s_fp, short);
 extern	char *	fptoms		(s_fp, short);
 extern	bool	hextolfp	(const char *, l_fp *);

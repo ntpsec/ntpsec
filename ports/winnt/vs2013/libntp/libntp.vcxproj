@@ -219,7 +219,6 @@
     <ClCompile Include="..\..\..\..\libntp\authreadkeys.c" />
     <ClCompile Include="..\..\..\..\libntp\authusekey.c" />
     <ClCompile Include="..\..\..\..\libntp\a_md5encrypt.c" />
-    <ClCompile Include="..\..\..\..\libntp\buftvtots.c" />
     <ClCompile Include="..\..\..\..\libntp\caljulian.c" />
     <ClCompile Include="..\..\..\..\libntp\caltontp.c" />
     <ClCompile Include="..\..\..\..\libntp\calyearstart.c" />

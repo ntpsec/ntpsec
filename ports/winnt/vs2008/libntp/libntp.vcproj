@@ -320,10 +320,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\..\libntp\buftvtots.c"
-				>
-			</File>
-			<File
 				RelativePath="..\..\..\..\libntp\caljulian.c"
 				>
 			</File>
