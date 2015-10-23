@@ -2004,12 +2004,10 @@ decodeint(
 	long *val
 	)
 {
-	if (*str == '0') {
-		if (*(str+1) == 'x' || *(str+1) == 'X')
-		    return hextoint(str+2, (u_long *)val);
-		return octtoint(str, (u_long *)val);
-	}
-	return atoint(str, val);
+	errno = 0;
+	/* magic 0 enables hex/octal recognition */
+	*val = strtoll(str, NULL, 0);
+	return !(errno == EINVAL || errno == ERANGE);
 }
 
 
@@ -2022,12 +2020,10 @@ decodeuint(
 	u_long *val
 	)
 {
-	if (*str == '0') {
-		if (*(str + 1) == 'x' || *(str + 1) == 'X')
-			return (hextoint(str + 2, val));
-		return (octtoint(str, val));
-	}
-	return (atouint(str, val));
+	errno = 0;
+	/* magic 0 enables hex/octal recognition */
+	*val = strtoul(str, NULL, 0);
+	return !(errno == EINVAL || errno == ERANGE);
 }
 
 
