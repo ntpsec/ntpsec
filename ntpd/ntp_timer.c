@@ -488,7 +488,9 @@ check_leapsec(
 		lsprox = LSPROX_NOWARN;
 		leapsec_reset_frame();
 		memset(&lsdata, 0, sizeof(lsdata));
-	} else if (leapsec_query(&lsdata, now, tpiv)) {
+	} else {
+		int fired = leapsec_query(&lsdata, now, tpiv);
+
 		DPRINTF(1, ("*** leapsec_query: fired %i, now %u (0x%08X), tai_diff %i, ddist %u\n",
 		      fired, now, now, lsdata.tai_diff, lsdata.ddist));
 #ifdef ENABLE_LEAP_SMEAR
@@ -558,33 +560,35 @@ check_leapsec(
 		/* Full hit. Eventually step the clock, but always
 		 * announce the leap event has happened.
 		 */
-		const char *leapmsg = NULL;
-		if (lsdata.warped < 0) {
-			if (clock_max_back > 0.0 &&
-			    clock_max_back < fabs(lsdata.warped)) {
-				step_systime(lsdata.warped);
-				leapmsg = leapmsg_p_step;
-			} else {
-				leapmsg = leapmsg_p_slew;
+	  	if (fired) {
+			const char *leapmsg = NULL;
+			if (lsdata.warped < 0) {
+				if (clock_max_back > 0.0 &&
+				    clock_max_back < fabs(lsdata.warped)) {
+					step_systime(lsdata.warped);
+					leapmsg = leapmsg_p_step;
+				} else {
+					leapmsg = leapmsg_p_slew;
+				}
+			} else 	if (lsdata.warped > 0) {
+				if (clock_max_fwd > 0.0 &&
+				    clock_max_fwd < fabs(lsdata.warped)) {
+					step_systime(lsdata.warped);
+					leapmsg = leapmsg_n_step;
+				} else {
+					leapmsg = leapmsg_n_slew;
+				}
 			}
-		} else 	if (lsdata.warped > 0) {
-			if (clock_max_fwd > 0.0 &&
-			    clock_max_fwd < fabs(lsdata.warped)) {
-				step_systime(lsdata.warped);
-				leapmsg = leapmsg_n_step;
-			} else {
-				leapmsg = leapmsg_n_slew;
-			}
+			if (leapmsg)
+				msyslog(LOG_NOTICE, "%s", leapmsg);
+			report_event(EVNT_LEAP, NULL, NULL);
+			lsprox  = LSPROX_NOWARN;
+			leapsec = LSPROX_NOWARN;
+			sys_tai = lsdata.tai_offs;
+		} else {
+			lsprox  = lsdata.proximity;
+			sys_tai = lsdata.tai_offs;
 		}
-		if (leapmsg)
-			msyslog(LOG_NOTICE, "%s", leapmsg);
-		report_event(EVNT_LEAP, NULL, NULL);
-		lsprox  = LSPROX_NOWARN;
-		leapsec = LSPROX_NOWARN;
-		sys_tai = lsdata.tai_offs;
-	} else {
-		lsprox  = lsdata.proximity;
-		sys_tai = lsdata.tai_offs;
 	}
 
 	/* We guard against panic alarming during the red alert phase.
