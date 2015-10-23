@@ -213,9 +213,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\..\libntp\adjtime.c" />
-    <ClCompile Include="..\..\..\..\libntp\atoint.c" />
     <ClCompile Include="..\..\..\..\libntp\atolfp.c" />
-    <ClCompile Include="..\..\..\..\libntp\atouint.c" />
     <ClCompile Include="..\..\..\..\libntp\audio.c" />
     <ClCompile Include="..\..\..\..\libntp\authkeys.c" />
     <ClCompile Include="..\..\..\..\libntp\authreadkeys.c" />
@@ -233,7 +231,6 @@
     <ClCompile Include="..\..\..\..\libntp\emalloc.c" />
     <ClCompile Include="..\..\..\..\libntp\findconfig.c" />
     <ClCompile Include="..\..\..\..\libntp\getopt.c" />
-    <ClCompile Include="..\..\..\..\libntp\hextoint.c" />
     <ClCompile Include="..\..\..\..\libntp\hextolfp.c" />
     <ClCompile Include="..\..\..\..\libntp\humandate.c" />
     <ClCompile Include="..\..\..\..\libntp\icom.c" />

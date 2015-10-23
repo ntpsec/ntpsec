@@ -189,15 +189,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\libntp\atoint.c"
-				>
-			</File>
-			<File
 				RelativePath="..\..\..\libntp\atolfp.c"
-				>
-			</File>
-			<File
-				RelativePath="..\..\..\libntp\atouint.c"
 				>
 			</File>
 			<File
@@ -286,10 +278,6 @@
 			</File>
 			<File
 				RelativePath="..\..\..\libntp\getopt.c"
-				>
-			</File>
-			<File
-				RelativePath="..\..\..\libntp\hextoint.c"
 				>
 			</File>
 			<File
