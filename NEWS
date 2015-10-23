@@ -6,8 +6,9 @@ Much of the traditional function of a news file is now better addressed
 by browsing the comments in the revision history.  This file will focus
 on user-visible changes.
 
-== Forward-ported bugfixes from NTP Classic ==
+== Bugfixes either ported from NTP Classic or fixed by NTPsec changes ==
 
+* [Bug 2625] Deprecate flag1 in local refclock.  Hal Murray, Harlan Stenn.
 * [Bug 2778] Implement "apeers"  ntpq command to include associd.
 * [Bug 2823] ntpsweep with recursive peers option doesn't work.  H.Stenn.
 * [Bug 2836] DFC77 patches from Frank Kardel to make decoding more
@@ -25,5 +26,7 @@ on user-visible changes.
 * [Bug 2866] segmentation fault at initgroups().  Harlan Stenn.
 * [Bug 2867] ntpd with autokey active crashed by 'ntpq -crv'
 * [Bug 2883] ntpd crashes on exit with empty driftfile.  Miroslav Lichvar.
+* [Bug 2886] Misspelling: "outlyer" should be "outlier"
+
 
 // end
