@@ -30,6 +30,6 @@ on user-visible changes.
 * [Bug 2890] Ignore ENOBUFS on routing netlink socket.  Konstantin Khlebnikov.
 * [Bug 2902] configuration directives "pidfile" and "driftfile"
   should be local-only. (patch by Miroslav Lichvar)
-
+* [Bug 2909] Slow memory leak in CRYPTO_ASSOC
 
 // end
