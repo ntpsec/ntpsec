@@ -255,6 +255,36 @@ The reason for this policy is not that we hate all other scripting
 languages, it's to reduce the complexity of maintenance and testing
 due to multiple languages.
 
+=== Version string ===
+
+We use a varient of three part Semantic Versioning, of the form X.Y.Z.
+X, Y, and Z are non-negative decimal integers.
+
+X is the "major" version number.
+Y is the "minor" version number.
+Z is the "revision" number.
+
+Each release will result in an incremented version number, and the
+version number string will be tagged into the git repository.
+
+When the minor number is even, it refers to a "stable" release, and
+when the minor number is odd, it refers to a "development" release.
+New releases on "stable" are generally bugfixes that are backported
+from it's matching "development".
+
+When a new stable release happens, that also results in the creation
+of a new development release.  For example, the currently hypothetical
+future release of "1.14.0" will also cause the release of an identical
+"1.15.0".
+
+The first public release is version 0.9.0, and will drive to 1.0.0.
+When 1.0.0 is released, that will also create an identical 1.1.0.
+
+We currently have no formal policies for the criteria for releases,
+for the schedule of releases, and no formal policies for how far back
+bugfixes will be backported into stable releases.  Feel free to
+discuss it with project management.
+
 == Patch and change-comment conventions ==
 
 === Patch format ===
