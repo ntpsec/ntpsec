@@ -1,0 +1,157 @@
+= TO DO =
+
+== Checklist for a quality first release ==
+
+=== Blocker bugs ===
+
+None right now. (Sep-22 2015)
+
+=== Build system ===
+
+* Document build files.
+
+* Cleanup and separate features in pylib/*
+
+* Add 'snapshot' feature to dump config status into a JSON file for collecting 
+  build + platform information
+
+* The doc target should build manual pages. Model command is
+  a2x --format manpage --asciidoc-opts=--conf-file=../docs/asciidoc.conf foo.txt
+
+* An issue with the install productions as presently written is that
+  they're written to install to ${PREFIX}/bin and {PREFIX}/sbin.  This
+  is right if we're trying to install a test setup to userspace but wrong
+  in the normal case - we want /sbin, not /usr/sbin.
+
+* There's no installation yet for ntpleapfetch, or the Perl
+  executables that should be installed (ntpwait, ntptrace), nor
+  for their support library under perllib/.
+
+* The install production needs to warn of stale ntpdc and ntpdate binaries.
+
+* Add support for enabling all conditional checks to ensure none are broken.
+
+* Add support for disabling specific conditional tests to ensure nothing is 
+  compiled into the base in a surprising fashion.
+
+* Add monkeypatch for rmdir, rmtree under Windows.
+
+* ntpdsim does not quite build.  There is something wrong with the way waf is
+  setting up the linkage.  To reproduce, remove the "if 0" near the end of
+  ntpd/wscript.
+
+=== Code ===
+
+* We need a build time option to disable all dangerous operations
+  that ntpq can produce.  First we need to enumerate them.
+
+* systime.c needs patching to put ntpdsim's hook back in place. Deferred
+  until the ntpdsim build is fixed.
+
+=== Testing ===
+
+* Unit testing.  "make check" needs to run all the unit tests.
+
+* Build testing.  The build/CI farm needs to be fully operational.
+
+* We need to live-test various refclocks.  It would be nice
+  to test the full matrix of refclock x platform, but that's too
+  much work.  We should probably test as many refclocks as we can
+  on at least one platform and test the NMEA, Atom, and SHM drivers
+  on most platforms.
+
+* We need to live-test leap seconds, both getting them from a file
+  with ntpleapfetch and getting them from other NTP servers.
+
+* The script tests in scripts/t should be investigated, perhaps
+  they are salvageable.
+
+=== Documentation ===
+
+* Short doc on how to tell your ntpd is running correctly.
+  Perhaps lifted from GPSD Time Service HOWTO?
+
+* The format and organization of the NEWS file needs a rethink.
+
+* Phabricator-centered workflow needs to be written up and integrated
+  with the website content I wrote for us.
+
+* Website needs to be integrated (with a contacts and services page,
+  among other things) and published.
+
+=== Remaining procedural issues ===
+
+* The dev changes need to be fed through through Phabricator,
+  reviewed, and if necessary fixed.
+
+* Version-numbering policy needs to be decided and written up.  Are
+  we going to go with the original 1.x/2.x split?  The website draft
+  still assumes this.
+
+* We need a release checklist.
+
+== After beta release ==
+
+* ntpproto.py - a Python library that knows the NTP wire protocol and
+  can be used to generate and interpret packets.  Daniel has speculated
+  about writing this in order to test possible exploits, but there are
+  other uses.  Translate it from the Perl protcol library under scripts/lib.
+
+* Use ntpproto.py to translate the Perl stuff under scripts/ to Python.
+
+* Hal says "We need a way to inspect/debug bits on the wire. `ntpdate
+  -du' is the traditional approach."  Hal's straw man is a new program
+  rather than trying to make sntp do this.  Eric's proposed answer:
+  ntpshark, a command interpreter written around ntpproto.py and
+  loosely modeled on wireshark.
+
+* Replace ntpq with a Python wrapper around ntpproto.py.
+
+* We might be able to eliminate a lot of the Linux runtime
+  droproot code by using file capabilities.
+
+* Better ANSI/POSIX conformance in MinGW and Visual Studio 2013 might
+  enable us to get rid of the SYS_WINNT code. Should be tried...
+
+* There is a mess around the symbols NO_MAIN_ALLOWED, BUILD_AS_LIB, and
+  LIBNTP_C that needs to be refactored.  ntpd should *always* be built as
+  a library linked to a main module, these guard symbols should go away.
+
+* seccomp sandboxing fails to build under Ubuntu due to some confusion
+  in the Linux headers.  Investigate.
+
+* Use the snprintb in util/ntptime for flag words like flash
+  codes and use it systematically to make reports more readable.
+
+* Timer events need, as much as possible, to be eliminated - they eat
+  power on laptops and mobile devices, usually unnecessarily.  At least
+  one, the /etc/resolv.conf reload, would be better handled under Linux
+  by asynchronous file-change notifications.
+
+* Take another look at SHM.  Hal thinks we can make a version that is
+  read-only and solid.  Maybe write a support package that does all the
+  work if you call it with the date/time.
+
+Hal:
+> I think there is some interaction between when the ACTS driver calls and the 
+> state of other stuff, like the connection to the net.  This is probably a 
+> good candidate to get cleaned up.
+> 
+> There is another possible tangle in this area.  If you set "noselect" on the 
+> server line in the config file, ntpd goes through all the action of 
+> collecting the data and writing log files, but then drops the clock.  I don't 
+> know things well enough to be sure that this sort of logic won't pick one 
+> back up.
+
+* Forward-port NTP Classic fix for [Bug 2830] just in case we want to
+  revive Autokey someday.
+
+== Old, sometime ancient stuff ==
+
+970711: Look Real Hard at changing the key stuff from u_long to u_int32.
+
+970711: Make sure it's safe to convert proto_config's 2nd argument from
+	u_long to u_int32.  Watch "set" in ntp_request.c:setclr_flags().
+
+970318: in hourly_stats(?), squawk if the magnitude of the drift is,
+	say, >400.

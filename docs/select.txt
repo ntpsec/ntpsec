@@ -12,17 +12,17 @@ the root dispersion plus minor error contributions not considered here.
 
 First, a number of sanity checks is performed to sift the selectable
 candidate from among the source population. The sanity checks are
-sumarized as follows:.
+summarized as follows:.
 
 1.  A _stratum error_ occurs if (1) the source had never been
-synchronized or (2) the stratum of the source is below the `floor`
-option or not below the `ceiling` option of the
-link:miscopt.html#tos[`tos`] command. The default values for these
+synchronized or (2) the stratum of the source is below the +floor+
+option or not below the +ceiling+ option of the
+link:miscopt.html#tos[+tos+] command. The default values for these
 options are 0 and 15, respectively. Note that 15 is a valid stratum, but
 a server operating at that stratum cannot synchronize clients.
 2.  A _distance error_ occurs for a source if the root distance (also
 known as synchronization distance) of the source is not below the
-distance threshold `maxdist` option of the link:miscopt.html#tos[`tos`]
+distance threshold +maxdist+ option of the link:miscopt.html#tos[+tos+]
 command. The default value for this option is 1.5 s for networks
 including only the Earth, but this should be increased to 2.5 s for
 networks including the Moon.
@@ -30,7 +30,7 @@ networks including the Moon.
 This can occur if two peers are configured with each other in symmetric
 modes.
 4.  An _unreachable_ _error_ occurs if the source is unreachable or if
-the `server` or `peer` command for the source includes the `noselect`
+the +server+ or +peer+ command for the source includes the +noselect+
 option.
 
 Sources showing one or more of these errors are considered
@@ -120,8 +120,8 @@ interval can be quite small, especially when the candidates are multiple
 reference clocks. In such cases the intersection interval might be
 empty, due to insignificant differences in the reference clock offsets.
 To avoid this, the size of the correctness interval is padded to the
-value of `mindist`, with default 1 ms. This value can be changed using
-the `mindist` option of the link:miscopt.html#tos[`tos`] command.
+value of +mindist+, with default 1 ms. This value can be changed using
+the +mindist+ option of the link:miscopt.html#tos[+tos+] command.
 
 '''''
 

@@ -2,10 +2,7 @@
 /* (c) Copyright Tai Jin, 1988.  All Rights Reserved.                    */
 /*     Hewlett-Packard Laboratories.                                     */
 /*                                                                       */
-/* Permission is hereby granted for unlimited modification, use, and     */
-/* distribution.  This software is made available with no warranty of    */
-/* any kind, express or implied.  This copyright notice must remain      */
-/* intact in all versions of this software.                              */
+/* SPDX-License-Identifier: BSD-2-clause
 /*                                                                       */
 /* The author would appreciate it if any bug fixes and enhancements were */
 /* to be sent back to him for incorporation into future versions of this */

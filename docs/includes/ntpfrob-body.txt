@@ -2,35 +2,43 @@
 // It's included in two places: once for the docs/ HTML
 // tree, and once to make an individual man page.
 
+[[synop]]
 == Synopsis ==
 
-`{ntpfrob} [ -A ] [ -a tick ] [ -p ppsdev ] [-c] [-e] [-s]`
++{ntpfrob}+ [ +-A+] [ +-a+ 'tick' ] [ +-p+ 'ppsdev' ] [+-c+] [+-e+] [+-r+] [+-s+]
 
+[[descr]]
 == Description ==
 
 The {ntpfrob} program frobs the local clock hardware.  It collects
 several small diagnostic functions into a set that will differ
-depending on your platform and underlying system calls.
-Portions of it formerly traveled as `tickadj` and `ntptime`.  
+depending on your platform and underlying system calls.  Portions of
+it formerly traveled as +tickadj+ and some undocumented small
+utilities.
 
+[[cmd]]
 == Command Line Options ==
 
-`-a` 'tick'::
-  Set the kernel variable `tick` to the value _tick_ specifies.
-`-A`::
-  Display the kernel variable `tick`.
-`-p` 'ppsdev'::
-  Look for PPS pulses on a specified device
-`-c`::
++-a+ 'tick'::
+  Set the kernel variable +tick+ to the value _tick_ specifies.
++-A+::
+  Display the kernel variable +tick+.
++-c+::
   Compute and display clock jitter.
-`-e`::
++-e+::
   Measure clock precision.
-`-s`::
-  Check for stepback bug.
-`-j`::
++-j+::
   Report in self-describing JSON.
++-p+ 'ppsdev'::
+  Look for PPS pulses on a specified device
++-r+::
+  Raw mode.  Only applies to the jitter mode, and means the raw
+  clock samples should be emitted to stdout for postanalysis.
++-s+::
+  Check for stepback bug.
 
-== Modes of operation ==
+[[usage]]
+== Usage ==
 
 Documentation for some of these functions is scanty; this is a problem
 inherited from ancient days along with their code. If you suspect
@@ -68,7 +76,9 @@ hardware interrupt, usually in the range 10 us-1 ms. For those systems
 with microsecond counters the jitter is dominated only by the
 operating system.
 
-The -j option is applicable to this mode.
+The -j option is applicable to this mode.  With the -r option, write
+the raw unsorted clock samples to standard output for post-analysis.
+All but the last -j or -r option before the -c mode flag is ignored
 
 === Pulse-per-second check ==
 

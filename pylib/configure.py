@@ -125,7 +125,7 @@ def cmd_configure(ctx):
 	structure_fields = (
 		("time_tick", "timex", "sys/timex.h"),
 		("modes", "timex", "sys/timex.h"),
-		("tv_nsec", "ntptimeval", "sys/timex.h"),
+		("time.tv_nsec", "ntptimeval", "sys/timex.h"),
 		)
 	for (f, s, h) in structure_fields:
 		ctx.check_structfield(f, s, h)
@@ -193,7 +193,6 @@ def cmd_configure(ctx):
 		('MD5Init', "md5.h", "CRYPTO"),
 		('ntp_adjtime', "sys/timex.h"),		# BSD
 		('ntp_gettime', "sys/timex.h"),		# BSD
-		('plock', "sys/lock.h"),		# OSF/1, SVID[23], XPG2
 		('pthread_attr_getstacksize', "pthread.h", "PTHREAD"),
 		('pthread_attr_setstacksize', "pthread.h", "PTHREAD"),
 		('res_init', "resolv.h"),
@@ -232,12 +231,10 @@ def cmd_configure(ctx):
 	optional_headers = (
 		"alloca.h",
 		"arpa/nameser.h",
-		"dirent.h",
 		"dns_sd.h",
 		"histedit.h",
 		"ieeefp.h",
 		"ifaddrs.h",
-		"libgen.h",
 		"libintl.h",
 		"libscf.h",
 		"linux/if_addr.h",
@@ -245,43 +242,40 @@ def cmd_configure(ctx):
 		"linux/serial.h",
 		#"linux/seccomp.h",	- Doesn't build yet, investigate
 		"machine/soundcard.h",
-		"netinet/in_systm.h",
-		"md5.h",
+		("md5.h", ["sys/types.h"]),
 		"net/if6.h",
-		"net/if_var.h",
-		"net/route.h",
-		"netinet/in_var.h",
+		("net/route.h", ["sys/socket.h","net/if.h","net/route.h"]),
 		"netinfo/ni.h",
-		"netinet/ip.h",
 		"priv.h",
-		"readline/readline.h",
-		"readline/history.h",
-		"resolv.h",
+		("readline/readline.h",["stdio.h"]),
+		("readline/history.h", ["stdio.h","readline/readline.h"]),
+		("resolv.h", ["sys/types.h","netinet/in.h","arpa/nameser.h"]),
 		"semaphore.h",
 		"stdatomic.h",
 		"sys/audioio.h",
 		"sys/ioctl.h",
-		"sys/lock.h",
 		"sys/modem.h",
-		"sys/param.h",
 		"sys/prctl.h",
 		"sys/ppsclock.h",
 		"sys/procset.h",
 		"sys/sockio.h",
 		"sys/soundcard.h",
-		"sys/sysctl.h",
+		("sys/sysctl.h", ["sys/types.h"]),
 		"sys/systune.h",
-		"sysexits.h",
-		"utime.h",
+		("timepps.h", ["inttypes.h"]),
+		("sys/timepps.h", ["inttypes.h"]),
 	)
 	for hdr in optional_headers:
-		if not ctx.check_cc(header_name=hdr, mandatory=False) \
-		   and os.path.exists("/usr/include/" + hdr):
+		if type(hdr) == type(""):
+			if ctx.check_cc(header_name=hdr, mandatory=False):
+				continue
+		else:
+			(hdr, prereqs) = hdr
+			if probe_header_with_prerequisites(ctx, hdr, prereqs):
+				continue
+		if os.path.exists("/usr/include/" + hdr):
 			# Sanity check...
 			print "Compilation check failed but include exists %s" % hdr
-
-	for header in ["timepps.h", "sys/timepps.h"]:
-		probe_header_with_prerequisites(ctx, header, ["inttypes.h"])
 
 	if ctx.get_define("HAVE_TIMEPPS_H") or ctx.get_define("HAVE_SYS_TIMEPPS_H"):
 		ctx.define("HAVE_PPSAPI", 1)
@@ -439,7 +433,7 @@ def cmd_configure(ctx):
 	ctx.define("DIR_SEP", "'%s'" % sep, quote=False)
 
 
-	# lib/isc/
+	# libisc/
 	# XXX: Hack that needs to be fixed properly for all platforms
 	ctx.define("ISC_PLATFORM_NORETURN_PRE", "", quote=False)
 	ctx.define("ISC_PLATFORM_NORETURN_POST", "__attribute__((__noreturn__))", quote=False)

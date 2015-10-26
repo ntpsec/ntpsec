@@ -11,14 +11,13 @@ The skunk watches for intruders and sprays.
 
 == Related Links ==
 
-include::includes/command.txt[]
 include::includes/accopt.txt[]
 
 '''''
 
 == Commands and Options ==
 
-Unless noted otherwise, further information about these ccommands is on
+Unless noted otherwise, further information about these commands is on
 the link:accopt.html[Access Control Support] page.
 
 include::includes/access-commands.txt[]

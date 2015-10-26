@@ -24,14 +24,14 @@ receiving four or more satellites.
 The receiver should be configured before starting the NTP daemon, in
 order to establish reliable position and operating conditions. It does
 not initiate surveying or hold mode. For use with NTP, the daylight
-savings time feature should be disables (`D0` command) and the broadcast
-mode set to operate in UTC (`BU` command).
+savings time feature should be disables (+D0+ command) and the broadcast
+mode set to operate in UTC (+BU+ command).
 
 The timecode format supported by this driver is selected by the poll
-sequence `B5`, which initiates a line in the following format to be
-repeated once per second until turned off by the `B0` command.
+sequence +B5+, which initiates a line in the following format to be
+repeated once per second until turned off by the +B0+ command.
 
-Format `B5` (24 ASCII printing characters):
+Format +B5+ (24 ASCII printing characters):
 
 -------------------------------------------------------
 <cr><lf>i yy ddd hh:mm:ss.000bbb
@@ -52,7 +52,7 @@ receiver status string (SR) is written to the clockstats file.
 
 The time quality character is encoded in IEEE P1344 standard:
 
-Format `TQ` (IEEE P1344 estimated worst-case time quality)
+Format +TQ+ (IEEE P1344 estimated worst-case time quality)
 
 -----------------------------------------
 0       clock locked, maximum accuracy
@@ -69,7 +69,7 @@ B       clock unlocked, accuracy < 10 s
 
 The status string is encoded as follows:
 
-Format `SR` (25 ASCII printing characters)
+Format +SR+ (25 ASCII printing characters)
 
 ----------------------------------------------
 V=vv S=ss T=t P=pdop E=ee
@@ -87,9 +87,9 @@ intrinsic jitter of the radio itself.
 
 == Monitor Data ==
 
-When enabled by the `flag4` fudge flag, an additional line containing
+When enabled by the +flag4+ fudge flag, an additional line containing
 the latitude, longitude, elevation and optional deviation data is
-written to the `clockstats` file. The deviation data operates with an
+written to the +clockstats+ file. The deviation data operates with an
 external pulse-per-second (PPS) input, such as a cesium oscillator or
 another radio clock. The PPS input should be connected to the B event
 channel and the radio initialized for deviation data on that channel.
@@ -99,24 +99,24 @@ over the last 16 seconds.
 
 == Fudge Factors ==
 
-`time1` 'time'::
++time1+ 'time'::
   Specifies the time offset calibration factor, in seconds and fraction,
   with default 0.0.
-`time2` 'time'::
++time2+ 'time'::
   Not used by this driver.
-`stratum` 'number'::
++stratum+ 'number'::
   Specifies the driver stratum, in decimal from 0 to 15, with default 0.
-`refid` 'string'::
++refid+ 'string'::
   Specifies the driver reference identifier, an ASCII string from one to
-  four characters, with default `GPS`.
-`flag1 0 | 1`::
+  four characters, with default +GPS+.
++flag1 {0 | 1}+::
   Not used by this driver.
-`flag2 0 | 1`::
++flag2 {0 | 1}+::
   Not used by this driver.
-`flag3 0 | 1`::
++flag3 {0 | 1}+::
   Not used by this driver.
-`flag4 0 | 1`::
-  Enable verbose `clockstats` recording if set.
++flag4 {0 | 1}+::
+  Enable verbose +clockstats+ recording if set.
 
 == Author ==
 

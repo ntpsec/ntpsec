@@ -1,35 +1,7 @@
 /*
- * /src/NTP/REPOSITORY/ntp4-dev/include/parse.h,v 4.12 2007/01/14 08:36:03 kardel RELEASE_20070114_A
- *
- * parse.h,v 4.12 2007/01/14 08:36:03 kardel RELEASE_20070114_A
- *
- * Copyright (c) 1995-2005 by Frank Kardel <kardel <AT> ntp.org>
- * Copyright (c) 1989-1994 by Frank Kardel, Friedrich-Alexander Universitaet Erlangen-Nuernberg, Germany
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in the
- *    documentation and/or other materials provided with the distribution.
- * 3. Neither the name of the author nor the names of its contributors
- *    may be used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND CONTRIBUTORS ``AS IS'' AND
- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHOR OR CONTRIBUTORS BE LIABLE
- * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
- * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
- * OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
- * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
- * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
- * SUCH DAMAGE.
- *
+ * Copyright (c) 1989-2015 by Frank Kardel <kardel@ntp.org>
+ * Copyright 2015 by the NTPsec project contributors
+ * SPDX-License-Identifier: BSD-3-clause
  */
 
 #ifndef GUARD__PARSE_H
@@ -96,7 +68,7 @@
  * feature information
  */
 #define PARSEB_S_LEAP		  0x00010000 /* supports LEAP */
-#define PARSEB_S_ANTENNA	  0x00020000 /* supports antenna information */
+#define PARSEB_S_CALLBIT	  0x00020000 /* supports callbit information */
 #define PARSEB_S_PPS     	  0x00040000 /* supports PPS time stamping */
 #define PARSEB_S_POSITION	  0x00080000 /* supports position information (GPS) */
 
@@ -122,7 +94,7 @@
 #define PARSE_LEAPSECOND(x)	(PARSE_SYNC(x) && ((x) & PARSEB_LEAP_SECOND))
 
 #define PARSE_S_LEAP(x)		((x) & PARSEB_S_LEAP)
-#define PARSE_S_ANTENNA(x)	((x) & PARSEB_S_ANTENNA)
+#define PARSE_S_CALLBIT(x)	((x) & PARSEB_S_CALLBIT)
 #define PARSE_S_PPS(x)		((x) & PARSEB_S_PPS)
 #define PARSE_S_POSITION(x)	((x) & PARSEB_S_POSITION)
 

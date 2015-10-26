@@ -94,24 +94,24 @@ def build(ctx):
 		ctx.recurse("docs")
 
 
-	ctx.recurse("lib/isc")
+	ctx.recurse("libisc")
 	if ctx.env.REFCLOCK_PARSE: # Only required by the parse refclock
 		ctx.recurse("libparse")
 	ctx.recurse("libntp")
 	ctx.recurse("ntpdig")
 	ctx.recurse("ntpd")
-#	ctx.recurse("ntpfrob")
+	ctx.recurse("ntpfrob")
 	ctx.recurse("ntpq")
 	ctx.recurse("ntpkeygen") 
+	ctx.recurse("ntptime")
 	ctx.recurse("util")
 #	ctx.recurse("tests")
 
 
 	subst_scripts = [
-		"scripts/ntpwait/ntpwait.in",
-		"scripts/ntpsweep/ntpsweep.in",
-		"scripts/ntptrace/ntptrace.in",
-		"scripts/update-leap/update-leap.in"
+		"ntpwait/ntpwait.in",
+		"ntptrace/ntptrace.in",
+		"util/ntpsweep/ntpsweep.in",
 	]
 
 	ctx(
@@ -121,21 +121,23 @@ def build(ctx):
 		chmod	    = Utils.O755
 	)
 
-	subst_files = [
-		"ntpkeygen/ntpkeygen-man.txt.in",
-		"ntpd/complete.conf.in",
-		"ntpd/ntpd-man.txt.in",
-		"ntpq/ntpq-man.txt.in",
-		"scripts/ntpwait/ntpwait-man.txt.in",
-		"scripts/ntptrace/ntptrace-man.txt.in",
-		"ntpdig/ntpdig-man.txt.in",
-		"ntpfrob/ntpfrob-man.txt.in",
-		"util/ntptime-man.txt.in",
+	man_sources = [
+		"ntpd/ntpd-man.txt",
+		"ntpdig/ntpdig-man.txt",
+		"ntpfrob/ntpfrob-man.txt",
+		"ntpkeygen/ntpkeygen-man.txt",
+		"ntpleapfetch/ntpleapfetch-man.txt",
+		"ntpq/ntpq-man.txt",
+		"ntptime/ntptime-man.txt",
+		"ntptrace/ntptrace-man.txt",
+		"ntpwait/ntpwait-man.txt",
+		"scripts/ntpsweep/ntpsweep-man.txt",
 	]
 
-	ctx(
-		features    = "subst",
-		source      = subst_files,
-		target	    = [x.replace(".in", "") for x in subst_files],
-	)
+	#ctx(
+	#	features    = "subst",
+	#	source      = subst_files,
+	#	target	    = [x.replace(".in", "") for x in subst_files],
+	#)
 
+# end

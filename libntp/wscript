@@ -3,13 +3,10 @@ def build(ctx):
 
 	libntp_source = [
 		"a_md5encrypt.c",
-		"atoint.c",
 		"atolfp.c",
-		"atouint.c",
 		"authkeys.c",
 		"authreadkeys.c",
 		"authusekey.c",
-		"buftvtots.c",
 		"caljulian.c",
 		"caltontp.c",
 		"calyearstart.c",
@@ -20,7 +17,6 @@ def build(ctx):
 		"dolfptoa.c",
 		"emalloc.c",
 		"getopt.c",
-		"hextoint.c",
 		"hextolfp.c",
 		"humandate.c",
 		"icom.c",
@@ -42,10 +38,10 @@ def build(ctx):
 		"ntp_worker.c",
 		"numtoa.c",
 		"numtohost.c",
-		"octtoint.c",
 		"prettydate.c",
 		"recvbuff.c",
 		"refnumtoa.c",
+		"refidsmear.c",
 		"socket.c",
 		"socktoa.c",
 		"socktohost.c",
@@ -55,7 +51,6 @@ def build(ctx):
 		"syssignal.c",
 		"timetoa.c",
 		"timevalops.c",
-		"uglydate.c",
 		"vint64ops.c",
 		"work_thread.c",
 		"ymd2yd.c",
@@ -84,8 +79,8 @@ def build(ctx):
 		features	= "c cstlib bld_include src_include",
 		source		= libntp_source + libntp_source_systime,
 		includes	= [
-						"%s/lib/isc/include/" % srcnode,
-						"%s/lib/isc/unix/include/" % srcnode, # XXX: platform: requires unix/win32 switch.
+						"%s/libisc/include/" % srcnode,
+						"%s/libisc/unix/include/" % srcnode, # XXX: platform: requires unix/win32 switch.
 					],
 
 	)

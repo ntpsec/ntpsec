@@ -6,9 +6,6 @@ def build(ctx):
 
 	util = ['hist', 'propdelay', 'sht', 'tg2']
 
-	if ctx.env.PLATFORM_TARGET != "freebsd": # XXX: fix this using a test in configure().
-		util += ["ntptime"]
-
 	for name in util:
 		ctx(
 			target		= name,
@@ -18,7 +15,7 @@ def build(ctx):
 						"%s/%s/" % (bldnode, name)
 					],
 			use		= "ntp opts isc M RT PTHREAD",
-			install_path = "${PREFIX}/bin/"
+			install_path    = False
 		)
 
 

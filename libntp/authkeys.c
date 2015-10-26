@@ -301,6 +301,7 @@ freesymkey(
 	if (sk->secret != NULL) {
 		memset(sk->secret, '\0', sk->secretsize);
 		free(sk->secret);
+                sk->secret = NULL;
 	}
 	UNLINK_SLIST(unlinked, *bucket, sk, hlink, symkey);
 	DEBUG_ENSURE(sk == unlinked);
@@ -535,6 +536,8 @@ MD5auth_setkey(
 			sk->type = (u_short)keytype;
 			secretsize = len;
 			sk->secretsize = (u_short)secretsize;
+                        free(sk->secret);
+                        sk->secret = emalloc(secretsize);
 			memcpy(sk->secret, key, secretsize);
 			if (cache_keyid == keyno) {
 				cache_flags = 0;
@@ -588,6 +591,7 @@ auth_delkeys(void)
 			if (sk->secret != NULL) {
 				memset(sk->secret, '\0', sk->secretsize);
 				free(sk->secret);
+				sk->secret = NULL;
 			}
 			sk->secretsize = 0;
 			sk->lifetime = 0;

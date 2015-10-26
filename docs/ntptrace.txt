@@ -11,7 +11,7 @@ The rabbit knows the way back.
 
 '''''
 
-include::includes/ntptrace-body.txt
+include::includes/ntptrace-body.txt[]
 
 == Bugs ==
 

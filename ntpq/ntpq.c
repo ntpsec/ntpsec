@@ -1713,7 +1713,9 @@ getarg(
 
 	case NTP_UINT:
 		if ('&' == str[0]) {
-			if (!atouint(&str[1], &ul)) {
+			errno = 0;
+			ul = strtoul(&str[1], NULL, 10);
+			if (errno == EINVAL || errno == ERANGE) {
 				fprintf(stderr,
 					"***Association index `%s' invalid/undecodable\n",
 					str);
@@ -1732,7 +1734,9 @@ getarg(
 			argp->uval = assoc_cache[ul - 1].assid;
 			break;
 		}
-		if (!atouint(str, &argp->uval)) {
+		errno = 0;
+		argp->uval = strtoul(str, NULL, 10);
+		if (errno == EINVAL || errno == ERANGE) {
 			fprintf(stderr, "***Illegal unsigned value %s\n",
 				str);
 			return false;
@@ -1740,7 +1744,9 @@ getarg(
 		break;
 
 	case NTP_INT:
-		if (!atoint(str, &argp->ival)) {
+		errno = 0;
+		argp->ival = strtol(str, NULL, 10);
+		if (errno == EINVAL || errno == ERANGE) {
 			fprintf(stderr, "***Illegal integer value %s\n",
 				str);
 			return false;
@@ -2004,12 +2010,10 @@ decodeint(
 	long *val
 	)
 {
-	if (*str == '0') {
-		if (*(str+1) == 'x' || *(str+1) == 'X')
-		    return hextoint(str+2, (u_long *)val);
-		return octtoint(str, (u_long *)val);
-	}
-	return atoint(str, val);
+	errno = 0;
+	/* magic 0 enables hex/octal recognition */
+	*val = strtol(str, NULL, 0);
+	return !(errno == EINVAL || errno == ERANGE);
 }
 
 
@@ -2022,12 +2026,10 @@ decodeuint(
 	u_long *val
 	)
 {
-	if (*str == '0') {
-		if (*(str + 1) == 'x' || *(str + 1) == 'X')
-			return (hextoint(str + 2, val));
-		return (octtoint(str, val));
-	}
-	return (atouint(str, val));
+	errno = 0;
+	/* magic 0 enables hex/octal recognition */
+	*val = strtoul(str, NULL, 0);
+	return !(errno == EINVAL || errno == ERANGE);
 }
 
 
@@ -3258,7 +3260,7 @@ cookedprint(
 
 		if (output_raw != 0) {
 			atoascii(name, MAXVARLEN, bn, sizeof(bn));
-			atoascii(value, MAXVALLEN, bv, sizeof(bv));
+			atoascii(value, MAXVALLEN, bv, sizeof(bv)-1);
 			if (output_raw != '*') {
 				len = strlen(bv);
 				bv[len] = output_raw;

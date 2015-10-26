@@ -8,14 +8,16 @@
 #include <stdio.h>
 #include <stdbool.h>
 
+#include "ntpfrob.h"
+
 #define	DEFAULT_SYS_PRECISION	-99
 
 int default_get_resolution(void);
 int default_get_precision(void);
 
-void precision(const bool json)
+void precision(const iomode mode)
 {
-	if (json)
+	if (mode == json)
 		printf("{\"log2 of resolution\":%d, \"log2 of precision\":%d}\n",
 		       default_get_resolution(),
 		       default_get_precision());

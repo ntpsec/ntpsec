@@ -6,6 +6,8 @@
  *		University of Delaware
  *		Newark, DE 19711
  * Copyright (c) 2006
+ * Copyright 2015 by the NTPsec project contributors
+ * SPDX-License-Identifier: BSD-2-clause
  */
 
 %{
@@ -139,6 +141,7 @@
 %token	<Integer>	T_Kod
 %token	<Integer>	T_Mssntp
 %token	<Integer>	T_Leapfile
+%token	<Integer>	T_Leapsmearinterval
 %token	<Integer>	T_Limited
 %token	<Integer>	T_Link
 %token	<Integer>	T_Listen
@@ -1212,24 +1215,37 @@ misc_cmd_int_keyword
 	:	T_Dscp
 	;
 
+misc_cmd_int_keyword
+	:	T_Leapsmearinterval
+		{
+#ifndef LEAP_SMEAR
+			yyerror("Built without LEAP_SMEAR support.");
+#endif
+		}
+	;
+
 misc_cmd_str_keyword
 	:	T_Ident
 	|	T_Leapfile
-	|	T_Pidfile
 	;
 
 misc_cmd_str_lcl_keyword
 	:	T_Logfile
+	|	T_Pidfile
 	|	T_Saveconfigdir
 	;
 
 drift_parm
 	:	T_String
 		{
-			attr_val *av;
-			
-			av = create_attr_sval(T_Driftfile, $1);
-			APPEND_G_FIFO(cfgt.vars, av);
+			if (lex_from_file()) {
+				attr_val *av;
+				av = create_attr_sval(T_Driftfile, $1);
+				APPEND_G_FIFO(cfgt.vars, av);
+			} else {
+				YYFREE($1);
+				yyerror("driftfile remote configuration ignored");
+			}
 		}
 	|	T_String T_Double
 		{
@@ -1244,7 +1260,7 @@ drift_parm
 		{
 			attr_val *av;
 			
-			av = create_attr_sval(T_Driftfile, "");
+			av = create_attr_sval(T_Driftfile, estrdup(""));
 			APPEND_G_FIFO(cfgt.vars, av);
 		}
 	;

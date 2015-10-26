@@ -100,7 +100,7 @@ include::../docs/includes/auth-commands.txt[]
 
 {ntpdman} includes a comprehensive monitoring facility suitable
 for continuous, long term recording of server and client timekeeping
-performance. See thestatisticscommand below for a listing and example of
+performance. See the +statistics+ command below for a listing and example of
 each type of statistics currently supported. Statistic files are managed
 using file generation sets and scripts in the ./scripts directory of this
 distribution. Using these facilities and UNIX cron(8) jobs, the data
@@ -140,8 +140,8 @@ violations include certificate or identity verification failure; rate
 limit violations generally result from defective NTP implementations
 that send packets at abusive rates. Some violations cause denied service
 only for the offending packet, others cause denied service for a timed
-period and others cause the denied service for an indefinate period.
-When a client or network is denied access for an indefinate period, the
+period and others cause the denied service for an indefinite period.
+When a client or network is denied access for an indefinite period, the
 only way at present to remove the restrictions is by restarting the
 server.
 
@@ -209,7 +209,7 @@ in `/usr/share/doc/{ntp}`).
     least _minclock_ peers remaining. This value defaults to 1, but can
     be changed to any number from 1 to 15.
   `minclock` _minclock_;;
-    The clustering algorithm repeatedly casts out outlyer associations
+    The clustering algorithm repeatedly casts out outlier associations
     until no more than _minclock_ associations remain. This value
     defaults to 3, but can be changed to any number from 1 to the number
     of configured sources.

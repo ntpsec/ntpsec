@@ -444,6 +444,16 @@ timer_clr_stats(void)
 }
 
 static void
+check_leap_sec_in_progress( const leap_result_t *lsdata ) {
+	bool prv_leap_sec_in_progress = leap_sec_in_progress;
+	leap_sec_in_progress = lsdata->tai_diff && (lsdata->ddist < 3);
+
+	/* if changed we may have to update the leap status sent to clients */
+	if (leap_sec_in_progress != prv_leap_sec_in_progress)
+		set_sys_leap(sys_leap);
+}
+
+static void
 check_leapsec(
 	uint32_t        now  ,
 	const time_t * tpiv ,
@@ -471,41 +481,114 @@ check_leapsec(
 	leapsec_electric(0);
 # endif
 #endif	
+#ifdef ENABLE_LEAP_SMEAR
+	leap_smear.enabled = (leap_smear_intv != 0);
+#endif
 	if (reset)	{
 		lsprox = LSPROX_NOWARN;
 		leapsec_reset_frame();
 		memset(&lsdata, 0, sizeof(lsdata));
-	} else if (leapsec_query(&lsdata, now, tpiv)) {
+	} else {
+		int fired = leapsec_query(&lsdata, now, tpiv);
+
+		DPRINTF(1, ("*** leapsec_query: fired %i, now %u (0x%08X), tai_diff %i, ddist %u\n",
+		      fired, now, now, lsdata.tai_diff, lsdata.ddist));
+#ifdef ENABLE_LEAP_SMEAR
+		leap_smear.in_progress = false;
+		leap_smear.doffset = 0.0;
+
+		if (leap_smear.enabled) {
+		      if (lsdata.tai_diff) {
+			      if (leap_smear.interval == 0) {
+				      leap_smear.interval = leap_smear_intv;
+				      leap_smear.intv_end = lsdata.ttime.Q_s;
+				      leap_smear.intv_start = leap_smear.intv_end - leap_smear.interval;
+				      DPRINTF(1, ("*** leapsec_query: setting leap_smear interval %li, begin %.0f, end %.0f\n",
+					      leap_smear.interval, leap_smear.intv_start, leap_smear.intv_end));
+			      }
+		      }
+		      else {
+			      if (leap_smear.interval)
+				      DPRINTF(1, ("*** leapsec_query: clearing leap_smear interval\n"));
+			      leap_smear.interval = 0;
+		      }
+
+		      if (leap_smear.interval) {
+			      double dtemp = now;
+			      if (dtemp >= leap_smear.intv_start && dtemp <= leap_smear.intv_end) {
+				      double leap_smear_time = dtemp - leap_smear.intv_start;
+				      /*
+				       * For now we just do a linear interpolation over the smear interval
+				       */
+#if 0
+				      // linear interpolation
+				      leap_smear.doffset = -(leap_smear_time * lsdata.tai_diff / leap_smear.interval);
+#else
+				      // Google approach: lie(t) = (1.0 - cos(pi * t / w)) / 2.0
+				      leap_smear.doffset = -((double) lsdata.tai_diff - cos( M_PI * leap_smear_time / leap_smear.interval)) / 2.0;
+#endif
+				      /*
+				       * TODO see if we're inside an
+				       * inserted leap second, so we
+				       * need to compute
+				       * leap_smear.doffset = 1.0 -
+				       * leap_smear.doffset
+				       */
+				      leap_smear.in_progress = true;
+#if 0 && defined( DEBUG )
+				      msyslog(LOG_NOTICE, "*** leapsec_query: [%.0f:%.0f] (%li), now %u (%.0f), smear offset %.6f ms\n",
+					      leap_smear.intv_start, leap_smear.intv_end, leap_smear.interval,
+					      now, leap_smear_time, leap_smear.doffset);
+#else
+				      DPRINTF(1, ("*** leapsec_query: [%.0f:%.0f] (%li), now %u (%.0f), smear offset %.6f ms\n",
+					      leap_smear.intv_start, leap_smear.intv_end, leap_smear.interval,
+					      now, leap_smear_time, leap_smear.doffset));
+#endif
+
+			      }
+		      }
+		}
+		else
+		      leap_smear.interval = 0;
+
+		/*
+		 * Update the current leap smear offset, eventually 0.0 if outside smear interval.
+		 */
+		DTOLFP(leap_smear.doffset, &leap_smear.offset);
+#endif	/* ENABLE_LEAP_SMEAR */
+
 		/* Full hit. Eventually step the clock, but always
 		 * announce the leap event has happened.
 		 */
-		const char *leapmsg = NULL;
-		if (lsdata.warped < 0) {
-			if (clock_max_back > 0.0 &&
-			    clock_max_back < fabs(lsdata.warped)) {
-				step_systime(lsdata.warped);
-				leapmsg = leapmsg_p_step;
-			} else {
-				leapmsg = leapmsg_p_slew;
+	  	if (fired) {
+			const char *leapmsg = NULL;
+			if (lsdata.warped < 0) {
+				if (clock_max_back > 0.0 &&
+				    clock_max_back < fabs(lsdata.warped)) {
+					step_systime(lsdata.warped);
+					leapmsg = leapmsg_p_step;
+				} else {
+					leapmsg = leapmsg_p_slew;
+				}
+			} else 	if (lsdata.warped > 0) {
+				if (clock_max_fwd > 0.0 &&
+				    clock_max_fwd < fabs(lsdata.warped)) {
+					step_systime(lsdata.warped);
+					leapmsg = leapmsg_n_step;
+				} else {
+					leapmsg = leapmsg_n_slew;
+				}
 			}
-		} else 	if (lsdata.warped > 0) {
-			if (clock_max_fwd > 0.0 &&
-			    clock_max_fwd < fabs(lsdata.warped)) {
-				step_systime(lsdata.warped);
-				leapmsg = leapmsg_n_step;
-			} else {
-				leapmsg = leapmsg_n_slew;
-			}
+			if (leapmsg)
+				msyslog(LOG_NOTICE, "%s", leapmsg);
+			report_event(EVNT_LEAP, NULL, NULL);
+			lsprox  = LSPROX_NOWARN;
+			leapsec = LSPROX_NOWARN;
+			sys_tai = lsdata.tai_offs;
+		} else {
+			lsprox  = lsdata.proximity;
+			sys_tai = lsdata.tai_offs;
 		}
-		if (leapmsg)
-			msyslog(LOG_NOTICE, "%s", leapmsg);
-		report_event(EVNT_LEAP, NULL, NULL);
-		lsprox  = LSPROX_NOWARN;
-		leapsec = LSPROX_NOWARN;
-		sys_tai = lsdata.tai_offs;
-	} else {
-		lsprox  = lsdata.proximity;
-		sys_tai = lsdata.tai_offs;
 	}
 
 	/* We guard against panic alarming during the red alert phase.
@@ -539,4 +622,6 @@ check_leapsec(
                 leapdif = lsdata.tai_diff;
         else
                 leapdif = 0;
+
+	check_leap_sec_in_progress(&lsdata);
 }

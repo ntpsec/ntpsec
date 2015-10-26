@@ -8,17 +8,17 @@ Reference ID: GPS
 Serial Port: /dev/gps__u__; 4800-115200bps, 8N1
 Serial Port: /dev/gpspps__u__; for PPS
 Serial Port: /dev/gps__u__; symlink to server:port (for nmead)
-Features: `tty_clk`
+Features: +tty_clk+
 
 == Description ==
 
-This driver supports GPS receivers with the `$GPRMC`, `$GPGLL`,
-`$GPGGA`, `$GPZDA` and `$GPZDG` NMEA sentences by default.  Note that
-Accord's custom NMEA sentence `$GPZDG` reports using the GPS timescale,
+This driver supports GPS receivers with the +$GPRMC+, +$GPGLL+,
++$GPGGA+, +$GPZDA+ and +$GPZDG+ NMEA sentences by default.  Note that
+Accord's custom NMEA sentence +$GPZDG+ reports using the GPS timescale,
 while the rest of the sentences report UTC.  The difference between the
 two is a whole number of seconds which increases with each leap second
 insertion in UTC.  To avoid problems mixing UTC and GPS timescales, the
-driver disables processing of UTC sentences once `$GPZDG` is received.
+driver disables processing of UTC sentences once +$GPZDG+ is received.
 
 The driver expects the receiver to be set up to transmit at least one
 supported sentence every second.
@@ -93,16 +93,16 @@ The various GPS sentences that this driver recognises look like this:
 
 Specific GPS sentences and bitrates may be selected by setting bits of the \'mode' in the server configuration line:
 
-`server       127.127.20.x mode X`
++server       127.127.20.x mode X+
 
 .mode byte bits and bit groups
 [cols="10%,10%,10%,70%",options="header"]
 |=============================================================================
 |Bit    | Decimal | Hex | Meaning
-|0      |1        |1    |process `$GPMRC`
-|1      |2        |2    |process `$GPGGA`
-|2      |4        |4    |process `$GPGLL`
-|3      |8        |8    |process `$GPZDA` or `$GPZDG`
+|0      |1        |1    |process +$GPMRC+
+|1      |2        |2    |process +$GPGGA+
+|2      |4        |4    |process +$GPGLL+
+|3      |8        |8    |process +$GPZDA+ or +$GPZDG+
 .+|4-6  |0        |0    |linespeed 4800 bps
 |       |16       |0x10 |linespeed 9600 bps
 |       |32       |0x20 |linespeed 19200 bps
@@ -111,10 +111,10 @@ Specific GPS sentences and bitrates may be selected by setting bits of the \'mod
 |       |80       |0x50 |linespeed 115200 bps
 |7      |128      |0x80 |
 Write the sub-second fraction of the receive time stamp to the clockstat
-file for all recognised NMEA sentences. This can be used to get a useful
+file for all recognized NMEA sentences. This can be used to get a useful
 *Caveat:* This will fill your clockstat file rather fast. Use it only
 temporarily to get the numbers for the NMEA sentence of your choice.
-|8      |256      |0x100|process `$PGRMF`
+|8      |256      |0x100|process +$PGRMF+
 |9-15   |         |0xFE00   |reserved - leave 0
 |16     |65536    |0x10000 | Append extra statistics to the clockstats line. Details below.
 |=============================================================================
@@ -122,8 +122,8 @@ temporarily to get the numbers for the NMEA sentence of your choice.
 
 The default (mode 0) is to process all supported sentences at a
 linespeed of 4800 bps, which results in the first one received and
-recognised in each cycle being used.  If only specific sentences should
-be recognised, then the mode byte must be chosen to enable only the
+recognized in each cycle being used.  If only specific sentences should
+be recognized, then the mode byte must be chosen to enable only the
 selected ones.  Multiple sentences may be selected by adding their mode
 bit values, but of those enabled still only the first received sentence
 in a cycle will be used.  Using more than one sentence per cycle is
@@ -140,18 +140,18 @@ be selected using bits 4 to 6 of the mode field.
 
 *Caveat:* Using higher line speeds does not necessarily increase the
 precision of the timing device.  Higher line speeds are not necessarily
-helpful for the NMEA driver, either.  They can be used to accomodate for
+helpful for the NMEA driver, either.  They can be used to accommodate
 an amount of data that does not fit into a 1-second cycle at 4800 bps,
 but high-speed high-volume NMEA data is likely to cause trouble with the
 serial line driver since NMEA supports no protocol handshake.  Any
 device that is exclusively used for time synchronisation purposes should
-be configured to transmit the relevant data only, e.g. one `$GPRMC` or
-`$GPZDA` per second, at a linespeed of 4800 bps or 9600 bps.
+be configured to transmit the relevant data only, e.g. one +$GPRMC+ or
++$GPZDA+ per second, at a linespeed of 4800 bps or 9600 bps.
 
 == Monitor Data ==
 
 The last GPS sentence that is accepted or rejected is written to the
-clockstats file and available with `{ntpq} -c clockvar`. (Logging the
+clockstats file and available with +{ntpq} -c clockvar+. (Logging the
 rejected sentences lets you see/debug why they were rejected.) Filtered
 sentences are not logged.
 
@@ -216,32 +216,32 @@ switched on by sending the following string.
 
 == Fudge Factors ==
 
-`time1` 'time'::
++time1+ 'time'::
   Specifies the PPS time offset calibration factor, in seconds and
   fraction, with default 0.0.
-`time2` 'time'::
++time2+ 'time'::
   Specifies the serial end of line time offset calibration factor, in
   seconds and fraction, with default 0.0.
-`stratum` 'number'::
++stratum+ 'number'::
   Specifies the driver stratum, in decimal from 0 to 15, with default 0.
-`refid` 'string'::
++refid+ 'string'::
   Specifies the driver reference identifier, an ASCII string from one to
-  four characters, with default `GPS`.
-`flag1 0 | 1`::
+  four characters, with default +GPS+.
++flag1 {0 | 1}+::
   Disable PPS signal processing if 0 (default); enable PPS signal
   processing if 1.
-`flag2 0 | 1`::
++flag2 {0 | 1}+::
   If PPS signal processing is enabled, capture the pulse on the rising
   edge if 0 (default); capture on the falling edge if 1.
-`flag3 0 | 1`::
-  If PPS signal processing is enabled, use the `{ntpd}` clock discipline
++flag3 {0 | 1}+::
+  If PPS signal processing is enabled, use the +{ntpd}+ clock discipline
   if 0 (default); use the kernel discipline if 1.
-`flag4 0 | 1`::
++flag4 {0 | 1}+::
   Obscures location in timecode: 0 for disable (default), 1 for enable.
 
 == Additional Information ==
 
-//`flag1`, `flag2`, and `flag3` are ignored under Windows.
+//+flag1+, +flag2+, and +flag3+ are ignored under Windows.
 
 link:refclock.html[Reference Clock Drivers]
 

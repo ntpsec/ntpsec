@@ -36,19 +36,19 @@ Magnavox proprietary NMEA sentence format.
 
 === Table 1. Magnavox Proprietary NMEA Sentence Format ===
 
- `$PMVXG,XXX,...................*CK `
+ +$PMVXG,XXX,...................*CK +
 
 [width="100%",cols="<50%,<50%",options="header"]
 |================================
 | Character | Meaning
-| `$`       | Sentence Start Character
-| `P`       | Special ID (P = Proprietary)
-| `MVX`     | Originator ID (MVX = Magnavox)
-| `G`       | Interface ID (G = GPS)
-| `XXX`     | Sentence Type
-| `...`     | Data
-| `*`       | Optional Checksum Field Delimiter
-| `CK`      | Optional Checksum
+| +$+       | Sentence Start Character
+| +P+       | Special ID (P = Proprietary)
+| +MVX+     | Originator ID (MVX = Magnavox)
+| +G+       | Interface ID (G = GPS)
+| +XXX+     | Sentence Type
+| +...+     | Data
+| +*+       | Optional Checksum Field Delimiter
+| +CK+      | Optional Checksum
 |================================
 
 === Table 2. NMEA Sentence Reserved Characters ===
@@ -56,15 +56,15 @@ Magnavox proprietary NMEA sentence format.
 [width="100%",cols="<34%,<33%,<33%",options="header"]
 |================================
 | Character   | Hex Value  | Usage
-| `$`         | 24         | Start of Sentence Identifier
-| `{cr}{lf}`  | 0D 0A      | End of Sentence Identifier
-| `,`         | 2C         | Sentence Delimiter
-| `*`         | 2A         | Optional Checksum Field Delimiter
+| +$+         | 24         | Start of Sentence Identifier
+| +{cr}{lf}+  | 0D 0A      | End of Sentence Identifier
+| +,+         | 2C         | Sentence Delimiter
+| +*+         | 2A         | Optional Checksum Field Delimiter
 |================================
 
-Following the start character `$`, are five characters which constitute
+Following the start character +$+, are five characters which constitute
 the block label of the sentence. For Magnavox proprietary sentences,
-this label is always `PMVXG`. The next field after the block label is
+this label is always +PMVXG+. The next field after the block label is
 the sentence type, consisting of three decimal digits.
 
 The data, delimited by commas, follows the sentence type. Note that the
@@ -72,10 +72,10 @@ receiver uses a free-format parsing algorithm, so you need not send the
 exact number of characters shown in the examples. You will need to use
 the commas to determine how many bytes of data need to be retrieved.
 
-The notation `CK` shown in link:#table_1[Table 1] symbolically indicates
+The notation +CK+ shown in link:#table_1[Table 1] symbolically indicates
 the optional checksum in the examples. The checksum is computed by
-exclusive-ORing all of the bytes between the `$` and the `*` characters.
-The `$`, `*` and the checksum are not included in the checksum
+exclusive-ORing all of the bytes between the +$+ and the +*+ characters.
+The +$+, +*+ and the checksum are not included in the checksum
 computation.
 
 Checksums are optional for Control Port input sentences, but are highly
@@ -196,7 +196,7 @@ that the receiver is to output.
 
 .Example:
 --------------------------------------------------
-$PMVXG,007,022,0,1,,1,,,*4F`
+$PMVXG,007,022,0,1,,1,,,*4F+
 --------------------------------------------------
 
 '''''

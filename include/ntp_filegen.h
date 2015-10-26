@@ -1,14 +1,10 @@
 /*
- * ntp_filegen.h,v 3.9 1996/12/01 16:02:45 kardel Exp
- *
  * definitions for NTP file generations support
- *
  *
  * Copyright (C) 1992, 1996 by Rainer Pruy
  * Friedrich-Alexander Universitaet Erlangen-Nuernberg, Germany
  *
- * This code may be modified and used freely
- * provided the credits remain intact.
+ * SPDX-License-Identifier: BSD-2-clause
  */
 
 #include "ntp_types.h"

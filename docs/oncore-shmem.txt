@@ -34,7 +34,7 @@ FreeBSD, Linux, and Solaris.
 Although the Shared Memory Interface will be compiled into the Oncore
 driver on those systems where Shared Memory is supported, to activate
 this interface you must include a *STATUS* or *SHMEM* line in the
-`/etc/ntp.oncore` data file that looks like
++/etc/ntp.oncore+ data file that looks like
 
 ----------------------------
         STATUS < file_name >
@@ -141,7 +141,7 @@ bit patterns in the last data byte of the record.
 == Opening the Shared Memory File ==
 
 The shared memory segment is accessed through a file name given on a
-*SHMEM* card in the `/etc/ntp.oncore` input file. The following code
+*SHMEM* card in the +/etc/ntp.oncore+ input file. The following code
 could be used to open the Shared Memory Segment:
 
 ---------------------------------------------------------------------------------

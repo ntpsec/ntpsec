@@ -288,15 +288,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\..\libntp\atoint.c"
-				>
-			</File>
-			<File
 				RelativePath="..\..\..\..\libntp\atolfp.c"
-				>
-			</File>
-			<File
-				RelativePath="..\..\..\..\libntp\atouint.c"
 				>
 			</File>
 			<File
@@ -325,10 +317,6 @@
 			</File>
 			<File
 				RelativePath="..\..\..\..\lib\isc\buffer.c"
-				>
-			</File>
-			<File
-				RelativePath="..\..\..\..\libntp\buftvtots.c"
 				>
 			</File>
 			<File
@@ -389,10 +377,6 @@
 			</File>
 			<File
 				RelativePath="..\..\..\..\libntp\getopt.c"
-				>
-			</File>
-			<File
-				RelativePath="..\..\..\..\libntp\hextoint.c"
 				>
 			</File>
 			<File
@@ -560,10 +544,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\..\lib\isc\sockaddr.c"
-				>
-			</File>
-			<File
 				RelativePath="..\..\..\..\libntp\socket.c"
 				>
 			</File>
@@ -632,10 +612,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\..\libntp\uglydate.c"
-				>
-			</File>
-			<File
 				RelativePath="..\..\libntp\util_clockstuff.c"
 				>
 			</File>
@@ -694,10 +670,6 @@
 			</File>
 			<File
 				RelativePath="..\..\include\gaa_compat.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\..\..\lib\isc\include\isc\hash.h"
 				>
 			</File>
 			<File

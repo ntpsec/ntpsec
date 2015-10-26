@@ -29,8 +29,8 @@ the orphan parent.
 
 Hosts sharing the same common subnet, including potential orphan parents
 and potential orphan children, can be enabled for orphan mode using the
-`orphan stratum` option of the link:miscopt.html#tos[`tos command`],
-where `stratum` is some stratum less than 16 and greater than any
++orphan stratum+ option of the link:miscopt.html#tos[+tos command+],
+where +stratum+ is some stratum less than 16 and greater than any
 anticipated stratum that might occur with configured Internet time
 servers. However, sufficient headroom should remain so every subnet host
 dependent on the orphan children has stratum less than 16. Where no
@@ -43,8 +43,8 @@ when the daemon is first started and when all sources have been lost
 after that. The delay is intended to allow time for other sources to
 become reachable and selectable. Only when the delay has expired with no
 sources will orphan mode be enabled. By default the delay is 300 s (five
-minutes), but this can be changed using the `orphanwait` option of the
-link:miscopt.html#tos[`tos`] command.
+minutes), but this can be changed using the +orphanwait+ option of the
+link:miscopt.html#tos[+tos+] command.
 
 A orphan parent with no sources shows reference ID LOOP if operating at
 stratum 1 and 127.0.0.1 (IPv4 loopback address) otherwise. While

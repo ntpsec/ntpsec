@@ -1,10 +1,10 @@
 // Monitoring commands. Is included twice.
 
-`statistics` _name..._::
++statistics+ _name..._::
   Enables writing of statistics records. Currently, eight kinds of
   _name_ statistics are supported.
 
-  `clockstats`;;
+  +clockstats+;;
     Enables recording of clock driver statistics information. Each
     update received from a clock driver appends a line of the following
     form to the file generation set named _clockstats_:
@@ -21,7 +21,7 @@ meaningful. In some clock drivers a good deal of additional
 information can be gathered and displayed as well. See information
 specific to each clock for further details.
 
-  `cryptostats`;;
+  +cryptostats+;;
     This option requires the OpenSSL cryptographic software library. It
     enables recording of cryptographic public key protocol information.
     Each message received by the protocol module appends a line of the
@@ -34,10 +34,10 @@ specific to each clock for further details.
 [width="100%",cols="<34%,<33%,<33%"]
 |============================================
 |Item         | Units  |Description
-|`49213`      |MJD     |date
-|`525.624`    |s       |time past midnight
-|`127.127.4.1`|IP      |reference clock address
-|_`message`_  |text    |log message
+|+49213+      |MJD     |date
+|+525.624+    |s       |time past midnight
+|+127.127.4.1+|IP      |reference clock address
+|_+message+_  |text    |log message
 |============================================
 +
 The first two fields show the date (Modified Julian Day) and time
@@ -46,7 +46,7 @@ peer address in dotted-quad notation, The final message field
 includes the message type and certain ancillary information. See the
 'Authentication Options' section for further information.
 
-  `loopstats`;;
+  +loopstats+;;
     Enables recording of loop filter statistics information. Each update
     of the local clock outputs a line of the following form to the file
     generation set named _loopstats_:
@@ -58,13 +58,13 @@ includes the message type and certain ancillary information. See the
 [width="100%",cols="<34%,<33%,<33%"]
 |==================================
 |Item         |Units     |Description
-|`50935`      |MJD       |date
-|`75440.031`  |s         |time past midnight
-|`0.000006019`|s         |clock offset
-|`13.778`     |PPM       |frequency offset
-|`0.000351733`|s         |RMS jitter
-|`0.013380`   |PPM       |RMS frequency jitter (aka wander)
-|`6`          |log~2~ s  |clock discipline loop time constant
+|+50935+      |MJD       |date
+|+75440.031+  |s         |time past midnight
+|+0.000006019+|s         |clock offset
+|+13.778+     |PPM       |frequency offset
+|+0.000351733+|s         |RMS jitter
+|+0.013380+   |PPM       |RMS frequency jitter (aka wander)
+|+6+          |log~2~ s  |clock discipline loop time constant
 |==================================
 +
 The first two fields show the date (Modified Julian Day) and time
@@ -73,27 +73,27 @@ time offset (seconds), frequency offset (parts per million - PPM),
 RMS jitter (seconds), Allan deviation (PPM) and clock discipline
 time constant.
 
-  `protostats`;;
+  +protostats+;;
     Record significant peer and system events. Each significant
-    event appends one line to the `protostats` file set:
+    event appends one line to the +protostats+ file set:
 +
-`49213 525.624 128.4.1.1 963a 8a` _`message`_
++49213 525.624 128.4.1.1 963a 8a+ _+message+_
 +
 [width="100%",cols="<34%,<33%,<33%"]
 |====================================
 |Item       |Units     |Description
-|`49213`    |MJD       |date
-|`525.624`  |s         |time past midnight
-|`128.4.1.1`|IP        |source address (`0.0.0.0` for system)
-|`963a`     |code      |status word
-|`8a`       |code      |event message code
-|_`message`_|text      |event message
+|+49213+    |MJD       |date
+|+525.624+  |s         |time past midnight
+|+128.4.1.1+|IP        |source address (+0.0.0.0+ for system)
+|+963a+     |code      |status word
+|+8a+       |code      |event message code
+|_+message+_|text      |event message
 |====================================
 +
-The event message code and _`message`_ field are described on the
+The event message code and _+message+_ field are described on the
 "Event Messages and Status Words" page.
 
-  `peerstats`;;
+  +peerstats+;;
     Enables recording of peer statistics information. This includes
     statistics records of all peers of a NTP server and of special
     signals, where present and configured. Each valid update appends a
@@ -107,14 +107,14 @@ The event message code and _`message`_ field are described on the
 [width="100%",cols="<34%,<33%,<33%"]
 |===================================================
 |Item          |Units   |Description
-|`48773`       |MJD     |date
-|`10847.650`   |s       |time past midnight
-|`127.127.4.1` |IP      |source address
-|`9714`        |hex     |status word
-|`-0.001605376`|s       |clock offset
-|`0.000000000` |s       |roundtrip delay
-|`0.001424877` |s       |dispersion
-|`0.000958674` |s       |RMS jitter
+|+48773+       |MJD     |date
+|+10847.650+   |s       |time past midnight
+|+127.127.4.1+ |IP      |source address
+|+9714+        |hex     |status word
+|+-0.001605376+|s       |clock offset
+|+0.000000000+ |s       |roundtrip delay
+|+0.001424877+ |s       |dispersion
+|+0.000958674+ |s       |RMS jitter
 |===================================================
 +
 The first two fields show the date (Modified Julian Day) and time
@@ -124,7 +124,7 @@ The status field is encoded in hex in the format described in
 Appendix A of the NTP specification RFC 1305. The final four fields
 show the offset, delay, dispersion and RMS jitter, all in seconds.
 
-  `rawstats`;;
+  +rawstats+;;
     Enables recording of raw-timestamp statistics information. This
     includes statistics records of all peers of a NTP server and of
     special signals, where present and configured. Each NTP message
@@ -166,7 +166,7 @@ receive, transmit and final NTP timestamps in order. The timestamp
 values are as received and before processing by the various data
 smoothing and mitigation algorithms.
 
-  `sysstats`;;
+  +sysstats+;;
     Enables recording of {ntpd} statistics counters on a periodic basis.
     Each hour a line of the following form is appended to the file
     generation set named _sysstats_:
@@ -178,19 +178,19 @@ smoothing and mitigation algorithms.
 [width="100%",cols="<34%,<33%,<33%",]
 |==================================================
 |Item      |Units    |Description
-|`50928`   |MJD      |date
-|`2132.543`|s        |time past midnight
-|`3600`    |s        |time since reset
-|`81965`   |#        |packets received
-|`0`       |#        |packets for this host
-|`9546`    |#        |current versions
-|`56`      |#        |old version
-|`512`     |#        |access denied
-|`540`     |#        |bad length or format
-|`10`      |#        |bad authentication
-|`4`       |#        |declined
-|`147`     |#        |rate exceeded
-|`1`       |#        |kiss-o'-death packets sent
+|+50928+   |MJD      |date
+|+2132.543+|s        |time past midnight
+|+3600+    |s        |time since reset
+|+81965+   |#        |packets received
+|+0+       |#        |packets for this host
+|+9546+    |#        |current versions
+|+56+      |#        |old version
+|+512+     |#        |access denied
+|+540+     |#        |bad length or format
+|+10+      |#        |bad authentication
+|+4+       |#        |declined
+|+147+     |#        |rate exceeded
+|+1+       |#        |kiss-o'-death packets sent
 |==================================================
 +
 The first two fields show the date (Modified Julian Day) and time
@@ -198,31 +198,31 @@ The first two fields show the date (Modified Julian Day) and time
 show the statistics counter values accumulated since the last
 generated line.
 
-  `timingstats`;;
-   (Only available when the deamon is compiled with process time
+  +timingstats+;;
+   (Only available when the daemon is compiled with process time
    debugging support (--enable-debug-timing - costs performance). Record
    processing time statistics for various selected code paths.
 +
-`53876 36.920 10.0.3.5 1 0.000014592 input processing delay`
++53876 36.920 10.0.3.5 1 0.000014592 input processing delay+
 +
 [width="100%",cols="<34%,<33%,<33%",]
 |====================================
 |Item         |Units    |Description
-|`53876`      |MJD      |date
-|`36.920`     |s        |time past midnight
-|`10.0.3.5`   |IP       |server address
-|`1`          |#        |event count
-|`0.000014592`|s        |total time
-|_`message`_  |text     |code path description (see source)
+|+53876+      |MJD      |date
+|+36.920+     |s        |time past midnight
+|+10.0.3.5+   |IP       |server address
+|+1+          |#        |event count
+|+0.000014592+|s        |total time
+|_+message+_  |text     |code path description (see source)
 |====================================
 
-  `statsdir` _directory_path_;;
+  +statsdir+ _directory_path_;;
     Indicates the full path of a directory where statistics files should
     be created (see below). This keyword allows the (otherwise constant)
     _filegen_ filename prefix to be modified for file generation sets,
     which is useful for handling statistics logs.
 
-  `filegen` _name_ [`file` _filename_] [`type` _typename_] [`link` | `nolink`] [`enable` | `disable`];;
+  +filegen+ _name_ [+file+ _filename_] [+type+ _typename_] [+link+ | +nolink+] [+enable+ | +disable+];;
     Configures setting of generation file set name. Generation file sets
     provide a means for handling files that are continuously growing
     during the lifetime of a server. Server statistics are a typical
@@ -231,17 +231,17 @@ generated line.
     element of the set is being written to. The type given specifies
     when and how data will be directed to a new element of the set. This
     way, information stored in elements of a file set that are currently
-    unused are available for administrational operations without the
+    unused are available for administrative operations without the
     risk of disturbing the operation of {ntpd}. (Most important: they can
     be removed to free space for new data produced.)
 +
 Note that this command can be sent from the
 {ntpqman} program running at a remote location.
 +
-    `name`::
+    +name+::
       This is the type of the statistics records, as shown in the
       _statistics_ command.
-    `file` _filename_::
+    +file+ _filename_::
       This is the file name for the statistics records. Filenames of set
       members are built from three concatenated elements _prefix_,
       _filename_ and _suffix_:
@@ -257,19 +257,19 @@ Note that this command can be sent from the
       _filename_;;
         This string is directly concatenated to the prefix mentioned
         above (no intervening ‘/’). This can be modified using the file
-        argument to the _filegen_ statement. No `..` elements are
+        argument to the _filegen_ statement. No +..+ elements are
         allowed in this component to prevent filenames referring to
         parts outside the filesystem hierarchy denoted by _prefix_.
       _suffix_;;
         This part is reflects individual elements of a file set. It is
         generated according to the type of a file set.
-    `type` _typename_::
+    +type+ _typename_::
       A file generation set is characterized by its type. The following
       types are supported:
 
-      `none`;;
+      +none+;;
         The file set is actually a single plain file.
-      `pid`;;
+      +pid+;;
         One element of file set is used per incarnation of a {ntpd}
         server. This type does not perform any changes to file set
         members during runtime, however it provides an easy way of
@@ -278,7 +278,7 @@ Note that this command can be sent from the
         ‘.’ to concatenated prefix and filename strings, and appending the
         decimal representation of the process ID of the
         {ntpdman} server process.
-      `day`;;
+      +day+;;
         One file generation set element is created per day. A day is
         defined as the period between 00:00 and 24:00 UTC. The file set
         member suffix consists of a ‘.’ and a day specification in the
@@ -286,7 +286,7 @@ Note that this command can be sent from the
         _MM_ is a two digit month number. _dd_ is a two digit day
         number. Thus, all information written at 10 December 1992 would
         end up in a file named _prefix_ _filename_.19921210.
-      `week`;;
+      +week+;;
         Any file set member contains data related to a certain week of a
         year. The term week is defined by computing day-of-year modulo 7.
         Elements of such a file generation set are distinguished by
@@ -294,14 +294,14 @@ Note that this command can be sent from the
         dot, a 4-digit year number, the letter _W_, and a 2-digit week
         number. For example, information from January, 10th 1992 would
         end up in a file with suffix _1992W1_.
-      `month`;;
+      +month+;;
         One generation file set element is generated per month. The file
         name suffix consists of a dot, a 4-digit year number, and a
         2-digit month.
-      `year`;;
+      +year+;;
         One generation file element is generated per year. The filename
         suffix consists of a dot and a 4 digit year number.
-      `age`;;
+      +age+;;
         This type of file generation sets changes to a new element of
         the file set every 24 hours of server operation. The filename
         suffix consists of a dot, the letter _a_, and an 8-digit number.
@@ -320,9 +320,9 @@ Note that this command can be sent from the
       unlinked. This allows the current file to be accessed by a
       constant name.
 
-  `enable` | `disable`::
+  +enable+ | +disable+::
       Enables or disables the recording function.
       Information is only written to a file generation by specifying
-      `enable`; output is prevented by specifying `disable`.
+      +enable+; output is prevented by specifying +disable+.
 
 // end

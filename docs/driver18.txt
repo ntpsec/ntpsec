@@ -34,22 +34,22 @@ The actual line speed ranges from 1200 bps with USNO to 14,400 bps with
 NIST. The modem setup string is hard-coded in the driver and may require
 changes for nonstandard modems or special circumstances.
 
-There are three modes of operation selected by the `mode` keyword in the
-`server` configuration command. In manual mode (2) the calling program
-is initiated by setting fudge `flag1`. This can be done manually using
-`{ntpq}`, or by a cron job. In auto mode (0) `flag1` is set at each poll
-event. In backup mode (1) `flag1` is set at each poll event, but only if
+There are three modes of operation selected by the +mode+ keyword in the
++server+ configuration command. In manual mode (2) the calling program
+is initiated by setting fudge +flag1+. This can be done manually using
++{ntpq}+, or by a cron job. In auto mode (0) +flag1+ is set at each poll
+event. In backup mode (1) +flag1+ is set at each poll event, but only if
 no other synchronization sources are available.
 
-When `flag1` is set, the calling program dials the first number in the
-list specified by the `phone` command. If the call fails for any reason,
+When +flag1+ is set, the calling program dials the first number in the
+list specified by the +phone+ command. If the call fails for any reason,
 the program dials the second number and so on. The phone number is
 specified by the Hayes ATDT prefix followed by the number itself,
 including the prefix and long-distance digits and delay code, if
-necessary. The `flag1` is reset and the calling program terminated if
+necessary. The +flag1+ is reset and the calling program terminated if
 (a) valid clock update has been determined, (b) no more numbers remain
-in the list, (c) a device fault or timeout occurs or (d) fudge `flag1`
-is reset manually using `{ntpq}`.
+in the list, (c) a device fault or timeout occurs or (d) fudge +flag1+
+is reset manually using +{ntpq}+.
 
 The driver automatically recognizes the message format of each modem
 time service. It selects the parsing algorithm depending on the message
@@ -61,21 +61,21 @@ set to NIST, USNO, PTB or WWVB as appropriate.
 
 The Spectracom receiver can be connected via a modem if the radio is
 configured to send time codes continuously at 1-s intervals. In
-principle, fudge `flag2` enables port locking, allowing the modem to be
+principle, fudge +flag2+ enables port locking, allowing the modem to be
 shared when not in use by this driver. At least on Solaris with the
 current NTP I/O routines, this results in lots of ugly error messages.
 
-The `minpoll` and `maxpoll` keywords of the server configuration command
+The +minpoll+ and +maxpoll+ keywords of the server configuration command
 can be used to limit the intervals between calls. The recommended
-settings are 12 (1.1 hours) for `minpoll` and 17 (36 hours) for
-`maxpoll`. Ordinarily, the poll interval will start at `minpoll` and
-ramp up to `maxpoll` in a day or two.
+settings are 12 (1.1 hours) for +minpoll+ and 17 (36 hours) for
++maxpoll+. Ordinarily, the poll interval will start at +minpoll+ and
+ramp up to +maxpoll+ in a day or two.
 
 == US Phone Numbers and Formats ==
 
 Note: Phone numbers include the entire Hayes modem command, including
-the `ATDT` and other control codes as may be necessary. For most cases
-only the `ATDT` may be necessary.
+the +ATDT+ and other control codes as may be necessary. For most cases
+only the +ATDT+ may be necessary.
 
 http://www.boulder.nist.gov/timefreq[National Institute of Science and
 Technology (NIST)]
@@ -94,8 +94,8 @@ MJD YR MO DA H M S ST S UT1 msADV <OTM>
 ...
 ----------------------------------------------------
 
-`MJD`, `YR`, `ST`, `UT1` and `UTC(NIST)` are not used by this driver.
-The `<OTM>` on-time character "`*`" changes to "`#`" when the delay
++MJD+, +YR+, +ST+, +UT1+ and +UTC(NIST)+ are not used by this driver.
+The +<OTM>+ on-time character "+*+" changes to "+#+" when the delay
 correction is valid.
 
 http://tycho.usno.navy.mil[US Naval Observatory (USNO)]
@@ -120,33 +120,33 @@ http://www.spectracomcorp.com[Spectracom GPS Receivers]
 
 If a modem is connected to a Spectracom receiver, this driver will call
 it and retrieve the time in one of two formats, 0 and 2. Ordinarily, the
-receiver requires a `T` in order to return the timecode. As this driver
+receiver requires a +T+ in order to return the timecode. As this driver
 does not send data via the modem, it must either be configured in
 continuous mode or be polled by another local driver.
 
 == Monitor Data ==
 
-The received timecode is written as-is to the `clockstats` file along
+The received timecode is written as-is to the +clockstats+ file along
 with the Hayes connection and hang-up commands and result codes.
 
 == Fudge Factors ==
 
-`time1` 'time'::
++time1+ 'time'::
   Specifies the time offset calibration factor, in seconds and fraction,
   with default 0.0.
-`time2` 'time'::
++time2+ 'time'::
   Not used by this driver.
-`stratum` 'number'::
++stratum+ 'number'::
   Specifies the driver stratum, in decimal from 0 to 15, with default 0.
-`refid` 'string'::
-  Set by the driver to (one of) `NIST`, `USNO`, `PTB` or `WWVB`.
-`flag1 0 | 1`::
++refid+ 'string'::
+  Set by the driver to (one of) +NIST+, +USNO+, +PTB+ or +WWVB+.
++flag1 {0 | 1}+::
   Initiate a call if 1. Automatically reset by program.
-`flag2 0 | 1`::
++flag2 {0 | 1}+::
   Enables port locking if 1, disables if 0 (default).
-`flag3 0 | 1`::
++flag3 {0 | 1}+::
   Not used by this driver.
-`flag4 0 | 1`::
++flag4 {0 | 1}+::
   Not used by this driver.
 
 

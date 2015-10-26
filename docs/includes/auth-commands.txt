@@ -1,6 +1,6 @@
 // Authentication commands - included twice
 
-//`autokey` [_logsec_]::
+//+autokey+ [_logsec_]::
 //  Specifies the interval between regenerations of the session key list
 //  used with the Autokey protocol. Note that the size of the key list for
 //  each association depends on this interval and the current poll
@@ -8,7 +8,7 @@
 //  poll intervals above the specified interval, a session key list with a
 //  single entry will be regenerated for every message sent.
 //
-//`automax` ['logsec']::
+//+automax+ ['logsec']::
 //  Specifies the interval between regenerations of the session key list
 //  used with the Autokey protocol, as a power of 2 in seconds. Note that
 //  the size of the key list for each association depends on this interval
@@ -18,87 +18,87 @@
 //  See the link:autokey.html[Autokey Public Key Authentication] page for
 //  further information.
 
-`controlkey` _key_::
++controlkey+ _key_::
   Specifies the key identifier to use with the
   {ntpqman} utility, which uses the standard protocol defined in
   RFC-5905. The _key_ argument is the key identifier for a trusted key,
   where the value can be in the range 1 to 65,534, inclusive.
 
-`crypto` [`cert` _file_] [`leap` _file_] [`randfile` _file_] [`host` _file_] [`sign` _file_] [`gq` _file_] [`gqpar` _file_] [`iffpar` _file_] [`mvpar` _file_] [`pw` _password_]::
++crypto+ [+cert+ _file_] [+leap+ _file_] [+randfile+ _file_] [+host+ _file_] [+sign+ _file_] [+gq+ _file_] [+gqpar+ _file_] [+iffpar+ _file_] [+mvpar+ _file_] [+pw+ _password_]::
   This command requires the OpenSSL library. It activates public key
   cryptography, selects the message digest and signature encryption
   scheme and loads the required private and public values described
   above. If one or more files are left unspecified, the default names
   are used as described above. Unless the complete path and name of the
   file are specified, the location of a file is relative to the keys
-  directory specified in the `keysdir` command or default
-  `/usr/local/etc`. Following are the subcommands:
+  directory specified in the +keysdir+ command or default
+  +/usr/local/etc+. Following are the subcommands:
 
   //NAMECHANGE
-  `cert` _file_;;
+  +cert+ _file_;;
     Specifies the location of the required host public certificate file.
     This overrides the link _ntpkey_cert_hostname_ in the keys
     directory.
-  `digest` 'digest';;
+  +digest+ 'digest';;
     Specify the message digest algorithm, with default MD5. If the
-    OpenSSL library is installed, `digest` can be be any message digest
+    OpenSSL library is installed, +digest+ can be be any message digest
     algorithm supported by the library. The current selections are:
-    `MD2`, `MD4`, `MD5,` `MDC2`, `RIPEMD160`, `SHA` and `SHA1`. All
+    +MD2+, +MD4+, +MD5,+ +MDC2+, +RIPEMD160+, +SHA+ and +SHA1+. All
     participants in an Autokey subnet must use the same algorithm. The
     Autokey message digest algorithm is separate and distinct from the
     symmetric key message digest algorithm. Note: If compliance with
-    FIPS 140-2 is required, the algorithm must be ether `SHA` or `SHA1`.
-  `gqpar` _file_;;
+    FIPS 140-2 is required, the algorithm must be ether +SHA+ or +SHA1+.
+  +gqpar+ _file_;;
     Specifies the location of the optional GQ parameters file. This
     overrides the link _ntpkey_gq_hostname_ in the keys directory.
-  `host` _file_;;
+  +host+ _file_;;
     Specifies the location of the required host key file. This overrides
     the link _ntpkey_key_hostname_ in the keys directory.
-//  `ident` 'group';;
+//  +ident+ 'group';;
 //    Specify the cryptographic media names for the identity scheme files.
 //    If this option is not specified, the default name is the string
-//    returned by the Unix `gethostname()` routine.
+//    returned by the Unix +gethostname()+ routine.
 //+
 //[red]#Note: In the latest Autokey version, this option has no effect other
 //than to change the cryptographic media file names.#
-  `iffpar` _file_;;
+  +iffpar+ _file_;;
     Specifies the location of the optional IFF parameters file.This
     overrides the link _ntpkey_iff_hostname_ in the keys directory.
-  `leap` _file_;;
+  +leap+ _file_;;
     Specifies the location of the optional leapsecond file. This
     overrides the link _ntpkey_leap_ in the keys directory.
-  `mvpar` _file_;;
+  +mvpar+ _file_;;
     Specifies the location of the optional MV parameters file. This
     overrides the link _ntpkey_mv_hostname_ in the keys directory.
-  `pw` _password_;;
+  +pw+ _password_;;
     Specifies the password to decrypt files containing private keys and
     identity parameters. This is required only if these files have been
     encrypted.
-  `randfile` _file_;;
+  +randfile+ _file_;;
     Specifies the location of the random seed file used by the OpenSSL
     library. The defaults are described in the main text above.
-  `sign` _file_;;
+  +sign+ _file_;;
     Specifies the location of the optional sign key file. This overrides
     the link _ntpkey_sign_hostname_ in the keys directory. If this file
     is not found, the host key is also the sign key.
 
-//`ident` 'group'::
+//+ident+ 'group'::
 //  Specifies the group name for ephemeral associations mobilized by
 //  broadcast and symmetric passive modes. See the
 //  "Autokey Public-Key Authentication" page for further
 //  information.
 
-`keys` _keyfile_::
++keys+ _keyfile_::
   Specifies the complete path and location of the MD5 key file
   containing the keys and key identifiers used by {ntpdman},
   and {ntpqman} when operating with symmetric-key cryptography.
-  This is the same operation as the `-k` command line option.
+  This is the same operation as the +-k+ command line option.
 
-`keysdir` _path_::
++keysdir+ _path_::
   This command specifies the default directory path for cryptographic
-  keys, parameters and certificates. The default is `/usr/local/etc/`.
+  keys, parameters and certificates. The default is +/usr/local/etc/+.
 
-`revoke` _logsec_::
++revoke+ _logsec_::
   Specifies the interval between re-randomization of certain
   cryptographic values used by the Autokey scheme, as a power of 2 in
   seconds. These values need to be updated frequently in order to
@@ -108,7 +108,7 @@
   the specified interval, the values will be updated for every message
   sent.
 
-`trustedkey` _key..._ ::
++trustedkey+ _key..._ ::
   Specifies the key identifiers which are trusted for the purposes of
   authenticating peers with symmetric key cryptography, as well as keys
   used by the {ntpqman} program. The

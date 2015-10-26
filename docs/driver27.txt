@@ -20,7 +20,7 @@ NIST modulation change in 2013.
 == Description ==
 
 This driver supports the Arcron MSF, DCF and WWVB receivers. The clock
-reports its ID as `"MSFa"`, `"MSF"`, `"DCF"` to indicate
+reports its ID as +"MSFa"+, +"MSF"+, +"DCF"+ to indicate
 the time source.
 
 To use the alternate modes, the mode flag must be specified. If the mode
@@ -45,7 +45,7 @@ of the more important details follow.
 The driver interrogates the clock at each poll (ie every 64sec by default)
 for a timestamp. The clock responds at the start of the next second
 (with the start bit of the first byte being on-time). In the default or
-original MSF mode, the time is in `local' format, including the daylight
+original MSF mode, the time is in +local' format, including the daylight
 savings adjustment when it is in effect. The driver code converts the
 time back to UTC. In modes 1-2 the driver can be configured for UTC or
 local time depending on the setting of flag1.
@@ -55,9 +55,9 @@ time, and given the low data transmission speed from clock to host, and
 the fact that the clock is not in continuous sync with MSF, it seems
 sensible to set the 'precision' of this clock to -5 or -4, -4 being used
 in this code, which builds in a reported dispersion of over 63ms (ie
-says ``This clock is not very good.''). You can improve the reported
+says ++This clock is not very good.''). You can improve the reported
 precision to -4 (and thus reduce the base dispersion to about 31ms) by
-setting the fudge `flag3` to `1`.
+setting the fudge +flag3+ to +1+.
 
 Even a busy and slow IP link can yield lower dispersions than this from
 polls of primary time servers on the Internet, which reinforces the idea
@@ -68,8 +68,8 @@ sources such as GPS.
 By default this clock reports itself to be at stratum 2 rather than the
 usual stratum 0 for a refclock, because it is not really suited to be
 used as other than a backup source. The stratum reported can be changed
-with the `stratum` directive to be whatever you like. After careful
-monitoring of your clock, and appropriate choice of the `time1` fudge
+with the +stratum+ directive to be whatever you like. After careful
+monitoring of your clock, and appropriate choice of the +time1+ fudge
 factor to remove systematic errors in the clock's reported time, you
 might fudge the clock to stratum 1 to allow a stratum-2 secondary server
 to sync to it.
@@ -95,9 +95,9 @@ once per day, which would almost certainly not be acceptable for NTP
 purposes.
 
 The driver does not force an immediate resync of the clock to MSF when
-it starts up to avoid excessive battery drain in case `{ntpd}` is going to
+it starts up to avoid excessive battery drain in case +{ntpd}+ is going to
 be repeatedly restarted for any reason, and also to allow enough samples
-of the clock to be taken for `{ntpd}` to sync immediately to this clock
+of the clock to be taken for +{ntpd}+ to sync immediately to this clock
 (and not remain unsynchronised or to sync briefly to another configured
 peer, only to hop back in a few poll times, causing unnecessary
 disturbance). This behaviour should not cause problems because the
@@ -108,7 +108,7 @@ if with up to a day's clock drift in the worst case (the clock by
 default resyncs to MSF once per day).
 
 When alternate modes 1 or 2 are selected, the driver can be configured to
-ignore the resync requests by setting `flag2` to 1. This allows clocks
+ignore the resync requests by setting +flag2+ to 1. This allows clocks
 at the fringe of the signal to resync at night when signals are
 stronger.
 
@@ -121,7 +121,7 @@ This arrangement has two consequences:
 characters
 
 This driver, running on standard Sun and x86 hardware, seems to work
-fine; note the use of the `send_slow()` routine to queue up command
+fine; note the use of the +send_slow()+ routine to queue up command
 characters to be sent once every two seconds.
 
 Three commands are sent to the clock by this driver. Each command
@@ -129,12 +129,12 @@ consists of a single letter (of which only the bottom four bits are
 significant), followed by a CR (ASCII 13). Each character sent to the
 clock should be followed by a delay to allow the unit to echo the
 character, and then by a further 10ms. Following the echo of the command
-string, there may be a response (ie in the case of the `g` and `o`
-commands below), which in the case of the `o` command may be delayed by
+string, there may be a response (ie in the case of the +g+ and +o+
+commands below), which in the case of the +o+ command may be delayed by
 up to 1 second so as the start bit of the first byte of the response can
 arrive on time. The commands and their responses are:
 
-`g` CR::
++g+ CR::
     Request for signal quality. Answer only valid during (late part of)
     resync to MSF signal. The response consists of two characters as
     follows:
@@ -183,9 +183,9 @@ arrive on time. The commands and their responses are:
     	reception signal quality in the range 0--5 (very poor to very good); if
 	in the range 0--2 no successful reception is to be expected. The
 	reported value drops to zero when not resyncing, ie when first returned
-	byte is not `3'.
+	byte is not +3'.
 
-`h` CR::
++h+ CR::
     Request to resync to signal. Can take up from about 30s to 360s. Drains
     batteries so should not be used excessively. After this the clock time
     and date should be correct and the phase within 20ms of time as
@@ -195,7 +195,7 @@ arrive on time. The commands and their responses are:
     saving time quickly). This driver code, by default, resyncs at least
     once per hour to minimise clock wander.
 
-`o` CR::
++o+ CR::
     Request timestamp. Start bit of first byte of response is on-time, so
     may be delayed up to 1 second. Note that the driver will convert time to
     GMT, if required. The response data is as follows:
@@ -266,13 +266,13 @@ arrive on time. The commands and their responses are:
 --
 +
 The driver only accepts time from the clock if the bottom three bits of
-the status byte are `011` or `flag2` is set to 1 to ignore resync
+the status byte are +011+ or +flag2+ is set to 1 to ignore resync
 requests. For the MSF clock, if the UK parliament decides to move us to
 +0100/+0200 time as opposed to the current +0000/+0100 time, it is not
 clear what effect that will have on the time broadcast by MSF, and
 therefore on this driver's usefulness.
 
-A typical `ntp.conf` configuration file for this driver might be:
+A typical +ntp.conf+ configuration file for this driver might be:
 
 -------------------------------------------------------------------------------
 # hostname(n) means we expect (n) to be the stratum at which hostname runs.
@@ -315,25 +315,25 @@ restrict 11.22.33.9 nomodify
 restrict 127.0.0.1
 -------------------------------------------------------------------------------
 
-There are a few `#defineS` in the code that you might wish to play with:
+There are a few +#defines+ in the code that you might wish to play with:
 
-`ARCRON_KEEN`::
++ARCRON_KEEN+::
    With this defined, the code is relatively trusting of the clock, and
    assumes that you will have the clock as one of a few time sources, so
    will bend over backwards to use the time from the clock when available
-   and avoid `{ntpd}` dropping sync from the clock where possible. You may
+   and avoid +{ntpd}+ dropping sync from the clock where possible. You may
    wish to undefine this, especially if you have better sources of time or
    your reception is ropey. However, there are many checks built in even
    with this flag defined.
 
-`ARCRON_MULTIPLE_SAMPLES`::
++ARCRON_MULTIPLE_SAMPLES+::
    When is defined, we regard each character in the returned timecode as at
    a known delay from the start of the second, and use the smallest (most
    negative) offset implied by any such character, ie with the smallest
    kernel-induced display, and use that. This helps to reduce jitter and
    spikes.
 
-`ARCRON_LEAPSECOND_KEEN`::
++ARCRON_LEAPSECOND_KEEN+::
    When is defined, we try to do a resync to MSF as soon as possible in the
    first hour of the morning of the first day of the first and seventh
    months, ie just after a leap-second insertion or deletion would happen
@@ -343,20 +343,20 @@ There are a few `#defineS` in the code that you might wish to play with:
    did not seem functional at the leap-second insertion of 30th June 1997
    so is by default disabled.
 
-`PRECISION`::
-   Currently set to `-4`, but you may wish to set it to `-5` if you are
-   more conservative, or to `-6` if you have particularly good experience
-   with the clock and you live on the edge. Note that the `flag3` fudge
++PRECISION+::
+   Currently set to +-4+, but you may wish to set it to +-5+ if you are
+   more conservative, or to +-6+ if you have particularly good experience
+   with the clock and you live on the edge. Note that the +flag3+ fudge
    value will improve the reported dispersion one notch if clock signal
    quality is known good. So maybe just leave this alone.
 
 == Monitor Data ==
 
-Each timecode is written to the `clockstats` file with a signal quality
+Each timecode is written to the +clockstats+ file with a signal quality
 value appended ("0"--"5" as reported by the clock, or "6" for unknown).
 
 Each resync and result (plus gaining or losing MSF sync) is logged to
-the system log at level `LOG_NOTICE`; note that each resync drains the
+the system log at level +LOG_NOTICE+; note that each resync drains the
 unit's batteries, so the syslog entry seems justified.
 
 Syslog entries are of the form:
@@ -374,7 +374,7 @@ May 10 12:41:34 oolong ntpd[615]: ARCRON: sync finished, signal quality 3: OK, w
 
 == Fudge Factors ==
 
-`mode 0 | 1 | 2`::
++mode 0 | 1 | 2+::
    Specifies the clock hardware model. This parameter is optional, it
    defaults to the original mode of operation.
 +
@@ -386,32 +386,32 @@ Supported modes of operation:
 +
 2 - New DCF77
 
-`time1` 'time'::
++time1+ 'time'::
    Specifies the time offset calibration factor, in seconds and fraction,
    with default 0.0. On a Sun SparcStation 1 running SunOS 4.1.3_U1, with
    the receiver in London, a value of 0.020 (20ms) seems to be appropriate.
-`time2` 'time'::
++time2+ 'time'::
     Not currently used by this driver.
-`stratum` 'number'::
++stratum+ 'number'::
    Specifies the driver stratum, in decimal from 0 to 15, with default 2.
    It is suggested that the clock be not be fudged higher than stratum 1 so
    that it is used a backup time source rather than a primary when more
    accurate sources are available.
-`refid` 'string'::
++refid+ 'string'::
    Specifies the driver reference identifier, an ASCII string from one to
-   four characters, with default `MSFa`. When used in modes 1-3, the driver
-   will report either `MSF`, `DCF`, or `WWVB` respectively.
-`flag1 0 | 1`::
+   four characters, with default +MSFa+. When used in modes 1-3, the driver
+   will report either +MSF+, +DCF+, or +WWVB+ respectively.
++flag1 {0 | 1}+::
    (Modes 1-3) If set to 0 (the default), the clock is set to UTC time. If
    set to 1, the clock is set to localtime.
-`flag2 0 | 1`::
++flag2 {0 | 1}+::
    (Modes 1-3) If set to 0 (the default), the clock will be forced to
    resync approximately every hour. If set to 1, the clock will resync per
    normal operations (approximately midnight).
-`flag3 0 | 1`::
++flag3 {0 | 1}+::
    If set to 1, better precision is reported (and thus lower dispersion)
    while clock's received signal quality is known to be good.
-`flag4 0 | 1`::
++flag4 {0 | 1}+::
    Not used by this driver.
 
 == Authors ==

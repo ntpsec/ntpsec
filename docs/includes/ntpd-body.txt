@@ -4,31 +4,32 @@
 
 [[synop]]
 == SYNOPSIS ==
-*{ntpd}*
+[verse]
+{ntpd}
     [-46aAbgLmnNqx ] [ -c 'conffile' ] [ -f 'driftfile' ] [ -i 'jaildir' ]
     [ -k 'keyfile' ] [ -l 'logfile' ] [ -p 'pidfile' ] [ -P 'priority' ]
-    [ -r 'broadcast‐delay' ]  [ -s 'statsdir' ]  [ -t  'key' ]
+    [ -r 'broadcast-delay' ]  [ -s 'statsdir' ]  [ -t  'key' ]
     [ -u 'user'[:'group'] ] [ -U 'interface_update_interval' ]
     [ -v 'variable' ] [ -V 'variable' ]
 
 [[descr]]
 == DESCRIPTION ==
 
-The `{ntpd}` utility is an operating system daemon which sets and
+The +{ntpd}+ utility is an operating system daemon which sets and
 maintains the system time of day in synchronism with Internet standard
 time servers. It is a complete implementation of the Network Time
 Protocol (NTP) version 4, as defined by RFC-5905, but also retains
 compatibility with version 3, as defined by RFC-1305, and versions 1 and
 2, as defined by RFC-1059 and RFC-1119, respectively.
 
-The `{ntpd}` utility does most computations in 64-bit floating point
+The +{ntpd}+ utility does most computations in 64-bit floating point
 arithmetic and does relatively clumsy 64-bit fixed point operations only
 when necessary to preserve the ultimate precision, about 232
 picoseconds. While the ultimate precision is not achievable with
 ordinary workstations and networks of today, it may be required with
 future gigahertz CPU clocks and gigabit LANs.
 
-Ordinarily, `{ntpd}` reads the {ntpconfman} configuration file at startup
+Ordinarily, +{ntpd}+ reads the {ntpconfman} configuration file at startup
 time in order to determine the synchronization sources and operating
 modes. It is also possible to specify a working, although limited,
 configuration entirely on the command line, obviating the need for a
@@ -36,53 +37,53 @@ configuration file. This may be particularly useful when the local host
 is to be configured as a broadcast/multicast client, with all peers
 being determined by listening to broadcasts at run time.
 
-The `{ntpd}` program normally operates continuously while adjusting the
+The +{ntpd}+ program normally operates continuously while adjusting the
 system time and frequency, but in some cases this might not be
-practical. With the `-q` option `{ntpd}` operates as in continuous mode,
+practical. With the +-q+ option +{ntpd}+ operates as in continuous mode,
 but exits just after setting the clock for the first time. Most
-applications will probably want to specify the `iburst` option with the
-`server` command. With this option a volley of messages is exchanged to
+applications will probably want to specify the +iburst+ option with the
++server+ command. With this option a volley of messages is exchanged to
 groom the data and set the clock in about ten seconds. If nothing is
 heard after a few minutes, the daemon times out and exits without
 setting the clock.
 
-If NetInfo support is built into `{ntpd}`, then `{ntpd}` will attempt to
+If NetInfo support is built into +{ntpd}+, then +{ntpd}+ will attempt to
 read its configuration from the NetInfo if the default
 {ntpconfman} file cannot be read and no file is specified by
-the `-c` option.
+the +-c+ option.
 
-Various internal `{ntpd}` variables can be displayed and configuration
-options altered while the `{ntpd}` is running using the
+Various internal +{ntpd}+ variables can be displayed and configuration
+options altered while the +{ntpd}+ is running using the
 {ntpqman} utility program.
 
-When `{ntpd}` starts it looks at the value of umask(2), and if
-zero `{ntpd}` will set the umask(2) to 022.
+When +{ntpd}+ starts it looks at the value of umask(2), and if
+zero +{ntpd}+ will set the umask(2) to 022.
 
 [[cmd]]
 == OPTIONS ==
 
-`-4`, `--ipv4`::
++-4+, +--ipv4+::
   Force IPv4 DNS name resolution. This option must not appear in
   combination with any of the following options: ipv6.
 +
 Force DNS resolution of following host names on the command line to
 the IPv4 namespace.
 
-`-6`, `--ipv6`::
++-6+, +--ipv6+::
   Force IPv6 DNS name resolution. This option must not appear in
   combination with any of the following options: ipv4.
 +
 Force DNS resolution of following host names on the command line to
 the IPv6 namespace.
 
-`-a`, `--authreq`::
++-a+, +--authreq+::
   Require crypto authentication. This option must not appear in
   combination with any of the following options: authnoreq.
 +
 Require cryptographic authentication for broadcast client, multicast
 client and symmetric passive associations. This is the default.
 
-`-A`, `--authnoreq`::
++-A+, +--authnoreq+::
   Do not require crypto authentication. This option must not appear in
   combination with any of the following options: authreq.
 +
@@ -90,46 +91,46 @@ Do not require cryptographic authentication for broadcast client,
 multicast client and symmetric passive associations. This is almost
 never a good idea.
 
-`-b`, `--bcastsync`::
++-b+, +--bcastsync+::
   Allow us to sync to broadcast servers.
 
-`-c` string, `--configfile`=_string_::
++-c+ string, +--configfile+=_string_::
   configuration file name.
 +
-The name and path of the configuration file, `/etc/{ntpconf}` by
+The name and path of the configuration file, +/etc/{ntpconf}+ by
 default.
 
-`-d`, `--debug-level`::
++-d+, +--debug-level+::
   Increase debug verbosity level. This option may appear an unlimited
   number of times.
 
-`-D` number, `--set-debug-level`=_number_::
++-D+ number, +--set-debug-level+=_number_::
   Set the debug verbosity level. This option may appear an unlimited
   number of times. This option takes an integer number as its argument.
 
-`-f` string, `--driftfile`=_string_::
++-f+ string, +--driftfile+=_string_::
   frequency drift file name.
 +
-The name and path of the frequency file, `/etc/ntp.drift` by default.
+The name and path of the frequency file, +/etc/ntp.drift+ by default.
 This is the same operation as the _driftfile_
-configuration specification in the `/etc/{ntpconf}` file.
+configuration specification in the +/etc/{ntpconf}+ file.
 
-`-g`, `--panicgate`::
++-g+, +--panicgate+::
   Allow the first adjustment to be Big. This option may appear an
   unlimited number of times.
 +
-Normally, `{ntpd}` exits with a message to the system log if the offset
+Normally, +{ntpd}+ exits with a message to the system log if the offset
 exceeds the panic threshold, which is 1000 s by default. This option
 allows the time to be set to any value without restriction; however,
 this can happen only once. If the threshold is exceeded after that,
-`{ntpd}` will exit with a message to the system log. This option can be
-used with the `-q` and `-x` options. See the _tinker_ configuration
++{ntpd}+ will exit with a message to the system log. This option can be
+used with the +-q+ and +-x+ options. See the _tinker_ configuration
 file directive for other options.
 
-`-G`, `--force-step-once`::
++-G+, +--force-step-once+::
   Step any initial offset correction..
 +
-Normally, `{ntpd}` steps the time if the time offset exceeds the step
+Normally, +{ntpd}+ steps the time if the time offset exceeds the step
 threshold, which is 128 ms by default, and otherwise slews the time.
 This option forces the initial offset correction to be stepped, so the
 highest time accuracy can be achieved quickly. However, this may also
@@ -137,18 +138,18 @@ cause the time to be stepped back so this option must not be used if
 applications requiring monotonic time are running. See the _tinker_
 configuration file directive for other options.
 
-`-i` string, `--jaildir`=_string_::
++-i+ string, +--jaildir+=_string_::
   Jail directory.
 +
 Chroot the server to the directory _jaildir_ This option also implies
 that the server attempts to drop root privileges at startup. You may
-need to also specify a `-u` option. This option is only available if
+need to also specify a +-u+ option. This option is only available if
 the OS supports adjusting the clock without full root privileges. This
-option is supported under NetBSD (configure with `--enable-clockctl`)
-or Linux (configure with `--enable-linuxcaps`) or Solaris (configure
-with `--enable-solarisprivs`).
+option is supported under NetBSD (configure with +--enable-clockctl+)
+or Linux (configure with +--enable-linuxcaps+) or Solaris (configure
+with +--enable-solarisprivs+).
 
-`-I` iface, `--interface`=_iface_::
++-I+ iface, +--interface+=_iface_::
   Listen on an interface name or address. This option may appear an
   unlimited number of times.
 +
@@ -158,111 +159,111 @@ option also implies not opening other addresses, except wildcard and
 localhost. This option is deprecated. Please consider using the
 configuration file _interface_ command, which is more versatile.
 
-`-k` string, `--keyfile`=_string_::
++-k+ string, +--keyfile+=_string_::
   path to symmetric keys.
 +
-Specify the name and path of the symmetric key file. `/etc/{ntpkeys}`
+Specify the name and path of the symmetric key file. +/etc/{ntpkeys}+
 is the default. This is the same operation as the _keys_
 configuration file directive.
 
-`-l` string, `--logfile`=_string_::
++-l+ string, +--logfile+=_string_::
   path to the log file.
 +
 Specify the name and path of the log file. The default is the system
 log file. This is the same operation as the _logfile_
 configuration file directive.
 
-`-L`, `--novirtualips`::
++-L+, +--novirtualips+::
   Do not listen to virtual interfaces.
 +
 Do not listen to virtual interfaces, defined as those with names
 containing a colon. This option is deprecated. Please consider using
-the configuration file `interface` command, which is more versatile.
+the configuration file +interface+ command, which is more versatile.
 
-`-m`, `--mdns`::
++-m+, +--mdns+::
   Register with mDNS as a NTP server.
 +
 Registers as an NTP server with the local mDNS server which allows the
 server to be discovered via mDNS client lookup.
 
-`-M`, `--modifymmtimer`::
++-M+, +--modifymmtimer+::
   Modify Multimedia Timer (Windows only).
 +
 Set the Windows Multimedia Timer to highest resolution. This ensures
 the resolution does not change while {ntpd} is running, avoiding
 timekeeping glitches associated with changes.
 
-`-n`, `--nofork`::
++-n+, +--nofork+::
   Do not fork. This option must not appear in combination with any of
   the following options: wait-sync.
 
-`-N`, `--nice`::
++-N+, +--nice+::
   Run at high priority.
 +
-To the extent permitted by the operating system, run `{ntpd}` at the
+To the extent permitted by the operating system, run +{ntpd}+ at the
 highest priority.
 
-`-p` string, `--pidfile`=_string_::
++-p+ string, +--pidfile+=_string_::
   path to the PID file.
 +
-Specify the name and path of the file used to record `{ntpd}`'s process
+Specify the name and path of the file used to record +{ntpd}+'s process
 ID. This is the same operation as the _pidfile_ _pidfile_
 configuration file directive.
 
-`-P` number, `--priority`=_number_::
++-P+ number, +--priority+=_number_::
   Process priority. This option takes an integer number as its argument.
 +
-To the extent permitted by the operating system, run `{ntpd}` at the
+To the extent permitted by the operating system, run +{ntpd}+ at the
 specified _sched_setscheduler(SCHED_FIFO)_ priority.
 
-`-q`, `--quit`::
++-q+, +--quit+::
   Set the time and quit. This option must not appear in combination with
   any of the following options: saveconfigquit, wait-sync.
 +
-`{ntpd}` will not daemonize and will exit after the clock is first
++{ntpd}+ will not daemonize and will exit after the clock is first
 synchronized. This behavior mimics that of the old _ntpdate_ program,
-which has been replaced with a shell script. The `-g` and `-x` options can be
+which has been replaced with a shell script. The +-g+ and +-x+ options can be
 used with this option. Note: The kernel time discipline is disabled
 with this option.
 
-`-Q`, `--saveconfigquit`=_string_::
++-Q+, +--saveconfigquit+=_string_::
   Save parsed configuration and quit. This option must not appear in
   combination with any of the following options: quit, wait-sync.
 +
-Cause `{ntpd}` to parse its startup configuration file and save an
+Cause +{ntpd}+ to parse its startup configuration file and save an
 equivalent to the given filename and exit. This option was designed
 for automated testing.
 
-`-r` string, `--propagationdelay`=_string_::
++-r+ string, +--propagationdelay+=_string_::
   Broadcast/propagation delay.
 +
 Specify the default propagation delay from the broadcast/multicast
 server to this client. This is necessary only if the delay cannot be
 computed automatically by the protocol.
 
-`-s` string, `--statsdir`=_string_::
++-s+ string, +--statsdir+=_string_::
   Statistics file location.
 +
 Specify the directory path for files created by the statistics
 facility. This is the same operation as the _statsdir_ _statsdir_
 configuration file directive.
 
-`-t` tkey, `--trustedkey`=_tkey_::
++-t+ tkey, +--trustedkey+=_tkey_::
   Trusted key number. This option may appear an unlimited number of
   times.
 +
 Add the specified key number to the trusted key list.
 
-`-u` string, `--user`=_string_::
++-u+ string, +--user+=_string_::
   Run as userid (or userid:groupid).
 +
 Specify a user, and optionally a group, to switch to. This option is
 only available if the OS supports adjusting the clock without full
 root privileges. This option is supported under NetBSD (configure with
-`--enable-clockctl`) or Linux (configure with `--enable-linuxcaps`) or
-Solaris (configure with `--enable-solarisprivs`).
++--enable-clockctl+) or Linux (configure with +--enable-linuxcaps+) or
+Solaris (configure with +--enable-solarisprivs+).
 
-`-U` number, `--updateinterval`=_number_::
++-U+ number, +--updateinterval+=_number_::
   interval in seconds between scans for new or dropped interfaces. This
   option takes an integer number as its argument.
 +
@@ -272,20 +273,20 @@ performed shortly after the interface change has been detected by the
 system. Use 0 to disable scanning. 60 seconds is the minimum time
 between scans.
 
-`-w` number, `--wait-sync`=_number_::
++-w+ number, +--wait-sync+=_number_::
   Seconds to wait for first clock sync. This option must not appear in
   combination with any of the following options: nofork, quit,
   saveconfigquit. This option takes an integer number as its argument.
 +
-If greater than zero, alters `{ntpd}`'s behavior when forking to
+If greater than zero, alters +{ntpd}+'s behavior when forking to
 daemonize. Instead of exiting with status 0 immediately after the
 fork, the parent waits up to the specified number of seconds for the
 child to first synchronize the clock. The exit status is zero
 (success) if the clock was synchronized, otherwise it is ETIMEDOUT.
-This provides the option for a script starting `{ntpd}` to easily wait
+This provides the option for a script starting +{ntpd}+ to easily wait
 for the first set of the clock before proceeding.
 
-`-x`, `--slew`::
++-x+, +--slew+::
   Slew up to 600 seconds.
 +
 Normally, the time is slewed if the offset is less than the step
@@ -295,19 +296,19 @@ within the accuracy window to set the clock manually. Note: Since the
 slew rate of typical Unix kernels is limited to 0.5 ms/s, each second
 of adjustment requires an amortization interval of 2000 s. Thus, an
 adjustment as much as 600 s will take almost 14 days to complete. This
-option can be used with the `-g` and `-q` options. See the _tinker_
+option can be used with the +-g+ and +-q+ options. See the _tinker_
 configuration file directive for other options. Note: The kernel time
 discipline is disabled with this option.
 
-`-z` _nvar_, --var`=_nvar_::
++-z+ _nvar_, --var+=_nvar_::
   make ARG an ntp variable (RW). This option may appear an unlimited
   number of times.
 
-`-Z` _nvar_, --dvar`=_ndvar_::
++-Z+ _nvar_, --dvar+=_ndvar_::
   make ARG an ntp variable (RW|DEF). This option may appear an unlimited
   number of times.
 
-//`--usepcc`::
+//+--usepcc+::
 //  Use CPU cycle counter (Windows only).
 //+
 //Attempt to substitute the CPU counter for _QueryPerformanceCounter_.
@@ -315,14 +316,14 @@ discipline is disabled with this option.
 //they have the same frequency, the CPU counter (RDTSC on x86) is used
 //directly, saving the overhead of a system call.
 
-//`--pccfreq`=_string_::
+//+--pccfreq+=_string_::
 //  Force CPU cycle counter use (Windows only).
 //+
 //Force substitution the CPU counter for _QueryPerformanceCounter_. The
 //CPU counter (RDTSC on x86) is used unconditionally with the given
 //frequency (in Hz).
 
-`-V, --version`::
++-V, --version+::
   Output version of program and exit. -VV gives more detailed version
   information.
 
@@ -331,7 +332,7 @@ discipline is disabled with this option.
 
 === How NTP Operates ===
 
-The `{ntpd}` utility operates by exchanging messages with one or more
+The +{ntpd}+ utility operates by exchanging messages with one or more
 configured servers over a range of designated poll intervals. When
 started, whether for the first or subsequent times, the program requires
 several exchanges from the majority of these servers so the signal
@@ -349,25 +350,25 @@ Most operating systems and hardware of today incorporate a time-of-year
 When the machine is booted, the chip is used to initialize the operating
 system time. After the machine has synchronized to a NTP server, the
 operating system corrects the chip from time to time. In the default
-case, if `{ntpd}` detects that the time on the host is more than 1000s
-from the server time, `{ntpd}` assumes something must be terribly wrong
+case, if +{ntpd}+ detects that the time on the host is more than 1000s
+from the server time, +{ntpd}+ assumes something must be terribly wrong
 and the only reliable action is for the operator to intervene and set
 the clock by hand. (Reasons for this include there is no TOY chip, or
 its battery is dead, or that the TOY chip is just of poor quality.) This
-causes `{ntpd}` to exit with a panic message to the system log. The `-g`
+causes +{ntpd}+ to exit with a panic message to the system log. The +-g+
 option overrides this check and the clock will be set to the server time
 regardless of the chip time (up to 68 years in the past or future — this
 is a limitation of the NTPv4 protocol). However, and to protect against
 broken hardware, such as when the CMOS battery fails or the clock
 counter becomes defective, once the clock has been set an error greater
-than 1000s will cause `{ntpd}` to exit anyway.
+than 1000s will cause +{ntpd}+ to exit anyway.
 
-Under ordinary conditions, `{ntpd}` adjusts the clock in small steps so
+Under ordinary conditions, +{ntpd}+ adjusts the clock in small steps so
 that the timescale is effectively continuous and without
 discontinuities. Under conditions of extreme network congestion, the
 roundtrip delay jitter can exceed three seconds and the synchronization
 distance, which is equal to one-half the roundtrip delay plus error
-budget terms, can become very large. The `{ntpd}` algorithms discard
+budget terms, can become very large. The +{ntpd}+ algorithms discard
 sample offsets exceeding 128 ms, unless the interval during which no
 sample offset is less than 128 ms exceeds 900s. The first sample after
 that, no matter what the offset, steps the clock to the indicated time.
@@ -376,15 +377,15 @@ in error to a vanishingly low incidence.
 
 As the result of this behavior, once the clock has been set it very
 rarely strays more than 128 ms even under extreme cases of network path
-congestion and jitter. Sometimes, in particular when `{ntpd}` is first
+congestion and jitter. Sometimes, in particular when +{ntpd}+ is first
 started without a valid drift file on a system with a large intrinsic
 drift the error might grow to exceed 128 ms, which would cause the clock
 to be set backwards if the local clock time is more than 128 s in the
 future relative to the server. In some applications, this behavior may
-be unacceptable. There are several solutions, however. If the `-x`
+be unacceptable. There are several solutions, however. If the +-x+
 option is included on the command line, the clock will never be stepped
 and only slew corrections will be used. But this choice comes with a
-cost that should be carefully explored before deciding to use the `-x`
+cost that should be carefully explored before deciding to use the +-x+
 option. The maximum slew rate possible is limited to 500
 parts-per-million (PPM) as a consequence of the correctness principles
 on which the NTP protocol and algorithm design are based. As a result,
@@ -399,7 +400,7 @@ In spite of the above precautions, sometimes when large frequency errors
 are present the resulting time offsets stray outside the 128-ms range
 and an eventual step or slew time correction is required. If following
 such a correction the frequency error is so large that the first sample
-is outside the acceptable range, `{ntpd}` enters the same state as when
+is outside the acceptable range, +{ntpd}+ enters the same state as when
 the _ntp.drift_ file is not present. The intent of this behavior is to
 quickly correct the frequency and restore operation to the normal
 tracking mode. In the most extreme cases (the host _time.ien.it_ comes
@@ -429,39 +430,39 @@ effectively "warm-start" and your system's clock will be stable in under
 11 seconds' time.
 
 As soon as possible in the startup sequence, start
-{ntpdman} with at least the `-g` and perhaps the `-N` options.
+{ntpdman} with at least the +-g+ and perhaps the +-N+ options.
 Then, start the rest of your "normal" processes. This will give
 {ntpdman} as much time as possible to get the system's clock
 synchronized and stable.
 
 Finally, if you have processes like _dovecot_ or database servers that
 require monotonically-increasing time, run {ntpwaitman} as
-late as possible in the boot sequence (perhaps with the_`-v`_flag) and
+late as possible in the boot sequence (perhaps with the_+-v+_flag) and
 after {ntpwaitman} exits successfully it is as safe as it
 will ever be to start any process that require stable time.
 
 === Frequency Discipline ===
 
-The `{ntpd}` behavior at startup depends on whether the frequency file,
+The +{ntpd}+ behavior at startup depends on whether the frequency file,
 usually _ntp.drift_, exists. This file contains the latest estimate of
-clock frequency error. When the `{ntpd}` is started and the file does not
-exist, the `{ntpd}` enters a special mode designed to quickly adapt to the
+clock frequency error. When the +{ntpd}+ is started and the file does not
+exist, the +{ntpd}+ enters a special mode designed to quickly adapt to the
 particular system clock oscillator time and frequency error. This takes
 approximately 15 minutes, after which the time and frequency are set to
-nominal values and the `{ntpd}` enters normal mode, where the time and
+nominal values and the +{ntpd}+ enters normal mode, where the time and
 frequency are continuously tracked relative to the server. After one
 hour the frequency file is created and the current frequency offset
-written to it. When the `{ntpd}` is started and the file does exist, the
-`{ntpd}` frequency is initialized from the file and enters normal mode
+written to it. When the +{ntpd}+ is started and the file does exist, the
++{ntpd}+ frequency is initialized from the file and enters normal mode
 immediately. After that the current frequency offset is written to the
 file at hourly intervals.
 
 === Operating Modes ===
 
-The `{ntpd}` utility can operate in any of several modes, including
+The +{ntpd}+ utility can operate in any of several modes, including
 symmetric active/passive, client/server broadcast/multicast and
 manycast, as described in the "Association Management" page (available
-as part of the HTML documentation provided in `/usr/share/doc/{ntp}`). It
+as part of the HTML documentation provided in +/usr/share/doc/{ntp}+). It
 normally operates continuously while monitoring for small changes in
 frequency and trimming the clock for the ultimate precision. However, it
 can operate in a one-time mode where the time is set from an external
@@ -472,7 +473,7 @@ itself automatically. This makes it possible to deploy a fleet of
 workstations without specifying configuration details specific to the
 local environment.
 
-By default, `{ntpd}` runs in continuous mode where each of possibly
+By default, +{ntpd}+ runs in continuous mode where each of possibly
 several external servers is polled at intervals determined by an
 intricate state machine. The state machine measures the incidental
 roundtrip delay jitter and oscillator frequency wander and determines
@@ -484,9 +485,9 @@ servers. In addition, should a server become unreachable for some time,
 the poll interval is increased in steps to 1024s in order to reduce
 network overhead.
 
-In some cases it may not be practical for `{ntpd}` to run continuously.
-The `-q` option is provided to support running `{ntpd}` periodically
-from a cron(8) job. Setting this option will cause `{ntpd}` to exit
+In some cases it may not be practical for +{ntpd}+ to run continuously.
+The +-q+ option is provided to support running +{ntpd}+ periodically
+from a cron(8) job. Setting this option will cause +{ntpd}+ to exit
 just after setting the clock for the first time. The procedure for
 initially setting the clock is the same as in continuous mode; most
 applications will probably want to specify the _iburst_ keyword with
@@ -497,11 +498,11 @@ exits.
 
 When kernel support is available to discipline the clock frequency,
 which is the case for stock Solaris, Tru64, Linux and FreeBSD, a useful
-feature is available to discipline the clock frequency. First, `{ntpd}` is
+feature is available to discipline the clock frequency. First, +{ntpd}+ is
 run in continuous mode with selected servers in order to measure and
 record the intrinsic clock frequency offset in the frequency file. It
 may take some hours for the frequency and offset to settle down. Then
-the `{ntpd}` is stopped and run in one-time mode as required. At each
+the +{ntpd}+ is stopped and run in one-time mode as required. At each
 startup, the frequency is read from the file and initializes the kernel
 frequency.
 
@@ -567,14 +568,14 @@ as described in {ntpconfman}.
 [options="header"]
 |================================================================
 |File               |Default         |Option      |Option
-|configuration file |`/etc/{ntpconf}`|`-c`        |`conffile`
-|frequency file     |none            |`-f`        |`driftfile`
-|leapseconds file   |none            |            |`leapfile`
-|process ID file    |none            |`-p`        |`pidfile`
-|log file           |system log      |`-l`        |`logfile`
-|include file       |none            |none        |`includefile`
-|statistics path    |`/var/NTP`      |`-s`        |`statsdir`
-|keys path          |`/usr/local/etc`|none        |`keysdir`
+|configuration file |+/etc/{ntpconf}+|+-c+        |+conffile+
+|frequency file     |none            |+-f+        |+driftfile+
+|leapseconds file   |none            |            |+leapfile+
+|process ID file    |none            |+-p+        |+pidfile+
+|log file           |system log      |+-l+        |+logfile+
+|include file       |none            |none        |+includefile+
+|statistics path    |+/var/NTP+      |+-s+        |+statsdir+
+|keys path          |+/usr/local/etc+|none        |+keysdir+
 |================================================================
 
 [[bugs]]
@@ -583,8 +584,8 @@ as described in {ntpconfman}.
 The '-V' option is not backward-compatible with its use (as the
 equivalent of -Z) in older versions.
 
-The `{ntpd}` utility has gotten rather fat. While not huge, it has gotten
-larger than might be desirable for an elevated-priority `{ntpd}` running
+The +{ntpd}+ utility has gotten rather fat. While not huge, it has gotten
+larger than might be desirable for an elevated-priority +{ntpd}+ running
 on a workstation, particularly since many of the fancy features which
 consume the space were designed more with a busy primary server, rather
 than a high stratum workstation in mind.

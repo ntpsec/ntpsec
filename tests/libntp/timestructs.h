@@ -1,8 +1,7 @@
 /*
  * timestructs.h -- test bed adaptors for time structs.
  *
- * Written by Juergen Perlinger (perlinger@ntp.org) for the NTP project.
- * The contents of 'html/copyright.html' apply.
+ * Written by Juergen Perlinger <perlinger@ntp.org> for the NTP project.
  *
  * Some wrapper classes and a closeness predicate that are used to
  * bridge the gap between the goggletest framework and the structs used
@@ -12,6 +11,9 @@
  * output on errors. The normal string conversion functions will give
  * HRVs (human readable values) but we might also be interested in the
  * machine representation for diagnostic purposes.
+ *
+ * Copyright 2015 by the NTPsec project contributors
+ * SPDX-License-Identifier: NTP
  */
 #ifndef GUARD_TIMESTRUCTS_H
 #define GUARD_TIMESTRUCTS_H

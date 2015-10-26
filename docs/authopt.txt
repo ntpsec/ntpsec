@@ -12,7 +12,6 @@ Our resident cryptographer; now you see him, now you don't.
 
 == Related Links ==
 
-include::includes/command.txt[]
 include::includes/authopt.txt[]
 
 '''''

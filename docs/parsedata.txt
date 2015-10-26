@@ -77,7 +77,7 @@ Format of the Meinberg standard time string:
     hh:mm:ss      = hour, minute, second, separated by dots
     u             = '#' for GPS receivers: time is not synchronized
                            '#' for older PZF5xx receivers: no correlation, not synchronized
-                           '#' for other devices: never sync'ed since powerup
+                           '#' for other devices: never synced since powerup
                            ' ' if nothing of the above applies
     v             = '*' for GPS receivers: position has not been verified
                            '*' for other devices: freewheeling based on internal quartz
@@ -106,7 +106,7 @@ Format of the Uni Erlangen time string for PZF5xx receivers:
 
     t             = 'U' if UTC time is transmitted, else ' '
     u             = '#' for older PZF5xx receivers: no correlation, not synchronized
-                           '#' for PZF511 and newer: never sync'ed since powerup
+                           '#' for PZF511 and newer: never synced since powerup
                            ' ' if nothing of the above applies
     v             = '*' if freewheeling based on internal quartz, else ' '
     x             = 'S' if daylight saving time is active, else ' '
@@ -313,7 +313,7 @@ Special flags are:
 ELV DCF7000: end='\r', pattern=" - - - - - - - \r"
 
 The ELV DCF7000 is a cheap DCF77 receiver sending each second a time
-code (though not very precise!) delimited by '`r'
+code (though not very precise!) delimited by '\r'
 
 ------------------------------------
     Timecode

@@ -17,23 +17,28 @@
 #include <unistd.h>
 #include <stdlib.h>
 
-#ifndef HAVE_ADJTIMEX
-#error This program requires the adjtimex(2) system call.
-#else
+#include "ntpfrob.h"
+
+#ifdef HAVE_ADJTIMEX
 # include <sys/time.h>	/* prerequisite on NetBSD */
 # include <sys/timex.h>
 
 static struct timex txc;
+#endif /* HAVE_ADJTIMEX */
 
-void tickadj(const bool json, const int newtick)
+void tickadj(const iomode mode, const int newtick)
 {
+#ifndef HAVE_ADJTIMEX
+	fputs("ntpfrob: \n", stderr);
+	exit(1);
+#else
 	if (newtick != 0)
 	{
 #ifdef STRUCT_TIMEX_HAS_TIME_TICK
 		if ( (txc.time_tick = newtick) < 1 )
 #else
 		if ( (txc.tick = newtick) < 1 )
-#endif
+#endif /* STRUCT_TIMEX_HAS_TIME_TICK */
 		{
 			fprintf(stderr, "ntpfrob: silly value for tick: %d\n", newtick);
 			exit(1);
@@ -45,8 +50,8 @@ void tickadj(const bool json, const int newtick)
 		txc.modes = ADJ_TICK;
 #else
 		txc.mode = ADJ_TICK;
-#endif
-#endif
+#endif /* STRUCT_TIMEX_HAS_MODES */
+#endif /* ADJ_TIMETICK */
 	}
 	else
 	{
@@ -57,8 +62,8 @@ void tickadj(const bool json, const int newtick)
 		txc.modes = 0;
 #else
 		txc.mode = 0;
-#endif
-#endif
+#endif /* STRUCT_TIMEX_HAS_MODES */
+#endif /* ADJ_TIMETICK */
 	}
 
 	if (adjtimex(&txc) < 0)
@@ -79,8 +84,10 @@ void tickadj(const bool json, const int newtick)
 			printf("{\"tick\":%ld}\n", txc.tick);
 		else
 			printf("tick = %ld\n", txc.tick);
-#endif
+#endif /* STRUCT_TIMEX_HAS_TIME_TICK */
 	}
 
+#endif /* HAVE_ADJTIMEX */
 }
-#endif
+
+/* end */

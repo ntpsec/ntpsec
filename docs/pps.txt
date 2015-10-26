@@ -28,7 +28,7 @@ Most conventional time sources (radio clocks and GPSes) are connected
 using a serial or USB port operating at speeds of 9600 bps. The
 accuracy using typical clock-radio timecode formats, where the on-time
 epoch is indicated by a designated ASCII character such as
-carriage-return `<cr>`, is normally limited to 100 &mu;s; NMEA streams
+carriage-return +<cr>+, is normally limited to 100 &mu;s; NMEA streams
 from GPSes have a similar limit.  Some are worse; the SiRF line of
 consumer-grade GPSes, for example, has a long-period wander of about
 170&mu;s.
@@ -56,8 +56,8 @@ support, which is available in a few operating systems, including
 FreeBSD, Linux, and Solaris.  The kernel interface described on the
 link:kernpps.html[PPSAPI Interface for Precision Time Signals] page is
 the only interface currently supported. Older PPS interfaces based on
-the `ppsclock` and `tty_clk` streams modules are no longer supported.
-The interface consists of the `timepps.h` header file, which should be
+the +ppsclock+ and +tty_clk+ streams modules are no longer supported.
+The interface consists of the +timepps.h+ header file, which should be
 in the /usr/include/ or /usr/include/sys directory of your file
 system.
 
@@ -68,11 +68,11 @@ driver, and may be added to other drivers in future.  Alternatively,
 the PPS driver described on the link:driver22.html[Type 22 PPS Clock
 Discipline] page can be used. It operates in conjunction with another
 source that provides seconds numbering. The selected source is
-designate a prefer peer, as using the `prefer` option, as described on
-the link:prefer.html[Mitigation Rules and the `prefer` Keyword]
+designate a prefer peer, as using the +prefer+ option, as described on
+the link:prefer.html[Mitigation Rules and the +prefer+ Keyword]
 page. The prefer peer is ordinarily the radio clock that provides the
 PPS signal, but in principle another radio clock or even a remote
-Internet server could be designated preferred Note that the `pps`
+Internet server could be designated preferred Note that the +pps+
 configuration command has been obsoleted by this driver.
 
 [[use]]

@@ -1,4 +1,4 @@
-= `{ntpd}` - Network Time Protocol (NTP) Daemon =
+= +{ntpd}+ - Network Time Protocol (NTP) Daemon =
 
 [cols="10%,90%",frame="none",grid="none",style="verse"]
 |==============================
@@ -9,10 +9,6 @@ You need help from the monkeys.
 
 |==============================
 
-
-== Related Links ==
-
-include::includes/command.txt[]
 
 == Table of Contents ==
 

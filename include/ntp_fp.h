@@ -339,7 +339,6 @@ extern	char *	dofptoa		(u_fp, int, short, int);
 extern	char *	dolfptoa	(uint32_t, uint32_t, int, short, int);
 
 extern	bool	atolfp		(const char *, l_fp *);
-extern	int	buftvtots	(const char *, l_fp *);
 extern	char *	fptoa		(s_fp, short);
 extern	char *	fptoms		(s_fp, short);
 extern	bool	hextolfp	(const char *, l_fp *);
@@ -347,7 +346,8 @@ extern  void	gpstolfp	(int, int, unsigned long, l_fp *);
 extern	bool	mstolfp		(const char *, l_fp *);
 extern	char *	prettydate	(l_fp *);
 extern	char *	gmprettydate	(l_fp *);
-extern	char *	uglydate	(l_fp *);
+extern	char *	gmprettydate	(l_fp *);
+extern	char *	rfc3339date	(l_fp *);
 extern  void	mfp_mul		(int32_t *, uint32_t *, int32_t, uint32_t, int32_t, uint32_t);
 
 extern	void	set_sys_fuzz	(double);

@@ -1,0 +1,345 @@
+= How-to for NTPsec hackers =
+
+Annoying but necessary legalese:
+
+    By submitting patches to this project, you agree to allow them to be
+    redistributed under the project's license according to the normal
+    forms and usages of the open-source community.
+
+The code history has been moved to git; the BitKeeper-based advice that used
+to live here is obsolete.  As we develop a git-based patch workflow it will be
+documented here.
+
+== General notes ==
+
+=== Build system ===
+
+The build uses waf, replacing a huge ancient autoconf hairball that
+caused many problems. The waf script is embedded in the top level of
+the distribution; run "./waf --help" or consult INSTALL for basic
+instructions.
+
+Full waf documentation is at: https://waf.io/
+
+=== C API standards ===
+
+The baseline C standard to write to is ISO/IEC 9899:1999, also known
+as C99 (but see the following section on banned functions).  Note that
+C99 is a coding standard, not an ABI standard, so it can happily
+coexist with distributions that use C89 conventions.
+
+You can download the C99 standard for free from here:
+    http://atrey.karlin.mff.cuni.cz/projekty/vrr/doc/c99.pdf
+
+Only POSIX-1.2001/SuSv3 library functions should be used.  If a library
+function not in POSIX 2001 is required, then a wrapper function for back
+compatibility must be provided.  One notable case is clock_gettime()
+which is used, when available, for increased accuracy, and has a
+fallback implementation using native time calls.
+
+You can view POSIX-1.2001, with 2004 Corrigendum, online for free here:
+    http://pubs.opengroup.org/onlinepubs/009695399/toc.htm
+
+=== Banned functions ===
+
+The following C99/POSIX functions are BANNED.  They are unsafe, tending to
+cause buffer overruns and (all too often) exploitable security holes:
+
+* strcpy, strncpy, strcat:  Use strlcpy and strlcat instead.
+* sprintf, vsprintf: use snprintf and vsnprintf instead.
+* In scanf and friends, the %s format without length limit is banned.
+* strtok: use strtok_r() or unroll this into the obvious loop.
+* gets: Use fgets instead. 
+* gmtime(), localtime(), asctime(), ctime(): use the reentrant *_r variants.
+* tmpnam() - use mkstemp() or tmpfile() instead.
+* dirname() - the Linux version is re-entrant but this property is not portable.
+
+In general, avoid functions that are non-reentrant.  When in doubt, see
+http://www.unix.org/whitepapers/reentrant.html[Thread-safety and POSIX.1]
+
+=== Naming conventions ===
+
+Every binary and script we install has an "ntp" prefix on the name,
+because namespace pollution is rude.  If you write a new tool that you
+want us to install, follow this convention.
+
+Generally we favor "ntp" rather than "ntp-" for consistency and to
+reduce the amount people have to type. Choose tastefully.
+
+=== Well-tempered output ===
+
+We are devotees of the Unix rule that programs should play nicely
+with other programs.  We like output formats that are simple,
+regular, and machine-parseable without ambiguity. The practical
+goal to aim at, given our choice of scripting languages, is
+is to make writing script wrappers in Python easy.
+
+There is more than one way to arrange this.  If you can design a
+simple tabular output format, or something resembling an RF2822 header
+that's easy for both human eyes and programs to parse, do that.
+Besides being simple, formats like these are easily handled by either
+Python or shellscripts.
+
+Such simplicity is often difficult or impractical for heterogenous
+data that needs to be both grouped and labeled, so we have another
+convention for those cases. Here it is:
+
+Wherever it is reasonable, tools that generate complex reports to
+standard output should be able to emit two formats. The default can be
+relatively unstructured multiline text for human eyeballs. There
+should also be a -j/--json option that emits a self-describing JSON
+object.  You can read about JSON at
+
+	 http://www.json.org/
+
+Be aware that if you present a tool design with a messy output format
+and no JSON option it is quite likely to be rejected.
+
+Our preferred format for dates is RFC3339 (a version of ISO8601 for
+UTC with some options frozen; full year required, medial T required,
+explicit Zulu timezone). Local times should be expressed in ISO8601,
+always with full years and timezone offset.
+
+=== Copyrights and licenses ===
+
+Much of the historic code in this distribution is under the "NTP
+License" resembling BSD-2-clause.  Our favored licenses are
+BSD-2-clause for code and Creative Commons Attribute 4.0 License for
+documentation.
+
+Please do *not* submit code under GPL or other licenses which place
+conditions on derived works; we cannot accept such code.
+
+We use the SPDX convention for inclusion by reference  You can read
+about this at
+
+      http://spdx.org/licenses
+
+When you create a new file, mark it as follows (updating the year)
+as required:
+
+------------------------------------------------
+/* Copyright 2015 by the NTPsec project contributors
+ * SPDX-License-Identifier: BSD-2-Clause
+ */
+------------------------------------------------
+
+For documentation:
+
+------------------------------------------------
+// Copyright 2015 by the NTPsec project contributors
+// SPDX-License-Identifier: CC-BY-4.0
+------------------------------------------------
+
+Modify as needed for whatever comment syntax the language or markup uses.
+Good places for these markings are at the end of an extended
+header comment, or at the very top of the file.
+
+When you modify a file, leave existing copyright markings in place -
+especially all references to Dr. Dave Mills, to Mr. Harlan Stenn, and
+to the Network Time Foundation.
+
+You *may* add a project copyright and replace the inline license
+with an SPDX tag. For example:
+
+------------------------------------------------
+/* Copyright 2015 by the NTPsec project contributors
+ * SPDX-License-Identifier: NTP
+ */
+------------------------------------------------
+
+We recognize that occasionally a file may have changed so much that
+the historic copyright is no longer appropriate, but such decisions
+cannot be made casually. Discuss it with the project management
+before moving.
+
+=== Documentation format and structure ===
+
+All our documentation is mastered in asciidoc.  That includes internal
+documentation like this file. We do this because asciidoc is easy to
+edit and gives us good options for rendering to multiple formats,
+including both HTML and Unix manual pages
+
+If you're going to write in anything else you need to have a good
+reason, and the bar for "good" will be set high.  "I like Markdown",
+in particular, does not qualify - it doesn't have good enough table
+support for our needs.  ReST does, but the hassle costs of supporting
+two different master markups are too high.
+
+The NTP Classic documentation had a terrible problem with duplicative
+documentation gradually diverging as the duplicates mutated and
+bitrotted. Therefore one of our house rules is to have a *single point
+of truth* for everything.
+
+Accordingly, the way we handle pairs of manual and Web pages that
+need to have the same content is to have both be thin wrappers around
+a large common include file. These includes live in docs/includes
+and are probably what you need to edit if you're updating anything
+that appears on a man page.
+
+=== Conventions for #ifdef guard names ===
+
+Parts of this code are a thicket of C preprocessor conditionals.
+In an attempt to make these halfway comprehensible, we use the
+following conventions to distinguish classes of macro names:
+
+ENABLE_*::
+	Gates the code for an optional feature.  Set by a switch on
+	the "waf configure" invocation.
+
+GUARD_*::
+	Symbols with thie GUARD_ prefix are idempotency guards - that is,
+	they're used to nullify inclusions of a header file
+	after the first. They don't interact with the build system's
+	configuration logic in any way at all.
+
+HAVE_*_H::
+	Guard symbol derived by configuration logic from checking
+	for the presence of a system header.  For example, the symbol
+	HAVE_SYS_FOOBAR_H gets defined only if waf configure detects
+	the presence of a sys/foobar.h in the system include directory.
+
+HAVE_*::
+	Without an H suffix, a HAVE symbol is set on the availability
+	of a specified function in the system libraries.
+
+NEED_*::
+	Need symbols conditionalize porting hacks the need for which
+	cannot be detected by checking for a system header or
+	function, but instead have to be probed for by some ad-hoc
+	test in waf configure.
+
+OVERRIDE_*::
+	Override a default for debugging purposes. These are values
+	(buffer lengths and the like) which waf is not expected to
+	normally override but which might need to be forced.
+
+USE_*::
+	Use symbols are set internally within other conditionals to
+	gate use of sections of code that must be conditionally
+	compiled deoending on *combinations* of HAVE and NEED symbols.
+
+=== Cross-platform portability ===
+
+Do not bake in any assumptions about 32-vs-64-bit word size.  It is OK
+to assume the code will never run on a 16-bit machine.  When in doubt,
+use the fixed-width integral types from <stdint.h>.
+
+Do not assume any particular endianness. When in doubt, use
+htons()/htonl()/ntohs()/ntohl() and do your bit-bashing in network
+(big-endian) byte order.
+
+Do not assume anything about sign-bit interpretation in chars.  Target
+machines may have either signed or unsigned characters.
+
+Do not rely on assumptions about how structure or unions are padded.
+
+Do not assume pointers can be cast to ints, or vice-versa.  While this
+is true on effectively all modern hardware, the code runs on some
+sufficiently old iron that this is not necessarily the case even if
+the compiler and toolchain have been modernized.
+
+=== Coding style and indentation ==
+
+Dr. Dave Mills likes this code indented formatted in a consistent way.
+The file "dot.emacs" has the emacs C-mode indentation style that Dave likes.
+
+=== Other languages ===
+
+The only scripting languages allowed and supported are POSIX sh and
+Python 2.5. If you find code in the distribution that is in a
+scripting language and not one of these, you would be doing us a
+favor by translating it into Python or sh.
+
+The reason for this policy is not that we hate all other scripting
+languages, it's to reduce the complexity of maintenance and testing
+due to multiple languages.
+
+=== Version string ===
+
+We use a varient of three part Semantic Versioning, of the form X.Y.Z.
+X, Y, and Z are non-negative decimal integers.
+
+X is the "major" version number.
+Y is the "minor" version number.
+Z is the "revision" number.
+
+Each release will result in an incremented version number, and the
+version number string will be tagged into the git repository.
+
+When the minor number is even, it refers to a "stable" release, and
+when the minor number is odd, it refers to a "development" release.
+New releases on "stable" are generally bugfixes that are backported
+from it's matching "development".
+
+When a new stable release happens, that also results in the creation
+of a new development release.  For example, the currently hypothetical
+future release of "1.14.0" will also cause the release of an identical
+"1.15.0".
+
+The first public release is version 0.9.0, and will drive to 1.0.0.
+When 1.0.0 is released, that will also create an identical 1.1.0.
+
+We currently have no formal policies for the criteria for releases,
+for the schedule of releases, and no formal policies for how far back
+bugfixes will be backported into stable releases.  Feel free to
+discuss it with project management.
+
+== Patch and change-comment conventions ==
+
+=== Patch format ===
+
+Please submit patches as git format-patch patches *only*.  This ensures that
+your change comment and attribution will be properly imported.
+
+If for some reason it is impossible for you to use git format-patch, at least
+send context (-c) or unified (-u) diffs rather than the default ed (-e) style,
+which is very brittle.
+
+=== Commit comments ===
+
+And please follow git conventions for change comments. That means your comment
+should consist of:
+
+* A summary line, never more than 69 characters long and ideally no more than
+  50 characters long.  These numbers are set by the window sizes of various
+  common web views of git repositories.
+
+* Your summary line should be terse and imperative.  "Fix bug #666" "Add DWIM
+  feature" and "Typo repair" are good summary lines.
+
+* If your comment is longer than the summary line, separate it from
+  the summary with a blank line.
+
+* The remainder of your comment should be one or more paragraphs line-wrapped at
+  72 characters - please do *not* enter entire paragraphs as single lines, it
+  makes life more difficult for browsing tools and people viewing the output of
+  git format-patch. Bulleted list items are also OK.
+
+* In some cases it may be appropriate to end your summary line with a comma
+  or ellipsis ("...") to indicate that it runs dictly into a following paragraph.
+  You should still try to make the summary self-contained when you do this.
+
+Finally, it is not necessary (and is in fact bad style) to list all
+the files a multi-file commit touches in the comment for it.  The
+--name-status, --name-only, and --stat options of git log will report
+this information to users who want it.  It is still appropriate
+to list a file path if you have something specific to say about that
+individual file, or if it's the only one touched in a single-file
+change and you can easily fit it in the summary line along with your
+summary.
+
+Yes, we know the pre-git portions of the history violate some of these.
+That was then, this is now.
+
+=== How to refer to previous commits ===
+
+The best (most human-friendly) way to reference a commit is by quoting its
+summary line.  If you need to disambiguate, give its date and author.
+
+The worst way is to quote its git hash, because humans are not good at
+keeping random strings of hex digits in working memory.  Besides, hashes
+will break if the history is ever moved to another VCS or the repository
+has to be surgically altered.
+
+//end

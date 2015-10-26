@@ -1,41 +1,14 @@
 /*
- * /src/NTP/REPOSITORY/ntp4-dev/libparse/clk_rawdcf.c,v 4.18 2006/06/22 18:40:01 kardel RELEASE_20060622_A
- *
- * clk_rawdcf.c,v 4.18 2006/06/22 18:40:01 kardel RELEASE_20060622_A
- *
  * Raw DCF77 pulse clock support
  *
- * Copyright (c) 1995-2006 by Frank Kardel <kardel <AT> ntp.org>
- * Copyright (c) 1989-1994 by Frank Kardel, Friedrich-Alexander Universitaet Erlangen-Nuernberg, Germany
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in the
- *    documentation and/or other materials provided with the distribution.
- * 3. Neither the name of the author nor the names of its contributors
- *    may be used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND CONTRIBUTORS ``AS IS'' AND
- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHOR OR CONTRIBUTORS BE LIABLE
- * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
- * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
- * OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
- * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
- * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
- * SUCH DAMAGE.
- *
+ * Copyright (c) 1989-2015 by Frank Kardel <kardel <AT> ntp.org>
+ * Copyright 2015 by the NTPsec project contributors
+ * SPDX-License-Identifier: BSD-3-Clause
  */
 
 #include <config.h>
 #include "ntp_fp.h"
+#include "timevalops.h"
 #include "ntp_unixtime.h"
 #include "ntp_calendar.h"
 
@@ -96,7 +69,9 @@ static parse_cvt_fnc_t cvt_rawdcf;
 static parse_inp_fnc_t inp_rawdcf;
 
 typedef struct last_tcode {
-	time_t tcode;	/* last converted time code */
+	time_t      tcode;	/* last converted time code */
+        timestamp_t tminute;	/* sample time for minute start */
+        timestamp_t timeout;	/* last timeout timestamp */
 } last_tcode_t;
 
 #define BUFFER_MAX	61
@@ -219,12 +194,12 @@ convert_rawdcf(
 	const unsigned char *c = dcfprm->zerobits;
 	int i;
 
-	parseprintf(DD_RAWDCF,("parse: convert_rawdcf: \"%s\"\n", buffer));
+	parseprintf(DD_RAWDCF,("parse: convert_rawdcf: \"%.*s\"\n", size, buffer));
 
 	if (size < 57)
 	{
 		msyslog(LOG_ERR, "parse: convert_rawdcf: INCOMPLETE DATA - time code only has %d bits", size);
-		return CVT_NONE;
+		return CVT_FAIL|CVT_BADFMT;
 	}
 
 	for (i = 0; i < size; i++)
@@ -257,7 +232,7 @@ convert_rawdcf(
 		 */
 		parseprintf(DD_RAWDCF,("parse: convert_rawdcf: parity check passed\n"));
 
-		clock_time->flags  = PARSEB_S_ANTENNA|PARSEB_S_LEAP;
+		clock_time->flags  = PARSEB_S_CALLBIT|PARSEB_S_LEAP;
 		clock_time->utctime= 0;
 		clock_time->usecond= 0;
 		clock_time->second = 0;
@@ -298,7 +273,7 @@ convert_rawdcf(
 		if (ext_bf(buffer, DCF_R, dcfprm->zerobits))
 		    clock_time->flags |= PARSEB_CALLBIT;
 
-		parseprintf(DD_RAWDCF,("parse: convert_rawdcf: TIME CODE OK: %d:%d, %d.%d.%d, flags 0x%lx\n",
+		parseprintf(DD_RAWDCF,("parse: convert_rawdcf: TIME CODE OK: %02d:%02d, %02d.%02d.%02d, flags 0x%lx\n",
 				       (int)clock_time->hour, (int)clock_time->minute, (int)clock_time->day, (int)clock_time->month,(int) clock_time->year,
 				       (u_long)clock_time->flags));
 		return CVT_OK;
@@ -308,7 +283,7 @@ convert_rawdcf(
 		/*
 		 * bad format - not for us
 		 */
-		msyslog(LOG_ERR, "parse: convert_rawdcf: parity check FAILED for \"%s\"", buffer);
+	    msyslog(LOG_ERR, "parse: convert_rawdcf: parity check FAILED for \"%.*s\"", size, buffer);
 		return CVT_FAIL|CVT_BADFMT;
 	}
 }
@@ -470,6 +445,8 @@ cvt_rawdcf(
 		if (*c) c++;
 	}
 
+	*s = '\0';
+
         if (rtc == CVT_NONE)
         {
 	       rtc = convert_rawdcf(buffer, size, &dcfparameter, clock_time);
@@ -480,13 +457,15 @@ cvt_rawdcf(
 			newtime = parse_to_unixtime(clock_time, &rtc);
 			if ((rtc == CVT_OK) && t)
 			{
-				if ((newtime - t->tcode) == 60) /* guard against multi bit errors */
+				if ((newtime - t->tcode) <= 600) /* require a successful telegram within last 10 minutes */
 				{
+				        parseprintf(DD_RAWDCF,("parse: cvt_rawdcf: recent timestamp check OK\n"));
 					clock_time->utctime = newtime;
 				}
 				else
 				{
-					rtc = CVT_FAIL|CVT_BADTIME;
+					parseprintf(DD_RAWDCF,("parse: cvt_rawdcf: recent timestamp check FAIL - ignore timestamp\n"));
+					rtc = CVT_SKIP;
 				}
 				t->tcode            = newtime;
 			}
@@ -519,13 +498,52 @@ pps_rawdcf(
 	return CVT_NONE;
 }
 
+static long
+calc_usecdiff(
+	timestamp_t *ref,
+	timestamp_t *base,
+	long         offset
+	)
+{
+	struct timeval delta;
+	long delta_usec = 0;
+	l_fp delt;
+
+	delt = ref->fp;
+	delt.l_i -= offset;
+	L_SUB(&delt, &base->fp);
+	TSTOTV(&delt, &delta);
+
+	delta_usec = 1000000 * (int32_t)delta.tv_sec + delta.tv_usec;
+	return delta_usec;
+}
+
 static u_long
 snt_rawdcf(
 	parse_t *parseio,
 	timestamp_t *ptime
 	)
 {
-	if ((parseio->parse_dtime.parse_status & CVT_MASK) == CVT_OK)
+	/*
+	 * only synthesize if all of following conditions are met:
+	 * - CVT_OK parse_status (we have a time stamp base)
+	 * - ABS(ptime - tminute - (parse_index - 1) sec) < 500ms (spaced by 1 sec +- 500ms)
+	 * - minute marker is available (confirms minute raster as base)
+	 */
+	last_tcode_t  *t = (last_tcode_t *)parseio->parse_pdata;
+	long delta_usec = -1;
+
+	if (t != NULL && t->tminute.tv.tv_sec != 0) {
+		delta_usec = calc_usecdiff(ptime, &t->tminute, parseio->parse_index - 1);
+		if (delta_usec < 0)
+			delta_usec = -delta_usec;
+	}
+
+	parseprintf(DD_RAWDCF,("parse: snt_rawdcf: synth for offset %d seconds - absolute usec error %ld\n",
+			       parseio->parse_index - 1, delta_usec));
+
+	if (((parseio->parse_dtime.parse_status & CVT_MASK) == CVT_OK) &&
+	    (delta_usec < 500000 && delta_usec >= 0)) /* only if minute marker is available */
 	{
 		parseio->parse_dtime.parse_stime = *ptime;
 
@@ -558,10 +576,43 @@ inp_rawdcf(
 
 	if (parse_timedout(parseio, tstamp, &timeout))
 	{
-		parseprintf(DD_PARSE, ("inp_rawdcf: time out seen\n"));
+		last_tcode_t *t = (last_tcode_t *)parseio->parse_pdata;
+		long delta_usec;
 
+		parseprintf(DD_RAWDCF, ("inp_rawdcf: time out seen\n"));
+		/* finish collection */
 		(void) parse_end(parseio);
+
+		if (t != NULL)
+		{
+			/* remember minute start sample time if timeouts occur in minute raster */
+			if (t->timeout.tv.tv_sec != 0)
+			{
+				delta_usec = calc_usecdiff(tstamp, &t->timeout, 60);
+				if (delta_usec < 0)
+					delta_usec = -delta_usec;
+			}
+			else
+			{
+				delta_usec = -1;
+			}
+
+			if (delta_usec < 500000 && delta_usec >= 0)
+			{
+				parseprintf(DD_RAWDCF, ("inp_rawdcf: timeout time difference %ld usec - minute marker set\n", delta_usec));
+				/* collect minute markers only if spaced by 60 seconds */
+				t->tminute = *tstamp;
+			}
+			else
+			{
+				parseprintf(DD_RAWDCF, ("inp_rawdcf: timeout time difference %ld usec - minute marker cleared\n", delta_usec));
+				memset((char *)&t->tminute, 0, sizeof(t->tminute));
+			}
+			t->timeout = *tstamp;
+		}
 		(void) parse_addchar(parseio, ch);
+
+		/* pass up to higher layers */
 		return PARSE_INP_TIME;
 	}
 	else

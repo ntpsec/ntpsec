@@ -2,7 +2,6 @@
  * timespecops.h -- calculations on 'struct timespec' values
  *
  * Written by Juergen Perlinger (perlinger@ntp.org) for the NTP project.
- * The contents of 'html/copyright.html' apply.
  *
  * Rationale
  * ---------
@@ -34,6 +33,9 @@
  *
  * Input and output operands may overlap; all input is consumed before
  * the output is written to.
+ *
+ * Copyright 2015 by the NTPsec project contributors
+ * SPDX-License-Identifier: NTP
  */
 #ifndef GUARD_TIMESPECOPS_H
 #define GUARD_TIMESPECOPS_H

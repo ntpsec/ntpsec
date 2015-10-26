@@ -11,9 +11,6 @@
 #if !defined(FNM_CASEFOLD) && defined(FNM_IGNORECASE)
 # define FNM_CASEFOLD FNM_IGNORECASE
 #endif
-#ifdef HAVE_SYS_PARAM_H
-# include <sys/param.h>
-#endif
 #ifdef HAVE_SYS_IOCTL_H
 # include <sys/ioctl.h>
 #endif
@@ -75,6 +72,14 @@ extern int listen_to_virtual_ips;
 #define IPTOS_DSCP_EF 0xb8
 #endif
 int qos = IPTOS_DSCP_EF;	/* QoS RFC3246 */
+
+#ifdef ENABLE_LEAP_SMEAR
+/* TODO burnicki: This should be moved to ntp_timer.c, but if we do so
+ * we get a linker error. Since we're running out of time before the leap
+ * second occurs, we let it here where it just works.
+ */
+int leap_smear_intv;
+#endif
 
 /*
  * NIC rule entry
@@ -3230,8 +3235,8 @@ read_refclock_packet(
 	l_fp			ts
 	)
 {
-	int			i;
-	int			buflen;
+	size_t			i;
+	ssize_t			buflen;
 	int			saved_errno;
 	int			consumed;
 	struct recvbuf *	rb;
@@ -3251,10 +3256,10 @@ read_refclock_packet(
 
 	i = (rp->datalen == 0
 	     || rp->datalen > sizeof(rb->recv_space))
-	        ? (int)sizeof(rb->recv_space)
+	        ? sizeof(rb->recv_space)
 		: rp->datalen;
 	do {
-		buflen = read(fd, (char *)&rb->recv_space, (u_int)i);
+		buflen = read(fd, (char *)&rb->recv_space, i);
 	} while (buflen < 0 && EINTR == errno);
 
 	if (buflen <= 0) {
@@ -4592,10 +4597,15 @@ process_routing_msgs(struct asyncio_reader *reader)
 	cnt = read(reader->fd, buffer, sizeof(buffer));
 
 	if (cnt < 0) {
-		msyslog(LOG_ERR,
-			"i/o error on routing socket %m - disabling");
-		remove_asyncio_reader(reader);
-		delete_asyncio_reader(reader);
+		if (errno == ENOBUFS) {
+			msyslog(LOG_ERR,
+				"routing socket reports: %m");
+		} else {
+			msyslog(LOG_ERR,
+				"routing socket reports: %m - disabling");
+			remove_asyncio_reader(reader);
+			delete_asyncio_reader(reader);
+		}
 		return;
 	}
 

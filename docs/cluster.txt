@@ -35,13 +35,13 @@ of candidates is greater than the _maxclock_ _threshold_, the association
 is demobilized. This is useful in the schemes described on the
 link:discover.html[Automatic Server Discovery Schemes] page. The
 maxclock threshold default is 10, but it can be changed using the
-`maxclock` option of the link:miscopt.html#tos[`tos`] command. Further
++maxclock+ option of the link:miscopt.html#tos[+tos+] command. Further
 pruning is subject to the following termination conditions, but no
 associations will be automatically demobilized.
 
 The termination condition has two parts. First, if the number of
 survivors is not greater than the _minclock_ _threshold_ set by the
-`minclock` option of the link:miscopt.html#tos[`tos`] command, the
++minclock+ option of the link:miscopt.html#tos[+tos+] command, the
 pruning process terminates. The _minclock_ default is 3, but can be
 changed to fit special conditions, as described on the
 link:prefer.html[Mitigation Rules and the prefer Keyword] page.
