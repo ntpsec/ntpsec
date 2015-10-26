@@ -102,7 +102,7 @@ always with full years and timezone offset.
 
 === Copyrights and licenses ===
 
-Much of the historic code in this distribution is under an "NTP
+Much of the historic code in this distribution is under the "NTP
 License" resembling BSD-2-clause.  Our favored licenses are
 BSD-2-clause for code and Creative Commons Attribute 4.0 License for
 documentation.
@@ -135,8 +135,8 @@ Modify as needed for whatever comment syntax the language or markup uses.
 Good places for these markings are at the end of an extended
 header comment, or at the very top of the file.
 
-When you modify a file, leave existing copyrights in place -
-especially all references to Dr. Dave Mills, to Mr Harlan Stenn, and
+When you modify a file, leave existing copyright markings in place -
+especially all references to Dr. Dave Mills, to Mr. Harlan Stenn, and
 to the Network Time Foundation.
 
 You *may* add a project copyright and replace the inline license
