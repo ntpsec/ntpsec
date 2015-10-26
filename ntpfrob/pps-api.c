@@ -9,14 +9,17 @@
  *  SPDX-License-Identifier: BSD-2-Clause
  */
 
+#include "config.h"
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <sys/types.h>
 #include <time.h>
-#include <sys/timepps.h>
 #include <unistd.h>
+#ifdef HAVE_SYS_TIMEPPS_H
+#include <sys/timepps.h>
 
 #define timespecsub(vvp, uvp)                                           \
         do {                                                            \
@@ -50,15 +53,20 @@ static int err(int out, const char *legend)
     fprintf(stderr, "ntpfrob: %s\n", legend);
     exit(out);
 }
+#endif /* HAVE_SYS_TIMEPPS_H */
 
 void ppscheck(char *device)
 {
+#ifndef HAVE_SYS_TIMEPPS_H
+ 	fputs("ntpfrob: PPS is not available.\n", stderr);
+	exit(1);
+#else
 	int fd;
 	pps_info_t pi;
 	pps_params_t pp;
 	pps_handle_t ph;
 	int i, mode;
-	u_int olda, oldc;
+	u_int olda = 0, oldc = 0;
 	struct timespec to;
 
 	if (device == NULL)
@@ -100,6 +108,7 @@ void ppscheck(char *device)
 		olda = pi.assert_sequence;
 		oldc = pi.clear_sequence;
 	}
+#endif /* HAVE_SYS_TIMEPPS_H */
 }
 
 /* end */

@@ -5,7 +5,7 @@
 ["verse",subs="normal"]
 Address: 127.127.35.'u'
 Reference ID: PCF
-Parallel Port: `/dev/pcfclocks/`__u__ or `/dev/pcfclocku`
+Parallel Port: +/dev/pcfclocks/+__u__ or +/dev/pcfclocku+
 
 == Deprecation warning ==
 
@@ -31,33 +31,33 @@ http://schumann.cx/pcfclock/[FreeBSD] are available.
 This driver uses C library functions to convert the received timecode to
 UTC and thus requires that the local timezone be CET or CEST. If your
 server is not located in Central Europe you have to set the environment
-variable TZ to CET before starting `{ntpd}`.
+variable TZ to CET before starting +{ntpd}+.
 
 == Monitor Data ==
 
-Each timecode is written to the `clockstats` file in the format
-`YYYY MM DD HH MI SS`.
+Each timecode is written to the +clockstats+ file in the format
++YYYY MM DD HH MI SS+.
 
 == Fudge Factors ==
 
-`time1` 'time'::
++time1+ 'time'::
    Specifies the time offset calibration factor, in seconds and fraction,
    with default 0.1725.
-`time2` 'time'::
++time2+ 'time'::
    Not used by this driver.
-`stratum` 'number'::
++stratum+ 'number'::
    Specifies the driver stratum, in decimal from 0 to 15, with default 0.
-`refid` 'string'::
++refid+ 'string'::
    Specifies the driver reference identifier, an ASCII string from one to
-   four characters, with default `PCF`.
-`flag1 0 | 1`::
+   four characters, with default +PCF+.
++flag1 {0 | 1}+::
    Not used by this driver.
-`flag2 0 | 1`::
++flag2 {0 | 1}+::
    If set to 1, the radio clock's synchronisation status bit is ignored, ie
    the timecode is used without a check.
-`flag3 0 | 1`::
++flag3 {0 | 1}+::
    Not used by this driver.
-`flag4 0 | 1`::
++flag4 {0 | 1}+::
    Not used by this driver.
 
 '''''

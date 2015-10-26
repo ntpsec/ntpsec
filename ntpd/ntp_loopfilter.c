@@ -567,7 +567,7 @@ local_clock(
 		switch (state) {
 
 		/*
-		 * In SYNC state we ignore the first outlyer and switch
+		 * In SYNC state we ignore the first outlier and switch
 		 * to SPIK state.
 		 */
 		case EVNT_SYNC:
@@ -578,8 +578,8 @@ local_clock(
 			return (0);
 
 		/*
-		 * In FREQ state we ignore outlyers and inlyers. At the
-		 * first outlyer after the stepout threshold, compute
+		 * In FREQ state we ignore outliers and inliers. At the
+		 * first outlier after the stepout threshold, compute
 		 * the apparent frequency correction and step the phase.
 		 */
 		case EVNT_FREQ:
@@ -591,8 +591,8 @@ local_clock(
 			/* fall through to EVNT_SPIK */
 
 		/*
-		 * In SPIK state we ignore succeeding outlyers until
-		 * either an inlyer is found or the stepout threshold is
+		 * In SPIK state we ignore succeeding outliers until
+		 * either an inlier is found or the stepout threshold is
 		 * exceeded.
 		 */
 		case EVNT_SPIK:

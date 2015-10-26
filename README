@@ -22,23 +22,24 @@ NEWS::		What's new in this release.
 
 README::	This file.
 
-devel-docs/::	Documentation aimed at developers.
-
-conf/::		Directory containing a motley collection of
-		configuration files for various systems. For example only.
+devel/::	Documentation aimed at developers.
 
 docs/::		Directory containing a complete set of documentation on
 		building and configuring a NTP server or client. The files
 		are in asciidoc markup.  This replaces the 'html' directory
 		of precious versions, but html can be generated from it.
 
+etc/::		Directory containing a motley collection of configuration files
+		and launch scruots for various systems. For example
+		only.
+
 include/::	Directory containing include header files used by most
 		programs in the distribution.
 
-lib/::		Source code for third-party libraries included in the
-		distribution.  Currently just one: isc, utility code
-		from Internet Systems Consortium.  The local copy has
-		been significantly modified.
+INSTALL::	Installation instructions.
+
+libisc/::	Utility code from Internet Systems Consortium.  The local
+		copy has been significantly trimmed and modified.
 
 libjsmn/::	A minimal JSON library used by the GPSD-JSON driver.
 
@@ -51,42 +52,60 @@ libparse/:: 	This directory contains the files making up the parser for
 		by just providing a conversion routine and the
 		appropriate NTP parameters
 
+NEWS::		Project news summarizing user-visible changes.
+
 ntpd/::		Sources for the main time-synchronization daemon.
 
-ntpdate/::	Directory containing sources for a program to set the
-		local machine time from one or more remote machines
-		running NTP.  Operates like rdate, but much more accurate.
+ntpdig/::	Query an NTP or SNTP server to report or set the time.
+		(This tool was formerly sntp).
 
-ntpfrob::       The ntpfrob utility collects several small diagnostic
+ntpfrob/::       The ntpfrob utility collects several small diagnostic
 		functions for reading and tweaking the local clock
 		hardware, including reading the clock tick rate,
 		precision, and jitter.
 
-ntpkeygen::
-		Directory containing the utility program used to generate
+ntpkeygen/::	Directory containing the utility program used to generate
 		NTP authentication keys.
+
+ntpleapfetch/::	Directory containing a script ro be run from a cron job
+		to keep your local leap-second file properly updated.
 
 ntpq/::		Directory containing sources for a utility program to
 		query local and remote NTP peers for state variables and
 		related timekeeping information. This program conforms
 		to Appendix A of the NTP Version 3 Specification RFC 1305.
 
+ntptime/:: 	Directory containing a utility for reading and modifying
+		kernel parameters related to the local clock.
+
+ntptrace/::	Directory containing source for a utility program that
+		can be used to reveal the chain of NTP peers from a
+		designated peer to the primary server at the root of the
+		timekeeping subnet.
+
+ntpwait/::	Directory contsining a script that nlocks until ntpd is
+		in state 4 (synchronized). Useful at boot time, to delay
+		the boot sequence until after "ntpd -g" has set the time.
+
+perllib/::	NTP interface package required to query Mode 6 packets
+		from the daemon from Perl scripts.
+
 ports/::	Subdirectories of this contain code for non-Unix operating
 		systems.  At present there is just one, for Windows.
 
-scripts/::	Directory containing scripts to build the configuration
-		files in this directory and then the makefiles used in
-		various dependent directories. the subdirectories
-		monitoring and support hold various perl and shell
-		scripts for visualizing synchronization and daemon startup.
+pylib/::	A library of Python procedures used by the build sytem.
 
-ntpdig/::	Query an NTP or SNTP server to report or set the time.
-		(This tool was formerly sntp).
+README::	This file
 
 tests/::	Self-test code.
 
-util/::		Directory containing sources for various utility and
-		testing programs.
+util/:: 	Directory containing sources for various utility and testing
+		programs that are *not* part of a normal installation.
+		The subdirectories monitoring/ and support/ hold
+		various perl and shell scripts for visualizing
+		synchronization and daemon startup.
+
+VERSION::	The version stamp, to be used by scripts and programs.
 
 waf::		A copy of the waf builder.  This is the engine used to configure
 		and build the codebase.

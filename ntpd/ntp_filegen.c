@@ -1,6 +1,4 @@
 /*
- * ntp_filegen.c,v 3.12 1994/01/25 19:06:11 kardel Exp
- *
  *  implements file generations support for NTP
  *  logfiles and statistic files
  *
@@ -8,8 +6,7 @@
  * Copyright (C) 1992, 1996 by Rainer Pruy
  * Friedrich-Alexander Universitaet Erlangen-Nuernberg, Germany
  *
- * This code may be modified and used freely
- * provided credits remain intact.
+ * SPDX-License-Identifier: BSD-2-clause
  */
 
 #include <config.h>

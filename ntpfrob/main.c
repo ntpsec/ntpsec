@@ -1,5 +1,5 @@
 /* Copyright 2015 by the NTPsec project contributors
-   SPDX-License-Identifier: BSD-2-Clause
+ * SPDX-License-Identifier: BSD-2-Clause
  */
 
 #include <stdlib.h>
@@ -8,22 +8,14 @@
 #include <stdbool.h>
 
 #include "config.h"
-
-/*
- * Our methods, one per linked module
- */
-extern void ppscheck(char *device);
-extern void tickadj(const bool json, const int tick);
-extern void jitter(const bool json);
-extern void stepback(void);
-extern void precision(const bool json);
+#include "ntpfrob.h"
 
 int
 main(int argc, char **argv)
 {
 	int ch;
-	bool json = false;
-	while ((ch = getopt(argc, argv, "a:Acejp:")) != EOF) {
+	iomode mode = plain_text;
+	while ((ch = getopt(argc, argv, "a:Acejp:r")) != EOF) {
 		switch (ch) {
 		case 'A':
 #ifdef HAVE_ADJTIMEX
@@ -35,22 +27,22 @@ main(int argc, char **argv)
 		    break;
 		case 'a':
 #ifdef HAVE_ADJTIMEX
-		    tickadj(json, atoi(optarg));
+		    tickadj(mode, atoi(optarg));
 #else
 		    fputs("ntpfrob: no adjtimex(2) call.\n", stderr);
 		    exit(0);
 #endif
 		    break;
 		case 'c':
-		    jitter(json);
+		    jitter(mode);
 		    exit(0);
 		    break;
 		case 'e':
-		    precision(json);
+		    precision(mode);
 		    exit(0);
 		    break;
 		case 'j':
-		    json = true;
+		    mode = json;
 		    break;
 		case 'p':
 #ifdef HAVE_SYS_TIMEPPS_H
@@ -59,6 +51,9 @@ main(int argc, char **argv)
 		    fputs("ntpfrob: no PPS kernel interface.\n", stderr);
 		    exit(0);
 #endif
+		    break;
+		case 'r':
+		    mode = raw;
 		    break;
 		default:
 		    fputs("ntpfrob: no mode option specified.\n", stderr);

@@ -5,33 +5,9 @@
  *   On systems that support PPSAPI (RFC2783) PPSAPI is the
  *   preferred interface.
  *
- * Copyright (c) 1995-2009 by Frank Kardel <kardel <AT> ntp.org>
- * Copyright (c) 1989-1994 by Frank Kardel, Friedrich-Alexander Universitaet Erlangen-Nuernberg, Germany
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in the
- *    documentation and/or other materials provided with the distribution.
- * 3. Neither the name of the author nor the names of its contributors
- *    may be used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND CONTRIBUTORS ``AS IS'' AND
- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHOR OR CONTRIBUTORS BE LIABLE
- * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
- * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
- * OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
- * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
- * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
- * SUCH DAMAGE.
- *
+ * Copyright (c) 1989-2015 by Frank Kardel <kardel@ntp.org>
+ * Copyright 2015 by the NTPsec project contributors
+ * SPDX-License-Identifier: BSD-3-Clause
  */
 
 #include "config.h"
@@ -2053,7 +2029,7 @@ parsestate(
 	  {
 		  { PARSEB_S_LEAP,     "LEAP INDICATION" },
 		  { PARSEB_S_PPS,      "PPS SIGNAL" },
-		  { PARSEB_S_ANTENNA,  "ANTENNA" },
+		  { PARSEB_S_CALLBIT,  "CALLBIT" },
 		  { PARSEB_S_POSITION, "POSITION" },
 		  { 0,		       NULL }
 	  };
@@ -2075,7 +2051,7 @@ parsestate(
 		i++;
 	}
 
-	if (lstate & (PARSEB_S_LEAP|PARSEB_S_ANTENNA|PARSEB_S_PPS|PARSEB_S_POSITION))
+	if (lstate & (PARSEB_S_LEAP|PARSEB_S_CALLBIT|PARSEB_S_PPS|PARSEB_S_POSITION))
 	{
 		if (s != t)
 			t = ap(buffer, size, t, "; ");
@@ -2506,7 +2482,7 @@ parse_start(
 	if (!notice)
         {
 		NLOG(NLOG_CLOCKINFO) /* conditional if clause for conditional syslog */
-			msyslog(LOG_INFO, "NTP PARSE support: Copyright (c) 1989-2009, Frank Kardel");
+			msyslog(LOG_INFO, "NTP PARSE support: Copyright (c) 1989-2015, Frank Kardel");
 		notice = 1;
 	}
 
@@ -3241,6 +3217,8 @@ parse_process(
 					msyslog(LOG_WARNING, "PARSE receiver #%d: FAILED TIMECODE: \"%s\" (check receiver configuration / wiring)",
 						CLK_UNIT(parse->peer), mkascii(buffer, sizeof buffer, tmpctl.parsegettc.parse_buffer, (unsigned)(tmpctl.parsegettc.parse_count - 1)));
 			}
+			/* copy status to show only changes in case of failures */
+			parse->timedata.parse_status = parsetime->parse_status;
 		}
 	}
 

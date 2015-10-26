@@ -7,7 +7,9 @@
  *		Newark, DE 19711
  * Some parts borrowed from the older ntp_config.c
  * Copyright (c) 2006
- */
+ * Copyright 2015 by the NTPsec project contributors
+ * SPDX-License-Identifier: BSD-2-clause
+*/
 
 #include <config.h>
 
@@ -17,9 +19,6 @@
 
 #include <stdio.h>
 #include <ctype.h>
-#ifdef HAVE_SYS_PARAM_H
-# include <sys/param.h>
-#endif
 #include <signal.h>
 #include <sys/wait.h>
 
@@ -3469,6 +3468,13 @@ config_vars(
 			stats_config(STATS_LEAP_FILE, curr_var->value.s);
 			break;
 
+#ifdef ENABLE_LEAP_SMEAR
+		case T_Leapsmearinterval:
+			leap_smear_intv = curr_var->value.i;
+			msyslog(LOG_INFO, "config: leap smear interval %i s", leap_smear_intv);
+			break;
+#endif
+
 		case T_Pidfile:
 			stats_config(STATS_PID_FILE, curr_var->value.s);
 			break;
@@ -4178,7 +4184,7 @@ config_sim(
 	serv_info = HEAD_PFIFO(sim_n->servers);
 	for (; serv_info != NULL; serv_info = serv_info->link)
 		simulation.num_of_servers++;
-	simulation.servers = emalloc(simulation.num_of_servers *
+	simulation.servers = eallocarray(simulation.num_of_servers,
 				     sizeof(simulation.servers[0]));
 
 	i = 0;
@@ -4724,8 +4730,9 @@ gettokens_netinfo (
 				if (namelist.ni_namelist_len == 0) continue;
 
 				config->val_list =
-				    emalloc(sizeof(char*) *
-				    (namelist.ni_namelist_len + 1));
+				    eallocarray(
+					(namelist.ni_namelist_len + 1),
+					sizeof(char*));
 				val_list = config->val_list;
 
 				for (index = 0;

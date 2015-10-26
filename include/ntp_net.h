@@ -9,12 +9,6 @@
 #include <sys/socket.h>
 #include <net/if.h>
 #include <netinet/in.h>
-#ifdef HAVE_NET_IF_VAR_H
-#include <net/if_var.h>
-#endif
-#ifdef HAVE_NETINET_IN_VAR_H
-#include <netinet/in_var.h>
-#endif
 
 #include "ntp_rfc2553.h"
 #include "ntp_malloc.h"

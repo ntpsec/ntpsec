@@ -399,27 +399,27 @@ screen width and looks similar to:
 
 == Fudge Factors ==
 
-time1 _time_ ::
++time1+ _time_ ::
   Specifies the time offset calibration factor, in seconds and fraction.
   The default value depends on the clock type.
-time2 _time_ ::
++time2+ _time_ ::
   If flag1 is 0, time2 specifies the offset of the PPS signal from the
   actual time (PPS fine tuning).  If flag1 is 1, time2 specifies the
   number of seconds a receiver with a premium local oscillator can be
   trusted after losing synchronisation.
-stratum _stratum_ ::
++stratum+ _stratum_ ::
   The stratum for this reference clock.
-refid _refid_ ::
++refid+ _refid_ ::
   The refid for this reference clock.
 
-flag1 \{ 0 | 1 } ::
++flag1 {0 | 1}+::
   If 0, the fudge factor time2 refers to the PPS offset. +
   If 1, time2 refers to the TRUST TIME.
-flag2 \{ 0 | 1 } ::
++flag2 {0 | 1}+::
   If flag2 is 1, sample PPS on CLEAR instead of on ASSERT.
-flag3 \{ 0 | 1 } ::
++flag3 {0 | 1}+::
   If flag3 is 1, link kernel PPS tracking to this refclock instance.
-flag4 \{ 0 | 1 } ::
++flag4 {0 | 1}+::
   Delete next leap second instead of adding it. (You'll need to wait a
   bit for that to happen 8-)
 

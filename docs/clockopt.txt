@@ -16,7 +16,7 @@ include::includes/clockopt.txt[]
 '''''
 
 [[addrs]]
-== Reference Clock Adddresses ==
+== Reference Clock Addresses ==
 
 Unless noted otherwise, further information about these commands is on
 the link:refclock.html[Reference Clock Support] page.

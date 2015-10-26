@@ -213,15 +213,12 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\..\libntp\adjtime.c" />
-    <ClCompile Include="..\..\..\..\libntp\atoint.c" />
     <ClCompile Include="..\..\..\..\libntp\atolfp.c" />
-    <ClCompile Include="..\..\..\..\libntp\atouint.c" />
     <ClCompile Include="..\..\..\..\libntp\audio.c" />
     <ClCompile Include="..\..\..\..\libntp\authkeys.c" />
     <ClCompile Include="..\..\..\..\libntp\authreadkeys.c" />
     <ClCompile Include="..\..\..\..\libntp\authusekey.c" />
     <ClCompile Include="..\..\..\..\libntp\a_md5encrypt.c" />
-    <ClCompile Include="..\..\..\..\libntp\buftvtots.c" />
     <ClCompile Include="..\..\..\..\libntp\caljulian.c" />
     <ClCompile Include="..\..\..\..\libntp\caltontp.c" />
     <ClCompile Include="..\..\..\..\libntp\calyearstart.c" />
@@ -233,7 +230,6 @@
     <ClCompile Include="..\..\..\..\libntp\emalloc.c" />
     <ClCompile Include="..\..\..\..\libntp\findconfig.c" />
     <ClCompile Include="..\..\..\..\libntp\getopt.c" />
-    <ClCompile Include="..\..\..\..\libntp\hextoint.c" />
     <ClCompile Include="..\..\..\..\libntp\hextolfp.c" />
     <ClCompile Include="..\..\..\..\libntp\humandate.c" />
     <ClCompile Include="..\..\..\..\libntp\icom.c" />
@@ -270,7 +266,6 @@
     <ClCompile Include="..\..\..\..\libntp\systime.c" />
     <ClCompile Include="..\..\..\..\libntp\timetoa.c" />
     <ClCompile Include="..\..\..\..\libntp\timevalops.c" />
-    <ClCompile Include="..\..\..\..\libntp\uglydate.c" />
     <ClCompile Include="..\..\..\..\libntp\vint64ops.c" />
     <ClCompile Include="..\..\..\..\libntp\work_fork.c" />
     <ClCompile Include="..\..\..\..\libntp\work_thread.c" />
@@ -290,7 +285,6 @@
     <ClCompile Include="..\..\..\..\lib\isc\nls\msgcat.c" />
     <ClCompile Include="..\..\..\..\lib\isc\ondestroy.c" />
     <ClCompile Include="..\..\..\..\lib\isc\sha1.c" />
-    <ClCompile Include="..\..\..\..\lib\isc\sockaddr.c" />
     <ClCompile Include="..\..\..\..\lib\isc\task.c" />
     <ClCompile Include="..\..\..\..\lib\isc\win32\condition.c" />
     <ClCompile Include="..\..\..\..\lib\isc\win32\interfaceiter.c" />
@@ -348,7 +342,6 @@
     <ClInclude Include="..\..\..\..\include\timevalops.h" />
     <ClInclude Include="..\..\..\..\include\vint64ops.h" />
     <ClInclude Include="..\..\..\..\lib\isc\include\isc\event.h" />
-    <ClInclude Include="..\..\..\..\lib\isc\include\isc\hash.h" />
     <ClInclude Include="..\..\..\..\lib\isc\include\isc\interfaceiter.h" />
     <ClInclude Include="..\..\..\..\lib\isc\include\isc\log.h" />
     <ClInclude Include="..\..\..\..\lib\isc\include\isc\md5.h" />

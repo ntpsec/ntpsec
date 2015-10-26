@@ -73,9 +73,9 @@ packet sent or received and the next packet for that source. The minimum
 receive headway is defined as the guard time. In the reference
 implementation, if the receive headway is less than the guard time, the
 packet is discarded. The guard time defaults to 2 s, but this can be
-changed using the `minimum` option of the
-link:accopt.html#discard[`discard`] command. By design, the minimum
-interval between `burst` and `iburst` packets sent by any client is 2 s,
+changed using the +minimum+ option of the
+link:accopt.html#discard[+discard+] command. By design, the minimum
+interval between +burst+ and +iburst+ packets sent by any client is 2 s,
 which does not violate this constraint. Packets sent by other
 implementations that violate this constraint will be dropped and a KoD
 packet returned, if enabled.
@@ -94,9 +94,9 @@ counter increments by a value equal to the minimum average headway (MAH)
 and then decrements by one each second. For each packet transmitted, the
 output counter increments by the MAH and then decrements by one each
 second. The default MAH is 8 s, but this can be changed using the
-`average` option of the link:accopt.html#discard[`discard`] command.
++average+ option of the link:accopt.html#discard[+discard+] command.
 
-If the `iburst` or `burst` options are present, the poll algorithm sends
+If the +iburst+ or +burst+ options are present, the poll algorithm sends
 a burst of packets instead of a single packet at each poll opportunity.
 The NTPv4 specification requires that bursts contain no more than eight
 packets. Starting from an output counter value of zero, the maximum
@@ -151,8 +151,8 @@ proactive response is needed to cause the client to slow down. A special
 packet has been created for this purpose called the kiss-o'-death (KoD)
 packet. KoD packets have leap indicator 3, stratum 0 and the reference
 identifier set to a four-octet ASCII code. At present, only one code
-`RATE` is sent by the server if the `limited` and `kod` flags of the
-link:accopt.html#restrict[`restrict`] command are present and either the
++RATE+ is sent by the server if the +limited+ and +kod+ flags of the
+link:accopt.html#restrict[+restrict+] command are present and either the
 guard time or MAH time are violated.
 
 A client receiving a KoD packet is expected to slow down; however, no

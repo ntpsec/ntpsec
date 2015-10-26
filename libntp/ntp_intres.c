@@ -56,15 +56,9 @@
 #include <stdio.h>
 #include <ctype.h>
 #include <signal.h>
-
-/**/
 #include <sys/types.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
-/**/
-#ifdef HAVE_SYS_PARAM_H
-# include <sys/param.h>
-#endif
 
 #if defined(HAVE_RESOLV_H) && defined(HAVE_RES_INIT)
 # ifdef HAVE_ARPA_NAMESER_H

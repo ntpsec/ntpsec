@@ -40,7 +40,7 @@ any assistance in that repair.
 This distribution includes support for the Autokey public key algorithms
 and protocol specified in RFC-5906 "Network Time Protocol Version 4:
 Autokey Specification". This support is available only if the OpenSSL
-library has been installed and the `--enable-autokey` option is
+library has been installed and the +--enable-autokey+ option is
 specified when the distribution is built.
 
 Public key cryptography is generally considered more secure than
@@ -98,11 +98,11 @@ additional certificates are produced with the Autokey host name as
 subject and the host that signs the certificate as issuer.
 
 There are two timeouts associated with the Autokey scheme. The _key list
-timeout_ is set by the `automax` command, which specifies the interval
+timeout_ is set by the +automax+ command, which specifies the interval
 between generating new key lists by the client or server. The default
 timeout of about 1.1 hr is appropriate for the majority of
 configurations and ordinarily should not be changed. The _revoke
-timeout_ is set by the `revoke` command, which specifies the interval
+timeout_ is set by the +revoke+ command, which specifies the interval
 between generating new server private values. It is intended to reduce
 the vulnerability to cryptanalysis; however, new values require the
 server to encrypt each client cookie separately. The default timeout of
@@ -190,12 +190,12 @@ In some configurations where more than one subnet shares an Ethernet or
 when multiple subnets exist in a manycast or pool configuration, it is
 useful to isolate one subnet from another. In Autokey this can be done
 using group names. An Autokey host name is specified by the
-`-s`` host@group` option of the  {ntpkeygen} program, where _`host`_ is
-the host name and _`group`_ is the group name. If _`host`_ is omitted,
-the name defaults to the string returned by the Unix `gethostname()`
++-s++ host@group+ option of the  {ntpkeygen} program, where +host+ is
+the host name and +group+ is the group name. If +host+ is omitted,
+the name defaults to the string returned by the Unix +gethostname()+
 routine, ordinarily the DNS name of the host. Thus, for host
-`beauregard.udel.edu` the option `-s @red` specifies the Autokey host
-name `beauegard.udel.edu@red`.
++beauregard.udel.edu+ the option +-s @red+ specifies the Autokey host
+name +beauregard.udel.edu@red+.
 
 A subnet host with a given group name will discard ASSOC packets from
 all subnets with a different group name. This effectively disables the
@@ -206,13 +206,13 @@ filtered in the same way.
 
 However, as shown in Figure 1, there are configurations where a TH of
 one group needs to listen to a TA of a different group. This is
-accomplished using the `ident group` option of the `crypto` command
-and/or the `ident group` option of the `server` command. The former case
+accomplished using the +ident group+ option of the +crypto+ command
+and/or the +ident group+ option of the +server+ command. The former case
 applies to all hosts sharing a common broadcast, manycast or symmetric
 passive modes, while the latter case applies to each individual
 client/server or symmetric active mode association. In either case the
 host listens to the specified group name in addition to the group name
-specified in the `-s` option of the `{ntpkeygen}` program.
+specified in the +-s+ option of the +{ntpkeygen}+ program.
 
 [[secure]]
 == Secure Groups ==
@@ -264,32 +264,32 @@ which usually contains a subset of the keys file.
 Figure 2 shows how keys and parameters are distributed to servers and
 clients. A TA constructs the encrypted keys file and the nonencrypted
 parameters file. Hosts with no dependent clients can retrieve client
-parameter files from an archive or web page. The `{ntpkeygen}` program
-can export parameter files using the `-e` option. By convention, the
-file name is the name of the secure group and must match the `ident`
-option of the `crypto` command or the `ident` option of the `server`
+parameter files from an archive or web page. The +{ntpkeygen}+ program
+can export parameter files using the +-e+ option. By convention, the
+file name is the name of the secure group and must match the +ident+
+option of the +crypto+ command or the +ident+ option of the +server+
 command.
 
 When more than one TH Is involved in the secure group, it is convenient
 for the TAs and THs to use the same encrypted key files. To do this, one
-of the parent TAs includes the `-i group` option on the `{ntpkeygen}`
-command line, where _`group`_ is the name of the child secure group. The
-`{ntpkeygen}` program can export server keys files using the `-q` option
+of the parent TAs includes the +-i group+ option on the +{ntpkeygen}+
+command line, where +group+ is the name of the child secure group. The
++{ntpkeygen}+ program can export server keys files using the +-q+ option
 and a chosen remote password. The files are installed on the TAs and
 then renamed using the name given as the first line in the file, but
-without the filestamp. The secure group name must match the `ident`
+without the filestamp. The secure group name must match the +ident+
 option for all TAs.
 
 [red]#In the latest Autokey version, the host name and group name are 
-independent of each other and the `host` option of the `crypto` command
+independent of each other and the +host+ option of the +crypto+ command
 is deprecated. When compatibility with older versions is required,
-specify the same name for both the `-s` and `-i` options.#
+specify the same name for both the +-s+ and +-i+ options.#
 
 In special circumstances the Autokey message digest algorithm can be
-changed using the `digest` option of the `crypto` command. The digest
+changed using the +digest+ option of the +crypto+ command. The digest
 algorithm is separate and distinct from the symmetric key message digest
 algorithm. If compliance with FIPS 140-2 is required, the algorithm must
-be ether `SHA` or `SHA1`. The Autokey message digest algorithm must be
+be ether +SHA+ or +SHA1+. The Autokey message digest algorithm must be
 the same for all participants in the NTP subnet.
 
 Example
@@ -313,43 +313,43 @@ operated by NIST and USNO. Configuration for TC is very simple.
 Referring to Figure 1, for each TH, A, B, R and X, as root:
 
 ["literal",subs="normal"]
-`# cd /usr/local/etc`   
-`# {ntpkeygen} -T`
++# cd /usr/local/etc+   
++# {ntpkeygen} -T+
 
-and for the other hosts the same commands without the `-T` option. This
+and for the other hosts the same commands without the +-T+ option. This
 generates an RSA private/public host key file and a self-signed
 certificate file for the RSA digital signature algorithm with the MD5
 message digest algorithm. For the THs a trusted certificate is
-generated; for the others a nontreusted certificate is generated.
-Include in the `{ntpconf}` configuration file for all hosts other than
+generated; for the others a nontrusted certificate is generated.
+Include in the +{ntpconf}+ configuration file for all hosts other than
 the primary servers, A, B and R, something like
 
 ["literal",subs="normal"]
-`# server 'host' autokey`   
-`# crypto`   
-`# driftfile /etc/ntp.drift`
++# server 'host' autokey+   
++# crypto+   
++# driftfile /etc/ntp.drift+
 
-where _`host`_ is the selected server name as shown in the figure.
+where +host+ is the selected server name as shown in the figure.
 Servers A, B and R are configured for local reference clocks or trusted
 remoter servers as required.
 
 In the above configuration examples, the default host name is the string
-returned by the Unix `gethostname()` routine, ordinarily the DNS name of
+returned by the Unix +gethostname()+ routine, ordinarily the DNS name of
 the host. This name is used as the subject and issuer names on the
 certificate, as well as the default password for the encrypted keys
-file. The host name can be changed using the `-s` option of the
-`{ntpkeygen}` program. The default password can be changed using the `-p`
-option of the `{ntpkeygen}` program and the `pw` option of the `crypto`
+file. The host name can be changed using the +-s+ option of the
++{ntpkeygen}+ program. The default password can be changed using the +-p+
+option of the +{ntpkeygen}+ program and the +pw+ option of the +crypto+
 configuration command.
 
 Group names can be added to this configuration by including the
-`-s host@group` option with the `{ntpkeygen}` program. For the purpose of
-illustration, the `host` string is empty, signifying the default host
-name. For example, @`yellow` can be used for the Alice group, @`orange`
-for the Helen group and @`blue` for the Carol group. In addition, for TH
-X the `ident yellow` option should be added to the `server` command for
-the Alice group and the `ident orange` option should be added to the
-`server` command for the Helen group.
++-s host@group+ option with the +{ntpkeygen}+ program. For the purpose of
+illustration, the +host+ string is empty, signifying the default host
+name. For example, @+yellow+ can be used for the Alice group, @+orange+
+for the Helen group and @+blue+ for the Carol group. In addition, for TH
+X the +ident yellow+ option should be added to the +server+ command for
+the Alice group and the +ident orange+ option should be added to the
++server+ command for the Helen group.
 
 [[scfg]]
 == Configuration - Identity Schemes ==
@@ -360,22 +360,22 @@ functioning TC configuration and add commands as necessary. We start
 with the subnets of Figure 1 configured as in the previous section.
 Recall that the parent subnet TA for Alice is C and for Helen is S. Each
 of the TAs generates an encrypted server keys file and nonencrypted
-client parameters file for the IFF identity scheme using the `-I` option
-of the `{ntpkeygen}` program. Note the TAs are not necessarily trusted
-hosts, so may not need the `-T` option.
+client parameters file for the IFF identity scheme using the +-I+ option
+of the +{ntpkeygen}+ program. Note the TAs are not necessarily trusted
+hosts, so may not need the +-T+ option.
 
 The nonencrypted client parameters can be exported using the command
 
-`{ntpkeygen} -e >file`,
++{ntpkeygen} -e >file+,
 
-where the `-e` option redirects the client parameters to _`file`_ via
+where the +-e+ option redirects the client parameters to +file+ via
 the standard output stream for a mail application or stored locally for
 later distribution to one or more THs. In a similar fashion the
 encrypted keys file can be exported using the command
 
-`{ntpkeygen} -q passw2 >file`,
++{ntpkeygen} -q passw2 >file+,
 
-where _`passwd2`_ is the read password for another TA. We won't need
+where +passwd2+ is the read password for another TA. We won't need
 this file here.
 
 While the file names used for the exported files are arbitrary, it is
@@ -384,12 +384,12 @@ the filestamp suppressed. Thus, the nonencryted parameters file from
 each TA is copied to X with this name.
 
 To complete the configuration, the TH includes the client parameters
-file name in the `ident` option of the the `server` command for the TA
+file name in the +ident+ option of the the +server+ command for the TA
 association
 
-`server 1.2.3.4 ident group,`
++server 1.2.3.4 ident group,+
 
-where _`group`_ is the file name given above.
+where +group+ is the file name given above.
 
 [[ident]]
 == Identity Schemes and Cryptotypes ==
@@ -407,22 +407,22 @@ NONE::
   not configured. Packets exchanged between client and server have no
   MAC.
 AUTH::
-  A client or server is type AUTH if the `key` option is specified with
-  the `server` configuration command and the client and server keys are
+  A client or server is type AUTH if the +key+ option is specified with
+  the +server+ configuration command and the client and server keys are
   compatible. Packets exchanged between clients and servers have a MAC.
 PC::
-  A client or server is type PC if the `autokey` option is specified
-  with the `server` configuration command and compatible host key and
+  A client or server is type PC if the +autokey+ option is specified
+  with the +server+ configuration command and compatible host key and
   private certificate files are present. Packets exchanged between
   clients and servers have a MAC.
 TC::
-  A client or server is type TC if the `autokey` option is specified
-  with the `server` configuration command and compatible host key and
+  A client or server is type TC if the +autokey+ option is specified
+  with the +server+ configuration command and compatible host key and
   public certificate files are present. Packets exchanged between
   clients and servers have a MAC.
 IDENT::
-  A client or server is type IDENT if the `autokey` option is specified
-  with the `server` configuration command and compatible host key,
+  A client or server is type IDENT if the +autokey+ option is specified
+  with the +server+ configuration command and compatible host key,
   public certificate and identity scheme files are present. Packets
   exchanged between clients and servers have a MAC.
 
@@ -441,7 +441,7 @@ following table.
 |===============================
 
 pass:[*] These combinations are not valid if the restriction list includes the
-`notrust` option.
++notrust+ option.
 
 [[err]]
 == Error Codes ==
@@ -454,11 +454,11 @@ digest schemes or identity schemes and must be corrected by installing
 the correct media and/or correcting the configuration file. One of the
 most common errors is expired certificates, which must be regenerated
 and signed at least once per year using the
-link:keygen.html[`{ntpkeygen}` - generate public and private keys]
+link:keygen.html[+{ntpkeygen}+ - generate public and private keys]
 program.
 
 The following error codes are reported via the NTP control and
-monitoring protocol trap mechanism and to the `cryptostats` monitoring
+monitoring protocol trap mechanism and to the +cryptostats+ monitoring
 file if configured.
 
 101 bad field format or length::
@@ -501,7 +501,7 @@ file if configured.
 [[files]]
 == Files ==
 
-See the link:keygen.html[`{ntpkeygen}`] page. Note that provisions to
+See the link:keygen.html[+{ntpkeygen}+] page. Note that provisions to
 load leap second values from the NIST files have been removed. These
 provisions are now available whether or not the OpenSSL library is
 available. However, the functions that can download these values from

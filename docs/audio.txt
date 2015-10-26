@@ -35,7 +35,7 @@ change in 2013.
 Audio drivers for the NIST time stations WWV and WWVH have already
 been removed from the distribution because they pre-dated the 2013
 modulation change.  The remaining CHU and IRIG drivers are a
-significant maintainance problem, are deprecated, and are likely to be
+significant maintainence problem, are deprecated, and are likely to be
 removed in a future release unless a significant user constituency for
 them makes itself known.
 
@@ -82,7 +82,7 @@ order to assure reliable operation, the signal level must be in the
 range where the audio gain control is effective. In general, this means
 the input signal level must be such as to cause the AGC to set the gain
 somewhere in the middle of the range from 0 to 255, as indicated in the
-timecode displayed by the `{ntpq}` program.
+timecode displayed by the +{ntpq}+ program.
 
 The IRIG driver operates by disciplining a logical clock based
 on the codec sample clock to the audio signal as received. This is done
@@ -92,16 +92,16 @@ audio signal, the sample clock frequency tolerance must be less than 250
 PPM (.025 percent) for the IRIG driver.
 The largest error observed so far is about 60 PPM, but it is possible
 some sound cards or codecs may exceed that value. In any case, the
-configuration file command `tinker codec` command can be used to change
+configuration file command +tinker codec+ command can be used to change
 the systematic offset in units of 125 PPM.
 
 The drivers include provisions to select the input port and to monitor
-the input signal. The `fudge flag 2` command selects the microphone port
+the input signal. The +fudge flag 2+ command selects the microphone port
 if set to zero or the line-in port if set to one. It does not seem
-useful to specify the compact disc player port. The `fudge flag 3`
+useful to specify the compact disc player port. The +fudge flag 3+
 command enables the input signal monitor using the previously selected
 output port and output gain. Both of these flags can be set in the
-configuration file or remotely using the `{ntpq}` utility program.
+configuration file or remotely using the +{ntpq}+ utility program.
 
 [[short]]
 == Shortwave Radio Drivers ==
@@ -162,8 +162,8 @@ best WWV frequency is 15 MHz.
 == Autotune Modes ==
 
 The shortwave drivers include support for an optional autotune function
-compatible with ICOM receivers and transceivers. The `mode` keyword of
-the `server` configuration command specifies the ICOM ID select code in
+compatible with ICOM receivers and transceivers. The +mode+ keyword of
+the +server+ configuration command specifies the ICOM ID select code in
 decimal. A missing or zero argument disables the CI-V interface. Since
 all ICOM select codes are less than 128, the high order bit of the code
 is used by the driver to specify the baud rate. If this bit is not set,
@@ -193,7 +193,7 @@ radios.
 The audio drivers include extensive setup and debugging support to help
 hook up the audio signals and monitor the driver operations. The
 documentation page for each driver describes the various messages that
-can be produced either in real time or written to the `clockstats` file
+can be produced either in real time or written to the +clockstats+ file
 for later analysis. Of particular help in verifying signal connections
 and compatibility is a provision to monitor the signal via headphones or
 speaker.
@@ -215,12 +215,12 @@ results in a level the line-in port can handle..
 
 It is very easy to underdriven or overdrive the audio codec, in which
 case the drivers will not synchronize to the signal. The drivers use
-`fudge   flag2` to enable audio monitoring of the input signal. This is
++fudge   flag2+ to enable audio monitoring of the input signal. This is
 useful during setup to confirm the signal is actually reaching the audio
 codec and generally free of noise and interference. Note that the
 monitor volume must be set before the driver is started.
 
-The drivers write a synthesized timecode to the `clockstats` file each
+The drivers write a synthesized timecode to the +clockstats+ file each
 time the clock is set or verified and at other times if verbose
 monitoring is enabled. The format includes several fixed-length fields
 defining the UTC time to the millisecond, together with additional

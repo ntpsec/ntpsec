@@ -1,10 +1,12 @@
 /*
  * vint64ops.h - operations on 'vint64' values
  *
- * Written by Juergen Perlinger (perlinger@ntp.org) for the NTP project.
- * The contents of 'html/copyright.html' apply.
+ * Written by Juergen Perlinger <perlinger@ntp.org> for the NTP project. 
  * ----------------------------------------------------------------------
  * This is an attempt to get the vint64 calculations stuff centralised.
+ *
+ * Copyright 2015 by the NTPsec project contributors
+ * SPDX-License-Identifier: NTP
  */
 #ifndef GUARD_VINT64OPS_H
 #define GUARD_VINT64OPS_H

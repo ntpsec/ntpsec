@@ -17,7 +17,7 @@ corrects the apparent offset using the sign of the offset and the
 difference between the apparent delay and minimum delay. The name of the
 filter reflects the negative (huff) and positive (puff) correction,
 which depends on the sign of the offset. The filter is activated by the
-`tinker huffpuff` command, as described in the
++tinker huffpuff+ command, as described in the
 link:miscopt.html[Miscellaneous Options] page.
 
 '''''

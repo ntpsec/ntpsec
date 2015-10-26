@@ -45,7 +45,7 @@ routines. The true roots of this file seem to be shrouded by the mist of time...
 This version still provides the 'user space PPS' emulation
 feature.
 
-Juergen Perlinger (perlinger@ntp.org) Feb 2012
+Juergen Perlinger <perlinger@ntp.org> Feb 2012
 
 -----------------------------------------------------------------------
 */

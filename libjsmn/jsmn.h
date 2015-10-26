@@ -1,3 +1,5 @@
+/* SPDX-License-Identifier: MIT */
+
 #ifndef GUARD_JSMN_H
 #define GUARD_JSMN_H
 

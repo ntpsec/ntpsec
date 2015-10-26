@@ -4,7 +4,14 @@
  *
  */
 
+#include <unistd.h>
+
 #include "config.h"
+
+#ifdef HAVE_SYS_TIMEX_H
+# include <sys/time.h>	/* prerequisite on NetBSD */
+# include <sys/timex.h>
+#endif
 
 #include "ntp.h"
 #include "ntp_machine.h"
@@ -14,7 +21,6 @@
 #include "lib_strbuf.h"
 #include "ntp_debug.h"
 #include "ntp_syscall.h"
-#include <unistd.h>
 
 #ifdef SYS_WINNT
 int _getch(void);	/* Declare the one function rather than include conio.h */

@@ -9,7 +9,7 @@
 ["verse",subs="normal"]
 Address: 127.127.29._u_ 
 Reference ID: GPS
-Serial Port: `/dev/palisade`__u__; 9600bps 8N1/8O1
+Serial Port: +/dev/palisade+__u__; 9600bps 8N1/8O1
 
 == Description ==
 
@@ -48,7 +48,7 @@ hardware platforms:
 |=============================================================================
 
 *Attention*: Thunderbolt Receiver has not being tested on the previous
-software and hardware plataforms.
+software and hardware platforms.
 
 == GPS Receiver ==
 
@@ -99,7 +99,7 @@ Palisade NTP reference clock driver.
 
 == O/S Serial Port Configuration ==
 
-The driver attempts to open the device `/dev/palisade`__u__ where 'u' is
+The driver attempts to open the device +/dev/palisade+__u__ where 'u' is
 the NTP refclock unit number as defined by the LSB of the refclock
 address.  Valid refclock unit numbers are 0 - 3.
 
@@ -188,7 +188,7 @@ UTC almanac.
 the interface module. It should flash once per second.
 3.  Connect Palisade's port A to the NTP host.
 4.  Configure NTP and the serial I/O port on the host system.
-5.  Initially use link:#flag2[`fudge flag2`] in *link:#Configuration[{ntpconf}],* to disable event polling (see configuration).
+5.  Initially use link:#flag2[+fudge flag2+] in *link:#Configuration[{ntpconf}],* to disable event polling (see configuration).
 6.  Run NTP in debug mode (-d -d), to observe Palisade_receive events.
 7.  The driver reports the link:#TrackingStatus[tracking status of the
 receiver]. Make sure it is tracking several satellites.
@@ -209,19 +209,19 @@ Nov 14 16:16:21 terrapin ntpd[1127]: Palisade #0: message
 ---------------------------------------------------------
 
 == Fudge Factors ==
-[[time1]]link:#Configuration[`time1` 'time]'::
+[[time1]]link:#Configuration[+time1+ 'time]'::
    Specifies the time offset calibration factor, in seconds and fraction,
    with default 0.0. If event capture is not used, time1 should be set to
    20 milliseconds to correct serial line and operating system delays
    incurred in capturing time stamps from the synchronous packets.
 
-`stratum number`::
++stratum number+::
    Specifies the driver stratum, in decimal from 0 to 15, with default 0.
 
-link:#refid[`refid string`]::
+link:#refid[+refid string+]::
    Specifies the driver reference identifier, *GPS*.
 
-[[flag2]]link:#Configuration[`flag2 0 | 1`]::
+[[flag2]]link:#Configuration[+flag2 {0 | 1}+]::
    When set to 1, driver does not use hardware event capture. The
    synchronous packet output by the receiver at the beginning of each
    second is time stamped by the driver. If triggering the event pulse
@@ -422,7 +422,7 @@ Thunderbolt can output 2 synchronous packets.
 | 36-43|     | Latitude             |Double    |          |radians
 | 44-51|     | Longitude            |Double    |          |radians
 | 52-59|     | Altitude             |Double    |          |Meters
-| 60-67|     | Spare                |          |          |For Future Expantion
+| 60-67|     | Spare                |          |          |For Future Expansion
 |=================================================================================
 
 

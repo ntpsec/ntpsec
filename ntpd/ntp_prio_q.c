@@ -7,6 +7,8 @@
  *		University of Delaware
  *		Newark, DE 19711
  * Copyright (c) 2006
+ * Copyright 2015 by the NTPsec project contributors
+ * SPDX-License-Identifier: BSD-2-clause
  */
 #include <config.h>
 

@@ -4,7 +4,7 @@
 
 ["verse",subs="normal"]
 Address: 127.127.45.'u'
-Reference ID: GPS | IRIG | HVQ | FREQ | ACTS | PPS,PTP | ACT | USR | LOCL
+Reference ID: GPS | IRIG | HVQ | FREQ | ACTS | PPS | PTP | ACT | USR | LOCL
 Driver ID: Spectracom TSYNC PCI
 Driver Port: `/dev/tsyncpci`'u'
 Features: `(none)`

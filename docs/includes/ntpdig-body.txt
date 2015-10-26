@@ -3,12 +3,12 @@
 // tree, and once to make an individual man page.
 
 == SYNOPSIS ==
-
+[verse]
 {ntpdig}
     [--help | -?] [-4 | -6] [-a keynum] [-b bcaddress] [-B bctimeout]
     [-c] [-d] [-D debug-level] [-g delay] [-j] [-K kodfile] [-k keyfile]
     [-l logfile] [-M steplimit] [-o ntpver] [-r] [-S] [-s]
-    [-u uctimeout] [--wait] [--version] [address...]`
+    [-u uctimeout] [--wait] [--version] [address...]+
 
 == DESCRIPTION ==
 
@@ -25,16 +25,16 @@ not UTC) to the standard output in a format like:
 2015-10-14 13:46:04.534916 (+0500) -0.000007 +/- 0.084075 localhost 127.0.0.1 s2 no-leap
 -----------------------------------------------------
 
-where the `(+0500)` means that to get to UTC from the reported local
-time one must add 5 hours and 0 minutes, the `-0.000007` indicates the
+where the +(+0500)+ means that to get to UTC from the reported local
+time one must add 5 hours and 0 minutes, the +-0.000007+ indicates the
 local clock is 0.000007 seconds ahead of correct time (so 0.000007 seconds
 must be subtracted from the local clock to get it to be correct). Note that
 the number of decimals printed for this value will change based on the
-reported precision of the server.`+/- 0.084075` is the reported
+reported precision of the server. `+/- 0.084075` is the reported
 _synchronization_ _distance_ (in seconds), which represents the
 maximum error due to all causes. If the server does not report valid
 data needed to calculate the synchronization distance, this will be
-reported as `+/- ?`.
+reported as ++/- ?+.
 
 If the _host_ is different from the _IP_, both will be
 displayed. Otherwise, only the _IP_ is displayed. Finally, the
@@ -54,68 +54,68 @@ JSON record:
 In the JSON format, time is in ISO8601 format; precision is the synch
 distance, with an unknown synch distance is reported as 0.  Host and
 IP are always emitted even if duplicate. The "adjusted" boolean
-reports whether ntpdig adusted the time.
+reports whether ntpdig adjusted the time.
 
 == OPTIONS ==
 
-//`-?, --help`::
+//+-?, --help+::
 //  displays usage information. The short form typically requires shell
-//  quoting, such as `-\?`, otherwise `?` is consumed by the shell.
+//  quoting, such as +-\?+, otherwise +?+ is consumed by the shell.
 
-`-4`, `--ipv4`::
++-4+, +--ipv4+::
   Force IPv4 DNS name resolution. This option must not appear in
   combination with any of the following options: ipv6.
 +
 Force DNS resolution of the following host names on the command line
 to the IPv4 namespace.
 
-`-6`, `--ipv6`::
++-6+, +--ipv6+::
   Force IPv6 DNS name resolution. This option must not appear in
   combination with any of the following options: ipv4.
 +
 Force DNS resolution of the following host names on the command line
 to the IPv6 namespace.
 
-`-a` auth-keynumber, `--authentication`=_auth-keynumber_::
++-a+ auth-keynumber, +--authentication+=_auth-keynumber_::
   Enable authentication with the key _auth-keynumber_. This option takes
   an integer number as its argument.
   +
 Enable authentication using the key specified in this option's
 argument. The argument of this option is the _keyid_, a number
 specified in the _keyfile_ as this key's identifier. See the _keyfile_
-option (`-k`) for more details.
+option (+-k+) for more details.
 
-`-b` broadcast-address, `--broadcast`=_broadcast-address_::
++-b+ broadcast-address, +--broadcast+=_broadcast-address_::
   Listen to the address specified for broadcast time sync. This option
   may appear an unlimited number of times.
 +
-If specified `{ntpdig}` will listen to the specified address for NTP
+If specified +{ntpdig}+ will listen to the specified address for NTP
 broadcasts. The default maximum wait time can (and probably should) be
-modified with `-t`.
+modified with +-t+.
 
-`-c` host-name, `--concurrent`=_host-name_::
++-c+ host-name, +--concurrent+=_host-name_::
   Concurrently query all IPs returned for host-name. This option may
   appear an unlimited number of times.
 +
 Requests from an NTP "client" to a "server" should never be sent more
 rapidly than one every 2 seconds. By default, any IPs returned as part
 of a DNS lookup are assumed to be for a single instance of {ntpd}, and
-therefore `{ntpdig}` will send queries to these IPs one after another,
+therefore +{ntpdig}+ will send queries to these IPs one after another,
 with a 2-second gap in between each query.
 +
-The `-c` or `--concurrent` flag says that any IPs returned for the DNS
+The +-c+ or +--concurrent+ flag says that any IPs returned for the DNS
 lookup of the supplied host-name are on different machines, so we can
 send concurrent queries.  This is appropriate when using a server pool.
 
-`-d`, `--debug-level`::
++-d+, +--debug-level+::
   Increase debug verbosity level. This option may appear an unlimited
   number of times.
 
-`-D` number, `--set-debug-level`=_number_::
++-D+ number, +--set-debug-level+=_number_::
   Set the debug verbosity level. This option may appear an unlimited
   number of times. This option takes an integer number as its argument.
 
-`-g` milliseconds, `--gap`=_milliseconds_::
++-g+ milliseconds, +--gap+=_milliseconds_::
   The gap (in milliseconds) between time requests. This option takes an
   integer number as its argument. The default _milliseconds_ for this
   option is 50.
@@ -127,31 +127,31 @@ milliseconds. A larger _delay_ reduces the query load on the time
 sources, iat the cost of ncreasing the time to receive a valid
 response if the first source attempted is slow or unreachable.
 
-`-j`::
++-j+::
   Output to stdout in JSON, suppressing syslog messages.
 
-`-K` file-name, `--kod`=_file-name_::
++-K+ file-name, +--kod+=_file-name_::
   KoD history filename. The default _file-name_ for this option is:
-  `/var/db/ntp-kod`.
+  +/var/db/ntp-kod+.
 +
 Specifies the filename to be used for the persistent history of KoD
 responses received from servers. If the file does not exist, a warning
 message will be displayed. The file will not be created.
 
-`-k` file-name, `--keyfile`=_file-name_::
-  Look in this file for the key specified with `-a`.
++-k+ file-name, +--keyfile+=_file-name_::
+  Look in this file for the key specified with +-a+.
 +
-This option specifies the keyfile. `{ntpdig}` will search for the key
-specified with `-a` keyno in this file. See _{ntpkeysman}_ for more
+This option specifies the keyfile. +{ntpdig}+ will search for the key
+specified with +-a+ keyno in this file. See _{ntpkeysman}_ for more
 information.
 
-`-l` file-name, `--logfile`=_file-name_::
++-l+ file-name, +--logfile+=_file-name_::
   Log to specified logfile.
 +
 This option causes the client to write log messages to the specified
 _logfile_.
 
-`-M` number, `--steplimit`=_number_::
++-M+ number, +--steplimit+=_number_::
   Adjustments less than _steplimit_ msec will be slewed. This option
   takes an integer number as its argument. The value of _number_ is
   constrained to being greater than or equal to 0,
@@ -162,66 +162,66 @@ _clock_settime()_ or _settimeofday(2)_. The default value is 0, which
 means all adjustments will be stepped. This is a feature, as different
 situations demand different values.
 
-`-o` number, `--ntpversion`=_number_::
++-o+ number, +--ntpversion+=_number_::
   Send _int_ as our NTP protocol version. This option takes an integer
   number as its argument.  Defaults to 4.  Seldom useful.
 
-`-r`, `--usereservedport`::
-  By default, `{ntpdig}` uses a UDP source port number selected by the
++-r+, +--usereservedport+::
+  By default, +{ntpdig}+ uses a UDP source port number selected by the
   operating system. When this option is used, the reserved NTP port 123
-  is used, which most often requires `{ntpdig}` be invoked as the superuser
+  is used, which most often requires +{ntpdig}+ be invoked as the superuser
   (commonly "root"). This can help identify connectivity failures due to
-  port-based firewalling which affect `{ntpd}`, which always uses source
+  port-based firewalling which affect +{ntpd}+, which always uses source
   port 123.
 
-`-S`, `--step`::
-  By default, `{ntpdig}` displays the clock offset but does not attempt to
++-S+, +--step+::
+  By default, +{ntpdig}+ displays the clock offset but does not attempt to
   correct it. This option enables offset correction by stepping, that
   is, directly setting the clock to the corrected time. This typically
-  requires `{ntpdig}` be invoked as the superuser ("root").
+  requires +{ntpdig}+ be invoked as the superuser ("root").
 
-`-s`, `--slew`::
-  By default, `{ntpdig}` displays the clock offset but does not attempt to
++-s+, +--slew+::
+  By default, +{ntpdig}+ displays the clock offset but does not attempt to
   correct it. This option enables offset correction by slewing using
   adjtime(), which changes the rate of the clock for a period long
   enough to accomplish the required offset (phase) correction. This
-  typically requires `{ntpdig}` be invoked as the superuser ("root").
+  typically requires +{ntpdig}+ be invoked as the superuser ("root").
 
-`-t` seconds, `--timeout`=_seconds_::
++-t+ seconds, +--timeout+=_seconds_::
   The number of seconds to wait for responses. This option takes an
   integer number as its argument. The default _seconds_ for this option
   is: 5.
 +
-When waiting for a reply, `{ntpdig}` will wait the number of seconds
+When waiting for a reply, +{ntpdig}+ will wait the number of seconds
 specified before giving up. The default should be more than enough for
-a unicast response. If `{ntpdig}` is only waiting for a broadcast response
+a unicast response. If +{ntpdig}+ is only waiting for a broadcast response
 a longer timeout is likely needed.
 
-`--wait`, `--no-wait`::
++--wait+, +--no-wait+::
   Wait for pending replies (if not setting the time). The _no-wait_ form
   will disable the option. This option is enabled by default.
 +
 If we are not setting the time, wait for all pending responses.
 
-`--version`::
++--version+::
   Output version of program and exit.
 
 == USAGE ==
 
-`{ntpdig} ntpserver.somewhere`::
++{ntpdig} ntpserver.somewhere+::
   is the simplest use of this program and can be run as an unprivileged
   command to check the current time and error in the local clock.
-`{ntpdig} -Ss -M 128 ntpserver.somewhere`::
++{ntpdig} -Ss -M 128 ntpserver.somewhere+::
   With suitable privilege, run as a command or from a _cron_(8) job,
-  `{ntpdig} -Ss -M 128 ntpserver.somewhere` will request the time from the
+  +{ntpdig} -Ss -M 128 ntpserver.somewhere+ will request the time from the
   server, and if that server reports that it is synchronized then if the
   offset adjustment is less than 128 milliseconds the correction will be
   slewed, and if the correction is more than 128 milliseconds the
   correction will be stepped.
-`{ntpdig} -S ntpserver.somewhere`::
++{ntpdig} -S ntpserver.somewhere+::
   With suitable privilege, run as a command or from a _cron_(8) job,
-  `{ntpdig} -S ntpserver.somewhere` will set (step) the local clock from a
-  synchronized specified server, like the `ntpdate` utility from older
+  +{ntpdig} -S ntpserver.somewhere+ will set (step) the local clock from a
+  synchronized specified server, like the +ntpdate+ utility from older
   NTP implementations.
 
 == EXIT STATUS ==

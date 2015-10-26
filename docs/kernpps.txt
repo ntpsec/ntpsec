@@ -29,12 +29,12 @@ systems a parallel port can be used for the same purpose.
 
 The PPSAPI interface defined in RFC-2783 is the only PPS interface
 supported in NTP Version 4. The PPSAPI is supported in stock FreeBSD
-and, with the addition of the `PPSkit` kernel module, in Linux.
+and, with the addition of the +PPSkit+ kernel module, in Linux.
 
-The special header file `/usr/include/sys/timepps.h` implements the
-PPSAPI using whatever primitives are available in each archeticture and
-operating system. It obsoletes previous APIs based on the `tty_clock`
-and `ppsclock` line disciplines and streams modules, which are no longer
+The special header file +/usr/include/sys/timepps.h+ implements the
+PPSAPI using whatever primitives are available in each architecture and
+operating system. It obsoletes previous APIs based on the +tty_clock+
+and +ppsclock+ line disciplines and streams modules, which are no longer
 supported.
 
 The link:driver22.html[PPS Clock Discipline] driver (type 22)
@@ -47,28 +47,28 @@ link:kern.html[Kernel Model for Precision Timekeeping] page.
 
 The PPSAPI interface provides the following functions:
 
-`time_pps_create`::
++time_pps_create+::
   Creates a PPS interface instance and returns a handle to it.
-`time_pps_destroy`::
++time_pps_destroy+::
   Destroys a PPS interface and returns the resources used.
-`time_pps_setparams`::
++time_pps_setparams+::
   Sets the parameters associated with a PPS interface instance,
   including offsets to be automatically added to captured timestamps.
-`time_pps_getparams`::
++time_pps_getparams+::
   Returns the parameters associated with a PPS interface instance.
-`time_pps_getcap`::
++time_pps_getcap+::
   Returns the capabilities of the current interface and kernel
   implementation.
-`time_pps_fetch`::
++time_pps_fetch+::
   Returns the current timestamps associated with a PPS interface
-  instance in either nanoseconds and nanoseconds (Unix `timespec`) or
+  instance in either nanoseconds and nanoseconds (Unix +timespec+) or
   seconds and fraction (NTP) format.
-`time_pps_kcbind`::
++time_pps_kcbind+::
   If kernel PPS processing is supported, this binds the support to the
   associated PPS interface instance.
 
 The entire PPS interface functionality is currently provided by inline
-code in the `timepps.h` header file. While not all implementations
+code in the +timepps.h+ header file. While not all implementations
 support the full PPSAPI specification, they do support all the functions
 required for the PPS driver described next. The FreeBSD, Linux and
 Solaris implementations can be used with the stock kernels provided with

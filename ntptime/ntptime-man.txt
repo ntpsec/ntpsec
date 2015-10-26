@@ -1,0 +1,18 @@
+= ntptime(8) =
+:doctype: manpage
+
+== NAME ==
+ntptime - read and set kernel time variables
+
+include::../docs/includes/ntptime-body.txt[]
+
+== EXIT STATUS ==
+
+One of the following exit values will be returned:
+
+0 (EXIT_SUCCESS)::
+  Successful program execution.
+1 (EXIT_FAILURE)::
+  The operation failed or the command invocation was not valid.
+
+// end

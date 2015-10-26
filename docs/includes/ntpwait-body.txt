@@ -1,28 +1,29 @@
 == SYNOPSIS ==
-{ntpwait} [-v] [-n 'number'] [-s 'secs']
+
++{ntpwait}+ [+-v+] [+-n+ 'number'] [+-s+ 'secs']
 
 == DESCRIPTION ==
 
-The `{ntpwait}` program blocks until {ntpd} is in synchronized state. This
+The +{ntpwait}+ program blocks until {ntpd} is in synchronized state. This
 can be useful at boot time, to delay the boot sequence until after "{ntpd}
 -g" has set the time.
 
-`{ntpwait}` will send at most _num-tries_ queries to {ntpdman}, sleeping
++{ntpwait}+ will send at most _num-tries_ queries to {ntpdman}, sleeping
 for _secs-between_ after each status return that says {ntpdman} has not
 yet produced a synchronized and stable system clock._
 
-`{ntpwait}` will do this quietly, unless the `-v` flag is provided.
++{ntpwait}+ will do this quietly, unless the +-v+ flag is provided.
 
 == OPTIONS ==
 
-`-n` number, `--tries`=_number_::
++-n+ number, +--tries+=_number_::
   Number of times to check {ntpd}. This option takes an integer number as
   its argument. The default _number_ for this option is: 100.
 +
 The maximum number of times we will check _{ntpd}_ to see if it has been
 able to synchronize and stabilize the system clock.
 
-`-s` secs-between-tries, `--sleep`=_secs-between-tries_::
++-s+ secs-between-tries, +--sleep+=_secs-between-tries_::
   How long to sleep between tries. This option takes an integer number
   as its argument. The default _secs-between-tries_ for this option
   is: 6.
@@ -30,10 +31,10 @@ able to synchronize and stabilize the system clock.
 We will sleep for _secs-between-tries_ after each query of _{ntpd}_ that
 returns "the time is not yet stable".
 
-`-v`, `--verbose`::
++-v+, +--verbose+::
   Be verbose.
 +
-By default, `{ntpwait}` is silent. With this option, `{ntpwait}` will
+By default, +{ntpwait}+ is silent. With this option, +{ntpwait}+ will
 provide status information.
 
 == AUTHOR ==

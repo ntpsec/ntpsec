@@ -41,7 +41,7 @@ delay, varies from 16 &mu;s for a dual-core Pentium running FreeBSD 6.1 to
 1100 &mu;s for a Sun Blade 1500 running Solaris 10.
 
 Interleaved mode can be used only in NTP symmetric and broadcast modes.
-It is activated by the `xleave` option with the `peer` or `broadcast`
+It is activated by the +xleave+ option with the +peer+ or +broadcast+
 configuration commands. A broadcast server configured for interleaved
 mode is transparent to ordinary broadcast clients, so both ordinary and
 interleaved broadcast clients can use the same packets. An interleaved

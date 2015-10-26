@@ -44,19 +44,19 @@ algorithms, and prune the surplus associations.
 
 All schemes use an iterated process to discover new preemptable client
 associations as long as the total number of client associations is less
-than the `maxclock` option of the `tos` command. The `maxclock` default
+than the +maxclock+ option of the +tos+ command. The +maxclock+ default
 is 10, but it should be changed in typical configuration to some lower
-number, usually two greater than the `minclock` option of the same
+number, usually two greater than the +minclock+ option of the same
 command.
 
 All schemes use a stratum filter to select just those servers with
 stratum considered useful. This can avoid large numbers of clients
 ganging up on a small number of low-stratum servers and avoid servers
 below or above specified stratum levels. By default, servers of all
-strata are acceptable; however, the `tos` command can be used to
-restrict the acceptable range from the `floor` option, inclusive, to the
-`ceiling` option, exclusive. Potential servers operating at the same
-stratum as the client will be avoided, unless the `cohort` option is
+strata are acceptable; however, the +tos+ command can be used to
+restrict the acceptable range from the +floor+ option, inclusive, to the
++ceiling+ option, exclusive. Potential servers operating at the same
+stratum as the client will be avoided, unless the +cohort+ option is
 present. Additional filters can be supplied using the methods described
 on the link:authentic.html[Authentication Support] page.
 
@@ -87,11 +87,11 @@ Options] page. See that page for applicability and defaults.
 
 A broadcast server generates messages continuously at intervals by
 default 64 s and time-to-live by default 127. These defaults can be
-overridden by the `minpoll` and `ttl` options, respectively. Not all
-kernels support the `ttl` option. A broadcast client responds to the
+overridden by the +minpoll+ and +ttl+ options, respectively. Not all
+kernels support the +ttl+ option. A broadcast client responds to the
 first message received by waiting a randomized interval to avoid
 implosion at the server. It then polls the server in client/server mode
-using the `iburst` option in order to quickly authenticate the server,
+using the +iburst+ option in order to quickly authenticate the server,
 calibrate the propagation delay and set the client clock. This normally
 results in a volley of six client/server exchanges at 2-s intervals
 during which both the synchronization and cryptographic protocols run
@@ -101,15 +101,15 @@ Following the volley, the server continues in listen-only mode and sends
 no further messages. If for some reason the broadcast server does not
 respond to these messages, the client will cease transmission and
 continue in listen-only mode with a default propagation delay. The
-volley can be avoided by using the `broadcastdelay` command with nonzero
+volley can be avoided by using the +broadcastdelay+ command with nonzero
 argument.
 
-A server is configured in broadcast mode using the `broadcast` command
+A server is configured in broadcast mode using the +broadcast+ command
 and specifying the broadcast address of a local interface. If two or
 more local interfaces are installed with different broadcast addresses,
-a `broadcast` command is needed for each address. This provides a way to
+a +broadcast+ command is needed for each address. This provides a way to
 limit exposure in a firewall, for example. A broadcast client is
-configured using the `broadcastclient` command.
+configured using the +broadcastclient+ command.
 
 NTP multicast mode can be used to extend the scope using IPv4 multicast
 or IPv6 broadcast with defined span. The IANA has assigned IPv4
@@ -120,9 +120,9 @@ administratively scoped IPv4 group addresses should be used, as
 described in RFC-2365, or GLOP group addresses, as described in
 RFC-2770.
 
-A multicast server is configured using the `broadcast` command, but
+A multicast server is configured using the +broadcast+ command, but
 specifying a multicast address instead of a broadcast address. A
-multicast client is configured using the `multicastclient` command
+multicast client is configured using the +multicastclient+ command
 specifying a list of one or more multicast addresses. Note that there is
 a subtle distinction between the IPv4 and IPv6 address families. The
 IPv4 broadcast or mulitcast mode is determined by the IPv4 class. For
@@ -138,9 +138,9 @@ synchronization distance.
 Since an intruder can impersonate a broadcast server and inject false
 time values, broadcast mode should always be cryptographically
 authenticated. By default, a broadcast association will not be mobilized
-unless cryptographically authenticated. If necessary, the `auth` option
-of the `disable` command will disable this feature. The feature can be
-selectively enabled using the `notrust` option of the `restrict`
+unless cryptographically authenticated. If necessary, the +auth+ option
+of the +disable+ command will disable this feature. The feature can be
+selectively enabled using the +notrust+ option of the +restrict+
 command.
 
 With symmetric key cryptography each broadcast server can use the same
@@ -166,7 +166,7 @@ cryptographic means and evaluate their time values with respect to
 other servers that might be lurking in the vicinity. It uses the
 grab-n'-drop paradigm with the additional feature that active means
 are used to grab additional servers should the number of associations
-fall below the `maxclock` option of the `tos` command. The intended
+fall below the +maxclock+ option of the +tos+ command. The intended
 result is that each manycast client mobilizes client associations with
 some number of the "best" of the nearby manycast servers, yet
 automatically reconfigures to sustain this number of servers should
@@ -186,15 +186,15 @@ available from _http://www.openssl.org/_. The library can also be used
 with other NTPv4 modes as well and is highly recommended, especially for
 broadcast modes.
 
-A manycast client is configured using the `manycastclient`
-configuration command, which is similar to the `server` configuration
+A manycast client is configured using the +manycastclient+
+configuration command, which is similar to the +server+ configuration
 command but with a multicast (IPv4 class _D_ or IPv6 prefix _FF_)
 group address. The IANA has designated IPv4 address 224.1.1.1 and IPv6
 address FF05::101 (site local) for NTP.
 
 The client sends sends ordinary client mode messages, but to one of
 these broadcast addresses rather than a unicast address, and sends
-only if less than `maxclock` associations remain and then only at the
+only if less than +maxclock+ associations remain and then only at the
 minimum feasible rate and minimum feasible time-to-live (TTL)
 hops. The polling strategy is designed to reduce as much as possible
 the volume of broadcast messages and the effects of implosion due to
@@ -202,7 +202,7 @@ near-simultaneous arrival of manycast server messages. There can be as
 many manycast client associations as different addresses, each one
 serving as a template for future unicast client/server associations.
 
-A manycast server is configured using the `manycastserver` command,
+A manycast server is configured using the +manycastserver+ command,
 which listens on the specified broadcast address for manycast client
 messages.  If a manycast server is in scope of the current TTL and is
 itself synchronized to a valid source and operating at a stratum level
@@ -239,7 +239,7 @@ associations have been found. Further retransmissions use the same TTL.
 
 The quality and reliability of the suite of associations discovered by
 the manycast client is determined by the NTP mitigation algorithms and
-the _minclock_ and _minsane_ values specified in the `tos` configuration
+the _minclock_ and _minsane_ values specified in the +tos+ configuration
 command. At least _minsane_ candidate servers must be available and the
 mitigation algorithms produce at least _minclock_ survivors in order to
 synchronize the clock. Byzantine agreement principles require at least
@@ -270,9 +270,9 @@ server stratum, primary (stratum 1) servers will find only primary
 servers in TTL range, which is probably the most common objective.
 However, unless configured otherwise, all manycast clients in TTL range
 will eventually find all primary servers in TTL range, which is probably
-not the most common objective in large networks. The `tos` command can
+not the most common objective in large networks. The +tos+ command can
 be used to modify this behavior. Servers with stratum below _floor_ or
-above _ceiling_ specified in the `tos` command are strongly discouraged
+above _ceiling_ specified in the +tos+ command are strongly discouraged
 during the selection process; however, these servers may be temporally
 accepted if the number of servers within TTL range is less than
 _minclock_.
@@ -297,13 +297,13 @@ organize themselves in an optimum configuration based on stratum and
 synchronization distance. For example, consider an NTP subnet of two
 primary servers and a hundred or more dependent clients. With two
 exceptions, all servers and clients have identical configuration files
-including both `multicastclient` and `multicastserver` commands using,
+including both +multicastclient+ and +multicastserver+ commands using,
 for instance, multicast group address 239.1.1.1. The only exception is
 that each primary server configuration file must include commands for
 the primary reference source such as a GPS receiver.
 
 The remaining configuration files for all secondary servers and clients
-have the same contents, except for the `tos` command, which is specific
+have the same contents, except for the +tos+ command, which is specific
 for each stratum level. For stratum 1 and stratum 2 servers, that
 command is not necessary. For stratum 3 and above servers the _floor_
 value is set to the intended stratum number. Thus, all stratum 3
@@ -320,10 +320,10 @@ and other clients will time out the corresponding association and
 re-associate accordingly.
 
 Some administrators prefer to avoid running {ntpdman} continuously and
-run {ntpdman} `-q` as a cron job. In either case the servers must be
+run {ntpdman} +-q+ as a cron job. In either case the servers must be
 configured in advance and the program fails if none are available when
 the cron job runs. A really slick application of manycast is with
-{ntpd} `-q`. The program wakes up, scans the local landscape looking
+{ntpd} +-q+. The program wakes up, scans the local landscape looking
 for the usual suspects, selects the best from among the rascals, sets
 the clock and then departs. Servers do not have to be configured in
 advance and all clients throughout the network can have the same
@@ -332,7 +332,7 @@ configuration file.
 The use of cryptographic authentication is always a good idea in any
 server discovery scheme. Both symmetric key and public key cryptography
 can be used in the same scenarios as described above for the
-broadast/multicast scheme.
+broadcast/multicast scheme.
 
 //=== Manycast Interactions with Autokey ===
 //
@@ -373,22 +373,22 @@ To support this service, custom DNS software is used by pool.ntp.org and
 its subdomains to discover a random selection of participating servers
 in response to a DNS query. The client receiving this list mobilizes
 some or all of them, similar to the manycast discovery scheme, and
-prunes the excess. Unlike `manycastclient`, cryptographic authentication
+prunes the excess. Unlike +manycastclient+, cryptographic authentication
 is not required. The pool scheme solicits a single server at a time,
-compared to `manycastclient` which solicits all servers within a
+compared to +manycastclient+ which solicits all servers within a
 multicast TTL range simultaneously. Otherwise, the pool server discovery
 scheme operates as manycast does.
 
-The pool scheme is configured using one or more `pool` commands with DNS
-names indicating the pool from which to draw. The `pool` command can be
+The pool scheme is configured using one or more +pool+ commands with DNS
+names indicating the pool from which to draw. The +pool+ command can be
 used more than once; duplicate servers are detected and discarded. In
 principle, it is possible to use a configuration file containing a
-single line `pool   pool.ntp.org`. The
+single line +pool   pool.ntp.org+. The
 http://www.pool.ntp.org/en/use.html[NTP Pool Project] offers
-instructions on using the pool with the `server` command, which is
-suboptimal but works with older versions of `{ntpd}` predating the `pool`
-command. Consider replacing the multiple `server`
-commands in their example with a single `pool` command.
+instructions on using the pool with the +server+ command, which is
+suboptimal but works with older versions of +{ntpd}+ predating the +pool+
+command. Consider replacing the multiple +server+
+commands in their example with a single +pool+ command.
 
 '''''
 

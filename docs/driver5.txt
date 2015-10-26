@@ -5,8 +5,8 @@
 ["verse",subs="normal"]
 Address: 127.127.5.'u'
 Reference ID: TRUE
-Serial Port: `/dev/true`'u'; 9600bps 8N1
-Features: `tty_clk`
+Serial Port: +/dev/true+'u'; 9600bps 8N1
+Features: +tty_clk+
 
 == Deprecation warning ==
 
@@ -48,8 +48,8 @@ GPS-TM/TMD Receiver
 
 == Notes on the 468-DC receiver: ==
 
-Send the clock a `R` or `C` and once per second a timestamp will appear.
-Send a `R` to get the satellite position once (GOES only).
+Send the clock a +R+ or +C+ and once per second a timestamp will appear.
+Send a +R+ to get the satellite position once (GOES only).
 
 Since the old east/west satellite locations are only historical, you
 can't set your clock propagation delay settings correctly and still use
@@ -59,7 +59,7 @@ time1 and time2 to incorporate corrections. If your clock is set for 50
 and it should be 58 for using the west and 46 for using the east, use
 the line
 
-`fudge 127.127.5.0 time1 +0.008 time2 -0.004`
++fudge 127.127.5.0 time1 +0.008 time2 -0.004+
 
 This corrects the 4 milliseconds advance and 8 milliseconds retard
 needed. The software will ask the clock which satellite it sees.
@@ -92,31 +92,31 @@ reference oscillator.
 
 == Monitor Data ==
 
-When enabled by the `flag4` fudge flag, every received timecode is
-written as-is to the `clockstats` file.
+When enabled by the +flag4+ fudge flag, every received timecode is
+written as-is to the +clockstats+ file.
 
 == Fudge Factors ==
 
-`time1` 'time'::
++time1+ 'time'::
    Specifies the time offset calibration factor, in seconds and fraction,
    to be used for the West satellite, with default 0.0.
-`time2 time`::
++time2 time+::
    Specifies the time offset calibration factor, in seconds and fraction,
    to be used for the East satellite, with default 0.0.
-`stratum` 'number'::
++stratum+ 'number'::
    Specifies the driver stratum, in decimal from 0 to 15, with default 0.
-`refid` 'string'::
++refid+ 'string'::
    Specifies the driver reference identifier, an ASCII string from one to
-   four characters, with default `TRUE`.
-`flag1 0 | 1`::
+   four characters, with default +TRUE+.
++flag1 {0 | 1}+::
    Silence the clock side of {ntpd}, just reading the clock without trying to
    write to it.
-`flag2 0 | 1`::
++flag2 {0 | 1}+::
    Generate a debug file /tmp/true%d.
-`flag3 0 | 1`::
++flag3 {0 | 1}+::
    Not used by this driver.
-`flag4 0 | 1`::
-   Enable verbose `clockstats` recording if set.
++flag4 {0 | 1}+::
+   Enable verbose +clockstats+ recording if set.
 
 == Additional Information ==
 
