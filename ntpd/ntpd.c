@@ -645,11 +645,6 @@ ntpdmain(
 	init_winnt_time();
 # endif
 	/*
-	 * Initialize libsodium and its RNG
-	 */
-	sodium_init();
-
-	/*
 	 * Detach us from the terminal.  May need an #ifndef GIZMO.
 	 */
 	if (!nofork) {
@@ -698,6 +693,13 @@ ntpdmain(
 #  endif	/* SIGDANGER */
 # endif		/* HAVE_WORKING_FORK */
 	}
+
+        /*
+	 * Initialize libsodium and its RNG
+	 */
+	sodium_init();
+
+
 
         if (!saveconfigquit && !dumpopts) {
 	    /* Setup stack size in preparation for locking pages in memory. */
