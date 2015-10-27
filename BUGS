@@ -4,7 +4,8 @@
   logs in some cases involving asynchronous getaddrinfo lookups.
 
 * There is a concurrency bug in asynchronous getaddrinfo lookups which
-  nanifests as name lookups getting dropped.  Hal says:
+  nanifests as name lookups getting dropped (thee workaround is to
+  specify servers as IP addresses).  Hal says:
 
 --------------------------------------------------------------------------
 The bug is also in NTP classic.
@@ -25,7 +26,7 @@ But it doesn't leave the index pointing to a new slot.
 
 I don't think there is any simple fix.  You can't make ring-buffers
 bigger by just adding more space on the end.  The fingers may be
-pointing into the middle of the +block.
+pointing into the middle of the block.
 
 There is probably a similar bug on the request side.
 --------------------------------------------------------------------------
