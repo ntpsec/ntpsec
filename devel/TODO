@@ -79,17 +79,6 @@ None right now. (Sep-22 2015)
 * Website needs to be integrated (with a contacts and services page,
   among other things) and published.
 
-=== Remaining procedural issues ===
-
-* The dev changes need to be fed through through Phabricator,
-  reviewed, and if necessary fixed.
-
-* Version-numbering policy needs to be decided and written up.  Are
-  we going to go with the original 1.x/2.x split?  The website draft
-  still assumes this.
-
-* We need a release checklist.
-
 == After beta release ==
 
 * ntpproto.py - a Python library that knows the NTP wire protocol and
