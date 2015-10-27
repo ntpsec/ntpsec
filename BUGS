@@ -1,0 +1,31 @@
+= Known bugs =
+
+* msyslog doesn't have its own mutex.  Non-atomicity can cause scrambled
+  logs in some cases involving asynchronous getaddrinfo lookups.
+
+* There is a concurrency bug in asynchronous getaddrinfo lookups which
+  nanifests as name lookups getting dropped.  Hal says:
+
+--------------------------------------------------------------------------
+The bug is also in NTP classic.
+
+It's allocating a slot for the [DNS] response.  It's screwing up in
+the need-more case.
+
+First an overview:
+
+There is one thread doing DNS lookups.  All its info is in a
+blocking_child struct.
+
+There are 2 arrays.  One for requests and another for responses.  They
+are used as ring buffers.
+
+If the next slot isn't free, ensure_workresp_empty_slot (re)allocates more space
+But it doesn't leave the index pointing to a new slot.
+
+I don't think there is any simple fix.  You can't make ring-buffers
+bigger by just adding more space on the end.  The fingers may be
+pointing into the middle of the +block.
+
+There is probably a similar bug on the request side.
+--------------------------------------------------------------------------

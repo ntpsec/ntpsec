@@ -8,6 +8,8 @@ on user-visible changes.
 
 == Bugfixes either ported from NTP Classic or fixed by NTPsec changes ==
 
+These reflect fixes to NTP Classic since the 2015-06-06 fork point.
+
 * [Bug 2625] Deprecate flag1 in local refclock.  Hal Murray, Harlan Stenn.
 * [Bug 2778] Implement "apeers"  ntpq command to include associd.
 * [Bug 2823] ntpsweep with recursive peers option doesn't work.  H.Stenn.

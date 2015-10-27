@@ -10,8 +10,10 @@
 # Debug this by giving the -n option, which causes it to echo the
 # generated ntpdig command rather than executing it.
 #
-# Known bug: The -e and -p options of ntpdate are not yet
-# implemented.
+# Known bugs:
+# * The -e and -p options of ntpdate are not yet implemented.
+# * ntpdate took 4 samples and chose the best (shortest trip time).
+#   This takes the first.
 #
 # ntpdate ntpdig  ntpd    What it does
 # -4      -4      -q -4   Resolve DNS lookups to A records         

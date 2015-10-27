@@ -13,14 +13,15 @@ directory.
 The base directory ./ contains the configuration files, source
 directories and related stuff:
 
-INSTALL::	Generic installation instructions for autoconf-based programs.
-		Unless you really know what you are doing, you should read the
-		directions in the HTML pages, starting with ./html/index.html.
-		For Windows/NT, visit html/build/hints/winnt.html
+BUGS::		Descriptions of known bugs.
+
+INSTALL::	Generic installation instructions.
 
 NEWS::		What's new in this release.
 
 README::	This file.
+
+VERSION::	The version stamp, to be used by scripts and programs.
 
 devel/::	Documentation aimed at developers.
 
@@ -36,8 +37,6 @@ etc/::		Directory containing a motley collection of configuration files
 include/::	Directory containing include header files used by most
 		programs in the distribution.
 
-INSTALL::	Installation instructions.
-
 libisc/::	Utility code from Internet Systems Consortium.  The local
 		copy has been significantly trimmed and modified.
 
@@ -51,8 +50,6 @@ libparse/:: 	This directory contains the files making up the parser for
 		this refclock drivers allows a refclock implementation
 		by just providing a conversion routine and the
 		appropriate NTP parameters
-
-NEWS::		Project news summarizing user-visible changes.
 
 ntpd/::		Sources for the main time-synchronization daemon.
 
@@ -95,8 +92,6 @@ ports/::	Subdirectories of this contain code for non-Unix operating
 
 pylib/::	A library of Python procedures used by the build sytem.
 
-README::	This file
-
 tests/::	Self-test code.
 
 util/:: 	Directory containing sources for various utility and testing
@@ -104,8 +99,6 @@ util/:: 	Directory containing sources for various utility and testing
 		The subdirectories monitoring/ and support/ hold
 		various perl and shell scripts for visualizing
 		synchronization and daemon startup.
-
-VERSION::	The version stamp, to be used by scripts and programs.
 
 waf::		A copy of the waf builder.  This is the engine used to configure
 		and build the codebase.
