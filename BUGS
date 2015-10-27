@@ -4,7 +4,7 @@
   logs in some cases involving asynchronous getaddrinfo lookups.
 
 * There is a concurrency bug in asynchronous getaddrinfo lookups which
-  nanifests as name lookups getting dropped (thee workaround is to
+  manifests as name lookups getting dropped (the workaround is to
   specify servers as IP addresses).  Hal says:
 
 --------------------------------------------------------------------------
