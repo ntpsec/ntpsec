@@ -142,13 +142,13 @@ leapsec_set_table(
 /* ------------------------------------------------------------------ */
 bool
 leapsec_electric(
-	bool on)
+	electric_mode el)
 {
 	int res = _electric;
-	if (on < 0)
+	if (el == electric_query)
 		return res;
 
-	_electric = (on != 0);
+	_electric = (el == electric_on);
 	if (_electric == res)
 		return res;
 

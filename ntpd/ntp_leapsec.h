@@ -60,9 +60,10 @@ extern int leapsec_validate(leapsec_reader, void*);
  *
  * Simply querying the state or setting it to the same value as before
  * does not have any unwanted side effects.  You can query by giving a
- * negative value for the switch.
+ * the electric_query value for the argument.
  */
-extern bool leapsec_electric(bool on);
+typedef enum {electric_query=-1, electric_off=0, electric_on=1} electric_mode;
+extern bool leapsec_electric(electric_mode el);
 
 
 /* Query result for a leap second schedule
