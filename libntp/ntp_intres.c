@@ -1,5 +1,5 @@
 /*
- * ntp_intres.c - Implements a generic blocking worker child or thread,
+ * ntp_intres.c - Implements a generic blocking worker thread,
  *		  initially to provide a nonblocking solution for DNS
  *		  name to address lookups available with getaddrinfo().
  *
@@ -15,37 +15,20 @@
  *
  * A secondary goal is to provide a generic mechanism for other
  * blocking operations to be delegated to a worker using a common
- * model for both Unix and Windows ntpd.  ntp_worker.c, work_fork.c,
- * and work_thread.c implement the generic mechanism.  This file
- * implements the two current consumers, getaddrinfo_sometime() and the
- * presently unused getnameinfo_sometime().
+ * model for both Unix and Windows ntpd.  ntp_worker.c and work_thread.c 
+ * implement the generic mechanism.  This file implements the two 
+ * current consumers, getaddrinfo_sometime() and the presently unused 
+ * getnameinfo_sometime().
  *
  * Both routines deliver results to a callback and manage memory
  * allocation, meaning there is no freeaddrinfo_sometime().
  *
- * The initial implementation for Unix uses a pair of unidirectional
- * pipes, one each for requests and responses, connecting the forked
- * blocking child worker with the ntpd mainline.  The threaded code
- * uses arrays of pointers to queue requests and responses.
- *
- * The parent drives the process, including scheduling sleeps between
- * retries.
- *
- * Memory is managed differently for a child process, which mallocs
- * request buffers to read from the pipe into, whereas the threaded
- * code mallocs a copy of the request to hand off to the worker via
- * the queueing array.  The resulting request buffer is free()d by
+ * The code uses arrays of pointers to queue requests and responses.
+ * The main thread schedules sleeps between retries.  The code mallocs
+ * a copy of the request to hand off to the worker via the queueing
+ * array.  The resulting request buffer is free()d by
  * platform-independent code.  A wrinkle is the request needs to be
  * available to the requestor during response processing.
- *
- * Response memory allocation is also platform-dependent.  With a
- * separate process and pipes, the response is free()d after being
- * written to the pipe.  With threads, the same memory is handed
- * over and the requestor frees it after processing is completed.
- *
- * The code should be generalized to support threads on Unix using
- * much of the same code used for Windows initially.
- *
  */
 #include <config.h>
 
