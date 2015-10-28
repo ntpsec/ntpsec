@@ -476,9 +476,9 @@ check_leapsec(
 	
 #ifndef SYS_WINNT  /* WinNT port has its own leap second handling */
 # ifdef HAVE_KERNEL_PLL
-	leapsec_electric(pll_control && kern_enable);
+	leapsec_electric((pll_control && kern_enable) ? electric_on : electric_off);
 # else
-	leapsec_electric(0);
+	leapsec_electric(electric_off);
 # endif
 #endif	
 #ifdef ENABLE_LEAP_SMEAR

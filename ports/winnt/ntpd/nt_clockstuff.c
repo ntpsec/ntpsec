@@ -554,12 +554,12 @@ adj_systime(
 				 * And we have to tell the core that we deal with it.
 				 */
                                 ls_ft.ull -= (HECTONANOSECONDS + HECTONANOSECONDS/2);
-                                leapsec_electric(TRUE);
+                                leapsec_electric(electric_on);
                         } else if (lsi.tai_diff < 0) {
                                 /* Do not handle negative leap seconds here. If this
                                  * happens, let the system step.
                                  */
-                                leapsec_electric(FALSE);
+                                leapsec_electric(electric_off);
                         }
                 }
         } else {
@@ -692,7 +692,7 @@ init_winnt_time(void)
 #pragma warning(pop)
 
 	init_small_adjustment();
-        leapsec_electric(TRUE);
+        leapsec_electric(electric_on);
 
 	/*
 	 * Get privileges needed for fiddling with the clock
