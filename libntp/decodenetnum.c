@@ -38,7 +38,7 @@ decodenetnum(
 	const size_t numlen = strlen(num);
 	bool have_brackets;
 
-#ifdef INCLUDE_IPV6_SUPPORT
+#ifdef ENABLE_IPV6
 	char ip[INET6_ADDRSTRLEN];
 #else
 	char ip[INET_ADDRSTRLEN];
@@ -115,7 +115,7 @@ decodenetnum(
 	hints.ai_protocol = IPPROTO_UDP;
 	/* One final validity check: only IPv6 addresses are allowed to
 	 * have brackets. */
-#ifdef INCLUDE_IPV6_SUPPORT
+#ifdef ENABLE_IPV6
 	hints.ai_family = have_brackets ? AF_INET6 : AF_UNSPEC;
 #else
 	if(have_brackets) {
