@@ -4,7 +4,34 @@
 
 === Blocker bugs ===
 
-None right now. (Sep-22 2015)
+* The doc target should build manual pages. Model command is
+  a2x --format manpage --asciidoc-opts=--conf-file=../docs/asciidoc.conf foo.txt
+
+* There's no installation yet for ntpleapfetch, or the Perl
+  executables that should be installed (ntpwait, ntptrace), nor
+  for their support library under perllib/.
+
+* We need to live-test leap seconds, both getting them from a file
+  with ntpleapfetch and getting them from other NTP servers.
+
+* ntpwait and ntptrace need to be smoke-tested on a live installation.
+  This would complete the list of installables known to be behaving sanely.
+
+* Unit testing.  "waf check" needs to run all the unit tests.
+  This means both that the C++ glue needs to be fixed and waf needs
+  to actually call the tests.
+
+* Phabricator-centered workflow needs to be written up and integrated
+  with the website content.
+
+* Website contacts page needs completion.  This means we need to have the
+  bugtracker up, and all mailing lists created.
+
+* Designations for fixed vulns, including CVEs, need to be added to the
+  NEWS file.
+
+* We need a resolution on the bug induced by Daniel's decodenetnum() rewrite,
+  either to fix it or document it as a known problem.
 
 === Build system ===
 
@@ -15,24 +42,17 @@ None right now. (Sep-22 2015)
 * Add 'snapshot' feature to dump config status into a JSON file for collecting 
   build + platform information
 
-* The doc target should build manual pages. Model command is
-  a2x --format manpage --asciidoc-opts=--conf-file=../docs/asciidoc.conf foo.txt
-
-* An issue with the install productions as presently written is that
-  they're written to install to ${PREFIX}/bin and {PREFIX}/sbin.  This
-  is right if we're trying to install a test setup to userspace but wrong
-  in the normal case - we want /sbin, not /usr/sbin.
-
-* There's no installation yet for ntpleapfetch, or the Perl
-  executables that should be installed (ntpwait, ntptrace), nor
-  for their support library under perllib/.
-
 * The install production needs to warn of stale ntpdc and ntpdate binaries.
 
 * Add support for enabling all conditional checks to ensure none are broken.
 
 * Add support for disabling specific conditional tests to ensure nothing is 
-  compiled into the base in a surprising fashion.
+  compiled into the base in a surprising fashion, e.g. --undefine=FOO should
+  suppress generation of any FOO #define into config.h.
+
+* Add support for enabling hidden features like autokey and/or
+  internal symbols for testing, e.g --define FOO=BAR generates #define
+  FOO BAR into config.h.
 
 * Add monkeypatch for rmdir, rmtree under Windows.
 
@@ -48,20 +68,16 @@ None right now. (Sep-22 2015)
 * systime.c needs patching to put ntpdsim's hook back in place. Deferred
   until the ntpdsim build is fixed.
 
+* Hal has seen a core dump in ntpdig.  It has not reproduced, so we don't
+  know what's going on there.
+
 === Testing ===
-
-* Unit testing.  "make check" needs to run all the unit tests.
-
-* Build testing.  The build/CI farm needs to be fully operational.
 
 * We need to live-test various refclocks.  It would be nice
   to test the full matrix of refclock x platform, but that's too
   much work.  We should probably test as many refclocks as we can
   on at least one platform and test the NMEA, Atom, and SHM drivers
   on most platforms.
-
-* We need to live-test leap seconds, both getting them from a file
-  with ntpleapfetch and getting them from other NTP servers.
 
 * The script tests in scripts/t should be investigated, perhaps
   they are salvageable.
@@ -72,11 +88,6 @@ None right now. (Sep-22 2015)
   Perhaps lifted from GPSD Time Service HOWTO?
 
 * The format and organization of the NEWS file needs a rethink.
-
-* Phabricator-centered workflow needs to be written up and integrated
-  with the website content I wrote for us.
-
-* Website contacts page needs completion.
 
 == After beta release ==
 
@@ -89,7 +100,7 @@ None right now. (Sep-22 2015)
 
 * Hal says "We need a way to inspect/debug bits on the wire. `ntpdate
   -du' is the traditional approach."  Hal's straw man is a new program
-  rather than trying to make sntp do this.  Eric's proposed answer:
+  rather than trying to make ntpdig do this.  Eric's proposed answer:
   ntpshark, a command interpreter written around ntpproto.py and
   loosely modeled on wireshark.
 
