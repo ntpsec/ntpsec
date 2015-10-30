@@ -444,16 +444,6 @@ def cmd_configure(ctx):
 	ctx.define("ISC_PLATFORM_USETHREADS", 1)
 	ctx.define("HAVE_IFLIST_SYSCTL", 1)
 
-
-	# Build settings for util/
-	# Required in order to access this in build()
-	if ctx.get_define("HAVE_SYS_TIMEPPS_H"):
-		ctx.env.HAVE_TIMEPPS = True
-
-	if ctx.get_define("HAVE_ADJTIMEX"):
-		ctx.env.HAVE_ADJTIMEX = True
-
-
 	ctx.start_msg("Writing configuration header:")
 	ctx.write_config_header("config.h")
 	ctx.end_msg("config.h", "PINK")
