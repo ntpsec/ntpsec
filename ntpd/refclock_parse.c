@@ -2075,7 +2075,7 @@ parsestate(
 			}
 			i++;
 		}
-		t = ap(buffer, size, t, ")");
+		ap(buffer, size, t, ")");
 	}
 	return buffer;
 }
@@ -2194,7 +2194,7 @@ l_mktime(
 	m = delta % 60;
 	delta /= 60;
 
-	t = ap(buffer, sizeof(buffer), t, "%02d:%02d:%02d",
+	ap(buffer, sizeof(buffer), t, "%02d:%02d:%02d",
 	     (int)delta, (int)m, (int)s);
 
 	return buffer;
@@ -3058,7 +3058,7 @@ parse_control(
 			        	tmpctl.parseformat.parse_buffer);
 			}
 
-			tt = ap(start, 80, tt, "\"");
+			ap(start, 80, tt, "\"");
 		}
 
 		/*
@@ -4031,7 +4031,7 @@ gps16x_message(
 					}
 					else
 					{
-						p = ap(buffer, sizeof(buffer), p, "gps_utc_correction=\"<NO UTC DATA>\"");
+						ap(buffer, sizeof(buffer), p, "gps_utc_correction=\"<NO UTC DATA>\"");
 					}
 					set_var(&parse->kv, buffer, sizeof(buffer), RO|DEF);
 				}
@@ -5225,7 +5225,7 @@ trimbletsip_message(
 			break;
 		}
 
-		t = ap(pbuffer, sizeof(pbuffer), t, "\"");
+		ap(pbuffer, sizeof(pbuffer), t, "\"");
 		set_var(&parse->kv, pbuffer, sizeof(pbuffer), var_flag);
 	}
 }
