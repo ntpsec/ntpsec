@@ -1263,6 +1263,7 @@ isc_log_open(isc_logchannel_t *channel) {
 	 * version renamed, and only if the base file exists
 	 * and either has no size limit or has reached its size limit.
 	 */
+	/* coverity[toctou] */
 	if (stat(path, &statbuf) == 0) {
 		regular_file = S_ISREG(statbuf.st_mode) ? true : false;
 		/* XXXDCL if not regular_file complain? */

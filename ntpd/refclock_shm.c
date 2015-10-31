@@ -34,7 +34,7 @@
 # include <stdio.h>
 #endif
 
-#ifdef HAVE_STDATOMIC_H
+#if defined(HAVE_STDATOMIC_H) && !defined(__COVERITY__)
 # include <stdatomic.h>
 #endif /* HAVE_STDATOMIC_H */
 
@@ -370,7 +370,7 @@ struct shm_stat_t {
 
 static inline void memory_barrier(void)
 {
-#ifdef HAVE_STDATOMIC_H
+#if defined(HAVE_STDATOMIC_H) && !defined(__COVERITY__)
     atomic_thread_fence(memory_order_seq_cst);
 #endif /* HAVE_STDATOMIC_H */
 }

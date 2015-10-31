@@ -161,7 +161,7 @@ mx4200_start(
 	 */
 	snprintf(gpsdev, sizeof(gpsdev), DEVICE, unit);
 	fd = refclock_open(gpsdev, SPEED232, LDISC_PPS);
-	if (fd <= 0)
+	if (fd < 0)
 		return false;
 
 	/*
