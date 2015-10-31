@@ -3029,7 +3029,7 @@ parse_control(
 
 			tt += strlen(tt);
 
-			tt = ap(start, 512, tt, "\"");
+			ap(start, 512, tt, "\"");
 
 			if (tmpctl.parsegettc.parse_count)
 			    mkascii(outstatus+strlen(outstatus), (int)(sizeof(outstatus)- strlen(outstatus) - 1),
@@ -4027,7 +4027,7 @@ gps16x_message(
 						p = ap(buffer, sizeof(buffer), p, "gps_utc_correction=\"");
 						mk_utcinfo(p, utc.t0t.wn, utc.WNlsf, utc.DNt, utc.delta_tls, utc.delta_tlsf, BUFFER_SIZE(buffer, p));
 						p += strlen(p);
-						p = ap(buffer, sizeof(buffer), p, "\"");
+						ap(buffer, sizeof(buffer), p, "\"");
 					}
 					else
 					{

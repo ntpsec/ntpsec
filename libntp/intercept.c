@@ -286,6 +286,7 @@ void intercept_drift_write(char *driftfile, double drift)
 	strlcpy(driftcopy, driftfile, PATH_MAX);
 	strlcpy(tmpfile, dirname(driftcopy), sizeof(tmpfile));
 	strlcat(tmpfile, "/driftXXXXXX", sizeof(tmpfile));
+	/* coverity[secure_temp] Warning is bogus on POSIX-compliant systems*/
 	if ((fd = mkstemp(tmpfile)) < 0) {
 	    msyslog(LOG_ERR, "frequency file %s: %m", tmpfile);
 	    return;
