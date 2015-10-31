@@ -123,9 +123,9 @@ def cmd_configure(ctx):
 		ctx.check_type(f, h)
 
 	structure_fields = (
-		("time_tick", "timex", "sys/timex.h"),
-		("modes", "timex", "sys/timex.h"),
-		("time.tv_nsec", "ntptimeval", "sys/timex.h"),
+		("time_tick", "timex", ["sys/timex.h", "sys/time.h"]),
+		("modes", "timex", ["sys/timex.h", "sys/time.h"]),
+		("time.tv_nsec", "ntptimeval", ["sys/timex.h", "sys/time.h"]),
 		)
 	for (f, s, h) in structure_fields:
 		ctx.check_structfield(f, s, h)
