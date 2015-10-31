@@ -49,7 +49,7 @@ the canonical host names.
   Maximum number of peers to trace. This option takes an integer number
   as its argument. The default _number_ for this option is 99.
 
-+-r+ string, +--host+=_string_
++-r+ string, +--host+=_string_::
   Trace a single remote host.
 
 // end
