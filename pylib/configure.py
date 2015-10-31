@@ -313,14 +313,12 @@ def cmd_configure(ctx):
 		from refclock import refclock_config
 		refclock_config(ctx)
 
-	if not ctx.options.disable_ipv6:
-		ctx.define("ENABLE_IPV6", 1)
-		# These other things should be derived,
-		# but the fate of the SYS_WINNT code
-		# needs to be decided before that will
-		# make sense.
-		ctx.define("ISC_PLATFORM_HAVEIPV6", 1)
-		ctx.define("ISC_PLATFORM_HAVEIN6PKTINFO", 1)
+	# FIXME: These other things should be derived,
+	# but the fate of the SYS_WINNT code
+	# needs to be decided before that will
+	# make sense.
+	ctx.define("ISC_PLATFORM_HAVEIPV6", 1)
+	ctx.define("ISC_PLATFORM_HAVEIN6PKTINFO", 1)
 
 	# NetBSD (used to) need to recreate sockets on changed routing.
 	# Perhaps it still does. If so, this should be set.  The autoconf
@@ -456,5 +454,4 @@ def cmd_configure(ctx):
 	msg_setting("LDFLAGS", " ".join(ctx.env.LDFLAGS))
 	msg_setting("PREFIX", ctx.env.PREFIX)
 	msg_setting("Debug Support", ctx.options.enable_debug)
-	msg_setting("IPv6 Support", not ctx.options.disable_ipv6)
 	msg_setting("Refclocks", ctx.options.refclocks)

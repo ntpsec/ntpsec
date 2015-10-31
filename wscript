@@ -39,7 +39,6 @@ def options(ctx):
 	grp = ctx.add_option_group("NTP build options")
 	grp.add_option('--enable-debug', action='store_true', default=False, help="Enable debugging code")
 	grp.add_option('--enable-debug-gdb', action='store_true', default=False, help="Enable GDB debugging symbols")
-	grp.add_option('--disable-ipv6', action='store_true', default=False, help="Disable IPv6")
 	grp.add_option('--enable-doc', action='store_true', default=False, help="Build NTP documentation")
 	grp.add_option('--enable-crypto', action='store_true', default=False, help="Enable OpenSSL.")
 	grp.add_option('--disable-droproot', action='store_true', default=False, help="Disable dropping root.")
