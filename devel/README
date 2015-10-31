@@ -20,7 +20,7 @@ ifdex-ignores::
 	Lists and explains a large number of internal configuration symbols.	
 
 TODO::
-	List of items the NTP developers are working on.
+	List of items the NTPsec developers are working on.
 
 HISTORIC-NEWS::
 	NTP Classic news file up to 4.2.8p3 (May 2015).
