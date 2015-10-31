@@ -449,7 +449,7 @@ step_systime(
 
 	/* ---> time-critical path starts ---> */
 
-	/* get the current time as l_fp (without fuzz) and as struct timeval */
+	/* get the current time as l_fp (without fuzz) and as struct timespec */
 	get_ostime(&timets);
 	fp_sys = tspec_stamp_to_lfp(timets);
 
@@ -494,6 +494,8 @@ step_systime(
 	 *
 	 * This might become even uglier...
 	 */
+	timetv.tv_sec = timets.tv_sec;
+	timetv.tv_usec = timets.tv_nsec / 1000;
 	tvdiff = abs_tval(sub_tval(timetv, tvlast));
 	if (tvdiff.tv_sec > 0) {
 #ifdef OVERRIDE_OTIME_MSG
@@ -549,6 +551,7 @@ step_systime(
 #undef OTIME_MSG
 #undef NTIME_MSG
 	}
+	tvlast = timetv;
 	return true;
 }
 
