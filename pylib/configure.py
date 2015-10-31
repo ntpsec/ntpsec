@@ -191,8 +191,8 @@ def cmd_configure(ctx):
 		('getdtablesize', ["unistd.h"]),		# SVr4, 4.2BSD
 		('getpassphrase', ["stdlib.h"]),		# Sun systems
 		('MD5Init', ["md5.h"], "CRYPTO"),
-		('ntp_adjtime', ["sys/timex.h", "sys/time.h"]),		# BSD
-		('ntp_gettime', ["sys/timex.h", "sys/time.h"]),		# BSD
+		('ntp_adjtime', ["sys/time.h", "sys/timex.h"]),		# BSD
+		('ntp_gettime', ["sys/time.h", "sys/timex.h"]),		# BSD
 		('pthread_attr_getstacksize', ["pthread.h"], "PTHREAD"),
 		('pthread_attr_setstacksize', ["pthread.h"], "PTHREAD"),
 		('res_init', ["resolv.h"]),
@@ -368,7 +368,7 @@ def cmd_configure(ctx):
 	# file /usr/include/sys/timex.h for the particular
 	# architecture to be in place."
 	#
-	if ctx.check_cc(header_name="sys/timex.h", mandatory=False):
+	if probe_header_with_prerequisites(ctx, "sys/timex.h", ["sys/time.h"]):
 		ctx.define("HAVE_KERNEL_PLL", 1)
 
 	# SO_REUSEADDR socket option is needed to open a socket on an
