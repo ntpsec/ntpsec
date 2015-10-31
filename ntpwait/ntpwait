@@ -1,10 +1,9 @@
-#! @BIN_PERL@
+#!/usr/bin/env perl
 
 package ntp_wait;
 use 5.006_000;
 use strict;
 use warnings;
-use lib "@PERLLIBDIR@";
 use NTP::Util qw(ntp_read_vars);
 use Getopt::Long qw(GetOptionsFromArray);
 Getopt::Long::Configure(qw(no_auto_abbrev no_ignore_case_always));

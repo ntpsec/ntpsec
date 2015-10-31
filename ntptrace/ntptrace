@@ -1,10 +1,9 @@
-#! @BIN_PERL@ -w
+#!/usr/bin/env perl
 # John Hay -- John.Hay@icomtek.csir.co.za / jhay@FreeBSD.org
 
 package ntptrace;
 use 5.006_000;
 use strict;
-use lib "@PERLLIBDIR@";
 use NTP::Util qw(ntp_read_vars do_dns);
 use Getopt::Long qw(GetOptionsFromArray);
 Getopt::Long::Configure(qw(no_auto_abbrev no_ignore_case_always));
