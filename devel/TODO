@@ -30,9 +30,6 @@
 * Designations for fixed vulns, including CVEs, need to be added to the
   NEWS file.
 
-* We need a resolution on the bug induced by Daniel's decodenetnum() rewrite,
-  either to fix it or document it as a known problem.
-
 === Build system ===
 
 * Document build files.
