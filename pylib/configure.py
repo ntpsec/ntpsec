@@ -180,40 +180,38 @@ def cmd_configure(ctx):
 	# Optional functions.  Do all function checks here, otherwise
 	# we're likely to duplicate them.
 	functions = (
-		('adjtimex', "sys/timex.h"),
-		('arc4random', "stdlib.h"),
-		('arc4random_buf', "stdlib.h"),
-		('closefrom', "stdlib.h"),
-		('clock_gettime', "time.h", "RT"),
-		('clock_settime', "time.h", "RT"),
-		('EVP_MD_do_all_sorted', "openssl/evp.h", "CRYPTO"),
-		('getclock', "sys/timers.h"),
-		('getdtablesize', "unistd.h"),		# SVr4, 4.2BSD
-		('getpassphrase', "stdlib.h"),		# Sun systems
-		('MD5Init', "md5.h", "CRYPTO"),
-		('ntp_adjtime', "sys/timex.h"),		# BSD
-		('ntp_gettime', "sys/timex.h"),		# BSD
-		('pthread_attr_getstacksize', "pthread.h", "PTHREAD"),
-		('pthread_attr_setstacksize', "pthread.h", "PTHREAD"),
-		('res_init', "resolv.h"),
-		("rtprio", "sys/rtprio.h"),		# Sun/BSD
-		('settimeofday', "sys/time.h", "RT"),	# BSD - remove?
-		('strlcpy', "string.h"),
-		('strlcat', "string.h"),
-		('sysconf', "unistd.h"),
-		('timegm', "time.h"),
-		('updwtmpx', "utmpx.h"),		# glibc
+		('adjtimex', ["sys/timex.h", "sys/time.h"]),
+		('arc4random', ["stdlib.h"]),
+		('arc4random_buf', ["stdlib.h"]),
+		('closefrom', ["stdlib.h"]),
+		('clock_gettime', ["time.h"], "RT"),
+		('clock_settime', ["time.h"], "RT"),
+		('EVP_MD_do_all_sorted', ["openssl/evp.h"], "CRYPTO"),
+		('getclock', ["sys/timers.h"]),
+		('getdtablesize', ["unistd.h"]),		# SVr4, 4.2BSD
+		('getpassphrase', ["stdlib.h"]),		# Sun systems
+		('MD5Init', ["md5.h"], "CRYPTO"),
+		('ntp_adjtime', ["sys/timex.h", "sys/time.h"]),		# BSD
+		('ntp_gettime', ["sys/timex.h", "sys/time.h"]),		# BSD
+		('pthread_attr_getstacksize', ["pthread.h"], "PTHREAD"),
+		('pthread_attr_setstacksize', ["pthread.h"], "PTHREAD"),
+		('res_init', ["resolv.h"]),
+		("rtprio", ["sys/rtprio.h"]),		# Sun/BSD
+		('settimeofday', ["sys/time.h"], "RT"),	# BSD - remove?
+		('strlcpy', ["string.h"]),
+		('strlcat', ["string.h"]),
+		('sysconf', ["unistd.h"]),
+		('timegm', ["time.h"]),
+		('updwtmpx', ["utmpx.h"]),		# glibc
 		)
 	for ft in functions:
 		if len(ft) == 2:
-			ctx.check_cc(function_name=ft[0],
-				     header_name=ft[1],
-				     mandatory=False)
+			probe_function_with_prerequisites(ctx, function=ft[0],
+							  prerequisites=ft[1])
 		else:
-			ctx.check_cc(function_name=ft[0],
-				     header_name=ft[1],
-				     use=ft[2],
-				     mandatory=False)
+			probe_function_with_prerequisites(ctx, function=ft[0],
+							  prerequisites=ft[1],
+							  use=ft[2])
 
 	ctx.check_cc(header_name="stdbool.h", mandatory=True)
 
