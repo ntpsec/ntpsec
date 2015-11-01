@@ -2,6 +2,11 @@
 // twice, one in generating the Web documentation tree and one when
 // generating the manual page describing the daemon config file.
 
+In these commands, an _address_ can be any of (a) an IPV4 address in
+a.b.c.d format, (b) an IPV6 address in [a:b:c:d:e:f:g] format, (c) a
+link-local IPV6 address with an interface specified in
+[a:b:c:d:e:f:g]%device format, or (d) a DNS hostname.
+
 +pool+ _address_ [+burst+] [+iburst+] [+version+ _version_] [+prefer+] [+minpoll+ _minpoll_] [+maxpoll+ _maxpoll_] [+preempt+]::
 +server+ _address_ [+key+ _key_ | +autokey+] [+burst+] [+iburst+] [+version+ _version_] [+prefer+] [+minpoll+ _minpoll_] [+maxpoll+ _maxpoll_]::
 +peer+ _address_ [+key+ _key_ | +autokey+] [+version+ _version_] [+prefer+] [+minpoll+ _minpoll_] [+maxpoll+ _maxpoll_] [+xleave+]::
