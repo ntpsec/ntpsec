@@ -617,7 +617,12 @@ wait_for_sem(
 	if (NULL == timeout)
 		rc = sem_wait(sem);
 	else
+#ifdef sem_timedwait
 		rc = sem_timedwait(sem, timeout);
+#else
+		/* No sem_timedwait on NetBSD - thread stays around forever. */
+		rc = sem_wait(sem);
+#endif
 
 	return rc;
 }

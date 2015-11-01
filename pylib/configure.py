@@ -123,9 +123,9 @@ def cmd_configure(ctx):
 		ctx.check_type(f, h)
 
 	structure_fields = (
-		("time_tick", "timex", ["sys/timex.h", "sys/time.h"]),
-		("modes", "timex", ["sys/timex.h", "sys/time.h"]),
-		("time.tv_nsec", "ntptimeval", ["sys/timex.h", "sys/time.h"]),
+		("time_tick", "timex", ["sys/time.h", "sys/timex.h"]),
+		("modes", "timex", ["sys/time.h", "sys/timex.h"]),
+		("time.tv_nsec", "ntptimeval", ["sys/time.h", "sys/timex.h"]),
 		)
 	for (f, s, h) in structure_fields:
 		ctx.check_structfield(f, s, h)
@@ -180,7 +180,7 @@ def cmd_configure(ctx):
 	# Optional functions.  Do all function checks here, otherwise
 	# we're likely to duplicate them.
 	functions = (
-		('adjtimex', ["sys/timex.h", "sys/time.h"]),
+		('adjtimex', ["sys/time.h", "sys/timex.h"]),
 		('arc4random', ["stdlib.h"]),
 		('arc4random_buf', ["stdlib.h"]),
 		('closefrom', ["stdlib.h"]),
@@ -261,7 +261,7 @@ def cmd_configure(ctx):
 		("sys/sysctl.h", ["sys/types.h"]),
 		"sys/systune.h",
 		("timepps.h", ["inttypes.h"]),
-		("sys/timepps.h", ["inttypes.h"]),
+		("sys/timepps.h", ["inttypes.h", "sys/time.h"]),
 	)
 	for hdr in optional_headers:
 		if type(hdr) == type(""):
