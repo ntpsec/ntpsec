@@ -10,7 +10,7 @@
     [ -k 'keyfile' ] [ -l 'logfile' ] [ -p 'pidfile' ] [ -P 'priority' ]
     [ -r 'broadcast-delay' ]  [ -s 'statsdir' ]  [ -t  'key' ]
     [ -u 'user'[:'group'] ] [ -U 'interface_update_interval' ]
-    [ -v 'variable' ] [ -V 'variable' ]
+    [ -v 'variable' ] [ -V 'variable' ] [server...]
 
 [[descr]]
 == DESCRIPTION ==
@@ -326,6 +326,11 @@ discipline is disabled with this option.
 +-V, --version+::
   Output version of program and exit. -VV gives more detailed version
   information.
+
+Any arguments given after options are interpreted as server addresses
+or hostnames, with the _iburst_ option implied. Associations with
+theseare formed before any associations implied by the configuration
+file.
 
 [[usage]]
 == USAGE ==
