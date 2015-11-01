@@ -3,7 +3,7 @@ from waflib.Configure import conf
 TYPE_FRAG = """
 #include <stdint.h>
 #include <sys/types.h>
-#include <%s>
+%s
 int main () {
 	struct %s x;
 	if (sizeof (x.%s))
@@ -13,11 +13,13 @@ int main () {
 """
 
 @conf
-def check_structfield(ctx, fld, type, hdr, mandatory=False):
+def check_structfield(ctx, fld, type, hdrs, mandatory=False):
 	name = "STRUCT_%s_HAS_%s" % (type.upper(), fld.upper().replace('.','_'))
-
+	src = ""
+        for hdr in hdrs:
+		src += "#include <%s>\n" % hdr
 	ctx.check_cc(
-		fragment    = TYPE_FRAG % (hdr, type, fld),
+		fragment    = TYPE_FRAG % (src, type, fld),
 		define_name = name,
 		execute     = False,
 		msg         = "Checking for %s in struct %s" % (fld, type),
