@@ -21,6 +21,10 @@
 #ifdef HAVE_SYS_TIMEPPS_H
 #include <sys/timepps.h>
 
+#ifdef timespecsub
+  /* It's defined on NetBSD */
+# undef timespecsub
+#endif
 #define timespecsub(vvp, uvp)                                           \
         do {                                                            \
                 (vvp)->tv_sec -= (uvp)->tv_sec;                         \
