@@ -88,6 +88,17 @@
 #include "ntp_types.h"
 #include "ntp_control.h"	/* for CTL_* clocktypes */
 
+#ifndef LLONG_MAX
+  /* ntp_types.h includes limits.h
+   * On NetBSD, that includes machine/limits.h
+   * Normally, that provides LLONG_MAX and LLONG_MIN 
+   * But that doesn't work on NetBSD.  It needs _NETBSD_SOURCE or such.
+   * These are the same on both 32 and 64 bit systems.
+   */
+#define  LLONG_MAX    0x7fffffffffffffffLL    /* max signed long long */
+#define  LLONG_MIN  (-0x7fffffffffffffffLL-1) /* min signed long long */
+#endif
+
 /* =====================================================================
  * Get the little JSMN library directly into our guts. Use the 'parent
  * link' feature for maximum speed.

@@ -50,6 +50,8 @@ def cmd_configure(ctx):
 		ctx.env.PLATFORM_TARGET = "osx"
 	elif platform.startswith("freebsd"):
 		ctx.env.PLATFORM_TARGET = "freebsd"
+	elif platform.startswith("netbsd"):
+		ctx.env.PLATFORM_TARGET = "netbsd"
 	else:
 		ctx.env.PLATFORM_TARGET = "unix"
 	ctx.end_msg(ctx.env.PLATFORM_TARGET	)
@@ -59,6 +61,8 @@ def cmd_configure(ctx):
 	if ctx.env.PLATFORM_TARGET == "freebsd":
 		ctx.env.PLATFORM_INCLUDES = ["/usr/local/include"]
 		ctx.env.PLATFORM_LIBPATH = ["/usr/local/lib"]
+	elif ctx.env.PLATFORM_TARGET == "netbsd":
+		ctx.env.PLATFORM_LIBPATH = ["/usr/pkg/lib"]
 	elif ctx.env.PLATFORM_TARGET == "osx":
 		ctx.env.PLATFORM_INCLUDES = ["/opt/local/include"]
 		ctx.env.PLATFORM_LIBPATH = ["/opt/local/lib"]
