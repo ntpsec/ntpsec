@@ -125,8 +125,8 @@ typedef int tok_ref;
  */
 typedef signed   long long int json_int;
 typedef unsigned long long int json_uint;
-#define JSON_INT_MAX LLONG_MAX
-#define JSON_INT_MIN LLONG_MIN
+#define JSON_INT_MAX LONG_MAX
+#define JSON_INT_MIN LONG_MIN
 
 /* =====================================================================
  * header stuff we need
