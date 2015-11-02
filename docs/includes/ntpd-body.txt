@@ -329,7 +329,7 @@ discipline is disabled with this option.
 
 Any arguments given after options are interpreted as server addresses
 or hostnames, with the _iburst_ option implied. Associations with
-theseare formed before any associations implied by the configuration
+these are formed before any associations implied by the configuration
 file.
 
 [[usage]]
