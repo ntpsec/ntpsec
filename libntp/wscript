@@ -56,8 +56,7 @@ def build(ctx):
 	]
 
 	if ctx.env.REFCLOCK_CHU == True \
-		or ctx.env.REFCLOCK_IRIG == True \
-		or ctx.env.REFCLOCK_WWV == True:
+		or ctx.env.REFCLOCK_IRIG == True:
 
 		libntp_source += [
 			"audio.c"
