@@ -133,6 +133,18 @@ By default, `make install' will install the package's files in
 installation prefix other than `/usr/local' by giving waf the
 option `--prefix=PATH'.
 
+== Uninstalled binaries and scripts ==
+
+Due to variations in Perl library paths, our stock source distribution
+makes no attempt to install certain Perl scripts: notably
+ntpleapfetch, ntpwait, and ntptrace.  If you installed this sotware
+from a binary package prepared by your OS distributor, the OS
+distributor may install them, arranging a rendezvous with the
+Perl implementation's library path.
+
+The utils/ directory contains various other uninstalled programs, some
+of only historical interest. Consult util/README for details.
+
 == Optional Features ==
 
 The waf builder accepts `--enable-FEATURE' options to where FEATURE

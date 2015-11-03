@@ -7,16 +7,6 @@
 * The doc target should build manual pages. Model command is
   a2x --format manpage --asciidoc-opts=--conf-file=../docs/asciidoc.conf foo.txt
 
-* There's no installation yet for ntpleapfetch, or the Perl
-  executables that should be installed (ntpwait, ntptrace), nor
-  for their support library under perllib/.
-
-* We need to live-test leap seconds, both getting them from a file
-  with ntpleapfetch and getting them from other NTP servers.
-
-* ntpwait and ntptrace need to be smoke-tested on a live installation.
-  This would complete the list of installables known to be behaving sanely.
-
 * Unit testing.  "waf check" needs to run all the unit tests.
   This means both that the C++ glue needs to be fixed and waf needs
   to actually call the tests.
