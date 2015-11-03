@@ -31,7 +31,29 @@ These reflect fixes to NTP Classic since the 2015-06-06 fork point.
 * [Bug 2886] Misspelling: "outlyer" should be "outlier"
 * [Bug 2890] Ignore ENOBUFS on routing netlink socket.  Konstantin Khlebnikov.
 * [Bug 2902] configuration directives "pidfile" and "driftfile"
-  should be local-only. (patch by Miroslav Lichvar)
-* [Bug 2909] Slow memory leak in CRYPTO_ASSOC
+  should be local-only. (patch by Miroslav Lichvar) (CVE-2015-7703)
+* [Bug 2909] Slow memory leak in CRYPTO_ASSOC (CVE-2015-7701)
+* [Bug 2941] NAK to the Future: Symmetric association authentication
+  bypass via crypto-NAK (CVE-2015-7871)
+* [Bug 2922] decodenetnum() will ASSERT botch instead of returning
+  FAIL on some bogus values (CVE-2015-7855)
+* [Bug 2921] Password Length Memory Corruption Vulnerability (CVE-2015-7854)
+* [Bug 2920] Invalid length data provided by a custom refclock driver
+  could cause a buffer overflow (CVE-2015-7853)
+* [Bug 2919] ntpq atoascii() potential memory corruption (CVE-2015-7852)
+* [Bug 2918] saveconfig Directory Traversal Vulnerability. (OpenVMS)
+  (CVE-2015-7851)
+* [Bug 2916] trusted key use-after-free (CVE-2015-7849)
+* [Bug 2901] Clients that receive a KoD should validate the origin
+  timestamp field (CVE-2015-7704, CVE-2015-7705)
+
+Additionally the NTPsec team is aware of the following vulnerabilities
+impacting autokey: CVE-2015-7691, CVE-2015-7692, CVE-2015-7702. NTPsec
+does not support building with autokey support and therefore is not
+exposed; the vulnerable code will not be fixed, but will be removed in
+a future release.
+
+NTPsec is not impacted by CVE-2015-7848 (mode 7 loop counter underrun)
+because ntpdc and support for mode 7 packets have been removed.
 
 // end

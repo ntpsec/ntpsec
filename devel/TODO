@@ -17,9 +17,6 @@
 * Website contacts page needs completion.  This means we need to have the
   bugtracker up, and all mailing lists created.
 
-* Designations for fixed vulns, including CVEs, need to be added to the
-  NEWS file.
-
 === Build system ===
 
 * Document build files.
