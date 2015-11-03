@@ -15,7 +15,6 @@
 #include "log.h"
 #include "libntp.h"
 
-
 bool shutting_down;
 bool time_derived;
 bool time_adjusted;

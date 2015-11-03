@@ -43,7 +43,13 @@ typedef struct blocking_pipe_header_tag {
 # ifdef USE_WORK_THREAD
 #  ifdef USE_WORK_PIPE
 typedef pthread_t *	thr_ref;
+#    ifdef __MACH__
+#include <mach/task.h>
+#include <mach/semaphore.h>
+typedef semaphore_t* sem_ref;
+#    else /* !__MACH__ */
 typedef sem_t *		sem_ref;
+#    endif /* !__MACH__ */
 #  else
 typedef HANDLE		thr_ref;
 typedef HANDLE		sem_ref;

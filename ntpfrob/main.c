@@ -10,11 +10,14 @@
 #include "config.h"
 #include "ntpfrob.h"
 
+void init_lib(void);
+
 int
 main(int argc, char **argv)
 {
 	int ch;
 	iomode mode = plain_text;
+	init_lib();
 	while ((ch = getopt(argc, argv, "a:Acejp:r")) != EOF) {
 		switch (ch) {
 		case 'A':

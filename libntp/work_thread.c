@@ -38,6 +38,28 @@
 #define DEVOLATILE(type, var) ((type)(uintptr_t)(volatile void *)(var))
 #endif
 
+#ifdef __MACH__
+#include <mach/clock.h>
+#include <mach/mach.h>
+#undef sem_init
+#define sem_init(s,p,c) semaphore_create(mach_task_self(),s,SYNC_POLICY_FIFO,c)
+#undef sem_destroy
+#define sem_destroy(s) semaphore_destroy(mach_task_self(),*s)
+#undef sem_wait
+#define sem_wait(s) semaphore_wait(*s)
+#undef sem_post
+#define sem_post(s) semaphore_signal(*s)
+#undef sem_timedwait
+static int sem_timedwait_osx(sem_ref sem, const struct timespec *abs_timeout)
+{
+	mach_timespec_t wait_time;
+	wait_time.tv_sec = abs_timeout->tv_sec;
+	wait_time.tv_nsec = abs_timeout->tv_nsec;
+	return semaphore_timedwait(*sem, wait_time);
+}
+#define sem_timedwait sem_timedwait_osx
+#endif
+
 #ifdef SYS_WINNT
 # define thread_exit(c)	_endthreadex(c)
 # define tickle_sem	SetEvent
@@ -77,7 +99,6 @@ exit_worker(
 {
 	thread_exit(exitcode);	/* see #define thread_exit */
 }
-
 
 int
 worker_sleep(

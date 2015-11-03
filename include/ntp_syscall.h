@@ -16,7 +16,7 @@
 # include <sys/timex.h>
 #endif
 
-#ifndef HAVE_NTP_GETTIME
+#ifndef HAVE_STRUCT_NTPTIMEVAL
 struct ntptimeval
 {
 	struct timeval	time;		/* current time (ro) */
@@ -25,6 +25,6 @@ struct ntptimeval
 };
 
 int ntp_gettime(struct ntptimeval *);
-#endif	/* !HAVE_NTP_GETTIME */
+#endif	/* !HAVE_STRUCT_NTPTIMEVAL */
 
 #endif	/* GUARD_NTP_SYSCALL_H */

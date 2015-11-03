@@ -377,6 +377,8 @@ main(
 
 	progname = argv[0];
 
+	init_lib();
+
 #ifdef SYS_WINNT
 	/* Initialize before OpenSSL checks */
 	InitWin32Sockets();

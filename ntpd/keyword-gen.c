@@ -273,6 +273,7 @@ int main(int argc, char **argv)
 		exit(1);
 	}
 	debug = true;
+	init_lib();
 
 	populate_symb(argv[1]);
 

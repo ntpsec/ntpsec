@@ -17,12 +17,12 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
+#include "ntp_unixtime.h"
 #include "ntp_fp.h"
 
 #include "ntpfrob.h"
 
 #define NBUF	800002
-#define JAN_1970 2208988800UL		/* Unix base epoch */
 #define NSAMPLES 10
 
 char progname[10];

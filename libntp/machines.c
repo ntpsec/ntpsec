@@ -26,7 +26,7 @@
 int _getch(void);	/* Declare the one function rather than include conio.h */
 #else
 
-#ifndef HAVE_NTP_GETTIME
+#if !defined(HAVE_NTP_GETTIME) && defined(HAVE_NTP_ADJTIME)
 int ntp_gettime(struct ntptimeval *ntv)
 {
 	struct timex tntx;
