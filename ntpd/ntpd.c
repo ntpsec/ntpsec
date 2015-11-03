@@ -494,9 +494,11 @@ set_process_priority(void)
 			else
 				sched.sched_priority = config_priority;
 		}
+#ifdef HAVE_SCHED_SETSCHEDULER
 		if ( sched_setscheduler(0, SCHED_FIFO, &sched) == -1 )
 			msyslog(LOG_ERR, "sched_setscheduler(): %m");
 		else
+#endif
 			priority_done = PRIORITY_OK;
 	}
 # ifdef HAVE_RTPRIO

@@ -1,20 +1,21 @@
 from waflib import Utils
 
 def build(ctx):
-	srcnode = ctx.srcnode.abspath()
-	bldnode = ctx.bldnode.abspath()
+	if ctx.env.PLATFORM_TARGET not in ['osx']:
+		srcnode = ctx.srcnode.abspath()
+		bldnode = ctx.bldnode.abspath()
 
-	ctx(
-		target		= "ntptime",
-		features	= "c cprogram bld_include src_include libisc_include",
-		source		= ["ntptime.c"],
-		includes	= [
-					"%s/ntptime/" % bldnode,
-					"%s/ntptime/" % srcnode,
-				],
-		use		= "ntp opts isc M RT PTHREAD",
-		install_path = "${PREFIX}/bin/"
-	)
+		ctx(
+			target		= "ntptime",
+			features	= "c cprogram bld_include src_include libisc_include",
+			source		= ["ntptime.c"],
+			includes	= [
+						"%s/ntptime/" % bldnode,
+						"%s/ntptime/" % srcnode,
+					  ],
+			use		= "ntp opts isc M RT PTHREAD",
+			install_path = "${PREFIX}/bin/"
+		)
 
 	ctx.manpage(8, "ntptime-man.txt")
 

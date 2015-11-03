@@ -22,6 +22,11 @@
 #endif
 #include <assert.h>
 
+#include "ntp_stdlib.h"
+#include "ntp_unixtime.h"
+
+char	*progname;
+
 struct shmTime {
 	int    mode; /* 0 - if valid set
 		      *       use values, 
@@ -119,6 +124,10 @@ main (
 	volatile struct shmTime *p;
 	int unit;
 	char *argp;
+
+	progname = argv[0];
+
+	init_lib();
 
 	if (argc<=1) {
 	  usage:

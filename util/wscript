@@ -5,8 +5,9 @@ def build(ctx):
 	bldnode = ctx.bldnode.abspath()
 
 	util = ['hist', 'propdelay', 'sht']
-	if ctx.env.PLATFORM_TARGET != "netbsd":
-		util.append('tg2')
+
+	if ctx.env.PLATFORM_TARGET not in ['netbsd', 'osx']:
+		util += ['tg2']
 
 	for name in util:
 		ctx(

@@ -58,16 +58,17 @@ def cmd_configure(ctx):
 
 
 	# XXX: hack
-	if ctx.env.PLATFORM_TARGET == "freebsd":
+	if ctx.env.PLATFORM_TARGET in ["freebsd", "osx"]:
 		ctx.env.PLATFORM_INCLUDES = ["/usr/local/include"]
 		ctx.env.PLATFORM_LIBPATH = ["/usr/local/lib"]
 	elif ctx.env.PLATFORM_TARGET == "netbsd":
 		ctx.env.PLATFORM_LIBPATH = ["/usr/pkg/lib"]
-	elif ctx.env.PLATFORM_TARGET == "osx":
-		ctx.env.PLATFORM_INCLUDES = ["/opt/local/include"]
-		ctx.env.PLATFORM_LIBPATH = ["/opt/local/lib"]
 	elif ctx.env.PLATFORM_TARGET == "win":
 		ctx.load("msvc")
+
+	# OS X needs this for IPV6
+	if ctx.env.PLATFORM_TARGET == "osx":
+		ctx.define("__APPLE_USE_RFC_3542", 1)
 
 	# Wipe out and override flags with those from the commandline
 	for flag in ctx.env.OPT_STORE:
@@ -129,6 +130,13 @@ def cmd_configure(ctx):
 		)
 	for (f, h) in net_types:
 		ctx.check_type(f, h)
+
+	structures = (
+		("struct timex", "sys/timex.h"),
+		("struct ntptimeval", "sys/timex.h"),
+		)
+	for (s, h) in structures:
+		ctx.check_type(s, h)
 
 	structure_fields = (
 		("time_tick", "timex", ["sys/time.h", "sys/timex.h"]),
@@ -205,11 +213,13 @@ def cmd_configure(ctx):
 		('pthread_attr_setstacksize', ["pthread.h"], "PTHREAD"),
 		('res_init', ["resolv.h"]),
 		("rtprio", ["sys/rtprio.h"]),		# Sun/BSD
+		('sched_setscheduler', ["sched.h"]),
 		('settimeofday', ["sys/time.h"], "RT"),	# BSD - remove?
 		('strlcpy', ["string.h"]),
 		('strlcat', ["string.h"]),
 		('sysconf', ["unistd.h"]),
 		('timegm', ["time.h"]),
+		('timer_create', ["time.h"]),
 		('updwtmpx', ["utmpx.h"]),		# glibc
 		)
 	for ft in functions:
