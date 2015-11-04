@@ -91,7 +91,7 @@ void ppscheck(char *device)
 	pp.mode = PPS_CAPTUREBOTH;
 	/* pp.mode = PPS_CAPTUREASSERT; */
 
-	/* coverity_submit[uninit_use_in_call] */
+	/* coverity[uninit_use_in_call] */
 	i = time_pps_setparams(ph, &pp);
 	if (i < 0)
 		err(1, "time_pps_setparams");
