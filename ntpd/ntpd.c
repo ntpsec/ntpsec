@@ -326,7 +326,9 @@ parse_cmdline_opts(
 	    case 'u':
 #ifdef ENABLE_DROPROOT
 		droproot = true;
+		/* coverity[overwrite_var] Leak is real but harmless */
 		user = estrdup(ntp_optarg);
+		/* coverity[overwrite_var] Leak is real but harmless */
 		group = strrchr(user, ':');
 		if (group != NULL) {
 			size_t	len;

@@ -3110,13 +3110,13 @@ parse_control(
 		tt = ap(start, LEN_STATES, tt,
 		    "; running time: %s\"", l_mktime(sum));
 
-		tt = add_var(&out->kv_list, 32, RO);
+		add_var(&out->kv_list, 32, RO);
 		snprintf(tt, 32,  "refclock_id=\"%s\"", parse->parse_type->cl_id);
 
-		tt = add_var(&out->kv_list, 80, RO);
+		add_var(&out->kv_list, 80, RO);
 		snprintf(tt, 80,  "refclock_iomode=\"%s\"", parse->binding->bd_description);
 
-		tt = add_var(&out->kv_list, 128, RO);
+		add_var(&out->kv_list, 128, RO);
 		snprintf(tt, 128, "refclock_driver_version=\"%s\"", VERSION);
 
 		{
@@ -3943,7 +3943,7 @@ gps16x_message(
 						p = ap(buffer, sizeof(buffer),
 						    p, "gps_tot_63=\"");
 						mbg_tgps_str(&p, &cfgh.tot_63, BUFFER_SIZE(buffer, p));
-						p = ap(buffer, sizeof(buffer),
+						ap(buffer, sizeof(buffer),
 						    p, "\"");
 						set_var(&parse->kv, buffer, sizeof(buffer), RO|COND_DEF);
 
@@ -3951,7 +3951,7 @@ gps16x_message(
 						p = ap(buffer, sizeof(buffer),
 						    p, "gps_t0a=\"");
 						mbg_tgps_str(&p, &cfgh.t0a, BUFFER_SIZE(buffer, p));
-						p = ap(buffer, sizeof(buffer),
+						ap(buffer, sizeof(buffer),
 						    p, "\"");
 						set_var(&parse->kv, buffer, sizeof(buffer), RO|COND_DEF);
 

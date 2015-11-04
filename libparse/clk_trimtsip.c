@@ -321,6 +321,7 @@ cvt_trimtsip(
 				    t->t_dayleap    = (u_short) getshort((unsigned char *)&mb(22)); /* day in week of leap correction */
 				    t->t_week = (u_short) getshort((unsigned char *)&mb(18)); /* current week no */
 				    if (t->t_week < GPSWRAP)
+				      /* coverity[copy_paste_error] */ 
 				      t->t_week = (u_short)(t->t_weekleap + GPSWEEKS);
 
 				    lbp = (unsigned char *)&mb(14); /* last update time */

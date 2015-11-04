@@ -101,6 +101,7 @@ create_buffers(int nbufs)
 		total_recvbufs++;
 	}
 	lowater_adds++;
+	/* coverity[leaked_storage] */
 }
 
 void
