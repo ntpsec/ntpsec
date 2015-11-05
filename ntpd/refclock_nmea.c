@@ -296,16 +296,16 @@ static char *	field_parse	(nmea_data * data, int fn);
 static void	field_wipe	(nmea_data * data, ...);
 static uint8_t	parse_qual	(nmea_data * data, int idx,
 				 char tag, int inv);
-static int	parse_time	(struct calendar * jd, long * nsec,
+static bool	parse_time	(struct calendar * jd, long * nsec,
 				 nmea_data *, int idx);
-static int	parse_date	(struct calendar *jd, nmea_data*,
+static bool	parse_date	(struct calendar *jd, nmea_data*,
 				 int idx, enum date_fmt fmt);
-static int	parse_weekdata	(gps_weektm *, nmea_data *,
+static bool	parse_weekdata	(gps_weektm *, nmea_data *,
 				 int weekidx, int timeidx, int leapidx);
 /* calendar / date helpers */
-static int	unfold_day	(struct calendar * jd, uint32_t rec_ui);
-static int	unfold_century	(struct calendar * jd, uint32_t rec_ui);
-static int	gpsfix_century	(struct calendar * jd, const gps_weektm * wd,
+static bool	unfold_day	(struct calendar * jd, uint32_t rec_ui);
+static bool	unfold_century	(struct calendar * jd, uint32_t rec_ui);
+static bool	gpsfix_century	(struct calendar * jd, const gps_weektm * wd,
 				 u_short * ccentury);
 static l_fp     eval_gps_time	(struct peer * peer, const struct calendar * gpst,
 				 const struct timespec * gpso, const l_fp * xrecv);
@@ -798,8 +798,8 @@ nmea_receive(
 	uint8_t		sentence;	/* sentence tag */
 	int		checkres;
 	char *		cp;
-	int		rc_date;
-	int		rc_time;
+	bool		rc_date;
+	bool		rc_time;
 
 	/* make sure data has defined pristine state */
 	ZERO(tofs);
@@ -986,12 +986,12 @@ nmea_receive(
 	}
 
 	/* Check sanity of time-of-day. */
-	if (rc_time == 0) {	/* no time or conversion error? */
+	if (!rc_time) {	/* no time or conversion error? */
 		checkres = CEVNT_BADTIME;
 		up->tally.malformed++;
 	}
 	/* Check sanity of date. */
-	else if (rc_date == 0) {/* no date or conversion error? */
+	else if (!rc_date) {/* no date or conversion error? */
 		checkres = CEVNT_BADDATE;
 		up->tally.malformed++;
 	}
@@ -1463,10 +1463,10 @@ parse_qual(
  * -------------------------------------------------------------------
  * Parse a time stamp in HHMMSS[.sss] format with error checking.
  *
- * returns 1 on success, 0 on failure
+ * returns true on success, false on failure
  * -------------------------------------------------------------------
  */
-static int
+static bool
 parse_time(
 	struct calendar * jd,	/* result calendar pointer */
 	long		* ns,	/* storage for nsec fraction */
@@ -1520,10 +1520,10 @@ parse_time(
  * spec spanning three fields. This function does some extensive error
  * checking to make sure the date string was consistent.
  *
- * returns 1 on success, 0 on failure
+ * returns true on success, false on failure
  * -------------------------------------------------------------------
  */
-static int
+static bool
 parse_date(
 	struct calendar * jd,	/* result pointer */
 	nmea_data       * rd,
@@ -1585,10 +1585,10 @@ parse_date(
  * the GPS week number, the GPS time-of-week and the leap seconds GPS
  * to UTC.
  *
- * returns 1 on success, 0 on failure
+ * returns true on success, false on failure
  * -------------------------------------------------------------------
  */
-static int
+static bool
 parse_weekdata(
 	gps_weektm * wd,
 	nmea_data  * rd,
@@ -1634,7 +1634,7 @@ parse_weekdata(
  * returns 1 on success, 0 on failure
  * -------------------------------------------------------------------
  */
-static int
+static bool
 unfold_day(
 	struct calendar * jd,
 	uint32_t		  rec_ui
@@ -1671,10 +1671,10 @@ unfold_day(
  * Since the GPS epoch starts at 1980-01-06, the resulting year will be
  * not be before 1980 in any case.
  *
- * returns 1 on success, 0 on failure
+ * returns true on success, false on failure
  * -------------------------------------------------------------------
  */
-static int
+static bool
 unfold_century(
 	struct calendar * jd,
 	uint32_t		  rec_ui
@@ -1715,10 +1715,10 @@ unfold_century(
  * Note: This function needs a full date&time spec on input due to the
  * necessary leap second corrections!
  *
- * returns 1 on success, 0 on failure
+ * returns true on success, false on failure
  * -------------------------------------------------------------------
  */
-static int
+static bool
 gpsfix_century(
 	struct calendar  * jd,
 	const gps_weektm * wd,
