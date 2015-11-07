@@ -904,11 +904,12 @@ mx4200_parse_t(
 	up = pp->unitptr;
 
 	leapsec_warn = 0;  /* Not all receivers output leap second warnings (!) */
-	sscanf(pp->a_lastcode,
+	if (14 != sscanf(pp->a_lastcode,
 		"$PMVXG,%d,%c,%d,%d,%d,%d:%d:%d,%c,%c,%d,%d,%d,%d",
 		&sentence_type, &time_mark_valid, &year, &month, &day_of_month,
 		&hour, &minute, &second, &time_sync, &op_mode,
-		&oscillator_offset, &time_mark_error, &time_bias, &leapsec_warn);
+		&oscillator_offset, &time_mark_error, &time_bias, &leapsec_warn))
+		return ("unexpected sentence");
 
 	if (sentence_type != PMVXG_D_TRECOVOUT)
 		return ("wrong rec-type");
@@ -1186,10 +1187,11 @@ mx4200_parse_p(
 	/* Should never happen! */
 	if (up->moving) return ("mobile platform - no pos!");
 
-	sscanf ( pp->a_lastcode,
+	if (11 != sscanf ( pp->a_lastcode,
 		"$PMVXG,%d,%lf,%lf,%c,%lf,%c,%lf,%lf,%lf,%lf,%d",
 		&sentence_type, &mtime, &lat, &north_south, &lon, &east_west,
-		&alt, &geoid, &vele, &veln, &mode);
+		&alt, &geoid, &vele, &veln, &mode))
+		return ("unexpected sentence");
 
 	/* Sentence type */
 	if (sentence_type != PMVXG_D_PHV)
@@ -1400,7 +1402,8 @@ mx4200_parse_s(
 
 	pp = peer->procptr;
 
-        sscanf ( pp->a_lastcode, "$PMVXG,%d", &sentence_type);
+        if (sscanf ( pp->a_lastcode, "$PMVXG,%d", &sentence_type) != 1)
+		return ("unexpected sentence");
 
 	/* Sentence type */
 	switch (sentence_type) {
