@@ -459,6 +459,7 @@ ntp_monitor(
 			   (double)oldest_age / mon_age) {
 			return ~(RES_LIMITED | RES_KOD) & flags;
 		} else {
+			/* coverity[var_deref_model] */
 			mon_reclaim_entry(oldest);
 			mon = oldest;
 		}

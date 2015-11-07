@@ -3001,11 +3001,11 @@ parse_control(
 
 		if (parse->timedata.parse_time.fp.l_ui == 0)
 		{
-			tt = ap(start, 128, tt, "<UNDEFINED>\"");
+			ap(start, 128, tt, "<UNDEFINED>\"");
 		}
 		else
 		{
-			tt = ap(start, 128, tt, "%s\"",
+			ap(start, 128, tt, "%s\"",
 			    gmprettydate(&parse->timedata.parse_time.fp));
 		}
 
@@ -3909,7 +3909,7 @@ gps16x_message(
 						break;
 					}
 
-					p = ap(buffer, sizeof(buffer), p, "\"");
+					ap(buffer, sizeof(buffer), p, "\"");
 
 					set_var(&parse->kv, buffer, sizeof(buffer), RO|DEF);
 				}
@@ -3935,7 +3935,7 @@ gps16x_message(
 						p = ap(buffer, sizeof(buffer),
 						    p, "gps_tot_51=\"");
 						mbg_tgps_str(&p, &cfgh.tot_51, BUFFER_SIZE(buffer, p));
-						p = ap(buffer, sizeof(buffer),
+						ap(buffer, sizeof(buffer),
 						    p, "\"");
 						set_var(&parse->kv, buffer, sizeof(buffer), RO|COND_DEF);
 
@@ -4081,7 +4081,7 @@ gps16x_message(
 }
 
 /*------------------------------------------------------------
- * gps16x_poll - query the reciver peridically
+ * gps16x_poll - query the receiver periodically
  */
 static void
 gps16x_poll(
@@ -4719,6 +4719,8 @@ trimbletsip_init(
 	}
 	else
 	{
+		/* The macro value is actually unsigned */
+		/* coverity[negative_returns] */
 		if ((parse_clockinfo[CLK_TYPE(parse->peer)].cl_lflag & ICANON))
 		{
 #ifdef VEOL

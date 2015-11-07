@@ -1544,8 +1544,7 @@ mx4200_send(struct peer *peer, char *fmt, ...)
 
 	m = write(pp->io.fd, buf, (unsigned)n);
 	if (m < 0)
-		/* coverity[bad_printf_format_string] */
-		msyslog(LOG_ERR, "mx4200_send: write: %m (%s)", buf);
+	    msyslog(LOG_ERR, "mx4200_send: write: %s [%s]", buf, strerror(errno));
 	mx4200_debug(peer, "mx4200_send: %d %s\n", m, buf);
 	va_end(ap);
 }
