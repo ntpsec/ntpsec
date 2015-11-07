@@ -1631,7 +1631,7 @@ parse_weekdata(
  * The function updates the calendar structure it also uses as
  * input to fetch the time from.
  *
- * returns 1 on success, 0 on failure
+ * returns true on success, false on failure
  * -------------------------------------------------------------------
  */
 static bool
@@ -1656,6 +1656,7 @@ unfold_day(
 					   ntpcal_date_to_daysec(jd),
 					   SECSPERDAY);
 	rec_ds.hi += ntpcal_daysec_to_date(jd, rec_ds.lo);
+	/* -1 return means calculation overflowed */
 	return (ntpcal_rd_to_date(jd, rec_ds.hi + DAY_NTP_STARTS) >= 0);
 }
 

@@ -511,7 +511,7 @@ priv_timesplit(
 ntpcal_split
 ntpcal_split_eradays(
 	int32_t days,
-	bool  *isleapyear
+	int32_t *isleapyear
 	)
 {
 	ntpcal_split res;
@@ -594,20 +594,21 @@ ntpcal_split_yeardays(
 /*
  *---------------------------------------------------------------------
  * Convert a RD into the date part of a 'struct calendar'.
+ * Returns -1 on calculation overflow.
  *---------------------------------------------------------------------
  */
-bool
+int
 ntpcal_rd_to_date(
 	struct calendar *jd,
 	int32_t		 rd
 	)
 {
 	ntpcal_split split;
-	bool	     leaps;
-	bool	     retv;
+	int32_t	     leaps;
+	int32_t	     retv;
 
-	leaps = false;
-	retv = false;
+	leaps = 0;
+	retv = 0;
 	/* Get day-of-week first. Since rd is signed, the remainder can
 	 * be in the range [-6..+6], but the assignment to an unsigned
 	 * variable maps the negative values to positive values >=7.
@@ -620,7 +621,7 @@ ntpcal_rd_to_date(
 		jd->weekday += 7;
 
 	split = ntpcal_split_eradays(rd - 1, &leaps);
-	retv  = leaps;
+	retv  = (int)leaps;
 	/* get year and day-of-year */
 	jd->year = (uint16_t)split.hi + 1;
 	if (jd->year != split.hi + 1) {
@@ -649,7 +650,7 @@ ntpcal_rd_to_tm(
 	)
 {
 	ntpcal_split split;
-	bool	     leaps;
+	int32_t	     leaps;
 
 	leaps = 0;
 	/* get day-of-week first */
@@ -667,7 +668,7 @@ ntpcal_rd_to_tm(
 	utm->tm_mon  = split.hi;	/* 0-based */
 	utm->tm_mday = split.lo + 1;	/* 1-based */
 
-	return leaps;
+	return leaps != 0;
 }
 
 /*
@@ -1055,7 +1056,7 @@ ntpcal_rd_to_mstart(
 	)
 {
 	ntpcal_split split;
-	bool	     leaps;
+	int32_t	     leaps;
 
 	split = ntpcal_split_eradays(rd - 1, &leaps);
 	split = ntpcal_split_yeardays(split.lo, leaps);
