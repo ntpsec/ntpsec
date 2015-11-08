@@ -145,7 +145,7 @@ static	void	clock_update	(struct peer *);
 static	void	measure_precision(const bool);
 static	double	measure_tick_fuzz(void);
 static	int	local_refid	(struct peer *);
-static	bool	peer_unfit	(struct peer *);
+static	int	peer_unfit	(struct peer *);
 #ifdef ENABLE_AUTOKEY
 static	bool	group_test	(char *, char *);
 #endif /* ENABLE_AUTOKEY */
@@ -3895,7 +3895,7 @@ local_refid(
  * > BOGON12 a direct or indirect synchronization loop would form
  * > BOGON13 unreachable or noselect
  */
-bool				/* false if fit, true if unfit */
+int				/* false if fit, true if unfit */
 peer_unfit(
 	struct peer *peer	/* peer structure pointer */
 	)
