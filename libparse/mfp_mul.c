@@ -40,7 +40,7 @@ mfp_mul(
   uint32_t  f;
   u_long a[4];			/* operand a */
   u_long b[4];			/* operand b */
-  u_long c[5];			/* result c - 5 items for performance - see below */
+  u_long c[6];			/* result c - 5 items for performance - see below */
   u_long carry;
   
   int neg = 0;
@@ -121,7 +121,7 @@ mfp_mul(
       f = ~(unsigned)0;
     }
   else
-    {				/* take produkt - discarding extra precision */
+    {				/* take product - discarding extra precision */
       i = c[2];
       f = c[1];
     }
