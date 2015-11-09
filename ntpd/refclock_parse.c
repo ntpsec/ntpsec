@@ -3809,11 +3809,11 @@ gps16x_message(
 							}
 							s++;
 						}
-						p = ap(buffer, sizeof(buffer), p, "\"");
+						ap(buffer, sizeof(buffer), p, "\"");
 					}
 					else
 					{
-						p = ap(buffer, sizeof(buffer), p, "<all buffered data complete>\"");
+						ap(buffer, sizeof(buffer), p, "<all buffered data complete>\"");
 					}
 
 					set_var(&parse->kv, buffer, strlen(buffer)+1, RO|DEF);
@@ -3999,7 +3999,7 @@ gps16x_message(
 							if (tmp_val & 0x08)  /* A-S is on, P-code is encrypted */
 								p = ap( buffer, sizeof(buffer), p, ", A-S on" );
 
-							p = ap(buffer, sizeof(buffer), p, ")\"");
+						        ap(buffer, sizeof(buffer), p, ")\"");
 							set_var(&parse->kv, buffer, sizeof(buffer), RO|COND_DEF);
 						}
 					}
