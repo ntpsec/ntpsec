@@ -529,6 +529,7 @@ receive(
 			return;			/* bad length */
 		}
 		if (has_mac <= (int)MAX_MAC_LEN) {
+			/* coverity[overrun-local] */
 			skeyid = ntohl(((uint32_t *)pkt)[authlen / 4]);
 			break;
 
