@@ -30,8 +30,8 @@ accuracy using typical clock-radio timecode formats, where the on-time
 epoch is indicated by a designated ASCII character such as
 carriage-return +<cr>+, is normally limited to 100 &mu;s; NMEA streams
 from GPSes have a similar limit.  Some are worse; the SiRF line of
-consumer-grade GPSes, for example, has a long-period wander of about
-170&mu;s.
+consumer-grade GPSes, for example, has a long-period wander of over
+100 ms.
 
 Using carefully crafted averaging techniques, the {project-shortname}
 algorithms can whittle this down to a few tens of
@@ -95,7 +95,7 @@ not present.
 
 An option flag in the driver determines whether the NTP algorithms or
 kernel support is enabled (if available). For historical reasons, the
-NTP algorithms are selected by by default, since performance is
+NTP algorithms are selected by default, since performance is
 generally better using older, slower systems. However, performance is
 generally better with kernel support using newer, faster systems.
 
