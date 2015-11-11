@@ -4,7 +4,6 @@
 #include "tests_main.h"
 
 #include "ntp_stdlib.h"
-#include "ntpdig-opts.h"
 
 #if 0
 class ntpdigtest : public ntptest {

@@ -1,0 +1,34 @@
+
+def build(ctx):
+	srcnode = ctx.srcnode.abspath()
+
+	unity_source = [
+		"unity/unity.c",
+		"unity/unity_fixture.c"
+	]
+
+	ctx(
+		features    = "c",
+        target      = "unity",
+        source      = unity_source
+	)
+
+
+	test_source = [
+		"ntpdig/fileHandlingTest.c",
+		"ntpdig/keyFile.c",
+		"ntpdig/crypto.c",
+		"ntpdig/tests_main.c"
+	]
+
+
+	ctx(
+		features    = "c cprogram bld_include src_include libisc_include",
+        target      = "ntpdig_crypto",
+		includes	= [
+			"%s/tests/unity/" % srcnode,
+			"%s/ntpdig/" % srcnode
+		],
+		use			= "unity ntpdig_obj ntp isc M",
+        source      = test_source,
+	)

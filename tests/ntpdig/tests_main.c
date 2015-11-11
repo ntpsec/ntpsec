@@ -5,6 +5,8 @@ const char *progname = "ntpdigtest";
 static const char** args_argv;
 static int args_argc;
 
+/* XXX: This needs to have named arguments and error
+   out if one is not supplied */
 const char* tests_main_args(int arg)
 {
 	int a;
