@@ -18,4 +18,4 @@ def build(ctx):
 		install_path = "${PREFIX}/bin/"
 	)
 
-
+	ctx.manpage(8, "ntpfrob-man.txt")

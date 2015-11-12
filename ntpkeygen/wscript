@@ -20,3 +20,4 @@ def build(ctx):
 		install_path= "${PREFIX}/bin/"
 	)
 
+	ctx.manpage(8, "ntpkeygen-man.txt")

@@ -33,3 +33,4 @@ def build(ctx):
 		install_path= "${PREFIX}/bin/",
 	)
 
+	ctx.manpage(1, "ntpq-man.txt")

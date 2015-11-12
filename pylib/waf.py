@@ -49,3 +49,17 @@ def ntp_version(self):
 	tsk.env.TARGET = self.target
 	self.source.extend([n])
 
+
+def manpage_subst_fun(task, text):
+	return text.replace("include::../docs/", "include::../../docs/")
+
+@conf
+def manpage(ctx, section, source):
+	ctx(
+		features    = "subst",
+		source      = source,
+		target      = source + '.man-tmp',
+		subst_fun   = manpage_subst_fun
+	)
+ 
+	ctx(source=source + '.man-tmp', section=section) 
