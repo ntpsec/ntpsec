@@ -92,6 +92,12 @@ few will be user-visible:
   same masters as this web documentation, so the two will no longer
   drift out of synchronization.  
 
+* Internally, there is more consistent use of nanosecond precision.
+  A visible effect of this is that time stepping with sufficiently
+  high-precision time sources could be accurate down to nanoseconds
+  rather than microseconds; this might actually matter for GPSDOs
+  and high-quality radio clocks.
+
 * The deprecated ntpdc utility, long since replaced by {ntpq}, has been removed.
 
 * The ntpsnmpd daemon, incomplete and not conformant with RFC 5907,
