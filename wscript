@@ -87,11 +87,10 @@ def configure(ctx):
 def build(ctx):
 	ctx.load('waf', tooldir='pylib/')
 	ctx.load('bison')
+	ctx.load('asciidoc', tooldir='pylib/')
 
 	if ctx.env.ENABLE_DOC:
-		ctx.load('asciidoc', tooldir='pylib/')
 		ctx.recurse("docs")
-
 
 	ctx.recurse("libisc")
 	if ctx.env.REFCLOCK_PARSE: # Only required by the parse refclock
@@ -121,18 +120,10 @@ def build(ctx):
 		chmod	    = Utils.O755
 	)
 
-	man_sources = [
-		"ntpd/ntpd-man.txt",
-		"ntpdig/ntpdig-man.txt",
-		"ntpfrob/ntpfrob-man.txt",
-		"ntpkeygen/ntpkeygen-man.txt",
-		"ntpleapfetch/ntpleapfetch-man.txt",
-		"ntpq/ntpq-man.txt",
-		"ntptime/ntptime-man.txt",
-		"ntptrace/ntptrace-man.txt",
-		"ntpwait/ntpwait-man.txt",
-		"scripts/ntpsweep/ntpsweep-man.txt",
-	]
+	ctx.manpage(8, "ntpleapfetch/ntpleapfetch-man.txt")
+	ctx.manpage(8, "ntpwait/ntpwait-man.txt")
+	ctx.manpage(1, "ntptrace/ntptrace-man.txt")
+
 
 	#ctx(
 	#	features    = "subst",
@@ -141,3 +132,4 @@ def build(ctx):
 	#)
 
 # end
+

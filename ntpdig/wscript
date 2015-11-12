@@ -35,3 +35,5 @@ def build(ctx):
 					] + ctx.env.PLATFORM_INCLUDES, # XXX: Hack needs to use libevent_inc or something else.
 		install_path= "${PREFIX}/bin/",
 	)
+
+	ctx.manpage(1, "ntpdig-man.txt")

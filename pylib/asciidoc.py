@@ -16,3 +16,18 @@ def run_asciidoc(self, node):
 	tsk = self.create_task("asciidoc", node, [out])
 	tsk.cwd = node.parent.get_bld().abspath()
 
+
+class a2x(Task.Task):
+	color   = "YELLOW"
+	shell   = True
+	run_str = '${BIN_A2X} ${A2X_FLAGS} ${SRC[0].abspath()}'
+
+
+@extension('.man-tmp')
+def run_a2x(self, node):
+	n_file = node.path_from(self.bld.bldnode)
+	out = "%s.%s" % (n_file.replace("-man.txt.man-tmp", ""), self.section)
+	out_n = self.bld.path.find_or_declare(out)
+	tsk = self.create_task('a2x', node, out_n)
+	self.bld.install_files("${PREFIX}/man%s/" % self.section, out_n)
+
