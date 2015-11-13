@@ -33,4 +33,4 @@ def build(ctx):
         source      = test_source,
 	)
 
-	ctx.env.TEST_BIN += ["%s/tests/%s" % (bldnode, tg.target)]
+	ctx.env.TEST_BIN += [("%s/tests/%s" % (bldnode, tg.target), "%s/tests/ntpdig/data/" % srcnode)]

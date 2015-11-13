@@ -130,10 +130,10 @@ def build(ctx):
 
 
 	if ctx.cmd == "check":
-		for bin in ctx.env.TEST_BIN:
+		for bin, args in ctx.env.TEST_BIN:
 
 			ctx(
-				rule	= bin,
+				rule	= "%s %s" % (bin, args),
 				shell	= True
 			)
 
