@@ -67,3 +67,14 @@ def manpage(ctx, section, source):
 	)
  
 	ctx(source=source + '.man-tmp', section=section) 
+
+@conf
+def ntp_test(ctx, **kwargs):
+	tg = ctx(**kwargs)
+
+	if hasattr(tg, "test_data"):
+		test_data = tg.test_data
+	else:
+		test_data = None
+
+	ctx.env.TEST_BIN += [("%s/tests/%s" % (ctx.bldnode.abspath(), tg.target), test_data)]

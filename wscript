@@ -133,7 +133,7 @@ def build(ctx):
 		for bin, args in ctx.env.TEST_BIN:
 
 			ctx(
-				rule	= "%s %s" % (bin, args),
+				rule	= "%s -v %s" % (bin, args or " "),
 				shell	= True
 			)
 
