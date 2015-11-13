@@ -19,7 +19,6 @@ def parse_version():
 
 config = parse_version()
 
-
 def dist(ctx):
         ctx.base_name = "ntpsec-%d.%d.%d" % \
                         (config["NTPS_VERSION_MAJOR"], \
@@ -63,6 +62,7 @@ def options(ctx):
 	grp.add_option('--ldflags', type='string', action="callback", callback=callback_flags, help="Users should use LDFLAGS in their environment.")
 	grp.add_option('--enable-fortify', action='store_true', help="Enable HP Fortify.")
 	grp.add_option('--fortify-flags', type='string', action='store', help="Fortify flags.")
+	grp.add_option('--check', action='store_true', default=False, help="Run tests")
 
 
 
@@ -82,6 +82,10 @@ def configure(ctx):
 	ctx.env.OPT_STORE = OPT_STORE
 
 	cmd_configure(ctx)
+
+from waflib.Build import BuildContext
+class check(BuildContext):
+	cmd = 'check'
 
 
 def build(ctx):
@@ -124,6 +128,14 @@ def build(ctx):
 	ctx.manpage(8, "ntpwait/ntpwait-man.txt")
 	ctx.manpage(1, "ntptrace/ntptrace-man.txt")
 
+
+	if ctx.cmd == "check":
+		for bin in ctx.env.TEST_BIN:
+
+			ctx(
+				rule	= bin,
+				shell	= True
+			)
 
 # end
 
