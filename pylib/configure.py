@@ -453,11 +453,18 @@ def cmd_configure(ctx):
 	ctx.end_msg("config.h", "PINK")
 
 
+	def yesno(x):
+		if x:
+			return "Yes"
+		return "No"
+
+
 	msg("")
 	msg("Build Options")
 	msg_setting("CC", " ".join(ctx.env.CC))
 	msg_setting("CFLAGS", " ".join(ctx.env.CFLAGS))
 	msg_setting("LDFLAGS", " ".join(ctx.env.LDFLAGS))
 	msg_setting("PREFIX", ctx.env.PREFIX)
-	msg_setting("Debug Support", ctx.options.enable_debug)
+	msg_setting("Debug Support", yesno(ctx.options.enable_debug))
 	msg_setting("Refclocks", ctx.options.refclocks)
+	msg_setting("Build Manpages", yesno(ctx.env.BIN_A2X))
