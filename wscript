@@ -125,11 +125,5 @@ def build(ctx):
 	ctx.manpage(1, "ntptrace/ntptrace-man.txt")
 
 
-	#ctx(
-	#	features    = "subst",
-	#	source      = subst_files,
-	#	target	    = [x.replace(".in", "") for x in subst_files],
-	#)
-
 # end
 
