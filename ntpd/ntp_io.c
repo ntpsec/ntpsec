@@ -3350,7 +3350,7 @@ fetch_timestamp(
 					nts.l_uf = (unsigned long)(ticks * (unsigned long)(sys_tick * FRAC));
 				}
                                 DPRINTF(4, ("fetch_timestamp: system bintime network time stamp: %ld.%09lu\n",
-                                            btp->sec, (unsigned long)((nts.l_uf / FRAC) * 1e9)));
+                                            (long)btp->sec, (unsigned long)((nts.l_uf / FRAC) * 1e9)));
 				break;
 #endif  /* USE_SCM_BINTIME */
 #ifdef USE_SCM_TIMESTAMPNS

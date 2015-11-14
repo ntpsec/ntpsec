@@ -41,8 +41,8 @@ Chew(struct timespec *tsa, struct timespec *tsc, unsigned sa, unsigned sc)
 {
 	struct timespec ts;
 
-	printf("%ld.%09ld ", tsa->tv_sec, tsa->tv_nsec);
-	printf("%ld.%09ld ", tsc->tv_sec, tsc->tv_nsec);
+	printf("%ld.%09ld ", (long)tsa->tv_sec, tsa->tv_nsec);
+	printf("%ld.%09ld ", (long)tsc->tv_sec, tsc->tv_nsec);
 	printf("%u %u ", sa, sc);
 
 	ts = *tsc;
