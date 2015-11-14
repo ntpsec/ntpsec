@@ -132,8 +132,8 @@ def cmd_configure(ctx):
 		ctx.check_type(f, h)
 
 	structures = (
-		("struct timex", "sys/timex.h"),
-		("struct ntptimeval", "sys/timex.h"),
+		("struct timex", ["sys/timex.h"]),
+		("struct ntptimeval", ["sys/timex.h"]),
 		)
 	for (s, h) in structures:
 		ctx.check_type(s, h)
