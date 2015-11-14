@@ -110,6 +110,9 @@ documentation.
 Please do *not* submit code under GPL or other licenses which place
 conditions on derived works; we cannot accept such code.
 
+It is your responsibility to make sure you have the necessary rights
+to contribute a patch to the project.
+
 We use the SPDX convention for inclusion by reference  You can read
 about this at
 
@@ -285,16 +288,47 @@ for the schedule of releases, and no formal policies for how far back
 bugfixes will be backported into stable releases.  Feel free to
 discuss it with project management.
 
-== Patch and change-comment conventions ==
+== Contribution workflow and conventions ==
 
-=== Patch format ===
+== GitLab.com ==
 
-Please submit patches as git format-patch patches *only*.  This ensures that
-your change comment and attribution will be properly imported.
+We use GitLab.com as our forge.
 
-If for some reason it is impossible for you to use git format-patch, at least
-send context (-c) or unified (-u) diffs rather than the default ed (-e) style,
-which is very brittle.
+Our GitLab group is at https://gitlab.com/groups/NTPsec
+
+Please used the issue tracker and the pull request process at GitLab.com.
+
+Please work on one piece of conceptual work at a time.  Keep each
+narrative of work each in a different branch.
+
+Before starting significant work, propose it first in the
+mailto:devel@ntpsec.org mailing list.  Other people may have
+suggestions, will want to collaborate, and will wish to review your
+code.
+
+== Optional: Send patches by email ==
+
+If you do not want to use GitLab pull requests, we welcome simple fix
+and "drive by" patches submitted by email.
+
+Please create the patch with git format-patch.
+
+If for some reason it is impossible for you to use git format-patch,
+at least send context (-c) or unified (-u) diffs rather than the
+default ed (-e) style, which is very brittle.
+
+You can email your patch to mailto:devel@ntpsec.org if are a member of
+that mailing list, or you can email your patch to
+mailto:contact@ntpsec.org if you are not.
+
+Please make sure your "From:" header in the email is correct, as that
+is what will be used as attribution of the commit.
+
+The person on the team that merges in your patch will use the git
+parameter ---author from the email From header and the git parameter
+--date from the email Date header.
+
+For complex patches and contribtion narratives, please use GitLab.
 
 === Commit comments ===
 
