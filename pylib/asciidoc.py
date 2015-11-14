@@ -30,4 +30,3 @@ def run_a2x(self, node):
 	out_n = self.bld.path.find_or_declare(out)
 	tsk = self.create_task('a2x', node, out_n)
 	self.bld.install_files("${PREFIX}/man%s/" % self.section, out_n)
-
