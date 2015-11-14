@@ -133,7 +133,7 @@ def cmd_configure(ctx):
 
 	structures = (
 		("struct timex", ["sys/timex.h"]),
-		("struct ntptimeval", ["sys/timex.h"]),
+		("struct ntptimeval", ["sys/time.h", "sys/timex.h"]),
 		)
 	for (s, h) in structures:
 		ctx.check_type(s, h)
