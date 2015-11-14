@@ -1,10 +1,10 @@
 from waflib.Configure import conf
 
 # Note: When you change this list. also check the following files:
-# ntpd/refclock_conf.c
-# libntp/clocktypes.c
 # doc/recflock.txt
 # include/ntp.h
+# libntp/clocktypes.c
+# ntpd/refclock_conf.c
 
 refclock_map = {
 
