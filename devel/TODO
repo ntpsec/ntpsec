@@ -1,17 +1,6 @@
 = TO DO =
 
-== Checklist for a quality first release ==
-
-=== Blocker bugs ===
-
-* The doc target should build manual pages. Model command is
-  a2x --format manpage --asciidoc-opts=--conf-file=../docs/asciidoc.conf foo.txt
-
-* Unit testing.  "waf check" needs to run all the unit tests.
-  This means both that the C++ glue needs to be fixed and waf needs
-  to actually call the tests.
-
-* Final repository location needs to go on the website contacts page.
+== Checklist for a quality 1.0 release ==
 
 === Build system ===
 
@@ -52,6 +41,9 @@
   know what's going on there.
 
 === Testing ===
+
+* Unit testing.  "waf check" needs to run all the unit tests, not
+  just the small fraction it does.
 
 * We need to live-test various refclocks.  It would be nice
   to test the full matrix of refclock x platform, but that's too
