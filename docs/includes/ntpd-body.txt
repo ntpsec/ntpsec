@@ -207,7 +207,7 @@ highest priority.
   path to the PID file.
 +
 Specify the name and path of the file used to record +{ntpd}+'s process
-ID. This is the same operation as the _pidfile_ _pidfile_
+ID. This is the same operation as the _pidfile_
 configuration file directive.
 
 +-P+ number, +--priority+=_number_::
@@ -245,7 +245,7 @@ computed automatically by the protocol.
   Statistics file location.
 +
 Specify the directory path for files created by the statistics
-facility. This is the same operation as the _statsdir_ _statsdir_
+facility. This is the same operation as the _statsdir_
 configuration file directive.
 
 +-t+ tkey, +--trustedkey+=_tkey_::
