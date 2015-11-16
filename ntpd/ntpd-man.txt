@@ -18,4 +18,6 @@ One of the following exit values will be returned:
 
 == SEE ALSO ==
 
-{ntpconfman}, {ntpqman}, {ntpdigman}.
+{ntpdconfman}, {ntpqman}, {ntpdigman}.
+
+// end
