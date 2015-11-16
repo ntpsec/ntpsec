@@ -10,8 +10,9 @@ or a BSD-like pair of ntp_gettime(2)/ntp_adjtime(2) calls.
 There are some prerequisites.  Libraries need the library installed
 to run and in addition, the development headers installed to build.
 
-Python >= 2.5::
-   Required to build.  May be needed by some utilities.
+Python 2.x, x >= 5::
+   Required to build.  May be needed by some utilities.  Note, we don't
+   play well with Python 3 yet.
 
 bison::
    Required to build.
@@ -88,6 +89,9 @@ this library if you wish and they have it available.
 
 These are generic Unix installation instructions.
 
+If your default python is Python 3, replace "./waf" with "python2 waf"
+or whatever else is locally required to get python2 interpretation.
+
 Under Unix, the simplest way to compile this package is:
 
   1. `cd' to the directory containing the package's source code and
@@ -104,7 +108,7 @@ Under Unix, the simplest way to compile this package is:
   5. You can remove the program binaries and object files from the
      source code directory by typing `./waf clean'.
 
-  6. To also remove the files that `waf configure' created (so you can
+  6. To also remove the files that `./waf configure' created (so you can
      configure and compile the package for a different kind of
      computer), type `./waf distclean'.
 
