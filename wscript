@@ -108,7 +108,7 @@ def build(ctx):
 	ctx.recurse("ntpkeygen") 
 	ctx.recurse("ntptime")
 	ctx.recurse("util")
-#	ctx.recurse("tests")
+	ctx.recurse("tests")
 
 
 	subst_scripts = [
