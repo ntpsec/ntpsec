@@ -56,4 +56,10 @@ a future release.
 NTPsec is not impacted by CVE-2015-7848 (mode 7 loop counter underrun)
 because ntpdc and support for mode 7 packets have been removed.
 
+== 2015-09-16 release version 0.9.0, now open to public development ==
+
+NTPsec canonical git repo and bug tracker is now world-readable
+
+The project forge is https://gitlab.com/NTPsec/ntpsec
+
 // end
