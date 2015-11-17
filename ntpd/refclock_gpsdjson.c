@@ -88,17 +88,6 @@
 #include "ntp_types.h"
 #include "ntp_control.h"	/* for CTL_* clocktypes */
 
-#ifndef LLONG_MAX
-  /* ntp_types.h includes limits.h
-   * On NetBSD, that includes machine/limits.h
-   * Normally, that provides LLONG_MAX and LLONG_MIN 
-   * But that doesn't work on NetBSD.  It needs _NETBSD_SOURCE or such.
-   * These are the same on both 32 and 64 bit systems.
-   */
-#define  LLONG_MAX    0x7fffffffffffffffLL    /* max signed long long */
-#define  LLONG_MIN  (-0x7fffffffffffffffLL-1) /* min signed long long */
-#endif
-
 /* =====================================================================
  * Get the little JSMN library directly into our guts. Use the 'parent
  * link' feature for maximum speed.
@@ -123,8 +112,8 @@ typedef int tok_ref;
 
 /* We roll our own integer number parser.
  */
-typedef signed   long long int json_int;
-typedef unsigned long long int json_uint;
+typedef signed   long int json_int;
+typedef unsigned long int json_uint;
 #define JSON_INT_MAX LONG_MAX
 #define JSON_INT_MIN LONG_MIN
 
@@ -1589,7 +1578,7 @@ process_tpv(
 	/* Set the precision from the GPSD data
 	 * Use the ETP field for an estimation of the precision of the
 	 * serial data. If ETP is not available, use the default serial
-	 * data presion instead. (Note: The PPS branch has a different
+	 * data precision instead. (Note: The PPS branch has a different
 	 * precision estimation, since it gets the proper value directly
 	 * from GPSD!)
 	 */
