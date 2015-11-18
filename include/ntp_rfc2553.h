@@ -224,7 +224,7 @@ char	*gai_strerror (int);
  * Set up some macros to look for IPv6 and IPv6 multicast
  */
 
-#if defined(ISC_PLATFORM_HAVEIPV6) && defined(ENABLE_IPV6)
+#ifdef ISC_PLATFORM_HAVEIPV6
 # define USE_IPV6_SUPPORT
 # if defined(IPV6_JOIN_GROUP) && defined(IPV6_LEAVE_GROUP)
 #  define USE_IPV6_MULTICAST_SUPPORT
