@@ -167,3 +167,5 @@ def build(ctx):
 		)
 
 	ctx.manpage(8, "ntpd-man.txt")
+	ctx.manpage(5, "ntp.conf-man.txt")
+	ctx.manpage(5, "ntp.keys-man.txt")

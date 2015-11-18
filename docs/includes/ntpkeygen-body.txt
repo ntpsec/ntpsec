@@ -343,7 +343,7 @@ generation is distinct and can be readily recognized in monitoring data.
 
 Each cryptographic configuration involves selection of
 a signature scheme and identification scheme, called a cryptotype, as
-explained in the _Authentication Options_ section of {ntpconfman}.
+explained in the _Authentication Options_ section of {ntpdconfman}.
 The default cryptotype uses RSA encryption, MD5 message digest and TC
 identification. First, configure a NTP subnet including one or more
 low-stratum trusted hosts from which all other hosts derive
@@ -354,7 +354,7 @@ trails to one or more trusted hosts. A trusted group is the set of all
 hosts that have, directly or indirectly, a certificate trail ending at a
 trusted host. The trail is defined by static configuration file entries
 or dynamic means described on the _Automatic_ _NTP_ _Configuration_
-_Options_ section of {ntpconfman}.
+_Options_ section of {ntpdconfman}.
 
 On each trusted host as root, change to the keys directory. To insure a
 fresh fileset, remove all _ntpkey_ files. Then run +{ntpkeygen}+ +-T+ to
