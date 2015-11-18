@@ -2,7 +2,7 @@
 :doctype: manpage
 
 == NAME ==
-ntpkeys - NTP symmetric key file format configuration file
+ntp.keys - NTP symmetric key file format configuration file
 
 == DESCRIPTION ==
 
