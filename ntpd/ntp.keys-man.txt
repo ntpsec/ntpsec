@@ -2,7 +2,7 @@
 :doctype: manpage
 
 == NAME ==
-{ntpkeys} - NTP symmetric key file format configuration file
+ntpkeys - NTP symmetric key file format configuration file
 
 == DESCRIPTION ==
 
@@ -54,6 +54,6 @@ format.
 
 == SEE ALSO ==
 
-{ntpconfman}, {ntpdman}, {ntpqman}, {ntpdigman}.
+{ntpdconfman}, {ntpdman}, {ntpqman}, {ntpdigman}.
 
 // end

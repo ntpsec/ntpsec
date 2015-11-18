@@ -17,7 +17,7 @@
 if necessary, updates leap-second definition file.
 
 Ordinarily, the file is found using the "leapfile" directive in
-_{ntpconfman}_. However, an alternate location can be specified on the
+_{ntpdconfman}_. However, an alternate location can be specified on the
 command line.
 
 If the file does not exist, is not valid, has expired, or is expiring

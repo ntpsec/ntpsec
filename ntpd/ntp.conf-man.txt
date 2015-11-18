@@ -2,7 +2,7 @@
 :doctype: manpage
 
 == NAME ==
-{ntpconf} - Network Time Protocol (NTP) daemon configuration file format
+ntp.conf - Network Time Protocol (NTP) daemon configuration file format
 
 == SYNOPSIS ==
 /etc/{ntpconf}

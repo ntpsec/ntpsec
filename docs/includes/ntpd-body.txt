@@ -29,7 +29,7 @@ picoseconds. While the ultimate precision is not achievable with
 ordinary workstations and networks of today, it may be required with
 future gigahertz CPU clocks and gigabit LANs.
 
-Ordinarily, +{ntpd}+ reads the {ntpconfman} configuration file at startup
+Ordinarily, +{ntpd}+ reads the {ntpdconfman} configuration file at startup
 time in order to determine the synchronization sources and operating
 modes. It is also possible to specify a working, although limited,
 configuration entirely on the command line, obviating the need for a
@@ -49,7 +49,7 @@ setting the clock.
 
 If NetInfo support is built into +{ntpd}+, then +{ntpd}+ will attempt to
 read its configuration from the NetInfo if the default
-{ntpconfman} file cannot be read and no file is specified by
+{ntpdconfman} file cannot be read and no file is specified by
 the +-c+ option.
 
 Various internal +{ntpd}+ variables can be displayed and configuration
@@ -348,7 +348,7 @@ over a few seconds. At the default initial poll interval of 64s, several
 minutes can elapse before the clock is set. This initial delay to set
 the clock can be safely and dramatically reduced using the _iburst_
 keyword with the _server_ configuration command, as described in
-{ntpconfman}.
+{ntpdconfman}.
 
 Most operating systems and hardware of today incorporate a time-of-year
 (TOY) chip to maintain the time during periods when the power is off.
@@ -565,7 +565,7 @@ the negative (huff) and positive (puff) correction, which depends on the
 sign of the offset.
 
 The filter is activated by the _tinker_ command and _huffpuff_ keyword,
-as described in {ntpconfman}.
+as described in {ntpdconfman}.
 
 [[files]]
 == FILES ==
