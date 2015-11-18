@@ -53,13 +53,6 @@ edge cases.  To support the latter case, it is highly desirable that the
 event-capture format be a text stream in an eyeball-friendly,
 readily-editable format.
 
-Note that for test purposes we will not consider I/O traffic to and
-from refclocks to be events.  In part this is a way to avoid the high
-complexity of emulating the refclocks.  In part it reflects the
-strategic decision to carve those drivers off of ntpd into a separate
-refclockd communicating through an IPC driver (task REFCLOCKD). At a
-later stage refclockd may have its own simulation mode.
-
 == Implementation ==
 
 ntpd needs two new switches: capture and replay.  The capture switch
@@ -78,63 +71,6 @@ terminate - the replay failed.  Otherwise continue.
 
 Replay succeeds if the event stream reaches the shutdown event with
 no mismatches.
-
-== Event file format ==
-
-Simple is best.  Textual, usually one event per line.  Each line
-consists of a verb optionally followed by argument fields (or is a
-comment, or whitespace).  The verbs look like:
-
-startup::
-	Initialization event.  Command-line arguments follow.
-
-config::
-	Read the configuration file. Must have multiline syntax.
-
-refclock::
-	Report from a reference clock.  Fields should be all possible data
-        that a refclock may return.  Including, not limited to:  driver ID,
-	refid, unit number, system time of measurement, refclock at time
-        of measurement, precision, leap notify, etc.
-
-systime::
-	Report from the system clock: seconds part of time, fractional part of
-	time.
-
-seed::
-	Set the seed for the random-number generator
-
-random::
-	Call to a random-number generator. One field, the number
-	returned.
-
-alarm::
-	Alarm timer went off.
-
-driftread::
-	Read the drift file.
-
-driftwrite::
-	Write the drift file.
-
-leapsec::
-	Get the leapsecond value.
-
-receive::
-	Receive packet. Field is some sort of textual packet dump.
-
-adjtime::
-	Adjust system clock.  Fields are the arguments.  May need an
-	adjtimex variant for Linux.
-
-send::
-	Send packet. Field is some sort of textual packet dump.
-
-getaddrinfo::
-	A DNS name and its lookup result.
-
-shutdown::
-	Termination. The single argument field is a return status.
 
 *****************************************************************************/
 
@@ -260,17 +196,23 @@ bool intercept_drift_read(const char *drift_file, double *drift)
 {
     FILE *fp;
 
-    if ((fp = fopen(drift_file, "r")) == NULL)
-	return false;
+    if (mode != replay) {
+	if ((fp = fopen(drift_file, "r")) == NULL)
+	    return false;
 
-    if (fscanf(fp, "%lf", drift) != 1) {
-	msyslog(LOG_ERR,
-		"format error frequency file %s",
-		drift_file);
+	if (fscanf(fp, "%lf", drift) != 1) {
+	    msyslog(LOG_ERR,
+		    "format error frequency file %s",
+		    drift_file);
+	    fclose(fp);
+	    return false;
+	}
 	fclose(fp);
-	return false;
     }
-    fclose(fp);
+
+    if (mode != none)
+	printf("event drift %.3f\n", *drift);
+
     return true;
 }
 
@@ -311,8 +253,15 @@ void intercept_drift_write(char *driftfile, double drift)
 
 int intercept_adjtime(struct timex *tx)
 {
+    int res = 0;
+
+    /* FIXME: replay logic goes here */
+
+    if (mode != replay)
+	res = ntp_adjtime(tx);
+
     if (mode != none)
-	printf("event adjtime %u %ld %ld %ld %ld %i %ld %ld %ld %ld %ld %i %ld %ld %ld %ld\n",
+	printf("event adjtime %u %ld %ld %ld %ld %i %ld %ld %ld %ld %ld %i %ld %ld %ld %ld %d\n",
 	       tx->modes,
 	       tx->offset,
 	       tx->freq,
@@ -328,20 +277,22 @@ int intercept_adjtime(struct timex *tx)
 	       tx->jitcnt,
 	       tx->calcnt,
 	       tx->errcnt,
-	       tx->stbcnt
+	       tx->stbcnt,
+	       res
 	    );
 
-    return ntp_adjtime(tx);
+    return res;
 }
 
 void intercept_sendpkt(const char *legend,
 		  sockaddr_u *dest, struct interface *ep, int ttl,
 		  struct pkt *pkt, int len)
 {
-    if (mode == none)
+    if (mode != replay)
 	sendpkt(dest, ep, ttl, pkt, len);
-    else {
-	fputs("event sendpkt ", stdout);
+
+    if (mode != none) {
+	printf("event sendpkt \"%s\" ...", legend);
 	/* FIXME: dump the destination and the guts of the packet */
 	fputs("\n", stdout);
     }	
