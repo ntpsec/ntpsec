@@ -33,6 +33,7 @@ int ntp_gettime(struct ntptimeval *ntv)
 	int result;
 
 	ZERO(tntx);
+	/* not intercepted because ntpd doesn't use this */
 	result = ntp_adjtime(&tntx);
 	ntv->time = tntx.time;
 	ntv->maxerror = tntx.maxerror;

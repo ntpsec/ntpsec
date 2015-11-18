@@ -8,6 +8,7 @@
 #include "ntp_refclock.h"
 #include "ntp_stdlib.h"
 #include "ntp_control.h"	/* for CTL_* clocktypes */
+#include "ntp_intercept.h"
 
 #include <stdio.h>
 #include <ctype.h>
@@ -169,7 +170,7 @@ local_poll(
 	 */
 #if defined(HAVE_KERNEL_PLL) && defined(ENABLE_LOCKCLOCK)
 	memset(&ntv,  0, sizeof ntv);
-	switch (ntp_adjtime(&ntv)) {
+	switch (intercept_adjtime(&ntv)) {
 	case TIME_OK:
 		pp->leap = LEAP_NOWARNING;
 		peer->stratum = pp->stratum;
