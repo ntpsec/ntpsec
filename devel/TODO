@@ -61,7 +61,7 @@
 
 * The format and organization of the NEWS file needs a rethink.
 
-== After beta release ==
+== After 1.0 release ==
 
 * ntpproto.py - a Python library that knows the NTP wire protocol and
   can be used to generate and interpret packets.  Daniel has speculated
