@@ -2,6 +2,11 @@
  * ntp_intercept.h - intercept/replay support for environment calls
  */
 
+#ifdef HAVE_SYS_TIMEX_H
+# include <sys/time.h>	/* prerequisite on NetBSD */
+# include <sys/timex.h>
+#endif
+
 /* Macro for declaring function with printf-like arguments. */
 # if __GNUC__ >= 3 || (__GNUC__ == 2 && __GNUC_MINOR__ >= 7)
 #define PRINTF_FUNC(format_index, arg_index) \
@@ -11,7 +16,7 @@
 #endif
 
 typedef enum {none, capture, replay} intercept_mode;
-    
+
 intercept_mode intercept_get_mode(void);
 void intercept_set_mode(intercept_mode);
 
@@ -25,3 +30,6 @@ void intercept_sendpkt(const char *,
 		       sockaddr_u *, struct interface *, int, struct pkt *, int);
 bool intercept_drift_read(const char *, double *);
 void intercept_drift_write(char *, double);
+int intercept_adjtime(struct timex *);
+
+/* end */

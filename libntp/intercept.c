@@ -20,7 +20,7 @@ following kinds:
 
 7. Alarm events.
 
-8. Calls to adjtime/adjtimex to set the system clock.  (TODO)
+8. Calls to adjtime to set the system clock.
 
 9. Read of the system leapsecond file.  (TODO)
 
@@ -161,6 +161,7 @@ shutdown::
 #include "ntp_assert.h"
 #include "ntp_intercept.h"
 #include "ntp_fp.h"
+#include "ntp_syscall.h"
 
 static intercept_mode mode = none;
 
@@ -306,6 +307,31 @@ void intercept_drift_write(char *driftfile, double drift)
 		    "Unable to rename temp drift file %s to %s, %m",
 		    tmpfile, driftfile);
     }
+}
+
+int intercept_adjtime(struct timex *tx)
+{
+    if (mode != none)
+	printf("event adjtime %u %ld %ld %ld %ld %i %ld %ld %ld %ld %ld %i %ld %ld %ld %ld\n",
+	       tx->modes,
+	       tx->offset,
+	       tx->freq,
+	       tx->maxerror,
+	       tx->esterror,
+	       tx->status,
+	       tx->constant,
+	       tx->precision,
+	       tx->tolerance,
+	       tx->ppsfreq,
+	       tx->jitter,
+	       tx->shift,
+	       tx->jitcnt,
+	       tx->calcnt,
+	       tx->errcnt,
+	       tx->stbcnt
+	    );
+
+    return ntp_adjtime(tx);
 }
 
 void intercept_sendpkt(const char *legend,

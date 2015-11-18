@@ -25,10 +25,6 @@
 #include "ntp_md5.h"	/* provides OpenSSL digest API */
 #include "ntp_intercept.h"
 #include "lib_strbuf.h"
-#ifdef HAVE_KERNEL_PLL
-# include "ntp_syscall.h"
-#endif
-
 
 /*
  * Structure to hold request procedure information
@@ -1701,7 +1697,7 @@ ctl_putsys(
 	if (CS_KERN_FIRST <= varid && varid <= CS_KERN_LAST &&
 	    current_time != ntp_adjtime_time) {
 		ZERO(ntx);
-		if (ntp_adjtime(&ntx) < 0)
+		if (intercept_adjtime(&ntx) < 0)
 			msyslog(LOG_ERR, "ntp_adjtime() for mode 6 query failed: %m");
 		else
 			ntp_adjtime_time = current_time;
