@@ -441,7 +441,7 @@ snprintb(
 	else
 		snprintf(buf, buflen, "0x%x", v);
 	cp = buf + strlen(buf);
-	cplim = buf + sizeof(buf);
+	cplim = buf + buflen;
 	if (bits != NULL) {
 		bits++;
 		*cp++ = ' ';
@@ -473,7 +473,7 @@ snprintb(
 	return buf;
 
     overrun:
-	return "sprintb buffer too small";
+	return "snprintb buffer too small";
 }
 
 const char * const timex_states[] = {
