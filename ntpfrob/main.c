@@ -18,7 +18,7 @@ main(int argc, char **argv)
 	int ch;
 	iomode mode = plain_text;
 	init_lib();
-	while ((ch = getopt(argc, argv, "a:Acejp:r")) != EOF) {
+	while ((ch = getopt(argc, argv, "a:Acejp:rs")) != EOF) {
 		switch (ch) {
 		case 'A':
 #ifdef HAVE_ADJTIMEX
@@ -57,6 +57,9 @@ main(int argc, char **argv)
 		    break;
 		case 'r':
 		    mode = raw;
+		    break;
+		case 's':
+		    stepback();
 		    break;
 		default:
 		    fputs("ntpfrob: no mode option specified.\n", stderr);
