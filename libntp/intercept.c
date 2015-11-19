@@ -168,7 +168,7 @@ void intercept_get_systime(const char *legend, l_fp *now)
     if (mode == capture)
 	printf("event systime %s %ld %ld\n",
 		legend, (long)ts.tv_sec, ts.tv_nsec);
-	
+
     normalize_time(ts, ntp_random(), now);
 }
 
@@ -225,7 +225,7 @@ void intercept_drift_write(char *driftfile, double drift)
 	int fd;
 	char tmpfile[PATH_MAX], driftcopy[PATH_MAX];
 	char driftval[32];
-	
+
 	strlcpy(driftcopy, driftfile, PATH_MAX);
 	strlcpy(tmpfile, dirname(driftcopy), sizeof(tmpfile));
 	strlcat(tmpfile, "/driftXXXXXX", sizeof(tmpfile));
@@ -251,7 +251,8 @@ void intercept_drift_write(char *driftfile, double drift)
     }
 }
 
-int intercept_adjtime(struct timex *tx)
+#ifdef HAVE_KERNEL_PLL
+int intercept_kernel_pll_adjtime(struct timex *tx)
 {
     int res = 0;
 
@@ -283,6 +284,7 @@ int intercept_adjtime(struct timex *tx)
 
     return res;
 }
+#endif
 
 void intercept_sendpkt(const char *legend,
 		  sockaddr_u *dest, struct interface *ep, int ttl,
@@ -295,5 +297,5 @@ void intercept_sendpkt(const char *legend,
 	printf("event sendpkt \"%s\" ...", legend);
 	/* FIXME: dump the destination and the guts of the packet */
 	fputs("\n", stdout);
-    }	
+    }
 }
