@@ -169,7 +169,7 @@ void intercept_get_systime(const char *legend, l_fp *now)
 	printf("event systime %s %ld %ld\n",
 		legend, (long)ts.tv_sec, ts.tv_nsec);
 
-    normalize_time(ts, ntp_random(), now);
+    normalize_time(ts, sys_fuzz > 0.0 ? ntp_random() : 0UL, now);
 }
 
 long intercept_ntp_random(const char *legend)
