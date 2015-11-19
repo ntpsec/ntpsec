@@ -30,7 +30,7 @@ static void RunAllTests(void)
 	RUN_TEST_GROUP(keyFile);
 //	RUN_TEST_GROUP(kodDatabase);
 //	RUN_TEST_GROUP(kodFile);
-//	RUN_TEST_GROUP(packetHandling);
+	RUN_TEST_GROUP(packetHandling);
 #endif
 
 #ifdef TEST_LIBNTP_SSL
