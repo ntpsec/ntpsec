@@ -90,7 +90,8 @@ def cmd_configure(ctx):
 
 	# XXX: conditionally build this with --disable-man?  Should it build without docs enabled?
 	ctx.env.A2X_FLAGS = ["--format", "manpage", "--asciidoc-opts=--conf-file=%s/docs/asciidoc.conf" % ctx.srcnode.abspath()]
-
+	if not ctx.options.enable_a2x_xmllint:
+		ctx.env.A2X_FLAGS += ["--no-xmllint"]
 
 
 	from os.path import exists
