@@ -3,6 +3,7 @@ from waflib import Utils
 out="build"
 
 from pylib.configure import cmd_configure
+from waflib.Tools import waf_unit_test
 
 OPT_STORE = {} # Storage for options to pass into configure
 
@@ -31,6 +32,7 @@ def dist(ctx):
 def options(ctx):
 	ctx.load("compiler_c")
 	ctx.load("msvc")
+	ctx.load('waf_unit_test')
 
 	def callback_flags(option, opt, value, parser):
 		OPT_STORE.setdefault(opt, []).append(value)
@@ -80,14 +82,36 @@ def configure(ctx):
 
 
 	ctx.load('waf', tooldir='pylib/')
+	ctx.load('waf_unit_test')
 
 	ctx.env.OPT_STORE = OPT_STORE
 
 	cmd_configure(ctx)
 
+
 from waflib.Build import BuildContext
 class check(BuildContext):
 	cmd = 'check'
+
+
+
+def test_print_log(ctx):
+	from waflib.Logs import pprint
+	for binary, retval, lines, error in ctx.utest_results:
+
+		pprint("YELLOW", "BINARY      :", binary)
+		pprint("YELLOW", "RETURN VALUE:", retval)
+		print("")
+
+		if retval or error:
+			pprint("RED", "****** ERROR ******")
+
+			print error or lines
+
+		if (not retval) and (not error):
+			pprint("GREEN", "****** LOG ******", lines)
+
+		print
 
 
 def build(ctx):
@@ -131,12 +155,14 @@ def build(ctx):
 	ctx.manpage(1, "ntptrace/ntptrace-man.txt")
 
 
+	# Force re-running of tests.  Same as 'waf --alltests'
 	if ctx.cmd == "check":
-		for bin, args in ctx.env.TEST_BIN:
+		ctx.options.all_tests = True
 
-			ctx(
-				rule	= "%s -v %s" % (bin, args or " "),
-				shell	= True
-			)
+		# Print log if -v is supplied
+		if ctx.options.verbose:
+			ctx.add_post_fun(test_print_log)
 
-# end
+	# Print a summary at the end
+	ctx.add_post_fun(waf_unit_test.summary)
+

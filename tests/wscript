@@ -2,9 +2,10 @@ def build(ctx):
 	srcnode = ctx.srcnode.abspath()
 	bldnode = ctx.bldnode.abspath()
 
+	# Unity source
 	unity_source = [
 		"unity/unity.c",
-		"unity/unity_fixture.c"
+		"unity/unity_fixture.c",
 	]
 
 	ctx(
@@ -14,24 +15,56 @@ def build(ctx):
 	)
 
 
-	test_source = [
-		"ntpdig/fileHandlingTest.c",
-		"ntpdig/keyFile.c",
-		"ntpdig/crypto.c",
-		"ntpdig/tests_main.c"
+	# Test main.
+	common_source = [
+		"common/tests_main.c"
 	]
 
 
+	ntpdig_source = [
+		"ntpdig/crypto.c",
+		"ntpdig/fileHandlingTest.c",
+		"ntpdig/keyFile.c",
+#		"ntpdig/kodDatabase.c",
+#		"ntpdig/kodFile.c",
+#		"ntpdig/networking.c",
+#		"ntpdig/packetHandling.c",
+	] + common_source
+
+	# ntpdig/
 	ctx.ntp_test(
-		features    = "c cprogram bld_include src_include libisc_include",
-        target      = "ntpdig_crypto",
+		features    = "c cprogram bld_include src_include libisc_include test",
+        target      = "test_ntpdig",
+		defines		= ["TEST_NTPDIG=1"],
 		includes	= [
 			"%s/tests/unity/" % srcnode,
+			"%s/tests/common/" % srcnode,
 			"%s/ntpdig/" % srcnode
 		],
 		use			= "unity ntpdig_obj ntp isc M",
-        source      = test_source,
-		test_data	= "%s/tests/ntpdig/data/" % srcnode
+        source      = ntpdig_source,
+		test_data	= "%s/tests/ntpdig/data/" % srcnode,
 	)
 
-#	ctx.env.TEST_BIN += [("%s/tests/%s" % (bldnode, tg.target), "%s/tests/ntpdig/data/" % srcnode)]
+
+"""
+	# libntp/
+	libntp_source = [
+		"libntp/ssl_init.c",
+	]
+
+	ctx.ntp_test(
+		features    = "c cprogram bld_include src_include libisc_include",
+        target      = "test_libntp",
+		defines		= ["TEST_LIBNTP_SSL"],
+		includes	= [
+			"%s/tests/unity/" % srcnode,
+			"%s/tests/libntp/" % srcnode,
+			"%s/tests/ntpdig/" % srcnode,
+			"%s/tests/common/" % srcnode
+		],
+		use			= "unity ntp isc M test_common",
+        source      = libntp_source,
+	)
+
+"""

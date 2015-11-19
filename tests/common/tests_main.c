@@ -24,8 +24,19 @@ const char* tests_main_args(int arg)
 
 static void RunAllTests(void)
 {
+
+#ifdef TEST_NTPDIG
 	RUN_TEST_GROUP(crypto);
 	RUN_TEST_GROUP(keyFile);
+//	RUN_TEST_GROUP(kodDatabase);
+//	RUN_TEST_GROUP(kodFile);
+//	RUN_TEST_GROUP(packetHandling);
+#endif
+
+#ifdef TEST_LIBNTP_SSL
+	RUN_TEST_GROUP(ssl_init);
+#endif
+
 }
 
 int main(int argc, const char * argv[]) {
