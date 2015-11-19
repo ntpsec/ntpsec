@@ -70,6 +70,7 @@ def manpage(ctx, section, source):
 
 @conf
 def ntp_test(ctx, **kwargs):
+	bldnode = ctx.bldnode.abspath()
 	tg = ctx(**kwargs)
 
 	if hasattr(tg, "test_data"):
@@ -77,4 +78,4 @@ def ntp_test(ctx, **kwargs):
 	else:
 		test_data = None
 
-	ctx.env.TEST_BIN += [("%s/tests/%s" % (ctx.bldnode.abspath(), tg.target), test_data)]
+	tg.ut_exec = ["%s/tests/%s" % (bldnode, tg.target), "-v", tg.test_data]
