@@ -93,6 +93,9 @@ def cmd_configure(ctx):
 	if not ctx.options.enable_a2x_xmllint:
 		ctx.env.A2X_FLAGS += ["--no-xmllint"]
 
+	# Disable manpages within build()
+	if ctx.options.disable_manpage:
+		ctx.env.DISABLE_MANPAGE = True
 
 	from os.path import exists
 	from waflib.Utils import subprocess
@@ -478,4 +481,4 @@ def cmd_configure(ctx):
 	msg_setting("PREFIX", ctx.env.PREFIX)
 	msg_setting("Debug Support", yesno(ctx.options.enable_debug))
 	msg_setting("Refclocks", ctx.options.refclocks)
-	msg_setting("Build Manpages", yesno(ctx.env.BIN_A2X))
+	msg_setting("Build Manpages", yesno(ctx.env.BIN_A2X and not ctx.env.DISABLE_MANPAGE))
