@@ -338,7 +338,7 @@ or, from ntp_adjtime():
 
 	if (  (time_status & (STA_UNSYNC | STA_CLOCKERR))
 	    || (time_status & (STA_PPSFREQ | STA_PPSTIME)
-		&& !(time_status & STA_PPSSIGNAL)) 
+		&& !(time_status & STA_PPSSIGNAL))
 	    || (time_status & STA_PPSTIME
 		&& time_status & STA_PPSJITTER)
 	    || (time_status & STA_PPSFREQ
@@ -800,7 +800,7 @@ local_clock(
 		 * the pps. In any case, fetch the kernel offset,
 		 * frequency and jitter.
 		 */
-		ntp_adj_ret = intercept_adjtime(&ntv);
+		ntp_adj_ret = intercept_kernel_pll_adjtime(&ntv);
 		/*
 		 * A squeal is a return status < 0, or a state change.
 		 */
@@ -835,7 +835,7 @@ local_clock(
 			loop_tai = sys_tai;
 			ntv.modes = MOD_TAI;
 			ntv.constant = sys_tai;
-			if ((ntp_adj_ret = intercept_adjtime(&ntv)) != 0) {
+			if ((ntp_adj_ret = intercept_kernel_pll_adjtime(&ntv)) != 0) {
 			    ntp_adjtime_error_handler(__func__, &ntv, ntp_adj_ret, errno, false, true, __LINE__ - 1);
 			}
 		}
@@ -1072,7 +1072,7 @@ set_freq(
 			loop_desc = "kernel";
 			ntv.freq = DTOFREQ(drift_comp);
 		}
-		if ((ntp_adj_ret = intercept_adjtime(&ntv)) != 0) {
+		if ((ntp_adj_ret = intercept_kernel_pll_adjtime(&ntv)) != 0) {
 		    ntp_adjtime_error_handler(__func__, &ntv, ntp_adj_ret, errno, false, false, __LINE__ - 1);
 		}
 	}
@@ -1109,7 +1109,7 @@ start_kern_loop(void)
 		pll_control = false;
 	} else {
 		if (sigsetjmp(env, 1) == 0) {
-			if ((ntp_adj_ret = intercept_adjtime(&ntv)) != 0) {
+			if ((ntp_adj_ret = intercept_kernel_pll_adjtime(&ntv)) != 0) {
 			    ntp_adjtime_error_handler(__func__, &ntv, ntp_adj_ret, errno, false, false, __LINE__ - 1);
 			}
 		}
@@ -1120,7 +1120,7 @@ start_kern_loop(void)
 		}
 	}
 #else /* SIGSYS */
-	if ((ntp_adj_ret = intercept_adjtime(&ntv)) != 0) {
+	if ((ntp_adj_ret = intercept_kernel_pll_adjtime(&ntv)) != 0) {
 	    ntp_adjtime_error_handler(__func__, &ntv, ntp_adj_ret, errno, false, false, __LINE__ - 1);
 	}
 #endif /* SIGSYS */
@@ -1269,7 +1269,7 @@ loop_config(
 			memset((char *)&ntv, 0, sizeof(ntv));
 			ntv.modes = MOD_STATUS;
 			ntv.status = STA_UNSYNC;
-			intercept_adjtime(&ntv);
+			intercept_kernel_pll_adjtime(&ntv);
 			sync_status("kernel time sync disabled",
 				pll_status,
 				ntv.status);

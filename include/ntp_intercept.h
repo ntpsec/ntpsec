@@ -30,6 +30,8 @@ void intercept_sendpkt(const char *,
 		       sockaddr_u *, struct interface *, int, struct pkt *, int);
 bool intercept_drift_read(const char *, double *);
 void intercept_drift_write(char *, double);
-int intercept_adjtime(struct timex *);
+#ifdef HAVE_KERNEL_PLL
+int intercept_kernel_pll_adjtime(struct timex *);
+#endif
 
 /* end */
