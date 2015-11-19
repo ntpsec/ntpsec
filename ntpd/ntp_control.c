@@ -861,7 +861,7 @@ save_config(
 	 * backslashes as equivalent directory separators at the API
 	 * level.  On POSIX systems we could allow '\\' but such
 	 * filenames are tricky to manipulate from a shell, so just
-	 * reject both types of slashes on all platforms.  We add 
+	 * reject both types of slashes on all platforms.  We add
 	 * DIR_SEP anyway so we don't have a vulnerability pop up
 	 * in case the code is ported to OpenVMS or Stratus VOS or
 	 * something.
@@ -1697,7 +1697,7 @@ ctl_putsys(
 	if (CS_KERN_FIRST <= varid && varid <= CS_KERN_LAST &&
 	    current_time != ntp_adjtime_time) {
 		ZERO(ntx);
-		if (intercept_adjtime(&ntx) < 0)
+		if (intercept_kernel_pll_adjtime(&ntx) < 0)
 			msyslog(LOG_ERR, "ntp_adjtime() for mode 6 query failed: %m");
 		else
 			ntp_adjtime_time = current_time;

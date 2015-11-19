@@ -81,7 +81,7 @@ static	void	local_poll	(int, struct peer *);
  * Local variables
  */
 static	u_long poll_time;	/* last time polled */
-	
+
 /*
  * Transfer vector
  */
@@ -170,7 +170,7 @@ local_poll(
 	 */
 #if defined(HAVE_KERNEL_PLL) && defined(ENABLE_LOCKCLOCK)
 	memset(&ntv,  0, sizeof ntv);
-	switch (intercept_adjtime(&ntv)) {
+	switch (intercept_kernel_pll_adjtime(&ntv)) {
 	case TIME_OK:
 		pp->leap = LEAP_NOWARNING;
 		peer->stratum = pp->stratum;
