@@ -56,7 +56,7 @@ def manpage_subst_fun(task, text):
 @conf
 def manpage(ctx, section, source):
 
-	if not ctx.env.BIN_A2X:
+	if (not ctx.env.BIN_A2X) or ctx.env.DISABLE_MANPAGE:
 		return
 
 	ctx(

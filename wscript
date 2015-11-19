@@ -45,6 +45,7 @@ def options(ctx):
 	grp.add_option('--disable-dns-lookup', action='store_true', default=False, help="Disable DNS lookups.")
 	grp.add_option('--disable-dns-retry', action='store_true', default=False, help="Disable DNS lookups.")
 	grp.add_option('--disable-mdns-registration', action='store_true', default=False, help="Disable DNS lookups.")
+	grp.add_option('--disable-manpage', action='store_true', default=False, help="Disable Manpage building.")
 
 
 	grp = ctx.add_option_group("NTP features")
