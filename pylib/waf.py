@@ -73,12 +73,9 @@ def ntp_test(ctx, **kwargs):
 	bldnode = ctx.bldnode.abspath()
 	tg = ctx(**kwargs)
 
-
 	args = ["%s/tests/%s" % (bldnode, tg.target), "-v"]
 
 	if hasattr(tg, "test_args"):
 		args += tg.test_args
-
-	print " ".join(args)
 
 	tg.ut_exec = args
