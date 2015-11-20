@@ -43,7 +43,7 @@ def build(ctx):
 		],
 		use			= "unity ntpdig_obj ntp isc M",
         source      = ntpdig_source,
-		test_data	= "%s/tests/ntpdig/data/" % srcnode,
+		test_args	= ["%s/tests/ntpdig/data/" % srcnode, "%s/tests/ntpdig/" % bldnode]
 	)
 
 
