@@ -556,3 +556,15 @@ TEST(lfp, UnsignedRelOps) {
 //----------------------------------------------------------------------
 // that's all folks... but feel free to add things!
 //----------------------------------------------------------------------
+
+TEST_GROUP_RUNNER(lfp) {
+	RUN_TEST_CASE(lfp, AdditionLR);
+	RUN_TEST_CASE(lfp, AdditionRL);
+	RUN_TEST_CASE(lfp, SubtractionLR);
+	RUN_TEST_CASE(lfp, SubtractionRL);
+	RUN_TEST_CASE(lfp, Negation);
+	RUN_TEST_CASE(lfp, Absolute);
+	RUN_TEST_CASE(lfp, FDF_RoundTrip);
+	RUN_TEST_CASE(lfp, SignedRelOps);
+	RUN_TEST_CASE(lfp, UnsignedRelOps);
+}

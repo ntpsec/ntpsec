@@ -102,3 +102,12 @@ TEST(decodenetnum, IllegalCharInPort) {
 	TEST_ASSERT_TRUE(decodenetnum(str, &actual));
 	TEST_ASSERT_TRUE(IsEqual(expected, actual));
 }
+
+TEST_GROUP_RUNNER(decodenetnum) {
+	RUN_TEST_CASE(decodenetnum, IPv4AddressOnly);
+	RUN_TEST_CASE(decodenetnum, IPv4AddressWithPort);
+	RUN_TEST_CASE(decodenetnum, IPv6AddressOnly);
+	RUN_TEST_CASE(decodenetnum, IPv6AddressWithPort);
+	RUN_TEST_CASE(decodenetnum, IllegalAddress);
+	RUN_TEST_CASE(decodenetnum, IllegalCharInPort);
+}

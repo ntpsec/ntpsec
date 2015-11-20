@@ -59,3 +59,11 @@ TEST(ssl_init, SHA1KeyName) {
 	TEST_ASSERT_EQUAL_STRING("SHA", keytype_name(NID_sha));
 }
 #endif	/* HAVE_OPENSSL */
+
+TEST_GROUP_RUNNER(ssl_init) {
+	RUN_TEST_CASE(ssl_init, MD5KeyTypeWithoutDigestLength);
+	RUN_TEST_CASE(ssl_init, MD5KeyTypeWithDigestLength);
+	RUN_TEST_CASE(ssl_init, SHA1KeyTypeWithDigestLength);
+	RUN_TEST_CASE(ssl_init, MD5KeyName);
+	RUN_TEST_CASE(ssl_init, SHA1KeyName);
+}

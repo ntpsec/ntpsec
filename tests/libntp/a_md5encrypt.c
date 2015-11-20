@@ -98,3 +98,11 @@ TEST(a_md5encrypt, IPv6AddressToRefId) {
 
 	TEST_ASSERT_EQUAL(expected, addr2refid(&addr));
 }
+
+TEST_GROUP_RUNNER(a_md5encrypt) {
+	RUN_TEST_CASE(a_md5encrypt, Encrypt);
+	RUN_TEST_CASE(a_md5encrypt, DecryptValid);
+	RUN_TEST_CASE(a_md5encrypt, DecryptInvalid);
+	RUN_TEST_CASE(a_md5encrypt, IPv4AddressToRefId);
+	RUN_TEST_CASE(a_md5encrypt, IPv6AddressToRefId);
+}

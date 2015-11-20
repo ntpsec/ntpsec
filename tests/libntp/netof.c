@@ -78,3 +78,10 @@ TEST(netof, IPv6Address) {
 	TEST_ASSERT_TRUE(actual != NULL);
 	TEST_ASSERT_TRUE(IsEqual(expected, *actual));
 }
+
+TEST_GROUP_RUNNER(netof) {
+	RUN_TEST_CASE(netof, ClassBAddress);
+	RUN_TEST_CASE(netof, ClassCAddress);
+	RUN_TEST_CASE(netof, ClassAAddress);
+	RUN_TEST_CASE(netof, IPv6Address);
+}

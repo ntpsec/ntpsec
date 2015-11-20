@@ -24,3 +24,7 @@ TEST(numtohost, LoopbackNetNonResolve) {
 
 	TEST_ASSERT_EQUAL_STRING("127.0.1.1", numtohost(htonl(input)));
 }
+
+TEST_GROUP_RUNNER(numtohost) {
+	RUN_TEST_CASE(numtohost, LoopbackNetNonResolve);
+}

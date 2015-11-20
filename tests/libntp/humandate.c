@@ -52,3 +52,8 @@ TEST(humandate, CurrentTime) {
 
 	TEST_ASSERT_EQUAL_STRING(expected.str().c_str(), humantime(sample));
 }
+
+TEST_GROUP_RUNNER(humandate) {
+	RUN_TEST_CASE(humandate, RegularTime);
+	RUN_TEST_CASE(humandate, CurrentTime);
+}

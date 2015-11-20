@@ -109,3 +109,12 @@ TEST(socktoa, IgnoreIPv6Fields) {
 
 	TEST_ASSERT_EQUAL(sock_hash(&input1), sock_hash(&input2));
 }
+
+TEST_GROUP_RUNNER(socktoa) {
+	RUN_TEST_CASE(socktoa, IPv4AddressWithPort);
+	RUN_TEST_CASE(socktoa, IPv6AddressWithPort);
+	RUN_TEST_CASE(socktoa, ScopedIPv6AddressWithPort);
+	RUN_TEST_CASE(socktoa, HashEqual);
+	RUN_TEST_CASE(socktoa, HashNotEqual);
+	RUN_TEST_CASE(socktoa, IgnoreIPv6Fields);
+}

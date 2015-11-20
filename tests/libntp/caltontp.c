@@ -58,3 +58,10 @@ TEST(caltontp, WraparoundDateIn2036) {
 
 	TEST_ASSERT_EQUAL(expected, caltontp(&input));
 }
+
+TEST_GROUP_RUNNER(caltontp) {
+	RUN_TEST_CASE(caltontp, DateGivenMonthDay);
+	RUN_TEST_CASE(caltontp, DateGivenYearDay);
+	RUN_TEST_CASE(caltontp, DateLeapYear);
+	RUN_TEST_CASE(caltontp, WraparoundDateIn2036);
+}

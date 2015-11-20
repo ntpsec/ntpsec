@@ -25,3 +25,8 @@ TEST(modetoa, UnknownMode) {
 
 	TEST_ASSERT_EQUAL_STRING("mode#100", modetoa(MODE));
 }
+
+TEST_GROUP_RUNNER(modetoa) {
+	RUN_TEST_CASE(modetoa, KnownMode);
+	RUN_TEST_CASE(modetoa, UnknownMode);
+}

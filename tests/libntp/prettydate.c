@@ -25,3 +25,7 @@ TEST(prettydate, ConstantDate) {
 
 	TEST_ASSERT_EQUAL_STRING("cfba1ce0.80000000  2010-06-09T14:00:00.500", gmprettydate(&time));
 }
+
+TEST_GROUP_RUNNER(prettydate) {
+	RUN_TEST_CASE(prettydate, ConstantDate);
+}

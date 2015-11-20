@@ -103,3 +103,10 @@ TEST(caljulian, uLongWrapped) {
 
 	TEST_ASSERT_TRUE(IsEqual(expected, actual));
 }
+
+TEST_GROUP_RUNNER(caljulian) {
+	RUN_TEST_CASE(caljulian, RegularTime);
+	RUN_TEST_CASE(caljulian, LeapYear);
+	RUN_TEST_CASE(caljulian, uLongBoundary);
+	RUN_TEST_CASE(caljulian, uLongWrapped);
+}

@@ -52,3 +52,9 @@ TEST(calyearstart, WrapInDateRange) {
 	TEST_ASSERT_EQUAL(expected, calyearstart(input, &nowtime));
 	TEST_ASSERT_EQUAL(expected, calyearstart(input, NULL));
 }
+
+TEST_GROUP_RUNNER(calyearstart) {
+	RUN_TEST_CASE(calyearstart, NoWrapInDateRange);
+	RUN_TEST_CASE(calyearstart, NoWrapInDateRangeLeapYear);
+	RUN_TEST_CASE(calyearstart, WrapInDateRange);
+}

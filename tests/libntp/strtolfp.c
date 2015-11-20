@@ -116,3 +116,13 @@ TEST(strtolfp, InvalidChars) {
 	TEST_ASSERT_FALSE(atolfp(str, &actual));
 	TEST_ASSERT_FALSE(mstolfp(str, &actual_ms));
 }
+
+TEST_GROUP_RUNNER(strtolfp) {
+	RUN_TEST_CASE(strtolfp, PositiveInteger);
+	RUN_TEST_CASE(strtolfp, NegativeInteger);
+	RUN_TEST_CASE(strtolfp, PositiveFraction);
+	RUN_TEST_CASE(strtolfp, NegativeFraction);
+	RUN_TEST_CASE(strtolfp, PositiveMsFraction);
+	RUN_TEST_CASE(strtolfp, NegativeMsFraction);
+	RUN_TEST_CASE(strtolfp, InvalidChars);
+}

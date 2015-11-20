@@ -36,3 +36,10 @@ TEST(statestr, ClockCodeExists) {
 TEST(statestr, ClockCodeUnknown) {
 	TEST_ASSERT_EQUAL_STRING("clk_-1", ceventstr(-1));
 }
+
+TEST_GROUP_RUNNER(statestr) {
+	RUN_TEST_CASE(statestr, PeerRestart);
+	RUN_TEST_CASE(statestr, SysUnspecified);
+	RUN_TEST_CASE(statestr, ClockCodeExists);
+	RUN_TEST_CASE(statestr, ClockCodeUnknown);
+}

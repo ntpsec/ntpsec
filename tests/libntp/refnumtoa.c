@@ -61,3 +61,8 @@ TEST(refnumtoa, UnknownId) {
 	TEST_ASSERT_EQUAL_STRING(expected.str().c_str(), refnumtoa(&address));
 }
 #endif	/* REFCLOCK */
+
+TEST_GROUP_RUNNER(refnumtoa) {
+	RUN_TEST_CASE(refnumtoa, LocalClock);
+	RUN_TEST_CASE(refnumtoa, UnknownId);
+}

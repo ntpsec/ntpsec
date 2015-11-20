@@ -63,3 +63,9 @@ TEST(tvtots, MicrosecondsExact) {
 	// The error should be less than 0.5 us
 	TEST_ASSERT_FLOAT_WITHIN(0.0000005, expectedDouble, actualDouble);
 }
+
+TEST_GROUP_RUNNER(tvtots) {
+	RUN_TEST_CASE(tvtots, Seconds);
+	RUN_TEST_CASE(tvtots, MicrosecondsRounded);
+	RUN_TEST_CASE(tvtots, MicrosecondsExact);
+}
