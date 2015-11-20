@@ -146,3 +146,14 @@ TEST(msyslog, msnprintfTruncate)
 	TEST_ASSERT_EQUAL_STRING(exp_buf + 3, undist);
 	TEST_ASSERT_EQUAL_STRING(act_buf + 3, undist);
 }
+
+TEST_GROUP_RUNNER(msyslog) {
+	RUN_TEST_CASE(msyslog, msnprintf)
+	RUN_TEST_CASE(msyslog, msnprintfLiteralPercentm)
+	RUN_TEST_CASE(msyslog, msnprintfBackslashLiteralPercentm)
+	RUN_TEST_CASE(msyslog, msnprintfBackslashPercent)
+	RUN_TEST_CASE(msyslog, msnprintfHangingPercent)
+	RUN_TEST_CASE(msyslog, format_errmsgHangingPercent)
+	RUN_TEST_CASE(msyslog, msnprintfNullTarget)
+	RUN_TEST_CASE(msyslog, msnprintfTruncate)
+}

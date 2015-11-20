@@ -109,3 +109,12 @@ TEST(authkeys, EmptyKey) {
 
 	TEST_ASSERT_FALSE(authusekey(KEYNO, KEYTYPE, (u_char*)KEY));
 }
+
+TEST_GROUP_RUNNER(authkeys) {
+	RUN_TEST_CASE(authkeys, AddTrustedKeys);
+	RUN_TEST_CASE(authkeys, AddUntrustedKey);
+	RUN_TEST_CASE(authkeys, HaveKeyCorrect);
+	RUN_TEST_CASE(authkeys, HaveKeyIncorrect);
+	RUN_TEST_CASE(authkeys, AddWithAuthUseKey);
+	RUN_TEST_CASE(authkeys, EmptyKey);
+}

@@ -66,3 +66,13 @@ TEST(octtoint, IllegalDigit) {
 
 	TEST_ASSERT_FALSE(octtoint(str, &actual));
 }
+
+TEST_GROUP_RUNNER(octtoint) {
+	RUN_TEST_CASE(octtoint, SingleDigit);
+	RUN_TEST_CASE(octtoint, MultipleDigits);
+	RUN_TEST_CASE(octtoint, Zero);
+	RUN_TEST_CASE(octtoint, MaximumUnsigned32bit);
+	RUN_TEST_CASE(octtoint, Overflow);
+	RUN_TEST_CASE(octtoint, IllegalCharacter);
+	RUN_TEST_CASE(octtoint, IllegalDigit);
+}

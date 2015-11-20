@@ -32,3 +32,10 @@ TEST(ymd2yd, LeapYearDecember) {
 	int expected = 31+29+31+30+31+30+31+31+30+31+30+31;
 	TEST_ASSERT_EQUAL(expected, ymd2yd(2012,12,31));
 }
+
+TEST_GROUP_RUNNER(ymd2yd) {
+	RUN_TEST_CASE(ymd2yd, NonLeapYearFebruary);
+	RUN_TEST_CASE(ymd2yd, NonLeapYearJune);
+	RUN_TEST_CASE(ymd2yd, LeapYearFebruary);
+	RUN_TEST_CASE(ymd2yd, LeapYearDecember);
+}

@@ -346,3 +346,16 @@ TEST(calendar, RoundTripDayStart) {
 	}
 }
 
+TEST_GROUP_RUNNER(calendar) {
+	RUN_TEST_CASE(calendar, DaySplitMerge);
+	RUN_TEST_CASE(calendar, SplitYearDays1);
+	RUN_TEST_CASE(calendar, SplitYearDays2);
+	RUN_TEST_CASE(calendar, RataDie1);
+	RUN_TEST_CASE(calendar, LeapYears1);
+	RUN_TEST_CASE(calendar, LeapYears2);
+	RUN_TEST_CASE(calendar, RoundTripDate);
+	RUN_TEST_CASE(calendar, RoundTripYearStart);
+	RUN_TEST_CASE(calendar, RoundTripMonthStart);
+	RUN_TEST_CASE(calendar, RoundTripWeekStart);
+	RUN_TEST_CASE(calendar, RoundTripDayStart);
+}

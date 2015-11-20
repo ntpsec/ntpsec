@@ -27,3 +27,8 @@ TEST(numtoa, Netmask) {
 
 	TEST_ASSERT_EQUAL_STRING("255.255.255.0", numtoa(input));
 }
+
+TEST_GROUP_RUNNER(numtoa) {
+	RUN_TEST_CASE(numtoa, Address);
+	RUN_TEST_CASE(numtoa, Netmask);
+}

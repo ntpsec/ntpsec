@@ -66,3 +66,9 @@ TEST(tstotv, MicrosecondsRounding) {
 
 	TEST_ASSERT_TRUE(IsEqual(expected, actual));
 }
+
+TEST_GROUP_RUNNER(tstotv) {
+	RUN_TEST_CASE(tstotv, Seconds);
+	RUN_TEST_CASE(tstotv, MicrosecondsExact);
+	RUN_TEST_CASE(tstotv, MicrosecondsRounding);
+}

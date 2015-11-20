@@ -73,3 +73,9 @@ TEST(vi64, ParseVUI64_case) {
 	TEST_ASSERT_EQUAL(*ep, '\0');
 }
 
+
+TEST_GROUP_RUNNER(vi64) {
+	RUN_TEST_CASE(vi64, ParseVUI64_pos);
+	RUN_TEST_CASE(vi64, ParseVUI64_neg);
+	RUN_TEST_CASE(vi64, ParseVUI64_case);
+}

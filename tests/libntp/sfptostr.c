@@ -80,3 +80,14 @@ TEST(sfptostr, SingleDecimalRounding) {
 	TEST_ASSERT_EQUAL_STRING("2.8", fptoa(test, 1));
 	TEST_ASSERT_EQUAL_STRING("2750.0", fptoms(test, 1));
 }
+
+TEST_GROUP_RUNNER(sfptostr) {
+	RUN_TEST_CASE(sfptostr, PositiveInteger);
+	RUN_TEST_CASE(sfptostr, NegativeInteger);
+	RUN_TEST_CASE(sfptostr, PositiveIntegerPositiveFraction);
+	RUN_TEST_CASE(sfptostr, NegativeIntegerNegativeFraction);
+	RUN_TEST_CASE(sfptostr, PositiveIntegerNegativeFraction);
+	RUN_TEST_CASE(sfptostr, NegativeIntegerPositiveFraction);
+	RUN_TEST_CASE(sfptostr, SingleDecimalInteger);
+	RUN_TEST_CASE(sfptostr, SingleDecimalRounding);
+}

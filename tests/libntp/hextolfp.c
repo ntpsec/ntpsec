@@ -67,3 +67,12 @@ TEST(hextolfp, IllegalChar) {
 
 	TEST_ASSERT_FALSE(hextolfp(str, &actual));
 }
+
+TEST_GROUP_RUNNER(hextolfp) {
+	RUN_TEST_CASE(hextolfp, PositiveInteger);
+	RUN_TEST_CASE(hextolfp, NegativeInteger);
+	RUN_TEST_CASE(hextolfp, PositiveFraction);
+	RUN_TEST_CASE(hextolfp, NegativeFraction);
+	RUN_TEST_CASE(hextolfp, IllegalNumberOfInteger);
+	RUN_TEST_CASE(hextolfp, IllegalChar);
+}

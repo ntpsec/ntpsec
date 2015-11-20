@@ -47,3 +47,9 @@ TEST(recvbuff, GetAndFill) {
 	TEST_ASSERT_TRUE(has_full_recv_buffer());
 	TEST_ASSERT_EQUAL(buf, get_full_recv_buffer());
 }
+
+TEST_GROUP_RUNNER(recvbuff) {
+	RUN_TEST_CASE(recvbuff, Initialization);
+	RUN_TEST_CASE(recvbuff, GetAndFree);
+	RUN_TEST_CASE(recvbuff, GetAndFill);
+}

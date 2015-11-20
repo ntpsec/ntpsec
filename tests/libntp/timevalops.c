@@ -489,3 +489,34 @@ TEST(timeval, ToString) {
 }
 
 // -*- EOF -*-
+
+TEST_GROUP_RUNNER(timevalops) {
+	RUN_TEST_CASE(timeval, Helpers1);
+	RUN_TEST_CASE(timeval, Normalise);
+	RUN_TEST_CASE(timeval, SignNoFrac);
+	RUN_TEST_CASE(timeval, SignWithFrac);
+	RUN_TEST_CASE(timeval, CmpFracEQ);
+	RUN_TEST_CASE(timeval, CmpFracGT);
+	RUN_TEST_CASE(timeval, CmpFracLT);
+	RUN_TEST_CASE(timeval, AddFullNorm);
+	RUN_TEST_CASE(timeval, AddFullOflow1);
+	RUN_TEST_CASE(timeval, AddUsecNorm);
+	RUN_TEST_CASE(timeval, AddUsecOflow1);
+	RUN_TEST_CASE(timeval, SubFullNorm);
+	RUN_TEST_CASE(timeval, SubFullOflow);
+	RUN_TEST_CASE(timeval, SubUsecNorm);
+	RUN_TEST_CASE(timeval, SubUsecOflow);
+	RUN_TEST_CASE(timeval, Neg);
+	RUN_TEST_CASE(timeval, AbsNoFrac);
+	RUN_TEST_CASE(timeval, AbsWithFrac);
+	RUN_TEST_CASE(timeval, Helpers2);
+	RUN_TEST_CASE(timeval, ToLFPbittest);
+	RUN_TEST_CASE(timeval, ToLFPrelPos);
+	RUN_TEST_CASE(timeval, ToLFPrelNeg);
+	RUN_TEST_CASE(timeval, ToLFPabs);
+	RUN_TEST_CASE(timeval, FromLFPbittest);
+	RUN_TEST_CASE(timeval, FromLFPrelPos);
+	RUN_TEST_CASE(timeval, FromLFPrelNeg);
+	RUN_TEST_CASE(timeval, LFProundtrip);
+	RUN_TEST_CASE(timeval, ToString);
+}

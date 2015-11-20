@@ -112,3 +112,17 @@ TEST(lfptostr, UnsignedInteger) {
 
 	TEST_ASSERT_EQUAL_STRING("3000000000.0", ulfptoa(&test, 1));
 }
+
+TEST_GROUP_RUNNER(lfptostr) {
+	RUN_TEST_CASE(lfptostr, PositiveInteger);
+	RUN_TEST_CASE(lfptostr, NegativeInteger);
+	RUN_TEST_CASE(lfptostr, PositiveIntegerWithFraction);
+	RUN_TEST_CASE(lfptostr, NegativeIntegerWithFraction);
+	RUN_TEST_CASE(lfptostr, RoundingDownToInteger);
+	RUN_TEST_CASE(lfptostr, RoundingMiddleToInteger);
+	RUN_TEST_CASE(lfptostr, RoundingUpToInteger);
+	RUN_TEST_CASE(lfptostr, SingleDecimal);
+	RUN_TEST_CASE(lfptostr, MillisecondsRoundingUp);
+	RUN_TEST_CASE(lfptostr, MillisecondsRoundingDown);
+	RUN_TEST_CASE(lfptostr, UnsignedInteger);
+}

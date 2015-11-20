@@ -196,3 +196,14 @@ TEST(clocktime, AlwaysInLimit) {
 		}
 	}
 }
+
+TEST_GROUP_RUNNER(clocktime) {
+	RUN_TEST_CASE(clocktime, CurrentYear);
+	RUN_TEST_CASE(clocktime, CurrentYearFuzz);
+	RUN_TEST_CASE(clocktime, TimeZoneOffset);
+	RUN_TEST_CASE(clocktime, WrongYearStart);
+	RUN_TEST_CASE(clocktime, PreviousYear);
+	RUN_TEST_CASE(clocktime, NextYear);
+	RUN_TEST_CASE(clocktime, NoReasonableConversion);
+	RUN_TEST_CASE(clocktime, AlwaysInLimit);
+}
