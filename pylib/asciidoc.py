@@ -1,7 +1,9 @@
-# asciidoc -b html5 -a linkcss -a stylesdir=/mnt/devel/ntp/commit/docs -o asd driver32.txt
-
+from util import ascii_doc_scan
 from waflib import Task
 from waflib.TaskGen import extension
+
+# asciidoc -b html5 -a linkcss -a stylesdir=/mnt/devel/ntp/commit/docs -o asd driver32.txt
+
 
 # ASCIIDOC_FLAGS are almost always needed and need to be set by the user.
 class asciidoc(Task.Task):
@@ -21,7 +23,7 @@ class a2x(Task.Task):
 	color   = "YELLOW"
 	shell   = True
 	run_str = '${BIN_A2X} ${A2X_FLAGS} ${SRC[0].abspath()}'
-
+	scan	= ascii_doc_scan
 
 @extension('.man-tmp')
 def run_a2x(self, node):
