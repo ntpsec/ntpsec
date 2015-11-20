@@ -25,7 +25,7 @@ def build(ctx):
 		"ntpdig/crypto.c",
 		"ntpdig/fileHandlingTest.c",
 		"ntpdig/keyFile.c",
-#		"ntpdig/kodDatabase.c",
+		"ntpdig/kodDatabase.c",
 #		"ntpdig/kodFile.c",
 #		"ntpdig/networking.c",
 		"ntpdig/packetHandling.c",

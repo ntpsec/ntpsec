@@ -1,3 +1,5 @@
+#include <unistd.h>
+
 #include "unity.h"
 #include "unity_fixture.h"
 
@@ -116,4 +118,12 @@ TEST(kodDatabase, DeleteEntry) {
 	// Ensure that the other entry is still there.
 	TEST_ASSERT_EQUAL(1, search_entry(HOST1, &result));
 	free(result);
+}
+
+TEST_GROUP_RUNNER(kodDatabase) {
+	RUN_TEST_CASE(kodDatabase, SingleEntryHandling);
+//	RUN_TEST_CASE(kodDatabase, MultipleEntryHandling); Buffer overrun detected during free()
+	RUN_TEST_CASE(kodDatabase, NoMatchInSearch);
+//	RUN_TEST_CASE(kodDatabase, AddDuplicate); Disable for now due to sleep */
+//	RUN_TEST_CASE(kodDatabase, DeleteEntry); Buffer overrun detected during free()
 }
