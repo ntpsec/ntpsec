@@ -90,7 +90,7 @@ TEST(kodFile, WriteEmptyFile) {
 	 * Open file and ensure that the filesize is 0 bytes.
 	 */
 	is = fopen(kod_db_file, "wb");
-	TEST_ASSERT_NULL(is);
+	TEST_ASSERT_NOT_NULL(is);
 	TEST_ASSERT_FALSE(ferror(is));
 
 	TEST_ASSERT_EQUAL(0, GetFileSize(is));
@@ -120,11 +120,11 @@ TEST(kodFile, WriteFileWithSingleEntry) {
 	 * Open file and compare sizes.
 	 */
 	actual = fopen(kod_db_file, "rb");
-	TEST_ASSERT_NULL(actual);
+	TEST_ASSERT_NOT_NULL(actual);
 	TEST_ASSERT_FALSE(ferror(actual));
 	expected_file = CreatePath("kod-expected-single", INPUT_DIR);;
 	expected = fopen(expected_file, "rb");
-	TEST_ASSERT_NULL(expected);
+	TEST_ASSERT_NOT_NULL(expected);
 	TEST_ASSERT_FALSE(ferror(expected));
 
 	TEST_ASSERT_EQUAL(GetFileSize(expected), GetFileSize(actual));
@@ -162,11 +162,11 @@ TEST(kodFile, WriteFileWithMultipleEntries) {
 	 * Open file and compare sizes and content.
 	 */
 	actual = fopen(kod_db_file, "rb");
-	TEST_ASSERT_NULL(actual);
+	TEST_ASSERT_NOT_NULL(actual);
 	TEST_ASSERT_FALSE(ferror(actual));
-	expected_file = CreatePath("kod-expected-single", INPUT_DIR);;
+	expected_file = CreatePath("kod-expected-multiple", INPUT_DIR);;
 	expected = fopen(expected_file, "rb");
-	TEST_ASSERT_NULL(expected);
+	TEST_ASSERT_NOT_NULL(expected);
 	TEST_ASSERT_FALSE(ferror(expected));
 
 	TEST_ASSERT_EQUAL(GetFileSize(expected), GetFileSize(actual));
@@ -177,4 +177,13 @@ TEST(kodFile, WriteFileWithMultipleEntries) {
 	fclose(actual);
 	free((void*) kod_db_file);
 	free((void*) expected_file);
+}
+
+TEST_GROUP_RUNNER(kodFile) {
+	RUN_TEST_CASE(kodFile, ReadEmptyFile);
+	RUN_TEST_CASE(kodFile, ReadCorrectFile);
+	RUN_TEST_CASE(kodFile, ReadFileWithBlankLines);
+	RUN_TEST_CASE(kodFile, WriteEmptyFile);
+	RUN_TEST_CASE(kodFile, WriteFileWithSingleEntry);
+	RUN_TEST_CASE(kodFile, WriteFileWithMultipleEntries);
 }

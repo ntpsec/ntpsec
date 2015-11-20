@@ -29,7 +29,7 @@ static void RunAllTests(void)
 	RUN_TEST_GROUP(crypto);
 	RUN_TEST_GROUP(keyFile);
 	RUN_TEST_GROUP(kodDatabase);
-//	RUN_TEST_GROUP(kodFile);
+	RUN_TEST_GROUP(kodFile);
 	RUN_TEST_GROUP(packetHandling);
 #endif
 
