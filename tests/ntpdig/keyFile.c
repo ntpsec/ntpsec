@@ -1,7 +1,10 @@
+#include "config.h"
+
 #include "unity.h"
 #include "unity_fixture.h"
 
-#include "fileHandlingTest.h"
+#include "ntp_stdlib.h"
+#include <file_handling.h>
 
 #include "crypto.h"
 

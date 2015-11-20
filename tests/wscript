@@ -17,13 +17,13 @@ def build(ctx):
 
 	# Test main.
 	common_source = [
-		"common/tests_main.c"
+		"common/tests_main.c",
 	]
 
 
 	ntpdig_source = [
 		"ntpdig/crypto.c",
-		"ntpdig/fileHandlingTest.c",
+		"common/file_handling.c",
 		"ntpdig/keyFile.c",
 		"ntpdig/kodDatabase.c",
 		"ntpdig/kodFile.c",

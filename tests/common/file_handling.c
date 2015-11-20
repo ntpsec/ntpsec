@@ -1,7 +1,6 @@
-
 #include <stdio.h>
-
-#include "fileHandlingTest.h"
+#include "tests_main.h"
+#include "file_handling.h"
 
 const char* CreatePath(const char* filename, DirectoryType argument) {
 	const char* argpath = tests_main_args(argument);
