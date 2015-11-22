@@ -85,7 +85,7 @@ def build(ctx):
 	] + common_source
 
 	ctx.ntp_test(
-		features    = "c cprogram bld_include src_include libisc_include test",
+		features    = "c cprogram bld_include src_include libisc_include test CRYPTO",
         target      = "test_libntp",
 		defines		= ["TEST_LIBNTP_SSL"],
 		includes	= [
