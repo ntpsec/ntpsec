@@ -3,8 +3,6 @@
 #include "unity.h"
 #include "unity_fixture.h"
 
-#include <time.h>
-
 #include "timevalops.h"
 
 TEST_GROUP(tstotv);
