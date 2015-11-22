@@ -18,9 +18,7 @@
 #ifndef GUARD_TIMESTRUCTS_H
 #define GUARD_TIMESTRUCTS_H
 
-extern "C" {
 #include "ntp_fp.h"
-}
 
 namespace timeStruct {
 
