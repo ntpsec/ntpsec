@@ -206,6 +206,8 @@ mx4200_shutdown(
 	register struct mx4200unit *up;
 	struct refclockproc *pp;
 
+	UNUSED_ARG(unit);
+
 	pp = peer->procptr;
 	up = pp->unitptr;
 	if (-1 != pp->io.fd)
@@ -546,6 +548,8 @@ mx4200_poll(
 {
 	register struct mx4200unit *up;
 	struct refclockproc *pp;
+
+	UNUSED_ARG(unit);
 
 	pp = peer->procptr;
 	up = pp->unitptr;
@@ -1502,7 +1506,10 @@ mx4200_pps(
 static void
 mx4200_debug(struct peer *peer, char *fmt, ...)
 {
-#ifdef DEBUG
+	UNUSED_ARG(peer);
+#ifndef DEBUG
+	UNUSED_ARG(fmt);
+#else
 	va_list ap;
 
 	if (debug) {

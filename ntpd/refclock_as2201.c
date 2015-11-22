@@ -210,6 +210,8 @@ as2201_shutdown(
 	register struct as2201unit *up;
 	struct refclockproc *pp;
 
+	UNUSED_ARG(unit);
+
 	pp = peer->procptr;
 	up = pp->unitptr;
 	if (-1 != pp->io.fd)
@@ -361,6 +363,8 @@ as2201_poll(
 	)
 {
 	struct refclockproc *pp;
+
+	UNUSED_ARG(unit);
 
 	/*
 	 * Send a "\r*toc\r" to get things going. We go to great pains

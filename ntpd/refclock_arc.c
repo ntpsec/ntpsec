@@ -547,6 +547,8 @@ dummy_event_handler(
 	struct peer *peer
 	)
 {
+	UNUSED_ARG(peer);
+
 #ifdef DEBUG
 	if(debug) { printf("arc: dummy_event_handler() called.\n"); }
 #endif
@@ -745,6 +747,8 @@ arc_shutdown(
 	register struct arcunit *up;
 	struct refclockproc *pp;
 
+	UNUSED_ARG(unit);
+
 	peer->procptr->action = dummy_event_handler;
 
 	pp = peer->procptr;
@@ -786,6 +790,8 @@ send_slow(
 {
 	int sl = strlen(s);
 	int spaceleft = space_left(up);
+
+	UNUSED_ARG(fd);
 
 #ifdef DEBUG
 	if(debug > 1) { printf("arc: spaceleft = %d.\n", spaceleft); }
@@ -1421,6 +1427,9 @@ request_time(
 {
 	struct refclockproc *pp = peer->procptr;
 	register struct arcunit *up = pp->unitptr;
+
+	UNUSED_ARG(unit);
+
 #ifdef DEBUG
 	if(debug) { printf("arc: unit %d: requesting time.\n", unit); }
 #endif

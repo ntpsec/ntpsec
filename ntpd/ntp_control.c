@@ -2906,6 +2906,9 @@ control_unspec(
 {
 	struct peer *peer;
 
+	UNUSED_ARG(rbufp);
+	UNUSED_ARG(restrict_mask);
+
 	/*
 	 * What is an appropriate response to an unspecified op-code?
 	 * I return no errors and no data, unless a specified assocation
@@ -2941,6 +2944,8 @@ read_status(
 	/* a_st holds association ID, status pairs alternating */
 	u_short a_st[CTL_MAX_DATA_LEN / sizeof(u_short)];
 
+	UNUSED_ARG(rbufp);
+	UNUSED_ARG(restrict_mask);
 #ifdef DEBUG
 	if (debug > 2)
 		printf("read_status: ID %d\n", res_associd);
@@ -3111,6 +3116,9 @@ read_variables(
 	int restrict_mask
 	)
 {
+	UNUSED_ARG(rbufp);
+	UNUSED_ARG(restrict_mask);
+
 	if (res_associd)
 		read_peervars();
 	else
@@ -3137,6 +3145,9 @@ write_variables(
 	char *vareqv;
 	const char *t;
 	char *tt;
+
+	UNUSED_ARG(rbufp);
+	UNUSED_ARG(restrict_mask);
 
 	val = 0;
 	/*
@@ -4008,6 +4019,8 @@ read_ifstats(
 	u_int	ifidx;
 	endpt *	la;
 
+	UNUSED_ARG(rbufp);
+
 	/*
 	 * loop over [0..sys_ifnum] searching ep_list for each
 	 * ifnum in turn.
@@ -4164,6 +4177,8 @@ read_addr_restrictions(
 {
 	u_int idx;
 
+	UNUSED_ARG(rbufp);
+
 	idx = 0;
 	send_restrict_list(restrictlist4, false, &idx);
 	send_restrict_list(restrictlist6, true, &idx);
@@ -4186,6 +4201,9 @@ read_ordlist(
 	const size_t a_r_chars = COUNTOF(addr_rst_s) - 1;
 	struct ntp_control *	cpkt;
 	u_short			qdata_octets;
+
+	UNUSED_ARG(rbufp);
+	UNUSED_ARG(restrict_mask);
 
 	/*
 	 * CTL_OP_READ_ORDLIST_A was first named CTL_OP_READ_IFSTATS and
@@ -4224,6 +4242,8 @@ static void req_nonce(
 {
 	char	buf[64];
 
+	UNUSED_ARG(restrict_mask);
+
 	generate_nonce(rbufp, buf, sizeof(buf));
 	ctl_putunqstr("nonce", buf, strlen(buf));
 	ctl_flushpkt(0);
@@ -4241,6 +4261,8 @@ read_clockstatus(
 	)
 {
 #ifndef REFCLOCK
+	UNUSED_ARG(rbufp);
+	UNUSED_ARG(restrict_mask);
 	/*
 	 * If no refclock support, no data to return
 	 */
@@ -4256,6 +4278,9 @@ read_clockstatus(
 	const uint8_t *		cc;
 	struct ctl_var *	kv;
 	struct refclockstat	cs;
+
+	UNUSED_ARG(rbufp);
+	UNUSED_ARG(restrict_mask);
 
 	if (res_associd != 0) {
 		peer = findpeerbyassoc(res_associd);
@@ -4347,6 +4372,9 @@ write_clockstatus(
 	int restrict_mask
 	)
 {
+	UNUSED_ARG(rbufp);
+	UNUSED_ARG(restrict_mask);
+
 	ctl_error(CERR_PERMISSION);
 }
 

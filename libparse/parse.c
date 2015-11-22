@@ -542,6 +542,8 @@ syn_simple(
 	register u_long why
 	)
 {
+	UNUSED_ARG(format);
+	UNUSED_ARG(why);
 	parseio->parse_dtime.parse_stime = *ts;
 }
 
@@ -558,6 +560,7 @@ pps_simple(
 	register timestamp_t *ptime
 	)
 {
+	UNUSED_ARG(status);
 	parseio->parse_dtime.parse_ptime  = *ptime;
 	parseio->parse_dtime.parse_state |= PARSEB_PPS|PARSEB_S_PPS;
 
@@ -774,6 +777,8 @@ parse_getfmt(
 	parse_t    *parse
 	)
 {
+	UNUSED_ARG(dct);
+	UNUSED_ARG(parse);
 	if (dct->parseformat.parse_format < nformats &&
 	    Strlen(clockformats[dct->parseformat.parse_format]->name) <= PARSE_TCMAX)
 	{

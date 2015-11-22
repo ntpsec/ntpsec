@@ -55,7 +55,10 @@ cvt_dcf7000(
 	    void          *local
 	    )
 {
-	if (!Strok(buffer, format->fixed_string))
+    UNUSED_ARG(size);
+    UNUSED_ARG(local);
+
+    if (!Strok(buffer, format->fixed_string))
 	{
 		return CVT_NONE;
 	}

@@ -1501,6 +1501,8 @@ abortcmd(
 	int sig
 	)
 {
+	UNUSED_ARG(sig);
+
 	if (current_output == stdout)
 	    (void) fflush(stdout);
 	putc('\n', stderr);
@@ -1853,6 +1855,8 @@ getnetnum(
 	)
 {
 	struct addrinfo hints, *ai = NULL;
+
+	UNUSED_ARG(af);
 
 	ZERO(hints);
 	hints.ai_flags = AI_CANONNAME;
@@ -2292,6 +2296,7 @@ ntp_poll(
 	FILE *fp
 	)
 {
+	UNUSED_ARG(pcmd);
 	(void) fprintf(fp, "poll not implemented yet\n");
 }
 
@@ -2453,6 +2458,8 @@ quit(
 	FILE *fp
 	)
 {
+	UNUSED_ARG(pcmd);
+	UNUSED_ARG(fp);
 	if (havehost)
 	    closesocket(sockfd);	/* cleanliness next to godliness */
 	exit(0);
@@ -2470,6 +2477,7 @@ version(
 	)
 {
 
+	UNUSED_ARG(pcmd);
 	(void) fprintf(fp, "ntpq %s\n", Version);
 	return;
 }
@@ -2484,6 +2492,7 @@ raw(
 	FILE *fp
 	)
 {
+	UNUSED_ARG(pcmd);
 	rawmode = true;
 	(void) fprintf(fp, "Output set to raw\n");
 }
@@ -2499,6 +2508,7 @@ cooked(
 	FILE *fp
 	)
 {
+	UNUSED_ARG(pcmd);
 	rawmode = false;
 	(void) fprintf(fp, "Output set to cooked\n");
 	return;
@@ -2958,6 +2968,7 @@ rawprint(
 	const char *cp;
 	const char *cpend;
 
+	UNUSED_ARG(datatype);
 	/*
 	 * Essentially print the data as is.  We reformat unprintables, though.
 	 */

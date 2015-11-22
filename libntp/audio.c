@@ -118,6 +118,8 @@ audio_config_read(
 	FILE *fd;
 	char device[20], line[100], ab[100];
 
+	UNUSED_ARG(c_dev);
+	UNUSED_ARG(i_dev);
 	snprintf(device, sizeof(device), "%s%d", INIT_FILE, unit);
 	if ((fd = fopen(device, "r")) == NULL) {
 		printf("audio_config_read: <%s> NO\n", device);

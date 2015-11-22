@@ -27,6 +27,7 @@ MD5authencrypt(
 	u_int	len;
 	EVP_MD_CTX ctx;
 
+	UNUSED_ARG(type);
 	/*
 	 * Compute digest of key concatenated with packet. Note: the
 	 * key type and digest type have been verified when the key
@@ -68,6 +69,7 @@ MD5authdecrypt(
 	u_int	len;
 	EVP_MD_CTX ctx;
 
+	UNUSED_ARG(type);
 	/*
 	 * Compute digest of key concatenated with packet. Note: the
 	 * key type and digest type have been verified when the key

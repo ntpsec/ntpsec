@@ -320,6 +320,8 @@ cvt_rawdcf(
 	 * a 200ms pulse would create all zeroes (and probably a frame error)
 	 */
 
+	UNUSED_ARG(param);
+
 	for (i = 0; i < BITS; i++)
 	{
 		histbuf[i] = 0;

@@ -557,6 +557,10 @@ ntpdig_name_resolved(
 	u_int			xmt_delay;
 	size_t			octets;
 
+	UNUSED_ARG(name);
+	UNUSED_ARG(service);
+	UNUSED_ARG(hints);
+
 	xmt_delay_v4 = 0;
 	xmt_delay_v6 = 0;
 	dctx = context;
@@ -645,6 +649,8 @@ queue_xmt(
 	struct timeval	start_cb;
 	struct timeval	delay;
 
+	UNUSED_ARG(dctx);
+
 	dest = &spkt->addr;
 	if (IS_IPV6(dest))
 		pkt_listp = &v6_pkts_list;
@@ -720,6 +726,7 @@ xmt_timer_cb(
 	xmt_ctx *	x;
 
 	UNUSED_ARG(fd);
+	UNUSED_ARG(what);
 	UNUSED_ARG(ctx);
 	DEBUG_INSIST(EV_TIMEOUT == what);
 
@@ -954,6 +961,8 @@ sock_cb(
 	int		rpktl;
 	int		rc;
 
+	UNUSED_ARG(ptr);
+
 	INSIST(sock4 == fd || sock6 == fd);
 
 	TRACE(3, ("sock_cb: event on sock%s:%s%s%s%s\n",
@@ -1102,6 +1111,8 @@ worker_resp_cb(
 {
 	blocking_child *	c;
 
+	UNUSED_ARG(fd);
+	UNUSED_ARG(what);
 	DEBUG_INSIST(EV_READ & what);
 	c = ctx;
 	DEBUG_INSIST(fd == c->resp_read_pipe);
@@ -1149,6 +1160,9 @@ worker_timeout(
 	)
 {
 	UNUSED_ARG(fd);
+#ifndef DEBUG
+	UNUSED_ARG(what);
+#endif /* DEBUG */
 	UNUSED_ARG(ctx);
 
 	DEBUG_REQUIRE(EV_TIMEOUT & what);
@@ -1395,6 +1409,10 @@ offset_calculation(
 	l_fp p_rec, p_xmt, p_ref, p_org, tmp, dst;
 	u_fp p_rdly, p_rdsp;
 	double t21, t34, delta;
+
+#ifndef DEBUG
+	UNUSED_ARG(rpktl);
+#endif /* DEBUG */
 
 	/* Convert timestamps from network to host byte order */
 	p_rdly = NTOHS_FP(rpkt->rootdelay);

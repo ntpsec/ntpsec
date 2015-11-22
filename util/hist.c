@@ -31,6 +31,9 @@ main(
 	int i, j, n;
 	long t, u, v, w, gtod[NBUF], ovfl[NSRT];
 
+	UNUSED_ARG(argc);
+	UNUSED_ARG(argv);
+
 	/*
 	 * Force pages into memory
 	 */

@@ -240,6 +240,10 @@ cvt_meinberg(
 {
 	struct format *format;
 
+	UNUSED_ARG(size);
+	UNUSED_ARG(unused);
+	UNUSED_ARG(local);
+
 	/*
 	 * select automagically correct data format
 	 */

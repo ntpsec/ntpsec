@@ -115,6 +115,8 @@ pcf_shutdown(
 {
 	struct refclockproc *pp;
 	
+	UNUSED_ARG(unit);
+
 	pp = peer->procptr;
 	if (NULL != pp)
 		close(pp->io.fd);
@@ -135,6 +137,8 @@ pcf_poll(
 	struct tm tm, *tp;
 	time_t t;
 	
+	UNUSED_ARG(unit);
+
 	pp = peer->procptr;
 
 	buf[0] = 0;

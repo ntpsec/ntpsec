@@ -59,6 +59,9 @@ int ntpq_stripquotes ( char *resultbuf, char *srcbuf, int datalen, int maxlen )
 {
 	char* tmpbuf = srcbuf;
 
+	UNUSED_ARG(datalen);
+	UNUSED_ARG(maxlen);
+
 	while ( *tmpbuf != 0 )
 	{
 		if ( *tmpbuf == '\"' )

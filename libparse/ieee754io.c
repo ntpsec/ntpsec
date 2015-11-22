@@ -391,6 +391,9 @@ put_ieee754(
 #endif
 /*int length;*/
   unsigned long mask;
+
+  UNUSED_ARG(bufpp);
+  UNUSED_ARG(offsets);
   
   outlfp = *lfpp;
 

@@ -1565,6 +1565,8 @@ process_packet(
 	double	etemp, ftemp, td;
 #endif /* ENABLE_ASYMMETRIC */
 
+	UNUSED_ARG(len);
+
 	sys_processed++;
 	peer->processed++;
 	p_del = FPTOD(NTOHS_FP(pkt->rootdelay));
@@ -3810,6 +3812,10 @@ pool_name_resolved(
 {
 	struct peer *	pool;	/* pool solicitor association */
 	associd_t	assoc;
+
+	UNUSED_ARG(gai_errno);
+	UNUSED_ARG(service);
+	UNUSED_ARG(hints);
 
 	if (rescode) {
 		msyslog(LOG_ERR,

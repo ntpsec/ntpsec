@@ -134,6 +134,9 @@ cvt_hopf6021(
 {
 	unsigned char status,weekday;
 
+	UNUSED_ARG(size);
+	UNUSED_ARG(local);
+
 	if (!Strok(buffer, format->fixed_string))
 	{
 		return CVT_NONE;

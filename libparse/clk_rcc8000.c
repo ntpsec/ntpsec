@@ -71,7 +71,10 @@ cvt_rcc8000(
 	    void          *local
 	    )
 {
-	if (!Strok(buffer, format->fixed_string)) return CVT_NONE;
+    UNUSED_ARG(size);
+    UNUSED_ARG(local);
+
+    if (!Strok(buffer, format->fixed_string)) return CVT_NONE;
 #define	OFFS(x) format->field_offsets[(x)].offset
 #define STOI(x, y) Stoi(&buffer[OFFS(x)], y, format->field_offsets[(x)].length)
 	if (	STOI(O_DAY,	&clock_time->day)	||

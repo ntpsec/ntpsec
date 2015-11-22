@@ -1685,6 +1685,8 @@ local_nop(
 	struct parseunit *parse
 	)
 {
+	UNUSED_ARG(parse);
+
 	return true;
 }
 
@@ -2475,6 +2477,8 @@ parse_start(
 	char parseppsdev[sizeof(PARSEPPSDEVICE)+20];
 	parsectl_t tmp_ctl;
 	u_int type;
+
+	UNUSED_ARG(sysunit);
 
 	/*
 	 * get out Copyright information once

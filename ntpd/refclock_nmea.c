@@ -1107,6 +1107,8 @@ nmea_poll(
 	struct refclockproc * const pp = peer->procptr;
 	nmea_unit	    * const up = (nmea_unit *)pp->unitptr;
 	
+	UNUSED_ARG(unit);
+
 	/*
 	 * Process median filter samples. If none received, declare a
 	 * timeout and keep going.

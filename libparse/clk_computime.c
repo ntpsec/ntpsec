@@ -80,6 +80,8 @@ cvt_computime(
 	void          *local
 	)
 {
+	UNUSED_ARG(size);
+	UNUSED_ARG(local);
 
 	if (!Strok(buffer, format->fixed_string)) {
 		return CVT_NONE;

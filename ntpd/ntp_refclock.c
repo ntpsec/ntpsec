@@ -902,6 +902,10 @@ refclock_ioctl(
 	u_int	lflags		/* line discipline flags */
 	)
 {
+	UNUSED_ARG(fd);
+#ifndef DEBUG
+	UNUSED_ARG(lflags);
+#endif /* DEBUG */
 	/*
 	 * simply return true if no UNIX line discipline is supported
 	 */
@@ -1176,6 +1180,8 @@ refclock_pps(
 	pps_info_t pps_info;
 	struct timespec timeout;
 	double	dtemp;
+
+	UNUSED_ARG(mode);
 
 	/*
 	 * We require the clock to be synchronized before setting the

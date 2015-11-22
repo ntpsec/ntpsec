@@ -225,6 +225,8 @@ jupiter_shutdown(int unit, struct peer *peer)
 	struct instance *instance;
 	struct refclockproc *pp;
 
+	UNUSED_ARG(unit);
+
 	pp = peer->procptr;
 	instance = pp->unitptr;
 	if (!instance)
@@ -408,6 +410,8 @@ jupiter_poll(int unit, struct peer *peer)
 	struct instance *instance;
 	struct refclockproc *pp;
 
+	UNUSED_ARG(unit);
+
 	pp = peer->procptr;
 	instance = pp->unitptr;
 
@@ -452,6 +456,10 @@ jupiter_control(
 	struct refclockproc *pp;
 	struct instance *instance;
 	uint8_t sloppyclockflag;
+
+	UNUSED_ARG(unit);
+	UNUSED_ARG(in);
+	UNUSED_ARG(out);
 
 	pp = peer->procptr;
 	instance = pp->unitptr;
@@ -853,6 +861,8 @@ jupiter_debug(
 {
 	char	buffer[200];
 	va_list	ap;
+
+	UNUSED_ARG(function);
 
 	va_start(ap, fmt);
 	/*

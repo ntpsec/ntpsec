@@ -1248,6 +1248,7 @@ moredebug(
 {
 	int saved_errno = errno;
 
+	UNUSED_ARG(sig);
 	if (debug < 255)
 	{
 		debug++;
@@ -1267,6 +1268,7 @@ lessdebug(
 {
 	int saved_errno = errno;
 
+	UNUSED_ARG(sig);
 	if (debug > 0)
 	{
 		debug--;

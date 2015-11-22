@@ -317,6 +317,7 @@ static bool tsync_start(int unit, struct peer *peer)
     struct refclockproc *pp;
     TsyncUnit           *up;
 
+    UNUSED_ARG(unit);
 
     /*
     **  initialize reference clock and peer parameters
@@ -368,7 +369,8 @@ static bool tsync_start(int unit, struct peer *peer)
 *******************************************************************************/
 static void tsync_shutdown(int unit, struct peer *peer)
 {
-
+    UNUSED_ARG(unit);
+    UNUSED_ARG(peer);
 } /* End - tsync_shutdown() */
 
 /******************************************************************************
@@ -412,6 +414,8 @@ static void tsync_poll(int unit, struct peer *peer)
     l_fp                 ltemp;
     ReferenceObj *	 pRefObj;
 
+
+    UNUSED_ARG(unit);
 
     /* Construct the device name */
     snprintf(device, sizeof(device), "%s%d", DEVICE, (int)peer->refclkunit);

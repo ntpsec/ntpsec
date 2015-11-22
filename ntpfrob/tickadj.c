@@ -28,6 +28,8 @@ static struct timex txc;
 
 void tickadj(const iomode mode, const int newtick)
 {
+	UNUSED_ARG(mode);
+
 #ifndef HAVE_ADJTIMEX
 	fputs("ntpfrob: \n", stderr);
 	exit(1);

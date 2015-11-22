@@ -740,6 +740,7 @@ poll_secondary(
 	clockprocT * const pp   ,
 	gpsd_unitT * const up   )
 {
+	UNUSED_ARG(up);
 	if (pp->coderecv != pp->codeproc) {
 		/* all is well */
 		pp->lastref = pp->lastrec;
@@ -760,6 +761,8 @@ gpsd_poll(
 	clockprocT * const pp = peer->procptr;
 	gpsd_unitT * const up = (gpsd_unitT *)pp->unitptr;
 
+	UNUSED_ARG(unit);
+
 	++pp->polls;
 	if (peer == up->pps_peer)
 		poll_secondary(peer, pp, up);
@@ -778,6 +781,10 @@ gpsd_control(
 {
 	clockprocT * const pp = peer->procptr;
 	gpsd_unitT * const up = (gpsd_unitT *)pp->unitptr;
+
+	UNUSED_ARG(unit);
+	UNUSED_ARG(in_st);
+	UNUSED_ARG(out_st);
 
 	if (peer == up->pps_peer) {
 		DTOLFP(pp->fudgetime1, &up->pps_fudge2);
@@ -877,6 +884,8 @@ gpsd_timer(
 {
 	clockprocT * const pp = peer->procptr;
 	gpsd_unitT * const up = (gpsd_unitT *)pp->unitptr;
+
+	UNUSED_ARG(unit);
 
 	if (peer == up->pps_peer)
 		timer_secondary(peer, pp, up);
@@ -1415,6 +1424,8 @@ process_watch(
 
 	const char * path;
 
+	UNUSED_ARG(rtime);
+
 	path = json_object_lookup_string(jctx, 0, "device");
 	if (NULL == path || strcmp(path, up->device))
 		return;
@@ -1444,6 +1455,8 @@ process_version(
 	const char *revision;
 	const char *release;
 	uint16_t    pvhi, pvlo;
+
+	UNUSED_ARG(rtime);
 
 	/* get protocol version number */
 	revision = json_object_lookup_string_default(

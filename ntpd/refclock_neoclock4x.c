@@ -585,6 +585,8 @@ neoclock4x_poll(int unit,
   struct neoclock4x_unit *up;
   struct refclockproc *pp;
 
+  UNUSED_ARG(unit);
+
   pp = peer->procptr;
   up = pp->unitptr;
 

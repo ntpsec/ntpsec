@@ -780,6 +780,8 @@ oncore_shutdown(
 	register struct instance *instance;
 	struct refclockproc *pp;
 
+	UNUSED_ARG(unit);
+
 	pp = peer->procptr;
 	instance = pp->unitptr;
 
@@ -1586,6 +1588,8 @@ oncore_get_timestamp(
 	double dmy;
 	struct timespec *tsp = 0;
 
+	UNUSED_ARG(dt1);
+
 	int	current_mode;
 	pps_params_t current_params;
 	struct timespec timeout;
@@ -1891,7 +1895,12 @@ oncore_msg_any(
 	int idx
 	)
 {
-#ifdef ONCORE_VERBOSE_MSG_ANY
+#ifndef ONCORE_VERBOSE_MSG_ANY
+	UNUSED_ARG(instance);
+	UNUSED_ARG(buf);
+	UNUSED_ARG(len);
+	UNUSED_ARG(idx);
+#else
 	int i;
 	const char *fmt = oncore_messages[idx].fmt;
 	const char *p;
@@ -1951,6 +1960,9 @@ oncore_msg_Adef(
 	size_t len
 	)
 {
+	UNUSED_ARG(instance);
+	UNUSED_ARG(buf);
+	UNUSED_ARG(len);
 }
 
 
@@ -1965,6 +1977,8 @@ oncore_msg_Ag(
 	)
 {
 	const char *cp;
+
+	UNUSED_ARG(len);
 
 	cp = "set to";
 	if (instance->o_state == ONCORE_RUN)
@@ -1989,6 +2003,8 @@ oncore_msg_As(
 	size_t len
 	)
 {
+	UNUSED_ARG(len);
+
 	instance->ss_lat  = buf_w32(&buf[4]);
 	instance->ss_long = buf_w32(&buf[8]);
 	instance->ss_ht   = buf_w32(&buf[12]);
@@ -2011,6 +2027,8 @@ oncore_msg_At(
 	size_t len
 	)
 {
+	UNUSED_ARG(len);
+
 	instance->saw_At = 1;
 	if (instance->site_survey == ONCORE_SS_TESTING) {
 		if (buf[4] == 2) {
@@ -2037,6 +2055,8 @@ oncore_msg_Ay(
 	size_t len
 	)
 {
+	UNUSED_ARG(len);
+
 	if (instance->saw_Ay)
 		return;
 
@@ -2061,6 +2081,8 @@ oncore_msg_Az(
 	size_t len
 	)
 {
+	UNUSED_ARG(len);
+
 	if (instance->saw_Az)
 		return;
 
@@ -2426,6 +2448,7 @@ oncore_msg_Bd(
 	size_t len
 	)
 {
+	UNUSED_ARG(len);
 	oncore_log_f(instance, LOG_NOTICE,
 		     "Bd: Almanac %s, week = %d, t = %d, %d SVs: %x",
 		     ((buf[4]) ? "LOADED" : "(NONE)"), buf[5], buf[6],
@@ -2453,6 +2476,8 @@ oncore_msg_Bj(
 	)
 {
 	const char	*cp;
+
+	UNUSED_ARG(len);
 
 	instance->saw_Bj = 1;
 
@@ -2492,6 +2517,8 @@ oncore_msg_Bl(
 		WARN_PLUS,
 		WARN_MINUS
 	} warn;
+
+	UNUSED_ARG(len);
 
 	day_now = day_lsf = 0;
 	cp = NULL;	/* keep gcc happy */
@@ -2673,6 +2700,8 @@ oncore_msg_CaFaIa(
 {
 	int	i;
 
+	UNUSED_ARG(len);
+
 	if (instance->o_state == ONCORE_TEST_SENT) {
 		enum antenna_state antenna;
 
@@ -2781,6 +2810,9 @@ oncore_msg_Cf(
 	size_t len
 	)
 {
+	UNUSED_ARG(buf);
+	UNUSED_ARG(len);
+
 	if (instance->o_state == ONCORE_RESET_SENT) {
 		oncore_sendmsg(instance, oncore_cmd_Cg, sizeof(oncore_cmd_Cg)); /* Return to  Posn Fix mode */
 										       /* Reset set VP to IDLE */
@@ -2869,6 +2901,9 @@ oncore_msg_Cj_id(
 {
 	char *cp2, Model[21];
 	const char *cp, *cp1;
+
+	UNUSED_ARG(buf);
+	UNUSED_ARG(len);
 
 	/* Write Receiver ID message to clockstats file */
 
@@ -2987,6 +3022,9 @@ oncore_msg_Cj_init(
 	int	mode;
 
 
+	UNUSED_ARG(buf);
+	UNUSED_ARG(len);
+
 	/* The M12 with 1.3 or 2.0 Firmware, loses track of all Satellites and has to
 	 * start again if we go from 0D -> 3D, then loses them again when we
 	 * go from 3D -> 0D.  We do this to get a @@Ea message for SHMEM.
@@ -3090,6 +3128,7 @@ oncore_msg_Ga(
 	long lat, lon, ht;
 	double Lat, Lon, Ht;
 
+	UNUSED_ARG(len);
 
 	lat = buf_w32(&buf[4]);
 	lon = buf_w32(&buf[8]);
@@ -3128,6 +3167,8 @@ oncore_msg_Gb(
 	const char *	gmts;
 	int	mo, d, y, h, m, s, gmth, gmtm;
 
+	UNUSED_ARG(len);
+
 	mo = buf[4];
 	d  = buf[5];
 	y  = 256*buf[6]+buf[7];
@@ -3158,6 +3199,8 @@ oncore_msg_Gc(
 {
 	const char *tbl[] = {"OFF", "ON", "SATELLITE", "TRAIM" };
 
+	UNUSED_ARG(len);
+
 	instance->pps_control_msg_seen = 1;
 	oncore_log_f(instance, LOG_INFO, "PPS Control set to %s",
 		     tbl[buf[4]]);
@@ -3182,6 +3225,8 @@ oncore_msg_Gj(
 
 	int dt;
 	const char *cp;
+
+	UNUSED_ARG(len);
 
 	instance->saw_Gj = 1; /* flag, saw_Gj, dont need to try Bj in check_leap */
 
@@ -3247,6 +3292,9 @@ oncore_msg_Sz(
 	size_t len
 	)
 {
+	UNUSED_ARG(buf);
+	UNUSED_ARG(len);
+
 	if (instance && instance->peer) {
 		oncore_log(instance, LOG_ERR, "Oncore: System Failure at Power On");
 		oncore_shutdown(instance->unit, instance->peer);
@@ -3619,7 +3667,10 @@ oncore_print_Cb(
 	uint8_t *cp
 	)
 {
-#ifdef ONCORE_VERBOSE_CB
+#ifndef ONCORE_VERBOSE_CB
+	UNUSED_ARG(instance);
+	UNUSED_ARG(cp);
+#else
 	int	ii;
 	char	Msg[160], Msg2[10];
 
