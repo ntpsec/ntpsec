@@ -626,11 +626,11 @@ refclock_gtlin(
  *
  * *tsptr receives a copy of the buffer timestamp.
  */
-int
+size_t
 refclock_gtraw(
 	struct recvbuf *rbufp,	/* receive buffer pointer */
 	char	*lineptr,	/* current line pointer */
-	int	bmax,		/* remaining characters in line */
+	size_t	bmax,		/* remaining characters in line */
 	l_fp	*tsptr		/* pointer to timestamp returned */
 	)
 {
@@ -643,7 +643,7 @@ refclock_gtraw(
 	lineptr[bmax] = '\0';
 
 	*tsptr = rbufp->recv_time;
-	DPRINTF(2, ("refclock_gtraw: fd %d time %s timecode %d %s\n",
+	DPRINTF(2, ("refclock_gtraw: fd %d time %s timecode %zd %s\n",
 		    rbufp->fd, ulfptoa(&rbufp->recv_time, 6), bmax,
 		    lineptr));
 	return (bmax);

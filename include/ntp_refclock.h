@@ -235,7 +235,7 @@ extern 	void	refclock_process_offset(struct refclockproc *, l_fp,
 					l_fp, double);
 extern	void	refclock_report	(struct peer *, int);
 extern	int	refclock_gtlin	(struct recvbuf *, char *, int, l_fp *);
-extern	int	refclock_gtraw	(struct recvbuf *, char *, int, l_fp *);
+extern	size_t	refclock_gtraw	(struct recvbuf *, char *, size_t, l_fp *);
 extern	bool	indicate_refclock_packet(struct refclockio *,
 					 struct recvbuf *);
 extern	void	process_refclock_packet(struct recvbuf *);

@@ -1002,7 +1002,7 @@ process_control(
 	dataend = &rpkt.u.data[CTL_MAX_DATA_LEN];
 
 	if ((rbufp->recv_length & 0x3) != 0)
-		DPRINTF(3, ("Control packet length %d unrounded\n",
+		DPRINTF(3, ("Control packet length %zd unrounded\n",
 			    rbufp->recv_length));
 
 	/*
@@ -1027,7 +1027,7 @@ process_control(
 		res_authenticate = true;
 		pkid = (void *)((char *)pkt + properlen);
 		res_keyid = ntohl(*pkid);
-		DPRINTF(3, ("recv_len %d, properlen %d, wants auth with keyid %08x, MAC length=%zu\n",
+		DPRINTF(3, ("recv_len %zd, properlen %d, wants auth with keyid %08x, MAC length=%zu\n",
 			    rbufp->recv_length, properlen, res_keyid,
 			    maclen));
 

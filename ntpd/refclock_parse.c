@@ -1912,8 +1912,8 @@ local_receive(
 	if (rbufp->recv_length != sizeof(parsetime_t))
 	{
 		ERR(ERR_BADIO)
-			msyslog(LOG_ERR,"PARSE receiver #%d: local_receive: bad size (got %d expected %d)",
-				CLK_UNIT(parse->peer), rbufp->recv_length, (int)sizeof(parsetime_t));
+			msyslog(LOG_ERR,"PARSE receiver #%d: local_receive: bad size (got %zd expected %zd)",
+				CLK_UNIT(parse->peer), rbufp->recv_length, sizeof(parsetime_t));
 		parse_event(parse, CEVNT_BADREPLY);
 		return;
 	}

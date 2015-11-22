@@ -554,7 +554,7 @@ static void tsync_poll(int unit, struct peer *peer)
     tmscl = ntohl(tmscl);
 
     // Extract leap second info from ioctl payload and perform byte swapping
-    for (i = 0; i < (sizeof(leapSec) / 4); i++)
+    for (i = 0; i < (int)(sizeof(leapSec) / 4); i++)
     {
         for (j = 0; j < 4; j++)
         {

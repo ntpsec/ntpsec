@@ -416,7 +416,7 @@ irig_receive(
 	 */
 	double	sample;		/* codec sample */
 	uint8_t	*dpt;		/* buffer pointer */
-	int	bufcnt;		/* buffer counter */
+	size_t	bufcnt;		/* buffer counter */
 	l_fp	ltemp;		/* l_fp temp */
 
 	peer = rbufp->recv_peer;

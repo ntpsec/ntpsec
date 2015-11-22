@@ -562,7 +562,7 @@ jjy_receive ( struct recvbuf *rbufp )
 	 */
 	if ( up->linediscipline == LDISC_RAW ) {
 
-		pp->lencode  = refclock_gtraw ( rbufp, pp->a_lastcode, BMAX-1, &tRecvTimestamp ) ;
+		pp->lencode  = (int)refclock_gtraw ( rbufp, pp->a_lastcode, BMAX-1, &tRecvTimestamp ) ;
 		/* 3rd argument can be BMAX, but the coverity scan tool claim "Memory - corruptions  (OVERRUN)" */
 		/* "a_lastcode" is defined as "char a_lastcode[BMAX]" in the ntp_refclock.h */
 		/* To avoid its claim, pass the value BMAX-1. */
@@ -2655,7 +2655,8 @@ jjy_start_telephone ( int unit, struct peer *peer, struct jjyunit *up )
 {
 
 	char	sLog [ 80 ], sFirstThreeDigits [ 4 ] ;
-	int	i, iNumberOfDigitsOfPhoneNumber, iCommaCount, iCommaPosition ;
+	int	iNumberOfDigitsOfPhoneNumber, iCommaCount, iCommaPosition ;
+	size_t	i;
 	int	iFirstThreeDigitsCount ;
 
 	jjy_write_clockstats( peer, JJY_CLOCKSTATS_MARK_JJY, "Refclock: Telephone JJY" ) ;
@@ -2774,7 +2775,7 @@ jjy_receive_telephone ( struct recvbuf *rbufp )
 	struct	refclockproc *pp ;
 	struct	jjyunit      *up ;
 	char	*pBuf ;
-	int	iLen ;
+	size_t	iLen ;
 	short	iPreviousModemState ;
 
 	peer = rbufp->recv_peer ;
@@ -3882,10 +3883,10 @@ modem_receive ( struct recvbuf *rbufp )
 #ifdef DEBUG
 	if ( debug ) {
 		char	sResp [ 40 ] ;
-		int	iCopyLen ;
+		size_t	iCopyLen ;
 		iCopyLen = ( iLen <= sizeof(sResp)-1 ? iLen : sizeof(sResp)-1 ) ;
 		strlcpy( sResp, pBuf, sizeof(sResp) ) ;
-		printf ( "refclock_jjy.c : modem_receive : iLen=%d pBuf=[%s] iModemEvent=%d\n", iCopyLen, sResp, up->iModemEvent ) ;
+		printf ( "refclock_jjy.c : modem_receive : iLen=%zd pBuf=[%s] iModemEvent=%d\n", iCopyLen, sResp, up->iModemEvent ) ;
 	}
 #endif
 	modem_control ( peer, pp, up ) ;
