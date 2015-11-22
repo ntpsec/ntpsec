@@ -2692,7 +2692,7 @@ jjy_start_telephone ( int unit, struct peer *peer, struct jjyunit *up )
 	iNumberOfDigitsOfPhoneNumber = iCommaCount = iCommaPosition = iFirstThreeDigitsCount = 0 ;
 	for ( i = 0 ; i < strlen( sys_phone[0] ) ; i ++ ) {
 		if ( isdigit( *(sys_phone[0]+i) ) ) {
-			if ( iFirstThreeDigitsCount < sizeof(sFirstThreeDigits)-1 ) {
+		    if ( iFirstThreeDigitsCount < (int)sizeof(sFirstThreeDigits)-1 ) {
 				sFirstThreeDigits[iFirstThreeDigitsCount++] = *(sys_phone[0]+i) ;
 			}
 			iNumberOfDigitsOfPhoneNumber ++ ;
@@ -3884,7 +3884,7 @@ modem_receive ( struct recvbuf *rbufp )
 	if ( debug ) {
 		char	sResp [ 40 ] ;
 		size_t	iCopyLen ;
-		iCopyLen = ( iLen <= sizeof(sResp)-1 ? iLen : sizeof(sResp)-1 ) ;
+		iCopyLen = ( iLen <= (int)sizeof(sResp)-1 ? iLen : (int)sizeof(sResp)-1 ) ;
 		strlcpy( sResp, pBuf, sizeof(sResp) ) ;
 		printf ( "refclock_jjy.c : modem_receive : iLen=%zd pBuf=[%s] iModemEvent=%d\n", iCopyLen, sResp, up->iModemEvent ) ;
 	}

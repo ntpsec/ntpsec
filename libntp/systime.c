@@ -200,7 +200,7 @@ get_systime(
 {
 	struct timespec ts;	/* seconds and nanoseconds */
 	get_ostime(&ts);
-	normalize_time(ts, sys_fuzz > 0.0 ? ntp_random() : 0UL, now);
+	normalize_time(ts, sys_fuzz > 0.0 ? ntp_random() : 0, now);
 }
 
 void

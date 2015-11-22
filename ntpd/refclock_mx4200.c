@@ -1443,7 +1443,7 @@ mx4200_pps(
 	struct peer *peer
 	)
 {
-	int temp_serial;
+	u_int temp_serial;
 	struct refclockproc *pp;
 	struct mx4200unit *up;
 

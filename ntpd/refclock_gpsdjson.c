@@ -1191,7 +1191,7 @@ json_object_lookup(
 			tid = json_token_skip(ctx, tid); /* skip val */
 		} else if (strcmp(key, ctx->buf + ctx->tok[tid].start)) {
 			tid = json_token_skip(ctx, tid+1); /* skip key+val */
-		} else if (what < 0 || what == ctx->tok[tid+1].type) {
+		} else if (what < 0 || what == (int)ctx->tok[tid+1].type) {
 			return tid + 1;
 		} else {
 			break;

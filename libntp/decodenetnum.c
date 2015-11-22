@@ -98,7 +98,7 @@ decodenetnum(
 	   either NULL or pointing to the start of the port. Check
 	   whether the IP is short enough to possibly be valid and
 	   if so copy it into ip. */
-	if(ip_end - ip_start + 1 > sizeof ip) {
+	if(ip_end - ip_start + 1 > (int)sizeof(ip)) {
 		return false;
 	} else {
 		memcpy(ip, ip_start, ip_end - ip_start);

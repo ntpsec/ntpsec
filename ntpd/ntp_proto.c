@@ -3614,7 +3614,7 @@ fast_xmit(
 #ifdef DEBUG
 		if (debug)
 			printf(
-			    "transmit: at %ld %s->%s mode %d len %d\n",
+			    "transmit: at %ld %s->%s mode %d len %zd\n",
 			    current_time, stoa(&rbufp->dstadr->sin),
 			    stoa(&rbufp->recv_srcadr), xmode, sendlen);
 #endif
@@ -3671,7 +3671,7 @@ fast_xmit(
 #ifdef DEBUG
 	if (debug)
 		printf(
-		    "transmit: at %ld %s->%s mode %d keyid %08x len %d\n",
+		    "transmit: at %ld %s->%s mode %d keyid %08x len %zd\n",
 		    current_time, ntoa(&rbufp->dstadr->sin),
 		    ntoa(&rbufp->recv_srcadr), xmode, xkeyid, sendlen);
 #endif

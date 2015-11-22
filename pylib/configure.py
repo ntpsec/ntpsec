@@ -38,7 +38,7 @@ def cmd_configure(ctx):
 		ctx.define("DEBUG", 1)
 		ctx.env.BISONFLAGS += ["--debug"]
 
-	ctx.env.CFLAGS += ["-Wall"]	# Default CFLAGS.
+	ctx.env.CFLAGS += ["-Wall", "-Wextra"]	# Default CFLAGS.
 
 
 	# Check target platform.

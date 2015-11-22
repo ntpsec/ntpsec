@@ -708,7 +708,7 @@ populate_symb(
 	while (NULL != fgets(line, sizeof(line), yh))
 		if (2 == sscanf(line, "#define %s %d", name, &token)
 		    && 'T' == name[0] && '_' == name[1] && token >= 0
-		    && token < COUNTOF(symb)) {
+		    && token < (int)COUNTOF(symb)) {
 
 			symb[token] = estrdup(name);
 			if (strlen(name) > MAX_TOK_LEN) {
