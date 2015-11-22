@@ -404,7 +404,7 @@ void clear_globals(void)
 #endif /* !BUILD_AS_LIB */
 #endif /* NO_MAIN_ALLOWED */
 
-#define ALL_OPTIONS "46c:dD:inOpV"
+#define ALL_OPTIONS "46c:dD:inOpVw"
 static const struct option longoptions[] = {
     { "ipv4",		    0, 0, '4' },
     { "ipv6",		    0, 0, '6' },
@@ -416,6 +416,7 @@ static const struct option longoptions[] = {
     { "old-rv",             1, 0, 'O' },
     { "peers",              1, 0, 'p' },
     { "version",	    0, 0, 'V' },
+    { "wide",		    0, 0, 'w' },
     { NULL,                 0, 0, '\0'},
 };
 
@@ -540,6 +541,8 @@ ntpqmain(
 			opt_wide = true;
 			break;
 		    default :
+			/* chars not in table get converted to ? */
+			printf("Unknown command line switch ignored.\n");
 			break;
 		    } /*switch*/
 		}

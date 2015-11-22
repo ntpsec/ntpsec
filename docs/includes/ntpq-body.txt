@@ -4,7 +4,7 @@
 
 == Synopsis ==
 
-+{ntpq}+ [+-46dinp+] [+-c+ 'command'] ['host'] [...]
++{ntpq}+ [+-46dinpw+] [+-c+ 'command'] ['host'] [...]
 
 == Description ==
 
@@ -52,27 +52,38 @@ option other than +-i+ or +-n+ will cause the specified query (queries)
 to be sent to the indicated host(s) immediately. Otherwise, +{ntpq}+ will
 attempt to read interactive format commands from the standard input.
 
-+-4+::
++-4+, +--ipv4+::
   Force DNS resolution of following host names on the command line to
   the IPv4 namespace.
-+-6+::
++-6+, +--ipv6+::
   Force DNS resolution of following host names on the command line to
   the IPv6 namespace.
-+-c+::
++-c+ cmd, +--command+=cmd::
   The following argument is interpreted as an interactive format command
   and is added to the list of commands to be executed on the specified
   host(s). Multiple +-c+ options may be given.
-+-d+::
-  Turn on debugging mode.
-+-i+::
++-d+, +--debug+::
+  Increase debugging level by 1.
++-D+ num, +--set-debug-level+=num::
+  The debug level is set to the following numeric argument.
++-i+, +--interactive+::
   Force +{ntpq}+ to operate in interactive mode. Prompts will be written
   to the standard output and commands read from the standard input.
-+-n+::
-  Output all host addresses in dotted-quad numeric format rather than
++-n+, +--numeric+::
+  Output all host addresses in numeric format rather than
   converting to the canonical host names.
-+-p+::
++-O+, +--old-rv+::
+  Print an extra line when reading a single value with rv,
+  for example +ntpq -O -c "rv 0 frequency"+
++-p+, +--peers+::
   Print a list of the peers known to the server as well as a summary of
   their state. This is equivalent to the +peers+ interactive command.
++-V+, +--version+::
+  Print the version string and exit.
++-w+, +--wide+::
+  Wide mode: if the host name or IP Address doesn't fit, write the
+  full name/address and indent the next line so columns line up.
+  The default truncates the name or address.
 
 == Internal Commands ==
 
