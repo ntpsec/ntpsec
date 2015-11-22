@@ -47,7 +47,7 @@ const char *prompt = "ntpq> ";	/* prompt to ask him about */
  * libntpq clients such as ntpsnmpd, which are free to reset it as
  * desired.
  */
-int	old_rv = 1;
+bool	old_rv = true;
 
 
 /*
@@ -411,10 +411,10 @@ static const struct option longoptions[] = {
     { "command",	    1, 0, 'c' },
     { "debug",		    0, 0, 'd' },
     { "set-debug-level",    1, 0, 'D' },
-    { "interactive",        1, 0, 'i' },
-    { "numeric",            1, 0, 'n' },
-    { "old-rv",             1, 0, 'O' },
-    { "peers",              1, 0, 'p' },
+    { "interactive",        0, 0, 'i' },
+    { "numeric",            0, 0, 'n' },
+    { "old-rv",             0, 0, 'O' },
+    { "peers",              0, 0, 'p' },
     { "version",	    0, 0, 'V' },
     { "wide",		    0, 0, 'w' },
     { NULL,                 0, 0, '\0'},
