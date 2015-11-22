@@ -125,7 +125,7 @@ struct chost_tag {
 extern chost	chosts[];
 
 extern int	interactive;	/* are we prompting? */
-extern int	old_rv;		/* use old rv behavior? --old-rv */
+extern bool	old_rv;		/* use old rv behavior? --old-rv */
 extern u_int	assoc_cache_slots;/* count of allocated array entries */
 extern u_int	numassoc;	/* number of cached associations */
 extern u_int	numhosts;
