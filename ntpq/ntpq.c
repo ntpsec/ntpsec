@@ -450,7 +450,7 @@ ntpqmain(
 	)
 {
 	u_int ihost;
-	int icmd;
+	size_t icmd;
 	int msglen;
 
 	delay_time.l_ui = 0;
@@ -620,9 +620,10 @@ ntpqmain(
 		getcmds();
 	} else {
 		for (ihost = 0; ihost < numhosts; ihost++) {
+			int i;
 			if (openhost(chosts[ihost].name, chosts[ihost].fam))
-				for (icmd = 0; icmd < numcmds; icmd++)
-					docmd(ccmds[icmd]);
+				for (i = 0; i < numcmds; i++)
+					docmd(ccmds[i]);
 		}
 	}
 #ifdef SYS_WINNT

@@ -391,7 +391,7 @@ receive(
 	uint8_t	hisstratum;		/* packet stratum */
 	u_short	restrict_mask;		/* restrict bits */
 	int	has_mac;		/* length of MAC field */
-	int	authlen;		/* offset of MAC field */
+	size_t	authlen;		/* offset of MAC field */
 	int	is_authentic = 0;	/* cryptosum ok */
 	int	retcode = AM_NOMATCH;	/* match code */
 	keyid_t	skeyid = 0;		/* key IDs */
@@ -671,7 +671,7 @@ receive(
 #ifdef DEBUG
 		if (debug)
 			printf(
-			    "receive: at %ld %s<-%s mode %d len %d\n",
+			    "receive: at %ld %s<-%s mode %d len %zd\n",
 			    current_time, stoa(dstadr_sin),
 			    stoa(&rbufp->recv_srcadr), hismode,
 			    authlen);
@@ -682,7 +682,7 @@ receive(
 #ifdef DEBUG
 		if (debug)
 			printf(
-			    "receive: at %ld %s<-%s mode %d keyid %08x len %d auth %d\n",
+			    "receive: at %ld %s<-%s mode %d keyid %08x len %zd auth %d\n",
 			    current_time, stoa(dstadr_sin),
 			    stoa(&rbufp->recv_srcadr), hismode, skeyid,
 			    authlen + has_mac, is_authentic);
@@ -778,7 +778,7 @@ receive(
 			 * purposes is zero. Note the hash is saved for
 			 * use later in the autokey mambo.
 			 */
-			if (authlen > (int)LEN_PKT_NOMAC && pkeyid != 0) {
+			if (authlen > LEN_PKT_NOMAC && pkeyid != 0) {
 				session_key(&rbufp->recv_srcadr,
 				    dstadr_sin, skeyid, 0, 2);
 				tkeyid = session_key(
@@ -812,7 +812,7 @@ receive(
 #ifdef DEBUG
 		if (debug)
 			printf(
-			    "receive: at %ld %s<-%s mode %d keyid %08x len %d auth %d\n",
+			    "receive: at %ld %s<-%s mode %d keyid %08x len %zd auth %d\n",
 			    current_time, stoa(dstadr_sin),
 			    stoa(&rbufp->recv_srcadr), hismode, skeyid,
 			    authlen + has_mac, is_authentic);
@@ -1147,7 +1147,7 @@ receive(
 			if (debug) {
 				 printf(
 					 "receive: at %ld refusing to mobilize passive association"
-					 " with unknown peer %s mode %d keyid %08x len %d auth %d\n",
+					 " with unknown peer %s mode %d keyid %08x len %zd auth %d\n",
 					 current_time, stoa(&rbufp->recv_srcadr), hismode, skeyid,
 					 authlen + has_mac, is_authentic);
 			}
@@ -3491,7 +3491,7 @@ fast_xmit(
 	struct pkt xpkt;	/* transmit packet structure */
 	struct pkt *rpkt;	/* receive packet structure */
 	l_fp	xmt_tx, xmt_ty;
-	int	sendlen;
+	size_t	sendlen;
 #ifdef ENABLE_AUTOKEY
 	uint32_t	temp32;
 #endif

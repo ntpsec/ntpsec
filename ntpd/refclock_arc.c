@@ -845,7 +845,8 @@ arc_receive(
 	struct refclockproc *pp;
 	struct peer *peer;
 	char c;
-	int i, wday, month, flags, status;
+	int wday, month, flags, status;
+	size_t i;
 	int arc_last_offset;
 	static int quality_average = 0;
 	static int quality_sum = 0;
@@ -913,7 +914,7 @@ arc_receive(
 		timestamp = rbufp->recv_time;
 #ifdef DEBUG
 		if(debug) { /* Show \r as `R', other non-printing char as `?'. */
-			printf("arc: stamp -->%c<-- (%d chars rcvd)\n",
+			printf("arc: stamp -->%c<-- (%zd chars rcvd)\n",
 			       ((c == '\r') ? 'R' : (isgraph((unsigned char)c) ? c : '?')),
 			       rbufp->recv_length);
 		}
@@ -944,7 +945,7 @@ arc_receive(
 #ifdef DEBUG
 		if(debug > 1) {
 			printf(
-				"arc: %s%d char(s) rcvd, the last for lastcode[%d]; -%sms offset applied.\n",
+				"arc: %s%zd char(s) rcvd, the last for lastcode[%d]; -%sms offset applied.\n",
 				((rbufp->recv_length > 1) ? "*** " : ""),
 				rbufp->recv_length,
 				arc_last_offset,
