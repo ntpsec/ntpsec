@@ -94,6 +94,6 @@ def build(ctx):
 			"%s/tests/ntpdig/" % srcnode,
 			"%s/tests/common/" % srcnode
 		],
-		use			= "unity ntp isc M PTHREAD",
+		use			= "unity ntp isc M PTHREAD RT",
         source      = libntp_source,
 	)
