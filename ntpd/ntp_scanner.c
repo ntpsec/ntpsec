@@ -743,7 +743,7 @@ yylex(void)
 			}
 
 			i++;
-			if (i >= COUNTOF(yytext))
+			if (i >= (int)COUNTOF(yytext))
 				goto lex_too_long;
 		}
 		/* Pick up all of the string inside between " marks, to
@@ -757,7 +757,7 @@ yylex(void)
 			while (EOF != (ch = lex_getch(lex_stack)) &&
 			       ch != '"' && ch != '\n') {
 				yytext[i++] = (char)ch;
-				if (i >= COUNTOF(yytext))
+				if (i >= (int)COUNTOF(yytext))
 					goto lex_too_long;
 			}
 			/*

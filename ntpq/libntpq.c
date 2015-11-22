@@ -308,7 +308,7 @@ int  ntpq_read_associations ( u_short resultbuf[], int max_entries )
 
     if (ntpq_dogetassoc()) {       
         
-        if(numassoc < max_entries)
+        if((int)numassoc < max_entries)
           max_entries = numassoc;
 
         for (i=0;i<max_entries;i++)
@@ -373,7 +373,7 @@ int  ntpq_read_associations ( u_short resultbuf[], int max_entries )
  
 int ntpq_get_assoc_number ( associd_t associd )
 {
-	int i;
+	u_int i;
 
 	for (i=0;i<numassoc;i++) {
 		if (assoc_cache[i].assid == associd)
@@ -712,7 +712,7 @@ ntpq_get_assoc_clocktype(
 	char		dstadr[NI_MAXHOST];
 	char		resultbuf[NTPQ_BUFLEN];
 
-	if (assoc_index < 0 || assoc_index >= numassoc)
+	if (assoc_index < 0 || assoc_index >= (int)numassoc)
 		return -1;
 
 	associd = assoc_cache[assoc_index].assid;
