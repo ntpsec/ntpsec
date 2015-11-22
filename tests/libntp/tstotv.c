@@ -3,19 +3,13 @@
 #include "unity.h"
 #include "unity_fixture.h"
 
-#include <sys/time.h>
+#include "timevalops.h"
 
 TEST_GROUP(tstotv);
 
 TEST_SETUP(tstotv) {}
 
 TEST_TEAR_DOWN(tstotv) {}
-
-#include "libntptest.h"
-
-#include "ntp_fp.h"
-#include "timevalops.h"
-//#include "ntpd.h"
 
 u_long      current_time;
 
@@ -34,7 +28,7 @@ static const u_long HALF = 2147483648UL;
 
 
 TEST(tstotv, Seconds) {
-	const l_fp input = {50, 0}; // 50.0 s
+	const l_fp input = {{50}, 0}; // 50.0 s
 	const struct timeval expected = {50, 0};
 	struct timeval actual;
 
@@ -44,7 +38,7 @@ TEST(tstotv, Seconds) {
 }
 
 TEST(tstotv, MicrosecondsExact) {
-	const l_fp input = {50, HALF}; // 10.5 s
+	const l_fp input = {{50}, HALF}; // 10.5 s
 	const struct timeval expected = {50, 500000};
 	struct timeval actual;
 
@@ -55,7 +49,7 @@ TEST(tstotv, MicrosecondsExact) {
 }
 
 TEST(tstotv, MicrosecondsRounding) {
-	const l_fp input = {50, 3865471UL}; // Should round to 50.0009
+	const l_fp input = {{50}, 3865471UL}; // Should round to 50.0009
 	const struct timeval expected = {50, 900};
 	struct timeval actual;
 
