@@ -292,6 +292,8 @@ acts_shutdown(
 	struct actsunit *up;
 	struct refclockproc *pp;
 
+	UNUSED_ARG(unit);
+
 	/*
 	 * Warning: do this only when a call is not in progress.
 	 */
@@ -643,6 +645,8 @@ acts_poll(
 	struct actsunit *up;
 	struct refclockproc *pp;
 
+	UNUSED_ARG(unit);
+
 	/*
 	 * This routine is called at every system poll. All it does is
 	 * set flag1 under certain conditions. The real work is done by
@@ -696,6 +700,8 @@ acts_timer(
 {
 	struct actsunit *up;
 	struct refclockproc *pp;
+
+	UNUSED_ARG(unit);
 
 	/*
 	 * This routine implments a timeout which runs for a programmed

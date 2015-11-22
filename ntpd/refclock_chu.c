@@ -590,6 +590,8 @@ chu_shutdown(
 	struct chuunit *up;
 	struct refclockproc *pp;
 
+	UNUSED_ARG(unit);
+
 	pp = peer->procptr;
 	up = pp->unitptr;
 	if (up == NULL)
@@ -1307,6 +1309,8 @@ chu_poll(
 {
 	struct refclockproc *pp;
 
+	UNUSED_ARG(unit);
+
 	pp = peer->procptr;
 	pp->polls++;
 }
@@ -1327,6 +1331,8 @@ chu_second(
 	char	synchar, qual, leapchar;
 	int	minset, i;
 	double	dtemp;
+
+	UNUSED_ARG(unit);
 
 	pp = peer->procptr;
 	up = pp->unitptr;

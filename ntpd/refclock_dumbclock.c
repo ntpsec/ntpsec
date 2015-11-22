@@ -171,6 +171,8 @@ dumbclock_shutdown(
 	register struct dumbclock_unit *up;
 	struct refclockproc *pp;
 
+	UNUSED_ARG(unit);
+
 	pp = peer->procptr;
 	up = pp->unitptr;
 	if (-1 != pp->io.fd)

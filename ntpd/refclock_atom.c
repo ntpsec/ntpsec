@@ -165,6 +165,8 @@ atom_shutdown(
 	struct refclockproc *pp;
 	struct ppsunit *up;
 
+	UNUSED_ARG(unit);
+
 	pp = peer->procptr;
 	up = pp->unitptr;
 	if (up->fddev > 0)
@@ -184,6 +186,8 @@ atom_timer(
 	struct ppsunit *up;
 	struct refclockproc *pp;
 	char	tbuf[80];
+
+	UNUSED_ARG(unit);
 
 	pp = peer->procptr;
 	up = pp->unitptr;
@@ -214,6 +218,8 @@ atom_poll(
 	)
 {
 	struct refclockproc *pp;
+
+	UNUSED_ARG(unit);
 
 	/*
 	 * Don't wiggle the clock until some other driver has numbered

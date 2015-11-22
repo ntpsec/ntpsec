@@ -190,6 +190,8 @@ cvt_trimtsip(
 #define mb(_X_) (buffer[2+(_X_)]) /* shortcut for buffer access */
 	register uint8_t cmd;
 
+	UNUSED_ARG(format);
+
 	clock_time->flags = 0;
 
 	if (!t) {

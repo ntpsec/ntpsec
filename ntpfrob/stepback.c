@@ -25,6 +25,8 @@ struct timeval adjustment, result;
 static void
 timeout(int sig)
 {
+	(void)sig;
+
 	if (adjtime(&adjustment, &result))
 	    printf("adjtime call failed\n");
 	if (result.tv_sec != 0 || result.tv_usec != 0) {

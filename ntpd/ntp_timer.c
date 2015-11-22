@@ -115,6 +115,8 @@ set_timer_or_die(
 	const char *	setfunc;
 	int		rc;
 
+	UNUSED_ARG(ptimer);
+
 #ifdef HAVE_TIMER_CREATE
 	setfunc = "timer_settime";
 	rc = timer_settime(timer_id, 0, &itimer, NULL);
@@ -419,6 +421,8 @@ alarming(
 # ifdef DEBUG
 	const char *msg = "alarming: initializing TRUE\n";
 # endif
+
+	UNUSED_ARG(sig);
 
 	if (!initializing) {
 		if (alarm_flag) {

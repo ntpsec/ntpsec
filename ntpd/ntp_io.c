@@ -1679,6 +1679,10 @@ check_flags6(
 	close(fd);
 	if ((ifr6.ifr_ifru.ifru_flags6 & flags6) != 0)
 		return true;
+#else
+	UNUSED_ARG(psau);
+	UNUSED_ARG(name);
+	UNUSED_ARG(flags6);
 #endif	/* USE_IPV6_SUPPORT && SIOCGIFAFLAG_IN6 */
 	return false;
 }
@@ -1692,6 +1696,8 @@ is_anycast(
 #ifdef IN6_IFF_ANYCAST
 	return check_flags6(psau, name, IN6_IFF_ANYCAST);
 #else
+	UNUSED_ARG(psau);
+	UNUSED_ARG(name);
 	return false;
 #endif
 }
@@ -3320,6 +3326,10 @@ fetch_timestamp(
 	l_fp			dts;
 #endif
 
+#ifndef DEBUG_TIMING
+	UNUSED_ARG(rb);
+#endif
+
 	cmsghdr = CMSG_FIRSTHDR(msghdr);
 	while (cmsghdr != NULL) {
 		switch (cmsghdr->cmsg_type)
@@ -4361,6 +4371,8 @@ kill_asyncio(
 	int	startfd
 	)
 {
+	UNUSED_ARG(startfd);
+
 	BLOCKIO();
 
 	/*

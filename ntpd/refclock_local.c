@@ -107,6 +107,8 @@ local_start(
 {
 	struct refclockproc *pp;
 
+	UNUSED_ARG(unit);
+
 	pp = peer->procptr;
 
 	/*
@@ -146,6 +148,8 @@ local_poll(
 	struct timex ntv;
 #endif /* HAVE_KERNEL_PLL ENABLE_LOCKCLOCK */
 	struct refclockproc *pp;
+
+	UNUSED_ARG(unit);
 
 	/*
 	 * Do no evil unless the house is dark or lit with our own lamp.

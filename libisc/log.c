@@ -1352,6 +1352,9 @@ isc_log_doit(isc_log_t *lctx, isc_logcategory_t *category,
 	isc_logchannellist_t *category_channels;
 	isc_result_t result;
 
+	UNUSED_ARG(msgset);
+	UNUSED_ARG(msg);
+
 	REQUIRE(lctx == NULL || VALID_CONTEXT(lctx));
 	REQUIRE(category != NULL);
 	REQUIRE(module != NULL);

@@ -227,6 +227,8 @@ hpgps_shutdown(
 	register struct hpgpsunit *up;
 	struct refclockproc *pp;
 
+	UNUSED_ARG(unit);
+
 	pp = peer->procptr;
 	up = pp->unitptr;
 	if (-1 != pp->io.fd)
@@ -600,6 +602,8 @@ hpgps_poll(
 {
 	register struct hpgpsunit *up;
 	struct refclockproc *pp;
+
+	UNUSED_ARG(unit);
 
 	/*
 	 * Time to poll the clock. The HP 58503A responds to a

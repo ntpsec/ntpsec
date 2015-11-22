@@ -1372,6 +1372,7 @@ pll_trap(
 	int arg
 	)
 {
+	UNUSED_ARG(arg);
 	pll_control = false;
 	siglongjmp(env, 1);
 }

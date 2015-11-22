@@ -75,6 +75,9 @@ cvt_wharton_400a(
 {
 	int	i;
 
+	UNUSED_ARG(format);
+	UNUSED_ARG(local);
+
 	/* The given `size' includes a terminating null-character. */
 	if (size != 15 || buffer[0] != STX || buffer[14] != ETX
 	    || buffer[13] < '0' || buffer[13] > ('0' + 0xf))

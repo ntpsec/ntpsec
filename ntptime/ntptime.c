@@ -414,6 +414,7 @@ pll_trap(
 	int arg
 	)
 {
+    UNUSED_ARG(arg);
 	pll_control--;
 	siglongjmp(env, 1);
 }

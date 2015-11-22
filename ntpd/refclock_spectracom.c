@@ -217,6 +217,8 @@ spectracom_shutdown(
 	struct refclockproc *	pp;
 	struct spectracomunit *	up;
 
+	UNUSED_ARG(unit);
+
 	pp = peer->procptr;
 	up = pp->unitptr;
 	if (-1 != pp->io.fd)
@@ -437,6 +439,8 @@ spectracom_timer(
 	struct peer *peer
 	)
 {
+	UNUSED_ARG(unit);
+
 	register struct spectracomunit *up;
 	struct refclockproc *pp;
 	char	pollchar;	/* character sent to clock */
@@ -486,6 +490,8 @@ spectracom_poll(
 {
 	register struct spectracomunit *up;
 	struct refclockproc *pp;
+
+	UNUSED_ARG(unit);
 
 	/*
 	 * Sweep up the samples received since the last poll. If none
@@ -550,6 +556,10 @@ spectracom_control(
 	register struct spectracomunit *up;
 	struct refclockproc *pp;
 	
+	UNUSED_ARG(unit);
+	UNUSED_ARG(in_st);
+	UNUSED_ARG(out_st);
+
 	pp = peer->procptr;
 	up = pp->unitptr;
 

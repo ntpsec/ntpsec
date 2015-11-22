@@ -295,6 +295,8 @@ true_shutdown(
 	register struct true_unit *up;
 	struct refclockproc *pp;
 
+	UNUSED_ARG(unit);
+
 	pp = peer->procptr;
 	up = pp->unitptr;
 	if (pp->io.fd != -1)
@@ -836,6 +838,8 @@ true_poll(
 {
 	struct true_unit *up;
 	struct refclockproc *pp;
+
+	UNUSED_ARG(unit);
 
 	/*
 	 * You don't need to poll this clock.  It puts out timecodes

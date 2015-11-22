@@ -121,6 +121,9 @@ cvt_sel240x( unsigned char *buffer,
 {
 	unsigned long rc = CVT_NONE;
 
+	UNUSED_ARG(size);
+	UNUSED_ARG(local);
+
 	if( Strok(buffer, format->fixed_string) )
 	{
 		struct tm ptime;

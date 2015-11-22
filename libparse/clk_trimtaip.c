@@ -68,6 +68,9 @@ cvt_trimtaip(
 	long   recv_csum;
 	int	 i;
 
+	UNUSED_ARG(size);
+	UNUSED_ARG(local);
+
 	if (!Strok(buffer, format->fixed_string)) return CVT_NONE;
 #define	OFFS(x) format->field_offsets[(x)].offset
 #define	STOI(x, y) \

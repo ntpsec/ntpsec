@@ -209,6 +209,8 @@ arb_shutdown(
 	register struct arbunit *up;
 	struct refclockproc *pp;
 
+	UNUSED_ARG(unit);
+
 	pp = peer->procptr;
 	up = pp->unitptr;
 	if (-1 != pp->io.fd)
@@ -433,6 +435,8 @@ arb_poll(
 {
 	register struct arbunit *up;
 	struct refclockproc *pp;
+
+	UNUSED_ARG(unit);
 
 	/*
 	 * Time to poll the clock. The Arbiter clock responds to a "B5"

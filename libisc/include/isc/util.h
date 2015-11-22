@@ -189,7 +189,7 @@
 #define RUNTIME_CHECK(cond)		ISC_ERROR_RUNTIMECHECK(cond)
 
 /* hack to ignore GCC Unused Result */
-#define ISC_IGNORE(r) do{if(r);}while(0)
+#define ISC_IGNORE(r) do{if(r){}}while(0)
 
 /*%
  * Time

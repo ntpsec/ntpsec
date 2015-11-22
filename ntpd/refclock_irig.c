@@ -385,6 +385,8 @@ irig_shutdown(
 	struct refclockproc *pp;
 	struct irigunit *up;
 
+	UNUSED_ARG(unit);
+
 	pp = peer->procptr;
 	up = pp->unitptr;
 	if (-1 != pp->io.fd)
@@ -749,6 +751,8 @@ irig_baud(
 	double	dtemp;
 	l_fp	ltemp;
 
+	UNUSED_ARG(bits);
+
         pp = peer->procptr;
 	up = pp->unitptr;
 
@@ -978,6 +982,8 @@ irig_poll(
 	)
 {
 	struct refclockproc *pp;
+
+	UNUSED_ARG(unit);
 
 	pp = peer->procptr;
 

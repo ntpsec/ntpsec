@@ -166,6 +166,7 @@ hopfpci_shutdown(
 	struct peer *peer
 	)
 {
+	UNUSED_ARG(unit);
 
 #ifndef SYS_WINNT
 	close(fd);

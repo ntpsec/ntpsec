@@ -3017,6 +3017,8 @@ config_mdnstries(
 #if defined(HAVE_DNS_SD_H) && defined(ENABLE_MDNS_REGISTRATION)
 	extern int mdnstries;
 	mdnstries = ptree->mdnstries;
+#else
+	UNUSED_ARG(ptree);
 #endif  /* ENABLE_MDNS_REGISTRATION */
 }
 
@@ -4015,7 +4017,9 @@ unpeer_name_resolved(
 	u_short		af;
 	const char *	fam_spec;
 
+	(void)gai_errno;
 	(void)context;
+	(void)service;
 	(void)hints;
 	DPRINTF(1, ("unpeer_name_resolved(%s) rescode %d\n", name, rescode));
 
@@ -4829,6 +4833,9 @@ getnetnum(
 	enum gnn_type a_type	/* ignored */
 	)
 {
+	UNUSED_ARG(complain);
+	UNUSED_ARG(a_type);
+
 	NTP_REQUIRE(AF_UNSPEC == AF(addr) ||
 		    AF_INET == AF(addr) ||
 		    AF_INET6 == AF(addr));
@@ -4859,6 +4866,11 @@ ntp_rlimit(
 	)
 {
 	struct rlimit	rl;
+
+#ifndef DEBUG
+	UNUSED_ARG(rl_scale);
+	UNUSED_ARG(rl_sstr);
+#endif
 
 	switch (rl_what) {
 #ifdef RLIMIT_MEMLOCK

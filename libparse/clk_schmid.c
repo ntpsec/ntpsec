@@ -79,6 +79,9 @@ cvt_schmid(
 	   void          *local
 	)
 {
+	UNUSED_ARG(format);
+	UNUSED_ARG(local);
+
 	if ((size != 11) || (buffer[10] != (unsigned char)'\375'))
 	{
 		return CVT_NONE;
@@ -170,6 +173,8 @@ inp_schmid(
 	  )
 {
 	unsigned int rtc;
+
+	UNUSED_ARG(tstamp);
 
 	parseprintf(DD_PARSE, ("inp_schmid(0x%lx, 0x%x, ...)\n", (long)parseio, ch));
 
