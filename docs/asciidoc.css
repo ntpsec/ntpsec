@@ -135,7 +135,7 @@ ul, ol, li > p {
 /* ul > li > * { color: black; } */
 
 .monospaced, code, pre {
-  /* font-family: "Courier New", Courier, monospace; */
+  font-family: "Courier New", Courier, monospace;
   font-size: inherit;
   /* color: navy; */
   color: #006600;
