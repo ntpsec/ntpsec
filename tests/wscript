@@ -31,6 +31,7 @@ def build(ctx):
 		"ntpdig/packetHandling.c",
 	] + common_source
 
+
 	# ntpdig/
 	ctx.ntp_test(
 		features    = "c cprogram bld_include src_include libisc_include test",
@@ -41,20 +42,50 @@ def build(ctx):
 			"%s/tests/common/" % srcnode,
 			"%s/ntpdig/" % srcnode
 		],
-		use			= "unity ntpdig_obj ntp isc M",
+		use			= "unity ntpdig_obj ntp",
         source      = ntpdig_source,
 		test_args	= ["%s/tests/ntpdig/data/" % srcnode, "%s/tests/ntpdig/" % bldnode]
 	)
 
 
-"""
 	# libntp/
 	libntp_source = [
-		"libntp/ssl_init.c",
-	]
+#		"libntp/a_md5encrypt.c",
+#		"libntp/authkeys.c",
+#		"libntp/calendar.c",
+#		"libntp/caljulian.c",
+#		"libntp/caltontp.c",
+#		"libntp/calyearstart.c",
+#		"libntp/clocktime.c",
+#		"libntp/decodenetnum.c",
+#		"libntp/hextolfp.c",
+#		"libntp/humandate.c",
+#		"libntp/lfpfunc.c",
+#		"libntp/lfptostr.c",
+#		"libntp/modetoa.c",
+#		"libntp/msyslog.c",
+#		"libntp/netof.c",
+#		"libntp/numtoa.c",
+#		"libntp/numtohost.c",
+#		"libntp/octtoint.c",
+#		"libntp/prettydate.c",
+#		"libntp/recvbuff.c",
+#		"libntp/refnumtoa.c",
+#		"libntp/sfptostr.c",
+#		"libntp/socktoa.c",
+#		"libntp/ssl_init.c",
+#		"libntp/statestr.c",
+#		"libntp/strtolfp.c",
+#		"libntp/timespecops.c",
+#		"libntp/timevalops.c",
+		"libntp/tstotv.c",
+#		"libntp/tvtots.c",
+#		"libntp/vi64ops.c",
+#		"libntp/ymd2yd.c"
+	] + common_source
 
 	ctx.ntp_test(
-		features    = "c cprogram bld_include src_include libisc_include",
+		features    = "c cprogram bld_include src_include libisc_include test",
         target      = "test_libntp",
 		defines		= ["TEST_LIBNTP_SSL"],
 		includes	= [
@@ -63,8 +94,6 @@ def build(ctx):
 			"%s/tests/ntpdig/" % srcnode,
 			"%s/tests/common/" % srcnode
 		],
-		use			= "unity ntp isc M test_common",
+		use			= "unity ntp isc M PTHREAD",
         source      = libntp_source,
 	)
-
-"""
