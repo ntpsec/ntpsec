@@ -40,15 +40,11 @@ def options(ctx):
 	grp = ctx.add_option_group("NTP build options")
 	grp.add_option('--enable-debug', action='store_true', default=False, help="Enable debugging code")
 	grp.add_option('--enable-debug-gdb', action='store_true', default=False, help="Enable GDB debugging symbols")
-	grp.add_option('--enable-doc', action='store_true', default=False, help="Build NTP documentation")
-	grp.add_option('--enable-doc-only', action='store_true', default=False, help="Only build NTP documentation")
-	grp.add_option('--enable-a2x-xmllint', action='store_true', default=False, help="Build NTP documentation with a2x XML lint")
 	grp.add_option('--enable-crypto', action='store_true', default=False, help="Enable OpenSSL.")
 	grp.add_option('--disable-droproot', action='store_true', default=False, help="Disable dropping root.")
 	grp.add_option('--disable-dns-lookup', action='store_true', default=False, help="Disable DNS lookups.")
 	grp.add_option('--disable-dns-retry', action='store_true', default=False, help="Disable DNS lookups.")
 	grp.add_option('--disable-mdns-registration', action='store_true', default=False, help="Disable DNS lookups.")
-	grp.add_option('--disable-manpage', action='store_true', default=False, help="Disable Manpage building.")
 
 
 	grp = ctx.add_option_group("NTP features")
@@ -69,6 +65,12 @@ def options(ctx):
 	grp.add_option('--fortify-flags', type='string', action='store', help="Fortify flags.")
 	grp.add_option('--check', action='store_true', default=False, help="Run tests")
 
+	grp = ctx.add_option_group("NTP documentation options")
+	grp.add_option('--enable-doc', action='store_true', default=False, help="Build NTP documentation")
+	grp.add_option('--enable-doc-only', action='store_true', default=False, help="Only build NTP documentation")
+	grp.add_option('--enable-a2x-xmllint', action='store_true', default=False, help="Build NTP documentation with a2x XML lint")
+	grp.add_option('--disable-manpage', action='store_true', default=False, help="Disable Manpage building.")
+	grp.add_option('--path-doc', type='string', action='store', default=None, help="Force doc install directory.")
 
 
 def configure(ctx):
