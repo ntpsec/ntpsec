@@ -180,6 +180,7 @@ static sigjmp_buf env;		/* environment var. for pll_trap() */
 #endif /* SIGSYS */
 #endif /* HAVE_KERNEL_PLL */
 
+#ifdef HAVE_KERNEL_PLL
 static void
 sync_status(const char *what, int ostatus, int nstatus)
 {
@@ -189,6 +190,7 @@ sync_status(const char *what, int ostatus, int nstatus)
 	snprintf(tbuf, sizeof(tbuf), "%s status: %s -> %s", what, obuf, nbuf);
 	report_event(EVNT_KERN, NULL, tbuf);
 }
+#endif /* HAVE_KERNEL_PLL */
 
 /*
  * file_name - return pointer to non-relative portion of this C file pathname
@@ -440,7 +442,9 @@ local_clock(
 {
 	int	rval;		/* return code */
 	int	osys_poll;	/* old system poll */
+#ifdef HAVE_KERNEL_PLL
 	int	ntp_adj_ret;	/* returned by ntp_adjtime */
+#endif /* HAVE_KERNEL_PLL */
 	double	mu;		/* interval since last update */
 	double	clock_frequency; /* clock frequency */
 	double	dtemp, etemp;	/* double temps */
