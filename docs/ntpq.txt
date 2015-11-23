@@ -9,6 +9,12 @@ A typical NTP monitoring packet
 
 |==============================
 
+== More Help ==
+
+include::includes/manual.txt[]
+
+'''''
+
 include::includes/ntpq-body.txt[]
 
 '''''
