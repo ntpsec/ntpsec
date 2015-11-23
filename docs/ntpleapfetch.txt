@@ -10,12 +10,6 @@ Occasionally, the leap-second needs an update.
 
 |==============================
 
-== More Help ==
-
-include::includes/manual.txt[]
-
-'''''
-
 include::includes/ntpleapfetch-body.txt[]
 
 '''''

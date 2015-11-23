@@ -10,10 +10,6 @@ All in a row.
 |==============================
 
 
-== Related Links ==
-
-include::includes/manual.txt[]
-
 == Table of Contents ==
 
 * link:#caveat[Caveat Emptor]
