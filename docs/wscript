@@ -23,3 +23,12 @@ def build(ctx):
 			target		= [ctx.path.find_node(dir).get_bld().make_node(x.name) for x in files]
 		)
 
+
+	# Copy extra files
+	ctx(
+		features	= "subst",
+		is_copy		= True,
+		source		= ["asciidoc.js"],
+		target		= ["asciidoc.js"]
+	)
+
