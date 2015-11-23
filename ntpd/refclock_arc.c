@@ -258,8 +258,6 @@ TO-DO LIST
     for long-term errors in the clock value (time2 defaults to 0 so the
     correction would be disabled by default).
 
-  * Consider trying to use the tty_clk/ppsclock support.
-
   * Possibly use average or maximum signal quality reported during
     resync, rather than just the last one, which may be atypical.
 
