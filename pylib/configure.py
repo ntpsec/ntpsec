@@ -88,6 +88,7 @@ def cmd_configure(ctx):
 		ctx.env.ASCIIDOC_FLAGS = ["-f", "%s/docs/asciidoc.conf" % ctx.srcnode.abspath()]
 		ctx.env.ENABLE_DOC = True
 		ctx.env.ENABLE_DOC_ONLY = ctx.options.enable_doc_only
+		ctx.env.PATH_DOC = ctx.options.path_doc
 
 	# XXX: conditionally build this with --disable-man?  Should it build without docs enabled?
 	ctx.env.A2X_FLAGS = ["--format", "manpage", "--asciidoc-opts=--conf-file=%s/docs/asciidoc.conf" % ctx.srcnode.abspath()]

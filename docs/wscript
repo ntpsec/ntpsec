@@ -37,7 +37,10 @@ def build(ctx):
 
 
 	# Install docs
-	install_prefix = "%s/share/ntpsec/docs/" % ctx.env.PREFIX
+	if ctx.env.PATH_DOC:
+		install_prefix = ctx.env.PATH_DOC
+	else:
+		install_prefix = "%s/share/ntpsec/docs/" % ctx.env.PREFIX
 
 	ctx.install_files(install_prefix, extra + [x.change_ext(".html").name for x in doc_source])
 	ctx.install_files(install_prefix, image_source, relative_trick=True)
