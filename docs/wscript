@@ -9,26 +9,35 @@ def build(ctx):
 		source	= doc_source
 	)
 
+	image_source = []
 	ctx.path.get_bld().make_node("hints").mkdir() # create 'hints' directory
 	for dir in ["icons", "pic"]:
 
 		files = ctx.path.ant_glob('%s/*' % dir) # Find images
 		ctx.path.get_bld().make_node(dir).mkdir() # create 'pic' directory
+		image_source += files
 
-		# Copy images
-		ctx(
-			features	= "subst",
-			is_copy		= True,
-			source		= files,
-			target		= [ctx.path.find_node(dir).get_bld().make_node(x.name) for x in files]
-		)
+	# Copy images
+	ctx(
+		features	= "subst",
+		is_copy		= True,
+		source		= image_source,
+		target		= [ctx.path.find_node(dir).get_bld().make_node(x.name) for x in image_source]
+	)
 
+	extra = ["asciidoc.js"]
 
 	# Copy extra files
 	ctx(
 		features	= "subst",
 		is_copy		= True,
-		source		= ["asciidoc.js"],
-		target		= ["asciidoc.js"]
+		source		= extra,
+		target		= extra
 	)
 
+
+	# Install docs
+	install_prefix = "%s/share/ntpsec/docs/" % ctx.env.PREFIX
+
+	ctx.install_files(install_prefix, extra + [x.change_ext(".html").name for x in doc_source])
+	ctx.install_files(install_prefix, image_source, relative_trick=True)
