@@ -9,6 +9,8 @@ We make house calls and bring our own bugs.
 
 |==============================
 
+== More Help ==
+
 include::includes/install.txt[]
 
 '''''
