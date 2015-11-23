@@ -1064,12 +1064,12 @@ set_freq(
 	)
 {
 	const char *	loop_desc;
-	int ntp_adj_ret;
 
 	drift_comp = freq;
 	loop_desc = "ntpd";
 #ifdef HAVE_KERNEL_PLL
 	if (pll_control) {
+		int ntp_adj_ret;
 		ZERO(ntv);
 		ntv.modes = MOD_FREQUENCY;
 		if (kern_enable) {
