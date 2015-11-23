@@ -41,6 +41,7 @@ def options(ctx):
 	grp.add_option('--enable-debug', action='store_true', default=False, help="Enable debugging code")
 	grp.add_option('--enable-debug-gdb', action='store_true', default=False, help="Enable GDB debugging symbols")
 	grp.add_option('--enable-doc', action='store_true', default=False, help="Build NTP documentation")
+	grp.add_option('--enable-doc-only', action='store_true', default=False, help="Only build NTP documentation")
 	grp.add_option('--enable-a2x-xmllint', action='store_true', default=False, help="Build NTP documentation with a2x XML lint")
 	grp.add_option('--enable-crypto', action='store_true', default=False, help="Enable OpenSSL.")
 	grp.add_option('--disable-droproot', action='store_true', default=False, help="Disable dropping root.")
@@ -121,6 +122,9 @@ def build(ctx):
 
 	if ctx.env.ENABLE_DOC:
 		ctx.recurse("docs")
+
+	if ctx.env.ENABLE_DOC_ONLY:
+		return
 
 	ctx.recurse("libisc")
 	if ctx.env.REFCLOCK_PARSE: # Only required by the parse refclock
