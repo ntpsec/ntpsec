@@ -26,26 +26,13 @@
 
 #include "mx4200.h"
 
-#ifdef HAVE_SYS_PPSCLOCK_H
-# include <sys/ppsclock.h>
-#endif
-
-struct ppsclockev {
-	struct timespec tv;
-	u_int serial;
-};
-
 #ifdef HAVE_PPSAPI
 # include "ppsapi_timepps.h"
 #endif /* HAVE_PPSAPI */
 
 /*
  * This driver supports the Magnavox Model MX 4200 GPS Receiver
- * adapted to precision timing applications.  It requires the
- * ppsclock line discipline or streams module described in the
- * Line Disciplines and Streams Drivers page. It also requires a
- * gadget box and 1-PPS level converter, such as described in the
- * Pulse-per-second (PPS) Signal Interfacing page.
+ * adapted to precision timing applications.  It requires the PPS API.
  *
  * It's likely that other compatible Magnavox receivers such as the
  * MX 4200D, MX 9212, MX 9012R, MX 9112 will be supported by this code.
@@ -86,7 +73,6 @@ struct mx4200unit {
 	u_int  pollcnt;			/* poll message counter */
 	u_int  polled;			/* Hand in a time sample? */
 	u_int  lastserial;		/* last pps serial number */
-	struct ppsclockev ppsev;	/* PPS control structure */
 	double avg_lat;			/* average latitude */
 	double avg_lon;			/* average longitude */
 	double avg_alt;			/* average height */

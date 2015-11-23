@@ -37,23 +37,12 @@
  * and "df" commands does not matter. The radio should select UTC
  * timescale using the "ts utc" command.
  *
- * There are two modes of operation for this driver. The first with
- * default configuration is used with stock kernels and serial-line
+ * This driver can be used with stock kernels and serial-line
  * drivers and works with almost any machine. In this mode the driver
  * assumes the radio captures a timestamp upon receipt of the "*" that
  * begins the driver query. Accuracies in this mode are in the order of
  * a millisecond or two and the receiver can be connected to only one
  * host.
- *
- * The second mode of operation can be used for SunOS kernels that have
- * been modified with the ppsclock streams module included in this
- * distribution. The mode is enabled if flag3 of the fudge configuration
- * command has been set to 1. In this mode a precise timestamp is
- * available using a gadget box and 1-pps signal from the receiver. This
- * improves the accuracy to the order of a few tens of microseconds. In
- * addition, the serial output and 1-pps signal can be bussed to more
- * than one hosts, but only one of them should be connected to the
- * radio input data line. 
  */
 
 /*

@@ -17,9 +17,6 @@
 #include <ctype.h>
 
 #include <termios.h>
-#ifdef HAVE_SYS_PPSCLOCK_H
-# include <sys/ppsclock.h>
-#endif
 
 /*
  * This driver provides support for the TOD serial port of a Zyfer GPStarplus.

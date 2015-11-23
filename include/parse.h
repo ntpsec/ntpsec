@@ -112,7 +112,7 @@
 #define PARSE_LEAP_DELETE   CLK_FLAG4  /* use flag4 to force leap deletion - only necessary when earth slows down */
 
 #define PARSE_FIXED_FMT     0x10  /* fixed format */
-#define PARSE_PPSCLOCK      0x20  /* try to get PPS time stamp via ppsclock ioctl */
+#define PARSE_PPSAPI        0x20  /* try to get PPS time stamp via API */
 
 /*
  * size of buffers

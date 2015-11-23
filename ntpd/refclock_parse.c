@@ -84,9 +84,6 @@
 # include "refclock_atom.h"
 #endif
 
-#ifdef HAVE_SYS_PPSCLOCK_H
-#  include <sys/ppsclock.h>
-#endif
 #ifdef HAVE_LINUX_SERIAL_H
 #  include <linux/serial.h>
 #endif
@@ -1776,7 +1773,7 @@ local_input(
 			if (!PARSE_PPS(parse->parseio.parse_dtime.parse_state))
 			{
 #ifdef HAVE_PPSAPI
-				if (parse->flags & PARSE_PPSCLOCK)
+				if (parse->flags & PARSE_PPSAPI)
 				{
 					struct timespec pps_timeout;
 					pps_info_t      pps_info;
@@ -2295,7 +2292,7 @@ parse_shutdown(
 	}
 
 #ifdef HAVE_PPSAPI
-	if (parse->flags & PARSE_PPSCLOCK)
+	if (parse->flags & PARSE_PPSAPI)
 	{
 		(void)time_pps_destroy(parse->atom.handle);
 	}
@@ -2390,7 +2387,7 @@ parse_ppsapi(
 	int cap, mode_ppsoffset;
 	const char *cp;
 
-	parse->flags &= (uint8_t) (~PARSE_PPSCLOCK);
+	parse->flags &= (uint8_t) (~PARSE_PPSAPI);
 
 	/*
 	 * collect PPSAPI offset capability - should move into generic handling
@@ -2453,7 +2450,7 @@ parse_ppsapi(
 		return false;
 	}
 
-	parse->flags |= PARSE_PPSCLOCK;
+	parse->flags |= PARSE_PPSAPI;
 	return true;
 }
 #else
@@ -2646,7 +2643,7 @@ parse_start(
 				msyslog(LOG_NOTICE,
 					"refclock_parse: optional PPS processing not available");
 			} else {
-				parse->flags    |= PARSE_PPSCLOCK;
+				parse->flags    |= PARSE_PPSAPI;
 #ifdef ASYNC_PPS_CD_NEG
 				NLOG(NLOG_CLOCKINFO)
 				  msyslog(LOG_INFO,
