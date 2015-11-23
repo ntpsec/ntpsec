@@ -31,6 +31,7 @@ void tickadj(const iomode mode, const int newtick)
 	UNUSED_ARG(mode);
 
 #ifndef HAVE_ADJTIMEX
+	UNUSED_ARG(newtick);
 	fputs("ntpfrob: \n", stderr);
 	exit(1);
 #else

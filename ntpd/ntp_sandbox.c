@@ -54,6 +54,9 @@ bool sandbox(const bool droproot,
 	     const char *chrootdir,
 	     bool want_dynamic_interface_tracking)
 {
+#ifndef HAVE_LINUX_CAPABILITY
+	UNUSED_ARG(want_dynamic_interface_tracking);
+#endif /* HAVE_LINUX_CAPABILITY */
 	bool nonroot = false;
 # ifdef ENABLE_DROPROOT
 	if (droproot) {
