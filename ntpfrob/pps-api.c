@@ -62,6 +62,7 @@ static int err(int out, const char *legend)
 void ppscheck(char *device)
 {
 #ifndef HAVE_SYS_TIMEPPS_H
+	(void)device;
  	fputs("ntpfrob: PPS is not available.\n", stderr);
 	exit(1);
 #else
