@@ -85,7 +85,7 @@ def cmd_configure(ctx):
 	if ctx.options.enable_doc and not ctx.env.BIN_ASCIIDOC:
 		ctx.fatal("asciidoc is required in order to build documentation")
 	elif ctx.options.enable_doc:
-		ctx.env.ASCIIDOC_FLAGS = ["-f", "%s/docs/asciidoc.conf" % ctx.srcnode.abspath(), "-a", "stylesdir=%s/docs/" % ctx.srcnode.abspath()]
+		ctx.env.ASCIIDOC_FLAGS = ["-f", "%s/docs/asciidoc.conf" % ctx.srcnode.abspath()]
 		ctx.env.ENABLE_DOC = True
 
 	# XXX: conditionally build this with --disable-man?  Should it build without docs enabled?
