@@ -1,7 +1,5 @@
-extern "C" {
 #include "unity.h"
 #include "unity_fixture.h"
-}
 
 TEST_GROUP(sfptostr);
 
@@ -16,14 +14,9 @@ TEST_TEAR_DOWN(sfptostr) {}
 
 #include "libntptest.h"
 
-extern "C" {
 #include "ntp_fp.h"
-};
 
-class sfptostr : public libntptest {
-protected:
-	static const int SFP_MAX_PRECISION = 6;
-};
+static const int SFP_MAX_PRECISION = 6;
 
 TEST(sfptostr, PositiveInteger) {
 	s_fp test = 300 << 16; // exact 300.000000
