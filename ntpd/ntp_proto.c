@@ -355,7 +355,7 @@ transmit(
 				if (peer_ntpdate == 0) {
 					msyslog(LOG_NOTICE,
 					    "ntpd: no servers found");
-					if (!msyslog_term)
+					if (!termlogit)
 						printf(
 						    "ntpd: no servers found\n");
 					exit (0);
