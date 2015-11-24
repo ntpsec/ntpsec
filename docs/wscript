@@ -25,7 +25,7 @@ def build(ctx):
 		target		= [ctx.path.find_node(dir).get_bld().make_node(x.name) for x in image_source]
 	)
 
-	extra = ["asciidoc.js"]
+	extra = ["asciidoc.js", "asciidoc.css"]
 
 	# Copy extra files
 	ctx(
