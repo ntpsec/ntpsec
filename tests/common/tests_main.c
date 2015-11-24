@@ -56,7 +56,7 @@ static void RunAllTests(void)
 //	RUN_TEST_GROUP(prettydate);
 //	RUN_TEST_GROUP(recvbuff);
 //	RUN_TEST_GROUP(refnumtoa);
-//	RUN_TEST_GROUP(sfptostr);
+	RUN_TEST_GROUP(sfptostr);
 //	RUN_TEST_GROUP(socktoa);
 //	RUN_TEST_GROUP(ssl_init);
 //	RUN_TEST_GROUP(statestr);
