@@ -37,26 +37,26 @@ def options(ctx):
 	def callback_flags(option, opt, value, parser):
 		OPT_STORE.setdefault(opt, []).append(value)
 
-	grp = ctx.add_option_group("NTP build options")
+	grp = ctx.add_option_group("NTP configure options")
 	grp.add_option('--enable-debug', action='store_true', default=False, help="Enable debugging code")
 	grp.add_option('--enable-debug-gdb', action='store_true', default=False, help="Enable GDB debugging symbols")
 	grp.add_option('--enable-crypto', action='store_true', default=False, help="Enable OpenSSL.")
 	grp.add_option('--disable-droproot', action='store_true', default=False, help="Disable dropping root.")
 	grp.add_option('--disable-dns-lookup', action='store_true', default=False, help="Disable DNS lookups.")
-	grp.add_option('--disable-dns-retry', action='store_true', default=False, help="Disable DNS lookups.")
-	grp.add_option('--disable-mdns-registration', action='store_true', default=False, help="Disable DNS lookups.")
+	grp.add_option('--disable-dns-retry', action='store_true', default=False, help="Disable retrying DNS lookups.")
+	grp.add_option('--disable-mdns-registration', action='store_true', default=False, help="Disable MDNS registration.")
 
 
-	grp = ctx.add_option_group("NTP features")
+	grp = ctx.add_option_group("NTP configure features")
 	grp.add_option('--enable-leap-smear', action='store_true', default=False, help="Enable Leap Smearing.")
 	grp.add_option('--enable-mssntp', action='store_true', default=False, help="Enable Samba MSS NTP support.")
 	grp.add_option('--enable-lockclock', action='store_true', default=False, help="Enable NIST lockclock scheme.")
 
-	grp = ctx.add_option_group("Refclock options")
+	grp = ctx.add_option_group("Refclock configure options")
 	grp.add_option('--refclock', dest='refclocks', help="Comma-separated list of Refclock IDs to build (or \"all\")", type='string')
 	grp.add_option('--list', action='store_true', default=False, help="List available Refclocks")
 
-	grp = ctx.add_option_group("NTP developer options")
+	grp = ctx.add_option_group("NTP developer configure options")
 	grp.add_option('--enable-saveconfig', action='store_true', help="Enable configuration saving on exit.")
 	grp.add_option('--build-version-tag', type='string', help="Append a tag to the version string.")
 	grp.add_option('--cflags', type='string', action="callback", callback=callback_flags, help="Users should use CFLAGS in their environment.")
@@ -65,7 +65,7 @@ def options(ctx):
 	grp.add_option('--fortify-flags', type='string', action='store', help="Fortify flags.")
 	grp.add_option('--check', action='store_true', default=False, help="Run tests")
 
-	grp = ctx.add_option_group("NTP documentation options")
+	grp = ctx.add_option_group("NTP documentation configure options")
 	grp.add_option('--enable-doc', action='store_true', default=False, help="Build NTP documentation")
 	grp.add_option('--enable-doc-only', action='store_true', default=False, help="Only build NTP documentation")
 	grp.add_option('--enable-a2x-xmllint', action='store_true', default=False, help="Build NTP documentation with a2x XML lint")
