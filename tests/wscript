@@ -80,7 +80,7 @@ def build(ctx):
 #		"libntp/timevalops.c",
 		"libntp/tstotv.c",
 		"libntp/tvtots.c",
-#		"libntp/vi64ops.c",
+		"libntp/vi64ops.c",
 #		"libntp/ymd2yd.c"
 	] + common_source
 
