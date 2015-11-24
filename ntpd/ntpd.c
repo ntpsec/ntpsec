@@ -583,7 +583,7 @@ ntpdmain(
 		change_logfile(logfilename, false);
 	} else {
 		if (nofork)
-			msyslog_term = true;
+			termlogit = true;
 		if (saveconfigquit || dumpopts)
 			syslogit = false;
 	}
@@ -618,7 +618,7 @@ ntpdmain(
 
 	uid = getuid();
 	if (uid && !saveconfigquit && !dumpopts) {
-		msyslog_term = true;
+		termlogit = true;
 		msyslog(LOG_ERR,
 			"must be run as root, not uid %ld", (long)uid);
 		exit(1);

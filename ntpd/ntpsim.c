@@ -120,7 +120,7 @@ ntpsim(
 
 	/* Initialize ntp modules */
 	initializing = true;
-	msyslog_term = true;
+	termlogit = true;
 	init_sim_io();
 	init_auth();
 	init_util();
