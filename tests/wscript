@@ -75,7 +75,7 @@ def build(ctx):
 #		"libntp/socktoa.c",
 #		"libntp/ssl_init.c",
 #		"libntp/statestr.c",
-#		"libntp/strtolfp.c",
+		"libntp/strtolfp.c",
 #		"libntp/timespecops.c",
 #		"libntp/timevalops.c",
 		"libntp/tstotv.c",
