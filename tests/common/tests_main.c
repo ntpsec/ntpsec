@@ -1,6 +1,7 @@
-#include "tests_main.h"
 
-const char *progname = "ntpdigtest";
+
+#include "tests_main.h"
+const char *progname = "ntpsectest";
 
 static const char** args_argv;
 static int args_argc;
@@ -35,13 +36,13 @@ static void RunAllTests(void)
 	RUN_TEST_GROUP(packetHandling);
 #endif
 
-#ifdef TEST_LIBNTP_SSL
+#ifdef TEST_LIBNTP
 //	RUN_TEST_GROUP(a_md5encrypt);
 //	RUN_TEST_GROUP(authkeys);
 //	RUN_TEST_GROUP(calendar);
 //	RUN_TEST_GROUP(caljulian);
 //	RUN_TEST_GROUP(caltontp);
-//	RUN_TEST_GROUP(calyearstart);
+	RUN_TEST_GROUP(calyearstart);
 //	RUN_TEST_GROUP(clocktime);
 //	RUN_TEST_GROUP(decodenetnum);
 //	RUN_TEST_GROUP(hextolfp);
@@ -71,6 +72,7 @@ static void RunAllTests(void)
 #endif
 
 }
+
 
 int main(int argc, const char * argv[]) {
 

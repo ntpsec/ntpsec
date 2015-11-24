@@ -55,7 +55,7 @@ def build(ctx):
 #		"libntp/calendar.c",
 #		"libntp/caljulian.c",
 #		"libntp/caltontp.c",
-#		"libntp/calyearstart.c",
+		"libntp/calyearstart.c",
 #		"libntp/clocktime.c",
 #		"libntp/decodenetnum.c",
 #		"libntp/hextolfp.c",
@@ -82,12 +82,12 @@ def build(ctx):
 		"libntp/tvtots.c",
 		"libntp/vi64ops.c",
 #		"libntp/ymd2yd.c"
-	] + common_source
+	] + common_source + ["common/caltime.c"]
 
 	ctx.ntp_test(
 		features    = "c cprogram bld_include src_include libisc_include test",
         target      = "test_libntp",
-		defines		= ["TEST_LIBNTP_SSL"],
+		defines		= ["TEST_LIBNTP=1"],
 		includes	= [
 			"%s/tests/unity/" % srcnode,
 			"%s/tests/libntp/" % srcnode,
