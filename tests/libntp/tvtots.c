@@ -1,7 +1,14 @@
-extern "C" {
+#include "config.h"
+
 #include "unity.h"
 #include "unity_fixture.h"
-}
+
+#include "lfptest.h"
+#include "timevalops.h"
+
+// Required on Solaris for ldexp.
+#include <math.h>
+
 
 TEST_GROUP(tvtots);
 
@@ -9,26 +16,15 @@ TEST_SETUP(tvtots) {}
 
 TEST_TEAR_DOWN(tvtots) {}
 
-#include "lfptest.h"
-
-extern "C" {
-#include "timevalops.h"
-};
-
-// Required on Solaris for ldexp.
-#include <math.h>
-
-class tvtotsTest : public lfptest {
-};
 
 TEST(tvtots, Seconds) {
-	timeval input = {500, 0}; // 500.0 s
-	l_fp expected = {500, 0};
+	struct timeval input = {500, 0}; // 500.0 s
+	l_fp expected = {{500}, 0};
 	l_fp actual;
 
 	TVTOTS(&input, &actual);
 
-	TEST_ASSERT_TRUE(IsEqual(expected, actual));
+	TEST_ASSERT_TRUE(IsEqual(&expected, &actual));
 }
 
 TEST(tvtots, MicrosecondsRounded) {
@@ -37,18 +33,18 @@ TEST(tvtots, MicrosecondsRounded) {
 	 * HALF_PROMILLE_UP (which is 2147484) should be
 	 * the correct rounding. */
 
-	timeval input = {0, 500}; // 0.0005 exact
-	l_fp expected = {0, HALF_PROMILLE_UP};
+	struct timeval input = {0, 500}; // 0.0005 exact
+	l_fp expected = {{0}, HALF_PROMILLE_UP};
 	l_fp actual;
 
 	TVTOTS(&input, &actual);
-	TEST_ASSERT_TRUE(IsEqual(expected, actual));
+	TEST_ASSERT_TRUE(IsEqual(&expected, &actual));
 }
 
 TEST(tvtots, MicrosecondsExact) {
 	// 0.5 can be represented exact in both l_fp and timeval.
-	const timeval input = {10, 500000}; // 0.5 exact
-	const l_fp expected = {10, HALF}; // 0.5 exact
+	const struct timeval input = {10, 500000}; // 0.5 exact
+	const l_fp expected = {{10}, HALF}; // 0.5 exact
 	l_fp actual;
 
 	TVTOTS(&input, &actual);
