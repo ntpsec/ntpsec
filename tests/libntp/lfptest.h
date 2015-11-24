@@ -4,11 +4,11 @@
 #include "libntptest.h"
 #include "ntp_fp.h"
 
-static bool IsEqual(const l_fp &expected, const l_fp &actual) {
-	if (L_ISEQU(&expected, &actual)) {
+static bool IsEqual(const l_fp *expected, const l_fp *actual) {
+	if (L_ISEQU(expected, actual)) {
 		return true;
 	} else {
-		printf("Expected: %d (%d.%d) but was: %d (%d.%d)\n", lfptoa(&expected, FRACTION_PREC), expected.l_ui, expected.l_uf, lfptoa(&actual, FRACTION_PREC), actual.l_ui, actual.l_uf);
+		printf("Expected: %s (%d.%d) but was: %s (%d.%d)\n", lfptoa(expected, FRACTION_PREC), expected->l_ui, expected->l_uf, lfptoa(actual, FRACTION_PREC), actual->l_ui, actual->l_uf);
 		return false;
 	}
 }
