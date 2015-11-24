@@ -10,6 +10,7 @@ TEST_SETUP(calyearstart) {}
 TEST_TEAR_DOWN(calyearstart) {}
 
 #include "libntptest.h"
+#include "cal.h"
 
 class calyearstartTest : public libntptest {
 protected:

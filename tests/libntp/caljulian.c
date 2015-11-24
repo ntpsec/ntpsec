@@ -15,6 +15,7 @@ extern "C" {
 #include "ntp_calendar.h"
 }
 
+#include "cal.h"
 #include <string>
 #include <sstream>
 
