@@ -10,6 +10,7 @@ TEST_SETUP(clocktime) {}
 TEST_TEAR_DOWN(clocktime) {}
 
 #include "libntptest.h"
+#include "cal.h"
 
 // ---------------------------------------------------------------------
 // test fixture
