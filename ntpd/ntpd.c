@@ -580,6 +580,7 @@ ntpdmain(
 	/* honor -l/--logfile option to log to a file */
 	if (logfilename != NULL) {
 		syslogit = false;
+		termlogit = false;
 		change_logfile(logfilename, false);
 	} else {
 		if (nofork)

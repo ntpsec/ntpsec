@@ -25,6 +25,7 @@ const char* tests_main_args(int arg)
 static void RunAllTests(void)
 {
 	syslogit = false;
+	termlogit = false;
 
 #ifdef TEST_NTPDIG
 	RUN_TEST_GROUP(crypto);

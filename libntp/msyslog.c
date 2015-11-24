@@ -22,7 +22,7 @@
 #endif
 
 
-bool	syslogit = true;
+bool	syslogit = true;	/* log messages to syslog */
 bool	termlogit = false;	/* duplicate to stdout/err */
 bool	termlogit_pid = true;
 bool	msyslog_include_timestamp = true;
@@ -149,8 +149,6 @@ addto_syslog(
 	else
 		if (syslog_file != NULL)
 			log_to_file = true;
-		else
-			log_to_term = true;
 #if DEBUG
 	if (debug > 0)
 		log_to_term = true;

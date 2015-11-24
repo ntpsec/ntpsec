@@ -10,7 +10,7 @@
 
 #include "ntp_types.h"		/* uint32_t type */
 
-extern bool	syslogit;
+extern bool	syslogit;	/* log to syslogit */
 extern bool	termlogit;	/* duplicate to stdout/err */
 extern bool	termlogit_pid;
 extern bool	msyslog_include_timestamp;
