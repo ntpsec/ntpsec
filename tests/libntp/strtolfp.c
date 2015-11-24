@@ -1,7 +1,5 @@
-extern "C" {
 #include "unity.h"
 #include "unity_fixture.h"
-}
 
 TEST_GROUP(strtolfp);
 
@@ -13,21 +11,19 @@ TEST_TEAR_DOWN(strtolfp) {}
 
 /* This class tests both atolfp and mstolfp */
 
-class strtolfpTest : public lfptest {
-};
 
 TEST(strtolfp, PositiveInteger) {
 	const char *str = "500";
 	const char *str_ms = "500000";
 
-	l_fp expected = {500,0};
+	l_fp expected = {{500},0};
 	l_fp actual, actual_ms;
 
 	TEST_ASSERT_TRUE(atolfp(str, &actual));
 	TEST_ASSERT_TRUE(mstolfp(str_ms, &actual_ms));
 
-	TEST_ASSERT_TRUE(IsEqual(expected, actual));
-	TEST_ASSERT_TRUE(IsEqual(expected, actual_ms));
+	TEST_ASSERT_TRUE(IsEqual(&expected, &actual));
+	TEST_ASSERT_TRUE(IsEqual(&expected, &actual_ms));
 }
 
 TEST(strtolfp, NegativeInteger) {
@@ -43,22 +39,22 @@ TEST(strtolfp, NegativeInteger) {
 	TEST_ASSERT_TRUE(atolfp(str, &actual));
 	TEST_ASSERT_TRUE(mstolfp(str_ms, &actual_ms));
 
-	TEST_ASSERT_TRUE(IsEqual(expected, actual));
-	TEST_ASSERT_TRUE(IsEqual(expected, actual_ms));
+	TEST_ASSERT_TRUE(IsEqual(&expected, &actual));
+	TEST_ASSERT_TRUE(IsEqual(&expected, &actual_ms));
 }
 
 TEST(strtolfp, PositiveFraction) {
 	const char *str = "+500.5";
 	const char *str_ms = "500500.0";
 
-	l_fp expected = {500, HALF};
+	l_fp expected = {{500}, HALF};
 	l_fp actual, actual_ms;
 
 	TEST_ASSERT_TRUE(atolfp(str, &actual));
 	TEST_ASSERT_TRUE(mstolfp(str_ms, &actual_ms));
 
-	TEST_ASSERT_TRUE(IsEqual(expected, actual));
-	TEST_ASSERT_TRUE(IsEqual(expected, actual_ms));
+	TEST_ASSERT_TRUE(IsEqual(&expected, &actual));
+	TEST_ASSERT_TRUE(IsEqual(&expected, &actual_ms));
 }
 
 TEST(strtolfp, NegativeFraction) {
@@ -74,22 +70,22 @@ TEST(strtolfp, NegativeFraction) {
 	TEST_ASSERT_TRUE(atolfp(str, &actual));
 	TEST_ASSERT_TRUE(mstolfp(str_ms, &actual_ms));
 
-	TEST_ASSERT_TRUE(IsEqual(expected, actual));
-	TEST_ASSERT_TRUE(IsEqual(expected, actual_ms));
+	TEST_ASSERT_TRUE(IsEqual(&expected, &actual));
+	TEST_ASSERT_TRUE(IsEqual(&expected, &actual_ms));
 }
 
 TEST(strtolfp, PositiveMsFraction) {
 	const char *str = "300.00025";
 	const char *str_ms = "300000.25";
 
-	l_fp expected = {300, QUARTER_PROMILLE_APPRX};
+	l_fp expected = {{300}, QUARTER_PROMILLE_APPRX};
 	l_fp actual, actual_ms;
 
 	TEST_ASSERT_TRUE(atolfp(str, &actual));
 	TEST_ASSERT_TRUE(mstolfp(str_ms, &actual_ms));
 
-	TEST_ASSERT_TRUE(IsEqual(expected, actual));
-	TEST_ASSERT_TRUE(IsEqual(expected, actual_ms));
+	TEST_ASSERT_TRUE(IsEqual(&expected, &actual));
+	TEST_ASSERT_TRUE(IsEqual(&expected, &actual_ms));
 }
 
 TEST(strtolfp, NegativeMsFraction) {
@@ -105,8 +101,8 @@ TEST(strtolfp, NegativeMsFraction) {
 	TEST_ASSERT_TRUE(atolfp(str, &actual));
 	TEST_ASSERT_TRUE(mstolfp(str_ms, &actual_ms));
 
-	TEST_ASSERT_TRUE(IsEqual(expected, actual));
-	TEST_ASSERT_TRUE(IsEqual(expected, actual_ms));
+	TEST_ASSERT_TRUE(IsEqual(&expected, &actual));
+	TEST_ASSERT_TRUE(IsEqual(&expected, &actual_ms));
 }
 
 TEST(strtolfp, InvalidChars) {
