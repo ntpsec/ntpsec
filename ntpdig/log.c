@@ -11,7 +11,7 @@ ntpdig_init_logging(
 	const char *prog
 	)
 {
-	termlogit = true;
+	termlogit = false;
 	init_logging(prog, 0, false);
 	termlogit_pid = false;
 	msyslog_include_timestamp = false;

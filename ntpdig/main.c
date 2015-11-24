@@ -1375,12 +1375,17 @@ handle_pkt(
 		    	   leaptxt,
 		    	   time_adjusted ? "true" : "false");
 		}
-		else
-		    msyslog(LOG_INFO, "%s %+.*f%s %s s%d %s%s", ts_str,
+		else {
+		    char msgbuf[132];
+		    snprintf(msgbuf, sizeof(msgbuf),
+			    "%s %+.*f%s %s s%d %s%s", ts_str,
 			    digits, offset, disptxt,
 			    hostnameaddr(hostname, host), stratum,
 			    leaptxt,
 			    time_adjusted ? " [excess]" : "");
+		    printf("%s\n", msgbuf);
+		    msyslog(LOG_INFO, "%s", msgbuf);
+		}
 		free(ts_str);
 
 		if (p_NTPDIG_PRETEND_TIME)

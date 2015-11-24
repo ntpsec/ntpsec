@@ -110,7 +110,7 @@ void intercept_set_mode(intercept_mode newmode)
 {
     mode = newmode;
     if (newmode == replay)
-	syslogit = false;
+	termlogit = syslogit = false;
 }
 
 void intercept_argparse(int *argc, char ***argv)
