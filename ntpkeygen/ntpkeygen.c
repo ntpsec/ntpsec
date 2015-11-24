@@ -759,7 +759,7 @@ main(
 	 * stream. The parameter file is the server key file with the
 	 * private key obscured.
 	 */
-	if (pkey_gqkey != NULL && opt_id_key)) {
+	if (pkey_gqkey != NULL && opt_id_key) {
 		RSA	*rsa;
 
 		snprintf(filename, sizeof(filename),
