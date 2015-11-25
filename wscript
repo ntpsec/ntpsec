@@ -107,12 +107,12 @@ def test_print_log(ctx):
 		print("")
 
 		if retval or error:
-			pprint("RED", "****** ERROR ******")
+			pprint("RED", "****** ERROR ******\n")
 
 			print error or lines
 
 		if (not retval) and (not error):
-			pprint("GREEN", "****** LOG ******", lines)
+			pprint("GREEN", "****** LOG ******\n", lines)
 
 		print
 
