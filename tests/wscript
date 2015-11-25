@@ -66,7 +66,7 @@ def build(ctx):
 #		"libntp/msyslog.c",
 #		"libntp/netof.c",
 		"libntp/numtoa.c",
-#		"libntp/numtohost.c",
+		"libntp/numtohost.c",
 		"libntp/prettydate.c",
 #		"libntp/recvbuff.c",
 #		"libntp/refnumtoa.c",
