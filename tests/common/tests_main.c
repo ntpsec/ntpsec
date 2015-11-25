@@ -70,6 +70,10 @@ static void RunAllTests(void)
 	RUN_TEST_GROUP(ymd2yd);
 #endif
 
+#ifdef TEST_NTPD
+	RUN_TEST_GROUP(leapsec);
+#endif
+
 }
 
 
