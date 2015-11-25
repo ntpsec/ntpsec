@@ -19,7 +19,10 @@ TEST_TEAR_DOWN(ssl_init) {}
 #include "ntp.h"
 
 static const size_t TEST_MD5_DIGEST_LENGTH = 16;
-//static const size_t TEST_SHA1_DIGEST_LENGTH = 20;
+
+#ifdef HAVE_OPENSSL
+static const size_t TEST_SHA1_DIGEST_LENGTH = 20;
+#endif
 
 // keytype_from_text()
 TEST(ssl_init, MD5KeyTypeWithoutDigestLength) {
