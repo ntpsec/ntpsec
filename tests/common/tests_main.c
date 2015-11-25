@@ -38,7 +38,7 @@ static void RunAllTests(void)
 
 #ifdef TEST_LIBNTP
 	RUN_TEST_GROUP(a_md5encrypt);
-//	RUN_TEST_GROUP(authkeys);
+	RUN_TEST_GROUP(authkeys);
 //	RUN_TEST_GROUP(calendar);
 //	RUN_TEST_GROUP(caljulian);
 //	RUN_TEST_GROUP(caltontp);
