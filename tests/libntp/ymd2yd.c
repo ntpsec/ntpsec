@@ -1,7 +1,5 @@
-extern "C" {
 #include "unity.h"
 #include "unity_fixture.h"
-}
 
 TEST_GROUP(ymd2yd);
 
@@ -11,8 +9,6 @@ TEST_TEAR_DOWN(ymd2yd) {}
 
 #include "libntptest.h"
 
-class ymd2ydTest : public libntptest {
-};
 
 TEST(ymd2yd, NonLeapYearFebruary) {
 	TEST_ASSERT_EQUAL(31+20, ymd2yd(2010,2,20)); //2010-02-20
