@@ -51,7 +51,7 @@ def build(ctx):
 	# libntp/
 	libntp_source = [
 		"libntp/a_md5encrypt.c",
-#		"libntp/authkeys.c",
+		"libntp/authkeys.c",
 #		"libntp/calendar.c",
 #		"libntp/caljulian.c",
 #		"libntp/caltontp.c",
