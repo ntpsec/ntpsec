@@ -3367,6 +3367,9 @@ static void list_md_fn(const EVP_MD *m, const char *from, const char *to, void *
     u_int digest_len;
     uint8_t digest[EVP_MAX_MD_SIZE];
 
+    UNUSED_ARG(from);
+    UNUSED_ARG(to);
+
     if (!m)
         return; /* Ignore aliases */
 
