@@ -17,13 +17,14 @@ def build(ctx):
 		ctx.path.get_bld().make_node(dir).mkdir() # create 'pic' directory
 		image_source += files
 
-	# Copy images
-	ctx(
-		features	= "subst",
-		is_copy		= True,
-		source		= image_source,
-		target		= [ctx.path.find_node(dir).get_bld().make_node(x.name) for x in image_source]
-	)
+		# Copy images
+		ctx(
+			features	= "subst",
+			is_copy		= True,
+			source		= files,
+			target		= [ctx.path.find_node(dir).get_bld().make_node(x.name) for x in files]
+		)
+
 
 	extra = ["asciidoc.js", "asciidoc.css"]
 
