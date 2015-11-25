@@ -1,7 +1,5 @@
-extern "C" {
 #include "unity.h"
 #include "unity_fixture.h"
-}
 
 TEST_GROUP(statestr);
 
@@ -11,13 +9,9 @@ TEST_TEAR_DOWN(statestr) {}
 
 #include "libntptest.h"
 
-extern "C" {
 #include "ntp.h" // Needed for MAX_MAC_LEN used in ntp_control.h
 #include "ntp_control.h"
-};
 
-class statestrTest : public libntptest {
-};
 
 // eventstr()
 TEST(statestr, PeerRestart) {
