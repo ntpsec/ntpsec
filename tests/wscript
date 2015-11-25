@@ -68,7 +68,7 @@ def build(ctx):
 		"libntp/numtoa.c",
 		"libntp/numtohost.c",
 		"libntp/prettydate.c",
-#		"libntp/recvbuff.c",
+		"libntp/recvbuff.c",
 #		"libntp/refnumtoa.c",
 		"libntp/sfptostr.c",
 #		"libntp/socktoa.c",
