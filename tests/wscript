@@ -62,7 +62,7 @@ def build(ctx):
 #		"libntp/humandate.c",
 #		"libntp/lfpfunc.c",
 #		"libntp/lfptostr.c",
-#		"libntp/modetoa.c",
+		"libntp/modetoa.c",
 #		"libntp/msyslog.c",
 #		"libntp/netof.c",
 		"libntp/numtoa.c",
