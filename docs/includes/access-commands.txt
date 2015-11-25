@@ -84,9 +84,7 @@
     configured association does not exist. It also includes _pool_
     associations, so if you want to use servers from a +pool+ directive
     and also want to use +nopeer+ by default, you'll want a +restrict
-    source ...+ line as well that does
-  +not+;;
-    include the +nopeer+ directive.
+    source ...+ line as well that does 'not' include the +nopeer+ directive.
   +noserve+;;
     Deny all packets except {ntpqman} and queries.
   +notrap+;;
