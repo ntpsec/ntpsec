@@ -16,7 +16,8 @@ def build(ctx):
 			"%s/ntpkeygen/" % bldnode,
 			"%s/libsodium/include/" % srcnode
 		],
-		use		= "ntp opts isc sodium M RT LIBEVENT LIBEVENT_CORE LIBEVENT_PTHREADS PTHREAD CRYPTO",
+		# clock_gettime needs -lrt for glibc versions before 2.17
+		use		= "ntp opts isc sodium M RT PTHREAD CRYPTO",
 		install_path= "${PREFIX}/bin/"
 	)
 
