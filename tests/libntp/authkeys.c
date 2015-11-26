@@ -1,19 +1,8 @@
-extern "C" {
 #include "unity.h"
 #include "unity_fixture.h"
-}
-
-TEST_GROUP(authkeys);
-
-TEST_SETUP(authkeys) {}
-
-TEST_TEAR_DOWN(authkeys) {}
-
-/* This file contains test for both libntp/authkeys.c and libntp/authusekey.c */
 
 #include "libntptest.h"
 
-extern "C" {
 #ifdef HAVE_OPENSSL
 # include "openssl/err.h"
 # include "openssl/rand.h"
@@ -21,44 +10,50 @@ extern "C" {
 #endif
 #include "ntp.h"
 #include "ntp_stdlib.h"
-};
 
-class authkeysTest : public libntptest {
-protected:
-	static const int KEYTYPE = KEY_TYPE_MD5;
+TEST_GROUP(authkeys);
 
-	virtual void SetUp() {
-		/*
-		 * init_auth() is called by tests_main.cpp earlier.  It
-		 * does not initialize global variables like
-		 * authnumkeys, so let's reset them to zero here.
-		 */
-		authnumkeys = 0;
+TEST_SETUP(authkeys) {
+	/*
+	 * init_auth() is called by tests_main.cpp earlier.  It
+	 * does not initialize global variables like
+	 * authnumkeys, so let's reset them to zero here.
+	 */
+	authnumkeys = 0;
 
-		/*
-		 * Especially, empty the key cache!
-		 */
-		cache_keyid = 0;
-		cache_type = 0;
-		cache_flags = 0;
-		cache_secret = NULL;
-		cache_secretsize = 0;
-	}
+	/*
+	 * Especially, empty the key cache!
+	 */
+	cache_keyid = 0;
+	cache_type = 0;
+	cache_flags = 0;
+	cache_secret = NULL;
+	cache_secretsize = 0;
+}
 
-	void AddTrustedKey(keyid_t keyno) {
-		/*
-		 * We need to add a MD5-key in addition to setting the
-		 * trust, because authhavekey() requires type != 0.
-		 */
-		MD5auth_setkey(keyno, KEYTYPE, NULL, 0);
+TEST_TEAR_DOWN(authkeys) {}
 
-		authtrust(keyno, TRUE);
-	}
+/* This file contains test for both libntp/authkeys.c and libntp/authusekey.c */
 
-	void AddUntrustedKey(keyid_t keyno) {
-		authtrust(keyno, FALSE);
-	}
-};
+
+
+static const int KEYTYPE = KEY_TYPE_MD5;
+
+
+void AddTrustedKey(keyid_t keyno) {
+	/*
+	 * We need to add a MD5-key in addition to setting the
+	 * trust, because authhavekey() requires type != 0.
+	 */
+	MD5auth_setkey(keyno, KEYTYPE, NULL, 0);
+
+	authtrust(keyno, 1);
+}
+
+void AddUntrustedKey(keyid_t keyno) {
+	authtrust(keyno, 0);
+}
+
 
 TEST(authkeys, AddTrustedKeys) {
 	const keyid_t KEYNO1 = 5;
@@ -73,7 +68,7 @@ TEST(authkeys, AddTrustedKeys) {
 
 TEST(authkeys, AddUntrustedKey) {
 	const keyid_t KEYNO = 3;
-   
+
 	AddUntrustedKey(KEYNO);
 
 	TEST_ASSERT_FALSE(authistrusted(KEYNO));
