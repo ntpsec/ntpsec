@@ -190,7 +190,7 @@ Datum/Bancomm/Symmetricom bc600-series GPS/IRIG Receiver.
 | link:driver31.html[Type 31] | D     | Rockwell Jupiter GPS
 | link:driver33.html[Type 33] | D     | Dumb Clock
 | link:driver35.html[Type 35] | D     | Conrad Parallel Port Radio Clock
-| link:driver38.html[Type 38] | D     | hopf GPS/DCF77 6021/komp for Serial Line
+| link:driver38.html[Type 38] | -     | hopf GPS/DCF77 6021/komp for Serial Line
 | link:driver39.html[Type 39] | -     | hopf GPS/DCF77 6039 for PCI-Bus
 | link:driver40.html[Type 40] | T     | JJY Receivers
 | link:driver42.html[Type 42] | -     | Zyfer GPStarplus Receiver
