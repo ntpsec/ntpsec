@@ -1,26 +1,17 @@
-extern "C" {
 #include "unity.h"
 #include "unity_fixture.h"
-}
+#include "libntptest.h"
+#include "recvbuff.h"
+
 
 TEST_GROUP(recvbuff);
 
-TEST_SETUP(recvbuff) {}
+TEST_SETUP(recvbuff) {
+	init_recvbuff(RECV_INIT);
+}
 
 TEST_TEAR_DOWN(recvbuff) {}
 
-#include "libntptest.h"
-
-extern "C" {
-#include "recvbuff.h"
-};
-
-class recvbuffTest : public libntptest {
-protected:
-	virtual void SetUp() {
-		init_recvbuff(RECV_INIT);
-	}
-};
 
 TEST(recvbuff, Initialization) {
 	TEST_ASSERT_EQUAL(RECV_INIT, free_recvbuffs());
@@ -39,7 +30,6 @@ TEST(recvbuff, GetAndFree) {
 }
 
 TEST(recvbuff, GetAndFill) {
-	int initial = free_recvbuffs();
 	recvbuf_t* buf = get_free_recv_buffer();
 
 	add_full_recv_buffer(buf);
