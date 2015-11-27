@@ -19,10 +19,10 @@ static bool IsEqual(const struct timeval *expected, const struct timeval *actual
 		// Success
 		return true;
 	} else {
-		/* long cast is required on Darwin */
+		/* long cast is required on Darwin and/or FreeBSD 9.3 */
 		printf("Expected: %ld.%ld but was %ld.%ld\n",
-		       expected->tv_sec, (long)expected->tv_usec,
-		       actual->tv_sec, (long)actual->tv_usec);
+		       (long)expected->tv_sec, (long)expected->tv_usec,
+		       (long)actual->tv_sec, (long)actual->tv_usec);
 		return false;
 	}
 }
