@@ -13,9 +13,9 @@ char *
 dolfptoa(
 	uint32_t fpi,
 	uint32_t fpv,
-	int neg,
+	bool neg,
 	short ndec,
-	int msec
+	bool msec
 	)
 {
 	uint8_t *cp, *cpend, *cpdec;
@@ -143,7 +143,7 @@ mfptoa(
 	short	ndec
 	)
 {
-	int	isneg;
+	bool	isneg;
 
 	isneg = M_ISNEG(fpi);
 	if (isneg) {
@@ -161,7 +161,7 @@ mfptoms(
 	short	ndec
 	)
 {
-	int	isneg;
+	bool	isneg;
 
 	isneg = M_ISNEG(fpi);
 	if (isneg) {

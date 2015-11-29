@@ -335,8 +335,8 @@ typedef uint32_t u_fp;
 /*
  * Prototypes
  */
-extern	char *	dofptoa		(u_fp, int, short, int);
-extern	char *	dolfptoa	(uint32_t, uint32_t, int, short, int);
+extern	char *	dofptoa		(u_fp, bool, short, bool);
+extern	char *	dolfptoa	(uint32_t, uint32_t, bool, short, bool);
 
 extern	bool	atolfp		(const char *, l_fp *);
 extern	char *	fptoa		(s_fp, short);
@@ -368,8 +368,8 @@ extern	struct tm * ntp2unix_tm (uint32_t ntp, int local);
 #define sptoa(addr)		sockporttoa(addr)
 #define stohost(addr)		socktohost(addr)
 
-#define	ufptoa(fpv, ndec)	dofptoa((fpv), 0, (ndec), 0)
-#define	ufptoms(fpv, ndec)	dofptoa((fpv), 0, (ndec), 1)
+#define	ufptoa(fpv, ndec)	dofptoa((fpv), false, (ndec), false)
+#define	ufptoms(fpv, ndec)	dofptoa((fpv), false, (ndec), true)
 #define	ulfptoa(fpv, ndec)	dolfptoa((fpv)->l_ui, (fpv)->l_uf, 0, (ndec), 0)
 #define	ulfptoms(fpv, ndec)	dolfptoa((fpv)->l_ui, (fpv)->l_uf, 0, (ndec), 1)
 #define	umfptoa(fpi, fpf, ndec) dolfptoa((fpi), (fpf), 0, (ndec), 0)

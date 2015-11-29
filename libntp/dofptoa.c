@@ -12,9 +12,9 @@
 char *
 dofptoa(
 	u_fp fpv,
-	int neg,
+	bool neg,
 	short ndec,
-	int msec
+	bool msec
 	)
 {
 	register uint8_t *cp, *cpend;
@@ -126,16 +126,16 @@ fptoa(
 	)
 {
 	u_fp	plusfp;
-	int	neg;
+	bool	isneg;
 
-	neg = (fpv < 0);
-	if (neg) {
+	isneg = (fpv < 0);
+	if (isneg) {
 		plusfp = (u_fp)(-fpv);
 	} else {
 		plusfp = (u_fp)fpv;
 	}
 
-	return dofptoa(plusfp, neg, ndec, false);
+	return dofptoa(plusfp, isneg, ndec, false);
 }
 
 
@@ -146,14 +146,14 @@ fptoms(
 	)
 {
 	u_fp	plusfp;
-	int	neg;
+	bool	isneg;
 
-	neg = (fpv < 0);
-	if (neg) {
+	isneg = (fpv < 0);
+	if (isneg) {
 		plusfp = (u_fp)(-fpv);
 	} else {
 		plusfp = (u_fp)fpv;
 	}
 
-	return dofptoa(plusfp, neg, ndec, true);
+	return dofptoa(plusfp, isneg, ndec, true);
 }
