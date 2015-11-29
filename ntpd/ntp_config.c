@@ -1891,7 +1891,7 @@ config_auth(
 
 	/* Keys Command */
 	if (ptree->auth.keys)
-		getauthkeys(ptree->auth.keys);
+		intercept_getauthkeys(ptree->auth.keys);
 
 	/* Control Key Command */
 	if (ptree->auth.control_key)
