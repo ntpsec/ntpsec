@@ -354,4 +354,33 @@ intercept_getauthkeys(
     /* FIXME: replay logic goes here */
 }
 
+#if !defined(SIM) && defined(SIGDIE1)
+/*
+ * finish - exit gracefully
+ */
+void intercept_finish(const int sig)
+{
+    if (mode == capture)
+	printf("finish %d\n", 0);
+
+    if (mode != replay) {
+	const char *sig_desc;
+
+	sig_desc = NULL;
+	sig_desc = strsignal(sig);
+	if (sig_desc == NULL)
+		sig_desc = "";
+	msyslog(LOG_NOTICE, "%s exiting on signal %d (%s)", progname,
+		sig, sig_desc);
+	/* See Bug 2513 and Bug 2522 re the unlink of PIDFILE */
+# if defined(HAVE_DNS_SD_H) && defined(ENABLE_MDNS_REGISTRATION)
+	if (mdns != NULL)
+		DNSServiceRefDeallocate(mdns);
+# endif
+	peer_cleanup();
+	exit(0);
+    }
+}
+#endif	/* !SIM && SIGDIE1 */
+
 /* end */
