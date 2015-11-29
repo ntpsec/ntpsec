@@ -802,7 +802,7 @@ ntpdmain(
 	        }
 		break;
 	    case 'k':
-		getauthkeys(ntp_optarg);
+		intercept_getauthkeys(ntp_optarg);
 		break;
 	    case 'M':
 # ifdef SYS_WINNT

@@ -39,5 +39,6 @@ int intercept_kernel_pll_adjtime(struct timex *);
 #endif
 extern bool intercept_leapsec_load_file(const char * fname, struct stat * sb,
 					bool force, bool logall);
+void intercept_getauthkeys(const char *);
 
 /* end */

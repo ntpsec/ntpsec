@@ -28,7 +28,7 @@ following kinds:
 
 11. Packets outgoing to NTP daemons.  (TODO)
 
-12. Read of authkey file  (TODO)
+12. Read of authkey file
 
 13. getaddrinfo() calls (TODO)
 
@@ -330,3 +330,28 @@ void intercept_sendpkt(const char *legend,
 	fputs("\n", stdout);
     }
 }
+
+void
+intercept_getauthkeys(
+	const char  * fname)
+{
+    if (mode != replay)
+	getauthkeys(fname);
+
+    if (mode == capture) {
+	FILE *fp = fopen(fname, "r");
+	if (fp != NULL) {
+	    int c;
+
+	    fputs("startauthkeys\n", stdout);
+	    while ((c = fgetc(fp)) != EOF)
+		putchar(c);
+	    fclose(fp);
+	    fputs("endauthkeys\n", stdout);
+	}
+    }
+
+    /* FIXME: replay logic goes here */
+}
+
+/* end */
