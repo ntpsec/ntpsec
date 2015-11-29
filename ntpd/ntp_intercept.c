@@ -24,9 +24,9 @@ following kinds:
 
 9. Read of the system leapsecond file.
 
-10. Packets incoming from NTP daemons.  (TODO)
+10. Packets incoming from NTP peers and others.  (TODO)
 
-11. Packets outgoing to NTP daemons.  (TODO)
+11. Packets outgoing to NTP peers and others.
 
 12. Read of authkey file
 
@@ -86,6 +86,8 @@ no mismatches.
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <libgen.h>
+#include <sys/socket.h>
+#include <netdb.h>
 
 #include "ntpd.h"
 #include "ntp_io.h"
@@ -325,10 +327,33 @@ void intercept_sendpkt(const char *legend,
 	sendpkt(dest, ep, ttl, pkt, len);
 
     if (mode != none) {
-	printf("event sendpkt \"%s\" ...", legend);
-	/* FIXME: dump the destination and the guts of the packet */
-	fputs("\n", stdout);
+	char host[BUFSIZ], serv[BUFSIZ];
+	/* sanity check: serv should always be "ntp" */
+	int status = getnameinfo(&dest->sa, SOCKLEN(dest),
+				 host, sizeof(host),
+				 serv, sizeof(serv),
+				 NI_NUMERICSERV);
+	if (status != 0)
+	    fprintf(stderr, "ntpd: getnameinfo() failed in intercept_sendpkt()\n");
+	else {
+	    size_t i;
+	    printf("event sendpkt \"%s\" %s %s %d:%d:%d:%d:%u:%u:%u:%d:%d:%d:%d",
+		   legend, host, serv,
+		   pkt->li_vn_mode, pkt->stratum, pkt->ppoll, pkt->precision,
+		   /* FIXME: might be better to dump these in fixed-point */
+		   pkt->rootdelay, pkt->rootdisp,
+		   pkt->refid,
+		   /* FIXME: might be better to dump last 4 in fixed-point */
+		   pkt->reftime.l_uf, pkt->org.l_uf,
+		   pkt->rec.l_uf, pkt->xmt.l_uf);
+	    /* dump MAC as len - LEN_PKT_NOMAC chars in hex */
+	    for (i = 0; i < len - LEN_PKT_NOMAC; i++)
+		printf("%02x", pkt->exten[i]);
+	    fputs("\n", stdout);
+	}
     }
+
+    /* FIXME: replay logic goes here */
 }
 
 void
