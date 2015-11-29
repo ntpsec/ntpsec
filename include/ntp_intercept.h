@@ -2,6 +2,10 @@
  * ntp_intercept.h - intercept/replay support for environment calls
  */
 
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
+
 #ifdef HAVE_SYS_TIMEX_H
 # include <sys/time.h>	/* prerequisite on NetBSD */
 # include <sys/timex.h>
@@ -33,5 +37,7 @@ void intercept_drift_write(char *, double);
 #ifdef HAVE_KERNEL_PLL
 int intercept_kernel_pll_adjtime(struct timex *);
 #endif
+extern bool intercept_leapsec_load_file(const char * fname, struct stat * sb,
+					bool force, bool logall);
 
 /* end */

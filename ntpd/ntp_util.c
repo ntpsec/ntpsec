@@ -349,7 +349,7 @@ stats_config(
 		leapfile_name = erealloc(leapfile_name, len + 1);
 		memcpy(leapfile_name, value, len + 1);
 
-		if (leapsec_load_file(
+		if (intercept_leapsec_load_file(
 			    leapfile_name, &leapfile_stat, true, true))
 		{
 			leap_signature_t lsig;
@@ -745,7 +745,7 @@ check_leap_file(
 		return;
 	
 	/* try to load leapfile, force it if no leapfile loaded yet */
-	if (leapsec_load_file(
+	if (intercept_leapsec_load_file(
 		    leapfile_name, &leapfile_stat,
 		    !have_leapfile, is_daily_check))
 		have_leapfile = true;

@@ -1,6 +1,6 @@
 /*****************************************************************************
 
-intercept.c - capture and replay logic for NTP environment calls
+ntp_intercept.c - capture and replay logic for NTP environment calls
 
 Think of ntpd as a complex finite-state machine for transforming a
 stream of input events to output events.  Events are of the
@@ -22,7 +22,7 @@ following kinds:
 
 8. Calls to adjtime to set the system clock.
 
-9. Read of the system leapsecond file.  (TODO)
+9. Read of the system leapsecond file.
 
 10. Packets incoming from NTP daemons.  (TODO)
 
@@ -98,6 +98,7 @@ no mismatches.
 #include "ntp_intercept.h"
 #include "ntp_fp.h"
 #include "ntp_syscall.h"
+#include "ntp_leapsec.h"
 
 static intercept_mode mode = none;
 
@@ -285,6 +286,36 @@ int intercept_kernel_pll_adjtime(struct timex *tx)
     return res;
 }
 #endif
+
+bool
+intercept_leapsec_load_file(
+	const char  * fname,
+	struct stat * sb_old,
+	bool   force,
+	bool   logall)
+{
+    bool loaded;
+
+    if (mode != replay)
+	loaded = leapsec_load_file(fname, sb_old, force, logall);
+
+    if (mode == capture) {
+	FILE *fp = fopen(fname, "r");
+	if (fp != NULL) {
+	    int c;
+
+	    fputs("startleapsec\n", stdout);
+	    while ((c = fgetc(fp)) != EOF)
+		putchar(c);
+	    fclose(fp);
+	    fputs("endleapsec\n", stdout);
+	}
+    }
+
+    /* FIXME: replay logic goes here */
+    
+    return loaded;
+}
 
 void intercept_sendpkt(const char *legend,
 		  sockaddr_u *dest, struct interface *ep, int ttl,
