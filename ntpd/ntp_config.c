@@ -35,6 +35,7 @@
 #include "lib_strbuf.h"
 #include "ntp_assert.h"
 #include "ntp_random.h"
+#include "ntp_intercept.h"
 /*
  * [Bug 467]: Some linux headers collide with CONFIG_PHONE and CONFIG_KEYS
  * so #include these later.

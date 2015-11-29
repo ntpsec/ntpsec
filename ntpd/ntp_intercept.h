@@ -41,4 +41,10 @@ extern bool intercept_leapsec_load_file(const char * fname, struct stat * sb,
 					bool force, bool logall);
 void intercept_getauthkeys(const char *);
 
+#if !defined(SIM) && defined(SIGDIE1)
+void intercept_finish(const int);
+#endif
+
+
+
 /* end */

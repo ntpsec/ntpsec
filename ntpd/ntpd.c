@@ -117,10 +117,6 @@ extern bool	check_netinfo;
 
 bool was_alarmed;
 
-#if !defined(SIM) && defined(SIGDIE1)
-static	void	finish		(int);
-#endif
-
 #if !defined(SIM) && defined(HAVE_WORKING_FORK)
 static int	wait_child_sync_if	(int, long);
 #endif
@@ -724,13 +720,13 @@ ntpdmain(
 	 * Set up signals we pay attention to locally.
 	 */
 # ifdef SIGDIE1
-	signal_no_reset(SIGDIE1, finish);
-	signal_no_reset(SIGDIE2, finish);
-	signal_no_reset(SIGDIE3, finish);
-	signal_no_reset(SIGDIE4, finish);
+	signal_no_reset(SIGDIE1, intercept_finish);
+	signal_no_reset(SIGDIE2, intercept_finish);
+	signal_no_reset(SIGDIE3, intercept_finish);
+	signal_no_reset(SIGDIE4, intercept_finish);
 # endif
 # ifdef SIGBUS
-	signal_no_reset(SIGBUS, finish);
+	signal_no_reset(SIGBUS, intercept_finish);
 # endif
 
 # ifdef DEBUG
@@ -1050,36 +1046,6 @@ ntpdmain(
 	return 1;
 }
 #endif	/* !SIM */
-
-
-#if !defined(SIM) && defined(SIGDIE1)
-/*
- * finish - exit gracefully
- */
-static void
-finish(
-	int sig
-	)
-{
-	const char *sig_desc;
-
-	intercept_log("event shutdown 0\n");
-	sig_desc = NULL;
-	sig_desc = strsignal(sig);
-	if (sig_desc == NULL)
-		sig_desc = "";
-	msyslog(LOG_NOTICE, "%s exiting on signal %d (%s)", progname,
-		sig, sig_desc);
-	/* See Bug 2513 and Bug 2522 re the unlink of PIDFILE */
-# if defined(HAVE_DNS_SD_H) && defined(ENABLE_MDNS_REGISTRATION)
-	if (mdns != NULL)
-		DNSServiceRefDeallocate(mdns);
-# endif
-	peer_cleanup();
-	exit(0);
-}
-#endif	/* !SIM && SIGDIE1 */
-
 
 #ifndef SIM
 /*
