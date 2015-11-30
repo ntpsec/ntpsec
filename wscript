@@ -4,6 +4,7 @@ out="build"
 
 from pylib.configure import cmd_configure
 from waflib.Tools import waf_unit_test
+from waflib.Logs import pprint
 
 OPT_STORE = {} # Storage for options to pass into configure
 
@@ -97,11 +98,29 @@ class check(BuildContext):
 	cmd = 'check'
 
 
+def test_write_log(ctx):
+	file_out = "%s/test.log" % out
+
+	log = lst = getattr(ctx, 'utest_results', [])
+
+	if not log:
+		return
+
+	with open(file_out, "w") as fp:
+		for binary, retval, lines, error in ctx.utest_results:
+			fp.write("BINARY      : %s\n" % binary)
+			fp.write("RETURN VALUE: %s\n" % retval)
+			fp.write("\n*** stdout ***\n")
+			fp.write(lines)
+			fp.write("\n*** stderr ***\n")
+			fp.write(error)
+			fp.write("\n\n\n")
+
+	pprint("BLUE", "Wrote test log to: ", file_out)
+
 
 def test_print_log(ctx):
-	from waflib.Logs import pprint
 	for binary, retval, lines, error in ctx.utest_results:
-
 		pprint("YELLOW", "BINARY      :", binary)
 		pprint("YELLOW", "RETURN VALUE:", retval)
 		print("")
@@ -168,6 +187,9 @@ def build(ctx):
 		# Print log if -v is supplied
 		if ctx.options.verbose:
 			ctx.add_post_fun(test_print_log)
+
+	# Write test log to a file
+	ctx.add_post_fun(test_write_log)
 
 	# Print a summary at the end
 	ctx.add_post_fun(waf_unit_test.summary)
