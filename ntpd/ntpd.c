@@ -1047,6 +1047,36 @@ ntpdmain(
 }
 #endif	/* !SIM */
 
+
+#if !defined(SIM) && defined(SIGDIE1)
+/*
+ * finish - exit gracefully
+ */
+void
+finish(
+	int sig
+	)
+{
+	const char *sig_desc;
+
+	intercept_log("event shutdown 0\n");
+	sig_desc = NULL;
+	sig_desc = strsignal(sig);
+	if (sig_desc == NULL)
+		sig_desc = "";
+	msyslog(LOG_NOTICE, "%s exiting on signal %d (%s)", progname,
+		sig, sig_desc);
+	/* See Bug 2513 and Bug 2522 re the unlink of PIDFILE */
+# if defined(HAVE_DNS_SD_H) && defined(ENABLE_MDNS_REGISTRATION)
+	if (mdns != NULL)
+		DNSServiceRefDeallocate(mdns);
+# endif
+	peer_cleanup();
+	exit(0);
+}
+#endif	/* !SIM && SIGDIE1 */
+
+
 #ifndef SIM
 /*
  * wait_child_sync_if - implements parent side of -w/--wait-sync
