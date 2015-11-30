@@ -303,7 +303,8 @@ def cmd_configure(ctx):
 			print "Compilation check failed but include exists %s" % hdr
 
 	if ctx.get_define("HAVE_TIMEPPS_H") or ctx.get_define("HAVE_SYS_TIMEPPS_H"):
-		ctx.define("HAVE_PPSAPI", 1)
+		from pylib.check_timepps import check_timepps
+		check_timepps(ctx)
 
 
 	ctx.check_cc(header_name="event2/event.h", includes=ctx.env.PLATFORM_INCLUDES)
@@ -485,5 +486,5 @@ def cmd_configure(ctx):
 	msg_setting("LDFLAGS", " ".join(ctx.env.LDFLAGS))
 	msg_setting("PREFIX", ctx.env.PREFIX)
 	msg_setting("Debug Support", yesno(ctx.options.enable_debug))
-	msg_setting("Refclocks", ctx.options.refclocks)
+	msg_setting("Refclocks", ", ".join(ctx.env.REFCLOCK_LIST))
 	msg_setting("Build Manpages", yesno(ctx.env.BIN_A2X and not ctx.env.DISABLE_MANPAGE))
