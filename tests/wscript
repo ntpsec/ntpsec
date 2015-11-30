@@ -33,19 +33,20 @@ def build(ctx):
 
 
 	# ntpdig/
-	ctx.ntp_test(
-		features    = "c cprogram bld_include src_include libisc_include test",
-        target      = "test_ntpdig",
-		defines		= ["TEST_NTPDIG=1"],
-		includes	= [
-			"%s/tests/unity/" % srcnode,
-			"%s/tests/common/" % srcnode,
-			"%s/ntpdig/" % srcnode
-		],
-		use			= "unity ntpdig_obj ntp",
-        source      = ntpdig_source,
-		test_args	= ["%s/tests/ntpdig/data/" % srcnode, "%s/tests/ntpdig/" % bldnode]
-	)
+	if ctx.env.LIBEVENT2_ENABLE:
+		ctx.ntp_test(
+			features    = "c cprogram bld_include src_include libisc_include test",
+	        target      = "test_ntpdig",
+			defines		= ["TEST_NTPDIG=1"],
+			includes	= [
+				"%s/tests/unity/" % srcnode,
+				"%s/tests/common/" % srcnode,
+				"%s/ntpdig/" % srcnode
+			],
+			use			= "unity ntpdig_obj ntp",
+	        source      = ntpdig_source,
+			test_args	= ["%s/tests/ntpdig/data/" % srcnode, "%s/tests/ntpdig/" % bldnode]
+		)
 
 
 	# libntp/

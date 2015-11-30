@@ -114,7 +114,8 @@ def build(ctx):
 	if ctx.env.REFCLOCK_PARSE: # Only required by the parse refclock
 		ctx.recurse("libparse")
 	ctx.recurse("libntp")
-	ctx.recurse("ntpdig")
+	if ctx.env.LIBEVENT2_ENABLE:
+		ctx.recurse("ntpdig")
 	ctx.recurse("libsodium")
 	ctx.recurse("ntpd")
 	ctx.recurse("ntpfrob")

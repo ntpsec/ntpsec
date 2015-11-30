@@ -1,6 +1,5 @@
 #include <config.h>
 
-#include <event2/util.h>
 #include <event2/event.h>
 
 #include "ntp_workimpl.h"
