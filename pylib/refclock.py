@@ -1,4 +1,5 @@
 from waflib.Configure import conf
+from waflib.Logs import pprint
 
 # Note: When you change this list. also check the following files:
 # doc/recflock.txt
@@ -110,6 +111,7 @@ refclock_map = {
 	30: {
 		"descr":	"Motorola UT Oncore GPS",
 		"define":	"CLOCK_ONCORE",
+		"require":	["ppsapi"],
 		"file":		"oncore"
 	},
 
@@ -225,12 +227,21 @@ def refclock_config(ctx):
 			for subtype in parse_clocks:
 				ctx.define(subtype, 1)
 
-		ctx.start_msg("Enabling Refclock %s:" % id)
-		ctx.env.REFCLOCK_SOURCE.append((rc["file"], rc["define"]))
-		ctx.end_msg(rc["descr"])
-		ctx.env["REFCLOCK_%s" % rc["file"].upper()] = True
+		ctx.start_msg("Enabling Refclock %s (%d):" % (rc["descr"], id))
 
+		if "require" in rc:
+			if "ppsapi" in rc["require"]:
+				if not ctx.get_define("HAVE_PPSAPI"):
+					ctx.end_msg("No")
+					pprint("RED", "Refclock \"%s\" disabled, PPS API has not been detected as working." % rc["descr"])
+					continue
+
+		ctx.env.REFCLOCK_SOURCE.append((rc["file"], rc["define"]))
+		ctx.env["REFCLOCK_%s" % rc["file"].upper()] = True
 		ctx.define(rc["define"], 1)
+		ctx.env.REFCLOCK_LIST += [str(id)]
+
+		ctx.end_msg("Yes")
 
 		refclock = True
 
