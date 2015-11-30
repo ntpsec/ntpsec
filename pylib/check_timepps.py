@@ -23,7 +23,7 @@ def check_timepps(ctx):
 		fragment	= TIMEPPS_FRAG,
 		define_name = "HAVE_PPSAPI",
 		features	= "c",
-		msg         = "Checking if PPS PAI works",
+		msg         = "Checking if PPS API works",
 		mandatory	= False
 	)
 
