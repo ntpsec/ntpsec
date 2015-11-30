@@ -4,7 +4,7 @@ out="build"
 
 from pylib.configure import cmd_configure
 from waflib.Tools import waf_unit_test
-from waflib.Logs import pprint
+from pylib.test import test_write_log, test_print_log
 
 OPT_STORE = {} # Storage for options to pass into configure
 
@@ -98,45 +98,8 @@ class check(BuildContext):
 	cmd = 'check'
 
 
-def test_write_log(ctx):
-	file_out = "%s/test.log" % out
-
-	log = lst = getattr(ctx, 'utest_results', [])
-
-	if not log:
-		return
-
-	with open(file_out, "w") as fp:
-		for binary, retval, lines, error in ctx.utest_results:
-			fp.write("BINARY      : %s\n" % binary)
-			fp.write("RETURN VALUE: %s\n" % retval)
-			fp.write("\n*** stdout ***\n")
-			fp.write(lines)
-			fp.write("\n*** stderr ***\n")
-			fp.write(error)
-			fp.write("\n\n\n")
-
-	pprint("BLUE", "Wrote test log to: ", file_out)
-
-
-def test_print_log(ctx):
-	for binary, retval, lines, error in ctx.utest_results:
-		pprint("YELLOW", "BINARY      :", binary)
-		pprint("YELLOW", "RETURN VALUE:", retval)
-		print("")
-
-		if retval or error:
-			pprint("RED", "****** ERROR ******\n")
-
-			print error or lines
-
-		if (not retval) and (not error):
-			pprint("GREEN", "****** LOG ******\n", lines)
-
-		print
-
-
 def build(ctx):
+
 	ctx.load('waf', tooldir='pylib/')
 	ctx.load('bison')
 	ctx.load('asciidoc', tooldir='pylib/')
