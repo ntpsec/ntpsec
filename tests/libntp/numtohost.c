@@ -1,3 +1,6 @@
+#include "config.h"
+#include "ntp_stdlib.h"
+
 #include "unity.h"
 #include "unity_fixture.h"
 
@@ -8,7 +11,6 @@ TEST_SETUP(numtohost) {}
 
 TEST_TEAR_DOWN(numtohost) {}
 
-#include "libntptest.h"
 
 
 TEST(numtohost, LoopbackNetNonResolve) {

@@ -1,3 +1,6 @@
+#include "config.h"
+#include "ntp_stdlib.h"
+
 #include "unity.h"
 #include "unity_fixture.h"
 
@@ -12,7 +15,6 @@ TEST_TEAR_DOWN(sfptostr) {}
  * since all these functions are very similar.
  */
 
-#include "libntptest.h"
 
 #include "ntp_fp.h"
 

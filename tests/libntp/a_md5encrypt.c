@@ -1,3 +1,6 @@
+#include "config.h"
+#include "ntp_stdlib.h"
+
 #include "unity.h"
 #include "unity_fixture.h"
 
@@ -7,7 +10,6 @@ TEST_SETUP(a_md5encrypt) {}
 
 TEST_TEAR_DOWN(a_md5encrypt) {}
 
-#include "libntptest.h"
 
 #ifdef HAVE_OPENSSL
 # include "openssl/err.h"

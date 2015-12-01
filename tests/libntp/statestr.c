@@ -1,3 +1,6 @@
+#include "config.h"
+#include "ntp_stdlib.h"
+
 #include "unity.h"
 #include "unity_fixture.h"
 
@@ -7,7 +10,6 @@ TEST_SETUP(statestr) {}
 
 TEST_TEAR_DOWN(statestr) {}
 
-#include "libntptest.h"
 
 #include "ntp.h" // Needed for MAX_MAC_LEN used in ntp_control.h
 #include "ntp_control.h"

@@ -1,6 +1,8 @@
+#include "config.h"
+#include "ntp_stdlib.h"
+
 #include "unity.h"
 #include "unity_fixture.h"
-#include "libntptest.h"
 #include "recvbuff.h"
 
 
