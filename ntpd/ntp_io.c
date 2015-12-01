@@ -348,7 +348,7 @@ maintain_activefds(
 {
 	int i;
 
-	if (fd < 0 || fd >= FD_SETSIZE) {
+	if (fd < 0 || fd >= (int)FD_SETSIZE) {
 		msyslog(LOG_ERR,
 			"Too many sockets in use, FD_SETSIZE %d exceeded by fd %d",
 			FD_SETSIZE, fd);
