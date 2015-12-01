@@ -29,6 +29,7 @@ def build(ctx):
 		"ntpdig/kodFile.c",
 #		"ntpdig/networking.c",
 		"ntpdig/packetHandling.c",
+#		"ntpdig/packetProcessing.c",
 	] + common_source
 
 
