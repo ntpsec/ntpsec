@@ -11,7 +11,7 @@ TIMEPPS_FRAG = """
 
 int main(void) {
 	pps_handle_t pps_h;
-	time_pps_destroya (pps_h);
+	time_pps_destroy (pps_h);
 
     return 0;
 }
