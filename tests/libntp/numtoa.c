@@ -1,3 +1,6 @@
+#include "config.h"
+#include "ntp_stdlib.h"
+
 #include "unity.h"
 #include "unity_fixture.h"
 
@@ -7,7 +10,6 @@ TEST_SETUP(numtoa) {}
 
 TEST_TEAR_DOWN(numtoa) {}
 
-#include "libntptest.h"
 
 TEST(numtoa, Address) {
 	u_int32_t input = htonl(3221225472UL+512UL+1UL); // 192.0.2.1

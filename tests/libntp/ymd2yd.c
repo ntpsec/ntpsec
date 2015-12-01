@@ -1,3 +1,6 @@
+#include "config.h"
+#include "ntp_stdlib.h"
+
 #include "unity.h"
 #include "unity_fixture.h"
 
@@ -7,7 +10,6 @@ TEST_SETUP(ymd2yd) {}
 
 TEST_TEAR_DOWN(ymd2yd) {}
 
-#include "libntptest.h"
 
 
 TEST(ymd2yd, NonLeapYearFebruary) {

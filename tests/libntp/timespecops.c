@@ -1,3 +1,6 @@
+#include "config.h"
+#include "ntp_stdlib.h"
+
 extern "C" {
 #include "unity.h"
 #include "unity_fixture.h"
@@ -9,7 +12,6 @@ TEST_SETUP(timespecops) {}
 
 TEST_TEAR_DOWN(timespecops) {}
 
-#include "libntptest.h"
 #include "timestructs.h"
 
 extern "C" {

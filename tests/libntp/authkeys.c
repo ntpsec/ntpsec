@@ -1,7 +1,9 @@
+#include "config.h"
+#include "ntp_stdlib.h"
+
 #include "unity.h"
 #include "unity_fixture.h"
 
-#include "libntptest.h"
 
 #ifdef HAVE_OPENSSL
 # include "openssl/err.h"

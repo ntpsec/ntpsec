@@ -1,7 +1,6 @@
 #ifndef GUARD_NTP_TESTS_LFPTEST_H
 #define GUARD_NTP_TESTS_LFPTEST_H
 
-#include "libntptest.h"
 #include "ntp_fp.h"
 
 static bool IsEqual(const l_fp *expected, const l_fp *actual) {
