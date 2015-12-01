@@ -92,7 +92,7 @@ send_packet(int fd, const char *buf, uint32_t len)
 {
 	uint32_t net_len = htonl(len);
 	if (write_all(fd, &net_len, sizeof(net_len)) != sizeof(net_len)) return -1;
-	if (write_all(fd, buf, len) != len) return -1;	
+	if (write_all(fd, buf, len) != (int)len) return -1;
 	return 0;
 }
 
@@ -105,7 +105,7 @@ recv_packet(int fd, char **buf, uint32_t *len)
 	if (read_all(fd, len, sizeof(*len)) != sizeof(*len)) return -1;
 	*len = ntohl(*len);
 	(*buf) = emalloc(*len);
-	if (read_all(fd, *buf, *len) != *len) {
+	if (read_all(fd, *buf, *len) != (int)*len) {
 		free(*buf);
 		return -1;
 	}
@@ -121,6 +121,7 @@ send_via_ntp_signd(
 	struct pkt  *xpkt
 	)
 {
+	UNUSED_ARG(flags);
 	
 	/* We are here because it was detected that the client
 	 * sent an all-zero signature, and we therefore know
