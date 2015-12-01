@@ -1,8 +1,6 @@
 #ifndef GUARD_TESTS_SOCKADDRTEST_H
 #define GUARD_TESTS_SOCKADDRTEST_H
 
-#include "libntptest.h"
-
 #include "ntp.h"
 
 bool IsEqualS(const sockaddr_u *expected, const sockaddr_u *actual) {
