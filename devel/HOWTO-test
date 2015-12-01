@@ -1,0 +1,86 @@
+This assumes you have downloaded the source and built a system
+and now you want to test your new ntpd.
+
+For help on getting that far, see ../INSTALL
+
+
+For a one off test:
+  Do "ps ax | grep ntpd" or equivalent to find out what the command line is.
+  Use whatever you do on your system to stop the normal ntpd.
+  Run ./build/ntpd/ntpd plus the command line parameters from above.
+  It will daemonize itself and give you back your terminal.
+
+Your current /etc/ntp.conf should work correctly.
+
+Check your log files to see if there is anything strange.
+Check ntpq to see if things look normal.
+
+--------
+
+For a longer test, including over reboots...
+
+Install your new code using "./waf install" (as root).
+That will install your new ntpd into /usr/local/sbin/ntpd
+
+Now you have to patch your (re)start scripts to look there
+and restart ntpd.  The details vary by OS/distro.
+
+Fedora and CentOS using systemd:
+  Edit /usr/lib/systemd/system/ntpd.service
+  Change ExecStart=/usr/sbin/ntpd -u ntp:ntp $OPTIONS
+  to     ExecStart=/usr/local/sbin/ntpd -u ntp:ntp $OPTIONS
+  then   service ntpd restart
+    systemctl will barf about an out of date file and tell you
+    how to fix it.  Follow its directions and try again.
+
+dnf update may undo that edit and revert to running the system version.
+
+
+Older versions used /etc/rc.d/init.d/ntpd.
+  I put a patch in /etc/sysconfig/ntpd
+  It gets sourced so you can put real code in there.
+  systemd doesn't do that.
+  I inserted:
+    PATH="/usr/local/sbin:$PATH"
+
+
+Debian, Ubuntu, Raspbian:
+  Edit /etc/init.d/ntp
+  Change DAEMON=/usr/sbin/ntpd
+  to     DAEMON=/usr/local/sbin/ntpd
+I duplicate that line, commend out the first one and fixup the second
+one so it looks like this:
+    # DAEMON=/usr/sbin/ntpd
+    DAEMON=/usr/local/sbin/ntpd
+
+If you are using DHCP and your DHCP servers provide NTP servers,
+Debian makes a dummy ntp.conf using those servers and not the
+ones you put into the normal /etc/ntp.conf.  To use your ntp.conf
+rather than the one it wants you to:
+  Edit /etc/init.d/ntp
+  Comment out the clump of 3 lines that references dhcp:
+# if [ -e /var/lib/ntp/ntp.conf.dhcp ]; then
+#       NTPD_OPTS="$NTPD_OPTS -c /var/lib/ntp/ntp.conf.dhcp"
+# fi
+
+apt-get upgrade may undo those edits and revert to running the system version.
+
+
+FreeBSD:
+  Edit /etc/rc.conf
+  It needs to contain
+    ntpd_enable="YES"
+    ntpd_program="/usr/local/sbin/ntpd"
+If you are running ntpd, the first line will be there
+already.  The default is NO.
+
+
+NetBSD:
+  Edit /etc/rc.d/ntpd:
+  Change: command="/usr/sbin/${name}"
+  To:     command="/usr/local/sbin/${name}"
+I duplicate the line, comment out the first one and edit the second one.
+It looks like this:
+  # command="/usr/sbin/${name}"
+  command="/usr/local/sbin/${name}"
+
