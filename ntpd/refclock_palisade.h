@@ -125,7 +125,7 @@ struct palisade_unit {
 	int 		polled;		/* flag to detect noreplies */
 	char		leap_status;	/* leap second flag */
 	char		rpt_status;	/* TSIP Parser State */
-	short 		rpt_cnt;	/* TSIP packet length so far */
+	size_t 		rpt_cnt;	/* TSIP packet length so far */
 	char 		rpt_buf[BMAX]; 	/* packet assembly buffer */
 	int		type;		/* Clock mode type */
 	int		month;		/* for LEAP filter */
