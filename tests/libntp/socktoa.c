@@ -1,10 +1,8 @@
 #include "config.h"
 #include "ntp_stdlib.h"
 
-extern "C" {
 #include "unity.h"
 #include "unity_fixture.h"
-}
 
 TEST_GROUP(socktoa);
 
@@ -14,8 +12,6 @@ TEST_TEAR_DOWN(socktoa) {}
 
 #include "sockaddrtest.h"
 
-class socktoaTest : public sockaddrtest {
-};
 
 TEST(socktoa, IPv4AddressWithPort) {
 	sockaddr_u input = CreateSockaddr4("192.0.2.10", 123);
@@ -25,12 +21,12 @@ TEST(socktoa, IPv4AddressWithPort) {
 }
 
 TEST(socktoa, IPv6AddressWithPort) {
-	const struct in6_addr address = {
+	const struct in6_addr address = {{{
 		0x20, 0x01, 0x0d, 0xb8,
-		0x85, 0xa3, 0x08, 0xd3, 
+		0x85, 0xa3, 0x08, 0xd3,
 		0x13, 0x19, 0x8a, 0x2e,
 		0x03, 0x70, 0x73, 0x34
-	};
+	}}};
 
 	const char* expected =
 		"2001:db8:85a3:8d3:1319:8a2e:370:7334";
@@ -49,16 +45,16 @@ TEST(socktoa, IPv6AddressWithPort) {
 
 #ifdef ISC_PLATFORM_HAVESCOPEID
 TEST(socktoa, ScopedIPv6AddressWithPort) {
-	const struct in6_addr address = {
+	const struct in6_addr address = {{{
 		0xfe, 0x80, 0x00, 0x00,
 		0x00, 0x00, 0x00, 0x00,
-		0x02, 0x12, 0x3f, 0xff, 
+		0x02, 0x12, 0x3f, 0xff,
 		0xfe, 0x29, 0xff, 0xfa
-	};
+	}}};
 
 	const char* expected =
 		"fe80::212:3fff:fe29:fffa%5";
-	const char* expected_port = 
+	const char* expected_port =
 		"[fe80::212:3fff:fe29:fffa%5]:123";
 
 	sockaddr_u input;
@@ -77,7 +73,7 @@ TEST(socktoa, HashEqual) {
 	sockaddr_u input1 = CreateSockaddr4("192.00.2.2", 123);
 	sockaddr_u input2 = CreateSockaddr4("192.0.2.2", 123);
 
-	TEST_ASSERT_TRUE(IsEqual(input1, input2));
+	TEST_ASSERT_TRUE(IsEqualS(&input1, &input2));
 	TEST_ASSERT_EQUAL(sock_hash(&input1), sock_hash(&input2));
 }
 
@@ -86,17 +82,17 @@ TEST(socktoa, HashNotEqual) {
 	sockaddr_u input1 = CreateSockaddr4("192.0.2.1", 123);
 	sockaddr_u input2 = CreateSockaddr4("192.0.2.2", 123);
 
-	TEST_ASSERT_FALSE(IsEqual(input1, input2));
+	TEST_ASSERT_FALSE(IsEqualS(&input1, &input2));
 	TEST_ASSERT_NOT_EQUAL(sock_hash(&input1), sock_hash(&input2));
 }
 
 TEST(socktoa, IgnoreIPv6Fields) {
-	const struct in6_addr address = {
+	const struct in6_addr address = {{{
 		0x20, 0x01, 0x0d, 0xb8,
-        0x85, 0xa3, 0x08, 0xd3, 
+        0x85, 0xa3, 0x08, 0xd3,
         0x13, 0x19, 0x8a, 0x2e,
         0x03, 0x70, 0x73, 0x34
-	};
+	}}};
 
 	sockaddr_u input1, input2;
 
