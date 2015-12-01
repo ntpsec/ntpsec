@@ -1580,7 +1580,6 @@ process_packet(
 	pleap = PKT_LEAP(pkt->li_vn_mode);
 	pversion = PKT_VERSION(pkt->li_vn_mode);
 	pstratum = PKT_TO_STRATUM(pkt->stratum);
-	if (peer->outcount) peer->outcount--;  /* dup, peer with shorter poll */
 
 	/*
 	 * Capture the header values in the client/peer association..
@@ -1589,7 +1588,7 @@ process_packet(
 	    &peer->dstadr->sin : NULL,
 	    &p_org, &p_rec, &p_xmt, &peer->dst,
 	    pleap, pversion, pmode, pstratum, pkt->ppoll, pkt->precision,
-	    p_del, p_disp, pkt->refid, peer->outcount);
+	    p_del, p_disp, pkt->refid);
 	peer->leap = pleap;
 	peer->stratum = min(pstratum, STRATUM_UNSPEC);
 	peer->pmode = pmode;
@@ -1598,7 +1597,6 @@ process_packet(
 	peer->rootdisp = p_disp;
 	peer->refid = pkt->refid;		/* network byte order */
 	peer->reftime = p_reftime;
-	peer->outcount = 0;
 
 	/*
 	 * First, if either burst mode is armed, enable the burst.
@@ -3121,7 +3119,6 @@ peer_xmit(
 		intercept_sendpkt(__func__, &peer->srcadr, peer->dstadr, sys_ttl[peer->ttl],
 		    &xpkt, sendlen);
 		peer->sent++;
-		peer->outcount++;
 		peer->throttle += (1 << peer->minpoll) - 2;
 
 		/*
