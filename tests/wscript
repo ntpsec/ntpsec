@@ -18,6 +18,8 @@ def build(ctx):
 	# Test main.
 	common_source = [
 		"common/tests_main.c",
+		"common/caltime.c",
+		"common/sockaddrtest.c"
 	]
 
 
@@ -83,7 +85,7 @@ def build(ctx):
 		"libntp/tvtots.c",
 		"libntp/vi64ops.c",
 		"libntp/ymd2yd.c"
-	] + common_source + ["common/caltime.c"]
+	] + common_source
 
 	ctx.ntp_test(
 		features    = "c cprogram bld_include src_include libisc_include test",
