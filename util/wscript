@@ -4,7 +4,7 @@ def build(ctx):
 	srcnode = ctx.srcnode.abspath()
 	bldnode = ctx.bldnode.abspath()
 
-	util = ['hist', 'propdelay', 'sht']
+	util = ['bumpclock', 'hist', 'propdelay', 'sht']
 
 	if ctx.env.PLATFORM_TARGET not in ['netbsd', 'osx']:
 		util += ['tg2']

@@ -11,6 +11,11 @@ audio-pcm.c::	Probe the capabilities of your sound card.  Assumes the
 		SunOS/Solaris/OpenSolaris, also implemented by *BSD
 		and in the old OSS Linux sound layer.
 
+bumpclock.c::	This is a simple program to bump the system clock so
+		you can see how ntpd and your OS respond.  The single
+		argument is the time-to-bump in microseconds.  The
+		default is 100000.
+
 hist.c::	This program can be used to calibrate the clock reading
 		jitter of a particular CPU and operating system. It
 		first tickles every element of an array, in order to
