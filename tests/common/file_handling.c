@@ -52,7 +52,7 @@ void CompareFileContent(FILE* expected, FILE* actual) {
 		TEST_ASSERT_FALSE(ferror(expected));
 		TEST_ASSERT_FALSE(ferror(actual));
 		if (fgets(e_line, sizeof(e_line), expected) != NULL &&
-		    fgets(e_line, sizeof(e_line), expected) != NULL) {
+		    fgets(a_line, sizeof(a_line), actual) != NULL) {
 			TEST_ASSERT_EQUAL_STRING(e_line, a_line);
 		}
 	}
