@@ -42,7 +42,7 @@ static void RunAllTests(void)
 	RUN_TEST_GROUP(a_md5encrypt);
 	RUN_TEST_GROUP(authkeys);
 //	RUN_TEST_GROUP(calendar);
-//	RUN_TEST_GROUP(caljulian);
+	RUN_TEST_GROUP(caljulian);
 	RUN_TEST_GROUP(caltontp);
 	RUN_TEST_GROUP(calyearstart);
 	RUN_TEST_GROUP(clocktime);
