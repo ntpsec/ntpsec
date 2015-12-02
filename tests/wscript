@@ -58,7 +58,7 @@ def build(ctx):
 		"libntp/authkeys.c",
 #		"libntp/calendar.c",
 #		"libntp/caljulian.c",
-#		"libntp/caltontp.c",
+		"libntp/caltontp.c",
 		"libntp/calyearstart.c",
 		"libntp/clocktime.c",
 		"libntp/decodenetnum.c",
