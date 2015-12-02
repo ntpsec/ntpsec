@@ -857,7 +857,7 @@ TSIP_decode (
 #ifdef DEBUG
 	printf("TSIP_decode: unit %d: bad packet %02x-%02x event %d len %d\n", 
 	       up->unit, up->rpt_buf[0] & 0xff, mb(0) & 0xff, 
-	       event, up->rpt_cnt);
+	       event, (int)up->rpt_cnt);
 #endif
 	return 0;
 }
