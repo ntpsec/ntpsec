@@ -175,17 +175,17 @@ Datum/Bancomm/Symmetricom bc600-series GPS/IRIG Receiver.
 | link:driver5.html[Type 5]   | D     | TrueTime GPS/GOES Receivers
 | link:driver6.html[Type 6]   | D     | IRIG Audio Decoder
 | link:driver7.html[Type 7]   | D     | Radio CHU Audio Demodulator/Decoder
-| link:driver8.html[Type 8]   | T     | Generic Reference Driver
+| link:driver8.html[Type 8]   | T     | Generic Reference Driver (Parse)
 | link:driver9.html[Type 9]   | D     | Magnavox MX4200 GPS Receiver
 | link:driver10.html[Type 10] | D     | Austron 2200A/2201A GPS Receivers
 | link:driver11.html[Type 11] | D     | Arbiter 1088A/B GPS Receiver
 | link:driver18.html[Type 18] | -     | NIST/USNO/PTB Modem Time Services
 | link:driver20.html[Type 20] | T     | Generic NMEA GPS Receiver
-| link:driver22.html[Type 22] | -     | PPS Clock Discipline
+| link:driver22.html[Type 22] | T     | PPS Clock Discipline
 | link:driver26.html[Type 26] | T     | Hewlett Packard 58503A GPS Receiver
 | link:driver27.html[Type 27] | D     | Arcron MSF Receiver
 | link:driver28.html[Type 28] | T     | Shared Memory Driver
-| link:driver29.html[Type 29] | -     | Trimble Navigation Palisade GPS
+| link:driver29.html[Type 29] | TM    | Trimble Navigation Palisade GPS
 | link:driver30.html[Type 30] | -     | Motorola UT Oncore GPS
 | link:driver31.html[Type 31] | D     | Rockwell Jupiter GPS
 | link:driver33.html[Type 33] | D     | Dumb Clock
@@ -203,7 +203,8 @@ The flags field should be interpreted as follows:
 
 |====================================================================
 | D | Deprecated.  May be removed in a future release
-| T | Regularly tested by an active maintainer
+| T | Regularly tested by an active maintainer (some devices/modes)
+| M | The driver supports multiple devices or major modes
 |====================================================================
 
 Driver numbers 2, 3, 12, 13, 14, 15, 16, 17, 19, 21, 23, 24, 25, 32, 34,
