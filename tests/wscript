@@ -73,7 +73,6 @@ def build(ctx):
 		"libntp/numtohost.c",
 		"libntp/prettydate.c",
 		"libntp/recvbuff.c",
-#		"libntp/refnumtoa.c",
 		"libntp/sfptostr.c",
 		"libntp/socktoa.c",
 		"libntp/ssl_init.c",
@@ -86,6 +85,9 @@ def build(ctx):
 		"libntp/vi64ops.c",
 		"libntp/ymd2yd.c"
 	] + common_source
+
+	if ctx.env.REFCLOCK_ENABLE:
+		libntp_source += ["libntp/refnumtoa.c"]
 
 	ctx.ntp_test(
 		features    = "c cprogram bld_include src_include libisc_include test",
