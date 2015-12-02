@@ -126,7 +126,10 @@ Mills-speak::
    wrote in a vivid and idiosyncratic style which is still preserved in
    much of NTP's documentation.  He coined many neologisms which
    connoisseurs refer to as "Mills-speak"; examples in this glossary
-   include <<falseticker>>, <<proventic>>, and <<truechimer>>.
+   include <<falseticker>>, <<proventic>>, and <<truechimer>>.  The
+   close-to-definitive reference is
+   http://lists.ntp.org/pipermail/questions/2007-December/016592.html[The
+   NTP dictionary], though not all those terms are still in use.
 
 [[NIST]]
 NIST::
