@@ -46,7 +46,7 @@ static void RunAllTests(void)
 //	RUN_TEST_GROUP(caltontp);
 	RUN_TEST_GROUP(calyearstart);
 	RUN_TEST_GROUP(clocktime);
-//	RUN_TEST_GROUP(decodenetnum);
+	RUN_TEST_GROUP(decodenetnum);
 	RUN_TEST_GROUP(hextolfp);
 //	RUN_TEST_GROUP(humandate);
 //	RUN_TEST_GROUP(lfp);

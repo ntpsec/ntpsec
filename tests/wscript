@@ -61,7 +61,7 @@ def build(ctx):
 #		"libntp/caltontp.c",
 		"libntp/calyearstart.c",
 		"libntp/clocktime.c",
-#		"libntp/decodenetnum.c",
+		"libntp/decodenetnum.c",
 		"libntp/hextolfp.c",
 #		"libntp/humandate.c",
 #		"libntp/lfpfunc.c",
