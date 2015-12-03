@@ -508,7 +508,7 @@ refclock_sample(
  * This routine simulates the NTP receive and packet procedures for a
  * reference clock. This provides a mechanism in which the ordinary NTP
  * filter, selection and combining algorithms can be used to suppress
- * misbehaving radios and to mitigate between them when more than one is
+ * misbehaving time sources and to mitigate between them when more than one is
  * available for backup.
  */
 void

@@ -9,7 +9,7 @@
 
 /*
  * NTP uses two fixed point formats.  The first (l_fp) is the "long"
- * format and is 64 bits long with the decimal between bits 31 and 32.
+ * format and is 64 bits wide with the decimal between bits 31 and 32.
  * This is used for time stamps in the NTP packet header (in network
  * byte order) and for internal computations of offsets (in local host
  * byte order). We use the same structure for both signed and unsigned
@@ -40,7 +40,7 @@ typedef struct {
 
 /*
  * Fractional precision (of an l_fp) is actually the number of
- * bits in a long.
+ * bits in an int32_t/uint32_t.
  */
 #define	FRACTION_PREC	(32)
 
@@ -65,7 +65,7 @@ typedef int32_t s_fp;
 typedef uint32_t u_fp;
 
 /*
- * A unit second in fp format.	Actually 2**(half_the_bits_in_a_long)
+ * A unit second in fp format.	Actually 2**(half_the_bits_in_int32)
  */
 #define	FP_SECOND	(0x10000)
 
