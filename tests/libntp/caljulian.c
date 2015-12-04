@@ -20,13 +20,6 @@ TEST_TEAR_DOWN(caljulian) {
 	ntpcal_set_timefunc(NULL);
 }
 
-const char *CalendarToString(const struct calendar *cal) {
-	char *str = malloc(255);
-	snprintf(str, 255, "%hu-%u-%u (%u) %u:%u:%u\n", cal->year, (u_int)cal->month, (u_int)cal->monthday, cal->yearday, (u_int)cal->hour, (u_int)cal->minute, (u_int)cal->second);
-
-	return str;
-}
-
 bool IsEqualC(const struct calendar *expected, const struct calendar *actual) {
 	if (expected->year == actual->year &&
 		(expected->yearday == actual->yearday ||
