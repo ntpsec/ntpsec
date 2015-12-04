@@ -22,6 +22,9 @@ ifdex-ignores::
 TODO::
 	List of items the NTPsec developers are working on.
 
+tour.txt:
+	A tour of the NTP internals.
+
 HISTORIC-NEWS::
 	NTP Classic news file up to 4.2.8p3 (May 2015).
 
