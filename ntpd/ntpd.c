@@ -135,6 +135,7 @@ char **	saved_argv;
 
 #ifndef SIM
 int		ntpdmain		(int, char **);
+static void	mainloop		(void);
 static void	set_process_priority	(void);
 static void	assertion_failed	(const char *, int,
 					 isc_assertiontype_t,
@@ -544,7 +545,6 @@ ntpdmain(
 	char *argv[]
 	)
 {
-	struct recvbuf *rbuf;
 	mode_t		uv;
 	uid_t		uid;
 # if defined(HAVE_WORKING_FORK)
@@ -754,7 +754,6 @@ ntpdmain(
 	init_util();
 	init_restrict();
 	init_mon();
-	init_timer();
 	init_control();
 	init_peer();
 # ifdef REFCLOCK
@@ -922,8 +921,20 @@ ntpdmain(
 		msyslog(LOG_INFO, "running as non-root disables dynamic interface tracking");
 	}
 
-# ifdef HAVE_IO_COMPLETION_PORT
+	mainloop();
+	return 1;
+}
 
+/*
+ * Process incoming packets until exit or interrupted.
+ */
+static void mainloop(void)
+{
+	struct recvbuf *rbuf;
+
+	init_timer();
+
+# ifdef HAVE_IO_COMPLETION_PORT
 	for (;;) {
 		GetReceivedBuffers();
 # else /* normal I/O */
@@ -1043,7 +1054,6 @@ ntpdmain(
 
 	}
 	UNBLOCK_IO_AND_ALARM();
-	return 1;
 }
 #endif	/* !SIM */
 

@@ -630,7 +630,8 @@ local_clock(
 			    fp_offset);
 			report_event(EVNT_CLOCKRESET, NULL, tbuf);
 			step_systime(fp_offset);
-			reinit_timer();
+			if (intercept_get_mode() != replay)
+			    reinit_timer();
 			tc_counter = 0;
 			clock_jitter = LOGTOD(sys_precision);
 			rval = 2;
