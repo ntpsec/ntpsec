@@ -23,3 +23,18 @@ void settime(int y, int m, int d, int H, int M, int S) {
 	nowtime = days * SECSPERDAY + secs;
 }
 
+
+const char *CalendarToString(const struct calendar *cal) {
+	char *str = malloc(255);
+	snprintf(str, 255, "%hu-%u-%u (%u) %u:%u:%u\n", cal->year, (u_int)cal->month, (u_int)cal->monthday, cal->yearday, (u_int)cal->hour, (u_int)cal->minute, (u_int)cal->second);
+
+	return str;
+}
+
+
+const char *CalendarToStringISO(const struct isodate *iso) {
+	char *str = malloc(255);
+	snprintf(str, 255, "%hu-%u-%u %u:%u:%u\n", iso->year, (u_int)iso->week, (u_int)iso->weekday, (u_int)iso->hour, (u_int)iso->minute, (u_int)iso->second);
+	return str;
+}
+
