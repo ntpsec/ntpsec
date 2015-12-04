@@ -787,6 +787,7 @@ ntpdmain(
 		stats_config(STATS_FREQ_FILE, driftfile);
 		break;
 	    case 'I':
+		if (intercept_get_mode() != replay)
 	        {
 		    sockaddr_u	addr;
 		    add_nic_rule(
