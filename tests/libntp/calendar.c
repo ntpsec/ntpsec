@@ -120,8 +120,11 @@ static const u_short real_month_days[2][14] = {
 // intermediate results would definitely overflow and the hi DWORD of
 // the 'vint64' is definitely needed.
 TEST(calendar, DaySplitMerge) {
-	for (int32_t day = -1000000; day <= 1000000; day += 100) {
-		for (int32_t sec = -100000; sec <= 186400; sec += 10000) {
+	int32_t day;
+	int32_t sec;
+
+	for (day = -1000000; day <= 1000000; day += 100) {
+		for (sec = -100000; sec <= 186400; sec += 10000) {
 			vint64	     merge = ntpcal_dayjoin(day, sec);
 			ntpcal_split split = ntpcal_daysplit(&merge);
 			int32_t	     eday  = day;
@@ -143,7 +146,9 @@ TEST(calendar, DaySplitMerge) {
 }
 
 TEST(calendar, SplitYearDays1) {
-	for (int32_t eyd = -1; eyd <= 365; eyd++) {
+	int32_t eyd;
+
+	for (eyd = -1; eyd <= 365; eyd++) {
 		ntpcal_split split = ntpcal_split_yeardays(eyd, 0);
 		if (split.lo >= 0 && split.hi >= 0) {
 			TEST_ASSERT_GREATER_THAN(12, split.hi);
@@ -156,7 +161,9 @@ TEST(calendar, SplitYearDays1) {
 }
 
 TEST(calendar, SplitYearDays2) {
-	for (int32_t eyd = -1; eyd <= 366; eyd++) {
+	int32_t eyd;
+
+	for (eyd = -1; eyd <= 366; eyd++) {
 		ntpcal_split split = ntpcal_split_yeardays(eyd, 1);
 		if (split.lo >= 0 && split.hi >= 0) {
 			TEST_ASSERT_GREATER_THAN(12, split.hi);
