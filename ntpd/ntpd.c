@@ -961,13 +961,12 @@ static void mainloop(void)
 		}
 
 		if (was_alarmed) {
-			intercept_alarm();
 			UNBLOCK_IO_AND_ALARM();
 			/*
 			 * Out here, signals are unblocked.  Call timer routine
 			 * to process expiry.
 			 */
-			timer();
+			intercept_timer();
 			was_alarmed = false;
 			BLOCK_IO_AND_ALARM();
 		}

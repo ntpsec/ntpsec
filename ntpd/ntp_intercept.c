@@ -185,12 +185,11 @@ long intercept_ntp_random(const char *legend)
     return rand;
 }
 
-void intercept_alarm(void)
+void intercept_timer(void)
 {
-    /* FIXME: replay mode, calling timer(), goes here */
-
     if (mode != none)
-	printf("event tick\n");
+	printf("event timer\n");
+    timer();
 }
 
 bool intercept_drift_read(const char *drift_file, double *drift)
