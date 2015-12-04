@@ -26,11 +26,11 @@ def build(ctx):
 	ntpdig_source = [
 		"ntpdig/crypto.c",
 		"common/file_handling.c",
-		"ntpdig/keyFile.c",
-		"ntpdig/kodDatabase.c",
-		"ntpdig/kodFile.c",
-		"ntpdig/packetHandling.c",
-		"ntpdig/packetProcessing.c",
+		"ntpdig/key_file.c",
+		"ntpdig/kod_database.c",
+		"ntpdig/kod_file.c",
+		"ntpdig/packet_handling.c",
+		"ntpdig/packet_processing.c",
 		"ntpdig/utilities.c",
 	] + common_source
 
