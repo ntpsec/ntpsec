@@ -1,10 +1,10 @@
 #include "config.h"
 #include "ntp_stdlib.h"
 
-extern "C" {
 #include "unity.h"
 #include "unity_fixture.h"
-}
+
+#include "caltime.h"
 
 TEST_GROUP(calendar);
 
@@ -13,35 +13,11 @@ TEST_SETUP(calendar) {}
 TEST_TEAR_DOWN(calendar) {}
 
 
-extern "C" {
 #include "ntp_calendar.h"
-}
 
-#include <string>
-#include <sstream>
+#define TEST_ASSERT_GREATER_THAN(a, b) TEST_ASSERT_TRUE(a > b)
 
-class calendarTest : public libntptest {
-protected:
-	static int leapdays(int year);
-
-	std::string CalendarToString(const calendar &cal);
-	std::string CalendarToString(const isodate &iso);
-	bool IsEqual(const calendar &expected, const calendar &actual);
-	bool IsEqual(const isodate &expected, const isodate &actual);
-
-	std::string DateToString(const calendar &cal);
-	std::string DateToString(const isodate &iso);
-	bool IsEqualDate(const calendar &expected, const calendar &actual);
-	bool IsEqualDate(const isodate &expected, const isodate &actual);
-};
-
-
-// ---------------------------------------------------------------------
-// test support stuff
-// ---------------------------------------------------------------------
-int
-calendarTest::leapdays(int year)
-{
+int leapdays(int year) {
 	if (year % 400 == 0)
 		return 1;
 	if (year % 100 == 0)
@@ -51,95 +27,73 @@ calendarTest::leapdays(int year)
 	return 0;
 }
 
-std::string 
-calendarTest::CalendarToString(const calendar &cal) {
-	std::ostringstream ss;
-	ss << cal.year << "-" << (u_int)cal.month << "-" << (u_int)cal.monthday
-	   << " (" << cal.yearday << ") " << (u_int)cal.hour << ":"
-	   << (u_int)cal.minute << ":" << (u_int)cal.second;
-	return ss.str();
-}
 
-std::string
-calendarTest:: CalendarToString(const isodate &iso) {
-	std::ostringstream ss;
-	ss << iso.year << "-" << (u_int)iso.week << "-" << (u_int)iso.weekday
-	   << (u_int)iso.hour << ":" << (u_int)iso.minute << ":" << (u_int)iso.second;
-	return ss.str();
-}
-
-bool
-calendarTest:: IsEqual(const calendar &expected, const calendar &actual) {
-	if (expected.year == actual.year &&
-	    (!expected.yearday || expected.yearday == actual.yearday) &&
-	    expected.month == actual.month &&
-	    expected.monthday == actual.monthday &&
-	    expected.hour == actual.hour &&
-	    expected.minute == actual.minute &&
-	    expected.second == actual.second) {
+bool IsEqualCA(const struct calendar *expected, const struct calendar *actual) {
+	if (expected->year == actual->year &&
+	    (!expected->yearday || expected->yearday == actual->yearday) &&
+	    expected->month == actual->month &&
+	    expected->monthday == actual->monthday &&
+	    expected->hour == actual->hour &&
+	    expected->minute == actual->minute &&
+	    expected->second == actual->second) {
 		return true;
 	} else {
-		return false
-		    << "expected: " << CalendarToString(expected) << " but was "
-		    << CalendarToString(actual);
+		printf("Expected: %s but was %s\n", CalendarToString(expected), CalendarToString(actual));
+		return false;
 	}
 }
 
-bool
-calendarTest:: IsEqual(const isodate &expected, const isodate &actual) {
-	if (expected.year == actual.year &&
-	    expected.week == actual.week &&
-	    expected.weekday == actual.weekday &&
-	    expected.hour == actual.hour &&
-	    expected.minute == actual.minute &&
-	    expected.second == actual.second) {
+
+bool IsEqualISO(const struct isodate *expected, const struct isodate *actual) {
+	if (expected->year == actual->year &&
+	    expected->week == actual->week &&
+	    expected->weekday == actual->weekday &&
+	    expected->hour == actual->hour &&
+	    expected->minute == actual->minute &&
+	    expected->second == actual->second) {
 		return true;
 	} else {
-		return false
-		    << "expected: " << CalendarToString(expected) << " but was "
-		    << CalendarToString(actual);
+		printf("Expected: %s but was %s\n", CalendarToStringISO(expected), CalendarToStringISO(actual));
+		return false;
 	}
 }
 
-std::string
-calendarTest:: DateToString(const calendar &cal) {
-	std::ostringstream ss;
-	ss << cal.year << "-" << (u_int)cal.month << "-" << (u_int)cal.monthday
-	   << " (" << cal.yearday << ")";
-	return ss.str();
+
+const char *DateToString(const struct calendar *cal) {
+	char *str = malloc(255);
+	snprintf(str, 255, "%hu-%u-%u(%u)\n", cal->year, (u_int)cal->month, (u_int)cal->monthday, cal->yearday);
+	return str;
 }
 
-std::string
-calendarTest:: DateToString(const isodate &iso) {
-	std::ostringstream ss;
-	ss << iso.year << "-" << (u_int)iso.week << "-" << (u_int)iso.weekday;
-	return ss.str();
+
+const char *DateToStringISO(const struct isodate *iso) {
+	char *str = malloc(255);
+	snprintf(str, 255, "%hu-%u-%u\n", iso->year, (u_int)iso->week, (u_int)iso->weekday);
+	return str;
+
 }
 
-bool
-calendarTest:: IsEqualDate(const calendar &expected, const calendar &actual) {
-	if (expected.year == actual.year &&
-	    (!expected.yearday || expected.yearday == actual.yearday) &&
-	    expected.month == actual.month &&
-	    expected.monthday == actual.monthday) {
-		return true;
+bool IsEqualDate(const struct calendar *expected, const struct calendar *actual) {
+	if (expected->year == actual->year &&
+	    (!expected->yearday || expected->yearday == actual->yearday) &&
+	    expected->month == actual->month &&
+	    expected->monthday == actual->monthday) {
+			return true;
 	} else {
-		return false
-		    << "expected: " << DateToString(expected) << " but was "
-		    << DateToString(actual);
+		printf("Expected: %s but was %s\n", DateToString(expected), DateToString(actual));
+		return false;
 	}
 }
 
-bool
-calendarTest:: IsEqualDate(const isodate &expected, const isodate &actual) {
-	if (expected.year == actual.year &&
-	    expected.week == actual.week &&
-	    expected.weekday == actual.weekday) {
+
+bool IsEqualDateISO(const struct isodate *expected, const struct isodate *actual) {
+	if (expected->year == actual->year &&
+	    expected->week == actual->week &&
+	    expected->weekday == actual->weekday) {
 		return true;
 	} else {
-		return false
-		    << "expected: " << DateToString(expected) << " but was "
-		    << DateToString(actual);
+		printf("Expected: %s but was %s\n", DateToStringISO(expected), DateToStringISO(actual));
+		return false;
 	}
 }
 
@@ -166,12 +120,12 @@ static const u_short real_month_days[2][14] = {
 // intermediate results would definitely overflow and the hi DWORD of
 // the 'vint64' is definitely needed.
 TEST(calendar, DaySplitMerge) {
-	for (int32 day = -1000000; day <= 1000000; day += 100) {
-		for (int32 sec = -100000; sec <= 186400; sec += 10000) {
+	for (int32_t day = -1000000; day <= 1000000; day += 100) {
+		for (int32_t sec = -100000; sec <= 186400; sec += 10000) {
 			vint64	     merge = ntpcal_dayjoin(day, sec);
 			ntpcal_split split = ntpcal_daysplit(&merge);
-			int32	     eday  = day;
-			int32	     esec  = sec;
+			int32_t	     eday  = day;
+			int32_t	     esec  = sec;
 
 			while (esec >= 86400) {
 				eday += 1;
@@ -189,12 +143,12 @@ TEST(calendar, DaySplitMerge) {
 }
 
 TEST(calendar, SplitYearDays1) {
-	for (int32 eyd = -1; eyd <= 365; eyd++) {
+	for (int32_t eyd = -1; eyd <= 365; eyd++) {
 		ntpcal_split split = ntpcal_split_yeardays(eyd, 0);
 		if (split.lo >= 0 && split.hi >= 0) {
 			TEST_ASSERT_GREATER_THAN(12, split.hi);
 			TEST_ASSERT_GREATER_THAN(real_month_days[0][split.hi+1], split.lo);
-			int32 tyd = real_month_table[0][split.hi] + split.lo;
+			int32_t tyd = real_month_table[0][split.hi] + split.lo;
 			TEST_ASSERT_EQUAL(eyd, tyd);
 		} else
 			TEST_ASSERT_TRUE(eyd < 0 || eyd > 364);
@@ -202,12 +156,12 @@ TEST(calendar, SplitYearDays1) {
 }
 
 TEST(calendar, SplitYearDays2) {
-	for (int32 eyd = -1; eyd <= 366; eyd++) {
+	for (int32_t eyd = -1; eyd <= 366; eyd++) {
 		ntpcal_split split = ntpcal_split_yeardays(eyd, 1);
 		if (split.lo >= 0 && split.hi >= 0) {
 			TEST_ASSERT_GREATER_THAN(12, split.hi);
 			TEST_ASSERT_GREATER_THAN(real_month_days[1][split.hi+1], split.lo);
-			int32 tyd = real_month_table[1][split.hi] + split.lo;
+			int32_t tyd = real_month_table[1][split.hi] + split.lo;
 			TEST_ASSERT_EQUAL(eyd, tyd);
 		} else
 			TEST_ASSERT_TRUE(eyd < 0 || eyd > 365);
@@ -215,17 +169,17 @@ TEST(calendar, SplitYearDays2) {
 }
 
 TEST(calendar, RataDie1) {
-	int32	 testDate = 1; // 0001-01-01 (proleptic date)
-	calendar expected = { 1, 1, 1, 1 };
-	calendar actual;
+	int32_t	 testDate = 1; // 0001-01-01 (proleptic date)
+	struct calendar expected = { 1, 1, 1, 1, 0, 0, 0, 0};
+	struct calendar actual;
 
 	ntpcal_rd_to_date(&actual, testDate);
-	TEST_ASSERT_TRUE(IsEqualDate(expected, actual));
+	TEST_ASSERT_TRUE(IsEqualDate(&expected, &actual));
 }
 
 // check last day of february for first 10000 years
 TEST(calendar, LeapYears1) {
-	calendar dateIn, dateOut;
+	struct calendar dateIn, dateOut;
 
 	for (dateIn.year = 1; dateIn.year < 10000; ++dateIn.year) {
 		dateIn.month	= 2;
@@ -234,13 +188,13 @@ TEST(calendar, LeapYears1) {
 
 		ntpcal_rd_to_date(&dateOut, ntpcal_date_to_rd(&dateIn));
 
-		TEST_ASSERT_TRUE(IsEqualDate(dateIn, dateOut));
+		TEST_ASSERT_TRUE(IsEqualDate(&dateIn, &dateOut));
 	}
 }
 
 // check first day of march for first 10000 years
 TEST(calendar, LeapYears2) {
-	calendar dateIn, dateOut;
+	struct calendar dateIn, dateOut;
 
 	for (dateIn.year = 1; dateIn.year < 10000; ++dateIn.year) {
 		dateIn.month	= 3;
@@ -248,7 +202,7 @@ TEST(calendar, LeapYears2) {
 		dateIn.yearday	= 60 + leapdays(dateIn.year);
 
 		ntpcal_rd_to_date(&dateOut, ntpcal_date_to_rd(&dateIn));
-		TEST_ASSERT_TRUE(IsEqualDate(dateIn, dateOut));
+		TEST_ASSERT_TRUE(IsEqualDate(&dateIn, &dateOut));
 	}
 }
 
@@ -258,8 +212,8 @@ TEST(calendar, LeapYears2) {
 // and the result of the inverse calculation must match the input no
 // invalid output can occur.)
 TEST(calendar, RoundTripDate) {
-	calendar truDate, expDate = { 1600, 0, 12, 31 };;
-	int32	 truRdn, expRdn	= ntpcal_date_to_rd(&expDate);
+	struct calendar truDate, expDate = { 1600, 0, 12, 31, 0, 0, 0, 0};
+	int32_t	 truRdn, expRdn	= ntpcal_date_to_rd(&expDate);
 	int	 leaps;
 
 	while (expDate.year < 2400) {
@@ -279,7 +233,7 @@ TEST(calendar, RoundTripDate) {
 				TEST_ASSERT_EQUAL(expRdn, truRdn);
 
 				ntpcal_rd_to_date(&truDate, truRdn);
-				TEST_ASSERT_TRUE(IsEqualDate(expDate, truDate));
+				TEST_ASSERT_TRUE(IsEqualDate(&expDate, &truDate));
 			}
 		}
 	}
@@ -288,8 +242,8 @@ TEST(calendar, RoundTripDate) {
 // Roundtrip testing on calyearstart
 TEST(calendar, RoundTripYearStart) {
 	static const time_t pivot = 0;
-	u_int32 ntp, expys, truys;
-	calendar date;
+	u_int32_t ntp, expys, truys;
+	struct calendar date;
 
 	for (ntp = 0; ntp < 0xFFFFFFFFu - 30000000u; ntp += 30000000u) {
 		truys = calyearstart(ntp, &pivot);
@@ -304,8 +258,8 @@ TEST(calendar, RoundTripYearStart) {
 // Roundtrip testing on calymonthstart
 TEST(calendar, RoundTripMonthStart) {
 	static const time_t pivot = 0;
-	u_int32 ntp, expms, trums;
-	calendar date;
+	u_int32_t ntp, expms, trums;
+	struct calendar date;
 
 	for (ntp = 0; ntp < 0xFFFFFFFFu - 2000000u; ntp += 2000000u) {
 		trums = calmonthstart(ntp, &pivot);
@@ -320,8 +274,8 @@ TEST(calendar, RoundTripMonthStart) {
 // Roundtrip testing on calweekstart
 TEST(calendar, RoundTripWeekStart) {
 	static const time_t pivot = 0;
-	u_int32 ntp, expws, truws;
-	isodate date;
+	u_int32_t ntp, expws, truws;
+	struct isodate date;
 
 	for (ntp = 0; ntp < 0xFFFFFFFFu - 600000u; ntp += 600000u) {
 		truws = calweekstart(ntp, &pivot);
@@ -336,8 +290,8 @@ TEST(calendar, RoundTripWeekStart) {
 // Roundtrip testing on caldaystart
 TEST(calendar, RoundTripDayStart) {
 	static const time_t pivot = 0;
-	u_int32 ntp, expds, truds;
-	calendar date;
+	u_int32_t ntp, expds, truds;
+	struct calendar date;
 
 	for (ntp = 0; ntp < 0xFFFFFFFFu - 80000u; ntp += 80000u) {
 		truds = caldaystart(ntp, &pivot);
