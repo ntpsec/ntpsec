@@ -1,10 +1,8 @@
 #include "config.h"
 #include "ntp_stdlib.h"
 
-extern "C" {
 #include "unity.h"
 #include "unity_fixture.h"
-}
 
 TEST_GROUP(msyslog);
 
@@ -13,18 +11,14 @@ TEST_SETUP(msyslog) {}
 TEST_TEAR_DOWN(msyslog) {}
 
 
-extern "C" {
 #include <stdio.h>
 #include <string.h>
 #include <errno.h>
+
 #ifndef VSNPRINTF_PERCENT_M
 // format_errmsg() is normally private to msyslog.c
 void	format_errmsg	(char *, size_t, const char *, int);
 #endif
-};
-
-class msyslogTest : public libntptest {
-};
 
 // msnprintf()
 TEST(msyslog, msnprintf)
@@ -88,7 +82,6 @@ TEST(msyslog, msnprintfBackslashPercent)
 
 TEST(msyslog, msnprintfHangingPercent)
 {
-	static char fmt[] = "percent then nul term then non-nul %\0oops!";
 	char exp_buf[64];
 	char act_buf[64];
 	int	exp_cnt;
@@ -96,8 +89,12 @@ TEST(msyslog, msnprintfHangingPercent)
 
 	ZERO(exp_buf);
 	ZERO(act_buf);
-	exp_cnt = snprintf(exp_buf, sizeof(exp_buf), fmt);
-	act_cnt = msnprintf(act_buf, sizeof(act_buf), fmt);
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wformat"
+	exp_cnt = snprintf(exp_buf, sizeof(exp_buf), "percent then nul term then non-nul %\0oops!");
+	act_cnt = msnprintf(act_buf, sizeof(act_buf), "percent then nul term then non-nul %\0oops!");
+#pragma clang diagnostic pop
+
 	TEST_ASSERT_EQUAL(exp_cnt, act_cnt);
 	TEST_ASSERT_EQUAL_STRING(exp_buf, act_buf);
 	TEST_ASSERT_EQUAL_STRING("", act_buf + 1 + strlen(act_buf));
