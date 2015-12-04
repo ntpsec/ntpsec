@@ -30,9 +30,7 @@ following kinds:
 
 12. Read of authkey file
 
-13. getaddrinfo() calls (TODO)
-
-14. Termination.
+13. Termination.
 
 We must support two modes of operation.  In "capture" mode, ntpd
 operates normally, logging all events.  In "replay" mode, ntpd accepts
@@ -319,6 +317,24 @@ intercept_leapsec_load_file(
     return loaded;
 }
 
+static void packet_dump(sockaddr_u *dest, struct pkt *pkt, int len)
+{
+    size_t i;
+    printf("%s %d:%d:%d:%d:%u:%u:%u:%d:%d:%d:%d",
+	   socktoa(dest),
+	   pkt->li_vn_mode, pkt->stratum, pkt->ppoll, pkt->precision,
+	   /* FIXME: might be better to dump these in fixed-point */
+	   pkt->rootdelay, pkt->rootdisp,
+	   pkt->refid,
+	   /* FIXME: might be better to dump last 4 in fixed-point */
+	   pkt->reftime.l_uf, pkt->org.l_uf,
+	   pkt->rec.l_uf, pkt->xmt.l_uf);
+    /* dump MAC as len - LEN_PKT_NOMAC chars in hex */
+    for (i = 0; i < len - LEN_PKT_NOMAC; i++)
+	printf("%02x", pkt->exten[i]);
+    fputs("\n", stdout);
+}
+
 void intercept_sendpkt(const char *legend,
 		  sockaddr_u *dest, struct interface *ep, int ttl,
 		  struct pkt *pkt, int len)
@@ -327,19 +343,8 @@ void intercept_sendpkt(const char *legend,
 	sendpkt(dest, ep, ttl, pkt, len);
 
     if (mode != none) {
-	size_t i;
-	printf("event sendpkt \"%s\" %s %d:%d:%d:%d:%u:%u:%u:%d:%d:%d:%d",
-	       legend, socktoa(dest),
-	       pkt->li_vn_mode, pkt->stratum, pkt->ppoll, pkt->precision,
-	       /* FIXME: might be better to dump these in fixed-point */
-	       pkt->rootdelay, pkt->rootdisp,
-	       pkt->refid,
-	       /* FIXME: might be better to dump last 4 in fixed-point */
-	       pkt->reftime.l_uf, pkt->org.l_uf,
-	       pkt->rec.l_uf, pkt->xmt.l_uf);
-	/* dump MAC as len - LEN_PKT_NOMAC chars in hex */
-	for (i = 0; i < len - LEN_PKT_NOMAC; i++)
-	    printf("%02x", pkt->exten[i]);
+	printf("event sendpkt \"%s\"", legend);
+	packet_dump(dest, pkt, len);
 	fputs("\n", stdout);
     }
 
