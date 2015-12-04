@@ -1,0 +1,161 @@
+= A Tour of the NTP Internals =
+
+This document is intended to be helpful to people trying to understand
+and modify the NTP code.  It aims to explain how the pieces fit
+together. It also explains some oddities that are more understandable
+if you know more about the history of this (rather old) codebase.
+
+If you learn a piece of the code well enough to do so, please add
+to this document.  Having tricks and traps that impeded understanding
+explained here is especially valuable.
+
+However, try not to replicate comments here; it's better to point
+at where they live in the code.  This document is 
+
+== Key Types ==
+
+=== l_fp, s_fp, u_fp ===
+
+C doesn't have any native fixed-point types, only float types.  In
+order to do certain time calculations without loss of precision, NTP
+home-brews three fixed-point types of its own.  Of these l_fp is the
+most common, with 32 bits of precision in both integer and fractional
+parts. Gory details are in include/ntp_fp.h.
+
+=== vint64 ===
+
+The vint64 type is a historical relic.  NTP was written well before
+the 64-bit word size became common. While compilers on 32-bit machines
+sometimes had have have "long long" as an integral 64-bit type, this
+was not guaranteed before C99.
+
+Thus, NTP carries a "variant 64-bit int" type that is actually a union
+with several different interpretations. Support is mainly in
+libntp/vint64ops.c.  If that code confuses you, don't feel slow; it
+really is ugly and hard to understand, and would have been removed
+already if it were not deeply intertwined with the calendar code.
+
+Someday all operations on vint64s will be replaced by code using
+int64_t or uint64_t scalars, and this section will go away.
+
+=== refid ===
+
+A refid is not a type of its own, but a convention that overloads
+different kinds of information in a 32-bit field that occurs in a
+couple of different places internally.
+
+In a clock sample (a time-sync packet with stratum number 1), the
+refid is interpreted as 4 ASCII characters of clock identification.
+In a time-synchronization packet with stratum 2 or higher the refid
+identifies the originating time server; it may be an IPv4 or a hash of
+an IPv6 address.  (If and when the protocol is fully redesigned for
+IPv6 the field length will go to 128 bits and it will become a full
+IPv6 address.)
+
+Internally the refid is used for loop detection. (Which is why hashing
+IPv6 addresses is risky - hash collisions happen.) It's also part of
+ntpq's display in the status line for a reference clock, if you have
+one locally attached.
+
+The driver structure for reference clocks has a refid field that is
+(by default) copied into samples issued from that clock. It is
+not necessarily unique to a driver type; notably, all GPS driver
+types ship the ID "GPS". It is possible to fudge this ID to
+something more informative in the ntpd configuration command
+for the driver.
+
+The conflation of ID-for-humans with loop-detection cookie is not quite
+the design error it looks like, as refclocks aren't implicated in
+loop detection.
+
+=== struct timespec vs. struct timeval ===
+
+These aren't local types themselves - both are standardized in
+ANSI/POSIX.  They're both second/subsecond pairs intended to represent
+time without loss of precision due to float operations.  The
+difference is that a timespec represents nanoseconds, while a timeval
+represents only nanonseconds.
+
+Historically, struct timeval is associated with the minicomputer-based
+Berkeley Unixes of the 1980s, designed when processor clocks were
+several orders of magnitude slower than they became after the turn of
+the millennium.  The struct timespec is newer and associated with
+ANSI/POSIX standardization.
+
+The NTP code was written well before calls like clock_gettime(2) that
+use it were standardized.  Thus, when you see a struct timeval in the
+code, it can mean one of two things. Either it's related to a system
+call dating from the BSD era (usually select(2) or ntp_gettime(2)), or
+it's very old time-computation code that has never been updated to
+use nanosecond precision. As NTP is cleaned up, instances of the
+second kind will become less common.
+
+=== struct peer ===
+
+In ntpd, there are peer control blocks - one per upstream synchronization
+source - that have an IP address in them.  That's what the main
+control logic works with.
+
+The peer buffer holds the last 8 samples from the upstream source.
+The normal logic uses the one with the lowest round trip time.  That's
+a hack to minimize errors from queuing delays out on the big bad
+internet.  Refclock data always has a round trip time of 0.
+
+== ntpd control flow ==
+
+In normal operation, after initialization, ntpd simply loops forever
+waiting for a UDP packet to arrive on some set of open interfaces, or
+a clock sample to arrive from a locally-attached reference clock.
+Incoming packets and clock samples are fed to a protocol state
+machine, which may generate UDP sends to peers.  This main loop is
+capured by a function in ntpd/ntpd.c tellingly named 'mainloop()'.
+
+This main loop is interrupted once per second by a timer tick that
+sets an alarm flag visible to the mainloop() logic.  When execution
+gets back around to where that flag is checked, a timer() function may
+fire.  This is used to adjust the system clock in time and frequency,
+implement the kiss-o'-death function and the association polling
+function.
+
+There may be one asynchronous thread.  It does DNS lookups of server
+and pool hostnames.  This is intended to avoid adding startup delay
+and jitter to the time synchronization logic due to address lookups
+of unpredictable length.
+
+=== Refclock management ===
+
+There is an illuminating comment in ntpd/ntp_refclock.c that begins
+"Reference clock support is provided here by maintaining the fiction
+that the clock is actually a peer."  The code mostly hides the
+difference between clock samples and sync updates from peers.
+
+Internally, each refclock has a FIFO holding the last ~64 samples.  For
+things like NMEA, each time the driver gets a valid sample it adds it to the
+FIFO.  For the Atom/PPS driver there is a hook that gets called/polled each
+second.  If it finds good data, it adds a sample to the FIFO.  The FIFO is
+actually a ring buffer.  On overflow, old samples are dropped.
+
+At the polling interval, the driver is "polled".  (Note the possible
+confusion on "poll".)  That is parallel with sending a packet to the
+device, if required - some have to be polled.  The driver can call
+back and say "process everything in the FIFO", or do something or set
+a flag and call back later.
+
+The process everything step sorts the contents of the FIFO, then discards
+outliers, roughly 1/3 of the samples, and then figures out the average and
+injects that into the peer buffer for the refclock.
+
+== ntpdig and libevent2 ==
+
+You may notice that ntpdig is written in a different style than the
+rest of the suite, and has a dependency on libevent2 that the rest of
+the code does not use.  This is because ntpdig, back when it was
+called sntp, was written separately from the rest of the NTP suite
+and incorporated wholesale after the fact.
+
+The libevent API provides a mechanism to execute a callback function
+when a specific event occurs on a file descriptor or after a timeout
+has been reached.  Other NTP programs, notably ntpd and ntpq, could
+use it, but would require serious rewrites to do so.
+
+// end
