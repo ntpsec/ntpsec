@@ -562,6 +562,7 @@ TEST(leapsec, ls2009limdata) {
 // add dynamic leap second (like from peer/clock)
 TEST(leapsec, addDynamic) {
 	bool           rc;
+	int            idx;
 
 	static const uint32_t insns[] = {
 		2982009600,	//	29	# 1 Jul 1994
@@ -577,7 +578,7 @@ TEST(leapsec, addDynamic) {
 	rc = setup_load_table(leap2, 0);
 	TEST_ASSERT_TRUE(rc);
 
-	for (int idx=1; insns[idx]; ++idx) {
+	for (idx=1; insns[idx]; ++idx) {
 	    rc = leapsec_add_dyn(true, insns[idx] - 20*SECSPERDAY - 100, NULL);
 		TEST_ASSERT_TRUE(rc);
 	}
@@ -591,6 +592,7 @@ TEST(leapsec, addDynamic) {
 // add fixed leap seconds (like from network packet)
 TEST(leapsec, addFixed) {
 	bool           rc;
+    int            idx;
 
 	static const struct { uint32_t tt; int of; } insns[] = {
 		{2982009600, 29},//	# 1 Jul 1994
@@ -607,7 +609,7 @@ TEST(leapsec, addFixed) {
 	TEST_ASSERT_TRUE(rc);
 
 	// try to get in BAD time stamps...
-	for (int idx=0; insns[idx].tt; ++idx) {
+	for (idx=0; insns[idx].tt; ++idx) {
 	    rc = leapsec_add_fix(
 		insns[idx].of,
 		insns[idx].tt - 20*SECSPERDAY - 100,
@@ -616,7 +618,7 @@ TEST(leapsec, addFixed) {
 		TEST_ASSERT_FALSE(rc);
 	}
 	// no do it right
-	for (int idx=0; insns[idx].tt; ++idx) {
+	for (idx=0; insns[idx].tt; ++idx) {
 		rc = leapsec_add_fix(
 		    insns[idx].of,
 		    insns[idx].tt,
@@ -911,14 +913,14 @@ TEST(leapsec, ls2012seqInsDumb) {
 TEST(leapsec, lsEmptyTableDumb) {
 	bool           rc;
 	leap_result_t  qr;
-
+	uint32_t       t;
 	const time_t   pivot = lsec2012;
 	const uint32_t t0   = lsec2012 - 10;
 	const uint32_t tE   = lsec2012 + 10;
 
 	TEST_ASSERT_EQUAL(0, leapsec_electric(-1));
 
-	for (uint32_t t = t0; t != tE; ++t) {
+	for (t = t0; t != tE; ++t) {
 		rc = leapsec_query(&qr, t, &pivot);
 		TEST_ASSERT_FALSE(rc);
 		TEST_ASSERT_EQUAL(0,             qr.warped   );
@@ -931,7 +933,7 @@ TEST(leapsec, lsEmptyTableDumb) {
 TEST(leapsec, lsEmptyTableElectric) {
 	bool           rc;
 	leap_result_t  qr;
-
+    time_t         t;
 	leapsec_electric(1);
 	TEST_ASSERT_TRUE(leapsec_electric(-1));
 
@@ -939,7 +941,7 @@ TEST(leapsec, lsEmptyTableElectric) {
 	const uint32_t t0 = lsec2012 - 10;
 	const uint32_t tE = lsec2012 + 10;
 
-	for (time_t t = t0; t != tE; ++t) {
+	for (t = t0; t != tE; ++t) {
 		rc = leapsec_query(&qr, t, &pivot);
 		TEST_ASSERT_FALSE(rc);
 		TEST_ASSERT_EQUAL(0,             qr.warped   );
