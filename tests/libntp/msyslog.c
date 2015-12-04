@@ -153,7 +153,9 @@ TEST_GROUP_RUNNER(msyslog) {
 	RUN_TEST_CASE(msyslog, msnprintfBackslashLiteralPercentm)
 	RUN_TEST_CASE(msyslog, msnprintfBackslashPercent)
 	RUN_TEST_CASE(msyslog, msnprintfHangingPercent)
+#ifndef VSNPRINTF_PERCENT_M
 	RUN_TEST_CASE(msyslog, format_errmsgHangingPercent)
+#endif
 	RUN_TEST_CASE(msyslog, msnprintfNullTarget)
 	RUN_TEST_CASE(msyslog, msnprintfTruncate)
 }
