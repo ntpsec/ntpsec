@@ -10,7 +10,6 @@
 
 #include <sys/time.h>
 
-#define GETTIMEOFDAY gettimeofday /* XXX: why? */
 #define EXPECT_DOUBLE_EQ(a, b) {} /* XXX: Not part of Unity */
 
 
@@ -38,7 +37,7 @@ TEST(packetHandling, GenerateUnauthenticatedPacket) {
 	struct timeval xmt;
 	l_fp expected_xmt, actual_xmt;
 
-	GETTIMEOFDAY(&xmt, NULL);
+	gettimeofday(&xmt, NULL);
 	xmt.tv_sec += JAN_1970;
 
 	TEST_ASSERT_EQUAL(LEN_PKT_NOMAC,
@@ -70,7 +69,7 @@ TEST(packetHandling, GenerateAuthenticatedPacket) {
 	memcpy(testkey.key_seq, "123456789", testkey.key_len);
 	memcpy(testkey.type, "MD5", 3);
 
-	GETTIMEOFDAY(&xmt, NULL);
+	gettimeofday(&xmt, NULL);
 	xmt.tv_sec += JAN_1970;
 
 	TEST_ASSERT_EQUAL(EXPECTED_PKTLEN,
