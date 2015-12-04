@@ -104,10 +104,9 @@ def build(ctx):
 	)
 
 
-"""
 	ntpd_source = [
 		"ntpd/leapsec.c"
-	] + common_source + ["common/caltime.c"]
+	] + common_source
 
 	ctx.ntp_test(
 		features    = "c cprogram bld_include src_include libisc_include test",
@@ -122,4 +121,3 @@ def build(ctx):
 		use			= "ntpd_lib libntpd_obj unity ntp isc M PTHREAD CRYPTO RT",
         source      = ntpd_source,
 	)
-"""

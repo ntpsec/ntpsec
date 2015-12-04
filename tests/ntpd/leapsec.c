@@ -445,7 +445,7 @@ TEST(leapsec, ls2009faraway) {
   	bool           rc;
 	leap_result_t  qr;
 
-	rc = setup_load_table(leap1, 1);
+	rc = setup_load_table(leap1, 0);
 	TEST_ASSERT_EQUAL(1, rc);
 
 	// test 60 days before leap. Nothing scheduled or indicated.
@@ -462,7 +462,7 @@ TEST(leapsec, ls2009weekaway) {
 	bool           rc;
 	leap_result_t  qr;
 
-	rc = setup_load_table(leap1, 1);
+	rc = setup_load_table(leap1, 0);
 	TEST_ASSERT_EQUAL(1, rc);
 
 	// test 7 days before leap. Leap scheduled, but not yet indicated.
@@ -479,7 +479,7 @@ TEST(leapsec, ls2009houraway) {
 	bool           rc;
 	leap_result_t  qr;
 
-	rc = setup_load_table(leap1, 1);
+	rc = setup_load_table(leap1, 0);
 	TEST_ASSERT_EQUAL(1, rc);
 
 	// test 1 hour before leap. 61 true seconds to go.
@@ -496,7 +496,7 @@ TEST(leapsec, ls2009secaway) {
 	bool           rc;
 	leap_result_t  qr;
 
-	rc = setup_load_table(leap1, 1);
+	rc = setup_load_table(leap1, 0);
 	TEST_ASSERT_TRUE(rc);
 
 	// test 1 second before leap (last boundary...) 2 true seconds to go.
@@ -513,7 +513,7 @@ TEST(leapsec, ls2009onspot) {
 	bool           rc;
 	leap_result_t  qr;
 
-	rc = setup_load_table(leap1, 1);
+	rc = setup_load_table(leap1, 0);
 	TEST_ASSERT_TRUE(rc);
 
 	// test on-spot: treat leap second as already gone.
@@ -644,7 +644,7 @@ TEST(leapsec, ls2009seqInsElectric) {
 	bool           rc;
 	leap_result_t  qr;
 
-	rc = setup_load_table(leap1, 1);
+	rc = setup_load_table(leap1, 0);
 	TEST_ASSERT_TRUE(rc);
 	leapsec_electric(1);
 	TEST_ASSERT_TRUE(leapsec_electric(-1));
@@ -687,7 +687,7 @@ TEST(leapsec, ls2009seqInsDumb) {
 	bool           rc;
 	leap_result_t  qr;
 
-	rc = setup_load_table(leap1, 1);
+	rc = setup_load_table(leap1, 0);
 	TEST_ASSERT_TRUE(rc);
 	TEST_ASSERT_EQUAL(0, leapsec_electric(-1));
 
@@ -735,7 +735,7 @@ TEST(leapsec, ls2009seqDelElectric) {
 	bool           rc;
 	leap_result_t  qr;
 
-	rc = setup_load_table(leap3, 1);
+	rc = setup_load_table(leap3, 0);
 	TEST_ASSERT_TRUE(rc);
 	leapsec_electric(1);
 	TEST_ASSERT_TRUE(leapsec_electric(-1));
@@ -778,7 +778,7 @@ TEST(leapsec, ls2009seqDelDumb) {
 	bool           rc;
 	leap_result_t  qr;
 
-	rc = setup_load_table(leap3, 1);
+	rc = setup_load_table(leap3, 0);
 	TEST_ASSERT_TRUE(rc);
 	TEST_ASSERT_EQUAL(0, leapsec_electric(-1));
 
@@ -820,7 +820,7 @@ TEST(leapsec, ls2012seqInsElectric) {
 	bool           rc;
 	leap_result_t  qr;
 
-	rc = setup_load_table(leap1, 1);
+	rc = setup_load_table(leap1, 0);
 	TEST_ASSERT_TRUE(rc);
 	leapsec_electric(1);
 	TEST_ASSERT_TRUE(leapsec_electric(-1));
@@ -863,7 +863,7 @@ TEST(leapsec, ls2012seqInsDumb) {
 	bool           rc;
 	leap_result_t  qr;
 
-	rc = setup_load_table(leap1, 1);
+	rc = setup_load_table(leap1, 0);
 	TEST_ASSERT_TRUE(rc);
 	TEST_ASSERT_EQUAL(0, leapsec_electric(-1));
 
