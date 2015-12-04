@@ -101,10 +101,14 @@ TEST(packetProcessing, TooShortExtensionFieldLength) {
 	 * This lengths must be multiples of 4 bytes, which gives
 	 * a minimum of 4 byte extension field length. */
 /* warning: array index 7 is past the end of the array (which contains 6 elements) [-Warray-bounds] */
+#ifdef __clang__
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Warray-bounds"
+#endif
 	testpkt.exten[7] = htonl(3); // 3 bytes is too short.
+#ifdef __clang__
 #pragma clang diagnostic pop
+#endif
 
 	/* We send in a pkt_len of header size + 4 byte extension
 	 * header + 24 byte MAC, this prevents the length error to

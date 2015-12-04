@@ -90,11 +90,15 @@ TEST(msyslog, msnprintfHangingPercent)
 	ZERO(exp_buf);
 	ZERO(act_buf);
 /* warning: format string contains '\0' within the string body [-Wformat] */
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wformat"
+#ifdef __clang__
+#  pragma clang diagnostic push
+#  pragma clang diagnostic ignored "-Wformat"
+#endif
 	exp_cnt = snprintf(exp_buf, sizeof(exp_buf), "percent then nul term then non-nul %\0oops!");
 	act_cnt = msnprintf(act_buf, sizeof(act_buf), "percent then nul term then non-nul %\0oops!");
-#pragma clang diagnostic pop
+#ifdef __clang__
+#  pragma clang diagnostic pop
+#endif
 
 	TEST_ASSERT_EQUAL(exp_cnt, act_cnt);
 	TEST_ASSERT_EQUAL_STRING(exp_buf, act_buf);
