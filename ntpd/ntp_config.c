@@ -2735,6 +2735,10 @@ config_nic_rules(
 
 	curr_node = HEAD_PFIFO(ptree->nic_rules);
 
+	/* we don't want to accept packets if we're replating a log */
+	if (intercept_get_mode() == replay)
+	    return;
+
 	if (curr_node != NULL && have_interface_option) {
 		msyslog(LOG_ERR,
 			"interface/nic rules are not allowed with --interface (-I) or --novirtualips (-L)%s",
