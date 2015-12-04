@@ -34,7 +34,7 @@ static void RunAllTests(void)
 	RUN_TEST_GROUP(kodDatabase);
 	RUN_TEST_GROUP(kodFile);
 	RUN_TEST_GROUP(packetHandling);
-//	RUN_TEST_GROUP(packetProcessing);
+	RUN_TEST_GROUP(packetProcessing);
 	RUN_TEST_GROUP(utilities);
 #endif
 
