@@ -9,9 +9,13 @@
 #include "ntp.h"
 
 #include <sys/time.h>
+#include <stdlib.h>
 
-#define EXPECT_DOUBLE_EQ(a, b) {} /* XXX: Not part of Unity */
 
+#define EXPECT_DOUBLE_EQ(a, b) { \
+	float max = 0.0000000001; \
+	TEST_ASSERT_TRUE(abs(a - b) < max); \
+}
 
 static bool LfpEquality(const l_fp* expected, const l_fp* actual) {
 	if (L_ISEQU(expected, actual)) {
@@ -33,6 +37,7 @@ TEST_SETUP(packetHandling) {}
 TEST_TEAR_DOWN(packetHandling) {}
 
 TEST(packetHandling, GenerateUnauthenticatedPacket) {
+
 	struct pkt testpkt;
 	struct timeval xmt;
 	l_fp expected_xmt, actual_xmt;
