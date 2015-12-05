@@ -80,9 +80,14 @@ refclock_map = {
 	22: {
 		"descr":	"PPS Clock Discipline",
 		"define":	"CLOCK_ATOM",
-		"require":	["ppsapi"],
 		"file":		"atom"
 	},
+
+        24: {
+                "descr":        "Garmin GPS-18 in binary mode",
+                "define":       "CLOCK_GARMIN",
+                "file":         "garmin"
+        },
 
 	26: {
 		"descr":	"Hewlett Packard 58503A GPS Receiver",
