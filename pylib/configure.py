@@ -34,7 +34,7 @@ def cmd_configure(ctx):
 	if ctx.options.enable_saveconfig:
 		ctx.define("SAVECONFIG", 1)
 
-	if ctx.options.enable_debug:
+	if not ctx.options.disable_debug:
 		ctx.define("DEBUG", 1)
 		ctx.env.BISONFLAGS += ["--debug"]
 
@@ -485,6 +485,12 @@ def cmd_configure(ctx):
 	msg_setting("CFLAGS", " ".join(ctx.env.CFLAGS))
 	msg_setting("LDFLAGS", " ".join(ctx.env.LDFLAGS))
 	msg_setting("PREFIX", ctx.env.PREFIX)
-	msg_setting("Debug Support", yesno(ctx.options.enable_debug))
+	msg_setting("Debug Support", yesno(not ctx.options.disable_debug))
 	msg_setting("Refclocks", ", ".join(ctx.env.REFCLOCK_LIST))
 	msg_setting("Build Manpages", yesno(ctx.env.BIN_A2X and not ctx.env.DISABLE_MANPAGE))
+
+	if ctx.options.enable_debug:
+		msg("")
+		msg("*** --enable-debug ignored.  (default on now)")
+		msg("")
+
