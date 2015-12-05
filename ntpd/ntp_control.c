@@ -477,7 +477,7 @@ static const struct ctl_var peer_var[] = {
 	{ CP_CONFIG,	RO, "config" },		/* 1 */
 	{ CP_AUTHENABLE, RO,	"authenable" },	/* 2 */
 	{ CP_AUTHENTIC, RO, "authentic" },	/* 3 */
-	{ CP_SRCADR,	RO, "srcadr" },		/* 4 */
+	{ CP_SRCADR,	RO, "srcaddr" },		/* 4 */
 	{ CP_SRCPORT,	RO, "srcport" },	/* 5 */
 	{ CP_DSTADR,	RO, "dstadr" },		/* 6 */
 	{ CP_DSTPORT,	RO, "dstport" },	/* 7 */
@@ -821,7 +821,7 @@ save_config(
 		NLOG(NLOG_SYSINFO)
 			msyslog(LOG_NOTICE,
 				"saveconfig from %s rejected due to nomodify restriction",
-				stoa(&rbufp->recv_srcadr));
+				stoa(&rbufp->recv_srcaddr));
 		sys_restricted++;
 		return;
 	}
@@ -835,7 +835,7 @@ save_config(
 		NLOG(NLOG_SYSINFO)
 			msyslog(LOG_NOTICE,
 				"saveconfig from %s rejected, no saveconfigdir",
-				stoa(&rbufp->recv_srcadr));
+				stoa(&rbufp->recv_srcaddr));
 		return;
 	}
 
@@ -873,7 +873,7 @@ save_config(
 		ctl_flushpkt(0);
 		msyslog(LOG_NOTICE,
 			"saveconfig with path from %s rejected",
-			stoa(&rbufp->recv_srcadr));
+			stoa(&rbufp->recv_srcaddr));
 		return;
 	}
 
@@ -893,13 +893,13 @@ save_config(
 			 filename);
 		msyslog(LOG_ERR,
 			"saveconfig %s from %s failed", filename,
-			stoa(&rbufp->recv_srcadr));
+			stoa(&rbufp->recv_srcaddr));
 	} else {
 		snprintf(reply, sizeof(reply),
 			 "Configuration saved to %s", filename);
 		msyslog(LOG_NOTICE,
 			"Configuration saved to %s (requested by %s)",
-			fullpath, stoa(&rbufp->recv_srcadr));
+			fullpath, stoa(&rbufp->recv_srcaddr));
 		/*
 		 * save the output filename in system variable
 		 * savedconfig, retrieved with:
@@ -945,7 +945,7 @@ process_control(
 	 * Save the addresses for error responses
 	 */
 	numctlreq++;
-	rmt_addr = &rbufp->recv_srcadr;
+	rmt_addr = &rbufp->recv_srcaddr;
 	lcl_inter = rbufp->dstadr;
 	pkt = (struct ntp_control *)&rbufp->recv_pkt;
 
@@ -1753,7 +1753,7 @@ ctl_putsys(
 
 	case CS_PEERADR:
 		if (sys_peer != NULL && sys_peer->dstadr != NULL)
-			ss = sptoa(&sys_peer->srcadr);
+			ss = sptoa(&sys_peer->srcaddr);
 		else
 			ss = "0.0.0.0:0";
 		ctl_putunqstr(sys_var[CS_PEERADR].text, ss, strlen(ss));
@@ -2356,11 +2356,11 @@ ctl_putpeer(
 		break;
 
 	case CP_SRCADR:
-		ctl_putadr(peer_var[id].text, 0, &p->srcadr);
+		ctl_putadr(peer_var[id].text, 0, &p->srcaddr);
 		break;
 
 	case CP_SRCPORT:
-		ctl_putuint(peer_var[id].text, SRCPORT(&p->srcadr));
+		ctl_putuint(peer_var[id].text, SRCPORT(&p->srcaddr));
 		break;
 
 	case CP_SRCHOST:
@@ -3258,7 +3258,7 @@ static void configure(
 		NLOG(NLOG_SYSINFO)
 			msyslog(LOG_NOTICE,
 				"runtime config from %s rejected due to nomodify restriction",
-				stoa(&rbufp->recv_srcadr));
+				stoa(&rbufp->recv_srcaddr));
 		sys_restricted++;
 		return;
 	}
@@ -3275,7 +3275,7 @@ static void configure(
 		ctl_flushpkt(0);
 		msyslog(LOG_NOTICE,
 			"runtime config from %s rejected: request too long",
-			stoa(&rbufp->recv_srcadr));
+			stoa(&rbufp->recv_srcaddr));
 		return;
 	}
 
@@ -3300,13 +3300,13 @@ static void configure(
 	DPRINTF(1, ("Got Remote Configuration Command: %s\n",
 		remote_config.buffer));
 	msyslog(LOG_NOTICE, "%s config: %s",
-		stoa(&rbufp->recv_srcadr),
+		stoa(&rbufp->recv_srcaddr),
 		remote_config.buffer);
 
 	if (replace_nl)
 		remote_config.buffer[data_count - 1] = '\n';
 
-	config_remotely(&rbufp->recv_srcadr);
+	config_remotely(&rbufp->recv_srcaddr);
 
 	/*
 	 * Check if errors were reported. If not, output 'Config
@@ -3329,7 +3329,7 @@ static void configure(
 	if (remote_config.no_errors > 0)
 		msyslog(LOG_NOTICE, "%d error in %s config",
 			remote_config.no_errors,
-			stoa(&rbufp->recv_srcadr));
+			stoa(&rbufp->recv_srcaddr));
 }
 
 
@@ -3389,7 +3389,7 @@ static void generate_nonce(
 {
 	uint32_t derived;
 
-	derived = derive_nonce(&rbufp->recv_srcadr,
+	derived = derive_nonce(&rbufp->recv_srcaddr,
 			       rbufp->recv_time.l_ui,
 			       rbufp->recv_time.l_uf);
 	snprintf(nonce, nonce_octets, "%08x%08x%08x",
@@ -3420,7 +3420,7 @@ static int validate_nonce(
 
 	ts.l_ui = (uint32_t)ts_i;
 	ts.l_uf = (uint32_t)ts_f;
-	derived = derive_nonce(&rbufp->recv_srcadr, ts.l_ui, ts.l_uf);
+	derived = derive_nonce(&rbufp->recv_srcaddr, ts.l_ui, ts.l_uf);
 	intercept_get_systime(__func__, &now_delta);
 	L_SUB(&now_delta, &ts);
 
@@ -3690,7 +3690,7 @@ static void read_mru_list(
 		NLOG(NLOG_SYSINFO)
 			msyslog(LOG_NOTICE,
 				"mrulist from %s rejected due to nomrulist restriction",
-				stoa(&rbufp->recv_srcadr));
+				stoa(&rbufp->recv_srcaddr));
 		sys_restricted++;
 		return;
 	}
@@ -4308,7 +4308,7 @@ read_clockstatus(
 	 * status.
 	 */
 	cs.kv_list = NULL;
-	refclock_control(&peer->srcadr, NULL, &cs);
+	refclock_control(&peer->srcaddr, NULL, &cs);
 	kv = cs.kv_list;
 	/*
 	 * Look for variables in the packet.
@@ -4413,7 +4413,7 @@ set_trap(
 	 * Call ctlsettrap() to do the work.  Return
 	 * an error if it can't assign the trap.
 	 */
-	if (!ctlsettrap(&rbufp->recv_srcadr, rbufp->dstadr, traptype,
+	if (!ctlsettrap(&rbufp->recv_srcaddr, rbufp->dstadr, traptype,
 			(int)res_version))
 		ctl_error(CERR_NORESOURCE);
 	ctl_flushpkt(0);
@@ -4444,7 +4444,7 @@ unset_trap(
 	/*
 	 * Call ctlclrtrap() to clear this out.
 	 */
-	if (!ctlclrtrap(&rbufp->recv_srcadr, rbufp->dstadr, traptype))
+	if (!ctlclrtrap(&rbufp->recv_srcaddr, rbufp->dstadr, traptype))
 		ctl_error(CERR_BADASSOC);
 	ctl_flushpkt(0);
 }
@@ -4677,10 +4677,10 @@ report_event(
 
 		peer->last_event = errlast;
 		peer->num_events++;
-		if (ISREFCLOCKADR(&peer->srcadr))
-			src = refnumtoa(&peer->srcadr);
+		if (ISREFCLOCKADR(&peer->srcaddr))
+			src = refnumtoa(&peer->srcaddr);
 		else
-			src = stoa(&peer->srcadr);
+			src = stoa(&peer->srcaddr);
 
 		snprintf(statstr, sizeof(statstr),
 		    "%s %04x %02x %s", src,
@@ -4739,7 +4739,7 @@ report_event(
 			struct ctl_var *kv;
 
 			cs.kv_list = NULL;
-			refclock_control(&peer->srcadr, NULL, &cs);
+			refclock_control(&peer->srcaddr, NULL, &cs);
 
 			ctl_puthex("refclockstatus",
 				   ctlclkstatus(&cs));

@@ -389,7 +389,7 @@ collect_timing(struct recvbuf *rb, const char *tag, int count, l_fp *dts)
 	snprintf(buf, sizeof(buf), "%s %d %s %s",
 		 (rb != NULL)
 		     ? ((rb->dstadr != NULL)
-			    ? stoa(&rb->recv_srcadr)
+			    ? stoa(&rb->recv_srcaddr)
 			    : "-REFCLOCK-")
 		     : "-",
 		 count, lfptoa(dts, 9), tag);
@@ -3471,16 +3471,16 @@ read_network_packet(
 		return (buflen);
 	}
 
-	fromlen = sizeof(rb->recv_srcadr);
+	fromlen = sizeof(rb->recv_srcaddr);
 
 #ifndef USE_PACKET_TIMESTAMP
 	rb->recv_length = recvfrom(fd, (char *)&rb->recv_space,
 				   sizeof(rb->recv_space), 0,
-				   &rb->recv_srcadr.sa, &fromlen);
+				   &rb->recv_srcaddr.sa, &fromlen);
 #else
 	iovec.iov_base        = &rb->recv_space;
 	iovec.iov_len         = sizeof(rb->recv_space);
-	msghdr.msg_name       = &rb->recv_srcadr;
+	msghdr.msg_name       = &rb->recv_srcaddr;
 	msghdr.msg_namelen    = fromlen;
 	msghdr.msg_iov        = &iovec;
 	msghdr.msg_iovlen     = 1;
@@ -3502,7 +3502,7 @@ read_network_packet(
 		return (buflen);
 	} else if (buflen < 0) {
 		msyslog(LOG_ERR, "recvfrom(%s) fd=%d: %m",
-			stoa(&rb->recv_srcadr), fd);
+			stoa(&rb->recv_srcaddr), fd);
 		DPRINTF(5, ("read_network_packet: fd=%d dropped (bad recvfrom)\n",
 			    fd));
 		freerecvbuf(rb);
@@ -3510,7 +3510,7 @@ read_network_packet(
 	}
 
 	DPRINTF(3, ("read_network_packet: fd=%d length %d from %s\n",
-		    fd, buflen, stoa(&rb->recv_srcadr)));
+		    fd, buflen, stoa(&rb->recv_srcaddr)));
 
 	/*
 	** Bug 2672: Some OSes (MacOSX and Linux) don't block spoofed ::1
@@ -3518,13 +3518,13 @@ read_network_packet(
 
 	if (AF_INET6 == itf->family) {
 		DPRINTF(2, ("Got an IPv6 packet, from <%s> (%d) to <%s> (%d)\n",
-			stoa(&rb->recv_srcadr),
-			IN6_IS_ADDR_LOOPBACK(PSOCK_ADDR6(&rb->recv_srcadr)),
+			stoa(&rb->recv_srcaddr),
+			IN6_IS_ADDR_LOOPBACK(PSOCK_ADDR6(&rb->recv_srcaddr)),
 			stoa(&itf->sin),
 			!IN6_IS_ADDR_LOOPBACK(PSOCK_ADDR6(&itf->sin))
 			));
 
-		if (   IN6_IS_ADDR_LOOPBACK(PSOCK_ADDR6(&rb->recv_srcadr))
+		if (   IN6_IS_ADDR_LOOPBACK(PSOCK_ADDR6(&rb->recv_srcaddr))
 		    && !IN6_IS_ADDR_LOOPBACK(PSOCK_ADDR6(&itf->sin))
 		   ) {
 			packets_dropped++;
@@ -3709,12 +3709,12 @@ input_handler(
 			 */
 			if (buflen < 0 && EAGAIN != errno) {
 				saved_errno = errno;
-				clk = refnumtoa(&rp->srcclock->srcadr);
+				clk = refnumtoa(&rp->srcclock->srcaddr);
 				errno = saved_errno;
 				msyslog(LOG_ERR, "%s read: %m", clk);
 				maintain_activefds(fd, true);
 			} else if (0 == buflen) {
-				clk = refnumtoa(&rp->srcclock->srcadr);
+				clk = refnumtoa(&rp->srcclock->srcaddr);
 				msyslog(LOG_ERR, "%s read EOF", clk);
 				maintain_activefds(fd, true);
 			} else {
@@ -3821,7 +3821,7 @@ input_handler(
 endpt *
 select_peerinterface(
 	struct peer *	peer,
-	sockaddr_u *	srcadr,
+	sockaddr_u *	srcaddr,
 	endpt *		dstadr
 	)
 {
@@ -3829,7 +3829,7 @@ select_peerinterface(
 #ifndef SIM
 	endpt *wild;
 
-	wild = ANY_INTERFACE_CHOOSE(srcadr);
+	wild = ANY_INTERFACE_CHOOSE(srcaddr);
 
 	/*
 	 * Initialize the peer structure and dance the interface jig.
@@ -3839,17 +3839,17 @@ select_peerinterface(
 	 * This might happen in some systems and would preclude proper
 	 * operation with public key cryptography.
 	 */
-	if (ISREFCLOCKADR(srcadr)) {
+	if (ISREFCLOCKADR(srcaddr)) {
 		ep = loopback_interface;
 	} else if (peer->cast_flags &
 		   (MDF_BCLNT | MDF_ACAST | MDF_MCAST | MDF_BCAST)) {
-		ep = findbcastinter(srcadr);
+		ep = findbcastinter(srcaddr);
 		if (ep != NULL)
 			DPRINTF(4, ("Found *-cast interface %s for address %s\n",
-				stoa(&ep->sin), stoa(srcadr)));
+				stoa(&ep->sin), stoa(srcaddr)));
 		else
 			DPRINTF(4, ("No *-cast local address found for address %s\n",
-				stoa(srcadr)));
+				stoa(srcaddr)));
 	} else {
 		ep = dstadr;
 		if (NULL == ep)
@@ -3862,7 +3862,7 @@ select_peerinterface(
 	 * way, try a little harder.
 	 */
 	if (wild == ep)
-		ep = findinterface(srcadr);
+		ep = findinterface(srcaddr);
 	/*
 	 * we do not bind to the wildcard interfaces for output
 	 * as our (network) source address would be undefined and

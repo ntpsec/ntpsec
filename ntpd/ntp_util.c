@@ -534,7 +534,7 @@ mprintf_clock_stats(
  */
 void
 record_raw_stats(
-	sockaddr_u *srcadr,
+	sockaddr_u *srcaddr,
 	sockaddr_u *dstadr,
 	l_fp	*t1,		/* originate timestamp */
 	l_fp	*t2,		/* receive timestamp */
@@ -564,7 +564,7 @@ record_raw_stats(
 	if (rawstats.fp != NULL) {
 		fprintf(rawstats.fp, "%lu %s %s %s %s %s %s %s %d %d %d %d %d %d %.6f %.6f %s\n",
 		    day, ulfptoa(&now, 3),
-		    stoa(srcadr), dstadr ?  stoa(dstadr) : "-",
+		    stoa(srcaddr), dstadr ?  stoa(dstadr) : "-",
 		    ulfptoa(t1, 9), ulfptoa(t2, 9),
 		    ulfptoa(t3, 9), ulfptoa(t4, 9),
 		    leap, version, mode, stratum, ppoll, precision,

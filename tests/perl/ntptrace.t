@@ -55,7 +55,7 @@ stdout_is(
 
 #Add response to a rv peer
 push @vars, {
-    srcadr     => '1.2.3.4',
+    srcaddr     => '1.2.3.4',
     srcport    => '123',
     dstadr     => '192.168.1.11',
     dstport    => '123',
