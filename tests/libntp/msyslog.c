@@ -94,6 +94,7 @@ TEST(msyslog, msnprintfHangingPercent)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wformat-contains-nul"
 #pragma GCC diagnostic ignored "-Wformat="
+#pragma GCC diagnostic ignored "-Wformat"
 #endif
 #ifdef __clang__
 #  pragma clang diagnostic push
