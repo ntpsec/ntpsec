@@ -80,6 +80,7 @@ refclock_map = {
 	22: {
 		"descr":	"PPS Clock Discipline",
 		"define":	"CLOCK_ATOM",
+		"require":	["ppsapi"],
 		"file":		"atom"
 	},
 
