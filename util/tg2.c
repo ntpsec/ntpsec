@@ -916,8 +916,8 @@ main(
 			}
 		}
 
-	switch (tolower(FormatCharacter)) {
-	case 'i':
+	switch (FormatCharacter) {
+	case 'i': case 'I':
 		printf ("\nFormat is IRIG-1998 (no year coded)...\n\n");
 		encode = IRIG;
 		IrigIncludeYear = false;
@@ -958,7 +958,7 @@ main(
 		UnmodulatedInverted = true;
 		break;
 
-	case 'w':
+	case 'w': case 'W':
 		printf ("\nFormat is WWV(H)...\n\n");
 		encode = WWV;
 		break;
@@ -1464,7 +1464,7 @@ main(
 				ParitySum = 0;
 				for (StringPointer=ParityString; *StringPointer!=NUL; StringPointer++)
 					{
-					switch (toupper(*StringPointer))
+					switch (*StringPointer)
 						{
 						case '1':
 						case '2':
@@ -1477,19 +1477,19 @@ main(
 						case '5':
 						case '6':
 						case '9':
-						case 'A':
-						case 'C':
+						case 'A': case 'a':
+						case 'C': case 'c':
 							ParitySum += 2;
 							break;
 
 						case '7':
-						case 'B':
-						case 'D':
-						case 'E':
+						case 'B': case 'b':
+						case 'D': case 'd':
+						case 'E': case 'e':
 							ParitySum += 3;
 							break;
 
-						case 'F':
+						case 'F': case 'f':
 							ParitySum += 4;
 							break;
 						}
@@ -1597,8 +1597,8 @@ main(
 				case DECC:	/* decrement pointer and send bit. */
 					ptr--;
 				case COEF:	/* send BCD bit */
-					AsciiValue = toupper(code[ptr]);
-					HexValue   = isdigit(AsciiValue) ? AsciiValue - '0' : (AsciiValue - 'A')+10;
+					AsciiValue = toupper((int)code[ptr]);
+					HexValue   = isdigit((int)AsciiValue) ? AsciiValue - '0' : (AsciiValue - 'A')+10;
 					/* if  (Debug) {
 						if  (ptr != OldPtr) {
 						if  (Verbose)
