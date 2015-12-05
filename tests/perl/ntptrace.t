@@ -57,7 +57,7 @@ stdout_is(
 push @vars, {
     srcaddr     => '1.2.3.4',
     srcport    => '123',
-    dstadr     => '192.168.1.11',
+    dstaddr     => '192.168.1.11',
     dstport    => '123',
     leap       => '00',
     stratum    => '2',

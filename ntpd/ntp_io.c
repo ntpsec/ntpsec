@@ -388,7 +388,7 @@ collect_timing(struct recvbuf *rb, const char *tag, int count, l_fp *dts)
 
 	snprintf(buf, sizeof(buf), "%s %d %s %s",
 		 (rb != NULL)
-		     ? ((rb->dstadr != NULL)
+		     ? ((rb->dstaddr != NULL)
 			    ? stoa(&rb->recv_srcaddr)
 			    : "-REFCLOCK-")
 		     : "-",
@@ -1997,7 +1997,7 @@ update_interfaces(
 
 		/* disconnect peers from deleted endpt. */
 		while (ep->peers != NULL)
-			set_peerdstadr(ep->peers, NULL);
+			set_peerdstaddr(ep->peers, NULL);
 
 		/*
 		 * update globals in case we lose
@@ -3281,7 +3281,7 @@ read_refclock_packet(
 	 */
 	rb->recv_length = buflen;
 	rb->recv_peer = rp->srcclock;
-	rb->dstadr = 0;
+	rb->dstaddr = 0;
 	rb->fd = fd;
 	rb->recv_time = ts;
 	rb->receiver = rp->clock_recv;
@@ -3539,7 +3539,7 @@ read_network_packet(
 	 * Got one.  Mark how and when it got here,
 	 * put it on the full list and do bookkeeping.
 	 */
-	rb->dstadr = itf;
+	rb->dstaddr = itf;
 	rb->fd = fd;
 #ifdef USE_PACKET_TIMESTAMP
 	/* pick up a network time stamp if possible */
@@ -3822,7 +3822,7 @@ endpt *
 select_peerinterface(
 	struct peer *	peer,
 	sockaddr_u *	srcaddr,
-	endpt *		dstadr
+	endpt *		dstaddr
 	)
 {
 	endpt *ep;
@@ -3851,13 +3851,13 @@ select_peerinterface(
 			DPRINTF(4, ("No *-cast local address found for address %s\n",
 				stoa(srcaddr)));
 	} else {
-		ep = dstadr;
+		ep = dstaddr;
 		if (NULL == ep)
 			ep = wild;
 	}
 	/*
 	 * If it is a multicast address, findbcastinter() may not find
-	 * it.  For unicast, we get to find the interface when dstadr is
+	 * it.  For unicast, we get to find the interface when dstaddr is
 	 * given to us as the wildcard (ANY_INTERFACE_CHOOSE).  Either
 	 * way, try a little harder.
 	 */

@@ -264,7 +264,7 @@ ind assid status conf reach auth condition last_event cnt
   mobilized and unmobilized associations.
 
 +lpeers+ [+-4+ | +-6+]::
-  Print a peer spreadsheet for the appropriate IP version(s). _dstadr_
+  Print a peer spreadsheet for the appropriate IP version(s). _dstaddr_
   (associated with any given IP version).
 
 +monstats+::
@@ -320,7 +320,7 @@ which could not be verified in parentheses.
 
 +opeers+ [+-4+ | +-6+]::
   Obtain and print the old-style list of all peers and clients showing
-  _dstadr_ (associated with any given IP version), rather than the
+  _dstaddr_ (associated with any given IP version), rather than the
   _refid_.
 
 +passociations+::
@@ -497,7 +497,7 @@ association. Not all variables are displayed in some configurations.
 |+associd+       |association ID
 |+status+        |link:decode.html#peer[peer status word]
 |+srcaddr srcport+|source (remote) IP address and port
-|+dstadr dstport+|destination (local) IP address and port
+|+dstaddr dstport+|destination (local) IP address and port
 |+leap+          |leap indicator (0-3)
 |+stratum+       |stratum (0-15)
 |+precision+     |precision (log~2~ s)

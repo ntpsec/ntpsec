@@ -337,9 +337,9 @@ findpeer(
 	 */
 	if (NULL == p) {
 		*action = MATCH_ASSOC(NO_PEER, pkt_mode);
-	} else if (p->dstadr != rbufp->dstadr) {
-		set_peerdstadr(p, rbufp->dstadr);
-		if (p->dstadr == rbufp->dstadr) {
+	} else if (p->dstaddr != rbufp->dstaddr) {
+		set_peerdstaddr(p, rbufp->dstaddr);
+		if (p->dstaddr == rbufp->dstaddr) {
 			DPRINTF(1, ("Changed %s local address to match response\n",
 				    stoa(&p->srcaddr)));
 			return findpeer(rbufp, pkt_mode, action);
@@ -529,7 +529,7 @@ unpeer(
 {
 	mprintf_event(PEVNT_DEMOBIL, peer, "assoc %u", peer->associd);
 	restrict_source(&peer->srcaddr, 1, 0);
-	set_peerdstadr(peer, NULL);
+	set_peerdstaddr(peer, NULL);
 	peer_demobilizations++;
 	peer_associations--;
 	if (FLAG_PREEMPT & peer->flags)
@@ -553,7 +553,7 @@ struct peer *
 peer_config(
 	sockaddr_u *	srcaddr,
 	const char *	hostname,
-	endpt *		dstadr,
+	endpt *		dstaddr,
 	uint8_t		hmode,
 	uint8_t		version,
 	uint8_t		minpoll,
@@ -604,45 +604,45 @@ peer_config(
 		flags |= FLAG_IBURST;
 	if ((MDF_ACAST | MDF_POOL) & cast_flags)
 		flags &= ~FLAG_PREEMPT;
-	return newpeer(srcaddr, hostname, dstadr, hmode, version,
+	return newpeer(srcaddr, hostname, dstaddr, hmode, version,
 	    minpoll, maxpoll, flags, cast_flags, ttl, key, ident);
 }
 
 /*
- * setup peer dstadr field keeping it in sync with the interface
+ * setup peer dstaddr field keeping it in sync with the interface
  * structures
  */
 void
-set_peerdstadr(
+set_peerdstaddr(
 	struct peer *	p,
-	endpt *		dstadr
+	endpt *		dstaddr
 	)
 {
 	struct peer *	unlinked;
 
-	if (p->dstadr == dstadr)
+	if (p->dstaddr == dstaddr)
 		return;
 
 	/*
 	 * Don't accept updates to a separate multicast receive-only
 	 * endpt while a BCLNT peer is running its unicast protocol.
 	 */
-	if (dstadr != NULL && (FLAG_BC_VOL & p->flags) &&
-	    (INT_MCASTIF & dstadr->flags) && MODE_CLIENT == p->hmode) {
+	if (dstaddr != NULL && (FLAG_BC_VOL & p->flags) &&
+	    (INT_MCASTIF & dstaddr->flags) && MODE_CLIENT == p->hmode) {
 		return;
 	}
-	if (p->dstadr != NULL) {
-		p->dstadr->peercnt--;
-		UNLINK_SLIST(unlinked, p->dstadr->peers, p, ilink,
+	if (p->dstaddr != NULL) {
+		p->dstaddr->peercnt--;
+		UNLINK_SLIST(unlinked, p->dstaddr->peers, p, ilink,
 			     struct peer);
 		msyslog(LOG_INFO, "%s local addr %s -> %s",
-			stoa(&p->srcaddr), latoa(p->dstadr),
-			latoa(dstadr));
+			stoa(&p->srcaddr), latoa(p->dstaddr),
+			latoa(dstaddr));
 	}
-	p->dstadr = dstadr;
-	if (dstadr != NULL) {
-		LINK_SLIST(dstadr->peers, p, ilink);
-		dstadr->peercnt++;
+	p->dstaddr = dstaddr;
+	if (dstaddr != NULL) {
+		LINK_SLIST(dstaddr->peers, p, ilink);
+		dstaddr->peercnt++;
 	}
 }
 
@@ -661,8 +661,8 @@ peer_refresh_interface(
 
 	DPRINTF(4, (
 	    "peer_refresh_interface: %s->%s mode %d vers %d poll %d %d flags 0x%x 0x%x ttl %u key %08x: new interface: ",
-	    p->dstadr == NULL ? "<null>" :
-	    stoa(&p->dstadr->sin), stoa(&p->srcaddr), p->hmode,
+	    p->dstaddr == NULL ? "<null>" :
+	    stoa(&p->dstaddr->sin), stoa(&p->srcaddr), p->hmode,
 	    p->version, p->minpoll, p->maxpoll, p->flags, p->cast_flags,
 	    p->ttl, p->keyid));
 	if (niface != NULL) {
@@ -679,13 +679,13 @@ peer_refresh_interface(
 		DPRINTF(4, ("<NONE>\n"));
 	}
 
-	piface = p->dstadr;
-	set_peerdstadr(p, niface);
-	if (p->dstadr != NULL) {
+	piface = p->dstaddr;
+	set_peerdstaddr(p, niface);
+	if (p->dstaddr != NULL) {
 		/*
 		 * clear crypto if we change the local address
 		 */
-		if (p->dstadr != piface && !(MDF_ACAST & p->cast_flags)
+		if (p->dstaddr != piface && !(MDF_ACAST & p->cast_flags)
 		    && MODE_BROADCAST != p->pmode)
 			peer_clear(p, "XFAC");
 
@@ -693,14 +693,14 @@ peer_refresh_interface(
 	 	 * Broadcast needs the socket enabled for broadcast
 	 	 */
 		if (MDF_BCAST & p->cast_flags)
-			enable_broadcast(p->dstadr, &p->srcaddr);
+			enable_broadcast(p->dstaddr, &p->srcaddr);
 
 		/*
 	 	 * Multicast needs the socket interface enabled for
 		 * multicast
 	 	 */
 		if (MDF_MCAST & p->cast_flags)
-			enable_multicast_if(p->dstadr, &p->srcaddr);
+			enable_multicast_if(p->dstaddr, &p->srcaddr);
 	}
 }
 
@@ -721,7 +721,7 @@ refresh_all_peerinterfaces(void)
 	 * or if the one they have hasn't worked for a while.
 	 */
 	for (p = peer_list; p != NULL; p = p->p_link) {
-		if (!(p->dstadr && (p->reach & 0x3)))	// Bug 2849 XOR 2043
+		if (!(p->dstaddr && (p->reach & 0x3)))	// Bug 2849 XOR 2043
 			peer_refresh_interface(p);
 	}
 }
@@ -734,7 +734,7 @@ struct peer *
 newpeer(
 	sockaddr_u *	srcaddr,
 	const char *	hostname,
-	endpt *		dstadr,
+	endpt *		dstaddr,
 	uint8_t		hmode,
 	uint8_t		version,
 	uint8_t		minpoll,
@@ -777,17 +777,17 @@ newpeer(
 	 * actual interface, because that's what gets put into the peer
 	 * structure.
 	 */
-	if (dstadr != NULL) {
+	if (dstaddr != NULL) {
 		peer = findexistingpeer(srcaddr, hostname, NULL, hmode,
 					cast_flags);
 		while (peer != NULL) {
-			if (peer->dstadr == dstadr ||
+			if (peer->dstaddr == dstaddr ||
 			    ((MDF_BCLNT & cast_flags) &&
 			     (MDF_BCLNT & peer->cast_flags)))
 				break;
 
-			if (dstadr == ANY_INTERFACE_CHOOSE(srcaddr) &&
-			    peer->dstadr == findinterface(srcaddr))
+			if (dstaddr == ANY_INTERFACE_CHOOSE(srcaddr) &&
+			    peer->dstaddr == findinterface(srcaddr))
 				break;
 
 			peer = findexistingpeer(srcaddr, hostname, peer,
@@ -839,8 +839,8 @@ newpeer(
 	peer->version = version;
 	peer->flags = flags;
 	peer->cast_flags = cast_flags;
-	set_peerdstadr(peer, 
-		       select_peerinterface(peer, srcaddr, dstadr));
+	set_peerdstaddr(peer, 
+		       select_peerinterface(peer, srcaddr, dstaddr));
 
 	/*
 	 * It is an error to set minpoll less than NTP_MINPOLL or to
@@ -860,10 +860,10 @@ newpeer(
 	if (peer->minpoll > peer->maxpoll)
 		peer->minpoll = peer->maxpoll;
 
-	if (peer->dstadr != NULL)
+	if (peer->dstaddr != NULL)
 		DPRINTF(3, ("newpeer(%s): using fd %d and our addr %s\n",
-			stoa(srcaddr), peer->dstadr->fd,
-			stoa(&peer->dstadr->sin)));
+			stoa(srcaddr), peer->dstaddr->fd,
+			stoa(&peer->dstaddr->sin)));
 	else
 		DPRINTF(3, ("newpeer(%s): local interface currently not bound\n",
 			stoa(srcaddr)));	
@@ -871,14 +871,14 @@ newpeer(
 	/*
 	 * Broadcast needs the socket enabled for broadcast
 	 */
-	if ((MDF_BCAST & cast_flags) && peer->dstadr != NULL)
-		enable_broadcast(peer->dstadr, srcaddr);
+	if ((MDF_BCAST & cast_flags) && peer->dstaddr != NULL)
+		enable_broadcast(peer->dstaddr, srcaddr);
 
 	/*
 	 * Multicast needs the socket interface enabled for multicast
 	 */
-	if ((MDF_MCAST & cast_flags) && peer->dstadr != NULL)
-		enable_multicast_if(peer->dstadr, srcaddr);
+	if ((MDF_MCAST & cast_flags) && peer->dstaddr != NULL)
+		enable_multicast_if(peer->dstaddr, srcaddr);
 
 #ifdef ENABLE_AUTOKEY
 	if (key > NTP_MAXKEY)
@@ -924,14 +924,14 @@ newpeer(
 			/*
 			 * Dump it, something screwed up
 			 */
-			set_peerdstadr(peer, NULL);
+			set_peerdstaddr(peer, NULL);
 			free_peer(peer, 0);
 			return NULL;
 		}
 #else /* REFCLOCK */
 		msyslog(LOG_ERR, "refclock %s isn't supported. ntpd was compiled without refclock support.",
 			stoa(&peer->srcaddr));
-		set_peerdstadr(peer, NULL);
+		set_peerdstaddr(peer, NULL);
 		free_peer(peer, 0);
 		return NULL;
 #endif /* REFCLOCK */
@@ -951,7 +951,7 @@ newpeer(
 	restrict_source(&peer->srcaddr, 0, 0);
 	mprintf_event(PEVNT_MOBIL, peer, "assoc %d", peer->associd);
 	DPRINTF(1, ("newpeer: %s->%s mode %u vers %u poll %u %u flags 0x%x 0x%x ttl %u key %08x\n",
-	    latoa(peer->dstadr), stoa(&peer->srcaddr), peer->hmode,
+	    latoa(peer->dstaddr), stoa(&peer->srcaddr), peer->hmode,
 	    peer->version, peer->minpoll, peer->maxpoll, peer->flags,
 	    peer->cast_flags, peer->ttl, peer->keyid));
 	return peer;

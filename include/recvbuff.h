@@ -59,7 +59,7 @@ struct recvbuf {
 #ifdef HAVE_IO_COMPLETION_PORT
 	int		recv_srcaddr_len;/* filled in on completion */
 #endif
-	endpt *		dstadr;		/* address pkt arrived on */
+	endpt *		dstaddr;		/* address pkt arrived on */
 	SOCKET		fd;		/* fd on which it was received */
 	int		msg_flags;	/* Flags received about the packet */
 	l_fp		recv_time;	/* time of arrival */

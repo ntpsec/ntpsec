@@ -1864,7 +1864,7 @@ local_input(
 #ifndef HAVE_IO_COMPLETION_PORT
 					buf->srcaddr       = rbufp->srcaddr;
 #endif
-					buf->dstadr       = rbufp->dstadr;
+					buf->dstaddr       = rbufp->dstaddr;
 					buf->receiver     = rbufp->receiver;
 					buf->fd           = rbufp->fd;
 					buf->X_from_where = rbufp->X_from_where;

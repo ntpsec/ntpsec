@@ -479,7 +479,7 @@ static const struct ctl_var peer_var[] = {
 	{ CP_AUTHENTIC, RO, "authentic" },	/* 3 */
 	{ CP_SRCADR,	RO, "srcaddr" },		/* 4 */
 	{ CP_SRCPORT,	RO, "srcport" },	/* 5 */
-	{ CP_DSTADR,	RO, "dstadr" },		/* 6 */
+	{ CP_DSTADR,	RO, "dstaddr" },		/* 6 */
 	{ CP_DSTPORT,	RO, "dstport" },	/* 7 */
 	{ CP_LEAP,	RO, "leap" },		/* 8 */
 	{ CP_HMODE,	RO, "hmode" },		/* 9 */
@@ -946,7 +946,7 @@ process_control(
 	 */
 	numctlreq++;
 	rmt_addr = &rbufp->recv_srcaddr;
-	lcl_inter = rbufp->dstadr;
+	lcl_inter = rbufp->dstaddr;
 	pkt = (struct ntp_control *)&rbufp->recv_pkt;
 
 	/*
@@ -1752,7 +1752,7 @@ ctl_putsys(
 		break;
 
 	case CS_PEERADR:
-		if (sys_peer != NULL && sys_peer->dstadr != NULL)
+		if (sys_peer != NULL && sys_peer->dstaddr != NULL)
 			ss = sptoa(&sys_peer->srcaddr);
 		else
 			ss = "0.0.0.0:0";
@@ -2371,15 +2371,15 @@ ctl_putpeer(
 
 	case CP_DSTADR:
 		ctl_putadr(peer_var[id].text, 0,
-			   (p->dstadr != NULL)
-				? &p->dstadr->sin
+			   (p->dstaddr != NULL)
+				? &p->dstaddr->sin
 				: NULL);
 		break;
 
 	case CP_DSTPORT:
 		ctl_putuint(peer_var[id].text,
-			    (p->dstadr != NULL)
-				? SRCPORT(&p->dstadr->sin)
+			    (p->dstaddr != NULL)
+				? SRCPORT(&p->dstaddr->sin)
 				: 0);
 		break;
 
@@ -4413,7 +4413,7 @@ set_trap(
 	 * Call ctlsettrap() to do the work.  Return
 	 * an error if it can't assign the trap.
 	 */
-	if (!ctlsettrap(&rbufp->recv_srcaddr, rbufp->dstadr, traptype,
+	if (!ctlsettrap(&rbufp->recv_srcaddr, rbufp->dstaddr, traptype,
 			(int)res_version))
 		ctl_error(CERR_NORESOURCE);
 	ctl_flushpkt(0);
@@ -4444,7 +4444,7 @@ unset_trap(
 	/*
 	 * Call ctlclrtrap() to clear this out.
 	 */
-	if (!ctlclrtrap(&rbufp->recv_srcaddr, rbufp->dstadr, traptype))
+	if (!ctlclrtrap(&rbufp->recv_srcaddr, rbufp->dstaddr, traptype))
 		ctl_error(CERR_BADASSOC);
 	ctl_flushpkt(0);
 }

@@ -1209,7 +1209,7 @@ ntp-4.3 begins.
   sys_residual.
 * [Bug 2087] from 4.2.6p5-RC3: sys_jitter calculation overweights
   sys.peer jitter.
-* from 4.2.6p5-RC3: Ensure NULL peer->dstadr is not accessed in orphan
+* from 4.2.6p5-RC3: Ensure NULL peer->dstaddr is not accessed in orphan
   parent selection.
 (4.2.7p237) 2011/12/01 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 2050] from 4.2.6p5-RC2: Orphan mode stratum counting to infinity.
@@ -2460,7 +2460,7 @@ No changes from 4.2.6p5-RC3.
 * [Bug 2085] clock_update() sys_rootdisp calculation omits root delay.
 * [Bug 2086] get_systime() should not offset by sys_residual.
 * [Bug 2087] sys_jitter calculation overweights sys.peer jitter.
-* Ensure NULL peer->dstadr is not accessed in orphan parent selection.
+* Ensure NULL peer->dstaddr is not accessed in orphan parent selection.
 
 ---
 (4.2.6p5-RC2) 2011/11/30 Released by Harlan Stenn <stenn@ntp.org>
@@ -3768,7 +3768,7 @@ display both build and runtime OpenSSL versions when they differ.
 * [Bug 850] Fix the wander threshold parameter on the driftfile command.
 * ntp_io.c: Dead code cleanup - Coverity View 19.
 * Leap file related cleanup from Dave Mills.
-* ntp_peer.c: Set peer->srcaddr before (not after) calling set_peerdstadr().
+* ntp_peer.c: Set peer->srcaddr before (not after) calling set_peerdstaddr().
 * Initialize offset in leap_file() - Coverity View 17.
 * Use the correct stratum on KISS codes.
 * Fuzz bits cleanup.
