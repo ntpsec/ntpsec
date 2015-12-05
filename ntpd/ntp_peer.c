@@ -275,7 +275,7 @@ findexistingpeer(
  */
 struct peer *
 findpeer(
-	struct recvbuf *rbufp,
+	struct payload *payload,
 	int		pkt_mode,
 	int *		action
 	)
@@ -287,7 +287,7 @@ findpeer(
 	l_fp		pkt_org;
 
 	findpeer_calls++;
-	srcaddr = &rbufp->recv_srcaddr;
+	srcaddr = &payload->recv_srcaddr;
 	hash = NTP_HASH_ADDR(srcaddr);
 	for (p = peer_hash[hash]; p != NULL; p = p->adr_link) {
 		if (ADDR_PORT_EQ(srcaddr, &p->srcaddr)) {
@@ -310,10 +310,10 @@ findpeer(
 			 */
 			if (MODE_SERVER == pkt_mode &&
 			    AM_PROCPKT == *action) {
-				pkt = &rbufp->recv_pkt;
+				pkt = &payload->recv_pkt;
 				NTOHL_FP(&pkt->org, &pkt_org);
 				if (!L_ISEQU(&p->aorg, &pkt_org) &&
-				    findmanycastpeer(rbufp))
+				    findmanycastpeer(payload))
 					*action = AM_ERR;
 			}
 
@@ -337,12 +337,12 @@ findpeer(
 	 */
 	if (NULL == p) {
 		*action = MATCH_ASSOC(NO_PEER, pkt_mode);
-	} else if (p->dstaddr != rbufp->dstaddr) {
-		set_peerdstaddr(p, rbufp->dstaddr);
-		if (p->dstaddr == rbufp->dstaddr) {
+	} else if (p->dstaddr != payload->dstaddr) {
+		set_peerdstaddr(p, payload->dstaddr);
+		if (p->dstaddr == payload->dstaddr) {
 			DPRINTF(1, ("Changed %s local address to match response\n",
 				    stoa(&p->srcaddr)));
-			return findpeer(rbufp, pkt_mode, action);
+			return findpeer(payload, pkt_mode, action);
 		}
 	}
 	return p;
@@ -1014,7 +1014,7 @@ peer_all_reset(void)
  */
 struct peer *
 findmanycastpeer(
-	struct recvbuf *rbufp	/* receive buffer pointer */
+	struct payload *payload	/* receive buffer pointer */
 	)
 {
 	struct peer *peer;
@@ -1031,7 +1031,7 @@ findmanycastpeer(
 	 * solicitation assocations, so this assumes the transmit
 	 * timestamps are unique for such.
 	 */
-	pkt = &rbufp->recv_pkt;
+	pkt = &payload->recv_pkt;
 	for (peer = peer_list; peer != NULL; peer = peer->p_link)
 		if (MDF_SOLICIT_MASK & peer->cast_flags) {
 			NTOHL_FP(&pkt->org, &p_org);

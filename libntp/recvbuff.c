@@ -276,7 +276,7 @@ purge_recv_buffers_for_fd(
 	     rbufp != NULL;
 	     rbufp = next) {
 		next = rbufp->link;
-		if (rbufp->fd == fd) {
+		if (rbufp->payload.fd == fd) {
 			UNLINK_MID_FIFO(punlinked, full_recv_fifo,
 					rbufp, link, recvbuf_t);
 			INSIST(punlinked == rbufp);

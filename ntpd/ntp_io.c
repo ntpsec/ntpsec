@@ -3471,26 +3471,26 @@ read_network_packet(
 		return (buflen);
 	}
 
-	fromlen = sizeof(rb->recv_srcaddr);
+	fromlen = sizeof(rb->payload.recv_srcaddr);
 
 #ifndef USE_PACKET_TIMESTAMP
 	rb->recv_length = recvfrom(fd, (char *)&rb->recv_space,
 				   sizeof(rb->recv_space), 0,
 				   &rb->recv_srcaddr.sa, &fromlen);
 #else
-	iovec.iov_base        = &rb->recv_space;
-	iovec.iov_len         = sizeof(rb->recv_space);
-	msghdr.msg_name       = &rb->recv_srcaddr;
+	iovec.iov_base        = &rb->payload.recv_space;
+	iovec.iov_len         = sizeof(rb->payload.recv_space);
+	msghdr.msg_name       = &rb->payload.recv_srcaddr;
 	msghdr.msg_namelen    = fromlen;
 	msghdr.msg_iov        = &iovec;
 	msghdr.msg_iovlen     = 1;
 	msghdr.msg_control    = (void *)&control;
 	msghdr.msg_controllen = sizeof(control);
 	msghdr.msg_flags      = 0;
-	rb->recv_length       = recvmsg(fd, &msghdr, 0);
+	rb->payload.recv_length       = recvmsg(fd, &msghdr, 0);
 #endif
 
-	buflen = rb->recv_length;
+	buflen = rb->payload.recv_length;
 
 	if (buflen == 0 || (buflen == -1 &&
 	    (EWOULDBLOCK == errno
@@ -3502,7 +3502,7 @@ read_network_packet(
 		return (buflen);
 	} else if (buflen < 0) {
 		msyslog(LOG_ERR, "recvfrom(%s) fd=%d: %m",
-			stoa(&rb->recv_srcaddr), fd);
+			stoa(&rb->payload.recv_srcaddr), fd);
 		DPRINTF(5, ("read_network_packet: fd=%d dropped (bad recvfrom)\n",
 			    fd));
 		freerecvbuf(rb);
@@ -3524,7 +3524,7 @@ read_network_packet(
 			!IN6_IS_ADDR_LOOPBACK(PSOCK_ADDR6(&itf->sin))
 			));
 
-		if (   IN6_IS_ADDR_LOOPBACK(PSOCK_ADDR6(&rb->recv_srcaddr))
+		if (   IN6_IS_ADDR_LOOPBACK(PSOCK_ADDR6(&rb->payload.recv_srcaddr))
 		    && !IN6_IS_ADDR_LOOPBACK(PSOCK_ADDR6(&itf->sin))
 		   ) {
 			packets_dropped++;
@@ -3539,13 +3539,13 @@ read_network_packet(
 	 * Got one.  Mark how and when it got here,
 	 * put it on the full list and do bookkeeping.
 	 */
-	rb->dstaddr = itf;
-	rb->fd = fd;
+	rb->payload.dstaddr = itf;
+	rb->payload.fd = fd;
 #ifdef USE_PACKET_TIMESTAMP
 	/* pick up a network time stamp if possible */
 	ts = fetch_timestamp(rb, &msghdr, ts);
 #endif
-	rb->recv_time = ts;
+	rb->payload.recv_time = ts;
 	rb->receiver = receive;
 
 	add_full_recv_buffer(rb);
