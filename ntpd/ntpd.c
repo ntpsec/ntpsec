@@ -1010,7 +1010,7 @@ static void mainloop(void)
 					collect_timing(rbuf, "buffer processing delay", 1, &dts);
 					bufcount++;
 # endif
-					(*rbuf->receiver)(rbuf);
+					(*rbuf->receiver)(&rbuf->payload);
 				} else {
 					msyslog(LOG_ERR, "fatal: receive buffer callback NULL");
 					abort();

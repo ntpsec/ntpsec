@@ -44,10 +44,7 @@ extern HANDLE	get_recv_buff_event(void);
 #define	RX_BUFF_SIZE	1000		/* hail Mary */
 
 
-typedef struct recvbuf recvbuf_t;
-
-struct recvbuf {
-	recvbuf_t *	link;	/* next in list */
+struct payload {
 	union {
 		sockaddr_u	X_recv_srcaddr;	/* where packet came from */
 		void *		X_recv_srcclock;
@@ -63,7 +60,6 @@ struct recvbuf {
 	SOCKET		fd;		/* fd on which it was received */
 	int		msg_flags;	/* Flags received about the packet */
 	l_fp		recv_time;	/* time of arrival */
-	void		(*receiver)(struct recvbuf *); /* callback */
 	size_t		recv_length;	/* number of octets received */
 	union {
 		struct pkt	X_recv_pkt;
@@ -71,7 +67,15 @@ struct recvbuf {
 	} recv_space;
 #define	recv_pkt		recv_space.X_recv_pkt
 #define	recv_buffer		recv_space.X_recv_buffer
-	int used;		/* reference count */
+};
+
+typedef struct recvbuf recvbuf_t;
+
+struct recvbuf {
+	recvbuf_t *	link;	/* next in list */
+	struct payload	payload;
+	void		(*receiver)(struct payload *); /* callback */
+	int		used;		/* reference count */
 };
 
 extern	void	init_recvbuff(int);

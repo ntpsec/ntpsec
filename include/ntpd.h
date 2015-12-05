@@ -64,7 +64,7 @@ extern	u_short ctlpeerstatus	(struct peer *);
 extern	bool	ctlsettrap	(sockaddr_u *, struct interface *, int, int);
 extern	u_short ctlsysstatus	(void);
 extern	void	init_control	(void);
-extern	void	process_control (struct recvbuf *, int);
+extern	void	process_control (struct payload *, int);
 extern	void	report_event	(int, struct peer *, const char *);
 extern	int	mprintf_event	(int, struct peer *, const char *, ...)
 			NTP_PRINTF(3, 4);
@@ -161,14 +161,14 @@ extern 	int	freq_cnt;
 extern	void	init_mon	(void);
 extern	void	mon_start	(int);
 extern	void	mon_stop	(int);
-extern	u_short	ntp_monitor	(struct recvbuf *, u_short);
+extern	u_short	ntp_monitor	(struct payload *, u_short);
 extern	void	mon_clearinterface(endpt *interface);
 
 /* ntp_peer.c */
 extern	void	init_peer	(void);
 extern	struct peer *findexistingpeer(sockaddr_u *, const char *,
 				      struct peer *, int, uint8_t);
-extern	struct peer *findpeer	(struct recvbuf *, int, int *);
+extern	struct peer *findpeer	(struct payload *, int, int *);
 extern	struct peer *findpeerbyassoc(associd_t);
 extern  void	set_peerdstaddr	(struct peer *, endpt *);
 extern	struct peer *newpeer	(sockaddr_u *, const char *,
@@ -186,7 +186,7 @@ extern	void	refresh_all_peerinterfaces(void);
 extern	void	unpeer		(struct peer *);
 extern	void	clear_all	(void);
 extern	int	score_all	(struct peer *);
-extern	struct peer *findmanycastpeer(struct recvbuf *);
+extern	struct peer *findmanycastpeer(struct payload *);
 extern	void	peer_cleanup	(void);
 
 /* ntp_crypto.c */
@@ -217,7 +217,7 @@ extern struct value tai_leap;
 
 /* ntp_proto.c */
 extern	void	transmit	(struct peer *);
-extern	void	receive 	(struct recvbuf *);
+extern	void	receive 	(struct payload *);
 extern	void	peer_clear	(struct peer *, const char *);
 extern	void 	process_packet	(struct peer *, struct pkt *, u_int);
 extern	void	clock_select	(void);
