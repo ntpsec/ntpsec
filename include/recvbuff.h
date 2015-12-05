@@ -53,9 +53,6 @@ struct payload {
 #define recv_srcaddr		X_from_where.X_recv_srcaddr
 #define	recv_srcclock		X_from_where.X_recv_srcclock
 #define recv_peer		X_from_where.X_recv_peer
-#ifdef HAVE_IO_COMPLETION_PORT
-	int		recv_srcaddr_len;/* filled in on completion */
-#endif
 	endpt *		dstaddr;		/* address pkt arrived on */
 	SOCKET		fd;		/* fd on which it was received */
 	int		msg_flags;	/* Flags received about the packet */
@@ -74,6 +71,9 @@ typedef struct recvbuf recvbuf_t;
 struct recvbuf {
 	recvbuf_t *	link;	/* next in list */
 	struct payload	payload;
+#ifdef HAVE_IO_COMPLETION_PORT
+	int		recv_srcaddr_len;/* filled in on completion */
+#endif
 	void		(*receiver)(struct payload *); /* callback */
 	int		used;		/* reference count */
 };

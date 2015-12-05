@@ -1370,12 +1370,12 @@ QueueSocketRecv(
 
 	Flags = 0;
 	buff->fd = s;
-	buff->recv_srcadr_len = sizeof(buff->recv_srcadr);
+	buff->recv_srcaddr_len = sizeof(buff->recv_srcadr);
 	wsabuf.buf = (char *)buff->recv_buffer;
 	wsabuf.len = sizeof(buff->recv_buffer);
 
 	rc = WSARecvFrom(buff->fd, &wsabuf, 1, NULL, &Flags, 
-			 &buff->recv_srcadr.sa, &buff->recv_srcadr_len, 
+			 &buff->recv_srcadr.sa, &buff->recv_srcaddr_len, 
 			 &lpo->ol, NULL);
 	if (SOCKET_ERROR == rc) 
 		return IoResultCheck(GetLastError(), lpo,
@@ -1431,7 +1431,7 @@ OnSocketRecv(
 	 * If we keep it add some info to the structure
 	 */
 	if (buff->recv_length && !inter->ignore_packets) {
-		NTP_INSIST(buff->recv_srcadr_len <=
+		NTP_INSIST(buff->recv_srcaddr_len <=
 			   sizeof(buff->recv_srcadr));
 		buff->receiver = &receive; 
 		buff->dstadr   = inter;
