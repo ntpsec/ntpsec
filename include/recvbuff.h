@@ -49,16 +49,14 @@ typedef struct recvbuf recvbuf_t;
 struct recvbuf {
 	recvbuf_t *	link;	/* next in list */
 	union {
-		sockaddr_u	X_recv_srcadr;
+		sockaddr_u	X_recv_srcadr;	/* where packet came from */
 		void *		X_recv_srcclock;
 		struct peer *	X_recv_peer;
 	} X_from_where;
 #define recv_srcadr		X_from_where.X_recv_srcadr
 #define	recv_srcclock		X_from_where.X_recv_srcclock
 #define recv_peer		X_from_where.X_recv_peer
-#ifndef HAVE_IO_COMPLETION_PORT
-	sockaddr_u	srcadr;		/* where packet came from */
-#else
+#ifdef HAVE_IO_COMPLETION_PORT
 	int		recv_srcadr_len;/* filled in on completion */
 #endif
 	endpt *		dstadr;		/* address pkt arrived on */
