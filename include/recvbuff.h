@@ -55,7 +55,6 @@ struct payload {
 #define recv_peer		X_from_where.X_recv_peer
 	endpt *		dstaddr;		/* address pkt arrived on */
 	SOCKET		fd;		/* fd on which it was received */
-	int		msg_flags;	/* Flags received about the packet */
 	l_fp		recv_time;	/* time of arrival */
 	size_t		recv_length;	/* number of octets received */
 	union {
