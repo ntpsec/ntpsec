@@ -327,7 +327,7 @@ ntp_monitor(
 		return ~(RES_LIMITED | RES_KOD) & flags;
 
 	pkt = &rbufp->recv_pkt;
-	hash = MON_HASH(&rbufp->recv_srcadr);
+	hash = MON_HASH(&rbufp->recv_srcaddr);
 	mode = PKT_MODE(pkt->li_vn_mode);
 	version = PKT_VERSION(pkt->li_vn_mode);
 	mon = mon_hash[hash];
@@ -338,7 +338,7 @@ ntp_monitor(
 	 */
 
 	for (; mon != NULL; mon = mon->hash_next)
-		if (SOCK_EQ(&mon->rmtadr, &rbufp->recv_srcadr))
+		if (SOCK_EQ(&mon->rmtadr, &rbufp->recv_srcaddr))
 			break;
 
 	if (mon != NULL) {
@@ -348,7 +348,7 @@ ntp_monitor(
 		L_ADDUF(&interval_fp, 0x80000000);
 		interval = interval_fp.l_i;
 		mon->last = rbufp->recv_time;
-		NSRCPORT(&mon->rmtadr) = NSRCPORT(&rbufp->recv_srcadr);
+		NSRCPORT(&mon->rmtadr) = NSRCPORT(&rbufp->recv_srcaddr);
 		mon->count++;
 		restrict_mask = flags;
 		mon->vn_mode = VN_MODE(version, mode);
@@ -475,7 +475,7 @@ ntp_monitor(
 	mon->count = 1;
 	mon->flags = ~(RES_LIMITED | RES_KOD) & flags;
 	mon->leak = 0;
-	memcpy(&mon->rmtadr, &rbufp->recv_srcadr, sizeof(mon->rmtadr));
+	memcpy(&mon->rmtadr, &rbufp->recv_srcaddr, sizeof(mon->rmtadr));
 	mon->vn_mode = VN_MODE(version, mode);
 	mon->lcladr = rbufp->dstadr;
 	mon->cast_flags = (uint8_t)(((rbufp->dstadr->flags &

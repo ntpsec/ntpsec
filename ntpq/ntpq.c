@@ -113,7 +113,7 @@ const var_format cookedvars[] = {
 	{ "rec",		TS },
 	{ "xmt",		TS },
 	{ "flash",		FX },
-	{ "srcadr",		HA },
+	{ "srcaddr",		HA },
 	{ "peeradr",		HA },	/* compat with others */
 	{ "dstadr",		NA },
 	{ "filtdelay",		AR },

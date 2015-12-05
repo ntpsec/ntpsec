@@ -412,7 +412,7 @@ res_sorts_before6(
  */
 u_short
 restrictions(
-	sockaddr_u *srcadr
+	sockaddr_u *srcaddr
 	)
 {
 	restrict_u *match;
@@ -422,17 +422,17 @@ restrictions(
 	res_calls++;
 	flags = 0;
 	/* IPv4 source address */
-	if (IS_IPV4(srcadr)) {
+	if (IS_IPV4(srcaddr)) {
 		/*
 		 * Ignore any packets with a multicast source address
 		 * (this should be done early in the receive process,
 		 * not later!)
 		 */
-		if (IN_CLASSD(SRCADR(srcadr)))
+		if (IN_CLASSD(SRCADR(srcaddr)))
 			return (int)RES_IGNORE;
 
-		match = match_restrict4_addr(SRCADR(srcadr),
-					     SRCPORT(srcadr));
+		match = match_restrict4_addr(SRCADR(srcaddr),
+					     SRCPORT(srcaddr));
 		match->count++;
 		/*
 		 * res_not_found counts only use of the final default
@@ -447,8 +447,8 @@ restrictions(
 	}
 
 	/* IPv6 source address */
-	if (IS_IPV6(srcadr)) {
-		pin6 = PSOCK_ADDR6(srcadr);
+	if (IS_IPV6(srcaddr)) {
+		pin6 = PSOCK_ADDR6(srcaddr);
 
 		/*
 		 * Ignore any packets with a multicast source address
@@ -458,7 +458,7 @@ restrictions(
 		if (IN6_IS_ADDR_MULTICAST(pin6))
 			return (int)RES_IGNORE;
 
-		match = match_restrict6_addr(pin6, SRCPORT(srcadr));
+		match = match_restrict6_addr(pin6, SRCPORT(srcaddr));
 		match->count++;
 		if (&restrict_def6 == match)
 			res_not_found++;

@@ -241,7 +241,7 @@ struct peer {
 	struct peer *adr_link;	/* link pointer in address hash */
 	struct peer *aid_link;	/* link pointer in associd hash */
 	struct peer *ilink;	/* list of peers for interface */
-	sockaddr_u srcadr;	/* address of remote host */
+	sockaddr_u srcaddr;	/* address of remote host */
 	char *	hostname;	/* if non-NULL, remote name */
 	struct addrinfo *addrs;	/* hostname query result */
 	struct addrinfo *ai;	/* position within addrs */

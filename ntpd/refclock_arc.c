@@ -1409,7 +1409,7 @@ arc_receive(
 		refclock_report(peer, CEVNT_BADTIME);
 		return;
 	}
-	record_clock_stats(&peer->srcadr, pp->a_lastcode);
+	record_clock_stats(&peer->srcaddr, pp->a_lastcode);
 	refclock_receive(peer);
 }
 
