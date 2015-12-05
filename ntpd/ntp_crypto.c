@@ -226,7 +226,7 @@ readlink(char * link, char * file, int len) {
  */
 keyid_t
 session_key(
-	sockaddr_u *srcadr, 	/* source address */
+	sockaddr_u *srcaddr, 	/* source address */
 	sockaddr_u *dstadr, 	/* destination address */
 	keyid_t	keyno,		/* key ID */
 	keyid_t	private,	/* private value */
@@ -247,9 +247,9 @@ session_key(
 	 * greater than zero, install the key and call it trusted.
 	 */
 	hdlen = 0;
-	switch(AF(srcadr)) {
+	switch(AF(srcaddr)) {
 	case AF_INET:
-		header[0] = NSRCADR(srcadr);
+		header[0] = NSRCADR(srcaddr);
 		header[1] = NSRCADR(dstadr);
 		header[2] = htonl(keyno);
 		header[3] = htonl(private);
@@ -257,7 +257,7 @@ session_key(
 		break;
 
 	case AF_INET6:
-		memcpy(&header[0], PSOCK_ADDR6(srcadr),
+		memcpy(&header[0], PSOCK_ADDR6(srcaddr),
 		    sizeof(struct in6_addr));
 		memcpy(&header[4], PSOCK_ADDR6(dstadr),
 		    sizeof(struct in6_addr));
@@ -276,7 +276,7 @@ session_key(
 		authtrust(keyno, lifetime);
 	}
 	DPRINTF(2, ("session_key: %s > %s %08x %08x hash %08x life %lu\n",
-		    stoa(srcadr), stoa(dstadr), keyno,
+		    stoa(srcaddr), stoa(dstadr), keyno,
 		    private, keyid, lifetime));
 
 	return (keyid);
@@ -353,7 +353,7 @@ make_keylist(
 	for (i = 0; i < NTP_MAXSESSION; i++) {
 		peer->keylist[i] = keyid;
 		peer->keynumber = i;
-		keyid = session_key(&dstadr->sin, &peer->srcadr, keyid,
+		keyid = session_key(&dstadr->sin, &peer->srcaddr, keyid,
 		    cookie, lifetime + mpoll);
 		lifetime -= mpoll;
 		if (auth_havekey(keyid) || keyid <= NTP_MAXKEY ||
@@ -621,7 +621,7 @@ crypto_recv(
 			    "assoc %d %d host %s %s", peer->associd,
 			    peer->assoc, peer->subject,
 			    OBJ_nid2ln(temp32));
-			record_crypto_stats(&peer->srcadr, statstr);
+			record_crypto_stats(&peer->srcaddr, statstr);
 #ifdef DEBUG
 			if (debug)
 				printf("crypto_recv: %s\n", statstr);
@@ -682,7 +682,7 @@ crypto_recv(
 			    xinfo->subject, xinfo->issuer, xinfo->flags,
 			    OBJ_nid2ln(temp32), temp32,
 			    ntohl(ep->fstamp));
-			record_crypto_stats(&peer->srcadr, statstr);
+			record_crypto_stats(&peer->srcaddr, statstr);
 #ifdef DEBUG
 			if (debug)
 				printf("crypto_recv: %s\n", statstr);
@@ -722,7 +722,7 @@ crypto_recv(
 			peer->flash &= ~BOGON8;
 			snprintf(statstr, sizeof(statstr), "iff %s fs %u",
 			    peer->issuer, ntohl(ep->fstamp));
-			record_crypto_stats(&peer->srcadr, statstr);
+			record_crypto_stats(&peer->srcaddr, statstr);
 #ifdef DEBUG
 			if (debug)
 				printf("crypto_recv: %s\n", statstr);
@@ -763,7 +763,7 @@ crypto_recv(
 			peer->flash &= ~BOGON8;
 			snprintf(statstr, sizeof(statstr), "gq %s fs %u",
 			    peer->issuer, ntohl(ep->fstamp));
-			record_crypto_stats(&peer->srcadr, statstr);
+			record_crypto_stats(&peer->srcaddr, statstr);
 #ifdef DEBUG
 			if (debug)
 				printf("crypto_recv: %s\n", statstr);
@@ -803,7 +803,7 @@ crypto_recv(
 			peer->flash &= ~BOGON8;
 			snprintf(statstr, sizeof(statstr), "mv %s fs %u",
 			    peer->issuer, ntohl(ep->fstamp));
-			record_crypto_stats(&peer->srcadr, statstr);
+			record_crypto_stats(&peer->srcaddr, statstr);
 #ifdef DEBUG
 			if (debug)
 				printf("crypto_recv: %s\n", statstr);
@@ -872,7 +872,7 @@ crypto_recv(
 			snprintf(statstr, sizeof(statstr),
 			    "cook %x ts %u fs %u", peer->pcookie,
 			    ntohl(ep->tstamp), ntohl(ep->fstamp));
-			record_crypto_stats(&peer->srcadr, statstr);
+			record_crypto_stats(&peer->srcaddr, statstr);
 #ifdef DEBUG
 			if (debug)
 				printf("crypto_recv: %s\n", statstr);
@@ -934,7 +934,7 @@ crypto_recv(
 			    "auto seq %d key %x ts %u fs %u", bp->seq,
 			    bp->key, ntohl(ep->tstamp),
 			    ntohl(ep->fstamp));
-			record_crypto_stats(&peer->srcadr, statstr);
+			record_crypto_stats(&peer->srcaddr, statstr);
 #ifdef DEBUG
 			if (debug)
 				printf("crypto_recv: %s\n", statstr);
@@ -974,7 +974,7 @@ crypto_recv(
 			    xinfo->subject, xinfo->issuer, xinfo->flags,
 			    OBJ_nid2ln(temp32), temp32,
 			    ntohl(ep->fstamp));
-			record_crypto_stats(&peer->srcadr, statstr);
+			record_crypto_stats(&peer->srcaddr, statstr);
 #ifdef DEBUG
 			if (debug)
 				printf("crypto_recv: %s\n", statstr);
@@ -1025,7 +1025,7 @@ crypto_recv(
 			    "leap TAI offset %d at %u expire %u fs %u",
 			    ntohl(ep->pkt[0]), ntohl(ep->pkt[1]),
 			    ntohl(ep->pkt[2]), ntohl(ep->fstamp));
-			record_crypto_stats(&peer->srcadr, statstr);
+			record_crypto_stats(&peer->srcaddr, statstr);
 #ifdef DEBUG
 			if (debug)
 				printf("crypto_recv: %s\n", statstr);
@@ -1077,7 +1077,7 @@ crypto_recv(
 			snprintf(statstr, sizeof(statstr),
 			    "%04x %d %02x %s", htonl(ep->opcode),
 			    associd, rval, eventstr(rval));
-			record_crypto_stats(&peer->srcadr, statstr);
+			record_crypto_stats(&peer->srcaddr, statstr);
 #ifdef DEBUG
 			if (debug)
 				printf("crypto_recv: %s\n", statstr);
@@ -1119,7 +1119,7 @@ crypto_xmit(
 {
 	struct exten *fp;	/* extension pointers */
 	struct cert_info *cp, *xp, *yp; /* cert info/value pointer */
-	sockaddr_u *srcadr_sin; /* source address */
+	sockaddr_u *srcaddr_sin; /* source address */
 	uint32_t	*pkt;		/* packet pointer */
 	u_int	opcode;		/* extension field opcode */
 	char	certname[MAXHOSTNAME + 1]; /* subject name buffer */
@@ -1142,11 +1142,11 @@ crypto_xmit(
 	fp = (struct exten *)pkt;
 	opcode = ntohl(ep->opcode);
 	if (peer != NULL) {
-		srcadr_sin = &peer->srcadr;
+		srcaddr_sin = &peer->srcaddr;
 		if (!(opcode & CRYPTO_RESP))
 			peer->opcode = ep->opcode;
 	} else {
-		srcadr_sin = &rbufp->recv_srcadr;
+		srcaddr_sin = &rbufp->recv_srcaddr;
 	}
 	associd = (associd_t) ntohl(ep->associd);
 	len = 8;
@@ -1425,7 +1425,7 @@ crypto_xmit(
 		snprintf(statstr, sizeof(statstr),
 		    "%04x %d %02x %s", opcode, associd, rval,
 		    eventstr(rval));
-		record_crypto_stats(srcadr_sin, statstr);
+		record_crypto_stats(srcaddr_sin, statstr);
 #ifdef DEBUG
 		if (debug)
 			printf("crypto_xmit: %s\n", statstr);
@@ -1699,7 +1699,7 @@ crypto_ident(
 		snprintf(filename, sizeof(filename), "ntpkey_%spar_%s",
 		    scheme_name, peer->ident);
 		peer->ident_pkey = crypto_key(filename, NULL,
-		    &peer->srcadr);
+		    &peer->srcaddr);
 		if (peer->ident_pkey != NULL)
 			return scheme_id;
 	}

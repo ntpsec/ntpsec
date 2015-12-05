@@ -1531,7 +1531,7 @@ decodeaddrtype(
  * A list of variables required by the peers command
  */
 struct varlist opeervarlist[] = {
-	{ "srcadr",	0 },	/* 0 */
+	{ "srcaddr",	0 },	/* 0 */
 	{ "dstadr",	0 },	/* 1 */
 	{ "stratum",	0 },	/* 2 */
 	{ "hpoll",	0 },	/* 3 */
@@ -1549,7 +1549,7 @@ struct varlist opeervarlist[] = {
 };
 
 struct varlist peervarlist[] = {
-	{ "srcadr",	0 },	/* 0 */
+	{ "srcaddr",	0 },	/* 0 */
 	{ "refid",	0 },	/* 1 */
 	{ "stratum",	0 },	/* 2 */
 	{ "hpoll",	0 },	/* 3 */
@@ -1568,7 +1568,7 @@ struct varlist peervarlist[] = {
 };
 
 struct varlist apeervarlist[] = {
-	{ "srcadr",	0 },	/* 0 */
+	{ "srcaddr",	0 },	/* 0 */
 	{ "refid",	0 },	/* 1 */
 	{ "assid",	0 },	/* 2 */
 	{ "stratum",	0 },	/* 3 */
@@ -1610,7 +1610,7 @@ doprintpeers(
 	bool have_dstadr;
 	bool have_da_rid;
 	bool have_jitter;
-	sockaddr_u srcadr;
+	sockaddr_u srcaddr;
 	sockaddr_u dstadr;
 	sockaddr_u dum_store;
 	sockaddr_u refidadr;
@@ -1642,7 +1642,7 @@ doprintpeers(
 	have_dstadr = false;
 	have_da_rid = false;
 	have_jitter = false;
-	ZERO_SOCK(&srcadr);
+	ZERO_SOCK(&srcaddr);
 	ZERO_SOCK(&dstadr);
 	clock_name[0] = '\0';
 	ZERO(estoffset);
@@ -1651,9 +1651,9 @@ doprintpeers(
 	ZERO(estdisp);
 
 	while (nextvar(&datalen, &data, &name, &value)) {
-		if (!strcmp("srcadr", name) ||
+		if (!strcmp("srcaddr", name) ||
 		    !strcmp("peeradr", name)) {
-			if (!decodenetnum(value, &srcadr))
+			if (!decodenetnum(value, &srcaddr))
 				fprintf(stderr, "malformed %s=%s\n",
 					name, value);
 		} else if (!strcmp("srchost", name)) {
@@ -1780,18 +1780,18 @@ doprintpeers(
 
 	case MODE_BROADCAST:
 		/* broadcast or multicast server */
-		if (IS_MCAST(&srcadr))
+		if (IS_MCAST(&srcaddr))
 			type = 'M';
 		else
 			type = 'B';
 		break;
 
 	case MODE_CLIENT:
-		if (ISREFCLOCKADR(&srcadr))
+		if (ISREFCLOCKADR(&srcaddr))
 			type = 'l';	/* local refclock*/
-		else if (SOCK_UNSPEC(&srcadr))
+		else if (SOCK_UNSPEC(&srcaddr))
 			type = 'p';	/* pool */
-		else if (IS_MCAST(&srcadr))
+		else if (IS_MCAST(&srcaddr))
 			type = 'a';	/* manycastclient */
 		else
 			type = 'u';	/* unicast */
@@ -1829,9 +1829,9 @@ doprintpeers(
 		}
 		fprintf(fp, "%-*s ", (int)maxhostlen, serverlocal);
 	}
-	if (AF_UNSPEC == af || AF(&srcadr) == af) {
+	if (AF_UNSPEC == af || AF(&srcaddr) == af) {
 		if (!have_srchost)
-			strlcpy(clock_name, nntohost(&srcadr),
+			strlcpy(clock_name, nntohost(&srcaddr),
 				sizeof(clock_name));
 		if (wideremote && 15 < strlen(clock_name))
 			fprintf(fp, "%c%s\n                 ", c, clock_name);

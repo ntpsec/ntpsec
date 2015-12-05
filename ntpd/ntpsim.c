@@ -349,8 +349,8 @@ int simulate_server(
     rbuf.recv_pkt = xpkt;
     rbuf.dstadr = inter;
     rbuf.fd = inter->fd;
-    memcpy(&rbuf.srcadr, serv_addr, sizeof(rbuf.srcadr));
-    memcpy(&rbuf.recv_srcadr, serv_addr, sizeof(rbuf.recv_srcadr));
+    memcpy(&rbuf.srcaddr, serv_addr, sizeof(rbuf.srcaddr));
+    memcpy(&rbuf.recv_srcaddr, serv_addr, sizeof(rbuf.recv_srcaddr));
 
     /*
      * Create a packet event and insert it onto the event_queue at the

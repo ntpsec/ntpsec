@@ -311,7 +311,7 @@ arb_receive(
 		} else if (!strncmp(tbuf, "DB", 2)) {
 			strlcat(up->latlon, " ", sizeof(up->latlon));
 			strlcat(up->latlon, tbuf + 2, sizeof(up->latlon));
-			record_clock_stats(&peer->srcadr, up->latlon);
+			record_clock_stats(&peer->srcaddr, up->latlon);
 #ifdef DEBUG
 			if (debug)
 				printf("arbiter: %s\n", up->latlon);
@@ -462,7 +462,7 @@ arb_poll(
 		return;
 	}
 	refclock_receive(peer);
-	record_clock_stats(&peer->srcadr, pp->a_lastcode);
+	record_clock_stats(&peer->srcaddr, pp->a_lastcode);
 #ifdef DEBUG
 	if (debug)
 		printf("arbiter: timecode %d %s\n",

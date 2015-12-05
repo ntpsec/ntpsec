@@ -496,7 +496,7 @@ association. Not all variables are displayed in some configurations.
 |Variable        |Description
 |+associd+       |association ID
 |+status+        |link:decode.html#peer[peer status word]
-|+srcadr srcport+|source (remote) IP address and port
+|+srcaddr srcport+|source (remote) IP address and port
 |+dstadr dstport+|destination (local) IP address and port
 |+leap+          |leap indicator (0-3)
 |+stratum+       |stratum (0-15)
