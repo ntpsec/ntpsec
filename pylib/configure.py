@@ -62,7 +62,7 @@ def cmd_configure(ctx):
 		ctx.env.PLATFORM_INCLUDES = ["/usr/local/include"]
 		ctx.env.PLATFORM_LIBPATH = ["/usr/local/lib"]
 	elif ctx.env.PLATFORM_TARGET == "netbsd":
-		ctx.env.PLATFORM_LIBPATH = ["/usr/pkg/lib"]
+		ctx.env.PLATFORM_LIBPATH = ["/usr/lib"]
 	elif ctx.env.PLATFORM_TARGET == "win":
 		ctx.load("msvc")
 
@@ -190,6 +190,7 @@ def cmd_configure(ctx):
 
 	ctx.check_cc(lib="edit", mandatory=False)
 	ctx.check_cc(lib="m")
+	ctx.check_cc(lib="ossaudio", mandatory=False)  # NetBSD audio
 	ctx.check_cc(lib="pthread")
 	ctx.check_cc(lib="rt", mandatory=False)
 	ctx.check_cc(lib="readline", mandatory=False)
