@@ -108,5 +108,5 @@ TEST_GROUP_RUNNER(decodenetnum) {
 	RUN_TEST_CASE(decodenetnum, IPv6AddressOnly);
 	RUN_TEST_CASE(decodenetnum, IPv6AddressWithPort);
 	RUN_TEST_CASE(decodenetnum, IllegalAddress);
-//XXX	RUN_TEST_CASE(decodenetnum, IllegalCharInPort);  Expected sa_family: 2 but got: 188
+	RUN_TEST_CASE(decodenetnum, IllegalCharInPort);
 }
