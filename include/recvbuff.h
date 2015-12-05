@@ -47,11 +47,9 @@ extern HANDLE	get_recv_buff_event(void);
 struct payload {
 	union {
 		sockaddr_u	X_recv_srcaddr;	/* where packet came from */
-		void *		X_recv_srcclock;
 		struct peer *	X_recv_peer;
 	} X_from_where;
 #define recv_srcaddr		X_from_where.X_recv_srcaddr
-#define	recv_srcclock		X_from_where.X_recv_srcclock
 #define recv_peer		X_from_where.X_recv_peer
 	endpt *		dstaddr;		/* address pkt arrived on */
 	SOCKET		fd;		/* fd on which it was received */
