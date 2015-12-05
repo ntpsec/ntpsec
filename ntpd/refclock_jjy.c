@@ -396,7 +396,7 @@ jjy_start ( int unit, struct peer *peer )
 #ifdef DEBUG
 	if ( debug ) {
 		printf( "refclock_jjy.c : jjy_start : %s  mode=%d  dev=%s  unit=%d\n",
-			 ntoa(&peer->srcadr), peer->ttl, DEVICE, unit ) ;
+			 ntoa(&peer->srcaddr), peer->ttl, DEVICE, unit ) ;
 	}
 #endif
 
@@ -455,7 +455,7 @@ jjy_start ( int unit, struct peer *peer )
 			rc = jjy_start_telephone ( unit, peer, up ) ;
 		} else {
 			msyslog ( LOG_ERR, "JJY receiver [ %s mode %d ] : Unsupported mode",
-				  ntoa(&peer->srcadr), peer->ttl ) ;
+				  ntoa(&peer->srcaddr), peer->ttl ) ;
 			free ( (void*) up ) ;
 		return false ;
 		}
@@ -463,7 +463,7 @@ jjy_start ( int unit, struct peer *peer )
 
 	if ( rc != 0 ) {
 		msyslog ( LOG_ERR, "JJY receiver [ %s mode %d ] : Initialize error",
-			  ntoa(&peer->srcadr), peer->ttl ) ;
+			  ntoa(&peer->srcaddr), peer->ttl ) ;
 		free ( (void*) up ) ;
 		return false ;
 	}
@@ -527,7 +527,7 @@ jjy_shutdown ( int unit, struct peer *peer )
 	}
 
 	snprintf( sLog, sizeof(sLog), "JJY stopped. unit=%d mode=%d", unit, peer->ttl ) ;
-	record_clock_stats( &peer->srcadr, sLog ) ;
+	record_clock_stats( &peer->srcaddr, sLog ) ;
 
 }
 
@@ -4457,7 +4457,7 @@ jjy_write_clockstats ( struct peer *peer, int iMark, const char *pData )
 		printf( "refclock_jjy.c : clockstats : %s\n", sLog ) ;
 	}
 #endif
-	record_clock_stats( &peer->srcadr, sLog ) ;
+	record_clock_stats( &peer->srcaddr, sLog ) ;
 
 }
 
