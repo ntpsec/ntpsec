@@ -393,9 +393,9 @@ TEST(leapsec, loadFileExpire) {
 	rc =   leapsec_load(pt, stringreader, &cp, false)
 	    && leapsec_set_table(pt);
 	TEST_ASSERT_EQUAL(1, rc);
-	rc = leapsec_expired(3439756800, NULL);
+	rc = leapsec_expired(3439756800u, NULL);
 	TEST_ASSERT_EQUAL(0, rc);
-	rc = leapsec_expired(3610569601, NULL);
+	rc = leapsec_expired(3610569601u, NULL);
 	TEST_ASSERT_EQUAL(1, rc);
 }
 
@@ -565,13 +565,13 @@ TEST(leapsec, addDynamic) {
 	int            idx;
 
 	static const uint32_t insns[] = {
-		2982009600,	//	29	# 1 Jul 1994
-		3029443200,	//	30	# 1 Jan 1996
-		3076704000,	//	31	# 1 Jul 1997
-		3124137600,	//	32	# 1 Jan 1999
-		3345062400,	//	33	# 1 Jan 2006
-		3439756800,	//	34	# 1 Jan 2009
-		3550089600,	//	35	# 1 Jul 2012
+		2982009600u,	//	29	# 1 Jul 1994
+		3029443200u,	//	30	# 1 Jan 1996
+		3076704000u,	//	31	# 1 Jul 1997
+		3124137600u,	//	32	# 1 Jan 1999
+		3345062400u,	//	33	# 1 Jan 2006
+		3439756800u,	//	34	# 1 Jan 2009
+		3550089600u,	//	35	# 1 Jul 2012
 		0 // sentinel
 	};
 
@@ -595,13 +595,13 @@ TEST(leapsec, addFixed) {
     int            idx;
 
 	static const struct { uint32_t tt; int of; } insns[] = {
-		{2982009600, 29},//	# 1 Jul 1994
-		{3029443200, 30},//	# 1 Jan 1996
-		{3076704000, 31},//	# 1 Jul 1997
-		{3124137600, 32},//	# 1 Jan 1999
-		{3345062400, 33},//	# 1 Jan 2006
-		{3439756800, 34},//	# 1 Jan 2009
-		{3550089600, 35},//	# 1 Jul 2012
+		{2982009600u, 29},//	# 1 Jul 1994
+		{3029443200u, 30},//	# 1 Jan 1996
+		{3076704000u, 31},//	# 1 Jul 1997
+		{3124137600u, 32},//	# 1 Jan 1999
+		{3345062400u, 33},//	# 1 Jan 2006
+		{3439756800u, 34},//	# 1 Jan 2009
+		{3550089600u, 35},//	# 1 Jul 2012
 		{0,0} // sentinel
 	};
 
@@ -938,8 +938,8 @@ TEST(leapsec, lsEmptyTableElectric) {
 	TEST_ASSERT_TRUE(leapsec_electric(-1));
 
 	const time_t   pivot = lsec2012;
-	const uint32_t t0 = lsec2012 - 10;
-	const uint32_t tE = lsec2012 + 10;
+	const time_t   t0 = lsec2012 - 10;
+	const time_t   tE = lsec2012 + 10;
 
 	for (t = t0; t != tE; ++t) {
 		rc = leapsec_query(&qr, t, &pivot);
