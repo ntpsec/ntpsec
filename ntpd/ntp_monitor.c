@@ -477,8 +477,8 @@ ntp_monitor(
 	mon->leak = 0;
 	memcpy(&mon->rmtadr, &rbufp->recv_srcaddr, sizeof(mon->rmtadr));
 	mon->vn_mode = VN_MODE(version, mode);
-	mon->lcladr = rbufp->dstadr;
-	mon->cast_flags = (uint8_t)(((rbufp->dstadr->flags &
+	mon->lcladr = rbufp->dstaddr;
+	mon->cast_flags = (uint8_t)(((rbufp->dstaddr->flags &
 	    INT_MCASTOPEN) && rbufp->fd == mon->lcladr->fd) ? MDF_MCAST
 	    : rbufp->fd == mon->lcladr->bfd ? MDF_BCAST : MDF_UCAST);
 

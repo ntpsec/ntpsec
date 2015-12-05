@@ -227,7 +227,7 @@ readlink(char * link, char * file, int len) {
 keyid_t
 session_key(
 	sockaddr_u *srcaddr, 	/* source address */
-	sockaddr_u *dstadr, 	/* destination address */
+	sockaddr_u *dstaddr, 	/* destination address */
 	keyid_t	keyno,		/* key ID */
 	keyid_t	private,	/* private value */
 	u_long	lifetime 	/* key lifetime */
@@ -239,7 +239,7 @@ session_key(
 	uint32_t	header[10];	/* data in network byte order */
 	u_int	hdlen, len;
 
-	if (!dstadr)
+	if (!dstaddr)
 		return 0;
 	
 	/*
@@ -250,7 +250,7 @@ session_key(
 	switch(AF(srcaddr)) {
 	case AF_INET:
 		header[0] = NSRCADR(srcaddr);
-		header[1] = NSRCADR(dstadr);
+		header[1] = NSRCADR(dstaddr);
 		header[2] = htonl(keyno);
 		header[3] = htonl(private);
 		hdlen = 4 * sizeof(uint32_t);
@@ -259,7 +259,7 @@ session_key(
 	case AF_INET6:
 		memcpy(&header[0], PSOCK_ADDR6(srcaddr),
 		    sizeof(struct in6_addr));
-		memcpy(&header[4], PSOCK_ADDR6(dstadr),
+		memcpy(&header[4], PSOCK_ADDR6(dstaddr),
 		    sizeof(struct in6_addr));
 		header[8] = htonl(keyno);
 		header[9] = htonl(private);
@@ -276,7 +276,7 @@ session_key(
 		authtrust(keyno, lifetime);
 	}
 	DPRINTF(2, ("session_key: %s > %s %08x %08x hash %08x life %lu\n",
-		    stoa(srcaddr), stoa(dstadr), keyno,
+		    stoa(srcaddr), stoa(dstaddr), keyno,
 		    private, keyid, lifetime));
 
 	return (keyid);
@@ -299,7 +299,7 @@ session_key(
 int
 make_keylist(
 	struct peer *peer,	/* peer structure pointer */
-	struct interface *dstadr /* interface */
+	struct interface *dstaddr /* interface */
 	)
 {
 	EVP_MD_CTX ctx;		/* signature context */
@@ -312,7 +312,7 @@ make_keylist(
 	u_int	len, mpoll;
 	int	i;
 
-	if (!dstadr)
+	if (!dstaddr)
 		return XEVNT_ERR;
 	
 	/*
@@ -353,7 +353,7 @@ make_keylist(
 	for (i = 0; i < NTP_MAXSESSION; i++) {
 		peer->keylist[i] = keyid;
 		peer->keynumber = i;
-		keyid = session_key(&dstadr->sin, &peer->srcaddr, keyid,
+		keyid = session_key(&dstaddr->sin, &peer->srcaddr, keyid,
 		    cookie, lifetime + mpoll);
 		lifetime -= mpoll;
 		if (auth_havekey(keyid) || keyid <= NTP_MAXKEY ||

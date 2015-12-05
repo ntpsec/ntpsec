@@ -347,7 +347,7 @@ int simulate_server(
     rbuf.receiver = &receive;   /* callback to process the packet */
     rbuf.recv_length = LEN_PKT_NOMAC;
     rbuf.recv_pkt = xpkt;
-    rbuf.dstadr = inter;
+    rbuf.dstaddr = inter;
     rbuf.fd = inter->fd;
     memcpy(&rbuf.srcaddr, serv_addr, sizeof(rbuf.srcaddr));
     memcpy(&rbuf.recv_srcaddr, serv_addr, sizeof(rbuf.recv_srcaddr));
