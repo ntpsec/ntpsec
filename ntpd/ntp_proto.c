@@ -139,7 +139,7 @@ u_long	sys_kodsent;		/* KoD sent */
 static	double	root_distance	(struct peer *);
 static	void	clock_combine	(peer_select *, int, int);
 static	void	peer_xmit	(struct peer *);
-static	void	fast_xmit	(struct payload *, int, keyid_t, int);
+static	void	fast_xmit	(struct recvbuf *, int, keyid_t, int);
 static	void	pool_xmit	(struct peer *);
 static	void	clock_update	(struct peer *);
 static	void	measure_precision(const bool);
@@ -380,7 +380,7 @@ transmit(
  */
 void
 receive(
-	struct payload *payload
+	struct recvbuf *rbufp
 	)
 {
 	register struct peer *peer;	/* peer structure pointer */
@@ -397,7 +397,7 @@ receive(
 	keyid_t	skeyid = 0;		/* key IDs */
 	uint32_t	opcode = 0;		/* extension field opcode */
 #if defined(DEBUG) || defined(ENABLE_AUTOKEY)
-	sockaddr_u *dstaddr_sin; 	/* active runway */
+	sockaddr_u *dstadr_sin; 	/* active runway */
 #endif
 	struct peer *peer2;		/* aux peer structure pointer */
 	endpt *	match_ep;		/* newpeer() local address */
@@ -427,16 +427,16 @@ receive(
 	 * reveals a clogging attack.
 	 */
 	sys_received++;
-	if (0 == SRCPORT(&payload->recv_srcaddr)) {
+	if (0 == SRCPORT(&rbufp->recv_srcadr)) {
 		sys_badlength++;
 		return;				/* bogus port */
 	}
-	restrict_mask = restrictions(&payload->recv_srcaddr);
+	restrict_mask = restrictions(&rbufp->recv_srcadr);
 	DPRINTF(2, ("receive: at %ld %s<-%s flags %x restrict %03x\n",
-		    current_time, stoa(&payload->dstaddr->sin),
-		    stoa(&payload->recv_srcaddr),
-		    payload->dstaddr->flags, restrict_mask));
-	pkt = &payload->recv_pkt;
+		    current_time, stoa(&rbufp->dstadr->sin),
+		    stoa(&rbufp->recv_srcadr),
+		    rbufp->dstadr->flags, restrict_mask));
+	pkt = &rbufp->recv_pkt;
 	hisversion = PKT_VERSION(pkt->li_vn_mode);
 	hisleap = PKT_LEAP(pkt->li_vn_mode);
 	hismode = (int)PKT_MODE(pkt->li_vn_mode);
@@ -455,7 +455,7 @@ receive(
 			sys_restricted++;
 			return;			/* no query control */
 		}
-		process_control(payload, restrict_mask);
+		process_control(rbufp, restrict_mask);
 		return;
 	}
 	if (restrict_mask & RES_DONTSERVE) {
@@ -516,7 +516,7 @@ receive(
 	 * field and go around again.
 	 */
 	authlen = LEN_PKT_NOMAC;
-	has_mac = payload->recv_length - authlen;
+	has_mac = rbufp->recv_length - authlen;
 	while (has_mac > 0) {
 		uint32_t	len;
 #ifdef ENABLE_AUTOKEY
@@ -537,7 +537,7 @@ receive(
 			opcode = ntohl(((uint32_t *)pkt)[authlen / 4]);
 			len = opcode & 0xffff;
 			if (len % 4 != 0 || len < 4 || (int)len +
-			    authlen > payload->recv_length) {
+			    authlen > rbufp->recv_length) {
 				sys_badlength++;
 				return;		/* bad length */
 			}
@@ -594,21 +594,21 @@ receive(
 	 * RES_LIMITED and RES_KOD will be cleared in the returned
 	 * restrict_mask unless one or both actions are warranted.
 	 */
-	restrict_mask = ntp_monitor(payload, restrict_mask);
+	restrict_mask = ntp_monitor(rbufp, restrict_mask);
 	if (restrict_mask & RES_LIMITED) {
 		sys_limitrejected++;
 		if (!(restrict_mask & RES_KOD) || MODE_BROADCAST ==
 		    hismode || MODE_SERVER == hismode) {
 			if (MODE_SERVER == hismode)
 				DPRINTF(1, ("Possibly self-induced rate limiting of MODE_SERVER from %s\n",
-					stoa(&payload->recv_srcaddr)));
+					stoa(&rbufp->recv_srcadr)));
 			return;			/* rate exceeded */
 		}
 		if (hismode == MODE_CLIENT)
-			fast_xmit(payload, MODE_SERVER, skeyid,
+			fast_xmit(rbufp, MODE_SERVER, skeyid,
 			    restrict_mask);
 		else
-			fast_xmit(payload, MODE_ACTIVE, skeyid,
+			fast_xmit(rbufp, MODE_ACTIVE, skeyid,
 			    restrict_mask);
 		return;				/* rate exceeded */
 	}
@@ -633,9 +633,9 @@ receive(
 	 * multicaster, the broadcast address is null, so we use the
 	 * unicast address anyway. Don't ask.
 	 */
-	peer = findpeer(payload,  hismode, &retcode);
+	peer = findpeer(rbufp,  hismode, &retcode);
 #ifdef DEBUG
-	dstaddr_sin = &payload->dstaddr->sin;
+	dstadr_sin = &rbufp->dstadr->sin;
 #endif
 	NTOHL_FP(&pkt->org, &p_org);
 	NTOHL_FP(&pkt->rec, &p_rec);
@@ -672,8 +672,8 @@ receive(
 		if (debug)
 			printf(
 			    "receive: at %ld %s<-%s mode %d len %zd\n",
-			    current_time, stoa(dstaddr_sin),
-			    stoa(&payload->recv_srcaddr), hismode,
+			    current_time, stoa(dstadr_sin),
+			    stoa(&rbufp->recv_srcadr), hismode,
 			    authlen);
 #endif
 	} else if (has_mac == 4) {
@@ -683,8 +683,8 @@ receive(
 		if (debug)
 			printf(
 			    "receive: at %ld %s<-%s mode %d keyid %08x len %zd auth %d\n",
-			    current_time, stoa(dstaddr_sin),
-			    stoa(&payload->recv_srcaddr), hismode, skeyid,
+			    current_time, stoa(dstadr_sin),
+			    stoa(&rbufp->recv_srcadr), hismode, skeyid,
 			    authlen + has_mac, is_authentic);
 #endif
 
@@ -754,18 +754,18 @@ receive(
 				 * mobilized. However, if this is from
 				 * the wildcard interface, game over.
 				 */
-				if (crypto_flags && payload->dstaddr ==
-				    ANY_INTERFACE_CHOOSE(&payload->recv_srcaddr)) {
+				if (crypto_flags && rbufp->dstadr ==
+				    ANY_INTERFACE_CHOOSE(&rbufp->recv_srcadr)) {
 					sys_restricted++;
 					return;	     /* no wildcard */
 				}
 				pkeyid = 0;
-				if (!SOCK_UNSPEC(&payload->dstaddr->bcast))
-					dstaddr_sin =
-					    &payload->dstaddr->bcast;
+				if (!SOCK_UNSPEC(&rbufp->dstadr->bcast))
+					dstadr_sin =
+					    &rbufp->dstadr->bcast;
 			} else if (peer == NULL) {
 				pkeyid = session_key(
-				    &payload->recv_srcaddr, dstaddr_sin, 0,
+				    &rbufp->recv_srcadr, dstadr_sin, 0,
 				    sys_private, 0);
 			} else {
 				pkeyid = peer->pcookie;
@@ -779,14 +779,14 @@ receive(
 			 * use later in the autokey mambo.
 			 */
 			if (authlen > LEN_PKT_NOMAC && pkeyid != 0) {
-				session_key(&payload->recv_srcaddr,
-				    dstaddr_sin, skeyid, 0, 2);
+				session_key(&rbufp->recv_srcadr,
+				    dstadr_sin, skeyid, 0, 2);
 				tkeyid = session_key(
-				    &payload->recv_srcaddr, dstaddr_sin,
+				    &rbufp->recv_srcadr, dstadr_sin,
 				    skeyid, pkeyid, 0);
 			} else {
 				tkeyid = session_key(
-				    &payload->recv_srcaddr, dstaddr_sin,
+				    &rbufp->recv_srcadr, dstadr_sin,
 				    skeyid, pkeyid, 2);
 			}
 
@@ -813,8 +813,8 @@ receive(
 		if (debug)
 			printf(
 			    "receive: at %ld %s<-%s mode %d keyid %08x len %zd auth %d\n",
-			    current_time, stoa(dstaddr_sin),
-			    stoa(&payload->recv_srcaddr), hismode, skeyid,
+			    current_time, stoa(dstadr_sin),
+			    stoa(&rbufp->recv_srcadr), hismode, skeyid,
 			    authlen + has_mac, is_authentic);
 #endif
 	}
@@ -843,13 +843,13 @@ receive(
 		 * If authentication OK, send a server reply; otherwise,
 		 * send a crypto-NAK.
 		 */
-		if (!(payload->dstaddr->flags & INT_MCASTOPEN)) {
+		if (!(rbufp->dstadr->flags & INT_MCASTOPEN)) {
 			if (AUTH(restrict_mask & RES_DONTTRUST,
 			   is_authentic)) {
-				fast_xmit(payload, MODE_SERVER, skeyid,
+				fast_xmit(rbufp, MODE_SERVER, skeyid,
 				    restrict_mask);
 			} else if (is_authentic == AUTH_ERROR) {
-				fast_xmit(payload, MODE_SERVER, 0,
+				fast_xmit(rbufp, MODE_SERVER, 0,
 				    restrict_mask);
 				sys_badauth++;
 			} else {
@@ -884,7 +884,7 @@ receive(
 		 */
 		if (sys_leap == LEAP_NOTINSYNC || sys_stratum >=
 		    hisstratum || (!sys_cohort && sys_stratum ==
-		    hisstratum + 1) || payload->dstaddr->addr_refid ==
+		    hisstratum + 1) || rbufp->dstadr->addr_refid ==
 		    pkt->refid) {
 			sys_declined++;
 			return;			/* no help */
@@ -895,7 +895,7 @@ receive(
 		 * crypto-NAK, as that would not be useful.
 		 */
 		if (AUTH(restrict_mask & RES_DONTTRUST, is_authentic))
-			fast_xmit(payload, MODE_SERVER, skeyid,
+			fast_xmit(rbufp, MODE_SERVER, skeyid,
 			    restrict_mask);
 		return;				/* hooray */
 
@@ -929,7 +929,7 @@ receive(
 			return;
 		}
 #endif /* ENABLE_AUTOKEY */
-		if ((peer2 = findmanycastpeer(payload)) == NULL) {
+		if ((peer2 = findmanycastpeer(rbufp)) == NULL) {
 			sys_restricted++;
 			return;			/* not enabled */
 		}
@@ -949,7 +949,7 @@ receive(
 			sys_declined++;
 			return;			/* no help */
 		}
-		peer = newpeer(&payload->recv_srcaddr, NULL, payload->dstaddr,
+		peer = newpeer(&rbufp->recv_srcadr, NULL, rbufp->dstadr,
 			       MODE_CLIENT, hisversion, peer2->minpoll,
 			       peer2->maxpoll, FLAG_PREEMPT |
 			       (FLAG_IBURST & peer2->flags), MDF_UCAST |
@@ -1034,8 +1034,8 @@ receive(
 		 * ephemeral associations are unique across all local
 		 * endpoints.
 		 */
-		if (!(INT_MCASTOPEN & payload->dstaddr->flags))
-			match_ep = payload->dstaddr;
+		if (!(INT_MCASTOPEN & rbufp->dstadr->flags))
+			match_ep = rbufp->dstadr;
 		else
 			match_ep = NULL;
 
@@ -1058,7 +1058,7 @@ receive(
 			 * Do not execute the volley. Start out in
 			 * broadcast client mode.
 			 */
-			peer = newpeer(&payload->recv_srcaddr, NULL,
+			peer = newpeer(&rbufp->recv_srcadr, NULL,
 			    match_ep, MODE_BCLIENT, hisversion,
 			    pkt->ppoll, pkt->ppoll, FLAG_PREEMPT,
 			    MDF_BCLNT, 0, skeyid, sys_ident);
@@ -1080,7 +1080,7 @@ receive(
 		 * packet, normally 6 (64 s) and that the poll interval
 		 * is fixed at this value.
 		 */
-		peer = newpeer(&payload->recv_srcaddr, NULL, match_ep,
+		peer = newpeer(&rbufp->recv_srcadr, NULL, match_ep,
 		    MODE_CLIENT, hisversion, pkt->ppoll, pkt->ppoll,
 		    FLAG_BC_VOL | FLAG_IBURST | FLAG_PREEMPT, MDF_BCLNT,
 		    0, skeyid, sys_ident);
@@ -1090,7 +1090,7 @@ receive(
 		}
 #ifdef ENABLE_AUTOKEY
 		if (skeyid > NTP_MAXKEY)
-			crypto_recv(peer, payload);
+			crypto_recv(peer, rbufp);
 #endif	/* ENABLE_AUTOKEY */
 
 		return;				/* hooray */
@@ -1123,12 +1123,12 @@ receive(
 			 */
 			if (AUTH(restrict_mask & RES_DONTTRUST,
 			    is_authentic)) {
-				fast_xmit(payload, MODE_PASSIVE, skeyid,
+				fast_xmit(rbufp, MODE_PASSIVE, skeyid,
 				    restrict_mask);
 				return;			/* hooray */
 			}
 			if (is_authentic == AUTH_ERROR) {
-				fast_xmit(payload, MODE_ACTIVE, 0,
+				fast_xmit(rbufp, MODE_ACTIVE, 0,
 				    restrict_mask);
 				sys_restricted++;
 				return;
@@ -1148,7 +1148,7 @@ receive(
 				 printf(
 					 "receive: at %ld refusing to mobilize passive association"
 					 " with unknown peer %s mode %d keyid %08x len %zd auth %d\n",
-					 current_time, stoa(&payload->recv_srcaddr), hismode, skeyid,
+					 current_time, stoa(&rbufp->recv_srcadr), hismode, skeyid,
 					 authlen + has_mac, is_authentic);
 			}
 #endif
@@ -1176,8 +1176,8 @@ receive(
 		 * The message is correctly authenticated and allowed.
 		 * Mobilize a symmetric passive association.
 		 */
-		if ((peer = newpeer(&payload->recv_srcaddr, NULL,
-		    payload->dstaddr, MODE_PASSIVE, hisversion, pkt->ppoll,
+		if ((peer = newpeer(&rbufp->recv_srcadr, NULL,
+		    rbufp->dstadr, MODE_PASSIVE, hisversion, pkt->ppoll,
 		    NTP_MAXDPOLL, 0, MDF_UCAST, 0, skeyid,
 		    sys_ident)) == NULL) {
 			sys_declined++;
@@ -1268,7 +1268,7 @@ receive(
 		if (!L_ISZERO(&p_org) && !(peer->flags & FLAG_XB)) {
 			peer->flags |= FLAG_XB;
 			peer->aorg = p_xmt;
-			peer->borg = payload->recv_time;
+			peer->borg = rbufp->recv_time;
 			report_event(PEVNT_XLEAVE, peer, NULL);
 			return;
 		}
@@ -1344,7 +1344,7 @@ receive(
 		peer->badauth++;
 		if (has_mac &&
 		    (hismode == MODE_ACTIVE || hismode == MODE_PASSIVE))
-			fast_xmit(payload, MODE_ACTIVE, 0, restrict_mask);
+			fast_xmit(rbufp, MODE_ACTIVE, 0, restrict_mask);
 		if (peer->flags & FLAG_PREEMPT) {
 			unpeer(peer);
 			return;
@@ -1362,7 +1362,7 @@ receive(
 	if (peer->flip == 0) {
 		if (hismode != MODE_BROADCAST)
 			peer->rec = p_xmt;
-		peer->dst = payload->recv_time;
+		peer->dst = rbufp->recv_time;
 	}
 	peer->xmt = p_xmt;
 
@@ -1438,7 +1438,7 @@ receive(
 				ap->seq--;
 		}
 		peer->flash |= BOGON8;
-		rval = crypto_recv(peer, payload);
+		rval = crypto_recv(peer, rbufp);
 		if (rval == XEVNT_OK) {
 			peer->unreach = 0;
 		} else {
@@ -1496,7 +1496,7 @@ receive(
 					break;
 				}
 				tkeyid = session_key(
-				    &payload->recv_srcaddr, dstaddr_sin,
+				    &rbufp->recv_srcadr, dstadr_sin,
 				    tkeyid, pkeyid, 0);
 			}
 			if (peer->flash & BOGON8)
@@ -1524,7 +1524,7 @@ receive(
 	 * the packet over the fence for processing, which may light up
 	 * more flashers.
 	 */
-	process_packet(peer, pkt, payload->recv_length);
+	process_packet(peer, pkt, rbufp->recv_length);
 
 	/*
 	 * In interleaved mode update the state variables. Also adjust the
@@ -1532,7 +1532,7 @@ receive(
 	 */
 	if (peer->flip != 0) {
 		peer->rec = p_rec;
-		peer->dst = payload->recv_time;
+		peer->dst = rbufp->recv_time;
 		if (peer->nextdate - current_time < (1U << min(peer->ppoll,
 		    peer->hpoll)) / 2)
 			peer->nextdate++;
@@ -1584,8 +1584,8 @@ process_packet(
 	/*
 	 * Capture the header values in the client/peer association..
 	 */
-	record_raw_stats(&peer->srcaddr, peer->dstaddr ?
-	    &peer->dstaddr->sin : NULL,
+	record_raw_stats(&peer->srcadr, peer->dstadr ?
+	    &peer->dstadr->sin : NULL,
 	    &p_org, &p_rec, &p_xmt, &peer->dst,
 	    pleap, pversion, pmode, pstratum, pkt->ppoll, pkt->precision,
 	    p_del, p_disp, pkt->refid);
@@ -1899,7 +1899,7 @@ clock_update(
 	    peer->stratum == STRATUM_UNSPEC)
 		sys_refid = peer->refid;
 	else
-		sys_refid = addr2refid(&peer->srcaddr);
+		sys_refid = addr2refid(&peer->srcadr);
 	/*
 	 * Root Dispersion (E) is defined (in RFC 5905) as:
 	 *
@@ -2153,7 +2153,7 @@ poll_update(
 			peer->nextdate += ntp_minpkt;
 	}
 	DPRINTF(2, ("poll_update: at %lu %s poll %d burst %d retry %d head %d early %lu next %lu\n",
-		    current_time, ntoa(&peer->srcaddr), peer->hpoll,
+		    current_time, ntoa(&peer->srcadr), peer->hpoll,
 		    peer->burst, peer->retry, peer->throttle,
 		    utemp - current_time, peer->nextdate -
 		    current_time));
@@ -2428,7 +2428,7 @@ clock_filter(
 	 * processing. If not synchronized or not in a burst, tickle the
 	 * clock select algorithm.
 	 */
-	record_peer_stats(&peer->srcaddr, ctlpeerstatus(peer),
+	record_peer_stats(&peer->srcadr, ctlpeerstatus(peer),
 	    peer->offset, peer->delay, peer->disp, peer->jitter);
 #ifdef DEBUG
 	if (debug)
@@ -2544,11 +2544,11 @@ clock_select(void)
 			uint32_t	localmet;
 			uint32_t peermet;
 
-			if (peer->dstaddr != NULL)
-				localmet = ntohl(peer->dstaddr->addr_refid);
+			if (peer->dstadr != NULL)
+				localmet = ntohl(peer->dstadr->addr_refid);
 			else
 				localmet = UINT32_MAX;
-			peermet = ntohl(addr2refid(&peer->srcaddr));
+			peermet = ntohl(addr2refid(&peer->srcadr));
 			if (peermet < localmet && peermet < orphmet) {
 				typeorphan = peer;
 				orphmet = peermet;
@@ -2764,7 +2764,7 @@ clock_select(void)
 	for (i = 0; i < nlist; i++) {
 		peers[i].peer->new_status = CTL_PST_SEL_SELCAND;
 		DPRINTF(2, ("select: survivor %s %f\n",
-			stoa(&peers[i].peer->srcaddr), peers[i].synch));
+			stoa(&peers[i].peer->srcadr), peers[i].synch));
 	}
 
 	/*
@@ -2803,7 +2803,7 @@ clock_select(void)
 			break;
 
 		DPRINTF(3, ("select: drop %s seljit %.6f jit %.6f\n",
-			ntoa(&peers[k].peer->srcaddr), g, d));
+			ntoa(&peers[k].peer->srcadr), g, d));
 		if (nlist > sys_maxclock)
 			peers[k].peer->new_status = CTL_PST_SEL_EXCESS;
 		for (j = k + 1; j < nlist; j++)
@@ -3056,7 +3056,7 @@ peer_xmit(
 	keyid_t	xkeyid = 0;	/* transmit key ID */
 	l_fp	xmt_tx, xmt_ty;
 
-	if (!peer->dstaddr)	/* drop peers without interface */
+	if (!peer->dstadr)	/* drop peers without interface */
 		return;
 
 	xpkt.li_vn_mode = PKT_LI_VN_MODE(sys_leap, peer->version,
@@ -3116,7 +3116,7 @@ peer_xmit(
 			}
 		}
 		peer->t21_bytes = sendlen;
-		intercept_sendpkt(__func__, &peer->srcaddr, peer->dstaddr, sys_ttl[peer->ttl],
+		intercept_sendpkt(__func__, &peer->srcadr, peer->dstadr, sys_ttl[peer->ttl],
 		    &xpkt, sendlen);
 		peer->sent++;
 		peer->throttle += (1 << peer->minpoll) - 2;
@@ -3137,9 +3137,9 @@ peer_xmit(
 #ifdef DEBUG
 		if (debug)
 			printf("transmit: at %ld %s->%s mode %d len %zu\n",
-		    	    current_time, peer->dstaddr ?
-			    stoa(&peer->dstaddr->sin) : "-",
-		            stoa(&peer->srcaddr), peer->hmode, sendlen);
+		    	    current_time, peer->dstadr ?
+			    stoa(&peer->dstadr->sin) : "-",
+		            stoa(&peer->srcadr), peer->hmode, sendlen);
 #endif
 		return;
 	}
@@ -3198,7 +3198,7 @@ peer_xmit(
 			 * regenerate it.
 			 */
 			if (peer->keynumber == 0)
-				make_keylist(peer, peer->dstaddr);
+				make_keylist(peer, peer->dstadr);
 			else
 				peer->keynumber--;
 			xkeyid = peer->keylist[peer->keynumber];
@@ -3384,7 +3384,7 @@ peer_xmit(
 		 * fields are present, the cookie value is zero.
 		 */
 		if (sendlen > (int)LEN_PKT_NOMAC) {
-			session_key(&peer->dstaddr->sin, &peer->srcaddr,
+			session_key(&peer->dstadr->sin, &peer->srcadr,
 			    xkeyid, 0, 2);
 		}
 	}
@@ -3429,7 +3429,7 @@ peer_xmit(
 		exit (-1);
 	}
 	peer->t21_bytes = sendlen;
-	intercept_sendpkt(__func__, &peer->srcaddr, peer->dstaddr, sys_ttl[peer->ttl], &xpkt,
+	intercept_sendpkt(__func__, &peer->srcadr, peer->dstadr, sys_ttl[peer->ttl], &xpkt,
 	    sendlen);
 	peer->sent++;
 	peer->throttle += (1 << peer->minpoll) - 2;
@@ -3451,17 +3451,17 @@ peer_xmit(
 #ifdef DEBUG
 	if (debug)
 		printf("transmit: at %ld %s->%s mode %d keyid %08x len %zu index %d\n",
-		    current_time, latoa(peer->dstaddr),
-		    ntoa(&peer->srcaddr), peer->hmode, xkeyid, sendlen,
+		    current_time, latoa(peer->dstadr),
+		    ntoa(&peer->srcadr), peer->hmode, xkeyid, sendlen,
 		    peer->keynumber);
 #endif
 #else	/* !ENABLE_AUTOKEY follows */
 #ifdef DEBUG
 	if (debug)
 		printf("transmit: at %ld %s->%s mode %d keyid %08x len %zd\n",
-		    current_time, peer->dstaddr ?
-		    ntoa(&peer->dstaddr->sin) : "-",
-		    ntoa(&peer->srcaddr), peer->hmode, xkeyid, sendlen);
+		    current_time, peer->dstadr ?
+		    ntoa(&peer->dstadr->sin) : "-",
+		    ntoa(&peer->srcadr), peer->hmode, xkeyid, sendlen);
 #endif
 #endif	/* !ENABLE_AUTOKEY */
 }
@@ -3483,7 +3483,7 @@ leap_smear_add_offs(l_fp *t, l_fp *t_recv) {
  */
 static void
 fast_xmit(
-	struct payload *payload,	/* receive packet pointer */
+	struct recvbuf *rbufp,	/* receive packet pointer */
 	int	xmode,		/* receive mode */
 	keyid_t	xkeyid,		/* transmit key ID */
 	int	flags		/* restrict mask */
@@ -3508,9 +3508,9 @@ fast_xmit(
 	 * If the gazinta was from a multicast address, the gazoutta
 	 * must go out another way.
 	 */
-	rpkt = &payload->recv_pkt;
-	if (payload->dstaddr->flags & INT_MCASTOPEN)
-		payload->dstaddr = findinterface(&payload->recv_srcaddr);
+	rpkt = &rbufp->recv_pkt;
+	if (rbufp->dstadr->flags & INT_MCASTOPEN)
+		rbufp->dstadr = findinterface(&rbufp->recv_srcadr);
 
 	/*
 	 * If this is a kiss-o'-death (KoD) packet, show leap
@@ -3580,12 +3580,12 @@ fast_xmit(
 		xpkt.org = rpkt->xmt;
 
 #ifdef ENABLE_LEAP_SMEAR
-		this_recv_time = payload->recv_time;
+		this_recv_time = rbufp->recv_time;
 		if (leap_smear.in_progress)
 			leap_smear_add_offs(&this_recv_time, NULL);
 		HTONL_FP(&this_recv_time, &xpkt.rec);
 #else
-		HTONL_FP(&payload->recv_time, &xpkt.rec);
+		HTONL_FP(&rbufp->recv_time, &xpkt.rec);
 #endif
 
 		intercept_get_systime(__func__, &xmt_tx);
@@ -3598,7 +3598,7 @@ fast_xmit(
 
 #ifdef ENABLE_MSSNTP
 	if (flags & RES_MSSNTP) {
-		send_via_ntp_signd(payload, xmode, xkeyid, flags, &xpkt);
+		send_via_ntp_signd(rbufp, xmode, xkeyid, flags, &xpkt);
 		return;
 	}
 #endif /* ENABLE_MSSNTP */
@@ -3609,15 +3609,15 @@ fast_xmit(
 	 * packet is not authenticated.
 	 */
 	sendlen = LEN_PKT_NOMAC;
-	if (payload->recv_length == sendlen) {
-		intercept_sendpkt(__func__, &payload->recv_srcaddr, payload->dstaddr, 0, &xpkt,
+	if (rbufp->recv_length == sendlen) {
+		intercept_sendpkt(__func__, &rbufp->recv_srcadr, rbufp->dstadr, 0, &xpkt,
 		    sendlen);
 #ifdef DEBUG
 		if (debug)
 			printf(
 			    "transmit: at %ld %s->%s mode %d len %zd\n",
-			    current_time, stoa(&payload->dstaddr->sin),
-			    stoa(&payload->recv_srcaddr), xmode, sendlen);
+			    current_time, stoa(&rbufp->dstadr->sin),
+			    stoa(&rbufp->recv_srcadr), xmode, sendlen);
 #endif
 		return;
 	}
@@ -3643,19 +3643,19 @@ fast_xmit(
 		 * jerk can decode it. If no extension field is present,
 		 * use the cookie to generate the session key.
 		 */
-		cookie = session_key(&payload->recv_srcaddr,
-		    &payload->dstaddr->sin, 0, sys_private, 0);
-		if (payload->recv_length > sendlen + (int)MAX_MAC_LEN) {
-			session_key(&payload->dstaddr->sin,
-			    &payload->recv_srcaddr, xkeyid, 0, 2);
+		cookie = session_key(&rbufp->recv_srcadr,
+		    &rbufp->dstadr->sin, 0, sys_private, 0);
+		if (rbufp->recv_length > sendlen + (int)MAX_MAC_LEN) {
+			session_key(&rbufp->dstadr->sin,
+			    &rbufp->recv_srcadr, xkeyid, 0, 2);
 			temp32 = CRYPTO_RESP;
 			rpkt->exten[0] |= htonl(temp32);
-			sendlen += crypto_xmit(NULL, &xpkt, payload,
+			sendlen += crypto_xmit(NULL, &xpkt, rbufp,
 			    sendlen, (struct exten *)rpkt->exten,
 			    cookie);
 		} else {
-			session_key(&payload->dstaddr->sin,
-			    &payload->recv_srcaddr, xkeyid, cookie, 2);
+			session_key(&rbufp->dstadr->sin,
+			    &rbufp->recv_srcadr, xkeyid, cookie, 2);
 		}
 	}
 #endif	/* ENABLE_AUTOKEY */
@@ -3665,7 +3665,7 @@ fast_xmit(
 	if (xkeyid > NTP_MAXKEY)
 		authtrust(xkeyid, 0);
 #endif	/* ENABLE_AUTOKEY */
-	intercept_sendpkt(__func__, &payload->recv_srcaddr, payload->dstaddr, 0, &xpkt, sendlen);
+	intercept_sendpkt(__func__, &rbufp->recv_srcadr, rbufp->dstadr, 0, &xpkt, sendlen);
 	intercept_get_systime(__func__, &xmt_ty);
 	L_SUB(&xmt_ty, &xmt_tx);
 	sys_authdelay = xmt_ty;
@@ -3673,8 +3673,8 @@ fast_xmit(
 	if (debug)
 		printf(
 		    "transmit: at %ld %s->%s mode %d keyid %08x len %zd\n",
-		    current_time, ntoa(&payload->dstaddr->sin),
-		    ntoa(&payload->recv_srcaddr), xmode, xkeyid, sendlen);
+		    current_time, ntoa(&rbufp->dstadr->sin),
+		    ntoa(&rbufp->recv_srcadr), xmode, xkeyid, sendlen);
 #endif
 }
 
@@ -3704,7 +3704,7 @@ pool_xmit(
 			pool->addrs = NULL;
 		}
 		ZERO(hints);
-		hints.ai_family = AF(&pool->srcaddr);
+		hints.ai_family = AF(&pool->srcadr);
 		hints.ai_socktype = SOCK_DGRAM;
 		hints.ai_protocol = IPPROTO_UDP;
 		/* ignore getaddrinfo_sometime() errors, we will retry */
@@ -3882,10 +3882,10 @@ local_refid(
 {
 	endpt *	unicast_ep;
 
-	if (p->dstaddr != NULL && !(INT_MCASTIF & p->dstaddr->flags))
-		unicast_ep = p->dstaddr;
+	if (p->dstadr != NULL && !(INT_MCASTIF & p->dstadr->flags))
+		unicast_ep = p->dstadr;
 	else
-		unicast_ep = findinterface(&p->srcaddr);
+		unicast_ep = findinterface(&p->srcadr);
 
 	if (unicast_ep != NULL && p->refid == unicast_ep->addr_refid)
 		return true;

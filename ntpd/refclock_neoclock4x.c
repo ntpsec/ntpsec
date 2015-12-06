@@ -575,7 +575,7 @@ neoclock4x_receive(struct recvbuf *rbufp)
   /* report good status */
   refclock_report(peer, CEVNT_NOMINAL);
 
-  record_clock_stats(&peer->srcaddr, pp->a_lastcode);
+  record_clock_stats(&peer->srcadr, pp->a_lastcode);
 }
 
 static void

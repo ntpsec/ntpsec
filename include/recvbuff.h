@@ -44,16 +44,28 @@ extern HANDLE	get_recv_buff_event(void);
 #define	RX_BUFF_SIZE	1000		/* hail Mary */
 
 
-struct payload {
+typedef struct recvbuf recvbuf_t;
+
+struct recvbuf {
+	recvbuf_t *	link;	/* next in list */
 	union {
-		sockaddr_u	X_recv_srcaddr;	/* where packet came from */
+		sockaddr_u	X_recv_srcadr;
+		void *		X_recv_srcclock;
 		struct peer *	X_recv_peer;
 	} X_from_where;
-#define recv_srcaddr		X_from_where.X_recv_srcaddr
+#define recv_srcadr		X_from_where.X_recv_srcadr
+#define	recv_srcclock		X_from_where.X_recv_srcclock
 #define recv_peer		X_from_where.X_recv_peer
-	endpt *		dstaddr;		/* address pkt arrived on */
+#ifndef HAVE_IO_COMPLETION_PORT
+	sockaddr_u	srcadr;		/* where packet came from */
+#else
+	int		recv_srcadr_len;/* filled in on completion */
+#endif
+	endpt *		dstadr;		/* address pkt arrived on */
 	SOCKET		fd;		/* fd on which it was received */
+	int		msg_flags;	/* Flags received about the packet */
 	l_fp		recv_time;	/* time of arrival */
+	void		(*receiver)(struct recvbuf *); /* callback */
 	size_t		recv_length;	/* number of octets received */
 	union {
 		struct pkt	X_recv_pkt;
@@ -61,18 +73,7 @@ struct payload {
 	} recv_space;
 #define	recv_pkt		recv_space.X_recv_pkt
 #define	recv_buffer		recv_space.X_recv_buffer
-};
-
-typedef struct recvbuf recvbuf_t;
-
-struct recvbuf {
-	recvbuf_t *	link;	/* next in list */
-	struct payload	payload;
-#ifdef HAVE_IO_COMPLETION_PORT
-	int		recv_srcaddr_len;/* filled in on completion */
-#endif
-	void		(*receiver)(struct payload *); /* callback */
-	int		used;		/* reference count */
+	int used;		/* reference count */
 };
 
 extern	void	init_recvbuff(int);

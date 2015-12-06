@@ -122,9 +122,9 @@ sub get_info {
 sub get_next_host {
     my ($peer, $host) = @_;
 
-    my $info = ntp_read_vars($peer, [qw(srcaddr)], $host);
+    my $info = ntp_read_vars($peer, [qw(srcadr)], $host);
     return if not defined $info;
-    return $info->{srcaddr};
+    return $info->{srcadr};
 }
 
 END { close STDOUT };

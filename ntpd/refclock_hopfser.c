@@ -313,7 +313,7 @@ hopfserial_receive (
 	msyslog(LOG_ERR, " D:%x  D:%d D:%d",synch,pp->minute,pp->second);
 #endif
 
-	record_clock_stats(&peer->srcaddr, pp->a_lastcode);
+	record_clock_stats(&peer->srcadr, pp->a_lastcode);
 
 	return;
 }
@@ -342,7 +342,7 @@ hopfserial_poll (
 	up->rpt_next = 1;
 
 #if 0
-	record_clock_stats(&peer->srcaddr, pp->a_lastcode);
+	record_clock_stats(&peer->srcadr, pp->a_lastcode);
 #endif
 
 	return;

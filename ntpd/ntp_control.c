@@ -37,7 +37,7 @@ struct ctl_proc {
 	/* Only one flag.  Authentication required or not. */
 #define NOAUTH	0
 #define AUTH	1
-	void (*handler) (struct payload *, int); /* handle request */
+	void (*handler) (struct recvbuf *, int); /* handle request */
 };
 
 
@@ -73,33 +73,33 @@ static	void	ctl_putclock	(int, struct refclockstat *, int);
 static	const struct ctl_var *ctl_getitem(const struct ctl_var *,
 					  char **);
 static	u_short	count_var	(const struct ctl_var *);
-static	void	control_unspec	(struct payload *, int);
-static	void	read_status	(struct payload *, int);
+static	void	control_unspec	(struct recvbuf *, int);
+static	void	read_status	(struct recvbuf *, int);
 static	void	read_sysvars	(void);
 static	void	read_peervars	(void);
-static	void	read_variables	(struct payload *, int);
-static	void	write_variables (struct payload *, int);
-static	void	read_clockstatus(struct payload *, int);
-static	void	write_clockstatus(struct payload *, int);
-static	void	set_trap	(struct payload *, int);
-static	void	save_config	(struct payload *, int);
-static	void	configure	(struct payload *, int);
+static	void	read_variables	(struct recvbuf *, int);
+static	void	write_variables (struct recvbuf *, int);
+static	void	read_clockstatus(struct recvbuf *, int);
+static	void	write_clockstatus(struct recvbuf *, int);
+static	void	set_trap	(struct recvbuf *, int);
+static	void	save_config	(struct recvbuf *, int);
+static	void	configure	(struct recvbuf *, int);
 static	void	send_mru_entry	(mon_entry *, int);
 static	void	send_random_tag_value(int);
-static	void	read_mru_list	(struct payload *, int);
+static	void	read_mru_list	(struct recvbuf *, int);
 static	void	send_ifstats_entry(endpt *, u_int);
-static	void	read_ifstats	(struct payload *);
+static	void	read_ifstats	(struct recvbuf *);
 static	void	sockaddrs_from_restrict_u(sockaddr_u *,	sockaddr_u *,
 					  restrict_u *, int);
 static	void	send_restrict_entry(restrict_u *, int, u_int);
 static	void	send_restrict_list(restrict_u *, int, u_int *);
-static	void	read_addr_restrictions(struct payload *);
-static	void	read_ordlist	(struct payload *, int);
+static	void	read_addr_restrictions(struct recvbuf *);
+static	void	read_ordlist	(struct recvbuf *, int);
 static	uint32_t	derive_nonce	(sockaddr_u *, uint32_t, uint32_t);
-static	void	generate_nonce	(struct payload *, char *, size_t);
-static	int	validate_nonce	(const char *, struct payload *);
-static	void	req_nonce	(struct payload *, int);
-static	void	unset_trap	(struct payload *, int);
+static	void	generate_nonce	(struct recvbuf *, char *, size_t);
+static	int	validate_nonce	(const char *, struct recvbuf *);
+static	void	req_nonce	(struct recvbuf *, int);
+static	void	unset_trap	(struct recvbuf *, int);
 static	struct ctl_trap *ctlfindtrap(sockaddr_u *,
 				     struct interface *);
 
@@ -477,9 +477,9 @@ static const struct ctl_var peer_var[] = {
 	{ CP_CONFIG,	RO, "config" },		/* 1 */
 	{ CP_AUTHENABLE, RO,	"authenable" },	/* 2 */
 	{ CP_AUTHENTIC, RO, "authentic" },	/* 3 */
-	{ CP_SRCADR,	RO, "srcaddr" },		/* 4 */
+	{ CP_SRCADR,	RO, "srcadr" },		/* 4 */
 	{ CP_SRCPORT,	RO, "srcport" },	/* 5 */
-	{ CP_DSTADR,	RO, "dstaddr" },		/* 6 */
+	{ CP_DSTADR,	RO, "dstadr" },		/* 6 */
 	{ CP_DSTPORT,	RO, "dstport" },	/* 7 */
 	{ CP_LEAP,	RO, "leap" },		/* 8 */
 	{ CP_HMODE,	RO, "hmode" },		/* 9 */
@@ -796,7 +796,7 @@ ctl_error(
  */
 void
 save_config(
-	struct payload *payload,
+	struct recvbuf *rbufp,
 	int restrict_mask
 	)
 {
@@ -821,7 +821,7 @@ save_config(
 		NLOG(NLOG_SYSINFO)
 			msyslog(LOG_NOTICE,
 				"saveconfig from %s rejected due to nomodify restriction",
-				stoa(&payload->recv_srcaddr));
+				stoa(&rbufp->recv_srcadr));
 		sys_restricted++;
 		return;
 	}
@@ -835,7 +835,7 @@ save_config(
 		NLOG(NLOG_SYSINFO)
 			msyslog(LOG_NOTICE,
 				"saveconfig from %s rejected, no saveconfigdir",
-				stoa(&payload->recv_srcaddr));
+				stoa(&rbufp->recv_srcadr));
 		return;
 	}
 
@@ -873,7 +873,7 @@ save_config(
 		ctl_flushpkt(0);
 		msyslog(LOG_NOTICE,
 			"saveconfig with path from %s rejected",
-			stoa(&payload->recv_srcaddr));
+			stoa(&rbufp->recv_srcadr));
 		return;
 	}
 
@@ -893,13 +893,13 @@ save_config(
 			 filename);
 		msyslog(LOG_ERR,
 			"saveconfig %s from %s failed", filename,
-			stoa(&payload->recv_srcaddr));
+			stoa(&rbufp->recv_srcadr));
 	} else {
 		snprintf(reply, sizeof(reply),
 			 "Configuration saved to %s", filename);
 		msyslog(LOG_NOTICE,
 			"Configuration saved to %s (requested by %s)",
-			fullpath, stoa(&payload->recv_srcaddr));
+			fullpath, stoa(&rbufp->recv_srcadr));
 		/*
 		 * save the output filename in system variable
 		 * savedconfig, retrieved with:
@@ -927,7 +927,7 @@ save_config(
  */
 void
 process_control(
-	struct payload *payload,
+	struct recvbuf *rbufp,
 	int restrict_mask
 	)
 {
@@ -945,19 +945,19 @@ process_control(
 	 * Save the addresses for error responses
 	 */
 	numctlreq++;
-	rmt_addr = &payload->recv_srcaddr;
-	lcl_inter = payload->dstaddr;
-	pkt = (struct ntp_control *)&payload->recv_pkt;
+	rmt_addr = &rbufp->recv_srcadr;
+	lcl_inter = rbufp->dstadr;
+	pkt = (struct ntp_control *)&rbufp->recv_pkt;
 
 	/*
 	 * If the length is less than required for the header, or
 	 * it is a response or a fragment, ignore this.
 	 */
-	if (payload->recv_length < (int)CTL_HEADER_LEN
+	if (rbufp->recv_length < (int)CTL_HEADER_LEN
 	    || (CTL_RESPONSE | CTL_MORE | CTL_ERROR) & pkt->r_m_e_op
 	    || pkt->offset != 0) {
 		DPRINTF(1, ("invalid format in control packet\n"));
-		if (payload->recv_length < (int)CTL_HEADER_LEN)
+		if (rbufp->recv_length < (int)CTL_HEADER_LEN)
 			numctltooshort++;
 		if (CTL_RESPONSE & pkt->r_m_e_op)
 			numctlinputresp++;
@@ -1001,16 +1001,16 @@ process_control(
 	datapt = rpkt.u.data;
 	dataend = &rpkt.u.data[CTL_MAX_DATA_LEN];
 
-	if ((payload->recv_length & 0x3) != 0)
+	if ((rbufp->recv_length & 0x3) != 0)
 		DPRINTF(3, ("Control packet length %zd unrounded\n",
-			    payload->recv_length));
+			    rbufp->recv_length));
 
 	/*
 	 * We're set up now. Make sure we've got at least enough
 	 * incoming data space to match the count.
 	 */
-	req_data = payload->recv_length - CTL_HEADER_LEN;
-	if (req_data < req_count || payload->recv_length & 0x3) {
+	req_data = rbufp->recv_length - CTL_HEADER_LEN;
+	if (req_data < req_count || rbufp->recv_length & 0x3) {
 		ctl_error(CERR_BADFMT);
 		numctldatatooshort++;
 		return;
@@ -1020,21 +1020,21 @@ process_control(
 	/* round up proper len to a 8 octet boundary */
 
 	properlen = (properlen + 7) & ~7;
-	maclen = payload->recv_length - properlen;
-	if ((payload->recv_length & 3) == 0 &&
+	maclen = rbufp->recv_length - properlen;
+	if ((rbufp->recv_length & 3) == 0 &&
 	    maclen >= MIN_MAC_LEN && maclen <= MAX_MAC_LEN &&
 	    sys_authenticate) {
 		res_authenticate = true;
 		pkid = (void *)((char *)pkt + properlen);
 		res_keyid = ntohl(*pkid);
 		DPRINTF(3, ("recv_len %zd, properlen %d, wants auth with keyid %08x, MAC length=%zu\n",
-			    payload->recv_length, properlen, res_keyid,
+			    rbufp->recv_length, properlen, res_keyid,
 			    maclen));
 
 		if (!authistrusted(res_keyid))
 			DPRINTF(3, ("invalid keyid %08x\n", res_keyid));
 		else if (authdecrypt(res_keyid, (uint32_t *)pkt,
-				     payload->recv_length - maclen,
+				     rbufp->recv_length - maclen,
 				     maclen)) {
 			res_authokay = true;
 			DPRINTF(3, ("authenticated okay\n"));
@@ -1063,7 +1063,7 @@ process_control(
 				ctl_error(CERR_PERMISSION);
 				return;
 			}
-			(cc->handler)(payload, restrict_mask);
+			(cc->handler)(rbufp, restrict_mask);
 			return;
 		}
 	}
@@ -1752,8 +1752,8 @@ ctl_putsys(
 		break;
 
 	case CS_PEERADR:
-		if (sys_peer != NULL && sys_peer->dstaddr != NULL)
-			ss = sptoa(&sys_peer->srcaddr);
+		if (sys_peer != NULL && sys_peer->dstadr != NULL)
+			ss = sptoa(&sys_peer->srcadr);
 		else
 			ss = "0.0.0.0:0";
 		ctl_putunqstr(sys_var[CS_PEERADR].text, ss, strlen(ss));
@@ -2356,11 +2356,11 @@ ctl_putpeer(
 		break;
 
 	case CP_SRCADR:
-		ctl_putadr(peer_var[id].text, 0, &p->srcaddr);
+		ctl_putadr(peer_var[id].text, 0, &p->srcadr);
 		break;
 
 	case CP_SRCPORT:
-		ctl_putuint(peer_var[id].text, SRCPORT(&p->srcaddr));
+		ctl_putuint(peer_var[id].text, SRCPORT(&p->srcadr));
 		break;
 
 	case CP_SRCHOST:
@@ -2371,15 +2371,15 @@ ctl_putpeer(
 
 	case CP_DSTADR:
 		ctl_putadr(peer_var[id].text, 0,
-			   (p->dstaddr != NULL)
-				? &p->dstaddr->sin
+			   (p->dstadr != NULL)
+				? &p->dstadr->sin
 				: NULL);
 		break;
 
 	case CP_DSTPORT:
 		ctl_putuint(peer_var[id].text,
-			    (p->dstaddr != NULL)
-				? SRCPORT(&p->dstaddr->sin)
+			    (p->dstadr != NULL)
+				? SRCPORT(&p->dstadr->sin)
 				: 0);
 		break;
 
@@ -2900,13 +2900,13 @@ ctl_getitem(
 /*ARGSUSED*/
 static void
 control_unspec(
-	struct payload *payload,
+	struct recvbuf *rbufp,
 	int restrict_mask
 	)
 {
 	struct peer *peer;
 
-	UNUSED_ARG(payload);
+	UNUSED_ARG(rbufp);
 	UNUSED_ARG(restrict_mask);
 
 	/*
@@ -2934,7 +2934,7 @@ control_unspec(
 /*ARGSUSED*/
 static void
 read_status(
-	struct payload *payload,
+	struct recvbuf *rbufp,
 	int restrict_mask
 	)
 {
@@ -2944,7 +2944,7 @@ read_status(
 	/* a_st holds association ID, status pairs alternating */
 	u_short a_st[CTL_MAX_DATA_LEN / sizeof(u_short)];
 
-	UNUSED_ARG(payload);
+	UNUSED_ARG(rbufp);
 	UNUSED_ARG(restrict_mask);
 #ifdef DEBUG
 	if (debug > 2)
@@ -3112,11 +3112,11 @@ read_sysvars(void)
 /*ARGSUSED*/
 static void
 read_variables(
-	struct payload *payload,
+	struct recvbuf *rbufp,
 	int restrict_mask
 	)
 {
-	UNUSED_ARG(payload);
+	UNUSED_ARG(rbufp);
 	UNUSED_ARG(restrict_mask);
 
 	if (res_associd)
@@ -3133,7 +3133,7 @@ read_variables(
 /*ARGSUSED*/
 static void
 write_variables(
-	struct payload *payload,
+	struct recvbuf *rbufp,
 	int restrict_mask
 	)
 {
@@ -3146,7 +3146,7 @@ write_variables(
 	const char *t;
 	char *tt;
 
-	UNUSED_ARG(payload);
+	UNUSED_ARG(rbufp);
 	UNUSED_ARG(restrict_mask);
 
 	val = 0;
@@ -3232,7 +3232,7 @@ write_variables(
  *		generic runtime reconfiguration.
  */
 static void configure(
-	struct payload *payload,
+	struct recvbuf *rbufp,
 	int restrict_mask
 	)
 {
@@ -3258,7 +3258,7 @@ static void configure(
 		NLOG(NLOG_SYSINFO)
 			msyslog(LOG_NOTICE,
 				"runtime config from %s rejected due to nomodify restriction",
-				stoa(&payload->recv_srcaddr));
+				stoa(&rbufp->recv_srcadr));
 		sys_restricted++;
 		return;
 	}
@@ -3275,7 +3275,7 @@ static void configure(
 		ctl_flushpkt(0);
 		msyslog(LOG_NOTICE,
 			"runtime config from %s rejected: request too long",
-			stoa(&payload->recv_srcaddr));
+			stoa(&rbufp->recv_srcadr));
 		return;
 	}
 
@@ -3300,13 +3300,13 @@ static void configure(
 	DPRINTF(1, ("Got Remote Configuration Command: %s\n",
 		remote_config.buffer));
 	msyslog(LOG_NOTICE, "%s config: %s",
-		stoa(&payload->recv_srcaddr),
+		stoa(&rbufp->recv_srcadr),
 		remote_config.buffer);
 
 	if (replace_nl)
 		remote_config.buffer[data_count - 1] = '\n';
 
-	config_remotely(&payload->recv_srcaddr);
+	config_remotely(&rbufp->recv_srcadr);
 
 	/*
 	 * Check if errors were reported. If not, output 'Config
@@ -3329,7 +3329,7 @@ static void configure(
 	if (remote_config.no_errors > 0)
 		msyslog(LOG_NOTICE, "%d error in %s config",
 			remote_config.no_errors,
-			stoa(&payload->recv_srcaddr));
+			stoa(&rbufp->recv_srcadr));
 }
 
 
@@ -3382,18 +3382,18 @@ static uint32_t derive_nonce(
  * generate_nonce - generate client-address-specific nonce string.
  */
 static void generate_nonce(
-	struct payload *	payload,
+	struct recvbuf *	rbufp,
 	char *			nonce,
 	size_t			nonce_octets
 	)
 {
 	uint32_t derived;
 
-	derived = derive_nonce(&payload->recv_srcaddr,
-			       payload->recv_time.l_ui,
-			       payload->recv_time.l_uf);
+	derived = derive_nonce(&rbufp->recv_srcadr,
+			       rbufp->recv_time.l_ui,
+			       rbufp->recv_time.l_uf);
 	snprintf(nonce, nonce_octets, "%08x%08x%08x",
-		 payload->recv_time.l_ui, payload->recv_time.l_uf, derived);
+		 rbufp->recv_time.l_ui, rbufp->recv_time.l_uf, derived);
 }
 
 
@@ -3405,7 +3405,7 @@ static void generate_nonce(
  */
 static int validate_nonce(
 	const char *		pnonce,
-	struct payload *	payload
+	struct recvbuf *	rbufp
 	)
 {
 	u_int	ts_i;
@@ -3420,7 +3420,7 @@ static int validate_nonce(
 
 	ts.l_ui = (uint32_t)ts_i;
 	ts.l_uf = (uint32_t)ts_f;
-	derived = derive_nonce(&payload->recv_srcaddr, ts.l_ui, ts.l_uf);
+	derived = derive_nonce(&rbufp->recv_srcadr, ts.l_ui, ts.l_uf);
 	intercept_get_systime(__func__, &now_delta);
 	L_SUB(&now_delta, &ts);
 
@@ -3645,7 +3645,7 @@ send_mru_entry(
  *			entry.
  */
 static void read_mru_list(
-	struct payload *payload,
+	struct recvbuf *rbufp,
 	int restrict_mask
 	)
 {
@@ -3690,7 +3690,7 @@ static void read_mru_list(
 		NLOG(NLOG_SYSINFO)
 			msyslog(LOG_NOTICE,
 				"mrulist from %s rejected due to nomrulist restriction",
-				stoa(&payload->recv_srcaddr));
+				stoa(&rbufp->recv_srcadr));
 		sys_restricted++;
 		return;
 	}
@@ -3776,7 +3776,7 @@ static void read_mru_list(
 	if (NULL == pnonce)
 		return;
 
-	nonce_valid = validate_nonce(pnonce, payload);
+	nonce_valid = validate_nonce(pnonce, rbufp);
 	free(pnonce);
 	if (!nonce_valid)
 		return;
@@ -3841,7 +3841,7 @@ static void read_mru_list(
 	 * send up to limit= entries in up to frags= datagrams
 	 */
 	intercept_get_systime(__func__, &now);
-	generate_nonce(payload, buf, sizeof(buf));
+	generate_nonce(rbufp, buf, sizeof(buf));
 	ctl_putunqstr("nonce", buf, strlen(buf));
 	prior_mon = NULL;
 	for (count = 0;
@@ -4013,13 +4013,13 @@ send_ifstats_entry(
  */
 static void
 read_ifstats(
-	struct payload *	payload
+	struct recvbuf *	rbufp
 	)
 {
 	u_int	ifidx;
 	endpt *	la;
 
-	UNUSED_ARG(payload);
+	UNUSED_ARG(rbufp);
 
 	/*
 	 * loop over [0..sys_ifnum] searching ep_list for each
@@ -4172,12 +4172,12 @@ send_restrict_list(
  */
 static void
 read_addr_restrictions(
-	struct payload *	payload
+	struct recvbuf *	rbufp
 )
 {
 	u_int idx;
 
-	UNUSED_ARG(payload);
+	UNUSED_ARG(rbufp);
 
 	idx = 0;
 	send_restrict_list(restrictlist4, false, &idx);
@@ -4191,7 +4191,7 @@ read_addr_restrictions(
  */
 static void
 read_ordlist(
-	struct payload *	payload,
+	struct recvbuf *	rbufp,
 	int			restrict_mask
 	)
 {
@@ -4202,7 +4202,7 @@ read_ordlist(
 	struct ntp_control *	cpkt;
 	u_short			qdata_octets;
 
-	UNUSED_ARG(payload);
+	UNUSED_ARG(rbufp);
 	UNUSED_ARG(restrict_mask);
 
 	/*
@@ -4216,16 +4216,16 @@ read_ordlist(
 	 * which are access control lists.  Other request data return
 	 * CERR_UNKNOWNVAR.
 	 */
-	cpkt = (struct ntp_control *)&payload->recv_pkt;
+	cpkt = (struct ntp_control *)&rbufp->recv_pkt;
 	qdata_octets = ntohs(cpkt->count);
 	if (0 == qdata_octets || (ifstatint8_ts == qdata_octets &&
 	    !memcmp(ifstats_s, cpkt->u.data, ifstatint8_ts))) {
-		read_ifstats(payload);
+		read_ifstats(rbufp);
 		return;
 	}
 	if (a_r_chars == qdata_octets &&
 	    !memcmp(addr_rst_s, cpkt->u.data, a_r_chars)) {
-		read_addr_restrictions(payload);
+		read_addr_restrictions(rbufp);
 		return;
 	}
 	ctl_error(CERR_UNKNOWNVAR);
@@ -4236,7 +4236,7 @@ read_ordlist(
  * req_nonce - CTL_OP_REQ_NONCE for ntpq -c mrulist prerequisite.
  */
 static void req_nonce(
-	struct payload *	payload,
+	struct recvbuf *	rbufp,
 	int			restrict_mask
 	)
 {
@@ -4244,7 +4244,7 @@ static void req_nonce(
 
 	UNUSED_ARG(restrict_mask);
 
-	generate_nonce(payload, buf, sizeof(buf));
+	generate_nonce(rbufp, buf, sizeof(buf));
 	ctl_putunqstr("nonce", buf, strlen(buf));
 	ctl_flushpkt(0);
 }
@@ -4256,12 +4256,12 @@ static void req_nonce(
 /*ARGSUSED*/
 static void
 read_clockstatus(
-	struct payload *payload,
+	struct recvbuf *rbufp,
 	int restrict_mask
 	)
 {
 #ifndef REFCLOCK
-	UNUSED_ARG(payload);
+	UNUSED_ARG(rbufp);
 	UNUSED_ARG(restrict_mask);
 	/*
 	 * If no refclock support, no data to return
@@ -4279,7 +4279,7 @@ read_clockstatus(
 	struct ctl_var *	kv;
 	struct refclockstat	cs;
 
-	UNUSED_ARG(payload);
+	UNUSED_ARG(rbufp);
 	UNUSED_ARG(restrict_mask);
 
 	if (res_associd != 0) {
@@ -4308,7 +4308,7 @@ read_clockstatus(
 	 * status.
 	 */
 	cs.kv_list = NULL;
-	refclock_control(&peer->srcaddr, NULL, &cs);
+	refclock_control(&peer->srcadr, NULL, &cs);
 	kv = cs.kv_list;
 	/*
 	 * Look for variables in the packet.
@@ -4368,11 +4368,11 @@ read_clockstatus(
 /*ARGSUSED*/
 static void
 write_clockstatus(
-	struct payload *payload,
+	struct recvbuf *rbufp,
 	int restrict_mask
 	)
 {
-	UNUSED_ARG(payload);
+	UNUSED_ARG(rbufp);
 	UNUSED_ARG(restrict_mask);
 
 	ctl_error(CERR_PERMISSION);
@@ -4388,7 +4388,7 @@ write_clockstatus(
  */
 static void
 set_trap(
-	struct payload *payload,
+	struct recvbuf *rbufp,
 	int restrict_mask
 	)
 {
@@ -4413,7 +4413,7 @@ set_trap(
 	 * Call ctlsettrap() to do the work.  Return
 	 * an error if it can't assign the trap.
 	 */
-	if (!ctlsettrap(&payload->recv_srcaddr, payload->dstaddr, traptype,
+	if (!ctlsettrap(&rbufp->recv_srcadr, rbufp->dstadr, traptype,
 			(int)res_version))
 		ctl_error(CERR_NORESOURCE);
 	ctl_flushpkt(0);
@@ -4425,7 +4425,7 @@ set_trap(
  */
 static void
 unset_trap(
-	struct payload *payload,
+	struct recvbuf *rbufp,
 	int restrict_mask
 	)
 {
@@ -4444,7 +4444,7 @@ unset_trap(
 	/*
 	 * Call ctlclrtrap() to clear this out.
 	 */
-	if (!ctlclrtrap(&payload->recv_srcaddr, payload->dstaddr, traptype))
+	if (!ctlclrtrap(&rbufp->recv_srcadr, rbufp->dstadr, traptype))
 		ctl_error(CERR_BADASSOC);
 	ctl_flushpkt(0);
 }
@@ -4677,10 +4677,10 @@ report_event(
 
 		peer->last_event = errlast;
 		peer->num_events++;
-		if (ISREFCLOCKADR(&peer->srcaddr))
-			src = refnumtoa(&peer->srcaddr);
+		if (ISREFCLOCKADR(&peer->srcadr))
+			src = refnumtoa(&peer->srcadr);
 		else
-			src = stoa(&peer->srcaddr);
+			src = stoa(&peer->srcadr);
 
 		snprintf(statstr, sizeof(statstr),
 		    "%s %04x %02x %s", src,
@@ -4739,7 +4739,7 @@ report_event(
 			struct ctl_var *kv;
 
 			cs.kv_list = NULL;
-			refclock_control(&peer->srcaddr, NULL, &cs);
+			refclock_control(&peer->srcadr, NULL, &cs);
 
 			ctl_puthex("refclockstatus",
 				   ctlclkstatus(&cs));

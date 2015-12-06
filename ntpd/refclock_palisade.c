@@ -917,7 +917,7 @@ palisade_receive (
 		return;
 	}
 
-	record_clock_stats(&peer->srcaddr, pp->a_lastcode); 
+	record_clock_stats(&peer->srcadr, pp->a_lastcode); 
 
 #ifdef DEBUG
 	if (debug)
@@ -991,7 +991,7 @@ praecis_parse (
 
 	if(buf[p-2] == '\r' && buf[p-1] == '\n') {
 		buf[p-2] = '\0';
-		record_clock_stats(&peer->srcaddr, buf);
+		record_clock_stats(&peer->srcadr, buf);
 
 		p = 0;
 		praecis_msg = false;

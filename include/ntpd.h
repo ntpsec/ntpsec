@@ -64,7 +64,7 @@ extern	u_short ctlpeerstatus	(struct peer *);
 extern	bool	ctlsettrap	(sockaddr_u *, struct interface *, int, int);
 extern	u_short ctlsysstatus	(void);
 extern	void	init_control	(void);
-extern	void	process_control (struct payload *, int);
+extern	void	process_control (struct recvbuf *, int);
 extern	void	report_event	(int, struct peer *, const char *);
 extern	int	mprintf_event	(int, struct peer *, const char *, ...)
 			NTP_PRINTF(3, 4);
@@ -161,16 +161,16 @@ extern 	int	freq_cnt;
 extern	void	init_mon	(void);
 extern	void	mon_start	(int);
 extern	void	mon_stop	(int);
-extern	u_short	ntp_monitor	(struct payload *, u_short);
+extern	u_short	ntp_monitor	(struct recvbuf *, u_short);
 extern	void	mon_clearinterface(endpt *interface);
 
 /* ntp_peer.c */
 extern	void	init_peer	(void);
 extern	struct peer *findexistingpeer(sockaddr_u *, const char *,
 				      struct peer *, int, uint8_t);
-extern	struct peer *findpeer	(struct payload *, int, int *);
+extern	struct peer *findpeer	(struct recvbuf *, int, int *);
 extern	struct peer *findpeerbyassoc(associd_t);
-extern  void	set_peerdstaddr	(struct peer *, endpt *);
+extern  void	set_peerdstadr	(struct peer *, endpt *);
 extern	struct peer *newpeer	(sockaddr_u *, const char *,
 				 endpt *, uint8_t, uint8_t,
 				 uint8_t, uint8_t, u_int, uint8_t, uint32_t,
@@ -186,7 +186,7 @@ extern	void	refresh_all_peerinterfaces(void);
 extern	void	unpeer		(struct peer *);
 extern	void	clear_all	(void);
 extern	int	score_all	(struct peer *);
-extern	struct peer *findmanycastpeer(struct payload *);
+extern	struct peer *findmanycastpeer(struct recvbuf *);
 extern	void	peer_cleanup	(void);
 
 /* ntp_crypto.c */
@@ -217,7 +217,7 @@ extern struct value tai_leap;
 
 /* ntp_proto.c */
 extern	void	transmit	(struct peer *);
-extern	void	receive 	(struct payload *);
+extern	void	receive 	(struct recvbuf *);
 extern	void	peer_clear	(struct peer *, const char *);
 extern	void 	process_packet	(struct peer *, struct pkt *, u_int);
 extern	void	clock_select	(void);
@@ -287,7 +287,7 @@ extern	void	record_loop_stats (double, double, double, double, int);
 extern	void	record_clock_stats (sockaddr_u *, const char *);
 extern	int	mprintf_clock_stats(sockaddr_u *, const char *, ...)
 			NTP_PRINTF(2, 3);
-extern	void	record_raw_stats (sockaddr_u *srcaddr, sockaddr_u *dstaddr, l_fp *t1, l_fp *t2, l_fp *t3, l_fp *t4, int leap, int version, int mode, int stratum, int ppoll, int precision, double root_delay, double root_dispersion, uint32_t refid);
+extern	void	record_raw_stats (sockaddr_u *srcadr, sockaddr_u *dstadr, l_fp *t1, l_fp *t2, l_fp *t3, l_fp *t4, int leap, int version, int mode, int stratum, int ppoll, int precision, double root_delay, double root_dispersion, uint32_t refid);
 extern	void	check_leap_file	(int is_daily_check, uint32_t ntptime, const time_t * systime);
 extern	void	record_crypto_stats (sockaddr_u *, const char *);
 #ifdef DEBUG

@@ -113,9 +113,9 @@ const var_format cookedvars[] = {
 	{ "rec",		TS },
 	{ "xmt",		TS },
 	{ "flash",		FX },
-	{ "srcaddr",		HA },
+	{ "srcadr",		HA },
 	{ "peeradr",		HA },	/* compat with others */
-	{ "dstaddr",		NA },
+	{ "dstadr",		NA },
 	{ "filtdelay",		AR },
 	{ "filtoffset",		AR },
 	{ "filtdisp",		AR },

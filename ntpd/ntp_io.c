@@ -388,8 +388,8 @@ collect_timing(struct recvbuf *rb, const char *tag, int count, l_fp *dts)
 
 	snprintf(buf, sizeof(buf), "%s %d %s %s",
 		 (rb != NULL)
-		     ? ((rb->dstaddr != NULL)
-			    ? stoa(&rb->recv_srcaddr)
+		     ? ((rb->dstadr != NULL)
+			    ? stoa(&rb->recv_srcadr)
 			    : "-REFCLOCK-")
 		     : "-",
 		 count, lfptoa(dts, 9), tag);
@@ -1997,7 +1997,7 @@ update_interfaces(
 
 		/* disconnect peers from deleted endpt. */
 		while (ep->peers != NULL)
-			set_peerdstaddr(ep->peers, NULL);
+			set_peerdstadr(ep->peers, NULL);
 
 		/*
 		 * update globals in case we lose
@@ -3281,7 +3281,7 @@ read_refclock_packet(
 	 */
 	rb->recv_length = buflen;
 	rb->recv_peer = rp->srcclock;
-	rb->dstaddr = 0;
+	rb->dstadr = 0;
 	rb->fd = fd;
 	rb->recv_time = ts;
 	rb->receiver = rp->clock_recv;
@@ -3471,25 +3471,26 @@ read_network_packet(
 		return (buflen);
 	}
 
-	fromlen = sizeof(rb->payload.recv_srcaddr);
+	fromlen = sizeof(rb->recv_srcadr);
 
 #ifndef USE_PACKET_TIMESTAMP
 	rb->recv_length = recvfrom(fd, (char *)&rb->recv_space,
 				   sizeof(rb->recv_space), 0,
-				   &rb->recv_srcaddr.sa, &fromlen);
+				   &rb->recv_srcadr.sa, &fromlen);
 #else
-	iovec.iov_base        = &rb->payload.recv_space;
-	iovec.iov_len         = sizeof(rb->payload.recv_space);
-	msghdr.msg_name       = &rb->payload.recv_srcaddr;
+	iovec.iov_base        = &rb->recv_space;
+	iovec.iov_len         = sizeof(rb->recv_space);
+	msghdr.msg_name       = &rb->recv_srcadr;
 	msghdr.msg_namelen    = fromlen;
 	msghdr.msg_iov        = &iovec;
 	msghdr.msg_iovlen     = 1;
 	msghdr.msg_control    = (void *)&control;
 	msghdr.msg_controllen = sizeof(control);
-	rb->payload.recv_length       = recvmsg(fd, &msghdr, 0);
+	msghdr.msg_flags      = 0;
+	rb->recv_length       = recvmsg(fd, &msghdr, 0);
 #endif
 
-	buflen = rb->payload.recv_length;
+	buflen = rb->recv_length;
 
 	if (buflen == 0 || (buflen == -1 &&
 	    (EWOULDBLOCK == errno
@@ -3501,7 +3502,7 @@ read_network_packet(
 		return (buflen);
 	} else if (buflen < 0) {
 		msyslog(LOG_ERR, "recvfrom(%s) fd=%d: %m",
-			stoa(&rb->payload.recv_srcaddr), fd);
+			stoa(&rb->recv_srcadr), fd);
 		DPRINTF(5, ("read_network_packet: fd=%d dropped (bad recvfrom)\n",
 			    fd));
 		freerecvbuf(rb);
@@ -3509,7 +3510,7 @@ read_network_packet(
 	}
 
 	DPRINTF(3, ("read_network_packet: fd=%d length %d from %s\n",
-		    fd, buflen, stoa(&rb->recv_srcaddr)));
+		    fd, buflen, stoa(&rb->recv_srcadr)));
 
 	/*
 	** Bug 2672: Some OSes (MacOSX and Linux) don't block spoofed ::1
@@ -3517,13 +3518,13 @@ read_network_packet(
 
 	if (AF_INET6 == itf->family) {
 		DPRINTF(2, ("Got an IPv6 packet, from <%s> (%d) to <%s> (%d)\n",
-			stoa(&rb->recv_srcaddr),
-			IN6_IS_ADDR_LOOPBACK(PSOCK_ADDR6(&rb->recv_srcaddr)),
+			stoa(&rb->recv_srcadr),
+			IN6_IS_ADDR_LOOPBACK(PSOCK_ADDR6(&rb->recv_srcadr)),
 			stoa(&itf->sin),
 			!IN6_IS_ADDR_LOOPBACK(PSOCK_ADDR6(&itf->sin))
 			));
 
-		if (   IN6_IS_ADDR_LOOPBACK(PSOCK_ADDR6(&rb->payload.recv_srcaddr))
+		if (   IN6_IS_ADDR_LOOPBACK(PSOCK_ADDR6(&rb->recv_srcadr))
 		    && !IN6_IS_ADDR_LOOPBACK(PSOCK_ADDR6(&itf->sin))
 		   ) {
 			packets_dropped++;
@@ -3538,13 +3539,13 @@ read_network_packet(
 	 * Got one.  Mark how and when it got here,
 	 * put it on the full list and do bookkeeping.
 	 */
-	rb->payload.dstaddr = itf;
-	rb->payload.fd = fd;
+	rb->dstadr = itf;
+	rb->fd = fd;
 #ifdef USE_PACKET_TIMESTAMP
 	/* pick up a network time stamp if possible */
 	ts = fetch_timestamp(rb, &msghdr, ts);
 #endif
-	rb->payload.recv_time = ts;
+	rb->recv_time = ts;
 	rb->receiver = receive;
 
 	add_full_recv_buffer(rb);
@@ -3708,12 +3709,12 @@ input_handler(
 			 */
 			if (buflen < 0 && EAGAIN != errno) {
 				saved_errno = errno;
-				clk = refnumtoa(&rp->srcclock->srcaddr);
+				clk = refnumtoa(&rp->srcclock->srcadr);
 				errno = saved_errno;
 				msyslog(LOG_ERR, "%s read: %m", clk);
 				maintain_activefds(fd, true);
 			} else if (0 == buflen) {
-				clk = refnumtoa(&rp->srcclock->srcaddr);
+				clk = refnumtoa(&rp->srcclock->srcadr);
 				msyslog(LOG_ERR, "%s read EOF", clk);
 				maintain_activefds(fd, true);
 			} else {
@@ -3820,15 +3821,15 @@ input_handler(
 endpt *
 select_peerinterface(
 	struct peer *	peer,
-	sockaddr_u *	srcaddr,
-	endpt *		dstaddr
+	sockaddr_u *	srcadr,
+	endpt *		dstadr
 	)
 {
 	endpt *ep;
 #ifndef SIM
 	endpt *wild;
 
-	wild = ANY_INTERFACE_CHOOSE(srcaddr);
+	wild = ANY_INTERFACE_CHOOSE(srcadr);
 
 	/*
 	 * Initialize the peer structure and dance the interface jig.
@@ -3838,30 +3839,30 @@ select_peerinterface(
 	 * This might happen in some systems and would preclude proper
 	 * operation with public key cryptography.
 	 */
-	if (ISREFCLOCKADR(srcaddr)) {
+	if (ISREFCLOCKADR(srcadr)) {
 		ep = loopback_interface;
 	} else if (peer->cast_flags &
 		   (MDF_BCLNT | MDF_ACAST | MDF_MCAST | MDF_BCAST)) {
-		ep = findbcastinter(srcaddr);
+		ep = findbcastinter(srcadr);
 		if (ep != NULL)
 			DPRINTF(4, ("Found *-cast interface %s for address %s\n",
-				stoa(&ep->sin), stoa(srcaddr)));
+				stoa(&ep->sin), stoa(srcadr)));
 		else
 			DPRINTF(4, ("No *-cast local address found for address %s\n",
-				stoa(srcaddr)));
+				stoa(srcadr)));
 	} else {
-		ep = dstaddr;
+		ep = dstadr;
 		if (NULL == ep)
 			ep = wild;
 	}
 	/*
 	 * If it is a multicast address, findbcastinter() may not find
-	 * it.  For unicast, we get to find the interface when dstaddr is
+	 * it.  For unicast, we get to find the interface when dstadr is
 	 * given to us as the wildcard (ANY_INTERFACE_CHOOSE).  Either
 	 * way, try a little harder.
 	 */
 	if (wild == ep)
-		ep = findinterface(srcaddr);
+		ep = findinterface(srcadr);
 	/*
 	 * we do not bind to the wildcard interfaces for output
 	 * as our (network) source address would be undefined and

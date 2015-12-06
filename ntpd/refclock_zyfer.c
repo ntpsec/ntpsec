@@ -242,7 +242,7 @@ zyfer_receive(
 	if (pp->lencode < LENZYFER)
 		return;
 
-	record_clock_stats(&peer->srcaddr, pp->a_lastcode);
+	record_clock_stats(&peer->srcadr, pp->a_lastcode);
 
 	/*
 	 * We get down to business, check the timecode format and decode

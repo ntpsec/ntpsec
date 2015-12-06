@@ -305,7 +305,7 @@ mon_clearinterface(
  */
 u_short
 ntp_monitor(
-	struct payload *payload,
+	struct recvbuf *rbufp,
 	u_short	flags
 	)
 {
@@ -326,8 +326,8 @@ ntp_monitor(
 	if (mon_enabled == MON_OFF)
 		return ~(RES_LIMITED | RES_KOD) & flags;
 
-	pkt = &payload->recv_pkt;
-	hash = MON_HASH(&payload->recv_srcaddr);
+	pkt = &rbufp->recv_pkt;
+	hash = MON_HASH(&rbufp->recv_srcadr);
 	mode = PKT_MODE(pkt->li_vn_mode);
 	version = PKT_VERSION(pkt->li_vn_mode);
 	mon = mon_hash[hash];
@@ -338,17 +338,17 @@ ntp_monitor(
 	 */
 
 	for (; mon != NULL; mon = mon->hash_next)
-		if (SOCK_EQ(&mon->rmtadr, &payload->recv_srcaddr))
+		if (SOCK_EQ(&mon->rmtadr, &rbufp->recv_srcadr))
 			break;
 
 	if (mon != NULL) {
-		interval_fp = payload->recv_time;
+		interval_fp = rbufp->recv_time;
 		L_SUB(&interval_fp, &mon->last);
 		/* add one-half second to round up */
 		L_ADDUF(&interval_fp, 0x80000000);
 		interval = interval_fp.l_i;
-		mon->last = payload->recv_time;
-		NSRCPORT(&mon->rmtadr) = NSRCPORT(&payload->recv_srcaddr);
+		mon->last = rbufp->recv_time;
+		NSRCPORT(&mon->rmtadr) = NSRCPORT(&rbufp->recv_srcadr);
 		mon->count++;
 		restrict_mask = flags;
 		mon->vn_mode = VN_MODE(version, mode);
@@ -439,7 +439,7 @@ ntp_monitor(
 		oldest = TAIL_DLIST(mon_mru_list, mru);
 		oldest_age = 0;		/* silence uninit warning */
 		if (oldest != NULL) {
-			interval_fp = payload->recv_time;
+			interval_fp = rbufp->recv_time;
 			L_SUB(&interval_fp, &oldest->last);
 			/* add one-half second to round up */
 			L_ADDUF(&interval_fp, 0x80000000);
@@ -470,17 +470,17 @@ ntp_monitor(
 	 */
 	mru_entries++;
 	mru_peakentries = max(mru_peakentries, mru_entries);
-	mon->last = payload->recv_time;
+	mon->last = rbufp->recv_time;
 	mon->first = mon->last;
 	mon->count = 1;
 	mon->flags = ~(RES_LIMITED | RES_KOD) & flags;
 	mon->leak = 0;
-	memcpy(&mon->rmtadr, &payload->recv_srcaddr, sizeof(mon->rmtadr));
+	memcpy(&mon->rmtadr, &rbufp->recv_srcadr, sizeof(mon->rmtadr));
 	mon->vn_mode = VN_MODE(version, mode);
-	mon->lcladr = payload->dstaddr;
-	mon->cast_flags = (uint8_t)(((payload->dstaddr->flags &
-	    INT_MCASTOPEN) && payload->fd == mon->lcladr->fd) ? MDF_MCAST
-	    : payload->fd == mon->lcladr->bfd ? MDF_BCAST : MDF_UCAST);
+	mon->lcladr = rbufp->dstadr;
+	mon->cast_flags = (uint8_t)(((rbufp->dstadr->flags &
+	    INT_MCASTOPEN) && rbufp->fd == mon->lcladr->fd) ? MDF_MCAST
+	    : rbufp->fd == mon->lcladr->bfd ? MDF_BCAST : MDF_UCAST);
 
 	/*
 	 * Drop him into front of the hash table. Also put him on top of

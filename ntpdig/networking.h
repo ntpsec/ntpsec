@@ -44,7 +44,7 @@ int process_pkt(struct pkt *rpkt, sockaddr_u *sas, int pkt_len,
 /* Shortened peer structure. Not absolutely necessary yet */
 struct speer {
 	struct speer *next;
-	sockaddr_u srcaddr;
+	sockaddr_u srcadr;
 	uint8_t version;
 	uint8_t hmode;
 	uint8_t hpoll;

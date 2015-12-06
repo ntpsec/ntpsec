@@ -203,7 +203,7 @@ atom_timer(
 	if (pp->sloppyclockflag & CLK_FLAG4) {
 		snprintf(tbuf, sizeof(tbuf), "%.9f",
 			 pp->filter[pp->coderecv]);
-		record_clock_stats(&peer->srcaddr, tbuf);
+		record_clock_stats(&peer->srcadr, tbuf);
 	}
 }
 

@@ -306,12 +306,12 @@ hpgps_receive(
 			up->lastptr += pp->lencode;
 		}
 		if (up->linecnt == 0) 
-		    record_clock_stats(&peer->srcaddr, up->statscrn);
+		    record_clock_stats(&peer->srcadr, up->statscrn);
                
 		return;
 	}
 
-	record_clock_stats(&peer->srcaddr, pp->a_lastcode);
+	record_clock_stats(&peer->srcadr, pp->a_lastcode);
 	pp->lastrec = trtmp;
             
 	up->lastptr = up->statscrn;

@@ -213,13 +213,13 @@ send_via_ntp_signd(
 			if (ntohl(samba_reply.op) == 3 && reply_len >  offsetof(struct samba_key_out, pkt)) {
 				sendlen = reply_len - offsetof(struct samba_key_out, pkt);
 				xpkt = &samba_reply.pkt;
-				sendpkt(&rbufp->recv_srcaddr, rbufp->dstaddr, 0, xpkt, sendlen);
+				sendpkt(&rbufp->recv_srcadr, rbufp->dstadr, 0, xpkt, sendlen);
 #ifdef DEBUG
 				if (debug)
 					printf(
 						"transmit ntp_signd packet: at %ld %s->%s mode %d keyid %08x len %d\n",
-						current_time, ntoa(&rbufp->dstaddr->sin),
-						ntoa(&rbufp->recv_srcaddr), xmode, xkeyid, sendlen);
+						current_time, ntoa(&rbufp->dstadr->sin),
+						ntoa(&rbufp->recv_srcadr), xmode, xkeyid, sendlen);
 #endif
 			}
 		}

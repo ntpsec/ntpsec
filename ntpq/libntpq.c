@@ -709,7 +709,7 @@ ntpq_get_assoc_clocktype(
 	int		i;
 	int		rc;
 	sockaddr_u	dum_store;
-	char		dstaddr[NI_MAXHOST];
+	char		dstadr[NI_MAXHOST];
 	char		resultbuf[NTPQ_BUFLEN];
 
 	if (assoc_index < 0 || assoc_index >= (int)numassoc)
@@ -717,17 +717,17 @@ ntpq_get_assoc_clocktype(
 
 	associd = assoc_cache[assoc_index].assid;
 	if (associd == peervar_assoc) {
-		rc = ntpq_get_peervar("dstaddr", dstaddr, sizeof(dstaddr));
+		rc = ntpq_get_peervar("dstadr", dstadr, sizeof(dstadr));
 	} else {
 		i = ntpq_read_assoc_peervars(associd, resultbuf,
 					     sizeof(resultbuf));
 		if (i <= 0)
 			return -1;
-		rc = ntpq_getvar(resultbuf, i, "dstaddr", dstaddr,
-				 sizeof(dstaddr));
+		rc = ntpq_getvar(resultbuf, i, "dstadr", dstadr,
+				 sizeof(dstadr));
 	}
 
-	if (0 != rc && decodenetnum(dstaddr, &dum_store))
+	if (0 != rc && decodenetnum(dstadr, &dum_store))
 		return ntpq_decodeaddrtype(&dum_store);
 
 	return -1;

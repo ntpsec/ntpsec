@@ -162,14 +162,14 @@ refclock_newpeer(
 	 * Check for valid clock address. If already running, shut it
 	 * down first.
 	 */
-	if (!ISREFCLOCKADR(&peer->srcaddr)) {
+	if (!ISREFCLOCKADR(&peer->srcadr)) {
 		msyslog(LOG_ERR,
 			"refclock_newpeer: clock address %s invalid",
-			stoa(&peer->srcaddr));
+			stoa(&peer->srcadr));
 		return false;
 	}
-	clktype = (uint8_t)REFCLOCKTYPE(&peer->srcaddr);
-	unit = REFCLOCKUNIT(&peer->srcaddr);
+	clktype = (uint8_t)REFCLOCKTYPE(&peer->srcadr);
+	unit = REFCLOCKUNIT(&peer->srcadr);
 	if (clktype >= num_refclock_conf ||
 		refclock_conf[clktype]->clock_start == noentry) {
 		msyslog(LOG_ERR,
@@ -302,7 +302,7 @@ refclock_transmit(
 #ifdef DEBUG
 		if (debug)
 			printf("refclock_transmit: at %ld %s\n",
-			    current_time, stoa(&(peer->srcaddr)));
+			    current_time, stoa(&(peer->srcadr)));
 #endif
 
 		/*
@@ -521,7 +521,7 @@ refclock_receive(
 #ifdef DEBUG
 	if (debug)
 		printf("refclock_receive: at %lu %s\n",
-		    current_time, stoa(&peer->srcaddr));
+		    current_time, stoa(&peer->srcadr));
 #endif
 
 	/*
@@ -926,7 +926,7 @@ refclock_ioctl(
  */
 void
 refclock_control(
-	sockaddr_u *srcaddr,
+	sockaddr_u *srcadr,
 	const struct refclockstat *in,
 	struct refclockstat *out
 	)
@@ -939,13 +939,13 @@ refclock_control(
 	/*
 	 * Check for valid address and running peer
 	 */
-	if (!ISREFCLOCKADR(srcaddr))
+	if (!ISREFCLOCKADR(srcadr))
 		return;
 
-	clktype = (uint8_t)REFCLOCKTYPE(srcaddr);
-	unit = REFCLOCKUNIT(srcaddr);
+	clktype = (uint8_t)REFCLOCKTYPE(srcadr);
+	unit = REFCLOCKUNIT(srcadr);
 
-	peer = findexistingpeer(srcaddr, NULL, NULL, -1, 0);
+	peer = findexistingpeer(srcadr, NULL, NULL, -1, 0);
 
 	if (NULL == peer)
 		return;
@@ -1037,7 +1037,7 @@ refclock_control(
  */
 void
 refclock_buginfo(
-	sockaddr_u *srcaddr,	/* clock address */
+	sockaddr_u *srcadr,	/* clock address */
 	struct refclockbug *bug /* output structure */
 	)
 {
@@ -1050,13 +1050,13 @@ refclock_buginfo(
 	/*
 	 * Check for valid address and peer structure
 	 */
-	if (!ISREFCLOCKADR(srcaddr))
+	if (!ISREFCLOCKADR(srcadr))
 		return;
 
-	clktype = (uint8_t) REFCLOCKTYPE(srcaddr);
-	unit = REFCLOCKUNIT(srcaddr);
+	clktype = (uint8_t) REFCLOCKTYPE(srcadr);
+	unit = REFCLOCKUNIT(srcadr);
 
-	peer = findexistingpeer(srcaddr, NULL, NULL, -1, 0);
+	peer = findexistingpeer(srcadr, NULL, NULL, -1, 0);
 
 	if (NULL == peer || NULL == peer->procptr)
 		return;

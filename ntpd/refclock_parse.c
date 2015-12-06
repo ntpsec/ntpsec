@@ -1420,7 +1420,7 @@ static int ncltypes = sizeof(parse_clockinfo) / sizeof(struct parse_clockinfo);
 
 #define CLK_REALTYPE(x) ((int)(((x)->ttl) & 0x7F))
 #define CLK_TYPE(x)	((CLK_REALTYPE(x) >= ncltypes) ? ~0 : CLK_REALTYPE(x))
-#define CLK_UNIT(x)	((int)REFCLOCKUNIT(&(x)->srcaddr))
+#define CLK_UNIT(x)	((int)REFCLOCKUNIT(&(x)->srcadr))
 #define CLK_PPS(x)	(((x)->ttl) & 0x80)
 
 /*
@@ -1862,9 +1862,9 @@ local_input(
 					buf->recv_length  = sizeof(parsetime_t);
 					buf->recv_time    = rbufp->recv_time;
 #ifndef HAVE_IO_COMPLETION_PORT
-					buf->srcaddr       = rbufp->srcaddr;
+					buf->srcadr       = rbufp->srcadr;
 #endif
-					buf->dstaddr       = rbufp->dstaddr;
+					buf->dstadr       = rbufp->dstadr;
 					buf->receiver     = rbufp->receiver;
 					buf->fd           = rbufp->fd;
 					buf->X_from_where = rbufp->X_from_where;
