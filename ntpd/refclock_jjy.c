@@ -661,7 +661,7 @@ jjy_receive ( struct recvbuf *rbufp )
 				up->iLineBufLen ++ ;
 
 				/* Copy printable characters */
-				if ( ! iscntrl( up->sRawBuf[i] ) ) {
+				if ( ! iscntrl( (int)up->sRawBuf[i] ) ) {
 					up->sTextBuf[up->iTextBufLen] = up->sRawBuf[i] ;
 					up->iTextBufLen ++ ;
 				}
@@ -2691,7 +2691,7 @@ jjy_start_telephone ( int unit, struct peer *peer, struct jjyunit *up )
 
 	iNumberOfDigitsOfPhoneNumber = iCommaCount = iCommaPosition = iFirstThreeDigitsCount = 0 ;
 	for ( i = 0 ; i < strlen( sys_phone[0] ) ; i ++ ) {
-		if ( isdigit( *(sys_phone[0]+i) ) ) {
+		if ( isdigit( (int)*(sys_phone[0]+i) ) ) {
 		    if ( iFirstThreeDigitsCount < (int)sizeof(sFirstThreeDigits)-1 ) {
 				sFirstThreeDigits[iFirstThreeDigitsCount++] = *(sys_phone[0]+i) ;
 			}

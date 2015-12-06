@@ -34,7 +34,7 @@
 /*
  * some constants useful for GPS time conversion
  */
-#define GPSORIGIN       2524953600                 /* NTP origin - GPS origin in seconds */
+#define GPSORIGIN       2524953600u                /* GPS origin - NTP origin in seconds */
 #define GPSWRAP         990                        /* assume week count less than this in the previous epoch */
 #define GPSWEEKS        1024                       /* number of weeks until the GPS epch rolls over */
 

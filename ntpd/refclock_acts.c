@@ -381,7 +381,7 @@ acts_message(
 	 */
 	strlcpy(tbuf, msg, sizeof(tbuf));
 	for (cp = tbuf; cp < tbuf + sizeof(tbuf); cp++)
-	    if (isspace(*cp))
+	    if (isspace((int)*cp))
 		*cp = '\0';
 
 	switch (up->state) {
