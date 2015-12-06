@@ -5,6 +5,7 @@ TIMEPPS_FRAG = """
 # include <timepps.h>
 #else
 # ifdef HAVE_SYS_TIMEPPS_H
+#  include <sys/time.h>   /* Needed on NetBSD */
 #  include <sys/timepps.h>
 # endif
 #endif
