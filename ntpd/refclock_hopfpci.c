@@ -248,7 +248,7 @@ hopfpci_poll(
 	}
 	pp->lastref = pp->lastrec;
 	refclock_receive(peer);
-	record_clock_stats(&peer->srcaddr, pp->a_lastcode);
+	record_clock_stats(&peer->srcadr, pp->a_lastcode);
 	return;
 }
 

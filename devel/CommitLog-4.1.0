@@ -1334,7 +1334,7 @@ comments in the version-control system.
 2000-12-03  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* ntpd/ntp_proto.c (receive): That any_interface is now an
-	rbufp->dstaddr.
+	rbufp->dstadr.
 	Various other doc and code cleanup.
 	* ntpd/ntp_peer.c (findmanycastpeer): Fixes
 	From Dave Mills
@@ -1912,7 +1912,7 @@ comments in the version-control system.
 
 2000-07-24  Harlan Stenn  <stenn@whimsy.udel.edu>
 
-	* ntpd/ntp_proto.c (receive): dstaddr_sin needs  higher visibility
+	* ntpd/ntp_proto.c (receive): dstadr_sin needs  higher visibility
 	From: Dave Mills
 
 	* flock-build: Added baldwin
@@ -2721,7 +2721,7 @@ comments in the version-control system.
 	* configure.in: Get the path to perl
 	(AC_CONFIG_*): Added scripts/ntp-wait
 
-	* ntptrace/ntptrace.c (DoTrace): If the server's srcaddr is 0.0.0.0
+	* ntptrace/ntptrace.c (DoTrace): If the server's srcadr is 0.0.0.0
 	then we haven't synced yet.  Note and punt.
 	Reported by: Bdale Garbee <bdale@gag.com>,http://bugs.debian.org/56551
 
@@ -5263,7 +5263,7 @@ Sat Oct 10 20:13:14 1998  Harlan Stenn  <stenn@whimsy.udel.edu>
 
 	* ntpd/ntpd.c (ntpdmain): HAVE_SETPGRP_0 typo.
 	* parseutil/dcfd.c (detach): Ditto.
-	* ntpd/ntp_control.c (ctl_putpeer): Sometimes, peer->dstaddr is
+	* ntpd/ntp_control.c (ctl_putpeer): Sometimes, peer->dstadr is
 	NIL.
 	From: Perry Ross <pross@platinum.com>
 

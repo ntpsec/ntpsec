@@ -3942,7 +3942,7 @@ config_unpeers(
 			p = findpeerbyassoc(curr_unpeer->assocID);
 			if (p != NULL) {
 				msyslog(LOG_NOTICE, "unpeered %s",
-					stoa(&p->srcaddr));
+					stoa(&p->srcadr));
 				peer_clear(p, "GONE");
 				unpeer(p);
 			}

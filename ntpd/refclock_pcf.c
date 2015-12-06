@@ -212,7 +212,7 @@ pcf_poll(
 		refclock_report(peer, CEVNT_BADTIME);
 		return;
 	}
-	record_clock_stats(&peer->srcaddr, pp->a_lastcode);
+	record_clock_stats(&peer->srcadr, pp->a_lastcode);
 	if ((buf[1] & 1) && !(pp->sloppyclockflag & CLK_FLAG2))
 		pp->leap = LEAP_NOTINSYNC;
 	else

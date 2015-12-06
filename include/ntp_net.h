@@ -204,9 +204,9 @@ typedef union {
 #define	REFCLOCK_ADDR	0x7f7f0000	/* 127.127.0.0 */
 #define	REFCLOCK_MASK	0xffff0000	/* 255.255.0.0 */
 
-#define	ISREFCLOCKADR(srcaddr)					\
-	(IS_IPV4(srcaddr) &&					\
-	 (SRCADR(srcaddr) & REFCLOCK_MASK) == REFCLOCK_ADDR)
+#define	ISREFCLOCKADR(srcadr)					\
+	(IS_IPV4(srcadr) &&					\
+	 (SRCADR(srcadr) & REFCLOCK_MASK) == REFCLOCK_ADDR)
 
 /*
  * Macro for checking for invalid addresses.  This is really, really
@@ -216,11 +216,11 @@ typedef union {
 #define	LOOPBACKADR	0x7f000001
 #define	LOOPNETMASK	0xff000000
 
-#define	ISBADADR(srcaddr)					\
-	(IS_IPV4(srcaddr)					\
-	 && ((SRCADR(srcaddr) & LOOPNETMASK)			\
+#define	ISBADADR(srcadr)					\
+	(IS_IPV4(srcadr)					\
+	 && ((SRCADR(srcadr) & LOOPNETMASK)			\
 	     == (LOOPBACKADR & LOOPNETMASK))			\
-	 && SRCADR(srcaddr) != LOOPBACKADR)
+	 && SRCADR(srcadr) != LOOPBACKADR)
 
 
 #endif /* GUARD_NTP_NET_H */

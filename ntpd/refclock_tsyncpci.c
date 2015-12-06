@@ -706,7 +706,7 @@ static void tsync_poll(int unit, struct peer *peer)
                 {
                     // Store reference peer stratum level and ID
                     up->refStratum = sys_peer->stratum;
-                    up->refId      = addr2refid(&sys_peer->srcaddr);
+                    up->refId      = addr2refid(&sys_peer->srcadr);
                 }
             }
             else
@@ -759,7 +759,7 @@ static void tsync_poll(int unit, struct peer *peer)
         return;
     }
 
-    record_clock_stats(&peer->srcaddr, pp->a_lastcode);
+    record_clock_stats(&peer->srcadr, pp->a_lastcode);
     refclock_receive(peer);
 
     /* Increment the number of times the reference has been polled */

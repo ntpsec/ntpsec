@@ -347,10 +347,10 @@ int simulate_server(
     rbuf.receiver = &receive;   /* callback to process the packet */
     rbuf.recv_length = LEN_PKT_NOMAC;
     rbuf.recv_pkt = xpkt;
-    rbuf.dstaddr = inter;
+    rbuf.dstadr = inter;
     rbuf.fd = inter->fd;
-    memcpy(&rbuf.srcaddr, serv_addr, sizeof(rbuf.srcaddr));
-    memcpy(&rbuf.recv_srcaddr, serv_addr, sizeof(rbuf.recv_srcaddr));
+    memcpy(&rbuf.srcadr, serv_addr, sizeof(rbuf.srcadr));
+    memcpy(&rbuf.recv_srcadr, serv_addr, sizeof(rbuf.recv_srcadr));
 
     /*
      * Create a packet event and insert it onto the event_queue at the

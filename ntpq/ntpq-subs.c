@@ -165,10 +165,10 @@ struct xcmd opcmds[] = {
 	  "obtain and print a list of all peers and clients [IP version]" },
 	{ "opeers", opeers,     { OPT|IP_VERSION, NO, NO, NO },
 	  { "-4|-6", "", "", "" },
-	  "print peer list the old way, with dstaddr shown rather than refid [IP version]" },
+	  "print peer list the old way, with dstadr shown rather than refid [IP version]" },
 	{ "lopeers", lopeers,   { OPT|IP_VERSION, NO, NO, NO },
 	  { "-4|-6", "", "", "" },
-	  "obtain and print a list of all peers and clients showing dstaddr [IP version]" },
+	  "obtain and print a list of all peers and clients showing dstadr [IP version]" },
 	{ ":config", config,   { NTP_STR, NO, NO, NO },
 	  { "<configuration command line>", "", "", "" },
 	  "send a remote configuration command to ntpd" },
@@ -1531,8 +1531,8 @@ decodeaddrtype(
  * A list of variables required by the peers command
  */
 struct varlist opeervarlist[] = {
-	{ "srcaddr",	0 },	/* 0 */
-	{ "dstaddr",	0 },	/* 1 */
+	{ "srcadr",	0 },	/* 0 */
+	{ "dstadr",	0 },	/* 1 */
 	{ "stratum",	0 },	/* 2 */
 	{ "hpoll",	0 },	/* 3 */
 	{ "ppoll",	0 },	/* 4 */
@@ -1549,7 +1549,7 @@ struct varlist opeervarlist[] = {
 };
 
 struct varlist peervarlist[] = {
-	{ "srcaddr",	0 },	/* 0 */
+	{ "srcadr",	0 },	/* 0 */
 	{ "refid",	0 },	/* 1 */
 	{ "stratum",	0 },	/* 2 */
 	{ "hpoll",	0 },	/* 3 */
@@ -1568,7 +1568,7 @@ struct varlist peervarlist[] = {
 };
 
 struct varlist apeervarlist[] = {
-	{ "srcaddr",	0 },	/* 0 */
+	{ "srcadr",	0 },	/* 0 */
 	{ "refid",	0 },	/* 1 */
 	{ "assid",	0 },	/* 2 */
 	{ "stratum",	0 },	/* 3 */
@@ -1607,17 +1607,17 @@ doprintpeers(
 	int c;
 	int len;
 	bool have_srchost;
-	bool have_dstaddr;
+	bool have_dstadr;
 	bool have_da_rid;
 	bool have_jitter;
-	sockaddr_u srcaddr;
-	sockaddr_u dstaddr;
+	sockaddr_u srcadr;
+	sockaddr_u dstadr;
 	sockaddr_u dum_store;
 	sockaddr_u refidadr;
 	long hmode = 0;
 	u_long srcport = 0;
 	uint32_t u32;
-	const char *dstaddr_refid = "0.0.0.0";
+	const char *dstadr_refid = "0.0.0.0";
 	const char *serverlocal;
 	size_t drlen;
 	u_long stratum = 0;
@@ -1639,11 +1639,11 @@ doprintpeers(
 	get_systime(&ts);
 	
 	have_srchost = false;
-	have_dstaddr = false;
+	have_dstadr = false;
 	have_da_rid = false;
 	have_jitter = false;
-	ZERO_SOCK(&srcaddr);
-	ZERO_SOCK(&dstaddr);
+	ZERO_SOCK(&srcadr);
+	ZERO_SOCK(&dstadr);
 	clock_name[0] = '\0';
 	ZERO(estoffset);
 	ZERO(estdelay);
@@ -1651,9 +1651,9 @@ doprintpeers(
 	ZERO(estdisp);
 
 	while (nextvar(&datalen, &data, &name, &value)) {
-		if (!strcmp("srcaddr", name) ||
+		if (!strcmp("srcadr", name) ||
 		    !strcmp("peeradr", name)) {
-			if (!decodenetnum(value, &srcaddr))
+			if (!decodenetnum(value, &srcadr))
 				fprintf(stderr, "malformed %s=%s\n",
 					name, value);
 		} else if (!strcmp("srchost", name)) {
@@ -1669,14 +1669,14 @@ doprintpeers(
 					have_srchost = true;
 				}
 			}
-		} else if (!strcmp("dstaddr", name)) {
+		} else if (!strcmp("dstadr", name)) {
 			if (decodenetnum(value, &dum_store)) {
 				type = decodeaddrtype(&dum_store);
-				have_dstaddr = true;
-				dstaddr = dum_store;
+				have_dstadr = true;
+				dstadr = dum_store;
 				if (pvl == opeervarlist) {
 					have_da_rid = true;
-					dstaddr_refid = trunc_left(stoa(&dstaddr), 15);
+					dstadr_refid = trunc_left(stoa(&dstadr), 15);
 				}
 			}
 		} else if (!strcmp("hmode", name)) {
@@ -1686,19 +1686,19 @@ doprintpeers(
 				have_da_rid = true;
 				drlen = strlen(value);
 				if (0 == drlen) {
-					dstaddr_refid = "";
+					dstadr_refid = "";
 				} else if (drlen <= 4) {
 					ZERO(u32);
 					memcpy(&u32, value, drlen);
-					dstaddr_refid = refid_str(u32, 1);
+					dstadr_refid = refid_str(u32, 1);
 				} else if (decodenetnum(value, &refidadr)) {
 					if (SOCK_UNSPEC(&refidadr))
-						dstaddr_refid = "0.0.0.0";
+						dstadr_refid = "0.0.0.0";
 					else if (ISREFCLOCKADR(&refidadr))
-						dstaddr_refid =
+						dstadr_refid =
 						    refnumtoa(&refidadr);
 					else
-						dstaddr_refid =
+						dstadr_refid =
 						    stoa(&refidadr);
 				} else {
 					have_da_rid = false;
@@ -1707,17 +1707,17 @@ doprintpeers(
 				have_da_rid = true;
 				drlen = strlen(value);
 				if (0 == drlen) {
-					dstaddr_refid = "";
+					dstadr_refid = "";
 				} else if (drlen <= 4) {
 					ZERO(u32);
 					memcpy(&u32, value, drlen);
-					dstaddr_refid = refid_str(u32, 1);
+					dstadr_refid = refid_str(u32, 1);
 					//fprintf(stderr, "apeervarlist S1 refid: value=<%s>\n", value);
 				} else if (decodenetnum(value, &refidadr)) {
 					if (SOCK_UNSPEC(&refidadr))
-						dstaddr_refid = "0.0.0.0";
+						dstadr_refid = "0.0.0.0";
 					else if (ISREFCLOCKADR(&refidadr))
-						dstaddr_refid =
+						dstadr_refid =
 						    refnumtoa(&refidadr);
 					else {
 						char *buf = emalloc(10);
@@ -1725,7 +1725,7 @@ doprintpeers(
 
 						snprintf(buf, 10,
 							"%0x", i);
-						dstaddr_refid = buf;
+						dstadr_refid = buf;
 					//fprintf(stderr, "apeervarlist refid: value=<%x>\n", i);
 					}
 					//fprintf(stderr, "apeervarlist refid: value=<%s>\n", value);
@@ -1780,18 +1780,18 @@ doprintpeers(
 
 	case MODE_BROADCAST:
 		/* broadcast or multicast server */
-		if (IS_MCAST(&srcaddr))
+		if (IS_MCAST(&srcadr))
 			type = 'M';
 		else
 			type = 'B';
 		break;
 
 	case MODE_CLIENT:
-		if (ISREFCLOCKADR(&srcaddr))
+		if (ISREFCLOCKADR(&srcadr))
 			type = 'l';	/* local refclock*/
-		else if (SOCK_UNSPEC(&srcaddr))
+		else if (SOCK_UNSPEC(&srcadr))
 			type = 'p';	/* pool */
-		else if (IS_MCAST(&srcaddr))
+		else if (IS_MCAST(&srcadr))
 			type = 'a';	/* manycastclient */
 		else
 			type = 'u';	/* unicast */
@@ -1816,8 +1816,8 @@ doprintpeers(
 		c = flash2[CTL_PEER_STATVAL(rstatus) & 0x3];
 	if (numhosts > 1) {
 		if ((pvl == peervarlist || pvl == apeervarlist)
-		    && have_dstaddr) {
-			serverlocal = nntohost_col(&dstaddr,
+		    && have_dstadr) {
+			serverlocal = nntohost_col(&dstadr,
 			    (size_t)min(LIB_BUFLENGTH - 1, maxhostlen),
 			    true);
 		} else {
@@ -1829,9 +1829,9 @@ doprintpeers(
 		}
 		fprintf(fp, "%-*s ", (int)maxhostlen, serverlocal);
 	}
-	if (AF_UNSPEC == af || AF(&srcaddr) == af) {
+	if (AF_UNSPEC == af || AF(&srcadr) == af) {
 		if (!have_srchost)
-			strlcpy(clock_name, nntohost(&srcaddr),
+			strlcpy(clock_name, nntohost(&srcadr),
 				sizeof(clock_name));
 		if (wideremote && 15 < strlen(clock_name))
 			fprintf(fp, "%c%s\n                 ", c, clock_name);
@@ -1840,8 +1840,8 @@ doprintpeers(
 		if (!have_da_rid) {
 			drlen = 0;
 		} else {
-			drlen = strlen(dstaddr_refid);
-			makeascii(drlen, dstaddr_refid, fp);
+			drlen = strlen(dstadr_refid);
+			makeascii(drlen, dstadr_refid, fp);
 		}
 		if (pvl == apeervarlist) {
 			while (drlen++ < 9)

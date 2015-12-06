@@ -23,8 +23,8 @@
  * Macros to determine the clock type and unit numbers from a
  * 127.127.t.u address
  */
-#define	REFCLOCKTYPE(srcaddr)	((SRCADR(srcaddr) >> 8) & 0xff)
-#define REFCLOCKUNIT(srcaddr)	(SRCADR(srcaddr) & 0xff)
+#define	REFCLOCKTYPE(srcadr)	((SRCADR(srcadr) >> 8) & 0xff)
+#define REFCLOCKUNIT(srcadr)	(SRCADR(srcadr) & 0xff)
 
 /*
  * List of reference clock names and descriptions. These must agree with

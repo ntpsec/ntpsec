@@ -395,9 +395,9 @@ sub process_response
 	else			# peer event
 	{
 	    $msg .= sprintf("peer %5d ",$associd);
-	    ($srcaddr) = ($data =~ /srcaddr=\[?([\d\.]+)/);
-	    $msg .= sprintf("%-18s %40s ", "[$srcaddr]",
-			    &hostname(pack("C4",split(/\./,$srcaddr))));
+	    ($srcadr) = ($data =~ /srcadr=\[?([\d\.]+)/);
+	    $msg .= sprintf("%-18s %40s ", "[$srcadr]",
+			    &hostname(pack("C4",split(/\./,$srcadr))));
 	    $evnt = &ntp'PeerEvent($status); #';
 	    $msg .= "$evnt ";
 	    ;# for special cases include additional info

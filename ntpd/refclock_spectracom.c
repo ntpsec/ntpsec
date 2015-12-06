@@ -365,7 +365,7 @@ spectracom_receive(
 		 */
 		if (up->linect > 0) {
 			up->linect--;
-			record_clock_stats(&peer->srcaddr,
+			record_clock_stats(&peer->srcadr,
 			    pp->a_lastcode);
 		} else {
 			refclock_report(peer, CEVNT_BADREPLY);
@@ -532,7 +532,7 @@ spectracom_poll(
 	}
 #endif /* HAVE_PPSAPI */
 	refclock_receive(peer);
-	record_clock_stats(&peer->srcaddr, pp->a_lastcode);
+	record_clock_stats(&peer->srcadr, pp->a_lastcode);
 #ifdef DEBUG
 	if (debug)
 		printf("wwvb: timecode %d %s\n", pp->lencode,
@@ -589,7 +589,7 @@ spectracom_control(
 	}
 
 	msyslog(LOG_WARNING, "%s flag1 1 but PPSAPI fails",
-		refnumtoa(&peer->srcaddr));
+		refnumtoa(&peer->srcadr));
 }
 #endif	/* HAVE_PPSAPI */
 

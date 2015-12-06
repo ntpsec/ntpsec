@@ -265,7 +265,7 @@ as2201_receive(
 			up->linect = atoi(pp->a_lastcode);
 			return;
 		} else {
-			record_clock_stats(&peer->srcaddr, up->stats);
+			record_clock_stats(&peer->srcadr, up->stats);
 #ifdef DEBUG
 			if (debug)
 			    printf("gps: stat %s\n", up->stats);
