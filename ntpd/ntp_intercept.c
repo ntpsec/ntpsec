@@ -24,7 +24,7 @@ following kinds:
 
 9. Read of the system leapsecond file.
 
-10. Packets incoming from NTP peers and others.  (TODO)
+10. Packets incoming from NTP peers and others.
 
 11. Packets outgoing to NTP peers and others.
 
@@ -319,15 +319,14 @@ intercept_leapsec_load_file(
 static void packet_dump(sockaddr_u *dest, struct pkt *pkt, int len)
 {
     size_t i;
-    printf("%s %d:%d:%d:%d:%u:%u:%u:%d:%d:%d:%d",
+    printf("%s %d:%d:%d:%d:%u:%u:%u:%s:%s:%s:%s",
 	   socktoa(dest),
 	   pkt->li_vn_mode, pkt->stratum, pkt->ppoll, pkt->precision,
 	   /* FIXME: might be better to dump these in fixed-point */
 	   pkt->rootdelay, pkt->rootdisp,
 	   pkt->refid,
-	   /* FIXME: might be better to dump last 4 in fixed-point */
-	   pkt->reftime.l_uf, pkt->org.l_uf,
-	   pkt->rec.l_uf, pkt->xmt.l_uf);
+	   lfptoa(&pkt->reftime, 10), lfptoa(&pkt->org, 10),
+	   lfptoa(&pkt->rec, 10), lfptoa(&pkt->xmt, 10));
     /* dump MAC as len - LEN_PKT_NOMAC chars in hex */
     for (i = 0; i < len - LEN_PKT_NOMAC; i++)
 	printf("%02x", pkt->exten[i]);
@@ -344,6 +343,27 @@ void intercept_sendpkt(const char *legend,
     if (mode != none) {
 	printf("event sendpkt \"%s\"", legend);
 	packet_dump(dest, pkt, len);
+	fputs("\n", stdout);
+    }
+
+    /* FIXME: replay logic goes here */
+}
+
+void intercept_receive(struct recvbuf *rbufp)
+{
+    if (mode != replay)
+	receive(rbufp);
+
+    if (mode != none) {
+	/*
+	 * Order is: cast flags, receipt time, source address, packet, length.
+	 * Cast flags are only kept because they change the ntpq display,
+	 * they have no implications for the protocol machine.
+	 * We don't dump srcadr because only the parse clock uses that.
+	 */
+	printf("event receive %0x %s ",
+	       rbufp->cast_flags, lfptoa(&rbufp->recv_time, 10));
+	packet_dump(&rbufp->recv_srcadr, &rbufp->recv_pkt, rbufp->recv_length);
 	fputs("\n", stdout);
     }
 

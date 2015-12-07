@@ -32,6 +32,7 @@ long intercept_ntp_random(const char *);
 void intercept_timer(void);
 void intercept_sendpkt(const char *,
 		       sockaddr_u *, struct interface *, int, struct pkt *, int);
+void intercept_receive(struct recvbuf *);
 bool intercept_drift_read(const char *, double *);
 void intercept_drift_write(char *, double);
 #ifdef HAVE_KERNEL_PLL
