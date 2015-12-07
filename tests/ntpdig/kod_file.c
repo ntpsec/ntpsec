@@ -54,6 +54,7 @@ TEST(kodFile, ReadCorrectFile) {
 	TEST_ASSERT_EQUAL_STRING("RSTR", res->type);
 	TEST_ASSERT_EQUAL_STRING("192.0.2.100", res->hostname);
 	TEST_ASSERT_EQUAL(0xfff, res->timestamp);
+	/* coverity[leaked_storage] */
 }
 
 TEST(kodFile, ReadFileWithBlankLines) {
@@ -80,6 +81,7 @@ TEST(kodFile, ReadFileWithBlankLines) {
 	TEST_ASSERT_EQUAL_STRING("DENY", res->type);
 	TEST_ASSERT_EQUAL_STRING("example.com", res->hostname);
 	TEST_ASSERT_EQUAL(0xabcd, res->timestamp);
+	/* coverity[leaked_storage] */
 }
 
 TEST(kodFile, WriteEmptyFile) {

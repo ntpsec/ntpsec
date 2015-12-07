@@ -20,6 +20,7 @@ const char * Version = "stub unit test Version string";
 
 struct addrinfo CreateAddrinfo(sockaddr_u* sock) {
 	struct addrinfo a;
+	memset(&a, '\0', sizeof(struct addrinfo));
 	a.ai_family = sock->sa.sa_family;
 	a.ai_addrlen = SIZEOF_SOCKADDR(a.ai_family);
 	a.ai_addr = &sock->sa;
@@ -75,8 +76,11 @@ TEST(utilities, IPv4Address) {
 	sockaddr_u input = CreateSockaddr4(ADDR, 123);
 	struct addrinfo inputA = CreateAddrinfo(&input);
 
+	/* coverity[leaked_storage] */
 	TEST_ASSERT_EQUAL_STRING(ADDR, ss_to_str(&input));
+	/* coverity[leaked_storage] */
 	TEST_ASSERT_EQUAL_STRING(ADDR, addrinfo_to_str(&inputA));
+	/* coverity[leaked_storage] */
 }
 
 TEST(utilities, IPv6Address) {
@@ -93,10 +97,12 @@ TEST(utilities, IPv6Address) {
 	memset(&input, 0, sizeof(input));
 	input.sa6.sin6_family = AF_INET6;
 	input.sa6.sin6_addr = address;
+	/* coverity[leaked_storage] */
 	TEST_ASSERT_EQUAL_STRING(expected, ss_to_str(&input));
 
 	inputA = CreateAddrinfo(&input);
-	TEST_ASSERT_EQUAL_STRING(expected, addrinfo_to_str(&inputA));
+	/* coverity[leaked_storage] */
+TEST_ASSERT_EQUAL_STRING(expected, addrinfo_to_str(&inputA));
 }
 
 TEST(utilities, SetLiVnMode1) {

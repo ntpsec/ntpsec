@@ -212,7 +212,7 @@ stats_config(
 	FILE	*fp;
 	const char *value;
 	int	len;
-	double	new_drift;
+	double	new_drift = 0;
 	l_fp	now;
 	time_t  ttnow;
 	const char temp_ext[] = ".TEMP";

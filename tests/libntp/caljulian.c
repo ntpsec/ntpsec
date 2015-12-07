@@ -30,6 +30,7 @@ bool IsEqualC(const struct calendar *expected, const struct calendar *actual) {
 		expected->second == actual->second) {
 		return true;
 	} else {
+		/* coverity[leaked_storage] */
 		printf("expected: %s but was %s", CalendarToString(expected), CalendarToString(actual));
 
 		return false;

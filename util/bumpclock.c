@@ -25,6 +25,7 @@ int main(int argc, char *argv[]) {
     er1 = errno;
 
     set = was;
+    /* coverity[tainted_data] */
     set.tv_usec += bump;
     while (set.tv_usec >= 1000000 ) {
 	set.tv_usec -= 1000000;

@@ -284,7 +284,7 @@ typedef struct _PointerPair
 } PointerPair;
 
 enum {MAX_POINTERS=50};
-static PointerPair pointer_store[MAX_POINTERS];
+static PointerPair pointer_store[MAX_POINTERS+1];
 static int pointer_index = 0;
 
 void UnityPointer_Init(void)
@@ -295,12 +295,16 @@ void UnityPointer_Init(void)
 void UnityPointer_Set(void ** pointer, void * newValue)
 {
     if (pointer_index >= MAX_POINTERS)
+    {
         TEST_FAIL_MESSAGE("Too many pointers set");
-
-    pointer_store[pointer_index].pointer = pointer;
-    pointer_store[pointer_index].old_value = *pointer;
-    *pointer = newValue;
-    pointer_index++;
+    }
+    else
+    {
+	pointer_store[pointer_index].pointer = pointer;
+	pointer_store[pointer_index].old_value = *pointer;
+	*pointer = newValue;
+	pointer_index++;
+    }
 }
 
 void UnityPointer_UndoAllSets(void)
