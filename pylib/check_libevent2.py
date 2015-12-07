@@ -43,7 +43,7 @@ def check_libevent2(ctx):
 		print("")
 		pprint("RED", "Warning libevent2 does not work")
 		pprint("RED", "This means ntpdig will not be built")
-		pprint("RED", "While not nessicary you will lose 'ntpdate' functionality.")
+		pprint("RED", "While not necessary you will lose 'ntpdate' functionality.")
 		print("")
 	else:
 		ctx.env.LIBEVENT2_ENABLE=True
