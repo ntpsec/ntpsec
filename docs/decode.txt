@@ -139,7 +139,7 @@ of the +rv associd+ display produced by the +{ntpq}+ program.
 
 The Status Field displays the peer status code bits in hexadecimal; each
 bit is an independent flag. (Note this field is 5 bits wide, and
-combines with the the 3-bit-wide Select Field to create the first full
+combines with the 3-bit-wide Select Field to create the first full
 byte of the peer status word.) The meaning of each bit in the Status
 Field is listed in the following table:
 

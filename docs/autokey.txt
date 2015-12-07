@@ -91,7 +91,7 @@ produced by commercial services, utility programs in the OpenSSL
 software library, and the link:keygen.html[{ntpkeygen}] utility program
 in the NTP software distribution. A certificate includes the subject
 name of the client, the issuer name of the server, the public key of the
-client and the time period over which the the public and private keys
+client and the time period over which the public and private keys
 are valid. All Autokey hosts have a self-signed certificate with the
 Autokey name as both the subject and issuer. During the protocol,
 additional certificates are produced with the Autokey host name as
@@ -384,7 +384,7 @@ the filestamp suppressed. Thus, the nonencryted parameters file from
 each TA is copied to X with this name.
 
 To complete the configuration, the TH includes the client parameters
-file name in the +ident+ option of the the +server+ command for the TA
+file name in the +ident+ option of the +server+ command for the TA
 association
 
 +server 1.2.3.4 ident group,+
@@ -400,7 +400,7 @@ can be configured using more than one cryptotype combination, although
 not all combinations are interoperable. Note however that some
 cryptotype combinations may successfully intemperate with each other,
 but may not represent good security practice. The server and client
-cryptotypes are defined by the the following codes.
+cryptotypes are defined by the following codes.
 
 NONE::
   A client or server is type NONE if authentication is not available or

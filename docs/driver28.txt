@@ -109,7 +109,7 @@ The 4th field is the number of second ticks since the last poll. The 5th
 field is the number of good data samples found. The last 64 will be used
 by _{ntpd}_. The 6th field is the number of sample that didn't have valid
 data ready. The 7th field is the number of bad samples. The 8th field is
-the number of times the the mode 1 info was update while _{ntpd}_ was
+the number of times the mode 1 info was update while _{ntpd}_ was
 trying to grab a sample.
 
 Here is a sample showing the GPS reception fading out:

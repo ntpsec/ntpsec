@@ -2391,7 +2391,7 @@ clock_filter(
 	peer->jitter = max(SQRT(peer->jitter), LOGTOD(sys_precision));
 
 	/*
-	 * If the the new sample and the current sample are both valid
+	 * If the new sample and the current sample are both valid
 	 * and the difference between their offsets exceeds CLOCK_SGATE
 	 * (3) times the jitter and the interval between them is less
 	 * than twice the host poll interval, consider the new sample

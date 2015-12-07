@@ -23,7 +23,7 @@ include::includes/misc-options.txt[]
 // If you change this, be very sure to keep that synchronized.
 
 +tos+ [+beacon+ 'beacon' | +ceiling+ 'ceiling' | +cohort+ {+0+ | +1+} | +floor+ 'floor' | +maxclock+ 'maxclock' | +maxdist+ 'maxdist' | +minclock+ 'minclock' | +mindist+ 'mindist' | +minsane+ 'minsane' | +orphan+ 'stratum' | +orphanwait+ 'delay']::
-  This command alters certain system variables used by the the clock
+  This command alters certain system variables used by the clock
   selection and clustering algorithms. The default values of these
   variables have been carefully optimized for a wide range of network
   speeds and reliability expectations. Very rarely is it necessary to

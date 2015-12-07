@@ -420,7 +420,7 @@ struct	refclock refclock_oncore = {
 
 /*
  * Understanding the next bit here is not easy unless you have a manual
- * for the the various Oncore Models.
+ * for the various Oncore Models.
  */
 
 static struct msg_desc {

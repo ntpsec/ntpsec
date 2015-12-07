@@ -81,7 +81,7 @@ static	PGETADAPTERSADDRESSES	pGAA;
 /* Common utility functions */
 
 /*
- * Windows always provides 255.255.255.255 as the the broadcast
+ * Windows always provides 255.255.255.255 as the broadcast
  * address.  ntpd needs to know the broadcast address which will target
  * only that network interface, not all.  Reconstruct it from the
  * address and mask.

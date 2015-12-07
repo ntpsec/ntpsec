@@ -61,7 +61,7 @@ jitter dominates peer jitter,the algorithm prunes candidate 1. In (b),
 pruning additional candidates does not reduce select jitter, the
 algorithm terminates with candidates 2, 3 and 4 as survivors.
 
-The survivor list is passed on to the the mitigation algorithms, which
+The survivor list is passed on to the mitigation algorithms, which
 combine the survivors, select a system peer, and compute the system
 statistics passed on to dependent clients. Note the use of root distance
 λ as a weight factor at each round in the clock cluster algorithm. This

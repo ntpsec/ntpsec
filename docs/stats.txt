@@ -61,7 +61,7 @@ offset, delay and dispersion are called the sample statistics.
 
 [NOTE]
 In very fast networks where the client clock frequency is not
-within 1 PPM or so of the the server clock frequency, the roundtrip
+within 1 PPM or so of the server clock frequency, the roundtrip
 delay may have small negative values. This is usually a temporary
 condition when the client is first started. When using the roundtrip
 delay in calculations, negative values are assumed zero.

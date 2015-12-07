@@ -88,7 +88,7 @@ the TOY chip clock has drifted significantly from NTP time. This can
 cause a transient at system startup. In the past, this has produced a
 phase transient and resulted in a frequency surge that could take some
 time, even hours, to subside. When the highest accuracy is required,
-some means is necessary to manage the startup process so that the the
+some means is necessary to manage the startup process so that the
 clock is quickly set correctly and the frequency is undisturbed. The
 hold timer is used to suppress frequency adjustments during the training
 and startup intervals described below. At the beginning of the interval
@@ -141,7 +141,7 @@ Sync Interval::
 
 The state machine consists of five states. An event is created when an
 update is received by the discipline algorithm. Depending on the state
-and the the offset magnitude, the machine performs some actions and
+and the offset magnitude, the machine performs some actions and
 transitions to the same or another state. Following is a short
 description of the states.
 
