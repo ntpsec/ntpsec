@@ -105,6 +105,7 @@ TEST(packetProcessing, TooShortExtensionFieldLength) {
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Warray-bounds"
 #endif
+	/* coverity[overrun-local] */
 	testpkt.exten[7] = htonl(3); // 3 bytes is too short.
 #ifdef __clang__
 #pragma clang diagnostic pop

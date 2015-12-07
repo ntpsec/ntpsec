@@ -239,6 +239,7 @@ TEST(packetHandling, HandleKodDemobilize) {
 
 	TEST_ASSERT_EQUAL(1, search_entry(HOSTNAME, &entry));
 	TEST_ASSERT_TRUE(memcmp(REASON, entry->type, 4) == 0);
+	/* coverity[leaked_storage] */
 }
 
 TEST(packetHandling, HandleKodRate) {

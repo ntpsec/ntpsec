@@ -38,6 +38,7 @@ bool IsEqualCA(const struct calendar *expected, const struct calendar *actual) {
 	    expected->second == actual->second) {
 		return true;
 	} else {
+		/* coverity[leaked_storage] */
 		printf("Expected: %s but was %s\n", CalendarToString(expected), CalendarToString(actual));
 		return false;
 	}
@@ -53,6 +54,7 @@ bool IsEqualISO(const struct isodate *expected, const struct isodate *actual) {
 	    expected->second == actual->second) {
 		return true;
 	} else {
+		/* coverity[leaked_storage] */
 		printf("Expected: %s but was %s\n", CalendarToStringISO(expected), CalendarToStringISO(actual));
 		return false;
 	}
@@ -80,6 +82,7 @@ bool IsEqualDate(const struct calendar *expected, const struct calendar *actual)
 	    expected->monthday == actual->monthday) {
 			return true;
 	} else {
+		/* coverity[leaked_storage] */
 		printf("Expected: %s but was %s\n", DateToString(expected), DateToString(actual));
 		return false;
 	}
@@ -92,6 +95,7 @@ bool IsEqualDateISO(const struct isodate *expected, const struct isodate *actual
 	    expected->weekday == actual->weekday) {
 		return true;
 	} else {
+		/* coverity[leaked_storage] */
 		printf("Expected: %s but was %s\n", DateToStringISO(expected), DateToStringISO(actual));
 		return false;
 	}

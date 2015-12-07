@@ -293,7 +293,7 @@ intercept_leapsec_load_file(
 	bool   force,
 	bool   logall)
 {
-    bool loaded;
+    bool loaded = true;
 
     if (mode != replay)
 	loaded = leapsec_load_file(fname, sb_old, force, logall);

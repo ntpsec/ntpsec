@@ -1062,8 +1062,9 @@ palisade_io (
 		    case TSIP_PARSED_DLE_2:
 			if (*c == DLE) {
 				up->rpt_status = TSIP_PARSED_DATA;
-				mb(up->rpt_cnt++) = 
-				    *c;
+				/* prevent overrun - should never happen */
+				if (up->rpt_cnt < BMAX - 2)
+					mb(up->rpt_cnt++) = *c;
 			}
 			else if (*c == ETX) 
 				up->rpt_status = TSIP_PARSED_FULL;
