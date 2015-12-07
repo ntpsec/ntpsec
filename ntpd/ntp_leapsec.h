@@ -77,7 +77,7 @@ extern bool leapsec_electric(electric_mode el);
  * 'tai_offs' is the CURRENT distance from clock (UTC) to TAI. Always valid.
  * 'tai_diff' is the change in TAI offset after the next leap
  *	transition. Zero if nothing is pending or too far ahead.
- * 'warped' is set only once, when the the leap second occurred between
+ * 'warped' is set only once, when the leap second occurred between
  *	two queries. Always zero in electric mode. If non-zero,
  *      immediately step the clock.
  * 'proximity' is a proximity warning. See definitions below. This is

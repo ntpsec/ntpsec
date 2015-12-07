@@ -25,7 +25,7 @@ In other words, we would like to replace the transmit softstamp with a
 drivestamp, but the problem is the transmit drivestamp is available only
 after the packet has been sent. A solution for this problem is the
 two-step or interleaved protocol described on this page and included in
-the the current reference implementation. In interleaved modes the
+the current reference implementation. In interleaved modes the
 transmit drivestamp for one packet is actually carried in the
 immediately following packet. The trick, however, is to implement the
 interleaved protocol without changing the NTP packet header format,

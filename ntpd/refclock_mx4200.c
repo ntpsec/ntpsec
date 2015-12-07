@@ -1064,7 +1064,7 @@ static int day1tab[] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
 static int day2tab[] = {31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
 
 /*
- * Calculate the the Julian Day
+ * Calculate the Julian Day
  */
 static int
 mx4200_jday(

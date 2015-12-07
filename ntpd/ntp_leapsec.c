@@ -964,7 +964,7 @@ do_hash_data(
 		isc_sha1_update(mdctx, text, tlen);
 }
 
-/* given a reader and a reader arg, calculate and validate the the hash
+/* given a reader and a reader arg, calculate and validate the hash
  * signature of a NIST leap second file.
  */
 int

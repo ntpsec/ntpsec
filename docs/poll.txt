@@ -16,7 +16,7 @@ a jiggle counter, which is initially set to zero. When a clock update is
 received and the offset exceeds the clock jitter by a factor of 4, the
 jiggle counter is increased by the poll exponent; otherwise, it is
 decreased by twice the poll exponent. If the jiggle counter is greater
-than an arbitrary threshold of 30, it is reset to 0 and the the poll
+than an arbitrary threshold of 30, it is reset to 0 and the poll
 exponent is increased by 1. If the jiggle counter is less than -30, it
 is set to 0 and the poll exponent decreased by 1. In effect, the
 algorithm has a relatively slow reaction to good news, but a relatively

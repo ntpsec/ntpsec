@@ -183,7 +183,7 @@ prefer peer is among the survivors, the combine algorithm is not used.
 Instead, the offset and jitter of the prefer peer are used exclusively
 as the final values. In the common case involving a radio clock and a
 flock of remote backup servers, and with the radio clock designated a
-prefer peer, the the radio clock disciplines the system clock as long as
+prefer peer, the radio clock disciplines the system clock as long as
 the radio itself remains operational. However, if the radio fails or
 becomes a falseticker, the combined backup sources continue to
 discipline the system clock.

@@ -211,7 +211,7 @@ typedef union {
 /*
  * Macro for checking for invalid addresses.  This is really, really
  * gross, but is needed so no one configures a host on net 127 now that
- * we're encouraging it the the configuration file.
+ * we're encouraging it the configuration file.
  */
 #define	LOOPBACKADR	0x7f000001
 #define	LOOPNETMASK	0xff000000

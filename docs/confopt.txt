@@ -72,7 +72,7 @@ include::includes/assoc-options.txt[]
 == Auxiliary Commands ==
 
 Information on authentication for broadcast, manycast, and
-manycat options can be found at link:authopt.html[Authentication Options].
+manycast options can be found at link:authopt.html[Authentication Options].
 
 include::includes/assoc-auxcommands.txt[]
 
