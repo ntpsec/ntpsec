@@ -3282,6 +3282,7 @@ read_refclock_packet(
 	rb->recv_length = buflen;
 	rb->recv_peer = rp->srcclock;
 	rb->dstadr = 0;
+	rb->cast_flags = 0;
 	rb->fd = fd;
 	rb->recv_time = ts;
 	rb->receiver = rp->clock_recv;
@@ -3540,6 +3541,9 @@ read_network_packet(
 	 * put it on the full list and do bookkeeping.
 	 */
 	rb->dstadr = itf;
+	rb->cast_flags = (uint8_t)(((rb->dstadr->flags &
+				     INT_MCASTOPEN) && rb->fd == rb->dstadr->fd) ? MDF_MCAST
+				   : rb->fd == rb->dstadr->bfd ? MDF_BCAST : MDF_UCAST);
 	rb->fd = fd;
 #ifdef USE_PACKET_TIMESTAMP
 	/* pick up a network time stamp if possible */
