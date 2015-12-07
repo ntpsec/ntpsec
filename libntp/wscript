@@ -54,8 +54,7 @@ def build(ctx):
 		"ymd2yd.c",
 	]
 
-	if ctx.env.REFCLOCK_CHU == True \
-		or ctx.env.REFCLOCK_IRIG == True:
+	if ctx.env.AUDIO_ENABLE:
 
 		libntp_source += [
 			"audio.c"
