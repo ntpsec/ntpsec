@@ -90,22 +90,20 @@ TEST(msyslog, msnprintfHangingPercent)
 	ZERO(exp_buf);
 	ZERO(act_buf);
 /* warning: format string contains '\0' within the string body [-Wformat] */
-#ifdef __GNUC__
+#ifdef __clang__
+#  pragma clang diagnostic push
+#  pragma clang diagnostic ignored "-Wformat"
+#else /* GCC */
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wformat-contains-nul"
 #pragma GCC diagnostic ignored "-Wformat="
 #pragma GCC diagnostic ignored "-Wformat"
 #endif
-#ifdef __clang__
-#  pragma clang diagnostic push
-#  pragma clang diagnostic ignored "-Wformat"
-#endif
 	exp_cnt = snprintf(exp_buf, sizeof(exp_buf), "percent then nul term then non-nul %\0oops!");
 	act_cnt = msnprintf(act_buf, sizeof(act_buf), "percent then nul term then non-nul %\0oops!");
 #ifdef __clang__
 #  pragma clang diagnostic pop
-#endif
-#ifdef __GNUC__
+#else
 #pragma GCC diagnostic pop
 #endif
 
