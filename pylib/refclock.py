@@ -30,12 +30,14 @@ refclock_map = {
 	6: {
 		"descr":	"IRIG Audio Decoder",
 		"define":	"CLOCK_IRIG",
+		"require":	["audio"],
 		"file":		"irig"
 	},
 
 	7: {
 		"descr":	"Radio CHU Audio Demodulator/Decoder",
 		"define":	"CLOCK_CHU",
+		"require":	["audio"],
 		"file":		"chu"
 	},
 
@@ -235,6 +237,13 @@ def refclock_config(ctx):
 					ctx.end_msg("No")
 					pprint("RED", "Refclock \"%s\" disabled, PPS API has not been detected as working." % rc["descr"])
 					continue
+
+			if "audio" in rc["require"]:
+				if not ctx.env.AUDIO_ENABLE:
+					ctx.end_msg("No")
+					pprint("RED", "Refclock \"%s\" disabled, Audio (OSS) support is not available." % rc["descr"])
+					continue
+
 
 		ctx.env.REFCLOCK_SOURCE.append((rc["file"], rc["define"]))
 		ctx.env["REFCLOCK_%s" % rc["file"].upper()] = True
