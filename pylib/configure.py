@@ -337,6 +337,13 @@ def cmd_configure(ctx):
 
 	if ctx.options.refclocks:
 		from refclock import refclock_config
+
+		# Enable audio when the right headers exist.
+		if ctx.get_define("HAVE_SYS_AUDIOIO_H") or \
+				ctx.get_define("HAVE_SYS_SOUNDCARD_H") or \
+				ctx.get_define("HAVE_MACHINE_SOUNDCARD_H"):
+			ctx.env.AUDIO_ENABLE = True
+
 		refclock_config(ctx)
 
 	# FIXME: These other things should be derived,
@@ -455,13 +462,6 @@ def cmd_configure(ctx):
 		sep = "/"
 
 	ctx.define("DIR_SEP", "'%s'" % sep, quote=False)
-
-	# Enable audio when the right headers exist.
-	if ctx.get_define("HAVE_SYS_AUDIOIO_H") or \
-			ctx.get_define("HAVE_SYS_SOUNDCARD_H") or \
-			ctx.get_define("HAVE_MACHINE_SOUNDCARD_H"):
-		ctx.env.AUDIO_ENABLE = True
-
 
 	# libisc/
 	# XXX: Hack that needs to be fixed properly for all platforms
