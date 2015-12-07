@@ -478,9 +478,7 @@ ntp_monitor(
 	memcpy(&mon->rmtadr, &rbufp->recv_srcadr, sizeof(mon->rmtadr));
 	mon->vn_mode = VN_MODE(version, mode);
 	mon->lcladr = rbufp->dstadr;
-	mon->cast_flags = (uint8_t)(((rbufp->dstadr->flags &
-	    INT_MCASTOPEN) && rbufp->fd == mon->lcladr->fd) ? MDF_MCAST
-	    : rbufp->fd == mon->lcladr->bfd ? MDF_BCAST : MDF_UCAST);
+	mon->cast_flags = rbufp->cast_flags;
 
 	/*
 	 * Drop him into front of the hash table. Also put him on top of
