@@ -460,7 +460,7 @@ step_systime(
 	timets = lfp_stamp_to_tspec(fp_sys, &pivot);
 
 	/* now set new system time */
-	if (ntp_set_tod(&timets, NULL) != 0) {
+	if (ntp_set_tod(&timets) != 0) {
 		msyslog(LOG_ERR, "step-systime: %m");
 		return false;
 	}

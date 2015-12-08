@@ -64,8 +64,7 @@ pset_tod_using	set_tod_using = NULL;
 
 int
 ntp_set_tod(
-	struct timespec *tvs,
-	void *tzp
+	struct timespec *tvs
 	)
 {
 	static int	tod;
@@ -101,7 +100,7 @@ ntp_set_tod(
 
 		adjtv.tv_sec = tvs->tv_sec;
 		adjtv.tv_usec = (tvs->tv_nsec + 500) / 1000;
-		rc = settimeofday(&adjtv, tzp);
+		rc = settimeofday(&adjtv, NULL);
 		saved_errno = errno;
 		TRACE(1, ("ntp_set_tod: settimeofday: %d %m\n", rc));
 		if (!tod && !rc)
