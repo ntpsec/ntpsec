@@ -88,6 +88,7 @@
 
 +xleave+::
   Operate in interleaved mode (symmetric and broadcast modes only).
-  Further information is on the "NTP Interleaved Modes" page.
+  Further information is on the link:xleave.html[NTP Interleaved Modes]
+  page.
 
 // end
