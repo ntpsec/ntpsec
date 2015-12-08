@@ -351,21 +351,24 @@ void intercept_sendpkt(const char *legend,
 
 void intercept_receive(struct recvbuf *rbufp)
 {
-    if (mode != replay)
-	receive(rbufp);
-
     if (mode != none) {
 	/*
-	 * Order is: cast flags, receipt time, source address, packet, length.
-	 * Cast flags are only kept because they change the ntpq display,
-	 * they have no implications for the protocol machine.
-	 * We don't dump srcadr because only the parse clock uses that.
+	 * Order is: cast flags, receipt time, interface name, source
+	 * address, packet, length.  Cast flags are only kept because
+	 * they change the ntpq display, they have no implications for
+	 * the protocol machine.  We don't dump srcadr because only
+	 * the parse clock uses that.
 	 */
-	printf("event receive %0x %s ",
-	       rbufp->cast_flags, lfptoa(&rbufp->recv_time, 10));
+	printf("event receive %0x %s %s ",
+	       rbufp->cast_flags,
+	       lfptoa(&rbufp->recv_time, 10),
+	       rbufp->dstadr->name);
 	packet_dump(&rbufp->recv_srcadr, &rbufp->recv_pkt, rbufp->recv_length);
 	fputs("\n", stdout);
     }
+
+    if (mode != replay)
+	receive(rbufp);
 
     /* FIXME: replay logic goes here */
 }

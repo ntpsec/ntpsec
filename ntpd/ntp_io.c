@@ -3550,7 +3550,7 @@ read_network_packet(
 	ts = fetch_timestamp(rb, &msghdr, ts);
 #endif
 	rb->recv_time = ts;
-	rb->receiver = receive;
+	rb->receiver = intercept_receive;
 
 	add_full_recv_buffer(rb);
 
