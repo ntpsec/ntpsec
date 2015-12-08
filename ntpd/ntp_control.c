@@ -3448,7 +3448,7 @@ send_random_tag_value(
 	int	noise;
 	char	buf[32];
 
-	noise = rand() ^ (rand() << 16);
+	noise = intercept_ntp_random("send_random_tag");
 	buf[0] = 'a' + noise % 26;
 	noise >>= 5;
 	buf[1] = 'a' + noise % 26;
@@ -3488,7 +3488,7 @@ send_mru_entry(
 
 	remaining = COUNTOF(sent);
 	ZERO(sent);
-	noise = (uint32_t)(rand() ^ (rand() << 16));
+	noise = intercept_ntp_random("send_mru_entry");
 	while (remaining > 0) {
 		which = (noise & 7) % COUNTOF(sent);
 		noise >>= 3;
@@ -3923,7 +3923,7 @@ send_ifstats_entry(
 	noisebits = 0;
 	while (remaining > 0) {
 		if (noisebits < 4) {
-			noise = rand() ^ (rand() << 16);
+			noise = intercept_ntp_random("send_ifstats_entry");
 			noisebits = 31;
 		}
 		which = (noise & 0xf) % COUNTOF(sent);
@@ -4102,7 +4102,7 @@ send_restrict_entry(
 	noisebits = 0;
 	while (remaining > 0) {
 		if (noisebits < 2) {
-			noise = rand() ^ (rand() << 16);
+			noise = intercept_ntp_random("send_restrict_entry");
 			noisebits = 31;
 		}
 		which = (noise & 0x3) % COUNTOF(sent);
