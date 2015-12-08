@@ -110,8 +110,14 @@ intercept_mode intercept_get_mode(void)
 void intercept_set_mode(intercept_mode newmode)
 {
     mode = newmode;
-    if (newmode == replay)
-	termlogit = syslogit = false;
+    if (mode != none) {
+	if (mode == replay)
+	    fputs("# Setting replay mode\n", stdout);
+	else if (mode == capture)
+	    fputs("# Setting capture mode\n", stdout);
+	syslogit = false;
+	hashprefix = termlogit = true;
+    }
 }
 
 void intercept_argparse(int *argc, char ***argv)
@@ -119,9 +125,9 @@ void intercept_argparse(int *argc, char ***argv)
     int i;
     for (i = 1; i < *argc; i++)
 	if (strcmp((*argv)[i], "-y") == 0)
-	    mode = capture;
+	    intercept_set_mode(capture);
 	else if  (strcmp((*argv)[i], "-Y") == 0)
-	    mode = replay;
+	    intercept_set_mode(replay);
 
     if (mode == capture)
     {
