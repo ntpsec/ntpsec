@@ -9,8 +9,7 @@ pset_tod_using		set_tod_using = NULL;
 
 int
 ntp_set_tod(
-	struct timespec *tp,
-	void *tzp
+	struct timespec *tp
 	)
 {
 	SYSTEMTIME st;
@@ -18,8 +17,6 @@ ntp_set_tod(
 		FILETIME ft;
 		ULONGLONG ull;
 	} t;
-
-	UNUSED_ARG(tzp);
 
 	t.ull = FILETIME_1970 +
 		(ULONGLONG)tv->tv_sec * 10 * 1000 * 1000 +
