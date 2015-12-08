@@ -137,20 +137,37 @@ void intercept_argparse(int *argc, char ***argv)
 		printf(" %s", (*argv)[i]);
 	putchar('\n');
     }
+
+    /* FIXME: replay logic goes here */
 }
+
+static bool pump(const char *fn, const char *lead, const char *trail, FILE *ofp)
+{
+	FILE *fp = fopen(fn, "r");
+	if (fp == NULL)
+	    return false;
+	else
+	{
+	    int c;
+
+	    fputs(lead, ofp);
+	    while ((c = fgetc(fp)) != EOF)
+		fputc(c, ofp);
+	    fclose(fp);
+	    fputs(trail, ofp);
+	    return true;
+	}
+}
+
 
 void intercept_getconfig(const char *configfile)
 {
-    if (mode == none)
+    printf("CONFIG %s\n", configfile);
+    if (mode != replay)
 	getconfig(configfile);
-    else {
-	fputs("startconfig\n", stdout);
-#ifdef SAVECONFIG
-	dump_all_config_trees(stdout, false);
-#endif
-	fputs("endconfig\n", stdout);
 
-    }
+    if (mode == capture)
+	pump(configfile, "startconfig\n", "endconfig\n", stdout);
 
     if (mode == replay) {
 	stats_control = false;	/* suppress writing stats files */
@@ -304,18 +321,8 @@ intercept_leapsec_load_file(
     if (mode != replay)
 	loaded = leapsec_load_file(fname, sb_old, force, logall);
 
-    if (mode == capture) {
-	FILE *fp = fopen(fname, "r");
-	if (fp != NULL) {
-	    int c;
-
-	    fputs("startleapsec\n", stdout);
-	    while ((c = fgetc(fp)) != EOF)
-		putchar(c);
-	    fclose(fp);
-	    fputs("endleapsec\n", stdout);
-	}
-    }
+    if (mode == capture)
+	pump(fname, "startleapsec\n", "endleapsec\n", stdout);
 
     /* FIXME: replay logic goes here */
     
@@ -336,7 +343,6 @@ static void packet_dump(sockaddr_u *dest, struct pkt *pkt, int len)
     /* dump MAC as len - LEN_PKT_NOMAC chars in hex */
     for (i = 0; i < len - LEN_PKT_NOMAC; i++)
 	printf("%02x", pkt->exten[i]);
-    fputs("\n", stdout);
 }
 
 void intercept_sendpkt(const char *legend,
@@ -347,7 +353,7 @@ void intercept_sendpkt(const char *legend,
 	sendpkt(dest, ep, ttl, pkt, len);
 
     if (mode != none) {
-	printf("event sendpkt \"%s\"", legend);
+	printf("event sendpkt \"%s\" ", legend);
 	packet_dump(dest, pkt, len);
 	fputs("\n", stdout);
     }
