@@ -158,12 +158,6 @@ char *ntp_signd_socket = default_ntp_signd_socket;
 struct netinfo_config_state *config_netinfo = NULL;
 bool check_netinfo = true;
 #endif /* HAVE_NETINFO_NI_H */
-#ifdef SYS_WINNT
-char *alt_config_file;
-LPTSTR temp;
-char config_file_storage[MAX_PATH];
-char alt_config_file_storage[MAX_PATH];
-#endif /* SYS_WINNT */
 
 #ifdef HAVE_NETINFO_NI_H
 /*
@@ -4353,12 +4347,14 @@ getconfig(const char *explicit_config)
 {
 	char	line[256];
 
-#ifdef FREE_CFG_T
-	atexit(free_all_config_trees);
-#endif
 #ifndef SYS_WINNT
 	config_file = CONFIG_FILE;
 #else
+	char *alt_config_file;
+	LPTSTR temp;
+	char config_file_storage[MAX_PATH];
+	char alt_config_file_storage[MAX_PATH];
+
 	temp = CONFIG_FILE;
 	if (!ExpandEnvironmentStringsA(temp, config_file_storage,
 				       sizeof(config_file_storage))) {
@@ -4376,6 +4372,13 @@ getconfig(const char *explicit_config)
 	alt_config_file = alt_config_file_storage;
 #endif /* SYS_WINNT */
 
+	if (explicit_config) {
+#ifdef HAVE_NETINFO_NI_H
+	    check_netinfo = false;
+#endif
+	    config_file = explicit_config;
+	}
+
 	/*
 	 * install a non default variable with this daemon version
 	 */
@@ -4388,13 +4391,6 @@ getconfig(const char *explicit_config)
 	 * which syscall is being used to step.
 	 */
 	set_tod_using = &ntpd_set_tod_using;
-
-	if (explicit_config) {
-#ifdef HAVE_NETINFO_NI_H
-	    check_netinfo = false;
-#endif
-	    config_file = explicit_config;
-	}
 
 	init_syntax_tree(&cfgt);
 	if (
@@ -4429,6 +4425,9 @@ getconfig(const char *explicit_config)
 	} else
 		cfgt.source.value.s = estrdup(config_file);
 
+#ifdef FREE_CFG_T
+	atexit(free_all_config_trees);
+#endif
 
 	/*** BULK OF THE PARSER ***/
 #ifdef DEBUG
