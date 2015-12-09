@@ -128,7 +128,8 @@ void intercept_set_mode(intercept_mode newmode)
 	else if (mode == capture)
 	    fputs("# Setting capture mode\n", stdout);
 	syslogit = false;
-	hashprefix = termlogit = true;
+	//hashprefix = termlogit = true;
+	termlogit = false;
     }
 }
 
@@ -174,7 +175,6 @@ static bool pump(const char *fn, const char *lead, const char *trail, FILE *ofp)
 
 void intercept_getconfig(const char *configfile)
 {
-    printf("CONFIG %s\n", configfile);
     if (mode != replay)
 	getconfig(configfile);
 
