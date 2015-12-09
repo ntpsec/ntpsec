@@ -321,7 +321,8 @@ normalize_time(
 #if !defined SYS_WINNT
 bool				/* true on okay, false on error */
 adj_systime(
-	double now		/* adjustment (s) */
+	double now,		/* adjustment (s) */
+	int (*ladjtime)(const struct timeval *, struct timeval *)
 	)
 {
 	struct timeval adjtv;	/* new adjustment */
@@ -376,7 +377,7 @@ adj_systime(
 		sys_residual = -sys_residual;
 	}
 	if (adjtv.tv_sec != 0 || adjtv.tv_usec != 0) {
-		if (adjtime(&adjtv, &oadjtv) < 0) {
+		if (ladjtime(&adjtv, &oadjtv) < 0) {
 			msyslog(LOG_ERR, "adj_systime: %m");
 			return false;
 		}
