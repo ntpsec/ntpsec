@@ -146,7 +146,6 @@ char *	saveconfigdir;
 bool	config_priority_override = false;
 int	config_priority;
 
-const char *config_file;
 static char default_ntp_signd_socket[] =
 #ifdef MSSNTP_PATH
 					MSSNTP_PATH;
@@ -4342,10 +4341,11 @@ config_remotely(
 /*
  * getconfig() - process startup configuration file e.g /etc/ntp.conf
  */
-void
+const char *
 getconfig(const char *explicit_config)
 {
 	char	line[256];
+	const char *config_file;
 
 #ifndef SYS_WINNT
 	config_file = CONFIG_FILE;
@@ -4405,7 +4405,7 @@ getconfig(const char *explicit_config)
 		if (!saveconfigquit)
 			io_open_sockets();
 
-		return;
+		return NULL;
 #else
 		/* Under WinNT try alternate_config_file name, first NTP.CONF, then NTP.INI */
 
@@ -4418,7 +4418,7 @@ getconfig(const char *explicit_config)
 			if (!saveconfigquit)
 				io_open_sockets();
 
-			return;
+			return NULL;
 		}
 		cfgt.source.value.s = estrdup(alt_config_file);
 #endif	/* SYS_WINNT */
@@ -4447,6 +4447,8 @@ getconfig(const char *explicit_config)
 	if (config_netinfo)
 		free_netinfo_config(config_netinfo);
 #endif /* HAVE_NETINFO_NI_H */
+
+	return config_file;
 }
 
 
