@@ -22,7 +22,7 @@ following kinds:
 
 8. Calls to adjtime/ntp_adjtime/adjtime to adjust the system clock.
 
-9  Calls to ntp_set_tod to ser the system clock.
+9  Calls to ntp_set_tod to set the system clock.
 
 10. Read of the system leapsecond file.
 
@@ -72,6 +72,13 @@ terminate - the replay failed.  Otherwise continue.
 Replay succeeds if the event stream reaches the shutdown event with
 no mismatches.
 
+== Limitations ==
+
+Replay mode has to not require root privileges and not actually change
+the timekeeping state of the machine.  Therefore it mocks the state of the
+system clock with static storage.  Bug: the state of the PLL is not yet
+mocked.
+
 *****************************************************************************/
 
 #include <time.h>
@@ -103,6 +110,9 @@ no mismatches.
 #include "ntp_leapsec.h"
 
 static intercept_mode mode = none;
+
+/* mock the clock state */
+static struct timespec replay_time;
 
 intercept_mode intercept_get_mode(void)
 {
@@ -189,7 +199,11 @@ void intercept_log(const char *fmt, ...)
 void intercept_get_systime(const char *legend, l_fp *now)
 {
     struct timespec ts;	/* seconds and nanoseconds */
-    get_ostime(&ts);
+
+    if (mode == replay)
+	memcpy(&ts, &replay_time, sizeof(struct timespec));
+    else
+	get_ostime(&ts);
 
     if (mode == capture)
 	printf("event systime %s %ld %ld\n",
@@ -330,10 +344,10 @@ int intercept_set_tod(struct timespec *tvs)
     if (mode != none)
 	printf("event set_tod %ld %ld\n", tvs->tv_sec, tvs->tv_nsec);
 
-    if (mode != replay)
+    if (mode == replay)
 	return ntp_set_tod(tvs);
 
-    /* dodgy - returning success despite not setting time */
+    memcpy(&replay_time, &tvs, sizeof(struct timespec));
     return 0;
 }
 

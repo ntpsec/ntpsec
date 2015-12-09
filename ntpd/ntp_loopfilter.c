@@ -496,7 +496,7 @@ local_clock(
 	if (mode_ntpdate) {
 		if (  ( fp_offset > clock_max_fwd  && clock_max_fwd  > 0)
 		   || (-fp_offset > clock_max_back && clock_max_back > 0)) {
-			step_systime(fp_offset);
+			step_systime(fp_offset, intercept_set_tod);
 			msyslog(LOG_NOTICE, "ntpd: time set %+.6f s",
 			    fp_offset);
 			printf("ntpd: time set %+.6fs\n", fp_offset);
@@ -629,7 +629,7 @@ local_clock(
 			snprintf(tbuf, sizeof(tbuf), "%+.6f s",
 			    fp_offset);
 			report_event(EVNT_CLOCKRESET, NULL, tbuf);
-			step_systime(fp_offset);
+			step_systime(fp_offset, intercept_set_tod);
 			if (intercept_get_mode() != replay)
 			    reinit_timer();
 			tc_counter = 0;
