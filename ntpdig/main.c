@@ -1555,7 +1555,7 @@ set_time(
 	    (   !opt_slew
 	     || (opt_slew && (fabs(offset) > steplimit))
 	    )) {
-		rc = step_systime(offset);
+		rc = step_systime(offset, ntp_set_tod);
 
 		/* If there was a problem, can we rely on errno? */
 		if (1 == rc)

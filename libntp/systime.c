@@ -393,7 +393,8 @@ adj_systime(
 
 bool
 step_systime(
-	double step
+	double step,
+	int (*settime)(struct timespec *)
 	)
 {
 	time_t pivot; /* for ntp era unfolding */
@@ -461,7 +462,7 @@ step_systime(
 	timets = lfp_stamp_to_tspec(fp_sys, &pivot);
 
 	/* now set new system time */
-	if (ntp_set_tod(&timets) != 0) {
+	if (settime(&timets) != 0) {
 		msyslog(LOG_ERR, "step-systime: %m");
 		return false;
 	}
