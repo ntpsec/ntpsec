@@ -66,6 +66,8 @@ def options(ctx):
 	grp.add_option('--enable-fortify', action='store_true', help="Enable HP Fortify.")
 	grp.add_option('--fortify-flags', type='string', action='store', help="Fortify flags.")
 	grp.add_option('--check', action='store_true', default=False, help="Run tests")
+	grp.add_option('--enable-rtems-trace', action='store_true', default=False, help="Enable RTEMS Trace.")
+	grp.add_option('--rtems-trace-path', type='string', default="", help="Path to rtems-tld.")
 
 	grp = ctx.add_option_group("NTP documentation configure options")
 	grp.add_option('--enable-doc', action='store_true', default=False, help="Build NTP documentation")
@@ -104,6 +106,7 @@ def build(ctx):
 	ctx.load('waf', tooldir='pylib/')
 	ctx.load('bison')
 	ctx.load('asciidoc', tooldir='pylib/')
+	ctx.load('rtems_trace', tooldir='pylib/')
 
 	if ctx.env.ENABLE_DOC:
 		ctx.recurse("docs")
