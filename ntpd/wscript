@@ -133,7 +133,7 @@ def build(ctx):
 
 	ctx(
 		target		= "ntpd",
-		features	= "c cprogram bld_include src_include libisc_include libisc_pthread_include ntp_version",
+		features	= "c rtems_trace cprogram bld_include src_include libisc_include libisc_pthread_include ntp_version",
 		source		= ntpd_source,
 		use			= "libntpd_obj bison_obj isc ntp sodium opts OSSAUDIO M parse GCC_S RT CAP THR PTHREAD CRYPTO DNS_SD DNS_SD_INCLUDES %s" % use_refclock,
 		includes	= [

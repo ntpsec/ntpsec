@@ -5,9 +5,13 @@ import sys, os
 
 
 def cmd_configure(ctx):
+	srcnode = ctx.srcnode.abspath()
+	bldnode = ctx.bldnode.abspath()
+
 	from check_type import check_type
 	from check_sizeof import check_sizeof
 	from check_structfield import check_structfield
+
 
 	if ctx.options.list:
 		from refclock import refclock_map
@@ -75,6 +79,16 @@ def cmd_configure(ctx):
 		opt = flag.replace("--", "").upper() # XXX: find a better way.
 		ctx.env[opt] = ctx.env.OPT_STORE[flag]
 
+	if ctx.options.enable_rtems_trace:
+		ctx.find_program("rtems-tld", var="BIN_RTEMS_TLD", path_list=[ctx.options.rtems_trace_path, ctx.env.BINDIR])
+		ctx.env.RTEMS_TEST_ENABLE = True
+		ctx.env.RTEMS_TEST_FLAGS = ["-C", "%s/devel/trace/ntpsec-trace.ini" % srcnode,
+									"-W", "%s/ntpsec-wrapper" % bldnode,
+									"-P", "%s/devel/trace/" % srcnode,
+									"-f", "-I%s" % bldnode,
+									"-f", "-I%s/include/" % srcnode,
+									"-f", "-I%s/libisc/include/" % srcnode,
+									"-f", "-I%s/libisc/unix/include/" % srcnode]
 
 	ctx.find_program("awk", var="BIN_AWK")
 	ctx.find_program("perl", var="BIN_PERL")
