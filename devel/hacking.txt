@@ -191,7 +191,7 @@ ENABLE_*::
 	the "waf configure" invocation.
 
 GUARD_*::
-	Symbols with thie GUARD_ prefix are idempotency guards - that is,
+	Symbols with the GUARD_ prefix are idempotency guards - that is,
 	they're used to nullify inclusions of a header file
 	after the first. They don't interact with the build system's
 	configuration logic in any way at all.
@@ -220,7 +220,7 @@ OVERRIDE_*::
 USE_*::
 	Use symbols are set internally within other conditionals to
 	gate use of sections of code that must be conditionally
-	compiled deoending on *combinations* of HAVE and NEED symbols.
+	compiled depending on *combinations* of HAVE and NEED symbols.
 
 === Cross-platform portability ===
 
@@ -328,7 +328,7 @@ The person on the team that merges in your patch will use the git
 parameter ---author from the email From header and the git parameter
 --date from the email Date header.
 
-For complex patches and contribtion narratives, please use GitLab.
+For complex patches and contribution narratives, please use GitLab.
 
 === Commit comments ===
 
@@ -351,8 +351,9 @@ should consist of:
   git format-patch. Bulleted list items are also OK.
 
 * In some cases it may be appropriate to end your summary line with a comma
-  or ellipsis ("...") to indicate that it runs dictly into a following paragraph.
-  You should still try to make the summary self-contained when you do this.
+  or ellipsis ("...") to indicate that it runs directly into a following
+  paragraph. You should still try to make the summary self-contained when
+  you do this.
 
 Finally, it is not necessary (and is in fact bad style) to list all
 the files a multi-file commit touches in the comment for it.  The
