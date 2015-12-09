@@ -112,7 +112,7 @@ mocked.
 static intercept_mode mode = none;
 
 /* mock the clock state */
-static struct timespec replay_time;
+static l_fp replay_time;
 
 intercept_mode intercept_get_mode(void)
 {
@@ -200,16 +200,16 @@ void intercept_get_systime(const char *legend, l_fp *now)
 {
     struct timespec ts;	/* seconds and nanoseconds */
 
-    if (mode == replay)
-	memcpy(&ts, &replay_time, sizeof(struct timespec));
-    else
+    if (mode == replay) {
+	*now = replay_time;
+    } else {
 	get_ostime(&ts);
+	normalize_time(ts, sys_fuzz > 0.0 ? ntp_random() : 0, now);
+    }
 
-    if (mode == capture)
-	printf("event systime %s %ld %ld\n",
-		legend, (long)ts.tv_sec, ts.tv_nsec);
+    if (mode != none)
+	printf("event systime %s %s\n", legend, lfptoa(now, 10));
 
-    normalize_time(ts, sys_fuzz > 0.0 ? ntp_random() : 0, now);
 }
 
 long intercept_ntp_random(const char *legend)
@@ -347,7 +347,7 @@ int intercept_set_tod(struct timespec *tvs)
     if (mode == replay)
 	return ntp_set_tod(tvs);
 
-    memcpy(&replay_time, &tvs, sizeof(struct timespec));
+    normalize_time(*tvs, 9, &replay_time);
     return 0;
 }
 
