@@ -176,9 +176,10 @@ static bool pump(const char *fn, const char *lead, const char *trail, FILE *ofp)
 void intercept_getconfig(const char *configfile)
 {
     if (mode != replay)
-	getconfig(configfile);
+	/* this can be null if the default config doesn't exist */
+	configfile = getconfig(configfile);
 
-    if (mode == capture)
+    if (configfile != NULL && mode != none)
 	pump(configfile, "startconfig\n", "endconfig\n", stdout);
 
     if (mode == replay) {
