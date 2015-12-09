@@ -501,7 +501,7 @@ local_clock(
 			    fp_offset);
 			printf("ntpd: time set %+.6fs\n", fp_offset);
 		} else {
-			adj_systime(fp_offset);
+			adj_systime(fp_offset, intercept_adjtime);
 			msyslog(LOG_NOTICE, "ntpd: time slew %+.6f s",
 			    fp_offset);
 			printf("ntpd: time slew %+.6fs\n", fp_offset);
@@ -662,7 +662,7 @@ local_clock(
 		 * the stepout threshold.
 		 */
 		case EVNT_NSET:
-			adj_systime(fp_offset);
+			adj_systime(fp_offset, intercept_adjtime);
 			rstclock(EVNT_FREQ, fp_offset);
 			break;
 
@@ -805,7 +805,7 @@ local_clock(
 		 * the pps. In any case, fetch the kernel offset,
 		 * frequency and jitter.
 		 */
-		ntp_adj_ret = intercept_kernel_pll_adjtime(&ntv);
+		ntp_adj_ret = intercept_ntp_adjtime(&ntv);
 		/*
 		 * A squeal is a return status < 0, or a state change.
 		 */
@@ -840,7 +840,7 @@ local_clock(
 			loop_tai = sys_tai;
 			ntv.modes = MOD_TAI;
 			ntv.constant = sys_tai;
-			if ((ntp_adj_ret = intercept_kernel_pll_adjtime(&ntv)) != 0) {
+			if ((ntp_adj_ret = intercept_ntp_adjtime(&ntv)) != 0) {
 			    ntp_adjtime_error_handler(__func__, &ntv, ntp_adj_ret, errno, false, true, __LINE__ - 1);
 			}
 		}
@@ -997,7 +997,7 @@ adj_host_clock(
 	 * but does not automatically stop slewing when an offset
 	 * has decayed to zero.
 	 */
-	adj_systime(offset_adj + freq_adj);
+	adj_systime(offset_adj + freq_adj, intercept_adjtime);
 #endif /* ENABLE_LOCKCLOCK */
 }
 
@@ -1077,7 +1077,7 @@ set_freq(
 			loop_desc = "kernel";
 			ntv.freq = DTOFREQ(drift_comp);
 		}
-		if ((ntp_adj_ret = intercept_kernel_pll_adjtime(&ntv)) != 0) {
+		if ((ntp_adj_ret = intercept_ntp_adjtime(&ntv)) != 0) {
 		    ntp_adjtime_error_handler(__func__, &ntv, ntp_adj_ret, errno, false, false, __LINE__ - 1);
 		}
 	}
@@ -1114,7 +1114,7 @@ start_kern_loop(void)
 		pll_control = false;
 	} else {
 		if (sigsetjmp(env, 1) == 0) {
-			if ((ntp_adj_ret = intercept_kernel_pll_adjtime(&ntv)) != 0) {
+			if ((ntp_adj_ret = intercept_ntp_adjtime(&ntv)) != 0) {
 			    ntp_adjtime_error_handler(__func__, &ntv, ntp_adj_ret, errno, false, false, __LINE__ - 1);
 			}
 		}
@@ -1125,7 +1125,7 @@ start_kern_loop(void)
 		}
 	}
 #else /* SIGSYS */
-	if ((ntp_adj_ret = intercept_kernel_pll_adjtime(&ntv)) != 0) {
+	if ((ntp_adj_ret = intercept_ntp_adjtime(&ntv)) != 0) {
 	    ntp_adjtime_error_handler(__func__, &ntv, ntp_adj_ret, errno, false, false, __LINE__ - 1);
 	}
 #endif /* SIGSYS */
@@ -1274,7 +1274,7 @@ loop_config(
 			memset((char *)&ntv, 0, sizeof(ntv));
 			ntv.modes = MOD_STATUS;
 			ntv.status = STA_UNSYNC;
-			intercept_kernel_pll_adjtime(&ntv);
+			intercept_ntp_adjtime(&ntv);
 			sync_status("kernel time sync disabled",
 				pll_status,
 				ntv.status);

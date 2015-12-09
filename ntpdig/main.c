@@ -1572,7 +1572,7 @@ set_time(
 	}
 
 	if (opt_slew) {
-		rc = adj_systime(offset);
+		rc = adj_systime(offset, adjtime);
 
 		/* If there was a problem, can we rely on errno? */
 		if (rc)

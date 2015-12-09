@@ -1697,7 +1697,7 @@ ctl_putsys(
 	if (CS_KERN_FIRST <= varid && varid <= CS_KERN_LAST &&
 	    current_time != ntp_adjtime_time) {
 		ZERO(ntx);
-		if (intercept_kernel_pll_adjtime(&ntx) < 0)
+		if (intercept_ntp_adjtime(&ntx) < 0)
 			msyslog(LOG_ERR, "ntp_adjtime() for mode 6 query failed: %m");
 		else
 			ntp_adjtime_time = current_time;

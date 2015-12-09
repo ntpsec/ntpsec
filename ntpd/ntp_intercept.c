@@ -20,17 +20,19 @@ following kinds:
 
 7. Alarm events.
 
-8. Calls to adjtime to set the system clock.
+8. Calls to adjtime/ntp_adjtime/adjtime to adjust the system clock.
 
-9. Read of the system leapsecond file.
+9  Calls to ntp_set_tod to ser the system clock.
 
-10. Packets incoming from NTP peers and others.
+10. Read of the system leapsecond file.
 
-11. Packets outgoing to NTP peers and others.
+11. Packets incoming from NTP peers and others.
 
-12. Read of authkey file
+12. Packets outgoing to NTP peers and others.
 
-13. Termination.
+13. Read of authkey file
+
+14. Termination.
 
 We must support two modes of operation.  In "capture" mode, ntpd
 operates normally, logging all events.  In "replay" mode, ntpd accepts
@@ -234,16 +236,17 @@ bool intercept_drift_read(const char *drift_file, double *drift)
     }
 
     if (mode != none)
-	printf("event drift %.3f\n", *drift);
+	printf("event drift-read %.3f\n", *drift);
 
     return true;
 }
 
 void intercept_drift_write(char *driftfile, double drift)
 {
-    if (mode == capture || mode == replay)
-	printf("event drift %.3f\n", drift);
-    else
+    if (mode != none)
+	printf("event drift-write %.3f\n", drift);
+
+    if (mode != replay)
     {
 	int fd;
 	char tmpfile[PATH_MAX], driftcopy[PATH_MAX];
@@ -274,8 +277,21 @@ void intercept_drift_write(char *driftfile, double drift)
     }
 }
 
+int intercept_adjtime(const struct timeval *ntv, struct timeval *otv)
+/* old-fashioned BSD call for systems with no PLL */
+{
+    printf("event adjtime %ld %ld %ld %ld",
+	   ntv->tv_sec, ntv->tv_usec, ntv->tv_sec, ntv->tv_usec);
+
+    if (mode != replay)
+	return adjtime(ntv, otv);
+
+    return 0;
+}
+
 #ifdef HAVE_KERNEL_PLL
-int intercept_kernel_pll_adjtime(struct timex *tx)
+int intercept_ntp_adjtime(struct timex *tx)
+/* for newer systems with PLLs */
 {
     int res = 0;
 
@@ -285,7 +301,7 @@ int intercept_kernel_pll_adjtime(struct timex *tx)
 	res = ntp_adjtime(tx);
 
     if (mode != none)
-	printf("event adjtime %u %ld %ld %ld %ld %i %ld %ld %ld %ld %ld %i %ld %ld %ld %ld %d\n",
+	printf("event ntp_adjtime %u %ld %ld %ld %ld %i %ld %ld %ld %ld %ld %i %ld %ld %ld %ld %d\n",
 	       tx->modes,
 	       tx->offset,
 	       tx->freq,
@@ -308,6 +324,18 @@ int intercept_kernel_pll_adjtime(struct timex *tx)
     return res;
 }
 #endif
+
+int intercept_set_tod(struct timespec *tvs)
+{
+    if (mode != none)
+	printf("event set_tod %ld %ld\n", tvs->tv_sec, tvs->tv_nsec);
+
+    if (mode != replay)
+	return ntp_set_tod(tvs);
+
+    /* dodgy - returning success despite not setting time */
+    return 0;
+}
 
 bool
 intercept_leapsec_load_file(

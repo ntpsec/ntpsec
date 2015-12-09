@@ -35,9 +35,11 @@ void intercept_sendpkt(const char *,
 void intercept_receive(struct recvbuf *);
 bool intercept_drift_read(const char *, double *);
 void intercept_drift_write(char *, double);
+int intercept_adjtime(const struct timeval *, struct timeval *);
 #ifdef HAVE_KERNEL_PLL
-int intercept_kernel_pll_adjtime(struct timex *);
+int intercept_ntp_adjtime(struct timex *);
 #endif
+int intercept_set_tod(struct timespec *tvs);
 extern bool intercept_leapsec_load_file(const char * fname, struct stat * sb,
 					bool force, bool logall);
 void intercept_getauthkeys(const char *);
