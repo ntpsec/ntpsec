@@ -25,7 +25,7 @@
  *
  * In former times this driver supported the Spectracom 9300 (now
  * end-of-lifed) and several models of Spectracom radio clocks that were
- * obsolesced by the WWVB modulation change in 2013.
+ * obsolesced by the WWVB modulation change at 2012-10-29T15:00:00Z.
  *
  * There are two timecode formats used by these clocks:
  *

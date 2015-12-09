@@ -38,12 +38,13 @@ reference clock use only Coordinated Universal Time (UTC). Timezone and
 standard/daylight adjustments are performed by the operating system
 kernel.
 
-Nowadays a reference clock will generally (though not always) be a GPS or GPSDO
-(GPS-conditioned oscillator). In former times it was often a radio timecode
-receiver synchronized to standard time as provided by NIST and USNO in
-the US, NRC in Canada and their counterparts elsewhere in the world.
-Precision time radios have been extinct in the U.S. since NIST changed their
-signal modulation in 2013; elsewhere they still exist but usage is
+Nowadays a reference clock will generally (though not always) be a GPS
+or GPSDO (GPS-conditioned oscillator). In former times it was often a
+radio timecode receiver synchronized to standard time as provided by
+NIST and USNO in the US, NRC in Canada and their counterparts
+elsewhere in the world.  Precision time radios have been extinct in
+the U.S. since NIST changed their signal modulation at
+2012-10-29T15:00:00Z; elsewhere they still exist but usage is
 declining under pressure from GPS technology.
 
 A device driver specific to each reference clock must be compiled in
@@ -160,8 +161,9 @@ link:copyright.html[Copyright Notice] page.
 
 If you have seen older versions of NTP, this list may have fewer
 entries than you expected.  Support for some very ancient drivers
-(notably, those rendered obsolete by the WWVB modulation change in
-2013) has been dropped in order to reduce our maintainence load.
+(notably, those rendered obsolete by the WWVB modulation change at
+2012-10-29T15:00:00Z) has been dropped in order to reduce our
+maintainence load.
 
 For security reasons, we will no longer support any refclock that requires
 a closed-source driver to run.  This filtered out the

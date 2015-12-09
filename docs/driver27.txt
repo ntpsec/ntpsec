@@ -15,7 +15,7 @@ maintainers plan to remove it in a future release.  If you have a
 requirement for it, please make this known to us.
 
 The "WWVB" functionality of this driver has been inoperable since the
-NIST modulation change in 2013.
+NIST modulation change at 2012-10-29T15:00:00Z.
 
 == Description ==
 

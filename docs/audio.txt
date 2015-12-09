@@ -30,14 +30,14 @@ substantially less accurate and less reliably available, for reasons
 ranging from longer atmospheric path to intrinsic jitter in the
 receiving devices.  Reflecting this, no precision time radios have been
 manufactured in the U.S. since NIST's incompatible WWV modulation
-change in 2013.
+change at 2012-10-29T15:00:00Z.
 
 Audio drivers for the NIST time stations WWV and WWVH have already
-been removed from the distribution because they pre-dated the 2013
-modulation change.  The remaining CHU and IRIG drivers are a
-significant maintainence problem, are deprecated, and are likely to be
-removed in a future release unless a significant user constituency for
-them makes itself known.
+been removed from the distribution because they pre-dated the
+2012-10-29T15:00:00Z modulation change.  The remaining CHU and IRIG
+drivers are a significant maintainence problem, are deprecated, and
+are likely to be removed in a future release unless a significant user
+constituency for them makes itself known.
 
 [[sound]]
 == Sound Card Drivers ==
@@ -56,7 +56,8 @@ Inter Range Instrumentation Group (IRIG) signals produced by many
 radio clocks and timing devices, and another for the Canadian
 time/frequency radio station CHU.  There was formerly a third audio
 driver for the NIST time & frequency radio stations WWV and WWVH, but
-it was obsolesced by the 2013 modulation change and has been removed.
+it was obsolesced by the 2012-10-29T15:00:00Z modulation change and
+has been removed.
 
 These drivers make ample use of sophisticated digital signal
 processing algorithms designed to efficiently extract timing signals
