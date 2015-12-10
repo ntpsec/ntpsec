@@ -8,6 +8,13 @@ def cmd_configure(ctx):
 	srcnode = ctx.srcnode.abspath()
 	bldnode = ctx.bldnode.abspath()
 
+	ctx.load('compiler_c')
+	ctx.load('bison')
+
+
+	from compiler import check_compiler
+	check_compiler(ctx)
+
 	from check_type import check_type
 	from check_sizeof import check_sizeof
 	from check_structfield import check_structfield
@@ -22,9 +29,6 @@ def cmd_configure(ctx):
 
 		return
 
-
-	ctx.load('compiler_c')
-	ctx.load('bison')
 
 	# This needs to be at the top since it modifies CC and AR
 	if ctx.options.enable_fortify:
