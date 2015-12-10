@@ -123,17 +123,27 @@ void intercept_set_mode(intercept_mode newmode)
 {
     mode = newmode;
     if (mode != none) {
+	if (mode == replay)
+	    fputs("# Setting replay mode\n", stdout);
+	else if (mode == capture)
+	    fputs("# Setting capture mode\n", stdout);
 	syslogit = false;
-	hashprefix = true;
-	termlogit = (debug > 0);
+	//hashprefix = termlogit = true;
+	termlogit = false;
     }
 }
 
 void intercept_argparse(int *argc, char ***argv)
 {
+    int i;
+    for (i = 1; i < *argc; i++)
+	if (strcmp((*argv)[i], "-y") == 0)
+	    intercept_set_mode(capture);
+	else if  (strcmp((*argv)[i], "-Y") == 0)
+	    intercept_set_mode(replay);
+
     if (mode == capture)
     {
-	int i;
 	printf("event startup");
 	for (i = 1; i < *argc; i++)
 	    if (strcmp((*argv)[i], "-y") != 0 && strcmp((*argv)[i], "-Y") != 0)

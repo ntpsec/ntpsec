@@ -2430,9 +2430,8 @@ config_access(
 					    ? "source"
 					    : "default";
 			const char *kod_warn = "KOD does nothing without LIMITED.";
-			/* FIXME: should probly just drop this */
-			if (intercept_get_mode() == none)
-			    fprintf(stderr, "restrict %s: %s\n", kod_where, kod_warn);
+
+			fprintf(stderr, "restrict %s: %s\n", kod_where, kod_warn);
 			msyslog(LOG_WARNING, "restrict %s: %s", kod_where, kod_warn);
 		}
 

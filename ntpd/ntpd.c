@@ -375,10 +375,10 @@ parse_cmdline_opts(
 		/* defer */
 		break;
 	    case 'y':
-		intercept_set_mode(capture);
+		/* processed by interception code */
 		break;
 	    case 'Y':
-		intercept_set_mode(replay);
+		/* processed by interception code */
 		break;
 	    case 'z':
 		/* defer */
