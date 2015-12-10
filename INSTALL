@@ -132,7 +132,7 @@ Please report this as a bug, along with your platform details.
 
 == Installation Names ==
 
-By default, `make install' will install the package's files in
+By default, `waf install' will install the package's files in
 `/usr/local/bin', `/usr/local/man', etc.  You can specify an
 installation prefix other than `/usr/local' by giving waf the
 option `--prefix=PATH'.
@@ -141,7 +141,7 @@ option `--prefix=PATH'.
 
 Due to variations in Perl library paths, our stock source distribution
 makes no attempt to install certain Perl scripts: notably
-ntpleapfetch, ntpwait, and ntptrace.  If you installed this sotware
+ntpleapfetch, ntpwait, and ntptrace.  If you installed this software
 from a binary package prepared by your OS distributor, the OS
 distributor may install them, arranging a rendezvous with the
 Perl implementation's library path.
