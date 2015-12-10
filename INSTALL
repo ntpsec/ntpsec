@@ -1,6 +1,6 @@
 = Installation instructions =
 
-== Prerequsites ==
+== Prerequisites ==
 
 This software should build on any operating system conformant to
 POSIX.1-2001 and ISO/IEC 9899:1999 (C99).  In addition, the
@@ -20,7 +20,7 @@ bison::
    Debian: bison
 
 libevent 2.x::
-   Required.
+   Optional. Without it, ntpdig won't build. 
    Fedora: libevent and libevent-devel
    Debian: libevent and libevent-dev
 
