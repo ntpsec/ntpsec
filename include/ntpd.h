@@ -540,6 +540,7 @@ extern const char *chrootdir;	/* directory to chroot() to */
 #ifdef HAVE_WORKING_FORK
 extern	int	waitsync_fd_to_close;	/* -w/--wait-sync */
 #endif
+extern  void	finish		(int sig);
 
 /* ntservice.c */
 #ifdef SYS_WINNT

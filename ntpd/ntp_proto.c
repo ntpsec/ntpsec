@@ -358,7 +358,7 @@ transmit(
 					if (!termlogit)
 						printf(
 						    "ntpd: no servers found\n");
-					exit (0);
+					intercept_exit(0);
 				}
 			}
 		}
