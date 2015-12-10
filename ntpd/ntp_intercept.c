@@ -192,6 +192,12 @@ void intercept_log(const char *fmt, ...)
     }
 }
 
+/*
+ * An lfp used as a full date has an an unsigned seconds part.
+ * Invert this with atolfp().
+ */
+#define lfpdump(n)	ulfptoa(n, 10)
+
 void intercept_get_systime(const char *legend, l_fp *now)
 {
     struct timespec ts;	/* seconds and nanoseconds */
@@ -204,7 +210,7 @@ void intercept_get_systime(const char *legend, l_fp *now)
     }
 
     if (mode != none)
-	printf("event systime %s %s\n", legend, lfptoa(now, 10));
+	printf("event systime %s %s\n", legend, lfpdump(now));
 
 }
 
@@ -376,8 +382,8 @@ static void packet_dump(sockaddr_u *dest, struct pkt *pkt, int len)
 	   /* FIXME: might be better to dump these in fixed-point */
 	   pkt->rootdelay, pkt->rootdisp,
 	   pkt->refid,
-	   lfptoa(&pkt->reftime, 10), lfptoa(&pkt->org, 10),
-	   lfptoa(&pkt->rec, 10), lfptoa(&pkt->xmt, 10));
+	   lfpdump(&pkt->reftime), lfpdump(&pkt->org),
+	   lfpdump(&pkt->rec), lfpdump(&pkt->xmt));
     /* dump MAC as len - LEN_PKT_NOMAC chars in hex */
     for (i = 0; i < len - LEN_PKT_NOMAC; i++)
 	printf("%02x", pkt->exten[i]);
@@ -411,7 +417,7 @@ void intercept_receive(struct recvbuf *rbufp)
 	 */
 	printf("event receive %0x %s %s ",
 	       rbufp->cast_flags,
-	       lfptoa(&rbufp->recv_time, 10),
+	       lfpdump(&rbufp->recv_time),
 	       rbufp->dstadr->name);
 	packet_dump(&rbufp->recv_srcadr, &rbufp->recv_pkt, rbufp->recv_length);
 	fputs("\n", stdout);
