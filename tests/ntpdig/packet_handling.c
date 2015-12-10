@@ -14,7 +14,7 @@
 
 #define EXPECT_DOUBLE_EQ(a, b) { \
 	static const double epsilon = 1e-10; \
-	TEST_ASSERT_TRUE(abs(a - b) < epsilon); \
+	TEST_ASSERT_TRUE(fabs(a - b) < epsilon); \
 }
 
 static bool LfpEquality(const l_fp* expected, const l_fp* actual) {
