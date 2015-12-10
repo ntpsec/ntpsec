@@ -291,7 +291,7 @@ int intercept_adjtime(const struct timeval *ntv, struct timeval *otv)
 /* old-fashioned BSD call for systems with no PLL */
 {
     printf("event adjtime %ld %ld %ld %ld",
-	   ntv->tv_sec, ntv->tv_usec, ntv->tv_sec, ntv->tv_usec);
+	   (long)ntv->tv_sec, (long)ntv->tv_usec, (long)ntv->tv_sec, (long)ntv->tv_usec);
 
     if (mode != replay)
 	return adjtime(ntv, otv);
@@ -338,7 +338,7 @@ int intercept_ntp_adjtime(struct timex *tx)
 int intercept_set_tod(struct timespec *tvs)
 {
     if (mode != none)
-	printf("event set_tod %ld %ld\n", tvs->tv_sec, tvs->tv_nsec);
+	printf("event set_tod %ld %ld\n", (long)tvs->tv_sec, tvs->tv_nsec);
 
     if (mode == replay)
 	return ntp_set_tod(tvs);
