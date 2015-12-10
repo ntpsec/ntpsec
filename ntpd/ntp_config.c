@@ -2431,7 +2431,8 @@ config_access(
 					    : "default";
 			const char *kod_warn = "KOD does nothing without LIMITED.";
 
-			fprintf(stderr, "restrict %s: %s\n", kod_where, kod_warn);
+			if (intercept_get_mode() == none)
+			    fprintf(stderr, "restrict %s: %s\n", kod_where, kod_warn);
 			msyslog(LOG_WARNING, "restrict %s: %s", kod_where, kod_warn);
 		}
 

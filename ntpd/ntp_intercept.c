@@ -123,13 +123,8 @@ void intercept_set_mode(intercept_mode newmode)
 {
     mode = newmode;
     if (mode != none) {
-	if (mode == replay)
-	    fputs("# Setting replay mode\n", stdout);
-	else if (mode == capture)
-	    fputs("# Setting capture mode\n", stdout);
 	syslogit = false;
-	//hashprefix = termlogit = true;
-	termlogit = false;
+	hashprefix = true;
     }
 }
 
