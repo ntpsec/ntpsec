@@ -4278,7 +4278,7 @@ config_ntpd(
 	config_trap(ptree);
 	config_vars(ptree);
 
-	if (!saveconfigquit)
+	if (!saveconfigquit && intercept_get_mode() != replay)
 		io_open_sockets();
 
 	config_other_modes(ptree);
@@ -4403,7 +4403,7 @@ getconfig(const char *explicit_config)
 		) {
 		msyslog(LOG_INFO, "getconfig: Couldn't open <%s>: %m", config_file);
 #ifndef SYS_WINNT
-		if (!saveconfigquit)
+		if (!saveconfigquit && intercept_get_mode() != replay)
 			io_open_sockets();
 
 		return NULL;
@@ -4416,7 +4416,7 @@ getconfig(const char *explicit_config)
 			 * a configuration file.
 			 */
 			msyslog(LOG_INFO, "getconfig: Couldn't open <%s>: %m", alt_config_file);
-			if (!saveconfigquit)
+			if (!saveconfigquit && intercept_get_mode() != replay)
 				io_open_sockets();
 
 			return NULL;
