@@ -722,13 +722,13 @@ ntpdmain(
 	 * Set up signals we pay attention to locally.
 	 */
 # ifdef SIGDIE1
-	signal_no_reset(SIGDIE1, intercept_finish);
-	signal_no_reset(SIGDIE2, intercept_finish);
-	signal_no_reset(SIGDIE3, intercept_finish);
-	signal_no_reset(SIGDIE4, intercept_finish);
+	signal_no_reset(SIGDIE1, finish);
+	signal_no_reset(SIGDIE2, finish);
+	signal_no_reset(SIGDIE3, finish);
+	signal_no_reset(SIGDIE4, finish);
 # endif
 # ifdef SIGBUS
-	signal_no_reset(SIGBUS, intercept_finish);
+	signal_no_reset(SIGBUS, finish);
 # endif
 
 # ifdef DEBUG
@@ -1071,8 +1071,6 @@ finish(
 {
 	const char *sig_desc;
 
-	intercept_log("event shutdown 0\n");
-	sig_desc = NULL;
 	sig_desc = strsignal(sig);
 	if (sig_desc == NULL)
 		sig_desc = "";
@@ -1084,7 +1082,7 @@ finish(
 		DNSServiceRefDeallocate(mdns);
 # endif
 	peer_cleanup();
-	exit(0);
+	intercept_exit(0);
 }
 #endif	/* !SIM && SIGDIE1 */
 

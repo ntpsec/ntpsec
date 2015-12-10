@@ -139,7 +139,9 @@ void intercept_argparse(int *argc, char ***argv)
 
     if (mode == capture)
     {
-	printf("event startup");
+	printf("NTP replay version 1\n");
+
+	printf("startup");
 	for (i = 1; i < *argc; i++)
 	    if (strcmp((*argv)[i], "-y") != 0 && strcmp((*argv)[i], "-Y") != 0)
 		printf(" %s", (*argv)[i]);
@@ -210,7 +212,7 @@ void intercept_get_systime(const char *legend, l_fp *now)
     }
 
     if (mode != none)
-	printf("event systime %s %s\n", legend, lfpdump(now));
+	printf("systime %s %s\n", legend, lfpdump(now));
 
 }
 
@@ -221,7 +223,7 @@ long intercept_ntp_random(const char *legend)
     /* FIXME: replay logic goes here */
 
     if (mode != none)
-	printf("event random %s %ld\n", legend, rand);
+	printf("random %s %ld\n", legend, rand);
 
     return rand;
 }
@@ -229,7 +231,7 @@ long intercept_ntp_random(const char *legend)
 void intercept_timer(void)
 {
     if (mode != none)
-	printf("event timer\n");
+	printf("timer\n");
     timer();
 }
 
@@ -252,7 +254,7 @@ bool intercept_drift_read(const char *drift_file, double *drift)
     }
 
     if (mode != none)
-	printf("event drift-read %.3f\n", *drift);
+	printf("drift-read %.3f\n", *drift);
 
     return true;
 }
@@ -260,7 +262,7 @@ bool intercept_drift_read(const char *drift_file, double *drift)
 void intercept_drift_write(char *driftfile, double drift)
 {
     if (mode != none)
-	printf("event drift-write %.3f\n", drift);
+	printf("drift-write %.3f\n", drift);
 
     if (mode != replay)
     {
@@ -296,7 +298,7 @@ void intercept_drift_write(char *driftfile, double drift)
 int intercept_adjtime(const struct timeval *ntv, struct timeval *otv)
 /* old-fashioned BSD call for systems with no PLL */
 {
-    printf("event adjtime %ld %ld %ld %ld",
+    printf("adjtime %ld %ld %ld %ld",
 	   (long)ntv->tv_sec, (long)ntv->tv_usec, (long)ntv->tv_sec, (long)ntv->tv_usec);
 
     if (mode != replay)
@@ -317,7 +319,7 @@ int intercept_ntp_adjtime(struct timex *tx)
 	res = ntp_adjtime(tx);
 
     if (mode != none)
-	printf("event ntp_adjtime %u %ld %ld %ld %ld %i %ld %ld %ld %ld %ld %i %ld %ld %ld %ld %d\n",
+	printf("ntp_adjtime %u %ld %ld %ld %ld %i %ld %ld %ld %ld %ld %i %ld %ld %ld %ld %d\n",
 	       tx->modes,
 	       tx->offset,
 	       tx->freq,
@@ -344,7 +346,7 @@ int intercept_ntp_adjtime(struct timex *tx)
 int intercept_set_tod(struct timespec *tvs)
 {
     if (mode != none)
-	printf("event set_tod %ld %ld\n", (long)tvs->tv_sec, tvs->tv_nsec);
+	printf("set_tod %ld %ld\n", (long)tvs->tv_sec, tvs->tv_nsec);
 
     if (mode == replay)
 	return ntp_set_tod(tvs);
@@ -397,7 +399,7 @@ void intercept_sendpkt(const char *legend,
 	sendpkt(dest, ep, ttl, pkt, len);
 
     if (mode != none) {
-	printf("event sendpkt \"%s\" ", legend);
+	printf("sendpkt \"%s\" ", legend);
 	packet_dump(dest, pkt, len);
 	fputs("\n", stdout);
     }
@@ -415,7 +417,7 @@ void intercept_receive(struct recvbuf *rbufp)
 	 * the protocol machine.  We don't dump srcadr because only
 	 * the parse clock uses that.
 	 */
-	printf("event receive %0x %s %s ",
+	printf("receive %0x %s %s ",
 	       rbufp->cast_flags,
 	       lfpdump(&rbufp->recv_time),
 	       rbufp->dstadr->name);
@@ -452,15 +454,12 @@ intercept_getauthkeys(
     /* FIXME: replay logic goes here */
 }
 
-void intercept_finish(int sig)
+void intercept_exit(int sig)
 {
     if (mode != none)
 	printf("finish %d\n", sig);
 
-#if !defined(SIM) && defined(SIGDIE1)
-    extern void finish(int);	/* ugh */
-    finish(sig);
-#endif	/* !SIM && SIGDIE1 */
+    exit(sig);
 }
 
 /* end */

@@ -510,7 +510,7 @@ local_clock(
 		}
 		record_loop_stats(fp_offset, drift_comp, clock_jitter,
 		    clock_stability, sys_poll);
-		exit (0);
+		intercept_exit(0);
 	}
 
 	/*
