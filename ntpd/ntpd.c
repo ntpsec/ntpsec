@@ -375,10 +375,12 @@ parse_cmdline_opts(
 		/* defer */
 		break;
 	    case 'y':
-		/* processed by interception code */
+		nofork = true;
+		/* further processed by interception code */
 		break;
 	    case 'Y':
-		/* processed by interception code */
+		nofork = true;
+		/* further processed by interception code */
 		break;
 	    case 'z':
 		/* defer */
@@ -580,7 +582,7 @@ ntpdmain(
 		change_logfile(logfilename, false);
 	} else {
 		if (nofork)
-			termlogit = true;
+		    termlogit = (intercept_get_mode() == none || debug > 0);
 		if (saveconfigquit || dumpopts)
 			syslogit = false;
 	}
