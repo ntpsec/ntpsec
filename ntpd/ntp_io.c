@@ -1094,12 +1094,12 @@ log_listen_address(
 	)
 {
 	msyslog(LOG_INFO, "%s on %d %s %s",
-		(ep->ignore_packets)
-		    ? "Listen and drop"
-		    : "Listen normally",
-		ep->ifnum,
-		ep->name,
-		sptoa(&ep->sin));
+			(ep->ignore_packets)
+			    ? "Listen and drop"
+			    : "Listen normally",
+			ep->ifnum,
+			ep->name,
+			sptoa(&ep->sin));
 }
 
 

@@ -499,12 +499,14 @@ local_clock(
 			step_systime(fp_offset, intercept_set_tod);
 			msyslog(LOG_NOTICE, "ntpd: time set %+.6f s",
 			    fp_offset);
-			printf("ntpd: time set %+.6fs\n", fp_offset);
+			if (intercept_get_mode() != replay)
+				printf("ntpd: time set %+.6fs\n", fp_offset);
 		} else {
 			adj_systime(fp_offset, intercept_adjtime);
 			msyslog(LOG_NOTICE, "ntpd: time slew %+.6f s",
 			    fp_offset);
-			printf("ntpd: time slew %+.6fs\n", fp_offset);
+			if (intercept_get_mode() != replay)
+				printf("ntpd: time slew %+.6fs\n", fp_offset);
 		}
 		record_loop_stats(fp_offset, drift_comp, clock_jitter,
 		    clock_stability, sys_poll);
