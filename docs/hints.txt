@@ -8,7 +8,7 @@ Mother in law has all the answers.
 
 '''''
 
-file:./hints/[Hint Index]
+link:./hints/[Hint Index]
 
 This is an index for a set of troubleshooting notes contained in
 individual files in the `./hints` directory. They were supplied by
@@ -25,12 +25,12 @@ the computer manufacturer (and model numbers where appropriate),
 operating system (specific version(s) where appropriate), problem
 description, problem solution and submitter's name and electric address.
 If the submitter is willing to continue debate on the problem, please so
-advise. See the link:hints/[directory listing].
+advise.
 
 This list is cleaned up by removing obsolete notes or, when possible,
 routinizing the hints into the standard build and install procedure.
-Thus, you might find it empty, and if you do that is probably a good
-thing.
+Thus, you might find it empty ('not found'), and if you do that is
+probably a good thing.
 
 
 '''''
