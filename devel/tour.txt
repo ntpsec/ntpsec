@@ -10,7 +10,8 @@ to this document.  Having tricks and traps that impeded understanding
 explained here is especially valuable.
 
 However, try not to replicate comments here; it's better to point
-at where they live in the code.  This document is 
+at where they live in the code.  This document is intended to convey
+a higher-level view than individual comments.
 
 == Key Types ==
 
@@ -21,6 +22,17 @@ order to do certain time calculations without loss of precision, NTP
 home-brews three fixed-point types of its own.  Of these l_fp is the
 most common, with 32 bits of precision in both integer and fractional
 parts. Gory details are in include/ntp_fp.h.
+
+One point not covered there is that when used to represent dates
+internally an l_fp is normally interpreted as a pair consisting of
+an *unsigned* number of seconds since 1900-01-01T00:00:00Z (the
+NTP epoch) and unsigned decimal fractional seconds.  Just to complicate
+matters, however, some uses of l_fp are time offsets with a signed
+seconds part - how it's interpreted depends on which member of a union
+is used.
+
+The comments in libntp/ntp_calendar.c are pretty illuminating about
+calendar representations.
 
 === vint64 ===
 
