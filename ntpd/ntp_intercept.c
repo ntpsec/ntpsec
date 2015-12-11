@@ -114,6 +114,8 @@ static intercept_mode mode = none;
 /* mock the clock state */
 static l_fp replay_time;
 
+static char linebuf[256];
+
 intercept_mode intercept_get_mode(void)
 {
     return mode;
@@ -128,9 +130,35 @@ void intercept_set_mode(intercept_mode newmode)
     }
 }
 
+static void get_operation(const char *expect)
+/* get the next (non-comment) line from the log */
+{
+    for (;;)
+    {
+	char *in = fgets(linebuf, sizeof(linebuf), stdin);
+
+	if (in == NULL) {
+	    fputs("ntpd: replay failed, unexpected EOF\n", stderr);
+	    exit(1);
+	}
+	    
+	if (expect != NULL && strncmp(linebuf, expect, strlen(expect)) != 0) {
+	    fprintf(stderr, "ntpd: replay failed, expected %s but saw %*s\n",
+		    expect, (int)strlen(expect), linebuf);
+	    exit(1);
+	}
+	    
+	if (linebuf[0] != '#')
+	    break;
+    }
+	
+}
+
 void intercept_argparse(int *argc, char ***argv)
 {
     int i;
+    const char *leader = "NTP replay version 1";
+
     for (i = 1; i < *argc; i++)
 	if (strcmp((*argv)[i], "-y") == 0)
 	    intercept_set_mode(capture);
@@ -139,7 +167,7 @@ void intercept_argparse(int *argc, char ***argv)
 
     if (mode == capture)
     {
-	printf("NTP replay version 1\n");
+	printf("%s\n", leader);
 
 	printf("startup");
 	for (i = 1; i < *argc; i++)
@@ -147,8 +175,24 @@ void intercept_argparse(int *argc, char ***argv)
 		printf(" %s", (*argv)[i]);
 	putchar('\n');
     }
+    else if (mode == replay)
+    {
+	char *cp;
+	bool was_space = true;
 
-    /* FIXME: replay logic goes here */
+	/* require a log first line that matches what we can interpret */
+	get_operation(leader);
+	
+	get_operation("startup ");
+	*argc = 0;
+	for (cp = strdup(linebuf + 9); *cp; cp++) {
+	    if (was_space && !isspace(*cp))
+		(*argv)[(*argc)++] = cp;
+	    was_space = isspace(*cp);
+	    if (was_space)
+		*cp = '\0';
+	}
+    }
 }
 
 static bool pump(const char *fn, const char *lead, const char *trail, FILE *ofp)
@@ -180,13 +224,31 @@ void intercept_getconfig(const char *configfile)
 	pump(configfile, "startconfig\n", "endconfig\n", stdout);
 
     if (mode == replay) {
+	char tempfile[PATH_MAX];
+	FILE *tfp;
+
 	stats_control = false;	/* suppress writing stats files */
+	get_operation("startconfig");
+	snprintf(tempfile, sizeof(tempfile), ".fake_ntp_config_%d", getpid());
+	tfp = fopen(tempfile, "w");
+	for (;;) {
+	    char *nextline = fgets(linebuf, sizeof(linebuf), stdin);
+	    if (nextline == NULL) {
+		fputs("ntpd: replay failed, unexpected EOF in config\n", stderr);
+		exit(1);
+	    }
+	    if (strncmp(linebuf, "endconfig", 9) == 0)
+		break;
+	    fputs(linebuf, tfp);
+	}	    
+	getconfig(tempfile);
+	unlink(tempfile);
     }
 }
 
 void intercept_log(const char *fmt, ...)
 {
-    if (mode != none) {
+    if (mode == capture) {
 	va_list ap;
 	va_start(ap, fmt);
 	vfprintf(stdout, fmt, ap);
