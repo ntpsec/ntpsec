@@ -111,10 +111,8 @@ mocked.
 
 static intercept_mode mode = none;
 
-/* mock the clock state */
-static l_fp replay_time;
-
 static char linebuf[256];
+static int lineno;
 
 intercept_mode intercept_get_mode(void)
 {
@@ -136,6 +134,8 @@ static void get_operation(const char *expect)
     for (;;)
     {
 	char *in = fgets(linebuf, sizeof(linebuf), stdin);
+
+	++lineno;
 
 	if (in == NULL) {
 	    fputs("ntpd: replay failed, unexpected EOF\n", stderr);
@@ -246,16 +246,6 @@ void intercept_getconfig(const char *configfile)
     }
 }
 
-void intercept_log(const char *fmt, ...)
-{
-    if (mode == capture) {
-	va_list ap;
-	va_start(ap, fmt);
-	vfprintf(stdout, fmt, ap);
-	va_end(ap);
-    }
-}
-
 /*
  * An lfp used as a full date has an an unsigned seconds part.
  * Invert this with atolfp().
@@ -267,15 +257,28 @@ void intercept_get_systime(const char *legend, l_fp *now)
     struct timespec ts;	/* seconds and nanoseconds */
 
     if (mode == replay) {
-	*now = replay_time;
+	int sec, subsec;
+	char expecting[BUFSIZ];
+	get_operation("systime");
+	if (sscanf(linebuf, "systime %s %d.%d", expecting, &sec, &subsec) != 3) {
+	    fprintf(stderr, "ntpd: garbled systime format, line %d\n", lineno);
+	    exit(1);
+	}
+	else if (strcmp(legend, expecting) == 0) {
+	    fprintf(stderr, "ntpd: expected systime %s on line %d\n",
+		    expecting, lineno);
+	    exit(1);
+	}
+	ts.tv_sec = sec;
+	ts.tv_nsec = subsec;
+	normalize_time(ts, 0, now);
     } else {
 	get_ostime(&ts);
 	normalize_time(ts, sys_fuzz > 0.0 ? ntp_random() : 0, now);
+	if (mode == capture)
+	    printf("systime %s %s\n", legend, lfpdump(now));
+
     }
-
-    if (mode != none)
-	printf("systime %s %s\n", legend, lfpdump(now));
-
 }
 
 long intercept_ntp_random(const char *legend)
@@ -407,13 +410,15 @@ int intercept_ntp_adjtime(struct timex *tx)
 
 int intercept_set_tod(struct timespec *tvs)
 {
-    if (mode != none)
-	printf("set_tod %ld %ld\n", (long)tvs->tv_sec, tvs->tv_nsec);
-
-    if (mode == replay)
+    if (mode == replay) {
+	get_operation("set_tod");
+	/* FIXME: more replay logic goes here */
+    }
+    else {
+	if (mode == capture)
+	    printf("set_tod %ld %ld\n", (long)tvs->tv_sec, tvs->tv_nsec);
 	return ntp_set_tod(tvs);
-
-    normalize_time(*tvs, 9, &replay_time);
+    }
     return 0;
 }
 
@@ -521,7 +526,7 @@ void intercept_exit(int sig)
     if (mode != none)
 	printf("finish %d\n", sig);
 
-    exit(sig);
+    exit(0);
 }
 
 /* end */
