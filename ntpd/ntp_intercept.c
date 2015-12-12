@@ -6,9 +6,9 @@ Think of ntpd as a complex finite-state machine for transforming a
 stream of input events to output events.  Events are of the
 following kinds:
 
-1. Startup or termination.
+1. Startup, capuring command-line switches.
 
-2. Configuration read (including option state).
+2. Configuration read.
 
 3. Time reports from reference clocks.
 
@@ -74,10 +74,7 @@ no mismatches.
 
 == Limitations ==
 
-Replay mode has to not require root privileges and not actually change
-the timekeeping state of the machine.  Therefore it mocks the state of the
-system clock with static storage.  Bug: the state of the PLL is not yet
-mocked.
+Reference-clock eventare not yet intercepted.
 
 *****************************************************************************/
 
@@ -334,7 +331,7 @@ bool intercept_drift_read(const char *drift_file, double *drift)
 	 * This could cause an obscure bug in replay if drift 
 	 * ever requires 53 bits of precision as opposed to 24
 	 * (and that's assuming IEEE-754, otherwise things could
-	 * get .
+	 * get hairier).
 	 */ 
 	if (sscanf(linebuf, "drift-read %f'", &df) != 1) {
 	    fprintf(stderr, "ntpd: garbled drift-read format, line %d\n",lineno);
@@ -370,11 +367,25 @@ bool intercept_drift_read(const char *drift_file, double *drift)
 
 void intercept_drift_write(char *driftfile, double drift)
 {
-    if (mode != none)
-	printf("drift-write %.3f\n", drift);
-
-    if (mode != replay)
-    {
+    if (mode == replay) {
+	/*
+	 * We don't want to actually mes with the system's timekeeping in 
+	 * replay mode, so just check that we're writing out the same drift. 
+	 */
+	float df;
+	get_operation("drift-write");
+	/* See the comment of drift-read chwxcking. */ 
+	if (sscanf(linebuf, "drift-write %f'", &df) != 1) {
+	    fprintf(stderr, "ntpd: garbled drift-write format, line %d\n",lineno);
+	    exit(1);
+	}
+	/* beware spurious failures here due to float imprecisiion */ 
+	if (df != drift) {
+	    fprintf(stderr, "ntpd: expected drift %f but saw %f, line %d\n",
+		    drift, df, lineno);
+	    exit(1);
+	}
+    } else {
 	int fd;
 	char tmpfile[PATH_MAX], driftcopy[PATH_MAX];
 	char driftval[32];
@@ -401,18 +412,51 @@ void intercept_drift_write(char *driftfile, double drift)
 	    msyslog(LOG_WARNING,
 		    "Unable to rename temp drift file %s to %s, %m",
 		    tmpfile, driftfile);
+
+	if (mode == capture)
+	    printf("drift-write %.3f\n", drift);
     }
 }
 
 int intercept_adjtime(const struct timeval *ntv, struct timeval *otv)
 /* old-fashioned BSD call for systems with no PLL */
 {
-    printf("adjtime %ld %ld %ld %ld",
-	   (long)ntv->tv_sec, (long)ntv->tv_usec, (long)ntv->tv_sec, (long)ntv->tv_usec);
+    if (mode == replay) {
+	struct timeval rntv, rotv;
+	get_operation("adjtime");
+	/* bletch - likely to foo up on 32-bit machines */
+	if (sscanf(linebuf, "adjtime %ld %ld %ld %ld",
+		   &rntv.tv_sec, &rntv.tv_usec,
+		   &rotv.tv_sec, &rotv.tv_usec) != 4)
+	{
+	    fprintf(stderr, "ntpd: garbled adjtime format, line %d\n", lineno);
+	    exit(1);
+	}
+	if (ntv->tv_sec != rntv.tv_sec
+	    || ntv->tv_usec != rntv.tv_usec
+	    || otv->tv_sec != rotv.tv_sec
+	    || otv->tv_usec != rotv.tv_usec)
+	{
+	    fprintf(stderr, "ntpd: adjtime expected %ld.%ld/%ld.%ld but saw %ld.%ld/%ld.%ld, line %d\n",
+		    (long)rntv.tv_sec,
+		    (long)rntv.tv_usec,
+		    (long)rotv.tv_sec,
+		    (long)rotv.tv_usec,  
+		    (long)ntv->tv_sec,
+		    (long)ntv->tv_usec,
+		    (long)otv->tv_sec,
+		    (long)otv->tv_usec,  
+		    lineno);
+	    exit(1);
+	}
+    } else {
+	if (mode == capture)
+	    printf("adjtime %ld %ld %ld %ld",
+		   (long)ntv->tv_sec, (long)ntv->tv_usec,
+		   (long)otv->tv_sec, (long)otv->tv_usec);
 
-    if (mode != replay)
 	return adjtime(ntv, otv);
-
+    }
     return 0;
 }
 
