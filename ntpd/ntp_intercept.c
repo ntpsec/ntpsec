@@ -283,43 +283,87 @@ void intercept_get_systime(const char *legend, l_fp *now)
 
 long intercept_ntp_random(const char *legend)
 {
-    long rand = ntp_random();
+    long roll;
 
-    /* FIXME: replay logic goes here */
+    if (mode == replay) {
+	char expecting[BUFSIZ];
+	/*
+	 * Presently we're only using this as a check on the call sequence,
+	 * as all the environment-altering functions that call ntp_random()
+	 * are themselves intercepted.
+	 */
+	if (sscanf(linebuf, "random %s %ld", expecting, &roll) != 2) {
+	    fprintf(stderr, "ntpd: garbled random format, line %d\n", lineno);
+	    exit(1);
+	}
+	else if (strcmp(legend, expecting) == 0) {
+	    fprintf(stderr, "ntpd: expected random %s on line %d\n",
+		    expecting, lineno);
+	    exit(1);
+	}
+	return roll;
+    } else {
+	roll = ntp_random();
 
-    if (mode != none)
-	printf("random %s %ld\n", legend, rand);
+	if (mode == capture)
+	    printf("random %s %ld\n", legend, roll);
+    }
 
-    return rand;
+    return roll;
 }
 
 void intercept_timer(void)
 {
-    if (mode != none)
+    if (mode == capture)
 	printf("timer\n");
+    else if (mode == replay)
+	/* probably is not necessary to record this... */
+	get_operation("timer");
     timer();
 }
 
 bool intercept_drift_read(const char *drift_file, double *drift)
 {
-    FILE *fp;
-
-    if (mode != replay) {
-	if ((fp = fopen(drift_file, "r")) == NULL)
+    if (mode == replay) {
+	float df;
+	get_operation("drift_read");
+	if (strstr(linebuf, "false") != NULL)
 	    return false;
+	/*
+	 * Weirdly, sscanf has no format for reading doubles.
+	 * This could cause an obscure bug in replay if drift 
+	 * ever requires 53 bits of precision as opposed to 24
+	 * (and that's assuming IEEE-754, otherwise things could
+	 * get .
+	 */ 
+	if (sscanf(linebuf, "drift-read %f'", &df) != 1) {
+	    fprintf(stderr, "ntpd: garbled drift-read format, line %d\n",lineno);
+	    exit(1);
+	}
+	*drift = df;
+    } else {
+	FILE *fp;
+
+	if ((fp = fopen(drift_file, "r")) == NULL) {
+	    if (mode == capture)
+		printf("drift-read false\n");
+	    return false;
+	}
 
 	if (fscanf(fp, "%lf", drift) != 1) {
 	    msyslog(LOG_ERR,
 		    "format error frequency file %s",
 		    drift_file);
 	    fclose(fp);
+	    if (mode == capture)
+		printf("drift-read false\n");
 	    return false;
 	}
 	fclose(fp);
-    }
 
-    if (mode != none)
-	printf("drift-read %.3f\n", *drift);
+	if (mode == capture)
+	    printf("drift-read %.3f\n", *drift);
+    }
 
     return true;
 }
