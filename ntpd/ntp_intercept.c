@@ -594,16 +594,7 @@ intercept_getauthkeys(
 	getauthkeys(fname);
 
     if (mode == capture) {
-	FILE *fp = fopen(fname, "r");
-	if (fp != NULL) {
-	    int c;
-
-	    fputs("startauthkeys\n", stdout);
-	    while ((c = fgetc(fp)) != EOF)
-		putchar(c);
-	    fclose(fp);
-	    fputs("endauthkeys\n", stdout);
-	}
+	pump(fname, "startauthkeys", "endauthkeys", stdout);
     }
 
     /* FIXME: replay logic goes here */
@@ -611,7 +602,7 @@ intercept_getauthkeys(
 
 void intercept_exit(int sig)
 {
-    if (mode != none)
+    if (mode == capture)
 	printf("finish %d\n", sig);
 
     exit(0);
