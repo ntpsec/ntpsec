@@ -464,35 +464,92 @@ int intercept_adjtime(const struct timeval *ntv, struct timeval *otv)
 int intercept_ntp_adjtime(struct timex *tx)
 /* for newer systems with PLLs */
 {
+#define ADJFMT "%u %ld %ld %ld %ld %i %ld %ld %ld %ld %ld %i %ld %ld %ld %ld"
+#define ADJDUMP(x, buf)			\
+    snprintf(buf, sizeof(buf), ADJFMT,	\
+	     (x)->modes,			\
+	     (x)->offset,			\
+	     (x)->freq,			\
+	     (x)->maxerror,		\
+	     (x)->esterror,		\
+	     (x)->status,			\
+	     (x)->constant,		\
+	     (x)->precision,		\
+	     (x)->tolerance,		\
+	     (x)->ppsfreq,		\
+	     (x)->jitter,			\
+	     (x)->shift,			\
+	     (x)->jitcnt,			\
+	     (x)->calcnt,			\
+	     (x)->errcnt,			\
+	     (x)->stbcnt)
+
+    char txdump[BUFSIZ], rtxdump[BUFSIZ];
+    ADJDUMP(tx, txdump);
     int res = 0;
 
-    /* FIXME: replay logic goes here */
+    if (mode == replay)
+    {
+	struct timex rtx;
+	get_operation("ntp_adjtime");
+	if (sscanf(linebuf, "ntp_adtime " ADJFMT " %d",
+		   &rtx.modes,
+		   &rtx.offset,
+		   &rtx.freq,
+		   &rtx.maxerror,
+		   &rtx.esterror,
+		   &rtx.status,
+		   &rtx.constant,
+		   &rtx.precision,
+		   &rtx.tolerance,
+		   &rtx.ppsfreq,
+		   &rtx.jitter,
+		   &rtx.shift,
+		   &rtx.jitcnt,
+		   &rtx.calcnt,
+		   &rtx.errcnt,
+		   &rtx.stbcnt,
+		   &res) != 17)
+	{
+	    fprintf(stderr, "ntpd: garbled ntp_adtime format, line %d\n",
+		    lineno);
+	    exit(1);
+	}
 
-    if (mode != replay)
+	ADJDUMP(&rtx, rtxdump);
+	if (strcmp(txdump, rtxdump) != 0) {
+	    printf("ntpd: adjtime mismatch at line %d, saw %s\n",
+		   lineno, txdump);
+	    exit(1);
+	}
+    } else {
 	res = ntp_adjtime(tx);
 
-    if (mode != none)
-	printf("ntp_adjtime %u %ld %ld %ld %ld %i %ld %ld %ld %ld %ld %i %ld %ld %ld %ld %d\n",
-	       tx->modes,
-	       tx->offset,
-	       tx->freq,
-	       tx->maxerror,
-	       tx->esterror,
-	       tx->status,
-	       tx->constant,
-	       tx->precision,
-	       tx->tolerance,
-	       tx->ppsfreq,
-	       tx->jitter,
-	       tx->shift,
-	       tx->jitcnt,
-	       tx->calcnt,
-	       tx->errcnt,
-	       tx->stbcnt,
-	       res
-	    );
+	if (mode == capture)
+	    printf("ntp_adjtime " ADJFMT " %d\n",
+		   tx->modes,
+		   tx->offset,
+		   tx->freq,
+		   tx->maxerror,
+		   tx->esterror,
+		   tx->status,
+		   tx->constant,
+		   tx->precision,
+		   tx->tolerance,
+		   tx->ppsfreq,
+		   tx->jitter,
+		   tx->shift,
+		   tx->jitcnt,
+		   tx->calcnt,
+		   tx->errcnt,
+		   tx->stbcnt,
+		   res
+		);
+    }
 
     return res;
+#undef ADJFMT
+#undef ADJDUMP
 }
 #endif
 
@@ -504,7 +561,7 @@ int intercept_set_tod(struct timespec *tvs)
     }
     else {
 	if (mode == capture)
-	    printf("set_tod %ld %ld\n", (long)tvs->tv_sec, tvs->tv_nsec);
+	    printf("set_tod %ld %ld\n", (long)tvs->tv_sec, (long)tvs->tv_nsec);
 	return ntp_set_tod(tvs);
     }
     return 0;
