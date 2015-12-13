@@ -4029,7 +4029,11 @@ measure_tick_fuzz(void)
 	DTOLFP(MINSTEP, &minstep);
 	intercept_get_systime(__func__, &last);
 	for (i = 0; i < MAXLOOPS && changes < MINCHANGES; i++) {
-		intercept_get_systime(__func__, &val);
+		/*
+		 * Not intercepted because it's called a variable
+		 * number of times, which screws up replay.
+		 */
+		get_systime(&val);
 		ldiff = val;
 		L_SUB(&ldiff, &last);
 		last = val;
