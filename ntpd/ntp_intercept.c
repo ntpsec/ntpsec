@@ -110,6 +110,7 @@ static intercept_mode mode = none;
 
 static char linebuf[256];
 static int lineno;
+static double saved_drift;
 
 intercept_mode intercept_get_mode(void)
 {
@@ -140,8 +141,8 @@ static void get_operation(const char *expect)
 	}
 	    
 	if (expect != NULL && strncmp(linebuf, expect, strlen(expect)) != 0) {
-	    fprintf(stderr, "ntpd: replay failed, expected %s but saw %*s\n",
-		    expect, (int)strlen(expect), linebuf);
+	    fprintf(stderr, "ntpd: replay failed on line %d, expected %s but saw %*s",
+		    lineno, expect, (int)strlen(expect), linebuf);
 	    exit(1);
 	}
 	    
@@ -251,8 +252,15 @@ void intercept_getconfig(const char *configfile)
 	/* this can be null if the default config doesn't exist */
 	configfile = getconfig(configfile);
 
-	if (configfile != NULL && mode != none)
+	if (configfile != NULL && mode == capture)
 	    pump(configfile, "startconfig\n", "endconfig\n", stdout);
+	/*
+	 * Has to be done here because intercept_drift_read() is called from
+	 * inside the config parser - otherwise, things get emitted in the
+	 * wrong order.
+	 */
+	if (mode == capture)
+	    printf("drift-read %.3f\n", saved_drift);
     }
 }
 
@@ -337,7 +345,7 @@ bool intercept_drift_read(const char *drift_file, double *drift)
 {
     if (mode == replay) {
 	float df;
-	get_operation("drift_read ");
+	get_operation("drift-read ");
 	if (strstr(linebuf, "false") != NULL)
 	    return false;
 	/*
@@ -372,8 +380,8 @@ bool intercept_drift_read(const char *drift_file, double *drift)
 	}
 	fclose(fp);
 
-	if (mode == capture)
-	    printf("drift-read %.3f\n", *drift);
+	/* capture write has to be done in the config intercwept */
+	saved_drift = *drift;
     }
 
     return true;
