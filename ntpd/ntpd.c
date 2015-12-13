@@ -616,7 +616,7 @@ ntpdmain(
 	isc_error_setunexpected(library_unexpected_error);
 
 	uid = getuid();
-	if (uid && !saveconfigquit && !dumpopts) {
+	if (uid && intercept_get_mode() != replay && !saveconfigquit && !dumpopts) {
 		termlogit = true;
 		msyslog(LOG_ERR,
 			"must be run as root, not uid %ld", (long)uid);
