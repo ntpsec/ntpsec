@@ -274,9 +274,9 @@ void intercept_get_systime(const char *legend, l_fp *now)
 	    fprintf(stderr, "ntpd: garbled systime format, line %d\n", lineno);
 	    exit(1);
 	}
-	else if (strcmp(legend, expecting) == 0) {
-	    fprintf(stderr, "ntpd: expected systime %s on line %d\n",
-		    expecting, lineno);
+	else if (strcmp(legend, expecting) != 0) {
+	    fprintf(stderr, "ntpd: expected systime %s on line %d but saw %s\n",
+		    expecting, lineno, legend);
 	    exit(1);
 	}
 	ts.tv_sec = sec;
@@ -307,9 +307,9 @@ long intercept_ntp_random(const char *legend)
 	    fprintf(stderr, "ntpd: garbled random format, line %d\n", lineno);
 	    exit(1);
 	}
-	else if (strcmp(legend, expecting) == 0) {
-	    fprintf(stderr, "ntpd: expected random %s on line %d\n",
-		    expecting, lineno);
+	else if (strcmp(legend, expecting) != 0) {
+	    fprintf(stderr, "ntpd: expected random %s from line %d but saw %s\n",
+		    expecting, lineno, legend);
 	    exit(1);
 	}
 	return roll;
