@@ -210,36 +210,49 @@ static bool pump(const char *fn, const char *lead, const char *trail, FILE *ofp)
 	}
 }
 
+static void file_replay(const char *configfile, char *delimiter, char *tempfile)
+{
+    FILE *tfp;
+
+    tfp = fopen(tempfile, "w");
+    if (tfp == NULL) {
+	fprintf(stderr,
+		"ntpd: replay failed, can't copy %s\n", configfile);
+	exit(1);
+    }
+    for (;;) {
+	char *nextline = fgets(linebuf, sizeof(linebuf), stdin);
+
+	++lineno;
+	if (nextline == NULL) {
+	    fprintf(stderr,
+		    "ntpd: replay failed, unexpected EOF at line %d\n", lineno);
+	    exit(1);
+	}
+	if (strncmp(linebuf, delimiter, strlen(delimiter)) == 0)
+	    break;
+	fputs(linebuf, tfp);
+    }
+    fclose(tfp);
+}
 
 void intercept_getconfig(const char *configfile)
 {
-    if (mode != replay)
-	/* this can be null if the default config doesn't exist */
-	configfile = getconfig(configfile);
-
-    if (configfile != NULL && mode != none)
-	pump(configfile, "startconfig\n", "endconfig\n", stdout);
-
     if (mode == replay) {
 	char tempfile[PATH_MAX];
-	FILE *tfp;
 
 	stats_control = false;	/* suppress writing stats files */
 	get_operation("startconfig");
 	snprintf(tempfile, sizeof(tempfile), ".fake_ntp_config_%d", getpid());
-	tfp = fopen(tempfile, "w");
-	for (;;) {
-	    char *nextline = fgets(linebuf, sizeof(linebuf), stdin);
-	    if (nextline == NULL) {
-		fputs("ntpd: replay failed, unexpected EOF in config\n", stderr);
-		exit(1);
-	    }
-	    if (strncmp(linebuf, "endconfig", 9) == 0)
-		break;
-	    fputs(linebuf, tfp);
-	}	    
+	file_replay(configfile, "endconfig", tempfile);
 	getconfig(tempfile);
 	unlink(tempfile);
+    } else {
+	/* this can be null if the default config doesn't exist */
+	configfile = getconfig(configfile);
+
+	if (configfile != NULL && mode != none)
+	    pump(configfile, "startconfig\n", "endconfig\n", stdout);
     }
 }
 
@@ -578,21 +591,28 @@ int intercept_set_tod(struct timespec *tvs)
 
 bool
 intercept_leapsec_load_file(
-	const char  * fname,
-	struct stat * sb_old,
+	const char  *leapsecfile,
+	struct stat *sb_old,
 	bool   force,
 	bool   logall)
 {
     bool loaded = true;
 
-    if (mode != replay)
-	loaded = leapsec_load_file(fname, sb_old, force, logall);
+    if (mode == replay) {
+	char tempfile[PATH_MAX];
 
-    if (mode == capture)
-	pump(fname, "startleapsec\n", "endleapsec\n", stdout);
+	get_operation("startleapsec");
+	snprintf(tempfile, sizeof(tempfile), ".fake_leapsec_file_%d", getpid());
+	file_replay(leapsecfile, "endleapsec", tempfile);
+	loaded = leapsec_load_file(tempfile, sb_old, force, logall);
+	unlink(tempfile);
+    } else {
+	loaded = leapsec_load_file(leapsecfile, sb_old, force, logall);
 
-    /* FIXME: replay logic goes here */
-    
+	if (mode == capture)
+	    pump(leapsecfile, "startleapsec\n", "endleapsec\n", stdout);
+    }
+
     return loaded;
 }
 
@@ -670,17 +690,22 @@ void intercept_receive(struct recvbuf *rbufp)
 }
 
 void
-intercept_getauthkeys(
-	const char  * fname)
+intercept_getauthkeys(const char *authkeysfile)
 {
-    if (mode != replay)
-	getauthkeys(fname);
+    if (mode == replay) {
+	char tempfile[PATH_MAX];
 
-    if (mode == capture) {
-	pump(fname, "startauthkeys", "endauthkeys", stdout);
+	get_operation("startauthkeys");
+	snprintf(tempfile, sizeof(tempfile), ".fake_ntp_authkeys_%d", getpid());
+	file_replay(authkeysfile, "endauthkeys", tempfile);
+	getauthkeys(tempfile);
+	unlink(tempfile);
+    } else {
+	getauthkeys(authkeysfile);
+
+	if (mode == capture)
+	    pump(authkeysfile, "startauthkeys\n", "endauthkeys\n", stdout);
     }
-
-    /* FIXME: replay logic goes here */
 }
 
 void intercept_exit(int sig)
