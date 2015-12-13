@@ -256,7 +256,7 @@ void intercept_get_systime(const char *legend, l_fp *now)
     if (mode == replay) {
 	int sec, subsec;
 	char expecting[BUFSIZ];
-	get_operation("systime");
+	get_operation("systime ");
 	if (sscanf(linebuf, "systime %s %d.%d", expecting, &sec, &subsec) != 3) {
 	    fprintf(stderr, "ntpd: garbled systime format, line %d\n", lineno);
 	    exit(1);
@@ -289,6 +289,7 @@ long intercept_ntp_random(const char *legend)
 	 * as all the environment-altering functions that call ntp_random()
 	 * are themselves intercepted.
 	 */
+	get_operation("random ");
 	if (sscanf(linebuf, "random %s %ld", expecting, &roll) != 2) {
 	    fprintf(stderr, "ntpd: garbled random format, line %d\n", lineno);
 	    exit(1);
@@ -323,7 +324,7 @@ bool intercept_drift_read(const char *drift_file, double *drift)
 {
     if (mode == replay) {
 	float df;
-	get_operation("drift_read");
+	get_operation("drift_read ");
 	if (strstr(linebuf, "false") != NULL)
 	    return false;
 	/*
@@ -373,7 +374,7 @@ void intercept_drift_write(char *driftfile, double drift)
 	 * replay mode, so just check that we're writing out the same drift. 
 	 */
 	float df;
-	get_operation("drift-write");
+	get_operation("drift-write ");
 	/* See the comment of drift-read chwxcking. */ 
 	if (sscanf(linebuf, "drift-write %f'", &df) != 1) {
 	    fprintf(stderr, "ntpd: garbled drift-write format, line %d\n",lineno);
@@ -423,7 +424,7 @@ int intercept_adjtime(const struct timeval *ntv, struct timeval *otv)
 {
     if (mode == replay) {
 	struct timeval rntv, rotv;
-	get_operation("adjtime");
+	get_operation("adjtime ");
 	/* bletch - likely to foo up on 32-bit machines */
 	if (sscanf(linebuf, "adjtime %ld %ld %ld %ld",
 		   &rntv.tv_sec, &rntv.tv_usec,
@@ -491,7 +492,7 @@ int intercept_ntp_adjtime(struct timex *tx)
     if (mode == replay)
     {
 	struct timex rtx;
-	get_operation("ntp_adjtime");
+	get_operation("ntp_adjtime ");
 	if (sscanf(linebuf, "ntp_adtime " ADJFMT " %d",
 		   &rtx.modes,
 		   &rtx.offset,
@@ -555,16 +556,24 @@ int intercept_ntp_adjtime(struct timex *tx)
 
 int intercept_set_tod(struct timespec *tvs)
 {
+    char newset[BUFSIZ];
+    snprintf(newset, sizeof(newset),
+	     "set_tod %ld %ld\n", (long)tvs->tv_sec, (long)tvs->tv_nsec);
+    
     if (mode == replay) {
 	get_operation("set_tod");
-	/* FIXME: more replay logic goes here */
+	if (strcmp(linebuf, newset) != 0) {
+	    fprintf(stderr, "ntpd: line %d, set_tod mismatch saw %s\n",
+		    lineno, newset);
+	    exit(1);
+	}
+	return 0;
     }
     else {
 	if (mode == capture)
-	    printf("set_tod %ld %ld\n", (long)tvs->tv_sec, (long)tvs->tv_nsec);
+	    fputs(newset, stdout);
 	return ntp_set_tod(tvs);
     }
-    return 0;
 }
 
 bool
@@ -587,10 +596,18 @@ intercept_leapsec_load_file(
     return loaded;
 }
 
-static void packet_dump(sockaddr_u *dest, struct pkt *pkt, int len)
+static void packet_dump(char *buf, size_t buflen,
+			sockaddr_u *dest, struct pkt *pkt, int len)
 {
+    /*
+     * Order is: cast flags, receipt time, interface name, source
+     * address, packet, length.  Cast flags are only kept because
+     * they change the ntpq display, they have no implications for
+     * the protocol machine.  We don't dump srcadr because only
+     * the parse clock uses that.
+     */
     size_t i;
-    printf("%s %d:%d:%d:%d:%u:%u:%u:%s:%s:%s:%s",
+    snprintf(buf, buflen, "%s %d:%d:%d:%d:%u:%u:%u:%s:%s:%s:%s",
 	   socktoa(dest),
 	   pkt->li_vn_mode, pkt->stratum, pkt->ppoll, pkt->precision,
 	   /* FIXME: might be better to dump these in fixed-point */
@@ -607,40 +624,49 @@ void intercept_sendpkt(const char *legend,
 		  sockaddr_u *dest, struct interface *ep, int ttl,
 		  struct pkt *pkt, int len)
 {
-    if (mode != replay)
+    char pkt_dump[BUFSIZ], newpacket[BUFSIZ];
+    packet_dump(pkt_dump, sizeof(pkt_dump), dest, pkt, len);
+    snprintf(newpacket, sizeof(newpacket), "sendpkt %s %s\n", legend, pkt_dump);
+
+    if (mode == replay)
+    {
+	get_operation("sendpkt ");
+	if (strcmp(linebuf, newpacket) != 0) {
+	    fprintf(stderr, "ntpd: line %d, sendpkt mismatch saw %s\n",
+		    lineno, pkt_dump);
+	    exit(1);
+	}
+    } else {
 	sendpkt(dest, ep, ttl, pkt, len);
 
-    if (mode != none) {
-	printf("sendpkt \"%s\" ", legend);
-	packet_dump(dest, pkt, len);
-	fputs("\n", stdout);
+	if (mode == capture)
+	    fputs(newpacket, stdout);
     }
-
-    /* FIXME: replay logic goes here */
 }
 
 void intercept_receive(struct recvbuf *rbufp)
 {
-    if (mode != none) {
-	/*
-	 * Order is: cast flags, receipt time, interface name, source
-	 * address, packet, length.  Cast flags are only kept because
-	 * they change the ntpq display, they have no implications for
-	 * the protocol machine.  We don't dump srcadr because only
-	 * the parse clock uses that.
-	 */
-	printf("receive %0x %s %s ",
-	       rbufp->cast_flags,
-	       lfpdump(&rbufp->recv_time),
-	       rbufp->dstadr->name);
-	packet_dump(&rbufp->recv_srcadr, &rbufp->recv_pkt, rbufp->recv_length);
-	fputs("\n", stdout);
-    }
+    char pkt_dump[BUFSIZ], newpacket[BUFSIZ];
+    packet_dump(pkt_dump, sizeof(pkt_dump),
+		&rbufp->recv_srcadr,
+		&rbufp->recv_pkt, rbufp->recv_length);
+    snprintf(newpacket, sizeof(newpacket),
+	     "receive %0x %s %s\n",
+	     rbufp->cast_flags, lfpdump(&rbufp->recv_time), pkt_dump);
 
-    if (mode != replay)
+    if (mode == replay) {
+	get_operation("receive ");
+	if (strcmp(linebuf, newpacket) != 0) {
+	    fprintf(stderr, "ntpd: line %d, receive mismatch saw %s\n",
+		    lineno, newpacket);
+	    exit(1);
+	}
+    } else {
+	if (mode == capture)
+	    fputs(newpacket, stdout);
+
 	receive(rbufp);
-
-    /* FIXME: replay logic goes here */
+    }
 }
 
 void
