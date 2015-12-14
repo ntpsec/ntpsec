@@ -473,7 +473,7 @@ int intercept_adjtime(const struct timeval *ntv, struct timeval *otv)
 	}
     } else {
 	if (mode == capture)
-	    printf("adjtime %ld %ld %ld %ld",
+	    printf("adjtime %ld %ld %ld %ld\n",
 		   (long)ntv->tv_sec, (long)ntv->tv_usec,
 		   (long)otv->tv_sec, (long)otv->tv_usec);
 
