@@ -716,7 +716,7 @@ addr_samesubnet(
  * and set the return value
  * see the bind9/getaddresses.c for details
  */
-int
+bool
 is_ip_address(
 	const char *	host,
 	u_short		af,
