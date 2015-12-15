@@ -935,7 +935,10 @@ ntpdmain(
 		msyslog(LOG_INFO, "running as non-root disables dynamic interface tracking");
 	}
 
-	mainloop();
+	if (intercept_get_mode() == replay)
+	    intercept_replay();
+	else
+	    mainloop();
 	return 1;
 }
 
@@ -980,7 +983,7 @@ static void mainloop(void)
 			 * Out here, signals are unblocked.  Call timer routine
 			 * to process expiry.
 			 */
-			intercept_timer();
+			timer();
 			was_alarmed = false;
 			BLOCK_IO_AND_ALARM();
 		}
