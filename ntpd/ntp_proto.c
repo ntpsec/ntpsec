@@ -2240,7 +2240,19 @@ peer_clear(
 	} else if (MODE_PASSIVE == peer->hmode) {
 		peer->nextdate += ntp_minpkt;
 	} else {
-		peer->nextdate += intercept_ntp_random(__func__) % peer->minpoll;
+	    /*
+	     * Randomizing the next poll interval used to be done with
+	     * ntp_random(); this leads to replay-mode problems and is
+	     * unnecessary, any deterministic but uniformly
+	     * distributed function of the peer state would be good
+	     * enough.  Furthermore, changing the function creates no
+	     * interop problems. For security reasons (to prevent
+	     * hypothetical timing attacks) we want at least one input
+	     * to be invisible from outside ntpd; the internal
+	     * association ID fits the bill.
+	     */
+	    int pseudorandom = peer->associd ^ sock_hash(&peer->srcadr);
+	    peer->nextdate += pseudorandom % peer->minpoll;
 	}
 #ifdef ENABLE_AUTOKEY
 	peer->refresh = current_time + (1 << NTP_REFRESH);
