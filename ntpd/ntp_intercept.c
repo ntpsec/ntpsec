@@ -653,10 +653,7 @@ void intercept_sendpkt(const char *legend,
 		  struct pkt *pkt, int len)
 {
     char pkt_dump[BUFSIZ], newpacket[BUFSIZ];
-if (1) {
-	sendpkt(dest, ep, ttl, pkt, len);
-	return;
-};
+
     packet_dump(pkt_dump, sizeof(pkt_dump), dest, pkt, len);
     snprintf(newpacket, sizeof(newpacket), "sendpkt %s %s\n", legend, pkt_dump);
 
@@ -679,10 +676,6 @@ if (1) {
 void intercept_receive(struct recvbuf *rbufp)
 {
     char pkt_dump[BUFSIZ], newpacket[BUFSIZ];
-if (1) {
-	receive(rbufp);
-	return;
-};
 
     packet_dump(pkt_dump, sizeof(pkt_dump),
 		&rbufp->recv_srcadr,
