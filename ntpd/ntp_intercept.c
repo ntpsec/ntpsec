@@ -644,8 +644,12 @@ static void packet_dump(char *buf, size_t buflen,
 	   lfpdump(&pkt->reftime), lfpdump(&pkt->org),
 	   lfpdump(&pkt->rec), lfpdump(&pkt->xmt));
     /* dump MAC as len - LEN_PKT_NOMAC chars in hex */
-    for (i = 0; i < len - LEN_PKT_NOMAC; i++)
-	printf("%02x", pkt->exten[i]);
+    for (i = 0; i < len - LEN_PKT_NOMAC; i++) {
+	if (i == 0)
+	    strlcat(buf, " ", buflen);
+	snprintf(buf + strlen(buf), buflen - strlen(buf),
+		 "%02x", pkt->exten[i]);
+    }
 }
 
 void intercept_sendpkt(const char *legend,
