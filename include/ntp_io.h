@@ -47,7 +47,7 @@ typedef enum {
 extern int	qos;
 SOCKET		move_fd(SOCKET fd);
 bool	get_broadcastclient_flag(void);
-extern int	is_ip_address(const char *, u_short, sockaddr_u *);
+extern bool	is_ip_address(const char *, u_short, sockaddr_u *);
 extern void	sau_from_netaddr(sockaddr_u *, const isc_netaddr_t *);
 extern void	add_nic_rule(nic_rule_match match_type,
 			     const char *if_name, int prefixlen,
