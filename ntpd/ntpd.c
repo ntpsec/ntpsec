@@ -622,17 +622,6 @@ ntpdmain(
 			"must be run as root, not uid %ld", (long)uid);
 		exit(1);
 	}
-	switch (intercept_get_mode())
-	{
-	case none:
-	    break;
-	case replay:
-	    msyslog(LOG_NOTICE, "setting replay mode.");
-	    break;
-	case capture:
-	    msyslog(LOG_NOTICE, "setting capture mode.");
-	    break;
-	}
 
 # ifdef HAVE_WORKING_FORK
 	if (wait_sync <= 0)
