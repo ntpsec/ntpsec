@@ -20,7 +20,6 @@ void intercept_argparse(int *, char ***);
 void intercept_getconfig(const char *);
 void intercept_get_systime(const char *, l_fp *);
 long intercept_ntp_random(const char *);
-void intercept_timer(void);
 void intercept_sendpkt(const char *,
 		       sockaddr_u *, struct interface *, int, struct pkt *, int);
 void intercept_receive(struct recvbuf *);
@@ -34,6 +33,7 @@ int intercept_set_tod(struct timespec *tvs);
 extern bool intercept_leapsec_load_file(const char * fname, struct stat * sb,
 					bool force, bool logall);
 void intercept_getauthkeys(const char *);
+void intercept_replay(void);
 void intercept_exit(const int);
 
 /* end */

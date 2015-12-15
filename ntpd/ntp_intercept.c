@@ -18,21 +18,19 @@ following kinds:
 
 6. Calls to the host's random-number generator.
 
-7. Alarm events.
+7. Calls to adjtime/ntp_adjtime/adjtime to adjust the system clock.
 
-8. Calls to adjtime/ntp_adjtime/adjtime to adjust the system clock.
+8  Calls to ntp_set_tod to set the system clock.
 
-9  Calls to ntp_set_tod to set the system clock.
+9. Read of the system leapsecond file.
 
-10. Read of the system leapsecond file.
+10. Packets incoming from NTP peers and others.
 
-11. Packets incoming from NTP peers and others.
+11. Packets outgoing to NTP peers and others.
 
-12. Packets outgoing to NTP peers and others.
+12. Read of authkey file
 
-13. Read of authkey file
-
-14. Termination.
+13. Termination.
 
 We must support two modes of operation.  In "capture" mode, ntpd
 operates normally, logging all events.  In "replay" mode, ntpd accepts
@@ -331,16 +329,6 @@ long intercept_ntp_random(const char *legend)
     return roll;
 }
 
-void intercept_timer(void)
-{
-    timer();
-    if (mode == capture)
-	printf("timer\n");
-    else if (mode == replay)
-	/* probably is not necessary to record this... */
-	get_operation("timer");
-}
-
 bool intercept_drift_read(const char *drift_file, double *drift)
 {
     if (mode == replay) {
@@ -625,7 +613,7 @@ intercept_leapsec_load_file(
 }
 
 static void packet_dump(char *buf, size_t buflen,
-			sockaddr_u *dest, struct pkt *pkt, int len)
+			sockaddr_u *dest, struct pkt *pkt, size_t len)
 {
     size_t i;
     /*
@@ -648,6 +636,23 @@ static void packet_dump(char *buf, size_t buflen,
 	    snprintf(buf + strlen(buf), buflen - strlen(buf),
 		     "%02x", pkt->exten[i]);
 	}
+}
+
+static void recvbuf_dump(char *buf, size_t buflen, struct recvbuf *rbufp)
+{
+    char pkt_dump[BUFSIZ];
+
+    packet_dump(pkt_dump, sizeof(pkt_dump),
+		&rbufp->recv_srcadr, &rbufp->recv_pkt, rbufp->recv_length);
+    /*
+     * Order is: cast flags, receipt time, source address, packet,
+     * MAC.  Cast flags are only kept because they change the ntpq
+     * display, they have no implications for the protocol machine.
+     * We don't dump srcadr because only the parse clock uses that.
+     */
+    snprintf(buf, buflen,
+	     "receive %0x %s %s\n",
+	     rbufp->cast_flags, lfpdump(&rbufp->recv_time), pkt_dump);
 }
 
 void intercept_sendpkt(const char *legend,
@@ -677,31 +682,62 @@ void intercept_sendpkt(const char *legend,
 
 void intercept_receive(struct recvbuf *rbufp)
 {
-    char pkt_dump[BUFSIZ], newpacket[BUFSIZ];
+    /* never called in replay mode */
+    if (mode == capture) {
+	char pkt_dump[BUFSIZ];
 
-    packet_dump(pkt_dump, sizeof(pkt_dump),
-		&rbufp->recv_srcadr,
-		&rbufp->recv_pkt, rbufp->recv_length);
-    /*
-     * Order is: cast flags, receipt time, source address, packet,
-     * MAC.  Cast flags are only kept because they change the ntpq
-     * display, they have no implications for the protocol machine.
-     * We don't dump srcadr because only the parse clock uses that.
-     */
-    snprintf(newpacket, sizeof(newpacket),
-	     "receive %0x %s %s\n",
-	     rbufp->cast_flags, lfpdump(&rbufp->recv_time), pkt_dump);
-
-    if (mode == replay) {
-	if (strcmp(linebuf, newpacket) != 0) {
-	    fprintf(stderr, "ntpd: line %d, receive mismatch saw %s\n",
-		    lineno, newpacket);
-	    exit(1);
-	}
-    } else if (mode == capture)
-	fputs(newpacket, stdout);
+	recvbuf_dump(pkt_dump, sizeof(pkt_dump), rbufp);
+	fputs(pkt_dump, stdout);
+    }
 
     receive(rbufp);
+}
+
+void intercept_replay(void)
+{
+    printf("# entering replay loop at line %d\n", lineno);
+    for (;;) {
+	get_operation(NULL);
+	if (strncmp(linebuf, "finish", 6) == 0)
+	    break;
+	else if (strncmp(linebuf, "receive ", 8) == 0)
+	{
+	    struct recvbuf rbuf;
+	    char recvbuf[BUFSIZ], srcbuf[BUFSIZ], pktbuf[BUFSIZ], macbuf[BUFSIZ];
+
+	    if (sscanf(linebuf, "receive %x %s %s %s %s",
+		       &rbuf.cast_flags, recvbuf, srcbuf, pktbuf, macbuf) != 5)
+	    {
+		fprintf(stderr, "ntpd: bad receive format at line %d\n", lineno);
+		exit(1);
+	    }
+
+	    atolfp(recvbuf, &rbuf.recv_time);
+	    /* FIXME: parse source address */
+	    /* FIXME: parse packet and MAC */
+
+	    /*
+	     * If the packet doesn't dump identically to how it came in,
+	     * something is wrong with our packet parsing.
+	     */
+	    recvbuf_dump(recvbuf, sizeof(recvbuf), &rbuf);
+	    if (strcmp(linebuf, recvbuf) != 0)
+	    {
+		fprintf(stderr, "ntpd: round-trip failure at line %d\n", lineno);
+		fprintf(stderr, "old = %s\n", linebuf);
+		fprintf(stderr, "new = %s\n", recvbuf);
+		exit(1);
+	    }
+
+	    /* executing the receive call may pop other things off the queue */
+	    receive(&rbuf);
+	}
+	else
+	{
+	    fprintf(stderr, "ntpd: unexpected operation at line %d\n", lineno);
+	    exit(1);
+	}
+    }
 }
 
 void
