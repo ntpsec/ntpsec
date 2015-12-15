@@ -333,12 +333,12 @@ long intercept_ntp_random(const char *legend)
 
 void intercept_timer(void)
 {
+    timer();
     if (mode == capture)
 	printf("timer\n");
     else if (mode == replay)
 	/* probably is not necessary to record this... */
 	get_operation("timer");
-    timer();
 }
 
 bool intercept_drift_read(const char *drift_file, double *drift)
@@ -627,15 +627,11 @@ intercept_leapsec_load_file(
 static void packet_dump(char *buf, size_t buflen,
 			sockaddr_u *dest, struct pkt *pkt, int len)
 {
-    /*
-     * Order is: cast flags, receipt time, interface name, source
-     * address, packet, length.  Cast flags are only kept because
-     * they change the ntpq display, they have no implications for
-     * the protocol machine.  We don't dump srcadr because only
-     * the parse clock uses that.
-     */
     size_t i;
-    snprintf(buf, buflen, "%s %d:%d:%d:%d:%u:%u:%u:%s:%s:%s:%s",
+    /*
+     * Format is three tokens: source address, packet, MAC token. 
+     */
+    snprintf(buf, buflen, "%s %d:%d:%d:%d:%u:%u:%u:%s:%s:%s:%s ",
 	   socktoa(dest),
 	   pkt->li_vn_mode, pkt->stratum, pkt->ppoll, pkt->precision,
 	   /* FIXME: might be better to dump these in fixed-point */
@@ -643,13 +639,15 @@ static void packet_dump(char *buf, size_t buflen,
 	   pkt->refid,
 	   lfpdump(&pkt->reftime), lfpdump(&pkt->org),
 	   lfpdump(&pkt->rec), lfpdump(&pkt->xmt));
-    /* dump MAC as len - LEN_PKT_NOMAC chars in hex */
-    for (i = 0; i < len - LEN_PKT_NOMAC; i++) {
-	if (i == 0)
-	    strlcat(buf, " ", buflen);
-	snprintf(buf + strlen(buf), buflen - strlen(buf),
-		 "%02x", pkt->exten[i]);
-    }
+
+    if (len == LEN_PKT_NOMAC)
+	strlcat(buf, "nomac", buflen);
+    else
+	/* dump MAC as len - LEN_PKT_NOMAC chars in hex */
+	for (i = 0; i < len - LEN_PKT_NOMAC; i++) {
+	    snprintf(buf + strlen(buf), buflen - strlen(buf),
+		     "%02x", pkt->exten[i]);
+	}
 }
 
 void intercept_sendpkt(const char *legend,
@@ -684,23 +682,26 @@ void intercept_receive(struct recvbuf *rbufp)
     packet_dump(pkt_dump, sizeof(pkt_dump),
 		&rbufp->recv_srcadr,
 		&rbufp->recv_pkt, rbufp->recv_length);
+    /*
+     * Order is: cast flags, receipt time, source address, packet,
+     * MAC.  Cast flags are only kept because they change the ntpq
+     * display, they have no implications for the protocol machine.
+     * We don't dump srcadr because only the parse clock uses that.
+     */
     snprintf(newpacket, sizeof(newpacket),
 	     "receive %0x %s %s\n",
 	     rbufp->cast_flags, lfpdump(&rbufp->recv_time), pkt_dump);
 
     if (mode == replay) {
-	get_operation("receive ");
 	if (strcmp(linebuf, newpacket) != 0) {
 	    fprintf(stderr, "ntpd: line %d, receive mismatch saw %s\n",
 		    lineno, newpacket);
 	    exit(1);
 	}
-    } else {
-	if (mode == capture)
-	    fputs(newpacket, stdout);
+    } else if (mode == capture)
+	fputs(newpacket, stdout);
 
-	receive(rbufp);
-    }
+    receive(rbufp);
 }
 
 void
