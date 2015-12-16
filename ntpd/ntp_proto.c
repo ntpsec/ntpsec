@@ -3103,9 +3103,11 @@ peer_xmit(
 #endif	/* !ENABLE_AUTOKEY */
 
 		/*
-		 * Transmit a-priori timestamps
+		 * Transmit a-priori timestamps.  We don't need to log these
+		 * for replay because the timestamp gets stuffed in the packet
+		 * which is what's visible in the replay log.
 		 */
-		intercept_get_systime(__func__, &xmt_tx);
+		get_systime(&xmt_tx);
 		if (peer->flip == 0) {	/* basic mode */
 			peer->aorg = xmt_tx;
 			HTONL_FP(&xmt_tx, &xpkt.xmt);
