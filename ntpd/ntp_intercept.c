@@ -642,6 +642,43 @@ static void packet_dump(char *buf, size_t buflen,
 	}
 }
 
+static void packet_parse(char *pktbuf, char *macbuf, struct pkt *pkt)
+{
+    char refbuf[32], orgbuf[32], recbuf[32], xmtbuf[32];
+    int li_vn_mode = 0, stratum = 0, ppoll = 0, precision = 0;
+
+    if (sscanf(pktbuf, "%d:%d:%d:%d:%u:%u:%u:%s:%s:%s:%s",
+	       &li_vn_mode, &stratum,
+	       &ppoll, &precision,
+	       &pkt->rootdelay, &pkt->rootdisp,
+	       &pkt->refid,
+	       refbuf, orgbuf, recbuf, xmtbuf) != 7)
+    {
+	fprintf(stderr, "ntpd: malformed packet dump at line %d\n",
+		lineno);
+	exit(1);
+    }
+    /* extra transfers required because the struct members are int8_t */
+    pkt->li_vn_mode = li_vn_mode;
+    pkt->stratum = stratum;
+    pkt->ppoll = ppoll;
+    pkt->precision = precision;
+    atolfp(refbuf, &pkt->reftime);
+    atolfp(orgbuf, &pkt->org);
+    atolfp(recbuf, &pkt->rec);
+    atolfp(xmtbuf, &pkt->xmt);
+
+    memset(pkt->exten, '\0', sizeof(pkt->exten));
+    if (strcmp(macbuf, "nomac") != 0) {
+	size_t i;
+	for (i = 0; i < strlen(macbuf)/2; i++) {
+	    int hexval;
+	    sscanf(macbuf + 2*i, "%02x", &hexval);
+	    pkt->exten[i] = hexval & 0xff;
+	}
+    }
+}
+
 static void recvbuf_dump(char *buf, size_t buflen, struct recvbuf *rbufp)
 {
     char pkt_dump[BUFSIZ];
@@ -704,13 +741,30 @@ void intercept_replay(void)
 	get_operation(NULL);
 	if (strncmp(linebuf, "finish", 6) == 0)
 	    break;
+#if 0
+	else if (strncmp(linebuf, "sendpkt ", 9) == 0)
+	{
+	    struct pkt pkt;
+	    char legend[BUFSIZ], recvbuf[BUFSIZ], destbuf[BUFSIZ];
+	    char pktbuf[BUFSIZ], macbuf[BUFSIZ];
+
+	    if (sscanf(linebuf, "sendpkt %x %s %s %s %s",
+		       legend, recvbuf, destbuf, pktbuf, macbuf) != 5)
+	    {
+		fprintf(stderr, "ntpd: bad receive format at line %d\n", lineno);
+		exit(1);
+	    }
+
+	    packet_parse(recvbuf, macbuf, &pkt);
+
+
+	}
+#endif
 	else if (strncmp(linebuf, "receive ", 8) == 0)
 	{
 	    struct recvbuf rbuf;
 	    struct pkt *pkt;
-	    int li_vn_mode = 0, stratum = 0, ppoll = 0, precision = 0;
 	    char recvbuf[BUFSIZ], srcbuf[BUFSIZ], pktbuf[BUFSIZ], macbuf[BUFSIZ];
-	    char refbuf[32], orgbuf[32], recbuf[32], xmtbuf[32];
 
 	    if (sscanf(linebuf, "receive %x %s %s %s %s",
 		       &rbuf.cast_flags, recvbuf, srcbuf, pktbuf, macbuf) != 5)
@@ -726,36 +780,7 @@ void intercept_replay(void)
 	    }
 
 	    pkt = &rbuf.recv_pkt;
-	    if (sscanf(pktbuf, "%d:%d:%d:%d:%u:%u:%u:%s:%s:%s:%s",
-		       &li_vn_mode, &stratum,
-		       &ppoll, &precision,
-		       &pkt->rootdelay, &pkt->rootdisp,
-		       &pkt->refid,
-		       refbuf, orgbuf, recbuf, xmtbuf) != 7)
-	    {
-		fprintf(stderr, "ntpd: malformed packet dump at line %d\n",
-			lineno);
-		exit(1);
-	    }
-	    /* extra transfers required because the struct members are int8_t */
-	    pkt->li_vn_mode = li_vn_mode;
-	    pkt->stratum = stratum;
-	    pkt->ppoll = ppoll;
-	    pkt->precision = precision;
-	    atolfp(refbuf, &pkt->reftime);
-	    atolfp(orgbuf, &pkt->org);
-	    atolfp(recbuf, &pkt->rec);
-	    atolfp(xmtbuf, &pkt->xmt);
-
-	    memset(pkt->exten, '\0', sizeof(pkt->exten));
-	    if (strcmp(macbuf, "nomac") != 0) {
-		size_t i;
-		for (i = 0; i < strlen(macbuf)/2; i++) {
-		    int hexval;
-		    sscanf(macbuf + 2*i, "%02x", &hexval);
-		    pkt->exten[i] = hexval & 0xff;
-		}
-	    }
+	    packet_parse(recvbuf, macbuf, pkt);
 
 	    /*
 	     * If the packet doesn't dump identically to how it came in,
@@ -775,7 +800,13 @@ void intercept_replay(void)
 	}
 	else
 	{
-	    fprintf(stderr, "ntpd: unexpected operation at line %d\n", lineno);
+	    char errbuf[BUFSIZ], *cp;
+	    strlcpy(errbuf, linebuf, sizeof(errbuf));
+	    cp = strchr(errbuf, ' ');
+	    if (cp != NULL)
+		*cp = '\0';
+	    fprintf(stderr, "ntpd: unexpected operation '%s' at line %d\n",
+		    errbuf, lineno);
 	    exit(1);
 	}
     }
