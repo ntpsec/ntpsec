@@ -433,15 +433,20 @@ int intercept_adjtime(const struct timeval *ntv, struct timeval *otv)
 {
     if (mode == replay) {
 	struct timeval rntv, rotv;
+	long nsec, nusec, osec, ousec;
 	get_operation("adjtime ");
 	/* bletch - likely to foo up on 32-bit machines */
 	if (sscanf(linebuf, "adjtime %ld %ld %ld %ld",
-		   &rntv.tv_sec, &rntv.tv_usec,
-		   &rotv.tv_sec, &rotv.tv_usec) != 4)
+		   &nsec, &nusec, &osec, &ousec) != 4)
 	{
 	    fprintf(stderr, "ntpd: garbled adjtime format, line %d\n", lineno);
 	    exit(1);
 	}
+	/* avoid compiler warnings due to time_t having an unexpected length */
+	rntv.tv_sec = nsec;
+	rntv.tv_usec = nusec;
+	rntv.tv_sec = osec;
+	rntv.tv_usec = ousec;
 	if (ntv->tv_sec != rntv.tv_sec
 	    || ntv->tv_usec != rntv.tv_usec
 	    || otv->tv_sec != rotv.tv_sec
@@ -622,7 +627,6 @@ static void packet_dump(char *buf, size_t buflen,
     snprintf(buf, buflen, "%s %d:%d:%d:%d:%u:%u:%u:%s:%s:%s:%s ",
 	   socktoa(dest),
 	   pkt->li_vn_mode, pkt->stratum, pkt->ppoll, pkt->precision,
-	   /* FIXME: might be better to dump these in fixed-point */
 	   pkt->rootdelay, pkt->rootdisp,
 	   pkt->refid,
 	   lfpdump(&pkt->reftime), lfpdump(&pkt->org),
@@ -703,7 +707,10 @@ void intercept_replay(void)
 	else if (strncmp(linebuf, "receive ", 8) == 0)
 	{
 	    struct recvbuf rbuf;
+	    struct pkt *pkt;
+	    int li_vn_mode = 0, stratum = 0, ppoll = 0, precision = 0;
 	    char recvbuf[BUFSIZ], srcbuf[BUFSIZ], pktbuf[BUFSIZ], macbuf[BUFSIZ];
+	    char refbuf[32], orgbuf[32], recbuf[32], xmtbuf[32];
 
 	    if (sscanf(linebuf, "receive %x %s %s %s %s",
 		       &rbuf.cast_flags, recvbuf, srcbuf, pktbuf, macbuf) != 5)
@@ -713,8 +720,42 @@ void intercept_replay(void)
 	    }
 
 	    atolfp(recvbuf, &rbuf.recv_time);
-	    /* FIXME: parse source address */
-	    /* FIXME: parse packet and MAC */
+	    if (!is_ip_address(srcbuf, AF_UNSPEC, &rbuf.recv_srcadr)) {
+		fprintf(stderr, "ntpd: invalid IP address in receive at line %d\n", lineno);
+		exit(1);
+	    }
+
+	    pkt = &rbuf.recv_pkt;
+	    if (sscanf(pktbuf, "%d:%d:%d:%d:%u:%u:%u:%s:%s:%s:%s",
+		       &li_vn_mode, &stratum,
+		       &ppoll, &precision,
+		       &pkt->rootdelay, &pkt->rootdisp,
+		       &pkt->refid,
+		       refbuf, orgbuf, recbuf, xmtbuf) != 7)
+	    {
+		fprintf(stderr, "ntpd: malformed packet dump at line %d\n",
+			lineno);
+		exit(1);
+	    }
+	    /* extra transfers required because the struct members are int8_t */
+	    pkt->li_vn_mode = li_vn_mode;
+	    pkt->stratum = stratum;
+	    pkt->ppoll = ppoll;
+	    pkt->precision = precision;
+	    atolfp(refbuf, &pkt->reftime);
+	    atolfp(orgbuf, &pkt->org);
+	    atolfp(recbuf, &pkt->rec);
+	    atolfp(xmtbuf, &pkt->xmt);
+
+	    memset(pkt->exten, '\0', sizeof(pkt->exten));
+	    if (strcmp(macbuf, "nomac") != 0) {
+		size_t i;
+		for (i = 0; i < strlen(macbuf)/2; i++) {
+		    int hexval;
+		    sscanf(macbuf + 2*i, "%02x", &hexval);
+		    pkt->exten[i] = hexval & 0xff;
+		}
+	    }
 
 	    /*
 	     * If the packet doesn't dump identically to how it came in,
