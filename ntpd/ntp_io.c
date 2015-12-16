@@ -3583,7 +3583,12 @@ io_handler(void)
 	if (nfound > 0) {
 		l_fp ts;
 
-		intercept_get_systime(__func__, &ts);
+		/*
+		 * Doesn't need to be intercepted, because the time
+		 * algorithms don't use it.  It's strictly internal
+		 * to the I/O handling.
+		 */
+		get_systime(&ts);
 
 		input_handler(&ts);
 	} else if (nfound == -1 && errno != EINTR) {
