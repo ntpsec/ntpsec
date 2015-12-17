@@ -636,7 +636,7 @@ static void packet_dump(char *buf, size_t buflen,
 	strlcat(buf, "nomac", buflen);
     else
 	/* dump MAC as len - LEN_PKT_NOMAC chars in hex */
-	for (i = 0; i < len - LEN_PKT_NOMAC; i++) {
+	for (i = 0; i + LEN_PKT_NOMAC < len; i++) {
 	    snprintf(buf + strlen(buf), buflen - strlen(buf),
 		     "%02x", pkt->exten[i]);
 	}
