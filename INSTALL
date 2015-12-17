@@ -158,18 +158,20 @@ of options.
 refclocks are enabled with `--refclock=<n1,n2,n3..> or --refclock=all'
 `waf configure --list' will print a list of available refclocks.
 
-If you want to build with symbols for gdb, use the configuration option
-`--enable-debug-gdb`.
+== Developer options ==
+
+--enable-debug-gdb::
+     Enable GDB debugging symbols.
 
 == Operation Controls ==
 
 The waf builder recognizes the following options to control how it
 operates.
 
-`--help'
+--help::
      Print a summary of the options to `waf configure', and exit.
 
-`--version'
+--version::
      Print the version of waf used to generate the `configure'
      script, and exit.
 
