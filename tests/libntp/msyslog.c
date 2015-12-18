@@ -80,40 +80,6 @@ TEST(msyslog, msnprintfBackslashPercent)
 	TEST_ASSERT_EQUAL_STRING(exp_buf, act_buf);
 }
 
-TEST(msyslog, msnprintfHangingPercent)
-{
-	char exp_buf[64];
-	char act_buf[64];
-	int	exp_cnt;
-	int	act_cnt;
-
-	ZERO(exp_buf);
-	ZERO(act_buf);
-/* warning: format string contains '\0' within the string body [-Wformat] */
-#ifdef __clang__
-#  pragma clang diagnostic push
-#  pragma clang diagnostic ignored "-Wformat"
-#else /* GCC */
-#ifndef __netbsd__
-# pragma GCC diagnostic push
-# pragma GCC diagnostic ignored "-Wformat-contains-nul"
-# pragma GCC diagnostic ignored "-Wformat="
-# pragma GCC diagnostic ignored "-Wformat"
-#endif
-#endif
-	exp_cnt = snprintf(exp_buf, sizeof(exp_buf), "percent then nul term then non-nul %\0oops!");
-	act_cnt = msnprintf(act_buf, sizeof(act_buf), "percent then nul term then non-nul %\0oops!");
-#ifdef __clang__
-#  pragma clang diagnostic pop
-#else
-#pragma GCC diagnostic pop
-#endif
-
-	TEST_ASSERT_EQUAL(exp_cnt, act_cnt);
-	TEST_ASSERT_EQUAL_STRING(exp_buf, act_buf);
-	TEST_ASSERT_EQUAL_STRING("", act_buf + 1 + strlen(act_buf));
-}
-
 #ifndef VSNPRINTF_PERCENT_M
 TEST(msyslog, format_errmsgHangingPercent)
 {
@@ -159,6 +125,52 @@ TEST(msyslog, msnprintfTruncate)
 	TEST_ASSERT_EQUAL_STRING(exp_buf + 3, undist);
 	TEST_ASSERT_EQUAL_STRING(act_buf + 3, undist);
 }
+
+/* NetBSD 7.0, gcc 4.8.4 is OK.
+ * FreeBSD 10.0 uses clang
+ * NetBSD 6.1.5, gcc 4.5.3 doesn't support pragma inside procedures.
+ * NetBSD 6.1.5, gcc 4.5.3 doesn't support push/pop.
+ * FreeBSD 9.3, gcc 4.2.1 doesn't support pragma inside procedures.
+ * FreeBSD 9.3, gcc 4.2.1 doesn't support push/pop.
+ * FreeBSD 9.3, gcc 4.2.1 doesn't support ignoring -Wformat-contains-nul.
+ * Put this test last since we can't undo turning off some warnings. */
+#ifdef __clang__
+#  pragma clang diagnostic push
+#  pragma clang diagnostic ignored "-Wformat"
+#else /* GCC */
+#if ! defined(__NetBSD__) && ! defined(__FreeBSD__)
+# pragma GCC diagnostic push
+#endif
+#ifndef __FreeBSD__
+# pragma GCC diagnostic ignored "-Wformat-contains-nul"
+#endif
+#pragma GCC diagnostic ignored "-Wformat="
+#pragma GCC diagnostic ignored "-Wformat"
+#endif
+TEST(msyslog, msnprintfHangingPercent)
+{
+	char exp_buf[64];
+	char act_buf[64];
+	int	exp_cnt;
+	int	act_cnt;
+
+	ZERO(exp_buf);
+	ZERO(act_buf);
+/* warning: format string contains '\0' within the string body [-Wformat] */
+	exp_cnt = snprintf(exp_buf, sizeof(exp_buf), "percent then nul term then non-nul %\0oops!");
+	act_cnt = msnprintf(act_buf, sizeof(act_buf), "percent then nul term then non-nul %\0oops!");
+
+	TEST_ASSERT_EQUAL(exp_cnt, act_cnt);
+	TEST_ASSERT_EQUAL_STRING(exp_buf, act_buf);
+	TEST_ASSERT_EQUAL_STRING("", act_buf + 1 + strlen(act_buf));
+}
+#ifdef __clang__
+#  pragma clang diagnostic pop
+#else
+#if ! defined(__NetBSD__) && ! defined(__FreeBSD__)
+# pragma GCC diagnostic pop
+#endif
+#endif
 
 TEST_GROUP_RUNNER(msyslog) {
 	RUN_TEST_CASE(msyslog, msnprintf)
