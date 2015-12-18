@@ -94,10 +94,12 @@ TEST(msyslog, msnprintfHangingPercent)
 #  pragma clang diagnostic push
 #  pragma clang diagnostic ignored "-Wformat"
 #else /* GCC */
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wformat-contains-nul"
-#pragma GCC diagnostic ignored "-Wformat="
-#pragma GCC diagnostic ignored "-Wformat"
+#ifndef __netbsd__
+# pragma GCC diagnostic push
+# pragma GCC diagnostic ignored "-Wformat-contains-nul"
+# pragma GCC diagnostic ignored "-Wformat="
+# pragma GCC diagnostic ignored "-Wformat"
+#endif
 #endif
 	exp_cnt = snprintf(exp_buf, sizeof(exp_buf), "percent then nul term then non-nul %\0oops!");
 	act_cnt = msnprintf(act_buf, sizeof(act_buf), "percent then nul term then non-nul %\0oops!");
