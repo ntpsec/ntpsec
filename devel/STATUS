@@ -1,8 +1,12 @@
-Last update, 2015 Dec 01
+Last update, 2015 Dec 17
 
 It builds on the following systems.  In general there should be no warnings,
-but as of the above date, there are a few that haven't been stamped out yet.
+but as of the above date, there is one we can't easily work around.  Some
+compilers will complain about
+  comparison between signed and unsigned integer expressions
+  at ntpd/ntp_io.c:4638
 
+It's known to build cleanly on:
   Fedora 22 and 23 on i686 and x86_64
   Debian wheezy and jessie on amd64
   Ubuntu 14.04.3 LTS and 15.04 on x86_64
@@ -10,23 +14,8 @@ but as of the above date, there are a few that haven't been stamped out yet.
   Debian wheezy on BeagleBone Black ARM v7
 
   FreeBSD 9.3 on i386 and 10.1 on amd64
-
-
-NetBSD needs more work.  The basic ntpd builds and runs.
   NetBSD 6.1.5 and 7.0 on x86_64
-
-Audio doesn't work.  That is used by
-  6     IRIG Audio Decoder
-  7     Radio CHU Audio Demodulator/Decoder
-  util/tg2
-
-Loading libevent2 doesn't work.  That breaks
-  ntpdig and one of the tests
-Both build ok but don't load at run time.
-
-I haven't found libevent2 for NetBSD 6.1 so ntpdig doesn't build.
-
-
+    (see the comment about libevent in ../INSTALL)
 
 
 The basic parts of ntpd run on all of the above systems.
