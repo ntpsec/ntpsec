@@ -182,9 +182,9 @@ void intercept_argparse(int *argc, char ***argv)
 	get_operation("startup ");
 	*argc = 0;
 	for (cp = strdup(linebuf + 9); *cp; cp++) {
-	    if (was_space && !isspace(*cp))
+	    if (was_space && !isspace((int)*cp))
 		(*argv)[(*argc)++] = cp;
-	    was_space = isspace(*cp);
+	    was_space = isspace((int)*cp);
 	    if (was_space)
 		*cp = '\0';
 	}
