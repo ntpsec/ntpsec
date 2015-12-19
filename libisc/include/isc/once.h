@@ -12,7 +12,6 @@
 
 #include <pthread.h>
 
-#include <isc/platform.h>
 #include <isc/result.h>
 
 typedef pthread_once_t isc_once_t;

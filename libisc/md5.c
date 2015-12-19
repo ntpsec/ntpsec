@@ -26,7 +26,6 @@
 
 #include <isc/assertions.h>
 #include <isc/md5.h>
-#include <isc/platform.h>
 #include <isc/types.h>
 #include <isc/util.h>
 

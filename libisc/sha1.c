@@ -25,7 +25,6 @@
 #include <string.h>
 
 #include <isc/assertions.h>
-#include <isc/platform.h>
 #include <isc/sha1.h>
 #include <isc/types.h>
 #include <isc/util.h>

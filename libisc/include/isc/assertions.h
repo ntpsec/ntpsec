@@ -12,7 +12,6 @@
 #define GUARD_ISC_ASSERTIONS_H 1
 
 #include <isc/lang.h>
-#include <isc/platform.h>
 
 ISC_LANG_BEGINDECLS
 
