@@ -15,7 +15,6 @@
  */
 
 #include <isc/lang.h>
-#include <isc/platform.h>
 #include <isc/types.h>
 
 #define ISC_SHA1_DIGESTLENGTH 20U

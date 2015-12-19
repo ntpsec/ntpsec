@@ -67,7 +67,6 @@
 /***
  *** Imports.
  ***/
-#include <isc/platform.h>
 
 /*
  * Because of some sort of problem in the MS header files, this cannot

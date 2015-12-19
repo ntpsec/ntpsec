@@ -18,7 +18,6 @@
 #include <stdio.h>
 
 #include <isc/lang.h>
-#include <isc/platform.h>
 #include <isc/types.h>
 
 #include <ntp_stdlib.h>
