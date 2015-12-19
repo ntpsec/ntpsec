@@ -9,7 +9,6 @@ def build(ctx):
 		"log.c",
 		"md5.c",
 		"netaddr.c",
-		"random.c",
 		"result.c",
 		"sha1.c",
 		"unix/errno2result.c",
