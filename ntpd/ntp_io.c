@@ -3804,11 +3804,12 @@ input_handler(
 	}
 	/* We've done our work */
 #ifdef DEBUG_TIMING
-	intercept_get_systime(__func__, &ts_e);
+	get_systime(&ts_e);
 	/*
 	 * (ts_e - ts) is the amount of time we spent
 	 * processing this gob of file descriptors.  Log
-	 * it.
+	 * it.  Because it's only used for logging, this
+	 * get_systime doesn't have to be captured/replayed.
 	 */
 	L_SUB(&ts_e, &ts);
 	collect_timing(NULL, "input handler", 1, &ts_e);

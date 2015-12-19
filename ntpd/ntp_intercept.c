@@ -741,25 +741,13 @@ void intercept_replay(void)
 	get_operation(NULL);
 	if (strncmp(linebuf, "finish", 6) == 0)
 	    break;
-#if 0
 	else if (strncmp(linebuf, "sendpkt ", 9) == 0)
-	{
-	    struct pkt pkt;
-	    char legend[BUFSIZ], recvbuf[BUFSIZ], destbuf[BUFSIZ];
-	    char pktbuf[BUFSIZ], macbuf[BUFSIZ];
-
-	    if (sscanf(linebuf, "sendpkt %x %s %s %s %s",
-		       legend, recvbuf, destbuf, pktbuf, macbuf) != 5)
-	    {
-		fprintf(stderr, "ntpd: bad receive format at line %d\n", lineno);
-		exit(1);
-	    }
-
-	    packet_parse(recvbuf, macbuf, &pkt);
-
-
-	}
-#endif
+	    /*
+	     * If we get here, this is a sendpkt generated not by the protocol
+	     * machine but by an initial association setup. No way to check it,
+	     * so skip it.
+	     */
+	    continue;
 	else if (strncmp(linebuf, "receive ", 8) == 0)
 	{
 	    struct recvbuf rbuf;
