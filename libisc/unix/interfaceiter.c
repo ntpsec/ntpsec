@@ -21,7 +21,6 @@
 #include <errno.h>
 
 #include <isc/interfaceiter.h>
-#include <isc/log.h>
 #include <isc/magic.h>
 #include <isc/mem.h>
 #include <isc/net.h>
@@ -182,25 +181,28 @@ linux_if_inet6_current(isc_interfaceiter_t *iter) {
 	if (iter->valid != ISC_R_SUCCESS)
 		return (iter->valid);
 	if (iter->proc == NULL) {
-		isc_log_write(isc_lctx, ISC_LOGCATEGORY_GENERAL,
+/*		isc_log_write(isc_lctx, ISC_LOGCATEGORY_GENERAL,
 			      ISC_LOGMODULE_INTERFACE, ISC_LOG_ERROR,
 			      "/proc/net/if_inet6:iter->proc == NULL");
+*/
 		return (ISC_R_FAILURE);
 	}
 
 	res = sscanf(iter->entry, "%32[a-f0-9] %x %x %x %x %16s\n",
 		     address, &ifindex, &prefix, &scope, &flags, name);
 	if (res != 6) {
-		isc_log_write(isc_lctx, ISC_LOGCATEGORY_GENERAL,
+/*		isc_log_write(isc_lctx, ISC_LOGCATEGORY_GENERAL,
 			      ISC_LOGMODULE_INTERFACE, ISC_LOG_ERROR,
 			      "/proc/net/if_inet6:sscanf() -> %d (expected 6)",
 			      res);
+*/
 		return (ISC_R_FAILURE);
 	}
 	if (strlen(address) != 32) {
-		isc_log_write(isc_lctx, ISC_LOGCATEGORY_GENERAL,
+/*		isc_log_write(isc_lctx, ISC_LOGCATEGORY_GENERAL,
 			      ISC_LOGMODULE_INTERFACE, ISC_LOG_ERROR,
 			      "/proc/net/if_inet6:strlen(%s) != 32", address);
+*/
 		return (ISC_R_FAILURE);
 	}
 	/*

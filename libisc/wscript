@@ -6,15 +6,13 @@ def build(ctx):
 		"backtrace-emptytbl.c",
 		"backtrace.c",
 		"error.c",
-		"log.c",
 		"md5.c",
 		"netaddr.c",
 		"result.c",
 		"sha1.c",
 		"unix/errno2result.c",
 		"unix/interfaceiter.c",
-		"unix/net.c",
-		"unix/time.c"
+		"unix/net.c"
 	]
 
 	ctx(
