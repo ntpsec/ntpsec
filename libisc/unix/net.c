@@ -7,6 +7,7 @@
 
 #include <config.h>
 
+#include <stdio.h>
 #include <sys/types.h>
 
 #if defined(HAVE_SYS_SYSCTL_H)
@@ -17,7 +18,6 @@
 #include <unistd.h>
 #include <string.h>
 
-#include <isc/log.h>
 #include <isc/net.h>
 #include <isc/once.h>
 #include <isc/util.h>
@@ -133,19 +133,20 @@ try_proto(int domain) {
 		len = sizeof(sin6);
 		if (getsockname(s, (struct sockaddr *)&sin6, &len) < 0)
 		{
-			isc_log_write(isc_lctx, ISC_LOGCATEGORY_GENERAL,
+/*			isc_log_write(isc_lctx, ISC_LOGCATEGORY_GENERAL,
 				      ISC_LOGMODULE_SOCKET, ISC_LOG_ERROR,
 				      "retrieving the address of an IPv6 "
 				      "socket from the kernel failed.");
 			isc_log_write(isc_lctx, ISC_LOGCATEGORY_GENERAL,
 				      ISC_LOGMODULE_SOCKET, ISC_LOG_ERROR,
 				      "IPv6 is not supported.");
+*/
 			result = ISC_R_NOTFOUND;
 		} else {
 			if (len == sizeof(struct sockaddr_in6))
 				result = ISC_R_SUCCESS;
 			else {
-				isc_log_write(isc_lctx,
+/*				isc_log_write(isc_lctx,
 					      ISC_LOGCATEGORY_GENERAL,
 					      ISC_LOGMODULE_SOCKET,
 					      ISC_LOG_ERROR,
@@ -156,6 +157,7 @@ try_proto(int domain) {
 					      ISC_LOGMODULE_SOCKET,
 					      ISC_LOG_ERROR,
 					      "IPv6 is not supported.");
+*/
 				result = ISC_R_NOTFOUND;
 			}
 		}
