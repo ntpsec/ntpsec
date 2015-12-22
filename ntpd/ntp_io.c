@@ -3396,7 +3396,7 @@ fetch_timestamp(
 #endif  /* USE_SCM_TIMESTAMP */
 			}
 			/*
-			 * RNG call does notb have toi be recorded for replay
+			 * RNG call does not have to be recorded for replay
 			 * because the fuzzed timestamp is recorded.
 			 */
 			fuzz = ntp_random() * 2. / FRAC * sys_fuzz;
