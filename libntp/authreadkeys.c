@@ -79,6 +79,7 @@ authreadkeys(
 	uint8_t	keystr[32];		/* Bug 2537 */
 	size_t	len;
 	size_t	j;
+	int	keys = 0;
 
 	/*
 	 * Open file.  Complain and return if it can't be opened.
@@ -90,6 +91,7 @@ authreadkeys(
 		return false;
 	}
 	INIT_SSL();
+msyslog(LOG_ERR, "authreadkeys: reading %s", file);
 
 	/*
 	 * Remove all existing keys
@@ -177,6 +179,7 @@ authreadkeys(
 		len = strlen(token);
 		if (len <= 20) {	/* Bug 2537 */
 			MD5auth_setkey(keyno, keytype, (uint8_t *)token, len);
+			keys++;
 		} else {
 			char	hex[] = "0123456789abcdef";
 			uint8_t	temp;
@@ -200,8 +203,10 @@ authreadkeys(
 				continue;
 			}
 			MD5auth_setkey(keyno, keytype, keystr, jlim / 2);
+			keys++;
 		}
 	}
 	fclose(fp);
+msyslog(LOG_ERR, "authreadkeys: added %d keys", keys);
 	return true;
 }
