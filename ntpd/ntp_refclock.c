@@ -65,7 +65,7 @@ bool	cal_enable;		/* enable refclock calibrate */
  * Forward declarations
  */
 static int refclock_cmpl_fp (const void *, const void *);
-static int refclock_sample (struct peer *);
+static int refclock_sample (struct refclockproc *);
 static bool refclock_ioctl(int, u_int);
 
 
@@ -443,14 +443,12 @@ refclock_process(
  */
 static int
 refclock_sample(
-	struct peer *peer               /* peer structure pointer */
+	struct refclockproc *pp		/* refclock structure pointer */
 	)
 {
-	struct  refclockproc *pp = peer->procptr;
 	size_t	i, j, k, m, n;
 	double	off[MAXSTAGE];
-	double	offset, std_dev;
-	double	mean_all, std_dev_all;
+	double	offset;
 
 	/*
 	 * Copy the raw offsets and sort into ascending order. Don't do
@@ -494,26 +492,6 @@ refclock_sample(
 	}
 	pp->offset /= m;
 	pp->jitter = max(SQRT(pp->jitter / m), LOGTOD(sys_precision));
-
-	std_dev = 0;
-	for (k = i; k < j; k++)
-	    std_dev += SQUARE(off[k] - pp->offset);
-	std_dev = SQRT(std_dev / m);
-
-	mean_all = 0;
-	for (k = 0; k < n; k++)
-	    mean_all += off[k];
-	mean_all /= n;
-	std_dev_all = 0;
-	for (k = 0; k < n; k++)
-	    std_dev_all += SQUARE(off[k] - mean_all);
-	std_dev_all = SQRT(std_dev_all / n);
-
-	record_ref_stats(&peer->srcadr, n, i, j-1,
-	    off[0], off[i], pp->offset, off[j-1], off[n-1],
-	    pp->jitter, std_dev, std_dev_all);
-
-
 #ifdef DEBUG
 	if (debug)
 		printf(
@@ -567,7 +545,7 @@ refclock_receive(
 	peer->aorg = pp->lastrec;
 	peer->rootdisp = pp->disp;
 	get_systime(&peer->dst);
-	if (!refclock_sample(peer))
+	if (!refclock_sample(pp))
 		return;
 
 	clock_filter(peer, pp->offset, 0., pp->jitter);
