@@ -146,8 +146,11 @@ def cmd_configure(ctx):
 	# int32_t and uint32_t probes aren't really needed, POSIX guarantees
 	# them.  But int64_t and uint64_t are not guaranteed to exist on 32-bit
 	# machines.
-	types = ["int32_t", "uint32_t", "int64_t", "uint64_t",
-		 "uint_t", "size_t", "wint_t", "pid_t", "intptr_t", "uintptr_t"]
+#HGM	types = ["int32_t", "uint32_t", "int64_t", "uint64_t",
+#HGM		 "uint_t", "size_t", "wint_t", "pid_t", "intptr_t", "uintptr_t"]
+	# Used by timevalops and timespecops in tests/libntp/
+	# May go away when that is cleaned up.
+	types = ["uint64_t"]
 
 	for inttype in sorted(types):
 		ctx.check_type(inttype, ["stdint.h", "sys/types.h"])
@@ -174,14 +177,15 @@ def cmd_configure(ctx):
 	for (f, s, h) in structure_fields:
 		ctx.check_structfield(f, s, h)
 
+	# mostly used by timetoa.h and timespecops.h
 	sizeofs = [
 		("time.h",		"time_t"),
 		(None,			"int"),
-		(None,			"short"),
+#HGM		(None,                  "short"),
 		(None,			"long"),
 		(None,			"long long"),
-		("pthread.h",	"pthread_t"),
-		(None,			"signed char"),
+#HGM		("pthread.h",   "pthread_t"),
+#HGM		(None,                  "signed char"),
 	]
 
 	for header, sizeof in sorted(sizeofs):
@@ -194,7 +198,7 @@ def cmd_configure(ctx):
 	ctx.define("GETSOCKNAME_SOCKLEN_TYPE", "socklen_t", quote=False)
 	ctx.define("DFLT_RLIMIT_STACK", 50)
 	ctx.define("DFLT_RLIMIT_MEMLOCK", 32)
-	ctx.define("POSIX_SHELL", "/bin/sh")
+#HGM	ctx.define("POSIX_SHELL", "/bin/sh")
 
 	ctx.define("OPENSSL_VERSION_TEXT", "#XXX: Fixme")
 
@@ -226,14 +230,14 @@ def cmd_configure(ctx):
 	# we're likely to duplicate them.
 	functions = (
 		('adjtimex', ["sys/time.h", "sys/timex.h"]),
-		('arc4random', ["stdlib.h"]),
-		('arc4random_buf', ["stdlib.h"]),
+#HGM		('arc4random', ["stdlib.h"]),
+#HGM		('arc4random_buf', ["stdlib.h"]),
 		('closefrom', ["stdlib.h"]),
 		('clock_gettime', ["time.h"], "RT"),
 		('clock_settime', ["time.h"], "RT"),
 		('EVP_MD_do_all_sorted', ["openssl/evp.h"], "CRYPTO"),
 		('getclock', ["sys/timers.h"]),
-		('getdtablesize', ["unistd.h"]),		# SVr4, 4.2BSD
+#HGM		('getdtablesize', ["unistd.h"]),                # SVr4, 4.2BSD
 		('getpassphrase', ["stdlib.h"]),		# Sun systems
 		('MD5Init', ["md5.h"], "CRYPTO"),
 		('ntp_adjtime', ["sys/time.h", "sys/timex.h"]),		# BSD
@@ -243,10 +247,10 @@ def cmd_configure(ctx):
 		('res_init', ["resolv.h"]),
 		("rtprio", ["sys/rtprio.h"]),		# Sun/BSD
 		('sched_setscheduler', ["sched.h"]),
-		('settimeofday', ["sys/time.h"], "RT"),	# BSD - remove?
+		('settimeofday', ["sys/time.h"], "RT"),	# BSD
 		('strlcpy', ["string.h"]),
 		('strlcat', ["string.h"]),
-		('sysconf', ["unistd.h"]),
+#HGM		('sysconf', ["unistd.h"]),
 		('timegm', ["time.h"]),
 		('timer_create', ["time.h"]),
 		('updwtmpx', ["utmpx.h"]),		# glibc
@@ -260,6 +264,7 @@ def cmd_configure(ctx):
 							  prerequisites=ft[1],
 							  use=ft[2])
 
+	# Nobody uses the symbol, but this seems like a good sanity check.
 	ctx.check_cc(header_name="stdbool.h", mandatory=True)
 
 	# This is a list of every optional include header in the
@@ -274,13 +279,13 @@ def cmd_configure(ctx):
 	# Some of these are cruft from ancient big-iron systems and should
 	# be removed.
 	optional_headers = (
-		"alloca.h",
-		"arpa/nameser.h",
+#HGM		"alloca.h",
+#HGM		"arpa/nameser.h",
 		"dns_sd.h",
 		"histedit.h",
 		"ieeefp.h",
 		("ifaddrs.h", ["sys/types.h"]),
-		"libintl.h",
+#HGM		"libintl.h",
 		"libscf.h",
 		"linux/if_addr.h",
 		"linux/rtnetlink.h",
@@ -301,11 +306,11 @@ def cmd_configure(ctx):
 		"sys/ioctl.h",
 		"sys/modem.h",
 		"sys/prctl.h",
-		"sys/procset.h",
+#HGM		"sys/procset.h",
 		"sys/sockio.h",
 		"sys/soundcard.h",
 		("sys/sysctl.h", ["sys/types.h"]),
-		"sys/systune.h",
+#HGM		"sys/systune.h",
 		("timepps.h", ["inttypes.h"]),
 		("sys/timepps.h", ["inttypes.h", "sys/time.h"]),
 	)
@@ -322,9 +327,10 @@ def cmd_configure(ctx):
 			print "Compilation check failed but include exists %s" % hdr
 
 	if ctx.get_define("HAVE_TIMEPPS_H") or ctx.get_define("HAVE_SYS_TIMEPPS_H"):
-		from pylib.check_timepps import check_timepps
-		check_timepps(ctx)
-
+#HGM		from pylib.check_timepps import check_timepps
+#HGM		check_timepps(ctx)
+#HGM  Can delete pylib/check_timepps.py
+		ctx.define("HAVE_PPSAPI", 1)
 
 	# Check for libevent and whether it is working.
 	from pylib.check_libevent2 import check_libevent2
@@ -347,10 +353,10 @@ def cmd_configure(ctx):
 	from check_sockaddr import check_sockaddr
 	check_sockaddr(ctx)
 
-	from check_posix_thread_version import check_posix_thread_version
+#HGM	from check_posix_thread_version import check_posix_thread_version
 
-	check_posix_thread_version(ctx)
-	ctx.define('HAVE_PTHREADS', ctx.env.POSIX_THREAD_VERISON)
+#HGM	check_posix_thread_version(ctx)
+#HGM	ctx.define('HAVE_PTHREADS', ctx.env.POSIX_THREAD_VERISON)
 
 
 	if ctx.options.refclocks:
