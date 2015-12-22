@@ -123,6 +123,35 @@ synchronization without needing the Internet at all.
   Record a timestamp once for each second if 1. Useful for constructing
   Allan deviation plots.
 
+== Clockstats  ==
+
+If clockstats is enabled, the driver will log a few counters.  Examples:
+
+----------------------------------------------------------------------------
+57378 3313.351 127.127.22.0 423681 64 0 0 0
+57378 3377.352 127.127.22.0 423745 64 0 0 0
+57378 3441.352 127.127.22.0 423809 64 0 0 0
+57378 3505.351 127.127.22.0 423873 64 0 0 0
+----------------------------------------------------------------------------
+
+.Clockstats
+[cols="10%,20%,70%",options="header"]
+|=============================================================================
+|Column|Sample          |Meaning
+|1     |57378           |MJD
+|2     |3505.351        |Time of day in seconds
+|3     |127.127.22.0    |IP Address from server config line
+|4     |423873          |Total number of PPS pulses the kernel has seen
+|5     |64              |Number of PPS pulses the driver processed
+                         This should be the difference between col 4 and
+                         col 4 from the previous line
+|6     |0               |ntpd doesn't know the time yet
+|7     |0               |Error from Kernel
+|8     |0               |Number of times there was no pulse ready
+|=============================================================================
+
+
+
 == Additional Information ==
 
 link:refclock.html[Reference Clock Drivers]
@@ -142,3 +171,4 @@ David L. Mills <mills@udel.edu>
 '''''
 
 include::includes/footer.txt[]
+
