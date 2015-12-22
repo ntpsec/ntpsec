@@ -65,7 +65,7 @@ bool	cal_enable;		/* enable refclock calibrate */
  * Forward declarations
  */
 static int refclock_cmpl_fp (const void *, const void *);
-static int refclock_sample (struct refclockproc *);
+static int refclock_sample (struct peer *);
 static bool refclock_ioctl(int, u_int);
 
 
@@ -443,12 +443,14 @@ refclock_process(
  */
 static int
 refclock_sample(
-	struct refclockproc *pp		/* refclock structure pointer */
+	struct peer *peer               /* peer structure pointer */
 	)
 {
+	struct  refclockproc *pp = peer->procptr;
 	size_t	i, j, k, m, n;
 	double	off[MAXSTAGE];
-	double	offset;
+	double	offset, std_dev;
+	double	mean_all, std_dev_all;
 
 	/*
 	 * Copy the raw offsets and sort into ascending order. Don't do
@@ -492,6 +494,26 @@ refclock_sample(
 	}
 	pp->offset /= m;
 	pp->jitter = max(SQRT(pp->jitter / m), LOGTOD(sys_precision));
+
+	std_dev = 0;
+	for (k = i; k < j; k++)
+	    std_dev += SQUARE(off[k] - pp->offset);
+	std_dev = SQRT(std_dev / m);
+
+	mean_all = 0;
+	for (k = 0; k < n; k++)
+	    mean_all += off[k];
+	mean_all /= n;
+	std_dev_all = 0;
+	for (k = 0; k < n; k++)
+	    std_dev_all += SQUARE(off[k] - mean_all);
+	std_dev_all = SQRT(std_dev_all / n);
+
+	record_ref_stats(&peer->srcadr, n, i, j-1,
+	    off[0], off[i], pp->offset, off[j-1], off[n-1],
+	    pp->jitter, std_dev, std_dev_all);
+
+
 #ifdef DEBUG
 	if (debug)
 		printf(
@@ -545,7 +567,7 @@ refclock_receive(
 	peer->aorg = pp->lastrec;
 	peer->rootdisp = pp->disp;
 	get_systime(&peer->dst);
-	if (!refclock_sample(pp))
+	if (!refclock_sample(peer))
 		return;
 
 	clock_filter(peer, pp->offset, 0., pp->jitter);
@@ -1169,7 +1191,7 @@ refclock_params(
  * timestamp from the kernel and saves the sign-extended fraction in
  * a circular buffer for processing at the next poll event.
  */
-bool
+pps_status
 refclock_pps(
 	struct peer *peer,		/* peer structure pointer */
 	struct refclock_atom *ap,	/* atom structure pointer */
@@ -1190,11 +1212,11 @@ refclock_pps(
 	 */ 
 	pp = peer->procptr;
 	if (ap->handle == 0)
-		return false;
+		return PPS_SETUP;
 
 	if (ap->pps_params.mode == 0 && sys_leap != LEAP_NOTINSYNC) {
 		if (refclock_params(pp->sloppyclockflag, ap) < 1)
-			return false;
+			return PPS_SETUP;
 	}
 	timeout.tv_sec = 0;
 	timeout.tv_nsec = 0;
@@ -1202,18 +1224,26 @@ refclock_pps(
 	if (time_pps_fetch(ap->handle, PPS_TSFMT_TSPEC, &pps_info,
 	    &timeout) < 0) {
 		refclock_report(peer, CEVNT_FAULT);
-		return false;
+		return PPS_KERNEL;
 	}
 	timeout = ap->ts;
-	if (ap->pps_params.mode & PPS_CAPTUREASSERT)
+	if (ap->pps_params.mode & PPS_CAPTUREASSERT) {
 		ap->ts = pps_info.assert_timestamp;
-	else if (ap->pps_params.mode & PPS_CAPTURECLEAR)
+		ap->sequence = pps_info.assert_sequence;
+	}
+	else if (ap->pps_params.mode & PPS_CAPTURECLEAR) {
 		ap->ts = pps_info.clear_timestamp;
+		ap->sequence = pps_info.clear_sequence;
+	}
 	else
-		return false;
+		return PPS_NREADY;
 
+	/* Check for duplicates.
+	 * Sequence number might not be implemented.
+	 * saved (above) for debugging.
+	 */
 	if (0 == memcmp(&timeout, &ap->ts, sizeof(timeout)))
-		return false;
+		return PPS_NREADY;
 
 	/*
 	 * Convert to signed fraction offset and stuff in median filter.
@@ -1229,7 +1259,7 @@ refclock_pps(
 		printf("refclock_pps: %lu %f %f\n", current_time,
 		    dtemp, pp->fudgetime1);
 #endif
-	return true;
+	return PPS_OK;
 }
 #endif /* HAVE_PPSAPI */
 #endif /* REFCLOCK */

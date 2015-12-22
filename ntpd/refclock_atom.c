@@ -84,6 +84,10 @@
 struct ppsunit {
 	struct refclock_atom atom; /* atom structure pointer */
 	int	fddev;		/* file descriptor */
+	int	pcount;		/* PPS samples added to FIFO */
+	int	scount;		/* PPS not setup */
+	int	kcount;		/* PPS error from kernel */
+	int	rcount;		/* PPS not ready */
 };
 
 /*
@@ -183,16 +187,31 @@ atom_timer(
 	struct peer *peer	/* peer structure pointer */
 	)
 {
-	struct ppsunit *up;
-	struct refclockproc *pp;
-	char	tbuf[80];
+	struct	ppsunit *up;
+	struct	refclockproc *pp;
+	pps_status rc;
 
 	UNUSED_ARG(unit);
 
 	pp = peer->procptr;
 	up = pp->unitptr;
-	if (refclock_pps(peer, &up->atom, pp->sloppyclockflag) <= 0)
-		return;
+	rc = refclock_pps(peer, &up->atom, pp->sloppyclockflag);
+        switch (rc) {
+            case PPS_OK:
+                up->pcount++;
+                break;
+            default:
+            case PPS_SETUP:
+                up->scount++;
+                break;
+            case PPS_KERNEL:
+                up->kcount++;
+                break;
+            case PPS_NREADY:
+                up->rcount++;
+                break;
+        }
+        if (rc != PPS_OK) return;
 
 	peer->flags |= FLAG_PPS;
 
@@ -201,9 +220,8 @@ atom_timer(
 	 * That's so we can make awesome Allan deviation plots.
 	 */
 	if (pp->sloppyclockflag & CLK_FLAG4) {
-		snprintf(tbuf, sizeof(tbuf), "%.9f",
-			 pp->filter[pp->coderecv]);
-		record_clock_stats(&peer->srcadr, tbuf);
+		mprintf_clock_stats(&peer->srcadr, "%.9f",
+			pp->filter[pp->coderecv]);
 	}
 }
 
@@ -217,19 +235,32 @@ atom_poll(
 	struct peer *peer	/* peer structure pointer */
 	)
 {
+	struct ppsunit *up;
 	struct refclockproc *pp;
 
 	UNUSED_ARG(unit);
+
+	pp = peer->procptr;
+	up = (struct ppsunit *)pp->unitptr;
 
 	/*
 	 * Don't wiggle the clock until some other driver has numbered
 	 * the seconds.
 	 */
-	if (sys_leap == LEAP_NOTINSYNC)
+	if (sys_leap == LEAP_NOTINSYNC) {
+		pp->codeproc = pp->coderecv;  // xxx ??
+		up->pcount = up->scount = up->kcount = up->rcount = 0;
 		return;
+        }
 
-	pp = peer->procptr;
 	pp->polls++;
+
+	mprintf_clock_stats(&peer->srcadr,
+	    "%ld %d %d %d %d",
+	    up->atom.sequence,
+	    up->pcount, up->scount, up->kcount, up->rcount);
+	up->pcount = up->scount = up->kcount = up->rcount = 0;
+
 	if (pp->codeproc == pp->coderecv) {
 		peer->flags &= ~FLAG_PPS;
 		refclock_report(peer, CEVNT_TIMEOUT);
