@@ -51,6 +51,7 @@ The various GPS sentences that this driver recognises look like this:
 
 //FIXME: 'GPS sync status' in table not indented properly 
 .NMEA data items
+[cols="15%,85%",options="header"]
 [options="header"]
 |=============================================================================
 |Symbol  | Meaning and Format
