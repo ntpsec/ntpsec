@@ -645,17 +645,18 @@ static void packet_dump(char *buf, size_t buflen,
 static void packet_parse(char *pktbuf, char *macbuf, struct pkt *pkt)
 {
     char refbuf[32], orgbuf[32], recbuf[32], xmtbuf[32];
-    int li_vn_mode = 0, stratum = 0, ppoll = 0, precision = 0;
+    int fc, li_vn_mode = 0, stratum = 0, ppoll = 0, precision = 0;
 
-    if (sscanf(pktbuf, "%d:%d:%d:%d:%u:%u:%u:%s:%s:%s:%s",
-	       &li_vn_mode, &stratum,
-	       &ppoll, &precision,
-	       &pkt->rootdelay, &pkt->rootdisp,
-	       &pkt->refid,
-	       refbuf, orgbuf, recbuf, xmtbuf) != 7)
+    printf("Foo! %s\n", pktbuf);
+    if ((fc = sscanf(pktbuf, "%d:%d:%d:%d:%u:%u:%u:%[^:]:%[^:]:%[^:]:%[^:]",
+		     &li_vn_mode, &stratum,
+		     &ppoll, &precision,
+		     &pkt->rootdelay, &pkt->rootdisp,
+		     &pkt->refid,
+		     refbuf, orgbuf, recbuf, xmtbuf)) != 11)
     {
-	fprintf(stderr, "ntpd: malformed packet dump at line %d\n",
-		lineno);
+	fprintf(stderr, "ntpd: %d fields in malformed packet dump at line %d\n",
+		fc, lineno);
 	exit(1);
     }
     /* extra transfers required because the struct members are int8_t */
@@ -731,6 +732,11 @@ void intercept_receive(struct recvbuf *rbufp)
 	fputs(pkt_dump, stdout);
     }
 
+    /*
+     * Processing has to come after the dump so that if a send or time adjustment
+     * is called during replay the corresponding event in the log will be found
+     * where it should be after the receive.
+     */
     receive(rbufp);
 }
 
@@ -739,9 +745,9 @@ void intercept_replay(void)
     printf("# entering replay loop at line %d\n", lineno);
     for (;;) {
 	get_operation(NULL);
-	if (strncmp(linebuf, "finish", 6) == 0)
+	if (strncmp(linebuf, "finish", 7) == 0)
 	    break;
-	else if (strncmp(linebuf, "sendpkt ", 9) == 0)
+	else if (strncmp(linebuf, "sendpkt ", 8) == 0)
 	    /*
 	     * If we get here, this is a sendpkt generated not by the protocol
 	     * machine but by an initial association setup. No way to check it,
@@ -768,7 +774,7 @@ void intercept_replay(void)
 	    }
 
 	    pkt = &rbuf.recv_pkt;
-	    packet_parse(recvbuf, macbuf, pkt);
+	    packet_parse(pktbuf, macbuf, pkt);
 
 	    /*
 	     * If the packet doesn't dump identically to how it came in,

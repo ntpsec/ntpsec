@@ -331,10 +331,7 @@ timer(void)
 		sys_rootdisp = 0;
 	}
 
-	/*
-	 * Recorded and played back in case the leap-second check fires.
-	 */
-	intercept_get_systime(__func__, &now);
+	get_systime(&now);
 	time(&tnow);
 
 	/*
