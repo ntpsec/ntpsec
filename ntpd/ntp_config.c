@@ -276,6 +276,7 @@ static void config_rlimit(config_tree *);
 static void config_system_opts(config_tree *);
 static void config_tinker(config_tree *);
 static void config_tos(config_tree *);
+static void config_logfile(config_tree *);
 static void config_vars(config_tree *);
 
 #ifdef SIM
@@ -3422,6 +3423,33 @@ free_config_fudge(
 #endif	/* FREE_CFG_T */
 
 
+/* Clone of config_vars that only does log file. */
+static void
+config_logfile(
+	config_tree *ptree
+	)
+{
+	attr_val *curr_var;
+
+	curr_var = HEAD_PFIFO(ptree->vars);
+	for (; curr_var != NULL; curr_var = curr_var->link) {
+		/* Determine which variable to set and set it */
+		switch (curr_var->attr) {
+
+		case T_Logfile:
+			if (-1 == change_logfile(curr_var->value.s, true))
+				msyslog(LOG_ERR,
+					"Cannot open logfile %s: %m",
+					curr_var->value.s);
+			break;
+
+		default:
+			break;
+		}
+	}
+}
+
+
 static void
 config_vars(
 	config_tree *ptree
@@ -3481,10 +3509,7 @@ config_vars(
 			break;
 
 		case T_Logfile:
-			if (-1 == change_logfile(curr_var->value.s, true))
-				msyslog(LOG_ERR,
-					"Cannot open logfile %s: %m",
-					curr_var->value.s);
+			/* processed in config_logfile */
 			break;
 
 		case T_Saveconfigdir:
@@ -4262,6 +4287,11 @@ config_ntpd(
 	bool input_from_files
 	)
 {
+
+/* Do this early so most errors go to new log file */
+/* Command line arg is earlier. */
+	config_logfile(ptree);
+
 	config_nic_rules(ptree, input_from_files);
 	config_monitor(ptree);
 	config_auth(ptree);
