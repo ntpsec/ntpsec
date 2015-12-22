@@ -2024,12 +2024,12 @@ clock_update(
 		if (leapsec == LSPROX_NOWARN) {
 			if (leap_vote_ins > leap_vote_del
 			    && leap_vote_ins > sys_survivors / 2) {
-				intercept_get_systime(__func__, &now);
+				get_systime(&now);
 				leapsec_add_dyn(true, now.l_ui, NULL);
 			}
 			if (leap_vote_del > leap_vote_ins
 			    && leap_vote_del > sys_survivors / 2) {
-				intercept_get_systime(__func__, &now);
+				get_systime(&now);
 				leapsec_add_dyn(false, now.l_ui, NULL);
 			}
 		}
@@ -2142,7 +2142,11 @@ poll_update(
 			next = 1 << hpoll;
 		else
 #endif /* REFCLOCK */
-			next = ((0x1000UL | (intercept_ntp_random(__func__) & 0x0ff)) <<
+			/*
+			 * Doesn't need to be captured, because the poll interval
+			 * has no effect on replay.
+			 */
+			next = ((0x1000UL | (ntp_random() & 0x0ff)) <<
 			    hpoll) >> 12;
 		next += peer->outdate;
 		if (next > utemp)
@@ -3106,7 +3110,7 @@ peer_xmit(
 		 * Transmit a-priori timestamps.  This is paired with
 		 * a later call used to record transmission time.
 		 */
-		intercept_get_systime("pre-sendpkt", &xmt_tx);
+		get_systime(&xmt_tx);
 		if (peer->flip == 0) {	/* basic mode */
 			peer->aorg = xmt_tx;
 			HTONL_FP(&xmt_tx, &xpkt.xmt);
@@ -3137,7 +3141,7 @@ peer_xmit(
 		/*
 		 * Capture a-posteriori timestamps
 		 */
-		intercept_get_systime("post-sendpkt", &xmt_ty);
+		get_systime(&xmt_ty);
 		if (peer->flip != 0) {		/* interleaved modes */
 			if (peer->flip > 0)
 				peer->aorg = xmt_ty;

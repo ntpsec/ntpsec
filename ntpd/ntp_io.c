@@ -3395,7 +3395,11 @@ fetch_timestamp(
 				break;
 #endif  /* USE_SCM_TIMESTAMP */
 			}
-			fuzz = intercept_ntp_random(__func__) * 2. / FRAC * sys_fuzz;
+			/*
+			 * RNG call does notb have toi be recorded for replay
+			 * because the fuzzed timestamp is recorded.
+			 */
+			fuzz = ntp_random() * 2. / FRAC * sys_fuzz;
 			DTOLFP(fuzz, &lfpfuzz);
 			L_ADD(&nts, &lfpfuzz);
 #ifdef DEBUG_TIMING
