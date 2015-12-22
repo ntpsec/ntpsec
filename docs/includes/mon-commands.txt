@@ -134,7 +134,7 @@ show the offset, delay, dispersion and RMS jitter, all in seconds.
 ---------------------------------------------------------------------------------
 5628 54575.160 128.4.1.1 192.168.1.5 3565350574.400229473
     3565350574.442385200 3565350574.442436000 3565350575.154505763
-    0 4 4 1 8 -21 0.000000 0.000320 PPS
+    0 4 4 1 8 -21 0.000000 0.000320 PPS 0
 ---------------------------------------------------------------------------------
 +
 |==============================================================================
@@ -153,9 +153,10 @@ show the offset, delay, dispersion and RMS jitter, all in seconds.
 |1                   |1-15, 16: not synced              |stratum
 |8                   |log~2~ seconds                    |poll
 |-21                 |log~2~ seconds                    |precision
-|0.000000            |seconds                           |total roundtrip delay to the primary reference clock
-|0.000320            |seconds                           |total dispersion to the primary reference clock
+|0.000000            |seconds                           |total roundtrip delay from the remote server to the primary reference clock
+|0.000320            |seconds                           |total dispersion from the remote server to the primary reference clock
 |.PPS.               |IP or text                        |refid, association ID
+| 0                  |integer                           |lost packets since last response
 |==============================================================================
 +
 The first two fields show the date (Modified Julian Day) and time

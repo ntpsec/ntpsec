@@ -548,7 +548,9 @@ record_raw_stats(
 	int	precision,
 	double	root_delay,	/* seconds */
 	double	root_dispersion,/* seconds */
-	uint32_t	refid
+	uint32_t	refid,
+	u_int	outcount
+
 	)
 {
 	l_fp	now;
@@ -562,13 +564,14 @@ record_raw_stats(
 	day = now.l_ui / 86400 + MJD_1900;
 	now.l_ui %= 86400;
 	if (rawstats.fp != NULL) {
-		fprintf(rawstats.fp, "%lu %s %s %s %s %s %s %s %d %d %d %d %d %d %.6f %.6f %s\n",
+		fprintf(rawstats.fp, "%lu %s %s %s %s %s %s %s %d %d %d %d %d %d %.6f %.6f %s %d\n",
 		    day, ulfptoa(&now, 3),
 		    stoa(srcadr), dstadr ?  stoa(dstadr) : "-",
 		    ulfptoa(t1, 9), ulfptoa(t2, 9),
 		    ulfptoa(t3, 9), ulfptoa(t4, 9),
 		    leap, version, mode, stratum, ppoll, precision,
-		    root_delay, root_dispersion, refid_str(refid, stratum));
+		    root_delay, root_dispersion, refid_str(refid, stratum),
+		    outcount);
 		fflush(rawstats.fp);
 	}
 }

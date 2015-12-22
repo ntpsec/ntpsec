@@ -361,6 +361,7 @@ struct peer {
 	/*
 	 * End of clear-to-zero area
 	 */
+	u_int   outcount;       /* packets sent without reply */
 	u_long	update;		/* receive epoch */
 #define end_clear_to_zero update
 	int	unreach;	/* watchdog counter */
