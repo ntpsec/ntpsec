@@ -170,6 +170,7 @@ a closed-source driver to run.  This filtered out the
 Datum/Bancomm/Symmetricom bc600-series GPS/IRIG Receiver.
 
 [options="header"]
+[cols="10%,5%,85%",options="header"]
 |====================================================================
 | Number                      | Flags | Driver
 | link:driver1.html[Type 1]   | D     | Undisciplined Local Clock
@@ -203,7 +204,9 @@ Datum/Bancomm/Symmetricom bc600-series GPS/IRIG Receiver.
 
 The flags field should be interpreted as follows:
 
+[cols="5%,95%",options="header"]
 |====================================================================
+|Flag| Meaning
 | D | Deprecated.  May be removed in a future release
 | T | Regularly tested by an active maintainer (some devices/modes)
 | M | The driver supports multiple devices or major modes
