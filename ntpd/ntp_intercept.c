@@ -6,7 +6,7 @@ Think of ntpd as a complex finite-state machine for transforming a
 stream of input events to output events.  Events are of the
 following kinds:
 
-1. Startup, capuring command-line switches.
+1. Startup, capturing command-line switches.
 
 2. Configuration read (and synchronous DNS call/returns).
 
@@ -72,7 +72,7 @@ no mismatches.
 
 == Limitations ==
 
-Reference-clock eventare not yet intercepted.
+Reference-clock events are not yet intercepted.
 
 *****************************************************************************/
 
@@ -437,7 +437,7 @@ void intercept_drift_write(char *driftfile, double drift)
 {
     if (mode == replay) {
 	/*
-	 * We don't want to actually mes with the system's timekeeping in 
+	 * We don't want to actually mess with the system's timekeeping in
 	 * replay mode, so just check that we're writing out the same drift. 
 	 */
 	float df;
@@ -447,7 +447,7 @@ void intercept_drift_write(char *driftfile, double drift)
 	    fprintf(stderr, "ntpd: garbled drift-write format, line %d\n",lineno);
 	    exit(1);
 	}
-	/* beware spurious failures here due to float imprecisiion */ 
+	/* beware spurious failures here due to float imprecision */
 	if (df != drift) {
 	    fprintf(stderr, "ntpd: expected drift %f but saw %f, line %d\n",
 		    drift, df, lineno);
