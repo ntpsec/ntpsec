@@ -292,7 +292,8 @@ void intercept_get_systime(const char *legend, l_fp *now)
 	get_ostime(&ts);
 	normalize_time(ts, sys_fuzz > 0.0 ? ntp_random() : 0, now);
 	if (mode == capture)
-	    printf("systime %s %s\n", legend, lfpdump(now));
+	    printf("systime %s %ld.%ld\n",
+		   legend, (long)ts.tv_sec, (long)ts.tv_nsec);
 
     }
 }
