@@ -104,9 +104,31 @@ TEST(lfptostr, MillisecondsRoundingDown) {
 }
 
 TEST(lfptostr, UnsignedInteger) {
-	l_fp test = {{3000000000UL}, 0};
+	l_fp test1 = {{3000000000UL}, 0};
+	l_fp test2 = {{3000000UL}, 0x80000000};
+	l_fp test3 = {{13UL}, 0xC0000000};
+	l_fp test4 = {{13UL}, 0x028F5C28};
 
-	TEST_ASSERT_EQUAL_STRING("3000000000.0", ulfptoa(&test, 1));
+	l_fp test5 = {{4212665562UL}, 0x3C6BE7E6};
+	l_fp test6 = {{4212665562UL}, 0x36222683};
+	l_fp test7 = {{4212665562UL}, 0xBD3F2F5A};
+	l_fp test8a = {{1444359386UL}, 0x2E0C7582};
+	l_fp test8b = {{1444359386UL}, 0x2E0C7583};
+	l_fp test9 = {{3660323067UL}, 0x1CD3101C};
+
+	TEST_ASSERT_EQUAL_STRING("3000000000.0", ulfptoa(&test1, 1));
+	TEST_ASSERT_EQUAL_STRING("3000000000.000000", ulfptoa(&test1, 6));
+	TEST_ASSERT_EQUAL_STRING("3000000.5", ulfptoa(&test2, 1));
+	TEST_ASSERT_EQUAL_STRING("3000000.500", ulfptoa(&test2, 3));
+	TEST_ASSERT_EQUAL_STRING("13.750000", ulfptoa(&test3, 6));
+	TEST_ASSERT_EQUAL_STRING("13.010000", ulfptoa(&test4, 6));
+
+	TEST_ASSERT_EQUAL_STRING("4212665562.2360215127", ulfptoa(&test5, 10));
+	TEST_ASSERT_EQUAL_STRING("4212665562.2114585943", ulfptoa(&test6, 10));
+	TEST_ASSERT_EQUAL_STRING("4212665562.739245376", ulfptoa(&test7, 9));
+	TEST_ASSERT_EQUAL_STRING("1444359386.1798776095", ulfptoa(&test8a, 10));
+	TEST_ASSERT_EQUAL_STRING("1444359386.1798776097", ulfptoa(&test8b, 10));
+	TEST_ASSERT_EQUAL_STRING("3660323067.1125955647", ulfptoa(&test9, 10));
 }
 
 TEST_GROUP_RUNNER(lfptostr) {
