@@ -381,7 +381,7 @@ void intercept_drift_write(char *driftfile, double drift)
 	 */
 	float df;
 	get_operation("drift-write ");
-	/* See the comment of drift-read chwxcking. */ 
+	/* See the comment of drift-read checking. */ 
 	if (sscanf(linebuf, "drift-write %f'", &df) != 1) {
 	    fprintf(stderr, "ntpd: garbled drift-write format, line %d\n",lineno);
 	    exit(1);
@@ -613,13 +613,6 @@ intercept_leapsec_load_file(
 
     return loaded;
 }
-
-#define LFPTOUINT64(lfp)	((lfp)->l_uf | ((lfp)->l_ui << ))
-
-/*
- * These functions are requited beaus dplfptoa() is lodssy and won't
- * invert properly thrpugh atolfp().
- */
 
 static char *lfpdump(l_fp *fp)
 {
