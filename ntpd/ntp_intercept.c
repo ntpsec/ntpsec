@@ -821,6 +821,8 @@ void intercept_replay(void)
 		fprintf(stderr, "new = %s\n", recvbuf);
 		exit(1);
 	    }
+	    /* defeat the anti-clogging check */
+	    SET_PORT(&rbuf.recv_srcadr, NTP_PORT);
 
 	    /* executing the receive call may pop other things off the queue */
 	    receive(&rbuf);
