@@ -101,6 +101,8 @@ Reference-clock eventare not yet intercepted.
 #include "ntp_assert.h"
 #include "ntp_intercept.h"
 #include "ntp_fp.h"
+#include "lib_strbuf.h"
+#include "ntp_stdlib.h"
 #include "ntp_syscall.h"
 #include "ntp_leapsec.h"
 
@@ -261,12 +263,6 @@ void intercept_getconfig(const char *configfile)
 	    printf("drift-read %.3f\n", saved_drift);
     }
 }
-
-/*
- * An lfp used as a full date has an an unsigned seconds part.
- * Invert this with atolfp().
- */
-#define lfpdump(n)	ulfptoa(n, 10)
 
 void intercept_get_systime(const char *legend, l_fp *now)
 {
@@ -618,6 +614,39 @@ intercept_leapsec_load_file(
     return loaded;
 }
 
+#define LFPTOUINT64(lfp)	((lfp)->l_uf | ((lfp)->l_ui << ))
+
+/*
+ * These functions are requited beaus dplfptoa() is lodssy and won't
+ * invert properly thrpugh atolfp().
+ */
+
+static char *lfpdump(l_fp *fp)
+{
+    char *buf;
+    uint64_t	np;
+
+    LIB_GETBUF(buf);
+
+    np = fp->l_ui;
+    np <<= FRACTION_PREC;
+    np |= fp->l_uf;
+
+    snprintf(buf, LIB_BUFLENGTH, "%lx", np);
+
+    return buf;
+}
+
+static void lfpload(char *str, l_fp *fp)
+{
+    uint64_t	np;
+
+    sscanf(str, "%lx", &np);
+    
+    (fp)->l_uf = (np) & 0xFFFFFFFF;					\
+    (fp)->l_ui = (((np) >> FRACTION_PREC) & 0xFFFFFFFF);		\
+}
+
 static void packet_dump(char *buf, size_t buflen,
 			sockaddr_u *dest, struct pkt *pkt, size_t len)
 {
@@ -643,12 +672,12 @@ static void packet_dump(char *buf, size_t buflen,
 	}
 }
 
-static void packet_parse(char *pktbuf, char *macbuf, struct pkt *pkt)
+static size_t packet_parse(char *pktbuf, char *macbuf, struct pkt *pkt)
 {
     char refbuf[32], orgbuf[32], recbuf[32], xmtbuf[32];
     int fc, li_vn_mode = 0, stratum = 0, ppoll = 0, precision = 0;
+    size_t pktlen;
 
-    printf("Foo! %s\n", pktbuf);
     if ((fc = sscanf(pktbuf, "%d:%d:%d:%d:%u:%u:%u:%[^:]:%[^:]:%[^:]:%[^:]",
 		     &li_vn_mode, &stratum,
 		     &ppoll, &precision,
@@ -665,11 +694,12 @@ static void packet_parse(char *pktbuf, char *macbuf, struct pkt *pkt)
     pkt->stratum = stratum;
     pkt->ppoll = ppoll;
     pkt->precision = precision;
-    atolfp(refbuf, &pkt->reftime);
-    atolfp(orgbuf, &pkt->org);
-    atolfp(recbuf, &pkt->rec);
-    atolfp(xmtbuf, &pkt->xmt);
+    lfpload(refbuf, &pkt->reftime);
+    lfpload(orgbuf, &pkt->org);
+    lfpload(recbuf, &pkt->rec);
+    lfpload(xmtbuf, &pkt->xmt);
 
+    pktlen = LEN_PKT_NOMAC;
     memset(pkt->exten, '\0', sizeof(pkt->exten));
     if (strcmp(macbuf, "nomac") != 0) {
 	size_t i;
@@ -677,8 +707,10 @@ static void packet_parse(char *pktbuf, char *macbuf, struct pkt *pkt)
 	    int hexval;
 	    sscanf(macbuf + 2*i, "%02x", &hexval);
 	    pkt->exten[i] = hexval & 0xff;
+	    ++pktlen;
 	}
     }
+    return pktlen;
 }
 
 static void recvbuf_dump(char *buf, size_t buflen, struct recvbuf *rbufp)
@@ -768,14 +800,14 @@ void intercept_replay(void)
 		exit(1);
 	    }
 
-	    atolfp(recvbuf, &rbuf.recv_time);
+	    lfpload(recvbuf, &rbuf.recv_time);
 	    if (!is_ip_address(srcbuf, AF_UNSPEC, &rbuf.recv_srcadr)) {
 		fprintf(stderr, "ntpd: invalid IP address in receive at line %d\n", lineno);
 		exit(1);
 	    }
 
 	    pkt = &rbuf.recv_pkt;
-	    packet_parse(pktbuf, macbuf, pkt);
+	    rbuf.recv_length = packet_parse(pktbuf, macbuf, pkt);
 
 	    /*
 	     * If the packet doesn't dump identically to how it came in,
