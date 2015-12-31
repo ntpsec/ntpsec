@@ -4402,12 +4402,11 @@ config_remotely(
 
 
 /*
- * getconfig() - process startup configuration file e.g /etc/ntp.conf
+ * getconfig() - return name of configuration file e.g /etc/ntp.conf
  */
 const char *
 getconfig(const char *explicit_config)
 {
-	char	line[256];
 	const char *config_file;
 
 #ifndef SYS_WINNT
@@ -4442,6 +4441,20 @@ getconfig(const char *explicit_config)
 	    config_file = explicit_config;
 	}
 
+#ifdef SYS_WINNT
+	if (access(config_file, R_OK) != 0)
+	    config_file = alt_config_file;
+#endif /* SYS_WINNT */
+
+	return config_file;
+}
+
+/*
+ * readconfig() - process startup configuration file
+ */
+void readconfig(const char *config_file)
+{
+	char	line[256];
 	/*
 	 * install a non default variable with this daemon version
 	 */
@@ -4468,22 +4481,7 @@ getconfig(const char *explicit_config)
 		if (!saveconfigquit && intercept_get_mode() != replay)
 			io_open_sockets();
 
-		return NULL;
-#else
-		/* Under WinNT try alternate_config_file name, first NTP.CONF, then NTP.INI */
-
-		if (!lex_init_stack(alt_config_file, "r"))  {
-			/*
-			 * Broadcast clients can sometimes run without
-			 * a configuration file.
-			 */
-			msyslog(LOG_INFO, "getconfig: Couldn't open <%s>: %m", alt_config_file);
-			if (!saveconfigquit && intercept_get_mode() != replay)
-				io_open_sockets();
-
-			return NULL;
-		}
-		cfgt.source.value.s = estrdup(alt_config_file);
+		return;
 #endif	/* SYS_WINNT */
 	} else
 		cfgt.source.value.s = estrdup(config_file);
@@ -4510,8 +4508,6 @@ getconfig(const char *explicit_config)
 	if (config_netinfo)
 		free_netinfo_config(config_netinfo);
 #endif /* HAVE_NETINFO_NI_H */
-
-	return config_file;
 }
 
 
