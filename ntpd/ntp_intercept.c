@@ -123,6 +123,7 @@ void intercept_set_mode(intercept_mode newmode)
     if (mode != none) {
 	syslogit = false;
 	hashprefix = true;
+	force_synchronous_dns = true;
     }
 }
 

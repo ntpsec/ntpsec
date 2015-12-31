@@ -53,6 +53,7 @@
 /* list of servers from command line for config_peers() */
 int	cmdline_server_count;
 char **	cmdline_servers;
+bool	force_synchronous_dns;
 
 /* set to false if admin doesn't want memory locked */
 bool	do_memlock = true;
@@ -3687,7 +3688,6 @@ peerflag_bits(
 	return peerflags;
 }
 
-
 static void
 config_peers(
 	config_tree *ptree
@@ -3728,6 +3728,53 @@ config_peers(
 					0,
 					0,
 					NULL);
+		} else if (force_synchronous_dns) {
+			sockaddr_u		peeraddr;
+			struct addrinfo		hints;
+
+			struct addrinfo *res;
+			int a_info;
+			size_t octets;
+
+			ZERO(hints);
+			hints.ai_family = AF_UNSPEC;
+			hints.ai_socktype = SOCK_DGRAM;
+			hints.ai_protocol = IPPROTO_UDP;
+			a_info = getaddrinfo(*cmdline_servers,
+					     "ntp", &hints,
+					     &res);
+			if (a_info == EAI_NONAME
+#ifdef EAI_NODATA
+			    || a_info == EAI_NODATA
+#endif
+			   ) {
+				hints.ai_flags = AI_CANONNAME;
+				hints.ai_flags |= AI_ADDRCONFIG;
+				a_info = getaddrinfo(*cmdline_servers, "ntp", &hints, &res);
+			}
+			if (a_info != 0) {
+				msyslog(LOG_ERR,
+					"hostname %s can not be used (%s), please use IP address.",
+					*cmdline_servers, gai_strerror(a_info));
+			} else {
+				INSIST(res != NULL);
+				ZERO(peeraddr);
+				octets = min(sizeof(peeraddr), res->ai_addrlen);
+				memcpy(&peeraddr, res->ai_addr, octets);
+
+				peer_config(
+					&peeraddr,
+					NULL,
+					NULL,
+					MODE_CLIENT,
+					NTP_VERSION,
+					0,
+					0,
+					FLAG_IBURST,
+					0,
+					0,
+					NULL);
+			}
 		} else {
 			/* we have a hostname to resolve */
 # ifdef USE_WORKER
@@ -3750,8 +3797,8 @@ config_peers(
 					     (void *)ctx);
 # else	/* !USE_WORKER follows */
 			msyslog(LOG_ERR,
-				"hostname %s can not be used, please use IP address instead.",
-				curr_peer->addr->address);
+				"hostname %s can not be used (%s), please use IP address instead.",
+				curr_peer->addr->address, gai_strerror(a_info));
 # endif
 		}
 	}
@@ -3780,8 +3827,7 @@ config_peers(
 				curr_peer->group);
 		/*
 		 * If we have a numeric address, we can safely
-		 * proceed in the mainline with it.  Otherwise, hand
-		 * the hostname off to the blocking child.
+		 * proceed in the mainline with it.
 		 */
 		} else if (is_ip_address(curr_peer->addr->address,
 				  curr_peer->addr->type, &peeraddr)) {
@@ -3801,8 +3847,58 @@ config_peers(
 					curr_peer->ttl,
 					curr_peer->peerkey,
 					curr_peer->group);
+		/*
+		 * synchronous lookup may be forced.
+		 */
+		} else if (force_synchronous_dns) {
+			sockaddr_u		peeraddr;
+			struct addrinfo		hints;
+
+			struct addrinfo *res;
+			int a_info;
+			size_t octets;
+
+			ZERO(hints);
+			hints.ai_family = curr_peer->addr->type;
+			hints.ai_socktype = SOCK_DGRAM;
+			hints.ai_protocol = IPPROTO_UDP;
+			a_info = getaddrinfo(curr_peer->addr->address,
+					     "ntp", &hints,
+					     &res);
+			if (a_info == EAI_NONAME
+#ifdef EAI_NODATA
+			    || a_info == EAI_NODATA
+#endif
+			   ) {
+				hints.ai_flags = AI_CANONNAME;
+				hints.ai_flags |= AI_ADDRCONFIG;
+				a_info = getaddrinfo(curr_peer->addr->address, "ntp", &hints, &res);
+			}
+			if (a_info != 0) {
+				msyslog(LOG_ERR,
+					"hostname %s can not be used, please use IP address.",
+					curr_peer->addr->address);
+			} else {
+				INSIST(res != NULL);
+				ZERO(peeraddr);
+				octets = min(sizeof(peeraddr), res->ai_addrlen);
+				memcpy(&peeraddr, res->ai_addr, octets);
+
+				peer_config(
+					&peeraddr,
+					NULL,
+					NULL,
+					hmode,
+					curr_peer->peerversion,
+					curr_peer->minpoll,
+					curr_peer->maxpoll,
+					peerflag_bits(curr_peer),
+					curr_peer->ttl,
+					curr_peer->peerkey,
+					curr_peer->group);
+			}
 		} else {
-			/* we have a hostname to resolve */
+			/* hand the hostname off to the blocking child */
 # ifdef USE_WORKER
 			ctx = emalloc_zero(sizeof(*ctx));
 			ctx->family = curr_peer->addr->type;
