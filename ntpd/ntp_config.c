@@ -3688,6 +3688,40 @@ peerflag_bits(
 	return peerflags;
 }
 
+static bool sync_lookup(char *hname, sockaddr_u *peeraddrp)
+{
+	int a_info;
+	size_t octets;
+	struct addrinfo		hints, *res;
+
+	ZERO(hints);
+	hints.ai_family = AF_UNSPEC;
+	hints.ai_socktype = SOCK_DGRAM;
+	hints.ai_protocol = IPPROTO_UDP;
+	a_info = getaddrinfo(hname, "ntp", &hints, &res);
+	if (a_info == EAI_NONAME
+#ifdef EAI_NODATA
+	    || a_info == EAI_NODATA
+#endif
+	   ) {
+		hints.ai_flags = AI_CANONNAME;
+		hints.ai_flags |= AI_ADDRCONFIG;
+		a_info = getaddrinfo(hname, "ntp", &hints, &res);
+	}
+	if (a_info != 0) {
+		msyslog(LOG_ERR,
+			"hostname %s can not be used (%s), please use IP address.",
+			hname, gai_strerror(a_info));
+		return false;
+	} else {
+		INSIST(res != NULL);
+		memset(peeraddrp, '\0', sizeof(*peeraddrp));
+		octets = min(sizeof(*peeraddrp), res->ai_addrlen);
+		memcpy(peeraddrp, res->ai_addr, octets);
+		return true;
+	}
+}
+
 static void
 config_peers(
 	config_tree *ptree
@@ -3729,39 +3763,7 @@ config_peers(
 					0,
 					NULL);
 		} else if (force_synchronous_dns) {
-			sockaddr_u		peeraddr;
-			struct addrinfo		hints;
-
-			struct addrinfo *res;
-			int a_info;
-			size_t octets;
-
-			ZERO(hints);
-			hints.ai_family = AF_UNSPEC;
-			hints.ai_socktype = SOCK_DGRAM;
-			hints.ai_protocol = IPPROTO_UDP;
-			a_info = getaddrinfo(*cmdline_servers,
-					     "ntp", &hints,
-					     &res);
-			if (a_info == EAI_NONAME
-#ifdef EAI_NODATA
-			    || a_info == EAI_NODATA
-#endif
-			   ) {
-				hints.ai_flags = AI_CANONNAME;
-				hints.ai_flags |= AI_ADDRCONFIG;
-				a_info = getaddrinfo(*cmdline_servers, "ntp", &hints, &res);
-			}
-			if (a_info != 0) {
-				msyslog(LOG_ERR,
-					"hostname %s can not be used (%s), please use IP address.",
-					*cmdline_servers, gai_strerror(a_info));
-			} else {
-				INSIST(res != NULL);
-				ZERO(peeraddr);
-				octets = min(sizeof(peeraddr), res->ai_addrlen);
-				memcpy(&peeraddr, res->ai_addr, octets);
-
+			if (sync_lookup(*cmdline_servers, &peeraddr)) {
 				peer_config(
 					&peeraddr,
 					NULL,
@@ -3851,39 +3853,7 @@ config_peers(
 		 * synchronous lookup may be forced.
 		 */
 		} else if (force_synchronous_dns) {
-			sockaddr_u		peeraddr;
-			struct addrinfo		hints;
-
-			struct addrinfo *res;
-			int a_info;
-			size_t octets;
-
-			ZERO(hints);
-			hints.ai_family = curr_peer->addr->type;
-			hints.ai_socktype = SOCK_DGRAM;
-			hints.ai_protocol = IPPROTO_UDP;
-			a_info = getaddrinfo(curr_peer->addr->address,
-					     "ntp", &hints,
-					     &res);
-			if (a_info == EAI_NONAME
-#ifdef EAI_NODATA
-			    || a_info == EAI_NODATA
-#endif
-			   ) {
-				hints.ai_flags = AI_CANONNAME;
-				hints.ai_flags |= AI_ADDRCONFIG;
-				a_info = getaddrinfo(curr_peer->addr->address, "ntp", &hints, &res);
-			}
-			if (a_info != 0) {
-				msyslog(LOG_ERR,
-					"hostname %s can not be used, please use IP address.",
-					curr_peer->addr->address);
-			} else {
-				INSIST(res != NULL);
-				ZERO(peeraddr);
-				octets = min(sizeof(peeraddr), res->ai_addrlen);
-				memcpy(&peeraddr, res->ai_addr, octets);
-
+			if (sync_lookup(curr_peer->addr->address, &peeraddr)) {
 				peer_config(
 					&peeraddr,
 					NULL,
