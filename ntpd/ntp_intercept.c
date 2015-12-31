@@ -8,7 +8,7 @@ following kinds:
 
 1. Startup, capuring command-line switches.
 
-2. Configuration read.
+2. Configuration read (and synchronous DNS call/returns).
 
 3. Time reports from reference clocks.
 
@@ -240,6 +240,31 @@ static void file_replay(const char *configfile, char *delimiter, char *tempfile)
 
 bool intercept_getaddrinfo(char *hname, sockaddr_u *peeraddrp)
 {
+    if (mode == replay) {
+	char addr[BUFSIZ], ip[BUFSIZ];
+	int retval;
+
+	get_operation("getaddrinfo");
+	if (sscanf(linebuf, "getaddrinfo %s %s %d", addr, ip, &retval) != 3) {
+	    fprintf(stderr, "ntpd: garbled getaddrinfo format, line %d\n", lineno);
+	    exit(1);
+	}
+	if (strcmp(hname, addr) != 0) {
+	    fprintf(stderr, "ntpd: saw hostname %s, when expecting %s\n",
+		    addr, hname);
+	    exit(1);
+	}
+	if (retval == 0) {
+	    fprintf(stderr, "ntpd: hostname %s lookup failed\n",
+		    addr);
+	    exit(1);
+	}
+	if (!is_ip_address(ip, AF_UNSPEC, peeraddrp)) {
+	    fprintf(stderr, "ntpd: invalid IP address in getaddrinfo at line %d\n", lineno);
+	    exit(1);
+	}
+	return true;
+    } else {
 	int a_info;
 	size_t octets;
 	struct addrinfo		hints, *res;
@@ -253,23 +278,29 @@ bool intercept_getaddrinfo(char *hname, sockaddr_u *peeraddrp)
 #ifdef EAI_NODATA
 	    || a_info == EAI_NODATA
 #endif
-	   ) {
-		hints.ai_flags = AI_CANONNAME;
-		hints.ai_flags |= AI_ADDRCONFIG;
-		a_info = getaddrinfo(hname, "ntp", &hints, &res);
+	    ) {
+	    hints.ai_flags = AI_CANONNAME;
+	    hints.ai_flags |= AI_ADDRCONFIG;
+	    a_info = getaddrinfo(hname, "ntp", &hints, &res);
 	}
+	if (mode == capture)
+	    printf("getaddrinfo %s %s %d\n",
+		   hname,
+		   socktoa((sockaddr_u *)res->ai_addr),
+		   a_info == 0);
 	if (a_info != 0) {
-		msyslog(LOG_ERR,
-			"hostname %s can not be used (%s), please use IP address.",
-			hname, gai_strerror(a_info));
-		return false;
+	    msyslog(LOG_ERR,
+		    "hostname %s can not be used (%s), please use IP address.",
+		    hname, gai_strerror(a_info));
+	    return false;
 	} else {
-		INSIST(res != NULL);
-		memset(peeraddrp, '\0', sizeof(*peeraddrp));
-		octets = min(sizeof(*peeraddrp), res->ai_addrlen);
-		memcpy(peeraddrp, res->ai_addr, octets);
-		return true;
+	    INSIST(res != NULL);
+	    memset(peeraddrp, '\0', sizeof(*peeraddrp));
+	    octets = min(sizeof(*peeraddrp), res->ai_addrlen);
+	    memcpy(peeraddrp, res->ai_addr, octets);
+	    return true;
 	}
+    }
 }
 
 void intercept_getconfig(const char *configfile)
@@ -289,6 +320,7 @@ void intercept_getconfig(const char *configfile)
 
 	if (configfile != NULL && mode == capture)
 	    pump(configfile, "startconfig\n", "endconfig\n", stdout);
+
 	/*
 	 * Has to be done here because intercept_drift_read() is called from
 	 * inside the config parser - otherwise, things get emitted in the
