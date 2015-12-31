@@ -238,6 +238,40 @@ static void file_replay(const char *configfile, char *delimiter, char *tempfile)
     fclose(tfp);
 }
 
+bool intercept_getaddrinfo(char *hname, sockaddr_u *peeraddrp)
+{
+	int a_info;
+	size_t octets;
+	struct addrinfo		hints, *res;
+
+	ZERO(hints);
+	hints.ai_family = AF_UNSPEC;
+	hints.ai_socktype = SOCK_DGRAM;
+	hints.ai_protocol = IPPROTO_UDP;
+	a_info = getaddrinfo(hname, "ntp", &hints, &res);
+	if (a_info == EAI_NONAME
+#ifdef EAI_NODATA
+	    || a_info == EAI_NODATA
+#endif
+	   ) {
+		hints.ai_flags = AI_CANONNAME;
+		hints.ai_flags |= AI_ADDRCONFIG;
+		a_info = getaddrinfo(hname, "ntp", &hints, &res);
+	}
+	if (a_info != 0) {
+		msyslog(LOG_ERR,
+			"hostname %s can not be used (%s), please use IP address.",
+			hname, gai_strerror(a_info));
+		return false;
+	} else {
+		INSIST(res != NULL);
+		memset(peeraddrp, '\0', sizeof(*peeraddrp));
+		octets = min(sizeof(*peeraddrp), res->ai_addrlen);
+		memcpy(peeraddrp, res->ai_addr, octets);
+		return true;
+	}
+}
+
 void intercept_getconfig(const char *configfile)
 {
     if (mode == replay) {

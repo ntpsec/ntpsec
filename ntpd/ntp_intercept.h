@@ -17,6 +17,7 @@ intercept_mode intercept_get_mode(void);
 void intercept_set_mode(intercept_mode);
 
 void intercept_argparse(int *, char ***);
+bool intercept_getaddrinfo(char *, sockaddr_u *);
 void intercept_getconfig(const char *);
 void intercept_get_systime(const char *, l_fp *);
 long intercept_ntp_random(const char *);
