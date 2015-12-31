@@ -110,7 +110,6 @@ static intercept_mode mode = none;
 
 static char linebuf[256];
 static int lineno;
-static double saved_drift;
 
 intercept_mode intercept_get_mode(void)
 {
@@ -312,7 +311,7 @@ void intercept_getconfig(const char *configfile)
 	get_operation("startconfig");
 	snprintf(tempfile, sizeof(tempfile), ".fake_ntp_config_%d", getpid());
 	file_replay(configfile, "endconfig", tempfile);
-	getconfig(tempfile);
+	readconfig(getconfig(tempfile));
 	unlink(tempfile);
     } else {
 	/* this can be null if the default config doesn't exist */
@@ -321,13 +320,7 @@ void intercept_getconfig(const char *configfile)
 	if (configfile != NULL && mode == capture)
 	    pump(configfile, "startconfig\n", "endconfig\n", stdout);
 
-	/*
-	 * Has to be done here because intercept_drift_read() is called from
-	 * inside the config parser - otherwise, things get emitted in the
-	 * wrong order.
-	 */
-	if (mode == capture)
-	    printf("drift-read %.3f\n", saved_drift);
+	readconfig(configfile);
     }
 }
 
@@ -432,8 +425,9 @@ bool intercept_drift_read(const char *drift_file, double *drift)
 	}
 	fclose(fp);
 
-	/* capture write has to be done in the config intercwept */
-	saved_drift = *drift;
+	if (mode == capture)
+	    printf("drift-read %.3f\n", *drift);
+
     }
 
     return true;
