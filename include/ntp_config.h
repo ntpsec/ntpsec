@@ -43,6 +43,7 @@
 /* list of servers from command line for config_peers() */
 extern	int	cmdline_server_count;
 extern	char **	cmdline_servers;
+extern	bool	force_synchronous_dns;
 
 /* set to false if admin doesn't want memory locked */
 extern	bool	do_memlock;
