@@ -192,7 +192,7 @@ command but with a multicast (IPv4 class _D_ or IPv6 prefix _FF_)
 group address. The IANA has designated IPv4 address 224.1.1.1 and IPv6
 address FF05::101 (site local) for NTP.
 
-The client sends sends ordinary client mode messages, but to one of
+The client sends ordinary client mode messages, but to one of
 these broadcast addresses rather than a unicast address, and sends
 only if less than +maxclock+ associations remain and then only at the
 minimum feasible rate and minimum feasible time-to-live (TTL)
