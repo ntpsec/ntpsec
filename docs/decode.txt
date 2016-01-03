@@ -71,7 +71,7 @@ Count (8-11) and Event (12-15). It is reported in the first line of the
 
 The Leap Field displays the system leap indicator bits coded as follows:
 
-[width="100%",cols="<34%,<33%,<33%",]
+[width="70%",cols=">10%,<30%,<60%",]
 |========================================================================
 |Code  | Message        | Description
 | +0+  | +leap_none+    | normal synchronized state
@@ -83,7 +83,7 @@ The Leap Field displays the system leap indicator bits coded as follows:
 The Source Field displays the current synchronization source coded as
 follows:
 
-[width="100%",cols="<34%,<33%,<33%",]
+[width="70%",cols=">10%,<30%,<60%",]
 |=============================================================================
 | Code  | Message          | Description
 | +0+   | +sync_unspec+    | not yet synchronized
@@ -104,7 +104,7 @@ ignored.
 
 The Event Field displays the most recent event message coded as follows:
 
-[width="100%",cols="<34%,<33%,<33%",]
+[width="70%",cols=">10%,<30%,<60%",]
 |============================================================================
 | Code  | Message                   | Description
 | +00+  | +unspecified+             | unspecified
@@ -143,7 +143,7 @@ combines with the 3-bit-wide Select Field to create the first full
 byte of the peer status word.) The meaning of each bit in the Status
 Field is listed in the following table:
 
-[width="100%",cols="<34%,<33%,<33%",]
+[width="70%",cols=">10%,<30%,<60%",]
 |==============================================================
 | Code | Message   | Description
 | +08+ | +bcst+    | broadcast association
@@ -157,8 +157,8 @@ The Select Field displays the current selection status. (The T Field in
 the following table gives the corresponding tally codes used in the
 +{ntpq} peers+ display.) The values are coded as follows:
 
-[width="100%",cols="<25%,<25%,<25%,<25%",]
-|================================================================================
+[width="70%",cols=">10%,<25%,^10%,<55%",]
+|============================================================================
 | Code| Message         | T   | Description
 | +0+ | +sel_reject+    |     | discarded as not valid (TEST10-TEST13)
 | +1+ | +sel_falsetick+ | +x+ | discarded by intersection algorithm
@@ -168,7 +168,7 @@ the following table gives the corresponding tally codes used in the
 | +5+ | +sel_backup+    | +#+ | backup (more than +tos maxclock+ sources)
 | +6+ | +sel_sys.peer+  | +*+ | system peer
 | +7+ | +sel_pps.peer+  | +o+ | PPS peer (when the prefer peer is valid)
-|================================================================================
+|=============================================================================
 
 The Count Field displays the number of events since the last time the
 code changed. Upon reaching 15, subsequent events with the same code are
@@ -176,7 +176,7 @@ ignored.
 
 The Event Field displays the most recent event message coded as follows:
 
-[width="100%",cols="<34%,<33%,<33%",]
+[width="70%",cols=">10%,<30%,<60%",]
 |============================================================================
 | Code | Message            | Description
 | +01+ | +mobilize+         | association mobilized
@@ -212,10 +212,10 @@ The Count Field displays the number of events since the last +lockvar+
 command, while the Event Field displays the most recent event message
 coded as follows:
 
-[width="100%",cols="<34%,<33%,<33%",]
+[width="70%",cols=">10%,<30%,<60%",]
 |===========================================================================
 | Code | Message            | Description
-| +00+ | +clk_unspe+        | nominal
+| +00+ | +clk_unspec+        | nominal
 | +01+ | +clk_noreply+      | no reply to poll
 | +02+ | +clk_badformat+    | bad timecode format
 | +03+ | +clk_fault+        | hardware or software fault
@@ -233,7 +233,7 @@ peer event is reported.
 The flash status word is displayed by the +{ntpq}+ program +rv+ command.
 It consists of a number of bits coded in hexadecimal as follows:
 
-[width="100%",cols="<25%,<25%,<25%,<25%",]
+[width="70%",cols=">10%,<15%,<25%,<50%",]
 |==============================================================================
 | Code   | Tag     | Message        | Description
 | +0001+ | BOGON1  | +pkt_dup+      | duplicate packet
@@ -263,7 +263,7 @@ charactes. In practice they are informal and tend to change with time
 and implementation. Some of these codes can appear in the reference
 identifier field in +{ntpq}+ billboards. Following is the current list:
 
-[width="100%",cols="<50%,<50%",]
+[width="50%",cols=">20%,<80%"]
 |==================================================================
 | Code   | Description
 | +ACST+ | manycast server
@@ -285,7 +285,7 @@ identifier field in +{ntpq}+ billboards. Following is the current list:
 These messages are sent to the +cryptostats+ file when an error is
 detected in the Autokey protocol.
 
-[width="100%",cols="<34%,<33%,<33%",]
+[width="70%",cols=">10%,<30%,<60%",]
 |==========================================================================
 | Code | Message               | Description
 | +01+ | +bad_format+          | bad extension field format or length
