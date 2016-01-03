@@ -398,8 +398,7 @@ struct peer {
  * Values for peer mode and packet mode. Only the modes through
  * MODE_BROADCAST and MODE_BCLIENT appear in the transition
  * function. MODE_CONTROL and MODE_PRIVATE can appear in packets,
- * but those never survive to the transition function.
- * is a
+ * but those never survive to the translation function.
 / */
 #define	MODE_UNSPEC	0	/* unspecified (old version) */
 #define	MODE_ACTIVE	1	/* symmetric active mode */
@@ -411,7 +410,7 @@ struct peer {
  * These can appear in packets
  */
 #define	MODE_CONTROL	6	/* control mode */
-#define	MODE_PRIVATE	7	/* private mode */
+#define	MODE_PRIVATE	7	/* Dead: private mode */
 /*
  * This is a madeup mode for broadcast client.
  */
