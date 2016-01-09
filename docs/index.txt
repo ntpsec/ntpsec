@@ -199,7 +199,7 @@ collections arranged by topic. The Program Manual Pages collection may
 be the best place to start. The link:comdex.html[Command Index]
 collection contains a list of all configuration file commands together
 with a short function description. There is a
-link:ntpsleak.html[glossary of NTP-speak]. A great wealth of
+link:ntpspeak.html[glossary of NTP-speak]. A great wealth of
 additional information is available via the External Links collection,
 including a book and numerous background papers and briefing
 presentations.
