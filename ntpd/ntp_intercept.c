@@ -686,7 +686,11 @@ static char *lfpdump(l_fp *fp)
     np <<= FRACTION_PREC;
     np |= fp->l_uf;
 
+#if SIZEOF_LONG_LONG == SIZEOF_LONG
     snprintf(buf, LIB_BUFLENGTH, "%lx", np);
+#else
+    snprintf(buf, LIB_BUFLENGTH, "%llx", np);
+#endif
 
     return buf;
 }
@@ -695,7 +699,11 @@ static void lfpload(char *str, l_fp *fp)
 {
     uint64_t	np;
 
+#if SIZEOF_LONG_LONG == SIZEOF_LONG
     sscanf(str, "%lx", &np);
+#else
+    sscanf(str, "%llx", &np);
+#endif
     
     (fp)->l_uf = (np) & 0xFFFFFFFF;					\
     (fp)->l_ui = (((np) >> FRACTION_PREC) & 0xFFFFFFFF);		\
