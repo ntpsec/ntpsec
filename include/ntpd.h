@@ -320,7 +320,6 @@ extern	char *	fstostr(time_t);	/* NTP timescale seconds */
 /* ntp_config.c */
 extern char const *	progname;
 extern char	*sys_phone[];		/* ACTS phone numbers */
-extern bool	config_priority_override;
 extern char *ntp_signd_socket;
 extern struct config_tree_tag *cfg_tree_history;
 

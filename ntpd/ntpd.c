@@ -106,8 +106,8 @@ int	waitsync_fd_to_close = -1;	/* -w/--wait-sync */
  */
 bool initializing;
 
-extern bool config_priority_override;
-static int config_priority;
+bool config_priority_override = false;
+int config_priority;
 
 char const *progname;
 
