@@ -215,8 +215,7 @@ def cmd_configure(ctx):
 	ctx.check_cc(lib="edit", mandatory=False)
 	ctx.check_cc(lib="m")
 	ctx.check_cc(lib="ossaudio", mandatory=False)  # NetBSD audio
-	if not ctx.env.ENABLE_CROSS:
-		ctx.check_cc(lib="pthread")
+	ctx.check_cc(lib="pthread")
 	ctx.check_cc(lib="rt", mandatory=False)
 	ctx.check_cc(lib="readline", mandatory=False)
 	ctx.check_cc(lib="thr", mandatory=False)
