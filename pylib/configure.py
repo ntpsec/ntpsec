@@ -11,6 +11,8 @@ def cmd_configure(ctx):
 	ctx.load('compiler_c')
 	ctx.load('bison')
 
+	if ctx.options.enable_cross:
+		ctx.env.ENABLE_CROSS = True
 
 	from compiler import check_compiler
 	check_compiler(ctx)
@@ -188,8 +190,9 @@ def cmd_configure(ctx):
 #HGM		(None,                  "signed char"),
 	]
 
-	for header, sizeof in sorted(sizeofs):
-		ctx.check_sizeof(header, sizeof)
+	if not ctx.env.ENABLE_CROSS:
+		for header, sizeof in sorted(sizeofs):
+			ctx.check_sizeof(header, sizeof)
 
 	# The protocol major number
 	ctx.define("NTP_API",	4)
@@ -213,7 +216,8 @@ def cmd_configure(ctx):
 	ctx.check_cc(lib="edit", mandatory=False)
 	ctx.check_cc(lib="m")
 	ctx.check_cc(lib="ossaudio", mandatory=False)  # NetBSD audio
-	ctx.check_cc(lib="pthread")
+	if not ctx.env.ENABLE_CROSS:
+		ctx.check_cc(lib="pthread")
 	ctx.check_cc(lib="rt", mandatory=False)
 	ctx.check_cc(lib="readline", mandatory=False)
 	ctx.check_cc(lib="thr", mandatory=False)
