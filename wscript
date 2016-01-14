@@ -47,6 +47,7 @@ def options(ctx):
 	grp.add_option('--disable-dns-lookup', action='store_true', default=False, help="Disable DNS lookups.")
 	grp.add_option('--disable-dns-retry', action='store_true', default=False, help="Disable retrying DNS lookups.")
 	grp.add_option('--disable-mdns-registration', action='store_true', default=False, help="Disable MDNS registration.")
+	grp.add_option('--enable-cross', action='store_true', default=False, help="Cross compile.")
 
 
 	grp = ctx.add_option_group("NTP configure features")

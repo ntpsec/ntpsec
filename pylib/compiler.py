@@ -29,6 +29,9 @@ int main(void) {
 
 def check_compiler(ctx):
 
+	if ctx.env.ENABLE_CROSS:
+		return
+
 	defines = {
 		1: ("COMPILER_CLANG",	"clang"),
 		2: ("COMPILER_ICC",		"ICC"),
