@@ -190,9 +190,8 @@ def cmd_configure(ctx):
 #HGM		(None,                  "signed char"),
 	]
 
-	if not ctx.env.ENABLE_CROSS:
-		for header, sizeof in sorted(sizeofs):
-			ctx.check_sizeof(header, sizeof)
+	for header, sizeof in sorted(sizeofs):
+		ctx.check_sizeof(header, sizeof)
 
 	# The protocol major number
 	ctx.define("NTP_API",	4)
@@ -336,19 +335,6 @@ def cmd_configure(ctx):
 #HGM  Can delete pylib/check_timepps.py
 		ctx.define("HAVE_PPSAPI", 1)
 
-	# Check for libevent and whether it is working.
-	from pylib.check_libevent2 import check_libevent2
-	check_libevent2(ctx)
-
-
-	# Check for Linux capability.
-	ctx.check_cc(header_name="sys/capability.h", mandatory=False)
-	ctx.check_cc(lib="cap", mandatory=False)
-	if ctx.env.LIB_CAP:
-		from check_cap import check_cap
-		check_cap(ctx)
-	if ctx.get_define("HAVE_CAPABILITY") and ctx.get_define("HAVE_SYS_CAPABILITY_H") and ctx.get_define("HAVE_SYS_PRCTL_H"):
-		ctx.define("HAVE_LINUX_CAPABILITY", 1)
 
 	# Check for Solaris capabilities
 	if ctx.get_define("HAVE_PRIV_H") and sys.platform == "Solaris":
@@ -404,10 +390,6 @@ def cmd_configure(ctx):
 
 	if not ctx.options.disable_dns_retry:
 		ctx.define("ENABLE_DNS_RETRY", 1)
-
-	if not ctx.options.disable_mdns_registration:
-		from check_mdns import check_mdns
-		check_mdns(ctx)
 
 
 	# There is an ENABLE_AUTOKEY as well, but as that feature
@@ -501,6 +483,32 @@ def cmd_configure(ctx):
 	ctx.define("ISC_PLATFORM_HAVESCOPEID", 1)
 	ctx.define("ISC_PLATFORM_USETHREADS", 1)
 	ctx.define("HAVE_IFLIST_SYSCTL", 1)
+
+
+
+	# Header checks
+	from pylib.check_cap import check_cap_header
+	check_cap_header(ctx)
+
+	from pylib.check_libevent2 import check_libevent2_header
+	check_libevent2_header(ctx)
+
+	if not ctx.options.disable_mdns_registration:
+		from pylib.check_mdns import check_mdns_header
+		check_mdns_header(ctx)
+
+
+	# Run checks
+	from pylib.check_cap import check_cap_run
+	check_cap_run(ctx)
+
+	from pylib.check_libevent2 import check_libevent2_run
+	check_libevent2_run(ctx)
+
+	if not ctx.options.disable_mdns_registration:
+		from pylib.check_mdns import check_mdns_run
+		check_mdns_run(ctx)
+
 
 	ctx.start_msg("Writing configuration header:")
 	ctx.write_config_header("config.h")
