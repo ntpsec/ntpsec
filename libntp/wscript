@@ -23,7 +23,6 @@ def build(ctx):
 		"iosignal.c",
 		"lib_strbuf.c",
 		"machines.c",
-		"mktime.c",
 		"modetoa.c",
 		"mstolfp.c",
 		"msyslog.c",
