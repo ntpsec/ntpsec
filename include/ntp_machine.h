@@ -65,9 +65,5 @@ int ntp_set_tod (struct timespec *tvs);
 # define HAVE_NO_NICE
 #endif
 
-#ifndef HAVE_TIMEGM
-extern time_t	timegm		(struct tm *);
-#endif
-
 
 #endif	/* GUARD_NTP_MACHINE_H */

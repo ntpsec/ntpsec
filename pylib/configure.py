@@ -253,7 +253,6 @@ def cmd_configure(ctx):
 		('strlcpy', ["string.h"]),
 		('strlcat', ["string.h"]),
 #HGM		('sysconf', ["unistd.h"]),
-		('timegm', ["time.h"]),
 		('timer_create', ["time.h"]),
 		('updwtmpx', ["utmpx.h"]),		# glibc
 		)
