@@ -1,4 +1,8 @@
 from waflib import Utils
+from waflib.Build import BuildContext, CleanContext, InstallContext, UninstallContext, StepContext, ListContext
+from waflib import Context, Errors
+from waflib import Scripting
+from waflib.Logs import pprint
 
 out="build"
 
@@ -102,12 +106,67 @@ class check(BuildContext):
 	cmd = 'check'
 
 
+# Borrowed from https://www.rtems.org/
+variant_cmd = (
+	("build",   BuildContext),
+	("clean",   CleanContext),
+	("install", InstallContext),
+	("step",    StepContext),
+	("list",    ListContext),
+	("check",   BuildContext)
+)
+
+def init_handler(ctx):
+	cmd = ctx.cmd
+	if cmd == 'init_handler':
+		cmd = 'build'
+
+	def make_context(name):
+		for x in Context.classes:
+			if x.cmd == name and x.fun != 'init_handler':
+				return x()
+		ctx.fatal('No class for %r' % cmd)
+
+	# By default we want to iterate over each variant.
+	for v in ["host", "main"]:
+		obj = make_context(cmd)
+		obj.variant = v
+		pprint("YELLOW", "--- %sing %s ---" % (cmd, v))
+		obj.execute()
+
+commands = (
+	("install",     "init_handler", None),
+	("uninstall",   "init_handler", None),
+	("build",       "init_handler", None),
+	("clean",       "init_handler", None),
+	("list",        "init_handler", None),
+	("step",        "init_handler", None),
+#	("info",        "cmd_info",     "Show build information / configuration.")
+)
+
+
+for command, func, descr in commands:
+	class tmp(Context.Context):
+		if descr:
+			__doc__ = descr
+		cmd = command
+		fun = func
+		if command in 'install uninstall build clean list step docs bsp info':
+			execute = Scripting.autoconfigure(Context.Context.execute)
+# end borrowed code
+
+
+
 def build(ctx):
 
 	ctx.load('waf', tooldir='pylib/')
 	ctx.load('bison')
 	ctx.load('asciidoc', tooldir='pylib/')
 	ctx.load('rtems_trace', tooldir='pylib/')
+
+	if ctx.variant == "host":
+		ctx.recurse("ntpd")
+		return
 
 	if ctx.env.ENABLE_DOC:
 		ctx.recurse("docs")
@@ -149,17 +208,20 @@ def build(ctx):
 	ctx.manpage(1, "ntptrace/ntptrace-man.txt")
 
 
-	# Force re-running of tests.  Same as 'waf --alltests'
-	if ctx.cmd == "check":
-		ctx.options.all_tests = True
+	# Skip running unit tests on a cross compile build
+	if not ctx.env.ENABLE_CROSS:
+		# Force re-running of tests.  Same as 'waf --alltests'
+		if ctx.cmd == "check":
+			ctx.options.all_tests = True
 
-		# Print log if -v is supplied
-		if ctx.options.verbose:
-			ctx.add_post_fun(test_print_log)
+			# Print log if -v is supplied
+			if ctx.options.verbose:
+				ctx.add_post_fun(test_print_log)
 
-	# Write test log to a file
-	ctx.add_post_fun(test_write_log)
+		# Write test log to a file
+		ctx.add_post_fun(test_write_log)
 
-	# Print a summary at the end
-	ctx.add_post_fun(waf_unit_test.summary)
-
+		# Print a summary at the end
+		ctx.add_post_fun(waf_unit_test.summary)
+	else:
+		pprint("YELLOW", "Unit test runner skipped on a cross-compiled build.")

@@ -483,7 +483,6 @@ def cmd_configure(ctx):
 	ctx.define("HAVE_IFLIST_SYSCTL", 1)
 
 
-
 	# Header checks
 	from pylib.check_cap import check_cap_header
 	check_cap_header(ctx)
