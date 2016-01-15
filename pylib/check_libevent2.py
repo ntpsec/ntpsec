@@ -29,7 +29,7 @@ def check_libevent2_run(ctx):
 		if ctx.env.EVENT2_HEADER: # XXX Remove when variant builds exist
 			ctx.define("HAVE_LIBEVENT2", 1)
 			ctx.env.LIBEVENT2_ENABLE = True
-	return
+		return
 
 	ctx.check(
 		fragment	= LIBEVENT2_FRAG,
