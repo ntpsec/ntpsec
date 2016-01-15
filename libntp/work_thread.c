@@ -453,24 +453,21 @@ start_blocking_thread_internal(
 	(*addremove_io_fd)(c->resp_read_pipe, c->ispipe, false);
 	pthread_attr_init(&thr_attr);
 	pthread_attr_setdetachstate(&thr_attr, PTHREAD_CREATE_DETACHED);
-#if defined(HAVE_PTHREAD_ATTR_GETSTACKSIZE) && \
-    defined(HAVE_PTHREAD_ATTR_SETSTACKSIZE)
 	rc = pthread_attr_getstacksize(&thr_attr, &stacksize);
-	if (-1 == rc) {
+	if (0 != rc) {
+		errno = rc;
 		msyslog(LOG_ERR,
 			"start_blocking_thread: pthread_attr_getstacksize %m");
 	} else if (stacksize < THREAD_MINSTACKSIZE) {
 		rc = pthread_attr_setstacksize(&thr_attr,
 					       THREAD_MINSTACKSIZE);
-		if (-1 == rc)
+		if (0 != rc)
+			errno = rc;
 			msyslog(LOG_ERR,
 				"start_blocking_thread: pthread_attr_setstacksize(0x%lx -> 0x%lx) %m",
 				(u_long)stacksize,
 				(u_long)THREAD_MINSTACKSIZE);
 	}
-#else
-	UNUSED_ARG(stacksize);
-#endif
 	pthread_attr_setscope(&thr_attr, PTHREAD_SCOPE_SYSTEM);
 	c->thread_ref = emalloc_zero(sizeof(*c->thread_ref));
 	block_thread_signals(&saved_sig_mask);

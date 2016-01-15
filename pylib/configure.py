@@ -244,8 +244,6 @@ def cmd_configure(ctx):
 		('MD5Init', ["md5.h"], "CRYPTO"),
 		('ntp_adjtime', ["sys/time.h", "sys/timex.h"]),		# BSD
 		('ntp_gettime', ["sys/time.h", "sys/timex.h"]),		# BSD
-		('pthread_attr_getstacksize', ["pthread.h"], "PTHREAD"),
-		('pthread_attr_setstacksize', ["pthread.h"], "PTHREAD"),
 		('res_init', ["resolv.h"]),
 		("rtprio", ["sys/rtprio.h"]),		# Sun/BSD
 		('sched_setscheduler', ["sched.h"]),
