@@ -6,7 +6,7 @@ from waflib.Task import Task
 @before_method('apply_incpaths')
 @feature('bld_include')
 def insert_blddir(self):
-	bldnode = self.bld.bldnode.abspath()
+	bldnode = self.bld.bldnode.parent.abspath()
 	self.includes += [bldnode]
 
 @before_method('apply_incpaths')

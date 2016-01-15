@@ -3,52 +3,56 @@ def build(ctx):
 	srcnode = ctx.srcnode.abspath()
 	bldnode = ctx.bldnode.abspath()
 
-	bison_source = [
-		"ntp_parser.y"
-	]
 
-	ctx(
-		target		= "bison_obj",
-		features	= "c src_include bld_include libisc_include",
-		source		= bison_source,
-		includes    = [
-						"%s/ntpd/" % srcnode
+	if ctx.variant == "host":
+
+		bison_source = [
+			"ntp_parser.y"
 		]
-	)
 
-	ctx.add_group() # Generate Bison files first.
+		ctx(
+			target		= "bison_obj",
+			features	= "c src_include bld_include libisc_include",
+			source		= bison_source,
+			includes    = [
+							"%s/ntpd/" % srcnode,
+							"%s/" % ctx.bldnode.parent.abspath()
+			]
+		)
 
-
-	keyword_gen_source = [
-		"keyword-gen.c",
-    ]
-
-	ctx(
-		target      = "keyword-gen",
-		features    = "c cprogram bld_include src_include libisc_include",
-# src_include libisc_include",
-		source      = keyword_gen_source,
-#		use			= "ntp isc RT THR PTHREAD",
-		includes    = [
-						"%s/ntpd/" % bldnode
-		],
-		install_path= False
-	)
-
-	# XXX: needs a dependency to rebuild ntp_keyword.h when keyword-gen is rebuilt
-
-	ctx.add_group() # Make sure keyword-gen is created next.
-
-	ctx(
-		rule        = "%s/ntpd/keyword-gen ${SRC} > ${TGT}" % bldnode,
-		features    = "c bld_include src_include",
-		source      = "ntp_parser.tab.h",
-		target      = "ntp_keyword.h"
-	)
+		ctx.add_group() # Generate Bison files first.
 
 
-	ctx.add_group() # Make sure ntp_keyword.h is created last.
+		keyword_gen_source = [
+			"keyword-gen.c",
+   	 ]
 
+		ctx(
+			target      = "keyword-gen",
+			features    = "c cprogram bld_include src_include libisc_include",
+			source      = keyword_gen_source,
+			includes    = [
+							"%s/ntpd/" % bldnode,
+							"%s/" % ctx.bldnode.parent.abspath()
+			],
+			install_path= False
+		)
+
+		# XXX: needs a dependency to rebuild ntp_keyword.h when keyword-gen is rebuilt
+
+		ctx.add_group() # Make sure keyword-gen is created next.
+
+		ctx(
+			rule        = "%s/ntpd/keyword-gen ${SRC} > ${TGT}" % bldnode,
+			features    = "c bld_include src_include",
+			source      = "ntp_parser.tab.h",
+			target      = "ntp_keyword.h"
+		)
+
+
+		ctx.add_group() # Make sure ntp_keyword.h is created last.
+
+		return
 
 
 	libntpd_source = [
@@ -107,14 +111,12 @@ def build(ctx):
 			)
 			use_refclock += " refclock_%s" % file
 
-
-
-
 	ntpd_source = [
 		"ntp_config.c",
 		"ntp_io.c",
 		"ntp_scanner.c",
 		"ntpd.c",
+		ctx.bldnode.parent.find_node("host/ntpd/ntp_parser.tab.c")
 	]
 
 
@@ -137,8 +139,8 @@ def build(ctx):
 		source		= ntpd_source,
 		use			= "libntpd_obj bison_obj isc ntp sodium opts OSSAUDIO M parse GCC_S RT CAP THR PTHREAD CRYPTO DNS_SD DNS_SD_INCLUDES %s" % use_refclock,
 		includes	= [
-			"%s/ntpd/" % bldnode,
-			"%s/ntpd/" % srcnode,
+						"%s/host/ntpd/" % ctx.bldnode.parent.abspath(),
+						"%s/ntpd/" % srcnode,
                         "%s/libsodium/include" % srcnode
 		],
 		install_path= "${PREFIX}/sbin/",
