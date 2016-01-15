@@ -235,7 +235,7 @@ dumbclock_receive(
 	if (sscanf(pp->a_lastcode,"%02d:%02d:%02d",
 		   &hours,&minutes,&seconds) == 3)
 	{
-	    struct tm *gmtp;
+	    struct tm *gmtp, mygm;
 	    struct tm *lt_p;
 	    struct tm tmbuf;
 	    time_t     asserted_time;	     /* the SPM time based on the composite time+date */
@@ -289,7 +289,7 @@ dumbclock_receive(
 		return;
 	    }
 
-	    if ((gmtp = gmtime (&asserted_time)) == NULL)
+	    if ((gmtp = gmtime_r (&asserted_time, &mygm)) == NULL)
 	    {
 		refclock_report (peer, CEVNT_FAULT);
 		return;

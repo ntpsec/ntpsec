@@ -1250,7 +1250,7 @@ arc_receive(
 	if(peer->ttl > 0) {
 		if(pp->sloppyclockflag & CLK_FLAG1) {
 			struct tm  local;
-			struct tm *gmtp;
+			struct tm *gmtp, mygm;
 			time_t	   unixtime;
 
 			/*
@@ -1317,7 +1317,7 @@ arc_receive(
 				break;
 			}
 			unixtime = mktime (&local);
-			if ((gmtp = gmtime (&unixtime)) == NULL)
+			if ((gmtp = gmtime_r (&unixtime, &mygm)) == NULL)
 			{
 				pp->lencode = 0;
 				refclock_report (peer, CEVNT_FAULT);
