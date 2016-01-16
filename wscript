@@ -51,8 +51,11 @@ def options(ctx):
 	grp.add_option('--disable-dns-lookup', action='store_true', default=False, help="Disable DNS lookups.")
 	grp.add_option('--disable-dns-retry', action='store_true', default=False, help="Disable retrying DNS lookups.")
 	grp.add_option('--disable-mdns-registration', action='store_true', default=False, help="Disable MDNS registration.")
-	grp.add_option('--enable-cross', action='store_true', default=False, help="Cross compile.")
 
+	grp = ctx.add_option_group("NTP cross compile options")
+	grp.add_option('--cross-compiler', type='string', help="Path to cross compiler CC. (enables cross-compiling)")
+	grp.add_option('--cross-cflags', type='string',  action="callback", callback=callback_flags, help="Cross compiler CFLAGS.")
+	grp.add_option('--cross-ldflags', type='string', action="callback", callback=callback_flags, help="Cross compiler LDFLAGS.")
 
 	grp = ctx.add_option_group("NTP configure features")
 	grp.add_option('--enable-leap-smear', action='store_true', default=False, help="Enable Leap Smearing.")

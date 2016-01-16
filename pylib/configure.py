@@ -8,18 +8,52 @@ def cmd_configure(ctx):
 	srcnode = ctx.srcnode.abspath()
 	bldnode = ctx.bldnode.abspath()
 
+	opt_map = {}
+	# Wipe out and override flags with those from the commandline
+	for flag in ctx.env.OPT_STORE:
+		opt = flag.replace("--", "").upper() # XXX: find a better way.
+		opt_map[opt] = ctx.env.OPT_STORE[flag]
+
+
+	msg("--- Configuring host ---")
+	ctx.setenv('host', ctx.env.derive())
+
 	ctx.load('compiler_c')
 	ctx.load('bison')
 
-	if ctx.options.enable_cross:
-		ctx.env.ENABLE_CROSS = True
+	for opt in opt_map:
+		ctx.env[opt] = opt_map[opt]
 
 	from compiler import check_compiler
 	check_compiler(ctx)
 
+
+
+	msg("--- Configuring main ---")
+	ctx.setenv("main", ctx.env.derive())
+
 	from check_type import check_type
 	from check_sizeof import check_sizeof
 	from check_structfield import check_structfield
+
+	for opt in opt_map:
+		ctx.env[opt] = opt_map[opt]
+
+	if ctx.options.cross_compiler:
+		ctx.env.ENABLE_CROSS = True
+
+		ctx.start_msg("Using Cross compiler CC:")
+#		ctx.get_cc_version(ctx.env.CC, gcc=True)
+		ctx.end_msg(ctx.options.cross_compiler)
+
+		ctx.env.CC = ctx.options.cross_compiler
+		ctx.env.LINK_CC = ctx.options.cross_compiler
+
+		if ctx.env["CROSS-CFLAGS"]:
+			ctx.env.CFLAGS = opt_map["CROSS-CFLAGS"]
+
+		if ctx.env["CROSS-LDFLAGS"]:
+			ctx.env.LDFLAGS = opt_map["CROSS-LDFLAGS"]
 
 
 	if ctx.options.list:
@@ -30,6 +64,7 @@ def cmd_configure(ctx):
 			print "%-5s %s" % (id, refclock_map[id]["descr"])
 
 		return
+
 
 
 	# This needs to be at the top since it modifies CC and AR
@@ -79,11 +114,6 @@ def cmd_configure(ctx):
 	# OS X needs this for IPV6
 	if ctx.env.PLATFORM_TARGET == "osx":
 		ctx.define("__APPLE_USE_RFC_3542", 1)
-
-	# Wipe out and override flags with those from the commandline
-	for flag in ctx.env.OPT_STORE:
-		opt = flag.replace("--", "").upper() # XXX: find a better way.
-		ctx.env[opt] = ctx.env.OPT_STORE[flag]
 
 	if ctx.options.enable_rtems_trace:
 		ctx.find_program("rtems-tld", var="BIN_RTEMS_TLD", path_list=[ctx.options.rtems_trace_path, ctx.env.BINDIR])
@@ -215,7 +245,7 @@ def cmd_configure(ctx):
 	ctx.check_cc(lib="edit", mandatory=False)
 	ctx.check_cc(lib="m")
 	ctx.check_cc(lib="ossaudio", mandatory=False)  # NetBSD audio
-	ctx.check_cc(lib="pthread")
+	ctx.check_cc(lib="pthread", mandatory=False)
 	ctx.check_cc(lib="rt", mandatory=False)
 	ctx.check_cc(lib="readline", mandatory=False)
 	ctx.check_cc(lib="thr", mandatory=False)
