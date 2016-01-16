@@ -107,7 +107,7 @@ def configure(ctx):
 from waflib.Build import BuildContext
 class check(BuildContext):
 	cmd = 'check'
-
+	variant = "main"
 
 # Borrowed from https://www.rtems.org/
 variant_cmd = (
@@ -116,8 +116,16 @@ variant_cmd = (
 	("install", InstallContext),
 	("step",    StepContext),
 	("list",    ListContext),
-	("check",   BuildContext)
+#	("check",   BuildContext)
 )
+
+for v in ["host", "main"]:
+    # the reason for creating these subclasses is just for __doc__ below...
+	for cmd, cls in variant_cmd:
+		class tmp(cls):
+			__doc__ = "%s %s" % (cmd, v)
+			cmd = "%s_%s" % (cmd, v)
+			variant = v
 
 def init_handler(ctx):
 	cmd = ctx.cmd
