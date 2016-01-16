@@ -61,6 +61,7 @@ def check_sizeof_cross(ctx, header, sizeof, mandatory=True):
 		try:
 			ctx.check_cc(
 				fragment	= SIZE_FRAG_CROSS % (header_snippet, sizeof, size),
+				features	= "c",
 				execute     = False,
 				mandatory	= mandatory,
 			)
