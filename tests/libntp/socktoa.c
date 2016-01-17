@@ -82,7 +82,7 @@ TEST(socktoa, HashNotEqual) {
 	sockaddr_u input1 = CreateSockaddr4("192.0.2.1", 123);
 	sockaddr_u input2 = CreateSockaddr4("192.0.2.2", 123);
 
-	TEST_ASSERT_FALSE(IsEqualS(&input1, &input2));
+	TEST_ASSERT_TRUE(IsDiffS(&input1, &input2));
 	TEST_ASSERT_NOT_EQUAL(sock_hash(&input1), sock_hash(&input2));
 }
 

@@ -99,7 +99,7 @@ TEST(decodenetnum, IllegalCharInPort) {
 	SET_PORT(&expected, NTP_PORT);
 
 	TEST_ASSERT_FALSE(decodenetnum(str, &actual));
-	TEST_ASSERT_FALSE(IsEqualS(&expected, &actual));
+	TEST_ASSERT_TRUE(IsDiffS(&expected, &actual));
 }
 
 TEST_GROUP_RUNNER(decodenetnum) {

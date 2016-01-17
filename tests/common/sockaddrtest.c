@@ -35,6 +35,36 @@ bool IsEqualS(const sockaddr_u *expected, const sockaddr_u *actual) {
 	}
 }
 
+/* Similar to IsEqualS, but doesn't print misleading messages */
+bool IsDiffS(const sockaddr_u *expected, const sockaddr_u *actual) {
+	if (expected->sa.sa_family != actual->sa.sa_family) {
+		return true;
+	}
+
+	if (actual->sa.sa_family == AF_INET) { // IPv4
+		if (expected->sa4.sin_port == actual->sa4.sin_port &&
+			memcmp(&expected->sa4.sin_addr, &actual->sa4.sin_addr,
+				   sizeof(in_addr_t)) == 0) {
+			printf("IPv4 address matches: %u (%s)\n", expected->sa4.sin_addr.s_addr, socktoa(expected));
+			return false;
+		} else {
+			return true;
+		}
+	} else if (actual->sa.sa_family == AF_INET6) { //IPv6
+		if (expected->sa6.sin6_port == actual->sa6.sin6_port &&
+			memcmp(&expected->sa6.sin6_addr, &actual->sa6.sin6_addr,
+				   sizeof(struct in6_addr)) == 0) {
+			printf("IPv6 address matches\n");
+			return false;
+		} else {
+			return true;
+		}
+	} else { // Unknown family
+		printf("Can't compare unknown address family\n");
+		return false;
+	}
+}
+
 sockaddr_u CreateSockaddr4(const char* address, unsigned int port) {
 	sockaddr_u s;
 	s.sa4.sin_family = AF_INET;
