@@ -4,6 +4,7 @@
 #include "ntp.h"
 
 bool IsEqualS(const sockaddr_u *expected, const sockaddr_u *actual);
+bool IsDiffS(const sockaddr_u *expected, const sockaddr_u *actual);
 sockaddr_u CreateSockaddr4(const char* address, unsigned int port);
 
 
