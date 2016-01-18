@@ -877,6 +877,7 @@ getresponse(
 	fd_set fds;
 	int n;
 	int errcode;
+	int bail = 0;
 
 	/*
 	 * This is pretty tricky.  We may get between 1 and MAXFRAG packets
@@ -900,6 +901,14 @@ getresponse(
 	 * code paths to loop again use continue.
 	 */
 	for (;;) {
+
+                /* Discarding various invalid packets can cause us to
+                   loop more than MAXFRAGS times, but enforce a sane bound
+                   on how long we're willing to spend here. */
+		if(bail++ >= (2*MAXFRAGS)) {
+                        warning("too many packets in response; bailing out");
+			return ERR_TOOMUCH;
+                }
 
 		if (numfrags == 0)
 			tvo = tvout;
