@@ -1279,7 +1279,7 @@ receive(
 	 * the packet is not bogus in symmetric interleaved mode.
 	 */
 	} else if (peer->flip == 0) {
-		if (!L_ISEQU(&p_org, &peer->aorg)) {
+		if (!L_ISEQU(&p_org, &peer->aorg) || L_ISZERO(&p_org)) {
 			peer->bogusorg++;
 			peer->flash |= BOGON2;	/* bogus */
 			if (!L_ISZERO(&peer->dst) && L_ISEQU(&p_org,
