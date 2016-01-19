@@ -88,7 +88,7 @@ symmetric key or public key cryptography.
 
 Autokey uses industry standard X.509 public certificates, which can be
 produced by commercial services, utility programs in the OpenSSL
-software library, and the link:keygen.html[{ntpkeygen}] utility program
+software library, and the link:ntpkeygen.html[{ntpkeygen}] utility program
 in the NTP software distribution. A certificate includes the subject
 name of the client, the issuer name of the server, the public key of the
 client and the time period over which the public and private keys
@@ -454,7 +454,7 @@ digest schemes or identity schemes and must be corrected by installing
 the correct media and/or correcting the configuration file. One of the
 most common errors is expired certificates, which must be regenerated
 and signed at least once per year using the
-link:keygen.html[+{ntpkeygen}+ - generate public and private keys]
+link:ntpkeygen.html[+{ntpkeygen}+ - generate public and private keys]
 program.
 
 The following error codes are reported via the NTP control and
@@ -501,7 +501,7 @@ file if configured.
 [[files]]
 == Files ==
 
-See the link:keygen.html[+{ntpkeygen}+] page. Note that provisions to
+See the link:ntpkeygen.html[+{ntpkeygen}+] page. Note that provisions to
 load leap second values from the NIST files have been removed. These
 provisions are now available whether or not the OpenSSL library is
 available. However, the functions that can download these values from
