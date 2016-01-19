@@ -213,7 +213,7 @@ typedef struct bind
 
 struct errorregression
 {
-	u_long err_count;	/* number of repititions per class */
+	u_long err_count;	/* number of repetitions per class */
 	u_long err_delay;	/* minimum delay between messages */
 };
 
@@ -283,7 +283,7 @@ struct errorinfo
 {
 	u_long err_started;	/* begin time (ntp) of error condition */
 	u_long err_last;	/* last time (ntp) error occurred */
-	u_long err_cnt;	/* number of error repititions */
+	u_long err_cnt;	/* number of error repetitions */
 	u_long err_suppressed;	/* number of suppressed messages */
 	struct errorregression *err_stage; /* current error stage */
 };

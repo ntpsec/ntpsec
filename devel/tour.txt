@@ -38,8 +38,8 @@ calendar representations.
 
 The vint64 type is a historical relic.  NTP was written well before
 the 64-bit word size became common. While compilers on 32-bit machines
-sometimes had have have "long long" as an integral 64-bit type, this
-was not guaranteed before C99.
+sometimes have had "long long" as an integral 64-bit type, this was not
+guaranteed before C99.
 
 Thus, NTP carries a "variant 64-bit int" type that is actually a union
 with several different interpretations. Support is mainly in
@@ -86,7 +86,7 @@ These aren't local types themselves - both are standardized in
 ANSI/POSIX.  They're both second/subsecond pairs intended to represent
 time without loss of precision due to float operations.  The
 difference is that a timespec represents nanoseconds, while a timeval
-represents only nanonseconds.
+represents only microseconds.
 
 Historically, struct timeval is associated with the minicomputer-based
 Berkeley Unixes of the 1980s, designed when processor clocks were
@@ -120,7 +120,7 @@ waiting for a UDP packet to arrive on some set of open interfaces, or
 a clock sample to arrive from a locally-attached reference clock.
 Incoming packets and clock samples are fed to a protocol state
 machine, which may generate UDP sends to peers.  This main loop is
-capured by a function in ntpd/ntpd.c tellingly named 'mainloop()'.
+captured by a function in ntpd/ntpd.c tellingly named 'mainloop()'.
 
 This main loop is interrupted once per second by a timer tick that
 sets an alarm flag visible to the mainloop() logic.  When execution
