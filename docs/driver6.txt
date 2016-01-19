@@ -67,8 +67,7 @@ the reference clock interface routines.
 
 This driver incorporates several features in common with other audio
 drivers such as described in the link:driver7.html[Radio CHU Audio
-Demodulator/Decoder] and the link:driver36.html[Radio WWV/H Audio
-Demodulator/Decoder] pages. They include automatic gain control (AGC),
+Demodulator/Decoder].  They include automatic gain control (AGC),
 selectable audio codec port and signal monitoring capabilities. For a
 discussion of these common features, as well as a guide to hookup,
 debugging and monitoring, see the link:audio.html[Reference Clock
