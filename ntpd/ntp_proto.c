@@ -1319,14 +1319,6 @@ receive(
 		report_event(PEVNT_AUTH, peer, "crypto_NAK");
 		peer->flash |= BOGON5;		/* bad auth */
 		peer->badauth++;
-		if (peer->flags & FLAG_PREEMPT) {
-			unpeer(peer);
-			return;
-		}
-#ifdef ENABLE_AUTOKEY
-		if (peer->crypto)
-			peer_clear(peer, "AUTH");
-#endif	/* ENABLE_AUTOKEY */
 		return;
 
 	/*
@@ -1345,10 +1337,6 @@ receive(
 		if (has_mac &&
 		    (hismode == MODE_ACTIVE || hismode == MODE_PASSIVE))
 			fast_xmit(rbufp, MODE_ACTIVE, 0, restrict_mask);
-		if (peer->flags & FLAG_PREEMPT) {
-			unpeer(peer);
-			return;
-		}
 #ifdef ENABLE_AUTOKEY
 		if (peer->crypto)
 			peer_clear(peer, "AUTH");
