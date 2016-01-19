@@ -1249,9 +1249,8 @@ receive(
 		peer->flash |= BOGON3;			/* unsynch */
 
 	/*
-	 * If the transmit timestamp duplicates a previous one, the
-	 * packet is a replay. This prevents the bad guys from replaying
-	 * the most recent packet, authenticated or not.
+	 * If the transmit timestamp duplicates the previous one, the
+	 * packet is a duplicate.
 	 */
 	} else if (L_ISEQU(&peer->xmt, &p_xmt)) {
 		peer->flash |= BOGON1;			/* duplicate */
@@ -1273,6 +1272,26 @@ receive(
 			return;
 		}
 
+		/* In basic (non-interleaved) broadcast mode, origin
+		 * timestamps are zero. This is problematic because,
+		 * when authentication is not enabled, origin timestamp
+		 * checking is our only real line of defense to prevent
+		 * spoofing by off-path attackers. Enabling
+		 * authentication helps, but then we need some means
+		 * of replay detection. Our solution is to reject
+		 * packets whose transmit timestamp is earlier than
+		 * one which was previously seen. This should be enforced
+		 * *only* if authentication is enabled, because otherwise
+		 * it results in an easy DoS by sending a spoofed packet
+		 * with the transmit timestamp far in the future.
+		 */
+		
+		if((restrict_mask & RES_DONTTRUST) &&
+		   L_ISGEQ(&peer->xmt, &p_xmt)) {
+			peer->flash |= BOGON1;
+			peer->oldpkt++;
+			return;
+		}
 	/*
 	 * Check for bogus packet in basic mode. If found, switch to
 	 * interleaved mode and resynchronize, but only after confirming
