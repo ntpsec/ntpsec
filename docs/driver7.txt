@@ -62,9 +62,8 @@ later in this page. Note that additional checks are done elsewhere in
 the reference clock interface routines.
 
 This driver incorporates several features in common with other audio
-drivers such as described in the link:driver36.html[Radio WWV/H Audio
-Demodulator/Decoder] and the link:driver6.html[IRIG Audio Decoder]
-pages. They include automatic gain control (AGC), selectable audio codec
+drivers such as described in the link:driver6.html[IRIG Audio Decoder]
+page. They include automatic gain control (AGC), selectable audio codec
 port and signal monitoring capabilities. For a discussion of these
 common features, as well as a guide to hookup, debugging and monitoring,
 see the link:audio.html[Reference Clock Audio Drivers] page.
