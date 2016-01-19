@@ -69,7 +69,7 @@ public-key cryptography feature is installed, the TAI offset is
 automatically propagated along with other cryptographic media to
 dependent servers and clients.
 
-You may also wish to read the page on link:leapsmer.html[leap smearing].
+You may also wish to read the page on link:leapsmear.html[leap smearing].
 
 include::includes/footer.txt[]
 
