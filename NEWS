@@ -16,7 +16,7 @@ Initial NTPsec beta release.
 * The documentation has been extensively updated and revised.  One
   important change is that manual pages are now generated from the
   same masters as this web documentation, so the two will no longer
-  drift out of synchronization.  
+  drift out of synchronization.
 
 * Internally, there is more consistent use of nanosecond precision.
   A visible effect of this is that time stepping with sufficiently
@@ -34,7 +34,7 @@ Initial NTPsec beta release.
 * The sntp program has been renamed 'ntpdig' in order to make
   NTP installables have a uniform name prefix and take up less
   namespace. Also, ntp-keygen is now ntpkeygen, ntp-wait
-  is ntpwait}, and update-leap is now ntpleapfetch.
+  is ntpwait, and update-leap is now ntpleapfetch.
 
 * A new utility, ntpfrob, collects several small diagnostic functions
   for reading and tweaking the local clock hardware, including reading
