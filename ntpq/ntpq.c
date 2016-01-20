@@ -2075,8 +2075,12 @@ decodearr(
 		    break;
 
 		bp = buf;
-		while (!isspace((int)*cp) && *cp != '\0')
+		while (!isspace((int)*cp) && *cp != '\0') {
 		    *bp++ = *cp++;
+		    if(bp >= buf + sizeof buf)
+		        return false;
+		}
+
 		*bp++ = '\0';
 
 		if (!decodetime(buf, lfp))
@@ -3088,7 +3092,11 @@ outputarr(
 	register char *cp;
 	register int i;
 	register int len;
-	char buf[256];
+	char *buf;
+
+	REQUIRE(narr >= 0 && narr <= MAXVALLEN);
+	buf = malloc(16 + 8*narr);
+	ENSURE(buf != NULL);
 
 	bp = buf;
 	/*
@@ -3116,6 +3124,7 @@ outputarr(
 	}
 	*bp = '\0';
 	output(fp, name, buf);
+	free(buf);
 }
 
 static char *
