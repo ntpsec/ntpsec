@@ -6,8 +6,69 @@ Much of the traditional function of a news file is now better addressed
 by browsing the comments in the revision history.  This file will focus
 on user-visible changes.
 
-== 2016-01-19: 0.9.1 (pending) ==
+== 2016-01-20: 0.9.1 (pending) ==
 
+Point release for security. Fixes:
+
+* CVE-2015-7973: Replay attack on authenticated broadcast mode
+  (Aanchal Malhotra)
+* CVE-2015-7975: nextvar() missing length check (Jonathan Gardner)
+* CVE-2015-7979: Off-path Denial of Service (DoS) attack on
+  authenticated broadcast and other preemptable modes (Aanchal
+  Malhotra)
+* CVE-2015-8138: Zero Origin Timestamp Bypass (Matthew van Gundy &
+  Jonathan Gardner)
+* CVE-2015-8139: Origin Leak: ntpq and ntpdc Disclose Origin Timestamp
+  to Unauthenticated Clients (Matthew van Gundy)
+* CVE-2015-8158: Potential Infinite Loop in ntpq (Jonathan Gardner)
+* Timing attack on MAC verification (Daniel Franke)
+* Missing length checks in decodearr() and outputarr() (Daniel Franke)
+
+Two additional security issues hve been reported to us for which we
+are not implementing code changes, but the user should be aware of
+their impact.
+
+The first (CVE-2015-8140) pertains to NTP's dynamic reconfiguration
+feature, which permits on-the-fly modification of NTP's configuration
+via ntpq. This feature is rarely used, typically disabled, and can
+only be enabled when authentication is configured. Ntpd has no means
+of detecting that a request to change its configuration is a replay of
+an old packet. Therefore, if an administrator sets ntpd to
+configuration A and then to configuration B, an attacker who captures
+the packets commanding these changes can replay the first one and
+restore ntpd's state to configuration A. This is only a concern when
+the configuration commands are sent over an untrusted
+network. Configuration changes made via localhost are not susceptible.
+
+This is an inherent design flaw in NTP cryptography and in the remote
+reconfiguration protocol, and can be fixed only with a considerable
+reworking and by changing the protocol in a way that is neither
+forward nor backward compatible. This cryptographic rework is on the
+horizon in the form of Network Time Security (currently a draft in the
+IETF network time working group). Given that this vulnerability
+impacts few if any real users, we have chosen to defer fixing it until
+we have tools more suitable to the task. For the mean time, if you
+rely on NTP's reconfiguration support, we recommend either restricting
+its use to localhost or trusted networks, or tunneling through SSH or
+a VPN. The 'nomodify' option to the 'restrict' directive may be used
+to enforce this policy.
+
+The second (CVE-2015-7974) pertains to the fact that when multiple
+trusted keys are configured, no mechanism exists to associate
+particular keys with particular peers or assign particular privileges.
+This is not a bug, per se, but rather a lack of expressiveness in
+NTP's configuration language. We intend to address in a future release
+as part of a larger redesign aimed at giving clearer semantics to the
+configuration language and making it easier to write safe
+configurations.
+
+Note that NTPsec is not impacted by CVE-2015-7976, CVE-2015-7977, or
+CVE-2015-7978. CVE-2015-7977 and CVE-2015-7978 both pertain to mode 7
+packets, support for which was completely removed before NTPsec's
+first beta. CVE-2015-7976 is a feature request to restrict the format
+of filenames used in saveconfig commands. Saveconfig support is
+disabled at compile time in NTPsec and will not be re-enabled without
+much more extensive hardening.
 
 == 2015-11-16: 0.9.0 ==
 
