@@ -93,13 +93,6 @@ extern	void	auth_prealloc_symkeys(int);
 extern	int	ymd2yd		(int, int, int);
 
 /* getopt.c */
-extern const int no_argument;
-extern const int required_argument;
-extern const int optional_argument;
-
-extern char* ntp_optarg;
-extern int ntp_optind, ntp_opterr, ntp_optopt;
-
 struct option {
     const char* name;
     int has_arg;
