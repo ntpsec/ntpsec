@@ -461,12 +461,13 @@ start_blocking_thread_internal(
 	} else if (stacksize < THREAD_MINSTACKSIZE) {
 		rc = pthread_attr_setstacksize(&thr_attr,
 					       THREAD_MINSTACKSIZE);
-		if (0 != rc)
+		if (0 != rc) {
 			errno = rc;
 			msyslog(LOG_ERR,
 				"start_blocking_thread: pthread_attr_setstacksize(0x%lx -> 0x%lx) %m",
 				(u_long)stacksize,
 				(u_long)THREAD_MINSTACKSIZE);
+		}
 	}
 	pthread_attr_setscope(&thr_attr, PTHREAD_SCOPE_SYSTEM);
 	c->thread_ref = emalloc_zero(sizeof(*c->thread_ref));
