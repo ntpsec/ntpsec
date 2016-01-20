@@ -53,10 +53,11 @@ static char *common_prettydate(l_fp *, bool);
 
 static struct tm *
 get_struct_tm(
-	const vint64 *stamp,
-	int	      local)
+	const	vint64 *stamp,
+	int	local,
+	struct	tm *tmbuf)
 {
-	struct tm  tmbuf, *tm = NULL;
+	struct tm *tm;
 	int32_t	   folds = 0;
 	time_t	   ts;
 
@@ -93,7 +94,7 @@ get_struct_tm(
 	 * versions of 'gmtime_r()' and 'localtime_r()' will bark on time
 	 * stamps < 0.
 	 */
-	while ((tm = (*(local ? localtime_r : gmtime_r))(&ts, &tmbuf)) == NULL)
+	while ((tm = (*(local ? localtime_r : gmtime_r))(&ts, tmbuf)) == NULL)
 		if (ts < 0) {
 			if (--folds < MINFOLD)
 				return NULL;
@@ -126,7 +127,7 @@ common_prettydate(
 	    "%08lx.%08lx %04d-%02d-%02dT%02d:%02d:%02d.%03u";
 
 	char	    *bp;
-	struct tm   *tm;
+	struct tm   *tm, tmbuf;
 	u_int	     msec;
 	uint32_t	     ntps;
 	vint64	     sec;
@@ -141,7 +142,7 @@ common_prettydate(
 		ntps++;
 	}
 	sec = ntpcal_ntp_to_time(ntps, NULL);
-	tm  = get_struct_tm(&sec, local);
+	tm  = get_struct_tm(&sec, local, &tmbuf);
 	if (!tm) {
 		/*
 		 * get a replacement, but always in UTC, using
@@ -192,14 +193,3 @@ gmprettydate(
 	return common_prettydate(ts, false);
 }
 
-
-struct tm *
-ntp2unix_tm(
-	uint32_t ntp, int local
-	)
-{
-	vint64 vl;
-	vl = ntpcal_ntp_to_time(ntp, NULL);
-	return get_struct_tm(&vl, local);
-}
-	

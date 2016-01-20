@@ -358,8 +358,6 @@ extern	void	get_systime	(l_fp *);
 extern	bool	step_systime	(double, int (*settime)(struct timespec *));
 extern	bool	adj_systime	(double, int (*adjtime)(const struct timeval *, struct timeval *));
 
-extern	struct tm * ntp2unix_tm (uint32_t ntp, int local);
-
 #define	lfptoa(fpv, ndec)	mfptoa((fpv)->l_ui, (fpv)->l_uf, (ndec))
 #define	lfptoms(fpv, ndec)	mfptoms((fpv)->l_ui, (fpv)->l_uf, (ndec))
 
