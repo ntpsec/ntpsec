@@ -20,7 +20,7 @@ It's known to build cleanly on:
 
 The basic parts of ntpd run on all of the above systems.
 
-That are many options we havn't tested yet.
+There are many options that we haven't yet tested.
 
 Refclocks known to work on Linux:
   20    NMEA GPS Receiver
