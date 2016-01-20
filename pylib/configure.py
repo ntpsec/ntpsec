@@ -76,9 +76,6 @@ def cmd_configure(ctx):
 	if ctx.options.enable_debug_gdb:
 		ctx.env.CFLAGS += ["-g"]
 
-	if ctx.options.enable_saveconfig:
-		ctx.define("SAVECONFIG", 1)
-
 	if not ctx.options.disable_debug:
 		ctx.define("DEBUG", 1)
 		ctx.env.BISONFLAGS += ["--debug"]
