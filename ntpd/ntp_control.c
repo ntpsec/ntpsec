@@ -251,7 +251,7 @@ static const struct ctl_proc control_codes[] = {
 #define	CP_ROOTDISPERSION	15
 #define	CP_REFID		16
 #define	CP_REFTIME		17
-/* #define	CP_ORG			18 */
+#define	CP_ORG			18
 #define	CP_REC			19
 #define	CP_XMT			20
 #define	CP_REACH		21
@@ -491,9 +491,9 @@ static const struct ctl_var peer_var[] = {
 	{ CP_ROOTDISPERSION, RO, "rootdisp" },	/* 15 */
 	{ CP_REFID,	RO, "refid" },		/* 16 */
 	{ CP_REFTIME,	RO, "reftime" },	/* 17 */
-        /* This variable is disabled because leaking it creates a
-           vulnerability */
-        /*	{ CP_ORG,	RO, "org" }, */	/* 18 */
+        /* Placeholder. Reporting of this variable is disabled because
+           leaking it creates a vulnerability */
+        { CP_ORG,	RO, "org" },	        /* 18 */
 	{ CP_REC,	RO, "rec" },		/* 19 */
 	{ CP_XMT,	RO, "xleave" },		/* 20 */
 	{ CP_REACH,	RO, "reach" },		/* 21 */
