@@ -176,7 +176,8 @@ def build(ctx):
 	ctx.load('rtems_trace', tooldir='pylib/')
 
 	if ctx.env.ENABLE_DOC:
-		ctx.recurse("docs")
+		if ctx.variant != "main":
+			ctx.recurse("docs")
 
 	if ctx.env.ENABLE_DOC_ONLY:
 		return
