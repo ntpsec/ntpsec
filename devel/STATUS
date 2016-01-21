@@ -1,4 +1,4 @@
-Last update, 2015 Dec 17
+Last update, 2016 Jan 21
 
 It builds on the following systems.  In general there should be no warnings,
 but as of the above date, there is one we can't easily work around.  Some
@@ -6,10 +6,11 @@ compilers will complain about
   comparison between signed and unsigned integer expressions
   at ntpd/ntp_io.c:4638
 
-It's known to build cleanly on:
-  Fedora 22 and 23 on i686 and x86_64
-  Debian wheezy and jessie on amd64
-  Ubuntu 14.04.3 LTS and 15.04 on x86_64
+We have reports that it builds cleanly on at least:
+  Fedora 22 and 23 (i686, x86_64)
+  CentOS 5.11 (i386)
+  Debian wheezy (amd64)  and jessie (amd64, i686)
+  Ubuntu 14.04.3 LTS and 15.10 on x86_64
   Raspbian wheezy and jessie on ARM v6 and v7 (Pi and Pi 2)
   Debian wheezy on BeagleBone Black ARM v7
 
