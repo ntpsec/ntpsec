@@ -175,15 +175,17 @@ def build(ctx):
 	ctx.load('asciidoc', tooldir='pylib/')
 	ctx.load('rtems_trace', tooldir='pylib/')
 
-	if ctx.variant == "host":
-		ctx.recurse("ntpd")
-		return
-
 	if ctx.env.ENABLE_DOC:
 		ctx.recurse("docs")
 
 	if ctx.env.ENABLE_DOC_ONLY:
 		return
+
+
+	if ctx.variant == "host":
+		ctx.recurse("ntpd")
+		return
+
 
 	ctx.recurse("libisc")
 	if ctx.env.REFCLOCK_PARSE: # Only required by the parse refclock

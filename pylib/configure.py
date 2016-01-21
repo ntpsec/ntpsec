@@ -15,6 +15,17 @@ def cmd_configure(ctx):
 		opt_map[opt] = ctx.env.OPT_STORE[flag]
 
 
+
+
+
+
+
+
+
+
+
+
+
 	msg("--- Configuring host ---")
 	ctx.setenv('host', ctx.env.derive())
 
@@ -28,89 +39,6 @@ def cmd_configure(ctx):
 	check_compiler(ctx)
 
 
-
-	msg("--- Configuring main ---")
-	ctx.setenv("main", ctx.env.derive())
-
-	from check_type import check_type
-	from check_sizeof import check_sizeof
-	from check_structfield import check_structfield
-
-	for opt in opt_map:
-		ctx.env[opt] = opt_map[opt]
-
-	if ctx.options.cross_compiler:
-		ctx.env.ENABLE_CROSS = True
-
-		ctx.start_msg("Using Cross compiler CC:")
-#		ctx.get_cc_version(ctx.env.CC, gcc=True)
-		ctx.end_msg(ctx.options.cross_compiler)
-
-		ctx.env.CC = ctx.options.cross_compiler
-		ctx.env.LINK_CC = ctx.options.cross_compiler
-
-		if ctx.env["CROSS-CFLAGS"]:
-			ctx.env.CFLAGS = opt_map["CROSS-CFLAGS"]
-
-		if ctx.env["CROSS-LDFLAGS"]:
-			ctx.env.LDFLAGS = opt_map["CROSS-LDFLAGS"]
-
-
-	if ctx.options.list:
-		from refclock import refclock_map
-		print "ID    Description"
-		print "~~    ~~~~~~~~~~~"
-		for id in refclock_map:
-			print "%-5s %s" % (id, refclock_map[id]["descr"])
-
-		return
-
-
-
-	# This needs to be at the top since it modifies CC and AR
-	if ctx.options.enable_fortify:
-		from check_fortify import check_fortify
-		check_fortify(ctx)
-
-
-	if ctx.options.enable_debug_gdb:
-		ctx.env.CFLAGS += ["-g"]
-
-	if not ctx.options.disable_debug:
-		ctx.define("DEBUG", 1)
-		ctx.env.BISONFLAGS += ["--debug"]
-
-	ctx.env.CFLAGS += ["-Wall", "-Wextra"]	# Default CFLAGS.
-
-
-	# Check target platform.
-	ctx.start_msg("Checking build target")
-	from sys import platform
-	if platform == "win32":
-		ctx.env.PLATFORM_TARGET = "win"
-	elif platform == "darwin":
-		ctx.env.PLATFORM_TARGET = "osx"
-	elif platform.startswith("freebsd"):
-		ctx.env.PLATFORM_TARGET = "freebsd"
-	elif platform.startswith("netbsd"):
-		ctx.env.PLATFORM_TARGET = "netbsd"
-	else:
-		ctx.env.PLATFORM_TARGET = "unix"
-	ctx.end_msg(ctx.env.PLATFORM_TARGET	)
-
-
-	# XXX: hack
-	if ctx.env.PLATFORM_TARGET in ["freebsd", "osx"]:
-		ctx.env.PLATFORM_INCLUDES = ["/usr/local/include"]
-		ctx.env.PLATFORM_LIBPATH = ["/usr/local/lib"]
-	elif ctx.env.PLATFORM_TARGET == "netbsd":
-		ctx.env.PLATFORM_LIBPATH = ["/usr/lib"]
-	elif ctx.env.PLATFORM_TARGET == "win":
-		ctx.load("msvc")
-
-	# OS X needs this for IPV6
-	if ctx.env.PLATFORM_TARGET == "osx":
-		ctx.define("__APPLE_USE_RFC_3542", 1)
 
 	if ctx.options.enable_rtems_trace:
 		ctx.find_program("rtems-tld", var="BIN_RTEMS_TLD", path_list=[ctx.options.rtems_trace_path, ctx.env.BINDIR])
@@ -171,6 +99,93 @@ def cmd_configure(ctx):
 
 	ctx.define("NTPS_VERSION_STRING", ctx.env.NTPS_VERSION_STRING)
 	ctx.end_msg(ctx.env.NTPS_VERSION_STRING)
+
+
+
+
+
+
+
+	msg("--- Configuring main ---")
+	ctx.setenv("main", ctx.env.derive())
+
+	from check_type import check_type
+	from check_sizeof import check_sizeof
+	from check_structfield import check_structfield
+
+	for opt in opt_map:
+		ctx.env[opt] = opt_map[opt]
+
+	if ctx.options.cross_compiler:
+		ctx.env.ENABLE_CROSS = True
+
+		ctx.start_msg("Using Cross compiler CC:")
+#		ctx.get_cc_version(ctx.env.CC, gcc=True)
+		ctx.end_msg(ctx.options.cross_compiler)
+
+		ctx.env.CC = ctx.options.cross_compiler
+		ctx.env.LINK_CC = ctx.options.cross_compiler
+
+		if ctx.env["CROSS-CFLAGS"]:
+			ctx.env.CFLAGS = opt_map["CROSS-CFLAGS"]
+
+		if ctx.env["CROSS-LDFLAGS"]:
+			ctx.env.LDFLAGS = opt_map["CROSS-LDFLAGS"]
+
+
+	if ctx.options.list:
+		from refclock import refclock_map
+		print "ID    Description"
+		print "~~    ~~~~~~~~~~~"
+		for id in refclock_map:
+			print "%-5s %s" % (id, refclock_map[id]["descr"])
+
+		return
+
+	# This needs to be at the top since it modifies CC and AR
+	if ctx.options.enable_fortify:
+		from check_fortify import check_fortify
+		check_fortify(ctx)
+
+
+	if ctx.options.enable_debug_gdb:
+		ctx.env.CFLAGS += ["-g"]
+
+	if not ctx.options.disable_debug:
+		ctx.define("DEBUG", 1)
+		ctx.env.BISONFLAGS += ["--debug"]
+
+	ctx.env.CFLAGS += ["-Wall", "-Wextra"]	# Default CFLAGS.
+
+
+	# Check target platform.
+	ctx.start_msg("Checking build target")
+	from sys import platform
+	if platform == "win32":
+		ctx.env.PLATFORM_TARGET = "win"
+	elif platform == "darwin":
+		ctx.env.PLATFORM_TARGET = "osx"
+	elif platform.startswith("freebsd"):
+		ctx.env.PLATFORM_TARGET = "freebsd"
+	elif platform.startswith("netbsd"):
+		ctx.env.PLATFORM_TARGET = "netbsd"
+	else:
+		ctx.env.PLATFORM_TARGET = "unix"
+	ctx.end_msg(ctx.env.PLATFORM_TARGET	)
+
+
+	# XXX: hack
+	if ctx.env.PLATFORM_TARGET in ["freebsd", "osx"]:
+		ctx.env.PLATFORM_INCLUDES = ["/usr/local/include"]
+		ctx.env.PLATFORM_LIBPATH = ["/usr/local/lib"]
+	elif ctx.env.PLATFORM_TARGET == "netbsd":
+		ctx.env.PLATFORM_LIBPATH = ["/usr/lib"]
+	elif ctx.env.PLATFORM_TARGET == "win":
+		ctx.load("msvc")
+
+	# OS X needs this for IPV6
+	if ctx.env.PLATFORM_TARGET == "osx":
+		ctx.define("__APPLE_USE_RFC_3542", 1)
 
 	# int32_t and uint32_t probes aren't really needed, POSIX guarantees
 	# them.  But int64_t and uint64_t are not guaranteed to exist on 32-bit
