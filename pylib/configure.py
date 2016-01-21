@@ -14,18 +14,6 @@ def cmd_configure(ctx):
 		opt = flag.replace("--", "").upper() # XXX: find a better way.
 		opt_map[opt] = ctx.env.OPT_STORE[flag]
 
-
-
-
-
-
-
-
-
-
-
-
-
 	msg("--- Configuring host ---")
 	ctx.setenv('host', ctx.env.derive())
 
@@ -70,9 +58,6 @@ def cmd_configure(ctx):
 	if not ctx.options.enable_a2x_xmllint:
 		ctx.env.A2X_FLAGS += ["--no-xmllint"]
 
-	# The rest is not needed for documentation building.
-	if ctx.options.enable_doc_only:
-		return
 
 	# Disable manpages within build()
 	if ctx.options.disable_manpage:
@@ -101,13 +86,15 @@ def cmd_configure(ctx):
 	ctx.end_msg(ctx.env.NTPS_VERSION_STRING)
 
 
-
-
-
-
-
 	msg("--- Configuring main ---")
 	ctx.setenv("main", ctx.env.derive())
+
+	# XXX: temp hack to fix --enable-doc-only
+	ctx.env.ENABLE_DOC_ONLY = ctx.options.enable_doc_only
+
+	# The rest is not needed for documentation building.
+	if ctx.options.enable_doc_only:
+		return
 
 	from check_type import check_type
 	from check_sizeof import check_sizeof
