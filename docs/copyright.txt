@@ -79,7 +79,7 @@ driver for JJY receivers
 Leitch atomic clock controller
 3.  mailto:altmeier@atlsoft.de[Bernd Altmeier <altmeier@atlsoft.de>]
 hopf Elektronik serial line and PCI-bus devices
-4.  mailto:vbais@mailman1.intel.co[Viraj Bais
+4.  mailto:vbais@mailman1.intel.com[Viraj Bais
 <vbais@mailman1.intel.com>] and
 mailto:kirkwood@striderfm.intel.com[Clayton Kirkwood
 <kirkwood@striderfm.intel.com>] port to WindowsNT 3.5
@@ -124,7 +124,7 @@ General maintenance, Windows port interpolation rewrite
 <glenn@herald.usask.ca>] GOES clock driver
 23. mailto:iglesias@uci.edu[Mike Iglesias <iglesias@uci.edu>] DEC
 Alpha port
-24. mailto:jagubox.gsfc.nasa.gov[Jim Jagielski
+24. mailto:jim@jagubox.gsfc.nasa.gov[Jim Jagielski
 <jim@jagubox.gsfc.nasa.gov>] A/UX port
 25. mailto:jbj@chatham.usdesign.com[Jeff Johnson
 <jbj@chatham.usdesign.com>] massive prototyping overhaul
@@ -134,7 +134,7 @@ mailto:H.Lambermont@chello.nl[<H.Lambermont@chello.nl>] ntpsweep
 27. mailto:phk@FreeBSD.ORG[Poul-Henning Kamp <phk@FreeBSD.ORG>]
 Oncore driver (Original author)
 28. http://www4.informatik.uni-erlangen.de/%7ekardel[Frank Kardel]
-mailto:kardel%28at%29ntp%28dot%29org[<kardel (at) ntp
+mailto:kardel@ntp.org[<kardel (at) ntp
 (dot) org>] PARSE <GENERIC> (driver 14 reference clocks), STREAMS
 modules for PARSE, support scripts, syslog cleanup, dynamic interface
 handling
@@ -187,7 +187,7 @@ html/pic/ subdirectory
 <schnitz@unipress.com>] Unixware1 port
 50. mailto:shields@tembel.org[Michael Shields <shields@tembel.org>]
 USNO clock driver
-51. mailto:pebbles.jpl.nasa.gov[Jeff Steinman
+51. mailto:jss@pebbles.jpl.nasa.gov[Jeff Steinman
 <jss@pebbles.jpl.nasa.gov>] Datum PTS clock driver
 52. mailto:harlan@pfcs.com[Harlan Stenn <harlan@pfcs.com>] GNU
 automake/autoconfigure makeover, various other bits (see the ChangeLog)
