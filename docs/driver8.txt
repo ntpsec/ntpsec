@@ -78,7 +78,7 @@ hardware and kindly lent me their time and patience during the
 development and debugging cycle. Thus for continued support and quality,
 direct access to the receivers is a big help. Nevertheless I am not
 prepared to buy these reference clocks - donations to
-(mailto:kardel%20%3CAT%3E%20ntp.org[kardel <AT> ntp.org]) are welcome as
+(mailto:kardel@ntp.org[kardel <AT> ntp.org]) are welcome as
 long as they work within Europe 8-).
 +
 Verified implementations are:
