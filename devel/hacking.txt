@@ -84,13 +84,14 @@ Such simplicity is often difficult or impractical for heterogenous
 data that needs to be both grouped and labeled, so we have another
 convention for those cases. Here it is:
 
+[quote]
 Wherever it is reasonable, tools that generate complex reports to
 standard output should be able to emit two formats. The default can be
 relatively unstructured multiline text for human eyeballs. There
 should also be a -j/--json option that emits a self-describing JSON
-object.  You can read about JSON at
+object.
 
-	 http://www.json.org/
+You can read about JSON at http://www.json.org/
 
 Be aware that if you present a tool design with a messy output format
 and no JSON option it is quite likely to be rejected.
