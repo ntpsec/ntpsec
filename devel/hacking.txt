@@ -49,7 +49,7 @@ cause buffer overruns and (all too often) exploitable security holes:
 * sprintf, vsprintf: use snprintf and vsnprintf instead.
 * In scanf and friends, the %s format without length limit is banned.
 * strtok: use strtok_r() or unroll this into the obvious loop.
-* gets: Use fgets instead. 
+* gets: Use fgets instead.
 * gmtime(), localtime(), asctime(), ctime(): use the reentrant *_r variants.
 * tmpnam() - use mkstemp() or tmpfile() instead.
 * dirname() - the Linux version is re-entrant but this property is not portable.
@@ -104,8 +104,8 @@ always with full years and timezone offset.
 
 Much of the historic code in this distribution is under the "NTP
 License" resembling BSD-2-clause.  Our favored licenses are
-BSD-2-clause for code and Creative Commons Attribute 4.0 License for
-documentation.
+BSD-2-clause for code and Creative Commons Attribution 4.0 License
+for documentation.
 
 Please do *not* submit code under GPL or other licenses which place
 conditions on derived works; we cannot accept such code.
@@ -250,9 +250,9 @@ The file "dot.emacs" has the emacs C-mode indentation style that Dave likes.
 === Other languages ===
 
 The only scripting languages allowed and supported are POSIX sh and
-Python 2.5. If you find code in the distribution that is in a
-scripting language and not one of these, you would be doing us a
-favor by translating it into Python or sh.
+Python 2.5 or later, but not Python 3. If you find code in the
+distribution that is in a scripting language and not one of these,
+you would be doing us a favor by translating it into Python or sh.
 
 The reason for this policy is not that we hate all other scripting
 languages, it's to reduce the complexity of maintenance and testing
