@@ -8,14 +8,14 @@
 
 * Cleanup and separate features in pylib/*
 
-* Add 'snapshot' feature to dump config status into a JSON file for collecting 
+* Add 'snapshot' feature to dump config status into a JSON file for collecting
   build + platform information
 
 * The install production needs to warn of stale ntpdc and ntpdate binaries.
 
 * Add support for enabling all conditional checks to ensure none are broken.
 
-* Add support for disabling specific conditional tests to ensure nothing is 
+* Add support for disabling specific conditional tests to ensure nothing is
   compiled into the base in a surprising fashion, e.g. --undefine=FOO should
   suppress generation of any FOO #define into config.h.
 
@@ -103,16 +103,18 @@
   read-only and solid.  Maybe write a support package that does all the
   work if you call it with the date/time.
 
-Hal:
-> I think there is some interaction between when the ACTS driver calls and the 
-> state of other stuff, like the connection to the net.  This is probably a 
-> good candidate to get cleaned up.
-> 
-> There is another possible tangle in this area.  If you set "noselect" on the 
-> server line in the config file, ntpd goes through all the action of 
-> collecting the data and writing log files, but then drops the clock.  I don't 
-> know things well enough to be sure that this sort of logic won't pick one 
-> back up.
+[quote, Hal]
+__________
+I think there is some interaction between when the ACTS driver calls and the
+state of other stuff, like the connection to the net.  This is probably a
+good candidate to get cleaned up.
+
+There is another possible tangle in this area.  If you set "noselect" on the
+server line in the config file, ntpd goes through all the action of
+collecting the data and writing log files, but then drops the clock.  I don't
+know things well enough to be sure that this sort of logic won't pick one
+back up.
+__________
 
 * Forward-port NTP Classic fix for [Bug 2830] just in case we want to
   revive Autokey someday.
