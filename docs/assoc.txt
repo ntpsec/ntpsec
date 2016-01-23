@@ -69,10 +69,11 @@ client (mode 3) request to the specified server and expects a server
 described as a "pull" operation, in that the host pulls the time and
 related values from the server.
 
-A host is configured in client mode using the +server+ (sic) command and
-specifying the server DNS name or IPv4 or IPv6 address; the server
-requires no prior configuration. The +iburst+ option described later on
-this page is recommended for clients, as this speeds up initial
+A host is configured in client mode using the +server+ (sic)
+or +pool+ command and specifying the server DNS name or IPv4 or
+IPv6 address; the server requires no prior configuration (but
+see link:access.html[Access Control]). The +iburst+ option described
+later on this page is recommended for clients, as this speeds up initial
 synchronization from several minutes to several seconds. The +burst+
 option described later on this page can be useful to reduce jitter on
 very noisy dial-up or ISDN network links.
