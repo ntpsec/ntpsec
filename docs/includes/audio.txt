@@ -1,4 +1,4 @@
-== Reference Clock Audio Drivers ==
+=== Reference Clock Audio Drivers ===
 * link:driver6.html[IRIG Audio Decoder]
 * link:driver7.html[Radio CHU Audio Demodulator/Decoder]
 * link:audio.html[Reference Clock Audio Drivers]
