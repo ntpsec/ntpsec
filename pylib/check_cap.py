@@ -37,7 +37,7 @@ def check_cap_run(ctx):
 		mandatory	= False
 	)
 
-	check_sanity(ctx, ctx.env.LIBCAP_HEADER, "CAPABILITY")
+	check_sanity(ctx, ctx.env.LIBCAP_HEADER, "libcap")
 
 
 	if ctx.get_define("HAVE_CAPABILITY"):
