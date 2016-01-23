@@ -121,7 +121,7 @@ the 0.9.0 beta release.
 * [Bug 2625] Deprecate flag1 in local refclock.  Hal Murray, Harlan Stenn.
 * [Bug 2778] Implement "apeers"  ntpq command to include associd.
 * [Bug 2823] ntpsweep with recursive peers option doesn't work.  H.Stenn.
-* [Bug 2836] DFC77 patches from Frank Kardel to make decoding more
+* [Bug 2836] DCF77 patches from Frank Kardel to make decoding more
   robust, and require 2 consecutive timestamps to be consistent.
 * [Bug 2845] Harden memory allocation in ntpd; implement and
   use 'eallocarray(...)' where appropriate.
