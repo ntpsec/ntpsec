@@ -24,14 +24,14 @@ Point release for security. Fixes:
 * Timing attack on MAC verification (Daniel Franke)
 * Missing length checks in decodearr() and outputarr() (Daniel Franke)
 
-Two additional security issues hve been reported to us for which we
+Two additional security issues have been reported to us for which we
 are not implementing code changes, but the user should be aware of
 their impact.
 
 The first (CVE-2015-8140) pertains to NTP's dynamic reconfiguration
 feature, which permits on-the-fly modification of NTP's configuration
 via ntpq. This feature is rarely used, typically disabled, and can
-only be enabled when authentication is configured. Ntpd has no means
+only be enabled when authentication is configured. ntpd has no means
 of detecting that a request to change its configuration is a replay of
 an old packet. Therefore, if an administrator sets ntpd to
 configuration A and then to configuration B, an attacker who captures
