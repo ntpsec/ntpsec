@@ -152,8 +152,8 @@ driver relative to an association designated the prefer peer.
 == List of Reference Clock Drivers ==
 
 Following is a list showing the type and title of each driver currently
-implemented. The compile-time identifier for each is shown in
-parentheses. Click on a selected type for specific description and
+implemented. The default compile-time identifier for each is shown in
+under +RefID+. Click on a selected type for specific description and
 configuration documentation, including the clock address, reference ID,
 driver ID, device name and serial line speed. For those drivers without
 specific documentation, please contact the author listed in the
@@ -170,36 +170,36 @@ a closed-source driver to run.  This filtered out the
 Datum/Bancomm/Symmetricom bc600-series GPS/IRIG Receiver.
 
 [options="header"]
-[cols="10%,5%,85%",options="header"]
+[cols="10%,5%,5%,80%",options="header"]
 |====================================================================
-| Number                      | Flags | Driver
-| link:driver1.html[Type 1]   | D     | Undisciplined Local Clock
-| link:driver4.html[Type 4]   | -     | Generic Spectracom Receivers
-| link:driver5.html[Type 5]   | D     | TrueTime GPS/GOES Receivers
-| link:driver6.html[Type 6]   | D     | IRIG Audio Decoder
-| link:driver7.html[Type 7]   | D     | Radio CHU Audio Demodulator/Decoder
-| link:driver8.html[Type 8]   | T     | Generic Reference Driver (Parse)
-| link:driver9.html[Type 9]   | D     | Magnavox MX4200 GPS Receiver
-| link:driver10.html[Type 10] | D     | Austron 2200A/2201A GPS Receivers
-| link:driver11.html[Type 11] | D     | Arbiter 1088A/B GPS Receiver
-| link:driver18.html[Type 18] | -     | NIST/USNO/PTB Modem Time Services
-| link:driver20.html[Type 20] | T     | Generic NMEA GPS Receiver
-| link:driver22.html[Type 22] | T     | PPS Clock Discipline
-| link:driver26.html[Type 26] | T     | Hewlett Packard 58503A GPS Receiver
-| link:driver27.html[Type 27] | D     | Arcron MSF Receiver
-| link:driver28.html[Type 28] | T     | Shared Memory Driver
-| link:driver29.html[Type 29] | TM    | Trimble Navigation Palisade GPS
-| link:driver30.html[Type 30] | -     | Motorola UT Oncore GPS
-| link:driver31.html[Type 31] | D     | Rockwell Jupiter GPS
-| link:driver33.html[Type 33] | D     | Dumb Clock
-| link:driver35.html[Type 35] | D     | Conrad Parallel Port Radio Clock
-| link:driver38.html[Type 38] | D     | hopf GPS/DCF77 6021/komp for Serial Line
-| link:driver39.html[Type 39] | -     | hopf GPS/DCF77 6039 for PCI-Bus
-| link:driver40.html[Type 40] | T     | JJY Receivers
-| link:driver42.html[Type 42] | -     | Zyfer GPStarplus Receiver
-| link:driver44.html[Type 44] | -     | NeoClock4X - DCF77 / TDF serial line
-| link:driver45.html[Type 45] | -     | Spectracom TSYNC PCI
-| link:driver46.html[Type 46] | T     | GPSD NG client protocol
+| Number                      | Flags |RefID| Driver
+| link:driver1.html[Type 1]   | D     |LOCL | Undisciplined Local Clock
+| link:driver4.html[Type 4]   | -     |+SPECTRACOM+| Generic Spectracom Receivers
+| link:driver5.html[Type 5]   | D     |TRUE | TrueTime GPS/GOES Receivers
+| link:driver6.html[Type 6]   | D     |IRIG | IRIG Audio Decoder
+| link:driver7.html[Type 7]   | D     |+CHU+| Radio CHU Audio Demodulator/Decoder
+| link:driver8.html[Type 8]   | TR    |DCFx | Generic Reference Driver (Parse)
+| link:driver9.html[Type 9]   | D     |GPS  | Magnavox MX4200 GPS Receiver
+| link:driver10.html[Type 10] | D     |GPS  | Austron 2200A/2201A GPS Receivers
+| link:driver11.html[Type 11] | D     |GPS  | Arbiter 1088A/B GPS Receiver
+| link:driver18.html[Type 18] | R     |NIST | NIST/USNO/PTB Modem Time Services
+| link:driver20.html[Type 20] | T     |GPS  | Generic NMEA GPS Receiver
+| link:driver22.html[Type 22] | T     |PPS  | PPS Clock Discipline
+| link:driver26.html[Type 26] | T     |GPS  | Hewlett Packard 58503A GPS Receiver
+| link:driver27.html[Type 27] | DR    |MSF  | Arcron MSF Receiver
+| link:driver28.html[Type 28] | T     |SHM  | Shared Memory Driver
+| link:driver29.html[Type 29] | TM    |GPS  | Trimble Navigation Palisade GPS
+| link:driver30.html[Type 30] | -     |GPS  | Motorola UT Oncore GPS
+| link:driver31.html[Type 31] | D     |GPS  | Rockwell Jupiter GPS
+| link:driver33.html[Type 33] | D     |DUMB | Dumb Clock
+| link:driver35.html[Type 35] | D     |PCF  | Conrad Parallel Port Radio Clock
+| link:driver38.html[Type 38] | D     |hopf | hopf GPS/DCF77 6021/komp for Serial Line
+| link:driver39.html[Type 39] | -     |hopf | hopf GPS/DCF77 6039 for PCI-Bus
+| link:driver40.html[Type 40] | T     |JJY  | JJY Receivers
+| link:driver42.html[Type 42] | -     |GPS  | Zyfer GPStarplus Receiver
+| link:driver44.html[Type 44] | -     |neol | NeoClock4X - DCF77 / TDF serial line
+| link:driver45.html[Type 45] | R     |GPS  | Spectracom TSYNC PCI
+| link:driver46.html[Type 46] | T     |GPSD | GPSD NG client protocol
 |====================================================================
 
 The flags field should be interpreted as follows:
@@ -210,6 +210,7 @@ The flags field should be interpreted as follows:
 | D | Deprecated.  May be removed in a future release
 | T | Regularly tested by an active maintainer (some devices/modes)
 | M | The driver supports multiple devices or major modes
+| R | Multiple Reference IDs supported, please check the driver page
 |====================================================================
 
 Driver numbers 2, 3, 12, 13, 14, 15, 16, 17, 19, 21, 23, 24, 25, 32, 34,
