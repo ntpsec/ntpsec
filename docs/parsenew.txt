@@ -14,7 +14,7 @@ What to do:
 
 Make a conversion module (libparse/clk_*.c)
 
-1.  What ist the time code format ?
+1.  What is the time code format ?
 * find year, month, day, hour, minute, second, status (synchronised or
 not), possibly time zone information (you need to give the offset to
 UTC) You will have to convert the data from a string into a struct
@@ -68,13 +68,13 @@ These are feature flags denoting items that are supported by the clock:
    
 ----------------------------------------------------------------------------
 +
-If the utctime field is non zero this value will be take as time code
+If the utctime field is non-zero this value will be take as time code
 value. This allows for conversion routines that already have the utc
 time value. The utctime field gives the seconds since Jan 1st 1970,
 0:00:00. The useconds field gives the respective usec value. The fields
 for date and time (down to second resolution) will be ignored.
 +
-Conversion is done in the cvt_* routine in parse/clk_*.c files. look in
+Conversion is done in the cvt_* routine in parse/clk_*.c files. Look in
 them for examples. The basic structure is:
 +
 -----------------------------------------------------
@@ -127,8 +127,9 @@ The above should have given you some hints on how to build a clk_*.c
 file with the time code conversion. See the examples and pick a clock
 closest to yours and tweak the code to match your clock.
 +
-In order to make your clk_*.c file usable a reference to the clockformat
+In order to make your clk_*.c file usable, a reference to the clockformat
 structure must be put into parse_conf.c.
+
 2.  TTY setup and initialization/configuration will be done in
 ntpd/refclock_parse.c.
 * Find out the exact tty settings for your clock (baud rate, parity,
@@ -207,8 +208,8 @@ clocks for example)
   };
 -------------------------------------------------------------------------------------
 
-Well, this is very sketchy, i know. But I hope it helps a little bit.
-The best way is to look which clock comes closest to your and tweak that
+Well, this is very sketchy, I know. But I hope it helps a little bit.
+The best way is to look which clock comes closest to yours and tweak that
 code.
 
 Two sorts of clocks are used with parse. Clocks that automatically send
@@ -217,7 +218,7 @@ because they send the data all the time. The second sort are the clocks
 that need a command sent to them in order to reply with a time code
 (like the Trimble clock).
 
-For questions: mailto:%20kardel%20AT%20acm.org[kardel@acm.org].
+For questions: mailto:kardel@acm.org[kardel@acm.org].
 
 Please include an exact description on how your clock works.
 (initialization, TTY modes, strings to be sent to it, responses received
