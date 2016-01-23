@@ -1,4 +1,4 @@
-== Reference Clock Support ==
+=== Reference Clock Support ===
 * link:extern.html[External Clock Discipline and the Local Clock Driver]
 * link:howto.html[How to Write a Reference Clock Driver]
 * link:howto.html[How to build new PARSE clocks]
