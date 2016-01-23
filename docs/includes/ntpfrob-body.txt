@@ -49,7 +49,7 @@ maintainers.
 
 Normally this tool reports in an eyeball-friendly unstructured text
 format. With the -j option (where applicable) it reports JSON records.
-Note that the -j option should be given before any mode option. 
+Note that the -j option should be given before any mode option.
 
 The reporting formats of this tool should be considered unstable;
 they may change as diagnostics are added or improved.  JSON
@@ -59,7 +59,7 @@ reports will be kept forward-compatible through changes.
 
 The -A function reads your clock's tick rate in microseconds.  The -a
 function sets it. Both rely on the adjtimex(2) system call.  This
-mode finishes by tereporting the tick value and (if available) the
+mode finishes by reporting the tick value and (if available) the
 tick adjustment value.
 
 The -j option is applicable to this mode.
@@ -72,15 +72,15 @@ enough to have a fully POSIX.1-2001-conformant Unix.
 The -c option can be used to determine the timing jitter due to the
 operating system in a gettimeofday() call.  For most systems the
 dominant contribution to the jitter budget is the period of the
-hardware interrupt, usually in the range 10 us-1 ms. For those systems
-with microsecond counters the jitter is dominated only by the
-operating system.
+hardware interrupt, usually in the range between 10 us and 1 ms. For
+those systems with microsecond counters the jitter is dominated
+only by the operating system.
 
 The -j option is applicable to this mode.  With the -r option, write
 the raw unsorted clock samples to standard output for post-analysis.
-All but the last -j or -r option before the -c mode flag is ignored
+All but the last -j or -r option before the -c mode flag is ignored.
 
-=== Pulse-per-second check ==
+=== Pulse-per-second check ===
 
 The -p option shows whether the  PPS-API (RFC 2783 kernel
 PPS interface) finds PPS on a specified device.
