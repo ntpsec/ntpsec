@@ -20,7 +20,7 @@ requirement for it, please make this known to us.
 
 This driver synchronizes the computer time using shortwave radio
 transmissions from Canadian time/frequency station
-http://inms-ienm.nrc-cnrc.gc.ca/time_services/shortwave_broadcasts_e.html[CHU]
+http://www.nrc-cnrc.gc.ca/eng/services/time/short_wave.html[CHU]
 in Ottawa, Ontario. CHU transmissions are made continuously on 3.330,
 7.850 and 14.670 MHz in upper sideband, compatible AM mode. An ordinary
 shortwave receiver can be tuned manually to one of these frequencies or,
@@ -83,8 +83,9 @@ independent timestamp upon arrival with a potential total of 60
 timestamps for each minute.
 
 The CHU timecode format is described on the
-http://inms-ienm.nrc-cnrc.gc.ca/time_services/chu_e.html[CHU website]. A
-timecode is assembled when all bursts have been received in each minute.
+http://www.nrc-cnrc.gc.ca/eng/services/time/broadcast_codes.html[CHU
+website]. A timecode is assembled when all bursts have been received
+in each minute.
 The timecode is considered valid and the clock set when at least one
 valid format B burst has been decoded and the majority decoder declares
 success. Once the driver has synchronized for the first time, it will
