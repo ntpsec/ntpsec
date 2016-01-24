@@ -120,7 +120,7 @@ image::pic/pzf511.jpg[http://www.meinberg.de/english/products/pzf-eurocard.htm]
 
 * *server 127.127.8.0-3 mode 2*
 +
-*http://www.meinberg.de[Meinberg] http://www.meinberg.de/english/products/c51.html[DCF C51 receiver and similar] (AM demodulation / 4ms)*
+*http://www.meinberg.de[Meinberg] https://www.meinbergglobal.com/english/archive/c51.htm[DCF C51 receiver and similar] (AM demodulation / 4ms)*
 +
 image:pic/c51.jpg[http://www.meinberg.de/english/products/c51.htm]
 +
