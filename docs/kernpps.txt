@@ -77,7 +77,7 @@ functions not provided in the stock kernels. Solaris users are cautioned
 that these functions operate improperly in Solaris versions prior to 2.8
 with patch Generic_108528-02. Header files for other systems can be
 found via the web at
-ftp://ftp.udel.edu/pub/ntp/software/nanokernel.tar.gz[nanokernel.tar.gz].
+https://www.eecis.udel.edu/~ntp/ntp_spool/software/nanokernel.tar.gz[nanokernel.tar.gz].
 
 '''''
 
