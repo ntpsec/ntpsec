@@ -1,0 +1,27 @@
+= ToDo =
+
+Things to keep an eye on.
+
+== ntp.org SSL ==
+
+The following changes were made, as *.ntp.org has a non-well-trusted
+SSL cert.  They should be checked periodically, and the change reverted
+when possible.
+
+----
+--- a/docs/driver20.txt
+-https://support.ntp.org/bin/view/Support/ConfiguringNMEARefclocks[Configuring
++http://support.ntp.org/bin/view/Support/ConfiguringNMEARefclocks[Configuring
+----
+ 
+----
+--- a/docs/driver29.txt
+-*link:https://lists.ntp.isc.org/pipermail/hackers/2006-April/002216.html[]*
++*link:http://lists.ntp.isc.org/pipermail/hackers/2006-April/002216.html[]*
+----
+ 
+----
+-link:https://lists.ntp.isc.org/pipermail/hackers/2006-April/002216.html[*Questions or Comments:*]
++link:http://lists.ntp.isc.org/pipermail/hackers/2006-April/002216.html[*Questions or Comments:*]
+----
+ 
