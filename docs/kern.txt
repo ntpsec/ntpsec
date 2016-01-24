@@ -50,7 +50,6 @@ November 2000). Paper:
 |
 {millshome}database/papers/nano/nano2.pdf[PDF],
 Slides:
-{millshome}database/brief/nano/nano.html[HTML] |
 {millshome}database/brief/nano/nano.ps[PostScript]
 | {millshome}database/brief/nano/nano.pdf[PDF] |
 {millshome}database/brief/nano/nano.ppt[PowerPoint]
