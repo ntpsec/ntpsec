@@ -119,6 +119,11 @@ __________
 * Forward-port NTP Classic fix for [Bug 2830] just in case we want to
   revive Autokey someday.
 
+== Potential device removals ==
+
+* Modes 9 and 10 in the parse driver support hardware that was discontinued
+  before 2003.
+
 == Old, sometime ancient stuff ==
 
 970711: Look Real Hard at changing the key stuff from u_long to u_int32.
