@@ -197,7 +197,7 @@ image:pic/pd_om006.gif[http://www.trimble.com/cgi/omprod.cgi/pd_om006.html]
 
 * *server 127.127.8.0-3 mode 12*
 +
-*http://www.hopf-time.com[HOPF] http://www.hopf-time.com/engl/kart6021.html[Funkuhr 6021]*
+*http://www.hopf-time.com[HOPF] http://hopf.com/manuals/english/pdf_6---/e6021gps_0601.pdf[Funkuhr 6021]*
 +
 image:pic/fg6021.gif[http://www.hopf-time.com/engl/kart6021.html]
 
