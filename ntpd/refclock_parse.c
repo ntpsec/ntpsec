@@ -8,6 +8,11 @@
  * Copyright (c) 1989-2015 by Frank Kardel <kardel@ntp.org>
  * Copyright 2015 by the NTPsec project contributors
  * SPDX-License-Identifier: BSD-3-Clause
+ *
+ * Note: some modes are obsolete and could probably stand to be removed
+ * next time this code gets serious attention.  In particular, modes 9 and 10
+ * support the Trimble SVeeSix, which was discontinued before 2003. Related
+ * code in the parse library could also be dropped.
  */
 
 #include "config.h"
