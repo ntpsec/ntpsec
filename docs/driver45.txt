@@ -12,7 +12,7 @@ Features: `(none)`
 == Description ==
 
 This driver supports the
-http://www.spectracomcorp.com/ProductsServices/TimingSynchronization/BuslevelTiming[Spectracom
+http://spectracom.com/products-services/precision-timing/tsync-timecode-processors[Spectracom
 TSYNC PCI] receiver.
 
 == Additional Information ==
