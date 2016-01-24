@@ -35,9 +35,7 @@ stand-alone mode, but no battery-life measurements have been taken.
 There is support for a Tcl/Tk monitor written by Derek Mulcahy that
 examines the output stats; see the
 http://www2.exnet.com/NTP/ARC/ARC.html[ARC Rugby MSF Receiver] page for
-more details and the code. Information on the WWVB version is available
-from http://www.arctime.com[Atomic Time] as their
-http://www.atomictime.com/Product17.html[Atomic Time PC].
+more details and the code.
 
 Look at the notes at the start of the code for further information; some
 of the more important details follow.
