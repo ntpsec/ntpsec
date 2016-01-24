@@ -20,10 +20,11 @@ requirement for it, please make this known to us.
 
 == Description ==
 
-This driver supports at least some models of the
-http://www.navman.com/oem/products/receivers/jupiter/[Rockwell Jupiter
-+GPS+ receivers] (Jupiter 11, Jupiter-T), they must at least support the
+This driver supports at least some models of the Rockwell Jupiter
+GPS receivers (Jupiter 11, Jupiter-T), they must at least support the
 _Zodiac Binary Protocol_.
+
+Please see below for links to further information.
 
 The driver requires a standard +PPS+ interface for the pulse-per-second
 output from the receiver. The serial data stream alone does not provide
@@ -81,6 +82,10 @@ receivers, Conexant receivers and (formerly) SiRF Technology receivers
 (SiRF has since moved to selling a very successful line of
 consumer-grade GPS chips based on its own designs). Rockwell seems to
 be the original and most commonly used name.
+
+Some more information may be available at:
+http://www.ko4bb.com/manuals/index.php?dir=02_GPS_Timing/Rockwell_Jupiter/MiscJupiterDocs[Didier Juges KO4BB] and
+http://www.gpskit.nl/documents/rockwell/jupiter-gps-board.pdf[GPSKit.nl]
 
 === Configuration ===
 
