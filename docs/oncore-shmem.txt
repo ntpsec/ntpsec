@@ -23,7 +23,7 @@ memory.
 To make use of this information you will need an Oncore Reference Manual
 for the Oncore GPS receiver that you have. The Manual for the VP only
 exists as a paper document, the UT+/GT+/M12 manuals are available as a
-pdf documents at http://www.synergy-gps.com/Mot_Manuals.html[Synergy] .
+pdf documents at http://www.synergy-gps.com/index.php?option=com_content&task=view&id=35&Itemid=60[Synergy] .
 
 This interface was written by Poul-Henning Kamp (phk@FreeBSD.org), and
 modified by Reg Clemens (reg@dwf.com). The interface is known to work in
