@@ -79,7 +79,7 @@ Time code format::
 Command        -\-> Reply +
 +{ENQ}1J{ETX}+ -\-> +{STX}JYYMMDD HHMMSSS{ETX}+
 
-* [[mode-3]]Echo Keisokuki Co.,Ltd. LT-2000 link:http://www.clock.co.jp/[] (Japanese only)
+* [[mode-3]]Echo Keisokuki Co.,Ltd. LT-2000 link:http://www.clock.co.jp/[] (domain no longer registered)
 +
 NTP configuration ( {ntpconf} )::
 +
