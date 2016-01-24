@@ -41,7 +41,7 @@ Discovery] page. There are about two dozen public time servers operated
 by the http://tf.nist.gov/tf-cgi/servers.cgi[National Institutes of
 Science and Technology (NIST)], http://tycho.usno.navy.mil/ntp.html[US
 Naval Observatory (USNO)],
-http://inms-ienm.nrc-cnrc.gc.ca/time_services/network_time_protocol_e.html[Canadian
+http://www.nrc-cnrc.gc.ca/eng/services/time/network_time.html[Canadian
 Metrology Centre (CMC)] and many others available on the Internet. Lists
 of public primary and secondary NTP servers maintained on the
 http://support.ntp.org/Servers/WebHome[Public NTP Time Servers] page,
