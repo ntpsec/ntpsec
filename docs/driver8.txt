@@ -181,11 +181,11 @@ image:pic/igclock.gif[http://www.igel.de/eigelmn.html]
 
 * *server 127.127.8.0-3 mode 9*
 +
-*http://www.trimble.com[Trimble] http://www.trimble.com/cgi/omprod.cgi/pd_om011.html[SVeeSix GPS receiver] TAIP protocol (GPS / <<1&mu;s)*
+*http://www.trimble.com[Trimble] ftp://ftp.trimble.com/pub/sct/embedded/bin/Data%20Sheets/SveeSix2.PDF[SVeeSix GPS receiver] TAIP protocol (GPS / <<1&mu;s)*
 
 * *server 127.127.8.0-3 mode 10*
 +
-*http://www.trimble.com[Trimble] http://www.trimble.com/cgi/omprod.cgi/pd_om011.html[SVeeSix GPS receiver] (GPS / <<1&mu;s) (no kernel support yet)*
+*http://www.trimble.com[Trimble] ftp://ftp.trimble.com/pub/sct/embedded/bin/Data%20Sheets/SveeSix2.PDF[SVeeSix GPS receiver] (GPS / <<1&mu;s) (no kernel support yet)*
 +
 image:pic/pd_om011.gif[http://www.trimble.com/cgi/omprod.cgi/pd_om011.html]
 +
