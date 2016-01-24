@@ -14,15 +14,15 @@ Serial Port: +/dev/palisade+__u__; 9600bps 8N1/8O1
 == Description ==
 
 The *refclock palisade* driver supports
-http://www.trimble.com/products/ntp[Trimble Navigation's Palisade
-Smart Antenna GPS receiver].
+ftp://ftp.trimble.com/pub/sct/embedded/bin/Manuals/Old%20Manuals/PALISADE.PDF[Trimble
+Navigation's Palisade Smart Antenna GPS receiver].
 
 Additional software and information about the Palisade GPS is
 available from:
 link:http://www.trimble.com/oem/ntp[http://www.trimble.com/oem/ntp]
 
-Latest NTP driver source, executables and documentation is maintained
-at: ftp://ftp.trimble.com/pub/ntp
+NTP driver source, executables and documentation was maintained
+at: ftp://ftp.trimble.com/pub/ntp , but seems no longer available.
 
 This documentation describes version 7.12 of the GPS Firmware and
 version 2.46 (July 15, 1999) and later, of the driver source.
@@ -33,6 +33,10 @@ Firmware, no tests have been made on further firmwares, please read
 documentation for more information.
 
 == Operating System Compatibility ==
+
+Note: There is no current support from either Trimble or HP for this
+product, and the links in the following table are the last known
+location of resources.
 
 The Palisade driver has been tested on the following software and
 hardware platforms:
