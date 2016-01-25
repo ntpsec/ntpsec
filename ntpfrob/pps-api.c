@@ -88,7 +88,7 @@ void ppscheck(char *device)
 	if (i < 0)
 		err(1, "time_pps_getcap");
 
-	pp.mode = PPS_CAPTUREASSERT | PPS_ECHOASSERT;
+	/* pp.mode = PPS_CAPTUREASSERT | PPS_ECHOASSERT; */
 	pp.mode = PPS_CAPTUREBOTH;
 	/* pp.mode = PPS_CAPTUREASSERT; */
 

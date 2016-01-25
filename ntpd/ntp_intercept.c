@@ -191,6 +191,7 @@ void intercept_argparse(int *argc, char ***argv)
 	    if (was_space)
 		*cp = '\0';
 	}
+	/* coverity[leaked_storage] */
     }
 }
 
@@ -298,6 +299,7 @@ bool intercept_getaddrinfo(char *hname, sockaddr_u *peeraddrp)
 	    memset(peeraddrp, '\0', sizeof(*peeraddrp));
 	    octets = min(sizeof(*peeraddrp), res->ai_addrlen);
 	    memcpy(peeraddrp, res->ai_addr, octets);
+	    freeaddrinfo(res);
 	    return true;
 	}
     }
@@ -504,8 +506,8 @@ int intercept_adjtime(const struct timeval *ntv, struct timeval *otv)
 	/* avoid compiler warnings due to time_t having an unexpected length */
 	rntv.tv_sec = nsec;
 	rntv.tv_usec = nusec;
-	rntv.tv_sec = osec;
-	rntv.tv_usec = ousec;
+	rotv.tv_sec = osec;
+	rotv.tv_usec = ousec;
 	if (ntv->tv_sec != rntv.tv_sec
 	    || ntv->tv_usec != rntv.tv_usec
 	    || otv->tv_sec != rotv.tv_sec

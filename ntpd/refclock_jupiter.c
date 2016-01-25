@@ -831,6 +831,7 @@ jupiter_parse_gpos(struct instance *instance, u_short *sp)
 
 	instance->gpos_gweek = jg->gweek;
 	instance->gpos_sweek = DS2UI(jg->sweek);
+	/* coverity[tainted_data] */
 	while(instance->gpos_sweek >= WEEKSECS) {
 		instance->gpos_sweek -= WEEKSECS;
 		++instance->gpos_gweek;
