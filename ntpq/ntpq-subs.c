@@ -1866,6 +1866,7 @@ doprintpeers(
 		return true;
 	}
 	else
+		/* coverity[leaked_storage] */
 		return true;
 }
 

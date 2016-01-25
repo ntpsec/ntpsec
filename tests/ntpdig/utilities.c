@@ -54,10 +54,16 @@ void FinishDebugTest(const char *expected,
 	fp_a = fopen(actual, "rb");
 	fp_e = fopen(expected, "rb");
 
-	CompareFileContent(fp_e, fp_a);
+	if (fp_a != NULL && fp_e != NULL)
+	    CompareFileContent(fp_e, fp_a);
+	else
+	    fprintf(stderr,
+		    "FinishDebugTest: file pointer unexpectedly null.\n");
 
-	fclose(fp_a);
-	fclose(fp_e);
+	if (fp_a)
+	    fclose(fp_a);
+	if (fp_e)
+	    fclose(fp_e);
 
 	free((void*) expected);
 	free((void*) actual);

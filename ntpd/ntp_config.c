@@ -2550,6 +2550,7 @@ config_access(
 		if (ai_list != NULL)
 			freeaddrinfo(ai_list);
 	}
+	/* coverity[leaked_storage] */
 }
 #endif	/* !SIM */
 

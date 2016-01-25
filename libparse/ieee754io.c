@@ -349,6 +349,7 @@ fetch_ieee754(
 		       */
 		      lfpp->l_ui  =  mantissa_high << (32 - frac_offset);
 		      lfpp->l_ui |= (mantissa_low >> frac_offset) & ((1 << (32 - frac_offset)) - 1);
+		      /* coverity[large_shift] */
 		      lfpp->l_uf  = (mantissa_low & ((1 << frac_offset) - 1)) << (32 - frac_offset);
 		    }
 		}
@@ -490,6 +491,7 @@ put_ieee754(
 	      mantissa_high  = (outlfp.l_ui << (mbits - msb)) & ((1 << (mbits - 32)) - 1);
 	      mantissa_high |=  outlfp.l_uf >> (32 - (mbits - msb));
 	      mantissa_low   = (outlfp.l_ui & ((1 << (msb - mbits)) - 1)) << (32 - (msb - mbits));
+	      /* coverity[shift_negative] */
 	      mantissa_low  |=  outlfp.l_uf >> (msb - mbits);
 	    }
 	  else

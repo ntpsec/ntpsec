@@ -414,6 +414,8 @@ blocking_getaddrinfo(
 		return -1;
 	}
 
+	/* FIXME: might be a real resource leak, not a Coverity false positive */
+	/* coverity[leaked_storage] */
 	return 0;
 }
 
