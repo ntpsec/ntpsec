@@ -70,6 +70,10 @@ of filenames used in saveconfig commands. Saveconfig support is
 disabled at compile time in NTPsec and will not be re-enabled without
 much more extensive hardening.
 
+Other fixes:
+
+Coverity found a slow memory leak in the asynchronous-DNS code.
+
 == 2015-11-16: 0.9.0 ==
 
 Initial NTPsec beta release.
