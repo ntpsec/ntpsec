@@ -13,6 +13,8 @@
  * next time this code gets serious attention.  In particular, modes 9 and 10
  * support the Trimble SVeeSix, which was discontinued before 2003. Related
  * code in the parse library could also be dropped.
+ * Also see modes 3 and 4, for which no information in use since 1999 and
+ * 2001 respectively can be found on the web.
  */
 
 #include "config.h"
