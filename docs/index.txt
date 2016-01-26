@@ -161,7 +161,7 @@ link:rate.html[Rate Management]::
   Describes the principles of rate management to minimize network load
   and defend against DoS attacks.
 link:refclock.html[Reference Clock Support]::
-  Describes the collection of radio clocks used to synchronize primary
+  Describes the collection of clocks and devices used to synchronize primary
   servers.
 link:warp.html[How NTP Works]::
   Gives an overview of the NTP daemon architecture and how it works.
