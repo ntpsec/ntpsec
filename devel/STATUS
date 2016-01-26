@@ -18,6 +18,9 @@ We have reports that it builds cleanly on at least:
   NetBSD 6.1.5 and 7.0 on x86_64
     (see the comment about libevent in ../INSTALL)
 
+  OpenBSD 5.8 : NTPSec does not build, due to at least an ancient
+  bison (v2.3, from 2006).  A newer version is expected in 5.9
+
 
 The basic parts of ntpd run on all of the above systems.
 
