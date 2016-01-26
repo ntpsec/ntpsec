@@ -3,29 +3,29 @@ def build(ctx):
 	srcnode = ctx.srcnode.abspath()
 	bldnode = ctx.bldnode.abspath()
 
-
 	if ctx.variant == "host":
 
-		bison_source = [
-			"ntp_parser.y"
-		]
-
-		ctx(
-			target		= "bison_obj",
-			features	= "c src_include bld_include libisc_include",
-			source		= bison_source,
-			includes    = [
-							"%s/ntpd/" % srcnode,
-							"%s/" % ctx.bldnode.parent.abspath()
+		if not ctx.env.NTPS_RELEASE:
+			bison_source = [
+				"ntp_parser.y"
 			]
-		)
 
-		ctx.add_group() # Generate Bison files first.
+			ctx(
+				target		= "bison_obj",
+				features	= "c src_include bld_include libisc_include",
+				source		= bison_source,
+				includes    = [
+								"%s/ntpd/" % srcnode,
+								"%s/" % ctx.bldnode.parent.abspath()
+				]
+			)
+
+			ctx.add_group() # Generate Bison files first.
 
 
 		keyword_gen_source = [
 			"keyword-gen.c",
-   	 ]
+		]
 
 		ctx(
 			target      = "keyword-gen",
@@ -81,7 +81,8 @@ def build(ctx):
 	ctx(
 		target		= "ntpd_lib",
 		features	= "c cstlib",
-		use			= "libntpd_obj bison_obj",
+		use			= "libntpd_obj",
+#		use			= "libntpd_obj bison_obj",
 	)
 
 
@@ -116,8 +117,9 @@ def build(ctx):
 		"ntp_io.c",
 		"ntp_scanner.c",
 		"ntpd.c",
-		ctx.bldnode.parent.find_node("host/ntpd/ntp_parser.tab.c")
+		ctx.bldnode.parent.find_node("host/ntpd/ntp_parser.tab.c") if not ctx.env.NTPS_RELEASE else "ntp_parser.tab.c"
 	]
+
 
 
 	# XXX: This really sucks, we need to get rid of all these refclock
@@ -137,7 +139,8 @@ def build(ctx):
 		target		= "ntpd",
 		features	= "c rtems_trace cprogram bld_include src_include libisc_include libisc_pthread_include ntp_version",
 		source		= ntpd_source,
-		use			= "libntpd_obj bison_obj isc ntp sodium opts OSSAUDIO M parse GCC_S RT CAP THR PTHREAD CRYPTO DNS_SD DNS_SD_INCLUDES %s" % use_refclock,
+		use			= "libntpd_obj isc ntp sodium opts OSSAUDIO M parse GCC_S RT CAP THR PTHREAD CRYPTO DNS_SD DNS_SD_INCLUDES %s" % use_refclock,
+#		use			= "libntpd_obj bison_obj isc ntp sodium opts OSSAUDIO M parse GCC_S RT CAP THR PTHREAD CRYPTO DNS_SD DNS_SD_INCLUDES %s" % use_refclock,
 		includes	= [
 						"%s/host/ntpd/" % ctx.bldnode.parent.abspath(),
 						"%s/ntpd/" % srcnode,

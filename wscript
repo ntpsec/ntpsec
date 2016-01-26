@@ -4,6 +4,10 @@ from waflib import Context, Errors
 from waflib import Scripting
 from waflib.Logs import pprint
 
+config = {
+	"NTPS_RELEASE": False # Set to 'True' if this is a release
+}
+
 out="build"
 
 from pylib.configure import cmd_configure
@@ -23,16 +27,49 @@ def parse_version():
                 "NTPS_VERSION_REV" : int(rev)
         }
 
-config = parse_version()
+config.update(parse_version())
 
 def dist(ctx):
-        ctx.base_name = "ntpsec-%d.%d.%d" % \
-                        (config["NTPS_VERSION_MAJOR"], \
-                         config["NTPS_VERSION_MINOR"], \
-                         config["NTPS_VERSION_REV"])
-        if ctx.options.build_version_tag:
-                ctx.base_name = ctx.base_name + "-" + \
-                                ctx.options.build_version_tag
+		from os import path
+		from shutil import copyfile
+		files_man = []
+
+		if not config["NTPS_RELEASE"]:
+			ctx.fatal("NTPS_RELEASE must be set to True")
+
+
+		# XXX: Redo to not use globs.
+		bldnode = ctx.path.make_node(out)
+		for section in [1, 5, 8]:
+			files_man += bldnode.ant_glob("**/*.%d" % section)
+
+		# Need a more reliable check.
+		if not files_man:
+			ctx.fatal("You must configure and build first with NTPS_RELEASE set to false")
+
+		for man in files_man:
+			src = man.abspath()
+			dst = src.replace("%s/main/" % bldnode.abspath(), "")
+			print "Copying %s -> %s" % (src, dst)
+			copyfile(src, dst)
+
+		files = [
+			("build/host/ntpd/ntp_parser.tab.c", "ntpd/ntp_parser.tab.c"),
+			("build/host/ntpd/ntp_parser.tab.h", "ntpd/ntp_parser.tab.h")
+		]
+
+		for src, dst in files:
+			if not path.exists(src):
+				ctx.fatal("%s doesn't exist please configure and build first.  NTPS_RELEASE must be set to False" % src)
+			print "Copying %s -> %s" % (src, dst)
+			copyfile(src, dst)
+
+		ctx.base_name = "ntpsec-%d.%d.%d" % \
+						(config["NTPS_VERSION_MAJOR"], \
+						config["NTPS_VERSION_MINOR"], \
+						config["NTPS_VERSION_REV"])
+		if ctx.options.build_version_tag:
+			ctx.base_name = "%s-%s" % (ctx.base_name, ctx.options.build_version_tag)
 
 def options(ctx):
 	ctx.load("compiler_c")
@@ -86,6 +123,7 @@ def options(ctx):
 
 
 def configure(ctx):
+	ctx.env.NTPS_RELEASE = config["NTPS_RELEASE"]
 	ctx.env.NTPS_VERSION_MAJOR = config["NTPS_VERSION_MAJOR"]
 	ctx.env.NTPS_VERSION_MINOR = config["NTPS_VERSION_MINOR"]
 	ctx.env.NTPS_VERSION_REV = config["NTPS_VERSION_REV"]
