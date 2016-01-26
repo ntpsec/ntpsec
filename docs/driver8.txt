@@ -14,8 +14,14 @@ PPS device: /dev/refclockpps-'u'; alternate PPS device
 
 == Description ==
 
-The PARSE driver supports 20 different clock
+The PARSE driver supports 25 different clock
 types/configurations. PARSE is actually a multi-clock driver.
+
+Note that some of these modes below are to support equipment that
+has not been commercially available for a long time; and may be
+removed.  See
+https://www.ntpsec.org/removal-plan.html[Feature removals] for a
+discussion of this issue.
 
 The actual receiver status is mapped into various synchronization states
 generally used by receivers. The driver is configured to interpret the
@@ -66,9 +72,10 @@ refclock_ppstime::
 
 == Supported Devices ==
 
-Currently, twenty-four clock types are supported by the PARSE driver and
+Currently, twenty-five clock types are supported by the PARSE driver and
 up to four (devices /dev/refclock-0 - /dev/refclock-3) of these clocks
 may be operational at any one time.
+
 A note on the implementations:
 
 * These implementations were mainly done without actual access to the
@@ -104,17 +111,23 @@ This implementation was provided and verified by SEL and
 http://networktimefoundation.org[Network Time Foundation] has an
 SEL-2407 in one of its development labs.
 
-The pictures below have been taken from and are linked to the vendors'
-web pages.
+The pictures below have been archived from the vendors' web pages.
 
 * *server 127.127.8.0-3 mode 0*
 +
-*http://www.meinberg.de[Meinberg] http://www.meinberg.de/english/products/timesource.htm#dcf---freq_sync[PZF5xx receiver family] (FM demodulation/TCXO / 50&mu;s)*
-
+*http://www.meinberg.de[Meinberg] https://www.meinbergglobal.com/english/archive/pzf511.htm[PZF5xx receiver family] (FM demodulation/TCXO / 50&mu;s)*
++
+WARNING: This equipment is no longer available for commercial sale, and
+support may be removed in the future.  See: 
+https://www.ntpsec.org/removal-plan.html[Feature removals]
 
 * *server 127.127.8.0-3 mode 1*
 +
-*http://www.meinberg.de[Meinberg] http://www.meinberg.de/english/products/timesource.htm#dcf---freq_sync[PZF5xx receiver family] (FM demodulation/OCXO / 50&mu;s)*
+*http://www.meinberg.de[Meinberg] https://www.meinbergglobal.com/english/archive/pzf511.htm[PZF5xx receiver family] (FM demodulation/OCXO / 50&mu;s)*
++
+WARNING: This equipment is no longer available for commercial sale, and
+support may be removed in the future.  See: 
+https://www.ntpsec.org/removal-plan.html[Feature removals]
 
 image::pic/pzf511.jpg[http://www.meinberg.de/english/products/pzf-eurocard.htm]
 
@@ -140,10 +153,18 @@ that comes with the Meinberg driver package.
 * *server 127.127.8.0-3 mode 3*
 +
 http://www.elv.de/[ELV] *DCF7000 (sloppy AM demodulation / 50ms)*
++
+WARNING: This equipment is no longer available for commercial sale, and
+support may be removed in the future.  See: 
+https://www.ntpsec.org/removal-plan.html[Feature removals]
 
 * *server 127.127.8.0-3 mode 4*
 +
 *Walter Schmid DCF receiver Kit (AM demodulation / 1ms)*
++
+WARNING: This equipment is no longer available for commercial sale, and
+support may be removed in the future.  See: 
+https://www.ntpsec.org/removal-plan.html[Feature removals]
 
 * *server 127.127.8.0-3 mode 5*
 +
@@ -182,10 +203,18 @@ image:pic/igclock.gif[http://www.igel.de/eigelmn.html]
 * *server 127.127.8.0-3 mode 9*
 +
 *http://www.trimble.com[Trimble] ftp://ftp.trimble.com/pub/sct/embedded/bin/Data%20Sheets/SveeSix2.PDF[SVeeSix GPS receiver] TAIP protocol (GPS / <<1&mu;s)*
++
+WARNING: This equipment is no longer available for commercial sale, and
+support may be removed in the future.  See: 
+https://www.ntpsec.org/removal-plan.html[Feature removals]
 
 * *server 127.127.8.0-3 mode 10*
 +
 *http://www.trimble.com[Trimble] ftp://ftp.trimble.com/pub/sct/embedded/bin/Data%20Sheets/SveeSix2.PDF[SVeeSix GPS receiver] (GPS / <<1&mu;s) (no kernel support yet)*
++
+WARNING: This equipment is no longer available for commercial sale, and
+support may be removed in the future.  See: 
+https://www.ntpsec.org/removal-plan.html[Feature removals]
 +
 image:pic/pd_om011.gif[http://www.trimble.com/cgi/omprod.cgi/pd_om011.html]
 +
