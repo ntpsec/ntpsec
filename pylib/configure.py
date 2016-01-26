@@ -18,7 +18,9 @@ def cmd_configure(ctx):
 	ctx.setenv('host', ctx.env.derive())
 
 	ctx.load('compiler_c')
-	ctx.load('bison')
+
+	if not ctx.env.NTPS_RELEASE:
+		ctx.load('bison')
 
 	for opt in opt_map:
 		ctx.env[opt] = opt_map[opt]
