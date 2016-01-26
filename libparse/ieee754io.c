@@ -491,7 +491,7 @@ put_ieee754(
 	      mantissa_high  = (outlfp.l_ui << (mbits - msb)) & ((1 << (mbits - 32)) - 1);
 	      mantissa_high |=  outlfp.l_uf >> (32 - (mbits - msb));
 	      mantissa_low   = (outlfp.l_ui & ((1 << (msb - mbits)) - 1)) << (32 - (msb - mbits));
-	      /* coverity[shift_negative] */
+	      /* coverity[negative_shift] */
 	      mantissa_low  |=  outlfp.l_uf >> (msb - mbits);
 	    }
 	  else
