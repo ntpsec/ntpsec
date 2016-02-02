@@ -880,13 +880,13 @@ nmea_receive(
 	 * make sure it came in clean
 	 *
 	 * Apparently, older NMEA specifications (which are expensive)
-	 * did not require the checksum for all sentences.  $GPMRC is
+	 * did not require the checksum for all sentences.  $GPRMC is
 	 * the only one so far identified which has always been required
 	 * to include a checksum.
 	 *
 	 * Today, most NMEA GPS receivers checksum every sentence.  To
 	 * preserve its error-detection capabilities with modern GPSes
-	 * while allowing operation without checksums on all but $GPMRC,
+	 * while allowing operation without checksums on all but $GPRMC,
 	 * we keep track of whether we've ever seen a valid checksum on
 	 * a given sentence, and if so, reject future instances without
 	 * checksum.  ('up->cksum_type[NMEA_GPRMC]' is set in
