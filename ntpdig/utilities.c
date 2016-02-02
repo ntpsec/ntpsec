@@ -162,6 +162,13 @@ tv_to_str(
 	mm = abs(lto % 60);
 
 	buf = emalloc(bufsize);
+
+	/* should never happen - here to appease Coverity */
+	if (p_tm_local == NULL) {
+	    strlcpy(buf, "tv_to_str(): invalid date", bufsize);
+	    return buf;
+	}
+
 	snprintf(buf, bufsize,
 		 json ? jsonstyle : oldstyle,
 		 p_tm_local->tm_year + 1900,
