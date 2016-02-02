@@ -100,7 +100,7 @@ Specific GPS sentences and bitrates may be selected by setting bits of the \'mod
 [cols="10%,10%,10%,70%",options="header"]
 |=============================================================================
 |Bit    | Decimal | Hex | Meaning
-|0      |1        |1    |process +$GPMRC+
+|0      |1        |1    |process +$GPRMC+
 |1      |2        |2    |process +$GPGGA+
 |2      |4        |4    |process +$GPGLL+
 |3      |8        |8    |process +$GPZDA+ or +$GPZDG+
