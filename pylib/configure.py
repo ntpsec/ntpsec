@@ -343,6 +343,7 @@ def cmd_configure(ctx):
 #HGM		"sys/systune.h",
 		("timepps.h", ["inttypes.h"]),
 		("sys/timepps.h", ["inttypes.h", "sys/time.h"]),
+		"utmpx.h"       # missing on RTEMS and OpenBSD
 	)
 	for hdr in optional_headers:
 		if type(hdr) == type(""):

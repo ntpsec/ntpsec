@@ -15,8 +15,9 @@
 #include "timespecops.h"
 #include "ntp_calendar.h"
 
+#ifdef UTMPX_H
 #include <utmpx.h>
-
+#endif
 
 #ifndef USE_COMPILETIME_PIVOT
 # define USE_COMPILETIME_PIVOT 1
@@ -449,21 +450,22 @@ step_systime(
 	timetv.tv_usec = timets.tv_nsec / 1000;
 	tvdiff = abs_tval(sub_tval(timetv, tvlast));
 	if (tvdiff.tv_sec > 0) {
-#ifdef OVERRIDE_OTIME_MSG
-# define OTIME_MSG OVERRIDE_OTIME_MSG
-#else
+#ifdef UTMPX_H
+# ifdef OVERRIDE_OTIME_MSG
+#  define OTIME_MSG OVERRIDE_OTIME_MSG
+# else
 /* Already defined on NetBSD */
-# ifndef OTIME_MSG
-#  define OTIME_MSG	"Old NTP time"
+#  ifndef OTIME_MSG
+#   define OTIME_MSG	"Old NTP time"
+#  endif
 # endif
-#endif
-#ifdef OVERRIDE_NTIME_MSG
-# define NTIME_MSG OVERRIDE_NTIME_MSG
-#else
-# ifndef NTIME_MSG
-#  define NTIME_MSG	"New NTP time"
+# ifdef OVERRIDE_NTIME_MSG
+#  define NTIME_MSG OVERRIDE_NTIME_MSG
+# else
+#  ifndef NTIME_MSG
+#   define NTIME_MSG	"New NTP time"
+#  endif
 # endif
-#endif
 		struct utmpx utx;
 
 		ZERO(utx);
@@ -484,8 +486,8 @@ step_systime(
 		endutxent();
 
 		/* Not POSIX - glibc extension */
-#ifdef HAVE_UPDWTMPX
-#define WTMPX_FILE "/var/log/wtmp"
+# ifdef HAVE_UPDWTMPX
+# define WTMPX_FILE "/var/log/wtmp"
 		/* WTMPX */
 		utx.ut_type = OLD_TIME;
 		utx.ut_tv.tv_sec = tvlast.tv_sec;
@@ -497,10 +499,11 @@ step_systime(
 		utx.ut_tv.tv_usec = timetv.tv_usec;
 		strlcpy(utx.ut_line, NTIME_MSG, sizeof(utx.ut_line));
 		updwtmpx(WTMPX_FILE, &utx);
-#undef WTMPX_FILE
-#endif /* HAVE_UPDWTMPX */
-#undef OTIME_MSG
-#undef NTIME_MSG
+# undef WTMPX_FILE
+# endif /* HAVE_UPDWTMPX */
+# undef OTIME_MSG
+# undef NTIME_MSG
+#endif
 	}
 	tvlast = timetv;
 	return true;
