@@ -26,7 +26,7 @@ def build(ctx):
 		target		= "ntpq",
 		features	= "c cprogram bld_include src_include libisc_include ntp_version",
 		source		= ntpq_source,
-		use			= "ntp opts isc M RT READLINE EDIT PTHREAD CRYPTO",
+		use			= "ntp opts isc M RT READLINE EDIT PTHREAD CRYPTO CURSES READLINE",
 		includes	= [
 						"%s/ntpq/" % bldnode
 		],

@@ -252,7 +252,8 @@ def cmd_configure(ctx):
 	ctx.check_cc(lib="ossaudio", mandatory=False)  # NetBSD audio
 	ctx.check_cc(lib="pthread", mandatory=False)
 	ctx.check_cc(lib="rt", mandatory=False)
-	ctx.check_cc(lib="readline", mandatory=False)
+	ctx.check_cc(lib="curses", mandatory=False) # Required for readline on OpenBSD.
+	ctx.check_cc(lib="readline", use="CURSES", mandatory=False)
 	ctx.check_cc(lib="thr", mandatory=False)
 	ctx.check_cc(lib="gcc_s", mandatory=False)
 
