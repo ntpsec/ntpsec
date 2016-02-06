@@ -15,7 +15,7 @@
 #include "timespecops.h"
 #include "ntp_calendar.h"
 
-#ifdef UTMPX_H
+#ifdef HAVE_UTMPX_H
 #include <utmpx.h>
 #endif
 
@@ -450,7 +450,7 @@ step_systime(
 	timetv.tv_usec = timets.tv_nsec / 1000;
 	tvdiff = abs_tval(sub_tval(timetv, tvlast));
 	if (tvdiff.tv_sec > 0) {
-#ifdef UTMPX_H
+#ifdef HAVE_UTMPX_H
 # ifdef OVERRIDE_OTIME_MSG
 #  define OTIME_MSG OVERRIDE_OTIME_MSG
 # else
