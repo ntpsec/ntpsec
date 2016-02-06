@@ -158,13 +158,17 @@ def cmd_configure(ctx):
 		ctx.env.PLATFORM_TARGET = "freebsd"
 	elif platform.startswith("netbsd"):
 		ctx.env.PLATFORM_TARGET = "netbsd"
+	elif platform.startswith("openbsd"):
+		ctx.env.PLATFORM_TARGET = "openbsd"
 	else:
 		ctx.env.PLATFORM_TARGET = "unix"
 	ctx.end_msg(ctx.env.PLATFORM_TARGET	)
 
+	ctx.define("PLATFORM_%s" % ctx.env.PLATFORM_TARGET.upper(), 1)
+
 
 	# XXX: hack
-	if ctx.env.PLATFORM_TARGET in ["freebsd", "osx"]:
+	if ctx.env.PLATFORM_TARGET in ["freebsd", "osx", "openbsd"]:
 		ctx.env.PLATFORM_INCLUDES = ["/usr/local/include"]
 		ctx.env.PLATFORM_LIBPATH = ["/usr/local/lib"]
 	elif ctx.env.PLATFORM_TARGET == "netbsd":
@@ -343,7 +347,9 @@ def cmd_configure(ctx):
 #HGM		"sys/systune.h",
 		("timepps.h", ["inttypes.h"]),
 		("sys/timepps.h", ["inttypes.h", "sys/time.h"]),
-		"utmpx.h"       # missing on RTEMS and OpenBSD
+		"utmpx.h",       # missing on RTEMS and OpenBSD
+		"sys/timex.h",
+		"sys/audio.h"
 	)
 	for hdr in optional_headers:
 		if type(hdr) == type(""):
@@ -376,6 +382,13 @@ def cmd_configure(ctx):
 #HGM	check_posix_thread_version(ctx)
 #HGM	ctx.define('HAVE_PTHREADS', ctx.env.POSIX_THREAD_VERISON)
 
+	# Some systems don't have sys/timex.h eg OS X, OpenBSD...
+	if ctx.get_define("HAVE_SYS_TIMEX_H"):
+		ctx.env.HEADER_SYS_TIMEX_H = True
+
+	# Some systems don't have sys/audio.h eg OS X, OpenBSD...
+	if ctx.get_define("HAVE_SYS_AUDIO_H"):
+		ctx.env.HEADER_SYS_AUDIO_H = True
 
 	if ctx.options.refclocks:
 		from refclock import refclock_config

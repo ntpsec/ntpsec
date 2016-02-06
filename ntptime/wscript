@@ -1,7 +1,7 @@
 from waflib import Utils
 
 def build(ctx):
-	if ctx.env.PLATFORM_TARGET not in ['osx']:
+	if ctx.env.HEADER_SYS_TIMEX_H:
 		srcnode = ctx.srcnode.abspath()
 		bldnode = ctx.bldnode.abspath()
 
