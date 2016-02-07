@@ -316,12 +316,12 @@ def cmd_configure(ctx):
 	optional_headers = (
 #HGM		"alloca.h",
 #HGM		"arpa/nameser.h",
-		"dns_sd.h",
-		"histedit.h",
-		"ieeefp.h",
+		"dns_sd.h",		# NetBSD, Apple, mDNS
+		"histedit.h",		# Apple
+#HGM		"ieeefp.h",             # x86, depricated by FreeBSD
 		("ifaddrs.h", ["sys/types.h"]),
 #HGM		"libintl.h",
-		"libscf.h",
+		"libscf.h",		# Solaris
 		"linux/if_addr.h",
 		"linux/rtnetlink.h",
 		"linux/serial.h",
@@ -330,17 +330,18 @@ def cmd_configure(ctx):
 		("md5.h", ["sys/types.h"]),
 		"net/if6.h",
 		("net/route.h", ["sys/types.h","sys/socket.h","net/if.h"]),
-		"netinfo/ni.h",
-		"priv.h",
+		"netinfo/ni.h",		# Apple
+		"priv.h",               # Solaris
 		("readline/readline.h",["stdio.h"]),
 		("readline/history.h", ["stdio.h","readline/readline.h"]),
 		("resolv.h", ["sys/types.h","netinet/in.h","arpa/nameser.h"]),
 		"semaphore.h",
 		"stdatomic.h",
 		"sys/audioio.h",
+		"sys/capability.h",     # Linux
 		"sys/ioctl.h",
-		"sys/modem.h",
-		"sys/prctl.h",
+		"sys/modem.h",          # Apple
+		"sys/prctl.h",          # Linux
 #HGM		"sys/procset.h",
 		"sys/sockio.h",
 		"sys/soundcard.h",
@@ -470,7 +471,7 @@ def cmd_configure(ctx):
 	# ctx.define("NEED_RCVBUF_SLOP", 1)
 
 	# It should be possible to use asynchrpnous I/O with notification
-	# by SIGIO on any Unix conformant to POSIX.1-2001. But she code to
+	# by SIGIO on any Unix conformant to POSIX.1-2001. But the code to
 	# do this is untested and there are historical reasons to suspect
 	# it might not work reliably on all platforms.  Enable cautiously
 	# and test carefully.
