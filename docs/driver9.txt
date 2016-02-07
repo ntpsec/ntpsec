@@ -21,11 +21,11 @@ precision timing applications. This driver supports all compatible
 receivers such as the 6-channel MX4200, MX4200D, and the 12-channel
 MX9212, MX9012R, MX9112.
 
-//FIXME: caption and float attributes not showing up correctly
-image:pic/9400n.jpg["MX9400N",float="left",link="http://www.leica-gps.com/", caption="Leica MX9400N Navigator"] http://www.leica-gps.com/[Leica Geosystems] acquired the
-Magnavox commercial GPS technology business in February of 1994. They
-now market and support former Magnavox GPS products such as the MX4200
-and its successors.
+image:pic/9400n.jpg["MX9400N",float="left",caption="Leica MX9400N Navigator"]
+https://web.archive.org/web/19971014210945/http://www.leica-gps.com/[Leica
+Geosystems] acquired the Magnavox commercial GPS technology business in
+February of 1994. They marketed and supported former Magnavox GPS
+products such as the MX4200 and its successors.
 
 == Operating Modes ==
 

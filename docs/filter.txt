@@ -72,8 +72,7 @@ process inserts a dummy infinity sample in the shift register for each
 poll sent. After eight polls, the register returns to its original
 state.
 
-//FIXME: Image pair not centered
-image:pic/flt1.gif[]   image:pic/flt2.gif[]
+image:pic/flt1.gif["Raw",align="left"] image:pic/flt2.gif["Filtered",align="right"]
 
 Figure 2. Raw (left) and Filtered (right) Offsets
 
