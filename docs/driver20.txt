@@ -49,7 +49,6 @@ The various GPS sentences that this driver recognises look like this:
 |$GPZDG,GPSTIME,DD,MM,YYYY,AA.BB,V*CS<cr><lf>|Accord
 |=============================================================================
 
-//FIXME: 'GPS sync status' in table not indented properly 
 .NMEA data items
 [cols="15%,85%",options="header"]
 [options="header"]
@@ -185,7 +184,6 @@ example:
 Sentences like $GPGSV that don't contain the time will get counted in
 the total but otherwise ignored.
 
-//FIXME: ntp.org reference
 http://support.ntp.org/bin/view/Support/ConfiguringNMEARefclocks[Configuring
 NMEA Refclocks] might give further useful hints for specific hardware
 devices that exhibit strange or curious behaviour.

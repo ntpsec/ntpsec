@@ -164,7 +164,7 @@ selects the key used as the password for the {ntpqman} utility.
 //strong security against replay with or without modification, spoofing,
 //masquerade and most forms of clogging attacks.
 //
-////FIXME: page reference may be invalid
+//FIXME: page reference may be invalid
 //The Autokey protocol has several modes of operation corresponding to
 //the various NTP modes supported. Most modes use a special cookie which
 //can be computed independently by the client and server, but encrypted
