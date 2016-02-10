@@ -287,8 +287,7 @@ def cmd_configure(ctx):
 		('strlcpy', ["string.h"]),
 		('strlcat', ["string.h"]),
 #HGM		('sysconf', ["unistd.h"]),
-		('timer_create', ["time.h"]),
-		('updwtmpx', ["utmpx.h"]),		# glibc
+		('timer_create', ["time.h"])
 		)
 	for ft in functions:
 		if len(ft) == 2:
