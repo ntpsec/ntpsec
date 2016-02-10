@@ -487,7 +487,7 @@ io_open_sockets(void)
 	if (already_opened)
 		return;
 
-	already_opened = 1;
+	already_opened = true;
 
 	/*
 	 * Create the sockets
