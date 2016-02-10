@@ -485,22 +485,6 @@ step_systime(
 		pututxline(&utx);
 		endutxent();
 
-		/* Not POSIX - glibc extension */
-# ifdef HAVE_UPDWTMPX
-# define WTMPX_FILE "/var/log/wtmp"
-		/* WTMPX */
-		utx.ut_type = OLD_TIME;
-		utx.ut_tv.tv_sec = tvlast.tv_sec;
-		utx.ut_tv.tv_usec = tvlast.tv_usec;
-		strlcpy(utx.ut_line, OTIME_MSG, sizeof(utx.ut_line));
-		updwtmpx(WTMPX_FILE, &utx);
-		utx.ut_type = NEW_TIME;
-		utx.ut_tv.tv_sec = timetv.tv_sec;
-		utx.ut_tv.tv_usec = timetv.tv_usec;
-		strlcpy(utx.ut_line, NTIME_MSG, sizeof(utx.ut_line));
-		updwtmpx(WTMPX_FILE, &utx);
-# undef WTMPX_FILE
-# endif /* HAVE_UPDWTMPX */
 # undef OTIME_MSG
 # undef NTIME_MSG
 #endif
