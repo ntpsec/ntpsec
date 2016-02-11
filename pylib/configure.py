@@ -200,7 +200,7 @@ def cmd_configure(ctx):
 		ctx.check_type(f, h)
 
 	structures = (
-		("struct timex", ["sys/timex.h"]),
+		("struct timex", ["sys/time.h", "sys/timex.h"]),
 		("struct ntptimeval", ["sys/time.h", "sys/timex.h"]),
 		)
 	for (s, h) in structures:
@@ -349,7 +349,7 @@ def cmd_configure(ctx):
 		("timepps.h", ["inttypes.h"]),
 		("sys/timepps.h", ["inttypes.h", "sys/time.h"]),
 		"utmpx.h",       # missing on RTEMS and OpenBSD
-		"sys/timex.h",
+		("sys/timex.h", ["sys/time.h"]),
 		"sys/audio.h"
 	)
 	for hdr in optional_headers:
