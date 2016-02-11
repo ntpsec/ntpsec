@@ -277,3 +277,5 @@ def build(ctx):
 		ctx.add_post_fun(waf_unit_test.summary)
 	else:
 		pprint("YELLOW", "Unit test runner skipped on a cross-compiled build.")
+		from waflib import Options
+		Options.options.no_tests = True
