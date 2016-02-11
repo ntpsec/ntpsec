@@ -431,7 +431,7 @@ def cmd_configure(ctx):
 	# file /usr/include/sys/timex.h for the particular
 	# architecture to be in place."
 	#
-	if probe_header_with_prerequisites(ctx, "sys/timex.h", ["sys/time.h"]):
+	if ctx.get_define("HAVE_SYS_TIMEX_H"):
 		ctx.define("HAVE_KERNEL_PLL", 1)
 
 	# SO_REUSEADDR socket option is needed to open a socket on an
