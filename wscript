@@ -130,7 +130,7 @@ def configure(ctx):
 
 	ctx.env.NTPS_VERSION = "%s.%s.%s" % (ctx.env.NTPS_VERSION_MAJOR, ctx.env.NTPS_VERSION_MINOR, ctx.env.NTPS_VERSION_REV)
 	ctx.define("NTPS_VERSION_MAJOR", ctx.env.NTPS_VERSION_MAJOR)
-	ctx.define("NTPS_VERSION_MINOR", ctx.env.NTPS_VERSION_REV)
+	ctx.define("NTPS_VERSION_MINOR", ctx.env.NTPS_VERSION_MINOR)
 	ctx.define("NTPS_VERSION_REV", ctx.env.NTPS_VERSION_REV)
 
 
