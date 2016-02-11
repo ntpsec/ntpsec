@@ -112,8 +112,8 @@ def cmd_configure(ctx):
 #		ctx.get_cc_version(ctx.env.CC, gcc=True)
 		ctx.end_msg(ctx.options.cross_compiler)
 
-		ctx.env.CC = ctx.options.cross_compiler
-		ctx.env.LINK_CC = ctx.options.cross_compiler
+		ctx.env.CC = [ctx.options.cross_compiler]
+		ctx.env.LINK_CC = [ctx.options.cross_compiler]
 
 		if ctx.env["CROSS-CFLAGS"]:
 			ctx.env.CFLAGS = opt_map["CROSS-CFLAGS"]
