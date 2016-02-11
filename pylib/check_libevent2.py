@@ -18,6 +18,9 @@ int main(void) {
 def check_libevent2_header(ctx):
 	ctx.check(header_name="event2/event.h", includes=ctx.env.PLATFORM_INCLUDES, mandatory = False)
 	ctx.check(header_name="event2/thread.h", includes=ctx.env.PLATFORM_INCLUDES, mandatory = False)
+
+	# XXX: On some systems (NetBSD) event_core doesn't exist.  libevent is pulled in with event_pthreads.
+	#      This results in a warning from check_sanity()
 	ctx.check(feature="c cshlib", lib="event_core", libpath=ctx.env.PLATFORM_LIBPATH, uselib_store="LIBEVENT_CORE", mandatory = False)
 	ctx.check(feature="c cshlib", lib="event_pthreads", libpath=ctx.env.PLATFORM_LIBPATH, uselib_store="LIBEVENT_PTHREADS", use="LIBEVENT_CORE", mandatory = False)
 
