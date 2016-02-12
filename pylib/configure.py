@@ -231,7 +231,7 @@ def cmd_configure(ctx):
 	ctx.define("DFLT_RLIMIT_STACK", 50)
 	ctx.define("DFLT_RLIMIT_MEMLOCK", 32)
 
-	ctx.define("OPENSSL_VERSION_TEXT", "#XXX: Fixme")
+#	ctx.define("OPENSSL_VERSION_TEXT", "#XXX: Fixme")
 
 	probe_multicast(ctx, "MCAST", "Checking for multicast capability")
 
