@@ -16,16 +16,8 @@
 #include <stdio.h>
 #include <ctype.h>
 #include <sys/types.h>
-#ifdef HAVE_SYS_IOCTL_H
-# include <sys/ioctl.h>
-#endif
 #include <unistd.h>
 #include <sys/stat.h>
-
-#ifdef HAVE_IEEEFP_H
-# include <ieeefp.h>
-#endif
-#include <math.h>
 
 /*
  * Defines used by the leapseconds stuff
