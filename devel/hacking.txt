@@ -57,6 +57,10 @@ cause buffer overruns and (all too often) exploitable security holes:
 In general, avoid functions that are non-reentrant.  When in doubt, see
 http://www.unix.org/whitepapers/reentrant.html[Thread-safety and POSIX.1]
 
+=== Banned features ===
+
+All C files should be in plain US-ASCII encoding; do not use trigraphs.
+
 === Naming conventions ===
 
 Every binary and script we install has an "ntp" prefix on the name,
