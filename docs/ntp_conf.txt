@@ -325,7 +325,7 @@ file.
 2.  Write the action to be performed on recognizing the rules. These
 actions will be used to build the AST.
 3.  If new reserved words are needed, add these to the
-+struct key_tok keyword_list[]+ structure in the *ntp_config.c* file.
++struct key_tok ntp_keywords[]+ structure in the *keyword-gen.c* file.
 This will allow the scanner to recognize these reserved words and
 generate the desired tokens on recognizing them.
 4.  Specify the types of all the terminals and non-terminal symbols in
