@@ -273,7 +273,7 @@ static	bool	addr_eqprefix	(const sockaddr_u *, const sockaddr_u *,
 static  bool	addr_samesubnet	(const sockaddr_u *, const sockaddr_u *,
 				 const sockaddr_u *, const sockaddr_u *);
 static	int	create_sockets	(u_short);
-static	SOCKET	open_socket	(sockaddr_u *, int, int, endpt *);
+static	SOCKET	open_socket	(sockaddr_u *, bool, bool, endpt *);
 static	char *	fdbits		(int, fd_set *);
 static	void	set_reuseaddr	(bool);
 static	bool	socket_broadcast_enable	 (struct interface *, SOCKET, sockaddr_u *);
@@ -2872,8 +2872,8 @@ io_multicast_del(
 static SOCKET
 open_socket(
 	sockaddr_u *	addr,
-	int		bcast,
-	int		turn_off_reuse,
+	bool		bcast,
+	bool		turn_off_reuse,
 	endpt *		interf
 	)
 {
@@ -2883,8 +2883,8 @@ open_socket(
 	 * int is OK for REUSEADR per
 	 * http://www.kohala.com/start/mcast.api.txt
 	 */
-	int	on = 1;
-	int	off = 0;
+	const int	on = 1;
+	const int	off = 0;
 
 	if (IS_IPV6(addr) && !ipv6_works)
 		return INVALID_SOCKET;
