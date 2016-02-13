@@ -105,7 +105,7 @@ default token.
 
 +struct state *create_keyword_scanner(struct key_tok *keyword_list)+::
   This function takes a list of (_keyword, token_) pairs and converts
-  them into a trie that can recognize the keywords (reserved words).
+  them into a tree that can recognize the keywords (reserved words).
   Every time the scanner reads a lexeme, it compares it against the list
   of reserved words. If it finds a match, it returns the corresponding
   token for that keyword.

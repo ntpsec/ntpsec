@@ -53,7 +53,7 @@ typedef enum {
 
 /* 
  * Define a structure to hold the FSA for the keywords.
- * The structure is actually a trie.
+ * The structure is actually a tree.
  *
  * To save space, a single uint32_t encodes four fields, and a fifth
  * (the token completed for terminal states) is implied by the index of
