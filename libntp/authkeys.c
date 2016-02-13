@@ -55,18 +55,15 @@ static void		freesymkey(symkey *, symkey **);
 static void		free_auth_mem(void);
 #endif
 
-symkey	key_listhead;		/* list of all in-use keys */;
+symkey key_listhead;		/* list of all in-use keys */;
 /*
  * The hash table. This is indexed by the low order bits of the
- * keyid. We make this fairly big for potentially busy servers.
+ * keyid. This gets updated in auth_resize_hashtable
  */
-#define	DEF_AUTHHASHSIZE	64
-//#define	HASHMASK	((HASHSIZE)-1)
-#define	KEYHASH(keyid)	((keyid) & authhashmask)
-
-int	authhashdisabled;
-u_short	authhashbuckets = DEF_AUTHHASHSIZE;
-u_short authhashmask = DEF_AUTHHASHSIZE - 1;
+#define KEYHASH(keyid)	((keyid) & authhashmask)
+#define INIT_AUTHHASHSIZE 64
+u_short authhashbuckets = INIT_AUTHHASHSIZE;
+u_short authhashmask = INIT_AUTHHASHSIZE - 1;
 symkey **key_hash;
 
 u_long authkeynotfound;		/* keys not found */
