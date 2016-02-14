@@ -55,7 +55,7 @@ static void		freesymkey(symkey *, symkey **);
 static void		free_auth_mem(void);
 #endif
 
-symkey key_listhead;		/* list of all in-use keys */;
+symkey key_listhead;		/* list of all in-use keys */
 /*
  * The hash table. This is indexed by the low order bits of the
  * keyid. This gets updated in auth_resize_hashtable
