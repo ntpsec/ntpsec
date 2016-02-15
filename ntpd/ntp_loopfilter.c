@@ -120,13 +120,14 @@ static bool loop_started;	/* true after LOOP_DRIFTINIT */
 static void rstclock (int, double); /* transition function */
 static double direct_freq(double); /* direct set frequency */
 static void set_freq(double);	/* set frequency */
+
+#ifdef HAVE_KERNEL_PLL
 #ifndef PATH_MAX
 # define PATH_MAX MAX_PATH
 #endif
 static char relative_path[PATH_MAX + 1]; /* relative path per recursive make */
 static char *this_file = NULL;
 
-#ifdef HAVE_KERNEL_PLL
 static struct timex ntv;	/* ntp_adjtime() parameters */
 int	pll_status;		/* last kernel status bits */
 #if defined(STA_NANO) && NTP_API == 4
@@ -190,7 +191,6 @@ sync_status(const char *what, int ostatus, int nstatus)
 	snprintf(tbuf, sizeof(tbuf), "%s status: %s -> %s", what, obuf, nbuf);
 	report_event(EVNT_KERN, NULL, tbuf);
 }
-#endif /* HAVE_KERNEL_PLL */
 
 /*
  * file_name - return pointer to non-relative portion of this C file pathname
@@ -205,6 +205,7 @@ static char *file_name(void)
 	}
 	return this_file;
 }
+#endif /* HAVE_KERNEL_PLL */
 
 /*
  * init_loopfilter - initialize loop filter data
