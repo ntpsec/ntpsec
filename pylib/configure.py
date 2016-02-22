@@ -41,9 +41,12 @@ def cmd_configure(ctx):
 									"-f", "-I%s/libisc/include/" % srcnode,
 									"-f", "-I%s/libisc/unix/include/" % srcnode]
 
-	ctx.find_program("awk", var="BIN_AWK")
-	ctx.find_program("perl", var="BIN_PERL")
-	ctx.find_program("sh", var="BIN_SH")
+	# Not needed to build.  Used by utility scripts.
+	ctx.find_program("awk", var="BIN_AWK", mandatory=False)
+	ctx.find_program("perl", var="BIN_PERL", mandatory=False)
+	ctx.find_program("sh", var="BIN_SH", mandatory=False)
+
+	# used to make man and html pages
 	ctx.find_program("asciidoc", var="BIN_ASCIIDOC", mandatory=False)
 	ctx.find_program("a2x", var="BIN_A2X", mandatory=False)
 
