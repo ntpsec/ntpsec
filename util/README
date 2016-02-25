@@ -14,7 +14,7 @@ audio-pcm.c::	Probe the capabilities of your sound card.  Assumes the
 bumpclock.c::	This is a simple program to bump the system clock so
 		you can see how ntpd and your OS respond.  The single
 		argument is the time-to-bump in microseconds.  The
-		default is 100000.
+		default is 100000.  Stand-alone compile.
 
 hist.c::	This program can be used to calibrate the clock reading
 		jitter of a particular CPU and operating system. It
