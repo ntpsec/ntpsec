@@ -698,7 +698,10 @@ static void lfpload(char *str, l_fp *fp)
 {
     uint64_t	np;
 
-    sscanf(str, "%" PRIu64, &np);
+    if (sscanf(str, "%" PRIu64, &np) != 1) {
+	fprintf(stderr, "ntpd: bad fp format at line %d\n", lineno);
+	exit(1);
+    }
     
     (fp)->l_uf = (np) & 0xFFFFFFFF;					\
     (fp)->l_ui = (((np) >> FRACTION_PREC) & 0xFFFFFFFF);		\
@@ -762,7 +765,10 @@ static size_t packet_parse(char *pktbuf, char *macbuf, struct pkt *pkt)
 	size_t i;
 	for (i = 0; i < strlen(macbuf)/2; i++) {
 	    int hexval;
-	    sscanf(macbuf + 2*i, "%02x", &hexval);
+	    if (sscanf(macbuf + 2*i, "%02x", &hexval) != 1) {
+		fprintf(stderr, "ntpd: bad hexval format at line %d\n", lineno);
+		exit(1);
+	    }
 	    pkt->exten[i] = hexval & 0xff;
 	    ++pktlen;
 	}
