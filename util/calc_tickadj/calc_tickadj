@@ -20,8 +20,8 @@ sub run {
     my $tick       = $opts->{'tick'};
 
     if (!$tick) {
-        my ($fl) = `ntptickadj`;
-        if (defined $fl && $fl =~ /(?:KERNEL|PRESET)?\s*tick\s+=\s+(\d+)/) {
+        my ($fl) = `ntpfrob -A`;
+        if (defined $fl && $fl =~ /(\d+)/) {
             $tick = $1;
         }
         else {
