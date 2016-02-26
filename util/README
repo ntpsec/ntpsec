@@ -42,6 +42,10 @@ kern.c:: 	Header comment from deep in the mists of past time says:
 monitoring::	Directory containing perl scripts useful for monitoring
                 operations
 
+ntpdate::	Wrapper script to maintain compatability. Maps options
+		to ntpdig and calls it.
+		Tested: 20160226
+
 ntpsweep::	prints per host given in <file> the NTP stratum level, the
 		clock offset in seconds, the daemon version, the operating
 		system and the processor.
