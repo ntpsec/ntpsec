@@ -1,8 +1,11 @@
-#!/usr/bin/env -w
+#!/usr/bin/env perl
 #
 # drift of 104.8576 -> +1 tick.  Base  of 10000 ticks.
 #
 # 970306 HMS Deal with nanoseconds.  Fix sign of adjustments.
+
+use warnings;
+
 package calc_tickadj;
 use strict;
 
