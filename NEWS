@@ -6,6 +6,10 @@ Much of the traditional function of a news file is now better addressed
 by browsing the comments in the revision history.  This file will focus
 on user-visible changes.
 
+== -dev ==
+
+* Drop support for testing an ancient RS6000 bug (Sanjeev Gupta)
+
 == 2016-01-25: 0.9.1 ==
 
 Point release for security. Fixes:
