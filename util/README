@@ -27,7 +27,7 @@ hist.c::	This program can be used to calibrate the clock reading
 		the jitter and if the clock ever runs backwards.
 		To compile in the util directory, run waf configure and:
 		gcc -I ../include/ -I ../build/ hist.c
-		There is no docimentation on how to interpret results.
+		There is no documentation on how to interpret results.
 		Tested: 20160226
 
 kern.c:: 	Header comment from deep in the mists of past time says:
