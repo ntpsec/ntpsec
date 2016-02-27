@@ -49,6 +49,10 @@ ntpdate::	Wrapper script to maintain compatibility. Maps options
 ntpsweep::	prints per host given in <file> the NTP stratum level, the
 		clock offset in seconds, the daemon version, the operating
 		system and the processor.
+		Needs -I <directory above NTP/Util.pm>
+		May not work on today's Internet, because servers do not
+		wish to be interrogated.
+		Tested: 20160228
 
 ntpver::	Simple script using ntpq to print out the suite version.
 		Tested: 20160226
