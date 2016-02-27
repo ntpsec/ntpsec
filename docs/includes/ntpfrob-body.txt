@@ -5,7 +5,7 @@
 [[synop]]
 == Synopsis ==
 
-+{ntpfrob}+ [ +-A+] [ +-a+ 'tick' ] [ +-p+ 'ppsdev' ] [+-c+] [+-e+] [+-r+] [+-s+]
++{ntpfrob}+ [ +-A+] [ +-a+ 'tick' ] [ +-p+ 'ppsdev' ] [+-c+] [+-e+] [+-r+]
 
 [[descr]]
 == Description ==
@@ -34,8 +34,6 @@ utilities.
 +-r+::
   Raw mode.  Only applies to the jitter mode, and means the raw
   clock samples should be emitted to stdout for postanalysis.
-+-s+::
-  Check for stepback bug.
 
 [[usage]]
 == Usage ==
@@ -91,15 +89,5 @@ The -e option measure the resolution of the system clock, watching how
 the current time changes as we read it repeatedly.
 
 The -j option is applicable to this mode.
-
-=== Stepback bug check ===
-
-The -s option checks for a bug originally seen on IBM RS/6000 AIX
-machines. If a negative offset is given, the system gets messed up and
-never completes the adjustment.  If the problem is fixed, this program
-will print the time, sit there for 10 seconds, and exit.  If the
-problem isn't fixed, the program will print an occasional
-"result=nnnnnn" (the residual slew from adjtime()).
-
 
 // end
