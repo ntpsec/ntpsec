@@ -81,7 +81,7 @@ tg2.c::		A tone generator; makes audio signals that emulate WWV/H or
 		TRIED: 20160228
 		This program may no longer compile, or run, on anything
 		except a *BSD system.  It need lots of includes, including
-		a strlcpy implementaion, removal of multiple redifines of
+		a strlcpy implementation, removal of multiple redefines of
 		included functions and headers, etc.
 		WWV and pals are gone, anyway.
 

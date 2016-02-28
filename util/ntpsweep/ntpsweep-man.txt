@@ -13,7 +13,7 @@ ntpsweep - print various informations about given NTP servers
 seconds, the daemon version, the operating system and the processor.
 Optionally recursing through all peers.
 
-`ntpswwep` relies on `ntpq` and `ntpdig` to probe servers.  This depends
+`ntpsweep` relies on `ntpq` and `ntpdig` to probe servers.  This depends
 on the remote host's _restrict_ configuration allowing this.
 
 `ntpsweep` is a perl script, and you may need to run it as:
