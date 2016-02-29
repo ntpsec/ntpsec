@@ -39,6 +39,7 @@ struct key_tok ntp_keywords[] = {
 { "io",			T_Io,			FOLLBY_TOKEN },
 { "includefile",	T_Includefile,		FOLLBY_STRING },
 { "leapfile",		T_Leapfile,		FOLLBY_STRING },
+{ "leapsmearinterval",	T_Leapsmearinterval,	FOLLBY_TOKEN },
 { "logconfig",		T_Logconfig,		FOLLBY_STRINGS_TO_EOC },
 { "logfile",		T_Logfile,		FOLLBY_STRING },
 { "manycastclient",	T_Manycastclient,	FOLLBY_STRING },
