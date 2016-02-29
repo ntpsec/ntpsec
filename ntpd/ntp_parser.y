@@ -1218,7 +1218,7 @@ misc_cmd_int_keyword
 misc_cmd_int_keyword
 	:	T_Leapsmearinterval
 		{
-#ifndef LEAP_SMEAR
+#ifndef ENABLE_LEAP_SMEAR
 			yyerror("Built without LEAP_SMEAR support.");
 #endif
 		}
