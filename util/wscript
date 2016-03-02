@@ -6,7 +6,7 @@ def build(ctx):
 
 	util = ['bumpclock', 'hist', 'propdelay', 'sht']
 
-	if ctx.env.HEADER_SYS_AUDIO_H:
+	if ctx.env.HAVE_AUDIO:
 		util += ['tg2']
 
 	for name in util:

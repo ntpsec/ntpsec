@@ -367,8 +367,10 @@ def cmd_configure(ctx):
 		ctx.env.HEADER_SYS_TIMEX_H = True
 
 	# Some systems don't have sys/audio.h eg OS X, OpenBSD...
-	if ctx.get_define("HAVE_SYS_AUDIO_H"):
-		ctx.env.HEADER_SYS_AUDIO_H = True
+	if ctx.get_define("HAVE_SYS_AUDIO_H") or \
+	   ctx.get_define("HAVE_SYS_SOUNDCARD_H") or \
+	   ctx.get_define("HAVE_MACHINE_SOUNDCARD_H"):
+		ctx.env.HAVE_AUDIO = True  # makes util/tg2
 
 	if ctx.options.refclocks:
 		from refclock import refclock_config
