@@ -701,8 +701,8 @@ local_clock(
 				 */
 				if (sys_poll >= allan_xpt)
 					clock_frequency += (fp_offset -
-					    clock_offset) / max(ULOGTOD(sys_poll),
-					    mu) * CLOCK_FLL;
+					    clock_offset) / (max(ULOGTOD(sys_poll),
+					    mu) * CLOCK_FLL);
 
 				/*
 				 * The PLL frequency gain (numerator) depends on
