@@ -4,10 +4,6 @@ from waflib import Context, Errors
 from waflib import Scripting
 from waflib.Logs import pprint
 
-config = {
-	"NTPS_RELEASE": False # Set to 'True' if this is a release
-}
-
 out="build"
 
 from pylib.configure import cmd_configure
@@ -15,6 +11,7 @@ from waflib.Tools import waf_unit_test
 from pylib.test import test_write_log, test_print_log
 
 OPT_STORE = {} # Storage for options to pass into configure
+config = {}
 
 def parse_version():
         with open("VERSION", "r") as f:
@@ -32,11 +29,23 @@ config.update(parse_version())
 def dist(ctx):
 		from os import path
 		from shutil import copyfile
+		from os.path import exists
+		import time
+
 		files_man = []
 
-		if not config["NTPS_RELEASE"]:
-			ctx.fatal("NTPS_RELEASE must be set to True")
+		if not ctx.options.build_snapshot and not ctx.options.build_release:
+			ctx.fatal("Please supply --build-snapshot or --build-release")
 
+		if exists("build/c4che/host_cache.py"):
+			from waflib.ConfigSet import ConfigSet
+			cset = ConfigSet()
+			cset.load("build/c4che/host_cache.py")
+		else:
+			ctx.fatal("Please run 'waf configure' first.")
+
+		rev = cset.NTPS_REVISION[:7]
+		timestamp = time.strftime("%Y-%m-%d_%H%M%S")
 
 		# XXX: Redo to not use globs.
 		bldnode = ctx.path.make_node(out)
@@ -64,10 +73,16 @@ def dist(ctx):
 			print "Copying %s -> %s" % (src, dst)
 			copyfile(src, dst)
 
-		ctx.base_name = "ntpsec-%d.%d.%d" % \
-						(config["NTPS_VERSION_MAJOR"], \
+		version = "%d.%d.%d" % (config["NTPS_VERSION_MAJOR"], \
 						config["NTPS_VERSION_MINOR"], \
 						config["NTPS_VERSION_REV"])
+
+
+		if ctx.options.build_snapshot:
+			ctx.base_name = "ntpsec-%s-%s-%s" % (timestamp, version, rev)
+		else:
+			ctx.base_name = "ntpsec-%s" % version
+
 		if ctx.options.build_version_tag:
 			ctx.base_name = "%s-%s" % (ctx.base_name, ctx.options.build_version_tag)
 
@@ -120,6 +135,10 @@ def options(ctx):
 	grp.add_option('--enable-a2x-xmllint', action='store_true', default=False, help="Build NTP documentation with a2x XML lint")
 	grp.add_option('--disable-manpage', action='store_true', default=False, help="Disable Manpage building.")
 	grp.add_option('--path-doc', type='string', action='store', default=None, help="Force doc install directory.")
+
+	grp = ctx.add_option_group("Not for general use")
+	grp.add_option('--build-snapshot', action='store_true', default=False, help="Generate source snapshot.")
+	grp.add_option('--build-release', action='store_true', default=False, help="Generate a release tarball..")
 
 
 def configure(ctx):
