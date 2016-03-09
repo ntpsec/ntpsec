@@ -275,7 +275,7 @@ static  bool	addr_samesubnet	(const sockaddr_u *, const sockaddr_u *,
 static	int	create_sockets	(u_short);
 static	SOCKET	open_socket	(sockaddr_u *, bool, bool, endpt *);
 static	char *	fdbits		(int, fd_set *);
-static	void	set_reuseaddr	(bool);
+static	void	set_reuseaddr	(int);
 static	bool	socket_broadcast_enable	 (struct interface *, SOCKET, sockaddr_u *);
 #ifdef  OS_MISSES_SPECIFIC_ROUTE_UPDATES
 static	bool	socket_broadcast_disable (struct interface *, sockaddr_u *);
@@ -2080,7 +2080,7 @@ create_sockets(
 	 * Now that we have opened all the sockets, turn off the reuse
 	 * flag for security.
 	 */
-	set_reuseaddr(false);
+	set_reuseaddr(0);
 
 	DPRINTF(2, ("create_sockets: Total interfaces = %d\n", ninterfaces));
 
@@ -2235,7 +2235,7 @@ set_excladdruse(
  */
 static void
 set_reuseaddr(
-	bool flag
+	int flag
 	)
 {
 #ifndef SO_EXCLUSIVEADDRUSE
