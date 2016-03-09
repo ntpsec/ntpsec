@@ -161,7 +161,7 @@ send_via_ntp_signd(
 	ZERO(samba_pkt);
 	samba_pkt.op = 0; /* Sign message */
 	/* This will be echoed into the reply - a different
-	 * impelementation might want multiple packets
+	 * implementation might want multiple packets
 	 * awaiting signing */
 
 	samba_pkt.packet_id = 1;
