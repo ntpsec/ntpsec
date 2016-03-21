@@ -196,10 +196,11 @@ local_poll(
 	}
 	pp->disp = 0;
 	pp->jitter = 0;
-#else /* HAVE_KERNEL_PLL ENABLE_LOCKCLOCK */
+#else /* HAVE_KERNEL_PLL && ENABLE_LOCKCLOCK */
+	pp->leap = LEAP_NOWARNING;
 	pp->disp = DISPERSION;
 	pp->jitter = 0;
-#endif /* HAVE_KERNEL_PLL ENABLE_LOCKCLOCK */
+#endif /* HAVE_KERNEL_PLL && ENABLE_LOCKCLOCK */
 	pp->lastref = pp->lastrec;
 	refclock_receive(peer);
 }
