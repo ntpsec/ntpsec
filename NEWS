@@ -8,14 +8,16 @@ on user-visible changes.
 
 == Repository head ==
 
-The following reflect forward-ported fixes from Classic:
+The following fixes have been forward-ported from Classic:
 
 [Bug 2772] adj_systime overflows tv_usec
+[Bug 2814] msyslog deadlock when signaled.
 [Bug 2829] Look at pipe_fds in ntpd.c
 [Bug 2887] fudge stratum only accepts values [0..16].
 [Bug 2937] (NTPQ) nextvar() missing length check
-[Bug 2958] ntpq: fatal error messages need a final newline. Craig Leres.
+[Bug 2958] ntpq: fatal error messages need a final newline.
 [Bug 2965] Local clock didn't work since 4.2.8p4.
+[Bug 2969] Segfault from ntpq/mrulist when looking at server with lots of clients
 
 == 2016-03-15: 0.9.2 ==
 
