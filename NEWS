@@ -6,6 +6,16 @@ Much of the traditional function of a news file is now better addressed
 by browsing the comments in the revision history.  This file will focus
 on user-visible changes.
 
+== Repository head ==
+
+The following reflect forward-ported fixes to Classic:
+
+[Bug 2772] adj_systime overflows tv_usec
+[Bug 2829] Look at pipe_fds in ntpd.c
+[Bug 2887] fudge stratum only accepts values [0..16].
+[Bug 2937] (NTPQ) nextvar() missing length check
+[Bug 2958] ntpq: fatal error messages need a final newline. Craig Leres.
+
 == 2016-03-15: 0.9.2 ==
 
 Point release.
@@ -152,22 +162,22 @@ the 0.9.0 beta release.
 * [Bug 2883] ntpd crashes on exit with empty driftfile.  Miroslav Lichvar.
 * [Bug 2886] Misspelling: "outlyer" should be "outlier"
 * [Bug 2890] Ignore ENOBUFS on routing netlink socket.  Konstantin Khlebnikov.
+* [Bug 2901] Clients that receive a KoD should validate the origin
+  timestamp field (CVE-2015-7704, CVE-2015-7705)
 * [Bug 2902] configuration directives "pidfile" and "driftfile"
   should be local-only. (patch by Miroslav Lichvar) (CVE-2015-7703)
 * [Bug 2909] Slow memory leak in CRYPTO_ASSOC (CVE-2015-7701)
-* [Bug 2941] NAK to the Future: Symmetric association authentication
-  bypass via crypto-NAK (CVE-2015-7871)
-* [Bug 2922] decodenetnum() will ASSERT botch instead of returning
-  FAIL on some bogus values (CVE-2015-7855)
-* [Bug 2921] Password Length Memory Corruption Vulnerability (CVE-2015-7854)
-* [Bug 2920] Invalid length data provided by a custom refclock driver
-  could cause a buffer overflow (CVE-2015-7853)
-* [Bug 2919] ntpq atoascii() potential memory corruption (CVE-2015-7852)
+* [Bug 2916] trusted key use-after-free (CVE-2015-7849)
 * [Bug 2918] saveconfig Directory Traversal Vulnerability. (OpenVMS)
   (CVE-2015-7851)
-* [Bug 2916] trusted key use-after-free (CVE-2015-7849)
-* [Bug 2901] Clients that receive a KoD should validate the origin
-  timestamp field (CVE-2015-7704, CVE-2015-7705)
+* [Bug 2919] ntpq atoascii() potential memory corruption (CVE-2015-7852)
+* [Bug 2920] Invalid length data provided by a custom refclock driver
+  could cause a buffer overflow (CVE-2015-7853)
+* [Bug 2921] Password Length Memory Corruption Vulnerability (CVE-2015-7854)
+* [Bug 2922] decodenetnum() will ASSERT botch instead of returning
+  FAIL on some bogus values (CVE-2015-7855)
+* [Bug 2941] NAK to the Future: Symmetric association authentication
+  bypass via crypto-NAK (CVE-2015-7871)
 
 Additionally the NTPsec team is aware of the following vulnerabilities
 impacting autokey: CVE-2015-7691, CVE-2015-7692, CVE-2015-7702. NTPsec
