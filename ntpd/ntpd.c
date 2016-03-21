@@ -45,6 +45,13 @@ extern bool sandbox(const bool droproot,
 		    const char *chrootdir,
 		    bool want_dynamic_interface_tracking);
 
+#if !defined(SIM) && defined(SIGDIE1)
+static volatile bool signalled	= false;
+static volatile int signo	= 0;
+/* In an ideal world, 'finish_safe()' would declared as noreturn... */
+static	void		finish_safe	(int);
+#endif
+
 #ifdef SIGDANGER
 # include <ulimit.h>
 #endif /* SIGDANGER */
@@ -957,6 +964,10 @@ static void mainloop(void)
 
 # ifdef HAVE_IO_COMPLETION_PORT
 	for (;;) {
+#if !defined(SIM) && defined(SIGDIE1)
+		if (signalled)
+			finish_safe(signo);
+#endif
 		GetReceivedBuffers();
 # else /* normal I/O */
 
@@ -964,6 +975,10 @@ static void mainloop(void)
 	was_alarmed = false;
 
 	for (;;) {
+#if !defined(SIM) && defined(SIGDIE1)
+		if (signalled)
+			finish_safe(signo);
+#endif
 		if (alarm_flag) {	/* alarmed? */
 			was_alarmed = true;
 			alarm_flag = false;
@@ -1082,8 +1097,8 @@ static void mainloop(void)
 /*
  * finish - exit gracefully
  */
-void
-finish(
+static void
+finish_safe(
 	int sig
 	)
 {
@@ -1102,6 +1117,16 @@ finish(
 	peer_cleanup();
 	intercept_exit(0);
 }
+
+void
+finish(
+	int	sig
+	)
+{
+	signalled = true;
+	signo = sig;
+}
+
 #endif	/* !SIM && SIGDIE1 */
 
 
