@@ -4,7 +4,7 @@
  * Written by Juergen Perlinger <perlinger@ntp.org> for the NTP project.
  *
  * For a rationale look at 'timespecops.h'; we do the same here, but the
- * normalisation keeps the microseconds in [0 .. 10^6[, of course.
+ * normalisation keeps the microseconds in [0 .. 10^6], of course.
  *
  * Copyright 2015 by the NTPsec project contributors
  * SPDX-License-Identifier: NTP

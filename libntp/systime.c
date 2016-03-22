@@ -313,7 +313,7 @@ adj_systime(
 		quant = 1e-6;
 	ticks = (long)(dtemp / quant + .5);
 	adjtv.tv_usec = (long)(ticks * quant * 1.e6 + .5);
-	/* The rounding in the conversions could us push over the
+	/* The rounding in the conversions could push us over the
 	 * limits: make sure the result is properly normalised!
 	 * note: sign comes later, all numbers non-negative here.
 	 */
