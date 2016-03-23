@@ -13,7 +13,7 @@ from pylib.test import test_write_log, test_print_log
 OPT_STORE = {} # Storage for options to pass into configure
 
 config = {
-	"NTPS_RELEASE": True
+	"NTPS_RELEASE": False
 }
 
 # Release procedure:
