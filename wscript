@@ -11,11 +11,24 @@ from waflib.Tools import waf_unit_test
 from pylib.test import test_write_log, test_print_log
 
 OPT_STORE = {} # Storage for options to pass into configure
-config = {}
+
+config = {
+	"NTPS_RELEASE": True
+}
+
+# Release procedure:
+#   1. waf configure
+#   2. waf build
+#   3. Edit wscript and set NTPS_RELEASE to True
+#   4. waf dist
+
+# Snapshot procedure:
+#   Steps 1-3 as above.
+#   4. waf dist --build-snapshot
 
 def parse_version():
         with open("VERSION", "r") as f:
-                version_string = f.read().strip()
+                version_string = f.read().split(" ")[0].strip()
         [major,minor,rev] = version_string.split(".")
         return {
                 # "NTPS" for NTPSec -- this avoids any naming collisions
@@ -34,8 +47,11 @@ def dist(ctx):
 
 		files_man = []
 
-		if not ctx.options.build_snapshot and not ctx.options.build_release:
-			ctx.fatal("Please supply --build-snapshot or --build-release")
+		if not ctx.options.build_snapshot and not config["NTPS_RELEASE"]:
+			ctx.fatal('Please supply --build-snapshot or set config["NTPS_RELEASE"] = True')
+
+		if not config["NTPS_RELEASE"]:
+			ctx.fatal('config["NTPS_RELEASE"] must be set to True')
 
 		if exists("build/c4che/host_cache.py"):
 			from waflib.ConfigSet import ConfigSet
@@ -85,6 +101,11 @@ def dist(ctx):
 
 		if ctx.options.build_version_tag:
 			ctx.base_name = "%s-%s" % (ctx.base_name, ctx.options.build_version_tag)
+
+		if ctx.options.build_snapshot:
+			with open("VERSION", "w") as fp:
+				fp.write("%s %s %s\n" % (version, timestamp, rev))
+
 
 def options(ctx):
 	ctx.load("compiler_c")
@@ -138,7 +159,6 @@ def options(ctx):
 
 	grp = ctx.add_option_group("Not for general use")
 	grp.add_option('--build-snapshot', action='store_true', default=False, help="Generate source snapshot.")
-	grp.add_option('--build-release', action='store_true', default=False, help="Generate a release tarball..")
 
 
 def configure(ctx):
@@ -226,7 +246,6 @@ for command, func, descr in commands:
 
 
 def build(ctx):
-
 	ctx.load('waf', tooldir='pylib/')
 	ctx.load('bison')
 	ctx.load('asciidoc', tooldir='pylib/')
