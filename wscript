@@ -14,7 +14,8 @@ OPT_STORE = {} # Storage for options to pass into configure
 
 config = {
 	"NTPS_RELEASE": True,
-	"out": out
+	"out": out,
+	"OPT_STORE": {}
 }
 
 # Release procedure:
@@ -39,7 +40,7 @@ def options(ctx):
 	ctx.load('waf_unit_test')
 
 	def callback_flags(option, opt, value, parser):
-		OPT_STORE.setdefault(opt, []).append(value)
+		config["OPT_STORE"].setdefault(opt, []).append(value)
 
 	grp = ctx.add_option_group("NTP configure options")
 	grp.add_option('--enable-debug', action='store_true', default=False, help="(ignored)")
@@ -88,26 +89,8 @@ def options(ctx):
 
 
 def configure(ctx):
-	from pylib.util import parse_version
-	parse_version(config)
-
-	ctx.env.NTPS_RELEASE = config["NTPS_RELEASE"]
-	ctx.env.NTPS_VERSION_MAJOR = config["NTPS_VERSION_MAJOR"]
-	ctx.env.NTPS_VERSION_MINOR = config["NTPS_VERSION_MINOR"]
-	ctx.env.NTPS_VERSION_REV = config["NTPS_VERSION_REV"]
-
-	ctx.env.NTPS_VERSION = "%s.%s.%s" % (ctx.env.NTPS_VERSION_MAJOR, ctx.env.NTPS_VERSION_MINOR, ctx.env.NTPS_VERSION_REV)
-	ctx.define("NTPS_VERSION_MAJOR", ctx.env.NTPS_VERSION_MAJOR)
-	ctx.define("NTPS_VERSION_MINOR", ctx.env.NTPS_VERSION_MINOR)
-	ctx.define("NTPS_VERSION_REV", ctx.env.NTPS_VERSION_REV)
-
-
-	ctx.load('waf', tooldir='pylib/')
-	ctx.load('waf_unit_test')
-
-	ctx.env.OPT_STORE = OPT_STORE
-
-	cmd_configure(ctx)
+	from pylib.configure import cmd_configure
+	cmd_configure(ctx, config)
 
 
 from waflib.Build import BuildContext
