@@ -60,7 +60,7 @@ def manpage(ctx, section, source):
 		ctx.install_files("${PREFIX}/man%s/" % section, source.replace("-man.txt", ".%s" % section))
 		return
 
-	if (not ctx.env.BIN_A2X) or ctx.env.DISABLE_MANPAGE:
+	if (not ctx.env.BIN_A2X and not BIN_XSLTPROC) or ctx.env.DISABLE_MANPAGE:
 		return
 
 	ctx(
