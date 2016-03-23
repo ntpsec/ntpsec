@@ -57,7 +57,7 @@ def dist_cmd(ctx, config):
 
 
 		if ctx.options.build_snapshot:
-			ctx.base_name = "ntpsec-%s-%s-%s" % (timestamp, version, rev)
+			ctx.base_name = "ntpsec-%s-%s-%s-snap" % (timestamp, version, rev)
 		else:
 			ctx.base_name = "ntpsec-%s" % version
 
