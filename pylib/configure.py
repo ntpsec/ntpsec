@@ -4,9 +4,27 @@ from probes import *
 import sys, os
 from util import parse_version
 
-def cmd_configure(ctx):
+def cmd_configure(ctx, config):
 	srcnode = ctx.srcnode.abspath()
 	bldnode = ctx.bldnode.abspath()
+
+	ctx.load('waf', tooldir='pylib/')
+	ctx.load('waf_unit_test')
+
+	from pylib.util import parse_version
+	parse_version(config)
+
+	ctx.env.NTPS_RELEASE = config["NTPS_RELEASE"]
+	ctx.env.NTPS_VERSION_MAJOR = config["NTPS_VERSION_MAJOR"]
+	ctx.env.NTPS_VERSION_MINOR = config["NTPS_VERSION_MINOR"]
+	ctx.env.NTPS_VERSION_REV = config["NTPS_VERSION_REV"]
+
+	ctx.env.NTPS_VERSION = "%s.%s.%s" % (ctx.env.NTPS_VERSION_MAJOR, ctx.env.NTPS_VERSION_MINOR, ctx.env.NTPS_VERSION_REV)
+	ctx.define("NTPS_VERSION_MAJOR", ctx.env.NTPS_VERSION_MAJOR)
+	ctx.define("NTPS_VERSION_MINOR", ctx.env.NTPS_VERSION_MINOR)
+	ctx.define("NTPS_VERSION_REV", ctx.env.NTPS_VERSION_REV)
+
+	ctx.env.OPT_STORE = config["OPT_STORE"]
 
 	opt_map = {}
 	# Wipe out and override flags with those from the commandline
