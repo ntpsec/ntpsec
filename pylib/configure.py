@@ -2,7 +2,7 @@ from waflib.Configure import conf
 from util import msg, msg_setting
 from probes import *
 import sys, os
-
+from util import parse_version
 
 def cmd_configure(ctx):
 	srcnode = ctx.srcnode.abspath()
