@@ -67,9 +67,10 @@ def cmd_configure(ctx, config):
 	# used to make man and html pages
 	ctx.find_program("asciidoc", var="BIN_ASCIIDOC", mandatory=False)
 	ctx.find_program("a2x", var="BIN_A2X", mandatory=False)
+	ctx.find_program("xsltproc", var="BIN_XSLTPROC", mandatory=False)
 
-	if (ctx.options.enable_doc or ctx.options.enable_doc_only) and not ctx.env.BIN_ASCIIDOC:
-		ctx.fatal("asciidoc is required in order to build documentation")
+	if (ctx.options.enable_doc or ctx.options.enable_doc_only) and not ctx.env.BIN_ASCIIDOC and not BIN_XSLTPROC:
+		ctx.fatal("asciidoc and xsltproc are required in order to build documentation")
 	elif (ctx.options.enable_doc or ctx.options.enable_doc_only):
 		ctx.env.ASCIIDOC_FLAGS = ["-f", "%s/docs/asciidoc.conf" % ctx.srcnode.abspath()]
 		ctx.env.ENABLE_DOC = True
@@ -569,7 +570,7 @@ def cmd_configure(ctx, config):
 	msg_setting("PREFIX", ctx.env.PREFIX)
 	msg_setting("Debug Support", yesno(not ctx.options.disable_debug))
 	msg_setting("Refclocks", ", ".join(ctx.env.REFCLOCK_LIST))
-	msg_setting("Build Manpages", yesno(ctx.env.BIN_A2X and not ctx.env.DISABLE_MANPAGE))
+	msg_setting("Build Manpages", yesno((ctx.env.BIN_XSLTPROC and ctx.env.BIN_A2X) and not ctx.env.DISABLE_MANPAGE))
 
 	if ctx.options.enable_debug:
 		msg("")
