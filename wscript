@@ -11,8 +11,6 @@ from waflib.Tools import waf_unit_test
 from pylib.test import test_write_log, test_print_log
 from pylib.options import options_cmd
 
-OPT_STORE = {} # Storage for options to pass into configure
-
 config = {
 	"NTPS_RELEASE": False,
 	"out": out,
