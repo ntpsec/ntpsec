@@ -40,3 +40,16 @@ def ascii_doc_scan(self):
 					node_lst.append(k)
 	return [depnodes, ()]
 
+
+def parse_version(config):
+	with open("VERSION", "r") as f:
+		version_string = f.read().split(" ")[0].strip()
+		[major, minor, rev] = version_string.split(".")
+		map = {
+			# "NTPS" for NTPSec -- this avoids any naming collisions
+			"NTPS_VERSION_MAJOR" : int(major),
+			"NTPS_VERSION_MINOR" : int(minor),
+			"NTPS_VERSION_REV" : int(rev)
+		}
+
+	config.update(map)

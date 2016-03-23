@@ -2,9 +2,12 @@ from os import path
 from shutil import copyfile
 from os.path import exists
 import time
+from util import parse_version
 
 def dist_cmd(ctx, config):
 		files_man = []
+
+		parse_version(config)
 
 		if not ctx.options.build_snapshot and not config["NTPS_RELEASE"]:
 			ctx.fatal('Please supply --build-snapshot or set config["NTPS_RELEASE"] = True')

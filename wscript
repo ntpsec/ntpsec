@@ -13,7 +13,7 @@ from pylib.test import test_write_log, test_print_log
 OPT_STORE = {} # Storage for options to pass into configure
 
 config = {
-	"NTPS_RELEASE": False,
+	"NTPS_RELEASE": True,
 	"out": out
 }
 
@@ -27,18 +27,6 @@ config = {
 #   Steps 1-3 as above.
 #   4. waf dist --build-snapshot
 
-def parse_version():
-        with open("VERSION", "r") as f:
-                version_string = f.read().split(" ")[0].strip()
-        [major,minor,rev] = version_string.split(".")
-        return {
-                # "NTPS" for NTPSec -- this avoids any naming collisions
-                "NTPS_VERSION_MAJOR" : int(major),
-                "NTPS_VERSION_MINOR" : int(minor),
-                "NTPS_VERSION_REV" : int(rev)
-        }
-
-config.update(parse_version())
 
 def dist(ctx):
 	from pylib.dist import dist_cmd
@@ -100,6 +88,9 @@ def options(ctx):
 
 
 def configure(ctx):
+	from pylib.util import parse_version
+	parse_version(config)
+
 	ctx.env.NTPS_RELEASE = config["NTPS_RELEASE"]
 	ctx.env.NTPS_VERSION_MAJOR = config["NTPS_VERSION_MAJOR"]
 	ctx.env.NTPS_VERSION_MINOR = config["NTPS_VERSION_MINOR"]
