@@ -14,7 +14,11 @@ cmd_map = {
 	("main/util/propdelay", 		  "1","1", "2"," 2"):	r'.*summer propagation, height 350 km, hops 1, delay 0.00239626 seconds.*',
 	("main/util/sht",				  "2:r"):				r'.*reader.*',
 	("main/util/tg2",				  "--help"):			r'.*illegal option.*',
+
+# XXX: Need to figure out how to test this.
 #	("main/util/hist",  			  ""):  				r'',
+
+# Perl library
 #	("main/ntptrace/ntptrace",  	  ""):  				r'',
 #	("main/ntpwait/ntpwait",		  ""):  				r'',
 #	("main/util/ntpsweep/ntpsweep",   ""):  				r'',
