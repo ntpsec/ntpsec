@@ -46,6 +46,10 @@ class check(BuildContext):
 	cmd = 'check'
 	variant = "main"
 
+def bin_test(ctx):
+	from pylib.bin_test import cmd_bin_test
+	cmd_bin_test(ctx, config)
+
 # Borrowed from https://www.rtems.org/
 variant_cmd = (
 	("build",   BuildContext),
