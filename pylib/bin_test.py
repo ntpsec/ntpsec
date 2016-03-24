@@ -58,6 +58,7 @@ def cmd_bin_test(ctx, config):
 		fail = run(cmd, cmd_map[cmd])
 
 	if fail:
-		ctx.fatal("Failed")
+		pprint("RED", "Tests failed!")
+#		ctx.fatal("Failed")
 
 #cmd_bin_test(None, None)
