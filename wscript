@@ -4,6 +4,8 @@ from waflib import Context, Errors
 from waflib import Scripting
 from waflib.Logs import pprint
 
+pprint.__doc__ = None
+
 out="build"
 
 from pylib.configure import cmd_configure
@@ -49,6 +51,7 @@ class check(BuildContext):
 def bin_test(ctx):
 	from pylib.bin_test import cmd_bin_test
 	cmd_bin_test(ctx, config)
+bin_test.__doc__ = "Run binary check, use after tests."
 
 # Borrowed from https://www.rtems.org/
 variant_cmd = (
