@@ -118,7 +118,7 @@ def build(ctx):
 	ctx.load('asciidoc', tooldir='pylib/')
 	ctx.load('rtems_trace', tooldir='pylib/')
 
-	if ctx.env.ENABLE_DOC:
+	if ctx.env.ENABLE_DOC_USER:
 		if ctx.variant != "main":
 			ctx.recurse("docs")
 
