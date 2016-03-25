@@ -174,10 +174,10 @@ Datum/Bancomm/Symmetricom bc600-series GPS/IRIG Receiver.
 |====================================================================
 | Number                      | Flags |RefID| Driver
 | link:driver1.html[Type 1]   | D     |LOCL | Undisciplined Local Clock
-| link:driver4.html[Type 4]   | -     |+SPECTRACOM+| Generic Spectracom Receivers
+| link:driver4.html[Type 4]   | -     |SPECTRACOM| Generic Spectracom Receivers
 | link:driver5.html[Type 5]   | D     |TRUE | TrueTime GPS/GOES Receivers
 | link:driver6.html[Type 6]   | D     |IRIG | IRIG Audio Decoder
-| link:driver7.html[Type 7]   | D     |+CHU+| Radio CHU Audio Demodulator/Decoder
+| link:driver7.html[Type 7]   | D     |CHU  | Radio CHU Audio Demodulator/Decoder
 | link:driver8.html[Type 8]   | TR    |DCFx | Generic Reference Driver (Parse)
 | link:driver9.html[Type 9]   | D     |GPS  | Magnavox MX4200 GPS Receiver
 | link:driver10.html[Type 10] | D     |GPS  | Austron 2200A/2201A GPS Receivers
