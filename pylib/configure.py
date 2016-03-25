@@ -69,12 +69,17 @@ def cmd_configure(ctx, config):
 	ctx.find_program("a2x", var="BIN_A2X", mandatory=False)
 	ctx.find_program("xsltproc", var="BIN_XSLTPROC", mandatory=False)
 
-	if (ctx.options.enable_doc or ctx.options.enable_doc_only) and not ctx.env.BIN_ASCIIDOC and not BIN_XSLTPROC:
+	ctx.env.ENABLE_DOC = False
+	if ctx.env.BIN_ASCIIDOC and ctx.env.BIN_XSLTPROC and ctx.env.BIN_A2X:
+		ctx.env.ENABLE_DOC = True
+
+
+	if (ctx.options.enable_doc or ctx.options.enable_doc_only) and not ctx.env.ENABLE_DOC:
 		ctx.fatal("asciidoc and xsltproc are required in order to build documentation")
 	elif (ctx.options.enable_doc or ctx.options.enable_doc_only):
 		ctx.env.ASCIIDOC_FLAGS = ["-f", "%s/docs/asciidoc.conf" % ctx.srcnode.abspath()]
-		ctx.env.ENABLE_DOC = True
 		ctx.env.ENABLE_DOC_ONLY = ctx.options.enable_doc_only
+		ctx.env.ENABLE_DOC_USER = ctx.options.enable_doc
 		ctx.env.PATH_DOC = ctx.options.path_doc
 
 	# XXX: conditionally build this with --disable-man?  Should it build without docs enabled?
@@ -570,7 +575,7 @@ def cmd_configure(ctx, config):
 	msg_setting("PREFIX", ctx.env.PREFIX)
 	msg_setting("Debug Support", yesno(not ctx.options.disable_debug))
 	msg_setting("Refclocks", ", ".join(ctx.env.REFCLOCK_LIST))
-	msg_setting("Build Manpages", yesno((ctx.env.BIN_XSLTPROC and ctx.env.BIN_A2X) and not ctx.env.DISABLE_MANPAGE))
+	msg_setting("Build Manpages", yesno(ctx.env.ENABLE_DOC and not ctx.env.DISABLE_MANPAGE))
 
 	if ctx.options.enable_debug:
 		msg("")
