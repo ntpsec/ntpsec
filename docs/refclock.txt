@@ -21,14 +21,14 @@ include::includes/audio.txt[]
 [[intro]]
 == Introduction ==
 
-{project-shortname} supports a large numberr of satellite, radio and
+{project-shortname} supports a large number of satellite, radio and
 telephone modem reference clocks plus several audio devices for
-instrumentation signals.plus a special pseudo-clock used for backup or
+instrumentation signals, plus a special pseudo-clock used for backup or
 when no other clock source is available.
 
 A general description of the reference clock support is on this
 page. Additional information about each reference clock driver can be
-found via links from this page. Additional information is on the
+found via links from here. Additional information is on the
 link:rdebug.html[Debugging Hints for Reference Clock Drivers] and
 link:howto.html[How To Write a Reference Clock Driver] pages.
 Information on how to support pulse-per-second (PPS) signals produced by
