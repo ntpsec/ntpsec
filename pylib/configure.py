@@ -405,13 +405,6 @@ def cmd_configure(ctx, config):
 
 		refclock_config(ctx)
 
-	# FIXME: These other things should be derived,
-	# but the fate of the SYS_WINNT code
-	# needs to be decided before that will
-	# make sense.
-	ctx.define("ISC_PLATFORM_HAVEIPV6", 1, comment="Enable IPv6 in ISC platform library")
-	ctx.define("ISC_PLATFORM_HAVEIN6PKTINFO", 1, comment="IPv6 packet information, requires ISC_PLATFORM_HAVEIPV6")
-
 	# NetBSD (used to) need to recreate sockets on changed routing.
 	# Perhaps it still does. If so, this should be set.  The autoconf
 	# build set it "if the OS clears cached routes when more specifics
