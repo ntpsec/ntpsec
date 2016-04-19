@@ -203,9 +203,9 @@ def cmd_configure(ctx, config):
 	elif ctx.env.PLATFORM_TARGET == "win":
 		ctx.load("msvc")
 
-	# OS X needs this for IPV6
+	# OS X needs this for IPv6
 	if ctx.env.PLATFORM_TARGET == "osx":
-		ctx.define("__APPLE_USE_RFC_3542", 1)
+		ctx.define("__APPLE_USE_RFC_3542", 1, comment="Needed for IPv6 support")
 
 	# int32_t and uint32_t probes aren't really needed, POSIX guarantees
 	# them.  But int64_t and uint64_t are not guaranteed to exist on 32-bit
