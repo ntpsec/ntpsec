@@ -46,7 +46,7 @@ def check_compiler(ctx):
 		quote		= False,
 		execute		= True,
 		define_ret  = True,
-		mandatory	= True
+		mandatory	= True,
 	)
 
 	compiler_int = int(ctx.get_define("COMPILER_INT"))
@@ -57,7 +57,7 @@ def check_compiler(ctx):
 
 	ctx.start_msg("Compiler found")
 
-	ctx.define(define, 1) # config.h
+	ctx.define(define, 1, comment="Compiler detected during configure.") # config.h
 	ctx.env[define] = True # Build system.
 
 	ctx.end_msg(name)

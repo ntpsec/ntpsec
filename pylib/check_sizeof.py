@@ -28,6 +28,7 @@ def check_sizeof_host(ctx, header, sizeof, mandatory=True):
 		define_ret  = True,
 		quote		= False,
 		mandatory	= mandatory,
+		comment		= "Size of %s from <%s>" % (sizeof, header)
 	)
 	ctx.end_msg(ctx.get_define(name))
 
@@ -65,7 +66,7 @@ def check_sizeof_cross(ctx, header, sizeof, mandatory=True):
 				execute     = False,
 				mandatory	= mandatory,
 			)
-			ctx.define(name, size)
+			ctx.define(name, size, comment="Size of %s from <%s>" % (sizeof, header))
 			ctx.end_msg(ctx.get_define(name))
 			return
 		except Errors.ConfigurationError:

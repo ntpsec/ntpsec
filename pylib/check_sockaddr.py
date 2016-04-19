@@ -23,7 +23,8 @@ def check_sockaddr(ctx):
 		define_name = "HAVE_STRUCT_SOCKADDR_STORAGE",
 		features	= "c",
 		msg         = "Checking for type sockaddr_storage",
-		mandatory	= False
+		mandatory	= False,
+		comment		= "Whether sockaddr_storage exists"
 	)
 
 	ctx.check_cc(
@@ -31,6 +32,7 @@ def check_sockaddr(ctx):
 		define_name = "ISC_PLATFORM_HAVESALEN",
 		features	= "c",
 		msg         = "Checking for sockaddr->sa_len",
-		mandatory	= False
+		mandatory	= False,
+		comment		= "Whether sockaddr.sa_len exists"
 	)
 

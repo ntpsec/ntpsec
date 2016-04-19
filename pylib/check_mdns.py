@@ -19,7 +19,7 @@ def check_mdns_header(ctx):
 def check_mdns_run(ctx):
 	if ctx.env.ENABLE_CROSS: # XXX Remove when variant builds exist
 		if ctx.env.DNS_SD_HEADER:
-			ctx.define("HAVE_MDNS", 1)
+			ctx.define("HAVE_MDNS", 1, comment="multicast dns support")
 		return
 
 	ctx.check_cc(
@@ -31,8 +31,9 @@ def check_mdns_run(ctx):
 		export_includes = ctx.env.PLATFORM_INCLUDES,
 		msg         = "Checking if mDNSResponder works",
 		name		= "MDNS_INCLUDES",
-		mandatory	= False
+		mandatory	= False,
+		comment		= "Multicast DNS support"
 	)
 
 	if ctx.get_define("HAVE_MDNS"):
-		ctx.define("ENABLE_MDNS_REGISTRATION", 1)
+		ctx.define("ENABLE_MDNS_REGISTRATION", 1, comment="Multicast DNS support")

@@ -20,5 +20,6 @@ def check_type(ctx, typename, headers=[], mandatory=False):
 		define_name = name,
 		execute     = False,
 		msg         = "Checking for type %s" % (typename),
-		mandatory	= mandatory
+		mandatory	= mandatory,
+		comment		= "Whether type '%s' exists." % typename
 	)

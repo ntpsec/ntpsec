@@ -16,13 +16,13 @@ int main(void) {
 
 
 def check_libevent2_header(ctx):
-	ctx.check(header_name="event2/event.h", includes=ctx.env.PLATFORM_INCLUDES, mandatory = False)
-	ctx.check(header_name="event2/thread.h", includes=ctx.env.PLATFORM_INCLUDES, mandatory = False)
+	ctx.check(header_name="event2/event.h", includes=ctx.env.PLATFORM_INCLUDES, mandatory=False, comment="libevent2 main header")
+	ctx.check(header_name="event2/thread.h", includes=ctx.env.PLATFORM_INCLUDES, mandatory=False, comment="libevent2 thread support")
 
 	# XXX: On some systems (NetBSD) event_core doesn't exist.  libevent is pulled in with event_pthreads.
 	#      This results in a warning from check_sanity()
-	ctx.check(feature="c cshlib", lib="event_core", libpath=ctx.env.PLATFORM_LIBPATH, uselib_store="LIBEVENT_CORE", mandatory = False)
-	ctx.check(feature="c cshlib", lib="event_pthreads", libpath=ctx.env.PLATFORM_LIBPATH, uselib_store="LIBEVENT_PTHREADS", use="LIBEVENT_CORE", mandatory = False)
+	ctx.check(feature="c cshlib", lib="event_core", libpath=ctx.env.PLATFORM_LIBPATH, uselib_store="LIBEVENT_CORE", mandatory=False, comment="libevent core library")
+	ctx.check(feature="c cshlib", lib="event_pthreads", libpath=ctx.env.PLATFORM_LIBPATH, uselib_store="LIBEVENT_PTHREADS", use="LIBEVENT_CORE", mandatory=False, comment="libevent pthread library")
 
 	if ctx.get_define("HAVE_EVENT2_THREAD_H") and ctx.get_define("HAVE_EVENT2_EVENT_H") and ctx.env.LIB_LIBEVENT_PTHREADS and ctx.env.LIB_LIBEVENT_CORE:
 		ctx.env.EVENT2_HEADER = True
@@ -30,7 +30,7 @@ def check_libevent2_header(ctx):
 def check_libevent2_run(ctx):
 	if ctx.env.ENABLE_CROSS:
 		if ctx.env.EVENT2_HEADER: # XXX Remove when variant builds exist
-			ctx.define("HAVE_LIBEVENT2", 1)
+			ctx.define("HAVE_LIBEVENT2", 1, comment="libevent2 support")
 			ctx.env.LIBEVENT2_ENABLE = True
 		return
 
@@ -42,7 +42,8 @@ def check_libevent2_run(ctx):
 		msg         = "Checking if libevent2 works",
 		includes        = ctx.env.PLATFORM_INCLUDES,
 		export_includes = ctx.env.PLATFORM_INCLUDES,
-		mandatory	= False
+		mandatory	= False,
+		comment		= "libevent2 support"
 	)
 
 	check_sanity(ctx, ctx.env.EVENT2_HEADER, "libevent2")
@@ -55,4 +56,4 @@ def check_libevent2_run(ctx):
 		print("")
 	else:
 		ctx.env.LIBEVENT2_ENABLE = True
-		ctx.define("HAVE_LIBEVENT2", 1)
+		ctx.define("HAVE_LIBEVENT2", 1, comment="libevent2 support")
