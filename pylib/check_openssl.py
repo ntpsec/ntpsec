@@ -36,7 +36,7 @@ def configure_ssl(ctx):
 	)
 
 	for hdr in headers:
-		if not ctx.check_cc(header_name=hdr, mandatory=False):
+		if not ctx.check_cc(header_name=hdr, mandatory=False, comment="<%s> header" % hdr):
 			OPENSSL_HEADERS=False
 
 	libs = ["ssl", "crypto"]
@@ -57,4 +57,8 @@ def configure_ssl(ctx):
 			msg			= "Checking if OpenSSL works",
 			comment		= "OpenSSL support"
 		)
+
+	if ctx.get_define("HAVE_OPENSSL"):
+		ctx.define("USE_OPENSSL_CRYPTO_RAND", 1, comment="Use OpenSSL pseudo-random number generator")
+		ctx.define("ISC_PLATFORM_OPENSSLHASH", 1, comment="Use OpenSSL for hashing")
 

@@ -282,8 +282,6 @@ def cmd_configure(ctx, config):
 	if ctx.options.enable_crypto:
 		from check_openssl import configure_ssl
 		configure_ssl(ctx)
-		ctx.define("USE_OPENSSL_CRYPTO_RAND", 1, comment="Use OpenSSL pseudo-random number generator")
-		ctx.define("ISC_PLATFORM_OPENSSLHASH", 1, comment="Use OpenSSL for hashing")
 
 	# Optional functions.  Do all function checks here, otherwise
 	# we're likely to duplicate them.
