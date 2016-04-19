@@ -15,7 +15,8 @@ def probe_header_with_prerequisites(ctx, header, prerequisites, use=None):
 		define_name=have_name,
 		msg = "Checking for header %s" % header,
 		use = use or [],
-		mandatory = False)
+		mandatory = False,
+		comment = "<%s> header" % header)
 	return ctx.get_define(have_name)
 
 def probe_function_with_prerequisites(ctx, function, prerequisites, use=None):
@@ -34,7 +35,8 @@ def probe_function_with_prerequisites(ctx, function, prerequisites, use=None):
 		define_name=have_name,
 		msg = "Checking for function %s" % function,
 		use = use or [],
-		mandatory = False)
+		mandatory = False,
+		comment = "Whether %s() exists" % function)
 	return ctx.get_define(have_name)
 
 def probe_multicast(ctx, symbol, legend):
@@ -50,7 +52,8 @@ int main() {
 """,
 		define_name=symbol,
 		msg = legend,
-		mandatory = False)
+		mandatory = False,
+		comment = "IP multicast capability")
 
 # What we really want to do here is test to see if the following program
 # compiles *and exits with 9 status*.  Because we don't know how to check
@@ -102,4 +105,5 @@ int main()
 ''',
 		define_name=symbol,
 		msg = legend,
-		mandatory = False)
+		mandatory = False,
+		comment="%m expanding to strerror(error) in glibc style")

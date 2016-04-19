@@ -227,7 +227,7 @@ def refclock_config(ctx):
 				"CLOCK_WHARTON_400A",
 				)
 			for subtype in parse_clocks:
-				ctx.define(subtype, 1)
+				ctx.define(subtype, 1, comment="Enable individual parse clock")
 
 		ctx.start_msg("Enabling Refclock %s (%d):" % (rc["descr"], id))
 
@@ -247,7 +247,7 @@ def refclock_config(ctx):
 
 		ctx.env.REFCLOCK_SOURCE.append((rc["file"], rc["define"]))
 		ctx.env["REFCLOCK_%s" % rc["file"].upper()] = True
-		ctx.define(rc["define"], 1)
+		ctx.define(rc["define"], 1, comment="Enable '%s' refclock" % rc["descr"])
 		ctx.env.REFCLOCK_LIST += [str(id)]
 
 		ctx.end_msg("Yes")
@@ -256,4 +256,4 @@ def refclock_config(ctx):
 
 	if refclock:
 		ctx.env.REFCLOCK_ENABLE = True
-		ctx.define("REFCLOCK", 1)
+		ctx.define("REFCLOCK", 1, comment="Enable refclock support")

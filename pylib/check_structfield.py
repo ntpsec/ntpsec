@@ -23,5 +23,6 @@ def check_structfield(ctx, fld, type, hdrs, mandatory=False):
 		define_name = name,
 		execute     = False,
 		msg         = "Checking for %s in struct %s" % (fld, type),
-		mandatory   = mandatory
+		mandatory   = mandatory,
+		comment		= "Whether struct '%s' has field '%s'" % (fld, type)
 	)

@@ -54,6 +54,7 @@ def configure_ssl(ctx):
 			define_ret  = False,
 			mandatory	= False,
 			use			= "SSL CRYPTO",
-			msg			= "Checking if OpenSSL works"
+			msg			= "Checking if OpenSSL works",
+			comment		= "OpenSSL support"
 		)
 

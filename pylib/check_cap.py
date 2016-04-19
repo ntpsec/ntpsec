@@ -16,7 +16,7 @@ int main(void) {
 
 def check_cap_header(ctx):
 	ctx.check_cc(header_name="sys/capability.h", mandatory=False)
-	ctx.check_cc(lib="cap", mandatory=False)
+	ctx.check_cc(lib="cap", comment="Capability library", mandatory=False)
 
 	if ctx.get_define("HAVE_SYS_CAPABILITY_H") and ctx.get_define("HAVE_SYS_PRCTL_H") and ctx.env.LIB_LIBCAP:
 		ctx.env.LIBCAP_HEADER = True
@@ -25,7 +25,7 @@ def check_cap_header(ctx):
 def check_cap_run(ctx):
 	if ctx.env.ENABLE_CROSS: # XXX Remove when variant builds exist
 		if ctx.env.LIBCAP_HEADER:
-			ctx.define("HAVE_CAPABILITY", 1)
+			ctx.define("HAVE_CAPABILITY", 1, comment="Capability support")
 		return
 
 	ctx.check_cc(
@@ -34,11 +34,12 @@ def check_cap_run(ctx):
 		features	= "c",
 		use			= "CAP",
 		msg         = "Checking if libcap works",
-		mandatory	= False
+		mandatory	= False,
+		comment		= "Capability support"
 	)
 
 	check_sanity(ctx, ctx.env.LIBCAP_HEADER, "libcap")
 
 
 	if ctx.get_define("HAVE_CAPABILITY"):
-		ctx.define("HAVE_LINUX_CAPABILITY", 1)
+		ctx.define("HAVE_LINUX_CAPABILITY", 1, comment="Capability support") # XXX: why two?
