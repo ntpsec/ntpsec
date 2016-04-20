@@ -269,11 +269,9 @@ def cmd_configure(ctx, config):
 	ctx.check_cc(lib="edit", mandatory=False, comment="libedit library")
 	ctx.check_cc(lib="m", comment="Math library")
 	ctx.check_cc(lib="ossaudio", mandatory=False, comment="ossaudio for NetBSD")  # NetBSD audio
-	ctx.check_cc(lib="pthread", mandatory=False, comment="pthread library")
 	ctx.check_cc(lib="rt", mandatory=False, comment="realtime library")
 	ctx.check_cc(lib="curses", mandatory=False, comment="curses library, required for readline on OpenBSD") # Required for readline on OpenBSD.
 	ctx.check_cc(lib="readline", use="CURSES", mandatory=False, comment="readline library")
-	ctx.check_cc(lib="thr", mandatory=False, comment="thr library, required by some operating systems.")
 	ctx.check_cc(lib="gcc_s", mandatory=False, comment="GCC runtime library.")
 
 	# Find OpenSSL. Must happen before function checks
@@ -517,7 +515,6 @@ def cmd_configure(ctx, config):
 	ctx.define("ISC_PLATFORM_HAVEIN6PKTINFO", 1)
 	ctx.define("ISC_PLATFORM_HAVEIPV6", 1)
 	ctx.define("ISC_PLATFORM_HAVESCOPEID", 1)
-	ctx.define("ISC_PLATFORM_USETHREADS", 1)
 
 	if ctx.get_define("HAVE_SYS_SYSCTL_H"):
 		ctx.define("HAVE_IFLIST_SYSCTL", 1, comment="Whether sysctl interface exists")
@@ -529,6 +526,9 @@ def cmd_configure(ctx, config):
 
 	from pylib.check_libevent2 import check_libevent2_header
 	check_libevent2_header(ctx)
+
+	from pylib.check_pthread import check_pthread_header_lib
+	check_pthread_header_lib(ctx)
 
 	if not ctx.options.disable_mdns_registration:
 		from pylib.check_mdns import check_mdns_header
@@ -542,9 +542,17 @@ def cmd_configure(ctx, config):
 	from pylib.check_libevent2 import check_libevent2_run
 	check_libevent2_run(ctx)
 
+
+	from pylib.check_pthread import check_pthread_run
+	check_pthread_run(ctx)
+
 	if not ctx.options.disable_mdns_registration:
 		from pylib.check_mdns import check_mdns_run
 		check_mdns_run(ctx)
+
+
+	if ctx.env.PTHREAD_ENABLE:
+		ctx.define("ISC_PLATFORM_USETHREADS", 1)
 
 
 	ctx.start_msg("Writing configuration header:")
