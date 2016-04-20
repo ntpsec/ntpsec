@@ -258,8 +258,6 @@ def cmd_configure(ctx, config):
 	ctx.define("DFLT_RLIMIT_STACK", 50, comment="Default stack size")
 	ctx.define("DFLT_RLIMIT_MEMLOCK", 32, comment="Locked memory size")
 
-#	ctx.define("OPENSSL_VERSION_TEXT", "#XXX: Fixme")
-
 	probe_multicast(ctx, "MCAST", "Checking for multicast capability")
 
 	ctx.define("TYPEOF_IP_MULTICAST_LOOP", "u_char", quote=False, comment="Multicast loop type") #XXX: check for mcast type
