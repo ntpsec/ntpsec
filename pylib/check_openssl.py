@@ -1,8 +1,6 @@
 from waflib.Configure import conf
 from util import msg, msg_setting
 
-from check_posix_thread_version import check_posix_thread_version
-
 import os
 
 # Versions older than 0.9.7d were deemed incompatible in NTP Classic.
