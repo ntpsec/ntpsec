@@ -518,7 +518,9 @@ def cmd_configure(ctx, config):
 	ctx.define("ISC_PLATFORM_HAVEIPV6", 1)
 	ctx.define("ISC_PLATFORM_HAVESCOPEID", 1)
 	ctx.define("ISC_PLATFORM_USETHREADS", 1)
-	ctx.define("HAVE_IFLIST_SYSCTL", 1)
+
+	if ctx.get_define("HAVE_SYS_SYSCTL_H"):
+		ctx.define("HAVE_IFLIST_SYSCTL", 1, comment="Whether sysctl interface exists")
 
 
 	# Header checks
