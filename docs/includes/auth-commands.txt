@@ -1,23 +1,5 @@
 // Authentication commands - included twice
 
-//+autokey+ [_logsec_]::
-//  Specifies the interval between regenerations of the session key list
-//  used with the Autokey protocol. Note that the size of the key list for
-//  each association depends on this interval and the current poll
-//  interval. The default value is 12 (4096 s or about 1.1 hours). For
-//  poll intervals above the specified interval, a session key list with a
-//  single entry will be regenerated for every message sent.
-//
-//+automax+ ['logsec']::
-//  Specifies the interval between regenerations of the session key list
-//  used with the Autokey protocol, as a power of 2 in seconds. Note that
-//  the size of the key list for each association depends on this interval
-//  and the current poll interval. The default interval is 12 (about 1.1
-//  hr). For poll intervals above the specified interval, a session key
-//  list with a single entry will be regenerated for every message sent.
-//  See the link:autokey.html[Autokey Public Key Authentication] page for
-//  further information.
-
 +controlkey+ _key_::
   Specifies the key identifier to use with the
   {ntpqman} utility, which uses the standard protocol defined in
@@ -43,24 +25,15 @@
     Specify the message digest algorithm, with default MD5. If the
     OpenSSL library is installed, +digest+ can be be any message digest
     algorithm supported by the library. The current selections are:
-    +MD2+, +MD4+, +MD5,+ +MDC2+, +RIPEMD160+, +SHA+ and +SHA1+. All
-    participants in an Autokey subnet must use the same algorithm. The
-    Autokey message digest algorithm is separate and distinct from the
-    symmetric key message digest algorithm. Note: If compliance with
-    FIPS 140-2 is required, the algorithm must be ether +SHA+ or +SHA1+.
+    +MD2+, +MD4+, +MD5,+ +MDC2+, +RIPEMD160+, +SHA+ and +SHA1+.
+    Note: If compliance with FIPS 140-2 is required, the algorithm
+    must be ether +SHA+ or +SHA1+.
   +gqpar+ _file_;;
     Specifies the location of the optional GQ parameters file. This
     overrides the link _ntpkey_gq_hostname_ in the keys directory.
   +host+ _file_;;
     Specifies the location of the required host key file. This overrides
     the link _ntpkey_key_hostname_ in the keys directory.
-//  +ident+ 'group';;
-//    Specify the cryptographic media names for the identity scheme files.
-//    If this option is not specified, the default name is the string
-//    returned by the Unix +gethostname()+ routine.
-//+
-//[red]#Note: In the latest Autokey version, this option has no effect other
-//than to change the cryptographic media file names.#
   +iffpar+ _file_;;
     Specifies the location of the optional IFF parameters file.This
     overrides the link _ntpkey_iff_hostname_ in the keys directory.
@@ -82,12 +55,6 @@
     the link _ntpkey_sign_hostname_ in the keys directory. If this file
     is not found, the host key is also the sign key.
 
-//+ident+ 'group'::
-//  Specifies the group name for ephemeral associations mobilized by
-//  broadcast and symmetric passive modes. See the
-//  "Autokey Public-Key Authentication" page for further
-//  information.
-
 +keys+ _keyfile_::
   Specifies the complete path and location of the MD5 key file
   containing the keys and key identifiers used by {ntpdman},
@@ -97,16 +64,6 @@
 +keysdir+ _path_::
   This command specifies the default directory path for cryptographic
   keys, parameters and certificates. The default is +/usr/local/etc/+.
-
-+revoke+ _logsec_::
-  Specifies the interval between re-randomization of certain
-  cryptographic values used by the Autokey scheme, as a power of 2 in
-  seconds. These values need to be updated frequently in order to
-  deflect brute-force attacks on the algorithms of the scheme; however,
-  updating some values is a relatively expensive operation. The default
-  interval is 16 (65,536 s or about 18 hours). For poll intervals above
-  the specified interval, the values will be updated for every message
-  sent.
 
 +trustedkey+ _key..._ ::
   Specifies the key identifiers which are trusted for the purposes of

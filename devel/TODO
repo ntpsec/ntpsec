@@ -19,7 +19,7 @@
   compiled into the base in a surprising fashion, e.g. --undefine=FOO should
   suppress generation of any FOO #define into config.h.
 
-* Add support for enabling hidden features like autokey and/or
+* Add support for enabling hidden features and/or
   internal symbols for testing, e.g --define FOO=BAR generates #define
   FOO BAR into config.h.
 

@@ -8,10 +8,10 @@ link-local IPV6 address with an interface specified in
 [a:b:c:d:e:f:g]%device format, or (d) a DNS hostname.
 
 +pool+ _address_ [+burst+] [+iburst+] [+version+ _version_] [+prefer+] [+minpoll+ _minpoll_] [+maxpoll+ _maxpoll_] [+preempt+]::
-+server+ _address_ [+key+ _key_ | +autokey+] [+burst+] [+iburst+] [+version+ _version_] [+prefer+] [+minpoll+ _minpoll_] [+maxpoll+ _maxpoll_]::
-+peer+ _address_ [+key+ _key_ | +autokey+] [+version+ _version_] [+prefer+] [+minpoll+ _minpoll_] [+maxpoll+ _maxpoll_] [+xleave+]::
-+broadcast+ _address_ [+key+ _key_ | +autokey+] [+version+ _version_] [+prefer+] [+minpoll+ _minpoll_] [+ttl+ _ttl_] [+xleave+]::
-+manycastclient+ _address_ [+key+ _key_ | +autokey+] [+version+ _version_] [+prefer+] [+minpoll+ _minpoll_] [+maxpoll+ _maxpoll_] [+ttl+ _ttl_] [+preempt+]::
++server+ _address_ [+key+ _key_] [+burst+] [+iburst+] [+version+ _version_] [+prefer+] [+minpoll+ _minpoll_] [+maxpoll+ _maxpoll_]::
++peer+ _address_ [+key+ _key_] [+version+ _version_] [+prefer+] [+minpoll+ _minpoll_] [+maxpoll+ _maxpoll_] [+xleave+]::
++broadcast+ _address_ [+key+ _key_] [+version+ _version_] [+prefer+] [+minpoll+ _minpoll_] [+ttl+ _ttl_] [+xleave+]::
++manycastclient+ _address_ [+key+ _key_] [+version+ _version_] [+prefer+] [+minpoll+ _minpoll_] [+maxpoll+ _maxpoll_] [+ttl+ _ttl_] [+preempt+]::
 +unpeer+ ['address' | 'associd']::
   These six commands specify the time server name or address to be used
   and the mode in which to operate. The _address_ can be either a DNS

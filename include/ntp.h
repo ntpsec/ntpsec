@@ -257,7 +257,6 @@ struct peer {
 	uint8_t	last_event;	/* last peer error code */
 	uint8_t	num_events;	/* number of error events */
 	uint32_t	ttl;	/* ttl/refclock mode */
-	char	*ident;		/* group identifier name */
 
 	/*
 	 * Variables used by reference clock support
@@ -286,37 +285,7 @@ struct peer {
 	 * Variables used by authenticated client
 	 */
 	keyid_t keyid;		/* current key ID */
-#ifdef ENABLE_AUTOKEY
-#define clear_to_zero opcode
-	uint32_t	opcode;		/* last request opcode */
-	associd_t assoc;	/* peer association ID */
-	uint32_t	crypto;		/* peer status word */
-	EVP_PKEY *pkey;		/* public key */
-	const EVP_MD *digest;	/* message digest algorithm */
-	char	*subject;	/* certificate subject name */
-	char	*issuer;	/* certificate issuer name */
-	struct cert_info *xinfo; /* issuer certificate */
-	keyid_t	pkeyid;		/* previous key ID */
-	keyid_t	hcookie;	/* host cookie */
-	keyid_t	pcookie;	/* peer cookie */
-	const struct pkey_info *ident_pkey; /* identity key */
-	BIGNUM	*iffval;	/* identity challenge (IFF, GQ, MV) */
-	const BIGNUM *grpkey;	/* identity challenge key (GQ) */
-	struct value cookval;	/* receive cookie values */
-	struct value recval;	/* receive autokey values */
-	struct exten *cmmd;	/* extension pointer */
-	u_long	refresh;	/* next refresh epoch */
-
-	/*
-	 * Variables used by authenticated server
-	 */
-	keyid_t	*keylist;	/* session key ID list */
-	int	keynumber;	/* current key number */
-	struct value encrypt;	/* send encrypt values */
-	struct value sndval;	/* send autokey values */
-#else	/* !ENABLE_AUTOKEY follows */
 #define clear_to_zero status
-#endif	/* !ENABLE_AUTOKEY */
 
 	/*
 	 * Ephemeral state variables
@@ -438,14 +407,10 @@ struct peer {
 #define	FLAG_IBURST	0x0100	/* initial burst mode */
 #define	FLAG_NOSELECT	0x0200	/* never select */
 #define	FLAG_TRUE	0x0400	/* force truechimer */
-#define	FLAG_SKEY	0x0800  /* autokey authentication */
-#define	FLAG_XLEAVE	0x1000	/* interleaved protocol */
-#define	FLAG_XB		0x2000	/* interleaved broadcast */
-#define	FLAG_XBOGUS	0x4000	/* interleaved bogus packet */
-#ifdef	HAVE_OPENSSL
-# define FLAG_ASSOC	0x8000	/* autokey request */
-#endif /* HAVE_OPENSSL */
-#define FLAG_TSTAMP_PPS	0x10000	/* PPS source provides absolute timestamp */
+#define	FLAG_XLEAVE	0x0800	/* interleaved protocol */
+#define	FLAG_XB		0x1000	/* interleaved broadcast */
+#define	FLAG_XBOGUS	0x2000	/* interleaved bogus packet */
+#define FLAG_TSTAMP_PPS	0x4cd000	/* PPS source provides absolute timestamp */
 
 /*
  * Definitions for the clear() routine.  We use memset() to clear
@@ -550,19 +515,8 @@ struct pkt {
 	 * response, so the maximum total extension field length is 864
 	 * octets. But, to handle humungus certificates, the bank must
 	 * be broke.
-	 *
-	 * The different definitions of the 'exten' field are here for
-	 * the benefit of applications that want to send a packet from
-	 * an auto variable in the stack - not using the ENABLE_AUTOKEY version
-	 * saves 2KB of stack space. The receive buffer should ALWAYS be
-	 * big enough to hold a full extended packet if the extension
-	 * fields have to be parsed or skipped.
 	 */
-#ifdef ENABLE_AUTOKEY
-	uint32_t	exten[(NTP_MAXEXTEN + MAX_MAC_LEN) / sizeof(uint32_t)];
-#else	/* !ENABLE_AUTOKEY follows */
 	uint32_t	exten[(MAX_MAC_LEN) / sizeof(uint32_t)];
-#endif	/* !ENABLE_AUTOKEY */
 };
 
 /*

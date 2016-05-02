@@ -47,10 +47,6 @@ supports a reference clock. Events are normally reported to the
 addition, if the trap facility is configured, events can be reported to
 a remote program that can page an administrator.
 
-This page also includes a description of the error messages produced by
-the Autokey protocol. These messages are normally sent to the
-+cryptostats+ monitoring file.
-
 In the following tables the Event Field is the status or event code
 assigned and the Message Field a short string used for display and event
 reporting. The Description field contains a longer explanation of the
@@ -116,7 +112,7 @@ The Event Field displays the most recent event message coded as follows:
 | +06+  | +restart+                 | program restart
 | +07+  | +panic_stop+              | clock error more than 600 s
 | +08+  | +no_system_peer+          | no system peer
-| +09+  | +leap_armed+              | leap second armed from file or Autokey
+| +09+  | +leap_armed+              | leap second armed
 | +0a+  | +leap_disarmed+           | leap second disarmed
 | +0b+  | +leap_event+              | leap event
 | +0c+  | +clock_step+              | clock stepped
@@ -243,8 +239,6 @@ It consists of a number of bits coded in hexadecimal as follows:
 | +0010+ | BOGON5  | +pkt_auth+     | authentication failure
 | +0020+ | BOGON6  | +pkt_stratum+  | invalid leap or stratum
 | +0040+ | BOGON7  | +pkt_header+   | header distance exceeded
-| +0080+ | BOGON8  | +pkt_autokey+  | Autokey sequence error
-| +0100+ | BOGON9  | +pkt_crypto+   | Autokey protocol error
 | +0200+ | BOGON10 | +peer_stratum+ | invalid header or stratum
 | +0400+ | BOGON11 | +peer_dist+    | distance threshold exceeded
 | +0800+ | BOGON12 | +peer_loop+    | synchronization loop
@@ -268,9 +262,7 @@ identifier field in +{ntpq}+ billboards. Following is the current list:
 | Code   | Description
 | +ACST+ | manycast server
 | +AUTH+ | authentication error
-| +AUTO+ | Autokey sequence error
 | +BCST+ | broadcast server
-| +CRYPT+| Autokey protocol error
 | +DENY+ | access denied by server
 | +INIT+ | association initialized
 | +MCST+ | multicast server
@@ -278,33 +270,5 @@ identifier field in +{ntpq}+ billboards. Following is the current list:
 | +TIME+ | association timeout
 | +STEP+ | step time change
 |==================================================================
-
-[[crypto]]
-== Crypto Messages ==
-
-These messages are sent to the +cryptostats+ file when an error is
-detected in the Autokey protocol.
-
-[width="70%",cols=">10%,<30%,<60%",]
-|==========================================================================
-| Code | Message               | Description
-| +01+ | +bad_format+          | bad extension field format or length
-| +02+ | +bad_timestamp+       | bad timestamp
-| +03+ | +bad_filestamp+       | bad filestamp
-| +04+ | +bad_public_key+      | bad or missing public key
-| +05+ | +bad_digest+          | unsupported digest type
-| +06+ | +bad_identity+        | unsupported identity type
-| +07+ | +bad_siglength+       | bad signature length
-| +08+ | +bad signature+       | extension field signature not verified
-| +09+ | +cert_not_verified+   | certificate signature not verified
-| +0a+ | +cert_expired+        | host certificate expired
-| +0b+ | +bad_cookie+          | bad or missing cookie
-| +0c+ | +bad_leapseconds+     | bad or missing leapseconds values
-| +0d+ | +cert_missing+        | bad or missing certificate
-| +0e+ | +bad_group_key+       | bad or missing group key
-| +0f+ | +proto_error+         | protocol error
-|==========================================================================
-
-'''''
 
 include::includes/footer.txt[]

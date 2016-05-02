@@ -62,37 +62,7 @@ struct speer {
 	l_fp reftime;
 	keyid_t keyid;
 
-#ifdef ENABLE_AUTOKEY
-#define clear_to_zero opcode
-	uint32_t	opcode;		/* last request opcode */
-	associd_t assoc;	/* peer association ID */
-	uint32_t	crypto;		/* peer status word */
-	EVP_PKEY *pkey;		/* public key */
-	const EVP_MD *digest;	/* message digest algorithm */
-	char	*subject;	/* certificate subject name */
-	char	*issuer;	/* certificate issuer name */
-	struct cert_info *xinfo; /* issuer certificate */
-	keyid_t	pkeyid;		/* previous key ID */
-	keyid_t	hcookie;	/* host cookie */
-	keyid_t	pcookie;	/* peer cookie */
-	const struct pkey_info *ident_pkey; /* identity key */
-	BIGNUM	*iffval;	/* identity challenge (IFF, GQ, MV) */
-	const BIGNUM *grpkey;	/* identity challenge key (GQ) */
-	struct value cookval;	/* receive cookie values */
-	struct value recval;	/* receive autokey values */
-	struct exten *cmmd;	/* extension pointer */
-	u_long	refresh;	/* next refresh epoch */
-
-	/*
-	 * Variables used by authenticated server
-	 */
-	keyid_t	*keylist;	/* session key ID list */
-	int	keynumber;	/* current key number */
-	struct value encrypt;	/* send encrypt values */
-	struct value sndval;	/* send autokey values */
-#else	/* !ENABLE_AUTOKEY follows */
 #define clear_to_zero status
-#endif	/* !ENABLE_AUTOKEY */
 	
 	l_fp	rec;		/* receive time stamp */
 	l_fp	xmt;		/* transmit time stamp */

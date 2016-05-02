@@ -8,6 +8,8 @@ on user-visible changes.
 
 == Repository head ==
 
+The long-deprected Autokey feature has been removed.
+
 The following fixes have been forward-ported from Classic:
 
 [Bug 2772] adj_systime overflows tv_usec

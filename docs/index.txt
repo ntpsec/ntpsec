@@ -75,10 +75,9 @@ two!), easier to understand, and easier to maintain.
 
 We retain, however, almost full compatibility and interoperation with
 NTP Classic.  The qualification "almost" is required because we do not
-support the Autokey public-key encryption scheme. It had
+support the Autokey (RFC5906) public-key encryption scheme. It had
 interoperability and exploitable vulnerability issues too severe to
-be patched. It will need redesign and reimplementation before it
-can be fielded again.
+be patched.
 
 This project began as an effort to address serious security issues
 with NTP Classic, and we intend to keep a particularly strong focus on
@@ -120,7 +119,7 @@ few will be user-visible:
 
 * Log timestamps look a little different; they are now in ISO8601 format.
 
-* As noted above, Autokey is not supported.
+* As noted above, Autokey is not supported; that code has been removed.
 
 [[platforms]]
 == Supported platforms ==

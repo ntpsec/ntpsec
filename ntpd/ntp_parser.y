@@ -74,8 +74,6 @@
 %token	<Integer>	T_Allan
 %token	<Integer>	T_Allpeers
 %token	<Integer>	T_Auth
-%token	<Integer>	T_Autokey
-%token	<Integer>	T_Automax
 %token	<Integer>	T_Average
 %token	<Integer>	T_Bclient
 %token	<Integer>	T_Beacon
@@ -119,7 +117,6 @@
 %token	<Integer>	T_Host
 %token	<Integer>	T_Huffpuff
 %token	<Integer>	T_Iburst
-%token	<Integer>	T_Ident
 %token	<Integer>	T_Ignore
 %token	<Integer>	T_Incalloc
 %token	<Integer>	T_Incmem
@@ -301,7 +298,6 @@
 %type	<Attr_val_fifo>	log_config_list
 %type	<Integer>	misc_cmd_dbl_keyword
 %type	<Integer>	misc_cmd_int_keyword
-%type	<Integer>	misc_cmd_str_keyword
 %type	<Integer>	misc_cmd_str_lcl_keyword
 %type	<Attr_val>	mru_option
 %type	<Integer>	mru_option_keyword
@@ -314,8 +310,6 @@
 %type	<Attr_val_fifo>	option_list
 %type	<Attr_val>	option_int
 %type	<Integer>	option_int_keyword
-%type	<Attr_val>	option_str
-%type	<Integer>	option_str_keyword
 %type	<Integer>	reset_command
 %type	<Integer>	rlimit_option_keyword
 %type	<Attr_val>	rlimit_option
@@ -452,7 +446,6 @@ option_list
 option
 	:	option_flag
 	|	option_int
-	|	option_str
 	;
 
 option_flag
@@ -461,8 +454,7 @@ option_flag
 	;
 
 option_flag_keyword
-	:	T_Autokey
-	|	T_Burst
+	:	T_Burst
 	|	T_Iburst
 	|	T_Noselect
 	|	T_Preempt
@@ -486,16 +478,6 @@ option_int_keyword
 	|	T_Mode
 	|	T_Version
 	;
-
-option_str
-	:	option_str_keyword T_String
-			{ $$ = create_attr_sval($1, $2); }
-	;
-
-option_str_keyword
-	:	T_Ident
-	;
-
 
 /* unpeer commands
  * ---------------
@@ -540,14 +522,7 @@ other_mode_command
  */
 
 authentication_command
-	:	T_Automax T_Integer
-		{
-			attr_val *atrv;
-			
-			atrv = create_attr_ival($1, $2);
-			APPEND_G_FIFO(cfgt.vars, atrv);
-		}
-	|	T_ControlKey T_Integer
+	:	T_ControlKey T_Integer
 			{ cfgt.auth.control_key = $2; }
 	|	T_Crypto crypto_command_list
 		{ 
@@ -605,7 +580,6 @@ crypto_command
 
 crypto_str_keyword
 	:	T_Host
-	|	T_Ident
 	|	T_Pw
 	|	T_Randfile
 	|	T_Digest
@@ -1149,13 +1123,6 @@ miscellaneous_command
 			av = create_attr_ival($1, $2);
 			APPEND_G_FIFO(cfgt.vars, av);
 		}
-	|	misc_cmd_str_keyword T_String
-		{
-			attr_val *av;
-			
-			av = create_attr_sval($1, $2);
-			APPEND_G_FIFO(cfgt.vars, av);
-		}
 	|	misc_cmd_str_lcl_keyword T_String
 		{
 			char error_text[64];
@@ -1229,11 +1196,6 @@ misc_cmd_int_keyword
 			yyerror("Built without LEAP_SMEAR support.");
 #endif
 		}
-	;
-
-misc_cmd_str_keyword
-	:	T_Ident
-	|	T_Leapfile
 	;
 
 misc_cmd_str_lcl_keyword

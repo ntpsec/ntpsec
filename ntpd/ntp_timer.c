@@ -23,11 +23,6 @@
 #include "ntp_syscall.h"
 #endif /* HAVE_KERNEL_PLL */
 
-#ifdef ENABLE_AUTOKEY
-#include <openssl/rand.h>
-#endif	/* ENABLE_AUTOKEY */
-
-
 /* TC_ERR represents the timer_create() error return value. */
 #define	TC_ERR	(-1)
 
@@ -62,12 +57,6 @@ static	u_long worker_idle_timer;/* next check for idle intres */
 u_long	leapsec;	        /* seconds to next leap (proximity class) */
 int     leapdif;                /* TAI difference step at next leap second*/
 u_long	orphwait; 		/* orphan wait time */
-#ifdef ENABLE_AUTOKEY
-static	u_long revoke_timer;	/* keys revoke timer */
-static	u_long keys_timer;	/* session key timer */
-u_long	sys_revoke = KEY_REVOKE; /* keys revoke timeout (log2 s) */
-u_long	sys_automax = NTP_AUTOMAX; /* key list timeout (log2 s) */
-#endif	/* ENABLE_AUTOKEY */
 
 /*
  * Statistics counter for the interested.
@@ -316,10 +305,6 @@ timer(void)
 	    current_time > orphwait) {
 		if (sys_leap == LEAP_NOTINSYNC) {
 			sys_leap = LEAP_NOWARNING;
-#ifdef ENABLE_AUTOKEY
-			if (crypto_flags)	
-				crypto_update();
-#endif	/* ENABLE_AUTOKEY */
 		}
 		sys_stratum = (uint8_t)sys_orphan;
 		if (sys_stratum > 1)
@@ -359,25 +344,6 @@ timer(void)
 		huffpuff_timer += HUFFPUFF;
 		huffpuff();
 	}
-
-#ifdef ENABLE_AUTOKEY
-	/*
-	 * Garbage collect expired keys.
-	 */
-	if (keys_timer <= current_time) {
-		keys_timer += 1 << sys_automax;
-		auth_agekeys();
-	}
-
-	/*
-	 * Generate new private value. This causes all associations
-	 * to regenerate cookies.
-	 */
-	if (revoke_timer && revoke_timer <= current_time) {
-		revoke_timer += 1 << sys_revoke;
-		RAND_bytes((uint8_t *)&sys_private, 4);
-	}
-#endif	/* ENABLE_AUTOKEY */
 
 	/*
 	 * Interface update timer

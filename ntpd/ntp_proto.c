@@ -104,7 +104,6 @@ keyid_t	sys_private;		/* private value for session seed */
 int	sys_manycastserver;	/* respond to manycast client pkts */
 int	peer_ntpdate;		/* active peers in ntpdate mode */
 int	sys_survivors;		/* truest of the truechimers */
-char	*sys_ident = NULL;	/* identity scheme */
 
 /*
  * TOS and multicast mapping stuff
@@ -146,9 +145,6 @@ static	void	measure_precision(const bool);
 static	double	measure_tick_fuzz(void);
 static	int	local_refid	(struct peer *);
 static	int	peer_unfit	(struct peer *);
-#ifdef ENABLE_AUTOKEY
-static	bool	group_test	(char *, char *);
-#endif /* ENABLE_AUTOKEY */
 #ifdef USE_WORKER
 void	pool_name_resolved	(int, int, void *, const char *,
 				 const char *, const struct addrinfo *,
@@ -396,7 +392,7 @@ receive(
 	int	retcode = AM_NOMATCH;	/* match code */
 	keyid_t	skeyid = 0;		/* key IDs */
 	uint32_t	opcode = 0;		/* extension field opcode */
-#if defined(DEBUG) || defined(ENABLE_AUTOKEY)
+#if defined(DEBUG)
 	sockaddr_u *dstadr_sin; 	/* active runway */
 #endif
 	struct peer *peer2;		/* aux peer structure pointer */
@@ -404,13 +400,6 @@ receive(
 	l_fp	p_org;			/* origin timestamp */
 	l_fp	p_rec;			/* receive timestamp */
 	l_fp	p_xmt;			/* transmit timestamp */
-#ifdef ENABLE_AUTOKEY
-	char	hostname[NTP_MAXSTRLEN + 1];
-	char	*groupname = NULL;
-	struct autokey *ap;		/* autokey structure pointer */
-	int	rval;			/* cookie snatcher */
-	keyid_t	pkeyid = 0, tkeyid = 0;	/* key IDs */
-#endif	/* ENABLE_AUTOKEY */
 #ifdef ENABLE_MSSNTP
 	static unsigned char zero_key[16];
 #endif /* ENABLE_MSSNTP */
@@ -519,11 +508,6 @@ receive(
 	has_mac = rbufp->recv_length - authlen;
 	while (has_mac > 0) {
 		uint32_t	len;
-#ifdef ENABLE_AUTOKEY
-		uint32_t	hostlen;
-		struct exten *ep;
-#endif /*ENABLE_AUTOKEY */
-
 		if (has_mac % 4 != 0 || has_mac < (int)MIN_MAC_LEN) {
 			sys_badlength++;
 			return;			/* bad length */
@@ -541,32 +525,6 @@ receive(
 				sys_badlength++;
 				return;		/* bad length */
 			}
-#ifdef ENABLE_AUTOKEY
-			/*
-			 * Extract calling group name for later.  If
-			 * sys_groupname is non-NULL, there must be
-			 * a group name provided to elicit a response.
-			 */
-			if ((opcode & 0x3fff0000) == CRYPTO_ASSOC &&
-			    sys_groupname != NULL) {
-				ep = (struct exten *)&((uint32_t *)pkt)[authlen / 4];
-				hostlen = ntohl(ep->vallen);
-				if (hostlen >= sizeof(hostname) ||
-				    hostlen > len -
-				    offsetof(struct exten, pkt)) {
-					sys_badlength++;
-					return;		/* bad length */
-				}
-				memcpy(hostname, &ep->pkt, hostlen);
-				hostname[hostlen] = '\0';
-				groupname = strchr(hostname, '@');
-				if (groupname == NULL) {
-					sys_declined++;
-					return;
-				}
-				groupname++;
-			}
-#endif /* ENABLE_AUTOKEY */
 			authlen += len;
 			has_mac -= len;
 		}
@@ -621,17 +579,6 @@ receive(
 	 * authenticate the packet if required. Note that we burn only
 	 * digest cycles, again to reduce exposure. There may be no
 	 * matching association and that's okay.
-	 *
-	 * More on the autokey mambo. Normally the local interface is
-	 * found when the association was mobilized with respect to a
-	 * designated remote address. We assume packets arriving from
-	 * the remote address arrive via this interface and the local
-	 * address used to construct the autokey is the unicast address
-	 * of the interface. However, if the sender is a broadcaster,
-	 * the interface broadcast address is used instead.
-	 * Notwithstanding this technobabble, if the sender is a
-	 * multicaster, the broadcast address is null, so we use the
-	 * unicast address anyway. Don't ask.
 	 */
 	peer = findpeer(rbufp,  hismode, &retcode);
 #ifdef DEBUG
@@ -707,97 +654,11 @@ receive(
 
 	} else {
 		restrict_mask &= ~RES_MSSNTP;
-#ifdef ENABLE_AUTOKEY
-		/*
-		 * For autokey modes, generate the session key
-		 * and install in the key cache. Use the socket
-		 * broadcast or unicast address as appropriate.
-		 */
-		if (crypto_flags && skeyid > NTP_MAXKEY) {
-
-			/*
-			 * More on the autokey dance (AKD). A cookie is
-			 * constructed from public and private values.
-			 * For broadcast packets, the cookie is public
-			 * (zero). For packets that match no
-			 * association, the cookie is hashed from the
-			 * addresses and private value. For server
-			 * packets, the cookie was previously obtained
-			 * from the server. For symmetric modes, the
-			 * cookie was previously constructed using an
-			 * agreement protocol; however, should PKI be
-			 * unavailable, we construct a fake agreement as
-			 * the EXOR of the peer and host cookies.
-			 *
-			 * hismode	ephemeral	persistent
-			 * =======================================
-			 * active	0		cookie#
-			 * passive	0%		cookie#
-			 * client	sys cookie	0%
-			 * server	0%		sys cookie
-			 * broadcast	0		0
-			 *
-			 * # if unsync, 0
-			 * % can't happen
-			 */
-			if (has_mac < (int)MAX_MD5_LEN) {
-				sys_badauth++;
-				return;
-			}
-			if (hismode == MODE_BROADCAST) {
-
-				/*
-				 * For broadcaster, use the interface
-				 * broadcast address when available;
-				 * otherwise, use the unicast address
-				 * found when the association was
-				 * mobilized. However, if this is from
-				 * the wildcard interface, game over.
-				 */
-				if (crypto_flags && rbufp->dstadr ==
-				    ANY_INTERFACE_CHOOSE(&rbufp->recv_srcadr)) {
-					sys_restricted++;
-					return;	     /* no wildcard */
-				}
-				pkeyid = 0;
-				if (!SOCK_UNSPEC(&rbufp->dstadr->bcast))
-					dstadr_sin =
-					    &rbufp->dstadr->bcast;
-			} else if (peer == NULL) {
-				pkeyid = session_key(
-				    &rbufp->recv_srcadr, dstadr_sin, 0,
-				    sys_private, 0);
-			} else {
-				pkeyid = peer->pcookie;
-			}
-
-			/*
-			 * The session key includes both the public
-			 * values and cookie. In case of an extension
-			 * field, the cookie used for authentication
-			 * purposes is zero. Note the hash is saved for
-			 * use later in the autokey mambo.
-			 */
-			if (authlen > LEN_PKT_NOMAC && pkeyid != 0) {
-				session_key(&rbufp->recv_srcadr,
-				    dstadr_sin, skeyid, 0, 2);
-				tkeyid = session_key(
-				    &rbufp->recv_srcadr, dstadr_sin,
-				    skeyid, pkeyid, 0);
-			} else {
-				tkeyid = session_key(
-				    &rbufp->recv_srcadr, dstadr_sin,
-				    skeyid, pkeyid, 2);
-			}
-
-		}
-#endif	/* ENABLE_AUTOKEY */
 
 		/*
 		 * Compute the cryptosum. Note a clogging attack may
-		 * succeed in bloating the key cache. If an autokey,
-		 * purge it immediately, since we won't be needing it
-		 * again. If the packet is authentic, it can mobilize an
+		 * succeed in bloating the key cache.
+		 * If the packet is authentic, it can mobilize an
 		 * association. Note that there is no key zero.
 		 */
 		if (!authdecrypt(skeyid, (uint32_t *)pkt, authlen,
@@ -805,10 +666,6 @@ receive(
 			is_authentic = AUTH_ERROR;
 		else
 			is_authentic = AUTH_OK;
-#ifdef ENABLE_AUTOKEY
-		if (crypto_flags && skeyid > NTP_MAXKEY)
-			authtrust(skeyid, 0);
-#endif	/* ENABLE_AUTOKEY */
 #ifdef DEBUG
 		if (debug)
 			printf(
@@ -867,16 +724,6 @@ receive(
 			return;			/* not enabled */
 		}
 
-#ifdef ENABLE_AUTOKEY
-		/*
-		 * Do not respond if not the same group.
-		 */
-		if (group_test(groupname, NULL)) {
-			sys_declined++;
-			return;
-		}
-#endif /* ENABLE_AUTOKEY */
-
 		/*
 		 * Do not respond if we are not synchronized or our
 		 * stratum is greater than the manycaster or the
@@ -920,15 +767,6 @@ receive(
 	 */
 	case AM_MANYCAST:
 
-#ifdef ENABLE_AUTOKEY
-		/*
-		 * Do not respond if not the same group.
-		 */
-		if (group_test(groupname, NULL)) {
-			sys_declined++;
-			return;
-		}
-#endif /* ENABLE_AUTOKEY */
 		if ((peer2 = findmanycastpeer(rbufp)) == NULL) {
 			sys_restricted++;
 			return;			/* not enabled */
@@ -953,7 +791,7 @@ receive(
 			       MODE_CLIENT, hisversion, peer2->minpoll,
 			       peer2->maxpoll, FLAG_PREEMPT |
 			       (FLAG_IBURST & peer2->flags), MDF_UCAST |
-			       MDF_UCLNT, 0, skeyid, sys_ident);
+			       MDF_UCLNT, 0, skeyid);
 		if (NULL == peer) {
 			sys_declined++;
 			return;			/* ignore duplicate  */
@@ -984,15 +822,6 @@ receive(
 	 */
 	case AM_NEWBCL:
 
-#ifdef ENABLE_AUTOKEY
-		/*
-		 * Do not respond if not the same group.
-		 */
-		if (group_test(groupname, sys_ident)) {
-			sys_declined++;
-			return;
-		}
-#endif /* ENABLE_AUTOKEY */
 		if (sys_bclient == 0) {
 			sys_restricted++;
 			return;			/* not enabled */
@@ -1013,18 +842,6 @@ receive(
 			return;			/* no help */
 		}
 
-#ifdef ENABLE_AUTOKEY
-		/*
-		 * Do not respond if Autokey and the opcode is not a
-		 * CRYPTO_ASSOC response with association ID.
-		 */
-		if (crypto_flags && skeyid > NTP_MAXKEY && (opcode &
-		    0xffff0000) != (CRYPTO_ASSOC | CRYPTO_RESP)) {
-			sys_declined++;
-			return;			/* protocol error */
-		}
-#endif	/* ENABLE_AUTOKEY */
-
 		/*
 		 * Broadcasts received via a multicast address may
 		 * arrive after a unicast volley has begun
@@ -1043,16 +860,6 @@ receive(
 		 * Determine whether to execute the initial volley.
 		 */
 		if (sys_bdelay != 0) {
-#ifdef ENABLE_AUTOKEY
-			/*
-			 * If a two-way exchange is not possible,
-			 * neither is Autokey.
-			 */
-			if (crypto_flags && skeyid > NTP_MAXKEY) {
-				sys_restricted++;
-				return;		/* no autokey */
-			}
-#endif	/* ENABLE_AUTOKEY */
 
 			/*
 			 * Do not execute the volley. Start out in
@@ -1061,7 +868,7 @@ receive(
 			peer = newpeer(&rbufp->recv_srcadr, NULL,
 			    match_ep, MODE_BCLIENT, hisversion,
 			    pkt->ppoll, pkt->ppoll, FLAG_PREEMPT,
-			    MDF_BCLNT, 0, skeyid, sys_ident);
+			    MDF_BCLNT, 0, skeyid);
 			if (NULL == peer) {
 				sys_restricted++;
 				return;		/* ignore duplicate */
@@ -1074,7 +881,7 @@ receive(
 
 		/*
 		 * Execute the initial volley in order to calibrate the
-		 * propagation delay and run the Autokey protocol.
+		 * propagation delay.
 		 *
 		 * Note that the minpoll is taken from the broadcast
 		 * packet, normally 6 (64 s) and that the poll interval
@@ -1083,15 +890,11 @@ receive(
 		peer = newpeer(&rbufp->recv_srcadr, NULL, match_ep,
 		    MODE_CLIENT, hisversion, pkt->ppoll, pkt->ppoll,
 		    FLAG_BC_VOL | FLAG_IBURST | FLAG_PREEMPT, MDF_BCLNT,
-		    0, skeyid, sys_ident);
+		    0, skeyid);
 		if (NULL == peer) {
 			sys_restricted++;
 			return;			/* ignore duplicate */
 		}
-#ifdef ENABLE_AUTOKEY
-		if (skeyid > NTP_MAXKEY)
-			crypto_recv(peer, rbufp);
-#endif	/* ENABLE_AUTOKEY */
 
 		return;				/* hooray */
 
@@ -1102,15 +905,6 @@ receive(
 	 */
 	case AM_NEWPASS:
 
-#ifdef ENABLE_AUTOKEY
-		/*
-		 * Do not respond if not the same group.
-		 */
-		if (group_test(groupname, sys_ident)) {
-			sys_declined++;
-			return;
-		}
-#endif /* ENABLE_AUTOKEY */
 		if (!AUTH((sys_authenticate?1:0) | (restrict_mask &
 		    (RES_NOPEER | RES_DONTTRUST)), is_authentic)) {
 
@@ -1178,8 +972,7 @@ receive(
 		 */
 		if ((peer = newpeer(&rbufp->recv_srcadr, NULL,
 		    rbufp->dstadr, MODE_PASSIVE, hisversion, pkt->ppoll,
-		    NTP_MAXDPOLL, 0, MDF_UCAST, 0, skeyid,
-		    sys_ident)) == NULL) {
+		    NTP_MAXDPOLL, 0, MDF_UCAST, 0, skeyid)) == NULL) {
 			sys_declined++;
 			return;			/* ignore duplicate */
 		}
@@ -1190,16 +983,6 @@ receive(
 	 * Process regular packet. Nothing special.
 	 */
 	case AM_PROCPKT:
-
-#ifdef ENABLE_AUTOKEY
-		/*
-		 * Do not respond if not the same group.
-		 */
-		if (group_test(groupname, peer->ident)) {
-			sys_declined++;
-			return;
-		}
-#endif /* ENABLE_AUTOKEY */
 		break;
 
 	/*
@@ -1220,19 +1003,6 @@ receive(
 		return;
 	}
 
-#ifdef ENABLE_AUTOKEY
-	/*
-	 * If the association is configured for Autokey, the packet must
-	 * have a public key ID; if not, the packet must have a
-	 * symmetric key ID.
-	 */
-	if (is_authentic != AUTH_CRYPTO && (((peer->flags &
-	    FLAG_SKEY) && skeyid <= NTP_MAXKEY) || (!(peer->flags &
-	    FLAG_SKEY) && skeyid > NTP_MAXKEY))) {
-		sys_badauth++;
-		return;
-	}
-#endif	/* ENABLE_AUTOKEY */
 	peer->received++;
 	peer->flash &= ~PKT_BOGON_MASK;
 	if (peer->flags & FLAG_XBOGUS) {
@@ -1356,10 +1126,6 @@ receive(
 		if (has_mac &&
 		    (hismode == MODE_ACTIVE || hismode == MODE_PASSIVE))
 			fast_xmit(rbufp, MODE_ACTIVE, 0, restrict_mask);
-#ifdef ENABLE_AUTOKEY
-		if (peer->crypto)
-			peer_clear(peer, "AUTH");
-#endif	/* ENABLE_AUTOKEY */
 		return;
 	}
 
@@ -1409,122 +1175,6 @@ receive(
 		peer->flags |= FLAG_AUTHENTIC;
 	else
 		peer->flags &= ~FLAG_AUTHENTIC;
-
-#ifdef ENABLE_AUTOKEY
-	/*
-	 * More autokey dance. The rules of the cha-cha are as follows:
-	 *
-	 * 1. If there is no key or the key is not auto, do nothing.
-	 *
-	 * 2. If this packet is in response to the one just previously
-	 *    sent or from a broadcast server, do the extension fields.
-	 *    Otherwise, assume bogosity and bail out.
-	 *
-	 * 3. If an extension field contains a verified signature, it is
-	 *    self-authenticated and we sit the dance.
-	 *
-	 * 4. If this is a server reply, check only to see that the
-	 *    transmitted key ID matches the received key ID.
-	 *
-	 * 5. Check to see that one or more hashes of the current key ID
-	 *    matches the previous key ID or ultimate original key ID
-	 *    obtained from the broadcaster or symmetric peer. If no
-	 *    match, sit the dance and call for new autokey values.
-	 *
-	 * In case of crypto error, fire the orchestra, stop dancing and
-	 * restart the protocol.
-	 */
-	if (peer->flags & FLAG_SKEY) {
-		/*
-		 * Decrement remaining autokey hashes. This isn't
-		 * perfect if a packet is lost, but results in no harm.
-		 */
-		ap = (struct autokey *)peer->recval.ptr;
-		if (ap != NULL) {
-			if (ap->seq > 0)
-				ap->seq--;
-		}
-		peer->flash |= BOGON8;
-		rval = crypto_recv(peer, rbufp);
-		if (rval == XEVNT_OK) {
-			peer->unreach = 0;
-		} else {
-			if (rval == XEVNT_ERR) {
-				report_event(PEVNT_RESTART, peer,
-				    "crypto error");
-				peer_clear(peer, "CRYP");
-				peer->flash |= BOGON9;	/* bad crypt */
-				if (peer->flags & FLAG_PREEMPT)
-					unpeer(peer);
-			}
-			return;
-		}
-
-		/*
-		 * If server mode, verify the receive key ID matches
-		 * the transmit key ID.
-		 */
-		if (hismode == MODE_SERVER) {
-			if (skeyid == peer->keyid)
-				peer->flash &= ~BOGON8;
-
-		/*
-		 * If an extension field is present, verify only that it
-		 * has been correctly signed. We don't need a sequence
-		 * check here, but the sequence continues.
-		 */
-		} else if (!(peer->flash & BOGON8)) {
-			peer->pkeyid = skeyid;
-
-		/*
-		 * Now the fun part. Here, skeyid is the current ID in
-		 * the packet, pkeyid is the ID in the last packet and
-		 * tkeyid is the hash of skeyid. If the autokey values
-		 * have not been received, this is an automatic error.
-		 * If so, check that the tkeyid matches pkeyid. If not,
-		 * hash tkeyid and try again. If the number of hashes
-		 * exceeds the number remaining in the sequence, declare
-		 * a successful failure and refresh the autokey values.
-		 */
-		} else if (ap != NULL) {
-			int i;
-
-			for (i = 0; ; i++) {
-				if (tkeyid == peer->pkeyid ||
-				    tkeyid == ap->key) {
-					peer->flash &= ~BOGON8;
-					peer->pkeyid = skeyid;
-					ap->seq -= i;
-					break;
-				}
-				if (i > ap->seq) {
-					peer->crypto &=
-					    ~CRYPTO_FLAG_AUTO;
-					break;
-				}
-				tkeyid = session_key(
-				    &rbufp->recv_srcadr, dstadr_sin,
-				    tkeyid, pkeyid, 0);
-			}
-			if (peer->flash & BOGON8)
-				report_event(PEVNT_AUTH, peer, "keylist");
-		}
-		if (!(peer->crypto & CRYPTO_FLAG_PROV)) /* test 9 */
-			peer->flash |= BOGON8;	/* bad autokey */
-
-		/*
-		 * The maximum lifetime of the protocol is about one
-		 * week before restarting the Autokey protocol to
-		 * refresh certificates and leapseconds values.
-		 */
-		if (current_time > peer->refresh) {
-			report_event(PEVNT_RESTART, peer,
-			    "crypto refresh");
-			peer_clear(peer, "TIME");
-			return;
-		}
-	}
-#endif	/* ENABLE_AUTOKEY */
 
 	/*
 	 * The dance is complete and the flash bits have been lit. Toss
@@ -1859,21 +1509,11 @@ process_packet(
 
 	/*
 	 * If we are in broadcast calibrate mode, return to broadcast
-	 * client mode when the client is fit and the autokey dance is
-	 * complete.
+	 * client mode when the client is fit.
 	 */
 	if ((FLAG_BC_VOL & peer->flags) && MODE_CLIENT == peer->hmode &&
 	    !(BOGON11 & peer_unfit(peer))) {	/* distance exceeded */
-#ifdef ENABLE_AUTOKEY
-		if (peer->flags & FLAG_SKEY) {
-			if (!(~peer->crypto & CRYPTO_FLAG_ALL))
-				peer->hmode = MODE_BCLIENT;
-		} else {
-			peer->hmode = MODE_BCLIENT;
-		}
-#else	/* !ENABLE_AUTOKEY follows */
 		peer->hmode = MODE_BCLIENT;
-#endif	/* !ENABLE_AUTOKEY */
 	}
 }
 
@@ -2004,10 +1644,6 @@ clock_update(
 		 */
 		if (sys_leap == LEAP_NOTINSYNC) {
 			set_sys_leap(LEAP_NOWARNING);
-#ifdef ENABLE_AUTOKEY
-			if (crypto_flags)
-				crypto_update();
-#endif	/* ENABLE_AUTOKEY */
 			/*
 			 * If our parent process is waiting for the
 			 * first clock sync, send them home satisfied.
@@ -2077,15 +1713,6 @@ poll_update(
 	 */
 	hpoll = max(min(peer->maxpoll, mpoll), peer->minpoll);
 
-#ifdef ENABLE_AUTOKEY
-	/*
-	 * If during the crypto protocol the poll interval has changed,
-	 * the lifetimes in the key list are probably bogus. Purge the
-	 * the key list and regenerate it later.
-	 */
-	if ((peer->flags & FLAG_SKEY) && hpoll != peer->hpoll)
-		key_expire(peer);
-#endif	/* ENABLE_AUTOKEY */
 	peer->hpoll = hpoll;
 
 	/*
@@ -2116,20 +1743,6 @@ poll_update(
 #endif /* REFCLOCK */
 		else
 			peer->nextdate = utemp;
-
-#ifdef ENABLE_AUTOKEY
-	/*
-	 * If a burst is not in progress and a crypto response message
-	 * is pending, delay 2 s, but only if this is a new interval.
-	 */
-	} else if (peer->cmmd != NULL) {
-		if (peer->nextdate > current_time) {
-			if (peer->nextdate + ntp_minpkt != utemp)
-				peer->nextdate = utemp;
-		} else {
-			peer->nextdate = utemp;
-		}
-#endif	/* ENABLE_AUTOKEY */
 
 	/*
 	 * The ordinary case. If a retry, use minpoll; if unreachable,
@@ -2184,31 +1797,6 @@ peer_clear(
 	)
 {
 	uint8_t	u;
-
-#ifdef ENABLE_AUTOKEY
-	/*
-	 * If cryptographic credentials have been acquired, toss them to
-	 * Valhalla. Note that autokeys are ephemeral, in that they are
-	 * tossed immediately upon use. Therefore, the keylist can be
-	 * purged anytime without needing to preserve random keys. Note
-	 * that, if the peer is purged, the cryptographic variables are
-	 * purged, too. This makes it much harder to sneak in some
-	 * unauthenticated data in the clock filter.
-	 */
-	key_expire(peer);
-	if (peer->iffval != NULL)
-		BN_free(peer->iffval);
-	value_free(&peer->cookval);
-	value_free(&peer->recval);
-	value_free(&peer->encrypt);
-	value_free(&peer->sndval);
-	if (peer->cmmd != NULL)
-		free(peer->cmmd);
-	if (peer->subject != NULL)
-		free(peer->subject);
-	if (peer->issuer != NULL)
-		free(peer->issuer);
-#endif /* ENABLE_AUTOKEY */
 
 	/*
 	 * Clear all values, including the optional crypto values above.
@@ -2267,9 +1855,6 @@ peer_clear(
 	    int pseudorandom = peer->associd ^ sock_hash(&peer->srcadr);
 	    peer->nextdate += pseudorandom % peer->minpoll;
 	}
-#ifdef ENABLE_AUTOKEY
-	peer->refresh = current_time + (1 << NTP_REFRESH);
-#endif	/* ENABLE_AUTOKEY */
 #ifdef DEBUG
 	if (debug)
 		printf(
@@ -3100,21 +2685,9 @@ peer_xmit(
 	 * If the received packet contains a MAC, the transmitted packet
 	 * is authenticated and contains a MAC. If not, the transmitted
 	 * packet is not authenticated.
-	 *
-	 * It is most important when autokey is in use that the local
-	 * interface IP address be known before the first packet is
-	 * sent. Otherwise, it is not possible to compute a correct MAC
-	 * the recipient will accept. Thus, the I/O semantics have to do
-	 * a little more work. In particular, the wildcard interface
-	 * might not be usable.
 	 */
 	sendlen = LEN_PKT_NOMAC;
-#ifdef ENABLE_AUTOKEY
-	if (!(peer->flags & FLAG_SKEY) && peer->keyid == 0) {
-#else	/* !ENABLE_AUTOKEY follows */
 	if (peer->keyid == 0) {
-#endif	/* !ENABLE_AUTOKEY */
-
 		/*
 		 * Transmit a-priori timestamps.  This is paired with
 		 * a later call used to record transmission time.
@@ -3173,249 +2746,8 @@ peer_xmit(
 
 	/*
 	 * Authentication is enabled, so the transmitted packet must be
-	 * authenticated. If autokey is enabled, fuss with the various
-	 * modes; otherwise, symmetric key cryptography is used.
-	 */
-#ifdef ENABLE_AUTOKEY
-	if (peer->flags & FLAG_SKEY) {
-		struct exten *exten;	/* extension field */
-
-		/*
-		 * The Public Key Dance (PKD): Cryptographic credentials
-		 * are contained in extension fields, each including a
-		 * 4-octet length/code word followed by a 4-octet
-		 * association ID and optional additional data. Optional
-		 * data includes a 4-octet data length field followed by
-		 * the data itself. Request messages are sent from a
-		 * configured association; response messages can be sent
-		 * from a configured association or can take the fast
-		 * path without ever matching an association. Response
-		 * messages have the same code as the request, but have
-		 * a response bit and possibly an error bit set. In this
-		 * implementation, a message may contain no more than
-		 * one command and one or more responses.
-		 *
-		 * Cryptographic session keys include both a public and
-		 * a private componet. Request and response messages
-		 * using extension fields are always sent with the
-		 * private component set to zero. Packets without
-		 * extension fields indlude the private component when
-		 * the session key is generated.
-		 */
-		while (1) {
-
-			/*
-			 * Allocate and initialize a keylist if not
-			 * already done. Then, use the list in inverse
-			 * order, discarding keys once used. Keep the
-			 * latest key around until the next one, so
-			 * clients can use client/server packets to
-			 * compute propagation delay.
-			 *
-			 * Note that once a key is used from the list,
-			 * it is retained in the key cache until the
-			 * next key is used. This is to allow a client
-			 * to retrieve the encrypted session key
-			 * identifier to verify authenticity.
-			 *
-			 * If for some reason a key is no longer in the
-			 * key cache, a birthday has happened or the key
-			 * has expired, so the pseudo-random sequence is
-			 * broken. In that case, purge the keylist and
-			 * regenerate it.
-			 */
-			if (peer->keynumber == 0)
-				make_keylist(peer, peer->dstadr);
-			else
-				peer->keynumber--;
-			xkeyid = peer->keylist[peer->keynumber];
-			if (authistrusted(xkeyid))
-				break;
-			else
-				key_expire(peer);
-		}
-		peer->keyid = xkeyid;
-		exten = NULL;
-		switch (peer->hmode) {
-
-		/*
-		 * In broadcast server mode the autokey values are
-		 * required by the broadcast clients. Push them when a
-		 * new keylist is generated; otherwise, push the
-		 * association message so the client can request them at
-		 * other times.
-		 */
-		case MODE_BROADCAST:
-			if (peer->flags & FLAG_ASSOC)
-				exten = crypto_args(peer, CRYPTO_AUTO |
-				    CRYPTO_RESP, peer->associd, NULL);
-			else
-				exten = crypto_args(peer, CRYPTO_ASSOC |
-				    CRYPTO_RESP, peer->associd, NULL);
-			break;
-
-		/*
-		 * In symmetric modes the parameter, certificate,
-		 * identity, cookie and autokey exchanges are
-		 * required. The leapsecond exchange is optional. But, a
-		 * peer will not believe the other peer until the other
-		 * peer has synchronized, so the certificate exchange
-		 * might loop until then. If a peer finds a broken
-		 * autokey sequence, it uses the autokey exchange to
-		 * retrieve the autokey values. In any case, if a new
-		 * keylist is generated, the autokey values are pushed.
-		 */
-		case MODE_ACTIVE:
-		case MODE_PASSIVE:
-
-			/*
-			 * Parameter, certificate and identity.
-			 */
-			if (!peer->crypto)
-				exten = crypto_args(peer, CRYPTO_ASSOC,
-				    peer->associd, hostval.ptr);
-			else if (!(peer->crypto & CRYPTO_FLAG_CERT))
-				exten = crypto_args(peer, CRYPTO_CERT,
-				    peer->associd, peer->issuer);
-			else if (!(peer->crypto & CRYPTO_FLAG_VRFY))
-				exten = crypto_args(peer,
-				    crypto_ident(peer), peer->associd,
-				    NULL);
-
-			/*
-			 * Cookie and autokey. We request the cookie
-			 * only when the this peer and the other peer
-			 * are synchronized. But, this peer needs the
-			 * autokey values when the cookie is zero. Any
-			 * time we regenerate the key list, we offer the
-			 * autokey values without being asked. If for
-			 * some reason either peer finds a broken
-			 * autokey sequence, the autokey exchange is
-			 * used to retrieve the autokey values.
-			 */
-			else if (sys_leap != LEAP_NOTINSYNC &&
-			    peer->leap != LEAP_NOTINSYNC &&
-			    !(peer->crypto & CRYPTO_FLAG_COOK))
-				exten = crypto_args(peer, CRYPTO_COOK,
-				    peer->associd, NULL);
-			else if (!(peer->crypto & CRYPTO_FLAG_AUTO))
-				exten = crypto_args(peer, CRYPTO_AUTO,
-				    peer->associd, NULL);
-			else if (peer->flags & FLAG_ASSOC &&
-			    peer->crypto & CRYPTO_FLAG_SIGN)
-				exten = crypto_args(peer, CRYPTO_AUTO |
-				    CRYPTO_RESP, peer->assoc, NULL);
-
-			/*
-			 * Wait for clock sync, then sign the
-			 * certificate and retrieve the leapsecond
-			 * values.
-			 */
-			else if (sys_leap == LEAP_NOTINSYNC)
-				break;
-
-			else if (!(peer->crypto & CRYPTO_FLAG_SIGN))
-				exten = crypto_args(peer, CRYPTO_SIGN,
-				    peer->associd, hostval.ptr);
-			else if (!(peer->crypto & CRYPTO_FLAG_LEAP))
-				exten = crypto_args(peer, CRYPTO_LEAP,
-				    peer->associd, NULL);
-			break;
-
-		/*
-		 * In client mode the parameter, certificate, identity,
-		 * cookie and sign exchanges are required. The
-		 * leapsecond exchange is optional. If broadcast client
-		 * mode the same exchanges are required, except that the
-		 * autokey exchange is substitutes for the cookie
-		 * exchange, since the cookie is always zero. If the
-		 * broadcast client finds a broken autokey sequence, it
-		 * uses the autokey exchange to retrieve the autokey
-		 * values.
-		 */
-		case MODE_CLIENT:
-
-			/*
-			 * Parameter, certificate and identity.
-			 */
-			if (!peer->crypto)
-				exten = crypto_args(peer, CRYPTO_ASSOC,
-				    peer->associd, hostval.ptr);
-			else if (!(peer->crypto & CRYPTO_FLAG_CERT))
-				exten = crypto_args(peer, CRYPTO_CERT,
-				    peer->associd, peer->issuer);
-			else if (!(peer->crypto & CRYPTO_FLAG_VRFY))
-				exten = crypto_args(peer,
-				    crypto_ident(peer), peer->associd,
-				    NULL);
-
-			/*
-			 * Cookie and autokey. These are requests, but
-			 * we use the peer association ID with autokey
-			 * rather than our own.
-			 */
-			else if (!(peer->crypto & CRYPTO_FLAG_COOK))
-				exten = crypto_args(peer, CRYPTO_COOK,
-				    peer->associd, NULL);
-			else if (!(peer->crypto & CRYPTO_FLAG_AUTO))
-				exten = crypto_args(peer, CRYPTO_AUTO,
-				    peer->assoc, NULL);
-
-			/*
-			 * Wait for clock sync, then sign the
-			 * certificate and retrieve the leapsecond
-			 * values.
-			 */
-			else if (sys_leap == LEAP_NOTINSYNC)
-				break;
-
-			else if (!(peer->crypto & CRYPTO_FLAG_SIGN))
-				exten = crypto_args(peer, CRYPTO_SIGN,
-				    peer->associd, hostval.ptr);
-			else if (!(peer->crypto & CRYPTO_FLAG_LEAP))
-				exten = crypto_args(peer, CRYPTO_LEAP,
-				    peer->associd, NULL);
-			break;
-		}
-
-		/*
-		 * Add a queued extension field if present. This is
-		 * always a request message, so the reply ID is already
-		 * in the message. If an error occurs, the error bit is
-		 * lit in the response.
-		 */
-		if (peer->cmmd != NULL) {
-			uint32_t temp32;
-
-			temp32 = CRYPTO_RESP;
-			peer->cmmd->opcode |= htonl(temp32);
-			sendlen += crypto_xmit(peer, &xpkt, NULL,
-			    sendlen, peer->cmmd, 0);
-			free(peer->cmmd);
-			peer->cmmd = NULL;
-		}
-
-		/*
-		 * Add an extension field created above. All but the
-		 * autokey response message are request messages.
-		 */
-		if (exten != NULL) {
-			if (exten->opcode != 0)
-				sendlen += crypto_xmit(peer, &xpkt,
-				    NULL, sendlen, exten, 0);
-			free(exten);
-		}
-
-		/*
-		 * Calculate the next session key. Since extension
-		 * fields are present, the cookie value is zero.
-		 */
-		if (sendlen > (int)LEN_PKT_NOMAC) {
-			session_key(&peer->dstadr->sin, &peer->srcadr,
-			    xkeyid, 0, 2);
-		}
-	}
-#endif	/* ENABLE_AUTOKEY */
+	 * authenticated.
+`	 */
 
 	/*
 	 * Transmit a-priori timestamps
@@ -3447,10 +2779,6 @@ peer_xmit(
 		return;
 	}
 	sendlen += authlen;
-#ifdef ENABLE_AUTOKEY
-	if (xkeyid > NTP_MAXKEY)
-		authtrust(xkeyid, 0);
-#endif	/* ENABLE_AUTOKEY */
 	if (sendlen > sizeof(xpkt)) {
 		msyslog(LOG_ERR, "proto: buffer overflow %zu", sendlen);
 		exit (-1);
@@ -3474,15 +2802,6 @@ peer_xmit(
 	}
 	L_SUB(&xmt_ty, &xmt_tx);
 	LFPTOD(&xmt_ty, peer->xleave);
-#ifdef ENABLE_AUTOKEY
-#ifdef DEBUG
-	if (debug)
-		printf("transmit: at %ld %s->%s mode %d keyid %08x len %zu index %d\n",
-		    current_time, latoa(peer->dstadr),
-		    ntoa(&peer->srcadr), peer->hmode, xkeyid, sendlen,
-		    peer->keynumber);
-#endif
-#else	/* !ENABLE_AUTOKEY follows */
 #ifdef DEBUG
 	if (debug)
 		printf("transmit: at %ld %s->%s mode %d keyid %08x len %zd\n",
@@ -3490,7 +2809,6 @@ peer_xmit(
 		    ntoa(&peer->dstadr->sin) : "-",
 		    ntoa(&peer->srcadr), peer->hmode, xkeyid, sendlen);
 #endif
-#endif	/* !ENABLE_AUTOKEY */
 }
 
 
@@ -3520,9 +2838,6 @@ fast_xmit(
 	struct pkt *rpkt;	/* receive packet structure */
 	l_fp	xmt_tx, xmt_ty;
 	size_t	sendlen;
-#ifdef ENABLE_AUTOKEY
-	uint32_t	temp32;
-#endif
 
 	/*
 	 * Initialize transmit packet header fields from the receive
@@ -3653,45 +2968,10 @@ fast_xmit(
 	 * The received packet contains a MAC, so the transmitted packet
 	 * must be authenticated. For symmetric key cryptography, use
 	 * the predefined and trusted symmetric keys to generate the
-	 * cryptosum. For autokey cryptography, use the server private
-	 * value to generate the cookie, which is unique for every
-	 * source-destination-key ID combination.
+	 * cryptosum.
 	 */
-#ifdef ENABLE_AUTOKEY
-	if (xkeyid > NTP_MAXKEY) {
-		keyid_t cookie;
-
-		/*
-		 * The only way to get here is a reply to a legitimate
-		 * client request message, so the mode must be
-		 * MODE_SERVER. If an extension field is present, there
-		 * can be only one and that must be a command. Do what
-		 * needs, but with private value of zero so the poor
-		 * jerk can decode it. If no extension field is present,
-		 * use the cookie to generate the session key.
-		 */
-		cookie = session_key(&rbufp->recv_srcadr,
-		    &rbufp->dstadr->sin, 0, sys_private, 0);
-		if (rbufp->recv_length > sendlen + (int)MAX_MAC_LEN) {
-			session_key(&rbufp->dstadr->sin,
-			    &rbufp->recv_srcadr, xkeyid, 0, 2);
-			temp32 = CRYPTO_RESP;
-			rpkt->exten[0] |= htonl(temp32);
-			sendlen += crypto_xmit(NULL, &xpkt, rbufp,
-			    sendlen, (struct exten *)rpkt->exten,
-			    cookie);
-		} else {
-			session_key(&rbufp->dstadr->sin,
-			    &rbufp->recv_srcadr, xkeyid, cookie, 2);
-		}
-	}
-#endif	/* ENABLE_AUTOKEY */
 	intercept_get_systime(__func__, &xmt_tx);
 	sendlen += authencrypt(xkeyid, (uint32_t *)&xpkt, sendlen);
-#ifdef ENABLE_AUTOKEY
-	if (xkeyid > NTP_MAXKEY)
-		authtrust(xkeyid, 0);
-#endif	/* ENABLE_AUTOKEY */
 	intercept_sendpkt(__func__, &rbufp->recv_srcadr, rbufp->dstadr, 0, &xpkt, sendlen);
 	intercept_get_systime(__func__, &xmt_ty);
 	L_SUB(&xmt_ty, &xmt_tx);
@@ -3793,39 +3073,6 @@ pool_xmit(
 }
 
 
-#ifdef ENABLE_AUTOKEY
-	/*
-	 * group_test - test if this is the same group
-	 *
-	 * host		assoc		return		action
-	 * none		none		0		mobilize *
-	 * none		group		0		mobilize *
-	 * group	none		0		mobilize *
-	 * group	group		1		mobilize
-	 * group	different	1		ignore
-	 * * ignore if notrust
-	 */
-bool group_test(
-	char	*grp,
-	char	*ident
-	)
-{
-	if (grp == NULL)
-		return false;
-
-	if (strcmp(grp, sys_groupname) == 0)
-		return false;
-
-	if (ident == NULL)
-		return true;
-
-	if (strcmp(grp, ident) == 0)
-		return false;
-
-	return true;
-}
-#endif /* ENABLE_AUTOKEY */
-
 #ifdef USE_WORKER
 void
 pool_name_resolved(
@@ -3867,35 +3114,6 @@ pool_name_resolved(
 
 }
 #endif	/* USE_WORKER */
-
-
-#ifdef ENABLE_AUTOKEY
-/*
- * key_expire - purge the key list
- */
-void
-key_expire(
-	struct peer *peer	/* peer structure pointer */
-	)
-{
-	int i;
-
-	if (peer->keylist != NULL) {
-		for (i = 0; i <= peer->keynumber; i++)
-			authtrust(peer->keylist[i], 0);
-		free(peer->keylist);
-		peer->keylist = NULL;
-	}
-	value_free(&peer->sndval);
-	peer->keynumber = 0;
-	peer->flags &= ~FLAG_ASSOC;
-#ifdef DEBUG
-	if (debug)
-		printf("key_expire: at %lu associd %d\n", current_time,
-		    peer->associd);
-#endif
-}
-#endif	/* ENABLE_AUTOKEY */
 
 
 /*

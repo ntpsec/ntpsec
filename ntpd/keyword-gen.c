@@ -24,7 +24,6 @@ struct key_tok {
 struct key_tok ntp_keywords[] = {
 { "...",		T_Ellipsis,		FOLLBY_TOKEN },
 { "allpeers",		T_Allpeers,		FOLLBY_TOKEN },
-{ "automax",		T_Automax,		FOLLBY_TOKEN },
 { "broadcast",		T_Broadcast,		FOLLBY_STRING },
 { "broadcastclient",	T_Broadcastclient,	FOLLBY_TOKEN },
 { "broadcastdelay",	T_Broadcastdelay,	FOLLBY_TOKEN },
@@ -79,7 +78,6 @@ struct key_tok ntp_keywords[] = {
 { "-4",			T_Ipv4_flag,		FOLLBY_TOKEN },
 { "-6",			T_Ipv6_flag,		FOLLBY_TOKEN },
 /* option */
-{ "autokey",		T_Autokey,		FOLLBY_TOKEN },
 { "burst",		T_Burst,		FOLLBY_TOKEN },
 { "iburst",		T_Iburst,		FOLLBY_TOKEN },
 { "key",		T_Key,			FOLLBY_TOKEN },
@@ -96,7 +94,6 @@ struct key_tok ntp_keywords[] = {
 { "xleave",		T_Xleave,		FOLLBY_TOKEN },
 /* crypto_command */
 { "host",		T_Host,			FOLLBY_STRING },
-{ "ident",		T_Ident,		FOLLBY_STRING },
 { "pw",			T_Pw,			FOLLBY_STRING },
 { "randfile",		T_Randfile,		FOLLBY_STRING },
 { "digest",		T_Digest,		FOLLBY_STRING },

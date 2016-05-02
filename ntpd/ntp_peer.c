@@ -506,9 +506,6 @@ free_peer(
 	if (p->hostname != NULL)
 		free(p->hostname);
 
-	if (p->ident != NULL)
-		free(p->ident);
-
 	if (p->addrs != NULL)
 		free(p->addrs);		/* from copy_addrinfo_list() */
 
@@ -560,8 +557,7 @@ peer_config(
 	uint8_t		maxpoll,
 	u_int		flags,
 	uint32_t		ttl,
-	keyid_t		key,
-	const char *	ident		/* autokey group */
+	keyid_t		key
 	)
 {
 	uint8_t cast_flags;
@@ -605,7 +601,7 @@ peer_config(
 	if ((MDF_ACAST | MDF_POOL) & cast_flags)
 		flags &= ~FLAG_PREEMPT;
 	return newpeer(srcadr, hostname, dstadr, hmode, version,
-	    minpoll, maxpoll, flags, cast_flags, ttl, key, ident);
+		       minpoll, maxpoll, flags, cast_flags, ttl, key);
 }
 
 /*
@@ -742,27 +738,11 @@ newpeer(
 	u_int		flags,
 	uint8_t		cast_flags,
 	uint32_t		ttl,
-	keyid_t		key,
-	const char *	ident
+	keyid_t		key
 	)
 {
 	struct peer *	peer;
 	u_int		hash;
-
-#ifdef ENABLE_AUTOKEY
-	/*
-	 * If Autokey is requested but not configured, complain loudly.
-	 */
-	if (!crypto_flags) {
-		if (key > NTP_MAXKEY) {
-			return (NULL);
-
-		} else if (flags & FLAG_SKEY) {
-			msyslog(LOG_ERR, "Autokey not configured");
-			return (NULL);
-		} 
-	}
-#endif	/* ENABLE_AUTOKEY */
 
 	/*
 	 * For now only pool associations have a hostname.
@@ -880,14 +860,8 @@ newpeer(
 	if ((MDF_MCAST & cast_flags) && peer->dstadr != NULL)
 		enable_multicast_if(peer->dstadr, srcadr);
 
-#ifdef ENABLE_AUTOKEY
-	if (key > NTP_MAXKEY)
-		peer->flags |= FLAG_SKEY;
-#endif	/* ENABLE_AUTOKEY */
 	peer->ttl = ttl;
 	peer->keyid = key;
-	if (ident != NULL)
-		peer->ident = estrdup(ident);
 	peer->precision = sys_precision;
 	peer->hpoll = peer->minpoll;
 	if (cast_flags & MDF_ACAST)

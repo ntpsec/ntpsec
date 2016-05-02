@@ -118,7 +118,7 @@ msyslog(LOG_ERR, "authreadkeys: reading %s", file);
 
 		if (keyno > NTP_MAXKEY) {
 			msyslog(LOG_ERR,
-			    "authreadkeys: key %s > %d reserved for Autokey",
+			    "authreadkeys: key %s > %d reserved",
 			    token, NTP_MAXKEY);
 			continue;
 		}

@@ -426,10 +426,6 @@ def cmd_configure(ctx, config):
 		ctx.define("ENABLE_DNS_RETRY", 1, comment="Retry DNS lookups after an initial failure")
 
 
-	# There is an ENABLE_AUTOKEY as well, but as that feature
-	# is not working and likely to be replaced it's not exposed
-	# and can't be enabled.
-
 	# There is an ENABLE_ASYMMETRIC that enables a section of the
 	# protocol code having to do with handling very long asymmetric
 	# delays, as in space communications. Likely this code has never
