@@ -64,7 +64,7 @@ recvdata(
 
 /* Parsing from a short 'struct pkt' directly is bound to create
  * coverity warnings. These are hard to avoid, as the formal declaration
- * does not reflect the true layout in the presence of autokey extension
+ * does not reflect the true layout in the presence of extension
  * fields. Parsing and skipping the extension fields of a received packet
  * until there's only the MAC left is better done in this separate
  * function.

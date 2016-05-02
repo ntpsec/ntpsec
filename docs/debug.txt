@@ -194,8 +194,7 @@ usually less than a few milliseconds.
 
 == Cryptographic Authentication ==
 
-Reliable source authentication requires the use of symmetric key or
-public key cryptography, as described on the
+Reliable source authentication requires the use of symmetric key
 link:authopt.html[Authentication Options] page. In symmetric key
 cryptography servers and clients share session keys contained in a
 secret key file In public key cryptography, which requires the OpenSSL
@@ -220,40 +219,6 @@ these associations require authentication; if not, an association is
 mobilized even if not authenticated. Users are cautioned that running
 with authentication disabled is very dangerous, since an intruder can
 easily strike up an association and inject false time values.
-
-Public key cryptography is supported in NTPv4 using the Autokey
-protocol, which is described in briefings on the {project-page}
-linked from {project-domain}
-Development of this protocol is mature and the +{ntpd}+ implementation
-is basically complete. Autokey version 2, which is the latest and
-current version, includes provisions to hike certificate trails,
-operate as certificate authorities and verify identity using
-challenge/response identification schemes. Further details of the
-protocol are on the link:authopt.html[Authentication Options] page.
-Common problems with configuration and key generation are mismatched
-key files, broken links and missing or broken random seed file.
-
-As in the symmetric key cryptography case, the trace facility is a good
-way to verify correct operation. A statistics file +cryptostats+ records
-protocol transactions and error messages. The daemon requires a random
-seed file, public/private key file and a valid certificate file;
-otherwise it exits immediately with a message to the system log. As each
-file is loaded a trace message appears with its filestamp. There are a
-number of checks to insure that only consistent data are used and that
-the certificate is valid. When the protocol is in operation a number of
-checks are done to verify the server has the expected credentials and
-its filestamps and timestamps are consistent. Errors found are reported
-using NTP control and monitoring protocol traps with extended trap codes
-shown in the Authentication Options page.
-
-To assist debugging every NTP extension field is displayed in the trace
-along with the Autokey operation code. Every extension field carrying a
-verified signature is identified and displayed along with filestamp and
-timestamp where meaningful. In all except broadcast/multicast client
-mode, correct operation of the protocol is confirmed by the absence of
-extension fields and an +auth+ value of one. It is normal in
-broadcast/multicast client mode that the broadcast server use one
-extension field to show the host name, status word and association ID.
 
 == Debugging Checklist ==
 

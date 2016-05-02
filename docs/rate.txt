@@ -60,7 +60,7 @@ citizen, even if configured in unfriendly ways. The ground rules are:
 * Send at the lowest rate consistent with the expected accuracy
 requirements.
 * Maintain strict guard time and minimum average headway time, even if
-multiple burst options and/or the Autokey protocol are operating.
+multiple burst options are operating.
 * When the first packet of a burst is sent to a server, do not send
 further packets until the first packet has been received from the
 server.
@@ -110,7 +110,7 @@ packets. Starting from an output counter value of zero, the maximum
 counter value, called the ceiling, can be no more than eight times the
 MAH. However, if the burst starts with a counter value other than zero,
 there is a potential to exceed the ceiling. This can result from
-protocol restarts and/or Autokey protocol operations. In these cases the
+protocol restarts. In these cases the
 poll algorithm throttles the output rate by computing an additional
 headway time so that the next packet sent will not exceed the ceiling.
 Designs such as this are often called leaky buckets.

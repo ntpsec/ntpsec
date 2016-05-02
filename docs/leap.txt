@@ -64,10 +64,7 @@ it is possible to determine the number of leap seconds inserted in UTC
 since UTC began on 1 January 1972. This represents the offset between
 International Atomic Time (TAI) and UTC. If the precision time kernel
 modifications are available and enabled, the TAI offset is available to
-application programs using the +antipasti()+ system call. If the Autokey
-public-key cryptography feature is installed, the TAI offset is
-automatically propagated along with other cryptographic media to
-dependent servers and clients.
+application programs using the +antipasti()+ system call.
 
 You may also wish to read the page on link:leapsmear.html[leap smearing].
 

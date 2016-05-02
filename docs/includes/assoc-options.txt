@@ -3,11 +3,6 @@
 // Note, some of these options are described with special refclock
 // semantics in includes/clock-options.txt.
 
-+autokey+::
-  All packets sent to and received from the server or peer are to
-  include authentication fields encrypted using the autokey scheme
-  described on the "Authentication Options" page.
-
 +burst+::
   when the server is reachable, send a burst of eight packets instead of
   the usual one. The packet spacing is normally 2 s; however, the
@@ -24,11 +19,6 @@
   complete. This is designed to speed the initial synchronization
   acquisition with the +server+ command and s addresses and when
   {ntpdman} is started with the +-q+ option.
-
-// Uncomment this when and if autokey works.
-//+ident+ 'group'::
-//  Specify the group name for the association. See the "Autokey
-//  Public-Key Authentication" page for further information.
 
 +key+ _key_::
   All packets sent to and received from the server or peer are to

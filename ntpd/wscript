@@ -57,7 +57,6 @@ def build(ctx):
 
 	libntpd_source = [
 		"ntp_control.c",
-		"ntp_crypto.c",
 		"ntp_filegen.c",
 		"ntp_intercept.c",
 		"ntp_leapsec.c",

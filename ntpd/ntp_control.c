@@ -216,20 +216,7 @@ static const struct ctl_proc control_codes[] = {
 #define	CS_WANDER_THRESH	89
 #define	CS_LEAPSMEARINTV	90
 #define	CS_LEAPSMEAROFFS	91
-#define	CS_MAX_NOAUTOKEY	CS_LEAPSMEAROFFS
-#ifdef ENABLE_AUTOKEY
-#define	CS_FLAGS		(1 + CS_MAX_NOAUTOKEY)
-#define	CS_HOST			(2 + CS_MAX_NOAUTOKEY)
-#define	CS_PUBLIC		(3 + CS_MAX_NOAUTOKEY)
-#define	CS_CERTIF		(4 + CS_MAX_NOAUTOKEY)
-#define	CS_SIGNATURE		(5 + CS_MAX_NOAUTOKEY)
-#define	CS_REVTIME		(6 + CS_MAX_NOAUTOKEY)
-#define	CS_IDENT		(7 + CS_MAX_NOAUTOKEY)
-#define	CS_DIGEST		(8 + CS_MAX_NOAUTOKEY)
-#define	CS_MAXCODE		CS_DIGEST
-#else	/* !ENABLE_AUTOKEY follows */
-#define	CS_MAXCODE		CS_MAX_NOAUTOKEY
-#endif	/* !ENABLE_AUTOKEY */
+#define	CS_MAXCODE		CS_LEAPSMEAROFFS
 
 /*
  * Peer variables we understand
@@ -284,20 +271,7 @@ static const struct ctl_proc control_codes[] = {
 #define	CP_SELDISP		48
 #define	CP_SELBROKEN		49
 #define	CP_CANDIDATE		50
-#define	CP_MAX_NOAUTOKEY	CP_CANDIDATE
-#ifdef ENABLE_AUTOKEY
-#define	CP_FLAGS		(1 + CP_MAX_NOAUTOKEY)
-#define	CP_HOST			(2 + CP_MAX_NOAUTOKEY)
-#define	CP_VALID		(3 + CP_MAX_NOAUTOKEY)
-#define	CP_INITSEQ		(4 + CP_MAX_NOAUTOKEY)
-#define	CP_INITKEY		(5 + CP_MAX_NOAUTOKEY)
-#define	CP_INITTSP		(6 + CP_MAX_NOAUTOKEY)
-#define	CP_SIGNATURE		(7 + CP_MAX_NOAUTOKEY)
-#define	CP_IDENT		(8 + CP_MAX_NOAUTOKEY)
-#define	CP_MAXCODE		CP_IDENT
-#else	/* !ENABLE_AUTOKEY follows */
-#define	CP_MAXCODE		CP_MAX_NOAUTOKEY
-#endif	/* !ENABLE_AUTOKEY */
+#define	CP_MAXCODE		CP_CANDIDATE
 
 /*
  * Clock variables we understand
@@ -414,17 +388,7 @@ static const struct ctl_var sys_var[] = {
 	{ CS_WANDER_THRESH,	RO, "clk_wander_threshold" }, /* 89 */
 	{ CS_LEAPSMEARINTV,	RO, "leapsmearinterval" },    /* 90 */
 	{ CS_LEAPSMEAROFFS,	RO, "leapsmearoffset" },      /* 91 */
-#ifdef ENABLE_AUTOKEY
-	{ CS_FLAGS,	RO, "flags" },		/* 1 + CS_MAX_NOAUTOKEY */
-	{ CS_HOST,	RO, "host" },		/* 2 + CS_MAX_NOAUTOKEY */
-	{ CS_PUBLIC,	RO, "update" },		/* 3 + CS_MAX_NOAUTOKEY */
-	{ CS_CERTIF,	RO, "cert" },		/* 4 + CS_MAX_NOAUTOKEY */
-	{ CS_SIGNATURE,	RO, "signature" },	/* 5 + CS_MAX_NOAUTOKEY */
-	{ CS_REVTIME,	RO, "until" },		/* 6 + CS_MAX_NOAUTOKEY */
-	{ CS_IDENT,	RO, "ident" },		/* 7 + CS_MAX_NOAUTOKEY */
-	{ CS_DIGEST,	RO, "digest" },		/* 8 + CS_MAX_NOAUTOKEY */
-#endif	/* ENABLE_AUTOKEY */
-	{ 0,		EOV, "" }		/* 87/95 */
+	{ 0,		EOV, "" }		/* 91 */
 };
 
 static struct ctl_var *ext_sys_var = NULL;
@@ -456,15 +420,6 @@ static const uint8_t def_sys_var[] = {
 	CS_TAI,
 	CS_LEAPTAB,
 	CS_LEAPEND,
-#ifdef ENABLE_AUTOKEY
-	CS_HOST,
-	CS_IDENT,
-	CS_FLAGS,
-	CS_DIGEST,
-	CS_SIGNATURE,
-	CS_PUBLIC,
-	CS_CERTIF,
-#endif	/* ENABLE_AUTOKEY */
 	0
 };
 
@@ -526,16 +481,6 @@ static const struct ctl_var peer_var[] = {
 	{ CP_SELDISP,	RO, "seldisp" },	/* 48 */
 	{ CP_SELBROKEN,	RO, "selbroken" },	/* 49 */
 	{ CP_CANDIDATE, RO, "candidate" },	/* 50 */
-#ifdef ENABLE_AUTOKEY
-	{ CP_FLAGS,	RO, "flags" },		/* 1 + CP_MAX_NOAUTOKEY */
-	{ CP_HOST,	RO, "host" },		/* 2 + CP_MAX_NOAUTOKEY */
-	{ CP_VALID,	RO, "valid" },		/* 3 + CP_MAX_NOAUTOKEY */
-	{ CP_INITSEQ,	RO, "initsequence" },	/* 4 + CP_MAX_NOAUTOKEY */
-	{ CP_INITKEY,	RO, "initkey" },	/* 5 + CP_MAX_NOAUTOKEY */
-	{ CP_INITTSP,	RO, "timestamp" },	/* 6 + CP_MAX_NOAUTOKEY */
-	{ CP_SIGNATURE,	RO, "signature" },	/* 7 + CP_MAX_NOAUTOKEY */
-	{ CP_IDENT,	RO, "ident" },		/* 8 + CP_MAX_NOAUTOKEY */
-#endif	/* ENABLE_AUTOKEY */
 	{ 0,		EOV, "" }		/* 50/58 */
 };
 
@@ -578,14 +523,6 @@ static const uint8_t def_peer_var[] = {
 	CP_FILTDELAY,
 	CP_FILTOFFSET,
 	CP_FILTERROR,
-#ifdef ENABLE_AUTOKEY
-	CP_HOST,
-	CP_FLAGS,
-	CP_SIGNATURE,
-	CP_VALID,
-	CP_INITSEQ,
-	CP_IDENT,
-#endif	/* ENABLE_AUTOKEY */
 	0
 };
 
@@ -1418,35 +1355,6 @@ ctl_putuint(
 	ctl_putdata(buffer, (unsigned)( cp - buffer ), 0);
 }
 
-#ifdef ENABLE_AUTOKEY
-/*
- * ctl_putcal - write a decoded calendar data into the response
- */
-static void
-ctl_putcal(
-	const char *tag,
-	const struct calendar *pcal
-	)
-{
-	char buffer[100];
-	unsigned numch;
-
-	numch = snprintf(buffer, sizeof(buffer),
-			"%s=%04d%02d%02d%02d%02d",
-			tag,
-			pcal->year,
-			pcal->month,
-			pcal->monthday,
-			pcal->hour,
-			pcal->minute
-			);
-	NTP_INSIST(numch < sizeof(buffer));
-	ctl_putdata(buffer, numch, 0);
-
-	return;
-}
-#endif	/* ENABLE_AUTOKEY */
-
 /*
  * ctl_putfs - write a decoded filestamp into the response
  */
@@ -1679,9 +1587,6 @@ ctl_putsys(
 	double kb;
 	double dtemp;
 	const char *ss;
-#ifdef ENABLE_AUTOKEY
-	struct cert_info *cp;
-#endif	/* ENABLE_AUTOKEY */
 #ifdef HAVE_KERNEL_PLL
 	static struct timex ntx;
 	static u_long ntp_adjtime_time;
@@ -2260,62 +2165,6 @@ ctl_putsys(
 	case CS_WANDER_THRESH:
 		ctl_putdbl(sys_var[varid].text, wander_threshold * 1e6);
 		break;
-#ifdef ENABLE_AUTOKEY
-	case CS_FLAGS:
-		if (crypto_flags)
-			ctl_puthex(sys_var[CS_FLAGS].text,
-			    crypto_flags);
-		break;
-
-	case CS_DIGEST:
-		if (crypto_flags) {
-			strlcpy(str, OBJ_nid2ln(crypto_nid),
-			    COUNTOF(str));
-			ctl_putstr(sys_var[CS_DIGEST].text, str,
-			    strlen(str));
-		}
-		break;
-
-	case CS_SIGNATURE:
-		if (crypto_flags) {
-			const EVP_MD *dp;
-
-			dp = EVP_get_digestbynid(crypto_flags >> 16);
-			strlcpy(str, OBJ_nid2ln(EVP_MD_pkey_type(dp)),
-			    COUNTOF(str));
-			ctl_putstr(sys_var[CS_SIGNATURE].text, str,
-			    strlen(str));
-		}
-		break;
-
-	case CS_HOST:
-		if (hostval.ptr != NULL)
-			ctl_putstr(sys_var[CS_HOST].text, hostval.ptr,
-			    strlen(hostval.ptr));
-		break;
-
-	case CS_IDENT:
-		if (sys_ident != NULL)
-			ctl_putstr(sys_var[CS_IDENT].text, sys_ident,
-			    strlen(sys_ident));
-		break;
-
-	case CS_CERTIF:
-		for (cp = cinfo; cp != NULL; cp = cp->link) {
-			snprintf(str, sizeof(str), "%s %s 0x%x",
-			    cp->subject, cp->issuer, cp->flags);
-			ctl_putstr(sys_var[CS_CERTIF].text, str,
-			    strlen(str));
-			ctl_putcal(sys_var[CS_REVTIME].text, &(cp->last));
-		}
-		break;
-
-	case CS_PUBLIC:
-		if (hostval.tstamp != 0)
-			ctl_putfs(sys_var[CS_PUBLIC].text,
-			    ntohl(hostval.tstamp));
-		break;
-#endif	/* ENABLE_AUTOKEY */
 	}
 }
 
@@ -2335,11 +2184,6 @@ ctl_putpeer(
 	char *be;
 	int i;
 	const struct ctl_var *k;
-#ifdef ENABLE_AUTOKEY
-	struct autokey *ap;
-	const EVP_MD *dp;
-	const char *str;
-#endif	/* ENABLE_AUTOKEY */
 
 	switch (id) {
 
@@ -2602,45 +2446,6 @@ ctl_putpeer(
 	case CP_CANDIDATE:
 		ctl_putuint(peer_var[id].text, p->status);
 		break;
-#ifdef ENABLE_AUTOKEY
-	case CP_FLAGS:
-		if (p->crypto)
-			ctl_puthex(peer_var[id].text, p->crypto);
-		break;
-
-	case CP_SIGNATURE:
-		if (p->crypto) {
-			dp = EVP_get_digestbynid(p->crypto >> 16);
-			str = OBJ_nid2ln(EVP_MD_pkey_type(dp));
-			ctl_putstr(peer_var[id].text, str, strlen(str));
-		}
-		break;
-
-	case CP_HOST:
-		if (p->subject != NULL)
-			ctl_putstr(peer_var[id].text, p->subject,
-			    strlen(p->subject));
-		break;
-
-	case CP_VALID:		/* not used */
-		break;
-
-	case CP_INITSEQ:
-		if (NULL == (ap = p->recval.ptr))
-			break;
-
-		ctl_putint(peer_var[CP_INITSEQ].text, ap->seq);
-		ctl_puthex(peer_var[CP_INITKEY].text, ap->key);
-		ctl_putfs(peer_var[CP_INITTSP].text,
-			  ntohl(p->recval.tstamp));
-		break;
-
-	case CP_IDENT:
-		if (p->ident != NULL)
-			ctl_putstr(peer_var[id].text, p->ident,
-			    strlen(p->ident));
-		break;
-#endif	/* ENABLE_AUTOKEY */
 	default:
 		break;
 	}
@@ -4725,7 +4530,7 @@ report_event(
 		rpkt.status = htons(ctlpeerstatus(peer));
 
 		/* Dump it all. Later, maybe less. */
-		for (i = 1; i <= CP_MAX_NOAUTOKEY; i++)
+		for (i = 1; i <= CP_MAXCODE; i++)
 			ctl_putpeer(i, peer);
 #ifdef REFCLOCK
 		/*

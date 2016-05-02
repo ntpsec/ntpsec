@@ -38,8 +38,10 @@ extern HANDLE	get_recv_buff_event(void);
 
 /*
  *  the maximum length NTP packet contains the NTP header, one Autokey
- *  request, one Autokey response and the MAC. Assuming certificates don't
- *  get too big, the maximum packet length is set arbitrarily at 1000.
+ *  request, one Autokey response and the MAC (Autokey has been removed 
+ *  from NTPsec, but we need to deal with the largest packets from legacy 
+ *  versions). Assuming certificates don't get too big, the maximum packet
+ *  length is set arbitrarily at 1000.
  */   
 #define	RX_BUFF_SIZE	1000		/* hail Mary */
 

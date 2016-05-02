@@ -1262,10 +1262,6 @@ create_peer_node(
 			}
 			break;
 
-		case T_Ident:
-			my_node->group = option->value.s;
-			break;
-
 		default:
 			msyslog(LOG_ERR,
 				"Unknown peer/server option token %s",
@@ -1799,44 +1795,6 @@ config_auth(
 	int		last;
 	int		i;
 	int		count;
-#ifdef ENABLE_AUTOKEY
-	int		item;
-#endif
-
-	/* Crypto Command */
-#ifdef ENABLE_AUTOKEY
-	item = -1;	/* quiet warning */
-	my_val = HEAD_PFIFO(ptree->auth.crypto_cmd_list);
-	for (; my_val != NULL; my_val = my_val->link) {
-		switch (my_val->attr) {
-
-		default:
-			INSIST(0);
-			break;
-
-		case T_Host:
-			item = CRYPTO_CONF_PRIV;
-			break;
-
-		case T_Ident:
-			item = CRYPTO_CONF_IDENT;
-			break;
-
-		case T_Pw:
-			item = CRYPTO_CONF_PW;
-			break;
-
-		case T_Randfile:
-			item = CRYPTO_CONF_RAND;
-			break;
-
-		case T_Digest:
-			item = CRYPTO_CONF_NID;
-			break;
-		}
-		crypto_config(item, my_val->value.s);
-	}
-#endif	/* ENABLE_AUTOKEY */
 
 	/* Keysdir Command */
 	if (ptree->auth.keysdir) {
@@ -1852,13 +1810,6 @@ config_auth(
 			free(ntp_signd_socket);
 		ntp_signd_socket = estrdup(ptree->auth.ntp_signd_socket);
 	}
-
-#ifdef ENABLE_AUTOKEY
-	if (ptree->auth.cryptosw && !cryptosw) {
-		crypto_setup();
-		cryptosw = 1;
-	}
-#endif	/* ENABLE_AUTOKEY */
 
 	/*
 	 * Count the number of trusted keys to preallocate storage and
@@ -1918,12 +1869,6 @@ config_auth(
 			}
 		}
 	}
-
-#ifdef ENABLE_AUTOKEY
-	/* crypto revoke command */
-	if (ptree->auth.revoke)
-		sys_revoke = 1UL << ptree->auth.revoke;
-#endif	/* ENABLE_AUTOKEY */
 }
 #endif	/* !SIM */
 
@@ -3484,10 +3429,6 @@ config_vars(
 			qos = curr_var->value.i << 2;
 			break;
 
-		case T_Ident:
-			sys_ident = curr_var->value.s;
-			break;
-
 		case T_WanderThreshold:		/* FALLTHROUGH */
 		case T_Nonvolatile:
 			wander_threshold = curr_var->value.d;
@@ -3533,12 +3474,6 @@ config_vars(
 					saveconfigdir = estrdup(
 					    curr_var->value.s);
 			}
-			break;
-
-		case T_Automax:
-#ifdef ENABLE_AUTOKEY
-			sys_automax = curr_var->value.i;
-#endif
 			break;
 
 		default:
@@ -3650,10 +3585,6 @@ peerflag_bits(
 			INSIST(0);
 			break;
 
-		case T_Autokey:
-			peerflags |= FLAG_SKEY;
-			break;
-
 		case T_Burst:
 			peerflags |= FLAG_BURST;
 			break;
@@ -3725,8 +3656,7 @@ config_peers(
 					0,
 					FLAG_IBURST,
 					0,
-					0,
-					NULL);
+					0);
 		} else if (force_synchronous_dns) {
 			if (intercept_getaddrinfo(*cmdline_servers, &peeraddr)) {
 				peer_config(
@@ -3739,8 +3669,7 @@ config_peers(
 					0,
 					FLAG_IBURST,
 					0,
-					0,
-					NULL);
+					0);
 			}
 		} else {
 			/* we have a hostname to resolve */
@@ -3790,8 +3719,7 @@ config_peers(
 				curr_peer->maxpoll,
 				peerflag_bits(curr_peer),
 				curr_peer->ttl,
-				curr_peer->peerkey,
-				curr_peer->group);
+				curr_peer->peerkey);
 		/*
 		 * If we have a numeric address, we can safely
 		 * proceed in the mainline with it.
@@ -3812,8 +3740,7 @@ config_peers(
 					curr_peer->maxpoll,
 					peerflag_bits(curr_peer),
 					curr_peer->ttl,
-					curr_peer->peerkey,
-					curr_peer->group);
+					curr_peer->peerkey);
 		/*
 		 * synchronous lookup may be forced.
 		 */
@@ -3829,8 +3756,7 @@ config_peers(
 					curr_peer->maxpoll,
 					peerflag_bits(curr_peer),
 					curr_peer->ttl,
-					curr_peer->peerkey,
-					curr_peer->group);
+					curr_peer->peerkey);
 			}
 		} else {
 			/* hand the hostname off to the blocking child */
@@ -3935,8 +3861,7 @@ peer_name_resolved(
 				ctx->maxpoll,
 				ctx->flags,
 				ctx->ttl,
-				ctx->keyid,
-				ctx->group);
+				ctx->keyid);
 			break;
 		}
 	}

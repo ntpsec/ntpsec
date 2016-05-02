@@ -12,7 +12,6 @@
 
 # These are potential feature configuration symbols
 ENABLE_ASYMMETRIC	# Enable deep-space asymmetric mode in the protocol 
-ENABLE_AUTOKEY		# Enable Autokey, presently broken
 ENABLE_CHU_AUDIO	# Enable audio demodulation support in the CHU driver
 ENABLE_ONCORE_SHMEM	# Should OnCore report via shmem?
 MSSNTP_PATH		# Set a default path for the MSSNTP feature.

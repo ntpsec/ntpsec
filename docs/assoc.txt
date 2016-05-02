@@ -43,7 +43,7 @@ timeout.
 
 Ordinarily, successful mobilization of ephemeral associations requires
 the server to be cryptographically authenticated to the client. This can
-be done using either symmetric key or Autokey public key cryptography,
+be done using symmetric key cryptography,
 as described on the link:authentic.html[Authentication Support] page.
 
 There are three principal modes of operation in NTP: client/server,

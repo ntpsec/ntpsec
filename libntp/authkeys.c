@@ -567,8 +567,8 @@ MD5auth_setkey(
 
 
 /*
- * auth_delkeys - delete non-autokey untrusted keys, and clear all info
- *                except the trusted bit of non-autokey trusted keys, in
+ * auth_delkeys - delete untrusted keys, and clear all info
+ *                except the trusted bit of trusted keys, in
  *		  preparation for rereading the keys file.
  */
 void
@@ -577,10 +577,6 @@ auth_delkeys(void)
 	symkey *	sk;
 
 	ITER_DLIST_BEGIN(key_listhead, sk, llink, symkey)
-		if (sk->keyid > NTP_MAXKEY) {	/* autokey */
-			continue;
-		}
-
 		/*
 		 * Don't lose info as to which keys are trusted.
 		 */

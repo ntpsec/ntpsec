@@ -610,10 +610,6 @@ RFC5905::
   David L. Mills and J. Martin, Ed. and J. Burbank and W. Kasch, _Network
   Time Protocol Version 4: Protocol and Algorithms Specification_, RFC5905
 
-RFC5906::
-  David L. Mills and B. Haberman, Ed., _Network Time Protocol Version 4:
-  Autokey Specification_, RFC5906
-
 RFC5907::
   H&#x2e; Gerstung and C. Elliott and B. Haberman, Ed., _Definitions of Managed
   Objects for Network Time Protocol Version 4: (NTPv4)_, RFC5907
