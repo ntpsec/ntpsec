@@ -1071,8 +1071,9 @@ receive(
 		if (!L_ISEQU(&p_org, &peer->aorg) || L_ISZERO(&p_org)) {
 			peer->bogusorg++;
 			peer->flash |= BOGON2;	/* bogus */
-			if (!L_ISZERO(&peer->dst) && L_ISEQU(&p_org,
-			    &peer->dst)) {
+			if (peer->flags & FLAG_XLEAVE &&
+                            !L_ISZERO(&peer->dst) &&
+                            L_ISEQU(&p_org, &peer->dst)) {
 				peer->flip = 1;
 				report_event(PEVNT_XLEAVE, peer, NULL);
 			}
