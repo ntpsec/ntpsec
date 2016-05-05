@@ -875,6 +875,7 @@ receive(
 
 			} else {
 				peer->delay = sys_bdelay;
+                                peer->xmt = p_xmt; /* for replay prevention */
 			}
 			break;
 		}
@@ -895,6 +896,7 @@ receive(
 			sys_restricted++;
 			return;			/* ignore duplicate */
 		}
+                peer->xmt = p_xmt; /* for reply prevention */
 
 		return;				/* hooray */
 
@@ -1025,6 +1027,11 @@ receive(
 	} else if (L_ISEQU(&peer->xmt, &p_xmt)) {
 		peer->flash |= BOGON1;			/* duplicate */
 		peer->oldpkt++;
+		msyslog(LOG_NOTICE, "Dropping duplicate packet: associd"
+                        "%d peer->xmt %#010x.%08x xmt %#010x.%08x",
+			peer->associd, peer->xmt.l_ui, peer->xmt.l_uf,
+                        p_xmt.l_ui, p_xmt.l_uf);
+
 		return;
 
 	/*
@@ -1055,13 +1062,18 @@ receive(
 		 * it results in an easy DoS by sending a spoofed packet
 		 * with the transmit timestamp far in the future.
 		 */
-		
-		if((restrict_mask & RES_DONTTRUST) &&
-		   L_ISGEQ(&peer->xmt, &p_xmt)) {
-			peer->flash |= BOGON1;
-			peer->oldpkt++;
-			return;
-		}
+
+               if((peer->keyid || (restrict_mask & RES_DONTTRUST)) &&
+                  L_ISGEQU(&peer->xmt, &p_xmt)) {
+                       peer->flash |= BOGON1;
+                       peer->oldpkt++;
+                       msyslog(LOG_NOTICE, "Dropping replay attempt: associd %d "
+                               "peer->xmt %#010x.%08x xmt %#010x.%08x",
+                               peer->associd, peer->xmt.l_ui,
+                               peer->xmt.l_uf, p_xmt.l_ui, p_xmt.l_uf);
+                       return;
+               }
+
 	/*
 	 * Check for bogus packet in basic mode. If found, switch to
 	 * interleaved mode and resynchronize, but only after confirming
@@ -1798,6 +1810,7 @@ peer_clear(
 	)
 {
 	uint8_t	u;
+        l_fp xmt = peer->xmt;
 
 	/*
 	 * Clear all values, including the optional crypto values above.
@@ -1808,6 +1821,11 @@ peer_clear(
 	peer->disp = MAXDISPERSE;
 	peer->flash = peer_unfit(peer);
 	peer->jitter = LOGTOD(sys_precision);
+
+	/* Don't throw away our broadcast replay protection */
+	if (peer->hmode == MODE_BCLIENT) {
+		peer->xmt = xmt;
+	}
 
 	/*
 	 * If interleave mode, initialize the alternate origin switch.
