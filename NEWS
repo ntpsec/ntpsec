@@ -10,7 +10,18 @@ on user-visible changes.
 
 The long-deprected Autokey feature has been removed.
 
-The following fixes have been forward-ported from Classic:
+This release contains fixes for three vulnerabilities inherited from
+NTP Classic:
+
+[Bug 3020] (CVE-2016-1551) Refclock impersonation vulnerability
+  (Credit: Matt Street et. al. of Cisco ASIG)
+[Bug 3008] (CVE-2016-2519) ctl_getitem() return value not always checked
+  (Credit: Yihan Lian of the Qihoo 360 cloud security team)
+[Bug 2978] (CVE-2016-1548) Interleave-pivot (Credit: Miroslav Lichvar of
+  RedHat and Jonathan Gardner of Cisco ASIG)
+
+The following non-security fixes have been
+forward-ported from Classic:
 
 [Bug 2772] adj_systime overflows tv_usec
 [Bug 2814] msyslog deadlock when signaled.
@@ -20,6 +31,24 @@ The following fixes have been forward-ported from Classic:
 [Bug 2958] ntpq: fatal error messages need a final newline.
 [Bug 2965] Local clock didn't work since 4.2.8p4.
 [Bug 2969] Segfault from ntpq/mrulist when looking at server with lots of clients
+
+We regard NTP Classic's [Bug 3012] (CVE-2016-1549) Sybil
+vulnerability: ephemeral association attack (Credit: Matthew van Gundy
+of Cisco ASIG) as a duplicate of CVE-2015-7974 (see 0.9.1 release
+notes) and it is WONTFIX for the time being: it is
+correct-but-unfortunate behavior consequent to confusing and
+inflexible semantics of ntp.conf's acesss control language, and we
+will address it with a future redesign effort. NTP Classic has
+partially addressed this pair of issues by extending the syntax of
+ntp.keys to support IP ACLing. We are not currently aware of any
+demand for this feature among NTPsec users and have no plans to
+implement it; if you have a need for it, please file a bug at
+https://gitlab.com/groups/NTPsec/issues to let us know you're out
+there.
+
+The remainder of the security issues patched in NTP Classic 4.2.8p7
+either are not believed to impact NTPsec or were already fixed in a
+previous release.
 
 == 2016-03-15: 0.9.2 ==
 
