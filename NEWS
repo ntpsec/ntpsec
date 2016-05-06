@@ -27,7 +27,6 @@ forward-ported from Classic:
 [Bug 2814] msyslog deadlock when signaled.
 [Bug 2829] Look at pipe_fds in ntpd.c
 [Bug 2887] fudge stratum only accepts values [0..16].
-[Bug 2937] (NTPQ) nextvar() missing length check
 [Bug 2958] ntpq: fatal error messages need a final newline.
 [Bug 2965] Local clock didn't work since 4.2.8p4.
 [Bug 2969] Segfault from ntpq/mrulist when looking at server with lots of clients
