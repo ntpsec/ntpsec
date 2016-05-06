@@ -74,7 +74,7 @@ Point release for security. Fixes:
 * CVE-2015-8139: Origin Leak: ntpq and ntpdc Disclose Origin Timestamp
   to Unauthenticated Clients (Matthew van Gundy)
 * CVE-2015-8158: Potential Infinite Loop in ntpq (Jonathan Gardner)
-* Timing attack on MAC verification (Daniel Franke)
+* CVE-2016-1550: Timing attack on MAC verification (Daniel Franke)
 * Missing length checks in decodearr() and outputarr() (Daniel Franke)
 
 Two additional security issues have been reported to us for which we
