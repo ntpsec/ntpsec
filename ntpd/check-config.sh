@@ -6,15 +6,15 @@
 
 # This only works on code built with --enable-saveconfig
 
-RAW=../ntpd/complete.conf.in
-IN=ntpd/complete.conf
-OUT=ntpd/compsave.conf            # from xxx
+RAW=../ntpd/complete.conf
+IN=main/ntpd/complete.conf
+OUT=main/ntpd/compsave.conf
 
 # may have to prune unsupported features
 #  rlimit requires MEMLOCK
 cp -p $RAW $IN
 
-./ntpd/ntpd --configfile $IN --saveconfigquit $OUT
+./main/ntpd/ntpd -n --configfile $IN --saveconfigquit $OUT
 if test "$?" -ge "0"
 then
   exit $?
