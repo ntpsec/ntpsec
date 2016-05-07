@@ -57,7 +57,7 @@ def manpage_subst_fun(task, text):
 def manpage(ctx, section, source):
 
 	if ctx.env.NTPS_RELEASE:
-		ctx.install_files("${PREFIX}/man%s/" % section, source.replace("-man.txt", ".%s" % section))
+		ctx.install_files("${PREFIX}/man/man%s/" % section, source.replace("-man.txt", ".%s" % section))
 		return
 
 	if not ctx.env.ENABLE_DOC or ctx.env.DISABLE_MANPAGE:
