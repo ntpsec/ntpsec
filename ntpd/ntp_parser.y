@@ -298,6 +298,7 @@
 %type	<Attr_val_fifo>	log_config_list
 %type	<Integer>	misc_cmd_dbl_keyword
 %type	<Integer>	misc_cmd_int_keyword
+%type	<Integer>	misc_cmd_str_keyword
 %type	<Integer>	misc_cmd_str_lcl_keyword
 %type	<Attr_val>	mru_option
 %type	<Integer>	mru_option_keyword
@@ -1123,6 +1124,13 @@ miscellaneous_command
 			av = create_attr_ival($1, $2);
 			APPEND_G_FIFO(cfgt.vars, av);
 		}
+	|	misc_cmd_str_keyword T_String
+		{
+			attr_val *av;
+
+			av = create_attr_sval($1, $2);
+			APPEND_G_FIFO(cfgt.vars, av);
+		}
 	|	misc_cmd_str_lcl_keyword T_String
 		{
 			char error_text[64];
@@ -1196,6 +1204,10 @@ misc_cmd_int_keyword
 			yyerror("Built without LEAP_SMEAR support.");
 #endif
 		}
+	;
+
+misc_cmd_str_keyword
+	:	T_Leapfile
 	;
 
 misc_cmd_str_lcl_keyword
