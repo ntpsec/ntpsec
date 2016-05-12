@@ -972,7 +972,7 @@ nmea_receive(
 		 */
 		rc_date  = parse_weekdata(&gpsw, &rdata, 1, 2, 5)
 		        && parse_date(&date, &rdata, 3, DATE_1_DDMMYY);
-		rc_time  = parse_time(&date, &tofs.tv_nsec, &rdata, REFIDLEN);
+		rc_time  = parse_time(&date, &tofs.tv_nsec, &rdata, 4);
 		pp->leap = parse_qual(&rdata, 11, '0', 1);		
 		rc_date  = rc_date
 		        && gpsfix_century(&date, &gpsw, &up->century_cache);
