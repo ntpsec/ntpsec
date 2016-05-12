@@ -236,7 +236,7 @@ ntpdig_main (
 		opt_logfile = ntp_optarg;
 		break;
 	    case 'M':
-		opt_ntpversion = atoi(ntp_optarg);
+		opt_steplimit = atoi(ntp_optarg);
 		if (opt_steplimit <= 0) {
 			printf("%s: invalid steplimit value!\n", progname);
 			exit(1);
