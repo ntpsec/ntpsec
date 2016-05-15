@@ -282,10 +282,13 @@ The variables operate as follows:
 +rlimit+ [+memlock+ _megabytes_ | +stacksize+ _4kPages_ | +filenum+ _filedescriptors_]::
 
   +memlock+ _megabytes_;;
-    Specify the number of megabytes of memory that can be allocated.
-    Probably only available under Linux, this option is useful when
-    dropping root (the +-i+ option). The default is 32 megabytes.
-    Setting this to zero will prevent any attempt to lock memory.
+    Specify the number of megabytes of memory that should be allocated
+    and locked.  Probably only available under Linux, this option may
+    be useful when dropping root (the <tt>-i</tt> option).  The
+    default is 32 megabytes on non-Linux machines, and -1 under Linux.
+    -1 means "do not lock the process into memory".  0 means "lock
+    whatever memory the process wants into memory". -1 means "don't
+    use locked memory".
   +stacksize+ _4kPages_;;
     Specifies the maximum size of the process stack on systems with the
     mlockall()_function. Defaults to 50 4k pages (200 4k pages in OpenBSD).
