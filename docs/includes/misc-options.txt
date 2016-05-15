@@ -240,7 +240,7 @@ The variables operate as follows:
 +allan+ _allan_;;
     The argument becomes the new value for the minimum Allan intercept,
     which is a parameter of the PLL/FLL clock discipline algorithm. The
-    value in log2 seconds defaults to 7 (1024 s), which is also the
+    value in log2 seconds defaults to 11 (2048 s), which is also the
     lower limit.
   +dispersion+ _dispersion_;;
     The argument becomes the new value for the dispersion increase rate,
