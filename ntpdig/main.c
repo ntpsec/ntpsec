@@ -1365,7 +1365,7 @@ handle_pkt(
 		}
 
 		if (opt_json) {
-		    printf("{\"time\"\"%s\",\"offset\":%f,\"precision\":%f,",
+		    printf("{\"time\":\"%s\",\"offset\":%f,\"precision\":%f,",
 		    	ts_str, offset, synch_distance);
 		    printf("\"host\":\"%s\",\"ip\":\"%s\",",
 			   hostname, stoa(host));
