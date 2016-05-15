@@ -331,8 +331,8 @@ def cmd_configure(ctx, config):
 		"histedit.h",		# Apple
 		("ifaddrs.h", ["sys/types.h"]),
 		"libscf.h",		# Solaris
-		"linux/if_addr.h",
-		"linux/rtnetlink.h",
+		("linux/if_addr.h", ["sys/socket.h"]),
+		("linux/rtnetlink.h", ["sys/socket.h"]),
 		"linux/serial.h",
 		#"linux/seccomp.h",	- Doesn't build yet, investigate
 		"machine/soundcard.h",
