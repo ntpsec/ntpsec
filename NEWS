@@ -8,6 +8,8 @@ on user-visible changes.
 
 == Repository head ==
 
+== 2016-05-17: 0.9.3 ==
+
 The long-deprected Autokey feature has been removed.
 
 This release contains fixes for three vulnerabilities inherited from
