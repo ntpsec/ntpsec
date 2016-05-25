@@ -191,3 +191,35 @@ __________
 
 970318: in hourly_stats(?), squawk if the magnitude of the drift is,
 	say, >400.
+
+
+== Simple Tasks for an intern ==
+
+[quote, ESR 2015-09-30]
+
+* Write C++ required to glue the unit tests under test/ to Unity so they
+  run when 'waf check is called.  (Daniel Franke may be working on this,
+  but it's not a good use of his time - we want him concentrating on vulns
+  and security auditing.)  Requires basic C++ skills.
+
+* In the docs subdirectory, include/command.txt is an HTML passthrough
+  in a not entirely successful attempt to emulate the look of the
+  Mills HTML documentation this directory was made from. It should be
+  cleaned up or replaced.  Requires HTML and CSS skills; intern must
+  be willing to learn asciidoc.
+
+* Similarly, includes/footer.txt is a tabular hack made to resemble
+  the old HTML and should be cleaned up.  Requires HTML and CSS
+  skills; intern must be willing to learn asciidoc
+
+* seccomp sandboxing fails to build under Ubuntu, apparently due to
+  some confusion in the Linux headers.  Investigate and report.
+  Requires basic C skills.
+
+* All Perl should be translated to Python for maintainability. Look
+  under scripts/. Requires Perl and Python skills.  It is possible
+  some of this is no longer useful - Daniel says some of it is in Perl 4!
+
+* In scripts/t/ are, apparently, unit tests for the stuff in scripts/.
+  Some attempt should be made to salvage these. Requires Perl and
+  Python skills.
