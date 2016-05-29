@@ -386,7 +386,7 @@ step_systime(
 		pivot += ntpcal_date_to_time(&jd);
 	} else {
 		msyslog(LOG_ERR,
-			"step-systime: assume 1970-01-01 as build date");
+			"step_systime: assume 1970-01-01 as build date");
 	}
 #else
 	UNUSED_LOCAL(jd);
@@ -422,7 +422,7 @@ step_systime(
 
 	/* now set new system time */
 	if (settime(&timets) != 0) {
-		msyslog(LOG_ERR, "step-systime: %m");
+		msyslog(LOG_ERR, "step_systime: %m");
 		return false;
 	}
 
