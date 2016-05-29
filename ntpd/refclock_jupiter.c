@@ -32,14 +32,8 @@
 #endif
 
 /*
- * This driver supports the Rockwell Jupiter GPS Receiver board
- * adapted to precision timing applications.  It requires the PPS API
- * support. It also requires a gadget box and 1-PPS level converter,
- * such as described in the Pulse-per-second (PPS) Signal Interfacing
- * page.
- *
- * It may work (with minor modifications) with other Rockwell GPS
- * receivers such as the CityTracker.
+ * This driver supports the Rockwell Jupiter GPS engine.
+ * It requires the PPS API support.
  */
 
 /*
