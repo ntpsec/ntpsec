@@ -89,7 +89,7 @@ http://www.gpskit.nl/documents/rockwell/jupiter-gps-board.pdf[GPSKit.nl]
 
 === Configuration ===
 
-The edge of the PPS signal that is on-time can be set with +flag2+.
+The edge of the PPS signal that is on-time can be set with +flag3+.
 There is currently no way to cause the +PPS+ signal to control the
 kernel +PLL+.
 
