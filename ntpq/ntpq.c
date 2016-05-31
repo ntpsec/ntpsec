@@ -542,8 +542,8 @@ ntpqmain(
 			break;
 		    default :
 			/* chars not in table get converted to ? */
-			printf("Unknown command line switch ignored.\n");
-			break;
+			printf("Command line switch ignored or missing an argument.\n");
+			exit(1);
 		    } /*switch*/
 		}
 
