@@ -1260,9 +1260,10 @@ process_packet(
 		peer->flash |= BOGON7;		/* bad header */
 
 	/*
-	 * If any tests fail at this point, the packet is discarded.
-	 * Note that some flashers may have already been set in the
-	 * receive() routine.
+	 * If any tests have failed at this point, the packet is
+	 * discarded.  Note that this check covers both the bits that
+	 * may have been set immediately above, as well as some that
+	 * may have been set earlier in the receive() routine.
 	 */
 	if (peer->flash & PKT_BOGON_MASK) {
 		peer->seldisptoolarge++;
