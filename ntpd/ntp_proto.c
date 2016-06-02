@@ -1237,8 +1237,6 @@ process_packet(
 
 	UNUSED_ARG(len);
 
-	sys_processed++;
-	peer->processed++;
 	p_del = FPTOD(NTOHS_FP(pkt->rootdelay));
 	p_offset = 0;
 	p_disp = FPTOD(NTOHS_FP(pkt->rootdisp));
@@ -1250,6 +1248,35 @@ process_packet(
 	pleap = PKT_LEAP(pkt->li_vn_mode);
 	pversion = PKT_VERSION(pkt->li_vn_mode);
 	pstratum = PKT_TO_STRATUM(pkt->stratum);
+
+	/*
+	 * Verify the server is synchronized; that is, the leap bits,
+	 * stratum and root distance are valid.
+	 */
+	if (pleap == LEAP_NOTINSYNC ||		/* test 6 */
+	    pstratum < sys_floor || pstratum >= sys_ceiling)
+		peer->flash |= BOGON6;		/* bad synch or strat */
+	if (p_del / 2 + p_disp >= MAXDISPERSE)	/* test 7 */
+		peer->flash |= BOGON7;		/* bad header */
+
+	/*
+	 * If any tests fail at this point, the packet is discarded.
+	 * Note that some flashers may have already been set in the
+	 * receive() routine.
+	 */
+	if (peer->flash & PKT_BOGON_MASK) {
+		peer->seldisptoolarge++;
+#ifdef DEBUG
+		if (debug)
+			printf("packet: flash header %04x\n",
+			    peer->flash);
+#endif
+		return;
+	}
+
+	sys_processed++;
+	peer->processed++;
+
 	if (peer->outcount) peer->outcount--;  /* dup, peer with shorter poll */
 
 	/*
@@ -1286,31 +1313,6 @@ process_packet(
 			peer->nextdate = current_time;
 	}
 	poll_update(peer, peer->hpoll);
-
-	/*
-	 * Verify the server is synchronized; that is, the leap bits,
-	 * stratum and root distance are valid.
-	 */
-	if (pleap == LEAP_NOTINSYNC ||		/* test 6 */
-	    pstratum < sys_floor || pstratum >= sys_ceiling)
-		peer->flash |= BOGON6;		/* bad synch or strat */
-	if (p_del / 2 + p_disp >= MAXDISPERSE)	/* test 7 */
-		peer->flash |= BOGON7;		/* bad header */
-
-	/*
-	 * If any tests fail at this point, the packet is discarded.
-	 * Note that some flashers may have already been set in the
-	 * receive() routine.
-	 */
-	if (peer->flash & PKT_BOGON_MASK) {
-		peer->seldisptoolarge++;
-#ifdef DEBUG
-		if (debug)
-			printf("packet: flash header %04x\n",
-			    peer->flash);
-#endif
-		return;
-	}
 
 	/*
 	 * If the peer was previously unreachable, raise a trap. In any
