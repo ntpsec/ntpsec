@@ -157,7 +157,7 @@ static void	library_unexpected_error(const char *, int,
 #endif	/* !SIM */
 
 
-#define ALL_OPTIONS "46aAbc:dD:f:gGi:I:k:l:LmMnNp:PqQ:r:Rs:t:u:UVw:xyYzZ"
+#define ALL_OPTIONS "46aAbc:dD:f:gGhi:I:k:l:LmMnNp:PqQ:r:Rs:t:u:UVw:xyYzZ"
 static const struct option longoptions[] = {
     { "ipv4",		    0, 0, '4' },
     { "ipv6",		    0, 0, '6' },
@@ -170,6 +170,7 @@ static const struct option longoptions[] = {
     { "ipv4",		    0, 0, '4' },
     { "driftile",	    1, 0, 'f' },
     { "panicgate",	    0, 0, 'g' },
+    { "help",	            0, 0, 'h' },
     { "jaildir",	    1, 0, 'i' },
     { "interface",	    1, 0, 'I' },
     { "keyfile",	    1, 0, 'k' },
@@ -194,6 +195,56 @@ static const struct option longoptions[] = {
     { NULL,                 0, 0, '\0'}, 
 };
 
+static void ntpd_usage(void)
+{
+#define P(x)	fputs(x, stderr)
+    P("USAGE:  ntpd [ -<flag> [<val>] | --<name>[{=| }<val>] ]...\n");
+    P("  Flg Arg Option-Name    Description\n");
+    P("   -4 no  ipv4           Force IPv4 DNS name resolution\n");
+    P("				- prohibits the option 'ipv6'\n");
+    P("   -6 no  ipv6           Force IPv6 DNS name resolution\n");
+    P("				- prohibits the option 'ipv4'\n");
+    P("   -a no  authreq        Require crypto authentication\n");
+    P("				- prohibits the option 'authnoreq'\n");
+    P("   -A no  authnoreq      Do not require crypto authentication\n");
+    P("				- prohibits the option 'authreq'\n");
+    P("   -b no  bcastsync      Allow us to sync to broadcast servers\n");
+    P("   -c Str configfile     configuration file name\n");
+    P("   -d no  debug-level    Increase output debug message level\n");
+    P("				- may appear multiple times\n");
+    P("   -D Str set-debug-level Set the output debug message level\n");
+    P("				- may appear multiple times\n");
+    P("   -f Str driftfile      frequency drift file name\n");
+    P("   -g no  panicgate      Allow the first adjustment to be Big\n");
+    P("				- may appear multiple times\n");
+    P("   -h no  --help         Display usage summary of options and exit.\n"); 
+    P("   -i Str jaildir        Jail directory\n");
+    P("   -I Str interface      Listen on an interface name or address\n");
+    P("				- may appear multiple times\n");
+    P("   -k Str keyfile        path to symmetric keys\n");
+    P("   -l Str logfile        path to the log file\n");
+    P("   -L no  novirtualips   Do not listen to virtual interfaces\n");
+    P("   -n no  nofork         Do not fork\n");
+    P("   -N no  nice           Run at high priority\n");
+    P("   -p Str pidfile        path to the PID file\n");
+    P("   -P Num priority       Process priority\n");
+    P("   -q no  quit           Set the time and quit\n");
+    P("   -r Str propagationdelay Broadcast/propagation delay\n");
+    P("      Str saveconfigquit Save parsed configuration and quit\n");
+    P("   -s Str statsdir       Statistics file location\n");
+    P("   -t Str trustedkey     Trusted key number\n");
+    P("				- may appear multiple times\n");
+    P("   -u Str user           Run as userid (or userid:groupid)\n");
+    P("   -U Num uinterval      interval in secs between scans for new or dropped interfaces\n");
+    P("      Str var            make ARG an ntp variable (RW)\n");
+    P("				- may appear multiple times\n");
+    P("      Str dvar           make ARG an ntp variable (RW|DEF)\n");
+    P("				- may appear multiple times\n");
+    P("   -x no  slew           Slew up to 600 seconds\n");
+    P("   -V no  version        Output version information and exit\n");
+    P("   -? no  help           Display extended usage information and exit\n");
+#undef P
+}
 
 static void
 parse_cmdline_opts(
@@ -249,6 +300,10 @@ parse_cmdline_opts(
 		break;
 	    case 'G':
 		force_step_once = true;
+		break;
+	    case 'h':
+		ntpd_usage();
+		exit(0);
 		break;
 	    case 'i':
 #ifdef ENABLE_DROPROOT
