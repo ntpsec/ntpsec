@@ -8,6 +8,14 @@ on user-visible changes.
 
 == Repository head ==
 
+This release contains a fix for one vulnerability inherited from
+NTP Classic:
+
+[Bug 3044] (CVE-2016-4954) Processing spoofed server packets
+
+https://lists.ntpsec.org/pipermail/devel/2016-June/001299.html provides
+additional information on this issue.
+
 == 2016-05-17: 0.9.3 ==
 
 The long-deprected Autokey feature has been removed.
