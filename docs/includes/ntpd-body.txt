@@ -6,7 +6,7 @@
 == SYNOPSIS ==
 [verse]
 {ntpd}
-    [-46aAbgLmnNqx ] [ -c 'conffile' ] [ -f 'driftfile' ] [ -i 'jaildir' ]
+    [-46aAbghLmnNqx ] [ -c 'conffile' ] [ -f 'driftfile' ] [ -i 'jaildir' ]
     [ -k 'keyfile' ] [ -l 'logfile' ] [ -p 'pidfile' ] [ -P 'priority' ]
     [ -r 'broadcast-delay' ]  [ -s 'statsdir' ]  [ -t  'key' ]
     [ -u 'user'[:'group'] ] [ -U 'interface_update_interval' ]
@@ -126,6 +126,9 @@ this can happen only once. If the threshold is exceeded after that,
 +{ntpd}+ will exit with a message to the system log. This option can be
 used with the +-q+ and +-x+ options. See the _tinker_ configuration
 file directive for other options.
+
++-h+, +--help+::
+  Print a usage message summarizing options end exit.
 
 +-G+, +--force-step-once+::
   Step any initial offset correction..

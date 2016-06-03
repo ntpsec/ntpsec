@@ -4,7 +4,7 @@
 
 == Synopsis ==
 
-+{ntpq}+ [+-46dinpw+] [+-c+ 'command'] ['host'] [...]
++{ntpq}+ [+-46dhinpw+] [+-c+ 'command'] ['host'] [...]
 
 == Description ==
 
@@ -67,7 +67,7 @@ attempt to read interactive format commands from the standard input.
 +-D+ num, +--set-debug-level+=num::
   The debug level is set to the following numeric argument.
 +-h+, +--help+::
-  Print a usage message summarizing options.
+  Print a usage message summarizing options end exit.
 +-i+, +--interactive+::
   Force +{ntpq}+ to operate in interactive mode. Prompts will be written
   to the standard output and commands read from the standard input.
