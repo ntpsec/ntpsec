@@ -411,6 +411,7 @@ static const struct option longoptions[] = {
     { "command",	    1, 0, 'c' },
     { "debug",		    0, 0, 'd' },
     { "set-debug-level",    1, 0, 'D' },
+    { "help",               0, 0, 'h' },
     { "interactive",        0, 0, 'i' },
     { "numeric",            0, 0, 'n' },
     { "old-rv",             0, 0, 'O' },
@@ -443,6 +444,36 @@ main(
 #endif
 
 #ifndef BUILD_AS_LIB
+static void ntpq_usage(void)
+{
+#define P(x)	fputs(x, stderr)
+    P("USAGE: ntpq [-46dphinOV] [-c str] [-D lvl] [ host ...]\n");
+    P("  Flg Arg Option-Name    Description\n");
+    P("   -4 no  ipv4           Force IPv4 DNS name resolution\n");
+    P("				- prohibits the option 'ipv6'\n");
+    P("   -6 no  ipv6           Force IPv6 DNS name resolution\n");
+    P("				- prohibits the option 'ipv4'\n");
+    P("   -c Str command        run a command and exit\n");
+    P("				- may appear multiple times\n");
+    P("   -d no  debug-level    Increase output debug message level\n");
+    P("				- may appear multiple times\n");
+    P("   -D Str set-debug-level Set the output debug message level\n");
+    P("				- may appear multiple times\n");
+    P("   -h no  help           Print a usage message.\n");
+    P("   -p no  peers          Print a list of the peers\n");
+    P("				- prohibits the option 'interactive'\n");
+    P("   -i no  interactive    Force ntpq to operate in interactive mode\n");
+    P("				- prohibits these options:\n");
+    P("				command\n");
+    P("				peers\n");
+    P("   -n no  numeric        numeric host addresses\n");
+    P("   -O no  old-rv         Always output status line with readvar\n");
+    P("   -V opt version        Output version information and exit\n");
+    P("   -w no  wide           enable wide display of addresses\n");
+#undef P
+}
+
+
 int
 ntpqmain(
 	int argc,
@@ -522,6 +553,10 @@ ntpqmain(
 			debug = atoi(ntp_optarg);
 #endif
 			break;
+		    case 'h':
+			ntpq_usage();
+			exit(0);
+			break;
 		    case 'i':
 			opt_interactive = true;
 			break;
@@ -540,9 +575,10 @@ ntpqmain(
 		    case 'w':
 			opt_wide = true;
 			break;
-		    default :
+		    default:
 			/* chars not in table get converted to ? */
 			printf("Unknown command line switch or missing argument.\n");
+			ntpq_usage();
 			exit(1);
 		    } /*switch*/
 		}
