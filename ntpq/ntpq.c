@@ -404,7 +404,7 @@ void clear_globals(void)
 #endif /* !BUILD_AS_LIB */
 #endif /* NO_MAIN_ALLOWED */
 
-#define ALL_OPTIONS "46c:dD:inOpVw"
+#define ALL_OPTIONS "46c:dhD:inOpVw"
 static const struct option longoptions[] = {
     { "ipv4",		    0, 0, '4' },
     { "ipv6",		    0, 0, '6' },
