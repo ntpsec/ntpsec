@@ -119,7 +119,7 @@ int  gettimeofday_cached(struct event_base *b, struct timeval *tv);
 
 #define EXIT_SOFTWARE	70
 
-#define ALL_OPTIONS "46a:b:c:dD:g:jK:k:l:M:o:rSst:VwW"
+#define ALL_OPTIONS "46a:b:c:dD:g:hjK:k:l:M:o:rSst:VwW"
 static const struct option longoptions[] = {
     { "ipv4",		    0, 0, '4' },
     { "ipv6",		    0, 0, '6' },
@@ -129,6 +129,7 @@ static const struct option longoptions[] = {
     { "debug",		    0, 0, 'd' },
     { "set-debug-level",    1, 0, 'D' },
     { "gap",                1, 0, 'g' },
+    { "help",               9, 0, 'h' },
     { "kod",                1, 0, 'K' },
     { "json",               1, 0, 'j' },
     { "keyfile",            1, 0, 'k' },
@@ -160,6 +161,37 @@ static bool opt_usereservedport;
 static bool opt_step =false, opt_slew = false;
 static float opt_timeout = 5.0;
 static int opt_wait = false;
+
+static void ntpdig_usage(void)
+{
+#define P(x)	fputs(x, stderr)
+    P("USAGE:  sntp [ -<flag> [<val>] | --<name>[{=| }<val>] ]...");
+    P("		[ hostname-or-IP ...]");
+    P("  Flg Arg Option-Name    Description");
+    P("   -4 no  ipv4           Force IPv4 DNS name resolution");
+    P("				- prohibits the option 'ipv6'");
+    P("   -6 no  ipv6           Force IPv6 DNS name resolution");
+    P("				- prohibits the option 'ipv4'");
+    P("   -d no  normalverbose  Normal verbose");
+    P("   -K Str kod            KoD history filename");
+    P("   -p no  syslog         Logging with syslog");
+    P("				- prohibits the option 'logfile'");
+    P("   -l Str logfile        Log to specified logfile");
+    P("				- prohibits the option 'syslog'");
+    P("   -s no  settod         Set (step) the time with settimeofday()");
+    P("				- prohibits the option 'adjtime'");
+    P("   -j no  adjtime        Set (slew) the time with adjtime()");
+    P("				- prohibits the option 'settod'");
+    P("   -b Str broadcast      Use broadcasts to the address specified for synchronisation");
+    P("   -t Num timeout        Specify seconds to wait for broadcasts");
+    P("   -a Num authentication Enable authentication with the numbered key");
+    P("   -k Str keyfile        Specify a keyfile. SNTP will look in this file");
+    P("                         for the key specified with -a");
+    P("   -V no version         Output version information and exit");
+    P("   -h no  help           Display extended usage information and exit");
+#undef P
+}
+
 
 /*
  * The actual main function.
@@ -222,6 +254,9 @@ ntpdig_main (
 			exit(1);
 		}
 		break;
+	    case 'h':
+		ntpdig_usage();
+		exit(0);
 	    case 'j':
 		opt_json = true;
 		syslogit = false;
@@ -264,7 +299,10 @@ ntpdig_main (
 		opt_wait = false;
 		break;
 	    default :
-		break;
+		/* chars not in table get converted to ? */
+		fputs("Unknown command line switch or missing argument.\n", stderr);
+		ntpdig_usage();
+		exit(1);
 	    } /*switch*/
 	}
 

@@ -107,17 +107,25 @@ few will be user-visible:
 * The +sntp+ program has been renamed +{ntpdig}+ in order to make
   NTP installables have a uniform name prefix and take up less
   namespace. Also, +ntp-keygen+ is now +{ntpkeygen}+, +ntp-wait+
-  is {ntpwait}, and +update-leap+ is now +ntpleapfetch+.
+  is {ntpwait}, and +update-leap+ is now +{ntpleapfetch}+.
 
 * A new utility, {ntpfrob}, collects several small diagnostic functions
   for reading and tweaking the local clock hardware, including reading
   the clock tick rate, precision, and jitter. Part of it formerly
   traveled as +tickadj+.
 
-* The deprecated ntpdate program has been replaced with a shell
-  wrapper around {ntpdig}.
+* The deprecated and vulnerability-prone ntpdate program has been
+  replaced with a shell wrapper around {ntpdig}.  Its -e and -p
+  options are not implemented. It is no longer documented, but can be
+  found in the util/ directory of the source distribution.
 
 * Log timestamps look a little different; they are now in ISO8601 format.
+
+* The -!m, ->, and -< options of some Classic commands are not
+  supported.  (The argument-parsing framework code that implemented
+  them in Classic was overcomplicated and buggy and had to be removed.)
+
+* The shortname of --help options is now -h, not -?
 
 * As noted above, Autokey is not supported; that code has been removed.
 

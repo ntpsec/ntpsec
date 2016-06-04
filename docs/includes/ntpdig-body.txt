@@ -58,9 +58,8 @@ reports whether ntpdig adjusted the time.
 
 == OPTIONS ==
 
-//+-?, --help+::
-//  displays usage information. The short form typically requires shell
-//  quoting, such as +-\?+, otherwise +?+ is consumed by the shell.
++-h, --help+::
+  Displays usage information and exits.
 
 +-4+, +--ipv4+::
   Force IPv4 DNS name resolution. This option must not appear in
