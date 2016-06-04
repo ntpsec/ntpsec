@@ -242,7 +242,7 @@ static void ntpd_usage(void)
     P("				- may appear multiple times\n");
     P("   -x no  slew           Slew up to 600 seconds\n");
     P("   -V no  version        Output version information and exit\n");
-    P("   -? no  help           Display extended usage information and exit\n");
+    P("   -h no  help           Display extended usage information and exit\n");
 #undef P
 }
 
@@ -304,7 +304,6 @@ parse_cmdline_opts(
 	    case 'h':
 		ntpd_usage();
 		exit(0);
-		break;
 	    case 'i':
 #ifdef ENABLE_DROPROOT
 		droproot = true;
@@ -450,8 +449,10 @@ parse_cmdline_opts(
 	    case 'Z':
 		/* defer */
 		break;
-	    default :
-		break;
+	    default:
+		fputs("Unknown command line switch or missing argument.\n", stderr);
+		ntpd_usage();
+		exit(1);
 	    } /*switch*/
 	}
 

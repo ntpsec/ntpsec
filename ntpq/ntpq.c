@@ -577,7 +577,7 @@ ntpqmain(
 			break;
 		    default:
 			/* chars not in table get converted to ? */
-			printf("Unknown command line switch or missing argument.\n");
+			fputs("Unknown command line switch or missing argument.\n", stderr);
 			ntpq_usage();
 			exit(1);
 		    } /*switch*/
