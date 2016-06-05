@@ -21,8 +21,8 @@ and +kerninfo+ command.
 
 //FIXME: Is this all modern Unix kernels?  Probably.
 This program is useful only with special kernels described in the
-link:kern.html[A Kernel Model for Precision Timekeeping] page. 
-system call.
+link:kern.html[A Kernel Model for Precision Timekeeping]
+page, featuring the adjtimex(2) system call or local equivalent. 
 
 == Options ==
 
