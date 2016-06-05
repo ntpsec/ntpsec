@@ -569,6 +569,7 @@ ntpqmain(
 			break;
 		    case 'p':
 			opt_peers = true;
+			ADDCMD("peers");
 			break;
 		    case 'V':
 			printf("ntpd %s\n", Version);
@@ -599,9 +600,6 @@ ntpqmain(
 		ai_fam_templ = AF_INET6;
 	else
 		ai_fam_templ = ai_fam_default;
-
-	if (opt_peers)
-		ADDCMD("peers");
 
 	if (opt_interactive)
 		interactive = true;
