@@ -542,6 +542,7 @@ ntpqmain(
 			break;
 		    case 'c':
 			opt_command = ntp_optarg;
+			ADDCMD(opt_command);
 			break;
 		    case 'd':
 #ifdef DEBUG
@@ -598,9 +599,6 @@ ntpqmain(
 		ai_fam_templ = AF_INET6;
 	else
 		ai_fam_templ = ai_fam_default;
-
-	if (opt_command != NULL)
-		ADDCMD(opt_command);
 
 	if (opt_peers)
 		ADDCMD("peers");
