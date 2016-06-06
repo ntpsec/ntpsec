@@ -39,7 +39,7 @@
 
 * Can the KERNEL_PLL code be removed? It's used by drivers 4, 8, 20, 22, and
   30, but Hal thinks it may no longer have a point since processors are much
-  faster and schedulers smoother than whem it was built.  Might remove the
+  faster and schedulers smoother than when it was built.  Might remove the
   need for adjtimex(2). We need to collect statistics on builds with and
   without the PLL to see if it's actually a win.
 
