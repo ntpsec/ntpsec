@@ -572,7 +572,7 @@ ntpqmain(
 			ADDCMD("peers");
 			break;
 		    case 'V':
-			printf("ntpd %s\n", Version);
+			printf("ntpq %s\n", Version);
 			exit(0);
 		    case 'w':
 			opt_wide = true;
