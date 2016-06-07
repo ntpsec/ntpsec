@@ -414,6 +414,10 @@ step_systime(
 	get_ostime(&timets);
 	fp_sys = tspec_stamp_to_lfp(timets);
 
+	/* only used for utmp/wtmpx time-step recording */
+	tvlast.tv_sec = timets.tv_sec;
+	tvlast.tv_usec = (timets.tv_nsec + 500) / 1000;
+
 	/* get the target time as l_fp */
 	L_ADD(&fp_sys, &fp_ofs);
 
@@ -498,7 +502,6 @@ step_systime(
 # undef NTIME_MSG
 #endif
 	}
-	tvlast = timetv;
 	return true;
 }
 
