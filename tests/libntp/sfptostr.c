@@ -28,7 +28,8 @@ TEST(sfptostr, PositiveInteger) {
 }
 
 TEST(sfptostr, NegativeInteger) {
-	s_fp test = -200 << 16; // exact -200.000000
+	/* Mask to avoid warnings.  See issue #71 */
+	s_fp test = (-200 & 0xffff)  << 16; // exact -200.000000
 
 	TEST_ASSERT_EQUAL_STRING("-200.000000", fptoa(test, SFP_MAX_PRECISION));
 	TEST_ASSERT_EQUAL_STRING("-200000.000", fptoms(test, SFP_MAX_PRECISION));
@@ -42,7 +43,7 @@ TEST(sfptostr, PositiveIntegerPositiveFraction) {
 }
 
 TEST(sfptostr, NegativeIntegerNegativeFraction) {
-	s_fp test = (-200 << 16) - (1 << 15); // -200 - 0.5
+	s_fp test = ((-200 & 0xffff) << 16) - (1 << 15); // -200 - 0.5
 
 	TEST_ASSERT_EQUAL_STRING("-200.500000", fptoa(test, SFP_MAX_PRECISION));
 	TEST_ASSERT_EQUAL_STRING("-200500.000", fptoms(test, SFP_MAX_PRECISION));
@@ -56,7 +57,7 @@ TEST(sfptostr, PositiveIntegerNegativeFraction) {
 }
 
 TEST(sfptostr, NegativeIntegerPositiveFraction) {
-	s_fp test = (-200 << 16) + (1 << 14)*3; // -200 + 0.75
+	s_fp test = ((-200 & 0xffff) << 16) + (1 << 14)*3; // -200 + 0.75
 
 	TEST_ASSERT_EQUAL_STRING("-199.250000", fptoa(test, SFP_MAX_PRECISION));
 	TEST_ASSERT_EQUAL_STRING("-199250.000", fptoms(test, SFP_MAX_PRECISION));
