@@ -165,30 +165,30 @@ static int opt_wait = false;
 static void ntpdig_usage(void)
 {
 #define P(x)	fputs(x, stderr)
-    P("USAGE:  sntp [ -<flag> [<val>] | --<name>[{=| }<val>] ]...");
-    P("		[ hostname-or-IP ...]");
-    P("  Flg Arg Option-Name    Description");
-    P("   -4 no  ipv4           Force IPv4 DNS name resolution");
-    P("				- prohibits the option 'ipv6'");
-    P("   -6 no  ipv6           Force IPv6 DNS name resolution");
-    P("				- prohibits the option 'ipv4'");
-    P("   -d no  normalverbose  Normal verbose");
-    P("   -K Str kod            KoD history filename");
-    P("   -p no  syslog         Logging with syslog");
-    P("				- prohibits the option 'logfile'");
-    P("   -l Str logfile        Log to specified logfile");
-    P("				- prohibits the option 'syslog'");
-    P("   -s no  settod         Set (step) the time with settimeofday()");
-    P("				- prohibits the option 'adjtime'");
-    P("   -j no  adjtime        Set (slew) the time with adjtime()");
-    P("				- prohibits the option 'settod'");
-    P("   -b Str broadcast      Use broadcasts to the address specified for synchronisation");
-    P("   -t Num timeout        Specify seconds to wait for broadcasts");
-    P("   -a Num authentication Enable authentication with the numbered key");
-    P("   -k Str keyfile        Specify a keyfile. SNTP will look in this file");
-    P("                         for the key specified with -a");
-    P("   -V no version         Output version information and exit");
-    P("   -h no  help           Display extended usage information and exit");
+    P("USAGE:  sntp [ -<flag> [<val>] | --<name>[{=| }<val>] ]...\n");
+    P("		[ hostname-or-IP ...]\n");
+    P("  Flg Arg Option-Name    Description\n");
+    P("   -4 no  ipv4           Force IPv4 DNS name resolution\n");
+    P("				- prohibits the option 'ipv6'\n");
+    P("   -6 no  ipv6           Force IPv6 DNS name resolution\n");
+    P("				- prohibits the option 'ipv4'\n");
+    P("   -d no  normalverbose  Normal verbose\n");
+    P("   -K Str kod            KoD history filename\n");
+    P("   -p no  syslog         Logging with syslog\n");
+    P("				- prohibits the option 'logfile'\n");
+    P("   -l Str logfile        Log to specified logfile\n");
+    P("				- prohibits the option 'syslog'\n");
+    P("   -s no  settod         Set (step) the time with settimeofday()\n");
+    P("				- prohibits the option 'adjtime'\n");
+    P("   -j no  adjtime        Set (slew) the time with adjtime()\n");
+    P("				- prohibits the option 'settod'\n");
+    P("   -b Str broadcast      Use broadcasts to the address specified for synchronisation\n");
+    P("   -t Num timeout        Specify seconds to wait for broadcasts\n");
+    P("   -a Num authentication Enable authentication with the numbered key\n");
+    P("   -k Str keyfile        Specify a keyfile. SNTP will look in this file\n");
+    P("                         for the key specified with -a\n");
+    P("   -V no version         Output version information and exit\n");
+    P("   -h no  help           Display extended usage information and exit"\n);
 #undef P
 }
 
