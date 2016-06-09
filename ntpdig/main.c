@@ -188,7 +188,7 @@ static void ntpdig_usage(void)
     P("   -k Str keyfile        Specify a keyfile. SNTP will look in this file\n");
     P("                         for the key specified with -a\n");
     P("   -V no version         Output version information and exit\n");
-    P("   -h no  help           Display extended usage information and exit"\n);
+    P("   -h no  help           Display extended usage information and exit\n");
 #undef P
 }
 
