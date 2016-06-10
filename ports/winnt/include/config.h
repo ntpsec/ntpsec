@@ -246,7 +246,6 @@ typedef int socklen_t;
 #define TYPEOF_IP_MULTICAST_LOOP	BOOL
 #define SETSOCKOPT_ARG_CAST		(const char *)
 #define HAVE_RANDOM 
-#define SAVECONFIG			1
 
 /*
  * Multimedia timer enable

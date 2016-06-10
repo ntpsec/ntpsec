@@ -202,12 +202,6 @@ conds' | +initalloc+ 'count' | +initmem+ 'kilobytes' | +incalloc+ 'count' | +inc
   Reset one or more groups of counters maintained by {ntpd} and exposed by
   +{ntpq}+.
 
-+saveconfigdir+ 'directory_path'::
-  Specify the directory in which to write configuration snapshots
-  requested with +{ntpq}+'s 'saveconfig' command.  If +saveconfigdir+
-  does not appear in the configuration file, saveconfig requests are
-  rejected by {ntpd}.
-
 +setvar+ _variable_ [_default_]::
   This command adds an additional system variable. These variables can
   be used to distribute additional information such as the access

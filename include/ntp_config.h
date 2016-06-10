@@ -20,18 +20,6 @@
 # endif /* SYS_WINNT */
 #endif /* not CONFIG_FILE */
 
-
-/*
- * We keep config trees around for possible saveconfig use.  When
- * built with configure --disable-saveconfig, and when built with
- * debugging enabled, include the free_config_*() routines.  In the
- * DEBUG case, they are used in an atexit() cleanup routine to make
- * postmortem leak check reports more interesting.
- */
-#if !defined(FREE_CFG_T) && (!defined(SAVECONFIG) || defined(DEBUG))
-#define FREE_CFG_T
-#endif
-
 /* Limits */
 #define MAXLINE 1024
 
@@ -310,13 +298,6 @@ extern struct REMOTE_CONFIG_INFO remote_config;
 void config_remotely(sockaddr_u *);
 
 extern bool have_interface_option;
-extern bool saveconfigquit;
-extern const char *saveconfigfile;
-
-#ifdef SAVECONFIG
-int dump_config_tree(config_tree *ptree, FILE *df, bool comment);
-int dump_all_config_trees(FILE *df, bool comment);
-#endif
 
 void ntp_rlimit(int, rlim_t, int, const char *);
 

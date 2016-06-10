@@ -120,8 +120,8 @@ int main(
 			fprintf(stderr,
 				"%s: unable to start as service:\n"
 				"%s\n"
-				"Use -d, -q, -n, -?, --help or "
-				"--saveconfigquit to run "
+				"Use -d, -q, -n, -?, --help "
+				"to run "
 				"interactive.\n",
 				argv[0], ntp_strerror(rc));
 		}

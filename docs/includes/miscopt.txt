@@ -10,7 +10,6 @@
 * link:miscopt.html#mru[mru - control monitor MRU list limits]
 * link:miscopt.html#phone[phone - specify modem phone numbers]
 * link:miscopt.html#reset[reset - reset groups of counters]
-* link:miscopt.html#saveconfigdir[saveconfigdir - specify saveconfig directory]
 * link:miscopt.html#setvar[setvar - set system variables]
 * link:miscopt.html#tinker[tinker - modify sacred system parameters (dangerous)]
 * link:miscopt.html#rlimit[rlimit - alters certain process storage allocation limits]

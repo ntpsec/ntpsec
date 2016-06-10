@@ -31,7 +31,6 @@ def options_cmd(ctx, config):
 	grp.add_option('--list', action='store_true', default=False, help="List available Refclocks")
 
 	grp = ctx.add_option_group("NTP developer configure options")
-	grp.add_option('--enable-saveconfig', action='store_true', help="Enable configuration saving on exit.")
 	grp.add_option('--build-version-tag', type='string', help="Append a tag to the version string.")
 	grp.add_option('--cflags', type='string', action="callback", callback=callback_flags, help="Users should use CFLAGS in their environment.")
 	grp.add_option('--ldflags', type='string', action="callback", callback=callback_flags, help="Users should use LDFLAGS in their environment.")

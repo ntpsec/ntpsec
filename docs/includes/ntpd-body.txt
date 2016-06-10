@@ -221,21 +221,13 @@ specified _sched_setscheduler(SCHED_FIFO)_ priority.
 
 +-q+, +--quit+::
   Set the time and quit. This option must not appear in combination with
-  any of the following options: saveconfigquit, wait-sync.
+  wait-sync.
 +
 +{ntpd}+ will not daemonize and will exit after the clock is first
 synchronized. This behavior mimics that of the old _ntpdate_ program,
 which has been replaced with a shell script. The +-g+ and +-x+ options can be
 used with this option. Note: The kernel time discipline is disabled
 with this option.
-
-+-Q+, +--saveconfigquit+=_string_::
-  Save parsed configuration and quit. This option must not appear in
-  combination with any of the following options: quit, wait-sync.
-+
-Cause +{ntpd}+ to parse its startup configuration file and save an
-equivalent to the given filename and exit. This option was designed
-for automated testing.
 
 +-r+ string, +--propagationdelay+=_string_::
   Broadcast/propagation delay.
@@ -278,8 +270,8 @@ between scans.
 
 +-w+ number, +--wait-sync+=_number_::
   Seconds to wait for first clock sync. This option must not appear in
-  combination with any of the following options: nofork, quit,
-  saveconfigquit. This option takes an integer number as its argument.
+  combination with any of the following options: nofork, quit.
+  This option takes an integer number as its argument.
 +
 If greater than zero, alters +{ntpd}+'s behavior when forking to
 daemonize. Instead of exiting with status 0 immediately after the

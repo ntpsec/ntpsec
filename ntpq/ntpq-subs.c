@@ -66,7 +66,6 @@ static	void	doopeers	(int, FILE *, int);
 static	void	opeers		(struct parse *, FILE *);
 static	void	lopeers 	(struct parse *, FILE *);
 static	void	config		(struct parse *, FILE *);
-static	void	saveconfig	(struct parse *, FILE *);
 static	void	config_from_file(struct parse *, FILE *);
 static	void	mrulist		(struct parse *, FILE *);
 static	void	ifstats		(struct parse *, FILE *);
@@ -82,9 +81,6 @@ static	void	timerstats	(struct parse *, FILE *);
  * Commands we understand.	Ntpdc imports this.
  */
 struct xcmd opcmds[] = {
-	{ "saveconfig", saveconfig, { NTP_STR, NO, NO, NO },
-		{ "filename", "", "", ""}, 
-		"save ntpd configuration to file, . for current config file"},
 	{ "associations", associations, {  NO, NO, NO, NO },
 	  { "", "", "", "" },
 	  "print list of association ID's and statuses for the server's peers" },
@@ -1368,38 +1364,6 @@ lpassociations(
 {
 	UNUSED_ARG(pcmd);
 	printassoc(1, fp);
-}
-
-
-/*
- *  saveconfig - dump ntp server configuration to server file
- */
-static void
-saveconfig(
-	struct parse *pcmd,
-	FILE *fp
-	)
-{
-	const char *datap;
-	int res;
-	int dsize;
-	u_short rstatus;
-
-	if (0 == pcmd->nargs)
-		return;
-	
-	res = doquery(CTL_OP_SAVECONFIG, 0, 1,
-		      strlen(pcmd->argval[0].string),
-		      pcmd->argval[0].string, &rstatus, &dsize,
-		      &datap);
-
-	if (res != 0)
-		return;
-
-	if (0 == dsize)
-		fprintf(fp, "(no response message, curiously)");
-	else
-		fprintf(fp, "%.*s", dsize, datap);
 }
 
 

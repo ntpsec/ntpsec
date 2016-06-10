@@ -386,16 +386,6 @@ displayed.
 +reslist+::
   Show the access control (restrict) list for +{ntpq}+.
 
-+saveconfig+ 'filename'::
-  Write the current configuration, including any runtime modifications
-  given with +:config+ or +config-from-file+, to the {ntpd} host's file
-  _filename_. This command will be rejected by the server unless
-  link:miscopt.html#saveconfigdir[saveconfigdir] appears in the +{ntpd}+
-  configuration file. _filename_ can use strftime() format specifies to
-  substitute the current date and time, for example,
-  +saveconfig ntp-%Y%m%d-%H%M%S.conf+. The filename used is stored in
-  system variable +savedconfig+. Authentication is required.
-
 +timerstats+::
   Display interval timer counters.
 

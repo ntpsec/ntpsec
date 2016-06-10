@@ -59,7 +59,6 @@ struct ntp_control {
 #define	CTL_OP_SETTRAP		6	/* set trap address */
 #define	CTL_OP_ASYNCMSG		7	/* asynchronous message */
 #define CTL_OP_CONFIGURE	8	/* runtime configuration */
-#define CTL_OP_SAVECONFIG	9	/* save config to file */
 #define CTL_OP_READ_MRU		10	/* retrieve MRU (mrulist) */
 #define CTL_OP_READ_ORDLIST_A	11	/* ordered list req. auth. */
 #define CTL_OP_REQ_NONCE	12	/* request a client nonce */

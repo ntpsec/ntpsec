@@ -4,7 +4,7 @@ use warnings;
 use Carp;
 use Exporter qw(import);
 our @EXPORT_OK = qw(OP_UNSPEC OP_READSTAT OP_READVAR OP_WRITEVAR OP_READCLOCK
-            OP_WRITECLOCK OP_SETTRAP OP_ASYNCMSG OP_CONFIGURE OP_SAVECONFIG
+            OP_WRITECLOCK OP_SETTRAP OP_ASYNCMSG OP_CONFIGURE
             OP_READ_MRU OP_READ_ORDLIST_A OP_REQ_NONCE OP_UNSETTRAP);
 our %EXPORT_TAGS = (const => \@EXPORT_OK);
 
@@ -18,7 +18,6 @@ use constant {
     OP_SETTRAP        => 6,  # set trap address
     OP_ASYNCMSG       => 7,  # asynchronous message
     OP_CONFIGURE      => 8,  # runtime configuration
-    OP_SAVECONFIG     => 9,  # save config to file
     OP_READ_MRU       => 10, # retrieve MRU (mrulist)
     OP_READ_ORDLIST_A => 11, # ordered list req. auth.
     OP_REQ_NONCE      => 12, # request a client nonce
