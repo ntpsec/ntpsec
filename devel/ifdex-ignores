@@ -42,10 +42,8 @@ NEOCLOCK4X_FIRMWARE	# Only used in the Neoclock4x driver
 TRIM_POLLRATE		# In the parse driver
 
 # Other
-FREE_CFG_T		# Can configuration trees be freed?
 NEED_SRANDOMDEV		# Random-number initialization - never set by NTP Classic
 NTPD_PRIO		# Priority to set the daemon to
-SAVECONFIG		# Name should move into the ENABLE group 
 SIM			# If we ever enable the ntpsdim build
 
 # Fine-grained debugging and tracing, not presently settable from waf

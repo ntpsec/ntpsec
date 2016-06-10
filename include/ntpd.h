@@ -55,7 +55,6 @@ extern	void	win_time_stepped(void);
 /* ntp_config.c */
 #define	TAI_1972	10	/* initial TAI offset (s) */
 extern	char	*keysdir;	/* crypto keys and leaptable directory */
-extern	char *	saveconfigdir;	/* ntpq saveconfig output directory */
 
 extern	const char	*getconfig	(const char *);
 extern	void	readconfig(const char *);

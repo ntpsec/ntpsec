@@ -102,6 +102,11 @@ few will be user-visible:
 * The ntpsnmpd daemon, incomplete and not conformant with RFC 5907,
   has been removed.
 
+* Various features related to runtime dumping of the configuration
+  state have been removed for security reasons.  These include the
+  saveconfig command in ntpq, the --saveconfigquit option of ntpd, and
+  the implementation of related config declarations in ntp.conf.
+
 * A number of obsolete refclocks have been removed.
 
 * The +sntp+ program has been renamed +{ntpdig}+ in order to make

@@ -157,7 +157,7 @@ static void	library_unexpected_error(const char *, int,
 #endif	/* !SIM */
 
 
-#define ALL_OPTIONS "46aAbc:dD:f:gGhi:I:k:l:LmMnNp:PqQ:r:Rs:t:u:UVw:xyYzZ"
+#define ALL_OPTIONS "46aAbc:dD:f:gGhi:I:k:l:LmMnNp:Pqr:Rs:t:u:UVw:xyYzZ"
 static const struct option longoptions[] = {
     { "ipv4",		    0, 0, '4' },
     { "ipv6",		    0, 0, '6' },
@@ -181,7 +181,6 @@ static const struct option longoptions[] = {
     { "quit",		    0, 0, 'q' },
     { "propagationdelay",   1, 0, 'r' },
     { "dumpopts",	    0, 0, 'R' },
-    { "saveconfigquit",	    1, 0, 'Q' },
     { "statsdir",	    1, 0, 's' },
     { "trustedkey",	    1, 0, 't' },
     { "user",		    1, 0, 'u' },
@@ -230,7 +229,6 @@ static void ntpd_usage(void)
     P("   -P Num priority       Process priority\n");
     P("   -q no  quit           Set the time and quit\n");
     P("   -r Str propagationdelay Broadcast/propagation delay\n");
-    P("      Str saveconfigquit Save parsed configuration and quit\n");
     P("   -s Str statsdir       Statistics file location\n");
     P("   -t Str trustedkey     Trusted key number\n");
     P("				- may appear multiple times\n");
@@ -349,17 +347,6 @@ parse_cmdline_opts(
 		mode_ntpdate = true;
 		nofork = true; 
 		break;
-	    case 'Q':	/* saveconfigquit - undocumented(?) in NTP Classic */
-		syslogit = false;
-#ifdef SAVECONFIG
-		saveconfigquit = true;
-		saveconfigfile = ntp_optarg;
-		nofork = true; 
-		break;
-#else
-		msyslog(LOG_ERR, "-Q/--saveconfigquit requires SAVECONFIG/--enable-saveconfig");
-		exit(1);
-#endif
 	    case 'r':
 		{
 		    double tmp;
@@ -646,7 +633,7 @@ ntpdmain(
 	} else {
 		if (nofork)
 		    termlogit = (intercept_get_mode() == none || debug > 0);
-		if (saveconfigquit || dumpopts)
+		if (dumpopts)
 			syslogit = false;
 	}
 
@@ -679,7 +666,7 @@ ntpdmain(
 	isc_error_setunexpected(library_unexpected_error);
 
 	uid = getuid();
-	if (uid && intercept_get_mode() != replay && !saveconfigquit && !dumpopts) {
+	if (uid && intercept_get_mode() != replay && !dumpopts) {
 		termlogit = true;
 		msyslog(LOG_ERR,
 			"must be run as root, not uid %ld", (long)uid);
@@ -782,7 +769,7 @@ ntpdmain(
 
 
 
-        if (!saveconfigquit && !dumpopts) {
+        if (!dumpopts) {
 	    /* Setup stack size in preparation for locking pages in memory. */
 	    ntp_rlimit(RLIMIT_STACK, DFLT_RLIMIT_STACK * 4096, 4096, "4k");
 #ifdef RLIMIT_MEMLOCK
@@ -974,7 +961,7 @@ ntpdmain(
 		/*
 		 * lock the process into memory
 		 */
-		if (!saveconfigquit && !dumpopts &&
+		if (!dumpopts &&
 		    0 != mlockall(MCL_CURRENT|MCL_FUTURE))
 			msyslog(LOG_ERR, "mlockall(): %m");
 	}
