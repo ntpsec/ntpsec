@@ -1,0 +1,8 @@
+# Minimal logging - we declare a drift file and that's it.
+
+driftfile /var/lib/ntp/ntp.drift
+
+# The following sets edit modes for GNU EMACS
+# Local Variables:
+# mode:conf
+# End:
