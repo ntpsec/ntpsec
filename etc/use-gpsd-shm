@@ -1,0 +1,18 @@
+# Simplest possible refclock configuration for sites with a GPS primary source.
+#
+# Delivers in-band GPS time (not very good, likely to have jitter in the 100s of
+# miliseconds) on one unit, and PPS time (probaly good to 1 ms or less( on
+# another.  Prefers the latter.
+
+# GPS Serial data reference (NTP0)
+server 127.127.28.0
+fudge 127.127.28.0 refid GPS
+
+# GPS PPS reference (NTP1)
+server 127.127.28.1 prefer
+fudge 127.127.28.1 refid PPS
+
+# The following sets edit modes for GNU EMACS
+# Local Variables:
+# mode:conf
+# End:

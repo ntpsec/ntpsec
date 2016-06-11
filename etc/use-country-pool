@@ -1,0 +1,37 @@
+# If you have no other local chimers to help NTP perform sanity checks
+# then you can use some public chimers from the NTP public pool:
+# http://www.pool.ntp.org/en/
+#
+# iburst tells it to send the first few requests at 2 second intervals rather
+# than wait for the poll interval which defaults to 64 seconds.  That greatly
+# speeds up the time for ntpd to set the system time and start responding to
+# requests.
+#
+# Notice we use the 'us' country code servers, otherwise we might get
+# pool servers from opposite sides of the planet accuracy would likely
+# be poor.  If you are not in the USA, then it will probably wrk to
+# change the 'us' to your two letter country code.
+#
+# Major Internet-using countries with pools include:
+# us gb de fr ru au at ca cn jp de fi it be br cz hk
+#
+# If you don't know your country code, find it at
+#
+# https://en.wikipedia.org/wiki/ISO_3166-1
+#
+# and then try pinging prepending it to ".pool.ntp.org" and pinging that.
+# hostname. If you get a response, you can use it.
+#
+# Note: in theory we could use the "pool" keyboard here. There is some
+# controvery over whether it is implemented correctly.  One known problem
+# (a bug in ntpd) is that it can't be used with restrict nopeer.
+#
+server 0.us.pool.ntp.org iburst
+server 1.us.pool.ntp.org iburst
+server 2.us.pool.ntp.org iburst
+server 3.us.pool.ntp.org iburst
+
+# The following sets edit modes for GNU EMACS
+# Local Variables:
+# mode:conf
+# End:

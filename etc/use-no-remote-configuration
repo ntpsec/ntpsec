@@ -1,0 +1,15 @@
+# Exchange time with everybody, but don't allow configuration.
+# This is the right security setup for 99% of deployments.
+
+# Note: due to a bug, restrict nopeer can't be used with the pool keyword.
+restrict default kod limited nomodify notrap nopeer noquery  
+restrict -6 default kod limited nomodify notrap nopeer noquery
+
+# Local users may interrogate the NTP server more closely.
+restrict 127.0.0.1  
+restrict -6 ::1
+
+# The following sets edit modes for GNU EMACS
+# Local Variables:
+# mode:conf
+# End:

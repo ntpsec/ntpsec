@@ -1,0 +1,16 @@
+# Use gpsd with the JSON refclock.
+#
+# Not recommended for production use: the JSON driver is buggy and
+# needs fixing.  This snippet is intended to give us a reproducible
+# configuration for testing.
+
+server 127.127.46.128 minpoll 4 maxpoll 4
+fudge 127.127.46.128
+
+server 127.127.46.0 minpoll 4 maxpoll 4
+fudge 127.127.46.0 flag1 1
+
+# The following sets edit modes for GNU EMACS
+# Local Variables:
+# mode:conf
+# End:

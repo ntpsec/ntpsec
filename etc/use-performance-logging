@@ -1,0 +1,18 @@
+# Collect NTP performance statistics for analysis
+
+driftfile /var/lib/ntp/ntp.drift
+
+statsdir /var/log/ntpstats/
+
+statistics loopstats peerstats clockstats
+filegen loopstats file loopstats type day enable
+filegen peerstats file peerstats type day enable
+filegen clockstats file clockstats type day enable
+
+logfile /var/log/ntpd.log  
+logconfig =syncall +clockall +peerall +sysall
+
+# The following sets edit modes for GNU EMACS
+# Local Variables:
+# mode:conf
+# End:
