@@ -663,8 +663,13 @@ create_peer_node(
 		switch (option->attr) {
 
 		case T_Flag:
-			APPEND_G_FIFO(my_node->peerflags, option);
-			freenode = false;
+		    if (hmode == T_Peer && option->attr == T_Flag && (option->value.i == T_Iburst || option->value.i == T_Burst)) {
+				msyslog(LOG_INFO,
+					"peer: ignoring burst or iburst option");
+			} else {
+				APPEND_G_FIFO(my_node->peerflags, option);
+				freenode = false;
+			}
 			break;
 
 		case T_Minpoll:
