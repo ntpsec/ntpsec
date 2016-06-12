@@ -630,8 +630,8 @@ create_peer_node(
 {
 	peer_node *my_node;
 	attr_val *option;
-	int freenode;
-	int errflag = 0;
+	bool freenode;
+	int errflag = false;
 
 	my_node = emalloc_zero(sizeof(*my_node));
 
@@ -658,13 +658,13 @@ create_peer_node(
 			break;
 		}
 
-		freenode = 1;
+		freenode = true;
 		/* Check the kind of option being set */
 		switch (option->attr) {
 
 		case T_Flag:
 			APPEND_G_FIFO(my_node->peerflags, option);
-			freenode = 0;
+			freenode = false;
 			break;
 
 		case T_Minpoll:
@@ -697,7 +697,7 @@ create_peer_node(
 		case T_Ttl:
 			if (option->value.u >= MAX_TTL) {
 				msyslog(LOG_ERR, "ttl: invalid argument");
-				errflag = 1;
+				errflag = true;
 			} else {
 				my_node->ttl = (uint8_t)option->value.u;
 			}
@@ -710,7 +710,7 @@ create_peer_node(
 		case T_Key:
 			if (option->value.u >= KEYID_T_MAX) {
 				msyslog(LOG_ERR, "key: invalid argument");
-				errflag = 1;
+				errflag = true;
 			} else {
 				my_node->peerkey =
 					(keyid_t)option->value.u;
@@ -720,7 +720,7 @@ create_peer_node(
 		case T_Version:
 			if (option->value.u >= UCHAR_MAX) {
 				msyslog(LOG_ERR, "version: invalid argument");
-				errflag = 1;
+				errflag = true;
 			} else {
 				my_node->peerversion =
 					(uint8_t)option->value.u;
@@ -731,7 +731,7 @@ create_peer_node(
 			msyslog(LOG_ERR,
 				"Unknown peer/server option token %s",
 				token_name(option->attr));
-			errflag = 1;
+			errflag = true;
 		}
 		if (freenode)
 			free(option);
