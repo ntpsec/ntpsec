@@ -18,8 +18,8 @@ The PARSE driver supports 25 different clock
 types/configurations. PARSE is actually a multi-clock driver.
 
 Note that some of these modes below are to support equipment that
-has not been commercially available for a long time; and may be
-removed.  See
+has not been commercially available for a long time, and may be
+removed in a future release.  See
 https://www.ntpsec.org/removal-plan.html[Feature removals] for a
 discussion of this issue.
 
