@@ -12,12 +12,12 @@
   +server+ command and s addresses.
 
 +iburst+::
-  When the server is unreachable, send a burst of eight packets instead
+  When the server is unreachable, send a burst of six packets instead
   of the usual one. The packet spacing is normally 2 s; however, the
   spacing between the first two packets can be changed with the
   calldelay command to allow additional time for a modem or ISDN call to
   complete. This is designed to speed the initial synchronization
-  acquisition with the +server+ command and s addresses and when
+  acquisition with the +server+ command, and when
   {ntpdman} is started with the +-q+ option.
 
 +key+ _key_::
