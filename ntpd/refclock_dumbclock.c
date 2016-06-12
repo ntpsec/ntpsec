@@ -74,9 +74,6 @@ struct dumbclock_unit {
 static	bool	dumbclock_start		(int, struct peer *);
 static	void	dumbclock_shutdown	(int, struct peer *);
 static	void	dumbclock_receive	(struct recvbuf *);
-#if 0
-static	void	dumbclock_poll		(int, struct peer *);
-#endif
 
 /*
  * Transfer vector
@@ -333,41 +330,3 @@ dumbclock_receive(
 	up->lasthour = (uint8_t)pp->hour;
 }
 
-#if 0
-/*
- * dumbclock_poll - called by the transmit procedure
- */
-static void
-dumbclock_poll(
-	int unit,
-	struct peer *peer
-	)
-{
-	register struct dumbclock_unit *up;
-	struct refclockproc *pp;
-	char pollchar;
-
-	/*
-	 * Time to poll the clock. The Chrono-log clock is supposed to
-	 * respond to a 'T' by returning a timecode in the format(s)
-	 * specified above.  Ours does (can?) not, but this seems to be
-	 * an installation-specific problem.  This code is dyked out,
-	 * but may be re-enabled if anyone ever finds a Chrono-log that
-	 * actually listens to this command.
-	 */
-#if 0
-	pp = peer->procptr;
-	up = pp->unitptr;
-	if (peer->reach == 0)
-		refclock_report(peer, CEVNT_TIMEOUT);
-	if (up->linect > 0)
-		pollchar = 'R';
-	else
-		pollchar = 'T';
-	if (write(pp->io.fd, &pollchar, 1) != 1)
-		refclock_report(peer, CEVNT_FAULT);
-	else
-		pp->polls++;
-#endif
-}
-#endif
