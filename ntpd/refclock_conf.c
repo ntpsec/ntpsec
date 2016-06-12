@@ -128,12 +128,6 @@ extern struct refclock refclock_dumbclock;
 #define refclock_dumbclock refclock_none
 #endif
 
-#ifdef CLOCK_PCF
-extern	struct refclock	refclock_pcf;
-#else
-#define	refclock_pcf	refclock_none
-#endif
-
 #ifdef CLOCK_HOPF_SERIAL
 extern	struct refclock	refclock_hopfser;
 #else
