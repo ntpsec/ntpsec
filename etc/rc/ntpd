@@ -1,5 +1,14 @@
 #!/bin/sh
 
+### BEGIN INIT INFO
+# Provides:        ntp
+# Required-Start:  $network $remote_fs $syslog
+# Required-Stop:   $network $remote_fs $syslog
+# Default-Start:   2 3 4 5
+# Default-Stop:    1
+# Short-Description: Control NTP daemon
+### END INIT INFO
+
 NTPD=/usr/sbin/ntpd
 PIDFILE=/var/run/ntpd.pid
 USER=ntp
