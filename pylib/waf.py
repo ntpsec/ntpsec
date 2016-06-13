@@ -51,7 +51,7 @@ def ntp_version(self):
 
 
 def manpage_subst_fun(task, text):
-	return text.replace("include::../docs/", "include::../../docs/")
+	return text.replace("include::../docs/", "include::../../../docs/")
 
 @conf
 def manpage(ctx, section, source):
