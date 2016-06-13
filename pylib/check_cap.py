@@ -1,4 +1,4 @@
-from tool import check_sanity
+from .tool import check_sanity
 
 PCAP_FRAG = """
 # include <sys/capability.h>

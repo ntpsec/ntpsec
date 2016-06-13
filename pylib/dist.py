@@ -2,7 +2,8 @@ from os import path
 from shutil import copyfile
 from os.path import exists
 import time
-from util import parse_version
+
+from .util import parse_version
 
 def dist_cmd(ctx, config):
 		files_man = []
@@ -37,7 +38,7 @@ def dist_cmd(ctx, config):
 		for man in files_man:
 			src = man.abspath()
 			dst = src.replace("%s/main/" % bldnode.abspath(), "")
-			print "Copying %s -> %s" % (src, dst)
+			print("Copying %s -> %s" % (src, dst))
 			copyfile(src, dst)
 
 		files = [
@@ -48,7 +49,7 @@ def dist_cmd(ctx, config):
 		for src, dst in files:
 			if not path.exists(src):
 				ctx.fatal("%s doesn't exist please configure and build first.  NTPS_RELEASE must be set to False" % src)
-			print "Copying %s -> %s" % (src, dst)
+			print("Copying %s -> %s" % (src, dst))
 			copyfile(src, dst)
 
 		version = "%d.%d.%d" % (config["NTPS_VERSION_MAJOR"], \

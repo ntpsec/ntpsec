@@ -13,7 +13,7 @@ def check_type(ctx, typename, headers=[], mandatory=False):
 	import os
 	name = "HAVE_%s" % typename.upper().replace(" ", "_")
 	src = ""
-        for hdr in headers:
+	for hdr in headers:
 		src += "#include <%s>\n" % hdr
 	ctx.check_cc(
 		fragment	= src + TYPE_FRAG % (typename),

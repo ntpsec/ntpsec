@@ -6,9 +6,9 @@ up the logic in the main configure.py.
 def probe_header_with_prerequisites(ctx, header, prerequisites, use=None):
 	"Check that a header (with its prerequisites) compiles."
 	src = ""
-        for hdr in prerequisites + [header]:
-        	src += "#include <%s>\n" % hdr
-        src += "int main() { return 0; }\n"
+	for hdr in prerequisites + [header]:
+		src += "#include <%s>\n" % hdr
+	src += "int main() { return 0; }\n"
 	have_name = "HAVE_%s" % header.replace(".","_").replace("/","_").upper()
 	ctx.check_cc(
 		fragment=src,
@@ -22,9 +22,9 @@ def probe_header_with_prerequisites(ctx, header, prerequisites, use=None):
 def probe_function_with_prerequisites(ctx, function, prerequisites, use=None):
 	"Check that a function (with its prerequisites) compiles."
 	src = ""
-        for hdr in prerequisites:
-        	src += "#include <%s>\n" % hdr
-        src += """int main() {
+	for hdr in prerequisites:
+		src += "#include <%s>\n" % hdr
+	src += """int main() {
 	void *p = (void*)(%s);
 	return (int)p;
 }

@@ -1,8 +1,9 @@
+import sys
+import os
+
 from waflib.Configure import conf
-from util import msg, msg_setting
-from probes import *
-import sys, os
-from util import parse_version
+from .util import msg, msg_setting, parse_version
+from .probes import *
 
 def cmd_configure(ctx, config):
 	srcnode = ctx.srcnode.abspath()
@@ -11,7 +12,7 @@ def cmd_configure(ctx, config):
 	ctx.load('waf', tooldir='pylib/')
 	ctx.load('waf_unit_test')
 
-	from pylib.util import parse_version
+	from .util import parse_version
 	parse_version(config)
 
 	ctx.env.NTPS_RELEASE = config["NTPS_RELEASE"]
@@ -43,7 +44,7 @@ def cmd_configure(ctx, config):
 	for opt in opt_map:
 		ctx.env[opt] = opt_map[opt]
 
-	from compiler import check_compiler
+	from .compiler import check_compiler
 	check_compiler(ctx)
 
 
@@ -97,7 +98,7 @@ def cmd_configure(ctx, config):
 	if exists(".git") and ctx.find_program("git", var="BIN_GIT", mandatory=False):
 		ctx.start_msg("DEVEL: Getting revision")
 		cmd = ["git", "log", "-1", "--format=%H"]
-		p = subprocess.Popen(cmd, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=None)
+		p = subprocess.Popen(cmd, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=None, universal_newlines=True)
 		ctx.env.NTPS_REVISION, stderr = p.communicate()
 		ctx.env.NTPS_REVISION = ctx.env.NTPS_REVISION.replace("\n", "")
 		ctx.end_msg(ctx.env.NTPS_REVISION)
@@ -125,9 +126,9 @@ def cmd_configure(ctx, config):
 	if ctx.options.enable_doc_only:
 		return
 
-	from check_type import check_type
-	from check_sizeof import check_sizeof
-	from check_structfield import check_structfield
+	from .check_type import check_type
+	from .check_sizeof import check_sizeof
+	from .check_structfield import check_structfield
 
 	for opt in opt_map:
 		ctx.env[opt] = opt_map[opt]
@@ -150,17 +151,17 @@ def cmd_configure(ctx, config):
 
 
 	if ctx.options.list:
-		from refclock import refclock_map
-		print "ID    Description"
-		print "~~    ~~~~~~~~~~~"
+		from .refclock import refclock_map
+		print("ID    Description")
+		print("~~    ~~~~~~~~~~~")
 		for id in refclock_map:
-			print "%-5s %s" % (id, refclock_map[id]["descr"])
+			print("%-5s %s" % (id, refclock_map[id]["descr"]))
 
 		return
 
 	# This needs to be at the top since it modifies CC and AR
 	if ctx.options.enable_fortify:
-		from check_fortify import check_fortify
+		from .check_fortify import check_fortify
 		check_fortify(ctx)
 
 
@@ -247,7 +248,7 @@ def cmd_configure(ctx, config):
 		(None,			"long long"),
 	]
 
-	for header, sizeof in sorted(sizeofs):
+	for header, sizeof in sorted(sizeofs, key=lambda x: x[1:]):
 		ctx.check_sizeof(header, sizeof)
 
 	# The protocol major number
@@ -276,7 +277,7 @@ def cmd_configure(ctx, config):
 
 	# Find OpenSSL. Must happen before function checks
 	if ctx.options.enable_crypto:
-		from check_openssl import configure_ssl
+		from .check_openssl import configure_ssl
 		configure_ssl(ctx)
 
 	# Optional functions.  Do all function checks here, otherwise
@@ -367,7 +368,7 @@ def cmd_configure(ctx, config):
 				continue
 		if os.path.exists("/usr/include/" + hdr):
 			# Sanity check...
-			print "Compilation check failed but include exists %s" % hdr
+			print("Compilation check failed but include exists %s" % hdr)
 
 	if ctx.get_define("HAVE_TIMEPPS_H") or ctx.get_define("HAVE_SYS_TIMEPPS_H"):
 		ctx.define("HAVE_PPSAPI", 1, comment="Enable the PPS API")
@@ -377,7 +378,7 @@ def cmd_configure(ctx, config):
 	if ctx.get_define("HAVE_PRIV_H") and sys.platform == "Solaris":
 		ctx.define("HAVE_SOLARIS_PRIVS", 1, comment="Enable Solaris Privileges (Solaris only)")
 
-	from check_sockaddr import check_sockaddr
+	from .check_sockaddr import check_sockaddr
 	check_sockaddr(ctx)
 
 	# Some systems don't have sys/timex.h eg OS X, OpenBSD...
@@ -391,7 +392,7 @@ def cmd_configure(ctx, config):
 		ctx.env.HAVE_AUDIO = True  # makes util/tg2
 
 	if ctx.options.refclocks:
-		from refclock import refclock_config
+		from .refclock import refclock_config
 
 		# Enable audio when the right headers exist.
 		if ctx.get_define("HAVE_SYS_AUDIOIO_H") or \
@@ -479,13 +480,13 @@ def cmd_configure(ctx, config):
 	#	]]
 	# ctx.define("HAVE_STRUCT_SND_SIZE", 1)
 
-        # These are required by the SHA2 code and various refclocks
-        if sys.byteorder == "little":
-                pass
-        elif sys.byteorder == "big":
-                ctx.define("WORDS_BIGENDIAN", 1)
-        else:
-                print "Can't determine byte order!"
+	# These are required by the SHA2 code and various refclocks
+	if sys.byteorder == "little":
+		pass
+	elif sys.byteorder == "big":
+		ctx.define("WORDS_BIGENDIAN", 1)
+	else:
+		print("Can't determine byte order!")
 
 	probe_vsprintfm(ctx, "VSNPRINTF_PERCENT_M",
 			    "Checking for %m expansion in vsnprintf(3)")
@@ -517,33 +518,33 @@ def cmd_configure(ctx, config):
 
 
 	# Header checks
-	from pylib.check_cap import check_cap_header
+	from .check_cap import check_cap_header
 	check_cap_header(ctx)
 
-	from pylib.check_libevent2 import check_libevent2_header
+	from .check_libevent2 import check_libevent2_header
 	check_libevent2_header(ctx)
 
-	from pylib.check_pthread import check_pthread_header_lib
+	from .check_pthread import check_pthread_header_lib
 	check_pthread_header_lib(ctx)
 
 	if not ctx.options.disable_mdns_registration:
-		from pylib.check_mdns import check_mdns_header
+		from .check_mdns import check_mdns_header
 		check_mdns_header(ctx)
 
 
 	# Run checks
-	from pylib.check_cap import check_cap_run
+	from .check_cap import check_cap_run
 	check_cap_run(ctx)
 
-	from pylib.check_libevent2 import check_libevent2_run
+	from .check_libevent2 import check_libevent2_run
 	check_libevent2_run(ctx)
 
 
-	from pylib.check_pthread import check_pthread_run
+	from .check_pthread import check_pthread_run
 	check_pthread_run(ctx)
 
 	if not ctx.options.disable_mdns_registration:
-		from pylib.check_mdns import check_mdns_run
+		from .check_mdns import check_mdns_run
 		check_mdns_run(ctx)
 
 

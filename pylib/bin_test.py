@@ -1,7 +1,10 @@
-from waflib.Utils import subprocess
-from waflib.Logs import pprint
+from __future__ import print_function
+
 import re
 from os.path import exists
+
+from waflib.Utils import subprocess
+from waflib.Logs import pprint
 
 cmd_map = {
 	("main/ntpd/ntpd",				"-h"):					r'.*must be run as root, not uid.*',
@@ -32,13 +35,13 @@ def run(cmd, reg):
 	if cmd[1] == None:
 		cmd = [cmd[0]]
 
-	print "running: ", " ".join(cmd),
+	print("running: ", " ".join(cmd), end='')
 
 	if not exists("build/%s" % cmd[0]):
 		pprint("YELLOW", " SKIPPING (does not exist)")
 		return False
 
-	p = subprocess.Popen(cmd, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=None, cwd="build")
+	p = subprocess.Popen(cmd, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=None, cwd="build", universal_newlines=True)
 
 	stdout, stderr = p.communicate()
 

@@ -1,5 +1,5 @@
 from waflib.Logs import pprint
-from tool import check_sanity
+from .tool import check_sanity
 
 LIBEVENT2_FRAG = """
 #include <event2/thread.h>

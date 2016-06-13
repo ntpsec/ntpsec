@@ -171,7 +171,7 @@ refclock_map = {
 
 @conf
 def refclock_config(ctx):
-	from refclock import refclock_map
+	from .refclock import refclock_map
 
 	if ctx.options.refclocks == "all":
 		ids = refclock_map.keys()

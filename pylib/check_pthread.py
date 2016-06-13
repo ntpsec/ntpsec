@@ -1,5 +1,5 @@
 from waflib.Logs import pprint
-from tool import check_sanity
+from .tool import check_sanity
 
 PTHREAD_FRAG = """
 #include <pthread.h>
