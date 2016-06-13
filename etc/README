@@ -5,8 +5,8 @@ NTP daemon, and some example startup scripts for launching it.
 
 The "use-" files are modular pieces of ntp.conf files that you can string
 together in any order for effect.  The file titles are clues to what they're
-useful for.  Each has an explanstory header comment.  The file "example conf"
-shows what a file made oud of use snippets is like.
+useful for.  Each has an explanatory header comment.  The file "example conf"
+shows what a file made out of use snippets is like.
 
 The directory 'historical' contains some example scripts from NTP
 Classic.  They are quite particular to specific machines; just copying
