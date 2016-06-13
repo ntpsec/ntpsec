@@ -186,9 +186,6 @@
     <ClCompile Include="..\..\..\..\ntpd\refclock_parse.c">
       <Filter>Reference Clock</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\ntpd\refclock_pcf.c">
-      <Filter>Reference Clock</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\ntpd\refclock_pst.c">
       <Filter>Reference Clock</Filter>
     </ClCompile>

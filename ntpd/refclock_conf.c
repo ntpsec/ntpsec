@@ -211,7 +211,7 @@ struct refclock * const refclock_conf[] = {
 	&refclock_none,		/* 32 was: REFCLK_CHRONOLOG */
 	&refclock_dumbclock,	/* 33 REFCLK_DUMBCLOCK */
 	&refclock_none,		/* 34 was: REFCLOCK_ULINK */
-	&refclock_pcf,		/* 35 REFCLOCK_PCF */
+	&refclock_none,		/* 35 was: REFCLOCK_PCF */
 	&refclock_none,		/* 36 was: REFCLOCK_WWV_AUDIO */
 	&refclock_none,		/* 37 was: REFCLOCK_FG */
 	&refclock_hopfser,	/* 38 REFCLK_HOPF_SERIAL */

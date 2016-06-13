@@ -130,12 +130,6 @@ refclock_map = {
 		"file":		"dumbclock"
 	},
 
-	35: {
-		"descr":	"Conrad Parallel Port Radio Clock",
-		"define":	"CLOCK_PCF",
-		"file":		"pcf"
-	},
-
 	38: {
 		"descr":	"hopf GPS/DCF77 6021/komp for Serial Line",
 		"define":	"CLOCK_HOPF_SERIAL",

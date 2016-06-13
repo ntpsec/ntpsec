@@ -310,7 +310,6 @@
     <ClCompile Include="..\..\..\..\ntpd\refclock_oncore.c" />
     <ClCompile Include="..\..\..\..\ntpd\refclock_palisade.c" />
     <ClCompile Include="..\..\..\..\ntpd\refclock_parse.c" />
-    <ClCompile Include="..\..\..\..\ntpd\refclock_pcf.c" />
     <ClCompile Include="..\..\..\..\ntpd\refclock_pst.c" />
     <ClCompile Include="..\..\..\..\ntpd\refclock_ripencc.c" />
     <ClCompile Include="..\..\..\..\ntpd\refclock_shm.c" />
