@@ -162,6 +162,11 @@ Neither is ideal, easy pickings for someone to code on.
 * Timer events need, as much as possible, to be eliminated - they eat
   power on laptops and mobile devices, usually unnecessarily.
 
+* Richer signal semantics: HUP for close/reopen of any files (logrotate…),
+  USR1 for re-read of config and maybe USR2 for re-read of an alternate
+  config file (so you can go back pre ante by just sending USR1 if you
+  messed up). Open for discussion.
+
 * Take another look at SHM.  Hal thinks we can make a version that is
   read-only and solid.  Maybe write a support package that does all the
   work if you call it with the date/time.
