@@ -187,7 +187,6 @@ Spectracom TSYNC PCI.
 | link:driver20.html[Type 20] | T     |GPS  | Generic NMEA GPS Receiver
 | link:driver22.html[Type 22] | T     |PPS  | PPS Clock Discipline
 | link:driver26.html[Type 26] | T     |GPS  | Hewlett Packard 58503A GPS Receiver
-| link:driver27.html[Type 27] | DR    |MSF  | Arcron MSF Receiver
 | link:driver28.html[Type 28] | T     |SHM  | Shared Memory Driver
 | link:driver29.html[Type 29] | TM    |GPS  | Trimble Navigation Palisade GPS
 | link:driver30.html[Type 30] | -     |GPS  | Motorola UT Oncore GPS

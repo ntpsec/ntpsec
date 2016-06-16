@@ -92,12 +92,6 @@ refclock_map = {
 		"file":		"hpgps"
 	},
 
-	27: {
-		"descr":	"Arcron MSF Receiver",
-		"define":	"CLOCK_ARCRON_MSF",
-		"file":		"arc"
-	},
-
 	28: {
 		"descr":	"Shared Memory Driver",
 		"define":	"CLOCK_SHM",
