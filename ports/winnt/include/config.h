@@ -334,7 +334,6 @@ extern char *	ntp_strerror	(int e);
 /* #define CLOCK_PARSE  */
 #define CLOCK_ACTS
 #define CLOCK_ARBITER
-#define CLOCK_ARCRON_MSF
 #define OWN_PPS_NTP_TIMESTAMP_FROM_COUNTER	/* timepps.h */
 #define HAVE_TIMEPPS_H
 #define HAVE_PPSAPI

@@ -168,7 +168,7 @@ ntptrace utility
 OpenServer port
 42. mailto:derek@toybox.demon.co.uk[Derek Mulcahy
 <derek@toybox.demon.co.uk>] and mailto:d@hd.org[Damon Hart-Davis
-<d@hd.org>] ARCRON MSF clock driver
+<d@hd.org>] ARCRON MSF clock driver (removed)
 43. mailto:neal@ntp.org[Rob Neal <neal@ntp.org>] Bancomm refclock and
 config/parse code maintenance
 44. mailto:Rainer.Pruy@informatik.uni-erlangen.de[Rainer Pruy

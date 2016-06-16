@@ -36,7 +36,6 @@ ISC_PLATFORM_HAVEIPV6
 ISC_PLATFORM_HAVEIN6PKTINFO
 
 # Refclock-specific configuration (NTP Classic never set these)
-ARCRON.*		# Only used in reflock_arc.c (some for configuration)
 ENABLE_PPS720		# Enable use of PCL720 with TrueTime refclock
 NEOCLOCK4X_FIRMWARE	# Only used in the Neoclock4x driver
 TRIM_POLLRATE		# In the parse driver
