@@ -138,7 +138,7 @@ const char *types[] = {"unknown", "goes", "tm", "tcu", "omega", "tl3"};
 struct true_unit {
 	unsigned int	pollcnt;	/* poll message counter */
 	unsigned int	station;	/* which station we are on */
-	unsigned int	polled;		/* Hand in a time sample? */
+	bool		polled;		/* Hand in a time sample? */
 	enum true_state	state;		/* state machine */
 	enum true_type	type;		/* what kind of clock is it? */
 	int		unit;		/* save an extra copy of this */
@@ -558,7 +558,7 @@ true_receive(
 		 * We have succedded in answering the poll.
 		 * Turn off the flag and return
 		 */
-		up->polled = 0;
+		up->polled = false;
 
 		return;
 	}
@@ -859,7 +859,7 @@ true_poll(
 	 * polled every 64 seconds. Ask true_receive to hand in a
 	 * timestamp.
 	 */
-	up->polled = 1;
+	up->polled = true;
 	pp->polls++;
 }
 
