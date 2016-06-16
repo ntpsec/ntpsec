@@ -160,12 +160,6 @@ refclock_map = {
 		"file":		"neoclock4x"
 	},
 
-	45: {
-		"descr":	"Spectracom TSYNC",
-		"define":	"CLOCK_TSYNCPCI",
-		"file":		"tsyncpci"
-	},
-
 	46: {
 		"descr":	"GPSD NG client protocol",
 		"define":	"CLOCK_GPSDJSON",

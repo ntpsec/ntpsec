@@ -204,9 +204,6 @@
     <ClCompile Include="..\..\..\..\ntpd\refclock_true.c">
       <Filter>Reference Clock</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\ntpd\refclock_tsyncpci.c">
-      <Filter>Reference Clock</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\ntpd\refclock_tt560.c">
       <Filter>Reference Clock</Filter>
     </ClCompile>

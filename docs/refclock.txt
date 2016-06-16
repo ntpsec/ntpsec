@@ -167,7 +167,8 @@ maintainence load.
 
 For security reasons, we will no longer support any refclock that requires
 a closed-source driver to run.  This filtered out the
-Datum/Bancomm/Symmetricom bc600-series GPS/IRIG Receiver.
+Datum/Bancomm/Symmetricom bc600-series GPS/IRIG Receiver and the
+Spectracom TSYNC PCI.
 
 [options="header"]
 [cols="10%,5%,5%,80%",options="header"]
@@ -197,7 +198,6 @@ Datum/Bancomm/Symmetricom bc600-series GPS/IRIG Receiver.
 | link:driver40.html[Type 40] | T     |JJY  | JJY Receivers
 | link:driver42.html[Type 42] | -     |GPS  | Zyfer GPStarplus Receiver
 | link:driver44.html[Type 44] | -     |neol | NeoClock4X - DCF77 / TDF serial line
-| link:driver45.html[Type 45] | R     |GPS  | Spectracom TSYNC PCI
 | link:driver46.html[Type 46] | T     |GPSD | GPSD NG client protocol
 |====================================================================
 
