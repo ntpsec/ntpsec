@@ -245,8 +245,6 @@ GENERAL
 TO-DO LIST
 ==========
 
-  * Eliminate use of scanf().
-
   * Allow user setting of resync interval to trade battery life for
     accuracy; maybe could be done via fudge factor or unit number.
 
@@ -1480,7 +1478,7 @@ arc_poll(
 
 	  In addition to the normal NTP fun of clocks that don't report
 	  leap-seconds spooking their hosts, this clock does not even
-	  sample the radio sugnal the whole time, so may miss a
+	  sample the radio signal the whole time, so may miss a
 	  leap-second insertion or deletion for up to a whole sample
 	  time.
 
