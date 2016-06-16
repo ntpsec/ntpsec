@@ -17,12 +17,6 @@
 # include <sys/ioctl.h>
 #endif /* HAVE_SYS_IOCTL_H */
 
-#ifdef SYS_WINNT
-#undef write	/* ports/winnt/include/config.h: #define write _write */
-extern int async_write(int, const void *, unsigned int);
-#define write(fd, data, octets)	async_write(fd, data, octets)
-#endif
-
 /*
  * This driver supports the US (NIST, USNO) and European (PTB, NPL,
  * etc.) modem time services, as well as Spectracom GPS

@@ -15,12 +15,6 @@
 #include "ntp_stdlib.h"
 #include "ntp_control.h"	/* for CTL_* clocktypes */
 
-#ifdef SYS_WINNT
-extern int async_write(int, const void *, unsigned int);
-#undef write
-#define write(fd, data, octets)	async_write(fd, data, octets)
-#endif
-
 /* This should be an atom clock but those are very hard to build.
  *
  * The PCL720 from P C Labs has an Intel 8253 lookalike, as well as a bunch

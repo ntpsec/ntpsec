@@ -44,12 +44,6 @@
 # include <sys/ioctl.h>
 #endif /* not HAVE_SYS_IOCTL_H */
 
-#ifdef SYS_WINNT
-extern int async_write(int, const void *, unsigned int);
-#undef write
-#define write(fd, data, octets)	async_write(fd, data, octets)
-#endif
-
 #include "refclock_palisade.h"
 /* Table to get from month to day of the year */
 const int days_of_year [12] = {
