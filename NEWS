@@ -13,6 +13,15 @@ configuration directives, have been removed for security reasons. The
 ntpd --saveconfigquit option, undocumented in NTP Classic, has
 also been removed.
 
+Refclock 27 (ARCRON MSF) has been removed on the advice of last maintainer.
+
+Refclock 45 (Spectracom TSYNC PCI); has been removed. It required a
+proprietary driver.  As a matter of good security policy, NTPsec will
+not trust nor attempt to support code it cannot audit.
+
+Refclock 35 (Conrad Parallel Port radio) has been removed.  It required
+a third-party parallel-port driver for Linux that no longer exists.
+
 This release contains a fix for one vulnerability inherited from
 NTP Classic:
 
