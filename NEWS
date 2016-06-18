@@ -21,6 +21,10 @@ NTP Classic:
 https://lists.ntpsec.org/pipermail/devel/2016-June/001299.html provides
 additional information on this issue.
 
+It also includes the following fix cross-ported from Classic:
+
+[Bug 3047] refclock_jjy does not work with C-DEX JST2000
+
 == 2016-05-17: 0.9.3 ==
 
 The long-deprecated Autokey feature has been removed.
