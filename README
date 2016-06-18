@@ -28,10 +28,10 @@ devel/::	Documentation aimed at developers.
 docs/::		Directory containing a complete set of documentation on
 		building and configuring a NTP server or client. The files
 		are in asciidoc markup.  This replaces the 'html' directory
-		of precious versions, but html can be generated from it.
+		of previous versions, but html can be generated from it.
 
 etc/::		Directory containing a motley collection of configuration files
-		and launch scruots for various systems. For example
+		and launch scripts for various systems. For example
 		only.
 
 include/::	Directory containing include header files used by most
@@ -64,7 +64,7 @@ ntpfrob/::       The ntpfrob utility collects several small diagnostic
 ntpkeygen/::	Directory containing the utility program used to generate
 		NTP authentication keys.
 
-ntpleapfetch/::	Directory containing a script ro be run from a cron job
+ntpleapfetch/::	Directory containing a script to be run from a cron job
 		to keep your local leap-second file properly updated.
 
 ntpq/::		Directory containing sources for a utility program to
@@ -80,7 +80,7 @@ ntptrace/::	Directory containing source for a utility program that
 		designated peer to the primary server at the root of the
 		timekeeping subnet.
 
-ntpwait/::	Directory contsining a script that nlocks until ntpd is
+ntpwait/::	Directory containing a script that blocks until ntpd is
 		in state 4 (synchronized). Useful at boot time, to delay
 		the boot sequence until after "ntpd -g" has set the time.
 

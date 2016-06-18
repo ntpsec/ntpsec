@@ -86,7 +86,7 @@ __________
 [quote, Gary Miller]
 __________
 'ntpq -p' is user hostile compared to 'chronyc sources'.  chronyc adds
-units to the display, so you do not have to keep referring to them
+units to the display, so you do not have to keep referring to the
 manual, and it makes it easy to deal with jitter and delay that
 varies by orders of magnitude.
 
