@@ -4,7 +4,7 @@ import re
 from os.path import exists
 
 cmd_map = {
-	("main/ntpd/ntpd",				"-h"):					r'.*must be run as root, not uid.*',
+	("main/ntpd/ntpd",				"-invalid"):			r'.*must be run as root, not uid.*',
 	("main/ntpdig/ntpdig",			"time.apple.com"):		r'.*time.apple.com.*',
 	("main/ntpfrob/ntpfrob",			"-h"):				r'.*illegal option.*',
 	("main/ntpkeygen/ntpkeygen",	  "-M"):				r'.*Generating new md5 file and link.*',
