@@ -77,7 +77,7 @@ RS-232C, 9600 BPS, 8-bits, no parity, 1 stop bit;;
 Time code format::
 +
 Command        -\-> Reply +
-+{ENQ}1J{ETX}+ -\-> +{STX}JYYMMDD HHMMSSS{ETX}+
++{ENQ}1J{ETX}+ -\-> +{STX}JYYMMDDWHHMMSSS{ETX}+
 
 * [[mode-3]]Echo Keisokuki Co.,Ltd. LT-2000 link:http://www.clock.co.jp/[] (domain no longer registered)
 +
