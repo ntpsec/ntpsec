@@ -68,9 +68,6 @@
  *
  */
 
-#ifndef GUARD_REFCLOCK_PALISADE_H
-#define GUARD_REFCLOCK_PALISADE_H
-
 #if defined HAVE_SYS_MODEM_H
 #include <sys/modem.h>
 #endif
@@ -204,9 +201,6 @@ static  void	sendint			(struct packettx *buffer, int a);
 static  int	sendetx			(struct packettx *buffer, int fd);
 static  void	init_thunderbolt	(int fd);
 static  void	init_acutime		(int fd);
-
-#endif /* GUARD_REFCLOCK_PALISADE_H */
-
 
 
 /* Table to get from month to day of the year */
