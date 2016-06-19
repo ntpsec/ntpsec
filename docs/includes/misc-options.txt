@@ -22,7 +22,7 @@
   operation as the +-f+ command line option. If the file exists, it is
   read at startup in order to set the initial frequency and then updated
   once per hour with the current frequency computed by the daemon. If
-  the file name is specified, but the file itself does not exist, the
+  the file name is specified, but the file itself does not exist, +ntpd+
   starts with an initial frequency of zero and creates the file when
   writing it for the first time. If this command is not given, the
   daemon will always start with an initial frequency of zero.
