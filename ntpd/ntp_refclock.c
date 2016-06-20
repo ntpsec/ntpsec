@@ -1152,8 +1152,12 @@ refclock_params(
 		if (time_pps_kcbind(ap->handle, PPS_KC_HARDPPS,
 		    ap->pps_params.mode & ~PPS_TSFMT_TSPEC,
 		    PPS_TSFMT_TSPEC) < 0) {
-			msyslog(LOG_ERR,
-			    "refclock_params: time_pps_kcbind: %m");
+			if (errno == EOPNOTSUPP)
+			    msyslog(LOG_ERR,
+				"refclock_params: kernel PLL (hardpps, RFC 1589) not implemented");
+			else
+			    msyslog(LOG_ERR,
+				"refclock_params: time_pps_kcbind: %m");
 			return false;
 		}
 		hardpps_enable = true;
