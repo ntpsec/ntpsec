@@ -3194,6 +3194,13 @@ peer_unfit(
 	if (!(peer->flags & FLAG_REFCLOCK) && root_distance(peer) >=
 	    sys_maxdist + clock_phi * ULOGTOD(peer->hpoll))
 		rval |= BOGON11;		/* distance exceeded */
+/* Startup bug, https://gitlab.com/NTPsec/ntpsec/issues/68
+ *   introduced with ntp-dev-4.2.7p385
+ * [2085] Fix root distance and root dispersion calculations.
+ */
+        if (!(peer->flags & FLAG_REFCLOCK) && peer->disp >=
+            sys_maxdist + clock_phi * ULOGTOD(peer->hpoll))
+                rval |= BOGON11;                /* Initialization */
 
 	/*
 	 * A loop error occurs if the remote peer is synchronized to the
