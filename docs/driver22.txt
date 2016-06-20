@@ -116,7 +116,7 @@ synchronization without needing the Internet at all.
   leading edge will _always_ be used.
 +flag3 {0 | 1}+::
   Controls the kernel PPS discipline: 0 for disable (default), 1 for
-  enable. Not used under Windows - if the special +serialpps.sys<\tt>
+  enable. Not used under Windows - if the special +serialpps.sys+
   serial port driver is used then kernel PPS will be available and
   used.
 +flag4 {0 | 1}+::
