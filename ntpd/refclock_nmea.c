@@ -462,7 +462,7 @@ nmea_start(
 	devlen = snprintf(device, sizeof(device), DEVICE, unit);
 	if (devlen >= sizeof(device)) {
 		msyslog(LOG_ERR, "%s clock device name too long",
-			refnumtoa(&peer->srcadr));
+			refclock_name(peer));
 		return false; /* buffer overflow */
 	}
 	pp->io.fd = refclock_open(device, baudrate, LDISC_CLK);
@@ -472,7 +472,7 @@ nmea_start(
 			return false;
 	}
 	LOGIF(CLOCKINFO, (LOG_NOTICE, "%s serial %s open at %s bps",
-	      refnumtoa(&peer->srcadr), device, baudtext));
+	      refclock_name(peer), device, baudtext));
 
 	/* succeed if this clock can be added */
 	return io_addclock(&pp->io) != 0;
@@ -555,7 +555,7 @@ nmea_control(
 		} else {
 			up->ppsapi_fd = -1;
 			msyslog(LOG_ERR, "%s PPS device name too long",
-				refnumtoa(&peer->srcadr));
+				refclock_name(peer));
 		}
 		if (-1 == up->ppsapi_fd)
 			up->ppsapi_fd = pp->io.fd;	
@@ -568,7 +568,7 @@ nmea_control(
 				time_pps_destroy(up->atom.handle);
 				msyslog(LOG_WARNING,
 					"%s set PPSAPI params fails",
-					refnumtoa(&peer->srcadr));				
+					refclock_name(peer));
 			}
 			/* note: the PPS I/O handle remains valid until
 			 * flag1 is cleared or the clock is shut down. 
@@ -576,7 +576,7 @@ nmea_control(
 		} else {
 			msyslog(LOG_WARNING,
 				"%s flag1 1 but PPSAPI fails",
-				refnumtoa(&peer->srcadr));
+				refclock_name(peer));
 		}
 	}
 
@@ -815,7 +815,7 @@ nmea_receive(
 
 	case CHECK_INVALID:
 		DPRINTF(1, ("%s invalid data: '%s'\n",
-			refnumtoa(&peer->srcadr), rd_lastcode));
+			refclock_name(peer), rd_lastcode));
 		refclock_report(peer, CEVNT_BADREPLY);
 		return;
 
@@ -824,7 +824,7 @@ nmea_receive(
 
 	default:
 		DPRINTF(1, ("%s gpsread: %d '%s'\n",
-			refnumtoa(&peer->srcadr), rd_lencode,
+			refclock_name(peer), rd_lencode,
 			rd_lastcode));
 		break;
 	}
@@ -890,7 +890,7 @@ nmea_receive(
 		up->cksum_type[sentence] = (uint8_t)checkres;
 	} else {
 		DPRINTF(1, ("%s checksum missing: '%s'\n",
-			refnumtoa(&peer->srcadr), rd_lastcode));
+			refclock_name(peer), rd_lastcode));
 		refclock_report(peer, CEVNT_BADREPLY);
 		up->tally.malformed++;
 		return;
@@ -907,7 +907,7 @@ nmea_receive(
 	}
 
 	DPRINTF(1, ("%s processing %d bytes, timecode '%s'\n",
-		refnumtoa(&peer->srcadr), rd_lencode, rd_lastcode));
+		refclock_name(peer), rd_lencode, rd_lastcode));
 
 	/*
 	 * Grab fields depending on clock string type and possibly wipe
@@ -1003,14 +1003,14 @@ nmea_receive(
 	}
 
 	DPRINTF(1, ("%s effective timecode: %04u-%02u-%02u %02d:%02d:%02d\n",
-		refnumtoa(&peer->srcadr),
+		refclock_name(peer),
 		date.year, date.month, date.monthday,
 		date.hour, date.minute, date.second));
 
 	/* Check if we must enter GPS time mode; log so if we do */
 	if (!up->gps_time && (sentence == NMEA_GPZDG)) {
 		msyslog(LOG_INFO, "%s using GPS time as if it were UTC",
-			refnumtoa(&peer->srcadr));
+			refclock_name(peer));
 		up->gps_time = true;
 	}
 	
@@ -1030,7 +1030,7 @@ nmea_receive(
 	rd_fudge = pp->fudgetime2;
 
 	DPRINTF(1, ("%s using '%s'\n",
-		    refnumtoa(&peer->srcadr), rd_lastcode));
+		    refclock_name(peer), rd_lastcode));
 
 	/* Data will be accepted. Update stats & log data. */
 	up->tally.accepted++;
@@ -1052,7 +1052,7 @@ nmea_receive(
 			peer->precision = PPS_PRECISION;
 			peer->flags |= FLAG_PPS;
 			DPRINTF(2, ("%s PPS_RELATE_PHASE\n",
-				    refnumtoa(&peer->srcadr)));
+				    refclock_name(peer)));
 			up->tally.pps_used++;
 			break;
 			
@@ -1060,7 +1060,7 @@ nmea_receive(
 			up->ppsapi_gate = true;
 			peer->precision = PPS_PRECISION;
 			DPRINTF(2, ("%s PPS_RELATE_EDGE\n",
-				    refnumtoa(&peer->srcadr)));
+				    refclock_name(peer)));
 			break;
 			
 		case PPS_RELATE_NONE:
@@ -1071,7 +1071,7 @@ nmea_receive(
 			 * at the end of the poll cycle we know...
 			 */
 			DPRINTF(2, ("%s PPS_RELATE_NONE\n",
-				    refnumtoa(&peer->srcadr)));
+				    refclock_name(peer)));
 			break;
 		}
 #endif /* HAVE_PPSAPI */
@@ -1215,7 +1215,7 @@ gps_send(
 			       len, beg, dcs);
 		if ((size_t)len >= sizeof(buf)) {
 			DPRINTF(1, ("%s gps_send: buffer overflow for command '%s'\n",
-				    refnumtoa(&peer->srcadr), cmd));
+				    refclock_name(peer), cmd));
 			return;	/* game over player 1 */
 		}
 		cmd = buf;
@@ -1223,7 +1223,7 @@ gps_send(
 		len = strlen(cmd);
 	}
 
-	DPRINTF(1, ("%s gps_send: '%.*s'\n", refnumtoa(&peer->srcadr),
+	DPRINTF(1, ("%s gps_send: '%.*s'\n", refclock_name(peer),
 		len - 2, cmd));
 
 	/* send out the whole stuff */
@@ -1855,7 +1855,7 @@ eval_gps_time(
 		up->epoch_warp = weeks;
 		LOGIF(CLOCKINFO, (LOG_INFO,
 				  "%s Changed GPS epoch warp to %d weeks",
-				  refnumtoa(&peer->srcadr), weeks));
+				  refclock_name(peer), weeks));
 	}
 
 	/* - build result and be done */
