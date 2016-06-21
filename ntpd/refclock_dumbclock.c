@@ -3,11 +3,6 @@
  * that only provides hh:mm:ss (in local time, yet!).
  */
 
-/*
- * Must interpolate back to local time.  Very annoying.
- */
-#define GET_LOCALTIME
-
 #include <config.h>
 #include "ntpd.h"
 #include "ntp_io.h"
