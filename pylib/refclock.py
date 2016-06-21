@@ -130,12 +130,6 @@ refclock_map = {
 		"file":		"hopfser"
 	},
 
-	39: {
-		"descr":	"hopf GPS/DCF77 6039 for PCI-Bus",
-		"define":	"CLOCK_HOPF_PCI",
-		"file":		"hopfpci"
-	},
-
 	40: {
 		"descr":	"JJY Receivers",
 		"define":	"CLOCK_JJY",
