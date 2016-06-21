@@ -38,7 +38,7 @@
 +mode+ 'option'::
   Pass the +option+ to a reference clock driver, where +option+ is an
   integer in the range from 0 to 255, inclusive. This option is valid
-  only with type r addresses.
+  only with refclock addresses.
 
 +noselect+::
   Marks the server as unused, except for display purposes. The server is
