@@ -4356,7 +4356,7 @@ report_event(
 
 		peer->last_event = errlast;
 		peer->num_events++;
-		if (ISREFCLOCKADR(&peer->srcadr))
+		if (IS_PEER_REFCLOCK(peer))
 			src = refnumtoa(&peer->srcadr);
 		else
 			src = stoa(&peer->srcadr);

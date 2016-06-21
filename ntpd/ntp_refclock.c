@@ -162,7 +162,7 @@ refclock_newpeer(
 	 * Check for valid clock address. If already running, shut it
 	 * down first.
 	 */
-	if (!ISREFCLOCKADR(&peer->srcadr)) {
+	if (!IS_PEER_REFCLOCK(peer)) {
 		msyslog(LOG_ERR,
 			"refclock_newpeer: clock address %s invalid",
 			stoa(&peer->srcadr));
@@ -939,19 +939,17 @@ refclock_control(
 	/*
 	 * Check for valid address and running peer
 	 */
-	if (!ISREFCLOCKADR(srcadr))
-		return;
-
-	clktype = (uint8_t)REFCLOCKTYPE(srcadr);
-	unit = REFCLOCKUNIT(srcadr);
-
 	peer = findexistingpeer(srcadr, NULL, NULL, -1, 0);
 
 	if (NULL == peer)
 		return;
 
-	NTP_INSIST(peer->procptr != NULL);
+	if (!IS_PEER_REFCLOCK(peer))
+		return;
+
 	pp = peer->procptr;
+	clktype = peer->refclktype;
+	unit = peer->refclkunit;
 
 	/*
 	 * Initialize requested data
@@ -1048,20 +1046,19 @@ refclock_buginfo(
 	unsigned u;
 
 	/*
-	 * Check for valid address and peer structure
+	 * Check for valid peer structure and address
 	 */
-	if (!ISREFCLOCKADR(srcadr))
-		return;
-
-	clktype = (uint8_t) REFCLOCKTYPE(srcadr);
-	unit = REFCLOCKUNIT(srcadr);
-
 	peer = findexistingpeer(srcadr, NULL, NULL, -1, 0);
 
 	if (NULL == peer || NULL == peer->procptr)
 		return;
 
 	pp = peer->procptr;
+	if (pp == NULL)
+	    return;
+
+	clktype = peer->refclktype;
+	unit = peer->refclkunit;
 
 	/*
 	 * Copy structure values

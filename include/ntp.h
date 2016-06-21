@@ -232,6 +232,15 @@ struct interface {
 #define	PEER_BOGON_MASK	(BOGON10 | BOGON11 | BOGON12 | BOGON13)
 
 /*
+ * Does a peer node represent a reference clock?
+ */
+#ifdef REFCLOCK
+#define IS_PEER_REFCLOCK(p)	((p)->procptr != NULL)
+#else
+#define IS_PEER_REFCLOCK(p)	false
+#endif
+
+/*
  * The peer structure. Holds state information relating to the guys
  * we are peering with. Most of this stuff is from section 3.2 of the
  * spec.

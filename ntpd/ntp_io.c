@@ -3864,7 +3864,7 @@ select_peerinterface(
 	 * This might happen in some systems and would preclude proper
 	 * operation with public key cryptography.
 	 */
-	if (ISREFCLOCKADR(srcadr)) {
+	if (IS_PEER_REFCLOCK(peer)) {
 		ep = loopback_interface;
 	} else if (peer->cast_flags &
 		   (MDF_BCLNT | MDF_ACAST | MDF_MCAST | MDF_BCAST)) {

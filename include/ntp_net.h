@@ -198,7 +198,7 @@ typedef union {
  * We tell reference clocks from real peers by giving the reference
  * clocks an address of the form 127.127.t.u, where t is the type and
  * u is the unit number.  We define some of this here since we will need
- * some sanity checks to make sure this address isn't interpretted as
+ * some sanity checks to make sure this address isn't interpreted as
  * that of a normal peer.
  */
 #define	REFCLOCK_ADDR	0x7f7f0000	/* 127.127.0.0 */
