@@ -9,7 +9,7 @@
   spacing between the first and second packets can be changed with the
   calldelay command to allow additional time for a modem or ISDN call to
   complete. This is designed to improve timekeeping quality with the
-  +server+ command and s addresses.
+  +server+ command.
 
 +iburst+::
   When the server is unreachable, send a burst of six packets instead
