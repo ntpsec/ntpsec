@@ -169,7 +169,9 @@ For security reasons, we will no longer support any refclock that requires
 a closed-source driver to run.  This filtered out the
 Datum/Bancomm/Symmetricom bc600-series GPS/IRIG Receiver,
 the Hopf GPS/DCF77 6039 for PCI-Bus,
-and the Spectracom TSYNC PCI.
+and the Spectracom TSYNC PCI.  The Hopf 6021 driver has also been
+removed because it duplicates support for the 6021 in the generic
+parse driver.
 
 [options="header"]
 [cols="10%,5%,5%,80%",options="header"]
@@ -193,7 +195,6 @@ and the Spectracom TSYNC PCI.
 | link:driver30.html[Type 30] | -     |GPS  | Motorola UT Oncore GPS
 | link:driver31.html[Type 31] | D     |GPS  | Rockwell Jupiter GPS
 | link:driver33.html[Type 33] | D     |DUMB | Dumb Clock
-| link:driver38.html[Type 38] | D     |hopf | Hopf 6021 and compatible
 | link:driver40.html[Type 40] | T     |JJY  | JJY Receivers
 | link:driver42.html[Type 42] | -     |GPS  | Zyfer GPStarplus Receiver
 | link:driver44.html[Type 44] | -     |neol | NeoClock4X - DCF77 / TDF

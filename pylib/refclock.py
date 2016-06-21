@@ -124,12 +124,6 @@ refclock_map = {
 		"file":		"dumbclock"
 	},
 
-	38: {
-		"descr":	"hopf GPS/DCF77 6021/komp for Serial Line",
-		"define":	"CLOCK_HOPF_SERIAL",
-		"file":		"hopfser"
-	},
-
 	40: {
 		"descr":	"JJY Receivers",
 		"define":	"CLOCK_JJY",
