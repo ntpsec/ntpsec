@@ -342,7 +342,6 @@ extern char *	ntp_strerror	(int e);
 #define CLOCK_CHRONOLOG
 #define CLOCK_DUMBCLOCK
 #define CLOCK_HOPF_SERIAL	/* device 38, hopf DCF77/GPS serial line receiver  */
-#define CLOCK_HOPF_PCI		/* device 39, hopf DCF77/GPS PCI-Bus receiver  */
 #define CLOCK_JUPITER
 #define CLOCK_LOCAL
 #define CLOCK_NMEA

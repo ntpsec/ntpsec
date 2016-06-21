@@ -295,7 +295,6 @@
     <ClCompile Include="..\..\..\..\ntpd\refclock_dumbclock.c" />
     <ClCompile Include="..\..\..\..\ntpd\refclock_fg.c" />
     <ClCompile Include="..\..\..\..\ntpd\refclock_gpsvme.c" />
-    <ClCompile Include="..\..\..\..\ntpd\refclock_hopfpci.c" />
     <ClCompile Include="..\..\..\..\ntpd\refclock_hopfser.c" />
     <ClCompile Include="..\..\..\..\ntpd\refclock_hpgps.c" />
     <ClCompile Include="..\..\..\..\ntpd\refclock_irig.c" />
@@ -320,7 +319,6 @@
     <ClCompile Include="..\..\..\..\ntpd\refclock_ulink.c" />
     <ClCompile Include="..\..\..\..\ntpd\refclock_wwv.c" />
     <ClCompile Include="..\..\..\..\ntpd\refclock_zyfer.c" />
-    <ClCompile Include="..\..\ntpd\hopf_PCI_io.c" />
     <ClCompile Include="..\..\ntpd\ntp_iocompletionport.c" />
     <ClCompile Include="..\..\ntpd\ntservice.c" />
     <ClCompile Include="..\..\ntpd\nt_clockstuff.c" />
@@ -422,7 +420,6 @@
     <ClInclude Include="..\..\include\arpa\inet.h" />
     <ClInclude Include="..\..\include\clockstuff.h" />
     <ClInclude Include="..\..\include\config.h" />
-    <ClInclude Include="..\..\include\hopf_PCI_io.h" />
     <ClInclude Include="..\..\include\ntp_iocompletionport.h" />
     <ClInclude Include="..\..\include\ntp_timer.h" />
     <ClInclude Include="..\..\include\ntservice.h" />

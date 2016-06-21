@@ -441,10 +441,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\include\hopf_PCI_io.h"
-				>
-			</File>
-			<File
 				RelativePath="..\..\..\..\include\ieee754io.h"
 				>
 			</File>
@@ -762,10 +758,6 @@
 			Name="Reference Clock"
 			>
 			<File
-				RelativePath="..\..\ntpd\hopf_PCI_io.c"
-				>
-			</File>
-			<File
 				RelativePath="..\..\..\..\ntpd\refclock_acts.c"
 				>
 			</File>
@@ -815,10 +807,6 @@
 			</File>
 			<File
 				RelativePath="..\..\..\..\ntpd\refclock_gpsvme.c"
-				>
-			</File>
-			<File
-				RelativePath="..\..\..\..\ntpd\refclock_hopfpci.c"
 				>
 			</File>
 			<File

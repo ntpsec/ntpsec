@@ -99,9 +99,6 @@
     <ClCompile Include="..\..\ntpd\ntservice.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\ntpd\hopf_PCI_io.c">
-      <Filter>Reference Clock</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\ntpd\refclock_acts.c">
       <Filter>Reference Clock</Filter>
     </ClCompile>
@@ -139,9 +136,6 @@
       <Filter>Reference Clock</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\ntpd\refclock_gpsvme.c">
-      <Filter>Reference Clock</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\ntpd\refclock_hopfpci.c">
       <Filter>Reference Clock</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\ntpd\refclock_hopfser.c">
@@ -297,9 +291,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\ntpd\declcond.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\hopf_PCI_io.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\ieee754io.h">
