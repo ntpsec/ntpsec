@@ -884,7 +884,7 @@ newpeer(
 	peer->timereachable = current_time;
 	peer->timereceived = current_time;
 
-	if (ISREFCLOCKADR(&peer->srcadr)) {
+	if (IS_PEER_REFCLOCK(peer)) {
 #ifdef REFCLOCK
 		/*
 		 * We let the reference clock support do clock
