@@ -122,12 +122,6 @@ extern struct refclock refclock_dumbclock;
 #define refclock_dumbclock refclock_none
 #endif
 
-#ifdef CLOCK_HOPF_SERIAL
-extern	struct refclock	refclock_hopfser;
-#else
-#define	refclock_hopfser refclock_none
-#endif
-
 #ifdef CLOCK_JJY
 extern	struct refclock	refclock_jjy;
 #else
@@ -196,7 +190,7 @@ struct refclock * const refclock_conf[] = {
 	&refclock_none,		/* 35 was: REFCLOCK_PCF */
 	&refclock_none,		/* 36 was: REFCLOCK_WWV_AUDIO */
 	&refclock_none,		/* 37 was: REFCLOCK_FG */
-	&refclock_hopfser,	/* 38 REFCLK_HOPF_SERIAL */
+	&refclock_none,		/* 38 was: REFCLK_HOPF_SERIAL */
 	&refclock_none,		/* 39 was: REFCLK_HOPF_PCI */
 	&refclock_jjy,		/* 40 REFCLK_JJY */
 	&refclock_none,		/* 41 was: REFCLK_TT560 */

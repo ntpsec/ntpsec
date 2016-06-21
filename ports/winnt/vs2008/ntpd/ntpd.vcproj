@@ -810,10 +810,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\..\ntpd\refclock_hopfser.c"
-				>
-			</File>
-			<File
 				RelativePath="..\..\..\..\ntpd\refclock_hpgps.c"
 				>
 			</File>
