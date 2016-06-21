@@ -18,29 +18,29 @@ link-local IPV6 address with an interface specified in
   name or an IP address in dotted-quad notation.
 
 +pool+::
-  For type s addresses, this command mobilizes a persistent client mode
-  association with a number of remote servers. In this mode the local
-  clock can synchronized to the remote server, but the remote server can
-  never be synchronized to the local clock.
+  For server addresses, this command mobilizes a persistent client
+  mode association with a number of remote servers. In this mode the
+  local clock can synchronized to the remote server, but the remote
+  server can never be synchronized to the local clock.
 
 +server+::
-  For type s and r addresses, this command mobilizes a persistent client
+  For server and refclock addresses, this command mobilizes a persistent client
   mode association with the specified remote server or local radio
   clock. In this mode the local clock can synchronized to the remote
   server, but the remote server can never be synchronized to the local
-  clock. This command should _not_ be used for type b or m addresses.
+  clock. This command should _not_ be used for broadcast or multicast addresses.
 
 +peer+::
-  For type s addresses (only), this command mobilizes a persistent
+  For server addresses (only), this command mobilizes a persistent
   symmetric-active mode association with the specified remote peer. In
   this mode the local clock can be synchronized to the remote peer or
   the remote peer can be synchronized to the local clock. This is useful
   in a network of servers where, depending on various failure scenarios,
   either the local or remote peer may be the better source of time. This
-  command should NOT be used for type b, m or r addresses.
+  command should NOT be used for broadcast, multicast, or refclock addresses.
 
 +broadcast+::
-  For type b and m addresses (only), this command mobilizes a persistent
+  For broadcast and multicast addresses (only), this command mobilizes a persistent
   broadcast mode association. Multiple commands can be used to specify
   multiple local broadcast interfaces (subnets) and/or multiple
   multicast groups. Note that local broadcast messages go only to the
@@ -57,7 +57,7 @@ link-local IPV6 address with an interface specified in
   _broadcastclient_ or _multicastclient_ commands below.
 
 +manycastclient+::
-  For type m addresses (only), this command mobilizes a manycast client
+  For multicast addresses (only), this command mobilizes a manycast client
   mode association for the multicast address specified. In this case a
   specific address must be supplied which matches the address used on
   the _manycastserver_ command for the designated manycast servers. The
