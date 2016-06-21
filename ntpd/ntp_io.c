@@ -3733,12 +3733,12 @@ input_handler(
 			 */
 			if (buflen < 0 && EAGAIN != errno) {
 				saved_errno = errno;
-				clk = refnumtoa(&rp->srcclock->srcadr);
+				clk = refclock_name(rp->srcclock);
 				errno = saved_errno;
 				msyslog(LOG_ERR, "%s read: %m", clk);
 				maintain_activefds(fd, true);
 			} else if (0 == buflen) {
-				clk = refnumtoa(&rp->srcclock->srcadr);
+				clk = refclock_name(rp->srcclock);
 				msyslog(LOG_ERR, "%s read EOF", clk);
 				maintain_activefds(fd, true);
 			} else {

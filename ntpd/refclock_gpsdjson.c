@@ -511,7 +511,7 @@ gpsd_start(
 		++up->refcount;
 
 		/* initialize the unit structure */
-		up->logname  = estrdup(refnumtoa(&peer->srcadr));
+		up->logname  = estrdup(refclock_name(peer));
 		up->unit     = unit & 0x7F;
 		up->fdt      = -1;
 		up->addr     = s_gpsd_addr;
@@ -566,7 +566,7 @@ gpsd_start(
 
 	LOGIF(CLOCKINFO,
 	      (LOG_NOTICE, "%s: startup, device is '%s'",
-	       refnumtoa(&peer->srcadr), up->device));
+	       refclock_name(peer), up->device));
 	up->mode = MODE_OP_MODE(peer->ttl);
 	if (up->mode > MODE_OP_MAXVAL)
 		up->mode = 0;
@@ -632,7 +632,7 @@ gpsd_shutdown(
 	}
 	pp->unitptr = NULL;
 	LOGIF(CLOCKINFO,
-	      (LOG_NOTICE, "%s: shutdown", refnumtoa(&peer->srcadr)));
+	      (LOG_NOTICE, "%s: shutdown", refclock_name(peer)));
 }
 
 /* ------------------------------------------------------------------ */

@@ -10,6 +10,7 @@
 #include "ntp_refclock.h"
 #include "ntp_stdlib.h"
 #include "ntp_assert.h"
+#include "lib_strbuf.h"
 
 #include <stdio.h>
 
@@ -116,6 +117,27 @@ refclock_report(
 		pp->currentstatus = (uint8_t)code;
 		report_event(PEVNT_CLOCK, peer, ceventstr(code));
 	}
+}
+
+char *
+refclock_name(
+	struct peer *peer
+	)
+{
+	char *buf;
+	const char *rclock;
+
+	LIB_GETBUF(buf);
+	rclock = peer->procptr->clockdesc;
+
+	if (rclock != NULL)
+		snprintf(buf, LIB_BUFLENGTH, "%s(%d)",
+			 rclock, peer->refclkunit);
+	else
+		snprintf(buf, LIB_BUFLENGTH, "REFCLK(%d,%d)",
+			 peer->refclktype, peer->refclkunit);
+
+	return buf;
 }
 
 
