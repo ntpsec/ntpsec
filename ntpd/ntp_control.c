@@ -4357,7 +4357,7 @@ report_event(
 		peer->last_event = errlast;
 		peer->num_events++;
 #ifdef REFCLOCK
-		if (ISREFCLOCKADR(&peer->srcadr))
+		if (IS_PEER_REFCLOCK(peer))
 			src = refclock_name(peer);
 		else
 #endif /* REFCLOCK */ 
