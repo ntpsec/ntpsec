@@ -1,7 +1,9 @@
 # Simplest possible refclock configuration for sites with a GPS primary source.
 #
-# Delivers in-band GPS time (not very good, likely to have jitter in the 100s of
-# miliseconds) on one unit, and PPS time (probaly good to 1 ms or less( on
+# Uses the shared-memory driver, accepting fixes from a running gpsd
+# instance watching one PPS-capable GPS. Accepts in-band GPS time (not
+# very good, likely to have jitter in the 100s of milliseconds) on one
+# unit, and PPS time (almost certainly good to 1 ms or less) on
 # another.  Prefers the latter.
 
 # GPS Serial data reference (NTP0)
