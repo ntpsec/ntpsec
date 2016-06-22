@@ -232,7 +232,7 @@ extern	void	init_restrict	(void);
 extern	u_short	restrictions	(sockaddr_u *);
 extern	void	hack_restrict	(int, sockaddr_u *, sockaddr_u *,
 				 u_short, u_short, u_long);
-extern	void	restrict_source	(sockaddr_u *, int, u_long);
+extern	void	restrict_source	(sockaddr_u *, bool, u_long);
 
 /* ntp_timer.c */
 extern	void	init_timer	(void);

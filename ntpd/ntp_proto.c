@@ -3064,7 +3064,7 @@ pool_xmit(
 		return;	/* out of addresses, re-query DNS next poll */
 	restrict_mask = restrictions(rmtadr);
 	if (RES_FLAGS & restrict_mask)
-		restrict_source(rmtadr, 0,
+		restrict_source(rmtadr, false,
 				current_time + POOL_SOLICIT_WINDOW + 1);
 	lcladr = findinterface(rmtadr);
 	memset(&xpkt, 0, sizeof(xpkt));
