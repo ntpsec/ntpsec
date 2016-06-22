@@ -416,6 +416,7 @@ typedef struct poll_info
  */
 #define	DCFUA31_ROOTDELAY	0.0  /* 0 */
 #define	DCFUA31_BASEDELAY	0.010  /* 10.7421875ms: 10 ms (+/- 3 ms) */
+#define DCFUA31_NAME		"MEINBERG_C51"
 #define	DCFUA31_DESCRIPTION	"Meinberg DCF77 C51 or compatible"
 #define DCFUA31_MAXUNSYNC       60*30       /* only trust clock for 1/2 hour */
 #define DCFUA31_SPEED		MBG_SPEED
@@ -432,6 +433,7 @@ typedef struct poll_info
  */
 #define	DCFPZF535_ROOTDELAY	0.0
 #define	DCFPZF535_BASEDELAY	0.001968  /* 1.968ms +- 104us (oscilloscope) - relative to start (end of STX) */
+#define	DCFPZF535_NAME		"MEINBERG_5XX"
 #define	DCFPZF535_DESCRIPTION	"Meinberg DCF PZF 535/509 / TCXO"
 #define DCFPZF535_MAXUNSYNC     60*60*12           /* only trust clock for 12 hours
 						    * @ 5e-8df/f we have accumulated
@@ -451,6 +453,7 @@ typedef struct poll_info
  */
 #define	DCFPZF535OCXO_ROOTDELAY	0.0
 #define	DCFPZF535OCXO_BASEDELAY	0.001968 /* 1.968ms +- 104us (oscilloscope) - relative to start (end of STX) */
+#define	DCFPZF535OCXO_NAME	"MEINBERG_5XX"
 #define	DCFPZF535OCXO_DESCRIPTION "Meinberg DCF PZF 535/509 / OCXO"
 #define DCFPZF535OCXO_MAXUNSYNC     60*60*96       /* only trust clock for 4 days
 						    * @ 5e-9df/f we have accumulated
@@ -473,6 +476,7 @@ static  bool    gps16x_poll_init (struct parseunit *);
 
 #define	GPS16X_ROOTDELAY	0.0         /* nothing here */
 #define	GPS16X_BASEDELAY	0.001968         /* XXX to be fixed ! 1.968ms +- 104us (oscilloscope) - relative to start (end of STX) */
+#define	GPS16X_NAME             "GPS_MEINBERG"
 #define	GPS16X_DESCRIPTION      "Meinberg GPS receiver"
 #define GPS16X_MAXUNSYNC        60*60*96       /* only trust clock for 4 days
 						* @ 5e-9df/f we have accumulated
@@ -506,6 +510,7 @@ static poll_info_t gps16x_pollinfo = { GPS16X_POLLRATE, GPS16X_POLLCMD, GPS16X_C
  */
 #define DCF7000_ROOTDELAY	0.0 /* 0 */
 #define DCF7000_BASEDELAY	0.405 /* slow blow */
+#define DCF7000_NAME		"ELV_DCF7000"
 #define DCF7000_DESCRIPTION	"ELV DCF7000"
 #define DCF7000_MAXUNSYNC	(60*5) /* sorry - but it just was not build as a clock */
 #define DCF7000_SPEED		(B9600)
@@ -537,6 +542,7 @@ static poll_info_t wsdcf_pollinfo = { WS_POLLRATE, WS_POLLCMD, WS_CMDSIZE };
 #define WSDCF_DATA		((void *)(&wsdcf_pollinfo))
 #define	WSDCF_ROOTDELAY		0.0	/* 0 */
 #define	WSDCF_BASEDELAY	 	0.010	/*  ~  10ms */
+#define WSDCF_NAME		"WSDCF"
 #define WSDCF_DESCRIPTION	"WS/DCF Receiver"
 #define WSDCF_FORMAT		"Schmid"
 #define WSDCF_MAXUNSYNC		(60*60)	/* assume this beast hold at 1 h better than 2 ms XXX-must verify */
@@ -575,23 +581,27 @@ static poll_info_t wsdcf_pollinfo = { WS_POLLRATE, WS_POLLCMD, WS_CMDSIZE };
  * (~40DM - roughly $30 ) followed by a level converter for RS232
  */
 #define CONRAD_BASEDELAY	0.292 /* Conrad receiver @ 50 Baud on a Sun */
+#define CONRAD_NAME		"RAWDCF_CONRAD"
 #define CONRAD_DESCRIPTION	"RAW DCF77 CODE (Conrad DCF77 receiver module)"
 
 /* Gude Analog- und Digitalsystem GmbH 'Expert mouseCLOCK USB v2.0' */
 #define GUDE_EMC_USB_V20_SPEED            (B4800)
 #define GUDE_EMC_USB_V20_BASEDELAY        0.425 /* USB serial<->USB converter FTDI232R */
+#define GUDE_EMC_USB_V20_NAME             "RAWDCF_MOUSECLOCK"
 #define GUDE_EMC_USB_V20_DESCRIPTION      "RAW DCF77 CODE (Expert mouseCLOCK USB v2.0)"
 
 /*
  * TimeBrick receiver
  */
 #define TIMEBRICK_BASEDELAY	0.210 /* TimeBrick @ 50 Baud on a Sun */
+#define TIMEBRICK_NAME		"RAWDCF_TIMEBRICK"
 #define TIMEBRICK_DESCRIPTION	"RAW DCF77 CODE (TimeBrick)"
 
 /*
  * IGEL:clock receiver
  */
 #define IGELCLOCK_BASEDELAY	0.258 /* IGEL:clock receiver */
+#define IGELCLOCK_NAME		"RAWDCF_IGEL"
 #define IGELCLOCK_DESCRIPTION	"RAW DCF77 CODE (IGEL:clock)"
 #define IGELCLOCK_SPEED		(B1200)
 #define IGELCLOCK_CFLAG		(CS8|CREAD|HUPCL|CLOCAL)
@@ -601,6 +611,7 @@ static poll_info_t wsdcf_pollinfo = { WS_POLLRATE, WS_POLLCMD, WS_CMDSIZE };
  * (like Expert mouse clock)
  */
 static	bool	rawdcf_init_1	(struct parseunit *);
+#define RAWDCFDTRSET_NAME		"RAW_DCF77"
 #define RAWDCFDTRSET_DESCRIPTION	"RAW DCF77 CODE (DTR SET/RTS CLR)"
 #define RAWDCFDTRSET75_DESCRIPTION	"RAW DCF77 CODE (DTR SET/RTS CLR @ 75 baud)"
 #define RAWDCFDTRSET_INIT 		rawdcf_init_1
@@ -610,6 +621,7 @@ static	bool	rawdcf_init_1	(struct parseunit *);
  * DTR CLR and RTS SET
  */
 static	bool	rawdcf_init_2	(struct parseunit *);
+#define RAWDCFDTRCLRRTSSET_NAME		"RAW_DCF77"
 #define RAWDCFDTRCLRRTSSET_DESCRIPTION	"RAW DCF77 CODE (DTR CLR/RTS SET)"
 #define RAWDCFDTRCLRRTSSET75_DESCRIPTION "RAW DCF77 CODE (DTR CLR/RTS SET @ 75 baud)"
 #define RAWDCFDTRCLRRTSSET_INIT	rawdcf_init_2
@@ -689,6 +701,9 @@ static	void	trimbletsip_event	(struct parseunit *, int);
 #define TRIMBLETAIP_BASEDELAY        0.0
 #define TRIMBLETSIP_BASEDELAY        0.020	/* GPS time message latency */
 
+#define TRIMBLETAIP_NAME	     "GPS_TAIP"
+#define TRIMBLETSIP_NAME	     "GPS_TSIP"
+
 #define TRIMBLETAIP_DESCRIPTION      "Trimble GPS (TAIP) receiver"
 #define TRIMBLETSIP_DESCRIPTION      "Trimble GPS (TSIP) receiver"
 
@@ -713,6 +728,7 @@ static poll_info_t rcc8000_pollinfo = { RCC_POLLRATE, RCC_POLLCMD, RCC_CMDSIZE }
 #define RCC8000_ROOTDELAY       0.0
 #define RCC8000_BASEDELAY       0.0
 #define RCC8000_ID              MSF_ID
+#define RCC8000_NAME            "MSF_RCC8000"
 #define RCC8000_DESCRIPTION     "RCC 8000 MSF Receiver"
 #define RCC8000_FORMAT          "Radiocode RCC8000"
 #define RCC8000_MAXUNSYNC       (60*60) /* should be ok for an hour */
@@ -730,6 +746,7 @@ static poll_info_t rcc8000_pollinfo = { RCC_POLLRATE, RCC_POLLCMD, RCC_CMDSIZE }
  */
 #define HOPF6021_ROOTDELAY	0.0
 #define HOPF6021_BASEDELAY	0.0
+#define HOPF6021_NAME		"HOPF_6021"
 #define HOPF6021_DESCRIPTION	"HOPF 6021"
 #define HOPF6021_FORMAT         "hopf Funkuhr 6021"
 #define HOPF6021_MAXUNSYNC	(60*60)  /* should be ok for an hour */
@@ -749,6 +766,7 @@ static poll_info_t rcc8000_pollinfo = { RCC_POLLRATE, RCC_POLLCMD, RCC_CMDSIZE }
 #define COMPUTIME_ROOTDELAY   0.0
 #define COMPUTIME_BASEDELAY   0.0
 #define COMPUTIME_ID          DCF_ID
+#define COMPUTIME_NAME        "COMPUTIME"
 #define COMPUTIME_DESCRIPTION "Diem's Computime receiver"
 #define COMPUTIME_FORMAT      "Diem's Computime Radio Clock"
 #define COMPUTIME_TYPE        DCF_TYPE
@@ -768,6 +786,7 @@ static poll_info_t rcc8000_pollinfo = { RCC_POLLRATE, RCC_POLLCMD, RCC_CMDSIZE }
 #define VARITEXT_ROOTDELAY   0.0
 #define VARITEXT_BASEDELAY   0.0
 #define VARITEXT_ID          MSF_ID
+#define VARITEXT_NAME        "VARITEXT"
 #define VARITEXT_DESCRIPTION "Varitext receiver"
 #define VARITEXT_FORMAT      "Varitext Radio Clock"
 #define VARITEXT_TYPE        DCF_TYPE
@@ -798,6 +817,7 @@ static poll_info_t sel240x_pollinfo = { SEL240X_POLLRATE,
 #define SEL240X_ROOTDELAY	0.0
 #define SEL240X_BASEDELAY	0.0
 #define SEL240X_ID		GPS_ID
+#define SEL240X_NAME		"SEL240X"
 #define SEL240X_DESCRIPTION	"SEL240x Satellite Synchronized Clock"
 #define SEL240X_FORMAT		"SEL B8"
 #define SEL240X_MAXUNSYNC	60*60*12 /* only trust clock for 12 hours */
@@ -822,7 +842,8 @@ static struct parse_clockinfo
 	double    cl_basedelay;		/* current offset by which the RS232
 				time code is delayed from the actual time */
 	const char *cl_id;		/* ID code */
-	const char *cl_description;		/* device name */
+	const char *cl_name;		/* device name (tag for logging) */
+	const char *cl_description;	/* device description */
 	const char *cl_format;		/* fixed format */
 	uint8_t  cl_type;		/* clock type (ntp control) */
 	u_long  cl_maxunsync;		/* time to trust oscillator after losing synch */
@@ -846,6 +867,7 @@ static struct parse_clockinfo
 		DCFPZF535_ROOTDELAY,
 		DCFPZF535_BASEDELAY,
 		DCF_P_ID,
+		DCFPZF535_NAME,
 		DCFPZF535_DESCRIPTION,
 		DCFPZF535_FORMAT,
 		DCF_TYPE,
@@ -869,6 +891,7 @@ static struct parse_clockinfo
 		DCFPZF535OCXO_ROOTDELAY,
 		DCFPZF535OCXO_BASEDELAY,
 		DCF_P_ID,
+		DCFPZF535OCXO_NAME,
 		DCFPZF535OCXO_DESCRIPTION,
 		DCFPZF535OCXO_FORMAT,
 		DCF_TYPE,
@@ -892,6 +915,7 @@ static struct parse_clockinfo
 		DCFUA31_ROOTDELAY,
 		DCFUA31_BASEDELAY,
 		DCF_A_ID,
+		DCFUA31_NAME,
 		DCFUA31_DESCRIPTION,
 		DCFUA31_FORMAT,
 		DCF_TYPE,
@@ -915,6 +939,7 @@ static struct parse_clockinfo
 		DCF7000_ROOTDELAY,
 		DCF7000_BASEDELAY,
 		DCF_A_ID,
+		DCF7000_NAME,
 		DCF7000_DESCRIPTION,
 		DCF7000_FORMAT,
 		DCF_TYPE,
@@ -938,6 +963,7 @@ static struct parse_clockinfo
 		WSDCF_ROOTDELAY,
 		WSDCF_BASEDELAY,
 		DCF_A_ID,
+		WSDCF_NAME,
 		WSDCF_DESCRIPTION,
 		WSDCF_FORMAT,
 		DCF_TYPE,
@@ -961,6 +987,7 @@ static struct parse_clockinfo
 		RAWDCF_ROOTDELAY,
 		CONRAD_BASEDELAY,
 		DCF_A_ID,
+		CONRAD_NAME,
 		CONRAD_DESCRIPTION,
 		RAWDCF_FORMAT,
 		DCF_TYPE,
@@ -984,6 +1011,7 @@ static struct parse_clockinfo
 		RAWDCF_ROOTDELAY,
 		TIMEBRICK_BASEDELAY,
 		DCF_A_ID,
+		TIMEBRICK_NAME,
 		TIMEBRICK_DESCRIPTION,
 		RAWDCF_FORMAT,
 		DCF_TYPE,
@@ -1007,6 +1035,7 @@ static struct parse_clockinfo
 		GPS16X_ROOTDELAY,
 		GPS16X_BASEDELAY,
 		GPS16X_ID,
+		GPS16X_NAME,
 		GPS16X_DESCRIPTION,
 		GPS16X_FORMAT,
 		GPS_TYPE,
@@ -1030,6 +1059,7 @@ static struct parse_clockinfo
 		RAWDCF_ROOTDELAY,
 		IGELCLOCK_BASEDELAY,
 		DCF_A_ID,
+		IGELCLOCK_NAME,
 		IGELCLOCK_DESCRIPTION,
 		RAWDCF_FORMAT,
 		DCF_TYPE,
@@ -1057,6 +1087,7 @@ static struct parse_clockinfo
 		TRIMBLETAIP_ROOTDELAY,
 		TRIMBLETAIP_BASEDELAY,
 		TRIMBLETAIP_ID,
+		TRIMBLETAIP_NAME,
 		TRIMBLETAIP_DESCRIPTION,
 		TRIMBLETAIP_FORMAT,
 		GPS_TYPE,
@@ -1084,6 +1115,7 @@ static struct parse_clockinfo
 		TRIMBLETSIP_ROOTDELAY,
 		TRIMBLETSIP_BASEDELAY,
 		TRIMBLETSIP_ID,
+		TRIMBLETSIP_NAME,
 		TRIMBLETSIP_DESCRIPTION,
 		TRIMBLETSIP_FORMAT,
 		GPS_TYPE,
@@ -1107,6 +1139,7 @@ static struct parse_clockinfo
 		RCC8000_ROOTDELAY,
 		RCC8000_BASEDELAY,
 		RCC8000_ID,
+		RCC8000_NAME,
 		RCC8000_DESCRIPTION,
 		RCC8000_FORMAT,
 		DCF_TYPE,
@@ -1130,6 +1163,7 @@ static struct parse_clockinfo
 		HOPF6021_ROOTDELAY,
 		HOPF6021_BASEDELAY,
 		DCF_ID,
+		HOPF6021_NAME,
 		HOPF6021_DESCRIPTION,
 		HOPF6021_FORMAT,
 		DCF_TYPE,
@@ -1153,6 +1187,7 @@ static struct parse_clockinfo
 		COMPUTIME_ROOTDELAY,
 		COMPUTIME_BASEDELAY,
 		COMPUTIME_ID,
+		COMPUTIME_NAME,
 		COMPUTIME_DESCRIPTION,
 		COMPUTIME_FORMAT,
 		COMPUTIME_TYPE,
@@ -1176,6 +1211,7 @@ static struct parse_clockinfo
 		RAWDCF_ROOTDELAY,
 		RAWDCF_BASEDELAY,
 		DCF_A_ID,
+		RAWDCFDTRSET_NAME,
 		RAWDCFDTRSET_DESCRIPTION,
 		RAWDCF_FORMAT,
 		DCF_TYPE,
@@ -1200,7 +1236,8 @@ static struct parse_clockinfo
 		11.0 /* bits */ / 9600,		/* current offset by which the RS232
 				           	time code is delayed from the actual time */
 		DCF_ID,				/* ID code */
-		"WHARTON 400A Series clock",	/* device name */
+		"WHARTON400A",
+		"WHARTON 400A Series clock",	/* device description */
 		"WHARTON 400A Series clock Output Format 1",	/* fixed format */
 			/* Must match a format-name in a libparse/clk_xxx.c file */
 		DCF_TYPE,			/* clock type (ntp control) */
@@ -1224,6 +1261,7 @@ static struct parse_clockinfo
 		RAWDCF_ROOTDELAY,
 		RAWDCF_BASEDELAY,
 		DCF_A_ID,
+		RAWDCFDTRCLRRTSSET_NAME,
 		RAWDCFDTRCLRRTSSET_DESCRIPTION,
 		RAWDCF_FORMAT,
 		DCF_TYPE,
@@ -1247,6 +1285,7 @@ static struct parse_clockinfo
                 VARITEXT_ROOTDELAY,
                 VARITEXT_BASEDELAY,
                 VARITEXT_ID,
+                VARITEXT_NAME,
                 VARITEXT_DESCRIPTION,
                 VARITEXT_FORMAT,
                 VARITEXT_TYPE,
@@ -1270,6 +1309,7 @@ static struct parse_clockinfo
 		GPS16X_ROOTDELAY,
 		GPS16X_BASEDELAY,
 		GPS16X_ID,
+		GPS16X_NAME,
 		GPS16X_DESCRIPTION,
 		GPS16X_FORMAT,
 		GPS_TYPE,
@@ -1293,6 +1333,7 @@ static struct parse_clockinfo
 		RAWDCF_ROOTDELAY,
 		GUDE_EMC_USB_V20_BASEDELAY,
 		DCF_A_ID,
+		GUDE_EMC_USB_V20_NAME,
 		GUDE_EMC_USB_V20_DESCRIPTION,
 		RAWDCF_FORMAT,
 		DCF_TYPE,
@@ -1316,6 +1357,7 @@ static struct parse_clockinfo
 		RAWDCF_ROOTDELAY,
 		RAWDCF_BASEDELAY,
 		DCF_A_ID,
+		RAWDCFDTRSET_NAME,
 		RAWDCFDTRSET75_DESCRIPTION,
 		RAWDCF_FORMAT,
 		DCF_TYPE,
@@ -1340,6 +1382,7 @@ static struct parse_clockinfo
 		RAWDCF_ROOTDELAY,
 		RAWDCF_BASEDELAY,
 		DCF_A_ID,
+		RAWDCFDTRCLRRTSSET_NAME,
 		RAWDCFDTRCLRRTSSET75_DESCRIPTION,
 		RAWDCF_FORMAT,
 		DCF_TYPE,
@@ -1363,6 +1406,7 @@ static struct parse_clockinfo
 		DCFUA31_ROOTDELAY,
 		DCFUA31_BASEDELAY,
 		DCF_A_ID,
+		DCFUA31_NAME,
 		DCFUA31_DESCRIPTION,
 		DCFUA31_FORMAT,
 		DCF_TYPE,
@@ -1386,6 +1430,7 @@ static struct parse_clockinfo
 		GPS16X_ROOTDELAY,
 		GPS16X_BASEDELAY,
 		GPS16X_ID,
+		GPS16X_NAME,
 		GPS16X_DESCRIPTION,
 		GPS16X_FORMAT,
 		GPS_TYPE,
@@ -1409,6 +1454,7 @@ static struct parse_clockinfo
 		SEL240X_ROOTDELAY,
 		SEL240X_BASEDELAY,
 		SEL240X_ID,
+		SEL240X_NAME,
 		SEL240X_DESCRIPTION,
 		SEL240X_FORMAT,
 		GPS_TYPE,
@@ -2552,6 +2598,7 @@ parse_start(
 	parse->generic->fudgetime2 = 0.0;
 	parse->ppsphaseadjust = parse->generic->fudgetime2;
 
+	parse->generic->clockname  = parse->parse_type->cl_name;
 	parse->generic->clockdesc  = parse->parse_type->cl_description;
 
 	peer->rootdelay       = parse->parse_type->cl_rootdelay;

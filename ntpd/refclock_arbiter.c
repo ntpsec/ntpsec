@@ -88,6 +88,7 @@
 #define	SPEED232	B9600	/* uart speed (9600 baud) */
 #define	PRECISION	(-20)	/* precision assumed (about 1 us) */
 #define	REFID		"GPS "	/* reference ID */
+#define	NAME		"GPS_ARBITER"
 #define	DESCRIPTION	"Arbiter 1088A/B GPS Receiver" /* WRU */
 #define	LENARB		24	/* format B5 timecode length */
 #define MAXSTA		40	/* max length of status string */
@@ -173,6 +174,7 @@ arb_start(
 	 * Initialize miscellaneous variables
 	 */
 	peer->precision = PRECISION;
+	pp->clockname = NAME;
 	pp->clockdesc = DESCRIPTION;
 	memcpy((char *)&pp->refid, REFID, REFIDLEN);
 	peer->sstclktype = CTL_SST_TS_UHF;

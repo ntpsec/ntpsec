@@ -299,7 +299,8 @@ struct jplat {
  * Radio interface parameters
  */
 #define	PRECISION	(-18)	/* precision assumed (about 4 us) */
-#define	REFID	"GPS\0"		/* reference id */
+#define	REFID		"GPS\0"		/* reference id */
+#define	NAME		"GPS_JUPITER"
 #define	DESCRIPTION	"Rockwell Jupiter GPS Receiver" /* who we are */
 #define	DEFFUDGETIME	0	/* default fudge time (ms) */
 
@@ -430,6 +431,7 @@ jupiter_start(
 	 * Initialize miscellaneous variables
 	 */
 	peer->precision = PRECISION;
+	pp->clockname = NAME;
 	pp->clockdesc = DESCRIPTION;
 	memcpy((char *)&pp->refid, REFID, REFIDLEN);
 	peer->sstclktype = CTL_SST_TS_UHF;

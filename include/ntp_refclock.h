@@ -153,6 +153,7 @@ struct refclockproc {
 	uint8_t	currentstatus;	/* clock status */
 	uint8_t	lastevent;	/* last exception event */
 	uint8_t	type;		/* clock type */
+	const char *clockname;	/* clock name (tag for logging) */
 	const char *clockdesc;	/* clock description */
 	u_long	nextaction;	/* local activity timeout */
 	void	(*action)(struct peer *); /* timeout callback */

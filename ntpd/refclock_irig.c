@@ -147,6 +147,7 @@
 #define	DEVICE_AUDIO	"/dev/audio" /* audio device name */
 #define	PRECISION	(-17)	/* precision assumed (about 10 us) */
 #define	REFID		"IRIG"	/* reference ID */
+#define	NAME		"IRIG_AUDIO"
 #define	DESCRIPTION	"Generic IRIG Audio Driver" /* WRU */
 #define	AUDIO_BUFSIZ	320	/* audio buffer size (40 ms) */
 #define SECOND		8000	/* nominal sample rate (Hz) */
@@ -347,6 +348,7 @@ irig_start(
 	 * Initialize miscellaneous variables
 	 */
 	peer->precision = PRECISION;
+	pp->clockname = NAME;
 	pp->clockdesc = DESCRIPTION;
 	memcpy((char *)&pp->refid, REFID, REFIDLEN);
 	peer->sstclktype = CTL_SST_TS_UHF;

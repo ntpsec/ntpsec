@@ -169,6 +169,9 @@
 # include "ppsapi_timepps.h"
 #endif
 
+#define NAME		"GPS_ONCORE"
+#define DESCRIPTION	"Motorola Oncore GPS Receiver"
+
 struct Bl {
 	int	dt_ls;
 	int	dt_lsf;
@@ -620,7 +623,8 @@ oncore_start(
 	peer->precision = -26;
 	peer->minpoll = 4;
 	peer->maxpoll = 4;
-	pp->clockdesc = "Motorola Oncore GPS Receiver";
+	pp->clockname = NAME;
+	pp->clockdesc = DESCRIPTION;
 	memcpy((char *)&pp->refid, "GPS\0", (size_t) 4);
 
 	oncore_log(instance, LOG_NOTICE, "ONCORE DRIVER -- CONFIGURING");
