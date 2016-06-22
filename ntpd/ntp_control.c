@@ -4356,10 +4356,12 @@ report_event(
 
 		peer->last_event = errlast;
 		peer->num_events++;
+#ifdef REFCLOCK
 		if (IS_PEER_REFCLOCK(peer))
 			src = refclock_name(peer);
 		else
-			src = stoa(&peer->srcadr);
+#endif /* REFCLOCK */ 
+		    src = stoa(&peer->srcadr);
 
 		snprintf(statstr, sizeof(statstr),
 		    "%s %04x %02x %s", src,
