@@ -91,7 +91,7 @@ static	restrict_u	restrict_def6;
 /*
  * "restrict source ..." enabled knob and restriction bits.
  */
-static	int		restrict_source_enabled;
+static	bool		restrict_source_enabled = false;
 static	u_short		restrict_source_flags;
 static	u_short		restrict_source_mflags;
 
@@ -496,7 +496,7 @@ hack_restrict(
 		NTP_REQUIRE(RESTRICT_FLAGS == op);
 		restrict_source_flags = flags;
 		restrict_source_mflags = mflags;
-		restrict_source_enabled = 1;
+		restrict_source_enabled = true;
 		return;
 	}
 
@@ -612,7 +612,7 @@ hack_restrict(
 void
 restrict_source(
 	sockaddr_u *	addr,
-	int		farewell,	/* 0 to add, 1 to remove */
+	bool		farewell,	/* false to add, true to remove */
 	u_long		expire		/* 0 is infinite, valid until */
 	)
 {

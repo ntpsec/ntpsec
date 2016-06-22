@@ -525,7 +525,7 @@ unpeer(
 	)
 {
 	mprintf_event(PEVNT_DEMOBIL, peer, "assoc %u", peer->associd);
-	restrict_source(&peer->srcadr, 1, 0);
+	restrict_source(&peer->srcadr, true, 0);
 	set_peerdstadr(peer, NULL);
 	peer_demobilizations++;
 	peer_associations--;
@@ -922,7 +922,7 @@ newpeer(
 	assoc_hash_count[hash]++;
 	LINK_SLIST(peer_list, peer, p_link);
 
-	restrict_source(&peer->srcadr, 0, 0);
+	restrict_source(&peer->srcadr, false, 0);
 	mprintf_event(PEVNT_MOBIL, peer, "assoc %d", peer->associd);
 	DPRINTF(1, ("newpeer: %s->%s mode %u vers %u poll %u %u flags 0x%x 0x%x ttl %u key %08x\n",
 	    latoa(peer->dstadr), stoa(&peer->srcadr), peer->hmode,
