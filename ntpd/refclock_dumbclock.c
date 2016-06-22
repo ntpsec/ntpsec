@@ -35,6 +35,7 @@
 #define	SPEED232	B9600	/* uart speed (9600 baud) */
 #define	PRECISION	(-13)	/* precision assumed (about 100 us) */
 #define	REFID		"DUMB"	/* reference ID */
+#define	NAME		"DUMBCLOCK"
 #define	DESCRIPTION	"Dumb clock" /* WRU */
 
 
@@ -138,6 +139,7 @@ dumbclock_start(
 	 * Initialize miscellaneous variables
 	 */
 	peer->precision = PRECISION;
+	pp->clockname = NAME;
 	pp->clockdesc = DESCRIPTION;
 	memcpy((char *)&pp->refid, REFID, REFIDLEN);
 	peer->sstclktype = CTL_SST_TS_LF;

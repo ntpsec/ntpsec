@@ -53,6 +53,7 @@
 #define	SPEED232	B9600	/* uart speed (9600 baud) */
 #define	PRECISION	(-20)	/* precision assumed (about 1 us) */
 #define	REFID		"GPS\0"	/* reference ID */
+#define	NAME		"GPS_AS2201"
 #define	DESCRIPTION	"Austron 2201A GPS Receiver" /* WRU */
 
 #define	LENTOC		19	/* yy:ddd:hh:mm:ss.mmm timecode lngth */
@@ -178,6 +179,7 @@ as2201_start(
 	 * Initialize miscellaneous variables
 	 */
 	peer->precision = PRECISION;
+	pp->clockname = NAME;
 	pp->clockdesc = DESCRIPTION;
 	memcpy((char *)&pp->refid, REFID, REFIDLEN);
 	peer->sstclktype = CTL_SST_TS_UHF;

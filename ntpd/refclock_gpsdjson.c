@@ -182,6 +182,7 @@ typedef unsigned long int json_uint;
 #define	PRECISION	(-9)	/* precision assumed (about 2 ms) */
 #define	PPS_PRECISION	(-20)	/* precision assumed (about 1 us) */
 #define	REFID		"GPSD"	/* reference id */
+#define	NAME		"GPSD_JSON"
 #define	DESCRIPTION	"GPSD JSON client clock" /* who we are */
 
 #define MAX_PDU_LEN	1600
@@ -547,6 +548,7 @@ gpsd_start(
 	pp->io.datalen    = 0;
 	pp->a_lastcode[0] = '\0';
 	pp->lencode       = 0;
+	pp->clockname     = NAME;
 	pp->clockdesc     = DESCRIPTION;
 	memcpy(&pp->refid, REFID, REFIDLEN);
 	peer->sstclktype = CTL_SST_TS_UHF;

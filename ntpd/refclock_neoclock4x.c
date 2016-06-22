@@ -27,6 +27,9 @@
 
 #include <termios.h>
 
+#define NAME		"NEOCLK4X"
+#define DESCRIPTION	"NeoClock4X"
+
 /*
  * If you want the driver for whatever reason to not use
  * the TX line to send anything to your NeoClock4X
@@ -227,7 +230,8 @@ neoclock4x_start(int unit,
 
   memset((char *)up, 0, sizeof(struct neoclock4x_unit));
   pp = peer->procptr;
-  pp->clockdesc = "NeoClock4X";
+  pp->clockname = NAME;
+  pp->clockdesc = DESCRIPTION;
   pp->unitptr = up;
   pp->io.clock_recv = neoclock4x_receive;
   pp->io.srcclock = peer;

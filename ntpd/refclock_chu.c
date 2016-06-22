@@ -228,9 +228,11 @@
 #define AGAIN		6.	/* baseband gain */
 #define LAG		10	/* discriminator lag */
 #define	DEVICE_AUDIO	"/dev/audio" /* device name */
+#define	NAME		"CHU_AUDIO"
 #define	DESCRIPTION	"CHU Audio/Modem Receiver" /* WRU */
 #define	AUDIO_BUFSIZ	240	/* audio buffer size (30 ms) */
 #else
+#define	NAME		"CHU_MODEM"
 #define	DESCRIPTION	"CHU Modem Receiver" /* WRU */
 #endif /* ENABLE_CHU_AUDIO */
 
@@ -524,6 +526,7 @@ chu_start(
 	 * Initialize miscellaneous variables
 	 */
 	peer->precision = PRECISION;
+	pp->clockname = NAME;
 	pp->clockdesc = DESCRIPTION;
 	strlcpy(up->ident, "CHU", sizeof(up->ident));
 	memcpy(&pp->refid, up->ident, REFIDLEN);

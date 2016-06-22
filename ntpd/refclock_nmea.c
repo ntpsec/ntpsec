@@ -142,10 +142,11 @@
  */
 #define	DEVICE		"/dev/gps%d"	/* GPS serial device */
 #define	PPSDEV		"/dev/gpspps%d"	/* PPSAPI device override */
-#define	SPEED232	B4800	/* uart speed (4800 bps) */
-#define	PRECISION	(-9)	/* precision assumed (about 2 ms) */
-#define	PPS_PRECISION	(-20)	/* precision assumed (about 1 us) */
-#define	REFID		"GPS\0"	/* reference id */
+#define	SPEED232	B4800		/* uart speed (4800 bps) */
+#define	PRECISION	(-9)		/* precision assumed (about 2 ms) */
+#define	PPS_PRECISION	(-20)		/* precision assumed (about 1 us) */
+#define	REFID		"GPS\0"		/* reference id */
+#define	NAME		"GPS_NMEA"	/* name (tag for logging) */
 #define	DESCRIPTION	"NMEA GPS Clock" /* who we are */
 #ifndef O_NOCTTY
 #define M_NOCTTY	0
@@ -454,6 +455,7 @@ nmea_start(
 
 	/* Initialize miscellaneous variables */
 	peer->precision = PRECISION;
+	pp->clockname = NAME;
 	pp->clockdesc = DESCRIPTION;
 	memcpy(&pp->refid, REFID, REFIDLEN);
 	peer->sstclktype = CTL_SST_TS_UHF;

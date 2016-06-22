@@ -76,6 +76,7 @@
 #define DEVICE		"/dev/pps%d" /* device name and unit */
 #define	PRECISION	(-20)	/* precision assumed (about 1 us) */
 #define	REFID		"PPS\0"	/* reference ID */
+#define	NAME		"PPS"
 #define	DESCRIPTION	"PPS Clock Discipline" /* WRU */
 
 /*
@@ -130,6 +131,7 @@ atom_start(
 	 */
 	pp = peer->procptr;
 	peer->precision = PRECISION;
+	pp->clockname = NAME;
 	pp->clockdesc = DESCRIPTION;
 	pp->stratum = STRATUM_UNSPEC;
 	memcpy((char *)&pp->refid, REFID, REFIDLEN);

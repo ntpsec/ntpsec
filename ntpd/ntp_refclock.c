@@ -128,7 +128,7 @@ refclock_name(
 	const char *rclock;
 
 	LIB_GETBUF(buf);
-	rclock = peer->procptr->clockdesc;
+	rclock = peer->procptr->clockname;
 
 	if (rclock != NULL)
 		snprintf(buf, LIB_BUFLENGTH, "%s(%d)",

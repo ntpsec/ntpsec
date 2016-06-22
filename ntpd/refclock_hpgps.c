@@ -92,6 +92,7 @@
 #define	SPEED232Z	B19200	/* uart speed (19200 baud) */
 #define	PRECISION	(-10)	/* precision assumed (about 1 ms) */
 #define	REFID		"GPS\0"	/*  reference ID */
+#define NAME		"GPS_HP"
 #define	DESCRIPTION	"HP 58503A GPS Time and Frequency Reference Receiver" 
 
 #define SMAX            23*80+1 /* for :SYSTEM:PRINT? status screen response */
@@ -193,6 +194,7 @@ hpgps_start(
 	 * Initialize miscellaneous variables
 	 */
 	peer->precision = PRECISION;
+	pp->clockname = NAME;
 	pp->clockdesc = DESCRIPTION;
 	memcpy((char *)&pp->refid, REFID, REFIDLEN);
 	peer->sstclktype = CTL_SST_TS_UHF;
