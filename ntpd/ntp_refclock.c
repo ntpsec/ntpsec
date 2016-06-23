@@ -167,9 +167,8 @@ init_refclock(void)
  * driver-specific support routine completes the initialization, if
  * used. Default peer variables which identify the clock and establish
  * its reference ID and stratum are set here. It returns true if success
- * and false if the clock address is invalid or already running,
- * insufficient resources are available or the driver declares a bum
- * rap.
+ * and false if the clock already running, insufficient resources are
+ * available or the driver declares a bum rap.
  */
 bool
 refclock_newpeer(
@@ -181,15 +180,8 @@ refclock_newpeer(
 	int unit;
 
 	/*
-	 * Check for valid clock address. If already running, shut it
-	 * down first.
+	 * If already running, shut it down.
 	 */
-	if (!ISREFCLOCKADR(&peer->srcadr)) {
-		msyslog(LOG_ERR,
-			"refclock_newpeer: clock address %s invalid",
-			stoa(&peer->srcadr));
-		return false;
-	}
 	clktype = (uint8_t)REFCLOCKTYPE(&peer->srcadr);
 	unit = REFCLOCKUNIT(&peer->srcadr);
 	if (clktype >= num_refclock_conf ||
