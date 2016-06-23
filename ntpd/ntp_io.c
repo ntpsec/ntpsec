@@ -3517,16 +3517,11 @@ read_network_packet(
 	DPRINTF(3, ("read_network_packet: fd=%d length %d from %s\n",
 		    fd, buflen, stoa(&rb->recv_srcadr)));
 
-	if (ISREFCLOCKADR(&rb->recv_srcadr)) {
-		msyslog(LOG_ERR, "recvfrom(%s) fd=%d: refclock srcadr on a network interface!",
-			stoa(&rb->recv_srcadr), fd);
-		DPRINTF(1, ("read_network_packet: fd=%d dropped (refclock srcadr))\n",
-			    fd));
-		packets_dropped++;
-		freerecvbuf(rb);
-		return (buflen);
-	}
-
+	/*
+	 * We used to drop network packets with addresses matching the magic
+	 * refclock format here. Now we do the check in the protocol machine,
+	 * rejecting any source address that matches an active clock.
+	 */
 
 	/*
 	** Bug 2672: Some OSes (MacOSX and Linux) don't block spoofed ::1
