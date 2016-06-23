@@ -581,6 +581,19 @@ receive(
 	 * matching association and that's okay.
 	 */
 	peer = findpeer(rbufp,  hismode, &retcode);
+
+	/*
+	 * If a network packet (nonzero dstadr) source-matched an
+	 * active refclock node, drop it. This replaces the old style of
+	 * looking for a magic address prefix.
+	 */
+	if (peer && IS_PEER_REFCLOCK(peer) && rbufp->dstadr != 0)
+	{
+	    msyslog(LOG_ERR, "refclock srcadr on a network interface (%s)!",
+		    stoa(&peer->srcadr));
+	    return;
+	}
+
 #ifdef DEBUG
 	dstadr_sin = &rbufp->dstadr->sin;
 #endif
