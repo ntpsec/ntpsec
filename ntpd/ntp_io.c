@@ -3281,7 +3281,7 @@ read_refclock_packet(
 	 */
 	rb->recv_length = buflen;
 	rb->recv_peer = rp->srcclock;
-	rb->dstadr = 0;
+	rb->dstadr = NULL;	/* see is_refclock_packet() */
 	rb->cast_flags = 0;
 	rb->fd = fd;
 	rb->recv_time = ts;
