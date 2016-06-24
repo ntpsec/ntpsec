@@ -419,7 +419,12 @@ receive(
 		sys_badlength++;
 		return;				/* bogus port */
 	}
-	restrict_mask = restrictions(&rbufp->recv_srcadr);
+#ifdef REFCLOCK
+	if (!is_network_packet(rbufp))
+	    restrict_mask = 0;
+	else
+#endif /* REFCLOCK */
+	    restrict_mask = restrictions(&rbufp->recv_srcadr);
 	DPRINTF(2, ("receive: at %ld %s<-%s flags %x restrict %03x\n",
 		    current_time, stoa(&rbufp->dstadr->sin),
 		    stoa(&rbufp->recv_srcadr),
