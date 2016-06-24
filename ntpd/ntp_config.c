@@ -3072,7 +3072,8 @@ config_peers(
 					0,
 					FLAG_IBURST,
 					0,
-					0);
+					0,
+					false);
 		} else if (force_synchronous_dns) {
 			if (intercept_getaddrinfo(*cmdline_servers, &peeraddr)) {
 				peer_config(
@@ -3085,7 +3086,8 @@ config_peers(
 					0,
 					FLAG_IBURST,
 					0,
-					0);
+					0,
+					false);
 			}
 		} else {
 			/* we have a hostname to resolve */
@@ -3135,7 +3137,8 @@ config_peers(
 				curr_peer->maxpoll,
 				peerflag_bits(curr_peer),
 				curr_peer->ttl,
-				curr_peer->peerkey);
+				curr_peer->peerkey,
+				ISREFCLOCKADR(&peeraddr));
 		/*
 		 * If we have a numeric address, we can safely
 		 * proceed in the mainline with it.
@@ -3156,7 +3159,8 @@ config_peers(
 					curr_peer->maxpoll,
 					peerflag_bits(curr_peer),
 					curr_peer->ttl,
-					curr_peer->peerkey);
+					curr_peer->peerkey,
+					false);
 		/*
 		 * synchronous lookup may be forced.
 		 */
@@ -3172,7 +3176,8 @@ config_peers(
 					curr_peer->maxpoll,
 					peerflag_bits(curr_peer),
 					curr_peer->ttl,
-					curr_peer->peerkey);
+					curr_peer->peerkey,
+					false);
 			}
 		} else {
 			/* hand the hostname off to the blocking child */
@@ -3277,7 +3282,8 @@ peer_name_resolved(
 				ctx->maxpoll,
 				ctx->flags,
 				ctx->ttl,
-				ctx->keyid);
+				ctx->keyid,
+				false);
 			break;
 		}
 	}

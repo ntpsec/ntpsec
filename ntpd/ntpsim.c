@@ -86,7 +86,8 @@ void create_server_associations(void)
 				NTP_MAXDPOLL,
 				0, /* peerflags */
 				0, /* ttl */
-				0, /* peerkey */) == 0) {
+				0, /* peerkey */
+				false) == 0) {
 			fprintf(stderr,
 				"ERROR!! Could not create association for: %s\n",
 				stoa(simulation.servers[i].addr));
