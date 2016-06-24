@@ -2337,9 +2337,15 @@ ctl_putclock(
 	switch (id) {
 
 	case CC_TYPE:
-		if (mustput || pcs->clockdesc == NULL
-		    || *(pcs->clockdesc) == '\0') {
-			ctl_putuint(clock_var[id].text, pcs->type);
+		if (pcs->clockname == NULL ||
+		    *(pcs->clockname) == '\0') {
+			if (mustput)
+				ctl_putstr(clock_var[id].text,
+					   "", 0);
+		} else {
+			ctl_putstr(clock_var[id].text,
+				   pcs->clockname,
+				   strlen(pcs->clockname));
 		}
 		break;
 	case CC_TIMECODE:
