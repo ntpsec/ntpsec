@@ -180,7 +180,7 @@ extern	void	peer_clr_stats	(void);
 extern	struct peer *peer_config(sockaddr_u *, const char *,
 				 endpt *, uint8_t, uint8_t,
 				 uint8_t, uint8_t, u_int, uint32_t,
-				 keyid_t);
+				 keyid_t, bool);
 extern	void	peer_reset	(struct peer *);
 extern	void	refresh_all_peerinterfaces(void);
 extern	void	unpeer		(struct peer *);

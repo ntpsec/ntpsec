@@ -557,7 +557,8 @@ peer_config(
 	uint8_t		maxpoll,
 	u_int		flags,
 	uint32_t		ttl,
-	keyid_t		key
+	keyid_t		key,
+	bool		refclock
 	)
 {
 	uint8_t cast_flags;
@@ -602,7 +603,7 @@ peer_config(
 		flags &= ~FLAG_PREEMPT;
 	return newpeer(srcadr, hostname, dstadr, hmode, version,
 		       minpoll, maxpoll, flags, cast_flags, ttl, key,
-		       ISREFCLOCKADR(srcadr));
+		       refclock);
 }
 
 /*
