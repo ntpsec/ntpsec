@@ -601,7 +601,8 @@ peer_config(
 	if ((MDF_ACAST | MDF_POOL) & cast_flags)
 		flags &= ~FLAG_PREEMPT;
 	return newpeer(srcadr, hostname, dstadr, hmode, version,
-		       minpoll, maxpoll, flags, cast_flags, ttl, key);
+		       minpoll, maxpoll, flags, cast_flags, ttl, key,
+		       ISREFCLOCKADR(srcadr));
 }
 
 /*
@@ -738,7 +739,8 @@ newpeer(
 	u_int		flags,
 	uint8_t		cast_flags,
 	uint32_t		ttl,
-	keyid_t		key
+	keyid_t		key,
+	bool		is_refclock_packet
 	)
 {
 	struct peer *	peer;
@@ -884,7 +886,7 @@ newpeer(
 	peer->timereachable = current_time;
 	peer->timereceived = current_time;
 
-	if (ISREFCLOCKADR(&peer->srcadr)) {
+	if (is_refclock_packet) {
 #ifdef REFCLOCK
 		/*
 		 * We let the reference clock support do clock

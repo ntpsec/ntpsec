@@ -804,7 +804,8 @@ receive(
 			       MODE_CLIENT, hisversion, peer2->minpoll,
 			       peer2->maxpoll, FLAG_PREEMPT |
 			       (FLAG_IBURST & peer2->flags), MDF_UCAST |
-			       MDF_UCLNT, 0, skeyid);
+			       MDF_UCLNT, 0, skeyid,
+			       ISREFCLOCKADR(&rbufp->recv_srcadr));
 		if (NULL == peer) {
 			sys_declined++;
 			return;			/* ignore duplicate  */
@@ -881,7 +882,8 @@ receive(
 			peer = newpeer(&rbufp->recv_srcadr, NULL,
 			    match_ep, MODE_BCLIENT, hisversion,
 			    pkt->ppoll, pkt->ppoll, FLAG_PREEMPT,
-			    MDF_BCLNT, 0, skeyid);
+			    MDF_BCLNT, 0, skeyid,
+			    ISREFCLOCKADR(&rbufp->recv_srcadr));
 			if (NULL == peer) {
 				sys_restricted++;
 				return;		/* ignore duplicate */
@@ -904,7 +906,7 @@ receive(
 		peer = newpeer(&rbufp->recv_srcadr, NULL, match_ep,
 		    MODE_CLIENT, hisversion, pkt->ppoll, pkt->ppoll,
 		    FLAG_BC_VOL | FLAG_IBURST | FLAG_PREEMPT, MDF_BCLNT,
-		    0, skeyid);
+		    0, skeyid, ISREFCLOCKADR(&rbufp->recv_srcadr));
 		if (NULL == peer) {
 			sys_restricted++;
 			return;			/* ignore duplicate */
@@ -987,7 +989,8 @@ receive(
 		 */
 		if ((peer = newpeer(&rbufp->recv_srcadr, NULL,
 		    rbufp->dstadr, MODE_PASSIVE, hisversion, pkt->ppoll,
-		    NTP_MAXDPOLL, 0, MDF_UCAST, 0, skeyid)) == NULL) {
+				    NTP_MAXDPOLL, 0, MDF_UCAST, 0, skeyid,
+				    ISREFCLOCKADR(&rbufp->recv_srcadr))) == NULL) {
 			sys_declined++;
 			return;			/* ignore duplicate */
 		}
