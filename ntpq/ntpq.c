@@ -3268,11 +3268,7 @@ cookedprint(
 
 		case RF:
 			if (decodenetnum(value, &hval)) {
-				if (ISREFCLOCKADR(&hval))
-					output(fp, name,
-					       refnumtoa(&hval));
-				else
-					output(fp, name, stoa(&hval));
+			    output(fp, name, stoa(&hval));
 			} else if (strlen(value) <= 4) {
 				output(fp, name, value);
 			} else {
