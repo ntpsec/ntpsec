@@ -76,8 +76,6 @@ struct recvbuf {
 	int used;		/* reference count */
 };
 
-#define is_refclock_packet(rbufp)	((rbufp)->dstadr == NULL)
-
 extern	void	init_recvbuff(int);
 
 /* freerecvbuf - make a single recvbuf available for reuse

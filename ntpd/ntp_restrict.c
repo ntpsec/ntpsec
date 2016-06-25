@@ -620,7 +620,8 @@ restrict_source(
 	restrict_u *	res;
 	int		found_specific;
 
-	if (!restrict_source_enabled || SOCK_UNSPEC(addr) || IS_MCAST(addr))
+	if (!restrict_source_enabled || SOCK_UNSPEC(addr) ||
+	    IS_MCAST(addr) || ISREFCLOCKADR(addr))
 		return;
 
 	NTP_REQUIRE(AF_INET == AF(addr) || AF_INET6 == AF(addr));

@@ -420,12 +420,7 @@ receive(
 		sys_badlength++;
 		return;				/* bogus port */
 	}
-#ifdef REFCLOCK
-	if (is_refclock_packet(rbufp))
-	    restrict_mask = 0;
-	else
-#endif /* REFCLOCK */
-	    restrict_mask = restrictions(&rbufp->recv_srcadr);
+	restrict_mask = restrictions(&rbufp->recv_srcadr);
 	DPRINTF(2, ("receive: at %ld %s<-%s flags %x restrict %03x\n",
 		    current_time, stoa(&rbufp->dstadr->sin),
 		    stoa(&rbufp->recv_srcadr),
@@ -592,7 +587,7 @@ receive(
 	 * active refclock node, drop it. This replaces the old style of
 	 * looking for a magic address prefix.
 	 */
-	if (IS_PEER_REFCLOCK(peer) && !is_refclock_packet(rbufp))
+	if (peer && IS_PEER_REFCLOCK(peer) && rbufp->dstadr != 0)
 	{
 	    msyslog(LOG_ERR, "refclock srcadr on a network interface (%s)!",
 		    stoa(&peer->srcadr));
@@ -810,7 +805,7 @@ receive(
 			       peer2->maxpoll, FLAG_PREEMPT |
 			       (FLAG_IBURST & peer2->flags), MDF_UCAST |
 			       MDF_UCLNT, 0, skeyid,
-			       is_refclock_packet(rbufp));
+			       ISREFCLOCKADR(&rbufp->recv_srcadr));
 		if (NULL == peer) {
 			sys_declined++;
 			return;			/* ignore duplicate  */
@@ -888,7 +883,7 @@ receive(
 			    match_ep, MODE_BCLIENT, hisversion,
 			    pkt->ppoll, pkt->ppoll, FLAG_PREEMPT,
 			    MDF_BCLNT, 0, skeyid,
-			    is_refclock_packet(rbufp));
+			    ISREFCLOCKADR(&rbufp->recv_srcadr));
 			if (NULL == peer) {
 				sys_restricted++;
 				return;		/* ignore duplicate */
@@ -911,7 +906,7 @@ receive(
 		peer = newpeer(&rbufp->recv_srcadr, NULL, match_ep,
 		    MODE_CLIENT, hisversion, pkt->ppoll, pkt->ppoll,
 		    FLAG_BC_VOL | FLAG_IBURST | FLAG_PREEMPT, MDF_BCLNT,
-		    0, skeyid, is_refclock_packet(rbufp));
+		    0, skeyid, ISREFCLOCKADR(&rbufp->recv_srcadr));
 		if (NULL == peer) {
 			sys_restricted++;
 			return;			/* ignore duplicate */
@@ -995,7 +990,7 @@ receive(
 		if ((peer = newpeer(&rbufp->recv_srcadr, NULL,
 		    rbufp->dstadr, MODE_PASSIVE, hisversion, pkt->ppoll,
 				    NTP_MAXDPOLL, 0, MDF_UCAST, 0, skeyid,
-				    is_refclock_packet(rbufp))) == NULL) {
+				    ISREFCLOCKADR(&rbufp->recv_srcadr))) == NULL) {
 			sys_declined++;
 			return;			/* ignore duplicate */
 		}
