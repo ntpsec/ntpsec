@@ -3286,6 +3286,7 @@ read_refclock_packet(
 	rb->fd = fd;
 	rb->recv_time = ts;
 	rb->receiver = rp->clock_recv;
+	rb->network_packet = false;
 
 	consumed = indicate_refclock_packet(rp, rb);
 	if (!consumed) {
@@ -3561,6 +3562,9 @@ read_network_packet(
 #endif
 	rb->recv_time = ts;
 	rb->receiver = intercept_receive;
+#ifdef REFCLOCK
+	rb->network_packet = true;
+#endif /* REFCLOCK */
 
 	add_full_recv_buffer(rb);
 

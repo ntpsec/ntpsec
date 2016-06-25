@@ -370,9 +370,6 @@ transmit(
 	poll_update(peer, hpoll);
 }
 
-/* true for network packets, false for refclock packets */
-#define is_network_packet(rbufp)	ISREFCLOCKADR(&rbufp->recv_srcadr)
-
 /*
  * receive - receive procedure called for each packet received
  */
