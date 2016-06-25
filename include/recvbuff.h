@@ -74,7 +74,18 @@ struct recvbuf {
 #define	recv_pkt		recv_space.X_recv_pkt
 #define	recv_buffer		recv_space.X_recv_buffer
 	int used;		/* reference count */
+#ifdef REFCLOCK
+	bool network_packet;
+#endif /* REFCLOCK */
 };
+
+/* true for network packets, false for refclock packets */
+#ifdef REFCLOCK
+#define is_network_packet(rbufp)	((rbufp)->network_packet)
+#else
+#define is_network_packet(rbufp)	false
+#endif /* REFCLOCK */
+
 
 extern	void	init_recvbuff(int);
 
