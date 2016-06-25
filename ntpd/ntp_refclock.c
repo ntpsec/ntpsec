@@ -207,7 +207,6 @@ refclock_newpeer(
 	peer->leap = LEAP_NOTINSYNC;
 	peer->stratum = STRATUM_REFCLOCK;
 	peer->ppoll = peer->maxpoll;
-	pp->type = clktype;
 	pp->conf = refclock_conf[clktype];
 	pp->timestarted = current_time;
 	pp->io.fd = -1;
@@ -1026,7 +1025,7 @@ refclock_control(
 
 		out->lastevent = pp->lastevent;
 		out->currentstatus = pp->currentstatus;
-		out->type = pp->type;
+		out->clockname = pp->clockname;
 		out->clockdesc = pp->clockdesc;
 		out->lencode = (u_short)pp->lencode;
 		out->p_lastcode = pp->a_lastcode;

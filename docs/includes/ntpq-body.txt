@@ -541,4 +541,14 @@ some configurations.
 |+flags+       |driver flags
 |==========================================
 
+== Compatibility ==
+
+When listing refids, addresses of the form 127.127.x.x are no
+longer automatically interpreted as local refclocks as in older
+versons of +ntpq+.
+
+In older versions, the 'type' variable associated with a
+reference clock was a numeric driver type index. It has been replaced
+by 'name', a shortname for the driver type.
+
 // end

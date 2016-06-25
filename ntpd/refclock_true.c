@@ -99,6 +99,7 @@
  */
 #define	PRECISION	(-10)	/* precision assumed (about 1 ms) */
 #define	REFID		"TRUE"	/* reference id */
+#define	NAME		"TRUETIME"
 #define	DESCRIPTION	"Kinemetrics/TrueTime Receiver"
 
 /*
@@ -257,6 +258,7 @@ true_start(
 	 * Initialize miscellaneous variables
 	 */
 	peer->precision = PRECISION;
+	pp->clockname = NAME;
 	pp->clockdesc = DESCRIPTION;
 	memcpy(&pp->refid, REFID, REFIDLEN);
 	peer->sstclktype = CTL_SST_TS_UHF;
