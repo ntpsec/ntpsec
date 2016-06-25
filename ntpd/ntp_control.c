@@ -269,7 +269,8 @@ static const struct ctl_proc control_codes[] = {
 #define	CP_SELDISP		48
 #define	CP_SELBROKEN		49
 #define	CP_CANDIDATE		50
-#define	CP_MAXCODE		CP_CANDIDATE
+#define CP_DISPLAYNAME		51
+#define	CP_MAXCODE		CP_DISPLAYNAME
 
 /*
  * Clock variables we understand
@@ -479,7 +480,8 @@ static const struct ctl_var peer_var[] = {
 	{ CP_SELDISP,	RO, "seldisp" },	/* 48 */
 	{ CP_SELBROKEN,	RO, "selbroken" },	/* 49 */
 	{ CP_CANDIDATE, RO, "candidate" },	/* 50 */
-	{ 0,		EOV, "" }		/* 50/58 */
+	{ CP_DISPLAYNAME, RO, "displayname" },	/* 51 */
+	{ 0,		EOV, "" }		/* 51/58 */
 };
 
 
@@ -521,6 +523,7 @@ static const uint8_t def_peer_var[] = {
 	CP_FILTDELAY,
 	CP_FILTOFFSET,
 	CP_FILTERROR,
+	CP_DISPLAYNAME,
 	0
 };
 
@@ -2311,6 +2314,16 @@ ctl_putpeer(
 	case CP_CANDIDATE:
 		ctl_putuint(peer_var[id].text, p->status);
 		break;
+
+	case CP_DISPLAYNAME:
+		if (p->procptr != NULL) {
+		    char buf[NI_MAXHOST];
+		    snprintf(buf, sizeof(buf), "%s(%d)",
+			     p->procptr->clockname, p->refclkunit);
+		    ctl_putunqstr(peer_var[id].text, buf, 6);
+		}
+		break;
+
 	default:
 		break;
 	}

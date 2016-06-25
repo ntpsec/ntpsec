@@ -1599,6 +1599,7 @@ doprintpeers(
 	char type = '?';
 	char whenbuf[8], pollbuf[8];
 	char clock_name[NI_MAXHOST];
+	char *displayname;
 
 	get_systime(&ts);
 	
@@ -1720,6 +1721,8 @@ doprintpeers(
 		} else if (!strcmp("reftime", name)) {
 			if (!decodets(value, &reftime))
 				L_CLR(&reftime);
+		} else if (!strcmp("displayname", name)) {
+			displayname = value;
 		} else {
 			// fprintf(stderr, "UNRECOGNIZED name=%s ", name);
 		}
@@ -1745,7 +1748,7 @@ doprintpeers(
 		break;
 
 	case MODE_CLIENT:
-		if (ISREFCLOCKADR(&srcadr))
+		if (displayname[0])
 			type = 'l';	/* local refclock*/
 		else if (SOCK_UNSPEC(&srcadr))
 			type = 'p';	/* pool */
@@ -1788,7 +1791,9 @@ doprintpeers(
 		fprintf(fp, "%-*s ", (int)maxhostlen, serverlocal);
 	}
 	if (AF_UNSPEC == af || AF(&srcadr) == af) {
-		if (!have_srchost)
+		if (displayname[0])
+			strlcpy(clock_name, displayname, sizeof(clock_name));
+		else if (!have_srchost)
 			strlcpy(clock_name, nntohost(&srcadr),
 				sizeof(clock_name));
 		if (wideremote && 15 < strlen(clock_name))
