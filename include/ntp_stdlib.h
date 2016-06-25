@@ -170,7 +170,6 @@ extern	int	sockaddr_masktoprefixlen(const sockaddr_u *);
 extern	const char * socktohost	(const sockaddr_u *);
 extern	bool	octtoint	(const char *, u_long *);
 extern	u_long	ranp2		(int);
-extern	const char *refnumtoa	(sockaddr_u *);
 extern	const char *refid_str	(uint32_t, int);
 
 extern	bool	decodenetnum	(const char *, sockaddr_u *);

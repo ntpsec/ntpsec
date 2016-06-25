@@ -413,10 +413,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\libntp\refnumtoa.c"
-				>
-			</File>
-			<File
 				RelativePath="..\libntp\setpriority.c"
 				>
 			</File>
