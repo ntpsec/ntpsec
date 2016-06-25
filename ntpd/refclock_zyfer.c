@@ -71,6 +71,7 @@
 #define	SPEED232	B9600	/* uart speed (9600 baud) */
 #define	PRECISION	(-20)	/* precision assumed (about 1 us) */
 #define	REFID		"GPS\0"	/* reference ID */
+#define	NAME		"GPS_ZYFER"
 #define	DESCRIPTION	"Zyfer GPStarplus" /* WRU */
 
 #define	LENZYFER	29	/* timecode length */
@@ -156,6 +157,7 @@ zyfer_start(
 	 * Initialize miscellaneous variables
 	 */
 	peer->precision = PRECISION;
+	pp->clockname = NAME;
 	pp->clockdesc = DESCRIPTION;
 	memcpy((char *)&pp->refid, REFID, REFIDLEN);
 	peer->sstclktype = CTL_SST_TS_UHF;

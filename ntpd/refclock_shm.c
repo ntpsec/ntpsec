@@ -47,6 +47,7 @@
  */
 #define PRECISION       (-1)    /* precision assumed (0.5 s) */
 #define REFID           "SHM"   /* reference ID */
+#define	NAME		"SHM"
 #define DESCRIPTION     "SHM/Shared memory interface"
 
 #define NSAMPLES        3       /* stages of median filter */
@@ -237,6 +238,7 @@ shm_start(
 		peer->precision = up->shm->precision;
 		up->shm->valid = 0;
 		up->shm->nsamples = NSAMPLES;
+		pp->clockname = NAME;
 		pp->clockdesc = DESCRIPTION;
 		/* items to be changed later in 'shm_control()': */
 		up->max_delay = 5;

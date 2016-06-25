@@ -274,7 +274,7 @@ static const struct ctl_proc control_codes[] = {
 /*
  * Clock variables we understand
  */
-#define	CC_TYPE		1
+#define	CC_NAME		1
 #define	CC_TIMECODE	2
 #define	CC_POLL		3
 #define	CC_NOREPLY	4
@@ -531,7 +531,7 @@ static const uint8_t def_peer_var[] = {
  */
 static const struct ctl_var clock_var[] = {
 	{ 0,		PADDING, "" },		/* 0 */
-	{ CC_TYPE,	RO, "type" },		/* 1 */
+	{ CC_NAME,	RO, "name" },		/* 1 */
 	{ CC_TIMECODE,	RO, "timecode" },	/* 2 */
 	{ CC_POLL,	RO, "poll" },		/* 3 */
 	{ CC_NOREPLY,	RO, "noreply" },	/* 4 */
@@ -553,7 +553,7 @@ static const struct ctl_var clock_var[] = {
  */
 static const uint8_t def_clock_var[] = {
 	CC_DEVICE,
-	CC_TYPE,	/* won't be output if device = known */
+	CC_NAME,
 	CC_TIMECODE,
 	CC_POLL,
 	CC_NOREPLY,
@@ -2336,10 +2336,16 @@ ctl_putclock(
 
 	switch (id) {
 
-	case CC_TYPE:
-		if (mustput || pcs->clockdesc == NULL
-		    || *(pcs->clockdesc) == '\0') {
-			ctl_putuint(clock_var[id].text, pcs->type);
+	case CC_NAME:
+		if (pcs->clockname == NULL ||
+		    *(pcs->clockname) == '\0') {
+			if (mustput)
+				ctl_putstr(clock_var[id].text,
+					   "", 0);
+		} else {
+			ctl_putstr(clock_var[id].text,
+				   pcs->clockname,
+				   strlen(pcs->clockname));
 		}
 		break;
 	case CC_TIMECODE:
