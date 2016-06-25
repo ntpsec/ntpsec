@@ -49,6 +49,25 @@
   int yyparse (void);
 #endif
 
+/*
+ * In the past, we told reference clocks from network peers by giving the
+ * reference clocks an address of the form 127.127.t.u, where t is the
+ * type and u is the unit number.  In ntpd itself, the filtering that
+ * used to be done based on this magic address prefix is now done
+ * using the is_network_packet() test on incoming packets.   In ntpq, the
+ * filtering is replaced by asking the server how a peer's name should
+ * be displayed.
+ *
+ * Address filtering is still done here so we can tell which config
+ * declarations refer to clocks.
+ */
+#define	REFCLOCK_ADDR	0x7f7f0000	/* 127.127.0.0 */
+#define	REFCLOCK_MASK	0xffff0000	/* 255.255.0.0 */
+
+#define	ISREFCLOCKADR(srcadr)					\
+	(IS_IPV4(srcadr) &&					\
+	 (SRCADR(srcadr) & REFCLOCK_MASK) == REFCLOCK_ADDR)
+
 
 /* list of servers from command line for config_peers() */
 int	cmdline_server_count;
@@ -3087,7 +3106,7 @@ config_peers(
 					FLAG_IBURST,
 					0,
 					0,
-					ISREFCLOCKADR(&peeraddr));
+					false);
 			}
 		} else {
 			/* we have a hostname to resolve */
@@ -3177,7 +3196,7 @@ config_peers(
 					peerflag_bits(curr_peer),
 					curr_peer->ttl,
 					curr_peer->peerkey,
-					ISREFCLOCKADR(&peeraddr));
+					false);
 			}
 		} else {
 			/* hand the hostname off to the blocking child */

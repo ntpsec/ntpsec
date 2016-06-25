@@ -195,36 +195,6 @@ typedef union {
 
 
 /*
- * In the past, we told reference clocks from real peers by giving the
- * reference clocks an address of the form 127.127.t.u, where t is the
- * type and u is the unit number.  In ntpd itself, the filtering that
- * used to be done based on this magic address prefix is now done
- * using the is_refclock_packet() test on incoming packets.  The
- * remaining instances of magic-address testing are in the
- * configuration-language interpreter only and are used to prevent
- * inapropriate configuration commands from being applied to
- * refclock entries.  They'll go away when the configuration syntax
- * is redesigned.
- *
- * In theory, therefore, it would now be possible for ntpd to use a
- * server with an address in the 127.127.t.u range.  In practice this 
- * is probably a bad idea as it would confuse ntpq, which keeps some
- * of these prefix checks in order to be able to recognize clock packets
- * by address only (that being all it has to work with).
- *
- * De-confusing ntpq will require some modifications to mode 6
- * response formats so that the response to a peer query conveys
- * *explicitly* whether it's a refclock.  Even so, legacy ntpq 
- * instances will still be confused.
- */
-#define	REFCLOCK_ADDR	0x7f7f0000	/* 127.127.0.0 */
-#define	REFCLOCK_MASK	0xffff0000	/* 255.255.0.0 */
-
-#define	ISREFCLOCKADR(srcadr)					\
-	(IS_IPV4(srcadr) &&					\
-	 (SRCADR(srcadr) & REFCLOCK_MASK) == REFCLOCK_ADDR)
-
-/*
  * Macro for checking for invalid addresses.  This is really, really
  * gross, but is needed so no one configures a host on net 127 now that
  * we're encouraging it the configuration file.
