@@ -66,6 +66,7 @@ extern struct clktype clktypes[];
  * Structure for returning clock status
  */
 struct refclockstat {
+	uint8_t	type;		/* clock type */
 	uint8_t	flags;		/* clock flags */
 	uint8_t	haveflags;	/* bit array of valid flags */
 	u_short	lencode;	/* length of last timecode */
@@ -75,7 +76,6 @@ struct refclockstat {
 	uint32_t	badformat;	/* bad format timecode received */
 	uint32_t	baddata;	/* invalid data timecode received */
 	uint32_t	timereset;	/* driver resets */
-	const char *clockname;	/* refclockname */
 	const char *clockdesc;	/* ASCII description */
 	double	fudgetime1;	/* configure fudge time1 */
 	double	fudgetime2;	/* configure fudge time2 */
@@ -152,6 +152,7 @@ struct refclockproc {
 	uint8_t	leap;		/* leap/synchronization code */
 	uint8_t	currentstatus;	/* clock status */
 	uint8_t	lastevent;	/* last exception event */
+	uint8_t	type;		/* clock type */
 	const char *clockname;	/* clock name (tag for logging) */
 	const char *clockdesc;	/* clock description */
 	u_long	nextaction;	/* local activity timeout */

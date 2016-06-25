@@ -269,9 +269,7 @@ static const struct ctl_proc control_codes[] = {
 #define	CP_SELDISP		48
 #define	CP_SELBROKEN		49
 #define	CP_CANDIDATE		50
-#define	CP_CLOCKTYPE		51
-#define	CP_CLOCKUNIT		52
-#define	CP_MAXCODE		CP_CLOCKUNIT
+#define	CP_MAXCODE		CP_CANDIDATE
 
 /*
  * Clock variables we understand
@@ -481,8 +479,6 @@ static const struct ctl_var peer_var[] = {
 	{ CP_SELDISP,	RO, "seldisp" },	/* 48 */
 	{ CP_SELBROKEN,	RO, "selbroken" },	/* 49 */
 	{ CP_CANDIDATE, RO, "candidate" },	/* 50 */
-	{ CP_CLOCKTYPE, RO, "clocktype" },	/* 51 */
-	{ CP_CLOCKUNIT, RO, "clockunit" },	/* 52 */
 	{ 0,		EOV, "" }		/* 50/58 */
 };
 
@@ -525,8 +521,6 @@ static const uint8_t def_peer_var[] = {
 	CP_FILTDELAY,
 	CP_FILTOFFSET,
 	CP_FILTERROR,
-	CP_CLOCKTYPE,
-	CP_CLOCKUNIT,
 	0
 };
 
@@ -2317,19 +2311,6 @@ ctl_putpeer(
 	case CP_CANDIDATE:
 		ctl_putuint(peer_var[id].text, p->status);
 		break;
-
-#ifdef REFCLOCK
-	case CP_CLOCKTYPE:
-		s = (char *)p->procptr->clockname;
-		s = s ? s : "";
-		ctl_putstr(peer_var[id].text, s, strlen(s));
-		break;
-
-	case CP_CLOCKUNIT:
-		ctl_putuint(peer_var[id].text, p->refclkunit);
-		break;
-#endif /* REFCLOCK */
-
 	default:
 		break;
 	}
@@ -2356,15 +2337,9 @@ ctl_putclock(
 	switch (id) {
 
 	case CC_TYPE:
-		if (pcs->clockname == NULL ||
-		    *(pcs->clockname) == '\0') {
-			if (mustput)
-				ctl_putstr(clock_var[id].text,
-					   "", 0);
-		} else {
-			ctl_putstr(clock_var[id].text,
-				   pcs->clockname,
-				   strlen(pcs->clockname));
+		if (mustput || pcs->clockdesc == NULL
+		    || *(pcs->clockdesc) == '\0') {
+			ctl_putuint(clock_var[id].text, pcs->type);
 		}
 		break;
 	case CC_TIMECODE:
