@@ -1972,8 +1972,6 @@ nntohost_col(
 			out = trunc_left(stoa(addr), width);
 		else
 			out = trunc_right(stoa(addr), width);
-	} else if (ISREFCLOCKADR(addr)) {
-		out = refnumtoa(addr);
 	} else {
 		out = trunc_right(socktohost(addr), width);
 	}
@@ -1994,8 +1992,6 @@ nntohostp(
 
 	if (!showhostnames || SOCK_UNSPEC(netnum))
 		return sptoa(netnum);
-	else if (ISREFCLOCKADR(netnum))
-		return refnumtoa(netnum);
 
 	hostn = socktohost(netnum);
 	LIB_GETBUF(buf);
