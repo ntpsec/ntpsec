@@ -58,9 +58,6 @@ static void RunAllTests(void)
 	RUN_TEST_GROUP(numtohost);
 	RUN_TEST_GROUP(prettydate);
 	RUN_TEST_GROUP(recvbuff);
-#ifdef REFCLOCK
-	RUN_TEST_GROUP(refnumtoa);
-#endif
 	RUN_TEST_GROUP(sfptostr);
 	RUN_TEST_GROUP(socktoa);
 	RUN_TEST_GROUP(ssl_init);

@@ -253,7 +253,6 @@
     <ClCompile Include="..\..\..\..\libntp\octtoint.c" />
     <ClCompile Include="..\..\..\..\libntp\prettydate.c" />
     <ClCompile Include="..\..\..\..\libntp\recvbuff.c" />
-    <ClCompile Include="..\..\..\..\libntp\refnumtoa.c" />
     <ClCompile Include="..\..\..\..\libntp\snprintf.c" />
     <ClCompile Include="..\..\..\..\libntp\socket.c" />
     <ClCompile Include="..\..\..\..\libntp\socktoa.c" />

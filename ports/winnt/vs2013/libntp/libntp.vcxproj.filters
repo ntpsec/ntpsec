@@ -203,9 +203,6 @@
     <ClCompile Include="..\..\..\..\libntp\recvbuff.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\libntp\refnumtoa.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\libntp\setpriority.c">
       <Filter>Source Files</Filter>
     </ClCompile>
