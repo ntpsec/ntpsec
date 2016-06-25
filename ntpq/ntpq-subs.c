@@ -1658,6 +1658,9 @@ doprintpeers(
 				} else if (decodenetnum(value, &refidadr)) {
 					if (SOCK_UNSPEC(&refidadr))
 						dstadr_refid = "0.0.0.0";
+					else if (ISREFCLOCKADR(&refidadr))
+						dstadr_refid =
+						    refnumtoa(&refidadr);
 					else
 						dstadr_refid =
 						    stoa(&refidadr);
@@ -1677,6 +1680,9 @@ doprintpeers(
 				} else if (decodenetnum(value, &refidadr)) {
 					if (SOCK_UNSPEC(&refidadr))
 						dstadr_refid = "0.0.0.0";
+					else if (ISREFCLOCKADR(&refidadr))
+						dstadr_refid =
+						    refnumtoa(&refidadr);
 					else {
 						char *buf = emalloc(10);
 						int i = ntohl(refidadr.sa4.sin_addr.s_addr);

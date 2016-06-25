@@ -657,6 +657,7 @@ neoclock4x_control(int unit,
       char tmpbuf[80];
 
       out->kv_list = (struct ctl_var *)0;
+      out->type    = REFCLK_NEOCLOCK4X;
 
       snprintf(tmpbuf, sizeof(tmpbuf)-1,
 	       "%04d-%02d-%02d %02d:%02d:%02d.%03d",

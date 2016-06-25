@@ -3017,6 +3017,8 @@ parse_control(
 
 		outstatus[0] = '\0';
 
+		out->type       = REFCLK_PARSE;
+
 		/*
 		 * keep fudgetime2 in sync with TRUSTTIME/MAXUNSYNC flag1
 		 */
