@@ -246,6 +246,7 @@ static void     enter_opmode(peerT *peer, int mode);
 static void	leave_opmode(peerT *peer, int mode);
 
 struct refclock refclock_gpsdjson = {
+	NAME,			/* basename of driver */
 	gpsd_start,		/* start up driver */
 	gpsd_shutdown,		/* shut down driver */
 	gpsd_poll,		/* transmit poll message */

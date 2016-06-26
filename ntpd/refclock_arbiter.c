@@ -120,6 +120,7 @@ static	void	arb_poll	(int, struct peer *);
  * Transfer vector
  */
 struct	refclock refclock_arbiter = {
+	NAME,			/* basename of driver */
 	arb_start,		/* start up driver */
 	arb_shutdown,		/* shut down driver */
 	arb_poll,		/* transmit poll message */

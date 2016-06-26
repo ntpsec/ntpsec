@@ -407,6 +407,7 @@ static	void	oncore_msg_Gj	   (struct instance *, uint8_t *, size_t);
 static	void	oncore_msg_Sz	   (struct instance *, uint8_t *, size_t);
 
 struct	refclock refclock_oncore = {
+	NAME,			/* basename of driver */
 	oncore_start,		/* start up driver */
 	oncore_shutdown,	/* shut down driver */
 	oncore_poll,		/* transmit poll message */

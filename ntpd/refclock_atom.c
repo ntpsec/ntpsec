@@ -103,6 +103,7 @@ static	void	atom_timer	(int, struct peer *);
  * Transfer vector
  */
 struct	refclock refclock_atom = {
+	NAME,			/* basename of driver */
 	atom_start,		/* start up driver */
 	atom_shutdown,		/* shut down driver */
 	atom_poll,		/* transmit poll message */

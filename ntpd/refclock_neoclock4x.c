@@ -114,6 +114,7 @@ static bool	neol_check_firmware	(int, const char*, char *);
 #endif
 
 struct refclock refclock_neoclock4x = {
+  NAME,			/* basename of driver */
   neoclock4x_start,	/* start up driver */
   neoclock4x_shutdown,	/* shut down driver */
   neoclock4x_poll,	/* transmit poll message */

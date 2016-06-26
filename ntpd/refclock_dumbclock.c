@@ -69,6 +69,7 @@ static	void	dumbclock_receive	(struct recvbuf *);
  * Transfer vector
  */
 struct	refclock refclock_dumbclock = {
+	NAME,				     /* basename of driver */
 	dumbclock_start,		     /* start up driver */
 	dumbclock_shutdown,		     /* shut down driver */
 	noentry,			     /* poll the driver -- a nice fabrication */

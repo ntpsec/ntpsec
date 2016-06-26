@@ -132,6 +132,7 @@ static	void	hpgps_poll	(int, struct peer *);
  * Transfer vector
  */
 struct	refclock refclock_hpgps = {
+	NAME,			/* basename of driver */
 	hpgps_start,		/* start up driver */
 	hpgps_shutdown,		/* shut down driver */
 	hpgps_poll,		/* transmit poll message */

@@ -442,6 +442,7 @@ static double qsy[NCHAN] = {3.330, 7.850, 14.670}; /* freq (MHz) */
  * Transfer vector
  */
 struct	refclock refclock_chu = {
+	NAME,			/* basename of driver */
 	chu_start,		/* start up driver */
 	chu_shutdown,		/* shut down driver */
 	chu_poll,		/* transmit poll message */

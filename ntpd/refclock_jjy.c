@@ -320,6 +320,7 @@ static	void	printableString ( char*, int, const char*, int ) ;
  * Transfer vector
  */
 struct	refclock refclock_jjy = {
+	NAME,		/* basename of driver */
 	jjy_start,	/* start up driver */
 	jjy_shutdown,	/* shutdown driver */
 	jjy_poll,	/* transmit poll message */

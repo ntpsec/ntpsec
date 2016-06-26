@@ -376,6 +376,7 @@ static	bool	jupiter_start	(int, struct peer *);
  * Transfer vector
  */
 struct	refclock refclock_jupiter = {
+	NAME,			/* basename of driver */
 	jupiter_start,		/* start up driver */
 	jupiter_shutdown,	/* shut down driver */
 	jupiter_poll,		/* transmit poll message */

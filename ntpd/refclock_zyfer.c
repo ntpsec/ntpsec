@@ -99,6 +99,7 @@ static	void	zyfer_poll	(int, struct peer *);
  * Transfer vector
  */
 struct	refclock refclock_zyfer = {
+	NAME,			/* basename of driver */
 	zyfer_start,		/* start up driver */
 	zyfer_shutdown,		/* shut down driver */
 	zyfer_poll,		/* transmit poll message */

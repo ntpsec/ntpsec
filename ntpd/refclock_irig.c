@@ -287,6 +287,7 @@ static	void	irig_gain	(struct peer *);
  * Transfer vector
  */
 struct	refclock refclock_irig = {
+	NAME,			/* basename of driver */
 	irig_start,		/* start up driver */
 	irig_shutdown,		/* shut down driver */
 	irig_poll,		/* transmit poll message */

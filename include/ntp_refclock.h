@@ -203,6 +203,7 @@ struct refclockproc {
 #define	noentry	0		/* flag for null routine */
 
 struct refclock {
+	const char *basename;
 	bool (*clock_start)	(int, struct peer *);
 	void (*clock_shutdown)	(int, struct peer *);
 	void (*clock_poll)	(int, struct peer *);
