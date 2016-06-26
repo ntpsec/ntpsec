@@ -52,11 +52,11 @@
 /*
  * Radio interface parameters
  */
-#define	PRECISION	(-18)	/* precision assumed (about 4 us) */
+#define	PRECISION	(-18)		/* precision assumed (about 4 us) */
 #define	REFID		"GPS\0"		/* reference id */
-#define	NAME		"GPS_MX4200"
+#define	NAME		"MX4200"	/* shortname */
 #define	DESCRIPTION	"Magnavox MX4200 GPS Receiver" /* who we are */
-#define	DEFFUDGETIME	0	/* default fudge time (ms) */
+#define	DEFFUDGETIME	0		/* default fudge time (ms) */
 
 #define	SLEEPTIME	32	/* seconds to wait for reconfig to complete */
 

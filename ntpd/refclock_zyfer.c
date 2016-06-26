@@ -71,7 +71,7 @@
 #define	SPEED232	B9600	/* uart speed (9600 baud) */
 #define	PRECISION	(-20)	/* precision assumed (about 1 us) */
 #define	REFID		"GPS\0"	/* reference ID */
-#define	NAME		"GPS_ZYFER"
+#define	NAME		"ZYFER"	/* shortname */
 #define	DESCRIPTION	"Zyfer GPStarplus" /* WRU */
 
 #define	LENZYFER	29	/* timecode length */

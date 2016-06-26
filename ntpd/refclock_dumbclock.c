@@ -32,11 +32,11 @@
  * Interface definitions
  */
 #define	DEVICE		"/dev/dumbclock%d" /* device name and unit */
-#define	SPEED232	B9600	/* uart speed (9600 baud) */
-#define	PRECISION	(-13)	/* precision assumed (about 100 us) */
-#define	REFID		"DUMB"	/* reference ID */
-#define	NAME		"DUMBCLOCK"
-#define	DESCRIPTION	"Dumb clock" /* WRU */
+#define	SPEED232	B9600		/* uart speed (9600 baud) */
+#define	PRECISION	(-13)		/* precision assumed (about 100 us) */
+#define	REFID		"DUMB"		/* reference ID */
+#define	NAME		"DUMBCLOCK"	/* shortname */
+#define	DESCRIPTION	"Dumb clock"	/* WRU */
 
 
 /*

@@ -27,7 +27,7 @@
 
 #include <termios.h>
 
-#define NAME		"NEOCLK4X"
+#define NAME		"NEOCLOCK"
 #define DESCRIPTION	"NeoClock4X"
 
 /*

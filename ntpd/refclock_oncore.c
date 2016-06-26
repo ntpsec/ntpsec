@@ -169,7 +169,7 @@
 # include "ppsapi_timepps.h"
 #endif
 
-#define NAME		"GPS_ONCORE"
+#define NAME		"ONCORE"
 #define DESCRIPTION	"Motorola Oncore GPS Receiver"
 
 struct Bl {

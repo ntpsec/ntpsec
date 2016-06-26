@@ -48,12 +48,12 @@
 /*
  * GPS Definitions
  */
-#define SMAX		200	/* statistics buffer length */
-#define	DEVICE		"/dev/gps%d" /* device name and unit */
-#define	SPEED232	B9600	/* uart speed (9600 baud) */
-#define	PRECISION	(-20)	/* precision assumed (about 1 us) */
-#define	REFID		"GPS\0"	/* reference ID */
-#define	NAME		"GPS_AS2201"
+#define SMAX		200		/* statistics buffer length */
+#define	DEVICE		"/dev/gps%d"	/* device name and unit */
+#define	SPEED232	B9600		/* uart speed (9600 baud) */
+#define	PRECISION	(-20)		/* precision assumed (about 1 us) */
+#define	REFID		"GPS\0"		/* reference ID */
+#define	NAME		"AUSTRON"	/* shortname */
 #define	DESCRIPTION	"Austron 2201A GPS Receiver" /* WRU */
 
 #define	LENTOC		19	/* yy:ddd:hh:mm:ss.mmm timecode lngth */

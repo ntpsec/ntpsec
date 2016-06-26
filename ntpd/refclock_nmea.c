@@ -146,7 +146,7 @@
 #define	PRECISION	(-9)		/* precision assumed (about 2 ms) */
 #define	PPS_PRECISION	(-20)		/* precision assumed (about 1 us) */
 #define	REFID		"GPS\0"		/* reference id */
-#define	NAME		"GPS_NMEA"	/* name (tag for logging) */
+#define	NAME		"NMEA"		/* shortname */
 #define	DESCRIPTION	"NMEA GPS Clock" /* who we are */
 #ifndef O_NOCTTY
 #define M_NOCTTY	0

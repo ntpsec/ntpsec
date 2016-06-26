@@ -97,9 +97,9 @@
 /*
  * Radio interface parameters
  */
-#define	PRECISION	(-10)	/* precision assumed (about 1 ms) */
-#define	REFID		"TRUE"	/* reference id */
-#define	NAME		"TRUETIME"
+#define	PRECISION	(-10)		/* precision assumed (about 1 ms) */
+#define	REFID		"TRUE"		/* reference id */
+#define	NAME		"TRUETIME"	/* shortname */
 #define	DESCRIPTION	"Kinemetrics/TrueTime Receiver"
 
 /*

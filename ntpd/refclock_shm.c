@@ -47,7 +47,7 @@
  */
 #define PRECISION       (-1)    /* precision assumed (0.5 s) */
 #define REFID           "SHM"   /* reference ID */
-#define	NAME		"SHM"
+#define	NAME		"SHM"	/* shortname */
 #define DESCRIPTION     "SHM/Shared memory interface"
 
 #define NSAMPLES        3       /* stages of median filter */

@@ -90,11 +90,11 @@
  * GPS Definitions
  */
 #define	DESCRIPTION	"Trimble Palisade GPS" /* Long name */
-#define NAME		"GPS_PALISADE"
-#define	PRECISION	(-20)	/* precision assumed (about 1 us) */
-#define	REFID		"GPS\0"	/* reference ID */
-#define TRMB_MINPOLL    4	/* 16 seconds */
-#define TRMB_MAXPOLL	5	/* 32 seconds */
+#define NAME		"PALISADE"	/* shortname */
+#define	PRECISION	(-20)		/* precision assumed (about 1 us) */
+#define	REFID		"GPS\0"		/* reference ID */
+#define TRMB_MINPOLL    4		/* 16 seconds */
+#define TRMB_MAXPOLL	5		/* 32 seconds */
 
 /*
  * I/O Definitions
