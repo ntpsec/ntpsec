@@ -984,10 +984,7 @@ fudge_factor_bool_keyword
 refclock_command
 	:	T_Refclock T_String T_Unit T_U_int refclock_option_list
 		{
-			peer_node *my_node;
-
-			my_node = create_refclock_node($2, $4, $5);
-			APPEND_G_FIFO(cfgt.peers, my_node);
+		    /* FIXME */
 		}
 	;
 
