@@ -991,6 +991,7 @@ refclock_command
 			address_node *fakeaddr;
 			char addrbuf[NI_MAXHOST];
 			int dtype = -1;
+			char *dupaddr;
 
 			for (dtype = 1; dtype < (int)num_refclock_conf; dtype++)
 			    if (refclock_conf[dtype]->basename != NULL && !strcasecmp(refclock_conf[dtype]->basename, $2) == 0)
@@ -1002,14 +1003,13 @@ refclock_command
 				exit(1);
 			}
 
-			snprintf(addrbuf, strlen(addrbuf),
-				 "127.127.%d.%d", dtype, $3);
-			fakeaddr = create_address_node(estrdup(addrbuf),
-						       AF_INET);
-			fprintf(stderr, "Foo! %s\n", addrbuf);
-
+			snprintf(addrbuf, sizeof(addrbuf),
+				 "127.127.%d.%d", dtype, $4);
+			dupaddr = estrdup(addrbuf);
+			fakeaddr = create_address_node(dupaddr, AF_INET);
 			my_node = create_peer_node(T_Server, fakeaddr, $5);
-			APPEND_G_FIFO(cfgt.peers, my_node);			
+			APPEND_G_FIFO(cfgt.peers, my_node);
+			fakeaddr = create_address_node(dupaddr, AF_INET);
 			aon = create_addr_opts_node(fakeaddr, $6);
 			APPEND_G_FIFO(cfgt.fudge, aon);
 		}
