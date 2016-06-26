@@ -222,6 +222,7 @@ const char * Tracking_Status[15][15] = {
  * Transfer vector
  */
 struct refclock refclock_palisade = {
+	NAME,			/* basename of driver */
 	palisade_start,		/* start up driver */
 	palisade_shutdown,	/* shut down driver */
 	palisade_poll,		/* transmit poll message */

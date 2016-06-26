@@ -118,6 +118,7 @@ static	bool	mx4200_pps	(struct peer *);
  * Transfer vector
  */
 struct	refclock refclock_mx4200 = {
+	NAME,			/* basename of driver */
 	mx4200_start,		/* start up driver */
 	mx4200_shutdown,	/* shut down driver */
 	mx4200_poll,		/* transmit poll message */

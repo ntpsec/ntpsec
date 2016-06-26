@@ -87,6 +87,7 @@ static	u_long poll_time;	/* last time polled */
  * Transfer vector
  */
 struct	refclock refclock_local = {
+	NAME,			/* basename of driver */
 	local_start,		/* start up driver */
 	noentry,		/* shut down driver (not used) */
 	local_poll,	 	/* transmit poll message */

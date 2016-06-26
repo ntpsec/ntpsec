@@ -223,6 +223,7 @@ static	void	acts_close	(struct peer *);
  * Transfer vector (conditional structure name)
  */
 struct refclock refclock_acts = {
+	NAME,			/* basename of driver */
 	acts_start,		/* start up driver */
 	acts_shutdown,		/* shut down driver */
 	acts_poll,		/* transmit poll message */

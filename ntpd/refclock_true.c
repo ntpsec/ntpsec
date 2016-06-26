@@ -161,6 +161,7 @@ static	u_long	true_sample720	(void);
  * Transfer vector
  */
 struct	refclock refclock_true = {
+	NAME,			/* basename of driver */
 	true_start,		/* start up driver */
 	true_shutdown,		/* shut down driver */
 	true_poll,		/* transmit poll message */

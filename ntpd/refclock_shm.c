@@ -72,6 +72,7 @@ static	void	shm_control	(int unit, const struct refclockstat * in_st,
  * Transfer vector
  */
 struct  refclock refclock_shm = {
+	NAME,			/* basename of driver */
 	shm_start,              /* start up driver */
 	shm_shutdown,           /* shut down driver */
 	shm_poll,		/* transmit poll message */

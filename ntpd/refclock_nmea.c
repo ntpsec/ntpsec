@@ -332,6 +332,7 @@ static int32_t g_gpsMinYear;
  * -------------------------------------------------------------------
  */
 struct refclock refclock_nmea = {
+	NAME,			/* basename of driver */
 	nmea_start,		/* start up driver */
 	nmea_shutdown,		/* shut down driver */
 	nmea_poll,		/* transmit poll message */

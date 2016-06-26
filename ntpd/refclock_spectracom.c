@@ -100,6 +100,7 @@
 #define	PRECISION	(-13)	/* precision assumed (about 100 us) */
 #define	PPS_PRECISION	(-13)	/* precision assumed (about 100 us) */
 #define	REFID		"GPS\0"	/* reference ID */
+#define NAME		"SPECTRACOM"
 #define	DESCRIPTION	"Spectracom GPS Receiver" /* WRU */
 
 #define	LENTYPE0	22	/* format 0 timecode length */
@@ -144,6 +145,7 @@ static	void	spectracom_control	(int, const struct refclockstat *,
  * Transfer vector
  */
 struct	refclock refclock_spectracom = {
+	NAME,			/* basename of driver */
 	spectracom_start,		/* start up driver */
 	spectracom_shutdown,		/* shut down driver */
 	spectracom_poll,		/* transmit poll message */
@@ -198,6 +200,7 @@ spectracom_start(
 	 * Initialize miscellaneous variables
 	 */
 	peer->precision = PRECISION;
+	pp->clockname = NAME;
 	pp->clockdesc = DESCRIPTION;
 	memcpy(&pp->refid, REFID, REFIDLEN);
 	peer->sstclktype = CTL_SST_TS_LF;

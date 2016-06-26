@@ -133,6 +133,7 @@ static	void	parse_poll	(int, struct peer *);
 static	void	parse_control	(int, const struct refclockstat *, struct refclockstat *, struct peer *);
 
 struct	refclock refclock_parse = {
+	"GENERIC",			/* basename of driver */
 	parse_start,
 	parse_shutdown,
 	parse_poll,
