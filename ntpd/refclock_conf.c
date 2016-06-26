@@ -1,5 +1,8 @@
 /*
  * refclock_conf.c - reference clock configuration
+ *
+ * This is the only place in the code that knows how to map driver numeric types
+ * to driver method tables and their attributes.
  */
 #include <config.h>
 
@@ -201,4 +204,4 @@ struct refclock * const refclock_conf[] = {
 	&refclock_gpsdjson	/* 46 REFCLK_GPSDJSON */
 };
 
-uint8_t num_refclock_conf = sizeof(refclock_conf)/sizeof(struct refclock *);
+const uint8_t num_refclock_conf = sizeof(refclock_conf)/sizeof(struct refclock *);

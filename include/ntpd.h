@@ -516,6 +516,6 @@ extern int accept_wildcard_if_for_winnt;
 #ifdef REFCLOCK
 /* refclock configuration table */
 extern struct refclock * const refclock_conf[];
-extern uint8_t	num_refclock_conf;
+extern const uint8_t	num_refclock_conf;
 #endif
 
