@@ -117,7 +117,7 @@
 #define	SPEED232_SEIKO_TIMESYS_TDC_300	B2400   /* UART speed (2400 baud) */
 #define	SPEED232_TELEPHONE		B2400   /* UART speed (4800 baud) */
 #define	REFID   	"JJY"		/* reference ID */
-#define	NAME		"JJY"
+#define	NAME		"JJY"		/* shortname */
 #define	DESCRIPTION	"JJY Receiver"
 #define	PRECISION	(-3)		/* precision assumed (about 100 ms) */
 

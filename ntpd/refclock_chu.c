@@ -217,20 +217,20 @@
 /*
  * Audio demodulator definitions
  */
-#define SECOND		8000	/* nominal sample rate (Hz) */
-#define BAUD		300	/* modulation rate (bps) */
-#define OFFSET		128	/* companded sample offset */
-#define SIZE		256	/* decompanding table size */
-#define	MAXAMP		6000.	/* maximum signal level */
-#define	MAXCLP		100	/* max clips above reference per s */
-#define	SPAN		800.	/* min envelope span */
-#define LIMIT		1000.	/* soft limiter threshold */
-#define AGAIN		6.	/* baseband gain */
-#define LAG		10	/* discriminator lag */
-#define	DEVICE_AUDIO	"/dev/audio" /* device name */
-#define	NAME		"CHU_AUDIO"
+#define SECOND		8000		/* nominal sample rate (Hz) */
+#define BAUD		300		/* modulation rate (bps) */
+#define OFFSET		128		/* companded sample offset */
+#define SIZE		256		/* decompanding table size */
+#define	MAXAMP		6000.		/* maximum signal level */
+#define	MAXCLP		100		/* max clips above reference per s */
+#define	SPAN		800.		/* min envelope span */
+#define LIMIT		1000.		/* soft limiter threshold */
+#define AGAIN		6.		/* baseband gain */
+#define LAG		10		/* discriminator lag */
+#define	DEVICE_AUDIO	"/dev/audio"	/* device name */
+#define	NAME		"CHU_AUDIO"	/* shortname */
 #define	DESCRIPTION	"CHU Audio/Modem Receiver" /* WRU */
-#define	AUDIO_BUFSIZ	240	/* audio buffer size (30 ms) */
+#define	AUDIO_BUFSIZ	240		/* audio buffer size (30 ms) */
 #else
 #define	NAME		"CHU_MODEM"
 #define	DESCRIPTION	"CHU Modem Receiver" /* WRU */

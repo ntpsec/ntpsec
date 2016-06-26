@@ -144,26 +144,26 @@
 /*
  * Interface definitions
  */
-#define	DEVICE_AUDIO	"/dev/audio" /* audio device name */
-#define	PRECISION	(-17)	/* precision assumed (about 10 us) */
-#define	REFID		"IRIG"	/* reference ID */
-#define	NAME		"IRIG_AUDIO"
+#define	DEVICE_AUDIO	"/dev/audio"	/* audio device name */
+#define	PRECISION	(-17)		/* precision assumed (about 10 us) */
+#define	REFID		"IRIG"		/* reference ID */
+#define	NAME		"IRIG_AUDIO"	/* shortname */
 #define	DESCRIPTION	"Generic IRIG Audio Driver" /* WRU */
-#define	AUDIO_BUFSIZ	320	/* audio buffer size (40 ms) */
-#define SECOND		8000	/* nominal sample rate (Hz) */
-#define BAUD		80	/* samples per baud interval */
-#define OFFSET		128	/* companded sample offset */
-#define SIZE		256	/* decompanding table size */
-#define CYCLE		8	/* samples per bit */
-#define SUBFLD		10	/* bits per frame */
-#define FIELD		100	/* bits per second */
-#define MINTC		2	/* min PLL time constant */
-#define MAXTC		10	/* max PLL time constant max */
-#define	MAXAMP		3000.	/* maximum signal amplitude */
-#define	MINAMP		2000.	/* minimum signal amplitude */
-#define DRPOUT		100.	/* dropout signal amplitude */
-#define MODMIN		0.5	/* minimum modulation index */
-#define MAXFREQ		(250e-6 * SECOND) /* freq tolerance (.025%) */
+#define	AUDIO_BUFSIZ	320		/* audio buffer size (40 ms) */
+#define SECOND		8000		/* nominal sample rate (Hz) */
+#define BAUD		80		/* samples per baud interval */
+#define OFFSET		128		/* companded sample offset */
+#define SIZE		256		/* decompanding table size */
+#define CYCLE		8		/* samples per bit */
+#define SUBFLD		10		/* bits per frame */
+#define FIELD		100		/* bits per second */
+#define MINTC		2		/* min PLL time constant */
+#define MAXTC		10		/* max PLL time constant max */
+#define	MAXAMP		3000.		/* maximum signal amplitude */
+#define	MINAMP		2000.		/* minimum signal amplitude */
+#define DRPOUT		100.		/* dropout signal amplitude */
+#define MODMIN		0.5		/* minimum modulation index */
+#define MAXFREQ		(250e-6*SECOND)	/* freq tolerance (.025%) */
 
 /*
  * The on-time synchronization point is the positive-going zero crossing

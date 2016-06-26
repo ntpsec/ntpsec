@@ -298,11 +298,11 @@ struct jplat {
 /*
  * Radio interface parameters
  */
-#define	PRECISION	(-18)	/* precision assumed (about 4 us) */
+#define	PRECISION	(-18)		/* precision assumed (about 4 us) */
 #define	REFID		"GPS\0"		/* reference id */
-#define	NAME		"GPS_JUPITER"
+#define	NAME		"JUPITER"	/* shortname */
 #define	DESCRIPTION	"Rockwell Jupiter GPS Receiver" /* who we are */
-#define	DEFFUDGETIME	0	/* default fudge time (ms) */
+#define	DEFFUDGETIME	0		/* default fudge time (ms) */
 
 /* Unix timestamp for the GPS epoch: January 6, 1980 */
 #define GPS_EPOCH 315964800

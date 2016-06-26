@@ -84,15 +84,15 @@
 /*
  * Interface definitions
  */
-#define	DEVICE		"/dev/gps%d" /* device name and unit */
-#define	SPEED232	B9600	/* uart speed (9600 baud) */
-#define	PRECISION	(-20)	/* precision assumed (about 1 us) */
-#define	REFID		"GPS "	/* reference ID */
-#define	NAME		"GPS_ARBITER"
+#define	DEVICE		"/dev/gps%d"	/* device name and unit */
+#define	SPEED232	B9600		/* uart speed (9600 baud) */
+#define	PRECISION	(-20)		/* precision assumed (about 1 us) */
+#define	REFID		"GPS "		/* reference ID */
+#define	NAME		"ARBITER"	/* shortname */
 #define	DESCRIPTION	"Arbiter 1088A/B GPS Receiver" /* WRU */
-#define	LENARB		24	/* format B5 timecode length */
-#define MAXSTA		40	/* max length of status string */
-#define MAXPOS		80	/* max length of position string */
+#define	LENARB		24		/* format B5 timecode length */
+#define MAXSTA		40		/* max length of status string */
+#define MAXPOS		80		/* max length of position string */
 
 #define COMMAND_HALT_BCAST ( (peer->ttl % 2) ? "O0" : "B0" )
 #define COMMAND_START_BCAST ( (peer->ttl % 2) ? "O5" : "B5" )
