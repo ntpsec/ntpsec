@@ -313,8 +313,6 @@
 %type	<Attr_val_fifo>	option_list
 %type	<Attr_val>	option_int
 %type	<Integer>	option_int_keyword
-%type	<Attr_val>	refclock_option
-%type	<Attr_val_fifo>	refclock_option_list
 %type	<Integer>	reset_command
 %type	<Integer>	rlimit_option_keyword
 %type	<Attr_val>	rlimit_option
@@ -977,38 +975,43 @@ fudge_factor_bool_keyword
 	|	T_Flag4
 	;
 
-/* Refclock Commands
- * --------------
+/* Refclock Command
+ * ----------------
+ *
+ * Stupidest possible implementation - fakes the old syntax, and imposes
+ * an ordering restriction that all fudge factors must follow all server
+ * options.  Good enough to start with, but needs to be cleaned up.
  */
 
 refclock_command
-	:	T_Refclock T_String T_Unit T_U_int refclock_option_list
+	:	T_Refclock T_String T_Unit T_Integer option_list fudge_factor_list
 		{
-		    /* FIXME */
-		}
-	;
+			peer_node *my_node;
+			addr_opts_node *aon;
+			address_node *fakeaddr;
+			char addrbuf[NI_MAXHOST];
+			int dtype = -1;
 
-refclock_option
-	:	option
-		{
-			$$ = $1;
-		}
-	|	fudge_factor
-		{
-			$$ = $1;
-		}
-	;
-	
-refclock_option_list
-	:	refclock_option_list refclock_option
-		{
-			$$ = $1;
-			APPEND_G_FIFO($$, $2);
-		}
-	|	refclock_option
-		{
-			$$ = NULL;
-			APPEND_G_FIFO($$, $1);
+			for (dtype = 1; dtype < (int)num_refclock_conf; dtype++)
+			    if (refclock_conf[dtype]->basename != NULL && !strcasecmp(refclock_conf[dtype]->basename, $2) == 0)
+			    {
+				break;
+			    }
+			if (dtype == -1) {
+				msyslog(LOG_ERR, "Unknown driver name %s", $2);
+				exit(1);
+			}
+
+			snprintf(addrbuf, strlen(addrbuf),
+				 "127.127.%d.%d", dtype, $3);
+			fakeaddr = create_address_node(estrdup(addrbuf),
+						       AF_INET);
+			fprintf(stderr, "Foo! %s\n", addrbuf);
+
+			my_node = create_peer_node(T_Server, fakeaddr, $5);
+			APPEND_G_FIFO(cfgt.peers, my_node);			
+			aon = create_addr_opts_node(fakeaddr, $6);
+			APPEND_G_FIFO(cfgt.fudge, aon);
 		}
 	;
 
