@@ -68,7 +68,6 @@
 	(IS_IPV4(srcadr) &&					\
 	 (SRCADR(srcadr) & REFCLOCK_MASK) == REFCLOCK_ADDR)
 
-#define MAKECLOCKADDR(t, u)	(REFCLOCK_ADDR & ((t) << 8) & (u))
 
 /* list of servers from command line for config_peers() */
 int	cmdline_server_count;
@@ -769,29 +768,6 @@ create_peer_node(
 	}
 
 	return my_node;
-}
-
-
-peer_node *
-create_refclock_node(char *drivername, int unit,
-			    attr_val_fifo *options)
-{
-	int dtype = -1;
-	int binaddr = 0;
-
-	for (dtype = 0; dtype < (int)num_refclock_conf; dtype++)
-	    if (!strcasecmp(refclock_conf[dtype]->basename, drivername) == 0)
-	    {
-		binaddr = MAKECLOCKADDR(dtype, unit);
-		break;
-	    }
-	if (dtype == -1) {
-		msyslog(LOG_ERR, "Unknown driver name %s", drivername);
-		exit(1);
-	}
-	fprintf(stderr, "%s(%d) -> %x\n", drivername, unit, binaddr);
-	UNUSED_ARG(options);
-	return NULL;
 }
 
 

@@ -267,8 +267,6 @@ void *	concat_gen_fifos(void *first, void *second);
 peer_node *create_peer_node(int hmode, address_node *addr,
 			    attr_val_fifo *options);
 unpeer_node *create_unpeer_node(address_node *addr);
-peer_node *create_refclock_node(char *drivername, int unit,
-			    attr_val_fifo *options);
 address_node *create_address_node(char *addr, int type);
 void destroy_address_node(address_node *my_node);
 attr_val *create_attr_dval(int attr, double value);
