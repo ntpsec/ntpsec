@@ -2370,10 +2370,11 @@ jjy_receive_seiko_tsys_tdc_300 ( struct recvbuf *rbufp )
 		}
 
 		time( &now ) ;
-		pTime = localtime_r( &now, &tmbuf ) ;
-		up->year  = pTime->tm_year ;
-		up->month = pTime->tm_mon + 1 ;
-		up->day   = pTime->tm_mday ;
+		if ((pTime = localtime_r( &now, &tmbuf )) != NULL) {
+			up->year  = pTime->tm_year ;
+			up->month = pTime->tm_mon + 1 ;
+			up->day   = pTime->tm_mday ;
+		}
 
 		break ;
 
