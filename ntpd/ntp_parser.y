@@ -200,6 +200,7 @@
 %token	<Integer>	T_Pw
 %token	<Integer>	T_Randfile
 %token	<Integer>	T_Rawstats
+%token	<Integer>	T_Refclock
 %token	<Integer>	T_Refid
 %token	<Integer>	T_Requestkey
 %token	<Integer>	T_Reset
@@ -235,6 +236,7 @@
 %token	<Integer>	T_Ttl
 %token	<Integer>	T_Type
 %token	<Integer>	T_U_int			/* Not a token */
+%token	<Integer>	T_Unit
 %token	<Integer>	T_Unconfig
 %token	<Integer>	T_Unpeer
 %token	<Integer>	T_Version
@@ -311,6 +313,8 @@
 %type	<Attr_val_fifo>	option_list
 %type	<Attr_val>	option_int
 %type	<Integer>	option_int_keyword
+%type	<Attr_val>	refclock_option
+%type	<Attr_val_fifo>	refclock_option_list
 %type	<Integer>	reset_command
 %type	<Integer>	rlimit_option_keyword
 %type	<Attr_val>	rlimit_option
@@ -387,6 +391,7 @@ command :	/* NULL STATEMENT */
 	|	access_control_command
 	|	orphan_mode_command
 	|	fudge_command
+	|	refclock_command
 	|	rlimit_command
 	|	system_option_command
 	|	tinker_command
@@ -970,6 +975,41 @@ fudge_factor_bool_keyword
 	|	T_Flag2
 	|	T_Flag3
 	|	T_Flag4
+	;
+
+/* Refclock Commands
+ * --------------
+ */
+
+refclock_command
+	:	T_Refclock T_String T_Unit T_U_int refclock_option_list
+		{
+		    /* FIXME */
+		}
+	;
+
+refclock_option
+	:	option
+		{
+			$$ = $1;
+		}
+	|	fudge_factor
+		{
+			$$ = $1;
+		}
+	;
+	
+refclock_option_list
+	:	refclock_option_list refclock_option
+		{
+			$$ = $1;
+			APPEND_G_FIFO($$, $2);
+		}
+	|	refclock_option
+		{
+			$$ = NULL;
+			APPEND_G_FIFO($$, $1);
+		}
 	;
 
 /* rlimit Commands

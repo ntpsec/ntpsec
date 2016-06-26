@@ -52,6 +52,7 @@ struct key_tok ntp_keywords[] = {
 { "discard",		T_Discard,		FOLLBY_TOKEN },
 { "reset",		T_Reset,		FOLLBY_TOKEN },
 { "restrict",		T_Restrict,		FOLLBY_TOKEN },
+{ "refclock",		T_Refclock,		FOLLBY_STRING },
 { "rlimit",		T_Rlimit,		FOLLBY_TOKEN },
 { "server",		T_Server,		FOLLBY_STRING },
 { "setvar",		T_Setvar,		FOLLBY_STRING },
@@ -64,6 +65,7 @@ struct key_tok ntp_keywords[] = {
 { "tos",		T_Tos,			FOLLBY_TOKEN },
 { "trap",		T_Trap,			FOLLBY_STRING },
 { "unconfig",		T_Unconfig,		FOLLBY_STRING },
+{ "unit",		T_Unit,			FOLLBY_STRING },
 { "unpeer",		T_Unpeer,		FOLLBY_STRING },
 /* authentication_command */
 { "controlkey",		T_ControlKey,		FOLLBY_TOKEN },
