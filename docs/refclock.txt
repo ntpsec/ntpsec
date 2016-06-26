@@ -152,7 +152,7 @@ driver relative to an association designated the prefer peer.
 == List of Reference Clock Drivers ==
 
 Following is a list showing the type and title of each driver currently
-implemented. The default compile-time identifier for each is shown in
+implemented. The default compile-time identifier exported to other systems is shown in
 under +RefID+. Click on a selected type for specific description and
 configuration documentation, including the clock address, reference ID,
 driver ID, device name and serial line speed. For those drivers without
@@ -175,31 +175,31 @@ parse driver.
 
 [options="header"]
 [cols="10%,5%,5%,80%",options="header"]
-|====================================================================
-| Number                      | Flags |RefID| Driver
-| link:driver1.html[Type 1]   | D     |LOCL | Undisciplined Local Clock
-| link:driver4.html[Type 4]   | -     |SPECTRACOM| Generic Spectracom Receivers
-| link:driver5.html[Type 5]   | D     |TRUE | TrueTime GPS/GOES Receivers
-| link:driver6.html[Type 6]   | D     |IRIG | IRIG Audio Decoder
-| link:driver7.html[Type 7]   | D     |CHU  | Radio CHU Audio Demodulator/Decoder
-| link:driver8.html[Type 8]   | TR    |DCFx | Generic Reference Driver (Parse)
-| link:driver9.html[Type 9]   | D     |GPS  | Magnavox MX4200 GPS Receiver
-| link:driver10.html[Type 10] | D     |GPS  | Austron 2200A/2201A GPS Receivers
-| link:driver11.html[Type 11] | D     |GPS  | Arbiter 1088A/B GPS Receiver
-| link:driver18.html[Type 18] | R     |NIST | NIST/USNO/PTB Modem Time Services
-| link:driver20.html[Type 20] | T     |GPS  | Generic NMEA GPS Receiver
-| link:driver22.html[Type 22] | T     |PPS  | PPS Clock Discipline
-| link:driver26.html[Type 26] | T     |GPS  | Hewlett Packard 58503A GPS Receiver
-| link:driver28.html[Type 28] | T     |SHM  | Shared Memory Driver
-| link:driver29.html[Type 29] | TM    |GPS  | Trimble Navigation Palisade GPS
-| link:driver30.html[Type 30] | -     |GPS  | Motorola UT Oncore GPS
-| link:driver31.html[Type 31] | D     |GPS  | Rockwell Jupiter GPS
-| link:driver33.html[Type 33] | D     |DUMB | Dumb Clock
-| link:driver40.html[Type 40] | T     |JJY  | JJY Receivers
-| link:driver42.html[Type 42] | -     |GPS  | Zyfer GPStarplus Receiver
-| link:driver44.html[Type 44] | -     |neol | NeoClock4X - DCF77 / TDF
-| link:driver46.html[Type 46] | T     |GPSD | GPSD NG client protocol
-|====================================================================
+|==========================================================================
+| Name                        | Flags |RefID| Driver
+|link:driver1.html[LOCAL]     | D     |LOCL | Undisciplined Local Clock
+|link:driver4.html[SPECTRACOM]| -     |GPS  | Generic Spectracom Receivers
+|link:driver5.html[TRUETIME]  | D     |TRUE | TrueTime GPS/GOES Receivers
+|link:driver6.html[IRIG]      | D     |IRIG | IRIG Audio Decoder
+|link:driver7.html[CHU]       | D     |CHU  |Radio CHU Audio Demodulator/Decoder
+|link:driver8.html[GENERIC]   | TR    |DCFx | Generic Reference Driver (Parse)
+|link:driver9.html[MX4200]    | D     |GPS  | Magnavox MX4200 GPS Receiver
+|link:driver10.html[AUSTRON]  | D     |GPS  | Austron 2200A/2201A GPS Receivers
+|link:driver11.html[ARBITER]  | D     |GPS  | Arbiter 1088A/B GPS Receiver
+|link:driver18.html[ACTS]     | R     |NIST | NIST/USNO/PTB Modem Time Services
+|link:driver20.html[NMEA]     | T     |GPS  | Generic NMEA GPS Receiver
+|link:driver22.html[PPS]      | T     |PPS  | PPS Clock Discipline
+|link:driver26.html[HP58503A] | T     |GPS  | Hewlett Packard 58503A GPS Receiver
+|link:driver28.html[SHM]      | T     |SHM  | Shared Memory Driver
+|link:driver29.html[PALISADE] | TM    |GPS  | Trimble Navigation Palisade GPS
+|link:driver30.html[ONCORE]   | -     |GPS  | Motorola UT Oncore GPS
+|link:driver31.html[JUPITER]  | D     |GPS  | Rockwell Jupiter GPS
+|link:driver33.html[DUMBCLOCK]| D     |DUMB | Dumb Clock
+|link:driver40.html[JJY]      | T     |JJY  | JJY Receivers
+|link:driver42.html[ZYFER]    | -     |GPS  | Zyfer GPStarplus Receiver
+|link:driver44.html[NEOCLOCK] | -     |neol | NeoClock4X - DCF77 / TDF
+|link:driver46.html[GPSD]     | T     |GPSD | GPSD NG client protocol
+|==========================================================================
 
 The flags field should be interpreted as follows:
 

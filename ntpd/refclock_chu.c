@@ -204,6 +204,7 @@
 #define	SPEED232	B300	/* uart speed (300 baud) */
 #define	PRECISION	(-10)	/* precision assumed (about 1 ms) */
 #define	REFID		"CHU"	/* reference ID */
+#define	NAME		"CHU"	/* shortname */
 #define	DEVICE		"/dev/chu%d" /* device name and unit */
 #define	SPEED232	B300	/* UART speed (300 baud) */
 #ifdef USE_ICOM_RADIO
@@ -228,11 +229,9 @@
 #define AGAIN		6.		/* baseband gain */
 #define LAG		10		/* discriminator lag */
 #define	DEVICE_AUDIO	"/dev/audio"	/* device name */
-#define	NAME		"CHU_AUDIO"	/* shortname */
 #define	DESCRIPTION	"CHU Audio/Modem Receiver" /* WRU */
 #define	AUDIO_BUFSIZ	240		/* audio buffer size (30 ms) */
 #else
-#define	NAME		"CHU_MODEM"
 #define	DESCRIPTION	"CHU Modem Receiver" /* WRU */
 #endif /* ENABLE_CHU_AUDIO */
 
