@@ -30,7 +30,7 @@ A general description of the reference clock support is on this
 page. Additional information about each reference clock driver can be
 found via links from here. Additional information is on the
 link:rdebug.html[Debugging Hints for Reference Clock Drivers] and
-link:howto.html[How To Write a Reference Clock Driver] pages.
+link:driver_howto.html[How To Write a Reference Clock Driver] pages.
 Information on how to support pulse-per-second (PPS) signals produced by
 some devices is on the link:pps.html[Pulse-per-second (PPS) Signal
 Interfacing] page. All reference clock drivers require that the

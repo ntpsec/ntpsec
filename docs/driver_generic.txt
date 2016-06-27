@@ -2,7 +2,7 @@
 
 == Name ==
 
-refclock_parse - multidevice parse driver for generic time radios and GPSDOs.
+refclock_generic - multidevice parse driver for generic time radios and GPSDOs.
 
 == Synopsis ==
 
@@ -14,8 +14,9 @@ PPS device: /dev/refclockpps-'u'; alternate PPS device
 
 == Description ==
 
-The PARSE driver supports 25 different clock
-types/configurations. PARSE is actually a multi-clock driver.
+The generic driver supports many different clock
+types/configurations by pugging type-specific packet-parsing
+routine into a generic drive framework.
 
 Note that some of these modes below are to support equipment that
 has not been commercially available for a long time, and may be
@@ -27,7 +28,7 @@ The actual receiver status is mapped into various synchronization states
 generally used by receivers. The driver is configured to interpret the
 time codes of Meinberg DCF77 AM receivers, DCF77 FM receivers, Meinberg
 GPS16x/17x receivers, Trimble SV6 GPS, ELV DCF7000, Schmid, Wharton 400A
-and low cost receivers.
+and various low-cost receivers.
 
 The reference clock support in NTP contains the necessary configuration
 tables for those receivers. In addition to supporting several different
@@ -72,7 +73,7 @@ refclock_ppstime::
 
 == Supported Devices ==
 
-Currently, twenty-five clock types are supported by the PARSE driver and
+Currently, twenty-five clock types are supported by the GENERIC driver and
 up to four (devices /dev/refclock-0 - /dev/refclock-3) of these clocks
 may be operational at any one time.
 
@@ -292,7 +293,7 @@ See comment from mode 20 clock.
 *http://www.selinc.com/[Schweitzer Engineering Laboratories]*
 
 Actual data formats and setup requirements of the various clocks can be
-found in link:parsedata.html[NTP PARSE clock data formats].
+found in link:parsedata.html[NTP GENERIC clock data formats].
 
 == Operation ==
 
@@ -452,11 +453,11 @@ screen width and looks similar to:
   Delete next leap second instead of adding it. (You'll need to wait a
   bit for that to happen 8-)
 
-== Making your own PARSE clocks ==
+== Making your own generic clocks ==
 
-The parse clock mechanism deviates from the way other NTP reference
-clocks work. For a short description of how to build parse reference
-clocks, see link:parsenew.html[making PARSE clocks].
+The generic clock mechanism deviates from the way other NTP reference
+clocks work. For a short description of how to build generic reference
+clocks, see link:generic_howto.html[making generic clocks].
 
 Additional Information
 
