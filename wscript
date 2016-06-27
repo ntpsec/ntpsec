@@ -132,7 +132,7 @@ def build(ctx):
 
 
 	ctx.recurse("libisc")
-	if ctx.env.REFCLOCK_PARSE: # Only required by the parse refclock
+	if ctx.env.REFCLOCK_GENERIC: # Only required by the generic refclock
 		ctx.recurse("libparse")
 	ctx.recurse("libntp")
 	if ctx.env.LIBEVENT2_ENABLE:

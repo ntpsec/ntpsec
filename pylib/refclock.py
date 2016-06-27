@@ -2,150 +2,149 @@ from waflib.Configure import conf
 from waflib.Logs import pprint
 
 # Note: When you change this list. also check the following files:
-# doc/recflock.txt
+# doc/refclock.txt
 # include/ntp.h
-# libntp/clocktypes.c
 # ntpd/refclock_conf.c
 
 refclock_map = {
 
-	1: {
+	"local": {
 		"descr":	"Undisciplined Local Clock",
 		"define":	"CLOCK_LOCAL",
 		"file":		"local"
 	},
 
-	4: {
+	"spectracom": {
 		"descr":	"Spectracom WWVB/GPS Receivers",
 		"define":	"CLOCK_SPECTRACOM",
 		"file":		"spectracom"
 	},
 
-	5: {
+	"truetime": {
 		"descr":	"TrueTime GPS/GOES/OMEGA Receivers",
 		"define":	"CLOCK_TRUETIME",
-		"file":		"true"
+		"file":		"truetime"
 	},
 
-	6: {
+	"irig": {
 		"descr":	"IRIG Audio Decoder",
 		"define":	"CLOCK_IRIG",
 		"require":	["audio"],
 		"file":		"irig"
 	},
 
-	7: {
+	"chu": {
 		"descr":	"Radio CHU Audio Demodulator/Decoder",
 		"define":	"CLOCK_CHU",
 		"require":	["audio"],
 		"file":		"chu"
 	},
 
-	8: {
+	"generic": {
 		"descr":	"Generic Reference Driver (Parse)",
-		"define":	"CLOCK_PARSE",
+		"define":	"CLOCK_GENERIC",
 		"require":	["parse"],
-		"file":		"parse"
+		"file":		"generic"
 	},
 
-	9: {
+       "mx4200": {
 		"descr":	"Magnavox MX4200 GPS Receiver",
 		"define":	"CLOCK_MX4200",
 		"require":	["ppsapi"],
 		"file":		"mx4200"
 	},
 
-	10: {
+	"austron": {
 		"descr":	"Austron 2200A/2201A GPS Receivers",
-		"define":	"CLOCK_AS2201",
-		"file":		"as2201"
+		"define":	"CLOCK_AUSTRON",
+		"file":		"austron"
 	},
 
-	11: {
+	"arbiter": {
 		"descr":	"Arbiter 1088A/B GPS Receiver",
 		"define":	"CLOCK_ARBITER",
 		"file":		"arbiter"
 	},
 
-	18: {
+	"acts": {
 		"descr":	"NIST/USNO/PTB Modem Time Services",
 		"define":	"CLOCK_ACTS",
 		"file":		"acts"
 	},
 
-	20: {
+	"nmea": {
 		"descr":	"Generic NMEA GPS Receiver",
 		"define":	"CLOCK_NMEA",
 		"file":		"nmea"
 	},
 
-	22: {
+	"pps": {
 		"descr":	"PPS Clock Discipline",
-		"define":	"CLOCK_ATOM",
+		"define":	"CLOCK_PPS",
 		"require":	["ppsapi"],
-		"file":		"atom"
+		"file":		"pps"
 	},
 
-	26: {
+	"hp58503a": {
 		"descr":	"Hewlett Packard 58503A GPS Receiver",
-		"define":	"CLOCK_HPGPS",
-		"file":		"hpgps"
+		"define":	"CLOCK_HP58503A",
+		"file":		"hp58503a"
 	},
 
-	28: {
+	"shm": {
 		"descr":	"Shared Memory Driver",
 		"define":	"CLOCK_SHM",
 		"file":		"shm"
 	},
 
-	29: {
+	"palisade": {
 		"descr":	"Trimble Navigation Palisade GPS",
 		"define":	"CLOCK_PALISADE",
 		"file":		"palisade"
 	},
 
-	30: {
+	"oncore": {
 		"descr":	"Motorola UT Oncore GPS",
 		"define":	"CLOCK_ONCORE",
 		"require":	["ppsapi"],
 		"file":		"oncore"
 	},
 
-	31: {
+	"jupiter": {
 		"descr":	"Rockwell Jupiter GPS",
 		"define":	"CLOCK_JUPITER",
 		"require":	["ppsapi"],
 		"file":		"jupiter"
 	},
 
-	33: {
+	"dumbclock": {
 		"descr":	"Dumb Clock",
 		"define":	"CLOCK_DUMBCLOCK",
 		"file":		"dumbclock"
 	},
 
-	40: {
+	"jjy": {
 		"descr":	"JJY Receivers",
 		"define":	"CLOCK_JJY",
 		"file":		"jjy"
 	},
 
-	42: {
+	"zyfer": {
 		"descr":	"Zyfer GPStarplus Receiver",
 		"define":	"CLOCK_ZYFER",
 		"file":		"zyfer"
 	},
 
-	44: {
+	"neoclock": {
 		"descr":	"NeoClock4X - DCF77 / TDF serial line",
-		"define":	"CLOCK_NEOCLOCK4X",
-		"file":		"neoclock4x"
+		"define":	"CLOCK_NEOCLOCK",
+		"file":		"neoclock"
 	},
 
-	46: {
+	"gpsd": {
 		"descr":	"GPSD NG client protocol",
 		"define":	"CLOCK_GPSDJSON",
-		"file":		"gpsdjson"
+		"file":		"gpsd"
 	}
 }
 
@@ -171,17 +170,12 @@ def refclock_config(ctx):
 
 	refclock = False
 	for id in unique_id:
-		try:
-			id = int(id)
-		except ValueError:
-			ctx.fatal("'%s' is not an integer." % id)
-
 		if id not in refclock_map:
 			ctx.fatal("'%s' is not a valid Refclock ID" % id)
 
 		rc = refclock_map[id]
 
-		if rc['define'] == "CLOCK_PARSE":
+		if rc['define'] == "CLOCK_GENERIC":
 			parse_clocks = (
 				"CLOCK_COMPUTIME",
 				"CLOCK_DCF7000",
@@ -199,7 +193,7 @@ def refclock_config(ctx):
 			for subtype in parse_clocks:
 				ctx.define(subtype, 1, comment="Enable individual parse clock")
 
-		ctx.start_msg("Enabling Refclock %s (%d):" % (rc["descr"], id))
+		ctx.start_msg("Enabling Refclock %s (%s):" % (rc["descr"], id))
 
 		if "require" in rc:
 			if "ppsapi" in rc["require"]:

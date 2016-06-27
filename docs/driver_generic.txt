@@ -189,7 +189,7 @@ a special firmware version may be available.
 +
 In this mode some additional GPS receiver status information is also
 read. However, this requires a point-to-point connection.
-link:imap://mills@mail.eecis.udel.edu:993/fetch%3EUID%3E.INBOX%3E67132?part=1.3&type=text/html&filename=driver8.html#mode18[Mode
+link:imap://mills@mail.eecis.udel.edu:993/fetch%3EUID%3E.INBOX%3E67132?part=1.3&type=text/html&filename=driver_generic.html#mode18[Mode
 18] should be used if the device is accessed by a multidrop connection.
 +
 *Note:* mode 7 must not be used with Meinberg PCI cards; use mode 2 instead.

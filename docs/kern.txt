@@ -36,7 +36,7 @@ The kernel model also provides support for an external precision timing
 source, such as described in the link:pps.html[Pulse-per-second (PPS)
 Signal Interfacing] page. The new system calls are used by the
 link:kernpps.html[PPSAPI interface] and in turn by the
-link:driver22.html[PPS Clock Discipline] driver (type 22) to
+link:driver_pps.html[PPS Clock Discipline] driver to
 provide synchronization limited in principle only by the accuracy and
 stability of the external timing source. Typical results with the PPS
 signal from a GPS receiver and a modern computer are in the 3 μs range.

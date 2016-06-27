@@ -89,8 +89,8 @@ GPSDO::
 GPSD::
    The http://www.catb.org/gpsd/[GPS Daemon], an open-source device
    manager for GPSes and other geodetic sensors. Frequently used as
-   a clock source by Stratum 1 sites via the SHM
-   link:driver28.html[(Type 28)] interface.
+   a clock source by Stratum 1 sites via the link:driver_shm.html[SHM]
+   interface.
 
 [[holdover]]
 holdover::
@@ -155,7 +155,7 @@ nonce::
 
 [[parse-driver]]
 parse driver::
-  A refclock link:driver8.html[(type 8)] which, uniquely, handles
+  A refclock link:driver_generic.html[generic] which, uniquely, handles
   multiple <<time radio>> protocols - two dozen mostly European
   precision time radios mostly using DCF, the broadcast time from the
   German national authority. Each clock type is internally represented
@@ -204,8 +204,8 @@ refclock::
 [[SADA]]
 SADA::
    Sun Audio Driver API, a software interface to audio devices
-   directly supported by NTP and used by the Irig Audio Decoder (type
-   6) and IRIG (type 7) refclocks. Originating in SunOS, it was later
+   directly supported by NTP and used by the Irig Audio Decoder
+   and IRIG refclocks. Originating in SunOS, it was later
    implemented in Solaris and OpenSolaris, supported in the Linux OSS
    sound layer, and is still used by the *BSD family of open-source
    operating systems.
