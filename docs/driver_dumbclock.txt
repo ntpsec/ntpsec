@@ -36,6 +36,12 @@ L - \n (newline)
 
 This driver does not interpret fudges, option flags, or the mode.
 
+== Configuration Example ==
+
+----------------------------------------------------------------------------
+refclock dumbclock
+----------------------------------------------------------------------------
+
 '''''
 
 include::includes/footer.txt[]

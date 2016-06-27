@@ -387,6 +387,12 @@ alarms are nonfatal; only the data in the burst are discarded.
 +mode+::
   Not used by this driver.
 
+== Configuration Example ==
+
+----------------------------------------------------------------------------
+refclock chu
+----------------------------------------------------------------------------
+
 == Author ==
 
 David L. Mills <mills@udel.edu>

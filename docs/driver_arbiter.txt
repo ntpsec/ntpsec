@@ -120,6 +120,12 @@ over the last 16 seconds.
 +mode+::
   Not used by this driver.
 
+== Configuration Example ==
+
+----------------------------------------------------------------------------
+refclock arbiter
+----------------------------------------------------------------------------
+
 == Author ==
 
 David L. Mills <mills@udel.edu>

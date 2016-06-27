@@ -195,6 +195,12 @@ The error flags are defined as follows in hex:
 +mode+::
    Not used by this driver.
 
+== Configuration Example ==
+
+----------------------------------------------------------------------------
+refclock irig
+----------------------------------------------------------------------------
+
 == Author ==
 
 David L. Mills <mills@udel.edu>

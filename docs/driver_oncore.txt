@@ -79,6 +79,12 @@ specific receiver in use will be required.
 +mode+::
    Not used by this driver.
 
+== Configuration Example ==
+
+----------------------------------------------------------------------------
+refclock oncore
+----------------------------------------------------------------------------
+
 == Additional Information ==
 
 The driver was initially developed on FreeBSD, and has since been tested

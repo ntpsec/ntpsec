@@ -236,11 +236,13 @@ signal, it should not be used to create a possible PPS peer: These get
 extra clout and can effectively become the sole source of input for the
 control loop. You do not want to use sloppy data for that.
 
-'''''
+== Configuration Example ==
 
-Additional Information
+----------------------------------------------------------------------------
+refclock gpsd mode 2
+----------------------------------------------------------------------------
 
-link:refclock.html[Reference Clock Drivers]
+This is configured for the experimental automatic mode.
 
 '''''
 

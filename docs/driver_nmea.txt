@@ -236,7 +236,13 @@ switched on by sending the following string.
 +flag4 {0 | 1}+::
   Obscures location in timecode: 0 for disable (default), 1 for enable.
 +mode+::
-   Used to control baud rate and GPS sentence selection.
+   Used to control baud rate, GPS sentence selection, and logging.
+
+== Configuration Example ==
+
+----------------------------------------------------------------------------
+refclock nmea mode 17	# GPMRC only at 9600bps
+----------------------------------------------------------------------------
 
 == Additional Information ==
 

@@ -27,6 +27,12 @@ link:refclock.html[Reference Clock Drivers]
 
 This driver does not interpret any fudges, option bits, or the mode.
 
+== Configuration Example ==
+
+----------------------------------------------------------------------------
+refclock zyfer
+----------------------------------------------------------------------------
+
 '''''
 
 include::includes/footer.txt[]

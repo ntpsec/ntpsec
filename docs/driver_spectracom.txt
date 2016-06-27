@@ -110,6 +110,12 @@ received.
 +mode+::
    Not used by this driver.
 
+== Configuration Example ==
+
+----------------------------------------------------------------------------
+refclock spectracom
+----------------------------------------------------------------------------
+
 == Author ==
 
 David L. Mills <mills@udel.edu>

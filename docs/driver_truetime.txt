@@ -120,6 +120,12 @@ written as-is to the +clockstats+ file.
 +mode+::
    Not used by this driver.
 
+== Configuration Example ==
+
+----------------------------------------------------------------------------
+refclock truetime
+----------------------------------------------------------------------------
+
 == Additional Information ==
 
 link:refclock.html[Reference Clock Drivers]
