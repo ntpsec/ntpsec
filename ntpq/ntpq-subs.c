@@ -1599,7 +1599,7 @@ doprintpeers(
 	char type = '?';
 	char whenbuf[8], pollbuf[8];
 	char clock_name[NI_MAXHOST];
-	char *displayname;
+	char *displayname = NULL;
 
 	get_systime(&ts);
 	
