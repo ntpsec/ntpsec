@@ -487,7 +487,7 @@ true_receive(
 		if ((pp->sloppyclockflag & CLK_FLAG4) && up->pcl720init) {
 			l_fp   off;
 
-#ifdef CLOCK_ATOM
+#ifdef CLOCK_PPS
 			/*
 			 * find out what time it really is. Include
 			 * the count from the PCL720
@@ -502,7 +502,7 @@ true_receive(
 #endif
 
 			pp->usec = true_sample720();
-#ifdef CLOCK_ATOM
+#ifdef CLOCK_PPS
 			TVUTOTSF(pp->usec, off.l_uf);
 #endif
 
@@ -513,7 +513,7 @@ true_receive(
 			 * rather than when the data was collected.
 			 */
 			get_systime(&pp->lastrec);
-#ifdef CLOCK_ATOM
+#ifdef CLOCK_PPS
 			/*
 			 * Create a true offset for feeding to pps_sample()
 			 */

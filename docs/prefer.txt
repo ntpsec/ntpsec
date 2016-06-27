@@ -135,12 +135,12 @@ Note that, as described on the link:orphan.html[Orphan Mode] page, all
 orphan children will select the same orphan parent for synchronization.
 3.  When a device driver has been configured for pulse-per-second (PPS)
 signals and PPS signals are being received, it is designated the _PPS
-driver._ Note that the Pulse-per-Second driver (type 22) is often used
+driver._ Note that the Pulse-per-Second driver is often used
 as a PPS driver, but any driver can be configure as a PPS driver if the
 hardware facilities are available. The PPS driver provides precision
 clock discipline only within ±0.4 s, so it is always associated with
 another source or sources that provide the seconds numbering function.
-4.  When the Undisciplined Local Clock driver (type 1) is configured, it
+4.  When the Undisciplined Local Clock driver is configured, it
 is designated the _local driver_. It can be used either as a backup
 source (stratum greater than zero) should all sources fail, or as the
 primary source (stratum zero) whether or not other sources are available
@@ -149,7 +149,7 @@ kernel time is disciplined by some other means of synchronization, such
 as the NIST +lock clock+ scheme, or another synchronization protocol
 such as the IEEE 1588 Precision Time Protocol (PTP) or Digital Time
 Synchronization Service (DTSS).
-5.  When the Automated Computer Time Service driver (type 18) is
+5.  When the Automated Computer Time Service driver is
 configured, it is designated the _modem driver_. It is used either as a
 backup source, should all other sources fail, or as the primary source
 if the +prefer+ option is present.

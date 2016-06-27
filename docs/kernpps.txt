@@ -37,7 +37,7 @@ operating system. It obsoletes previous APIs based on the +tty_clock+
 and +ppsclock+ line disciplines and streams modules, which are no longer
 supported.
 
-The link:driver22.html[PPS Clock Discipline] driver (type 22)
+The link:driver_pps.html[PPS Clock Discipline] driver
 uses the PPSAPI in conjunction with a local radio clock or remote
 NTP server as a reference clock. The driver can also use the PPSAPI as
 an interface directly to the kernel PPS facility as described on the

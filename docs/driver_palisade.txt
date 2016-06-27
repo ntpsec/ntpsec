@@ -1,9 +1,9 @@
 = Trimble Palisade and Thunderbolt Receivers =
 
 [width="100%",cols="<50%,<50%",frame="none",grid="none"]
-|======================================================
-| image:pic/driver29.gif[] | image:pic/thunderbolt.jpg[]
-|======================================================
+|==============================================================
+| image:pic/driver_palisade.gif[] | image:pic/thunderbolt.jpg[]
+|==============================================================
 
 == Synopsis ==
 ["verse",subs="normal"]

@@ -65,7 +65,7 @@ system.
 
 PPS support is built into some drivers, in particular the NMEA
 driver, and may be added to other drivers in future.  Alternatively,
-the PPS driver described on the link:driver22.html[Type 22 PPS Clock
+the PPS driver described on the link:driver_pps.html[PPS Clock
 Discipline] page can be used. It operates in conjunction with another
 source that provides seconds numbering. The selected source is
 designate a prefer peer, as using the +prefer+ option, as described on

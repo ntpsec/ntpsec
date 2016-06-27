@@ -35,7 +35,7 @@ extern	struct refclock	refclock_spectracom;
 #define	refclock_spectracom	refclock_none
 #endif
 
-#ifdef CLOCK_PARSE
+#ifdef CLOCK_GENERIC
 extern	struct refclock	refclock_parse;
 #else
 #define	refclock_parse	refclock_none
@@ -47,7 +47,7 @@ extern	struct refclock	refclock_mx4200;
 #define	refclock_mx4200	refclock_none
 #endif
 
-#ifdef CLOCK_AS2201
+#ifdef CLOCK_AUSTRON
 extern	struct refclock	refclock_as2201;
 #else
 #define	refclock_as2201	refclock_none
@@ -83,13 +83,13 @@ extern	struct refclock refclock_nmea;
 #define	refclock_nmea	refclock_none
 #endif
 
-#if defined (CLOCK_ATOM) && defined(HAVE_PPSAPI)
+#if defined (CLOCK_PPS) && defined(HAVE_PPSAPI)
 extern	struct refclock	refclock_atom;
 #else
 #define refclock_atom	refclock_none
 #endif
 
-#ifdef CLOCK_HPGPS
+#ifdef CLOCK_HP58503A
 extern	struct refclock	refclock_hpgps;
 #else
 #define	refclock_hpgps	refclock_none
@@ -137,7 +137,7 @@ extern	struct refclock	refclock_zyfer;
 #define	refclock_zyfer refclock_none
 #endif
 
-#ifdef CLOCK_NEOCLOCK4X
+#ifdef CLOCK_NEOCLOCK
 extern	struct refclock	refclock_neoclock4x;
 #else
 #define	refclock_neoclock4x	refclock_none
@@ -163,7 +163,7 @@ struct refclock * const refclock_conf[] = {
 	&refclock_true,		/* 5 REFCLK_TRUETIME */
 	&refclock_irig,		/* 6 REFCLK_IRIG_AUDIO */
 	&refclock_chu,		/* 7 REFCLK_CHU_AUDIO */
-	&refclock_parse,	/* 8 REFCLK_PARSE */
+	&refclock_parse,	/* 8 REFCLK_GENERIC */
 	&refclock_mx4200,	/* 9 REFCLK_GPS_MX4200 */
 	&refclock_as2201,	/* 10 REFCLK_GPS_AS2201 */
 	&refclock_arbiter,	/* 11 REFCLK_GPS_ARBITER */

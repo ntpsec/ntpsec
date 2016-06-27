@@ -101,7 +101,7 @@ shortwave radio and antenna. A third is for the generic IRIG signal
 produced by some timing devices. Currently, these are supported in
 FreeBSD, Solaris and SunOS and likely in other system as well.
 
-The link:driver1.html[Undisciplined Local Clock] driver can
+The link:driver_local.html[Undisciplined Local Clock] driver can
 simulate a reference clock when no external synchronization sources are
 available. If a server with this driver is connected directly or
 indirectly to the public Internet, there is some danger that it can
@@ -119,7 +119,7 @@ page.
 Several drivers make use of the pulse-per-second (PPS) signal
 discipline, which is part of the generic driver interface, so require no
 specific configuration. For those drivers that do not use this
-interface, the link:driver22.html[PPS Clock Discipline] driver
+interface, the link:driver_pps.html[PPS Clock Discipline] driver
 can be can provide this function. It normally works in conjunction with
 the reference clock that produces the timecode signal, but can work with
 another driver or remote server. When PPS kernel features are present,
@@ -172,29 +172,29 @@ parse driver.
 [options="header"]
 [cols="10%,5%,5%,80%",options="header"]
 |====================================================================
-| Name                        | Flags | Driver
-|link:driver1.html[local]     | D     | Undisciplined Local Clock
-|link:driver4.html[spectracom]| -     | Generic Spectracom Receivers
-|link:driver5.html[truetime]  | D     | TrueTime GPS/GOES Receivers
-|link:driver6.html[irig]      | D     | IRIG Audio Decoder
-|link:driver7.html[chu]       | D     | Radio CHU Audio Demodulator/Decoder
-|link:driver8.html[generic]   | TM    | Generic Reference Driver (Parse)
-|link:driver9.html[mx4200]    | D     | Magnavox MX4200 GPS Receiver
-|link:driver10.html[austron]  | D     | Austron 2200A/2201A GPS Receivers
-|link:driver11.html[arbiter]  | D     | Arbiter 1088A/B GPS Receiver
-|link:driver18.html[acts]     | R     | NIST/USNO/PTB Modem Time Services
-|link:driver20.html[nmea]     | T     | Generic NMEA GPS Receiver
-|link:driver22.html[pps]      | T     | PPS Clock Discipline
-|link:driver26.html[hp58503a] | T     | Hewlett Packard 58503A GPS Receiver
-|link:driver28.html[shm]      | T     | Shared Memory Driver
-|link:driver29.html[palisade] | TM    | Trimble Navigation Palisade GPS
-|link:driver30.html[oncore]   | -     | Motorola UT Oncore GPS
-|link:driver31.html[jupiter]  | D     | Rockwell Jupiter GPS
-|link:driver33.html[dumbclock]| D     | Dumb Clock
-|link:driver40.html[jjy]      | T     | JJY Receivers
-|link:driver42.html[zyfer]    | -     | Zyfer GPStarplus Receiver
-|link:driver44.html[neoclock] | -     | NeoClock4X DCF77 / TDF Receiver
-|link:driver46.html[gpsd]     | T     | GPSD NG client protocol
+| Name                                  | Flags | Driver
+|link:driver_local.html[local]          | D | Undisciplined Local Clock
+|link:driver_spectracom.html[spectracom]| - | Generic Spectracom Receivers
+|link:driver_truetime.html[truetime]    | D | TrueTime GPS/GOES Receivers
+|link:driver_irig.html[irig]            | D | IRIG Audio Decoder
+|link:driver_chu.html[chu]              | D | Radio CHU Audio Demodulator/Decoder
+|link:driver_generic.html[generic]      | TM| Generic Reference Driver (Parse)
+|link:driver_mx4200.html[mx4200]        | D | Magnavox MX4200 GPS Receiver
+|link:driver_austron.html[austron]      | D | Austron 2200A/2201A GPS Receivers
+|link:driver_arbiter.html[arbiter]      | D | Arbiter 1088A/B GPS Receiver
+|link:driver_acts.html[acts]            | - | NIST/USNO/PTB Modem Time Services
+|link:driver_nmea.html[nmea]            | T | Generic NMEA GPS Receiver
+|link:driver_pps.html[pps]              | T | PPS Clock Discipline
+|link:driver_hp58503a.html[hp58503a]    | T | Hewlett Packard 58503A GPS Receiver
+|link:driver_shm.html[shm]              | T | Shared Memory Driver
+|link:driver_palisade.html[palisade]    | TM| Trimble Navigation Palisade GPS
+|link:driver_oncore.html[oncore]        | - | Motorola UT Oncore GPS
+|link:driver_jupiter.html[jupiter]      | D | Rockwell Jupiter GPS
+|link:driver_dumbclock.html[dumbclock]  | D | Dumb Clock
+|link:driver_jjy.html[jjy]              | T | JJY Receivers
+|link:driver_zyfer.html[zyfer]          | - | Zyfer GPStarplus Receiver
+|link:driver_neoclock.html[neoclock]    | - | NeoClock4X DCF77 / TDF Receiver
+|link:driver_gpsd.html[gpsd]            | T | GPSD client protocol
 |==========================================================================
 
 The name in the left column is the driver type to be used in the

@@ -23,8 +23,8 @@ needs to be provided for the clock driver to pass on status information
 and error statistics to the NTP daemon.
 
 Control and monitoring functions for the external clock and driver are
-implemented using the link:driver1.html[Local Clock (type 1)
-driver] and the +ntp_adjtime()+ system call. This system call is
+implemented using the link:driver_local.html[Local Clockdriver]
+and the +ntp_adjtime()+ system call. This system call is
 implemented by special kernel provisions included in the kernel of
 several operating systems, including Solaris, Tru64, FreeBSD and Linux,
 and possibly others. When the external clock is disabled or not
