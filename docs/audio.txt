@@ -97,10 +97,10 @@ configuration file command +tinker codec+ command can be used to change
 the systematic offset in units of 125 PPM.
 
 The drivers include provisions to select the input port and to monitor
-the input signal. The +fudge flag 2+ command selects the microphone port
+the input signal. The +flag 2+ option selects the microphone port
 if set to zero or the line-in port if set to one. It does not seem
-useful to specify the compact disc player port. The +fudge flag 3+
-command enables the input signal monitor using the previously selected
+useful to specify the compact disc player port. The +flag 3+
+option enables the input signal monitor using the previously selected
 output port and output gain. Both of these flags can be set in the
 configuration file or remotely using the +{ntpq}+ utility program.
 
@@ -216,7 +216,7 @@ results in a level the line-in port can handle..
 
 It is very easy to underdriven or overdrive the audio codec, in which
 case the drivers will not synchronize to the signal. The drivers use
-+fudge   flag2+ to enable audio monitoring of the input signal. This is
+the +flag2+ option to enable audio monitoring of the input signal. This is
 useful during setup to confirm the signal is actually reaching the audio
 codec and generally free of noise and interference. Note that the
 monitor volume must be set before the driver is started.

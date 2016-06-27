@@ -3,7 +3,7 @@
 == Synopsis ==
 
 ["verse",subs="normal"]
-Address: 127.127.30._u_
+Name: oncore
 Reference ID: GPS
 Serial Port: /dev/oncore.serial._u_; 9600bps 8N1.
 PPS Port: /dev/oncore.pps._u_
@@ -56,7 +56,7 @@ manual page for information on how to use this option. For either
 debugging or using the SHMEM option, an Oncore Reference Manual for the
 specific receiver in use will be required.
 
-== Fudge Factors ==
+== Driver Options ==
 
 +time1+ 'time'::
    Specifies the time offset calibration factor, in seconds and fraction,

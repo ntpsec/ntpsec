@@ -104,7 +104,7 @@
 #define PARSE_MESSAGE(x)	((x) & PARSEB_MESSAGE)
 
 /*
- * operation flags - lower nibble contains fudge flags
+ * operation flags - lower nibble contains driver option flags
  */
 #define PARSE_TRUSTTIME     CLK_FLAG1  /* use flag1 to indicate the time2 references mean the trust time */
 #define PARSE_CLEAR         CLK_FLAG2  /* use flag2 to control pps on assert */

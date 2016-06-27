@@ -36,7 +36,7 @@
  * so on. The phone number is specified by the Hayes ATDT prefix
  * followed by the number itself, including the long-distance prefix
  * and delay code, if necessary. The calling program is enabled
- * when (a) fudge flag1 is set by ntpq, (b) at each poll interval
+ * when (a) option flag1 is set by ntpq, (b) at each poll interval
  * when no other synchronization sources are present, and (c) at each
  * poll interval whether or not other synchronization sources are 
  * present. The calling program disconnects if (a) the called party
@@ -50,7 +50,7 @@
  * succeed is the message accepted. Corrupted lines are discarded
  * without complaint.
  *
- * Fudge controls
+ * Options:
  *
  * flag1	force a call in manual mode
  * flag2	enable port locking (not verified)
@@ -63,7 +63,7 @@
  * list is defined. If no phones list is defined, the port can be 
  * connected directly to a device or another computer. In this case the
  * driver will send a single character 'T' at each poll event. If
- * fudge flag2 is enabled, port locking allows the modem to be shared
+ * option flag2 is enabled, port locking allows the modem to be shared
  * when not in use by this driver.
  */
 /*
@@ -655,7 +655,7 @@ acts_poll(
 
 	/*
 	 * In manual mode the calling program is activated by the ntpq
-	 * program using the enable flag (fudge flag1), either manually
+	 * program using the enable flag (flag1 option), either manually
 	 * or by a cron job.
 	 */
 	case MODE_MANUAL:

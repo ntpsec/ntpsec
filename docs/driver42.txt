@@ -3,7 +3,7 @@
 == Synopsis ==
 
 ["verse",subs="normal"]
-Address: 127.127.42.'u'
+Name: zyfer
 Reference ID: GPS
 Serial Port: /dev/zyfer__u__; 9600bps 8N1
 

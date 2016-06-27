@@ -3,7 +3,7 @@
 == Synopsis ==
 
 ["verse",subs="normal"]
-Address: 127.127.9.'u'
+Name: mx4200
 Reference ID: GPS
 Serial Port: /dev/gps__u__; 4800bps 8N1
 Features: +ppsclock+ (required)
@@ -51,7 +51,7 @@ Documentation for the 'NMEA-0183' proprietary sentences produced by the
 MX4200 can be found in link:mx4200data.html[MX4200 Receiver Data
 Format].
 
-== Fudge Factors ==
+== Driver Options ==
 
 +time1+ 'time'::
    Specifies the time offset calibration factor, in seconds and fraction,

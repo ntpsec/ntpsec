@@ -27,7 +27,7 @@
  * a multi-line reply showing the corresponding statistics or other
  * selected data. Statistics commands are sent in order as determined by
  * a vector of commands; these might have to be changed with different
- * radio options. If flag4 of the fudge configuration command is set to
+ * radio options. If flag4 of the refclock command is set to
  * 1, the statistics data are written to the clockstats file for later
  * processing.
  *

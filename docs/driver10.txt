@@ -3,7 +3,7 @@
 == Synopsis ==
 
 ["verse",subs="normal"]
-Address: 127.127.10.'u'
+Name: austron
 Reference ID: GPS
 Serial Port: /dev/gps__u__; 9600bps 8N1
 Features: +tty_clk+
@@ -27,9 +27,9 @@ For use with a single computer, the receiver can be connected directly
 to the receiver. For use with multiple computers, one of them is
 connected directly to the receiver and generates the polling messages.
 The other computers just listen to the receiver output directly or
-through a buffer amplifier. For computers that just listen,
-+fudge flag2+ must be set and the +ppsclock+ streams module configured
-on each of them.
+through a buffer amplifier. For computers that just listen, the
++flag2+ option must be set and the +ppsclock+ streams module
+configured on each of them.
 
 This receiver is capable of a comprehensive and large volume of
 statistics and operational data. The specific data collection commands
@@ -42,10 +42,10 @@ of the distribution.
 
 == Monitor Data ==
 
-When enabled by the +flag4+ fudge flag, every received timecode is
+When enabled by the +flag4+ option, every received timecode is
 written as-is to the +clockstats+ file.
 
-== Fudge Factors ==
+== Driver Options ==
 
 +time1+ 'time'::
   Specifies the time offset calibration factor, in seconds and fraction,

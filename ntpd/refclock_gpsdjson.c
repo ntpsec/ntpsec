@@ -250,7 +250,7 @@ struct refclock refclock_gpsdjson = {
 	gpsd_start,		/* start up driver */
 	gpsd_shutdown,		/* shut down driver */
 	gpsd_poll,		/* transmit poll message */
-	gpsd_control,		/* fudge control */
+	gpsd_control,		/* fudge and option control */
 	gpsd_init,		/* initialize driver */
 	noentry,		/* buginfo */
 	gpsd_timer		/* called once per second */

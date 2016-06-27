@@ -92,6 +92,9 @@ new implementations.
 Radio and modem reference clocks by convention have addresses of the
 form +127.127.t.u+, where _t_ is the clock type and _u_ in the range 0-3
 is used to distinguish multiple instances of clocks of the same type.
+These addresses used to be exposed as part of the refclock
+configuration syntax, but are no longer.
+
 Most clocks require a serial or parallel port or special bus peripheral.
 The particular device is normally specified by adding a soft link
 +/dev/deviceu+ to the particular hardware device.
@@ -108,7 +111,7 @@ compiled.
 == Conventions, Fudge Factors and Flags ==
 
 Most drivers support manual or automatic calibration for systematic
-offset bias using values encoded in the +fudge+ configuration command.
+offset bias using values encoded in the +refclock+ configuration command.
 By convention, the +time1+ value defines the calibration offset in
 seconds. For those drivers that support statistics collection using the
 +filegen+ utility and the +clockstats+ file, the +flag4+ switch enables

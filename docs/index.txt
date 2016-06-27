@@ -91,6 +91,10 @@ few will be user-visible:
   same masters as this web documentation, so the two will no longer
   drift out of synchronization.  
 
+* There is a new, simpler syntax for declaring refclocks.  The old
+  syntax with the magic 127.127.t.u addresses is still supported,
+  but no longer documented.  It may be removed in a future release.
+
 * Internally, there is more consistent use of nanosecond precision.
   A visible effect of this is that time stepping with sufficiently
   high-precision time sources could be accurate down to nanoseconds

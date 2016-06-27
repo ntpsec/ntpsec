@@ -60,7 +60,7 @@
  * infrequent, but a reliable PPS signal, such as from an Ultra Stable
  * Oscillator (USO) is available.
  *
- * Fudge Factors
+ * Driver options
  *
  * The PPS timestamp is captured on the rising (assert) edge if flag2 is
  * dim (default) and on the falling (clear) edge if lit. If flag3 is dim

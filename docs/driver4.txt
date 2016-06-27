@@ -3,8 +3,8 @@
 == Synopsis ==
 
 ["verse",subs="normal"]
-Address: 127.127.4._u_
-Reference ID: +SPECTRACOM+
+Name: spectracom
+Reference ID: +GPS+
 Serial Port: +/dev/spectracom+'u'; 9600bps 8N1
 Features: Optional PPS signal processing, +tty_clk+
 Requires: Optional PPS signal processing requires the PPSAPI signal interface.
@@ -78,12 +78,12 @@ signal is disconnected.
 == Monitor Data ==
 
 The driver writes each timecode as received to the +clockstats+ file.
-When enabled by the +flag4+ fudge flag, a table of quality data
+When enabled by the +flag4+ option, a table of quality data
 maintained internally by the Netclock/2 is retrieved and written to the
 +clockstats+ file when the first timecode message of a new day is
 received.
 
-== Fudge Factors ==
+== Driver Options ==
 
 +time1+ 'time'::
   Specifies the PPS time offset calibration factor, in seconds and

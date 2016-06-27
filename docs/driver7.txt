@@ -3,7 +3,7 @@
 == Synopsis ==
 
 ["verse",subs="normal"]
-Address: 127.127.7.'u'
+Name: chu
 Reference ID: +CHU+
 Driver ID: +CHU+
 Modem Port: +/dev/chu+'u'; 300 baud, 8-bits, no parity
@@ -232,7 +232,7 @@ program and the +clockvar+ command. This displays the last determined
 timecode and related status and error counters, even when the program is
 not discipline the system clock. If the debugging trace feature (+-d+ on
 the +{ntpd}+ command line) is enabled, the program produces detailed
-status messages as it operates. If the +fudge flag 4+ is set, these
+status messages as it operates. If the +flag 4+ option is set, these
 messages are written to the +clockstats+ file. All messages produced by
 this driver have the prefix +chu+ for convenient filtering with the Unix
 +grep+ command.
@@ -360,7 +360,7 @@ alarms are nonfatal; only the data in the burst are discarded.
   least 20 timestamps in the minute; otherwise all data in the minute
   are discarded.
 
-== Fudge Factors ==
+== Driver Options ==
 
 +time1+ 'time'::
   Specifies the propagation delay for CHU (45:18N 75:45N), in seconds

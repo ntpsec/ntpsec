@@ -3,7 +3,7 @@
 == Synopsis ==
 
 ["verse",subs="normal"]
-Address: 127.127.1._u_
+Name: localclock
 Reference ID: LOCL
 
 == Description ==
@@ -35,7 +35,7 @@ disabled if another source is available and operating.
 
 No +filegen clockstats+ monitor data are produced by this driver.
 
-== Fudge Factors ==
+== Driver Options ==
 
 +time1+ 'time'::
   Specifies the time offset calibration factor, in seconds and fraction,

@@ -24,7 +24,7 @@ link-local IPV6 address with an interface specified in
   server can never be synchronized to the local clock.
 
 +server+::
-  For server and refclock addresses, this command mobilizes a persistent client
+  For server addresses, this command mobilizes a persistent client
   mode association with the specified remote server or local radio
   clock. In this mode the local clock can synchronized to the remote
   server, but the remote server can never be synchronized to the local

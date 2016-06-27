@@ -3,7 +3,7 @@
 == Synopsis ==
 
 ["verse",subs="normal"]
-Address: 127.127.31.'u'
+Name: jupiter
 Reference ID: GPS
 Driver ID: JUPITER
 Serial Port: +/dev/gps+__u__; 9600bps 8N1
@@ -44,7 +44,7 @@ first starting to use the driver you should definitely review the
 information written to the clockstats file to verify that the driver is
 running correctly.
 
-== Fudge Factors ==
+== Driver Options ==
 
 +time1+ 'time'::
    Specifies the time offset calibration factor, in seconds and fraction,

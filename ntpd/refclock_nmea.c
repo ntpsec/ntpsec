@@ -54,7 +54,7 @@
  * On startup if initialization of the PPSAPI fails, it will fall back
  * to the "normal" timestamps.
  *
- * The PPSAPI part of the driver understands fudge flag2 and flag3. If
+ * The PPSAPI part of the driver understands options flag2 and flag3. If
  * flag2 is set, it will use the clear edge of the pulse. If flag3 is
  * set, kernel hardpps is enabled.
  *

@@ -3,7 +3,7 @@
 == Synopsis ==
 
 ["verse",subs="normal"]
-Address: 127.127.33._u_
+Name: dumbclock
 Reference ID: DUMB
 Serial Port: /dev/dumbclock_u_; 9600bps 8N1
 

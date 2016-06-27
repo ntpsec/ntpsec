@@ -3,7 +3,7 @@
 == Synopsis ==
 
 ["verse",subs="normal"]
-Address: 127.127.40.'u'
+Name: jjy
 Reference ID: JJY
 Serial Port: +/dev/jjyu+; See corresponding receiver
 
@@ -26,9 +26,7 @@ sold in Japan, and the time service through a telephone line.
 NTP configuration ( {ntpconf} )::
 +
 --
-server   127.127.40.X mode 1;;
-
-fudge   127.127.40.X time1 0.NNN flag1 {0|1};;
+refclock jjy unit X mode 1 time1 0.NNN flag1 {0|1};;
   Time1 may specify a constant to be added to the time offset for the
   time from the receiver, a fixed-point decimal number in seconds. You
   may specify the time offset from several tens of milliseconds (
@@ -66,9 +64,7 @@ whether it's before or after midnight.
 NTP configuration ( {ntpconf} )::
 +
 --
-server 127.127.40.X mode 2;;
-
-fudge 127.127.40.X time1 0.NNN;;
+refclock jjy unit X mode 2 time1 0.NNN;;
 --
 +
 Interface::
@@ -84,9 +80,7 @@ Command        -\-> Reply +
 NTP configuration ( {ntpconf} )::
 +
 --
-server 127.127.40.X mode 3;;
-
-fudge 127.127.40.X time1 0.NNN;;
+refclock jjy unit X mode 3 time1 0.NNN;;
 --
 +
 Interface::
@@ -107,9 +101,7 @@ Time code format::
 NTP configuration ( {ntpconf} )::
 +
 --
-server 127.127.40.X mode 4;;
-
-fudge 127.127.40.X time1 0.NNN;;
+refclock jjy unit X mode 4 time1 0.NNN;;
 --
 +
 Interface::
@@ -135,9 +127,7 @@ GPS driver ( Type 20 )] supports the TS-GPSclock-01 in NMEA mode.
 NTP configuration ( {ntpconf} )::
 +
 --
-server 127.127.40.X mode 5;;
-
-fudge 127.127.40.X time1 0.NNN flag1 {0|1};;
+refclock jjy unit X mode 5 time1 0.NNN flag1 {0|1};;
   Time1 may specify a constant to be added to the time offset for the
   time from the receiver, a fixed-point decimal number in seconds. +
   Flag1 has no effect for time synchronization. When a flag1 is set to
@@ -177,9 +167,7 @@ menu display and the switches.
 NTP configuration ( {ntpconf} )::
 +
 --
-server 127.127.40.X mode 6;;
-
-fudge 127.127.40.X time1 0.NNN;;
+refclock jjy unit X mode 6 time1 0.NNN;;
 --
 +
 Interface::
@@ -210,7 +198,7 @@ appropriate "phone" statement among the "phone" statements.
 NTP configuration ( {ntpconf} )::
 +
 --
-server 127.127.40.X mode (100, 101 to 180) minpoll N;;
+refclock jjy unit X mode (100, 101 to 180) minpoll N;;
     The mode 100 is specified, this driver does not issue the loopback
     command in order to measure the delay, and the delay of the
     delay of the telephone line and the system processing is not
@@ -244,7 +232,7 @@ minpoll value 12 is 4096 seconds interval ( about 1 hour ), 14 is
 16384 seconds interval ( about 4.5 hours ), 16 is 65536 seconds (
 about 18 hours ), respectively.
 
-fudge 127.127.40.X flag1 {0|1} flag2 {0|1} flag3 {0|1} flag4 {0|1};;
+flag1 {0|1} flag2 {0|1} flag3 {0|1} flag4 {0|1};;
     Time1 may specify a constant to be added to the time offset for the time from the receiver, a fixed-point decimal number in seconds. +
     When the mode 100 is specified, the time1 may be specified in order to adjust the time offset. +
     When the mode 101 to 180 is specified, the time1 should not be
@@ -372,7 +360,7 @@ filegen clockstats file clockstats type day enable
 |+-X-+ | Error message
 |============================================================
 
-== Fudge Factors ==
+== Driver Options ==
 
 +time1+ 'time'::
   Specifies the time offset calibration factor, in seconds and fraction,

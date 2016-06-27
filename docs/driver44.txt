@@ -3,7 +3,7 @@
 == Synopsis ==
 
 ["verse",subs="normal"]
-Address: 127.127.44.'u'
+Name: neoclock
 Reference ID: neol
 Serial Port: /dev/neoclock4x-u
 
@@ -17,13 +17,13 @@ is available as a http://www.dcf77.de[DCF77] or TDF receiver. Both
 receivers have the same output string. For more information about the
 NeoClock4X receiver please visit http://www.linux-funkuhr.de.  
 
-== Fudge Factors ==
+== Driver Options ==
 
 link:clockopt.html[+time1+ time]::
    Specifies the time offset calibration factor with the default value of
    0.16958333 seconds. This offset is used  to correct serial line and
    operating system delays incurred in capturing time stamps. If you want
-   to fudge the time1 offset *ALWAYS* add a value off 0.16958333. This is
+   to fudge the +time1+ offset *ALWAYS* add a value off 0.16958333. This is
    necessary to compensate for the delay that is caused by transmitting the
    timestamp at 2400 Baud. If you want to compensate the delay that the
    DCF77 or TDF radio signal takes to travel to your site simply add the

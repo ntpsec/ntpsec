@@ -245,7 +245,7 @@ system variables remain as they are.
 
 The +minsane+ option of the link:miscopt.html#tos[+tos+] command, the
 +prefer+ option of the +server+ and +peer+ commands and the +flag+
-option of the +fudge+ command for a selected driver can be used with the
+option of the +refclock+ command for a selected driver can be used with the
 mitigation rules to provide many useful configurations. The +minsane+
 option specifies the minimum number of survivors required to synchronize
 the system clock. The +prefer+ option operates as described in previous

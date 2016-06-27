@@ -3,7 +3,7 @@
 == Synopsis ==
 
 ["verse",subs="normal"]
-Address: 127.127.22.'u'
+Name: pps
 Reference ID: PPS
 Driver ID: PPS
 Serial or Parallel Port: /dev/pps__u__
@@ -65,14 +65,14 @@ the actual physical device.
 
 The driver normally operates like any other driver and uses the same
 mitigation algorithms and PLL/FLL clock discipline incorporated in the
-daemon. If kernel PLL/FLL support is available, the kernel PLL/FLL clock
-discipline can be used instead. The default behavior is not to use the
-kernel PPS clock discipline, even if present. This driver incorporates a
-good deal of signal processing to reduce jitter using the median filter
-algorithm in the driver. As the result, performance with +minpoll+
-configured at 4 (16s) is generally better than the kernel PPS
-discipline. However, fudge flag 3 can be used to enable the kernel PPS
-discipline if necessary.
+daemon. If kernel PLL/FLL support is available, the kernel PLL/FLL
+clock discipline can be used instead. The default behavior is not to
+use the kernel PPS clock discipline, even if present. This driver
+incorporates a good deal of signal processing to reduce jitter using
+the median filter algorithm in the driver. As the result, performance
+with +minpoll+ configured at 4 (16s) is generally better than the
+kernel PPS discipline. However, the +flag 3+ option can be used to
+enable the kernel PPS discipline if necessary.
 
 This driver is enabled only under one of two conditions (a) a prefer
 peer other than this driver is among the survivors of the mitigation
@@ -95,7 +95,7 @@ In a similar scenario a PPS signal can be used to discipline the clock
 between updates produced by the modem driver. This would provide precise
 synchronization without needing the Internet at all.
 
-== Fudge Factors ==
+== Driver Options ==
 
 +time1+ 'time'::
   Specifies the time offset calibration factor, in seconds and fraction,
