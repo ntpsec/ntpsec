@@ -313,6 +313,7 @@
 %type	<Attr_val_fifo>	option_list
 %type	<Attr_val>	option_int
 %type	<Integer>	option_int_keyword
+%type	<Integer>	optional_unit
 %type	<Integer>	reset_command
 %type	<Integer>	rlimit_option_keyword
 %type	<Attr_val>	rlimit_option
@@ -984,7 +985,7 @@ fudge_factor_bool_keyword
  */
 
 refclock_command
-	:	T_Refclock T_String T_Unit T_Integer option_list fudge_factor_list
+	:	T_Refclock T_String optional_unit option_list fudge_factor_list
 		{
 #ifdef REFCLOCK
 			peer_node *my_node;
@@ -1005,17 +1006,26 @@ refclock_command
 			}
 
 			snprintf(addrbuf, sizeof(addrbuf),
-				 "127.127.%d.%d", dtype, $4);
+				 "127.127.%d.%d", dtype, $3);
 			dupaddr = estrdup(addrbuf);
 			fakeaddr = create_address_node(dupaddr, AF_INET);
-			my_node = create_peer_node(T_Server, fakeaddr, $5);
+			my_node = create_peer_node(T_Server, fakeaddr, $4);
 			APPEND_G_FIFO(cfgt.peers, my_node);
 			fakeaddr = create_address_node(dupaddr, AF_INET);
-			aon = create_addr_opts_node(fakeaddr, $6);
+			aon = create_addr_opts_node(fakeaddr, $5);
 			APPEND_G_FIFO(cfgt.fudge, aon);
 #endif /* REFCLOCK */
 		}
 	;
+
+optional_unit
+	:
+			{$$ = 0;}
+	|
+		T_Unit T_Integer
+			{$$ = $2;}
+	;
+
 
 /* rlimit Commands
  * ---------------
