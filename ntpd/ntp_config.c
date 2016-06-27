@@ -74,9 +74,6 @@ int	cmdline_server_count;
 char **	cmdline_servers;
 bool	force_synchronous_dns;
 
-/* set to false if admin doesn't want memory locked */
-bool	do_memlock = true;
-
 /*
  * FIXME: ugly globals, only created to avoid wiring in option-parsing cruft.
  * These are symptoms of deeper factoring issues; the things they're controlling,
@@ -2018,8 +2015,6 @@ config_rlimit(
 				/* STDERR as well would be fine... */
 				msyslog(LOG_WARNING, "'rlimit memlock' specified but is not available on this system.");
 #endif /* RLIMIT_MEMLOCK */
-			} else {
-				do_memlock = false;
 			}
 			break;
 
