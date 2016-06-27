@@ -30,7 +30,7 @@
  * This driver works slightly different from most others, as the PPS
  * information (if available) is also coming from GPSD via the data
  * connection. This makes using both the PPS data and the serial data
- * easier, but OTOH it's not possible to use the ATOM driver to feed a
+ * easier, but OTOH it's not possible to use the PPS driver to feed a
  * raw PPS stream to the core of NTPD.
  *
  * To go around this, the driver can use a secondary clock unit

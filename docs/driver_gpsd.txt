@@ -1,4 +1,4 @@
-= GPSD NG client driver =
+= GPSD JSON client driver =
 
 
 == Synopsis ==
@@ -83,7 +83,7 @@ A few operation modes can be selected with the mode word.
 |===========================================================================
 3+|The Mode Word
 |Bits     |Value |Description
-.4+<.>|0..1  |  0   |STI only operation. This mode is affected by the timing
+.4+<.>|0..1  |  0   |STI (serial time information) only operation. This mode is affected by the timing
 stability of whatever protocol is used between the GPS  and GPSD
 	
 Running on STI only is not recommended in general. Possible use cases include:
@@ -193,7 +193,7 @@ since the last poll.
 == Driver Options ==
 
 +time1+ 'time'::
-  Specifies tkhe PPS time offset calibration factor, in seconds and
+  Specifies the PPS time offset calibration factor, in seconds and
   fraction, with default 0.0.
 +time2+ 'time'::
   _[Primary Unit]_ Specifies the TPV/TIME time offset calibration
@@ -218,6 +218,8 @@ since the last poll.
   hunts.
 +flag4 {0 | 1}+::
   _[Primary Unit]_ If set, write a clock stats line on every poll cycle.
++mode+::
+  Control STI and strict operating modes.
 
 [[fn1]]link:#fn1bl[^1^)]Data transmission and decoding is done only once by the
 primary unit. The decoded data is then processed independently in both

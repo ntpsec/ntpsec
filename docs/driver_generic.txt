@@ -452,6 +452,8 @@ screen width and looks similar to:
 +flag4 {0 | 1}+::
   Delete next leap second instead of adding it. (You'll need to wait a
   bit for that to happen 8-)
++mode+::
+  Used to select the device type and serial parameters.
 
 == Making your own generic clocks ==
 

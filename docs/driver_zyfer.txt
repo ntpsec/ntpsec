@@ -23,6 +23,10 @@ and IRIG output.
 
 link:refclock.html[Reference Clock Drivers]
 
+== Driver Options ==
+
+This driver does not interpret any fudges, option bits, or the mode.
+
 '''''
 
 include::includes/footer.txt[]

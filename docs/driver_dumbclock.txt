@@ -32,6 +32,10 @@ C - \r (carriage return)
 L - \n (newline)
 ---------------------------
 
+== Driver Options ==
+
+This driver does not interpret fudges, option flags, or the mode.
+
 '''''
 
 include::includes/footer.txt[]
