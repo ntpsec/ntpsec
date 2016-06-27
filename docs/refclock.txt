@@ -185,7 +185,7 @@ parse driver.
 |link:driver_acts.html[acts]            | - | NIST/USNO/PTB Modem Time Services
 |link:driver_nmea.html[nmea]            | T | Generic NMEA GPS Receiver
 |link:driver_pps.html[pps]              | T | PPS Clock Discipline
-|link:driver_hp58503a.html[hp58503a]    | T | Hewlett Packard 58503A GPS Receiver
+|link:driver_hpgps.html[hpgps]          | T | Hewlett Packard GPS Receivers
 |link:driver_shm.html[shm]              | T | Shared Memory Driver
 |link:driver_palisade.html[palisade]    | TM| Trimble Navigation Palisade GPS
 |link:driver_oncore.html[oncore]        | - | Motorola UT Oncore GPS
