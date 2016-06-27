@@ -85,10 +85,10 @@ refclock_map = {
 		"file":		"pps"
 	},
 
-	"hp58503a": {
+	"hpgps": {
 		"descr":	"Hewlett Packard 58503A GPS Receiver",
-		"define":	"CLOCK_HP58503A",
-		"file":		"hp58503a"
+		"define":	"CLOCK_HPGPS",
+		"file":		"hpgps"
 	},
 
 	"shm": {

@@ -1,5 +1,5 @@
 /*
- * refclock_hpgps - clock driver for HP 58503A GPS receiver
+ * refclock_hpgps - clock driver for HP GPS receivers
  */
 
 #include <config.h>

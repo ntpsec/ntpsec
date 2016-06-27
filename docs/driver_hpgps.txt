@@ -1,9 +1,9 @@
-= Hewlett Packard 58503A GPS Receiver and HP Z3801A =
+= Hewlett Packard GPS Receivers -  HP 58503A and HP Z3801A =
 
 == Synopsis ==
 
 ["verse",subs="normal"]
-Name: hp58503a
+Name: hpgps
 Reference ID: GPS
 Driver ID: GPS_HP
 Serial Port: /dev/hpgps__u__; 9600bps 8N1, 19200bps 7N2 for the HP Z3801A
@@ -11,13 +11,22 @@ Serial Port: /dev/hpgps__u__; 9600bps 8N1, 19200bps 7N2 for the HP Z3801A
 == Description ==
 
 This driver supports the HP 58503A Time and Frequency Reference Receiver
-and HP Z3801A GPS Receiver. They use HP SmartClock (TM) to implement an
-Enhanced GPS receiver. The receiver accuracy when locked to GPS in
-normal operation is better than 1 usec. The accuracy when operating in
-holdover is typically better than 10 us per day. It receiver should be
-operated with factory default settings. Initial driver operation:
-expects the receiver to be already locked to GPS, configured and able to
-output timecode format 2 messages.
+and HP Z3801A GPS Receiver. It will probably work with other Z38xx models.
+Two-unit pairs of these are sometimes known as a KS-24361.
+
+These receivers are very old designs, dating from around 1990, so
+their GPS receiver stages are not very sensitive by modern
+standards. On the other hand, lots of them are available cheap,
+because they used to be standard kit on cell towers and were surplused
+off in the thousands.
+
+They use HP SmartClock (TM) to implement an Enhanced GPS receiver. The
+receiver accuracy when locked to GPS in normal operation is better
+than 1 usec. The accuracy when operating in holdover is typically
+better than 10 us per day. The receiver should be operated with
+factory default settings. Initial driver operation: expects the
+receiver to be already locked to GPS, configured and able to output
+timecode format 2 messages.
 
 The driver uses the poll sequence +:PTIME:TCODE?+ to get a response from
 the receiver. The receiver responds with a timecode string of ASCII
@@ -48,7 +57,7 @@ on an HP 9000 Model 712/80 HP-UX 9.05 -0.953175 on an HP 9000 Model 370
 HP-UX 9.10
 
 This driver will probably work with the 58503B and 59551A if they are
-setup appropriately.
+set up appropriately.
 
 To use an HP Z3801A, specify +mode 1+ on the server config line to setup
 the right line paramters.
@@ -82,7 +91,7 @@ http://www.symmetricom.com/[Symmetricom].
 == Configuration Example ==
 
 ----------------------------------------------------------------------------
-refclock hp58503a
+refclock hpgps
 ----------------------------------------------------------------------------
 
 '''''

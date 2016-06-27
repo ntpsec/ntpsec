@@ -89,7 +89,7 @@ extern	struct refclock	refclock_pps;
 #define refclock_pps	refclock_none
 #endif
 
-#ifdef CLOCK_HP58503A
+#ifdef CLOCK_HPGPS
 extern	struct refclock	refclock_hpgps;
 #else
 #define	refclock_hpgps	refclock_none
