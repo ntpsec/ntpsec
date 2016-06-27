@@ -1,14 +1,14 @@
-= How to build new PARSE clocks =
+= How to build new GENERIC clocks =
 
 Here is an attempt to sketch out what you need to do in order to add
-another clock to the parse driver: Currently the implementation is being
+another clock to the generic driver: Currently the implementation is being
 cleaned up - so not all information in here is completely correct. Refer
 to the included code where in doubt.
 
 Prerequisites:
 
 * Does the system you want the clock connect to have the include file
-termios.h? (You need that for the parse driver)
+termios.h? (You need that for the generic driver)
 
 What to do:
 
@@ -97,7 +97,7 @@ them for examples. The basic structure is:
        }
 -----------------------------------------------------
 +
-The struct clockformat is the interface to the rest of the parse driver
+The struct clockformat is the interface to the rest of the generic driver
 - it holds all information necessary for finding the clock message and
 doing the appropriate time stamping.
 +
@@ -131,11 +131,11 @@ In order to make your clk_*.c file usable, a reference to the clockformat
 structure must be put into parse_conf.c.
 
 2.  TTY setup and initialization/configuration will be done in
-ntpd/refclock_parse.c.
+ntpd/refclock_generic.c.
 * Find out the exact tty settings for your clock (baud rate, parity,
 stop bits, character size, ...) and note them in terms of termio*.h
 c_cflag macros.
-* in {ntpd}/refclock_parse.c fill out a new the struct clockinfo element
+* in {ntpd}/refclock_generic.c fill out a new the struct clockinfo element
 (that allocates a new "IP" address - see comments) (see all the other
 clocks for example)
 +

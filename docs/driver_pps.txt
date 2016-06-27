@@ -9,13 +9,6 @@ Driver ID: PPS
 Serial or Parallel Port: /dev/pps__u__
 Requires: PPSAPI signal interface for PPS signal processing.
 
-Note: This driver supersedes an older one of the same name. The older
-driver operated with several somewhat archaic signal interface
-devices, required intricate configuration and was poorly
-documented. This driver requires the Pulse per Second API
-(PPSAPI)^1^. Note also that the +pps+ configuration
-command has been obsoleted by this driver.
-
 == Description ==
 
 This driver furnishes an interface for the pulse-per-second (PPS) signal

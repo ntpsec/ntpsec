@@ -22,8 +22,27 @@ include::includes/misc.txt[]
 
 '''''
 
+== When Not to Write a Driver ==
+
+If the device you are trying to support is an exotic GPS, you should
+probably not write an +{ntpd}+ driver for it.  Instead, check to see
+if it is already supported by {GPSD}, a project with which
+{project-shortname} cooperates closely.  The GPSD people are
+specialists in managing GPSes and better at it than we are,
+supporting a much broader range of devices, and GPSD is designed
+to feed clock samples to +{ntpd}+ from any of them.  If you need
+to write a driver for a GPS, they'll take it and should have it.
+
+If you have a non-GPS time source (like a time radio or GPSDO) that
+you want to support, consider link:generic_howto.html[writing a mode
+for it in the generic driver] rather than a full driver of its own;
+this will be easier.  The generic driver is so called because it
+factors out a lot of I/O and housekeeping code common to all drivers,
+allowing you support a new device type by writing only a parser for
+its sentences.
+
 [[desc]]
-== Description ==
+== Structure of a Driver ==
 
 NTP reference clock support maintains the fiction that the clock is
 actually an ordinary server in the NTP tradition, but operating at a
@@ -93,7 +112,10 @@ Radio and modem reference clocks by convention have addresses of the
 form +127.127.t.u+, where _t_ is the clock type and _u_ in the range 0-3
 is used to distinguish multiple instances of clocks of the same type.
 These addresses used to be exposed as part of the refclock
-configuration syntax, but are no longer.
+configuration syntax, but are no longer.  Nothing in ntpd now actually
+requires this form of address for clocks, but it is still generated
+so as not to hand surprises to legacy ntpq instances that still make
+the assumption.
 
 Most clocks require a serial or parallel port or special bus peripheral.
 The particular device is normally specified by adding a soft link
@@ -101,12 +123,9 @@ The particular device is normally specified by adding a soft link
 
 By convention, reference clock drivers are named in the form
 +refclock_xxxx.c+, where +xxxx+ is a unique string. Each driver is
-assigned a unique type number, long-form driver name, short-form driver
-name and device name. The existing assignments are in the
+assigned a unique long-form driver name, short-form driver name and
+device name. The existing assignments are in the
 link:refclock.html[Reference Clock Drivers] page and its dependencies.
-All drivers supported by the particular hardware and operating system
-are automatically detected in the autoconfigure phase and conditionally
-compiled.
 
 == Conventions, Fudge Factors and Flags ==
 
