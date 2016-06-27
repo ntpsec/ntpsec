@@ -7,7 +7,7 @@ refclock_parse - multidevice parse driver for generic time radios and GPSDOs.
 == Synopsis ==
 
 ["verse",subs="normal"]
-Address: 127.127.8.'u'
+Name: generic
 Reference ID: DCF | DCFa | DCFp | GPS | MSF
 Serial Port: /dev/refclock-'u'; TTY mode according to clock type
 PPS device: /dev/refclockpps-'u'; alternate PPS device
@@ -113,7 +113,7 @@ SEL-2407 in one of its development labs.
 
 The pictures below have been archived from the vendors' web pages.
 
-* *server 127.127.8.0-3 mode 0*
+* *refclock generic unit 0-3 mode 0*
 +
 *http://www.meinberg.de[Meinberg] https://www.meinbergglobal.com/english/archive/pzf511.htm[PZF5xx receiver family] (FM demodulation/TCXO / 50&mu;s)*
 +
@@ -121,7 +121,7 @@ WARNING: This equipment is no longer available for commercial sale, and
 support may be removed in the future.  See: 
 https://www.ntpsec.org/removal-plan.html[Feature removals]
 
-* *server 127.127.8.0-3 mode 1*
+* *refclock generic unit 0-3 mode 1*
 +
 *http://www.meinberg.de[Meinberg] https://www.meinbergglobal.com/english/archive/pzf511.htm[PZF5xx receiver family] (FM demodulation/OCXO / 50&mu;s)*
 +
@@ -131,7 +131,7 @@ https://www.ntpsec.org/removal-plan.html[Feature removals]
 
 image::pic/pzf511.jpg[http://www.meinberg.de/english/products/pzf-eurocard.htm]
 
-* *server 127.127.8.0-3 mode 2*
+* *refclock generic unit 0-3 mode 2*
 +
 *http://www.meinberg.de[Meinberg] https://www.meinbergglobal.com/english/archive/c51.htm[DCF C51 receiver and similar] (AM demodulation / 4ms)*
 +
@@ -150,7 +150,7 @@ installed. That driver emulates a refclock device in order to allow {ntpd}
 to access those cards. For details, please refer to the README file
 that comes with the Meinberg driver package.
 
-* *server 127.127.8.0-3 mode 3*
+* *refclock generic unit 0-3 mode 3*
 +
 http://www.elv.de/[ELV] *DCF7000 (sloppy AM demodulation / 50ms)*
 +
@@ -158,7 +158,7 @@ WARNING: This equipment is no longer available for commercial sale, and
 support may be removed in the future.  See: 
 https://www.ntpsec.org/removal-plan.html[Feature removals]
 
-* *server 127.127.8.0-3 mode 4*
+* *refclock generic unit 0-3 mode 4*
 +
 *Walter Schmid DCF receiver Kit (AM demodulation / 1ms)*
 +
@@ -166,15 +166,15 @@ WARNING: This equipment is no longer available for commercial sale, and
 support may be removed in the future.  See: 
 https://www.ntpsec.org/removal-plan.html[Feature removals]
 
-* *server 127.127.8.0-3 mode 5*
+* *refclock generic unit 0-3 mode 5*
 +
 *RAW DCF77 100/200ms pulses (Conrad DCF77 receiver module / 5ms)*
 
-* *server 127.127.8.0-3 mode 6*
+* *refclock generic unit 0-3 mode 6*
 +
 *RAW DCF77 100/200ms pulses (TimeBrick DCF77 receiver module / 5ms)*
 
-* *server 127.127.8.0-3 mode 7*
+* *refclock generic unit 0-3 mode 7*
 +
 * http://www.meinberg.de[Meinberg] http://www.meinberg.de/english/products/timesource.htm#gps---freq_sync[GPS16x/GPS17x receivers] (GPS / <<1&mu;s) *
 +
@@ -194,13 +194,13 @@ link:imap://mills@mail.eecis.udel.edu:993/fetch%3EUID%3E.INBOX%3E67132?part=1.3&
 +
 *Note:* mode 7 must not be used with Meinberg PCI cards; use mode 2 instead.
 
-* *server 127.127.8.0-3 mode 8*
+* *refclock generic unit 0-3 mode 8*
 +
 http://www.igel.de/[IGEL] http://www.igel.de/eigelmn.html[clock]
 +
 image:pic/igclock.gif[http://www.igel.de/eigelmn.html]
 
-* *server 127.127.8.0-3 mode 9*
+* *refclock generic unit 0-3 mode 9*
 +
 *http://www.trimble.com[Trimble] ftp://ftp.trimble.com/pub/sct/embedded/bin/Data%20Sheets/SveeSix2.PDF[SVeeSix GPS receiver] TAIP protocol (GPS / <<1&mu;s)*
 +
@@ -208,7 +208,7 @@ WARNING: This equipment is no longer available for commercial sale, and
 support may be removed in the future.  See: 
 https://www.ntpsec.org/removal-plan.html[Feature removals]
 
-* *server 127.127.8.0-3 mode 10*
+* *refclock generic unit 0-3 mode 10*
 +
 *http://www.trimble.com[Trimble] ftp://ftp.trimble.com/pub/sct/embedded/bin/Data%20Sheets/SveeSix2.PDF[SVeeSix GPS receiver] (GPS / <<1&mu;s) (no kernel support yet)*
 +
@@ -220,37 +220,37 @@ image:pic/pd_om011.gif[http://www.trimble.com/cgi/omprod.cgi/pd_om011.html]
 +
 image:pic/pd_om006.gif[http://www.trimble.com/cgi/omprod.cgi/pd_om006.html]
 
-* *server 127.127.8.0-3 mode 11*
+* *refclock generic unit 0-3 mode 11*
 +
 *Radiocode Clocks Ltd RCC 8000 Intelligent Off-Air Master Clock support*
 
-* *server 127.127.8.0-3 mode 12*
+* *refclock generic unit 0-3 mode 12*
 +
 *http://www.hopf-time.com[HOPF] http://hopf.com/manuals/english/pdf_6---/e6021gps_0601.pdf[Funkuhr 6021]*
 +
 image:pic/fg6021.gif[http://www.hopf-time.com/engl/kart6021.html]
 
-* *server 127.127.8.0-3 mode 13*
+* *refclock generic unit 0-3 mode 13*
 +
 *Diem's Computime Radio Clock*
 
-* *server 127.127.8.0-3 mode 14*
+* *refclock generic unit 0-3 mode 14*
 +
 *RAWDCF receiver (DTR=high/RTS=low)*
 
-* *server 127.127.8.0-3 mode 15*
+* *refclock generic unit 0-3 mode 15*
 +
 *WHARTON 400A Series Clocks with a 404.2 Serial Interface*
 
-* *server 127.127.8.0-3 mode 16*
+* *refclock generic unit 0-3 mode 16*
 +
 *RAWDCF receiver (DTR=low/RTS=high)*
 
-* *server 127.127.8.0-3 mode 17*
+* *refclock generic unit 0-3 mode 17*
 +
 *VARITEXT Receiver (MSF)*
 
-* *server 127.127.8.0-3 mode 18*
+* *refclock generic unit 0-3 mode 18*
 +
 *http://www.meinberg.de[Meinberg] http://www.meinberg.de/english/products/timesource.htm#gps---freq_sync[GPS16x/GPS17x receivers] (GPS / <<1&mu;s)*
 +
@@ -261,11 +261,11 @@ multiclient operation.
 *Note:* mode 18 must not be used with Meinberg PCI cards, use mode 2
 instead.
 
-* *server 127.127.8.0-3 mode 19*
+* *refclock generic unit 0-3 mode 19*
 +
 *Gude Analog- und Digitalsystem GmbH \'Expert mouseCLOCK USB v2.0'*
 
-* *server 127.127.8.0-3 mode 20*
+* *refclock generic unit 0-3 mode 20*
 +
 *RAWDCF receiver similar to mode 14, but operating @ 75 baud (DTR=high/RTS=low)*
 +
@@ -273,21 +273,21 @@ Driving the DCF clocks at 75 baud may help to get them to work with a
 bunch of common USB serial converters, that do 75 but cannot do 50 baud
 at all, e.g. those based on Prolific PL2303.
 
-* *server 127.127.8.0-3 mode 21*
+* *refclock generic unit 0-3 mode 21*
 +
 *RAWDCF receiver similar to mode 16, but operating @ 75 baud (DTR=low/RTS=high)*
 +
 See comment from mode 20 clock.
 
-* *server 127.127.8.0-3 mode 22*
+* *refclock generic unit 0-3 mode 22*
 +
 *MEINBERG, mode 2 but with POWERUP trust*
 
-* *server 127.127.8.0-3 mode 23*
+* *refclock generic unit 0-3 mode 23*
 +
 *MEINBERG, mode 7 but with POWERUP trust*
 
-* *server 127.127.8.0-3 mode 24*
+* *refclock generic unit 0-3 mode 24*
 +
 *http://www.selinc.com/[Schweitzer Engineering Laboratories]*
 
@@ -426,7 +426,7 @@ screen width and looks similar to:
   gps_cfg[5]="[0x9] BLOCK II"          
 ----------------------------------------
 
-== Fudge Factors ==
+== Driver Options ==
 
 +time1+ _time_ ::
   Specifies the time offset calibration factor, in seconds and fraction.

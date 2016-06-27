@@ -3,7 +3,7 @@
 == Synopsis ==
 
 ["verse",subs="normal"]
-Address: 127.127.6.'u'
+Name: irig
 Reference ID: IRIG
 Audio Device: +/dev/audio+ and +/dev/audioctl+
 
@@ -124,7 +124,7 @@ following format:
 +00 00 98 23 19:26:52 2782 143 0.694 10 0.3 66.5 3094572411.00027+
 
 If clockstats is enabled, the most recent line is written to the
-clockstats file every 64 s. If verbose recording is enabled (fudge flag
+clockstats file every 64 s. If verbose recording is enabled (option flag
 4) each line is written as generated.
 
 The first field contains the error flags in hex, where the hex bits are
@@ -169,7 +169,7 @@ The error flags are defined as follows in hex:
 +x80+::
   Device status error (Spectracom).
 
-== Fudge Factors ==
+== Driver Options ==
 
 +time1+ 'time'::
   Specifies the time offset calibration factor, in seconds and fraction,

@@ -66,7 +66,7 @@
 /*	       jjy_start()					      */
 /*    [Change] Change clockstats format of the Tristate JJY01/02      */
 /*	       Issues more command to get the status of the receiver  */
-/*	       when "fudge 127.127.40.X flag1 1" is specified	      */
+/*	       when "flag1 1" is specified	      */
 /*	       ( DATE,STIM -> DCST,STUS,DATE,STIM )		      */
 /*								      */
 /*  2011/04/30							      */
@@ -4066,19 +4066,19 @@ modem_init_resp00 ( struct peer *peer, struct refclockproc *pp, struct jjyunit *
 	case 2 :
 		/* Mn = Speaker switch  0:Off  1:On until remote carrier detected  2:On */
 		if ( ( pp->sloppyclockflag & CLK_FLAG3 ) == 0 ) {
-			/* fudge 127.127.40.n flag3 0 */
+			/* refclock jjy unit n flag3 0 */
 			iSpeakerSwitch = 0 ;
 		} else {
-			/* fudge 127.127.40.n flag3 1 */
+			/* refclock jjy unit n flag3 1 */
 			iSpeakerSwitch = 2 ;
 		}
 
 		/* Ln = Speaker volume  0:Very low  1:Low  2:Middle  3:High */
 		if ( ( pp->sloppyclockflag & CLK_FLAG4 ) == 0 ) {
-			/* fudge 127.127.40.n flag4 0 */
+			/* refclock jjy unit n flag4 0 */
 			iSpeakerVolume = 1 ;
 		} else {
-			/* fudge 127.127.40.n flag4 1 */
+			/* refclock jjy unit n flag4 1 */
 			iSpeakerVolume = 2 ;
 		}
 
@@ -4104,10 +4104,10 @@ modem_init_resp00 ( struct peer *peer, struct refclockproc *pp, struct jjyunit *
 	case 6 :
 		/* \Nn = Error correction  0:Normal mode  1:Direct mode  2:V42,MNP  3:V42,MNP,Normal */
 		if ( ( pp->sloppyclockflag & CLK_FLAG2 ) == 0 ) {
-			/* fudge 127.127.40.n flag2 0 */
+			/* refclock jjy unit n flag2 0 */
 			iErrorCorrection = 0 ;
 		} else {
-			/* fudge 127.127.40.n flag2 1 */
+			/* refclock jjy unit n flag2 1 */
 			iErrorCorrection = 3 ;
 		}
 
@@ -4205,10 +4205,10 @@ modem_dial_dialout ( struct peer *peer, struct refclockproc *pp, struct jjyunit 
 
 	/* Tone or Pulse */
 	if ( ( pp->sloppyclockflag & CLK_FLAG1 ) == 0 ) {
-		/* fudge 127.127.40.n flag1 0 */
+		/* refclock jjy unit n flag1 0 */
 		cToneOrPulse = 'T' ;
 	} else {
-		/* fudge 127.127.40.n flag1 1 */
+		/* refclock jjy unit n flag1 1 */
 		cToneOrPulse = 'P' ;
 	}
 

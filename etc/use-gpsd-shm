@@ -7,12 +7,10 @@
 # another.  Prefers the latter.
 
 # GPS Serial data reference (NTP0)
-server 127.127.28.0
-fudge 127.127.28.0 refid GPS
+refclock shm unit 0 refid GPS
 
 # GPS PPS reference (NTP1)
-server 127.127.28.1 prefer
-fudge 127.127.28.1 refid PPS
+refclock shm unit 1 prefer refid PPS
 
 # The following sets edit modes for GNU EMACS
 # Local Variables:

@@ -56,16 +56,14 @@ not been appropriately configured results in a scalding remark to the
 system log file, but is otherwise non hazardous.
 
 Reference clocks are supported in the same way as ordinary NTP clients
-and use the same filter, select, cluster and combine algorithms. Drivers
-have addresses in the form 127.127._t.u_, where _t_ is the driver type
-and _u_ is a unit number to distinguish multiple
-instances of the same driver. The connection to the computer is device
-dependent, usually a serial port, parallel port or special bus
-peripheral, but some can work directly from an audio codec or sound
-card. The particular device is specified by adding a soft link from the
-name used by the driver to the particular device name.
+and use the same filter, select, cluster and combine algorithms. The
+connection to the computer is device dependent, usually a serial port,
+parallel port or special bus peripheral, but some can work directly
+from an audio codec or sound card. The particular device is specified
+by adding a soft link from the name used by the driver to the
+particular device name.
 
-The +server+ command is used to configure a reference clock. Only the
+The +refclock+ command is used to configure a reference clock. Only the
 +mode+, +minpoll+, +maxpoll+, and +prefer+ options are supported for
 reference clocks, as described on the link:clockopt.html[Reference
 Clock Commands] page. The +prefer+ option can be useful to persuade
@@ -75,23 +73,21 @@ link:prefer.html[Mitigation Rules and the +prefer+ Keyword] page. The
 +minpoll+ and +maxpoll+ options have meaning only for selected clock
 drivers.
 
-The +fudge+ command is used to provide additional information for
-individual clock drivers and normally follows immediately after the
-+server+ command. The +address+ argument specifies the clock address.
-The +refid+ and +stratum+ options can be used to override the defaults
-for the device. There are two optional device-dependent time offsets and
-four flags that can be included in the +fudge+ command as well.
+Additionally, the +refid+ and +stratum+ options can be used to
+override the defaults for the device. There are two optional
+device-dependent time offsets and four flags that can be included in
+the +refclock+ command as well.
 
 The stratum number of a reference clock is by default zero. Since the
 {ntpdman} daemon adds one to the stratum of each peer, a primary
 server ordinarily displays an external stratum of one. In order to
-provide engineered backups, it is often useful to specify the reference
-clock stratum as greater than zero. The stratum option is used for this
-purpose. Also, in cases involving both a reference clock and a
-pulse-per-second (PPS) discipline signal, it is useful to specify the
-reference clock identifier as other than the default, depending on the
-driver. The refid option is used for this purpose. Except where noted,
-these options apply to all clock drivers.
+provide engineered backups, it is often useful to specify the
+reference clock stratum as greater than zero. The stratum option is
+used for this purpose. Also, in cases involving both a reference clock
+and a pulse-per-second (PPS) discipline signal, it may be useful to
+specify the reference clock identifier as other than the default,
+depending on the driver. The refid option is used for this
+purpose. Except where noted, these options apply to all clock drivers.
 
 
 [[spec]]
@@ -151,13 +147,13 @@ driver relative to an association designated the prefer peer.
 [[list]]
 == List of Reference Clock Drivers ==
 
-Following is a list showing the type and title of each driver currently
-implemented. The default compile-time identifier exported to other systems is shown in
-under +RefID+. Click on a selected type for specific description and
-configuration documentation, including the clock address, reference ID,
-driver ID, device name and serial line speed. For those drivers without
-specific documentation, please contact the author listed in the
-link:copyright.html[Copyright Notice] page.
+Following is a list showing the type name and title of each driver
+currently implemented. Click on a selected type for specific
+description and configuration documentation, including the clock
+address, reference ID, driver ID, device name and serial line
+speed. For those drivers without specific documentation, please
+contact the author listed in the link:copyright.html[Copyright Notice]
+page.
 
 If you have seen older versions of NTP, this list may have fewer
 entries than you expected.  Support for some very ancient drivers
@@ -175,31 +171,34 @@ parse driver.
 
 [options="header"]
 [cols="10%,5%,5%,80%",options="header"]
+|====================================================================
+| Name                        | Flags | Driver
+|link:driver1.html[local]     | D     | Undisciplined Local Clock
+|link:driver4.html[spectracom]| -     | Generic Spectracom Receivers
+|link:driver5.html[truetime]  | D     | TrueTime GPS/GOES Receivers
+|link:driver6.html[irig]      | D     | IRIG Audio Decoder
+|link:driver7.html[chu]       | D     | Radio CHU Audio Demodulator/Decoder
+|link:driver8.html[generic]   | TM    | Generic Reference Driver (Parse)
+|link:driver9.html[mx4200]    | D     | Magnavox MX4200 GPS Receiver
+|link:driver10.html[austron]  | D     | Austron 2200A/2201A GPS Receivers
+|link:driver11.html[arbiter]  | D     | Arbiter 1088A/B GPS Receiver
+|link:driver18.html[acts]     | R     | NIST/USNO/PTB Modem Time Services
+|link:driver20.html[nmea]     | T     | Generic NMEA GPS Receiver
+|link:driver22.html[pps]      | T     | PPS Clock Discipline
+|link:driver26.html[hp58503a] | T     | Hewlett Packard 58503A GPS Receiver
+|link:driver28.html[shm]      | T     | Shared Memory Driver
+|link:driver29.html[palisade] | TM    | Trimble Navigation Palisade GPS
+|link:driver30.html[oncore]   | -     | Motorola UT Oncore GPS
+|link:driver31.html[jupiter]  | D     | Rockwell Jupiter GPS
+|link:driver33.html[dumbclock]| D     | Dumb Clock
+|link:driver40.html[jjy]      | T     | JJY Receivers
+|link:driver42.html[zyfer]    | -     | Zyfer GPStarplus Receiver
+|link:driver44.html[neoclock] | -     | NeoClock4X DCF77 / TDF Receiver
+|link:driver46.html[gpsd]     | T     | GPSD NG client protocol
 |==========================================================================
-| Name                        | Flags |RefID| Driver
-|link:driver1.html[LOCAL]     | D     |LOCL | Undisciplined Local Clock
-|link:driver4.html[SPECTRACOM]| -     |GPS  | Generic Spectracom Receivers
-|link:driver5.html[TRUETIME]  | D     |TRUE | TrueTime GPS/GOES Receivers
-|link:driver6.html[IRIG]      | D     |IRIG | IRIG Audio Decoder
-|link:driver7.html[CHU]       | D     |CHU  |Radio CHU Audio Demodulator/Decoder
-|link:driver8.html[GENERIC]   | TR    |DCFx | Generic Reference Driver (Parse)
-|link:driver9.html[MX4200]    | D     |GPS  | Magnavox MX4200 GPS Receiver
-|link:driver10.html[AUSTRON]  | D     |GPS  | Austron 2200A/2201A GPS Receivers
-|link:driver11.html[ARBITER]  | D     |GPS  | Arbiter 1088A/B GPS Receiver
-|link:driver18.html[ACTS]     | R     |NIST | NIST/USNO/PTB Modem Time Services
-|link:driver20.html[NMEA]     | T     |GPS  | Generic NMEA GPS Receiver
-|link:driver22.html[PPS]      | T     |PPS  | PPS Clock Discipline
-|link:driver26.html[HP58503A] | T     |GPS  | Hewlett Packard 58503A GPS Receiver
-|link:driver28.html[SHM]      | T     |SHM  | Shared Memory Driver
-|link:driver29.html[PALISADE] | TM    |GPS  | Trimble Navigation Palisade GPS
-|link:driver30.html[ONCORE]   | -     |GPS  | Motorola UT Oncore GPS
-|link:driver31.html[JUPITER]  | D     |GPS  | Rockwell Jupiter GPS
-|link:driver33.html[DUMBCLOCK]| D     |DUMB | Dumb Clock
-|link:driver40.html[JJY]      | T     |JJY  | JJY Receivers
-|link:driver42.html[ZYFER]    | -     |GPS  | Zyfer GPStarplus Receiver
-|link:driver44.html[NEOCLOCK] | -     |neol | NeoClock4X - DCF77 / TDF
-|link:driver46.html[GPSD]     | T     |GPSD | GPSD NG client protocol
-|==========================================================================
+
+The name in the left column is the driver type to be used in the
+refclock declaration. Matching to these names is case-insensitive.
 
 The flags field should be interpreted as follows:
 
@@ -209,13 +208,7 @@ The flags field should be interpreted as follows:
 | D | Deprecated.  May be removed in a future release
 | T | Regularly tested by an active maintainer (some devices/modes)
 | M | The driver supports multiple devices or major modes
-| R | Multiple Reference IDs supported, please check the driver page
 |====================================================================
-
-Driver numbers 2, 3, 12, 13, 14, 15, 16, 17, 19, 21, 23, 24, 25, 32, 34,
-35, 36, 37, 41, and 43 (all unused numbers below 46) are reserved. Some of
-these were used by refclock types (now obsolete) in older NTP versions.
-
 
 '''''
 

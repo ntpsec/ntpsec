@@ -81,7 +81,7 @@ struct mx4200unit {
 	double N_fixes;			/* Number of position measurements */
 	int    last_leap;		/* leap second warning */
 	u_int  moving;			/* mobile platform? */
-	u_long sloppyclockflag;		/* fudge flags */
+	u_long sloppyclockflag;		/* driver option flags */
 	u_int  known;			/* position known yet? */
 	u_long clamp_time;		/* when to stop postion averaging */
 	u_long log_time;		/* when to print receiver status */
@@ -226,7 +226,7 @@ mx4200_config(
 	/*
 	 * Initialize the unit variables
 	 *
-	 * STRANGE BEHAVIOUR WARNING: The fudge flags are not available
+	 * STRANGE BEHAVIOUR WARNING: The driver option flags are not available
 	 * at the time mx4200_start is called.  These are set later,
 	 * and so the code must be prepared to handle changing flags.
 	 */

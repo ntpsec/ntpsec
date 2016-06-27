@@ -21,15 +21,7 @@ include::includes/clockopt.txt[]
 Unless noted otherwise, further information about these commands is on
 the link:refclock.html[Reference Clock Support] page.
 
-Reference clocks are identified by a syntactically correct but invalid
-IP address, in order to distinguish them from ordinary NTP peers. These
-addresses are of the form 127.127._t_._u_, where _t_ is an integer
-denoting the clock type and _u_ indicates the unit number in the range
-0-3. While it may seem overkill, it is in fact sometimes useful to
-configure multiple reference clocks of the same type, in which case the
-unit numbers must be unique.
-
-[[cmd]]
+[[options]]
 == Commands and Options ==
 
 include::includes/clock-options.txt[]

@@ -4,11 +4,8 @@
 # needs fixing.  This snippet is intended to give us a reproducible
 # configuration for testing.
 
-server 127.127.46.128 minpoll 4 maxpoll 4
-fudge 127.127.46.128
-
-server 127.127.46.0 minpoll 4 maxpoll 4
-fudge 127.127.46.0 flag1 1
+refclock gpsd unit 128 minpoll 4 maxpoll 4
+refclock gpsd unit 0 minpoll 4 maxpoll 4 flag1 1
 
 # The following sets edit modes for GNU EMACS
 # Local Variables:

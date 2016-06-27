@@ -1,6 +1,6 @@
 Statistics file formats (README.stats)
 
-The xntp3 daemon can produce a variety of statistics files which are
+The ntpd daemon can produce a variety of statistics files which are
 useful for maintenance, evaluation and retrospective calibration
 purposes. See the xntpd.8 man page for instructions on how to configure
 this feature. Since these files can become rather large and cumbersome,
@@ -91,7 +91,7 @@ refclock_as2201.c source module for a list of the commands used. These
 data are collected only if the following line is included in the
 configuration file ntp.conf:
 
-  fudge 127.127.10.1 flag4 1    # enable extended statistics collection
+  refclock austron unit 0 flag4 1    # enable extended statistics collection
 
 The format of each data line returned is summarized in the following
 list.

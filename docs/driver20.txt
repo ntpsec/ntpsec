@@ -3,7 +3,7 @@
 == Synopsis ==
 
 ["verse",subs="normal"]
-Address: 127.127.20._u_
+Name: nmea
 Reference ID: GPS
 Serial Port: /dev/gps__u__; 4800-115200bps, 8N1
 Serial Port: /dev/gpspps__u__; for PPS
@@ -30,8 +30,8 @@ limited by the precision of the timecode and the latencies of the serial
 interface and operating system.
 
 If the operating system supports PPSAPI
-(http://www.ietf.org/rfc/rfc2783.txt[RFC 2783]), fudge flag1 1 enables
-its use.
+(http://www.ietf.org/rfc/rfc2783.txt[RFC 2783]), the +flag1 1+ option
+enables its use.
 
 If there is a /dev/gpspps__u__ it is tried first for PPS, before /dev/gps__u__.
 
@@ -91,9 +91,7 @@ The various GPS sentences that this driver recognises look like this:
 
 == The \'mode' byte ==
 
-Specific GPS sentences and bitrates may be selected by setting bits of the \'mode' in the server configuration line:
-
-+server       127.127.20.x mode X+
+Specific GPS sentences and bitrates may be selected by setting bits of the \'mode' in the refclock configuration line:
 
 .mode byte bits and bit groups
 [cols="10%,10%,10%,70%",options="header"]
@@ -129,7 +127,7 @@ bit values, but of those enabled still only the first received sentence
 in a cycle will be used.  Using more than one sentence per cycle is
 impossible, because
 
-* there is only link:#fudgetime2[fudge time2] available to compensate
+* there is only the link:#fudgetime2[time2] option available to compensate
 for transmission delays but every sentence would need a different one
 and
 * using more than one sentence per cycle overstuffs the internal data
@@ -213,7 +211,7 @@ switched on by sending the following string.
 "$PGRMC,,,,,,,,,,,,2<cr><lf>"
 -----------------------------
 
-== Fudge Factors ==
+== Driver Options ==
 
 +time1+ 'time'::
   Specifies the PPS time offset calibration factor, in seconds and

@@ -8,13 +8,6 @@ together in any order for effect.  The file titles are clues to what they're
 useful for.  Each has an explanatory header comment.  The file "example conf"
 shows what a file made out of use snippets is like.
 
-The directory 'historical' contains some example scripts from NTP
-Classic.  They are quite particular to specific machines; just copying
-them won't get you anywhere. They're included as examples. They have
-been modified a bit to -track changes in configuration options,
-notably the elimination of the -'requestkey' option associated with
-mode 7 access.
-
 The rc files are start/stop scripts for NTP.  They are  intended as models
 for distribution packagers.
 

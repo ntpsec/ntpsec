@@ -1104,8 +1104,8 @@ refclock_buginfo(
 /*
  * refclock_ppsapi - initialize/update ppsapi
  *
- * This routine is called after the fudge command to open the PPSAPI
- * interface for later parameter setting after the fudge command.
+ * This routine is called after the refclock command to open the PPSAPI
+ * interface for later parameter setting after the refclock command.
  */
 bool
 refclock_ppsapi(

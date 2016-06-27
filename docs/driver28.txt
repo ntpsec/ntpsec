@@ -3,7 +3,7 @@
 == Synopsis ==
 
 ["verse",subs="normal"]
-Address: 127.127.28.'u'
+Name: shm
 Reference ID: SHM
 
 == Description ==
@@ -133,10 +133,9 @@ Here is a sample showing the GPS reception fading out:
 == The \'mode' word ==
 
 Some aspects of the driver behavior can be adjusted by setting bits of
+the mode option of the refclock declaration.
 
 ["literal",subs="normal"]
-server 127.127.28.'X' mode 'Y'
-
 .mode word bits and bit groups
 [cols="10%,10%,10%,70%",options="header"]
 |=============================================================
@@ -148,7 +147,7 @@ for the specific unit.
 |1-31 |  -  |  -  | _reserved -- do not use_
 |=============================================================
 
-== Fudge Factors ==
+== Driver Options ==
 
 +time1+ 'time'::
    Specifies the time offset calibration factor, in seconds and fraction,
@@ -204,7 +203,7 @@ that the allocation of SHM segments must be done early during the clock
 setup. The actual polling of the clock is done as the run-time user;
 deferring the creation of the SHM segment to this point will create a
 SHM segment owned by the runtime-user account. The internal structure of
-{ntpd} does not permit the use of a fudge flag if this is to be avoided;
+{ntpd} does not permit the use of a refclock option if this is to be avoided;
 this is the reason why a mode bit is used for the configuration of a
 public segment.
 

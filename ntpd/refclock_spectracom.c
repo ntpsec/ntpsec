@@ -85,10 +85,9 @@
  * Fudge Factors
  *
  * This driver can retrieve a table of quality data maintained
- * internally by the Netclock/2 clock. If flag4 of the fudge
- * configuration command is set to 1, the driver will retrieve this
- * table and write it to the clockstats file when the first timecode
- * message of a new day is received.
+ * internally by the Netclock/2 clock. If option flag4 is set to 1,
+ * the driver will retrieve this table and write it to the clockstats
+ * file when the first timecode message of a new day is received.
  *
  * PPS calibration fudge time 1: format 0 .003134, format 2 .004034
  */

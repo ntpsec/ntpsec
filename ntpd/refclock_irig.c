@@ -126,14 +126,14 @@
  * audio codec would be useful in a single machine. More than one would
  * probably chew up too much CPU time anyway.
  *
- * Fudge factors
+ * Fudge factors and options
  *
- * Fudge flag4 causes the dubugging output described above to be
+ * Option flag4 causes the dubugging output described above to be
  * recorded in the clockstats file. Fudge flag2 selects the audio input
  * port, where 0 is the mike port (default) and 1 is the line-in port.
  * It does not seem useful to select the compact disc player port. Fudge
  * flag3 enables audio monitoring of the input signal. For this purpose,
- * the monitor gain is set t a default value. Fudgetime2 is used as a
+ * the monitor gain is set t a default value. Fudge time2 is used as a
  * frequency vernier for broken codec sample frequency.
  *
  * Alarm codes

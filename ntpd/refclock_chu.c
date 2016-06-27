@@ -171,11 +171,11 @@
  * set to the radio propagation delay from CHU to the receiver. This can
  * be done conviently using the minimuf program.
  *
- * Fudge flag4 causes the dubugging output described above to be
+ * Option flag4 causes the dubugging output described above to be
  * recorded in the clockstats file. When the audio driver is compiled,
- * fudge flag2 selects the audio input port, where 0 is the mike port
+ * option flag2 selects the audio input port, where 0 is the mike port
  * (default) and 1 is the line-in port. It does not seem useful to
- * select the compact disc player port. Fudge flag3 enables audio
+ * select the compact disc player port. Option flag3 enables audio
  * monitoring of the input signal. For this purpose, the monitor gain is
  * set to a default value.
  *

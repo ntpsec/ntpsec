@@ -3,7 +3,7 @@
 == Synopsis ==
 
 ["verse",subs="normal"]
-Address: 127.127.26.'u'
+Name: hp58503a
 Reference ID: GPS
 Driver ID: GPS_HP
 Serial Port: /dev/hpgps__u__; 9600bps 8N1, 19200bps 7N2 for the HP Z3801A
@@ -42,7 +42,7 @@ The T is the on-time character, at 980 msec. before the next 1PPS edge.
 The # is the timecode format type. We look for format 2. Without any of
 the CLK or PPS stuff, then, the receiver buffer timestamp at the <cr> is
 24 characters later, which is about 25 msec. at 9600 bps, so the first
-approximation for fudge time1 is nominally -0.955 seconds. This number
+approximation for the +time1+ option is nominally -0.955 seconds. This number
 probably needs adjusting for each machine / OS type, so far: -0.955000
 on an HP 9000 Model 712/80 HP-UX 9.05 -0.953175 on an HP 9000 Model 370
 HP-UX 9.10
@@ -56,7 +56,7 @@ the right line paramters.
 The timekeeping portion of HP's business has been sold to
 http://www.symmetricom.com/[Symmetricom].
 
-== Fudge Factors ==
+== Driver Options ==
 
 +time1+ 'time'::
    Specifies the time offset calibration factor, in seconds and fraction,

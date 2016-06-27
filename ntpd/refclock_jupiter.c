@@ -340,7 +340,7 @@ struct instance {
 	uint32_t stime;			/* used to detect firmware bug */
 	bool wantid;			/* don't reconfig on channel id msg */
 	u_int  moving;			/* mobile platform? */
-	uint8_t sloppyclockflag;		/* fudge flags */
+	uint8_t sloppyclockflag;	/* driver options */
 	u_short sbuf[512];		/* local input buffer */
 	int ssize;			/* space used in sbuf */
 };
@@ -692,7 +692,7 @@ jupiter_poll(int unit, struct peer *peer)
 }
 
 /*
- * jupiter_control - fudge control
+ * jupiter_control - fudge and option control
  */
 static void
 jupiter_control(

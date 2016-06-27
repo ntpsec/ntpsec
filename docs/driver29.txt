@@ -7,7 +7,7 @@
 
 == Synopsis ==
 ["verse",subs="normal"]
-Address: 127.127.29._u_ 
+Name: palisade
 Reference ID: GPS
 Serial Port: +/dev/palisade+__u__; 9600bps 8N1/8O1
 
@@ -75,7 +75,7 @@ No user initialization of the receiver is required. This driver is compatible wi
 | 7.12     | Yes          | 38158-00
 |======================================================
 
-Note: When using Palisade 26664-00, you must set fudge flag2 to 1 in
+Note: When using Palisade 26664-00, you must set the +flag2+ option to 1 in
 *{ntpconf}*. See link:#Configuration[configuration].
 
 == GPS Installation ==
@@ -129,7 +129,7 @@ Palisade NTP configuration file "{ntpconf}" with event polling:
 ["literal",subs="normal"]
 #------------------------------------------------------------------------------
 # The Primary reference
-server 127.127.29.0 # Trimble Palisade GPS Refclock Unit #0
+refclock palisade unit 0
 peer terrapin.csc.ncsu.edu # internet server
 # Drift file for expedient re-synchronization after downtime or reboot.
 driftfile /etc/ntp.drift
@@ -139,12 +139,9 @@ Configuration without event polling:
 
 ["literal",subs="normal"]
 #------------------------------------------------------------------------------
-# The Primary reference
-server 127.127.29.0 # Trimble Palisade GPS (Stratum 1).
-# Set packet delay
-link:#time1[fudge 127.127.29.0 time1 0.020]
-# and set flag2 to turn off event polling.
-link:#flag2[fudge 127.127.29.0 flag2 1]
+# The Primary reference.
+# Set packet delay and set flag2 to turn off event polling.
+refclock palisade unit 0 link:#time1[time1 0.020] link:#flag2[flag2 1]
 #------------------------------------------------------------------------------
 
 == Thunderbolt NTP Configuration file ==
@@ -154,11 +151,7 @@ Configuration without event polling:
 ["literal",subs="normal"]
 #------------------------------------------------------------------------------
 # The Primary reference
-server 127.127.29.0 mode 2 # Trimble Thunderbolt GPS (Stratum 1).
-# Set packet delay
-link:#time1[fudge 127.127.29.0 time1 0.020]
-# and set flag2 to turn off event polling.
-link:#flag2[fudge 127.127.29.0 flag2 1]
+refclock palisade unit 0 mode 2 link:#time1[time1 0.020] link:#flag2[flag2 1]
 #------------------------------------------------------------------------------
 
 Currently the Thunderbolt mode doesn't support event polling, the
@@ -192,11 +185,13 @@ UTC almanac.
 the interface module. It should flash once per second.
 3.  Connect Palisade's port A to the NTP host.
 4.  Configure NTP and the serial I/O port on the host system.
-5.  Initially use link:#flag2[+fudge flag2+] in *link:#Configuration[{ntpconf}],* to disable event polling (see configuration).
+5.  Initially use the link:#flag2[+flag2+] option in
+*link:#Configuration[{ntpconf}],* to disable event polling (see
+configuration).
 6.  Run NTP in debug mode (-d -d), to observe Palisade_receive events.
 7.  The driver reports the link:#TrackingStatus[tracking status of the
 receiver]. Make sure it is tracking several satellites.
-8.  Remove fudge flag2 and restart the daemon in debug mode to observe
+8.  Remove the +flag2+ option and restart the daemon in debug mode to observe
 palisade_receive events.
 9.  If event polling fails, verify the link:#Pinouts[connections] and
 that the host hardware supports RTS control.
@@ -212,7 +207,7 @@ clock driver will be of the form:
 Nov 14 16:16:21 terrapin ntpd[1127]: Palisade #0: message
 ---------------------------------------------------------
 
-== Fudge Factors ==
+== Driver Options ==
 [[time1]]link:#Configuration[+time1+ 'time]'::
    Specifies the time offset calibration factor, in seconds and fraction,
    with default 0.0. If event capture is not used, time1 should be set to

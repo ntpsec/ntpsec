@@ -3,7 +3,7 @@
 == Synopsis ==
 
 ["verse",subs="normal"]
-Address: 127.127.11.'u'
+Name: arbiter
 Reference ID: GPS
 Driver ID: GPS_ARBITER
 Serial Port: /dev/gps__u__; 9600bps 8N1
@@ -87,7 +87,7 @@ intrinsic jitter of the radio itself.
 
 == Monitor Data ==
 
-When enabled by the +flag4+ fudge flag, an additional line containing
+When enabled by the +flag4+ option, an additional line containing
 the latitude, longitude, elevation and optional deviation data is
 written to the +clockstats+ file. The deviation data operates with an
 external pulse-per-second (PPS) input, such as a cesium oscillator or
@@ -97,7 +97,7 @@ The deviation data consists of the mean offset and standard deviation of
 the external PPS signal relative the GPS signal, both in microseconds
 over the last 16 seconds.
 
-== Fudge Factors ==
+== Driver Options ==
 
 +time1+ 'time'::
   Specifies the time offset calibration factor, in seconds and fraction,

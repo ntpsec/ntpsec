@@ -51,10 +51,11 @@ falseticker::
 
 [[fudge]]
 fudge::
-  Can have one of two senses.  Either (1) an offset configured for
-  a <<refclock>> or server to correct its time, reversing a fixed or
-  nearly-fixed propagation delay, or (2) a "fudge bit" set in
-  a configuration file to change the refclock's behavior in some
+  Can have one of two senses.  Either (1) an offset configured for a
+  <<refclock>> or server to correct its time, reversing a fixed or
+  nearly-fixed propagation delay, or (2) in the old config syntax, a "fudge
+  bit" was what is now called a driver option - set in a refclock
+  declaration to change the refclock's behavior in some
   driver-dependent way.
 
 [[fuzzball]]

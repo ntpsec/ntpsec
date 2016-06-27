@@ -54,7 +54,7 @@ variables for the clock, as well as other peers of interest. The
 +clockvar+ command with argument shows the peer variables specific to
 reference clock peers, including the clock status, device name, last
 received timecode (if relevant), and various event counters. In
-addition, a subset of the +fudge+ parameters is included. The poll and
+addition, a subset of the driver options is included. The poll and
 error counters in the +clockvar+ billboard are useful debugging aids.
 The +poll+ counts the poll messages sent to the clock, while the
 +noreply+, +badformat+ and +baddate+ count various errors. Check the

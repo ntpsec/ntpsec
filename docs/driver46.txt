@@ -4,7 +4,7 @@
 == Synopsis ==
 
 ["verse",subs="normal"]
-Address: 127.127.46.'u'
+Bame: gpsd
 Reference ID: GPSD
 Serial Port: /dev/gps__u__ 
 
@@ -124,7 +124,7 @@ and cluttering the log files is frowned upon. So we attempt to log
 persistent or recurring errors only once per hour. On the other hand,
 when tracking a problem the syslog flood throttle can get into the way.
 
-Therefore, fudge _flag3_ can be used to _disable_ the flood throttle at
+Therefore, option _flag3_ can be used to _disable_ the flood throttle at
 any time; the throttle is engaged by default. Running with the syslog
 flood throttle disabled for lengthy time is not recommended unless the
 log files are closely monitored.
@@ -146,7 +146,7 @@ samples:
 * The phase adjustment from the PPS signal must also be less than 400ms
 absolute.
 
-If fudge flag +flag1+ is set for the secondary unit, the unit asserts
+If option +flag1+ is set for the secondary unit, the unit asserts
 the PPS flag on the clock as long as PPS data is available. This makes
 the unit eligible as PPS peer and should only be used if the GPS
 receiver can be trusted for the quality of its PPS
@@ -154,9 +154,9 @@ signal^link:#fn2[2]^. [[fn2bl]] The PPS flag gets cleared if no PPS
 records can be acquired for some time. The unit also flushes the
 sample buffer at this point to avoid the use of stale PPS data.
 
-*Attention:* This unit uses its own PPS fudge value which must be set as
-fudge +time1+. Only the fudge values +time1+ and +flag1+ have an impact
-on secondary units.
+*Attention:* This unit uses its own PPS fudge value which must be set
+as fudge +time1+. Only the fudge values +time1+ and the +flag1+ option
+have an impact on secondary units.
 
 == Clockstats ==
 
@@ -190,7 +190,7 @@ the last poll.
 since the last poll.
 |===========================================================================
 
-== Fudge Factors ==
+== Driver Options ==
 
 +time1+ 'time'::
   Specifies tkhe PPS time offset calibration factor, in seconds and
