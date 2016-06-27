@@ -986,6 +986,7 @@ fudge_factor_bool_keyword
 refclock_command
 	:	T_Refclock T_String T_Unit T_Integer option_list fudge_factor_list
 		{
+#ifdef REFCLOCK
 			peer_node *my_node;
 			addr_opts_node *aon;
 			address_node *fakeaddr;
@@ -1012,6 +1013,7 @@ refclock_command
 			fakeaddr = create_address_node(dupaddr, AF_INET);
 			aon = create_addr_opts_node(fakeaddr, $6);
 			APPEND_G_FIFO(cfgt.fudge, aon);
+#endif /* REFCLOCK */
 		}
 	;
 
