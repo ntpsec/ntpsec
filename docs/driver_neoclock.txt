@@ -63,7 +63,10 @@ link:clockopt.html[+flag4 {0 | 1}+]::
 +
 Default setting is 0 = don't log received data and converted utc time.
 
-Author:
++mode+::
+   Not used by this driver.
+
+== Author ==
 
 Please send any comments or question to
 mailto:neoclock4@linum.com[neoclock4x@linum.com].

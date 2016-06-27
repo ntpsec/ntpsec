@@ -107,6 +107,8 @@ received.
   if 0 (default); use the kernel discipline if 1.
 +flag4 {0 | 1}+::
   Enable verbose +clockstats+ recording if set.
++mode+::
+   Not used by this driver.
 
 == Author ==
 

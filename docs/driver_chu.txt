@@ -384,6 +384,8 @@ alarms are nonfatal; only the data in the burst are discarded.
   before the driver is started.
 +flag4 {0 | 1}+::
   Enable verbose +clockstats+ recording if set.
++mode+::
+  Not used by this driver.
 
 == Author ==
 

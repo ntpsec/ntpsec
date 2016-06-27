@@ -173,6 +173,8 @@ for the specific unit.
 +flag4 {0 | 1}+::
    If flag4 is set, clockstats records will be written when the driver is
    polled.
++mode+::
+   Not used by this driver.
 
 == Public vs. Private SHM segments ==
 

@@ -380,6 +380,8 @@ filegen clockstats file clockstats type day enable
   See corresponding receiver.
 +flag4 {0 | 1}+::
   See corresponding receiver.
++mode+::
+   Used to select a device type and serial paramters.
 
 '''''
 

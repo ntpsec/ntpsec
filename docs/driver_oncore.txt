@@ -76,6 +76,8 @@ specific receiver in use will be required.
    Not used by this driver.
 +flag4 {0 | 1}+::
    Not used by this driver.
++mode+::
+   Not used by this driver.
 
 == Additional Information ==
 

@@ -117,6 +117,8 @@ written as-is to the +clockstats+ file.
    Not used by this driver.
 +flag4 {0 | 1}+::
    Enable verbose +clockstats+ recording if set.
++mode+::
+   Not used by this driver.
 
 == Additional Information ==
 
