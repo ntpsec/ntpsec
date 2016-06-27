@@ -37,7 +37,7 @@
 
 #ifdef HAVE_PPSAPI
 # include "ppsapi_timepps.h"
-# include "refclock_atom.h"
+# include "refclock_pps.h"
 #endif /* HAVE_PPSAPI */
 
 
@@ -219,7 +219,7 @@ enum date_fmt {
  */
 typedef struct {
 #ifdef HAVE_PPSAPI
-	struct refclock_atom atom; /* PPSAPI structure */
+	struct refclock_ppsctl ppsctl; /* PPSAPI structure */
 	int	ppsapi_fd;	/* fd used with PPSAPI */
 	bool	ppsapi_tried;	/* attempt PPSAPI once */
 	bool	ppsapi_lit;	/* time_pps_create() worked */
@@ -504,7 +504,7 @@ nmea_shutdown(
 	if (up != NULL) {
 #ifdef HAVE_PPSAPI
 		if (up->ppsapi_lit)
-			time_pps_destroy(up->atom.handle);
+			time_pps_destroy(up->ppsctl.handle);
 		if (up->ppsapi_tried && up->ppsapi_fd != pp->io.fd)
 			close(up->ppsapi_fd);
 #endif
@@ -562,13 +562,13 @@ nmea_control(
 		}
 		if (-1 == up->ppsapi_fd)
 			up->ppsapi_fd = pp->io.fd;	
-		if (refclock_ppsapi(up->ppsapi_fd, &up->atom)) {
+		if (refclock_ppsapi(up->ppsapi_fd, &up->ppsctl)) {
 			/* use the PPS API for our own purposes now. */
 			up->ppsapi_lit = refclock_params(
-				pp->sloppyclockflag, &up->atom);
+				pp->sloppyclockflag, &up->ppsctl);
 			if (!up->ppsapi_lit) {
 				/* failed to configure, drop PPS unit */
-				time_pps_destroy(up->atom.handle);
+				time_pps_destroy(up->ppsctl.handle);
 				msyslog(LOG_WARNING,
 					"%s set PPSAPI params fails",
 					refclock_name(peer));
@@ -587,8 +587,8 @@ nmea_control(
 	if (!(CLK_FLAG1 & pp->sloppyclockflag) && up->ppsapi_tried) {
 		/* shutdown PPS API */
 		if (up->ppsapi_lit)
-			time_pps_destroy(up->atom.handle);
-		up->atom.handle = 0;
+			time_pps_destroy(up->ppsctl.handle);
+		up->ppsctl.handle = 0;
 		/* close/drop PPS fd */
 		if (up->ppsapi_fd != pp->io.fd)
 			close(up->ppsapi_fd);
@@ -650,7 +650,7 @@ nmea_timer(
  * move the receive time stamp to the corresponding edge. This can warp
  * into future, if a transmission delay of more than 500ms is not
  * compensated with a corresponding fudge time2 value, because then the
- * next PPS edge is nearer than the last. (Similiar to what the PPS ATOM
+ * next PPS edge is nearer than the last. (Similiar to what the PPS
  * driver does, but we deal with full time stamps here, not just phase
  * shift information.) Likewise, a negative fudge time2 value must be
  * used if the reference time stamp correlates with the *following* PPS
@@ -670,7 +670,7 @@ nmea_timer(
  * The function returns PPS_RELATE_NONE (0) if no PPS edge correlation
  * can be fixed; PPS_RELATE_EDGE (1) when a PPS edge could be fixed, but
  * the distance to the reference time stamp is too big (exceeds
- * +/-400ms) and the ATOM driver PLL cannot be used to fix the phase;
+ * +/-400ms) and the PPS driver PLL cannot be used to fix the phase;
  * and PPS_RELATE_PHASE (2) when the ATOM driver PLL code can be used.
  *
  * On output, the receive time stamp is replaced with the corresponding
@@ -686,7 +686,7 @@ nmea_timer(
 static int
 refclock_ppsrelate(
 	const struct refclockproc  * pp	    ,	/* for sanity	  */
-	const struct refclock_atom * ap	    ,	/* for PPS io	  */
+	const struct refclock_ppsctl * ap    ,	/* for PPS io	  */
 	const l_fp		   * reftime ,
 	l_fp			   * rd_stamp,	/* i/o read stamp */
 	double			     pp_fudge,	/* pps fudge	  */
@@ -737,18 +737,18 @@ refclock_ppsrelate(
 
 	/* if whole system out-of-sync, do not try to PLL */
 	if (sys_leap == LEAP_NOTINSYNC)
-		return PPS_RELATE_EDGE; /* cannot PLL with atom code */
+		return PPS_RELATE_EDGE; /* cannot PLL with pps code */
 
-	/* check against reftime if ATOM PLL can be used */
+	/* check against reftime if PPS PLL can be used */
 	pp_delta = *reftime;
 	L_SUB(&pp_delta, &pp_stamp);
 	LFPTOD(&pp_delta, delta);
 	delta += pp_fudge;
 	if (fabs(delta) > 0.45)
-		return PPS_RELATE_EDGE; /* cannot PLL with atom code */
+		return PPS_RELATE_EDGE; /* cannot PLL with PPS code */
 
 	/* all checks passed, gets an AAA rating here! */
-	return PPS_RELATE_PHASE; /* can PLL with atom code */
+	return PPS_RELATE_PHASE; /* can PLL with PPS code */
 }
 #endif	/* HAVE_PPSAPI */
 
@@ -1047,7 +1047,7 @@ nmea_receive(
 	 */
 	if (up->ppsapi_lit)
 		switch (refclock_ppsrelate(
-				pp, &up->atom, &rd_reftime, &rd_timestamp,
+				pp, &up->ppsctl, &rd_reftime, &rd_timestamp,
 				pp->fudgetime1,	&rd_fudge))
 		{
 		case PPS_RELATE_PHASE:

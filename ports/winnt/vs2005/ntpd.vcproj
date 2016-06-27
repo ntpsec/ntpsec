@@ -1067,7 +1067,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\..\..\ntpd\refclock_atom.c"
+				RelativePath="..\..\..\ntpd\refclock_pps.c"
 				>
 				<FileConfiguration
 					Name="Release|Win32"

@@ -232,15 +232,15 @@ When the Pulse-per-Second Application Interface (RFC 2783) is present, a
 compact PPS interface is available to all drivers. See the
 link:prefer.html[Mitigation Rules and the Prefer Peer] page for further
 information. To use this interface, include the +timeppps.h+ and
-+refclock_atom.h+ header files and define the +refclock_atom+ structure
++refclock_pps.h+ header files and define the +refclock_ppsctl+ structure
 in the driver private storage. The +timepps.h+ file is specific to each
 operating system and may not be available for some systems.
 
 To use the interface, call +refclock_ppsapi+ from the startup routine
-passing the device file descriptor and +refclock_atom+ structure
+passing the device file descriptor and +refclock_ppsctl+ structure
 pointer. Then, call +refclock_pps+ from the timer routine passing the
-association pointer and +refclock_atom+ structure pointer. See the
-+refclock_atom.c+ file for examples and calling sequences. If the PPS
+association pointer and +refclock_ppsctl+ structure pointer. See the
++refclock_pps.c+ file for examples and calling sequences. If the PPS
 signal is valid, the offset sample will be save in the circular buffer
 and a bit set in the association flags word indicating the sample is
 valid and the driver an be selected as a PPS peer. If this bit is set

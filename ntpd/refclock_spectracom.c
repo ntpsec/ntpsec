@@ -16,7 +16,7 @@
 
 #ifdef HAVE_PPSAPI
 #include "ppsapi_timepps.h"
-#include "refclock_atom.h"
+#include "refclock_pps.h"
 #endif /* HAVE_PPSAPI */
 
 /*
@@ -112,7 +112,7 @@
  */
 struct spectracomunit {
 #ifdef HAVE_PPSAPI
-	struct refclock_atom atom; /* PPSAPI structure */
+	struct refclock_ppsctl ppsctl; /* PPSAPI structure */
 	int	ppsapi_tried;	/* attempt PPSAPI once */
 	int	ppsapi_lit;	/* time_pps_create() worked */
 	int	tcount;		/* timecode sample counter */
@@ -472,7 +472,7 @@ spectracom_timer(
 #endif
 #ifdef HAVE_PPSAPI
 	if (up->ppsapi_lit &&
-	    refclock_pps(peer, &up->atom, pp->sloppyclockflag) > 0) {
+	    refclock_catcher(peer, &up->ppsctl, pp->sloppyclockflag) > 0) {
 		up->pcount++,
 		peer->flags |= FLAG_PPS;
 		peer->precision = PPS_PRECISION;
@@ -573,8 +573,8 @@ spectracom_control(
 			return;
 		peer->flags &= ~FLAG_PPS;
 		peer->precision = PRECISION;
-		time_pps_destroy(up->atom.handle);
-		up->atom.handle = 0;
+		time_pps_destroy(up->ppsctl.handle);
+		up->ppsctl.handle = 0;
 		up->ppsapi_lit = 0;
 		return;
 	}
@@ -585,7 +585,7 @@ spectracom_control(
 	 * Light up the PPSAPI interface.
 	 */
 	up->ppsapi_tried = 1;
-	if (refclock_ppsapi(pp->io.fd, &up->atom)) {
+	if (refclock_ppsapi(pp->io.fd, &up->ppsctl)) {
 		up->ppsapi_lit = 1;
 		return;
 	}

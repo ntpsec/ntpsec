@@ -1,5 +1,5 @@
 /*
- * refclock_atom - clock driver for 1-pps signals
+ * refclock_pps - clock driver for 1-pps signals
  */
 #include <config.h>
 #include <stdio.h>
@@ -16,7 +16,7 @@
  * This driver requires the PPSAPI interface (RFC 2783)
  */
 #include "ppsapi_timepps.h"
-#include "refclock_atom.h"
+#include "refclock_pps.h"
 
 /*
  * This driver furnishes an interface for pulse-per-second (PPS) signals
@@ -53,7 +53,7 @@
  * This deriver is subject to the mitigation rules described in the
  * "mitigation rulse and the prefer peer" page. However, there is an
  * important difference. If this driver becomes the PPS driver according
- * to these rules, it is acrive only if (a) a prefer peer other than
+ * to these rules, it is active only if (a) a prefer peer other than
  * this driver is among the survivors or (b) there are no survivors and
  * the minsane option of the tos command is zero. This is intended to
  * support space missions where updates from other spacecraft are
@@ -82,8 +82,7 @@
 /*
  * PPS unit control structure
  */
-struct ppsunit {
-	struct refclock_atom atom; /* atom structure pointer */
+struct ppsunit {struct refclock_ppsctl ppsctl; /* PPS context structure pointer */
 	int	fddev;		/* file descriptor */
 	int	pcount;		/* PPS samples added to FIFO */
 	int	scount;		/* PPS not setup */
@@ -94,31 +93,31 @@ struct ppsunit {
 /*
  * Function prototypes
  */
-static	bool	atom_start	(int, struct peer *);
-static	void	atom_shutdown	(int, struct peer *);
-static	void	atom_poll	(int, struct peer *);
-static	void	atom_timer	(int, struct peer *);
+static	bool	pps_start	(int, struct peer *);
+static	void	pps_shutdown	(int, struct peer *);
+static	void	pps_poll	(int, struct peer *);
+static	void	pps_timer	(int, struct peer *);
 
 /*
  * Transfer vector
  */
-struct	refclock refclock_atom = {
+struct	refclock refclock_pps = {
 	NAME,			/* basename of driver */
-	atom_start,		/* start up driver */
-	atom_shutdown,		/* shut down driver */
-	atom_poll,		/* transmit poll message */
+	pps_start,		/* start up driver */
+	pps_shutdown,		/* shut down driver */
+	pps_poll,		/* transmit poll message */
 	noentry,		/* control (not used) */
 	noentry,		/* initialize driver (not used) */
 	noentry,		/* buginfo (not used) */
-	atom_timer,		/* called once per second */
+	pps_timer,		/* called once per second */
 };
 
 
 /*
- * atom_start - initialize data for processing
+ * pps_start - initialize data for processing
  */
 static bool
-atom_start(
+pps_start(
 	int unit,		/* unit number (not used) */
 	struct peer *peer	/* peer structure pointer */
 	)
@@ -149,22 +148,22 @@ atom_start(
 	up->fddev = tty_open(device, O_RDWR, 0777);
 	if (up->fddev <= 0) {
 		msyslog(LOG_ERR,
-			"refclock_atom: %s: %m", device);
+			"refclock_pps: %s: %m", device);
 		return false;
 	}
 
 	/*
 	 * Light up the PPSAPI interface.
 	 */
-	return (refclock_ppsapi(up->fddev, &up->atom));
+	return (refclock_ppsapi(up->fddev, &up->ppsctl));
 }
 
 
 /*
- * atom_shutdown - shut down the clock
+ * pps_shutdown - shut down the clock
  */
 static void
-atom_shutdown(
+pps_shutdown(
 	int unit,		/* unit number (not used) */
 	struct peer *peer	/* peer structure pointer */
 	)
@@ -182,10 +181,10 @@ atom_shutdown(
 }
 
 /*
- * atom_timer - called once per second
+ * pps_timer - called once per second
  */
 void
-atom_timer(
+pps_timer(
 	int	unit,		/* unit pointer (not used) */
 	struct peer *peer	/* peer structure pointer */
 	)
@@ -198,7 +197,7 @@ atom_timer(
 
 	pp = peer->procptr;
 	up = pp->unitptr;
-	rc = refclock_pps(peer, &up->atom, pp->sloppyclockflag);
+	rc = refclock_catcher(peer, &up->ppsctl, pp->sloppyclockflag);
         switch (rc) {
             case PPS_OK:
                 up->pcount++;
@@ -230,10 +229,10 @@ atom_timer(
 
 
 /*
- * atom_poll - called by the transmit procedure
+ * pps_poll - called by the transmit procedure
  */
 static void
-atom_poll(
+pps_poll(
 	int unit,		/* unit number (not used) */
 	struct peer *peer	/* peer structure pointer */
 	)
@@ -260,7 +259,7 @@ atom_poll(
 
 	mprintf_clock_stats(&peer->srcadr,
 	    "%ld %d %d %d %d",
-	    up->atom.sequence,
+	    up->ppsctl.sequence,
 	    up->pcount, up->scount, up->kcount, up->rcount);
 	up->pcount = up->scount = up->kcount = up->rcount = 0;
 

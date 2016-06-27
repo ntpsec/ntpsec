@@ -84,9 +84,9 @@ extern	struct refclock refclock_nmea;
 #endif
 
 #if defined (CLOCK_PPS) && defined(HAVE_PPSAPI)
-extern	struct refclock	refclock_atom;
+extern	struct refclock	refclock_pps;
 #else
-#define refclock_atom	refclock_none
+#define refclock_pps	refclock_none
 #endif
 
 #ifdef CLOCK_HP58503A
@@ -177,7 +177,7 @@ struct refclock * const refclock_conf[] = {
 	&refclock_none,		/* 19 was: REFCLK_WWV_HEATH */
 	&refclock_nmea,		/* 20 REFCLK_GPS_NMEA */
 	&refclock_none,		/* 21 was: REFCLK_GPS_VME */
-	&refclock_atom,		/* 22 REFCLK_ATOM_PPS */
+	&refclock_pps,		/* 22 REFCLK_ATOM_PPS */
 	&refclock_none,		/* 23 not used */
 	&refclock_none,		/* 24 not used */
 	&refclock_none,		/* 25 not used */
