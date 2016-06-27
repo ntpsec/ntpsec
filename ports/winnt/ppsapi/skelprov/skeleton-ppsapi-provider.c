@@ -39,7 +39,7 @@ ppps_ntp_timestamp_from_counter	p_ntp_timestamp_from_counter;
 /*
  * The ntp_timestamp_from_counter callback into timepps.h routines in
  * the host is saved in each unit separately, so that binaries that
- * inline timepps.h into multiple source files (such as refclock_atom.c
+ * inline timepps.h into multiple source files (such as refclock_pps.c
  * and a number of other ntpd refclocks including refclock_nmea.c) will
  * get called back in the correct instance for each unit.  This assumes 
  * that ppsapi_prov_init for subsequent instances happens only after the

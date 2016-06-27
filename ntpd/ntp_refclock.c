@@ -26,7 +26,7 @@
 
 #ifdef HAVE_PPSAPI
 #include "ppsapi_timepps.h"
-#include "refclock_atom.h"
+#include "refclock_pps.h"
 #endif /* HAVE_PPSAPI */
 
 /*
@@ -1110,7 +1110,7 @@ refclock_buginfo(
 bool
 refclock_ppsapi(
 	int	fddev,			/* fd device */
-	struct refclock_atom *ap	/* atom structure pointer */
+	struct refclock_ppsctl *ap	/* PPS context structure pointer */
 	)
 {
 	if (ap->handle == 0) {
@@ -1133,7 +1133,7 @@ refclock_ppsapi(
 bool
 refclock_params(
 	int	mode,			/* mode bits */
-	struct refclock_atom *ap	/* atom structure pointer */
+	struct refclock_ppsctl *ap	/* PPS context structure pointer */
 	)
 {
 	ZERO(ap->pps_params);
@@ -1177,16 +1177,16 @@ refclock_params(
 
 
 /*
- * refclock_pps - called once per second
+ * refclock_catcher - called once per second
  *
  * This routine is called once per second. It snatches the PPS
  * timestamp from the kernel and saves the sign-extended fraction in
  * a circular buffer for processing at the next poll event.
  */
 pps_status
-refclock_pps(
+refclock_catcher(
 	struct peer *peer,		/* peer structure pointer */
-	struct refclock_atom *ap,	/* atom structure pointer */
+	struct refclock_ppsctl *ap,	/* PPS context structure pointer */
 	int	mode			/* mode bits */	
 	)
 {

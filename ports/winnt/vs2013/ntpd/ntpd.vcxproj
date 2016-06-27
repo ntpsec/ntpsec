@@ -286,7 +286,7 @@
     <ClCompile Include="..\..\..\..\ntpd\refclock_arbiter.c" />
     <ClCompile Include="..\..\..\..\ntpd\refclock_arc.c" />
     <ClCompile Include="..\..\..\..\ntpd\refclock_as2201.c" />
-    <ClCompile Include="..\..\..\..\ntpd\refclock_atom.c" />
+    <ClCompile Include="..\..\..\..\ntpd\refclock_pps.c" />
     <ClCompile Include="..\..\..\..\ntpd\refclock_bancomm.c" />
     <ClCompile Include="..\..\..\..\ntpd\refclock_chronolog.c" />
     <ClCompile Include="..\..\..\..\ntpd\refclock_chu.c" />

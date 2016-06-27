@@ -2572,7 +2572,7 @@ clock_select(void)
 	/*
 	 * If a PPS driver is lit and the combined offset is less than
 	 * 0.4 s, select the driver as the PPS peer and use its offset
-	 * and jitter. However, if this is the atom driver, use it only
+	 * and jitter. However, if this is the pps driver, use it only
 	 * if there is a prefer peer or there are no survivors and none
 	 * are required.
 	 */

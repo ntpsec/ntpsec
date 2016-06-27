@@ -337,7 +337,7 @@ unit_from_ppsapi_handle(
 /*
  * ntpd on Windows only looks to errno after finding
  * GetLastError returns NO_ERROR.  To accomodate its
- * use of msyslog in portable code such as refclock_atom.c,
+ * use of msyslog in portable code such as refclock_pps.c,
  * this implementation always clears the Windows
  * error code using SetLastError(NO_ERROR) when
  * returning an errno.  This is also a good idea

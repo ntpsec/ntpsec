@@ -88,7 +88,7 @@
 
 #ifdef HAVE_PPSAPI
 # include "ppsapi_timepps.h"
-# include "refclock_atom.h"
+# include "refclock_pps.h"
 #endif
 
 #ifdef HAVE_LINUX_SERIAL_H
@@ -339,7 +339,7 @@ struct parseunit
 	int	      ppsfd;	        /* fd to ise for PPS io */
 #ifdef HAVE_PPSAPI
         int           hardppsstate;     /* current hard pps state */
-	struct refclock_atom atom;      /* PPSAPI structure */
+	struct refclock_ppsctl ppsctl;      /* PPSAPI structure */
 #endif
 	parsetime_t   timedata;		/* last (parse module) data */
 	void         *localdata;        /* optional local, receiver-specific data */
@@ -1835,7 +1835,7 @@ local_input(
 					pps_timeout.tv_sec  = 0;
 					pps_timeout.tv_nsec = 0;
 
-					if (time_pps_fetch(parse->atom.handle, PPS_TSFMT_TSPEC, &pps_info,
+					if (time_pps_fetch(parse->ppsctl.handle, PPS_TSFMT_TSPEC, &pps_info,
 							   &pps_timeout) == 0)
 					{
 						if (pps_info.assert_sequence + pps_info.clear_sequence != parse->ppsserial)
@@ -2348,7 +2348,7 @@ parse_shutdown(
 #ifdef HAVE_PPSAPI
 	if (parse->flags & PARSE_PPSAPI)
 	{
-		(void)time_pps_destroy(parse->atom.handle);
+		(void)time_pps_destroy(parse->ppsctl.handle);
 	}
 #endif
 	if (parse->generic->io.fd != parse->ppsfd && parse->ppsfd != -1)
@@ -2411,7 +2411,7 @@ parse_hardpps(
 				        i = PPS_CAPTUREASSERT;
 			}
 
-		if (time_pps_kcbind(parse->atom.handle, PPS_KC_HARDPPS, i,
+		if (time_pps_kcbind(parse->ppsctl.handle, PPS_KC_HARDPPS, i,
 		    PPS_TSFMT_TSPEC) < 0) {
 		        msyslog(LOG_ERR, "PARSE receiver #%d: time_pps_kcbind failed: %m",
 				CLK_UNIT(parse->peer));
@@ -2446,7 +2446,7 @@ parse_ppsapi(
 	/*
 	 * collect PPSAPI offset capability - should move into generic handling
 	 */
-	if (time_pps_getcap(parse->atom.handle, &cap) < 0) {
+	if (time_pps_getcap(parse->ppsctl.handle, &cap) < 0) {
 		msyslog(LOG_ERR, "PARSE receiver #%d: parse_ppsapi: time_pps_getcap failed: %m",
 			CLK_UNIT(parse->peer));
 
@@ -2460,7 +2460,7 @@ parse_ppsapi(
 	 * is handled here for now. Ideally this should also
 	 * be part of the generic PPSAPI interface
 	 */
-	if (!refclock_params(parse->flags & (CLK_FLAG1|CLK_FLAG2|CLK_FLAG4), &parse->atom))
+	if (!refclock_params(parse->flags & (CLK_FLAG1|CLK_FLAG2|CLK_FLAG4), &parse->ppsctl))
 		return false;
 
 	/* nb. only turn things on, if someone else has turned something
@@ -2485,20 +2485,20 @@ parse_ppsapi(
 	} else {
 		if (mode_ppsoffset == PPS_OFFSETCLEAR)
 			{
-				parse->atom.pps_params.clear_offset.tv_sec = (time_t)(-parse->ppsphaseadjust);
-				parse->atom.pps_params.clear_offset.tv_nsec = (long)(-1e9*(parse->ppsphaseadjust - (double)(long)parse->ppsphaseadjust));
+				parse->ppsctl.pps_params.clear_offset.tv_sec = (time_t)(-parse->ppsphaseadjust);
+				parse->ppsctl.pps_params.clear_offset.tv_nsec = (long)(-1e9*(parse->ppsphaseadjust - (double)(long)parse->ppsphaseadjust));
 			}
 
 		if (mode_ppsoffset == PPS_OFFSETASSERT)
 			{
-				parse->atom.pps_params.assert_offset.tv_sec = (time_t)(-parse->ppsphaseadjust);
-				parse->atom.pps_params.assert_offset.tv_nsec = (long)(-1e9*(parse->ppsphaseadjust - (double)(long)parse->ppsphaseadjust));
+				parse->ppsctl.pps_params.assert_offset.tv_sec = (time_t)(-parse->ppsphaseadjust);
+				parse->ppsctl.pps_params.assert_offset.tv_nsec = (long)(-1e9*(parse->ppsphaseadjust - (double)(long)parse->ppsphaseadjust));
 			}
 	}
 
-	parse->atom.pps_params.mode |= mode_ppsoffset;
+	parse->ppsctl.pps_params.mode |= mode_ppsoffset;
 
-	if (time_pps_setparams(parse->atom.handle, &parse->atom.pps_params) < 0) {
+	if (time_pps_setparams(parse->ppsctl.handle, &parse->ppsctl.pps_params) < 0) {
 	  msyslog(LOG_ERR, "PARSE receiver #%d: FAILED set PPS parameters: %m",
 		  CLK_UNIT(parse->peer));
 		return false;
@@ -2715,7 +2715,7 @@ parse_start(
 		parse->hardppsstate = PARSE_HARDPPS_DISABLE;
 		if (CLK_PPS(parse->peer))
 		{
-		  if (!refclock_ppsapi(parse->ppsfd, &parse->atom))
+		  if (!refclock_ppsapi(parse->ppsfd, &parse->ppsctl))
 		    {
 		      msyslog(LOG_NOTICE, "PARSE receiver #%d: parse_start: could not set up PPS: %m", CLK_UNIT(parse->peer));
 		    }
@@ -3491,7 +3491,7 @@ parse_process(
 		/*
 		 * set fudge = 0.0 if already included in PPS time stamps
 		 */
-		if (parse->atom.pps_params.mode & (PPS_OFFSETCLEAR|PPS_OFFSETASSERT))
+		if (parse->ppsctl.pps_params.mode & (PPS_OFFSETCLEAR|PPS_OFFSETASSERT))
 		        {
 			        ppsphaseadjust = 0.0;
 			}
