@@ -79,6 +79,12 @@ http://www.symmetricom.com/[Symmetricom].
 +mode+::
    Not used by this driver.
 
+== Configuration Example ==
+
+----------------------------------------------------------------------------
+refclock hp58503a
+----------------------------------------------------------------------------
+
 '''''
 
 include::includes/footer.txt[]

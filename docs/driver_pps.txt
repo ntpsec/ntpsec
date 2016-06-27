@@ -118,6 +118,17 @@ synchronization without needing the Internet at all.
 +mode+::
    Not used by this driver.
 
+== Configuration Example ==
+
+----------------------------------------------------------------------------
+refclock pps flag2 1	# Capture PPS on trailing edge
+----------------------------------------------------------------------------
+
+This driver does not need to be configured explicitly in order to be
+active; thus no "refclock pps" is required unless you need to set a
+driver option, . It is initialized by whatever other driver is using
+it. That will be one of the following: generic, nmea, or spectracom.
+
 == Clockstats  ==
 
 If clockstats is enabled, the driver will log a few counters.  Examples:

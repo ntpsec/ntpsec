@@ -59,6 +59,12 @@ No +filegen clockstats+ monitor data are produced by this driver.
 +mode+::
    Not used by this driver.
 
+== Configuration Example ==
+
+----------------------------------------------------------------------------
+refclock local
+----------------------------------------------------------------------------
+
 == Additional Information ==
 
 link:refclock.html[Reference Clock Drivers]

@@ -383,6 +383,10 @@ filegen clockstats file clockstats type day enable
 +mode+::
    Used to select a device type and serial paramters.
 
+== Configuration Examples ==
+
+See the examples in the Description section.
+
 '''''
 
 include::includes/footer.txt[]

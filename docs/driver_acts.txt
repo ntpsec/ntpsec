@@ -152,6 +152,14 @@ with the Hayes connection and hang-up commands and result codes.
 +mode+::
   Not used by this driver.
 
+== Configuration Example ==
+
+----------------------------------------------------------------------------
+refclock acts
+----------------------------------------------------------------------------
+
+The modem-control string is, alas, hardwired into the driver.
+
 == Author ==
 
 David L. Mills <mills@udel.edu>

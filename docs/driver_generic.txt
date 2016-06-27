@@ -455,6 +455,10 @@ screen width and looks similar to:
 +mode+::
   Used to select the device type and serial parameters.
 
+== Configuration Examples ==
+
+See the examples above under "Supported devices"
+
 == Making your own generic clocks ==
 
 The generic clock mechanism deviates from the way other NTP reference

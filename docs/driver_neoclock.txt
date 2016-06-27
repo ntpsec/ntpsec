@@ -66,6 +66,12 @@ Default setting is 0 = don't log received data and converted utc time.
 +mode+::
    Not used by this driver.
 
+== Configuration Example ==
+
+----------------------------------------------------------------------------
+refclock neoclock
+----------------------------------------------------------------------------
+
 == Author ==
 
 Please send any comments or question to

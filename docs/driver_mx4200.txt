@@ -74,6 +74,12 @@ Format].
 +mode+::
    Not used by this driver.
 
+== Configuration Example ==
+
+----------------------------------------------------------------------------
+refclock mx4200
+----------------------------------------------------------------------------
+
 == Additional Information ==
 
 link:refclock.html[Reference Clock Drivers] 

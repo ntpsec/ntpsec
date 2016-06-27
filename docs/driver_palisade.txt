@@ -241,6 +241,12 @@ link:#refid[+refid string+]::
    other options are *1* for an *Endrun Praecis* in Trimble emulation mode,
    and *2* for the *Trimble Thunderbolt* GPS Disciplined Clock Receiver.
 
+== Configuration Example ==
+
+----------------------------------------------------------------------------
+refclock palisade
+----------------------------------------------------------------------------
+
 == DEFINEs ==
 
 The following constants are defined in the driver source code. These
