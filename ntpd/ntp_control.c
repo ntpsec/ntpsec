@@ -2321,7 +2321,7 @@ ctl_putpeer(
 		    char buf[NI_MAXHOST];
 		    snprintf(buf, sizeof(buf), "%s(%d)",
 			     p->procptr->clockname, p->refclkunit);
-		    ctl_putunqstr(peer_var[id].text, buf, 6);
+		    ctl_putunqstr(peer_var[id].text, buf, strlen(buf));
 		}
 #endif /* REFCLOCK */
 		break;
