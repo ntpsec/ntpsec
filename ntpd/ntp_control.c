@@ -2316,12 +2316,14 @@ ctl_putpeer(
 		break;
 
 	case CP_DISPLAYNAME:
+#ifdef REFCLOCK
 		if (p->procptr != NULL) {
 		    char buf[NI_MAXHOST];
 		    snprintf(buf, sizeof(buf), "%s(%d)",
 			     p->procptr->clockname, p->refclkunit);
 		    ctl_putunqstr(peer_var[id].text, buf, 6);
 		}
+#endif /* REFCLOCK */
 		break;
 
 	default:
