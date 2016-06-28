@@ -174,7 +174,7 @@ for the specific unit.
    If flag4 is set, clockstats records will be written when the driver is
    polled.
 +mode+::
-   Not used by this driver.
+   Can be used to set private mode
 
 == Configuration Example ==
 

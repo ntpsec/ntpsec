@@ -15,7 +15,7 @@ PPS device: /dev/refclockpps-'u'; alternate PPS device
 == Description ==
 
 The generic driver supports many different clock
-types/configurations by pugging type-specific packet-parsing
+types/configurations by plugging type-specific packet-parsing
 routine into a generic drive framework.
 
 Note that some of these modes below are to support equipment that
