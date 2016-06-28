@@ -256,7 +256,6 @@ def cmd_configure(ctx, config):
 	ctx.define("NTP_KEYSDIR", "%s/etc" % ctx.env.PREFIX, comment="NTP key file directory")
 	ctx.define("GETSOCKNAME_SOCKLEN_TYPE", "socklen_t", quote=False, comment="socklen type")
 	ctx.define("DFLT_RLIMIT_STACK", 50, comment="Default stack size")
-	ctx.define("DFLT_RLIMIT_MEMLOCK", 32, comment="Locked memory size")
 
 	probe_multicast(ctx, "MCAST", "Checking for multicast capability")
 

@@ -767,22 +767,6 @@ ntpdmain(
 	 */
 	sodium_init();
 
-
-
-        if (!dumpopts) {
-	    /* Setup stack size in preparation for locking pages in memory. */
-	    ntp_rlimit(RLIMIT_STACK, DFLT_RLIMIT_STACK * 4096, 4096, "4k");
-#ifdef RLIMIT_MEMLOCK
-	    /*
-	     * The default RLIMIT_MEMLOCK is very low on Linux systems.
-	     * Unless we increase this limit malloc calls are likely to
-	     * fail if we drop root privilege.  To be useful the value
-	     * has to be larger than the largest ntpd resident set size.
-	     */
-	    ntp_rlimit(RLIMIT_MEMLOCK, DFLT_RLIMIT_MEMLOCK * 1024 * 1024, 1024 * 1024, "MB");
-#endif	/* RLIMIT_MEMLOCK */
-        }
-
 	/*
 	 * Set up signals we pay attention to locally.
 	 */
