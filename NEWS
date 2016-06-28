@@ -8,19 +8,30 @@ on user-visible changes.
 
 == Repository head ==
 
+A new, simpler configuration syntax for refclocks has been
+implemented.  Configuration examples in the new syntax have been added
+to each driver page.
+
+Refclocks are now designated by name, not number. A list is available
+from "--waf configure --list".
+
 The rarely-used saveconfig feature in ntpq, and various associated
 configuration directives, have been removed for security reasons. The
 ntpd --saveconfigquit option, undocumented in NTP Classic, has
 also been removed.
 
-Refclock 27 (ARCRON MSF) has been removed on the advice of last maintainer.
+The ARCRON MSF refclock has been removed on the advice of last maintainer.
 
-Refclock 45 (Spectracom TSYNC PCI); has been removed. It required a
+The Spectracom TSYNC PCI refclock has been removed. It required a
 proprietary driver.  As a matter of good security policy, NTPsec will
 not trust nor attempt to support code it cannot audit.
 
-Refclock 35 (Conrad Parallel Port radio) has been removed.  It required
+The Conrad Parallel Port radio refclock has been removed.  It required
 a third-party parallel-port driver for Linux that no longer exists.
+
+Both Hopf refclocks have been removed.  The 6039 driver required a
+kernel driver that no longer exists; the 6021 driver duplicated
+support in the generic driver.
 
 This release contains a fix for one vulnerability inherited from
 NTP Classic:
