@@ -488,15 +488,44 @@ struct peer {
 #define REFCLK_GPSDJSON		46
 #define REFCLK_MAX		46
 
+#define	LEN_PKT_NOMAC	48 /* min header length */
 
-/*
- * NTP packet format.  The mac field is optional.  It isn't really
- * an l_fp either, but for now declaring it that way is convenient.
- * See Appendix A in the specification.
- *
- * Note that all u_fp and l_fp values arrive in network byte order
- * and must be converted (except the mac, which isn't, really).
- */
+/* This is the new, sane way of representing packets. All fields are
+   in host byte order, and the fixed-point time fields are just integers,
+   with uints of 2^-16 or 2^-32 seconds as appropriate. */
+
+struct parsed_pkt {
+        uint8_t li_vn_mode;
+        uint8_t stratum;
+        uint8_t ppoll;
+        int8_t precision;
+        uint32_t rootdelay;
+        uint32_t rootdisp;
+        char refid[4];
+        uint64_t reftime;
+        uint64_t org;
+        uint64_t rec;
+        uint64_t xmt;
+        unsigned num_extensions;
+        struct exten *extensions;
+        bool keyid_present;
+        uint32_t keyid;
+        size_t mac_len;
+        char mac[20];
+};
+
+struct exten {
+        uint16_t type;
+        uint16_t len;
+        uint8_t *body;
+};
+
+/* This is the old, insane way of representing packets. It'll gradually
+   be phased out and removed. Packets are simply pulled off the wire and
+   then type-punned into this structure, so all fields are in network
+   byte order. Note that there is no pack pragma. The only reason this
+   ever worked at all is that all the fields are self-aligned, so no ABI
+   has been evil enough to insert padding between fields. */
 struct pkt {
 	uint8_t	li_vn_mode;	/* peer leap indicator */
 	uint8_t	stratum;	/* peer stratum */
@@ -510,21 +539,10 @@ struct pkt {
 	l_fp	rec;		/* receive time stamp */
 	l_fp	xmt;		/* transmit time stamp */
 
-#define	LEN_PKT_NOMAC	(12 * sizeof(uint32_t)) /* min header length */
 #define MIN_MAC_LEN	(1 * sizeof(uint32_t))	/* crypto_NAK */
 #define MAX_MD5_LEN	(5 * sizeof(uint32_t))	/* MD5 */
 #define	MAX_MAC_LEN	(6 * sizeof(uint32_t))	/* SHA */
 
-	/*
-	 * The length of the packet less MAC must be a multiple of 64
-	 * with an RSA modulus and Diffie-Hellman prime of 256 octets
-	 * and maximum host name of 128 octets, the maximum autokey
-	 * command is 152 octets and maximum autokey response is 460
-	 * octets. A packet can contain no more than one command and one
-	 * response, so the maximum total extension field length is 864
-	 * octets. But, to handle humungus certificates, the bank must
-	 * be broke.
-	 */
 	uint32_t	exten[(MAX_MAC_LEN) / sizeof(uint32_t)];
 };
 

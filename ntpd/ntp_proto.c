@@ -7,6 +7,7 @@
 #include <config.h>
 
 #include "ntpd.h"
+#include "ntp_endian.h"
 #include "ntp_stdlib.h"
 #include "ntp_unixtime.h"
 #include "ntp_control.h"
@@ -178,6 +179,190 @@ set_sys_leap(u_char new_sys_leap) {
 		}
 #endif	/* ENABLE_LEAP_SMEAR */
 	}
+}
+
+/* Free a parsed_pkt sturcture allocated by parsed_packet(). In the
+   event of a parse error, this function may be called from within
+   parse_packet() while the structure is only partially initalized, so
+   we must be careful not to dereference uninitialized pointers.  This
+   is achieved by making sure we use calloc() everywhere in
+   parse_packet(), and then comparing to NULL before dereferencing.
+*/
+void
+free_packet(
+	struct parsed_pkt *pkt
+	)
+{
+	size_t i;
+	if(pkt == NULL) { return; };
+	if(pkt->extensions != NULL) {
+		for(i = 0; i < pkt->num_extensions; i++) {
+			free(pkt->extensions[i].body);
+			pkt->extensions[i].body = NULL;
+		}
+		free(pkt->extensions);
+		pkt->extensions = NULL;
+	}
+	free(pkt);
+};
+
+struct parsed_pkt*
+parse_packet(
+	struct recvbuf const* rbufp
+	)
+{
+	REQUIRE(rbufp != NULL);
+
+	size_t recv_length = rbufp->recv_length;
+	uint8_t const* recv_buf = rbufp->recv_space.X_recv_buffer;
+
+	if(recv_length < LEN_PKT_NOMAC) {
+		/* Packet is too short to possibly be valid. */
+		return NULL;
+	}
+
+	struct parsed_pkt *pkt = calloc(1, sizeof (struct parsed_pkt));
+
+	if(pkt == NULL) { goto fail; }
+
+	/* Parse header fields */
+	pkt->li_vn_mode = recv_buf[0];
+	pkt->stratum = recv_buf[1];
+	pkt->ppoll = recv_buf[2];
+	pkt->precision = (int8_t)recv_buf[3];
+	pkt->rootdelay = ntp_be32dec(recv_buf + 4);
+	pkt->rootdisp = ntp_be32dec(recv_buf + 8);
+	memcpy(pkt->refid, recv_buf + 12, 4);
+	pkt->reftime = ntp_be64dec(recv_buf + 16);
+	pkt->org = ntp_be64dec(recv_buf + 24);
+	pkt->rec = ntp_be64dec(recv_buf + 32);
+	pkt->xmt = ntp_be64dec(recv_buf + 40);
+
+	/* These initializations should have already been taken care of
+	   by calloc(), but let's be explicit. */
+	pkt->num_extensions = 0;
+	pkt->extensions = NULL;
+	pkt->keyid_present = false;
+	pkt->keyid = 0;
+	pkt->mac_len = 0;
+
+	uint8_t const* bufptr = recv_buf + LEN_PKT_NOMAC;
+
+	if(PKT_VERSION(pkt->li_vn_mode) > 4) {
+		/* Unsupported version */
+		goto fail;
+	} else if(PKT_VERSION(pkt->li_vn_mode) == 4) {
+		/* Only version 4 packets support extensions. */
+
+		/* Count and validate extensions */
+		size_t ext_count = 0;
+		size_t extlen = 0;
+		size_t i;
+		while(bufptr <= recv_buf + recv_length - 28) {
+			extlen = ntp_be16dec(bufptr + 2);
+			if(extlen % 4 != 0 || extlen < 16) {
+				/* Illegal extension length */
+				goto fail;
+			}
+			if((size_t)(recv_buf + recv_length - bufptr) < extlen) {
+				/* Extension length field points past
+				 * end of packet */
+				goto fail;
+			}
+			bufptr += extlen;
+			ext_count++;
+		}
+
+		pkt->num_extensions = ext_count;
+		pkt->extensions = calloc(ext_count, sizeof (struct exten));
+		if(pkt->extensions == NULL) { goto fail; }
+
+		/* Copy extensions */
+		bufptr = recv_buf + LEN_PKT_NOMAC;
+		for(i = 0; i < ext_count; i++) {
+			pkt->extensions[i].type = ntp_be16dec(bufptr);
+			pkt->extensions[i].len = ntp_be16dec(bufptr + 2) - 4;
+			pkt->extensions[i].body =
+			    calloc(1, pkt->extensions[i].len);
+			if(pkt->extensions[i].body == NULL) { goto fail; }
+			memcpy(pkt->extensions[i].body, bufptr + 4,
+			       pkt->extensions[i].len);
+			bufptr += pkt->extensions[i].len;
+		}
+	}
+
+	/* Parse the authenticator */
+	switch(recv_buf + recv_length - bufptr) {
+	    case 0:
+		/* No authenticator */
+		pkt->keyid_present = false;
+		pkt->keyid = 0;
+		pkt->mac_len = 0;
+		break;
+	    case 4:
+		/* crypto-NAK */
+		if(PKT_VERSION(pkt->li_vn_mode) < 3) {
+			/* Only allowed as of NTPv3 */
+			goto fail;
+		}
+		pkt->keyid_present = true;
+		pkt->keyid = ntp_be32dec(bufptr);
+		pkt->mac_len = 0;
+		break;
+	    case 6:
+		/* NTPv2 authenticator, which we allow but strip because
+		   we don't support it any more */
+		if(PKT_VERSION(pkt->li_vn_mode) != 2) { goto fail; }
+		pkt->keyid_present = false;
+		pkt->keyid = 0;
+		pkt->mac_len = 0;
+		break;
+	    case 20:
+		/* MD5 authenticator */
+		if(PKT_VERSION(pkt->li_vn_mode) < 3) {
+			/* Only allowed as of NTPv3 */
+			goto fail;
+		}
+		pkt->keyid_present = true;
+		pkt->keyid = ntp_be32dec(bufptr);
+		pkt->mac_len = 16;
+		memcpy(pkt->mac, bufptr + 4, 16);
+		break;
+	    case 24:
+		/* SHA-1 authenticator */
+		if(PKT_VERSION(pkt->li_vn_mode) < 3) {
+			/* Only allowed as of NTPv3 */
+			goto fail;
+		}
+		pkt->keyid_present = true;
+		pkt->keyid = ntp_be32dec(bufptr);
+		pkt->mac_len = 20;
+		memcpy(pkt->mac, bufptr + 4, 20);
+		break;
+	    case 72:
+		/* MS-SNTP */
+		if(PKT_VERSION(pkt->li_vn_mode) != 3) {
+			/* Only allowed for NTPv3 */
+			goto fail;
+		}
+
+		/* We don't deal with the MS-SNTP fields, so just strip
+		 * them.
+		 */
+		pkt->keyid_present = false;
+		pkt->keyid = 0;
+		pkt->mac_len = 0;
+
+		break;
+	    default:
+		/* Any other length is illegal */
+		goto fail;
+	}
+
+	return pkt;
+  fail:
+	free_packet(pkt);
+	return NULL;
 }
 
 /*
