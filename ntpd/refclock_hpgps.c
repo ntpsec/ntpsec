@@ -90,8 +90,8 @@
 #define	SPEED232Z	B19200		/* uart speed (19200 baud) */
 #define	PRECISION	(-10)		/* precision assumed (about 1 ms) */
 #define	REFID		"GPS\0"		/* reference ID */
-#define NAME		"HP58503A"	/* shortname */
-#define	DESCRIPTION	"HP 58503A GPS Time and Frequency Reference Receiver" 
+#define NAME		"HPGPS"		/* shortname */
+#define	DESCRIPTION	"HP GPS Time and Frequency Reference Receiver"
 
 #define SMAX            23*80+1 /* for :SYSTEM:PRINT? status screen response */
 
