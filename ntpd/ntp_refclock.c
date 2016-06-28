@@ -125,17 +125,11 @@ refclock_name(
 	)
 {
 	char *buf;
-	const char *rclock;
 
 	LIB_GETBUF(buf);
-	rclock = peer->procptr->clockname;
 
-	if (rclock != NULL)
-		snprintf(buf, LIB_BUFLENGTH, "%s(%d)",
-			 rclock, peer->refclkunit);
-	else
-		snprintf(buf, LIB_BUFLENGTH, "REFCLK(%d,%d)",
-			 peer->refclktype, peer->refclkunit);
+	snprintf(buf, LIB_BUFLENGTH, "%s(%d)",
+			 peer->procptr->clockname, peer->refclkunit);
 
 	return buf;
 }
@@ -180,10 +174,12 @@ refclock_newpeer(
 	int unit;
 
 	/*
-	 * If already running, shut it down.
+	 * This is the only place outside of the config parser
+	 * that still knows about magic clock addresses.  Alas...
 	 */
 	clktype = (uint8_t)REFCLOCKTYPE(&peer->srcadr);
 	unit = REFCLOCKUNIT(&peer->srcadr);
+
 	if (clktype >= num_refclock_conf ||
 		refclock_conf[clktype]->clock_start == noentry) {
 		msyslog(LOG_ERR,
@@ -228,7 +224,7 @@ refclock_newpeer(
 	 * Do driver dependent initialization. The above defaults
 	 * can be wiggled, then finish up for consistency.
 	 */
-	if (!((refclock_conf[clktype]->clock_start)(unit, peer))) {
+	if (!((pp->conf->clock_start)(unit, peer))) {
 		refclock_unpeer(peer);
 		return false;
 	}

@@ -2319,8 +2319,7 @@ ctl_putpeer(
 #ifdef REFCLOCK
 		if (p->procptr != NULL) {
 		    char buf[NI_MAXHOST];
-		    snprintf(buf, sizeof(buf), "%s(%d)",
-			     p->procptr->clockname, p->refclkunit);
+		    strlcpy(buf, refclock_name(p), sizeof(buf));
 		    ctl_putunqstr(peer_var[id].text, buf, strlen(buf));
 		}
 #endif /* REFCLOCK */
