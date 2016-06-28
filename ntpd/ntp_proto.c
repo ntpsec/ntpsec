@@ -248,7 +248,7 @@ transmit(
 	 * growth in associations if the system clock or network quality
 	 * result in survivor count dipping below sys_minclock often.
 	 * This was observed testing with pool, where sys_maxclock == 12
-	 * resulted in 60 associations without the hard limit.  A
+	 * resulted in 60 associations without the hard limit.	A
 	 * similar hard limit on manycastclient ephemeral associations
 	 * may be appropriate.
 	 */
@@ -298,7 +298,7 @@ transmit(
 
 			/*
 			 * Here the peer is reachable. Send a burst if
-			 * enabled and the peer is fit.  Reset unreach
+			 * enabled and the peer is fit.	 Reset unreach
 			 * for persistent and ephemeral associations.
 			 * Unreach is also reset for survivors in
 			 * clock_select().
@@ -392,7 +392,7 @@ receive(
 	keyid_t	skeyid = 0;		/* key IDs */
 	uint32_t	opcode = 0;		/* extension field opcode */
 #if defined(DEBUG)
-	sockaddr_u *dstadr_sin; 	/* active runway */
+	sockaddr_u *dstadr_sin;		/* active runway */
 #endif
 	struct peer *peer2;		/* aux peer structure pointer */
 	endpt *	match_ep;		/* newpeer() local address */
@@ -492,7 +492,7 @@ receive(
 			hismode = MODE_CLIENT;
 		} else {
 			sys_badlength++;
-			return;                 /* invalid mode */
+			return;			/* invalid mode */
 		}
 	}
 
@@ -584,7 +584,7 @@ receive(
 	 * digest cycles, again to reduce exposure. There may be no
 	 * matching association and that's okay.
 	 */
-	peer = findpeer(rbufp,  hismode, &retcode);
+	peer = findpeer(rbufp,	hismode, &retcode);
 
 	/*
 	 * If a network packet (nonzero dstadr) source-matched an
@@ -609,18 +609,18 @@ receive(
 	 * Authentication is conditioned by three switches:
 	 *
 	 * NOPEER  (RES_NOPEER) do not mobilize an association unless
-	 *         authenticated
+	 *	   authenticated
 	 * NOTRUST (RES_DONTTRUST) do not allow access unless
-	 *         authenticated (implies NOPEER)
+	 *	   authenticated (implies NOPEER)
 	 * enable  (sys_authenticate) master NOPEER switch, by default
-	 *         on
+	 *	   on
 	 *
 	 * The NOPEER and NOTRUST can be specified on a per-client basis
 	 * using the restrict command. The enable switch if on implies
 	 * NOPEER for all clients. There are four outcomes:
 	 *
-	 * NONE    The packet has no MAC.
-	 * OK      the packet has a MAC and authentication succeeds
+	 * NONE	   The packet has no MAC.
+	 * OK	   the packet has a MAC and authentication succeeds
 	 * ERROR   the packet has a MAC and authentication fails
 	 * CRYPTO  crypto-NAK. The MAC has four octets only.
 	 *
@@ -865,7 +865,7 @@ receive(
 		 * arrive after a unicast volley has begun
 		 * with the same remote address.  newpeer() will not
 		 * find duplicate associations on other local endpoints
-		 * if a non-NULL endpoint is supplied.  multicastclient
+		 * if a non-NULL endpoint is supplied.	multicastclient
 		 * ephemeral associations are unique across all local
 		 * endpoints.
 		 */
@@ -894,7 +894,7 @@ receive(
 
 			} else {
 				peer->delay = sys_bdelay;
-                                peer->xmt = p_xmt; /* for replay prevention */
+				peer->xmt = p_xmt; /* for replay prevention */
 			}
 			break;
 		}
@@ -915,7 +915,7 @@ receive(
 			sys_restricted++;
 			return;			/* ignore duplicate */
 		}
-                peer->xmt = p_xmt; /* for reply prevention */
+		peer->xmt = p_xmt; /* for reply prevention */
 
 		return;				/* hooray */
 
@@ -1048,9 +1048,9 @@ receive(
 		peer->flash |= BOGON1;			/* duplicate */
 		peer->oldpkt++;
 		msyslog(LOG_NOTICE, "Dropping duplicate packet: associd"
-                        "%d peer->xmt %#010x.%08x xmt %#010x.%08x",
+			"%d peer->xmt %#010x.%08x xmt %#010x.%08x",
 			peer->associd, peer->xmt.l_ui, peer->xmt.l_uf,
-                        p_xmt.l_ui, p_xmt.l_uf);
+			p_xmt.l_ui, p_xmt.l_uf);
 
 		return;
 
@@ -1083,16 +1083,16 @@ receive(
 		 * with the transmit timestamp far in the future.
 		 */
 
-               if((peer->keyid || (restrict_mask & RES_DONTTRUST)) &&
-                  L_ISGEQU(&peer->xmt, &p_xmt)) {
-                       peer->flash |= BOGON1;
-                       peer->oldpkt++;
-                       msyslog(LOG_NOTICE, "Dropping replay attempt: associd %d "
-                               "peer->xmt %#010x.%08x xmt %#010x.%08x",
-                               peer->associd, peer->xmt.l_ui,
-                               peer->xmt.l_uf, p_xmt.l_ui, p_xmt.l_uf);
-                       return;
-               }
+	       if((peer->keyid || (restrict_mask & RES_DONTTRUST)) &&
+		  L_ISGEQU(&peer->xmt, &p_xmt)) {
+		       peer->flash |= BOGON1;
+		       peer->oldpkt++;
+		       msyslog(LOG_NOTICE, "Dropping replay attempt: associd %d "
+			       "peer->xmt %#010x.%08x xmt %#010x.%08x",
+			       peer->associd, peer->xmt.l_ui,
+			       peer->xmt.l_uf, p_xmt.l_ui, p_xmt.l_uf);
+		       return;
+	       }
 
 	/*
 	 * Check for bogus packet in basic mode. If found, switch to
@@ -1104,8 +1104,8 @@ receive(
 			peer->bogusorg++;
 			peer->flash |= BOGON2;	/* bogus */
 			if (peer->flags & FLAG_XLEAVE &&
-                            !L_ISZERO(&peer->dst) &&
-                            L_ISEQU(&p_org, &peer->dst)) {
+			    !L_ISZERO(&peer->dst) &&
+			    L_ISEQU(&p_org, &peer->dst)) {
 				peer->flip = 1;
 				report_event(PEVNT_XLEAVE, peer, NULL);
 			}
@@ -1504,7 +1504,7 @@ process_packet(
 	 * the roundtrip delay. Then it calculates the correction as a
 	 * fraction of d.
 	 */
- 	peer->t21 = t21;
+	peer->t21 = t21;
 	peer->t21_last = peer->t21_bytes;
 	peer->t34 = -t34;
 	peer->t34_bytes = len;
@@ -1521,7 +1521,7 @@ process_packet(
 			td = 0;
 
 		/*
- 		 * Unfortunately, in many cases the errors are
+		 * Unfortunately, in many cases the errors are
 		 * unacceptable, so for the present the rates are not
 		 * used. In future, we might find conditions where the
 		 * calculations are useful, so this should be considered
@@ -1592,14 +1592,14 @@ clock_update(
 	 *
 	 * where:
 	 *  p.epsilon_r is the PollProc's root dispersion
-	 *  p.epsilon   is the PollProc's dispersion
-	 *  p.psi       is the PollProc's jitter
-	 *  THETA       is the combined offset
+	 *  p.epsilon	is the PollProc's dispersion
+	 *  p.psi	is the PollProc's jitter
+	 *  THETA	is the combined offset
 	 *
 	 * NB: Think Hard about where these numbers come from and
 	 * what they mean.  When did peer->update happen?  Has anything
 	 * interesting happened since then?  What values are the most
-	 * defensible?  Why?
+	 * defensible?	Why?
 	 *
 	 * DLM thinks this equation is probably the best of all worse choices.
 	 */
@@ -1833,7 +1833,7 @@ peer_clear(
 	)
 {
 	uint8_t	u;
-        l_fp xmt = peer->xmt;
+	l_fp xmt = peer->xmt;
 
 	/*
 	 * Clear all values, including the optional crypto values above.
@@ -1888,7 +1888,7 @@ peer_clear(
 	     * ntp_random(); this leads to replay-mode problems and is
 	     * unnecessary, any deterministic but uniformly
 	     * distributed function of the peer state would be good
-	     * enough.  Furthermore, changing the function creates no
+	     * enough.	Furthermore, changing the function creates no
 	     * interop problems. For security reasons (to prevent
 	     * hypothetical timing attacks) we want at least one input
 	     * to be invisible from outside ntpd; the internal
@@ -2185,7 +2185,7 @@ clock_select(void)
 		 * If this peer is an orphan parent, elect the
 		 * one with the lowest metric defined as the
 		 * IPv4 address or the first 64 bits of the
-		 * hashed IPv6 address.  To ensure convergence
+		 * hashed IPv6 address.	 To ensure convergence
 		 * on the same selected orphan, consider as
 		 * well that this system may have the lowest
 		 * metric and be the orphan parent.  If this
@@ -2214,7 +2214,7 @@ clock_select(void)
 		 * from selection to avoid forming a
 		 * synchronization loop within the orphan mesh,
 		 * triggering stratum climb to infinity
-		 * instability.  Peers at stratum higher than
+		 * instability.	 Peers at stratum higher than
 		 * the orphan stratum could have the orphan
 		 * parent in ancestry so are excluded.
 		 * See http://bugs.ntp.org/2050
@@ -2466,7 +2466,7 @@ clock_select(void)
 	/*
 	 * What remains is a list usually not greater than sys_minclock
 	 * peers. Note that unsynchronized peers cannot survive this
-	 * far.  Count and mark these survivors.
+	 * far.	 Count and mark these survivors.
 	 *
 	 * While at it, count the number of leap warning bits found.
 	 * This will be used later to vote the system leap warning bit.
@@ -2583,7 +2583,7 @@ clock_select(void)
 		typesystem = typepps;
 		sys_clockhop = 0;
 		typesystem->new_status = CTL_PST_SEL_PPS;
- 		sys_offset = typesystem->offset;
+		sys_offset = typesystem->offset;
 		sys_jitter = typesystem->jitter;
 		DPRINTF(1, ("select: pps offset %.9f jitter %.9f\n",
 			sys_offset, sys_jitter));
@@ -2668,7 +2668,7 @@ root_distance(
 	 *  epsilon is the remote server precision + local precision
 	 *	    + (15 usec each second)
 	 *  EPSILON is the root dispersion
-	 *  phi     is the peer jitter statistic
+	 *  phi	    is the peer jitter statistic
 	 *
 	 * NB: Think hard about why we are using these values, and what
 	 * the alternatives are, and the various pros/cons.
@@ -2718,7 +2718,7 @@ peer_xmit(
 	xpkt.precision = sys_precision;
 	xpkt.refid = sys_refid;
 	xpkt.rootdelay = HTONS_FP(DTOFP(sys_rootdelay));
-	xpkt.rootdisp =  HTONS_FP(DTOUFP(sys_rootdisp));
+	xpkt.rootdisp =	 HTONS_FP(DTOUFP(sys_rootdisp));
 	HTONL_FP(&sys_reftime, &xpkt.reftime);
 	HTONL_FP(&peer->rec, &xpkt.org);
 	HTONL_FP(&peer->dst, &xpkt.rec);
@@ -2779,9 +2779,9 @@ peer_xmit(
 #ifdef DEBUG
 		if (debug)
 			printf("transmit: at %ld %s->%s mode %d len %zu\n",
-		    	    current_time, peer->dstadr ?
+			    current_time, peer->dstadr ?
 			    stoa(&peer->dstadr->sin) : "-",
-		            stoa(&peer->srcadr), peer->hmode, sendlen);
+			    stoa(&peer->srcadr), peer->hmode, sendlen);
 #endif
 		return;
 	}
@@ -2862,7 +2862,7 @@ leap_smear_add_offs(l_fp *t, l_fp *t_recv) {
 	L_ADD(t, &leap_smear.offset);
 }
 
-#endif  /* ENABLE_LEAP_SMEAR */
+#endif	/* ENABLE_LEAP_SMEAR */
 
 /*
  * fast_xmit - Send packet for nonpersistent association. Note that
@@ -3218,9 +3218,9 @@ peer_unfit(
  *   introduced with ntp-dev-4.2.7p385
  * [2085] Fix root distance and root dispersion calculations.
  */
-        if (!(peer->flags & FLAG_REFCLOCK) && peer->disp >=
-            sys_maxdist + clock_phi * ULOGTOD(peer->hpoll))
-                rval |= BOGON11;                /* Initialization */
+	if (!(peer->flags & FLAG_REFCLOCK) && peer->disp >=
+	    sys_maxdist + clock_phi * ULOGTOD(peer->hpoll))
+		rval |= BOGON11;		/* Initialization */
 
 	/*
 	 * A loop error occurs if the remote peer is synchronized to the
@@ -3493,7 +3493,7 @@ proto_config(
 		break;
 
 	case PROTO_PPS:		/* PPS discipline (pps) */
-	 	hardpps_enable = (bool)value;
+		hardpps_enable = (bool)value;
 		break;
 
 	case PROTO_FILEGEN:	/* statistics (stats) */
