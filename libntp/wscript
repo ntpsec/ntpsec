@@ -27,6 +27,7 @@ def build(ctx):
 		"msyslog.c",
 		"netof.c",
 		"ntp_calendar.c",
+		"ntp_endian.c",
 		"ntp_intres.c",
 		"ntp_lineedit.c",
 		"ntp_random.c",
