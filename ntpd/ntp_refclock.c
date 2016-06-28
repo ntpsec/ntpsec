@@ -245,7 +245,6 @@ refclock_unpeer(
 	struct peer *peer	/* peer structure pointer */
 	)
 {
-	uint8_t clktype;
 	int unit;
 
 	/*
@@ -255,10 +254,9 @@ refclock_unpeer(
 	if (NULL == peer->procptr)
 		return;
 
-	clktype = peer->refclktype;
 	unit = peer->refclkunit;
-	if (refclock_conf[clktype]->clock_shutdown != noentry)
-		(refclock_conf[clktype]->clock_shutdown)(unit, peer);
+	if (peer->procptr->conf->clock_shutdown != noentry)
+		(peer->procptr->conf->clock_shutdown)(unit, peer);
 	free(peer->procptr);
 	peer->procptr = NULL;
 }
@@ -297,10 +295,8 @@ refclock_transmit(
 	struct peer *peer	/* peer structure pointer */
 	)
 {
-	uint8_t clktype;
 	int unit;
 
-	clktype = peer->refclktype;
 	unit = peer->refclkunit;
 	peer->sent++;
 	get_systime(&peer->xmt);
@@ -339,8 +335,8 @@ refclock_transmit(
 	} else {
 		peer->burst--;
 	}
-	if (refclock_conf[clktype]->clock_poll != noentry)
-		(refclock_conf[clktype]->clock_poll)(unit, peer);
+	if (peer->procptr->conf->clock_poll != noentry)
+		(peer->procptr->conf->clock_poll)(unit, peer);
 	poll_update(peer, peer->hpoll);
 }
 
@@ -946,7 +942,6 @@ refclock_control(
 {
 	struct peer *peer;
 	struct refclockproc *pp;
-	uint8_t clktype;
 	int unit;
 
 	/*
@@ -961,7 +956,6 @@ refclock_control(
 		return;
 
 	pp = peer->procptr;
-	clktype = peer->refclktype;
 	unit = peer->refclkunit;
 
 	/*
@@ -1034,8 +1028,8 @@ refclock_control(
 	/*
 	 * Give the stuff to the clock
 	 */
-	if (refclock_conf[clktype]->clock_control != noentry)
-		(refclock_conf[clktype]->clock_control)(unit, in, out, peer);
+	if (peer->procptr->conf->clock_control != noentry)
+		(peer->procptr->conf->clock_control)(unit, in, out, peer);
 }
 
 
@@ -1054,8 +1048,6 @@ refclock_buginfo(
 {
 	struct peer *peer;
 	struct refclockproc *pp;
-	int clktype;
-	int unit;
 	unsigned u;
 
 	/*
@@ -1069,9 +1061,6 @@ refclock_buginfo(
 	pp = peer->procptr;
 	if (pp == NULL)
 	    return;
-
-	clktype = peer->refclktype;
-	unit = peer->refclkunit;
 
 	/*
 	 * Copy structure values
@@ -1095,8 +1084,8 @@ refclock_buginfo(
 	/*
 	 * Give the stuff to the clock
 	 */
-	if (refclock_conf[clktype]->clock_buginfo != noentry)
-		(refclock_conf[clktype]->clock_buginfo)(unit, bug, peer);
+	if (peer->procptr->conf->clock_buginfo != noentry)
+		(peer->procptr->conf->clock_buginfo)(peer->refclkunit, bug, peer);
 }
 
 
