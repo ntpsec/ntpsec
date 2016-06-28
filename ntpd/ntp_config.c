@@ -2005,17 +2005,7 @@ config_rlimit(
 			break;
 
 		case T_Memlock:
-			if (rlimit_av->value.i != 0) {
-#if defined(RLIMIT_MEMLOCK)
-				ntp_rlimit(RLIMIT_MEMLOCK,
-					   (rlim_t)(rlimit_av->value.i * 1024 * 1024),
-					   1024 * 1024,
-					   "MB");
-#else
-				/* STDERR as well would be fine... */
-				msyslog(LOG_WARNING, "'rlimit memlock' specified but is not available on this system.");
-#endif /* RLIMIT_MEMLOCK */
-			}
+			/* ignore, for backward compatibility */
 			break;
 
 		case T_Stacksize:
@@ -4214,21 +4204,9 @@ ntp_rlimit(
 #endif
 
 	switch (rl_what) {
-#ifdef RLIMIT_MEMLOCK
 	    case RLIMIT_MEMLOCK:
-		/*
-		 * The default RLIMIT_MEMLOCK is very low on Linux systems.
-		 * Unless we increase this limit malloc calls are likely to
-		 * fail if we drop root privilege.  To be useful the value
-		 * has to be larger than the largest ntpd resident set size.
-		 */
-		DPRINTF(2, ("ntp_rlimit: MEMLOCK: %d %s\n",
-			(int)(rl_value / rl_scale), rl_sstr));
-		rl.rlim_cur = rl.rlim_max = rl_value;
-		if (setrlimit(RLIMIT_MEMLOCK, &rl) == -1)
-			msyslog(LOG_ERR, "Cannot set RLIMIT_MEMLOCK: %m");
+		/* ignore - for backward compatibility only */
 		break;
-#endif /* RLIMIT_MEMLOCK */
 
 #ifdef RLIMIT_NOFILE
 	    case RLIMIT_NOFILE:
