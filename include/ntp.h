@@ -435,59 +435,11 @@ struct peer {
 				    - CRYPTO_TO_ZERO((struct peer *)0))
 
 /*
- * Reference clock types.  Added as necessary.
- *
- * This is all assigned refclock types since the beginning of time.
- * Some are no longer in use.
+ * Thw last remnant of knowledge of driver type numbers outside of
+ * refclock_conf.c. Ratained only to avoid a string compare on
+ * the name.
  */
-#define	REFCLK_NONE		0	/* unknown or missing */
-#define	REFCLK_LOCALCLOCK	1	/* external (e.g., lockclock) */
-#define	REFCLK_GPS_TRAK		2	/* TRAK 8810 GPS Receiver */
-#define	REFCLK_WWV_PST		3	/* PST/Traconex 1020 WWV/H */
-#define	REFCLK_SPECTRACOM	4	/* Spectracom (generic) Receivers */
-#define	REFCLK_TRUETIME		5	/* TrueTime (generic) Receivers */
-#define REFCLK_IRIG_AUDIO	6	/* IRIG-B/W audio decoder */
-#define	REFCLK_CHU_AUDIO	7	/* CHU audio demodulator/decoder */
-#define REFCLK_PARSE		8	/* generic driver (usually DCF77,GPS,MSF) */
-#define	REFCLK_GPS_MX4200	9	/* Magnavox MX4200 GPS */
-#define REFCLK_GPS_AS2201	10	/* Austron 2201A GPS */
-#define	REFCLK_GPS_ARBITER	11	/* Arbiter 1088A/B/ GPS */
-#define REFCLK_IRIG_TPRO	12	/* KSI/Odetics TPRO-S IRIG */
-#define REFCLK_ATOM_LEITCH	13	/* Leitch CSD 5300 Master Clock */
-#define REFCLK_MSF_EES		14	/* EES M201 MSF Receiver */
-#define	REFCLK_GPSTM_TRUE	15	/* OLD TrueTime GPS/TM-TMD Receiver */
-#define REFCLK_IRIG_BANCOMM	16	/* Bancomm GPS/IRIG Interface */
-#define REFCLK_GPS_DATUM	17	/* Datum Programmable Time System */
-#define REFCLK_ACTS		18	/* Generic Auto Computer Time Service */
-#define REFCLK_WWV_HEATH	19	/* Heath GC1000 WWV/WWVH Receiver */
-#define REFCLK_GPS_NMEA		20	/* NMEA based GPS clock */
-#define REFCLK_GPS_VME		21	/* TrueTime GPS-VME Interface */
-#define REFCLK_ATOM_PPS		22	/* 1-PPS Clock Discipline */
-#define REFCLK_PTB_ACTS		23	/* replaced by REFCLK_ACTS */
-#define REFCLK_USNO		24	/* replaced by REFCLK_ACTS */
-#define REFCLK_GPS_HP		26	/* HP 58503A Time/Frequency Receiver */
-#define REFCLK_ARCRON_MSF	27	/* ARCRON MSF radio clock. */
-#define REFCLK_SHM		28	/* clock attached thru shared memory */
-#define REFCLK_PALISADE		29	/* Trimble Navigation Palisade GPS */
-#define REFCLK_ONCORE		30	/* Motorola UT Oncore GPS */
-#define REFCLK_GPS_JUPITER	31	/* Rockwell Jupiter GPS receiver */
-#define REFCLK_CHRONOLOG	32	/* Chrono-log K WWVB receiver */
-#define REFCLK_DUMBCLOCK	33	/* Dumb localtime clock */
-#define REFCLK_ULINK		34	/* Ultralink M320 WWVB receiver */
-#define REFCLK_PCF		35	/* Conrad parallel port radio clock */
-#define REFCLK_WWV_AUDIO	36	/* WWV/H audio demodulator/decoder */
-#define REFCLK_FG		37	/* Forum Graphic GPS */
-#define REFCLK_HOPF_SERIAL	38	/* hopf DCF77/GPS serial receiver  */
-#define REFCLK_HOPF_PCI		39	/* hopf DCF77/GPS PCI receiver  */
-#define REFCLK_JJY		40	/* JJY receiver  */
-#define	REFCLK_TT560		41	/* TrueTime 560 IRIG-B decoder */
-#define REFCLK_ZYFER		42	/* Zyfer GPStarplus receiver  */
-#define REFCLK_RIPENCC		43	/* RIPE NCC Trimble driver */
-#define REFCLK_NEOCLOCK4X	44	/* NeoClock4X DCF77 or TDF receiver */
-#define REFCLK_TSYNCPCI		45	/* Spectracom TSYNC PCI timing board */
-#define REFCLK_GPSDJSON		46
-#define REFCLK_MAX		46
-
+#define REFCLK_ATOM_PPS		22	/* 1PPS Clock Discipline */
 
 /*
  * NTP packet format.  The mac field is optional.  It isn't really

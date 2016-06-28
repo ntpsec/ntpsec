@@ -2,7 +2,8 @@
  * refclock_conf.c - reference clock configuration
  *
  * This is the only place in the code that knows how to map driver numeric types
- * to driver method tables and their attributes.
+ * to driver method tables and their attributes.  There is one other bit of
+ * knowledge elsewhere, the #define REFCLK_ATOM_PPS in ntp.h.
  */
 #include <config.h>
 
@@ -148,11 +149,17 @@ extern struct refclock refclock_gpsdjson;
 #else
 #define refclock_gpsdjson refclock_none
 #endif
+
 /*
- * Order is clock_start(), clock_shutdown(), clock_poll(),
- * clock_control(), clock_init(), clock_buginfo, clock_flags;
+ * The symbols in the comments are no longer defined, except for REFCLK_ATOM_PPS.
+ * If you compact or reorder this table, two bad things will happen:
  *
- * Types are defined in ntp.h.  The index must match this.
+ * 1. Legacy ntpq instances that think they can deduce driver types from
+ *    address fields will get them wrong.
+ *
+ * 2. If the PPS driver entry moves and you don't fix the definition of 
+ *    REFCLK_ATOM_PPS to be a corrected index into this table, 
+ *    some cases of PPS-assisted time sync will break.
  */
 struct refclock * const refclock_conf[] = {
 	&refclock_none,		/* 0 REFCLK_NONE */
