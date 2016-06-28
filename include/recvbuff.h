@@ -81,9 +81,9 @@ struct recvbuf {
 
 /* true for network packets, false for refclock packets */
 #ifdef REFCLOCK
-#define is_network_packet(rbufp)	((rbufp)->network_packet)
+#define is_refclock_packet(rbufp)	(!(rbufp)->network_packet)
 #else
-#define is_network_packet(rbufp)	false
+#define is_refclock_packet(rbufp)	false
 #endif /* REFCLOCK */
 
 
