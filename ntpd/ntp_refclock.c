@@ -197,7 +197,6 @@ refclock_newpeer(
 	/*
 	 * Initialize structures
 	 */
-	peer->refclktype = clktype;
 	peer->refclkunit = (uint8_t)unit;
 	peer->flags |= FLAG_REFCLOCK;
 	peer->leap = LEAP_NOTINSYNC;
@@ -556,8 +555,8 @@ refclock_receive(
 	clock_filter(peer, pp->offset, 0., pp->jitter);
 	if (cal_enable && fabs(last_offset) < sys_mindisp && sys_peer !=
 	    NULL) {
-		if (sys_peer->refclktype == REFCLK_ATOM_PPS &&
-		    peer->refclktype != REFCLK_ATOM_PPS)
+		if (sys_peer->is_pps_driver &&
+		    !peer->is_pps_driver)
 			pp->fudgetime1 -= pp->offset * FUDGEFAC;
 	}
 }

@@ -272,7 +272,7 @@ struct peer {
 	 */
 #ifdef REFCLOCK
 	struct refclockproc *procptr; /* refclock structure pointer */
-	uint8_t	refclktype;	/* reference clock type */
+	bool	is_pps_driver;	/* is this the PPS driver? */
 	uint8_t	refclkunit;	/* reference clock unit number */
 	uint8_t	sstclktype;	/* clock type for system status word */
 #endif /* REFCLOCK */
@@ -433,13 +433,6 @@ struct peer {
 #define END_CRYPTO_TO_ZERO(p)	((char *)&((p)->end_clear_to_zero))
 #define LEN_CRYPTO_TO_ZERO	(END_CRYPTO_TO_ZERO((struct peer *)0) \
 				    - CRYPTO_TO_ZERO((struct peer *)0))
-
-/*
- * Thw last remnant of knowledge of driver type numbers outside of
- * refclock_conf.c. Ratained only to avoid a string compare on
- * the name.
- */
-#define REFCLK_ATOM_PPS		22	/* 1PPS Clock Discipline */
 
 /*
  * NTP packet format.  The mac field is optional.  It isn't really
