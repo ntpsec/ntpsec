@@ -420,7 +420,7 @@ receive(
 		return;				/* bogus port */
 	}
 #ifdef REFCLOCK
-	if (!is_network_packet(rbufp))
+	if (is_refclock_packet(rbufp))
 	    restrict_mask = 0;
 	else
 #endif /* REFCLOCK */
@@ -809,7 +809,7 @@ receive(
 			       peer2->maxpoll, FLAG_PREEMPT |
 			       (FLAG_IBURST & peer2->flags), MDF_UCAST |
 			       MDF_UCLNT, 0, skeyid,
-			       is_network_packet(rbufp));
+			       is_refclock_packet(rbufp));
 		if (NULL == peer) {
 			sys_declined++;
 			return;			/* ignore duplicate  */
@@ -887,7 +887,7 @@ receive(
 			    match_ep, MODE_BCLIENT, hisversion,
 			    pkt->ppoll, pkt->ppoll, FLAG_PREEMPT,
 			    MDF_BCLNT, 0, skeyid,
-			    is_network_packet(rbufp));
+			    is_refclock_packet(rbufp));
 			if (NULL == peer) {
 				sys_restricted++;
 				return;		/* ignore duplicate */
@@ -910,7 +910,7 @@ receive(
 		peer = newpeer(&rbufp->recv_srcadr, NULL, match_ep,
 		    MODE_CLIENT, hisversion, pkt->ppoll, pkt->ppoll,
 		    FLAG_BC_VOL | FLAG_IBURST | FLAG_PREEMPT, MDF_BCLNT,
-		    0, skeyid, is_network_packet(rbufp));
+		    0, skeyid, is_refclock_packet(rbufp));
 		if (NULL == peer) {
 			sys_restricted++;
 			return;			/* ignore duplicate */
@@ -994,7 +994,7 @@ receive(
 		if ((peer = newpeer(&rbufp->recv_srcadr, NULL,
 		    rbufp->dstadr, MODE_PASSIVE, hisversion, pkt->ppoll,
 				    NTP_MAXDPOLL, 0, MDF_UCAST, 0, skeyid,
-				    is_network_packet(rbufp))) == NULL) {
+				    is_refclock_packet(rbufp))) == NULL) {
 			sys_declined++;
 			return;			/* ignore duplicate */
 		}
