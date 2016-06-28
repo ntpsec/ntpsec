@@ -130,6 +130,7 @@ pps_start(
 	 * Allocate and initialize unit structure
 	 */
 	pp = peer->procptr;
+	peer->is_pps_driver = true;
 	peer->precision = PRECISION;
 	pp->clockname = NAME;
 	pp->clockdesc = DESCRIPTION;

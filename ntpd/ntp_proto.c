@@ -2577,8 +2577,8 @@ clock_select(void)
 	 * are required.
 	 */
 	if (typepps != NULL && fabs(sys_offset) < 0.4 &&
-	    (typepps->refclktype != REFCLK_ATOM_PPS ||
-	    (typepps->refclktype == REFCLK_ATOM_PPS && (sys_prefer !=
+	    (!typepps->is_pps_driver ||
+	    (typepps->is_pps_driver && (sys_prefer !=
 	    NULL || (typesystem == NULL && sys_minsane == 0))))) {
 		typesystem = typepps;
 		sys_clockhop = 0;

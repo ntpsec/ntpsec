@@ -152,14 +152,8 @@ extern struct refclock refclock_gpsdjson;
 
 /*
  * The symbols in the comments are no longer defined, except for REFCLK_ATOM_PPS.
- * If you compact or reorder this table, two bad things will happen:
- *
- * 1. Legacy ntpq instances that think they can deduce driver types from
- *    address fields will get them wrong.
- *
- * 2. If the PPS driver entry moves and you don't fix the definition of 
- *    REFCLK_ATOM_PPS to be a corrected index into this table, 
- *    some cases of PPS-assisted time sync will break.
+ * If you compact or reorder this table, legacy ntpq instances that think they
+ * can deduce driver types from address fields will get them wrong.
  */
 struct refclock * const refclock_conf[] = {
 	&refclock_none,		/* 0 REFCLK_NONE */
