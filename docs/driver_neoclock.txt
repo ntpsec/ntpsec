@@ -23,7 +23,7 @@ link:clockopt.html[+time1+ time]::
    Specifies the time offset calibration factor with the default value of
    0.16958333 seconds. This offset is used  to correct serial line and
    operating system delays incurred in capturing time stamps. If you want
-   to fudge the +time1+ offset *ALWAYS* add a value off 0.16958333. This is
+   to fudge the +time1+ offset *ALWAYS* add a value of 0.16958333. This is
    necessary to compensate for the delay that is caused by transmitting the
    timestamp at 2400 Baud. If you want to compensate the delay that the
    DCF77 or TDF radio signal takes to travel to your site simply add the
@@ -36,7 +36,7 @@ link:clockopt.html[+time2+ time]::
    Not used by this driver.
 
 link:clockopt.html[+flag1 {0 | 1}+]::
-   When set to 1 the driver will feed ntp with timestampe even if the radio
+   When set to 1 the driver will feed ntp with timestamps even if the radio
    signal is lost. In this case an internal backup clock generates the
    timestamps. This is ok as long as the receiver is synced once since the
    receiver is able to keep time for a long period.

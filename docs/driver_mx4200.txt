@@ -30,7 +30,7 @@ products such as the MX4200 and its successors.
 == Operating Modes ==
 
 This driver supports two modes of operation, static and mobile,
-controlled by clock flag 2.
+controlled by option +flag2+.
 
 In static mode (the default) the driver assumes that the GPS antenna is
 in a fixed location. The receiver is initially placed in a "Static, 3D
