@@ -147,7 +147,7 @@ extern	HANDLE	WaitableIoEventHandle;
 
 struct refclockproc {
 	void *	unitptr;	/* pointer to unit structure */
-	struct refclock * conf;	/* refclock_conf[type] */
+	struct refclock * conf;	/* pointer to driver method table */
 	struct refclockio io;	/* I/O handler structure */
 	uint8_t	leap;		/* leap/synchronization code */
 	uint8_t	currentstatus;	/* clock status */
