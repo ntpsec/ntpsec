@@ -6,6 +6,7 @@
 #define GUARD_NTP_FP_H
 
 #include "ntp_types.h"
+#include <arpa/inet.h>
 
 /*
  * NTP uses two fixed point formats.  The first (l_fp) is the "long"
@@ -37,6 +38,17 @@ typedef struct {
 
 #define l_ui	Ul_i.Xl_ui		/* unsigned integral part */
 #define	l_i	Ul_i.Xl_i		/* signed integral part */
+
+static inline uint64_t lfp_to_uint64(const l_fp *lfp) {
+  return
+    (uint64_t)ntohl(lfp->l_ui) << 32 |
+    (uint64_t)ntohl(lfp->l_uf);
+}
+
+static inline void uint64_to_lfp(l_fp *lfp, uint64_t x) {
+  lfp->l_ui = htonl(x >> 32);
+  lfp->l_uf = htonl(x & 0xFFFFFFFFUL);
+}
 
 /*
  * Fractional precision (of an l_fp) is actually the number of
