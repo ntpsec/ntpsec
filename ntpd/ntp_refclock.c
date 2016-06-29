@@ -66,7 +66,6 @@ bool	cal_enable;		/* enable refclock calibrate */
  */
 static int refclock_cmpl_fp (const void *, const void *);
 static int refclock_sample (struct refclockproc *);
-static bool refclock_ioctl(int, u_int);
 
 
 /*
@@ -760,10 +759,6 @@ refclock_open(
 		close(fd);
 		return -1;
 	}
-	if (!refclock_ioctl(fd, lflags)) {
-		close(fd);
-		return -1;
-	}
 #ifdef O_NONBLOCK
 	/*
 	 * We want to make sure there is no pending trash in the input
@@ -879,34 +874,6 @@ refclock_setup(
 	if (tcflush(fd, TCIOFLUSH) < 0)
 		msyslog(LOG_ERR, "refclock_setup fd %d tcflush(): %m",
 			fd);
-	return true;
-}
-
-
-/*
- * refclock_ioctl - set serial port control functions
- *
- * This routine attempts to hide the internal, system-specific details
- * of serial ports. It can handle POSIX (termios), SYSV (termio) and BSD
- * (sgtty) interfaces with varying degrees of success. The routine sets
- * up optional features such as tty_clk. The routine returns true if
- * successful.
- */
-bool
-refclock_ioctl(
-	int	fd, 		/* file descriptor */
-	u_int	lflags		/* line discipline flags */
-	)
-{
-	UNUSED_ARG(fd);
-#ifndef DEBUG
-	UNUSED_ARG(lflags);
-#endif /* DEBUG */
-	/*
-	 * simply return true if no UNIX line discipline is supported
-	 */
-	DPRINTF(1, ("refclock_ioctl: fd %d flags 0x%x\n", fd, lflags));
-
 	return true;
 }
 
