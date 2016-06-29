@@ -170,7 +170,7 @@ removed because it duplicates support for the 6021 in the generic
 parse driver.
 
 [options="header"]
-[cols="16%,5%,80%",options="header"]
+[cols="15%,5%,80%",options="header"]
 |====================================================================
 | Name                                  | Flags | Driver
 |link:driver_local.html[local]          | D | Undisciplined Local Clock
