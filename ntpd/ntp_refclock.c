@@ -54,8 +54,7 @@
  * which is used for all peer-specific processing and contains a
  * pointer to the refclockproc structure, which in turn contains a
  * pointer to the unit structure, if used.  The peer structure is 
- * identified by an interface address in the dotted quad form 
- * 127.127.t.u, where t is the clock type and u the unit.
+ * identified as a refclock by having a non-NULL procptr member. 
  */
 #define FUDGEFAC	.1	/* fudge correction factor */
 #define LF		0x0a	/* ASCII LF */
