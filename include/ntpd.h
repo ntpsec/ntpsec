@@ -174,13 +174,13 @@ extern  void	set_peerdstadr	(struct peer *, endpt *);
 extern	struct peer *newpeer	(sockaddr_u *, const char *,
 				 endpt *, uint8_t, uint8_t,
 				 uint8_t, uint8_t, u_int, uint8_t, uint32_t,
-				 keyid_t, bool);
+				 keyid_t);
 extern	void	peer_all_reset	(void);
 extern	void	peer_clr_stats	(void);
 extern	struct peer *peer_config(sockaddr_u *, const char *,
 				 endpt *, uint8_t, uint8_t,
 				 uint8_t, uint8_t, u_int, uint32_t,
-				 keyid_t, bool clockaddr);
+				 keyid_t);
 extern	void	peer_reset	(struct peer *);
 extern	void	refresh_all_peerinterfaces(void);
 extern	void	unpeer		(struct peer *);
@@ -215,7 +215,7 @@ extern  void    proto_dump(FILE *);
 
 /* ntp_refclock.c */
 #ifdef	REFCLOCK
-extern	bool	refclock_newpeer (struct peer *);
+extern	bool	refclock_newpeer (uint8_t, int, struct peer *);
 extern	void	refclock_unpeer (struct peer *);
 extern	void	refclock_receive (struct peer *);
 extern	void	refclock_transmit (struct peer *);

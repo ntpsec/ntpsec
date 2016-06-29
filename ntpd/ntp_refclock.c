@@ -166,19 +166,12 @@ init_refclock(void)
  */
 bool
 refclock_newpeer(
+	uint8_t clktype,
+	int unit,
 	struct peer *peer	/* peer structure pointer */
 	)
 {
 	struct refclockproc *pp;
-	uint8_t clktype;
-	int unit;
-
-	/*
-	 * This is the only place outside of the config parser
-	 * that still knows about magic clock addresses.  Alas...
-	 */
-	clktype = (uint8_t)REFCLOCKTYPE(&peer->srcadr);
-	unit = REFCLOCKUNIT(&peer->srcadr);
 
 	if (clktype >= num_refclock_conf ||
 		refclock_conf[clktype]->clock_start == noentry) {

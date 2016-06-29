@@ -20,13 +20,6 @@
 				pp->codeproc = (pp->codeproc + 1) % MAXSTAGE;
 
 /*
- * Macros to determine the clock type and unit numbers from a
- * 127.127.t.u address
- */
-#define	REFCLOCKTYPE(srcadr)	((SRCADR(srcadr) >> 8) & 0xff)
-#define REFCLOCKUNIT(srcadr)	(SRCADR(srcadr) & 0xff)
-
-/*
  * List of reference clock names and descriptions. These must agree with
  * lib/clocktypes.c and ntpd/refclock_conf.c.
  */
