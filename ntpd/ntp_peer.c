@@ -556,9 +556,8 @@ peer_config(
 	uint8_t		minpoll,
 	uint8_t		maxpoll,
 	u_int		flags,
-	uint32_t		ttl,
-	keyid_t		key,
-	bool		clockaddr
+	uint32_t	ttl,
+	keyid_t		key
 	)
 {
 	uint8_t cast_flags;
@@ -602,8 +601,7 @@ peer_config(
 	if ((MDF_ACAST | MDF_POOL) & cast_flags)
 		flags &= ~FLAG_PREEMPT;
 	return newpeer(srcadr, hostname, dstadr, hmode, version,
-		       minpoll, maxpoll, flags, cast_flags, ttl, key,
-		       clockaddr);
+		       minpoll, maxpoll, flags, cast_flags, ttl, key);
 }
 
 /*
@@ -740,8 +738,7 @@ newpeer(
 	u_int		flags,
 	uint8_t		cast_flags,
 	uint32_t		ttl,
-	keyid_t		key,
-	bool		is_refclock_packet
+	keyid_t		key
 	)
 {
 	struct peer *	peer;
@@ -886,33 +883,6 @@ newpeer(
 	peer->timereset = current_time;
 	peer->timereachable = current_time;
 	peer->timereceived = current_time;
-
-	if (is_refclock_packet) {
-#ifdef REFCLOCK
-		/*
-		 * We let the reference clock support do clock
-		 * dependent initialization.  This includes setting
-		 * the peer timer, since the clock may have requirements
-		 * for this.
-		 */
-		if (maxpoll == 0)
-			peer->maxpoll = peer->minpoll;
-		if (!refclock_newpeer(peer)) {
-			/*
-			 * Dump it, something screwed up
-			 */
-			set_peerdstadr(peer, NULL);
-			free_peer(peer, 0);
-			return NULL;
-		}
-#else /* REFCLOCK */
-		msyslog(LOG_ERR, "refclock %s isn't supported. ntpd was compiled without refclock support.",
-			stoa(&peer->srcadr));
-		set_peerdstadr(peer, NULL);
-		free_peer(peer, 0);
-		return NULL;
-#endif /* REFCLOCK */
-	}
 
 	/*
 	 * Put the new peer in the hash tables.

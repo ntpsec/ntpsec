@@ -68,6 +68,13 @@
 	(IS_IPV4(srcadr) &&					\
 	 (SRCADR(srcadr) & REFCLOCK_MASK) == REFCLOCK_ADDR)
 
+/*
+ * Macros to determine the clock type and unit numbers from a
+ * 127.127.t.u address
+ */
+#define	REFCLOCKTYPE(srcadr)	((SRCADR(srcadr) >> 8) & 0xff)
+#define REFCLOCKUNIT(srcadr)	(SRCADR(srcadr) & 0xff)
+
 
 /* list of servers from command line for config_peers() */
 int	cmdline_server_count;
@@ -3076,8 +3083,7 @@ config_peers(
 					0,
 					FLAG_IBURST,
 					0,
-					0,
-					false);
+					0);
 		} else if (force_synchronous_dns) {
 			if (intercept_getaddrinfo(*cmdline_servers, &peeraddr)) {
 				peer_config(
@@ -3090,8 +3096,7 @@ config_peers(
 					0,
 					FLAG_IBURST,
 					0,
-					0,
-					false);
+					0);
 			}
 		} else {
 			/* we have a hostname to resolve */
@@ -3141,8 +3146,7 @@ config_peers(
 				curr_peer->maxpoll,
 				peerflag_bits(curr_peer),
 				curr_peer->ttl,
-				curr_peer->peerkey,
-				false);
+				curr_peer->peerkey);
 		/*
 		 * If we have a numeric address, we can safely
 		 * proceed in the mainline with it.
@@ -3152,8 +3156,8 @@ config_peers(
 
 			SET_PORT(&peeraddr, NTP_PORT);
 			if (is_sane_resolved_address(&peeraddr,
-			    curr_peer->host_mode))
-				peer_config(
+						     curr_peer->host_mode)) {
+				struct peer *peer = peer_config(
 					&peeraddr,
 					NULL,
 					NULL,
@@ -3163,8 +3167,40 @@ config_peers(
 					curr_peer->maxpoll,
 					peerflag_bits(curr_peer),
 					curr_peer->ttl,
-					curr_peer->peerkey,
-					ISREFCLOCKADR(&peeraddr));
+					curr_peer->peerkey);
+				if (ISREFCLOCKADR(&peeraddr))
+#ifdef REFCLOCK
+				{
+					uint8_t clktype;
+					int unit;
+					/*
+					 * We let the reference clock
+					 * support do clock dependent
+					 * initialization.  This
+					 * includes setting the peer
+					 * timer, since the clock may
+					 * have requirements for this.
+					 */
+					if (peer->maxpoll == 0)
+						peer->maxpoll = peer->minpoll;
+					clktype = (uint8_t)REFCLOCKTYPE(&peer->srcadr);
+					unit = REFCLOCKUNIT(&peer->srcadr);
+
+					if (!refclock_newpeer(clktype,
+							      unit,
+							      peer)) {
+						/*
+						 * Dump it, something screwed up
+						 */
+						unpeer(peer);
+					}
+#else /* REFCLOCK */
+					msyslog(LOG_ERR, "ntpd was compiled without refclock support.");
+					unpeer(peer);
+#endif /* REFCLOCK */
+				}
+
+			}
 		/*
 		 * synchronous lookup may be forced.
 		 */
@@ -3180,8 +3216,7 @@ config_peers(
 					curr_peer->maxpoll,
 					peerflag_bits(curr_peer),
 					curr_peer->ttl,
-					curr_peer->peerkey,
-					false);
+					curr_peer->peerkey);
 			}
 		} else {
 			/* hand the hostname off to the blocking child */
@@ -3286,8 +3321,7 @@ peer_name_resolved(
 				ctx->maxpoll,
 				ctx->flags,
 				ctx->ttl,
-				ctx->keyid,
-				false);
+				ctx->keyid);
 			break;
 		}
 	}
