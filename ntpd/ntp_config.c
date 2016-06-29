@@ -54,7 +54,7 @@
  * reference clocks an address of the form 127.127.t.u, where t is the
  * type and u is the unit number.  In ntpd itself, the filtering that
  * used to be done based on this magic address prefix is now done
- * using the is_network_packet() test on incoming packets.   In ntpq, the
+ * using the is_refclock_packet() test on incoming packets.   In ntpq, the
  * filtering is replaced by asking the server how a peer's name should
  * be displayed.
  *
@@ -3077,7 +3077,7 @@ config_peers(
 					FLAG_IBURST,
 					0,
 					0,
-					ISREFCLOCKADR(&peeraddr));
+					false);
 		} else if (force_synchronous_dns) {
 			if (intercept_getaddrinfo(*cmdline_servers, &peeraddr)) {
 				peer_config(
@@ -3142,7 +3142,7 @@ config_peers(
 				peerflag_bits(curr_peer),
 				curr_peer->ttl,
 				curr_peer->peerkey,
-				ISREFCLOCKADR(&peeraddr));
+				false);
 		/*
 		 * If we have a numeric address, we can safely
 		 * proceed in the mainline with it.
@@ -3287,7 +3287,7 @@ peer_name_resolved(
 				ctx->flags,
 				ctx->ttl,
 				ctx->keyid,
-				ISREFCLOCKADR(&peeraddr));
+				false);
 			break;
 		}
 	}
