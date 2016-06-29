@@ -1,28 +1,29 @@
 // Options for refclocks.  Included twice.
-//
-// This can't be merged with the master description of association
-// options because the cited options have different
-// and more specific semantics when used with refclocks.
 
-+refclock+ _drivername_ +unit+ _u_ [+prefer+] [+mode+ _int_] [+minpoll+ _int_]
-[+maxpoll+ _int_] [+time1+ _sec_] [+time2+ _sec_] [+stratum+ _int_] [+refid+ _string_] [+mode+ _int_] [+flag1+ +0+ | +1+] [+flag2+ +0+ | +1+] [+flag3+ +0+ | +1+] [+flag4+ +0+ | +1+]::
-  This command can be used to configure reference clocks in special
-  ways. The required _drivername_ argument is the shortname of a driver type
++refclock+ _drivername_ [+unit+ _u_] [+prefer+] [+subtype+ _int_] [+mode+ _int_] [+minpoll+ _int_] [+maxpoll+ _int_] [+time1+ _sec_] [+time2+ _sec_] [+stratum+ _int_] [+refid+ _string_] [+flag1+ {+0+ | +1+}] [+flag2+ {+0+ | +1+}] [+flag3+ {+0+ | +1+}] [+flag4+ {+0+ | +1+}]::
+  This command is used to configure reference clocks.
+  The required _drivername_ argument is the shortname of a driver type
   (e.g. +shm+, +nmea+, +generic+; see the "Reference Clock Drivers"
   page for a full list. The options are interpreted as follows:
 
   +unit+;;
     The 0-origin unit number of the device. Modifies the devicename.
+    If not specified, defaults to zero.
   +prefer+;;
     Marks the reference clock as preferred. All other things being
     equal, this host will be chosen for synchronization among a set of
-    correctly operating hosts. See the "Mitigation Rules and the prefer
-    Keyword" page (available as part of the HTML documentation provided
-    in +/usr/share/doc/{ntp}+) for further information.
+    correctly operating hosts and clocks. See the "Mitigation Rules
+    and the prefer Keyword" page (available as part of the HTML
+    documentation provided in +/usr/share/doc/{ntp}+) for further
+    information.
+  +subtype+ _int_;;
+    Some drivers (notably the generic and jjy drivers) support
+    multiple device types.  This option selects among them in
+    a driver-dependent way.
   +mode+ _int_;;
     Specifies a mode number which is interpreted in a device-specific
     fashion. For instance, it selects a dialing protocol in the ACTS
-    driver and a device subtype in the parse drivers.
+    driver and a sentence mix in the nmea driver.
   +minpoll+ _int_; +maxpoll+ _int_;;
     These options specify the minimum and maximum polling interval for
     reference clock messages, as a power of 2 in seconds. For most
@@ -60,10 +61,6 @@
     defines the reference identifier used by the driver. This string
     overrides the default identifier ordinarily assigned by the driver
     itself.
-  +mode+ _int_;;
-    Specifies a mode number which is interpreted in a device-specific
-    fashion. For instance, it selects a dialing protocol in the ACTS
-    driver and a device subtype in the parse drivers.
   +flag1+ +{0 | 1}+; +flag2+ +{0 | 1}+; +flag3+ +{0 | 1}+; +flag4+ +{0 | 1}+;;
     These four flags are used for customizing the clock driver. The
     interpretation of these values, and whether they are used at all, is
