@@ -713,6 +713,9 @@ static void packet_dump(char *buf, size_t buflen,
     size_t i;
     /*
      * Format is three tokens: source address, packet, MAC token. 
+     *
+     * FIXME: struct pkt fields are in network byte order. Need to
+     * add htonl()/ntohl() calls here and in packet_parse().
      */
     snprintf(buf, buflen, "%s %d:%d:%d:%d:%u:%u:%u:%s:%s:%s:%s ",
 	   socktoa(dest),
@@ -795,11 +798,21 @@ static void recvbuf_dump(char *buf, size_t buflen, struct recvbuf *rbufp)
 
 void intercept_sendpkt(const char *legend,
 		  sockaddr_u *dest, struct interface *ep, int ttl,
-		  struct pkt *pkt, int len)
+		  void *pkt, int len)
 {
     char pkt_dump[BUFSIZ], newpacket[BUFSIZ];
 
-    packet_dump(pkt_dump, sizeof(pkt_dump), dest, pkt, len);
+    /* FIXME: packet_dump expects a well formed struct pkt, but this
+       function is also called from ntp_control.c with other data.
+       Until packet_dump is rewritten to use parse_packet(),
+       to avoid a possible out-of-bounds read just shortcut to calling
+       sendpkt when len < 48. */
+    if(len < LEN_PKT_NOMAC) {
+      sendpkt(dest, ep, ttl, pkt, len);
+      return;
+    }
+
+    packet_dump(pkt_dump, sizeof(pkt_dump), dest, (struct pkt*)pkt, len);
     snprintf(newpacket, sizeof(newpacket), "sendpkt %s %s\n", legend, pkt_dump);
 
     if (mode == replay)
