@@ -3110,7 +3110,7 @@ sendpkt(
 	sockaddr_u *		dest,
 	struct interface *	ep,
 	int			ttl,
-	struct pkt *		pkt,
+	void *			pkt,
 	int			len
 	)
 {
@@ -3186,7 +3186,7 @@ sendpkt(
 #ifdef SIM
 		cc = simulate_server(dest, src, pkt);
 #else
-		cc = sendto(src->fd, (char *)pkt, (u_int)len, 0,
+		cc = sendto(src->fd, pkt, (u_int)len, 0,
 			    &dest->sa, SOCKLEN(dest));
 #endif
 		if (cc == -1) {
