@@ -721,11 +721,11 @@ ctl_error(
 		maclen = authencrypt(res_keyid, (uint32_t *)&rpkt,
 				     CTL_HEADER_LEN);
 		intercept_sendpkt(__func__,
-				  rmt_addr, lcl_inter, -2, (void *)&rpkt,
+				  rmt_addr, lcl_inter, -2, &rpkt,
 				  CTL_HEADER_LEN + maclen);
 	} else
 		intercept_sendpkt(__func__,
-			      rmt_addr, lcl_inter, -3, (void *)&rpkt,
+			      rmt_addr, lcl_inter, -3, &rpkt,
 			      CTL_HEADER_LEN);
 }
 
@@ -1025,10 +1025,10 @@ ctl_flushpkt(
 			maclen = authencrypt(res_keyid,
 					     (uint32_t *)&rpkt, totlen);
 			intercept_sendpkt(__func__, rmt_addr, lcl_inter, -5,
-				(struct pkt *)&rpkt, totlen + maclen);
+				&rpkt, totlen + maclen);
 		} else {
 			intercept_sendpkt(__func__, rmt_addr, lcl_inter, -6,
-				(struct pkt *)&rpkt, sendlen);
+				&rpkt, sendlen);
 		}
 		if (more)
 			numctlfrags++;
