@@ -20,17 +20,6 @@
 				pp->codeproc = (pp->codeproc + 1) % MAXSTAGE;
 
 /*
- * List of reference clock names and descriptions. These must agree with
- * lib/clocktypes.c and ntpd/refclock_conf.c.
- */
-struct clktype {
-	int code;		/* driver "major" number */
-	const char *clocktype;	/* long description */
-	const char *abbrev;	/* short description */
-};
-extern struct clktype clktypes[];
-
-/*
  * Configuration flag values
  */
 #define	CLK_HAVETIME1	0x1
