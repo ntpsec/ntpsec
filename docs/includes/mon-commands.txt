@@ -61,7 +61,7 @@ includes the message type and certain ancillary information. See the
 |+50935+      |MJD       |date
 |+75440.031+  |s         |time past midnight
 |+0.000006019+|s         |clock offset
-|+13.778+     |PPM       |frequency offset
+|+13.778+     |PPM       |drift (frequency offset)
 |+0.000351733+|s         |RMS jitter
 |+0.013380+   |PPM       |RMS frequency jitter (aka wander)
 |+6+          |log~2~ s  |clock discipline loop time constant
