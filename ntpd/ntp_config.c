@@ -3169,8 +3169,8 @@ config_peers(
 					curr_peer->ttl,
 					curr_peer->peerkey);
 				if (ISREFCLOCKADR(&peeraddr))
-#ifdef REFCLOCK
 				{
+#ifdef REFCLOCK
 					uint8_t clktype;
 					int unit;
 					/*
