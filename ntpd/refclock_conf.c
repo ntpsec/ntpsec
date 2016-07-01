@@ -51,7 +51,7 @@ extern	struct refclock	refclock_magnavox;
 #ifdef CLOCK_AUSTRON
 extern	struct refclock	refclock_austron;
 #else
-#define	refclock_as2201	refclock_none
+#define	refclock_austron	refclock_none
 #endif
 
 #ifdef CLOCK_ARBITER
