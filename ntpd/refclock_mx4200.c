@@ -80,9 +80,9 @@ struct mx4200unit {
 	double central_meridian;	/* central meridian */
 	double N_fixes;			/* Number of position measurements */
 	int    last_leap;		/* leap second warning */
-	u_int  moving;			/* mobile platform? */
+	bool   moving;			/* mobile platform? */
 	u_long sloppyclockflag;		/* driver option flags */
-	u_int  known;			/* position known yet? */
+	bool   known;			/* position known yet? */
 	u_long clamp_time;		/* when to stop postion averaging */
 	u_long log_time;		/* when to print receiver status */
 	pps_handle_t	pps_h;
@@ -232,14 +232,14 @@ mx4200_config(
 	 */
 	up->sloppyclockflag = pp->sloppyclockflag;
 	if (pp->sloppyclockflag & CLK_FLAG2) {
-		up->moving   = 1;	/* Receiver on mobile platform */
+		up->moving   = true;	/* Receiver on mobile platform */
 		msyslog(LOG_DEBUG, "mx4200_config: mobile platform");
 	} else {
-		up->moving   = 0;	/* Static Installation */
+		up->moving   = false;	/* Static Installation */
 	}
 	up->pollcnt     	= 2;
 	up->polled      	= 0;
-	up->known       	= 0;
+	up->known       	= false;
 	up->avg_lat     	= 0.0;
 	up->avg_lon     	= 0.0;
 	up->avg_alt     	= 0.0;
@@ -355,9 +355,9 @@ mx4200_config(
 	 */
 
 	if (pp->sloppyclockflag & CLK_FLAG2)
-		up->moving   = 1;	/* Receiver on mobile platform */
+		up->moving   = true;	/* Receiver on mobile platform */
 	else
-		up->moving   = 0;	/* Static Installation */
+		up->moving   = false;	/* Static Installation */
 
 	up->pollcnt  = 2;
 	if (up->moving) {
@@ -742,7 +742,7 @@ mx4200_receive(
 			 * if position is well known.
 			 */
 			if (current_time > up->clamp_time) {
-				up->known++;
+			    up->known = true;
 				mx4200_debug(peer, "mx4200_receive: reconfiguring!\n");
 				mx4200_ref(peer);
 			}
