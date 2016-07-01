@@ -1043,7 +1043,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\..\..\ntpd\refclock_as2201.c"
+				RelativePath="..\..\..\ntpd\refclock_austron.c"
 				>
 				<FileConfiguration
 					Name="Release|Win32"
