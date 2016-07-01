@@ -108,7 +108,7 @@
     <ClCompile Include="..\..\..\..\ntpd\refclock_arc.c">
       <Filter>Reference Clock</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\ntpd\refclock_as2201.c">
+    <ClCompile Include="..\..\..\..\ntpd\refclock_austron.c">
       <Filter>Reference Clock</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\ntpd\refclock_pps.c">

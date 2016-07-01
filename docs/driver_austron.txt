@@ -37,8 +37,7 @@ and attributes are embedded in the driver source code; however, the
 collection process can be enabled or disabled using the flag4 flag. If
 set, collection is enabled; if not, which is the default, it is
 disabled. A comprehensive suite of data reduction and summary scripts is
-in the ./scripts/stats directory
-of the distribution.
+in the ./scripts/stats directory of the distribution.
 
 == Monitor Data ==
 
@@ -77,7 +76,7 @@ refclock austron
 For debugging:
 
 ----------------------------------------------------------------------------
-refclock austron flag 4 1
+refclock austron flag4 1  # Enable clock statistic recording
 ----------------------------------------------------------------------------
 
 == Author ==

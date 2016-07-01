@@ -1,5 +1,5 @@
 /*
- * refclock_as2201 - clock driver for the Austron 2201A GPS
+ * refclock_austron - clock driver for the Austron 2201A GPS
  *	Timing Receiver
  */
 
@@ -124,7 +124,7 @@ static	void	as2201_poll	(int, struct peer *);
 /*
  * Transfer vector
  */
-struct	refclock refclock_as2201 = {
+struct	refclock refclock_austron = {
 	NAME,			/* basename of driver */
 	as2201_start,		/* start up driver */
 	as2201_shutdown,	/* shut down driver */
