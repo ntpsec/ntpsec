@@ -23,14 +23,6 @@ Module, Output Buffer Module, IRIG-B Interface Module and LORAN Assist
 Module. It requires the RS232 Buffered Serial Interface module for
 communication with the driver.
 
-For use with a single computer, the receiver can be connected directly
-to the receiver. For use with multiple computers, one of them is
-connected directly to the receiver and generates the polling messages.
-The other computers just listen to the receiver output directly or
-through a buffer amplifier. For computers that just listen, the
-+flag2+ option must be set and the +ppsclock+ streams module
-configured on each of them.
-
 This receiver is capable of a comprehensive and large volume of
 statistics and operational data. The specific data collection commands
 and attributes are embedded in the driver source code; however, the
@@ -59,7 +51,7 @@ written as-is to the +clockstats+ file.
 +flag1 {0 | 1}+::
   Not used by this driver.
 +flag2 {0 | 1}+::
-  Set for computers that listen-only.
+  Not used by this driver.
 +flag3 {0 | 1}+::
   Not used by this driver.
 +flag4 {0 | 1}+::
