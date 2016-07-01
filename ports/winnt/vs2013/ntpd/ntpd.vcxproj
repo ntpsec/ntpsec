@@ -302,7 +302,7 @@
     <ClCompile Include="..\..\..\..\ntpd\refclock_leitch.c" />
     <ClCompile Include="..\..\..\..\ntpd\refclock_local.c" />
     <ClCompile Include="..\..\..\..\ntpd\refclock_msfees.c" />
-    <ClCompile Include="..\..\..\..\ntpd\refclock_mx4200.c" />
+    <ClCompile Include="..\..\..\..\ntpd\refclock_magnavox.c" />
     <ClCompile Include="..\..\..\..\ntpd\refclock_neoclock4x.c" />
     <ClCompile Include="..\..\..\..\ntpd\refclock_nmea.c" />
     <ClCompile Include="..\..\..\..\ntpd\refclock_oncore.c" />
