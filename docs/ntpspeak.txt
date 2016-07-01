@@ -28,6 +28,11 @@ association::
   for discovering association partners, creating and maintaining
   associations, and preventing attackers from forming associations.
 
+[[atom]]
+atom::
+  Old name for the PPS driver.  Origin lost in the mists of history,
+  but probably related in some way to cesium atomic clocks.
+
 [[drift]]
 drift::
   In an NTP context, drift refers to the frequency offset of a clock crystal
@@ -100,6 +105,15 @@ holdover::
    <<drift>> in the oscillator, accuracy drops as holdover time (time
    since last signal lock) increases.
 
+[[in-band time]]
+in-band time::
+   GPS-based time sources often deliver two channels of time
+   information. The timestamp delivered as ASCII data over the
+   serial link is called "in-band time" to contrast it with the
+   out-of-band <<PPS>> signal.  Abbreviated IBT. Seldom useful
+   by itself as it tends to have a large random wander from top
+   of second.
+
 [[leap second]]
 leap second::
    Because the earth's rotation varies in irregular ways (gradually
@@ -155,11 +169,19 @@ nonce::
 
 [[parse-driver]]
 parse driver::
-  A refclock link:driver_generic.html[generic] which, uniquely, handles
-  multiple <<time radio>> protocols - two dozen mostly European
-  precision time radios mostly using DCF, the broadcast time from the
-  German national authority. Each clock type is internally represented
-  as a few parse methods and table entries in a table-driven parser.
+  A refclock, now known as link:driver_generic.html[generic], which
+  handles multiple <<time radio>> protocols - two dozen mostly
+  European precision time radios mostly using DCF, the broadcast time
+  from the German national authority. Each clock type is internally
+  represented as a few parse methods and table entries in a
+  table-driven parser. Older documentation used the term "parse
+  driver" interchangeably with "generic driver".
+
+[[popcorn spike]]
+popcorn spike::
+  A packet from a particular peer that has a computed theta more than
+  three standard deviations from the prevous sample.  These are
+  normally treated as random outliers and suppressed.
 
 [[PPS]]
 PPS::
@@ -168,11 +190,10 @@ PPS::
   is often connected to a RS-232 modem control signal pin.
   A PPS signal doesn't tell you which second a pulse corresponds to
   so it must be used with an ancillary signal, typically text over
-  the same RS-232 connector.
+  the same RS-232 connector (see <<in-band time>>).
   The advantage of a PPS signal is improved accuracy.  Most OSes have
   provisions to grab a timestamp at interrupt time.  The API is described
   in RFC-2783.
-
 
 [[PTP]]
 PTP::
