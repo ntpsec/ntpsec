@@ -1371,7 +1371,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\..\..\ntpd\refclock_mx4200.c"
+				RelativePath="..\..\..\ntpd\refclock_magnavox.c"
 				>
 				<FileConfiguration
 					Name="Release|Win32"

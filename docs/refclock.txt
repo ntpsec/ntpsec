@@ -179,7 +179,7 @@ parse driver.
 |link:driver_irig.html[irig]            | D | IRIG Audio Decoder
 |link:driver_chu.html[chu]              | D | Radio CHU Audio Demodulator/Decoder
 |link:driver_generic.html[generic]      | TM| Generic Reference Driver (Parse)
-|link:driver_mx4200.html[mx4200]        | D | Magnavox MX4200 GPS Receiver
+|link:driver_magnavox.html[magnavox]    | D | MX4200 and compatible GPS receivers
 |link:driver_austron.html[austron]      | D | Austron 2200A/2201A GPS Receivers
 |link:driver_arbiter.html[arbiter]      | D | Arbiter 1088A/B GPS Receiver
 |link:driver_acts.html[acts]            | - | NIST/USNO/PTB Modem Time Services
@@ -187,7 +187,7 @@ parse driver.
 |link:driver_pps.html[pps]              | T | PPS Clock Discipline
 |link:driver_hpgps.html[hpgps]          | T | Hewlett Packard GPS Receivers
 |link:driver_shm.html[shm]              | T | Shared Memory Driver
-|link:driver_palisade.html[palisade]    | TM| Trimble Navigation Palisade GPS
+|link:driver_palisade.html[palisade]    | TM| Trimble Palisade/Thunderbolt GPS
 |link:driver_oncore.html[oncore]        | - | Motorola UT Oncore GPS
 |link:driver_jupiter.html[jupiter]      | D | Rockwell Jupiter GPS
 |link:driver_dumbclock.html[dumbclock]  | D | Dumb Clock
