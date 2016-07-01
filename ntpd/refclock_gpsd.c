@@ -145,7 +145,7 @@ typedef unsigned long int json_uint;
 
 /* get operation modes from mode word.
 
- * + SERIAL (default) evaluates only serial time information ('STI') as
+ * + SERIAL (default) evaluates only in-band time ('IBT') as
  *   provided by TPV and TOFF records. TPV evaluation suffers from a
  *   bigger jitter than TOFF, sine it does not contain the receive time
  *   from GPSD and therefore the receive time of NTPD must be
@@ -162,18 +162,18 @@ typedef unsigned long int json_uint;
  *   feeding samples when GPSD says that the time information is
  *   effectively unreliable.
  *
- * + STRICT means only feed clock samples when a valid STI/PPS pair is
- *   available. Combines the reference time from STI with the pulse time
+ * + STRICT means only feed clock samples when a valid IBT/PPS pair is
+ *   available. Combines the reference time from IBT with the pulse time
  *   from PPS. Masks the serial data jitter as long PPS is available,
  *   but can rapidly deteriorate once PPS drops out.
  *
- * + AUTO tries to use STI/PPS pairs if available for some time, and if
- *   this fails for too long switches back to STI only until the PPS
+ * + AUTO tries to use IBT/PPS pairs if available for some time, and if
+ *   this fails for too long switches back to IBT only until the PPS
  *   signal becomes available again. See the HTML docs for this driver
  *   about the gotchas and why this is not the default.
  */
 #define MODE_OP_MASK   0x03
-#define MODE_OP_STI    0
+#define MODE_OP_IBT    0
 #define MODE_OP_STRICT 1
 #define MODE_OP_AUTO   2
 #define MODE_OP_MAXVAL 2
@@ -1031,9 +1031,9 @@ eval_auto(
 	if (!up->fl_sti)
 		return;
 
-	/* check how to handle STI+PPS: Can PPS be used to augment STI
+	/* check how to handle IBT+PPS: Can PPS be used to augment IBT
 	 * (or vice versae), do we drop the sample because there is a
-	 * temporary missing PPS signal, or do we feed on STI time
+	 * temporary missing PPS signal, or do we feed on IBT time
 	 * stamps alone?
 	 *
 	 * Do a counter/threshold dance to decide how to proceed.
@@ -1782,9 +1782,9 @@ gpsd_parse(
 		eval_pps_secondary(
 			up->pps_peer, up->pps_peer->procptr, up);
 
-	/* check PPS vs. STI receive times:
-	 * If STI is before PPS, then clearly the STI is too old. If PPS
-	 * is before STI by more than one second, then PPS is too old.
+	/* check PPS vs. IBT receive times:
+	 * If IBT is before PPS, then clearly the IBT is too old. If PPS
+	 * is before IBT by more than one second, then PPS is too old.
 	 * Weed out stale time stamps & flags.
 	 */
 	if (up->fl_pps && up->fl_sti) {
@@ -1800,7 +1800,7 @@ gpsd_parse(
 	/* dispatch to the mode-dependent processing functions */
 	switch (up->mode) {
 	default:
-	case MODE_OP_STI:
+	case MODE_OP_IBT:
 		eval_serial(peer, pp, up);
 		break;
 
