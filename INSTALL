@@ -63,7 +63,8 @@ sys/timepps.h::
 asciidoc, a2x::
    You will need asciidoc to make HTML and a2x to make manual pages from the
    documentation masters.  Only required if you configured with --enable-doc.
-   Fedora: asciidoc
+   Note, you need asciidoc 8.6.0 at minimum.
+   Fedora: asciidoc  (Stock CentOS/RHEL has only 8.4.5, you must upgrade)
    Debian: asciidoc
 
 The OS X build has been tested in this environment:
