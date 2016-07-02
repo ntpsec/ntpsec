@@ -13,6 +13,7 @@
 #include "utilities.h"
 #include "log.h"
 #include "libntp.h"
+#include "ntp_intres.h"
 
 bool shutting_down;
 bool time_derived;
