@@ -941,6 +941,22 @@ ntpdmain(
 	have_interface_option = (!listen_to_virtual_ips || explicit_interface);
 	intercept_getconfig(explicit_config);
 
+	/*
+	 * ntpd's working set is never going to be larege relative to memory
+	 * availability on modern machines. Do what chrony does and indulge it;
+	 * we get some latency improvement that way.
+	 */
+	{
+	    struct rlimit rlim;
+	    rlim.rlim_max = rlim.rlim_cur = RLIM_INFINITY;
+	    if (setrlimit(RLIMIT_MEMLOCK, &rlim) < 0)
+		msyslog(LOG_WARNING, "setrlimit() failed: not locking into RAM");
+	    else if (mlockall(MCL_CURRENT|MCL_FUTURE) < 0)
+		msyslog(LOG_WARNING, "mlockall() failed: not locking into RAM");
+	    else
+		msyslog(LOG_INFO, "successfully locked into RAM");
+	}
+
 	loop_config(LOOP_DRIFTINIT, 0);
 	report_event(EVNT_SYSRESTART, NULL, NULL);
 	initializing = false;
