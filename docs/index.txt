@@ -77,7 +77,8 @@ We retain, however, almost full compatibility and interoperation with
 NTP Classic.  The qualification "almost" is required because we do not
 support the Autokey (RFC5906) public-key encryption scheme. It had
 interoperability and exploitable vulnerability issues too severe to
-be patched.
+be patched.  We are participating in an IETF effort to develop better
+security features.
 
 This project began as an effort to address serious security issues
 with NTP Classic, and we intend to keep a particularly strong focus on
@@ -106,6 +107,9 @@ few will be user-visible.
   state have been removed for security reasons.  These include the
   saveconfig command in ntpq, the --saveconfigquit option of ntpd, and
   the implementation of related config declarations in ntp.conf.
+
+* The code has been systematically hardened, with with unsafe string
+  copy and formatting functions replaced by safe (bounded) ones.
 
 * In toto, around 60% of the NTP Classic code has been outright
   removed, with less than 5% new code added. This is a dramatic
@@ -168,7 +172,9 @@ few will be user-visible.
 {project-shortname} supports all operating systems conforming to
 POSIX.1-2001 and ISO/IEC 9899:1999 (aka C99).  Primary platforms
 include Linux and the *BSD family; any reasonably modern proprietary
-Unix will also serve
+Unix will also serve.  The OS must have either a Linux-like
+adjtimex(2) call or a BSD-like pair of ntp_gettime(2)/ntp_adjtime(2)
+calls.
 
 If you have a requirement for time service on an OS we don't support,
 and its API is reasonably close to our POSIX/C99 conformance baseline,
