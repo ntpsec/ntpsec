@@ -288,6 +288,7 @@ def cmd_configure(ctx, config):
 		('EVP_MD_do_all_sorted', ["openssl/evp.h"], "CRYPTO"),
 		('getclock', ["sys/timers.h"]),
 		('getpassphrase', ["stdlib.h"]),		# Sun systems
+		('getrusage', ["sys/time.h", "sys/resource.h"]),
 		('MD5Init', ["md5.h"], "CRYPTO"),
 		('ntp_adjtime', ["sys/time.h", "sys/timex.h"]),		# BSD
 		('ntp_gettime', ["sys/time.h", "sys/timex.h"]),		# BSD

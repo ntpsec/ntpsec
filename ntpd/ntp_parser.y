@@ -239,6 +239,7 @@
 %token	<Integer>	T_Unit
 %token	<Integer>	T_Unconfig
 %token	<Integer>	T_Unpeer
+%token	<Integer>	T_Usestats
 %token	<Integer>	T_Version
 %token	<Integer>	T_WanderThreshold	/* Not a token */
 %token	<Integer>	T_Week
@@ -684,8 +685,9 @@ stat
 	|	T_Peerstats
 	|	T_Rawstats
 	|	T_Sysstats
-	|	T_Timingstats
 	|	T_Protostats
+	|	T_Timingstats
+	|	T_Usestats
 	;
 
 filegen_option_list

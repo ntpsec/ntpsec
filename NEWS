@@ -8,6 +8,9 @@ on user-visible changes.
 
 == Repository head ==
 
+usestats has been added to the statistics collection to record
+system resource usage statistics.
+
 A new, simpler configuration syntax for refclocks has been
 implemented.  Configuration examples in the new syntax have been added
 to each driver page.
