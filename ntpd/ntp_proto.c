@@ -123,7 +123,7 @@ uint8_t	sys_ttl[MAX_TTL];	/* ttl mapping vector */
 /*
  * Statistics counters - first the good, then the bad
  */
-u_long	sys_stattime;		/* elapsed time */
+u_long	sys_stattime;		/* elapsed time since reset */
 u_long	sys_received;		/* packets received */
 u_long	sys_processed;		/* packets for this host */
 u_long	sys_newversion;		/* current version */
@@ -134,6 +134,7 @@ u_long	sys_badauth;		/* bad authentication */
 u_long	sys_declined;		/* declined */
 u_long	sys_limitrejected;	/* rate exceeded */
 u_long	sys_kodsent;		/* KoD sent */
+u_long	use_stattime;		/* elapsed time since reset */
 
 static	double	root_distance	(struct peer *);
 static	void	clock_combine	(peer_select *, int, int);
@@ -3421,6 +3422,7 @@ init_proto(const bool verbose)
 	sys_stattime = current_time;
 	orphwait = current_time + sys_orphwait;
 	proto_clr_stats();
+	use_stattime = current_time;
 	for (i = 0; i < MAX_TTL; i++) {
 		sys_ttl[i] = (uint8_t)((i * 256) / MAX_TTL);
 		sys_ttlmax = i;

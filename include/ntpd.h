@@ -454,6 +454,8 @@ extern u_long	sys_badauth;		/* bad authentication */
 extern u_long	sys_declined;		/* declined */
 extern u_long	sys_limitrejected;	/* rate exceeded */
 extern u_long	sys_kodsent;		/* KoD sent */
+extern u_long	use_stattime;		/* time since reset */
+
 
 /* ntp_restrict.c */
 extern restrict_u *	restrictlist4;	/* IPv4 restriction list */

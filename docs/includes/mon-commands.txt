@@ -199,6 +199,41 @@ The first two fields show the date (Modified Julian Day) and time
 show the statistics counter values accumulated since the last
 generated line.
 
+  +usestats+;;
+    Enables recording of {ntpd} resource usage statistics.
+    Each hour a line of the following form is appended to the file
+    generation set named _usestats_:
++
+-----------------------------------------------------------
+57570 83399.541 3600 0.902 1.451 164 0 0 0 2328 64226 1 0 4308
+-----------------------------------------------------------
++
+[width="100%",cols="<34%,<33%,<33%",]
+|==================================================
+|Item       |Units    |Description
+|+57570+    |MJD      |date
+|+83399.541+|s        |time past midnight
+|+3600+     |s        |time since reset
+|+0.902+    |s        |ru_utime: CPU seconds - user mode
+|+1.451+    |s        |ru_stime: CPU seconds - system
+|+164+      |#        |ru_minflt: page faults - reclaim/soft (no I/O)
+|+0+        |#        |ru_majflt: page faults - I/O
+|+0+        |#        |ru_nswap: process swapped out
+|+0+        |#        |ru_inblock: file blocks in
+|+2328+     |#        |ru_oublock: file blocks out
+|+64226+    |#        |ru_nvcsw: context switches, wait
+|+1+        |#        |ru_nivcsw: context switches, prempts
+|+0+        |#        |ru_nsignals: signals
+|+4308+     |#        |ru_maxrss: resident set size, kilobytes
+|==================================================
++
+The first two fields show the date (Modified Julian Day) and time
+(seconds and fraction past UTC midnight).  The ru_ tags are the
+names from the rusage struct.  See +man getrusage+ for details.
+(The NetBSD and FreeBSD man pages have more details.)
+The maxrss column is the high water mark since the process was started.
+The remaining fields show the values used since the last report.
+
   +timingstats+;;
    (Only available when the daemon is compiled with process time
    debugging support (--enable-debug-timing - costs performance). Record
