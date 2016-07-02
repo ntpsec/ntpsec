@@ -48,9 +48,9 @@ of _GPSD_!) Running without TOFF objects has a negative impact on the
 jitter and offset of the serial timing information; if possible, a
 version of _GPSD_ with support for TOFF objects should be used.
 
-The acronym [underline]#STI# is used here as a synonym for _serial
-time information_ from the data channel of the receiver, no matter
-what objects were used to obtain it.
+The acronym [underline]#IBT# is used here as a synonym for "in-band
+time" from the data channel of the receiver, no matter what objects
+were used to obtain it.
 
 == Naming a Device ==
 
@@ -83,10 +83,10 @@ A few operation modes can be selected with the mode word.
 |===========================================================================
 3+|The Mode Word
 |Bits     |Value |Description
-.4+<.>|0..1  |  0   |STI (serial time information) only operation. This mode is affected by the timing
+.4+<.>|0..1  |  0   |IBT only operation. This mode is affected by the timing
 stability of whatever protocol is used between the GPS  and GPSD
 	
-Running on STI only is not recommended in general. Possible use cases include:
+Running on IBT only is not recommended in general. Possible use cases include:
 
 * The receiver does not provide a PPS signal.
 * The receiver _does_ provide a PPS signal and the secondary PPS unit is used.
@@ -94,8 +94,8 @@ Running on STI only is not recommended in general. Possible use cases include:
 * You have other time sources available and want to establish a useful
   fudge value for +time2+.
          | 1    |Strict operation. This mode needs a valid PPS and a valid
-STI to combine the absolute time from the STI with the time stamp from
-the PPS record. Does not feed clock samples if no valid PPS+STI pair is available.
+IBT to combine the absolute time from the IBT with the time stamp from
+the PPS record. Does not feed clock samples if no valid PPS+IBT pair is available.
 
 This type of operation results in an ordinary clock with a very low
 jitter as long as the PPS data is available, but the clock fails once
@@ -104,15 +104,15 @@ a PPS signal most of the time but have an unstable serial timing that
 cannot be fudge-compensated.
 
         | 2       |Automatic mode. Tries to operate in strict mode unless it fails to process valid samples for some time, currently 120s. Then
-it reverts to STI-only operation until the PPS is stable again for
+it reverts to IBT-only operation until the PPS is stable again for
 40s, when strict mode is engaged again.
 
 *Important Notice: This is an experimental feature!*
 
-Switching between strict and STI-only mode will cause changes in offset
-and jitter. Use this mode only if STI-only works fairly well with your
+Switching between strict and IBT-only mode will cause changes in offset
+and jitter. Use this mode only if IBT-only works fairly well with your
 setup, or if you expect longer dropouts of the PPS signal and prefer to
-use STI alone over not getting synchronised at all.
+use IBT alone over not getting synchronised at all.
         | 3       |'(reserved for future extension, do not use)'
 | 2..31 2+|'(reserved for future extension, do not use)'
 |===========================================================================
@@ -219,7 +219,7 @@ since the last poll.
 +flag4 {0 | 1}+::
   _[Primary Unit]_ If set, write a clock stats line on every poll cycle.
 +mode+::
-  Control STI and strict operating modes.
+  Control IBT and strict operating modes.
 
 [[fn1]]link:#fn1bl[^1^)]Data transmission and decoding is done only once by the
 primary unit. The decoded data is then processed independently in both

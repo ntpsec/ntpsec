@@ -47,11 +47,11 @@ refclock_map = {
 		"file":		"generic"
 	},
 
-       "mx4200": {
-		"descr":	"Magnavox MX4200 GPS Receiver",
-		"define":	"CLOCK_MX4200",
+       "magnavox": {
+		"descr":	"Magnavox MX4200 and related GPS receivers",
+		"define":	"CLOCK_MAGNAVOX",
 		"require":	["ppsapi"],
-		"file":		"mx4200"
+		"file":		"magnavox"
 	},
 
 	"austron": {

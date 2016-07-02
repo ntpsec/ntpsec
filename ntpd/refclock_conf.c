@@ -42,16 +42,16 @@ extern	struct refclock	refclock_parse;
 #define	refclock_parse	refclock_none
 #endif
 
-#if defined(CLOCK_MX4200) && defined(HAVE_PPSAPI)
-extern	struct refclock	refclock_mx4200;
+#if defined(CLOCK_MAGNAVOX) && defined(HAVE_PPSAPI)
+extern	struct refclock	refclock_magnavox;
 #else
-#define	refclock_mx4200	refclock_none
+#define	refclock_magnavox	refclock_none
 #endif
 
 #ifdef CLOCK_AUSTRON
-extern	struct refclock	refclock_as2201;
+extern	struct refclock	refclock_austron;
 #else
-#define	refclock_as2201	refclock_none
+#define	refclock_austron	refclock_none
 #endif
 
 #ifdef CLOCK_ARBITER
@@ -151,9 +151,12 @@ extern struct refclock refclock_gpsdjson;
 #endif
 
 /*
- * The symbols in the comments are no longer defined, except for REFCLK_ATOM_PPS.
- * If you compact or reorder this table, legacy ntpq instances that think they
- * can deduce driver types from address fields will get them wrong.
+ * This is the only place in the code that knows about the mapping between
+ * old-style numeric driver types and the drivers.
+ *
+ * The symbols in the comments are no longer defined. If you compact or
+ * reorder this table, legacy ntpq instances that think they can
+ * deduce driver types from address fields will get them wrong.
  */
 struct refclock * const refclock_conf[] = {
 	&refclock_none,		/* 0 REFCLK_NONE */
@@ -165,8 +168,8 @@ struct refclock * const refclock_conf[] = {
 	&refclock_irig,		/* 6 REFCLK_IRIG_AUDIO */
 	&refclock_chu,		/* 7 REFCLK_CHU_AUDIO */
 	&refclock_parse,	/* 8 REFCLK_GENERIC */
-	&refclock_mx4200,	/* 9 REFCLK_GPS_MX4200 */
-	&refclock_as2201,	/* 10 REFCLK_GPS_AS2201 */
+	&refclock_magnavox,	/* 9 REFCLK_GPS_MX4200 */
+	&refclock_austron,	/* 10 REFCLK_GPS_AS2201 */
 	&refclock_arbiter,	/* 11 REFCLK_GPS_ARBITER */
 	&refclock_none,		/* 12 was: REFCLK_IRIG_TPRO */
 	&refclock_none,		/* 13 was: REFCLK_ATOM_LEITCH */

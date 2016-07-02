@@ -770,7 +770,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\..\ntpd\refclock_as2201.c"
+				RelativePath="..\..\..\..\ntpd\refclock_austron.c"
 				>
 			</File>
 			<File
@@ -838,7 +838,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\..\ntpd\refclock_mx4200.c"
+				RelativePath="..\..\..\..\ntpd\refclock_magnavox.c"
 				>
 			</File>
 			<File
