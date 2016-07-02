@@ -1,6 +1,5 @@
 /*
- * refclock_as2201 - clock driver for the Austron 2201A GPS
- *	Timing Receiver
+ * refclock_austron - clock driver for the Austron 2201A GPS Timing Receiver
  */
 
 #include <config.h>
@@ -69,7 +68,7 @@ struct as2201unit {
 };
 
 /*
- * Radio commands to extract statitistics
+ * Radio commands to extract statistics
  *
  * A command consists of an ASCII string terminated by a <cr> (\r). The
  * command list consist of a sequence of commands terminated by a null
@@ -124,7 +123,7 @@ static	void	as2201_poll	(int, struct peer *);
 /*
  * Transfer vector
  */
-struct	refclock refclock_as2201 = {
+struct	refclock refclock_austron = {
 	NAME,			/* basename of driver */
 	as2201_start,		/* start up driver */
 	as2201_shutdown,	/* shut down driver */
@@ -253,8 +252,6 @@ as2201_receive(
 	 * the timecode; in the later case, save the number of lines and
 	 * quietly return.
 	 */
-	if (pp->sloppyclockflag & CLK_FLAG2)
-		pp->lastrec = trtmp;
 	if (up->linect > 0) {
 		up->linect--;
 		if ((int)(up->lastptr - up->stats + pp->lencode) > SMAX - 2)
@@ -368,8 +365,7 @@ as2201_poll(
 		refclock_report(peer, CEVNT_FAULT);
 	} else {
 		pp->polls++;
-		if (!(pp->sloppyclockflag & CLK_FLAG2))
-			get_systime(&pp->lastrec);
+		get_systime(&pp->lastrec);
 	}
         if (pp->coderecv == pp->codeproc) {
                 refclock_report(peer, CEVNT_TIMEOUT);

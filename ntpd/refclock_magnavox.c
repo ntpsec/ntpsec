@@ -24,8 +24,6 @@
 #include <stdio.h>
 #include <ctype.h>
 
-#include "mx4200.h"
-
 #ifdef HAVE_PPSAPI
 # include "ppsapi_timepps.h"
 #endif /* HAVE_PPSAPI */
@@ -54,8 +52,8 @@
  */
 #define	PRECISION	(-18)		/* precision assumed (about 4 us) */
 #define	REFID		"GPS\0"		/* reference id */
-#define	NAME		"MX4200"	/* shortname */
-#define	DESCRIPTION	"Magnavox MX4200 GPS Receiver" /* who we are */
+#define	NAME		"MAGNAVOX"	/* shortname */
+#define	DESCRIPTION	"Magnavox MX4200 and compatible GPS receivers" /* who we are */
 #define	DEFFUDGETIME	0		/* default fudge time (ms) */
 
 #define	SLEEPTIME	32	/* seconds to wait for reconfig to complete */
@@ -66,6 +64,46 @@
 #define INTERVAL	1	/* Interval between position measurements (s) */
 #define AVGING_TIME	24	/* Number of hours to average */
 #define NOT_INITIALIZED	-9999.	/* initial pivot longitude */
+
+/* records transmitted from extern CDU to MX 4200 */
+#define PMVXG_S_INITMODEA	0	/* initialization/mode part A */
+#define PMVXG_S_INITMODEB	1	/* initialization/mode part B*/
+#define PMVXG_S_SATHEALTH	2	/* satellite health control */
+#define PMVXG_S_DIFFNAV		3	/* differential navigation control */
+#define PMVXG_S_PORTCONF	7	/* control port configuration */
+#define PMVXG_S_GETSELFTEST	13	/* self test (request results) */
+#define PMVXG_S_RTCMCONF	16	/* RTCM port configuration */
+#define PMVXG_S_PASSTHRU	17	/* equipment port pass-thru config */
+#define PMVXG_S_RESTART		18	/* restart control */
+#define PMVXG_S_OSCPARAM	19	/* oscillator parameter */
+#define PMVXG_S_DOSELFTEST	20	/* self test (activate a test) */
+#define PMVXG_S_TRECOVCONF	23	/* time recovery configuration */
+#define PMVXG_S_RAWDATASEL	24	/* raw data port data selection */
+#define PMVXG_S_EQUIPCONF	26	/* equipment port configuration */
+#define PMVXG_S_RAWDATACONF	27	/* raw data port configuration */
+
+/* records transmitted from MX 4200 to external CDU */
+#define PMVXG_D_STATUS		0	/* status */
+#define PMVXG_D_POSITION	1	/* position */
+#define PMVXG_D_OPDOPS		3	/* (optimum) DOPs */
+#define PMVXG_D_MODEDATA	4	/* mode data */
+#define PMVXG_D_SATPRED		5	/* satellite predictions */
+#define PMVXG_D_SATHEALTH	6	/* satellite health status */
+#define PMVXG_D_UNRECOG		7	/* unrecognized request response */
+#define PMVXG_D_SIGSTRLOC	8	/* sig strength & location (sats 1-4) */
+#define PMVXG_D_SPEEDHEAD	11	/* speed/heading data */
+#define PMVXG_D_OSELFTEST	12	/* (old) self-test results */
+#define PMVXG_D_SIGSTRLOC2	18	/* sig strength & location (sats 5-8) */
+#define PMVXG_D_OSCPARAM	19	/* oscillator parameter */
+#define PMVXG_D_SELFTEST	20	/* self test results */
+#define PMVXG_D_PHV		21	/* position, height & velocity */
+#define PMVXG_D_DOPS		22	/* DOPs */
+#define PMVXG_D_SOFTCONF	30	/* software configuration */
+#define PMVXG_D_DIFFGPSMODE	503	/* differential gps moding */
+#define PMVXG_D_TRECOVUSEAGE	523	/* time recovery usage */
+#define PMVXG_D_RAWDATAOUT	524	/* raw data port data output */
+#define PMVXG_D_TRECOVRESULT	828	/* time recovery results */
+#define PMVXG_D_TRECOVOUT	830	/* time recovery output message */
 
 /*
  * MX4200 unit control structure.
@@ -80,9 +118,9 @@ struct mx4200unit {
 	double central_meridian;	/* central meridian */
 	double N_fixes;			/* Number of position measurements */
 	int    last_leap;		/* leap second warning */
-	u_int  moving;			/* mobile platform? */
+	bool   moving;			/* mobile platform? */
 	u_long sloppyclockflag;		/* driver option flags */
-	u_int  known;			/* position known yet? */
+	bool   known;			/* position known yet? */
 	u_long clamp_time;		/* when to stop postion averaging */
 	u_long log_time;		/* when to print receiver status */
 	pps_handle_t	pps_h;
@@ -117,7 +155,7 @@ static	bool	mx4200_pps	(struct peer *);
 /*
  * Transfer vector
  */
-struct	refclock refclock_mx4200 = {
+struct	refclock refclock_magnavox = {
 	NAME,			/* basename of driver */
 	mx4200_start,		/* start up driver */
 	mx4200_shutdown,	/* shut down driver */
@@ -232,14 +270,14 @@ mx4200_config(
 	 */
 	up->sloppyclockflag = pp->sloppyclockflag;
 	if (pp->sloppyclockflag & CLK_FLAG2) {
-		up->moving   = 1;	/* Receiver on mobile platform */
+		up->moving   = true;	/* Receiver on mobile platform */
 		msyslog(LOG_DEBUG, "mx4200_config: mobile platform");
 	} else {
-		up->moving   = 0;	/* Static Installation */
+		up->moving   = false;	/* Static Installation */
 	}
 	up->pollcnt     	= 2;
 	up->polled      	= 0;
-	up->known       	= 0;
+	up->known       	= false;
 	up->avg_lat     	= 0.0;
 	up->avg_lon     	= 0.0;
 	up->avg_alt     	= 0.0;
@@ -355,9 +393,9 @@ mx4200_config(
 	 */
 
 	if (pp->sloppyclockflag & CLK_FLAG2)
-		up->moving   = 1;	/* Receiver on mobile platform */
+		up->moving   = true;	/* Receiver on mobile platform */
 	else
-		up->moving   = 0;	/* Static Installation */
+		up->moving   = false;	/* Static Installation */
 
 	up->pollcnt  = 2;
 	if (up->moving) {
@@ -742,7 +780,7 @@ mx4200_receive(
 			 * if position is well known.
 			 */
 			if (current_time > up->clamp_time) {
-				up->known++;
+			    up->known = true;
 				mx4200_debug(peer, "mx4200_receive: reconfiguring!\n");
 				mx4200_ref(peer);
 			}

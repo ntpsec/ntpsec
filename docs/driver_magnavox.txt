@@ -1,9 +1,9 @@
-= Magnavox MX4200 GPS Receiver =
+= Magnavox MX4200 and compatible GPS receivers =
 
 == Synopsis ==
 
 ["verse",subs="normal"]
-Name: mx4200
+Name: magnavox
 Reference ID: GPS
 Serial Port: /dev/gps__u__; 4800bps 8N1
 Features: +ppsclock+ (required)
@@ -17,9 +17,9 @@ requirement for it, please make this known to us.
 == Description ==
 
 This driver supports the Magnavox MX4200 Navigation Receiver adapted to
-precision timing applications. This driver supports all compatible
+precision timing applications. It also supports all compatible
 receivers such as the 6-channel MX4200, MX4200D, and the 12-channel
-MX9212, MX9012R, MX9112.
+MX9212, MX9012R, abd MX9112.
 
 image:pic/9400n.jpg["MX9400N",float="left",caption="Leica MX9400N Navigator"]
 https://web.archive.org/web/19971014210945/http://www.leica-gps.com/[Leica
@@ -77,7 +77,7 @@ Format].
 == Configuration Example ==
 
 ----------------------------------------------------------------------------
-refclock mx4200
+refclock magnavox
 ----------------------------------------------------------------------------
 
 == Additional Information ==
