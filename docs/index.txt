@@ -108,7 +108,7 @@ few will be user-visible.
   saveconfig command in ntpq, the --saveconfigquit option of ntpd, and
   the implementation of related config declarations in ntp.conf.
 
-* The code has been systematically hardened, with with unsafe string
+* The code has been systematically hardened, with unsafe string
   copy and formatting functions replaced by safe (bounded) ones.
 
 * In toto, around 60% of the NTP Classic code has been outright
