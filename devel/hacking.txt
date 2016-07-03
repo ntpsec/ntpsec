@@ -391,7 +391,7 @@ There are two kinds of merge bubbles in git commit graphs. The
 necessary kind happens because branches have genuinely diverged enough
 that a merge by hand is required - common files have been touched in
 incompatible ways. In the unnecessary kind, the patches on either side
-of the bubble commute cleanly, but the developer on one side or the 
+of the bubble commute cleanly, but the developer on one side or the other
 forgot to rebase so his commit would be a fast-forward.
 
 We strongly dislike unnecessary merge bubbles.  They make the
@@ -402,7 +402,7 @@ from new ones because a long-lived branch was rebased.
 
 To avoid merge bubbles, git pull --rebase before pushing.  This will
 pull all pending commits from the repo, then attempt to rebase your
-locak commits on the new tip.  You may find it helpful to set
+local commits on the new tip.  You may find it helpful to set
 "rebase = true" in your .git/config, so it looks like this:
 
 -------------------------------------------------------------
