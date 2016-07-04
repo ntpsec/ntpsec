@@ -756,6 +756,18 @@ void intercept_sendpkt(const char *legend,
     }
 }
 
+ssize_t intercept_recvfrom(int sockfd, void *buf, size_t len, int flags,
+                        struct sockaddr *src_addr, socklen_t *addrlen)
+{
+    return recvfrom(sockfd, buf, len, flags, src_addr, addrlen);
+}
+
+SOCKET intercept_open_socket(sockaddr_u *addr,
+			     bool bcast, bool turn_off_reuse, endpt *interface)
+{
+    return open_socket(addr, bcast, turn_off_reuse, interface);
+}
+
 void intercept_replay(void)
 {
     printf("# entering replay loop at line %d\n", lineno);
