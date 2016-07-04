@@ -3561,7 +3561,7 @@ read_network_packet(
 	ts = fetch_timestamp(rb, &msghdr, ts);
 #endif
 	rb->recv_time = ts;
-	rb->receiver = intercept_receive;
+	rb->receiver = receive;
 #ifdef REFCLOCK
 	rb->network_packet = true;
 #endif /* REFCLOCK */

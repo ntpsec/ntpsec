@@ -694,19 +694,6 @@ static char *lfpdump(l_fp *fp)
     return buf;
 }
 
-static void lfpload(char *str, l_fp *fp)
-{
-    uint64_t	np;
-
-    if (sscanf(str, "%" PRIu64, &np) != 1) {
-	fprintf(stderr, "ntpd: bad fp format at line %d\n", lineno);
-	exit(1);
-    }
-    
-    (fp)->l_uf = (np) & 0xFFFFFFFF;					\
-    (fp)->l_ui = (((np) >> FRACTION_PREC) & 0xFFFFFFFF);		\
-}
-
 static void packet_dump(char *buf, size_t buflen,
 			sockaddr_u *dest, struct pkt *pkt, size_t len)
 {
@@ -735,67 +722,6 @@ static void packet_dump(char *buf, size_t buflen,
 	}
 }
 
-static size_t packet_parse(char *pktbuf, char *macbuf, struct pkt *pkt)
-{
-    char refbuf[32], orgbuf[32], recbuf[32], xmtbuf[32];
-    int fc, li_vn_mode = 0, stratum = 0, ppoll = 0, precision = 0;
-    size_t pktlen;
-
-    if ((fc = sscanf(pktbuf, "%d:%d:%d:%d:%u:%u:%u:%[^:]:%[^:]:%[^:]:%[^:]",
-		     &li_vn_mode, &stratum,
-		     &ppoll, &precision,
-		     &pkt->rootdelay, &pkt->rootdisp,
-		     &pkt->refid,
-		     refbuf, orgbuf, recbuf, xmtbuf)) != 11)
-    {
-	fprintf(stderr, "ntpd: %d fields in malformed packet dump at line %d\n",
-		fc, lineno);
-	exit(1);
-    }
-    /* extra transfers required because the struct members are int8_t */
-    pkt->li_vn_mode = li_vn_mode;
-    pkt->stratum = stratum;
-    pkt->ppoll = ppoll;
-    pkt->precision = precision;
-    lfpload(refbuf, &pkt->reftime);
-    lfpload(orgbuf, &pkt->org);
-    lfpload(recbuf, &pkt->rec);
-    lfpload(xmtbuf, &pkt->xmt);
-
-    pktlen = LEN_PKT_NOMAC;
-    memset(pkt->exten, '\0', sizeof(pkt->exten));
-    if (strcmp(macbuf, "nomac") != 0) {
-	size_t i;
-	for (i = 0; i < strlen(macbuf)/2; i++) {
-	    int hexval;
-	    if (sscanf(macbuf + 2*i, "%02x", &hexval) != 1) {
-		fprintf(stderr, "ntpd: bad hexval format at line %d\n", lineno);
-		exit(1);
-	    }
-	    pkt->exten[i] = hexval & 0xff;
-	    ++pktlen;
-	}
-    }
-    return pktlen;
-}
-
-static void recvbuf_dump(char *buf, size_t buflen, struct recvbuf *rbufp)
-{
-    char pkt_dump[BUFSIZ];
-
-    packet_dump(pkt_dump, sizeof(pkt_dump),
-		&rbufp->recv_srcadr, &rbufp->recv_pkt, rbufp->recv_length);
-    /*
-     * Order is: cast flags, receipt time, source address, packet,
-     * MAC.  Cast flags are only kept because they change the ntpq
-     * display, they have no implications for the protocol machine.
-     * We don't dump srcadr because only the parse clock uses that.
-     */
-    snprintf(buf, buflen,
-	     "receive %0x %s %s\n",
-	     rbufp->cast_flags, lfpdump(&rbufp->recv_time), pkt_dump);
-}
-
 void intercept_sendpkt(const char *legend,
 		  sockaddr_u *dest, struct interface *ep, int ttl,
 		  void *pkt, int len)
@@ -804,8 +730,7 @@ void intercept_sendpkt(const char *legend,
 
     /* FIXME: packet_dump expects a well formed struct pkt, but this
        function is also called from ntp_control.c with other data.
-       Until packet_dump is rewritten to use parse_packet(),
-       to avoid a possible out-of-bounds read just shortcut to calling
+       To avoid a possible out-of-bounds read just shortcut to calling
        sendpkt when len < 48. */
     if(len < (int)LEN_PKT_NOMAC) {
       sendpkt(dest, ep, ttl, pkt, len);
@@ -831,24 +756,6 @@ void intercept_sendpkt(const char *legend,
     }
 }
 
-void intercept_receive(struct recvbuf *rbufp)
-{
-    /* never called in replay mode */
-    if (mode == capture) {
-	char pkt_dump[BUFSIZ];
-
-	recvbuf_dump(pkt_dump, sizeof(pkt_dump), rbufp);
-	fputs(pkt_dump, stdout);
-    }
-
-    /*
-     * Processing has to come after the dump so that if a send or time adjustment
-     * is called during replay the corresponding event in the log will be found
-     * where it should be after the receive.
-     */
-    receive(rbufp);
-}
-
 void intercept_replay(void)
 {
     printf("# entering replay loop at line %d\n", lineno);
@@ -863,46 +770,6 @@ void intercept_replay(void)
 	     * so skip it.
 	     */
 	    continue;
-	else if (strncmp(linebuf, "receive ", 8) == 0)
-	{
-	    struct recvbuf rbuf;
-	    struct pkt *pkt;
-	    char recvbuf[BUFSIZ], srcbuf[BUFSIZ], pktbuf[BUFSIZ], macbuf[BUFSIZ];
-
-	    if (sscanf(linebuf, "receive %x %s %s %s %s",
-		       &rbuf.cast_flags, recvbuf, srcbuf, pktbuf, macbuf) != 5)
-	    {
-		fprintf(stderr, "ntpd: bad receive format at line %d\n", lineno);
-		exit(1);
-	    }
-
-	    lfpload(recvbuf, &rbuf.recv_time);
-	    if (!is_ip_address(srcbuf, AF_UNSPEC, &rbuf.recv_srcadr)) {
-		fprintf(stderr, "ntpd: invalid IP address in receive at line %d\n", lineno);
-		exit(1);
-	    }
-
-	    pkt = &rbuf.recv_pkt;
-	    rbuf.recv_length = packet_parse(pktbuf, macbuf, pkt);
-
-	    /*
-	     * If the packet doesn't dump identically to how it came in,
-	     * something is wrong with our packet parsing.
-	     */
-	    recvbuf_dump(recvbuf, sizeof(recvbuf), &rbuf);
-	    if (strcmp(linebuf, recvbuf) != 0)
-	    {
-		fprintf(stderr, "ntpd: round-trip failure at line %d\n", lineno);
-		fprintf(stderr, "old = %s\n", linebuf);
-		fprintf(stderr, "new = %s\n", recvbuf);
-		exit(1);
-	    }
-	    /* defeat the anti-clogging check */
-	    SET_PORT(&rbuf.recv_srcadr, NTP_PORT);
-
-	    /* executing the receive call may pop other things off the queue */
-	    receive(&rbuf);
-	}
 	else
 	{
 	    char errbuf[BUFSIZ], *cp;
