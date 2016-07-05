@@ -421,7 +421,7 @@ receive(
 		return;				/* bogus port */
 	}
 #ifdef REFCLOCK
-	if (is_refclock_packet(rbufp))
+	if (!rbufp->network_packet)
 	    restrict_mask = 0;
 	else
 #endif /* REFCLOCK */
@@ -991,8 +991,9 @@ receive(
 		 * Mobilize a symmetric passive association.
 		 */
 		if ((peer = newpeer(&rbufp->recv_srcadr, NULL,
-		    rbufp->dstadr, MODE_PASSIVE, hisversion, pkt->ppoll,
-				    NTP_MAXDPOLL, 0, MDF_UCAST, 0, skeyid)) == NULL) {
+				    rbufp->dstadr, MODE_PASSIVE, hisversion,
+				    pkt->ppoll, NTP_MAXDPOLL, 0, MDF_UCAST,
+				    0, skeyid)) == NULL) {
 			sys_declined++;
 			return;			/* ignore duplicate */
 		}

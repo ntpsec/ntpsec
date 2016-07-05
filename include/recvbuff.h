@@ -79,14 +79,6 @@ struct recvbuf {
 #endif /* REFCLOCK */
 };
 
-/* true for network packets, false for refclock packets */
-#ifdef REFCLOCK
-#define is_refclock_packet(rbufp)	(!(rbufp)->network_packet)
-#else
-#define is_refclock_packet(rbufp)	false
-#endif /* REFCLOCK */
-
-
 extern	void	init_recvbuff(int);
 
 /* freerecvbuf - make a single recvbuf available for reuse
