@@ -6,7 +6,6 @@
 #define GUARD_NTP_FP_H
 
 #include "ntp_types.h"
-#include <arpa/inet.h>
 
 /*
  * NTP uses two fixed point formats.  The first (l_fp) is the "long"
@@ -41,13 +40,13 @@ typedef struct {
 
 static inline uint64_t lfp_to_uint64(const l_fp *lfp) {
   return
-    (uint64_t)ntohl(lfp->l_ui) << 32 |
-    (uint64_t)ntohl(lfp->l_uf);
+    (uint64_t)lfp->l_ui << 32 |
+    (uint64_t)lfp->l_uf;
 }
 
 static inline void uint64_to_lfp(l_fp *lfp, uint64_t x) {
-  lfp->l_ui = htonl(x >> 32);
-  lfp->l_uf = htonl(x & 0xFFFFFFFFUL);
+  lfp->l_ui = x >> 32;
+  lfp->l_uf = x & 0xFFFFFFFFUL;
 }
 
 /*
