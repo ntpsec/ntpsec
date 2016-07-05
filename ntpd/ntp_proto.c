@@ -525,13 +525,24 @@ handle_procpkt(
 		}
 	} else if(PKT_MODE(pkt->li_vn_mode) == MODE_ACTIVE ||
 		  PKT_MODE(pkt->li_vn_mode) == MODE_PASSIVE) {
-		/* TODO: Symmetric mode needs to be more tolerant of
-		   bogus origin timestamps than client/server mode, and
-		   interleaved mode needs different rules altogether.
-		   Implement appropriate rules here.
+		/* In symmetric modes, even if the origin timestamp is
+		   bogus we still need to be willing to update the aorg
+		   peer variable. Otherwise, a single droppped packet
+		   will result in permanent DoS as the peers continually
+		   reject each other as bogus. Also, to be tolerant of
+		   restarts, we can't enforce outcount-checking.
 		*/
-		sys_declined++;
-		return;
+		if(pkt->org == 0) {
+			uint64_to_lfp(&peer->xmt, pkt->xmt);
+			peer->flash |= BOGON3;
+			peer->bogusorg++;
+			return;
+		} else if(pkt->org != lfp_to_uint64(&peer->aorg)) {
+			uint64_to_lfp(&peer->xmt, pkt->xmt);
+			peer->flash |= BOGON2;
+			peer->bogusorg++;
+			return;
+		}
 	} else {
 		/* This case should be unreachable. */
 		sys_declined++;
