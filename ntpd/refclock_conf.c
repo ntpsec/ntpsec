@@ -2,8 +2,7 @@
  * refclock_conf.c - reference clock configuration
  *
  * This is the only place in the code that knows how to map driver numeric types
- * to driver method tables and their attributes.  There is one other bit of
- * knowledge elsewhere, the #define REFCLK_ATOM_PPS in ntp.h.
+ * to driver method tables and their attributes.
  */
 #include <config.h>
 
@@ -157,6 +156,8 @@ extern struct refclock refclock_gpsdjson;
  * The symbols in the comments are no longer defined. If you compact or
  * reorder this table, legacy ntpq instances that think they can
  * deduce driver types from address fields will get them wrong.
+ * Also the addresses generated into statistics files won't match
+ * what people expect - the type in the third octet will be off.
  */
 struct refclock * const refclock_conf[] = {
 	&refclock_none,		/* 0 REFCLK_NONE */
