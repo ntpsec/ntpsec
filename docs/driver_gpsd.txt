@@ -220,6 +220,8 @@ since the last poll.
   _[Primary Unit]_ If set, write a clock stats line on every poll cycle.
 +mode+::
   Control IBT and strict operating modes.
++mode+::
+  Synonym for subtype, retained for backward compatibility.
 
 [[fn1]]link:#fn1bl[^1^)]Data transmission and decoding is done only once by the
 primary unit. The decoded data is then processed independently in both

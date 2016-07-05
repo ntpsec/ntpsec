@@ -59,7 +59,7 @@ HP-UX 9.10
 This driver will probably work with the 58503B and 59551A if they are
 set up appropriately.
 
-To use an HP Z3801A, specify +mode 1+ on the server config line to setup
+To use an HP Z3801A, specify +subtype 1+ on the server config line to setup
 the right line parameters.
 
 The timekeeping portion of HP's business has been sold to
@@ -85,8 +85,10 @@ http://www.symmetricom.com/[Symmetricom].
    Not used by this driver.
 +flag4 {0 | 1}+::
    Not used by this driver.
-+mode+::
++subtype+::
    Setting mode 1 configures for the HP Z3801A.
++mode+::
+  Synonym for subtype, retained for backward compatibility.
 
 == Configuration Example ==
 
