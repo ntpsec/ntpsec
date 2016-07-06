@@ -942,7 +942,7 @@ ntpdmain(
 	intercept_getconfig(explicit_config);
 
 	/*
-	 * ntpd's working set is never going to be larege relative to memory
+	 * ntpd's working set is never going to be large relative to memory
 	 * availability on modern machines. Do what chrony does and indulge it;
 	 * we get some latency improvement that way.
 	 */

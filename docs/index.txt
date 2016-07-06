@@ -142,7 +142,7 @@ few will be user-visible.
   namespace. Also, +ntp-keygen+ is now +{ntpkeygen}+, +ntp-wait+
   is {ntpwait}, and +update-leap+ is now +{ntpleapfetch}+.
 
-* A new utility, {ntpfrob}, collects several small diagnostic functions
+* A new utility, +{ntpfrob}+, collects several small diagnostic functions
   for reading and tweaking the local clock hardware, including reading
   the clock tick rate, precision, and jitter. Part of it formerly
   traveled as +tickadj+.
