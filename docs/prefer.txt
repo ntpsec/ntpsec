@@ -38,7 +38,7 @@ principles and performance metrics, see the link:stats.html[Performance
 Metrics] page.
 
 Recall the suite of NTP data acquisition and grooming algorithms. These
-algorithms proceed in five phases. Phase one discovers the available
+algorithms proceed in four phases. Phase one discovers the available
 _sources_ and mobilizes an association for each source found. These
 sources can result from explicit configuration, broadcast discovery or
 the pool and manycast autonomous configuration schemes. See the
@@ -50,12 +50,14 @@ those sources showing one or more of the errors summarized on the
 link:select.html[Clock Select Algorithm] page and to determine the
 _truechimers_ from among the candidates, leaving behind the
 _falsetickers_. A server or peer configured with the +true+ option is
-declared a truechimer independent of this algorithm. Phase four uses the
-algorithm described on the link:cluster.html[Clock Cluster Algorithm]
-page to prune the statistical outliers from the truechimers, leaving the
-_survivor list_ as result.
+declared a truechimer independent of this algorithm.
 
-Phase five uses a set of algorithms and mitigation rules to combined the
+Phase three uses the algorithm described on the
+link:cluster.html[Clock Cluster Algorithm] page to prune the
+statistical outliers from the truechimers, leaving the _survivor list_
+as result.
+
+Phase four uses a set of algorithms and mitigation rules to combined the
 survivor statistics and discipline the system clock. The mitigation
 rules select from among the survivors a _system peer_ from which a set
 of system statistics can be inherited and passed along to dependent
