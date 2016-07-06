@@ -223,8 +223,7 @@ pps_timer(
 	 * That's so we can make awesome Allan deviation plots.
 	 */
 	if (pp->sloppyclockflag & CLK_FLAG4) {
-		mprintf_clock_stats(&peer->srcadr, "%.9f",
-			pp->filter[pp->coderecv]);
+		mprintf_clock_stats(peer, "%.9f", pp->filter[pp->coderecv]);
 	}
 }
 
@@ -258,7 +257,7 @@ pps_poll(
 
 	pp->polls++;
 
-	mprintf_clock_stats(&peer->srcadr,
+	mprintf_clock_stats(peer,
 	    "%ld %d %d %d %d",
 	    up->ppsctl.sequence,
 	    up->pcount, up->scount, up->kcount, up->rcount);

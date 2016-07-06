@@ -1120,7 +1120,7 @@ jupiter_debug(
 	 * In the future, we may want to get get more creative...
 	 */
 	mvsnprintf(buffer, sizeof(buffer), fmt, ap);
-	record_clock_stats(&peer->srcadr, buffer);
+	record_clock_stats(peer, buffer);
 #ifdef DEBUG
 	if (debug) {
 		printf("%s: %s\n", function, buffer);

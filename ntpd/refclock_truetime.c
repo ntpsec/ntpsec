@@ -348,7 +348,7 @@ true_receive(
 		   pp->lencode);
 
 	up->pollcnt = 2;
-	record_clock_stats(&peer->srcadr, pp->a_lastcode);
+	record_clock_stats(peer, pp->a_lastcode);
 
 	/*
 	 * We get down to business, check the timecode format and decode

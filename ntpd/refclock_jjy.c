@@ -431,7 +431,7 @@ jjy_start ( int unit, struct peer *peer )
 	jjy_write_clockstats( peer, JJY_CLOCKSTATS_MARK_JJY, sLog ) ;
 
 	/*
-	 * peer->ttl is a subtype number specified by "127.127.40.X mode N" in the ntp.conf
+	 * peer->ttl is a subtype number specified by "refclock jjy subtype N" in the ntp.conf
 	 */
 	switch ( peer->ttl ) {
 	case 0 :
@@ -534,7 +534,7 @@ jjy_shutdown ( int unit, struct peer *peer )
 	}
 
 	snprintf( sLog, sizeof(sLog), "JJY stopped. unit=%d mode=%d", unit, peer->ttl ) ;
-	record_clock_stats( &peer->srcadr, sLog ) ;
+	record_clock_stats( peer, sLog ) ;
 
 }
 
@@ -1037,7 +1037,7 @@ jjy_synctime ( struct peer *peer, struct refclockproc *pp, struct jjyunit *up )
 /*##												##*/
 /*##    The Tristate Ltd. JJY receiver TS-JJY01, TS-JJY02					##*/
 /*##												##*/
-/*##    server  127.127.40.X  subtype 1								##*/
+/*##    refclock jjy unit X subtype 1								##*/
 /*##												##*/
 /*################################################################################################*/
 /*################################################################################################*/
@@ -1368,7 +1368,7 @@ jjy_poll_tristate_jjy01  ( int unit, struct peer *peer )
 /*##												##*/
 /*##    The C-DEX Co. Ltd. JJY receiver JST2000							##*/
 /*##												##*/
-/*##    server  127.127.40.X  subtype 2								##*/
+/*##    refclock jjy unit X subtype 2								##*/
 /*##												##*/
 /*################################################################################################*/
 /*################################################################################################*/
@@ -1531,7 +1531,7 @@ jjy_poll_cdex_jst2000 ( int unit, struct peer *peer )
 /*##												##*/
 /*##    The Echo Keisokuki Co. Ltd. JJY receiver LT2000						##*/
 /*##												##*/
-/*##    server  127.127.40.X  subtype 3								##*/
+/*##    refclock jjy unit X subtype 3								##*/
 /*##												##*/
 /*################################################################################################*/
 /*################################################################################################*/
@@ -1763,7 +1763,7 @@ jjy_poll_echokeisokuki_lt2000 ( int unit, struct peer *peer )
 /*##												##*/
 /*##    The CITIZEN T.I.C CO., LTD. JJY receiver JJY200						##*/
 /*##												##*/
-/*##    server  127.127.40.X  subtype 4								##*/
+/*##    refclock jjy unit X subtype 4								##*/
 /*##												##*/
 /*################################################################################################*/
 /*################################################################################################*/
@@ -1904,7 +1904,7 @@ jjy_poll_citizentic_jjy200 ( int unit, struct peer *peer )
 /*##												##*/
 /*##    The Tristate Ltd. GPS clock TS-GPS01							##*/
 /*##												##*/
-/*##    server  127.127.40.X  subtype 5								##*/
+/*##    refclock jjy unit X subtype 5								##*/
 /*##												##*/
 /*################################################################################################*/
 /*################################################################################################*/
@@ -2259,7 +2259,7 @@ jjy_poll_tristate_gpsclock01 ( int unit, struct peer *peer )
 /*##												##*/
 /*##    The SEIKO TIME SYSTEMS TDC-300								##*/
 /*##												##*/
-/*##    server  127.127.40.X  subtype 6								##*/
+/*##    refclock jjy unit X subtype 6								##*/
 /*##												##*/
 /*################################################################################################*/
 /*################################################################################################*/
@@ -2490,7 +2490,7 @@ jjy_poll_seiko_tsys_tdc_300 ( int unit, struct peer *peer )
 /*##												##*/
 /*##    Telephone JJY										##*/
 /*##												##*/
-/*##    server  127.127.40.X  subtype 100 to 180							##*/
+/*##    refclock jjy unit X subtype 100 to 180							##*/
 /*##												##*/
 /*################################################################################################*/
 /*################################################################################################*/
@@ -4465,7 +4465,7 @@ jjy_write_clockstats ( struct peer *peer, int iMark, const char *pData )
 		printf( "refclock_jjy.c : clockstats : %s\n", sLog ) ;
 	}
 #endif
-	record_clock_stats( &peer->srcadr, sLog ) ;
+	record_clock_stats( peer, sLog ) ;
 
 }
 
