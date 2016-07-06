@@ -381,7 +381,7 @@ stats_config(
 }
 
 static const char *
-peerlabel(const struct peer *peer)
+peerlabel(struct peer *peer)
 {
 #ifndef ENABLE_CLASSIC_MODE
  	if (peer->procptr != NULL)
