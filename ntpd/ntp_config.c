@@ -3157,7 +3157,12 @@ config_peers(
 			SET_PORT(&peeraddr, NTP_PORT);
 			if (is_sane_resolved_address(&peeraddr,
 						     curr_peer->host_mode)) {
+#ifdef REFCLOCK
+				/* save maxpoll from config line
+				 * newpeer smashes it
+				 */
 				uint8_t maxpoll = curr_peer->maxpoll;
+#endif
 				struct peer *peer = peer_config(
 					&peeraddr,
 					NULL,
@@ -3183,6 +3188,9 @@ config_peers(
 					 * have requirements for this.
 					 */
 					if (maxpoll == 0)
+						/* default maxpoll for
+						 * refclocks is minpoll
+						 */
 						peer->maxpoll = peer->minpoll;
 					clktype = (uint8_t)REFCLOCKTYPE(&peer->srcadr);
 					unit = REFCLOCKUNIT(&peer->srcadr);
