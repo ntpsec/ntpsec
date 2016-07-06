@@ -148,9 +148,7 @@ Chroot the server to the directory _jaildir_ This option also implies
 that the server attempts to drop root privileges at startup. You may
 need to also specify a +-u+ option. This option is only available if
 the OS supports adjusting the clock without full root privileges. This
-option is supported under NetBSD (configure with +--enable-clockctl+)
-or Linux (configure with +--enable-linuxcaps+) or Solaris (configure
-with +--enable-solarisprivs+).
+option is supported under Linux or Solaris.
 
 +-I+ iface, +--interface+=_iface_::
   Listen on an interface name or address. This option may appear an
@@ -254,9 +252,7 @@ Add the specified key number to the trusted key list.
 +
 Specify a user, and optionally a group, to switch to. This option is
 only available if the OS supports adjusting the clock without full
-root privileges. This option is supported under NetBSD (configure with
-+--enable-clockctl+) or Linux (configure with +--enable-linuxcaps+) or
-Solaris (configure with +--enable-solarisprivs+).
+root privileges. This option is supported under Linux or Solaris.
 
 +-U+ number, +--updateinterval+=_number_::
   interval in seconds between scans for new or dropped interfaces. This
@@ -497,7 +493,7 @@ nothing is heard after a couple of minutes, the daemon times out and
 exits.
 
 When kernel support is available to discipline the clock frequency,
-which is the case for stock Solaris, Tru64, Linux and FreeBSD, a useful
+which is the case for stock Solaris, Linux and FreeBSD, a useful
 feature is available to discipline the clock frequency. First, +{ntpd}+ is
 run in continuous mode with selected servers in order to measure and
 record the intrinsic clock frequency offset in the frequency file. It
