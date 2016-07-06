@@ -59,8 +59,8 @@ NTP Classic:
   (Credit: Matt Street et. al. of Cisco ASIG)
 [Bug 3008] (CVE-2016-2519) ctl_getitem() return value not always checked
   (Credit: Yihan Lian of the Qihoo 360 cloud security team)
-[Bug 2978] (CVE-2016-1548) Interleave-pivot (Credit: Miroslav Lichvar of
-  RedHat and Jonathan Gardner of Cisco ASIG)
+[Bug 2978] (CVE-2016-1548) Interleave-pivot
+  (Credit: Miroslav Lichvar of RedHat and Jonathan Gardner of Cisco ASIG)
 
 The following non-security fixes have been
 forward-ported from Classic:
