@@ -188,8 +188,6 @@ The Event Field displays the most recent event message coded as follows:
 | +0b+ | +clock_event+      | see clock status word
 | +0c+ | +bad_auth+         | authentication failure
 | +0d+ | +popcorn+          | popcorn spike suppressor
-| +0e+ | +interleave_mode+  | entering interleave mode
-| +0f+ | +interleave_error+ | interleave error (recovered)
 |============================================================================
 
 [[clock]]

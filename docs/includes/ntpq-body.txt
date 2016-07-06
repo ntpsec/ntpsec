@@ -494,15 +494,11 @@ association. Not all variables are displayed in some configurations.
 |+dispersion+    |filter dispersion
 |+jitter+        |filter jitter
 |+bias+          |unicast/broadcast bias
-|+xleave+        |interleave delay (see link:xleave.html[NTP Interleaved Modes])
 |=======================================================================
 
 The bias variable is calculated when the first broadcast packet is
 received after the calibration volley. It represents the offset of the
-broadcast subgraph relative to the unicast subgraph. The xleave variable
-appears only the interleaved symmetric and interleaved modes. It
-represents the internal queuing, buffering and transmission delays for
-the preceding packet.
+broadcast subgraph relative to the unicast subgraph.
 
 When {ntpd} is compiled with the OpenSSL software library,
 additional peer variables are displayed, including the following:
