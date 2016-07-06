@@ -306,7 +306,6 @@ struct peer {
 	u_long	epoch;		/* reference epoch */
 	int	burst;		/* packets remaining in burst */
 	int	retry;		/* retry counter */
-	int	flip;		/* interleave mode control */
 	int	filter_nextpt;	/* index into filter shift register */
 	double	filter_delay[NTP_SHIFT]; /* delay shift register */
 	double	filter_offset[NTP_SHIFT]; /* offset shift register */
@@ -316,13 +315,11 @@ struct peer {
 	l_fp	rec;		/* receive time stamp */
 	l_fp	xmt;		/* transmit time stamp */
 	l_fp	dst;		/* destination timestamp */
-	l_fp	aorg;		/* origin timestamp */
-	l_fp	borg;		/* alternate origin timestamp */
+	l_fp	org;		/* origin timestamp */
 	double	offset;		/* peer clock offset */
 	double	delay;		/* peer roundtrip delay */
 	double	jitter;		/* peer jitter (squares) */
 	double	disp;		/* peer dispersion */
-	double	xleave;		/* interleave delay */
 	double	bias;		/* programmed offset bias */
 
 	/*
@@ -416,9 +413,6 @@ struct peer {
 #define	FLAG_IBURST	0x0100	/* initial burst mode */
 #define	FLAG_NOSELECT	0x0200	/* never select */
 #define	FLAG_TRUE	0x0400	/* force truechimer */
-#define	FLAG_XLEAVE	0x0800	/* interleaved protocol */
-#define	FLAG_XB		0x1000	/* interleaved broadcast */
-#define	FLAG_XBOGUS	0x2000	/* interleaved bogus packet */
 #define FLAG_TSTAMP_PPS	0x4cd000	/* PPS source provides absolute timestamp */
 
 /*
@@ -613,8 +607,6 @@ struct pkt {
 #define	PEVNT_CLOCK	(11 | PEER_EVENT) /* clock event */
 #define	PEVNT_AUTH	(12 | PEER_EVENT) /* bad auth */
 #define	PEVNT_POPCORN	(13 | PEER_EVENT) /* popcorn */
-#define	PEVNT_XLEAVE	(14 | PEER_EVENT) /* interleave mode */
-#define	PEVNT_XERR	(15 | PEER_EVENT) /* interleave error */
 
 /*
  * Clock event codes

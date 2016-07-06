@@ -147,8 +147,6 @@ static const struct codestring peer_codes[] = {
 	{ PEVNT_CLOCK & ~PEER_EVENT,	"clock_event" },
 	{ PEVNT_AUTH & ~PEER_EVENT,	"bad_auth" },
 	{ PEVNT_POPCORN & ~PEER_EVENT,	"popcorn" },
-	{ PEVNT_XLEAVE & ~PEER_EVENT,	"interleave_mode" },
-	{ PEVNT_XERR & ~PEER_EVENT,	"interleave_error" },
 	{ -1,				"" }
 };
 

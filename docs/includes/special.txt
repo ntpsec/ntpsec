@@ -2,7 +2,6 @@
 * link:warp.html[How NTP Works]
 * link:prefer.html[Mitigation Rules and the `prefer` Keyword]
 * link:orphan.html[Orphan Mode]
-* link:xleave.html[NTP Interleaved Modes]
 * link:huffpuff.html[Huff-n'-Puff Filter]
 * link:filter.html[Clock Filter Algorithm]
 * link:select.html[Clock Select Algorithm]

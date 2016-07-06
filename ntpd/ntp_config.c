@@ -3043,10 +3043,6 @@ peerflag_bits(
 		case T_True:
 			peerflags |= FLAG_TRUE;
 			break;
-
-		case T_Xleave:
-			peerflags |= FLAG_XLEAVE;
-			break;
 		}
 	}
 

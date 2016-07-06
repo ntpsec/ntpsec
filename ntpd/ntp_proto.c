@@ -518,7 +518,7 @@ handle_procpkt(
 			peer->flash |= BOGON3;
 			peer->bogusorg++;
 			return;
-		} else if(pkt->org != lfp_to_uint64(&peer->aorg)) {
+		} else if(pkt->org != lfp_to_uint64(&peer->org)) {
 			peer->flash |= BOGON2;
 			peer->bogusorg++;
 			return;
@@ -526,7 +526,7 @@ handle_procpkt(
 	} else if(PKT_MODE(pkt->li_vn_mode) == MODE_ACTIVE ||
 		  PKT_MODE(pkt->li_vn_mode) == MODE_PASSIVE) {
 		/* In symmetric modes, even if the origin timestamp is
-		   bogus we still need to be willing to update the aorg
+		   bogus we still need to be willing to update the xmt
 		   peer variable. Otherwise, a single droppped packet
 		   will result in permanent DoS as the peers continually
 		   reject each other as bogus. Also, to be tolerant of
@@ -537,7 +537,7 @@ handle_procpkt(
 			peer->flash |= BOGON3;
 			peer->bogusorg++;
 			return;
-		} else if(pkt->org != lfp_to_uint64(&peer->aorg)) {
+		} else if(pkt->org != lfp_to_uint64(&peer->org)) {
 			uint64_to_lfp(&peer->xmt, pkt->xmt);
 			peer->flash |= BOGON2;
 			peer->bogusorg++;
@@ -632,9 +632,9 @@ handle_procpkt(
 	    scalbn((double)(pkt->xmt - dst), -32) :
 	    -scalbn((double)(dst - pkt->xmt), -32);
 	const double t21 =
-	    (pkt->rec >= lfp_to_uint64(&peer->aorg)) ?
-	    scalbn((double)(pkt->rec - lfp_to_uint64(&peer->aorg)), -32) :
-	    -scalbn((double)(lfp_to_uint64(&peer->aorg) - pkt->rec), -32);
+	    (pkt->rec >= lfp_to_uint64(&peer->org)) ?
+	    scalbn((double)(pkt->rec - lfp_to_uint64(&peer->org)), -32) :
+	    -scalbn((double)(lfp_to_uint64(&peer->org) - pkt->rec), -32);
 	const double theta = (t21 + t34) / 2.;
 	const double delta = max(fabs(t21 - t34), LOGTOD(sys_precision));
 	const double epsilon = LOGTOD(sys_precision) +
@@ -1223,11 +1223,6 @@ peer_clear(
 		peer->xmt = xmt;
 	}
 
-	/*
-	 * If interleave mode, initialize the alternate origin switch.
-	 */
-	if (peer->flags & FLAG_XLEAVE)
-		peer->flip = 1;
 	for (u = 0; u < NTP_SHIFT; u++) {
 		peer->filter_order[u] = u;
 		peer->filter_disp[u] = MAXDISPERSE;
@@ -2079,7 +2074,7 @@ peer_xmit(
 	struct pkt xpkt;	/* transmit packet */
 	size_t	sendlen, authlen;
 	keyid_t	xkeyid = 0;	/* transmit key ID */
-	l_fp	xmt_tx, xmt_ty;
+	l_fp	xmt_tx;
 
 	if (!peer->dstadr)	/* drop peers without interface */
 		return;
@@ -2108,27 +2103,8 @@ peer_xmit(
 		 * a later call used to record transmission time.
 		 */
 		get_systime(&xmt_tx);
-		if (peer->flip == 0) {	/* basic mode */
-			peer->aorg = xmt_tx;
-			HTONL_FP(&xmt_tx, &xpkt.xmt);
-		} else {		/* interleaved modes */
-			if (peer->hmode == MODE_BROADCAST) { /* bcst */
-				HTONL_FP(&xmt_tx, &xpkt.xmt);
-				if (peer->flip > 0)
-					HTONL_FP(&peer->borg,
-					    &xpkt.org);
-				else
-					HTONL_FP(&peer->aorg,
-					    &xpkt.org);
-			} else {	/* symmetric */
-				if (peer->flip > 0)
-					HTONL_FP(&peer->borg,
-					    &xpkt.xmt);
-				else
-					HTONL_FP(&peer->aorg,
-					    &xpkt.xmt);
-			}
-		}
+		peer->org = xmt_tx;
+		HTONL_FP(&xmt_tx, &xpkt.xmt);
 		peer->t21_bytes = sendlen;
 		intercept_sendpkt(__func__, &peer->srcadr, peer->dstadr, sys_ttl[peer->ttl],
 		    &xpkt, sendlen);
@@ -2136,19 +2112,6 @@ peer_xmit(
 		peer->outcount++;
 		peer->throttle += (1 << peer->minpoll) - 2;
 
-		/*
-		 * Capture a-posteriori timestamps
-		 */
-		get_systime(&xmt_ty);
-		if (peer->flip != 0) {		/* interleaved modes */
-			if (peer->flip > 0)
-				peer->aorg = xmt_ty;
-			else
-				peer->borg = xmt_ty;
-			peer->flip = -peer->flip;
-		}
-		L_SUB(&xmt_ty, &xmt_tx);
-		LFPTOD(&xmt_ty, peer->xleave);
 #ifdef DEBUG
 		if (debug)
 			printf("transmit: at %ld %s->%s mode %d len %zu\n",
@@ -2168,23 +2131,8 @@ peer_xmit(
 	 * Transmit a-priori timestamps
 	 */
 	intercept_get_systime(__func__, &xmt_tx);
-	if (peer->flip == 0) {		/* basic mode */
-		peer->aorg = xmt_tx;
-		HTONL_FP(&xmt_tx, &xpkt.xmt);
-	} else {			/* interleaved modes */
-		if (peer->hmode == MODE_BROADCAST) { /* bcst */
-			HTONL_FP(&xmt_tx, &xpkt.xmt);
-			if (peer->flip > 0)
-				HTONL_FP(&peer->borg, &xpkt.org);
-			else
-				HTONL_FP(&peer->aorg, &xpkt.org);
-		} else {		/* symmetric */
-			if (peer->flip > 0)
-				HTONL_FP(&peer->borg, &xpkt.xmt);
-			else
-				HTONL_FP(&peer->aorg, &xpkt.xmt);
-		}
-	}
+	peer->org = xmt_tx;
+	HTONL_FP(&xmt_tx, &xpkt.xmt);
 	xkeyid = peer->keyid;
 	authlen = authencrypt(xkeyid, (uint32_t *)&xpkt, sendlen);
 	if (authlen == 0) {
@@ -2203,20 +2151,6 @@ peer_xmit(
 	    sendlen);
 	peer->sent++;
 	peer->throttle += (1 << peer->minpoll) - 2;
-
-	/*
-	 * Capture a-posteriori timestamps
-	 */
-	intercept_get_systime(__func__, &xmt_ty);
-	if (peer->flip != 0) {			/* interleaved modes */
-		if (peer->flip > 0)
-			peer->aorg = xmt_ty;
-		else
-			peer->borg = xmt_ty;
-		peer->flip = -peer->flip;
-	}
-	L_SUB(&xmt_ty, &xmt_tx);
-	LFPTOD(&xmt_ty, peer->xleave);
 #ifdef DEBUG
 	if (debug)
 		printf("transmit: at %ld %s->%s mode %d keyid %08x len %zd\n",
@@ -2471,7 +2405,7 @@ pool_xmit(
 	xpkt.rootdisp = HTONS_FP(DTOUFP(sys_rootdisp));
 	HTONL_FP(&sys_reftime, &xpkt.reftime);
 	intercept_get_systime(__func__, &xmt_tx);
-	pool->aorg = xmt_tx;
+	pool->org = xmt_tx;
 	HTONL_FP(&xmt_tx, &xpkt.xmt);
 	intercept_sendpkt(__func__,
 			  rmtadr, lcladr, sys_ttl[pool->ttl], &xpkt,
