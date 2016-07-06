@@ -143,6 +143,20 @@ By default, `waf install' will install the package's files in
 installation prefix other than `/usr/local' by giving waf the
 option `--prefix=PATH'.
 
+== Strict compatibility mode ==
+
+There have been a handful of forward-incompatible changes from NTP Classic.
+These are unlikely to affect normal operation.  However, there is a configure
+operation, --enable-classic-mode, that restores certain legacy behaviors. This
+is not recommended, as it makes the code a little bulkier and slower.
+
+Here's what it presently does:
+
+* Reverts logging to the old format that designates clocks with magic
+  addresses rather than the driver shortname and unit number.
+
+Other behaviors may be added in future releases.
+
 == Uninstalled binaries and scripts ==
 
 Due to variations in Perl library paths, our stock source distribution

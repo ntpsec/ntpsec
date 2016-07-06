@@ -957,8 +957,7 @@ irig_decode(
 			pp->lencode = strlen(pp->a_lastcode);
 			up->errflg = 0;
 			if (pp->sloppyclockflag & CLK_FLAG4) {
-				record_clock_stats(&peer->srcadr,
-				    pp->a_lastcode);
+				record_clock_stats(peer, pp->a_lastcode);
 #ifdef DEBUG
 				if (debug)
 					printf("irig %s\n",
@@ -997,7 +996,7 @@ irig_poll(
 	}
 	refclock_receive(peer);
 	if (!(pp->sloppyclockflag & CLK_FLAG4)) {
-		record_clock_stats(&peer->srcadr, pp->a_lastcode);
+		record_clock_stats(peer, pp->a_lastcode);
 #ifdef DEBUG
 		if (debug)
 			printf("irig %s\n", pp->a_lastcode);

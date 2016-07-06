@@ -721,7 +721,7 @@ poll_primary(
 
 	if (pp->sloppyclockflag & CLK_FLAG4)
 		mprintf_clock_stats(
-			&peer->srcadr,"%u %u %u %u %u %u %u",
+			peer,"%u %u %u %u %u %u %u",
 			up->tc_recv,
 			up->tc_breply, up->tc_nosync,
 			up->tc_ibt_recv, up->tc_ibt_used,

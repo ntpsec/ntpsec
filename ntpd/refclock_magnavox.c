@@ -677,7 +677,7 @@ mx4200_receive(
 
 	up->pollcnt = 2;
 	pp->a_lastcode[pp->lencode] = '\0';
-	record_clock_stats(&peer->srcadr, pp->a_lastcode);
+	record_clock_stats(peer, pp->a_lastcode);
 	mx4200_debug(peer, "mx4200_receive: %d %s\n",
 		     pp->lencode, pp->a_lastcode);
 

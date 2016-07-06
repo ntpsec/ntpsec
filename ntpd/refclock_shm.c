@@ -648,7 +648,7 @@ static void shm_clockstats(
 	UNUSED_ARG(unit);
 	if (pp->sloppyclockflag & CLK_FLAG4) {
 		mprintf_clock_stats(
-			&peer->srcadr, "%3d %3d %3d %3d %3d",
+			peer, "%3d %3d %3d %3d %3d",
 			up->ticks, up->good, up->notready,
 			up->bad, up->clash);
 	}

@@ -367,8 +367,7 @@ spectracom_receive(
 		 */
 		if (up->linect > 0) {
 			up->linect--;
-			record_clock_stats(&peer->srcadr,
-			    pp->a_lastcode);
+			record_clock_stats(peer, pp->a_lastcode);
 		} else {
 			refclock_report(peer, CEVNT_BADREPLY);
 		}
@@ -534,7 +533,7 @@ spectracom_poll(
 	}
 #endif /* HAVE_PPSAPI */
 	refclock_receive(peer);
-	record_clock_stats(&peer->srcadr, pp->a_lastcode);
+	record_clock_stats(peer, pp->a_lastcode);
 #ifdef DEBUG
 	if (debug)
 		printf("wwvb: timecode %d %s\n", pp->lencode,

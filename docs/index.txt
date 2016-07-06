@@ -154,6 +154,11 @@ few will be user-visible.
 
 * Log timestamps look a little different; they are now in ISO8601 format.
 
+* Clock identifiers in log files are normally the driver shortname
+  followed by the unit number in parentheses, rather than the magic IP
+  addresses formerly used.  The code can be built in a strict NTP
+  Classic compatibility mode that restores the old behavior.
+
 * The -!m, ->, and -< options of some Classic commands are not
   supported.  (The argument-parsing framework code that implemented
   them in Classic was overcomplicated and buggy and had to be removed.)
