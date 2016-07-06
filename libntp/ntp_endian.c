@@ -12,8 +12,8 @@
 
 uint16_t ntp_be16dec(const void *buf) {
 	const uint8_t *b = (const uint8_t*)buf;
-	((uint16_t)(b[0]) << 8) +
-	    (uint16_t)(b[1]);
+	return ((uint16_t)(b[0]) << 8) +
+          (uint16_t)(b[1]);
 }
 
 void ntp_be16enc(void *buf, uint16_t x) {
