@@ -3157,6 +3157,7 @@ config_peers(
 			SET_PORT(&peeraddr, NTP_PORT);
 			if (is_sane_resolved_address(&peeraddr,
 						     curr_peer->host_mode)) {
+				uint8_t maxpoll = curr_peer->maxpoll;
 				struct peer *peer = peer_config(
 					&peeraddr,
 					NULL,
@@ -3181,7 +3182,7 @@ config_peers(
 					 * timer, since the clock may
 					 * have requirements for this.
 					 */
-					if (peer->maxpoll == 0)
+					if (maxpoll == 0)
 						peer->maxpoll = peer->minpoll;
 					clktype = (uint8_t)REFCLOCKTYPE(&peer->srcadr);
 					unit = REFCLOCKUNIT(&peer->srcadr);
