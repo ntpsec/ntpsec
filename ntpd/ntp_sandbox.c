@@ -63,7 +63,7 @@ bool sandbox(const bool droproot,
 		/* Drop super-user privileges and chroot now if the OS supports this */
 
 #  ifdef HAVE_LINUX_CAPABILITY
-		/* set flag: keep privileges accross setuid() call (we only really need cap_sys_time): */
+		/* set flag: keep privileges across setuid() call. */
 		if (prctl( PR_SET_KEEPCAPS, 1L, 0L, 0L, 0L ) == -1) {
 			msyslog( LOG_ERR, "prctl( PR_SET_KEEPCAPS, 1L ) failed: %m" );
 			exit(-1);
@@ -204,7 +204,7 @@ getgroup:
 			 *  We may be running under non-root uid now,
 			 *  but we still hold full root privileges!
 			 *  We drop all of them, except for the
-			 *  crucial one or two: cap_sys_time and
+			 *  crucial few: cap_sys_nice, cap_sys_time and
 			 *  cap_net_bind_service for doing dynamic
 			 *  interface tracking.
 			 */
@@ -212,8 +212,8 @@ getgroup:
 			char *captext;
 			
 			captext = want_dynamic_interface_tracking
-				      ? "cap_sys_time,cap_net_bind_service=pe"
-				      : "cap_sys_time=pe";
+				      ? "cap_sys_nice,cap_sys_time,cap_net_bind_service=pe"
+				      : "cap_sys_nice,cap_sys_time=pe";
 			caps = cap_from_text(captext);
 			if (!caps) {
 				msyslog(LOG_ERR,
