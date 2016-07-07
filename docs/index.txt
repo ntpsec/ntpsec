@@ -74,11 +74,11 @@ ship code that is security-hardened, simpler, drastically less bulky
 two!), easier to understand, and easier to maintain.
 
 We retain, however, almost full compatibility and interoperation with
-NTP Classic.  The qualification "almost" is required because we do not
-support the Autokey (RFC5906) public-key encryption scheme. It had
-interoperability and exploitable vulnerability issues too severe to
-be patched.  We are participating in an IETF effort to develop better
-security features.
+NTP Classic.  The qualification "almost" is required mainly because we
+do not support the Autokey (RFC5906) public-key encryption scheme. It
+had interoperability and exploitable vulnerability issues too severe
+to be patched.  We are participating in an IETF effort to develop
+better security features.
 
 This project began as an effort to address serious security issues
 with NTP Classic, and we intend to keep a particularly strong focus on
@@ -137,10 +137,10 @@ few will be user-visible.
   each refclock page.  One major feature of the new syntax is that
   refclock drivers are referred to by names, not numbers.
 
-* Using the new refclock syntax, the maximum number of units that can
-  be set up per generic-driver device type changes from 4 (numbers
-  0-3) to unlimited.  However, the old magic-address syntax will
-  not work correctly - you _must_ use the new syntax to declare
+* For the generic (parse) driver only: Using the new refclock syntax,
+  the maximum number of units that can be set up changes from 4
+  (numbers 0-3) to unlimited.  However, the old magic-address syntax
+  will not work correctly - you _must_ use the new syntax to declare
   generic-driver refclocks.
 
 * The +sntp+ program has been renamed +{ntpdig}+ in order to make
