@@ -2540,6 +2540,11 @@ parse_start(
 		notice = 1;
 	}
 
+#ifdef ENABLE_CLASSIC_MODE
+	peer->ttl = (peer->refclkunit & ~0x80) >> 2;
+	peer->refclkunit = peer->refclkunit & 0x03;
+#endif /* ENABLE_CLASSIC_MODE */
+
 	type = CLK_TYPE(peer);
 	unit = peer->refclkunit;
 

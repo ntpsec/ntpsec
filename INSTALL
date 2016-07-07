@@ -155,6 +155,10 @@ Here's what it presently does:
 * Reverts logging to the old format that designates clocks with magic
   addresses rather than the driver shortname and unit number.
 
+* Enables declaring generic-driver refclocks with the old magic-address
+  syntax (but the new syntax won't work for these, though it will for
+  other driver types).
+
 Other behaviors may be added in future releases.
 
 == Uninstalled binaries and scripts ==

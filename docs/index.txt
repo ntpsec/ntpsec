@@ -141,7 +141,8 @@ few will be user-visible.
   the maximum number of units that can be set up changes from 4
   (numbers 0-3) to unlimited.  However, the old magic-address syntax
   will not work correctly - you _must_ use the new syntax to declare
-  generic-driver refclocks.
+  generic-driver refclocks.  If the software was compiled with the
+  --enable-classic-mode switch, the foregoing is reversed.
 
 * The +sntp+ program has been renamed +{ntpdig}+ in order to make
   NTP installables have a uniform name prefix and take up less
@@ -171,8 +172,8 @@ few will be user-visible.
 
 * The shortname of --help options is now -h, not -?
 
-* An instance of {ntpq} built from the {project-shortname} code
-  querying a legacy NTP daemons will not automatically display
+* An instance of +{ntpq}+ built from the {project-shortname} code
+  querying a legacy NTP daemon will not automatically display
   peers with 127.127.127.t.u addresses as refclocks; that assumption
   has been removed from the {project-shortname} code as part of
   getting it fully IPv6-ready.
