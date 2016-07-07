@@ -582,6 +582,46 @@ handle_procpkt(
 		return;
 	}
 
+        /* Compute theta (peer offset), delta (peer distance), and epsilon
+	   (peer dispersion) statistics. The timestamps may be large but
+	   the difference between them should be small, so it's important
+	   to do the subtraction *before* converting to floating point to
+	   avoid loss of precision.
+	*/
+
+	const uint64_t dst = lfp_to_uint64(&rbufp->recv_time);
+	const double t34 =
+	    (pkt->xmt >= dst) ?
+	    scalbn((double)(pkt->xmt - dst), -32) :
+	    -scalbn((double)(dst - pkt->xmt), -32);
+	const double t21 =
+	    (pkt->rec >= lfp_to_uint64(&peer->org)) ?
+	    scalbn((double)(pkt->rec - lfp_to_uint64(&peer->org)), -32) :
+	    -scalbn((double)(lfp_to_uint64(&peer->org) - pkt->rec), -32);
+	const double theta = (t21 + t34) / 2.;
+	const double delta = max(fabs(t21 - t34), LOGTOD(sys_precision));
+	const double epsilon = LOGTOD(sys_precision) +
+	    LOGTOD(peer->precision) +
+	    clock_phi * delta;
+
+	/* One final test before we touch any variables that could
+	   affect the clock: don't accept any packets with a round
+	   trip delay longer than sys_maxdist.	Failure to enforce
+	   this constraint could allow an on-path attacker, despite
+	   authentication, to mess with the clock by adding long
+	   artificial delays in one direction but not the other.
+	   Anything rejected here should be getting rejected later by
+	   clock filtering anyhow, but performing this check early
+	   makes the desired security invariant easier to verify.
+	*/
+	if(delta > sys_maxdist) {
+	  peer->flash |= BOGON1; /*XXX we should probably allocate a
+				   new bogon bit here rather than
+				   recycling BOGON1. */
+	  peer->oldpkt++;
+	  return;
+	}
+
 	peer->leap = PKT_LEAP(pkt->li_vn_mode);
 	peer->stratum = min(PKT_TO_STRATUM(pkt->stratum), STRATUM_UNSPEC);
 	peer->pmode = PKT_MODE(pkt->li_vn_mode);
@@ -618,28 +658,6 @@ handle_procpkt(
 		peer->timereachable = current_time;
 	}
 	peer->reach |= 1;
-
-	/* Compute theta (peer offset), delta (peer distance), and epsilon
-	   (peer dispersion) statistics. The timestamps may be large but
-	   the difference between them should be small, so it's important
-	   to do the subtraction *before* converting to floating point to
-	   avoid loss of precision.
-	*/
-
-	uint64_t dst = lfp_to_uint64(&rbufp->recv_time);
-	const double t34 =
-	    (pkt->xmt >= dst) ?
-	    scalbn((double)(pkt->xmt - dst), -32) :
-	    -scalbn((double)(dst - pkt->xmt), -32);
-	const double t21 =
-	    (pkt->rec >= lfp_to_uint64(&peer->org)) ?
-	    scalbn((double)(pkt->rec - lfp_to_uint64(&peer->org)), -32) :
-	    -scalbn((double)(lfp_to_uint64(&peer->org) - pkt->rec), -32);
-	const double theta = (t21 + t34) / 2.;
-	const double delta = max(fabs(t21 - t34), LOGTOD(sys_precision));
-	const double epsilon = LOGTOD(sys_precision) +
-	    LOGTOD(peer->precision) +
-	    clock_phi * delta;
 
 	/* Hooray! Pass our new sample off to the clock filter. */
 	clock_filter(peer, theta + peer->bias, delta, epsilon);
