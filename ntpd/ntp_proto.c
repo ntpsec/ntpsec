@@ -379,23 +379,44 @@ parse_packet(
 }
 
 /* Returns true if we should not accept any unauthenticated packets from
-   this peer. There are two ways the user can configure this requirement:
+   this peer. There are four ways the user can configure this requirement:
 
    1. A 'restrict notrust' command applies to the peer's IP, or,
-   2. The peer is one of our servers, and we've configured it with a
-      'key' option to the 'server' command.
-
+   2. We've configured the peer with a 'key' option,
+   3. The packet wants to create a new associations, and a 'restrict
+      nopeer' command applies to the peer's IP.
+   4. This is a symmetric mode packet, and sys_authenticate is set
+      (as it is by default).
+      
    The 'peer' argument may be NULL to indicate that we have no current
    association.
+
+   These rules implement a couple changes in behavior from NTP Classic:
+
+   1. Unless sys_authenticate is disabled, we always require
+      authentication for symmetric mode. NTP Classic only requires
+      authentication for symmetric active mode packets from new peers.
+      However, without authentication, symmetric mode is vulnerable
+      to simple attacks even from off path, so we require it.
+
+   2. We don't enforce 'restrict nopeer' against pool-mode responses.
 */
 static bool
 i_require_authentication(
 	struct peer const* peer,
+	struct parsed_pkt const* pkt,
 	u_short restrict_mask
 	)
 {
 	return (peer != NULL && peer->keyid != 0) ||
-          (restrict_mask & RES_DONTTRUST);
+	    (restrict_mask & RES_DONTTRUST) ||
+	    ((restrict_mask & RES_NOPEER) &&
+	     ((peer != NULL && (peer->cast_flags & MDF_ACAST)) ||
+	      (peer == NULL && PKT_MODE(pkt->li_vn_mode) == MODE_ACTIVE) ||
+	      (PKT_MODE(pkt->li_vn_mode) == MODE_BROADCAST))) ||
+	     (sys_authenticate &&
+	      (PKT_MODE(pkt->li_vn_mode) == MODE_ACTIVE ||
+	       PKT_MODE(pkt->li_vn_mode) == MODE_PASSIVE));
 }
 
 static bool
@@ -499,6 +520,8 @@ handle_procpkt(
 
 	/* Shouldn't happen, but include this for safety. */
 	if(peer == NULL) { return; }
+
+	peer->flash &= ~PKT_BOGON_MASK;
 
 	/* Duplicate detection */
 	if(pkt->xmt == lfp_to_uint64(&peer->xmt)) {
@@ -663,6 +686,43 @@ handle_procpkt(
 	clock_filter(peer, theta + peer->bias, delta, epsilon);
 }
 
+static void
+handle_manycast(
+	struct recvbuf *rbufp,
+	u_short restrict_mask,
+	struct parsed_pkt const* pkt,
+	struct peer *mpeer,
+	bool request_already_authenticated
+	)
+{
+	(void)request_already_authenticated;
+	(void)restrict_mask;
+
+	if(mpeer == NULL) {
+		sys_restricted++;
+		return;
+	};
+
+	if(mpeer->cast_flags & MDF_POOL) {
+		mpeer->nextdate = current_time + 1;
+	}
+
+	/* Don't bother associating with unsynchronized servers */
+	if (PKT_LEAP(pkt->li_vn_mode) == LEAP_NOTINSYNC ||
+	    PKT_TO_STRATUM(pkt->stratum) < sys_floor ||
+	    PKT_TO_STRATUM(pkt->stratum) >= sys_ceiling ||
+	    scalbn((double)pkt->rootdelay/2.0 + (double)pkt->rootdisp, -16) >=
+	    MAXDISPERSE) {
+		return;
+	}
+
+	newpeer(&rbufp->recv_srcadr, NULL, rbufp->dstadr,
+		MODE_CLIENT, PKT_VERSION(pkt->li_vn_mode),
+		mpeer->minpoll, mpeer->maxpoll,
+		FLAG_PREEMPT | (FLAG_IBURST & mpeer->flags),
+		MDF_UCAST | MDF_UCLNT, 0, mpeer->keyid, false);
+}
+	
 void
 receive(
 	struct recvbuf *rbufp
@@ -705,9 +765,11 @@ receive(
 		goto done;
 	}
 	peer = findpeer(rbufp, PKT_MODE(pkt->li_vn_mode), &match);
-	if(peer != NULL) { peer->flash &= ~PKT_BOGON_MASK; }
+	if(peer == NULL && match == AM_MANYCAST) {
+		peer = findmanycastpeer(rbufp);
+	}
 
-	if(i_require_authentication(peer, restrict_mask)) {
+	if(i_require_authentication(peer, pkt, restrict_mask)) {
 		if(
 			/* Check whether an authenticator is even present. */
 			!pkt->keyid_present || is_crypto_nak(pkt) ||
@@ -741,6 +803,9 @@ receive(
 		break;
 	    case AM_PROCPKT:
 		handle_procpkt(rbufp, restrict_mask, pkt, peer, authenticated);
+		break;
+	    case AM_MANYCAST:
+		handle_manycast(rbufp, restrict_mask, pkt, peer, authenticated);
 		break;
 	    default:
 		/* Everything else is for symmetric passive, broadcast,
