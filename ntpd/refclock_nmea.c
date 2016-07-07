@@ -859,7 +859,7 @@ nmea_receive(
 
 	/* Eventually output delay measurement now. */
 	if (peer->ttl & NMEA_DELAYMEAS_MASK) {
-		mprintf_clock_stats(&peer->srcadr, "delay %0.6f %.*s",
+		mprintf_clock_stats(peer, "delay %0.6f %.*s",
 			 ldexp(rd_timestamp.l_uf, -32),
 			 (int)(strchr(rd_lastcode, ',') - rd_lastcode),
 			 rd_lastcode);
@@ -1144,13 +1144,13 @@ nmea_poll(
 		const char *nmea = pp->a_lastcode;
 		if (*nmea == '\0') nmea = "(none)";
 		mprintf_clock_stats(
-		  &peer->srcadr, "%s  %u %u %u %u %u %u",
+		  peer, "%s  %u %u %u %u %u %u",
 		  nmea,
 		  up->tally.total, up->tally.accepted,
 		  up->tally.rejected, up->tally.malformed,
 		  up->tally.filtered, up->tally.pps_used);
 	} else {
-		record_clock_stats(&peer->srcadr, pp->a_lastcode);
+		record_clock_stats(peer, pp->a_lastcode);
 	}
 	ZERO(up->tally);
 }

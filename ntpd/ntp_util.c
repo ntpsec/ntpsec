@@ -474,7 +474,7 @@ record_loop_stats(
  */
 void
 record_clock_stats(
-	sockaddr_u *addr,
+	struct peer *peer,
 	const char *text	/* timecode string */
 	)
 {
@@ -490,7 +490,7 @@ record_clock_stats(
 	now.l_ui %= 86400;
 	if (clockstats.fp != NULL) {
 		fprintf(clockstats.fp, "%lu %s %s %s\n", day,
-		    ulfptoa(&now, 3), stoa(addr), text);
+		    ulfptoa(&now, 3), stoa(&peer->srcadr), text);
 		fflush(clockstats.fp);
 	}
 }
@@ -502,7 +502,7 @@ record_clock_stats(
  */
 int
 mprintf_clock_stats(
-	sockaddr_u *addr,
+	struct peer *peer,
 	const char *fmt,
 	...
 	)
@@ -515,7 +515,7 @@ mprintf_clock_stats(
 	rc = mvsnprintf(msg, sizeof(msg), fmt, ap);
 	va_end(ap);
 	if (stats_control)
-		record_clock_stats(addr, msg);
+		record_clock_stats(peer, msg);
 
 	return rc;
 }

@@ -318,7 +318,7 @@ dumbclock_receive(
 	}
 	pp->lastref = pp->lastrec;
 	refclock_receive(peer);
-	record_clock_stats(&peer->srcadr, pp->a_lastcode);
+	record_clock_stats(peer, pp->a_lastcode);
 	up->lasthour = (uint8_t)pp->hour;
 }
 
