@@ -139,7 +139,9 @@ few will be user-visible.
 
 * Using the new refclock syntax, the maximum number of units that can
   be set up per generic-driver device type changes from 4 (numbers
-  0-3) to unlimited.
+  0-3) to unlimited.  However, the old magic-address syntax will
+  not work correctly - you _must_ use the new syntax to declare
+  generic-driver refclocks.
 
 * The +sntp+ program has been renamed +{ntpdig}+ in order to make
   NTP installables have a uniform name prefix and take up less
