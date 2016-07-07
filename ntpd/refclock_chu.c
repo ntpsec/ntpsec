@@ -182,12 +182,12 @@
  * The audio codec code is normally compiled in the driver if the
  * architecture supports it (ENABLE_CHU_AUDIO defined), but is used only if
  * the link /dev/chu_audio is defined and valid. The serial port code is
- * always compiled in the driver, but is used only if the autdio codec
+ * always compiled in the driver, but is used only if the audio codec
  * is not available and the link /dev/chu%d is defined and valid.
  *
  * The ICOM code is normally compiled in the driver if selected (USE_ICOM_RADIO
  * defined), but is used only if the link /dev/icom%d is defined and
- * valid and the mode keyword on the server configuration command
+ * valid and the mode keyword on the refclock configuration command
  * specifies a nonzero mode (ICOM ID select code). The C-IV speed is
  * 9600 bps if the high order 0x80 bit of the mode is zero and 1200 bps
  * if one. The C-IV trace is turned on if the debug level is greater

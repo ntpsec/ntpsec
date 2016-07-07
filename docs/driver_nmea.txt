@@ -235,6 +235,8 @@ switched on by sending the following string.
   if 0 (default); use the kernel discipline if 1.
 +flag4 {0 | 1}+::
   Obscures location in timecode: 0 for disable (default), 1 for enable.
++subtype+::
+   Not used by this driver.
 +mode+::
    Used to control baud rate, GPS sentence selection, and logging.
 

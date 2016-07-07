@@ -41,7 +41,7 @@
  * The same driver also handles the HP Z3801A which is available surplus
  * from the cell phone industry.  It's popular with hams.
  * It needs a different line setup: 19200 baud, 7 data bits, odd parity
- * That is selected by adding "mode 1" to the server line in ntp.conf
+ * That is selected by adding "subtype 1" to the server line in ntp.conf
  * HP Z3801A code from Jeff Mock added by Hal Murray, Sep 2005
  *
  *
@@ -163,7 +163,7 @@ hpgps_start(
 	snprintf(device, sizeof(device), DEVICE, unit);
 	ldisc = LDISC_CLK;
 	speed = SPEED232;
-	/* mode parameter to server config line shares ttl slot */
+	/* subtype parameter to server config line shares ttl slot */
 	if (1 == peer->ttl) {
 		ldisc |= LDISC_7O1;
 		speed = SPEED232Z;
