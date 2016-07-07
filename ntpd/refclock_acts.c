@@ -577,7 +577,7 @@ acts_timeout(
 			report_event(PEVNT_CLOCK, peer, "no timecodes");
 		} else {
 			pp->lastref = pp->lastrec;
-			record_clock_stats(peer, pp->a_lastcode);
+			record_clock_stats(&peer->srcadr, pp->a_lastcode);
 			refclock_receive(peer);
 		}
 		break;
