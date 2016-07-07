@@ -115,8 +115,6 @@ synchronization without needing the Internet at all.
 +flag4 {0 | 1}+::
   Record a timestamp once for each second if 1. Useful for constructing
   Allan deviation plots.
-+subtype+::
-   Not used by this driver.
 +mode+::
    Not used by this driver.
 

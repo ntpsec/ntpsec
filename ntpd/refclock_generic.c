@@ -9,11 +9,11 @@
  * Copyright 2015 by the NTPsec project contributors
  * SPDX-License-Identifier: BSD-3-Clause
  *
- * Note: some subtypes are obsolete and could probably stand to be removed
- * next time this code gets serious attention.  In particular, subtypes 9 and 10
+ * Note: some modes are obsolete and could probably stand to be removed
+ * next time this code gets serious attention.  In particular, modes 9 and 10
  * support the Trimble SVeeSix, which was discontinued before 2003. Related
  * code in the parse library could also be dropped.
- * Also see subtypes 3 and 4, for which no information in use since 1999 and
+ * Also see modes 3 and 4, for which no information in use since 1999 and
  * 2001 respectively can be found on the web.
  */
 
@@ -857,7 +857,7 @@ static struct parse_clockinfo
 	u_long  cl_keep;              /* samples for median filter to keep */
 } parse_clockinfo[] =
 {
-	{				/* subtype 0 */
+	{				/* mode 0 */
 		MBG_FLAGS,
 		NO_POLL,
 		NO_INIT,
@@ -881,7 +881,7 @@ static struct parse_clockinfo
 		DCFPZF535_SAMPLES,
 		DCFPZF535_KEEP
 	},
-	{				/* subtype 1 */
+	{				/* mode 1 */
 		MBG_FLAGS,
 		NO_POLL,
 		NO_INIT,
@@ -905,7 +905,7 @@ static struct parse_clockinfo
 		DCFPZF535OCXO_SAMPLES,
 		DCFPZF535OCXO_KEEP
 	},
-	{				/* subtype 2 */
+	{				/* mode 2 */
 		MBG_FLAGS,
 		NO_POLL,
 		NO_INIT,
@@ -929,7 +929,7 @@ static struct parse_clockinfo
 		DCFUA31_SAMPLES,
 		DCFUA31_KEEP
 	},
-	{				/* subtype 3 */
+	{				/* mode 3 */
 		MBG_FLAGS,
 		NO_POLL,
 		NO_INIT,
@@ -953,7 +953,7 @@ static struct parse_clockinfo
 		DCF7000_SAMPLES,
 		DCF7000_KEEP
 	},
-	{				/* subtype 4 */
+	{				/* mode 4 */
 		NO_CL_FLAGS,
 		WSDCF_POLL,
 		WSDCF_INIT,
@@ -977,7 +977,7 @@ static struct parse_clockinfo
 		WSDCF_SAMPLES,
 		WSDCF_KEEP
 	},
-	{				/* subtype 5 */
+	{				/* mode 5 */
 		RAWDCF_FLAGS,
 		NO_POLL,
 		RAWDCF_INIT,
@@ -1001,7 +1001,7 @@ static struct parse_clockinfo
 		RAWDCF_SAMPLES,
 		RAWDCF_KEEP
 	},
-	{				/* subtype 6 */
+	{				/* mode 6 */
 		RAWDCF_FLAGS,
 		NO_POLL,
 		RAWDCF_INIT,
@@ -1025,7 +1025,7 @@ static struct parse_clockinfo
 		RAWDCF_SAMPLES,
 		RAWDCF_KEEP
 	},
-	{				/* subtype 7 */
+	{				/* mode 7 */
 		MBG_FLAGS,
 		GPS16X_POLL,
 		GPS16X_INIT,
@@ -1049,7 +1049,7 @@ static struct parse_clockinfo
 		GPS16X_SAMPLES,
 		GPS16X_KEEP
 	},
-	{				/* subtype 8 */
+	{				/* mode 8 */
 		RAWDCF_FLAGS,
 		NO_POLL,
 		NO_INIT,
@@ -1073,7 +1073,7 @@ static struct parse_clockinfo
 		RAWDCF_SAMPLES,
 		RAWDCF_KEEP
 	},
-	{				/* subtype 9 */
+	{				/* mode 9 */
 		TRIMBLETAIP_FLAGS,
 #if TRIM_POLLRATE		/* DHD940515: Allow user config */
 		NO_POLL,
@@ -1101,7 +1101,7 @@ static struct parse_clockinfo
 		TRIMBLETAIP_SAMPLES,
 		TRIMBLETAIP_KEEP
 	},
-	{				/* subtype 10 */
+	{				/* mode 10 */
 		TRIMBLETSIP_FLAGS,
 #if TRIM_POLLRATE		/* DHD940515: Allow user config */
 		NO_POLL,
@@ -1129,7 +1129,7 @@ static struct parse_clockinfo
 		TRIMBLETSIP_SAMPLES,
 		TRIMBLETSIP_KEEP
 	},
-	{                             /* subtype 11 */
+	{                             /* mode 11 */
 		NO_CL_FLAGS,
 		RCC8000_POLL,
 		RCC8000_INIT,
@@ -1153,7 +1153,7 @@ static struct parse_clockinfo
 		RCC8000_SAMPLES,
 		RCC8000_KEEP
 	},
-	{                             /* subtype 12 */
+	{                             /* mode 12 */
 		HOPF6021_FLAGS,
 		NO_POLL,
 		NO_INIT,
@@ -1177,7 +1177,7 @@ static struct parse_clockinfo
 		HOPF6021_SAMPLES,
 		HOPF6021_KEEP
 	},
-	{                            /* subtype 13 */
+	{                            /* mode 13 */
 		COMPUTIME_FLAGS,
 		NO_POLL,
 		NO_INIT,
@@ -1201,7 +1201,7 @@ static struct parse_clockinfo
 		COMPUTIME_SAMPLES,
 		COMPUTIME_KEEP
 	},
-	{				/* subtype 14 */
+	{				/* mode 14 */
 		RAWDCF_FLAGS,
 		NO_POLL,
 		RAWDCFDTRSET_INIT,
@@ -1225,7 +1225,7 @@ static struct parse_clockinfo
 		RAWDCF_SAMPLES,
 		RAWDCF_KEEP
 	},
-	{				/* subtype 15 */
+	{				/* mode 15 */
 		0,				/* operation flags (io modes) */
   		NO_POLL,			/* active poll routine */
 		NO_INIT,			/* active poll init routine */
@@ -1251,7 +1251,7 @@ static struct parse_clockinfo
 		5,				/* samples for median filter */
 		3,				/* samples for median filter to keep */
 	},
-	{				/* subtype 16 - RAWDCF RTS set, DTR clr */
+	{				/* mode 16 - RAWDCF RTS set, DTR clr */
 		RAWDCF_FLAGS,
 		NO_POLL,
 		RAWDCFDTRCLRRTSSET_INIT,
@@ -1275,7 +1275,7 @@ static struct parse_clockinfo
 		RAWDCF_SAMPLES,
 		RAWDCF_KEEP
 	},
-        {                            /* subtype 17 */
+        {                            /* mode 17 */
                 VARITEXT_FLAGS,
                 NO_POLL,
                 NO_INIT,
@@ -1299,7 +1299,7 @@ static struct parse_clockinfo
                 VARITEXT_SAMPLES,
                 VARITEXT_KEEP
         },
-	{				/* subtype 18 */
+	{				/* mode 18 */
 		MBG_FLAGS,
 		NO_POLL,
 		NO_INIT,
@@ -1323,7 +1323,7 @@ static struct parse_clockinfo
 		GPS16X_SAMPLES,
 		GPS16X_KEEP
 	},
-	{				/* subtype 19 */
+	{				/* mode 19 */
 		RAWDCF_FLAGS,
 		NO_POLL,
 		RAWDCF_INIT,
@@ -1347,7 +1347,7 @@ static struct parse_clockinfo
 		RAWDCF_SAMPLES,
 		RAWDCF_KEEP
 	},
-	{				/* subtype 20, like subtype 14 but driven by 75 baud */
+	{				/* mode 20, like mode 14 but driven by 75 baud */
 		RAWDCF_FLAGS,
 		NO_POLL,
 		RAWDCFDTRSET_INIT,
@@ -1371,7 +1371,7 @@ static struct parse_clockinfo
 		RAWDCF_SAMPLES,
 		RAWDCF_KEEP
 	},
-	{				/* subtype 21, like subtype 16 but driven by 75 baud
+	{				/* mode 21, like mode 16 but driven by 75 baud
 					 - RAWDCF RTS set, DTR clr */
 		RAWDCF_FLAGS,
 		NO_POLL,
@@ -1396,7 +1396,7 @@ static struct parse_clockinfo
 		RAWDCF_SAMPLES,
 		RAWDCF_KEEP
 	},
-	{				/* subtype 22 - like 2 with POWERUP trust */
+	{				/* mode 22 - like 2 with POWERUP trust */
 		MBG_FLAGS | PARSE_F_POWERUPTRUST,
 		NO_POLL,
 		NO_INIT,
@@ -1420,7 +1420,7 @@ static struct parse_clockinfo
 		DCFUA31_SAMPLES,
 		DCFUA31_KEEP
 	},
-	{				/* subtype 23 - like 7 with POWERUP trust */
+	{				/* mode 23 - like 7 with POWERUP trust */
 		MBG_FLAGS | PARSE_F_POWERUPTRUST,
 		GPS16X_POLL,
 		GPS16X_INIT,
@@ -1444,7 +1444,7 @@ static struct parse_clockinfo
 		GPS16X_SAMPLES,
 		GPS16X_KEEP
 	},
-	{				/* subtype 24 */
+	{				/* mode 24 */
 		SEL240X_FLAGS,
 		SEL240X_POLL,
 		SEL240X_INIT,

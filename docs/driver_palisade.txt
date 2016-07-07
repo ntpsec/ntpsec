@@ -235,14 +235,11 @@ link:#refid[+refid string+]::
 +flag4 {0 | 1}+::
   Not used by this driver.
 
-+subtype+ 'number'::
++mode+ 'number'::
    The mode parameter to the server command specifies the specific hardware
    this driver is for. The default is 0 for a normal Trimble Palisade. The
    other options are *1* for an *Endrun Praecis* in Trimble emulation mode,
    and *2* for the *Trimble Thunderbolt* GPS Disciplined Clock Receiver.
-
-+mode+ 'number'::
-   Synonym for subtype, retained for backward compatibility.
 
 == Configuration Example ==
 
