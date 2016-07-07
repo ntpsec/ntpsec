@@ -60,7 +60,7 @@
  *
  * GPS sentences other than RMC (the default) may be enabled by setting
  * the relevent bits of 'mode' in the server configuration line
- * server 127.127.20.x mode X
+ * refclock u mode X
  * 
  * bit 0 - enables RMC (1)
  * bit 1 - enables GGA (2)
