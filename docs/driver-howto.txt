@@ -114,7 +114,7 @@ is used to distinguish multiple instances of clocks of the same type.
 These addresses used to be exposed as part of the refclock
 configuration syntax, but are no longer.  Nothing in ntpd now actually
 requires this form of address for clocks, but it is still generated
-so as not to hand surprises to legacy +{ntpq}+ instances that still make
+so as not to hand surprises to legacy ntpq instances that still make
 the assumption.
 
 Most clocks require a serial or parallel port or special bus peripheral.

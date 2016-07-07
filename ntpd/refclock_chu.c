@@ -1131,7 +1131,7 @@ chu_b(
 		snprintf(p, cb, "%02x", up->cbuf[i]);
 	}
 	if (pp->sloppyclockflag & CLK_FLAG4)
-		record_clock_stats(peer, tbuf);
+		record_clock_stats(&peer->srcadr, tbuf);
 #ifdef DEBUG
 	if (debug)
 		printf("%s\n", tbuf);
@@ -1236,7 +1236,7 @@ chu_a(
 		snprintf(p, cb, "%02x", up->cbuf[i]);
 	}
 	if (pp->sloppyclockflag & CLK_FLAG4)
-		record_clock_stats(peer, tbuf);
+		record_clock_stats(&peer->srcadr, tbuf);
 #ifdef DEBUG
 	if (debug)
 		printf("%s\n", tbuf);
@@ -1410,7 +1410,7 @@ chu_second(
 		}
 	}
 	if (dtemp > 0)
-		record_clock_stats(peer, pp->a_lastcode);
+		record_clock_stats(&peer->srcadr, pp->a_lastcode);
 #ifdef DEBUG
 	if (debug)
 		printf("chu: timecode %d %s\n", pp->lencode,

@@ -1302,7 +1302,8 @@ process_packet(
 	/*
 	 * Capture the header values in the client/peer association..
 	 */
-	record_raw_stats(peer, peer->dstadr ? &peer->dstadr->sin : NULL,
+	record_raw_stats(&peer->srcadr, peer->dstadr ?
+	    &peer->dstadr->sin : NULL,
 	    &p_org, &p_rec, &p_xmt, &peer->dst,
 	    pleap, pversion, pmode, pstratum, pkt->ppoll, pkt->precision,
 	    p_del, p_disp, pkt->refid, peer->outcount);
@@ -2078,7 +2079,7 @@ clock_filter(
 	 * processing. If not synchronized or not in a burst, tickle the
 	 * clock select algorithm.
 	 */
-	record_peer_stats(peer, ctlpeerstatus(peer),
+	record_peer_stats(&peer->srcadr, ctlpeerstatus(peer),
 	    peer->offset, peer->delay, peer->disp, peer->jitter);
 #ifdef DEBUG
 	if (debug)
