@@ -97,6 +97,7 @@ typedef DECL_FIFO_ANCHOR(restrict_node) restrict_fifo;
  * Packaging these makes context copies a bit more succinct.
  */
 struct peer_ctl {
+	int		flags;
 	uint8_t		minpoll;
 	uint8_t		maxpoll;
 	uint32_t	ttl;
@@ -107,7 +108,6 @@ typedef struct peer_node_tag peer_node;
 struct peer_node_tag {
 	peer_node *	link;
 	address_node *	addr;
-	attr_val_fifo *	peerflags;
 	int		host_mode;
 	uint8_t		peerversion;
 	struct peer_ctl	ctl;

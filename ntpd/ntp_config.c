@@ -130,7 +130,6 @@ static struct masks logcfg_class_items[] = {
 };
 
 typedef struct peer_resolved_ctx_tag {
-	int		flags;
 	int		host_mode;	/* T_* token identifier */
 	u_short		family;
 	uint8_t		hmode;		/* MODE_* */
@@ -312,7 +311,6 @@ static void config_unpeers(config_tree *);
 static void config_nic_rules(config_tree *, bool input_from_file);
 static void config_reset_counters(config_tree *);
 static uint8_t get_correct_host_mode(int token);
-static int peerflag_bits(peer_node *);
 #endif	/* !SIM */
 
 #ifdef USE_WORKER
@@ -661,12 +659,7 @@ create_peer_node(
 	my_node->host_mode = hmode;
 	my_node->addr = addr;
 
-	/*
-	 * the options FIFO mixes items that will be saved in the
-	 * peer_node as explicit members, such as minpoll, and
-	 * those that are moved intact to the peer_node's peerflags
-	 * FIFO.  The options FIFO is consumed and reclaimed here.
-	 */
+	/* The options FIFO is consumed and reclaimed here */
 
 	if (options != NULL)
 		CHECK_FIFO_CONSISTENCY(*options);
@@ -686,8 +679,40 @@ create_peer_node(
 				msyslog(LOG_INFO,
 					"peer: ignoring burst or iburst option");
 			} else {
-				APPEND_G_FIFO(my_node->peerflags, option);
-				freenode = false;
+				switch (option->value.i) {
+
+				default:
+					INSIST(0);
+					break;
+
+				case T_Burst:
+					my_node->ctl.flags |= FLAG_BURST;
+					break;
+
+				case T_Iburst:
+					my_node->ctl.flags |= FLAG_IBURST;
+					break;
+
+				case T_Noselect:
+					my_node->ctl.flags |= FLAG_NOSELECT;
+					break;
+
+				case T_Preempt:
+					my_node->ctl.flags |= FLAG_PREEMPT;
+					break;
+
+				case T_Prefer:
+					my_node->ctl.flags |= FLAG_PREFER;
+					break;
+
+				case T_True:
+					my_node->ctl.flags |= FLAG_TRUE;
+					break;
+
+				case T_Xleave:
+					my_node->ctl.flags |= FLAG_XLEAVE;
+					break;
+				}
 			}
 			break;
 
@@ -2987,61 +3012,6 @@ get_correct_host_mode(
 }
 
 
-/*
- * peerflag_bits()	get config_peers() peerflags value from a
- *			peer_node's queue of flag attr_val entries.
- */
-static int
-peerflag_bits(
-	peer_node *pn
-	)
-{
-	int peerflags;
-	attr_val *option;
-
-	/* translate peerflags options to bits */
-	peerflags = 0;
-	option = HEAD_PFIFO(pn->peerflags);
-	for (; option != NULL; option = option->link) {
-		switch (option->value.i) {
-
-		default:
-			INSIST(0);
-			break;
-
-		case T_Burst:
-			peerflags |= FLAG_BURST;
-			break;
-
-		case T_Iburst:
-			peerflags |= FLAG_IBURST;
-			break;
-
-		case T_Noselect:
-			peerflags |= FLAG_NOSELECT;
-			break;
-
-		case T_Preempt:
-			peerflags |= FLAG_PREEMPT;
-			break;
-
-		case T_Prefer:
-			peerflags |= FLAG_PREFER;
-			break;
-
-		case T_True:
-			peerflags |= FLAG_TRUE;
-			break;
-
-		case T_Xleave:
-			peerflags |= FLAG_XLEAVE;
-			break;
-		}
-	}
-
-	return peerflags;
-}
-
 static void
 config_peers(
 	config_tree *ptree
@@ -3103,7 +3073,7 @@ config_peers(
 			ctx->host_mode = T_Server;
 			ctx->hmode = MODE_CLIENT;
 			ctx->version = NTP_VERSION;
-			ctx->flags = FLAG_IBURST;
+			ctx->ctl.flags = FLAG_IBURST;
 
 			ZERO(hints);
 			hints.ai_family = (u_short)ctx->family;
@@ -3141,7 +3111,7 @@ config_peers(
 				curr_peer->peerversion,
 				curr_peer->ctl.minpoll,
 				curr_peer->ctl.maxpoll,
-				peerflag_bits(curr_peer),
+				curr_peer->ctl.flags,
 				curr_peer->ctl.ttl,
 				curr_peer->ctl.peerkey);
 		/*
@@ -3168,7 +3138,7 @@ config_peers(
 					curr_peer->peerversion,
 					curr_peer->ctl.minpoll,
 					curr_peer->ctl.maxpoll,
-					peerflag_bits(curr_peer),
+					curr_peer->ctl.flags,
 					curr_peer->ctl.ttl,
 					curr_peer->ctl.peerkey);
 				if (ISREFCLOCKADR(&peeraddr))
@@ -3220,7 +3190,7 @@ config_peers(
 					curr_peer->peerversion,
 					curr_peer->ctl.minpoll,
 					curr_peer->ctl.maxpoll,
-					peerflag_bits(curr_peer),
+					curr_peer->ctl.flags,
 					curr_peer->ctl.ttl,
 					curr_peer->ctl.peerkey);
 			}
@@ -3232,7 +3202,6 @@ config_peers(
 			ctx->host_mode = curr_peer->host_mode;
 			ctx->hmode = hmode;
 			ctx->version = curr_peer->peerversion;
-			ctx->flags = peerflag_bits(curr_peer);
 			ctx->ctl = curr_peer->ctl;
 			ctx->group = curr_peer->group;
 
@@ -3322,7 +3291,7 @@ peer_name_resolved(
 				ctx->version,
 				ctx->ctl.minpoll,
 				ctx->ctl.maxpoll,
-				ctx->flags,
+				ctx->ctl.flags,
 				ctx->ctl.ttl,
 				ctx->ctl.peerkey);
 			break;
@@ -3346,7 +3315,6 @@ free_config_peers(
 			if (NULL == curr_peer)
 				break;
 			destroy_address_node(curr_peer->addr);
-			destroy_attr_val_fifo(curr_peer->peerflags);
 			free(curr_peer);
 		}
 		free(ptree->peers);
