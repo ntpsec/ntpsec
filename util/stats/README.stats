@@ -1,4 +1,4 @@
-= Statistics file formats (README.stats) =
+Statistics file formats (README.stats)
 
 The ntpd daemon can produce a variety of statistics files which are
 useful for maintenance, evaluation and retrospective calibration
@@ -14,14 +14,13 @@ consist of a string drivername followed by unit number in parentheses
 rather than the magic IP addresses used in NTP Classic.  The code can
 be built in a Classic compatibility node that restores the old behavior.
 
-== peerstats ==
+peerstats
 
 The following data are collected in the peerstats files. The files are
 reduced to summary data using the peer.sh shell script. See the peer.awk
 script for further information. A line in the file is produced upon
 reception of each valid update from a configured peer.
 
---------------------------------------------------------------------
   49236 30.756 140.173.96.1 9474 0.000603 0.37532
 
   49236             modified Julian day number
@@ -31,16 +30,14 @@ reception of each valid update from a configured peer.
   0.000603          offset (s)
   0.08929           delay (s)
   0.37532           dispersion (s)
---------------------------------------------------------------------
 
-== loopstats ==
+loopstats
 
 The following data are collected in the loopstats files. The files are
 reduced to summary data using the loop.sh shell script. See the loop.awk
 script for further information. A line in the file is produced at each
 valid update of the local clock.
 
---------------------------------------------------------------------
   49236 11.897 -0.000004 -35.9384 0
 
   49236             modified Julian day number
@@ -48,9 +45,8 @@ valid update of the local clock.
   -0.000004         time offset (s)
   -35.9384          frequency offset (ppm)
   0                 phase-lock loop time constant
---------------------------------------------------------------------
 
-== clockstats ==
+clockstats
 
 The following data are collected in the clockstats files. The files are
 reduced to summary data using the clock.sh shell script, which also
@@ -61,14 +57,12 @@ received from a configured radio clock. Data are at present recorded for
 several radios. The first part of each data line is similar for all
 radios, e.g.:
 
---------------------------------------------------------------------
   49234 60517.826 spectracom(1) 93 247 16:48:21.814
 
   49234                modified Julian day number
   60517.826            time of day (s) past midnight UTC
   spectracom(1)        receiver identifier (Spectracom unit 1)
   93 247 16:48:21.814  timecode (format varies)
---------------------------------------------------------------------
 
 In the case of the Austron GPS receiver, a good deal of additional
 information is extracted from the radio, as described below. The formats
@@ -77,30 +71,24 @@ timecode formats specific to each radio follow. See the file
 README.timecodes for detailed information on the timecode formats used
 by these radios.
 
-Spectracom receiver:
+Spectracom receiver
 
---------------------------------------------------------------------
   49234 60517.826 spectracom(1) ?A93 247 16:48:21.814
 
   The '?' and 'A' characters are present only when the receiver is
   unsynchronized; otherwise, they are replaced by space ' ' characters.
---------------------------------------------------------------------
 
-IRIG audio decoder:
+IRIG audio decoder
 
---------------------------------------------------------------------
   49234 60517.826 irig(0) 247 16:48:21?
 
   The '?' character is present only when the receiver is unsynchronized.
---------------------------------------------------------------------
 
-Austron 2200A/2201A GPS receiver:
+Austron 2200A/2201A GPS receiver
 
---------------------------------------------------------------------
   49234 60580.843 austron(1) 93:247:16:49:24.814?
 
   The '?' character is present only when the receiver is unsynchronized.
---------------------------------------------------------------------
 
 Depending on the installed options, the Austron 2200A/2201A recognizes a
 number of special commands that report various data items. See the
@@ -108,9 +96,7 @@ refclock_as2201.c source module for a list of the commands used. These
 data are collected only if the following line is included in the
 configuration file ntp.conf:
 
---------------------------------------------------------------------
   refclock austron unit 0 flag4 1    # enable extended statistics collection
---------------------------------------------------------------------
 
 The format of each data line returned is summarized in the following
 list.
@@ -121,7 +107,6 @@ These data determine the deviations of external time/frequency inputs
 relative to receiver oscillator time. The following data are typical
 using an external cesium oscillator PPS and 5-MHz outputs.
 
---------------------------------------------------------------------
   49234 60580.843 austron(1) 93:247:16:49:24.814 ETF
 
   -85.9             time interval (ns)
@@ -132,13 +117,11 @@ using an external cesium oscillator PPS and 5-MHz outputs.
   +1.592E-11        average deltaf/f
   5.297E-13         sigma deltaf/f
   500               number of samples
---------------------------------------------------------------------
 
-Model and option identifiers:
+Model and option identifiers
 
 These data show the receiver model number and option configuration.
 
---------------------------------------------------------------------
   49234 60708.848 austron(1) 93:247:16:51:32.817 ID;OPT;VER
 
   GPS 2201A         model ident (must be "GPS 2200A" or "GPS 2201A")
@@ -150,14 +133,12 @@ These data show the receiver model number and option configuration.
   B.00              data processor software version ("B.00" or later)
   B.00              signal processor software version ("B.00" or later)
   28-Apr-93         software version date ("28-Apr-93" or later)
---------------------------------------------------------------------
 
-Internal time/frequency data:
+Internal time/frequency data
 
 These data determine the deviations of the receiver oscillator with
 respect to satellite time.
 
---------------------------------------------------------------------
   49234 60564.846 austron(1) 93:247:16:49:08.816 ITF
 
   COCO              current mode (must be "COCO")
@@ -168,14 +149,12 @@ respect to satellite time.
   -6.4746E-11       oscillator ageing rate
   500.00            loop time constant
   4.984072          electrical tuning (V)
---------------------------------------------------------------------
 
-GPS/LORAN ensemble data (requires LORAN assist option LORAN):
+GPS/LORAN ensemble data (requires LORAN assist option LORAN)
 
 These data determine the deviations and weights to calculate ensemble
 time from GPS and LORAN data.
 
---------------------------------------------------------------------
   49234 60596.852 austron(1) 93:247:16:49:40.812 LORAN ENSEMBLE
 
   +9.06E-08         GPS t (s)
@@ -186,15 +165,13 @@ time from GPS and LORAN data.
   .468              LORAN weight
   +6.56E-08         ensemble t
   +6.94E-08         ensemble sigma (s)
---------------------------------------------------------------------
 
-LORAN stationkeeping data (requires LORAN assist option LORAN):
+LORAN stationkeeping data (requires LORAN assist option LORAN)
 
 These data determine which stations of the LORAN chain are being
 tracked, together with individual signal/noise ratios, deviations and
 weights.
 
---------------------------------------------------------------------
   49234 60532.850 austron(1) 93:247:16:48:36.820 LORAN TDATA
 
   M                 station identifier; data follows
@@ -209,14 +186,12 @@ weights.
   X OK 0 0 1740.27 -11.2 2.20E-07 .294  station identifier and data
   Y OK 0 0 2180.71 -4.6 2.68E-07 .198  station identifier and data
   Z CV 0 0 3392.94 -30.0  station identifier and data
---------------------------------------------------------------------
 
-Oscillator status and environment:
+Oscillator status and environment
 
 These data determine the receiver oscillator type, mode, status and
 environment. Nominal operating conditions are shown below.
 
---------------------------------------------------------------------
   49234 60628.847 austron(1) 93:247:16:50:12.817 OSC;ET;TEMP
 
   1121 Software     Control  oscillator model and mode (must be
@@ -224,14 +199,12 @@ environment. Nominal operating conditions are shown below.
   Locked            status (must be "Locked")
   4.979905          electrical tuning (V)
   44.81             oscillator cavity temperature
---------------------------------------------------------------------
 
-Receiver position, status and offsets:
+Receiver position, status and offsets
 
 These data determine the receiver position and elevation, together with
 programmable delay corrections for the antenna cable and receiver.
 
---------------------------------------------------------------------
   49234 60788.847 austron(1) 93:247:16:52:52.817 POS;PPS;PPSOFF
 
   +39:40:48.425     receiver latitude (N)
@@ -243,28 +216,24 @@ programmable delay corrections for the antenna cable and receiver.
                     receiver)
   200               cable delay (ns)
   0                 user time bias (ns) (must be zero)
---------------------------------------------------------------------
 
-Satellite tracking status:
+Satellite tracking status
 
 These data determine how many satellites are being tracked. At the
 present state of constellation development, there should be at least
 three visible satellites in view. Much of the time the maximum of
 seven are being tracked; rarely this number drops to two.
 
---------------------------------------------------------------------
   49234 60612.850 austron(1) 93:247:16:49:56.820 TRSTAT
 
   24 T              satellite prn and status (T = track, A = acquire)
   16 A 13 T 20 T 18 T 07 T 12 T  list continued
---------------------------------------------------------------------
 
-UTC leap-second information:
+UTC leap-second information
 
 These data determine when the next leap second is to occur. The exact
 method to use is obscure.
 
---------------------------------------------------------------------
   49234 60548.847 austron(1) 93:247:16:48:52.818 UTC
 
   -1.2107E-08       A0 term (s)
@@ -275,7 +244,4 @@ method to use is obscure.
   +1.9100E+02       week number for future leap (weeks)
   +4.0000E+00       day number for future leap (days)
   +9.0000E+00       future leap seconds (s)
---------------------------------------------------------------------
-
-// end
 
