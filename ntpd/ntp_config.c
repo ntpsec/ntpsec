@@ -50,16 +50,15 @@
 #endif
 
 /*
- * In the past, we told reference clocks from network peers by giving the
- * reference clocks an address of the form 127.127.t.u, where t is the
- * type and u is the unit number.  In ntpd itself, the filtering that
- * used to be done based on this magic address prefix is now done
- * using the is_refclock_packet() test on incoming packets.   In ntpq, the
- * filtering is replaced by asking the server how a peer's name should
- * be displayed.
+ * In the past, we told reference clocks from network peers by giving
+ * the reference clocks magic address of a particular special form
+ * ntpd itself, the filtering that used to be done based on this magic
+ * address prefix is now done using a flag set on incoming packets.
+ * In ntpq, the filtering is replaced by asking the server how a
+ * peer's name should be displayed.
  *
- * Address filtering is still done here so we can tell which config
- * declarations refer to clocks.
+ * Address filtering is still done in this file so we can tell which old-style
+ * config declarations refer to clocks. When that syntax is retired, drop these.
  */
 #define	REFCLOCK_ADDR	0x7f7f0000	/* 127.127.0.0 */
 #define	REFCLOCK_MASK	0xffff0000	/* 255.255.0.0 */
@@ -70,7 +69,7 @@
 
 /*
  * Macros to determine the clock type and unit numbers from a
- * 127.127.t.u address
+ * refclock magic address
  */
 #define	REFCLOCKTYPE(srcadr)	((SRCADR(srcadr) >> 8) & 0xff)
 #define REFCLOCKUNIT(srcadr)	(SRCADR(srcadr) & 0xff)
