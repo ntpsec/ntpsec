@@ -63,9 +63,6 @@ link:clockopt.html[+flag4 {0 | 1}+]::
 +
 Default setting is 0 = don't log received data and converted utc time.
 
-+subtype+::
-   Not used by this driver.
-
 +mode+::
    Not used by this driver.
 

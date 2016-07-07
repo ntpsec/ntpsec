@@ -173,8 +173,6 @@ for the specific unit.
 +flag4 {0 | 1}+::
    If flag4 is set, clockstats records will be written when the driver is
    polled.
-+subtype+::
-   Not used by this driver.
 +mode+::
    Can be used to set private mode
 

@@ -71,8 +71,6 @@ Format].
    Not used by this driver.
 +flag4 {0 | 1}+::
    Not used by this driver.
-+subtype+::
-   Not used by this driver.
 +mode+::
    Not used by this driver.
 

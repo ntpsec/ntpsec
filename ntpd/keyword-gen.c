@@ -89,7 +89,6 @@ struct key_tok ntp_keywords[] = {
 { "mode",		T_Mode,			FOLLBY_TOKEN },
 { "noselect",		T_Noselect,		FOLLBY_TOKEN },
 { "preempt",		T_Preempt,		FOLLBY_TOKEN },
-{ "subtype",		T_Mode,			FOLLBY_TOKEN },
 { "true",		T_True,			FOLLBY_TOKEN },
 { "prefer",		T_Prefer,		FOLLBY_TOKEN },
 { "ttl",		T_Ttl,			FOLLBY_TOKEN },

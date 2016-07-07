@@ -431,7 +431,7 @@ jjy_start ( int unit, struct peer *peer )
 	jjy_write_clockstats( peer, JJY_CLOCKSTATS_MARK_JJY, sLog ) ;
 
 	/*
-	 * peer->ttl is a subtype number specified by "127.127.40.X mode N" in the ntp.conf
+	 * peer->ttl is a mode number specified by "127.127.40.X mode N" in the ntp.conf
 	 */
 	switch ( peer->ttl ) {
 	case 0 :
@@ -1037,7 +1037,7 @@ jjy_synctime ( struct peer *peer, struct refclockproc *pp, struct jjyunit *up )
 /*##												##*/
 /*##    The Tristate Ltd. JJY receiver TS-JJY01, TS-JJY02					##*/
 /*##												##*/
-/*##    server  127.127.40.X  subtype 1								##*/
+/*##    server  127.127.40.X  mode 1								##*/
 /*##												##*/
 /*################################################################################################*/
 /*################################################################################################*/
@@ -1368,7 +1368,7 @@ jjy_poll_tristate_jjy01  ( int unit, struct peer *peer )
 /*##												##*/
 /*##    The C-DEX Co. Ltd. JJY receiver JST2000							##*/
 /*##												##*/
-/*##    server  127.127.40.X  subtype 2								##*/
+/*##    server  127.127.40.X  mode 2								##*/
 /*##												##*/
 /*################################################################################################*/
 /*################################################################################################*/
@@ -1531,7 +1531,7 @@ jjy_poll_cdex_jst2000 ( int unit, struct peer *peer )
 /*##												##*/
 /*##    The Echo Keisokuki Co. Ltd. JJY receiver LT2000						##*/
 /*##												##*/
-/*##    server  127.127.40.X  subtype 3								##*/
+/*##    server  127.127.40.X  mode 3								##*/
 /*##												##*/
 /*################################################################################################*/
 /*################################################################################################*/
@@ -1763,7 +1763,7 @@ jjy_poll_echokeisokuki_lt2000 ( int unit, struct peer *peer )
 /*##												##*/
 /*##    The CITIZEN T.I.C CO., LTD. JJY receiver JJY200						##*/
 /*##												##*/
-/*##    server  127.127.40.X  subtype 4								##*/
+/*##    server  127.127.40.X  mode 4								##*/
 /*##												##*/
 /*################################################################################################*/
 /*################################################################################################*/
@@ -1904,12 +1904,12 @@ jjy_poll_citizentic_jjy200 ( int unit, struct peer *peer )
 /*##												##*/
 /*##    The Tristate Ltd. GPS clock TS-GPS01							##*/
 /*##												##*/
-/*##    server  127.127.40.X  subtype 5								##*/
+/*##    server  127.127.40.X  mode 5								##*/
 /*##												##*/
 /*################################################################################################*/
 /*################################################################################################*/
 /*                                                                                                */
-/*  This clock has NMEA mode and command/response mode.                                            */
+/*  This clock has NMEA mode and command/respose mode.                                            */
 /*  When this jjy driver are used, set to command/respose mode of this clock                      */
 /*  by the onboard switch SW4, and make sure the LED-Y is tured on.                               */
 /*  Other than this JJY driver, the refclock driver type 20, generic NMEA driver,                 */
@@ -2259,7 +2259,7 @@ jjy_poll_tristate_gpsclock01 ( int unit, struct peer *peer )
 /*##												##*/
 /*##    The SEIKO TIME SYSTEMS TDC-300								##*/
 /*##												##*/
-/*##    server  127.127.40.X  subtype 6								##*/
+/*##    server  127.127.40.X  mode 6								##*/
 /*##												##*/
 /*################################################################################################*/
 /*################################################################################################*/
@@ -2490,7 +2490,7 @@ jjy_poll_seiko_tsys_tdc_300 ( int unit, struct peer *peer )
 /*##												##*/
 /*##    Telephone JJY										##*/
 /*##												##*/
-/*##    server  127.127.40.X  subtype 100 to 180							##*/
+/*##    server  127.127.40.X  mode 100 to 180							##*/
 /*##												##*/
 /*################################################################################################*/
 /*################################################################################################*/
@@ -3084,7 +3084,7 @@ teljjy_getDelay ( struct peer *peer, struct jjyunit *up )
 		return -1 ;
 	}
 
-	/* subtype 101 = 1%, subtype 150 = 50%, subtype 180 = 80% */
+	/* mode 101 = 1%, mode 150 = 50%, mode 180 = 80% */
 
 	iPercent = ( peer->ttl - 100 ) ;
 
@@ -3488,10 +3488,10 @@ teljjy_conn_data ( struct peer *peer, struct refclockproc *pp, struct jjyunit *u
 			bAdjustment = true ;
 
 			if ( peer->ttl == 100 ) {
-				/* subtype=100 */
+				/* mode=100 */
 				up->msecond = 0 ;
 			} else {
-				/* subtype=101 to 110 */
+				/* mode=101 to 110 */
 				up->msecond = teljjy_getDelay( peer, up ) ;
 				if (up->msecond < 0 ) {
 					up->msecond = 0 ;

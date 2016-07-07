@@ -18,7 +18,7 @@ The generic driver supports many different clock
 types/configurations by plugging type-specific packet-parsing
 routine into a generic drive framework.
 
-Note that some of these subtypes below are to support equipment that
+Note that some of these modes below are to support equipment that
 has not been commercially available for a long time, and may be
 removed in a future release.  See
 https://www.ntpsec.org/removal-plan.html[Feature removals] for a
@@ -114,7 +114,7 @@ SEL-2407 in one of its development labs.
 
 The pictures below have been archived from the vendors' web pages.
 
-* *refclock generic unit 0-3 subtype 0*
+* *refclock generic unit 0-3 mode 0*
 +
 *http://www.meinberg.de[Meinberg] https://www.meinbergglobal.com/english/archive/pzf511.htm[PZF5xx receiver family] (FM demodulation/TCXO / 50&mu;s)*
 +
@@ -122,7 +122,7 @@ WARNING: This equipment is no longer available for commercial sale, and
 support may be removed in the future.  See: 
 https://www.ntpsec.org/removal-plan.html[Feature removals]
 
-* *refclock generic unit 0-3 subtype 1*
+* *refclock generic unit 0-3 mode 1*
 +
 *http://www.meinberg.de[Meinberg] https://www.meinbergglobal.com/english/archive/pzf511.htm[PZF5xx receiver family] (FM demodulation/OCXO / 50&mu;s)*
 +
@@ -132,15 +132,15 @@ https://www.ntpsec.org/removal-plan.html[Feature removals]
 
 image::pic/pzf511.jpg[http://www.meinberg.de/english/products/pzf-eurocard.htm]
 
-* *refclock generic unit 0-3 subtype 2*
+* *refclock generic unit 0-3 mode 2*
 +
 *http://www.meinberg.de[Meinberg] https://www.meinbergglobal.com/english/archive/c51.htm[DCF C51 receiver and similar] (AM demodulation / 4ms)*
 +
 image:pic/c51.jpg[http://www.meinberg.de/english/products/c51.htm]
 +
-This subtype expects the Meinberg standard time string format with 9600/7E2.
+This mode expects the Meinberg standard time string format with 9600/7E2.
 +
-*Note:* subtype 2 must also be used for
+*Note:* mode 2 must also be used for
 http://www.meinberg.de/english/products/formfactor.htm#slot_card[Meinberg
 PCI cards] under Linux, e.g.
 http://www.meinberg.de/english/products/gps-pcicard.htm[the GPS PCI
@@ -151,7 +151,7 @@ installed. That driver emulates a refclock device in order to allow {ntpd}
 to access those cards. For details, please refer to the README file
 that comes with the Meinberg driver package.
 
-* *refclock generic unit 0-3 subtype 3*
+* *refclock generic unit 0-3 mode 3*
 +
 http://www.elv.de/[ELV] *DCF7000 (sloppy AM demodulation / 50ms)*
 +
@@ -159,7 +159,7 @@ WARNING: This equipment is no longer available for commercial sale, and
 support may be removed in the future.  See: 
 https://www.ntpsec.org/removal-plan.html[Feature removals]
 
-* *refclock generic unit 0-3 subtype 4*
+* *refclock generic unit 0-3 mode 4*
 +
 *Walter Schmid DCF receiver Kit (AM demodulation / 1ms)*
 +
@@ -167,41 +167,41 @@ WARNING: This equipment is no longer available for commercial sale, and
 support may be removed in the future.  See: 
 https://www.ntpsec.org/removal-plan.html[Feature removals]
 
-* *refclock generic unit 0-3 subtype 5*
+* *refclock generic unit 0-3 mode 5*
 +
 *RAW DCF77 100/200ms pulses (Conrad DCF77 receiver module / 5ms)*
 
-* *refclock generic unit 0-3 subtype 6*
+* *refclock generic unit 0-3 mode 6*
 +
 *RAW DCF77 100/200ms pulses (TimeBrick DCF77 receiver module / 5ms)*
 
-* *refclock generic unit 0-3 subtype 7*
+* *refclock generic unit 0-3 mode 7*
 +
 * http://www.meinberg.de[Meinberg] http://www.meinberg.de/english/products/timesource.htm#gps---freq_sync[GPS16x/GPS17x receivers] (GPS / <<1&mu;s) *
 +
 image:pic/gps167.jpg[http://www.meinberg.de/english/products/gps-eurocard.htm]
 +
-This subtype expects either the University of Erlangen time string format
+This mode expects either the University of Erlangen time string format
 or the Meinberg standard time string format at 19200/8N1.
 +
 The University of Erlangen format is preferred. Newer Meinberg GPS
 receivers can be configured to transmit that format; for older devices,
 a special firmware version may be available.
 +
-In this subtype some additional GPS receiver status information is also
+In this mode some additional GPS receiver status information is also
 read. However, this requires a point-to-point connection.
-link:imap://mills@mail.eecis.udel.edu:993/fetch%3EUID%3E.INBOX%3E67132?part=1.3&type=text/html&filename=driver_generic.html#subtype18[Subtype
+link:imap://mills@mail.eecis.udel.edu:993/fetch%3EUID%3E.INBOX%3E67132?part=1.3&type=text/html&filename=driver_generic.html#mode18[Mode
 18] should be used if the device is accessed by a multidrop connection.
 +
-*Note:* subtype 7 must not be used with Meinberg PCI cards; use subtype 2 instead.
+*Note:* mode 7 must not be used with Meinberg PCI cards; use mode 2 instead.
 
-* *refclock generic unit 0-3 subtype 8*
+* *refclock generic unit 0-3 mode 8*
 +
 http://www.igel.de/[IGEL] http://www.igel.de/eigelmn.html[clock]
 +
 image:pic/igclock.gif[http://www.igel.de/eigelmn.html]
 
-* *refclock generic unit 0-3 subtype 9*
+* *refclock generic unit 0-3 mode 9*
 +
 *http://www.trimble.com[Trimble] ftp://ftp.trimble.com/pub/sct/embedded/bin/Data%20Sheets/SveeSix2.PDF[SVeeSix GPS receiver] TAIP protocol (GPS / <<1&mu;s)*
 +
@@ -209,7 +209,7 @@ WARNING: This equipment is no longer available for commercial sale, and
 support may be removed in the future.  See: 
 https://www.ntpsec.org/removal-plan.html[Feature removals]
 
-* *refclock generic unit 0-3 subtype 10*
+* *refclock generic unit 0-3 mode 10*
 +
 *http://www.trimble.com[Trimble] ftp://ftp.trimble.com/pub/sct/embedded/bin/Data%20Sheets/SveeSix2.PDF[SVeeSix GPS receiver] (GPS / <<1&mu;s) (no kernel support yet)*
 +
@@ -221,74 +221,74 @@ image:pic/pd_om011.gif[http://www.trimble.com/cgi/omprod.cgi/pd_om011.html]
 +
 image:pic/pd_om006.gif[http://www.trimble.com/cgi/omprod.cgi/pd_om006.html]
 
-* *refclock generic unit 0-3 subtype 11*
+* *refclock generic unit 0-3 mode 11*
 +
 *Radiocode Clocks Ltd RCC 8000 Intelligent Off-Air Master Clock support*
 
-* *refclock generic unit 0-3 subtype 12*
+* *refclock generic unit 0-3 mode 12*
 +
 *http://www.hopf-time.com[HOPF] http://hopf.com/manuals/english/pdf_6---/e6021gps_0601.pdf[Funkuhr 6021]*
 +
 image:pic/fg6021.gif[http://www.hopf-time.com/engl/kart6021.html]
 
-* *refclock generic unit 0-3 subtype 13*
+* *refclock generic unit 0-3 mode 13*
 +
 *Diem's Computime Radio Clock*
 
-* *refclock generic unit 0-3 subtype 14*
+* *refclock generic unit 0-3 mode 14*
 +
 *RAWDCF receiver (DTR=high/RTS=low)*
 
-* *refclock generic unit 0-3 subtype 15*
+* *refclock generic unit 0-3 mode 15*
 +
 *WHARTON 400A Series Clocks with a 404.2 Serial Interface*
 
-* *refclock generic unit 0-3 subtype 16*
+* *refclock generic unit 0-3 mode 16*
 +
 *RAWDCF receiver (DTR=low/RTS=high)*
 
-* *refclock generic unit 0-3 subtype 17*
+* *refclock generic unit 0-3 mode 17*
 +
 *VARITEXT Receiver (MSF)*
 
-* *refclock generic unit 0-3 subtype 18*
+* *refclock generic unit 0-3 mode 18*
 +
 *http://www.meinberg.de[Meinberg] http://www.meinberg.de/english/products/timesource.htm#gps---freq_sync[GPS16x/GPS17x receivers] (GPS / <<1&mu;s)*
 +
-This subtype works without additional data communication (version, GPS
+This mode works without additional data communication (version, GPS
 status etc.) and thus should be used with multidrop, heterogeneous
 multiclient operation.
 +
-*Note:* subtype 18 must not be used with Meinberg PCI cards, use subtype 2
+*Note:* mode 18 must not be used with Meinberg PCI cards, use mode 2
 instead.
 
-* *refclock generic unit 0-3 subtype 19*
+* *refclock generic unit 0-3 mode 19*
 +
 *Gude Analog- und Digitalsystem GmbH \'Expert mouseCLOCK USB v2.0'*
 
-* *refclock generic unit 0-3 subtype 20*
+* *refclock generic unit 0-3 mode 20*
 +
-*RAWDCF receiver similar to subtype 14, but operating @ 75 baud (DTR=high/RTS=low)*
+*RAWDCF receiver similar to mode 14, but operating @ 75 baud (DTR=high/RTS=low)*
 +
 Driving the DCF clocks at 75 baud may help to get them to work with a
 bunch of common USB serial converters, that do 75 but cannot do 50 baud
 at all, e.g. those based on Prolific PL2303.
 
-* *refclock generic unit 0-3 subtype 21*
+* *refclock generic unit 0-3 mode 21*
 +
-*RAWDCF receiver similar to subtype 16, but operating @ 75 baud (DTR=low/RTS=high)*
+*RAWDCF receiver similar to mode 16, but operating @ 75 baud (DTR=low/RTS=high)*
 +
-See comment from subtype 20 clock.
+See comment from mode 20 clock.
 
-* *refclock generic unit 0-3 subtype 22*
+* *refclock generic unit 0-3 mode 22*
 +
-*MEINBERG, subtype 2 but with POWERUP trust*
+*MEINBERG, mode 2 but with POWERUP trust*
 
-* *refclock generic unit 0-3 subtype 23*
+* *refclock generic unit 0-3 mode 23*
 +
-*MEINBERG, subtype 7 but with POWERUP trust*
+*MEINBERG, mode 7 but with POWERUP trust*
 
-* *refclock generic unit 0-3 subtype 24*
+* *refclock generic unit 0-3 mode 24*
 +
 *http://www.selinc.com/[Schweitzer Engineering Laboratories]*
 
@@ -326,13 +326,13 @@ In addition to the PPS loopfilter control, a true PPS hardware signal
 can be utilized via the PPSAPI interface. PPS pulses are usually fed via
 a level converter to the DCD pin of an RS-232 serial port (pin 8 of a
 25-pin connector or pin 1 of a 9-pin connector). To select PPS support,
-the subtype parameter is the subtype value as above plus 128. If 128 is not
-added to the subtype value, PPS will be detected to be available but will
+the mode parameter is the mode value as above plus 128. If 128 is not
+added to the mode value, PPS will be detected to be available but will
 not be used.
 
 == Hardware PPS support ==
 
-For PPS to be used, add 128 to the subtype parameter.
+For PPS to be used, add 128 to the mode parameter.
 
 If the PPS signal is fed in from a device different from the device
 providing the serial communication (/dev/refclock-\{0..3}), this device
@@ -452,10 +452,8 @@ screen width and looks similar to:
 +flag4 {0 | 1}+::
   Delete next leap second instead of adding it. (You'll need to wait a
   bit for that to happen 8-)
-+subtype+::
-  Used to select the device type and serial parameters.
 +mode+::
-  Synonym for subtype, retained for backward compatibility.
+  Used to select the device type and serial parameters.
 
 == Configuration Examples ==
 
