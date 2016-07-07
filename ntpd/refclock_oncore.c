@@ -4075,7 +4075,7 @@ oncore_log (
 	)
 {
 	msyslog(log_level, "ONCORE[%d]: %s", instance->unit, msg);
-	mprintf_clock_stats(&instance->peer->srcadr, "ONCORE[%d]: %s",
+	mprintf_clock_stats(instance->peer, "ONCORE[%d]: %s",
 			    instance->unit, msg);
 }
 

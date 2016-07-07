@@ -534,7 +534,7 @@ jjy_shutdown ( int unit, struct peer *peer )
 	}
 
 	snprintf( sLog, sizeof(sLog), "JJY stopped. unit=%d subtype=%d", unit, peer->ttl ) ;
-	record_clock_stats( &peer->srcadr, sLog ) ;
+	record_clock_stats(peer, sLog ) ;
 
 }
 
@@ -4465,7 +4465,7 @@ jjy_write_clockstats ( struct peer *peer, int iMark, const char *pData )
 		printf( "refclock_jjy.c : clockstats : %s\n", sLog ) ;
 	}
 #endif
-	record_clock_stats( &peer->srcadr, sLog ) ;
+	record_clock_stats( peer, sLog ) ;
 
 }
 
