@@ -457,7 +457,7 @@ def cmd_configure(ctx, config):
 	# Shouldn't be an issue as 8.x shipped in January 1991!
 	# ctx.define("NEED_RCVBUF_SLOP", 1)
 
-	# It should be possible to use asynchrpnous I/O with notification
+	# It should be possible to use asynchronous I/O with notification
 	# by SIGIO on any Unix conformant to POSIX.1-2001. But the code to
 	# do this is untested and there are historical reasons to suspect
 	# it might not work reliably on all platforms.  Enable cautiously
@@ -546,6 +546,10 @@ def cmd_configure(ctx, config):
 		from pylib.check_mdns import check_mdns_run
 		check_mdns_run(ctx)
 
+	if ctx.options.enable_classic_mode:
+		ctx.define("ENABLE_CLASSIC_MODE", 1)
+	else:
+		ctx.undefine("ENABLE_CLASSIC_MODE")
 
 	if ctx.env.PTHREAD_ENABLE:
 		ctx.define("ISC_PLATFORM_USETHREADS", 1)
