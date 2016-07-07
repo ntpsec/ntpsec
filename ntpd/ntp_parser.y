@@ -220,6 +220,7 @@
 %token	<Integer>	T_Stepfwd
 %token	<Integer>	T_Stepout
 %token	<Integer>	T_Stratum
+%token	<Integer>	T_Subtype
 %token	<String>	T_String		/* not a token */
 %token	<Integer>	T_Sys
 %token	<Integer>	T_Sysstats
@@ -482,6 +483,7 @@ option_int_keyword
 	|	T_Maxpoll
 	|	T_Ttl
 	|	T_Mode
+	|	T_Subtype
 	|	T_Version
 	;
 

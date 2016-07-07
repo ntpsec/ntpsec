@@ -91,6 +91,7 @@ struct key_tok ntp_keywords[] = {
 { "preempt",		T_Preempt,		FOLLBY_TOKEN },
 { "true",		T_True,			FOLLBY_TOKEN },
 { "prefer",		T_Prefer,		FOLLBY_TOKEN },
+{ "subtype",		T_Subtype,		FOLLBY_TOKEN },
 { "ttl",		T_Ttl,			FOLLBY_TOKEN },
 { "version",		T_Version,		FOLLBY_TOKEN },
 { "xleave",		T_Xleave,		FOLLBY_TOKEN },

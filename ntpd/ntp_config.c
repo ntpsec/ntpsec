@@ -731,6 +731,7 @@ create_peer_node(
 			}
 			break;
 
+		case T_Subtype:
 		case T_Mode:
 			my_node->ttl = option->value.u;
 			break;
