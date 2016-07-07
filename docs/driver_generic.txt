@@ -76,6 +76,11 @@ refclock_ppstime::
 Currently, twenty-five clock types are supported by the GENERIC driver
 and any number of these clocks may be operational at any one time.
 
+Note: In {project-shortname}, you _must_ use the new configuration
+syntax (refclock generic subtype N) to declare generic clocks, rather
+than the old-style syntax with a magic address. We apologize for
+the inconvenience.
+
 A note on the implementations:
 
 * These implementations were mainly done without actual access to the
