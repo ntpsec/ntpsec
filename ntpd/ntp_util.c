@@ -386,7 +386,7 @@ stats_config(
  * file format:
  * day (MJD)
  * time (s past UTC midnight)
- * IP address
+ * IP address (old format) or drivername(unit) (new format)
  * status word (hex)
  * offset
  * delay
@@ -418,6 +418,16 @@ record_peer_stats(
 	}
 }
 
+static const char *
+peerlabel(const struct peer *peer)
+{
+#ifndef ENABLE_CLASSIC_MODE
+ 	if (peer->procptr != NULL)
+		return refclock_name((struct peer *)peer);
+	else
+#endif /* ENABLE_CLASSIC_MODE */
+		return stoa(&peer->srcadr);
+}
 
 /*
  * record_loop_stats - write loop filter statistics to file
@@ -465,7 +475,7 @@ record_loop_stats(
  * file format:
  * day (MJD)
  * time (s past midnight)
- * IP address
+ * IP address (old format) or drivername(unit) new format
  * text message
  */
 void
@@ -486,7 +496,7 @@ record_clock_stats(
 	now.l_ui %= 86400;
 	if (clockstats.fp != NULL) {
 		fprintf(clockstats.fp, "%lu %s %s %s\n", day,
-		    ulfptoa(&now, 3), stoa(&peer->srcadr), text);
+		    ulfptoa(&now, 3), peerlabel(peer), text);
 		fflush(clockstats.fp);
 	}
 }
@@ -523,7 +533,7 @@ mprintf_clock_stats(
  * day (MJD)
  * time (s past midnight)
  * peer ip address
- * IP address
+ * IP address old format) or drivername(unit) (new format)
  * t1 t2 t3 t4 timestamps
  */
 void
@@ -551,7 +561,7 @@ record_raw_stats(
 	l_fp	now;
 	u_long	day;
 
-	UNUSED_ARG(peer);
+	UNUSED_ARG(srcadr);
 	
 	if (!stats_control)
 		return;
@@ -563,7 +573,7 @@ record_raw_stats(
 	if (rawstats.fp != NULL) {
 		fprintf(rawstats.fp, "%lu %s %s %s %s %s %s %s %d %d %d %d %d %d %.6f %.6f %s %d\n",
 		    day, ulfptoa(&now, 3),
-		    stoa(srcadr), dstadr ?  stoa(dstadr) : "-",
+		    peerlabel(peer), dstadr ?  stoa(dstadr) : "-",
 		    ulfptoa(t1, 9), ulfptoa(t2, 9),
 		    ulfptoa(t3, 9), ulfptoa(t4, 9),
 		    leap, version, mode, stratum, ppoll, precision,
