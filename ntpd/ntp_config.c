@@ -133,12 +133,9 @@ typedef struct peer_resolved_ctx_tag {
 	int		flags;
 	int		host_mode;	/* T_* token identifier */
 	u_short		family;
-	keyid_t		keyid;
 	uint8_t		hmode;		/* MODE_* */
 	uint8_t		version;
-	uint8_t		minpoll;
-	uint8_t		maxpoll;
-	uint32_t		ttl;
+	struct peer_ctl	ctl;
 	const char *	group;
 } peer_resolved_ctx;
 
@@ -701,9 +698,9 @@ create_peer_node(
 					"minpoll: provided value (%d) is out of range [%d-%d])",
 					option->value.i, NTP_MINPOLL,
 					UCHAR_MAX);
-				my_node->minpoll = NTP_MINPOLL;
+				my_node->ctl.minpoll = NTP_MINPOLL;
 			} else {
-				my_node->minpoll =
+				my_node->ctl.minpoll =
 					(uint8_t)option->value.u;
 			}
 			break;
@@ -714,9 +711,9 @@ create_peer_node(
 				msyslog(LOG_INFO,
 					"maxpoll: provided value (%d) is out of range [0-%d])",
 					option->value.i, NTP_MAXPOLL);
-				my_node->maxpoll = NTP_MAXPOLL;
+				my_node->ctl.maxpoll = NTP_MAXPOLL;
 			} else {
-				my_node->maxpoll =
+				my_node->ctl.maxpoll =
 					(uint8_t)option->value.u;
 			}
 			break;
@@ -726,13 +723,13 @@ create_peer_node(
 				msyslog(LOG_ERR, "ttl: invalid argument");
 				errflag = true;
 			} else {
-				my_node->ttl = (uint8_t)option->value.u;
+				my_node->ctl.ttl = (uint8_t)option->value.u;
 			}
 			break;
 
 		case T_Subtype:
 		case T_Mode:
-			my_node->ttl = option->value.u;
+			my_node->ctl.ttl = option->value.u;
 			break;
 
 		case T_Key:
@@ -740,7 +737,7 @@ create_peer_node(
 				msyslog(LOG_ERR, "key: invalid argument");
 				errflag = true;
 			} else {
-				my_node->peerkey =
+				my_node->ctl.peerkey =
 					(keyid_t)option->value.u;
 			}
 			break;
@@ -3142,11 +3139,11 @@ config_peers(
 				NULL,
 				hmode,
 				curr_peer->peerversion,
-				curr_peer->minpoll,
-				curr_peer->maxpoll,
+				curr_peer->ctl.minpoll,
+				curr_peer->ctl.maxpoll,
 				peerflag_bits(curr_peer),
-				curr_peer->ttl,
-				curr_peer->peerkey);
+				curr_peer->ctl.ttl,
+				curr_peer->ctl.peerkey);
 		/*
 		 * If we have a numeric address, we can safely
 		 * proceed in the mainline with it.
@@ -3161,7 +3158,7 @@ config_peers(
 				/* save maxpoll from config line
 				 * newpeer smashes it
 				 */
-				uint8_t maxpoll = curr_peer->maxpoll;
+				uint8_t maxpoll = curr_peer->ctl.maxpoll;
 #endif
 				struct peer *peer = peer_config(
 					&peeraddr,
@@ -3169,11 +3166,11 @@ config_peers(
 					NULL,
 					hmode,
 					curr_peer->peerversion,
-					curr_peer->minpoll,
-					curr_peer->maxpoll,
+					curr_peer->ctl.minpoll,
+					curr_peer->ctl.maxpoll,
 					peerflag_bits(curr_peer),
-					curr_peer->ttl,
-					curr_peer->peerkey);
+					curr_peer->ctl.ttl,
+					curr_peer->ctl.peerkey);
 				if (ISREFCLOCKADR(&peeraddr))
 				{
 #ifdef REFCLOCK
@@ -3221,11 +3218,11 @@ config_peers(
 					NULL,
 					hmode,
 					curr_peer->peerversion,
-					curr_peer->minpoll,
-					curr_peer->maxpoll,
+					curr_peer->ctl.minpoll,
+					curr_peer->ctl.maxpoll,
 					peerflag_bits(curr_peer),
-					curr_peer->ttl,
-					curr_peer->peerkey);
+					curr_peer->ctl.ttl,
+					curr_peer->ctl.peerkey);
 			}
 		} else {
 			/* hand the hostname off to the blocking child */
@@ -3235,11 +3232,8 @@ config_peers(
 			ctx->host_mode = curr_peer->host_mode;
 			ctx->hmode = hmode;
 			ctx->version = curr_peer->peerversion;
-			ctx->minpoll = curr_peer->minpoll;
-			ctx->maxpoll = curr_peer->maxpoll;
 			ctx->flags = peerflag_bits(curr_peer);
-			ctx->ttl = curr_peer->ttl;
-			ctx->keyid = curr_peer->peerkey;
+			ctx->ctl = curr_peer->ctl;
 			ctx->group = curr_peer->group;
 
 			ZERO(hints);
@@ -3326,11 +3320,11 @@ peer_name_resolved(
 				NULL,
 				ctx->hmode,
 				ctx->version,
-				ctx->minpoll,
-				ctx->maxpoll,
+				ctx->ctl.minpoll,
+				ctx->ctl.maxpoll,
 				ctx->flags,
-				ctx->ttl,
-				ctx->keyid);
+				ctx->ctl.ttl,
+				ctx->ctl.peerkey);
 			break;
 		}
 	}
