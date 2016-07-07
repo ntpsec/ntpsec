@@ -10,13 +10,10 @@ support can run as low as 3k code with the parse refclock driver.
 The structure of the parse reference clock driver is as follows:
 
 ntpd contains the contains NTP implementation and calls a reference
-clock 127.127.8.x which is implemented by refclock_parse.c, which
-contains several refclock decriptions. These are selected by the x
-part of the refclock address.  The lower two bits specify the device
-to use. Thus the value (x % 4) determines the device to open
-(/dev/refclock-0 - /dev/refclock-3).
+clock driver named "generic" which is implemented by refclock_parse.c,
+which contains a large number of refclock descriptions.
 
-The kind of clock is selected by the mode parameter. This parameter
+The kind of clock is selected by the subtype parameter. This parameter
 selects the clock type which determines how I/O is done, the tty
 parameters and the NTP parameters.
 

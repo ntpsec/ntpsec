@@ -137,6 +137,10 @@ few will be user-visible.
   each refclock page.  One major feature of the new syntax is that
   refclock drivers are referred to by names, not numbers.
 
+* Using the new refclock syntax, the maximum number of units that can
+  be set up per generic-driver device type changes from 4 (numbers
+  0-3) to unlimited.
+
 * The +sntp+ program has been renamed +{ntpdig}+ in order to make
   NTP installables have a uniform name prefix and take up less
   namespace. Also, +ntp-keygen+ is now +{ntpkeygen}+, +ntp-wait+
