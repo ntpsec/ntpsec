@@ -395,12 +395,8 @@ stats_config(
 */
 void
 record_peer_stats(
-	sockaddr_u *addr,
-	int	status,
-	double	offset,		/* offset */
-	double	delay,		/* delay */
-	double	dispersion,	/* dispersion */
-	double	jitter		/* jitter */
+	struct peer *peer,
+	int	status
 	)
 {
 	l_fp	now;
@@ -416,8 +412,8 @@ record_peer_stats(
 	if (peerstats.fp != NULL) {
 		fprintf(peerstats.fp,
 		    "%lu %s %s %x %.9f %.9f %.9f %.9f\n", day,
-		    ulfptoa(&now, 3), stoa(addr), status, offset,
-		    delay, dispersion, jitter);
+		    ulfptoa(&now, 3), stoa(&peer->srcadr), status, peer->offset,
+		    peer->delay, peer->disp, peer->jitter);
 		fflush(peerstats.fp);
 	}
 }
@@ -532,6 +528,7 @@ mprintf_clock_stats(
  */
 void
 record_raw_stats(
+	const struct peer *peer,
 	sockaddr_u *srcadr,
 	sockaddr_u *dstadr,
 	l_fp	*t1,		/* originate timestamp */
@@ -554,6 +551,8 @@ record_raw_stats(
 	l_fp	now;
 	u_long	day;
 
+	UNUSED_ARG(peer);
+	
 	if (!stats_control)
 		return;
 
