@@ -109,6 +109,8 @@ received.
   Enable verbose +clockstats+ recording if set.
 +mode+::
    Not used by this driver.
++mode+::
+   Not used by this driver.
 
 == Configuration Example ==
 
