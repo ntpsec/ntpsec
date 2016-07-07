@@ -32,7 +32,7 @@ and various low-cost receivers.
 
 The reference clock support in NTP contains the necessary configuration
 tables for those receivers. In addition to supporting several different
-clock types and up to 4 devices, the processing of a PPS signal is also
+clock types and multiple devices, the processing of a PPS signal is also
 provided as a configuration option. The PPS configuration option uses
 the receiver-generated time stamps for feeding the PPS loopfilter
 control for much finer clock synchronization.
@@ -73,9 +73,8 @@ refclock_ppstime::
 
 == Supported Devices ==
 
-Currently, twenty-five clock types are supported by the GENERIC driver and
-up to four (devices /dev/refclock-0 - /dev/refclock-3) of these clocks
-may be operational at any one time.
+Currently, twenty-five clock types are supported by the GENERIC driver
+and any number of these clocks may be operational at any one time.
 
 A note on the implementations:
 
@@ -89,9 +88,11 @@ prepared to buy these reference clocks - donations to
 (mailto:kardel@ntp.org[kardel@ntp.org]) are welcome as
 long as they work within Europe 8-).
 +
+The pictures below have been archived from the vendors' web pages.
++
 Verified implementations are:
 
-** RAWDCF variants
+* *RAWDCF variants*
 +
 These variants have been tested for correct decoding with my own
 homegrown receivers. Interfacing with specific commercial products may
@@ -100,21 +101,19 @@ receivers have a seemingly unlimited number of ways to draw power from
 the RS-232 port and to encode the DCF77 datastream. You are mainly on
 your own here unless I have a sample of the receiver.
 
-** http://www.meinberg.de[Meinberg clocks]
+* * http://www.meinberg.de[Meinberg clocks] *
 +
 These implementations have been verified by the Meinberg people
 themselves and I have access to one of these clocks.
 
 
-** http://www.selinc.com[Schweitzer Engineering Laboratories SEL-240x clocks]
+* http://www.selinc.com[Schweitzer Engineering Laboratories SEL-240x clocks] *
 +
 This implementation was provided and verified by SEL and
 http://networktimefoundation.org[Network Time Foundation] has an
 SEL-2407 in one of its development labs.
 
-The pictures below have been archived from the vendors' web pages.
-
-* *refclock generic unit 0-3 subtype 0*
+* *refclock generic subtype 0*
 +
 *http://www.meinberg.de[Meinberg] https://www.meinbergglobal.com/english/archive/pzf511.htm[PZF5xx receiver family] (FM demodulation/TCXO / 50&mu;s)*
 +
@@ -122,7 +121,7 @@ WARNING: This equipment is no longer available for commercial sale, and
 support may be removed in the future.  See: 
 https://www.ntpsec.org/removal-plan.html[Feature removals]
 
-* *refclock generic unit 0-3 subtype 1*
+* *refclock generic subtype 1*
 +
 *http://www.meinberg.de[Meinberg] https://www.meinbergglobal.com/english/archive/pzf511.htm[PZF5xx receiver family] (FM demodulation/OCXO / 50&mu;s)*
 +
@@ -132,7 +131,7 @@ https://www.ntpsec.org/removal-plan.html[Feature removals]
 
 image::pic/pzf511.jpg[http://www.meinberg.de/english/products/pzf-eurocard.htm]
 
-* *refclock generic unit 0-3 subtype 2*
+* *refclock generic subtype 2*
 +
 *http://www.meinberg.de[Meinberg] https://www.meinbergglobal.com/english/archive/c51.htm[DCF C51 receiver and similar] (AM demodulation / 4ms)*
 +
@@ -151,7 +150,7 @@ installed. That driver emulates a refclock device in order to allow {ntpd}
 to access those cards. For details, please refer to the README file
 that comes with the Meinberg driver package.
 
-* *refclock generic unit 0-3 subtype 3*
+* *refclock generic subtype 3*
 +
 http://www.elv.de/[ELV] *DCF7000 (sloppy AM demodulation / 50ms)*
 +
@@ -159,7 +158,7 @@ WARNING: This equipment is no longer available for commercial sale, and
 support may be removed in the future.  See: 
 https://www.ntpsec.org/removal-plan.html[Feature removals]
 
-* *refclock generic unit 0-3 subtype 4*
+* *refclock generic subtype 4*
 +
 *Walter Schmid DCF receiver Kit (AM demodulation / 1ms)*
 +
@@ -167,15 +166,15 @@ WARNING: This equipment is no longer available for commercial sale, and
 support may be removed in the future.  See: 
 https://www.ntpsec.org/removal-plan.html[Feature removals]
 
-* *refclock generic unit 0-3 subtype 5*
+* *refclock generic subtype 5*
 +
 *RAW DCF77 100/200ms pulses (Conrad DCF77 receiver module / 5ms)*
 
-* *refclock generic unit 0-3 subtype 6*
+* *refclock generic subtype 6*
 +
 *RAW DCF77 100/200ms pulses (TimeBrick DCF77 receiver module / 5ms)*
 
-* *refclock generic unit 0-3 subtype 7*
+* *refclock generic subtype 7*
 +
 * http://www.meinberg.de[Meinberg] http://www.meinberg.de/english/products/timesource.htm#gps---freq_sync[GPS16x/GPS17x receivers] (GPS / <<1&mu;s) *
 +
@@ -195,13 +194,13 @@ link:imap://mills@mail.eecis.udel.edu:993/fetch%3EUID%3E.INBOX%3E67132?part=1.3&
 +
 *Note:* subtype 7 must not be used with Meinberg PCI cards; use subtype 2 instead.
 
-* *refclock generic unit 0-3 subtype 8*
+* *refclock generic subtype 8*
 +
 http://www.igel.de/[IGEL] http://www.igel.de/eigelmn.html[clock]
 +
 image:pic/igclock.gif[http://www.igel.de/eigelmn.html]
 
-* *refclock generic unit 0-3 subtype 9*
+* *refclock generic subtype 9*
 +
 *http://www.trimble.com[Trimble] ftp://ftp.trimble.com/pub/sct/embedded/bin/Data%20Sheets/SveeSix2.PDF[SVeeSix GPS receiver] TAIP protocol (GPS / <<1&mu;s)*
 +
@@ -209,7 +208,7 @@ WARNING: This equipment is no longer available for commercial sale, and
 support may be removed in the future.  See: 
 https://www.ntpsec.org/removal-plan.html[Feature removals]
 
-* *refclock generic unit 0-3 subtype 10*
+* *refclock generic subtype 10*
 +
 *http://www.trimble.com[Trimble] ftp://ftp.trimble.com/pub/sct/embedded/bin/Data%20Sheets/SveeSix2.PDF[SVeeSix GPS receiver] (GPS / <<1&mu;s) (no kernel support yet)*
 +
@@ -221,37 +220,37 @@ image:pic/pd_om011.gif[http://www.trimble.com/cgi/omprod.cgi/pd_om011.html]
 +
 image:pic/pd_om006.gif[http://www.trimble.com/cgi/omprod.cgi/pd_om006.html]
 
-* *refclock generic unit 0-3 subtype 11*
+* *refclock generic subtype 11*
 +
 *Radiocode Clocks Ltd RCC 8000 Intelligent Off-Air Master Clock support*
 
-* *refclock generic unit 0-3 subtype 12*
+* *refclock generic subtype 12*
 +
 *http://www.hopf-time.com[HOPF] http://hopf.com/manuals/english/pdf_6---/e6021gps_0601.pdf[Funkuhr 6021]*
 +
 image:pic/fg6021.gif[http://www.hopf-time.com/engl/kart6021.html]
 
-* *refclock generic unit 0-3 subtype 13*
+* *refclock generic subtype 13*
 +
 *Diem's Computime Radio Clock*
 
-* *refclock generic unit 0-3 subtype 14*
+* *refclock generic subtype 14*
 +
 *RAWDCF receiver (DTR=high/RTS=low)*
 
-* *refclock generic unit 0-3 subtype 15*
+* *refclock generic subtype 15*
 +
 *WHARTON 400A Series Clocks with a 404.2 Serial Interface*
 
-* *refclock generic unit 0-3 subtype 16*
+* *refclock generic subtype 16*
 +
 *RAWDCF receiver (DTR=low/RTS=high)*
 
-* *refclock generic unit 0-3 subtype 17*
+* *refclock generic subtype 17*
 +
 *VARITEXT Receiver (MSF)*
 
-* *refclock generic unit 0-3 subtype 18*
+* *refclock generic subtype 18*
 +
 *http://www.meinberg.de[Meinberg] http://www.meinberg.de/english/products/timesource.htm#gps---freq_sync[GPS16x/GPS17x receivers] (GPS / <<1&mu;s)*
 +
@@ -262,11 +261,11 @@ multiclient operation.
 *Note:* subtype 18 must not be used with Meinberg PCI cards, use subtype 2
 instead.
 
-* *refclock generic unit 0-3 subtype 19*
+* *refclock generic subtype 19*
 +
 *Gude Analog- und Digitalsystem GmbH \'Expert mouseCLOCK USB v2.0'*
 
-* *refclock generic unit 0-3 subtype 20*
+* *refclock generic subtype 20*
 +
 *RAWDCF receiver similar to subtype 14, but operating @ 75 baud (DTR=high/RTS=low)*
 +
@@ -274,21 +273,21 @@ Driving the DCF clocks at 75 baud may help to get them to work with a
 bunch of common USB serial converters, that do 75 but cannot do 50 baud
 at all, e.g. those based on Prolific PL2303.
 
-* *refclock generic unit 0-3 subtype 21*
+* *refclock generic subtype 21*
 +
 *RAWDCF receiver similar to subtype 16, but operating @ 75 baud (DTR=low/RTS=high)*
 +
 See comment from subtype 20 clock.
 
-* *refclock generic unit 0-3 subtype 22*
+* *refclock generic subtype 22*
 +
 *MEINBERG, subtype 2 but with POWERUP trust*
 
-* *refclock generic unit 0-3 subtype 23*
+* *refclock generic subtype 23*
 +
 *MEINBERG, subtype 7 but with POWERUP trust*
 
-* *refclock generic unit 0-3 subtype 24*
+* *refclock generic subtype 24*
 +
 *http://www.selinc.com/[Schweitzer Engineering Laboratories]*
 
