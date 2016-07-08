@@ -204,9 +204,7 @@ static void free_auth_node(config_tree *);
 static void free_all_config_trees(void);
 
 static struct peer *peer_config(sockaddr_u *, const char *,
-				 endpt *, uint8_t, uint8_t,
-				 uint8_t, uint8_t, u_int, uint32_t,
-				 keyid_t);
+				 endpt *, uint8_t, struct peer_ctl *);
 
 static void free_config_access(config_tree *);
 static void free_config_auth(config_tree *);
@@ -3001,13 +2999,7 @@ peer_config(
 	const char *	hostname,
 	endpt *		dstadr,
 	uint8_t		hmode,
-	uint8_t		version,
-	uint8_t		minpoll,
-	uint8_t		maxpoll,
-	u_int		flags,
-	uint32_t	ttl,
-	keyid_t		key
-	)
+	struct peer_ctl  *ctl)
 {
 	uint8_t cast_flags;
 
@@ -3045,13 +3037,14 @@ peer_config(
 	 * themselves preemptible, though the resulting associations
 	 * are.
 	 */
-	flags |= FLAG_CONFIG;
+	ctl->flags |= FLAG_CONFIG;
 	if (mode_ntpdate)
-		flags |= FLAG_IBURST;
+		ctl->flags |= FLAG_IBURST;
 	if ((MDF_ACAST | MDF_POOL) & cast_flags)
-		flags &= ~FLAG_PREEMPT;
-	return newpeer(srcadr, hostname, dstadr, hmode, version,
-		       minpoll, maxpoll, flags, cast_flags, ttl, key);
+		ctl->flags &= ~FLAG_PREEMPT;
+	return newpeer(srcadr, hostname, dstadr, hmode, ctl->version,
+		       ctl->minpoll, ctl->maxpoll, ctl->flags,
+		       cast_flags, ctl->ttl, ctl->peerkey);
 }
 
 #ifndef SIM
@@ -3092,8 +3085,16 @@ config_peers(
 
 	/* add servers named on the command line with iburst implied */
 	for (;
-	     cmdline_server_count > 0;
-	     cmdline_server_count--, cmdline_servers++) {
+	    cmdline_server_count > 0;
+	    cmdline_server_count--, cmdline_servers++) {
+		struct peer_ctl client_ctl = {
+		    .version = NTP_VERSION,
+		    .minpoll = 0,
+		    .maxpoll = 0,
+		    .flags = FLAG_IBURST,
+		    .ttl = 0,
+		    .peerkey = 0,
+		};
 
 		ZERO_SOCK(&peeraddr);
 		/*
@@ -3112,12 +3113,7 @@ config_peers(
 					NULL,
 					NULL,
 					MODE_CLIENT,
-					NTP_VERSION,
-					0,
-					0,
-					FLAG_IBURST,
-					0,
-					0);
+					&client_ctl);
 		} else if (force_synchronous_dns) {
 			if (intercept_getaddrinfo(*cmdline_servers, &peeraddr)) {
 				peer_config(
@@ -3125,12 +3121,7 @@ config_peers(
 					NULL,
 					NULL,
 					MODE_CLIENT,
-					NTP_VERSION,
-					0,
-					0,
-					FLAG_IBURST,
-					0,
-					0);
+					&client_ctl);
 			}
 		} else {
 			/* we have a hostname to resolve */
@@ -3175,12 +3166,7 @@ config_peers(
 				curr_peer->addr->address,
 				NULL,
 				hmode,
-				curr_peer->ctl.version,
-				curr_peer->ctl.minpoll,
-				curr_peer->ctl.maxpoll,
-				curr_peer->ctl.flags,
-				curr_peer->ctl.ttl,
-				curr_peer->ctl.peerkey);
+				&curr_peer->ctl);
 		/*
 		 * If we have a numeric address, we can safely
 		 * proceed in the mainline with it.
@@ -3202,12 +3188,7 @@ config_peers(
 					NULL,
 					NULL,
 					hmode,
-					curr_peer->ctl.version,
-					curr_peer->ctl.minpoll,
-					curr_peer->ctl.maxpoll,
-					curr_peer->ctl.flags,
-					curr_peer->ctl.ttl,
-					curr_peer->ctl.peerkey);
+					&curr_peer->ctl);
 				if (ISREFCLOCKADR(&peeraddr))
 				{
 #ifdef REFCLOCK
@@ -3254,12 +3235,7 @@ config_peers(
 					NULL,
 					NULL,
 					hmode,
-					curr_peer->ctl.version,
-					curr_peer->ctl.minpoll,
-					curr_peer->ctl.maxpoll,
-					curr_peer->ctl.flags,
-					curr_peer->ctl.ttl,
-					curr_peer->ctl.peerkey);
+					&curr_peer->ctl);
 			}
 		} else {
 			/* hand the hostname off to the blocking child */
@@ -3354,12 +3330,7 @@ peer_name_resolved(
 				NULL,
 				NULL,
 				ctx->hmode,
-				ctx->ctl.version,
-				ctx->ctl.minpoll,
-				ctx->ctl.maxpoll,
-				ctx->ctl.flags,
-				ctx->ctl.ttl,
-				ctx->ctl.peerkey);
+				&ctx->ctl);
 			break;
 		}
 	}
