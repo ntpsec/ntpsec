@@ -136,8 +136,7 @@ struct	refclock refclock_hpgps = {
 	hpgps_poll,		/* transmit poll message */
 	noentry,		/* not used (old hpgps_control) */
 	noentry,		/* initialize driver */
-	noentry,		/* not used (old hpgps_buginfo) */
-	noentry			/* not used */
+	noentry			/* timer - not used */
 };
 
 

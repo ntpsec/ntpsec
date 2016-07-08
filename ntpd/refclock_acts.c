@@ -227,9 +227,8 @@ struct refclock refclock_acts = {
 	acts_start,		/* start up driver */
 	acts_shutdown,		/* shut down driver */
 	acts_poll,		/* transmit poll message */
-	noentry,		/* not used */
-	noentry,		/* not used */
-	noentry,		/* not used */
+	noentry,		/* control - not used */
+	noentry,		/* init - not used */
 	acts_timer		/* housekeeping timer */
 };
 

@@ -150,7 +150,6 @@ struct	refclock refclock_spectracom = {
 	spectracom_poll,		/* transmit poll message */
 	SPECTRACOM_CONTROL,		/* fudge set/change notification */
 	noentry,		/* initialize driver (not used) */
-	noentry,		/* not used (old wwvb_buginfo) */
 	spectracom_timer		/* called once per second */
 };
 
