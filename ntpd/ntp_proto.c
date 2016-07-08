@@ -1302,7 +1302,7 @@ process_packet(
 	/*
 	 * Capture the header values in the client/peer association..
 	 */
-	record_raw_stats(peer, &peer->srcadr, peer->dstadr ?
+	record_raw_stats(&peer->srcadr, peer->dstadr ?
 	    &peer->dstadr->sin : NULL,
 	    &p_org, &p_rec, &p_xmt, &peer->dst,
 	    pleap, pversion, pmode, pstratum, pkt->ppoll, pkt->precision,
