@@ -50,16 +50,15 @@
 #endif
 
 /*
- * In the past, we told reference clocks from network peers by giving the
- * reference clocks an address of the form 127.127.t.u, where t is the
- * type and u is the unit number.  In ntpd itself, the filtering that
- * used to be done based on this magic address prefix is now done
- * using the is_network_packet() test on incoming packets.   In ntpq, the
- * filtering is replaced by asking the server how a peer's name should
- * be displayed.
+ * In the past, we told reference clocks from network peers by giving
+ * the reference clocks magic address of a particular special form
+ * ntpd itself, the filtering that used to be done based on this magic
+ * address prefix is now done using a flag set on incoming packets.
+ * In ntpq, the filtering is replaced by asking the server how a
+ * peer's name should be displayed.
  *
- * Address filtering is still done here so we can tell which config
- * declarations refer to clocks.
+ * Address filtering is still done in this file so we can tell which old-style
+ * config declarations refer to clocks. When that syntax is retired, drop these.
  */
 #define	REFCLOCK_ADDR	0x7f7f0000	/* 127.127.0.0 */
 #define	REFCLOCK_MASK	0xffff0000	/* 255.255.0.0 */
@@ -68,14 +67,18 @@
 	(IS_IPV4(srcadr) &&					\
 	 (SRCADR(srcadr) & REFCLOCK_MASK) == REFCLOCK_ADDR)
 
+/*
+ * Macros to determine the clock type and unit numbers from a
+ * refclock magic address
+ */
+#define	REFCLOCKTYPE(srcadr)	((SRCADR(srcadr) >> 8) & 0xff)
+#define REFCLOCKUNIT(srcadr)	(SRCADR(srcadr) & 0xff)
+
 
 /* list of servers from command line for config_peers() */
 int	cmdline_server_count;
 char **	cmdline_servers;
 bool	force_synchronous_dns;
-
-/* set to false if admin doesn't want memory locked */
-bool	do_memlock = true;
 
 /*
  * FIXME: ugly globals, only created to avoid wiring in option-parsing cruft.
@@ -127,15 +130,10 @@ static struct masks logcfg_class_items[] = {
 };
 
 typedef struct peer_resolved_ctx_tag {
-	int		flags;
 	int		host_mode;	/* T_* token identifier */
 	u_short		family;
-	keyid_t		keyid;
 	uint8_t		hmode;		/* MODE_* */
-	uint8_t		version;
-	uint8_t		minpoll;
-	uint8_t		maxpoll;
-	uint32_t		ttl;
+	struct peer_ctl	ctl;
 	const char *	group;
 } peer_resolved_ctx;
 
@@ -204,6 +202,9 @@ static void apply_enable_disable(attr_val_fifo *q, int enable);
 
 static void free_auth_node(config_tree *);
 static void free_all_config_trees(void);
+
+static struct peer *peer_config(sockaddr_u *, const char *,
+				 endpt *, uint8_t, struct peer_ctl *);
 
 static void free_config_access(config_tree *);
 static void free_config_auth(config_tree *);
@@ -312,7 +313,6 @@ static void config_unpeers(config_tree *);
 static void config_nic_rules(config_tree *, bool input_from_file);
 static void config_reset_counters(config_tree *);
 static uint8_t get_correct_host_mode(int token);
-static int peerflag_bits(peer_node *);
 #endif	/* !SIM */
 
 #ifdef USE_WORKER
@@ -655,18 +655,14 @@ create_peer_node(
 	my_node = emalloc_zero(sizeof(*my_node));
 
 	/* Initialize node values to default */
-	my_node->peerversion = NTP_VERSION;
+
+	my_node->ctl.version = NTP_VERSION;
 
 	/* Now set the node to the read values */
 	my_node->host_mode = hmode;
 	my_node->addr = addr;
 
-	/*
-	 * the options FIFO mixes items that will be saved in the
-	 * peer_node as explicit members, such as minpoll, and
-	 * those that are moved intact to the peer_node's peerflags
-	 * FIFO.  The options FIFO is consumed and reclaimed here.
-	 */
+	/* The options FIFO is consumed and reclaimed here */
 
 	if (options != NULL)
 		CHECK_FIFO_CONSISTENCY(*options);
@@ -686,8 +682,36 @@ create_peer_node(
 				msyslog(LOG_INFO,
 					"peer: ignoring burst or iburst option");
 			} else {
-				APPEND_G_FIFO(my_node->peerflags, option);
-				freenode = false;
+				switch (option->value.i) {
+
+				default:
+					INSIST(0);
+					break;
+
+				case T_Burst:
+					my_node->ctl.flags |= FLAG_BURST;
+					break;
+
+				case T_Iburst:
+					my_node->ctl.flags |= FLAG_IBURST;
+					break;
+
+				case T_Noselect:
+					my_node->ctl.flags |= FLAG_NOSELECT;
+					break;
+
+				case T_Preempt:
+					my_node->ctl.flags |= FLAG_PREEMPT;
+					break;
+
+				case T_Prefer:
+					my_node->ctl.flags |= FLAG_PREFER;
+					break;
+
+				case T_True:
+					my_node->ctl.flags |= FLAG_TRUE;
+					break;
+				}
 			}
 			break;
 
@@ -698,9 +722,9 @@ create_peer_node(
 					"minpoll: provided value (%d) is out of range [%d-%d])",
 					option->value.i, NTP_MINPOLL,
 					UCHAR_MAX);
-				my_node->minpoll = NTP_MINPOLL;
+				my_node->ctl.minpoll = NTP_MINPOLL;
 			} else {
-				my_node->minpoll =
+				my_node->ctl.minpoll =
 					(uint8_t)option->value.u;
 			}
 			break;
@@ -711,9 +735,9 @@ create_peer_node(
 				msyslog(LOG_INFO,
 					"maxpoll: provided value (%d) is out of range [0-%d])",
 					option->value.i, NTP_MAXPOLL);
-				my_node->maxpoll = NTP_MAXPOLL;
+				my_node->ctl.maxpoll = NTP_MAXPOLL;
 			} else {
-				my_node->maxpoll =
+				my_node->ctl.maxpoll =
 					(uint8_t)option->value.u;
 			}
 			break;
@@ -723,12 +747,13 @@ create_peer_node(
 				msyslog(LOG_ERR, "ttl: invalid argument");
 				errflag = true;
 			} else {
-				my_node->ttl = (uint8_t)option->value.u;
+				my_node->ctl.ttl = (uint8_t)option->value.u;
 			}
 			break;
 
+		case T_Subtype:
 		case T_Mode:
-			my_node->ttl = option->value.u;
+			my_node->ctl.ttl = option->value.u;
 			break;
 
 		case T_Key:
@@ -736,7 +761,7 @@ create_peer_node(
 				msyslog(LOG_ERR, "key: invalid argument");
 				errflag = true;
 			} else {
-				my_node->peerkey =
+				my_node->ctl.peerkey =
 					(keyid_t)option->value.u;
 			}
 			break;
@@ -746,7 +771,7 @@ create_peer_node(
 				msyslog(LOG_ERR, "version: invalid argument");
 				errflag = true;
 			} else {
-				my_node->peerversion =
+				my_node->ctl.version =
 					(uint8_t)option->value.u;
 			}
 			break;
@@ -2008,19 +2033,7 @@ config_rlimit(
 			break;
 
 		case T_Memlock:
-			if (rlimit_av->value.i != 0) {
-#if defined(RLIMIT_MEMLOCK)
-				ntp_rlimit(RLIMIT_MEMLOCK,
-					   (rlim_t)(rlimit_av->value.i * 1024 * 1024),
-					   1024 * 1024,
-					   "MB");
-#else
-				/* STDERR as well would be fine... */
-				msyslog(LOG_WARNING, "'rlimit memlock' specified but is not available on this system.");
-#endif /* RLIMIT_MEMLOCK */
-			} else {
-				do_memlock = false;
-			}
+			/* ignore, for backward compatibility */
 			break;
 
 		case T_Stacksize:
@@ -2973,6 +2986,63 @@ is_sane_resolved_address(
 }
 
 
+/*
+ * peer_config - configure a new association
+ */
+struct peer *
+peer_config(
+	sockaddr_u *	srcadr,
+	const char *	hostname,
+	endpt *		dstadr,
+	uint8_t		hmode,
+	struct peer_ctl  *ctl)
+{
+	uint8_t cast_flags;
+
+	/*
+	 * We do a dirty little jig to figure the cast flags. This is
+	 * probably not the best place to do this, at least until the
+	 * configure code is rebuilt. Note only one flag can be set.
+	 */
+	switch (hmode) {
+	case MODE_BROADCAST:
+
+	    if (IS_MCAST(srcadr))
+			cast_flags = MDF_MCAST;
+		else
+			cast_flags = MDF_BCAST;
+		break;
+
+	case MODE_CLIENT:
+		if (hostname != NULL && SOCK_UNSPEC(srcadr))
+			cast_flags = MDF_POOL;
+		else if (IS_MCAST(srcadr))
+			cast_flags = MDF_ACAST;
+		else
+			cast_flags = MDF_UCAST;
+		break;
+
+	default:
+		cast_flags = MDF_UCAST;
+	}
+
+	/*
+	 * Mobilize the association and initialize its variables. If
+	 * emulating ntpdate, force iburst.  For pool and manycastclient
+	 * strip FLAG_PREEMPT as the prototype associations are not
+	 * themselves preemptible, though the resulting associations
+	 * are.
+	 */
+	ctl->flags |= FLAG_CONFIG;
+	if (mode_ntpdate)
+		ctl->flags |= FLAG_IBURST;
+	if ((MDF_ACAST | MDF_POOL) & cast_flags)
+		ctl->flags &= ~FLAG_PREEMPT;
+	return newpeer(srcadr, hostname, dstadr, hmode, ctl->version,
+		       ctl->minpoll, ctl->maxpoll, ctl->flags,
+		       cast_flags, ctl->ttl, ctl->peerkey);
+}
+
 #ifndef SIM
 static uint8_t
 get_correct_host_mode(
@@ -2997,58 +3067,6 @@ get_correct_host_mode(
 	}
 }
 
-
-/*
- * peerflag_bits()	get config_peers() peerflags value from a
- *			peer_node's queue of flag attr_val entries.
- */
-static int
-peerflag_bits(
-	peer_node *pn
-	)
-{
-	int peerflags;
-	attr_val *option;
-
-	/* translate peerflags options to bits */
-	peerflags = 0;
-	option = HEAD_PFIFO(pn->peerflags);
-	for (; option != NULL; option = option->link) {
-		switch (option->value.i) {
-
-		default:
-			INSIST(0);
-			break;
-
-		case T_Burst:
-			peerflags |= FLAG_BURST;
-			break;
-
-		case T_Iburst:
-			peerflags |= FLAG_IBURST;
-			break;
-
-		case T_Noselect:
-			peerflags |= FLAG_NOSELECT;
-			break;
-
-		case T_Preempt:
-			peerflags |= FLAG_PREEMPT;
-			break;
-
-		case T_Prefer:
-			peerflags |= FLAG_PREFER;
-			break;
-
-		case T_True:
-			peerflags |= FLAG_TRUE;
-			break;
-		}
-	}
-
-	return peerflags;
-}
-
 static void
 config_peers(
 	config_tree *ptree
@@ -3062,8 +3080,16 @@ config_peers(
 
 	/* add servers named on the command line with iburst implied */
 	for (;
-	     cmdline_server_count > 0;
-	     cmdline_server_count--, cmdline_servers++) {
+	    cmdline_server_count > 0;
+	    cmdline_server_count--, cmdline_servers++) {
+		struct peer_ctl client_ctl = {
+		    .version = NTP_VERSION,
+		    .minpoll = 0,
+		    .maxpoll = 0,
+		    .flags = FLAG_IBURST,
+		    .ttl = 0,
+		    .peerkey = 0,
+		};
 
 		ZERO_SOCK(&peeraddr);
 		/*
@@ -3082,13 +3108,7 @@ config_peers(
 					NULL,
 					NULL,
 					MODE_CLIENT,
-					NTP_VERSION,
-					0,
-					0,
-					FLAG_IBURST,
-					0,
-					0,
-					ISREFCLOCKADR(&peeraddr));
+					&client_ctl);
 		} else if (force_synchronous_dns) {
 			if (intercept_getaddrinfo(*cmdline_servers, &peeraddr)) {
 				peer_config(
@@ -3096,13 +3116,7 @@ config_peers(
 					NULL,
 					NULL,
 					MODE_CLIENT,
-					NTP_VERSION,
-					0,
-					0,
-					FLAG_IBURST,
-					0,
-					0,
-					false);
+					&client_ctl);
 			}
 		} else {
 			/* we have a hostname to resolve */
@@ -3111,8 +3125,8 @@ config_peers(
 			ctx->family = AF_UNSPEC;
 			ctx->host_mode = T_Server;
 			ctx->hmode = MODE_CLIENT;
-			ctx->version = NTP_VERSION;
-			ctx->flags = FLAG_IBURST;
+			ctx->ctl.version = NTP_VERSION;
+			ctx->ctl.flags = FLAG_IBURST;
 
 			ZERO(hints);
 			hints.ai_family = (u_short)ctx->family;
@@ -3147,13 +3161,7 @@ config_peers(
 				curr_peer->addr->address,
 				NULL,
 				hmode,
-				curr_peer->peerversion,
-				curr_peer->minpoll,
-				curr_peer->maxpoll,
-				peerflag_bits(curr_peer),
-				curr_peer->ttl,
-				curr_peer->peerkey,
-				ISREFCLOCKADR(&peeraddr));
+				&curr_peer->ctl);
 		/*
 		 * If we have a numeric address, we can safely
 		 * proceed in the mainline with it.
@@ -3163,19 +3171,55 @@ config_peers(
 
 			SET_PORT(&peeraddr, NTP_PORT);
 			if (is_sane_resolved_address(&peeraddr,
-			    curr_peer->host_mode))
-				peer_config(
+						     curr_peer->host_mode)) {
+#ifdef REFCLOCK
+				/* save maxpoll from config line
+				 * newpeer smashes it
+				 */
+				uint8_t maxpoll = curr_peer->ctl.maxpoll;
+#endif
+				struct peer *peer = peer_config(
 					&peeraddr,
 					NULL,
 					NULL,
 					hmode,
-					curr_peer->peerversion,
-					curr_peer->minpoll,
-					curr_peer->maxpoll,
-					peerflag_bits(curr_peer),
-					curr_peer->ttl,
-					curr_peer->peerkey,
-					ISREFCLOCKADR(&peeraddr));
+					&curr_peer->ctl);
+				if (ISREFCLOCKADR(&peeraddr))
+				{
+#ifdef REFCLOCK
+					uint8_t clktype;
+					int unit;
+					/*
+					 * We let the reference clock
+					 * support do clock dependent
+					 * initialization.  This
+					 * includes setting the peer
+					 * timer, since the clock may
+					 * have requirements for this.
+					 */
+					if (maxpoll == 0)
+						/* default maxpoll for
+						 * refclocks is minpoll
+						 */
+						peer->maxpoll = peer->minpoll;
+					clktype = (uint8_t)REFCLOCKTYPE(&peer->srcadr);
+					unit = REFCLOCKUNIT(&peer->srcadr);
+
+					if (!refclock_newpeer(clktype,
+							      unit,
+							      peer)) {
+						/*
+						 * Dump it, something screwed up
+						 */
+						unpeer(peer);
+					}
+#else /* REFCLOCK */
+					msyslog(LOG_ERR, "ntpd was compiled without refclock support.");
+					unpeer(peer);
+#endif /* REFCLOCK */
+				}
+
+			}
 		/*
 		 * synchronous lookup may be forced.
 		 */
@@ -3186,13 +3230,7 @@ config_peers(
 					NULL,
 					NULL,
 					hmode,
-					curr_peer->peerversion,
-					curr_peer->minpoll,
-					curr_peer->maxpoll,
-					peerflag_bits(curr_peer),
-					curr_peer->ttl,
-					curr_peer->peerkey,
-					false);
+					&curr_peer->ctl);
 			}
 		} else {
 			/* hand the hostname off to the blocking child */
@@ -3201,12 +3239,7 @@ config_peers(
 			ctx->family = curr_peer->addr->type;
 			ctx->host_mode = curr_peer->host_mode;
 			ctx->hmode = hmode;
-			ctx->version = curr_peer->peerversion;
-			ctx->minpoll = curr_peer->minpoll;
-			ctx->maxpoll = curr_peer->maxpoll;
-			ctx->flags = peerflag_bits(curr_peer);
-			ctx->ttl = curr_peer->ttl;
-			ctx->keyid = curr_peer->peerkey;
+			ctx->ctl = curr_peer->ctl;
 			ctx->group = curr_peer->group;
 
 			ZERO(hints);
@@ -3292,13 +3325,7 @@ peer_name_resolved(
 				NULL,
 				NULL,
 				ctx->hmode,
-				ctx->version,
-				ctx->minpoll,
-				ctx->maxpoll,
-				ctx->flags,
-				ctx->ttl,
-				ctx->keyid,
-				ISREFCLOCKADR(&peeraddr));
+				&ctx->ctl);
 			break;
 		}
 	}
@@ -3320,7 +3347,6 @@ free_config_peers(
 			if (NULL == curr_peer)
 				break;
 			destroy_address_node(curr_peer->addr);
-			destroy_attr_val_fifo(curr_peer->peerflags);
 			free(curr_peer);
 		}
 		free(ptree->peers);
@@ -4215,21 +4241,9 @@ ntp_rlimit(
 #endif
 
 	switch (rl_what) {
-#ifdef RLIMIT_MEMLOCK
 	    case RLIMIT_MEMLOCK:
-		/*
-		 * The default RLIMIT_MEMLOCK is very low on Linux systems.
-		 * Unless we increase this limit malloc calls are likely to
-		 * fail if we drop root privilege.  To be useful the value
-		 * has to be larger than the largest ntpd resident set size.
-		 */
-		DPRINTF(2, ("ntp_rlimit: MEMLOCK: %d %s\n",
-			(int)(rl_value / rl_scale), rl_sstr));
-		rl.rlim_cur = rl.rlim_max = rl_value;
-		if (setrlimit(RLIMIT_MEMLOCK, &rl) == -1)
-			msyslog(LOG_ERR, "Cannot set RLIMIT_MEMLOCK: %m");
+		/* ignore - for backward compatibility only */
 		break;
-#endif /* RLIMIT_MEMLOCK */
 
 #ifdef RLIMIT_NOFILE
 	    case RLIMIT_NOFILE:

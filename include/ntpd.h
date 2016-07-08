@@ -120,6 +120,7 @@ extern	void	interface_update	(interface_receiver_t, void *);
 extern  void    io_handler              (void);
 #endif
 extern	void	init_io 	(void);
+extern  SOCKET	open_socket	(sockaddr_u *, bool, bool, endpt *);
 extern	void	io_open_sockets	(void);
 extern	void	io_clr_stats	(void);
 extern	void	io_setbclient	(void);
@@ -174,13 +175,9 @@ extern  void	set_peerdstadr	(struct peer *, endpt *);
 extern	struct peer *newpeer	(sockaddr_u *, const char *,
 				 endpt *, uint8_t, uint8_t,
 				 uint8_t, uint8_t, u_int, uint8_t, uint32_t,
-				 keyid_t, bool);
+				 keyid_t);
 extern	void	peer_all_reset	(void);
 extern	void	peer_clr_stats	(void);
-extern	struct peer *peer_config(sockaddr_u *, const char *,
-				 endpt *, uint8_t, uint8_t,
-				 uint8_t, uint8_t, u_int, uint32_t,
-				 keyid_t, bool clockaddr);
 extern	void	peer_reset	(struct peer *);
 extern	void	refresh_all_peerinterfaces(void);
 extern	void	unpeer		(struct peer *);
@@ -215,7 +212,7 @@ extern  void    proto_dump(FILE *);
 
 /* ntp_refclock.c */
 #ifdef	REFCLOCK
-extern	bool	refclock_newpeer (struct peer *);
+extern	bool	refclock_newpeer (uint8_t, int, struct peer *);
 extern	void	refclock_unpeer (struct peer *);
 extern	void	refclock_receive (struct peer *);
 extern	void	refclock_transmit (struct peer *);
@@ -247,11 +244,11 @@ extern	u_long	orphwait;		/* orphan wait time */
 extern	void	init_util	(void);
 extern	void	write_stats	(void);
 extern	void	stats_config	(int, const char *);
-extern	void	record_peer_stats (sockaddr_u *, int, double, double, double, double);
+extern	void	record_peer_stats (struct peer *, int);
 extern	void	record_proto_stats (char *);
 extern	void	record_loop_stats (double, double, double, double, int);
-extern	void	record_clock_stats (sockaddr_u *, const char *);
-extern	int	mprintf_clock_stats(sockaddr_u *, const char *, ...)
+extern	void	record_clock_stats (struct peer *, const char *);
+extern	int	mprintf_clock_stats(struct peer *, const char *, ...)
 			NTP_PRINTF(2, 3);
 extern	void	record_raw_stats (sockaddr_u *srcadr, sockaddr_u *dstadr, l_fp *t1, l_fp *t2, l_fp *t3, l_fp *t4, int leap, int version, int mode, int stratum, int ppoll, int precision, double root_delay, double root_dispersion, uint32_t refid, u_int outcount);
 extern	void	check_leap_file	(int is_daily_check, uint32_t ntptime, const time_t * systime);
@@ -454,6 +451,8 @@ extern u_long	sys_badauth;		/* bad authentication */
 extern u_long	sys_declined;		/* declined */
 extern u_long	sys_limitrejected;	/* rate exceeded */
 extern u_long	sys_kodsent;		/* KoD sent */
+extern u_long	use_stattime;		/* time since reset */
+
 
 /* ntp_restrict.c */
 extern restrict_u *	restrictlist4;	/* IPv4 restriction list */

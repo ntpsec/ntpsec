@@ -1,5 +1,5 @@
 /*
- * refclock_hpgps - clock driver for HP 58503A GPS receiver
+ * refclock_hpgps - clock driver for HP GPS receivers
  */
 
 #include <config.h>
@@ -41,7 +41,7 @@
  * The same driver also handles the HP Z3801A which is available surplus
  * from the cell phone industry.  It's popular with hams.
  * It needs a different line setup: 19200 baud, 7 data bits, odd parity
- * That is selected by adding "mode 1" to the server line in ntp.conf
+ * That is selected by adding "subtype 1" to the server line in ntp.conf
  * HP Z3801A code from Jeff Mock added by Hal Murray, Sep 2005
  *
  *
@@ -90,8 +90,8 @@
 #define	SPEED232Z	B19200		/* uart speed (19200 baud) */
 #define	PRECISION	(-10)		/* precision assumed (about 1 ms) */
 #define	REFID		"GPS\0"		/* reference ID */
-#define NAME		"HP58503A"	/* shortname */
-#define	DESCRIPTION	"HP 58503A GPS Time and Frequency Reference Receiver" 
+#define NAME		"HPGPS"		/* shortname */
+#define	DESCRIPTION	"HP GPS Time and Frequency Reference Receiver"
 
 #define SMAX            23*80+1 /* for :SYSTEM:PRINT? status screen response */
 
@@ -163,7 +163,7 @@ hpgps_start(
 	snprintf(device, sizeof(device), DEVICE, unit);
 	ldisc = LDISC_CLK;
 	speed = SPEED232;
-	/* mode parameter to server config line shares ttl slot */
+	/* subtype parameter to server config line shares ttl slot */
 	if (1 == peer->ttl) {
 		ldisc |= LDISC_7O1;
 		speed = SPEED232Z;
@@ -307,12 +307,12 @@ hpgps_receive(
 			up->lastptr += pp->lencode;
 		}
 		if (up->linecnt == 0) 
-		    record_clock_stats(&peer->srcadr, up->statscrn);
+		    record_clock_stats(peer, up->statscrn);
                
 		return;
 	}
 
-	record_clock_stats(&peer->srcadr, pp->a_lastcode);
+	record_clock_stats(peer, pp->a_lastcode);
 	pp->lastrec = trtmp;
             
 	up->lastptr = up->statscrn;

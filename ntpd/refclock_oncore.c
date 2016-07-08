@@ -113,7 +113,7 @@
  * which may be linked to the same device.
  * and can read initialization data from the file
  *	/etc/ntp.oncoreN, /etc/ntp.oncore.N, or /etc/ntp.oncore, where
- *	n or N are the unit number, viz 127.127.30.N.
+ *	n or N are the unit number
  * --------------------------------------------------------------------------
  * Reg.Clemens <reg@dwf.com> Sep98.
  *  Original code written for FreeBSD.
@@ -256,7 +256,7 @@ enum posn_mode {
 };
 
 struct instance {
-	int	unit;		/* 127.127.30.unit */
+	int	unit;
 	struct	refclockproc *pp;
 	struct	peer *peer;
 
@@ -1090,7 +1090,7 @@ oncore_read_config(
 /*
  * First we try to open the configuration file
  *    /etc/ntp.oncore.N
- * where N is the unit number viz 127.127.30.N.
+ * where N is the unit number
  * If we don't find it we try
  *    /etc/ntp.oncoreN
  * and then
@@ -4075,7 +4075,7 @@ oncore_log (
 	)
 {
 	msyslog(log_level, "ONCORE[%d]: %s", instance->unit, msg);
-	mprintf_clock_stats(&instance->peer->srcadr, "ONCORE[%d]: %s",
+	mprintf_clock_stats(instance->peer, "ONCORE[%d]: %s",
 			    instance->unit, msg);
 }
 

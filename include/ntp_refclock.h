@@ -20,24 +20,6 @@
 				pp->codeproc = (pp->codeproc + 1) % MAXSTAGE;
 
 /*
- * Macros to determine the clock type and unit numbers from a
- * 127.127.t.u address
- */
-#define	REFCLOCKTYPE(srcadr)	((SRCADR(srcadr) >> 8) & 0xff)
-#define REFCLOCKUNIT(srcadr)	(SRCADR(srcadr) & 0xff)
-
-/*
- * List of reference clock names and descriptions. These must agree with
- * lib/clocktypes.c and ntpd/refclock_conf.c.
- */
-struct clktype {
-	int code;		/* driver "major" number */
-	const char *clocktype;	/* long description */
-	const char *abbrev;	/* short description */
-};
-extern struct clktype clktypes[];
-
-/*
  * Configuration flag values
  */
 #define	CLK_HAVETIME1	0x1
@@ -147,7 +129,7 @@ extern	HANDLE	WaitableIoEventHandle;
 
 struct refclockproc {
 	void *	unitptr;	/* pointer to unit structure */
-	struct refclock * conf;	/* refclock_conf[type] */
+	struct refclock * conf;	/* pointer to driver method table */
 	struct refclockio io;	/* I/O handler structure */
 	uint8_t	leap;		/* leap/synchronization code */
 	uint8_t	currentstatus;	/* clock status */

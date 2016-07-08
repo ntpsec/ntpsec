@@ -40,6 +40,9 @@ fallback implementation using native time calls.
 You can view POSIX-1.2001, with 2004 Corrigendum, online for free here:
     http://pubs.opengroup.org/onlinepubs/009695399/toc.htm
 
+You *may* assume that the compiler supports POSIX 64-bit integral types
+(int64_t, uint64_t and friends) even if the target hardware is 32-bit).
+
 === Banned functions ===
 
 The following C99/POSIX functions are BANNED.  They are unsafe, tending to
@@ -103,7 +106,7 @@ and no JSON option it is quite likely to be rejected.
 Our preferred format for dates is RFC3339 (a version of ISO8601 for
 UTC with some options frozen; full year required, medial T required,
 explicit Zulu timezone). Local times should be expressed in ISO8601,
-always with full years and timezone offset.
+always with full year and timezone offset.
 
 === Copyrights and licenses ===
 
@@ -295,7 +298,7 @@ discuss it with project management.
 
 == Contribution workflow and conventions ==
 
-== GitLab.com ==
+=== GitLab.com ===
 
 We use GitLab.com as our forge.
 
@@ -311,10 +314,10 @@ mailto:devel@ntpsec.org mailing list.  Other people may have
 suggestions, will want to collaborate, and will wish to review your
 code.
 
-== Optional: Send patches by email ==
+=== Optional: Send patches by email ===
 
 If you do not want to use GitLab pull requests, we welcome simple fix
-and "drive by" patches submitted by email.
+and "drive-by" patches submitted by email.
 
 Please create the patch with git format-patch.
 
@@ -335,7 +338,7 @@ parameter ---author from the email From header and the git parameter
 
 For complex patches and contribution narratives, please use GitLab.
 
-=== Commit comments ===
+== Commit comments ==
 
 And please follow git conventions for change comments. That means your comment
 should consist of:
@@ -381,5 +384,36 @@ The worst way is to quote its git hash, because humans are not good at
 keeping random strings of hex digits in working memory.  Besides, hashes
 will break if the history is ever moved to another VCS or the repository
 has to be surgically altered.
+
+=== Avoid unnecessary merge bubbles ===
+
+There are two kinds of merge bubbles in git commit graphs. The
+necessary kind happens because branches have genuinely diverged enough
+that a merge by hand is required - common files have been touched in
+incompatible ways. In the unnecessary kind, the patches on either side
+of the bubble commute cleanly, but the developer on one side or the other
+forgot to rebase so his commit would be a fast-forward.
+
+We strongly dislike unnecessary merge bubbles.  They make the
+repository history difficult to read, and can make bisection tests
+trickier. We prefer the code to have a simple, close-to-linear
+history even if that means older commits are sometimes fast-forwarded
+from new ones because a long-lived branch was rebased.
+
+To avoid merge bubbles, git pull --rebase before pushing.  This will
+pull all pending commits from the repo, then attempt to rebase your
+local commits on the new tip.  You may find it helpful to set
+"rebase = true" in your .git/config, so it looks like this:
+
+-------------------------------------------------------------
+[branch "master"]
+	remote = origin
+	merge = refs/heads/master
+	rebase = true
+-------------------------------------------------------------
+
+Setting this option adds --rebase to all your pulls.  This may cause
+minor inconvenience when you have uncommitted local changes; you
+should be able to use "git stash" to get around that.
 
 //end

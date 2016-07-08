@@ -15,6 +15,7 @@ def options_cmd(ctx, config):
 	grp.add_option('--disable-dns-lookup', action='store_true', default=False, help="Disable DNS lookups.")
 	grp.add_option('--disable-dns-retry', action='store_true', default=False, help="Disable retrying DNS lookups.")
 	grp.add_option('--disable-mdns-registration', action='store_true', default=False, help="Disable MDNS registration.")
+	grp.add_option('--enable-classic-mode', action='store_true', default=False, help="Strict configuration and log-format compatibility with NTP Classic")
 
 	grp = ctx.add_option_group("NTP cross compile options")
 	grp.add_option('--cross-compiler', type='string', help="Path to cross compiler CC. (enables cross-compiling)")

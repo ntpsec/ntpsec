@@ -9,11 +9,11 @@
  * Copyright 2015 by the NTPsec project contributors
  * SPDX-License-Identifier: BSD-3-Clause
  *
- * Note: some modes are obsolete and could probably stand to be removed
- * next time this code gets serious attention.  In particular, modes 9 and 10
+ * Note: some subtypes are obsolete and could probably stand to be removed
+ * next time this code gets serious attention.  In particular, subtypes 9 and 10
  * support the Trimble SVeeSix, which was discontinued before 2003. Related
  * code in the parse library could also be dropped.
- * Also see modes 3 and 4, for which no information in use since 1999 and
+ * Also see subtypes 3 and 4, for which no information in use since 1999 and
  * 2001 respectively can be found on the web.
  */
 
@@ -857,7 +857,7 @@ static struct parse_clockinfo
 	u_long  cl_keep;              /* samples for median filter to keep */
 } parse_clockinfo[] =
 {
-	{				/* mode 0 */
+	{				/* subtype 0 */
 		MBG_FLAGS,
 		NO_POLL,
 		NO_INIT,
@@ -881,7 +881,7 @@ static struct parse_clockinfo
 		DCFPZF535_SAMPLES,
 		DCFPZF535_KEEP
 	},
-	{				/* mode 1 */
+	{				/* subtype 1 */
 		MBG_FLAGS,
 		NO_POLL,
 		NO_INIT,
@@ -905,7 +905,7 @@ static struct parse_clockinfo
 		DCFPZF535OCXO_SAMPLES,
 		DCFPZF535OCXO_KEEP
 	},
-	{				/* mode 2 */
+	{				/* subtype 2 */
 		MBG_FLAGS,
 		NO_POLL,
 		NO_INIT,
@@ -929,7 +929,7 @@ static struct parse_clockinfo
 		DCFUA31_SAMPLES,
 		DCFUA31_KEEP
 	},
-	{				/* mode 3 */
+	{				/* subtype 3 */
 		MBG_FLAGS,
 		NO_POLL,
 		NO_INIT,
@@ -953,7 +953,7 @@ static struct parse_clockinfo
 		DCF7000_SAMPLES,
 		DCF7000_KEEP
 	},
-	{				/* mode 4 */
+	{				/* subtype 4 */
 		NO_CL_FLAGS,
 		WSDCF_POLL,
 		WSDCF_INIT,
@@ -977,7 +977,7 @@ static struct parse_clockinfo
 		WSDCF_SAMPLES,
 		WSDCF_KEEP
 	},
-	{				/* mode 5 */
+	{				/* subtype 5 */
 		RAWDCF_FLAGS,
 		NO_POLL,
 		RAWDCF_INIT,
@@ -1001,7 +1001,7 @@ static struct parse_clockinfo
 		RAWDCF_SAMPLES,
 		RAWDCF_KEEP
 	},
-	{				/* mode 6 */
+	{				/* subtype 6 */
 		RAWDCF_FLAGS,
 		NO_POLL,
 		RAWDCF_INIT,
@@ -1025,7 +1025,7 @@ static struct parse_clockinfo
 		RAWDCF_SAMPLES,
 		RAWDCF_KEEP
 	},
-	{				/* mode 7 */
+	{				/* subtype 7 */
 		MBG_FLAGS,
 		GPS16X_POLL,
 		GPS16X_INIT,
@@ -1049,7 +1049,7 @@ static struct parse_clockinfo
 		GPS16X_SAMPLES,
 		GPS16X_KEEP
 	},
-	{				/* mode 8 */
+	{				/* subtype 8 */
 		RAWDCF_FLAGS,
 		NO_POLL,
 		NO_INIT,
@@ -1073,7 +1073,7 @@ static struct parse_clockinfo
 		RAWDCF_SAMPLES,
 		RAWDCF_KEEP
 	},
-	{				/* mode 9 */
+	{				/* subtype 9 */
 		TRIMBLETAIP_FLAGS,
 #if TRIM_POLLRATE		/* DHD940515: Allow user config */
 		NO_POLL,
@@ -1101,7 +1101,7 @@ static struct parse_clockinfo
 		TRIMBLETAIP_SAMPLES,
 		TRIMBLETAIP_KEEP
 	},
-	{				/* mode 10 */
+	{				/* subtype 10 */
 		TRIMBLETSIP_FLAGS,
 #if TRIM_POLLRATE		/* DHD940515: Allow user config */
 		NO_POLL,
@@ -1129,7 +1129,7 @@ static struct parse_clockinfo
 		TRIMBLETSIP_SAMPLES,
 		TRIMBLETSIP_KEEP
 	},
-	{                             /* mode 11 */
+	{                             /* subtype 11 */
 		NO_CL_FLAGS,
 		RCC8000_POLL,
 		RCC8000_INIT,
@@ -1153,7 +1153,7 @@ static struct parse_clockinfo
 		RCC8000_SAMPLES,
 		RCC8000_KEEP
 	},
-	{                             /* mode 12 */
+	{                             /* subtype 12 */
 		HOPF6021_FLAGS,
 		NO_POLL,
 		NO_INIT,
@@ -1177,7 +1177,7 @@ static struct parse_clockinfo
 		HOPF6021_SAMPLES,
 		HOPF6021_KEEP
 	},
-	{                            /* mode 13 */
+	{                            /* subtype 13 */
 		COMPUTIME_FLAGS,
 		NO_POLL,
 		NO_INIT,
@@ -1201,7 +1201,7 @@ static struct parse_clockinfo
 		COMPUTIME_SAMPLES,
 		COMPUTIME_KEEP
 	},
-	{				/* mode 14 */
+	{				/* subtype 14 */
 		RAWDCF_FLAGS,
 		NO_POLL,
 		RAWDCFDTRSET_INIT,
@@ -1225,7 +1225,7 @@ static struct parse_clockinfo
 		RAWDCF_SAMPLES,
 		RAWDCF_KEEP
 	},
-	{				/* mode 15 */
+	{				/* subtype 15 */
 		0,				/* operation flags (io modes) */
   		NO_POLL,			/* active poll routine */
 		NO_INIT,			/* active poll init routine */
@@ -1251,7 +1251,7 @@ static struct parse_clockinfo
 		5,				/* samples for median filter */
 		3,				/* samples for median filter to keep */
 	},
-	{				/* mode 16 - RAWDCF RTS set, DTR clr */
+	{				/* subtype 16 - RAWDCF RTS set, DTR clr */
 		RAWDCF_FLAGS,
 		NO_POLL,
 		RAWDCFDTRCLRRTSSET_INIT,
@@ -1275,7 +1275,7 @@ static struct parse_clockinfo
 		RAWDCF_SAMPLES,
 		RAWDCF_KEEP
 	},
-        {                            /* mode 17 */
+        {                            /* subtype 17 */
                 VARITEXT_FLAGS,
                 NO_POLL,
                 NO_INIT,
@@ -1299,7 +1299,7 @@ static struct parse_clockinfo
                 VARITEXT_SAMPLES,
                 VARITEXT_KEEP
         },
-	{				/* mode 18 */
+	{				/* subtype 18 */
 		MBG_FLAGS,
 		NO_POLL,
 		NO_INIT,
@@ -1323,7 +1323,7 @@ static struct parse_clockinfo
 		GPS16X_SAMPLES,
 		GPS16X_KEEP
 	},
-	{				/* mode 19 */
+	{				/* subtype 19 */
 		RAWDCF_FLAGS,
 		NO_POLL,
 		RAWDCF_INIT,
@@ -1347,7 +1347,7 @@ static struct parse_clockinfo
 		RAWDCF_SAMPLES,
 		RAWDCF_KEEP
 	},
-	{				/* mode 20, like mode 14 but driven by 75 baud */
+	{				/* subtype 20, like subtype 14 but driven by 75 baud */
 		RAWDCF_FLAGS,
 		NO_POLL,
 		RAWDCFDTRSET_INIT,
@@ -1371,7 +1371,7 @@ static struct parse_clockinfo
 		RAWDCF_SAMPLES,
 		RAWDCF_KEEP
 	},
-	{				/* mode 21, like mode 16 but driven by 75 baud
+	{				/* subtype 21, like subtype 16 but driven by 75 baud
 					 - RAWDCF RTS set, DTR clr */
 		RAWDCF_FLAGS,
 		NO_POLL,
@@ -1396,7 +1396,7 @@ static struct parse_clockinfo
 		RAWDCF_SAMPLES,
 		RAWDCF_KEEP
 	},
-	{				/* mode 22 - like 2 with POWERUP trust */
+	{				/* subtype 22 - like 2 with POWERUP trust */
 		MBG_FLAGS | PARSE_F_POWERUPTRUST,
 		NO_POLL,
 		NO_INIT,
@@ -1420,7 +1420,7 @@ static struct parse_clockinfo
 		DCFUA31_SAMPLES,
 		DCFUA31_KEEP
 	},
-	{				/* mode 23 - like 7 with POWERUP trust */
+	{				/* subtype 23 - like 7 with POWERUP trust */
 		MBG_FLAGS | PARSE_F_POWERUPTRUST,
 		GPS16X_POLL,
 		GPS16X_INIT,
@@ -1444,7 +1444,7 @@ static struct parse_clockinfo
 		GPS16X_SAMPLES,
 		GPS16X_KEEP
 	},
-	{				/* mode 24 */
+	{				/* subtype 24 */
 		SEL240X_FLAGS,
 		SEL240X_POLL,
 		SEL240X_INIT,
@@ -1474,7 +1474,6 @@ static int ncltypes = sizeof(parse_clockinfo) / sizeof(struct parse_clockinfo);
 
 #define CLK_REALTYPE(x) ((int)(((x)->ttl) & 0x7F))
 #define CLK_TYPE(x)	((CLK_REALTYPE(x) >= ncltypes) ? ~0 : CLK_REALTYPE(x))
-#define CLK_UNIT(x)	((int)REFCLOCKUNIT(&(x)->srcadr))
 #define CLK_PPS(x)	(((x)->ttl) & 0x80)
 
 /*
@@ -1554,7 +1553,7 @@ list_err(
 
 	if (!err->err_cnt && do_it)
 	    msyslog(LOG_INFO, "PARSE receiver #%d: interval for following error message class is at least %s",
-		    CLK_UNIT(parse->peer), l_mktime(err->err_stage->err_delay));
+		    parse->peer->refclkunit, l_mktime(err->err_stage->err_delay));
 
 	if (!do_it)
 	    err->err_suppressed++;
@@ -1564,7 +1563,7 @@ list_err(
 	if (do_it && err->err_suppressed)
 	{
 		msyslog(LOG_INFO, "PARSE receiver #%d: %ld message%s suppressed, error condition class persists for %s",
-			CLK_UNIT(parse->peer), err->err_suppressed, (err->err_suppressed == 1) ? " was" : "s where",
+			parse->peer->refclkunit, err->err_suppressed, (err->err_suppressed == 1) ? " was" : "s where",
 			l_mktime(current_time - err->err_started));
 		err->err_suppressed = 0;
 	}
@@ -1964,7 +1963,7 @@ local_receive(
 	{
 		ERR(ERR_BADIO)
 			msyslog(LOG_ERR,"PARSE receiver #%d: local_receive: bad size (got %zd expected %zd)",
-				CLK_UNIT(parse->peer), rbufp->recv_length, sizeof(parsetime_t));
+				parse->peer->refclkunit, rbufp->recv_length, sizeof(parsetime_t));
 		parse_event(parse, CEVNT_BADREPLY);
 		return;
 	}
@@ -1978,7 +1977,7 @@ local_receive(
 	if (debug > 3)
 	  {
 	    printf("PARSE receiver #%d: status %06x, state %08x, time(fp) %lx.%08lx, stime(fp) %lx.%08lx, ptime(fp) %lx.%08lx\n",
-		   CLK_UNIT(parse->peer),
+		   parse->peer->refclkunit,
 		   (unsigned int)parsetime.parse_status,
 		   (unsigned int)parsetime.parse_state,
 		   (unsigned long)parsetime.parse_time.fp.l_ui,
@@ -2267,11 +2266,11 @@ parse_statistics(
 	NLOG(NLOG_CLOCKSTATIST) /* conditional if clause for conditional syslog */
 		{
 			msyslog(LOG_INFO, "PARSE receiver #%d: running time: %s",
-				CLK_UNIT(parse->peer),
+				parse->peer->refclkunit,
 				l_mktime(current_time - parse->generic->timestarted));
 
 			msyslog(LOG_INFO, "PARSE receiver #%d: current status: %s",
-				CLK_UNIT(parse->peer),
+				parse->peer->refclkunit,
 				clockstatus(parse->generic->currentstatus));
 
 			for (i = 0; i <= CEVNT_MAX; i++)
@@ -2294,7 +2293,7 @@ parse_statistics(
 
 				if (s_time)
 				    msyslog(LOG_INFO, "PARSE receiver #%d: state %18s: %13s (%3ld.%02ld%%)",
-					    CLK_UNIT(parse->peer),
+					    parse->peer->refclkunit,
 					    clockstatus((unsigned int)i),
 					    l_mktime(s_time),
 					    percent / 100, percent % 100);
@@ -2380,7 +2379,7 @@ parse_shutdown(
 
 	NLOG(NLOG_CLOCKINFO) /* conditional if clause for conditional syslog */
 		msyslog(LOG_INFO, "PARSE receiver #%d: reference clock \"%s\" removed",
-			CLK_UNIT(parse->peer), parse->parse_type->cl_description);
+			parse->peer->refclkunit, parse->parse_type->cl_description);
 
 	parse->peer = (struct peer *)0; /* unused now */
 	peer->procptr->unitptr = (caddr_t)0;
@@ -2414,11 +2413,11 @@ parse_hardpps(
 		if (time_pps_kcbind(parse->ppsctl.handle, PPS_KC_HARDPPS, i,
 		    PPS_TSFMT_TSPEC) < 0) {
 		        msyslog(LOG_ERR, "PARSE receiver #%d: time_pps_kcbind failed: %m",
-				CLK_UNIT(parse->peer));
+				parse->peer->refclkunit);
 		} else {
 		        NLOG(NLOG_CLOCKINFO)
 		                msyslog(LOG_INFO, "PARSE receiver #%d: kernel PPS synchronisation %sabled",
-					CLK_UNIT(parse->peer), (mode == PARSE_HARDPPS_ENABLE) ? "en" : "dis");
+					parse->peer->refclkunit, (mode == PARSE_HARDPPS_ENABLE) ? "en" : "dis");
 			/*
 			 * tell the rest, that we have a kernel PPS source, iff we ever enable HARDPPS
 			 */
@@ -2448,7 +2447,7 @@ parse_ppsapi(
 	 */
 	if (time_pps_getcap(parse->ppsctl.handle, &cap) < 0) {
 		msyslog(LOG_ERR, "PARSE receiver #%d: parse_ppsapi: time_pps_getcap failed: %m",
-			CLK_UNIT(parse->peer));
+			parse->peer->refclkunit);
 
 		return false;
 	}
@@ -2476,11 +2475,11 @@ parse_ppsapi(
 	}
 
 	msyslog(LOG_INFO, "PARSE receiver #%d: initializing PPS to %s",
-		CLK_UNIT(parse->peer), cp);
+		parse->peer->refclkunit, cp);
 
 	if (!(mode_ppsoffset & cap)) {
 	  msyslog(LOG_WARNING, "PARSE receiver #%d: Cannot set PPS_%sCLEAR, this will increase jitter (PPS API capabilities=0x%x)",
-		  CLK_UNIT(parse->peer), cp, cap);
+		  parse->peer->refclkunit, cp, cap);
 		mode_ppsoffset = 0;
 	} else {
 		if (mode_ppsoffset == PPS_OFFSETCLEAR)
@@ -2500,7 +2499,7 @@ parse_ppsapi(
 
 	if (time_pps_setparams(parse->ppsctl.handle, &parse->ppsctl.pps_params) < 0) {
 	  msyslog(LOG_ERR, "PARSE receiver #%d: FAILED set PPS parameters: %m",
-		  CLK_UNIT(parse->peer));
+		  parse->peer->refclkunit);
 		return false;
 	}
 
@@ -2541,8 +2540,13 @@ parse_start(
 		notice = 1;
 	}
 
+#ifdef ENABLE_CLASSIC_MODE
+	peer->ttl = (peer->refclkunit & ~0x80) >> 2;
+	peer->refclkunit = peer->refclkunit & 0x03;
+#endif /* ENABLE_CLASSIC_MODE */
+
 	type = CLK_TYPE(peer);
-	unit = CLK_UNIT(peer);
+	unit = peer->refclkunit;
 
 	if ((type == (u_int)~0) || (parse_clockinfo[type].cl_description == (char *)0))
 	{
@@ -2623,7 +2627,7 @@ parse_start(
 	if (TTY_GETATTR(fd232, &tio) == -1)
 	{
 		msyslog(LOG_ERR, "PARSE receiver #%d: parse_start: tcgetattr(%d, &tio): %m", unit, fd232);
-		parse_shutdown(CLK_UNIT(parse->peer), peer); /* let our cleaning staff do the work */
+		parse_shutdown(parse->peer->refclkunit, peer); /* let our cleaning staff do the work */
 		return false;
 	}
 	else
@@ -2637,7 +2641,7 @@ parse_start(
 		disablec = fpathconf(parse->generic->io.fd, _PC_VDISABLE);
 		if (disablec == -1 && errno)
 		{
-			msyslog(LOG_ERR, "PARSE receiver #%d: parse_start: fpathconf(fd, _PC_VDISABLE): %m", CLK_UNIT(parse->peer));
+			msyslog(LOG_ERR, "PARSE receiver #%d: parse_start: fpathconf(fd, _PC_VDISABLE): %m", parse->peer->refclkunit);
 			memset((char *)tio.c_cc, 0, sizeof(tio.c_cc)); /* best guess */
 		}
 		else
@@ -2661,7 +2665,7 @@ parse_start(
 		    (cfsetispeed(&tio, (speed_t) parse_clockinfo[type].cl_speed) == -1))
 		{
 			msyslog(LOG_ERR, "PARSE receiver #%d: parse_start: tcset{i,o}speed(&tio, speed): %m", unit);
-			parse_shutdown(CLK_UNIT(parse->peer), peer); /* let our cleaning staff do the work */
+			parse_shutdown(parse->peer->refclkunit, peer); /* let our cleaning staff do the work */
 			return false;
 		}
 
@@ -2717,7 +2721,7 @@ parse_start(
 		{
 		  if (!refclock_ppsapi(parse->ppsfd, &parse->ppsctl))
 		    {
-		      msyslog(LOG_NOTICE, "PARSE receiver #%d: parse_start: could not set up PPS: %m", CLK_UNIT(parse->peer));
+		      msyslog(LOG_NOTICE, "PARSE receiver #%d: parse_start: could not set up PPS: %m", parse->peer->refclkunit);
 		    }
 		  else
 		    {
@@ -2729,7 +2733,7 @@ parse_start(
 		if (TTY_SETATTR(fd232, &tio) == -1)
 		{
 			msyslog(LOG_ERR, "PARSE receiver #%d: parse_start: tcsetattr(%d, &tio): %m", unit, fd232);
-			parse_shutdown(CLK_UNIT(parse->peer), peer); /* let our cleaning staff do the work */
+			parse_shutdown(parse->peer->refclkunit, peer); /* let our cleaning staff do the work */
 			return false;
 		}
 	}
@@ -2744,8 +2748,8 @@ parse_start(
 
 	if (parse->binding == (bind_t *)0)
 		{
-			msyslog(LOG_ERR, "PARSE receiver #%d: parse_start: io sub system initialisation failed.", CLK_UNIT(parse->peer));
-			parse_shutdown(CLK_UNIT(parse->peer), peer); /* let our cleaning staff do the work */
+			msyslog(LOG_ERR, "PARSE receiver #%d: parse_start: io sub system initialisation failed.", parse->peer->refclkunit);
+			parse_shutdown(parse->peer->refclkunit, peer); /* let our cleaning staff do the work */
 			return false;			/* well, ok - special initialisation broke */
 		}
 
@@ -2782,7 +2786,7 @@ parse_start(
 	if (!PARSE_SETCS(parse, &tmp_ctl))
 	{
 		msyslog(LOG_ERR, "PARSE receiver #%d: parse_start: parse_setcs() FAILED.", unit);
-		parse_shutdown(CLK_UNIT(parse->peer), peer); /* let our cleaning staff do the work */
+		parse_shutdown(parse->peer->refclkunit, peer); /* let our cleaning staff do the work */
 		return false;			/* well, ok - special initialisation broke */
 	}
 
@@ -2792,7 +2796,7 @@ parse_start(
 	if (!PARSE_SETFMT(parse, &tmp_ctl))
 	{
 		msyslog(LOG_ERR, "PARSE receiver #%d: parse_start: parse_setfmt() FAILED.", unit);
-		parse_shutdown(CLK_UNIT(parse->peer), peer); /* let our cleaning staff do the work */
+		parse_shutdown(parse->peer->refclkunit, peer); /* let our cleaning staff do the work */
 		return false;			/* well, ok - special initialisation broke */
 	}
 
@@ -2808,7 +2812,7 @@ parse_start(
 		{
 			if (parse->parse_type->cl_init(parse))
 				{
-					parse_shutdown(CLK_UNIT(parse->peer), peer); /* let our cleaning staff do the work */
+					parse_shutdown(parse->peer->refclkunit, peer); /* let our cleaning staff do the work */
 					return false;		/* well, ok - special initialisation broke */
 				}
 		}
@@ -2819,8 +2823,8 @@ parse_start(
 	if (!io_addclock(&parse->generic->io))
         {
 		msyslog(LOG_ERR,
-			"PARSE receiver #%d: parse_start: addclock %s fails (ABORT - clock type requires async io)", CLK_UNIT(parse->peer), parsedev);
-		parse_shutdown(CLK_UNIT(parse->peer), peer); /* let our cleaning staff do the work */
+			"PARSE receiver #%d: parse_start: addclock %s fails (ABORT - clock type requires async io)", parse->peer->refclkunit, parsedev);
+		parse_shutdown(parse->peer->refclkunit, peer); /* let our cleaning staff do the work */
 		return false;
 	}
 
@@ -2831,26 +2835,26 @@ parse_start(
 		{
 			/* conditional if clause for conditional syslog */
 			msyslog(LOG_INFO, "PARSE receiver #%d: reference clock \"%s\" (I/O device %s, PPS device %s) added",
-				CLK_UNIT(parse->peer),
+				parse->peer->refclkunit,
 				parse->parse_type->cl_description, parsedev,
 				(parse->ppsfd != parse->generic->io.fd) ? parseppsdev : parsedev);
 
 			msyslog(LOG_INFO, "PARSE receiver #%d: Stratum %d, trust time %s, precision %d",
-				CLK_UNIT(parse->peer),
+				parse->peer->refclkunit,
 				parse->peer->stratum,
 				l_mktime(parse->maxunsync), parse->peer->precision);
 
 			msyslog(LOG_INFO, "PARSE receiver #%d: rootdelay %.6f s, phase adjustment %.6f s, PPS phase adjustment %.6f s, %s IO handling",
-				CLK_UNIT(parse->peer),
+				parse->peer->refclkunit,
 				parse->parse_type->cl_rootdelay,
 				parse->generic->fudgetime1,
 				parse->ppsphaseadjust,
                                 parse->binding->bd_description);
 
-			msyslog(LOG_INFO, "PARSE receiver #%d: Format recognition: %s", CLK_UNIT(parse->peer),
+			msyslog(LOG_INFO, "PARSE receiver #%d: Format recognition: %s", parse->peer->refclkunit,
 				parse->parse_type->cl_format);
                         msyslog(LOG_INFO, "PARSE receiver #%d: %sPPS support",
-				CLK_UNIT(parse->peer),
+				parse->peer->refclkunit,
 				CLK_PPS(parse->peer) ? "" : "NO ");
 		}
 
@@ -2884,7 +2888,7 @@ parse_ctl(
                 {
 		  parse->generic->fudgetime1 = in->fudgetime1;
 		  msyslog(LOG_INFO, "PARSE receiver #%d: new phase adjustment %.6f s",
-			  CLK_UNIT(parse->peer),
+			  parse->peer->refclkunit,
 			  parse->generic->fudgetime1);
 		}
 
@@ -2895,14 +2899,14 @@ parse_ctl(
 		    {
 		      parse->maxunsync = (u_long)ABS(in->fudgetime2);
 		      msyslog(LOG_INFO, "PARSE receiver #%d: new trust time %s",
-			      CLK_UNIT(parse->peer),
+			      parse->peer->refclkunit,
 			      l_mktime(parse->maxunsync));
 		    }
 		  else
 		    {
 		      parse->ppsphaseadjust = in->fudgetime2;
 		      msyslog(LOG_INFO, "PARSE receiver #%d: new PPS phase adjustment %.6f s",
-			  CLK_UNIT(parse->peer),
+			  parse->peer->refclkunit,
 			      parse->ppsphaseadjust);
 #if defined(HAVE_PPSAPI)
 		      if (CLK_PPS(parse->peer))
@@ -2950,7 +2954,7 @@ parse_poll(
 		parse_event(parse, CEVNT_TIMEOUT);
 
 		ERR(ERR_NODATA)
-			msyslog(LOG_WARNING, "PARSE receiver #%d: no data from device within poll interval (check receiver / wiring)", CLK_UNIT(parse->peer));
+			msyslog(LOG_WARNING, "PARSE receiver #%d: no data from device within poll interval (check receiver / wiring)", parse->peer->refclkunit);
 	}
 
 	/*
@@ -3000,7 +3004,7 @@ parse_control(
 		return;
 	}
 
-	unit = CLK_UNIT(parse->peer);
+	unit = parse->peer->refclkunit;
 
 	/*
 	 * handle changes
@@ -3215,7 +3219,7 @@ parse_event(
 		{
 			NLOG(NLOG_CLOCKSTATUS)
 				msyslog(LOG_INFO, "PARSE receiver #%d: SYNCHRONIZED",
-					CLK_UNIT(parse->peer));
+					parse->peer->refclkunit);
 		}
 
 		refclock_report(parse->peer, event);
@@ -3249,7 +3253,7 @@ parse_process(
 
 		NLOG(NLOG_CLOCKINFO) /* conditional if clause for conditional syslog */
 			msyslog(LOG_WARNING, "PARSE receiver #%d: conversion status \"%s\"",
-				CLK_UNIT(parse->peer), parsestatus(parsetime->parse_status, buffer, sizeof(buffer)));
+				parse->peer->refclkunit, parsestatus(parsetime->parse_status, buffer, sizeof(buffer)));
 
 		if ((parsetime->parse_status & CVT_MASK) == CVT_FAIL)
 		{
@@ -3263,13 +3267,13 @@ parse_process(
 			if (!PARSE_GETTIMECODE(parse, &tmpctl))
 			{
 				ERR(ERR_INTERNAL)
-					msyslog(LOG_ERR, "PARSE receiver #%d: parse_process: parse_timecode() FAILED", CLK_UNIT(parse->peer));
+					msyslog(LOG_ERR, "PARSE receiver #%d: parse_process: parse_timecode() FAILED", parse->peer->refclkunit);
 			}
 			else
 			{
 				ERR(ERR_BADDATA)
 					msyslog(LOG_WARNING, "PARSE receiver #%d: FAILED TIMECODE: \"%s\" (check receiver configuration / wiring)",
-						CLK_UNIT(parse->peer), mkascii(buffer, sizeof buffer, tmpctl.parsegettc.parse_buffer, (unsigned)(tmpctl.parsegettc.parse_count - 1)));
+						parse->peer->refclkunit, mkascii(buffer, sizeof buffer, tmpctl.parsegettc.parse_buffer, (unsigned)(tmpctl.parsegettc.parse_count - 1)));
 			}
 			/* copy status to show only changes in case of failures */
 			parse->timedata.parse_status = parsetime->parse_status;
@@ -3336,13 +3340,13 @@ parse_process(
 		if (!PARSE_GETFMT(parse, &tmpctl))
 		{
 			ERR(ERR_INTERNAL)
-				msyslog(LOG_ERR, "PARSE receiver #%d: parse_getfmt() FAILED", CLK_UNIT(parse->peer));
+				msyslog(LOG_ERR, "PARSE receiver #%d: parse_getfmt() FAILED", parse->peer->refclkunit);
 		}
 		else
 		{
 			NLOG(NLOG_CLOCKINFO) /* conditional if clause for conditional syslog */
 				msyslog(LOG_INFO, "PARSE receiver #%d: packet format \"%s\"",
-					CLK_UNIT(parse->peer), tmpctl.parseformat.parse_buffer);
+					parse->peer->refclkunit, tmpctl.parseformat.parse_buffer);
 		}
 		parse->lastformat = parsetime->parse_format;
 	}
@@ -3364,7 +3368,7 @@ parse_process(
 
 		NLOG(NLOG_CLOCKINFO) /* conditional if clause for conditional syslog */
 			msyslog(LOG_INFO,"PARSE receiver #%d: STATE CHANGE: %s -> %s",
-				CLK_UNIT(parse->peer), tmp2, tmp1);
+				parse->peer->refclkunit, tmp2, tmp1);
 	}
 
 	/*
@@ -3419,7 +3423,7 @@ parse_process(
 		NLOG(NLOG_CLOCKSTATUS)
 			ERR(ERR_BADSTATUS)
 			msyslog(LOG_ERR,"PARSE receiver #%d: NOT SYNCHRONIZED/RECEIVER PROBLEMS",
-				CLK_UNIT(parse->peer));
+				parse->peer->refclkunit);
 	}
 	else
 	{
@@ -3459,7 +3463,7 @@ parse_process(
 			NLOG(NLOG_CLOCKSTATUS)
 				ERR(ERR_BADSTATUS)
 				msyslog(LOG_ERR,"PARSE receiver #%d: TIMECODE NOT CONFIRMED",
-					CLK_UNIT(parse->peer));
+					parse->peer->refclkunit);
 		}
 	}
 
@@ -3475,7 +3479,7 @@ parse_process(
 #ifdef DEBUG
 		if (debug > 3)
 			printf("PARSE receiver #%d: Reftime %s, Recvtime %s - initial offset %s\n",
-			       CLK_UNIT(parse->peer),
+			       parse->peer->refclkunit,
 			       prettydate(&reftime),
 			       prettydate(&rectime),
 			       lfptoa(&off,6));
@@ -3505,7 +3509,7 @@ parse_process(
 #ifdef DEBUG
 		if (debug > 3)
 			printf("PARSE receiver #%d: PPStime %s\n",
-				CLK_UNIT(parse->peer),
+				parse->peer->refclkunit,
 				prettydate(&offset));
 #endif
 		if (PARSE_TIMECODE(parsetime->parse_state))
@@ -3583,7 +3587,7 @@ parse_process(
 #ifdef DEBUG
 	if (debug > 3)
 		printf("PARSE receiver #%d: Reftime %s, Recvtime %s - final offset %s\n",
-			CLK_UNIT(parse->peer),
+			parse->peer->refclkunit,
 			prettydate(&reftime),
 			prettydate(&rectime),
 			lfptoa(&off,6));
@@ -3596,7 +3600,7 @@ parse_process(
 #ifdef DEBUG
 	if (debug > 3)
 		printf("PARSE receiver #%d: calculated Reftime %s, Recvtime %s\n",
-			CLK_UNIT(parse->peer),
+			parse->peer->refclkunit,
 			prettydate(&reftime),
 			prettydate(&rectime));
 #endif
@@ -3667,7 +3671,7 @@ parse_process(
 	        if (debug > 2)
 			{
 				       printf("PARSE receiver #%d: refclock_process_offset(reftime=%s, rectime=%s, Fudge=%f)\n",
-				       CLK_UNIT(parse->peer),
+				       parse->peer->refclkunit,
 				       prettydate(&reftime),
 				       prettydate(&rectime),
 				       fudge);
@@ -3789,7 +3793,7 @@ gps16x_message(
 
 			mkreadable(msgbuffer, sizeof(msgbuffer), (char *)parsetime->parse_msg, parsetime->parse_msglen, 1);
 			printf("PARSE receiver #%d: received message (%d bytes) >%s<\n",
-				CLK_UNIT(parse->peer),
+				parse->peer->refclkunit,
 				parsetime->parse_msglen,
 				msgbuffer);
 		}
@@ -3936,7 +3940,7 @@ gps16x_message(
 						NLOG(NLOG_CLOCKSTATUS)
 							ERR(ERR_BADSTATUS)
 							msyslog(LOG_ERR,"PARSE receiver #%d: ANTENNA FAILURE: %s",
-								CLK_UNIT(parse->peer), p);
+								parse->peer->refclkunit, p);
 
 						p = q;
 						mbg_tm_str(&p, &antinfo.tm_disconn, BUFFER_SIZE(buffer, p), 0);
@@ -4124,7 +4128,7 @@ gps16x_message(
 		{
 			msyslog(LOG_DEBUG, "PARSE receiver #%d: gps16x_message: message checksum error: hdr_csum = 0x%x (expected 0x%x), "
 			                   "data_len = %d, data_csum = 0x%x (expected 0x%x)",
-				CLK_UNIT(parse->peer),
+				parse->peer->refclkunit,
 				header.hdr_csum, mbg_csum(parsetime->parse_msg + 1, 6),
 				header.len,
 				header.data_csum, mbg_csum(bufp, (unsigned)((header.len < sizeof(parsetime->parse_msg)) ? header.len : 0)));
@@ -4187,7 +4191,7 @@ gps16x_poll(
 
 		mkreadable(buffer, sizeof(buffer), (char *)cmd_buffer, (unsigned)(outp - cmd_buffer), 1);
 		printf("PARSE receiver #%d: transmitted message #%ld (%d bytes) >%s<\n",
-		       CLK_UNIT(parse->peer),
+		       parse->peer->refclkunit,
 		       parse->localstate - 1,
 		       (int)(outp - cmd_buffer),
 		       buffer);
@@ -4199,13 +4203,13 @@ gps16x_poll(
 	if (rtc < 0)
 	{
 		ERR(ERR_BADIO)
-			msyslog(LOG_ERR, "PARSE receiver #%d: gps16x_poll: failed to send cmd to clock: %m", CLK_UNIT(parse->peer));
+			msyslog(LOG_ERR, "PARSE receiver #%d: gps16x_poll: failed to send cmd to clock: %m", parse->peer->refclkunit);
 	}
 	else
 	if (rtc != outp - cmd_buffer)
 	{
 		ERR(ERR_BADIO)
-			msyslog(LOG_ERR, "PARSE receiver #%d: gps16x_poll: failed to send cmd incomplete (%d of %d bytes sent)", CLK_UNIT(parse->peer), rtc, (int)(outp - cmd_buffer));
+			msyslog(LOG_ERR, "PARSE receiver #%d: gps16x_poll: failed to send cmd incomplete (%d of %d bytes sent)", parse->peer->refclkunit, rtc, (int)(outp - cmd_buffer));
 	}
 
 	clear_err(parse, ERR_BADIO);
@@ -4265,13 +4269,13 @@ poll_dpoll(
 	if (rtc < 0)
 	{
 		ERR(ERR_BADIO)
-			msyslog(LOG_ERR, "PARSE receiver #%d: poll_dpoll: failed to send cmd to clock: %m", CLK_UNIT(parse->peer));
+			msyslog(LOG_ERR, "PARSE receiver #%d: poll_dpoll: failed to send cmd to clock: %m", parse->peer->refclkunit);
 	}
 	else
 	    if (rtc != ct)
 	    {
 		    ERR(ERR_BADIO)
-			    msyslog(LOG_ERR, "PARSE receiver #%d: poll_dpoll: failed to send cmd incomplete (%ld of %ld bytes sent)", CLK_UNIT(parse->peer), rtc, ct);
+			    msyslog(LOG_ERR, "PARSE receiver #%d: poll_dpoll: failed to send cmd incomplete (%ld of %ld bytes sent)", parse->peer->refclkunit, rtc, ct);
 	    }
 	clear_err(parse, ERR_BADIO);
 }
@@ -4330,7 +4334,7 @@ trimbletaip_init(
 	 */
 	if (TTY_GETATTR(parse->generic->io.fd, &tio) == -1)
 	{
-		msyslog(LOG_ERR, "PARSE receiver #%d: trimbletaip_init: tcgetattr(fd, &tio): %m", CLK_UNIT(parse->peer));
+		msyslog(LOG_ERR, "PARSE receiver #%d: trimbletaip_init: tcgetattr(fd, &tio): %m", parse->peer->refclkunit);
 		return false;
 	}
 	else
@@ -4339,7 +4343,7 @@ trimbletaip_init(
 
 		if (TTY_SETATTR(parse->generic->io.fd, &tio) == -1)
 		{
-			msyslog(LOG_ERR, "PARSE receiver #%d: trimbletaip_init: tcsetattr(fd, &tio): %m", CLK_UNIT(parse->peer));
+			msyslog(LOG_ERR, "PARSE receiver #%d: trimbletaip_init: tcsetattr(fd, &tio): %m", parse->peer->refclkunit);
 			return false;
 		}
 	}
@@ -4375,7 +4379,7 @@ trimbletaip_event(
 				    int rtc = (int) write(parse->generic->io.fd, *iv, strlen(*iv));
 				    if (rtc < 0)
 				    {
-					    msyslog(LOG_ERR, "PARSE receiver #%d: trimbletaip_event: failed to send cmd to clock: %m", CLK_UNIT(parse->peer));
+					    msyslog(LOG_ERR, "PARSE receiver #%d: trimbletaip_event: failed to send cmd to clock: %m", parse->peer->refclkunit);
 					    return;
 				    }
 				    else
@@ -4383,7 +4387,7 @@ trimbletaip_event(
 					    if (rtc != (int)strlen(*iv))
 					    {
 						    msyslog(LOG_ERR, "PARSE receiver #%d: trimbletaip_event: failed to send cmd incomplete (%d of %d bytes sent)",
-							    CLK_UNIT(parse->peer), rtc, (int)strlen(*iv));
+							    parse->peer->refclkunit, rtc, (int)strlen(*iv));
 						    return;
 					    }
 				    }
@@ -4393,7 +4397,7 @@ trimbletaip_event(
 			    NLOG(NLOG_CLOCKINFO)
 				    ERR(ERR_BADIO)
 				    msyslog(LOG_ERR, "PARSE receiver #%d: trimbletaip_event: RECEIVER INITIALIZED",
-					    CLK_UNIT(parse->peer));
+					    parse->peer->refclkunit);
 		    }
 		    break;
 
@@ -4553,7 +4557,7 @@ sendetx(
 	if (write(parse->generic->io.fd, buf->txt, (unsigned long)buf->idx) != buf->idx)
 	{
 		ERR(ERR_BADIO)
-			msyslog(LOG_ERR, "PARSE receiver #%d: sendetx: failed to send cmd to clock: %m", CLK_UNIT(parse->peer));
+			msyslog(LOG_ERR, "PARSE receiver #%d: sendetx: failed to send cmd to clock: %m", parse->peer->refclkunit);
 	}
 	else
 	{
@@ -4564,7 +4568,7 @@ sendetx(
 
 		  mkreadable(buffer, sizeof(buffer), (char *)buf->txt, (unsigned)buf->idx, 1);
 		  printf("PARSE receiver #%d: transmitted message (%d bytes) >%s<\n",
-			 CLK_UNIT(parse->peer),
+			 parse->peer->refclkunit,
 			 buf->idx, buffer);
 	  }
 #endif
@@ -4661,7 +4665,7 @@ trimbletsip_setup(
 
 	NLOG(NLOG_CLOCKINFO)
 		ERR(ERR_BADIO)
-		msyslog(LOG_ERR, "PARSE receiver #%d: trimbletsip_setup: RECEIVER RE-INITIALIZED (%s)", CLK_UNIT(parse->peer), reason);
+		msyslog(LOG_ERR, "PARSE receiver #%d: trimbletsip_setup: RECEIVER RE-INITIALIZED (%s)", parse->peer->refclkunit, reason);
 
 	return false;
 }
@@ -4768,7 +4772,7 @@ trimbletsip_init(
 	 */
 	if (TTY_GETATTR(parse->generic->io.fd, &tio) == -1)
 	{
-		msyslog(LOG_ERR, "PARSE receiver #%d: trimbletsip_init: tcgetattr(%d, &tio): %m", CLK_UNIT(parse->peer), parse->generic->io.fd);
+		msyslog(LOG_ERR, "PARSE receiver #%d: trimbletsip_init: tcgetattr(%d, &tio): %m", parse->peer->refclkunit, parse->generic->io.fd);
 		return false;
 	}
 	else
@@ -4787,7 +4791,7 @@ trimbletsip_init(
 
 		if (TTY_SETATTR(parse->generic->io.fd, &tio) == -1)
 		{
-			msyslog(LOG_ERR, "PARSE receiver #%d: trimbletsip_init: tcsetattr(%d, &tio): %m", CLK_UNIT(parse->peer), parse->generic->io.fd);
+			msyslog(LOG_ERR, "PARSE receiver #%d: trimbletsip_init: tcsetattr(%d, &tio): %m", parse->peer->refclkunit, parse->generic->io.fd);
 			return false;
 		}
 	}
@@ -5311,7 +5315,7 @@ rawdcf_init_1(
 
 	if (ioctl(parse->generic->io.fd, TIOCMGET, (caddr_t)&sl232) == -1)
 	{
-		msyslog(LOG_NOTICE, "PARSE receiver #%d: rawdcf_init_1: WARNING: ioctl(fd, TIOCMGET, [C|T]IOCM_DTR): %m", CLK_UNIT(parse->peer));
+		msyslog(LOG_NOTICE, "PARSE receiver #%d: rawdcf_init_1: WARNING: ioctl(fd, TIOCMGET, [C|T]IOCM_DTR): %m", parse->peer->refclkunit);
 		return 0;
 	}
 
@@ -5323,7 +5327,7 @@ rawdcf_init_1(
 
 	if (ioctl(parse->generic->io.fd, TIOCMSET, (caddr_t)&sl232) == -1)
 	{
-		msyslog(LOG_NOTICE, "PARSE receiver #%d: rawdcf_init_1: WARNING: ioctl(fd, TIOCMSET, [C|T]IOCM_DTR): %m", CLK_UNIT(parse->peer));
+		msyslog(LOG_NOTICE, "PARSE receiver #%d: rawdcf_init_1: WARNING: ioctl(fd, TIOCMSET, [C|T]IOCM_DTR): %m", parse->peer->refclkunit);
 	}
 	return 0;
 }
@@ -5333,7 +5337,7 @@ rawdcfdtr_init_1(
 	struct parseunit *parse
 	)
 {
-	msyslog(LOG_NOTICE, "PARSE receiver #%d: rawdcf_init_1: WARNING: OS interface incapable of setting DTR to power DCF modules", CLK_UNIT(parse->peer));
+	msyslog(LOG_NOTICE, "PARSE receiver #%d: rawdcf_init_1: WARNING: OS interface incapable of setting DTR to power DCF modules", parse->peer->refclkunit);
 	return 0;
 }
 #endif  /* DTR initialisation type */
@@ -5358,7 +5362,7 @@ rawdcf_init_2(
 
 	if (ioctl(parse->generic->io.fd, TIOCMGET, (caddr_t)&sl232) == -1)
 	{
-		msyslog(LOG_NOTICE, "PARSE receiver #%d: rawdcf_init_2: WARNING: ioctl(fd, TIOCMGET, [C|T]IOCM_RTS): %m", CLK_UNIT(parse->peer));
+		msyslog(LOG_NOTICE, "PARSE receiver #%d: rawdcf_init_2: WARNING: ioctl(fd, TIOCMGET, [C|T]IOCM_RTS): %m", parse->peer->refclkunit);
 		return 0;
 	}
 
@@ -5370,7 +5374,7 @@ rawdcf_init_2(
 
 	if (ioctl(parse->generic->io.fd, TIOCMSET, (caddr_t)&sl232) == -1)
 	{
-		msyslog(LOG_NOTICE, "PARSE receiver #%d: rawdcf_init_2: WARNING: ioctl(fd, TIOCMSET, [C|T]IOCM_RTS): %m", CLK_UNIT(parse->peer));
+		msyslog(LOG_NOTICE, "PARSE receiver #%d: rawdcf_init_2: WARNING: ioctl(fd, TIOCMSET, [C|T]IOCM_RTS): %m", parse->peer->refclkunit);
 	}
 	return 0;
 }
@@ -5380,7 +5384,7 @@ rawdcf_init_2(
 	struct parseunit *parse
 	)
 {
-	msyslog(LOG_NOTICE, "PARSE receiver #%d: rawdcf_init_2: WARNING: OS interface incapable of setting RTS to power DCF modules", CLK_UNIT(parse->peer));
+	msyslog(LOG_NOTICE, "PARSE receiver #%d: rawdcf_init_2: WARNING: OS interface incapable of setting RTS to power DCF modules", parse->peer->refclkunit);
 	return 0;
 }
 #endif  /* DTR initialisation type */

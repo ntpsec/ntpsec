@@ -256,7 +256,6 @@ def cmd_configure(ctx, config):
 	ctx.define("NTP_KEYSDIR", "%s/etc" % ctx.env.PREFIX, comment="NTP key file directory")
 	ctx.define("GETSOCKNAME_SOCKLEN_TYPE", "socklen_t", quote=False, comment="socklen type")
 	ctx.define("DFLT_RLIMIT_STACK", 50, comment="Default stack size")
-	ctx.define("DFLT_RLIMIT_MEMLOCK", 32, comment="Locked memory size")
 
 	probe_multicast(ctx, "MCAST", "Checking for multicast capability")
 
@@ -289,6 +288,7 @@ def cmd_configure(ctx, config):
 		('EVP_MD_do_all_sorted', ["openssl/evp.h"], "CRYPTO"),
 		('getclock', ["sys/timers.h"]),
 		('getpassphrase', ["stdlib.h"]),		# Sun systems
+		('getrusage', ["sys/time.h", "sys/resource.h"]),
 		('MD5Init', ["md5.h"], "CRYPTO"),
 		('ntp_adjtime', ["sys/time.h", "sys/timex.h"]),		# BSD
 		('ntp_gettime', ["sys/time.h", "sys/timex.h"]),		# BSD
@@ -345,6 +345,7 @@ def cmd_configure(ctx, config):
 		"stdatomic.h",
 		"sys/audioio.h",
 		"sys/capability.h",     # Linux
+		"sys/clockctl.h",	# NetBSD
 		"sys/ioctl.h",
 		"sys/modem.h",          # Apple
 		"sys/prctl.h",          # Linux
@@ -457,7 +458,7 @@ def cmd_configure(ctx, config):
 	# Shouldn't be an issue as 8.x shipped in January 1991!
 	# ctx.define("NEED_RCVBUF_SLOP", 1)
 
-	# It should be possible to use asynchrpnous I/O with notification
+	# It should be possible to use asynchronous I/O with notification
 	# by SIGIO on any Unix conformant to POSIX.1-2001. But the code to
 	# do this is untested and there are historical reasons to suspect
 	# it might not work reliably on all platforms.  Enable cautiously
@@ -546,6 +547,10 @@ def cmd_configure(ctx, config):
 		from pylib.check_mdns import check_mdns_run
 		check_mdns_run(ctx)
 
+	if ctx.options.enable_classic_mode:
+		ctx.define("ENABLE_CLASSIC_MODE", 1)
+	else:
+		ctx.undefine("ENABLE_CLASSIC_MODE")
 
 	if ctx.env.PTHREAD_ENABLE:
 		ctx.define("ISC_PLATFORM_USETHREADS", 1)

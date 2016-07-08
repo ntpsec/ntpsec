@@ -13,6 +13,7 @@
 #include "utilities.h"
 #include "log.h"
 #include "libntp.h"
+#include "ntp_intres.h"
 
 bool shutting_down;
 bool time_derived;
@@ -117,8 +118,6 @@ void dec_pending_ntp(const char *, sockaddr_u *);
 bool libevent_version_ok(void);
 int  gettimeofday_cached(struct event_base *b, struct timeval *tv);
 
-#define EXIT_SOFTWARE	70
-
 #define ALL_OPTIONS "46a:b:c:dD:g:hjK:k:l:M:o:rSst:VwW"
 static const struct option longoptions[] = {
     { "ipv4",		    0, 0, '4' },
@@ -213,7 +212,7 @@ ntpdig_main (
 	ntpdig_init_logging(argv[0]);
 
 	if (!libevent_version_ok())
-		exit(EXIT_SOFTWARE);
+		exit(2);
 
 	init_lib();
 	init_auth();
@@ -331,7 +330,7 @@ ntpdig_main (
 	if (0 == argc && !opt_broadcast && !opt_concurrent) {
 		printf("%s: Must supply at least one of -b hostname, -c hostname, or hostname.\n",
 		       progname);
-		exit(EXIT_SOFTWARE);
+		exit(1);
 	}
 
 
@@ -1626,7 +1625,7 @@ set_time(
 		*/
 	}
 
-	return EXIT_SOFTWARE;
+	return EXIT_FAILURE;
 }
 
 

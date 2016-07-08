@@ -30,7 +30,7 @@
  * This driver works slightly different from most others, as the PPS
  * information (if available) is also coming from GPSD via the data
  * connection. This makes using both the PPS data and the serial data
- * easier, but OTOH it's not possible to use the ATOM driver to feed a
+ * easier, but OTOH it's not possible to use the PPS driver to feed a
  * raw PPS stream to the core of NTPD.
  *
  * To go around this, the driver can use a secondary clock unit
@@ -145,7 +145,7 @@ typedef unsigned long int json_uint;
 
 /* get operation modes from mode word.
 
- * + SERIAL (default) evaluates only serial time information ('STI') as
+ * + SERIAL (default) evaluates only in-band time ('IBT') as
  *   provided by TPV and TOFF records. TPV evaluation suffers from a
  *   bigger jitter than TOFF, sine it does not contain the receive time
  *   from GPSD and therefore the receive time of NTPD must be
@@ -162,18 +162,18 @@ typedef unsigned long int json_uint;
  *   feeding samples when GPSD says that the time information is
  *   effectively unreliable.
  *
- * + STRICT means only feed clock samples when a valid STI/PPS pair is
- *   available. Combines the reference time from STI with the pulse time
+ * + STRICT means only feed clock samples when a valid IBT/PPS pair is
+ *   available. Combines the reference time from IBT with the pulse time
  *   from PPS. Masks the serial data jitter as long PPS is available,
  *   but can rapidly deteriorate once PPS drops out.
  *
- * + AUTO tries to use STI/PPS pairs if available for some time, and if
- *   this fails for too long switches back to STI only until the PPS
+ * + AUTO tries to use IBT/PPS pairs if available for some time, and if
+ *   this fails for too long switches back to IBT only until the PPS
  *   signal becomes available again. See the HTML docs for this driver
  *   about the gotchas and why this is not the default.
  */
 #define MODE_OP_MASK   0x03
-#define MODE_OP_STI    0
+#define MODE_OP_IBT    0
 #define MODE_OP_STRICT 1
 #define MODE_OP_AUTO   2
 #define MODE_OP_MAXVAL 2
@@ -289,25 +289,25 @@ struct gpsd_unit {
 	int  ppscount2;	/* PPS counter (secondary unit) */
 
 	/* TPV or TOFF serial time information */
-	l_fp sti_local;	/* when we received the TPV/TOFF message */
-	l_fp sti_stamp;	/* effective GPS time stamp */
-	l_fp sti_recvt;	/* when GPSD got the fix */
+	l_fp ibt_local;	/* when we received the TPV/TOFF message */
+	l_fp ibt_stamp;	/* effective GPS time stamp */
+	l_fp ibt_recvt;	/* when GPSD got the fix */
 
 	/* precision estimates */
-	int16_t	    sti_prec;	/* serial precision based on EPT */
+	int16_t	    ibt_prec;	/* serial precision based on EPT */
 	int16_t     pps_prec;	/* PPS precision from GPSD or above */
 
 	/* fudge values for correction, mirrored as 'l_fp' */
 	l_fp pps_fudge;		/* PPS fudge primary channel */
 	l_fp pps_fudge2;	/* PPS fudge secondary channel */
-	l_fp sti_fudge;		/* TPV/TOFF serial data fudge */
+	l_fp ibt_fudge;		/* TPV/TOFF serial data fudge */
 
 	/* Flags to indicate available data */
 	int fl_nosync: 1;	/* GPSD signals bad quality */
-	int fl_sti   : 1;	/* valid TPV/TOFF seen (have time) */
+	int fl_ibt   : 1;	/* valid TPV/TOFF seen (have time) */
 	int fl_pps   : 1;	/* valid pulse seen */
 	int fl_pps2  : 1;	/* valid pulse seen for PPS channel */
-	int fl_rawsti: 1;	/* permit raw TPV/TOFF time stamps */
+	int fl_rawibt: 1;	/* permit raw TPV/TOFF time stamps */
 	int fl_vers  : 1;	/* have protocol version */
 	int fl_watch : 1;	/* watch reply seen */
 	/* protocol flags */
@@ -324,8 +324,8 @@ struct gpsd_unit {
 	u_int       tc_recv;	/* received known records */
 	u_int       tc_breply;	/* bad replies / parsing errors */
 	u_int       tc_nosync;	/* TPV / sample cycles w/o fix */
-	u_int       tc_sti_recv;/* received serial time info records */
-	u_int       tc_sti_used;/* used        --^-- */
+	u_int       tc_ibt_recv;/* received serial time info records */
+	u_int       tc_ibt_used;/* used        --^-- */
 	u_int       tc_pps_recv;/* received PPS timing info records */
 	u_int       tc_pps_used;/* used        --^-- */
 
@@ -721,18 +721,18 @@ poll_primary(
 
 	if (pp->sloppyclockflag & CLK_FLAG4)
 		mprintf_clock_stats(
-			&peer->srcadr,"%u %u %u %u %u %u %u",
+			peer,"%u %u %u %u %u %u %u",
 			up->tc_recv,
 			up->tc_breply, up->tc_nosync,
-			up->tc_sti_recv, up->tc_sti_used,
+			up->tc_ibt_recv, up->tc_ibt_used,
 			up->tc_pps_recv, up->tc_pps_used);
 
 	/* clear tallies for next round */
 	up->tc_breply   = 0;
 	up->tc_recv     = 0;
 	up->tc_nosync   = 0;
-	up->tc_sti_recv = 0;
-	up->tc_sti_used = 0;
+	up->tc_ibt_recv = 0;
+	up->tc_ibt_used = 0;
 	up->tc_pps_recv = 0;
 	up->tc_pps_used = 0;
 }
@@ -796,7 +796,7 @@ gpsd_control(
 	} else {
 		/* save preprocessed fudge times */
 		DTOLFP(pp->fudgetime1, &up->pps_fudge);
-		DTOLFP(pp->fudgetime2, &up->sti_fudge);
+		DTOLFP(pp->fudgetime2, &up->ibt_fudge);
 
 		if (MODE_OP_MODE(up->mode ^ peer->ttl)) {
 			leave_opmode(peer, up->mode);
@@ -912,11 +912,11 @@ enter_opmode(
 		    up->logname, MODE_OP_MODE(mode)));
 
 	if (MODE_OP_MODE(mode) == MODE_OP_AUTO) {
-		up->fl_rawsti = 0;
+		up->fl_rawibt = 0;
 		up->ppscount  = PPS_MAXCOUNT / 2;
 	}
 	up->fl_pps = 0;
-	up->fl_sti = 0;
+	up->fl_ibt = 0;
 }
 
 /* ------------------------------------------------------------------ */
@@ -933,11 +933,11 @@ leave_opmode(
 		    up->logname, MODE_OP_MODE(mode)));
 
 	if (MODE_OP_MODE(mode) == MODE_OP_AUTO) {
-		up->fl_rawsti = 0;
+		up->fl_rawibt = 0;
 		up->ppscount  = 0;
 	}
 	up->fl_pps = 0;
-	up->fl_sti = 0;
+	up->fl_ibt = 0;
 }
 
 /* =====================================================================
@@ -965,14 +965,14 @@ eval_strict(
 	clockprocT * const pp   ,
 	gpsd_unitT * const up   )
 {
-	if (up->fl_sti && up->fl_pps) {
+	if (up->fl_ibt && up->fl_pps) {
 		/* use TPV reference time + PPS receive time */
-		add_clock_sample(peer, pp, up->sti_stamp, up->pps_recvt);
+		add_clock_sample(peer, pp, up->ibt_stamp, up->pps_recvt);
 		peer->precision = up->pps_prec;
 		/* both packets consumed now... */
 		up->fl_pps = 0;
-		up->fl_sti = 0;
-		++up->tc_sti_used;
+		up->fl_ibt = 0;
+		++up->tc_ibt_used;
 	}
 }
 
@@ -1011,12 +1011,12 @@ eval_serial(
 	clockprocT * const pp   ,
 	gpsd_unitT * const up   )
 {
-	if (up->fl_sti) {
-		add_clock_sample(peer, pp, up->sti_stamp, up->sti_recvt);
-		peer->precision = up->sti_prec;
+	if (up->fl_ibt) {
+		add_clock_sample(peer, pp, up->ibt_stamp, up->ibt_recvt);
+		peer->precision = up->ibt_prec;
 		/* mark time stamp as burned... */
-		up->fl_sti = 0;
-		++up->tc_sti_used;
+		up->fl_ibt = 0;
+		++up->tc_ibt_used;
 	}
 }
 
@@ -1028,12 +1028,12 @@ eval_auto(
 	gpsd_unitT * const up   )
 {
 	/* If there's no TPV available, stop working here... */
-	if (!up->fl_sti)
+	if (!up->fl_ibt)
 		return;
 
-	/* check how to handle STI+PPS: Can PPS be used to augment STI
+	/* check how to handle IBT+PPS: Can PPS be used to augment IBT
 	 * (or vice versae), do we drop the sample because there is a
-	 * temporary missing PPS signal, or do we feed on STI time
+	 * temporary missing PPS signal, or do we feed on IBT time
 	 * stamps alone?
 	 *
 	 * Do a counter/threshold dance to decide how to proceed.
@@ -1041,16 +1041,16 @@ eval_auto(
 	if (up->fl_pps) {
 		up->ppscount = min(PPS_MAXCOUNT,
 				   (up->ppscount + PPS_INCCOUNT));
-		if ((PPS_MAXCOUNT == up->ppscount) && up->fl_rawsti) {
-			up->fl_rawsti = 0;
+		if ((PPS_MAXCOUNT == up->ppscount) && up->fl_rawibt) {
+			up->fl_rawibt = 0;
 			msyslog(LOG_INFO,
 				"%s: expect valid PPS from now",
 				up->logname);
 		}
 	} else {
 		up->ppscount = max(0, (up->ppscount - PPS_DECCOUNT));
-		if ((0 == up->ppscount) && !up->fl_rawsti) {
-			up->fl_rawsti = -1;
+		if ((0 == up->ppscount) && !up->fl_rawibt) {
+			up->fl_rawibt = -1;
 			msyslog(LOG_WARNING,
 				"%s: use TPV alone from now",
 				up->logname);
@@ -1058,7 +1058,7 @@ eval_auto(
 	}
 
 	/* now eventually feed the sample */
-	if (up->fl_rawsti)
+	if (up->fl_rawibt)
 		eval_serial(peer, pp, up);
 	else
 		eval_strict(peer, pp, up);
@@ -1552,9 +1552,9 @@ process_tpv(
 	if (gps_mode < 2 || NULL == gps_time) {
 		/* receiver has no fix; tell about and avoid stale data */
 		if ( ! up->pf_toff)
-			++up->tc_sti_recv;
+			++up->tc_ibt_recv;
 		++up->tc_nosync;
-		up->fl_sti    = 0;
+		up->fl_ibt    = 0;
 		up->fl_pps    = 0;
 		up->fl_nosync = -1;
 		return;
@@ -1565,29 +1565,29 @@ process_tpv(
 	 * TOFF sentence is *not* available
 	 */
 	if ( ! up->pf_toff) {
-		++up->tc_sti_recv;
+		++up->tc_ibt_recv;
 		/* save last time code to clock data */
 		save_ltc(pp, gps_time);
 		/* now parse the time string */
-		if (convert_ascii_time(&up->sti_stamp, gps_time)) {
+		if (convert_ascii_time(&up->ibt_stamp, gps_time)) {
 			DPRINTF(2, ("%s: process_tpv, stamp='%s',"
 				    " recvt='%s' mode=%u\n",
 				    up->logname,
-				    gmprettydate(&up->sti_stamp),
-				    gmprettydate(&up->sti_recvt),
+				    gmprettydate(&up->ibt_stamp),
+				    gmprettydate(&up->ibt_recvt),
 				    gps_mode));
 
 			/* have to use local receive time as substitute
 			 * for the real receive time: TPV does not tell
 			 * us.
 			 */
-			up->sti_local = *rtime;
-			up->sti_recvt = *rtime;
-			L_SUB(&up->sti_recvt, &up->sti_fudge);
-			up->fl_sti = -1;
+			up->ibt_local = *rtime;
+			up->ibt_recvt = *rtime;
+			L_SUB(&up->ibt_recvt, &up->ibt_fudge);
+			up->fl_ibt = -1;
 		} else {
 			++up->tc_breply;
-			up->fl_sti = 0;
+			up->fl_ibt = 0;
 		}
 	}
 
@@ -1604,7 +1604,7 @@ process_tpv(
 		xlog2 = INT_MIN;
 	if (ept > 2.0)
 		xlog2 = INT_MAX;
-	up->sti_prec = clamped_precision(xlog2);
+	up->ibt_prec = clamped_precision(xlog2);
 }
 
 /* ------------------------------------------------------------------ */
@@ -1653,7 +1653,7 @@ process_pps(
 	 * not there, take the precision from the serial data.
 	 */
 	xlog2 = json_object_lookup_int_default(
-			jctx, 0, "precision", up->sti_prec);
+			jctx, 0, "precision", up->ibt_prec);
 	up->pps_prec = clamped_precision(xlog2);
 	
 	/* Get fudged receive times for primary & secondary unit */
@@ -1699,7 +1699,7 @@ process_toff(
 	clockprocT * const pp = peer->procptr;
 	gpsd_unitT * const up = (gpsd_unitT *)pp->unitptr;
 
-	++up->tc_sti_recv;
+	++up->tc_ibt_recv;
 
 	/* remember this! */
 	up->pf_toff = -1;
@@ -1708,22 +1708,22 @@ process_toff(
 	if (up->fl_nosync)
 		return;
 
-	if ( ! get_binary_time(&up->sti_recvt, jctx,
+	if ( ! get_binary_time(&up->ibt_recvt, jctx,
 			       "clock_sec", "clock_nsec", 1))
 			goto fail;
-	if ( ! get_binary_time(&up->sti_stamp, jctx,
+	if ( ! get_binary_time(&up->ibt_stamp, jctx,
 			       "real_sec", "real_nsec", 1))
 			goto fail;
-	L_SUB(&up->sti_recvt, &up->sti_fudge);
-	up->sti_local = *rtime;
-	up->fl_sti    = -1;
+	L_SUB(&up->ibt_recvt, &up->ibt_fudge);
+	up->ibt_local = *rtime;
+	up->fl_ibt    = -1;
 
-	save_ltc(pp, gmprettydate(&up->sti_stamp));
+	save_ltc(pp, gmprettydate(&up->ibt_stamp));
 	DPRINTF(2, ("%s: TOFF record processed,"
 		    " stamp='%s', recvt='%s'\n",
 		    up->logname,
-		    gmprettydate(&up->sti_stamp),
-		    gmprettydate(&up->sti_recvt)));
+		    gmprettydate(&up->ibt_stamp),
+		    gmprettydate(&up->ibt_recvt)));
 	return;
 
   fail:
@@ -1782,25 +1782,25 @@ gpsd_parse(
 		eval_pps_secondary(
 			up->pps_peer, up->pps_peer->procptr, up);
 
-	/* check PPS vs. STI receive times:
-	 * If STI is before PPS, then clearly the STI is too old. If PPS
-	 * is before STI by more than one second, then PPS is too old.
+	/* check PPS vs. IBT receive times:
+	 * If IBT is before PPS, then clearly the IBT is too old. If PPS
+	 * is before IBT by more than one second, then PPS is too old.
 	 * Weed out stale time stamps & flags.
 	 */
-	if (up->fl_pps && up->fl_sti) {
+	if (up->fl_pps && up->fl_ibt) {
 		l_fp diff;
-		diff = up->sti_local;
+		diff = up->ibt_local;
 		L_SUB(&diff, &up->pps_local);
 		if (diff.l_i > 0)
 			up->fl_pps = 0; /* pps too old */
 		else if (diff.l_i < 0)
-			up->fl_sti = 0; /* serial data too old */
+			up->fl_ibt = 0; /* serial data too old */
 	}
 
 	/* dispatch to the mode-dependent processing functions */
 	switch (up->mode) {
 	default:
-	case MODE_OP_STI:
+	case MODE_OP_IBT:
 		eval_serial(peer, pp, up);
 		break;
 
@@ -1837,7 +1837,7 @@ gpsd_stop_socket(
 	up->tickover = up->tickpres;
 	up->tickpres = min(up->tickpres + 5, TICKOVER_HIGH);
 	up->fl_vers  = 0;
-	up->fl_sti   = 0;
+	up->fl_ibt   = 0;
 	up->fl_pps   = 0;
 	up->fl_watch = 0;
 }

@@ -273,7 +273,6 @@ static	bool	addr_eqprefix	(const sockaddr_u *, const sockaddr_u *,
 static  bool	addr_samesubnet	(const sockaddr_u *, const sockaddr_u *,
 				 const sockaddr_u *, const sockaddr_u *);
 static	int	create_sockets	(u_short);
-static	SOCKET	open_socket	(sockaddr_u *, bool, bool, endpt *);
 static	char *	fdbits		(int, fd_set *);
 static	void	set_reuseaddr	(int);
 static	bool	socket_broadcast_enable	 (struct interface *, SOCKET, sockaddr_u *);
@@ -2869,7 +2868,7 @@ io_multicast_del(
  * open_socket - open a socket, returning the file descriptor
  */
 
-static SOCKET
+SOCKET
 open_socket(
 	sockaddr_u *	addr,
 	bool		bcast,
@@ -3463,7 +3462,7 @@ read_network_packet(
 			freerecvbuf(rb);
 
 		fromlen = sizeof(from);
-		buflen = recvfrom(fd, buf, sizeof(buf), 0,
+		buflen = intercept_recvfrom(fd, buf, sizeof(buf), 0,
 				  &from.sa, &fromlen);
 		DPRINTF(4, ("%s on (%lu) fd=%d from %s\n",
 			(itf->ignore_packets)
@@ -3480,7 +3479,7 @@ read_network_packet(
 	fromlen = sizeof(rb->recv_srcadr);
 
 #ifndef USE_PACKET_TIMESTAMP
-	rb->recv_length = recvfrom(fd, (char *)&rb->recv_space,
+	rb->recv_length = intercept_recvfrom(fd, (char *)&rb->recv_space,
 				   sizeof(rb->recv_space), 0,
 				   &rb->recv_srcadr.sa, &fromlen);
 #else
@@ -3561,7 +3560,7 @@ read_network_packet(
 	ts = fetch_timestamp(rb, &msghdr, ts);
 #endif
 	rb->recv_time = ts;
-	rb->receiver = intercept_receive;
+	rb->receiver = receive;
 #ifdef REFCLOCK
 	rb->network_packet = true;
 #endif /* REFCLOCK */

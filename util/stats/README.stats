@@ -9,6 +9,11 @@ shell script once per day, week or month, as appropriate. There are
 three file collections presently defined: peerstats, loopstats and
 clockstats, each of which is described in this note.
 
+Note: The NTPsec versions of these formats differ in that clock IDs
+consist of a string drivername followed by unit number in parentheses
+rather than the magic IP addresses used in NTP Classic.  The code can
+be built in a Classic compatibility node that restores the old behavior.
+
 peerstats
 
 The following data are collected in the peerstats files. The files are
@@ -52,11 +57,11 @@ received from a configured radio clock. Data are at present recorded for
 several radios. The first part of each data line is similar for all
 radios, e.g.:
 
-  49234 60517.826 127.127.4.1   93 247 16:48:21.814
+  49234 60517.826 SPECTRACOM(1) 93 247 16:48:21.814
 
-  49234             modified Julian day number
-  60517.826         time of day (s) past midnight UTC
-  127.127.4.1       receiver identifier (Spectracom)
+  49234                modified Julian day number
+  60517.826            time of day (s) past midnight UTC
+  SPECTRACOM(1)        receiver identifier (Spectracom unit 1)
   93 247 16:48:21.814  timecode (format varies)
 
 In the case of the Austron GPS receiver, a good deal of additional
@@ -68,20 +73,20 @@ by these radios.
 
 Spectracom receiver
 
-  49234 60517.826 127.127.4.1 ?A93 247 16:48:21.814
+  49234 60517.826 SPECTRACOM(1) ?A93 247 16:48:21.814
 
   The '?' and 'A' characters are present only when the receiver is
   unsynchronized; otherwise, they are replaced by space ' ' characters.
 
 IRIG audio decoder
 
-  49234 60517.826 127.127.6.0 247 16:48:21?
+  49234 60517.826 IRIG(0) 247 16:48:21?
 
   The '?' character is present only when the receiver is unsynchronized.
 
 Austron 2200A/2201A GPS receiver
 
-  49234 60580.843 127.127.10.1 93:247:16:49:24.814?
+  49234 60580.843 AUSTRON(1) 93:247:16:49:24.814?
 
   The '?' character is present only when the receiver is unsynchronized.
 
@@ -102,7 +107,7 @@ These data determine the deviations of external time/frequency inputs
 relative to receiver oscillator time. The following data are typical
 using an external cesium oscillator PPS and 5-MHz outputs.
 
-  49234 60580.843 127.127.10.1 93:247:16:49:24.814 ETF
+  49234 60580.843 AUSTRON(1) 93:247:16:49:24.814 ETF
 
   -85.9             time interval (ns)
   -89.0             average time interval (ns)
@@ -117,7 +122,7 @@ Model and option identifiers
 
 These data show the receiver model number and option configuration.
 
-  49234 60708.848 127.127.10.1 93:247:16:51:32.817 ID;OPT;VER
+  49234 60708.848 AUSTRON(1) 93:247:16:51:32.817 ID;OPT;VER
 
   GPS 2201A         model ident (must be "GPS 2200A" or "GPS 2201A")
   TTY1              rs232 option present (required)
@@ -134,7 +139,7 @@ Internal time/frequency data
 These data determine the deviations of the receiver oscillator with
 respect to satellite time.
 
-  49234 60564.846 127.127.10.1 93:247:16:49:08.816 ITF
+  49234 60564.846 AUSTRON(1) 93:247:16:49:08.816 ITF
 
   COCO              current mode (must be "COCO")
   0                 code coast mode (must be zero)
@@ -150,7 +155,7 @@ GPS/LORAN ensemble data (requires LORAN assist option LORAN)
 These data determine the deviations and weights to calculate ensemble
 time from GPS and LORAN data.
 
-  49234 60596.852 127.127.10.1 93:247:16:49:40.812 LORAN ENSEMBLE
+  49234 60596.852 AUSTRON(1) 93:247:16:49:40.812 LORAN ENSEMBLE
 
   +9.06E-08         GPS t (s)
   +3.53E-08         GPS sigma (s)
@@ -167,7 +172,7 @@ These data determine which stations of the LORAN chain are being
 tracked, together with individual signal/noise ratios, deviations and
 weights.
 
-  49234 60532.850 127.127.10.1 93:247:16:48:36.820 LORAN TDATA
+  49234 60532.850 AUSTRON(1) 93:247:16:48:36.820 LORAN TDATA
 
   M                 station identifier; data follows
   OK                status (must be "OK" for tracking)
@@ -187,7 +192,7 @@ Oscillator status and environment
 These data determine the receiver oscillator type, mode, status and
 environment. Nominal operating conditions are shown below.
 
-  49234 60628.847 127.127.10.1 93:247:16:50:12.817 OSC;ET;TEMP
+  49234 60628.847 AUSTRON(1) 93:247:16:50:12.817 OSC;ET;TEMP
 
   1121 Software     Control  oscillator model and mode (must be
                     "Software Control")
@@ -200,7 +205,7 @@ Receiver position, status and offsets
 These data determine the receiver position and elevation, together with
 programmable delay corrections for the antenna cable and receiver.
 
-  49234 60788.847 127.127.10.1 93:247:16:52:52.817 POS;PPS;PPSOFF
+  49234 60788.847 AUSTRON(1) 93:247:16:52:52.817 POS;PPS;PPSOFF
 
   +39:40:48.425     receiver latitude (N)
   -075:45:02.392    receiver longitude (E)
@@ -219,7 +224,7 @@ present state of constellation development, there should be at least
 three visible satellites in view. Much of the time the maximum of
 seven are being tracked; rarely this number drops to two.
 
-  49234 60612.850 127.127.10.1 93:247:16:49:56.820 TRSTAT
+  49234 60612.850 AUSTRON(1) 93:247:16:49:56.820 TRSTAT
 
   24 T              satellite prn and status (T = track, A = acquire)
   16 A 13 T 20 T 18 T 07 T 12 T  list continued
@@ -229,7 +234,7 @@ UTC leap-second information
 These data determine when the next leap second is to occur. The exact
 method to use is obscure.
 
-  49234 60548.847 127.127.10.1 93:247:16:48:52.818 UTC
+  49234 60548.847 AUSTRON(1) 93:247:16:48:52.818 UTC
 
   -1.2107E-08       A0 term (s)
   -1.2790E-13       A1 term (s)
@@ -240,7 +245,3 @@ method to use is obscure.
   +4.0000E+00       day number for future leap (days)
   +9.0000E+00       future leap seconds (s)
 
-David L. Mills
-University of Delaware
-mills@udel.edu
-23 October 1993

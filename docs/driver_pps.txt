@@ -99,7 +99,7 @@ synchronization without needing the Internet at all.
   Specifies the driver stratum, in decimal from 0 to 15, with default 0.
 +refid+ 'string'::
   Specifies the driver reference identifier, an ASCII string from one to
-  four characters, with default +PPS+.
+   four characters, with default +PPS+.
 +flag1 {0 | 1}+::
   Not used by this driver.
 +flag2 {0 | 1}+::
@@ -115,16 +115,31 @@ synchronization without needing the Internet at all.
 +flag4 {0 | 1}+::
   Record a timestamp once for each second if 1. Useful for constructing
   Allan deviation plots.
++subtype+::
+   Not used by this driver.
++mode+::
+   Not used by this driver.
+
+== Configuration Example ==
+
+----------------------------------------------------------------------------
+refclock pps flag2 1	# Capture PPS on trailing edge
+----------------------------------------------------------------------------
+
+This driver does not need to be configured explicitly in order to be
+active; thus no "refclock pps" is required unless you need to set a
+driver option, . It is initialized by whatever other driver is using
+it. That will be one of the following: generic, nmea, or spectracom.
 
 == Clockstats  ==
 
 If clockstats is enabled, the driver will log a few counters.  Examples:
 
 ----------------------------------------------------------------------------
-57378 3313.351 127.127.22.0 423681 64 0 0 0
-57378 3377.352 127.127.22.0 423745 64 0 0 0
-57378 3441.352 127.127.22.0 423809 64 0 0 0
-57378 3505.351 127.127.22.0 423873 64 0 0 0
+57378 3313.351 PPS(0) 423681 64 0 0 0
+57378 3377.352 PPS(0) 423745 64 0 0 0
+57378 3441.352 PPS(0) 423809 64 0 0 0
+57378 3505.351 PPS(0) 423873 64 0 0 0
 ----------------------------------------------------------------------------
 
 .Clockstats
@@ -133,7 +148,7 @@ If clockstats is enabled, the driver will log a few counters.  Examples:
 |Column|Sample          |Meaning
 |1     |57378           |MJD
 |2     |3505.351        |Time of day in seconds
-|3     |127.127.22.0    |IP Address from server config line
+|3     |PPS(0)          |Clock identification
 |4     |423873          |Total number of PPS pulses the kernel has seen
 |5     |64              |Number of PPS pulses the driver processed
                          This should be the difference between col 4 and
@@ -143,7 +158,10 @@ If clockstats is enabled, the driver will log a few counters.  Examples:
 |8     |0               |Number of times there was no pulse ready
 |=============================================================================
 
-
+The clock identification is normally the driver type and unit, but if
+your {ntpd} was built in strict Classic compatibility mode it will
+be a magic clock address expressing the same information in a more
+opaque way.
 
 == Additional Information ==
 
