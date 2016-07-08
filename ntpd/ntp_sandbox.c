@@ -58,13 +58,13 @@ bool sandbox(const bool droproot,
 	UNUSED_ARG(want_dynamic_interface_tracking);
 #endif /* HAVE_LINUX_CAPABILITY */
 	bool nonroot = false;
-#if !defined(HAVE_LINUX_CAPABILITY) && !defined(HAVE_SOLARIS_PRIVS)
+#if !defined(HAVE_LINUX_CAPABILITY) && !defined(HAVE_SOLARIS_PRIVS) && !defined(HAVE_SYS_CLOCKCTL)
 	if (droproot) {
 		msyslog(LOG_ERR,
 			"root can't be dropped due to missing capabilities.");
 		exit(-1);
 	}
-#endif /* !defined(HAVE_LINUX_CAPABILITY) && !defined(HAVE_SOLARIS_PRIVS) */
+#endif /* !defined(HAVE_LINUX_CAPABILITY) && !defined(HAVE_SOLARIS_PRIVS)  && !defined(HAVE_SYS_CLOCKCTL) */
 # ifdef ENABLE_DROPROOT
 	if (droproot) {
 		/* Drop super-user privileges and chroot now if the OS supports this */

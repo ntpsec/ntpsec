@@ -345,6 +345,7 @@ def cmd_configure(ctx, config):
 		"stdatomic.h",
 		"sys/audioio.h",
 		"sys/capability.h",     # Linux
+		"sys/clockctl.h",	# NetBSD
 		"sys/ioctl.h",
 		"sys/modem.h",          # Apple
 		"sys/prctl.h",          # Linux
