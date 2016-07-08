@@ -987,62 +987,6 @@ refclock_control(
 }
 
 
-/*
- * refclock_buginfo - return debugging info
- *
- * This routine is used mainly for debugging. It returns designated
- * values from the interface structure that can be displayed using
- * ntpq and the clkbug command.
- */
-void
-refclock_buginfo(
-	sockaddr_u *srcadr,	/* clock address */
-	struct refclockbug *bug /* output structure */
-	)
-{
-	struct peer *peer;
-	struct refclockproc *pp;
-	unsigned u;
-
-	/*
-	 * Check for valid peer structure and address
-	 */
-	peer = findexistingpeer(srcadr, NULL, NULL, -1, 0);
-
-	if (NULL == peer || NULL == peer->procptr)
-		return;
-
-	pp = peer->procptr;
-	if (pp == NULL)
-	    return;
-
-	/*
-	 * Copy structure values
-	 */
-	bug->nvalues = 8;
-	bug->svalues = 0x0000003f;
-	bug->values[0] = pp->year;
-	bug->values[1] = pp->day;
-	bug->values[2] = pp->hour;
-	bug->values[3] = pp->minute;
-	bug->values[4] = pp->second;
-	bug->values[5] = pp->nsec;
-	bug->values[6] = pp->yearstart;
-	bug->values[7] = pp->coderecv;
-	bug->stimes = 0xfffffffc;
-	bug->times[0] = pp->lastref;
-	bug->times[1] = pp->lastrec;
-	for (u = 2; u < bug->ntimes; u++)
-		DTOLFP(pp->filter[u - 2], &bug->times[u]);
-
-	/*
-	 * Give the stuff to the clock
-	 */
-	if (peer->procptr->conf->clock_buginfo != noentry)
-		(peer->procptr->conf->clock_buginfo)(peer->refclkunit, bug, peer);
-}
-
-
 #ifdef HAVE_PPSAPI
 /*
  * refclock_ppsapi - initialize/update ppsapi

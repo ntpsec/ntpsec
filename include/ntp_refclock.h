@@ -182,7 +182,7 @@ struct refclockproc {
  * ntp_refclock.c and particular clock drivers. This must agree with the
  * structure defined in the driver.
  */
-#define	noentry	0		/* flag for null routine */
+#define	noentry	NULL		/* flag for null routine */
 
 struct refclock {
 	const char *basename;
@@ -192,7 +192,6 @@ struct refclock {
 	void (*clock_control)	(int, const struct refclockstat *,
 				 struct refclockstat *, struct peer *);
 	void (*clock_init)	(void);
-	void (*clock_buginfo)	(int, struct refclockbug *, struct peer *);
 	void (*clock_timer)	(int, struct peer *);
 };
 
@@ -203,8 +202,6 @@ extern	bool	io_addclock	(struct refclockio *);
 extern	void	io_closeclock	(struct refclockio *);
 
 #ifdef REFCLOCK
-extern	void	refclock_buginfo(sockaddr_u *,
-				 struct refclockbug *);
 extern	void	refclock_control(sockaddr_u *,
 				 const struct refclockstat *,
 				 struct refclockstat *);

@@ -226,10 +226,9 @@ struct refclock refclock_palisade = {
 	palisade_start,		/* start up driver */
 	palisade_shutdown,	/* shut down driver */
 	palisade_poll,		/* transmit poll message */
-	noentry,		/* not used  */
+	noentry,		/* control - not used  */
 	noentry,		/* initialize driver (not used) */
-	noentry,		/* not used */
-	noentry			/* not used */
+	noentry			/* timer - not used */
 };
 
 int day_of_year (char *dt);

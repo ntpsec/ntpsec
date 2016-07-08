@@ -108,7 +108,6 @@ struct	refclock refclock_pps = {
 	pps_poll,		/* transmit poll message */
 	noentry,		/* control (not used) */
 	noentry,		/* initialize driver (not used) */
-	noentry,		/* buginfo (not used) */
 	pps_timer,		/* called once per second */
 };
 

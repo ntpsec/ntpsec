@@ -382,8 +382,7 @@ struct	refclock refclock_jupiter = {
 	jupiter_poll,		/* transmit poll message */
 	jupiter_control,	/* (clock control) */
 	noentry,		/* (clock init) */
-	noentry,		/* (clock buginfo) */
-	noentry			/* not used */
+	noentry			/* timer - not used */
 };
 
 /*

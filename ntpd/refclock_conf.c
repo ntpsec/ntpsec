@@ -14,7 +14,7 @@
 #include "ntp_stdlib.h"
 
 static struct refclock refclock_none = {
-    NULL, noentry, noentry, noentry, noentry, noentry, noentry, noentry
+    NULL, noentry, noentry, noentry, noentry, noentry, noentry
 };
 
 #ifdef CLOCK_LOCAL

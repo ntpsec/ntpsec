@@ -78,7 +78,6 @@ struct  refclock refclock_shm = {
 	shm_poll,		/* transmit poll message */
 	shm_control,		/* control settings */
 	noentry,		/* not used: init */
-	noentry,		/* not used: buginfo */
 	shm_timer,              /* once per second */
 };
 

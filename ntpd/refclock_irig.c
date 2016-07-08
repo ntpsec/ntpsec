@@ -293,8 +293,7 @@ struct	refclock refclock_irig = {
 	irig_poll,		/* transmit poll message */
 	noentry,		/* not used (old irig_control) */
 	noentry,		/* initialize driver (not used) */
-	noentry,		/* not used (old irig_buginfo) */
-	noentry			/* not used */
+	noentry			/* timer - not used */
 };
 
 
