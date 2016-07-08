@@ -766,6 +766,7 @@ ssize_t intercept_recvfrom(int sockfd, void *buf, size_t len, int flags,
     {
 	get_operation("recvfrom ");
 	/* FIXME: replay implementation here */
+	recvlen = 0;  /* squish compiler warning */
     } else {
 	char *cp;
 	snprintf(pkt_dump, sizeof(pkt_dump),
@@ -796,6 +797,7 @@ SOCKET intercept_open_socket(sockaddr_u *addr,
     {
 	get_operation("open_socket ");
 	/* FIXME: replay implementation here */
+	sock = 0;  /* squish compiler warnings */
     } else {
 	snprintf(open_dump, sizeof(open_dump),
 		 "open_socket %s %d %d %s\n",
