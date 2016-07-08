@@ -134,7 +134,6 @@ typedef struct peer_resolved_ctx_tag {
 	u_short		family;
 	uint8_t		hmode;		/* MODE_* */
 	struct peer_ctl	ctl;
-	const char *	group;
 } peer_resolved_ctx;
 
 /* Limits */
@@ -649,7 +648,6 @@ create_peer_node(
 {
 	peer_node *my_node;
 	attr_val *option;
-	bool freenode;
 	int errflag = false;
 
 	my_node = emalloc_zero(sizeof(*my_node));
@@ -663,7 +661,6 @@ create_peer_node(
 	my_node->addr = addr;
 
 	/* The options FIFO is consumed and reclaimed here */
-
 	if (options != NULL)
 		CHECK_FIFO_CONSISTENCY(*options);
 	while (options != NULL) {
@@ -673,7 +670,6 @@ create_peer_node(
 			break;
 		}
 
-		freenode = true;
 		/* Check the kind of option being set */
 		switch (option->attr) {
 
@@ -782,8 +778,7 @@ create_peer_node(
 				token_name(option->attr));
 			errflag = true;
 		}
-		if (freenode)
-			free(option);
+		free(option);
 	}
 
 	/* Check if errors were reported. If yes, ignore the node */
@@ -3240,7 +3235,6 @@ config_peers(
 			ctx->host_mode = curr_peer->host_mode;
 			ctx->hmode = hmode;
 			ctx->ctl = curr_peer->ctl;
-			ctx->group = curr_peer->group;
 
 			ZERO(hints);
 			hints.ai_family = ctx->family;
