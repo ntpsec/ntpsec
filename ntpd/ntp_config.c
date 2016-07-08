@@ -133,7 +133,6 @@ typedef struct peer_resolved_ctx_tag {
 	int		host_mode;	/* T_* token identifier */
 	u_short		family;
 	uint8_t		hmode;		/* MODE_* */
-	uint8_t		version;
 	struct peer_ctl	ctl;
 	const char *	group;
 } peer_resolved_ctx;
@@ -203,6 +202,11 @@ static void apply_enable_disable(attr_val_fifo *q, int enable);
 
 static void free_auth_node(config_tree *);
 static void free_all_config_trees(void);
+
+static struct peer *peer_config(sockaddr_u *, const char *,
+				 endpt *, uint8_t, uint8_t,
+				 uint8_t, uint8_t, u_int, uint32_t,
+				 keyid_t);
 
 static void free_config_access(config_tree *);
 static void free_config_auth(config_tree *);
@@ -653,7 +657,8 @@ create_peer_node(
 	my_node = emalloc_zero(sizeof(*my_node));
 
 	/* Initialize node values to default */
-	my_node->peerversion = NTP_VERSION;
+
+	my_node->ctl.version = NTP_VERSION;
 
 	/* Now set the node to the read values */
 	my_node->host_mode = hmode;
@@ -772,7 +777,7 @@ create_peer_node(
 				msyslog(LOG_ERR, "version: invalid argument");
 				errflag = true;
 			} else {
-				my_node->peerversion =
+				my_node->ctl.version =
 					(uint8_t)option->value.u;
 			}
 			break;
@@ -2987,6 +2992,68 @@ is_sane_resolved_address(
 }
 
 
+/*
+ * peer_config - configure a new association
+ */
+struct peer *
+peer_config(
+	sockaddr_u *	srcadr,
+	const char *	hostname,
+	endpt *		dstadr,
+	uint8_t		hmode,
+	uint8_t		version,
+	uint8_t		minpoll,
+	uint8_t		maxpoll,
+	u_int		flags,
+	uint32_t	ttl,
+	keyid_t		key
+	)
+{
+	uint8_t cast_flags;
+
+	/*
+	 * We do a dirty little jig to figure the cast flags. This is
+	 * probably not the best place to do this, at least until the
+	 * configure code is rebuilt. Note only one flag can be set.
+	 */
+	switch (hmode) {
+	case MODE_BROADCAST:
+
+	    if (IS_MCAST(srcadr))
+			cast_flags = MDF_MCAST;
+		else
+			cast_flags = MDF_BCAST;
+		break;
+
+	case MODE_CLIENT:
+		if (hostname != NULL && SOCK_UNSPEC(srcadr))
+			cast_flags = MDF_POOL;
+		else if (IS_MCAST(srcadr))
+			cast_flags = MDF_ACAST;
+		else
+			cast_flags = MDF_UCAST;
+		break;
+
+	default:
+		cast_flags = MDF_UCAST;
+	}
+
+	/*
+	 * Mobilize the association and initialize its variables. If
+	 * emulating ntpdate, force iburst.  For pool and manycastclient
+	 * strip FLAG_PREEMPT as the prototype associations are not
+	 * themselves preemptible, though the resulting associations
+	 * are.
+	 */
+	flags |= FLAG_CONFIG;
+	if (mode_ntpdate)
+		flags |= FLAG_IBURST;
+	if ((MDF_ACAST | MDF_POOL) & cast_flags)
+		flags &= ~FLAG_PREEMPT;
+	return newpeer(srcadr, hostname, dstadr, hmode, version,
+		       minpoll, maxpoll, flags, cast_flags, ttl, key);
+}
+
 #ifndef SIM
 static uint8_t
 get_correct_host_mode(
@@ -3072,7 +3139,7 @@ config_peers(
 			ctx->family = AF_UNSPEC;
 			ctx->host_mode = T_Server;
 			ctx->hmode = MODE_CLIENT;
-			ctx->version = NTP_VERSION;
+			ctx->ctl.version = NTP_VERSION;
 			ctx->ctl.flags = FLAG_IBURST;
 
 			ZERO(hints);
@@ -3108,7 +3175,7 @@ config_peers(
 				curr_peer->addr->address,
 				NULL,
 				hmode,
-				curr_peer->peerversion,
+				curr_peer->ctl.version,
 				curr_peer->ctl.minpoll,
 				curr_peer->ctl.maxpoll,
 				curr_peer->ctl.flags,
@@ -3135,7 +3202,7 @@ config_peers(
 					NULL,
 					NULL,
 					hmode,
-					curr_peer->peerversion,
+					curr_peer->ctl.version,
 					curr_peer->ctl.minpoll,
 					curr_peer->ctl.maxpoll,
 					curr_peer->ctl.flags,
@@ -3187,7 +3254,7 @@ config_peers(
 					NULL,
 					NULL,
 					hmode,
-					curr_peer->peerversion,
+					curr_peer->ctl.version,
 					curr_peer->ctl.minpoll,
 					curr_peer->ctl.maxpoll,
 					curr_peer->ctl.flags,
@@ -3201,7 +3268,6 @@ config_peers(
 			ctx->family = curr_peer->addr->type;
 			ctx->host_mode = curr_peer->host_mode;
 			ctx->hmode = hmode;
-			ctx->version = curr_peer->peerversion;
 			ctx->ctl = curr_peer->ctl;
 			ctx->group = curr_peer->group;
 
@@ -3288,7 +3354,7 @@ peer_name_resolved(
 				NULL,
 				NULL,
 				ctx->hmode,
-				ctx->version,
+				ctx->ctl.version,
 				ctx->ctl.minpoll,
 				ctx->ctl.maxpoll,
 				ctx->ctl.flags,
