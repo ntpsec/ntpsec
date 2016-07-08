@@ -658,7 +658,25 @@ handle_procpkt(
 	uint64_to_lfp(&peer->xmt, pkt->xmt);
 	peer->dst = rbufp->recv_time;
 
-	/* FIXME: call record_raw_stats() here */
+	record_raw_stats(&peer->srcadr,
+			 peer->dstadr ? &peer->dstadr->sin : NULL,
+			 /* What we want to be reporting is values in the packet,
+			    not the values in the peer structure, but when we
+			    reach here they're the same thing. Passing the values
+			    in the peer structure is a convenience, because
+			    they're already in the l_fp format that
+			    record_raw_stats() expects. */
+			 &peer->org, &peer->rec, &peer->xmt, &peer->dst,
+			 PKT_LEAP(pkt->li_vn_mode),
+			 PKT_VERSION(pkt->li_vn_mode),
+			 PKT_MODE(pkt->li_vn_mode),
+			 PKT_TO_STRATUM(pkt->stratum),
+			 pkt->ppoll, pkt->precision,
+			 pkt->rootdelay, pkt->rootdisp,
+			 /* FIXME: this cast is disgusting */
+			 *(uint32_t*)pkt->refid,
+			 /* This will always be 0 by the time we get here */
+			 peer->outcount);
 
 	/* If either burst mode is armed, enable the burst.
 	 * Compute the headway for the next packet and delay if
