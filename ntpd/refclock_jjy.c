@@ -324,9 +324,8 @@ struct	refclock refclock_jjy = {
 	jjy_start,	/* start up driver */
 	jjy_shutdown,	/* shutdown driver */
 	jjy_poll,	/* transmit poll message */
-	noentry,	/* not used */
-	noentry,	/* not used */
-	noentry,	/* not used */
+	noentry,	/* control - not used */
+	noentry,	/* init - not used */
 	jjy_timer	/* 1 second interval timer */
 };
 
