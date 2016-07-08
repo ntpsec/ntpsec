@@ -80,7 +80,7 @@
  * 50 and it should be 58 for using the west and 46 for using the east,
  * use the line
  *
- * fudge 127.127.5.0 time1 +0.008 time2 -0.004
+ * refclock truetime time1 +0.008 time2 -0.004
  *
  * This corrects the 4 milliseconds advance and 8 milliseconds retard
  * needed. The software will ask the clock which satellite it sees.
@@ -348,7 +348,7 @@ true_receive(
 		   pp->lencode);
 
 	up->pollcnt = 2;
-	record_clock_stats(&peer->srcadr, pp->a_lastcode);
+	record_clock_stats(peer, pp->a_lastcode);
 
 	/*
 	 * We get down to business, check the timecode format and decode

@@ -108,7 +108,7 @@
     <ClCompile Include="..\..\..\..\ntpd\refclock_arc.c">
       <Filter>Reference Clock</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\ntpd\refclock_as2201.c">
+    <ClCompile Include="..\..\..\..\ntpd\refclock_austron.c">
       <Filter>Reference Clock</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\ntpd\refclock_pps.c">
@@ -159,7 +159,7 @@
     <ClCompile Include="..\..\..\..\ntpd\refclock_msfees.c">
       <Filter>Reference Clock</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\ntpd\refclock_mx4200.c">
+    <ClCompile Include="..\..\..\..\ntpd\refclock_magnavox.c">
       <Filter>Reference Clock</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\ntpd\refclock_neoclock4x.c">

@@ -91,6 +91,7 @@ struct key_tok ntp_keywords[] = {
 { "preempt",		T_Preempt,		FOLLBY_TOKEN },
 { "true",		T_True,			FOLLBY_TOKEN },
 { "prefer",		T_Prefer,		FOLLBY_TOKEN },
+{ "subtype",		T_Subtype,		FOLLBY_TOKEN },
 { "ttl",		T_Ttl,			FOLLBY_TOKEN },
 { "version",		T_Version,		FOLLBY_TOKEN },
 /* crypto_command */
@@ -104,10 +105,11 @@ struct key_tok ntp_keywords[] = {
 { "cryptostats",	T_Cryptostats,		FOLLBY_TOKEN },
 { "loopstats",		T_Loopstats,		FOLLBY_TOKEN },
 { "peerstats",		T_Peerstats,		FOLLBY_TOKEN },
+{ "protostats",		T_Protostats,		FOLLBY_TOKEN },
 { "rawstats",		T_Rawstats,		FOLLBY_TOKEN },
 { "sysstats", 		T_Sysstats,		FOLLBY_TOKEN },
-{ "protostats",		T_Protostats,		FOLLBY_TOKEN },
 { "timingstats",	T_Timingstats,		FOLLBY_TOKEN },
+{ "usestats",		T_Usestats,		FOLLBY_TOKEN },
 /* filegen_option */
 { "file",		T_File,			FOLLBY_STRING },
 { "link",		T_Link,			FOLLBY_TOKEN },

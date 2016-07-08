@@ -767,22 +767,6 @@ ntpdmain(
 	 */
 	sodium_init();
 
-
-
-        if (!dumpopts) {
-	    /* Setup stack size in preparation for locking pages in memory. */
-	    ntp_rlimit(RLIMIT_STACK, DFLT_RLIMIT_STACK * 4096, 4096, "4k");
-#ifdef RLIMIT_MEMLOCK
-	    /*
-	     * The default RLIMIT_MEMLOCK is very low on Linux systems.
-	     * Unless we increase this limit malloc calls are likely to
-	     * fail if we drop root privilege.  To be useful the value
-	     * has to be larger than the largest ntpd resident set size.
-	     */
-	    ntp_rlimit(RLIMIT_MEMLOCK, DFLT_RLIMIT_MEMLOCK * 1024 * 1024, 1024 * 1024, "MB");
-#endif	/* RLIMIT_MEMLOCK */
-        }
-
 	/*
 	 * Set up signals we pay attention to locally.
 	 */
@@ -957,13 +941,20 @@ ntpdmain(
 	have_interface_option = (!listen_to_virtual_ips || explicit_interface);
 	intercept_getconfig(explicit_config);
 
-	if (do_memlock) {
-		/*
-		 * lock the process into memory
-		 */
-		if (!dumpopts &&
-		    0 != mlockall(MCL_CURRENT|MCL_FUTURE))
-			msyslog(LOG_ERR, "mlockall(): %m");
+	/*
+	 * ntpd's working set is never going to be large relative to memory
+	 * availability on modern machines. Do what chrony does and indulge it;
+	 * we get some latency improvement that way.
+	 */
+	{
+	    struct rlimit rlim;
+	    rlim.rlim_max = rlim.rlim_cur = RLIM_INFINITY;
+	    if (setrlimit(RLIMIT_MEMLOCK, &rlim) < 0)
+		msyslog(LOG_WARNING, "setrlimit() failed: not locking into RAM");
+	    else if (mlockall(MCL_CURRENT|MCL_FUTURE) < 0)
+		msyslog(LOG_WARNING, "mlockall() failed: not locking into RAM");
+	    else
+		msyslog(LOG_INFO, "successfully locked into RAM");
 	}
 
 	loop_config(LOOP_DRIFTINIT, 0);

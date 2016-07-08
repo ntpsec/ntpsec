@@ -220,6 +220,7 @@
 %token	<Integer>	T_Stepfwd
 %token	<Integer>	T_Stepout
 %token	<Integer>	T_Stratum
+%token	<Integer>	T_Subtype
 %token	<String>	T_String		/* not a token */
 %token	<Integer>	T_Sys
 %token	<Integer>	T_Sysstats
@@ -239,6 +240,7 @@
 %token	<Integer>	T_Unit
 %token	<Integer>	T_Unconfig
 %token	<Integer>	T_Unpeer
+%token	<Integer>	T_Usestats
 %token	<Integer>	T_Version
 %token	<Integer>	T_WanderThreshold	/* Not a token */
 %token	<Integer>	T_Week
@@ -312,6 +314,7 @@
 %type	<Attr_val_fifo>	option_list
 %type	<Attr_val>	option_int
 %type	<Integer>	option_int_keyword
+%type	<Integer>	optional_unit
 %type	<Integer>	reset_command
 %type	<Integer>	rlimit_option_keyword
 %type	<Attr_val>	rlimit_option
@@ -478,6 +481,7 @@ option_int_keyword
 	|	T_Maxpoll
 	|	T_Ttl
 	|	T_Mode
+	|	T_Subtype
 	|	T_Version
 	;
 
@@ -681,8 +685,9 @@ stat
 	|	T_Peerstats
 	|	T_Rawstats
 	|	T_Sysstats
-	|	T_Timingstats
 	|	T_Protostats
+	|	T_Timingstats
+	|	T_Usestats
 	;
 
 filegen_option_list
@@ -982,38 +987,41 @@ fudge_factor_bool_keyword
  */
 
 refclock_command
-	:	T_Refclock T_String T_Unit T_Integer option_list fudge_factor_list
+	:	T_Refclock T_String optional_unit option_list fudge_factor_list
 		{
 #ifdef REFCLOCK
 			peer_node *my_node;
 			addr_opts_node *aon;
 			address_node *fakeaddr;
 			char addrbuf[NI_MAXHOST];
-			int dtype = -1;
-			char *dupaddr;
+			int dtype;
 
 			for (dtype = 1; dtype < (int)num_refclock_conf; dtype++)
-			    if (refclock_conf[dtype]->basename != NULL && !strcasecmp(refclock_conf[dtype]->basename, $2) == 0)
-			    {
-				break;
-			    }
-			if (dtype == -1) {
-				msyslog(LOG_ERR, "Unknown driver name %s", $2);
-				exit(1);
-			}
-
+			    if (refclock_conf[dtype]->basename != NULL && strcasecmp(refclock_conf[dtype]->basename, $2) == 0)
+				goto foundit;
+			 msyslog(LOG_ERR, "Unknown driver name %s", $2);
+			 exit(1);
+		foundit:
 			snprintf(addrbuf, sizeof(addrbuf),
-				 "127.127.%d.%d", dtype, $4);
-			dupaddr = estrdup(addrbuf);
-			fakeaddr = create_address_node(dupaddr, AF_INET);
-			my_node = create_peer_node(T_Server, fakeaddr, $5);
+				 "127.127.%d.%d", dtype, $3);
+			fakeaddr = create_address_node(estrdup(addrbuf),AF_INET);
+			my_node = create_peer_node(T_Server, fakeaddr, $4);
 			APPEND_G_FIFO(cfgt.peers, my_node);
-			fakeaddr = create_address_node(dupaddr, AF_INET);
-			aon = create_addr_opts_node(fakeaddr, $6);
+			fakeaddr = create_address_node(estrdup(addrbuf),AF_INET);
+			aon = create_addr_opts_node(fakeaddr, $5);
 			APPEND_G_FIFO(cfgt.fudge, aon);
 #endif /* REFCLOCK */
 		}
 	;
+
+optional_unit
+	:
+			{$$ = 0;}
+	|
+		T_Unit T_Integer
+			{$$ = $2;}
+	;
+
 
 /* rlimit Commands
  * ---------------

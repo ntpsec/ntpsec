@@ -40,6 +40,11 @@ and cable to either the microphone or line-in port of a workstation or
 PC. In this implementation, only one audio driver and codec can be
 supported on a single machine.
 
+The ICOM code is normally compiled in the driver if selected (USE_ICOM_RADIO
+defined), but is used only if the link /dev/icom%d is defined and
+valid and the mode keyword on the refclock configuration command
+specifies a nonzero mode (ICOM ID select code).
+
 In general and without calibration, the driver is accurate within 1 ms
 relative to the broadcast time when tracking a station. However,
 variations up to 0.3 ms can be expected due to diurnal variations in
@@ -384,6 +389,16 @@ alarms are nonfatal; only the data in the burst are discarded.
   before the driver is started.
 +flag4 {0 | 1}+::
   Enable verbose +clockstats+ recording if set.
++subtype+::
+  Not used by this driver.
++mode+::
+  Select ICOM mode and device speed.
+
+== Configuration Example ==
+
+----------------------------------------------------------------------------
+refclock chu
+----------------------------------------------------------------------------
 
 == Author ==
 

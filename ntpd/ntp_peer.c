@@ -544,69 +544,6 @@ unpeer(
 
 
 /*
- * peer_config - configure a new association
- */
-struct peer *
-peer_config(
-	sockaddr_u *	srcadr,
-	const char *	hostname,
-	endpt *		dstadr,
-	uint8_t		hmode,
-	uint8_t		version,
-	uint8_t		minpoll,
-	uint8_t		maxpoll,
-	u_int		flags,
-	uint32_t		ttl,
-	keyid_t		key,
-	bool		clockaddr
-	)
-{
-	uint8_t cast_flags;
-
-	/*
-	 * We do a dirty little jig to figure the cast flags. This is
-	 * probably not the best place to do this, at least until the
-	 * configure code is rebuilt. Note only one flag can be set.
-	 */
-	switch (hmode) {
-	case MODE_BROADCAST:
-		if (IS_MCAST(srcadr))
-			cast_flags = MDF_MCAST;
-		else
-			cast_flags = MDF_BCAST;
-		break;
-
-	case MODE_CLIENT:
-		if (hostname != NULL && SOCK_UNSPEC(srcadr))
-			cast_flags = MDF_POOL;
-		else if (IS_MCAST(srcadr))
-			cast_flags = MDF_ACAST;
-		else
-			cast_flags = MDF_UCAST;
-		break;
-
-	default:
-		cast_flags = MDF_UCAST;
-	}
-
-	/*
-	 * Mobilize the association and initialize its variables. If
-	 * emulating ntpdate, force iburst.  For pool and manycastclient
-	 * strip FLAG_PREEMPT as the prototype associations are not
-	 * themselves preemptible, though the resulting associations
-	 * are.
-	 */
-	flags |= FLAG_CONFIG;
-	if (mode_ntpdate)
-		flags |= FLAG_IBURST;
-	if ((MDF_ACAST | MDF_POOL) & cast_flags)
-		flags &= ~FLAG_PREEMPT;
-	return newpeer(srcadr, hostname, dstadr, hmode, version,
-		       minpoll, maxpoll, flags, cast_flags, ttl, key,
-		       clockaddr);
-}
-
-/*
  * setup peer dstadr field keeping it in sync with the interface
  * structures
  */
@@ -740,8 +677,7 @@ newpeer(
 	u_int		flags,
 	uint8_t		cast_flags,
 	uint32_t		ttl,
-	keyid_t		key,
-	bool		is_refclock_packet
+	keyid_t		key
 	)
 {
 	struct peer *	peer;
@@ -886,33 +822,6 @@ newpeer(
 	peer->timereset = current_time;
 	peer->timereachable = current_time;
 	peer->timereceived = current_time;
-
-	if (is_refclock_packet) {
-#ifdef REFCLOCK
-		/*
-		 * We let the reference clock support do clock
-		 * dependent initialization.  This includes setting
-		 * the peer timer, since the clock may have requirements
-		 * for this.
-		 */
-		if (maxpoll == 0)
-			peer->maxpoll = peer->minpoll;
-		if (!refclock_newpeer(peer)) {
-			/*
-			 * Dump it, something screwed up
-			 */
-			set_peerdstadr(peer, NULL);
-			free_peer(peer, 0);
-			return NULL;
-		}
-#else /* REFCLOCK */
-		msyslog(LOG_ERR, "refclock %s isn't supported. ntpd was compiled without refclock support.",
-			stoa(&peer->srcadr));
-		set_peerdstadr(peer, NULL);
-		free_peer(peer, 0);
-		return NULL;
-#endif /* REFCLOCK */
-	}
 
 	/*
 	 * Put the new peer in the hash tables.

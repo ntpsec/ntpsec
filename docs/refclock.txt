@@ -55,20 +55,20 @@ clock when the driver has not been compiled or the hardware port has
 not been appropriately configured results in a scalding remark to the
 system log file, but is otherwise non hazardous.
 
-Reference clocks are supported in the same way as ordinary NTP clients
+Reference clocks are supported in the same way as ordinary NTP servers
 and use the same filter, select, cluster and combine algorithms. The
-connection to the computer is device dependent, usually a serial port,
-parallel port or special bus peripheral, but some can work directly
-from an audio codec or sound card. The particular device is specified
-by adding a soft link from the name used by the driver to the
-particular device name.
+connection to the computer is device dependent - usually a serial
+port, but some can work directly from an audio codec or sound
+card. The particular device is specified by adding a soft link from
+the name used by the driver to the particular device name.
 
-The +refclock+ command is used to configure a reference clock. Only the
-+mode+, +minpoll+, +maxpoll+, and +prefer+ options are supported for
-reference clocks, as described on the link:clockopt.html[Reference
-Clock Commands] page. The +prefer+ option can be useful to persuade
-the server to cherish a reference clock with somewhat more enthusiasm
-than other reference clocks or peers. It is further discussed on the
+The +refclock+ command is used to configure a reference clock. The
+options resemble those of the +server+ directives, but +mode+,
++minpoll+, +maxpoll+, and +prefer+ options are supported for reference
+clocks, as described on the link:clockopt.html[Reference Clock
+Commands] page. The +prefer+ option can be useful to persuade the
+server to cherish a reference clock with somewhat more enthusiasm than
+other reference clocks or peers. It is further discussed on the
 link:prefer.html[Mitigation Rules and the +prefer+ Keyword] page. The
 +minpoll+ and +maxpoll+ options have meaning only for selected clock
 drivers.
@@ -170,7 +170,7 @@ removed because it duplicates support for the 6021 in the generic
 parse driver.
 
 [options="header"]
-[cols="10%,5%,5%,80%",options="header"]
+[cols="15%,5%,80%",options="header"]
 |====================================================================
 | Name                                  | Flags | Driver
 |link:driver_local.html[local]          | D | Undisciplined Local Clock
@@ -178,16 +178,16 @@ parse driver.
 |link:driver_truetime.html[truetime]    | D | TrueTime GPS/GOES Receivers
 |link:driver_irig.html[irig]            | D | IRIG Audio Decoder
 |link:driver_chu.html[chu]              | D | Radio CHU Audio Demodulator/Decoder
-|link:driver_generic.html[generic]      | TM| Generic Reference Driver (Parse)
-|link:driver_mx4200.html[mx4200]        | D | Magnavox MX4200 GPS Receiver
+|link:driver_generic.html[generic]      | T | Generic Reference Driver (Parse)
+|link:driver_magnavox.html[magnavox]    | D | MX4200 and compatible GPS receivers
 |link:driver_austron.html[austron]      | D | Austron 2200A/2201A GPS Receivers
 |link:driver_arbiter.html[arbiter]      | D | Arbiter 1088A/B GPS Receiver
 |link:driver_acts.html[acts]            | - | NIST/USNO/PTB Modem Time Services
 |link:driver_nmea.html[nmea]            | T | Generic NMEA GPS Receiver
 |link:driver_pps.html[pps]              | T | PPS Clock Discipline
-|link:driver_hp58503a.html[hp58503a]    | T | Hewlett Packard 58503A GPS Receiver
+|link:driver_hpgps.html[hpgps]          | T | Hewlett Packard GPS Receivers
 |link:driver_shm.html[shm]              | T | Shared Memory Driver
-|link:driver_palisade.html[palisade]    | TM| Trimble Navigation Palisade GPS
+|link:driver_palisade.html[palisade]    | T | Trimble Palisade/Thunderbolt GPS
 |link:driver_oncore.html[oncore]        | - | Motorola UT Oncore GPS
 |link:driver_jupiter.html[jupiter]      | D | Rockwell Jupiter GPS
 |link:driver_dumbclock.html[dumbclock]  | D | Dumb Clock
@@ -207,7 +207,6 @@ The flags field should be interpreted as follows:
 |Flag| Meaning
 | D | Deprecated.  May be removed in a future release
 | T | Regularly tested by an active maintainer (some devices/modes)
-| M | The driver supports multiple devices or major modes
 |====================================================================
 
 '''''

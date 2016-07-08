@@ -19,6 +19,11 @@
 #include <unistd.h>
 #include <sys/stat.h>
 
+#ifdef HAVE_GETRUSAGE
+#include <sys/time.h>
+#include <sys/resource.h>
+#endif
+
 /*
  * Defines used by the leapseconds stuff
  */
@@ -58,14 +63,15 @@ double	wander_threshold = 1e-7;	/* initial frequency threshold */
 
 
 char statsdir[MAXFILENAME] = NTP_VAR;
-static FILEGEN peerstats;
-static FILEGEN loopstats;
 static FILEGEN clockstats;
+static FILEGEN cryptostats;
+static FILEGEN loopstats;
+static FILEGEN peerstats;
+static FILEGEN protostats;
 static FILEGEN rawstats;
 static FILEGEN sysstats;
-static FILEGEN protostats;
-static FILEGEN cryptostats;
 static FILEGEN timingstats;
+static FILEGEN usestats;
 
 /*
  * This controls whether stats are written to the fileset. Provided
@@ -82,6 +88,7 @@ static double prev_drift_comp;		/* last frequency update */
  * Function prototypes
  */
 static	void	record_sys_stats(void);
+static	void	record_use_stats(void);
 	void	ntpd_time_stepped(void);
 static  void	check_leap_expiration(int, uint32_t, const time_t*);
 
@@ -112,15 +119,15 @@ uninit_util(void)
 		free(key_file_name);
 		key_file_name = NULL;
 	}
-	filegen_unregister("peerstats");
-	filegen_unregister("loopstats");
 	filegen_unregister("clockstats");
+	filegen_unregister("cryptostats");
+	filegen_unregister("loopstats");
 	filegen_unregister("rawstats");
 	filegen_unregister("sysstats");
+	filegen_unregister("peerstats");
 	filegen_unregister("protostats");
-#ifdef DEBUG_TIMING
 	filegen_unregister("timingstats");
-#endif	/* DEBUG_TIMING */
+	filegen_unregister("usestats");
 
 #if defined(_MSC_VER) && defined (_DEBUG)
 	_CrtCheckMemory();
@@ -135,14 +142,16 @@ uninit_util(void)
 void
 init_util(void)
 {
-	filegen_register(statsdir, "peerstats",	  &peerstats);
-	filegen_register(statsdir, "loopstats",	  &loopstats);
 	filegen_register(statsdir, "clockstats",  &clockstats);
+	filegen_register(statsdir, "cryptostats", &cryptostats);
+	filegen_register(statsdir, "loopstats",	  &loopstats);
 	filegen_register(statsdir, "rawstats",	  &rawstats);
 	filegen_register(statsdir, "sysstats",	  &sysstats);
+	filegen_register(statsdir, "peerstats",	  &peerstats);
 	filegen_register(statsdir, "protostats",  &protostats);
-	filegen_register(statsdir, "cryptostats", &cryptostats);
 	filegen_register(statsdir, "timingstats", &timingstats);
+	filegen_register(statsdir, "usestats",	  &usestats);
+
 	/*
 	 * register with libntp ntp_set_tod() to call us back
 	 * when time is stepped.
@@ -161,6 +170,7 @@ void
 write_stats(void)
 {
 	record_sys_stats();
+	record_use_stats();
 	if (stats_drift_file != 0) {
 
 		/*
@@ -370,14 +380,13 @@ stats_config(
 	}
 }
 
-
 /*
  * record_peer_stats - write peer statistics to file
  *
  * file format:
  * day (MJD)
  * time (s past UTC midnight)
- * IP address
+ * IP address (old format) or drivername(unit) (new format)
  * status word (hex)
  * offset
  * delay
@@ -386,12 +395,8 @@ stats_config(
 */
 void
 record_peer_stats(
-	sockaddr_u *addr,
-	int	status,
-	double	offset,		/* offset */
-	double	delay,		/* delay */
-	double	dispersion,	/* dispersion */
-	double	jitter		/* jitter */
+	struct peer *peer,
+	int	status
 	)
 {
 	l_fp	now;
@@ -407,12 +412,22 @@ record_peer_stats(
 	if (peerstats.fp != NULL) {
 		fprintf(peerstats.fp,
 		    "%lu %s %s %x %.9f %.9f %.9f %.9f\n", day,
-		    ulfptoa(&now, 3), stoa(addr), status, offset,
-		    delay, dispersion, jitter);
+		    ulfptoa(&now, 3), stoa(&peer->srcadr), status, peer->offset,
+		    peer->delay, peer->disp, peer->jitter);
 		fflush(peerstats.fp);
 	}
 }
 
+static const char *
+peerlabel(const struct peer *peer)
+{
+#ifndef ENABLE_CLASSIC_MODE
+ 	if (peer->procptr != NULL)
+		return refclock_name((struct peer *)peer);
+	else
+#endif /* ENABLE_CLASSIC_MODE */
+		return stoa(&peer->srcadr);
+}
 
 /*
  * record_loop_stats - write loop filter statistics to file
@@ -460,12 +475,12 @@ record_loop_stats(
  * file format:
  * day (MJD)
  * time (s past midnight)
- * IP address
+ * IP address (old format) or drivername(unit) new format
  * text message
  */
 void
 record_clock_stats(
-	sockaddr_u *addr,
+	struct peer *peer,
 	const char *text	/* timecode string */
 	)
 {
@@ -481,7 +496,7 @@ record_clock_stats(
 	now.l_ui %= 86400;
 	if (clockstats.fp != NULL) {
 		fprintf(clockstats.fp, "%lu %s %s %s\n", day,
-		    ulfptoa(&now, 3), stoa(addr), text);
+		    ulfptoa(&now, 3), peerlabel(peer), text);
 		fflush(clockstats.fp);
 	}
 }
@@ -493,7 +508,7 @@ record_clock_stats(
  */
 int
 mprintf_clock_stats(
-	sockaddr_u *addr,
+	struct peer *peer,
 	const char *fmt,
 	...
 	)
@@ -506,7 +521,7 @@ mprintf_clock_stats(
 	rc = mvsnprintf(msg, sizeof(msg), fmt, ap);
 	va_end(ap);
 	if (stats_control)
-		record_clock_stats(addr, msg);
+		record_clock_stats(peer, msg);
 
 	return rc;
 }
@@ -518,7 +533,7 @@ mprintf_clock_stats(
  * day (MJD)
  * time (s past midnight)
  * peer ip address
- * IP address
+ * IP address old format) or drivername(unit) (new format)
  * t1 t2 t3 t4 timestamps
  */
 void
@@ -608,6 +623,61 @@ record_sys_stats(void)
 		fflush(sysstats.fp);
 		proto_clr_stats();
 	}
+}
+
+
+/*
+ * record_use_stats - write usage statistics to file
+ *
+ * file format
+ * day (MJD)
+ * time (s past midnight)
+ * time since reset
+ */
+void record_use_stats(void)
+{
+#ifdef HAVE_GETRUSAGE
+	l_fp	now;
+	u_long	day;
+	struct rusage usage;
+	static struct rusage oldusage;
+	/* Descriptions in NetBSD and FreeBSD are better than Linux
+	 * man getrusage */
+
+	if (!stats_control)
+		return;
+
+	get_systime(&now);
+	filegen_setup(&usestats, now.l_ui);
+	day = now.l_ui / 86400 + MJD_1900;
+	now.l_ui %= 86400;
+	if (usestats.fp != NULL) {
+		double utime, stime;
+		getrusage(RUSAGE_SELF, &usage);
+		utime =  usage.ru_utime.tv_usec - oldusage.ru_utime.tv_usec;
+		utime /= 1E6;
+		utime += usage.ru_utime.tv_sec -  oldusage.ru_utime.tv_sec;
+		stime =  usage.ru_stime.tv_usec - oldusage.ru_stime.tv_usec;
+		stime /= 1E6;
+		stime += usage.ru_stime.tv_sec -  oldusage.ru_stime.tv_sec;
+		fprintf(usestats.fp,
+		    "%lu %s %lu %.3f %.3f %lu %lu %lu %lu %lu %lu %lu %lu %lu\n",
+		    day, ulfptoa(&now, 3), current_time - use_stattime,
+		    utime, stime,
+		    usage.ru_minflt -  oldusage.ru_minflt,
+		    usage.ru_majflt -  oldusage.ru_majflt,
+		    usage.ru_nswap -   oldusage.ru_nswap,
+		    usage.ru_inblock - oldusage.ru_inblock,
+		    usage.ru_oublock - oldusage.ru_oublock,
+		    usage.ru_nvcsw -    oldusage.ru_nvcsw,
+		    usage.ru_nivcsw -   oldusage.ru_nivcsw,
+		    usage.ru_nsignals - oldusage.ru_nsignals,
+		    usage.ru_maxrss );
+		fflush(usestats.fp);
+		oldusage = usage;
+		use_stattime = current_time;
+	}
+#endif /* HAVE_GETRUSAGE */
 }
 
 

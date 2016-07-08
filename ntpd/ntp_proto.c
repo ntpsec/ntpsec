@@ -112,7 +112,7 @@ uint8_t	sys_ttl[MAX_TTL];	/* ttl mapping vector */
 /*
  * Statistics counters - first the good, then the bad
  */
-u_long	sys_stattime;		/* elapsed time */
+u_long	sys_stattime;		/* elapsed time since reset */
 u_long	sys_received;		/* packets received */
 u_long	sys_processed;		/* packets for this host */
 u_long	sys_newversion;		/* current version */
@@ -123,6 +123,7 @@ u_long	sys_badauth;		/* bad authentication */
 u_long	sys_declined;		/* declined */
 u_long	sys_limitrejected;	/* rate exceeded */
 u_long	sys_kodsent;		/* KoD sent */
+u_long	use_stattime;		/* elapsed time since reset */
 
 static	double	root_distance	(struct peer *);
 static	void	clock_combine	(peer_select *, int, int);
@@ -720,7 +721,7 @@ handle_manycast(
 		MODE_CLIENT, PKT_VERSION(pkt->li_vn_mode),
 		mpeer->minpoll, mpeer->maxpoll,
 		FLAG_PREEMPT | (FLAG_IBURST & mpeer->flags),
-		MDF_UCAST | MDF_UCLNT, 0, mpeer->keyid, false);
+		MDF_UCAST | MDF_UCLNT, 0, mpeer->keyid);
 }
 	
 void
@@ -742,7 +743,7 @@ receive(
 	}
 
 #ifdef REFCLOCK
-	restrict_mask = is_network_packet(rbufp) ?
+	restrict_mask = rbufp->network_packet ?
 	    restrictions(&rbufp->recv_srcadr) :
 	    0;
 #else
@@ -1531,8 +1532,7 @@ clock_filter(
 	 * processing. If not synchronized or not in a burst, tickle the
 	 * clock select algorithm.
 	 */
-	record_peer_stats(&peer->srcadr, ctlpeerstatus(peer),
-	    peer->offset, peer->delay, peer->disp, peer->jitter);
+	record_peer_stats(peer, ctlpeerstatus(peer));
 #ifdef DEBUG
 	if (debug)
 		printf(
@@ -2028,8 +2028,8 @@ clock_select(void)
 	 * are required.
 	 */
 	if (typepps != NULL && fabs(sys_offset) < 0.4 &&
-	    (typepps->refclktype != REFCLK_ATOM_PPS ||
-	    (typepps->refclktype == REFCLK_ATOM_PPS && (sys_prefer !=
+	    (!typepps->is_pps_driver ||
+	    (typepps->is_pps_driver && (sys_prefer !=
 	    NULL || (typesystem == NULL && sys_minsane == 0))))) {
 		typesystem = typepps;
 		sys_clockhop = 0;
@@ -2814,6 +2814,7 @@ init_proto(const bool verbose)
 	sys_stattime = current_time;
 	orphwait = current_time + sys_orphwait;
 	proto_clr_stats();
+	use_stattime = current_time;
 	for (i = 0; i < MAX_TTL; i++) {
 		sys_ttl[i] = (uint8_t)((i * 256) / MAX_TTL);
 		sys_ttlmax = i;

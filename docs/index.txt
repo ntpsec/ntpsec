@@ -74,26 +74,48 @@ ship code that is security-hardened, simpler, drastically less bulky
 two!), easier to understand, and easier to maintain.
 
 We retain, however, almost full compatibility and interoperation with
-NTP Classic.  The qualification "almost" is required because we do not
-support the Autokey (RFC5906) public-key encryption scheme. It had
-interoperability and exploitable vulnerability issues too severe to
-be patched.
+NTP Classic.  The qualification "almost" is required mainly because we
+do not support the Autokey (RFC5906) public-key encryption scheme. It
+had interoperability and exploitable vulnerability issues too severe
+to be patched.  We are participating in an IETF effort to develop
+better security features.
 
 This project began as an effort to address serious security issues
 with NTP Classic, and we intend to keep a particularly strong focus on
 code security and code verifiability.
 
 Most of the changes are under the hood, internal to the codebase.  A
-few will be user-visible:
+few will be user-visible.
 
-* The documentation has been extensively updated and revised.  One
-  important change is that manual pages are now generated from the
-  same masters as this web documentation, so the two will no longer
-  drift out of synchronization.  
+=== Security changes ===
 
-* There is a new, simpler syntax for declaring refclocks.  The old
-  syntax with the magic 127.127.t.u addresses is still supported,
-  but no longer documented.  It may be removed in a future release.
+* The deprecated ntpdc utility, long since replaced by {ntpq} and a
+  chronic locus of security vulnerabilities, has been removed.
+
+* As noted above, Autokey is not supported; that code has been
+  removed, as it was chronically prone to security vulnerabilties.
+
+* The deprecated and vulnerability-prone ntpdate program has been
+  replaced with a shell wrapper around {ntpdig}.  Its -e and -p
+  options are not implemented. It is no longer documented, but can be
+  found in the util/ directory of the source distribution.
+
+* A large number of obsolete refclocks have been removed in order to
+  reduce attack surface, code bulk, and documentation complexity.
+
+* Various features related to runtime dumping of the configuration
+  state have been removed for security reasons.  These include the
+  saveconfig command in ntpq, the --saveconfigquit option of ntpd, and
+  the implementation of related config declarations in ntp.conf.
+
+* The code has been systematically hardened, with unsafe string
+  copy and formatting functions replaced by safe (bounded) ones.
+
+* In toto, around 60% of the NTP Classic code has been outright
+  removed, with less than 5% new code added. This is a dramatic
+  reduction in attack surface.
+
+=== Time-synchronization improvements ===
 
 * Internally, there is more consistent use of nanosecond precision.
   A visible effect of this is that time stepping with sufficiently
@@ -101,34 +123,48 @@ few will be user-visible:
   rather than microseconds; this might actually matter for GPSDOs
   and high-quality radio clocks.
 
-* The deprecated ntpdc utility, long since replaced by {ntpq}, has been removed.
+=== Documentation, Configuration, and Naming ===
 
-* The ntpsnmpd daemon, incomplete and not conformant with RFC 5907,
-  has been removed.
+* The documentation has been extensively updated and revised.  One
+  important change is that manual pages are now generated from the
+  same masters as this web documentation, so the two will no longer
+  drift out of synchronization.  
 
-* Various features related to runtime dumping of the configuration
-  state have been removed for security reasons.  These include the
-  saveconfig command in ntpq, the --saveconfigquit option of ntpd, and
-  the implementation of related config declarations in ntp.conf.
+* There is a new, simpler syntax for declaring refclocks.  The old
+  syntax with the magic 127.127.t.u addresses and fudge command is
+  still supported, but no longer documented.  It may be removed in a
+  future release.  Relevant examples of the new syntax are included on
+  each refclock page.  One major feature of the new syntax is that
+  refclock drivers are referred to by names, not numbers.
 
-* A number of obsolete refclocks have been removed.
+* For the generic (parse) driver only: Using the new refclock syntax,
+  the maximum number of units that can be set up changes from 4
+  (numbers 0-3) to unlimited.  However, the old magic-address syntax
+  will not work correctly - you _must_ use the new syntax to declare
+  generic-driver refclocks.  If the software was compiled with the
+  --enable-classic-mode switch, the foregoing is reversed.
 
 * The +sntp+ program has been renamed +{ntpdig}+ in order to make
   NTP installables have a uniform name prefix and take up less
   namespace. Also, +ntp-keygen+ is now +{ntpkeygen}+, +ntp-wait+
   is {ntpwait}, and +update-leap+ is now +{ntpleapfetch}+.
 
-* A new utility, {ntpfrob}, collects several small diagnostic functions
+* A new utility, +{ntpfrob}+, collects several small diagnostic functions
   for reading and tweaking the local clock hardware, including reading
   the clock tick rate, precision, and jitter. Part of it formerly
   traveled as +tickadj+.
 
-* The deprecated and vulnerability-prone ntpdate program has been
-  replaced with a shell wrapper around {ntpdig}.  Its -e and -p
-  options are not implemented. It is no longer documented, but can be
-  found in the util/ directory of the source distribution.
+=== Other user-visible changes ===
+
+* The ntpsnmpd daemon, incomplete and not conformant with RFC 5907,
+  has been removed.
 
 * Log timestamps look a little different; they are now in ISO8601 format.
+
+* Clock identifiers in log files are normally the driver shortname
+  followed by the unit number in parentheses, rather than the magic IP
+  addresses formerly used.  The code can be built in a strict NTP
+  Classic compatibility mode that restores the old behavior.
 
 * The -!m, ->, and -< options of some Classic commands are not
   supported.  (The argument-parsing framework code that implemented
@@ -136,7 +172,11 @@ few will be user-visible:
 
 * The shortname of --help options is now -h, not -?
 
-* As noted above, Autokey is not supported; that code has been removed.
+* An instance of +{ntpq}+ built from the {project-shortname} code
+  querying a legacy NTP daemon will not automatically display
+  peers with 127.127.127.t.u addresses as refclocks; that assumption
+  has been removed from the {project-shortname} code as part of
+  getting it fully IPv6-ready.
 
 [[platforms]]
 == Supported platforms ==
@@ -144,7 +184,9 @@ few will be user-visible:
 {project-shortname} supports all operating systems conforming to
 POSIX.1-2001 and ISO/IEC 9899:1999 (aka C99).  Primary platforms
 include Linux and the *BSD family; any reasonably modern proprietary
-Unix will also serve
+Unix will also serve.  The OS must have either a Linux-like
+adjtimex(2) call or a BSD-like pair of ntp_gettime(2)/ntp_adjtime(2)
+calls.
 
 If you have a requirement for time service on an OS we don't support,
 and its API is reasonably close to our POSIX/C99 conformance baseline,

@@ -10,16 +10,17 @@
     form to the file generation set named _clockstats_:
 +
 -----------------------------------------------
-49213 525.624 127.127.4.1 93 226 00:08:29.606 D
+49213 525.624 SPECTRACOM(4) 93 226 00:08:29.606 D
 -----------------------------------------------
 +
 The first two fields show the date (Modified Julian Day) and time
 (seconds and fraction past UTC midnight). The next field shows the
-clock address in dotted-quad notation. The final field shows the
-last timecode received from the clock in decoded ASCII format, where
-meaningful. In some clock drivers a good deal of additional
-information can be gathered and displayed as well. See information
-specific to each clock for further details.
+normally shows clock type and unit (but if you are running in strict
+Classic compatibility it will show the magic clock address in
+dotted-quad notation). The final field last timecode received from the
+clock in decoded ASCII format, where meaningful. In some clock drivers
+a good deal of additional information can be gathered and displayed as
+well. See information specific to each clock for further details.
 
   +cryptostats+;;
     This option requires the OpenSSL cryptographic software library. It
@@ -28,23 +29,26 @@ specific to each clock for further details.
     following form to the file generation set named _cryptostats_:
 +
 ---------------------------------
-49213 525.624 127.127.4.1 message
+49213 525.624 SPECTRACOM(4) message
 ---------------------------------
 +
 [width="100%",cols="<34%,<33%,<33%"]
-|============================================
-|Item         | Units  |Description
-|+49213+      |MJD     |date
-|+525.624+    |s       |time past midnight
-|+127.127.4.1+|IP      |reference clock address
-|_+message+_  |text    |log message
-|============================================
+|================================================
+|Item           | Units  |Description
+|+49213+        |MJD     |date
+|+525.624+      |s       |time past midnight
+|+SPECTRACOM(4)+|IP      |reference clock type and unit
+|_+message+_    |text    |log message
+|===============================================
 +
 The first two fields show the date (Modified Julian Day) and time
-(seconds and fraction past UTC midnight). The next field shows the
-peer address in dotted-quad notation, The final message field
-includes the message type and certain ancillary information. See the
-'Authentication Options' section for further information.
+(seconds and fraction past UTC midnight). The next field normally
+shows the clock driver type and unit (but if you have built in Classic
+compatibility mode it will show a magic clock address in dotted-quad
+notation). The final message field includes the message type and
+certain ancillary information. See the 'Authentication Options'
+section for further information.
+
 
   +loopstats+;;
     Enables recording of loop filter statistics information. Each update
@@ -61,7 +65,7 @@ includes the message type and certain ancillary information. See the
 |+50935+      |MJD       |date
 |+75440.031+  |s         |time past midnight
 |+0.000006019+|s         |clock offset
-|+13.778+     |PPM       |frequency offset
+|+13.778+     |PPM       |drift (frequency offset)
 |+0.000351733+|s         |RMS jitter
 |+0.013380+   |PPM       |RMS frequency jitter (aka wander)
 |+6+          |log~2~ s  |clock discipline loop time constant
@@ -101,26 +105,27 @@ The event message code and _+message+_ field are described on the
     generation set named _peerstats_:
 +
 ---------------------------------------------------------------------------------
-48773 10847.650 127.127.4.1 9714 -0.001605376 0.000000000 0.001424877 0.000958674
+48773 10847.650 SPECTRACOM(4) 9714 -0.001605376 0.000000000 0.001424877 0.000958674
 ---------------------------------------------------------------------------------
 +
 [width="100%",cols="<34%,<33%,<33%"]
 |===================================================
-|Item          |Units   |Description
-|+48773+       |MJD     |date
-|+10847.650+   |s       |time past midnight
-|+127.127.4.1+ |IP      |source address
-|+9714+        |hex     |status word
-|+-0.001605376+|s       |clock offset
-|+0.000000000+ |s       |roundtrip delay
-|+0.001424877+ |s       |dispersion
-|+0.000958674+ |s       |RMS jitter
+|Item            |Units   |Description
+|+48773+         |MJD     |date
+|+10847.650+     |s       |time past midnight
+|+SPECTRACOM(4)+ |IP      |clock name(unit) or source address
+|+9714+          |hex     |status word
+|+-0.001605376+  |s       |clock offset
+|+0.000000000+   |s       |roundtrip delay
+|+0.001424877+   |s       |dispersion
+|+0.000958674+  |s       |RMS jitter
 |===================================================
 +
 The first two fields show the date (Modified Julian Day) and time
-(seconds and fraction past UTC midnight). The next two fields show
-the peer address in dotted-quad notation and status, respectively.
-The status field is encoded in hex in the format described in
+(seconds and fraction past UTC midnight). The third field shows
+the reference clock type and unit number (but if you are running in
+the peer address in dotted-quad notation instead) The fourth field
+is a status word, encoded in hex in the format described in
 Appendix A of the NTP specification RFC 1305. The final four fields
 show the offset, delay, dispersion and RMS jitter, all in seconds.
 
@@ -161,7 +166,7 @@ show the offset, delay, dispersion and RMS jitter, all in seconds.
 +
 The first two fields show the date (Modified Julian Day) and time
 (seconds and fraction past UTC midnight). The next two fields show
-the remote peer or clock address followed by the local address in
+the remote peer or clock identification followed by the local address in
 dotted-quad notation. The final four fields show the originate,
 receive, transmit and final NTP timestamps in order. The timestamp
 values are as received and before processing by the various data
@@ -198,6 +203,41 @@ The first two fields show the date (Modified Julian Day) and time
 (seconds and fraction past UTC midnight). The remaining ten fields
 show the statistics counter values accumulated since the last
 generated line.
+
+  +usestats+;;
+    Enables recording of {ntpd} resource usage statistics.
+    Each hour a line of the following form is appended to the file
+    generation set named _usestats_:
++
+-----------------------------------------------------------
+57570 83399.541 3600 0.902 1.451 164 0 0 0 2328 64226 1 0 4308
+-----------------------------------------------------------
++
+[width="100%",cols="<34%,<33%,<33%",]
+|==================================================
+|Item       |Units    |Description
+|+57570+    |MJD      |date
+|+83399.541+|s        |time past midnight
+|+3600+     |s        |time since reset
+|+0.902+    |s        |ru_utime: CPU seconds - user mode
+|+1.451+    |s        |ru_stime: CPU seconds - system
+|+164+      |#        |ru_minflt: page faults - reclaim/soft (no I/O)
+|+0+        |#        |ru_majflt: page faults - I/O
+|+0+        |#        |ru_nswap: process swapped out
+|+0+        |#        |ru_inblock: file blocks in
+|+2328+     |#        |ru_oublock: file blocks out
+|+64226+    |#        |ru_nvcsw: context switches, wait
+|+1+        |#        |ru_nivcsw: context switches, prempts
+|+0+        |#        |ru_nsignals: signals
+|+4308+     |#        |ru_maxrss: resident set size, kilobytes
+|==================================================
++
+The first two fields show the date (Modified Julian Day) and time
+(seconds and fraction past UTC midnight).  The ru_ tags are the
+names from the rusage struct.  See +man getrusage+ for details.
+(The NetBSD and FreeBSD man pages have more details.)
+The maxrss column is the high water mark since the process was started.
+The remaining fields show the values used since the last report.
 
   +timingstats+;;
    (Only available when the daemon is compiled with process time

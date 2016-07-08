@@ -33,9 +33,6 @@ extern	int	cmdline_server_count;
 extern	char **	cmdline_servers;
 extern	bool	force_synchronous_dns;
 
-/* set to false if admin doesn't want memory locked */
-extern	bool	do_memlock;
-
 typedef struct int_range_tag {
 	int	first;
 	int	last;
@@ -95,17 +92,25 @@ struct restrict_node_tag {
 
 typedef DECL_FIFO_ANCHOR(restrict_node) restrict_fifo;
 
+/*
+ * Read-only control knobs for a peer structure.
+ * Packaging these makes context copies a bit more succinct.
+ */
+struct peer_ctl {
+	uint8_t		version;
+	int		flags;
+	uint8_t		minpoll;
+	uint8_t		maxpoll;
+	uint32_t	ttl;
+	keyid_t		peerkey;
+};
+
 typedef struct peer_node_tag peer_node;
 struct peer_node_tag {
 	peer_node *	link;
-	int		host_mode;
 	address_node *	addr;
-	attr_val_fifo *	peerflags;
-	uint8_t		minpoll;
-	uint8_t		maxpoll;
-	uint32_t		ttl;
-	uint8_t		peerversion;
-	keyid_t		peerkey;
+	int		host_mode;
+	struct peer_ctl	ctl;
 	char *		group;
 };
 
