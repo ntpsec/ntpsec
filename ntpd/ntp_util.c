@@ -421,11 +421,11 @@ record_peer_stats(
 static const char *
 peerlabel(const struct peer *peer)
 {
-#ifndef ENABLE_CLASSIC_MODE
+#if defined(REFCLOCK) && !defined(ENABLE_CLASSIC_MODE)
  	if (peer->procptr != NULL)
 		return refclock_name((struct peer *)peer);
 	else
-#endif /* ENABLE_CLASSIC_MODE */
+#endif /* defined(REFCLOCK) && !defined(ENABLE_CLASSIC_MODE)*/
 		return stoa(&peer->srcadr);
 }
 
