@@ -73,10 +73,9 @@ struct	refclock refclock_dumbclock = {
 	dumbclock_start,		     /* start up driver */
 	dumbclock_shutdown,		     /* shut down driver */
 	noentry,			     /* poll the driver -- a nice fabrication */
-	noentry,			     /* not used */
-	noentry,			     /* not used */
-	noentry,			     /* not used */
-	noentry				     /* not used */
+	noentry,			     /* control - not used */
+	noentry,			     /* init - not used */
+	noentry				     /* timer - not used */
 };
 
 

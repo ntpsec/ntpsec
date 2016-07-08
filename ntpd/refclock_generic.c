@@ -139,7 +139,6 @@ struct	refclock refclock_parse = {
 	parse_poll,
 	parse_control,
 	noentry,
-	noentry,
 	noentry
 };
 

@@ -338,7 +338,6 @@ struct refclock refclock_nmea = {
 	nmea_poll,		/* transmit poll message */
 	NMEA_CONTROL,		/* fudge control */
 	nmea_init,		/* initialize driver */
-	noentry,		/* buginfo */
 	nmea_timer		/* called once per second */
 };
 

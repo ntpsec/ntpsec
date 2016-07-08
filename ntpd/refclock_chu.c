@@ -447,7 +447,6 @@ struct	refclock refclock_chu = {
 	chu_poll,		/* transmit poll message */
 	noentry,		/* not used (old chu_control) */
 	noentry,		/* initialize driver (not used) */
-	noentry,		/* not used (old chu_buginfo) */
 	chu_second		/* housekeeping timer */
 };
 
