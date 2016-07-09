@@ -3274,7 +3274,6 @@ config_peers(
 					unit = REFCLOCKUNIT(&peer->srcadr);
 
 					peer->baud = curr_peer->ctl.baud;
-					msyslog(LOG_ERR, "passed %dbps", peer->baud);
 					if (refclock_newpeer(clktype,
 							      unit,
 							      peer))
