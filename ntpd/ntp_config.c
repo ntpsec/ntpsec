@@ -776,6 +776,70 @@ create_peer_node(
 			}
 			break;
 
+#ifdef REFCLOCK
+			/*
+			 * Past this point are options the old syntax
+			 * handled in fudge processing. They're parsed
+			 * here to avoid ordering constraints.
+			 */
+
+		case T_Time1:
+			my_node->clock_stat.haveflags |= CLK_HAVETIME1;
+			my_node->clock_stat.fudgetime1 = option->value.d;
+			break;
+
+		case T_Time2:
+			my_node->clock_stat.haveflags |= CLK_HAVETIME2;
+			my_node->clock_stat.fudgetime2 = option->value.d;
+			break;
+
+		case T_Stratum:
+			my_node->clock_stat.haveflags |= CLK_HAVEVAL1;
+			my_node->clock_stat.fudgeval1 = option->value.i;
+			break;
+
+		case T_Refid:
+			my_node->clock_stat.haveflags |= CLK_HAVEVAL2;
+			my_node->clock_stat.fudgeval2 = 0;
+			memcpy(&my_node->clock_stat.fudgeval2,
+			       option->value.s,
+			       min(strlen(option->value.s), REFIDLEN));
+			break;
+
+		case T_Flag1:
+			my_node->clock_stat.haveflags |= CLK_HAVEFLAG1;
+			if (option->value.i)
+				my_node->clock_stat.flags |= CLK_FLAG1;
+			else
+				my_node->clock_stat.flags &= ~CLK_FLAG1;
+			break;
+
+		case T_Flag2:
+			my_node->clock_stat.haveflags |= CLK_HAVEFLAG2;
+			if (option->value.i)
+				my_node->clock_stat.flags |= CLK_FLAG2;
+			else
+				my_node->clock_stat.flags &= ~CLK_FLAG2;
+			break;
+
+		case T_Flag3:
+			my_node->clock_stat.haveflags |= CLK_HAVEFLAG3;
+			if (option->value.i)
+				my_node->clock_stat.flags |= CLK_FLAG3;
+			else
+				my_node->clock_stat.flags &= ~CLK_FLAG3;
+			break;
+
+		case T_Flag4:
+			my_node->clock_stat.haveflags |= CLK_HAVEFLAG4;
+			if (option->value.i)
+				my_node->clock_stat.flags |= CLK_FLAG4;
+			else
+				my_node->clock_stat.flags &= ~CLK_FLAG4;
+			break;
+
+#endif /* REFCLOCK */
+
 		default:
 			msyslog(LOG_ERR,
 				"Unknown peer/server option token %s",
@@ -2777,7 +2841,7 @@ config_fudge(
 				clock_stat.fudgeval2 = 0;
 				memcpy(&clock_stat.fudgeval2,
 				       curr_opt->value.s,
-				       min(strlen(curr_opt->value.s), 4));
+				       min(strlen(curr_opt->value.s), REFIDLEN));
 				break;
 
 			case T_Flag1:
@@ -3205,14 +3269,17 @@ config_peers(
 					clktype = (uint8_t)REFCLOCKTYPE(&peer->srcadr);
 					unit = REFCLOCKUNIT(&peer->srcadr);
 
-					if (!refclock_newpeer(clktype,
+					if (refclock_newpeer(clktype,
 							      unit,
-							      peer)) {
+							      peer))
+						refclock_control(&peeraddr,
+								 &curr_peer->clock_stat,
+								 NULL);
+					else
 						/*
 						 * Dump it, something screwed up
 						 */
 						unpeer(peer);
-					}
 #else /* REFCLOCK */
 					msyslog(LOG_ERR, "ntpd was compiled without refclock support.");
 					unpeer(peer);
