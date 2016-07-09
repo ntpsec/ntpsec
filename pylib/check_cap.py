@@ -1,4 +1,5 @@
 from tool import check_sanity
+import sys
 
 PCAP_FRAG = """
 # include <sys/capability.h>
@@ -30,11 +31,11 @@ def check_cap_run(ctx):
 
 	ctx.check_cc(
 		fragment	= PCAP_FRAG,
-		define_name = "HAVE_CAPABILITY",
+		define_name	= "HAVE_CAPABILITY",
 		features	= "c",
-		use			= "CAP",
-		msg         = "Checking if libcap works",
-		mandatory	= False,
+		use		= "CAP",
+		msg		= "Checking if libcap works",
+		mandatory	= sys.platform.startswith("linux"),
 		comment		= "Capability support"
 	)
 
