@@ -30,7 +30,7 @@ libevent 2.x::
       # ln -s /usr/pkg/lib/libevent_core-2.0.so.5
 
 libcap::
-   Optional, required for -u user:group on Linux
+   Required on Linux, to support dropping root.
    Fedora: libcap and libcap-devel
    Debian: libcap2 and libcap-dev
 
