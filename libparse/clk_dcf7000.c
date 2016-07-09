@@ -46,7 +46,7 @@ clockformat_t clock_dcf7000 =
  *
  * convert dcf7000 type format
  */
-static u_long
+static unsigned long
 cvt_dcf7000(
 	    unsigned char *buffer,
 	    int            size,
@@ -114,7 +114,7 @@ cvt_dcf7000(
  *
  * grab data from input stream
  */
-static u_long
+static unsigned long
 inp_dcf7000(
 	  parse_t      *parseio,
 	  char         ch,

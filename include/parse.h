@@ -130,12 +130,12 @@ typedef union
  */
 struct parsetime
 {
-  u_long  parse_status;	/* data status - CVT_OK, CVT_NONE, CVT_FAIL ... */
+  unsigned long  parse_status;	/* data status - CVT_OK, CVT_NONE, CVT_FAIL ... */
   timestamp_t	 parse_time;	/* PARSE timestamp */
   timestamp_t	 parse_stime;	/* telegram sample timestamp */
   timestamp_t	 parse_ptime;	/* PPS time stamp */
   long           parse_usecerror;	/* sampled usec error */
-  u_long	 parse_state;	/* current receiver state */
+  unsigned long	 parse_state;	/* current receiver state */
   unsigned short parse_format;	/* format code */
   unsigned short parse_msglen;	/* length of message */
   unsigned char  parse_msg[PARSE_TCMAX]; /* original messages */
@@ -158,8 +158,8 @@ union parsectl
 {
   struct parsegettc
     {
-      u_long         parse_state;	/* last state */
-      u_long         parse_badformat; /* number of bad packets since last query */
+      unsigned long         parse_state;	/* last state */
+      unsigned long         parse_badformat; /* number of bad packets since last query */
       unsigned short parse_format;/* last decoded format */
       unsigned short parse_count;	/* count of valid time code bytes */
       char           parse_buffer[PARSE_TCMAX+1]; /* timecode buffer */
@@ -174,7 +174,7 @@ union parsectl
 
   struct parsesetcs
     {
-      u_long         parse_cs;	/* character size (needed for stripping) */
+      unsigned long         parse_cs;	/* character size (needed for stripping) */
     } parsesetcs;
 };
 
@@ -201,10 +201,10 @@ struct parse			/* parse module local data */
   char          *parse_data;    /* data buffer */
   unsigned short parse_dsize;	/* size of data buffer */
   unsigned short parse_lformat;	/* last format used */
-  u_long         parse_lstate;	/* last state code */
+  unsigned long  parse_lstate;	/* last state code */
   char          *parse_ldata;	/* last data buffer */
   unsigned short parse_ldsize;	/* last data buffer length */
-  u_long         parse_badformat;	/* number of unparsable pakets */
+  unsigned long  parse_badformat;	/* number of unparsable pakets */
 
   timestamp_t    parse_lastchar; /* last time a character was received */
   parsetime_t    parse_dtime;	/* external data prototype */
@@ -223,7 +223,7 @@ struct clocktime		/* clock time broken up from time code */
   long usecond;
   long utcoffset;	/* in seconds */
   time_t utctime;	/* the actual time - alternative to date/time */
-  u_long flags;		/* current clock status */
+  unsigned long flags;		/* current clock status */
 };
 
 typedef struct clocktime clocktime_t;
@@ -256,9 +256,9 @@ typedef struct clocktime clocktime_t;
 #define SYNC_ZERO	0x00
 #define SYNC_ONE	0x01
 
-typedef u_long parse_inp_fnc_t(parse_t *, char, timestamp_t *);
-typedef u_long parse_cvt_fnc_t(unsigned char *, int, struct format *, clocktime_t *, void *);
-typedef u_long parse_pps_fnc_t(parse_t *, int, timestamp_t *);
+typedef unsigned long parse_inp_fnc_t(parse_t *, char, timestamp_t *);
+typedef unsigned long parse_cvt_fnc_t(unsigned char *, int, struct format *, clocktime_t *, void *);
+typedef unsigned long parse_pps_fnc_t(parse_t *, int, timestamp_t *);
 
 struct clockformat
 {
@@ -299,9 +299,9 @@ extern unsigned int parse_end (parse_t *);
 extern int Strok (const unsigned char *, const unsigned char *);
 extern int Stoi (const unsigned char *, long *, int);
 
-extern time_t parse_to_unixtime (clocktime_t *, u_long *);
-extern u_long updatetimeinfo (parse_t *, u_long);
-extern void syn_simple (parse_t *, timestamp_t *, struct format *, u_long);
+extern time_t parse_to_unixtime (clocktime_t *, unsigned long *);
+extern unsigned long updatetimeinfo (parse_t *, unsigned long);
+extern void syn_simple (parse_t *, timestamp_t *, struct format *, unsigned long);
 extern parse_pps_fnc_t pps_simple;
 extern parse_pps_fnc_t pps_one;
 extern parse_pps_fnc_t pps_zero;

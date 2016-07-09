@@ -7,7 +7,7 @@
 #include <stddef.h>
 #include <math.h>
 
-#if _XOPEN_SOURCE >= 600
+#if (_XOPEN_SOURCE >= 600) || (__STDC_VERSION__ >= 199901L)
 /*
  * Supply GCCisms that stop being visible if we tell it we need the
  * prototype for strptime(3).

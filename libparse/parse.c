@@ -22,7 +22,7 @@
 extern clockformat_t *clockformats[];
 extern unsigned short nformats;
 
-static u_long timepacket (parse_t *);
+static unsigned long timepacket (parse_t *);
 
 /*
  * strings support usually not in kernel - duplicated, but what the heck
@@ -208,7 +208,7 @@ parse_ioread(
 	register timestamp_t *tstamp
 	)
 {
-	register u_int updated = CVT_NONE;
+	register unsigned int updated = CVT_NONE;
 	/*
 	 * within STREAMS CSx (x < 8) chars still have the upper bits set
 	 * so we normalize the characters by masking unecessary bits off.
@@ -256,7 +256,7 @@ parse_ioread(
 
 		if (input_status & PARSE_INP_TIME)	/* time sample is available */
 		{
-			updated = (u_int) timepacket(parseio);
+			updated = (unsigned int) timepacket(parseio);
 		}
 
 		if (input_status & PARSE_INP_DATA) /* got additional data */
@@ -300,7 +300,7 @@ parse_iopps(
 	register timestamp_t *ptime
 	)
 {
-	register u_int updated = CVT_NONE;
+	register unsigned int updated = CVT_NONE;
 
 	/*
 	 * PPS pulse information will only be delivered to ONE clock format
@@ -311,7 +311,7 @@ parse_iopps(
 
 	if (clockformats[parseio->parse_lformat]->syncpps)
 	{
-		updated = (u_int) clockformats[parseio->parse_lformat]->syncpps(parseio, status == SYNC_ONE, ptime);
+		updated = (unsigned int) clockformats[parseio->parse_lformat]->syncpps(parseio, status == SYNC_ONE, ptime);
 		parseprintf(DD_PARSE, ("parse_iopps: updated = 0x%x\n", updated));
 	}
 
@@ -346,7 +346,7 @@ parse_iodone(
 time_t
 parse_to_unixtime(
 	register clocktime_t   *clock_time,
-	register u_long *cvtrtc
+	register unsigned long *cvtrtc
 	)
 {
 #define SETRTC(_X_)	{ if (cvtrtc) *cvtrtc = (_X_); }
@@ -510,10 +510,10 @@ Strok(
 	return !*m;
 }
 
-u_long
+unsigned long
 updatetimeinfo(
 	       register parse_t *parseio,
-	       register u_long   flags
+	       register unsigned long   flags
 	       )
 {
 		parseio->parse_lstate          = parseio->parse_dtime.parse_state | flags | PARSEB_TIMECODE;
@@ -539,7 +539,7 @@ syn_simple(
 	register parse_t *parseio,
 	register timestamp_t *ts,
 	register struct format *format,
-	register u_long why
+	register unsigned long why
 	)
 {
 	UNUSED_ARG(format);
@@ -553,7 +553,7 @@ syn_simple(
  * handle a pps time stamp
  */
 /*ARGSUSED*/
-u_long
+unsigned long
 pps_simple(
 	register parse_t *parseio,
 	register int status,
@@ -573,7 +573,7 @@ pps_simple(
  * handle a pps time stamp in ONE edge
  */
 /*ARGSUSED*/
-u_long
+unsigned long
 pps_one(
 	register parse_t *parseio,
 	register int status,
@@ -592,7 +592,7 @@ pps_one(
  * handle a pps time stamp in ZERO edge
  */
 /*ARGSUSED*/
-u_long
+unsigned long
 pps_zero(
 	register parse_t *parseio,
 	register int status,
@@ -610,14 +610,14 @@ pps_zero(
  *
  * process a data packet
  */
-static u_long
+static unsigned long
 timepacket(
 	register parse_t *parseio
 	)
 {
 	register unsigned short format;
 	register time_t t;
-	u_long cvtrtc;		/* current conversion result */
+	unsigned long cvtrtc;		/* current conversion result */
 	clocktime_t clock_time;
 
 	memset((char *)&clock_time, 0, sizeof clock_time);

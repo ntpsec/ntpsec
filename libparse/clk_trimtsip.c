@@ -64,11 +64,11 @@ struct trimble
 {
 	uint8_t  t_in_pkt;	/* first DLE received */
 	uint8_t  t_dle;		/* subsequent DLE received */
-	u_short t_week;		/* GPS week */
-	u_short t_weekleap;	/* GPS week of next/last week */
-	u_short t_dayleap;	/* day in week */
-	u_short t_gpsutc;	/* GPS - UTC offset */
-	u_short t_gpsutcleap;	/* offset at next/last leap */
+	unsigned short t_week;		/* GPS week */
+	unsigned short t_weekleap;	/* GPS week of next/last week */
+	unsigned short t_dayleap;	/* day in week */
+	unsigned short t_gpsutc;	/* GPS - UTC offset */
+	unsigned short t_gpsutcleap;	/* offset at next/last leap */
 	uint8_t  t_operable;	/* receiver feels OK */
 	uint8_t  t_mode;		/* actual operating mode */
 	uint8_t  t_leap;		/* possible leap warning */
@@ -146,7 +146,7 @@ inp_tsip(
 			/* DLE,ETX -> end of packet */
 			parseio->parse_data[parseio->parse_index++] = DLE;
 			parseio->parse_data[parseio->parse_index] = ch;
-			parseio->parse_ldsize = (u_short) (parseio->parse_index + 1);
+			parseio->parse_ldsize = (unsigned short) (parseio->parse_index + 1);
 			memcpy(parseio->parse_ldata, parseio->parse_data, parseio->parse_ldsize);
 			parseio->parse_dtime.parse_msg[parseio->parse_dtime.parse_msglen++] = DLE;
 			parseio->parse_dtime.parse_msg[parseio->parse_dtime.parse_msglen++] = ch;
@@ -313,18 +313,18 @@ cvt_trimtsip(
 				    unsigned char *lbp;
 
 				    /* UTC correction data - derive a leap warning */
-				    int tls   = t->t_gpsutc     = (u_short) getshort((unsigned char *)&mb(12)); /* current leap correction (GPS-UTC) */
-				    int tlsf  = t->t_gpsutcleap = (u_short) getshort((unsigned char *)&mb(24)); /* new leap correction */
+				    int tls   = t->t_gpsutc     = (unsigned short) getshort((unsigned char *)&mb(12)); /* current leap correction (GPS-UTC) */
+				    int tlsf  = t->t_gpsutcleap = (unsigned short) getshort((unsigned char *)&mb(24)); /* new leap correction */
 
-				    t->t_weekleap   = (u_short) getshort((unsigned char *)&mb(20)); /* week no of leap correction */
+				    t->t_weekleap   = (unsigned short) getshort((unsigned char *)&mb(20)); /* week no of leap correction */
 				    if (t->t_weekleap < GPSWRAP)
-				      t->t_weekleap = (u_short)(t->t_weekleap + GPSWEEKS);
+				      t->t_weekleap = (unsigned short)(t->t_weekleap + GPSWEEKS);
 
-				    t->t_dayleap    = (u_short) getshort((unsigned char *)&mb(22)); /* day in week of leap correction */
-				    t->t_week = (u_short) getshort((unsigned char *)&mb(18)); /* current week no */
+				    t->t_dayleap    = (unsigned short) getshort((unsigned char *)&mb(22)); /* day in week of leap correction */
+				    t->t_week = (unsigned short) getshort((unsigned char *)&mb(18)); /* current week no */
 				    if (t->t_week < GPSWRAP)
 				      /* coverity[copy_paste_error] */ 
-				      t->t_week = (u_short)(t->t_weekleap + GPSWEEKS);
+				      t->t_week = (unsigned short)(t->t_weekleap + GPSWEEKS);
 
 				    lbp = (unsigned char *)&mb(14); /* last update time */
 				    if (fetch_ieee754(&lbp, IEEE_SINGLE, &t0t, trim_offsets) != IEEE_OK)

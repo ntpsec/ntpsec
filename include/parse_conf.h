@@ -39,7 +39,7 @@ struct format
       unsigned short length;		/* length of field */
     }         field_offsets[O_COUNT];
   const unsigned char *fixed_string;		/* string with must be chars (blanks = wildcards) */
-  u_long      flags;
+  unsigned long      flags;
 };
 #endif
 

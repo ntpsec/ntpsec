@@ -62,7 +62,7 @@ clockformat_t clock_rcc8000 =
 };
 
 /* parse_cvt_fnc_t cvt_rcc8000 */
-static u_long
+static unsigned long
 cvt_rcc8000(
 	    unsigned char *buffer,
 	    int            size,
@@ -125,7 +125,7 @@ cvt_rcc8000(
  *
  * grab data from input stream
  */
-static u_long
+static unsigned long
 inp_rcc8000(
 	    parse_t      *parseio,
 	    char         ch,

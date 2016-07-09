@@ -56,7 +56,7 @@ clocktime(
 	int	second	 ,	/* second of minute */
 	int	tzoff	 ,	/* hours west of GMT */
 	uint32_t rec_ui	 ,	/* pivot value */
-	u_long *yearstart,	/* cached start-of-year, should be fixed to uint32_t */
+	uint32_t *yearstart,	/* cached start-of-year */
 	uint32_t *ts_ui	 )	/* effective time stamp */
 {
 	uint32_t ystt[3];	/* year start */

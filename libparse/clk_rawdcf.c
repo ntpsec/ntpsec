@@ -143,14 +143,14 @@ static struct partab
 #define DCF_Z_MET 0x2
 #define DCF_Z_MED 0x1
 
-static u_long
+static unsigned long
 ext_bf(
 	unsigned char *buf,
 	int   idx,
 	const unsigned char *zero
 	)
 {
-	u_long sum = 0;
+	unsigned long sum = 0;
 	int i, first;
 
 	first = rawdcfcode[idx].offset;
@@ -181,7 +181,7 @@ pcheck(
 	return psum;
 }
 
-static u_long
+static unsigned long
 convert_rawdcf(
 	       unsigned char   *buffer,
 	       int              size,
@@ -275,7 +275,7 @@ convert_rawdcf(
 
 		parseprintf(DD_RAWDCF,("parse: convert_rawdcf: TIME CODE OK: %02d:%02d, %02d.%02d.%02d, flags 0x%lx\n",
 				       (int)clock_time->hour, (int)clock_time->minute, (int)clock_time->day, (int)clock_time->month,(int) clock_time->year,
-				       (u_long)clock_time->flags));
+				       (unsigned long)clock_time->flags));
 		return CVT_OK;
 	}
 	else
@@ -293,7 +293,7 @@ convert_rawdcf(
  * raw dcf input routine - needs to fix up 50 baud
  * characters for 1/0 decision
  */
-static u_long
+static unsigned long
 cvt_rawdcf(
 	   unsigned char   *buffer,
 	   int              size,
@@ -307,7 +307,7 @@ cvt_rawdcf(
 	unsigned char *e = s + size;
 	const unsigned char *b = dcfparameter.onebits;
 	const unsigned char *c = dcfparameter.zerobits;
-	u_long       rtc = CVT_NONE;
+	unsigned long       rtc = CVT_NONE;
 	unsigned int i, lowmax, highmax, cutoff, span;
 #define BITS 9
 	unsigned char     histbuf[BITS];
@@ -484,7 +484,7 @@ cvt_rawdcf(
  * also ones and zeros (which is easy)
  */
 /*ARGSUSED*/
-static u_long
+static unsigned long
 pps_rawdcf(
 	parse_t *parseio,
 	int status,
@@ -520,7 +520,7 @@ calc_usecdiff(
 	return delta_usec;
 }
 
-static u_long
+static unsigned long
 snt_rawdcf(
 	parse_t *parseio,
 	timestamp_t *ptime
@@ -563,7 +563,7 @@ snt_rawdcf(
  *
  * grab DCF77 data from input stream
  */
-static u_long
+static unsigned long
 inp_rawdcf(
 	  parse_t      *parseio,
 	  char         ch,

@@ -123,7 +123,7 @@ clockformat_t clock_hopf6021 =
 };
 
 /* parse_cvt_fnc_t cvt_hopf6021 */
-static u_long
+static unsigned long
 cvt_hopf6021(
 	     unsigned char *buffer,
 	     int            size,
@@ -211,7 +211,7 @@ cvt_hopf6021(
  *
  * grab data from input stream
  */
-static u_long
+static unsigned long
 inp_hopf6021(
 	     parse_t      *parseio,
 	     char         ch,

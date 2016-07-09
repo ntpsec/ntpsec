@@ -38,10 +38,10 @@ mfp_mul(
 {
   int32_t i, j;
   uint32_t  f;
-  u_long a[4];			/* operand a */
-  u_long b[4];			/* operand b */
-  u_long c[6];			/* result c - 5 items for performance - see below */
-  u_long carry;
+  unsigned long a[4];			/* operand a */
+  unsigned long b[4];			/* operand b */
+  unsigned long c[6];			/* result c - 5 items for performance - see below */
+  unsigned long carry;
   
   int neg = 0;
 
@@ -72,7 +72,7 @@ mfp_mul(
   for (i = 0; i < 4; i++)	/* we do assume 32 * 32 = 64 bit multiplication */
     for (j = 0; j < 4; j++)
       {
-	u_long result_low, result_high;
+	unsigned long result_low, result_high;
 	int low_index = (i+j)/2;      /* formal [0..3]  - index for low long word */
 	int mid_index = 1+low_index;  /* formal [1..4]! - index for high long word
 					 will generate unecessary add of 0 to c[4]
@@ -80,7 +80,7 @@ mfp_mul(
 	int high_index = 1+mid_index; /* formal [2..5]! - index for high word overflow
 					 - only assigned on overflow (limits range to 2..3) */
 
-	result_low = (u_long)a[i] * (u_long)b[j];	/* partial product */
+	result_low = (unsigned long)a[i] * (unsigned long)b[j];	/* partial product */
 
 	if ((i+j) & 1)		/* splits across two result registers */
 	  {
@@ -137,9 +137,9 @@ mfp_mul(
 #ifdef DEBUG
   if (debug > 6)
     printf("mfp_mul: %s * %s => %s\n",
-	   mfptoa((u_long)a_i, a_f, 6),
-	   mfptoa((u_long)b_i, b_f, 6),
-	   mfptoa((u_long)i, f, 6));
+	   mfptoa((unsigned long)a_i, a_f, 6),
+	   mfptoa((unsigned long)b_i, b_f, 6),
+	   mfptoa((unsigned long)i, f, 6));
 #endif
 }
 

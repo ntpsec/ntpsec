@@ -54,7 +54,7 @@ clockformat_t clock_trimtaip =
 };
 
 /* parse_cvt_fnc_t cvt_trimtaip */
-static u_long
+static unsigned long
 cvt_trimtaip(
 	     unsigned char *buffer,
 	     int            size,
@@ -110,7 +110,7 @@ cvt_trimtaip(
  *
  * grab data from input stream
  */
-static u_long
+static unsigned long
 inp_trimtaip(
 	     parse_t      *parseio,
 	     char         ch,

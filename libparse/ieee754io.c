@@ -141,9 +141,9 @@ fetch_ieee754(
   unsigned int bias;
   unsigned int maxexp;
   int mbits;
-  u_long mantissa_low;
-  u_long mantissa_high;
-  u_long characteristic;
+  unsigned long mantissa_low;
+  unsigned long mantissa_high;
+  unsigned long characteristic;
   long exponent;
 #ifdef DEBUG_PARSELIB
   int length;
@@ -191,7 +191,7 @@ fetch_ieee754(
       mantissa_high  = 0;
 
       mantissa_low   = (val &0x7F) << 16;
-      mantissa_low  |= (u_long)get_byte(bufp, offsets, &fieldindex) << 8;
+      mantissa_low  |= (unsigned long)get_byte(bufp, offsets, &fieldindex) << 8;
       mantissa_low  |= get_byte(bufp, offsets, &fieldindex);
       break;
       
@@ -200,12 +200,12 @@ fetch_ieee754(
       characteristic  |= (val & 0xF0) >> 4; /* grab lower characteristic bits */
 
       mantissa_high  = (val & 0x0F) << 16;
-      mantissa_high |= (u_long)get_byte(bufp, offsets, &fieldindex) << 8;
+      mantissa_high |= (unsigned long)get_byte(bufp, offsets, &fieldindex) << 8;
       mantissa_high |= get_byte(bufp, offsets, &fieldindex);
 
-      mantissa_low   = (u_long)get_byte(bufp, offsets, &fieldindex) << 24;
-      mantissa_low  |= (u_long)get_byte(bufp, offsets, &fieldindex) << 16;
-      mantissa_low  |= (u_long)get_byte(bufp, offsets, &fieldindex) << 8;
+      mantissa_low   = (unsigned long)get_byte(bufp, offsets, &fieldindex) << 24;
+      mantissa_low  |= (unsigned long)get_byte(bufp, offsets, &fieldindex) << 16;
+      mantissa_low  |= (unsigned long)get_byte(bufp, offsets, &fieldindex) << 8;
       mantissa_low  |= get_byte(bufp, offsets, &fieldindex);
       break;
       
@@ -384,10 +384,10 @@ put_ieee754(
 /*unsigned int maxexp;*/
   int mbits;
   int msb;
-  u_long mantissa_low = 0;
-  u_long mantissa_high = 0;
+  unsigned long mantissa_low = 0;
+  unsigned long mantissa_high = 0;
 #ifdef DEBUG_PARSELIB
-  u_long characteristic = 0;
+  unsigned long characteristic = 0;
   long exponent;
 #endif
 /*int length;*/
