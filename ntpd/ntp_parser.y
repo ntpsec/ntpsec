@@ -312,8 +312,13 @@
 %type	<Attr_val>	option_flag
 %type	<Integer>	option_flag_keyword
 %type	<Attr_val_fifo>	option_list
+%type	<Attr_val>	option_boolean
+%type	<Integer>	option_bool_keyword
+%type	<Attr_val>	option_double
+%type	<Integer>	option_double_keyword
 %type	<Attr_val>	option_int
 %type	<Integer>	option_int_keyword
+%type	<Attr_val>	option_string
 %type	<Integer>	optional_unit
 %type	<Integer>	reset_command
 %type	<Integer>	rlimit_option_keyword
@@ -452,6 +457,9 @@ option_list
 option
 	:	option_flag
 	|	option_int
+	|	option_double
+	|	option_string
+	|	option_boolean
 	;
 
 option_flag
@@ -474,6 +482,15 @@ option_int
 			{ $$ = create_attr_ival($1, $2); }
 	|	option_int_keyword T_U_int
 			{ $$ = create_attr_uval($1, $2); }
+	|	T_Stratum T_Integer
+		{
+			if ($2 >= 0 && $2 <= 16) {
+				$$ = create_attr_ival($1, $2);
+			} else {
+				$$ = NULL;
+				yyerror("fudge factor: stratum value not in [0..16], ignored");
+			}
+		}
 	;
 
 option_int_keyword
@@ -485,6 +502,34 @@ option_int_keyword
 	|	T_Subtype
 	|	T_Version
 	;
+
+option_double
+	:	option_double_keyword number
+			{ $$ = create_attr_dval($1, $2); }
+	;
+
+option_boolean
+	:	option_bool_keyword boolean
+			{ $$ = create_attr_ival($1, $2); }
+	;
+
+option_string
+	:	T_Refid T_String
+			{ $$ = create_attr_sval($1, $2); }
+	;
+
+option_double_keyword
+	:	T_Time1
+	|	T_Time2
+	;
+
+option_bool_keyword
+	:	T_Flag1
+	|	T_Flag2
+	|	T_Flag3
+	|	T_Flag4
+	;
+
 
 /* unpeer commands
  * ---------------
@@ -979,18 +1024,13 @@ fudge_factor_bool_keyword
 
 /* Refclock Command
  * ----------------
- *
- * Stupidest possible implementation - fakes the old syntax, and imposes
- * an ordering restriction that all fudge factors must follow all server
- * options.  Good enough to start with, but needs to be cleaned up.
  */
 
 refclock_command
-	:	T_Refclock T_String optional_unit option_list fudge_factor_list
+	:	T_Refclock T_String optional_unit option_list
 		{
 #ifdef REFCLOCK
 			peer_node *my_node;
-			addr_opts_node *aon;
 			address_node *fakeaddr;
 			char addrbuf[NI_MAXHOST];
 			int dtype;
@@ -1006,9 +1046,6 @@ refclock_command
 			fakeaddr = create_address_node(estrdup(addrbuf),AF_INET);
 			my_node = create_peer_node(T_Server, fakeaddr, $4);
 			APPEND_G_FIFO(cfgt.peers, my_node);
-			fakeaddr = create_address_node(estrdup(addrbuf),AF_INET);
-			aon = create_addr_opts_node(fakeaddr, $5);
-			APPEND_G_FIFO(cfgt.fudge, aon);
 #endif /* REFCLOCK */
 		}
 	;

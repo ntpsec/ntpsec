@@ -111,6 +111,7 @@ struct peer_node_tag {
 	address_node *	addr;
 	int		host_mode;
 	struct peer_ctl	ctl;
+	struct refclockstat clock_stat;
 	char *		group;
 };
 
