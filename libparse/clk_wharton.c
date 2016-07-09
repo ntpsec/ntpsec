@@ -64,7 +64,7 @@ static parse_inp_fnc_t inp_wharton_400a;
  * 
  * convert simple type format
  */
-static          u_long
+static          unsigned long
 cvt_wharton_400a(
 	unsigned char *buffer,
 	int            size,
@@ -113,7 +113,7 @@ cvt_wharton_400a(
  *
  * grab data from input stream
  */
-static u_long
+static unsigned long
 inp_wharton_400a(
 	      parse_t      *parseio,
 	      char         ch,

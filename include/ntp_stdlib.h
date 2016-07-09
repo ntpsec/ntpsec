@@ -69,7 +69,7 @@ extern	int	authencrypt	(keyid_t, uint32_t *, int);
 extern	int	authhavekey	(keyid_t);
 extern	int	authistrusted	(keyid_t);
 extern	bool	authreadkeys	(const char *);
-extern	void	authtrust	(keyid_t, u_long);
+extern	void	authtrust	(keyid_t, unsigned long);
 extern	bool	authusekey	(keyid_t, int, const uint8_t *);
 
 /*
@@ -84,7 +84,7 @@ extern	uint32_t	calweekstart	(uint32_t ntptime, const time_t *pivot);
 extern	uint32_t	caldaystart	(uint32_t ntptime, const time_t *pivot);
 
 extern	const char *clockname	(int);
-extern	int	clocktime	(int, int, int, int, int, uint32_t, u_long *, uint32_t *);
+extern	int	clocktime	(int, int, int, int, int, uint32_t, uint32_t *, uint32_t *);
 extern	void	init_auth	(void);
 extern	void	init_lib	(void);
 extern	struct savekey *auth_findkey (keyid_t);
@@ -154,8 +154,8 @@ extern	char *	mfptoms		(uint32_t, uint32_t, short);
 extern	const char * modetoa	(size_t);
 extern	const char * eventstr	(int);
 extern	const char * ceventstr	(int);
-extern	const char * res_match_flags(u_short);
-extern	const char * res_access_flags(u_short);
+extern	const char * res_match_flags(unsigned short);
+extern	const char * res_access_flags(unsigned short);
 #ifdef HAVE_KERNEL_PLL
 extern	const char * k_st_flags	(uint32_t);
 #endif
@@ -165,11 +165,11 @@ extern	char *	numtoa		(uint32_t);
 extern	char *	numtohost	(uint32_t);
 extern	const char * socktoa	(const sockaddr_u *);
 extern	const char * sockporttoa(const sockaddr_u *);
-extern	u_short	sock_hash	(const sockaddr_u *);
+extern	unsigned short	sock_hash	(const sockaddr_u *);
 extern	int	sockaddr_masktoprefixlen(const sockaddr_u *);
 extern	const char * socktohost	(const sockaddr_u *);
-extern	bool	octtoint	(const char *, u_long *);
-extern	u_long	ranp2		(int);
+extern	bool	octtoint	(const char *, unsigned long *);
+extern	unsigned long	ranp2		(int);
 extern	const char *refid_str	(uint32_t, int);
 
 extern	bool	decodenetnum	(const char *, sockaddr_u *);
@@ -186,24 +186,24 @@ extern	void	rereadkeys	(void);
  */
 
 /* authkeys.c */
-extern u_long	authkeynotfound;	/* keys not found */
-extern u_long	authkeylookups;		/* calls to lookup keys */
-extern u_long	authnumkeys;		/* number of active keys */
-extern u_long	authkeyexpired;		/* key lifetime expirations */
-extern u_long	authkeyuncached;	/* cache misses */
-extern u_long	authencryptions;	/* calls to encrypt */
-extern u_long	authdecryptions;	/* calls to decrypt */
+extern unsigned long	authkeynotfound;	/* keys not found */
+extern unsigned long	authkeylookups;		/* calls to lookup keys */
+extern unsigned long	authnumkeys;		/* number of active keys */
+extern unsigned long	authkeyexpired;		/* key lifetime expirations */
+extern unsigned long	authkeyuncached;	/* cache misses */
+extern unsigned long	authencryptions;	/* calls to encrypt */
+extern unsigned long	authdecryptions;	/* calls to decrypt */
 
 extern int	authnumfreekeys;
 
 /*
  * The key cache. We cache the last key we looked at here.
  */
-extern keyid_t	cache_keyid;		/* key identifier */
-extern int	cache_type;		/* key type */
+extern keyid_t		cache_keyid;		/* key identifier */
+extern int		cache_type;		/* key type */
 extern uint8_t *	cache_secret;		/* secret */
-extern u_short	cache_secretsize;	/* secret octets */
-extern u_short	cache_flags;		/* KEY_ bit flags */
+extern unsigned short	cache_secretsize;	/* secret octets */
+extern unsigned short	cache_flags;		/* KEY_ bit flags */
 
 /* getopt.c */
 extern char *	ntp_optarg;		/* global argument pointer */

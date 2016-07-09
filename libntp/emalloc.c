@@ -45,11 +45,11 @@ ereallocz(
 		termlogit = true;
 #ifndef EREALLOC_CALLSITE
 		msyslog(LOG_ERR, "fatal out of memory (%lu bytes)",
-			(u_long)newsz);
+			(unsigned long)newsz);
 #else
 		msyslog(LOG_ERR,
 			"fatal out of memory %s line %d (%lu bytes)",
-			file, line, (u_long)newsz);
+			file, line, (unsigned long)newsz);
 #endif
 		exit(1);
 	}

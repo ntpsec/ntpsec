@@ -148,7 +148,7 @@ struct refclockproc {
 	int	minute;		/* minute of hour */
 	int	second;		/* second of minute */
 	long	nsec;		/* nanosecond of second */
-	u_long	yearstart;	/* beginning of year */
+	uint32_t	yearstart;	/* beginning of year */
 	int	coderecv;	/* put pointer */
 	int	codeproc;	/* get pointer */
 	l_fp	lastref;	/* reference timestamp */

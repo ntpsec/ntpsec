@@ -70,7 +70,7 @@ clockformat_t clock_schmid =
 };
 
 /* parse_cvt_fnc_t */
-static u_long
+static unsigned long
 cvt_schmid(
 	   unsigned char *buffer,
 	   int            size,
@@ -165,7 +165,7 @@ cvt_schmid(
  *
  * grab data from input stream
  */
-static u_long
+static unsigned long
 inp_schmid(
 	  parse_t      *parseio,
 	  char         ch,

@@ -18,7 +18,7 @@ dofptoa(
 	)
 {
 	register uint8_t *cp, *cpend;
-	register u_long val;
+	register unsigned long val;
 	register short dec;
 	uint8_t cbuf[12];
 	uint8_t *cpdec;

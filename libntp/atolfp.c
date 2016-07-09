@@ -12,7 +12,7 @@
 /*
  * Powers of 10
  */
-static u_long ten_to_the_n[10] = {
+static unsigned long ten_to_the_n[10] = {
 	0,
 	10,
 	100,
@@ -33,8 +33,8 @@ atolfp(
 	)
 {
 	register const char *cp;
-	register u_long dec_i;
-	register u_long dec_f;
+	register unsigned long dec_i;
+	register unsigned long dec_f;
 	char *ind;
 	int ndec;
 	int isneg;
@@ -92,9 +92,9 @@ atolfp(
 	}
 
 	if (ndec > 0) {
-		register u_long tmp;
-		register u_long bit;
-		register u_long ten_fact;
+		register unsigned long tmp;
+		register unsigned long bit;
+		register unsigned long ten_fact;
 
 		ten_fact = ten_to_the_n[ndec];
 

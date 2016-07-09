@@ -96,7 +96,7 @@ clockformat_t   clock_varitext =
  *
  * convert simple type format
  */
-static u_long
+static unsigned long
 cvt_varitext(
 	     unsigned char	*buffer,
 	     int    		size,
@@ -151,7 +151,7 @@ cvt_varitext(
 }
 
 /* parse_inp_fnc_t inp_varitext */
-static u_long
+static unsigned long
 inp_varitext(
 	     parse_t	 *parseio,
 	     char ch,

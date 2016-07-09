@@ -148,8 +148,8 @@ icom_init(
 	ttyb.c_lflag = 0;	/* local modes */
 	ttyb.c_cc[VMIN] = 0;	/* min chars */
 	ttyb.c_cc[VTIME] = 5;	/* receive timeout */
-	cfsetispeed(&ttyb, (u_int)speed);
-	cfsetospeed(&ttyb, (u_int)speed);
+	cfsetispeed(&ttyb, (unsigned int)speed);
+	cfsetospeed(&ttyb, (unsigned int)speed);
 	rc = tcsetattr(fd, TCSANOW, &ttyb);
 	if (rc < 0) {
 		saved_errno = errno;

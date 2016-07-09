@@ -42,7 +42,7 @@ get_lsb_long(
   retval  = *((*bufpp)++);
   retval |= *((*bufpp)++) << 8;
   retval |= *((*bufpp)++) << 16;
-  retval |= (u_long)*((*bufpp)++) << 24;
+  retval |= (unsigned long)*((*bufpp)++) << 24;
 
   return retval;
 }
@@ -89,7 +89,7 @@ get_msb_long(
 {
   long retval;
 
-  retval  = (u_long)*((*bufpp)++) << 24;
+  retval  = (unsigned long)*((*bufpp)++) << 24;
   retval |= *((*bufpp)++) << 16;
   retval |= *((*bufpp)++) << 8;
   retval |= *((*bufpp)++);

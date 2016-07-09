@@ -71,7 +71,7 @@ clockformat_t clock_computime =
  *
  * convert simple type format
  */
-static u_long
+static unsigned long
 cvt_computime(
 	unsigned char *buffer,
 	int            size,
@@ -114,7 +114,7 @@ cvt_computime(
  *
  * grab data from input stream
  */
-static u_long
+static unsigned long
 inp_computime(
 	      parse_t      *parseio,
 	      char         ch,
