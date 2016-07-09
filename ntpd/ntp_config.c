@@ -776,6 +776,14 @@ create_peer_node(
 			}
 			break;
 
+		case T_Path:
+			my_node->ctl.path = estrdup(option->value.s);
+			break;
+
+		case T_Ppspath:
+			my_node->ctl.ppspath = estrdup(option->value.s);
+			break;
+
 #ifdef REFCLOCK
 		case T_Baud:
 			my_node->ctl.baud = option->value.u;
@@ -3273,6 +3281,8 @@ config_peers(
 					clktype = (uint8_t)REFCLOCKTYPE(&peer->srcadr);
 					unit = REFCLOCKUNIT(&peer->srcadr);
 
+					peer->path = curr_peer->ctl.path;
+					peer->ppspath = curr_peer->ctl.ppspath;
 					peer->baud = curr_peer->ctl.baud;
 					if (refclock_newpeer(clktype,
 							      unit,

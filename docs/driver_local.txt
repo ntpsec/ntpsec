@@ -60,7 +60,11 @@ No +filegen clockstats+ monitor data are produced by this driver.
    Not used by this driver.
 +mode+::
    Not used by this driver.
-+baud+::
++path+ 'filename'::
+  Not used by this driver.
++ppspath+ 'filename'::
+  Not used by this driver.
++baud+ 'number'::
   Not used by this driver.
 
 == Configuration Example ==

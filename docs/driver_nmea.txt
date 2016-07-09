@@ -240,8 +240,12 @@ switched on by sending the following string.
    Not used by this driver.
 +mode+::
    Used to control GPS sentence selection and logging.
-+baud+::
-   Used to set the baud rate used to talk to the GPS.
++path+ 'filename'::
+  Overrides the default device path.
++ppspath+ 'filename'::
+  Overrides the default PPS-device path.
++baud+ 'number'::
+  Overrides the default baud rate.
 
 == Configuration Example ==
 

@@ -475,7 +475,8 @@ chu_start(
 	/*
 	 * Open audio device. Don't complain if not there.
 	 */
-	fd_audio = audio_init(DEVICE_AUDIO, AUDIO_BUFSIZ, unit);
+	fd_audio = audio_init(peer->path ? peer->path : DEVICE_AUDIO,
+			      AUDIO_BUFSIZ, unit);
 
 #ifdef DEBUG
 	if (fd_audio >= 0 && debug)
@@ -489,7 +490,9 @@ chu_start(
 		fd = fd_audio;
 	} else {
 		snprintf(device, sizeof(device), DEVICE, unit);
-		fd = refclock_open(device, SPEED232, LDISC_RAW);
+		fd = refclock_open(peer->path ? peer->path : device,
+				   peer->baud ? peer->baud : SPEED232,
+				   LDISC_RAW);
 	}
 #else /* ENABLE_CHU_AUDIO */
 

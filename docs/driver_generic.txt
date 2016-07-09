@@ -461,8 +461,12 @@ screen width and looks similar to:
   Used to select the device type and serial parameters.
 +mode+::
   Synonym for subtype, retained for backward compatibility.
-+baud+::
-  Not used by this driver.
++path+ 'filename'::
+  Overrides the default device path.
++ppspath+ 'filename'::
+  Overrides the default PPS-device path.
++baud+ 'number'::
+  Not used by this driver.  Baud rate is implied by the selected mode.
 
 == Configuration Examples ==
 

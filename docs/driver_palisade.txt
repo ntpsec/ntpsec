@@ -244,8 +244,15 @@ link:#refid[+refid string+]::
 +mode+ 'number'::
    Synonym for subtype, retained for backward compatibility.
 
-+baud+::
++path+ 'filename'::
+  Overrides the default device path.
+
++ppspath+ 'filename'::
   Not used by this driver.
+
++baud+ 'number'::
+  Overrides the default baud rate.
+
 
 == Configuration Example ==
 

@@ -402,7 +402,9 @@ palisade_start (
 	/*
 	 * Open serial port. 
 	 */
-	fd = refclock_open(gpsdev, SPEED232, LDISC_RAW);
+	fd = refclock_open(peer->path ? peer->path : gpsdev,
+			   peer->baud ? peer->baud : SPEED232,
+			   LDISC_RAW);
 	if (fd <= 0) {
 #ifdef DEBUG
 		printf("Palisade(%d) start: open %s failed\n", unit, gpsdev);

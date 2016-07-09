@@ -152,7 +152,8 @@ hpgps_start(
 	register struct hpgpsunit *up;
 	struct refclockproc *pp;
 	int fd;
-	int speed, ldisc;
+	int ldisc;
+	unsigned int speed;
 	char device[20];
 
 	/*
@@ -167,7 +168,8 @@ hpgps_start(
 		ldisc |= LDISC_7O1;
 		speed = SPEED232Z;
 	}
-	fd = refclock_open(device, speed, ldisc);
+	fd = refclock_open(peer->path ? peer->path : device,
+			   peer->baud ? peer->baud : speed, ldisc);
 	if (fd <= 0)
 		/* coverity[leaked_handle] */
 		return false;

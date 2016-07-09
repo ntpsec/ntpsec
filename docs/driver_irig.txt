@@ -196,8 +196,12 @@ The error flags are defined as follows in hex:
    Not used by this driver.
 +mode+::
    Not used by this driver.
-+baud+::
++path+ 'filename'::
+  Overrides the default device path.
++ppspath+ 'filename'::
   Not used by this driver.
++baud+ 'number'::
+  Overrides the default baud rate.
 
 == Configuration Example ==
 

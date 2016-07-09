@@ -80,8 +80,12 @@ specific receiver in use will be required.
    Not used by this driver.
 +mode+::
    Not used by this driver.
-+baud+::
-  Not used by this driver.
++path+::
+   Not used by this driver.
++ppspath+::
+   Not used by this driver.
++baud+ 'number'::
+   Not used by this driver.
 
 == Configuration Example ==
 

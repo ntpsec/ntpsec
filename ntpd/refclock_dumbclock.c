@@ -100,11 +100,9 @@ dumbclock_start(
 	 * it's not available.
 	 */
 	snprintf(device, sizeof(device), DEVICE, unit);
-#ifdef DEBUG
-	if (debug)
-		printf ("starting Dumbclock with device %s\n",device);
-#endif
-	fd = refclock_open(device, SPEED232, 0);
+	fd = refclock_open(peer->path ? peer->path : device,
+			   peer->baud ? peer->baud : SPEED232,
+			   0);
 	if (fd <= 0)
 		/* coverity[leaked_handle] */
 		return false;
