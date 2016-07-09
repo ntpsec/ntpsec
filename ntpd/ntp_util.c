@@ -423,7 +423,7 @@ peerlabel(const struct peer *peer)
 {
 #if defined(REFCLOCK) && !defined(ENABLE_CLASSIC_MODE)
  	if (peer->procptr != NULL)
-		return refclock_name((struct peer *)peer);
+		return refclock_name(peer);
 	else
 #endif /* defined(REFCLOCK) && !defined(ENABLE_CLASSIC_MODE)*/
 		return stoa(&peer->srcadr);

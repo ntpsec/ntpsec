@@ -119,7 +119,7 @@ refclock_report(
 
 char *
 refclock_name(
-	struct peer *peer
+	const struct peer *peer
 	)
 {
 	char *buf;
