@@ -35,7 +35,7 @@ TEST(clocktime, CurrentYear) {
 
 	const int yday=175, hour=12, minute=50, second=0, tzoff=0;
 
-	u_long yearstart=0;
+	u_int32_t yearstart=0;
 	u_int32_t actual;
 
 	TEST_ASSERT_TRUE(clocktime(yday, hour, minute, second, tzoff, timestamp,
@@ -57,7 +57,7 @@ TEST(clocktime, CurrentYearFuzz) {
 
 	const int yday=175, hour=12, minute=0, second=0, tzoff=0;
 
-	u_long yearstart=0;
+	u_int32_t yearstart=0;
 	u_int32_t actual;
 
 	TEST_ASSERT_TRUE(clocktime(yday, hour, minute, second, tzoff, timestamp,
@@ -77,7 +77,7 @@ TEST(clocktime, TimeZoneOffset) {
 
 	const int yday=175, hour=4, minute=0, second=0, tzoff=8;
 
-	u_long yearstart=0;
+	u_int32_t yearstart=0;
 	u_int32_t actual;
 
 	TEST_ASSERT_TRUE(clocktime(yday, hour, minute, second, tzoff, timestamp,
@@ -96,7 +96,7 @@ TEST(clocktime, WrongYearStart) {
 
 	const int yday=2, hour=11, minute=0, second=0, tzoff=0;
 
-	u_long yearstart = 302024100UL; // Yearstart of 2009.
+	u_int32_t yearstart = 302024100UL; // Yearstart of 2009.
 	u_int32_t actual;
 
 	TEST_ASSERT_TRUE(clocktime(yday, hour, minute, second, tzoff, timestamp,
@@ -115,7 +115,7 @@ TEST(clocktime, PreviousYear) {
 
 	const int yday=365, hour=23, minute=0, second=0, tzoff=0;
 
-	u_long yearstart = 0;
+	u_int32_t yearstart = 0;
 	u_int32_t actual;
 
 	TEST_ASSERT_TRUE(clocktime(yday, hour, minute, second, tzoff, timestamp,
@@ -133,7 +133,7 @@ TEST(clocktime, NextYear) {
 	const u_int32_t expected	= 3471296400UL;
 
 	const int yday=1, hour=1, minute=0, second=0, tzoff=0;
-	u_long yearstart = 0;
+	u_int32_t yearstart = 0;
 	u_int32_t actual;
 
 	TEST_ASSERT_TRUE(clocktime(yday, hour, minute, second, tzoff, timestamp,
@@ -146,7 +146,7 @@ TEST(clocktime, NoReasonableConversion) {
 	const u_int32_t timestamp = 3471418800UL;
 
 	const int yday=100, hour=12, minute=0, second=0, tzoff=0;
-	u_long yearstart = 0;
+	u_int32_t yearstart = 0;
 	u_int32_t actual;
 
 	TEST_ASSERT_FALSE(clocktime(yday, hour, minute, second, tzoff, timestamp,
@@ -163,7 +163,7 @@ TEST(clocktime, AlwaysInLimit) {
 	u_short	ydayinc;
 	int	hour;
 	int	minute;
-	u_long	yearstart;
+	u_int32_t	yearstart;
 	u_int32_t	actual;
 	u_int32_t	diff;
 

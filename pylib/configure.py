@@ -171,7 +171,9 @@ def cmd_configure(ctx, config):
 		ctx.define("DEBUG", 1, comment="Enable debug mode")
 		ctx.env.BISONFLAGS += ["--debug"]
 
-	ctx.env.CFLAGS += ["-Wall", "-Wextra"]	# Default CFLAGS.
+	# We require some things that C99 doesn't enable, like pthreads.
+	# Thus -std=gnu99 rather than -std=c99 here.
+	ctx.env.CFLAGS += ["-Wall", "-Wextra", "-std=gnu99"]	# Default CFLAGS.
 
 
 	# Check target platform.
