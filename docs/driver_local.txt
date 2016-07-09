@@ -60,6 +60,8 @@ No +filegen clockstats+ monitor data are produced by this driver.
    Not used by this driver.
 +mode+::
    Not used by this driver.
++baud+::
+  Not used by this driver.
 
 == Configuration Example ==
 

@@ -400,34 +400,44 @@ nmea_start(
 	const char *			baudtext;
 
 
-	/* Get baudrate choice from mode byte bits 4/5/6 */
+	/* Old style: get baudrate choice from mode byte bits 4/5/6 */
 	rate = (peer->ttl & NMEA_BAUDRATE_MASK) >> NMEA_BAUDRATE_SHIFT;
+
+	/* New style: get baudrate from baud option */
+	if (peer->baud)
+		rate = peer->baud;
 
 	switch (rate) {
 	case 0:
+	case 4800:
 		baudrate = SPEED232;
 		baudtext = "4800";
 		break;
 	case 1:
+	case 9600:
 		baudrate = B9600;
 		baudtext = "9600";
 		break;
 	case 2:
+	case 19200:
 		baudrate = B19200;
 		baudtext = "19200";
 		break;
 	case 3:
+	case 38400:
 		baudrate = B38400;
 		baudtext = "38400";
 		break;
 #ifdef B57600
 	case 4:
+	case 57600:
 		baudrate = B57600;
 		baudtext = "57600";
 		break;
 #endif
 #ifdef B115200
 	case 5:
+	case 115200:
 		baudrate = B115200;
 		baudtext = "115200";
 		break;

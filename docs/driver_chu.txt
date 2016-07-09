@@ -393,6 +393,8 @@ alarms are nonfatal; only the data in the burst are discarded.
   Not used by this driver.
 +mode+::
   Select ICOM mode and device speed.
++baud+::
+  Not used by this driver.
 
 == Configuration Example ==
 

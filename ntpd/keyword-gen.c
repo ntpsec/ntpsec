@@ -27,6 +27,7 @@ struct key_tok ntp_keywords[] = {
 { "broadcast",		T_Broadcast,		FOLLBY_STRING },
 { "broadcastclient",	T_Broadcastclient,	FOLLBY_TOKEN },
 { "broadcastdelay",	T_Broadcastdelay,	FOLLBY_TOKEN },
+{ "baud",		T_Baud,			FOLLBY_TOKEN },
 { "ctl",		T_Ctl,			FOLLBY_TOKEN },
 { "disable",		T_Disable,		FOLLBY_TOKEN },
 { "driftfile",		T_Driftfile,		FOLLBY_STRING },

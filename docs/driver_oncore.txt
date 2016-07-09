@@ -80,6 +80,8 @@ specific receiver in use will be required.
    Not used by this driver.
 +mode+::
    Not used by this driver.
++baud+::
+  Not used by this driver.
 
 == Configuration Example ==
 

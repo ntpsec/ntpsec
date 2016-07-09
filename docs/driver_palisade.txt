@@ -244,6 +244,9 @@ link:#refid[+refid string+]::
 +mode+ 'number'::
    Synonym for subtype, retained for backward compatibility.
 
++baud+::
+  Not used by this driver.
+
 == Configuration Example ==
 
 ----------------------------------------------------------------------------

@@ -388,6 +388,8 @@ filegen clockstats file clockstats type day enable
    Used to select a device type and serial parameters.
 +mode+::
   Synonym for subtype, retained for backward compatibility.
++baud+::
+  Not used by this driver.
 
 == Configuration Examples ==
 

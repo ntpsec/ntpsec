@@ -272,6 +272,7 @@ struct peer {
 	 */
 #ifdef REFCLOCK
 	struct refclockproc *procptr; /* refclock structure pointer */
+	uint32_t baud;		/* baud rate to initialize driver with */
 	bool	is_pps_driver;	/* is this the PPS driver? */
 	uint8_t	refclkunit;	/* reference clock unit number */
 	uint8_t	sstclktype;	/* clock type for system status word */

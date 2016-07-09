@@ -103,6 +103,7 @@ struct peer_ctl {
 	uint8_t		maxpoll;
 	uint32_t	ttl;
 	keyid_t		peerkey;
+	uint32_t	baud;
 };
 
 typedef struct peer_node_tag peer_node;

@@ -777,6 +777,10 @@ create_peer_node(
 			break;
 
 #ifdef REFCLOCK
+		case T_Baud:
+			my_node->ctl.baud = option->value.u;
+			break;
+
 			/*
 			 * Past this point are options the old syntax
 			 * handled in fudge processing. They're parsed
@@ -3269,6 +3273,8 @@ config_peers(
 					clktype = (uint8_t)REFCLOCKTYPE(&peer->srcadr);
 					unit = REFCLOCKUNIT(&peer->srcadr);
 
+					peer->baud = curr_peer->ctl.baud;
+					msyslog(LOG_ERR, "passed %dbps", peer->baud);
 					if (refclock_newpeer(clktype,
 							      unit,
 							      peer))
