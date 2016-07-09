@@ -101,12 +101,6 @@ Specific GPS sentences and bitrates may be selected by setting bits of the \'mod
 |1      |2        |2    |process +$GPGGA+
 |2      |4        |4    |process +$GPGLL+
 |3      |8        |8    |process +$GPZDA+ or +$GPZDG+
-.+|4-6  |0        |0    |linespeed 4800 bps
-|       |16       |0x10 |linespeed 9600 bps
-|       |32       |0x20 |linespeed 19200 bps
-|       |48       |0x30 |linespeed 38400 bps
-|       |64       |0x40 |linespeed 57600 bps
-|       |80       |0x50 |linespeed 115200 bps
 |7      |128      |0x80 |
 Write the sub-second fraction of the receive time stamp to the clockstat
 file for all recognized NMEA sentences. This can be used to get a useful
@@ -135,7 +129,7 @@ and
 filters.
 
 The driver uses 4800 bits per second by default, but faster bitrates can
-be selected using bits 4 to 6 of the mode field.
+be selected using the +baud+ option.
 
 *Caveat:* Using higher line speeds does not necessarily increase the
 precision of the timing device.  Higher line speeds are not necessarily
@@ -244,12 +238,14 @@ switched on by sending the following string.
 +subtype+::
    Not used by this driver.
 +mode+::
-   Used to control baud rate, GPS sentence selection, and logging.
+   Used to control GPS sentence selection and logging.
++baud+::
+   Used to set the baud rate used to talk to the GPS.
 
 == Configuration Example ==
 
 ----------------------------------------------------------------------------
-refclock nmea mode 17	# GPMRC only at 9600bps
+refclock nmea mode baud 9600	# All sentences at 9600 baud
 ----------------------------------------------------------------------------
 
 == Additional Information ==

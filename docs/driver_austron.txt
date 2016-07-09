@@ -60,6 +60,8 @@ written as-is to the +clockstats+ file.
   Not used by this driver.
 +mode+::
   Not used by this driver.
++baud+::
+  Not used by this driver.
 
 == Configuration Examples ==
 

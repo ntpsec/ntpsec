@@ -182,6 +182,8 @@ for the specific unit.
    Not used by this driver.
 +mode+::
    Can be used to set private mode
++baud+::
+  Not used by this driver.
 
 == Configuration Example ==
 

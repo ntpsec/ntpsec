@@ -75,6 +75,8 @@ Format].
    Not used by this driver.
 +mode+::
    Not used by this driver.
++baud+::
+  Not used by this driver.
 
 == Configuration Example ==
 

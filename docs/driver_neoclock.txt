@@ -69,6 +69,9 @@ Default setting is 0 = don't log received data and converted utc time.
 +mode+::
    Not used by this driver.
 
++baud+::
+  Not used by this driver.
+
 == Configuration Example ==
 
 ----------------------------------------------------------------------------

@@ -74,6 +74,7 @@
 %token	<Integer>	T_Allpeers
 %token	<Integer>	T_Auth
 %token	<Integer>	T_Average
+%token	<Integer>	T_Baud
 %token	<Integer>	T_Bclient
 %token	<Integer>	T_Beacon
 %token	<Integer>	T_Broadcast
@@ -501,6 +502,7 @@ option_int_keyword
 	|	T_Mode
 	|	T_Subtype
 	|	T_Version
+	|	T_Baud
 	;
 
 option_double
