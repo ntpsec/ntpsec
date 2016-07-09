@@ -128,12 +128,14 @@ zyfer_start(
 	 * Something like LDISC_ACTS that looked for ! would be nice...
 	 */
 	snprintf(device, sizeof(device), DEVICE, unit);
-	fd = refclock_open(device, SPEED232, LDISC_RAW);
+	fd = refclock_open(peer->path ? peer->path : device,
+			   peer->baud ? peer->baud : SPEED232,
+			   LDISC_RAW);
 	if (fd <= 0)
 		/* coverity[leaked_handle] */
 		return false;
 
-	msyslog(LOG_NOTICE, "zyfer(%d) fd: %d dev <%s>", unit, fd, device);
+	msyslog(LOG_NOTICE, "zyfer(%d) fd: %d", unit, fd);
 
 	/*
 	 * Allocate and initialize unit structure

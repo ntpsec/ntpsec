@@ -388,8 +388,12 @@ filegen clockstats file clockstats type day enable
    Used to select a device type and serial parameters.
 +mode+::
   Synonym for subtype, retained for backward compatibility.
-+baud+::
++path+ 'filename'::
   Not used by this driver.
++ppspath+ 'filename'::
+  Not used by this driver.
++baud+ 'number'::
+  Not used by this driver. The subtype implies the baud rate.
 
 == Configuration Examples ==
 

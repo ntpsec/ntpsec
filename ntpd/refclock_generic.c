@@ -2560,7 +2560,8 @@ parse_start(
 	(void) snprintf(parsedev, sizeof(parsedev), PARSEDEVICE, unit);
 	(void) snprintf(parseppsdev, sizeof(parsedev), PARSEPPSDEVICE, unit);
 
-	fd232 = tty_open(parsedev, O_RDWR | O_NOCTTY | O_NONBLOCK, 0777);
+	fd232 = tty_open(peer->path ? peer->path : parsedev,
+			 O_RDWR | O_NOCTTY | O_NONBLOCK, 0777);
 
 	if (fd232 == -1)
 	{

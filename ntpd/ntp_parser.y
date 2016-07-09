@@ -187,12 +187,14 @@
 %token	<Integer>	T_Orphan
 %token	<Integer>	T_Orphanwait
 %token	<Integer>	T_Panic
+%token	<Integer>	T_Path
 %token	<Integer>	T_Peer
 %token	<Integer>	T_Peerstats
 %token	<Integer>	T_Phone
 %token	<Integer>	T_Pid
 %token	<Integer>	T_Pidfile
 %token	<Integer>	T_Pool
+%token	<Integer>	T_Ppspath
 %token	<Integer>	T_Port
 %token	<Integer>	T_Preempt
 %token	<Integer>	T_Prefer
@@ -517,6 +519,10 @@ option_boolean
 
 option_string
 	:	T_Refid T_String
+			{ $$ = create_attr_sval($1, $2); }
+	|	T_Path T_String
+			{ $$ = create_attr_sval($1, $2); }
+	|	T_Ppspath T_String
 			{ $$ = create_attr_sval($1, $2); }
 	;
 

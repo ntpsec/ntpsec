@@ -222,7 +222,11 @@ since the last poll.
   Control IBT and strict operating modes.
 +mode+::
   Synonym for subtype, retained for backward compatibility.
-+baud+::
++path+ 'filename'::
+  Not used by this driver.
++ppspath+ 'filename'::
+  Not used by this driver.
++baud+ 'number'::
   Not used by this driver.
 
 [[fn1]]link:#fn1bl[^1^)]Data transmission and decoding is done only once by the

@@ -152,7 +152,9 @@ as2201_start(
 	 * Open serial port. Use CLK line discipline, if available.
 	 */
 	snprintf(gpsdev, sizeof(gpsdev), DEVICE, unit);
-	fd = refclock_open(gpsdev, SPEED232, LDISC_CLK);
+	fd = refclock_open(peer->path ? peer->path : gpsdev,
+			   peer->baud ? peer->baud : SPEED232,
+			   LDISC_CLK);
 	if (fd <= 0)
 		/* coverity[leaked_handle] */
 		return false;

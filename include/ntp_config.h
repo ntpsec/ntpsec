@@ -104,6 +104,8 @@ struct peer_ctl {
 	uint32_t	ttl;
 	keyid_t		peerkey;
 	uint32_t	baud;
+	char		*path;
+	char		*ppspath;
 };
 
 typedef struct peer_node_tag peer_node;

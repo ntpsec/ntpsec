@@ -107,12 +107,16 @@ received.
   if 0 (default); use the kernel discipline if 1.
 +flag4 {0 | 1}+::
   Enable verbose +clockstats+ recording if set.
-+mode+::
++subtype+::
    Not used by this driver.
 +mode+::
    Not used by this driver.
-+baud+::
++path+ 'filename'::
+  Overrides the default device path.
++ppspath+ 'filename'::
   Not used by this driver.
++baud+ 'number'::
+  Overrides the default baud rate.
 
 == Configuration Example ==
 

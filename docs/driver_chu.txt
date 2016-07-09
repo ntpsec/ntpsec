@@ -393,8 +393,12 @@ alarms are nonfatal; only the data in the burst are discarded.
   Not used by this driver.
 +mode+::
   Select ICOM mode and device speed.
-+baud+::
++path+ 'filename'::
+  Overrides the default device path.
++ppspath+ 'filename'::
   Not used by this driver.
++baud+ 'number'::
+  Overrides the default baud rate.
 
 == Configuration Example ==
 

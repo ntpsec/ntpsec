@@ -182,7 +182,11 @@ for the specific unit.
    Not used by this driver.
 +mode+::
    Can be used to set private mode
-+baud+::
++path+ 'filename'::
+  Not used by this driver.
++ppspath+ 'filename'::
+  Not used by this driver.
++baud+ 'number'::
   Not used by this driver.
 
 == Configuration Example ==

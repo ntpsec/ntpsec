@@ -508,10 +508,10 @@ acts_timeout(
 		/*
 		 * Open the device in raw mode and link the I/O.
 		 */
-		snprintf(device, sizeof(device), DEVICE,
-		    up->unit);
-		fd = refclock_open(device, SPEED232, LDISC_ACTS |
-		    LDISC_RAW | LDISC_REMOTE);
+		snprintf(device, sizeof(device), DEVICE, up->unit);
+		fd = refclock_open(peer->path ? peer->path : device,
+				   peer->baud ? peer->baud : SPEED232,
+				   LDISC_ACTS | LDISC_RAW | LDISC_REMOTE);
 		if (fd < 0) {
 			msyslog(LOG_ERR, "acts: open fails %m");
 			return;

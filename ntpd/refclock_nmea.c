@@ -398,9 +398,8 @@ nmea_start(
 	struct refclockproc * const	pp = peer->procptr;
 	nmea_unit * const		up = emalloc_zero(sizeof(*up));
 	char				device[20];
-	size_t				devlen;
-	uint32_t				rate;
-	int				baudrate;
+	uint32_t			rate;
+	unsigned int			baudrate;
 	const char *			baudtext;
 
 
@@ -475,13 +474,10 @@ nmea_start(
 	peer->sstclktype = CTL_SST_TS_UHF;
 
 	/* Open serial port. Use CLK line discipline, if available. */
-	devlen = snprintf(device, sizeof(device), DEVICE, unit);
-	if (devlen >= sizeof(device)) {
-		msyslog(LOG_ERR, "%s clock device name too long",
-			refclock_name(peer));
-		return false; /* buffer overflow */
-	}
-	pp->io.fd = refclock_open(device, baudrate, LDISC_CLK);
+	snprintf(device, sizeof(device), DEVICE, unit);
+	pp->io.fd = refclock_open(peer->path ? peer->path : device,
+				  peer->baud ? peer->baud : baudrate,
+				  LDISC_CLK);
 	if (0 >= pp->io.fd) {
 		pp->io.fd = nmead_open(device);
 		if (-1 == pp->io.fd)
@@ -566,8 +562,8 @@ nmea_control(
 		up->ppsapi_tried = true;
 		devlen = snprintf(device, sizeof(device), PPSDEV, unit);
 		if (devlen < sizeof(device)) {
-			up->ppsapi_fd = open(device, PPSOPENMODE,
-					     S_IRUSR | S_IWUSR);
+		    up->ppsapi_fd = open(peer->ppspath ? peer->ppspath : device,
+					 PPSOPENMODE, S_IRUSR | S_IWUSR);
 		} else {
 			up->ppsapi_fd = -1;
 			msyslog(LOG_ERR, "%s PPS device name too long",

@@ -171,6 +171,10 @@ few will be user-visible.
   built in a strict NTP Classic compatibility mode that restores the
   old 4800bps default.
 
+* Most refclock drivers now support configuration options to override the
+  default device path, the default PPS device path (if any) and the
+  serial baud rate.
+
 * The -!m, ->, and -< options of some Classic commands are not
   supported.  (The argument-parsing framework code that implemented
   them in Classic was overcomplicated and buggy and had to be removed.)

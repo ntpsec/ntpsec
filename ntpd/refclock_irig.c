@@ -319,7 +319,8 @@ irig_start(
 	/*
 	 * Open audio device
 	 */
-	fd = audio_init(DEVICE_AUDIO, AUDIO_BUFSIZ, unit);
+	fd = audio_init(peer->path ? peer->path : DEVICE_AUDIO,
+			AUDIO_BUFSIZ, unit);
 	if (fd < 0)
 		return false;
 #ifdef DEBUG

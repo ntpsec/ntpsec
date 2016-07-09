@@ -119,8 +119,12 @@ synchronization without needing the Internet at all.
    Not used by this driver.
 +mode+::
    Not used by this driver.
-+baud+::
-  Not used by this driver.
++path+::
+   Not used by this driver.
++ppspath+::
+   Overrides the default PPS device path.
++baud+ 'number'::
+   Not used by this driver.
 
 == Configuration Example ==
 
