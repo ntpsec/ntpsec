@@ -166,6 +166,11 @@ few will be user-visible.
   addresses formerly used.  The code can be built in a strict NTP
   Classic compatibility mode that restores the old behavior.
 
+* The default baudrate of the NMEA driver has been changed to 9600 to
+  match the default speed of almost all modern GPSes.  The code can be
+  built in a strict NTP Classic compatibility mode that restores the
+  old 4800bps default.
+
 * The -!m, ->, and -< options of some Classic commands are not
   supported.  (The argument-parsing framework code that implemented
   them in Classic was overcomplicated and buggy and had to be removed.)

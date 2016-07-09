@@ -142,7 +142,11 @@
  */
 #define	DEVICE		"/dev/gps%d"	/* GPS serial device */
 #define	PPSDEV		"/dev/gpspps%d"	/* PPSAPI device override */
+#ifdef ENABLE_CLASSIC_MODE
 #define	SPEED232	B4800		/* uart speed (4800 bps) */
+#else
+#define	SPEED232	B9600		/* uart speed (9600 bps) */
+#endif
 #define	PRECISION	(-9)		/* precision assumed (about 2 ms) */
 #define	PPS_PRECISION	(-20)		/* precision assumed (about 1 us) */
 #define	REFID		"GPS\0"		/* reference id */

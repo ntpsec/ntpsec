@@ -35,8 +35,8 @@ enables its use.
 
 If there is a /dev/gpspps__u__ it is tried first for PPS, before /dev/gps__u__.
 
-The various GPS sentences that this driver recognises look like this:
-(others quietly ignored)
+The various GPS sentences that this driver recognises look like this
+(others are quietly ignored):
 
 .Accepted NMEA sentences
 [options="header"]
@@ -114,7 +114,7 @@ temporarily to get the numbers for the NMEA sentence of your choice.
 
 
 The default (mode 0) is to process all supported sentences at a
-linespeed of 4800 bps, which results in the first one received and
+linespeed of 9600 bps, which results in the first one received and
 recognized in each cycle being used.  If only specific sentences should
 be recognized, then the mode byte must be chosen to enable only the
 selected ones.  Multiple sentences may be selected by adding their mode
@@ -128,7 +128,8 @@ and
 * using more than one sentence per cycle overstuffs the internal data
 filters.
 
-The driver uses 4800 bits per second by default, but faster bitrates can
+The driver uses 9600 bits per second by default, unless {projecct-shortname}
+was built in which case the old default of 4800bps is used. Faster bitrates can
 be selected using the +baud+ option.
 
 *Caveat:* Using higher line speeds does not necessarily increase the
@@ -245,7 +246,7 @@ switched on by sending the following string.
 == Configuration Example ==
 
 ----------------------------------------------------------------------------
-refclock nmea mode baud 9600	# All sentences at 9600 baud
+refclock nmea mode baud 19200	# All sentences at 19200 baud
 ----------------------------------------------------------------------------
 
 == Additional Information ==

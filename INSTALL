@@ -159,6 +159,8 @@ Here's what it presently does:
   syntax (but the new syntax won't work for these, though it will for
   other driver types).
 
+* Reverts the default baudrate of the NMEA driver to 4800 (from 9600).
+
 Other behaviors may be added in future releases.
 
 == Uninstalled binaries and scripts ==
