@@ -346,11 +346,9 @@ def cmd_configure(ctx, config):
 		"semaphore.h",
 		"stdatomic.h",
 		"sys/audioio.h",
-		"sys/capability.h",     # Linux
 		"sys/clockctl.h",	# NetBSD
 		"sys/ioctl.h",
 		"sys/modem.h",          # Apple
-		"sys/prctl.h",          # Linux
 		"sys/sockio.h",
 		"sys/soundcard.h",
 		("sys/sysctl.h", ["sys/types.h"]),

@@ -26,12 +26,12 @@ def check_cap_header(ctx):
 def check_cap_run(ctx):
 	if ctx.env.ENABLE_CROSS: # XXX Remove when variant builds exist
 		if ctx.env.LIBCAP_HEADER:
-			ctx.define("HAVE_CAPABILITY", 1, comment="Capability support")
+			ctx.define("HAVE_LINUX_CAPABILITY", 1, comment="Capability support")
 		return
 
 	ctx.check_cc(
 		fragment	= PCAP_FRAG,
-		define_name	= "HAVE_CAPABILITY",
+		define_name	= "HAVE_LINUX_CAPABILITY",
 		features	= "c",
 		use		= "CAP",
 		msg		= "Checking if libcap works",
@@ -40,7 +40,3 @@ def check_cap_run(ctx):
 	)
 
 	check_sanity(ctx, ctx.env.LIBCAP_HEADER, "libcap")
-
-
-	if ctx.get_define("HAVE_CAPABILITY"):
-		ctx.define("HAVE_LINUX_CAPABILITY", 1, comment="Capability support") # XXX: why two?
