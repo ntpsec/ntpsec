@@ -110,6 +110,7 @@ Specific GPS sentences and bitrates may be selected by setting bits of the \'mod
 |7      |128      |0x80 |
 Write the sub-second fraction of the receive time stamp to the clockstat
 file for all recognized NMEA sentences. This can be used to get a useful
+value for fudge time2
 *Caveat:* This will fill your clockstat file rather fast. Use it only
 temporarily to get the numbers for the NMEA sentence of your choice.
 |8      |256      |0x100|process +$PGRMF+
