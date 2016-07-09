@@ -301,7 +301,7 @@ parse_packet(
 			if(pkt->extensions[i].body == NULL) { goto fail; }
 			memcpy(pkt->extensions[i].body, bufptr + 4,
 			       pkt->extensions[i].len);
-			bufptr += pkt->extensions[i].len;
+			bufptr += pkt->extensions[i].len + 4;
 		}
 	}
 
