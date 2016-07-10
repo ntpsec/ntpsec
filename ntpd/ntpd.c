@@ -241,6 +241,19 @@ static void ntpd_usage(void)
     P("   -x no  slew           Slew up to 600 seconds\n");
     P("   -V no  version        Output version information and exit\n");
     P("   -h no  help           Display extended usage information and exit\n");
+#ifdef REFCLOCK
+    P("This version was compiled with the following clock drivers:\n");
+    int ct = 0;
+    for (int dtype = 1; dtype < (int)num_refclock_conf; dtype++)
+	if (refclock_conf[dtype]->basename != NULL)
+	{
+	    fprintf(stderr, "%12s", refclock_conf[dtype]->basename);
+	    if (((++ct % 5) == 0))
+		fputc('\n', stderr);
+	}
+    if (ct % 5)
+	fputc('\n', stderr);
+#endif /* REFCLOCK */
 #undef P
 }
 
