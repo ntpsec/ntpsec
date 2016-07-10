@@ -1,0 +1,13 @@
+# On Linux systems with logrotate,
+#  drop this into /etc/logrotate.d/ntpd
+# That will rotate ntpd.log monthly and then
+# kick ntpd to switch to the new log file.
+
+/var/log/ntp/ntpd.log {
+    monthly
+    postrotate
+      /usr/bin/killall -HUP ntpd
+    endscript
+    rotate 9999
+}
+
