@@ -487,11 +487,11 @@ option_int
 			{ $$ = create_attr_uval($1, $2); }
 	|	T_Stratum T_Integer
 		{
-			if ($2 >= 0 && $2 <= 16) {
+			if ($2 >= 0 && $2 <= STRATUM_UNSPEC) {
 				$$ = create_attr_ival($1, $2);
 			} else {
 				$$ = NULL;
-				yyerror("fudge factor: stratum value not in [0..16], ignored");
+				yyerror("fudge factor: stratum value out of boands, ignored");
 			}
 		}
 	;
