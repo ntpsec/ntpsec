@@ -3028,7 +3028,7 @@ is_sane_resolved_address(
 	int		hmode
 	)
 {
-	if (ISBADADR(peeraddr)) {
+	if (!ISREFCLOCKADR(peeraddr) && ISBADADR(peeraddr)) {
 		msyslog(LOG_ERR,
 			"attempt to configure invalid address %s",
 			stoa(peeraddr));
