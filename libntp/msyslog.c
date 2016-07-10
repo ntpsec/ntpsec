@@ -538,3 +538,46 @@ setup_logfile(
 		msyslog(LOG_ERR, "Cannot reopen log file %s, %m",
 			syslog_fname);
 }
+
+/*
+ *  * reopen_logfile()
+ *   *
+ *    * reopen current logfile in case the old file has been renamed by logrotate
+ *     *
+ *      */
+
+void
+reopen_logfile(void)
+{
+	FILE *  new_file;
+
+	if (NULL == syslog_file) {
+		return;  /* no log file, no clutter */
+	}
+
+	new_file = fopen(syslog_fname, "a");
+	if (NULL == new_file) {
+		msyslog(LOG_ERR, "reopen_logfile: couldn't open %s %m", syslog_fname);
+		return;
+	}
+
+	/* This is a hack to avoid cluttering the log if we would reuse
+	 * the same file all over again.
+	 * change_logfile compares filenos.  That doesn't work.
+	 * Can't check for a new file using a length of 0 since
+	 * newsyslog on FreeBSD puts a "logfile turned over" message there.
+	 * This seems to work.
+	 */
+	if (ftell(syslog_file) == ftell(new_file)) {
+		/* just for debugging */
+		msyslog(LOG_INFO, "reopen_logfile: same length, ignored");
+		fclose(new_file);
+		return;
+	}
+
+	msyslog(LOG_INFO, "reopen_logfile: closing old file");
+	fclose(syslog_file);
+	syslog_file = new_file;
+	msyslog(LOG_INFO, "reopen_logfile: using %s", syslog_fname);
+}
+

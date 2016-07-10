@@ -267,10 +267,9 @@ extern	char *	fstostr(time_t);	/* NTP timescale seconds */
  * Signals which terminate us gracefully.
  */
 #ifndef SYS_WINNT
-# define SIGDIE1	SIGHUP
-# define SIGDIE2	SIGINT
-# define SIGDIE3	SIGQUIT
-# define SIGDIE4	SIGTERM
+# define SIGDIE1	SIGINT
+# define SIGDIE2	SIGQUIT
+# define SIGDIE3	SIGTERM
 #endif /* SYS_WINNT */
 
 
