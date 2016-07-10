@@ -1791,7 +1791,7 @@ doprintpeers(
 		fprintf(fp, "%-*s ", (int)maxhostlen, serverlocal);
 	}
 	if (AF_UNSPEC == af || AF(&srcadr) == af) {
-		if (displayname != NULL)
+		if (displayname != NULL && showhostnames)
 			strlcpy(clock_name, displayname, sizeof(clock_name));
 		else if (!have_srchost)
 			strlcpy(clock_name, nntohost(&srcadr),
