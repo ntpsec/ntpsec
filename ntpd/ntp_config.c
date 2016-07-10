@@ -2820,6 +2820,13 @@ config_fudge(
 				stoa(&addr_sock));
 		}
 
+		if (!ISREFCLOCKADR(&addr_sock)) {
+			err_flag = 1;
+			msyslog(LOG_ERR,
+				"inappropriate address %s for the fudge command, line ignored",
+				stoa(&addr_sock));
+		}
+
 		/* Parse all the options to the fudge command */
 		ZERO(clock_stat);
 		curr_opt = HEAD_PFIFO(curr_fudge->options);
