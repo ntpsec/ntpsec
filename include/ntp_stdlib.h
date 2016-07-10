@@ -35,6 +35,7 @@ extern	int	msnprintf(char *, size_t, const char *, ...)
 extern	void	msyslog(int, const char *, ...) NTP_PRINTF(2, 3);
 extern	void	init_logging	(const char *, uint32_t, int);
 extern	int	change_logfile	(const char *, int);
+extern	void	reopen_logfile  (void);
 extern	void	setup_logfile	(const char *);
 extern	void	errno_to_str(int, char *, size_t);
 

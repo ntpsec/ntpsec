@@ -128,6 +128,11 @@ bool was_alarmed;
 static int	wait_child_sync_if	(int, long);
 #endif
 
+#if !defined(SIM) && defined(SIGHUP)
+static	void	catchHUP	(int);
+volatile int sawHUP = false;
+#endif
+
 #if !defined(SIM) && !defined(SYS_WINNT)
 # ifdef	DEBUG
 static	void	moredebug	(int);
@@ -787,7 +792,9 @@ ntpdmain(
 	signal_no_reset(SIGDIE1, finish);
 	signal_no_reset(SIGDIE2, finish);
 	signal_no_reset(SIGDIE3, finish);
-	signal_no_reset(SIGDIE4, finish);
+# endif
+# ifdef SIGHUP
+	signal_no_reset(SIGHUP, catchHUP);
 # endif
 # ifdef SIGBUS
 	signal_no_reset(SIGBUS, finish);
@@ -1113,6 +1120,24 @@ static void mainloop(void)
 # endif
 
 		/*
+		 * Check files
+		 */
+		if (sawHUP) {
+			sawHUP = false;
+			msyslog(LOG_INFO, "Saw SIGHUP");
+
+			reopen_logfile();
+
+			{
+			l_fp snow;
+			time_t tnow;
+			get_systime(&snow);
+			time(&tnow);
+			check_leap_file(false, snow.l_ui, &tnow);
+			}
+		}
+
+		/*
 		 * Go around again
 		 */
 
@@ -1172,6 +1197,15 @@ finish(
 {
 	signalled = true;
 	signo = sig;
+}
+
+/*
+ * catchHUP - set flag to check files
+ */
+static void catchHUP(int sig)
+{
+	UNUSED_ARG(sig);
+	sawHUP = true;
 }
 
 #endif	/* !SIM && SIGDIE1 */
