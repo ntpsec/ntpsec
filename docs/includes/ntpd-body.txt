@@ -148,7 +148,7 @@ Chroot the server to the directory _jaildir_ This option also implies
 that the server attempts to drop root privileges at startup. You may
 need to also specify a +-u+ option. This option is only available if
 the OS supports adjusting the clock without full root privileges. This
-option is supported under Linux or Solaris.
+option is supported under Linux, NetBSD and Solaris.
 
 +-I+ iface, +--interface+=_iface_::
   Listen on an interface name or address. This option may appear an
@@ -252,7 +252,7 @@ Add the specified key number to the trusted key list.
 +
 Specify a user, and optionally a group, to switch to. This option is
 only available if the OS supports adjusting the clock without full
-root privileges. This option is supported under Linux or Solaris.
+root privileges. This option is supported under Linux, NetBSD and Solaris.
 
 +-U+ number, +--updateinterval+=_number_::
   interval in seconds between scans for new or dropped interfaces. This
