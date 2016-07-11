@@ -96,12 +96,10 @@ bool mdnsreg = false;
 int mdnstries = 5;
 #endif  /* ENABLE_MDNS_REGISTRATION */
 
-#ifdef ENABLE_DROPROOT
-bool droproot;
+bool droproot = false;
 char *user;		/* User to switch to */
 char *group;		/* group to switch to */
 const char *chrootdir;	/* directory to chroot to */
-#endif /* ENABLE_DROPROOT */
 
 #ifdef HAVE_WORKING_FORK
 int	waitsync_fd_to_close = -1;	/* -w/--wait-sync */

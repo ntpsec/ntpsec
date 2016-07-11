@@ -54,10 +54,17 @@ bool sandbox(const bool droproot,
 	     const char *chrootdir,
 	     bool want_dynamic_interface_tracking)
 {
+	bool nonroot = false;
+#ifndef ENABLE_DROPROOT
+	UNUSED_ARG(droproot);
+	UNUSED_ARG(user);
+	UNUSED_ARG(group);
+	UNUSED_ARG(chrootdir);
+	UNUSED_ARG(want_dynamic_interface_tracking);
+#else
 #ifndef HAVE_LINUX_CAPABILITY
 	UNUSED_ARG(want_dynamic_interface_tracking);
 #endif /* HAVE_LINUX_CAPABILITY */
-	bool nonroot = false;
 #if !defined(HAVE_LINUX_CAPABILITY) && !defined(HAVE_SOLARIS_PRIVS) && !defined(HAVE_SYS_CLOCKCTL_H)
 	if (droproot) {
 		msyslog(LOG_ERR,
@@ -65,7 +72,6 @@ bool sandbox(const bool droproot,
 		exit(-1);
 	}
 #endif /* !defined(HAVE_LINUX_CAPABILITY) && !defined(HAVE_SOLARIS_PRIVS)  && !defined(HAVE_SYS_CLOCKCTL) */
-# ifdef ENABLE_DROPROOT
 	if (droproot) {
 		/* Drop super-user privileges and chroot now if the OS supports this */
 #  ifdef HAVE_LINUX_CAPABILITY
