@@ -797,17 +797,6 @@ openhost(
 		return false;
 	}
 
-
-#ifdef NEED_RCVBUF_SLOP
-# ifdef SO_RCVBUF
-	{ int rbufsize = DATASIZE + 2048;	/* 2K for slop */
-	if (setsockopt(sockfd, SOL_SOCKET, SO_RCVBUF,
-		       &rbufsize, sizeof(int)) == -1)
-		error("setsockopt");
-	}
-# endif
-#endif
-
 	if (connect(sockfd, (struct sockaddr *)ai->ai_addr, ai->ai_addrlen)==-1)
 	{
 		error("connect");
