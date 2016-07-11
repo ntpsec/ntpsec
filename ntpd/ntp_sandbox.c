@@ -149,7 +149,7 @@ getgroup:
 				exit (-1);
 			}
 			if (chdir("/")) {
-				msyslog(LOG_ERR, "Cannot chdir() to`root after chroot(): %m");
+				msyslog(LOG_ERR, "Cannot chdir() to root after chroot(): %m");
 				exit (-1);
 			}
 		}
