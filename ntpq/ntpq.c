@@ -1053,14 +1053,6 @@ getresponse(
 		if (ntohs(rpkt.associd) != associd) {
 			TRACE(1, ("Association ID %d doesn't match expected %d\n",
 				  ntohs(rpkt.associd), associd));
-			/*
-			 * Hack for silly fuzzballs which, at the time
-			 * of writing, return an assID of sys.peer
-			 * when queried for system variables.
-			 */
-#ifdef __UNUSED__
-			continue;
-#endif
 		}
 
 		/*
