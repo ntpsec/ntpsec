@@ -2004,8 +2004,7 @@ decodets(
 		return hextolfp(str, lfp);
 
 	/*
-	 * Try it as a decimal.  If this fails, try as an unquoted
-	 * RT-11 date.  This code should go away eventually.
+	 * Try it as a decimal.
 	 */
 	if (atolfp(str, lfp))
 		return true;
