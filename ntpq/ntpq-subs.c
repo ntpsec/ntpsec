@@ -1851,17 +1851,8 @@ dogetpeers(
 	int dsize;
 	u_short rstatus;
 
-#ifdef __UNUSED__
 	res = doquerylist(pvl, CTL_OP_READVAR, associd, 0, &rstatus,
 			  &dsize, &datap);
-#else
-	/*
-	 * Damn fuzzballs
-	 */
-	res = doquery(CTL_OP_READVAR, associd, 0, 0, NULL, &rstatus,
-			  &dsize, &datap);
-#endif
-
 	if (res != 0)
 		return false;
 
@@ -2032,7 +2023,7 @@ apeers(
 
 
 /*
- * lpeers - print a peer spreadsheet including all fuzzball peers
+ * lpeers - print a peer spreadsheet
  */
 /*ARGSUSED*/
 static void
@@ -2121,7 +2112,7 @@ opeers(
 
 
 /*
- * lopeers - print a peer spreadsheet including all fuzzball peers
+ * lopeers - print a peer spreadsheet
  */
 /*ARGSUSED*/
 static void
