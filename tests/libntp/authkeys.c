@@ -11,7 +11,6 @@
 # include "openssl/evp.h"
 #endif
 #include "ntp.h"
-#include "ntp_stdlib.h"
 
 TEST_GROUP(authkeys);
 
