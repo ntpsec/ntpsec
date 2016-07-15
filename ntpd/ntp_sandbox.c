@@ -71,7 +71,7 @@ bool sandbox(const bool droproot,
 			"root can't be dropped due to missing capabilities.");
 		exit(-1);
 	}
-#endif /* !defined(HAVE_LINUX_CAPABILITY) && !defined(HAVE_SOLARIS_PRIVS)  && !defined(HAVE_SYS_CLOCKCTL) */
+#endif /* !defined(HAVE_LINUX_CAPABILITY) && !defined(HAVE_SOLARIS_PRIVS)  && !defined(HAVE_SYS_CLOCKCTL_H) */
 	if (droproot) {
 		/* Drop super-user privileges and chroot now if the OS supports this */
 #  ifdef HAVE_LINUX_CAPABILITY
