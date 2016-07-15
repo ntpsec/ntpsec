@@ -325,7 +325,7 @@ transmit(
 			/* ephemeral: no FLAG_CONFIG nor FLAG_PREEMPT */
 			if (!(peer->flags & (FLAG_CONFIG | FLAG_PREEMPT))) {
 				report_event(PEVNT_RESTART, peer, "timeout");
-				peer_clear(peer, "TIME");
+				peer_clear(peer, "TIME", false);
 				unpeer(peer);
 				return;
 			}
@@ -333,7 +333,7 @@ transmit(
 			    (peer_associations > sys_maxclock) &&
 			    score_all(peer)) {
 				report_event(PEVNT_RESTART, peer, "timeout");
-				peer_clear(peer, "TIME");
+				peer_clear(peer, "TIME", false);
 				unpeer(peer);
 				return;
 			}
@@ -809,7 +809,7 @@ receive(
 			       MODE_CLIENT, hisversion, peer2->minpoll,
 			       peer2->maxpoll, FLAG_PREEMPT |
 			       (FLAG_IBURST & peer2->flags), MDF_UCAST |
-			       MDF_UCLNT, 0, skeyid);
+			       MDF_UCLNT, 0, skeyid, false);
 		if (NULL == peer) {
 			sys_declined++;
 			return;			/* ignore duplicate  */
@@ -886,7 +886,7 @@ receive(
 			peer = newpeer(&rbufp->recv_srcadr, NULL,
 			    match_ep, MODE_BCLIENT, hisversion,
 			    pkt->ppoll, pkt->ppoll, FLAG_PREEMPT,
-			    MDF_BCLNT, 0, skeyid);
+			    MDF_BCLNT, 0, skeyid, false);
 			if (NULL == peer) {
 				sys_restricted++;
 				return;		/* ignore duplicate */
@@ -909,7 +909,7 @@ receive(
 		peer = newpeer(&rbufp->recv_srcadr, NULL, match_ep,
 		    MODE_CLIENT, hisversion, pkt->ppoll, pkt->ppoll,
 		    FLAG_BC_VOL | FLAG_IBURST | FLAG_PREEMPT, MDF_BCLNT,
-		    0, skeyid);
+		    0, skeyid, false);
 		if (NULL == peer) {
 			sys_restricted++;
 			return;			/* ignore duplicate */
@@ -993,7 +993,7 @@ receive(
 		if ((peer = newpeer(&rbufp->recv_srcadr, NULL,
 				    rbufp->dstadr, MODE_PASSIVE, hisversion,
 				    pkt->ppoll, NTP_MAXDPOLL, 0, MDF_UCAST,
-				    0, skeyid)) == NULL) {
+				    0, skeyid, false)) == NULL) {
 			sys_declined++;
 			return;			/* ignore duplicate */
 		}
@@ -1828,7 +1828,8 @@ poll_update(
 void
 peer_clear(
 	struct peer *peer,		/* peer structure */
-	const char *ident		/* tally lights */
+	const char *ident,		/* tally lights */
+	const bool initializing
 	)
 {
 	uint8_t	u;

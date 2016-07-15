@@ -105,12 +105,6 @@ const char *chrootdir;	/* directory to chroot to */
 int	waitsync_fd_to_close = -1;	/* -w/--wait-sync */
 #endif
 
-/*
- * Initializing flag.  All async routines watch this and only do their
- * thing when it is clear.
- */
-bool initializing;
-
 bool config_priority_override = false;
 int config_priority;
 
@@ -633,7 +627,6 @@ ntpdmain(
 	saved_argc = argc;
 	saved_argv = argv;
 	progname = argv[0];
-	initializing = true;		/* mark that we are initializing */
 	intercept_argparse(&argc, &argv);
 	parse_cmdline_opts(argc, argv);
 # ifdef DEBUG
@@ -977,7 +970,6 @@ ntpdmain(
 
 	loop_config(LOOP_DRIFTINIT, 0);
 	report_event(EVNT_SYSRESTART, NULL, NULL);
-	initializing = false;
 
 	if (ipv4_works && ipv6_works) {
 		if (opt_ipv4)

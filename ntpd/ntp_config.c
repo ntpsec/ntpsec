@@ -3115,7 +3115,7 @@ peer_config(
 		ctl->flags &= ~FLAG_PREEMPT;
 	return newpeer(srcadr, hostname, dstadr, hmode, ctl->version,
 		       ctl->minpoll, ctl->maxpoll, ctl->flags,
-		       cast_flags, ctl->ttl, ctl->peerkey);
+		       cast_flags, ctl->ttl, ctl->peerkey, true);
 }
 
 #ifndef SIM
@@ -3460,7 +3460,7 @@ config_unpeers(
 			if (p != NULL) {
 				msyslog(LOG_NOTICE, "unpeered %s",
 					stoa(&p->srcadr));
-				peer_clear(p, "GONE");
+				peer_clear(p, "GONE", true);
 				unpeer(p);
 			}
 
@@ -3479,7 +3479,7 @@ config_unpeers(
 			if (p != NULL) {
 				msyslog(LOG_NOTICE, "unpeered %s",
 					stoa(&peeraddr));
-				peer_clear(p, "GONE");
+				peer_clear(p, "GONE", true);
 				unpeer(p);
 			}
 
@@ -3495,7 +3495,7 @@ config_unpeers(
 					break;
 		if (p != NULL) {
 			msyslog(LOG_NOTICE, "unpeered %s", name);
-			peer_clear(p, "GONE");
+			peer_clear(p, "GONE", true);
 			unpeer(p);
 		}
 		/* Resolve the hostname to address(es). */
@@ -3568,7 +3568,7 @@ unpeer_name_resolved(
 					     : "";
 			msyslog(LOG_NOTICE, "unpeered %s %s-> %s", name,
 				fam_spec, stoa(&peeraddr));
-			peer_clear(peer, "GONE");
+			peer_clear(peer, "GONE", true);
 			unpeer(peer);
 		}
 	}
