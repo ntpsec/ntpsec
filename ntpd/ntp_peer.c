@@ -382,7 +382,7 @@ clear_all(void)
 	 */
 	for (p = peer_list; p != NULL; p = p->p_link)
 		if (!(MDF_TXONLY_MASK & p->cast_flags))
-			peer_clear(p, "STEP");
+		    peer_clear(p, "STEP", false);
 
 	DPRINTF(1, ("clear_all: at %lu\n", current_time));
 }
@@ -622,7 +622,7 @@ peer_refresh_interface(
 		 */
 		if (p->dstadr != piface && !(MDF_ACAST & p->cast_flags)
 		    && MODE_BROADCAST != p->pmode)
-			peer_clear(p, "XFAC");
+		    peer_clear(p, "XFAC", false);
 
 		/*
 	 	 * Broadcast needs the socket enabled for broadcast
@@ -677,7 +677,8 @@ newpeer(
 	u_int		flags,
 	uint8_t		cast_flags,
 	uint32_t		ttl,
-	keyid_t		key
+	keyid_t		key,
+	bool		initializing
 	)
 {
 	struct peer *	peer;
@@ -804,15 +805,15 @@ newpeer(
 	peer->precision = sys_precision;
 	peer->hpoll = peer->minpoll;
 	if (cast_flags & MDF_ACAST)
-		peer_clear(peer, "ACST");
+		peer_clear(peer, "ACST", initializing);
 	else if (cast_flags & MDF_POOL)
-		peer_clear(peer, "POOL");
+		peer_clear(peer, "POOL", initializing);
 	else if (cast_flags & MDF_MCAST)
-		peer_clear(peer, "MCST");
+		peer_clear(peer, "MCST", initializing);
 	else if (cast_flags & MDF_BCAST)
-		peer_clear(peer, "BCST");
+		peer_clear(peer, "BCST", initializing);
 	else
-		peer_clear(peer, "INIT");
+		peer_clear(peer, "INIT", initializing);
 	if (mode_ntpdate)
 		peer_ntpdate++;
 

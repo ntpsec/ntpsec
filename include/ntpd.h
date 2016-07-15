@@ -175,7 +175,7 @@ extern  void	set_peerdstadr	(struct peer *, endpt *);
 extern	struct peer *newpeer	(sockaddr_u *, const char *,
 				 endpt *, uint8_t, uint8_t,
 				 uint8_t, uint8_t, u_int, uint8_t, uint32_t,
-				 keyid_t);
+				 keyid_t, const bool);
 extern	void	peer_all_reset	(void);
 extern	void	peer_clr_stats	(void);
 extern	void	peer_reset	(struct peer *);
@@ -189,7 +189,7 @@ extern	void	peer_cleanup	(void);
 /* ntp_proto.c */
 extern	void	transmit	(struct peer *);
 extern	void	receive 	(struct recvbuf *);
-extern	void	peer_clear	(struct peer *, const char *);
+extern	void	peer_clear	(struct peer *, const char *, const bool);
 extern	void 	process_packet	(struct peer *, struct pkt *, u_int);
 extern	void	clock_select	(void);
 extern	void	set_sys_leap	(uint8_t);
