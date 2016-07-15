@@ -7,6 +7,8 @@
 
 #include <string.h>
 #include <stdio.h>
+#include <stdlib.h>
+
 #include "unity_fixture.h"
 #include "unity_internals.h"
 
@@ -172,9 +174,6 @@ void UnityMalloc_MakeMallocFailAfterCount(int countdown)
 #ifdef realloc
 #undef realloc
 #endif
-
-#include <stdlib.h>
-#include <string.h>
 
 typedef struct GuardBytes
 {

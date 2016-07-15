@@ -25,8 +25,6 @@
 #include "ntp_unixtime.h"
 #include "ntp_stdlib.h"
 
-#include <termios.h>
-
 #define NAME		"NEOCLOCK"
 #define DESCRIPTION	"NeoClock4X"
 

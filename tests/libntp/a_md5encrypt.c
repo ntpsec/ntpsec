@@ -17,7 +17,6 @@ TEST_TEAR_DOWN(a_md5encrypt) {}
 # include "openssl/evp.h"
 #endif
 #include "ntp.h"
-#include "ntp_stdlib.h"
 
 /*
  * Example packet with MD5 hash calculated manually.

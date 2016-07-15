@@ -19,8 +19,6 @@
 
 #include "ntp_stdlib.h"
 
-#include "ntp_stdlib.h"
-
 #include "mbg_gps166.h"
 #include "binio.h"
 #include "ascii.h"

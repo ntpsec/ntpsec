@@ -22,7 +22,6 @@
 #include "ntp_stdlib.h"
 #include "ntp_unixtime.h"
 #include "ntp_calendar.h"
-#include "ntp_assert.h"
 #include "lib_strbuf.h"
 #include "ntp_lineedit.h"
 #include "ntp_debug.h"
