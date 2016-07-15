@@ -20,7 +20,6 @@
 #include <libscf.h>
 #endif
 #include <unistd.h>
-#include <stdio.h>
 
 /*
  * This macro defines the authentication state. If x is 1 authentication
