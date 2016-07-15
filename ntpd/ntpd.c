@@ -947,12 +947,6 @@ ntpdmain(
 	}
 			
 	/*
-	 * Get the configuration.
-	 */
-	have_interface_option = (!listen_to_virtual_ips || explicit_interface);
-	intercept_getconfig(explicit_config);
-
-	/*
 	 * ntpd's working set is never going to be large relative to memory
 	 * availability on modern machines. Do what chrony does and indulge it;
 	 * we get some latency improvement that way.
@@ -968,9 +962,6 @@ ntpdmain(
 		msyslog(LOG_INFO, "successfully locked into RAM");
 	}
 
-	loop_config(LOOP_DRIFTINIT, 0);
-	report_event(EVNT_SYSRESTART, NULL, NULL);
-
 	if (ipv4_works && ipv6_works) {
 		if (opt_ipv4)
 			ipv6_works = false;
@@ -983,6 +974,15 @@ ntpdmain(
 		msyslog(LOG_WARNING, "-4/--ipv4 ignored, IPv4 networking not found.");
 	else if (opt_ipv6 && !ipv6_works)
 		msyslog(LOG_WARNING, "-6/--ipv6 ignored, IPv6 networking not found.");
+
+	/*
+	 * Get the configuration.
+	 */
+	have_interface_option = (!listen_to_virtual_ips || explicit_interface);
+	intercept_getconfig(explicit_config);
+
+	loop_config(LOOP_DRIFTINIT, 0);
+	report_event(EVNT_SYSRESTART, NULL, NULL);
 
 	/* drop root privileges */
 	if (sandbox(droproot, user, group, chrootdir, interface_interval!=0) && interface_interval) {
