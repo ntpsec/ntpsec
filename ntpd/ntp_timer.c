@@ -384,28 +384,25 @@ alarming(
 	int sig
 	)
 {
-# ifdef DEBUG
-	const char *msg = "alarming: initializing TRUE\n";
-# endif
-
 	UNUSED_ARG(sig);
 
-	if (!initializing) {
-		if (alarm_flag) {
-			alarm_overflow++;
 # ifdef DEBUG
-			msg = "alarming: overflow\n";
+	const char *msg = NULL;
 # endif
-		} else {
-			alarm_flag++;
+	if (alarm_flag) {
+		alarm_overflow++;
 # ifdef DEBUG
-			msg = "alarming: normal\n";
+		msg = "alarming: overflow\n";
 # endif
-		}
+	} else {
+		alarm_flag++;
+# ifdef DEBUG
+		msg = "alarming: normal\n";
+# endif
 	}
 # ifdef DEBUG
-	if (debug >= 4)
-		(void)(-1 == write(1, msg, strlen(msg)));
+if (debug >= 4 && msg != NULL)
+	(void)(-1 == write(1, msg, strlen(msg)));
 # endif
 }
 #endif /* !SYS_WINNT */
