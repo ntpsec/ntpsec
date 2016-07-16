@@ -16,8 +16,6 @@
 typedef char libbufstr[LIB_BUFLENGTH];
 extern libbufstr lib_stringbuf[LIB_NUMBUF];
 extern int lib_nextbuf;
-extern bool lib_inited;
-
 
 /*
  * Macro to get a pointer to the next buffer
