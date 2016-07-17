@@ -972,22 +972,6 @@ ntpdmain(
 	    exit(0);
 	}
 			
-	/*
-	 * ntpd's working set is never going to be large relative to memory
-	 * availability on modern machines. Do what chrony does and indulge it;
-	 * we get some latency improvement that way.
-	 */
-	{
-	    struct rlimit rlim;
-	    rlim.rlim_max = rlim.rlim_cur = RLIM_INFINITY;
-	    if (setrlimit(RLIMIT_MEMLOCK, &rlim) < 0)
-		msyslog(LOG_WARNING, "setrlimit() failed: not locking into RAM");
-	    else if (mlockall(MCL_CURRENT|MCL_FUTURE) < 0)
-		msyslog(LOG_WARNING, "mlockall() failed: not locking into RAM");
-	    else
-		msyslog(LOG_INFO, "successfully locked into RAM");
-	}
-
 	if (ipv4_works && ipv6_works) {
 		if (opt_ipv4)
 			ipv6_works = false;
