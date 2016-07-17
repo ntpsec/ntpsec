@@ -1851,8 +1851,8 @@ dogetpeers(
 	int dsize;
 	u_short rstatus;
 
-	res = doquerylist(pvl, CTL_OP_READVAR, associd, 0, &rstatus,
-			  &dsize, &datap);
+	res = doquery(CTL_OP_READVAR, associd, 0, 0, NULL, &rstatus,
+		&dsize, &datap);
 	if (res != 0)
 		return false;
 
