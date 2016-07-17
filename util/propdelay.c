@@ -47,21 +47,15 @@
  * to find delays to GOES via each of the three satellites.
  */
 
-#include <config.h>
+#include "config.h"
 
+#include <stdbool.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
+#include <math.h>
 
 #include "ntp_stdlib.h"
-
-extern	double	sin	(double);
-extern	double	cos	(double);
-extern	double	acos	(double);
-extern	double	tan	(double);
-extern	double	atan	(double);
-extern	double	sqrt	(double);
-
-#define	STREQ(a, b)	(*(a) == *(b) && strcmp((a), (b)) == 0)
 
 /*
  * Program constants
@@ -110,11 +104,11 @@ char *goes_stby_long = GOES_STBY_LONG;
 char *goes_west_long = GOES_WEST_LONG;
 char *goes_sat_lat = GOES_SAT_LAT;
 
-int hflag = 0;
-int Wflag = 0;
-int Cflag = 0;
-int Gflag = 0;
-int height;
+bool hflag = false;
+bool Wflag = false;
+bool Cflag = false;
+bool Gflag = false;
+double height;
 
 char *progname;
 
@@ -138,7 +132,7 @@ main(
 	)
 {
 	int c;
-	int errflg = 0;
+	bool errflg = false;
 	double lat1, long1;
 	double lat2, long2;
 	double lat3, long3;
@@ -152,25 +146,25 @@ main(
 		    ++debug;
 		    break;
 		case 'h':
-		    hflag++;
+		    hflag = true;
 		    height = atof(ntp_optarg);
 		    if (height <= 0.0) {
 			    (void) fprintf(stderr, "height %s unlikely\n",
 					   ntp_optarg);
-			    errflg++;
+			    errflg = true;
 		    }
 		    break;
 		case 'C':
-		    Cflag++;
+		    Cflag = true;
 		    break;
 		case 'W':
-		    Wflag++;
+		    Wflag = true;
 		    break;
 		case 'G':
-		    Gflag++;
+		    Gflag = true;
 		    break;
 		default:
-		    errflg++;
+		    errflg = true;
 		    break;
 	    }
 	if (errflg || (!(Cflag || Wflag || Gflag) && ntp_optind+4 != argc) || 
