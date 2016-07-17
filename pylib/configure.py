@@ -333,7 +333,6 @@ def cmd_configure(ctx, config):
 		("linux/if_addr.h", ["sys/socket.h"]),
 		("linux/rtnetlink.h", ["sys/socket.h"]),
 		"linux/serial.h",
-		#"linux/seccomp.h",	- Doesn't build yet, investigate
 		"machine/soundcard.h",
 		("md5.h", ["sys/types.h"]),
 		"net/if6.h",
@@ -419,6 +418,10 @@ def cmd_configure(ctx, config):
 
 	if not ctx.options.disable_droproot:
 		ctx.define("ENABLE_DROPROOT", 1, comment="Drop root after initialising")
+	if ctx.options.enable_early_droproot:
+		ctx.define("ENABLE_EARLY_DROPROOT", 1, comment="Enable early drop root")
+	if ctx.options.enable_seccomp:
+		ctx.define("ENABLE_SECCOMP", 1, comment="Enable seccomp")
 
 	if not ctx.options.disable_dns_lookup:
 		ctx.define("ENABLE_DNS_LOOKUP", 1, comment="Enable DNS lookup of hostnames")
@@ -517,15 +520,19 @@ def cmd_configure(ctx, config):
 		ctx.define("HAVE_IFLIST_SYSCTL", 1, comment="Whether sysctl interface exists")
 
 
-	# Header checks
-	from pylib.check_cap import check_cap_header
-	check_cap_header(ctx)
+	# Header/library checks
+	from pylib.check_cap import check_cap
+	check_cap(ctx)
+
+	from pylib.check_seccomp import check_seccomp
+	check_seccomp(ctx)
 
 	from pylib.check_libevent2 import check_libevent2_header
 	check_libevent2_header(ctx)
 
-	from pylib.check_pthread import check_pthread_header_lib
-	check_pthread_header_lib(ctx)
+	if not ctx.options.disable_dns_retry:
+	    from pylib.check_pthread import check_pthread_header_lib
+	    check_pthread_header_lib(ctx)
 
 	if not ctx.options.disable_mdns_registration:
 		from pylib.check_mdns import check_mdns_header
@@ -533,27 +540,22 @@ def cmd_configure(ctx, config):
 
 
 	# Run checks
-	from pylib.check_cap import check_cap_run
-	check_cap_run(ctx)
-
 	from pylib.check_libevent2 import check_libevent2_run
 	check_libevent2_run(ctx)
 
 
-	from pylib.check_pthread import check_pthread_run
-	check_pthread_run(ctx)
+	if not ctx.options.disable_dns_retry:
+	    from pylib.check_pthread import check_pthread_run
+	    check_pthread_run(ctx)
 
 	if not ctx.options.disable_mdns_registration:
-		from pylib.check_mdns import check_mdns_run
-		check_mdns_run(ctx)
+	    from pylib.check_mdns import check_mdns_run
+	    check_mdns_run(ctx)
 
 	if ctx.options.enable_classic_mode:
-		ctx.define("ENABLE_CLASSIC_MODE", 1)
-	else:
-		ctx.undefine("ENABLE_CLASSIC_MODE")
-
-	if ctx.env.PTHREAD_ENABLE:
-		ctx.define("ISC_PLATFORM_USETHREADS", 1)
+	    ctx.define("ENABLE_CLASSIC_MODE", 1)
+        else:
+            ctx.undefine("ENABLE_CLASSIC_MODE")
 
 
 	ctx.start_msg("Writing configuration header:")

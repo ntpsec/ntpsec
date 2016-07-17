@@ -34,6 +34,11 @@ libcap::
    Fedora: libcap and libcap-devel
    Debian: libcap2 and libcap-ng-dev
 
+seccomp::
+   Optional on Linux to support restricting syscalls
+   Fedora: libseccomp-devel
+   Debian: libseccomp-dev (gets libseccomp2)
+
 OpenSSL::
    Optional, required for --enable-crypto.
    Enables encryption and authentication.
