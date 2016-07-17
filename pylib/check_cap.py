@@ -1,42 +1,23 @@
-from tool import check_sanity
+from waflib.Logs import pprint
 import sys
 
-PCAP_FRAG = """
-# include <sys/capability.h>
+def check_cap(ctx):
 
-int main(void) {
-    cap_t caps;
-    char *txt_caps;
+    if ctx.options.disable_droproot:
+        return
+    if not sys.platform.startswith("linux"):
+        return
 
-    caps = cap_from_text("cap_chown+e");
-    cap_free(caps);
+    ctx.check_cc(header_name="sys/prctl.h", mandatory=False)
+    ctx.check_cc(header_name="sys/capability.h", mandatory=False)
+    ctx.check_cc(lib="cap", comment="Capability library", mandatory=False)
 
-    return 0;
-}
-"""
-
-def check_cap_header(ctx):
-	ctx.check_cc(header_name="sys/capability.h", mandatory=False)
-	ctx.check_cc(lib="cap", comment="Capability library", mandatory=False)
-
-	if ctx.get_define("HAVE_SYS_CAPABILITY_H") and ctx.get_define("HAVE_SYS_PRCTL_H") and ctx.env.LIB_LIBCAP:
-		ctx.env.LIBCAP_HEADER = True
+    if ctx.get_define("HAVE_SYS_CAPABILITY_H") and \
+        ctx.get_define("HAVE_SYS_PRCTL_H") and ctx.env.LIB_CAP:
+            ctx.define("HAVE_LINUX_CAPABILITY", 1)
+    else:
+        pprint("RED", "Warning libcap and headers not installed")
+        pprint("RED", "Fedora needs libcap-devel")
+        pprint("RED", "Debian needs libcap-ng-dev")
 
 
-def check_cap_run(ctx):
-	if ctx.env.ENABLE_CROSS: # XXX Remove when variant builds exist
-		if ctx.env.LIBCAP_HEADER:
-			ctx.define("HAVE_LINUX_CAPABILITY", 1, comment="Capability support")
-		return
-
-	ctx.check_cc(
-		fragment	= PCAP_FRAG,
-		define_name	= "HAVE_LINUX_CAPABILITY",
-		features	= "c",
-		use		= "CAP",
-		msg		= "Checking if libcap works",
-		mandatory	= sys.platform.startswith("linux"),
-		comment		= "Capability support"
-	)
-
-	check_sanity(ctx, ctx.env.LIBCAP_HEADER, "libcap")

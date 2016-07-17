@@ -9,6 +9,7 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <errno.h>
+#include <signal.h>
 
 #include <config.h>
 
@@ -31,11 +32,9 @@ static priv_set_t *lowprivs = NULL;
 static priv_set_t *highprivs = NULL;
 #endif /* HAVE_SOLARIS_PRIVS */
 
-#ifdef HAVE_LINUX_SECCOMP_H
-# include <linux/seccomp.h>
-# include <linux/filter.h>
-# include <linux/audit.h>
-#endif /* HAVE_LINUX_SECCOMP_H */
+#ifdef HAVE_SECCOMP_H
+# include <seccomp.h>
+#endif /* HAVE_SECCOMP_H */
 
 #ifdef ENABLE_DROPROOT
 bool root_dropped;
@@ -48,6 +47,12 @@ struct passwd *pw;
 
 #include "ntp_syslog.h"
 #include "ntp_stdlib.h"
+
+#ifdef ENABLE_SECCOMP
+#ifdef HAVE_SECCOMP
+static void catchTrap(int sig);
+#endif
+#endif
 
 bool sandbox(const bool droproot,
 	     const char *user, const char *group,
@@ -257,17 +262,29 @@ getgroup:
 	}	/* if (droproot) */
 # endif	/* ENABLE_DROPROOT */
 
+#ifdef ENABLE_SECCOMP
 /* libssecomp sandboxing */
-#if defined(HAVE_LINUX_SECCOMP_H) && (defined(__x86_64__) || defined(__i386__))
-	scmp_filter_ctx ctx;
+// Working on ARM
+// #if defined(HAVE_SECCOMP) && (defined(__x86_64__) || defined(__i386__))
+#if defined(HAVE_SECCOMP)
 
-	if ((ctx = seccomp_init(SCMP_ACT_KILL)) < 0)
-		msyslog(LOG_ERR, "%s: seccomp_init(SCMP_ACT_KILL) failed: %m", __func__);
-	else {
-		msyslog(LOG_DEBUG, "%s: seccomp_init(SCMP_ACT_KILL) succeeded", __func__);
-	}
+#ifdef KILLonTRAP
+  #define MY_SCMP_ACT SCMP_ACT_KILL
+#else
+  #define MY_SCMP_ACT SCMP_ACT_TRAP
+#endif
+	scmp_filter_ctx ctx = seccomp_init(MY_SCMP_ACT);
 
-#ifdef __x86_64__
+        signal_no_reset(SIGSYS, catchTrap);
+
+
+	if (NULL == ctx) {
+		msyslog(LOG_ERR, "sandbox: seccomp_init  failed: %m");
+		return nonroot;
+		}
+	else
+		msyslog(LOG_DEBUG, "sandbox: seccomp_init succeeded");
+
 int scmp_sc[] = {
 	SCMP_SYS(adjtimex),
 	SCMP_SYS(bind),
@@ -278,90 +295,133 @@ int scmp_sc[] = {
 	SCMP_SYS(close),
 	SCMP_SYS(connect),
 	SCMP_SYS(exit_group),
+	SCMP_SYS(fcntl),
 	SCMP_SYS(fstat),
 	SCMP_SYS(fsync),
-	SCMP_SYS(futex),
+#ifdef __NR_getrandom
+	SCMP_SYS(getrandom),	/* 3.17 kernel */
+#endif
 	SCMP_SYS(getitimer),
+#ifdef __NR_ugetrlimit
+	SCMP_SYS(ugetrlimit),	/* sysconf */
+#endif
+#ifdef __NR_getrlimit
+	SCMP_SYS(getrlimit),	/* sysconf */
+	SCMP_SYS(setrlimit),
+#endif
+	SCMP_SYS(getrusage),
 	SCMP_SYS(getsockname),
+	SCMP_SYS(getsockopt),
+	SCMP_SYS(gettimeofday),	/* mkstemp */
 	SCMP_SYS(ioctl),
+	SCMP_SYS(link),
 	SCMP_SYS(lseek),
-	SCMP_SYS(madvise),
-	SCMP_SYS(mmap),
 	SCMP_SYS(munmap),
 	SCMP_SYS(open),
 	SCMP_SYS(poll),
 	SCMP_SYS(read),
+	SCMP_SYS(recvfrom),
 	SCMP_SYS(recvmsg),
 	SCMP_SYS(rename),
 	SCMP_SYS(rt_sigaction),
 	SCMP_SYS(rt_sigprocmask),
 	SCMP_SYS(rt_sigreturn),
-	SCMP_SYS(select),
+	SCMP_SYS(sigaction),
+	SCMP_SYS(sigprocmask),
+	SCMP_SYS(sigreturn),
+#ifdef __NR_select
+	SCMP_SYS(select),	/* not in ARM */
+#endif
 	SCMP_SYS(sendto),
 	SCMP_SYS(setitimer),
 	SCMP_SYS(setsid),
+#ifdef __NR_setsockopt
+	SCMP_SYS(setsockopt),	/* not in old kernels */
+#endif
 	SCMP_SYS(socket),
+	SCMP_SYS(socketcall),	/* old kernels */
 	SCMP_SYS(stat),
-	SCMP_SYS(time),
+#ifdef __NR_time
+	SCMP_SYS(time),		/* not in ARM */
+#endif
 	SCMP_SYS(write),
-};
+        SCMP_SYS(unlink),
+
+#ifdef ENABLE_DNS_LOOKUP
+	/* Needed for threads */
+	SCMP_SYS(clone),
+	SCMP_SYS(madvise),
+	SCMP_SYS(mprotect),
+	SCMP_SYS(set_robust_list),
+	SCMP_SYS(exit),
+	SCMP_SYS(futex),	/* sem_xxx */
+	SCMP_SYS(sendmmsg),	/* DNS lookup */
+	SCMP_SYS(socketpair),
+#endif
+
+#ifdef HAVE_UTMPX_H
+	/* for setutxent and friends in libntp/systime.c */
+        /* Writing time-changed msg to accounting file */
+        SCMP_SYS(access),
+#endif
+
+#ifdef REFCLOCK
+	SCMP_SYS(nanosleep),
+#endif
+#ifdef CLOCK_SHM
+        SCMP_SYS(shmget),
+        SCMP_SYS(shmat),
+#endif
+
+#ifdef __x86_64__
+	SCMP_SYS(mmap),
 #endif
 #ifdef __i386__
-int scmp_sc[] = {
 	SCMP_SYS(_newselect),
-	SCMP_SYS(adjtimex),
-	SCMP_SYS(brk),
-	SCMP_SYS(chdir),
-	SCMP_SYS(clock_gettime),
-	SCMP_SYS(clock_settime),
-	SCMP_SYS(close),
-	SCMP_SYS(exit_group),
-	SCMP_SYS(fsync),
-	SCMP_SYS(futex),
-	SCMP_SYS(getitimer),
-	SCMP_SYS(madvise),
-	SCMP_SYS(mmap),
+	SCMP_SYS(_llseek),
 	SCMP_SYS(mmap2),
-	SCMP_SYS(munmap),
-	SCMP_SYS(open),
-	SCMP_SYS(poll),
-	SCMP_SYS(read),
-	SCMP_SYS(rename),
-	SCMP_SYS(rt_sigaction),
-	SCMP_SYS(rt_sigprocmask),
-	SCMP_SYS(select),
-	SCMP_SYS(setitimer),
-	SCMP_SYS(setsid),
-	SCMP_SYS(sigprocmask),
-	SCMP_SYS(sigreturn),
-	SCMP_SYS(socketcall),
+	SCMP_SYS(fcntl64),
+	SCMP_SYS(fstat64),
 	SCMP_SYS(stat64),
-	SCMP_SYS(time),
-	SCMP_SYS(write),
-};
 #endif
+};
 	{
-		int i;
+		unsigned int i;
 
 		for (i = 0; i < COUNTOF(scmp_sc); i++) {
 			if (seccomp_rule_add(ctx,
 			    SCMP_ACT_ALLOW, scmp_sc[i], 0) < 0) {
 				msyslog(LOG_ERR,
-				    "%s: seccomp_rule_add() failed: %m",
-				    __func__);
+				    "sandbox: seccomp_rule_add() failed: %m");
 			}
 		}
 	}
 
 	if (seccomp_load(ctx) < 0)
-		msyslog(LOG_ERR, "%s: seccomp_load() failed: %m",
-		    __func__);	
+		msyslog(LOG_ERR, "sandbox: seccomp_load() failed: %m");	
 	else {
-		msyslog(LOG_DEBUG, "%s: seccomp_load() succeeded", __func__);
+		msyslog(LOG_DEBUG, "sandbox: seccomp_load() succeeded");
 	}
-#endif /* HAVE_LINUX_SECCOMP_H */
+#endif /* HAVE_SECCOMP */
+#endif /* ENABLE_SECCOMP */
 
 	return nonroot;
 }
+
+#ifdef ENABLE_SECCOMP
+#ifdef HAVE_SECCOMP
+/*
+ * catchTrap - get here if something missing from list above
+ * (or a bad guy finds a way in)
+ */
+static void catchTrap(int sig)
+{
+	UNUSED_ARG(sig);	/* signal number */
+	msyslog(LOG_ERR, "SIGSYS: got a trap.  Bailing.");
+	exit(1);
+}
+#endif /* HAVE_SECCOMP */
+#endif /* ENABLE_SECCOMP */
+
 
 /* end */

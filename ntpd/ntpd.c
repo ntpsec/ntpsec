@@ -901,6 +901,32 @@ ntpdmain(
 	    }
 	}
 
+	/*
+	 * ntpd's working set is never going to be large relative to memory
+	 * availability on modern machines. Do what chrony does and indulge it;
+	 * we get some latency improvement that way.
+	 * Need to do this before droproot.
+	 */
+	{
+	    struct rlimit rlim;
+	    rlim.rlim_max = rlim.rlim_cur = RLIM_INFINITY;
+	    if (setrlimit(RLIMIT_MEMLOCK, &rlim) < 0)
+		msyslog(LOG_WARNING, "setrlimit() failed: not locking into RAM");
+	    else if (mlockall(MCL_CURRENT|MCL_FUTURE) < 0)
+		msyslog(LOG_WARNING, "mlockall() failed: not locking into RAM");
+	    else
+		msyslog(LOG_INFO, "successfully locked into RAM");
+	}
+
+#ifdef ENABLE_EARLY_DROPROOT
+	/* drop root privileges */
+	/* This doesn't work on NetBSD or with SHM */
+	if (sandbox(droproot, user, group, chrootdir, interface_interval!=0) && interface_interval) {
+		interface_interval = 0;
+		msyslog(LOG_INFO, "running as non-root disables dynamic interface tracking");
+	}
+#endif
+
      	/* use this to test if option setting gives expected results */
 	if (dumpopts) {
 	    proto_dump(stdout);
@@ -984,11 +1010,13 @@ ntpdmain(
 	loop_config(LOOP_DRIFTINIT, 0);
 	report_event(EVNT_SYSRESTART, NULL, NULL);
 
+#ifndef ENABLE_EARLY_DROPROOT
 	/* drop root privileges */
 	if (sandbox(droproot, user, group, chrootdir, interface_interval!=0) && interface_interval) {
 		interface_interval = 0;
 		msyslog(LOG_INFO, "running as non-root disables dynamic interface tracking");
 	}
+#endif
 
 	if (intercept_get_mode() == replay)
 	    intercept_replay();
