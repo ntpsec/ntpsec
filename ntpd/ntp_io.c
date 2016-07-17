@@ -1163,7 +1163,7 @@ create_wildcards(
 			log_listen_address(wildif);
 		} else {
 			msyslog(LOG_ERR,
-				"unable to bind to wildcard address %s - another process may be running - EXITING",
+				"unable to bind to wildcard address %s - another process may be running: %m; EXITING",
 				stoa(&wildif->sin));
 			exit(1);
 		}
@@ -1215,7 +1215,7 @@ create_wildcards(
 			log_listen_address(wildif);
 		} else {
 			msyslog(LOG_ERR,
-				"unable to bind to wildcard address %s - another process may be running - EXITING",
+				"unable to bind to wildcard address %s - another process may be running: %m; EXITING",
 				stoa(&wildif->sin));
 			exit(1);
 		}
@@ -3085,7 +3085,7 @@ open_socket(
  * Add the socket to the completion port
  */
 	if (io_completion_port_add_socket(fd, interf)) {
-		msyslog(LOG_ERR, "unable to set up io completion port - EXITING");
+		msyslog(LOG_ERR, "unable to set up io completion port: %m;  EXITING");
 		exit(1);
 	}
 #endif
