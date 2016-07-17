@@ -18,6 +18,6 @@ def check_cap(ctx):
     else:
         pprint("RED", "Warning libcap and headers not installed")
         pprint("RED", "Fedora needs libcap-devel")
-        pprint("RED", "Debian needs libcap-ng-dev")
+        pprint("RED", "Debian needs libcap-dev")
 
 

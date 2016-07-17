@@ -32,7 +32,7 @@ libevent 2.x::
 libcap::
    Required on Linux, to support dropping root.
    Fedora: libcap and libcap-devel
-   Debian: libcap2 and libcap-ng-dev
+   Debian: libcap2 and libcap-dev
 
 seccomp::
    Optional on Linux to support restricting syscalls
