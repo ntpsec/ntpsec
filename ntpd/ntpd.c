@@ -8,7 +8,7 @@
 #include "ntpd.h"
 #include "ntp_io.h"
 #include "ntp_stdlib.h"
-#include <ntp_random.h>
+#include "ntp_random.h"
 
 #include "ntp_config.h"
 #include "ntp_syslog.h"
@@ -74,6 +74,9 @@ static  enum {PRIORITY_UNSET,	/* Set priority */
 				/* Latter two are pretty much the same */
 } priority_done = PRIORITY_NOSET;
 
+static bool config_priority_override = false;
+static int config_priority;
+
 bool listen_to_virtual_ips = true;
 
 static char *logfilename;
@@ -104,9 +107,6 @@ const char *chrootdir;	/* directory to chroot to */
 #ifdef HAVE_WORKING_FORK
 int	waitsync_fd_to_close = -1;	/* -w/--wait-sync */
 #endif
-
-bool config_priority_override = false;
-int config_priority;
 
 char const *progname;
 
@@ -560,14 +560,12 @@ set_process_priority(void)
 #endif
 			priority_done = PRIORITY_OK;
 	}
-# if defined(NTPD_PRIO) && NTPD_PRIO != 0
 	if (priority_done == PRIORITY_UNSET) {
 		if (-1 == setpriority(PRIO_PROCESS, 0, NTPD_PRIO))
 			msyslog(LOG_ERR, "setpriority() error: %m");
 		else
 			priority_done = PRIORITY_OK;
 	}
-# endif	/* NTPD_PRIO && NTPD_PRIO != 0 */
 	if (priority_done == PRIORITY_UNSET)
 		msyslog(LOG_ERR, "set_process_priority: No way found to improve our priority");
 }
