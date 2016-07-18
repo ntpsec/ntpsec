@@ -64,6 +64,8 @@ struct isc_interface {
 
 ISC_LANG_BEGINDECLS
 
+bool
+isc_interfaceiter_create_bool(isc_mem_t *mctx, isc_interfaceiter_t **iterp);
 isc_result_t
 isc_interfaceiter_create(isc_mem_t *mctx, isc_interfaceiter_t **iterp);
 /*!<
@@ -76,6 +78,8 @@ isc_interfaceiter_create(isc_mem_t *mctx, isc_interfaceiter_t **iterp);
  *\li	Various network-related errors
  */
 
+bool
+isc_interfaceiter_first_bool(isc_interfaceiter_t *iter);
 isc_result_t
 isc_interfaceiter_first(isc_interfaceiter_t *iter);
 /*!<
@@ -86,6 +90,9 @@ isc_interfaceiter_first(isc_interfaceiter_t *iter);
  *\li	#ISC_R_NOMORE		There are no interfaces.
  */
 
+bool
+isc_interfaceiter_current_bool(isc_interfaceiter_t *iter,
+			  isc_interface_t *ifdata);
 isc_result_t
 isc_interfaceiter_current(isc_interfaceiter_t *iter,
 			  isc_interface_t *ifdata);
@@ -101,6 +108,8 @@ isc_interfaceiter_current(isc_interfaceiter_t *iter,
  *\li	#ISC_R_SUCCESS		Success.
  */
 
+bool
+isc_interfaceiter_next_bool(isc_interfaceiter_t *iter);
 isc_result_t
 isc_interfaceiter_next(isc_interfaceiter_t *iter);
 /*!<

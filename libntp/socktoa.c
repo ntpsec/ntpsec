@@ -10,7 +10,6 @@
 
 #include <stdio.h>
 #include <arpa/inet.h>
-#include <isc/result.h>
 #include <isc/netaddr.h>
 #include <isc/sockaddr.h>
 
@@ -148,15 +147,15 @@ sockaddr_masktoprefixlen(
 	isc_netaddr_t	isc_na;
 	isc_sockaddr_t	isc_sa;
 	u_int		pfxlen;
-	isc_result_t	result;
+	bool		result;
 	int		rc;
 
 	ZERO(isc_sa);
 	memcpy(&isc_sa.type, psa,
 	       min(sizeof(isc_sa.type), sizeof(*psa)));
 	isc_netaddr_fromsockaddr(&isc_na, &isc_sa);
-	result = isc_netaddr_masktoprefixlen(&isc_na, &pfxlen);
-	rc = (ISC_R_SUCCESS == result)
+	result = isc_netaddr_masktoprefixlen_bool(&isc_na, &pfxlen);
+	rc = (result)
 		 ? (int)pfxlen
 		 : -1;
 
