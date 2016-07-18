@@ -82,7 +82,7 @@ goal to aim at, given our choice of scripting languages, is
 is to make writing script wrappers in Python easy.
 
 There is more than one way to arrange this.  If you can design a
-simple tabular output format, or something resembling an RF2822 header
+simple tabular output format, or something resembling an RFC2822 header
 that's easy for both human eyes and programs to parse, do that.
 Besides being simple, formats like these are easily handled by either
 Python or shellscripts.
