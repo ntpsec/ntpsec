@@ -550,14 +550,15 @@ set_process_priority(void)
 			msyslog(LOG_ERR, "sched_setscheduler(): %m");
 		else
 			priority_ok = true;
+		if (!priority_ok) {
+			sched.sched_priority = NTPD_PRIO;
+			if ( sched_setscheduler(0, SCHED_OTHER, &sched) == -1 )
+				msyslog(LOG_ERR, "sched_setscheduler(): %m");
+			else
+				priority_ok = true;
+		}
 	}
 #endif
-	if (!priority_ok) {
-		if (-1 == setpriority(PRIO_PROCESS, 0, NTPD_PRIO))
-			msyslog(LOG_ERR, "setpriority() error: %m");
-		else
-			priority_ok = true;
-	}
 	if (!priority_ok)
 		msyslog(LOG_ERR, "set_process_priority: No way found to improve our priority");
 }
