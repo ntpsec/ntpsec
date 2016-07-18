@@ -68,12 +68,7 @@ DNSServiceRef mdns;
  */
 #define NTPD_PRIO	(-12)
 
-static  enum {PRIORITY_UNSET,	/* Set priority */
-	      PRIORITY_OK,	/* Priority is OK where it is */
-	      PRIORITY_NOSET,	/* Don't set priority */
-				/* Latter two are pretty much the same */
-} priority_done = PRIORITY_NOSET;
-
+static bool priority_ok = true;
 static bool config_priority_override = false;
 static int config_priority;
 
@@ -343,7 +338,7 @@ parse_cmdline_opts(
 		nofork = true;
 		break;
 	    case 'N':
-		priority_done = PRIORITY_UNSET;
+		priority_ok = false;
 		break;
 	    case 'p':
 		pidfile = ntp_optarg;
@@ -351,7 +346,7 @@ parse_cmdline_opts(
 	    case 'P':
 		config_priority = atoi(ntp_optarg);
 		config_priority_override = true;
-		priority_done = PRIORITY_UNSET;
+		priority_ok = false;
 		break;
 	    case 'q':
 		mode_ntpdate = true;
@@ -527,18 +522,16 @@ catch_danger(int signo)
 static void
 set_process_priority(void)
 {
-
 # ifdef DEBUG
 	if (debug > 1)
-		msyslog(LOG_DEBUG, "set_process_priority: %s: priority_done is <%d>",
-			((priority_done)
+		msyslog(LOG_DEBUG, "set_process_priority: %s",
+			((priority_ok)
 			 ? "Leave priority alone"
 			 : "Attempt to set priority"
-				),
-			priority_done);
+				));
 # endif /* DEBUG */
-
-	if (priority_done == PRIORITY_UNSET) {
+#ifdef HAVE_SCHED_SETSCHEDULER
+	if (!priority_ok) {
 		int pmax, pmin;
 		struct sched_param sched;
 
@@ -553,20 +546,19 @@ set_process_priority(void)
 			else
 				sched.sched_priority = config_priority;
 		}
-#ifdef HAVE_SCHED_SETSCHEDULER
 		if ( sched_setscheduler(0, SCHED_FIFO, &sched) == -1 )
 			msyslog(LOG_ERR, "sched_setscheduler(): %m");
 		else
-#endif
-			priority_done = PRIORITY_OK;
+			priority_ok = true;
 	}
-	if (priority_done == PRIORITY_UNSET) {
+#endif
+	if (!priority_ok) {
 		if (-1 == setpriority(PRIO_PROCESS, 0, NTPD_PRIO))
 			msyslog(LOG_ERR, "setpriority() error: %m");
 		else
-			priority_done = PRIORITY_OK;
+			priority_ok = true;
 	}
-	if (priority_done == PRIORITY_UNSET)
+	if (!priority_ok)
 		msyslog(LOG_ERR, "set_process_priority: No way found to improve our priority");
 }
 #endif	/* !SIM */
