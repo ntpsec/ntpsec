@@ -20,8 +20,8 @@ def build(ctx):
 		source		= libisc_source,
 		includes	= [
 						"%s/libisc/include/" % ctx.srcnode.abspath(),
-						"%s/libisc/unix/include/" % ctx.srcnode.abspath(), # XXX: platform: requires unix/win32 switch.
-						"%s/libisc/pthreads/include/" % ctx.srcnode.abspath() # XXX: platform: requires thread switch
+						"%s/libisc/unix/include/" % ctx.srcnode.abspath() # XXX: platform: requires unix/win32 switch.
+
 					],
 
 	)
