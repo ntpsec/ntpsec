@@ -295,7 +295,6 @@ def cmd_configure(ctx, config):
 		('ntp_adjtime', ["sys/time.h", "sys/timex.h"]),		# BSD
 		('ntp_gettime', ["sys/time.h", "sys/timex.h"]),		# BSD
 		('res_init', ["resolv.h"]),
-		("rtprio", ["sys/rtprio.h"]),		# Sun/BSD
 		('sched_setscheduler', ["sched.h"]),
 		('settimeofday', ["sys/time.h"], "RT"),	# BSD
 		('strlcpy', ["string.h"]),
