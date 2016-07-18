@@ -81,64 +81,6 @@
 
 #include <isc/result.h>		/* Contractual promise. */
 
-#define LOCK(lp) do { \
-	ISC_UTIL_TRACE(fprintf(stderr, "LOCKING %p %s %d\n", \
-			       (lp), __FILE__, __LINE__)); \
-	RUNTIME_CHECK(pthread_mutex_lock((lp)) == 0); \
-	ISC_UTIL_TRACE(fprintf(stderr, "LOCKED %p %s %d\n", \
-			       (lp), __FILE__, __LINE__)); \
-	} while (0)
-#define UNLOCK(lp) do { \
-	RUNTIME_CHECK(pthread_mutex_unlock((lp)) == 0); \
-	ISC_UTIL_TRACE(fprintf(stderr, "UNLOCKED %p %s %d\n", \
-			       (lp), __FILE__, __LINE__)); \
-	} while (0)
-#define ISLOCKED(lp) (1)
-#define DESTROYLOCK(lp) \
-	RUNTIME_CHECK(pthread_mutex_destroy((lp)) == 0)
-
-
-#define BROADCAST(cvp) do { \
-	ISC_UTIL_TRACE(fprintf(stderr, "BOADCAST %p %s %d\n", \
-			       (cvp), __FILE__, __LINE__)); \
-	RUNTIME_CHECK(isc_condition_broadcast((cvp)) == ISC_R_SUCCESS); \
-	} while (0)
-#define SIGNAL(cvp) do { \
-	ISC_UTIL_TRACE(fprintf(stderr, "SIGNAL %p %s %d\n", \
-			       (cvp), __FILE__, __LINE__)); \
-	RUNTIME_CHECK(isc_condition_signal((cvp)) == ISC_R_SUCCESS); \
-	} while (0)
-#define WAIT(cvp, lp) do { \
-	ISC_UTIL_TRACE(fprintf(stderr, "WAIT %p LOCK %p %s %d\n", \
-			       (cvp), (lp), __FILE__, __LINE__)); \
-	RUNTIME_CHECK(isc_condition_wait((cvp), (lp)) == ISC_R_SUCCESS); \
-	ISC_UTIL_TRACE(fprintf(stderr, "WAITED %p LOCKED %p %s %d\n", \
-			       (cvp), (lp), __FILE__, __LINE__)); \
-	} while (0)
-
-/*
- * isc_condition_waituntil can return ISC_R_TIMEDOUT, so we
- * don't RUNTIME_CHECK the result.
- *
- *  XXX Also, can't really debug this then...
- */
-
-#define WAITUNTIL(cvp, lp, tp) \
-	isc_condition_waituntil((cvp), (lp), (tp))
-
-#define RWLOCK(lp, t) do { \
-	ISC_UTIL_TRACE(fprintf(stderr, "RWLOCK %p, %d %s %d\n", \
-			       (lp), (t), __FILE__, __LINE__)); \
-	RUNTIME_CHECK(isc_rwlock_lock((lp), (t)) == ISC_R_SUCCESS); \
-	ISC_UTIL_TRACE(fprintf(stderr, "RWLOCKED %p, %d %s %d\n", \
-			       (lp), (t), __FILE__, __LINE__)); \
-	} while (0)
-#define RWUNLOCK(lp, t) do { \
-	ISC_UTIL_TRACE(fprintf(stderr, "RWUNLOCK %p, %d %s %d\n", \
-			       (lp), (t), __FILE__, __LINE__)); \
-	RUNTIME_CHECK(isc_rwlock_unlock((lp), (t)) == ISC_R_SUCCESS); \
-	} while (0)
-
 /*
  * List Macros.
  */

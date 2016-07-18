@@ -19,7 +19,6 @@
 #include <string.h>
 
 #include <isc/net.h>
-#include <isc/once.h>
 #include <isc/util.h>
 
 /*%
@@ -78,15 +77,15 @@
 #if defined(ISC_PLATFORM_HAVEIPV6)
 
 # if defined(ISC_PLATFORM_HAVEIPV6)
-static isc_once_t 	once_ipv6only = ISC_ONCE_INIT;
+static bool 	once_ipv6only = false;
 # endif
 
 # if defined(ISC_PLATFORM_HAVEIPV6) && defined(ISC_PLATFORM_HAVEIN6PKTINFO)
-static isc_once_t 	once_ipv6pktinfo = ISC_ONCE_INIT;
+static bool 	once_ipv6pktinfo = false;
 # endif
 #endif /* ISC_PLATFORM_HAVEIPV6 */
 
-static isc_once_t 	once = ISC_ONCE_INIT;
+static bool 	once = false;
 
 static isc_result_t	ipv4_result = ISC_R_NOTFOUND;
 static isc_result_t	ipv6_result = ISC_R_NOTFOUND;
@@ -182,7 +181,9 @@ initialize_action(void) {
 
 static void
 initialize(void) {
-	RUNTIME_CHECK(isc_once_do(&once, initialize_action) == ISC_R_SUCCESS);
+	if (once) return;
+	once = true;
+	initialize_action();
 }
 
 bool
@@ -274,8 +275,9 @@ close:
 
 static void
 initialize_ipv6only(void) {
-	RUNTIME_CHECK(isc_once_do(&once_ipv6only,
-				  try_ipv6only) == ISC_R_SUCCESS);
+	if (once_ipv6only) return;
+	once_ipv6only = true;
+	try_ipv6only();
 }
 
 #ifdef ISC_PLATFORM_HAVEIN6PKTINFO
@@ -322,8 +324,9 @@ close:
 
 static void
 initialize_ipv6pktinfo(void) {
-	RUNTIME_CHECK(isc_once_do(&once_ipv6pktinfo,
-				  try_ipv6pktinfo) == ISC_R_SUCCESS);
+	if (once_ipv6pktinfo) return;
+	once_ipv6pktinfo = true;
+	try_ipv6pktinfo();
 }
 #endif /* ISC_PLATFORM_HAVEIN6PKTINFO */
 #endif /* ISC_PLATFORM_HAVEIPV6 */
