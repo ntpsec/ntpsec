@@ -194,8 +194,8 @@ for the specific unit.
 The most common use of this driver is to get samples from a gpsd instance:
 
 ----------------------------------------------------------------------------
-refclock shm unit 0 prefer refid GPS
-refclock shm unit 1 refid PPS
+refclock shm unit 0 refid GPS
+refclock shm unit 1 prefer refid PPS
 ----------------------------------------------------------------------------
 
 == Public vs. Private SHM segments ==
