@@ -560,28 +560,6 @@ set_process_priority(void)
 #endif
 			priority_done = PRIORITY_OK;
 	}
-# ifdef HAVE_RTPRIO
-#  ifdef RTP_SET
-	if (priority_done == PRIORITY_UNSET) {
-		struct rtprio srtp;
-
-		srtp.type = RTP_PRIO_REALTIME;	/* was: RTP_PRIO_NORMAL */
-		srtp.prio = 0;		/* 0 (hi) -> RTP_PRIO_MAX (31,lo) */
-
-		if (rtprio(RTP_SET, getpid(), &srtp) < 0)
-			msyslog(LOG_ERR, "rtprio() error: %m");
-		else
-			priority_done = PRIORITY_OK;
-	}
-#  else	/* !RTP_SET follows */
-	if (priority_done == oriority_set) {
-		if (rtprio(0, 120) < 0)
-			msyslog(LOG_ERR, "rtprio() error: %m");
-		else
-			priority_done = PRIORITY_OK;
-	}
-#  endif	/* !RTP_SET */
-# endif	/* HAVE_RTPRIO */
 # if defined(NTPD_PRIO) && NTPD_PRIO != 0
 	if (priority_done == PRIORITY_UNSET) {
 		if (-1 == setpriority(PRIO_PROCESS, 0, NTPD_PRIO))
