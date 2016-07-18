@@ -61,9 +61,4 @@ int ntp_set_tod (struct timespec *tvs);
 	}
 #endif /* NO_MAIN_ALLOWED */
 
-#ifdef HAVE_RTPRIO
-# define HAVE_NO_NICE
-#endif
-
-
 #endif	/* GUARD_NTP_MACHINE_H */

@@ -30,9 +30,6 @@
 #ifdef HAVE_SYS_IOCTL_H
 # include <sys/ioctl.h>
 #endif /* HAVE_SYS_IOCTL_H */
-#if defined(HAVE_RTPRIO)
-# include <sys/rtprio.h>
-#endif
 #include <sched.h>
 #include <sys/mman.h>
 

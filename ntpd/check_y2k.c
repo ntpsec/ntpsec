@@ -47,19 +47,6 @@
 # include <io.h>
 # include "../libntp/log.h"
 #endif /* SYS_WINNT */
-#if defined(HAVE_RTPRIO)
-#include <sys/resource.h>
-# ifdef HAVE_SYS_LOCK_H
-#  include <sys/lock.h>
-# endif
-# include <sys/rtprio.h>
-#else
-# ifdef HAVE_PLOCK
-#  ifdef HAVE_SYS_LOCK_H
-#	include <sys/lock.h>
-#  endif
-# endif
-#endif
 #include <sched.h>
 #include <sys/mman.h>
 
