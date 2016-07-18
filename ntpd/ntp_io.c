@@ -35,7 +35,6 @@
 #include <isc/mem.h>
 #include <isc/interfaceiter.h>
 #include <isc/netaddr.h>
-#include <isc/result.h>
 #include <isc/sockaddr.h>
 
 #ifdef SIM
@@ -1757,7 +1756,7 @@ update_interfaces(
 	isc_mem_t *		mctx = (void *)-1;
 	interface_info_t	ifi;
 	isc_interfaceiter_t *	iter;
-	isc_result_t		result;
+	bool			result;
 	isc_interface_t		isc_if;
 	int			new_interface_found;
 	unsigned int		family;
@@ -1775,9 +1774,9 @@ update_interfaces(
 
 	new_interface_found = false;
 	iter = NULL;
-	result = isc_interfaceiter_create(mctx, &iter);
+	result = isc_interfaceiter_create_bool(mctx, &iter);
 
-	if (result != ISC_R_SUCCESS)
+	if (!result)
 		return false;
 
 	/*
@@ -1786,13 +1785,13 @@ update_interfaces(
 	 */
 	sys_interphase ^= 0x1;
 
-	for (result = isc_interfaceiter_first(iter);
-	     ISC_R_SUCCESS == result;
-	     result = isc_interfaceiter_next(iter)) {
+	for (result = isc_interfaceiter_first_bool(iter);
+	     result;
+	     result = isc_interfaceiter_next_bool(iter)) {
 
-		result = isc_interfaceiter_current(iter, &isc_if);
+		result = isc_interfaceiter_current_bool(iter, &isc_if);
 
-		if (result != ISC_R_SUCCESS)
+		if (!result)
 			break;
 
 		/* See if we have a valid family to use */
@@ -2976,7 +2975,7 @@ open_socket(
 				"setsockopt IPV6_TCLASS (%02x) fails on address %s: %m",
 				qos, stoa(addr));
 #endif /* IPV6_TCLASS */
-		if (isc_net_probe_ipv6only() == ISC_R_SUCCESS
+		if (isc_net_probe_ipv6only_bool()
 		    && setsockopt(fd, IPPROTO_IPV6, IPV6_V6ONLY,
 		    (char*)&on, sizeof(on)))
 			msyslog(LOG_ERR,

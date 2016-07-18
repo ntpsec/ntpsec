@@ -43,6 +43,8 @@ isc_netaddr_eqprefix(const isc_netaddr_t *a, const isc_netaddr_t *b,
  * ignored.  Return #true if they are equal, #false if not.
  */
 
+bool
+isc_netaddr_masktoprefixlen_bool(const isc_netaddr_t *s, unsigned int *lenp);
 isc_result_t
 isc_netaddr_masktoprefixlen(const isc_netaddr_t *s, unsigned int *lenp);
 /*%<

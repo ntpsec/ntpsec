@@ -81,6 +81,8 @@
 
 ISC_LANG_BEGINDECLS
 
+bool isc_net_probeipv4_bool(void);
+
 isc_result_t
 isc_net_probeipv4(void);
 /*%<
@@ -93,6 +95,8 @@ isc_net_probeipv4(void);
  *\li	#ISC_R_DISABLED		IPv4 is disabled.
  *\li	#ISC_R_UNEXPECTED
  */
+
+bool isc_net_probeipv6_bool(void);
 
 isc_result_t
 isc_net_probeipv6(void);
@@ -107,6 +111,8 @@ isc_net_probeipv6(void);
  *\li	#ISC_R_UNEXPECTED
  */
 
+bool
+isc_net_probe_ipv6only_bool(void);
 isc_result_t
 isc_net_probe_ipv6only(void);
 /*%<

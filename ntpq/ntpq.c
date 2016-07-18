@@ -15,7 +15,6 @@
 # include <mswsock.h>
 #endif
 #include <isc/net.h>
-#include <isc/result.h>
 
 #include "ntpq.h"
 #include "ntp_assert.h"

@@ -5,8 +5,6 @@
 #include "ntp_net.h"
 #include "ntp_lists.h"
 
-#include <isc/result.h>
-
 /*
  * recvbuf memory management
  */

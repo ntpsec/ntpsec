@@ -108,6 +108,10 @@ isc_netaddr_eqprefix(const isc_netaddr_t *a, const isc_netaddr_t *b,
 	return (true);
 }
 
+bool
+isc_netaddr_masktoprefixlen_bool(const isc_netaddr_t *s, unsigned int *lenp) {
+    return (ISC_R_SUCCESS == isc_netaddr_masktoprefixlen(s, lenp));
+}
 isc_result_t
 isc_netaddr_masktoprefixlen(const isc_netaddr_t *s, unsigned int *lenp) {
 	unsigned int nbits = 0, nbytes = 0, ipbytes = 0, i;

@@ -23,7 +23,6 @@
 #include <sys/wait.h>
 
 #include <isc/net.h>
-#include <isc/result.h>
 
 #include "ntp.h"
 #include "ntpd.h"

@@ -8,7 +8,6 @@ def build(ctx):
 		"error.c",
 		"md5.c",
 		"netaddr.c",
-		"result.c",
 		"sha1.c",
 		"unix/errno2result.c",
 		"unix/interfaceiter.c",

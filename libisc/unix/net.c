@@ -185,12 +185,20 @@ initialize(void) {
 	RUNTIME_CHECK(isc_once_do(&once, initialize_action) == ISC_R_SUCCESS);
 }
 
+bool
+isc_net_probeipv4_bool(void) {
+  return (ISC_R_SUCCESS == isc_net_probeipv4());
+}
 isc_result_t
 isc_net_probeipv4(void) {
 	initialize();
 	return (ipv4_result);
 }
 
+bool
+isc_net_probeipv6_bool(void) {
+  return (ISC_R_SUCCESS == isc_net_probeipv6());
+}
 isc_result_t
 isc_net_probeipv6(void) {
 	initialize();
@@ -320,6 +328,10 @@ initialize_ipv6pktinfo(void) {
 #endif /* ISC_PLATFORM_HAVEIN6PKTINFO */
 #endif /* ISC_PLATFORM_HAVEIPV6 */
 
+bool
+isc_net_probe_ipv6only_bool(void) {
+    return (ISC_R_SUCCESS == isc_net_probe_ipv6only());
+}
 isc_result_t
 isc_net_probe_ipv6only(void) {
 #ifdef ISC_PLATFORM_HAVEIPV6

@@ -2,7 +2,6 @@
 #define GUARD_MAIN_H
 
 #include <stdio.h>
-#include <isc/result.h>
 #include <isc/net.h>
 
 #include <ntp.h>
