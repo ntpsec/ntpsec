@@ -530,9 +530,8 @@ def cmd_configure(ctx, config):
 	from pylib.check_libevent2 import check_libevent2_header
 	check_libevent2_header(ctx)
 
-	if not ctx.options.disable_dns_retry:
-	    from pylib.check_pthread import check_pthread_header_lib
-	    check_pthread_header_lib(ctx)
+	from pylib.check_pthread import check_pthread_header_lib
+	check_pthread_header_lib(ctx)
 
 	if not ctx.options.disable_mdns_registration:
 		from pylib.check_mdns import check_mdns_header
