@@ -18,10 +18,6 @@
 #include "isc/formatcheck.h"
 #include "iosignal.h"
 
-#ifdef SIM
-# include "ntpsim.h"
-#endif
-
 #include <unistd.h>
 #include <sys/stat.h>
 #include <stdio.h>
@@ -42,7 +38,7 @@ extern bool sandbox(const bool droproot,
 		    const char *chrootdir,
 		    bool want_dynamic_interface_tracking);
 
-#if !defined(SIM) && defined(SIGDIE1)
+#if defined(SIGDIE1)
 static volatile bool signalled	= false;
 static volatile int signo	= 0;
 /* In an ideal world, 'finish_safe()' would declared as noreturn... */
@@ -103,28 +99,27 @@ extern bool	check_netinfo;
 
 bool was_alarmed;
 
-#if !defined(SIM) && defined(HAVE_WORKING_FORK)
+#if defined(HAVE_WORKING_FORK)
 static int	wait_child_sync_if	(int, long);
 #endif
 
-#if !defined(SIM) && defined(SIGHUP)
+#if defined(SIGHUP)
 static	void	catchHUP	(int);
 volatile int sawHUP = false;
 #endif
 
-#if !defined(SIM) && !defined(SYS_WINNT)
+#if !defined(SYS_WINNT)
 # ifdef	DEBUG
 static	void	moredebug	(int);
 static	void	lessdebug	(int);
 # else	/* !DEBUG follows */
 static	void	no_debug	(int);
 # endif	/* !DEBUG */
-#endif	/* !SIM && !SYS_WINNT */
+#endif	/* !SYS_WINNT */
 
 int	saved_argc;
 char **	saved_argv;
 
-#ifndef SIM
 int		ntpdmain		(int, char **);
 static void	mainloop		(void);
 static void	set_process_priority	(void);
@@ -138,8 +133,6 @@ static void	library_fatal_error	(const char *, int,
 static void	library_unexpected_error(const char *, int,
 					 const char *, va_list)
 					ISC_FORMAT_PRINTF(3, 0);
-#endif	/* !SIM */
-
 
 #define ALL_OPTIONS "46aAbc:dD:f:gGhi:I:k:l:LmMnNp:Pqr:Rs:t:u:UVw:xyYzZ"
 static const struct option longoptions[] = {
@@ -460,24 +453,6 @@ parse_cmdline_opts(
 		exit(0);
 }
 
-#ifdef SIM
-int
-main(
-	int argc,
-	char *argv[]
-	)
-{
-	progname = argv[0];
-	intercept_argparse(&argc, &argv);
-	parse_cmdline_opts(argc, argv);
-
-#ifdef DEBUG
-	DPRINTF(1, ("ntpd %s\n", Version));
-#endif
-
-	return ntpsim(argc, argv);
-}
-#else	/* !SIM follows */
 #ifdef NO_MAIN_ALLOWED
 CALL(ntpd,"ntpd",ntpdmain);
 #else	/* !NO_MAIN_ALLOWED follows */
@@ -492,7 +467,6 @@ main(
 }
 #endif /* !SYS_WINNT */
 #endif /* !NO_MAIN_ALLOWED */
-#endif /* !SIM */
 
 #ifdef SIGDANGER
 /*
@@ -510,7 +484,6 @@ catch_danger(int signo)
 /*
  * Set the process priority
  */
-#ifndef SIM
 static void
 set_process_priority(void)
 {
@@ -547,14 +520,11 @@ set_process_priority(void)
 	if (need_priority)
 		msyslog(LOG_ERR, "set_process_priority: No way found to improve our priority");
 }
-#endif	/* !SIM */
-
 
 /*
  * Main program.  Initialize us, disconnect us from the tty if necessary,
  * and loop waiting for I/O and/or timer expiries.
  */
-#ifndef SIM
 int
 ntpdmain(
 	int argc,
@@ -974,7 +944,7 @@ static void mainloop(void)
 
 # ifdef HAVE_IO_COMPLETION_PORT
 	for (;;) {
-#if !defined(SIM) && defined(SIGDIE1)
+#if defined(SIGDIE1)
 		if (signalled)
 			finish_safe(signo);
 #endif
@@ -985,7 +955,7 @@ static void mainloop(void)
 	was_alarmed = false;
 
 	for (;;) {
-#if !defined(SIM) && defined(SIGDIE1)
+#if defined(SIGDIE1)
 		if (signalled)
 			finish_safe(signo);
 #endif
@@ -1118,10 +1088,9 @@ static void mainloop(void)
 	}
 	UNBLOCK_IO_AND_ALARM();
 }
-#endif	/* !SIM */
 
 
-#if !defined(SIM) && defined(SIGDIE1)
+#if defined(SIGDIE1)
 /*
  * finish - exit gracefully
  */
@@ -1164,10 +1133,9 @@ static void catchHUP(int sig)
 	sawHUP = true;
 }
 
-#endif	/* !SIM && SIGDIE1 */
+#endif	/* SIGDIE1 */
 
 
-#ifndef SIM
 /*
  * wait_child_sync_if - implements parent side of -w/--wait-sync
  */
@@ -1320,9 +1288,8 @@ library_unexpected_error(
 		msyslog(LOG_ERR, "Too many errors.  Shutting up.");
 
 }
-#endif	/* !SIM */
 
-#if !defined(SIM) && !defined(SYS_WINNT)
+#if !defined(SYS_WINNT)
 # ifdef DEBUG
 
 /*
@@ -1381,4 +1348,4 @@ no_debug(
 	errno = saved_errno;
 }
 # endif	/* !DEBUG */
-#endif	/* !SIM && !SYS_WINNT */
+#endif	/* !SYS_WINNT */

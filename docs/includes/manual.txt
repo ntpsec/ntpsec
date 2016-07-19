@@ -5,7 +5,6 @@
 * link:ntpfrob.html[+{ntpfrob}+ - frob the local clock hardware]
 * link:ntpkeygen.html[+{ntpkeygen}+ - generate public and private keys]
 * link:ntpleapfetch.html[+{ntpleapfetch}+ fetch and manage leap-offset file]
-* link:ntpdsim.html[+{ntpdsim}+ - Network Time Protocol (NTP) simulator]
 * link:ntptime.html[+{ntptime}+ - read and set kernel time variables]
 * link:ntptrace.html[`ntptrace` - trace a chain of NTP servers back to the primary source]
 * link:ntpviz.html[+{ntpviz}+ - make offset, jitter, and other plots from logfiles]

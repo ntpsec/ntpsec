@@ -37,10 +37,6 @@
 #include <isc/netaddr.h>
 #include <isc/sockaddr.h>
 
-#ifdef SIM
-#include "ntpsim.h"
-#endif
-
 #ifdef HAVE_NET_ROUTE_H
 # define USE_ROUTING_SOCKET
 # include <net/route.h>
@@ -3181,12 +3177,8 @@ sendpkt(
 		}
 #endif	/* MCAST */
 
-#ifdef SIM
-		cc = simulate_server(dest, src, pkt);
-#else
 		cc = sendto(src->fd, pkt, (u_int)len, 0,
 			    &dest->sa, SOCKLEN(dest));
-#endif
 		if (cc == -1) {
 			src->notsent++;
 			packets_notsent++;
@@ -3848,7 +3840,6 @@ select_peerinterface(
 	)
 {
 	endpt *ep;
-#ifndef SIM
 	endpt *wild;
 
 	wild = ANY_INTERFACE_CHOOSE(srcadr);
@@ -3893,9 +3884,6 @@ select_peerinterface(
 	if (ep != NULL && INT_WILDCARD & ep->flags)
 		if (!accept_wildcard_if_for_winnt)
 			ep = NULL;
-#else	/* SIM follows */
-	ep = loopback_interface;
-#endif
 
 	return ep;
 }

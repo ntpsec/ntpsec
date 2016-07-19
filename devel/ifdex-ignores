@@ -41,7 +41,6 @@ TRIM_POLLRATE		# In the parse driver
 # Other
 NEED_SRANDOMDEV		# Random-number initialization - never set by NTP Classic
 NTPD_PRIO		# Priority to set the daemon to
-SIM			# If we ever enable the ntpsdim build
 
 # Fine-grained debugging and tracing, not presently settable from waf
 DEBUG

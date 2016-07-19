@@ -224,9 +224,6 @@ static void free_config_ttl(config_tree *);
 static void free_config_unpeers(config_tree *);
 static void free_config_vars(config_tree *);
 
-#ifdef SIM
-static void free_config_sim(config_tree *);
-#endif
 static void destroy_address_fifo(address_fifo *);
 #define FREE_ADDRESS_FIFO(pf)			\
 	do {					\
@@ -291,11 +288,6 @@ static void config_tos(config_tree *);
 static void config_logfile(config_tree *);
 static void config_vars(config_tree *);
 
-#ifdef SIM
-static sockaddr_u *get_next_address(address_node *addr);
-static void config_sim(config_tree *);
-static void config_ntpdsim(config_tree *);
-#else	/* !SIM follows */
 static void config_ntpd(config_tree *, bool input_from_file);
 static void config_other_modes(config_tree *);
 static void config_auth(config_tree *);
@@ -311,7 +303,6 @@ static void config_unpeers(config_tree *);
 static void config_nic_rules(config_tree *, bool input_from_file);
 static void config_reset_counters(config_tree *);
 static uint8_t get_correct_host_mode(int token);
-#endif	/* !SIM */
 
 #ifdef USE_WORKER
 static void peer_name_resolved(int, int, void *, const char *, const char *,
@@ -335,11 +326,8 @@ static void ntpd_set_tod_using(const char *);
 static uint32_t get_pfxmatch(const char **, struct masks *);
 static uint32_t get_match(const char *, struct masks *);
 static uint32_t get_logmask(const char *);
-#ifndef SIM
 static int getnetnum(const char *num, sockaddr_u *addr, int complain,
 		     enum gnn_type a_type);
-
-#endif
 
 
 /* FUNCTIONS FOR INITIALIZATION
@@ -425,9 +413,6 @@ free_config_tree(
 	free_config_unpeers(ptree);
 	free_config_nic_rules(ptree);
 	free_config_reset_counters(ptree);
-#ifdef SIM
-	free_config_sim(ptree);
-#endif
 	free_auth_node(ptree);
 
 	free(ptree);
@@ -1156,147 +1141,10 @@ create_addr_opts_node(
 	return my_node;
 }
 
-
-#ifdef SIM
-script_info *
-create_sim_script_info(
-	double		duration,
-	attr_val_fifo *	script_queue
-	)
-{
-	script_info *my_info;
-	attr_val *my_attr_val;
-
-	my_info = emalloc_zero(sizeof(*my_info));
-
-	/* Initialize Script Info with default values*/
-	my_info->duration = duration;
-	my_info->prop_delay = NET_DLY;
-	my_info->proc_delay = PROC_DLY;
-
-	/* Traverse the script_queue and fill out non-default values */
-
-	for (my_attr_val = HEAD_PFIFO(script_queue);
-	     my_attr_val != NULL;
-	     my_attr_val = my_attr_val->link) {
-
-		/* Set the desired value */
-		switch (my_attr_val->attr) {
-
-		case T_Freq_Offset:
-			my_info->freq_offset = my_attr_val->value.d;
-			break;
-
-		case T_Wander:
-			my_info->wander = my_attr_val->value.d;
-			break;
-
-		case T_Jitter:
-			my_info->jitter = my_attr_val->value.d;
-			break;
-
-		case T_Prop_Delay:
-			my_info->prop_delay = my_attr_val->value.d;
-			break;
-
-		case T_Proc_Delay:
-			my_info->proc_delay = my_attr_val->value.d;
-			break;
-
-		default:
-			msyslog(LOG_ERR, "Unknown script token %d",
-				my_attr_val->attr);
-		}
-	}
-
-	return my_info;
-}
-#endif	/* SIM */
-
-
-#ifdef SIM
-static sockaddr_u *
-get_next_address(
-	address_node *addr
-	)
-{
-	const char addr_prefix[] = "192.168.0.";
-	static int curr_addr_num = 1;
-#define ADDR_LENGTH 16 + 1	/* room for 192.168.1.255 */
-	char addr_string[ADDR_LENGTH];
-	sockaddr_u *final_addr;
-	struct addrinfo *ptr;
-	int gai_err;
-
-	final_addr = emalloc(sizeof(*final_addr));
-
-	if (addr->type == T_String) {
-		snprintf(addr_string, sizeof(addr_string), "%s%d",
-			 addr_prefix, curr_addr_num++);
-		printf("Selecting ip address %s for hostname %s\n",
-		       addr_string, addr->address);
-		gai_err = getaddrinfo(addr_string, "ntp", NULL, &ptr);
-	} else {
-		gai_err = getaddrinfo(addr->address, "ntp", NULL, &ptr);
-	}
-
-	if (gai_err) {
-		fprintf(stderr, "ERROR!! Could not get a new address\n");
-		exit(1);
-	}
-	memcpy(final_addr, ptr->ai_addr, ptr->ai_addrlen);
-	fprintf(stderr, "Successful in setting ip address of simulated server to: %s\n",
-		stoa(final_addr));
-	freeaddrinfo(ptr);
-
-	return final_addr;
-}
-#endif /* SIM */
-
-
-#ifdef SIM
-server_info *
-create_sim_server(
-	address_node *		addr,
-	double			server_offset,
-	script_info_fifo *	script
-	)
-{
-	server_info *my_info;
-
-	my_info = emalloc_zero(sizeof(*my_info));
-	my_info->server_time = server_offset;
-	my_info->addr = get_next_address(addr);
-	my_info->script = script;
-	UNLINK_FIFO(my_info->curr_script, *my_info->script, link);
-
-	return my_info;
-}
-#endif	/* SIM */
-
-sim_node *
-create_sim_node(
-	attr_val_fifo *		init_opts,
-	server_info_fifo *	servers
-	)
-{
-	sim_node *my_node;
-
-	my_node = emalloc(sizeof(*my_node));
-	my_node->init_opts = init_opts;
-	my_node->servers = servers;
-
-	return my_node;
-}
-
-
-
-
 /* FUNCTIONS FOR PERFORMING THE CONFIGURATION
  * ------------------------------------------
  */
 
-#ifndef SIM
 static void
 config_other_modes(
 	config_tree *	ptree
@@ -1338,8 +1186,6 @@ config_other_modes(
 		proto_config(PROTO_MULTICAST_ADD, 1, 0., NULL);
 	}
 }
-#endif	/* !SIM */
-
 
 static void
 destroy_address_fifo(
@@ -1370,7 +1216,6 @@ free_config_other_modes(
 }
 
 
-#ifndef SIM
 static void
 config_auth(
 	config_tree *ptree
@@ -1456,7 +1301,6 @@ config_auth(
 		}
 	}
 }
-#endif	/* !SIM */
 
 
 static void
@@ -1725,7 +1569,6 @@ free_config_monitor(
 }
 
 
-#ifndef SIM
 static void
 config_access(
 	config_tree *ptree
@@ -2077,7 +1920,6 @@ config_access(
 	}
 	/* coverity[leaked_storage] */
 }
-#endif	/* !SIM */
 
 
 static void
@@ -2221,7 +2063,6 @@ free_config_tinker(
 /*
  * config_nic_rules - apply interface listen/ignore/drop items
  */
-#ifndef SIM
 static void
 config_nic_rules(
 	config_tree *ptree,
@@ -2349,7 +2190,6 @@ config_nic_rules(
 			free(if_name);
 	}
 }
-#endif	/* !SIM */
 
 
 static void
@@ -2487,7 +2327,6 @@ free_config_logconfig(
 }
 
 
-#ifndef SIM
 static void
 config_phone(
 	config_tree *ptree
@@ -2510,7 +2349,6 @@ config_phone(
 		}
 	}
 }
-#endif	/* !SIM */
 
 static void
 config_mdnstries(
@@ -2534,7 +2372,6 @@ free_config_phone(
 }
 
 
-#ifndef SIM
 static void
 config_setvar(
 	config_tree *ptree
@@ -2560,7 +2397,6 @@ config_setvar(
 	if (str != NULL)
 		free(str);
 }
-#endif	/* !SIM */
 
 
 static void
@@ -2572,7 +2408,6 @@ free_config_setvar(
 }
 
 
-#ifndef SIM
 static void
 config_ttl(
 	config_tree *ptree
@@ -2592,7 +2427,6 @@ config_ttl(
 	}
 	sys_ttlmax = i - 1;
 }
-#endif	/* !SIM */
 
 
 static void
@@ -2604,7 +2438,6 @@ free_config_ttl(
 }
 
 
-#ifndef SIM
 static void
 config_trap(
 	config_tree *ptree
@@ -2776,7 +2609,6 @@ trap_name_resolved(
 	free(pstp);
 }
 # endif	/* USE_WORKER */
-#endif	/* !SIM */
 
 
 static void
@@ -2788,7 +2620,6 @@ free_config_trap(
 }
 
 
-#ifndef SIM
 static void
 config_fudge(
 	config_tree *ptree
@@ -2904,7 +2735,6 @@ config_fudge(
 		msyslog(LOG_ERR, "Fudge commands not supported: built without refclocks");
 # endif
 }
-#endif	/* !SIM */
 
 
 static void
@@ -3117,7 +2947,6 @@ peer_config(
 		       cast_flags, ctl->ttl, ctl->peerkey, true);
 }
 
-#ifndef SIM
 static uint8_t
 get_correct_host_mode(
 	int token
@@ -3339,7 +3168,6 @@ config_peers(
 		}
 	}
 }
-#endif	/* !SIM */
 
 /*
  * peer_name_resolved()
@@ -3435,7 +3263,6 @@ free_config_peers(
 }
 
 
-#ifndef SIM
 static void
 config_unpeers(
 	config_tree *ptree
@@ -3513,7 +3340,6 @@ config_unpeers(
 # endif
 	}
 }
-#endif	/* !SIM */
 
 
 /*
@@ -3595,7 +3421,6 @@ free_config_unpeers(
 }
 
 
-#ifndef SIM
 static void
 config_reset_counters(
 	config_tree *ptree
@@ -3642,7 +3467,6 @@ config_reset_counters(
 		}
 	}
 }
-#endif	/* !SIM */
 
 
 static void
@@ -3654,124 +3478,6 @@ free_config_reset_counters(
 }
 
 
-#ifdef SIM
-static void
-config_sim(
-	config_tree *ptree
-	)
-{
-	int i;
-	server_info *serv_info;
-	attr_val *init_stmt;
-	sim_node *sim_n;
-
-	/* Check if a simulate block was found in the configuration code.
-	 * If not, return an error and exit
-	 */
-	sim_n = HEAD_PFIFO(ptree->sim_details);
-	if (NULL == sim_n) {
-		fprintf(stderr, "ERROR!! I couldn't find a \"simulate\" block for configuring the simulator.\n");
-		fprintf(stderr, "\tCheck your configuration file.\n");
-		exit(1);
-	}
-
-	/* Process the initialization statements
-	 * -------------------------------------
-	 */
-	init_stmt = HEAD_PFIFO(sim_n->init_opts);
-	for (; init_stmt != NULL; init_stmt = init_stmt->link) {
-		switch(init_stmt->attr) {
-
-		case T_Beep_Delay:
-			simulation.beep_delay = init_stmt->value.d;
-			break;
-
-		case T_Sim_Duration:
-			simulation.end_time = init_stmt->value.d;
-			break;
-
-		default:
-			fprintf(stderr,
-				"Unknown simulator init token %d\n",
-				init_stmt->attr);
-			exit(1);
-		}
-	}
-
-	/* Process the server list
-	 * -----------------------
-	 */
-	simulation.num_of_servers = 0;
-	serv_info = HEAD_PFIFO(sim_n->servers);
-	for (; serv_info != NULL; serv_info = serv_info->link)
-		simulation.num_of_servers++;
-	simulation.servers = eallocarray(simulation.num_of_servers,
-				     sizeof(simulation.servers[0]));
-
-	i = 0;
-	serv_info = HEAD_PFIFO(sim_n->servers);
-	for (; serv_info != NULL; serv_info = serv_info->link) {
-		if (NULL == serv_info) {
-			fprintf(stderr, "Simulator server list is corrupt\n");
-			exit(1);
-		} else {
-			simulation.servers[i] = *serv_info;
-			simulation.servers[i].link = NULL;
-			i++;
-		}
-	}
-
-	printf("Creating server associations\n");
-	create_server_associations();
-	fprintf(stderr,"\tServer associations successfully created!!\n");
-}
-
-
-static void
-free_config_sim(
-	config_tree *ptree
-	)
-{
-	sim_node *sim_n;
-	server_info *serv_n;
-	script_info *script_n;
-
-	if (NULL == ptree->sim_details)
-		return;
-	sim_n = HEAD_PFIFO(ptree->sim_details);
-	free(ptree->sim_details);
-	ptree->sim_details = NULL;
-	if (NULL == sim_n)
-		return;
-
-	FREE_ATTR_VAL_FIFO(sim_n->init_opts);
-	for (;;) {
-		UNLINK_FIFO(serv_n, *sim_n->servers, link);
-		if (NULL == serv_n)
-			break;
-		free(serv_n->curr_script);
-		if (serv_n->script != NULL) {
-			for (;;) {
-				UNLINK_FIFO(script_n, *serv_n->script,
-					    link);
-				if (script_n == NULL)
-					break;
-				free(script_n);
-			}
-			free(serv_n->script);
-		}
-		free(serv_n);
-	}
-	free(sim_n);
-}
-#endif	/* SIM */
-
-
-/* Define two different config functions. One for the daemon and the other for
- * the simulator. The simulator ignores a lot of the standard ntpd configuration
- * options
- */
-#ifndef SIM
 static void
 config_ntpd(
 	config_tree *ptree,
@@ -3808,29 +3514,6 @@ config_ntpd(
 	config_fudge(ptree);
 	config_reset_counters(ptree);
 }
-#endif	/* !SIM */
-
-
-#ifdef SIM
-static void
-config_ntpdsim(
-	config_tree *ptree
-	)
-{
-	printf("Configuring Simulator...\n");
-	printf("Some ntpd-specific commands in the configuration file will be ignored.\n");
-
-	config_tos(ptree);
-	config_monitor(ptree);
-	config_tinker(ptree);
-	if (0)
-		config_rlimit(ptree);	/* not needed for the simulator */
-	config_system_opts(ptree);
-	config_logconfig(ptree);
-	config_vars(ptree);
-	config_sim(ptree);
-}
-#endif /* SIM */
 
 
 /*
@@ -3990,11 +3673,7 @@ save_and_apply_config_tree(bool input_from_file)
 	 * and call the appropriate function as needed.
 	 */
 
-#ifndef SIM
 	config_ntpd(ptree, input_from_file);
-#else
-	config_ntpdsim(ptree);
-#endif
 
 	UNLINK_SLIST(punlinked, cfg_tree_history, ptree, link,
 		     config_tree);
@@ -4272,7 +3951,6 @@ gettokens_netinfo (
  * returns 1 for success, and mysteriously, 0 for most failures, and
  * -1 if the address found is IPv6 and we believe IPv6 isn't working.
  */
-#ifndef SIM
 static int
 getnetnum(
 	const char *num,
@@ -4303,7 +3981,6 @@ getnetnum(
 
 	return 1;
 }
-#endif	/* !SIM */
 
 void
 ntp_rlimit(

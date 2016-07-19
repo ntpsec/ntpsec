@@ -2,10 +2,17 @@
 #define GUARD_NTP_CONFIG_H
 
 #include <sys/resource.h>
+#include <stdbool.h>
+#include <stdio.h>
+#include <math.h>
 
+#include "ntp_syslog.h"
+#include "ntp_fp.h"
+#include "ntp.h"
+#include "ntp_malloc.h"
+#include "ntp_refclock.h"
+#include "ntp_stdlib.h"
 #include "ntp_machine.h"
-#include "ntpsim.h"
-
 
 /*
  * Configuration file name
@@ -183,7 +190,6 @@ typedef struct sim_node_tag sim_node;
 struct sim_node_tag {
 	sim_node *		link;
 	attr_val_fifo *		init_opts;
-	server_info_fifo *	servers;
 };
 
 typedef DECL_FIFO_ANCHOR(sim_node) sim_fifo;
@@ -292,16 +298,9 @@ restrict_node *create_restrict_node(address_node *addr,
 int_node *create_int_node(int val);
 addr_opts_node *create_addr_opts_node(address_node *addr,
 				      attr_val_fifo *options);
-sim_node *create_sim_node(attr_val_fifo *init_opts,
-			  server_info_fifo *servers);
 setvar_node *create_setvar_node(char *var, char *val, int isdefault);
 nic_rule_node *create_nic_rule_node(int match_class, char *if_name,
 				    int action);
-
-script_info *create_sim_script_info(double duration,
-				    attr_val_fifo *script_queue);
-server_info *create_sim_server(address_node *addr, double server_offset,
-			       script_info_fifo *script);
 
 extern struct REMOTE_CONFIG_INFO remote_config;
 void config_remotely(sockaddr_u *);

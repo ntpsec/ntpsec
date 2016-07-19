@@ -21,7 +21,6 @@
 
 #include "ntpd.h"
 #include "ntp_config.h"
-#include "ntpsim.h"
 #include "ntp_scanner.h"
 #include "ntp_parser.tab.h"
 
