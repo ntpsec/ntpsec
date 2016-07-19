@@ -214,17 +214,6 @@ struct key_tok ntp_keywords[] = {
 { "wildcard",		T_Wildcard,		FOLLBY_TOKEN },
 { "listen",		T_Listen,		FOLLBY_TOKEN },
 { "drop",		T_Drop,			FOLLBY_TOKEN },
-/* simulator commands */
-{ "simulate",		T_Simulate,		FOLLBY_TOKEN },
-{ "simulation_duration",T_Sim_Duration,		FOLLBY_TOKEN },
-{ "beep_delay",		T_Beep_Delay,		FOLLBY_TOKEN },
-{ "duration",		T_Duration,		FOLLBY_TOKEN },
-{ "server_offset",	T_Server_Offset,	FOLLBY_TOKEN },
-{ "freq_offset",	T_Freq_Offset,		FOLLBY_TOKEN },
-{ "wander",		T_Wander,		FOLLBY_TOKEN },
-{ "jitter",		T_Jitter,		FOLLBY_TOKEN },
-{ "prop_delay",		T_Prop_Delay,		FOLLBY_TOKEN },
-{ "proc_delay",		T_Proc_Delay,		FOLLBY_TOKEN },
 };
 
 typedef struct big_scan_state_tag {

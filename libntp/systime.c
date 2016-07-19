@@ -68,14 +68,12 @@ double	sys_residual = 0;	/* adjustment residue (s) */
 bool	trunc_os_clock;		/* sys_tick > measured_tick */
 time_stepped_callback	step_callback;
 
-#ifndef SIM
 /* perlinger@ntp.org: As 'get_sysime()' does its own check for clock
  * backstepping, this could probably become a local variable in
  * 'get_systime()' and the cruft associated with communicating via a
  * static value could be removed after the v4.2.8 release.
  */
 static bool lamport_violated;	/* clock was stepped back */
-#endif	/* !SIM */
 
 #ifdef DEBUG
 static bool systime_init_done;
@@ -113,8 +111,6 @@ init_systime(void)
 	DONE_SYSTIME_INIT();
 }
 
-
-#ifndef SIM	/* ntpsim.c has get_systime() and friends for sim */
 
 void
 get_ostime(
@@ -504,5 +500,3 @@ step_systime(
 	}
 	return true;
 }
-
-#endif	/* !SIM */
