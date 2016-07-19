@@ -60,12 +60,7 @@ DNSServiceRef mdns;
 
 #include <sodium.h>
 
-/*
- * Scheduling priority we run at
- */
-#define NTPD_PRIO	(-12)
-
-static bool priority_ok = true;
+static bool need_priority = false;
 static bool config_priority_override = false;
 static int config_priority;
 
@@ -335,7 +330,7 @@ parse_cmdline_opts(
 		nofork = true;
 		break;
 	    case 'N':
-		priority_ok = false;
+		need_priority = true;
 		break;
 	    case 'p':
 		pidfile = ntp_optarg;
@@ -343,7 +338,7 @@ parse_cmdline_opts(
 	    case 'P':
 		config_priority = atoi(ntp_optarg);
 		config_priority_override = true;
-		priority_ok = false;
+		need_priority = true;
 		break;
 	    case 'q':
 		mode_ntpdate = true;
@@ -522,13 +517,13 @@ set_process_priority(void)
 # ifdef DEBUG
 	if (debug > 1)
 		msyslog(LOG_DEBUG, "set_process_priority: %s",
-			((priority_ok)
+			((!need_priority)
 			 ? "Leave priority alone"
 			 : "Attempt to set priority"
 				));
 # endif /* DEBUG */
 #ifdef HAVE_SCHED_SETSCHEDULER
-	if (!priority_ok) {
+	if (need_priority) {
 		int pmax, pmin;
 		struct sched_param sched;
 
@@ -546,17 +541,10 @@ set_process_priority(void)
 		if ( sched_setscheduler(0, SCHED_FIFO, &sched) == -1 )
 			msyslog(LOG_ERR, "sched_setscheduler(): %m");
 		else
-			priority_ok = true;
-		if (!priority_ok) {
-			sched.sched_priority = NTPD_PRIO;
-			if ( sched_setscheduler(0, SCHED_OTHER, &sched) == -1 )
-				msyslog(LOG_ERR, "sched_setscheduler(): %m");
-			else
-				priority_ok = true;
-		}
+			need_priority = false;
 	}
 #endif
-	if (!priority_ok)
+	if (need_priority)
 		msyslog(LOG_ERR, "set_process_priority: No way found to improve our priority");
 }
 #endif	/* !SIM */
