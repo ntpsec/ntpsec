@@ -1116,7 +1116,7 @@ ntpcal_date_to_time(
 /*
  * ==================================================================
  *
- * extended and unchecked variants of caljulian/caltontp
+ * extended and unchecked variants of calgregorian/caltontp
  *
  * ==================================================================
  */

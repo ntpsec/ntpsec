@@ -1,8 +1,5 @@
 /*
- * caljulian - determine the Julian date from an NTP time.
- *
- * (Note: since we use the GREGORIAN calendar, this should be renamed to
- * 'calgregorian' eventually...)
+ * calgregorian - determine the Julian date from an NTP time.
  */
 #include <config.h>
 #include <sys/types.h>
@@ -19,7 +16,7 @@
 #include "ntp_assert.h"
 
 void
-caljulian(
+calgregorian(
 	uint32_t		ntp,
 	struct calendar *	jt
 	)

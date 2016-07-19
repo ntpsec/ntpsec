@@ -217,7 +217,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\libntp\caljulian.c"
+				RelativePath="..\..\..\libntp\calgregorian.c"
 				>
 			</File>
 			<File

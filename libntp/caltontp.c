@@ -25,9 +25,9 @@
  * because the only thing we can check for consistency is our input, produced
  * by somebody else.
  *
- * BTW: A total roundtrip using 'caljulian' would be a quite shaky thing:
+ * BTW: A total roundtrip using 'calgregorian' would be a quite shaky thing:
  * Because of the truncation of the NTP time stamp to 32 bits and the epoch
- * unfolding around the current time done by 'caljulian' the roundtrip does
+ * unfolding around the current time done by 'calgregorian' the roundtrip does
  * *not* necessarily reproduce the input, especially if the time spec is more
  * than 68 years off from the current time...
  */
