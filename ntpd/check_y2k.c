@@ -437,8 +437,8 @@ main( void )
    }
   }
 
-    puts( " libntp/caljulian.c" );
-  {		/* test caljulian() */
+    puts( " libntp/calgregorian.c" );
+  {		/* test calgregorian() */
     struct	calendar  ot;
     u_long ntp_time;		/* NTP time */
 
@@ -467,7 +467,7 @@ main( void )
 	/* 01-01 for the current year */
 	ntp_time = Days( year ) - Days( year0 );  /* days into NTP time */
 	ntp_time *= 24 * 60 * 60;	/* convert into seconds */
-	caljulian( ntp_time, &ot );	/* convert January 1 */
+	calgregorian( ntp_time, &ot );	/* convert January 1 */
 	if ( ot.year  != year
 	  || ot.month != 1
 	  || ot.monthday != 1 )
@@ -481,7 +481,7 @@ main( void )
 	}
 
 	ntp_time += (31 + 28-1) * ( 24 * 60 * 60 );	/* advance to 02-28 */
-	caljulian( ntp_time, &ot );	/* convert Feb 28 */
+	calgregorian( ntp_time, &ot );	/* convert Feb 28 */
 	if ( ot.year  != year
 	  || ot.month != 2
 	  || ot.monthday != 28 )
@@ -502,7 +502,7 @@ main( void )
 	d = isleap_4(year) ? 29 : 1;
 
 	ntp_time += ( 24 * 60 * 60 );	/* advance to the next day */
-	caljulian( ntp_time, &ot );	/* convert this day */
+	calgregorian( ntp_time, &ot );	/* convert this day */
 	if ( ot.year  != year
 	  || ot.month != m
 	  || ot.monthday != d )
@@ -553,14 +553,14 @@ main( void )
 	    break;
 	}
 
-	/* now call caljulian as a type of failsafe supercheck */
-	caljulian( ObservedNtp, &ot );	/* convert January 1 */
+	/* now call calgregorian as a type of failsafe supercheck */
+	calgregorian( ObservedNtp, &ot );	/* convert January 1 */
 	if ( ot.year  != year
 	  || ot.month != 1
 	  || ot.monthday != 1 )
 	{
 	    Error(year);
-	    fprintf( stdout, "%lu: caljulian FAILSAFE EXPECTED %04d-01-01: FOUND %04d-%02d-%02d\n",
+	    fprintf( stdout, "%lu: calgregorian FAILSAFE EXPECTED %04d-01-01: FOUND %04d-%02d-%02d\n",
 			(unsigned long)ObservedNtp,
 			year, 
 			(int)ot.year, (int)ot.month, (int)ot.monthday );

@@ -53,7 +53,7 @@
     <ClCompile Include="..\..\..\..\lib\isc\buffer.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\libntp\caljulian.c">
+    <ClCompile Include="..\..\..\..\libntp\calgregorian.c">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\libntp\caltontp.c">

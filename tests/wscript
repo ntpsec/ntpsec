@@ -57,7 +57,7 @@ def build(ctx):
 		"libntp/a_md5encrypt.c",
 		"libntp/authkeys.c",
 		"libntp/calendar.c",
-		"libntp/caljulian.c",
+		"libntp/calgregorian.c",
 		"libntp/caltontp.c",
 		"libntp/calyearstart.c",
 		"libntp/clocktime.c",

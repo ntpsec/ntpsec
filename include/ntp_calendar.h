@@ -108,7 +108,7 @@ extern systime_func_ptr ntpcal_set_timefunc(systime_func_ptr);
 extern	const char * const months[12];
 extern	const char * const daynames[7];
 
-extern	void	 caljulian	(uint32_t, struct calendar *);
+extern	void	 calgregorian	(uint32_t, struct calendar *);
 extern	uint32_t caltontp	(const struct calendar *);
 
 /*
