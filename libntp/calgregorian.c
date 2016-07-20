@@ -1,5 +1,5 @@
 /*
- * calgregorian - determine the Julian date from an NTP time.
+ * calgregorian - determine the Gregorian date from an NTP time.
  */
 #include <config.h>
 #include <sys/types.h>
