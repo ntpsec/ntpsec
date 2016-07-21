@@ -38,12 +38,14 @@ reduced to summary data using the loop.sh shell script. See the loop.awk
 script for further information. A line in the file is produced at each
 valid update of the local clock.
 
-  49236 11.897 -0.000004 -35.9384 0
+  49236 11.897 -0.000004 -35.9384 0.000003815 0.000805 0
 
   49236             modified Julian day number
   11.897            time of day (s) past midnight UTC
   -0.000004         time offset (s)
   -35.9384          frequency offset (ppm)
+  0.000003815       jitter
+  0.000805          wander (ppm)
   0                 phase-lock loop time constant
 
 clockstats
