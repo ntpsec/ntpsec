@@ -1,4 +1,4 @@
-Radio Timecode Formats (README.timecodes)
+= Radio Timecode Formats (README.timecodes.txt) =
 
 Following are examples of the serial timecode formats used by various
 timecode receivers as given in the instruction manuals. These examples
@@ -8,6 +8,7 @@ character that begins a subfield. The values given after this symbol
 represent the character offset from the beginning of the timecode string
 as edited to remove control characters.
 
+----------------------------------------------------------------------------
 C         on-time character (start bit)
 Y         year of century
 T         time of day
@@ -17,6 +18,7 @@ Q         quality indicator (format specific)
 <LF>      ASCII line feed (hex 0a)
 <CR>      ASCII carriage return (hex 0d)
 <SP>      ASCII space (hex 20)
+----------------------------------------------------------------------------
 
 In order to promote uniform behavior in the various implementations, it
 is useful to have a common interpretation of alarm conditions and signal
@@ -30,8 +32,9 @@ In the following uppercase letters, punctuation marks and spaces <SP>
 stand for themselves; lowercase letters stand for fields as described.
 Special characters other than <LF>, <CR> and <SP> are preceded by ^.
 
-Spectracom 8170 and Netclock/2 WWV Synchonized Clock (format 0)
+== Spectracom 8170 and Netclock/2 WWV Synchonized Clock (format 0) ==
 
+----------------------------------------------------------------------------
 "<CR><LF>i  ddd hh:mm:ss  TZ=zz<CR><LF>"
  C       A  D   T
 
@@ -47,9 +50,11 @@ Spectracom 8170 and Netclock/2 WWV Synchonized Clock (format 0)
 
      example: "   216 15:36:43  TZ=0"
                A  D   T
+----------------------------------------------------------------------------
 
-Netclock/2 WWV Synchonized Clock (format 2)
+== Netclock/2 WWV Synchonized Clock (format 2) ==
 
+----------------------------------------------------------------------------
 "<CR><LF>iqyy ddd hh:mm:ss.fff ld"
  C       AQY  D   T
 
@@ -71,10 +76,13 @@ Netclock/2 WWV Synchonized Clock (format 2)
 
      example: "  92 216 15:36:43.640  D"
                AQ   D   T
+----------------------------------------------------------------------------
 
-TrueTime 468-DC Satellite Synchronized Clock (and other TrueTime
-receivers)
+== TrueTime 468-DC Satellite Synchronized Clock ==
 
+Also aopplies to other TrueTime receivers 
+
+----------------------------------------------------------------------------
 "<CR><LF><^A>ddd:hh:mm:ssq<CR>"
               D   T       QC
 
@@ -89,61 +97,9 @@ receivers)
 
      example: "216:15:36:43 "
                D   T       Q
+----------------------------------------------------------------------------
 
-Heath GC-1000 Most Accurate Clock (WWV/H)
-
-"<CR>hh:mm:ss.f     dd/mm/yy<CR>"
- C   T        A     D
-
-     poll: none; offsets: Y = none, D = 15, T = 0, A = 9, Q = none
-     hh:mm:ss = hours, minutes, seconds
-     f = deciseconds (? when out of spec)
-     dd/mm = day, month
-     yy = year of century (from DIPswitches)
-
-     Note: 0?:??:??.? is displayed before synch is first established and
-     hh:mm:ss.? once synch is established and then lost again for about
-     a day.
-
-     example: "15:36:43.6     04/08/91"
-               T        A     D     Y
-
-PST/Traconex 1020 Time Source (WWV/H) (firmware revision V4.01)
-
-"frdzycchhSSFTttttuuxx<CR>" "ahh:mm:ss.fffs<CR>" "yy/dd/mm/ddd<CR>"
-          A   Q               T                   Y  D
-
-     poll: "QMQDQT"; offsets: Y = 0, D = 3 T = 1,, A = 11, Q = 13
-     f = frequency enable (O = all frequencies enabled)
-     r = baud rate (3 = 1200, 6 = 9600)
-     d = features indicator (@ = month/day display enabled)
-     z = time zone (0 = UTC)
-     y = year (5 = 1991)
-     cc = WWV propagation delay (52 = 22 ms)
-     hh = WWVH propagation delay (81 = 33 ms)
-     SS = status (80 or 82 = operating correctly)
-     F = current receive frequency (1-5 = 2.5, 5, 10, 15, 20 MHz)
-     T = transmitter (C = WWV, H = WWVH)
-     tttt = time since last update (minutes)
-     uu = flush character (03 = ^C)
-     xx = 94 (unknown) (firmware revision X4.01.999 only)
-
-     a = AM/PM indicator (A = AM, P = PM, <SP> - 24-hour format)
-     hh:mm:ss.fff = hours, minutes, seconds, milliseconds of day
-     s = daylight-saving indicator (<SP> standard, D daylight)
-
-     yy = year of century (from DIPswitches)
-     dd/mm/ddd = day of month, month of year, day of year
-
-     Note: The alarm condition is indicated by other than ? at A, which
-     occurs during initial synchronization and when received signal is
-     lost for an extended period. A receiver unlock condition is
-     indicated by other than "0000" in the tttt subfield at Q.
-
-     example: "O3@055281824C00000394 91/08/04/216  15:36:43.640"
-                             T       Y        D    T
-
-David L. Mills
-University of Delaware
-mills@udel.edu
-23 October 1993
+ David L. Mills
+ University of Delaware
+ mills@udel.edu
+ 23 October 1993
