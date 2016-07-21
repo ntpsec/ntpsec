@@ -1,4 +1,4 @@
-Statistics processing scripts (README)
+= Statistics processing scripts (README.txt) =
 
 This directory contains a number of scripts for use with the filegen
 facility. Those files ending in .awk are for the Unix awk utility, while
@@ -28,12 +28,12 @@ as a background job. Its control files have the .S extension.
 The psummary.awk script can be used to scan the peer_summary file and
 construct an historical reprise of the daily summaries. 
 
-The file formats are documented in the README.stats file and in the
+The file formats are documented in the README.stats.txt file and in the
 scripts themselves. Further detail on the radio clock ASCII timecode
-formats and related data are in the README.timecode file.
+formats and related data are in the README.timecode.txt file.
 
-David L. Mills
-University of Delaware
-mills@udel.edu
-1 November 1993
-Revised 12 April 1994 
+ David L. Mills
+ University of Delaware
+ mills@udel.edu
+ 1 November 1993
+ Revised 12 April 1994 
