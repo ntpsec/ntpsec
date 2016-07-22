@@ -1,0 +1,168 @@
+#!/usr/bin/env python
+"""
+ntpviz - logfile visualizer for NTP log files
+
+Usage: ntpviz [-d statsdir] [-g] [-n name] [-p period] [-s starttime]
+              [--clock-offset | --clock-jitter | --clock-stability]
+              [--peer-offsets hosts | --all-peer-offsets]
+              [--peer-jitters hosts | --all-peer-jitters]
+
+This utility analyzes files in an NTP log directory and generates
+statistical plots from them.  It can report either PNG images or
+the GNUPlot programs to generate them to standard output.
+
+The most basic option is -d, which specifies a logfile directory to
+examine; the default is /var/log/ntpstats.
+
+The -n option allows you to set the sitename shown in the plot title.
+The default is the basame of the log directory.
+
+The -s and -p options allow you to set the time window to bw reported
+on. With -s you set the start time as an ISO8601-style timestamp
+- yyyy-mmm-ddThh:mm:ss. With -p you set the default in days.  The default
+is for the period to be 7 days and the start time to be set so that adding
+the period just reaches the last logfile entry.
+
+The --clock-offset, --clock-jitter, and --clock-stability options
+chose what graph is generated; choose only one.  By default, the
+GNUPLOT for the graph is reported; with -g you get the rendered PNG.
+
+The following plots are available:
+
+--local-offset:  Clock time and clock frequency offsets from the loop statistics
+                 (fields 3 and 4).
+
+--local-jitter:  Clock time-jitter plot from the loop statistics (field 5).
+
+--local-stability: RMS frequency-jitter plot from the loop statistics (field 6).
+                   This is deviation from a root-mean-square extrapolation of the
+                   moving average of past frequency readings.
+
+--peer-offsets:  Peer offset from local clock time from peerstats (field 4)
+                 A comma-separated list of peer names must follow. It is a fatal
+                 error for any of these names not to appear in peerstats.
+
+--all-peer-offsets: Report all peer offsets.  This is only a different
+                    option name from --peer-offsets because of a limitation
+                    in the Python standard libraries.
+
+--peer-jitter:  Peer jitter from local clock time, from peerstats (field 7)
+                A comma-separated list of peer names must follow. It is a fatal
+                error for any of these names not to appear in peerstats.
+
+--all-peer-jitters: Report all peer jitters.  This is only a different
+                  option name from --peer-offsets because of a limitation
+                  in the Python standard libraries.
+
+--peer-rtt:  Show offset plus or minus rount-trip-time (rtt) of a specified peer.
+
+The code includes various sanity checks and will bail out with a message to
+standard error on, for example, missing logfile data required for a plot.
+
+SPDX-License-Identifier: BSD-2-Clause
+"""
+from __future__ import print_function, division
+
+import os, sys, getopt
+from ntpstats import *
+
+if __name__ == '__main__':
+    try:
+        (options, arguments) = getopt.getopt(sys.argv[1:], "d:gn:p:s:", [
+            "local-offset", "local-jitter", "local-stability",
+            "all-peer-offsets", "peer-offsets=",
+            "all-peer-jitters", "peer-jitters=",
+            "peer-rtt=",
+            ])
+    except getopt.GetoptError as err:
+        sys.stderr.write(str(err) + "\n")
+        raise SystemExit(2)
+    period = 7	# days
+    sitename = None
+    statsdir = "/var/log/ntpstats"
+    starttime = None
+    generate = False
+    show_local_offset = show_local_jitter = show_local_stability = False
+    show_peer_offsets = show_peer_jitters = None
+    show_peer_rtt = None
+    for (switch, val) in options:
+        if switch == "-d":
+            statsdir = val
+        elif switch == "-g":
+            generate = True
+        elif switch == "-n":
+            sitename = val
+        elif switch == "-p":
+            period = int(val)	# Denominated in days
+        elif switch == "-s":
+            starttime = iso_to_unix(val)
+        elif switch == "--local-offset":
+            show_local_offset = True
+        elif switch == "--local-jitter":
+            show_local_jitter = True
+        elif switch == "--local-stability":
+            show_local_stability = True
+        elif switch == "--peer-offsets":
+            show_peer_offsets = val.split(",")
+        elif switch == "--all-peer-offsets":
+            show_peer_offsets = []
+        elif switch == "--peer-jitters":
+            show_peer_jitters = val.split(",")
+        elif switch == "--all-peer-jitters":
+            show_peer_jitters = []
+        elif switch == "--peer-rtt":
+            show_peer_rtt = val
+    period *= 24 * 60 * 60
+    stats = NTPStats(sitename=sitename, statsdir=statsdir)
+    # Default to one week before the latest date
+    if starttime is None:
+        starttime = int(stats.rangemax()) - period 
+    if stats.sitename is None:
+        stats.sitename = os.path.basename(statsdir)
+    if starttime:
+        stats.clip(starttime, starttime + period)
+        
+    if os.path.exists("/usr/share/fonts/liberation"):
+        os.environ["GDFONTPATH"] = "/usr/share/fonts/liberation"
+    elif os.path.exists("/usr/share/fonts/truetype/liberation"):
+        os.environ["GDFONTPATH"] = "/usr/share/fonts/truetype/liberation"
+    else:
+        sys.stderr.write("warning: liberation truetype fonts not found\n")
+    os.environ["GNUPLOT_DEFAULT_GDFONT"] = "LiberationSans-Regular"
+
+    if show_local_offset or show_local_jitter or show_local_stability:
+        if not stats.loopstats:
+            sys.stderr.write("ntpviz: missing loopstats data\n")
+            raise SystemExit(1)
+        if show_local_offset + show_local_jitter + show_local_stability > 1:
+            sys.stderr.write("ntpviz: clash of mode options\n")
+            raise SystemExit(1)
+        if show_local_offset:
+            plot = stats.local_clock_gnuplot()
+        if show_local_jitter:
+            plot = stats.local_clock_jitter_gnuplot()
+        if show_local_stability:
+            plot = stats.local_clock_stability_gnuplot()
+        if generate:
+            gnuplot(plot)
+        else:
+            sys.stdout.write(plot)
+        raise SystemExit(0)
+
+    if show_peer_offsets is not None or show_peer_jitters is not None or show_peer_rtt is not None:
+        if not stats.loopstats:
+            sys.stderr.write("ntpviz: missing peerstats data\n")
+            raise SystemExit(1)
+        if show_peer_offsets is not None:
+            plot = stats.peer_offsets_gnuplot(show_peer_offsets)
+        if show_peer_jitters is not None:
+            plot = stats.peer_jitters_gnuplot(show_peer_jitters)
+        if show_peer_rtt is not None:
+            plot = stats.peer_rtt_gnuplot(show_peer_rtt)
+        if generate:
+            gnuplot(plot)
+        else:
+            sys.stdout.write(plot)
+
+
+# end
