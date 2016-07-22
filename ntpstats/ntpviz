@@ -7,57 +7,7 @@ Usage: ntpviz [-d statsdir] [-g] [-n name] [-p period] [-s starttime]
               [--peer-offsets hosts | --all-peer-offsets]
               [--peer-jitters hosts | --all-peer-jitters]
 
-This utility analyzes files in an NTP log directory and generates
-statistical plots from them.  It can report either PNG images or
-the GNUPlot programs to generate them to standard output.
-
-The most basic option is -d, which specifies a logfile directory to
-examine; the default is /var/log/ntpstats.
-
-The -n option allows you to set the sitename shown in the plot title.
-The default is the basame of the log directory.
-
-The -s and -p options allow you to set the time window to bw reported
-on. With -s you set the start time as an ISO8601-style timestamp
-- yyyy-mmm-ddThh:mm:ss. With -p you set the default in days.  The default
-is for the period to be 7 days and the start time to be set so that adding
-the period just reaches the last logfile entry.
-
-The --clock-offset, --clock-jitter, and --clock-stability options
-chose what graph is generated; choose only one.  By default, the
-GNUPLOT for the graph is reported; with -g you get the rendered PNG.
-
-The following plots are available:
-
---local-offset:  Clock time and clock frequency offsets from the loop statistics
-                 (fields 3 and 4).
-
---local-jitter:  Clock time-jitter plot from the loop statistics (field 5).
-
---local-stability: RMS frequency-jitter plot from the loop statistics (field 6).
-                   This is deviation from a root-mean-square extrapolation of the
-                   moving average of past frequency readings.
-
---peer-offsets:  Peer offset from local clock time from peerstats (field 4)
-                 A comma-separated list of peer names must follow. It is a fatal
-                 error for any of these names not to appear in peerstats.
-
---all-peer-offsets: Report all peer offsets.  This is only a different
-                    option name from --peer-offsets because of a limitation
-                    in the Python standard libraries.
-
---peer-jitter:  Peer jitter from local clock time, from peerstats (field 7)
-                A comma-separated list of peer names must follow. It is a fatal
-                error for any of these names not to appear in peerstats.
-
---all-peer-jitters: Report all peer jitters.  This is only a different
-                  option name from --peer-offsets because of a limitation
-                  in the Python standard libraries.
-
---peer-rtt:  Show offset plus or minus rount-trip-time (rtt) of a specified peer.
-
-The code includes various sanity checks and will bail out with a message to
-standard error on, for example, missing logfile data required for a plot.
+See the manual page for details.
 
 SPDX-License-Identifier: BSD-2-Clause
 """

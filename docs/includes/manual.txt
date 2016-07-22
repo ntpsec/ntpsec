@@ -8,5 +8,6 @@
 * link:ntpdsim.html[+{ntpdsim}+ - Network Time Protocol (NTP) simulator]
 * link:ntptime.html[+{ntptime}+ - read and set kernel time variables]
 * link:ntptrace.html[`ntptrace` - trace a chain of NTP servers back to the primary source]
+* link:ntpviz.html[+{ntpviz}+ - make offset, jitter, and other plots from logfiles]
 * link:sitemap.html[Site Map]
 

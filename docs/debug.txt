@@ -131,6 +131,10 @@ system variables represents the quality metric for the client. If the
 root synchronization distance for any server exceeds 1.5 s, called the
 select threshold, the server is considered invalid.
 
+Sometimes the time distribution of errors can be revealing. It's a
+good idea to look occasionally at the plots produced by
+link:ntpviz.html{ntpviz}].
+
 == Large Frequency Errors ==
 
 The frequency tolerance of computer clock oscillators varies widely,
@@ -150,6 +154,7 @@ this program, this might be one using a command in the system startup
 file.
 
 == Access Controls ==
+
 Provisions are included in +{ntpd}+ for access controls which deflect
 unwanted traffic from selected hosts or networks. The controls described
 on the link:accopt.html[Access Control Options] include detailed packet
