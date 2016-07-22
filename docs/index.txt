@@ -157,7 +157,7 @@ few will be user-visible.
 === Other user-visible changes ===
 
 * There is a new data-visualization tool,
-  link:ntpviz.htnl[+{ntpviz}+], which can produce various useful and
+  link:ntpviz.html[+{ntpviz}+], which can produce various useful and
   interesting plots from the NTP statistics logs.  These should assist in
   monitoring a time-server's performance, fixing configuration
   problems, and identifying noise sources in network weather and
