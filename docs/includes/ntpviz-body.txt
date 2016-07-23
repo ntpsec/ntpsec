@@ -67,7 +67,8 @@ The following plots are available:
    standard library.
 
 --peer-rtt=host::
-   Show offset plus or minus rount-trip-time (rtt) of a specified peer.
+   Show offset plus or minus round-trip-time (rtt) of a specified
+   peer. This graph combines fields 4 and 5 of loopstats.
 
 The code includes various sanity checks and will bail out with a message to
 standard error on, for example, missing logfile data required for a plot.
