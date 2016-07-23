@@ -2,7 +2,7 @@
  * tg.c generate IRIG signals for test
  */
 /*
- * This program can generate audio signals that simulate yhe IRIG-B
+ * This program can generate audio signals that simulate the IRIG-B
  * timecode commonly used to synchronize laboratory equipment. It is
  * the IRIG driver (refclock_irig.c) in the NTP driver collection.
  *
@@ -34,7 +34,7 @@
  * as each new string is constructed. The display is followed by the
  * BCD binary bits as transmitted. Note that the transmissionorder is
  * low-order first as the frame is processed left to right.  The IRIG
- * ton-time marker M preceeds the first (units) bit, so its code is
+ * on-time marker M preceeds the first (units) bit, so its code is
  * delayed one bit and the next digit (tens) needs only three bits.
  *
  * The program has been tested with the Sun Blade 1500 running Solaris
