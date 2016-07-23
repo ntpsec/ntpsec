@@ -39,53 +39,8 @@ ntptrap:
 	This script convinced me that ntp trap messages are only of
 	little use.
 
-ntploopstat:
-	perl script to gather loop info statistics from ntpd via mode 7
-	LOOP_INFO requests.
-
-	This script collects data to allow monitoring of remote xntp servers
-	where it is not possible to directly access the loopstats file
-	produced by ntpd itself. Of course, it can be used to sample
-	a local server if it is not configured to produce a loopstats file.
-
-	Please note, this program poses a high load on the server as
-	a communication takes place every delay seconds ! USE WITH CARE !
-
-	usage:
-	  ntploopstat [-d<delay>] [-t<timeout>] [-l <logfile>] [-v] [ntpserver]
-	
-	delay:		number of seconds to wait between samples
-			default: 60 seconds
-	timeout:	number of seconds to wait for reply
-			default 12 seconds
-	logfile:	file to log samples to
-			default: loopstats:<ntpserver>:
-			(note the trailing colon)
-			This name actually is a prefix.
-			The file name is dynamically derived by appending
-			the name of the month the sample belongs to.
-			Thus all samples of a month end up in the same file.
-
-	the format of the files generated is identical to the format used by
-	ntpd with the loopstats file:
-		MJD <seconds since midnight UTC> offset frequency compliance
-	
-	if a timeout occurs the next sample is tried after delay/2 seconds
-
-	The script will terminate after MAX_FAIL (currently 60)
-	consecutive errors.
-
-	Errors are counted for:
-		- error on send call
-		- error on select call
-		- error on recv call
-		- short packet received
-		- bad packet 
-		- error on open for logfile
-
 ntploopwatch:
-	perl script to display loop filter statistics collected by ntploopstat
-	or dumped directly by ntpd.
+	perl script to display loop filter statistics dumped by ntpd.
 
 	Gnuplot is used to produce a graphical representation of the sample
 	values, that have been preprocessed and analysed by this script.
@@ -93,7 +48,7 @@ ntploopwatch:
 	It can either be called to produce a printout of specific data set or
 	used to continously monitor the values. Monitoring is achieved by 
 	periodically reprocessing the logfiles, which are updated regularly
-	either by a running ntploopstat process or by the running ntpd.
+	by the running ntpd.
 
 	usage:
 	  to watch statistics permanently:
