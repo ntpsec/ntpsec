@@ -91,7 +91,7 @@ typedef unsigned int	u_int;
  * Poll interval parameters
  */
 #define NTP_UNREACH	10	/* poll unreach threshold */
-#define	NTP_MINPOLL	3	/* log2 min poll interval (8 s) */
+#define	NTP_MINPOLL	0	/* log2 min poll interval (1 s) */
 #define NTP_MINDPOLL	6	/* log2 default min poll (64 s) */
 #define NTP_MAXDPOLL	10	/* log2 default max poll (~17 m) */
 #define	NTP_MAXPOLL	17	/* log2 max poll interval (~36 h) */

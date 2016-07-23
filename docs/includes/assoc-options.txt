@@ -33,7 +33,7 @@
   defaults to 10 (1,024 s), but can be increased by the _maxpoll_ option
   to an upper limit of 17 (36.4 h). The minimum poll interval defaults
   to 6 (64 s), but can be decreased by the _minpoll_ option to a lower
-  limit of 4 (16 s).
+  limit of 0 (1 s).
 
 +mode+ 'option'::
   Pass the +option+ to a reference clock driver, where +option+ is an
