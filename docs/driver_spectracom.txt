@@ -95,7 +95,7 @@ received.
   Specifies the driver stratum, in decimal from 0 to 15, with default 0.
 +refid+ 'string'::
   Specifies the driver reference identifier, an ASCII string from one to
-  four characters, with default +WWVB+.
+  four characters, with default +GPS+.
 +flag1 {0 | 1}+::
   Disable PPS signal processing if 0 (default); enable PPS signal
   processing if 1.

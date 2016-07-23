@@ -93,11 +93,10 @@ purpose. Except where noted, these options apply to all clock drivers.
 [[spec]]
 == Special Considerations ==
 
-The link:audio.html[Audio Drivers] page describes three software drivers
+The link:audio.html[Audio Drivers] page describes two software drivers
 that process audio signals from an audio codec or sound card. One is for
-the NIST time and frequency stations WWV and WWVH, another for the
-Canadian time and frequency station CHU. These require an external
-shortwave radio and antenna. A third is for the generic IRIG signal
+the Canadian time and frequency station CHU. These require an external
+shortwave radio and antenna. The second is for the generic IRIG signal
 produced by some timing devices. Currently, these are supported in
 FreeBSD, Solaris and SunOS and likely in other system as well.
 

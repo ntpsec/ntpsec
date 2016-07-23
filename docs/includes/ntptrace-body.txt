@@ -25,7 +25,7 @@ example of the output from ntptrace:
 % ntptrace
 localhost: stratum 4, offset 0.0019529, synch distance 0.144135
 server2ozo.com: stratum 2, offset 0.0124263, synch distance 0.115784
-usndh.edu: stratum 1, offset 0.0019298, synch distance 0.011993, refid 'WWVB'
+usndh.edu: stratum 1, offset 0.0019298, synch distance 0.011993, refid 'GPS'
 -------------------------------------------------------------------------------
 
 On each line, the fields are (left to right): the host name, the host

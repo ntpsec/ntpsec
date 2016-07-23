@@ -3,7 +3,6 @@
 # usage: awk -f check.awk clockstats
 #
 # This program works for the following radios:
-# PST/Traconex 1020 WWV reciever
 # Arbiter 1088 GPS receiver
 # Spectracom GPS receiver
 # IRIG audio decoder
@@ -17,30 +16,6 @@ BEGIN {
 # scan all records in file
 #
 {
-	#
-	# select PST/Traconex WWV records
-	# 00:00:37.234  96/07/08/190 O6@0:5281825C07510394
-	#
-	if (NF >= 4 && $3 == "127.127.3.1") {
-		if (substr($6, 14, 4) > "0010")
-			wwv_sync++
-		if (substr($6, 13, 1) == "C")
-			wwv_wwv++
-		if (substr($6, 13, 1) == "H")
-			wwv_wwvh++
-		x = substr($6, 12, 1)
-		if (x == "1")
-			wwv_2.5++
-		else if (x == "2")
-			wwv_5++
-		else if (x == "3")
-			wwv_10++
-		else if (x == "4")
-			wwv_15++
-		else if (x == "5")
-			wwv_20++
-		continue
-	}
 	#
 	# select Arbiter GPS records
 	# 96 190 00:00:37.000 0 V=08 S=44 T=3 P=10.6 E=00
@@ -240,11 +215,6 @@ BEGIN {
 	}
 } END {
 #
-# PST/Traconex WWV summary data
-#
-	if (wwv_wwv + wwv_wwvh > 0)
-		printf "wwv %d, wwvh %d, err %d, MHz (2.5) %d, (5) %d, (10) %d, (15) %d, (20) %d\n", wwv_wwv, wwv_wwvh, wwv_sync, wwv_2.5, wwv_5, wwv_10, wwv_15, wwv_20
-#
 # Arbiter 1088 summary data
 #
 # gps		record count
@@ -266,33 +236,6 @@ BEGIN {
 		}
 	}
 #
-# ensemble summary data
-#
-# ensemble	record count
-# badgps	gps data unavailable
-# badloran	loran data unavailable
-# rms		ensemble rms error (ns)
-# >200		ensemble error >200 ns
-# >100		100 ns < ensemble error < 200 ns
-#
-	if (ensemble_count > 0) {
-		ensemble_mean /= ensemble_count
-		ensemble_rms = sqrt(ensemble_rms / ensemble_count - ensemble_mean * ensemble_mean) * 1e9 
-		printf "ensemble %d, badgps %d, badloran %d, rms %.1f, >200 %d, >100 %d\n", ensemble_count, ensemble_badgps, ensemble_badloran, ensemble_rms, ensemble_200, ensemble_100
-	}
-#
-# wwvb summary data
-#
-# wwvb		record count
-# ?		unsynchronized
-# >1		error > 1 ms
-# >10		error > 10 ms
-# >100		error > 100 ms
-# >500		error > 500 ms
-#
-	if (wwvb_count > 0)
-		printf "wwvb %d, ? %d, >1 %d, >10 %d, >100 %d, >500 %d\n", wwvb_count, wwvb_x, wwvb_a, wwvb_b, wwvb_c, wwvb_d
-#
 # irig summary data
 #
 # irig		record count
@@ -300,29 +243,6 @@ BEGIN {
 #
 	if (irig_count > 0)
 		printf "irig %d, err %d\n", irig_count, irig_error
-#
-# tdata summary data
-#
-# tdata		record count
-# m		M master OK-count, mean level (dB)
-# w		W slave OK-count, mean level (dB)
-# x		X slave OK-count, mean level (dB)
-# y		Y slave OK-count, mean level (dB)
-# z		Z slave OK-count, mean level (dB)
-#
-	if (tdata_count > 0 ) {
-		if (tdata_m > 0)
-			m /= tdata_count
-		if (tdata_x > 0)
-			w /= tdata_count
-		if (tdata_x > 0)
-			x /= tdata_count
-		if (tdata_y > 0)
-			y /= tdata_count
-		if (tdata_z > 0)
-			z /= tdata_count
-		printf "tdata %d, m %d %.1f, w %d %.1f, x %d %.1f, y %d %.1f, z %d %.1f\n", tdata_count, tdata_m, m, tdata_w, w, tdata_x, x, tdata_y, y, tdata_z, z
-	}
 #
 # itf summary data
 #
