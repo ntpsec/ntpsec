@@ -126,12 +126,8 @@ TEST(msyslog, msnprintfTruncate)
 	TEST_ASSERT_EQUAL_STRING(act_buf + 3, undist);
 }
 
-/* NetBSD 7.0, gcc 4.8.4 is OK.
- * FreeBSD 10.0 uses clang
- * NetBSD 6.1.5, gcc 4.5.3 doesn't support pragma inside procedures.
- * FreeBSD 9.3, gcc 4.2.1 doesn't support pragma inside procedures.
- * FreeBSD 9.3, gcc 4.2.1 doesn't support ignoring -Wformat-contains-nul.
- * gcc 4.6 added support for push/pop
+/* gcc 4.6 added support for push/pop
+ * gcc 4.4 added support for -Wformat-contains-nul
  * Put this test last since we can't undo turning off some warnings. */
 #ifdef __clang__
 #  pragma clang diagnostic push
@@ -140,7 +136,7 @@ TEST(msyslog, msnprintfTruncate)
 #if __GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 6)
 # pragma GCC diagnostic push
 #endif
-#ifndef __FreeBSD__
+#if __GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 4)
 # pragma GCC diagnostic ignored "-Wformat-contains-nul"
 #endif
 #pragma GCC diagnostic ignored "-Wformat="
