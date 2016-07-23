@@ -70,43 +70,37 @@ struct as2201unit {
 /*
  * Radio commands to extract statistics
  *
- * A command consists of an ASCII string terminated by a <cr> (\r). The
- * command list consist of a sequence of commands terminated by a null
- * string ("\0"). One command from the list is sent immediately
- * following each received timecode (*toc\r command) and the ASCII
- * strings received from the radio are saved along with the timecode in
- * the clockstats file. Subsequent commands are sent at each timecode,
- * with the last one in the list followed by the first one. The data
- * received from the radio consist of ASCII strings, each terminated by
- * a <cr> (\r) character. The number of strings for each command is
- * specified as the first line of output as an ASCII-encode number. Note
- * that the ETF command requires the Input Buffer Module and the LORAN
- * commands require the LORAN Assist Module. However, if these modules
- * are not installed, the radio and this driver will continue to operate
- * successfuly, but no data will be captured for these commands.
+ * A command consists of an ASCII string terminated by a <cr>
+ * (\r). The command list consist of a sequence of commands terminated
+ * by a null string ("\0"). One command from the list is sent
+ * immediately following each received timecode (*toc\r command) and
+ * the ASCII strings received from the radio are saved along with the
+ * timecode in the clockstats file. Subsequent commands are sent at
+ * each timecode, with the last one in the list followed by the first
+ * one. The data received from the radio consist of ASCII strings,
+ * each terminated by a <cr> (\r) character. The number of strings for
+ * each command is specified as the first line of output as an
+ * ASCII-encode number. Note that the ETF command requires the Input
+ * Buffer Module. However, if this module is not installed, the radio
+ * and this driver will continue to operate successfuly, but no data
+ * will be captured for ETF.
  */
 static char stat_command[][30] = {
 	"ITF\r",		/* internal time/frequency */
 	"ETF\r",		/* external time/frequency */
-	"LORAN ENSEMBLE\r",	/* GPS/LORAN ensemble statistics */
-	"LORAN TDATA\r",	/* LORAN signal data */
 	"ID;OPT;VER\r",		/* model; options; software version */
 
 	"ITF\r",		/* internal time/frequency */
 	"ETF\r",		/* external time/frequency */
-	"LORAN ENSEMBLE\r",	/* GPS/LORAN ensemble statistics */
 	"TRSTAT\r",		/* satellite tracking status */
 	"POS;PPS;PPSOFF\r",	/* position, pps source, offsets */
 
 	"ITF\r",		/* internal time/frequency */
 	"ETF\r",		/* external time/frequency */
-	"LORAN ENSEMBLE\r",	/* GPS/LORAN ensemble statistics */
-	"LORAN TDATA\r",	/* LORAN signal data */
 	"UTC\r",			/* UTC leap info */
 
 	"ITF\r",		/* internal time/frequency */
 	"ETF\r",		/* external time/frequency */
-	"LORAN ENSEMBLE\r",	/* GPS/LORAN ensemble statistics */
 	"TRSTAT\r",		/* satellite tracking status */
 	"OSC;ET;TEMP\r",	/* osc type; tune volts; oven temp */
 	"\0"			/* end of table */

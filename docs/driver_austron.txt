@@ -16,11 +16,11 @@ requirement for it, please make this known to us.
 
 == Description ==
 
-This driver supports the Austron 2200A/2201A GPS/LORAN Synchronized
+This driver supports the Austron 2200A/2201A GPS Synchronized
 Clock and Timing Receiver connected via a serial port. It supports
 several special features of the clock, including the Input Buffer
-Module, Output Buffer Module, IRIG-B Interface Module and LORAN Assist
-Module. It requires the RS232 Buffered Serial Interface module for
+Module, Output Buffer Module, and IRIG-B Interface Module. It
+requires the RS232 Buffered Serial Interface module for
 communication with the driver.
 
 This receiver is capable of a comprehensive and large volume of
