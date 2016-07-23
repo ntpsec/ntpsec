@@ -72,6 +72,9 @@ ntpq/::		Directory containing sources for a utility program to
 		related timekeeping information. This program conforms
 		to Appendix A of the NTP Version 3 Specification RFC 1305.
 
+ntpstats::	Statistics visualization and analysis tools build around
+		the Python ntpstats.py module. Includes ntpviz.
+
 ntptime/:: 	Directory containing a utility for reading and modifying
 		kernel parameters related to the local clock.
 
