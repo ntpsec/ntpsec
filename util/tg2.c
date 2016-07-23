@@ -1,14 +1,12 @@
 /*
- * tg.c generate WWV or IRIG signals for test
+ * tg.c generate IRIG signals for test
  */
 /*
- * This program can generate audio signals that simulate the WWV/H
- * broadcast timecode. Alternatively, it can generate the IRIG-B
+ * This program can generate audio signals that simulate yhe IRIG-B
  * timecode commonly used to synchronize laboratory equipment. It is
- * intended to test the WWV/H driver (refclock_wwv.c) and the IRIG
- * driver (refclock_irig.c) in the NTP driver collection.
+ * the IRIG driver (refclock_irig.c) in the NTP driver collection.
  *
- * Besides testing the drivers themselves, this program can be used to
+ * Besides testing the driver itself, this program can be used to
  * synchronize remote machines over audio transmission lines or program
  * feeds. The program reads the time on the local machine and sets the
  * initial epoch of the signal generator within one millisecond.
@@ -16,34 +14,28 @@
  * is useful when searching for bugs and testing for correct response to
  * a leap second in UTC. Note however, the ultimate accuracy is limited
  * by the intrinsic frequency error of the codec sample clock, which can
- # reach well over 100 PPM.
+ * reach well over 100 PPM.
  *
  * The default is to route generated signals to the line output
  * jack; the s option on the command line routes these signals to the
  * internal speaker as well. The v option controls the speaker volume
- * over the range 0-255. The signal generator by default uses WWV
- * format; the h option switches to WWVH format and the i option
- * switches to IRIG-B format.
+ * over the range 0-255.
  *
  * Once started the program runs continuously. The default initial epoch
  * for the signal generator is read from the computer system clock when
  * the program starts. The y option specifies an alternate epoch using a
  * string yydddhhmmss, where yy is the year of century, ddd the day of
  * year, hh the hour of day and mm the minute of hour. For instance,
- * 1946Z on 1 January 2006 is 060011946. The l option lights the leap
- * warning bit in the WWV/H timecode, so is handy to check for correct
- * behavior at the next leap second epoch. The remaining options are
+ * 1946Z on 1 January 2006 is 060011946. The remaining options are
  * specified below under the Parse Options heading. Most of these are
  * for testing.
  *
- * During operation the program displays the WWV/H timecode (9 digits)
- * or IRIG timecode (20 digits) as each new string is constructed. The
- * display is followed by the BCD binary bits as transmitted. Note that
- * the transmissionorder is low-order first as the frame is processed
- * left to right. For WWV/H The leap warning L preceeds the first bit.
- * For IRIG the on-time marker M preceeds the first (units) bit, so its
- * code is delayed one bit and the next digit (tens) needs only three
- * bits.
+ * During operation the program displays the IRIG timecode (20 digits)
+ * as each new string is constructed. The display is followed by the
+ * BCD binary bits as transmitted. Note that the transmissionorder is
+ * low-order first as the frame is processed left to right.  The IRIG
+ * ton-time marker M preceeds the first (units) bit, so its code is
+ * delayed one bit and the next digit (tens) needs only three bits.
  *
  * The program has been tested with the Sun Blade 1500 running Solaris
  * 10, but not yet with other machines. It uses no special features and
@@ -53,155 +45,6 @@
  * and OpenSolaris, supported in the Linux OSS sound layer, 
  * and still used by the *BSD operating systems. In particular it should work
  * for FreeBSD from version 4.1 on with compatible sound card.
- *
- * Revision 1.28  2007/02/12 23:57:45  dmw
- * v0.23 2007-02-12 dmw:
- * - Changed statistics to include calculated error
- *   of frequency, based on number of added or removed
- *   cycles over time.
- *
- * Revision 1.27  2007/02/09 02:28:59  dmw
- * v0.22 2007-02-08 dmw:
- * - Changed default for rate correction to "enabled", "-j" switch now disables.
- * - Adjusted help message accordingly.
- * - Added "2007" to modifications note at end of help message.
- *
- * Revision 1.26  2007/02/08 03:36:17  dmw
- * v0.21 2007-02-07 dmw:
- * - adjusted strings for shorten and lengthen to make
- *   fit on smaller screen.
- *
- * Revision 1.25  2007/02/01 06:08:09  dmw
- * v0.20 2007-02-01 dmw:
- * - Added periodic display of running time along with legend on IRIG-B, allows tracking how
- *   close IRIG output is to actual clock time.
- *
- * Revision 1.24  2007/01/31 19:24:11  dmw
- * v0.19 2007-01-31 dmw:
- * - Added tracking of how many seconds have been adjusted,
- *   how many cycles added (actually in milliseconds), how
- *   many cycles removed, print periodically if verbose is
- *   active.
- * - Corrected lack of lengthen or shorten of minute & hour
- *   pulses for WWV format.
- *
- * Revision 1.23  2007/01/13 07:09:12  dmw
- * v0.18 2007-01-13 dmw:
- * - added -k option, which allows force of long or short
- *   cycles, to test against IRIG-B decoder.
- *
- * Revision 1.22  2007/01/08 16:27:23  dmw
- * v0.17 2007-01-08 dmw:
- * - Changed -j option to **enable** rate correction, not disable.
- *
- * Revision 1.21  2007/01/08 06:22:36  dmw
- * v0.17 2007-01-08 dmw:
- * - Run stability check versus ongoing system clock (assume NTP correction)
- *   and adjust time code rate to try to correct, if gets too far out of sync.
- *   Disable this algorithm with -j option.
- *
- * Revision 1.20  2006/12/19 04:59:04  dmw
- * v0.16 2006-12-18 dmw
- * - Corrected print of setting of output frequency, always
- *   showed 8000 samples/sec, now as specified on command line.
- * - Modified to reflect new employer Norscan.
- *
- * Revision 1.19  2006/12/19 03:45:38  dmw
- * v0.15 2006-12-18 dmw:
- * - Added count of number of seconds to output then exit,
- *   default zero for forever.
- *
- * Revision 1.18  2006/12/18 05:43:36  dmw
- * v0.14 2006-12-17 dmw:
- * - Corrected WWV(H) signal to leave "tick" sound off of 29th and 59th second of minute.
- * - Adjusted verbose output format for WWV(H).
- *
- * Revision 1.17  2006/12/18 02:31:33  dmw
- * v0.13 2006-12-17 dmw:
- * - Put SPARC code back in, hopefully will work, but I don't have
- *   a SPARC to try it on...
- * - Reworked Verbose mode, different flag to initiate (x not v)
- *   and actually implement turn off of verbosity when this flag used.
- * - Re-claimed v flag for output level.
- * - Note that you must define OSS_MODS to get OSS to compile,
- *   otherwise will expect to compile using old SPARC options, as
- *   it used to be.
- *
- * Revision 1.16  2006/10/26 19:08:43  dmw
- * v0.12 2006-10-26 dmw:
- * - Reversed output binary dump for IRIG, makes it easier to read the numbers.
- *
- * Revision 1.15  2006/10/24 15:57:09  dmw
- * v0.11 2006-10-24 dmw:
- * - another tweak.
- *
- * Revision 1.14  2006/10/24 15:55:53  dmw
- * v0.11 2006-10-24 dmw:
- * - Curses a fix to the fix to the fix of the usaeg.
- *
- * Revision 1.13  2006/10/24 15:53:25  dmw
- * v0.11 (still) 2006-10-24 dmw:
- * - Messed with usage message that's all.
- *
- * Revision 1.12  2006/10/24 15:50:05  dmw
- * v0.11 2006-10-24 dmw:
- * - oops, needed to note "hours" in usage of that offset.
- *
- * Revision 1.11  2006/10/24 15:49:09  dmw
- * v0.11 2006-10-24 dmw:
- * - Added ability to offset actual time sent, from the UTC time
- *   as per the computer.
- *
- * Revision 1.10  2006/10/24 03:25:55  dmw
- * v0.10 2006-10-23 dmw:
- * - Corrected polarity of correction of offset when going into or out of DST.
- * - Ensure that zero offset is always positive (pet peeve).
- *
- * Revision 1.9  2006/10/24 00:00:35  dmw
- * v0.9 2006-10-23 dmw:
- * - Shift time offset when DST in or out.
- *
- * Revision 1.8  2006/10/23 23:49:28  dmw
- * v0.8 2006-10-23 dmw:
- * - made offset of zero default positive.
- *
- * Revision 1.7  2006/10/23 23:44:13  dmw
- * v0.7 2006-10-23 dmw:
- * - Added unmodulated and inverted unmodulated output.
- *
- * Revision 1.6  2006/10/23 18:10:37  dmw
- * v0.6 2006-10-23 dmw:
- * - Cleaned up usage message.
- * - Require at least one option, or prints usage message and exits.
- *
- * Revision 1.5  2006/10/23 16:58:10  dmw
- * v0.5 2006-10-23 dmw:
- * - Finally added a usage message.
- * - Added leap second pending and DST change pending into IEEE 1344.
- * - Default code type is now IRIG-B with IEEE 1344.
- *
- * Revision 1.4  2006/10/23 03:27:25  dmw
- * v0.4 2006-10-22 dmw:
- * - Added leap second addition and deletion.
- * - Added DST changing forward and backward.
- * - Changed date specification to more conventional year, month, and day of month
- *   (rather than day of year).
- *
- * Revision 1.3  2006/10/22 21:04:12  dmw
- * v0.2 2006-10-22 dmw:
- * - Corrected format of legend line.
- *
- * Revision 1.2  2006/10/22 21:01:07  dmw
- * v0.1 2006-10-22 dmw:
- * - Added some more verbose output (as is my style)
- * - Corrected frame format - there were markers in the
- *   middle of frames, now correctly as "zero" bits.
- * - Added header line to show fields of output.
- * - Added straight binary seconds, were not implemented
- *   before.
- * - Added IEEE 1344 with parity.
- *
- *
  */
 #include <stdio.h>
 #include <stdlib.h>
@@ -240,14 +83,9 @@
 #define	SECOND	(8000)			/* one second of 125-us samples */
 #define BUFLNG	(400)			/* buffer size */
 #define	DEVICE	"/dev/audio"	/* default audio device */
-#define	WWV		(0)				/* WWV encoder */
-#define	IRIG	(1)				/* IRIG-B encoder */
 #define	OFF		(0)				/* zero amplitude */
 #define	LOW		(1)				/* low amplitude */
 #define	HIGH	(2)				/* high amplitude */
-#define	DATA0	(200)			/* WWV/H 0 pulse */
-#define	DATA1	(500)			/* WWV/H 1 pulse */
-#define PI		(800)			/* WWV/H PI pulse */
 #define	M2		(2)				/* IRIG 0 pulse */
 #define	M5		(5)				/* IRIG 1 pulse */
 #define	M8		(8)				/* IRIG PI pulse */
@@ -313,90 +151,6 @@ int c6000[] = {1, 63, 78, 86, 93, 98, 101, 104, 107, 110, /* 0-9 */
 struct progx {
 	int sw;			/* case switch number */
 	int arg;		/* argument */
-};
-
-/*
- * Case switch numbers
- */
-#define DATA	(0)		/* send data (0, 1, PI) */
-#define COEF	(1)		/* send BCD bit */
-#define	DEC		(2)		/* decrement to next digit and send PI */
-#define	MIN		(3)		/* minute pulse */
-#define	LEAP	(4)		/* leap warning */
-#define	DUT1	(5)		/* DUT1 bits */
-#define	DST1	(6)		/* DST1 bit */
-#define	DST2	(7)		/* DST2 bit */
-#define DECZ	(8)		/* decrement to next digit and send zero */
-#define DECC	(9)		/* decrement to next digit and send bit */
-#define NODEC	(10)	/* no decerement to next digit, send PI */
-#define DECX	(11)	/* decrement to next digit, send PI, but no tick */
-#define DATAX	(12)	/* send data (0, 1, PI), but no tick */
-
-/*
- * WWV/H format (100-Hz, 9 digits, 1 m frame)
- */
-struct progx progx[] = {
-	{MIN,	800},		/* 0 minute sync pulse */
-	{DATA,	DATA0},		/* 1 */
-	{DST2,	0},		/* 2 DST2 */
-	{LEAP,	0},		/* 3 leap warning */
-	{COEF,	1},		/* 4 1 year units */
-	{COEF,	2},		/* 5 2 */
-	{COEF,	4},		/* 6 4 */
-	{COEF,	8},		/* 7 8 */
-	{DEC,	DATA0},		/* 8 */
-	{DATA,	PI},		/* 9 p1 */
-	{COEF,	1},		/* 10 1 minute units */
-	{COEF,	2},		/* 11 2 */
-	{COEF,	4},		/* 12 4 */
-	{COEF,	8},		/* 13 8 */
-	{DEC,	DATA0},		/* 14 */
-	{COEF,	1},		/* 15 10 minute tens */
-	{COEF,	2},		/* 16 20 */
-	{COEF,	4},		/* 17 40 */
-	{COEF,	8},		/* 18 80 (not used) */
-	{DEC,	PI},		/* 19 p2 */
-	{COEF,	1},		/* 20 1 hour units */
-	{COEF,	2},		/* 21 2 */
-	{COEF,	4},		/* 22 4 */
-	{COEF,	8},		/* 23 8 */
-	{DEC,	DATA0},		/* 24 */
-	{COEF,	1},		/* 25 10 hour tens */
-	{COEF,	2},		/* 26 20 */
-	{COEF,	4},		/* 27 40 (not used) */
-	{COEF,	8},		/* 28 80 (not used) */
-	{DECX,	PI},		/* 29 p3 */
-	{COEF,	1},		/* 30 1 day units */
-	{COEF,	2},		/* 31 2 */
-	{COEF,	4},		/* 32 4 */
-	{COEF,	8},		/* 33 8 */
-	{DEC,	DATA0},		/* 34 not used */
-	{COEF,	1},		/* 35 10 day tens */
-	{COEF,	2},		/* 36 20 */
-	{COEF,	4},		/* 37 40 */
-	{COEF,	8},		/* 38 80 */
-	{DEC,	PI},		/* 39 p4 */
-	{COEF,	1},		/* 40 100 day hundreds */
-	{COEF,	2},		/* 41 200 */
-	{COEF,	4},		/* 42 400 (not used) */
-	{COEF,	8},		/* 43 800 (not used) */
-	{DEC,	DATA0},		/* 44 */
-	{DATA,	DATA0},		/* 45 */
-	{DATA,	DATA0},		/* 46 */
-	{DATA,	DATA0},		/* 47 */
-	{DATA,	DATA0},		/* 48 */
-	{DATA,	PI},		/* 49 p5 */
-	{DUT1,	8},		/* 50 DUT1 sign */
-	{COEF,	1},		/* 51 10 year tens */
-	{COEF,	2},		/* 52 20 */
-	{COEF,	4},		/* 53 40 */
-	{COEF,	8},		/* 54 80 */
-	{DST1,	0},		/* 55 DST1 */
-	{DUT1,	1},		/* 56 0.1 DUT1 fraction */
-	{DUT1,	2},		/* 57 0.2 */
-	{DUT1,	4},		/* 58 0.4 */
-	{DATAX,	PI},		/* 59 p6 */
-	{DATA,	DATA0},		/* 60 leap */
 };
 
 /*
@@ -493,8 +247,6 @@ struct progx progz[] = {
 /*
  * Forward declarations
  */
-void	WWV_Second(int, int);		/* send second */
-void	WWV_SecondNoTick(int, int);	/* send second with no tick */
 void	digit(int);		/* encode digit */
 void	peep(int, int, int);	/* send cycles */
 void	poop(int, int, int, int); /* Generate unmodulated from similar tables */
@@ -514,12 +266,7 @@ void	ReverseString(char *);
 char	buffer[BUFLNG];		/* output buffer */
 int	bufcnt = 0;		/* buffer counter */
 int	fd;			/* audio codec file descriptor */
-int	tone = 1000;		/* WWV sync frequency */
-int HourTone = 1500;	/* WWV hour on-time frequency */
-int	encode = IRIG;		/* encoder select */
-int	leap = 0;		/* leap indicator */
 int	DstFlag = 0;		/* winter/summer time */
-int	dut1 = 0;		/* DUT1 correction (sign, magnitude) */
 int	utc = 0;		/* option epoch */
 bool IrigIncludeYear = false;	/* Whether to send year in first control functions area, between P5 and P6. */
 bool IrigIncludeIeee = false;	/* Whether to send IEEE 1344 control functions extensions between P6 and P8. */
@@ -694,9 +441,9 @@ main(
 	SetSampleRate = SECOND;
 	
 #if	HAVE_SYS_SOUNDCARD_H
-	while ((temp = getopt(argc, argv, "a:b:c:df:g:hHi:jk:l:o:q:r:stu:xy:z?")) != -1) {
+	while ((temp = getopt(argc, argv, "a:b:c:df:g:hHi:jk:l:o:q:r:stxy:z?")) != -1) {
 #else
-	while ((temp = getopt(argc, argv, "a:b:c:df:g:hHi:jk:l:o:q:r:stu:v:xy:z?")) != -1) {
+	while ((temp = getopt(argc, argv, "a:b:c:df:g:hHi:jk:l:o:q:r:u:v:xy:z?")) != -1) {
 #endif
 		switch (temp) {
 
@@ -715,11 +462,11 @@ main(
 			sscanf(optarg, "%d", &SecondsToSend);
 			break;
 
-		case 'd':	/* set DST for summer (WWV/H only) / start with DST active (IRIG) */
+		case 'd':	/* start with DST active (IRIG) */
 			DstFlag++;
 			break;
 
-		case 'f':	/* select format: i=IRIG-98 (default) 2=IRIG-2004 3-IRIG+IEEE-1344 w=WWV(H) */
+		case 'f':	/* select format: i=IRIG-98 (default) 2=IRIG-2004 3-IRIG+IEEE-1344 */
 			sscanf(optarg, "%c", &FormatCharacter);
 			break;
 
@@ -825,22 +572,6 @@ main(
 			sscanf(optarg, "%d", &SetSampleRate);
 			break;
 
-		case 's':	/* set leap warning bit (WWV/H only) */
-			leap++;
-			break;
-
-		case 't':	/* select WWVH sync frequency */
-			tone = 1200;
-			break;
-
-		case 'u':	/* set DUT1 offset (-7 to +7) */
-			sscanf(optarg, "%d", &dut1);
-			if (dut1 < 0)
-				dut1 = abs(dut1);
-			else
-				dut1 |= 0x8;
-			break;
-
 #ifndef  HAVE_SYS_SOUNDCARD_H
 		case 'v':	/* set output level (0-255) */
 			sscanf(optarg, "%d", &level);
@@ -919,28 +650,24 @@ main(
 	switch (FormatCharacter) {
 	case 'i': case 'I':
 		printf ("\nFormat is IRIG-1998 (no year coded)...\n\n");
-		encode = IRIG;
 		IrigIncludeYear = false;
 		IrigIncludeIeee = false;
 		break;
 
 	case '2':
 		printf ("\nFormat is IRIG-2004 (BCD year coded)...\n\n");
-		encode = IRIG;
 		IrigIncludeYear = true;
 		IrigIncludeIeee = false;
 		break;
 
 	case '3':
 		printf ("\nFormat is IRIG with IEEE-1344 (BCD year coded, and more control functions)...\n\n");
-		encode = IRIG;
 		IrigIncludeYear = true;
 		IrigIncludeIeee = true;
 		break;
 
 	case '4':
 		printf ("\nFormat is unmodulated IRIG with IEEE-1344 (BCD year coded, and more control functions)...\n\n");
-		encode = IRIG;
 		IrigIncludeYear = true;
 		IrigIncludeIeee = true;
 
@@ -950,17 +677,11 @@ main(
 
 	case '5':
 		printf ("\nFormat is inverted unmodulated IRIG with IEEE-1344 (BCD year coded, and more control functions)...\n\n");
-		encode = IRIG;
 		IrigIncludeYear = true;
 		IrigIncludeIeee = true;
 
 		Unmodulated = true;
 		UnmodulatedInverted = true;
-		break;
-
-	case 'w': case 'W':
-		printf ("\nFormat is WWV(H)...\n\n");
-		encode = WWV;
 		break;
 
 	default:
@@ -1089,72 +810,35 @@ main(
 	StraightBinarySeconds = Second + (Minute * SECONDS_PER_MINUTE) + (Hour * SECONDS_PER_HOUR);
 
 	memset(code, 0, sizeof(code));
-	switch (encode) {
-
-	/*
-	 * For WWV/H and default time, carefully set the signal
-	 * generator seconds number to agree with the current time.
-	 */
-	case WWV:
-		printf("WWV time signal, starting point:\n");
-		printf(" Year = %02d, Day of year = %03d, Time = %02d:%02d:%02d, Minute tone = %d Hz, Hour tone = %d Hz.\n",
-		    Year, DayOfYear, Hour, Minute, Second, tone, HourTone);
-		snprintf(code, sizeof(code), "%01d%03d%02d%02d%01d",
-		    Year / 10, DayOfYear, Hour, Minute, Year % 10);
-		if  (Verbose)
+	printf ("IRIG-B time signal, starting point:\n");
+	printf (" Year = %02d, Day of year = %03d, Time = %02d:%02d:%02d, Straight binary seconds (SBS) = %05d / 0x%04X.\n",
+	    Year, DayOfYear, Hour, Minute, Second, StraightBinarySeconds, StraightBinarySeconds);
+	printf ("\n");
+	if  (Verbose)
+	    {
+	printf ("Codes: \".\" = marker/position indicator, \"-\" = zero dummy bit, \"0\" = zero bit, \"1\" = one bit.\n");
+		if  ((EnableRateCorrection) || (AddCycle) || (RemoveCycle))
 			{
-		    printf("\n Year = %2.2d, Day of year = %3d, Time = %2.2d:%2.2d:%2.2d, Code = %s", 
-				Year, DayOfYear, Hour, Minute, Second, code);
-
-				if  ((EnableRateCorrection) || (RemoveCycle) || (AddCycle))
-				printf (", CountOfSecondsSent = %d, TotalCyclesAdded = %d, TotalCyclesRemoved = %d\n", CountOfSecondsSent, TotalCyclesAdded, TotalCyclesRemoved);
-			else
-				printf ("\n");
+			printf ("       \"o\" = short zero, \"*\" = long zero, \"x\" = short one, \"+\" = long one.\n");
 			}
-
-		ptr = 8;
-		for (BitNumber = 0; BitNumber <= Second; BitNumber++) {
-			if (progx[BitNumber].sw == DEC)
-				ptr--;
-		}
-		break;
-
-	/*
-	 * For IRIG the signal generator runs every second, so requires
-	 * no additional alignment.
-	 */
-	case IRIG:
-		printf ("IRIG-B time signal, starting point:\n");
-		printf (" Year = %02d, Day of year = %03d, Time = %02d:%02d:%02d, Straight binary seconds (SBS) = %05d / 0x%04X.\n",
-		    Year, DayOfYear, Hour, Minute, Second, StraightBinarySeconds, StraightBinarySeconds);
-		printf ("\n");
-		if  (Verbose)
-		    {
-    		printf ("Codes: \".\" = marker/position indicator, \"-\" = zero dummy bit, \"0\" = zero bit, \"1\" = one bit.\n");
-			if  ((EnableRateCorrection) || (AddCycle) || (RemoveCycle))
-				{
-				printf ("       \"o\" = short zero, \"*\" = long zero, \"x\" = short one, \"+\" = long one.\n");
-				}
-	    	printf ("Numerical values are time order reversed in output to make it easier to read.\n");
-    		/*                 111111111122222222223333333333444444444455555555556666666666777777777788888888889999999999 */
-	    	/*       0123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789 */
-		    printf ("\n");
-    		printf ("Legend of output codes:\n");
-	    	//printf ("\n");
-		    //printf ("|  StraightBinSecs  | IEEE_1344_Control |   Year  |    Day_of_Year    |  Hours  | Minutes |Seconds |\n");
-    		//printf ("|  ---------------  | ----------------- |   ----  |    -----------    |  -----  | ------- |------- |\n");
-	    	//printf ("|                   |                   |         |                   |         |         |        |\n");
-	    	}
-		break;
+	printf ("Numerical values are time order reversed in output to make it easier to read.\n");
+	/*                 111111111122222222223333333333444444444455555555556666666666777777777788888888889999999999 */
+	/*       0123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789 */
+	    printf ("\n");
+	printf ("Legend of output codes:\n");
+	//printf ("\n");
+	    //printf ("|  StraightBinSecs  | IEEE_1344_Control |   Year  |    Day_of_Year    |  Hours  | Minutes |Seconds |\n");
+	//printf ("|  ---------------  | ----------------- |   ----  |    -----------    |  -----  | ------- |------- |\n");
+	//printf ("|                   |                   |         |                   |         |         |        |\n");
 	}
 
 	/*
 	 * Run the signal generator to generate new timecode strings
-	 * once per minute for WWV/H and once per second for IRIG.
+	 * once per second for IRIG.
 	 */
 	for (CountOfSecondsSent=0; ((SecondsToSend==0) || (CountOfSecondsSent<SecondsToSend)); CountOfSecondsSent++)
 		{
-		if  ((encode == IRIG) && (((Second % 20) == 0) || (CountOfSecondsSent == 0)))
+		if  ((((Second % 20) == 0) || (CountOfSecondsSent == 0)))
 			{
 	    	printf ("\n");
 
@@ -1362,37 +1046,8 @@ main(
 			 * At year rollover check for leap second.
 			 */
 			if (DayOfYear >= (Year & 0x3 ? 366 : 367)) {
-				if (leap) {
-					WWV_Second(DATA0, RateCorrection);
-					if  (Verbose)
-					    printf("\nLeap!");
-					leap = 0;
-				}
 				DayOfYear = 1;
 				Year++;
-			}
-			if (encode == WWV) {
-				snprintf(code, sizeof(code),
-				    "%01d%03d%02d%02d%01d", Year / 10,
-				    DayOfYear, Hour, Minute, Year % 10);
-				if  (Verbose)
-				    printf("\n Year = %2.2d, Day of year = %3d, Time = %2.2d:%2.2d:%2.2d, Code = %s", 
-						Year, DayOfYear, Hour, Minute, Second, code);
-
-				if  ((EnableRateCorrection) || (RemoveCycle) || (AddCycle))
-					{
-					printf (", CountOfSecondsSent = %d, TotalCyclesAdded = %d, TotalCyclesRemoved = %d\n", CountOfSecondsSent, TotalCyclesAdded, TotalCyclesRemoved);
-					if  ((CountOfSecondsSent != 0) && ((TotalCyclesAdded != 0) || (TotalCyclesRemoved != 0)))
-						{
-						RatioError = ((float) (TotalCyclesAdded - TotalCyclesRemoved)) / (1000.0 * (float) CountOfSecondsSent);
-						printf (" Adjusted by %2.1f%%, apparent send frequency is %4.2f Hz not %d Hz.\n\n", 
-										RatioError*100.0, (1.0+RatioError)*((float) SetSampleRate), SetSampleRate);
-						}
-					}
-				else
-					printf ("\n");
-
-				ptr = 8;
 			}
 		}	/* End of "if  (Second == 0)" */
 
@@ -1424,626 +1079,384 @@ main(
 
 		StraightBinarySeconds = Second + (Minute * SECONDS_PER_MINUTE) + (Hour * SECONDS_PER_HOUR);
 
-		if (encode == IRIG) {
-			if  (IrigIncludeIeee)
-				{
-				if  ((OffsetOnes == 0) && (OffsetHalf == 0))
-					OffsetSignBit = 0;
+		if  (IrigIncludeIeee)
+			{
+			if  ((OffsetOnes == 0) && (OffsetHalf == 0))
+				OffsetSignBit = 0;
 
-				ControlFunctions = (LeapSecondPending == 0 ? 0x00000 : 0x00001) | (LeapSecondPolarity == 0 ? 0x00000 : 0x00002)
-						| (DstPendingFlag == 0 ? 0x00000 : 0x00004) | (DstFlag == 0 ? 0x00000 : 0x00008)
-						| (OffsetSignBit == 0 ? 0x00000 : 0x00010)  | ((OffsetOnes & 0x0F) << 5)           | (OffsetHalf == 0 ? 0x00000 : 0x00200)
-						| ((TimeQuality & 0x0F) << 10);
-				/* if  (Verbose)
-				        printf ("\nDstFlag = %d, OffsetSignBit = %d, OffsetOnes = %d, OffsetHalf = %d, TimeQuality = 0x%1.1X ==> ControlFunctions = 0x%5.5X...",
-						    DstFlag, OffsetSignBit, OffsetOnes, OffsetHalf, TimeQuality, ControlFunctions);
-				*/
-				}
-			else
-				ControlFunctions = 0;
-
-			/*
-						      YearDay HourMin Sec
-			snprintf(code, sizeof(code), "%04x%04d%06d%02d%02d%02d",
-				0, Year, DayOfYear, Hour, Minute, Second);
+			ControlFunctions = (LeapSecondPending == 0 ? 0x00000 : 0x00001) | (LeapSecondPolarity == 0 ? 0x00000 : 0x00002)
+					| (DstPendingFlag == 0 ? 0x00000 : 0x00004) | (DstFlag == 0 ? 0x00000 : 0x00008)
+					| (OffsetSignBit == 0 ? 0x00000 : 0x00010)  | ((OffsetOnes & 0x0F) << 5)           | (OffsetHalf == 0 ? 0x00000 : 0x00200)
+					| ((TimeQuality & 0x0F) << 10);
+			/* if  (Verbose)
+				printf ("\nDstFlag = %d, OffsetSignBit = %d, OffsetOnes = %d, OffsetHalf = %d, TimeQuality = 0x%1.1X ==> ControlFunctions = 0x%5.5X...",
+					    DstFlag, OffsetSignBit, OffsetOnes, OffsetHalf, TimeQuality, ControlFunctions);
 			*/
-			if  (IrigIncludeYear) {
-				snprintf(ParityString, sizeof(ParityString),
-				    "%04X%02d%04d%02d%02d%02d",
-				    ControlFunctions & 0x7FFF, Year,
-				    DayOfYear, Hour, Minute, Second);
-			} else {
-				snprintf(ParityString, sizeof(ParityString),
-				    "%04X%02d%04d%02d%02d%02d",
-				    ControlFunctions & 0x7FFF,
-				    0, DayOfYear, Hour, Minute, Second);
 			}
-
-			if  (IrigIncludeIeee)
-				{
-				ParitySum = 0;
-				for (StringPointer=ParityString; *StringPointer!=NUL; StringPointer++)
-					{
-					switch (*StringPointer)
-						{
-						case '1':
-						case '2':
-						case '4':
-						case '8':
-							ParitySum += 1;
-							break;
-
-						case '3':
-						case '5':
-						case '6':
-						case '9':
-						case 'A': case 'a':
-						case 'C': case 'c':
-							ParitySum += 2;
-							break;
-
-						case '7':
-						case 'B': case 'b':
-						case 'D': case 'd':
-						case 'E': case 'e':
-							ParitySum += 3;
-							break;
-
-						case 'F': case 'f':
-							ParitySum += 4;
-							break;
-						}
-					}
-
-				if  ((ParitySum & 0x01) == 0x01)
-					ParityValue = 0x01;
-				else
-					ParityValue = 0;
-				}
-			else
-				ParityValue = 0;
-
-			ControlFunctions |= ((ParityValue & 0x01) << 14);
-
-			if  (IrigIncludeYear) {
-				snprintf(code, sizeof(code),
-				    /* YearDay HourMin Sec */
-				    "%05X%05X%02d%04d%02d%02d%02d",
-				    StraightBinarySeconds,
-				    ControlFunctions, Year, DayOfYear,
-				    Hour, Minute, Second);
-			} else {
-				snprintf(code, sizeof(code),
-				    /* YearDay HourMin Sec */
-				    "%05X%05X%02d%04d%02d%02d%02d",
-				    StraightBinarySeconds,
-				    ControlFunctions, 0, DayOfYear,
-				    Hour, Minute, Second);
-			}
-
-			if  (Debug)
-				printf("\nCode string: %s, ParityString = %s, ParitySum = 0x%2.2X, ParityValue = %d, DstFlag = %d...\n", code, ParityString, ParitySum, ParityValue, DstFlag);
-
-			ptr = strlen(code)-1;
-		}
+		else
+			ControlFunctions = 0;
 
 		/*
-		 * Generate data for the second
-		 */
-		switch (encode) {
+					      YearDay HourMin Sec
+		snprintf(code, sizeof(code), "%04x%04d%06d%02d%02d%02d",
+			0, Year, DayOfYear, Hour, Minute, Second);
+		*/
+		if  (IrigIncludeYear) {
+			snprintf(ParityString, sizeof(ParityString),
+			    "%04X%02d%04d%02d%02d%02d",
+			    ControlFunctions & 0x7FFF, Year,
+			    DayOfYear, Hour, Minute, Second);
+		} else {
+			snprintf(ParityString, sizeof(ParityString),
+			    "%04X%02d%04d%02d%02d%02d",
+			    ControlFunctions & 0x7FFF,
+			    0, DayOfYear, Hour, Minute, Second);
+		}
+
+		if  (IrigIncludeIeee)
+			{
+			ParitySum = 0;
+			for (StringPointer=ParityString; *StringPointer!=NUL; StringPointer++)
+				{
+				switch (*StringPointer)
+					{
+					case '1':
+					case '2':
+					case '4':
+					case '8':
+						ParitySum += 1;
+						break;
+
+					case '3':
+					case '5':
+					case '6':
+					case '9':
+					case 'A': case 'a':
+					case 'C': case 'c':
+						ParitySum += 2;
+						break;
+
+					case '7':
+					case 'B': case 'b':
+					case 'D': case 'd':
+					case 'E': case 'e':
+						ParitySum += 3;
+						break;
+
+					case 'F': case 'f':
+						ParitySum += 4;
+						break;
+					}
+				}
+
+			if  ((ParitySum & 0x01) == 0x01)
+				ParityValue = 0x01;
+			else
+				ParityValue = 0;
+			}
+		else
+			ParityValue = 0;
+
+		ControlFunctions |= ((ParityValue & 0x01) << 14);
+
+		if  (IrigIncludeYear) {
+			snprintf(code, sizeof(code),
+			    /* YearDay HourMin Sec */
+			    "%05X%05X%02d%04d%02d%02d%02d",
+			    StraightBinarySeconds,
+			    ControlFunctions, Year, DayOfYear,
+			    Hour, Minute, Second);
+		} else {
+			snprintf(code, sizeof(code),
+			    /* YearDay HourMin Sec */
+			    "%05X%05X%02d%04d%02d%02d%02d",
+			    StraightBinarySeconds,
+			    ControlFunctions, 0, DayOfYear,
+			    Hour, Minute, Second);
+		}
+
+		if  (Debug)
+			printf("\nCode string: %s, ParityString = %s, ParitySum = 0x%2.2X, ParityValue = %d, DstFlag = %d...\n", code, ParityString, ParitySum, ParityValue, DstFlag);
+
+		ptr = strlen(code)-1;
 
 		/*
 		 * The IRIG second consists of 20 BCD digits of width-
 		 * modulateod pulses at 2, 5 and 8 ms and modulated 50
 		 * percent on the 1000-Hz carrier.
 		 */
-		case IRIG:
-			/* Initialize the output string */
-			OutputDataString[0] = '\0';
+		/* Initialize the output string */
+		OutputDataString[0] = '\0';
 
-			for (BitNumber = 0; BitNumber < 100; BitNumber++) {
-				FrameNumber = (BitNumber/10) + 1;
-				switch (FrameNumber)
+		for (BitNumber = 0; BitNumber < 100; BitNumber++) {
+			FrameNumber = (BitNumber/10) + 1;
+			switch (FrameNumber)
+				{
+				case 1:
+					/* bits 0 to 9, first frame */
+					sw  = progz[BitNumber % 10].sw;
+					arg = progz[BitNumber % 10].arg;
+					break;
+
+				case 2:
+				case 3:
+				case 4:
+				case 5:
+				case 6:
+					/* bits 10 to 59, second to sixth frame */
+					sw  = progy[BitNumber % 10].sw;
+					arg = progy[BitNumber % 10].arg;
+					break;
+
+				case 7:
+					/* bits 60 to 69, seventh frame */
+					sw  = progw[BitNumber % 10].sw;
+					arg = progw[BitNumber % 10].arg;
+					break;
+
+				case 8:
+					/* bits 70 to 79, eighth frame */
+					sw  = progv[BitNumber % 10].sw;
+					arg = progv[BitNumber % 10].arg;
+					break;
+
+				case 9:
+					/* bits 80 to 89, ninth frame */
+					sw  = progw[BitNumber % 10].sw;
+					arg = progw[BitNumber % 10].arg;
+					break;
+
+				case 10:
+					/* bits 90 to 99, tenth frame */
+					sw  = progu[BitNumber % 10].sw;
+					arg = progu[BitNumber % 10].arg;
+					break;
+
+				default:
+					/* , Unexpected values of FrameNumber */
+					printf ("\n\nUnexpected value of FrameNumber = %d, cannot parse, aborting...\n\n", FrameNumber);
+					exit (-1);
+					break;
+				}
+
+			switch(sw) {
+
+			case DECC:	/* decrement pointer and send bit. */
+				ptr--;
+			case COEF:	/* send BCD bit */
+				AsciiValue = toupper((int)code[ptr]);
+				HexValue   = isdigit((int)AsciiValue) ? AsciiValue - '0' : (AsciiValue - 'A')+10;
+				/* if  (Debug) {
+					if  (ptr != OldPtr) {
+					if  (Verbose)
+					    printf("\n(%c->%X)", AsciiValue, HexValue);
+					OldPtr = ptr;
+					}
+				}
+				*/
+				// OK, adjust all unused bits in hundreds of days.
+				if  ((FrameNumber == 5) && ((BitNumber % 10) > 1))
 					{
-					case 1:
-						/* bits 0 to 9, first frame */
-						sw  = progz[BitNumber % 10].sw;
-						arg = progz[BitNumber % 10].arg;
-						break;
-
-					case 2:
-					case 3:
-					case 4:
-					case 5:
-					case 6:
-						/* bits 10 to 59, second to sixth frame */
-						sw  = progy[BitNumber % 10].sw;
-						arg = progy[BitNumber % 10].arg;
-						break;
-
-					case 7:
-						/* bits 60 to 69, seventh frame */
-						sw  = progw[BitNumber % 10].sw;
-						arg = progw[BitNumber % 10].arg;
-						break;
-
-					case 8:
-						/* bits 70 to 79, eighth frame */
-						sw  = progv[BitNumber % 10].sw;
-						arg = progv[BitNumber % 10].arg;
-						break;
-
-					case 9:
-						/* bits 80 to 89, ninth frame */
-						sw  = progw[BitNumber % 10].sw;
-						arg = progw[BitNumber % 10].arg;
-						break;
-
-					case 10:
-						/* bits 90 to 99, tenth frame */
-						sw  = progu[BitNumber % 10].sw;
-						arg = progu[BitNumber % 10].arg;
-						break;
-
-					default:
-						/* , Unexpected values of FrameNumber */
-						printf ("\n\nUnexpected value of FrameNumber = %d, cannot parse, aborting...\n\n", FrameNumber);
-						exit (-1);
-						break;
-					}
-
-				switch(sw) {
-
-				case DECC:	/* decrement pointer and send bit. */
-					ptr--;
-				case COEF:	/* send BCD bit */
-					AsciiValue = toupper((int)code[ptr]);
-					HexValue   = isdigit((int)AsciiValue) ? AsciiValue - '0' : (AsciiValue - 'A')+10;
-					/* if  (Debug) {
-						if  (ptr != OldPtr) {
-						if  (Verbose)
-						    printf("\n(%c->%X)", AsciiValue, HexValue);
-						OldPtr = ptr;
-						}
-					}
-					*/
-					// OK, adjust all unused bits in hundreds of days.
-					if  ((FrameNumber == 5) && ((BitNumber % 10) > 1))
-						{
-						if  (RateCorrection < 0)
-							{	// Need to remove cycles to catch up.
-							if  ((HexValue & arg) != 0) 
-								{
-								if  (Unmodulated)
-									{
-									poop(M5, 1000, HIGH, UnmodulatedInverted);
-									poop(M5-1, 1000, LOW,  UnmodulatedInverted);
-
-									TotalCyclesRemoved += 1;
-									}
-								else
-									{
-									peep(M5, 1000, HIGH);
-									peep(M5-1, 1000, LOW);
-
-									TotalCyclesRemoved += 1;
-									}
-								strlcat(OutputDataString, "x", OUTPUT_DATA_STRING_LENGTH);
-								}
-							else 
-								{
-								if	(Unmodulated)
-									{
-									poop(M2, 1000, HIGH, UnmodulatedInverted);
-									poop(M8-1, 1000, LOW,  UnmodulatedInverted);
-
-									TotalCyclesRemoved += 1;
-									}
-								else
-									{
-									peep(M2, 1000, HIGH);
-									peep(M8-1, 1000, LOW);
-
-									TotalCyclesRemoved += 1;
-									}
-								strlcat(OutputDataString, "o", OUTPUT_DATA_STRING_LENGTH);
-								}
-							}	// End of true clause for "if  (RateCorrection < 0)"
-						else
-							{	// Else clause for "if  (RateCorrection < 0)"
-							if  (RateCorrection > 0)
-								{	// Need to add cycles to slow back down.
-								if  ((HexValue & arg) != 0) 
-									{
-									if  (Unmodulated)
-										{
-										poop(M5, 1000, HIGH, UnmodulatedInverted);
-										poop(M5+1, 1000, LOW,  UnmodulatedInverted);
-
-										TotalCyclesAdded += 1;
-										}
-									else
-										{
-										peep(M5, 1000, HIGH);
-										peep(M5+1, 1000, LOW);
-
-										TotalCyclesAdded += 1;
-										}
-									strlcat(OutputDataString, "+", OUTPUT_DATA_STRING_LENGTH);
-									}
-								else 
-									{
-									if	(Unmodulated)
-										{
-										poop(M2, 1000, HIGH, UnmodulatedInverted);
-										poop(M8+1, 1000, LOW,  UnmodulatedInverted);
-
-										TotalCyclesAdded += 1;
-										}
-									else
-										{
-										peep(M2, 1000, HIGH);
-										peep(M8+1, 1000, LOW);
-
-										TotalCyclesAdded += 1;
-										}
-									strlcat(OutputDataString, "*", OUTPUT_DATA_STRING_LENGTH);
-									}
-								}	// End of true clause for "if  (RateCorrection > 0)"
-							else
-								{	// Else clause for "if  (RateCorrection > 0)"
-								// Rate is OK, just do what you feel!
-								if  ((HexValue & arg) != 0) 
-									{
-									if  (Unmodulated)
-										{
-										poop(M5, 1000, HIGH, UnmodulatedInverted);
-										poop(M5, 1000, LOW,  UnmodulatedInverted);
-										}
-									else
-										{
-										peep(M5, 1000, HIGH);
-										peep(M5, 1000, LOW);
-										}
-									strlcat(OutputDataString, "1", OUTPUT_DATA_STRING_LENGTH);
-									}
-								else 
-									{
-									if	(Unmodulated)
-										{
-										poop(M2, 1000, HIGH, UnmodulatedInverted);
-										poop(M8, 1000, LOW,  UnmodulatedInverted);
-										}
-									else
-										{
-										peep(M2, 1000, HIGH);
-										peep(M8, 1000, LOW);
-										}
-									strlcat(OutputDataString, "0", OUTPUT_DATA_STRING_LENGTH);
-									}
-								}	// End of else clause for "if  (RateCorrection > 0)"
-							}	// End of else claues for "if  (RateCorrection < 0)"
-						}	// End of true clause for "if  ((FrameNumber == 5) && (BitNumber == 8))"
-					else
-						{	// Else clause for "if  ((FrameNumber == 5) && (BitNumber == 8))"
+					if  (RateCorrection < 0)
+						{	// Need to remove cycles to catch up.
 						if  ((HexValue & arg) != 0) 
 							{
 							if  (Unmodulated)
 								{
 								poop(M5, 1000, HIGH, UnmodulatedInverted);
-								poop(M5, 1000, LOW,  UnmodulatedInverted);
+								poop(M5-1, 1000, LOW,  UnmodulatedInverted);
+
+								TotalCyclesRemoved += 1;
 								}
 							else
 								{
 								peep(M5, 1000, HIGH);
-								peep(M5, 1000, LOW);
+								peep(M5-1, 1000, LOW);
+
+								TotalCyclesRemoved += 1;
 								}
-							strlcat(OutputDataString, "1", OUTPUT_DATA_STRING_LENGTH);
+							strlcat(OutputDataString, "x", OUTPUT_DATA_STRING_LENGTH);
 							}
 						else 
 							{
 							if	(Unmodulated)
 								{
 								poop(M2, 1000, HIGH, UnmodulatedInverted);
-								poop(M8, 1000, LOW,  UnmodulatedInverted);
+								poop(M8-1, 1000, LOW,  UnmodulatedInverted);
+
+								TotalCyclesRemoved += 1;
 								}
 							else
 								{
 								peep(M2, 1000, HIGH);
-								peep(M8, 1000, LOW);
+								peep(M8-1, 1000, LOW);
+
+								TotalCyclesRemoved += 1;
 								}
-							strlcat(OutputDataString, "0", OUTPUT_DATA_STRING_LENGTH);
+							strlcat(OutputDataString, "o", OUTPUT_DATA_STRING_LENGTH);
 							}
-						} // end of else clause for "if  ((FrameNumber == 5) && (BitNumber == 8))"
-					break;
-
-				case DECZ:	/* decrement pointer and send zero bit */
-					ptr--;
-					if	(Unmodulated)
-						{
-						poop(M2, 1000, HIGH, UnmodulatedInverted);
-						poop(M8, 1000, LOW,  UnmodulatedInverted);
-						}
+						}	// End of true clause for "if  (RateCorrection < 0)"
 					else
-						{
-						peep(M2, 1000, HIGH);
-						peep(M8, 1000, LOW);
-						}
-					strlcat(OutputDataString, "-", OUTPUT_DATA_STRING_LENGTH);
-					break;
+						{	// Else clause for "if  (RateCorrection < 0)"
+						if  (RateCorrection > 0)
+							{	// Need to add cycles to slow back down.
+							if  ((HexValue & arg) != 0) 
+								{
+								if  (Unmodulated)
+									{
+									poop(M5, 1000, HIGH, UnmodulatedInverted);
+									poop(M5+1, 1000, LOW,  UnmodulatedInverted);
 
-				case DEC:	/* send marker/position indicator IM/PI bit */
-					ptr--;
-				case NODEC:	/* send marker/position indicator IM/PI bit but no decrement pointer */
-				case MIN:	/* send "second start" marker/position indicator IM/PI bit */
-					if  (Unmodulated)
-						{
-						poop(arg,      1000, HIGH, UnmodulatedInverted);
-						poop(10 - arg, 1000, LOW,  UnmodulatedInverted);
-						}
-					else
-						{
-						peep(arg,      1000, HIGH);
-						peep(10 - arg, 1000, LOW);
-						}
-					strlcat(OutputDataString, ".", OUTPUT_DATA_STRING_LENGTH);
-					break;
+									TotalCyclesAdded += 1;
+									}
+								else
+									{
+									peep(M5, 1000, HIGH);
+									peep(M5+1, 1000, LOW);
 
-				default:
-					printf ("\n\nUnknown state machine value \"%d\", unable to continue, aborting...\n\n", sw);
-					exit (-1);
-					break;
-				}
-				if (ptr < 0)
-					break;
+									TotalCyclesAdded += 1;
+									}
+								strlcat(OutputDataString, "+", OUTPUT_DATA_STRING_LENGTH);
+								}
+							else 
+								{
+								if	(Unmodulated)
+									{
+									poop(M2, 1000, HIGH, UnmodulatedInverted);
+									poop(M8+1, 1000, LOW,  UnmodulatedInverted);
+
+									TotalCyclesAdded += 1;
+									}
+								else
+									{
+									peep(M2, 1000, HIGH);
+									peep(M8+1, 1000, LOW);
+
+									TotalCyclesAdded += 1;
+									}
+								strlcat(OutputDataString, "*", OUTPUT_DATA_STRING_LENGTH);
+								}
+							}	// End of true clause for "if  (RateCorrection > 0)"
+						else
+							{	// Else clause for "if  (RateCorrection > 0)"
+							// Rate is OK, just do what you feel!
+							if  ((HexValue & arg) != 0) 
+								{
+								if  (Unmodulated)
+									{
+									poop(M5, 1000, HIGH, UnmodulatedInverted);
+									poop(M5, 1000, LOW,  UnmodulatedInverted);
+									}
+								else
+									{
+									peep(M5, 1000, HIGH);
+									peep(M5, 1000, LOW);
+									}
+								strlcat(OutputDataString, "1", OUTPUT_DATA_STRING_LENGTH);
+								}
+							else 
+								{
+								if	(Unmodulated)
+									{
+									poop(M2, 1000, HIGH, UnmodulatedInverted);
+									poop(M8, 1000, LOW,  UnmodulatedInverted);
+									}
+								else
+									{
+									peep(M2, 1000, HIGH);
+									peep(M8, 1000, LOW);
+									}
+								strlcat(OutputDataString, "0", OUTPUT_DATA_STRING_LENGTH);
+								}
+							}	// End of else clause for "if  (RateCorrection > 0)"
+						}	// End of else claues for "if  (RateCorrection < 0)"
+					}	// End of true clause for "if  ((FrameNumber == 5) && (BitNumber == 8))"
+				else
+					{	// Else clause for "if  ((FrameNumber == 5) && (BitNumber == 8))"
+					if  ((HexValue & arg) != 0) 
+						{
+						if  (Unmodulated)
+							{
+							poop(M5, 1000, HIGH, UnmodulatedInverted);
+							poop(M5, 1000, LOW,  UnmodulatedInverted);
+							}
+						else
+							{
+							peep(M5, 1000, HIGH);
+							peep(M5, 1000, LOW);
+							}
+						strlcat(OutputDataString, "1", OUTPUT_DATA_STRING_LENGTH);
+						}
+					else 
+						{
+						if	(Unmodulated)
+							{
+							poop(M2, 1000, HIGH, UnmodulatedInverted);
+							poop(M8, 1000, LOW,  UnmodulatedInverted);
+							}
+						else
+							{
+							peep(M2, 1000, HIGH);
+							peep(M8, 1000, LOW);
+							}
+						strlcat(OutputDataString, "0", OUTPUT_DATA_STRING_LENGTH);
+						}
+					} // end of else clause for "if  ((FrameNumber == 5) && (BitNumber == 8))"
+				break;
+
+			case DECZ:	/* decrement pointer and send zero bit */
+				ptr--;
+				if	(Unmodulated)
+					{
+					poop(M2, 1000, HIGH, UnmodulatedInverted);
+					poop(M8, 1000, LOW,  UnmodulatedInverted);
+					}
+				else
+					{
+					peep(M2, 1000, HIGH);
+					peep(M8, 1000, LOW);
+					}
+				strlcat(OutputDataString, "-", OUTPUT_DATA_STRING_LENGTH);
+				break;
+
+			case DEC:	/* send marker/position indicator IM/PI bit */
+				ptr--;
+			case NODEC:	/* send marker/position indicator IM/PI bit but no decrement pointer */
+			case MIN:	/* send "second start" marker/position indicator IM/PI bit */
+				if  (Unmodulated)
+					{
+					poop(arg,      1000, HIGH, UnmodulatedInverted);
+					poop(10 - arg, 1000, LOW,  UnmodulatedInverted);
+					}
+				else
+					{
+					peep(arg,      1000, HIGH);
+					peep(10 - arg, 1000, LOW);
+					}
+				strlcat(OutputDataString, ".", OUTPUT_DATA_STRING_LENGTH);
+				break;
+
+			default:
+				printf ("\n\nUnknown state machine value \"%d\", unable to continue, aborting...\n\n", sw);
+				exit (-1);
+				break;
 			}
-			ReverseString ( OutputDataString );
-			if  (Verbose)
+			if (ptr < 0)
+				break;
+		}
+		ReverseString ( OutputDataString );
+		if  (Verbose)
+			{
+		printf("%s", OutputDataString);
+			if  (RateCorrection > 0)
+				printf(" fast\n");
+			else
 				{
-    			printf("%s", OutputDataString);
-				if  (RateCorrection > 0)
-					printf(" fast\n");
+				if  (RateCorrection < 0)
+					printf (" slow\n");
 				else
-					{
-					if  (RateCorrection < 0)
-						printf (" slow\n");
-					else
-						printf ("\n");
-					}
+					printf ("\n");
 				}
-			break;
-
-		/*
-		 * The WWV/H second consists of 9 BCD digits of width-
-		 * modulateod pulses 200, 500 and 800 ms at 100-Hz.
-		 */
-		case WWV:
-			sw = progx[Second].sw;
-			arg = progx[Second].arg;
-			switch(sw) {
-
-			case DATA:		/* send data bit */
-				WWV_Second(arg, RateCorrection);
-				if  (Verbose)
-					{
-					if  (arg == DATA0)
-						printf ("0");
-					else
-						{
-						if  (arg == DATA1)
-							printf ("1");
-						else
-							{
-							if  (arg == PI)
-								printf ("P");
-							else
-								printf ("?");
-							}
-						}
-					}
-				break;
-
-			case DATAX:		/* send data bit */
-				WWV_SecondNoTick(arg, RateCorrection);
-				if  (Verbose)
-					{
-					if  (arg == DATA0)
-						printf ("0");
-					else
-						{
-						if  (arg == DATA1)
-							printf ("1");
-						else
-							{
-							if  (arg == PI)
-								printf ("P");
-							else
-								printf ("?");
-							}
-						}
-					}
-				break;
-
-			case COEF:		/* send BCD bit */
-				if (code[ptr] & arg) {
-					WWV_Second(DATA1, RateCorrection);
-					if  (Verbose)
-					    printf("1");
-				} else {
-					WWV_Second(DATA0, RateCorrection);
-					if  (Verbose)
-					    printf("0");
-				}
-				break;
-
-			case LEAP:		/* send leap bit */
-				if (leap) {
-					WWV_Second(DATA1, RateCorrection);
-					if  (Verbose)
-					    printf("L");
-				} else {
-					WWV_Second(DATA0, RateCorrection);
-					if  (Verbose)
-					    printf("0");
-				}
-				break;
-
-			case DEC:		/* send data bit */
-				ptr--;
-				WWV_Second(arg, RateCorrection);
-				if  (Verbose)
-					{
-					if  (arg == DATA0)
-						printf ("0");
-					else
-						{
-						if  (arg == DATA1)
-							printf ("1");
-						else
-							{
-							if  (arg == PI)
-								printf ("P");
-							else
-								printf ("?");
-							}
-						}
-					}
-				break;
-
-			case DECX:		/* send data bit with no tick */
-				ptr--;
-				WWV_SecondNoTick(arg, RateCorrection);
-				if  (Verbose)
-					{
-					if  (arg == DATA0)
-						printf ("0");
-					else
-						{
-						if  (arg == DATA1)
-							printf ("1");
-						else
-							{
-							if  (arg == PI)
-								printf ("P");
-							else
-								printf ("?");
-							}
-						}
-					}
-				break;
-
-			case MIN:		/* send minute sync */
-				if  (Minute == 0)
-					{
-					peep(arg, HourTone, HIGH);
-
-					if  (RateCorrection < 0)
-						{
-						peep( 990 - arg, HourTone, OFF);
-						TotalCyclesRemoved += 10;
-
-						if  (Debug)
-							printf ("\n* Shorter Second: ");
-						}
-					else
-						{
-						if	(RateCorrection > 0)
-							{
-							peep(1010 - arg, HourTone, OFF);
-
-							TotalCyclesAdded += 10;
-
-							if  (Debug)
-								printf ("\n* Longer Second: ");
-							}
-						else
-							{
-							peep(1000 - arg, HourTone, OFF);
-							}
-						}
-
-					if  (Verbose)
-					    printf("H");
-					}
-				else
-					{
-					peep(arg, tone, HIGH);
-
-					if  (RateCorrection < 0)
-						{
-						peep( 990 - arg, tone, OFF);
-						TotalCyclesRemoved += 10;
-
-						if  (Debug)
-							printf ("\n* Shorter Second: ");
-						}
-					else
-						{
-						if	(RateCorrection > 0)
-							{
-							peep(1010 - arg, tone, OFF);
-
-							TotalCyclesAdded += 10;
-
-							if  (Debug)
-								printf ("\n* Longer Second: ");
-							}
-						else
-							{
-							peep(1000 - arg, tone, OFF);
-							}
-						}
-
-					if  (Verbose)
-					    printf("M");
-					}
-				break;
-
-			case DUT1:		/* send DUT1 bits */
-				if (dut1 & arg)
-					{
-					WWV_Second(DATA1, RateCorrection);
-					if  (Verbose)
-					    printf("1");
-					}
-				else
-					{
-					WWV_Second(DATA0, RateCorrection);
-					if  (Verbose)
-					    printf("0");
-					}
-				break;
-
-			case DST1:		/* send DST1 bit */
-				ptr--;
-				if (DstFlag)
-					{
-					WWV_Second(DATA1, RateCorrection);
-					if  (Verbose)
-					    printf("1");
-					}
-				else
-					{
-					WWV_Second(DATA0, RateCorrection);
-					if  (Verbose)
-					    printf("0");
-					}
-				break;
-
-			case DST2:		/* send DST2 bit */
-				if (DstFlag)
-					{
-					WWV_Second(DATA1, RateCorrection);
-					if  (Verbose)
-					    printf("1");
-					}
-				else
-					{
-					WWV_Second(DATA0, RateCorrection);
-					if  (Verbose)
-					    printf("0");
-					}
-				break;
 			}
 		}
 
@@ -2186,102 +1599,6 @@ main(
 	
 printf ("\n\n>> Completed %d seconds, exiting...\n\n", SecondsToSend);
 return (0);
-}
-
-
-/*
- * Generate WWV/H 0 or 1 data pulse.
- */
-void WWV_Second(
-	int	code,		/* DATA0, DATA1, PI */
-	int Rate		/* <0 -> do a short second, 0 -> normal second, >0 -> long second */
-	)
-{
-	/*
-	 * The WWV data pulse begins with 5 ms of 1000 Hz follwed by a
-	 * guard time of 25 ms. The data pulse is 170, 570 or 770 ms at
-	 * 100 Hz corresponding to 0, 1 or position indicator (PI),
-	 * respectively. Note the 100-Hz data pulses are transmitted 6
-	 * dB below the 1000-Hz sync pulses. Originally the data pulses
-	 * were transmited 10 dB below the sync pulses, but the station
-	 * engineers increased that to 6 dB because the Heath GC-1000
-	 * WWV/H radio clock worked much better.
-	 */
-	peep(5, tone, HIGH);		/* send seconds tick */
-	peep(25, tone, OFF);
-	peep(code - 30, 100, LOW);	/* send data */
-	
-	/* The quiet time is shortened or lengthened to get us back on time */
-	if  (Rate < 0)
-		{
-		peep( 990 - code, 100, OFF);
-		
-		TotalCyclesRemoved += 10;
-
-		if  (Debug)
-			printf ("\n* Shorter Second: ");
-		}
-	else
-		{
-		if  (Rate > 0)
-			{
-			peep(1010 - code, 100, OFF);
-
-			TotalCyclesAdded += 10;
-
-			if  (Debug)
-				printf ("\n* Longer Second: ");
-			}
-		else
-			peep(1000 - code, 100, OFF);
-		}
-}
-
-/*
- * Generate WWV/H 0 or 1 data pulse, with no tick, for 29th and 59th seconds
- */
-void WWV_SecondNoTick(
-	int	code,		/* DATA0, DATA1, PI */
-	int Rate		/* <0 -> do a short second, 0 -> normal second, >0 -> long second */
-	)
-{
-	/*
-	 * The WWV data pulse begins with 5 ms of 1000 Hz follwed by a
-	 * guard time of 25 ms. The data pulse is 170, 570 or 770 ms at
-	 * 100 Hz corresponding to 0, 1 or position indicator (PI),
-	 * respectively. Note the 100-Hz data pulses are transmitted 6
-	 * dB below the 1000-Hz sync pulses. Originally the data pulses
-	 * were transmited 10 dB below the sync pulses, but the station
-	 * engineers increased that to 6 dB because the Heath GC-1000
-	 * WWV/H radio clock worked much better.
-	 */
-	peep(30, tone, OFF);		/* send seconds non-tick */
-	peep(code - 30, 100, LOW);	/* send data */
-
-	/* The quiet time is shortened or lengthened to get us back on time */
-	if  (Rate < 0)
-		{
-		peep( 990 - code, 100, OFF);
-
-		TotalCyclesRemoved += 10;
-
-		if  (Debug)
-			printf ("\n* Shorter Second: ");
-		}
-	else
-		{
-		if  (Rate > 0)
-			{
-			peep(1010 - code, 100, OFF);
-
-			TotalCyclesAdded += 10;
-
-			if  (Debug)
-				printf ("\n* Longer Second: ");
-			}
-		else
-			peep(1000 - code, 100, OFF);
-		}
 }
 
 /*
@@ -2450,7 +1767,7 @@ ConvertMonthDayToDayOfYear (int YearValue, int MonthValue, int DayOfMonthValue)
 void
 Help ( void )
 	{
-	printf ("\n\nTime Code Generation - IRIG-B or WWV, v%d.%d, %s dmw", VERSION, ISSUE, ISSUE_DATE);
+	printf ("\n\nTime Code Generation - IRIG-B v%d.%d, %s dmw", VERSION, ISSUE, ISSUE_DATE);
 	printf ("\n\nRCS Info:");
 	printf (  "\n  $Header: /home/dmw/src/IRIG_generation/ntp-4.2.2p3/util/RCS/tg.c,v 1.28 2007/02/12 23:57:45 dmw Exp $");
 	printf ("\n\nUsage: %s [option]*", CommandName);
@@ -2463,7 +1780,6 @@ Help ( void )
 	printf (  "\n                                        3 = Modulated IRIG-B w/IEEE 1344 (year & control funcs) (default)");
 	printf (  "\n                                        4 = Unmodulated IRIG-B w/IEEE 1344 (year & control funcs)");
 	printf (  "\n                                        5 = Inverted unmodulated IRIG-B w/IEEE 1344 (year & control funcs)");
-	printf (  "\n                                        w = WWV(H)");
 	printf (  "\n         -g yymmddhhmm                  Switch into/out of DST at beginning of minute specified");
 	printf (  "\n         -i yymmddhhmm                  Insert leap second at end of minute specified");
 	printf (  "\n         -j                             Disable time rate correction against system clock (default enabled)");
@@ -2472,9 +1788,6 @@ Help ( void )
 	printf (  "\n         -o time_offset                 Set IEEE 1344 time offset, +/-, to 0.5 hour (default 0)");
 	printf (  "\n         -q quality_code_hex            Set IEEE 1344 quality code (default 0)");
 	printf (  "\n         -r sample_rate                 Audio sample rate (default 8000)");
-	printf (  "\n         -s                             Set leap warning bit (WWV[H] only)");
-	printf (  "\n         -t sync_frequency              WWV(H) on-time pulse tone frequency (default 1200)");
-	printf (  "\n         -u DUT1_offset                 Set WWV(H) DUT1 offset -7 to +7 (default 0)");
 #ifndef  HAVE_SYS_SOUNDCARD_H
 	printf (  "\n         -v initial_output_level        Set initial output level (default %d, must be 0 to 255)", AUDIO_MAX_GAIN/8);
 #endif
