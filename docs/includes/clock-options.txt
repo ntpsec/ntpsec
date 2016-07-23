@@ -30,7 +30,7 @@
     directly connected reference clocks, both _minpoll_ and _maxpoll_
     default to 6 (64 sec). For modem reference clocks, _minpoll_ defaults
     to 10 (17.1 min) and _maxpoll_ defaults to 14 (4.5 hours). The allowable
-    range is 4 (16 sec) to 17 (36.4 hours) inclusive.
+    range is 0 (1 sec) to 17 (36.4 hours) inclusive.
   +time1+ _sec_;;
     Specifies a constant to be added to the time offset produced by the
     driver, a fixed-point decimal number in seconds. This is used as a
