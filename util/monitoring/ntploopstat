@@ -12,7 +12,7 @@
 ;#
 ;#################################################################
 ;#
-;# The format written to the logfile is the same as used by xntpd
+;# The format written to the logfile is the same as used by ntpd
 ;# for the loopstats file.
 ;# This script however allows to gather loop filter statistics from
 ;# remote servers where you do not have access to the loopstats logfile.

@@ -1,6 +1,13 @@
-= +{ntpviz}+ - make dta visualizations from statistics files =
+= +{ntpviz}+ - make data visualizations from statistics files =
 
-//Insert Pogo image here
+[cols="10%,90%",frame="none",grid="none",style="verse"]
+|==============================
+|image:pic/pogocell.gif[]|
+{millshome}pictures.html[from the 1969 Pogo Birthday Special]
+
+You could have a butterfly on your head and not even know it.
+
+|==============================
 
 == More Help ==
 
