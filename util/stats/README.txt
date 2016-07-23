@@ -8,11 +8,6 @@ daily loopstats, peerstats and clockstats files produced by the daemon,
 updates the loop_summary, peer_summary and clock_summary archive files,
 and deletes the daily files.
 
-In the case of the Austron 2201A GPS receiver, the clockstats file
-contains a wealth of additional monitoring data. These data are summarized
-and writted to the clock_summary file, then a series of special files are
-constructed for later processing by the S utility.
-
 The summary.sh script invokes a number of awk scripts to actually produce
 the data. This may result in multiple scans of the same input file.
 The input file is deleted after processing. In fact, the shell scripts will

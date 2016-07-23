@@ -47,12 +47,6 @@ extern	struct refclock	refclock_magnavox;
 #define	refclock_magnavox	refclock_none
 #endif
 
-#ifdef CLOCK_AUSTRON
-extern	struct refclock	refclock_austron;
-#else
-#define	refclock_austron	refclock_none
-#endif
-
 #ifdef CLOCK_ARBITER
 extern  struct refclock refclock_arbiter;
 #else
@@ -170,7 +164,7 @@ struct refclock * const refclock_conf[] = {
 	&refclock_chu,		/* 7 REFCLK_CHU_AUDIO */
 	&refclock_parse,	/* 8 REFCLK_GENERIC */
 	&refclock_magnavox,	/* 9 REFCLK_GPS_MX4200 */
-	&refclock_austron,	/* 10 REFCLK_GPS_AS2201 */
+	&refclock_none,		/* 10 was: REFCLK_GPS_AS2201 */
 	&refclock_arbiter,	/* 11 REFCLK_GPS_ARBITER */
 	&refclock_none,		/* 12 was: REFCLK_IRIG_TPRO */
 	&refclock_none,		/* 13 was: REFCLK_ATOM_LEITCH */
