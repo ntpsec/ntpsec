@@ -123,7 +123,7 @@ Since we're only going to use the first valid response we get and
 there is benefit to specifying a good number of servers to query,
 separate the queries we send out by the specified number of
 milliseconds. A larger _delay_ reduces the query load on the time
-sources, iat the cost of ncreasing the time to receive a valid
+sources, at the cost of increasing the time to receive a valid
 response if the first source attempted is slow or unreachable.
 
 +-j+::
@@ -151,7 +151,7 @@ This option causes the client to write log messages to the specified
 _logfile_.
 
 +-M+ number, +--steplimit+=_number_::
-  Adjustments less than _steplimit_ msec will be slewed. This option
+  Adjustments less than _steplimit_ milliseconds will be slewed. This option
   takes an integer number as its argument. The value of _number_ is
   constrained to being greater than or equal to 0,
 +
@@ -162,7 +162,7 @@ means all adjustments will be stepped. This is a feature, as different
 situations demand different values.
 
 +-o+ number, +--ntpversion+=_number_::
-  Send _int_ as our NTP protocol version. This option takes an integer
+  Send _number_ as our NTP protocol version. This option takes an integer
   number as its argument.  Defaults to 4.  Seldom useful.
 
 +-r+, +--usereservedport+::

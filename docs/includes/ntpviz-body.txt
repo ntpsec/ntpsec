@@ -20,7 +20,7 @@ The most basic option is -d, which specifies a logfile directory to
 examine; the default is /var/log/ntpstats.
 
 The -n option allows you to set the sitename shown in the plot title.
-The default is the basame of the log directory.
+The default is the basename of the log directory.
 
 The -s and -p options allow you to set the time window to be reported
 on. With -s you set the start time as an ISO8601-style timestamp
