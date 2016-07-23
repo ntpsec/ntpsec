@@ -5,7 +5,7 @@
 [[synop]]
 == Synopsis ==
 
-+{ntpfrob}+ [ +-A+] [ +-a+ 'tick' ] [ +-p+ 'ppsdev' ] [+-c+] [+-e+] [+-r+]
++{ntpfrob}+ [ +-A+] [+-b+ 'bump'] [ +-a+ 'tick' ] [ +-p+ 'ppsdev' ] [+-c+] [+-e+] [+-r+]
 
 [[descr]]
 == Description ==
@@ -23,6 +23,8 @@ utilities.
   Set the kernel variable +tick+ to the value _tick_ specifies.
 +-A+::
   Display the kernel variable +tick+.
++-b+ 'bump'::
+  Bump the clock by a specified number of microceseconds.
 +-c+::
   Compute and display clock jitter.
 +-e+::
@@ -64,6 +66,12 @@ The -j option is applicable to this mode.
 
 Tweaking your tick rate is almost never necessary on hardware new
 enough to have a fully POSIX.1-2001-conformant Unix.
+
+=== Clock bump ===
+
+Sometimes it is diagnostically interesting to peturb your clock in
+order to watch how {ntpd} responds and makes corrections. This
+option does that.
 
 === Clock jitter measurement ===
 

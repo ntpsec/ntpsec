@@ -10,15 +10,12 @@
 #include <string.h>
 #include <sys/time.h>
 
-int main(int argc, char *argv[]) {
+void bumpclock(int bump)
+{
     struct timeval was, set, now;
     int rc1, rc2, rc3;
     int er1, er2, er3;
-    int bump = 100000;
 
-    if (argc > 1) {
-	bump = atoi(argv[1]);
-    }
     printf("Bumping clock by %d microseconds.\n", bump);
 
     rc1 = gettimeofday(&was, NULL);
@@ -57,7 +54,4 @@ int main(int argc, char *argv[]) {
 	printf("Couldn't set time: %s\n", strerror(er3));
     else
 	printf("Now: %ld.%06ld\n", (long)now.tv_sec, (long)now.tv_usec);
-
-    return (rc1!=0 || rc2!=0 || rc3!=0);
-
 }

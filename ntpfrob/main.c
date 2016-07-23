@@ -18,7 +18,7 @@ main(int argc, char **argv)
 	int ch;
 	iomode mode = plain_text;
 	init_lib();
-	while ((ch = getopt(argc, argv, "a:Acejp:r")) != EOF) {
+	while ((ch = getopt(argc, argv, "a:Ab:cejp:r")) != EOF) {
 		switch (ch) {
 		case 'A':
 #ifdef HAVE_ADJTIMEX
@@ -35,6 +35,9 @@ main(int argc, char **argv)
 		    fputs("ntpfrob: no adjtimex(2) call.\n", stderr);
 		    exit(0);
 #endif
+		    break;
+		case 'b':
+		    bumpclock(atoi(optarg));
 		    break;
 		case 'c':
 		    jitter(mode);
