@@ -2,7 +2,7 @@
 
 The ntpd daemon can produce a variety of statistics files which are
 useful for maintenance, evaluation and retrospective calibration
-purposes. See the xntpd.8 man page for instructions on how to configure
+purposes. See the ntpd man page for instructions on how to configure
 this feature. Since these files can become rather large and cumbersome,
 they are ordinarily reduced to summary form by running the summary.sh
 shell script once per day, week or month, as appropriate. There are
