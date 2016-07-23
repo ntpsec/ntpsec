@@ -54,12 +54,6 @@ refclock_map = {
 		"file":		"magnavox"
 	},
 
-	"austron": {
-		"descr":	"Austron 2200A/2201A GPS Receivers",
-		"define":	"CLOCK_AUSTRON",
-		"file":		"austron"
-	},
-
 	"arbiter": {
 		"descr":	"Arbiter 1088A/B GPS Receiver",
 		"define":	"CLOCK_ARBITER",

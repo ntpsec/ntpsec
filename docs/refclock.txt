@@ -158,7 +158,9 @@ If you have seen older versions of NTP, this list may have fewer
 entries than you expected.  Support for some very ancient drivers
 (notably, those rendered obsolete by the WWVB modulation change at
 2012-10-29T15:00:00Z) has been dropped in order to reduce our
-maintainence load.
+maintainence load. So nave sime other drivers after having been
+end-of-lifed with no sign of aftermarket activuty for more than
+ten years.
 
 For security reasons, we will no longer support any refclock that requires
 a closed-source driver to run.  This filtered out the
@@ -179,7 +181,6 @@ parse driver.
 |link:driver_chu.html[chu]              | D | Radio CHU Audio Demodulator/Decoder
 |link:driver_generic.html[generic]      | T | Generic Reference Driver (Parse)
 |link:driver_magnavox.html[magnavox]    | D | MX4200 and compatible GPS receivers
-|link:driver_austron.html[austron]      | D | Austron 2200A/2201A GPS Receivers
 |link:driver_arbiter.html[arbiter]      | D | Arbiter 1088A/B GPS Receiver
 |link:driver_acts.html[acts]            | - | NIST/USNO/PTB Modem Time Services
 |link:driver_nmea.html[nmea]            | T | Generic NMEA GPS Receiver
