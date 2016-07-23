@@ -60,8 +60,6 @@ for f in clockstats.199[4-9][0-1][0-9][0-3][0-9]; do
 		if [ -f /dev/gps[0-9] ]; then
 			awk -f itf.awk $f >itf.$d
 			awk -f etf.awk $f >etf.$d
-			awk -f ensemble.awk $f >ensemble.$d
-			awk -f tdata.awk $f >tdata.$d
 		fi
 		rm -f $f
 	fi

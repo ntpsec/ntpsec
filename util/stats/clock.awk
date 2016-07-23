@@ -7,7 +7,7 @@
 # Arbiter 1088 GPS receiver
 # Spectracom GPS receiver
 # IRIG audio decoder
-# Austron 2200A/2201A GPS receiver (see README.austron file)
+# Austron 2200A/2201A GPS receiver
 #
 BEGIN {
 	etf_min = osc_vmin = osc_tmin = 1e9
@@ -112,62 +112,6 @@ BEGIN {
 		continue
 	}
 	#
-	# select Austron GPS LORAN ENSEMBLE records
-	# see summary for decode
-	#
-	else if (NF >= 13 && $6 == "ENSEMBLE") {
-		ensemble_count++
-		if ($9 <= 0)
-			ensemble_badgps++
-		else if ($12 <= 0)
-			ensemble_badloran++
-		else {
-			if ($13 > 200e-9 || $13 < -200e-9)
-				ensemble_200++
-			else if ($13 > 100e-9 || $13 < -100e-9)
-				ensemble_100++
-			ensemble_mean += $13
-			ensemble_rms += $13 * $13
-		}
-		continue
-	}
-	#
-	# select Austron LORAN TDATA records
-	# see summary for decode; note that signal quality log is simply
-	# copied to output
-	#
-	else if (NF >= 7 && $6 == "TDATA") {
-                tdata_count++
-                for (i = 7; i < NF; i++) {
-                        if ($i == "M" && $(i+1) == "OK") {
-                                i += 5
-                                m += $i
-                		tdata_m++
-		        }
-                        else if ($i == "W" && $(i+1) == "OK") {
-                                i += 5
-                                w += $i
-                        	tdata_w++
-			}
-                        else if ($i == "X" && $(i+1) == "OK") {
-                                i += 5
-                                x += $i
-                        	tdata_x++
-			}
-                        else if ($i == "Y" && $(i+1) == "OK") {
-                                i += 5
-                                y += $i
-                        	tdata_y++
-			}
-                        else if ($i == "Z" && $(i+1) == "OK") {
-                                i += 5
-                                z += $i
-                        	tdata_z++
-			}
-		}	
-		continue
-	}
-	#
 	# select Austron ITF records
 	# see summary for decode
 	#
@@ -213,12 +157,11 @@ BEGIN {
 	#
 	# select Austron ID;OPT;VER records
 	#
-	# config GPS 2201A TTY1 TC1 LORAN IN OUT1 B.00 B.00 28-Apr-93
+	# config GPS 2201A TTY1 TC1 IN OUT1 B.00 B.00 28-Apr-93
 	#
 	# GPS 2201A	receiver model
 	# TTY1		rs232 moduel
 	# TC1		IRIG module
-	# LORAN		LORAN assist module
 	# IN		input module
 	# OUT1		output module
 	# B.00 B.00	firmware revision

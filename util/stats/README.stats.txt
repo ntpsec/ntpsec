@@ -56,8 +56,8 @@ valid update of the local clock.
 
 The following data are collected in the clockstats files. The files are
 reduced to summary data using the clock.sh shell script, which also
-updates the ensemble, etf, itf and tdata data files as well. See the
-clock.awk, ensemble.awk, etf.awk, itf.awk and tdta.awk scripts for
+updates the etf, itf and tdata data files as well. See the
+clock.awk, etf.awk, itf.awk and tdta.awk scripts for
 further information. A line in the file is produced at each valid update
 received from a configured radio clock. Data are at present recorded for
 several radios. The first part of each data line is similar for all
@@ -146,7 +146,6 @@ These data show the receiver model number and option configuration.
   GPS 2201A         model ident (must be "GPS 2200A" or "GPS 2201A")
   TTY1              rs232 option present (required)
   TC1               IRIG option present (optional)
-  LORAN             LORAN assist option present (optional)
   IN                input buffer option present (optional)
   OUT1              output buffer option present (required)
   B.00              data processor software version ("B.00" or later)
@@ -170,47 +169,6 @@ respect to satellite time.
   -6.4746E-11       oscillator ageing rate
   500.00            loop time constant
   4.984072          electrical tuning (V)
-----------------------------------------------------------------------------
-
-=== GPS/LORAN ensemble data (requires LORAN assist option LORAN) ===
-
-These data determine the deviations and weights to calculate ensemble
-time from GPS and LORAN data.
-
-----------------------------------------------------------------------------
-  49234 60596.852 AUSTRON(1) 93:247:16:49:40.812 LORAN ENSEMBLE
-
-  +9.06E-08         GPS t (s)
-  +3.53E-08         GPS sigma (s)
-  .532              GPS weight
-  +3.71E-08         LORAN t (s)
-  +3.76E-08         LORAN sigma (s)
-  .468              LORAN weight
-  +6.56E-08         ensemble t
-  +6.94E-08         ensemble sigma (s)
-----------------------------------------------------------------------------
-
-=== LORAN stationkeeping data (requires LORAN assist option LORAN) ===
-
-These data determine which stations of the LORAN chain are being
-tracked, together with individual signal/noise ratios, deviations and
-weights.
-
-----------------------------------------------------------------------------
-  49234 60532.850 AUSTRON(1) 93:247:16:48:36.820 LORAN TDATA
-
-  M                 station identifier; data follows
-  OK                status (must be "OK" for tracking)
-  0                 cw flag
-  0                 sw flag
-  1162.17           time of arrival
-  -4.6              snr (-30.0 if not "OK" status)
-  1.67E-07          2-sample phase-time deviation
-  .507              weight (included only if "OK" status)
-  W AQ 0 0 3387.80 -31.0  station identifier and data
-  X OK 0 0 1740.27 -11.2 2.20E-07 .294  station identifier and data
-  Y OK 0 0 2180.71 -4.6 2.68E-07 .198  station identifier and data
-  Z CV 0 0 3392.94 -30.0  station identifier and data
 ----------------------------------------------------------------------------
 
 === Oscillator status and environment ===
