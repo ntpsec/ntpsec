@@ -4,7 +4,7 @@
 
 ["verse",subs="normal"]
 Name: acts
-Reference ID: NIST | USNO | PTB | WWVB
+Reference ID: NIST | USNO | PTB | GPS
 xSerial Port: /dev/acts__u__; 9600 8N1
 Features: tty_clk
 Requires: a dial-out device.
@@ -57,7 +57,7 @@ length. There is some hazard should the message be corrupted. However,
 the data format is checked carefully and only if all checks succeed is
 the message accepted. Corrupted lines are discarded without complaint.
 Once the service is known, the reference identifier for the driver is
-set to NIST, USNO, PTB or WWVB as appropriate.
+set to NIST, USNO, PTB or GPS as appropriate.
 
 The Spectracom receiver can be connected via a modem if the radio is
 configured to send time codes continuously at 1-s intervals. In
@@ -140,7 +140,7 @@ with the Hayes connection and hang-up commands and result codes.
 +stratum+ 'number'::
   Specifies the driver stratum, in decimal from 0 to 15, with default 0.
 +refid+ 'string'::
-  Set by the driver to (one of) +NIST+, +USNO+, +PTB+ or +WWVB+.
+  Set by the driver to (one of) +NIST+, +USNO+, +PTB+ or +GPS+.
 +flag1 {0 | 1}+::
   Initiate a call if 1. Automatically reset by program.
 +flag2 {0 | 1}+::

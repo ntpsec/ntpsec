@@ -15,7 +15,7 @@ refclock_map = {
 	},
 
 	"spectracom": {
-		"descr":	"Spectracom WWVB/GPS Receivers",
+		"descr":	"Spectracom GPS Receivers",
 		"define":	"CLOCK_SPECTRACOM",
 		"file":		"spectracom"
 	},

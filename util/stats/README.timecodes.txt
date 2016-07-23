@@ -32,7 +32,7 @@ In the following uppercase letters, punctuation marks and spaces <SP>
 stand for themselves; lowercase letters stand for fields as described.
 Special characters other than <LF>, <CR> and <SP> are preceded by ^.
 
-== Spectracom 8170 and Netclock/2 WWV Synchonized Clock (format 0) ==
+== Spectracom 8170 and Netclock/2 (format 0) ==
 
 ----------------------------------------------------------------------------
 "<CR><LF>i  ddd hh:mm:ss  TZ=zz<CR><LF>"
@@ -52,7 +52,9 @@ Special characters other than <LF>, <CR> and <SP> are preceded by ^.
                A  D   T
 ----------------------------------------------------------------------------
 
-== Netclock/2 WWV Synchonized Clock (format 2) ==
+== Netclock/2 (format 2) ==
+
+This format is used by several clocks from different vendors.
 
 ----------------------------------------------------------------------------
 "<CR><LF>iqyy ddd hh:mm:ss.fff ld"
