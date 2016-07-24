@@ -8,7 +8,6 @@ Laboratory]
 
 include::includes/hand.txt[]
 include::includes/refclock.txt[]
-include::includes/audio.txt[]
 
 == Table of Contents ==
 
@@ -93,13 +92,6 @@ purpose. Except where noted, these options apply to all clock drivers.
 [[spec]]
 == Special Considerations ==
 
-The link:audio.html[Audio Drivers] page describes two software drivers
-that process audio signals from an audio codec or sound card. One is for
-the Canadian time and frequency station CHU. These require an external
-shortwave radio and antenna. The second is for the generic IRIG signal
-produced by some timing devices. Currently, these are supported in
-FreeBSD, Solaris and SunOS and likely in other system as well.
-
 The link:driver_local.html[Undisciplined Local Clock] driver can
 simulate a reference clock when no external synchronization sources are
 available. If a server with this driver is connected directly or
@@ -158,9 +150,9 @@ If you have seen older versions of NTP, this list may have fewer
 entries than you expected.  Support for some very ancient drivers
 (notably, those rendered obsolete by the WWVB modulation change at
 2012-10-29T15:00:00Z) has been dropped in order to reduce our
-maintainence load. So nave sime other drivers after having been
-end-of-lifed with no sign of aftermarket activuty for more than
-ten years.
+maintainence load. So have some other drivers (notably the Austron
+2200A/2201A) after having been end-of-lifed with no sign of
+aftermarket activity for more than ten years.
 
 For security reasons, we will no longer support any refclock that requires
 a closed-source driver to run.  This filtered out the
@@ -177,8 +169,6 @@ parse driver.
 |link:driver_local.html[local]          | D | Undisciplined Local Clock
 |link:driver_spectracom.html[spectracom]| - | Generic Spectracom Receivers
 |link:driver_truetime.html[truetime]    | D | TrueTime GPS/GOES Receivers
-|link:driver_irig.html[irig]            | D | IRIG Audio Decoder
-|link:driver_chu.html[chu]              | D | Radio CHU Audio Demodulator/Decoder
 |link:driver_generic.html[generic]      | T | Generic Reference Driver (Parse)
 |link:driver_magnavox.html[magnavox]    | D | MX4200 and compatible GPS receivers
 |link:driver_arbiter.html[arbiter]      | D | Arbiter 1088A/B GPS Receiver

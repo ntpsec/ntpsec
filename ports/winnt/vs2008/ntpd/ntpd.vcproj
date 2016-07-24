@@ -782,10 +782,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\..\ntpd\refclock_chu.c"
-				>
-			</File>
-			<File
 				RelativePath="..\..\..\..\ntpd\refclock_conf.c"
 				>
 			</File>
@@ -807,10 +803,6 @@
 			</File>
 			<File
 				RelativePath="..\..\..\..\ntpd\refclock_hpgps.c"
-				>
-			</File>
-			<File
-				RelativePath="..\..\..\..\ntpd\refclock_irig.c"
 				>
 			</File>
 			<File

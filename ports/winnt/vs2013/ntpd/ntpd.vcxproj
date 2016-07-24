@@ -288,14 +288,12 @@
     <ClCompile Include="..\..\..\..\ntpd\refclock_pps.c" />
     <ClCompile Include="..\..\..\..\ntpd\refclock_bancomm.c" />
     <ClCompile Include="..\..\..\..\ntpd\refclock_chronolog.c" />
-    <ClCompile Include="..\..\..\..\ntpd\refclock_chu.c" />
     <ClCompile Include="..\..\..\..\ntpd\refclock_conf.c" />
     <ClCompile Include="..\..\..\..\ntpd\refclock_datum.c" />
     <ClCompile Include="..\..\..\..\ntpd\refclock_dumbclock.c" />
     <ClCompile Include="..\..\..\..\ntpd\refclock_fg.c" />
     <ClCompile Include="..\..\..\..\ntpd\refclock_gpsvme.c" />
     <ClCompile Include="..\..\..\..\ntpd\refclock_hpgps.c" />
-    <ClCompile Include="..\..\..\..\ntpd\refclock_irig.c" />
     <ClCompile Include="..\..\..\..\ntpd\refclock_jjy.c" />
     <ClCompile Include="..\..\..\..\ntpd\refclock_jupiter.c" />
     <ClCompile Include="..\..\..\..\ntpd\refclock_leitch.c" />

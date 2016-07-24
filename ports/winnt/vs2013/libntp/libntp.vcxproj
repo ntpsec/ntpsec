@@ -214,7 +214,6 @@
   <ItemGroup>
     <ClCompile Include="..\..\..\..\libntp\adjtime.c" />
     <ClCompile Include="..\..\..\..\libntp\atolfp.c" />
-    <ClCompile Include="..\..\..\..\libntp\audio.c" />
     <ClCompile Include="..\..\..\..\libntp\authkeys.c" />
     <ClCompile Include="..\..\..\..\libntp\authreadkeys.c" />
     <ClCompile Include="..\..\..\..\libntp\authusekey.c" />

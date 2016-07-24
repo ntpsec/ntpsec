@@ -269,7 +269,6 @@ def cmd_configure(ctx, config):
 
 	ctx.check_cc(lib="edit", mandatory=False, comment="libedit library")
 	ctx.check_cc(lib="m", comment="Math library")
-	ctx.check_cc(lib="ossaudio", mandatory=False, comment="ossaudio for NetBSD")  # NetBSD audio
 	ctx.check_cc(lib="rt", mandatory=False, comment="realtime library")
 	ctx.check_cc(lib="curses", mandatory=False, comment="curses library, required for readline on OpenBSD") # Required for readline on OpenBSD.
 	ctx.check_cc(lib="readline", use="CURSES", mandatory=False, comment="readline library")
@@ -343,7 +342,6 @@ def cmd_configure(ctx, config):
 		("resolv.h", ["sys/types.h","netinet/in.h","arpa/nameser.h"]),
 		"semaphore.h",
 		"stdatomic.h",
-		"sys/audioio.h",
 		"sys/clockctl.h",	# NetBSD
 		"sys/ioctl.h",
 		"sys/modem.h",          # Apple
@@ -354,7 +352,6 @@ def cmd_configure(ctx, config):
 		("sys/timepps.h", ["inttypes.h", "sys/time.h"]),
 		"utmpx.h",       # missing on RTEMS and OpenBSD
 		("sys/timex.h", ["sys/time.h"]),
-		"sys/audio.h"
 	)
 	for hdr in optional_headers:
 		if type(hdr) == type(""):
@@ -383,21 +380,8 @@ def cmd_configure(ctx, config):
 	if ctx.get_define("HAVE_SYS_TIMEX_H"):
 		ctx.env.HEADER_SYS_TIMEX_H = True
 
-	# Some systems don't have sys/audio.h eg OS X, OpenBSD...
-	if ctx.get_define("HAVE_SYS_AUDIO_H") or \
-	   ctx.get_define("HAVE_SYS_SOUNDCARD_H") or \
-	   ctx.get_define("HAVE_MACHINE_SOUNDCARD_H"):
-		ctx.env.HAVE_AUDIO = True  # makes util/tg2
-
 	if ctx.options.refclocks:
 		from refclock import refclock_config
-
-		# Enable audio when the right headers exist.
-		if ctx.get_define("HAVE_SYS_AUDIOIO_H") or \
-				ctx.get_define("HAVE_SYS_SOUNDCARD_H") or \
-				ctx.get_define("HAVE_MACHINE_SOUNDCARD_H"):
-			ctx.env.AUDIO_ENABLE = True
-
 		refclock_config(ctx)
 
 	# NetBSD (used to) need to recreate sockets on changed routing.
@@ -466,21 +450,6 @@ def cmd_configure(ctx, config):
 	# it might not work reliably on all platforms.  Enable cautiously
 	# and test carefully.
 	# ctx.define("ENABLE_SIGNALED_IO", 1)
-
-	# Used in libntp/audio.c:
-	#	[[
-	#	    #ifdef HAVE_MACHINE_SOUNDCARD_H
-	#	    # include <machine/soundcard.h>
-	#	    #endif
-	#	    #ifdef HAVE_SYS_SOUNDCARD_H
-	#	    # include <sys/soundcard.h>
-	#	    #endif
-	#	]],
-	#	[[
-	#	    extern struct snd_size *ss;
-	#	    return ss->rec_size;
-	#	]]
-	# ctx.define("HAVE_STRUCT_SND_SIZE", 1)
 
         # These are required by the SHA2 code and various refclocks
         if sys.byteorder == "little":

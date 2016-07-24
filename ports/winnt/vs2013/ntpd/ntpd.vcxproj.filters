@@ -117,9 +117,6 @@
     <ClCompile Include="..\..\..\..\ntpd\refclock_chronolog.c">
       <Filter>Reference Clock</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\ntpd\refclock_chu.c">
-      <Filter>Reference Clock</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\ntpd\refclock_conf.c">
       <Filter>Reference Clock</Filter>
     </ClCompile>
@@ -136,9 +133,6 @@
       <Filter>Reference Clock</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\ntpd\refclock_hpgps.c">
-      <Filter>Reference Clock</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\ntpd\refclock_irig.c">
       <Filter>Reference Clock</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\ntpd\refclock_jjy.c">
