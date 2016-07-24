@@ -164,12 +164,12 @@ parse driver.
 [cols="15%,5%,80%",options="header"]
 |====================================================================
 | Name                                  | Flags | Driver
-|link:driver_local.html[local]          | D | Undisciplined Local Clock
+|link:driver_local.html[local]          | - | Undisciplined Local Clock
 |link:driver_spectracom.html[spectracom]| - | Generic Spectracom Receivers
 |link:driver_truetime.html[truetime]    | D | TrueTime GPS/GOES Receivers
 |link:driver_generic.html[generic]      | T | Generic Reference Driver (Parse)
 |link:driver_magnavox.html[magnavox]    | D | MX4200 and compatible GPS receivers
-|link:driver_arbiter.html[arbiter]      | D | Arbiter 1088A/B GPS Receiver
+|link:driver_arbiter.html[arbiter]      | - | Arbiter 1088A/B GPS Receiver
 |link:driver_acts.html[acts]            | - | NIST/USNO/PTB Modem Time Services
 |link:driver_nmea.html[nmea]            | T | Generic NMEA GPS Receiver
 |link:driver_pps.html[pps]              | T | PPS Clock Discipline
