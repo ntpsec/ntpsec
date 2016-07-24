@@ -140,11 +140,7 @@ driver relative to an association designated the prefer peer.
 
 Following is a list showing the type name and title of each driver
 currently implemented. Click on a selected type for specific
-description and configuration documentation, including the clock
-address, reference ID, driver ID, device name and serial line
-speed. For those drivers without specific documentation, please
-contact the author listed in the link:copyright.html[Copyright Notice]
-page.
+description and configuration documentation.
 
 If you have seen older versions of NTP, this list may have fewer
 entries than you expected.  Support for some very ancient drivers
@@ -152,7 +148,9 @@ entries than you expected.  Support for some very ancient drivers
 2012-10-29T15:00:00Z) has been dropped in order to reduce our
 maintainence load. So have some other drivers (notably the Austron
 2200A/2201A) after having been end-of-lifed with no sign of
-aftermarket activity for more than ten years.
+aftermarket activity for more than ten years. Several others have been
+removed for relying on obsolete buses or hardware classes that no
+longer exist.
 
 For security reasons, we will no longer support any refclock that requires
 a closed-source driver to run.  This filtered out the
