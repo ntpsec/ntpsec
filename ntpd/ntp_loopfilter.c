@@ -113,7 +113,6 @@ double	clock_jitter;		/* offset jitter */
 double	drift_comp;		/* frequency (s/s) */
 static double init_drift_comp; /* initial frequency (PPM) */
 double	clock_stability;	/* frequency stability (wander) (s/s) */
-double	clock_codec;		/* audio codec frequency (samples/s) */
 static u_long clock_epoch;	/* last update */
 u_int	sys_tai;		/* TAI offset from UTC */
 static bool loop_started;	/* true after LOOP_DRIFTINIT */
@@ -1292,10 +1291,6 @@ loop_config(
 	 */
 	case LOOP_ALLAN:	/* Allan intercept (log2) (allan) */
 		allan_xpt = (uint8_t)freq;
-		break;
-
-	case LOOP_CODEC:	/* audio codec frequency (codec) */
-		clock_codec = freq / 1e6;
 		break;
 
 	case LOOP_PHI:		/* dispersion threshold (dispersion) */
