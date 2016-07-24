@@ -222,15 +222,6 @@ refclock::
   Shorthand for a "reference clock", a primary time source. A computer
   with a refclock is implicitly Stratum 1.
 
-[[SADA]]
-SADA::
-   Sun Audio Driver API, a software interface to audio devices
-   directly supported by NTP and used by the Irig Audio Decoder
-   and IRIG refclocks. Originating in SunOS, it was later
-   implemented in Solaris and OpenSolaris, supported in the Linux OSS
-   sound layer, and is still used by the *BSD family of open-source
-   operating systems.
-
 [[stratum]]
 stratum::
   A "stratum" is a layer in the hieratchy of time servers.  a

@@ -4,10 +4,7 @@ def build(ctx):
 	srcnode = ctx.srcnode.abspath()
 	bldnode = ctx.bldnode.abspath()
 
-	util = ['hist', 'propdelay', 'sht']
-
-	if ctx.env.HAVE_AUDIO:
-		util += ['tg2']
+	util = ['hist', 'sht']
 
 	for name in util:
 		ctx(
@@ -17,7 +14,7 @@ def build(ctx):
 			includes	= [
 						"%s/%s/" % (bldnode, name)
 					],
-			use		= "ntp opts isc OSSAUDIO M RT THR PTHREAD",
+			use		= "ntp opts isc M RT THR PTHREAD",
 			install_path    = False
 		)
 

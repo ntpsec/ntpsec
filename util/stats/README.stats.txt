@@ -86,13 +86,6 @@ used by these radios.
   The '?' and 'A' characters are present only when the receiver is
   unsynchronized; otherwise, they are replaced by space ' ' characters.
 
-=== IRIG audio decoder ===
-
-----------------------------------------------------------------------------
-  49234 60517.826 IRIG(0) 247 16:48:21?
-----------------------------------------------------------------------------
-
-  The '?' character is present only when the receiver is unsynchronized.
 
 
 //end

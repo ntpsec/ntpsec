@@ -32,9 +32,6 @@
     <ClCompile Include="..\..\..\..\libntp\atolfp.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\libntp\audio.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\libntp\authkeys.c">
       <Filter>Source Files</Filter>
     </ClCompile>

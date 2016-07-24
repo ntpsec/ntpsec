@@ -5,7 +5,6 @@
 # This program works for the following radios:
 # Arbiter 1088 GPS receiver
 # Spectracom GPS receiver
-# IRIG audio decoder
 #
 BEGIN {
 	etf_min = osc_vmin = osc_tmin = 1e9
@@ -75,16 +74,6 @@ BEGIN {
 		}
 		continue
 	}
-	#
-	# select IRIG audio decoder records
-	# see summary for decode
-	#
-	if (NF >= 4 && $3 == "127.127.6.0") {
-		irig_count++
-		if ($5 ~ /\?/)
-			irig_error++
-		continue
-	}
 } END {
 #
 # Arbiter 1088 summary data
@@ -107,12 +96,4 @@ BEGIN {
 			printf "\n"
 		}
 	}
-#
-# irig summary data
-#
-# irig		record count
-# err		error count
-#
-	if (irig_count > 0)
-		printf "irig %d, err %d\n", irig_count, irig_error
 }

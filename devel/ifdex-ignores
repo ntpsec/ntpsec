@@ -12,7 +12,6 @@
 
 # These are potential feature configuration symbols
 ENABLE_ASYMMETRIC	# Enable deep-space asymmetric mode in the protocol 
-ENABLE_CHU_AUDIO	# Enable audio demodulation support in the CHU driver
 ENABLE_ONCORE_SHMEM	# Should OnCore report via shmem?
 MSSNTP_PATH		# Set a default path for the MSSNTP feature.
 NTP_VAR			# Path to NTP statistics directory
@@ -29,7 +28,6 @@ OS_MISSES_SPECIFIC_ROUTE_UPDATES
 HAVE_SYSCTLBYNAME	# NTP Classic never set this.
 USE_SYSCTL_PORTRANGE	# NTP Classic never set this.
 ENABLE_SIGNALED_IO	# Use SIGIO for asynchronous I/O notification
-HAVE_STRUCT_SND_SIZE	# Used in SADA audio driver
 NEED_RCVBUF_SLOP	# Only applies to very old HP/UX systems
 HAVE_LINUX_SECCOMP_H
 ISC_PLATFORM_HAVEIPV6
@@ -79,7 +77,6 @@ OS_MISSES_SPECIFIC_ROUTE_UPDATES
 HAVE_SYSCTLBYNAME	# NTP Classic never set this.
 USE_SYSCTL_PORTRANGE	# NTP Classic never set this.
 ENABLE_SIGNALED_IO	# Use SIGIO for asynchronous I/O notification
-HAVE_STRUCT_SND_SIZE	# Used in SADA audio driver
 NEED_RCVBUF_SLOP	# Only applies to very old HP/UX systems
 HAVE_LINUX_SECCOMP_H
 ISC_PLATFORM_HAVEIPV6
@@ -157,7 +154,6 @@ UNUSED_ARG		# Used to quiet compiler warnings
 UNUSED_LOCAL		# Used to quiet compiler warnings
 UPDATE_GRACE		# ntp_io.c only
 USE_COMPILETIME_PIVOT	# Use build date in disambiguating time.
-USE_ICOM_RADIO		# Only used in the CHU refclock
 USE_IPV6_SUPPORT
 USE_IPV6_MULTICAST_SUPPORT
 USE_LE_EDITLINE

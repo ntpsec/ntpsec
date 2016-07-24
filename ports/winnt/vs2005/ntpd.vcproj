@@ -1111,10 +1111,6 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\..\..\ntpd\refclock_chu.c"
-				>
-			</File>
-			<File
 				RelativePath="..\..\..\ntpd\refclock_conf.c"
 				>
 				<FileConfiguration
@@ -1208,30 +1204,6 @@
 			</File>
 			<File
 				RelativePath="..\..\..\ntpd\refclock_hpgps.c"
-				>
-				<FileConfiguration
-					Name="Release|Win32"
-					ExcludedFromBuild="true"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Debug|Win32"
-					ExcludedFromBuild="true"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath="..\..\..\ntpd\refclock_irig.c"
 				>
 				<FileConfiguration
 					Name="Release|Win32"

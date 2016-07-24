@@ -23,12 +23,6 @@ extern	struct refclock	refclock_local;
 #define	refclock_local	refclock_none
 #endif
 
-#ifdef CLOCK_CHU
-extern	struct refclock	refclock_chu;
-#else
-#define	refclock_chu	refclock_none
-#endif
-
 #ifdef CLOCK_SPECTRACOM
 extern	struct refclock	refclock_spectracom;
 #else
@@ -51,12 +45,6 @@ extern	struct refclock	refclock_magnavox;
 extern  struct refclock refclock_arbiter;
 #else
 #define refclock_arbiter refclock_none
-#endif
-
-#ifdef CLOCK_IRIG
-extern	struct refclock	refclock_irig;
-#else
-#define refclock_irig	refclock_none
 #endif
 
 #ifdef CLOCK_TRUETIME
@@ -160,8 +148,8 @@ struct refclock * const refclock_conf[] = {
 	&refclock_none,		/* 3 was: REFCLK_WWV_PST */
 	&refclock_spectracom, 	/* 4 REFCLK_SPECTRACOM */
 	&refclock_true,		/* 5 REFCLK_TRUETIME */
-	&refclock_irig,		/* 6 REFCLK_IRIG_AUDIO */
-	&refclock_chu,		/* 7 REFCLK_CHU_AUDIO */
+	&refclock_none,		/* 6 was: REFCLK_IRIG_AUDIO */
+	&refclock_none,		/* 7 was: REFCLK_CHU_AUDIO */
 	&refclock_parse,	/* 8 REFCLK_GENERIC */
 	&refclock_magnavox,	/* 9 REFCLK_GPS_MX4200 */
 	&refclock_none,		/* 10 was: REFCLK_GPS_AS2201 */
