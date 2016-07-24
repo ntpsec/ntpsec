@@ -336,7 +336,6 @@ extern double	clock_max_fwd;		/* max forward offset before step (s) */
 extern double	clock_panic;		/* max offset before panic (s) */
 extern double	clock_phi;		/* dispersion rate (s/s) */
 extern double	clock_minstep;		/* step timeout (s) */
-extern double	clock_codec;		/* codec frequency */
 #ifdef HAVE_KERNEL_PLL
 extern int	pll_status;		/* status bits for kernel pll */
 #endif /* HAVE_KERNEL_PLL */

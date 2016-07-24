@@ -628,9 +628,8 @@ struct pkt {
 #define LOOP_ALLAN		10	/* set minimum Allan intercept */
 #define LOOP_HUFFPUFF		11	/* set huff-n'-puff filter length */
 #define LOOP_FREQ		12	/* set initial frequency */
-#define LOOP_CODEC		13	/* set audio codec frequency */
-#define	LOOP_LEAP		14	/* insert leap after second 23:59 */
-#define	LOOP_TICK		15	/* sim. low precision clock */
+#define	LOOP_LEAP		13	/* insert leap after second 23:59 */
+#define	LOOP_TICK		14	/* sim. low precision clock */
 
 /*
  * Configuration items for the stats printer
