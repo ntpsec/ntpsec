@@ -36,6 +36,15 @@ Both Hopf refclocks have been removed.  The 6039 driver required a
 kernel driver that no longer exists; the 6021 driver duplicated
 support in the generic driver.
 
+The Austron refclock has been removed, on the grounds that it was
+EOLed more than 20 years ago and there's been no aftermarket activity
+or web chatter around it for a decade.
+
+The audio-path drivers (IRIG and CHU) have been removed. The class
+of hardware required to support them has gone essentially extinct due
+to cheap DSP. The complexity/maintainance overhead of this code
+was high enough to motivate dropping them.
+
 This release contains a fix for one vulnerability inherited from
 NTP Classic:
 
