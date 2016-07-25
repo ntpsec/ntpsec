@@ -49,17 +49,6 @@ extern	void	errno_to_str(int, char *, size_t);
 #define EVP_MAX_MD_SIZE	64	/* longest known is SHA512 */
 #endif
 
-#define SAVE_ERRNO(stmt)				\
-	{						\
-		int preserved_errno;			\
-							\
-		preserved_errno = socket_errno();	\
-		{					\
-			stmt				\
-		}					\
-		errno = preserved_errno;		\
-	}
-
 typedef void (*ctrl_c_fn)(void);
 
 /* authkeys.c */
