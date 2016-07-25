@@ -745,14 +745,10 @@ refclock_open(
 	/* refclock_open() long returned 0 on failure, avoid it. */
 	if (0 == fd) {
 		fd = dup(0);
-		SAVE_ERRNO(
-			close(0);
-		)
+		close(0);
 	}
 	if (fd < 0) {
-		SAVE_ERRNO(
-			msyslog(LOG_ERR, "refclock_open %s: %m", dev);
-		)
+		msyslog(LOG_ERR, "refclock_open %s: %m", dev);
 		return -1;
 	}
 	if (!refclock_setup(fd, speed, lflags)) {
@@ -800,11 +796,7 @@ refclock_setup(
 	 * POSIX serial line parameters (termios interface)
 	 */
 	if (tcgetattr(fd, ttyp) < 0) {
-		SAVE_ERRNO(
-			msyslog(LOG_ERR,
-				"refclock_setup fd %d tcgetattr: %m",
-				fd);
-		)
+		msyslog(LOG_ERR, "refclock_setup fd %d tcgetattr: %m", fd);
 		return false;
 	}
 
@@ -858,11 +850,7 @@ refclock_setup(
 	if (lflags & LDISC_ECHO)
 		ttyp->c_lflag |= ECHO;
 	if (tcsetattr(fd, TCSANOW, ttyp) < 0) {
-		SAVE_ERRNO(
-			msyslog(LOG_ERR,
-				"refclock_setup fd %d TCSANOW: %m",
-				fd);
-		)
+		msyslog(LOG_ERR, "refclock_setup fd %d TCSANOW: %m", fd);
 		return false;
 	}
 
