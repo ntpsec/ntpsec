@@ -172,7 +172,7 @@ static double sys_mindly;	/* huff-n'-puff filter min delay */
 /* Emacs cc-mode goes nuts if we split the next line... */
 #define MOD_BITS (MOD_OFFSET | MOD_MAXERROR | MOD_ESTERROR | \
     MOD_STATUS | MOD_TIMECONST)
-#ifdef SIGSYSx
+#ifdef SIGSYS
 static void pll_trap (int);	/* configuration trap */
 static struct sigaction sigsys;	/* current sigaction status */
 static struct sigaction newsigsys; /* new sigaction status */
@@ -1103,7 +1103,7 @@ start_kern_loop(void)
 	ntv.maxerror = MAXDISPERSE;
 	ntv.esterror = MAXDISPERSE;
 	ntv.constant = sys_poll; /* why is it that here constant is unconditionally set to sys_poll, whereas elsewhere is is modified depending on nanosecond vs. microsecond kernel? */
-#ifdef SIGSYSx
+#ifdef SIGSYS
 	/*
 	 * Use sigsetjmp() to save state and then call ntp_adjtime(); if
 	 * it fails, then pll_trap() will set pll_control false before
@@ -1361,7 +1361,7 @@ loop_config(
 }
 
 
-#if defined(HAVE_KERNEL_PLL) && defined(SIGSYSx)
+#if defined(HAVE_KERNEL_PLL) && defined(SIGSYS)
 /*
  * _trap - trap processor for undefined syscalls
  *
