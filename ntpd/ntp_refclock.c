@@ -847,8 +847,6 @@ refclock_setup(
 		ttyp->c_iflag = 0;
 		ttyp->c_cc[VMIN] = 1;
 	}
-	if (lflags & LDISC_ECHO)
-		ttyp->c_lflag |= ECHO;
 	if (tcsetattr(fd, TCSANOW, ttyp) < 0) {
 		msyslog(LOG_ERR, "refclock_setup fd %d TCSANOW: %m", fd);
 		return false;
