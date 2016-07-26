@@ -31,7 +31,6 @@
 #define LDISC_CHU	0x008	/* depredated */
 #define LDISC_PPS	0x010	/* depredated */
 #define LDISC_RAW	0x020	/* raw binary */
-#define LDISC_ECHO	0x040	/* enable echo */
 #define	LDISC_REMOTE	0x080	/* remote mode */
 #define	LDISC_7O1	0x100	/* 7-bit, odd parity for Z3801A */
 
