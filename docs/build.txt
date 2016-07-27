@@ -65,18 +65,9 @@ The first thing to do is uncompress the distribution and extract the
 source tree. In the distribution base directory use the
 +./waf configure+ command to perform an automatic configuration procedure.
 This command inspects the hardware and software environment and
-configures the build process accordingly. Use the +waf+ command to
-compile and link the distribution and the +install+ command to install
+configures the build process accordingly. Use the +./waf build+ command to
+compile and link the distribution and the +./waf install+ command to install
 the executables by default in +/usr/local/bin+.
-
-If your site supports multiple architectures and uses NFS to share
-files, you can use a single source tree to build executables for
-multiple architectures. While running on a particular architecture,
-change to the base directory and create a subdirectory using a command
-like +mkdir A.machine, +which will create an architecture-specific
-directory, then change to this directory and mumble +../configure+. The
-remaining steps are the same whether building in the base directory or
-in the subdirectory.
 
 [[win]]
 == Building and Installing for Windows ==
