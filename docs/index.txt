@@ -182,6 +182,9 @@ few will be user-visible.
   default device path, the default PPS device path (if any) and the
   serial baud rate.
 
+* If you had a refclock on a path of the form /dev/palisadeNNN, that
+  link needs to change to /dev/trimbleNNN.
+
 * The -!m, ->, and -< options of some Classic commands are not
   supported.  (The argument-parsing framework code that implemented
   them in Classic was overcomplicated and buggy and had to be removed.)

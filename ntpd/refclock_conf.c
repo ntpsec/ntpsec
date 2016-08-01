@@ -83,10 +83,10 @@ extern	struct refclock refclock_shm;
 #define refclock_shm refclock_none
 #endif
 
-#ifdef CLOCK_PALISADE 
-extern	struct refclock refclock_palisade;
+#ifdef CLOCK_TRIMBLE
+extern	struct refclock refclock_trimble;
 #else
-#define refclock_palisade refclock_none
+#define refclock_trimble refclock_none
 #endif
 
 #if defined(CLOCK_ONCORE)
@@ -171,7 +171,7 @@ struct refclock * const refclock_conf[] = {
 	&refclock_hpgps,	/* 26 REFCLK_GPS_HP */
 	&refclock_none, 	/* 27 was: REFCLK_ARCRON_MSF */
 	&refclock_shm,		/* 28 REFCLK_SHM */
-	&refclock_palisade,	/* 29 REFCLK_PALISADE */
+	&refclock_trimble,	/* 29 REFCLK_PALISADE */
 	&refclock_oncore,	/* 30 REFCLK_ONCORE */
 	&refclock_jupiter,	/* 31 REFCLK_GPS_JUPITER */
 	&refclock_none,		/* 32 was: REFCLK_CHRONOLOG */

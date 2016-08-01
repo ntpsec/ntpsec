@@ -162,7 +162,7 @@
     <ClCompile Include="..\..\..\..\ntpd\refclock_oncore.c">
       <Filter>Reference Clock</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\ntpd\refclock_palisade.c">
+    <ClCompile Include="..\..\..\..\ntpd\refclock_trimble.c">
       <Filter>Reference Clock</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\ntpd\refclock_parse.c">
@@ -414,9 +414,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\recvbuff.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\ntpd\refclock_palisade.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\lib\isc\include\isc\result.h">

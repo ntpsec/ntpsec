@@ -175,7 +175,7 @@ parse driver.
 |link:driver_pps.html[pps]              | T | PPS Clock Discipline
 |link:driver_hpgps.html[hpgps]          | T | Hewlett Packard GPS Receivers
 |link:driver_shm.html[shm]              | T | Shared Memory Driver
-|link:driver_palisade.html[palisade]    | T | Trimble Palisade/Thunderbolt GPS
+|link:driver_trimble.html[trimble]      | T | Trimble Palisade/Thunderbolt/Acutime GPSes
 |link:driver_oncore.html[oncore]        | - | Motorola UT Oncore GPS
 |link:driver_jupiter.html[jupiter]      | D | Rockwell Jupiter GPS
 |link:driver_dumbclock.html[dumbclock]  | D | Dumb Clock

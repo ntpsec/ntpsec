@@ -77,10 +77,10 @@ refclock_map = {
 		"file":		"shm"
 	},
 
-	"palisade": {
-		"descr":	"Trimble Navigation Palisade GPS",
-		"define":	"CLOCK_PALISADE",
-		"file":		"palisade"
+	"trimble": {
+		"descr":	"Trimble Navigation GPSes",
+		"define":	"CLOCK_TRIMBLE",
+		"file":		"trimble"
 	},
 
 	"oncore": {
