@@ -7,7 +7,6 @@
 #include <stddef.h>
 #include <math.h>
 
-#if (_XOPEN_SOURCE >= 600) || (__STDC_VERSION__ >= 199901L)
 /*
  * Supply GCCisms that stop being visible if we tell it we need the
  * prototype for strptime(3).
@@ -15,7 +14,6 @@
 typedef unsigned long	u_long;
 typedef unsigned short	u_short;
 typedef unsigned int	u_int;
-#endif
 
 #include <ntp_fp.h>
 #include <ntp_types.h>
