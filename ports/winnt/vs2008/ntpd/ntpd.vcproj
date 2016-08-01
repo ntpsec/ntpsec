@@ -689,10 +689,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\..\ntpd\refclock_palisade.h"
-				>
-			</File>
-			<File
 				RelativePath="..\..\..\..\lib\isc\include\isc\result.h"
 				>
 			</File>
@@ -842,7 +838,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\..\ntpd\refclock_palisade.c"
+				RelativePath="..\..\..\..\ntpd\refclock_trimble0.c"
 				>
 			</File>
 			<File

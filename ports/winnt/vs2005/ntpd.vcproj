@@ -1387,7 +1387,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\..\..\ntpd\refclock_palisade.c"
+				RelativePath="..\..\..\ntpd\refclock_trimble.c"
 				>
 				<FileConfiguration
 					Name="Release|Win32"
@@ -1407,10 +1407,6 @@
 						PreprocessorDefinitions=""
 					/>
 				</FileConfiguration>
-			</File>
-			<File
-				RelativePath="..\..\..\ntpd\refclock_palisade.h"
-				>
 			</File>
 			<File
 				RelativePath="..\..\..\ntpd\refclock_parse.c"

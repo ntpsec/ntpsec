@@ -1,9 +1,9 @@
 /*
- * refclock_palisade - clock driver for the Trimble Palisade GPS
- * timing receiver
+ * refclock_trimble - clock driver for the Trimble Palisade
+ * Thunderbolt, and Acutime Gold timing receivers
  *
  * For detailed information on this program, please refer to the html 
- * Refclock 29 page accompanying the NTP distribution.
+ * refclock_trimble.html page accompanying the NTP distribution.
  *
  * for questions / bugs / comments, contact:
  * sven_dietrich@trimble.com
@@ -44,30 +44,6 @@
 # include <sys/ioctl.h>
 #endif /* not HAVE_SYS_IOCTL_H */
 
-/*
- * refclock_palisade - clock driver for the Trimble Palisade GPS
- * timing receiver
- *
- * For detailed information on this program, please refer to the html 
- * Refclock 29 page accompanying the NTP distribution.
- *
- * for questions / bugs / comments, contact:
- * sven_dietrich@trimble.com
- *
- * Sven-Thorsten Dietrich
- * 645 North Mary Avenue
- * Post Office Box 3642
- * Sunnyvale, CA 94088-3642
- *
- * This software was developed by the Software and Component Technologies
- * group of Trimble Navigation, Ltd.
- *
- * Copyright (c) 1997, 1998, 1999, 2000   Trimble Navigation Ltd.
- * Copyright 2015 by the NTPsec project contributors
- * SPDX-License-Identifier: BSD-4-clause
- *
- */
-
 #if defined HAVE_SYS_MODEM_H
 #include <sys/modem.h>
 #endif
@@ -89,8 +65,8 @@
 /*
  * GPS Definitions
  */
-#define	DESCRIPTION	"Trimble Palisade GPS" /* Long name */
-#define NAME		"PALISADE"	/* shortname */
+#define	DESCRIPTION	"Trimble Palisade/Thunderbolt/Acutime GPSes" /* Long name */
+#define NAME		"TRIMBLE"	/* shortname */
 #define	PRECISION	(-20)		/* precision assumed (about 1 us) */
 #define	REFID		"GPS\0"		/* reference ID */
 #define TRMB_MINPOLL    4		/* 16 seconds */
@@ -99,14 +75,14 @@
 /*
  * I/O Definitions
  */
-#define	DEVICE		"/dev/palisade%d" 	/* device name and unit */
+#define	DEVICE		"/dev/trimble%d" 	/* device name and unit */
 #define	SPEED232	B9600		  	/* uart speed (9600 baud) */
 
 /*
  * TSIP Report Definitions
  */
 #define LENCODE_8F0B	74	/* Length of TSIP 8F-0B Packet & header */
-#define LENCODE_NTP     22	/* Length of Palisade NTP Packet */
+#define LENCODE_NTP     22	/* Length of Trimble NTP Packet */
 
 #define LENCODE_8FAC    68      /* Length of Thunderbolt 8F-AC Position Packet*/
 #define LENCODE_8FAB    17      /* Length of Thunderbolt Primary Timing Packet*/
@@ -137,13 +113,13 @@
 
 /* 
  * Leap-Insert and Leap-Delete are encoded as follows:
- * 	PALISADE_UTC_TIME set   and PALISADE_LEAP_PENDING set: INSERT leap
+ * 	TRIMBLE_UTC_TIME set   and TRIMBLE_LEAP_PENDING set: INSERT leap
  */
 
-#define PALISADE_LEAP_INPROGRESS 0x08 /* This is the leap flag			*/
-#define PALISADE_LEAP_WARNING    0x04 /* GPS Leap Warning (see ICD-200) */
-#define PALISADE_LEAP_PENDING    0x02 /* Leap Pending (24 hours)		*/
-#define PALISADE_UTC_TIME        0x01 /* UTC time available				*/
+#define TRIMBLE_LEAP_INPROGRESS 0x08 /* This is the leap flag			*/
+#define TRIMBLE_LEAP_WARNING    0x04 /* GPS Leap Warning (see ICD-200) */
+#define TRIMBLE_LEAP_PENDING    0x02 /* Leap Pending (24 hours)		*/
+#define TRIMBLE_UTC_TIME        0x01 /* UTC time available				*/
 
 #define mb(_X_) (up->rpt_buf[(_X_ + 1)]) /* shortcut for buffer access	*/
 
@@ -162,9 +138,9 @@ struct packettx
 };
 
 /*
- * Palisade unit control structure.
+ * Trimble unit control structure.
  */
-struct palisade_unit {
+struct trimble_unit {
 	short		unit;		/* NTP refclock unit number */
 	int 		polled;		/* flag to detect noreplies */
 	char		leap_status;	/* leap second flag */
@@ -179,12 +155,12 @@ struct palisade_unit {
  * Function prototypes
  */
 
-static	bool	palisade_start		(int, struct peer *);
-static	void	palisade_shutdown	(int, struct peer *);
-static	void	palisade_receive	(struct peer *);
-static	void	palisade_poll		(int, struct peer *);
-static	void 	palisade_io		(struct recvbuf *);
-int 		palisade_configure	(int, struct peer *);
+static	bool	trimble_start		(int, struct peer *);
+static	void	trimble_shutdown	(int, struct peer *);
+static	void	trimble_receive	(struct peer *);
+static	void	trimble_poll		(int, struct peer *);
+static	void 	trimble_io		(struct recvbuf *);
+int 		trimble_configure	(int, struct peer *);
 int 		TSIP_decode		(struct peer *);
 long		HW_poll			(struct refclockproc *);
 static	double	getdbl 			(uint8_t *);
@@ -221,11 +197,11 @@ const char * Tracking_Status[15][15] = {
 /*
  * Transfer vector
  */
-struct refclock refclock_palisade = {
+struct refclock refclock_trimble = {
 	NAME,			/* basename of driver */
-	palisade_start,		/* start up driver */
-	palisade_shutdown,	/* shut down driver */
-	palisade_poll,		/* transmit poll message */
+	trimble_start,		/* start up driver */
+	trimble_shutdown,	/* shut down driver */
+	trimble_poll,		/* transmit poll message */
 	noentry,		/* control - not used  */
 	noentry,		/* initialize driver (not used) */
 	noentry			/* timer - not used */
@@ -383,15 +359,15 @@ init_acutime (
 }
 
 /*
- * palisade_start - open the devices and initialize data for processing
+ * trimble_start - open the devices and initialize data for processing
  */
 static bool
-palisade_start (
+trimble_start (
 	int unit,
 	struct peer *peer
 	)
 {
-	struct palisade_unit *up;
+	struct trimble_unit *up;
 	struct refclockproc *pp;
 	int fd;
 	char gpsdev[20];
@@ -407,20 +383,20 @@ palisade_start (
 			   LDISC_RAW);
 	if (fd <= 0) {
 #ifdef DEBUG
-		printf("Palisade(%d) start: open %s failed\n", unit, gpsdev);
+		printf("Trimble(%d) start: open %s failed\n", unit, gpsdev);
 #endif
 		/* coverity[leaked_handle] */
 		return false;
 	}
 
-	msyslog(LOG_NOTICE, "Palisade(%d) fd: %d dev: %s", unit, fd,
+	msyslog(LOG_NOTICE, "Trimble(%d) fd: %d dev: %s", unit, fd,
 		gpsdev);
 
 	if (tcgetattr(fd, &tio) < 0) {
 		msyslog(LOG_ERR, 
-			"Palisade(%d) tcgetattr(fd, &tio): %m",unit);
+			"Trimble(%d) tcgetattr(fd, &tio): %m",unit);
 #ifdef DEBUG
-		printf("Palisade(%d) tcgetattr(fd, &tio)\n",unit);
+		printf("Trimble(%d) tcgetattr(fd, &tio)\n",unit);
 #endif
 		close(fd);
 		return false;
@@ -440,26 +416,26 @@ palisade_start (
 		/* Normal mode, do nothing */
 		break;
 	    case CLK_PRAECIS:
-		msyslog(LOG_NOTICE, "Palisade(%d) Praecis mode enabled"
+		msyslog(LOG_NOTICE, "Trimble(%d) Praecis mode enabled"
 			,unit);
 		break;
 	    case CLK_THUNDERBOLT:
-		msyslog(LOG_NOTICE, "Palisade(%d) Thunderbolt mode enabled"
+		msyslog(LOG_NOTICE, "Trimble(%d) Thunderbolt mode enabled"
 			,unit);
 		tio.c_cflag = (CS8|CLOCAL|CREAD);
 		break;
 	    case CLK_ACUTIME:
-		msyslog(LOG_NOTICE, "Palisade(%d) Acutime Gold mode enabled"
+		msyslog(LOG_NOTICE, "Trimble(%d) Acutime Gold mode enabled"
 			,unit);
 		break;
 	    default:
-		msyslog(LOG_NOTICE, "Palisade(%d) mode unknown",unit);
+		msyslog(LOG_NOTICE, "Trimble(%d) mode unknown",unit);
 		break;
 	}
 	if (tcsetattr(fd, TCSANOW, &tio) == -1) {
-		msyslog(LOG_ERR, "Palisade(%d) tcsetattr(fd, &tio): %m",unit);
+		msyslog(LOG_ERR, "Trimble(%d) tcsetattr(fd, &tio): %m",unit);
 #ifdef DEBUG
-		printf("Palisade(%d) tcsetattr(fd, &tio)\n",unit);
+		printf("Trimble(%d) tcsetattr(fd, &tio)\n",unit);
 #endif
 		close(fd);
 		free(up);
@@ -467,13 +443,13 @@ palisade_start (
 	}
 
 	pp = peer->procptr;
-	pp->io.clock_recv = palisade_io;
+	pp->io.clock_recv = trimble_io;
 	pp->io.srcclock = peer;
 	pp->io.datalen = 0;
 	pp->io.fd = fd;
 	if (!io_addclock(&pp->io)) {
 #ifdef DEBUG
-		printf("Palisade(%d) io_addclock\n",unit);
+		printf("Trimble(%d) io_addclock\n",unit);
 #endif
 		close(fd);
 		pp->io.fd = -1;
@@ -509,15 +485,15 @@ palisade_start (
 
 
 /*
- * palisade_shutdown - shut down the clock
+ * trimble_shutdown - shut down the clock
  */
 static void
-palisade_shutdown (
+trimble_shutdown (
 	int unit,
 	struct peer *peer
 	)
 {
-	struct palisade_unit *up;
+	struct trimble_unit *up;
 	struct refclockproc *pp;
 
 	UNUSED_ARG(unit);
@@ -573,7 +549,7 @@ TSIP_decode (
 	double secfrac;
 	unsigned short event = 0;
 
-	struct palisade_unit *up;
+	struct trimble_unit *up;
 	struct refclockproc *pp;
 
 	pp = peer->procptr;
@@ -594,7 +570,7 @@ TSIP_decode (
 
 			/* standard time packet - GPS time and GPS week number */
 #ifdef DEBUG
-			printf("Palisade Port B packets detected. Connect to Port A\n");
+			printf("Trimble Port B packets detected. Connect to Port A\n");
 #endif
 
 			return 0;
@@ -689,7 +665,7 @@ TSIP_decode (
 			break;
 
 		    case PACKET_NTP:
-			/* Palisade-NTP Packet */
+			/* Trimble-NTP Packet */
 
 			if (up->rpt_cnt != LENCODE_NTP) /* check length */
 				break;
@@ -715,10 +691,10 @@ TSIP_decode (
 			}
 
 			up->month = mb(15);
-			if ( (up->leap_status & PALISADE_LEAP_PENDING) &&
+			if ( (up->leap_status & TRIMBLE_LEAP_PENDING) &&
 			/* Avoid early announce: https://bugs.ntp.org/2773 */
 				(6 == up->month || 12 == up->month) ) {
-				if (up->leap_status & PALISADE_UTC_TIME)  
+				if (up->leap_status & TRIMBLE_UTC_TIME)  
 					pp->leap = LEAP_ADDSECOND;
 				else
 					pp->leap = LEAP_DELSECOND;
@@ -1019,15 +995,15 @@ TSIP_decode (
 }
 
 /*
- * palisade__receive - receive data from the serial interface
+ * trimble__receive - receive data from the serial interface
  */
 
 static void
-palisade_receive (
+trimble_receive (
 	struct peer * peer
 	)
 {
-	struct palisade_unit *up;
+	struct trimble_unit *up;
 	struct refclockproc *pp;
 
 	/*
@@ -1046,7 +1022,7 @@ palisade_receive (
 #ifdef DEBUG
 	if (debug) 
 		printf(
-			"palisade_receive: unit %d: %4d %03d %02d:%02d:%02d.%09ld\n",
+			"trimble_receive: unit %d: %4d %03d %02d:%02d:%02d.%09ld\n",
 			up->unit, pp->year, pp->day, pp->hour, pp->minute, 
 			pp->second, pp->nsec);
 #endif
@@ -1067,7 +1043,7 @@ palisade_receive (
 		refclock_report(peer, CEVNT_BADTIME);
 
 #ifdef DEBUG
-		printf("palisade_receive: unit %d: refclock_process failed!\n",
+		printf("trimble_receive: unit %d: refclock_process failed!\n",
 		       up->unit);
 #endif
 		return;
@@ -1077,7 +1053,7 @@ palisade_receive (
 
 #ifdef DEBUG
 	if (debug)
-		printf("palisade_receive: unit %d: %s\n",
+		printf("trimble_receive: unit %d: %s\n",
 		       up->unit, prettydate(&pp->lastrec));
 #endif
 	pp->lastref = pp->lastrec;
@@ -1086,16 +1062,16 @@ palisade_receive (
 
 
 /*
- * palisade_poll - called by the transmit procedure
+ * trimble_poll - called by the transmit procedure
  *
  */
 static void
-palisade_poll (
+trimble_poll (
 	int unit,
 	struct peer *peer
 	)
 {
-	struct palisade_unit *up;
+	struct trimble_unit *up;
 	struct refclockproc *pp;
 	
 	pp = peer->procptr;
@@ -1109,7 +1085,7 @@ palisade_poll (
 	
 #ifdef DEBUG
 	if (debug)
-		printf("palisade_poll: unit %d: polling %s\n", unit,
+		printf("trimble_poll: unit %d: polling %s\n", unit,
 		       (pp->sloppyclockflag & CLK_FLAG2) ? 
 		       "synchronous packet" : "event");
 #endif 
@@ -1119,7 +1095,7 @@ palisade_poll (
 
 	if(up->type == CLK_PRAECIS) {
 		if(write(peer->procptr->io.fd,"SPSTAT\r\n",8) < 0)
-			msyslog(LOG_ERR, "Palisade(%d) write: %m:",unit);
+			msyslog(LOG_ERR, "Trimble(%d) write: %m:",unit);
 		else {
 			praecis_msg = true;
 			return;
@@ -1159,14 +1135,14 @@ praecis_parse (
 }
 
 static void
-palisade_io (
+trimble_io (
 	struct recvbuf *rbufp
 	)
 {
 	/*
 	 * Initialize pointers and read the timecode and timestamp.
 	 */
-	struct palisade_unit *up;
+	struct trimble_unit *up;
 	struct refclockproc *pp;
 	struct peer *peer;
 
@@ -1256,14 +1232,14 @@ palisade_io (
 			up->rpt_status =TSIP_PARSED_EMPTY;
 
 		if (up->rpt_status == TSIP_PARSED_FULL) 
-			palisade_receive(peer);
+			trimble_receive(peer);
 
 	} /* while chars in buffer */
 }
 
 
 /*
- * Trigger the Palisade's event input, which is driven off the RTS
+ * Trigger the Trimble's event input, which is driven off the RTS
  *
  * Take a system time stamp to match the GPS time stamp.
  *
@@ -1274,15 +1250,15 @@ HW_poll (
 	)
 {	
 	int x;	/* state before & after RTS set */
-	struct palisade_unit *up;
+	struct trimble_unit *up;
 
 	up = pp->unitptr;
 
 	/* read the current status, so we put things back right */
 	if (ioctl(pp->io.fd, TIOCMGET, &x) < 0) {
-		DPRINTF(1, ("Palisade HW_poll: unit %d: GET %m\n",
+		DPRINTF(1, ("Trimble HW_poll: unit %d: GET %m\n",
 			up->unit));
-		msyslog(LOG_ERR, "Palisade(%d) HW_poll: ioctl(fd,GET): %m", 
+		msyslog(LOG_ERR, "Trimble(%d) HW_poll: ioctl(fd,GET): %m", 
 			up->unit);
 		return -1;
 	}
@@ -1296,10 +1272,10 @@ HW_poll (
 	if (ioctl(pp->io.fd, TIOCMSET, &x) < 0) { 
 #ifdef DEBUG
 		if (debug)
-			printf("Palisade HW_poll: unit %d: SET \n", up->unit);
+			printf("Trimble HW_poll: unit %d: SET \n", up->unit);
 #endif
 		msyslog(LOG_ERR,
-			"Palisade(%d) HW_poll: ioctl(fd, SET, RTS_on): %m", 
+			"Trimble(%d) HW_poll: ioctl(fd, SET, RTS_on): %m", 
 			up->unit);
 		return -1;
 	}
@@ -1312,10 +1288,10 @@ HW_poll (
 	if (ioctl(pp->io.fd, TIOCMSET, &x) == -1) {
 #ifdef DEBUG
 		if (debug)
-			printf("Palisade HW_poll: unit %d: UNSET \n", up->unit);
+			printf("Trimble HW_poll: unit %d: UNSET \n", up->unit);
 #endif
 		msyslog(LOG_ERR,
-			"Palisade(%d) HW_poll: ioctl(fd, UNSET, RTS_off): %m", 
+			"Trimble(%d) HW_poll: ioctl(fd, UNSET, RTS_off): %m", 
 			up->unit);
 		return -1;
 	}

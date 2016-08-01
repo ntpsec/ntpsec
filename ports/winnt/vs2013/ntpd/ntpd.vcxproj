@@ -303,7 +303,7 @@
     <ClCompile Include="..\..\..\..\ntpd\refclock_neoclock4x.c" />
     <ClCompile Include="..\..\..\..\ntpd\refclock_nmea.c" />
     <ClCompile Include="..\..\..\..\ntpd\refclock_oncore.c" />
-    <ClCompile Include="..\..\..\..\ntpd\refclock_palisade.c" />
+    <ClCompile Include="..\..\..\..\ntpd\refclock_trimble.c" />
     <ClCompile Include="..\..\..\..\ntpd\refclock_parse.c" />
     <ClCompile Include="..\..\..\..\ntpd\refclock_pst.c" />
     <ClCompile Include="..\..\..\..\ntpd\refclock_ripencc.c" />
@@ -412,7 +412,6 @@
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">..\..\..\..\ntpd\ntp_keyword.h;..\..\..\..\ntpd\keyword-gen-utd</Outputs>
     </CustomBuild>
     <ClInclude Include="..\..\..\..\ntpd\ntp_scanner.h" />
-    <ClInclude Include="..\..\..\..\ntpd\refclock_palisade.h" />
     <ClInclude Include="..\..\include\arpa\inet.h" />
     <ClInclude Include="..\..\include\clockstuff.h" />
     <ClInclude Include="..\..\include\config.h" />

@@ -1,4 +1,4 @@
-= Trimble Palisade and Thunderbolt Receivers =
+= Trimble Palisade/Thunderbolt/Acutime Receivers =
 
 [width="100%",cols="<50%,<50%",frame="none",grid="none"]
 |==============================================================
@@ -7,13 +7,13 @@
 
 == Synopsis ==
 ["verse",subs="normal"]
-Name: palisade
+Name: trimble
 Reference ID: GPS
-Serial Port: +/dev/palisade+__u__; 9600bps 8N1/8O1
+Serial Port: +/dev/trimble+__u__; 9600bps 8N1/8O1
 
 == Description ==
 
-The *refclock palisade* driver supports
+The *refclock trimble* driver supports
 ftp://ftp.trimble.com/pub/sct/embedded/bin/Manuals/Old%20Manuals/PALISADE.PDF[Trimble
 Navigation's Palisade Smart Antenna GPS receiver].
 
@@ -34,11 +34,11 @@ documentation for more information.
 
 == Operating System Compatibility ==
 
-Note: There is no current support from either Trimble or HP for this
+Note: There is no current support from Trimble for this
 product, and the links in the following table are the last known
 location of resources.
 
-The Palisade driver has been tested on the following software and
+The Trimble driver has been tested on the following software and
 hardware platforms:
 
 [width="100%",cols="<25%,<25%,<25%,<25%",frame="none",grid="none",options="header"]
@@ -103,7 +103,7 @@ Palisade NTP reference clock driver.
 
 == O/S Serial Port Configuration ==
 
-The driver attempts to open the device +/dev/palisade+__u__ where 'u' is
+The driver attempts to open the device +/dev/trimble+__u__ where 'u' is
 the NTP refclock unit number as defined by the LSB of the refclock
 address.  Valid refclock unit numbers are 0 - 3.
 
@@ -111,7 +111,7 @@ The user is expected to provide a symbolic link to an available serial
 port device.  This is typically performed by a command such as:
 
 ---------------------------------
-ln -s /dev/ttyS0 /dev/palisade0
+ln -s /dev/ttyS0 /dev/trimble0
 ---------------------------------
 
 Windows NT does not support symbolic links to device files. COM**x**: is
@@ -124,12 +124,12 @@ parity).
 [[Configuration]]
 == NTP Configuration ==
 
-Palisade NTP configuration file "{ntpconf}" with event polling:
+Trimble NTP configuration file "{ntpconf}" with event polling:
 
 ["literal",subs="normal"]
 #------------------------------------------------------------------------------
 # The Primary reference
-refclock palisade unit 0
+refclock trimble unit 0
 peer terrapin.csc.ncsu.edu # internet server
 # Drift file for expedient re-synchronization after downtime or reboot.
 driftfile /etc/ntp.drift
@@ -141,7 +141,7 @@ Configuration without event polling:
 #------------------------------------------------------------------------------
 # The Primary reference.
 # Set packet delay and set flag2 to turn off event polling.
-refclock palisade unit 0 link:#time1[time1 0.020] link:#flag2[flag2 1]
+refclock trimble unit 0 link:#time1[time1 0.020] link:#flag2[flag2 1]
 #------------------------------------------------------------------------------
 
 == Thunderbolt NTP Configuration file ==
@@ -151,7 +151,7 @@ Configuration without event polling:
 ["literal",subs="normal"]
 #------------------------------------------------------------------------------
 # The Primary reference
-refclock palisade unit 0 mode 2 link:#time1[time1 0.020] link:#flag2[flag2 1]
+refclock trimble unit 0 mode 2 link:#time1[time1 0.020] link:#flag2[flag2 1]
 #------------------------------------------------------------------------------
 
 Currently the Thunderbolt mode doesn't support event polling, the
@@ -239,7 +239,8 @@ link:#refid[+refid string+]::
    The mode parameter to the server command specifies the specific hardware
    this driver is for. The default is 0 for a normal Trimble Palisade. The
    other options are *1* for an *Endrun Praecis* in Trimble emulation mode,
-   and *2* for the *Trimble Thunderbolt* GPS Disciplined Clock Receiver.
+   *2* for the *Trimble Thunderbolt* GPS Disciplined Clock Receiver,
+   *3* for the Trimble Acutime Gold, and *4* for the Acutime Gold port B.
 
 +mode+ 'number'::
    Synonym for subtype, retained for backward compatibility.
@@ -504,7 +505,7 @@ connector are as follows:*
 
 == Notes on the Thunderbolt Receiver's Firmware ==
 
-*The support for Thunderbolt Receiver in the palisade driver doesn't
+*The support for Thunderbolt Receiver in the trimble driver doesn't
 support (for now) event-polling, the reason is that the Thunderbolt
 receiver the patch is written for doesn't support time-on-request, so
 you just have to sit there and wait for the time to arrive with the PPS.
