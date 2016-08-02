@@ -192,7 +192,7 @@ configuration).
 7.  The driver reports the link:#TrackingStatus[tracking status of the
 receiver]. Make sure it is tracking several satellites.
 8.  Remove the +flag2+ option and restart the daemon in debug mode to observe
-palisade_receive events.
+trimble_receive events.
 9.  If event polling fails, verify the link:#Pinouts[connections] and
 that the host hardware supports RTS control.
 
@@ -258,7 +258,7 @@ link:#refid[+refid string+]::
 == Configuration Example ==
 
 ----------------------------------------------------------------------------
-refclock palisade
+refclock trimble
 ----------------------------------------------------------------------------
 
 == DEFINEs ==
@@ -270,7 +270,7 @@ systems.
 [width="50%",cols="<34%,<33%,<33%",options="header"]
 |===============================================================================
 | *Label*    | Definition                                      |Default Value
-| DEVICE     | The serial port device to be used by the driver | /dev/palisade__u__
+| DEVICE     | The serial port device to be used by the driver | /dev/trimble__u__
 | PRECISION  | Accuracy of time transfer                       | 1 microsecond
 |CURRENT_UTC | Valid GPS - UTC offset                          | 13
 |SPEED232    | Host RS-232 baud rate                           | B9600
