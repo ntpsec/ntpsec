@@ -69,7 +69,7 @@ enough to have a fully POSIX.1-2001-conformant Unix.
 
 === Clock bump ===
 
-Sometimes it is diagnostically interesting to peturb your clock in
+Sometimes it is diagnostically interesting to perturb your clock in
 order to watch how {ntpd} responds and makes corrections. This
 option does that.
 
