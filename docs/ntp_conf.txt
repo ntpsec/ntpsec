@@ -132,20 +132,20 @@ default token.
   +create_priority_queue+ function with the +get_fifo_order+ function
   as its argument.
 +void destroy_queue(queue *my_queue)+::
-  This function deletes _+my_queue+_ and frees up all the memory
+  This function deletes _my_queue_ and frees up all the memory
   allocated to it an its elements.
 +int empty(queue *my_queue)+::
-  This function checks to see if _+my_queue+_ is empty. Returns +true+
-  if _+my_queue+_ does not have any elements, else it returns false.
+  This function checks to see if _my_queue_ is empty. Returns +true+
+  if _my_queue_ does not have any elements, else it returns +false+.
 +queue *enqueue(queue *my_queue, void *my_node)+::
-  This function adds an element, _+my_node+_, to a queue, _+my_queue+_.
-  _+my_node+_ must be allocated on the heap using the +get_node+
+  This function adds an element, _my_node_, to a queue, _my_queue_.
+  _my_node_ must be allocated on the heap using the +get_node+
   function instead of +malloc+.
 +void *dequeue(queue *my_queue)+::
   This function returns the element at the front of the queue. This
-  element will be element with the highest priority.
+  element will be ithe element with the highest priority.
 +int get_no_of_elements(queue *my_queue)+::
-  This function returns the number of elements in _+my_queue+_.
+  This function returns the number of elements in _my_queue_.
 +void append_queue(queue *q1, queue *q2)+::
   This function adds all the elements of +q2+ to +q1+. The queue +q2+ is
   destroyed in the process.

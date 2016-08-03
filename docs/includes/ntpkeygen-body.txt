@@ -365,15 +365,15 @@ and the program exits with a suitable error message.
 [[crypto]]
 == Cryptographic Data Files ==
 
-File and link names are in the form _+ntpkey_key_name.fstamp+_, where
-_+key+_ is the key or parameter type, _+name+_ is the host or group name and
-_+fstamp+_ is the filestamp (NTP seconds) when the file was created). By
-convention, _+key+_ names in generated file names include both upper and
-lower case characters, while _+key+_ names in generated link names
+File and link names are in the form _ntpkey_key_name.fstamp_, where
+_key_ is the key or parameter type, _name_ is the host or group name and
+_fstamp_ is the filestamp (NTP seconds) when the file was created). By
+convention, _key_ names in generated file names include both upper and
+lower case characters, while _key_ names in generated link names
 include only lower case characters. The filestamp is not used in
 generated link names.
 
-The _+key+_ name is a string defining the cryptographic key type. Key
+The _key_ name is a string defining the cryptographic key type. Key
 types include public/private keys +host+ and +sign+, certificate +cert+
 and several challenge/response key types. By convention, client files
 used for challenges have a +par+ subtype, as in the IFF challenge
