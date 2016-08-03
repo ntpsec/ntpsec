@@ -38,7 +38,7 @@ well. See information specific to each clock for further details.
 |+49213+        |MJD     |date
 |+525.624+      |s       |time past midnight
 |+SPECTRACOM(4)+|IP      |reference clock type and unit
-|_+message+_    |text    |log message
+|_message_      |text    |log message
 |===============================================
 +
 The first two fields show the date (Modified Julian Day) and time
@@ -81,7 +81,7 @@ time constant.
     Record significant peer and system events. Each significant
     event appends one line to the +protostats+ file set:
 +
-+49213 525.624 128.4.1.1 963a 8a+ _+message+_
++49213 525.624 128.4.1.1 963a 8a+ _message_
 +
 [width="100%",cols="<34%,<33%,<33%"]
 |====================================
@@ -91,10 +91,10 @@ time constant.
 |+128.4.1.1+|IP        |source address (+0.0.0.0+ for system)
 |+963a+     |code      |status word
 |+8a+       |code      |event message code
-|_+message+_|text      |event message
+|_message_  |text      |event message
 |====================================
 +
-The event message code and _+message+_ field are described on the
+The event message code and _message_ field are described on the
 "Event Messages and Status Words" page.
 
   +peerstats+;;
@@ -254,7 +254,7 @@ The remaining fields show the values used since the last report.
 |+10.0.3.5+   |IP       |server address
 |+1+          |#        |event count
 |+0.000014592+|s        |total time
-|_+message+_  |text     |code path description (see source)
+|_message_    |text     |code path description (see source)
 |====================================
 
   +statsdir+ _directory_path_;;

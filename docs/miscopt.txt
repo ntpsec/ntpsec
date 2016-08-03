@@ -33,8 +33,8 @@ include::includes/misc-options.txt[]
   discovery schemes. The options are as follows:
   +beacon+ 'beacon';;
     The manycast server sends packets at intervals of 64 s if less than
-    +maxclock+ servers are available. Otherwise, it sends packets at the
-    _+beacon+_ interval in seconds. The default is 3600 s. See the
+    _maxclock_ servers are available. Otherwise, it sends packets at the
+    _beacon_ interval in seconds. The default is 3600 s. See the
     link:discover.html[Automatic Server Discovery] page for further
     details.
   +ceiling+ 'ceiling';;

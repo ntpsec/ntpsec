@@ -80,7 +80,7 @@ and that file system links, symbolic or otherwise, should be avoided.
   whether input is dropped without processing. The first parameter
   determines the action for addresses which match the second parameter.
   That parameter specifies a class of addresses, or a specific interface
-  name, or an address. In the address case, _+prefixlen+_ determines how
+  name, or an address. In the address case, _prefixlen_ determines how
   many bits must match for this rule to apply. +ignore+ prevents opening
   matching addresses, +drop+ causes +{ntpd}+ to open the address and drop
   all received packets without examination. Multiple +interface+
@@ -181,7 +181,7 @@ and so on is suppressed.
     entries or kilobytes. The default is 4 kilobytes.
 
 +nonvolatile+ 'threshold'::
-  Specify the _+threshold+_ in seconds to write the frequency file, with
+  Specify the _threshold_ in seconds to write the frequency file, with
   default of 1e-7 (0.1 PPM). The frequency file is inspected each hour.
   If the difference between the current frequency and the last value
   written exceeds the threshold, the file is written and the +threshold+
