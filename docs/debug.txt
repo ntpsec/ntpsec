@@ -133,7 +133,7 @@ select threshold, the server is considered invalid.
 
 Sometimes the time distribution of errors can be revealing. It's a
 good idea to look occasionally at the plots produced by
-link:ntpviz.html{ntpviz}].
+link:ntpviz.html[{ntpviz}].
 
 == Large Frequency Errors ==
 
