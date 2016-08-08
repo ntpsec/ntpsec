@@ -13,7 +13,6 @@ description: |
 confinement: devmode
 
 # TODO
-# - ntpd as daemon with autostart
 # - get proper access to conffiles (or snappy conf translator)
 # - fixup isolation to get it running in strict mode (might need new interfaces)
 # - leverage upstream ntp apparmor profile to stack on top of snappy isolation
@@ -37,7 +36,9 @@ apps:
     plugs: [network]
   ntpd:
     command: usr/local/sbin/ntpd
-    plugs: [network]
+    # that will auto-create systemd snap.ntpsec.ntpd.service for us
+    daemon: forking
+    plugs: [network, network-bind]
 
 parts:
   ntpsec:
