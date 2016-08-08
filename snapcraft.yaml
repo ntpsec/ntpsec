@@ -1,0 +1,64 @@
+name: ntpsec
+version: daily
+summary: a secure, hardened, and improved implementation of Network Time Protocol
+description: |
+        NTPsec, as its name implies, is a more secure NTP. Our goal is to
+        deliver code that can be used with confidence in deployments with the
+        most stringent security, availability, and assurance requirements.
+        Towards that end we apply best practices and state-of-the art
+        technology in code auditing, verification, and testing. We begin with
+        the most important best practice: true open-source code review.
+        The NTPsec code is available in a public git repository. One of our
+        goals is to support broader community participation.
+confinement: devmode
+
+# TODO
+# - ntpd as daemon with autostart
+# - get proper access to conffiles (or snappy conf translator)
+# - fixup isolation to get it running in strict mode (might need new interfaces)
+# - leverage upstream ntp apparmor profile to stack on top of snappy isolation
+# - leverage seccomp in ntp to be guarded on the snap level as well
+
+apps:
+  ntpdig:
+    command: usr/local/bin/ntpdig
+    plugs: [network]
+  ntpfrob:
+    command: usr/local/bin/ntpfrob
+    plugs: [network]
+  ntpkeygen:
+    command: usr/local/bin/ntpkeygen
+    plugs: [network]
+  ntpq:
+    command: usr/local/bin/ntpq
+    plugs: [network]
+  ntptime:
+    command: usr/local/bin/ntptime
+    plugs: [network]
+  ntpd:
+    command: usr/local/sbin/ntpd
+    plugs: [network]
+
+parts:
+  ntpsec:
+    source: .
+    plugin: waf
+    configflags:
+      - --check              # Run tests (as µ-CI)
+      - --refclock=all       # Build all Refclocks for Stratum 1 usage
+      - --enable-leap-smear  # Enable Leap Smearing.
+      - --enable-mssntp      # Enable Samba MSS NTP support.
+      - --enable-crypto      # Enable OpenSSL.
+      - --enable-seccomp     # Enable seccomp (restricts syscalls).
+    build-packages:
+      - asciidoc
+      - bison
+      - fonts-liberation
+      - gcc
+      - gnuplot
+      - libevent-dev
+      - libcap-dev
+      - libseccomp-dev
+      - libssl-dev
+      - libreadline-dev
+      - pps-tools
