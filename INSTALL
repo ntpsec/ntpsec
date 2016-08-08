@@ -23,7 +23,7 @@ bison::
 libcap::
    Required on Linux, to support dropping root.
    Fedora: libcap and libcap-devel
-   Debian: libcap2 and libcap-dev
+   Debian: libcap-dev (gets libcap2)
 
 gnuplot::
    Required for ntpviz.
@@ -37,7 +37,7 @@ psutils::
 libevent 2.x::
    Optional. Without it, ntpdig won't build. 
    Fedora: libevent and libevent-devel
-   Debian: libevent and libevent-dev
+   Debian: libevent-dev (gets further libevent-* dependencies)
 
    NetBSD: As installed, libevent is broken.  It links, but doesn't run.
      Here is a workaround:
@@ -53,13 +53,13 @@ OpenSSL::
    Optional, required for --enable-crypto.
    Enables encryption and authentication.
    Fedora: openssl-libs and openssl-devel
-   Debian: libssl1.0.0 and libssl-dev
+   Debian: libssl-dev (gets libssl1.0.0)
 
 GNU readline::
    Optional. Enhances ntpq's interactive mode by enabling line
    editing.
    Fedora: readline and readline-devel
-   Debian: libreadline6 and libreadline-dev
+   Debian: libreadline-dev (gets libreadline6)
 
 BSD libedit::
    Optional. Enhances ntpq's interactive mode by enabling line
@@ -85,7 +85,7 @@ asciidoc, a2x::
 liberation::
    Optional, improves font quality in ntpviz renderings.
    Fedora: liberation
-   Debian: liberation
+   Debian: fonts-liberation
 
 The OS X build has been tested in this environment:
 
