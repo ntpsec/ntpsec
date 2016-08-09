@@ -10,7 +10,10 @@
 #if (_XOPEN_SOURCE >= 600) || (__STDC_VERSION__ >= 199901L)
 /*
  * Supply GCCisms that stop being visible if we tell it we need the
- * prototype for strptime(3).
+ * prototype for strptime(3).  Note that this conditionalization is
+ * not actually necessary with -std=gnu99; we're leaving it here as
+ * documentation. Ideally all these nonstandard types should go away
+ * to be replaced by POSIX typedefs.
  */
 typedef unsigned long	u_long;
 typedef unsigned short	u_short;
