@@ -57,8 +57,7 @@ system log file, but is otherwise non hazardous.
 Reference clocks are supported in the same way as ordinary NTP servers
 and use the same filter, select, cluster and combine algorithms. The
 connection to the computer is device dependent - usually a serial
-port, but some can work directly from an audio codec or sound
-card. The particular device is specified by adding a soft link from
+port. The particular device is specified by adding a soft link from
 the name used by the driver to the particular device name.
 
 The +refclock+ command is used to configure a reference clock. The
