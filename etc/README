@@ -11,5 +11,8 @@ shows what a file made out of use snippets is like.
 The rc files are start/stop scripts for NTP.  They are  intended as models
 for distribution packagers.
 
+The snap directory contains a wrapper to help expose configuration files to the
+user until https://bugs.launchpad.net/ubuntu/+bug/1611287 is implemented.
+
 Additional information can be found in the ./docs directory of the
 base directory.
