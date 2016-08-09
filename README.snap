@@ -1,0 +1,26 @@
+= Using NTPsec from a snap =
+
+Snaps provide further isolation and an alternative cross-distribution mechanism
+to provide applications.
+
+Due to that isolation the tools you know are exposed to the host (your normal
+system) via a prefix. For example ntpq becomes ntpseq.ntpq.
+
+Currently the following binaries are exposed by the ntpsec snap:
+ - ntpsec.ntpdig
+ - ntpsec.ntpfrob
+ - ntpsec.ntpkeygen
+ - ntpsec.ntpq
+ - ntpsec.ntptime
+
+Additionally ntpd is exposed as a daemon (via a systemd service).
+It can be accessed via the usual tools as snap.ntpsec.ntpd.service.
+
+Examples:
+ 1. get status / start / stop / restart
+   $ systemctl status snap.ntpsec.ntpd.service
+
+ 2. check the log just for this service
+   $ journalctl -u snap.ntpsec.ntpd
+
+// end

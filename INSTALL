@@ -143,6 +143,21 @@ Under Unix, the simplest way to compile this package is:
 Under OS X you can build NTPsec using Xcode command line tools with no
 additions. There is currently no support for using Xcode's builder.
 
+== Snap Installation ==
+
+If using snapcraft (http://snapcraft.io/) the build consumption is further
+simplified.
+
+   1. Run `snapcraft cleanbuild' to create a new local snap from the current
+      source tree.
+
+   2. Running e.g. `snap install ntpsec_daily_amd64.snap --devmode' will make it
+      available on your system (filename depends on arch).
+
+   x. once ntpsec has pushed a snap to a snapstore you can install the provided
+      version from there as you would install apps from your Distributions
+      repositories.
+
 == Bugs ==
 
 The configuration system is a work in progress, and occasionally acts
