@@ -56,6 +56,7 @@ parts:
       - --enable-mssntp      # Enable Samba MSS NTP support.
       - --enable-crypto      # Enable OpenSSL.
       - --enable-seccomp     # Enable seccomp (restricts syscalls).
+      - --disable-manpage    # Disabled until usable, see pad.lv/1575593
     build-packages:
       - asciidoc
       - bison
