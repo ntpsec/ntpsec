@@ -315,11 +315,11 @@ def cmd_configure(ctx, config):
 	# This is a list of every optional include header in the
 	# codebase that is guarded by a directly corresponding HAVE_*_H symbol.
 	#
-	# In some cases one HAVE symbol controls inclusion of more than one
-	# header; there is an example of this in ntp/audio.c.  In these cases
-	# only the one header name matching the pattern of the HAVE_*_H symbol
-	# name is listed here, so we can invert the relationship to generate
-	# tests for all the symbols.
+	# In some cases one HAVE symbol controls inclusion of more
+	# than one header.  In these cases only the one header name
+	# matching the pattern of the HAVE_*_H symbol name is listed
+	# here, so we can invert the relationship to generate tests
+	# for all the symbols.
 	#
 	# Some of these are cruft from ancient big-iron systems and should
 	# be removed.
