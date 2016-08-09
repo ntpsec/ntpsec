@@ -28,9 +28,9 @@ on. With -s you set the start time as an ISO8601-style timestamp
 is for the period to be 7 days and the start time to be set so that adding
 the period just reaches the last logfile entry.
 
-The --clock-offset, --clock-jitter, and --clock-stability options
-chose what graph is generated; choose only one.  By default, the
-GNUPLOT for the graph is reported; with -g you get the rendered PNG.
+The plot options choose what graph is generated; invoke only one.  By
+default, the GNUPLOT for the graph is reported; with -g you get the
+rendered PNG.
 
 The following plots are available:
 
@@ -52,9 +52,9 @@ The following plots are available:
    error for any of these names not to appear in peerstats.
 
 --all-peer-offsets::
-   Report all peer offsets.  This is only a different
-   option name from --peer-offsets only because of a minor limitation
-   in the Python standard library.
+   Report all peer offsets.  This is a different option name from
+   --peer-offsets only because of a minor limitation in the Python
+   standard library.
 
 --peer-jitter=host1[,host2...]::
    Peer jitter from local clock time, from peerstats (field 7)
@@ -62,7 +62,7 @@ The following plots are available:
    error for any of these names not to appear in peerstats.
 
 --all-peer-jitters::
-   Report all peer jitters.  This is only a different option name from
+   Report all peer jitters.  This is a different option name from
    --peer-offsets only because of a limitation in the Python
    standard library.
 
