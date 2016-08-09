@@ -331,7 +331,6 @@ def cmd_configure(ctx, config):
 		("linux/if_addr.h", ["sys/socket.h"]),
 		("linux/rtnetlink.h", ["sys/socket.h"]),
 		"linux/serial.h",
-		"machine/soundcard.h",
 		("md5.h", ["sys/types.h"]),
 		"net/if6.h",
 		("net/route.h", ["sys/types.h","sys/socket.h","net/if.h"]),
@@ -346,7 +345,6 @@ def cmd_configure(ctx, config):
 		"sys/ioctl.h",
 		"sys/modem.h",          # Apple
 		"sys/sockio.h",
-		"sys/soundcard.h",
 		("sys/sysctl.h", ["sys/types.h"]),
 		("timepps.h", ["inttypes.h"]),
 		("sys/timepps.h", ["inttypes.h", "sys/time.h"]),
