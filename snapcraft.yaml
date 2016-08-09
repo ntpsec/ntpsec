@@ -35,12 +35,17 @@ apps:
     command: usr/local/bin/ntptime
     plugs: [network]
   ntpd:
-    command: usr/local/sbin/ntpd
+    command: usr/local/sbin/ntpd -c $SNAP_DATA/etc/ntpd.conf
     # that will auto-create systemd snap.ntpsec.ntpd.service for us
     daemon: forking
     plugs: [network, network-bind]
 
 parts:
+  defaultconf:
+    plugin: copy
+    files:
+        etc/example.conf: etc/ntpd.conf
+        etc/use*: etc/
   ntpsec:
     source: .
     plugin: waf
