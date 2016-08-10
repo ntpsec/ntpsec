@@ -43,7 +43,6 @@
 #include <openssl/objects.h>
 #endif	/* HAVE_OPENSSL */
 #include <sodium.h>
-#include <ssl_applink.c>
 
 /*
  * Cryptodefines
@@ -69,72 +68,6 @@ char	*hostname = NULL;	/* host, used in cert filenames */
 char	*groupname = NULL;	/* group name */
 char	filename[MAXFILENAME + 1]; /* file name */
 
-#ifdef SYS_WINNT
-BOOL init_randfile();
-
-/*
- * Don't try to create symbolic links on Windows, that is supported on
- * Vista and later only.  Instead, if CreateHardLink is available (XP
- * and later), hardlink the linkname to the original filename.  On
- * earlier systems, user must rename file to match expected link for
- * ntpd to find it.  To allow building a ntpkeygen.exe which loads on
- * Windows pre-XP, runtime link to CreateHardLinkA().
- */
-int
-symlink(
-	char *	filename,
-	char*	linkname
-	)
-{
-	typedef BOOL (WINAPI *PCREATEHARDLINKA)(
-		__in LPCSTR	lpFileName,
-		__in LPCSTR	lpExistingFileName,
-		__reserved LPSECURITY_ATTRIBUTES lpSA
-		);
-	static PCREATEHARDLINKA pCreateHardLinkA;
-	static int		tried;
-	HMODULE			hDll;
-	FARPROC			pfn;
-	int			link_created;
-	int			saved_errno;
-
-	if (!tried) {
-		tried = TRUE;
-		hDll = LoadLibrary("kernel32");
-		pfn = GetProcAddress(hDll, "CreateHardLinkA");
-		pCreateHardLinkA = (PCREATEHARDLINKA)pfn;
-	}
-
-	if (NULL == pCreateHardLinkA) {
-		errno = ENOSYS;
-		return -1;
-	}
-
-	link_created = (*pCreateHardLinkA)(linkname, filename, NULL);
-	
-	if (link_created)
-		return 0;
-
-	saved_errno = GetLastError();	/* yes we play loose */
-	mfprintf(stderr, "Create hard link %s to %s failed: %m\n",
-		 linkname, filename);
-	errno = saved_errno;
-	return -1;
-}
-
-void
-InitWin32Sockets() {
-	WORD wVersionRequested;
-	WSADATA wsaData;
-	wVersionRequested = MAKEWORD(2,0);
-	if (WSAStartup(wVersionRequested, &wsaData))
-	{
-		fprintf(stderr, "No useable winsock.dll\n");
-		exit(1);
-	}
-}
-#endif /* SYS_WINNT */
-
 #define ALL_OPTIONS "Mh"
 static const struct option longoptions[] = {
     { "md5key",		    0, 0, 'M' },
@@ -157,14 +90,6 @@ main(
 	progname = argv[0];
 
 	init_lib();
-
-#ifdef SYS_WINNT
-	/* Initialize before OpenSSL checks */
-	InitWin32Sockets();
-	if (!init_randfile())
-		fprintf(stderr, "Unable to initialize .rnd file\n");
-	ssl_applink();
-#endif
 
 #ifdef HAVE_OPENSSL
 	ssl_check_version();
