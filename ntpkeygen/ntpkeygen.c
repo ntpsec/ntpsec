@@ -56,7 +56,6 @@
  */
 FILE	*fheader	(const char *, const char *, const char *);
 bool	gen_md5		(const char *);
-void	followlink	(char *, size_t);
 
 /*
  * Program variables
@@ -72,19 +71,6 @@ char	filename[MAXFILENAME + 1]; /* file name */
 
 #ifdef SYS_WINNT
 BOOL init_randfile();
-
-/*
- * Don't try to follow symbolic links on Windows.  Assume link == file.
- */
-int
-readlink(
-	char *	link,
-	char *	file,
-	int	len
-	)
-{
-	return strlen(file);
-}
 
 /*
  * Don't try to create symbolic links on Windows, that is supported on
@@ -148,32 +134,6 @@ InitWin32Sockets() {
 	}
 }
 #endif /* SYS_WINNT */
-
-
-/*
- * followlink() - replace filename with its target if symlink.
- *
- * Some readlink() implementations do not null-terminate the result.
- */
-void
-followlink(
-	char *	fname,
-	size_t	bufsiz
-	)
-{
-	int len;
-
-	REQUIRE(bufsiz > 0);
-
-	len = readlink(fname, fname, (int)bufsiz);
-	if (len < 0 ) {
-		fname[0] = '\0';
-		return;
-	}
-	if (len > (int)bufsiz - 1)
-		len = (int)bufsiz - 1;
-	fname[len] = '\0';
-}
 
 #define ALL_OPTIONS "Mh"
 static const struct option longoptions[] = {
