@@ -3,7 +3,7 @@
 ntpviz - logfile visualizer for NTP log files
 
 Usage: ntpviz [-d statsdir] [-g] [-n name] [-p period] [-s starttime]
-              [--clock-offset | --clock-jitter | --clock-stability]
+              [--local-offset | --local-jitter | --local-stability]
               [--peer-offsets hosts | --all-peer-offsets]
               [--peer-jitters hosts | --all-peer-jitters]
 
