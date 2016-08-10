@@ -175,9 +175,10 @@ followlink(
 	fname[len] = '\0';
 }
 
-#define ALL_OPTIONS "M"
+#define ALL_OPTIONS "Mh"
 static const struct option longoptions[] = {
     { "md5key",		    0, 0, 'M' },
+    { "help",		    0, 0, 'h' },
     { NULL,                 0, 0, '\0'},
 };
 
@@ -231,8 +232,11 @@ main(
 	    case 'M':
 		/* dummy MD5 option for backwards compatibility */
 		break;
+	    case 'h':
+		fprintf(stderr, "usage: ntpkeygen [-M]\n" );
+		exit(0);
 	    default:
-		fprintf(stderr, "usage: ntpkeygen [-M]" );
+		fprintf(stderr, "usage: ntpkeygen [-M]\n" );
 		exit(1);
 	    }
 	}
