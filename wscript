@@ -155,7 +155,7 @@ def build(ctx):
 		"ntpstats/ntpviz",
 		"ntptrace/ntptrace",
 		"ntpwait/ntpwait",
-		"util/ntpsweep/ntpsweep",
+		#"util/ntpsweep/ntpsweep",
 	]
 
 	ctx(
@@ -169,7 +169,7 @@ def build(ctx):
 	ctx.manpage(1, "ntptrace/ntptrace-man.txt")
 	ctx.manpage(1, "ntpstats/ntpviz-man.txt")
 	ctx.manpage(8, "ntpwait/ntpwait-man.txt")
-	ctx.manpage(1, "util/ntpsweep/ntpsweep-man.txt")
+	#ctx.manpage(1, "util/ntpsweep/ntpsweep-man.txt")
 
 
 	# Skip running unit tests on a cross compile build
