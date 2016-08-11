@@ -9,17 +9,17 @@
 ["verse",subs="normal"]
 Name: trimble
 Reference ID: GPS
-Serial Port: +/dev/trimble+__u__; 9600bps 8N1/8O1
+Serial Port: /dev/trimble__u__; 9600bps 8N1/8O1
 
 == Description ==
 
 The *refclock trimble* driver supports
 ftp://ftp.trimble.com/pub/sct/embedded/bin/Manuals/Old%20Manuals/PALISADE.PDF[Trimble
-Navigation's Palisade Smart Antenna GPS receiver].
+Navigation's Palisade Smart Antenna GPS receiver], Thunderbolt, and Acutime.
 
-Additional software and information about the Palisade GPS is
+Additional software and information about the Trimble GPS models is
 available from:
-link:http://www.trimble.com/oem/ntp[http://www.trimble.com/oem/ntp]
+link:http://www.trimble.com/timing[http://www.trimble.com/timing]
 
 NTP driver source, executables and documentation was maintained
 at: ftp://ftp.trimble.com/pub/ntp , but seems no longer available.
@@ -62,7 +62,7 @@ rooftop deployment in static timing applications.
 
 Palisade generates a PPS synchronized to UTC within +/- 100 ns.  The
 Palisade's external event input with 40 nanosecond resolution is
-utilized by the Palisade NTP driver for asynchronous precision time
+utilized by the Trimble NTP driver for asynchronous precision time
 transfer.
 
 No user initialization of the receiver is required. This driver is compatible with the following versions of Palisade:
@@ -103,7 +103,7 @@ Palisade NTP reference clock driver.
 
 == O/S Serial Port Configuration ==
 
-The driver attempts to open the device +/dev/trimble+__u__ where 'u' is
+The driver attempts to open the device /dev/trimble__u__ where 'u' is
 the NTP refclock unit number as defined by the LSB of the refclock
 address.  Valid refclock unit numbers are 0 - 3.
 
@@ -116,7 +116,7 @@ ln -s /dev/ttyS0 /dev/trimble0
 
 Windows NT does not support symbolic links to device files. COM**x**: is
 used by the driver, based on the refclock unit number, where unit 1
-corresponds to COM**1**: and unit 3 corresponds to COM3:.
+corresponds to COM**1**: and unit 3 corresponds to COM**3**:.
 
 The Palisade ships 8N1 (no parity).  The Thunderbolt ships 8O1 (odd
 parity).
@@ -452,6 +452,7 @@ Thunderbolt can output 2 synchronous packets.
 |=================================================================================
 
 
+[[Pinouts]]
 == Pinouts ==
 
 link:#_gps_connection[The following connections are required when connecting
@@ -460,14 +461,14 @@ Palisade with a host:]
 [width="50%",frame="none",grid="none"]
 |===============================================================================
 |[underline]#Description#   3+| *Host*    3+| *Palisade*
-| *Port A*       |[underline]#DB-9#   | [underline]#DB-25# |    | [underline]#RS-232# | [underline]#RS-422#       | [underline]#Palisade Pin#
-| Receive Data   |2       |3      |<-->| Green  | Green / Blue | 8 (T-) & 10 (T+)
-| Request to Send|7       |4      |<-->| Gray   | Gray / White | 6 (R-) & 7 (R+)
-| Signal Ground  |5       |7      |<-->|Black   | Black        | 9 (GND)
-| *Port B*       |        |       |    |        |              |
-| Receive Data   |2       |3      |<-->|Brown   |Brown / Yellow| 4 (T-) & 5 (T+)
-| Transmit Data  |3       |2      |<-->|Violet  |Orange/ Violet| 2 (R-) & 3 (R+)
-| Signal Ground  |5       |7      |<-->|Black   |Black         | 9 (GND)
+| [[PortA]] *Port A* |[underline]#DB-9#   | [underline]#DB-25# |    | [underline]#RS-232# | [underline]#RS-422#       | [underline]#Palisade Pin#
+| Receive Data       |2       |3      |<-->| Green  | Green / Blue | 8 (T-) & 10 (T+)
+| Request to Send    |7       |4      |<-->| Gray   | Gray / White | 6 (R-) & 7 (R+)
+| Signal Ground      |5       |7      |<-->|Black   | Black        | 9 (GND)
+| [[PortB]] *Port B* |        |       |    |        |              |
+| Receive Data       |2       |3      |<-->|Brown   |Brown / Yellow| 4 (T-) & 5 (T+)
+| Transmit Data      |3       |2      |<-->|Violet  |Orange/ Violet| 2 (R-) & 3 (R+)
+| Signal Ground      |5       |7      |<-->|Black   |Black         | 9 (GND)
 |===============================================================================
 
 *Note: If driving the RS-422 inputs on the Palisade single ended, i.e.
