@@ -3,6 +3,7 @@
 #
 # This code should be Python2-vs-Python-3 agnostic.  Keep it that way!
 #
+# SPDX-License-Identifier: BSD-2-clause
 from __future__ import print_function, division
 import os, sys, socket, select, struct, curses.ascii
 

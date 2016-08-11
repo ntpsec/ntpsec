@@ -72,8 +72,6 @@ ntpq/::		Directory containing sources for a utility program to
 		related timekeeping information. This program conforms
 		to Appendix A of the NTP Version 3 Specification RFC 1305.
 
-pylib/::	Installable Python helper classes.
-
 ntpstats/::	Statistics visualization and analysis tools built around
 		the Python ntpstats.py module. Includes ntpviz.
 
@@ -94,6 +92,8 @@ perllib/::	NTP interface package required to query Mode 6 packets
 
 ports/::	Subdirectories of this contain code for non-Unix operating
 		systems.  At present there is just one, for Windows.
+
+pylib/::	Installable Python helper classes.
 
 tests/::	Self-test code.
 
