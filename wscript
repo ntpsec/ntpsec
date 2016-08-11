@@ -147,7 +147,7 @@ def build(ctx):
 	ctx.recurse("tests")
 
 	# These don't have installation productions yet.
-	# Installarion for their required Perl and Python libraries
+	# Installation for their required Perl and Python libraries
 	# needs to be worked out first. Awkwardly, their man pages do
 	# get installed. There is a note about this mess in INSTALL.
 	scripts = [
