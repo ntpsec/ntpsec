@@ -8,6 +8,7 @@
 # Due to a limitation of the Python Cmd class, the ":config" and
 # ":config-from-file "command" lose their colons.
 #
+# SPDX-License-Identifier: BSD-2-clause
 from __future__ import print_function, division
 
 import os, sys, getopt, cmd, errno, curses, curses.ascii
