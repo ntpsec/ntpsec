@@ -113,6 +113,7 @@ if __name__ == '__main__':
             gnuplot(plot)
         else:
             sys.stdout.write(plot)
+        raise SystemExit(0)
 
 
 # end
