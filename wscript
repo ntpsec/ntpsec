@@ -146,23 +146,30 @@ def build(ctx):
 	ctx.recurse("util")
 	ctx.recurse("tests")
 
-
-	subst_scripts = [
-		"ntpwait/ntpwait",
+	# These don't have installation productions yet.
+	# Installarion for their required Perl and Python libraries
+	# needs to be worked out first. Awkwardly, their man pages do
+	# get installed. There is a note about this mess in INSTALL.
+	scripts = [
+		"ntpleapfetch/ntpleapfetch",
+		"ntpstats/ntpviz",
 		"ntptrace/ntptrace",
+		"ntpwait/ntpwait",
 		"util/ntpsweep/ntpsweep",
 	]
 
 	ctx(
 		features    = "subst",
-		source      = subst_scripts,
-		target	    = [x.replace(".in", "") for x in subst_scripts],
+		source      = scripts,
+		target	    = scripts,
 		chmod	    = Utils.O755
 	)
 
 	ctx.manpage(8, "ntpleapfetch/ntpleapfetch-man.txt")
-	ctx.manpage(8, "ntpwait/ntpwait-man.txt")
 	ctx.manpage(1, "ntptrace/ntptrace-man.txt")
+	ctx.manpage(1, "ntpstats/ntpviz-man.txt")
+	ctx.manpage(8, "ntpwait/ntpwait-man.txt")
+	ctx.manpage(1, "util/ntpsweep/ntpsweep-man.txt")
 
 
 	# Skip running unit tests on a cross compile build
