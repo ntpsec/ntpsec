@@ -8,10 +8,10 @@ def cmd_configure(ctx, config):
 	srcnode = ctx.srcnode.abspath()
 	bldnode = ctx.bldnode.abspath()
 
-	ctx.load('waf', tooldir='pylib/')
+	ctx.load('waf', tooldir='wafhelpers/')
 	ctx.load('waf_unit_test')
 
-	from pylib.util import parse_version
+	from wafhelpers.util import parse_version
 	parse_version(config)
 
 	ctx.env.NTPS_RELEASE = config["NTPS_RELEASE"]
@@ -487,34 +487,34 @@ def cmd_configure(ctx, config):
 
 
 	# Header/library checks
-	from pylib.check_cap import check_cap
+	from wafhelpers.check_cap import check_cap
 	check_cap(ctx)
 
-	from pylib.check_seccomp import check_seccomp
+	from wafhelpers.check_seccomp import check_seccomp
 	check_seccomp(ctx)
 
-	from pylib.check_libevent2 import check_libevent2_header
+	from wafhelpers.check_libevent2 import check_libevent2_header
 	check_libevent2_header(ctx)
 
-	from pylib.check_pthread import check_pthread_header_lib
+	from wafhelpers.check_pthread import check_pthread_header_lib
 	check_pthread_header_lib(ctx)
 
 	if not ctx.options.disable_mdns_registration:
-		from pylib.check_mdns import check_mdns_header
+		from wafhelpers.check_mdns import check_mdns_header
 		check_mdns_header(ctx)
 
 
 	# Run checks
-	from pylib.check_libevent2 import check_libevent2_run
+	from wafhelpers.check_libevent2 import check_libevent2_run
 	check_libevent2_run(ctx)
 
 
 	if not ctx.options.disable_dns_retry:
-	    from pylib.check_pthread import check_pthread_run
+	    from wafhelpers.check_pthread import check_pthread_run
 	    check_pthread_run(ctx)
 
 	if not ctx.options.disable_mdns_registration:
-	    from pylib.check_mdns import check_mdns_run
+	    from wafhelpers.check_mdns import check_mdns_run
 	    check_mdns_run(ctx)
 
 	if ctx.options.enable_classic_mode:
