@@ -8,10 +8,10 @@ pprint.__doc__ = None
 
 out="build"
 
-from pylib.configure import cmd_configure
+from wafhelpers.configure import cmd_configure
 from waflib.Tools import waf_unit_test
-from pylib.test import test_write_log, test_print_log
-from pylib.options import options_cmd
+from wafhelpers.test import test_write_log, test_print_log
+from wafhelpers.options import options_cmd
 
 config = {
 	"NTPS_RELEASE": False,
@@ -31,7 +31,7 @@ config = {
 
 
 def dist(ctx):
-	from pylib.dist import dist_cmd
+	from wafhelpers.dist import dist_cmd
 	dist_cmd(ctx, config)
 
 
@@ -39,7 +39,7 @@ def options(ctx):
 	options_cmd(ctx, config)
 
 def configure(ctx):
-	from pylib.configure import cmd_configure
+	from wafhelpers.configure import cmd_configure
 	cmd_configure(ctx, config)
 
 
@@ -49,7 +49,7 @@ class check(BuildContext):
 	variant = "main"
 
 def bin_test(ctx):
-	from pylib.bin_test import cmd_bin_test
+	from wafhelpers.bin_test import cmd_bin_test
 	cmd_bin_test(ctx, config)
 bin_test.__doc__ = "Run binary check, use after tests."
 
@@ -113,10 +113,10 @@ for command, func, descr in commands:
 
 
 def build(ctx):
-	ctx.load('waf', tooldir='pylib/')
+	ctx.load('waf', tooldir='wafhelpers/')
 	ctx.load('bison')
-	ctx.load('asciidoc', tooldir='pylib/')
-	ctx.load('rtems_trace', tooldir='pylib/')
+	ctx.load('asciidoc', tooldir='wafhelpers/')
+	ctx.load('rtems_trace', tooldir='wafhelpers/')
 
 	if ctx.env.ENABLE_DOC_USER:
 		if ctx.variant != "main":
