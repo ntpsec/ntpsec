@@ -155,7 +155,7 @@ if __name__ == '__main__':
         raise SystemExit(2)
     period = 7	# days
     sitename = None
-    statsdir = "/var/log/ntpstats"
+    statsdirs = ["/var/log/ntpstats"]
     endtime = starttime = None
     generate = False
     show_local_offset = show_local_jitter = show_local_stability = False
@@ -163,7 +163,7 @@ if __name__ == '__main__':
     show_peer_rtt = None
     for (switch, val) in options:
         if switch == "-d":
-            statsdir = val
+            statsdirs = val.split(",")
         elif switch == "-e":
             endtime = isotime(val)
         elif switch == "-g":
@@ -194,19 +194,20 @@ if __name__ == '__main__':
         elif switch == "--peer-rtt":
             show_peer_rtt = val
     period *= 24 * 60 * 60
-    stats = NTPViz(sitename=sitename, statsdir=statsdir)
-    # Default to one week before the latest date
-    if endtime is None and starttime == None:
-        endtime = int(stats.rangemax())
-        starttime = endtime - period
-    elif starttime is None and endtime is not None:
-        starttime = endtime - period
-    elif starttime is not None and endtime is None:
-        endtime = starttime + period
-    if stats.sitename is None:
-        stats.sitename = os.path.basename(statsdir)
-    if starttime:
-        stats.clip(starttime, endtime)
+    statlist = [NTPViz(sitename=sitename, statsdir=d) for d in statsdirs]
+    for stats in statlist:
+        # Default to one week before the latest date
+        if endtime is None and starttime == None:
+            endtime = int(stats.rangemax())
+            starttime = endtime - period
+        elif starttime is None and endtime is not None:
+            starttime = endtime - period
+        elif starttime is not None and endtime is None:
+            endtime = starttime + period
+        if stats.sitename is None:
+            stats.sitename = os.path.basename(statsdir)
+        if starttime:
+            stats.clip(starttime, endtime)
 
     for fontpath in ("/usr/share/fonts/liberation",
                      "/usr/share/fonts/liberation-fonts",
@@ -219,40 +220,41 @@ if __name__ == '__main__':
         sys.stderr.write("warning: liberation truetype fonts not found\n")
     os.environ["GNUPLOT_DEFAULT_GDFONT"] = "LiberationSans-Regular"
 
-    if show_local_offset or show_local_jitter or show_local_stability:
-        if not stats.loopstats:
-            sys.stderr.write("ntpviz: missing loopstats data\n")
-            raise SystemExit(1)
-        if show_local_offset + show_local_jitter + show_local_stability > 1:
-            sys.stderr.write("ntpviz: clash of mode options\n")
-            raise SystemExit(1)
-        if show_local_offset:
-            plot = stats.local_clock_gnuplot()
-        if show_local_jitter:
-            plot = stats.local_clock_jitter_gnuplot()
-        if show_local_stability:
-            plot = stats.local_clock_stability_gnuplot()
-        if generate:
-            gnuplot(plot)
-        else:
-            sys.stdout.write(plot)
-        raise SystemExit(0)
+    if len(statlist) == 1:
+        stats = statlist[0]
+        if show_local_offset or show_local_jitter or show_local_stability:
+            if not stats.loopstats:
+                sys.stderr.write("ntpviz: missing loopstats data\n")
+                raise SystemExit(1)
+            if show_local_offset + show_local_jitter + show_local_stability > 1:
+                sys.stderr.write("ntpviz: clash of mode options\n")
+                raise SystemExit(1)
+            if show_local_offset:
+                plot = stats.local_clock_gnuplot()
+            if show_local_jitter:
+                plot = stats.local_clock_jitter_gnuplot()
+            if show_local_stability:
+                plot = stats.local_clock_stability_gnuplot()
+            if generate:
+                gnuplot(plot)
+            else:
+                sys.stdout.write(plot)
+            raise SystemExit(0)
 
-    if show_peer_offsets is not None or show_peer_jitters is not None or show_peer_rtt is not None:
-        if not stats.loopstats:
-            sys.stderr.write("ntpviz: missing peerstats data\n")
-            raise SystemExit(1)
-        if show_peer_offsets is not None:
-            plot = stats.peer_offsets_gnuplot(show_peer_offsets)
-        if show_peer_jitters is not None:
-            plot = stats.peer_jitters_gnuplot(show_peer_jitters)
-        if show_peer_rtt is not None:
-            plot = stats.peer_rtt_gnuplot(show_peer_rtt)
-        if generate:
-            gnuplot(plot)
-        else:
-            sys.stdout.write(plot)
-        raise SystemExit(0)
-
+        if show_peer_offsets is not None or show_peer_jitters is not None or show_peer_rtt is not None:
+            if not stats.loopstats:
+                sys.stderr.write("ntpviz: missing peerstats data\n")
+                raise SystemExit(1)
+            if show_peer_offsets is not None:
+                plot = stats.peer_offsets_gnuplot(show_peer_offsets)
+            if show_peer_jitters is not None:
+                plot = stats.peer_jitters_gnuplot(show_peer_jitters)
+            if show_peer_rtt is not None:
+                plot = stats.peer_rtt_gnuplot(show_peer_rtt)
+            if generate:
+                gnuplot(plot)
+            else:
+                sys.stdout.write(plot)
+            raise SystemExit(0)
 
 # end
