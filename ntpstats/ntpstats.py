@@ -277,10 +277,6 @@ def isotime(s):
     else:
         raise TypeError
 
-def iso_to_unix(tv):
-    "ISO timestamp in local time to Unix time."
-    return calendar.timelocal(time.strptime(tv, "%Y-%m-%dT%H:%M:%S"))
-
 def gnuplot(template):
     "Run a specified GNUPLOT program."
     proc = subprocess.Popen("gnuplot",

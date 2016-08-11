@@ -2,7 +2,8 @@
 """\
 ntpviz - logfile visualizer for NTP log files
 
-Usage: ntpviz [-d statsdir] [-g] [-n name] [-p period] [-s starttime]
+Usage: ntpviz [-d statsdir] [-g] [-n name] [-p period]
+              [-s starttime]  [-e endtime]
               [--local-offset | --local-jitter | --local-stability]
               [--peer-offsets hosts | --all-peer-offsets]
               [--peer-jitters hosts | --all-peer-jitters]
@@ -17,7 +18,7 @@ from ntpstats import *
 
 if __name__ == '__main__':
     try:
-        (options, arguments) = getopt.getopt(sys.argv[1:], "d:ghn:p:s:", [
+        (options, arguments) = getopt.getopt(sys.argv[1:], "d:e:ghn:p:s:", [
             "local-offset", "local-jitter", "local-stability",
             "all-peer-offsets", "peer-offsets=",
             "all-peer-jitters", "peer-jitters=",
@@ -29,7 +30,7 @@ if __name__ == '__main__':
     period = 7	# days
     sitename = None
     statsdir = "/var/log/ntpstats"
-    starttime = None
+    endtime = starttime = None
     generate = False
     show_local_offset = show_local_jitter = show_local_stability = False
     show_peer_offsets = show_peer_jitters = None
@@ -37,6 +38,8 @@ if __name__ == '__main__':
     for (switch, val) in options:
         if switch == "-d":
             statsdir = val
+        elif switch == "-e":
+            endtime = isotime(val)
         elif switch == "-g":
             generate = True
         elif switch == "-h":
@@ -47,7 +50,7 @@ if __name__ == '__main__':
         elif switch == "-p":
             period = int(val)	# Denominated in days
         elif switch == "-s":
-            starttime = iso_to_unix(val)
+            starttime = isotime(val)
         elif switch == "--local-offset":
             show_local_offset = True
         elif switch == "--local-jitter":
@@ -67,12 +70,17 @@ if __name__ == '__main__':
     period *= 24 * 60 * 60
     stats = NTPStats(sitename=sitename, statsdir=statsdir)
     # Default to one week before the latest date
-    if starttime is None:
-        starttime = int(stats.rangemax()) - period 
+    if endtime is None and starttime == None:
+        endtime = int(stats.rangemax())
+        starttime = endtime - period
+    elif starttime is None and endtime is not None:
+        starttime = endtime - period
+    elif starttime is not None and endtime is None:
+        endtime = starttime + period
     if stats.sitename is None:
         stats.sitename = os.path.basename(statsdir)
     if starttime:
-        stats.clip(starttime, starttime + period)
+        stats.clip(starttime, endtime)
 
     for fontpath in ("/usr/share/fonts/liberation",
                      "/usr/share/fonts/liberation-fonts",
