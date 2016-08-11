@@ -4,11 +4,7 @@ ntpstats.py - class for digesting and plotting NTP logfiles
 Requires GNUPLOT and liberation fonts installed.
 
 SPDX-License-Identifier: BSD-2-Clause
-
-Python by ESR, concept and GNUPLOT code by Dan Drown.
 """
-# RMS frequency jitter - Deviation from a root-mean-square linear approximation?
-# Investigate.
 from __future__ import print_function, division
 
 import os, sys, time, glob, calendar, subprocess, socket
