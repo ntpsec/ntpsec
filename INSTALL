@@ -121,15 +121,17 @@ Under Unix, the simplest way to compile this package is:
   You may want to add configuration options after the verb 'configure';
   see below.
 
-  3. Type `./waf build' to compile the package.
+  3. Invoke `./waf build' to compile the package.
 
-  4. Type `./waf install' to install the programs and any data files and
+  4. Invoke `./waf install' to install the programs and any data files and
      documentation.
 
-  5. You can remove the program binaries and object files from the
+  5. You can uninstall cleanly by invoking `./waf uninstall' as root.
+
+  6. You can remove the program binaries and object files from the
      source code directory by typing `./waf clean'.
 
-  6. To also remove the files that `./waf configure' created (so you can
+  7. To also remove the files that `./waf configure' created (so you can
      configure and compile the package for a different kind of
      computer), type `./waf distclean'.
 
