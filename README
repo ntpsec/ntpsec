@@ -74,7 +74,7 @@ ntpq/::		Directory containing sources for a utility program to
 
 pylib/::	Installable Python helper classes.
 
-ntpstats::	Statistics visualization and analysis tools build around
+ntpstats/::	Statistics visualization and analysis tools built around
 		the Python ntpstats.py module. Includes ntpviz.
 
 ntptime/:: 	Directory containing a utility for reading and modifying
