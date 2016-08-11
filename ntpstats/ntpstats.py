@@ -137,7 +137,7 @@ set rmargin 12
 plot \
  "-" using 1:($2*1000000) title "clock offset us" with linespoints ls 1, \
  "-" using 1:3 title "frequency offset ppm" with linespoints ls 2 axis x1y2
-"""
+""" % locals()
         return plot_template.replace('@', '%') + self.dump("loopstats") + "e\n" + self.dump("loopstats")
     def loopstats_gnuplot(self, fld, title, legend):
         "Generate GNUPLOT code of a given loopstats field"
@@ -218,7 +218,7 @@ plot \\
             if key in peerdict:
                 plot_template += "\n".join(peerdict[key]) + "\ne\n"
             else:
-                stderr.write("No such peer as %s" % key)
+                sys.stderr.write("No such peer as %s" % key)
                 raise SystemExit(1)
         return plot_template[:-2]
     def peer_offsets_gnuplot(self, peerlist):

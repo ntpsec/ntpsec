@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"""
+"""\
 ntpviz - logfile visualizer for NTP log files
 
 Usage: ntpviz [-d statsdir] [-g] [-n name] [-p period] [-s starttime]
@@ -8,9 +8,8 @@ Usage: ntpviz [-d statsdir] [-g] [-n name] [-p period] [-s starttime]
               [--peer-jitters hosts | --all-peer-jitters]
 
 See the manual page for details.
-
-SPDX-License-Identifier: BSD-2-Clause
 """
+#SPDX-License-Identifier: BSD-2-Clause
 from __future__ import print_function, division
 
 import os, sys, getopt
@@ -18,7 +17,7 @@ from ntpstats import *
 
 if __name__ == '__main__':
     try:
-        (options, arguments) = getopt.getopt(sys.argv[1:], "d:gn:p:s:", [
+        (options, arguments) = getopt.getopt(sys.argv[1:], "d:ghn:p:s:", [
             "local-offset", "local-jitter", "local-stability",
             "all-peer-offsets", "peer-offsets=",
             "all-peer-jitters", "peer-jitters=",
@@ -40,6 +39,9 @@ if __name__ == '__main__':
             statsdir = val
         elif switch == "-g":
             generate = True
+        elif switch == "-h":
+            sys.stdout.write(__doc__)
+            raise SystemExit(0)
         elif switch == "-n":
             sitename = val
         elif switch == "-p":
@@ -71,11 +73,14 @@ if __name__ == '__main__':
         stats.sitename = os.path.basename(statsdir)
     if starttime:
         stats.clip(starttime, starttime + period)
-        
-    if os.path.exists("/usr/share/fonts/liberation"):
-        os.environ["GDFONTPATH"] = "/usr/share/fonts/liberation"
-    elif os.path.exists("/usr/share/fonts/truetype/liberation"):
-        os.environ["GDFONTPATH"] = "/usr/share/fonts/truetype/liberation"
+
+    for fontpath in ("/usr/share/fonts/liberation",
+                     "/usr/share/fonts/liberation-fonts",
+                     "/usr/share/fonts/truetype/liberation"):
+
+        if os.path.exists(fontpath):
+            os.environ["GDFONTPATH"] = fontpath
+            break
     else:
         sys.stderr.write("warning: liberation truetype fonts not found\n")
     os.environ["GNUPLOT_DEFAULT_GDFONT"] = "LiberationSans-Regular"
