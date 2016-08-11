@@ -72,6 +72,8 @@ ntpq/::		Directory containing sources for a utility program to
 		related timekeeping information. This program conforms
 		to Appendix A of the NTP Version 3 Specification RFC 1305.
 
+pylib/::	Installable Python helper classes.
+
 ntpstats::	Statistics visualization and analysis tools build around
 		the Python ntpstats.py module. Includes ntpviz.
 

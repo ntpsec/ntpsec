@@ -1,5 +1,5 @@
 #
-# libntpq.py - definitions and classes for ntp-style querying of NTP
+# packet.py - definitions and classes for ntp-style querying of NTP
 #
 # This code should be Python2-vs-Python-3 agnostic.  Keep it that way!
 #

@@ -13,7 +13,7 @@ from __future__ import print_function, division
 import os, sys, getopt, cmd, errno, curses, curses.ascii
 import socket, select, struct, shlex
 
-from libntpq import *
+from ntp.packet import *
 
 # This import only works on Unixes.  The intention is to enable
 # Ctrl-P, Ctrl-N, and friends in Cmd.
