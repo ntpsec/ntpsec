@@ -264,7 +264,7 @@ def isotime(s):
         msec = s - date
         date = time.strftime("%Y-%m-%dT%H:%M:%S", time.localtime(s))
         return date + "." + repr(msec)[3:]
-    elif isinstance(s, STR_CLASS):
+    elif isinstance(s, str) or isinstance(s, unicode)::
         if s[-1] == "Z":
             s = s[:-1]
         if "." in s:
