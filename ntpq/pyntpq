@@ -196,6 +196,7 @@ class ntpq_interpreter(cmd.Cmd):
         self.wideremote = False		# show wide remote names? 
         self.ccmds = []			# Queued commands
         self.chosts = []		# Command-line hosts
+        self.debug = 0
     def do_EOF(self, _unused):
         "exit ntpq"
         sys.stdout.write("\n")
@@ -665,7 +666,7 @@ if __name__ == '__main__':
         elif switch in ("-O", "--old-rv"):
             interpreter.old_rv = True
         elif switch in ("-p", "--peers"):
-            interpreter.ccmd.append("peers")
+            interpreter.ccmds.append("peers")
         elif switch in ("-V", "--version"):
             print("ntpq %s\n" % version)
             raise SystemExit(0)
