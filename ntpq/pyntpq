@@ -290,7 +290,7 @@ usage: hostnames [ yes|no ]
             pass
         elif line == "more":
             self.debug +=1
-        elif line == "yes":
+        elif line == "less":
             self.debug -= 1
         elif line == "no":
             self.debug = 0
