@@ -113,26 +113,11 @@ class NTPStats:
         return key	# Someday, be smarter than this.
 
 def isotime(s):
-    "Convert timestamps in ISO8661 format to and from Unix time including optional fractional seconds."
-    if isinstance(s, int):
-        return time.strftime("%Y-%m-%dT%H:%M:%S", time.localtime(s))
-    elif isinstance(s, float):
-        date = int(s)
-        msec = s - date
-        date = time.strftime("%Y-%m-%dT%H:%M:%S", time.localtime(s))
-        return date + "." + repr(msec)[3:]
-    elif isinstance(s, str) or isinstance(s, unicode):
-        if s[-1] == "Z":
-            s = s[:-1]
-        if "." in s:
-            (date, msec) = s.split(".")
-        else:
-            date = s
-            msec = "0"
-        # Note: no leap-second correction!
-        return time.mktime(time.strptime(date, "%Y-%m-%dT%H:%M:%S")) + float("0." + msec)
+    "Accept timestamps in ISO8661 format or numeric POSIX time."
+    if s.isdigit(s):
+        return int(s)
     else:
-        raise TypeError
+        return time.mktime(time.strptime(date, "%Y-%m-%dT%H:%M:%S"))
 
 def gnuplot(template):
     "Run a specified GNUPLOT program."
