@@ -8,8 +8,8 @@
 {ntpviz} [-d statsdir] [-g] [-n name] [-p period]
          [-s starttime] [-e endtime]
          [--local-offset | --local-jitter | --local-stability]
-         [--peer-offsets hosts | --all-peer-offsets]
-         [--peer-jitters hosts | --all-peer-jitters]
+         [--peer-offsets=hosts | --all-peer-offsets]
+         [--peer-jitters=hosts | --all-peer-jitters]
 
 == DESCRIPTION ==
 
@@ -24,12 +24,13 @@ The -n option allows you to set the sitename shown in the plot title.
 The default is the basename of the log directory.
 
 The -s, -e and -p options allow you to set the time window to be
-reported on. With -s and -e you set the start and end times as
-ISO8601-style timestamps, - yyyy-mmm-ddThh:mm:ss. Alternatively you
-can specify either -s or -e (but not both) and use -p to set the
-default period in days.  The default is for the period to be 7 days,
-the end time to match the last logfile entry, and the start time to be
-set so that adding the period just reaches the last logfile entry.
+reported on. With -s and -e you set the start and end times as either
+numeric POSIX time or ISO8601-style timestamps, -
+yyyy-mmm-ddThh:mm:ss. Alternatively you can specify either -s or -e
+(but not both) and use -p to set the default period in days.  The
+default is for the period to be 7 days, the end time to match the last
+logfile entry, and the start time to be set so that adding the period
+just reaches the last logfile entry.
 
 The plot options choose what graph is generated; invoke only one.  By
 default, the GNUPLOT for the graph is reported; with -g you get the
@@ -51,8 +52,8 @@ The following plots are available:
 
 --peer-offsets=host1[,host2...]::
    Peer offset from local clock time from peerstats (field 4). A
-   comma-separated list of peer names must follow. It is a fatal
-   error for any of these names not to appear in peerstats.
+   comma-separated list of peer names or IP addresses must follow. It
+   is a fatal error for any of these names not to appear in peerstats.
 
 --all-peer-offsets::
    Report all peer offsets.  This is a different option name from
