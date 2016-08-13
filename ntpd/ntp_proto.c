@@ -1648,6 +1648,7 @@ clock_update(
 				pause();
 		}
 #endif /* HAVE_LIBSCF_H */
+		msyslog(LOG_ERR, "Panic: offset too big: %.3f", sys_offset);
 		intercept_exit (1);
 		/* not reached */
 
