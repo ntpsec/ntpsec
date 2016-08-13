@@ -5,8 +5,8 @@ ntpviz - logfile visualizer for NTP log files
 Usage: ntpviz [-d statsdir] [-g] [-n name] [-p period]
               [-s starttime]  [-e endtime]
               [--local-offset | --local-jitter | --local-stability]
-              [--peer-offsets hosts | --all-peer-offsets]
-              [--peer-jitters hosts | --all-peer-jitters]
+              [--peer-offsets=hosts | --all-peer-offsets]
+              [--peer-jitters=hosts | --all-peer-jitters]
 
 See the manual page for details.
 
@@ -15,7 +15,7 @@ Python by ESR, concept and GNUPLOT code by Dan Drown.
 #SPDX-License-Identifier: BSD-2-Clause
 from __future__ import print_function, division
 
-import os, sys, getopt
+import os, sys, getopt, socket
 from ntpstats import *
 
 # RMS frequency jitter - Deviation from a root-mean-square linear approximation?
@@ -85,9 +85,10 @@ plot \
         return self.loopstats_gnuplot(4, "RMS Time jitter", "Jitter")
     def local_clock_stability_gnuplot(self):
         "Generate GNUPLOT code graphing local clock stability"
-        return self.loopstats_gnuplot(5, "RMS Frequency Jitter - ADEV aka wander", "Stability")
+        return self.loopstats_gnuplot(5, "RMS Frequency Jitter", "Stability")
     def peerstats_gnuplot(self, peerlist, fld, title):
         "Plot a specified field from peerstats."
+        sitename = self.sitename
         peerdict = self.peersplit()
         if not peerlist:
             peerlist = list(peerdict.keys())
@@ -97,20 +98,24 @@ plot \
         else:
             title += "s"
         plot_template = NTPViz.Common + """\
-set title "%s"
+set title "%(sitename)s: %(title)s"
 set ylabel ""
 set ytics format "@1.0f us" nomirror
 set key top right box
 plot \\
-""" % title
+""" % locals()
 	plot_template = plot_template.replace("@", "%")
         for key in peerlist:
             plot_template += "'-' using 1:($%d*1000000) title '%s' with line, \\\n" % (fld, self.ip_label(key))
         
         plot_template = plot_template[:-4] + "\n"
         for key in peerlist:
-            if key in peerdict:
-                plot_template += "\n".join(peerdict[key]) + "\ne\n"
+            # Trickiness - we allow peerlist elements to be DNS names.
+            # The socket.gethostbyname() call maps these to IP addresses,
+            # passing through literal IP addresses unaltered.
+            ip = socket.gethostbyname(key)
+            if ip in peerdict:
+                plot_template += "\n".join(peerdict[ip]) + "\ne\n"
             else:
                 sys.stderr.write("No such peer as %s" % key)
                 raise SystemExit(1)
@@ -121,11 +126,12 @@ plot \\
         return self.peerstats_gnuplot(peerlist, 7, "Peer clock jitter")
     def peer_rtt_gnuplot(self, host):
         "Plot offset with rtt bounds for specified host."
+        sitename = self.sitename
         entries = self.peersplit()[host]
         fifty = self.percentile(4,  50, entries) * 1000000
         host = self.ip_label(host)
         plot_template = NTPViz.Common + """\
-set title "offset of %(host)s"
+set title "%(sitename)s: offset of %(host)s"
 set ylabel ""
 set ytics format "@1.0f us" nomirror
 set key top right box
