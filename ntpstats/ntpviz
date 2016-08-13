@@ -22,7 +22,7 @@ from ntpstats import *
 # Investigate.
 
 class NTPViz(NTPStats):
-    "Class for visualizing statistics from a sincle server."
+    "Class for visualizing statistics from a single server."
     Common = """\
 set terminal png size 900,600
 set xdata time
