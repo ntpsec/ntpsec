@@ -354,7 +354,7 @@ transmit(
 					if (!termlogit)
 						printf(
 						    "ntpd: no servers found\n");
-					intercept_exit(0);
+					intercept_exit(1);
 				}
 			}
 		}
@@ -1639,7 +1639,7 @@ clock_update(
 			if (smf_maintain_instance(fmri, 0) < 0) {
 				printf("smf_maintain_instance: %s\n",
 				    scf_strerror(scf_error()));
-				exit(1);
+				intercept_exit(1);
 			}
 			/*
 			 * Sleep until SMF kills us.
@@ -1648,7 +1648,7 @@ clock_update(
 				pause();
 		}
 #endif /* HAVE_LIBSCF_H */
-		exit (-1);
+		intercept_exit (1);
 		/* not reached */
 
 	/*
@@ -2821,7 +2821,7 @@ peer_xmit(
 	sendlen += authlen;
 	if (sendlen > sizeof(xpkt)) {
 		msyslog(LOG_ERR, "proto: buffer overflow %zu", sendlen);
-		exit (-1);
+		intercept_exit(1);
 	}
 	peer->t21_bytes = sendlen;
 	intercept_sendpkt(__func__, &peer->srcadr, peer->dstadr, sys_ttl[peer->ttl], &xpkt,
@@ -3341,7 +3341,7 @@ measure_tick_fuzz(void)
 	}
 	if (changes < MINCHANGES) {
 		msyslog(LOG_ERR, "Fatal error: precision could not be measured (MINSTEP too large?)");
-		exit(1);
+		intercept_exit(1);
 	}
 
 	if (0 == max_repeats) {
