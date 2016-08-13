@@ -183,7 +183,7 @@ Other behaviors may be added in future releases.
 == Uninstalled binaries and scripts ==
 
 Due to variations in Perl library paths, our stock source distribution
-makes no attempt to install certain Perl scripts: notably
+makes no attempt to install certain Perl/Python/shell scripts: notably
 ntpleapfetch, ntpwait, and ntptrace.  If you installed this software
 from a binary package prepared by your OS distributor, the OS
 distributor may install them, arranging a rendezvous with the
