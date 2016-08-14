@@ -6,10 +6,10 @@
 == SYNOPSIS ==
 [verse]
 +ntpleapfetch+
-    [+-46+] [+-d+ 'localfile'] [+-e+ 'expiry'] [+-f+ 'config']
-    [+-F+] [+-i+ 'interval'] [+-l+] [+L+] [+-p+ {4|6}] [+-P+ 'loglevel']
-    [+-q+] [+r+ 'retries'] [+-s+ 'source-url'] [-t 'path'] [-v]
-    [+-z+ 'path'] [+-Z+]
+    [+-46+] [+-c+ 'command'] [+-e+ 'expiry'] [+-f+ 'config'] [+-F+] [+-h+]
+	[+-i+ 'interval'] [+-l+] [+L+] [+-p+ {4|6}] [+-P+ 'logfacility'] [+-q+]
+	[+-r+ 'retries'] [+-s+ 'source-url'] [+-t+ 'path'] [+-v+] [+-z+ 'path']
+	[+-Z+] ['leapfile']
 
 == DESCRIPTION ==
 
@@ -39,29 +39,24 @@ For cron-friendly behavior, define CRONJOB=1 in the crontab.
 
 +-4+::
   Use only IPv4 addresses for DNS name resolution. This option must not
-  appear in combination with any of the following options: --ipv6.
+  appear in combination with any of the following options: +-6+.
 
 +-6+::
   Use only IPv6 addresses for DNS name resolution. This option must not
-  appear in combination with any of the following options: --ipv4.
+  appear in combination with any of the following options: +-4+.
 
 +-c+::
   Command to restart {ntpd} after installing a new file. Without such a
   command. {ntpd} checks the file daily.
 
-+-d+ localfile::
-  Filename on the local system.
-+
-The name to use to store the leapfile on the local system. $LEAPFILE
-
-+-e+ string::
++-e+ 'expiry'::
   Refresh the leapfile this long before it expires.
 +
-Specify how long before expiration the file is to be refreshed Units
-are required, e.g. "-e 60 days" Note that larger values imply more
+Specify how long before expiration the file is to be refreshed. Units
+are required, e.g. "-e 60 days". Note that larger values imply more
 frequent refreshes.
 
-+-f+ string::
++-f+ 'config'::
   Location of the {ntpconf} file.
 +
 Specify location of {ntpconf} (used to make sure leapfile directive is
@@ -70,8 +65,11 @@ present and to default leapfile) /etc/{ntpconf}
 +-F+::
   Force update even if current file is OK and not close to expiring.
 
-+-i+ 'interval::
-  Number of retries.
++-i+ 'interval'::
+  Number of minutes between retries.
+
++-h+::
+  Display inline help.
 
 +-l+::
   Use syslog for output (Implied if CRONJOB is set).
@@ -82,16 +80,16 @@ present and to default leapfile) /etc/{ntpconf}
 +-p+ {+4+|+6+}::
   Prefer IPv4 or IPv6 (as specified) addresses, but use either.
 
-+-P+ 'loglevel'::
-  Specify the syslog facility for logging
++-P+ 'logfacility'::
+  Specify the syslog facility for logging.
   
 +-q+::
-  Only report errors to stdout
+  Only report errors to stdout.
 
 +-r+ 'retries'::
   Number of retries.
 
-+-s+ string, +--source-url+=_string_::
++-s+ 'source-url'::
   The URL of the master copy of the leapseconds file.
 
 +-t+ 'path'::
