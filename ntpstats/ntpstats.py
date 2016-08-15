@@ -119,12 +119,4 @@ def isotime(s):
     else:
         return time.mktime(time.strptime(date, "%Y-%m-%dT%H:%M:%S"))
 
-def gnuplot(template):
-    "Run a specified GNUPLOT program."
-    proc = subprocess.Popen("gnuplot",
-                            shell=True, bufsize=4096, stdin=subprocess.PIPE)
-    proc.stdin.write(template)
-    proc.stdin.close()
-    return proc.wait()
-
 # end
