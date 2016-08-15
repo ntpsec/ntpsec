@@ -34,8 +34,10 @@ set xtic rotate by -45 scale 0
 set lmargin 12
 set rmargin 12
 """
-    def __init__(self, sitename, statsdir):
+    def __init__(self, statsdir, sitename=None):
         NTPStats.__init__(self, sitename, statsdir)
+        if self.sitename is None:
+            self.sitename = os.path.basename(statsdir)
     def local_clock_gnuplot(self):
         "Generate GNUPLOT code graphing local clock loop statistics"
         sitename = self.sitename
@@ -200,7 +202,7 @@ if __name__ == '__main__':
         elif switch == "--peer-rtt":
             show_peer_rtt = val
     period *= 24 * 60 * 60
-    statlist = [NTPViz(sitename=sitename, statsdir=d) for d in statsdirs]
+    statlist = [NTPViz(statsdir=d, sitename=sitename) for d in statsdirs]
     for stats in statlist:
         # Default to one week before the latest date
         if endtime is None and starttime == None:
@@ -210,8 +212,6 @@ if __name__ == '__main__':
             starttime = endtime - period
         elif starttime is not None and endtime is None:
             endtime = starttime + period
-        if stats.sitename is None:
-            stats.sitename = os.path.basename(statsdir)
         if starttime:
             stats.clip(starttime, endtime)
 
