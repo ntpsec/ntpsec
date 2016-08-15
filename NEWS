@@ -8,6 +8,9 @@ on user-visible changes.
 
 == Repository head ==
 
+A new visualization tool, ntpviz, generates graphical summaries of
+logfile data that can be helpful 
+
 usestats has been added to the statistics collection to record
 system resource usage statistics.
 

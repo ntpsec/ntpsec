@@ -16,7 +16,9 @@
 
 This utility analyzes files in an NTP log directory and generates
 statistical plots from them.  It can report either PNG images or
-the GNUPLOT programs to generate them to standard output.
+the GNUPLOT programs to generate them to standard output.  In its
+default mode it generates an HTML directory containing all polots
+and an index page.
 
 The most basic option is -d, which specifies a logfile directory to
 examine; the default is /var/log/ntpstats.

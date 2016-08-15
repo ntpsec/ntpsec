@@ -98,8 +98,9 @@ class NTPStats:
         if key[0].isdigit():
             # TO BE REMOVED SOMEDAY
             # Clock address - only possible if we're looking at a logfile made
-            # by NTP Classic or an NTPsec version before 0.4.  Nasty that we
-            # have to emit a numeric driver type here.
+            # by NTP Classic or an NTPsec version configured with
+            # --enable-classic-mode.  Nasty that we have to emit a numeric
+            # driver type here.
             if key.startswith("127.127."):
                 (_, _, t, u) = key.split(".")
                 return "REFCLOCK(ttype=%s,unit=%s)" % (t, u) 
