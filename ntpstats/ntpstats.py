@@ -115,11 +115,15 @@ class NTPStats:
                 pass
         return key	# Someday, be smarter than this.
 
-def isotime(s):
+def iso_to_posix(s):
     "Accept timestamps in ISO8661 format or numeric POSIX time."
     if s.isdigit(s):
         return int(s)
     else:
         return time.mktime(time.strptime(date, "%Y-%m-%dT%H:%M:%S"))
+
+def posix_to_iso(t):
+    "ISO8601 string from Unix time."
+    return time.strftime("%Y-%m-%dT%H:%M:%S", time.localtime(t))
 
 # end

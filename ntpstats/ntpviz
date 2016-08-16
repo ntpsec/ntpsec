@@ -16,11 +16,13 @@ Python by ESR, concept and GNUPLOT code by Dan Drown.
 #SPDX-License-Identifier: BSD-2-Clause
 from __future__ import print_function, division
 
-import os, sys, getopt, socket
+import os, sys, getopt, socket, binascii
 from ntpstats import *
 
 # RMS frequency jitter - Deviation from a root-mean-square linear approximation?
 # Investigate.
+#
+# TO-DO: Embed Dan Drown's glossary and notes file in the HTML.
 
 def gnuplot(template, outfile=None):
     "Run a specified GNUPLOT program."
@@ -166,7 +168,9 @@ plot \
         plot_template += data + "\ne\n"	+ data + "\ne\n" + data
         return plot_template
 
-
+ntpsec_logo = """
+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
+"""
 
 if __name__ == '__main__':
     try:
@@ -192,7 +196,7 @@ if __name__ == '__main__':
         if switch == "-d":
             statsdirs = val.split(",")
         elif switch == "-e":
-            endtime = isotime(val)
+            endtime = iso_to_posix(val)
         elif switch == "-g":
             generate = True
         elif switch == "-h":
@@ -203,7 +207,7 @@ if __name__ == '__main__':
         elif switch == "-p":
             period = int(val)	# Denominated in days
         elif switch == "-s":
-            starttime = isotime(val)
+            starttime = iso_to_posix(val)
         elif switch == "-o":
             outdir = val
         elif switch == "--local-offset":
@@ -285,14 +289,14 @@ if __name__ == '__main__':
             raise SystemExit(0)
 
         # Fall through to HTML code generation
-        if os.path.isdir(outdir):
-            sys.stderr.write("ntpviz: %s already exists.\n" % outdir)
-            raise SystemExit(1)
-        try:
-            os.mkdir(outdir)
-        except SystemError:
-            sys.stderr.write("ntpviz: %s can't be created.\n" % outdir)
-            raise SystemExit(1)
+        if not os.path.isdir(outdir):
+            try:
+                os.mkdir(outdir)
+            except SystemError:
+                sys.stderr.write("ntpviz: %s can't be created.\n" % outdir)
+                raise SystemExit(1)
+        with open(os.path.join(outdir, "ntpsec-logo.png", "w")) as wp:
+            wp.write(binascii.a2b_base64(ntpsec_logo))
         index_header = '''\
 <!DOCTYPE html>
 <html>
@@ -301,18 +305,26 @@ if __name__ == '__main__':
 <title>ntpviz plot</title>
 </head>
 <body>
+<img sec="ntpsec-logo.png"/>
 '''
         index_trailer = '''\
 </body>
 </html>
 '''
-        imagepairs = (
+        imagepairs = [
             ("local-offset", stats.local_offset_gnuplot),
             ("local-jitter", stats.local_offset_jitter_gnuplot),
             ("local-stability", stats.local_offset_stability_gnuplot),
             ("peer-offsets", lambda: stats.peer_offsets_gnuplot(None)),
-            ("peer-jitters", lambda: stats.peer_jitters_gnuplot(None)),
-            )
+            ]
+        for key in stats.peersplit().keys():
+            imagepairs.append(("peer-offset-" + key,
+                           lambda: stats.peer_offsets_gnuplot([key])))
+        imagepairs.append(("peer-jitters",
+                           lambda: stats.peer_jitters_gnuplot(None)))
+        for key in stats.peersplit().keys():
+            imagepairs.append(("peer-jitter-" + key,
+                           lambda: stats.peer_jitters_gnuplot([key])))
         for (imagename, generator) in imagepairs:
             gnuplot(generator(), os.path.join(outdir, imagename + ".png"))
             with open(os.path.join(outdir, "index.html"), "w") as ifile:
