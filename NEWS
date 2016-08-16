@@ -6,7 +6,7 @@ Much of the traditional function of a news file is now better addressed
 by browsing the comments in the revision history.  This file will focus
 on user-visible changes.
 
-== Repository head ==
+== 2016-08-16: 0.9.4 ==
 
 A new visualization tool, ntpviz, generates graphical summaries of
 logfile data that can be helpful for identifying problems such as
