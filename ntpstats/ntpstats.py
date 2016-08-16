@@ -41,6 +41,8 @@ class NTPStats:
                         lines += open(logpart).readlines()
             except IOError:
                 pass
+            # Filter out blank lines (we don't know where these come from)
+            lines = [line for line in lines if line.strip()]
             # Sort by date
             lines.sort(key=NTPStats.stampfields)
             # Morph first field into Unix time with fractional seconds 
