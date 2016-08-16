@@ -37,11 +37,12 @@ def dist(ctx):
 
 def options(ctx):
 	options_cmd(ctx, config)
+	ctx.recurse("ntpstats")
 
 def configure(ctx):
 	from wafhelpers.configure import cmd_configure
 	cmd_configure(ctx, config)
-
+	ctx.recurse("ntpstats")
 
 from waflib.Build import BuildContext
 class check(BuildContext):
@@ -143,12 +144,12 @@ def build(ctx):
 	ctx.recurse("ntpq")
 	ctx.recurse("ntpkeygen")
 	ctx.recurse("ntptime")
+	ctx.recurse("ntpstats")
 	ctx.recurse("util")
 	ctx.recurse("tests")
 
-	# These don't have installation productions yet.
-	# Installation for their required Perl and Python libraries
-	# needs to be worked out first. Awkwardly, their man pages do
+	# Some of these presently fail because they require a Perl
+	# module that'ds never installed. Awkwardly, their man pages do
 	# get installed. There is a note about this mess in INSTALL.
 	scripts = [
 		"ntpleapfetch/ntpleapfetch",
@@ -162,7 +163,8 @@ def build(ctx):
 		features    = "subst",
 		source      = scripts,
 		target	    = scripts,
-		chmod	    = Utils.O755
+		chmod	    = Utils.O755,
+		install_path = "${PREFIX}/bin/"
 	)
 
 	ctx.manpage(8, "ntpleapfetch/ntpleapfetch-man.txt")
