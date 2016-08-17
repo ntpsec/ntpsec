@@ -374,14 +374,11 @@ if __name__ == '__main__':
         now = datetime.datetime.utcnow()
         index_header = '''\
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta http-equiv="refresh" content="1800">
-<meta http-equiv="expires" content="0">
-<meta http-equiv="cache-content" content="no-cache">
-<meta http-equiv="pragma" content="no-cache">
-<meta http-equiv="content-language" content="en_US">
+<meta name="expires" content="0">
 <title>ntpviz plot</title>
 </head>
 <body>
@@ -393,7 +390,7 @@ if __name__ == '__main__':
 '''
         index_header += 'Last Update: %s UTC <br>' %  now.strftime("%c")
         index_header += 'Period: %s days <br></div> ' %  period_days
-        index_header += '<div style="clear:both;"/>'
+        index_header += '<div style="clear:both;"></div>'
 
         index_trailer = '''\
 <br>
