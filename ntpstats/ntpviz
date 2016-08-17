@@ -427,6 +427,15 @@ ntpviz</a>, part of the <a href="https://www.ntpsec.org/">NTPsec project</a>
                 ifile.write(index_header)
                 for (imagename, _) in imagepairs:
                     ifile.write("<img src='%s.png' alt='%s plot'>\n" % (imagename, imagename.replace('-', ' ')))
+                # if notes file, add it to index.html
+                notes = os.path.join(outdir, "notes")
+                if os.path.isdir(outdir):
+                    try:
+                        notes_file = open( notes, 'r')
+                        notes_txt = notes_file.read()
+                        ifile.write('<br>Notes:\n' + notes_txt + '\n')
+                    except IOError:
+                        pass
                 ifile.write(index_trailer)
 
 # end
