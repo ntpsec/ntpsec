@@ -22,7 +22,7 @@ implemented.  Configuration examples in the new syntax have been added
 to each driver page.
 
 Refclocks are now designated by name, not number. A list is available
-from "--waf configure --list".
+from "./waf configure --list".
 
 The rarely-used saveconfig feature in ntpq, and various associated
 configuration directives, have been removed for security reasons. The
