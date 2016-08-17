@@ -171,9 +171,9 @@ plot \\
                 sys.stderr.write("No such peer as %s" % key)
                 raise SystemExit(1)
         return plot_template[:-2]
-    def peer_offsets_gnuplot(self, peerlist):
+    def peer_offsets_gnuplot(self, peerlist=None):
         return self.peerstats_gnuplot(peerlist, 4, "Peer clock offset")
-    def peer_jitters_gnuplot(self, peerlist):
+    def peer_jitters_gnuplot(self, peerlist=None):
         return self.peerstats_gnuplot(peerlist, 7, "Peer clock jitter")
     def peer_rtt_gnuplot(self, host):
         "Plot offset with rtt bounds for specified host."
@@ -345,22 +345,22 @@ if __name__ == '__main__':
 </html>
 '''
         imagepairs = [
-            ("local-offset", stats.local_offset_gnuplot),
-            ("local-error", stats.local_error_gnuplot),
-            ("local-jitter", stats.local_offset_jitter_gnuplot),
-            ("local-stability", stats.local_offset_stability_gnuplot),
-            ("peer-offsets", lambda: stats.peer_offsets_gnuplot(None)),
+            ("local-offset", stats.local_offset_gnuplot()),
+            ("local-error", stats.local_error_gnuplot()),
+            ("local-jitter", stats.local_offset_jitter_gnuplot()),
+            ("local-stability", stats.local_offset_stability_gnuplot()),
+            ("peer-offsets", stats.peer_offsets_gnuplot()),
             ]
         for key in stats.peersplit().keys():
             imagepairs.append(("peer-offset-" + key,
-                           lambda: stats.peer_offsets_gnuplot([key])))
+                           stats.peer_offsets_gnuplot([key])))
         imagepairs.append(("peer-jitters",
-                           lambda: stats.peer_jitters_gnuplot(None)))
+                           stats.peer_jitters_gnuplot()))
         for key in stats.peersplit().keys():
             imagepairs.append(("peer-jitter-" + key,
-                           lambda: stats.peer_jitters_gnuplot([key])))
-        for (imagename, generator) in imagepairs:
-            gnuplot(generator(), os.path.join(outdir, imagename + ".png"))
+                           stats.peer_jitters_gnuplot([key])))
+        for (imagename, image) in imagepairs:
+            gnuplot(image, os.path.join(outdir, imagename + ".png"))
             with open(os.path.join(outdir, "index.html"), "w") as ifile:
                 ifile.write(index_header)
                 for (imagename, _) in imagepairs:
