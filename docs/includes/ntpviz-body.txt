@@ -90,10 +90,17 @@ named 'ntpgraphs', but the name can be changed with the -o option.
 Warning: existing PNG files and index.html in this directory will be
 clobbered.
 
-When an index is generated, ntpviz will look for the file named 'footer'
-in the output directory.  This file may contain any arbitrary HTML.  The
-contents of that file will be added almost at the bottom of the generated
-index.
+When an index is generated, ntpviz will look for two files in the
+output directory.  Neither file need be present, and both files may
+contain aribtrary HTML.
+
+The first file is named 'header'.  The contents of that file will be
+added almost at the top of the body on the generated index.
+
+This is the place to put links to other web pages, or headline notes.
+
+The second file is named 'footer'.  The contents of that file will be
+added almost at the bottom of the body on the generated index.
 
 It is suggested that notes on the server be included in the footer
 file: OS, versions, CPU speed, etc.  You may also put links there.
