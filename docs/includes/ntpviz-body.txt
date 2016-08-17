@@ -8,6 +8,7 @@
 {ntpviz} [-d statsdir] [-g] [-n name] [-p period]
          [-s starttime] [-e endtime]
          [--local-offset | --local-error | --local-jitter | --local-stability]
+	 [--local-offset-histogram]
          [--peer-offsets=hosts | --all-peer-offsets]
          [--peer-jitters=hosts | --all-peer-jitters]
 	 [-o outdir]
@@ -46,7 +47,7 @@ The following plots are available:
    (fields 3 and 4).
 
 --local-error::
-   Clock frequency offset from the loop statistics (field 3)
+   Clock frequency offset from the loop statistics (field 4)
 
 --local-jitter::
    Clock time-jitter plot from the loop statistics (field 5).
@@ -55,6 +56,9 @@ The following plots are available:
    RMS frequency-jitter plot from the loop statistics (field 6).
    This is deviation from a root-mean-square extrapolation of the
    moving average of past frequency readings.
+
+--local-offset-histogram::
+   Frequency histogram of distinct loopstats time offset values (field 3).
 
 --peer-offsets=host1[,host2...]::
    Peer offset from local clock time from peerstats (field 4). A
