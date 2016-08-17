@@ -196,6 +196,41 @@ plot \
         data = "\n".join(entries)
         plot_template += data + "\ne\n"	+ data + "\ne\n" + data
         return plot_template
+    def local_offset_histogram_gnuplot(self):
+        "Plot a histogram of clock offset values from loopstats."
+        sitename = self.sitename
+        cnt = collections.Counter()
+        for line in self.loopstats:
+            cnt[line.split()[1]] += 1
+        plot_template = '''\
+set terminal png size 900,600
+set grid
+set xtic rotate by -45 scale 0
+set title "%(sitename)s: Local Clock Time Offset - Histogram"
+set xtics format "@1.1f us" nomirror
+set label 1 gprintf("99@@ = @1.2f us",$NINETYNINE) at $NINETYNINE, graph 0.91 left front offset 1,-1
+set style arrow 1 nohead
+set arrow from $NINETYNINE,0 to $NINETYNINE,graph 0.91 as 1
+set label 2 gprintf(" 1@@ = @1.2f us",$ONE) at $ONE, graph 0.91 right front offset -1,-1
+set style arrow 2 nohead
+set arrow from $ONE,0 to $ONE,graph 0.91 as 2
+set label 3 gprintf("25@@ = @1.2f us",$TWENTYFIVE) at $TWENTYFIVE, graph 0.7 right front offset -1,-1
+set style arrow 3 nohead
+set arrow from $TWENTYFIVE,0 to $TWENTYFIVE,graph 0.7 as 3
+set label 4 gprintf("75@@ = @1.2f us",$SEVENTYFIVE) at $SEVENTYFIVE, graph 0.7 left front offset 1,-1
+set style arrow 4 nohead
+set arrow from $SEVENTYFIVE,0 to $SEVENTYFIVE,graph 0.7 as 4
+set key off
+set lmargin 12
+set rmargin 12
+set xrange [-20:20]
+plot \
+ "-" using (\$1/100):2 title "histogram" with boxes
+''' % locals()
+        vals = list(cnt.keys())
+        vals.sort()
+        histogram_data = ["%s %s\n" % (val, cnt[val]) for val in vals] 
+        return plot_template.replace('@', '%') + "".join(histogram_data)
 
 ntpsec_logo = """
 iVBORw0KGgoAAAANSUhEUgAAAEAAAABKCAQAAACh+5ozAAAABGdBTUEAALGPC/xhBQAAAAFzUkdCAK7OHOkAAAAgY0hSTQAAeiYAAICEAAD6AAAAgOgAAHUwAADqYAAAOpgAABdwnLpRPAAAAAJiS0dEAP7wiPwpAAAACXBIWXMAAAsTAAALEwEAmpwYAAAFKElEQVRo3s2ZT0wcVRzHPzMLKCwsNgqLkYPSxBjbRF3TcKlC4VAhFU0AdRN7a+zBEsUEL0qImqoxMTWhBzEkTdqmREhMCgpeiiV6KVE46MVE1KQguxv/df81tLvzPOzsMjs7sztvd7b4ndPsfPf3vu/33vv93vs9yGCIJMLyWaKJXTSxZMMTCITilJ1kKENRdeoB6rHGYboNb80cpAjEQZoNr90ctiHWcyBfgD0aCZTk2CFAYylKTd7bVZYNknycwGf5ryjTRE2/OWVr9Bh9ahbwnuGtnRdsTZ5h0/Rbhr1PDYhNUZyt2guwRjdazi8+G0lZeMWoeExna3mzxwbOBDgwlIWQYhefhCkSNl8SpCpkO/JAiHFO00D+kCokGa8JpRyylSTjIlSeAPiC7/AU/JomknLM9qRbIjv8XaaANNs4hyU7VcJE6UBUZeR7wLjgqgXT4jQL6JYw5Qqy/U3e6YazLWY9cJ5DDOc+/kvU9aHQ8HFP7m2O8/kCwoyQYgAvAD8xwja1rjUugA7e15NzgnlGCRfSvATZII1A4yv1KIqL/R/iF9IIBCGCitfOtEoHs/qeJURQ90elaGOCbQSCtLKhDOd/LJTiZ1KfDXGW+aFiP2h00o8CJJhX3m75PabdLMZXjIrdfIq6vhDDhFxtfkV9xtqXlrmgjltzHGIMSBMhXcEAeGjFAyxrX1sTLAXcAvTsHuE5tixjgga6NA92OUXjAS5zfzGFpXZEabb5w7Jn99LMAI3EmecGf9n4SS3lPydbskKjD3GcIM3ch4c0Y9xghgv8hiZvrBwBg3zIgwj+1FN9LfsZ52Uu8ikhWWPyAoY5Swu/coEZYmio+DhGD31M8CgjViG2PEwgEFyn3dR8GMEsHahAF+/SBezGjkums1A71xEIJtwR0K837zdwdk0HiRNnQE6ATNL1cpJWFjll4+YF5vFyQi6DyAhop5MkU0Rsvsd5hzC99FZLwAB+NlktwtjkGg08US0BDcDlogstwRoQkBkE2WVYePw6ondDZZUFAALssz2mVSwgHzFCPMwjAHhoY1HehKyAAF5D76aZNXyL6nF/jX+qI2CdJJ2087Ohyfw6iZcAsOZ8AOQm4Sqb+HmpCKOXXhKsS9iUEhDiEnCc/TbfWzmJlytcqZYAuMgG+/kgF4qN8HOWfiJMyQxAMRRLRoscy0s62e18GNOmu3QukF0Fc8AkfTzFN6zwJXEET9LF83QQ4RRz7vTe3gOg0McCMQQpQmyxRRRBnAX6LPa9rnsABEt8yxG6eFavC8dZYYqrxMvpZ3mRMM4Ci3ycqwhFC+qmVRYAsvWjsgX4GC2/d5SurNoK8Oo1ch9vuNFP+XN2kJjLR9Nh64asPNDEa7xKIxVNLgN8+PAzCVZRwurEGuQzGoEwr7NiUSmVQ5ouPsFPpgzkIFBlD+a2TpOF6txmPtXVMpkTCZ5d2jaDblaoABjUqy4mCcZ2+jlHK3CTt/gcxdUqmUDwIqepBzY4ykahgFbO0Q9AirCp6u8OFPz6qpvhlcLMMeZ6Wcr+iSu5E+TuTGvIyqzuA4BX5E5P5kAUrZuucSP42CDl2zHdLhYI2DmzsylhURYFd5F7fmOy5wJqaFbb7h5Q65PdGoDvrtEqz4HMAPTUfn97HZW4whKPKy14sgvf9QhoQi7ARImi8KNSlZAjgewqcCfzy0DfrGUFTPORi1c0pXGbNzObvV0PuFZgdAjd4/+DZZjBnbgzNSJ3f7rnq0AltrcCPMR4mro9a3/9Pwl2Z1Rsm9zNAAAAJXRFWHRkYXRlOmNyZWF0ZQAyMDE1LTA2LTI5VDE4OjMwOjA3LTA0OjAwZxkj2wAAACV0RVh0ZGF0ZTptb2RpZnkAMjAxNS0wNi0yOVQxODozMDowNy0wNDowMBZEm2cAAAAASUVORK5CYII=
@@ -205,6 +240,7 @@ if __name__ == '__main__':
     try:
         (options, arguments) = getopt.getopt(sys.argv[1:], "d:e:ghn:o:p:s:", [
             "local-offset", "local-error", "local-jitter", "local-stability",
+            "local-offset-histogram",
             "all-peer-offsets", "peer-offsets=",
             "all-peer-jitters", "peer-jitters=",
             "peer-rtt=",
@@ -217,7 +253,7 @@ if __name__ == '__main__':
     statsdirs = ["/var/log/ntpstats"]
     endtime = starttime = None
     generate = False
-    show_local_offset = show_local_error = show_local_jitter = show_local_stability = False
+    show_local_offset = show_local_error = show_local_jitter = show_local_stability = show_local_offset_histogram = False
     show_peer_offsets = show_peer_jitters = None
     show_peer_rtt = None
     outdir = "ntpgraphs"
@@ -247,6 +283,8 @@ if __name__ == '__main__':
             show_local_jitter = True
         elif switch == "--local-stability":
             show_local_stability = True
+        elif switch == "--local_offset_histogram":
+            show_local_offset_histogram = True
         elif switch == "--peer-offsets":
             show_peer_offsets = val.split(",")
         elif switch == "--all-peer-offsets":
@@ -284,11 +322,11 @@ if __name__ == '__main__':
 
     if len(statlist) == 1:
         stats = statlist[0]
-        if show_local_offset or show_local_error or show_local_jitter or show_local_stability:
+        if show_local_offset or show_local_error or show_local_jitter or show_local_stability or show_local_offset_histogram:
             if not stats.loopstats:
                 sys.stderr.write("ntpviz: missing loopstats data\n")
                 raise SystemExit(1)
-            if show_local_offset + show_local_error + show_local_jitter + show_local_stability > 1:
+            if show_local_offset + show_local_error + show_local_jitter + show_local_stability + show_local_offset_histogram > 1:
                 sys.stderr.write("ntpviz: clash of mode options\n")
                 raise SystemExit(1)
             if show_local_offset:
@@ -299,6 +337,8 @@ if __name__ == '__main__':
                 plot = stats.local_offset_jitter_gnuplot()
             if show_local_stability:
                 plot = stats.local_offset_stability_gnuplot()
+            if show_local_offset_histogram:
+                plot = stat.local_offset_histogram_gnuplot()
             if generate:
                 gnuplot(plot)
             else:
@@ -306,7 +346,7 @@ if __name__ == '__main__':
             raise SystemExit(0)
 
         if show_peer_offsets is not None or show_peer_jitters is not None or show_peer_rtt is not None:
-            if not stats.loopstats:
+            if not stats.peerstats:
                 sys.stderr.write("ntpviz: missing peerstats data\n")
                 raise SystemExit(1)
             if show_peer_offsets is not None:
@@ -370,6 +410,7 @@ ntpviz</a>, part of the <a href="https://www.ntpsec.org/">NTPsec project</a>
             ("local-error", stats.local_error_gnuplot()),
             ("local-jitter", stats.local_offset_jitter_gnuplot()),
             ("local-stability", stats.local_offset_stability_gnuplot()),
+            #("local-offset-histogram", stats.local_offset_histogram_gnuplot()),
             ("peer-offsets", stats.peer_offsets_gnuplot()),
             ]
         for key in stats.peersplit().keys():
@@ -385,7 +426,7 @@ ntpviz</a>, part of the <a href="https://www.ntpsec.org/">NTPsec project</a>
             with open(os.path.join(outdir, "index.html"), "w") as ifile:
                 ifile.write(index_header)
                 for (imagename, _) in imagepairs:
-                    ifile.write("<img src='%s.png'/>\n" % imagename)
+                    ifile.write("<img src='%s.png' alt='%s plot'>\n" % (imagename, imagename.replace('-', ' ')))
                 ifile.write(index_trailer)
 
 # end
