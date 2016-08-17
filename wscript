@@ -149,7 +149,7 @@ def build(ctx):
 	ctx.recurse("tests")
 
 	# Some of these presently fail because they require a Perl
-	# module that'ds never installed. Awkwardly, their man pages do
+	# module that's never installed. Awkwardly, their man pages do
 	# get installed. There is a note about this mess in INSTALL.
 	scripts = [
 		"ntpleapfetch/ntpleapfetch",

@@ -137,7 +137,7 @@ Under Unix, the simplest way to compile this package is:
      computer), type `./waf distclean'.
 
 Under OS X you can build NTPsec using Xcode command line tools with no
-additions.There is currently no support for using Xcode's builder.
+additions. There is currently no support for using Xcode's builder.
 
 == Bugs ==
 
