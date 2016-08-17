@@ -425,6 +425,16 @@ ntpviz</a>, part of the <a href="https://www.ntpsec.org/">NTPsec project</a>
             gnuplot(image, os.path.join(outdir, imagename + ".png"))
             with open(os.path.join(outdir, "index.html"), "w") as ifile:
                 ifile.write(index_header)
+                # if header file, add it to index.html
+                header = os.path.join(outdir, "header")
+                if os.path.isfile(header):
+                    try:
+                        header_file = open( header, 'r')
+                        header_txt = header_file.read()
+                        ifile.write('<br>\n' + header_txt + '\n')
+                    except IOError:
+                        pass
+                # now the graphs
                 for (imagename, _) in imagepairs:
                     ifile.write("<img src='%s.png' alt='%s plot'>\n" % (imagename, imagename.replace('-', ' ')))
                 # if footer file, add it to index.html
@@ -436,6 +446,8 @@ ntpviz</a>, part of the <a href="https://www.ntpsec.org/">NTPsec project</a>
                         ifile.write('<br>\n' + footer_txt + '\n')
                     except IOError:
                         pass
+                # and finish the file
                 ifile.write(index_trailer)
+                ifile.close()
 
 # end
