@@ -4,7 +4,7 @@ ntpviz - logfile visualizer for NTP log files
 
 Usage: ntpviz [-d statsdir] [-g] [-n name] [-p period]
               [-s starttime]  [-e endtime]
-              [--local-offset | --local-jitter | --local-stability]
+              [--local-offset | --local-error | --local-jitter | --local-stability]
               [--peer-offsets=hosts | --all-peer-offsets]
               [--peer-jitters=hosts | --all-peer-jitters]
               [-o outdir]
@@ -58,7 +58,7 @@ set rmargin 12
         "Generate GNUPLOT code graphing local clock loop statistics"
         sitename = self.sitename
         plot_template = NTPViz.Common + """\
-set title "%(sitename)s: Local Clock Offsets"
+set title "%(sitename)s: Local Clock Offset"
 set ytics format "@1.2f us" nomirror textcolor rgb '#0060ad'
 set y2tics format "@2.3f ppm" nomirror textcolor rgb '#dd181f'
 set key bottom right box
@@ -69,6 +69,35 @@ plot \
  "-" using 1:3 title "frequency offset ppm" with linespoints ls 2 axis x1y2
 """ % locals()
         return plot_template.replace('@', '%') + self.dump("loopstats") + "e\n" + self.dump("loopstats")
+    def local_error_gnuplot(self):
+        "Plot the local clock frequency error."
+        sitename = self.sitename
+        ninetynine = self.percentile(3, 95, self.loopstats)
+        ninetyfive = self.percentile(3, 99, self.loopstats)
+        five       = self.percentile(3,  5, self.loopstats)
+        one        = self.percentile(3,  1, self.loopstats)
+        nf_m_f     = ninetyfive - five
+        nn_m_o     = ninetynine - one
+        plot_template = NTPViz.Common + """\
+set title "%(sitename)s: Local Clock Frequency Offset"
+set ytics format "@1.3f ppm" nomirror
+set key bottom right box
+set style line 1 lc rgb '#0060ad' lt 1 lw 1 pt 7 ps 0   # --- blue
+set style line 2 lc rgb '#dd181f' lt 1 lw 1 pt 5 ps 0   # --- red
+set label 1 gprintf("99@@ = %(ninetynine)s ppm",99) at graph 0.01,0.3 left front
+set label 2 gprintf("95@@ = %(ninetyfive)s ppm",95) at graph 0.01,0.25 left front
+set label 3 gprintf(" 5@@ = %(five)s ppm",5) at graph 0.01,0.2 left front
+set label 4 gprintf(" 1@@ = %(one)s ppm",1) at graph 0.01,0.15 left front
+set label 5 gprintf("95@@ - 5@@ = %(nf_m_f)s ppm",90) at graph 0.01,0.1 left front
+set label 6 gprintf("99@@ - 1@@ = %(nn_m_o)s ppm",98) at graph 0.01,0.05 left front
+plot \
+ "-" using 1:3 title "local clock error" with linespoints ls 2, \
+ %(ninetynine)s title "99th percentile", \
+ %(ninetyfive)s title "95th percentile", \
+ %(five)s title "5th percentile", \
+ %(one)s title "1st percentile"
+""" % locals()
+        return plot_template.replace('@', '%') + self.dump("loopstats")
     def loopstats_gnuplot(self, fld, title, legend):
         "Generate GNUPLOT code of a given loopstats field"
         sitename   = self.sitename
@@ -175,7 +204,7 @@ iVBORw0KGgoAAAANSUhEUgAAAEAAAABKCAQAAACh+5ozAAAABGdBTUEAALGPC/xhBQAAAAFzUkdCAK7O
 if __name__ == '__main__':
     try:
         (options, arguments) = getopt.getopt(sys.argv[1:], "d:e:ghn:o:p:s:", [
-            "local-offset", "local-jitter", "local-stability",
+            "local-offset", "local-error", "local-jitter", "local-stability",
             "all-peer-offsets", "peer-offsets=",
             "all-peer-jitters", "peer-jitters=",
             "peer-rtt=",
@@ -188,7 +217,7 @@ if __name__ == '__main__':
     statsdirs = ["/var/log/ntpstats"]
     endtime = starttime = None
     generate = False
-    show_local_offset = show_local_jitter = show_local_stability = False
+    show_local_offset = show_local_error = show_local_jitter = show_local_stability = False
     show_peer_offsets = show_peer_jitters = None
     show_peer_rtt = None
     outdir = "ntpgraphs"
@@ -212,6 +241,8 @@ if __name__ == '__main__':
             outdir = val
         elif switch == "--local-offset":
             show_local_offset = True
+        elif switch == "--local-error":
+            show_local_error = True
         elif switch == "--local-jitter":
             show_local_jitter = True
         elif switch == "--local-stability":
@@ -253,15 +284,17 @@ if __name__ == '__main__':
 
     if len(statlist) == 1:
         stats = statlist[0]
-        if show_local_offset or show_local_jitter or show_local_stability:
+        if show_local_offset or show_local_error or show_local_jitter or show_local_stability:
             if not stats.loopstats:
                 sys.stderr.write("ntpviz: missing loopstats data\n")
                 raise SystemExit(1)
-            if show_local_offset + show_local_jitter + show_local_stability > 1:
+            if show_local_offset + show_local_error + show_local_jitter + show_local_stability > 1:
                 sys.stderr.write("ntpviz: clash of mode options\n")
                 raise SystemExit(1)
             if show_local_offset:
                 plot = stats.local_offset_gnuplot()
+            if show_local_error:
+                plot = stats.local_error_gnuplot()
             if show_local_jitter:
                 plot = stats.local_offset_jitter_gnuplot()
             if show_local_stability:
@@ -295,7 +328,7 @@ if __name__ == '__main__':
             except SystemError:
                 sys.stderr.write("ntpviz: %s can't be created.\n" % outdir)
                 raise SystemExit(1)
-        with open(os.path.join(outdir, "ntpsec-logo.png", "w")) as wp:
+        with open(os.path.join(outdir, "ntpsec-logo.png"), "w") as wp:
             wp.write(binascii.a2b_base64(ntpsec_logo))
         index_header = '''\
 <!DOCTYPE html>
@@ -313,6 +346,7 @@ if __name__ == '__main__':
 '''
         imagepairs = [
             ("local-offset", stats.local_offset_gnuplot),
+            ("local-error", stats.local_error_gnuplot),
             ("local-jitter", stats.local_offset_jitter_gnuplot),
             ("local-stability", stats.local_offset_stability_gnuplot),
             ("peer-offsets", lambda: stats.peer_offsets_gnuplot(None)),

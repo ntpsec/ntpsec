@@ -7,7 +7,7 @@
 [verse]
 {ntpviz} [-d statsdir] [-g] [-n name] [-p period]
          [-s starttime] [-e endtime]
-         [--local-offset | --local-jitter | --local-stability]
+         [--local-offset | --local-error | --local-jitter | --local-stability]
          [--peer-offsets=hosts | --all-peer-offsets]
          [--peer-jitters=hosts | --all-peer-jitters]
 	 [-o outdir]
@@ -44,6 +44,9 @@ The following plots are available:
 --local-offset::
    Clock time and clock frequency offsets from the loop statistics
    (fields 3 and 4).
+
+--local-error::
+   Clock frequency offset from the loop statistics (field 3)
 
 --local-jitter::
    Clock time-jitter plot from the loop statistics (field 5).
