@@ -427,13 +427,13 @@ ntpviz</a>, part of the <a href="https://www.ntpsec.org/">NTPsec project</a>
                 ifile.write(index_header)
                 for (imagename, _) in imagepairs:
                     ifile.write("<img src='%s.png' alt='%s plot'>\n" % (imagename, imagename.replace('-', ' ')))
-                # if notes file, add it to index.html
-                notes = os.path.join(outdir, "notes")
-                if os.path.isdir(outdir):
+                # if footer file, add it to index.html
+                footer = os.path.join(outdir, "footer")
+                if os.path.isfile(footer):
                     try:
-                        notes_file = open( notes, 'r')
-                        notes_txt = notes_file.read()
-                        ifile.write('<br>Notes:\n' + notes_txt + '\n')
+                        footer_file = open( footer, 'r')
+                        footer_txt = footer_file.read()
+                        ifile.write('<br>\n' + footer_txt + '\n')
                     except IOError:
                         pass
                 ifile.write(index_trailer)
