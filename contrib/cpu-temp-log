@@ -36,7 +36,7 @@ temperatures will be hardware specific.
 """
 
 
-import sys, re, datetime, subprocess
+import sys, re, time, subprocess
 
 output = subprocess.check_output(["sensors", "-u"], universal_newlines=True)
 
@@ -44,8 +44,8 @@ lines = output.split( '\n' )
 
 pat = re.compile('^\s+temp\d+_input:\s+([\d\.]+).*$')
 
-now = datetime.datetime.utcnow()
-sys.stdout.write(  now.strftime("%s") )
+now = int(time.time())
+sys.stdout.write(  int(now) )
 
 #lines = sys.stdin.readlines()
 line = ''
