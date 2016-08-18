@@ -23,6 +23,8 @@ README::	This file.
 
 VERSION::	The version stamp, to be used by scripts and programs.
 
+contrib/::	Directory containing contributed scripts, dragons dwell here.
+
 devel/::	Documentation aimed at developers.
 
 docs/::		Directory containing a complete set of documentation on
