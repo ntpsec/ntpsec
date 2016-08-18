@@ -1,3 +1,7 @@
 The following tools are not production-ready. They are included only as
 conveniences, examples or rudimetary starting points for other development
 efforts.
+
+cpu-temp-log is a tool to use the output of 'sensors -u' and write the
+motherboard temperatures to stdout.  Usefull to create a log that can be used
+by 'ntpviz --local-cpu-temp'
