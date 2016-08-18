@@ -258,7 +258,7 @@ The file "dot.emacs" has the emacs C-mode indentation style that Dave likes.
 === Other languages ===
 
 The only scripting languages allowed and supported are POSIX sh and
-Python 2.5 or later. If you find code in the
+Python 2.6 or later. If you find code in the
 distribution that is in a scripting language and not one of these,
 you would be doing us a favor by translating it into Python or sh.
 
