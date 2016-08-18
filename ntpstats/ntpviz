@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# coding: utf-8
 """\
 ntpviz - logfile visualizer for NTP log files
 
@@ -7,6 +8,7 @@ Usage: ntpviz [-d statsdir] [-g] [-n name] [-p days]
               [--local-offset | --local-error | --local-jitter | --local-stability]
               [--peer-offsets=hosts | --all-peer-offsets]
               [--peer-jitters=hosts | --all-peer-jitters]
+              [--local-cpu-temp]
               [-o outdir]
 
 See the manual page for details.
@@ -69,6 +71,20 @@ plot \
  "-" using 1:3 title "frequency offset ppm" with linespoints ls 2 axis x1y2
 """ % locals()
         return plot_template.replace('@', '%') + self.dump("loopstats") + "e\n" + self.dump("loopstats")
+
+    def local_cpu_temp_gnuplot(self):
+        "Generate GNUPLOT code graphing local cpu temp statistics"
+        sitename = self.sitename
+        plot_template = NTPViz.Common + """\
+set title "%(sitename)s: Local CPU Temp"
+set ytics format "@1.1f °C" nomirror textcolor rgb '#0060ad'
+set style line 1 lc rgb '#0060ad' lt 1 lw 1 pt 7 ps 0   # --- blue
+plot \
+ "-" using 1:($2) title "CPU temp" with linespoints ls 1
+""" % locals()
+        return plot_template.replace('@', '%')  \
+            + "".join(getattr(self, "cputemp"))
+
     def local_error_gnuplot(self):
         "Plot the local clock frequency error."
         sitename = self.sitename
@@ -247,6 +263,7 @@ if __name__ == '__main__':
             "local-offset-histogram",
             "all-peer-offsets", "peer-offsets=",
             "all-peer-jitters", "peer-jitters=",
+            "local-cpu-temp",
             "peer-rtt=",
             ])
     except getopt.GetoptError as err:
@@ -257,7 +274,8 @@ if __name__ == '__main__':
     statsdirs = ["/var/log/ntpstats"]
     endtime = starttime = None
     generate = False
-    show_local_offset = show_local_error = show_local_jitter = show_local_stability = show_local_offset_histogram = False
+    show_local_offset = show_local_error = show_local_jitter = False
+    show_local_stability = show_local_offset_histogram = show_cpu_temp = False
     show_peer_offsets = show_peer_jitters = None
     show_peer_rtt = None
     outdir = "ntpgraphs"
@@ -299,6 +317,8 @@ if __name__ == '__main__':
             show_peer_jitters = []
         elif switch == "--peer-rtt":
             show_peer_rtt = val
+        elif switch == "--local-cpu-temp":
+            show_cpu_temp = True
     period = 24 * 60 * 60 * period_days
     statlist = [NTPViz(statsdir=d, sitename=sitename) for d in statsdirs]
     for stats in statlist:
@@ -365,6 +385,18 @@ if __name__ == '__main__':
                 sys.stdout.write(plot)
             raise SystemExit(0)
 
+        if show_cpu_temp:
+            if not stats.cputemp:
+                sys.stderr.write("ntpviz: missing CPU temp data\n")
+                raise SystemExit(1)
+            if show_cpu_temp is not None:
+                plot = stats.local_cpu_temp_gnuplot();
+            if generate:
+                gnuplot(plot)
+            else:
+                sys.stdout.write(plot)
+            raise SystemExit(0)
+
         # Fall through to HTML code generation
         if not os.path.isdir(outdir):
             try:
@@ -413,6 +445,7 @@ ntpviz</a>, part of the <a href="https://www.ntpsec.org/">NTPsec project</a>
             ("local-stability", stats.local_offset_stability_gnuplot()),
             ("local-offset-histogram", stats.local_offset_histogram_gnuplot()),
             ("peer-offsets", stats.peer_offsets_gnuplot()),
+            ("local-cpu-temp", stats.local_cpu_temp_gnuplot()),
             ]
         for key in stats.peersplit().keys():
             imagepairs.append(("peer-offset-" + key,
