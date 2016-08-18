@@ -1,4 +1,4 @@
-= Radio Timecode Formats (README.timecodes.txt) =
+= Radio Timecode Formats =
 
 Following are examples of the serial timecode formats used by various
 timecode receivers as given in the instruction manuals. These examples
@@ -82,7 +82,7 @@ This format is used by several clocks from different vendors.
 
 == TrueTime 468-DC Satellite Synchronized Clock ==
 
-Also aopplies to other TrueTime receivers 
+Also applies to other TrueTime receivers 
 
 ----------------------------------------------------------------------------
 "<CR><LF><^A>ddd:hh:mm:ssq<CR>"

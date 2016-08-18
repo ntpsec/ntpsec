@@ -1,13 +1,11 @@
-= Statistics file formats (README.stats.txt) =
+= Statistics file formats =
 
 The ntpd daemon can produce a variety of statistics files which are
 useful for maintenance, evaluation and retrospective calibration
 purposes. See the ntpd man page for instructions on how to configure
-this feature. Since these files can become rather large and cumbersome,
-they are ordinarily reduced to summary form by running the summary.sh
-shell script once per day, week or month, as appropriate. There are
-three file collections presently defined: peerstats, loopstats and
-clockstats, each of which is described in this note.
+this feature. There are three file collections presently defined:
+peerstats, loopstats and clockstats, each of which is described in
+this note.
 
 Note: The NTPsec versions of these formats differ in that clock IDs
 consist of a string drivername followed by unit number in parentheses
@@ -54,14 +52,9 @@ valid update of the local clock.
 
 == clockstats ==
 
-The following data are collected in the clockstats files. The files are
-reduced to summary data using the clock.sh shell script, which also
-updates the etf, itf and tdata data files as well. See the
-clock.awk, etf.awk, itf.awk and tdta.awk scripts for
-further information. A line in the file is produced at each valid update
-received from a configured radio clock. Data are at present recorded for
-several radios. The first part of each data line is similar for all
-radios, e.g.:
+A line in this file is produced at each valid update received from a
+refclock configured to append to it. The first part of each data line
+is similar for all radios, e.g.:
 
 ----------------------------------------------------------------------------
   49234 60517.826 SPECTRACOM(1) 93 247 16:48:21.814
@@ -69,23 +62,7 @@ radios, e.g.:
   49234                modified Julian day number
   60517.826            time of day (s) past midnight UTC
   SPECTRACOM(1)        receiver identifier (Spectracom unit 1)
-  93 247 16:48:21.814  timecode (format varies)
+  93 247 16:48:21.814  timecode (format varies by refclock)
 ----------------------------------------------------------------------------
-
-The formats shown consist of one line with all the fields shown in
-order. The timecode formats specific to each radio follow. See the
-file README.timecodes for detailed information on the timecode formats
-used by these radios.
-
-=== Spectracom receiver ===
-
-----------------------------------------------------------------------------
-  49234 60517.826 SPECTRACOM(1) ?A93 247 16:48:21.814
-----------------------------------------------------------------------------
-
-  The '?' and 'A' characters are present only when the receiver is
-  unsynchronized; otherwise, they are replaced by space ' ' characters.
-
-
 
 //end
