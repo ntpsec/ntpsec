@@ -16,7 +16,7 @@ Python by ESR, concept and GNUPLOT code by Dan Drown.
 #SPDX-License-Identifier: BSD-2-Clause
 from __future__ import print_function, division
 
-import os, sys, getopt, socket, binascii, datetime
+import os, sys, getopt, socket, binascii, datetime, collections
 from ntpstats import *
 
 # RMS frequency jitter - Deviation from a root-mean-square linear approximation?
@@ -72,8 +72,8 @@ plot \
     def local_error_gnuplot(self):
         "Plot the local clock frequency error."
         sitename = self.sitename
-        ninetynine = self.percentile(3, 95, self.loopstats)
-        ninetyfive = self.percentile(3, 99, self.loopstats)
+        ninetynine = self.percentile(3, 99, self.loopstats)
+        ninetyfive = self.percentile(3, 95, self.loopstats)
         five       = self.percentile(3,  5, self.loopstats)
         one        = self.percentile(3,  1, self.loopstats)
         nf_m_f     = ninetyfive - five
@@ -101,8 +101,8 @@ plot \
     def loopstats_gnuplot(self, fld, title, legend):
         "Generate GNUPLOT code of a given loopstats field"
         sitename   = self.sitename
-        ninetynine = self.percentile(fld, 95, self.loopstats) * 1000000
-        ninetyfive = self.percentile(fld, 99, self.loopstats) * 1000000
+        ninetynine = self.percentile(fld, 99, self.loopstats) * 1000000
+        ninetyfive = self.percentile(fld, 95, self.loopstats) * 1000000
         five       = self.percentile(fld,  5, self.loopstats) * 1000000
         one        = self.percentile(fld,  1, self.loopstats) * 1000000
         nf_m_f     = ninetyfive - five
@@ -202,30 +202,34 @@ plot \
         cnt = collections.Counter()
         for line in self.loopstats:
             cnt[line.split()[1]] += 1
+        ninetynine  = self.percentile(2, 99, self.loopstats) * 1000000
+        seventyfive = self.percentile(2, 75, self.loopstats) * 1000000
+        twentyfive  = self.percentile(2, 25, self.loopstats) * 1000000
+        one         = self.percentile(2,  1, self.loopstats) * 1000000
         plot_template = '''\
 set terminal png size 900,600
 set grid
 set xtic rotate by -45 scale 0
 set title "%(sitename)s: Local Clock Time Offset - Histogram"
 set xtics format "@1.1f us" nomirror
-set label 1 gprintf("99@@ = @1.2f us",$NINETYNINE) at $NINETYNINE, graph 0.91 left front offset 1,-1
+set label 1 gprintf("99@@ = @1.2f us",%(ninetynine)s) at %(ninetynine)s, graph 0.91 left front offset 1,-1
 set style arrow 1 nohead
-set arrow from $NINETYNINE,0 to $NINETYNINE,graph 0.91 as 1
-set label 2 gprintf(" 1@@ = @1.2f us",$ONE) at $ONE, graph 0.91 right front offset -1,-1
+set arrow from %(ninetynine)s,0 to %(ninetynine)s,graph 0.91 as 1
+set label 2 gprintf(" 1@@ = @1.2f us",%(one)s) at %(one)s, graph 0.91 right front offset -1,-1
 set style arrow 2 nohead
-set arrow from $ONE,0 to $ONE,graph 0.91 as 2
-set label 3 gprintf("25@@ = @1.2f us",$TWENTYFIVE) at $TWENTYFIVE, graph 0.7 right front offset -1,-1
+set arrow from %(one)s,0 to %(one)s,graph 0.91 as 2
+set label 3 gprintf("25@@ = @1.2f us",%(twentyfive)s) at %(twentyfive)s, graph 0.7 right front offset -1,-1
 set style arrow 3 nohead
-set arrow from $TWENTYFIVE,0 to $TWENTYFIVE,graph 0.7 as 3
-set label 4 gprintf("75@@ = @1.2f us",$SEVENTYFIVE) at $SEVENTYFIVE, graph 0.7 left front offset 1,-1
+set arrow from %(twentyfive)s,0 to %(twentyfive)s,graph 0.7 as 3
+set label 4 gprintf("75@@ = @1.2f us",%(seventyfive)s) at %(seventyfive)s, graph 0.7 left front offset 1,-1
 set style arrow 4 nohead
-set arrow from $SEVENTYFIVE,0 to $SEVENTYFIVE,graph 0.7 as 4
+set arrow from %(seventyfive)s,0 to %(seventyfive)s,graph 0.7 as 4
 set key off
 set lmargin 12
 set rmargin 12
 set xrange [-20:20]
 plot \
- "-" using (\$1/100):2 title "histogram" with boxes
+ "-" using ($1/100):2 title "histogram" with boxes
 ''' % locals()
         vals = list(cnt.keys())
         vals.sort()
@@ -283,7 +287,7 @@ if __name__ == '__main__':
             show_local_jitter = True
         elif switch == "--local-stability":
             show_local_stability = True
-        elif switch == "--local_offset_histogram":
+        elif switch == "--local-offset-histogram":
             show_local_offset_histogram = True
         elif switch == "--peer-offsets":
             show_peer_offsets = val.split(",")
@@ -338,7 +342,7 @@ if __name__ == '__main__':
             if show_local_stability:
                 plot = stats.local_offset_stability_gnuplot()
             if show_local_offset_histogram:
-                plot = stat.local_offset_histogram_gnuplot()
+                plot = stats.local_offset_histogram_gnuplot()
             if generate:
                 gnuplot(plot)
             else:
@@ -407,7 +411,7 @@ ntpviz</a>, part of the <a href="https://www.ntpsec.org/">NTPsec project</a>
             ("local-error", stats.local_error_gnuplot()),
             ("local-jitter", stats.local_offset_jitter_gnuplot()),
             ("local-stability", stats.local_offset_stability_gnuplot()),
-            #("local-offset-histogram", stats.local_offset_histogram_gnuplot()),
+            ("local-offset-histogram", stats.local_offset_histogram_gnuplot()),
             ("peer-offsets", stats.peer_offsets_gnuplot()),
             ]
         for key in stats.peersplit().keys():
