@@ -75,6 +75,7 @@ plot \
     def local_cpu_temp_gnuplot(self):
         "Generate GNUPLOT code graphing local cpu temp statistics"
         sitename = self.sitename
+        lines = [line + '\n' for line in getattr(self, "cputemp")]
         plot_template = NTPViz.Common + """\
 set title "%(sitename)s: Local CPU Temp"
 set ytics format "@1.1f °C" nomirror textcolor rgb '#0060ad'
@@ -83,7 +84,7 @@ plot \
  "-" using 1:($2) title "CPU temp" with linespoints ls 1
 """ % locals()
         return plot_template.replace('@', '%')  \
-            + "".join(getattr(self, "cputemp"))
+            + "".join(lines)
 
     def local_error_gnuplot(self):
         "Plot the local clock frequency error."
