@@ -45,6 +45,10 @@ GPS-TM/TMD Receiver
     space less than 1 millisecond
 --------------------------------------------------
 
+In general, an alarm condition is indicated by ? at A, which occurs during
+initial synchronization and when received signal is lost for an
+extended period; unlock condition is indicated by other than <SP>
+in the quality field.
 
 == Notes on the 468-DC receiver: ==
 
