@@ -10,9 +10,10 @@ or a BSD-like pair of ntp_gettime(2)/ntp_adjtime(2) calls.
 There are some prerequisites.  Libraries need the library installed
 to run and in addition, the development headers installed to build.
 
-Python 2.x, x >= 5::
-   Required to build.  May be needed by some utilities.  Note, we don't
-   play well with Python 3 yet.
+Python 2.x, x >= 6, or Python 3.x >= 2::
+   Required to build, and for various scripts such as ntpviz.  Our
+   Python code has been written polyglot to also run with production
+   versions of Python 3.
 
 bison::
    Required to build.
