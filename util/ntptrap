@@ -4,9 +4,18 @@
 ;#
 ;# a client for the xntp mode 6 trap mechanism
 ;#
+;#	usage:
+;#	  ntptrap [-n] [-p <port>] [-l <debug-output>] servers...
+;#	
+;#	-n:		do not send set_trap requests
+;#
+;#	port:		port to listen for responses
+;#			useful if you have a configured trap
+;#
+;#	debug-output:	file to write trace output to (for debugging)
+;#
 ;# Copyright (c) 1992 
 ;#  Rainer Pruy Friedrich-Alexander Universitaet Erlangen-Nuernberg
-;#
 ;#
 ;#############################################################
 $0 =~ s!^.*/([^/]+)$!$1!;		# strip to filename
