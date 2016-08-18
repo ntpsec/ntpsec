@@ -14,7 +14,12 @@ class NTPStats:
     @staticmethod
     def stampfields(line):
         "Extract first two fields, MJD and seconds past midnight."
-        return (int(line.split()[0]), float(line.split()[1]))
+        line = line.strip()
+        try:
+            return (int(line.split()[0]), float(line.split()[1]))
+        except:
+            # unparseable  time 0 and it will be stripped later
+            return (0, 0)
     @staticmethod
     def unixtime(line):
         "Log timestamp (MJD & seconds past midnight) to Unix time"
@@ -42,7 +47,8 @@ class NTPStats:
             except IOError:
                 pass
             # Filter out blank lines (we don't know where these come from)
-            lines = [line for line in lines if line.strip()]
+            lines = [line.strip(' \0\r\n\t')  \
+                     for line in lines if line.strip(' \0\r\n\t')]
             # Sort by date
             lines.sort(key=NTPStats.stampfields)
             # Morph first field into Unix time with fractional seconds 
