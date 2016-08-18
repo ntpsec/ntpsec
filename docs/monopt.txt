@@ -43,10 +43,10 @@ _suffix_::
   A string of elements beginning with . (dot) followed by a number of
   elements depending on the file set type.
 
-Statistics files can be managed using scripts, examples of which are in
-the +./scripts+ directory. Using these or similar scripts and Unix
-+cron+ jobs, the files can be automatically summarized and archived for
-retrospective analysis.
+For more details on the format of statistics files, see
+link:statfiles.html[Statistics file formats].  There is a
+visualization tool, linkLntpviz.html[{ntpviz}], which assists
+in making sense of these.
 
 [[cmd]]
 == Monitoring Commands and Options ==
