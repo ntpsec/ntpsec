@@ -166,6 +166,13 @@ few will be user-visible.
   problems, and identifying noise sources in network weather and
   elsewhere.
 
+* Because +{ntpviz}+ exists, a number of ancient and poorly-documented
+  scripts in awk, Perl, and S, formerly used for making statistical
+  summaries, have been removed from the distribution in order to
+  reduce overall maintainance burden and complexity. If you miss any
+  of this cruft, the project team will (a) be quite surprised, and (b)
+  work with you on better analytics using ntpviz and modern tools.
+
 * The ntpsnmpd daemon, incomplete and not conformant with RFC 5907,
   has been removed.
 
