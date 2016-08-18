@@ -470,7 +470,9 @@ ntpviz</a>, part of the <a href="https://www.ntpsec.org/">NTPsec project</a>
                         pass
                 # now the graphs
                 for (imagename, _) in imagepairs:
-                    ifile.write("<div><img src='%s.png' alt='%s plot'></div>\n" % (imagename, imagename.replace('-', ' ')))
+                    ifile.write("<div><img src='%s.png' alt='%s plot'></div>\n" \
+                        % (imagename.replace(':', '%3A'), \
+                         imagename.replace('-', ' ')))
                 # if footer file, add it to index.html
                 footer = os.path.join(outdir, "footer")
                 if os.path.isfile(footer):
