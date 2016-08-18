@@ -31,7 +31,7 @@ class NTPStats:
     def __init__(self, sitename, statsdir):
         "Grab content of all logfiles, sorted by timestamp."
         self.sitename = sitename
-        for stem in ("clockstats", "peerstats", "loopstats", "rawstats"):
+        for stem in ("clockstats", "peerstats", "loopstats", "rawstats", "cputemp"):
             lines = []
             try:
                 for logpart in glob.glob(os.path.join(statsdir, stem) + "*"):
@@ -46,7 +46,8 @@ class NTPStats:
             # Sort by date
             lines.sort(key=NTPStats.stampfields)
             # Morph first field into Unix time with fractional seconds 
-            lines = [NTPStats.unixize(line) for line in lines]
+            if stem != "cputemp":
+                lines = [NTPStats.unixize(line) for line in lines]
             setattr(self, stem, lines)
     def clip(self, start, end):
         "Select a range of entries"
