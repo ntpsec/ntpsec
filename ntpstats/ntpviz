@@ -222,7 +222,7 @@ plot \
         sitename = self.sitename
         cnt = collections.Counter()
         for line in self.loopstats:
-            cnt[line.split()[1]] += 1
+            cnt[ round( float(line.split()[1]), 7)] += 1
         ninetynine  = self.percentile(2, 99, self.loopstats) * 1000000
         seventyfive = self.percentile(2, 75, self.loopstats) * 1000000
         twentyfive  = self.percentile(2, 25, self.loopstats) * 1000000
