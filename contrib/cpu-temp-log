@@ -45,7 +45,7 @@ lines = output.split( '\n' )
 pat = re.compile('^\s+temp\d+_input:\s+([\d\.]+).*$')
 
 now = int(time.time())
-sys.stdout.write(  int(now) )
+sys.stdout.write(  str(now) )
 
 #lines = sys.stdin.readlines()
 line = ''
