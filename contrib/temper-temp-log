@@ -1,0 +1,39 @@
+#!/usr/bin/env python
+# coding: utf-8
+"""\
+Usage: temper-temper-log
+
+Reads 'temper-poll -c' for room temperature data.  Writes the temperature
+found to stdout on one line, preceeded by the unix UTC time in seconds
+and the Log source ID.
+
+Before you can use this utility you must have a TEMPer USB thermometer
+plugged in, and the temper-python package must be installed and configured.
+See their documentation for that procedure.
+
+Sample log from a TEMPer:
+
+1471573103 TEMPER 37.000
+1471573104 TEMPER 37.000
+1471573105 TEMPER 37.000
+
+Field 1: unix UTC time in seconds
+Field 1: Log source (TEMPER)
+Field 3: CPU temperature in degrees C
+
+Sample crontab usage:
+
+# take and log cpu temp every 5 mins
+*/5 * * * * /usr/local/sbin/temper-temp-log >> /var/log/ntpstats/cputemp
+
+"""
+
+
+import re, time, subprocess
+
+output = subprocess.check_output(["temper-poll", "-c"], universal_newlines=True)
+
+now = int(time.time())
+
+temp = float( output )
+print str(now) + ' TEMPER ' + str(temp)

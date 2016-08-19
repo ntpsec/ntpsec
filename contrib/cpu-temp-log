@@ -14,16 +14,17 @@ on your lm_sensors configuration and your motherboard.
 
 Sample log from an Supermicro Quad Core Xeon:
 
-1471573103 37.000 35.000 31.000 31.000 30.000
-1471573104 37.000 35.000 30.000 31.000 29.000
-1471573105 37.000 35.000 30.000 31.000 29.000
+1471573103 LM 37.000 35.000 31.000 31.000 30.000
+1471573104 LM 37.000 35.000 30.000 31.000 29.000
+1471573105 LM 37.000 35.000 30.000 31.000 29.000
 
 Field 1: unix UTC time in seconds
-Field 2: North Bridge temperature in degrees C
-Field 3: CPU0 temperature in degrees C
-Field 4: CPU1 temperature in degrees C
-Field 5: CPU2 temperature in degrees C
-Field 6: CPU3 temperature in degrees C
+Field 2: Log source (LM)
+Field 3: North Bridge temperature in degrees C
+Field 4: CPU0 temperature in degrees C
+Field 5: CPU1 temperature in degrees C
+Field 6: CPU2 temperature in degrees C
+Field 7: CPU3 temperature in degrees C
 
 Sample crontab usage:
 
@@ -36,7 +37,7 @@ temperatures will be hardware specific.
 """
 
 
-import sys, re, time, subprocess
+import sys,  re, time, subprocess
 
 output = subprocess.check_output(["sensors", "-u"], universal_newlines=True)
 
@@ -45,13 +46,13 @@ lines = output.split( '\n' )
 pat = re.compile('^\s+temp\d+_input:\s+([\d\.]+).*$')
 
 now = int(time.time())
-sys.stdout.write(  str(now) )
+sys.stdout.write( str(now) + ' LM')
 
 #lines = sys.stdin.readlines()
 line = ''
 for line in lines:
     match = pat.match( line )
     if match and match.group(1):
-        sys.stdout.write(  ' ' + match.group(1) )
+        sys.stdout.write(' ' + match.group(1))
 
-sys.stdout.write(  '\n' )
+sys.stdout.write( '\n' )

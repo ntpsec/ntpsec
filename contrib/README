@@ -3,9 +3,14 @@ conveniences, examples or rudimetary starting points for other development
 efforts.
 
 cpu-temp-log is a tool to use the output of 'sensors -u' and write the
-motherboard temperatures to stdout.  Usefull to create a log that can be used
+motherboard temperatures to stdout.  Useful to create a log that can be used
 by 'ntpviz --local-cpu-temp'
 
 pi-temp-log for the Raspberry Pi.  It is a tool to read a magic /sys file
-to get the CPU temperature and write the temperatures to stdout.  Usefull
+to get the CPU temperature and write the temperatures to stdout.  Useful
 to create a log that can be used by 'ntpviz --local-cpu-temp'
+
+temper-temp-log for TEMPer USB thermometer.  Useful for logging room
+temperature.  This reads the thermometer using the temper-python command
+line utility and writes the temperatures to stdout.  Useful to create a
+og that can be used by 'ntpviz --local-cpu-temp'

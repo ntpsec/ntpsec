@@ -10,14 +10,15 @@ preceeded by the unix UTC time in seconds.
 
 Sample log:
 
-1471582083 56.92
-1471582084 57.458
-1471582085 56.92
-1471582086 56.92
+1471582083 PI 56.92
+1471582084 PI 57.458
+1471582085 PI 56.92
+1471582086 PI 56.92
 
 
 Field 1: unix UTC time in seconds
-Field 2: CPU Temerature
+Field 2: Loug source (PI)
+Field 3: CPU Temerature
 
 Sample crontab usage:
 
@@ -29,11 +30,9 @@ to read your system temperatures will be hardware specific.
 
 """
 
-
-import sys, time
+import time
 
 now = int(time.time())
-sys.stdout.write(  str(now) )
 
 f = open( '/sys/class/thermal/thermal_zone0/temp', 'r')
 for line in f:
@@ -44,4 +43,4 @@ f.close()
 
 temp /= 1000
 
-sys.stdout.write(  ' ' + str(temp) + '\n' )
+print str(now) + ' PI ' + str(temp)
