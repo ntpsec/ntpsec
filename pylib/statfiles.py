@@ -12,23 +12,18 @@ import os, sys, time, glob, calendar, subprocess, socket
 class NTPStats:
     "Gather statistics for a specified NTP site"
     @staticmethod
-    def stampfields(line):
+    def unixize(line):
         "Extract first two fields, MJD and seconds past midnight."
-        line = line.strip()
+        "convert timestamp (MJD & seconds past midnight) to Unix time"
+        "Replace MJD+second with Unix time."
         try:
-            return (int(line.split()[0]), float(line.split()[1]))
+            mjd = int(line.split()[0])
+            second = float(line.split()[1])
         except:
             # unparseable  time 0 and it will be stripped later
-            return (0, 0)
-    @staticmethod
-    def unixtime(line):
-        "Log timestamp (MJD & seconds past midnight) to Unix time"
-        (mjd, second) = NTPStats.stampfields(line)
-        return 24*60*60*mjd+second-3506716800; # warning: 32 bit overflows
-    @staticmethod
-    def unixize(line):
-        "Replace MJD+second with Unix time."
-        return str(NTPStats.unixtime(line)) + " " + " ".join(line.split()[2:])
+            return None
+        time = 24*60*60*mjd+second-3506716800; # warning: 32 bit overflows
+        return str( str(time) + " " + " ".join(line.split()[2:]))
     @staticmethod
     def timestamp(line):
         "get Unix time from converted line."
@@ -51,7 +46,8 @@ class NTPStats:
                      for line in lines if line.strip(' \0\r\n\t')]
             if stem != "cputemp":
                 # Morph first field into Unix time with fractional seconds
-                lines = [NTPStats.unixize(line) for line in lines]
+                lines = [NTPStats.unixize(line) for line in lines \
+                            if line != None]
             # Sort by datestamp
             lines.sort(key=lambda line: line[0])
             setattr(self, stem, lines)
