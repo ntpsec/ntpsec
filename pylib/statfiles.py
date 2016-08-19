@@ -49,11 +49,11 @@ class NTPStats:
             # Filter out blank lines (we don't know where these come from)
             lines = [line.strip(' \0\r\n\t')  \
                      for line in lines if line.strip(' \0\r\n\t')]
-            # Sort by date
-            lines.sort(key=NTPStats.stampfields)
-            # Morph first field into Unix time with fractional seconds 
             if stem != "cputemp":
+                # Morph first field into Unix time with fractional seconds
                 lines = [NTPStats.unixize(line) for line in lines]
+            # Sort by datestamp
+            lines.sort(key=lambda line: line[0])
             setattr(self, stem, lines)
     def clip(self, start, end):
         "Select a range of entries"
@@ -112,7 +112,7 @@ class NTPStats:
             # driver type here.
             if key.startswith("127.127."):
                 (_, _, t, u) = key.split(".")
-                return "REFCLOCK(ttype=%s,unit=%s)" % (t, u) 
+                return "REFCLOCK(ttype=%s,unit=%s)" % (t, u)
             # Ordinary IP address - replace with primary hostname.
             # Punt if the lookup fails.
             try:
