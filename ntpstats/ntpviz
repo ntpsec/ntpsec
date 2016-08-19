@@ -22,6 +22,10 @@ from __future__ import print_function, division
 import os, sys, getopt, socket, binascii, datetime, collections, gzip
 from ntp.statfiles import *
 
+#import cProfile, pstats, StringIO
+#pr = cProfile.Profile()
+#pr.enable()
+
 # RMS frequency jitter - Deviation from a root-mean-square linear approximation?
 # Investigate.
 #
@@ -490,5 +494,9 @@ ntpviz</a>, part of the <a href="https://www.ntpsec.org/">NTPsec project</a>
                 # and finish the file
                 ifile.write(index_trailer)
                 ifile.close()
+
+
+#pr.disable()
+#pr.print_stats('tottime')
 
 # end
