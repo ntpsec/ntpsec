@@ -3,8 +3,8 @@
 """\
 Usage: pi-temper-log
 
-Reads /sys/class/thermal/thermal_zone0/temp to find the CPU temperature 
-on a Raspberry Pi.  Writes all temperatures found to stdout on one line, 
+Reads /sys/class/thermal/thermal_zone0/temp to find the CPU temperature
+on a Raspberry Pi.  Writes all temperatures found to stdout on one line,
 preceeded by the unix UTC time in seconds.
 
 
@@ -24,7 +24,7 @@ Sample crontab usage:
 # take and log cpu temp every 5 mins
 */5 * * * * /usr/local/sbin/pi-temp-log >> /var/log/ntpstats/cputemp
 
-This ONLY works on a Raspberry Pi.  Maybe not all of them.  The way 
+This ONLY works on a Raspberry Pi.  Maybe not all of them.  The way
 to read your system temperatures will be hardware specific.
 
 """
