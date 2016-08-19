@@ -76,12 +76,15 @@ plot \
         "Generate GNUPLOT code graphing local cpu temp statistics"
         sitename = self.sitename
         lines = [line + '\n' for line in getattr(self, "cputemp")]
+        if not lines:
+            return ''
+
         plot_template = NTPViz.Common + """\
 set title "%(sitename)s: Local CPU Temp"
 set ytics format "@1.1f °C" nomirror textcolor rgb '#0060ad'
 set style line 1 lc rgb '#0060ad' lt 1 lw 1 pt 7 ps 0   # --- blue
 plot \
- "-" using 1:($3) title "CPU temp" with linespoints ls 1
+ "-" using 1:3 title "CPU temp" with linespoints ls 1
 """ % locals()
         return plot_template.replace('@', '%')  \
             + "".join(lines)
