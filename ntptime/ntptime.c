@@ -26,6 +26,36 @@
 #define tv_frac_sec tv_usec
 #endif
 
+/* MUSL port shim */
+#if !defined(HAVE_NTP_ADJTIME) && defined(HAVE_ADJTIMEX)
+#define ntp_adjtime adjtimex
+#endif
+
+/* MUSL port shim */
+#ifndef HAVE_NTP_GETTIME
+#ifdef STRUCT_NTPTIMEVAL_HAS_TAI
+int ntp_gettime(struct ntptimeval *ntv)
+#else
+int ntp_gettime(struct timex *ntv)
+#endif
+{
+	struct timex tntx;
+	int result;
+
+	ZERO(tntx);
+	result = ntp_adjtime(&tntx);
+	ntv->time = tntx.time;
+	ntv->maxerror = tntx.maxerror;
+	ntv->esterror = tntx.esterror;
+#  ifdef NTP_API
+#   if NTP_API > 3
+	ntv->tai = tntx.tai;
+#   endif
+#  endif
+	return result;
+}
+#endif	/* !HAVE_NTP_GETTIME */
+
 
 #define TIMEX_MOD_BITS \
 "\20\1OFFSET\2FREQUENCY\3MAXERROR\4ESTERROR\5STATUS\6TIMECONST\
@@ -74,7 +104,11 @@ main(
 {
 	extern int ntp_optind;
 	extern char *ntp_optarg;
+#ifdef STRUCT_NTPTIMEVAL_HAS_TAI
 	struct ntptimeval ntv;
+#else
+	struct timex ntv;
+#endif
 	struct timeval tv;
 	struct timex ntx, _ntx;
 	int	times[20];
