@@ -19,7 +19,7 @@ Python by ESR, concept and GNUPLOT code by Dan Drown.
 from __future__ import print_function, division
 
 import os, sys, getopt, socket, binascii, datetime, collections, gzip
-from ntpstats import *
+from ntp.statfiles import *
 
 # RMS frequency jitter - Deviation from a root-mean-square linear approximation?
 # Investigate.

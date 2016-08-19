@@ -1,5 +1,5 @@
 """
-ntpstats.py - class for digesting and plotting NTP logfiles
+statfiles.py - class for digesting and plotting NTP logfiles
 
 Requires GNUPLOT and liberation fonts installed.
 
