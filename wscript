@@ -38,6 +38,7 @@ def dist(ctx):
 def options(ctx):
 	options_cmd(ctx, config)
 	ctx.recurse("ntpstats")
+	ctx.recurse("pylib")
 
 def configure(ctx):
 	from wafhelpers.configure import cmd_configure

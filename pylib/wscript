@@ -1,0 +1,8 @@
+def options(opt):
+        opt.load('python')
+
+def configure(conf):
+        conf.load('python')
+
+def build(bld):
+        pass	# Don't know how to install compound module yet
