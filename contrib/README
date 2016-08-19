@@ -5,3 +5,7 @@ efforts.
 cpu-temp-log is a tool to use the output of 'sensors -u' and write the
 motherboard temperatures to stdout.  Usefull to create a log that can be used
 by 'ntpviz --local-cpu-temp'
+
+pi-temp-log for the Raspberry Pi.  It is a tool to read a magic /sys file 
+to get the CPU temperature and write the temperatures to stdout.  Usefull
+to create a log that can be used by 'ntpviz --local-cpu-temp'

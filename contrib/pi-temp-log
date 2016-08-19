@@ -1,0 +1,47 @@
+#!/usr/bin/env python
+# coding: utf-8
+"""\
+Usage: pi-temper-log
+
+Reads /sys/class/thermal/thermal_zone0/temp to find the CPU temperature 
+on a Raspberry Pi.  Writes all temperatures found to stdout on one line, 
+preceeded by the unix UTC time in seconds.
+
+
+Sample log:
+
+1471582083 56.92
+1471582084 57.458
+1471582085 56.92
+1471582086 56.92
+
+
+Field 1: unix UTC time in seconds
+Field 2: CPU Temerature
+
+Sample crontab usage:
+
+# take and log cpu temp every 5 mins
+*/5 * * * * /usr/local/sbin/pi-temp-log >> /var/log/ntpstats/cputemp
+
+This ONLY works on a Raspberry Pi.  Maybe not all of them.  The way 
+to read your system temperatures will be hardware specific.
+
+"""
+
+
+import sys, time
+
+now = int(time.time())
+sys.stdout.write(  str(now) )
+
+f = open( '/sys/class/thermal/thermal_zone0/temp', 'r')
+for line in f:
+    # just one line
+    temp = float(line)
+
+f.close()
+
+temp /= 1000
+
+sys.stdout.write(  ' ' + str(temp) + '\n' )
