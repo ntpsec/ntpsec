@@ -37,13 +37,12 @@ def dist(ctx):
 
 def options(ctx):
 	options_cmd(ctx, config)
-	ctx.recurse("ntpstats")
 	ctx.recurse("pylib")
 
 def configure(ctx):
 	from wafhelpers.configure import cmd_configure
 	cmd_configure(ctx, config)
-	ctx.recurse("ntpstats")
+	ctx.recurse("pylib")
 
 from waflib.Build import BuildContext
 class check(BuildContext):
@@ -145,7 +144,6 @@ def build(ctx):
 	ctx.recurse("ntpq")
 	ctx.recurse("ntpkeygen")
 	ctx.recurse("ntptime")
-	ctx.recurse("ntpstats")
 	ctx.recurse("pylib")
 	ctx.recurse("util")
 	ctx.recurse("tests")

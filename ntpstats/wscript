@@ -1,9 +1,0 @@
-def options(opt):
-        opt.load('python')
-
-def configure(conf):
-        conf.load('python')
-        conf.check_python_version((2,7,0))
-
-def build(bld):
-        bld(features='py', source=bld.path.ant_glob('*.py'), install_from='.')
