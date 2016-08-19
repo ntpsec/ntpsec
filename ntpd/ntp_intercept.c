@@ -106,6 +106,11 @@ Reference-clock events are not yet intercepted.
 #include "ntp_syscall.h"
 #include "ntp_leapsec.h"
 
+/* MUSL port shim */
+#if !defined(HAVE_NTP_ADJTIME) && defined(HAVE_ADJTIMEX)
+#define ntp_adjtime adjtimex
+#endif
+
 static intercept_mode mode = none;
 
 static char linebuf[256];
