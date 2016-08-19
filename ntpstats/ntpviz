@@ -5,7 +5,8 @@ ntpviz - logfile visualizer for NTP log files
 
 Usage: ntpviz [-d statsdir] [-g] [-n name] [-p days]
               [-s starttime]  [-e endtime]
-              [--local-offset | --local-error | --local-jitter | --local-stability]
+              [--local-offset | --local-error | --local-jitter
+                | --local-stability | --local-offset-histogram]
               [--peer-offsets=hosts | --all-peer-offsets]
               [--peer-jitters=hosts | --all-peer-jitters]
               [--local-cpu-temp]
@@ -253,7 +254,7 @@ plot \
 ''' % locals()
         vals = list(cnt.keys())
         vals.sort()
-        histogram_data = ["%s %s\n" % (val, cnt[val]) for val in vals] 
+        histogram_data = ["%s %s\n" % (val, cnt[val]) for val in vals]
         return plot_template.replace('@', '%') + "".join(histogram_data)
 
 ntpsec_logo = """
