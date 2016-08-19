@@ -146,6 +146,7 @@ def build(ctx):
 	ctx.recurse("ntpkeygen")
 	ctx.recurse("ntptime")
 	ctx.recurse("ntpstats")
+	ctx.recurse("pylib")
 	ctx.recurse("util")
 	ctx.recurse("tests")
 
