@@ -23,10 +23,11 @@ class NTPStats:
         except:
             # unparseable  time 0 and it will be stripped later
             return None
-        time = 24*60*60*mjd+second-3506716800; # warning: 32 bit overflows
+        # 86400 = 24 * 60 * 60
+        time = 86400*mjd + second - 3506716800; # warning: 32 bit overflows
         if time < starttime or time > endtime:
             return None
-        return str( str(time) + " " + " ".join(split[2:]))
+        return str(time) + " " + " ".join(split[2:])
     @staticmethod
     def timestamp(line):
         "get Unix time from converted line."
