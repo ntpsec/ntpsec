@@ -39,28 +39,37 @@ class NTPStats:
             lines = []
             try:
                 for logpart in glob.glob(os.path.join(statsdir, stem) + "*"):
+                    # skip files older than starttime
+                    if starttime > os.path.getmtime(logpart):
+                        continue;
                     if logpart.endswith("gz"):
                         line = gzip.open(logpart).readlines()
                     else:
                         lines += open(logpart).readlines()
             except IOError:
                 pass
-            # Filter out blank lines (we don't know where these come from)
-            lines = [line.strip(' \0\r\n\t') for line in lines]
+
+            lines1 = []
             if stem == "cputemp":
                 # cputemp is already in UNIX time
-                lines = [ line for line in lines if (line != None \
-                        and int(line.split()[0]) >= starttime and \
-                        int(line.split()[0]) <= endtime) ]
+                for line in lines:
+                    line = line.strip(' \0\r\n\t')
+                    if line != None:
+                        split = line.split(None, 2)
+                        if int(split[0]) >= starttime and \
+                           int(split[0]) <= endtime:
+                            lines1.append( line)
             else:
                 # Morph first field into Unix time with fractional seconds
-                lines = [ NTPStats.unixize(line,starttime, endtime) \
-                     for line in lines if line != None]
-                lines = [ line for line in lines if line != None]
+                for line in lines:
+                    line = line.strip(' \0\r\n\t')
+                    line = NTPStats.unixize(line,starttime, endtime)
+                    if line != None:
+                        lines1.append( line)
 
             # Sort by datestamp
-            lines.sort(key=lambda line: line.split()[0])
-            setattr(self, stem, lines)
+            lines1.sort(key=lambda line: line.split()[0])
+            setattr(self, stem, lines1)
     def clip(self, start, end):
         "Select a range of entries"
         for stem in ("clockstats", "peerstats", "loopstats", "rawstats"):
