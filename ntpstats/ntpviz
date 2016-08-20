@@ -37,8 +37,9 @@ def gnuplot(template, outfile=None):
         out = None
     else:
         out = open(outfile, "w")
+    # shell=True is a security hazard
     proc = subprocess.Popen("gnuplot",
-                            shell=True, bufsize=4096,
+                            shell=False, bufsize=4096,
                             stdin=subprocess.PIPE, stdout=out)
     proc.stdin.write(template)
     proc.stdin.close()
