@@ -19,7 +19,7 @@ Python by ESR, concept and GNUPLOT code by Dan Drown.
 #SPDX-License-Identifier: BSD-2-Clause
 from __future__ import print_function, division
 
-import os, sys, getopt, socket, binascii, datetime, collections, gzip, time
+import os, sys, getopt, socket, binascii, datetime, collections, time
 from ntp.statfiles import *
 
 #import cProfile, pstats

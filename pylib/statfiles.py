@@ -7,7 +7,7 @@ SPDX-License-Identifier: BSD-2-Clause
 """
 from __future__ import print_function, division
 
-import os, sys, time, glob, calendar, subprocess, socket
+import os, sys, time, glob, calendar, subprocess, socket, gzip
 
 class NTPStats:
     "Gather statistics for a specified NTP site"
