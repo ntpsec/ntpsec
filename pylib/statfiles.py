@@ -17,7 +17,7 @@ class NTPStats:
         "convert timestamp (MJD & seconds past midnight) to Unix time"
         "Replace MJD+second with Unix time."
         try:
-            split = line.split()
+            split = line.split(None, 2)
             mjd = int(split[0])
             second = float(split[1])
         except:
@@ -27,7 +27,7 @@ class NTPStats:
         time = 86400*mjd + second - 3506716800; # warning: 32 bit overflows
         if time < starttime or time > endtime:
             return None
-        return str(time) + " " + " ".join(split[2:])
+        return str(time) + " " + split[2]
     @staticmethod
     def timestamp(line):
         "get Unix time from converted line."
@@ -56,8 +56,8 @@ class NTPStats:
                 # Morph first field into Unix time with fractional seconds
                 lines = [ NTPStats.unixize(line,starttime, endtime) \
                      for line in lines if line != None]
+                lines = [ line for line in lines if line != None]
 
-            lines = [ line for line in lines if line != None]
             # Sort by datestamp
             lines.sort(key=lambda line: line.split()[0])
             setattr(self, stem, lines)
