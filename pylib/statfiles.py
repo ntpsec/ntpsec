@@ -12,7 +12,7 @@ import os, sys, time, glob, calendar, subprocess, socket
 class NTPStats:
     "Gather statistics for a specified NTP site"
     @staticmethod
-    def unixize(line):
+    def unixize(line, starttime, endtime):
         "Extract first two fields, MJD and seconds past midnight."
         "convert timestamp (MJD & seconds past midnight) to Unix time"
         "Replace MJD+second with Unix time."
@@ -23,12 +23,14 @@ class NTPStats:
             # unparseable  time 0 and it will be stripped later
             return None
         time = 24*60*60*mjd+second-3506716800; # warning: 32 bit overflows
+        if time < starttime or time > endtime:
+            return None
         return str( str(time) + " " + " ".join(line.split()[2:]))
     @staticmethod
     def timestamp(line):
         "get Unix time from converted line."
         return float(line.split()[0])
-    def __init__(self, sitename, statsdir):
+    def __init__(self, sitename, statsdir, starttime=0,endtime=9999999999):
         "Grab content of all logfiles, sorted by timestamp."
         self.sitename = sitename
         for stem in ("clockstats", "peerstats", "loopstats", "rawstats", "cputemp"):
@@ -42,14 +44,20 @@ class NTPStats:
             except IOError:
                 pass
             # Filter out blank lines (we don't know where these come from)
-            lines = [line.strip(' \0\r\n\t')  \
-                     for line in lines if line.strip(' \0\r\n\t')]
-            if stem != "cputemp":
+            lines = [line.strip(' \0\r\n\t') for line in lines]
+            if stem == "cputemp":
+                # cputemp is already in UNIX time
+                lines = [ line for line in lines if (line != None \
+                        and int(line.split()[0]) >= starttime and \
+                        int(line.split()[0]) <= endtime) ]
+            else:
                 # Morph first field into Unix time with fractional seconds
-                lines = [NTPStats.unixize(line) for line in lines \
-                            if line != None]
+                lines = [ NTPStats.unixize(line,starttime, endtime) \
+                     for line in lines if line != None]
+
+            lines = [ line for line in lines if line != None]
             # Sort by datestamp
-            lines.sort(key=lambda line: line[0])
+            lines.sort(key=lambda line: line.split()[0])
             setattr(self, stem, lines)
     def clip(self, start, end):
         "Select a range of entries"
