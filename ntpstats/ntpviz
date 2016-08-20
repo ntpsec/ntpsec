@@ -22,7 +22,7 @@ from __future__ import print_function, division
 import os, sys, getopt, socket, binascii, datetime, collections, gzip, time
 from ntp.statfiles import *
 
-#import cProfile, pstats, StringIO
+#import cProfile, pstats
 #pr = cProfile.Profile()
 #pr.enable()
 
@@ -482,9 +482,14 @@ ntpviz</a>, part of the <a href="https://www.ntpsec.org/">NTPsec project</a>
                         pass
                 # now the graphs
                 for (imagename, _) in imagepairs:
-                    ifile.write("<div><img src='%s.png' alt='%s plot'></div>\n" \
-                        % (imagename.replace(':', '%3A'), \
-                         imagename.replace('-', ' ')))
+                    div_name = imagename.replace('-', ' ')
+                    div = '''\
+<div>
+  <h3>%s</h3>
+  <img src='%s.png' alt='%s plot'>
+</div>
+''' % (div_name, imagename.replace(':', '%3A'), div_name)
+                    ifile.write( div )
                 # if footer file, add it to index.html
                 footer = os.path.join(outdir, "footer")
                 if os.path.isfile(footer):
