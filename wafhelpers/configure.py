@@ -272,7 +272,9 @@ def cmd_configure(ctx, config):
 	ctx.check_cc(lib="m", comment="Math library")
 	ctx.check_cc(lib="rt", mandatory=False, comment="realtime library")
 	ctx.check_cc(lib="curses", mandatory=False, comment="curses library, required for readline on OpenBSD") # Required for readline on OpenBSD.
+	ctx.check_cc(lib="ncurses", mandatory=False, comment="ncurses library, required for readline on LEDE") # Required for readline on LEDE.
 	ctx.check_cc(lib="readline", use="CURSES", mandatory=False, comment="readline library")
+	ctx.check_cc(lib="readline", use="NCURSES", mandatory=False, comment="readline library")
 
 	# Find OpenSSL. Must happen before function checks
 	if ctx.options.enable_crypto:
