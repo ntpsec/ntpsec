@@ -1,5 +1,15 @@
 = Known bugs =
 
+* The current setup assumed pthreads.  They are only used for DNS
+  lookups.  It looks like most of the code is setup to do the right
+  thing, but include/ntp_workimpl.h unconditionally turns on USE_WORKER
+
+  waf sets up HAVE_PTHREAD and HAVE_PTHREAD_H, but none of the code
+  uses them.
+
+  USE_WORKER should probably be renamed to USE_DNS or USE_DNS_WORKER
+
+
 * msyslog doesn't have its own mutex.  Non-atomicity can cause scrambled
   logs in some cases involving asynchronous getaddrinfo lookups.
 
