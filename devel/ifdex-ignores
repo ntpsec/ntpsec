@@ -155,6 +155,11 @@ USE_SCM_TIMESTAMPNS	# "
 # alternate way to get time stamps, never set
 ENABLE_SIGNALED_IO	# Use SIGIO for asynchronous I/O notification
 
+USE_WORKER		# Asynchronous DNS available, needs pthreads
+USE_WORK_PIPE		# Set in ntp_workimpl.h
+USE_WORK_THREAD
+
+
 USE_IPV6_SUPPORT
 USE_IPV6_MULTICAST_SUPPORT
 USE_LE_EDITLINE
@@ -165,9 +170,6 @@ USE_LIFC_FLAGS
 USE_PCM_STYLE_SOUND
 USE_ROUTING_SOCKET
 USE_TSF_USEC_TABLES
-USE_WORK_PIPE
-USE_WORK_THREAD
-USE_WORKER
 YY_YY_NTP_PARSER_TAB_H_INCLUDED
 calloc			# In Unity
 close			# In Windows port config
