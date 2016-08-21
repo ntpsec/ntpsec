@@ -177,6 +177,8 @@ few will be user-visible.
   has been removed.
 
 * Log timestamps look a little different; they are now in ISO8601 format.
+  The code can be built in a strict NTP Classic compatibility mode
+  that restores the old format.
 
 * Clock identifiers in log files are normally the driver shortname
   followed by the unit number in parentheses, rather than the magic IP

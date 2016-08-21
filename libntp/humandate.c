@@ -26,11 +26,18 @@ humanlogtime(void)
 		return "-- --- --:--:--";
 
 	LIB_GETBUF(bp);
-	
+
+#ifdef ENABLE_CLASSIC_MODE
+	snprintf(bp, LIB_BUFLENGTH, "%2d %s %02d:%02d:%02d",
+		 tm->tm_mday, months[tm->tm_mon],
+		 tm->tm_hour, tm->tm_min, tm->tm_sec);
+#else
+	/* ISO8601 is a better format, sort order equals time order */
 	snprintf(bp, LIB_BUFLENGTH, "%02d-%02dT%02d:%02d:%02d",
 		 tm->tm_mon+1, tm->tm_mday,
 		 tm->tm_hour, tm->tm_min, tm->tm_sec);
-		
+#endif /* ENABLE_CLASSIC_MODE */
+
 	return bp;
 }
 
