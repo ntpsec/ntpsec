@@ -512,6 +512,7 @@ gpsd_start(
 		++up->refcount;
 
 		/* initialize the unit structure */
+		pp->clockname     = NAME; /* Hack, needed by refclock_name */
 		up->logname  = estrdup(refclock_name(peer));
 		up->unit     = unit & 0x7F;
 		up->fdt      = -1;
