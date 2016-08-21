@@ -440,10 +440,6 @@ def cmd_configure(ctx, config):
 	# have it on everywhere.
 	ctx.define("NEED_REUSEADDR_FOR_IFADDRBIND", 1, comment="Whether SO_REUSEADDR is needed to open same sockets on alternate interfaces, required by Linux at least")
 
-	# Not yet known how to detect HP-UX at version < 8, but that needs this.
-	# Shouldn't be an issue as 8.x shipped in January 1991!
-	# ctx.define("NEED_RCVBUF_SLOP", 1)
-
 	# It should be possible to use asynchronous I/O with notification
 	# by SIGIO on any Unix conformant to POSIX.1-2001. But the code to
 	# do this is untested and there are historical reasons to suspect
