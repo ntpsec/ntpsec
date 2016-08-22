@@ -166,7 +166,7 @@ plot \
         peerdict = self.peersplit()
         if not peerlist:
             peerlist = list(peerdict.keys())
-        peerlist.sort()	# For stability of output
+        peerlist.sort() # For stability of output
         if len(peerlist) == 1:
             title += ": "+ peerlist[0]
         else:
@@ -178,7 +178,7 @@ set ytics format "@1.0f us" nomirror
 set key top right box
 plot \\
 """ % locals()
-	plot_template = plot_template.replace("@", "%")
+        plot_template = plot_template.replace("@", "%")
         for key in peerlist:
             plot_template += "'-' using 1:($%d*1000000) title '%s' with line, \\\n" % (fld, self.ip_label(key))
 
@@ -219,9 +219,9 @@ plot \
 '-' using 1:(($4-$5/2)*1000000) title 'offset-rtt/2' with line, \
 %(fifty)s title '50th percentile'
 """ % locals()
-	plot_template = plot_template.replace("@", "%")
+        plot_template = plot_template.replace("@", "%")
         data = "\n".join(entries)
-        plot_template += data + "\ne\n"	+ data + "\ne\n" + data
+        plot_template += data + "\ne\n" + data + "\ne\n" + data
         return plot_template
     def local_offset_histogram_gnuplot(self):
         "Plot a histogram of clock offset values from loopstats."
@@ -280,7 +280,7 @@ if __name__ == '__main__':
     except getopt.GetoptError as err:
         sys.stderr.write(str(err) + "\n")
         raise SystemExit(2)
-    period_days = 7	# days
+    period_days = 7     # days
     sitename = None
     statsdirs = ["/var/log/ntpstats"]
     endtime = starttime = None
@@ -303,7 +303,7 @@ if __name__ == '__main__':
         elif switch == "-n":
             sitename = val
         elif switch == "-p":
-            period_days = int(val)	# Denominated in days
+            period_days = int(val)      # Denominated in days
         elif switch == "-s":
             starttime = iso_to_posix(val)
         elif switch == "-o":
