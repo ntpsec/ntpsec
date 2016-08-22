@@ -98,6 +98,9 @@ plot \
 
     def local_error_gnuplot(self):
         "Plot the local clock frequency error."
+        if not len( self.loopstats):
+            sys.stderr.write("ntpviz: WARNING: no loopstats to graph\n")
+            return ''
         sitename = self.sitename
         ninetynine = self.percentile(3, 99, self.loopstats)
         ninetyfive = self.percentile(3, 95, self.loopstats)
@@ -127,6 +130,9 @@ plot \
         return plot_template.replace('@', '%') + self.dump("loopstats")
     def loopstats_gnuplot(self, fld, title, legend):
         "Generate GNUPLOT code of a given loopstats field"
+        if not len( self.loopstats):
+            sys.stderr.write("ntpviz: WARNING: no loopstats to graph\n")
+            return ''
         sitename   = self.sitename
         ninetynine = self.percentile(fld, 99, self.loopstats) * 1000000
         ninetyfive = self.percentile(fld, 95, self.loopstats) * 1000000
@@ -195,7 +201,7 @@ plot \\
             if ip in peerdict:
                 plot_template += "\n".join(peerdict[ip]) + "\ne\n"
             else:
-                sys.stderr.write("No such peer as %s" % key)
+                sys.stderr.write("ntpviz: ERROR: No such peer as %s" % key)
                 raise SystemExit(1)
         return plot_template[:-2]
     def peer_offsets_gnuplot(self, peerlist=None):
@@ -225,6 +231,9 @@ plot \
         return plot_template
     def local_offset_histogram_gnuplot(self):
         "Plot a histogram of clock offset values from loopstats."
+        if not len( self.loopstats):
+            sys.stderr.write("ntpviz: WARNING: no loopstats to graph\n")
+            return ''
         sitename = self.sitename
         cnt = collections.Counter()
         for line in self.loopstats:
@@ -355,17 +364,17 @@ if __name__ == '__main__':
             os.environ["GDFONTPATH"] = fontpath
             break
     else:
-        sys.stderr.write("warning: liberation truetype fonts not found\n")
+        sys.stderr.write("ntpviz: WARNING: liberation truetype fonts not found\n")
     os.environ["GNUPLOT_DEFAULT_GDFONT"] = "LiberationSans-Regular"
 
     if len(statlist) == 1:
         stats = statlist[0]
         if show_local_offset or show_local_error or show_local_jitter or show_local_stability or show_local_offset_histogram:
-            if not stats.loopstats:
-                sys.stderr.write("ntpviz: missing loopstats data\n")
+            if not len( stats.loopstats ):
+                sys.stderr.write("ntpviz: ERROR: missing loopstats data\n")
                 raise SystemExit(1)
             if show_local_offset + show_local_error + show_local_jitter + show_local_stability + show_local_offset_histogram > 1:
-                sys.stderr.write("ntpviz: clash of mode options\n")
+                sys.stderr.write("ntpviz: ERROR: clash of mode options\n")
                 raise SystemExit(1)
             if show_local_offset:
                 plot = stats.local_offset_gnuplot()
@@ -385,7 +394,7 @@ if __name__ == '__main__':
 
         if show_peer_offsets is not None or show_peer_jitters is not None or show_peer_rtt is not None:
             if not stats.peerstats:
-                sys.stderr.write("ntpviz: missing peerstats data\n")
+                sys.stderr.write("ntpviz: ERROR:  missing peerstats data\n")
                 raise SystemExit(1)
             if show_peer_offsets is not None:
                 plot = stats.peer_offsets_gnuplot(show_peer_offsets)
@@ -401,7 +410,7 @@ if __name__ == '__main__':
 
         if show_cpu_temp:
             if not stats.cputemp:
-                sys.stderr.write("ntpviz: missing CPU temp data\n")
+                sys.stderr.write("ntpviz: ERROR: missing CPU temp data\n")
                 raise SystemExit(1)
             if show_cpu_temp is not None:
                 plot = stats.local_cpu_temp_gnuplot();
@@ -416,7 +425,8 @@ if __name__ == '__main__':
             try:
                 os.mkdir(outdir)
             except SystemError:
-                sys.stderr.write("ntpviz: %s can't be created.\n" % outdir)
+                sys.stderr.write("ntpviz: ERROR: %s can't be created.\n" \
+                     % outdir)
                 raise SystemExit(1)
         with open(os.path.join(outdir, "ntpsec-logo.png"), "w") as wp:
             wp.write(binascii.a2b_base64(ntpsec_logo))

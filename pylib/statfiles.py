@@ -35,7 +35,13 @@ class NTPStats:
     def __init__(self, sitename, statsdir, starttime=0,endtime=9999999999):
         "Grab content of all logfiles, sorted by timestamp."
         self.sitename = sitename
-        for stem in ("clockstats", "peerstats", "loopstats", "rawstats", "cputemp"):
+        if not os.path.isdir(statsdir):
+            sys.stderr.write("ntpviz: ERROR: %s is not a directory\n" \
+                 % statsdir)
+            raise SystemExit(1)
+
+        for stem in ("clockstats", "peerstats", "loopstats", "rawstats", \
+                 "cputemp"):
             lines = []
             try:
                 for logpart in glob.glob(os.path.join(statsdir, stem) + "*"):
@@ -43,10 +49,12 @@ class NTPStats:
                     if starttime > os.path.getmtime(logpart):
                         continue;
                     if logpart.endswith("gz"):
-                        line = gzip.open(logpart).readlines()
+                        lines += gzip.open(logpart).readlines()
                     else:
                         lines += open(logpart).readlines()
             except IOError:
+                sys.stderr.write("ntpviz: WARNING: could not read %s\n" \
+                     % logpart)
                 pass
 
             lines1 = []
