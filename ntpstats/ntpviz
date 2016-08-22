@@ -34,7 +34,7 @@ from ntp.statfiles import *
 def gnuplot(template, outfile=None):
     "Run a specified GNUPLOT program."
     if not len( template ):
-        sys.stderr.write("ntpviz: WARNING: empty gnuplot template\n")
+        # silently ignore empty plots
         return ''
     if outfile is None:
         out = None
