@@ -43,4 +43,4 @@ f.close()
 
 temp /= 1000
 
-print str(now) + ' PI ' + str(temp)
+print( str(now) + ' PI ' + str(temp))
