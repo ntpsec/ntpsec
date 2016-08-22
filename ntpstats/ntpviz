@@ -33,6 +33,9 @@ from ntp.statfiles import *
 
 def gnuplot(template, outfile=None):
     "Run a specified GNUPLOT program."
+    if not len( template ):
+        sys.stderr.write("ntpviz: WARNING: empty gnuplot template\n")
+        return ''
     if outfile is None:
         out = None
     else:
@@ -65,6 +68,9 @@ set rmargin 12
             self.sitename = os.path.basename(statsdir)
     def local_offset_gnuplot(self):
         "Generate GNUPLOT code graphing local clock loop statistics"
+        if not len( self.loopstats):
+            sys.stderr.write("ntpviz: WARNING: no loopstats to graph\n")
+            return ''
         sitename = self.sitename
         plot_template = NTPViz.Common + """\
 set title "%(sitename)s: Local Clock Offset"
@@ -83,7 +89,8 @@ plot \
         "Generate GNUPLOT code graphing local cpu temp statistics"
         sitename = self.sitename
         lines = [line + '\n' for line in getattr(self, "cputemp")]
-        if not lines:
+        if not len( lines):
+            sys.stderr.write("ntpviz: WARNING: no cputemp to graph\n")
             return ''
 
         plot_template = NTPViz.Common + """\
@@ -393,7 +400,7 @@ if __name__ == '__main__':
             raise SystemExit(0)
 
         if show_peer_offsets is not None or show_peer_jitters is not None or show_peer_rtt is not None:
-            if not stats.peerstats:
+            if not len( stats.peerstats ):
                 sys.stderr.write("ntpviz: ERROR:  missing peerstats data\n")
                 raise SystemExit(1)
             if show_peer_offsets is not None:
@@ -409,7 +416,7 @@ if __name__ == '__main__':
             raise SystemExit(0)
 
         if show_cpu_temp:
-            if not stats.cputemp:
+            if not len( stats.cputemp):
                 sys.stderr.write("ntpviz: ERROR: missing CPU temp data\n")
                 raise SystemExit(1)
             if show_cpu_temp is not None:
@@ -476,8 +483,11 @@ ntpviz</a>, part of the <a href="https://www.ntpsec.org/">NTPsec project</a>
         imagepairs.append(("peer-jitters",
                            stats.peer_jitters_gnuplot()))
         for key in stats.peersplit().keys():
-            imagepairs.append(("peer-jitter-" + key,
-                           stats.peer_jitters_gnuplot([key])))
+            plot = stats.peer_jitters_gnuplot([key])
+            if len( plot ):
+                print ("\npeer-jitter-" + key + "\n>" + plot + "<\n")
+                imagepairs.append(("peer-jitter-" + key, plot))
+
         for (imagename, image) in imagepairs:
             gnuplot(image, os.path.join(outdir, imagename + ".png"))
             with open(os.path.join(outdir, "index.html"), "w") as ifile:
