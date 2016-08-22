@@ -179,6 +179,9 @@ plot \
         peerdict = self.peersplit()
         if not peerlist:
             peerlist = list(peerdict.keys())
+        if not len( peerlist):
+            sys.stderr.write("ntpviz: WARNING: no peer data to graph\n")
+            return ''
         peerlist.sort() # For stability of output
         if len(peerlist) == 1:
             title += ": "+ peerlist[0]
