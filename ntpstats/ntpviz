@@ -327,7 +327,7 @@ if __name__ == '__main__':
         elif switch == "-o":
             outdir = val
         elif switch == "-D":
-            debug = int(val)      # Debug level, 0 to 9, 9 most verbose
+            debug_level = int(val)      # Debug level, 0 to 9, 9 most verbose
         elif switch == "-N":
             # implemented as integer, in case the option needs to be extended
             nice = 19             # run ntpviz "nice"ly
@@ -355,10 +355,10 @@ if __name__ == '__main__':
             show_cpu_temp = True
     period = 24 * 60 * 60 * period_days
 
-    if 0 < debug:
+    if 0 < debug_level:
         sys.stderr.write("ntpviz: INFO: now running at debug: %s\n" % \
-            debug)
-        if 9 == debug:
+            debug_level)
+        if 9 == debug_level:
             # crazy debug, also profile
             import cProfile, pstats
             pr = cProfile.Profile()
@@ -372,13 +372,13 @@ if __name__ == '__main__':
             p.ionice(psutil.IOPRIO_CLASS_IDLE)
 
         except ImportError:
-            if 0 < debug:
+            if 0 < debug_level:
                 sys.stderr.write("ntpviz: INFO: psutils not found\n")
             pass
 
         # set nice()
         nice = os.nice( nice )
-        if 2 < debug:
+        if 2 < debug_level:
             sys.stderr.write("ntpviz: INFO: now running at nice: %s\n" % \
                 nice)
 
@@ -558,7 +558,7 @@ ntpviz</a>, part of the <a href="https://www.ntpsec.org/">NTPsec project</a>
                 ifile.close()
 
 
-if 9 == debug:
+if 9 == debug_level:
     # finish the profile
     pr.disable()
     pr.print_stats('tottime')
