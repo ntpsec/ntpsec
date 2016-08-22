@@ -42,7 +42,8 @@ is the default, quiet except for all ERRORs and some WARNINGs.  9 is
 painfully verbose.
 
 The -N option will force ntpviz to run "nice"ly.  This is appropriate
-when you run ntpvizz as a cron job.
+when you run ntpviz as a cron job.  If the Python library psutils is
+installed then ntpviz will also be run at ionice(IDLE).
 
 The plot options choose what graph is generated; invoke only one.  By
 default, the GNUPLOT for the graph is reported; with -g you get the

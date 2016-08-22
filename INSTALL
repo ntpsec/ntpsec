@@ -20,6 +20,20 @@ bison::
    Fedora: bison
    Debian: bison
 
+libcap::
+   Required on Linux, to support dropping root.
+   Fedora: libcap and libcap-devel
+   Debian: libcap2 and libcap-dev
+
+gnuplot::
+   Required for ntpviz.
+   Fedora: gnuplot
+   Debian: gnuplot
+
+psutils::
+   Optional for ntpviz.  Allows running with ionice()
+   Gentoo: dev-python/psutil
+
 libevent 2.x::
    Optional. Without it, ntpdig won't build. 
    Fedora: libevent and libevent-devel
@@ -29,11 +43,6 @@ libevent 2.x::
      Here is a workaround:
       # cd /usr/lib
       # ln -s /usr/pkg/lib/libevent_core-2.0.so.5
-
-libcap::
-   Required on Linux, to support dropping root.
-   Fedora: libcap and libcap-devel
-   Debian: libcap2 and libcap-dev
 
 seccomp::
    Optional on Linux to support restricting syscalls
@@ -72,11 +81,6 @@ asciidoc, a2x::
    Note, you need asciidoc 8.6.0 at minimum.
    Fedora: asciidoc  (Stock CentOS/RHEL has only 8.4.5, you must upgrade)
    Debian: asciidoc
-
-gnuplot::
-   Required for ntpviz.
-   Fedora: gnuplot
-   Debian: gnuplot
 
 liberation::
    Optional, improves font quality in ntpviz renderings.

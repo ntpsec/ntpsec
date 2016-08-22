@@ -365,6 +365,18 @@ if __name__ == '__main__':
             pr.enable()
 
     if 0 != nice:
+        try:
+            import psutil
+            # set ionice() to idle
+            p = psutil.Process(os.getpid())
+            p.ionice(psutil.IOPRIO_CLASS_IDLE)
+
+        except ImportError:
+            if 0 < debug:
+                sys.stderr.write("ntpviz: INFO: psutils not found\n")
+            pass
+
+        # set nice()
         nice = os.nice( nice )
         if 2 < debug:
             sys.stderr.write("ntpviz: INFO: now running at nice: %s\n" % \
