@@ -147,10 +147,10 @@ class NTPStats:
 
 def iso_to_posix(s):
     "Accept timestamps in ISO8661 format or numeric POSIX time."
-    if s.isdigit(s):
+    if s.isdigit():
         return int(s)
     else:
-        return time.mktime(time.strptime(date, "%Y-%m-%dT%H:%M:%S"))
+        return time.mktime(time.strptime(s, "%Y-%m-%dT%H:%M:%S"))
 
 def posix_to_iso(t):
     "ISO8601 string from Unix time."
