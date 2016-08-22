@@ -23,10 +23,6 @@ from __future__ import print_function, division
 import os, sys, getopt, socket, binascii, datetime, collections, time
 from ntp.statfiles import *
 
-#import cProfile, pstats
-#pr = cProfile.Profile()
-#pr.enable()
-
 # RMS frequency jitter - Deviation from a root-mean-square linear approximation?
 # Investigate.
 #
@@ -362,6 +358,11 @@ if __name__ == '__main__':
     if 0 < debug:
         sys.stderr.write("ntpviz: INFO: now running at debug: %s\n" % \
             debug)
+        if 9 == debug:
+            # crazy debug, also profile
+            import cProfile, pstats
+            pr = cProfile.Profile()
+            pr.enable()
 
     if 0 != nice:
         nice = os.nice( nice )
@@ -545,7 +546,9 @@ ntpviz</a>, part of the <a href="https://www.ntpsec.org/">NTPsec project</a>
                 ifile.close()
 
 
-#pr.disable()
-#pr.print_stats('tottime')
+if 9 == debug:
+    # finish the profile
+    pr.disable()
+    pr.print_stats('tottime')
 
 # end
