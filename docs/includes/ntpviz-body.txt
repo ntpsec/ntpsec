@@ -12,6 +12,7 @@
          [--peer-offsets=hosts | --all-peer-offsets]
          [--peer-jitters=hosts | --all-peer-jitters]
 	 [-o outdir]
+	 [-D N] [-N]
 
 == DESCRIPTION ==
 
@@ -35,6 +36,13 @@ yyyy-mmm-ddThh:mm:ss. Alternatively you can specify either -s or -e
 default is for the period to be 7 days, the end time to match the last
 logfile entry, and the start time to be set so that adding the period
 just reaches the last logfile entry.
+
+The -D N set the debug level to N and outputs with more verbosity.  0
+is the default, quiet except for all ERRORs and some WARNINGs.  9 is
+painfully verbose.
+
+The -N option will force ntpviz to run "nice"ly.  This is appropriate
+when you run ntpvizz as a cron job.
 
 The plot options choose what graph is generated; invoke only one.  By
 default, the GNUPLOT for the graph is reported; with -g you get the
