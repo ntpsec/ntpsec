@@ -45,6 +45,18 @@ def gnuplot(template, outfile=None):
     proc.stdin.close()
     return proc.wait()
 
+def plotwrap(imagename, image, outfile):
+    "Generate an image and index section for a GNUPLOT section."
+    gnuplot(image, os.path.join(outdir, imagename + ".png"))
+    div_name = imagename.replace('-', ' ')
+    div = '''\
+<div>
+  <h3>%s</h3>
+  <img src='%s.png' alt='%s plot'>
+</div>
+''' % (div_name, imagename.replace(':', '%3A'), div_name)
+    outfile.write(div)
+
 class NTPViz(NTPStats):
     "Class for visualizing statistics from a single server."
     Common = """\
@@ -306,7 +318,7 @@ if __name__ == '__main__':
     show_peer_offsets = show_peer_jitters = None
     show_peer_rtt = None
     outdir = "ntpgraphs"
-    debug_level = 0
+    debug = 0
     nice = 0
     for (switch, val) in options:
         if switch == "-d":
@@ -461,18 +473,18 @@ if __name__ == '__main__':
                 sys.stdout.write(plot)
             raise SystemExit(0)
 
-        # Fall through to HTML code generation
-        if not os.path.isdir(outdir):
-            try:
-                os.mkdir(outdir)
-            except SystemError:
-                sys.stderr.write("ntpviz: ERROR: %s can't be created.\n" \
-                     % outdir)
-                raise SystemExit(1)
-        with open(os.path.join(outdir, "ntpsec-logo.png"), "w") as wp:
-            wp.write(binascii.a2b_base64(ntpsec_logo))
+    # Fall through to HTML code generation
+    if not os.path.isdir(outdir):
+        try:
+            os.mkdir(outdir)
+        except SystemError:
+            sys.stderr.write("ntpviz: ERROR: %s can't be created.\n" \
+                 % outdir)
+            raise SystemExit(1)
+    with open(os.path.join(outdir, "ntpsec-logo.png"), "w") as wp:
+        wp.write(binascii.a2b_base64(ntpsec_logo))
 
-        index_header = '''\
+    index_header = '''\
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -488,11 +500,11 @@ if __name__ == '__main__':
 <div>
 <h1 style="margin-bottom:10px;">NTP Stats</h1>
 '''
-        index_header += 'Last Update: %s UTC <br>' %  start_time.strftime("%c")
-        index_header += 'Period: %s days <br></div> ' %  period_days
-        index_header += '<div style="clear:both;"></div>'
+    index_header += 'Last Update: %s UTC <br>' %  start_time.strftime("%c")
+    index_header += 'Period: %s days <br></div> ' %  period_days
+    index_header += '<div style="clear:both;"></div>'
 
-        index_trailer = '''\
+    index_trailer = '''\
 <br>
 <br>
 <br>
@@ -502,39 +514,41 @@ ntpviz</a>, part of the <a href="https://www.ntpsec.org/">NTPsec project</a>
 </body>
 </html>
 '''
-        imagepairs = [
-            ("local-offset", stats.local_offset_gnuplot()),
-            ("local-error", stats.local_error_gnuplot()),
-            ("local-jitter", stats.local_offset_jitter_gnuplot()),
-            ("local-stability", stats.local_offset_stability_gnuplot()),
-            ("local-offset-histogram", stats.local_offset_histogram_gnuplot()),
-            ("peer-offsets", stats.peer_offsets_gnuplot()),
-            ("local-cpu-temp", stats.local_cpu_temp_gnuplot()),
-            ]
-        for key in stats.peersplit().keys():
-            imagepairs.append(("peer-offset-" + key,
-                           stats.peer_offsets_gnuplot([key])))
-        imagepairs.append(("peer-jitters",
-                           stats.peer_jitters_gnuplot()))
-        for key in stats.peersplit().keys():
-            plot = stats.peer_jitters_gnuplot([key])
-            if len( plot ):
-                imagepairs.append(("peer-jitter-" + key, plot))
+    with open(os.path.join(outdir, "index.html"), "w") as ifile:
+        # if header file, add it to index.html
+        header = os.path.join(outdir, "header")
+        if os.path.isfile(header):
+            try:
+                header_file = open( header, 'r')
+                header_txt = header_file.read()
+                ifile.write('<br>\n' + header_txt + '\n')
+            except IOError:
+                pass
 
-        for (imagename, image) in imagepairs:
-            gnuplot(image, os.path.join(outdir, imagename + ".png"))
-            with open(os.path.join(outdir, "index.html"), "w") as ifile:
-                ifile.write(index_header)
-                # if header file, add it to index.html
-                header = os.path.join(outdir, "header")
-                if os.path.isfile(header):
-                    try:
-                        header_file = open( header, 'r')
-                        header_txt = header_file.read()
-                        ifile.write('<br>\n' + header_txt + '\n')
-                    except IOError:
-                        pass
-                # now the graphs
+        if len(statlist) > 1:
+            sys.stderr.write("Comparative multiplotting not yet implemented.\n")
+        else:
+            imagepairs = [
+                ("local-offset", stats.local_offset_gnuplot()),
+                ("local-error", stats.local_error_gnuplot()),
+                ("local-jitter", stats.local_offset_jitter_gnuplot()),
+                ("local-stability", stats.local_offset_stability_gnuplot()),
+                ("local-offset-histogram", stats.local_offset_histogram_gnuplot()),
+                ("peer-offsets", stats.peer_offsets_gnuplot()),
+                ("local-cpu-temp", stats.local_cpu_temp_gnuplot()),
+                ]
+            for key in stats.peersplit().keys():
+                imagepairs.append(("peer-offset-" + key,
+                               stats.peer_offsets_gnuplot([key])))
+            imagepairs.append(("peer-jitters",
+                               stats.peer_jitters_gnuplot()))
+            for key in stats.peersplit().keys():
+                plot = stats.peer_jitters_gnuplot([key])
+                if len( plot ):
+                    imagepairs.append(("peer-jitter-" + key, plot))
+
+            for (imagename, image) in imagepairs:
+                gnuplot(image, os.path.join(outdir, imagename + ".png"))
                 for (imagename, _) in imagepairs:
                     div_name = imagename.replace('-', ' ')
                     div = '''\
@@ -544,18 +558,19 @@ ntpviz</a>, part of the <a href="https://www.ntpsec.org/">NTPsec project</a>
 </div>
 ''' % (div_name, imagename.replace(':', '%3A'), div_name)
                     ifile.write( div )
-                # if footer file, add it to index.html
-                footer = os.path.join(outdir, "footer")
-                if os.path.isfile(footer):
-                    try:
-                        footer_file = open( footer, 'r')
-                        footer_txt = footer_file.read()
-                        ifile.write('<br>\n' + footer_txt + '\n')
-                    except IOError:
-                        pass
-                # and finish the file
-                ifile.write(index_trailer)
-                ifile.close()
+
+        # if footer file, add it to index.html
+        footer = os.path.join(outdir, "footer")
+        if os.path.isfile(footer):
+            try:
+                footer_file = open( footer, 'r')
+                footer_txt = footer_file.read()
+                ifile.write('<br>\n' + footer_txt + '\n')
+            except IOError:
+                pass
+        # and finish the file
+        ifile.write(index_trailer)
+        ifile.close()
 
 
 if 9 == debug_level:
