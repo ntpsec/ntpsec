@@ -17,16 +17,19 @@
 == DESCRIPTION ==
 
 This utility analyzes files in an NTP log directory and generates
-statistical plots from them.  It can report either PNG images or
-the GNUPLOT programs to generate them to standard output.  In its
-default mode it generates an HTML directory containing all plots
-and an index page.
+statistical plots from them.  It can report either PNG images or the
+GNUPLOT programs to generate them to standard output.  In its default
+mode it generates an HTML directory containing an index page and
+either (a) all plots, for a single statfiles directory, or (b) a
+subset of comparative plots for multiple directories.
 
-The most basic option is -d, which specifies a logfile directory to
-examine; the default is /var/log/ntpstats.
+The most basic option is -d, which specifies one or more logfile
+directories to examine; the default is a single directory,
+/var/log/ntpstats.
 
-The -n option allows you to set the sitename shown in the plot title.
-The default is the basename of the log directory.
+The -n option allows you to set the sitename shown in the plot title,
+and is effective only for the single-directory case. The default is
+the basename of the log directory.
 
 The -s, -e and -p options allow you to set the time window to be
 reported on. With -s and -e you set the start and end times as either
@@ -104,7 +107,7 @@ output directory.  Neither file need be present, and both files may
 contain aribtrary HTML.
 
 The first file is named 'header'.  The contents of that file will be
-added almost at the top of the body on the generated index.
+added almost at the top of the body on the generated index page.
 
 This is the place to put links to other web pages, or headline notes.
 
@@ -124,7 +127,8 @@ font package installed.
 
 == AUTHORS ==
 
-Eric S. Raymond  and Daniel Drown. The GNUPLOT in this package is
-largely based on templates in Daniel Drown's 'chrony-graph' project.
+Eric S. Raymond, Gary E. Miller, and Daniel Drown. The GNUPLOT in this
+package is largely based on templates in Daniel Drown's 'chrony-graph'
+project.
 
 // end
