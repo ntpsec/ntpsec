@@ -135,7 +135,7 @@ class NTPStats:
                 return hostname
             except socket.herror:
                 pass
-        return key	# Someday, be smarter than this.
+        return key      # Someday, be smarter than this.
 
 def iso_to_posix(s):
     "Accept timestamps in ISO8661 format or numeric POSIX time."
