@@ -488,7 +488,6 @@ ntpviz</a>, part of the <a href="https://www.ntpsec.org/">NTPsec project</a>
         for key in stats.peersplit().keys():
             plot = stats.peer_jitters_gnuplot([key])
             if len( plot ):
-                print ("\npeer-jitter-" + key + "\n>" + plot + "<\n")
                 imagepairs.append(("peer-jitter-" + key, plot))
 
         for (imagename, image) in imagepairs:
