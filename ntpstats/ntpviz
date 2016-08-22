@@ -11,6 +11,7 @@ Usage: ntpviz [-d statsdir] [-g] [-n name] [-p days]
               [--peer-jitters=hosts | --all-peer-jitters]
               [--local-cpu-temp]
               [-o outdir]
+              [-D N] [-N]
 
 See the manual page for details.
 
@@ -288,7 +289,7 @@ iVBORw0KGgoAAAANSUhEUgAAAEAAAABKCAQAAACh+5ozAAAABGdBTUEAALGPC/xhBQAAAAFzUkdCAK7O
 
 if __name__ == '__main__':
     try:
-        (options, arguments) = getopt.getopt(sys.argv[1:], "d:e:ghn:o:p:s:", [
+        (options, arguments) = getopt.getopt(sys.argv[1:], "d:e:ghn:o:p:s:D:N", [
             "local-offset", "local-error", "local-jitter", "local-stability",
             "local-offset-histogram",
             "all-peer-offsets", "peer-offsets=",
@@ -309,6 +310,8 @@ if __name__ == '__main__':
     show_peer_offsets = show_peer_jitters = None
     show_peer_rtt = None
     outdir = "ntpgraphs"
+    debug_level = 0
+    nice = 0
     for (switch, val) in options:
         if switch == "-d":
             statsdirs = val.split(",")
@@ -327,6 +330,11 @@ if __name__ == '__main__':
             starttime = iso_to_posix(val)
         elif switch == "-o":
             outdir = val
+        elif switch == "-D":
+            debug = int(val)      # Debug level, 0 to 9, 9 most verbose
+        elif switch == "-N":
+            # implemented as integer, in case the option needs to be extended
+            nice = 19             # run ntpviz "nice"ly
         elif switch == "--local-offset":
             show_local_offset = True
         elif switch == "--local-error":
@@ -350,6 +358,16 @@ if __name__ == '__main__':
         elif switch == "--local-cpu-temp":
             show_cpu_temp = True
     period = 24 * 60 * 60 * period_days
+
+    if 0 < debug:
+        sys.stderr.write("ntpviz: INFO: now running at debug: %s\n" % \
+            debug)
+
+    if 0 != nice:
+        nice = os.nice( nice )
+        if 2 < debug:
+            sys.stderr.write("ntpviz: INFO: now running at nice: %s\n" % \
+                nice)
 
     start_time = datetime.datetime.utcnow()
     start_time_secs = time.time()
