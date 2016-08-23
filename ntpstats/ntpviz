@@ -212,6 +212,8 @@ plot \
         # remove trailing "e\n"
         plot_data = plot_data[:-2]
 
+        unit = "us"
+        multiplier = 1000000
         if len(peerlist) == 1:
             # only one peer
             percentages = ""
@@ -222,12 +224,10 @@ plot \
                 fifty      = self.percentile(4, 50, peerdict[ip]) * 1000000
                 five       = self.percentile(4,  5, peerdict[ip]) * 1000000
                 one        = self.percentile(4,  1, peerdict[ip]) * 1000000
-                percentages = "\n%(fifty)s title '50th percentile', \\" \
-                    % locals()
-                unit = "us"
                 if 1000 <= ninetynine:
                     # go to millisec
                     unit = "ms"
+                    multiplier = 1000
                     ninetynine /= 1000
                     ninetyfive /= 1000
                     fifty      /= 1000
@@ -241,6 +241,8 @@ plot \
                 one        = round( one, 3)
                 nf_m_f     = ninetyfive - five
                 nn_m_o     = ninetynine - one
+                percentages = "\n%(fifty)s title '50th percentile', \\" \
+                    % locals()
                 labels = """\
 set label 1 gprintf("99@@ = %(ninetynine)s %(unit)s",99) at graph 0.01,0.95 left front
 set label 2 gprintf("95@@ = %(ninetyfive)s %(unit)s",95) at graph 0.01,0.90 left front
@@ -258,14 +260,16 @@ set label 7 gprintf("99@@ - 1@@ = %(nn_m_o)s %(unit)s",98) at graph 0.01,0.65 le
         plot_template = NTPViz.Common + """\
 set title "%(sitename)s: %(title)s"
 set ylabel ""
-set ytics format "@1.0f us" nomirror
+set ytics format "@1.0f %(unit)s" nomirror
 set key top right box
 %(labels)s
 plot \\%(percentages)s
 """ % locals()
         plot_template = plot_template.replace("@", "%")
         for key in peerlist:
-            plot_template += "'-' using 1:($%d*1000000) title '%s' with line, \\\n" % (fld, self.ip_label(key))
+            plot_template += "'-' using 1:($%d*%d) title '%s' with line, \\\n" \
+                 % (fld, multiplier, self.ip_label(key))
+
 
         # strip the trailing ", \\n"
         plot_template = plot_template[:-4] + "\n"
