@@ -11,7 +11,7 @@ Usage: ntpviz [-d statsdir] [-g] [-n name] [-p days]
               [--peer-jitters=hosts | --all-peer-jitters]
               [--local-cpu-temp]
               [-o outdir]
-              [-D N] [-N]
+              [-D N]
 
 See the manual page for details.
 
@@ -371,7 +371,6 @@ if __name__ == '__main__':
     show_peer_rtt = None
     outdir = "ntpgraphs"
     debug_level = 0
-    nice = 0
     for (switch, val) in options:
         if switch == "-d":
             statsdirs = val.split(",")
@@ -392,9 +391,6 @@ if __name__ == '__main__':
             outdir = val
         elif switch == "-D":
             debug_level = int(val)      # Debug level, 0 to 9, 9 most verbose
-        elif switch == "-N":
-            # implemented as integer, in case the option needs to be extended
-            nice = 19             # run ntpviz "nice"ly
         elif switch == "--local-offset":
             show_local_offset = True
         elif switch == "--local-error":
@@ -426,6 +422,7 @@ if __name__ == '__main__':
             pr = cProfile.Profile()
             pr.enable()
 
+    nice = 19       # always run nicely
     if 0 != nice:
         try:
             import psutil
