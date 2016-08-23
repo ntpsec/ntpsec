@@ -135,7 +135,7 @@ class NTPStats:
             # driver type here.
             if key.startswith("127.127."):
                 (_, _, t, u) = key.split(".")
-                return "REFCLOCK(ttype=%s,unit=%s)" % (t, u)
+                return "REFCLOCK(type=%s,unit=%s)" % (t, u)
             # Ordinary IP address - replace with primary hostname.
             # Punt if the lookup fails.
             try:
