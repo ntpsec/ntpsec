@@ -112,7 +112,7 @@ want to change them.
 The NTP pool is a worldwide federation of public-facing NTP servers,
 almost always equipped with their own local reference clocks, that
 have volunteered to provide time service to anyone who requests it
-through a pool dispatcher machine. The server declarations in your
+through a pool dispatcher machine. The +server+ declarations in your
 /etc/ntp.conf normally point at several of these pool dispatchers.
 When your +{ntpd}+ send a request to one, it picks a random server
 from its part of the pool and hands that address back to your

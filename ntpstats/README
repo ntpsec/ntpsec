@@ -1,5 +1,5 @@
-This directory contains code for deta reduction and visualization of NTP
-logfiles.  It's written around a class named NTPstats which can be found
+This directory contains code for data reduction and visualization of NTP
+logfiles.  It's written around a class named NTPstats, which can be found
 in ntpstats.py.
 
 While all comers are invited to experiment with ntpstats.py, its interface
@@ -7,7 +7,7 @@ and capabilities are at present private to the NTPsec suite, subject to
 change without notice, and should not be considered a public interface.
 This status may (and probably will) change in a future release.
 
-If you want to generate the ntpviz graphs regularly add these lines to
+If you want to generate the ntpviz graphs regularly, add these lines to
 your root crontab:
 
 53 * * * * cd /usr/local/src/NTP/ntpsec/ntpstats; ./ntpviz -p 1 -o day -N
