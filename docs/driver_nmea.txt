@@ -123,24 +123,26 @@ in a cycle will be used.  Using more than one sentence per cycle is
 impossible, because
 
 * there is only the link:#fudgetime2[time2] option available to compensate
-for transmission delays but every sentence would need a different one
-and
-* using more than one sentence per cycle overstuffs the internal data
-filters.
+  for transmission delays but every sentence would need a different one
 
-The driver uses 9600 bits per second by default, unless {projecct-shortname}
-was built in which case the old default of 4800bps is used. Faster bitrates can
-be selected using the +baud+ option.
+and
+
+* using more than one sentence per cycle overstuffs the internal data
+  filters.
+
+The driver uses 9600 bits per second by default, unless
+{project-shortname} was built in Classic strict-compatiblity in which
+case the old default of 4800bps is used. Faster bitrates can be
+selected using the +baud+ option.
 
 *Caveat:* Using higher line speeds does not necessarily increase the
-precision of the timing device.  Higher line speeds are not necessarily
-helpful for the NMEA driver, either.  They can be used to accommodate
-an amount of data that does not fit into a 1-second cycle at 4800 bps,
-but high-speed high-volume NMEA data is likely to cause trouble with the
-serial line driver since NMEA supports no protocol handshake.  Any
-device that is exclusively used for time synchronisation purposes should
-be configured to transmit the relevant data only, e.g. one +$GPRMC+ or
-+$GPZDA+ per second, at a linespeed of 4800 bps or 9600 bps.
+precision of the timing device.  9600 baud is useful to accommodate an
+amount of data that does not fit into a 1-second cycle at 4800 bps;
+some GPSes (especially when emitting skyview sentences) emit more than
+this.  Any device that is exclusively used for time synchronisation
+purposes should be configured to transmit the relevant data only,
+e.g. one +$GPRMC+ or +$GPZDA+ per second; this will slightly reduce
+jitter by reducing variation in transmission times.
 
 == Monitor Data ==
 
@@ -185,7 +187,9 @@ the total but otherwise ignored.
 
 http://support.ntp.org/bin/view/Support/ConfiguringNMEARefclocks[Configuring
 NMEA Refclocks] might give further useful hints for specific hardware
-devices that exhibit strange or curious behaviour.
+devices that exhibit strange or curious behaviour. Not that it
+describes NTP Classic and the old refclock confihuration syntax, and
+assumes the old default speed of 4800 baud.
 
 To make a specific setting, select the corresponding decimal values from
 the mode byte table, add them all together and enter the resulting
@@ -251,7 +255,7 @@ switched on by sending the following string.
 
 ------------------------------------------------------------------------------
 refclock nmea mode baud 19200	# All sentences from /dev/gps0 at 19200 baud
-refclock nmea path /dev/ttUSB0	# All sentences from /dev/ttyUSB0 at 9600 baud
+refclock nmea path /dev/ttyUSB0	# All sentences from /dev/ttyUSB0 at 9600 baud
 ------------------------------------------------------------------------------
 
 == Additional Information ==
