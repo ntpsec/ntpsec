@@ -167,7 +167,7 @@ set label 2 gprintf("95@@ = %(ninetyfive)s us",95) at graph 0.01,0.9 left front
 set label 3 gprintf(" 5@@ = %(five)s us",5) at graph 0.01,0.85 left front
 set label 4 gprintf(" 1@@ = %(one)s us",1) at graph 0.01,0.8 left front
 set label 5 gprintf("95@@ - 5@@ = %(nf_m_f)s us",90) at graph 0.01,0.75 left front
-set label 6 gprintf("99@@ - 1@@ = %(nn_m_o) us",98) at graph 0.01,0.7 left front
+set label 6 gprintf("99@@ - 1@@ = %(nn_m_o)s us",98) at graph 0.01,0.7 left front
 plot \
  "-" using 1:($%(fld)d*1000000) title "%(legend)s" with linespoints ls 1, \
  %(ninetynine)s title "99th percentile", \
