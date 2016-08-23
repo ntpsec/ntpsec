@@ -416,6 +416,8 @@ extern double	sys_rootdisp;		/* dispersion to primary source */
 extern uint32_t	sys_refid;		/* reference id */
 extern l_fp	sys_reftime;		/* last update time */
 extern struct peer *sys_peer;		/* current peer */
+extern int	sys_maxclock;		/* maximum candidates */
+extern int	sys_minclock;		/* minimum candidates */
 
 /*
  * Nonspecified system state variables.

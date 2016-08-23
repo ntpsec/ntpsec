@@ -56,6 +56,8 @@ DNSServiceRef mdns;
 
 #include <sodium.h>
 
+static void check_minsane();
+
 static bool need_priority = false;
 static bool config_priority_override = false;
 static int config_priority;
@@ -914,6 +916,7 @@ ntpdmain(
 	 */
 	have_interface_option = (!listen_to_virtual_ips || explicit_interface);
 	intercept_getconfig(explicit_config);
+	check_minsane();
 
 	loop_config(LOOP_DRIFTINIT, 0);
 	report_event(EVNT_SYSRESTART, NULL, NULL);
@@ -1205,6 +1208,43 @@ wait_child_sync_if(
 	return ETIMEDOUT;
 }
 # endif	/* HAVE_WORKING_FORK */
+
+
+/*
+ * check_minsane - check peers to see if minsane should be bigger
+ *
+ * This is just a first cut.  It should probably fixup things automagically.
+ * We also need to do similar for maxclock when running a pool command.
+ *
+ * With 2 working servers:
+ *   if they don't agree, you can't tell which one is correct
+ * With 3 working servers, 2 can outvote a falseticker
+ * With 4 servers, you still have 3 if one is down.
+ */
+static void check_minsane()
+{
+    struct peer *peer;
+    int servers = 0;
+
+    if (sys_minsane > 1) return;  /* already adjusted, assume reasonable */
+
+    for (peer = peer_list; peer != NULL; peer = peer->p_link) {
+	if (peer->flags & FLAG_NOSELECT) continue;
+	servers++;
+	if (peer->cast_flags & MDF_POOL) {
+	    /* pool server */
+	    servers = sys_maxclock;
+	    break;
+	}
+	/* ?? multicast and such */
+    }
+
+    if (servers >= 5)
+	msyslog(LOG_ERR, "Found %d servers, suggest minsane at least 3", servers);
+    else if (servers == 4)
+        msyslog(LOG_ERR, "Found 4 servers, suggest minsane of 2");
+
+};
 
 
 /*
