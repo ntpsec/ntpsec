@@ -219,21 +219,36 @@ plot \
             if "offset" == type:
                 ninetynine = self.percentile(4, 99, peerdict[ip]) * 1000000
                 ninetyfive = self.percentile(4, 95, peerdict[ip]) * 1000000
-                fifty = self.percentile(4,  50, peerdict[ip]) * 1000000
-                five = self.percentile(4, 5, peerdict[ip]) * 1000000
-                one = self.percentile(4, 1, peerdict[ip]) * 1000000
-                nf_m_f     = ninetyfive - five
-                nn_m_o     = ninetynine - one
+                fifty      = self.percentile(4, 50, peerdict[ip]) * 1000000
+                five       = self.percentile(4,  5, peerdict[ip]) * 1000000
+                one        = self.percentile(4,  1, peerdict[ip]) * 1000000
                 percentages = "\n%(fifty)s title '50th percentile', \\" \
                     % locals()
+                unit = "us"
+                if 1000 <= ninetynine:
+                    # go to millisec
+                    unit = "ms"
+                    ninetynine /= 1000
+                    ninetyfive /= 1000
+                    fifty      /= 1000
+                    five       /= 1000
+                    one        /= 1000
+
+                ninetynine = round( ninetynine, 3)
+                ninetyfive = round( ninetyfive, 3)
+                fifty      = round( fifty, 3)
+                five       = round( five, 3)
+                one        = round( one, 3)
+                nf_m_f     = ninetyfive - five
+                nn_m_o     = ninetynine - one
                 labels = """\
-set label 1 gprintf("99@@ = %(ninetynine)s us",99) at graph 0.01,0.95 left front
-set label 2 gprintf("95@@ = %(ninetyfive)s us",95) at graph 0.01,0.90 left front
-set label 3 gprintf("50@@ = %(fifty)s us",50) at graph 0.01,0.85 left front
-set label 4 gprintf("5@@ = %(five)s us",5) at graph 0.01,0.80 left front
-set label 5 gprintf("1@@ = %(one)s us",1) at graph 0.01,0.75 left front
-set label 6 gprintf("95@@ - 5@@ = %(nf_m_f)s us",90) at graph 0.01,0.70 left front
-set label 7 gprintf("99@@ - 1@@ = %(nn_m_o)s us",98) at graph 0.01,0.65 left front
+set label 1 gprintf("99@@ = %(ninetynine)s %(unit)s",99) at graph 0.01,0.95 left front
+set label 2 gprintf("95@@ = %(ninetyfive)s %(unit)s",95) at graph 0.01,0.90 left front
+set label 3 gprintf("50@@ = %(fifty)s %(unit)s",50) at graph 0.01,0.85 left front
+set label 4 gprintf("5@@ = %(five)s %(unit)s",5) at graph 0.01,0.80 left front
+set label 5 gprintf("1@@ = %(one)s %(unit)s",1) at graph 0.01,0.75 left front
+set label 6 gprintf("95@@ - 5@@ = %(nf_m_f)s %(unit)s",90) at graph 0.01,0.70 left front
+set label 7 gprintf("99@@ - 1@@ = %(nn_m_o)s %(unit)s",98) at graph 0.01,0.65 left front
 """ % locals()
 
         else:
