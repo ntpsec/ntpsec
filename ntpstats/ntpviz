@@ -543,10 +543,12 @@ if __name__ == '__main__':
 <div>
 <h1 style="margin-bottom:10px;">NTP Stats</h1>
 '''
+    index_header += 'Report generated: %s UTC <br>' \
+                     %  posix_to_iso(stats.starttime)
     # Ugh.  Not clear what to do in the multiplot case
     if len(statlist) == 1:
-        index_header += 'Last Update: %s UTC <br>' % posix_to_iso(stats.starttime)
-        index_header += 'Period: %s days <br></div> ' % int(stats.period // NTPStats.SecondsInWeek)
+        index_header += 'Period: %s days <br></div> ' \
+                 % int(stats.period // NTPStats.SecondsInWeek)
     index_header += '<div style="clear:both;"></div>'
 
     index_trailer = '''\
@@ -559,7 +561,7 @@ ntpviz</a>, part of the <a href="https://www.ntpsec.org/">NTPsec project</a>
 </div>
 <div style="float:left;margin-left:350px;">
     <a href="https://validator.w3.org/nu/">
-    <img src="https://www.w3.org/html/logo/downloads/HTML5_Logo_32.png" 
+    <img src="https://www.w3.org/html/logo/downloads/HTML5_Logo_32.png"
         alt="html 5">
     </a>
 &nbsp;&nbsp;
