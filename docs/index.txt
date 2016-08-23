@@ -89,8 +89,9 @@ few will be user-visible.
 
 === Security changes ===
 
-* The deprecated ntpdc utility, long since replaced by {ntpq} and a
-  chronic locus of security vulnerabilities, has been removed.
+* The deprecated ntpdc utility, long a chronic locus of security
+  vulnerabilities, has been removed.  Its function has been merged
+  into +{ntpq}+.
 
 * As noted above, Autokey is not supported; that code has been
   removed, as it was chronically prone to security vulnerabilties.
