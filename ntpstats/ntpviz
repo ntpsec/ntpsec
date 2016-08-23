@@ -20,7 +20,7 @@ Python by ESR, concept and GNUPLOT code by Dan Drown.
 #SPDX-License-Identifier: BSD-2-Clause
 from __future__ import print_function, division
 
-import os, sys, getopt, socket, binascii, datetime, collections, time
+import os, sys, getopt, socket, binascii, collections, time
 from ntp.statfiles import *
 
 # RMS frequency jitter - Deviation from a root-mean-square linear approximation?
@@ -70,9 +70,10 @@ set xtic rotate by -45 scale 0
 set lmargin 12
 set rmargin 12
 """
-    def __init__(self, statsdir, starttime, endtime,  sitename=None):
-        NTPStats.__init__(self, sitename, statsdir, starttime=starttime, \
-            endtime=endtime)
+    def __init__(self, statsdir,
+                 sitename=None, period=None, starttime=None, endtime=None):
+        NTPStats.__init__(self, statsdir=statsdir, sitename=sitename,
+                          period=period, starttime=starttime, endtime=endtime)
         if self.sitename is None:
             self.sitename = os.path.basename(statsdir)
     def local_offset_gnuplot(self):
@@ -360,10 +361,9 @@ if __name__ == '__main__':
     except getopt.GetoptError as err:
         sys.stderr.write(str(err) + "\n")
         raise SystemExit(2)
-    period_days = 7     # days
     sitename = None
     statsdirs = ["/var/log/ntpstats"]
-    endtime = starttime = None
+    period = endtime = starttime = None
     generate = False
     show_local_offset = show_local_error = show_local_jitter = False
     show_local_stability = show_local_offset_histogram = show_cpu_temp = False
@@ -385,7 +385,7 @@ if __name__ == '__main__':
         elif switch == "-n":
             sitename = val
         elif switch == "-p":
-            period_days = int(val)      # Denominated in days
+            period = int(val) * NTPStats.SecondsInWeek
         elif switch == "-s":
             starttime = iso_to_posix(val)
         elif switch == "-o":
@@ -417,8 +417,6 @@ if __name__ == '__main__':
             show_peer_rtt = val
         elif switch == "--local-cpu-temp":
             show_cpu_temp = True
-    period = 24 * 60 * 60 * period_days
-
     if 0 < debug_level:
         sys.stderr.write("ntpviz: INFO: now running at debug: %s\n" % \
             debug_level)
@@ -446,20 +444,9 @@ if __name__ == '__main__':
             sys.stderr.write("ntpviz: INFO: now running at nice: %s\n" % \
                 nice)
 
-    start_time = datetime.datetime.utcnow()
-    start_time_secs = time.time()
-
-    # Default to one week before the latest date
-    if endtime is None and starttime == None:
-        endtime = int(start_time_secs)
-        starttime = endtime - period
-    elif starttime is None and endtime is not None:
-        starttime = endtime - period
-    elif starttime is not None and endtime is None:
-        endtime = starttime + period
-
-    statlist = [NTPViz(statsdir=d, sitename=sitename, starttime=starttime, \
-        endtime=endtime) for d in statsdirs]
+    statlist = [NTPViz(statsdir=d, sitename=sitename,
+                       period=period, starttime=starttime, endtime=endtime)
+                for d in statsdirs]
 
     for fontpath in ("/usr/share/fonts/liberation",
                      "/usr/share/fonts/liberation-fonts",
@@ -556,8 +543,10 @@ if __name__ == '__main__':
 <div>
 <h1 style="margin-bottom:10px;">NTP Stats</h1>
 '''
-    index_header += 'Last Update: %s UTC <br>' %  start_time.strftime("%c")
-    index_header += 'Period: %s days <br></div> ' %  period_days
+    # Ugh.  Not clear what to do in the multiplot case
+    if len(statlist) == 1:
+        index_header += 'Last Update: %s UTC <br>' % posix_to_iso(stats.starttime)
+        index_header += 'Period: %s days <br></div> ' % int(stats.period // NTPStats.SecondsInWeek)
     index_header += '<div style="clear:both;"></div>'
 
     index_trailer = '''\

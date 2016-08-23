@@ -7,10 +7,12 @@ SPDX-License-Identifier: BSD-2-Clause
 """
 from __future__ import print_function, division
 
-import os, sys, time, glob, calendar, subprocess, socket, gzip
+import os, sys, time, glob, calendar, subprocess, socket, gzip, datetime
 
 class NTPStats:
     "Gather statistics for a specified NTP site"
+    SecondsInWeek = 24*60*60
+    DefaultPeriod = 7*24*60*60
     @staticmethod
     def unixize(line, starttime, endtime):
         "Extract first two fields, MJD and seconds past midnight."
@@ -32,8 +34,24 @@ class NTPStats:
     def timestamp(line):
         "get Unix time from converted line."
         return float(line.split()[0])
-    def __init__(self, sitename, statsdir, starttime=0,endtime=9999999999):
-        "Grab content of all logfiles, sorted by timestamp."
+    def __init__(self, statsdir, sitename=None, 
+                 period=None, starttime=None, endtime=None):
+        "Grab content of logfiles, sorted by timestamp."
+        if period is None:
+            period = NTPStats.DefaultPeriod
+        self.period = period
+
+        # Default to one week before the latest date
+        if endtime is None and starttime == None:
+            endtime = int(time.time())
+            starttime = endtime - period
+        elif starttime is None and endtime is not None:
+            starttime = endtime - period
+        elif starttime is not None and endtime is None:
+            endtime = starttime + period
+        self.starttime = starttime
+        self.endtime = endtime
+
         self.sitename = sitename
         if not os.path.isdir(statsdir):
             sys.stderr.write("ntpviz: ERROR: %s is not a directory\n" \
