@@ -234,6 +234,9 @@ A good deal of tutorial and directive information is available on the
 handbook pages. These should be read in conjunction with the command and
 option information available on the pages listed on the sitemap page.
 
+link:clientstart.html[Quick start for client configurations]::
+  Basic configuration for 99% of client installations.  Introduces
+  concepts used later in the Handbook.
 link:assoc.html[Association Management]::
   Describes how to configure servers and peers and manage the various
   options. Includes automatic server discovery schemes.
