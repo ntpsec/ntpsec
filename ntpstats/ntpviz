@@ -182,7 +182,7 @@ plot \
     def local_offset_stability_gnuplot(self):
         "Generate GNUPLOT code graphing local clock stability"
         return self.loopstats_gnuplot(5, "RMS Frequency Jitter", "Stability")
-    def peerstats_gnuplot(self, peerlist, fld, title):
+    def peerstats_gnuplot(self, peerlist, fld, title, type):
         "Plot a specified field from peerstats."
         sitename = self.sitename
         peerdict = self.peersplit()
@@ -214,11 +214,13 @@ plot \
 
         if len(peerlist) == 1:
             # only one peer
+            percentages = ""
             title += ": "+ peerlist[0]
-            fifty = self.percentile(4,  50, peerdict[ip]) * 1000000
-            percentages = "\n%(fifty)s title '50th percentile', \\" \
-                % locals()
-            labels = """\
+            if "offset" == type:
+                fifty = self.percentile(4,  50, peerdict[ip]) * 1000000
+                percentages = "\n%(fifty)s title '50th percentile', \\" \
+                    % locals()
+                labels = """\
 set label 1 gprintf("50@@ = %(fifty)s us",50) at graph 0.01,0.95 left front
 """ % locals()
 
@@ -243,9 +245,9 @@ plot \\%(percentages)s
         plot_template += plot_data
         return plot_template
     def peer_offsets_gnuplot(self, peerlist=None):
-        return self.peerstats_gnuplot(peerlist, 4, "Peer clock offset")
+        return self.peerstats_gnuplot(peerlist, 4, "Peer clock offset", "offset")
     def peer_jitters_gnuplot(self, peerlist=None):
-        return self.peerstats_gnuplot(peerlist, 7, "Peer clock jitter")
+        return self.peerstats_gnuplot(peerlist, 7, "Peer clock jitter", "jitter")
     def peer_rtt_gnuplot(self, host):
         "Plot offset with rtt bounds for specified host."
         sitename = self.sitename
