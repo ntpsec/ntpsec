@@ -105,9 +105,6 @@ extern systime_func_ptr ntpcal_set_timefunc(systime_func_ptr);
 			+ ((val)<<4) + ((val)<<2) + (val))	/* *big* hack */
 
 
-extern	void	 calgregorian	(uint32_t, struct calendar *);
-extern	uint32_t caltontp	(const struct calendar *);
-
 /*
  * Convert between 'time_t' and 'vint64'
  */

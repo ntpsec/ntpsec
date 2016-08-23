@@ -1113,13 +1113,6 @@ ntpcal_date_to_time(
 }
 
 
-/*
- * ==================================================================
- *
- * extended and unchecked variants of calgregorian/caltontp
- *
- * ==================================================================
- */
 int
 ntpcal_ntp64_to_date(
 	struct calendar *jd,
@@ -1405,7 +1398,7 @@ isocal_ntp64_to_date(
 	ds.lo = ds.lo % 7;			/* elapsed week days */
 	if (ds.lo < 0) {			/* floor division!   */
 		ds.hi -= 1;
-		ds.lo += 7;
+//		ds.lo += 7;
 	}
 	id->weekday = (uint8_t)ds.lo + 1;	/* weekday result    */
 
