@@ -192,22 +192,9 @@ plot \
             sys.stderr.write("ntpviz: WARNING: no peer data to graph\n")
             return ''
         peerlist.sort() # For stability of output
-        if len(peerlist) == 1:
-            title += ": "+ peerlist[0]
-        else:
-            title += "s"
-        plot_template = NTPViz.Common + """\
-set title "%(sitename)s: %(title)s"
-set ylabel ""
-set ytics format "@1.0f us" nomirror
-set key top right box
-plot \\
-""" % locals()
-        plot_template = plot_template.replace("@", "%")
-        for key in peerlist:
-            plot_template += "'-' using 1:($%d*1000000) title '%s' with line, \\\n" % (fld, self.ip_label(key))
-
-        plot_template = plot_template[:-4] + "\n"
+        peer_data = ()
+        plot_data = ""
+        labels = ""
         for key in peerlist:
             # Trickiness - we allow peerlist elements to be DNS names.
             # The socket.gethostbyname() call maps DNS names to IP addresses,
@@ -218,11 +205,43 @@ plot \\
             else:
                 ip = socket.gethostbyname(key)
             if ip in peerdict:
-                plot_template += "\n".join(peerdict[ip]) + "\ne\n"
+                plot_data += "\n".join(peerdict[ip]) + "\ne\n"
             else:
                 sys.stderr.write("ntpviz: ERROR: No such peer as %s" % key)
                 raise SystemExit(1)
-        return plot_template[:-2]
+        # remove trailing "e\n"
+        plot_data = plot_data[:-2]
+
+        if len(peerlist) == 1:
+            # only one peer
+            title += ": "+ peerlist[0]
+            fifty = self.percentile(4,  50, peerdict[ip]) * 1000000
+            percentages = "\n%(fifty)s title '50th percentile', \\" \
+                % locals()
+            labels = """\
+set label 1 gprintf("50@@ = %(fifty)s us",50) at graph 0.01,0.95 left front
+""" % locals()
+
+        else:
+            title += "s"
+            percentages = ""
+
+        plot_template = NTPViz.Common + """\
+set title "%(sitename)s: %(title)s"
+set ylabel ""
+set ytics format "@1.0f us" nomirror
+set key top right box
+%(labels)s
+plot \\%(percentages)s
+""" % locals()
+        plot_template = plot_template.replace("@", "%")
+        for key in peerlist:
+            plot_template += "'-' using 1:($%d*1000000) title '%s' with line, \\\n" % (fld, self.ip_label(key))
+
+        # strip the trailing ", \\n"
+        plot_template = plot_template[:-4] + "\n"
+        plot_template += plot_data
+        return plot_template
     def peer_offsets_gnuplot(self, peerlist=None):
         return self.peerstats_gnuplot(peerlist, 4, "Peer clock offset")
     def peer_jitters_gnuplot(self, peerlist=None):
