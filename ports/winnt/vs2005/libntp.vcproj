@@ -217,14 +217,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\libntp\calgregorian.c"
-				>
-			</File>
-			<File
-				RelativePath="..\..\..\libntp\caltontp.c"
-				>
-			</File>
-			<File
 				RelativePath="..\..\..\libntp\calyearstart.c"
 				>
 			</File>

@@ -50,12 +50,6 @@
     <ClCompile Include="..\..\..\..\lib\isc\buffer.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\libntp\calgregorian.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\libntp\caltontp.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\libntp\calyearstart.c">
       <Filter>Source Files</Filter>
     </ClCompile>
