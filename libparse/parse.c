@@ -411,7 +411,7 @@ parse_to_unixtime(
 		return -1;		/* bad hour */
 	}
 
-	t = TIMES24(t) + clock_time->hour;
+	t = t*24 + clock_time->hour;
 
 				/* min */
 	if (clock_time->minute < 0 || clock_time->minute > 59)
@@ -420,7 +420,7 @@ parse_to_unixtime(
 		return -1;		/* bad min */
 	}
 
-	t = TIMES60(t) + clock_time->minute;
+	t = t*60 + clock_time->minute;
 				/* sec */
 
 	if (clock_time->second < 0 || clock_time->second > 60)	/* allow for LEAPs */
@@ -429,7 +429,7 @@ parse_to_unixtime(
 		return -1;		/* bad sec */
 	}
 
-	t  = TIMES60(t) + clock_time->second;
+	t  = t*60 + clock_time->second;
 
 	t += clock_time->utcoffset;	/* warp to UTC */
 
