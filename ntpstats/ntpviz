@@ -318,7 +318,7 @@ if __name__ == '__main__':
     show_peer_offsets = show_peer_jitters = None
     show_peer_rtt = None
     outdir = "ntpgraphs"
-    debug = 0
+    debug_level = 0
     nice = 0
     for (switch, val) in options:
         if switch == "-d":
@@ -515,6 +515,7 @@ ntpviz</a>, part of the <a href="https://www.ntpsec.org/">NTPsec project</a>
 </html>
 '''
     with open(os.path.join(outdir, "index.html"), "w") as ifile:
+        ifile.write(index_header)
         # if header file, add it to index.html
         header = os.path.join(outdir, "header")
         if os.path.isfile(header):
