@@ -28,6 +28,11 @@ humanlogtime(void)
 	LIB_GETBUF(bp);
 
 #ifdef ENABLE_CLASSIC_MODE
+	const char * const months[12] = {
+	    "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+	    "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+	};
+
 	snprintf(bp, LIB_BUFLENGTH, "%2d %s %02d:%02d:%02d",
 		 tm->tm_mday, months[tm->tm_mon],
 		 tm->tm_hour, tm->tm_min, tm->tm_sec);
