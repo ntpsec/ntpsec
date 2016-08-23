@@ -481,8 +481,12 @@ if __name__ == '__main__':
             sys.stderr.write("ntpviz: ERROR: %s can't be created.\n" \
                  % outdir)
             raise SystemExit(1)
-    with open(os.path.join(outdir, "ntpsec-logo.png"), "w") as wp:
-        wp.write(binascii.a2b_base64(ntpsec_logo))
+
+    # if no ntpsec logo, write one.
+    logo_filename = os.path.join(outdir, "ntpsec-logo.png")
+    if not os.path.isfile( logo_filename ):
+        with open( logo_filename, "w" ) as wp:
+            wp.write(binascii.a2b_base64(ntpsec_logo))
 
     index_header = '''\
 <!DOCTYPE html>
