@@ -356,8 +356,14 @@ set ytics format "@1.2f us" nomirror textcolor rgb "#0060ad"
 set key bottom right box
 plot \\
 '''
+    # FIXME: We probably need to be more flexible about computing the plot label
+    sitenames = [os.path.basename(os.path.dirname(d)) for d in statsdirs]
     for (i, stats) in enumerate(statlist):
-        plot += '"-" using 1:($2*1000000) title "%s clock offset us" with linespoints, \\\n' % (stats.sitename)
+        plot += '"-" using 1:($2*1000000) title "%s clock offset us" with linespoints, \\\n' % (sitenames[i])
+    plot = plot[:-4] + "\n"
+    for stats in statlist:
+        plot += stats.dump("loopstats") + "e\n"
+    plot = plot[:-2]
     return plot.replace("@", "%")
 
 ntpsec_logo = """
