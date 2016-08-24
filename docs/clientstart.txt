@@ -177,8 +177,7 @@ link:ntpspeak.html[falseticker].  But that reduces to two if one of
 them is not responding.
 
 If you are using 4 servers, you still have 3 if one of them stops
-responding (your +{ntpd}+ will ask the pool dispatcher for another server
-when it notices this).  Unless you are serving time to other systems,
+responding.  Unless you are serving time to other systems,
 this is a reasonable setup. It is normal for client-only systems
 
 You can add more servers.  With 5 servers, you still have 3 if 2 are
@@ -195,7 +194,7 @@ accurate time, provided it has link:ntpspeak.html[PPS] capability.
 want check servers from the pool.)
 
 The easiest way to arrange this is by installing
-http://catb.org/gpsd/[GPSD] to watch the and configuring your +{ntpd}+
+http://catb.org/gpsd/[GPSD] to watch the GPS, and configuring your +{ntpd}+
 to accept time from it.  It is also possible to do this with native
 +{ntpd}+ drivers (nmea, jupiter, trimble, oncore), though these are
 less flexible and a bit more difficult to configure.
