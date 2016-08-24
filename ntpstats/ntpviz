@@ -6,10 +6,11 @@ ntpviz - logfile visualizer for NTP log files
 Usage: ntpviz [-d statsdir] [-g] [-n name] [-p days]
               [-s starttime]  [-e endtime]
               [--local-offset | --local-error | --local-jitter
-                | --local-stability | --local-offset-histogram]
-              [--peer-offsets=hosts | --all-peer-offsets]
-              [--peer-jitters=hosts | --all-peer-jitters]
-              [--local-cpu-temp]
+                | --local-stability | --local-offset-histogram
+                | --peer-offsets=hosts | --all-peer-offsets
+                | --peer-jitters=hosts | --all-peer-jitters
+                | --local-cpu-temp
+                | --local-offset-multiplot]
               [-o outdir]
               [-D N]
 
@@ -344,6 +345,21 @@ plot \
         histogram_data = ["%s %s\n" % (val, cnt[val]) for val in vals]
         return plot_template.replace('@', '%') + "".join(histogram_data)
 
+# Multplotting can't live inside NTPViz because it consumes a list
+# of such objects, not a single one.
+
+def local_offset_multiplot(statlist):
+    "Plot comparative local offsets for a list of NTPViz objects."
+    plot = NTPViz.Common + '''\
+set title "Local Clock Offsets"
+set ytics format "@1.2f us" nomirror textcolor rgb "#0060ad"
+set key bottom right box
+plot \\
+'''
+    for (i, stats) in enumerate(statlist):
+        plot += '"-" using 1:($2*1000000) title "%s clock offset us" with linespoints, \\\n' % (stats.sitename)
+    return plot.replace("@", "%")
+
 ntpsec_logo = """
 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
 """
@@ -357,6 +373,7 @@ if __name__ == '__main__':
             "all-peer-jitters", "peer-jitters=",
             "local-cpu-temp",
             "peer-rtt=",
+            "local-offset-multiplot",
             ])
     except getopt.GetoptError as err:
         sys.stderr.write(str(err) + "\n")
@@ -367,13 +384,14 @@ if __name__ == '__main__':
     generate = False
     show_local_offset = show_local_error = show_local_jitter = False
     show_local_stability = show_local_offset_histogram = show_cpu_temp = False
+    show_local_offset_multiplot = False
     show_peer_offsets = show_peer_jitters = None
     show_peer_rtt = None
     outdir = "ntpgraphs"
     debug_level = 0
     for (switch, val) in options:
         if switch == "-d":
-            statsdirs = val.split(",")
+            statsdirs = [os.path.expanduser(path) for path in val.split(",")]
         elif switch == "-e":
             endtime = iso_to_posix(val)
         elif switch == "-g":
@@ -413,6 +431,8 @@ if __name__ == '__main__':
             show_peer_rtt = val
         elif switch == "--local-cpu-temp":
             show_cpu_temp = True
+        elif switch == "--local-offset-multiplot":
+            show_local_offset_multiplot = True
     if 0 < debug_level:
         sys.stderr.write("ntpviz: INFO: now running at debug: %s\n" % \
             debug_level)
@@ -509,6 +529,14 @@ if __name__ == '__main__':
                 sys.stdout.write(plot)
             raise SystemExit(0)
 
+    if show_local_offset_multiplot:
+        plot = local_offset_multiplot(statlist)
+        if generate:
+            gnuplot(plot)
+        else:
+            sys.stdout.write(plot)
+        raise SystemExit(0)
+
     # Fall through to HTML code generation
     if not os.path.isdir(outdir):
         try:
@@ -585,7 +613,7 @@ ntpviz</a>, part of the <a href="https://www.ntpsec.org/">NTPsec project</a>
                 pass
 
         if len(statlist) > 1:
-            sys.stderr.write("Comparative multiplotting not yet implemented.\n")
+            ifile.write(local_offset_multiplot(statlist))
         else:
             imagepairs = [
                 ("local-offset", stats.local_offset_gnuplot()),

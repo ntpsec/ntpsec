@@ -8,9 +8,11 @@
 {ntpviz} [-d statsdir] [-g] [-n name] [-p period]
          [-s starttime] [-e endtime]
          [--local-offset | --local-error | --local-jitter | --local-stability]
-	 [--local-offset-histogram]
-         [--peer-offsets=hosts | --all-peer-offsets]
-         [--peer-jitters=hosts | --all-peer-jitters]
+	   | --local-offset-histogram
+           | --peer-offsets=hosts | --all-peer-offsets
+           | --peer-jitters=hosts | --all-peer-jitters
+	   | --peer=rtt-host=hostname
+	   | --local-offset-multiplot]
 	 [-o outdir]
 	 [-D N] [-N]
 
@@ -91,6 +93,9 @@ The following plots are available:
 --peer-rtt=host::
    Show offset plus or minus round-trip-time (rtt) of a specified
    peer. This graph combines fields 4 and 5 of loopstats.
+
+--local-offset-multiplot::
+   Plot comparative local offsets for multiple directories.
 
 If no individual plot is specified, all plots and an index HTML page
 are generated into a new output directory.  Normally this directory is
