@@ -367,7 +367,7 @@ maintain_activefds(
 #endif	/* !HAVE_IO_COMPLETION_PORT */
 
 
-#ifdef DEBUG_TIMING
+#ifdef ENABLE_DEBUG_TIMING
 /*
  * collect timing information for various processing
  * paths. currently we only pass them on to the file
@@ -3314,11 +3314,11 @@ fetch_timestamp(
 	double			fuzz;
 	l_fp			lfpfuzz;
 	l_fp			nts;
-#ifdef DEBUG_TIMING
+#ifdef ENABLE_DEBUG_TIMING
 	l_fp			dts;
 #endif
 
-#ifndef DEBUG_TIMING
+#ifndef ENABLE_DEBUG_TIMING
 	UNUSED_ARG(rb);
 #endif
 
@@ -3393,14 +3393,14 @@ fetch_timestamp(
 			fuzz = ntp_random() * 2. / FRAC * sys_fuzz;
 			DTOLFP(fuzz, &lfpfuzz);
 			L_ADD(&nts, &lfpfuzz);
-#ifdef DEBUG_TIMING
+#ifdef ENABLE_DEBUG_TIMING
 			dts = ts;
 			L_SUB(&dts, &nts);
 			collect_timing(rb, "input processing delay", 1,
 				       &dts);
 			DPRINTF(4, ("fetch_timestamp: timestamp delta: %s (incl. fuzz)\n",
 				    lfptoa(&dts, 9)));
-#endif	/* DEBUG_TIMING */
+#endif	/* ENABLE_DEBUG_TIMING */
 			ts = nts;  /* network time stamp */
 			break;
 #endif	/* USE_SCM_BINTIME || USE_SCM_TIMESTAMPNS || USE_SCM_TIMESTAMP */
@@ -3626,7 +3626,7 @@ input_handler(
 	blocking_child *c;
 	struct timeval	tvzero;
 	l_fp		ts;	/* Timestamp at BOselect() gob */
-#ifdef DEBUG_TIMING
+#ifdef ENABLE_DEBUG_TIMING
 	l_fp		ts_e;	/* Timestamp at EOselect() gob */
 #endif
 	fd_set		fds;
@@ -3807,7 +3807,7 @@ input_handler(
 		goto ih_return;
 	}
 	/* We've done our work */
-#ifdef DEBUG_TIMING
+#ifdef ENABLE_DEBUG_TIMING
 	get_systime(&ts_e);
 	/*
 	 * (ts_e - ts) is the amount of time we spent
@@ -3821,7 +3821,7 @@ input_handler(
 		msyslog(LOG_DEBUG,
 			"input_handler: Processed a gob of fd's in %s msec",
 			lfptoms(&ts_e, 6));
-#endif /* DEBUG_TIMING */
+#endif /* ENABLE_DEBUG_TIMING */
 	/* We're done... */
     ih_return:
 	return;

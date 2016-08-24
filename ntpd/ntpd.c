@@ -992,7 +992,7 @@ static void mainloop(void)
 
 # endif		/* !HAVE_IO_COMPLETION_PORT */
 
-# ifdef DEBUG_TIMING
+# ifdef ENABLE_DEBUG_TIMING
 		{
 			l_fp pts;
 			l_fp tsa, tsb;
@@ -1020,7 +1020,7 @@ static void mainloop(void)
 				 * packet.
 				 */
 				if (rbuf->receiver != NULL) {
-# ifdef DEBUG_TIMING
+# ifdef ENABLE_DEBUG_TIMING
 					l_fp dts = pts;
 
 					L_SUB(&dts, &rbuf->recv_time);
@@ -1038,7 +1038,7 @@ static void mainloop(void)
 				freerecvbuf(rbuf);
 				rbuf = get_full_recv_buffer();
 			}
-# ifdef DEBUG_TIMING
+# ifdef ENABLE_DEBUG_TIMING
 			intercept_get_systime(__func__, &tsb);
 			L_SUB(&tsb, &tsa);
 			if (bufcount) {

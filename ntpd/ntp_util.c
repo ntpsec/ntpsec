@@ -711,7 +711,7 @@ record_proto_stats(
 	}
 }
 
-#ifdef DEBUG_TIMING
+#ifdef ENABLE_DEBUG_TIMING
 /*
  * record_timing_stats - write timing statistics to file
  *

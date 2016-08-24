@@ -41,7 +41,6 @@ NTPD_PRIO		# Priority to set the daemon to
 
 # Fine-grained debugging and tracing, not presently settable from waf
 DEBUG
-DEBUG_TIMING		# In the future, might be set by waf
 ISC_LIST_CHECKINIT	# Debugging flag
 ISC_PLATFORM_USEBACKTRACE	# Use the ISC backtrace code on assertions
 ISC_UTIL_TRACEON	# Enables trace code in ISC service routines.
@@ -58,6 +57,7 @@ DEBUG_PPS720		# Only in refclock_true.c
 ISC_PLATFORM_BRACEPTHREADONCEINIT
 
 # Things WAF sets that don't get #undefs if they're not set
+ENABLE_DEBUG_TIMING
 ENABLE_DNS_RETRY
 ENABLE_IPV6
 ENABLE_LOCKCLOCK
