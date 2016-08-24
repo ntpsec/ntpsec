@@ -524,6 +524,10 @@ def cmd_configure(ctx, config):
         else:
             ctx.undefine("ENABLE_CLASSIC_MODE")
 
+	if ctx.options.enable_debug_timing:
+	    ctx.define("ENABLE_DEBUG_TIMING", 1)
+        else:
+            ctx.undefine("ENABLE_DEBUG_TIMING")
 
 	ctx.start_msg("Writing configuration header:")
 	ctx.write_config_header("config.h")
