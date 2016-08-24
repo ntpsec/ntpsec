@@ -52,7 +52,7 @@ class NTPStats:
         self.starttime = starttime
         self.endtime = endtime
 
-        self.sitename = sitename
+        self.sitename = sitename or os.path.basename(statsdir)
         if not os.path.isdir(statsdir):
             sys.stderr.write("ntpviz: ERROR: %s is not a directory\n" \
                  % statsdir)
