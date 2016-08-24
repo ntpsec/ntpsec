@@ -16,7 +16,6 @@ confinement: devmode
 # - fixup isolation to get it running in strict mode
 #   - extra devices will need new interfaces (e.g. /dev/pps)
 #   - leverage upstream ntp apparmor profile to stack on top of snappy isolation
-#   - leverage seccomp in ntp to be guarded on the snap level as well
 
 apps:
   ntpdig:
