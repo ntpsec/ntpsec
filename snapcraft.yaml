@@ -13,10 +13,10 @@ description: |
 confinement: devmode
 
 # TODO
-# - get proper access to conffiles (or snappy conf translator)
-# - fixup isolation to get it running in strict mode (might need new interfaces)
-# - leverage upstream ntp apparmor profile to stack on top of snappy isolation
-# - leverage seccomp in ntp to be guarded on the snap level as well
+# - fixup isolation to get it running in strict mode
+#   - extra devices will need new interfaces (e.g. /dev/pps)
+#   - leverage upstream ntp apparmor profile to stack on top of snappy isolation
+#   - leverage seccomp in ntp to be guarded on the snap level as well
 
 apps:
   ntpdig:
