@@ -570,8 +570,8 @@ period of time.  The majority of this change should come from
 temperature changes (ex: HVAC, the weather, CPU usage causing local
 heating).</p>
 <p>Smaller changes are better.  An ideal clock would be a flat line at 0ppm.</p>
-<p>Expected values: +/- 500ppm</p>
-<p>Expected values of 99%-1% percentiles: within 10ppm</p>
+<p>Expected values: within &plusmn;500ppm of 0</p>
+<p>Expected values of 99%-1% percentiles: within 10ppm of 0</p>
 """,
         "local-offset-histogram": """\
 <p>This shows the clock offsets of the local clock as a histogram.  It
@@ -676,7 +676,7 @@ and response and offset all went in the same direction).<p>
 <dt>upstream clock</dt>
 <dd>Any remote clock or reference clock used as a source of time.</dd>
 
-<dt>us, µs, microsecond</dt>
+<dt>µs, us, microsecond</dt>
 <dd>One millionth of a second, and one thousandth of a millisecond,
 0.0000001s.</dd>
 </dl>

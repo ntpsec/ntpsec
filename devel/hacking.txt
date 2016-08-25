@@ -177,6 +177,9 @@ in particular, does not qualify - it doesn't have good enough table
 support for our needs.  ReST does, but the hassle costs of supporting
 two different master markups are too high.
 
+If you must use non-ASCII characters, use UTF-8 and not Latin-1 or
+any other encoding.  Best practice is to use XML character entities.
+
 The NTP Classic documentation had a terrible problem with duplicative
 documentation gradually diverging as the duplicates mutated and
 bitrotted. Therefore one of our house rules is to have a *single point
