@@ -26,8 +26,6 @@ from ntp.statfiles import *
 
 # RMS frequency jitter - Deviation from a root-mean-square linear approximation?
 # Investigate.
-#
-# TO-DO: Embed Dan Drown's glossary and notes file in the HTML.
 
 def gnuplot(template, outfile=None):
     "Run a specified GNUPLOT program."
@@ -558,6 +556,71 @@ if __name__ == '__main__':
         with open( logo_filename, "w" ) as wp:
             wp.write(binascii.a2b_base64(ntpsec_logo))
 
+    explanations = {
+        "local-offset": """\
+<p>This graph can be used to see the relationship between the frequency
+offset of the local clock (red, in parts per million, right) against
+the local clock offset (blue, in μs). Quick changes in frequency will lead to
+larger clock offsets.</p>
+""",
+        "local-error": """\
+<p>This shows the frequency offset of the local clock.  It includes
+percentile data to show how much the frequency changes over a longer
+period of time.  The majority of this change should come from
+temperature changes (ex: HVAC, the weather, CPU usage causing local
+heating).</p>
+<p>Smaller changes are better.  An ideal clock would be a flat line at 0ppm.</p>
+<p>Expected values: +/- 500ppm</p>
+<p>Expected values of 99%-1% percentiles: within 10ppm</p>
+""",
+        "local-offset-histogram": """\
+<p>This shows the clock offsets of the local clock as a histogram.  It
+includes 1%, 25%, 75%, and 99% percentiles to show the performance of
+the system.</p>
+""",
+        "local-stability": """\
+<p>This shows the jitter of the local clock's frequency.  In other
+words, how fast it the local clock changes freqency.</p>
+<p>Lower is better.  An ideal clock would be a straight line at 0ppm.</p>
+""",
+        "local-jitter": """\
+<p>This shows the jitter of the local clock offset.  In other words,
+how fast the local clock offset is changing.</p>
+<p>Lower is better.  An ideal system would be a straight line at 0μs.</p>
+""",
+        "local-cpu-temp": """\
+<p>Ambient temperature - changes the clock crystal frequency, it
+oscillates faster when warmer. This the single most important
+component of frequency drift.</p>
+""",
+        "peer-offsets": """\
+<p>This shows the offset of all remote clocks and refclocks.  This can
+be useful to see if offset changes are happening in a single clock or
+all clocks together.</p>
+<p>Closer to 0μs is better.  An ideal system would be a straight line
+at 0μs.</p>
+""",
+        "peer-jitters": """\
+<p>This shows the jitter of the remote clock offset.  In other words,
+how quickly the remote clock offset is changing.</p>
+<p>Closer to 0μs/s is better.  An ideal system would be a straight
+line at 0μs/s.</p>
+""",
+        # FIXME: Not used yet
+        "peer-offset-X": """\
+<p>This shows the clock offset between the local clock and a remote
+clock or refclock.</p>
+<p>For remote clocks, the purple line is the offset while the green
+and blue lines are the request and response.  The request and response
+lines can show if the change in offset was due to an asymmetric
+network effect (either request or response latency went up/down, but
+not both), a symmetric network effect (request and response latency
+went in opposite directions), or the clocks changed in offset (request
+and response and offset all went in the same direction).<p>
+<p>The orange 50th percentile line shows the median offset value.  You can use this to align offsets between LAN stratum 1 servers.</p>
+"""
+        }
+
     index_header = '''\
 <!DOCTYPE html>
 <html lang="en">
@@ -606,6 +669,8 @@ ntpviz</a>, part of the <a href="https://www.ntpsec.org/">NTPsec project</a>
 </body>
 </html>
 '''
+    imagewrapper = "<img src='%s.png' alt='%s plot'>\n"
+
     with open(os.path.join(outdir, "index.html"), "w") as ifile:
         ifile.write(index_header)
         # if header file, add it to index.html
@@ -627,8 +692,8 @@ ntpviz</a>, part of the <a href="https://www.ntpsec.org/">NTPsec project</a>
                 ("local-jitter", stats.local_offset_jitter_gnuplot()),
                 ("local-stability", stats.local_offset_stability_gnuplot()),
                 ("local-offset-histogram", stats.local_offset_histogram_gnuplot()),
-                ("peer-offsets", stats.peer_offsets_gnuplot()),
                 ("local-cpu-temp", stats.local_cpu_temp_gnuplot()),
+                ("peer-offsets", stats.peer_offsets_gnuplot()),
                 ]
             for key in stats.peersplit().keys():
                 imagepairs.append(("peer-offset-" + key,
@@ -641,16 +706,16 @@ ntpviz</a>, part of the <a href="https://www.ntpsec.org/">NTPsec project</a>
                     imagepairs.append(("peer-jitter-" + key, plot))
 
             for (imagename, image) in imagepairs:
+                if not image:
+                    continue;
+                div_name = imagename.replace('-', ' ')
+                ifile.write("<div>\n<h2>%s:</h2>\n" % div_name)
+                if imagename in explanations:
+                    ifile.write("<div>\n%s</div>\n" % explanations[imagename])
                 gnuplot(image, os.path.join(outdir, imagename + ".png"))
-                for (imagename, _) in imagepairs:
-                    div_name = imagename.replace('-', ' ')
-                    div = '''\
-<div>
-  <h3>%s</h3>
-  <img src='%s.png' alt='%s plot'>
-</div>
-''' % (div_name, imagename.replace(':', '%3A'), div_name)
-                    ifile.write( div )
+                div = imagewrapper % (imagename.replace(':', '%3A'), div_name)
+                ifile.write(div)
+                ifile.write("</div>\n")
 
         # if footer file, add it to index.html
         footer = os.path.join(outdir, "footer")
