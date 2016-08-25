@@ -255,7 +255,7 @@ truechimer::
 [[USNO]]
 USNO::
   http://www.usno.navy.mil/USNO[The United States Naval Observatory],
-  one of tthe two U.S. national time authorities and the source of the
+  one of the two U.S. national time authorities and the source of the
   U.S. military time reference, now delivered primarily by GPS
   signals. U.S. civil and military time agree to within nanoseconds.
 
