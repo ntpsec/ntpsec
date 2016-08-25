@@ -17,6 +17,9 @@ confinement: strict
 #   - once available these two interfaces should provide most of what we need
 #     - time-hardware: https://bugs.launchpad.net/snappy/+bug/1616833
 #     - time-adjust: https://bugs.launchpad.net/snappy/+bug/1616834
+# - rework from deprecated copy to dump plugin currently blocked on
+#   understanding the transition, see
+#   https://bugs.launchpad.net/snapcraft/+bug/1616459
 
 apps:
   ntpdig:
