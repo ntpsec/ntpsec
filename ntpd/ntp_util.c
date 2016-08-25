@@ -46,7 +46,6 @@ static char	  *leapfile_name;		/* leapseconds file name */
 static struct stat leapfile_stat;	/* leapseconds file stat() buffer */
 static bool        have_leapfile = false;
 char	*stats_drift_file;		/* frequency file name */
-static	char *stats_temp_file;		/* temp frequency file name */
 static double wander_resid;		/* last frequency update */
 double	wander_threshold = 1e-7;	/* initial frequency threshold */
 
@@ -111,9 +110,7 @@ uninit_util(void)
 #endif
 	if (stats_drift_file) {
 		free(stats_drift_file);
-		free(stats_temp_file);
 		stats_drift_file = NULL;
-		stats_temp_file = NULL;
 	}
 	if (key_file_name) {
 		free(key_file_name);
@@ -214,7 +211,6 @@ stats_config(
 	double	new_drift = 0;
 	l_fp	now;
 	time_t  ttnow;
-	const char temp_ext[] = ".TEMP";
 
 	/*
 	 * Expand environment strings under Windows NT, since the
@@ -271,11 +267,7 @@ stats_config(
 			break;
 
 		stats_drift_file = erealloc(stats_drift_file, len + 1);
-		stats_temp_file = erealloc(stats_temp_file, 
-		    len + sizeof(".TEMP"));
 		memcpy(stats_drift_file, value, (size_t)(len+1));
-		memcpy(stats_temp_file, value, (size_t)len);
-		memcpy(stats_temp_file + len, temp_ext, sizeof(temp_ext));
 
 		/*
 		 * Open drift file and read frequency. If the file is
