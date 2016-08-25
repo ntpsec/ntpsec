@@ -646,6 +646,41 @@ and response and offset all went in the same direction).<p>
     index_header += '<div style="clear:both;"></div>'
 
     index_trailer = '''\
+<h2>Glossary:</h2>
+
+<dl>
+<dt>clock offset</dt>
+<dd>The difference between the actual time and the local clock's time.
+    (Also can be called phase offset)</dd>
+
+<dt>frequency offset</dt>
+<dd>The difference between the local clock's actual frequency and its
+    expected frequency (usually in parts per million, ppm)</dd>
+
+<dt>jitter</dt>
+<dd>The short term change in a value</dd>
+
+<dt>ms, millisecond</dt>
+<dd>One thousandth of a second = 0.001s</dd>
+
+<dt>ppm, parts per million</dt>
+<dd>Ratio between two values. These following are all the same:
+    1 ppm, one in one million, 1/1000000, 0.000001, and 0.0001%</dd>
+
+<dt>refclock</dt>
+<dd>Reference clock, from a GPS module or other source of time.</dd>
+
+<dt>remote clock</dt>
+<dd>Any clock reached over the network, LAN or WAN.</dd>
+
+<dt>upstream clock</dt>
+<dd>Any remote clock or reference clock used as a source of time.</dd>
+
+<dt>us, µs, microsecond</dt>
+<dd>One millionth of a second, and one thousandth of a millisecond,
+0.0000001s.</dd>
+</dl>
+
 <br>
 <br>
 <br>
