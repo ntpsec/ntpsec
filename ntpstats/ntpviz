@@ -343,7 +343,7 @@ plot \
         histogram_data = ["%s %s\n" % (val, cnt[val]) for val in vals]
         return plot_template.replace('@', '%') + "".join(histogram_data)
 
-# Multplotting can't live inside NTPViz because it consumes a list
+# Multiplotting can't live inside NTPViz because it consumes a list
 # of such objects, not a single one.
 
 def local_offset_multiplot(statlist):

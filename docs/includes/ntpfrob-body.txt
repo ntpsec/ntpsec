@@ -24,7 +24,7 @@ utilities.
 +-A+::
   Display the kernel variable +tick+.
 +-b+ 'bump'::
-  Bump the clock by a specified number of microceseconds.
+  Bump the clock by a specified number of microseconds.
 +-c+::
   Compute and display clock jitter.
 +-e+::
