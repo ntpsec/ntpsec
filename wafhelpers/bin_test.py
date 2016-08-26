@@ -7,13 +7,11 @@ cmd_map = {
 	("main/ntpd/ntpd",				"-invalid"):			r'.*must be run as root, not uid.*',
 	("main/ntpdig/ntpdig",			"time.apple.com"):		r'.*time.apple.com.*',
 	("main/ntpfrob/ntpfrob",			"-h"):				r'.*illegal option.*',
+	("main/ntpfrob/ntpfrob",			"-b 100000"):		r".*Bumping clock by 100000 microseconds.*",
 	("main/ntpkeygen/ntpkeygen",	  "-M"):				r'.*Generating new md5 file and link.*',
 	("main/ntpq/ntpq",  			  "-p"):				r'.*remote.*jitter.*',
 	("main/ntptime/ntptime",		  None):				r'.*ntp_gettime\(\) returns code 0 \(OK\).*',
-	("main/util/bumpclock", 		  None):				r".*Bumping clock by 100000 microseconds.*",
-	("main/util/propdelay", 		  "1","1", "2"," 2"):	r'.*summer propagation, height 350 km, hops 1, delay 0.00239626 seconds.*',
 	("main/util/sht",				  "2:r"):				r'.*reader.*',
-	("main/util/tg2",				  "--help"):			r'.*illegal option.*',
 
 # XXX: Need to figure out how to test this.
 #	("main/util/hist",  			  ""):  				r'',
