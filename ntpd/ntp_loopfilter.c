@@ -76,7 +76,7 @@
  * entirely and the daemon discipline used instead.
  *
  * There have been three versions of the kernel discipline code. The
- * first (microkernel) now in Solaris discipilnes the microseconds. The
+ * first (microkernel) now in Solaris disciplines the microseconds. The
  * second and third (nanokernel) disciplines the clock in nanoseconds.
  * These versions are identifed if the symbol STA_PLL is present in the
  * header file /usr/include/sys/timex.h. The third and current version
