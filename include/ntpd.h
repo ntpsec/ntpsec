@@ -313,7 +313,7 @@ extern volatile u_long handler_pkts;	/* number of pkts received by handler */
 extern u_long	io_timereset;		/* time counters were reset */
 
 /* ntp_io.c */
-extern  int	disable_dynamic_updates;
+extern bool	disable_dynamic_updates;
 extern u_int	sys_ifnum;		/* next .ifnum to assign */
 extern endpt *	any_interface;		/* IPv4 wildcard */
 extern endpt *	any6_interface;		/* IPv6 wildcard */
