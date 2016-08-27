@@ -10,7 +10,6 @@
 #include "ntp_syslog.h"
 #include "ntp_stdlib.h"
 #include "ntp_random.h"
-#include "iosignal.h"
 #include "timevalops.h"
 #include "timespecops.h"
 #include "ntp_calendar.h"
@@ -80,10 +79,6 @@ static bool systime_init_done;
 # define DONE_SYSTIME_INIT()	systime_init_done = true
 #else
 # define DONE_SYSTIME_INIT()	do {} while (false)
-#endif
-
-#ifdef ENABLE_SIGNALED_IO
-bool using_sigio;
 #endif
 
 #ifdef SYS_WINNT
@@ -191,29 +186,21 @@ normalize_time(
 	 * fuzzed result is strictly later than the prior.  Limit the
 	 * necessary fiction to 1 second.
 	 */
-	if (!USING_SIGIO()) {
-		ts_min = add_tspec_ns(ts_prev, sys_fuzz_nsec);
-		if (cmp_tspec(ts, ts_min) < 0) {
-			ts_lam = sub_tspec(ts_min, ts);
-			if (ts_lam.tv_sec > 0 && !lamport_violated) {
-				msyslog(LOG_ERR,
-					"get_systime Lamport advance exceeds one second (%.9f)",
-					ts_lam.tv_sec +
-					    1e-9 * ts_lam.tv_nsec);
-				exit(1);
-			}
-			if (!lamport_violated)
-				ts = ts_min;
+	ts_min = add_tspec_ns(ts_prev, sys_fuzz_nsec);
+	if (cmp_tspec(ts, ts_min) < 0) {
+		ts_lam = sub_tspec(ts_min, ts);
+		if (ts_lam.tv_sec > 0 && !lamport_violated) {
+			msyslog(LOG_ERR,
+				"get_systime Lamport advance exceeds one second (%.9f)",
+				ts_lam.tv_sec +
+				    1e-9 * ts_lam.tv_nsec);
+			exit(1);
 		}
-		ts_prev_log = ts_prev;
-		ts_prev = ts;
-	} else {
-		/*
-		 * Quiet "ts_prev_log.tv_sec may be used uninitialized"
-		 * warning from x86 gcc 4.5.2.
-		 */
-		ZERO(ts_prev_log);
+		if (!lamport_violated)
+			ts = ts_min;
 	}
+	ts_prev_log = ts_prev;
+	ts_prev = ts;
 
 	/* convert from timespec to l_fp fixed-point */
 	result = tspec_stamp_to_lfp(ts);
@@ -230,32 +217,30 @@ normalize_time(
 	 * sys_residual's effect for now) once sys_fuzz has been
 	 * determined.
 	 */
-	if (!USING_SIGIO()) {
-		if (!L_ISZERO(&lfp_prev) && !lamport_violated) {
-			if (!L_ISGTU(&result, &lfp_prev) &&
-			    sys_fuzz > 0.) {
-				msyslog(LOG_ERR, "ts_prev %s ts_min %s",
-					tspectoa(ts_prev_log),
-					tspectoa(ts_min));
-				msyslog(LOG_ERR, "ts %s", tspectoa(ts));
-				msyslog(LOG_ERR, "sys_fuzz %ld nsec, prior fuzz %.9f",
-					sys_fuzz_nsec, dfuzz_prev);
-				msyslog(LOG_ERR, "this fuzz %.9f",
-					dfuzz);
-				lfpdelta = lfp_prev;
-				L_SUB(&lfpdelta, &result);
-				LFPTOD(&lfpdelta, ddelta);
-				msyslog(LOG_ERR,
-					"prev get_systime 0x%x.%08x is %.9f later than 0x%x.%08x",
-					lfp_prev.l_ui, lfp_prev.l_uf,
-					ddelta, result.l_ui, result.l_uf);
-			}
+	if (!L_ISZERO(&lfp_prev) && !lamport_violated) {
+		if (!L_ISGTU(&result, &lfp_prev) &&
+		    sys_fuzz > 0.) {
+			msyslog(LOG_ERR, "ts_prev %s ts_min %s",
+				tspectoa(ts_prev_log),
+				tspectoa(ts_min));
+			msyslog(LOG_ERR, "ts %s", tspectoa(ts));
+			msyslog(LOG_ERR, "sys_fuzz %ld nsec, prior fuzz %.9f",
+				sys_fuzz_nsec, dfuzz_prev);
+			msyslog(LOG_ERR, "this fuzz %.9f",
+				dfuzz);
+			lfpdelta = lfp_prev;
+			L_SUB(&lfpdelta, &result);
+			LFPTOD(&lfpdelta, ddelta);
+			msyslog(LOG_ERR,
+				"prev get_systime 0x%x.%08x is %.9f later than 0x%x.%08x",
+				lfp_prev.l_ui, lfp_prev.l_uf,
+				ddelta, result.l_ui, result.l_uf);
 		}
-		lfp_prev = result;
-		dfuzz_prev = dfuzz;
-		if (lamport_violated) 
-			lamport_violated = false;
 	}
+	lfp_prev = result;
+	dfuzz_prev = dfuzz;
+	if (lamport_violated)
+		lamport_violated = false;
 	LEAVE_GET_SYSTIME_CRITSEC();
 	*now = result;
 }

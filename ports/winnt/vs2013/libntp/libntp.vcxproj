@@ -230,7 +230,6 @@
     <ClCompile Include="..\..\..\..\libntp\hextolfp.c" />
     <ClCompile Include="..\..\..\..\libntp\humandate.c" />
     <ClCompile Include="..\..\..\..\libntp\icom.c" />
-    <ClCompile Include="..\..\..\..\libntp\iosignal.c" />
     <ClCompile Include="..\..\..\..\libntp\lib_strbuf.c" />
     <ClCompile Include="..\..\..\..\libntp\machines.c" />
     <ClCompile Include="..\..\..\..\libntp\mktime.c" />
@@ -305,7 +304,6 @@
     <ClInclude Include="..\..\..\..\include\declcond.h" />
     <ClInclude Include="..\..\..\..\include\ieee754io.h" />
     <ClInclude Include="..\..\..\..\include\intreswork.h" />
-    <ClInclude Include="..\..\..\..\include\iosignal.h" />
     <ClInclude Include="..\..\..\..\include\isc\mem.h" />
     <ClInclude Include="..\..\..\..\include\lib_strbuf.h" />
     <ClInclude Include="..\..\..\..\include\ntp.h" />

@@ -10,7 +10,6 @@
 #include <ctype.h>
 #include <signal.h>
 
-#include "iosignal.h"
 #include "ntp_stdlib.h"
 #include "ntp_malloc.h"
 #include "ntp_syslog.h"

@@ -22,7 +22,6 @@
 #include "ntp_machine.h"
 #include "ntpd.h"
 #include "ntp_io.h"
-#include "iosignal.h"
 #include "ntp_lists.h"
 #include "ntp_refclock.h"
 #include "ntp_stdlib.h"
@@ -325,6 +324,7 @@ static int		cmp_addr_distance(const sockaddr_u *,
 #if !defined(HAVE_IO_COMPLETION_PORT)
 static inline int	read_network_packet	(SOCKET, struct interface *, l_fp);
 static void		ntpd_addremove_io_fd	(int, int, int);
+typedef void (input_handler_t)(l_fp *);
 static input_handler_t  input_handler;
 #ifdef REFCLOCK
 static inline int	read_refclock_packet	(SOCKET, struct refclockio *, l_fp);
@@ -446,10 +446,6 @@ init_io(void)
 #ifdef SYS_WINNT
 	init_io_completion_port();
 #endif
-
-#if defined(ENABLE_SIGNALED_IO)
-	(void) set_signal(input_handler);
-#endif
 }
 
 
@@ -461,10 +457,6 @@ ntpd_addremove_io_fd(
 	)
 {
 	UNUSED_ARG(is_pipe);
-
-#ifdef ENABLE_SIGNALED_IO
-	init_socket_sig(fd);
-#endif /* not ENABLE_SIGNALED_IO */
 
 	maintain_activefds(fd, remove_it);
 }
@@ -486,9 +478,7 @@ io_open_sockets(void)
 	/*
 	 * Create the sockets
 	 */
-	BLOCKIO();
 	create_sockets(NTP_PORT);
-	UNBLOCKIO();
 
 	init_async_notifications();
 
@@ -1558,9 +1548,7 @@ interface_update(
 	if (disable_dynamic_updates)
 		return;
 
-	BLOCKIO();
 	new_interface_found = update_interfaces(NTP_PORT, receiver, data);
-	UNBLOCKIO();
 
 	if (!new_interface_found)
 		return;
@@ -3064,10 +3052,6 @@ open_socket(
 
 	make_socket_nonblocking(fd);
 
-#ifdef ENABLE_SIGNALED_IO
-	init_socket_sig(fd);
-#endif /* not ENABLE_SIGNALED_IO */
-
 	add_fd_to_list(fd, FD_TYPE_SOCKET);
 
 #ifdef F_GETFL
@@ -3564,12 +3548,11 @@ read_network_packet(
 }
 
 /*
- * attempt to handle io (select()/signaled IO)
+ * attempt to handle io
  */
 void
 io_handler(void)
 {
-#  ifndef ENABLE_SIGNALED_IO
 	fd_set rdfdes;
 	int nfound;
 
@@ -3605,9 +3588,6 @@ io_handler(void)
 		DPRINTF(1, ("select() returned %d: %m\n", nfound));
 	}
 #   endif /* DEBUG */
-#  else /* ENABLE_SIGNALED_IO */
-	wait_for_signal();
-#  endif /* ENABLE_SIGNALED_IO */
 }
 
 /*
@@ -4300,22 +4280,14 @@ io_addclock(
 	struct refclockio *rio
 	)
 {
-	BLOCKIO();
-
 	/*
 	 * Stuff the I/O structure in the list and mark the descriptor
 	 * in use.  There is a harmless (I hope) race condition here.
 	 */
 	rio->active = true;
 
-# ifdef ENABLE_SIGNALED_IO
-	if (init_clock_sig(rio)) {
-		UNBLOCKIO();
-		return false;
-	}
-# elif defined(HAVE_IO_COMPLETION_PORT)
+# if defined(HAVE_IO_COMPLETION_PORT)
 	if (io_completion_port_add_clock_io(rio)) {
-		UNBLOCKIO();
 		return false;
 	}
 # endif
@@ -4330,7 +4302,6 @@ io_addclock(
 	 */
 	add_fd_to_list(rio->fd, FD_TYPE_FILE);
 
-	UNBLOCKIO();
 	return true;
 }
 
@@ -4345,8 +4316,6 @@ io_closeclock(
 {
 	struct refclockio *unlinked;
 
-	BLOCKIO();
-
 	/*
 	 * Remove structure from the list
 	 */
@@ -4360,8 +4329,6 @@ io_closeclock(
 		close_and_delete_fd_from_list(rio->fd);
 	}
 	rio->fd = -1;
-
-	UNBLOCKIO();
 }
 #endif	/* REFCLOCK */
 
@@ -4383,8 +4350,6 @@ kill_asyncio(
 {
 	UNUSED_ARG(startfd);
 
-	BLOCKIO();
-
 	/*
 	 * In the child process we do not maintain activefds and
 	 * maxactivefd.  Zeroing maxactivefd disables code which
@@ -4394,8 +4359,6 @@ kill_asyncio(
 
 	while (fd_list != NULL)
 		close_and_delete_fd_from_list(fd_list->fd);
-
-	UNBLOCKIO();
 }
 #endif	/* !SYS_WINNT */
 
@@ -4754,9 +4717,6 @@ init_async_notifications()
 	}
 #endif
 	make_socket_nonblocking(fd);
-#if defined(ENABLE_SIGNALED_IO)
-	init_socket_sig(fd);
-#endif /* ENABLE_SIGNALED_IO */
 
 	reader = new_asyncio_reader();
 

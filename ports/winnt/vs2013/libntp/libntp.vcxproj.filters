@@ -104,9 +104,6 @@
     <ClCompile Include="..\..\..\..\lib\isc\win32\interfaceiter.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\libntp\iosignal.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\lib\isc\lib.c">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -314,9 +311,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\sys\ioctl.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\iosignal.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\lib_strbuf.h">

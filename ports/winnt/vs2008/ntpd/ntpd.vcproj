@@ -457,10 +457,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\..\include\iosignal.h"
-				>
-			</File>
-			<File
 				RelativePath="..\..\..\..\ntpd\jupiter.h"
 				>
 			</File>
