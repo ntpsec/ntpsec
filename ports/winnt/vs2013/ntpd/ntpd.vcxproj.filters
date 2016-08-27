@@ -290,9 +290,6 @@
     <ClInclude Include="..\..\..\..\lib\isc\include\isc\interfaceiter.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\iosignal.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\..\ntpd\jupiter.h">
       <Filter>Header Files</Filter>
     </ClInclude>

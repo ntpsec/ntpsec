@@ -444,13 +444,6 @@ def cmd_configure(ctx, config):
 	# have it on everywhere.
 	ctx.define("NEED_REUSEADDR_FOR_IFADDRBIND", 1, comment="Whether SO_REUSEADDR is needed to open same sockets on alternate interfaces, required by Linux at least")
 
-	# It should be possible to use asynchronous I/O with notification
-	# by SIGIO on any Unix conformant to POSIX.1-2001. But the code to
-	# do this is untested and there are historical reasons to suspect
-	# it might not work reliably on all platforms.  Enable cautiously
-	# and test carefully.
-	# ctx.define("ENABLE_SIGNALED_IO", 1)
-
         # These are required by the SHA2 code and various refclocks
         if sys.byteorder == "little":
                 pass

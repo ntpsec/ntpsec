@@ -131,16 +131,8 @@ extern	void	sendpkt 	(sockaddr_u *, struct interface *, int, void *, int);
 #ifdef DEBUG
 extern	void	collect_timing  (struct recvbuf *, const char *, int, l_fp *);
 #endif
-#ifdef ENABLE_SIGNALED_IO
-extern	void	wait_for_signal		(void);
-extern	void	unblock_io_and_alarm	(void);
-extern	void	block_io_and_alarm	(void);
-# define	UNBLOCK_IO_AND_ALARM()	unblock_io_and_alarm()
-# define	BLOCK_IO_AND_ALARM()	block_io_and_alarm()
-#else
-# define	UNBLOCK_IO_AND_ALARM()	do {} while (0)
-# define	BLOCK_IO_AND_ALARM()	do {} while (0)
-#endif
+#define	UNBLOCK_IO_AND_ALARM()	do {} while (0)
+#define	BLOCK_IO_AND_ALARM()	do {} while (0)
 #define		latoa(pif)	localaddrtoa(pif)
 extern const char * localaddrtoa(endpt *);
 

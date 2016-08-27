@@ -7,7 +7,6 @@
 #include "ntp_stdlib.h"
 #include "ntp_lists.h"
 #include "recvbuff.h"
-#include "iosignal.h"
 
 
 /*
@@ -227,23 +226,6 @@ get_full_recv_buffer(void)
 	recvbuf_t *	rbuf;
 
 	LOCK();
-	
-#ifdef ENABLE_SIGNALED_IO
-	/*
-	 * make sure there are free buffers when we
-	 * wander off to do lengthy packet processing with
-	 * any buffer we grab from the full list.
-	 * 
-	 * fixes malloc() interrupted by SIGIO risk
-	 * (Bug 889)
-	 */
-	if (NULL == free_recv_list || buffer_shortfall > 0) {
-		/*
-		 * try to get us some more buffers
-		 */
-		create_buffers(RECV_INC);
-	}
-#endif
 
 	/*
 	 * try to grab a full buffer

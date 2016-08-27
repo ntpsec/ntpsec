@@ -392,10 +392,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\..\libntp\iosignal.c"
-				>
-			</File>
-			<File
 				RelativePath="..\..\..\..\lib\isc\lib.c"
 				>
 			</File>
@@ -674,10 +670,6 @@
 			</File>
 			<File
 				RelativePath="..\..\include\sys\ioctl.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\..\..\include\iosignal.h"
 				>
 			</File>
 			<File

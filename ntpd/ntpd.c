@@ -16,7 +16,6 @@
 #include "ntp_intercept.h"
 #include "isc/error.h"
 #include "isc/formatcheck.h"
-#include "iosignal.h"
 
 #include <unistd.h>
 #include <sys/stat.h>
