@@ -846,8 +846,14 @@ ntpdmain(
 #ifdef ENABLE_EARLY_DROPROOT
 	/* drop root privileges */
 	/* This doesn't work on NetBSD or with SHM */
-	if (sandbox(droproot, user, group, chrootdir, interface_interval!=0) && interface_interval) {
+	if (sandbox(droproot, user, group, chrootdir, interface_interval!=0)) {
 		interface_interval = 0;
+		/*
+		 * for now assume that the privilege to bind to privileged ports
+		 * is associated with running with uid 0 - should be refined on
+		 * ports that allow binding to NTP_PORT with uid != 0
+		 */
+		disable_dynamic_updates = true;
 		msyslog(LOG_INFO, "running as non-root disables dynamic interface tracking");
 	}
 #endif

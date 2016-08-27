@@ -170,7 +170,7 @@ bool broadcast_client_enabled;	/* is broadcast client enabled */
 u_int sys_ifnum;			/* next .ifnum to assign */
 int ninterfaces;			/* Total number of interfaces */
 
-int disable_dynamic_updates;		/* scan interfaces once only */
+bool disable_dynamic_updates;	/* if true, scan interfaces once only */
 
 #ifdef REFCLOCK
 /*
