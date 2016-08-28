@@ -121,20 +121,13 @@ Neither is ideal, easy pickings for someone to code on.
   (and multiple inbound NTP connections, and a hole in your firewall) even when
   it has a known-good local timesource like a GPS.  This should be fixed.
 
-* ntpproto.py - a Python library that knows the NTP wire protocol and
-  can be used to generate and interpret packets.  Daniel has speculated
-  about writing this in order to test possible exploits, but there are
-  other uses.  Translate it from the Perl protcol library under scripts/lib.
-
-* Use ntpproto.py to translate the Perl stuff under scripts/ to Python.
-
 * Hal says "We need a way to inspect/debug bits on the wire. `ntpdate
   -du' is the traditional approach."  Hal's straw man is a new program
   rather than trying to make ntpdig do this.  Eric's proposed answer:
-  ntpshark, a command interpreter written around ntpproto.py and
+  ntpshark, a command interpreter written around the ntp Python module and
   loosely modeled on wireshark.
 
-* Replace ntpq with a Python wrapper around ntpproto.py.
+* Replace ntpq with a Python wrapper around the ntp Python module.
 
 * We might be able to eliminate a lot of the Linux runtime
   droproot code by using file capabilities.
@@ -145,9 +138,6 @@ Neither is ideal, easy pickings for someone to code on.
 * There is a mess around the symbols NO_MAIN_ALLOWED, BUILD_AS_LIB, and
   LIBNTP_C that needs to be refactored.  ntpd should *always* be built as
   a library linked to a main module, these guard symbols should go away.
-
-* seccomp sandboxing fails to build under Ubuntu due to some confusion
-  in the Linux headers.  Investigate.
 
 * Use the snprintb in util/ntptime for flag words like flash
   codes and use it systematically to make reports more readable.
@@ -213,14 +203,12 @@ __________
   the old HTML and should be cleaned up.  Requires HTML and CSS
   skills; intern must be willing to learn asciidoc
 
-* seccomp sandboxing fails to build under Ubuntu, apparently due to
-  some confusion in the Linux headers.  Investigate and report.
-  Requires basic C skills.
-
-* All Perl should be translated to Python for maintainability. Look
-  under scripts/. Requires Perl and Python skills.  It is possible
-  some of this is no longer useful - Daniel says some of it is in Perl 4!
+* All remaining Perl (presently ntpwait, calc_tickadj, and ntpsweep)
+  should be translated to Python for maintainability.  Requires Perl
+  and Python skills.
 
 * In scripts/t/ are, apparently, unit tests for the stuff in scripts/.
   Some attempt should be made to salvage these. Requires Perl and
   Python skills.
+
+// end
