@@ -508,17 +508,14 @@ block_thread_signals(
 	sigaddset(&block, SIGALRM);
 	sigaddset(&block, MOREDEBUGSIG);
 	sigaddset(&block, LESSDEBUGSIG);
-# ifdef SIGDIE1
-	sigaddset(&block, SIGDIE1);
+# ifdef SIGINT
+	sigaddset(&block, SIGINT);
+# endif 
+# ifdef SIGQUIT
+	sigaddset(&block, SIGQUIT);
 # endif
-# ifdef SIGDIE2
-	sigaddset(&block, SIGDIE2);
-# endif
-# ifdef SIGDIE3
-	sigaddset(&block, SIGDIE3);
-# endif
-# ifdef SIGDIE4
-	sigaddset(&block, SIGDIE4);
+# ifdef SIGTERM
+	sigaddset(&block, SIGTERM);
 # endif
 # ifdef SIGBUS
 	sigaddset(&block, SIGBUS);

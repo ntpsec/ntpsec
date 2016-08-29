@@ -253,15 +253,6 @@ extern	char *	fstostr(time_t);	/* NTP timescale seconds */
  */
 #define MOREDEBUGSIG	SIGUSR1
 #define LESSDEBUGSIG	SIGUSR2
-/*
- * Signals which terminate us gracefully.
- */
-#ifndef SYS_WINNT
-# define SIGDIE1	SIGINT
-# define SIGDIE2	SIGQUIT
-# define SIGDIE3	SIGTERM
-#endif /* SYS_WINNT */
-
 
 /*
  * Last half: ntpd variables
