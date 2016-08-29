@@ -1035,7 +1035,6 @@ static void mainloop(void)
 					abort();
 				}
 
-				BLOCK_IO_AND_ALARM();
 				freerecvbuf(rbuf);
 				rbuf = get_full_recv_buffer();
 			}
@@ -1090,7 +1089,6 @@ static void mainloop(void)
 # endif /* ENABLE_MDNS_REGISTRATION */
 
 	}
-	UNBLOCK_IO_AND_ALARM();
 }
 
 
