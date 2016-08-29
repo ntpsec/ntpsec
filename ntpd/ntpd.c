@@ -959,7 +959,6 @@ static void mainloop(void)
 		GetReceivedBuffers();
 # else /* normal I/O */
 
-	BLOCK_IO_AND_ALARM();
 	was_alarmed = false;
 
 	for (;;) {
@@ -985,14 +984,12 @@ static void mainloop(void)
 		}
 
 		if (was_alarmed) {
-			UNBLOCK_IO_AND_ALARM();
 			/*
 			 * Out here, signals are unblocked.  Call timer routine
 			 * to process expiry.
 			 */
 			timer();
 			was_alarmed = false;
-			BLOCK_IO_AND_ALARM();
 		}
 
 # endif		/* !HAVE_IO_COMPLETION_PORT */
@@ -1012,7 +1009,6 @@ static void mainloop(void)
 					was_alarmed = true;
 					alarm_flag = false;
 				}
-				UNBLOCK_IO_AND_ALARM();
 
 				if (was_alarmed) {
 					/* avoid timer starvation during lengthy I/O handling */
