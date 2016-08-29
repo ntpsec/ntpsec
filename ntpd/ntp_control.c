@@ -4484,7 +4484,7 @@ report_event(
 		uint8_t		errlast;
 
 		errlast = (uint8_t)err & ~PEER_EVENT;
-		if (peer->last_event == errlast)
+		if (peer->last_event != errlast)
 			peer->num_events = 0;
 		if (peer->num_events >= CTL_PEER_MAXEVENTS)
 			return;
