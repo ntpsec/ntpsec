@@ -1,120 +1,197 @@
-#!/usr/bin/env perl
-
-package ntp_wait;
-use 5.006_000;
-use strict;
-use warnings;
-use NTP::Util qw(ntp_read_vars);
-use Getopt::Long qw(GetOptionsFromArray);
-Getopt::Long::Configure(qw(no_auto_abbrev no_ignore_case_always));
-
-my $usage;
-
-sub usage {
-    my ($ret) = @_;
-    print STDERR $usage;
-    exit $ret;
-}
-
-sub paged_usage {
-    my ($ret) = @_;
-    my $pager = $ENV{PAGER} || '(less || more)';
-
-    open STDOUT, "| $pager" or die "Can't fork a pager: $!";
-    print $usage;
-
-    exit $ret;
-}
-
-sub processOptions {
-    my $args = shift;
-
-    my $opts = {
-        'tries' => '100',
-        'sleep' => '6',
-        'verbose' => '',
-        'help' => '', 'more-help' => ''
-    };
-    my $argument = '';
-    my $ret = GetOptionsFromArray($args, $opts, (
-        'tries|n=i', 'sleep|s=i', 'verbose|v',
-        'help|?', 'more-help'));
-
-    $usage = <<'USAGE';
+#!/usr/bin/env python
+"""\
 ntpwait - Wait for ntpd to stabilize the system clock.
-USAGE: ntpwait [ -<flag> [<val>] | --<name>[{=| }<val>] ]...
+USAGE: ntpwait [-n tries] [-s sleeptime] [-v] [-h]
 
     -n, --tries=num              Number of times to check ntpd
     -s, --sleep=num              How long to sleep between tries
     -v, --verbose                Be verbose
-    -?, --help                   Display usage information and exit
-        --more-help              Pass the extended usage text through a pager
+    -h, --help                   Issue help
 
 Options are specified by doubled hyphens and their name or by a single
 hyphen and the flag character.
-USAGE
 
-    usage(0)       if $opts->{'help'};
-    paged_usage(0) if $opts->{'more-help'};
-    $_[0] = $opts;
-    return $ret;
-}
+A spurious 'not running' message can result from queries being disabled.
+"""
+#SPDX-License-Identifier: BSD-2-Clause
+from __future__ import print_function, division
 
-exit run(@ARGV) unless caller;
+import os, sys, getopt, re, time
+from ntp.packet import *
 
-sub run {
-    my $opts;
-    if (!processOptions(\@_, $opts)) {
-        usage(1);
-    };
+# General notes on Python 2/3 compatibility:
+#
+# This code uses the following strategy to allow it to run on both Python 2
+# and Python 3:
+#
+# - Use binary I/O to read/write data from/to files and subprocesses;
+#   where the exact bytes are important (such as in checking for
+#   modified files), use the binary data directly
+#
+# - Use latin-1 encoding to transform binary data to/from Unicode when
+#   necessary for operations where Python 3 expects Unicode; the
+#   polystr and polybytes functions are used to do this so that
+#   when running on Python 2, the byte string data is used unchanged;
+#   also, the make_wrapper function constructs a text stream that can
+#   wrap a file opened in binary mode for cases where a file object
+#   that can be passed around from function to function is needed
+#
+# - Construct custom stdin, stdout, and stderr streams when running
+#   on Python 3 that force latin-1 encoding, and wrap them around the
+#   underlying binary buffers (in Python 2, the streams are binary
+#   and are used unchanged); this ensures that the same transformation
+#   is done on data from/to the standard streams, as is done on binary
+#   data from/to files and subprocesses; the make_std_wrapper function
+#   does this
 
-    my $tries   = $opts->{tries};	# How many tries before we give up? (10 min+)
-    my $sleep   = $opts->{sleep};	# Seconds to sleep between tries (6s = 10/min)
-    my $verbose = $opts->{verbose};	# Be verbose?
+master_encoding = 'latin-1'
+
+if str is bytes:  # Python 2
+    polystr = str
+    polybytes = bytes
+
+    def string_escape(s):
+        return s.decode('string_escape')
+
+    def make_wrapper(fp):
+        return fp
+
+else:  # Python 3
+
+    def polystr(o):
+        "Polymorphic string factory function"
+        if isinstance(o, str):
+            return o
+        if not isinstance(o, bytes):
+            return str(o)
+        return str(o, encoding=master_encoding)
+
+    def polybytes(s):
+        "Polymorphic string encoding function"
+        if isinstance(s, bytes):
+            return s
+        if not isinstance(s, str):
+            return bytes(s)
+        return bytes(s, encoding=master_encoding)
+
+    def string_escape(s):
+        "Polymorphic string_escape/unicode_escape"
+        # This hack is necessary because Unicode strings in Python 3 don't
+        # have a decode method, so there's no simple way to ask it for the
+        # equivalent of decode('string_escape') in Python 2. This function
+        # assumes that it will be called with a Python 3 'str' instance
+        return s.encode(master_encoding).decode('unicode_escape')
+
+    def make_wrapper(fp):
+        "Wrapper factory function to enforce master encoding"
+        # This can be used to wrap normally binary streams for API
+        # compatibility with functions that need a text stream in
+        # Python 3; it ensures that the binary bytes are decoded using
+        # the master encoding we use to turn bytes to Unicode in
+        # polystr above
+        # newline="\n" ensures that Python 3 won't mangle line breaks
+        return io.TextIOWrapper(fp, encoding=master_encoding, newline="\n")
+
+    def make_std_wrapper(stream):
+        "Standard input/output wrapper factory function"
+        # This ensures that the encoding of standard output and standard
+        # error on Python 3 matches the master encoding we use to turn
+        # bytes to Unicode in polystr above
+        # line_buffering=True ensures that interactive command sessions work as expected
+        return io.TextIOWrapper(stream.buffer, encoding=master_encoding, newline="\n", line_buffering=True)
+
+    sys.stdin = make_std_wrapper(sys.stdin)
+    sys.stdout = make_std_wrapper(sys.stdout)
+    sys.stderr = make_std_wrapper(sys.stderr)
+
+class Unbuffered(object):
+   def __init__(self, stream):
+       self.stream = stream
+   def write(self, data):
+       self.stream.write(data)
+       self.stream.flush()
+   def __getattr__(self, attr):
+       return getattr(self.stream, attr)
+
+if __name__ == "__main__":
+    try:
+        (options, arguments) = getopt.getopt(sys.argv[1:], "hn:s:v", [
+            "tries=", "sleep=", "verbose", "help"
+            ])
+    except getopt.GetoptError as err:
+        sys.stderr.write(str(err) + "\n")
+        raise SystemExit(2)
+    tries = 100
+    sleep = 6
+    verbose = 0
+    help = False
+    for (switch, val) in options:
+        if switch in ("-n", "--tries"):
+            tries = int(val)
+        elif switch in ("-s", "--sleep"):
+            sleep = int(val)
+        elif switch in ("-v", "--verbose"):
+            verbose += 1
+        elif switch in ("-h", "--help"):
+            sys.stdout.write(__doc__)
+            raise SystemExit(0)
 
     # Autoflush stdout
-    $| = 1;
+    sys.stdout = Unbuffered(sys.stdout)
 
-    print "Waiting for ntpd to synchronize...  " if $verbose;
+    if verbose:
+        sys.stdout.write("Waiting for ntpd to synchronize...  ")
 
-    for my $i (1 .. $tries) {
-        my $info = ntp_read_vars(0, []);
+    for i in range(1, tries):
+        session = ntpq_session()
+        #session.debug = 4
+        if not session.openhost("localhost"):
+            if verbose:
+                sys.stdout.write("\bntpd is not running!\n")
+            continue
 
-        if (!defined $info) {
-            print "\bntpd is not running!\n" if $verbose;
-            return 1;
-        }
+        try:
+            msg = session.doquery(2)	# Request system variables
+        except socket.error:
+            if verbose:
+                sys.stdout.write("\b" + "*+:."[i % 4])
+            time.sleep(sleep)
+            continue
 
-        if (!exists $info->{status_line}{leap}) {
-            print "\bLeap status not avalaible\n";
-            return 1;
-        }
+        if verbose >= 2:
+            sys.stderr.write(repr(session.response) + "\n")
 
-        my $leap   = $info->{status_line}{leap};
-        my $sync   = $info->{status_line}{sync};
+        if msg and msg.startswith("***"):
+            if verbose:
+                sys.stdout.write("\b" + msg + "\n")
+            sys.exit(1)
 
-        if ($leap =~ /(sync|leap)_alarm/) {
-            print "\b".(substr "*+:.", $i % 4, 1) if $verbose;
-            sleep $sleep if $i < $tries;
-            next;
-        }
+        m = re.search(r"leap=([^,]*),", session.response)
+        if m:
+            leap = int(m.group(1))
+        else:
+            sys.stdout.write("\bLeap status not available\n")
+            sys.exit(1)
 
-        if ($leap =~ /leap_(none|((add|del)_sec))/) {
-            # We could check $sync here to make sure we like the source...
-            print "\bOK!\n" if $verbose;
-            return 0;
-        }
+        if leap == LEAP_NOTINSYNC:
+            if verbose:
+                sys.stdout.write("\b" + "*+:."[i % 4])
+            if i < tries:
+                time.sleep(sleep)
+            continue
 
-        print "\bUnexpected 'leap' status <$leap>\n";
-        return 1;
-    }
+        if leap in (LEAP_NOWARNING, LEAP_ADDSECOND, LEAP_DELSECOND):
+            # We could check "sync" here to make sure we like the source...
+            if verbose:
+                sys.stdout.write("\bOK!\n")
+            sys.exit(0)
 
-    print "\bNo!\nntpd did not synchronize.\n" if $verbose;
-    return 1;
-}
+        sys.stdout.write("\bUnexpected 'leap' status <%s>\n" % leap)
+        sys.exit(1)
 
-END { close STDOUT };
+    if verbose:
+        sys.stdout.write("\bNo!\nntpd did not synchronize.\n")
+    sys.exit(1)
 
+# end
 
-1;
-__END__
