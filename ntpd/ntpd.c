@@ -37,7 +37,7 @@ extern bool sandbox(const bool droproot,
 		    const char *chrootdir,
 		    bool want_dynamic_interface_tracking);
 
-#if defined(SIGDIE1)
+#if defined(SIGINT) || defined(SIGQUIT) || defined(SIGTERM)
 static volatile bool signalled	= false;
 static volatile int signo	= 0;
 /* In an ideal world, 'finish_safe()' would declared as noreturn... */
@@ -704,10 +704,14 @@ ntpdmain(
 	/*
 	 * Set up signals we pay attention to locally.
 	 */
-# ifdef SIGDIE1
-	signal_no_reset(SIGDIE1, finish);
-	signal_no_reset(SIGDIE2, finish);
-	signal_no_reset(SIGDIE3, finish);
+# ifdef SIGINT
+	signal_no_reset(SIGINT, finish);
+# endif
+# ifdef SIGQUIT
+	signal_no_reset(SIGQUIT, finish);
+# endif
+# ifdef SIGTERM
+	signal_no_reset(SIGTERM, finish);
 # endif
 # ifdef SIGHUP
 	signal_no_reset(SIGHUP, catchHUP);
@@ -952,7 +956,7 @@ static void mainloop(void)
 
 # ifdef HAVE_IO_COMPLETION_PORT
 	for (;;) {
-#if defined(SIGDIE1)
+#if defined(SIGINT) || defined(SIGQUIT) || defined(SIGTERM)
 		if (signalled)
 			finish_safe(signo);
 #endif
@@ -962,7 +966,7 @@ static void mainloop(void)
 	was_alarmed = false;
 
 	for (;;) {
-#if defined(SIGDIE1)
+#if defined(SIGINT) || defined(SIGQUIT) || defined(SIGTERM)
 		if (signalled)
 			finish_safe(signo);
 #endif
@@ -1092,7 +1096,7 @@ static void mainloop(void)
 }
 
 
-#if defined(SIGDIE1)
+#if defined(SIGINT) || defined(SIGQUIT) || defined(SIGTERM)
 /*
  * finish - exit gracefully
  */
@@ -1135,7 +1139,7 @@ static void catchHUP(int sig)
 	sawHUP = true;
 }
 
-#endif	/* SIGDIE1 */
+#endif	/* defined(SIGINT) || defined(SIGQUIT) || defined(SIGTERM) */
 
 
 /*
