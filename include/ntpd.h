@@ -131,8 +131,6 @@ extern	void	sendpkt 	(sockaddr_u *, struct interface *, int, void *, int);
 #ifdef DEBUG
 extern	void	collect_timing  (struct recvbuf *, const char *, int, l_fp *);
 #endif
-#define	UNBLOCK_IO_AND_ALARM()	do {} while (0)
-#define	BLOCK_IO_AND_ALARM()	do {} while (0)
 #define		latoa(pif)	localaddrtoa(pif)
 extern const char * localaddrtoa(endpt *);
 
