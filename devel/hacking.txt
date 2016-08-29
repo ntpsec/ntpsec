@@ -12,6 +12,9 @@ documented here.
 
 == General notes ==
 
+If you want to learn more about the code internals, find tour.txt.
+This document is about development practices and project conventions.
+
 === Build system ===
 
 The build uses waf, replacing a huge ancient autoconf hairball that

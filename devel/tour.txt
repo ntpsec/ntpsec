@@ -170,4 +170,50 @@ when a specific event occurs on a file descriptor or after a timeout
 has been reached.  Other NTP programs, notably ntpd and ntpq, could
 use it, but would require serious rewrites to do so.
 
+== Asynchronous DNS lookup ==
+
+There are great many complications in the code that arise from wanting
+to avoid stalling the main loop while it waits for a DNS lookup to
+return. And DNS lookups can take a *long* time.  Hal Murray notes that
+he thinks he's seen 40 seconds on a failing case.
+
+One reason for the complications is that the async-DNS support seems
+somewhat overengineered.  Whoever built it was thinking in terms of a
+general async-worker facility and implemented things that this use
+of it probably doesn't need - notably an input-buffer pool.
+
+This code is a candidate to be replaced by an async-DNS library such
+as cAres. One attempt at this has been made, but abandoned because
+the async-worker interface to the rest of the code is pretty gnarly.
+
+The DNS lookups during initialization - of hostnames specified on the
+coomand line of ntp.conf - could be done synchronously.  But there are
+two cases we know of where ntpd has to do a DNS lookup after its
+main loop gets started.
+
+One is the try again when DNS for the normal server case doesn't work during
+initialization.  It will try again occasionally until it gets an answer.
+(which might be negative)
+
+The main one is the pool code trying for a new server.  There are
+several possible extensions in this area.  The main one would be to verify that
+a server you are using is still in the pool.  (There isn't a way to do
+that yet - the pool doesn't have any DNS support for that.)  The other
+would be to try replacing the poorest server rather than only
+replacing dead servers.
+
+As long as we get packet receive timestamps from the OS, synchronous
+DNS delays probably won't introduce any lies on the normal path.  We
+could test that by putting a sleep in the main loop.  (There is a
+filter to reject packets that take too long, but Hal thinks that's
+time-in-flight and excludes time sitting on the server.)
+
+There are two known cases where a pause in ntpd would cause troubles.
+One is that it would mess up refclocks.  The other is that packets
+will get dropped if too many of them arrive during the stall.
+
+This probably means we could go synchronous-only and use the pool
+command on a system without refclocks.  That covers end nodes and
+maybe lightly loaded servers.
+
 // end
