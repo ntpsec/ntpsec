@@ -6,7 +6,7 @@
 
 * Document build files.
 
-* Cleanup and separate features in pylib/*
+* Cleanup and separate features in wafhelpers/*
 
 * Add 'snapshot' feature to dump config status into a JSON file for collecting
   build + platform information
@@ -203,9 +203,9 @@ __________
   the old HTML and should be cleaned up.  Requires HTML and CSS
   skills; intern must be willing to learn asciidoc
 
-* All remaining Perl (presently ntpwait, calc_tickadj, and ntpsweep)
-  should be translated to Python for maintainability.  Requires Perl
-  and Python skills.
+* All remaining Perl (presently ntpleapfetch, calc_tickadj and
+  ntpsweep) should be translated to Python for maintainability.
+  Requires Perl and Python skills.
 
 * In scripts/t/ are, apparently, unit tests for the stuff in scripts/.
   Some attempt should be made to salvage these. Requires Perl and

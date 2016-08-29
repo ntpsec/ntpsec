@@ -59,6 +59,11 @@ NERR_NORESOURCE	= NERR_PERMISSION	# wish there was a different code
 PEERVARS  = CTL_OP_READVAR
 #CLOCKVARS = CTL_OP_CLOCKVAR
 
+LEAP_NOWARNING	= 0x0	# leap_none: normal, no leap second warning
+LEAP_ADDSECOND	= 0x1	# leap_add_sec: last minute of day has 61 seconds
+LEAP_DELSECOND	= 0x2	# leap_del_sec: last minute of day has 59 seconds
+LEAP_NOTINSYNC	= 0x3	# leap_alarm: overload, clock is free running
+
 NTP_OLDVERSION	= 1	# C code said "oldest credible version"
 NTP_VERSION	= 4	# Current version
 
@@ -257,7 +262,7 @@ class ntpq_session:
         except AttributeError:
             sys.stderr.write("ntpq: API error, missing socket attributes\n")
         return None
-    def openhost(self, hname, fam):
+    def openhost(self, hname, fam=socket.AF_UNSPEC):
         "openhost - open a socket to a host"
         res = self.__lookuphost(hname, fam)
         if res is None:
@@ -468,13 +473,13 @@ class ntpq_session:
                     if fragments[f-1].endpoint() != fragments[f].offset:
                         break
                 else:
-                    warn("%d packets reassembled\n" % len(fragments))
+                    #warn("%d packets reassembled\n" % len(fragments))
                     self.response = "".join([frag.data for frag in fragments])
                     if self.debug >= 4:
                         sys.stdout.write("Response packet:\n")
                         dump_hex_printable(self.response)
                     return None
-    def doquery(self, opcode, associd, qdata, auth=False, quiet=False):
+    def doquery(self, opcode, associd=0, qdata="", auth=False, quiet=False):
         "send a request and save the response"
         if not self.havehost():
             return SERR_NOHOST
