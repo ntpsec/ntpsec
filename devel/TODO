@@ -51,9 +51,6 @@
   on at least one platform and test the NMEA, Atom, and SHM drivers
   on most platforms.
 
-* The script tests in scripts/t should be investigated, perhaps
-  they are salvageable.
-
 === Documentation ===
 
 * Short doc on how to tell your ntpd is running correctly.
@@ -207,7 +204,7 @@ __________
   ntpsweep) should be translated to Python for maintainability.
   Requires Perl and Python skills.
 
-* In scripts/t/ are, apparently, unit tests for the stuff in scripts/.
+* In tests/perl are, apparently, unit tests for old Perl code.
   Some attempt should be made to salvage these. Requires Perl and
   Python skills.
 
