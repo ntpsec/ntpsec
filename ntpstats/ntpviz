@@ -276,9 +276,9 @@ plot \\%(percentages)s
         plot_template += plot_data
         return plot_template
     def peer_offsets_gnuplot(self, peerlist=None):
-        return self.peerstats_gnuplot(peerlist, 4, "Peer clock offset", "offset")
+        return self.peerstats_gnuplot(peerlist, 4, "Peer Clock Offset", "offset")
     def peer_jitters_gnuplot(self, peerlist=None):
-        return self.peerstats_gnuplot(peerlist, 7, "Peer clock jitter", "jitter")
+        return self.peerstats_gnuplot(peerlist, 7, "Peer Clock Jitter", "jitter")
     def peer_rtt_gnuplot(self, host):
         "Plot offset with rtt bounds for specified host."
         sitename = self.sitename
