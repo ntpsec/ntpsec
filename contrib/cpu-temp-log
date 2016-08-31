@@ -3,8 +3,9 @@
 """\
 Usage: cpu-temper-log
 
-Reads 'sensors -u' for temperature data.  Writes all temperatures
-found to stdout on one line, preceeded by the unix UTC time in seconds.
+Reads 'sensors -u' for temperature data.  Writes all temperatures found
+to stdout.  One temp per line, preceeded by the unix UTC time in seconds,
+and an identifier.
 
 Before you can use this utility lm_sensors must be installed and
 configured.  See their documentation for that procedure.
@@ -14,45 +15,46 @@ on your lm_sensors configuration and your motherboard.
 
 Sample log from an Supermicro Quad Core Xeon:
 
-1471573103 LM 37.000 35.000 31.000 31.000 30.000
-1471573104 LM 37.000 35.000 30.000 31.000 29.000
-1471573105 LM 37.000 35.000 30.000 31.000 29.000
+1471573103 LM0 37.000
+1471573103 LM1 35.000
+1471573103 LM2 31.000
+1471573103 LM3 31.000
+1471573103 LM4 30.000
+1471573104 LM0 37.000
 
-Field 1: unix UTC time in seconds
+Field 1: unix time in seconds since the star of the epoch
 Field 2: Log source (LM)
-Field 3: North Bridge temperature in degrees C
-Field 4: CPU0 temperature in degrees C
-Field 5: CPU1 temperature in degrees C
-Field 6: CPU2 temperature in degrees C
-Field 7: CPU3 temperature in degrees C
+Field 3: temperature in degrees C
 
 Sample crontab usage:
 
 # take and log cpu temp every 5 mins
 */5 * * * * /usr/local/sbin/cpu-temp-log >> /var/log/ntpstats/cputemp
 
-This file is only useful as a template.  The way to read your system
+This file may only be useful as a template.  The way to read your system
 temperatures will be hardware specific.
 
 """
 
 
-import sys,  re, time, subprocess
+import sys, re, time, subprocess
 
 output = subprocess.check_output(["sensors", "-u"], universal_newlines=True)
 
 lines = output.split( '\n' )
 
+# this regex matches temperature output lines from 'sensors -u'
 pat = re.compile('^\s+temp\d+_input:\s+([\d\.]+).*$')
 
 now = int(time.time())
-sys.stdout.write( str(now) + ' LM')
 
 #lines = sys.stdin.readlines()
 line = ''
+index = 0
 for line in lines:
     match = pat.match( line )
     if match and match.group(1):
-        sys.stdout.write(' ' + match.group(1))
+        temp = match.group(1)
+        sys.stdout.write( '%d LM%d %s\n' % (now, index, temp))
+        index += 1
 
-sys.stdout.write( '\n' )
