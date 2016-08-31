@@ -99,6 +99,7 @@ plot \
         sitename = self.sitename
         tempsmap = self.tempssplit()
         tempslist = list(tempsmap.keys())
+        tempslist.sort()
 
         if not len( tempsmap) or not len( tempslist):
             sys.stderr.write("ntpviz: WARNING: no temps to graph\n")
