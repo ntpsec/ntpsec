@@ -632,9 +632,10 @@ and response and offset all went in the same direction).<p>
 <style>
 dt {
     font-weight: bold;
+    margin-left: 20px;
 }
 dd {
-    margin-bottom: 4px;
+    margin-top: 4px;
     margin-bottom: 10px;
 }
 </style>
