@@ -1,0 +1,57 @@
+#!/usr/bin/env python
+# coding: utf-8
+"""\
+Usage: smartctl-temper-log [device]
+
+Reads 'smartctl -a device' for temperature data.  If a device is not
+sepecified on the commline line then /dev/sda is used.  Writes the
+temperature found to stdout.  Each line contains the unix time in
+seconds since the epoch, the identifier, and the temperature in Celcius.
+
+Before you can use this utility smartctl must be installed and
+configured.  See their documentation for that procedure.
+
+Not all hard drives support SMART, and not all of them are supported by
+smartctl or even output temperature data.
+
+Sample log from a typical hard disk.
+
+1471573103 SMART 37.000
+
+Field 1: unix time in seconds since the star of the epoch
+Field 2: Log source (SMART)
+Field 3: temperature in degrees C
+
+Sample crontab usage:
+
+# take and log disk temp every 5 mins
+*/5 * * * * /usr/local/sbin/smart-temp-log >> /var/log/ntpstats/temps
+
+This file may only be useful as a template.  The way to read your disk
+temperatures will be hardware specific.
+
+"""
+
+
+import sys, re, time, subprocess
+
+device = '/dev/sda'
+output = subprocess.check_output(["smartctl", "-a", device], \
+    universal_newlines=True)
+
+lines = output.split( '\n' )
+
+# this regex matches temperature output lines from 'sensors -u'
+pat = re.compile('^\s+Temperature_Celsius\s+\S+\s+([\d\.]+).*$')
+pat = re.compile('^.+Temperature_Celsius\s+\S+\s+(\d+)\s+')
+
+now = int(time.time())
+
+#lines = sys.stdin.readlines()
+line = ''
+for line in lines:
+    match = pat.match( line )
+    if match and match.group(1):
+        temp = match.group(1)
+        sys.stdout.write( '%d SMART %s\n' % (now, temp))
+

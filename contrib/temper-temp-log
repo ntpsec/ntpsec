@@ -24,7 +24,7 @@ Field 3: CPU temperature in degrees C
 Sample crontab usage:
 
 # take and log cpu temp every 5 mins
-*/5 * * * * /usr/local/sbin/temper-temp-log >> /var/log/ntpstats/cputemp
+*/5 * * * * /usr/local/sbin/temper-temp-log >> /var/log/ntpstats/temps
 
 """
 
