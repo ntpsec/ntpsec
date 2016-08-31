@@ -11,9 +11,6 @@ seconds since the epoch, the identifier, and the temperature in Celcius.
 Before you can use this utility smartctl must be installed and
 configured.  See their documentation for that procedure.
 
-Not all hard drives support SMART, and not all of them are supported by
-smartctl or even output temperature data.
-
 Sample log from a typical hard disk.
 
 1471573103 SMART 37.000
@@ -27,23 +24,37 @@ Sample crontab usage:
 # take and log disk temp every 5 mins
 */5 * * * * /usr/local/sbin/smart-temp-log >> /var/log/ntpstats/temps
 
+Not all hard drives support SMART.
+Not all of SMART drives are supported by smartctl.
+Not all smartctl compatible drives report temperature.
+Not all reported temperatures are valid.
+
 This file may only be useful as a template.  The way to read your disk
 temperatures will be hardware specific.
 
 """
 
 
-import sys, re, time, subprocess
+import re, subprocess, sys, time
 
+# check for device on command line, otherwise use /dev/sda
 device = '/dev/sda'
-output = subprocess.check_output(["smartctl", "-a", device], \
-    universal_newlines=True)
+if 1 < len(sys.argv):
+    # process device
+    device = sys.argv[1]
+
+try:
+    output = subprocess.check_output(["smartctl", "-a", device], \
+        universal_newlines=True)
+except :
+    sys.stderr.write("ERROR: 'smartctl -a %s' failed\n" % device)
+    raise SystemExit(2)
+
 
 lines = output.split( '\n' )
 
 # this regex matches temperature output lines from 'sensors -u'
-pat = re.compile('^\s+Temperature_Celsius\s+\S+\s+([\d\.]+).*$')
-pat = re.compile('^.+Temperature_Celsius\s+\S+\s+(\d+)\s+')
+pat = re.compile('194 Temperature_Celsius\s+\S+\s+(\d+)\s+')
 
 now = int(time.time())
 
