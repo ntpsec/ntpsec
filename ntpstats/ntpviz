@@ -95,25 +95,40 @@ plot \
         return plot_template.replace('@', '%') + self.dump("loopstats") + "e\n" + self.dump("loopstats")
 
     def local_temps_gnuplot(self):
-        "Generate GNUPLOT code graphing local cpu temp statistics"
+        "Generate GNUPLOT code graphing local temperature statistics"
         sitename = self.sitename
         tempsmap = self.tempssplit()
         tempslist = list(tempsmap.keys())
 
-        lines = [line + '\n' for line in getattr(self, "temps")]
-        if not len( lines):
+        if not len( tempsmap) or not len( tempslist):
             sys.stderr.write("ntpviz: WARNING: no temps to graph\n")
             return ''
+
+        temps_data = ()
+        plot_data = ""
+        for key in tempslist:
+            plot_data += "\n".join(tempsmap[key]) + "\ne\n"
+        # remove trailing "e\n"
+        plot_data = plot_data[:-2]
+
 
         plot_template = NTPViz.Common + """\
 set title "%(sitename)s: Local Temps"
 set ytics format "@1.1f °C" nomirror textcolor rgb '#0060ad'
 set style line 1 lc rgb '#0060ad' lt 1 lw 1 pt 7 ps 0   # --- blue
-plot \
- "-" using 1:3 title "Temps" with linespoints ls 1
+plot \\
 """ % locals()
-        return plot_template.replace('@', '%')  \
-            + "".join(lines)
+
+        plot_template = plot_template.replace("@", "%")
+
+        for key in tempslist:
+            plot_template += "'-' using 1:3 title '%(key)s' with line, \\\n" \
+                 % locals()
+
+        # strip the trailing ", \n"
+        plot_template = plot_template[:-4] + "\n"
+        plot_template += plot_data
+        return plot_template
 
     def local_error_gnuplot(self):
         "Plot the local clock frequency error."
@@ -274,7 +289,7 @@ plot \\%(percentages)s
                  % (fld, multiplier, self.ip_label(key))
 
 
-        # strip the trailing ", \\n"
+        # strip the trailing ", \n"
         plot_template = plot_template[:-4] + "\n"
         plot_template += plot_data
         return plot_template
@@ -592,8 +607,10 @@ how fast the local clock offset is changing.</p>
 <p>Lower is better.  An ideal system would be a straight line at 0μs.</p>
 """,
         "local-temps": """\
-<p>Ambient temperature - changes the clock crystal frequency, it
-oscillates faster when warmer. This the single most important
+<p>Local temperatures.  These will be site specific depending on what
+temperature sensors you have and collect data from.  Temperature
+changes change the local clock crystal frequency and stability.  Crystals
+oscillate faster when warmer. This the single most important
 component of frequency drift.</p>
 """,
         "peer-offsets": """\
