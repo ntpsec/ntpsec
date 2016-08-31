@@ -24,6 +24,9 @@ Sample crontab usage:
 # take and log disk temp every 5 mins
 */5 * * * * /usr/local/sbin/smart-temp-log >> /var/log/ntpstats/temps
 
+Note, many distributions put smartctl in /usr/sbin, and do not
+put /usr/sbin in the PATH of programs executed by crontab.
+
 Not all hard drives support SMART.
 Not all of SMART drives are supported by smartctl.
 Not all smartctl compatible drives report temperature.
