@@ -45,9 +45,13 @@ if 1 < len(sys.argv):
 
 try:
     output = subprocess.check_output(["smartctl", "-a", device], \
+        stderr=subprocess.STDOUT, \
         universal_newlines=True)
-except :
-    sys.stderr.write("ERROR: 'smartctl -a %s' failed\n" % device)
+
+except subprocess.CalledProcessError, e:
+    sys.stderr.write( "ERROR: 'smartctl -a %s' failed\n" % device)
+    sys.stderr.write( e.output )
+    sys.stderr.write( "Return code: %s\n" % e.returncode )
     raise SystemExit(2)
 
 
