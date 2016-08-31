@@ -8,11 +8,13 @@
 {ntpviz} [-d statsdir] [-g] [-n name] [-p period]
          [-s starttime] [-e endtime]
          [--local-offset | --local-error | --local-jitter | --local-stability]
+	 [ --all-peer-jitters
+	   | --all-peer-offsets
 	   | --local-offset-histogram
-           | --peer-offsets=hosts | --all-peer-offsets
-           | --peer-jitters=hosts | --all-peer-jitters
-	   | --peer=rtt-host=hostname
-	   | --local-offset-multiplot]
+	   | --local-offset-multiplot
+           | --peer-jitters=hosts 
+           | --peer-offsets=hosts 
+	   | --peer=rtt-host=hostname]
 	 [-o outdir]
 	 [-D N] [-N]
 
@@ -52,9 +54,15 @@ rendered PNG.
 
 The following plots are available:
 
---local-offset::
-   Clock time and clock frequency offsets from the loop statistics
-   (fields 3 and 4).
+--all-peer-jitters::
+   Report all peer jitters.  This is a different option name from
+   --peer-offsets only because of a limitation in the Python
+   standard library.
+
+--all-peer-offsets::
+   Report all peer offsets.  This is a different option name from
+   --peer-offsets only because of a minor limitation in the Python
+   standard library.
 
 --local-error::
    Clock frequency offset from the loop statistics (field 4)
@@ -62,40 +70,34 @@ The following plots are available:
 --local-jitter::
    Clock time-jitter plot from the loop statistics (field 5).
 
---local-stability::
-   RMS frequency-jitter plot from the loop statistics (field 6).
-   This is deviation from a root-mean-square extrapolation of the
-   moving average of past frequency readings.
+--local-offset::
+   Clock time and clock frequency offsets from the loop statistics
+   (fields 3 and 4).
 
 --local-offset-histogram::
    Frequency histogram of distinct loopstats time offset values (field 3).
 
---peer-offsets=host1[,host2...]::
-   Peer offset from local clock time from peerstats (field 4). A
-   comma-separated list of peer names or IP addresses must follow. It
-   is a fatal error for any of these names not to appear in peerstats.
+--local-offset-multiplot::
+   Plot comparative local offsets for multiple directories.
 
---all-peer-offsets::
-   Report all peer offsets.  This is a different option name from
-   --peer-offsets only because of a minor limitation in the Python
-   standard library.
+--local-stability::
+   RMS frequency-jitter plot from the loop statistics (field 6).
+   This is deviation from a root-mean-square extrapolation of the
+   moving average of past frequency readings.
 
 --peer-jitter=host1[,host2...]::
    Peer jitter from local clock time, from peerstats (field 7)
    A comma-separated list of peer names must follow. It is a fatal
    error for any of these names not to appear in peerstats.
 
---all-peer-jitters::
-   Report all peer jitters.  This is a different option name from
-   --peer-offsets only because of a limitation in the Python
-   standard library.
+--peer-offsets=host1[,host2...]::
+   Peer offset from local clock time from peerstats (field 4). A
+   comma-separated list of peer names or IP addresses must follow. It
+   is a fatal error for any of these names not to appear in peerstats.
 
 --peer-rtt=host::
    Show offset plus or minus round-trip-time (rtt) of a specified
    peer. This graph combines fields 4 and 5 of loopstats.
-
---local-offset-multiplot::
-   Plot comparative local offsets for multiple directories.
 
 If no individual plot is specified, all plots and an index HTML page
 are generated into a new output directory.  Normally this directory is
