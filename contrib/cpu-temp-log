@@ -29,7 +29,7 @@ Field 3: temperature in degrees C
 Sample crontab usage:
 
 # take and log cpu temp every 5 mins
-*/5 * * * * /usr/local/sbin/cpu-temp-log >> /var/log/ntpstats/cputemp
+*/5 * * * * /usr/local/sbin/cpu-temp-log >> /var/log/ntpstats/temps
 
 This file may only be useful as a template.  The way to read your system
 temperatures will be hardware specific.

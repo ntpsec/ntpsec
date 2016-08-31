@@ -23,7 +23,7 @@ Field 3: CPU Temerature
 Sample crontab usage:
 
 # take and log cpu temp every 5 mins
-*/5 * * * * /usr/local/sbin/pi-temp-log >> /var/log/ntpstats/cputemp
+*/5 * * * * /usr/local/sbin/pi-temp-log >> /var/log/ntpstats/temps
 
 This ONLY works on a Raspberry Pi.  Maybe not all of them.  The way
 to read your system temperatures will be hardware specific.
