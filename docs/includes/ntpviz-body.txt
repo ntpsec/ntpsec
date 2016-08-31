@@ -12,6 +12,7 @@
 	   | --all-peer-offsets
 	   | --local-offset-histogram
 	   | --local-offset-multiplot
+	   | --local-temps
            | --peer-jitters=hosts 
            | --peer-offsets=hosts 
 	   | --peer=rtt-host=hostname]
@@ -79,6 +80,10 @@ The following plots are available:
 
 --local-offset-multiplot::
    Plot comparative local offsets for multiple directories.
+
+--local-temps::
+   Plot comparative local temperatures.  This plot is only generated if
+   there is a log file named temps in the log file directory.
 
 --local-stability::
    RMS frequency-jitter plot from the loop statistics (field 6).
