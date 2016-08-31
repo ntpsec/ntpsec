@@ -9,7 +9,7 @@ Usage: ntpviz [-d statsdir] [-g] [-n name] [-p days]
                 | --local-stability | --local-offset-histogram
                 | --peer-offsets=hosts | --all-peer-offsets
                 | --peer-jitters=hosts | --all-peer-jitters
-                | --local-cpu-temp
+                | --local-temps
                 | --local-offset-multiplot]
               [-o outdir]
               [-D N]
@@ -94,20 +94,23 @@ plot \
 """ % locals()
         return plot_template.replace('@', '%') + self.dump("loopstats") + "e\n" + self.dump("loopstats")
 
-    def local_cpu_temp_gnuplot(self):
+    def local_temps_gnuplot(self):
         "Generate GNUPLOT code graphing local cpu temp statistics"
         sitename = self.sitename
-        lines = [line + '\n' for line in getattr(self, "cputemp")]
+        tempsmap = self.tempssplit()
+        tempslist = list(tempsmap.keys())
+
+        lines = [line + '\n' for line in getattr(self, "temps")]
         if not len( lines):
-            sys.stderr.write("ntpviz: WARNING: no cputemp to graph\n")
+            sys.stderr.write("ntpviz: WARNING: no temps to graph\n")
             return ''
 
         plot_template = NTPViz.Common + """\
-set title "%(sitename)s: Local CPU Temp"
+set title "%(sitename)s: Local Temps"
 set ytics format "@1.1f °C" nomirror textcolor rgb '#0060ad'
 set style line 1 lc rgb '#0060ad' lt 1 lw 1 pt 7 ps 0   # --- blue
 plot \
- "-" using 1:3 title "CPU temp" with linespoints ls 1
+ "-" using 1:3 title "Temps" with linespoints ls 1
 """ % locals()
         return plot_template.replace('@', '%')  \
             + "".join(lines)
@@ -375,7 +378,7 @@ if __name__ == '__main__':
             "local-offset-histogram",
             "all-peer-offsets", "peer-offsets=",
             "all-peer-jitters", "peer-jitters=",
-            "local-cpu-temp",
+            "local-temps",
             "peer-rtt=",
             "local-offset-multiplot",
             ])
@@ -387,7 +390,7 @@ if __name__ == '__main__':
     period = endtime = starttime = None
     generate = False
     show_local_offset = show_local_error = show_local_jitter = False
-    show_local_stability = show_local_offset_histogram = show_cpu_temp = False
+    show_local_stability = show_local_offset_histogram = show_temps = False
     show_local_offset_multiplot = False
     show_peer_offsets = show_peer_jitters = None
     show_peer_rtt = None
@@ -433,8 +436,8 @@ if __name__ == '__main__':
             show_peer_jitters = []
         elif switch == "--peer-rtt":
             show_peer_rtt = val
-        elif switch == "--local-cpu-temp":
-            show_cpu_temp = True
+        elif switch == "--local-temps":
+            show_temps = True
         elif switch == "--local-offset-multiplot":
             show_local_offset_multiplot = True
     if 0 < debug_level:
@@ -521,12 +524,12 @@ if __name__ == '__main__':
                 sys.stdout.write(plot)
             raise SystemExit(0)
 
-        if show_cpu_temp:
-            if not len( stats.cputemp):
-                sys.stderr.write("ntpviz: ERROR: missing CPU temp data\n")
+        if show_temps:
+            if not len( stats.temps):
+                sys.stderr.write("ntpviz: ERROR: missing temps data\n")
                 raise SystemExit(1)
-            if show_cpu_temp is not None:
-                plot = stats.local_cpu_temp_gnuplot();
+            if show_temps is not None:
+                plot = stats.local_temps_gnuplot();
             if generate:
                 gnuplot(plot)
             else:
@@ -588,7 +591,7 @@ words, how fast it the local clock changes freqency.</p>
 how fast the local clock offset is changing.</p>
 <p>Lower is better.  An ideal system would be a straight line at 0μs.</p>
 """,
-        "local-cpu-temp": """\
+        "local-temps": """\
 <p>Ambient temperature - changes the clock crystal frequency, it
 oscillates faster when warmer. This the single most important
 component of frequency drift.</p>
@@ -741,7 +744,7 @@ ntpviz</a>, part of the <a href="https://www.ntpsec.org/">NTPsec project</a>
                 ("local-jitter", stats.local_offset_jitter_gnuplot()),
                 ("local-stability", stats.local_offset_stability_gnuplot()),
                 ("local-offset-histogram", stats.local_offset_histogram_gnuplot()),
-                ("local-cpu-temp", stats.local_cpu_temp_gnuplot()),
+                ("local-temps", stats.local_temps_gnuplot()),
                 ("peer-offsets", stats.peer_offsets_gnuplot()),
                 ]
             for key in stats.peersplit().keys():
