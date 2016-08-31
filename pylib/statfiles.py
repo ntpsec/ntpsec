@@ -59,7 +59,7 @@ class NTPStats:
             raise SystemExit(1)
 
         for stem in ("clockstats", "peerstats", "loopstats", "rawstats", \
-                 "cputemp"):
+                 "temps"):
             lines = []
             try:
                 for logpart in glob.glob(os.path.join(statsdir, stem) + "*"):
@@ -76,8 +76,8 @@ class NTPStats:
                 pass
 
             lines1 = []
-            if stem == "cputemp":
-                # cputemp is already in UNIX time
+            if stem == "temps":
+                # temps is already in UNIX time
                 for line in lines:
                     line = line.strip(' \0\r\n\t')
                     if line != None:
@@ -138,6 +138,15 @@ class NTPStats:
                 peermap[ip] = []
             peermap[ip].append(line)
         return peermap
+    def tempssplit(self):
+        "Return a dictionary mapping temperature sources to entry subsets."
+        tempsmap = {}
+        for line in self.temps:
+            source = line.split()[1]
+            if source not in tempsmap:
+                tempsmap[source] = []
+            tempsmap[source].append(line)
+        return tempsmap
     def dump(self, row):
         "dump a stored list of logfile entries"
         return "\n".join(getattr(self, row)) + "\n"
