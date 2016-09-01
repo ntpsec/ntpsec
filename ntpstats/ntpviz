@@ -710,6 +710,12 @@ system clock frequency (usually in parts per million, ppm)</dd>
 <dt>upstream clock:</dt>
 <dd>Any remote clock or reference clock used as a source of time.</dd>
 
+<dt>σ, sigma:</dt>
+<dd>Sigma denotes the standard distribution.  One sigma is the band of
+values centered on the mean value enclosing 68.27% of the samples.  Two
+sigma is 95.45%.  Three Sigma is 99.73%.  Two sigma is considered a
+sgignificant confidence level.</dd>
+
 <dt>µs, us, microsecond:</dt>
 <dd>One millionth of a second, also one thousandth of a millisecond,
 0.0000001s.</dd>
