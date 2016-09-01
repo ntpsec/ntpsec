@@ -798,7 +798,7 @@ system clock frequency (usually in parts per million, ppm)</dd>
 <dd>Sigma denotes the standard deviation (SD) and is centered on the
 arithmetic mean of the data set. The SD is simply the square root of
 the variance of the data set.  Two sigma is simply twice the standard
-deviation.  Three Sigma is three times sigma.  Smaller is better.</dd>
+deviation.  Three sigma is three times sigma.  Smaller is better.</dd>
 
 <dt>µs, us, microsecond:</dt>
 <dd>One millionth of a second, also one thousandth of a millisecond,
