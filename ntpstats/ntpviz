@@ -24,6 +24,33 @@ from __future__ import print_function, division
 import os, sys, getopt, socket, binascii, collections, time
 from ntp.statfiles import *
 
+# standard deviation functions
+# use this until we can guarantee Python 3.4 and the statistics module
+# http://stackoverflow.com/questions/15389768/standard-deviation-of-a-list#21505523
+
+def mean(data):
+    """Return the sample arithmetic mean of data."""
+    n = len(data)
+    if n < 1:
+        raise ValueError('mean requires at least one data point')
+    return sum(data)/n # in Python 2 use sum(data)/float(n)
+
+def _ss(data):
+    """Return sum of square deviations of sequence data."""
+    c = mean(data)
+    ss = sum((x-c)**2 for x in data)
+    return ss
+
+def pstdev(data):
+    """Calculates the population standard deviation."""
+    n = len(data)
+    if n < 2:
+        raise ValueError('variance requires at least two data points')
+    ss = _ss(data)
+    pvar = ss/n # the population variance
+    return pvar**0.5
+
+# end standard deviation functions
 # RMS frequency jitter - Deviation from a root-mean-square linear approximation?
 # Investigate.
 
@@ -75,6 +102,8 @@ set rmargin 12
                           period=period, starttime=starttime, endtime=endtime)
         if self.sitename is None:
             self.sitename = os.path.basename(statsdir)
+
+
     def local_offset_gnuplot(self):
         "Generate GNUPLOT code graphing local clock loop statistics"
         if not len( self.loopstats):
@@ -329,6 +358,11 @@ plot \
         for line in self.loopstats:
             # put into 100 nSec buckets
             cnt[ round( float(line.split()[1]), 7)] += 1
+
+        values = [float(line.split()[1]) for line in self.loopstats]
+        values.sort()
+        values_mean = mean( values )  * 1000000
+
         ninetynine  = self.percentile(2, 99, self.loopstats) * 1000000
         seventyfive = self.percentile(2, 75, self.loopstats) * 1000000
         twentyfive  = self.percentile(2, 25, self.loopstats) * 1000000
@@ -354,6 +388,7 @@ set arrow from %(seventyfive)s,0 to %(seventyfive)s,graph 0.7 as 4
 set key off
 set lmargin 12
 set rmargin 12
+set label 1 gprintf("mean = %(values_mean)s μs",50) at graph 0.01,0.3 left front
 plot \
  "-" using ($1 * 1000000):2 title "histogram" with boxes
 ''' % locals()
