@@ -35,18 +35,22 @@ def mean(data):
         raise ValueError('mean requires at least one data point')
     return sum(data)/n # in Python 2 use sum(data)/float(n)
 
-def _ss(data):
+def _ss(data, mu=None):
     """Return sum of square deviations of sequence data."""
-    c = mean(data)
+    if None == mu:
+        c = mean(data)
+    else:
+        c = mu
     ss = sum((x-c)**2 for x in data)
     return ss
 
-def pstdev(data):
+# fixme, need to handle mu=mean
+def pstdev(data, mu=None):
     """Calculates the population standard deviation."""
     n = len(data)
     if n < 2:
         raise ValueError('variance requires at least two data points')
-    ss = _ss(data)
+    ss = _ss(data, mu)
     pvar = ss/n # the population variance
     return pvar**0.5
 
@@ -354,41 +358,69 @@ plot \
             sys.stderr.write("ntpviz: WARNING: no loopstats to graph\n")
             return ''
         sitename = self.sitename
-        cnt = collections.Counter()
-        for line in self.loopstats:
-            # put into 100 nSec buckets
-            cnt[ round( float(line.split()[1]), 7)] += 1
 
+        # TODO normalize to 0 to 100
+
+        # grab and sort the values, no need for the timestamp, etc.
         values = [float(line.split()[1]) for line in self.loopstats]
         values.sort()
-        values_mean = mean( values )  * 1000000
 
-        ninetynine  = self.percentile(2, 99, self.loopstats) * 1000000
-        seventyfive = self.percentile(2, 75, self.loopstats) * 1000000
-        twentyfive  = self.percentile(2, 25, self.loopstats) * 1000000
-        one         = self.percentile(2,  1, self.loopstats) * 1000000
+        mu = mean( values )
+        values_mean = mu * 1000000
+        values_mean_str = str( round( values_mean, 3 ) )
+
+        values_pstd = round( pstdev( values, mu=mu ) * 1000000, 3)
+
+        # plus/minus of one sigma range
+        m1sigma = values_mean - (values_pstd / 2)
+        p1sigma = values_mean + (values_pstd / 2)
+
+        ninetynine  = round( self.percentiles(99, values) * 1000000, 2)
+        ninety      = round( self.percentiles(90, values) * 1000000, 2)
+        five        = round( self.percentiles( 5, values) * 1000000, 2)
+        one         = round( self.percentiles( 1, values) * 1000000, 2)
+
+        cnt = collections.Counter()
+        for value in values:
+            # put into 100 nSec buckets
+            # for a +/- 50 microSec range that is 1,000 buckets to plot
+            cnt[ round( float(value), 7)] += 1
+
+# skip the mean
+#set label 3 "mean = %(values_mean_str)s μs" at graph 0.01,0.3  left front
+
         plot_template = '''\
 set terminal png size 900,600
 set grid
 set xtic rotate by -45 scale 0
 set title "%(sitename)s: Local Clock Time Offset - Histogram"
 set xtics format "@1.1f μs" nomirror
-set label 1 gprintf("99@@ = @1.2f μs",%(ninetynine)s) at %(ninetynine)s, graph 0.91 left front offset 1,-1
 set style arrow 1 nohead
-set arrow from %(ninetynine)s,0 to %(ninetynine)s,graph 0.91 as 1
-set label 2 gprintf(" 1@@ = @1.2f μs",%(one)s) at %(one)s, graph 0.91 right front offset -1,-1
+set arrow from %(m1sigma)s,0 to %(m1sigma)s,graph 0.90 as 1
 set style arrow 2 nohead
-set arrow from %(one)s,0 to %(one)s,graph 0.91 as 2
-set label 3 gprintf("25@@ = @1.2f μs",%(twentyfive)s) at %(twentyfive)s, graph 0.7 right front offset -1,-1
+set arrow from %(p1sigma)s,0 to %(p1sigma)s,graph 0.90 as 2
 set style arrow 3 nohead
-set arrow from %(twentyfive)s,0 to %(twentyfive)s,graph 0.7 as 3
-set label 4 gprintf("75@@ = @1.2f μs",%(seventyfive)s) at %(seventyfive)s, graph 0.7 left front offset 1,-1
+set arrow from %(ninetynine)s,0 to %(ninetynine)s,graph 0.15 as 3
 set style arrow 4 nohead
-set arrow from %(seventyfive)s,0 to %(seventyfive)s,graph 0.7 as 4
+set arrow from %(ninety)s,0 to %(ninety)s,graph 0.30 as 4
+set style arrow 5 nohead
+set arrow from %(five)s,0 to %(five)s,graph 0.30 as 5
+set style arrow 6 nohead
+set arrow from %(one)s,0 to %(one)s,graph 0.15 as 6
 set key off
 set lmargin 12
 set rmargin 12
-set label 1 gprintf("mean = %(values_mean)s μs",50) at graph 0.01,0.3 left front
+set label 1 "1σ" at %(m1sigma)s, graph 0.96  left front offset -1,-1
+set label 2 "1σ" at %(p1sigma)s, graph 0.96  left front offset -1,-1
+set label 3 "99%%" at %(ninetynine)s, graph 0.20  left front offset -1,-1
+set label 4 "90%%" at %(ninety)s, graph 0.35  left front offset -1,-1
+set label 5 "1%%" at %(one)s, graph 0.20  left front offset -1,-1
+set label 6 "5%%" at %(five)s, graph 0.35  left front offset -1,-1
+set label 10 "1σ (68%%) = %(values_pstd)s μs" at graph 0.01,0.95 left front
+set label 11 "99%% = %(ninetynine)s μs" at graph 0.01,0.90 left front
+set label 12 "90%% = %(ninety)s μs" at graph 0.01,0.85 left front
+set label 13 "5%% = %(five)s μs" at graph 0.01,0.80 left front
+set label 14 "1%% = %(one)s μs" at graph 0.01,0.75 left front
 plot \
  "-" using ($1 * 1000000):2 title "histogram" with boxes
 ''' % locals()
@@ -629,7 +661,7 @@ heating).</p>
 """,
         "local-offset-histogram": """\
 <p>This shows the clock offsets of the local clock as a histogram.  It
-includes 1%, 25%, 75%, and 99% percentiles to show the performance of
+includes 1%, 5%, 95%, and 99% percentiles to show the performance of
 the system.</p>
 """,
         "local-stability": """\
