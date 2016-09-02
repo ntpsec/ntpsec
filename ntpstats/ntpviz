@@ -416,11 +416,11 @@ set label 3 "99%%" at %(ninetynine)s, graph 0.20  left front offset -1,-1
 set label 4 "90%%" at %(ninety)s, graph 0.35  left front offset -1,-1
 set label 5 "1%%" at %(one)s, graph 0.20  left front offset -1,-1
 set label 6 "5%%" at %(five)s, graph 0.35  left front offset -1,-1
-set label 10 "1σ (68%%) = %(values_pstd)s μs" at graph 0.01,0.95 left front
-set label 11 "99%% = %(ninetynine)s μs" at graph 0.01,0.90 left front
-set label 12 "90%% = %(ninety)s μs" at graph 0.01,0.85 left front
-set label 13 "5%% = %(five)s μs" at graph 0.01,0.80 left front
-set label 14 "1%% = %(one)s μs" at graph 0.01,0.75 left front
+set label 10 "1σ (68%%) = %(values_pstd)s μs" at graph 0.99,0.95 right front
+set label 11 "99%% = %(ninetynine)s μs" at graph 0.99,0.90 right front
+set label 12 "90%% = %(ninety)s μs" at graph 0.99,0.85 right front
+set label 13 "5%% = %(five)s μs" at graph 0.99,0.80 right front
+set label 14 "1%% = %(one)s μs" at graph 0.99,0.75 right front
 plot \
  "-" using ($1 * 1000000):2 title "histogram" with boxes
 ''' % locals()
