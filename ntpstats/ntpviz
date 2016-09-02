@@ -779,10 +779,10 @@ system clock frequency (usually in parts per million, ppm)</dd>
 <dd>Any remote clock or reference clock used as a source of time.</dd>
 
 <dt>σ, sigma:</dt>
-<dd>Sigma denotes the standard distribution.  One sigma is the band of
-values centered on the mean value enclosing 68.27% of the samples.  Two
-sigma is 95.45%.  Three Sigma is 99.73%.  Two sigma is considered a
-sgignificant confidence level.</dd>
+<dd>Sigma denotes the standard deviation (SD) and is centered on the
+arithmetic mean of the data set. The SD is simply the square root of
+the variance of the data set.  Two sigma is simply twice the standard
+deviation.  Three Sigma is three times sigma.  Smaller is better.</dd>
 
 <dt>µs, us, microsecond:</dt>
 <dd>One millionth of a second, also one thousandth of a millisecond,
