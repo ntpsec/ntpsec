@@ -372,8 +372,8 @@ plot \
         values_pstd = round( pstdev( values, mu=mu ) * 1000000, 3)
 
         # plus/minus of one sigma range
-        m1sigma = values_mean - (values_pstd / 2)
-        p1sigma = values_mean + (values_pstd / 2)
+        m1sigma = values_mean - values_pstd
+        p1sigma = values_mean + values_pstd
 
         ninetynine  = round( self.percentiles(99, values) * 1000000, 2)
         ninetyfive  = round( self.percentiles(95, values) * 1000000, 2)
@@ -410,8 +410,8 @@ set arrow from %(one)s,0 to %(one)s,graph 0.15 as 6
 set key off
 set lmargin 12
 set rmargin 12
-set label 1 "1σ" at %(m1sigma)s, graph 0.96  left front offset -1,-1
-set label 2 "1σ" at %(p1sigma)s, graph 0.96  left front offset -1,-1
+set label 1 "-1σ" at %(m1sigma)s, graph 0.96  left front offset -1,-1
+set label 2 "+1σ" at %(p1sigma)s, graph 0.96  left front offset -1,-1
 set label 3 "99%%" at %(ninetynine)s, graph 0.20  left front offset -1,-1
 set label 4 "95%%" at %(ninetyfive)s, graph 0.35  left front offset -1,-1
 set label 5 "1%%" at %(one)s, graph 0.20  left front offset -1,-1
