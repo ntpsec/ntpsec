@@ -413,7 +413,7 @@ set rmargin 12
 set label 1 "1σ" at %(m1sigma)s, graph 0.96  left front offset -1,-1
 set label 2 "1σ" at %(p1sigma)s, graph 0.96  left front offset -1,-1
 set label 3 "99%%" at %(ninetynine)s, graph 0.20  left front offset -1,-1
-set label 4 "90%%" at %(ninety)s, graph 0.35  left front offset -1,-1
+set label 4 "95%%" at %(ninetyfive)s, graph 0.35  left front offset -1,-1
 set label 5 "1%%" at %(one)s, graph 0.20  left front offset -1,-1
 set label 6 "5%%" at %(five)s, graph 0.35  left front offset -1,-1
 set label 10 "1σ (68%%) = %(values_pstd)s μs" at graph 0.99,0.95 right front
