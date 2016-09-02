@@ -410,6 +410,7 @@ set arrow from %(one)s,0 to %(one)s,graph 0.15 as 6
 set key off
 set lmargin 12
 set rmargin 12
+set style fill solid 0.5
 set label 1 "-1σ" at %(m1sigma)s, graph 0.96  left front offset -1,-1
 set label 2 "+1σ" at %(p1sigma)s, graph 0.96  left front offset -1,-1
 set label 3 "99%%" at %(ninetynine)s, graph 0.20  left front offset -1,-1
