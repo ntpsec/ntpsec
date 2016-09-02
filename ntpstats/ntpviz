@@ -416,7 +416,7 @@ set label 3 "99%%" at %(ninetynine)s, graph 0.20  left front offset -1,-1
 set label 4 "95%%" at %(ninetyfive)s, graph 0.35  left front offset -1,-1
 set label 5 "1%%" at %(one)s, graph 0.20  left front offset -1,-1
 set label 6 "5%%" at %(five)s, graph 0.35  left front offset -1,-1
-set label 10 "1σ (68%%) = %(values_pstd)s μs" at graph 0.99,0.95 right front
+set label 10 "1σ = %(values_pstd)s μs" at graph 0.99,0.95 right front
 set label 11 "99%% = %(ninetynine)s μs" at graph 0.99,0.90 right front
 set label 12 "95%% = %(ninetyfive)s μs" at graph 0.99,0.85 right front
 set label 13 "5%% = %(five)s μs" at graph 0.99,0.80 right front
