@@ -311,13 +311,13 @@ plot \
                 percentages = "\n%(fifty)s title '50th percentile', \\" \
                     % locals()
                 labels = """\
-set label 1 gprintf("99@@ = %(ninetynine)s %(unit)s",99) at graph 0.01,0.95 left front
-set label 2 gprintf("95@@ = %(ninetyfive)s %(unit)s",95) at graph 0.01,0.90 left front
-set label 3 gprintf("50@@ = %(fifty)s %(unit)s",50) at graph 0.01,0.85 left front
-set label 4 gprintf("5@@ = %(five)s %(unit)s",5) at graph 0.01,0.80 left front
-set label 5 gprintf("1@@ = %(one)s %(unit)s",1) at graph 0.01,0.75 left front
-set label 6 gprintf("95@@ - 5@@ = %(nf_m_f)s %(unit)s",90) at graph 0.01,0.70 left front
-set label 7 gprintf("99@@ - 1@@ = %(nn_m_o)s %(unit)s",98) at graph 0.01,0.65 left front
+set label 1 "99%% = %(ninetynine)s %(unit)s" at graph 0.01,0.95 left front
+set label 2 "95%% = %(ninetyfive)s %(unit)s" at graph 0.01,0.90 left front
+set label 3 "50%% = %(fifty)s %(unit)s" at graph 0.01,0.85 left front
+set label 4 "5%% = %(five)s %(unit)s" at graph 0.01,0.80 left front
+set label 5 "1%% = %(one)s %(unit)s" at graph 0.01,0.75 left front
+set label 6 "95%% - 5%% = %(nf_m_f)s %(unit)s" at graph 0.01,0.70 left front
+set label 7 "99%% - 1%% = %(nn_m_o)s %(unit)s" at graph 0.01,0.65 left front
 """ % locals()
 
         else:
@@ -328,7 +328,7 @@ set label 7 gprintf("99@@ - 1@@ = %(nn_m_o)s %(unit)s",98) at graph 0.01,0.65 le
         plot_template = NTPViz.Common + """\
 set title "%(sitename)s: %(title)s"
 set ylabel ""
-set ytics format "@1.0f %(unit)s" nomirror
+set ytics format "%%1.0f %(unit)s" nomirror
 set key top right box
 %(labels)s
 plot \\%(percentages)s
