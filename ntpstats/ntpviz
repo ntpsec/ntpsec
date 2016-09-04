@@ -201,6 +201,9 @@ plot \
         if not len( self.loopstats):
             sys.stderr.write("ntpviz: WARNING: no loopstats to graph\n")
             return ''
+        unit = "μs"
+        multiplier = 1000000
+
         sitename   = self.sitename
         ninetynine = self.percentile(fld, 99, self.loopstats) * 1000000
         ninetyfive = self.percentile(fld, 95, self.loopstats) * 1000000
@@ -208,20 +211,33 @@ plot \
         one        = self.percentile(fld,  1, self.loopstats) * 1000000
         nf_m_f     = ninetyfive - five
         nn_m_o     = ninetynine - one
+
+        if 1000 <= ninetynine:
+            # go to millisec
+            unit = "ms"
+            multiplier = 1000
+            ninetynine /= 1000
+            ninetyfive /= 1000
+            five       /= 1000
+            one        /= 1000
+            nf_m_f     /= 1000
+            nn_m_o     /= 1000
+
+
         plot_template = NTPViz.Common + """\
 set title "%(sitename)s: %(title)s"
-set ytics format "@1.2f μs" nomirror
+set ytics format "%%1.2f %(unit)s" nomirror
 set key top right box
 set style line 1 lc rgb '#0060ad' lt 1 lw 1 pt 7 ps 0   # --- blue
 set style line 2 lc rgb '#dd181f' lt 1 lw 1 pt 5 ps 0   # --- red
-set label 1 gprintf("99@@ = %(ninetynine)s μs",99) at graph 0.01,0.95 left front
-set label 2 gprintf("95@@ = %(ninetyfive)s μs",95) at graph 0.01,0.9 left front
-set label 3 gprintf(" 5@@ = %(five)s μs",5) at graph 0.01,0.85 left front
-set label 4 gprintf(" 1@@ = %(one)s μs",1) at graph 0.01,0.8 left front
-set label 5 gprintf("95@@ - 5@@ = %(nf_m_f)s μs",90) at graph 0.01,0.75 left front
-set label 6 gprintf("99@@ - 1@@ = %(nn_m_o)s μs",98) at graph 0.01,0.7 left front
+set label 1 "99%% = %(ninetynine)s %(unit)s" at graph 0.01,0.95 left front
+set label 2 "95%% = %(ninetyfive)s %(unit)s" at graph 0.01,0.9 left front
+set label 3 " 5%% = %(five)s %(unit)s" at graph 0.01,0.85 left front
+set label 4 " 1%% = %(one)s %(unit)s" at graph 0.01,0.8 left front
+set label 5 "95%% - 5%% = %(nf_m_f)s %(unit)s" at graph 0.01,0.75 left front
+set label 6 "99%% - 1%% = %(nn_m_o)s %(unit)s" at graph 0.01,0.7 left front
 plot \
- "-" using 1:($%(fld)d*1000000) title "%(legend)s" with linespoints ls 1, \
+ "-" using 1:($%(fld)d*%(multiplier)s) title "%(legend)s" with linespoints ls 1, \
  %(ninetynine)s title "99th percentile", \
  %(ninetyfive)s title "95th percentile", \
  %(five)s title "5th percentile", \
