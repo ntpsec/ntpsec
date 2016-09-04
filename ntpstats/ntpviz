@@ -286,27 +286,26 @@ plot \
             # only one peer
             percentages = ""
             title += ": "+ peerlist[0]
-            if "offset" == type:
-                ninetynine = self.percentile(4, 99, peerdict[ip]) * 1000000
-                ninetyfive = self.percentile(4, 95, peerdict[ip]) * 1000000
-                fifty      = self.percentile(4, 50, peerdict[ip]) * 1000000
-                five       = self.percentile(4,  5, peerdict[ip]) * 1000000
-                one        = self.percentile(4,  1, peerdict[ip]) * 1000000
-                if 1000 <= ninetynine:
-                    # go to millisec
-                    unit = "ms"
-                    multiplier = 1000
-                    ninetynine /= 1000
-                    ninetyfive /= 1000
-                    fifty      /= 1000
-                    five       /= 1000
-                    one        /= 1000
+            ninetynine = self.percentile(fld, 99, peerdict[ip]) * 1000000
+            one        = self.percentile(fld,  1, peerdict[ip]) * 1000000
+            if 1000 <= ninetynine or -1000 >= one:
+                # go to millisec
+                unit = "ms"
+                multiplier = 1000
+                ninetynine /= 1000
+                one /= 1000
+            ninetynine = round( ninetynine, 3)
+            one        = round( one, 3)
 
-                ninetynine = round( ninetynine, 3)
+            if "offset" == type:
+                # fld == 4
+                ninetyfive = self.percentile(4, 95, peerdict[ip]) * multiplier
+                fifty      = self.percentile(4, 50, peerdict[ip]) * multiplier
+                five       = self.percentile(4,  5, peerdict[ip]) * multiplier
+
                 ninetyfive = round( ninetyfive, 3)
                 fifty      = round( fifty, 3)
                 five       = round( five, 3)
-                one        = round( one, 3)
                 nf_m_f     = ninetyfive - five
                 nn_m_o     = ninetynine - one
                 percentages = "\n%(fifty)s title '50th percentile', \\" \
@@ -322,6 +321,7 @@ set label 7 gprintf("99@@ - 1@@ = %(nn_m_o)s %(unit)s",98) at graph 0.01,0.65 le
 """ % locals()
 
         else:
+            # many peers
             title += "s"
             percentages = ""
 
