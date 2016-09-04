@@ -416,23 +416,23 @@ set arrow from %(m1sigma)s,0 to %(m1sigma)s,graph 0.90 as 1
 set style arrow 2 nohead
 set arrow from %(p1sigma)s,0 to %(p1sigma)s,graph 0.90 as 2
 set style arrow 3 nohead
-set arrow from %(ninetynine)s,0 to %(ninetynine)s,graph 0.15 as 3
+set arrow from %(ninetynine)s,0 to %(ninetynine)s,graph 0.30 as 3
 set style arrow 4 nohead
-set arrow from %(ninetyfive)s,0 to %(ninetyfive)s,graph 0.30 as 4
+set arrow from %(ninetyfive)s,0 to %(ninetyfive)s,graph 0.45 as 4
 set style arrow 5 nohead
-set arrow from %(five)s,0 to %(five)s,graph 0.30 as 5
+set arrow from %(five)s,0 to %(five)s,graph 0.45 as 5
 set style arrow 6 nohead
-set arrow from %(one)s,0 to %(one)s,graph 0.15 as 6
+set arrow from %(one)s,0 to %(one)s,graph 0.30 as 6
 set key off
 set lmargin 12
 set rmargin 12
 set style fill solid 0.5
 set label 1 "-1σ" at %(m1sigma)s, graph 0.96  left front offset -1,-1
 set label 2 "+1σ" at %(p1sigma)s, graph 0.96  left front offset -1,-1
-set label 3 "99%%" at %(ninetynine)s, graph 0.20  left front offset -1,-1
-set label 4 "95%%" at %(ninetyfive)s, graph 0.35  left front offset -1,-1
-set label 5 "1%%" at %(one)s, graph 0.20  left front offset -1,-1
-set label 6 "5%%" at %(five)s, graph 0.35  left front offset -1,-1
+set label 3 "99%%" at %(ninetynine)s, graph 0.35  left front offset -1,-1
+set label 4 "95%%" at %(ninetyfive)s, graph 0.50  left front offset -1,-1
+set label 5 "1%%" at %(one)s, graph 0.35  left front offset -1,-1
+set label 6 "5%%" at %(five)s, graph 0.50  left front offset -1,-1
 set label 10 "1σ = %(values_pstd)s μs" at graph 0.99,0.95 right front
 set label 11 "99%% = %(ninetynine)s μs" at graph 0.99,0.90 right front
 set label 12 "95%% = %(ninetyfive)s μs" at graph 0.99,0.85 right front
