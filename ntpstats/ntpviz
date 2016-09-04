@@ -182,12 +182,12 @@ set ytics format "@1.3f ppm" nomirror
 set key bottom right box
 set style line 1 lc rgb '#0060ad' lt 1 lw 1 pt 7 ps 0   # --- blue
 set style line 2 lc rgb '#dd181f' lt 1 lw 1 pt 5 ps 0   # --- red
-set label 1 gprintf("99@@ = %(ninetynine)s ppm",99) at graph 0.01,0.3 left front
-set label 2 gprintf("95@@ = %(ninetyfive)s ppm",95) at graph 0.01,0.25 left front
-set label 3 gprintf(" 5@@ = %(five)s ppm",5) at graph 0.01,0.2 left front
-set label 4 gprintf(" 1@@ = %(one)s ppm",1) at graph 0.01,0.15 left front
-set label 5 gprintf("95@@ - 5@@ = %(nf_m_f)s ppm",90) at graph 0.01,0.1 left front
-set label 6 gprintf("99@@ - 1@@ = %(nn_m_o)s ppm",98) at graph 0.01,0.05 left front
+set label 1 "99%% = %(ninetynine)s ppm" at graph 0.01,0.3 left front
+set label 2 "95%% = %(ninetyfive)s ppm" at graph 0.01,0.25 left front
+set label 3 " 5%% = %(five)s ppm" at graph 0.01,0.2 left front
+set label 4 " 1%% = %(one)s ppm" at graph 0.01,0.15 left front
+set label 5 "95%% - 5%% = %(nf_m_f)s ppm" at graph 0.01,0.1 left front
+set label 6 "99%% - 1%% = %(nn_m_o)s ppm" at graph 0.01,0.05 left front
 plot \
  "-" using 1:3 title "local clock error" with linespoints ls 2, \
  %(ninetynine)s title "99th percentile", \
