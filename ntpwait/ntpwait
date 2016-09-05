@@ -124,7 +124,6 @@ if __name__ == "__main__":
     tries = 100
     sleep = 6
     verbose = 0
-    help = False
     for (switch, val) in options:
         if switch in ("-n", "--tries"):
             tries = int(val)
