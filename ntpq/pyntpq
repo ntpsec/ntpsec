@@ -317,7 +317,7 @@ function: exit ntpq
 usage: exit
 """)
     do_quit = do_exit
-    def help_exit(self):
+    def help_quit(self):
         sys.stdout.write("""\
 function: exit ntpq
 usage: quit
@@ -648,15 +648,15 @@ if __name__ == '__main__':
 
     for (switch, val) in options:
         if switch in ("-4", "--ipv4"):
-            interpreter.ai_family = AF_INET
+            interpreter.ai_family = socket.AF_INET
         elif switch in ("-6", "--ipv6"):
-            interpreter.ai_family = AF_INET6
+            interpreter.ai_family = socket.AF_INET6
         elif switch in ("-c", "--command"):
             interpreter.ccmds.append(val)
         elif switch in ("-d", "--debug"):
             interpreter.debug += 1
         elif switch in ("-D", "--set-debug-level"):
-            interpreter.debug = int(ntp_optarg)
+            interpreter.debug = int(val)
         elif switch in ("-h", "--help"):
             print(usage)
             raise SystemExit(0)
@@ -678,7 +678,7 @@ if __name__ == '__main__':
             sys.stderr.write(usage)
             raise SystemExit(1)
 
-    if interpreter.interactive and (opt_command or opt_peers):
+    if interpreter.interactive and len(interpreter.ccmds) > 0:
         sys.stderr.write("%s: invalid option combination.\n" % progname)
         raise SystemExit(1)
 
@@ -688,9 +688,9 @@ if __name__ == '__main__':
         for token in arguments:
             if token.startswith("-"):
                 if '4' == token[1]:
-                    session.ai_family = AF_INET
+                    session.ai_family = socket.AF_INET
                 elif '6' == token[1]:
-                    session.ai_family = AF_INET6
+                    session.ai_family = socket.AF_INET6
             else:
                 interpreter.chosts.append((token, session.ai_family))
 
