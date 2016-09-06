@@ -276,7 +276,7 @@ class ntpq_session:
             self.name = canonname or hname
             self.isnum = False
         if self.debug > 2:
-            sys.stdout.write("Opening host %s\n" % temphost)
+            sys.stdout.write("Opening host %s\n" % self.name)
         self.port = sockaddr[1]
         try:
             self.sock = socket.socket(family, socktype, protocol)
@@ -367,7 +367,7 @@ class ntpq_session:
                     warn("%s: timed out with incomplete data\n" % self.name);
                     if self.debug:
                         sys.stderr.write("ERR_INCOMPLETE: Received fragments:\n")
-                        for (i, frag) in enumerae(fragments):
+                        for (i, frag) in enumerate(fragments):
                             sys.stderr.write("%d: %s" % (i+1, frag.stats()))
                         sys.stderr.write("last fragment %sreceived\n",
                                     ("not " "", )[seenlastfrag])
@@ -389,7 +389,7 @@ class ntpq_session:
                 continue
             if rpkt.mode() != MODE_CONTROL:
                 if self.debug:
-                    warn("Packet received with mode %d\n" % pkt.mode())
+                    warn("Packet received with mode %d\n" % rpkt.mode())
                 continue
             if not rpkt.is_response():
                 if self.debug:
@@ -448,7 +448,7 @@ class ntpq_session:
 
             if len(fragments) > 0:
                 last = fragments[-1]
-                if last.end() > rkpt.offset:
+                if last.end() > rpkt.offset:
                     warn("received frag at %d overlaps with %d octet frag at %d\n" % (rpkt.offset, last.count, last.offset));
                     continue
 
