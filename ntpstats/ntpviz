@@ -282,9 +282,10 @@ plot \
 
         unit = "μs"
         multiplier = 1000000
+        rtt = 0
+        percentages = ""
         if len(peerlist) == 1:
             # only one peer
-            percentages = ""
             title += ": "+ peerlist[0]
             ninetynine = self.percentile(fld, 99, peerdict[ip]) * 1000000
             one        = self.percentile(fld,  1, peerdict[ip]) * 1000000
@@ -308,8 +309,9 @@ plot \
                 five       = round( five, 3)
                 nf_m_f     = ninetyfive - five
                 nn_m_o     = ninetynine - one
-                percentages = "\n%(fifty)s title '50th percentile', \\" \
-                    % locals()
+                percentages = " %(fifty)s title '50th percentile', " \
+                               % locals()
+
                 labels = """\
 set label 1 "99%% = %(ninetynine)s %(unit)s" at graph 0.01,0.95 left front
 set label 2 "95%% = %(ninetyfive)s %(unit)s" at graph 0.01,0.90 left front
@@ -320,10 +322,13 @@ set label 6 "95%% - 5%% = %(nf_m_f)s %(unit)s" at graph 0.01,0.70 left front
 set label 7 "99%% - 1%% = %(nn_m_o)s %(unit)s" at graph 0.01,0.65 left front
 """ % locals()
 
+                rtt = 1
+                # don't do rtt for reclocks
+                if "127.127." == peerlist[0][:8]:
+                    rtt = 0
         else:
             # many peers
             title += "s"
-            percentages = ""
 
         plot_template = NTPViz.Common + """\
 set title "%(sitename)s: %(title)s"
@@ -331,43 +336,31 @@ set ylabel ""
 set ytics format "%%1.0f %(unit)s" nomirror
 set key top right box
 %(labels)s
-plot \\%(percentages)s
+plot \
 """ % locals()
         plot_template = plot_template.replace("@", "%")
+        plot_template += percentages
         for key in peerlist:
-            plot_template += "'-' using 1:($%d*%d) title '%s' with line, \\\n" \
-                 % (fld, multiplier, self.ip_label(key))
+            label = self.ip_label(key)
+            plot_template += "'-' using 1:($%(fld)s*%(multiplier)s) title '%(label)s' with line, \\\n" \
+                 % locals()
 
+        if 1 == rtt:
+            plot_template += """\
+'-' using 1:(($4+$5/2)*%(multiplier)s) title 'offset+rtt/2' with line, \\
+'-' using 1:(($4-$5/2)*%(multiplier)s) title 'offset-rtt/2' with line
+""" % locals()
+            plot_template += plot_data + "\ne\n" + plot_data + "\ne\n"
+        else:
+            # strip the trailing ", \n"
+            plot_template = plot_template[:-4] + "\n"
 
-        # strip the trailing ", \n"
-        plot_template = plot_template[:-4] + "\n"
         plot_template += plot_data
         return plot_template
     def peer_offsets_gnuplot(self, peerlist=None):
         return self.peerstats_gnuplot(peerlist, 4, "Peer Clock Offset", "offset")
     def peer_jitters_gnuplot(self, peerlist=None):
         return self.peerstats_gnuplot(peerlist, 7, "Peer Clock Jitter", "jitter")
-    def peer_rtt_gnuplot(self, host):
-        "Plot offset with rtt bounds for specified host."
-        sitename = self.sitename
-        entries = self.peersplit()[host]
-        fifty = self.percentile(4,  50, entries) * 1000000
-        host = self.ip_label(host)
-        plot_template = NTPViz.Common + """\
-set title "%(sitename)s: offset of %(host)s"
-set ylabel ""
-set ytics format "%%1.0f μs" nomirror
-set key top right box
-plot \
-'-' using 1:($4*1000000) title 'offset' with line, \
-'-' using 1:(($4+$5/2)*1000000) title 'offset+rtt/2' with line, \
-'-' using 1:(($4-$5/2)*1000000) title 'offset-rtt/2' with line, \
-%(fifty)s title '50th percentile'
-""" % locals()
-        plot_template = plot_template.replace("@", "%")
-        data = "\n".join(entries)
-        plot_template += data + "\ne\n" + data + "\ne\n" + data
-        return plot_template
     def local_offset_histogram_gnuplot(self):
         "Plot a histogram of clock offset values from loopstats."
         if not len( self.loopstats):
@@ -479,7 +472,6 @@ if __name__ == '__main__':
             "all-peer-offsets", "peer-offsets=",
             "all-peer-jitters", "peer-jitters=",
             "local-temps",
-            "peer-rtt=",
             "local-offset-multiplot",
             ])
     except getopt.GetoptError as err:
@@ -493,7 +485,6 @@ if __name__ == '__main__':
     show_local_stability = show_local_offset_histogram = show_temps = False
     show_local_offset_multiplot = False
     show_peer_offsets = show_peer_jitters = None
-    show_peer_rtt = None
     outdir = "ntpgraphs"
     debug_level = 0
     for (switch, val) in options:
@@ -534,8 +525,6 @@ if __name__ == '__main__':
             show_peer_jitters = val.split(",")
         elif switch == "--all-peer-jitters":
             show_peer_jitters = []
-        elif switch == "--peer-rtt":
-            show_peer_rtt = val
         elif switch == "--local-temps":
             show_temps = True
         elif switch == "--local-offset-multiplot":
@@ -608,7 +597,7 @@ if __name__ == '__main__':
                 sys.stdout.write(plot)
             raise SystemExit(0)
 
-        if show_peer_offsets is not None or show_peer_jitters is not None or show_peer_rtt is not None:
+        if show_peer_offsets is not None or show_peer_jitters is not None:
             if not len( stats.peerstats ):
                 sys.stderr.write("ntpviz: ERROR:  missing peerstats data\n")
                 raise SystemExit(1)
@@ -616,8 +605,6 @@ if __name__ == '__main__':
                 plot = stats.peer_offsets_gnuplot(show_peer_offsets)
             if show_peer_jitters is not None:
                 plot = stats.peer_jitters_gnuplot(show_peer_jitters)
-            if show_peer_rtt is not None:
-                plot = stats.peer_rtt_gnuplot(show_peer_rtt)
             if generate:
                 gnuplot(plot)
             else:

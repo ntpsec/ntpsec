@@ -14,8 +14,7 @@
 	   | --local-offset-multiplot
 	   | --local-temps
            | --peer-jitters=hosts 
-           | --peer-offsets=hosts 
-	   | --peer=rtt-host=hostname]
+           | --peer-offsets=hosts ]
 	 [-o outdir]
 	 [-D N] [-N]
 
@@ -99,10 +98,6 @@ The following plots are available:
    Peer offset from local clock time from peerstats (field 4). A
    comma-separated list of peer names or IP addresses must follow. It
    is a fatal error for any of these names not to appear in peerstats.
-
---peer-rtt=host::
-   Show offset plus or minus round-trip-time (rtt) of a specified
-   peer. This graph combines fields 4 and 5 of loopstats.
 
 If no individual plot is specified, all plots and an index HTML page
 are generated into a new output directory.  Normally this directory is
