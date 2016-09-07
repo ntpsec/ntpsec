@@ -89,13 +89,14 @@ def plotwrap(imagename, image, outfile):
 
 class NTPViz(NTPStats):
     "Class for visualizing statistics from a single server."
+    # Python takes single quotes here. Since no % substitution
     Common = """\
 set terminal png size 900,600
 set xdata time
 set grid
 set xlabel "Time"
-set format x "@d-@H:@M"
-set timefmt "@s"
+set format x "%d-%H:%M"
+set timefmt "%s"
 set xtic rotate by -45 scale 0
 set lmargin 12
 set rmargin 12
@@ -125,7 +126,7 @@ plot \
  "-" using 1:($2*1000000) title "clock offset μs" with linespoints ls 1, \
  "-" using 1:3 title "frequency offset ppm" with linespoints ls 2 axis x1y2
 """ % locals()
-        return plot_template.replace('@', '%') + self.dump("loopstats") + "e\n" + self.dump("loopstats")
+        return plot_template + self.dump("loopstats") + "e\n" + self.dump("loopstats")
 
     def local_temps_gnuplot(self):
         "Generate GNUPLOT code graphing local temperature statistics"
@@ -152,8 +153,6 @@ set ytics format "%%1.1f °C" nomirror textcolor rgb '#0060ad'
 set style line 1 lc rgb '#0060ad' lt 1 lw 1 pt 7 ps 0   # --- blue
 plot \\
 """ % locals()
-
-        plot_template = plot_template.replace("@", "%")
 
         for key in tempslist:
             plot_template += "'-' using 1:3 title '%(key)s' with line, \\\n" \
@@ -195,7 +194,7 @@ plot \
  %(five)s title "5th percentile", \
  %(one)s title "1st percentile"
 """ % locals()
-        return plot_template.replace('@', '%') + self.dump("loopstats")
+        return plot_template + self.dump("loopstats")
     def loopstats_gnuplot(self, fld, title, legend):
         "Generate GNUPLOT code of a given loopstats field"
         if not len( self.loopstats):
@@ -243,7 +242,7 @@ plot \
  %(five)s title "5th percentile", \
  %(one)s title "1st percentile"
 """ % locals()
-        return plot_template.replace('@', '%') + self.dump("loopstats")
+        return plot_template + self.dump("loopstats")
     def local_offset_jitter_gnuplot(self):
         "Generate GNUPLOT code of local clock loop standard deviation"
         return self.loopstats_gnuplot(4, "RMS Time jitter", "Jitter")
@@ -338,7 +337,6 @@ set key top right box
 %(labels)s
 plot \
 """ % locals()
-        plot_template = plot_template.replace("@", "%")
         plot_template += percentages
         for key in peerlist:
             label = self.ip_label(key)
@@ -437,7 +435,7 @@ plot \
         vals = list(cnt.keys())
         vals.sort()
         histogram_data = ["%s %s\n" % (val, cnt[val]) for val in vals]
-        return plot_template.replace('@', '%') + "".join(histogram_data)
+        return plot_template + "".join(histogram_data)
 
 # Multiplotting can't live inside NTPViz because it consumes a list
 # of such objects, not a single one.
@@ -458,7 +456,7 @@ plot \\
     for stats in statlist:
         plot += stats.dump("loopstats") + "e\n"
     plot = plot[:-2]
-    return plot.replace("@", "%")
+    return plot
 
 ntpsec_logo = """
 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
