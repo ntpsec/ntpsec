@@ -753,7 +753,7 @@ dd {
 
 <dl>
 <dt>frequency offset:</dt>
-<dd>The difference between the ntpd calcualted frequency and the local
+<dd>The difference between the ntpd calculated frequency and the local
 system clock frequency (usually in parts per million, ppm)</dd>
 
 <dt>jitter:</dt>
@@ -770,7 +770,8 @@ system clock frequency (usually in parts per million, ppm)</dd>
 <dd>Reference clock, a local GPS module or other local source of time.</dd>
 
 <dt>remote clock:</dt>
-<dd>Any clock reached over the network, LAN or WAN.</dd>
+<dd>Any clock reached over the network, LAN or WAN.  Also called a peer
+or server.</dd>
 
 <dt>time offset:</dt>
 <dd>The difference between the ntpd calculated time and the local system
