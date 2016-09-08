@@ -259,7 +259,7 @@ plot \
         values.sort()
 
         ninetynine, ninetyfive, five, one = \
-                    self.percentiles( (99,95, 5, 1), values)
+                    self.percentiles( (99, 95, 5, 1), values)
 
         if 1e-3 <= ninetynine or -1e-3 >= one:
             # go to millisec
@@ -752,7 +752,7 @@ show how much the frequency changes over a longer period of time.  The
 majority of this change should come from temperature changes (ex: HVAC,
 the weather, CPU usage causing local heating).</p>
 
-<p>Smaller changes are better.  An ideal result would be a flat line at 0ppm.</p>
+<p>Smaller changes are better.  An ideal result would be a horizontal line at 0ppm.</p>
 <p>Expected values of 99%-1% percentiles: 0.4ppm</p>
 """,
         "local-offset-histogram": """\
@@ -764,13 +764,13 @@ the system.</p>
 <p>This shows the frequency jitter (aka wander) of the local clock's
 frequency.  In other words, how fast it the local clock changes freqency.
 This is field 6 in the loopstats log file.</p>
-<p>Lower is better.  An ideal clock would be a straight line at 0ppm.</p>
+<p>Lower is better.  An ideal clock would be a horizontal line at 0ppm.</p>
 """,
         "local-jitter": """\
 <p>This shows the jitter of the local clock offset.  In other words,
 how fast the local clock offset is changing.  This is field 5 in the
 loopstats log file</p>
-<p>Lower is better.  An ideal system would be a straight line at 0μs.</p>
+<p>Lower is better.  An ideal system would be a horizontal line at 0μs.</p>
 """,
         "local-temps": """\
 <p>Local temperatures.  These will be site specific depending on what
@@ -783,13 +783,13 @@ component of frequency drift.</p>
 <p>This shows the offset of all remote clocks and refclocks.  This can
 be useful to see if offset changes are happening in a single clock or
 all clocks together.</p>
-<p>Closer to 0μs is better.  An ideal system would be a straight line
+<p>Closer to 0μs is better.  An ideal system would be a horizontal line
 at 0μs.</p>
 """,
         "peer-jitters": """\
 <p>This shows the jitter of the remote clock offset.  In other words,
 how quickly the remote clock offset is changing.</p>
-<p>Closer to 0μs/s is better.  An ideal system would be a straight
+<p>Closer to 0μs/s is better.  An ideal system would be a horizontal
 line at 0μs/s.</p>
 """,
         }
@@ -845,6 +845,10 @@ system clock frequency (usually in parts per million, ppm)</dd>
 <dt>ms, millisecond:</dt>
 <dd>One thousandth of a second = 0.001s</dd>
 
+<dt>ns, nanosecond:</dt>
+<dd>One billionth of a second, also one thousandth of a microsecond,
+0.000000001s.</dd>
+
 <dt>ppb, parts per billion:</dt>
 <dd>Ratio between two values. These following are all the same:
     1 ppb, one in one billion, 1/1000000000, 0.000000001, and 0.0000001%</dd>
@@ -879,7 +883,7 @@ deviation.  Three sigma is three times sigma.  Smaller is better.</dd>
 
 <dt>µs, us, microsecond:</dt>
 <dd>One millionth of a second, also one thousandth of a millisecond,
-0.0000001s.</dd>
+0.000001s.</dd>
 </dl>
 
 <br>
