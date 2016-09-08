@@ -187,29 +187,40 @@ plot \\
         values = [float(line.split()[2]) for line in self.loopstats]
         values.sort()
 
+        multiplier = 1
+        unit = "ppm"
+        rnd = 3
+
         ninetynine, ninetyfive, five, one = \
-                    self.percentiles( (99,95, 5, 1), values)
-        ninetynine  = round( ninetynine, 3)
-        ninetyfive  = round( ninetyfive, 3)
-        five        = round(       five, 3)
-        one         = round(        one, 3)
+                    self.percentiles( (99, 95, 5, 1), values)
+
+        if 1 > ninetynine and -1 < one:
+            # go to ppb
+            multiplier = 1e3
+            unit = "ppb"
+            rnd = 0
+
+        ninetynine  = round( ninetynine * multiplier, rnd)
+        ninetyfive  = round( ninetyfive * multiplier, rnd)
+        five        = round(       five * multiplier, rnd)
+        one         = round(        one * multiplier, rnd)
 
         nf_m_f     = ninetyfive - five
         nn_m_o     = ninetynine - one
         plot_template = NTPViz.Common + """\
 set title "%(sitename)s: Local Clock Frequency Offset"
-set ytics format "%%1.3f ppm" nomirror
+set ytics format "%%1.0f %(unit)s" nomirror
 set key bottom right box
 set style line 1 lc rgb '#0060ad' lt 1 lw 1 pt 7 ps 0   # --- blue
 set style line 2 lc rgb '#dd181f' lt 1 lw 1 pt 5 ps 0   # --- red
-set label 1 "99%% = %(ninetynine)s ppm" at graph 0.01,0.3 left front
-set label 2 "95%% = %(ninetyfive)s ppm" at graph 0.01,0.25 left front
-set label 3 " 5%% = %(five)s ppm" at graph 0.01,0.2 left front
-set label 4 " 1%% = %(one)s ppm" at graph 0.01,0.15 left front
-set label 5 "95%% - 5%% = %(nf_m_f)s ppm" at graph 0.01,0.1 left front
-set label 6 "99%% - 1%% = %(nn_m_o)s ppm" at graph 0.01,0.05 left front
+set label 1 "99%% = %(ninetynine)s %(unit)s" at graph 0.01,0.3 left front
+set label 2 "95%% = %(ninetyfive)s %(unit)s" at graph 0.01,0.25 left front
+set label 3 " 5%% = %(five)s %(unit)s" at graph 0.01,0.2 left front
+set label 4 " 1%% = %(one)s %(unit)s" at graph 0.01,0.15 left front
+set label 5 "95%% - 5%% = %(nf_m_f)s %(unit)s" at graph 0.01,0.1 left front
+set label 6 "99%% - 1%% = %(nn_m_o)s %(unit)s" at graph 0.01,0.05 left front
 plot \
- "-" using 1:3 title "local clock error" with linespoints ls 2, \
+ "-" using 1:($3 * %(multiplier)s) title "local clock error" with linespoints ls 2, \
  %(ninetynine)s title "99th percentile", \
  %(ninetyfive)s title "95th percentile", \
  %(five)s title "5th percentile", \
@@ -722,11 +733,12 @@ larger frequency offsets.</p>
 """,
 
         "local-error": """\
-<p>This shows the frequency offset of the local clock.  It includes
-percentile data to show how much the frequency changes over a longer
-period of time.  The majority of this change should come from
-temperature changes (ex: HVAC, the weather, CPU usage causing local
-heating).</p>
+<p>This shows the frequency offset of the local clock.  It comes from
+field 3 of the loopstats log file.  The graph includes percentile data to
+show how much the frequency changes over a longer period of time.  The
+majority of this change should come from temperature changes (ex: HVAC,
+the weather, CPU usage causing local heating).</p>
+
 <p>Smaller changes are better.  An ideal result would be a flat line at 0ppm.</p>
 <p>Expected values of 99%-1% percentiles: 0.4ppm</p>
 """,
@@ -819,6 +831,10 @@ system clock frequency (usually in parts per million, ppm)</dd>
 
 <dt>ms, millisecond:</dt>
 <dd>One thousandth of a second = 0.001s</dd>
+
+<dt>ppb, parts per billion:</dt>
+<dd>Ratio between two values. These following are all the same:
+    1 ppb, one in one billion, 1/1000000000, 0.000000001, and 0.0000001%</dd>
 
 <dt>ppm, parts per million:</dt>
 <dd>Ratio between two values. These following are all the same:
