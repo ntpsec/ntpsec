@@ -133,7 +133,7 @@ class NTPStats:
         return values[int(len(values) * (percentile/100))]
     def percentiles(self, percents, values):
         "Return given percentiles of a given row in a given set of entries."
-        "assuming values are already spilit and sorted"
+        "assuming values are already split and sorted"
         ret = []
         length = len(values)
         for perc in percents:
