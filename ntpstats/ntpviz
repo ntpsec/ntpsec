@@ -408,7 +408,7 @@ set label 7 "99%% - 1%% = %(nn_m_o)s %(unit)s" at graph 0.01,0.65 left front
         plot_template = NTPViz.Common + """\
 set title "%(sitename)s: %(title)s"
 set ylabel ""
-set ytics format "%%1.0f %(unit)s" nomirror
+set ytics format "%%1.1f %(unit)s" nomirror
 set key top right box
 %(labels)s
 plot \
