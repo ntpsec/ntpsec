@@ -169,10 +169,15 @@ plot \\
             sys.stderr.write("ntpviz: WARNING: no loopstats to graph\n")
             return ''
         sitename = self.sitename
-        ninetynine = self.percentile(3, 99, self.loopstats)
-        ninetyfive = self.percentile(3, 95, self.loopstats)
-        five       = self.percentile(3,  5, self.loopstats)
-        one        = self.percentile(3,  1, self.loopstats)
+        # grab and sort the values, no need for the timestamp, etc.
+        values = [float(line.split()[2]) for line in self.loopstats]
+        values.sort()
+
+        ninetynine  = round( self.percentiles(99, values), 3)
+        ninetyfive  = round( self.percentiles(95, values), 3)
+        five        = round( self.percentiles( 5, values), 3)
+        one         = round( self.percentiles( 1, values), 3)
+
         nf_m_f     = ninetyfive - five
         nn_m_o     = ninetynine - one
         plot_template = NTPViz.Common + """\
@@ -204,10 +209,15 @@ plot \
         multiplier = 1000000
 
         sitename   = self.sitename
-        ninetynine = self.percentile(fld, 99, self.loopstats) * 1000000
-        ninetyfive = self.percentile(fld, 95, self.loopstats) * 1000000
-        five       = self.percentile(fld,  5, self.loopstats) * 1000000
-        one        = self.percentile(fld,  1, self.loopstats) * 1000000
+        # grab and sort the values, no need for the timestamp, etc.
+        values = [float(line.split()[fld - 1]) for line in self.loopstats]
+        values.sort()
+
+        ninetynine  = round( self.percentiles(99, values) * multiplier, 3)
+        ninetyfive  = round( self.percentiles(95, values) * multiplier, 3)
+        five        = round( self.percentiles( 5, values) * multiplier, 3)
+        one         = round( self.percentiles( 1, values) * multiplier, 3)
+
         nf_m_f     = ninetyfive - five
         nn_m_o     = ninetynine - one
 
@@ -286,8 +296,13 @@ plot \
         if len(peerlist) == 1:
             # only one peer
             title += ": "+ peerlist[0]
-            ninetynine = self.percentile(fld, 99, peerdict[ip]) * 1000000
-            one        = self.percentile(fld,  1, peerdict[ip]) * 1000000
+            # grab and sort the values, no need for the timestamp, etc.
+            values = [float(line.split()[fld - 1]) for line in peerdict[ip]]
+            values.sort()
+
+            ninetynine  = round( self.percentiles(99, values) * multiplier, 3)
+            one         = round( self.percentiles( 1, values) * multiplier, 3)
+
             if 1000 <= ninetynine or -1000 >= one:
                 # go to millisec
                 unit = "ms"
@@ -299,13 +314,10 @@ plot \
 
             if "offset" == type:
                 # fld == 4
-                ninetyfive = self.percentile(4, 95, peerdict[ip]) * multiplier
-                fifty      = self.percentile(4, 50, peerdict[ip]) * multiplier
-                five       = self.percentile(4,  5, peerdict[ip]) * multiplier
+                ninetyfive = round( self.percentiles(95, values) * multiplier, 3)
+                fifty      = round( self.percentiles(50, values) * multiplier, 3)
+                five       = round( self.percentiles( 5, values) * multiplier, 3)
 
-                ninetyfive = round( ninetyfive, 3)
-                fifty      = round( fifty, 3)
-                five       = round( five, 3)
                 nf_m_f     = ninetyfive - five
                 nn_m_o     = ninetynine - one
                 percentages = " %(fifty)s title '50th percentile', " \
