@@ -131,10 +131,14 @@ class NTPStats:
         values = [float(line.split()[n-1]) for line in entries]
         values.sort()
         return values[int(len(values) * (percentile/100))]
-    def percentiles(self, percentile, values):
+    def percentiles(self, percents, values):
         "Return given percentiles of a given row in a given set of entries."
         "assuming values are already spilit and sorted"
-        return values[int(len(values) * (percentile/100))]
+        ret = []
+        length = len(values)
+        for perc in percents:
+            ret.append( values[int(length * (perc/100))] )
+        return tuple( ret )
     def peersplit(self):
         "Return a dictionary mapping peerstats IPs to entry subsets."
         peermap = {}

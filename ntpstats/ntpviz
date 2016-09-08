@@ -173,10 +173,12 @@ plot \\
         values = [float(line.split()[2]) for line in self.loopstats]
         values.sort()
 
-        ninetynine  = round( self.percentiles(99, values), 3)
-        ninetyfive  = round( self.percentiles(95, values), 3)
-        five        = round( self.percentiles( 5, values), 3)
-        one         = round( self.percentiles( 1, values), 3)
+        ninetynine, ninetyfive, five, one = \
+                    self.percentiles( (99,95, 5, 1), values)
+        ninetynine  = round( ninetynine, 3)
+        ninetyfive  = round( ninetyfive, 3)
+        five        = round(       five, 3)
+        one         = round(        one, 3)
 
         nf_m_f     = ninetyfive - five
         nn_m_o     = ninetynine - one
@@ -213,10 +215,12 @@ plot \
         values = [float(line.split()[fld - 1]) for line in self.loopstats]
         values.sort()
 
-        ninetynine  = round( self.percentiles(99, values) * multiplier, 3)
-        ninetyfive  = round( self.percentiles(95, values) * multiplier, 3)
-        five        = round( self.percentiles( 5, values) * multiplier, 3)
-        one         = round( self.percentiles( 1, values) * multiplier, 3)
+        ninetynine, ninetyfive, five, one = \
+                    self.percentiles( (99,95, 5, 1), values)
+        ninetynine  = round( ninetynine * multiplier, 3)
+        ninetyfive  = round( ninetyfive * multiplier, 3)
+        five        = round(       five * multiplier, 3)
+        one         = round(        one * multiplier, 3)
 
         nf_m_f     = ninetyfive - five
         nn_m_o     = ninetynine - one
@@ -300,23 +304,27 @@ plot \
             values = [float(line.split()[fld - 1]) for line in peerdict[ip]]
             values.sort()
 
-            ninetynine  = round( self.percentiles(99, values) * multiplier, 3)
-            one         = round( self.percentiles( 1, values) * multiplier, 3)
+            ninetynine, ninetyfive, five, one = \
+                        self.percentiles( (99,95, 5, 1), values)
+            ninetynine  = round( ninetynine * multiplier, 3)
+            ninetyfive  = round( ninetyfive * multiplier, 3)
+            five        = round(       five * multiplier, 3)
+            one         = round(        one * multiplier, 3)
 
             if 1000 <= ninetynine or -1000 >= one:
                 # go to millisec
                 unit = "ms"
                 multiplier = 1000
-                ninetynine /= 1000
-                one /= 1000
-            ninetynine = round( ninetynine, 3)
-            one        = round( one, 3)
 
             if "offset" == type:
                 # fld == 4
-                ninetyfive = round( self.percentiles(95, values) * multiplier, 3)
-                fifty      = round( self.percentiles(50, values) * multiplier, 3)
-                five       = round( self.percentiles( 5, values) * multiplier, 3)
+                ninetynine, ninetyfive, fifty, five, one = \
+                            self.percentiles( (99,95, 50, 5, 1), values)
+                ninetynine  = round( ninetynine * multiplier, 3)
+                ninetyfive  = round( ninetyfive * multiplier, 3)
+                fifty       = round(      fifty * multiplier, 3)
+                five        = round(       five * multiplier, 3)
+                one         = round(        one * multiplier, 3)
 
                 nf_m_f     = ninetyfive - five
                 nn_m_o     = ninetynine - one
@@ -384,20 +392,23 @@ plot \
         values = [float(line.split()[1]) for line in self.loopstats]
         values.sort()
 
+        multiplier = 1000000
         mu = mean( values )
-        values_mean = mu * 1000000
+        values_mean = mu * multiplier
         values_mean_str = str( round( values_mean, 3 ) )
 
-        values_pstd = round( pstdev( values, mu=mu ) * 1000000, 3)
+        values_pstd = round( pstdev( values, mu=mu ) * multiplier, 3)
 
         # plus/minus of one sigma range
         m1sigma = values_mean - values_pstd
         p1sigma = values_mean + values_pstd
 
-        ninetynine  = round( self.percentiles(99, values) * 1000000, 2)
-        ninetyfive  = round( self.percentiles(95, values) * 1000000, 2)
-        five        = round( self.percentiles( 5, values) * 1000000, 2)
-        one         = round( self.percentiles( 1, values) * 1000000, 2)
+        ninetynine, ninetyfive, five, one = \
+                    self.percentiles( (99,95, 5, 1), values)
+        ninetynine  = round( ninetynine * multiplier, 2)
+        ninetyfive  = round( ninetyfive * multiplier, 2)
+        five        = round(       five * multiplier, 2)
+        one         = round(        one * multiplier, 2)
 
         cnt = collections.Counter()
         for value in values:
