@@ -59,9 +59,7 @@ extern	char	*keysdir;	/* crypto keys and leaptable directory */
 extern	const char	*getconfig	(const char *);
 extern	void	readconfig(const char *);
 extern	void	ctl_clr_stats	(void);
-extern	bool	ctlclrtrap	(sockaddr_u *, struct interface *, int);
 extern	u_short ctlpeerstatus	(struct peer *);
-extern	bool	ctlsettrap	(sockaddr_u *, struct interface *, int, int);
 extern	u_short ctlsysstatus	(void);
 extern	void	init_control	(void);
 extern	void	process_control (struct recvbuf *, int);
@@ -266,7 +264,6 @@ extern char *ntp_signd_socket;
 extern struct config_tree_tag *cfg_tree_history;
 
 /* ntp_control.c */
-extern int	num_ctl_traps;
 extern keyid_t	ctl_auth_keyid;		/* keyid used for authenticating write requests */
 
 /*

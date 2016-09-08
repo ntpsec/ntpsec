@@ -129,7 +129,6 @@
 %token	<Integer>	T_Logconfig
 %token	<Integer>	T_Logfile
 %token	<Integer>	T_Loopstats
-%token	<Integer>	T_Lowpriotrap
 %token	<Integer>	T_Manycastclient
 %token	<Integer>	T_Manycastserver
 %token	<Integer>	T_Mask
@@ -163,7 +162,6 @@
 %token	<Integer>	T_Noquery
 %token	<Integer>	T_Noselect
 %token	<Integer>	T_Noserve
-%token	<Integer>	T_Notrap
 %token	<Integer>	T_Notrust
 %token	<Integer>	T_Ntp
 %token	<Integer>	T_Ntpport
@@ -311,8 +309,6 @@
 %type	<Integer>	tos_option_dbl_keyword
 %type	<Integer>	tos_option_int_keyword
 %type	<Attr_val_fifo>	tos_option_list
-%type	<Attr_val>	trap_option
-%type	<Attr_val_fifo>	trap_option_list
 %type	<Integer>	unpeer_keyword
 %type	<Set_var>	variable_assign
 
@@ -863,13 +859,11 @@ access_control_flag
 	|	T_Kod
 	|	T_Mssntp
 	|	T_Limited
-	|	T_Lowpriotrap
 	|	T_Nomodify
 	|	T_Nomrulist
 	|	T_Nopeer
 	|	T_Noquery
 	|	T_Noserve
-	|	T_Notrap
 	|	T_Notrust
 	|	T_Ntpport
 	|	T_Version
@@ -1226,13 +1220,6 @@ miscellaneous_command
 			{ CONCAT_G_FIFOS(cfgt.phone, $2); }
 	|	T_Setvar variable_assign
 			{ APPEND_G_FIFO(cfgt.setvar, $2); }
-	|	T_Trap ip_address trap_option_list
-		{
-			addr_opts_node *aon;
-			
-			aon = create_addr_opts_node($2, $3);
-			APPEND_G_FIFO(cfgt.trap, aon);
-		}
 	|	T_Ttl integer_list
 			{ CONCAT_G_FIFOS(cfgt.ttl, $2); }
 	;
@@ -1305,26 +1292,6 @@ t_default_or_zero
 	:	T_Default
 	|	/* empty, no "default" modifier */
 			{ $$ = 0; }
-	;
-
-trap_option_list
-	:	/* empty list */
-			{ $$ = NULL; }
-	|	trap_option_list trap_option
-		{
-			$$ = $1;
-			APPEND_G_FIFO($$, $2);
-		}
-	;
-
-trap_option
-	:	T_Port T_Integer
-			{ $$ = create_attr_ival($1, $2); }
-	|	T_Interface ip_address
-		{
-			$$ = create_attr_sval($1, estrdup($2->address));
-			destroy_address_node($2);
-		}
 	;
 
 log_config_list

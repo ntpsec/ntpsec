@@ -90,20 +90,6 @@ include::includes/misc-options.txt[]
     This allows time for one or more primary sources to become reachable
     and selectable before using backup sources, and avoids transient use
     of the backup sources at startup.
-+trap+ 'host_address' [+port+ 'port_number'] [+interface+ 'interface_address']::
-  This command configures a trap receiver at the given host address and
-  port number for sending messages with the specified local interface
-  address. If the port number is unspecified, a value of 18447 is used.
-  If the interface address is not specified, the message is sent with a
-  source address of the local interface the message is sent through.
-  Note that on a multihomed host the interface used may vary from time
-  to time with routing changes.
-+
-The trap receiver will generally log event messages and other
-information from the server in a log file. While such monitor programs
-may also request their own trap dynamically, configuring a trap
-receiver will ensure that no messages are lost when the server is
-started.
 
 +ttl+ 'hop ...'::
   This command specifies a list of TTL values in increasing order. up to

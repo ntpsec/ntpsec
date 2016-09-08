@@ -84,8 +84,8 @@ diagnostics useful for tuning your time service.
 Your security/access section will almost always look a lot like this:
 
 ------------------------------------------------------------------
-restrict default kod limited nomodify notrap nopeer noquery  
-restrict -6 default kod limited nomodify notrap nopeer noquery
+restrict default kod limited nomodify nopeer noquery  
+restrict -6 default kod limited nomodify nopeer noquery
 restrict 127.0.0.1  
 restrict -6 ::1
 ------------------------------------------------------------------

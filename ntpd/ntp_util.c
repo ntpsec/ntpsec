@@ -356,7 +356,6 @@ stats_config(
 					  ? "expired"
 					  : "expires",
 				      fstostr(lsig.etime));
-
 			have_leapfile = true;
 
 			/* force an immediate daily expiration check of

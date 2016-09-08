@@ -71,9 +71,9 @@ static int refclock_sample (struct refclockproc *);
 /*
  * refclock_report - note the occurance of an event
  *
- * This routine presently just remembers the report and logs it, but
- * does nothing heroic for the trap handler. It tries to be a good
- * citizen and bothers the system log only if things change.
+ * This routine presently just remembers the report and logs it.  It
+ * tries to be a good citizen and bothers the system log only if
+ * things change.
  */
 void
 refclock_report(

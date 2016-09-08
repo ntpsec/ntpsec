@@ -219,7 +219,6 @@ static void free_config_setvar(config_tree *);
 static void free_config_system_opts(config_tree *);
 static void free_config_tinker(config_tree *);
 static void free_config_tos(config_tree *);
-static void free_config_trap(config_tree *);
 static void free_config_ttl(config_tree *);
 static void free_config_unpeers(config_tree *);
 static void free_config_vars(config_tree *);
@@ -296,7 +295,6 @@ static void config_mdnstries(config_tree *);
 static void config_phone(config_tree *);
 static void config_setvar(config_tree *);
 static void config_ttl(config_tree *);
-static void config_trap(config_tree *);
 static void config_fudge(config_tree *);
 static void config_peers(config_tree *);
 static void config_unpeers(config_tree *);
@@ -311,9 +309,6 @@ static void peer_name_resolved(int, int, void *, const char *, const char *,
 static void unpeer_name_resolved(int, int, void *, const char *, const char *,
 			  const struct addrinfo *,
 			  const struct addrinfo *);
-static void trap_name_resolved(int, int, void *, const char *, const char *,
-			const struct addrinfo *,
-			const struct addrinfo *);
 #endif
 
 enum gnn_type {
@@ -406,7 +401,6 @@ free_config_tree(
 	free_config_phone(ptree);
 	free_config_setvar(ptree);
 	free_config_ttl(ptree);
-	free_config_trap(ptree);
 	free_config_fudge(ptree);
 	free_config_vars(ptree);
 	free_config_peers(ptree);
@@ -1749,10 +1743,6 @@ config_access(
 				flags |= RES_LIMITED;
 				break;
 
-			case T_Lowpriotrap:
-				flags |= RES_LPTRAP;
-				break;
-
 			case T_Nomodify:
 				flags |= RES_NOMODIFY;
 				break;
@@ -1771,10 +1761,6 @@ config_access(
 
 			case T_Noserve:
 				flags |= RES_DONTSERVE;
-				break;
-
-			case T_Notrap:
-				flags |= RES_NOTRAP;
 				break;
 
 			case T_Notrust:
@@ -2438,188 +2424,6 @@ free_config_ttl(
 	)
 {
 	FREE_INT_FIFO(ptree->ttl);
-}
-
-
-static void
-config_trap(
-	config_tree *ptree
-	)
-{
-	addr_opts_node *curr_trap;
-	attr_val *curr_opt;
-	sockaddr_u addr_sock;
-	sockaddr_u peeraddr;
-	struct interface *localaddr;
-	struct addrinfo hints;
-	char port_text[8];
-	settrap_parms *pstp;
-	u_short port;
-	int err_flag;
-	int rc;
-
-	/* silence warning about addr_sock potentially uninitialized */
-	AF(&addr_sock) = AF_UNSPEC;
-
-	curr_trap = HEAD_PFIFO(ptree->trap);
-	for (; curr_trap != NULL; curr_trap = curr_trap->link) {
-		err_flag = 0;
-		port = 0;
-		localaddr = NULL;
-
-		curr_opt = HEAD_PFIFO(curr_trap->options);
-		for (; curr_opt != NULL; curr_opt = curr_opt->link) {
-			if (T_Port == curr_opt->attr) {
-				if (curr_opt->value.i < 1
-				    || curr_opt->value.i > USHRT_MAX) {
-					msyslog(LOG_ERR,
-						"invalid port number "
-						"%d, trap ignored",
-						curr_opt->value.i);
-					err_flag = 1;
-				}
-				port = (u_short)curr_opt->value.i;
-			}
-			else if (T_Interface == curr_opt->attr) {
-				/* Resolve the interface address */
-				ZERO_SOCK(&addr_sock);
-				if (getnetnum(curr_opt->value.s,
-					      &addr_sock, 1, t_UNK) != 1) {
-					err_flag = 1;
-					break;
-				}
-
-				localaddr = findinterface(&addr_sock);
-
-				if (NULL == localaddr) {
-					msyslog(LOG_ERR,
-						"can't find interface with address %s",
-						stoa(&addr_sock));
-					err_flag = 1;
-				}
-			}
-		}
-
-		/* Now process the trap for the specified interface
-		 * and port number
-		 */
-		if (!err_flag) {
-			if (!port)
-				port = TRAPPORT;
-			ZERO_SOCK(&peeraddr);
-			rc = getnetnum(curr_trap->addr->address,
-				       &peeraddr, 1, t_UNK);
-			if (1 != rc) {
-#ifndef USE_WORKER
-				msyslog(LOG_ERR,
-					"trap: unable to use IP address %s.",
-					curr_trap->addr->address);
-#else	/* USE_WORKER follows */
-				/*
-				 * save context and hand it off
-				 * for name resolution.
-				 */
-				ZERO(hints);
-				hints.ai_protocol = IPPROTO_UDP;
-				hints.ai_socktype = SOCK_DGRAM;
-				snprintf(port_text, sizeof(port_text),
-					 "%u", port);
-				hints.ai_flags = Z_AI_NUMERICSERV;
-				pstp = emalloc_zero(sizeof(*pstp));
-				if (localaddr != NULL) {
-					hints.ai_family = localaddr->family;
-					pstp->ifaddr_nonnull = 1;
-					memcpy(&pstp->ifaddr,
-					       &localaddr->sin,
-					       sizeof(pstp->ifaddr));
-				}
-				rc = getaddrinfo_sometime(
-					curr_trap->addr->address,
-					port_text, &hints,
-					INITIAL_DNS_RETRY,
-					&trap_name_resolved,
-					pstp);
-				if (!rc)
-					msyslog(LOG_ERR,
-						"config_trap: getaddrinfo_sometime(%s,%s): %m",
-						curr_trap->addr->address,
-						port_text);
-#endif	/* USE_WORKER */
-				continue;
-			}
-			/* port is at same location for v4 and v6 */
-			SET_PORT(&peeraddr, port);
-
-			if (NULL == localaddr)
-				localaddr = ANY_INTERFACE_CHOOSE(&peeraddr);
-			else
-				AF(&peeraddr) = AF(&addr_sock);
-
-			if (!ctlsettrap(&peeraddr, localaddr, 0,
-					NTP_VERSION))
-				msyslog(LOG_ERR,
-					"set trap %s -> %s failed.",
-					latoa(localaddr),
-					stoa(&peeraddr));
-		}
-	}
-}
-
-
-/*
- * trap_name_resolved()
- *
- * Callback invoked when config_trap()'s DNS lookup completes.
- */
-# ifdef USE_WORKER
-static void
-trap_name_resolved(
-	int			rescode,
-	int			gai_errno,
-	void *			context,
-	const char *		name,
-	const char *		service,
-	const struct addrinfo *	hints,
-	const struct addrinfo *	res
-	)
-{
-	settrap_parms *pstp;
-	struct interface *localaddr;
-	sockaddr_u peeraddr;
-
-	(void)gai_errno;
-	(void)service;
-	(void)hints;
-	pstp = context;
-	if (rescode) {
-		msyslog(LOG_ERR,
-			"giving up resolving trap host %s: %s (%d)",
-			name, gai_strerror(rescode), rescode);
-		free(pstp);
-		return;
-	}
-	INSIST(sizeof(peeraddr) >= res->ai_addrlen);
-	ZERO(peeraddr);
-	memcpy(&peeraddr, res->ai_addr, res->ai_addrlen);
-	localaddr = NULL;
-	if (pstp->ifaddr_nonnull)
-		localaddr = findinterface(&pstp->ifaddr);
-	if (NULL == localaddr)
-		localaddr = ANY_INTERFACE_CHOOSE(&peeraddr);
-	if (!ctlsettrap(&peeraddr, localaddr, 0, NTP_VERSION))
-		msyslog(LOG_ERR, "set trap %s -> %s failed.",
-			latoa(localaddr), stoa(&peeraddr));
-	free(pstp);
-}
-# endif	/* USE_WORKER */
-
-
-static void
-free_config_trap(
-	config_tree *ptree
-	)
-{
-	FREE_ADDR_OPTS_FIFO(ptree->trap);
 }
 
 
@@ -3505,7 +3309,6 @@ config_ntpd(
 	config_mdnstries(ptree);
 	config_setvar(ptree);
 	config_ttl(ptree);
-	config_trap(ptree);
 	config_vars(ptree);
 
 	if (intercept_get_mode() != replay)

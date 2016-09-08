@@ -15,13 +15,13 @@ use constant {
     OP_WRITEVAR       => 3,  # write variables
     OP_READCLOCK      => 4,  # read clock variables
     OP_WRITECLOCK     => 5,  # write clock variables
-    OP_SETTRAP        => 6,  # set trap address
+    OP_SETTRAP        => 6,  # set trap address (obsolete, unused)
     OP_ASYNCMSG       => 7,  # asynchronous message
     OP_CONFIGURE      => 8,  # runtime configuration
     OP_READ_MRU       => 10, # retrieve MRU (mrulist)
     OP_READ_ORDLIST_A => 11, # ordered list req. auth.
     OP_REQ_NONCE      => 12, # request a client nonce
-    OP_UNSETTRAP      => 31, # unset trap
+    OP_UNSETTRAP      => 31, # unset trap (obsolete, unused)
 };
 
 use constant {
