@@ -309,7 +309,12 @@ plot \
             if "(" in key or "::" in key:
                 ip = key
             else:
-                ip = socket.gethostbyname(key)
+                try:
+                    ip = socket.gethostbyname(key)
+                except:
+                    # ignore it
+                    ip = key
+
             if ip in peerdict:
                 plot_data += "\n".join(peerdict[ip]) + "\ne\n"
             else:
