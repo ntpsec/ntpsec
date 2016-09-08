@@ -40,15 +40,6 @@ ntpsweep::	prints per host given in <file> the NTP stratum level, the
 		wish to be interrogated.
 		Tested: 20160228
 
-ntptrap::	An ancient perl script to log ntp mode 6 trap messages.
-		Retained only so it can be translated and updated; it's
-		almost certainly not useful as is. It sends a set_trap
-		request to each server given and dumps the trap messages
-		received. It handles refresh of set_trap. Currently it
-		handles only NTP V2, however the NTP V3 servers
-		also accept v2 requests. It will not interpret v3 system and
-		peer statuses correctly.
-
 ntpver::	Simple script using ntpq to print out the suite version.
 		Tested: 20160226
 

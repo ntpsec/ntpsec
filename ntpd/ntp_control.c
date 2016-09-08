@@ -1,6 +1,6 @@
 /*
- * ntp_control.c - respond to mode 6 control messages and send async
- *		   traps.  Provides service to ntpq and others.
+ * ntp_control.c - respond to mode 6 control messages.
+ *		   Provides service to ntpq and others.
  */
 
 #include <config.h>
@@ -81,7 +81,6 @@ static	void	read_variables	(struct recvbuf *, int);
 static	void	write_variables (struct recvbuf *, int);
 static	void	read_clockstatus(struct recvbuf *, int);
 static	void	write_clockstatus(struct recvbuf *, int);
-static	void	set_trap	(struct recvbuf *, int);
 static	void	configure	(struct recvbuf *, int);
 static	void	send_mru_entry	(mon_entry *, int);
 static	void	send_random_tag_value(int);
@@ -98,9 +97,6 @@ static	uint32_t	derive_nonce	(sockaddr_u *, uint32_t, uint32_t);
 static	void	generate_nonce	(struct recvbuf *, char *, size_t);
 static	int	validate_nonce	(const char *, struct recvbuf *);
 static	void	req_nonce	(struct recvbuf *, int);
-static	void	unset_trap	(struct recvbuf *, int);
-static	struct ctl_trap *ctlfindtrap(sockaddr_u *,
-				     struct interface *);
 
 static const struct ctl_proc control_codes[] = {
 	{ CTL_OP_UNSPEC,		NOAUTH,	control_unspec },
@@ -109,12 +105,10 @@ static const struct ctl_proc control_codes[] = {
 	{ CTL_OP_WRITEVAR,		AUTH,	write_variables },
 	{ CTL_OP_READCLOCK,		NOAUTH,	read_clockstatus },
 	{ CTL_OP_WRITECLOCK,		NOAUTH,	write_clockstatus },
-	{ CTL_OP_SETTRAP,		NOAUTH,	set_trap },
 	{ CTL_OP_CONFIGURE,		AUTH,	configure },
 	{ CTL_OP_READ_MRU,		NOAUTH,	read_mru_list },
 	{ CTL_OP_READ_ORDLIST_A,	AUTH,	read_ordlist },
 	{ CTL_OP_REQ_NONCE,		NOAUTH,	req_nonce },
-	{ CTL_OP_UNSETTRAP,		NOAUTH,	unset_trap },
 	{ NO_REQUEST,			0,	NULL }
 };
 
@@ -584,23 +578,6 @@ static const char last_fmt[] =		"last.%d";
 static struct utsname utsnamebuf;
 
 /*
- * Trap structures. We only allow a few of these, and send a copy of
- * each async message to each live one. Traps time out after an hour, it
- * is up to the trap receipient to keep resetting it to avoid being
- * timed out.
- */
-/* ntp_request.c */
-struct ctl_trap ctl_traps[CTL_MAXTRAPS];
-int num_ctl_traps;
-
-/*
- * Type bits, for ctlsettrap() call.
- */
-#define TRAP_TYPE_CONFIG	0	/* used by configuration code */
-#define TRAP_TYPE_PRIO		1	/* priority trap */
-#define TRAP_TYPE_NONPRIO	2	/* nonpriority trap */
-
-/*
  * Keyid used for authenticating write requests.
  */
 keyid_t ctl_auth_keyid;
@@ -658,8 +635,6 @@ static keyid_t	res_keyid;
 
 #define MAXDATALINELEN	(72)
 
-static bool	res_async;	/* sending async trap response? */
-
 /*
  * Pointers for saving state when decoding request packets
  */
@@ -676,19 +651,14 @@ static	char *reqend;
 void
 init_control(void)
 {
-	size_t i;
-
 	uname(&utsnamebuf);
 
 	ctl_clr_stats();
 
 	ctl_auth_keyid = 0;
+	/* these may be unused with the old trap facility gone */
 	ctl_sys_last_event = EVNT_UNSPEC;
 	ctl_sys_num_events = 0;
-
-	num_ctl_traps = 0;
-	for (i = 0; i < COUNTOF(ctl_traps); i++)
-		ctl_traps[i].tr_flags = 0;
 }
 
 
@@ -797,7 +767,6 @@ process_control(
 	res_frags = 1;
 	res_offset = 0;
 	res_associd = htons(pkt->associd);
-	res_async = false;
 	res_authenticate = false;
 	res_keyid = 0;
 	res_authokay = false;
@@ -956,7 +925,6 @@ ctl_flushpkt(
 	uint8_t more
 	)
 {
-	size_t i;
 	int dlen;
 	int sendlen;
 	int maclen;
@@ -989,52 +957,31 @@ ctl_flushpkt(
 			(res_opcode & CTL_OP_MASK);
 	rpkt.count = htons((u_short)dlen);
 	rpkt.offset = htons((u_short)res_offset);
-	if (res_async) {
-		for (i = 0; i < COUNTOF(ctl_traps); i++) {
-			if (TRAP_INUSE & ctl_traps[i].tr_flags) {
-				rpkt.li_vn_mode =
-				    PKT_LI_VN_MODE(
-					sys_leap,
-					ctl_traps[i].tr_version,
-					MODE_CONTROL);
-				rpkt.sequence =
-				    htons(ctl_traps[i].tr_sequence);
-				intercept_sendpkt(__func__,
-				    &ctl_traps[i].tr_addr,
-				    ctl_traps[i].tr_localaddr, -4,
-				    (struct pkt *)&rpkt, sendlen);
-				if (!more)
-					ctl_traps[i].tr_sequence++;
-				numasyncmsgs++;
-			}
+	if (res_authenticate && sys_authenticate) {
+		totlen = sendlen;
+		/*
+		 * If we are going to authenticate, then there
+		 * is an additional requirement that the MAC
+		 * begin on a 64 bit boundary.
+		 */
+		while (totlen & 7) {
+			*datapt++ = '\0';
+			totlen++;
 		}
+		keyid = htonl(res_keyid);
+		memcpy(datapt, &keyid, sizeof(keyid));
+		maclen = authencrypt(res_keyid,
+				     (uint32_t *)&rpkt, totlen);
+		intercept_sendpkt(__func__, rmt_addr, lcl_inter, -5,
+			&rpkt, totlen + maclen);
 	} else {
-		if (res_authenticate && sys_authenticate) {
-			totlen = sendlen;
-			/*
-			 * If we are going to authenticate, then there
-			 * is an additional requirement that the MAC
-			 * begin on a 64 bit boundary.
-			 */
-			while (totlen & 7) {
-				*datapt++ = '\0';
-				totlen++;
-			}
-			keyid = htonl(res_keyid);
-			memcpy(datapt, &keyid, sizeof(keyid));
-			maclen = authencrypt(res_keyid,
-					     (uint32_t *)&rpkt, totlen);
-			intercept_sendpkt(__func__, rmt_addr, lcl_inter, -5,
-				&rpkt, totlen + maclen);
-		} else {
-			intercept_sendpkt(__func__, rmt_addr, lcl_inter, -6,
-				&rpkt, sendlen);
-		}
-		if (more)
-			numctlfrags++;
-		else
-			numctlresponses++;
+		intercept_sendpkt(__func__, rmt_addr, lcl_inter, -6,
+			&rpkt, sendlen);
 	}
+	if (more)
+		numctlfrags++;
+	else
+		numctlresponses++;
 
 	/*
 	 * Set us up for another go around.
@@ -4078,248 +4025,10 @@ write_clockstatus(
 }
 
 /*
- * Trap support from here on down. We send async trap messages when the
- * upper levels report trouble. Traps can by set either by control
- * messages or by configuration.
- */
-/*
- * set_trap - set a trap in response to a control message
- */
-static void
-set_trap(
-	struct recvbuf *rbufp,
-	int restrict_mask
-	)
-{
-	int traptype;
-
-	/*
-	 * See if this guy is allowed
-	 */
-	if (restrict_mask & RES_NOTRAP) {
-		ctl_error(CERR_PERMISSION);
-		return;
-	}
-
-	/*
-	 * Determine his allowed trap type.
-	 */
-	traptype = TRAP_TYPE_PRIO;
-	if (restrict_mask & RES_LPTRAP)
-		traptype = TRAP_TYPE_NONPRIO;
-
-	/*
-	 * Call ctlsettrap() to do the work.  Return
-	 * an error if it can't assign the trap.
-	 */
-	if (!ctlsettrap(&rbufp->recv_srcadr, rbufp->dstadr, traptype,
-			(int)res_version))
-		ctl_error(CERR_NORESOURCE);
-	ctl_flushpkt(0);
-}
-
-
-/*
- * unset_trap - unset a trap in response to a control message
- */
-static void
-unset_trap(
-	struct recvbuf *rbufp,
-	int restrict_mask
-	)
-{
-	int traptype;
-
-	/*
-	 * We don't prevent anyone from removing his own trap unless the
-	 * trap is configured. Note we also must be aware of the
-	 * possibility that restriction flags were changed since this
-	 * guy last set his trap. Set the trap type based on this.
-	 */
-	traptype = TRAP_TYPE_PRIO;
-	if (restrict_mask & RES_LPTRAP)
-		traptype = TRAP_TYPE_NONPRIO;
-
-	/*
-	 * Call ctlclrtrap() to clear this out.
-	 */
-	if (!ctlclrtrap(&rbufp->recv_srcadr, rbufp->dstadr, traptype))
-		ctl_error(CERR_BADASSOC);
-	ctl_flushpkt(0);
-}
-
-
-/*
- * ctlsettrap - called to set a trap
- */
-bool
-ctlsettrap(
-	sockaddr_u *raddr,
-	struct interface *linter,
-	int traptype,
-	int version
-	)
-{
-	size_t n;
-	struct ctl_trap *tp;
-	struct ctl_trap *tptouse;
-
-	/*
-	 * See if we can find this trap.  If so, we only need update
-	 * the flags and the time.
-	 */
-	if ((tp = ctlfindtrap(raddr, linter)) != NULL) {
-		switch (traptype) {
-
-		case TRAP_TYPE_CONFIG:
-			tp->tr_flags = TRAP_INUSE|TRAP_CONFIGURED;
-			break;
-
-		case TRAP_TYPE_PRIO:
-			if (tp->tr_flags & TRAP_CONFIGURED)
-				return true; /* don't change anything */
-			tp->tr_flags = TRAP_INUSE;
-			break;
-
-		case TRAP_TYPE_NONPRIO:
-			if (tp->tr_flags & TRAP_CONFIGURED)
-				return true; /* don't change anything */
-			tp->tr_flags = TRAP_INUSE|TRAP_NONPRIO;
-			break;
-		}
-		tp->tr_settime = current_time;
-		tp->tr_resets++;
-		return true;
-	}
-
-	/*
-	 * First we heard of this guy.	Try to find a trap structure
-	 * for him to use, clearing out lesser priority guys if we
-	 * have to. Clear out anyone who's expired while we're at it.
-	 */
-	tptouse = NULL;
-	for (n = 0; n < COUNTOF(ctl_traps); n++) {
-		tp = &ctl_traps[n];
-		if ((TRAP_INUSE & tp->tr_flags) &&
-		    !(TRAP_CONFIGURED & tp->tr_flags) &&
-		    ((tp->tr_settime + CTL_TRAPTIME) > current_time)) {
-			tp->tr_flags = 0;
-			num_ctl_traps--;
-		}
-		if (!(TRAP_INUSE & tp->tr_flags)) {
-			tptouse = tp;
-		} else if (!(TRAP_CONFIGURED & tp->tr_flags)) {
-			switch (traptype) {
-
-			case TRAP_TYPE_CONFIG:
-				if (tptouse == NULL) {
-					tptouse = tp;
-					break;
-				}
-				if ((TRAP_NONPRIO & tptouse->tr_flags) &&
-				    !(TRAP_NONPRIO & tp->tr_flags))
-					break;
-
-				if (!(TRAP_NONPRIO & tptouse->tr_flags)
-				    && (TRAP_NONPRIO & tp->tr_flags)) {
-					tptouse = tp;
-					break;
-				}
-				if (tptouse->tr_origtime <
-				    tp->tr_origtime)
-					tptouse = tp;
-				break;
-
-			case TRAP_TYPE_PRIO:
-				if ( TRAP_NONPRIO & tp->tr_flags) {
-					if (tptouse == NULL ||
-					    ((TRAP_INUSE &
-					      tptouse->tr_flags) &&
-					     tptouse->tr_origtime <
-					     tp->tr_origtime))
-						tptouse = tp;
-				}
-				break;
-
-			case TRAP_TYPE_NONPRIO:
-				break;
-			}
-		}
-	}
-
-	/*
-	 * If we don't have room for him return an error.
-	 */
-	if (tptouse == NULL)
-		return false;
-
-	/*
-	 * Set up this structure for him.
-	 */
-	tptouse->tr_settime = tptouse->tr_origtime = current_time;
-	tptouse->tr_count = tptouse->tr_resets = 0;
-	tptouse->tr_sequence = 1;
-	tptouse->tr_addr = *raddr;
-	tptouse->tr_localaddr = linter;
-	tptouse->tr_version = (uint8_t) version;
-	tptouse->tr_flags = TRAP_INUSE;
-	if (traptype == TRAP_TYPE_CONFIG)
-		tptouse->tr_flags |= TRAP_CONFIGURED;
-	else if (traptype == TRAP_TYPE_NONPRIO)
-		tptouse->tr_flags |= TRAP_NONPRIO;
-	num_ctl_traps++;
-	return true;
-}
-
-
-/*
- * ctlclrtrap - called to clear a trap
- */
-bool
-ctlclrtrap(
-	sockaddr_u *raddr,
-	struct interface *linter,
-	int traptype
-	)
-{
-	register struct ctl_trap *tp;
-
-	if ((tp = ctlfindtrap(raddr, linter)) == NULL)
-		return false;
-
-	if (tp->tr_flags & TRAP_CONFIGURED
-	    && traptype != TRAP_TYPE_CONFIG)
-		return false;
-
-	tp->tr_flags = 0;
-	num_ctl_traps--;
-	return true;
-}
-
-
-/*
- * ctlfindtrap - find a trap given the remote and local addresses
- */
-static struct ctl_trap *
-ctlfindtrap(
-	sockaddr_u *raddr,
-	struct interface *linter
-	)
-{
-	size_t	n;
-
-	for (n = 0; n < COUNTOF(ctl_traps); n++)
-		if ((ctl_traps[n].tr_flags & TRAP_INUSE)
-		    && ADDR_PORT_EQ(raddr, &ctl_traps[n].tr_addr)
-		    && (linter == ctl_traps[n].tr_localaddr))
-			return &ctl_traps[n];
-
-	return NULL;
-}
-
-
-/*
- * report_event - report an event to the trappers
+ * report_event - report an event to log files
+ *
+ * Code lives here because in past times it reported through the
+ * obsolete trap facility.
  */
 void
 report_event(
@@ -4329,12 +4038,10 @@ report_event(
 	)
 {
 	char	statstr[NTP_MAXSTRLEN];
-	int	i;
 	size_t	len;
 
 	/*
-	 * Report the error to the protostats file, system log and
-	 * trappers.
+	 * Report the error to the protostats file and system log
 	 */
 	if (peer == NULL) {
 
@@ -4400,69 +4107,6 @@ report_event(
 		printf("event at %lu %s\n", current_time, statstr);
 #endif
 
-	/*
-	 * If no trappers, return.
-	 */
-	if (num_ctl_traps <= 0)
-		return;
-
-	/*
-	 * Set up the outgoing packet variables
-	 */
-	res_opcode = CTL_OP_ASYNCMSG;
-	res_offset = 0;
-	res_async = true;
-	res_authenticate = false;
-	datapt = rpkt.u.data;
-	dataend = &rpkt.u.data[CTL_MAX_DATA_LEN];
-	if (!(err & PEER_EVENT)) {
-		rpkt.associd = 0;
-		rpkt.status = htons(ctlsysstatus());
-
-		/* Include the core system variables and the list. */
-		for (i = 1; i <= CS_VARLIST; i++)
-			ctl_putsys(i);
-	} else {
-		NTP_INSIST(peer != NULL);
-		rpkt.associd = htons(peer->associd);
-		rpkt.status = htons(ctlpeerstatus(peer));
-
-		/* Dump it all. Later, maybe less. */
-		for (i = 1; i <= CP_MAXCODE; i++)
-			ctl_putpeer(i, peer);
-#ifdef REFCLOCK
-		/*
-		 * for clock exception events: add clock variables to
-		 * reflect info on exception
-		 */
-		if (err == PEVNT_CLOCK) {
-			struct refclockstat cs;
-			struct ctl_var *kv;
-
-			cs.kv_list = NULL;
-			refclock_control(&peer->srcadr, NULL, &cs);
-
-			ctl_puthex("refclockstatus",
-				   ctlclkstatus(&cs));
-
-			for (i = 1; i <= CC_MAXCODE; i++)
-				ctl_putclock(i, &cs, false);
-			for (kv = cs.kv_list;
-			     kv != NULL && !(EOV & kv->flags);
-			     kv++)
-				if (DEF & kv->flags)
-					ctl_putdata(kv->text,
-						    strlen(kv->text),
-						    false);
-			free_varlist(cs.kv_list);
-		}
-#endif /* REFCLOCK */
-	}
-
-	/*
-	 * We're done, return.
-	 */
-	ctl_flushpkt(0);
 }
 
 

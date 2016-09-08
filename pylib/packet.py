@@ -19,13 +19,13 @@ CTL_OP_READVAR		= 2	# read variables
 CTL_OP_WRITEVAR		= 3	# write variables
 CTL_OP_READCLOCK	= 4	# read clock variables
 CTL_OP_WRITECLOCK	= 5	# write clock variables
-CTL_OP_SETTRAP		= 6	# set trap address
+CTL_OP_SETTRAP		= 6	# set trap address (obsolete, unused)
 CTL_OP_ASYNCMSG		= 7	# asynchronous message
 CTL_OP_CONFIGURE	= 8	# runtime configuration
 CTL_OP_READ_MRU		= 10	# retrieve MRU (mrulist)
 CTL_OP_READ_ORDLIST_A	= 11	# ordered list req. auth.
 CTL_OP_REQ_NONCE	= 12	# request a client nonce
-CTL_OP_UNSETTRAP	= 31	# unset trap
+CTL_OP_UNSETTRAP	= 31	# unset trap (obsolete, unused)
 
 # NTP Status codes
 NTP_STATUS_INVALID      = 0

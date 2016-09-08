@@ -43,9 +43,9 @@ Significant changes in program state are reported as events. There is
 one set of system events and a set of peer events for each association.
 In addition, there is a set of clock events for each association that
 supports a reference clock. Events are normally reported to the
-+protostats+ monitoring file and optionally to the system log. In
-addition, if the trap facility is configured, events can be reported to
-a remote program that can page an administrator.
++protostats+ monitoring file and optionally to the system log.
+//The now-removed trap feature was mentioned here - we're marking
+//this spot in case sometning like it is reintroduced.
 
 In the following tables the Event Field is the status or event code
 assigned and the Message Field a short string used for display and event

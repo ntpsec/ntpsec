@@ -30,8 +30,6 @@ struct ntp_control {
 /*
  * Limits and things
  */
-#define	CTL_MAXTRAPS	3		/* maximum number of traps we allow */
-#define	CTL_TRAPTIME	(60*60)		/* time out traps in 1 hour */
 #define	CTL_MAXAUTHSIZE	64		/* maximum size of an authen'ed req */
 
 /*
@@ -56,13 +54,13 @@ struct ntp_control {
 #define	CTL_OP_WRITEVAR		3	/* write variables */
 #define	CTL_OP_READCLOCK	4	/* read clock variables */
 #define	CTL_OP_WRITECLOCK	5	/* write clock variables */
-#define	CTL_OP_SETTRAP		6	/* set trap address */
+#define	CTL_OP_SETTRAP		6	/* set trap address (obsolete, unused) */
 #define	CTL_OP_ASYNCMSG		7	/* asynchronous message */
 #define CTL_OP_CONFIGURE	8	/* runtime configuration */
 #define CTL_OP_READ_MRU		10	/* retrieve MRU (mrulist) */
 #define CTL_OP_READ_ORDLIST_A	11	/* ordered list req. auth. */
 #define CTL_OP_REQ_NONCE	12	/* request a client nonce */
-#define	CTL_OP_UNSETTRAP	31	/* unset trap */
+#define	CTL_OP_UNSETTRAP	31	/* unset trap (obsolete, unused) */
 
 /*
  * {En,De}coding of the system status word
@@ -149,30 +147,6 @@ struct ntp_control {
 
 #define	CERR_NORESOURCE	CERR_PERMISSION	/* wish there was a different code */
 
-
-/*
- * Definition of the structure used internally to hold trap information.
- * ntp_request.c wants to see this.
- */
-struct ctl_trap {
-	sockaddr_u tr_addr;		/* address of trap recipient */
-	struct interface *tr_localaddr;	/* interface to send this through */
-	u_long tr_settime;		/* time trap was set */
-	u_long tr_count;		/* async messages sent to this guy */
-	u_long tr_origtime;		/* time trap was originally set */
-	u_long tr_resets;		/* count of resets for this trap */
-	u_short tr_sequence;		/* trap sequence id */
-	uint8_t tr_flags;		/* trap flags */
-	uint8_t tr_version;		/* version number of trapper */
-};
-extern struct ctl_trap ctl_traps[CTL_MAXTRAPS];
-
-/*
- * Flag bits
- */
-#define	TRAP_INUSE	0x1		/* this trap is active */
-#define	TRAP_NONPRIO	0x2		/* this trap is non-priority */
-#define	TRAP_CONFIGURED	0x4		/* this trap was configured */
 
 /*
  * Types of things we may deal with

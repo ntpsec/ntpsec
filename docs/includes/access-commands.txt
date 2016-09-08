@@ -58,13 +58,6 @@
     the monitoring capability of {ntpdman}. Thus, monitoring is
     always active as long as there is a restriction entry with
     the limited flag.
-  +lowpriotrap+;;
-    Declare traps set by matching hosts to be low priority. The number
-    of traps a server can maintain is limited (the current limit is 3).
-    Traps are usually assigned on a first come, first served basis, with
-    later trap requestors being denied service. This flag modifies the
-    assignment algorithm by allowing low priority traps to be overridden
-    by later requests for normal priority traps.
 //  +mssntp+;;
 //    Enable Microsoft Windows MS-SNTP authentication using Active
 //    Directory services. *Note: Potential users should be aware that
@@ -87,10 +80,6 @@
     source ...+ line as well that does 'not' include the +nopeer+ directive.
   +noserve+;;
     Deny all packets except {ntpqman} and queries.
-  +notrap+;;
-    Decline to provide mode 6 control message trap service to matching
-    hosts. The trap service is a subsystem of the {ntpq} control message
-    protocol which is intended for use by remote event logging programs.
   +notrust+;;
     Deny service unless the packet is cryptographically authenticated.
   +ntpport+;;

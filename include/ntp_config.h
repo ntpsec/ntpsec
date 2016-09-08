@@ -234,7 +234,6 @@ struct config_tree_tag {
 	string_fifo *	phone;
 	setvar_fifo *	setvar;
 	int_fifo *	ttl;
-	addr_opts_fifo *trap;
 	attr_val_fifo *	vars;
 	nic_rule_fifo *	nic_rules;
 	int_fifo *	reset_counters;
@@ -252,16 +251,6 @@ struct REMOTE_CONFIG_INFO {
 	int err_pos;
 	int no_errors;
 };
-
-
-/*
- * context for trap_name_resolved() to call ctlsettrap() once the 
- * name->address resolution completes.
- */
-typedef struct settrap_parms_tag {
-	sockaddr_u	ifaddr;
-	int		ifaddr_nonnull;
-} settrap_parms;
 
 
 /* get text from T_ tokens */
