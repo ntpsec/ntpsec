@@ -746,13 +746,16 @@ larger frequency offsets.</p>
 """,
 
         "local-error": """\
-<p>This shows the frequency offset of the local clock.  It comes from
-field 3 of the loopstats log file.  The graph includes percentile data to
-show how much the frequency changes over a longer period of time.  The
-majority of this change should come from temperature changes (ex: HVAC,
-the weather, CPU usage causing local heating).</p>
+<p>This shows the frequency offset of the local clock (aka drift).
+It comes from field 3 of the loopstats log file.  The graph includes
+percentile data to show how much the frequency changes over a longer
+period of time.  The majority of this change should come from
+temperature changes (ex: HVAC, the weather, CPU usage causing local
+heating).</p>
 
-<p>Smaller changes are better.  An ideal result would be a horizontal line at 0ppm.</p>
+<p>Smaller changes are better.  An ideal result would be a horizontal
+line at 0ppm.</p>
+
 <p>Expected values of 99%-1% percentiles: 0.4ppm</p>
 """,
         "local-offset-histogram": """\
