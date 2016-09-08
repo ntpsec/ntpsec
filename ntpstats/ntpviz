@@ -115,18 +115,32 @@ set rmargin 12
             sys.stderr.write("ntpviz: WARNING: no loopstats to graph\n")
             return ''
         sitename = self.sitename
+        unit = "μs"
+        multiplier = 1e6
+        values = [float(line.split()[1]) for line in self.loopstats]
+        values.sort()
+
+        ninetynine, one = \
+                    self.percentiles( (99, 1), values)
+
+        if 1 > ninetynine and -1 < one:
+            # go to nanosec
+            unit = "ns"
+            multiplier = 1e9
+
         plot_template = NTPViz.Common + """\
 set title "%(sitename)s: Local Clock Time/Frequency Offsets"
-set ytics format "%%1.2f μs" nomirror textcolor rgb '#0060ad'
+set ytics format "%%1.2f %(unit)s" nomirror textcolor rgb '#0060ad'
 set y2tics format "%%2.3f ppm" nomirror textcolor rgb '#dd181f'
 set key bottom right box
 set style line 1 lc rgb '#0060ad' lt 1 lw 1 pt 7 ps 0   # --- blue
 set style line 2 lc rgb '#dd181f' lt 1 lw 1 pt 5 ps 0   # --- red
 plot \
- "-" using 1:($2*1000000) title "clock offset μs" with linespoints ls 1, \
+ "-" using 1:($2*%(multiplier)s) title "clock offset %(unit)s" with linespoints ls 1, \
  "-" using 1:3 title "frequency offset ppm" with linespoints ls 2 axis x1y2
 """ % locals()
-        return plot_template + self.dump("loopstats") + "e\n" + self.dump("loopstats")
+        return plot_template + self.dump("loopstats") + "e\n" \
+             + self.dump("loopstats")
 
     def local_temps_gnuplot(self):
         "Generate GNUPLOT code graphing local temperature statistics"
