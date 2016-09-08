@@ -800,10 +800,11 @@ line at 0s.</p>
 <p>This shows the offset of a peer or server in seconds.
 This is field 5 from the loopstats log file.  This can be useful to
 see if the measured  offset is changing.</p>
-<p>Closer to 0s is better.  An ideal system would be a horizontal line
-at 0s. Typical 90% ranges may be: local serial GPS 200 ms; local LAN peer
-80µs; local PPS 20µs.  90% ranges for WAN servers may be 4ms and much larger.
-</p>
+<p>The chart also plots offset±rtt.  Where rtt is the round trip time
+to the remote.  NTP can not really know the offset of a remote chimer,
+NTP computes it by subtracting rtt/2 from the offset.  Plotting the
+offset±rtt reverses this calculation to easier see the effects of
+rtt changes.</p>
 """,
         "peer-offsets": """\
 <p>This shows the offset of all peers and servers in seconds.
@@ -811,7 +812,9 @@ This is field 5 from the loopstats log file.  This can be useful to
 see if offset changes are happening in a single clock or all clocks
 together.</p>
 <p>Closer to 0s is better.  An ideal system would be a horizontal line
-at 0s.</p>
+at 0s. Typical 90% ranges may be: local serial GPS 200 ms; local LAN peer
+80µs; local PPS 20µs.  90% ranges for WAN servers may be 4ms and much larger.
+</p>
 """,
         }
 
