@@ -130,7 +130,7 @@ set rmargin 12
 
         plot_template = NTPViz.Common + """\
 set title "%(sitename)s: Local Clock Time/Frequency Offsets"
-set ytics format "%%1.2f %(unit)s" nomirror textcolor rgb '#0060ad'
+set ytics format "%%1.0f %(unit)s" nomirror textcolor rgb '#0060ad'
 set y2tics format "%%2.3f ppm" nomirror textcolor rgb '#dd181f'
 set key bottom right box
 set style line 1 lc rgb '#0060ad' lt 1 lw 1 pt 7 ps 0   # --- blue
@@ -264,7 +264,7 @@ plot \
 
         plot_template = NTPViz.Common + """\
 set title "%(sitename)s: %(title)s"
-set ytics format "%%1.2f %(unit)s" nomirror
+set ytics format "%%1.0f %(unit)s" nomirror
 set key top right box
 set style line 1 lc rgb '#0060ad' lt 1 lw 1 pt 7 ps 0   # --- blue
 set style line 2 lc rgb '#dd181f' lt 1 lw 1 pt 5 ps 0   # --- red
