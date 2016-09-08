@@ -281,7 +281,7 @@ plot \
         return plot_template + self.dump("loopstats")
     def local_offset_jitter_gnuplot(self):
         "Generate GNUPLOT code of local clock loop standard deviation"
-        return self.loopstats_gnuplot(4, "RMS Time jitter", "Jitter", 0)
+        return self.loopstats_gnuplot(4, "RMS Time Jitter", "Jitter", 0)
     def local_offset_stability_gnuplot(self):
         "Generate GNUPLOT code graphing local clock stability"
         return self.loopstats_gnuplot(5, "RMS Frequency Jitter", "Stability", 1)
@@ -730,13 +730,15 @@ includes 1%, 5%, 95%, and 99% percentiles to show the performance of
 the system.</p>
 """,
         "local-stability": """\
-<p>This shows the jitter of the local clock's frequency.  In other
-words, how fast it the local clock changes freqency.</p>
+<p>This shows the frequency jitter (aka wander) of the local clock's
+frequency.  In other words, how fast it the local clock changes freqency.
+This is field 6 in the loopstats log file.</p>
 <p>Lower is better.  An ideal clock would be a straight line at 0ppm.</p>
 """,
         "local-jitter": """\
 <p>This shows the jitter of the local clock offset.  In other words,
-how fast the local clock offset is changing.</p>
+how fast the local clock offset is changing.  This is field 5 in the
+loopstats log file</p>
 <p>Lower is better.  An ideal system would be a straight line at 0μs.</p>
 """,
         "local-temps": """\
