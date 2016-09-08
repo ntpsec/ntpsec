@@ -222,7 +222,8 @@ plot \
             sys.stderr.write("ntpviz: WARNING: no loopstats to graph\n")
             return ''
         unit = "μs"
-        multiplier = 1000000
+        multiplier = 1e6
+        rnd = 3
 
         sitename   = self.sitename
         # grab and sort the values, no need for the timestamp, etc.
@@ -231,25 +232,27 @@ plot \
 
         ninetynine, ninetyfive, five, one = \
                     self.percentiles( (99,95, 5, 1), values)
-        ninetynine  = round( ninetynine * multiplier, 3)
-        ninetyfive  = round( ninetyfive * multiplier, 3)
-        five        = round(       five * multiplier, 3)
-        one         = round(        one * multiplier, 3)
+
+        if 1e3 <= ninetynine and -1e3 >= one:
+            # go to millisec
+            unit = "ms"
+            multiplier = 1e3
+        else:
+            if 1e6 > ninetynine and -1e6 < one:
+                # go to nanosec
+                unit = "ns"
+                multiplier = 1e9
+                rnd = 0
+
+        sys.stderr.write( " 99 = %(ninetynine)s, 1 = %(one)s \n" % locals() )
+
+        ninetynine  = round( ninetynine * multiplier, rnd)
+        ninetyfive  = round( ninetyfive * multiplier, rnd)
+        five        = round(       five * multiplier, rnd)
+        one         = round(        one * multiplier, rnd)
 
         nf_m_f     = ninetyfive - five
         nn_m_o     = ninetynine - one
-
-        if 1000 <= ninetynine:
-            # go to millisec
-            unit = "ms"
-            multiplier = 1000
-            ninetynine /= 1000
-            ninetyfive /= 1000
-            five       /= 1000
-            one        /= 1000
-            nf_m_f     /= 1000
-            nn_m_o     /= 1000
-
 
         plot_template = NTPViz.Common + """\
 set title "%(sitename)s: %(title)s"
@@ -411,7 +414,9 @@ plot \
         values = [float(line.split()[1]) for line in self.loopstats]
         values.sort()
 
-        multiplier = 1000000
+        unit = "μs"
+        multiplier = 1e6
+        rnd = 7
         mu = mean( values )
         values_mean = mu * multiplier
         values_mean_str = str( round( values_mean, 3 ) )
@@ -429,11 +434,17 @@ plot \
         five        = round(       five * multiplier, 2)
         one         = round(        one * multiplier, 2)
 
+        if 1 > ninetynine and -1 < one:
+            # go to nanosec
+            unit = "ns"
+            multiplier = 1e9
+            rnd = 9
+
         cnt = collections.Counter()
         for value in values:
             # put into 100 nSec buckets
             # for a +/- 50 microSec range that is 1,000 buckets to plot
-            cnt[ round( float(value), 7)] += 1
+            cnt[ round( float(value), rnd)] += 1
 
 # skip the mean
 #set label 3 "mean = %(values_mean_str)s μs" at graph 0.01,0.3  left front
@@ -443,7 +454,7 @@ set terminal png size 900,600
 set grid
 set xtic rotate by -45 scale 0
 set title "%(sitename)s: Local Clock Time Offset - Histogram"
-set xtics format "%%1.1f μs" nomirror
+set xtics format "%%1.1f %(unit)s" nomirror
 set style arrow 1 nohead
 set arrow from %(m1sigma)s,0 to %(m1sigma)s,graph 0.90 as 1
 set style arrow 2 nohead
@@ -466,13 +477,13 @@ set label 3 "99%%" at %(ninetynine)s, graph 0.35  left front offset -1,-1
 set label 4 "95%%" at %(ninetyfive)s, graph 0.50  left front offset -1,-1
 set label 5 "1%%" at %(one)s, graph 0.35  left front offset -1,-1
 set label 6 "5%%" at %(five)s, graph 0.50  left front offset -1,-1
-set label 10 "1σ = %(values_pstd)s μs" at graph 0.99,0.95 right front
-set label 11 "99%% = %(ninetynine)s μs" at graph 0.99,0.90 right front
-set label 12 "95%% = %(ninetyfive)s μs" at graph 0.99,0.85 right front
-set label 13 "5%% = %(five)s μs" at graph 0.99,0.80 right front
-set label 14 "1%% = %(one)s μs" at graph 0.99,0.75 right front
+set label 10 "1σ = %(values_pstd)s %(unit)s" at graph 0.99,0.95 right front
+set label 11 "99%% = %(ninetynine)s %(unit)s" at graph 0.99,0.90 right front
+set label 12 "95%% = %(ninetyfive)s %(unit)s" at graph 0.99,0.85 right front
+set label 13 "5%% = %(five)s %(unit)s" at graph 0.99,0.80 right front
+set label 14 "1%% = %(one)s %(unit)s" at graph 0.99,0.75 right front
 plot \
- "-" using ($1 * 1000000):2 title "histogram" with boxes
+ "-" using ($1 * %(multiplier)s):2 title "histogram" with boxes
 ''' % locals()
         vals = list(cnt.keys())
         vals.sort()
