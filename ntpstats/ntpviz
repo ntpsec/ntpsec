@@ -448,20 +448,21 @@ plot \
         values = [float(line.split()[1]) for line in self.loopstats]
         values.sort()
 
-        unit = "μs"
-        multiplier = 1e6
-        rnd = 7
         ninetynine, ninetyfive, five, one = \
                     self.percentiles( (99,95, 5, 1), values)
 
+        unit = "μs"
+        multiplier = 1e6
         rnd = 2
-        rnd1 = 7
+        rnd1 = 7        # round to 100 ns boxes
+        boxwidth = 1e-7
         if 1e-6 > ninetynine and -1e-6 < one:
             # go to nanosec
             unit = "ns"
             multiplier = 1e9
             rnd = 0
-            rnd1 = 9
+            rnd1 = 9        # round to 1 ns boxes
+            boxwidth = 1e-9
 
         ninetynine  = round( ninetynine * multiplier, rnd)
         ninetyfive  = round( ninetyfive * multiplier, rnd)
@@ -491,6 +492,7 @@ plot \
         plot_template = '''\
 set terminal png size 900,600
 set grid
+set boxwidth %(boxwidth)s
 set xtic rotate by -45 scale 0
 set title "%(sitename)s: Local Clock Time Offset - Histogram"
 set xtics format "%%1.1f %(unit)s" nomirror
