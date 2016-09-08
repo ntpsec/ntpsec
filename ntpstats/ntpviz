@@ -796,12 +796,22 @@ This is field 8 in the loopstats log file.</p>
 <p>Closer to 0s is better.  An ideal system would be a horizontal
 line at 0s.</p>
 """,
+        "peer-offset": """\
+<p>This shows the offset of a peer or server in seconds.
+This is field 5 from the loopstats log file.  This can be useful to
+see if the measured  offset is changing.</p>
+<p>Closer to 0s is better.  An ideal system would be a horizontal line
+at 0s. Typical 90% ranges may be: local serial GPS 200 ms; local LAN peer
+80µs; local PPS 20µs.  90% ranges for WAN servers may be 4ms and much larger.
+</p>
+""",
         "peer-offsets": """\
-<p>This shows the offset of all remote peers and servers.  This can
-be useful to see if offset changes are happening in a single clock or
-all clocks together.</p>
-<p>Closer to 0μs is better.  An ideal system would be a horizontal line
-at 0μs.</p>
+<p>This shows the offset of all peers and servers in seconds.
+This is field 5 from the loopstats log file.  This can be useful to
+see if offset changes are happening in a single clock or all clocks
+together.</p>
+<p>Closer to 0s is better.  An ideal system would be a horizontal line
+at 0s.</p>
 """,
         }
 
@@ -964,6 +974,8 @@ ntpviz</a>, part of the <a href="https://www.ntpsec.org/">NTPsec project</a>
                 ifile.write("<div>\n<h2>%s:</h2>\n" % div_name)
                 if 'peer-jitter-' == imagename[:12]:
                     exp = 'peer-jitter'
+                elif 'peer-offset-' == imagename[:12]:
+                    exp = 'peer-offset'
                 else:
                     exp = imagename
                 if exp in explanations:
