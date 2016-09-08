@@ -16,7 +16,7 @@
            | --peer-jitters=hosts 
            | --peer-offsets=hosts ]
 	 [-o outdir]
-	 [-D N] [-N]
+	 [-D N]
 
 == DESCRIPTION ==
 
