@@ -466,17 +466,17 @@ set xtic rotate by -45 scale 0
 set title "%(sitename)s: Local Clock Time Offset - Histogram"
 set xtics format "%%1.1f %(unit)s" nomirror
 set style arrow 1 nohead
-set arrow from %(m1sigma)s,0 to %(m1sigma)s,graph 0.90 as 1
+set arrow from %(m1sigma)s,graph 0 to %(m1sigma)s,graph 0.90 as 1
 set style arrow 2 nohead
-set arrow from %(p1sigma)s,0 to %(p1sigma)s,graph 0.90 as 2
+set arrow from %(p1sigma)s,graph 0 to %(p1sigma)s,graph 0.90 as 2
 set style arrow 3 nohead
-set arrow from %(ninetynine)s,0 to %(ninetynine)s,graph 0.30 as 3
+set arrow from %(ninetynine)s,graph 0 to %(ninetynine)s,graph 0.30 as 3
 set style arrow 4 nohead
-set arrow from %(ninetyfive)s,0 to %(ninetyfive)s,graph 0.45 as 4
+set arrow from %(ninetyfive)s,graph 0 to %(ninetyfive)s,graph 0.45 as 4
 set style arrow 5 nohead
-set arrow from %(five)s,0 to %(five)s,graph 0.45 as 5
+set arrow from %(five)s,graph 0 to %(five)s,graph 0.45 as 5
 set style arrow 6 nohead
-set arrow from %(one)s,0 to %(one)s,graph 0.30 as 6
+set arrow from %(one)s,graph 0 to %(one)s,graph 0.30 as 6
 set key off
 set lmargin 12
 set rmargin 12
