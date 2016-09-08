@@ -315,6 +315,11 @@ plot \
                 # go to millisec
                 unit = "ms"
                 multiplier = 1000
+            else:
+                if 1 > ninetynine and -1 < one:
+                    # go to nanosec
+                    unit = "ns"
+                    multiplier = 1e9
 
             if "offset" == type:
                 # fld == 4
