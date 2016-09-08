@@ -237,10 +237,13 @@ plot \
         ninetynine, ninetyfive, five, one = \
                     self.percentiles( (99,95, 5, 1), values)
 
-        if 1e-3 <= ninetynine and -1e-3 >= one and not freq:
+        if 1e-3 <= ninetynine or -1e-3 >= one:
             # go to millisec
-            unit = "ms"
             multiplier = 1e3
+            if freq:
+                unit = "ppt"
+            else:
+                unit = "ms"
         else:
             if 1e-6 > ninetynine and -1e-6 < one:
                 # go to nanosec, or ppb
@@ -830,6 +833,10 @@ system clock frequency (usually in parts per million, ppm)</dd>
 <dt>ppm, parts per million:</dt>
 <dd>Ratio between two values. These following are all the same:
     1 ppm, one in one million, 1/1000000, 0.000001, and 0.0001%</dd>
+
+<dt>ppt, parts per thousand:</dt>
+<dd>Ratio between two values. These following are all the same:
+    1 ppt, one in one thousand, 1/1000, 0.001, and 0.1%</dd>
 
 <dt>refclock:</dt>
 <dd>Reference clock, a local GPS module or other local source of time.</dd>
