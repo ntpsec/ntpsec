@@ -782,18 +782,26 @@ changes change the local clock crystal frequency and stability.  Crystals
 oscillate faster when warmer. This the single most important
 component of frequency drift.</p>
 """,
+        "peer-jitter": """\
+<p>This shows the jitter of a remote peer or server.  Jitter is the
+current estimated dispersion; the variation in offset between samples.
+This is field 8 in the loopstats log file.</p>
+<p>Closer to 0s is better.  An ideal system would be a horizontal
+line at 0s.</p>
+""",
+        "peer-jitters": """\
+<p>This shows the jitter of all remote peers and servers.  Jitter is the
+current estimated dispersion; the variation in offset between samples.
+This is field 8 in the loopstats log file.</p>
+<p>Closer to 0s is better.  An ideal system would be a horizontal
+line at 0s.</p>
+""",
         "peer-offsets": """\
-<p>This shows the offset of all remote clocks and refclocks.  This can
+<p>This shows the offset of all remote peers and servers.  This can
 be useful to see if offset changes are happening in a single clock or
 all clocks together.</p>
 <p>Closer to 0μs is better.  An ideal system would be a horizontal line
 at 0μs.</p>
-""",
-        "peer-jitters": """\
-<p>This shows the jitter of the remote clock offset.  In other words,
-how quickly the remote clock offset is changing.</p>
-<p>Closer to 0μs/s is better.  An ideal system would be a horizontal
-line at 0μs/s.</p>
 """,
         }
 
@@ -954,8 +962,12 @@ ntpviz</a>, part of the <a href="https://www.ntpsec.org/">NTPsec project</a>
                     continue;
                 div_name = imagename.replace('-', ' ')
                 ifile.write("<div>\n<h2>%s:</h2>\n" % div_name)
-                if imagename in explanations:
-                    ifile.write("<div>\n%s</div>\n" % explanations[imagename])
+                if 'peer-jitter-' == imagename[:12]:
+                    exp = 'peer-jitter'
+                else:
+                    exp = imagename
+                if exp in explanations:
+                    ifile.write("<div>\n%s</div>\n" % explanations[exp])
                 gnuplot(image, os.path.join(outdir, imagename + ".png"))
                 div = imagewrapper % (imagename.replace(':', '%3A'), div_name)
                 ifile.write(div)
