@@ -216,14 +216,18 @@ plot \
  %(one)s title "1st percentile"
 """ % locals()
         return plot_template + self.dump("loopstats")
-    def loopstats_gnuplot(self, fld, title, legend):
+    def loopstats_gnuplot(self, fld, title, legend, freq):
         "Generate GNUPLOT code of a given loopstats field"
         if not len( self.loopstats):
             sys.stderr.write("ntpviz: WARNING: no loopstats to graph\n")
             return ''
-        unit = "μs"
+
         multiplier = 1e6
         rnd = 3
+        if freq:
+            unit = "ppm"
+        else:
+            unit = "μs"
 
         sitename   = self.sitename
         # grab and sort the values, no need for the timestamp, etc.
@@ -233,16 +237,19 @@ plot \
         ninetynine, ninetyfive, five, one = \
                     self.percentiles( (99,95, 5, 1), values)
 
-        if 1e-3 <= ninetynine and -1e-3 >= one:
+        if 1e-3 <= ninetynine and -1e-3 >= one and not freq:
             # go to millisec
             unit = "ms"
             multiplier = 1e3
         else:
             if 1e-6 > ninetynine and -1e-6 < one:
-                # go to nanosec
-                unit = "ns"
+                # go to nanosec, or ppb
                 multiplier = 1e9
                 rnd = 0
+                if freq:
+                    unit = "ppb"
+                else:
+                    unit = "ns"
 
         ninetynine  = round( ninetynine * multiplier, rnd)
         ninetyfive  = round( ninetyfive * multiplier, rnd)
@@ -274,10 +281,10 @@ plot \
         return plot_template + self.dump("loopstats")
     def local_offset_jitter_gnuplot(self):
         "Generate GNUPLOT code of local clock loop standard deviation"
-        return self.loopstats_gnuplot(4, "RMS Time jitter", "Jitter")
+        return self.loopstats_gnuplot(4, "RMS Time jitter", "Jitter", 0)
     def local_offset_stability_gnuplot(self):
         "Generate GNUPLOT code graphing local clock stability"
-        return self.loopstats_gnuplot(5, "RMS Frequency Jitter", "Stability")
+        return self.loopstats_gnuplot(5, "RMS Frequency Jitter", "Stability", 1)
     def peerstats_gnuplot(self, peerlist, fld, title, type):
         "Plot a specified field from peerstats."
         sitename = self.sitename
