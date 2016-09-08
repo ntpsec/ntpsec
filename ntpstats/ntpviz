@@ -306,14 +306,11 @@ plot \
             # The socket.gethostbyname() call maps DNS names to IP addresses,
             # passing through literal IPv4 addresses unaltered.  However,
             # it barfs on either literal IPv6 addresses or refclock names.
-            if "(" in key or "::" in key:
+            try:
+                ip = socket.gethostbyname(key)
+            except:
+                # ignore it
                 ip = key
-            else:
-                try:
-                    ip = socket.gethostbyname(key)
-                except:
-                    # ignore it
-                    ip = key
 
             if ip in peerdict:
                 plot_data += "\n".join(peerdict[ip]) + "\ne\n"
