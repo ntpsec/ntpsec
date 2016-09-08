@@ -415,34 +415,39 @@ plot \
         unit = "μs"
         multiplier = 1e6
         rnd = 7
+        ninetynine, ninetyfive, five, one = \
+                    self.percentiles( (99,95, 5, 1), values)
+
+        rnd = 2
+        rnd1 = 7
+        if 1e-6 > ninetynine and -1e-6 < one:
+            # go to nanosec
+            unit = "ns"
+            multiplier = 1e9
+            rnd = 0
+            rnd1 = 9
+
+        ninetynine  = round( ninetynine * multiplier, rnd)
+        ninetyfive  = round( ninetyfive * multiplier, rnd)
+        five        = round(       five * multiplier, rnd)
+        one         = round(        one * multiplier, rnd)
+
+        cnt = collections.Counter()
+        for value in values:
+            # put into buckets
+            # for a +/- 50 microSec range that is 1,000 buckets to plot
+            cnt[ round( float(value), rnd1)] += 1
+
         mu = mean( values )
         values_mean = mu * multiplier
-        values_mean_str = str( round( values_mean, 3 ) )
+        values_mean_str = str( round( values_mean, rnd ) )
 
-        values_pstd = round( pstdev( values, mu=mu ) * multiplier, 3)
+        values_pstd = round( pstdev( values, mu=mu ) * multiplier, rnd)
 
         # plus/minus of one sigma range
         m1sigma = values_mean - values_pstd
         p1sigma = values_mean + values_pstd
 
-        ninetynine, ninetyfive, five, one = \
-                    self.percentiles( (99,95, 5, 1), values)
-        ninetynine  = round( ninetynine * multiplier, 2)
-        ninetyfive  = round( ninetyfive * multiplier, 2)
-        five        = round(       five * multiplier, 2)
-        one         = round(        one * multiplier, 2)
-
-        if 1 > ninetynine and -1 < one:
-            # go to nanosec
-            unit = "ns"
-            multiplier = 1e9
-            rnd = 9
-
-        cnt = collections.Counter()
-        for value in values:
-            # put into 100 nSec buckets
-            # for a +/- 50 microSec range that is 1,000 buckets to plot
-            cnt[ round( float(value), rnd)] += 1
 
 # skip the mean
 #set label 3 "mean = %(values_mean_str)s μs" at graph 0.01,0.3  left front
