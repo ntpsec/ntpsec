@@ -713,9 +713,10 @@ if __name__ == '__main__':
     explanations = {
         "local-offset": """\
 <p>The offsets of the ntpd calculated time and the local system clock.
-Showing frequency offset (red, in parts per million, scale on right) and the
-frequency offset (blue, in μs, scale on left). Quick changes in time offset
-will lead to larger frequency offsets.</p>
+Showing frequency offset (red, in parts per million, scale on right) and
+the time offset (blue, in μs, scale on left).  These are fields 4 and 3
+from the loopstats log file.  Quick changes in time offset will lead to
+larger frequency offsets.</p>
 """,
 
         "local-error": """\
