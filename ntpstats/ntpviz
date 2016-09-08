@@ -767,19 +767,6 @@ how quickly the remote clock offset is changing.</p>
 <p>Closer to 0μs/s is better.  An ideal system would be a straight
 line at 0μs/s.</p>
 """,
-        # FIXME: Not used yet
-        "peer-offset-X": """\
-<p>This shows the clock offset between the local clock and a remote
-clock or refclock.</p>
-<p>For remote clocks, the purple line is the offset while the green
-and blue lines are the request and response.  The request and response
-lines can show if the change in offset was due to an asymmetric
-network effect (either request or response latency went up/down, but
-not both), a symmetric network effect (request and response latency
-went in opposite directions), or the clocks changed in offset (request
-and response and offset all went in the same direction).<p>
-<p>The orange 50th percentile line shows the median offset value.  You can use this to align offsets between LAN stratum 1 servers.</p>
-"""
         }
 
     index_header = '''\
