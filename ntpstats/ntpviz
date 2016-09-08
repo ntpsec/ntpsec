@@ -233,18 +233,16 @@ plot \
         ninetynine, ninetyfive, five, one = \
                     self.percentiles( (99,95, 5, 1), values)
 
-        if 1e3 <= ninetynine and -1e3 >= one:
+        if 1e-3 <= ninetynine and -1e-3 >= one:
             # go to millisec
             unit = "ms"
             multiplier = 1e3
         else:
-            if 1e6 > ninetynine and -1e6 < one:
+            if 1e-6 > ninetynine and -1e-6 < one:
                 # go to nanosec
                 unit = "ns"
                 multiplier = 1e9
                 rnd = 0
-
-        sys.stderr.write( " 99 = %(ninetynine)s, 1 = %(one)s \n" % locals() )
 
         ninetynine  = round( ninetynine * multiplier, rnd)
         ninetyfive  = round( ninetyfive * multiplier, rnd)
