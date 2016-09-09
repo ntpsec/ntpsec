@@ -13,12 +13,13 @@ ntpsweep - print various informations about given NTP servers
 seconds, the daemon version, the operating system and the processor.
 Optionally recursing through all peers.
 
-`ntpsweep` relies on `ntpq` and `ntpdig` to probe servers.  This depends
-on the remote host's _restrict_ configuration allowing this.
+If no hosts are specified, `ntpsweep` reports on localhost.
 
-`ntpsweep` is a perl script, and you may need to run it as:
-
-+perl -I <directory above NTP/Util.pm> ntpsweep+
+`ntpsweep` relies on `ntpq` and Mode 6 queries to probe servers.  This
+depends on the remote host's _restrict_ configuration allowing
+queries. Nowadays effectively all public hosts set _noquery_, so this
+script is unlikely to be useful unless you have multiple specially-
+configured timeservers on a LAN.
 
 == OPTIONS ==
 
@@ -40,9 +41,7 @@ appear multiple times.
   Strip this string from hostnames.
 
 +-h+ string, +--host+=_string_::
-  Specify a single host.
-+
-_NOTE: THIS OPTION IS DEPRECATED_
+  Specify a single host.  Deprecated option for backwards compatibility.
 
 == EXIT STATUS ==
 
