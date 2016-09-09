@@ -7,7 +7,7 @@ SPDX-License-Identifier: BSD-2-Clause
 """
 from __future__ import print_function, division
 
-import os, sys, time, glob, calendar, subprocess, socket, gzip, datetime
+import calendar, datetime, glob, gzip, os, socket, subprocess, sys, time
 
 class NTPStats:
     "Gather statistics for a specified NTP site"
@@ -126,11 +126,11 @@ class NTPStats:
     def percentiles(self, percents, values):
         "Return given percentiles of a given row in a given set of entries."
         "assuming values are already split and sorted"
-        ret = []
+        ret = {}
         length = len(values)
         for perc in percents:
-            ret.append( values[int(length * (perc/100))] )
-        return tuple( ret )
+            ret[perc] = values[int(length * (perc/100))]
+        return ret
     def peersplit(self):
         "Return a dictionary mapping peerstats IPs to entry subsets."
         peermap = {}

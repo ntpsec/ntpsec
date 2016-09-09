@@ -120,10 +120,9 @@ set rmargin 12
         values = [float(line.split()[1]) for line in self.loopstats]
         values.sort()
 
-        ninetynine, one = \
-                    self.percentiles( (99, 1), values)
+        percs = self.percentiles( (99, 1), values)
 
-        if 1e-6 > ninetynine and -1e-6 < one:
+        if 1e-6 > percs[99] and -1e-6 < percs[1]:
             # go to nanosec
             unit = "ns"
             multiplier = 1e9
@@ -133,10 +132,9 @@ set rmargin 12
         values_f = [float(line.split()[2]) for line in self.loopstats]
         values_f.sort()
 
-        ninetynine_f, one_f = \
-                    self.percentiles( (99, 1), values_f)
+        percs_f = self.percentiles( (99, 1), values_f)
 
-        if 1 > ninetynine_f and -1 < one_f:
+        if 1 > percs_f[99] and -1 < percs_f[1]:
             # go to nanosec
             unit_f = "ppb"
             multiplier_f = 1e3
@@ -204,22 +202,21 @@ plot \\
         unit = "ppm"
         rnd = 3
 
-        ninetynine, ninetyfive, five, one = \
-                    self.percentiles( (99, 95, 5, 1), values)
+        percs = self.percentiles( (99, 95, 5, 1), values)
 
-        if 1 > ninetynine and -1 < one:
+        if 1 > percs[99] and -1 < percs[1]:
             # go to ppb
             multiplier = 1e3
             unit = "ppb"
             rnd = 0
 
-        ninetynine  = round( ninetynine * multiplier, rnd)
-        ninetyfive  = round( ninetyfive * multiplier, rnd)
-        five        = round(       five * multiplier, rnd)
-        one         = round(        one * multiplier, rnd)
+        ninetynine  = round( percs[99] * multiplier, rnd)
+        ninetyfive  = round( percs[95] * multiplier, rnd)
+        five        = round( percs[5]  * multiplier, rnd)
+        one         = round( percs[1]  * multiplier, rnd)
 
-        nf_m_f     = ninetyfive - five
-        nn_m_o     = ninetynine - one
+        nf_m_f     = percs[95] - percs[5]
+        nn_m_o     = percs[99] - percs[1]
         plot_template = NTPViz.Common + """\
 set title "%(sitename)s: Local Clock Frequency Offset"
 set ytics format "%%1.1f %(unit)s" nomirror
@@ -258,37 +255,35 @@ plot \
         values = [float(line.split()[fld - 1]) for line in self.loopstats]
         values.sort()
 
-        ninetynine, ninetyfive, five, one = \
-                    self.percentiles( (99, 95, 5, 1), values)
+        percs = self.percentiles( (99, 95, 5, 1), values)
 
-        if 1e-3 <= ninetynine or -1e-3 >= one:
+        if 1e-3 <= percs[99] or -1e-3 >= percs[1]:
             # go to millisec
             multiplier = 1e3
             if freq:
                 unit = "ppt"
             else:
                 unit = "ms"
-        else:
-            if 1e-6 > ninetynine and -1e-6 < one:
-                # go to nanosec, or ppb
-                multiplier = 1e9
-                rnd = 0
-                if freq:
-                    unit = "ppb"
-                else:
-                    unit = "ns"
+        elif 1e-6 > percs[99] and -1e-6 < percs[1]:
+            # go to nanosec, or ppb
+            multiplier = 1e9
+            rnd = 0
+            if freq:
+                unit = "ppb"
+            else:
+                unit = "ns"
 
-        ninetynine  = round( ninetynine * multiplier, rnd)
-        ninetyfive  = round( ninetyfive * multiplier, rnd)
-        five        = round(       five * multiplier, rnd)
-        one         = round(        one * multiplier, rnd)
+        ninetynine  = round( percs[99] * multiplier, rnd)
+        ninetyfive  = round( percs[95] * multiplier, rnd)
+        five        = round( percs[5]  * multiplier, rnd)
+        one         = round( percs[1]  * multiplier, rnd)
 
         nf_m_f     = ninetyfive - five
         nn_m_o     = ninetynine - one
 
         plot_template = NTPViz.Common + """\
 set title "%(sitename)s: %(title)s"
-set ytics format "%%1.0f %(unit)s" nomirror
+set ytics format "%%1.1f %(unit)s" nomirror
 set key top right box
 set style line 1 lc rgb '#0060ad' lt 1 lw 1 pt 7 ps 0   # --- blue
 set style line 2 lc rgb '#dd181f' lt 1 lw 1 pt 5 ps 0   # --- red
@@ -355,32 +350,25 @@ plot \
             values = [float(line.split()[fld - 1]) for line in peerdict[ip]]
             values.sort()
 
-            ninetynine, ninetyfive, five, one = \
-                        self.percentiles( (99,95, 5, 1), values)
-            ninetynine  = round( ninetynine * multiplier, 3)
-            ninetyfive  = round( ninetyfive * multiplier, 3)
-            five        = round(       five * multiplier, 3)
-            one         = round(        one * multiplier, 3)
+            percs = self.percentiles( (99, 95, 50, 5, 1), values)
 
-            if 1000 <= ninetynine or -1000 >= one:
+            if 1e-3 <= percs[99] or -1e-3 >= percs[1]:
                 # go to millisec
                 unit = "ms"
-                multiplier = 1000
-            else:
-                if 1 > ninetynine and -1 < one:
-                    # go to nanosec
-                    unit = "ns"
-                    multiplier = 1e9
+                multiplier = 1e3
+            elif 1e-6 > percs[99] and -1e-6 < percs[1]:
+                # go to nanosec
+                unit = "ns"
+                multiplier = 1e9
+
+            ninetynine  = round( percs[99] * multiplier, 3)
+            ninetyfive  = round( percs[95] * multiplier, 3)
+            fifty       = round( percs[50] * multiplier, 3)
+            five        = round( percs[5]  * multiplier, 3)
+            one         = round( percs[1]  * multiplier, 3)
 
             if "offset" == type:
                 # fld == 4
-                ninetynine, ninetyfive, fifty, five, one = \
-                            self.percentiles( (99,95, 50, 5, 1), values)
-                ninetynine  = round( ninetynine * multiplier, 3)
-                ninetyfive  = round( ninetyfive * multiplier, 3)
-                fifty       = round(      fifty * multiplier, 3)
-                five        = round(       five * multiplier, 3)
-                one         = round(        one * multiplier, 3)
 
                 nf_m_f     = ninetyfive - five
                 nn_m_o     = ninetynine - one
@@ -448,15 +436,14 @@ plot \
         values = [float(line.split()[1]) for line in self.loopstats]
         values.sort()
 
-        ninetynine, ninetyfive, five, one = \
-                    self.percentiles( (99,95, 5, 1), values)
+        percs = self.percentiles( (99, 95, 5, 1), values)
 
         unit = "μs"
         multiplier = 1e6
         rnd = 2
         rnd1 = 7        # round to 100 ns boxes
         boxwidth = 1e-7
-        if 1e-6 > ninetynine and -1e-6 < one:
+        if 1e-6 > percs[99] and -1e-6 < percs[1]:
             # go to nanosec
             unit = "ns"
             multiplier = 1e9
@@ -464,10 +451,10 @@ plot \
             rnd1 = 9        # round to 1 ns boxes
             boxwidth = 1e-9
 
-        ninetynine  = round( ninetynine * multiplier, rnd)
-        ninetyfive  = round( ninetyfive * multiplier, rnd)
-        five        = round(       five * multiplier, rnd)
-        one         = round(        one * multiplier, rnd)
+        ninetynine  = round( percs[99] * multiplier, rnd)
+        ninetyfive  = round( percs[95] * multiplier, rnd)
+        five        = round( percs[5]  * multiplier, rnd)
+        one         = round( percs[1]  * multiplier, rnd)
 
         cnt = collections.Counter()
         for value in values:
