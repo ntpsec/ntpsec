@@ -12,11 +12,16 @@
 
 == DESCRIPTION ==
 
-+ntptrace+ is a python script that uses the {ntpq} utility program to follow
-the chain of NTP servers from a given host back to the primary time
-source. For ntptrace to work properly, each of these servers must
++ntptrace+ is a python script that uses the {ntpq} utility program to
+follow the chain of NTP servers from a given host back to the primary
+time source.
+
+For +ntptrace+ to work properly, each of these servers must
 implement the NTP Control and Monitoring Protocol specified in RFC 1305
-and enable NTP Mode 6 packets.
+and enable NTP Mode 6 control packets.  Nowadays it is usual for
+public timeservers to disable Mode 6 queries, so this script is
+unlikely to be very useful unless you have a collectioon of
+specially-configured timeservers on your LAN.
 
 If given no arguments, ntptrace starts with localhost. Here is an
 example of the output from ntptrace:
