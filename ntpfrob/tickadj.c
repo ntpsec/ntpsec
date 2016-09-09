@@ -26,10 +26,8 @@
 static struct timex txc;
 #endif /* HAVE_ADJTIMEX */
 
-void tickadj(const iomode mode, const int newtick)
+void tickadj(const bool json, const int newtick)
 {
-	UNUSED_ARG(mode);
-
 #ifndef HAVE_ADJTIMEX
 	UNUSED_ARG(newtick);
 	fputs("ntpfrob: \n", stderr);

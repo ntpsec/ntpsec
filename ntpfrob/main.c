@@ -22,7 +22,7 @@ main(int argc, char **argv)
 		switch (ch) {
 		case 'A':
 #ifdef HAVE_ADJTIMEX
-		    tickadj(json, 0);
+		    tickadj(mode==json, 0);
 #else
 		    fputs("ntpfrob: no adjtimex(2) call.\n", stderr);
 		    exit(0);
