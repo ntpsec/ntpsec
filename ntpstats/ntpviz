@@ -820,6 +820,19 @@ at 0s. Typical 90% ranges may be: local serial GPS 200 ms; local LAN peer
 """,
         }
 
+    start_time = datetime.datetime.utcnow()
+    start_time_str = start_time.strftime("%c")
+
+    # if title file, get title from it
+    title_f = os.path.join(outdir, "title")
+    title = 'ntpviz'
+    if os.path.isfile(title_f):
+        try:
+            title_file = open( title_f, 'r')
+            title = title_file.read()
+        except IOError:
+            pass
+
     index_header = '''\
 <!DOCTYPE html>
 <html lang="en">
@@ -827,7 +840,7 @@ at 0s. Typical 90% ranges may be: local serial GPS 200 ms; local LAN peer
 <meta charset="UTF-8">
 <meta http-equiv="refresh" content="1800">
 <meta name="expires" content="0">
-<title>ntpviz plot</title>
+<title>%(title)s</title>
 <style>
 dt {
     font-weight: bold;
@@ -845,11 +858,10 @@ dd {
 <img src="ntpsec-logo.png" alt="NTPsec" style="float:left;margin:5px 50px;">
 </a>
 <div>
-<h1 style="margin-bottom:10px;">NTP Stats</h1>
-'''
+<h1 style="margin-bottom:10px;">%(title)s</h1>
+Report generated: %(start_time_str)s UTC <br>
+''' % locals()
 
-    start_time = datetime.datetime.utcnow()
-    index_header += 'Report generated: %s UTC <br>' % start_time.strftime("%c")
 
     # Ugh.  Not clear what to do in the multiplot case
     if len(statlist) == 1:
