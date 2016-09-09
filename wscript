@@ -148,15 +148,12 @@ def build(ctx):
 	ctx.recurse("util")
 	ctx.recurse("tests")
 
-	# Some of these presently fail because they require a Perl
-	# module that's never installed. Awkwardly, their man pages do
-	# get installed. There is a note about this mess in INSTALL.
 	scripts = [
 		"ntpleapfetch/ntpleapfetch",
 		"ntpstats/ntpviz",
 		"ntptrace/ntptrace",
 		"ntpwait/ntpwait",
-		#"util/ntpsweep/ntpsweep",
+		"ntpsweep/ntpsweep",
 	]
 
 	ctx(
@@ -171,7 +168,7 @@ def build(ctx):
 	ctx.manpage(1, "ntptrace/ntptrace-man.txt")
 	ctx.manpage(1, "ntpstats/ntpviz-man.txt")
 	ctx.manpage(8, "ntpwait/ntpwait-man.txt")
-	#ctx.manpage(1, "util/ntpsweep/ntpsweep-man.txt")
+	ctx.manpage(1, "ntpsweep/ntpsweep-man.txt")
 
 
 	# Skip running unit tests on a cross compile build

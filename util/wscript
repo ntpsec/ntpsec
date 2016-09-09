@@ -18,4 +18,3 @@ def build(ctx):
 			install_path    = False
 		)
 
-	ctx.manpage(1, "ntpsweep/ntpsweep-man.txt")
