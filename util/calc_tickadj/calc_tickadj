@@ -1,115 +1,92 @@
-#!/usr/bin/env perl
+#!/usr/bin/env python
 #
 # drift of 104.8576 -> +1 tick.  Base  of 10000 ticks.
 #
 # 970306 HMS Deal with nanoseconds.  Fix sign of adjustments.
+#
+# Translated from a very old Perl script - the comment above is a clue
+# to how old.
+#
+'''
+calc_tickadj - Calculates "optimal" value for tick given ntp drift file.
 
-use warnings;
-
-package calc_tickadj;
-use strict;
-
-exit run(@ARGV) unless caller;
-
-sub run {
-    my $opts;
-    if (!processOptions(\@_, $opts)) {
-        usage(1);
-    };
-    my $drift_file = $opts->{'drift-file'};
-    my $tick       = $opts->{'tick'};
-
-    if (!$tick) {
-        my ($fl) = `ntpfrob -A`;
-        if (defined $fl && $fl =~ /(\d+)/) {
-            $tick = $1;
-        }
-        else {
-            die "Could not get tick value, try manually with -t/--tick\n";
-        }
-    }
-
-    # Drift file is in PPM where Million is actually 2**20
-    my $cvt   = (2 ** 20) / $tick;
-    my $drift = 0.;
-
-    open my $dfh, $drift_file or die "Could not open $drift_file: $!\n";
-
-    $drift = <$dfh>; 
-
-    close $dfh;
-    die "Invalid drift file value <$drift>" if $drift !~ /[+-]?\d+\.?[0-9]+/;
-
-    while ($drift < 0) {
-        $drift += $cvt;
-        $tick--;
-    }
-
-    while ($drift > $cvt) {
-        $drift -= $cvt;
-        $tick++;
-    }
-
-    printf "%.3f (drift)\n", $drift;
-    printf "%d usec; %d nsec\n", $tick, ($tick + ($drift/$cvt)) * 1000;
-
-    return 0;
-}
-
-use Getopt::Long qw(GetOptionsFromArray);
-Getopt::Long::Configure(qw(no_auto_abbrev no_ignore_case_always));
-
-my $usage;
-
-sub usage {
-    my ($ret) = @_;
-    print STDERR $usage;
-    exit $ret;
-}
-
-sub paged_usage {
-    my ($ret) = @_;
-    my $pager = $ENV{PAGER} || '(less || more)';
-
-    open STDOUT, "| $pager" or die "Can't fork a pager: $!";
-    print $usage;
-
-    exit $ret;
-}
-
-sub processOptions {
-    my $args = shift;
-
-    my $opts = {
-        'drift-file' => '/etc/ntp/drift',
-        'tick' => '',
-        'help' => '', 'more-help' => ''
-    };
-    my $argument = '';
-    my $ret = GetOptionsFromArray($args, $opts, (
-        'drift-file|d=s', 'tick|t=i',
-        'help|?', 'more-help'));
-
-    $usage = <<'USAGE';
-calc_tickadj - Calculates "optimal" value for tick given ntp drift file. - Ver. 4.2.7p467
-USAGE: calc_tickadj [ -<flag> [<val>] | --<name>[{=| }<val>] ]... 
+USAGE: calc_tickadj [-t tick] [-d drift-file]
 
     -d, --drift-file=str         Ntp drift file to use
     -t, --tick=num               Tick value of this host
-    -?, --help                   Display usage information and exit
-        --more-help              Pass the extended usage text through a pager
+    -h, --help                   Display usage message and exit
 
 Options are specified by doubled hyphens and their name or by a single
 hyphen and the flag character.
-USAGE
+'''
+#SPDX-License-Identifier: BSD-2-Clause
 
-    usage(0)       if $opts->{'help'};
-    paged_usage(0) if $opts->{'more-help'};
-    $_[0] = $opts;
-    return $ret;
-}
+from __future__ import print_function, division
 
-END { close STDOUT };
+import sys, getopt, re
 
-1;
-__END__
+if __name__ == '__main__':
+    try:
+        (options, arguments) = getopt.getopt(
+            sys.argv[1:], "d:t:h", ["drift-file=", "tick=", "--help"])
+    except getopt.GetoptError as err:
+        sys.stderr.write(str(err) + "\n")
+        raise SystemExit(1)
+    tick = 0
+    drift_file = "/etc/ntp/drift"
+    for (switch, val) in options:
+        if switch == "-d" or switch == "--drift-file":
+            drift_file = val
+        elif switch == "-t" or switch == "--tick":
+            tick = int(val)
+        elif switch == "-h" or switch == "--help":
+            print(__doc__)
+            sys.exit(0)
+
+    if tick == 0:
+        try:
+            with sys.popen("ntpfrob -A") as rp:
+                response = rp.read()
+                m = re.search("[0-9]+", response)
+                if m:
+                    tick = int(m.group(0))
+        except:
+            pass
+
+    if tick == 0:
+        sys.stderr.write("Could not get tick value, try manually with -t/--tick\n\n")
+        sys.exit(1)
+
+    # Drift file is in PPM where Million is actually 2**20
+    cvt   = (2 ** 20) / tick
+    drift = 0.0
+
+    try:
+        with open(drift_file) as dp:
+            drift = dp.read()
+    except OSError:
+        sys.stderr.write("Could not open drift file: %s\n" % drift_file)
+        sys.exit(1)
+
+    m = re.match("[+-]?\d+\.?[0-9]+", drift)
+    if not m:
+        sys.stderr.write("Invalid drift file value '%s'\n" % drift)
+        sys.exit(1)
+    else:
+        drift = float(drift)
+
+    while drift < 0:
+        drift += cvt
+        tick -= 1
+
+    while drift > cvt:
+        drift -= cvt
+        tick += 1
+
+    print("%.3f (drift)" % drift)
+    print("%d usec; %d nsec" % (tick, (tick + (drift/cvt)) * 1000))
+
+    sys.exit(0)
+
+# end
+
