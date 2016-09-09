@@ -123,14 +123,6 @@ class NTPStats:
                 if ts < m:
                     m = ts
         return m
-    def percentile(self, n, percentile, entries):
-        "Return given percentiles of a given row in a given set of entries."
-        "If you call this twice on the same data set you should use"
-        "percentiles() instead"
-        # Row is decremented so we match GNUPLOT's 1-origin indexing.
-        values = [float(line.split()[n-1]) for line in entries]
-        values.sort()
-        return values[int(len(values) * (percentile/100))]
     def percentiles(self, percents, values):
         "Return given percentiles of a given row in a given set of entries."
         "assuming values are already split and sorted"
