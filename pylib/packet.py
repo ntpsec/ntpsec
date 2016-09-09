@@ -503,5 +503,30 @@ class ntpq_session:
             break
         # Return None on success, otherwise an error string
 	return res;
-
+    def readvars(self):
+        "Read system vars from the host as a dict, or return an error string."
+        self.doquery(opcode=CTL_OP_READVAR, quiet=True)
+        if self.response.startswith("*"):
+            return self.response
+        else:
+            response = self.response
+            # Trim trailing NULs from the text
+            while response.endswith("\x00"):
+                response = response[:-1]
+            response = response.rstrip()
+            items = []
+            for pair in response.split(","):
+                (var, val) = pair.split("=")
+                var = var.strip()
+                val = val.strip()
+                try:
+                    val = int(val)
+                except ValueError:
+                    try:
+                        val = float(val)
+                    except ValueError:
+                        if val[0] == '"' and val[-1] == '"':
+                            val = val[1:-1]
+                items.append((var, val))
+            return dict(items)
 # end
