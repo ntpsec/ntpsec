@@ -47,9 +47,6 @@ fallback implementation using native time calls.
 You can view POSIX-1.2001, with 2004 Corrigendum, online for free here:
     http://pubs.opengroup.org/onlinepubs/009695399/toc.htm
 
-You *may* assume that the compiler supports POSIX 64-bit integral types
-(int64_t, uint64_t and friends) even if the target hardware is 32-bit).
-
 === Banned functions ===
 
 The following C99/POSIX functions are BANNED.  They are unsafe, tending to
@@ -124,6 +121,9 @@ Do not bake in any assumptions about 32-vs-64-bit word size.  It is OK
 to assume the code will never run on a 16-bit machine.  When in doubt,
 use the fixed-width integral types from <stdint.h>.
 
+You *may* assume that the compiler supports POSIX 64-bit integral types
+(int64_t, uint64_t and friends) even if the target hardware is 32-bit).
+
 Do not assume any particular endianness. When in doubt, use
 htons()/htonl()/ntohs()/ntohl() and do your bit-bashing in network
 (big-endian) byte order.
@@ -133,7 +133,7 @@ machines may have either signed or unsigned characters.
 
 Do not rely on assumptions about how structure or unions are padded.
 Historically, the NTP code assumed self-alignment.  We're trying
-to eliminate that assumption, but the work isn't finisged.
+to eliminate that assumption, but the work isn't finished.
 
 Do not assume pointers can be cast to ints, or vice-versa.  While this
 is true on effectively all modern hardware, the code runs on some
@@ -209,7 +209,7 @@ and no JSON option it is quite likely to be rejected.
 Our preferred format for dates is RFC3339 (a version of ISO8601 for
 UTC with some options frozen; full year required, medial T required,
 explicit Zulu timezone). Local times should be expressed in ISO8601,
-always with full year and timezone offset.
+always with full 4-digit year.
 
 === Copyrights and licenses ===
 
