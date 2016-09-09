@@ -6,23 +6,27 @@ Annoying but necessary legalese:
     redistributed under the project's license according to the normal
     forms and usages of the open-source community.
 
-The code history has been moved to git; the BitKeeper-based advice that used
-to live here is obsolete.  As we develop a git-based patch workflow it will be
-documented here.
-
-== General notes ==
-
 If you want to learn more about the code internals, find tour.txt.
 This document is about development practices and project conventions.
 
-=== Build system ===
+== Choice of language ===
 
-The build uses waf, replacing a huge ancient autoconf hairball that
-caused many problems. The waf script is embedded in the top level of
-the distribution; run "./waf --help" or consult INSTALL for basic
-instructions.
+In order to reduce the complexity of maintenance and testing
+due to multiple languages, we hold the set of allowed languages
+to a minimum.
 
-Full waf documentation is at: https://waf.io/
+Time-critical code must be written in C. Use Python for any code that
+is not time-critical, as this reduces line count and complexity
+(thus, also, expected defect rates).
+
+The only scripting language allowed and supported other than Python is
+POSIX sh (this is more restricted than bash!).  Python is preferred, as
+it's easier to verify portability in Python than it is in sh.
+
+Please read our C and Python guidelines carefully. They're not just
+about style, they're serious measures to reduce defect rates.
+
+== C Guidelines ==
 
 === C API standards ===
 
@@ -66,6 +70,102 @@ http://www.unix.org/whitepapers/reentrant.html[Thread-safety and POSIX.1]
 === Banned features ===
 
 All C files should be in plain US-ASCII encoding; do not use trigraphs.
+
+=== Coding style and indentation ==
+
+Dr. Dave Mills likes this code indented formatted in a consistent way.
+The file "dot.emacs" has the emacs C-mode indentation style that Dave likes.
+
+=== Conventions for #ifdef guard names ===
+
+Parts of this code are a thicket of C preprocessor conditionals.
+In an attempt to make these halfway comprehensible, we use the
+following conventions to distinguish classes of macro names:
+
+ENABLE_*::
+	Gates the code for an optional feature.  Set by a switch on
+	the "waf configure" invocation.
+
+GUARD_*::
+	Symbols with the GUARD_ prefix are idempotency guards - that is,
+	they're used to nullify inclusions of a header file
+	after the first. They don't interact with the build system's
+	configuration logic in any way at all.
+
+HAVE_*_H::
+	Guard symbol derived by configuration logic from checking
+	for the presence of a system header.  For example, the symbol
+	HAVE_SYS_FOOBAR_H gets defined only if waf configure detects
+	the presence of a sys/foobar.h in the system include directory.
+
+HAVE_*::
+	Without an H suffix, a HAVE symbol is set on the availability
+	of a specified function in the system libraries.
+
+NEED_*::
+	Need symbols conditionalize porting hacks the need for which
+	cannot be detected by checking for a system header or
+	function, but instead have to be probed for by some ad-hoc
+	test in waf configure.
+
+OVERRIDE_*::
+	Override a default for debugging purposes. These are values
+	(buffer lengths and the like) which waf is not expected to
+	normally override but which might need to be forced.
+
+USE_*::
+	Use symbols are set internally within other conditionals to
+	gate use of sections of code that must be conditionally
+	compiled depending on *combinations* of HAVE and NEED symbols.
+
+=== Cross-platform portability ===
+
+Do not bake in any assumptions about 32-vs-64-bit word size.  It is OK
+to assume the code will never run on a 16-bit machine.  When in doubt,
+use the fixed-width integral types from <stdint.h>.
+
+Do not assume any particular endianness. When in doubt, use
+htons()/htonl()/ntohs()/ntohl() and do your bit-bashing in network
+(big-endian) byte order.
+
+Do not assume anything about sign-bit interpretation in chars.  Target
+machines may have either signed or unsigned characters.
+
+Do not rely on assumptions about how structure or unions are padded.
+Historically, the NTP code assumed self-alignment.  We're trying
+to eliminate that assumption, but the work isn't finisged.
+
+Do not assume pointers can be cast to ints, or vice-versa.  While this
+is true on effectively all modern hardware, the code runs on some
+sufficiently old iron that this is not necessarily the case even if
+the compiler and toolchain have been modernized.
+
+== Python guidelines ==
+
+You may assume Python 2 at 2.6 or later, or Python 3 at 3.2 or later.
+
+Please read https://www.python.org/dev/peps/pep-0008/[PEP 8] and use
+that style.  The only PEP 8 style rule we relax is that you may
+specify multiple module names in an import rather than going strictly
+with one per line.  The point is to encourage you to group your import
+declarations in informative ways.
+
+You *must* write Python code to be 'polyglot', that is able to run
+unaltered under 2 or 3.  Practices for doing so are documented in
+detail at
+
+http://www.catb.org/esr/faqs/practical-python-porting/
+
+== General notes ==
+
+=== Build system ===
+
+The build uses waf, replacing a huge ancient autoconf hairball that
+caused many problems. The waf script is embedded in the top level of
+the distribution; run "./waf --help" or consult INSTALL for basic
+instructions.
+
+Full waf documentation is at: https://waf.io/
 
 === Naming conventions ===
 
@@ -193,84 +293,6 @@ need to have the same content is to have both be thin wrappers around
 a large common include file. These includes live in docs/includes
 and are probably what you need to edit if you're updating anything
 that appears on a man page.
-
-=== Conventions for #ifdef guard names ===
-
-Parts of this code are a thicket of C preprocessor conditionals.
-In an attempt to make these halfway comprehensible, we use the
-following conventions to distinguish classes of macro names:
-
-ENABLE_*::
-	Gates the code for an optional feature.  Set by a switch on
-	the "waf configure" invocation.
-
-GUARD_*::
-	Symbols with the GUARD_ prefix are idempotency guards - that is,
-	they're used to nullify inclusions of a header file
-	after the first. They don't interact with the build system's
-	configuration logic in any way at all.
-
-HAVE_*_H::
-	Guard symbol derived by configuration logic from checking
-	for the presence of a system header.  For example, the symbol
-	HAVE_SYS_FOOBAR_H gets defined only if waf configure detects
-	the presence of a sys/foobar.h in the system include directory.
-
-HAVE_*::
-	Without an H suffix, a HAVE symbol is set on the availability
-	of a specified function in the system libraries.
-
-NEED_*::
-	Need symbols conditionalize porting hacks the need for which
-	cannot be detected by checking for a system header or
-	function, but instead have to be probed for by some ad-hoc
-	test in waf configure.
-
-OVERRIDE_*::
-	Override a default for debugging purposes. These are values
-	(buffer lengths and the like) which waf is not expected to
-	normally override but which might need to be forced.
-
-USE_*::
-	Use symbols are set internally within other conditionals to
-	gate use of sections of code that must be conditionally
-	compiled depending on *combinations* of HAVE and NEED symbols.
-
-=== Cross-platform portability ===
-
-Do not bake in any assumptions about 32-vs-64-bit word size.  It is OK
-to assume the code will never run on a 16-bit machine.  When in doubt,
-use the fixed-width integral types from <stdint.h>.
-
-Do not assume any particular endianness. When in doubt, use
-htons()/htonl()/ntohs()/ntohl() and do your bit-bashing in network
-(big-endian) byte order.
-
-Do not assume anything about sign-bit interpretation in chars.  Target
-machines may have either signed or unsigned characters.
-
-Do not rely on assumptions about how structure or unions are padded.
-
-Do not assume pointers can be cast to ints, or vice-versa.  While this
-is true on effectively all modern hardware, the code runs on some
-sufficiently old iron that this is not necessarily the case even if
-the compiler and toolchain have been modernized.
-
-=== Coding style and indentation ==
-
-Dr. Dave Mills likes this code indented formatted in a consistent way.
-The file "dot.emacs" has the emacs C-mode indentation style that Dave likes.
-
-=== Other languages ===
-
-The only scripting languages allowed and supported are POSIX sh and
-Python 2.6 or later. If you find code in the
-distribution that is in a scripting language and not one of these,
-you would be doing us a favor by translating it into Python or sh.
-
-The reason for this policy is not that we hate all other scripting
-languages, it's to reduce the complexity of maintenance and testing
-due to multiple languages.
 
 === Version string ===
 
