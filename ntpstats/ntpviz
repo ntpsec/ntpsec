@@ -938,69 +938,73 @@ ntpviz</a>, part of the <a href="https://www.ntpsec.org/">NTPsec project</a>
 '''
     imagewrapper = "<img src='%s.png' alt='%s plot'>\n"
 
+    # buffer the index.html output so the index.html is not empty
+    # during the run
+    index_buffer = index_header
+    # if header file, add it to index.html
+    header = os.path.join(outdir, "header")
+    if os.path.isfile(header):
+        try:
+            header_file = open( header, 'r')
+            header_txt = header_file.read()
+            index_buffer += '<br>\n' + header_txt + '\n'
+        except IOError:
+            pass
+
+    if len(statlist) > 1:
+        index_buffer += local_offset_multiplot(statlist)
+    else:
+        imagepairs = [
+            ("local-offset", stats.local_offset_gnuplot()),
+            ("local-error", stats.local_error_gnuplot()),
+            ("local-jitter", stats.local_offset_jitter_gnuplot()),
+            ("local-stability", stats.local_offset_stability_gnuplot()),
+            ("local-offset-histogram", stats.local_offset_histogram_gnuplot()),
+            ("local-temps", stats.local_temps_gnuplot()),
+            ("peer-offsets", stats.peer_offsets_gnuplot()),
+            ]
+        for key in stats.peersplit().keys():
+            imagepairs.append(("peer-offset-" + key,
+                           stats.peer_offsets_gnuplot([key])))
+        imagepairs.append(("peer-jitters",
+                           stats.peer_jitters_gnuplot()))
+        for key in stats.peersplit().keys():
+            plot = stats.peer_jitters_gnuplot([key])
+            if len( plot ):
+                imagepairs.append(("peer-jitter-" + key, plot))
+
+        for (imagename, image) in imagepairs:
+            if not image:
+                continue;
+            div_name = imagename.replace('-', ' ')
+            index_buffer += "<div>\n<h2>%s:</h2>\n" % div_name
+            if 'peer-jitter-' == imagename[:12]:
+                exp = 'peer-jitter'
+            elif 'peer-offset-' == imagename[:12]:
+                exp = 'peer-offset'
+            else:
+                exp = imagename
+            if exp in explanations:
+                index_buffer += "<div>\n%s</div>\n" % explanations[exp]
+            gnuplot(image, os.path.join(outdir, imagename + ".png"))
+            index_buffer += imagewrapper % \
+                             (imagename.replace(':', '%3A'), div_name)
+            index_buffer += "</div>\n"
+
+    # if footer file, add it to index.html
+    footer = os.path.join(outdir, "footer")
+    if os.path.isfile(footer):
+        try:
+            footer_file = open( footer, 'r')
+            footer_txt = footer_file.read()
+            index_buffer += '<br>\n' + footer_txt + '\n'
+        except IOError:
+            pass
+    index_buffer += index_trailer
+
+    # and send the file buffer
     with open(os.path.join(outdir, "index.html"), "w") as ifile:
-        ifile.write(index_header)
-        # if header file, add it to index.html
-        header = os.path.join(outdir, "header")
-        if os.path.isfile(header):
-            try:
-                header_file = open( header, 'r')
-                header_txt = header_file.read()
-                ifile.write('<br>\n' + header_txt + '\n')
-            except IOError:
-                pass
-
-        if len(statlist) > 1:
-            ifile.write(local_offset_multiplot(statlist))
-        else:
-            imagepairs = [
-                ("local-offset", stats.local_offset_gnuplot()),
-                ("local-error", stats.local_error_gnuplot()),
-                ("local-jitter", stats.local_offset_jitter_gnuplot()),
-                ("local-stability", stats.local_offset_stability_gnuplot()),
-                ("local-offset-histogram", stats.local_offset_histogram_gnuplot()),
-                ("local-temps", stats.local_temps_gnuplot()),
-                ("peer-offsets", stats.peer_offsets_gnuplot()),
-                ]
-            for key in stats.peersplit().keys():
-                imagepairs.append(("peer-offset-" + key,
-                               stats.peer_offsets_gnuplot([key])))
-            imagepairs.append(("peer-jitters",
-                               stats.peer_jitters_gnuplot()))
-            for key in stats.peersplit().keys():
-                plot = stats.peer_jitters_gnuplot([key])
-                if len( plot ):
-                    imagepairs.append(("peer-jitter-" + key, plot))
-
-            for (imagename, image) in imagepairs:
-                if not image:
-                    continue;
-                div_name = imagename.replace('-', ' ')
-                ifile.write("<div>\n<h2>%s:</h2>\n" % div_name)
-                if 'peer-jitter-' == imagename[:12]:
-                    exp = 'peer-jitter'
-                elif 'peer-offset-' == imagename[:12]:
-                    exp = 'peer-offset'
-                else:
-                    exp = imagename
-                if exp in explanations:
-                    ifile.write("<div>\n%s</div>\n" % explanations[exp])
-                gnuplot(image, os.path.join(outdir, imagename + ".png"))
-                div = imagewrapper % (imagename.replace(':', '%3A'), div_name)
-                ifile.write(div)
-                ifile.write("</div>\n")
-
-        # if footer file, add it to index.html
-        footer = os.path.join(outdir, "footer")
-        if os.path.isfile(footer):
-            try:
-                footer_file = open( footer, 'r')
-                footer_txt = footer_file.read()
-                ifile.write('<br>\n' + footer_txt + '\n')
-            except IOError:
-                pass
-        # and finish the file
-        ifile.write(index_trailer)
+        ifile.write(index_buffer)
         ifile.close()
 
 
