@@ -17,7 +17,7 @@ import re
 import socket
 import subprocess
 import sys
-
+import ntp.util
 
 def get_info(host):
     info = ntp_read_vars(0, [], host)
@@ -84,21 +84,6 @@ def ntp_read_vars(peer, vars, host):
     return outvars
 
 
-def do_dns(hostname):
-    try:
-        ai = socket.getaddrinfo(hostname, None, 0, 0, 0,
-                                socket.AI_CANONNAME)
-    except socket.gaierror as e:
-        print('getaddrinfo failed: %s' % e.strerr, file=sys.stderr)
-        raise SystemExit(1)
-    (family, socktype, proto, canonname, sockaddr) = ai[0]
-    try:
-        name = socket.getnameinfo(sockaddr, socket.NI_NAMEREQD)
-    except socket.gaierror:
-        return canonname.lower()
-    return name[0].lower()
-
-
 usage = r"""ntptrace - Trace peers of an NTP server.
 USAGE: ntptrace [ -<flag> [<val>] | --<name>[{=| }<val>] ]... [host]
 
@@ -148,7 +133,7 @@ while True:
         break
 
     if not numeric:
-        host = do_dns(host)
+        host = ntp.util.canonicalize_dns(host)
 
     print("%s: stratum %d, offset %f, synch distance %f" %
           (host, int(info['stratum']), info['offset'], info['syncdistance']), end='')
