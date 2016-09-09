@@ -210,10 +210,11 @@ plot \\
             unit = "ppb"
             rnd = 0
 
-        ninetynine  = round( percs[99] * multiplier, rnd)
-        ninetyfive  = round( percs[95] * multiplier, rnd)
-        five        = round( percs[5]  * multiplier, rnd)
-        one         = round( percs[1]  * multiplier, rnd)
+        percs.update({k: round( v * multiplier, rnd) for k, v in percs.items()})
+        ninetynine  = percs[99]
+        ninetyfive  = percs[95]
+        five        = percs[5]
+        one         = percs[1]
 
         nf_m_f     = percs[95] - percs[5]
         nn_m_o     = percs[99] - percs[1]
@@ -273,10 +274,11 @@ plot \
             else:
                 unit = "ns"
 
-        ninetynine  = round( percs[99] * multiplier, rnd)
-        ninetyfive  = round( percs[95] * multiplier, rnd)
-        five        = round( percs[5]  * multiplier, rnd)
-        one         = round( percs[1]  * multiplier, rnd)
+        percs.update({k: round( v * multiplier, rnd) for k, v in percs.items()})
+        ninetynine  = percs[99]
+        ninetyfive  = percs[95]
+        five        = percs[5]
+        one         = percs[1]
 
         nf_m_f     = ninetyfive - five
         nn_m_o     = ninetynine - one
@@ -340,7 +342,7 @@ plot \
         plot_data = plot_data[:-2]
 
         unit = "μs"
-        multiplier = 1000000
+        multiplier = 1e6
         rtt = 0
         percentages = ""
         if len(peerlist) == 1:
@@ -361,11 +363,13 @@ plot \
                 unit = "ns"
                 multiplier = 1e9
 
-            ninetynine  = round( percs[99] * multiplier, 3)
-            ninetyfive  = round( percs[95] * multiplier, 3)
-            fifty       = round( percs[50] * multiplier, 3)
-            five        = round( percs[5]  * multiplier, 3)
-            one         = round( percs[1]  * multiplier, 3)
+            rnd = 3
+            percs.update({k: round(v*multiplier, rnd) for k, v in percs.items()})
+            ninetynine  = percs[99]
+            ninetyfive  = percs[95]
+            fifty       = percs[50]
+            five        = percs[5]
+            one         = percs[1]
 
             if "offset" == type:
                 # fld == 4
@@ -451,10 +455,11 @@ plot \
             rnd1 = 9        # round to 1 ns boxes
             boxwidth = 1e-9
 
-        ninetynine  = round( percs[99] * multiplier, rnd)
-        ninetyfive  = round( percs[95] * multiplier, rnd)
-        five        = round( percs[5]  * multiplier, rnd)
-        one         = round( percs[1]  * multiplier, rnd)
+        percs.update({k: round(v*multiplier, rnd) for k, v in percs.items()})
+        ninetynine  = percs[99]
+        ninetyfive  = percs[95]
+        five        = percs[5]
+        one         = percs[1]
 
         cnt = collections.Counter()
         for value in values:
