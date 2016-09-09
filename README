@@ -77,6 +77,10 @@ ntpq/::		Directory containing sources for a utility program to
 ntpstats/::	Statistics visualization and analysis tools built around
 		the Python ntpstats.py module. Includes ntpviz.
 
+ntpsweep/::	Directory containing source for a utility program that can
+		fetch basic information about timservers, recursing through
+		peers to map the nearby topology of the time-service network.
+
 ntptime/:: 	Directory containing a utility for reading and modifying
 		kernel parameters related to the local clock.
 
@@ -89,13 +93,10 @@ ntpwait/::	Directory containing a script that blocks until ntpd is
 		in state 4 (synchronized). Useful at boot time, to delay
 		the boot sequence until after "ntpd -g" has set the time.
 
-perllib/::	NTP interface package required to query Mode 6 packets
-		from the daemon from Perl scripts.
-
 ports/::	Subdirectories of this contain code for non-Unix operating
 		systems.  At present there is just one, for Windows.
 
-pylib/::	Installable Python helper classes.
+pylib/::	Installable Python helper classes for scripts.
 
 tests/::	Self-test code.
 
