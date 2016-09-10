@@ -62,7 +62,6 @@ def cmd_configure(ctx, config):
 
 	# Not needed to build.  Used by utility scripts.
 	ctx.find_program("awk", var="BIN_AWK", mandatory=False)
-	ctx.find_program("perl", var="BIN_PERL", mandatory=False)
 	ctx.find_program("sh", var="BIN_SH", mandatory=False)
 
 	# used to make man and html pages

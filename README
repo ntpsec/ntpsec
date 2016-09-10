@@ -103,7 +103,7 @@ tests/::	Self-test code.
 util/:: 	Directory containing sources for various utility and testing
 		programs that are *not* part of a normal installation.
 		The subdirectories monitoring/ and support/ hold
-		various perl and shell scripts for visualizing
+		various Python and shell scripts for visualizing
 		synchronization and daemon startup.
 
 waf::		A copy of the waf builder.  This is the engine used to configure
