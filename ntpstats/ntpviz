@@ -782,13 +782,13 @@ if __name__ == '__main__':
 
     # if no ntpsec favicon.ico, write one.
     ico_filename = os.path.join(outdir, "favicon.ico")
-    if not os.path.isfile( ico_filename ):
+    if not os.path.lexists( ico_filename ):
         with open( ico_filename, "w" ) as wp:
             wp.write(binascii.a2b_base64(ntpsec_ico))
 
     # if no ntpsec logo, write one.
     logo_filename = os.path.join(outdir, "ntpsec-logo.png")
-    if not os.path.isfile( logo_filename ):
+    if not os.path.lexists( logo_filename ):
         with open( logo_filename, "w" ) as wp:
             wp.write(binascii.a2b_base64(ntpsec_logo))
 
