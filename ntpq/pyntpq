@@ -6,7 +6,7 @@
 # much like it as possible. Eventually it will replace the C version.
 #
 # Due to a limitation of the Python Cmd class, the ":config" and
-# ":config-from-file "command" lose their colons.
+# "config-from-file" commands lose their colons/hyphens.
 #
 # SPDX-License-Identifier: BSD-2-clause
 from __future__ import print_function, division
@@ -264,7 +264,7 @@ usage: poll [ n ] [ verbose ]
     def help_passwd(self):
         sys.stdout.write("""\
 function: specify a password to use for authenticated requests
-usage: passwd
+usage: passwd [  ]
 """)
     def do_hostnames(self, line):
         "specify whether hostnames or net numbers are printed"
@@ -409,8 +409,9 @@ usage: ntpversion [ version number ]
         pass
     def help_keytype(self):
         sys.stdout.write("""\
-function: set key type to use for authenticated requests (des|md5)
-usage: keytype [ key type (md5|des) ]
+function: set key type to use for authenticated requests, one of:
+    DSA, DSA-SHA, MD4, MD5, MDC2, RIPEMD160, SHA, SHA1
+usage: keytype [ digest-name ]
 """)
     def do_exercise(self, line):
         "Exercise the protocol - low level"
@@ -431,15 +432,43 @@ usage: keytype [ key type (md5|des) ]
     def do_associations(self, line):
         "print list of association IDs and statuses for the server's peers"
         pass
+
+    def help_associations(self):
+        sys.stdout.write("""\
+function: print list of association ID's and statuses for the server's peers
+usage: associations
+""")
+
     def do_passociations(self, line):
         "print list of associations returned by last associations command"
         pass
+
+    def help_passociations(self):
+        sys.stdout.write("""\
+function: print list of associations returned by last associations command
+usage: passociations
+""")
+
     def do_lassociations(self, line):
         "print list of associations including all client information"
         pass
+
+    def help_lassociations(self):
+        sys.stdout.write("""\
+function: print list of associations including all client information
+usage: lassociations
+""")
+
     def do_lpassociations(self, line):
         "print last obtained list of associations, including client information"
         pass
+
+    def help_lpassociations(self):
+        sys.stdout.write("""\
+function: print last obtained list of associations, including client information
+usage: lpassociations
+""")
+
     def do_addvars(self, line):
         "add variables to the variable list or change their values"
         if line == "":
@@ -449,6 +478,12 @@ usage: keytype [ key type (md5|des) ]
         vars_to_add = line.split(',')
         for add_var in vars_to_add:
             uservars[add_var.split("=")[0].strip()] = add_var.split("=")[1].strip()
+
+    def help_addvars(self):
+        sys.stdout.write("""\
+function: add variables to the variable list or change their values
+usage: addvars name[=value][,...]
+""")
 
     def do_rmvars(self, line):
         "remove variables from the variable list"
@@ -463,9 +498,21 @@ usage: keytype [ key type (md5|des) ]
             else:
                 del uservars[rm_var]
 
+    def help_rmvars(self):
+        sys.stdout.write("""\
+function: remove variables from the variable list
+usage: rmvars name[,...]
+""")
+
     def do_clearvars(self, line):
         "remove all variables from the variable list"
         uservars.clear()
+
+    def help_clearvars(self):
+        sys.stdout.write("""\
+function: remove all variables from the variable list
+usage: clearvars
+""")
 
     def do_showvars(self, line):
         "print variables on the variable list"
@@ -474,102 +521,331 @@ usage: keytype [ key type (md5|des) ]
         for name in uservars:
             print ("%s=%s" % (name, uservars[name]))
 
+    def help_showvars(self):
+        sys.stdout.write("""\
+function: print variables on the variable list
+usage: showvars
+""")
+
     def do_readlist(self, line):
         "read the system or peer variables included in the variable list"
         pass
+
+    def help_readlist(self):
+        sys.stdout.write("""\
+function: read the system or peer variables included in the variable list
+usage: readlist [ assocID ]
+""")
+
     def do_rl(self, line):
         "read the system or peer variables included in the variable list"
         pass
+
+    def help_rl(self):
+        sys.stdout.write("""\
+function: read the system or peer variables included in the variable list
+usage: rl [ assocID ]
+""")
+
     def do_writelist(self, line):
         "write the system or peer variables included in the variable list"
         pass
+
+    def help_writelist(self):
+        sys.stdout.write("""\
+function: write the system or peer variables included in the variable list
+usage: writelist [ assocID ]
+""")
+
     def do_readvar(self, line):
         "read system or peer variables"
         pass
+
+    def help_readvar(self):
+        sys.stdout.write("""\
+function: read system or peer variables
+usage: readvar [ assocID ] [ varname1 ] [ varname2 ] [ varname3 ]
+""")
+
     def do_rv(self, line):
         "read system or peer variables"
         pass
+
+    def help_rv(self):
+        sys.stdout.write("""\
+function: read system or peer variables
+usage: rv [ assocID ] [ varname1 ] [ varname2 ] [ varname3 ]
+""")
+
     def do_writevar(self, line):
         "write system or peer variables"
         pass
+
+    def help_writevar(self):
+        sys.stdout.write("""\
+function: write system or peer variables
+usage: writevar assocID name=value,[...]
+""")
+
     def do_mreadlist(self, line):
         "read the peer variables in the variable list for multiple peers"
         pass
+
+    def help_mreadlist(self):
+        sys.stdout.write("""\
+function: read the peer variables in the variable list for multiple peers
+usage: mreadlist assocIDlow assocIDhigh
+""")
+
     def do_mrl(self, line):
         "read the peer variables in the variable list for multiple peers"
         pass
+
+    def help_mrl(self):
+        sys.stdout.write("""\
+function: read the peer variables in the variable list for multiple peers
+usage: mrl assocIDlow assocIDhigh
+""")
+
     def do_mreadvar(self, line):
         "read peer variables from multiple peers"
         pass
+
+    def help_mreadvar(self):
+        sys.stdout.write("""\
+function: read peer variables from multiple peers
+usage: mreadvar assocIDlow assocIDhigh [ name=value[,...] ]
+""")
+
     def do_mrv(self, line):
         "read peer variables from multiple peers"
         pass
+
+    def help_mrv(self):
+        sys.stdout.write("""\
+function: read peer variables from multiple peers
+usage: mrv assocIDlow assocIDhigh [ name=value[,...] ]
+""")
+
     def do_clocklist(self, line):
         "read the clock variables included in the variable list"
         pass
+
+    def help_clocklist(self):
+        sys.stdout.write("""\
+function: read the clock variables included in the variable list
+usage: clocklist [ assocID ]
+""")
+
     def do_cl(self, line):
         "read the clock variables included in the variable list"
         pass
+
+    def help_cl(self):
+        sys.stdout.write("""\
+function: read the clock variables included in the variable list
+usage: cl [ assocID ]
+""")
+
     def do_clockvar(self, line):
         "read clock variables"
         pass
+
+    def help_clockvar(self):
+        sys.stdout.write("""\
+function: read clock variables
+usage: clockvar [ assocID ] [ name=value[,...] ]
+""")
+
     def do_cv(self, line):
         "read clock variables"
         pass
+
+    def help_cv(self):
+        sys.stdout.write("""\
+function: read clock variables
+usage: cv [ assocID ] [ name=value[,...] ]
+""")
+
     def do_pstats(self, line):
         "show statistics for a peer"
         pass
+
+    def help_pstats(self):
+        sys.stdout.write("""\
+function: show statistics for a peer
+usage: pstats assocID
+""")
+
     def do_peers(self, line):
         "obtain and print a list of the server's peers [IP version]"
         pass
+
+    def help_peers(self):
+        sys.stdout.write("""\
+function: obtain and print a list of the server's peers [IP version]
+usage: peers [ -4|-6 ]
+""")
+
     def do_apeers(self, line):
         "obtain and print a list of the server's peers and their assocIDs [IP version]"
         pass
+
+    def help_apeers(self):
+        sys.stdout.write("""\
+function: obtain and print a list of the server's peers and their assocIDs [IP version]
+usage: apeers [ -4|-6 ]
+""")
+
     def do_lpeers(self, line):
         "obtain and print a list of all peers and clients [IP version]"
         pass
+
+    def help_lpeers(self):
+        sys.stdout.write("""\
+function: obtain and print a list of all peers and clients [IP version]
+usage: lpeers [ -4|-6 ]
+""")
+
     def do_opeers(self, line):
         "print peer list the old way, with dstadr shown rather than refid [IP version]"
         pass
+
+    def help_opeers(self):
+        sys.stdout.write("""\
+function: print peer list the old way, with dstadr shown rather than refid [IP version]
+usage: opeers [ -4|-6 ]
+""")
+
     def do_lopeers(self, line):
         "obtain and print a list of all peers and clients showing dstadr [IP version]"
         pass
+
+    def help_lopeers(self):
+        sys.stdout.write("""\
+function: obtain and print a list of all peers and clients showing dstadr [IP version]
+usage: lopeers [ -4|-6 ]
+""")
+
     def do_config(self, line):
         "send a remote configuration command to ntpd"
         pass
+
+    def help_config(self):
+        sys.stdout.write("""\
+function: send a remote configuration command to ntpd
+usage: config <configuration command line>
+""")
+
     def do_config_from_file(self, line):
         "configure ntpd using the configuration filename"
         pass
+
+    def help_config_from_file(self):
+        sys.stdout.write("""\
+function: configure ntpd using the configuration filename
+usage: config_from_file <configuration filename>
+""")
+
     def do_mrulist(self, line):
         "display the list of most recently seen source addresses, tags mincount=... resall=0x... resany=0x..."
         pass
+
+    def help_mrulist(self):
+        sys.stdout.write("""\
+function: display the list of most recently seen source addresses, tags mincount=... resall=0x... resany=0x...
+usage: mrulist [ tag=value ] [ tag=value ] [ tag=value ] [ tag=value ]
+""")
+
     def do_ifstats(self, line):
         "show statistics for each local address ntpd is using"
         pass
+
+    def help_ifstats(self):
+        sys.stdout.write("""\
+function: show statistics for each local address ntpd is using
+usage: ifstats
+""")
+
     def do_reslist(self, line):
         "show ntpd access control list"
         pass
+
+    def help_reslist(self):
+        sys.stdout.write("""\
+function: show ntpd access control list
+usage: reslist
+""")
+
     def do_sysinfo(self, line):
         "display system summary"
         pass
+
+    def help_sysinfo(self):
+        sys.stdout.write("""\
+function: display system summary
+usage: sysinfo
+""")
+
     def do_kerninfo(self, line):
         "display kernel loop and PPS statistics"
         pass
+
+    def help_kerninfo(self):
+        sys.stdout.write("""\
+function: display kernel loop and PPS statistics
+usage: kerninfo
+""")
+
     def do_sysstats(self, line):
         "display system uptime and packet counts"
         pass
+
+    def help_sysstats(self):
+        sys.stdout.write("""\
+function: display system uptime and packet counts
+usage: sysstats
+""")
+
     def do_monstats(self, line):
         "display monitor (mrulist) counters and limits"
         pass
+
+    def help_monstats(self):
+        sys.stdout.write("""\
+function: display monitor (mrulist) counters and limits
+usage: monstats
+""")
+
     def do_authinfo(self, line):
         "display symmetric authentication counters"
         pass
+
+    def help_authinfo(self):
+        sys.stdout.write("""\
+function: display symmetric authentication counters
+usage: authinfo
+""")
+
     def do_iostats(self, line):
         "display network input and output counters"
         pass
+
+    def help_iostats(self):
+        sys.stdout.write("""\
+function: display network input and output counters
+usage: iostats
+""")
+
     def do_timerstats(self, line):
         "display interval timer counters"
         pass
+
+    def help_timerstats(self):
+        sys.stdout.write("""\
+function: display interval timer counters
+usage: timerstats
+""")
 
 # Default values we use.
 DEFHOST 	= "localhost"	# default host name
