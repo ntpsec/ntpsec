@@ -452,16 +452,16 @@ usage: keytype [ key type (md5|des) ]
 
     def do_rmvars(self, line):
         "remove variables from the variable list"
-        if add_var == "":
+        if line == "":
             print("usage rmvars name[,...]")
             return
 
-        vars_to_add = line.split(',')
-        for add_var in vars_to_add:
-            if add_var not in uservars:
-                print ("%s is not in the variable list" % add_var.split("=")[0])
+        vars_to_rm = line.split(',')
+        for rm_var in vars_to_rm:
+            if rm_var not in uservars:
+                print ("%s is not in the variable list" % rm_var)
             else:
-                del uservars[add_var]
+                del uservars[rm_var]
 
     def do_clearvars(self, line):
         "remove all variables from the variable list"
