@@ -21,6 +21,8 @@ include::includes/hand.txt[]
 * link:#pool[Configuring Pool Servers]
 * link:#howmany[How Many Servers?]
 * link:#gps[Configuring A Local GPS]
+* link:#dhcp[Special considerations when using DHCP]
+* link:#sanity[Sanity-Checking Your Time Service]
 
 '''''
 
@@ -249,6 +251,57 @@ to ntp.conf or it might not; this depends on your OS supplier (Debian
 derivatives normally 'do' base on your local ntp.conf). If it does,
 all is well.  If it does not, you may have to modify the hook scripts
 that generate that file, or disable the generation process.
+
+[[sanity]]
+== Sanity-Checking Your Time Service ==
+
+Here's how to tell your time service is working.  Wait a few minutes
+for it to sync with upstream servers, then fire up ntpq with the -p
+(peers) option.  You should see a display looking something like this:
+
+------------------------------------------------------------------
+     remote           refid      st t when poll reach   delay   offset  jitter
+==============================================================================
+*b1-66er.matrix. 18.26.4.105      2 u  871 1024  377    6.655    1.042   0.659
++tools.ninjaneer 216.218.254.202  2 u  268 1024  377   69.917    0.275   0.858
+-96.226.123.230  129.7.1.66       2 u  689 1024  377   43.322   -2.322   0.982
+-a1.pcloud.com   18.26.4.105      2 u  861 1024  377   41.805   -2.283   0.453
++juniperberry.ca 17.253.34.253    2 u  682 1024  377   82.361    0.927   1.370
+------------------------------------------------------------------
+
+If you have a local GPS you should see something like this:
+
+------------------------------------------------------------------
+     remote           refid      st t when poll reach   delay   offset  jitter
+==============================================================================
+xSHM(0)          .GPS.            0 l   39   64  377    0.000  -591.41  70.967
+*SHM(1)          .PPS.            0 l   43   64  377    0.000    0.003   0.004
++time-a.timefreq .ACTS.           1 u    5   64  377   48.438    0.487   3.163
+-time-a.nist.gov .ACTS.           1 u   23   64  377   73.233   32.901   0.587
+-fwwds-1-pt.tunn 173.162.192.156  2 u   11   64  377   48.311   -2.082   2.649
++clocka.ntpjs.or 192.5.41.40      2 u   22   64  377   13.146    0.743   0.644
+------------------------------------------------------------------
+
+The first two lines represent the refclock.
+
+In both cases, the column to look at first is the "reach". A value of
+377 indicates that your client has been getting samples continuously
+for eight poll intervals.  A value of 0 is bad - it means you're not
+communicating with the upstream server or clock at all.  To interpret other
+values, you need to interpret the reach column in octal, expand
+it to binary, and read each bit as a yes/no for its poll interval
+Thus, for example, 017 means samples from the last four polls but
+none before that.
+
+Next, you want to look at the line for "preferred" server (marked with
+*).  This is the one that is closest to the approximation of UTC that
+NTP's algorithms have computed from its inputs. What you want to see here
+is low jitter. The PPS feed in the second example is pretty good. The
+figures from 18.26.4.105 in the first display are not great, but
+they're not out of line for operation over a WAN.  Jitter over a
+second would indicate a serious problem, most likely due to
+asymmetric packet delays.
+
 
 '''''
 

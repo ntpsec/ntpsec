@@ -44,11 +44,6 @@
   on at least one platform and test the NMEA, Atom, and SHM drivers
   on most platforms.
 
-=== Documentation ===
-
-* Short doc on how to tell your ntpd is running correctly.
-  Perhaps lifted from GPSD Time Service HOWTO?
-
 == After 1.0 release ==
 
 === Slow convergence ===
