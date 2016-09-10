@@ -1,5 +1,5 @@
-from waflib.Logs import pprint
 import re
+from waflib.Logs import pprint
 
 def msg(str):
 	pprint("YELLOW", str)

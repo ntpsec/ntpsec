@@ -1,5 +1,5 @@
-from waflib.Logs import pprint
 import sys
+from waflib.Logs import pprint
 
 def check_seccomp(ctx):
 

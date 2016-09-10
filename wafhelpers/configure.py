@@ -1,8 +1,7 @@
-from waflib.Configure import conf
-from util import msg, msg_setting
-from probes import *
 import sys, os
-from util import parse_version
+from waflib.Configure import conf
+from wafhelpers.probes import *
+from wafhelpers.util import msg, msg_setting, parse_version
 
 def cmd_configure(ctx, config):
         srcnode = ctx.srcnode.abspath()
@@ -44,7 +43,7 @@ def cmd_configure(ctx, config):
         for opt in opt_map:
                 ctx.env[opt] = opt_map[opt]
 
-        from compiler import check_compiler
+        from wafhelpers.compiler import check_compiler
         check_compiler(ctx)
 
 
@@ -125,9 +124,9 @@ def cmd_configure(ctx, config):
         if ctx.options.enable_doc_only:
                 return
 
-        from check_type import check_type
-        from check_sizeof import check_sizeof
-        from check_structfield import check_structfield
+        from wafhelpers.check_type import check_type
+        from wafhelpers.check_sizeof import check_sizeof
+        from wafhelpers.check_structfield import check_structfield
 
         for opt in opt_map:
                 ctx.env[opt] = opt_map[opt]
@@ -150,7 +149,7 @@ def cmd_configure(ctx, config):
 
 
         if ctx.options.list:
-                from refclock import refclock_map
+                from wafhelpers.refclock import refclock_map
                 print( "ID    Description")
                 print( "~~    ~~~~~~~~~~~")
                 for id in refclock_map:
@@ -160,7 +159,7 @@ def cmd_configure(ctx, config):
 
         # This needs to be at the top since it modifies CC and AR
         if ctx.options.enable_fortify:
-                from check_fortify import check_fortify
+                from wafhelpers.check_fortify import check_fortify
                 check_fortify(ctx)
 
 
@@ -279,7 +278,7 @@ def cmd_configure(ctx, config):
 
         # Find OpenSSL. Must happen before function checks
         if ctx.options.enable_crypto:
-                from check_openssl import configure_ssl
+                from wafhelpers.check_openssl import configure_ssl
                 configure_ssl(ctx)
 
         # Optional functions.  Do all function checks here, otherwise
@@ -377,7 +376,7 @@ def cmd_configure(ctx, config):
         if ctx.get_define("HAVE_PRIV_H") and sys.platform == "Solaris":
                 ctx.define("HAVE_SOLARIS_PRIVS", 1, comment="Enable Solaris Privileges (Solaris only)")
 
-        from check_sockaddr import check_sockaddr
+        from wafhelpers.check_sockaddr import check_sockaddr
         check_sockaddr(ctx)
 
         # Some systems don't have sys/timex.h eg OS X, OpenBSD...
@@ -385,7 +384,7 @@ def cmd_configure(ctx, config):
                 ctx.env.HEADER_SYS_TIMEX_H = True
 
         if ctx.options.refclocks:
-                from refclock import refclock_config
+                from wafhelpers.refclock import refclock_config
                 refclock_config(ctx)
 
         # NetBSD (used to) need to recreate sockets on changed routing.
