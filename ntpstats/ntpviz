@@ -1032,7 +1032,8 @@ ntpviz</a>, part of the <a href="https://www.ntpsec.org/">NTPsec project</a>
             ]
 
         peerlist = stats.peersplit().keys()
-        peerlist.sort() # sort for output order stability
+        # sort for output order stability
+        peerlist = sorted( peerlist )
         for key in peerlist:
             imagepairs.append(("peer-offset-" + key,
                            stats.peer_offsets_gnuplot([key])))
