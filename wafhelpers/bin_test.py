@@ -1,3 +1,4 @@
+from __future__ import print_function
 import re
 from os.path import exists
 from waflib.Utils import subprocess
@@ -30,7 +31,7 @@ def run(cmd, reg):
 	if cmd[1] == None:
 		cmd = [cmd[0]]
 
-	print "running: ", " ".join(cmd),
+	print("running: ", " ".join(cmd), end="")
 
 	if not exists("build/%s" % cmd[0]):
 		pprint("YELLOW", " SKIPPING (does not exist)")

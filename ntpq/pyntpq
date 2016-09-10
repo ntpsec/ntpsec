@@ -494,7 +494,7 @@ usage: addvars name[=value][,...]
         vars_to_rm = line.split(',')
         for rm_var in vars_to_rm:
             if rm_var not in uservars:
-                print ("%s is not in the variable list" % rm_var)
+                print("%s is not in the variable list" % rm_var)
             else:
                 del uservars[rm_var]
 
@@ -517,9 +517,9 @@ usage: clearvars
     def do_showvars(self, line):
         "print variables on the variable list"
         if len(uservars) == 0:
-            print ("No variables on list.")
+            print("No variables on list.")
         for name in uservars:
-            print ("%s=%s" % (name, uservars[name]))
+            print("%s=%s" % (name, uservars[name]))
 
     def help_showvars(self):
         sys.stdout.write("""\
