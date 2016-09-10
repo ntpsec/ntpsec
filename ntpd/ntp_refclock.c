@@ -1013,10 +1013,9 @@ refclock_params(
 	ap->pps_params.api_version = PPS_API_VERS_1;
 
 	/*
-	 * Solaris serial ports provide PPS pulse capture only on the
-	 * assert edge. FreeBSD serial ports provide capture on the
-	 * clear edge, while FreeBSD parallel ports provide capture
-	 * on the assert edge. Your mileage may vary.
+	 * If flag2 is lit, capture on clear edge if we can.  Not all
+	 * PPSAPI implementations let you choose; if in doubt, check
+	 * the documentation of your serial driver.
 	 */
 	if (mode & CLK_FLAG2)
 		ap->pps_params.mode = PPS_TSFMT_TSPEC | PPS_CAPTURECLEAR;

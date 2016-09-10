@@ -36,10 +36,6 @@
   need for adjtimex(2). We need to collect statistics on builds with and
   without the PLL to see if it's actually a win.
 
-* From refclock_params in ntpd/ntp_refclock.c: " FreeBSD serial ports
-  provide capture on the clear edge, while FreeBSD parallel ports
-  provide capture on the assert edge.: Needs checking.
-
 === Testing ===
 
 * Unit testing.  "waf check" needs to run all the unit tests, not
