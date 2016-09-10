@@ -616,7 +616,7 @@ if __name__ == '__main__':
             "all-peer-jitters", "peer-jitters=",
             "local-temps",
             "local-offset-multiplot",
-            ])
+        ])
     except getopt.GetoptError as err:
         sys.stderr.write(str(err) + "\n")
         raise SystemExit(2)
@@ -875,7 +875,7 @@ at 0s. Typical 90% ranges may be: local serial GPS 200 ms; local LAN peer
 80µs; local PPS 20µs.  90% ranges for WAN servers may be 4ms and much larger.
 </p>
 """,
-        }
+    }
 
     start_time = datetime.datetime.utcnow()
     start_time_str = start_time.strftime("%c")
@@ -1032,7 +1032,7 @@ ntpviz</a>, part of the <a href="https://www.ntpsec.org/">NTPsec project</a>
             ("local-offset-histogram", stats.local_offset_histogram_gnuplot()),
             ("local-temps", stats.local_temps_gnuplot()),
             ("peer-offsets", stats.peer_offsets_gnuplot()),
-            ]
+        ]
 
         peerlist = list(stats.peersplit().keys())
         # sort for output order stability

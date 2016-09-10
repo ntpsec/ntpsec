@@ -117,7 +117,7 @@ if __name__ == "__main__":
     try:
         (options, arguments) = getopt.getopt(sys.argv[1:], "hn:s:v", [
             "tries=", "sleep=", "verbose", "help"
-            ])
+        ])
     except getopt.GetoptError as err:
         sys.stderr.write(str(err) + "\n")
         raise SystemExit(2)
