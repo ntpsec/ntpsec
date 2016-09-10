@@ -210,7 +210,7 @@ plot \\
             unit = "ppb"
             rnd = 0
 
-        percs.update({k: round( v * multiplier, rnd) for k, v in percs.items()})
+        percs.update({k: round( v * multiplier, rnd) for k, v in list(percs.items())})
         ninetynine  = percs[99]
         ninetyfive  = percs[95]
         five        = percs[5]
@@ -274,7 +274,7 @@ plot \
             else:
                 unit = "ns"
 
-        percs.update({k: round( v * multiplier, rnd) for k, v in percs.items()})
+        percs.update({k: round( v * multiplier, rnd) for k, v in list(percs.items())})
         ninetynine  = percs[99]
         ninetyfive  = percs[95]
         five        = percs[5]
@@ -364,7 +364,7 @@ plot \
                 multiplier = 1e9
 
             rnd = 3
-            percs.update({k: round(v*multiplier, rnd) for k, v in percs.items()})
+            percs.update({k: round(v*multiplier, rnd) for k, v in list(percs.items())})
             ninetynine  = percs[99]
             ninetyfive  = percs[95]
             fifty       = percs[50]
@@ -455,7 +455,7 @@ plot \
             rnd1 = 9        # round to 1 ns boxes
             boxwidth = 1e-9
 
-        percs.update({k: round(v*multiplier, rnd) for k, v in percs.items()})
+        percs.update({k: round(v*multiplier, rnd) for k, v in list(percs.items())})
         ninetynine  = percs[99]
         ninetyfive  = percs[95]
         five        = percs[5]
@@ -1031,7 +1031,7 @@ ntpviz</a>, part of the <a href="https://www.ntpsec.org/">NTPsec project</a>
             ("peer-offsets", stats.peer_offsets_gnuplot()),
             ]
 
-        peerlist = stats.peersplit().keys()
+        peerlist = list(stats.peersplit().keys())
         # sort for output order stability
         peerlist = sorted( peerlist )
         for key in peerlist:
