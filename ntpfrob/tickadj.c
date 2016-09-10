@@ -2,7 +2,7 @@
  * tickadj - read, and possibly modify, the kernel `tick' and
  *	     `tickadj' variables', using adjtimex(2).  This is
  *	     included only for compatibility with old scripts.
- *	     and its former support for unsafe /dev/kmem operations
+ *	     Its former support for unsafe /dev/kmem operations
  *	     has been removed.
  *
  * Copyright 2015 by the NTPsec project contributors
@@ -29,6 +29,7 @@ static struct timex txc;
 void tickadj(const bool json, const int newtick)
 {
 #ifndef HAVE_ADJTIMEX
+	UNUSED_ARG(json);
 	UNUSED_ARG(newtick);
 	fputs("ntpfrob: \n", stderr);
 	exit(1);
