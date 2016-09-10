@@ -151,10 +151,10 @@ def cmd_configure(ctx, config):
 
 	if ctx.options.list:
 		from refclock import refclock_map
-		print "ID    Description"
-		print "~~    ~~~~~~~~~~~"
+		print( "ID    Description")
+		print( "~~    ~~~~~~~~~~~")
 		for id in refclock_map:
-			print "%-5s %s" % (id, refclock_map[id]["descr"])
+			print( "%-5s %s" % (id, refclock_map[id]["descr"]))
 
 		return
 
@@ -367,7 +367,7 @@ def cmd_configure(ctx, config):
 				continue
 		if os.path.exists("/usr/include/" + hdr):
 			# Sanity check...
-			print "Compilation check failed but include exists %s" % hdr
+			print("Compilation check failed but include exists %s" % hdr)
 
 	if ctx.get_define("HAVE_TIMEPPS_H") or ctx.get_define("HAVE_SYS_TIMEPPS_H"):
 		ctx.define("HAVE_PPSAPI", 1, comment="Enable the PPS API")
@@ -450,7 +450,7 @@ def cmd_configure(ctx, config):
         elif sys.byteorder == "big":
                 ctx.define("WORDS_BIGENDIAN", 1)
         else:
-                print "Can't determine byte order!"
+                print( "Can't determine byte order!")
 
 	probe_vsprintfm(ctx, "VSNPRINTF_PERCENT_M",
 			    "Checking for %m expansion in vsnprintf(3)")
