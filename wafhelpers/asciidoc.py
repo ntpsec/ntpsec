@@ -1,6 +1,6 @@
-from util import ascii_doc_scan
 from waflib import Task
 from waflib.TaskGen import extension
+from wafhelpers.util import ascii_doc_scan
 
 # asciidoc -b html5 -a linkcss -a stylesdir=/mnt/devel/ntp/commit/docs -o asd driver32.txt
 

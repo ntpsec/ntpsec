@@ -1,7 +1,6 @@
-from waflib.Configure import conf
-from util import msg, msg_setting
-
 import os
+from waflib.Configure import conf
+from wafhelpers.util import msg, msg_setting
 
 # Versions older than 0.9.7d were deemed incompatible in NTP Classic.
 OPENSSL_FRAG = """

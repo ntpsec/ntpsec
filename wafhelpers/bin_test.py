@@ -1,7 +1,7 @@
-from waflib.Utils import subprocess
-from waflib.Logs import pprint
 import re
 from os.path import exists
+from waflib.Utils import subprocess
+from waflib.Logs import pprint
 
 cmd_map = {
 	("main/ntpd/ntpd",				"-invalid"):			r'.*must be run as root, not uid.*',

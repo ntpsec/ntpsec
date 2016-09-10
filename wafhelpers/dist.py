@@ -2,7 +2,7 @@ from os import path
 from shutil import copyfile
 from os.path import exists
 import time
-from util import parse_version
+from wafhelpers.util import parse_version
 
 def dist_cmd(ctx, config):
 		files_man = []
