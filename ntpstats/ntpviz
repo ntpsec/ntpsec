@@ -1030,12 +1030,15 @@ ntpviz</a>, part of the <a href="https://www.ntpsec.org/">NTPsec project</a>
             ("local-temps", stats.local_temps_gnuplot()),
             ("peer-offsets", stats.peer_offsets_gnuplot()),
             ]
-        for key in stats.peersplit().keys():
+
+        peerlist = stats.peersplit().keys()
+        peerlist.sort() # sort for output order stability
+        for key in peerlist:
             imagepairs.append(("peer-offset-" + key,
                            stats.peer_offsets_gnuplot([key])))
         imagepairs.append(("peer-jitters",
                            stats.peer_jitters_gnuplot()))
-        for key in stats.peersplit().keys():
+        for key in peerlist:
             plot = stats.peer_jitters_gnuplot([key])
             if len( plot ):
                 imagepairs.append(("peer-jitter-" + key, plot))
