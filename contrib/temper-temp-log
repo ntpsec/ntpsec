@@ -29,7 +29,7 @@ Sample crontab usage:
 """
 
 
-import re, time, subprocess
+import time, subprocess
 
 output = subprocess.check_output(["temper-poll", "-c"], universal_newlines=True)
 
