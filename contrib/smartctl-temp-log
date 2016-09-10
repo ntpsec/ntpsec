@@ -51,7 +51,7 @@ try:
         stderr=subprocess.STDOUT, \
         universal_newlines=True)
 
-except subprocess.CalledProcessError, e:
+except subprocess.CalledProcessError as e:
     sys.stderr.write( "ERROR: 'smartctl -a %s' failed\n" % device)
     sys.stderr.write( e.output )
     sys.stderr.write( "Return code: %s\n" % e.returncode )
