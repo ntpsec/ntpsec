@@ -221,14 +221,14 @@ def cmd_configure(ctx, config):
         net_types = (
                 ("struct if_laddrconf", ["sys/types.h", "net/if6.h"]),
                 ("struct if_laddrreq", ["sys/types.h", "net/if6.h"]),
-                )
+        )
         for (f, h) in net_types:
                 ctx.check_type(f, h)
 
         structures = (
                 ("struct timex", ["sys/time.h", "sys/timex.h"]),
                 ("struct ntptimeval", ["sys/time.h", "sys/timex.h"]),
-                )
+        )
         for (s, h) in structures:
                 ctx.check_type(s, h)
 
@@ -237,7 +237,7 @@ def cmd_configure(ctx, config):
                 ("modes", "timex", ["sys/time.h", "sys/timex.h"]),
                 ("time.tv_nsec", "ntptimeval", ["sys/time.h", "sys/timex.h"]),
                 ("tai", "ntptimeval", ["sys/time.h", "sys/timex.h"]),
-                )
+        )
         for (f, s, h) in structure_fields:
                 ctx.check_structfield(f, s, h)
 
@@ -301,7 +301,7 @@ def cmd_configure(ctx, config):
                 ('strlcpy', ["string.h"]),
                 ('strlcat', ["string.h"]),
                 ('timer_create', ["time.h"])
-                )
+        )
         for ft in functions:
                 if len(ft) == 2:
                         probe_function_with_prerequisites(ctx, function=ft[0],
