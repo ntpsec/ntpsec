@@ -150,10 +150,10 @@ def cmd_configure(ctx, config):
 
         if ctx.options.list:
                 from wafhelpers.refclock import refclock_map
-                print( "ID    Description")
-                print( "~~    ~~~~~~~~~~~")
+                print("ID    Description")
+                print("~~    ~~~~~~~~~~~")
                 for id in refclock_map:
-                        print( "%-5s %s" % (id, refclock_map[id]["descr"]))
+                        print("%-5s %s" % (id, refclock_map[id]["descr"]))
 
                 return
 
@@ -449,7 +449,7 @@ def cmd_configure(ctx, config):
         elif sys.byteorder == "big":
                 ctx.define("WORDS_BIGENDIAN", 1)
         else:
-                print( "Can't determine byte order!")
+                print("Can't determine byte order!")
 
         probe_vsprintfm(ctx, "VSNPRINTF_PERCENT_M",
                             "Checking for %m expansion in vsnprintf(3)")
