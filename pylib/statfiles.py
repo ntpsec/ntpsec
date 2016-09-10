@@ -35,7 +35,7 @@ class NTPStats:
     def timestamp(line):
         "get Unix time from converted line."
         return float(line.split()[0])
-    def __init__(self, statsdir, sitename=None, 
+    def __init__(self, statsdir, sitename=None,
                  period=None, starttime=None, endtime=None):
         "Grab content of logfiles, sorted by timestamp."
         if period is None:

@@ -1,12 +1,12 @@
-# Some compilers decide they like to mimic GCC as close as possible.  
-# Unfortunately this usually does not apply to #pragma's.  There can also be 
+# Some compilers decide they like to mimic GCC as close as possible.
+# Unfortunately this usually does not apply to #pragma's.  There can also be
 # quirks that need to be dodged specific to a compiler.
 #
-# There are also differences when it comes to coverage and profiling between 
-# compilers.  We'll want to support all to see how the source reacts under 
+# There are also differences when it comes to coverage and profiling between
+# compilers.  We'll want to support all to see how the source reacts under
 # different compilers and architectures.
 #
-# This file exist as the definitive way to check what compiler we're working 
+# This file exist as the definitive way to check what compiler we're working
 # under it defines COMPILER_X in both config.h and the build system.
 
 COMPILER_FRAG = """

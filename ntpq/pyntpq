@@ -127,15 +127,15 @@ NTP_2BIT	= 0x9	# leap bits
 
 # Format values
 PADDING	= 0
-HA	= 1	# host address 
-NA	= 2	# network address 
-LP	= 3	# leap (print in binary) 
-RF	= 4	# refid (sometimes string, sometimes not) 
-AR	= 5	# array of times 
-FX	= 6	# test flags 
-TS	= 7	# l_fp timestamp in hex 
-OC	= 8	# integer, print in octal 
-EOV	= 255	# end of table 
+HA	= 1	# host address
+NA	= 2	# network address
+LP	= 3	# leap (print in binary)
+RF	= 4	# refid (sometimes string, sometimes not)
+AR	= 5	# array of times
+FX	= 6	# test flags
+TS	= 7	# l_fp timestamp in hex
+OC	= 8	# integer, print in octal
+EOV	= 255	# end of table
 
 # For the most part ntpq simply displays what ntpd provides in the
 # mostly plain-text mode 6 responses.  A few variable names are by
@@ -152,32 +152,32 @@ cookedvars = {
     "xmt":		TS,
     "flash":		FX,
     "srcadr":		HA,
-    "peeradr":		HA,	# compat with others 
+    "peeradr":		HA,	# compat with others
     "dstadr":		NA,
     "filtdelay":	AR,
     "filtoffset":	AR,
     "filtdisp":		AR,
-    "filterror":	AR,	# compat with others 
+    "filterror":	AR,	# compat with others
 }
 
 uservars = {
 }
 
-# flasher bits 
+# flasher bits
 tstflagnames = (
-	"pkt_dup",		# BOGON1 
-	"pkt_bogus",		# BOGON2 
-	"pkt_unsync",		# BOGON3 
-	"pkt_denied",		# BOGON4 
-	"pkt_auth",		# BOGON5 
-	"pkt_stratum",		# BOGON6 
-	"pkt_header",		# BOGON7 
-	"pkt_autokey",		# BOGON8 
-	"pkt_crypto",		# BOGON9 
-	"peer_stratum",		# BOGON10 
-	"peer_dist",		# BOGON11 
-	"peer_loop",		# BOGON12 
-	"peer_unreach"		# BOGON13 
+	"pkt_dup",		# BOGON1
+	"pkt_bogus",		# BOGON2
+	"pkt_unsync",		# BOGON3
+	"pkt_denied",		# BOGON4
+	"pkt_auth",		# BOGON5
+	"pkt_stratum",		# BOGON6
+	"pkt_header",		# BOGON7
+	"pkt_autokey",		# BOGON8
+	"pkt_crypto",		# BOGON9
+	"peer_stratum",		# BOGON10
+	"peer_dist",		# BOGON11
+	"peer_loop",		# BOGON12
+	"peer_unreach"		# BOGON13
 )
 
 class ntpq_interpreter(cmd.Cmd):
@@ -191,10 +191,10 @@ class ntpq_interpreter(cmd.Cmd):
         #self.auth_keyid   = 0		# Keyid used for authentication.
         #self.auth_keytype = "NID_md5"	# MD5 (FIXME: string value is a dummy)
         #self.auth_hashlen = 16		# MD5
-        self.rawmode           = False	# Flag which indicates raw mode output. 
+        self.rawmode           = False	# Flag which indicates raw mode output.
         self.showhostnames     = True	# If false, display numeric IPs
 	#self.l_fp delay_time		# delay time
-        self.wideremote = False		# show wide remote names? 
+        self.wideremote = False		# show wide remote names?
         self.ccmds = []			# Queued commands
         self.chosts = []		# Command-line hosts
         self.debug = 0
@@ -244,7 +244,7 @@ usage: delay [ msec ]
             elif self.session.havehost():
                 print("current host remains %s" % self.session.name)
             else:
-                print("still no current host")        
+                print("still no current host")
     def help_host(self):
         sys.stdout.write("""\
 function: specify the host whose NTP server we talk to
@@ -857,12 +857,12 @@ DEFHOST 	= "localhost"	# default host name
 # with a single packet dropped, would take around 32 * DEFSTIMEOUT, or
 # 93 seconds to fail each of two times, or 186 seconds.
 # Some commands involve a series of requests, such as "peers" and
-# "mrulist", so the cumulative timeouts are even longer for those. 
-DEFDELAY	= 0x51EB852	# 20 milliseconds, l_fp fraction 
-MAXVARLEN	= 256		# maximum length of a variable name 
-MAXVALLEN	= 2048		# maximum length of a variable value 
-MAXOUTLINE	= 72		# maximum length of an output line 
-SCREENWIDTH	= 76		# nominal screen width in columns 
+# "mrulist", so the cumulative timeouts are even longer for those.
+DEFDELAY	= 0x51EB852	# 20 milliseconds, l_fp fraction
+MAXVARLEN	= 256		# maximum length of a variable name
+MAXVALLEN	= 2048		# maximum length of a variable value
+MAXOUTLINE	= 72		# maximum length of an output line
+SCREENWIDTH	= 76		# nominal screen width in columns
 
 # Macro definitions we use
 def ISSPACE(c):	return ((c) == ' ' or (c) == '\t')
@@ -870,7 +870,7 @@ def ISEOL(c):	return ((c) == '\n' or (c) == '\r' or (c) == '\0')
 
 #
 # main - parse arguments and handle options
-# 
+#
 
 usage = '''
 USAGE: ntpq [-46dphinOV] [-c str] [-D lvl] [ host ...]
@@ -902,7 +902,7 @@ if __name__ == '__main__':
     #delay_time.l_ui = 0
     #delay_time.l_uf = DEFDELAY
 
-    #init_lib()	# sets up ipv4_works, ipv6_works 
+    #init_lib()	# sets up ipv4_works, ipv6_works
     #ssl_applink()
     #init_auth()
 

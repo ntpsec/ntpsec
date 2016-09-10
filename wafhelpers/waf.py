@@ -69,8 +69,8 @@ def manpage(ctx, section, source):
 		target      = source + '.man-tmp',
 		subst_fun   = manpage_subst_fun
 	)
- 
-	ctx(source=source + '.man-tmp', section=section) 
+
+	ctx(source=source + '.man-tmp', section=section)
 
 
 @conf
