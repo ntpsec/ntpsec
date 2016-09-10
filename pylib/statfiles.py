@@ -13,6 +13,7 @@ class NTPStats:
     "Gather statistics for a specified NTP site"
     SecondsInWeek = 24*60*60
     DefaultPeriod = 7*24*60*60
+    peermap = {}    # cached result of peersplit()
     @staticmethod
     def unixize(line, starttime, endtime):
         "Extract first two fields, MJD and seconds past midnight."
@@ -133,13 +134,16 @@ class NTPStats:
         return ret
     def peersplit(self):
         "Return a dictionary mapping peerstats IPs to entry subsets."
-        peermap = {}
+        "This is very expensive, so cache the result"
+        if len( self.peermap):
+            return self.peermap
+
         for line in self.peerstats:
             ip = line.split()[1]
-            if ip not in peermap:
-                peermap[ip] = []
-            peermap[ip].append(line)
-        return peermap
+            if ip not in self.peermap:
+                self.peermap[ip] = []
+            self.peermap[ip].append(line)
+        return self.peermap
     def tempssplit(self):
         "Return a dictionary mapping temperature sources to entry subsets."
         tempsmap = {}
