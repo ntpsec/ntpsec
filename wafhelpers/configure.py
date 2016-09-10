@@ -8,6 +8,7 @@ def cmd_configure(ctx, config):
 	srcnode = ctx.srcnode.abspath()
 	bldnode = ctx.bldnode.abspath()
 
+	ctx.run_build_cls = 'check'
 	ctx.load('waf', tooldir='wafhelpers/')
 	ctx.load('waf_unit_test')
 
