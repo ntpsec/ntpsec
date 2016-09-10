@@ -249,7 +249,7 @@ def cmd_configure(ctx, config):
                 (None,                  "long long"),
         ]
 
-        for header, sizeof in sorted(sizeofs):
+        for header, sizeof in sorted(sizeofs, key=lambda x: x[1:]):
                 ctx.check_sizeof(header, sizeof)
 
         # The protocol major number
