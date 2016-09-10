@@ -236,13 +236,13 @@ class ntpq_session:
                                         hints)
         try:
             return hinted_lookup(port="ntp", hints=socket.AI_NUMERICHOST)
-        except socket.gaierror as (errno, string):
+        except socket.gaierror as e:
             if self.debug > 2:
-                sys.stderr.write("ntpq: numeric-mode lookup of %s failed, %s\n" % (hname, string))
+                sys.stderr.write("ntpq: numeric-mode lookup of %s failed, %s\n" % (hname, e.strerror))
         try:
             return hinted_lookup(port="ntp", hints=0)
-        except socket.gaierror as (errno, string):
-            sys.stderr.write("ntpq: standard-mode lookup of %s failed, %s\n" % (hname, string))
+        except socket.gaierror as e:
+            sys.stderr.write("ntpq: standard-mode lookup of %s failed, %s\n" % (hname, e.strerror))
         # EAI_NODATA and AI_CANONNAME should both exist - they're in the
         # POSIX API.  If this code throws AttributeErrors there is
         # probably a very old and broken socket layer in your Python
@@ -254,11 +254,11 @@ class ntpq_session:
         except AttributeError:
             pass
         try:
-            if errno in (socket.EAI_NONAME, socket.EAI_NODATA):
+            if e.errno in (socket.EAI_NONAME, socket.EAI_NODATA):
                 try:
                     return hinted_lookup(port="ndp", hints=0)
-                except socket.gaierror as (errno, string):
-                    sys.stderr.write("ntpq: ndp lookup failed, %s\n" % string)
+                except socket.gaierror as e:
+                    sys.stderr.write("ntpq: ndp lookup failed, %s\n" % e.strerror)
         except AttributeError:
             sys.stderr.write("ntpq: API error, missing socket attributes\n")
         return None
