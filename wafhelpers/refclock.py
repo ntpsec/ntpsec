@@ -33,7 +33,7 @@ refclock_map = {
 		"file":		"generic"
 	},
 
-       "magnavox": {
+	"magnavox": {
 		"descr":	"Magnavox MX4200 and related GPS receivers",
 		"define":	"CLOCK_MAGNAVOX",
 		"require":	["ppsapi"],
@@ -169,7 +169,7 @@ def refclock_config(ctx):
 				"CLOCK_TRIMTSIP",
 				"CLOCK_VARITEXT",
 				"CLOCK_WHARTON_400A",
-				)
+			)
 			for subtype in parse_clocks:
 				ctx.define(subtype, 1, comment="Enable individual parse clock")
 
