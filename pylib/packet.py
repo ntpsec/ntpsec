@@ -152,7 +152,7 @@ class control_frag(ntp_packet):
         self.session.sequence += 1
         self.sequence = self.session.sequence
         ntp_packet.send(self,
-                        self.sequence, self.status, self.associd, self.offset) 
+                        self.sequence, self.status, self.associd, self.offset)
     def analyze(self, data):
         (self.sequence,
          self.status,
@@ -202,8 +202,8 @@ class ntpq_session:
         self.ai_family = socket.AF_UNSPEC
         self.primary_timeout = 5000	# Timeout for first select on receive
         self.secondary_timeout = 3000	# Timeout for later selects
-        self.pktversion = NTP_OLDVERSION + 1	# Packet version number we use 
-        self.always_auth       = False	# Always send authenticated requests 
+        self.pktversion = NTP_OLDVERSION + 1	# Packet version number we use
+        self.always_auth       = False	# Always send authenticated requests
         self.keyid = None
         self.password = None
         self.name = None
@@ -395,7 +395,7 @@ class ntpq_session:
                 if self.debug:
                     warn("Received request, wanted response\n");
                 #continue
-            
+
             # Check opcode and sequence number for a match.
             # Could be old data getting to us.
             if rpkt.sequence != self.sequence:
@@ -437,7 +437,7 @@ class ntpq_session:
             if self.debug >= 2:
                 warn("Packet okay\n")
 
-            # Find the most recent fragment with a 
+            # Find the most recent fragment with a
             not_earlier = [frag for frag in fragments \
                            if frag.offset >= rpkt.offset]
             if len(not_earlier):
@@ -458,7 +458,7 @@ class ntpq_session:
 
             # Passed all tests, insert it into the frag list.
             fragments.append(rpkt)
-            fragments.sort(key=lambda frag: frag.offset) 
+            fragments.sort(key=lambda frag: frag.offset)
 
             # Figure out if this was the last.
             # Record status info out of the last packet.
@@ -468,7 +468,7 @@ class ntpq_session:
 
             # If we've seen the last fragment, look for holes in the sequence.
             # If there aren't any, we're done.
-            if seenlastfrag and fragments[0].offset == 0:                
+            if seenlastfrag and fragments[0].offset == 0:
                 for f in range(1, len(fragments)):
                     if fragments[f-1].endpoint() != fragments[f].offset:
                         break
