@@ -277,7 +277,8 @@ plot \
             else:
                 unit = "ns"
 
-        percs.update({k: round( v * multiplier, rnd) for k, v in list(percs.items())})
+        percs.update({k: round( v * multiplier, rnd) \
+                     for k, v in list(percs.items())})
         ninetynine  = percs[99]
         ninetyfive  = percs[95]
         five        = percs[5]
@@ -374,15 +375,13 @@ plot \
             five        = percs[5]
             one         = percs[1]
 
-            if "offset" == type:
-                # fld == 4
+            # show percentages
+            nf_m_f     = ninetyfive - five
+            nn_m_o     = ninetynine - one
+            percentages = " %(fifty)s title '50th percentile', " \
+                           % locals()
 
-                nf_m_f     = ninetyfive - five
-                nn_m_o     = ninetynine - one
-                percentages = " %(fifty)s title '50th percentile', " \
-                               % locals()
-
-                labels = """\
+            labels = """\
 set label 1 "99%% = %(ninetynine)s %(unit)s" at graph 0.01,0.95 left front
 set label 2 "95%% = %(ninetyfive)s %(unit)s" at graph 0.01,0.90 left front
 set label 3 "50%% = %(fifty)s %(unit)s" at graph 0.01,0.85 left front
@@ -391,6 +390,8 @@ set label 5 "1%% = %(one)s %(unit)s" at graph 0.01,0.75 left front
 set label 6 "95%% - 5%% = %(nf_m_f)s %(unit)s" at graph 0.01,0.70 left front
 set label 7 "99%% - 1%% = %(nn_m_o)s %(unit)s" at graph 0.01,0.65 left front
 """ % locals()
+
+            if "offset" == type:
 
                 rtt = 1
                 # don't do rtt for reclocks
