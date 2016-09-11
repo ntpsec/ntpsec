@@ -7,25 +7,25 @@
 from __future__ import print_function, division
 import os, sys, socket, select, struct, curses.ascii
 
-CTL_MAX_DATA_LEN	= 468	# Max data in a control packet
+CTL_MAX_DATA_LEN        = 468   # Max data in a control packet
 
 # Modes from ntp.h
 MODE_CONTROL = 6
 
 # Opcodes from ntp_control.c
-CTL_OP_UNSPEC		= 0	# unspecified
-CTL_OP_READSTAT		= 1	# read status
-CTL_OP_READVAR		= 2	# read variables
-CTL_OP_WRITEVAR		= 3	# write variables
-CTL_OP_READCLOCK	= 4	# read clock variables
-CTL_OP_WRITECLOCK	= 5	# write clock variables
-CTL_OP_SETTRAP		= 6	# set trap address (obsolete, unused)
-CTL_OP_ASYNCMSG		= 7	# asynchronous message
-CTL_OP_CONFIGURE	= 8	# runtime configuration
-CTL_OP_READ_MRU		= 10	# retrieve MRU (mrulist)
-CTL_OP_READ_ORDLIST_A	= 11	# ordered list req. auth.
-CTL_OP_REQ_NONCE	= 12	# request a client nonce
-CTL_OP_UNSETTRAP	= 31	# unset trap (obsolete, unused)
+CTL_OP_UNSPEC           = 0     # unspecified
+CTL_OP_READSTAT         = 1     # read status
+CTL_OP_READVAR          = 2     # read variables
+CTL_OP_WRITEVAR         = 3     # write variables
+CTL_OP_READCLOCK        = 4     # read clock variables
+CTL_OP_WRITECLOCK       = 5     # write clock variables
+CTL_OP_SETTRAP          = 6     # set trap address (obsolete, unused)
+CTL_OP_ASYNCMSG         = 7     # asynchronous message
+CTL_OP_CONFIGURE        = 8     # runtime configuration
+CTL_OP_READ_MRU         = 10    # retrieve MRU (mrulist)
+CTL_OP_READ_ORDLIST_A   = 11    # ordered list req. auth.
+CTL_OP_REQ_NONCE        = 12    # request a client nonce
+CTL_OP_UNSETTRAP        = 31    # unset trap (obsolete, unused)
 
 # NTP Status codes
 NTP_STATUS_INVALID      = 0
@@ -44,28 +44,28 @@ NTP_CLOCKTYPE_LOCAL     = 'l'
 NTP_CLOCKTYPE_UNICAST   = 'u'
 NTP_CLOCKTYPE_MULTICAST = 'm'
 
-NERR_UNSPEC	= 0
-NERR_PERMISSION	= 1
-NERR_BADFMT	= 2
-NERR_BADOP	= 3
-NERR_BADASSOC	= 4
-NERR_UNKNOWNVAR	= 5
-NERR_BADVALUE	= 6
-NERR_RESTRICT	= 7
+NERR_UNSPEC     = 0
+NERR_PERMISSION = 1
+NERR_BADFMT     = 2
+NERR_BADOP      = 3
+NERR_BADASSOC   = 4
+NERR_UNKNOWNVAR = 5
+NERR_BADVALUE   = 6
+NERR_RESTRICT   = 7
 
-NERR_NORESOURCE	= NERR_PERMISSION	# wish there was a different code
+NERR_NORESOURCE = NERR_PERMISSION       # wish there was a different code
 
 # Variable Sets
 PEERVARS  = CTL_OP_READVAR
 #CLOCKVARS = CTL_OP_CLOCKVAR
 
-LEAP_NOWARNING	= 0x0	# leap_none: normal, no leap second warning
-LEAP_ADDSECOND	= 0x1	# leap_add_sec: last minute of day has 61 seconds
-LEAP_DELSECOND	= 0x2	# leap_del_sec: last minute of day has 59 seconds
-LEAP_NOTINSYNC	= 0x3	# leap_alarm: overload, clock is free running
+LEAP_NOWARNING  = 0x0   # leap_none: normal, no leap second warning
+LEAP_ADDSECOND  = 0x1   # leap_add_sec: last minute of day has 61 seconds
+LEAP_DELSECOND  = 0x2   # leap_del_sec: last minute of day has 59 seconds
+LEAP_NOTINSYNC  = 0x3   # leap_alarm: overload, clock is free running
 
-NTP_OLDVERSION	= 1	# C code said "oldest credible version"
-NTP_VERSION	= 4	# Current version
+NTP_OLDVERSION  = 1     # C code said "oldest credible version"
+NTP_VERSION     = 4     # Current version
 
 # Limit on packets in a single response.  Increasing this value to
 # 96 will marginally speed "mrulist" operation on lossless networks
@@ -84,22 +84,22 @@ NTP_VERSION	= 4	# Current version
 # assuming a single multipacket response will be large enough for any
 # needs.  In contrast, the "mrulist" command is implemented as a series
 # of requests and multipacket responses to each.
-MAXFRAGS	= 32
+MAXFRAGS        = 32
 
 class ntp_packet:
     "Encapsulate an NTP fragment"
     # The following two methods are copied from macros in includes/control.h
     @staticmethod
-    def VN_MODE(v, m):		return ((((v) & 7) << 3) | ((m) & 0x7))
+    def VN_MODE(v, m):          return ((((v) & 7) << 3) | ((m) & 0x7))
     @staticmethod
-    def PKT_LI_VN_MODE(l,v,m):	return ((((l) & 3) << 6) | ntp_packet.VN_MODE((v), (m)))
+    def PKT_LI_VN_MODE(l,v,m):  return ((((l) & 3) << 6) | ntp_packet.VN_MODE((v), (m)))
     def __init__(self, session, version, mode):
-        self.session = session	# Where to get session context
-	self.li_vn_mode = 0	# leap, version, mode (uint8_t)
-	self.r_m_e_op = 0	# response, more, error, opcode (uint8_t)
+        self.session = session  # Where to get session context
+        self.li_vn_mode = 0     # leap, version, mode (uint8_t)
+        self.r_m_e_op = 0       # response, more, error, opcode (uint8_t)
         # Subclasses have four uint16_t fields here
-        self.count = 0		# octet count of extension data
-	self.extension = ''	# extension data
+        self.count = 0          # octet count of extension data
+        self.extension = ''     # extension data
         self.li_vn_mode = ntp_packet.PKT_LI_VN_MODE(0, version, mode)
     format = "!BBHHHHH"
     def send(self, payload1, payload2, payload3, payload4):
@@ -129,12 +129,12 @@ class control_frag(ntp_packet):
     "ntpq request/response "
     def __init__(self, session, opcode=0, associd=0, qdata=''):
         ntp_packet.__init__(self, session, session.pktversion, MODE_CONTROL)
-        self.r_m_e_op = opcode	# ntpq operation code
-	self.sequence = 0	# sequence number of request (uint16_t)
-	self.status = 0		# status word for association (uint16_t)
-	self.associd = associd	# association ID (uint16_t)
-	self.offset = 0		# offset of this batch of data (uint16_t)
-        self.extension = qdata	# Data for this packet
+        self.r_m_e_op = opcode  # ntpq operation code
+        self.sequence = 0       # sequence number of request (uint16_t)
+        self.status = 0         # status word for association (uint16_t)
+        self.associd = associd  # association ID (uint16_t)
+        self.offset = 0         # offset of this batch of data (uint16_t)
+        self.extension = qdata  # Data for this packet
     def is_response(self):
         return self.r_m_e_op & 0x80
     def opcode(self):
@@ -200,10 +200,10 @@ class ntpq_session:
     def __init__(self):
         self.debug = 0
         self.ai_family = socket.AF_UNSPEC
-        self.primary_timeout = 5000	# Timeout for first select on receive
-        self.secondary_timeout = 3000	# Timeout for later selects
-        self.pktversion = NTP_OLDVERSION + 1	# Packet version number we use
-        self.always_auth       = False	# Always send authenticated requests
+        self.primary_timeout = 5000     # Timeout for first select on receive
+        self.secondary_timeout = 3000   # Timeout for later selects
+        self.pktversion = NTP_OLDVERSION + 1    # Packet version number we use
+        self.always_auth       = False  # Always send authenticated requests
         self.keyid = None
         self.password = None
         self.name = None
@@ -290,23 +290,23 @@ class ntpq_session:
             return False
         return True
     def sendpkt(self, xdata):
-	"Send a packet to the host."
-	if self.debug >= 3:
-		print("Sending %d octets\n" % len(xdata))
+        "Send a packet to the host."
+        if self.debug >= 3:
+                print("Sending %d octets\n" % len(xdata))
         try:
             self.sock.sendall(xdata)
         except socket.error:
             # On failure, we don't know how much data was actually received
             sys.stderr.write("Write to %s failed\n" % self.name)
             return -1
-	if self.debug >= 4:
+        if self.debug >= 4:
             sys.stdout.write("Request packet:\n")
             dump_hex_printable(xdata)
-	return 0
+        return 0
     def sendrequest(self, opcode, associd, qdata, auth=False):
         "Ship an ntpq request packet to a server."
-	 # Check to make sure the data will fit in one packet
-	if len(qdata) > CTL_MAX_DATA_LEN:
+         # Check to make sure the data will fit in one packet
+        if len(qdata) > CTL_MAX_DATA_LEN:
             sys.stderr/write(stderr,
                              "***Internal error! Data too long\n",
                              len(qdata))
@@ -317,21 +317,21 @@ class ntpq_session:
 
         # If it isn't authenticated we can just send it.  Otherwise
         # we're going to have to think about it a little.
-	if not auth and not self.always_auth:
+        if not auth and not self.always_auth:
             return pkt.send();
         else:
             sys.stderr.write("Authenticated send is not yet implemented\n");
             return -1
     def getresponse(self, opcode, associd, timeo):
         "Get a response expected to match a given opcode and associd."
-	 # This is pretty tricky.  We may get between 1 and MAXFRAG packets
-	 # back in response to the request.  We peel the data out of
-	 # each packet and collect it in one long block.  When the last
-	 # packet in the sequence is received we'll know how much data we
-	 # should have had.  Note we use one long time out, should reconsider.
-	fragments = []
+         # This is pretty tricky.  We may get between 1 and MAXFRAG packets
+         # back in response to the request.  We peel the data out of
+         # each packet and collect it in one long block.  When the last
+         # packet in the sequence is received we'll know how much data we
+         # should have had.  Note we use one long time out, should reconsider.
+        fragments = []
         self.response = ''
-	seenlastfrag = False;
+        seenlastfrag = False;
         bail = 0
         warn = sys.stderr.write
 
@@ -483,7 +483,7 @@ class ntpq_session:
         "send a request and save the response"
         if not self.havehost():
             return SERR_NOHOST
-	done = False;
+        done = False;
         while True:
             # Ship the request
             res = self.sendrequest(opcode, associd, qdata, auth);
@@ -492,7 +492,7 @@ class ntpq_session:
             # Get the response.
             res = self.getresponse(opcode, associd, done)
             if res:
-		if not quiet:
+                if not quiet:
                     if type(res) == type(0):
                         sys.stderr.write("***Packet error %d" % res)
                     else:
@@ -502,7 +502,7 @@ class ntpq_session:
                     continue
             break
         # Return None on success, otherwise an error string
-	return res;
+        return res;
     def readvars(self):
         "Read system vars from the host as a dict, or return an error string."
         self.doquery(opcode=CTL_OP_READVAR, quiet=True)
