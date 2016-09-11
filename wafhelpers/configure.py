@@ -98,7 +98,7 @@ def cmd_configure(ctx, config):
                 cmd = ["git", "log", "-1", "--format=%H"]
                 p = subprocess.Popen(cmd, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=None)
                 ctx.env.NTPS_REVISION, stderr = p.communicate()
-                ctx.env.NTPS_REVISION = ctx.env.NTPS_REVISION.replace("\n", "")
+                ctx.env.NTPS_REVISION = str(ctx.env.NTPS_REVISION).replace("\n", "")
                 ctx.end_msg(ctx.env.NTPS_REVISION)
 
         ctx.start_msg("Building version")
