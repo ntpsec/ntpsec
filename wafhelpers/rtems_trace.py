@@ -6,5 +6,3 @@ from waflib.TaskGen import feature, after_method
 def rtems_trace(self):
 	if self.env.RTEMS_TEST_ENABLE:
 		self.link_task.env.LINK_CC = self.env.BIN_RTEMS_TLD + self.env.RTEMS_TEST_FLAGS + ['--']
-
-

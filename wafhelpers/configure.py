@@ -546,4 +546,3 @@ def cmd_configure(ctx, config):
                 msg("")
                 msg("*** --enable-debug ignored.  (default on now)")
                 msg("")
-

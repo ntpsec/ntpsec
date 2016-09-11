@@ -61,4 +61,3 @@ def check_compiler(ctx):
 	ctx.env[define] = True # Build system.
 
 	ctx.end_msg(name)
-

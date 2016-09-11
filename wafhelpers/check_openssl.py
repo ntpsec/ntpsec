@@ -58,4 +58,3 @@ def configure_ssl(ctx):
 	if ctx.get_define("HAVE_OPENSSL"):
 		ctx.define("USE_OPENSSL_CRYPTO_RAND", 1, comment="Use OpenSSL pseudo-random number generator")
 		ctx.define("USE_OPENSSL_HASH", 1, comment="Use OpenSSL for hashing")
-
