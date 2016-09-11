@@ -1080,9 +1080,7 @@ create_wildcards(
 	)
 {
 	bool			v4wild;
-#ifdef USE_IPV6_SUPPORT
 	bool			v6wild;
-#endif
 	sockaddr_u		wildaddr;
 	nic_rule_action		action;
 	struct interface *	wildif;
@@ -1096,7 +1094,6 @@ create_wildcards(
 	action = ACTION_LISTEN;
 	ZERO(wildaddr);
 
-#ifdef USE_IPV6_SUPPORT
 	/*
 	 * create pseudo-interface with wildcard IPv6 address
 	 */
@@ -1141,7 +1138,6 @@ create_wildcards(
 		}
 		DPRINT_INTERFACE(2, (wildif, "created ", "\n"));
 	}
-#endif
 
 	/*
 	 * create pseudo-interface with wildcard IPv4 address
@@ -1439,15 +1435,12 @@ convert_isc_if(
 			    isc_if->broadcast.type.in.s_addr;
 		}
 	}
-#ifdef USE_IPV6_SUPPORT
 	else if (IS_IPV6(&itf->sin)) {
 		SET_ADDR6N(&itf->sin, isc_if->address.type.in6);
 		SET_ADDR6N(&itf->mask, isc_if->netmask.type.in6);
 
 		SET_SCOPE(&itf->sin, isc_if->address.zone);
 	}
-#endif /* USE_IPV6_SUPPORT */
-
 
 	/* Process the rest of the flags */
 
@@ -1582,10 +1575,8 @@ is_wildcard_addr(
 	if (IS_IPV4(psau) && !NSRCADR(psau))
 		return true;
 
-#ifdef USE_IPV6_SUPPORT
 	if (IS_IPV6(psau) && S_ADDR6_EQ(psau, &in6addr_any))
 		return true;
-#endif
 
 	return false;
 }
@@ -1630,7 +1621,7 @@ check_flags6(
 	uint32_t flags6
 	)
 {
-#if defined(USE_IPV6_SUPPORT) && defined(SIOCGIFAFLAG_IN6)
+#if defined(SIOCGIFAFLAG_IN6)
 	struct in6_ifreq ifr6;
 	int fd;
 
@@ -1652,7 +1643,7 @@ check_flags6(
 	UNUSED_ARG(psau);
 	UNUSED_ARG(name);
 	UNUSED_ARG(flags6);
-#endif	/* USE_IPV6_SUPPORT && SIOCGIFAFLAG_IN6 */
+#endif	/* SIOCGIFAFLAG_IN6 */
 	return false;
 }
 
@@ -3045,14 +3036,12 @@ sendpkt(
 						sizeof(cttl));
 				break;
 
-# ifdef USE_IPV6_SUPPORT
 			case AF_INET6 :
 				rc = setsockopt(src->fd, IPPROTO_IPV6,
 						 IPV6_MULTICAST_HOPS,
 						 (void *)&ttl,
 						 sizeof(ttl));
 				break;
-# endif	/* USE_IPV6_SUPPORT */
 
 			default:
 				rc = 0;
@@ -4106,7 +4095,6 @@ findbcastinter(
 		 */
 		if (addr_ismulticast(addr)
 		    && (iface->flags & INT_MULTICAST)) {
-#ifdef USE_IPV6_SUPPORT
 			/*
 			 * ...it is the winner unless we're looking for
 			 * an interface to use for link-local multicast
@@ -4116,7 +4104,6 @@ findbcastinter(
 			    && IN6_IS_ADDR_MC_LINKLOCAL(PSOCK_ADDR6(addr))
 			    && !IN6_IS_ADDR_LINKLOCAL(PSOCK_ADDR6(&iface->sin)))
 				continue;
-#endif
 			break;
 		}
 
@@ -4134,7 +4121,6 @@ findbcastinter(
 			    == (NSRCADR(addr)	  & NSRCADR(&iface->mask)))
 				break;
 		}
-#ifdef USE_IPV6_SUPPORT
 		else if (IS_IPV6(addr)) {
 			if (SOCK_EQ(&iface->bcast, addr))
 				break;
@@ -4142,7 +4128,6 @@ findbcastinter(
 			if (SOCK_EQ(netof(&iface->sin), netof(addr)))
 				break;
 		}
-#endif
 	}
 #endif /* SIOCGIFCONF */
 	if (NULL == iface) {

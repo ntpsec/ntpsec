@@ -471,9 +471,6 @@ def cmd_configure(ctx, config):
         # XXX: Hack that needs to be fixed properly for all platforms
         ctx.define("ISC_PLATFORM_NORETURN_PRE", "", quote=False)
         ctx.define("ISC_PLATFORM_NORETURN_POST", "__attribute__((__noreturn__))", quote=False)
-        ctx.define("ISC_PLATFORM_HAVEIN6PKTINFO", 1)
-        ctx.define("ISC_PLATFORM_HAVEIPV6", 1)
-        ctx.define("ISC_PLATFORM_HAVESCOPEID", 1)
 
         if ctx.get_define("HAVE_SYS_SYSCTL_H"):
                 ctx.define("HAVE_IFLIST_SYSCTL", 1, comment="Whether sysctl interface exists")

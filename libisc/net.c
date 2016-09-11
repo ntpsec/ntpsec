@@ -21,16 +21,8 @@
 #include <isc/net.h>
 #include <isc/util.h>
 
-#if defined(ISC_PLATFORM_HAVEIPV6)
-
-# if defined(ISC_PLATFORM_HAVEIPV6)
 static bool 	once_ipv6only = false;
-# endif
-
-# if defined(ISC_PLATFORM_HAVEIPV6) && defined(ISC_PLATFORM_HAVEIN6PKTINFO)
 static bool 	once_ipv6pktinfo = false;
-# endif
-#endif /* ISC_PLATFORM_HAVEIPV6 */
 
 static bool 	once = false;
 
@@ -66,8 +58,6 @@ try_proto(int domain) {
 		}
 	}
 
-#ifdef ISC_PLATFORM_HAVEIPV6
-#ifdef ISC_PLATFORM_HAVEIN6PKTINFO
 	if (domain == PF_INET6) {
 		struct sockaddr_in6 sin6;
 		GETSOCKNAME_SOCKLEN_TYPE len;	/* NTP local change */
@@ -107,8 +97,6 @@ try_proto(int domain) {
 			}
 		}
 	}
-#endif
-#endif
 
 	(void)close(s);
 
@@ -118,11 +106,7 @@ try_proto(int domain) {
 static void
 initialize_action(void) {
 	ipv4_result = try_proto(PF_INET);
-#ifdef ISC_PLATFORM_HAVEIPV6
-#ifdef ISC_PLATFORM_HAVEIN6PKTINFO
 	ipv6_result = try_proto(PF_INET6);
-#endif
-#endif
 }
 
 static void
@@ -146,13 +130,13 @@ bool
 isc_net_probeipv6_bool(void) {
   return (ISC_R_SUCCESS == isc_net_probeipv6());
 }
+
 isc_result_t
 isc_net_probeipv6(void) {
 	initialize();
 	return (ipv6_result);
 }
 
-#ifdef ISC_PLATFORM_HAVEIPV6
 static void
 try_ipv6only(void) {
 #ifdef IPV6_V6ONLY
@@ -220,7 +204,6 @@ initialize_ipv6only(void) {
 	try_ipv6only();
 }
 
-#ifdef ISC_PLATFORM_HAVEIN6PKTINFO
 static void
 try_ipv6pktinfo(void) {
 	int s, on;
@@ -268,28 +251,21 @@ initialize_ipv6pktinfo(void) {
 	once_ipv6pktinfo = true;
 	try_ipv6pktinfo();
 }
-#endif /* ISC_PLATFORM_HAVEIN6PKTINFO */
-#endif /* ISC_PLATFORM_HAVEIPV6 */
 
 bool
 isc_net_probe_ipv6only_bool(void) {
     return (ISC_R_SUCCESS == isc_net_probe_ipv6only());
 }
+
 isc_result_t
 isc_net_probe_ipv6only(void) {
-#ifdef ISC_PLATFORM_HAVEIPV6
 	initialize_ipv6only();
-#endif
 	return (ipv6only_result);
 }
 
 isc_result_t
 isc_net_probe_ipv6pktinfo(void) {
-#ifdef ISC_PLATFORM_HAVEIPV6
-#ifdef ISC_PLATFORM_HAVEIN6PKTINFO
 	initialize_ipv6pktinfo();
-#endif
-#endif
 	return (ipv6pktinfo_result);
 }
 

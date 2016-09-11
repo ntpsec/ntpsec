@@ -100,11 +100,6 @@ struct addrinfo *copy_addrinfo_list_impl(const struct addrinfo *
  * If various macros are not defined we need to define them
  */
 
-#ifndef AF_INET6
-# define AF_INET6	AF_MAX
-# define PF_INET6	AF_INET6
-#endif
-
 #if !defined(_SS_MAXSIZE) && !defined(_SS_ALIGNSIZE)
 
 # define	_SS_MAXSIZE	128
@@ -155,76 +150,13 @@ struct addrinfo *copy_addrinfo_list_impl(const struct addrinfo *
 # define Z_AI_NUMERICSERV	AI_NUMERICSERV
 #endif
 
-#ifndef ISC_PLATFORM_HAVEIPV6
-
-struct addrinfo {
-	int	ai_flags;	/* AI_PASSIVE, AI_CANONNAME, AI_NUMERICHOST */
-	int	ai_family;	/* PF_xxx */
-	int	ai_socktype;	/* SOCK_xxx */
-	int	ai_protocol;	/* 0 or IPPROTO_xxx for IPv4 and IPv6 */
-	size_t	ai_addrlen;	/* length of ai_addr */
-	char	*ai_canonname;	/* canonical name for hostname */
-	struct	sockaddr *ai_addr;	/* binary address */
-	struct	addrinfo *ai_next;	/* next structure in linked list */
-};
-
-/*
- * Error return codes from getaddrinfo()
- */
-#define	EAI_ADDRFAMILY	 1	/* address family for hostname not supported */
-#define	EAI_AGAIN	 2	/* temporary failure in name resolution */
-#define	EAI_BADFLAGS	 3	/* invalid value for ai_flags */
-#define	EAI_FAIL	 4	/* non-recoverable failure in name resolution */
-#define	EAI_FAMILY	 5	/* ai_family not supported */
-#define	EAI_MEMORY	 6	/* memory allocation failure */
-#define	EAI_NODATA	 7	/* no address associated with hostname */
-#define	EAI_NONAME	 8	/* hostname nor servname provided, or not known */
-#define	EAI_SERVICE	 9	/* servname not supported for ai_socktype */
-#define	EAI_SOCKTYPE	10	/* ai_socktype not supported */
-#define	EAI_SYSTEM	11	/* system error returned in errno */
-#define	EAI_BADHINTS	12
-#define	EAI_PROTOCOL	13
-#define	EAI_MAX		14
-
-
-int	getaddrinfo (const char *, const char *,
-			 const struct addrinfo *, struct addrinfo **);
-int	getnameinfo (const struct sockaddr *, u_int, char *,
-			 size_t, char *, size_t, int);
-void	freeaddrinfo (struct addrinfo *);
-char	*gai_strerror (int);
-
-/*
- * Constants for getnameinfo()
- */
-#ifndef NI_MAXHOST
-#define	NI_MAXHOST	1025
-#define	NI_MAXSERV	32
-#endif
-
-/*
- * Flag values for getnameinfo()
- */
-#ifndef NI_NUMERICHOST
-#define	NI_NOFQDN	0x00000001
-#define	NI_NUMERICHOST	0x00000002
-#define	NI_NAMEREQD	0x00000004
-#define	NI_NUMERICSERV	0x00000008
-#define	NI_DGRAM	0x00000010
-#define NI_WITHSCOPEID	0x00000020
-#endif
-
-#endif /* !ISC_PLATFORM_HAVEIPV6 */
 
 /* 
  * Set up some macros to look for IPv6 and IPv6 multicast
  */
 
-#ifdef ISC_PLATFORM_HAVEIPV6
-# define USE_IPV6_SUPPORT
-# if defined(IPV6_JOIN_GROUP) && defined(IPV6_LEAVE_GROUP)
+#if defined(IPV6_JOIN_GROUP) && defined(IPV6_LEAVE_GROUP)
 #  define USE_IPV6_MULTICAST_SUPPORT
-# endif	/* IPV6 Multicast Support */
-#endif  /* IPv6 Support */
+#endif	/* IPV6 Multicast Support */
 
 #endif /* GUARD_!NTP_RFC2553_H */

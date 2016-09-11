@@ -47,6 +47,9 @@ fallback implementation using native time calls.
 You can view POSIX-1.2001, with 2004 Corrigendum, online for free here:
     http://pubs.opengroup.org/onlinepubs/009695399/toc.htm
 
+You may assume Berkeley sockets and the IPv6 API defined in RFC2493
+and RFC2553.
+
 === Banned functions ===
 
 The following C99/POSIX functions are BANNED.  They are unsafe, tending to
