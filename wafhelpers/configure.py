@@ -471,7 +471,6 @@ def cmd_configure(ctx, config):
         # XXX: Hack that needs to be fixed properly for all platforms
         ctx.define("ISC_PLATFORM_NORETURN_PRE", "", quote=False)
         ctx.define("ISC_PLATFORM_NORETURN_POST", "__attribute__((__noreturn__))", quote=False)
-        ctx.define("ISC_PLATFORM_HAVEIFNAMETOINDEX", 1)
         ctx.define("ISC_PLATFORM_HAVEIN6PKTINFO", 1)
         ctx.define("ISC_PLATFORM_HAVEIPV6", 1)
         ctx.define("ISC_PLATFORM_HAVESCOPEID", 1)
