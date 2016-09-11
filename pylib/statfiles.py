@@ -43,7 +43,7 @@ class NTPStats:
         self.period = period
 
         # Default to one week before the latest date
-        if endtime is None and starttime == None:
+        if endtime is None and starttime is None:
             endtime = int(time.time())
             starttime = endtime - period
         elif starttime is None and endtime is not None:
@@ -81,7 +81,7 @@ class NTPStats:
                 # temps is already in UNIX time
                 for line in lines:
                     line = line.strip(' \0\r\n\t')
-                    if line != None:
+                    if line is not None:
                         split = line.split(None, 2)
                         if int(split[0]) >= starttime and \
                            int(split[0]) <= endtime:
@@ -91,7 +91,7 @@ class NTPStats:
                 for line in lines:
                     line = line.strip(' \0\r\n\t')
                     line = NTPStats.unixize(line,starttime, endtime)
-                    if line != None:
+                    if line is not None:
                         lines1.append( line)
 
             # Sort by datestamp

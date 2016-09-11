@@ -28,7 +28,7 @@ cmd_map = {
 def run(cmd, reg):
         check = False
 
-        if cmd[1] == None:
+        if cmd[1] is None:
                 cmd = [cmd[0]]
 
         print("running: ", " ".join(cmd), end="")
