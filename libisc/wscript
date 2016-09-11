@@ -9,9 +9,9 @@ def build(ctx):
 		"md5.c",
 		"netaddr.c",
 		"sha1.c",
-		"unix/errno2result.c",
-		"unix/interfaceiter.c",
-		"unix/net.c"
+		"errno2result.c",
+		"interfaceiter.c",
+		"net.c"
 	]
 
 	ctx(
