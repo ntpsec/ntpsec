@@ -115,9 +115,6 @@ this library if you wish and they have it available.
 
 These are generic Unix installation instructions.
 
-If your default python is Python 3, replace "./waf" with "python2 waf"
-or whatever else is locally required to get python2 interpretation.
-
 Under Unix, the simplest way to compile this package is:
 
   1. `cd' to the directory containing the package's source code and
