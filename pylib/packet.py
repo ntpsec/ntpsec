@@ -175,7 +175,7 @@ SERR_NOHOST = "***No host open, use `host' command\n"
 def dump_hex_printable(xdata):
     "Dump a packet in hex, in a familiar hex format"
     llen = len(xdata)
-    i = 0;
+    i = 0
     while llen > 0:
         rowlen = min(16, llen)
         restart = i
@@ -318,9 +318,9 @@ class ntpq_session:
         # If it isn't authenticated we can just send it.  Otherwise
         # we're going to have to think about it a little.
         if not auth and not self.always_auth:
-            return pkt.send();
+            return pkt.send()
         else:
-            sys.stderr.write("Authenticated send is not yet implemented\n");
+            sys.stderr.write("Authenticated send is not yet implemented\n")
             return -1
     def getresponse(self, opcode, associd, timeo):
         "Get a response expected to match a given opcode and associd."
@@ -331,7 +331,7 @@ class ntpq_session:
          # should have had.  Note we use one long time out, should reconsider.
         fragments = []
         self.response = ''
-        seenlastfrag = False;
+        seenlastfrag = False
         bail = 0
         warn = sys.stderr.write
 
@@ -364,7 +364,7 @@ class ntpq_session:
                         warn("%s: timed out, nothing received\n" % self.name)
                         return SERR_TIMEOUT
                 if timeo:
-                    warn("%s: timed out with incomplete data\n" % self.name);
+                    warn("%s: timed out with incomplete data\n" % self.name)
                     if self.debug:
                         sys.stderr.write("ERR_INCOMPLETE: Received fragments:\n")
                         for (i, frag) in enumerate(fragments):
@@ -373,7 +373,7 @@ class ntpq_session:
                                     ("not " "", )[seenlastfrag])
                     return SERR_INCOMPLETE
 
-            rawdata = self.sock.recv(4096);
+            rawdata = self.sock.recv(4096)
             if self.debug:
                 warn("Received %d octets\n" % len(rawdata))
             rpkt = control_frag(self)
@@ -393,7 +393,7 @@ class ntpq_session:
                 continue
             if not rpkt.is_response():
                 if self.debug:
-                    warn("Received request, wanted response\n");
+                    warn("Received request, wanted response\n")
                 #continue
 
             # Check opcode and sequence number for a match.
@@ -449,7 +449,7 @@ class ntpq_session:
             if len(fragments) > 0:
                 last = fragments[-1]
                 if last.end() > rpkt.offset:
-                    warn("received frag at %d overlaps with %d octet frag at %d\n" % (rpkt.offset, last.count, last.offset));
+                    warn("received frag at %d overlaps with %d octet frag at %d\n" % (rpkt.offset, last.count, last.offset))
                     continue
 
             if not_earlier and rpkt.end() > not_earlier.offset:
@@ -483,10 +483,10 @@ class ntpq_session:
         "send a request and save the response"
         if not self.havehost():
             return SERR_NOHOST
-        done = False;
+        done = False
         while True:
             # Ship the request
-            res = self.sendrequest(opcode, associd, qdata, auth);
+            res = self.sendrequest(opcode, associd, qdata, auth)
             if res is not None:
                 return res
             # Get the response.
@@ -502,7 +502,7 @@ class ntpq_session:
                     continue
             break
         # Return None on success, otherwise an error string
-        return res;
+        return res
     def readvars(self):
         "Read system vars from the host as a dict, or return an error string."
         self.doquery(opcode=CTL_OP_READVAR, quiet=True)

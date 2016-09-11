@@ -760,7 +760,7 @@ if __name__ == '__main__':
                 sys.stderr.write("ntpviz: ERROR: missing temps data\n")
                 raise SystemExit(1)
             if show_temps is not None:
-                plot = stats.local_temps_gnuplot();
+                plot = stats.local_temps_gnuplot()
             if generate:
                 gnuplot(plot)
             else:
@@ -1050,7 +1050,7 @@ ntpviz</a>, part of the <a href="https://www.ntpsec.org/">NTPsec project</a>
 
         for (imagename, image) in imagepairs:
             if not image:
-                continue;
+                continue
             div_name = imagename.replace('-', ' ')
             index_buffer += "<div>\n<h2>%s:</h2>\n" % div_name
             if 'peer-jitter-' == imagename[:12]:

@@ -173,6 +173,6 @@ Host                             st offset(s) version     system       processor
     for host in hostlist:
           scan_host(host, 0)
 
-    sys.exit(0);
+    sys.exit(0)
 
 # end

@@ -27,7 +27,7 @@ class NTPStats:
             # unparseable  time 0 and it will be stripped later
             return None
         # 86400 = 24 * 60 * 60
-        time = 86400*mjd + second - 3506716800; # warning: 32 bit overflows
+        time = 86400*mjd + second - 3506716800 # warning: 32 bit overflows
         if time < starttime or time > endtime:
             return None
         return str(time) + " " + split[2]
@@ -66,7 +66,7 @@ class NTPStats:
                 for logpart in glob.glob(os.path.join(statsdir, stem) + "*"):
                     # skip files older than starttime
                     if starttime > os.path.getmtime(logpart):
-                        continue;
+                        continue
                     if logpart.endswith("gz"):
                         lines += gzip.open(logpart).readlines()
                     else:
