@@ -2764,15 +2764,11 @@ collect_mru_list(
 		 * Snooze for a bit between queries to let ntpd catch
 		 * up with other duties.
 		 */
-#ifdef SYS_WINNT
-		Sleep(sleep_msecs);
-#else
 		{
 			struct timespec interv = { 0,
 						   1000 * sleep_msecs };
 			nanosleep(&interv, NULL);
 		}
-#endif
 		/*
 		 * If there were no errors, increase the number of rows
 		 * to a maximum of 3 * MAXFRAGS (the most packets ntpq

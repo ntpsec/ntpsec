@@ -9,9 +9,7 @@
 #include <stdio.h>
 #include <ctype.h>
 #include <signal.h>
-#ifndef SYS_WINNT
 #include <pthread.h>
-#endif
 
 #include "ntp_stdlib.h"
 #include "ntp_malloc.h"
@@ -60,13 +58,7 @@ static int sem_timedwait_osx(sem_ref sem, const struct timespec *abs_timeout)
 #define sem_timedwait sem_timedwait_osx
 #endif
 
-#ifdef SYS_WINNT
-# define thread_exit(c)	_endthreadex(c)
-# define tickle_sem	SetEvent
-#else
-# define thread_exit(c)	pthread_exit((void*)(size_t)(c))
-# define tickle_sem	sem_post
-#endif
+#define thread_exit(c)	pthread_exit((void*)(size_t)(c))
 
 #ifdef USE_WORK_PIPE
 addremove_io_fd_func		addremove_io_fd;
@@ -82,14 +74,8 @@ static	void	ensure_workitems_empty_slot(blocking_child *);
 static	void	ensure_workresp_empty_slot(blocking_child *);
 static	int	queue_req_pointer(blocking_child *, blocking_pipe_header *);
 static	void	cleanup_after_child(blocking_child *);
-#ifdef SYS_WINNT
-u_int	WINAPI	blocking_thread(void *);
-#else
 void *		blocking_thread(void *);
-#endif
-#ifndef SYS_WINNT
 static	void	block_thread_signals(sigset_t *);
-#endif
 
 
 void
@@ -136,7 +122,7 @@ interrupt_worker_sleep(void)
 		c = blocking_children[idx];
 		if (NULL == c || NULL == c->wake_scheduled_sleep)
 			continue;
-		tickle_sem(c->wake_scheduled_sleep);
+		sem_post(c->wake_scheduled_sleep);
 	}
 }
 
@@ -215,7 +201,7 @@ queue_req_pointer(
 	 * event.  Wait with zero timeout to test.
 	 */
 	/* !!!! if (WAIT_OBJECT_0 == WaitForSingleObject(c->child_is_blocking, 0)) */
-		tickle_sem(c->blocking_req_ready);
+		sem_post(c->blocking_req_ready);
 
 	return 0;
 }
@@ -264,24 +250,11 @@ receive_blocking_req_internal(
 	/*
 	 * Child blocks here when idle.  SysV semaphores maintain a
 	 * count and release from sem_wait() only when it reaches 0.
-	 * Windows auto-reset events are simpler, and multiple SetEvent
-	 * calls before any thread waits result in a single wakeup.
-	 * On Windows, the child drains all workitems each wakeup, while
-	 * with SysV semaphores wait_sem() is used before each item.
 	 */
-#ifdef SYS_WINNT
-	while (NULL == c->workitems[c->next_workeritem]) {
-		/* !!!! SetEvent(c->child_is_blocking); */
-		rc = wait_for_sem(c->blocking_req_ready, NULL);
-		INSIST(0 == rc);
-		/* !!!! ResetEvent(c->child_is_blocking); */
-	}
-#else
 	do {
 		rc = wait_for_sem(c->blocking_req_ready, NULL);
 	} while (-1 == rc && EINTR == errno);
 	INSIST(0 == rc);
-#endif
 
 	req = c->workitems[c->next_workeritem];
 	INSIST(NULL != req);
@@ -312,7 +285,7 @@ send_blocking_resp_internal(
 #ifdef USE_WORK_PIPE
 	IGNORE(write(c->resp_write_pipe, "", 1));
 #else
-	tickle_sem(c->blocking_response_ready);
+	sem_post(c->blocking_response_ready);
 #endif
 
 	return 0;
@@ -391,37 +364,6 @@ static void
 start_blocking_thread_internal(
 	blocking_child *	c
 	)
-#ifdef SYS_WINNT
-{
-	thr_ref	blocking_child_thread;
-	u_int	blocking_thread_id;
-	bool	resumed;
-
-	(*addremove_io_semaphore)(c->blocking_response_ready, false);
-	blocking_child_thread =
-		(HANDLE)_beginthreadex(
-			NULL,
-			0,
-			&blocking_thread,
-			c,
-			CREATE_SUSPENDED,
-			&blocking_thread_id);
-
-	if (NULL == blocking_child_thread) {
-		msyslog(LOG_ERR, "start blocking thread failed: %m");
-		exit(-1);
-	}
-	c->thread_id = blocking_thread_id;
-	c->thread_ref = blocking_child_thread;
-	/* remember the thread priority is only within the process class */
-	if (!SetThreadPriority(blocking_child_thread,
-			       THREAD_PRIORITY_BELOW_NORMAL))
-		msyslog(LOG_ERR, "Error lowering blocking thread priority: %m");
-
-	resumed = ResumeThread(blocking_child_thread);
-	DEBUG_INSIST(resumed);
-}
-#else	/* pthreads start_blocking_thread_internal() follows */
 {
 	pthread_attr_t	thr_attr;
 	int		rc;
@@ -485,7 +427,6 @@ start_blocking_thread_internal(
 	pthread_sigmask(SIG_SETMASK, &saved_sig_mask, NULL);
 	pthread_attr_destroy(&thr_attr);
 }
-#endif
 
 
 /*
@@ -496,7 +437,6 @@ start_blocking_thread_internal(
  * active signal mask via pmask, to be restored by the main thread
  * after pthread_create().
  */
-#ifndef SYS_WINNT
 void
 block_thread_signals(
 	sigset_t *	pmask
@@ -523,7 +463,6 @@ block_thread_signals(
 	sigemptyset(pmask);
 	pthread_sigmask(SIG_BLOCK, &block, pmask);
 }
-#endif	/* !SYS_WINNT */
 
 
 /*
@@ -542,23 +481,6 @@ static void
 prepare_child_sems(
 	blocking_child *c
 	)
-#ifdef SYS_WINNT
-{
-	if (NULL == c->blocking_req_ready) {
-		/* manual reset using ResetEvent() */
-		/* !!!! c->child_is_blocking = CreateEvent(NULL, true, false, NULL); */
-		/* auto reset - one thread released from wait each set */
-		c->blocking_req_ready = CreateEvent(NULL, false, false, NULL);
-		c->blocking_response_ready = CreateEvent(NULL, false, false, NULL);
-		c->wake_scheduled_sleep = CreateEvent(NULL, false, false, NULL);
-	} else {
-		/* !!!! ResetEvent(c->child_is_blocking); */
-		/* ResetEvent(c->blocking_req_ready); */
-		/* ResetEvent(c->blocking_response_ready); */
-		/* ResetEvent(c->wake_scheduled_sleep); */
-	}
-}
-#else	/* pthreads prepare_child_sems() follows */
 {
 	size_t	octets;
 
@@ -578,7 +500,6 @@ prepare_child_sems(
 	sem_init(c->wake_scheduled_sleep, false, 0);
 	/* !!!! sem_init(c->child_is_blocking, false, 0); */
 }
-#endif
 
 
 static int
@@ -586,39 +507,7 @@ wait_for_sem(
 	sem_ref			sem,
 	struct timespec *	timeout		/* wall-clock */
 	)
-#ifdef SYS_WINNT
-{
-	struct timespec now;
-	struct timespec delta;
-	DWORD		msec;
-	DWORD		rc;
-
-	if (NULL == timeout) {
-		msec = INFINITE;
-	} else {
-		getclock(TIMEOFDAY, &now);
-		delta = sub_tspec(*timeout, now);
-		if (delta.tv_sec < 0) {
-			msec = 0;
-		} else if ((delta.tv_sec + 1) >= (MAXDWORD / 1000)) {
-			msec = INFINITE;
-		} else {
-			msec = 1000 * (DWORD)delta.tv_sec;
-			msec += delta.tv_nsec / (1000 * 1000);
-		}
-	}
-	rc = WaitForSingleObject(sem, msec);
-	if (WAIT_OBJECT_0 == rc)
-		return 0;
-	if (WAIT_TIMEOUT == rc) {
-		errno = ETIMEDOUT;
-		return -1;
-	}
-	msyslog(LOG_ERR, "WaitForSingleObject unexpected 0x%x", rc);
-	errno = EFAULT;
-	return -1;
-}
-#else	/* pthreads wait_for_sem() follows */
+	/* pthreads wait_for_sem() follows */
 {
 	int rc;
 
@@ -634,18 +523,12 @@ wait_for_sem(
 
 	return rc;
 }
-#endif
 
 
 /*
  * blocking_thread - thread functions have WINAPI calling convention
  */
-#ifdef SYS_WINNT
-u_int
-WINAPI
-#else
 void *
-#endif
 blocking_thread(
 	void *	ThreadArg
 	)
@@ -683,11 +566,7 @@ cleanup_after_child(
 	u_int	idx;
 
 	DEBUG_INSIST(!c->reusable);
-#ifdef SYS_WINNT
-	INSIST(CloseHandle(c->thread_ref));
-#else
 	free(c->thread_ref);
-#endif
 	c->thread_ref = NULL;
 	c->thread_id = 0;
 #ifdef USE_WORK_PIPE

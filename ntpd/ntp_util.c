@@ -53,11 +53,7 @@ double	wander_threshold = 1e-7;	/* initial frequency threshold */
  * Statistics file stuff
  */
 #ifndef NTP_VAR
-# ifndef SYS_WINNT
-#  define NTP_VAR "/var/NTP/"		/* NOTE the trailing '/' */
-# else
-#  define NTP_VAR "c:\\var\\ntp\\"	/* NOTE the trailing '\\' */
-# endif /* SYS_WINNT */
+# define NTP_VAR "/var/NTP/"		/* NOTE the trailing '/' */
 #endif
 
 
@@ -212,50 +208,7 @@ stats_config(
 	l_fp	now;
 	time_t  ttnow;
 
-	/*
-	 * Expand environment strings under Windows NT, since the
-	 * command interpreter doesn't do this, the program must.
-	 */
-#ifdef SYS_WINNT
-	char newvalue[MAX_PATH], parameter[MAX_PATH];
-
-	if (!ExpandEnvironmentStrings(invalue, newvalue, MAX_PATH)) {
-		switch (item) {
-		case STATS_FREQ_FILE:
-			strlcpy(parameter, "STATS_FREQ_FILE",
-				sizeof(parameter));
-			break;
-
-		case STATS_LEAP_FILE:
-			strlcpy(parameter, "STATS_LEAP_FILE",
-				sizeof(parameter));
-			break;
-
-		case STATS_STATSDIR:
-			strlcpy(parameter, "STATS_STATSDIR",
-				sizeof(parameter));
-			break;
-
-		case STATS_PID_FILE:
-			strlcpy(parameter, "STATS_PID_FILE",
-				sizeof(parameter));
-			break;
-
-		default:
-			strlcpy(parameter, "UNKNOWN",
-				sizeof(parameter));
-			break;
-		}
-		value = invalue;
-		msyslog(LOG_ERR,
-			"ExpandEnvironmentStrings(%s) failed: %m\n",
-			parameter);
-	} else {
-		value = newvalue;
-	}
-#else	 
 	value = invalue;
-#endif /* SYS_WINNT */
 
 	switch (item) {
 
@@ -817,22 +770,8 @@ getauthkeys(
 	if (!len)
 		return;
 	
-#ifndef SYS_WINNT
 	key_file_name = erealloc(key_file_name, len + 1);
 	memcpy(key_file_name, keyfile, len + 1);
-#else
-	key_file_name = erealloc(key_file_name, _MAX_PATH);
-	if (len + 1 > _MAX_PATH)
-		return;
-	if (!ExpandEnvironmentStrings(keyfile, key_file_name,
-				      _MAX_PATH)) {
-		msyslog(LOG_ERR,
-			"ExpandEnvironmentStrings(KEY_FILE) failed: %m");
-		strlcpy(key_file_name, keyfile, _MAX_PATH);
-	}
-	key_file_name = erealloc(key_file_name,
-				 1 + strlen(key_file_name));
-#endif /* SYS_WINNT */
 
 	authreadkeys(key_file_name);
 }
@@ -901,9 +840,4 @@ ntpd_time_stepped(void)
 		mon_stop(MON_OFF);
 		mon_start(saved_mon_enabled);
 	}
-
-	/* inform interpolating Windows code to allow time to go back */
-#ifdef SYS_WINNT
-	win_time_stepped();
-#endif
 }

@@ -22,21 +22,6 @@ static u_long volatile buffer_shortfall;/* number of missed free receive buffers
 static DECL_FIFO_ANCHOR(recvbuf_t) full_recv_fifo;
 static recvbuf_t *		   free_recv_list;
 	
-#if defined(SYS_WINNT)
-
-/*
- * For Windows we need to set up a lock to manipulate the
- * recv buffers to prevent corruption. We keep it lock for as
- * short a time as possible
- */
-static CRITICAL_SECTION RecvLock;
-# define LOCK()		EnterCriticalSection(&RecvLock)
-# define UNLOCK()	LeaveCriticalSection(&RecvLock)
-#else
-# define LOCK()		do {} while (false)
-# define UNLOCK()	do {} while (false)
-#endif
-
 #ifdef DEBUG
 static void uninit_recvbuff(void);
 #endif
@@ -115,10 +100,6 @@ init_recvbuff(int nbufs)
 
 	create_buffers(nbufs);
 
-#if defined(SYS_WINNT)
-	InitializeCriticalSection(&RecvLock);
-#endif
-
 #ifdef DEBUG
 	atexit(&uninit_recvbuff);
 #endif
@@ -159,13 +140,11 @@ freerecvbuf(recvbuf_t *rb)
 		return;
 	}
 
-	LOCK();
 	rb->used--;
 	if (rb->used != 0)
 		msyslog(LOG_ERR, "******** freerecvbuff non-zero usage: %d *******", rb->used);
 	LINK_SLIST(free_recv_list, rb, link);
 	free_recvbufs++;
-	UNLOCK();
 }
 
 	
@@ -176,10 +155,8 @@ add_full_recv_buffer(recvbuf_t *rb)
 		msyslog(LOG_ERR, "add_full_recv_buffer received NULL buffer");
 		return;
 	}
-	LOCK();
 	LINK_FIFO(full_recv_fifo, rb, link);
 	full_recvbufs++;
-	UNLOCK();
 }
 
 
@@ -188,7 +165,6 @@ get_free_recv_buffer(void)
 {
 	recvbuf_t *buffer;
 
-	LOCK();
 	UNLINK_HEAD_SLIST(buffer, free_recv_list, link);
 	if (buffer != NULL) {
 		free_recvbufs--;
@@ -197,7 +173,6 @@ get_free_recv_buffer(void)
 	} else {
 		buffer_shortfall++;
 	}
-	UNLOCK();
 
 	return buffer;
 }
@@ -225,15 +200,12 @@ get_full_recv_buffer(void)
 {
 	recvbuf_t *	rbuf;
 
-	LOCK();
-
 	/*
 	 * try to grab a full buffer
 	 */
 	UNLINK_FIFO(rbuf, full_recv_fifo, link);
 	if (rbuf != NULL)
 		full_recvbufs--;
-	UNLOCK();
 
 	return rbuf;
 }
@@ -252,8 +224,6 @@ purge_recv_buffers_for_fd(
 	recvbuf_t *next;
 	recvbuf_t *punlinked;
 
-	LOCK();
-
 	for (rbufp = HEAD_FIFO(full_recv_fifo);
 	     rbufp != NULL;
 	     rbufp = next) {
@@ -266,8 +236,6 @@ purge_recv_buffers_for_fd(
 			freerecvbuf(rbufp);
 		}
 	}
-
-	UNLOCK();
 }
 
 

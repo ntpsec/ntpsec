@@ -16,12 +16,6 @@
 #include "ntp_debug.h"
 #include "ntp_syslog.h"
 
-#ifdef SYS_WINNT
-# include <stdarg.h>
-# include "..\ports\winnt\libntp\messages.h"
-#endif
-
-
 bool	syslogit = true;	/* log messages to syslog */
 bool	termlogit = false;	/* duplicate to stdout/err */
 bool	hashprefix = false;	/* prefix with hash, for repolay use */
@@ -88,8 +82,6 @@ format_errmsg(
 /*
  * errno_to_str() - a thread-safe strerror() replacement.
  *		    Hides the varied signatures of strerror_r().
- *		    For Windows, we have:
- *			#define errno_to_str isc_strerror
  */
 void
 errno_to_str(
@@ -215,11 +207,7 @@ mvsnprintf(
 	/*
 	 * Save the error value as soon as possible
 	 */
-#ifdef SYS_WINNT
-	errval = GetLastError();
-	if (NO_ERROR == errval)
-#endif /* SYS_WINNT */
-		errval = errno;
+	errval = errno;
 
 #ifndef VSNPRINTF_PERCENT_M
 	format_errmsg(nfmt, sizeof(nfmt), fmt, errval);
@@ -247,11 +235,7 @@ mvfprintf(
 	/*
 	 * Save the error value as soon as possible
 	 */
-#ifdef SYS_WINNT
-	errval = GetLastError();
-	if (NO_ERROR == errval)
-#endif /* SYS_WINNT */
-		errval = errno;
+	errval = errno;
 
 #ifndef VSNPRINTF_PERCENT_M
 	format_errmsg(nfmt, sizeof(nfmt), fmt, errval);
@@ -374,11 +358,6 @@ init_logging(
 	else
 		pname = 1 + cp;	/* skip DIR_SEP */
 	progname = estrdup(pname);
-#ifdef SYS_WINNT			/* strip ".exe" */
-	cp = strrchr(progname, '.');
-	if (NULL != cp && !strcasecmp(cp, ".exe"))
-		progname[cp - progname] = '\0';
-#endif
 
 	if (is_daemon)
 		was_daemon = true;

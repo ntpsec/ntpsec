@@ -13,11 +13,6 @@
 #include <fcntl.h>
 #include <netinet/in.h>
 
-#ifdef SYS_WINNT
-# include <io.h>
-# include "win32_io.h"
-#endif
-
 #include <isc/netaddr.h>
 
 #include "libntp.h"	/* This needs Something above for GETDTABLESIZE */

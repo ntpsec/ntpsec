@@ -200,23 +200,12 @@ refclock shm unit 1 prefer refid PPS
 
 == Public vs. Private SHM segments ==
 
-The driver attempts to create a shared memory segment with an identifier
-depending on the unit number. This identifier (which can be a numeric
-value or a string) clearly depends on the method used, which in turn
-depends on the host operating system:
+The driver attempts to create a shared memory segment with an
+identifier depending on the unit number. Unix creates a shared memory
+segment with a key value of \0x4E545030+_u_, where _u_ is again the
+clock unit. (This value could be hex-decoded as \'NTP0', \'NTP1',...,
+with funny characters for units > 9.)
 
-* Windows uses a file mapping to the page file with the name
-\'\+Global\NTP+'u'' for public accessible mappings, where _u_ is the clock
-unit. Private / non-public mappings are created as \'\+Local\NTP+'u''.
-+
-Public access assigns a NULL DACL to the memory mapping, while private
-access just uses the default DACL of the process creating the mapping.
-+
-* Unix creates a shared memory segment with a key value of
-\0x4E545030+_u_, where _u_ is again the clock unit. (This value could
-be hex-decoded as \'NTP0', \'NTP1',..., with funny characters for units >
-9.)
-+
 Public access means a permission set of 0666, while private access
 creates the mapping with a permission set of 0600.
 
@@ -230,12 +219,6 @@ SHM segment owned by the runtime-user account. The internal structure of
 {ntpd} does not permit the use of a refclock option if this is to be avoided;
 this is the reason why a mode bit is used for the configuration of a
 public segment.
-
-When running under Windows, the chosen user account must be able to
-create a SHM segment in the global object name space for SHM clocks with
-public access. Otherwise the session isolation used by Windows kernels
-after WinXP will get into the way if the client program does not run in
-the same session.
 
 == Additional Information ==
 

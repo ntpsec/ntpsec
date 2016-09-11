@@ -2350,7 +2350,7 @@ parse_shutdown(
 	}
 #endif
 	if (parse->generic->io.fd != parse->ppsfd && parse->ppsfd != -1)
-		(void)closeserial(parse->ppsfd);  /* close separate PPS source */
+		(void)close(parse->ppsfd);  /* close separate PPS source */
 
 	/*
 	 * print statistics a last time and
@@ -2560,7 +2560,7 @@ parse_start(
 	(void) snprintf(parsedev, sizeof(parsedev), PARSEDEVICE, unit);
 	(void) snprintf(parseppsdev, sizeof(parsedev), PARSEPPSDEVICE, unit);
 
-	fd232 = tty_open(peer->path ? peer->path : parsedev,
+	fd232 = open(peer->path ? peer->path : parsedev,
 			 O_RDWR | O_NOCTTY | O_NONBLOCK, 0777);
 
 	if (fd232 == -1)
@@ -2674,7 +2674,7 @@ parse_start(
 		 * if the PARSEPPSDEVICE can be opened that will be used
 		 * for PPS else PARSEDEVICE will be used
 		 */
-		parse->ppsfd = tty_open(parseppsdev, O_RDWR | O_NOCTTY | O_NONBLOCK, 0777);
+		parse->ppsfd = open(parseppsdev, O_RDWR | O_NOCTTY | O_NONBLOCK, 0777);
 
 		if (parse->ppsfd == -1)
 		{

@@ -337,10 +337,6 @@ typical symbolic link command is as follows;
 ln -s /dev/ttyUSB0 /dev/jjy0
 ----------------------------------------------------------------
 
-Windows NT does not support symbolic links to device files. COM__X__: is
-the unit used by the driver, based on the refclock unit number, where
-unit 1 corresponds to COM1: and unit 3 corresponds to COM3:
-
 == Monitor Data ==
 
 The driver writes sent and received data to/from the JJY receivers, GPS

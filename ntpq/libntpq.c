@@ -260,13 +260,13 @@ ntpq_openhost(
  * Returns:
  *	int		0 (zero) if no host has been opened before
  *			- OR -
- *			the resultcode from the closesocket function call
+ *			the resultcode from the close function call
  ****************************************************************************/
 
 int ntpq_closehost(void)
 {
 	if ( numhosts )
-	 return closesocket(sockfd);
+	 return close(sockfd);
 	
 	return 0;
 }

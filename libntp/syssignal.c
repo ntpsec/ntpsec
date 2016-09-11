@@ -8,12 +8,7 @@
 #include "ntp_stdlib.h"
 
 static ctrl_c_fn	ctrl_c_hook;
-#ifndef SYS_WINNT
 void sigint_handler(int);
-#else
-BOOL WINAPI console_event_handler(DWORD);
-#endif
-
 
 # ifdef SA_RESTART
 #  define Z_SA_RESTART		SA_RESTART
@@ -54,7 +49,6 @@ signal_no_reset(
 	}
 }
 
-#ifndef SYS_WINNT
 /*
  * POSIX implementation of set_ctrl_c_hook()
  */
@@ -84,44 +78,3 @@ set_ctrl_c_hook(
 	}
 	signal_no_reset(SIGINT, handler);
 }
-#else	/* SYS_WINNT follows */
-/*
- * Windows implementation of set_ctrl_c_hook()
- */
-BOOL WINAPI 
-console_event_handler(  
-	DWORD	dwCtrlType
-	)
-{
-	BOOL handled;
-
-	if (CTRL_C_EVENT == dwCtrlType && ctrl_c_hook != NULL) {
-		(*ctrl_c_hook)();
-		handled = TRUE;
-	} else {
-		handled = FALSE;
-	}
-
-	return handled;
-}
-void
-set_ctrl_c_hook(
-	ctrl_c_fn	c_hook
-	)
-{
-	BOOL install;
-
-	if (NULL == c_hook) {
-		ctrl_c_hook = NULL;
-		install = FALSE;
-	} else {
-		ctrl_c_hook = c_hook;
-		install = TRUE;
-	}
-	if (!SetConsoleCtrlHandler(&console_event_handler, install))
-		msyslog(LOG_ERR, "Can't %s console control handler: %m",
-			(install)
-			    ? "add"
-			    : "remove");
-}
-#endif	/* SYS_WINNT */

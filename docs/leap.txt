@@ -19,7 +19,7 @@ A leap second is inserted following second 59 of the last minute of the
 day and becomes second 60 of that day. A leap second is deleted by
 omitting second 59 of the last minute of the day, although this has
 never happened and is highly unlikely to happen in future. So far as is
-known, there are no provisions in the Unix or Windows libraries to
+known, there are no provisions in the Unix libraries to
 account for this occasion other than to affect the conversion of an NTP
 datestamp or timestamp to conventional civil time.
 

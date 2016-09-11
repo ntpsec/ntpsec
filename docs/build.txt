@@ -18,7 +18,6 @@ include::includes/install.txt[]
 * link:#waf[Autoconf has been replaced with waf]
 * link:#build[Building and Installing the Distribution]
 * link:#unix[Building and Installing for Unix]
-* link:#win[Building and Installing for Windows]
 * link:#conf[Configuration]
 * link:#prob[If You Have Problems]
 * link:#additional[Additional +waf+ Commands]
@@ -68,14 +67,6 @@ This command inspects the hardware and software environment and
 configures the build process accordingly. Use the +./waf build+ command to
 compile and link the distribution and the +./waf install+ command to install
 the executables by default in +/usr/local/bin+.
-
-[[win]]
-== Building and Installing for Windows ==
-
-Building for Windows is not presently supported.  This may change in a
-future release.  If you have a requirement for this, you may be able
-to accelerate the process by contributing either skilled technical
-help or money so we can hire skilled technical help.
 
 [[conf]]
 == Configuration ==

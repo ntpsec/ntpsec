@@ -380,36 +380,4 @@ extern	bool	adj_systime	(double, int (*adjtime)(const struct timeval *, struct t
 typedef void (*time_stepped_callback)(void);
 extern time_stepped_callback	step_callback;
 
-/*
- * Multi-thread locking for get_systime()
- *
- * On most systems, get_systime() is used solely by the main ntpd
- * thread, but on Windows it's also used by the dedicated I/O thread.
- * The [Bug 2037] changes to get_systime() have it keep state between
- * calls to ensure time moves in only one direction, which means its
- * use on Windows needs to be protected against simultaneous execution
- * to avoid falsely detecting Lamport violations by ensuring only one
- * thread at a time is in get_systime().
- */
-#ifdef SYS_WINNT
-extern CRITICAL_SECTION get_systime_cs;
-# define INIT_GET_SYSTIME_CRITSEC()				\
-		InitializeCriticalSection(&get_systime_cs)
-# define ENTER_GET_SYSTIME_CRITSEC()				\
-		EnterCriticalSection(&get_systime_cs)
-# define LEAVE_GET_SYSTIME_CRITSEC()				\
-		LeaveCriticalSection(&get_systime_cs)
-# define INIT_WIN_PRECISE_TIME()				\
-		init_win_precise_time()
-#else	/* !SYS_WINNT follows */
-# define INIT_GET_SYSTIME_CRITSEC()			\
-		do {} while (false)
-# define ENTER_GET_SYSTIME_CRITSEC()			\
-		do {} while (false)
-# define LEAVE_GET_SYSTIME_CRITSEC()			\
-		do {} while (false)
-# define INIT_WIN_PRECISE_TIME()			\
-		do {} while (false)
-#endif
-
 #endif /* GUARD_NTP_FP_H */

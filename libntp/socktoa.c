@@ -31,7 +31,7 @@ socktoa(
 	char *		addr;
 	u_long		scope;
 
-	saved_errno = socket_errno();
+	saved_errno = errno;
 	LIB_GETBUF(res);
 
 	if (NULL == sock) {
@@ -79,7 +79,7 @@ sockporttoa(
 	const char *	atext;
 	char *		buf;
 
-	saved_errno = socket_errno();
+	saved_errno = errno;
 	atext = socktoa(sock);
 	LIB_GETBUF(buf);
 	snprintf(buf, LIB_BUFLENGTH,

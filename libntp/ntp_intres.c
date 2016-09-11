@@ -15,7 +15,7 @@
  *
  * A secondary goal is to provide a generic mechanism for other
  * blocking operations to be delegated to a worker using a common
- * model for both Unix and Windows ntpd.  ntp_worker.c and work_thread.c 
+ * model for all OS ports.  ntp_worker.c and work_thread.c
  * implement the generic mechanism.  This file implements the two 
  * current consumers, getaddrinfo_sometime() and the presently unused 
  * getnameinfo_sometime().

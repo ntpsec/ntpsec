@@ -112,7 +112,7 @@ initially within 68 years of the correct time. Further discussion on
 this issue is in the white paper
 {millshome}time.html[NTP Timestamp Calculations].
 Ordinarily, these formats are not seen by application programs, which
-convert these NTP formats to native Unix or Windows formats.
+convert these NTP formats to native formats.
 
 [[arch]]
 == 3. Architecture and Algorithms ==

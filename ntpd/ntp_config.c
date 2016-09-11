@@ -3357,30 +3357,7 @@ getconfig(const char *explicit_config)
 {
 	const char *config_file;
 
-#ifndef SYS_WINNT
 	config_file = CONFIG_FILE;
-#else
-	char *alt_config_file;
-	LPTSTR temp;
-	char config_file_storage[MAX_PATH];
-	char alt_config_file_storage[MAX_PATH];
-
-	temp = CONFIG_FILE;
-	if (!ExpandEnvironmentStringsA(temp, config_file_storage,
-				       sizeof(config_file_storage))) {
-		msyslog(LOG_ERR, "ExpandEnvironmentStrings CONFIG_FILE failed: %m");
-		exit(1);
-	}
-	config_file = config_file_storage;
-
-	temp = ALT_CONFIG_FILE;
-	if (!ExpandEnvironmentStringsA(temp, alt_config_file_storage,
-				       sizeof(alt_config_file_storage))) {
-		msyslog(LOG_ERR, "ExpandEnvironmentStrings ALT_CONFIG_FILE failed: %m");
-		exit(1);
-	}
-	alt_config_file = alt_config_file_storage;
-#endif /* SYS_WINNT */
 
 	if (explicit_config) {
 #ifdef HAVE_NETINFO_NI_H
@@ -3388,11 +3365,6 @@ getconfig(const char *explicit_config)
 #endif
 	    config_file = explicit_config;
 	}
-
-#ifdef SYS_WINNT
-	if (access(config_file, R_OK) != 0)
-	    config_file = alt_config_file;
-#endif /* SYS_WINNT */
 
 	return config_file;
 }
@@ -3425,12 +3397,10 @@ void readconfig(const char *config_file)
 #endif /* HAVE_NETINFO_NI_H */
 		) {
 		msyslog(LOG_INFO, "getconfig: Couldn't open <%s>: %m", config_file);
-#ifndef SYS_WINNT
 		if (intercept_get_mode() != replay)
 			io_open_sockets();
 
 		return;
-#endif	/* SYS_WINNT */
 	} else
 		cfgt.source.value.s = estrdup(config_file);
 

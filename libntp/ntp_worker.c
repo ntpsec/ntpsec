@@ -226,12 +226,6 @@ process_blocking_resp(
 	blocking_pipe_header *	resp;
 	void *			data;
 
-	/*
-	 * On Windows send_blocking_resp_internal() may signal the
-	 * blocking_response_ready event multiple times while we're
-	 * processing a response, so always consume all available
-	 * responses before returning to test the event again.
-	 */
 #ifdef USE_WORK_THREAD
 	do {
 #endif

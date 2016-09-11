@@ -47,11 +47,6 @@
 #endif
 
 
-/* nt_clockstuff.c */
-#ifdef SYS_WINNT
-extern	void	win_time_stepped(void);
-#endif
-
 /* ntp_config.c */
 #define	TAI_1972	10	/* initial TAI offset (s) */
 extern	char	*keysdir;	/* crypto keys and leaptable directory */
@@ -459,9 +454,6 @@ extern bool	leap_sec_in_progress;
 extern struct leap_smear_info leap_smear;
 extern int	leap_smear_intv;
 #endif
-#ifdef SYS_WINNT
-HANDLE WaitableTimerHandle;
-#endif
 
 /* ntp_util.c */
 extern	char	statsdir[MAXFILENAME];
@@ -483,11 +475,6 @@ extern const char *chrootdir;	/* directory to chroot() to */
 extern	int	waitsync_fd_to_close;	/* -w/--wait-sync */
 #endif
 extern  void	finish		(int sig);
-
-/* ntservice.c */
-#ifdef SYS_WINNT
-extern int accept_wildcard_if_for_winnt;
-#endif
 
 /* refclock_conf.c */
 #ifdef REFCLOCK
