@@ -20,10 +20,6 @@
 
 #ifdef REFCLOCK
 
-#ifdef HAVE_KERNEL_PLL
-#include "ntp_syscall.h"
-#endif /* HAVE_KERNEL_PLL */
-
 #ifdef HAVE_PPSAPI
 #include "ppsapi_timepps.h"
 #include "refclock_pps.h"
