@@ -151,6 +151,7 @@ static const struct option longoptions[] = {
     { "interface",	    1, 0, 'I' },
     { "keyfile",	    1, 0, 'k' },
     { "logfile",	    1, 0, 'l' },
+    { "mdns",	            0, 0, 'm' },
     { "novirtualips",	    0, 0, 'L' },
     { "nofork",		    0, 0, 'n' },
     { "nice",		    0, 0, 'N' },
@@ -199,6 +200,7 @@ static void ntpd_usage(void)
     P("   -k Str keyfile        path to symmetric keys\n");
     P("   -l Str logfile        path to the log file\n");
     P("   -L no  novirtualips   Do not listen to virtual interfaces\n");
+    P("   -m no                 Enable mDNS registration\n");
     P("   -n no  nofork         Do not fork\n");
     P("   -N no  nice           Run at high priority\n");
     P("   -p Str pidfile        path to the PID file\n");

@@ -58,13 +58,13 @@
     the monitoring capability of {ntpdman}. Thus, monitoring is
     always active as long as there is a restriction entry with
     the limited flag.
-//  +mssntp+;;
-//    Enable Microsoft Windows MS-SNTP authentication using Active
-//    Directory services. *Note: Potential users should be aware that
-//    these services involve a TCP connection to another process that
-//    could potentially block, denying services to other users. Therefore,
-//    this flag should be used only for a dedicated server with no clients
-//    other than MS-SNTP.*
+  +mssntp+;;
+    Enable Microsoft Windows MS-SNTP authentication using Active
+    Directory services. *Note: Potential users should be aware that
+    these services involve a TCP connection to another process that
+    could potentially block, denying services to other users. Therefore,
+    this flag should be used only for a dedicated server with no clients
+    other than MS-SNTP.*
   +nomodify+;;
     Deny {ntpqman} queries which attempt
     to modify the state of the server (i.e., run time reconfiguration).
