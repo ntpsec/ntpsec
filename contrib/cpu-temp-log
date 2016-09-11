@@ -57,4 +57,3 @@ for line in lines:
         temp = match.group(1)
         sys.stdout.write( '%d LM%d %s\n' % (now, index, temp))
         index += 1
-

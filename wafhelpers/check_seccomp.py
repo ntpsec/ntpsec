@@ -18,5 +18,3 @@ def check_seccomp(ctx):
         pprint("RED", "Warning libseccomp and headers")
         pprint("RED", "Fedora needs libseccomp-devel")
         pprint("RED", "Debian needs libseccomp-dev")
-
-

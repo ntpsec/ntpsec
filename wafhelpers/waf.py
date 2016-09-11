@@ -84,4 +84,3 @@ def ntp_test(ctx, **kwargs):
 		args += tg.test_args
 
 	tg.ut_exec = args
-

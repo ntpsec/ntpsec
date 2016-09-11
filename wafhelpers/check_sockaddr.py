@@ -35,4 +35,3 @@ def check_sockaddr(ctx):
 		mandatory	= False,
 		comment		= "Whether sockaddr.sa_len exists"
 	)
-

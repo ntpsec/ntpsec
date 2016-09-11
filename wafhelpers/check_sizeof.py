@@ -80,4 +80,3 @@ def check_sizeof(*kwargs):
 		return check_sizeof_cross(*kwargs)
 	else:
 		return check_sizeof_host(*kwargs)
-
