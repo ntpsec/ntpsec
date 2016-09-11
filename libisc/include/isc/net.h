@@ -138,39 +138,10 @@ isc_net_probe_ipv6pktinfo(void);
  * \li	#ISC_R_UNEXPECTED
  */
 
-void
-isc_net_disableipv4(void);
-
-void
-isc_net_disableipv6(void);
-
-void
-isc_net_enableipv4(void);
-
-void
-isc_net_enableipv6(void);
-
 isc_result_t
 isc_net_probeunix(void);
 /*
  * Returns whether UNIX domain sockets are supported.
- */
-
-isc_result_t
-isc_net_getudpportrange(int af, in_port_t *low, in_port_t *high);
-/*%<
- * Returns system's default range of ephemeral UDP ports, if defined.
- * If the range is not available or unknown, ISC_NET_PORTRANGELOW and
- * ISC_NET_PORTRANGEHIGH will be returned.
- *
- * Requires:
- *
- *\li	'low' and 'high' must be non NULL.
- *
- * Returns:
- *
- *\li	*low and *high will be the ports specifying the low and high ends of
- *	the range.
  */
 
 int
