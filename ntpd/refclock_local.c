@@ -13,10 +13,6 @@
 #include <stdio.h>
 #include <ctype.h>
 
-#ifdef HAVE_KERNEL_PLL
-#include "ntp_syscall.h"
-#endif
-
 /*
  * This is a hack to allow a machine to use its own system clock as a
  * reference clock, i.e., to free-run using no outside clock discipline
