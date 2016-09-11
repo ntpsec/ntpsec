@@ -71,6 +71,9 @@ def gnuplot(template, outfile=None):
     proc = subprocess.Popen("gnuplot",
                             shell=False, bufsize=4096,
                             stdin=subprocess.PIPE, stdout=out)
+    # next line works in Python 3, not Python 2
+    # proc.stdin.write(template.encode('ascii','ignore'))
+    # next line works in Python 2, not Python 3
     proc.stdin.write(template)
     proc.stdin.close()
     return proc.wait()
