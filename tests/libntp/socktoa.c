@@ -43,7 +43,6 @@ TEST(socktoa, IPv6AddressWithPort) {
 	TEST_ASSERT_EQUAL_STRING(expected_port, sockporttoa(&input));
 }
 
-#ifdef ISC_PLATFORM_HAVESCOPEID
 TEST(socktoa, ScopedIPv6AddressWithPort) {
 	const struct in6_addr address = {{{
 		0xfe, 0x80, 0x00, 0x00,
@@ -67,7 +66,6 @@ TEST(socktoa, ScopedIPv6AddressWithPort) {
 	TEST_ASSERT_EQUAL_STRING(expected, socktoa(&input));
 	TEST_ASSERT_EQUAL_STRING(expected_port, sockporttoa(&input));
 }
-#endif	/* ISC_PLATFORM_HAVESCOPEID */
 
 TEST(socktoa, HashEqual) {
 	sockaddr_u input1 = CreateSockaddr4("192.00.2.2", 123);

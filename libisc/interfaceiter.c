@@ -55,10 +55,6 @@ get_addr(unsigned int family, isc_netaddr_t *dst, struct sockaddr *src,
 {
 	struct sockaddr_in6 *sa6;
 
-#if !defined(ISC_PLATFORM_HAVESCOPEID)
-	UNUSED(ifname);
-#endif
-
 	/* clear any remaining value for safety */
 	memset(dst, 0, sizeof(*dst));
 
@@ -73,7 +69,6 @@ get_addr(unsigned int family, isc_netaddr_t *dst, struct sockaddr *src,
 		sa6 = (struct sockaddr_in6 *)(void *)src;
 		memcpy(&dst->type.in6, &sa6->sin6_addr,
 		       sizeof(struct in6_addr));
-#ifdef ISC_PLATFORM_HAVESCOPEIDS
 		if (sa6->sin6_scope_id != 0)
 			isc_netaddr_setzone(dst, sa6->sin6_scope_id);
 		else {
@@ -117,7 +112,6 @@ get_addr(unsigned int family, isc_netaddr_t *dst, struct sockaddr *src,
 				}
 			}
 		}
-#endif
 		break;
 	default:
 		INSIST(0);

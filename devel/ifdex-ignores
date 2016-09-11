@@ -27,8 +27,6 @@ NO_MAIN_ALLOWED		# Used to be set by VxWorks.
 OS_MISSES_SPECIFIC_ROUTE_UPDATES
 HAVE_SYSCTLBYNAME	# NTP Classic never set this.
 USE_SYSCTL_PORTRANGE	# NTP Classic never set this.
-ISC_PLATFORM_HAVEIPV6
-ISC_PLATFORM_HAVEIN6PKTINFO
 
 # Refclock-specific configuration (NTP Classic never set these)
 ENABLE_PPS720		# Enable use of PCL720 with TrueTime refclock
@@ -154,7 +152,6 @@ USE_WORK_PIPE		# Set in ntp_workimpl.h
 USE_WORK_THREAD
 
 
-USE_IPV6_SUPPORT
 USE_IPV6_MULTICAST_SUPPORT
 USE_LE_EDITLINE
 USE_LE_READLINE

@@ -401,11 +401,7 @@ internal_current4(isc_interfaceiter_t *iter) {
 	memcpy(&ifreq, ifrp, sizeof(ifreq));
 
 	family = ifreq.ifr_addr.sa_family;
-#if defined(ISC_PLATFORM_HAVEIPV6)
 	if (family != AF_INET && family != AF_INET6)
-#else
-	if (family != AF_INET)
-#endif
 		return (ISC_R_IGNORE);
 
 	memset(&iter->current, 0, sizeof(iter->current));
@@ -601,11 +597,7 @@ internal_current6(isc_interfaceiter_t *iter) {
 	memcpy(&lifreq, ifrp, sizeof(lifreq));
 
 	family = lifreq.lifr_addr.ss_family;
-#ifdef ISC_PLATFORM_HAVEIPV6
 	if (family != AF_INET && family != AF_INET6)
-#else
-	if (family != AF_INET)
-#endif
 		return (ISC_R_IGNORE);
 
 	memset(&iter->current, 0, sizeof(iter->current));
