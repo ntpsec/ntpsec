@@ -29,8 +29,6 @@
  *
  * It declares ntoh[sl]() and hton[sl]().
  *
- * It declares inet_aton()
- *
  * MP:
  *\li	No impact.
  *
@@ -137,17 +135,6 @@ isc_net_probe_ipv6pktinfo(void);
  * \li	#ISC_R_NOTFOUND		IPv6 itself or the option is not supported.
  * \li	#ISC_R_UNEXPECTED
  */
-
-isc_result_t
-isc_net_probeunix(void);
-/*
- * Returns whether UNIX domain sockets are supported.
- */
-
-int
-isc_net_aton(const char *cp, struct in_addr *addr);
-#undef inet_aton
-#define inet_aton isc_net_aton
 
 ISC_LANG_ENDDECLS
 

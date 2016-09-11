@@ -36,7 +36,6 @@ static bool 	once = false;
 
 static isc_result_t	ipv4_result = ISC_R_NOTFOUND;
 static isc_result_t	ipv6_result = ISC_R_NOTFOUND;
-static isc_result_t	unix_result = ISC_R_NOTFOUND;
 static isc_result_t	ipv6only_result = ISC_R_NOTFOUND;
 static isc_result_t	ipv6pktinfo_result = ISC_R_NOTFOUND;
 
@@ -151,12 +150,6 @@ isc_result_t
 isc_net_probeipv6(void) {
 	initialize();
 	return (ipv6_result);
-}
-
-isc_result_t
-isc_net_probeunix(void) {
-	initialize();
-	return (unix_result);
 }
 
 #ifdef ISC_PLATFORM_HAVEIPV6
