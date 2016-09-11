@@ -304,18 +304,11 @@ filegen_open(
 			 * Ok, it would just mean taking the part following
 			 * the last '/' in the name.... Should add it later....
 			 */
-
-			/* Windows NT does not support file links -Greg Schueman 1/18/97 */
-
-#if defined(SYS_WINNT)
-			SetLastError(0); /* On WinNT, don't support FGEN_FLAG_LINK */
-#else  /* not WINNT ; DO THE LINK) */
 			if (link(fullname, filename) != 0)
 				if (EEXIST != errno)
 					msyslog(LOG_ERR, 
 						"can't link(%s, %s): %m",
 						fullname, filename);
-#endif /* SYS_WINNT */
 		}		/* flags & FGEN_FLAG_LINK */
 	}			/* else fp == NULL */
 	
@@ -490,19 +483,6 @@ valid_fileref(
 
 	if (NULL == fname)
 		return false;
-
-#ifdef SYS_WINNT
-	/*
-	 * Windows treats / equivalent to \, reject any / to ensure
-	 * check below for DIR_SEP (\ on windows) are adequate.
-	 */
-	if (strchr(fname, '/')) {
-		msyslog(LOG_ERR,
-			"filegen filenames must not contain '/': %s",
-			fname);
-		return false;
-	}
-#endif
 
 	for (p = fname; p != NULL; p = strchr(p, DIR_SEP)) {
 		if ('.' == p[0] && '.' == p[1] 

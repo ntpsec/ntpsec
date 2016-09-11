@@ -53,7 +53,7 @@ cease operation.
 
 The next most common problem is incorrect DNS names. Check that each DNS
 name used in the configuration file exists and that the address responds
-to the Unix +ping+ command. The Unix +traceroute+ or Windows +tracert+
+to the Unix +ping+ command. The Unix +traceroute+
 utility can be used to verify a partial or complete path exists. Most
 problems reported to the NTP newsgroup are not NTP problems, but
 problems with the network or firewall configuration.

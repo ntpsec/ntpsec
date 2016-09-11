@@ -104,14 +104,10 @@ synchronization without needing the Internet at all.
   Not used by this driver.
 +flag2 {0 | 1}+::
   Specifies PPS capture on the rising (assert) pulse edge if 0 (default)
-  or falling (clear) pulse edge if 1. Not used under Windows - if the
-  special +serialpps.sys+ serial port driver is installed then the
-  leading edge will _always_ be used.
+  or falling (clear) pulse edge if 1.
 +flag3 {0 | 1}+::
   Controls the kernel PPS discipline: 0 for disable (default), 1 for
-  enable. Not used under Windows - if the special +serialpps.sys+
-  serial port driver is used then kernel PPS will be available and
-  used.
+  enable.
 +flag4 {0 | 1}+::
   Record a timestamp once for each second if 1. Useful for constructing
   Allan deviation plots.

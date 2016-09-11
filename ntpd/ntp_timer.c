@@ -72,30 +72,21 @@ u_long timer_timereset;
 u_long timer_overflows;
 u_long timer_xmtcalls;
 
-#ifdef SYS_WINNT
-HANDLE WaitableTimerHandle;
-#else
 static	void alarming (int);
-#endif /* SYS_WINNT */
 
-#if !defined SYS_WINNT || defined(SYS_CYGWIN32)
-#  ifdef HAVE_TIMER_CREATE
+#ifdef HAVE_TIMER_CREATE
 static timer_t timer_id;
 typedef struct itimerspec intervaltimer;
-#  define	itv_frac	tv_nsec
-#  else
+#define	itv_frac	tv_nsec
+#else
 typedef struct itimerval intervaltimer;
-#   define	itv_frac	tv_usec
-#  endif
+#define	itv_frac	tv_usec
+#endif
 intervaltimer itimer;
-#endif
 
-#if !defined(SYS_WINNT)
 void	set_timer_or_die(const intervaltimer *);
-#endif
 
 
-#if !defined(SYS_WINNT)
 void
 set_timer_or_die(
 	const intervaltimer *	ptimer
@@ -119,7 +110,6 @@ set_timer_or_die(
 		exit(1);
 	}
 }
-#endif	/* !SYS_WINNT */
 
 
 /*
@@ -128,7 +118,6 @@ set_timer_or_die(
 void 
 reinit_timer(void)
 {
-#if !defined(SYS_WINNT)
 	ZERO(itimer);
 #ifdef HAVE_TIMER_CREATE
 	timer_gettime(timer_id, &itimer);
@@ -146,7 +135,6 @@ reinit_timer(void)
 	itimer.it_interval.tv_sec = (1 << EVENT_TIMEOUT);
 	itimer.it_interval.itv_frac = 0;
 	set_timer_or_die(&itimer);
-# endif
 }
 
 
@@ -171,7 +159,6 @@ init_timer(void)
 	timer_xmtcalls = 0;
 	timer_timereset = 0;
 
-#ifndef SYS_WINNT
 	/*
 	 * Set up the alarm interrupt.	The first comes 2**EVENT_TIMEOUT
 	 * seconds from now and they continue on every 2**EVENT_TIMEOUT
@@ -188,33 +175,6 @@ init_timer(void)
 		itimer.it_value.tv_sec = (1 << EVENT_TIMEOUT);
 	itimer.it_interval.itv_frac = itimer.it_value.itv_frac = 0;
 	set_timer_or_die(&itimer);
-#else	/* SYS_WINNT follows */
-	/*
-	 * Set up timer interrupts for every 2**EVENT_TIMEOUT seconds
-	 * Under Windows/NT, 
-	 */
-
-	WaitableTimerHandle = CreateWaitableTimer(NULL, false, NULL);
-	if (WaitableTimerHandle == NULL) {
-		msyslog(LOG_ERR, "CreateWaitableTimer failed: %m");
-		exit(1);
-	}
-	else {
-		DWORD		Period;
-		LARGE_INTEGER	DueTime;
-		bool		rc;
-
-		Period = (1 << EVENT_TIMEOUT) * 1000;
-		DueTime.QuadPart = Period * 10000i64;
-		rc = SetWaitableTimer(WaitableTimerHandle, &DueTime,
-				      Period, NULL, NULL, false);
-		if (!rc) {
-			msyslog(LOG_ERR, "SetWaitableTimer failed: %m");
-			exit(1);
-		}
-	}
-
-#endif	/* SYS_WINNT */
 }
 
 
@@ -375,7 +335,6 @@ timer(void)
 }
 
 
-#ifndef SYS_WINNT
 /*
  * alarming - tell the world we've been alarmed
  */
@@ -405,7 +364,6 @@ if (debug >= 4 && msg != NULL)
 	(void)(-1 == write(1, msg, strlen(msg)));
 # endif
 }
-#endif /* !SYS_WINNT */
 
 
 void
@@ -457,13 +415,11 @@ check_leapsec(
 	leap_result_t lsdata;
 	uint32_t       lsprox;
 	
-#ifndef SYS_WINNT  /* WinNT port has its own leap second handling */
-# ifdef HAVE_KERNEL_PLL
+#ifdef HAVE_KERNEL_PLL
 	leapsec_electric((pll_control && kern_enable) ? electric_on : electric_off);
-# else
+#else
 	leapsec_electric(electric_off);
-# endif
-#endif	
+#endif
 #ifdef ENABLE_LEAP_SMEAR
 	leap_smear.enabled = (leap_smear_intv != 0);
 #endif

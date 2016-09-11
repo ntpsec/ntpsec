@@ -50,16 +50,6 @@ though this mechanism has been available for about 20 years' time, almost
 nobody uses it.
 
 
-== NTP Client for Windows Contains a Workaround ==
-
-The Windows system time knows nothing about leap seconds, so for many years
-the Windows port of ntpd provides a workaround where the system time is
-slewed by the client to compensate the leap second.
-
-Thus it is not required to use a smearing NTP server for Windows clients,
-but of course the smearing server approach also works.
-
-
 == The Leap Smear Approach ==
 
 Due to the reasons mentioned above some support for leap smearing has

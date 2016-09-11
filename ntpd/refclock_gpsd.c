@@ -8,23 +8,6 @@
  * Special thanks to Gary Miller and Hal Murray for their comments and
  * ideas.
  *
- * Note: This will currently NOT work with Windows due to some
- * limitations:
- *
- *  - There is no GPSD for Windows. (There is an unofficial port to
- *    cygwin, but Windows is not officially supported.)
- *
- *  - To work properly, this driver needs PPS and TPV/TOFF sentences
- *    from GPSD. I don't see how the cygwin port should deal with the
- *    PPS signal.
- *
- *  - The device name matching must be done in a different way for
- *    Windows. (Can be done with COMxx matching, as done for NMEA.)
- *
- * Apart from those minor hickups, once GPSD has been fully ported to
- * Windows, there's no reason why this should not work there ;-) If this
- * is ever to happen at all is a different question.
- *
  * ---------------------------------------------------------------------
  *
  * This driver works slightly different from most others, as the PPS

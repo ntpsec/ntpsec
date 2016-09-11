@@ -146,13 +146,8 @@ typedef union {
 	       sizeof(pin6A)->s6_addr)
 
 /* compare two in6_addr for equality only */
-#if !defined(SYS_WINNT) || !defined(in_addr6)
 #define ADDR6_EQ(pin6A, pin6B)					\
 	(!ADDR6_CMP(pin6A, pin6B))
-#else
-#define ADDR6_EQ(pin6A, pin6B)					\
-	IN6_ADDR_EQUAL(pin6A, pin6B)
-#endif
 
 /* compare a in6_addr with socket address */
 #define	S_ADDR6_EQ(psau, pin6)					\

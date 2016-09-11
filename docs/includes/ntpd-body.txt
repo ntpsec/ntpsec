@@ -187,13 +187,6 @@ the configuration file +interface+ command, which is more versatile.
 Registers as an NTP server with the local mDNS server which allows the
 server to be discovered via mDNS client lookup.
 
-+-M+, +--modifymmtimer+::
-  Modify Multimedia Timer (Windows only).
-+
-Set the Windows Multimedia Timer to highest resolution. This ensures
-the resolution does not change while {ntpd} is running, avoiding
-timekeeping glitches associated with changes.
-
 +-n+, +--nofork+::
   Do not fork. This option must not appear in combination with any of
   the following options: wait-sync.
@@ -298,21 +291,6 @@ discipline is disabled with this option.
 +-Z+ _nvar_, --dvar+=_ndvar_::
   make ARG an ntp variable (RW|DEF). This option may appear an unlimited
   number of times.
-
-//+--usepcc+::
-//  Use CPU cycle counter (Windows only).
-//+
-//Attempt to substitute the CPU counter for _QueryPerformanceCounter_.
-//The CPU counter and _QueryPerformanceCounter_ are compared, and if
-//they have the same frequency, the CPU counter (RDTSC on x86) is used
-//directly, saving the overhead of a system call.
-
-//+--pccfreq+=_string_::
-//  Force CPU cycle counter use (Windows only).
-//+
-//Force substitution the CPU counter for _QueryPerformanceCounter_. The
-//CPU counter (RDTSC on x86) is used unconditionally with the given
-//frequency (in Hz).
 
 +-V, --version+::
   Output version of program and exit. -VV gives more detailed version

@@ -109,14 +109,12 @@ static	void	catchHUP	(int);
 volatile int sawHUP = false;
 #endif
 
-#if !defined(SYS_WINNT)
 # ifdef	DEBUG
 static	void	moredebug	(int);
 static	void	lessdebug	(int);
 # else	/* !DEBUG follows */
 static	void	no_debug	(int);
 # endif	/* !DEBUG */
-#endif	/* !SYS_WINNT */
 
 int	saved_argc;
 char **	saved_argv;
@@ -135,7 +133,7 @@ static void	library_unexpected_error(const char *, int,
 					 const char *, va_list)
 					ISC_FORMAT_PRINTF(3, 0);
 
-#define ALL_OPTIONS "46aAbc:dD:f:gGhi:I:k:l:LmMnNp:Pqr:Rs:t:u:UVw:xyYzZ"
+#define ALL_OPTIONS "46aAbc:dD:f:gGhi:I:k:l:LmnNp:Pqr:Rs:t:u:UVw:xyYzZ"
 static const struct option longoptions[] = {
     { "ipv4",		    0, 0, '4' },
     { "ipv6",		    0, 0, '6' },
@@ -435,12 +433,6 @@ parse_cmdline_opts(
 	}
 
 	/*
-	 * Two port-specific options for Windows (USEPCC and PCCFREQ)
-	 * have been omitted until the Windows port can be beaten back
-	 * into shape.
-	 */
-
-	/*
 	 * Sanity checks and derived options
 	 */
 
@@ -457,7 +449,6 @@ parse_cmdline_opts(
 #ifdef NO_MAIN_ALLOWED
 CALL(ntpd,"ntpd",ntpdmain);
 #else	/* !NO_MAIN_ALLOWED follows */
-#ifndef SYS_WINNT
 int
 main(
 	int argc,
@@ -466,7 +457,6 @@ main(
 {
 	return ntpdmain(argc, argv);
 }
-#endif /* !SYS_WINNT */
 #endif /* !NO_MAIN_ALLOWED */
 
 #ifdef SIGDANGER
@@ -639,13 +629,6 @@ ntpdmain(
 # endif	/* HAVE_WORKING_FORK */
 
 	init_lib();
-# ifdef SYS_WINNT
-	/*
-	 * Start interpolation thread, must occur before first
-	 * get_systime()
-	 */
-	init_winnt_time();
-# endif
 	/*
 	 * Detach us from the terminal.  May need an #ifndef GIZMO.
 	 */
@@ -791,11 +774,6 @@ ntpdmain(
 	    case 'k':
 		intercept_getauthkeys(ntp_optarg);
 		break;
-	    case 'M':
-# ifdef SYS_WINNT
-		set_mm_timer(MM_TIMER_HIRES);
-# endif
-		break;
 	    case 'p':
 		stats_config(STATS_PID_FILE, pidfile);
 		break;
@@ -892,9 +870,6 @@ ntpdmain(
 	    fprintf(stdout, "#mdnsreg = %s\n",
 		    mdnsreg ? "true" : "false");
 #endif  /* ENABLE_MDNS_REGISTRATION */
-# ifdef SYS_WINNT
-	    /* FIXME: dump the timer state */
-# endif
 	    if (pidfile)
 		fprintf(stdout, "pidfile \"%s\";\n", pidfile);
 	    /* FIXME: dump priority */
@@ -1267,11 +1242,6 @@ assertion_failed(
 		file, line, isc_assertion_typetotext(type), cond);
 	msyslog(LOG_ERR, "exiting (due to assertion failure)");
 
-#if defined(DEBUG) && defined(SYS_WINNT)
-	if (debug)
-		DebugBreak();
-#endif
-
 	abort();
 }
 
@@ -1295,11 +1265,6 @@ library_fatal_error(
 	vsnprintf(errbuf, sizeof(errbuf), format, args);
 	msyslog(LOG_ERR, "%s", errbuf);
 	msyslog(LOG_ERR, "exiting (due to fatal error in library)");
-
-#if defined(DEBUG) && defined(SYS_WINNT)
-	if (debug)
-		DebugBreak();
-#endif
 
 	abort();
 }
@@ -1332,7 +1297,6 @@ library_unexpected_error(
 
 }
 
-#if !defined(SYS_WINNT)
 # ifdef DEBUG
 
 /*
@@ -1391,4 +1355,3 @@ no_debug(
 	errno = saved_errno;
 }
 # endif	/* !DEBUG */
-#endif	/* !SYS_WINNT */

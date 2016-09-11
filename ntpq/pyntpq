@@ -903,7 +903,6 @@ if __name__ == '__main__':
     #delay_time.l_uf = DEFDELAY
 
     #init_lib()	# sets up ipv4_works, ipv6_works
-    #ssl_applink()
     #init_auth()
 
     try:

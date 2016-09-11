@@ -45,7 +45,6 @@ hardware platforms:
 |=============================================================================
 | Platform        | Operating System | NTP Sources                  | Accuracy
 | i386 (PC)       | Linux            | NTP Distribution             |10 us
-| i386 (PC)       | Windows NT       | ftp://ftp.trimble.com/pub/ntp|1 ms
 | SUN             | Solaris 2.x      | NTP Distribution             |50 us
 | Hewlett-Packard | HPUX 9, 10, 11   | http://us-support.external.hp.com|50 us
 | Various         | Free BSD         | NTP Distribution             |20 us
@@ -113,10 +112,6 @@ port device.  This is typically performed by a command such as:
 ---------------------------------
 ln -s /dev/ttyS0 /dev/trimble0
 ---------------------------------
-
-Windows NT does not support symbolic links to device files. COM**x**: is
-used by the driver, based on the refclock unit number, where unit 1
-corresponds to COM**1**: and unit 3 corresponds to COM**3**:.
 
 The Palisade ships 8N1 (no parity).  The Thunderbolt ships 8O1 (odd
 parity).

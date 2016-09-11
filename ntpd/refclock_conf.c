@@ -125,7 +125,7 @@ extern	struct refclock	refclock_neoclock4x;
 #define	refclock_neoclock4x	refclock_none
 #endif
 
-#if defined(CLOCK_GPSDJSON) && !defined(SYS_WINNT) 
+#if defined(CLOCK_GPSDJSON)
 extern struct refclock refclock_gpsdjson;
 #else
 #define refclock_gpsdjson refclock_none

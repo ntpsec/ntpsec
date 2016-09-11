@@ -198,7 +198,6 @@ DNSlookup_name(
 	struct hostent **Addresses
 );
 
-#ifndef SYS_WINNT
 /*
  * Encapsulate gethostbyname to control the error code
  */
@@ -212,7 +211,6 @@ DNSlookup_name(
 	*Addresses = gethostbyname(name);
 	return (h_errno);
 }
-#endif
 
 static	int do_nodename (const char *nodename, struct addrinfo *ai,
     const struct addrinfo *hints);

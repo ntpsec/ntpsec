@@ -124,11 +124,6 @@ nic_rule *nic_rule_list;
 /* fill in for old/other timestamp interfaces */
 #endif
 
-#if defined(SYS_WINNT)
-#include "win32_io.h"
-#include <isc/win32os.h>
-#endif
-
 /*
  * We do asynchronous input using the SIGIO facility.  A number of
  * recvbuf buffers are preallocated for input.	In the signal
@@ -290,11 +285,7 @@ endpt *		mc6_list;	/* IPv6 mcast-capable unicast endpts */
 static endpt *	wildipv4;
 static endpt *	wildipv6;
 
-#ifdef SYS_WINNT
-int accept_wildcard_if_for_winnt;
-#else
 const int accept_wildcard_if_for_winnt = false;
-#endif
 
 static void	add_fd_to_list		(SOCKET, enum desc_type);
 static endpt *	find_addr_in_list	(sockaddr_u *);
@@ -441,10 +432,6 @@ init_io(void)
 
 #ifdef USE_WORK_PIPE
 	addremove_io_fd = &ntpd_addremove_io_fd;
-#endif
-
-#ifdef SYS_WINNT
-	init_io_completion_port();
 #endif
 }
 
@@ -2081,10 +2068,6 @@ create_interface(
 {
 	sockaddr_u	resmask;
 	endpt *		iface;
-#if defined(MCAST) && defined(MULTICAST_NONEWSOCKET)
-	remaddr_t *	entry;
-	remaddr_t *	next_entry;
-#endif
 	DPRINTF(2, ("create_interface(%s#%d)\n", stoa(&protot->sin),
 		    port));
 
@@ -2136,35 +2119,6 @@ create_interface(
 	add_addr_to_list(&iface->sin, iface);
 	add_interface(iface);
 
-#if defined(MCAST) && defined(MULTICAST_NONEWSOCKET)
-	/*
-	 * Join any previously-configured compatible multicast groups.
-	 */
-	if (INT_MULTICAST & iface->flags &&
-	    !((INT_LOOPBACK | INT_WILDCARD) & iface->flags) &&
-	    !iface->ignore_packets) {
-		for (entry = remoteaddr_list;
-		     entry != NULL;
-		     entry = next_entry) {
-			next_entry = entry->link;
-			if (AF(&iface->sin) != AF(&entry->addr) ||
-			    !IS_MCAST(&entry->addr))
-				continue;
-			if (socket_multicast_enable(iface,
-						    &entry->addr))
-				msyslog(LOG_INFO,
-					"Joined %s socket to multicast group %s",
-					stoa(&iface->sin),
-					stoa(&entry->addr));
-			else
-				msyslog(LOG_ERR,
-					"Failed to join %s socket to multicast group %s",
-					stoa(&iface->sin),
-					stoa(&entry->addr));
-		}
-	}
-#endif	/* MCAST && MCAST_NONEWSOCKET */
-
 	DPRINT_INTERFACE(2, (iface, "created ", "\n"));
 	return iface;
 }
@@ -2178,9 +2132,6 @@ set_excladdruse(
 {
 	int one = 1;
 	int failed;
-#ifdef SYS_WINNT
-	DWORD err;
-#endif
 
 	failed = setsockopt(fd, SOL_SOCKET, SO_EXCLUSIVEADDRUSE,
 			    (char *)&one, sizeof(one));
@@ -2188,21 +2139,6 @@ set_excladdruse(
 	if (!failed)
 		return;
 
-#ifdef SYS_WINNT
-	/*
-	 * Prior to Windows XP setting SO_EXCLUSIVEADDRUSE can fail with
-	 * error WSAINVAL depending on service pack level and whether
-	 * the user account is in the Administrators group.  Do not
-	 * complain if it fails that way on versions prior to XP (5.1).
-	 */
-	err = GetLastError();
-
-	if (isc_win32os_versioncheck(5, 1, 0, 0) < 0	/* < 5.1/XP */
-	    && WSAEINVAL == err)
-		return;
-
-	SetLastError(err);
-#endif
 	msyslog(LOG_ERR,
 		"setsockopt(%d, SO_EXCLUSIVEADDRUSE, on): %m",
 		(int)fd);
@@ -2727,7 +2663,6 @@ io_multicast_add(
 		return;
 	}
 
-#ifndef MULTICAST_NONEWSOCKET
 	ep = new_interface(NULL);
 
 	/*
@@ -2777,22 +2712,6 @@ io_multicast_add(
 	}
 	{	/* in place of the { following for in #else clause */
 		one_ep = ep;
-#else	/* MULTICAST_NONEWSOCKET follows */
-	/*
-	 * For the case where we can't use a separate socket (Windows)
-	 * join each applicable endpoint socket to the group address.
-	 */
-	if (IS_IPV4(addr))
-		one_ep = wildipv4;
-	else
-		one_ep = wildipv6;
-	for (ep = ep_list; ep != NULL; ep = ep->elink) {
-		if (ep->ignore_packets || AF(&ep->sin) != AF(addr) ||
-		    !(INT_MULTICAST & ep->flags) ||
-		    (INT_LOOPBACK | INT_WILDCARD) & ep->flags)
-			continue;
-		one_ep = ep;
-#endif	/* MULTICAST_NONEWSOCKET */
 		if (ep->fd >= 0 && socket_multicast_enable(ep, addr))
 			msyslog(LOG_INFO,
 				"Joined %s socket to multicast group %s",
@@ -2874,7 +2793,7 @@ open_socket(
 	/* create a datagram (UDP) socket */
 	fd = socket(AF(addr), SOCK_DGRAM, 0);
 	if (INVALID_SOCKET == fd) {
-		errval = socket_errno();
+		errval = errno;
 		msyslog(LOG_ERR,
 			"socket(AF_INET%s, SOCK_DGRAM, 0) failed on address %s: %m",
 			IS_IPV6(addr) ? "6" : "", stoa(addr));
@@ -2893,9 +2812,6 @@ open_socket(
 #endif /* __COVERITY__ */
 	}
 
-#ifdef SYS_WINNT
-	connection_reset_fix(fd, addr);
-#endif
 	/*
 	 * Fixup the file descriptor for some systems
 	 * See bug #530 for details of the issue.
@@ -2905,27 +2821,22 @@ open_socket(
 	/*
 	 * set SO_REUSEADDR since we will be binding the same port
 	 * number on each interface according to turn_off_reuse.
-	 * This is undesirable on Windows versions starting with
-	 * Windows XP (numeric version 5.1).
 	 */
-#ifdef SYS_WINNT
-	if (isc_win32os_versioncheck(5, 1, 0, 0) < 0)  /* before 5.1 */
-#endif
-		if (setsockopt(fd, SOL_SOCKET, SO_REUSEADDR,
-			       (char *)((turn_off_reuse)
-					    ? &off
-					    : &on),
-			       sizeof(on))) {
+	if (setsockopt(fd, SOL_SOCKET, SO_REUSEADDR,
+		       (char *)((turn_off_reuse)
+				    ? &off
+				    : &on),
+		       sizeof(on))) {
 
-			msyslog(LOG_ERR,
-				"setsockopt SO_REUSEADDR %s fails for address %s: %m",
-				(turn_off_reuse)
-				    ? "off"
-				    : "on",
-				stoa(addr));
-			closesocket(fd);
-			return INVALID_SOCKET;
-		}
+		msyslog(LOG_ERR,
+			"setsockopt SO_REUSEADDR %s fails for address %s: %m",
+			(turn_off_reuse)
+			    ? "off"
+			    : "on",
+			stoa(addr));
+		close(fd);
+		return INVALID_SOCKET;
+	}
 #ifdef SO_EXCLUSIVEADDRUSE
 	/*
 	 * setting SO_EXCLUSIVEADDRUSE on the wildcard we open
@@ -3004,7 +2915,7 @@ open_socket(
 				interf->flags);
 		}
 
-		closesocket(fd);
+		close(fd);
 
 		return INVALID_SOCKET;
 	}
@@ -3071,11 +2982,6 @@ open_socket(
 	return fd;
 }
 
-
-#ifdef SYS_WINNT
-#define sendto(fd, buf, len, flags, dest, destsz)	\
-	io_completion_port_sendto(fd, buf, len, (sockaddr_u *)(dest))
-#endif
 
 /* XXX ELIMINATE sendpkt similar in ntpq.c, ntp_io.c, ntptrace.c */
 /*
@@ -3939,20 +3845,20 @@ findlocalinterface(
 						SO_BROADCAST,
 						(char *)&on,
 						sizeof(on))) {
-			closesocket(s);
+			close(s);
 			return NULL;
 		}
 	}
 
 	rtn = connect(s, &addr->sa, SOCKLEN(addr));
 	if (SOCKET_ERROR == rtn) {
-		closesocket(s);
+		close(s);
 		return NULL;
 	}
 
 	sockaddrlen = sizeof(saddr);
 	rtn = getsockname(s, &saddr.sa, &sockaddrlen);
-	closesocket(s);
+	close(s);
 	if (SOCKET_ERROR == rtn)
 		return NULL;
 
@@ -4160,7 +4066,7 @@ findbcastinter(
 	endpt *	iface;
 
 	iface = NULL;
-#if (defined(SIOCGIFCONF) || defined(SYS_WINNT))
+#if defined(SIOCGIFCONF)
 	DPRINTF(4, ("Finding broadcast/multicast interface for addr %s in list of addresses\n",
 		    stoa(addr)));
 
@@ -4333,16 +4239,6 @@ io_closeclock(
 #endif	/* REFCLOCK */
 
 
-/*
- * On NT a SOCKET is an unsigned int so we cannot possibly keep it in
- * an array. So we use one of the ISC_LIST functions to hold the
- * socket value and use that when we want to enumerate it.
- *
- * This routine is called by the forked intres child process to close
- * all open sockets.  On Windows there's no need as intres runs in
- * the same process as a thread.
- */
-#ifndef SYS_WINNT
 void
 kill_asyncio(
 	int	startfd
@@ -4360,8 +4256,6 @@ kill_asyncio(
 	while (fd_list != NULL)
 		close_and_delete_fd_from_list(fd_list->fd);
 }
-#endif	/* !SYS_WINNT */
-
 
 /*
  * Add and delete functions for the list of open sockets
@@ -4398,11 +4292,11 @@ close_and_delete_fd_from_list(
 	switch (lsock->type) {
 
 	case FD_TYPE_SOCKET:
-		closesocket(lsock->fd);
+		close(lsock->fd);
 		break;
 
 	case FD_TYPE_FILE:
-		closeserial(lsock->fd);
+		close(lsock->fd);
 		break;
 
 	default:

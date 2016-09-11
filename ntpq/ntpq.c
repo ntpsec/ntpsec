@@ -11,9 +11,6 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/select.h>
-#ifdef SYS_WINNT
-# include <mswsock.h>
-#endif
 #include <isc/net.h>
 
 #include "ntpq.h"
@@ -29,7 +26,6 @@
 #include "openssl/objects.h"
 #include "openssl/err.h"
 #endif
-#include <ssl_applink.c>
 
 /*
  * Because we potentially understand a lot of commands we will run
@@ -154,9 +150,7 @@ static	int	sendrequest	(int, associd_t, int, int, const char *);
 static	char *	tstflags	(u_long);
 #ifndef BUILD_AS_LIB
 static	void	getcmds		(void);
-#ifndef SYS_WINNT
 static	void abortcmd	(int);
-#endif	/* SYS_WINNT */
 static	void	docmd		(const char *);
 static	void	tokenize	(const char *, char **, int *);
 static	bool	getarg		(const char *, int, arg_v *);
@@ -297,8 +291,8 @@ struct xcmd builtins[] = {
 /*
  * Some variables used and manipulated locally
  */
-struct sock_timeval tvout = { DEFTIMEOUT, 0 };	/* time out for reads */
-struct sock_timeval tvsout = { DEFSTIMEOUT, 0 };/* secondary time out */
+struct timeval tvout = { DEFTIMEOUT, 0 };	/* time out for reads */
+struct timeval tvsout = { DEFSTIMEOUT, 0 };/* secondary time out */
 l_fp delay_time;				/* delay time */
 char currenthost[NI_MAXHOST];			/* current host name */
 bool currenthostisnum;				/* is prior text from IP? */
@@ -486,7 +480,6 @@ ntpqmain(
 	delay_time.l_uf = DEFDELAY;
 
 	init_lib();	/* sets up ipv4_works, ipv6_works */
-	ssl_applink();
 	init_auth();
 
 	/* Check to see if we have IPv6. Otherwise default to IPv4 */
@@ -640,10 +633,8 @@ ntpqmain(
 		interactive = true;
 	}
 
-#ifndef SYS_WINNT /* Under NT cannot handle SIGINT, WIN32 spawns a handler */
 	if (interactive)
 	    (void) signal_no_reset(SIGINT, abortcmd);
-#endif /* SYS_WINNT */
 
 	if (numcmds == 0) {
 		(void) openhost(chosts[0].name, chosts[0].fam);
@@ -656,9 +647,6 @@ ntpqmain(
 					docmd(ccmds[i]);
 		}
 	}
-#ifdef SYS_WINNT
-	WSACleanup();
-#endif /* SYS_WINNT */
 	return 0;
 }
 #endif /* !BUILD_AS_LIB */
@@ -763,29 +751,13 @@ openhost(
 	if (havehost == 1) {
 		if (debug > 2)
 			printf("Closing old host %s\n", currenthost);
-		closesocket(sockfd);
+		close(sockfd);
 		havehost = false;
 	}
 	strlcpy(currenthost, temphost, sizeof(currenthost));
 
 	/* port maps to the same location in both families */
 	s_port = NSRCPORT(&addr);
-#ifdef SYS_WINNT
-	{
-		int optionValue = SO_SYNCHRONOUS_NONALERT;
-		int err;
-
-		err = setsockopt(INVALID_SOCKET, SOL_SOCKET, SO_OPENTYPE,
-				 (char *)&optionValue, sizeof(optionValue));
-		if (err) {
-			mfprintf(stderr,
-				 "setsockopt(SO_SYNCHRONOUS_NONALERT)"
-				 " error: %m\n");
-			freeaddrinfo(ai);
-			exit(1);
-		}
-	}
-#endif /* SYS_WINNT */
 
 	sockfd = socket(ai->ai_family, ai->ai_socktype,
 			ai->ai_protocol);
@@ -883,7 +855,7 @@ getresponse(
 	)
 {
 	struct ntp_control rpkt;
-	struct sock_timeval tvo;
+	struct timeval tvo;
 	u_short offsets[MAXFRAGS+1];
 	u_short counts[MAXFRAGS+1];
 	u_short offset;
@@ -1513,7 +1485,7 @@ getcmds(void)
 #endif /* !BUILD_AS_LIB */
 
 
-#if !defined(SYS_WINNT) && !defined(BUILD_AS_LIB)
+#if !defined(BUILD_AS_LIB)
 /*
  * abortcmd - catch interrupts and abort the current command
  */
@@ -1530,7 +1502,7 @@ abortcmd(
 	(void) fflush(stderr);
 	if (jump) longjmp(interrupt_buf, 1);
 }
-#endif	/* !SYS_WINNT && !BUILD_AS_LIB */
+#endif	/* !BUILD_AS_LIB */
 
 
 #ifndef	BUILD_AS_LIB
@@ -2481,7 +2453,7 @@ quit(
 	UNUSED_ARG(pcmd);
 	UNUSED_ARG(fp);
 	if (havehost)
-	    closesocket(sockfd);	/* cleanliness next to godliness */
+	    close(sockfd);	/* cleanliness next to godliness */
 	exit(0);
 }
 
@@ -2641,13 +2613,8 @@ getkeyid(
 	size_t ilim;
 	int fd;
 
-#ifndef SYS_WINNT
 	fd = open("/dev/tty", 2);
 	if (fd < 0 || (fi = fdopen(fd, "r")) == NULL)
-#else
-	fd = open("CONIN$", _O_TEXT);
-	if (fd < 0 || (fi = _fdopen(fd, "r")) == NULL)
-#endif /* SYS_WINNT */
 		fi = stdin;
 	else
 		setbuf(fi, (char *)NULL);

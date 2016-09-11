@@ -111,40 +111,10 @@ aligned_ptr(
  */
 #define	NONEMPTY_TRANSLATION_UNIT	extern void exit(int);
 
-/*
- * On Unix struct sock_timeval is equivalent to struct timeval.
- * On Windows built with 64-bit time_t, sock_timeval.tv_sec is a long
- * as required by Windows' socket() interface timeout argument, while
- * timeval.tv_sec is time_t for the more common use as a UTC time 
- * within NTP.
- */
-#ifndef SYS_WINNT
-#define	sock_timeval	timeval
-#endif
 
-/*
- * On Unix open() works for tty (serial) devices just fine, while on
- * Windows refclock serial devices are opened using CreateFile, a lower
- * level than the CRT-provided descriptors, because the C runtime lacks
- * tty APIs.  For refclocks which wish to use open() as well as or 
- * instead of refclock_open(), tty_open() is equivalent to open() on
- * Unix and  implemented in the Windows port similarly to
- * refclock_open().
- * Similarly, the termios emulation in the Windows code needs to know
- * about serial ports being closed, while the Posix systems do not.
- */
-#ifndef SYS_WINNT
-# define tty_open(f, a, m)	open(f, a, m)
-# define closeserial(fd)	close(fd)
-# define closesocket(fd)	close(fd)
 typedef int SOCKET;
 # define INVALID_SOCKET		(-1)
 # define SOCKET_ERROR		(-1)
-# define socket_errno()		(errno)
-#else	/* SYS_WINNT follows */
-# define socket_errno()		(errno = WSAGetLastError())
-#endif
-
 
 
 #endif	/* GUARD_NTP_TYPES_H */

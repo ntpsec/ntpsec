@@ -157,10 +157,6 @@ struct addrinfo *copy_addrinfo_list_impl(const struct addrinfo *
 
 #ifndef ISC_PLATFORM_HAVEIPV6
 
-#ifdef SYS_WINNT
-# define in6_addr in_addr6
-#endif
-
 struct addrinfo {
 	int	ai_flags;	/* AI_PASSIVE, AI_CANONNAME, AI_NUMERICHOST */
 	int	ai_family;	/* PF_xxx */

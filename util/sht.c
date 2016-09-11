@@ -4,7 +4,6 @@
  */
 #include "config.h"
 
-#ifndef SYS_WINNT
 #include <sys/types.h>
 #include <sys/ipc.h>
 #include <sys/shm.h>
@@ -12,14 +11,6 @@
 #include <time.h>
 #include <unistd.h>
 #include <stdlib.h>
-#else
-#include <windows.h>
-#include <time.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <iostream.h>
-#define sleep(x) Sleep(x*1000)
-#endif
 #include <assert.h>
 
 #include "ntp_stdlib.h"
@@ -54,7 +45,6 @@ getShmTime (
 	int unit
 	)
 {
-#ifndef SYS_WINNT
 	int shmid=shmget (0x4e545030+unit, sizeof (struct shmTime), IPC_CREAT|0777);
 	if (shmid==-1) {
 		perror ("shmget");
@@ -69,49 +59,6 @@ getShmTime (
 		assert (p!=0);
 		return p;
 	}
-#else
-	char buf[10];
-	LPSECURITY_ATTRIBUTES psec=0;
-	snprintf (buf, sizeof(buf), "NTP%d", unit);
-	SECURITY_DESCRIPTOR sd;
-	SECURITY_ATTRIBUTES sa;
-	HANDLE shmid;
-
-	assert (InitializeSecurityDescriptor(&sd, SECURITY_DESCRIPTOR_REVISION));
-	assert (SetSecurityDescriptorDacl(&sd,1,0,0));
-	sa.nLength=sizeof (SECURITY_ATTRIBUTES);
-	sa.lpSecurityDescriptor=&sd;
-	sa.bInheritHandle=0;
-	shmid=CreateFileMapping ((HANDLE)0xffffffff, 0, PAGE_READWRITE,
-				 psec, sizeof (struct shmTime),buf);
-	if (!shmid) {
-		shmid=CreateFileMapping ((HANDLE)0xffffffff, 0, PAGE_READWRITE,
-					 0, sizeof (struct shmTime),buf);
-		cout <<"CreateFileMapping with psec!=0 failed"<<endl;
-	}
-
-	if (!shmid) {
-		char mbuf[1000];
-		FormatMessage (FORMAT_MESSAGE_FROM_SYSTEM,
-			       0, GetLastError (), 0, mbuf, sizeof (mbuf), 0);
-		int x=GetLastError ();
-		cout <<"CreateFileMapping "<<buf<<":"<<mbuf<<endl;
-		exit (1);
-	}
-	else {
-		struct shmTime *p=(struct shmTime *) MapViewOfFile (shmid, 
-								    FILE_MAP_WRITE, 0, 0, sizeof (struct shmTime));
-		if (p==0) {
-			char mbuf[1000];
-			FormatMessage (FORMAT_MESSAGE_FROM_SYSTEM,
-				       0, GetLastError (), 0, mbuf, sizeof (mbuf), 0);
-			cout <<"MapViewOfFile "<<buf<<":"<<mbuf<<endl;
-			exit (1);
-		}
-		return p;
-	}
-	return 0;
-#endif
 }
 
 

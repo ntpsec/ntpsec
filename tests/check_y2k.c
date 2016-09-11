@@ -37,16 +37,10 @@
 #include <errno.h>
 #include <signal.h>
 
-#ifndef SYS_WINNT
-# ifdef HAVE_SYS_IOCTL_H
-#  include <sys/ioctl.h>
-# endif /* HAVE_SYS_IOCTL_H */
-# include <sys/resource.h>
-#else
-# include <process.h>
-# include <io.h>
-# include "../libntp/log.h"
-#endif /* SYS_WINNT */
+#ifdef HAVE_SYS_IOCTL_H
+# include <sys/ioctl.h>
+#endif /* HAVE_SYS_IOCTL_H */
+#include <sys/resource.h>
 #include <sched.h>
 #include <sys/mman.h>
 

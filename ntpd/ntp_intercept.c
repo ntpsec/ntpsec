@@ -477,12 +477,6 @@ void intercept_drift_write(char *driftfile, double drift)
 	IGNORE(write(fd, driftval, strlen(driftval)));
 	(void)close(fd);
 	/* atomic */
-#ifdef SYS_WINNT
-	if (_unlink(driftfile)) /* rename semantics differ under NT */
-	    msyslog(LOG_WARNING,
-		    "Unable to remove prior drift file %s, %m",
-		    driftfile);
-#endif /* SYS_WINNT */
 	if (rename(tmpfile, driftfile))
 	    msyslog(LOG_WARNING,
 		    "Unable to rename temp drift file %s to %s, %m",

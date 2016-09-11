@@ -26,13 +26,11 @@
 #include <ctype.h>
 #undef fileno
 
-#ifndef SYS_WINNT
-# include <sys/ipc.h>
-# include <sys/shm.h>
-# include <assert.h>
-# include <unistd.h>
-# include <stdio.h>
-#endif
+#include <sys/ipc.h>
+#include <sys/shm.h>
+#include <assert.h>
+#include <unistd.h>
+#include <stdio.h>
 
 #if defined(HAVE_STDATOMIC_H) && !defined(__COVERITY__)
 # include <stdatomic.h>
@@ -128,8 +126,6 @@ getShmTime(
 {
 	struct shmTime *p = NULL;
 
-#ifndef SYS_WINNT
-
 	int shmid;
 
 	/* 0x4e545030 is NTP0.
@@ -149,60 +145,6 @@ getShmTime(
 	}
 
 	return p;
-#else
-
-	static const char * nspref[2] = { "Local", "Global" };
-	char buf[20];
-	LPSECURITY_ATTRIBUTES psec = 0;
-	HANDLE shmid = 0;
-	SECURITY_DESCRIPTOR sd;
-	SECURITY_ATTRIBUTES sa;
-	unsigned int numch;
-
-	numch = snprintf(buf, sizeof(buf), "%s\\NTP%d",
-			 nspref[forall != 0], (unit & 0xFF));
-	if (numch >= sizeof(buf)) {
-		msyslog(LOG_ERR, "SHM name too long (unit %d)", unit);
-		return NULL;
-	}
-	if (forall) { /* world access */
-		if (!InitializeSecurityDescriptor(&sd, SECURITY_DESCRIPTOR_REVISION)) {
-			msyslog(LOG_ERR,"SHM InitializeSecurityDescriptor (unit %d): %m", unit);
-			return NULL;
-		}
-		if (!SetSecurityDescriptorDacl(&sd, true, NULL, false)) {
-			msyslog(LOG_ERR, "SHM SetSecurityDescriptorDacl (unit %d): %m", unit);
-			return NULL;
-		}
-		sa.nLength = sizeof(SECURITY_ATTRIBUTES);
-		sa.lpSecurityDescriptor = &sd;
-		sa.bInheritHandle = false;
-		psec = &sa;
-	}
-	shmid = CreateFileMapping ((HANDLE)0xffffffff, psec, PAGE_READWRITE,
-				   0, sizeof (struct shmTime), buf);
-	if (shmid == NULL) { /*error*/
-		char buf[1000];		
-		FormatMessage (FORMAT_MESSAGE_FROM_SYSTEM,
-			       0, GetLastError (), 0, buf, sizeof (buf), 0);
-		msyslog(LOG_ERR, "SHM CreateFileMapping (unit %d): %s", unit, buf);
-		return NULL;
-	}
-	p = (struct shmTime *)MapViewOfFile(shmid, FILE_MAP_WRITE, 0, 0,
-					    sizeof (struct shmTime));
-	if (p == NULL) { /*error*/
-		char buf[1000];		
-		FormatMessage (FORMAT_MESSAGE_FROM_SYSTEM,
-			       0, GetLastError (), 0, buf, sizeof (buf), 0);
-		msyslog(LOG_ERR,"SHM MapViewOfFile (unit %d): %s", unit, buf);
-		return NULL;
-	}
-
-	return p;
-#endif
-
-	/* NOTREACHED */
-	ENSURE(!"getShmTime(): Not reached.");
 }
 
 
@@ -299,16 +241,9 @@ shm_shutdown(
 	UNUSED_ARG(unit);
 	if (NULL == up)
 		return;
-#ifndef SYS_WINNT
 
-	/* HMS: shmdt() wants char* or const void * */
 	(void)shmdt((char *)up->shm);
 
-#else
-
-	UnmapViewOfFile(up->shm);
-
-#endif
 	free(up);
 }
 

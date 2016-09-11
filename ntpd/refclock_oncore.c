@@ -589,9 +589,7 @@ oncore_start(
 	struct refclockproc *pp;
 	int fd1, fd2;
 	char device1[STRING_LEN], device2[STRING_LEN];
-#ifndef SYS_WINNT
 	struct stat stat1, stat2;
-#endif
 
 	/* create instance structure for this unit */
 
@@ -657,12 +655,7 @@ oncore_start(
 	   Note that the linuxPPS N_PPS file is just like a N_TTY, so we can do
 	     the stat below without error even though the file has already had its
 	     line discipline changed by another process.
-
-	   The Windows port of ntpd arranges to return duplicate handles for
-	     multiple opens of the same serial device, and doesn't have inodes
-	     for serial handles, so we just open both on Windows.
 	*/
-#ifndef SYS_WINNT
 	if (stat(device1, &stat1)) {
 		oncore_log_f(instance, LOG_ERR, "Can't stat fd1 (%s)",
 			     device1);
@@ -674,7 +667,6 @@ oncore_start(
 		oncore_log_f(instance, LOG_ERR, "Can't stat fd2 (%s) %d %m",
 			     device2, errno);
 	}
-#endif	/* !SYS_WINNT */
 
 	fd1 = refclock_open(device1, SPEED, LDISC_RAW);
 	if (fd1 <= 0) {
@@ -688,14 +680,11 @@ oncore_start(
 	   It seems simplest to let an external program create the appropriate
 	   /dev/pps<n> file, and only check (carefully) for its existance here
 	 */
-
-#ifndef SYS_WINNT
 	if ((stat1.st_dev == stat2.st_dev) && (stat1.st_ino == stat2.st_ino))	/* same device here */
 		fd2 = fd1;
 	else
-#endif	/* !SYS_WINNT */
 	{	/* different devices here */
-		if ((fd2=tty_open(device2, O_RDWR, 0777)) < 0) {
+		if ((fd2=open(device2, O_RDWR, 0777)) < 0) {
 			oncore_log_f(instance, LOG_ERR,
 				     "Can't open fd2 (%s)", device2);
 			close(fd1);

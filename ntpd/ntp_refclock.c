@@ -682,7 +682,7 @@ indicate_refclock_packet(
  * process_refclock_packet()
  *
  * Used for deferred processing of 'io_input' on systems where threading
- * is used (notably Windows). This is acting as a trampoline to make the
+ * is used. This is acting as a trampoline to make the
  * real calls to the refclock functions.
  */
 #ifdef HAVE_IO_COMPLETION_PORT

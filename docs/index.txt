@@ -224,6 +224,11 @@ Unix will also serve.  The OS must have either a Linux-like
 adjtimex(2) call or a BSD-like pair of ntp_gettime(2)/ntp_adjtime(2)
 calls.
 
+Legacy Windows support has been removed from the {project-shortname}
+codebase. Future Windows support will be conditional on the quality
+of POSIX/C99 emulation environments such as Cygwin and/or the support
+for Linux binary execution in Windows 10 and later.
+
 If you have a requirement for time service on an OS we don't support,
 and its API is reasonably close to our POSIX/C99 conformance baseline,
 we'll try to meet you halfway. We're open to development partnerships

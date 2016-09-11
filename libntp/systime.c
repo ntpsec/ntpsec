@@ -81,11 +81,6 @@ static bool systime_init_done;
 # define DONE_SYSTIME_INIT()	do {} while (false)
 #endif
 
-#ifdef SYS_WINNT
-CRITICAL_SECTION get_systime_cs;
-#endif
-
-
 void
 set_sys_fuzz(
 	double	fuzz_val
@@ -101,8 +96,6 @@ set_sys_fuzz(
 void
 init_systime(void)
 {
-	INIT_GET_SYSTIME_CRITSEC();
-	INIT_WIN_PRECISE_TIME();
 	DONE_SYSTIME_INIT();
 }
 
@@ -165,7 +158,6 @@ normalize_time(
 	l_fp	lfpdelta;
 
 	DEBUG_REQUIRE(systime_init_done);
-	ENTER_GET_SYSTIME_CRITSEC();
 
         /* First check if here was a Lamport violation, that is, two
          * successive calls to 'get_ostime()' resulted in negative
@@ -241,7 +233,6 @@ normalize_time(
 	dfuzz_prev = dfuzz;
 	if (lamport_violated)
 		lamport_violated = false;
-	LEAVE_GET_SYSTIME_CRITSEC();
 	*now = result;
 }
 
@@ -249,7 +240,6 @@ normalize_time(
 /*
  * adj_systime - adjust system time by the argument.
  */
-#if !defined SYS_WINNT
 bool				/* true on okay, false on error */
 adj_systime(
 	double now,		/* adjustment (s) */
@@ -264,7 +254,10 @@ adj_systime(
 	int	isneg = 0;
 
 	/*
-	 * The Windows port adj_systime() depends on being called each
+	 * FIXME: With the legacy Windows port on, this might be removable.
+	 * See also the related FIXME comment in ntpd/ntp_loopfilter.c.
+	 *
+	 * The Windows port adj_systime() depended on being called each
 	 * second even when there's no additional correction, to allow
 	 * emulation of adjtime() behavior on top of an API that simply
 	 * sets the current rate.  This POSIX implementation needs to
@@ -324,7 +317,6 @@ adj_systime(
 	}
 	return true;
 }
-#endif
 
 
 /*

@@ -993,6 +993,11 @@ adj_host_clock(
 
 	clock_offset -= offset_adj;
 	/*
+	 * FIXME: With the Windows legacy port officially gone, this
+	 * could be called much less often.  However, leave some
+	 * version of the comment below in place in case of a re-port.
+	 * See also the related FIXME comment in libntp/systime.c
+	 *
 	 * Windows port adj_systime() must be called each second,
 	 * even if the argument is zero, to ease emulation of
 	 * adjtime() using Windows' slew API which controls the rate

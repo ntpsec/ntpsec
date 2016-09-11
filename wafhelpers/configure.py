@@ -421,11 +421,11 @@ def cmd_configure(ctx, config):
         # delays, as in space communications. Likely this code has never
         # been enabled for production.
 
-        # Won't be true under Windows, but is under every Unix-like OS.
+        # This is true under every Unix-like OS.
         ctx.define("HAVE_WORKING_FORK", 1, comment="Whether a working fork() exists")
 
         # Does the kernel implement a phase-locked loop for timing?
-        # All modern Unixes (in particular Linux and *BSD have this).
+        # All modern Unixes (in particular Linux and *BSD) have this.
         #
         # The README for the (now deleted) kernel directory says this:
         # "If the precision-time kernel (KERNEL_PLL define) is

@@ -22,10 +22,6 @@
 #include "ntp_debug.h"
 #include "ntp_syscall.h"
 
-#ifdef SYS_WINNT
-int _getch(void);	/* Declare the one function rather than include conio.h */
-#else
-
 /*
  * Simulate ANSI/POSIX conformance on platforms that don't have it
  */
@@ -166,28 +162,3 @@ ntp_set_tod(
 	return rc;
 }
 
-#endif /* not SYS_WINNT */
-
-#if defined (SYS_WINNT)
-/* getpass is used in ntpq.c */
-
-char *
-getpass(const char * prompt)
-{
-	int c, i;
-	static char password[32];
-
-	fprintf(stderr, "%s", prompt);
-	fflush(stderr);
-
-	for (i=0; i<sizeof(password)-1 && ((c=_getch())!='\n' && c!='\r'); i++) {
-		password[i] = (char) c;
-	}
-	password[i] = '\0';
-
-	fputc('\n', stderr);
-	fflush(stderr);
-
-	return password;
-}
-#endif /* SYS_WINNT */
