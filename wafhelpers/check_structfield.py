@@ -5,24 +5,24 @@ TYPE_FRAG = """
 #include <sys/types.h>
 %s
 int main () {
-	struct %s x;
-	if (sizeof (x.%s))
-		return 0;
-	return 0;
+        struct %s x;
+        if (sizeof (x.%s))
+                return 0;
+        return 0;
 }
 """
 
 @conf
 def check_structfield(ctx, fld, type, hdrs, mandatory=False):
-	name = "STRUCT_%s_HAS_%s" % (type.upper(), fld.upper().replace('.','_'))
-	src = ""
+        name = "STRUCT_%s_HAS_%s" % (type.upper(), fld.upper().replace('.','_'))
+        src = ""
         for hdr in hdrs:
-		src += "#include <%s>\n" % hdr
-	ctx.check_cc(
-		fragment    = TYPE_FRAG % (src, type, fld),
-		define_name = name,
-		execute     = False,
-		msg         = "Checking for %s in struct %s" % (fld, type),
-		mandatory   = mandatory,
-		comment		= "Whether struct '%s' has field '%s'" % (fld, type)
-	)
+                src += "#include <%s>\n" % hdr
+        ctx.check_cc(
+                fragment    = TYPE_FRAG % (src, type, fld),
+                define_name = name,
+                execute     = False,
+                msg         = "Checking for %s in struct %s" % (fld, type),
+                mandatory   = mandatory,
+                comment         = "Whether struct '%s' has field '%s'" % (fld, type)
+        )

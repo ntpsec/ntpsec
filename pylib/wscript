@@ -1,9 +1,9 @@
 def options(opt):
-        opt.load('python')
+    opt.load('python')
 
 def configure(conf):
-        conf.load('python')
-	conf.check_python_version((2,6,0))
+    conf.load('python')
+    conf.check_python_version((2,6,0))
 
 def build(bld):
-	bld(features='py', source=bld.path.ant_glob('*.py'), install_from='.',install_path='${PYTHONDIR}/ntp')
+    bld(features='py', source=bld.path.ant_glob('*.py'), install_from='.',install_path='${PYTHONDIR}/ntp')
