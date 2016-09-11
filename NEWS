@@ -8,11 +8,18 @@ on user-visible changes.
 
 == Repository head ==
 
-== 2016-08-16: 0.9.4 ==
+All remaining Perl code in the distribution has been moved to Python.
+
+The trap feature, broken in NTP Classic at the time of the NTPSec fork,
+has been removed. So has its only known client, the ntptrap script in the
+distribution.
 
 A new visualization tool, ntpviz, generates graphical summaries of
 logfile data that can be helpful for identifying problems such as
-misconfigured servers.
+misconfigured servers.  It replaces a messy and poorly documented pile
+of ancient Perl, awk, and S scripts; those have been removed.
+
+== 2016-08-16: 0.9.4 ==
 
 usestats has been added to the statistics collection to record
 system resource usage statistics.
