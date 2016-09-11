@@ -218,9 +218,7 @@ internal_current(isc_interfaceiter_t *iter) {
 		get_addr(family, &iter->current.broadcast, ifa->ifa_broadaddr,
 			 ifa->ifa_name);
 
-#ifdef ISC_PLATFORM_HAVEIFNAMETOINDEX
 	iter->current.ifindex = if_nametoindex(iter->current.name);
-#endif
 	return (ISC_R_SUCCESS);
 }
 
