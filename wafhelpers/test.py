@@ -13,9 +13,9 @@ def test_write_log(ctx):
 			fp.write("BINARY      : %s\n" % binary)
 			fp.write("RETURN VALUE: %s\n" % retval)
 			fp.write("\n*** stdout ***\n")
-			fp.write(lines)
+			fp.write(str(lines))
 			fp.write("\n*** stderr ***\n")
-			fp.write(error)
+			fp.write(str(error))
 			fp.write("\n\n\n")
 
 	pprint("BLUE", "Wrote test log to: ", file_out)
