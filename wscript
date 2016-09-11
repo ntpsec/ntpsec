@@ -50,9 +50,9 @@ class check(BuildContext):
 	variant = "main"
 
 def bin_test(ctx):
+	"""Run binary check, use after tests."""
 	from wafhelpers.bin_test import cmd_bin_test
 	cmd_bin_test(ctx, config)
-bin_test.__doc__ = "Run binary check, use after tests."
 
 # Borrowed from https://www.rtems.org/
 variant_cmd = (
