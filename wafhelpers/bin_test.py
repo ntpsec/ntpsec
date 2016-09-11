@@ -5,22 +5,22 @@ from waflib.Utils import subprocess
 from waflib.Logs import pprint
 
 cmd_map = {
-	("main/ntpd/ntpd",				"-invalid"):			r'.*must be run as root, not uid.*',
-	("main/ntpdig/ntpdig",			"time.apple.com"):		r'.*time.apple.com.*',
-	("main/ntpfrob/ntpfrob",			"-h"):				r'.*illegal option.*',
-	("main/ntpfrob/ntpfrob",			"-b 100000"):		r".*Bumping clock by 100000 microseconds.*",
-	("main/ntpkeygen/ntpkeygen",	  "-M"):				r'.*Generating new md5 file and link.*',
-	("main/ntpq/ntpq",  			  "-p"):				r'.*remote.*jitter.*',
-	("main/ntptime/ntptime",		  None):				r'.*ntp_gettime\(\) returns code 0 \(OK\).*',
-	("main/util/sht",				  "2:r"):				r'.*reader.*',
+	("main/ntpd/ntpd",				"-invalid"):			br'.*must be run as root, not uid.*',
+	("main/ntpdig/ntpdig",			"time.apple.com"):		br'.*time.apple.com.*',
+	("main/ntpfrob/ntpfrob",			"-h"):				br'.*illegal option.*',
+	("main/ntpfrob/ntpfrob",			"-b 100000"):		br".*Bumping clock by 100000 microseconds.*",
+	("main/ntpkeygen/ntpkeygen",	  "-M"):				br'.*Generating new md5 file and link.*',
+	("main/ntpq/ntpq",  			  "-p"):				br'.*remote.*jitter.*',
+	("main/ntptime/ntptime",		  None):				br'.*ntp_gettime\(\) returns code 0 \(OK\).*',
+	("main/util/sht",				  "2:r"):				br'.*reader.*',
 
 # XXX: Need to figure out how to test this.
-#	("main/util/hist",  			  ""):  				r'',
+#	("main/util/hist",  			  ""):  				br'',
 
 # Perl library
-#	("main/ntptrace/ntptrace",  	  ""):  				r'',
-#	("main/ntpwait/ntpwait",		  ""):  				r'',
-#	("main/util/ntpsweep/ntpsweep",   ""):  				r'',
+#	("main/ntptrace/ntptrace",  	  ""):  				br'',
+#	("main/ntpwait/ntpwait",		  ""):  				br'',
+#	("main/util/ntpsweep/ntpsweep",   ""):  				br'',
 }
 
 
