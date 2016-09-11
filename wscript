@@ -29,6 +29,16 @@ config = {
 #   Steps 1-3 as above.
 #   4. waf dist --build-snapshot
 
+def help(ctx):
+    "Be helpful, give a usage"
+    print('''
+Usage: waf <command>
+    configure	Configure the project
+    build	Build the project
+    install     Install the project
+    dist        Create a release
+
+''')
 
 def dist(ctx):
 	from wafhelpers.dist import dist_cmd
