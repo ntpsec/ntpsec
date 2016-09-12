@@ -29,7 +29,7 @@
 #include <isc/types.h>
 #include <isc/util.h>
 
-#ifdef ISC_PLATFORM_OPENSSLHASH
+#ifdef USE_OPENSSL_HASH
 
 void
 isc_sha1_init(isc_sha1_t *context)

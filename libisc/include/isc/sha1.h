@@ -20,7 +20,7 @@
 #define ISC_SHA1_DIGESTLENGTH 20U
 #define ISC_SHA1_BLOCK_LENGTH 64U
 
-#ifdef ISC_PLATFORM_OPENSSLHASH
+#ifdef USE_OPENSSL_HASH
 #include <openssl/evp.h>
 
 typedef EVP_MD_CTX isc_sha1_t;

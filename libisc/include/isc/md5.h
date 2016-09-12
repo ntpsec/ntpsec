@@ -35,7 +35,7 @@
 #define ISC_MD5_DIGESTLENGTH 16U
 #define ISC_MD5_BLOCK_LENGTH 64U
 
-#ifdef ISC_PLATFORM_OPENSSLHASH
+#ifdef USE_OPENSSL_HASH
 #include <openssl/evp.h>
 
 typedef EVP_MD_CTX isc_md5_t;
