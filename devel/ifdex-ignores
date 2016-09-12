@@ -2,11 +2,11 @@
 # and filter reports about #if guards in order to locate configuration symbols
 # and plain old cruft.
 #
-# Should be ued together with waf's config.h output, which ifdex can
+# Should be used together with waf's config.h output, which ifdex can
 # interpret to exclude most of its config symbols. Thus, from the toplevel
 # directory:
 #
-# ifdex -X build/config.h devel/ifdex-ignores .
+# ifdex -X build/config.h -X devel/ifdex-ignores .
 #
 # No output from this command means all symbols are accounted for
 
@@ -25,8 +25,6 @@ NO_MAIN_ALLOWED		# Used to be set by VxWorks.
 # System capabilities that waf should detect but does not.
 # Presently they're either forced on in waf or never set at all
 OS_MISSES_SPECIFIC_ROUTE_UPDATES
-HAVE_SYSCTLBYNAME	# NTP Classic never set this.
-USE_SYSCTL_PORTRANGE	# NTP Classic never set this.
 
 # Refclock-specific configuration (NTP Classic never set these)
 ENABLE_PPS720		# Enable use of PCL720 with TrueTime refclock
@@ -55,9 +53,11 @@ DEBUG_PPS720		# Only in refclock_true.c
 ISC_PLATFORM_BRACEPTHREADONCEINIT
 
 # Things WAF sets that don't get #undefs if they're not set
+ENABLE_EARLY_DROPROOT
+ENABLE_LEAP_SMEAR
+ENABLE_SECCOMP
 ENABLE_DEBUG_TIMING
 ENABLE_DNS_RETRY
-ENABLE_IPV6
 ENABLE_LOCKCLOCK
 ENABLE_MDNS_REGISTRATION
 ENABLE_MSSNTP
@@ -65,13 +65,16 @@ HAVE_LINUX_CAPABILITY
 HAVE_SOLARIS_PRIVS
 WORDS_BIGENDIAN
 
-# These things should be deduced, but are currently either forced in waf
-# or never set at all
-OS_MISSES_SPECIFIC_ROUTE_UPDATES
-HAVE_SYSCTLBYNAME	# NTP Classic never set this.
-USE_SYSCTL_PORTRANGE	# NTP Classic never set this.
-ISC_PLATFORM_HAVEIPV6
-ISC_PLATFORM_HAVEIN6PKTINFO
+# libsodium
+SODIUM_DLL_EXPORT
+SODIUM_STATIC
+sodium_H
+sodium_core_H
+sodium_export_H
+sodium_utils_H
+SYS_getrandom
+randombytes_H
+randombytes_sysrandom_H
 
 # Overrides
 OVERRIDE_BINTIME_CTLMSGBUF_SIZE
@@ -116,8 +119,6 @@ ISC_CHECK_NONE
 ISC_CHECK_REQUIRE
 ISC_FIX_TV_USEC
 ISC_MUTEX_PROFTABLESIZE
-ISC_NET_PORTRANGEHIGH
-ISC_NET_PORTRANGELOW
 JSMN_PARENT_LINKS
 JSMN_STRICT
 LIB_BUFLENGTH		# Only referenced by #if as a sanity check
@@ -126,6 +127,8 @@ MIN			# Minimum macro
 MRU_MAXDEPTH_DEF	# Exposed from ntp_monitor.c for hysterical raisins
 NEOCLOCK4X_FIRMWARE_VERSION_A	# Only used in the Neoclock4x driver
 NMEA_WRITE_SUPPORT	# Only used in the NMEA refclock
+NTIME_MSG
+OTIME_MSG
 FLASH_CODES_UNUSED
 NOTUSED
 ONCORE_VERBOSE_.*	# Debugging symbols internal to the OnCore refclock
@@ -133,7 +136,7 @@ PI			# Math constant used by the sim code
 RUN_TEST		# Internal to Unity
 SETSOCKOPT_ARG_CAST	# Can probably go away when the Windows port is cleaned up.
 THREAD_MINSTACKSIZE
-UINTPTR_MAX		# Unity and Windowa
+UINTPTR_MAX		# Unity
 UINTPTR_MAX0		# Unity
 INTPTR_MAX0		# Unity
 UNITY_.*		# Unity test framework internal macros
