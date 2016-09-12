@@ -231,7 +231,7 @@ struct vsock {
 
 vsock_t	*fd_list;
 
-#if !defined(HAVE_IO_COMPLETION_PORT) && defined(USE_ROUTING_SOCKET)
+#if defined(USE_ROUTING_SOCKET)
 /*
  * async notification processing (e. g. routing sockets)
  */
@@ -253,7 +253,7 @@ static struct asyncio_reader *new_asyncio_reader (void);
 static void add_asyncio_reader (struct asyncio_reader *, enum desc_type);
 static void remove_asyncio_reader (struct asyncio_reader *);
 
-#endif /* !defined(HAVE_IO_COMPLETION_PORT) && defined(USE_ROUTING_SOCKET) */
+#endif /* defined(USE_ROUTING_SOCKET) */
 
 static void init_async_notifications (void);
 
@@ -312,7 +312,6 @@ static int		cmp_addr_distance(const sockaddr_u *,
 /*
  * Routines to read the ntp packets
  */
-#if !defined(HAVE_IO_COMPLETION_PORT)
 static inline int	read_network_packet	(SOCKET, struct interface *, l_fp);
 static void		ntpd_addremove_io_fd	(int, int, int);
 typedef void (input_handler_t)(l_fp *);
@@ -320,11 +319,8 @@ static input_handler_t  input_handler;
 #ifdef REFCLOCK
 static inline int	read_refclock_packet	(SOCKET, struct refclockio *, l_fp);
 #endif
-#endif
 
 
-
-#ifndef HAVE_IO_COMPLETION_PORT
 void
 maintain_activefds(
 	int fd,
@@ -355,7 +351,6 @@ maintain_activefds(
 		}
 	}
 }
-#endif	/* !HAVE_IO_COMPLETION_PORT */
 
 
 #ifdef ENABLE_DEBUG_TIMING
@@ -555,7 +550,7 @@ print_interface(const endpt *iface, const char *pfx, const char *sfx)
 }
 #endif
 
-#if !defined(HAVE_IO_COMPLETION_PORT) && defined(USE_ROUTING_SOCKET)
+#if defined(USE_ROUTING_SOCKET)
 /*
  * create an asyncio_reader structure
  */
@@ -611,7 +606,7 @@ remove_asyncio_reader(
 
 	reader->fd = INVALID_SOCKET;
 }
-#endif /* !defined(HAVE_IO_COMPLETION_PORT) && defined(USE_ROUTING_SOCKET) */
+#endif /* defined(USE_ROUTING_SOCKET) */
 
 
 /* compare two sockaddr prefixes */
@@ -2022,13 +2017,8 @@ create_sockets(
 	u_short port
 	)
 {
-#ifndef HAVE_IO_COMPLETION_PORT
-	/*
-	 * I/O Completion Ports don't care about the select and FD_SET
-	 */
 	maxactivefd = 0;
 	FD_ZERO(&activefds);
-#endif
 
 	DPRINTF(2, ("create_sockets(%d)\n", port));
 
@@ -2961,15 +2951,6 @@ open_socket(
 	DPRINTF(4, ("flags for fd %d: 0x%x\n", fd, fcntl(fd, F_GETFL, 0)));
 #endif
 
-#if defined (HAVE_IO_COMPLETION_PORT)
-/*
- * Add the socket to the completion port
- */
-	if (io_completion_port_add_socket(fd, interf)) {
-		msyslog(LOG_ERR, "unable to set up io completion port: %m;  EXITING");
-		exit(1);
-	}
-#endif
 	return fd;
 }
 
@@ -3071,7 +3052,6 @@ sendpkt(
 }
 
 
-#if !defined(HAVE_IO_COMPLETION_PORT)
 /*
  * fdbits - generate ascii representation of fd_set (FAU debug support)
  * HFDF format - highest fd first.
@@ -3701,7 +3681,6 @@ input_handler(
     ih_return:
 	return;
 }
-#endif /* !HAVE_IO_COMPLETION_PORT */
 
 
 /*
@@ -4176,12 +4155,6 @@ io_addclock(
 	 * in use.  There is a harmless (I hope) race condition here.
 	 */
 	rio->active = true;
-
-# if defined(HAVE_IO_COMPLETION_PORT)
-	if (io_completion_port_add_clock_io(rio)) {
-		return false;
-	}
-# endif
 
 	/*
 	 * enqueue

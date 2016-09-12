@@ -681,30 +681,6 @@ indicate_refclock_packet(
  * is used. This is acting as a trampoline to make the
  * real calls to the refclock functions.
  */
-#ifdef HAVE_IO_COMPLETION_PORT
-void
-process_refclock_packet(
-	struct recvbuf * rb
-	)
-{
-	struct refclockio * rio;
-
-	/* get the refclockio structure from the receive buffer */
-	rio  = &rb->recv_peer->procptr->io;
-
-	/* call 'clock_recv' if either there is no input function or the
-	 * raw input function tells us to feed the packet to the
-	 * receiver.
-	 */
-	if (rio->io_input == NULL || (*rio->io_input)(rb) != 0) {
-		rio->recvcount++;
-		packets_received++;
-		handler_pkts++;		
-		(*rio->clock_recv)(rb);
-	}
-}
-#endif	/* HAVE_IO_COMPLETION_PORT */
-
 
 /*
  * refclock_open - open serial port for reference clock

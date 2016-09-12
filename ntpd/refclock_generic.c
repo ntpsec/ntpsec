@@ -1913,9 +1913,7 @@ local_input(
 						sizeof(parsetime_t));
 					buf->recv_length  = sizeof(parsetime_t);
 					buf->recv_time    = rbufp->recv_time;
-#ifndef HAVE_IO_COMPLETION_PORT
 					buf->srcadr       = rbufp->srcadr;
-#endif
 					buf->dstadr       = rbufp->dstadr;
 					buf->receiver     = rbufp->receiver;
 					buf->fd           = rbufp->fd;
@@ -1923,9 +1921,6 @@ local_input(
 					parse->generic->io.recvcount++;
 					packets_received++;
 					add_full_recv_buffer(buf);
-#ifdef HAVE_IO_COMPLETION_PORT
-					SetEvent(WaitableIoEventHandle);
-#endif
 				}
 				parse_iodone(&parse->parseio);
 			}

@@ -86,10 +86,6 @@ struct refclockio {
 	int	fd;		/* file descriptor */
 	u_long	recvcount;	/* count of receive completions */
 	bool	active;		/* true when in use */
-
-#ifdef HAVE_IO_COMPLETION_PORT
-	void *	device_context;	/* device-related data for i/o subsystem */
-#endif
 };
 
 /*
@@ -106,10 +102,6 @@ struct refclockbug {
 	uint32_t	values[NCLKBUGVALUES]; /* real values */
 	l_fp	times[NCLKBUGTIMES]; /* real times */
 };
-
-#ifdef HAVE_IO_COMPLETION_PORT
-extern	HANDLE	WaitableIoEventHandle;
-#endif
 
 /*
  * Structure interface between the reference clock support

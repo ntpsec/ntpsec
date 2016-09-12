@@ -178,23 +178,6 @@ get_free_recv_buffer(void)
 }
 
 
-#ifdef HAVE_IO_COMPLETION_PORT
-recvbuf_t *
-get_free_recv_buffer_alloc(void)
-{
-	recvbuf_t *buffer;
-	
-	buffer = get_free_recv_buffer();
-	if (NULL == buffer) {
-		create_buffers(RECV_INC);
-		buffer = get_free_recv_buffer();
-	}
-	NTP_ENSURE(buffer != NULL);
-	return (buffer);
-}
-#endif
-
-
 recvbuf_t *
 get_full_recv_buffer(void)
 {

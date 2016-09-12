@@ -13,25 +13,12 @@
 #define RECV_INC	5	/* get 5 more at a time */
 #define RECV_TOOMANY	40	/* this is way too many buffers */
 
-#if defined HAVE_IO_COMPLETION_PORT
-# include "ntp_iocompletionport.h"
-# include "ntp_timer.h"
-
-# define RECV_BLOCK_IO()	EnterCriticalSection(&RecvCritSection)
-# define RECV_UNBLOCK_IO()	LeaveCriticalSection(&RecvCritSection)
-
-/*  Return the event which is set when items are added to the full list
- */
-extern HANDLE	get_recv_buff_event(void);
-#else
-# define RECV_BLOCK_IO()	
-# define RECV_UNBLOCK_IO()	
-#endif
-
-
 /*
- * Format of a recvbuf.  These are used by the asynchronous receive
- * routine to store incoming packets and related information.
+ * Format of a recvbuf.  Back when this code did true asynchronous
+ * I/O, these were used by the asynchronous receive routine to store
+ * incoming packets and related information. Now, with faster processor
+ * and lower latency in the synchronous I/O loop, that complexity
+ * has been dropped.
  */
 
 /*
@@ -54,11 +41,7 @@ struct recvbuf {
 	} X_from_where;
 #define recv_srcadr		X_from_where.X_recv_srcadr
 #define recv_peer		X_from_where.X_recv_peer
-#ifndef HAVE_IO_COMPLETION_PORT
 	sockaddr_u	srcadr;		/* where packet came from */
-#else
-	int		recv_srcadr_len;/* filled in on completion */
-#endif
 	endpt *		dstadr;		/* address pkt arrived on */
 	SOCKET		fd;		/* fd on which it was received */
 	int		cast_flags;	/* unicast/broadcast/manycast mode */

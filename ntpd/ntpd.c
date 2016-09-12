@@ -931,15 +931,6 @@ static void mainloop(void)
 
 	init_timer();
 
-# ifdef HAVE_IO_COMPLETION_PORT
-	for (;;) {
-#if defined(SIGINT) || defined(SIGQUIT) || defined(SIGTERM)
-		if (signalled)
-			finish_safe(signo);
-#endif
-		GetReceivedBuffers();
-# else /* normal I/O */
-
 	was_alarmed = false;
 
 	for (;;) {
@@ -972,8 +963,6 @@ static void mainloop(void)
 			timer();
 			was_alarmed = false;
 		}
-
-# endif		/* !HAVE_IO_COMPLETION_PORT */
 
 # ifdef ENABLE_DEBUG_TIMING
 		{
