@@ -3,6 +3,7 @@
 from __future__ import print_function
 
 import socket
+import sys
 
 def canonicalize_dns(hostname):
     try:
