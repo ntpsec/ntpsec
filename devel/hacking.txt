@@ -38,7 +38,8 @@ coexist with distributions that use C89 conventions.
 You can download the C99 standard for free from here:
     http://atrey.karlin.mff.cuni.cz/projekty/vrr/doc/c99.pdf
 
-Only POSIX-1.2001/SuSv3 library functions should be used.  If a library
+Only POSIX-1.2001/SuSv3 library functions should be used (a few
+specific exceptions are noted below).  If a library
 function not in POSIX 2001 is required, then a wrapper function for back
 compatibility must be provided.  One notable case is clock_gettime()
 which is used, when available, for increased accuracy, and has a
@@ -47,8 +48,18 @@ fallback implementation using native time calls.
 You can view POSIX-1.2001, with 2004 Corrigendum, online for free here:
     http://pubs.opengroup.org/onlinepubs/009695399/toc.htm
 
-You may assume Berkeley sockets and the IPv6 API defined in RFC2493
-and RFC2553.
+POSIX threads *are* considered part of the standardized API and may be used.
+
+Here are the non-standardized AIs that may be used:
+
+* Linux-style adjtimex() or BSD-style ntp_gettime()/ntp_adjtime().
+
+* Berkeley sockets and the IPv6 API defined in RFC2493 and RFC2553.
+
+* getifaddrs(3) or an equivalent local API for iterating over the
+  system's active UDP interfaces. However, the local details should be
+  hidden as an implementation of the interfaceiter.c functions under
+  libisc - not called directly from the rest of the code.
 
 === Banned functions ===
 
