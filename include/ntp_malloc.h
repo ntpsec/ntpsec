@@ -25,11 +25,6 @@
 # ifndef alloca
 #  define alloca __alloca
 # endif
-#elif defined _MSC_VER
-# include <malloc.h>
-# ifndef alloca
-#  define alloca _alloca
-# endif
 #else
 # include <stddef.h>
 void * alloca(size_t);
