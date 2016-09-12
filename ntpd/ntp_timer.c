@@ -69,7 +69,6 @@ u_long current_time;		/* seconds since startup */
  * Stats.  Number of overflows and number of calls to transmit().
  */
 u_long timer_timereset;
-u_long timer_overflows;
 u_long timer_xmtcalls;
 
 static	void alarming (int);
@@ -155,7 +154,6 @@ init_timer(void)
 	huffpuff_timer = 0;
 	interface_timer = 0;
 	current_time = 0;
-	timer_overflows = 0;
 	timer_xmtcalls = 0;
 	timer_timereset = 0;
 
@@ -379,7 +377,6 @@ timer_interfacetimeout(u_long timeout)
 void
 timer_clr_stats(void)
 {
-	timer_overflows = 0;
 	timer_xmtcalls = 0;
 	timer_timereset = current_time;
 }
