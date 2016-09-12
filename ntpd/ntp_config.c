@@ -382,10 +382,6 @@ free_config_tree(
 	config_tree *ptree
 	)
 {
-#if defined(_MSC_VER) && defined (_DEBUG)
-	_CrtCheckMemory();
-#endif
-
 	if (ptree->source.value.s != NULL)
 		free(ptree->source.value.s);
 
@@ -410,10 +406,6 @@ free_config_tree(
 	free_auth_node(ptree);
 
 	free(ptree);
-
-#if defined(_MSC_VER) && defined (_DEBUG)
-	_CrtCheckMemory();
-#endif
 }
 
 /* generic fifo routines for structs linked by 1st member */

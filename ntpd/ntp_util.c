@@ -101,9 +101,6 @@ void	uninit_util(void);
 void
 uninit_util(void)
 {
-#if defined(_MSC_VER) && defined (_DEBUG)
-	_CrtCheckMemory();
-#endif
 	if (stats_drift_file) {
 		free(stats_drift_file);
 		stats_drift_file = NULL;
@@ -121,10 +118,6 @@ uninit_util(void)
 	filegen_unregister("protostats");
 	filegen_unregister("timingstats");
 	filegen_unregister("usestats");
-
-#if defined(_MSC_VER) && defined (_DEBUG)
-	_CrtCheckMemory();
-#endif
 }
 #endif /* DEBUG */
 
