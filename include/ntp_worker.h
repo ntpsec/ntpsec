@@ -7,6 +7,11 @@
 
 #include "ntp_workimpl.h"
 
+/* XXX: Why does OpenBSD need pthread.h here? */
+#ifdef PLATFORM_OPENBSD
+#include <pthread.h>
+#endif
+
 #ifdef USE_WORKER
 # if defined(USE_WORK_THREAD) && defined(USE_WORK_PIPE)
 #  ifdef HAVE_SEMAPHORE_H
