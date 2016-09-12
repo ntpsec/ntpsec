@@ -126,12 +126,10 @@ extern	int	worker_sleep(blocking_child *, time_t);
 extern	void	worker_idle_timer_fired(void);
 extern	void	interrupt_worker_sleep(void);
 extern	int	req_child_exit(blocking_child *);
-#ifndef HAVE_IO_COMPLETION_PORT
 extern	int	pipe_socketpair(int fds[2], bool *is_pipe);
 extern	void	close_all_beyond(int);
 extern	void	close_all_except(int);
 extern	void	kill_asyncio	(int);
-#endif
 
 # ifdef USE_WORK_PIPE
 typedef	void	(*addremove_io_fd_func)(int, int, int);

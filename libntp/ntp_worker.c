@@ -28,7 +28,6 @@ int			worker_per_query;	/* boolean */
 int			intres_req_pending;
 
 
-#ifndef HAVE_IO_COMPLETION_PORT
 /*
  * pipe_socketpair()
  *
@@ -118,8 +117,6 @@ close_all_beyond(
 		close(fd);
 # endif	/* !HAVE_CLOSEFROM && !F_CLOSEM */
 }
-#endif	/* HAVE_IO_COMPLETION_PORT */
-
 
 u_int
 available_blocking_child_slot(void)

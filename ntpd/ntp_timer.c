@@ -10,11 +10,6 @@
 #include "ntp_leapsec.h"
 #include "ntp_intercept.h"
 
-#if defined(HAVE_IO_COMPLETION_PORT)
-# include "ntp_iocompletionport.h"
-# include "ntp_timer.h"
-#endif
-
 #include <stdio.h>
 #include <signal.h>
 #include <unistd.h>
