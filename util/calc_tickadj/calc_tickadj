@@ -23,7 +23,7 @@ hyphen and the flag character.
 
 from __future__ import print_function, division
 
-import sys, getopt, re
+import sys, getopt, re, os
 
 if __name__ == '__main__':
     try:
@@ -45,7 +45,7 @@ if __name__ == '__main__':
 
     if tick == 0:
         try:
-            with sys.popen("ntpfrob -A") as rp:
+            with os.popen("ntpfrob -A") as rp:
                 response = rp.read()
                 m = re.search("[0-9]+", response)
                 if m:
