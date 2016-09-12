@@ -61,7 +61,7 @@ volatile u_long alarm_overflow;
 u_long current_time;		/* seconds since startup */
 
 /*
- * Stats.  Number of overflows and number of calls to transmit().
+ * Stats.  Time of last reset and number of calls to transmit().
  */
 u_long timer_timereset;
 u_long timer_xmtcalls;
