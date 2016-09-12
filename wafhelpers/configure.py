@@ -290,6 +290,7 @@ def cmd_configure(ctx, config):
                 ('clock_settime', ["time.h"], "RT"),
                 ('EVP_MD_do_all_sorted', ["openssl/evp.h"], "CRYPTO"),
                 ('getclock', ["sys/timers.h"]),
+		('getdtablesize', ["unistd.h"]),
                 ('getpassphrase', ["stdlib.h"]),                # Sun systems
                 ('getrusage', ["sys/time.h", "sys/resource.h"]),
                 ('MD5Init', ["md5.h"], "CRYPTO"),
@@ -326,6 +327,8 @@ def cmd_configure(ctx, config):
         # Some of these are cruft from ancient big-iron systems and should
         # be removed.
         optional_headers = (
+		"alloca.h",
+		"arpa/nameser.h",
                 "dns_sd.h",             # NetBSD, Apple, mDNS
                 ("ifaddrs.h", ["sys/types.h"]),
                 "libscf.h",             # Solaris

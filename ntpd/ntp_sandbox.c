@@ -268,7 +268,7 @@ getgroup:
 // #if defined(HAVE_SECCOMP) && (defined(__x86_64__) || defined(__i386__))
 #if defined(HAVE_SECCOMP)
 
-#ifdef KILLonTRAP
+#ifdef ENABLE_KILL_ON_TRAP
   #define MY_SCMP_ACT SCMP_ACT_KILL
 #else
   #define MY_SCMP_ACT SCMP_ACT_TRAP

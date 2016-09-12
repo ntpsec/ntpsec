@@ -13,6 +13,7 @@
 # These are potential feature configuration symbols
 ENABLE_ASYMMETRIC	# Enable deep-space asymmetric mode in the protocol 
 ENABLE_ONCORE_SHMEM	# Should OnCore report via shmem?
+ENABLE_KILL_ON_TRAP	# Die on seccomp trap
 MSSNTP_PATH		# Set a default path for the MSSNTP feature.
 NTP_VAR			# Path to NTP statistics directory
 
@@ -62,7 +63,13 @@ ENABLE_LOCKCLOCK
 ENABLE_MDNS_REGISTRATION
 ENABLE_MSSNTP
 HAVE_LINUX_CAPABILITY
+HAVE_OPENSSL
+HAVE_SECCOMP
+HAVE_SECCOMP_H
 HAVE_SOLARIS_PRIVS
+ISC_PLATFORM_NORETURN_POST
+ISC_PLATFORM_NORETURN_PRE
+PLATFORM_OPENBSD
 WORDS_BIGENDIAN
 
 # libsodium
@@ -75,6 +82,7 @@ sodium_utils_H
 SYS_getrandom
 randombytes_H
 randombytes_sysrandom_H
+ULONG_LONG_MAX
 
 # Overrides
 OVERRIDE_BINTIME_CTLMSGBUF_SIZE
@@ -92,6 +100,11 @@ OVERRIDE_TIMESTAMP_CTLMSGBUF_SIZE
 DAY_GPS_STARTS
 DAY_NTP_STARTS
 DSTMINUTES
+
+# Conditionals for unit tests
+TEST_LIBNTP
+TEST_NTPD
+TEST_NTPDIG
 
 # Purely internal symbols
 CONFIG_H
@@ -175,7 +188,7 @@ lifr_addrlen		# ISC interface-iterator code
 mac			# Avoid name conflict.
 ntohl			# In Windows port config
 realloc			# Internal to Unity
-sgi			# ISC interface-iterator code
+sem_timedwait		# In worker-thread code
 short			# In ntpd/ntp_parser.tab.c
 size_t			# In ntpd/ntp_parser.tab.c
 timercmp		# Only used in include/parse.h
