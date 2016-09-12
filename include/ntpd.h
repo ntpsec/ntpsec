@@ -447,7 +447,6 @@ extern volatile bool alarm_flag;		/* alarm flag */
 extern volatile u_long alarm_overflow;
 extern u_long	current_time;		/* seconds since startup */
 extern u_long	timer_timereset;
-extern u_long	timer_overflows;
 extern u_long	timer_xmtcalls;
 extern bool	leap_sec_in_progress;
 #ifdef ENABLE_LEAP_SMEAR
