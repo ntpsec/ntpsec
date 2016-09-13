@@ -82,4 +82,4 @@ typedef unsigned long long u_time;
 extern const char *
 format_time_fraction(time_t secs, long frac, int prec);
 
-#endif /* GUARD_!defined(TIMETOA_H) */
+#endif /* GUARD_TIMETOA_H */
