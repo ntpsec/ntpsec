@@ -9,8 +9,9 @@
 #include <sys/socket.h>
 #include <net/if.h>
 #include <netinet/in.h>
+#include <netdb.h>
+#include <isc/net.h>
 
-#include "ntp_rfc2553.h"
 #include "ntp_malloc.h"
 
 typedef union {
