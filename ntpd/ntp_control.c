@@ -773,7 +773,7 @@ process_control(
 	req_count = (int)ntohs(pkt->count);
 	datanotbinflag = false;
 	datalinelen = 0;
-	datasent = 0;
+	datasent = false;
 	datapt = rpkt.u.data;
 	dataend = &rpkt.u.data[CTL_MAX_DATA_LEN];
 

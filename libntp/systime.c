@@ -251,7 +251,7 @@ adj_systime(
 	double	quant;		/* quantize to multiples of */
 	double	dtemp;
 	long	ticks;
-	int	isneg = 0;
+	bool	isneg = false;
 
 	/*
 	 * FIXME: With the legacy Windows port on, this might be removable.
@@ -276,7 +276,7 @@ adj_systime(
 	 */
 	dtemp = now + sys_residual;
 	if (dtemp < 0) {
-		isneg = 1;
+		isneg = true;
 		dtemp = -dtemp;
 	}
 	adjtv.tv_sec = (long)dtemp;

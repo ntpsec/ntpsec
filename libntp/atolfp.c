@@ -37,12 +37,12 @@ atolfp(
 	register unsigned long dec_f;
 	char *ind;
 	int ndec;
-	int isneg;
+	bool isneg;
 	static const char *digits = "0123456789";
 
 	NTP_REQUIRE(str != NULL);
 
-	isneg = 0;
+	isneg = false;
 	dec_i = dec_f = 0;
 	ndec = 0;
 	cp = str;
@@ -57,7 +57,7 @@ atolfp(
 	
 	if (*cp == '-') {
 		cp++;
-		isneg = 1;
+		isneg = true;
 	}
 	
 	if (*cp == '+')

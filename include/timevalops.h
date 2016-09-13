@@ -79,14 +79,14 @@ extern const uint32_t tstoushi[128];
 
 #define sTVTOTS(tv, ts) \
 	do { \
-		int isneg = 0; \
+		bool isneg = false; \
 		long usec; \
 		(ts)->l_ui = (tv)->tv_sec; \
 		usec = (tv)->tv_usec; \
 		if (((tv)->tv_sec < 0) || ((tv)->tv_usec < 0)) { \
 			usec = -usec; \
 			(ts)->l_ui = -(ts)->l_ui; \
-			isneg = 1; \
+			isneg = true; \
 		} \
 		TVUTOTSF(usec, (ts)->l_uf); \
 		if (isneg) { \
