@@ -159,4 +159,4 @@ struct addrinfo *copy_addrinfo_list_impl(const struct addrinfo *
 #  define USE_IPV6_MULTICAST_SUPPORT
 #endif	/* IPV6 Multicast Support */
 
-#endif /* GUARD_!NTP_RFC2553_H */
+#endif /* !GUARD_NTP_RFC2553_H */

@@ -292,4 +292,4 @@ extern bool have_interface_option;
 
 void ntp_rlimit(int, rlim_t, int, const char *);
 
-#endif	/* GUARD_!defined(NTP_CONFIG_H) */
+#endif	/* GUARD_NTP_CONFIG_H */

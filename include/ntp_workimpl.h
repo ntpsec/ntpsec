@@ -17,4 +17,4 @@
 # define USE_WORKER
 #endif
 
-#endif	/* GUARD_!NTP_WORKIMPL_H */
+#endif	/* !GUARD_NTP_WORKIMPL_H */
