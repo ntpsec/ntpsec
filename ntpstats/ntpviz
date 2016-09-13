@@ -21,7 +21,7 @@ Python by ESR, concept and GNUPLOT code by Dan Drown.
 #SPDX-License-Identifier: BSD-2-Clause
 from __future__ import print_function, division
 
-import os, sys, getopt, socket, binascii, collections, time
+import binascii, collections, getopt, os, socket, sys, time
 from ntp.statfiles import *
 
 # standard deviation functions
