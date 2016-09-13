@@ -4,7 +4,30 @@
 #ifndef GUARD_NTP_INTRES_H
 #define GUARD_NTP_INTRES_H
 
-#include <ntp_worker.h>
+#include "ntp_worker.h"
+#include "ntp_malloc.h"
+
+struct addrinfo *copy_addrinfo_impl(const struct addrinfo *
+#ifdef EREALLOC_CALLSITE	/* from ntp_malloc.h */
+							   ,
+				    const char *, int
+#endif
+					 );
+struct addrinfo *copy_addrinfo_list_impl(const struct addrinfo *
+#ifdef EREALLOC_CALLSITE	/* from ntp_malloc.h */
+								,
+					 const char *, int
+#endif
+					 );
+#ifdef EREALLOC_CALLSITE
+# define copy_addrinfo(l) \
+	 copy_addrinfo_impl((l), __FILE__, __LINE__)
+# define copy_addrinfo_list(l) \
+	 copy_addrinfo_list_impl((l), __FILE__, __LINE__)
+#else
+# define copy_addrinfo(l)	copy_addrinfo_impl(l)
+# define copy_addrinfo_list(l)	copy_addrinfo_list_impl(l)
+#endif
 
 #ifdef USE_WORKER
 #define	INITIAL_DNS_RETRY	2	/* seconds between queries */
