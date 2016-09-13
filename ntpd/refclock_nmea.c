@@ -811,8 +811,8 @@ nmea_receive(
 	ZERO(date);
 	ZERO(gpsw);
 	sentence = 0;
-	rc_date = 0;
-	rc_time = 0;
+	rc_date = false;
+	rc_time = false;
 	/* 
 	 * Read the timecode and timestamp, then initialise field
 	 * processing. The <CR><LF> at the NMEA line end is translated
