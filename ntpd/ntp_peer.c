@@ -770,11 +770,11 @@ newpeer(
 	 * minpoll is clamped not greater than maxpoll.
 	 */
 	if (minpoll == 0)
-		peer->minpoll = NTP_MINPOLL;
+		peer->minpoll = NTP_MINDPOLL;
 	else
 		peer->minpoll = min(minpoll, NTP_MAXPOLL);
 	if (maxpoll == 0)
-		peer->maxpoll = NTP_MAXPOLL;
+		peer->maxpoll = NTP_MAXDPOLL;
 	else
 		peer->maxpoll = max(maxpoll, NTP_MINPOLL);
 	if (peer->minpoll > peer->maxpoll)
