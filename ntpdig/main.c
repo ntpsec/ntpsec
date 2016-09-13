@@ -530,7 +530,7 @@ handle_lookup(
 
 	ZERO(hints);
 	hints.ai_family = ai_fam_pref;
-	hints.ai_flags = AI_CANONNAME | Z_AI_NUMERICSERV;
+	hints.ai_flags = AI_CANONNAME | AI_NUMERICSERV;
 	/*
 	** Unless we specify a socktype, we'll get at least two
 	** entries for each address: one for TCP and one for

@@ -698,7 +698,7 @@ openhost(
 	hints.ai_family = fam;
 	hints.ai_protocol = IPPROTO_UDP;
 	hints.ai_socktype = SOCK_DGRAM;
-	hints.ai_flags = Z_AI_NUMERICHOST;
+	hints.ai_flags = AI_NUMERICHOST;
 	ai = NULL;
 
 	a_info = getaddrinfo(hname, svc, &hints, &ai);
