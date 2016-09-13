@@ -49,7 +49,12 @@
 #define IFS_CREATED     2       /* was just created */
 #define IFS_DELETED     3       /* was just delete */
 
-
+/* 
+ * Set up some macros to look for IPv6 and IPv6 multicast
+ */
+#if defined(IPV6_JOIN_GROUP) && defined(IPV6_LEAVE_GROUP)
+#  define USE_IPV6_MULTICAST_SUPPORT
+#endif	/* IPV6 Multicast Support */
 
 /*
  * setsockopt does not always have the same arg declaration

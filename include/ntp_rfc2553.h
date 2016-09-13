@@ -150,13 +150,4 @@ struct addrinfo *copy_addrinfo_list_impl(const struct addrinfo *
 # define Z_AI_NUMERICSERV	AI_NUMERICSERV
 #endif
 
-
-/* 
- * Set up some macros to look for IPv6 and IPv6 multicast
- */
-
-#if defined(IPV6_JOIN_GROUP) && defined(IPV6_LEAVE_GROUP)
-#  define USE_IPV6_MULTICAST_SUPPORT
-#endif	/* IPV6 Multicast Support */
-
 #endif /* !GUARD_NTP_RFC2553_H */
