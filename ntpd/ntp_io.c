@@ -3347,7 +3347,7 @@ read_network_packet(
 	msghdr.msg_flags      = 0;
 	msghdr.msg_control    = (void *)&control;
 	msghdr.msg_controllen = sizeof(control);
-	rb->recv_length       = recvmsg(fd, &msghdr, 0);
+	rb->recv_length       = intercept_recvmsg(fd, &msghdr, 0);
 #endif
 
 	buflen = rb->recv_length;

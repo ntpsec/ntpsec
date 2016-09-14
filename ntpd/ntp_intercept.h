@@ -25,6 +25,7 @@ void intercept_sendpkt(const char *,
 		       sockaddr_u *, struct interface *, int, void *, int);
 ssize_t intercept_recvfrom(int, void *,
 			   size_t, int, struct sockaddr *, socklen_t *);
+ssize_t intercept_recvmsg(int sockfd, struct msghdr *msg, int flags);
 SOCKET intercept_open_socket(sockaddr_u *, bool, bool, endpt *);
 bool intercept_drift_read(const char *, double *);
 void intercept_drift_write(char *, double);
