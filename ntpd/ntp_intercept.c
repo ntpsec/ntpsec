@@ -754,6 +754,38 @@ void intercept_sendpkt(const char *legend,
     }
 }
 
+int intercept_select(int nfds, fd_set *readfds)
+{
+    char pkt_dump[BUFSIZ];
+    int nfound;
+
+    if (mode == replay)
+    {
+	get_operation("select ");
+	/* FIXME: replay implementation here */
+	return 0;
+    } else {
+	nfound = select(nfds + 1, readfds, NULL, NULL, NULL);
+
+	if (mode == capture)
+	{
+	    int fd;
+	    snprintf(pkt_dump, sizeof(pkt_dump),
+		     "select %d:", nfound);
+	    for (fd = 0; fd <= nfds; fd++)
+		if (FD_ISSET(fd, readfds))
+		    snprintf(pkt_dump + strlen(pkt_dump),
+			     sizeof(pkt_dump) - strlen(pkt_dump),
+			     " %d", fd);
+	    strlcat(pkt_dump, "\n", sizeof(pkt_dump));
+
+	    fputs(pkt_dump, stdout);
+	}
+
+	return nfound;
+    }
+}
+
 ssize_t intercept_recvfrom(int sockfd, void *buf, size_t len, int flags,
                         struct sockaddr *src_addr, socklen_t *addrlen)
 {
@@ -779,7 +811,6 @@ ssize_t intercept_recvfrom(int sockfd, void *buf, size_t len, int flags,
 			 sizeof(pkt_dump) - strlen(pkt_dump),
 			 "%0x", *cp);
 	    strlcat(pkt_dump, "\n", sizeof(pkt_dump));
-    
 
 	    fputs(pkt_dump, stdout);
 	}

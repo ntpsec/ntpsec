@@ -3445,8 +3445,7 @@ io_handler(void)
 	 * Mostly harmless, I think.
 	 */
 	rdfdes = activefds;
-	nfound = select(maxactivefd + 1, &rdfdes, NULL,
-			NULL, NULL);
+	nfound = intercept_select(maxactivefd, &rdfdes);
 	if (nfound > 0) {
 		l_fp ts;
 
