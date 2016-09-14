@@ -37,12 +37,10 @@ extern bool sandbox(const bool droproot,
 		    const char *chrootdir,
 		    bool want_dynamic_interface_tracking);
 
-#if defined(SIGINT) || defined(SIGQUIT) || defined(SIGTERM)
 static volatile bool signalled	= false;
 static volatile int signo	= 0;
 /* In an ideal world, 'finish_safe()' would declared as noreturn... */
 static	void		finish_safe	(int);
-#endif
 
 #ifdef SIGDANGER
 # include <ulimit.h>
@@ -689,21 +687,11 @@ ntpdmain(
 	/*
 	 * Set up signals we pay attention to locally.
 	 */
-# ifdef SIGINT
 	signal_no_reset(SIGINT, finish);
-# endif
-# ifdef SIGQUIT
 	signal_no_reset(SIGQUIT, finish);
-# endif
-# ifdef SIGTERM
 	signal_no_reset(SIGTERM, finish);
-# endif
-# ifdef SIGHUP
 	signal_no_reset(SIGHUP, catchHUP);
-# endif
-# ifdef SIGBUS
-	signal_no_reset(SIGBUS, finish);
-# endif
+	signal_no_reset(SIGBUS, finish);  /* FIXME: It's broken, can't continue. */
 
 # ifdef DEBUG
 	(void) signal_no_reset(MOREDEBUGSIG, moredebug);
@@ -716,9 +704,7 @@ ntpdmain(
 	/*
 	 * Set up signals we should never pay attention to.
 	 */
-# ifdef SIGPIPE
 	signal_no_reset(SIGPIPE, SIG_IGN);
-# endif
 
 	/*
 	 * Call the init_ routines to initialize the data structures.
@@ -934,10 +920,8 @@ static void mainloop(void)
 	was_alarmed = false;
 
 	for (;;) {
-#if defined(SIGINT) || defined(SIGQUIT) || defined(SIGTERM)
 		if (signalled)
 			finish_safe(signo);
-#endif
 		if (alarm_flag) {	/* alarmed? */
 			was_alarmed = true;
 			alarm_flag = false;
@@ -1062,7 +1046,6 @@ static void mainloop(void)
 }
 
 
-#if defined(SIGINT) || defined(SIGQUIT) || defined(SIGTERM)
 /*
  * finish - exit gracefully
  */
@@ -1104,8 +1087,6 @@ static void catchHUP(int sig)
 	UNUSED_ARG(sig);
 	sawHUP = true;
 }
-
-#endif	/* defined(SIGINT) || defined(SIGQUIT) || defined(SIGTERM) */
 
 
 /*

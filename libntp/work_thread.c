@@ -448,18 +448,10 @@ block_thread_signals(
 	sigaddset(&block, SIGALRM);
 	sigaddset(&block, MOREDEBUGSIG);
 	sigaddset(&block, LESSDEBUGSIG);
-# ifdef SIGINT
 	sigaddset(&block, SIGINT);
-# endif 
-# ifdef SIGQUIT
 	sigaddset(&block, SIGQUIT);
-# endif
-# ifdef SIGTERM
 	sigaddset(&block, SIGTERM);
-# endif
-# ifdef SIGBUS
 	sigaddset(&block, SIGBUS);
-# endif
 	sigemptyset(pmask);
 	pthread_sigmask(SIG_BLOCK, &block, pmask);
 }
