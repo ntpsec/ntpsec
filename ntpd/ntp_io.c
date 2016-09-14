@@ -3437,12 +3437,9 @@ io_handler(void)
 	int nfound;
 
 	/*
-	 * Use select() on all on all input fd's for unlimited
+	 * Use select() on all input fd's for unlimited
 	 * time.  select() will terminate on SIGALARM or on the
-	 * reception of input.	Using select() means we can't do
-	 * robust signal handling and we get a potential race
-	 * between checking for alarms and doing the select().
-	 * Mostly harmless, I think.
+	 * reception of input.
 	 */
 	rdfdes = activefds;
 	nfound = intercept_select(maxactivefd, &rdfdes);
@@ -3517,8 +3514,8 @@ input_handler(
 	fds = activefds;
 	tvzero.tv_sec = tvzero.tv_usec = 0;
 
-	n = select(maxactivefd + 1, &fds, (fd_set *)0, (fd_set *)0,
-		   &tvzero);
+	/* Doesn't wait, just scans. */
+	n = select(maxactivefd + 1, &fds, NULL, NULL, &tvzero);
 
 	/*
 	 * If there are no packets waiting just return
