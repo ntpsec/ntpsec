@@ -91,6 +91,8 @@ Reference-clock events are not yet intercepted.
 #include <sys/socket.h>
 #include <netdb.h>
 #include <inttypes.h>
+#include <assert.h>
+#include <ctype.h>
 
 #include "ntpd.h"
 #include "ntp_io.h"
@@ -396,18 +398,11 @@ long intercept_ntp_random(const char *legend)
 bool intercept_drift_read(const char *drift_file, double *drift)
 {
     if (mode == replay) {
-	float df;
+	double df;
 	get_operation("drift-read ");
 	if (strstr(linebuf, "false") != NULL)
 	    return false;
-	/*
-	 * Weirdly, sscanf has no format for reading doubles.
-	 * This could cause an obscure bug in replay if drift 
-	 * ever requires 53 bits of precision as opposed to 24
-	 * (and that's assuming IEEE-754, otherwise things could
-	 * get hairier).
-	 */ 
-	if (sscanf(linebuf, "drift-read %f'", &df) != 1) {
+	if (sscanf(linebuf, "drift-read %lf'", &df) != 1) {
 	    fprintf(stderr, "ntpd: garbled drift-read format, line %d\n",lineno);
 	    exit(1);
 	}
@@ -494,7 +489,6 @@ int intercept_adjtime(const struct timeval *ntv, struct timeval *otv)
 	struct timeval rntv, rotv;
 	long nsec, nusec, osec, ousec;
 	get_operation("adjtime ");
-	/* bletch - likely to foo up on 32-bit machines */
 	if (sscanf(linebuf, "adjtime %ld %ld %ld %ld",
 		   &nsec, &nusec, &osec, &ousec) != 4)
 	{
@@ -502,10 +496,10 @@ int intercept_adjtime(const struct timeval *ntv, struct timeval *otv)
 	    exit(1);
 	}
 	/* avoid compiler warnings due to time_t having an unexpected length */
-	rntv.tv_sec = nsec;
-	rntv.tv_usec = nusec;
-	rotv.tv_sec = osec;
-	rotv.tv_usec = ousec;
+	rntv.tv_sec = (time_t)nsec;
+	rntv.tv_usec = (suseconds_t)nusec;
+	rotv.tv_sec = (time_t)osec;
+	rotv.tv_usec = (suseconds_t)ousec;
 	if (ntv->tv_sec != rntv.tv_sec
 	    || ntv->tv_usec != rntv.tv_usec
 	    || otv->tv_sec != rotv.tv_sec
@@ -541,21 +535,21 @@ int intercept_ntp_adjtime(struct timex *tx)
 #define ADJFMT "%u %ld %ld %ld %ld %i %ld %ld %ld %ld %ld %i %ld %ld %ld %ld"
 #define ADJDUMP(x, buf)			\
     snprintf(buf, sizeof(buf), ADJFMT,	\
-	     (x)->modes,			\
-	     (x)->offset,			\
+	     (x)->modes,		\
+	     (x)->offset,		\
 	     (x)->freq,			\
 	     (x)->maxerror,		\
 	     (x)->esterror,		\
-	     (x)->status,			\
+	     (x)->status,		\
 	     (x)->constant,		\
 	     (x)->precision,		\
 	     (x)->tolerance,		\
 	     (x)->ppsfreq,		\
-	     (x)->jitter,			\
-	     (x)->shift,			\
-	     (x)->jitcnt,			\
-	     (x)->calcnt,			\
-	     (x)->errcnt,			\
+	     (x)->jitter,		\
+	     (x)->shift,		\
+	     (x)->jitcnt,		\
+	     (x)->calcnt,		\
+	     (x)->errcnt,		\
 	     (x)->stbcnt)
 
     char txdump[BUFSIZ], rtxdump[BUFSIZ];
@@ -759,11 +753,38 @@ int intercept_select(int nfds, fd_set *readfds)
     char pkt_dump[BUFSIZ];
     int nfound;
 
+    /*
+     * A select event is expected to look like one of these:
+     *
+     * select 1: 4
+     * select 2: 6 9
+     *
+     * That is, a count of readable fds followed by a list of them,
+     * ended by a newline.
+     */
     if (mode == replay)
     {
+	char *space, *colon, *cursor;
+	int cnt;
 	get_operation("select ");
-	/* FIXME: replay implementation here */
-	return 0;
+	space = strchr(linebuf, ' ');
+	assert(space);
+	colon = strchr(linebuf, ':');
+	assert(colon);
+	colon = '\0';
+	nfound = atoi(space + 1);
+	cursor = colon +1;
+	FD_ZERO(readfds);
+	cnt = 0;
+	while (*cursor == ' ')
+	{
+	    char *nstart = ++cursor;
+	    assert(isdigit(*cursor));
+	    FD_SET((int)strtol(nstart, &cursor, 10), readfds);
+	    ++cnt;
+	}
+	assert(cnt == nfound);
+	return nfound;
     } else {
 	nfound = select(nfds + 1, readfds, NULL, NULL, NULL);
 
@@ -794,8 +815,27 @@ ssize_t intercept_recvfrom(int sockfd, void *buf, size_t len, int flags,
 
     if (mode == replay)
     {
+	char *cursor;
+	int rsockfd, rflags;
 	get_operation("recvfrom ");
-	/* FIXME: replay implementation here */
+	cursor = strchr(linebuf, ' ');
+	assert(cursor);
+	assert(isdigit(*cursor));
+	rsockfd = (int)strtol(cursor, &cursor, 10);
+	if (sockfd != rsockfd) {
+	    fprintf(stderr, "ntpd: replay failed, expected socket %d in recvfrom but saw %d\n",
+		    rsockfd, sockfd);
+	    exit(1);
+	}
+	++cursor;
+	rflags = (int)strtol(cursor, &cursor, 16);
+	if (flags != rflags) {
+	    fprintf(stderr, "ntpd: replay failed, expected flags %x in recvfrom but saw %x\n",
+		    rflags, flags);
+	    exit(1);
+	}
+	++cursor;
+	/* FIXME: rest of replay implementation here */
 	recvlen = 0;  /* squish compiler warning */
     } else {
 	recvlen = recvfrom(sockfd, buf, len, flags, src_addr, addrlen);
@@ -826,8 +866,27 @@ ssize_t intercept_recvmsg(int sockfd, struct msghdr *msg, int flags)
 
     if (mode == replay)
     {
+	char *cursor;
+	int rsockfd, rflags;
 	get_operation("recvmsg ");
-	/* FIXME: replay implementation here */
+	cursor = strchr(linebuf, ' ');
+	assert(cursor);
+	assert(isdigit(*cursor));
+	rsockfd = (int)strtol(cursor, &cursor, 10);
+	if (sockfd != rsockfd) {
+	    fprintf(stderr, "ntpd: replay failed, expected socket %d in recvfrom but saw %d\n",
+		    rsockfd, sockfd);
+	    exit(1);
+	}
+	++cursor;
+	rflags = (int)strtol(cursor, &cursor, 16);
+	if (flags != rflags) {
+	    fprintf(stderr, "ntpd: replay failed, expected flags %x in recvfrom but saw %x\n",
+		    rflags, flags);
+	    exit(1);
+	}
+	++cursor;
+	/* FIXME: rest of replay implementation here */
 	recvlen = 0;  /* squish compiler warning */
     } else {
 	recvlen = recvmsg(sockfd, msg, flags);
