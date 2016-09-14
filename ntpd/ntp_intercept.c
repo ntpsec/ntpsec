@@ -766,20 +766,57 @@ ssize_t intercept_recvfrom(int sockfd, void *buf, size_t len, int flags,
 	/* FIXME: replay implementation here */
 	recvlen = 0;  /* squish compiler warning */
     } else {
-	char *cp;
-	snprintf(pkt_dump, sizeof(pkt_dump),
-		 "recvfrom %d %0x %s",
-		 sockfd, flags, socktoa((sockaddr_u *)src_addr));
-	for (cp = (char *)buf; cp < (char *)buf + len; cp++)
-	    snprintf(pkt_dump + strlen(pkt_dump),
-		     sizeof(pkt_dump) - strlen(pkt_dump),
-		     "%0x", *cp);
-	strlcat(pkt_dump, "\n", sizeof(pkt_dump));
-    
 	recvlen = recvfrom(sockfd, buf, len, flags, src_addr, addrlen);
 
 	if (mode == capture)
+	{
+	    char *cp;
+	    snprintf(pkt_dump, sizeof(pkt_dump),
+		     "recvfrom %d %0x %s",
+		     sockfd, flags, socktoa((sockaddr_u *)src_addr));
+	    for (cp = (char *)buf; cp < (char *)buf + recvlen; cp++)
+		snprintf(pkt_dump + strlen(pkt_dump),
+			 sizeof(pkt_dump) - strlen(pkt_dump),
+			 "%0x", *cp);
+	    strlcat(pkt_dump, "\n", sizeof(pkt_dump));
+    
+
 	    fputs(pkt_dump, stdout);
+	}
+    }
+
+    return recvlen;
+}
+
+ssize_t intercept_recvmsg(int sockfd, struct msghdr *msg, int flags)
+{
+    char pkt_dump[BUFSIZ];
+    ssize_t recvlen;
+
+    if (mode == replay)
+    {
+	get_operation("recvmsg ");
+	/* FIXME: replay implementation here */
+	recvlen = 0;  /* squish compiler warning */
+    } else {
+	recvlen = recvmsg(sockfd, msg, flags);
+
+	if (mode == capture) {
+	    char *cp;
+	    snprintf(pkt_dump, sizeof(pkt_dump),
+		     "recvmsg %d %0x %s",
+		     sockfd, msg->msg_flags,
+		     socktoa((sockaddr_u *)(&msg->msg_name)));
+	    for (cp = (char *)msg->msg_iov->iov_base;
+		 cp < (char *)msg->msg_iov->iov_base + recvlen;
+		 cp++)
+		snprintf(pkt_dump + strlen(pkt_dump),
+			 sizeof(pkt_dump) - strlen(pkt_dump),
+			 "%0x", *cp);
+	    strlcat(pkt_dump, "\n", sizeof(pkt_dump));
+
+	    fputs(pkt_dump, stdout);
+	}
     }
 
     return recvlen;
