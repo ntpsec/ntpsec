@@ -928,13 +928,20 @@ int intercept_open_socket(sockaddr_u *addr,
     return sock;
 }
 
-void intercept_replay(void)
+bool intercept_replay(void)
 {
-    printf("# entering replay loop at line %d\n", lineno);
+    if (mode == capture)
+	fputs("mainloop\n", stdout);
+    if (mode != replay)
+	return false;	/* fall through to normal mail loop */
+
     for (;;) {
 	get_operation(NULL);
-	if (strncmp(linebuf, "finish", 7) == 0)
+	if (strncmp(linebuf, "mainloop", 8) == 0)
 	    break;
+	else if (strncmp(linebuf, "getaddrinfo ", 12) == 0)
+	    /* DNS lookups for initial configuration */
+	    continue;
 	else if (strncmp(linebuf, "sendpkt ", 8) == 0)
 	    /*
 	     * If we get here, this is a sendpkt generated not by the protocol
@@ -943,17 +950,10 @@ void intercept_replay(void)
 	     */
 	    continue;
 	else
-	{
-	    char errbuf[BUFSIZ], *cp;
-	    strlcpy(errbuf, linebuf, sizeof(errbuf));
-	    cp = strchr(errbuf, ' ');
-	    if (cp != NULL)
-		*cp = '\0';
-	    fprintf(stderr, "ntpd: unexpected operation '%s' at line %d\n",
-		    errbuf, lineno);
-	    exit(1);
-	}
+	    replay_fail("unexpected operation before mainloop\n");
     }
+
+    return true;	/* don't do normal main loop */
 }
 
 void
