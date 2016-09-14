@@ -70,10 +70,6 @@ terminate - the replay failed.  Otherwise continue.
 Replay succeeds if the event stream reaches the shutdown event with
 no mismatches.
 
-== Limitations ==
-
-Reference-clock events are not yet intercepted.
-
 *****************************************************************************/
 
 #include <time.h>
@@ -93,6 +89,7 @@ Reference-clock events are not yet intercepted.
 #include <inttypes.h>
 #include <assert.h>
 #include <ctype.h>
+#include <stdarg.h>
 
 #include "ntpd.h"
 #include "ntp_io.h"
@@ -119,11 +116,13 @@ static char linebuf[256];
 static int lineno;
 
 intercept_mode intercept_get_mode(void)
+/* return the current test-frame activation mode: none, capture, or replay */
 {
     return mode;
 }
 
 void intercept_set_mode(intercept_mode newmode)
+/* set the testframe activation mode, and global flags required to go with it */
 {
     mode = newmode;
     if (mode != none) {
@@ -134,7 +133,7 @@ void intercept_set_mode(intercept_mode newmode)
 }
 
 static void get_operation(const char *expect)
-/* get the next (non-comment) line from the log */
+/* get the next (non-comment) line from the log, specifying expected keyword */
 {
     for (;;)
     {
@@ -160,6 +159,7 @@ static void get_operation(const char *expect)
 }
 
 void intercept_argparse(int *argc, char ***argv)
+/* extract test-frame activation mode options from the command line */
 {
     int i;
     const char *leader = "NTP replay version 1";
@@ -202,6 +202,7 @@ void intercept_argparse(int *argc, char ***argv)
 }
 
 static bool pump(const char *fn, const char *lead, const char *trail, FILE *ofp)
+/* dump a specified file wuth specified leader and trailer delimiting tokens */
 {
 	FILE *fp = fopen(fn, "r");
 	if (fp == NULL)
@@ -219,25 +220,39 @@ static bool pump(const char *fn, const char *lead, const char *trail, FILE *ofp)
 	}
 }
 
+static void replay_fail(const char *fmt, ...)
+/* fatal replay error; assemble msg in printf(3) style */
+{
+    char buf[BUFSIZ], keyword[BUFSIZ], *sp, *tp;
+    va_list ap;
+    
+    tp = keyword;
+    for (sp = linebuf; *sp != ' ' && *sp; sp++)
+	*tp++ = *sp;
+    *tp = '\0';
+    snprintf(buf, sizeof(buf), "ntpd: replay failed on line %d (%s), ",
+	    lineno, keyword);
+    va_start(ap, fmt);
+    vsnprintf(buf + strlen(buf), sizeof(buf) - strlen(buf), fmt, ap);
+    va_end(ap);
+    fputs(buf, stderr);
+    exit(1);
+}
+
 static void file_replay(const char *configfile, char *delimiter, char *tempfile)
+/* line oriented copy of specified config file to tempfile */
 {
     FILE *tfp;
 
     tfp = fopen(tempfile, "w");
-    if (tfp == NULL) {
-	fprintf(stderr,
-		"ntpd: replay failed, can't copy %s\n", configfile);
-	exit(1);
-    }
+    if (tfp == NULL)
+	replay_fail("can't copy %s\n", configfile);
     for (;;) {
 	char *nextline = fgets(linebuf, sizeof(linebuf), stdin);
 
 	++lineno;
-	if (nextline == NULL) {
-	    fprintf(stderr,
-		    "ntpd: replay failed, unexpected EOF at line %d\n", lineno);
-	    exit(1);
-	}
+	if (nextline == NULL)
+	    replay_fail("unexpected EOF\n");
 	if (strncmp(linebuf, delimiter, strlen(delimiter)) == 0)
 	    break;
 	fputs(linebuf, tfp);
@@ -245,31 +260,24 @@ static void file_replay(const char *configfile, char *delimiter, char *tempfile)
     fclose(tfp);
 }
 
+
 bool intercept_getaddrinfo(char *hname, sockaddr_u *peeraddrp)
 {
     if (mode == replay) {
 	char addr[BUFSIZ], ip[BUFSIZ];
 	int retval;
 
-	get_operation("getaddrinfo");
-	if (sscanf(linebuf, "getaddrinfo %s %s %d", addr, ip, &retval) != 3) {
-	    fprintf(stderr, "ntpd: garbled getaddrinfo format, line %d\n", lineno);
-	    exit(1);
-	}
-	if (strcmp(hname, addr) != 0) {
-	    fprintf(stderr, "ntpd: saw hostname %s, when expecting %s\n",
-		    addr, hname);
-	    exit(1);
-	}
+	get_operation("getaddrinfo ");
+	if (sscanf(linebuf, "getaddrinfo %s %s %d", addr, ip, &retval) != 3)
+	    replay_fail("garbled event format\n");
+	if (strcmp(hname, addr) != 0)
+	    replay_fail("saw hostname %s when expecting %s\n", addr, hname);
 	if (retval == 0) {
-	    fprintf(stderr, "ntpd: hostname %s lookup failed\n",
-		    addr);
+	    replay_fail("hostname %s lookup failed\n", addr);
 	    exit(1);
 	}
-	if (!is_ip_address(ip, AF_UNSPEC, peeraddrp)) {
-	    fprintf(stderr, "ntpd: invalid IP address in getaddrinfo at line %d\n", lineno);
-	    exit(1);
-	}
+	if (!is_ip_address(ip, AF_UNSPEC, peeraddrp))
+	    replay_fail("invalid IP address %s\n", addr);
 	return true;
     } else {
 	int a_info;
@@ -341,15 +349,11 @@ void intercept_get_systime(const char *legend, l_fp *now)
 	int sec, subsec;
 	char expecting[BUFSIZ];
 	get_operation("systime ");
-	if (sscanf(linebuf, "systime %s %d.%d", expecting, &sec, &subsec) != 3) {
-	    fprintf(stderr, "ntpd: garbled systime format, line %d\n", lineno);
-	    exit(1);
-	}
-	else if (strcmp(legend, expecting) != 0) {
-	    fprintf(stderr, "ntpd: expected systime %s on line %d but saw %s\n",
-		    expecting, lineno, legend);
-	    exit(1);
-	}
+	if (sscanf(linebuf, "systime %s %d.%d", expecting, &sec, &subsec) != 3)
+	    replay_fail("garbled systime format\n");
+	else if (strcmp(legend, expecting) != 0)
+	    replay_fail("expected systime %s but saw %s\n",
+		    expecting, legend);
 	ts.tv_sec = sec;
 	ts.tv_nsec = subsec;
 	normalize_time(ts, 0, now);
@@ -375,15 +379,11 @@ long intercept_ntp_random(const char *legend)
 	 * are themselves intercepted.
 	 */
 	get_operation("random ");
-	if (sscanf(linebuf, "random %s %ld", expecting, &roll) != 2) {
-	    fprintf(stderr, "ntpd: garbled random format, line %d\n", lineno);
-	    exit(1);
-	}
-	else if (strcmp(legend, expecting) != 0) {
-	    fprintf(stderr, "ntpd: expected random %s from line %d but saw %s\n",
-		    expecting, lineno, legend);
-	    exit(1);
-	}
+	if (sscanf(linebuf, "random %s %ld", expecting, &roll) != 2)
+	    replay_fail("garbled event format\n");
+	else if (strcmp(legend, expecting) != 0)
+	    replay_fail("expected random %s but saw %s\n",
+		    expecting, legend);
 	return roll;
     } else {
 	roll = ntp_random();
@@ -402,10 +402,8 @@ bool intercept_drift_read(const char *drift_file, double *drift)
 	get_operation("drift-read ");
 	if (strstr(linebuf, "false") != NULL)
 	    return false;
-	if (sscanf(linebuf, "drift-read %lf'", &df) != 1) {
-	    fprintf(stderr, "ntpd: garbled drift-read format, line %d\n",lineno);
-	    exit(1);
-	}
+	if (sscanf(linebuf, "drift-read %lf'", &df) != 1)
+	    replay_fail("garbled event format\n");
 	*drift = df;
     } else {
 	FILE *fp;
@@ -445,16 +443,11 @@ void intercept_drift_write(char *driftfile, double drift)
 	float df;
 	get_operation("drift-write ");
 	/* See the comment of drift-read checking. */ 
-	if (sscanf(linebuf, "drift-write %f'", &df) != 1) {
-	    fprintf(stderr, "ntpd: garbled drift-write format, line %d\n",lineno);
-	    exit(1);
-	}
+	if (sscanf(linebuf, "drift-write %f'", &df) != 1)
+	    replay_fail("garbled event format\n");
 	/* beware spurious failures here due to float imprecision */
-	if (df != drift) {
-	    fprintf(stderr, "ntpd: expected drift %f but saw %f, line %d\n",
-		    drift, df, lineno);
-	    exit(1);
-	}
+	if (df != drift)
+	    replay_fail("expected drift %f but saw %f\n", drift, df);
     } else {
 	int fd;
 	char tmpfile[PATH_MAX], driftcopy[PATH_MAX];
@@ -488,13 +481,11 @@ int intercept_adjtime(const struct timeval *ntv, struct timeval *otv)
     if (mode == replay) {
 	struct timeval rntv, rotv;
 	long nsec, nusec, osec, ousec;
+	int retval;
 	get_operation("adjtime ");
-	if (sscanf(linebuf, "adjtime %ld %ld %ld %ld",
-		   &nsec, &nusec, &osec, &ousec) != 4)
-	{
-	    fprintf(stderr, "ntpd: garbled adjtime format, line %d\n", lineno);
-	    exit(1);
-	}
+	if (sscanf(linebuf, "adjtime %ld %ld %ld %ld %d",
+		   &nsec, &nusec, &osec, &ousec, &retval) != 5)
+	    replay_fail("garbled adjtime format\n");
 	/* avoid compiler warnings due to time_t having an unexpected length */
 	rntv.tv_sec = (time_t)nsec;
 	rntv.tv_usec = (suseconds_t)nusec;
@@ -504,19 +495,16 @@ int intercept_adjtime(const struct timeval *ntv, struct timeval *otv)
 	    || ntv->tv_usec != rntv.tv_usec
 	    || otv->tv_sec != rotv.tv_sec
 	    || otv->tv_usec != rotv.tv_usec)
-	{
-	    fprintf(stderr, "ntpd: adjtime expected %ld.%ld/%ld.%ld but saw %ld.%ld/%ld.%ld, line %d\n",
-		    (long)rntv.tv_sec,
-		    (long)rntv.tv_usec,
-		    (long)rotv.tv_sec,
-		    (long)rotv.tv_usec,  
-		    (long)ntv->tv_sec,
-		    (long)ntv->tv_usec,
-		    (long)otv->tv_sec,
-		    (long)otv->tv_usec,  
-		    lineno);
-	    exit(1);
-	}
+	    replay_fail("expected %ld.%ld/%ld.%ld but saw %ld.%ld/%ld.%ld\n",
+		(long)rntv.tv_sec,
+		(long)rntv.tv_usec,
+		(long)rotv.tv_sec,
+		(long)rotv.tv_usec,  
+		(long)ntv->tv_sec,
+		(long)ntv->tv_usec,
+		(long)otv->tv_sec,
+		(long)otv->tv_usec);
+	return retval;
     } else {
 	if (mode == capture)
 	    printf("adjtime %ld %ld %ld %ld\n",
@@ -525,7 +513,6 @@ int intercept_adjtime(const struct timeval *ntv, struct timeval *otv)
 
 	return adjtime(ntv, otv);
     }
-    return 0;
 }
 
 #ifdef HAVE_KERNEL_PLL
@@ -578,18 +565,10 @@ int intercept_ntp_adjtime(struct timex *tx)
 		   &rtx.errcnt,
 		   &rtx.stbcnt,
 		   &res) != 17)
-	{
-	    fprintf(stderr, "ntpd: garbled ntp_adtime format, line %d\n",
-		    lineno);
-	    exit(1);
-	}
-
+	    replay_fail("garbled event format, line %d\n");
 	ADJDUMP(&rtx, rtxdump);
-	if (strcmp(txdump, rtxdump) != 0) {
-	    printf("ntpd: adjtime mismatch at line %d, saw %s\n",
-		   lineno, txdump);
-	    exit(1);
-	}
+	if (strcmp(txdump, rtxdump) != 0)
+	    replay_fail("mismatch expecting %s\n", txdump);
     } else {
 	res = ntp_adjtime(tx);
 
@@ -629,17 +608,15 @@ int intercept_set_tod(struct timespec *tvs)
     
     if (mode == replay) {
 	get_operation("set_tod");
-	if (strcmp(linebuf, newset) != 0) {
-	    fprintf(stderr, "ntpd: line %d, set_tod mismatch saw %s\n",
-		    lineno, newset);
-	    exit(1);
-	}
+	if (strcmp(linebuf, newset) != 0)
+	    replay_fail("mismatch saw %s\n", newset);
 	return 0;
     }
     else {
+	int retval = ntp_set_tod(tvs);
 	if (mode == capture)
 	    fputs(newset, stdout);
-	return ntp_set_tod(tvs);
+	return retval;
     }
 }
 
@@ -735,11 +712,8 @@ void intercept_sendpkt(const char *legend,
     if (mode == replay)
     {
 	get_operation("sendpkt ");
-	if (strcmp(linebuf, newpacket) != 0) {
-	    fprintf(stderr, "ntpd: line %d, sendpkt mismatch saw %s\n",
-		    lineno, pkt_dump);
-	    exit(1);
-	}
+	if (strcmp(linebuf, newpacket) != 0)
+	    replay_fail("sendpkt mismatch saw %s\n", pkt_dump);
     } else {
 	sendpkt(dest, ep, ttl, pkt, len);
 
@@ -822,18 +796,12 @@ ssize_t intercept_recvfrom(int sockfd, void *buf, size_t len, int flags,
 	assert(cursor);
 	assert(isdigit(*cursor));
 	rsockfd = (int)strtol(cursor, &cursor, 10);
-	if (sockfd != rsockfd) {
-	    fprintf(stderr, "ntpd: replay failed, expected socket %d in recvfrom but saw %d\n",
-		    rsockfd, sockfd);
-	    exit(1);
-	}
+	if (sockfd != rsockfd)
+	    replay_fail("expected socket %d but saw %d\n", rsockfd, sockfd);
 	++cursor;
 	rflags = (int)strtol(cursor, &cursor, 16);
-	if (flags != rflags) {
-	    fprintf(stderr, "ntpd: replay failed, expected flags %x in recvfrom but saw %x\n",
-		    rflags, flags);
-	    exit(1);
-	}
+	if (flags != rflags)
+	    replay_fail("expected flags %x but saw %x\n", rflags, flags);
 	++cursor;
 	/* FIXME: rest of replay implementation here */
 	recvlen = 0;  /* squish compiler warning */
@@ -873,18 +841,12 @@ ssize_t intercept_recvmsg(int sockfd, struct msghdr *msg, int flags)
 	assert(cursor);
 	assert(isdigit(*cursor));
 	rsockfd = (int)strtol(cursor, &cursor, 10);
-	if (sockfd != rsockfd) {
-	    fprintf(stderr, "ntpd: replay failed, expected socket %d in recvfrom but saw %d\n",
-		    rsockfd, sockfd);
-	    exit(1);
-	}
+	if (sockfd != rsockfd)
+	    replay_fail("ntpd: expected socket %d but saw %d\n", rsockfd,sockfd);
 	++cursor;
 	rflags = (int)strtol(cursor, &cursor, 16);
-	if (flags != rflags) {
-	    fprintf(stderr, "ntpd: replay failed, expected flags %x in recvfrom but saw %x\n",
-		    rflags, flags);
-	    exit(1);
-	}
+	if (flags != rflags)
+	    replay_fail("expected flags %x but saw %x\n", rflags, flags);
 	++cursor;
 	/* FIXME: rest of replay implementation here */
 	recvlen = 0;  /* squish compiler warning */
@@ -912,7 +874,7 @@ ssize_t intercept_recvmsg(int sockfd, struct msghdr *msg, int flags)
     return recvlen;
 }
 
-SOCKET intercept_open_socket(sockaddr_u *addr,
+int intercept_open_socket(sockaddr_u *addr,
 			     bool bcast, bool turn_off_reuse, endpt *interface)
 {
     char open_dump[BUFSIZ];
@@ -920,16 +882,29 @@ SOCKET intercept_open_socket(sockaddr_u *addr,
 
     if (mode == replay)
     {
+	char raddr[BUFSIZ], riname[BUFSIZ];
+	int rbcast, rreuse;
 	get_operation("open_socket ");
-	/* FIXME: replay implementation here */
-	sock = 0;  /* squish compiler warnings */
+	if (sscanf(linebuf, "open_socket %s %d %d %s %d\n",
+		   raddr, &rbcast, &rreuse, riname, &sock) != 5)
+	    replay_fail("garbled event format\n");
+	if (strcmp(socktoa(addr), raddr) != 0)
+	    replay_fail("expected address %s but saw %s",
+		    raddr, socktoa(addr));
+	if (rbcast != bcast)
+	    replay_fail("expected bcast %d but saw %d\n", rbcast, bcast);
+	if (rreuse != turn_off_reuse)
+	    replay_fail("expected turn_off_reuse %d but saw %d\n",
+			rreuse, turn_off_reuse);
+	if (strcmp(interface->name, riname) != 0)
+	    replay_fail("expected endpoint %s but saw %s\n",
+			riname, interface->name);
     } else {
-	snprintf(open_dump, sizeof(open_dump),
-		 "open_socket %s %d %d %s\n",
-		 socktoa(addr), bcast, turn_off_reuse, interface->name);
-
 	sock = open_socket(addr, bcast, turn_off_reuse, interface);
 
+	snprintf(open_dump, sizeof(open_dump),
+		 "open_socket %s %d %d %s %d\n",
+		 socktoa(addr), bcast, turn_off_reuse, interface->name, sock);
 	if (mode == capture)
 	    fputs(open_dump, stdout);
     }
