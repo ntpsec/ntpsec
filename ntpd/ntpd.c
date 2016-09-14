@@ -37,8 +37,8 @@ extern bool sandbox(const bool droproot,
 		    const char *chrootdir,
 		    bool want_dynamic_interface_tracking);
 
-static volatile bool signalled	= false;
-static volatile int signo	= 0;
+void catchQuit (int sig);
+static volatile int signo = 0;
 /* In an ideal world, 'finish_safe()' would declared as noreturn... */
 static	void		finish_safe	(int);
 
@@ -96,16 +96,11 @@ char const *progname;
 extern bool	check_netinfo;
 #endif
 
-bool was_alarmed;
-
 #if defined(HAVE_WORKING_FORK)
 static int	wait_child_sync_if	(int, long);
 #endif
 
-#if defined(SIGHUP)
 static	void	catchHUP	(int);
-volatile int sawHUP = false;
-#endif
 
 # ifdef	DEBUG
 static	void	moredebug	(int);
@@ -687,11 +682,11 @@ ntpdmain(
 	/*
 	 * Set up signals we pay attention to locally.
 	 */
-	signal_no_reset(SIGINT, finish);
-	signal_no_reset(SIGQUIT, finish);
-	signal_no_reset(SIGTERM, finish);
+	signal_no_reset(SIGINT, catchQuit);
+	signal_no_reset(SIGQUIT, catchQuit);
+	signal_no_reset(SIGTERM, catchQuit);
 	signal_no_reset(SIGHUP, catchHUP);
-	signal_no_reset(SIGBUS, finish);  /* FIXME: It's broken, can't continue. */
+	signal_no_reset(SIGBUS, catchQuit);  /* FIXME: It's broken, can't continue. */
 
 # ifdef DEBUG
 	(void) signal_no_reset(MOREDEBUGSIG, moredebug);
@@ -915,35 +910,24 @@ static void mainloop(void)
 
 	init_timer();
 
-	was_alarmed = false;
-
 	for (;;) {
-		if (signalled)
+		if (sawQuit)
 			finish_safe(signo);
-		if (alarm_flag) {	/* alarmed? */
-			was_alarmed = true;
-			alarm_flag = false;
-		}
 
-		if (!was_alarmed && !has_full_recv_buffer()) {
+		if (!sawALRM && !has_full_recv_buffer()) {
 			/*
 			 * Nothing to do.  Wait for something.
 			 */
 			io_handler();
 		}
 
-		if (alarm_flag) {	/* alarmed? */
-			was_alarmed = true;
-			alarm_flag = false;
-		}
-
-		if (was_alarmed) {
+		if (sawALRM) {
 			/*
 			 * Out here, signals are unblocked.  Call timer routine
 			 * to process expiry.
 			 */
 			timer();
-			was_alarmed = false;
+			sawALRM = false;
 		}
 
 # ifdef ENABLE_DEBUG_TIMING
@@ -957,15 +941,11 @@ static void mainloop(void)
 # endif
 			rbuf = get_full_recv_buffer();
 			while (rbuf != NULL) {
-				if (alarm_flag) {
-					was_alarmed = true;
-					alarm_flag = false;
-				}
 
-				if (was_alarmed) {
+				if (sawALRM) {
 					/* avoid timer starvation during lengthy I/O handling */
 					timer();
-					was_alarmed = false;
+					sawALRM = false;
 				}
 
 				/*
@@ -1045,7 +1025,7 @@ static void mainloop(void)
 
 
 /*
- * finish - exit gracefully
+ * finish_safe - exit gracefully
  */
 static void
 finish_safe(
@@ -1069,11 +1049,11 @@ finish_safe(
 }
 
 void
-finish(
+catchQuit(
 	int	sig
 	)
 {
-	signalled = true;
+	sawQuit = true;
 	signo = sig;
 }
 

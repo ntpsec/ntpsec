@@ -445,7 +445,9 @@ extern void send_via_ntp_signd(struct recvbuf *, int, keyid_t, int,
 #endif
 
 /* ntp_timer.c */
-extern volatile bool alarm_flag;		/* alarm flag */
+extern volatile bool sawALRM;
+extern volatile bool sawHUP;
+extern volatile bool sawQuit;		/* SIGQUIT, SIGINT, SIGTERM */
 extern volatile u_long alarm_overflow;
 extern u_long	current_time;		/* seconds since startup */
 extern u_long	timer_timereset;
@@ -475,7 +477,6 @@ extern const char *chrootdir;	/* directory to chroot() to */
 #ifdef HAVE_WORKING_FORK
 extern	int	waitsync_fd_to_close;	/* -w/--wait-sync */
 #endif
-extern  void	finish		(int sig);
 
 /* refclock_conf.c */
 #ifdef REFCLOCK

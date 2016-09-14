@@ -36,9 +36,11 @@ static void check_leapsec(uint32_t, const time_t*, bool);
 volatile int interface_interval;     /* init_io() sets def. 300s */
 
 /*
- * Alarm flag. The mainline code imports this.
+ * Flags from signal handlers
  */
-volatile bool alarm_flag;
+volatile bool sawALRM = false;
+volatile bool sawHUP = false;
+volatile bool sawQuit = false;  /* SIGQUIT, SIGINT, SIGTERM */
 
 /*
  * The counters and timeouts
@@ -66,7 +68,7 @@ u_long current_time;		/* seconds since startup */
 u_long timer_timereset;
 u_long timer_xmtcalls;
 
-static	void alarming (int);
+static	void catchALRM (int);
 
 #ifdef HAVE_TIMER_CREATE
 static timer_t timer_id;
@@ -141,7 +143,7 @@ init_timer(void)
 	/*
 	 * Initialize...
 	 */
-	alarm_flag = false;
+	sawALRM = false;
 	alarm_overflow = 0;
 	adjust_timer = 1;
 	stats_timer = SECSPERHR;
@@ -163,7 +165,7 @@ init_timer(void)
 		exit(1);
 	}
 #endif
-	signal_no_reset(SIGALRM, alarming);
+	signal_no_reset(SIGALRM, catchALRM);
 	itimer.it_interval.tv_sec = 
 		itimer.it_value.tv_sec = (1 << EVENT_TIMEOUT);
 	itimer.it_interval.itv_frac = itimer.it_value.itv_frac = 0;
@@ -329,10 +331,10 @@ timer(void)
 
 
 /*
- * alarming - tell the world we've been alarmed
+ * catchALRM - tell the world we've been alarmed
  */
 static void
-alarming(
+catchALRM(
 	int sig
 	)
 {
@@ -341,15 +343,15 @@ alarming(
 # ifdef DEBUG
 	const char *msg = NULL;
 # endif
-	if (alarm_flag) {
+	if (sawALRM) {
 		alarm_overflow++;
 # ifdef DEBUG
-		msg = "alarming: overflow\n";
+		msg = "catchALRM: overflow\n";
 # endif
 	} else {
-		alarm_flag++;
+		sawALRM = true;
 # ifdef DEBUG
-		msg = "alarming: normal\n";
+		msg = "catchALRM: normal\n";
 # endif
 	}
 # ifdef DEBUG
