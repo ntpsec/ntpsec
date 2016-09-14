@@ -900,10 +900,8 @@ ntpdmain(
 		msyslog(LOG_INFO, "running as non-root disables dynamic interface tracking");
 	}
 #endif
-
-	if (intercept_get_mode() == replay)
-	    intercept_replay();
-	else
+	
+	if (!intercept_replay())
 	    mainloop();
 	return 1;
 }

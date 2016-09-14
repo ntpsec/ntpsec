@@ -38,7 +38,7 @@ int intercept_set_tod(struct timespec *tvs);
 extern bool intercept_leapsec_load_file(const char * fname, struct stat * sb,
 					bool force, bool logall);
 void intercept_getauthkeys(const char *);
-void intercept_replay(void);
+bool intercept_replay(void);
 void intercept_exit(const int);
 
 /* end */
