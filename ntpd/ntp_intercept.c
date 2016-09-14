@@ -87,7 +87,6 @@ no mismatches.
 #include <sys/socket.h>
 #include <netdb.h>
 #include <inttypes.h>
-#include <assert.h>
 #include <ctype.h>
 #include <stdarg.h>
 
@@ -742,9 +741,9 @@ int intercept_select(int nfds, fd_set *readfds)
 	int cnt;
 	get_operation("select ");
 	space = strchr(linebuf, ' ');
-	assert(space);
+	INSIST(space);
 	colon = strchr(linebuf, ':');
-	assert(colon);
+	INSIST(colon);
 	colon = '\0';
 	nfound = atoi(space + 1);
 	cursor = colon +1;
@@ -753,11 +752,11 @@ int intercept_select(int nfds, fd_set *readfds)
 	while (*cursor == ' ')
 	{
 	    char *nstart = ++cursor;
-	    assert(isdigit(*cursor));
+	    INSIST(isdigit(*cursor));
 	    FD_SET((int)strtol(nstart, &cursor, 10), readfds);
 	    ++cnt;
 	}
-	assert(cnt == nfound);
+	INSIST(cnt == nfound);
 	return nfound;
     } else {
 	nfound = select(nfds + 1, readfds, NULL, NULL, NULL);
@@ -781,30 +780,49 @@ int intercept_select(int nfds, fd_set *readfds)
     }
 }
 
+static int hexpack(char *bin, char *hex, int len)
+/* pack a hex-encoded buffer into binary data */
+{
+    char	hexdigits[] = "0123456789abcdef";
+    uint8_t	temp;
+    char	*ptr;
+    int		j;
+
+    for (j = 0; hex[j] && j < len; j++) {
+	ptr = strchr(hexdigits, tolower((unsigned char)hex[j]));
+	if (ptr == NULL)
+	    replay_fail("short packet representation");
+	temp = (uint8_t)(ptr - hexdigits);
+	if (j & 1)
+	    bin[j / 2] |= temp;
+	else
+	    bin[j / 2] = temp << 4;
+    }
+    return j;
+ }
+
 ssize_t intercept_recvfrom(int sockfd, void *buf, size_t len, int flags,
                         struct sockaddr *src_addr, socklen_t *addrlen)
 {
-    char pkt_dump[BUFSIZ];
+    char raddr[BUFSIZ], pkt_dump[BUFSIZ];
     ssize_t recvlen;
 
     if (mode == replay)
     {
-	char *cursor;
 	int rsockfd, rflags;
+	const  char *a;
 	get_operation("recvfrom ");
-	cursor = strchr(linebuf, ' ');
-	assert(cursor);
-	assert(isdigit(*cursor));
-	rsockfd = (int)strtol(cursor, &cursor, 10);
+	if (sscanf(linebuf, "recvfrom %d %x %s %s",
+		   &rsockfd, &rflags, raddr, pkt_dump) != 3)
+	    replay_fail("garbled event format");
 	if (sockfd != rsockfd)
 	    replay_fail("expected socket %d but saw %d\n", rsockfd, sockfd);
-	++cursor;
-	rflags = (int)strtol(cursor, &cursor, 16);
 	if (flags != rflags)
 	    replay_fail("expected flags %x but saw %x\n", rflags, flags);
-	++cursor;
-	/* FIXME: rest of replay implementation here */
-	recvlen = 0;  /* squish compiler warning */
+	a = socktoa((sockaddr_u *)src_addr);
+	if (strcmp(a, raddr) != 0)
+	    replay_fail("expected address %s but saw %s\n", raddr, a);
+	recvlen = hexpack(buf, pkt_dump, len);
     } else {
 	recvlen = recvfrom(sockfd, buf, len, flags, src_addr, addrlen);
 
@@ -812,12 +830,12 @@ ssize_t intercept_recvfrom(int sockfd, void *buf, size_t len, int flags,
 	{
 	    char *cp;
 	    snprintf(pkt_dump, sizeof(pkt_dump),
-		     "recvfrom %d %0x %s",
+		     "recvfrom %d %02x %s",
 		     sockfd, flags, socktoa((sockaddr_u *)src_addr));
 	    for (cp = (char *)buf; cp < (char *)buf + recvlen; cp++)
 		snprintf(pkt_dump + strlen(pkt_dump),
 			 sizeof(pkt_dump) - strlen(pkt_dump),
-			 "%0x", *cp);
+			 "%02x", *cp);
 	    strlcat(pkt_dump, "\n", sizeof(pkt_dump));
 
 	    fputs(pkt_dump, stdout);
@@ -829,34 +847,33 @@ ssize_t intercept_recvfrom(int sockfd, void *buf, size_t len, int flags,
 
 ssize_t intercept_recvmsg(int sockfd, struct msghdr *msg, int flags)
 {
-    char pkt_dump[BUFSIZ];
+    char raddr[BUFSIZ], pkt_dump[BUFSIZ];
     ssize_t recvlen;
 
     if (mode == replay)
     {
-	char *cursor;
 	int rsockfd, rflags;
+	const char *a;
 	get_operation("recvmsg ");
-	cursor = strchr(linebuf, ' ');
-	assert(cursor);
-	assert(isdigit(*cursor));
-	rsockfd = (int)strtol(cursor, &cursor, 10);
+	if (sscanf(linebuf, "recvmsg %d %x %s %s",
+		   &rsockfd, &rflags, raddr, pkt_dump) != 3)
+	    replay_fail("garbled event format");
 	if (sockfd != rsockfd)
-	    replay_fail("ntpd: expected socket %d but saw %d\n", rsockfd,sockfd);
-	++cursor;
-	rflags = (int)strtol(cursor, &cursor, 16);
+	    replay_fail("expected socket %d but saw %d\n", rsockfd, sockfd);
 	if (flags != rflags)
 	    replay_fail("expected flags %x but saw %x\n", rflags, flags);
-	++cursor;
-	/* FIXME: rest of replay implementation here */
-	recvlen = 0;  /* squish compiler warning */
+	a = socktoa((sockaddr_u *)msg->msg_name);
+	if (strcmp(a, raddr) != 0)
+	    replay_fail("expected address %s but saw %s\n", raddr, a);
+	recvlen = hexpack(msg->msg_iov->iov_base,
+			  pkt_dump, msg->msg_iov->iov_len);
     } else {
 	recvlen = recvmsg(sockfd, msg, flags);
 
 	if (mode == capture) {
 	    char *cp;
 	    snprintf(pkt_dump, sizeof(pkt_dump),
-		     "recvmsg %d %0x %s",
+		     "recvmsg %d %02x %s",
 		     sockfd, msg->msg_flags,
 		     socktoa((sockaddr_u *)(&msg->msg_name)));
 	    for (cp = (char *)msg->msg_iov->iov_base;
@@ -864,7 +881,7 @@ ssize_t intercept_recvmsg(int sockfd, struct msghdr *msg, int flags)
 		 cp++)
 		snprintf(pkt_dump + strlen(pkt_dump),
 			 sizeof(pkt_dump) - strlen(pkt_dump),
-			 "%0x", *cp);
+			 "%02x", *cp);
 	    strlcat(pkt_dump, "\n", sizeof(pkt_dump));
 
 	    fputs(pkt_dump, stdout);
