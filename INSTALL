@@ -85,7 +85,7 @@ asciidoc, a2x::
    Fedora: asciidoc  (Stock CentOS/RHEL has only 8.4.5, you must upgrade)
    Debian: asciidoc
 
-Local copy of DocBook styslesheets:
+Local copy of DocBook stylesheets:
    Optional: Prevents documentation build failures when your Internet is down
    Fedora: docbook-xsl-stylesheets
    Debian: docbook-xsl
