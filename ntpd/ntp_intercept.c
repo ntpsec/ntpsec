@@ -744,7 +744,7 @@ int intercept_select(int nfds, fd_set *readfds)
 	INSIST(space);
 	colon = strchr(linebuf, ':');
 	INSIST(colon);
-	colon = '\0';
+	*colon = '\0';
 	nfound = atoi(space + 1);
 	cursor = colon +1;
 	FD_ZERO(readfds);
