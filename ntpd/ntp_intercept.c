@@ -661,7 +661,11 @@ void intercept_sendpkt(const char *legend,
       return;
     }
 
-    packet_dump(pkt_dump, sizeof(pkt_dump), dest, (struct pkt*)pkt, len);
+    strlcpy(pkt_dump, socktoa(dest), sizeof(pkt_dump));
+    strlcat(pkt_dump, " ", sizeof(pkt_dump));
+    packet_dump(pkt_dump + strlen(pkt_dump), sizeof(pkt_dump) - strlen(pkt_dump),
+		(struct pkt*)pkt, len);
+    strlcat(pkt_dump, " ", sizeof(pkt_dump));
     snprintf(newpacket, sizeof(newpacket), "sendpkt %s %s\n", legend, pkt_dump);
 
     if (mode == replay)

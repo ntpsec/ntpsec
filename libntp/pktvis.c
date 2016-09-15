@@ -31,18 +31,14 @@ static char *lfpdump(l_fp *fp)
     return buf;
 }
 
-void packet_dump(char *buf, size_t buflen,
-			sockaddr_u *dest, struct pkt *pkt, size_t len)
+void packet_dump(char *buf, size_t buflen, struct pkt *pkt, size_t len)
 {
     size_t i;
     /*
-     * Format is three tokens: source address, packet, MAC token. 
-     *
      * FIXME: struct pkt fields are in network byte order. Need to
-     * add htonl()/ntohl() calls here.
+     * add htonl()/ntohl() calls here  for comprehensibility.
      */
-    snprintf(buf, buflen, "%s %d:%d:%d:%d:%u:%u:%u:%s:%s:%s:%s ",
-	   socktoa(dest),
+    snprintf(buf, buflen, "%d:%d:%d:%d:%u:%u:%u:%s:%s:%s:%s:",
 	   pkt->li_vn_mode, pkt->stratum, pkt->ppoll, pkt->precision,
 	   pkt->rootdelay, pkt->rootdisp,
 	   pkt->refid,

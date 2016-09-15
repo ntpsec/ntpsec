@@ -67,6 +67,7 @@ def build(ctx):
 		"libntp/modetoa.c",
 		"libntp/msyslog.c",
 		"libntp/netof.c",
+		"libntp/ntpvis.c",
 		"libntp/numtoa.c",
 		"libntp/numtohost.c",
 		"libntp/prettydate.c",
