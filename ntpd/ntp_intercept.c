@@ -690,6 +690,61 @@ static void packet_dump(char *buf, size_t buflen,
 	}
 }
 
+#ifdef __unused__
+static void lfpload(char *str, l_fp *fp)
+{
+    uint64_t	np;
+
+    if (sscanf(str, "%" PRIu64, &np) != 1)
+	replay_fail("bad fp format\n");
+
+    
+    (fp)->l_uf = (np) & 0xFFFFFFFF;					\
+    (fp)->l_ui = (((np) >> FRACTION_PREC) & 0xFFFFFFFF);		\
+}
+
+static size_t packet_parse(char *pktbuf, struct pkt *pkt)
+{
+    char refbuf[32], orgbuf[32], recbuf[32], xmtbuf[32], macbuf[BUFSIZ];
+    int li_vn_mode = 0, stratum = 0, ppoll = 0, precision = 0;
+    size_t pktlen;
+
+    if (sscanf(pktbuf, "%d:%d:%d:%d:%u:%u:%u:%[^:]:%[^:]:%[^:]:%[^:] %s",
+		     &li_vn_mode, &stratum,
+		     &ppoll, &precision,
+		     &pkt->rootdelay, &pkt->rootdisp,
+		     &pkt->refid,
+	       refbuf, orgbuf, recbuf, xmtbuf, macbuf) != 11)
+	replay_fail("garbled event format\n");
+
+    /* extra transfers required because the struct members are int8_t */
+    pkt->li_vn_mode = (uint8_t)li_vn_mode;
+    pkt->stratum = (uint8_t)stratum;
+    pkt->ppoll = (uint8_t)ppoll;
+    pkt->precision = (int8_t)precision;
+    lfpload(refbuf, &pkt->reftime);
+    lfpload(orgbuf, &pkt->org);
+    lfpload(recbuf, &pkt->rec);
+    lfpload(xmtbuf, &pkt->xmt);
+
+    pktlen = LEN_PKT_NOMAC;
+    memset(pkt->exten, '\0', sizeof(pkt->exten));
+    if (strcmp(macbuf, "nomac") != 0) {
+	size_t i;
+	for (i = 0; i < strlen(macbuf)/2; i++) {
+	    int hexval;
+	    if (sscanf(macbuf + 2*i, "%02x", &hexval) != 1) {
+		fprintf(stderr, "ntpd: bad hexval format at line %d\n", lineno);
+		exit(1);
+	    }
+	    pkt->exten[i] = hexval & 0xff;
+	    ++pktlen;
+	}
+    }
+    return pktlen;
+}
+#endif
+
 void intercept_sendpkt(const char *legend,
 		  sockaddr_u *dest, struct interface *ep, int ttl,
 		  void *pkt, int len)
