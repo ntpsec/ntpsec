@@ -11,7 +11,7 @@
 #include "ntp_fp.h"
 #include "lib_strbuf.h"
 
-#define BIGEND_BYTESHIFT(i, m)	(8 * ((m) - (i % (m))))
+#define BIGEND_BYTESHIFT(i, m)	(8 * ((m - 1) - (i % (m))))
 #define BIGEND_GETBYTE(u32, i)	(((u32) >> BIGEND_BYTESHIFT(i, 4)) & 0xff)
 #define BIGEND_PUTBYTE(b, i)	(((b) & 0xff) << BIGEND_BYTESHIFT(i, 4))
 
