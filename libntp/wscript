@@ -29,6 +29,7 @@ def build(ctx):
 		"ntp_worker.c",
 		"numtoa.c",
 		"numtohost.c",
+		"pktvis.c",
 		"prettydate.c",
 		"recvbuff.c",
 		"refidsmear.c",
