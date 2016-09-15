@@ -240,7 +240,7 @@ extern	void	record_timing_stats (const char *);
 extern	char *	fstostr(time_t);	/* NTP timescale seconds */
 
 /* ntpvis.c */
-void packet_dump(char *, size_t, sockaddr_u *, struct pkt *, size_t);
+void packet_dump(char *, size_t, struct pkt *, size_t);
 size_t packet_undump(char *, int len, char *);
 
 /*
