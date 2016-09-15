@@ -35,8 +35,9 @@ void packet_dump(char *buf, size_t buflen, struct pkt *pkt, size_t len)
 {
     size_t i;
     /*
-     * FIXME: struct pkt fields are in network byte order. Need to
-     * add htonl()/ntohl() calls here  for comprehensibility.
+     * FIXME: struct pkt 32-bit ints (uint32_t, u_fp) are in network
+     * byte order. Might need to add htonl()/ntohl() calls here for
+     * comprehensibility.
      */
     snprintf(buf, buflen, "%d:%d:%d:%d:%u:%u:%u:%s:%s:%s:%s:",
 	   pkt->li_vn_mode, pkt->stratum, pkt->ppoll, pkt->precision,

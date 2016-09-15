@@ -441,12 +441,10 @@ struct peer {
 				    - CRYPTO_TO_ZERO((struct peer *)0))
 
 /*
- * NTP packet format.  The mac field is optional.  It isn't really
- * an l_fp either, but for now declaring it that way is convenient.
- * See Appendix A in the specification.
+ * NTP packet format. See Appendix A in the specification.
  *
  * Note that all u_fp and l_fp values arrive in network byte order
- * and must be converted (except the mac, which isn't, really).
+ * and must be converted.
  */
 struct pkt {
 	uint8_t	li_vn_mode;	/* peer leap indicator */
