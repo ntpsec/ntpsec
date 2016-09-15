@@ -690,7 +690,6 @@ static void packet_dump(char *buf, size_t buflen,
 	}
 }
 
-#ifdef __unused__
 static void lfpload(char *str, l_fp *fp)
 {
     uint64_t	np;
@@ -743,7 +742,17 @@ static size_t packet_parse(char *pktbuf, struct pkt *pkt)
     }
     return pktlen;
 }
-#endif
+
+static size_t packet_binpack(char *bin, int len, char *pktbuf)
+{
+    struct pkt pkt;
+    size_t pktlen = packet_parse(pktbuf, &pkt);
+    INSIST((size_t)len >= pktlen);
+    /* works because pkt fields and extension are in network byte order */
+    memcpy(bin, (char *)&pkt, sizeof(pkt));
+    memcpy(bin + sizeof(pkt), (char *)&pkt.exten, pktlen -  sizeof(pkt));
+    return pktlen;
+}
 
 void intercept_sendpkt(const char *legend,
 		  sockaddr_u *dest, struct interface *ep, int ttl,
@@ -835,27 +844,6 @@ int intercept_select(int nfds, fd_set *readfds)
     }
 }
 
-static int hexpack(char *bin, char *hex, int len)
-/* pack a hex-encoded buffer into binary data */
-{
-    char	hexdigits[] = "0123456789abcdef";
-    uint8_t	temp;
-    char	*ptr;
-    int		j;
-
-    for (j = 0; hex[j] && j < len; j++) {
-	ptr = strchr(hexdigits, tolower((unsigned char)hex[j]));
-	if (ptr == NULL)
-	    replay_fail("short packet representation");
-	temp = (uint8_t)(ptr - hexdigits);
-	if (j & 1)
-	    bin[j / 2] |= temp;
-	else
-	    bin[j / 2] = temp << 4;
-    }
-    return j;
- }
-
 ssize_t intercept_recvfrom(int sockfd, void *buf, size_t len, int flags,
                         struct sockaddr *src_addr, socklen_t *addrlen)
 {
@@ -877,7 +865,7 @@ ssize_t intercept_recvfrom(int sockfd, void *buf, size_t len, int flags,
 	a = socktoa((sockaddr_u *)src_addr);
 	if (strcmp(a, raddr) != 0)
 	    replay_fail("expected address %s but saw %s\n", raddr, a);
-	recvlen = hexpack(buf, pkt_dump, len);
+	recvlen = (int)packet_binpack(buf, len, pkt_dump);
     } else {
 	recvlen = recvfrom(sockfd, buf, len, flags, src_addr, addrlen);
 
@@ -920,8 +908,8 @@ ssize_t intercept_recvmsg(int sockfd, struct msghdr *msg, int flags)
 	a = socktoa((sockaddr_u *)msg->msg_name);
 	if (strcmp(a, raddr) != 0)
 	    replay_fail("expected address %s but saw %s\n", raddr, a);
-	recvlen = hexpack(msg->msg_iov->iov_base,
-			  pkt_dump, msg->msg_iov->iov_len);
+	recvlen = (int)packet_binpack(msg->msg_iov->iov_base,
+				      msg->msg_iov->iov_len, pkt_dump);
     } else {
 	recvlen = recvmsg(sockfd, msg, flags);
 
