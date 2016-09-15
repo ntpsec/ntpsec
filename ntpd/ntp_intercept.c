@@ -662,6 +662,10 @@ static char *lfpdump(l_fp *fp)
     return buf;
 }
 
+#define BIGEND_BYTESHIFT(i, m)	(8 * ((m) - (i % (m))))
+#define BIGEND_GETBYTE(u32, i)	(((u32) >> BIGEND_BYTESHIFT(i, 4)) & 0xff)
+#define BIGEND_PUTBYTE(b, i)	(((b) & 0xff) << BIGEND_BYTESHIFT(i, 4))
+
 static void packet_dump(char *buf, size_t buflen,
 			sockaddr_u *dest, struct pkt *pkt, size_t len)
 {
@@ -686,7 +690,7 @@ static void packet_dump(char *buf, size_t buflen,
 	/* dump MAC as len - LEN_PKT_NOMAC chars in hex */
 	for (i = 0; i + LEN_PKT_NOMAC < len; i++) {
 	    snprintf(buf + strlen(buf), buflen - strlen(buf),
-		     "%02x", pkt->exten[i]);
+		     "%02x", BIGEND_GETBYTE(pkt->exten[i / sizeof(uint32_t)], i));
 	}
 }
 
@@ -736,7 +740,7 @@ static size_t packet_parse(char *pktbuf, struct pkt *pkt)
 		fprintf(stderr, "ntpd: bad hexval format at line %d\n", lineno);
 		exit(1);
 	    }
-	    pkt->exten[i] = hexval & 0xff;
+	    pkt->exten[i / sizeof(uint32_t)] |= BIGEND_PUTBYTE(hexval, i);
 	    ++pktlen;
 	}
     }
