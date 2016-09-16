@@ -87,13 +87,6 @@
 	((x)->tv_usec >= 0 && (x)->tv_usec < MICROSECONDS)
 
 /*
- * Convert milliseconds to a time stamp fraction.  Unused except for
- * refclock_leitch.c, so accompanying lookup tables were removed in
- * favor of reusing the microseconds conversion tables.
- */
-#define	MSUTOTSF(msu, tsf)	TVUTOTSF((msu) * 1000, tsf)
-
-/*
  * predicate: returns true if the microseconds are out-of-bounds
  * use like: int timeval_isdenormal(const struct timeval *x)
  */
