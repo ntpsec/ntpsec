@@ -36,13 +36,6 @@ static void check_leapsec(uint32_t, const time_t*, bool);
 volatile int interface_interval;     /* init_io() sets def. 300s */
 
 /*
- * Flags from signal handlers
- */
-volatile bool sawALRM = false;
-volatile bool sawHUP = false;
-volatile bool sawQuit = false;  /* SIGQUIT, SIGINT, SIGTERM */
-
-/*
  * The counters and timeouts
  */
 static  u_long interface_timer;	/* interface update timer */
