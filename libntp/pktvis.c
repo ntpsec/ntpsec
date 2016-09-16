@@ -15,31 +15,19 @@
 #define BIGEND_GETBYTE(u32, i)	(((u32) >> BIGEND_BYTESHIFT(i, 4)) & 0xff)
 #define BIGEND_PUTBYTE(b, i)	(((b) & 0xff) << BIGEND_BYTESHIFT(i, 4))
 
-static char *lfpdump(l_fp *fp)
-{
-    char *buf;
-    uint64_t	np;
-
-    LIB_GETBUF(buf);
-
-    np = fp->l_ui;
-    np <<= FRACTION_PREC;
-    np |= fp->l_uf;
-
-    snprintf(buf, LIB_BUFLENGTH, "%" PRIu64, np);
-
-    return buf;
-}
+static const int LFP_MAX_PRECISION = 10;
 
 void packet_dump(char *buf, size_t buflen, struct pkt *pkt, size_t len)
 {
     size_t i;
     snprintf(buf, buflen, "%d:%d:%d:%d:%u:%u:%08x:%s:%s:%s:%s:",
-	   pkt->li_vn_mode, pkt->stratum, pkt->ppoll, pkt->precision,
-	   pkt->rootdelay, pkt->rootdisp,
-	   pkt->refid,
-	   lfpdump(&pkt->reftime), lfpdump(&pkt->org),
-	   lfpdump(&pkt->rec), lfpdump(&pkt->xmt));
+	     pkt->li_vn_mode, pkt->stratum, pkt->ppoll, pkt->precision,
+	     pkt->rootdelay, pkt->rootdisp,
+	     pkt->refid,
+	     lfptoa(&pkt->reftime, LFP_MAX_PRECISION),
+	     lfptoa(&pkt->org, LFP_MAX_PRECISION),
+	     lfptoa(&pkt->rec, LFP_MAX_PRECISION),
+	     lfptoa(&pkt->xmt, LFP_MAX_PRECISION));
 
     if (len == LEN_PKT_NOMAC)
 	strlcat(buf, "nomac", buflen);
@@ -49,16 +37,6 @@ void packet_dump(char *buf, size_t buflen, struct pkt *pkt, size_t len)
 	    snprintf(buf + strlen(buf), buflen - strlen(buf),
 		     "%02x", BIGEND_GETBYTE(pkt->exten[i / sizeof(uint32_t)], i));
 	}
-}
-
-static void lfpload(char *str, l_fp *fp)
-{
-    uint64_t	np;
-
-    INSIST(sscanf(str, "%" PRIu64, &np) == 1);
-    
-    (fp)->l_uf = (np) & 0xFFFFFFFF;
-    (fp)->l_ui = (((np) >> FRACTION_PREC) & 0xFFFFFFFF);
 }
 
 static int packet_parse(char *pktbuf, struct pkt *pkt)
@@ -80,10 +58,10 @@ static int packet_parse(char *pktbuf, struct pkt *pkt)
     pkt->stratum = (uint8_t)stratum;
     pkt->ppoll = (uint8_t)ppoll;
     pkt->precision = (int8_t)precision;
-    lfpload(refbuf, &pkt->reftime);
-    lfpload(orgbuf, &pkt->org);
-    lfpload(recbuf, &pkt->rec);
-    lfpload(xmtbuf, &pkt->xmt);
+    atolfp(refbuf, &pkt->reftime);
+    atolfp(orgbuf, &pkt->org);
+    atolfp(recbuf, &pkt->rec);
+    atolfp(xmtbuf, &pkt->xmt);
 
     pktlen = LEN_PKT_NOMAC;
     memset(pkt->exten, '\0', sizeof(pkt->exten));

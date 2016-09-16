@@ -6,11 +6,16 @@
 
 TEST_GROUP(ntpvis);
 
-TEST_SETUP(ntpvis) {}
-
-TEST_TEAR_DOWN(ntpvis) {}
-
 #include "ntpd.h"
+#include "timevalops.h"
+
+/* second/usec pair to unsigned lfp */
+#define SECUSECTOTS(sec, usec, ts)		\
+	do { \
+		(ts)->l_ui = (u_long)sec; \
+		TVUTOTSF(usec, (ts)->l_uf); \
+	} while (false)
+
 
 static struct pkt ExamplePacket1 = {
     .li_vn_mode = 6,
@@ -20,15 +25,9 @@ static struct pkt ExamplePacket1 = {
     .rootdelay = 0,
     .rootdisp = 0,
     .refid = 0x47505300,	/* big-endian 'GPS\0' */
-#ifdef __unused__
-    .reftime = 0,
-    .org = 0,
-    .rec = 0,
-    .xmt = 0,
-#endif
     .exten = {0},
 };
-static char *ExampleDump1 = "6:2:3:-21:0:0:47505300:0:0:0:0:nomac";
+static char *ExampleDump1 = "6:2:3:-21:0:0:47505300:1474021718.5261510001:0.0000000000:0.0000000000:0.0000000000:nomac";
 
 /* same as ExamplePacket1 but with 4 extension bytes */
 static struct pkt ExamplePacket2 = {
@@ -39,16 +38,17 @@ static struct pkt ExamplePacket2 = {
     .rootdelay = 0,
     .rootdisp = 0,
     .refid = 0x47505300,	/* big-endian 'GPS\0' */
-#ifdef __unused__
-    .reftime = 0,
-    .org = 0,
-    .rec = 0,
-    .xmt = 0,
-#endif
     .exten = {0x01020304},
 };
-static char *ExampleDump2 = "6:2:3:-21:0:0:47505300:0:0:0:0:01020304";
+static char *ExampleDump2 = "6:2:3:-21:0:0:47505300:1474021718.5261510001:0.0000000000:0.0000000000:0.0000000000:01020304";
 
+TEST_SETUP(ntpvis) {
+    /* becomes lfp 1474021718.5261510001 */
+    SECUSECTOTS(1474021718, 526151, &ExamplePacket1.reftime); 
+    SECUSECTOTS(1474021718, 526151, &ExamplePacket2.reftime); 
+}
+
+TEST_TEAR_DOWN(ntpvis) {}
 
 TEST(ntpvis, PacketDump1) {
     char buf[BUFSIZ];
