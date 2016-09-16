@@ -28,7 +28,7 @@ static struct pkt ExamplePacket1 = {
 #endif
     .exten = {0},
 };
-static char *ExampleDump1 = "6:2:3:-21:0:0:1196446464:0:0:0:0:nomac";
+static char *ExampleDump1 = "6:2:3:-21:0:0:47505300:0:0:0:0:nomac";
 
 /* same as ExamplePacket1 but with 4 extension bytes */
 static struct pkt ExamplePacket2 = {
@@ -47,7 +47,7 @@ static struct pkt ExamplePacket2 = {
 #endif
     .exten = {0x01020304},
 };
-static char *ExampleDump2 = "6:2:3:-21:0:0:1196446464:0:0:0:0:01020304";
+static char *ExampleDump2 = "6:2:3:-21:0:0:47505300:0:0:0:0:01020304";
 
 
 TEST(ntpvis, PacketDump1) {
