@@ -102,16 +102,6 @@ aligned_ptr(
 	return base + ALIGN_UNITS((minsize < 1) ? 1 : minsize);
 }
 
-/*
- * Macro to use in otherwise-empty source files to comply with ANSI C
- * requirement that each translation unit (source file) contain some
- * declaration.  This has commonly been done by declaring an unused
- * global variable of type int or char.  An extern reference to exit()
- * serves the same purpose without bloat.
- */
-#define	NONEMPTY_TRANSLATION_UNIT	extern void exit(int);
-
-
 typedef int SOCKET;
 # define INVALID_SOCKET		(-1)
 # define SOCKET_ERROR		(-1)

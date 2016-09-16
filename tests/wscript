@@ -78,7 +78,6 @@ def build(ctx):
 		"libntp/statestr.c",
 		"libntp/strtolfp.c",
 #		"libntp/timespecops.c",
-#		"libntp/timevalops.c",
 		"libntp/tstotv.c",
 		"libntp/tvtots.c",
 		"libntp/vi64ops.c",
