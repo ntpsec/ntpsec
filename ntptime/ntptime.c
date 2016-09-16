@@ -122,7 +122,7 @@ main(
 	int ch;
 	int errflg	= 0;
 	int cost	= 0;
-	bool json       = false;
+	volatile bool json      = false;
 	volatile int rawtime	= 0;
 	char ascbuf[BUFSIZ];
 

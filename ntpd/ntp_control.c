@@ -1329,7 +1329,7 @@ ctl_putrefid(
 	char *	oplim;
 	char *	iptr;
 	char *	iplim;
-	char *	past_eq;
+	char *	past_eq = NULL;
 
 	optr = output;
 	oplim = output + sizeof(output);

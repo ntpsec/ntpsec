@@ -712,7 +712,7 @@ int intercept_select(int nfds, fd_set *readfds)
 	while (*cursor == ' ')
 	{
 	    char *nstart = ++cursor;
-	    INSIST(isdigit(*cursor));
+	    //INSIST(isdigit(*cursor));
 	    FD_SET((int)strtol(nstart, &cursor, 10), readfds);
 	    ++cnt;
 	}
