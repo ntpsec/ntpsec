@@ -610,7 +610,7 @@ AADRxQAAxBEAAA==
 
 if __name__ == '__main__':
     try:
-        (options, arguments) = getopt.getopt(sys.argv[1:], "d:e:ghn:o:p:s:D:N", [
+        (options, arguments) = getopt.getopt(sys.argv[1:], "d:e:ghn:o:p:s:D:", [
             "local-offset", "local-error", "local-jitter", "local-stability",
             "local-offset-histogram",
             "all-peer-offsets", "peer-offsets=",
