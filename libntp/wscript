@@ -41,7 +41,6 @@ def build(ctx):
 		"strl_obsd.c",
 		"syssignal.c",
 		"timetoa.c",
-		"timevalops.c",
 		"vint64ops.c",
 		"work_thread.c",
 		"ymd2yd.c",

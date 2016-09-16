@@ -25,48 +25,18 @@
 /*
  * Convert usec to a time stamp fraction.
  */
-#ifdef USE_TSF_USEC_TABLES
-extern const uint32_t ustotslo[];
-extern const uint32_t ustotsmid[];
-extern const uint32_t ustotshi[];
-
-# define TVUTOTSF(tvu, tsf)						\
-	 ((tsf) = ustotslo[(tvu) & 0xff]				\
-		  + ustotsmid[((tvu) >> 8) & 0xff]			\
-		  + ustotshi[((tvu) >> 16) & 0xf])
-#else
 # define TVUTOTSF(tvu, tsf)						\
 	((tsf) = (uint32_t)						\
 		 ((((uint64_t)(tvu) << 32) + MICROSECONDS / 2) /		\
 		  MICROSECONDS))
-#endif
 
 /*
  * Convert a time stamp fraction to microseconds.  The time stamp
  * fraction is assumed to be unsigned.
  */
-#ifdef USE_TSF_USEC_TABLES
-extern const uint32_t tstouslo[256];
-extern const uint32_t tstousmid[256];
-extern const uint32_t tstoushi[128];
-
-/*
- * TV_SHIFT is used to turn the table result into a usec value.  To
- * round, add in TV_ROUNDBIT before shifting.
- */
-#define	TV_SHIFT	3
-#define	TV_ROUNDBIT	0x4
-
-# define TSFTOTVU(tsf, tvu)						\
-	 ((tvu) = (tstoushi[((tsf) >> 24) & 0xff]			\
-		  + tstousmid[((tsf) >> 16) & 0xff]			\
-		  + tstouslo[((tsf) >> 9) & 0x7f]			\
-		  + TV_ROUNDBIT) >> TV_SHIFT)
-#else
 # define TSFTOTVU(tsf, tvu)						\
 	 ((tvu) = (int32_t)						\
 		  (((uint64_t)(tsf) * MICROSECONDS + 0x80000000) >> 32))
-#endif
 
 /*
  * Convert a struct timeval to a time stamp.
