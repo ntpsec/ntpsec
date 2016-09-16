@@ -34,12 +34,7 @@ static char *lfpdump(l_fp *fp)
 void packet_dump(char *buf, size_t buflen, struct pkt *pkt, size_t len)
 {
     size_t i;
-    /*
-     * FIXME: struct pkt 32-bit ints (uint32_t, u_fp) are in network
-     * byte order. Might need to add htonl()/ntohl() calls here for
-     * comprehensibility.
-     */
-    snprintf(buf, buflen, "%d:%d:%d:%d:%u:%u:%u:%s:%s:%s:%s:",
+    snprintf(buf, buflen, "%d:%d:%d:%d:%u:%u:%08x:%s:%s:%s:%s:",
 	   pkt->li_vn_mode, pkt->stratum, pkt->ppoll, pkt->precision,
 	   pkt->rootdelay, pkt->rootdisp,
 	   pkt->refid,
@@ -72,7 +67,7 @@ static int packet_parse(char *pktbuf, struct pkt *pkt)
     int li_vn_mode = 0, stratum = 0, ppoll = 0, precision = 0;
     size_t pktlen;
 
-    if (sscanf(pktbuf, "%d:%d:%d:%d:%u:%u:%u:%[^:]:%[^:]:%[^:]:%[^:] %s",
+    if (sscanf(pktbuf, "%d:%d:%d:%d:%u:%u:%08x:%[^:]:%[^:]:%[^:]:%[^:] %s",
 		     &li_vn_mode, &stratum,
 		     &ppoll, &precision,
 		     &pkt->rootdelay, &pkt->rootdisp,
