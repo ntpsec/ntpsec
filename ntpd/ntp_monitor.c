@@ -11,12 +11,6 @@
 #include "ntp_random.h"
 #include "ntp_intercept.h"
 
-#include <stdio.h>
-#include <signal.h>
-#ifdef HAVE_SYS_IOCTL_H
-# include <sys/ioctl.h>
-#endif
-
 /*
  * Record statistics based on source address, mode and version. The
  * receive procedure calls us with the incoming rbufp before it does

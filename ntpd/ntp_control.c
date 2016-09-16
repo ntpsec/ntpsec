@@ -7,7 +7,6 @@
 
 #include <stdio.h>
 #include <ctype.h>
-#include <signal.h>
 #include <sys/stat.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
