@@ -325,6 +325,13 @@ static input_handler_t  input_handler;
 static inline int	read_refclock_packet	(SOCKET, struct refclockio *, l_fp);
 #endif
 
+/*
+ * Flags from signal handlers
+ */
+volatile bool sawALRM = false;
+volatile bool sawHUP = false;
+volatile bool sawQuit = false;  /* SIGQUIT, SIGINT, SIGTERM */
+sigset_t blockMask;
 
 void
 maintain_activefds(
@@ -429,6 +436,16 @@ init_io(void)
 	init_recvbuff(RECV_INIT);
 	/* update interface every 5 minutes as default */
 	interface_interval = 300;
+
+	sigemptyset(&blockMask);
+	sigaddset(&blockMask, SIGALRM);
+	sigaddset(&blockMask, MOREDEBUGSIG);
+	sigaddset(&blockMask, LESSDEBUGSIG);
+	sigaddset(&blockMask, SIGINT);
+	sigaddset(&blockMask, SIGQUIT);
+	sigaddset(&blockMask, SIGTERM);
+	sigaddset(&blockMask, SIGHUP);
+
 
 #ifdef USE_WORK_PIPE
 	addremove_io_fd = &ntpd_addremove_io_fd;

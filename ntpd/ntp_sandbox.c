@@ -319,6 +319,7 @@ int scmp_sc[] = {
 	SCMP_SYS(munmap),
 	SCMP_SYS(open),
 	SCMP_SYS(poll),
+	SCMP_SYS(pselect6),
 	SCMP_SYS(read),
 	SCMP_SYS(recvfrom),
 	SCMP_SYS(recvmsg),

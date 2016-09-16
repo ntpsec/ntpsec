@@ -428,6 +428,11 @@ extern u_long	sys_limitrejected;	/* rate exceeded */
 extern u_long	sys_kodsent;		/* KoD sent */
 extern u_long	use_stattime;		/* time since reset */
 
+/* Signalling */
+extern volatile bool sawALRM;
+extern volatile bool sawHUP;
+extern volatile bool sawQuit;		/* SIGQUIT, SIGINT, SIGTERM */
+extern sigset_t blockMask;
 
 /* ntp_restrict.c */
 extern restrict_u *	restrictlist4;	/* IPv4 restriction list */
@@ -445,9 +450,6 @@ extern void send_via_ntp_signd(struct recvbuf *, int, keyid_t, int,
 #endif
 
 /* ntp_timer.c */
-extern volatile bool sawALRM;
-extern volatile bool sawHUP;
-extern volatile bool sawQuit;		/* SIGQUIT, SIGINT, SIGTERM */
 extern volatile u_long alarm_overflow;
 extern u_long	current_time;		/* seconds since startup */
 extern u_long	timer_timereset;
