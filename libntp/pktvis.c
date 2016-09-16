@@ -45,12 +45,12 @@ static int packet_parse(char *pktbuf, struct pkt *pkt)
     int li_vn_mode = 0, stratum = 0, ppoll = 0, precision = 0;
     size_t pktlen;
 
-    if (sscanf(pktbuf, "%d:%d:%d:%d:%u:%u:%08x:%[^:]:%[^:]:%[^:]:%[^:] %s",
+    if (sscanf(pktbuf, "%d:%d:%d:%d:%u:%u:%08x:%[^:]:%[^:]:%[^:]:%[^:]:%s",
 		     &li_vn_mode, &stratum,
 		     &ppoll, &precision,
 		     &pkt->rootdelay, &pkt->rootdisp,
 		     &pkt->refid,
-	       refbuf, orgbuf, recbuf, xmtbuf, macbuf) != 11)
+	       refbuf, orgbuf, recbuf, xmtbuf, macbuf) != 12)
 	return -1;
 
     /* extra transfers required because the struct members are int8_t */
@@ -73,8 +73,9 @@ static int packet_parse(char *pktbuf, struct pkt *pkt)
 		return -1;
 	    }
 	    pkt->exten[i / sizeof(uint32_t)] |= BIGEND_PUTBYTE(hexval, i);
-	    ++pktlen;
 	}
+
+	pktlen += i;
     }
     return pktlen;
 }
@@ -85,8 +86,7 @@ size_t packet_undump(char *bin, int len, char *pktbuf)
     int pktlen = packet_parse(pktbuf, &pkt);
     INSIST((pktlen != -1) && len >= pktlen);
     /* works because pkt fields and extension are in network byte order */
-    memcpy(bin, (char *)&pkt, sizeof(pkt));
-    memcpy(bin + sizeof(pkt), (char *)&pkt.exten, pktlen -  sizeof(pkt));
+    memcpy(bin, (char *)&pkt, pktlen);
     return pktlen;
 }
 
