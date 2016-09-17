@@ -393,9 +393,9 @@ lfp_stamp_to_tval(
 
 	/* copying a vint64 to a time_t needs some care... */
 #if SIZEOF_TIME_T <= 4
-	out.tv_sec = (time_t)sec.d_s.lo;
+	out.tv_sec = (time_t)vint64lo(sec);
 #else
-	out.tv_sec = (time_t)sec.q_s;
+	out.tv_sec = (time_t)vint64s(sec);
 #endif
 	out = normalize_tval(out);
 

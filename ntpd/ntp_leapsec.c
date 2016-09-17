@@ -204,7 +204,7 @@ leapsec_load(
 				pt->head.expire = strtouv64(cp, &ep, 10);
 				if (parsefail(cp, ep))
 					goto fail_read;
-				pt->lsig.etime = pt->head.expire.D_s.lo;
+				pt->lsig.etime = vint64lo(pt->head.expire);
 			} else if (*cp == '$') {
 				cp = skipws(cp+1);
 				pt->head.update = strtouv64(cp, &ep, 10);
@@ -227,7 +227,7 @@ leapsec_load(
 			} else {
 				pt->head.base_tai = (int16_t)taiof;
 			}
-			pt->lsig.ttime = ttime.D_s.lo;
+			pt->lsig.ttime = vint64lo(ttime);
 			pt->lsig.taiof = (int16_t)taiof;
 		}
 	}
@@ -310,14 +310,14 @@ leapsec_query(
 		 * both modes is easier to maintain.
 		 */
 		last = pt->head.ttime;
-		qr->warped = (int16_t)(last.D_s.lo -
-				       pt->head.dtime.D_s.lo);
+		qr->warped = (int16_t)(vint64lo(last) -
+				       vint64lo(pt->head.dtime));
 		next = addv64i32(&ts64, qr->warped);
 		reload_limits(pt, &next);
 		fired = ucmpv64(&pt->head.ebase, &last) == 0;
 		if (fired) {
 			ts64 = next;
-			ts32 = next.D_s.lo;
+			ts32 = vint64lo(next);
 		} else {
 			qr->warped = 0;
 		}
@@ -330,7 +330,7 @@ leapsec_query(
 		return fired;
 
 	/* now start to collect the remaing data */
-	due32 = pt->head.dtime.D_s.lo;
+	due32 = vint64lo(pt->head.dtime);
 
 	qr->tai_diff  = pt->head.next_tai - pt->head.this_tai;
 	qr->ttime     = pt->head.ttime;
@@ -832,7 +832,7 @@ leapsec_add(
 	ttime = ntpcal_date_to_ntp64(&fts);
 
 	li.ttime = ttime;
-	li.stime = ttime.D_s.lo - starttime.D_s.lo;
+	li.stime = vint64lo(ttime) - vint64lo(starttime);
 	li.taiof = (pt->head.size ? pt->info[0].taiof : pt->head.base_tai)
 	         + (insert ? 1 : -1);
 	li.dynls = 1;
@@ -870,7 +870,7 @@ leapsec_raw(
 	fts.month--; /* was in range 1..12, no overflow here! */
 	starttime    = ntpcal_date_to_ntp64(&fts);
 	li.ttime = *ttime;
-	li.stime = ttime->D_s.lo - starttime.D_s.lo;
+	li.stime = vint64lo(*ttime) - vint64lo(starttime);
 	li.taiof = (int16_t)taiof;
 	li.dynls = (dynls != 0);
 	return add_range(pt, &li);

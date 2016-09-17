@@ -62,7 +62,7 @@ get_struct_tm(
 	time_t	   ts;
 
 	int64_t tl;
-	ts = tl = stamp->q_s;
+	ts = tl = vint64s(*stamp);
 
 	/*
 	 * If there is chance of truncation, try to fix it. Let the

@@ -94,7 +94,7 @@ strtouv64(
 		if (digit >= base)
 			break;
 		num = 1;
-		res.Q_s = res.Q_s * base + digit;
+		setvint64u(res, vint64u(res) * base + digit);
 		src++;
 	}
 	if (!num)
@@ -102,7 +102,7 @@ strtouv64(
 	if (endp)
 		*endp = (char*)noconst(src);
 	if (sig)
-		M_NEG(res.D_s.hi, res.D_s.lo);
+		M_NEG(vint64hiu(res), vint64lo(res));
 	return res;
 }
 
@@ -116,8 +116,8 @@ icmpv64(
 {
 	int res;
 
-	res = (lhs->q_s > rhs->q_s)
-	    - (lhs->q_s < rhs->q_s);
+	res = (vint64s(*lhs) > vint64s(*rhs))
+	    - (vint64s(*lhs) < vint64s(*rhs));
 
 	return res;
 }
@@ -132,8 +132,8 @@ ucmpv64(
 {
 	int res;
 	
-	res = (lhs->Q_s > rhs->Q_s)
-	    - (lhs->Q_s < rhs->Q_s);
+	res = (vint64u(*lhs) > vint64u(*rhs))
+	    - (vint64u(*lhs) < vint64u(*rhs));
 
 	return res;
 }
@@ -148,7 +148,7 @@ addv64(
 {
 	vint64 res;
 
-	res.Q_s = lhs->Q_s + rhs->Q_s;
+	setvint64u(res, vint64u(*lhs) + vint64u(*rhs));
 
 	return res;
 }
@@ -163,7 +163,7 @@ subv64(
 {
 	vint64 res;
 
-	res.Q_s = lhs->Q_s - rhs->Q_s;
+	setvint64u(res, vint64u(*lhs) - vint64u(*rhs));
 
 	return res;
 }
@@ -179,7 +179,7 @@ addv64i32(
 	vint64 res;
 
 	res = *lhs;
-	res.q_s += rhs;
+	setvint64u(res, vint64u(res) + rhs);
 
 	return res;
 }
@@ -195,7 +195,7 @@ subv64i32(
 	vint64 res;
 
 	res = *lhs;
-	res.q_s -= rhs;
+	setvint64s(res, vint64s(res) - rhs);
 
 	return res;
 }
@@ -227,7 +227,7 @@ subv64u32(
 	vint64 res;
 
 	res = *lhs;
-	res.Q_s -= rhs;
+	setvint64u(res, vint64u(res) - rhs); 
 
 	return res;
 }
