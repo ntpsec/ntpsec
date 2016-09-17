@@ -32,7 +32,13 @@ seconds part - how it's interpreted depends on which member of a union
 is used.
 
 The comments in libntp/ntp_calendar.c are pretty illuminating about
-calendar representations.
+calendar representations.  A high-level point they don't make is
+that ignoring time cycles in l_fp is exactly how NTP gets around the
+Y2K38 problem. As long as the average clock skew between machines
+is much less than the length of a calendar cycle (which it generally
+will be, by a factor of at least five million) we can map all incoming
+timestamps from whatever cycle into the nearest time im modular
+arithmetic relative to the cycle length.
 
 === vint64 ===
 

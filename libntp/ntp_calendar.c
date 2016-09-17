@@ -4,6 +4,9 @@
  * Written by Juergen Perlinger <perlinger@ntp.org> for the NTP project.
  * Copyright 2015 by the NTPsec project contributors
  * SPDX-License-Identifier: NTP
+ *
+ * There is more about these types and calculations in the internals tour
+ * document distributed with the code.
  */
 #include <config.h>
 #include <sys/types.h>
@@ -512,7 +515,7 @@ ntpcal_split_eradays(
 	 * Split off calendar cycles, using floor division in the first
 	 * step. After that first step, simple division does it because
 	 * all operands are positive; alas, we have to be aware of the
-	 * possibe cycle overflows for 100 years and 1 year, caused by
+	 * possible cycle overflows for 100 years and 1 year, caused by
 	 * the additional leap day.
 	 */
 	n400 = days / GREGORIAN_CYCLE_DAYS;
