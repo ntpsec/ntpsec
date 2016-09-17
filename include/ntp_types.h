@@ -69,6 +69,17 @@ typedef union {
 	uint64_t Q_s;	/* unsigned quad scalar */
 } vint64; /* variant int 64 */
 
+/* hide the structure of a vint64 */
+#define vint64lo(n)       (n).d_s.lo
+#define setvint64lo(n,v)  (n).d_s.lo = (v)
+#define vint64his(n)      (n).d_s.hi
+#define setvint64his(n,v) (n).d_s.hi = (v)
+#define vint64hiu(n)      (n).D_s.hi
+#define setvint64hiu(n,v) (n).D_s.hi = (v)
+#define vint64s(n)        (n).q_s
+#define setvint64s(n,v)   (n).q_s = (v)
+#define vint64u(n)        (n).Q_s
+#define setvint64u(n,v)   (n).Q_s = (v)
 
 typedef uint16_t	associd_t; /* association ID */
 #define ASSOCID_MAX	USHRT_MAX

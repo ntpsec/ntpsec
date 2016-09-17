@@ -17,14 +17,8 @@ bool IsEqual(const vint64 *expected, const vint64 *actual) {
 	if (0 == memcmp(expected, actual, sizeof(vint64))) {
 		return true;
 	} else {
-		printf("Expected: %04x.%04x but was: %04x.%04x\n", expected->D_s.hi, expected->D_s.lo, actual->D_s.hi, actual->D_s.lo);
+		printf("Expected: %04x.%04x but was: %04x.%04x\n", vint64hiu(*expected), vint64lo(*expected), vint64hiu(*actual), vint64lo(*actual));
 		return false;
-//		    << "expected: "
-//		    << std::hex << expected.D_s.hi << '.'
-//		    << std::hex << expected.D_s.lo
-//		    << " but was "
-//		    << std::hex << actual.D_s.hi << '.'
-//		    << std::hex << actual.D_s.lo;
 	}
 }
 
@@ -36,8 +30,8 @@ TEST(vi64ops, ParseVUI64_pos) {
 	char       *ep;
 
 	sp         = "1234x";
-	exp.D_s.hi = 0;
-	exp.D_s.lo = 1234;
+	setvint64hiu(exp, 0);
+	setvint64lo(exp, 1234);
 	act        = strtouv64(sp, &ep, 0);
 	TEST_ASSERT_TRUE(IsEqual(&exp, &act));
 	TEST_ASSERT_EQUAL(*ep, 'x');
@@ -49,8 +43,8 @@ TEST(vi64ops, ParseVUI64_neg) {
 	char       *ep;
 
 	sp         = "-1234x";
-	exp.D_s.hi = ~0;
-	exp.D_s.lo = -1234;
+	setvint64hiu(exp, ~0);
+	setvint64lo(exp, -1234);
 	act        = strtouv64(sp, &ep, 0);
 	TEST_ASSERT_TRUE(IsEqual(&exp, &act));
 	TEST_ASSERT_EQUAL(*ep, 'x');
@@ -62,8 +56,8 @@ TEST(vi64ops, ParseVUI64_case) {
 	char       *ep;
 
 	sp         = "0123456789AbCdEf";
-	exp.D_s.hi = 0x01234567;
-	exp.D_s.lo = 0x89ABCDEF;
+	setvint64hiu(exp, 0x01234567);
+	setvint64lo(exp, 0x89ABCDEF);
 	act        = strtouv64(sp, &ep, 16);
 	TEST_ASSERT_TRUE(IsEqual(&exp, &act));
 	TEST_ASSERT_EQUAL(*ep, '\0');
