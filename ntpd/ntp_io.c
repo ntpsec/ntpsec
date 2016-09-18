@@ -267,7 +267,6 @@ static	bool	addr_eqprefix	(const sockaddr_u *, const sockaddr_u *,
 static  bool	addr_samesubnet	(const sockaddr_u *, const sockaddr_u *,
 				 const sockaddr_u *, const sockaddr_u *);
 static	int	create_sockets	(u_short);
-static	char *	fdbits		(int, fd_set *);
 static	void	set_reuseaddr	(int);
 static	bool	socket_broadcast_enable	 (struct interface *, SOCKET, sockaddr_u *);
 #ifdef  OS_MISSES_SPECIFIC_ROUTE_UPDATES
@@ -318,9 +317,8 @@ static int		cmp_addr_distance(const sockaddr_u *,
  * Routines to read the ntp packets
  */
 static inline int	read_network_packet	(SOCKET, struct interface *, l_fp);
-static void		ntpd_addremove_io_fd	(int, int, int);
-typedef void (input_handler_t)(l_fp *);
-static input_handler_t  input_handler;
+static void ntpd_addremove_io_fd (int, int, int);
+static void input_handler (fd_set *, l_fp *);
 #ifdef REFCLOCK
 static inline int	read_refclock_packet	(SOCKET, struct refclockio *, l_fp);
 #endif
@@ -3074,30 +3072,6 @@ sendpkt(
 }
 
 
-/*
- * fdbits - generate ascii representation of fd_set (FAU debug support)
- * HFDF format - highest fd first.
- */
-static char *
-fdbits(
-	int count,
-	fd_set *set
-	)
-{
-	static char buffer[256];
-	char * buf = buffer;
-
-	count = min(count,  255);
-
-	while (count >= 0) {
-		*buf++ = FD_ISSET(count, set) ? '#' : '-';
-		count--;
-	}
-	*buf = '\0';
-
-	return buffer;
-}
-
 
 #ifdef REFCLOCK
 /*
@@ -3470,7 +3444,7 @@ io_handler(void)
 		 */
 		get_systime(&ts);
 
-		input_handler(&ts);
+		input_handler(&rdfdes, &ts);
 	} else if (nfound == -1 && errno != EINTR) {
 		msyslog(LOG_ERR, "select() error: %m");
 	}
@@ -3488,21 +3462,18 @@ io_handler(void)
  */
 static void
 input_handler(
+	fd_set *	fds,
 	l_fp *	cts
 	)
 {
 	int		buflen;
-	int		n;
 	u_int		idx;
 	int		doing;
 	SOCKET		fd;
-	blocking_child *c;
-	struct timeval	tvzero;
 	l_fp		ts;	/* Timestamp at BOselect() gob */
 #ifdef ENABLE_DEBUG_TIMING
 	l_fp		ts_e;	/* Timestamp at EOselect() gob */
 #endif
-	fd_set		fds;
 	size_t		select_count;
 	endpt *		ep;
 #ifdef REFCLOCK
@@ -3524,51 +3495,6 @@ input_handler(
 	 */
 	ts = *cts;
 
-	/*
-	 * Do a poll to see who has data
-	 */
-
-	fds = activefds;
-	tvzero.tv_sec = tvzero.tv_usec = 0;
-
-	/* Doesn't wait, just scans. */
-	n = select(maxactivefd + 1, &fds, NULL, NULL, &tvzero);
-
-	/*
-	 * If there are no packets waiting just return
-	 */
-	if (n < 0) {
-		int err = errno;
-		int j, b, prior;
-		/*
-		 * extended FAU debugging output
-		 */
-		if (err != EINTR)
-			msyslog(LOG_ERR,
-				"select(%d, %s, 0L, 0L, &0.0) error: %m",
-				maxactivefd + 1,
-				fdbits(maxactivefd, &activefds));
-		if (err != EBADF)
-			goto ih_return;
-		for (j = 0, prior = 0; j <= maxactivefd; j++) {
-			if (FD_ISSET(j, &activefds)) {
-				if (-1 != read(j, &b, 0)) {
-					prior = j;
-					continue;
-				}
-				msyslog(LOG_ERR,
-					"Removing bad file descriptor %d from select set",
-					j);
-				FD_CLR(j, &activefds);
-				if (j == maxactivefd)
-					maxactivefd = prior;
-			}
-		}
-		goto ih_return;
-	}
-	else if (n == 0)
-		goto ih_return;
-
 	++handler_pkts;
 
 #ifdef REFCLOCK
@@ -3580,7 +3506,7 @@ input_handler(
 		for (rp = refio; rp != NULL; rp = rp->next) {
 			fd = rp->fd;
 
-			if (!FD_ISSET(fd, &fds))
+			if (!FD_ISSET(fd, fds))
 				continue;
 			++select_count;
 			buflen = read_refclock_packet(fd, rp, ts);
@@ -3627,7 +3553,7 @@ input_handler(
 			}
 			if (fd < 0)
 				continue;
-			if (FD_ISSET(fd, &fds))
+			if (FD_ISSET(fd, fds))
 				do {
 					++select_count;
 					buflen = read_network_packet(
@@ -3646,7 +3572,7 @@ input_handler(
 	while (asyncio_reader != NULL) {
 		/* callback may unlink and free asyncio_reader */
 		next_asyncio_reader = asyncio_reader->link;
-		if (FD_ISSET(asyncio_reader->fd, &fds)) {
+		if (FD_ISSET(asyncio_reader->fd, fds)) {
 			++select_count;
 			(*asyncio_reader->receiver)(asyncio_reader);
 		}
@@ -3658,10 +3584,10 @@ input_handler(
 	 * Check for a response from a blocking child
 	 */
 	for (idx = 0; idx < blocking_children_alloc; idx++) {
-		c = blocking_children[idx];
+		blocking_child *c = blocking_children[idx];
 		if (NULL == c || -1 == c->resp_read_pipe)
 			continue;
-		if (FD_ISSET(c->resp_read_pipe, &fds)) {
+		if (FD_ISSET(c->resp_read_pipe, fds)) {
 			select_count++;
 			process_blocking_resp(c);
 		}
@@ -3677,7 +3603,7 @@ input_handler(
 		if (debug)
 			msyslog(LOG_DEBUG, "input_handler: select() returned 0");
 #endif /* DEBUG */
-		goto ih_return;
+		return;
 	}
 	/* We've done our work */
 #ifdef ENABLE_DEBUG_TIMING
@@ -3696,7 +3622,6 @@ input_handler(
 			lfptoms(&ts_e, 6));
 #endif /* ENABLE_DEBUG_TIMING */
 	/* We're done... */
-    ih_return:
 	return;
 }
 
