@@ -384,7 +384,7 @@ ntpcal_ntp_to_time(
 	vint64 res;
 
 	setvint64s(res, (pivot != NULL) ? *pivot : now());
-	setvint64u(res, vint64s(res)-0x80000000);	/* unshift of half range */
+	setvint64u(res, vint64u(res)-0x80000000);	/* unshift of half range */
 	ntp	-= (uint32_t)JAN_1970;		/* warp into UN*X domain */
 	ntp	-= vint64lo(res);		/* cycle difference	 */
 	setvint64u(res, vint64u(res)+(uint64_t)ntp);	/* get expanded time */
