@@ -198,6 +198,11 @@ class ntpq_interpreter(cmd.Cmd):
         self.ccmds = []			# Queued commands
         self.chosts = []		# Command-line hosts
         self.debug = 0
+
+    def emptyline(self):
+        "Called when an empty line is entered in response to the prompt."
+        pass
+
     def do_EOF(self, _unused):
         "exit ntpq"
         sys.stdout.write("\n")
