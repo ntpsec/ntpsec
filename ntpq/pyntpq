@@ -193,7 +193,7 @@ class ntpq_interpreter(cmd.Cmd):
         #self.auth_hashlen = 16		# MD5
         self.rawmode           = False	# Flag which indicates raw mode output.
         self.showhostnames     = True	# If false, display numeric IPs
-	#self.l_fp delay_time		# delay time
+        #self.l_fp delay_time		# delay time
         self.wideremote = False		# show wide remote names?
         self.ccmds = []			# Queued commands
         self.chosts = []		# Command-line hosts
