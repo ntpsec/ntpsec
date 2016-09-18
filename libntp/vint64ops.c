@@ -211,7 +211,7 @@ addv64u32(
 	vint64 res;
 
 	res = *lhs;
-	res.Q_s += rhs;
+	setvint64u(res, vint64u(res) + rhs);
 
 	return res;
 }
