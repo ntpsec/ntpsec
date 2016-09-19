@@ -97,7 +97,7 @@ class NTPViz(NTPStats):
 set terminal png size 900,600
 set xdata time
 set grid
-set xlabel "Time"
+set xlabel "Time (dd-hh:mm)"
 set format x "%d-%H:%M"
 set timefmt "%s"
 set xtic rotate by -45 scale 0
