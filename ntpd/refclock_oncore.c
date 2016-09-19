@@ -3378,7 +3378,6 @@ oncore_check_almanac(
 			     instance->mode == MODE_3D,
 			     instance->rsm.bad_almanac,
 			     instance->rsm.bad_fix);
-		}
 #endif
 	}
 }
