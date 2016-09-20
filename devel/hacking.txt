@@ -156,7 +156,7 @@ the compiler and toolchain have been modernized.
 
 == Python guidelines ==
 
-You may assume Python 2 at 2.6 or later, or Python 3 at 3.2 or later.
+You may assume Python 2 at 2.6 or later, or Python 3 at 3.3 or later.
 
 Please read https://www.python.org/dev/peps/pep-0008/[PEP 8] and use
 that style.  The only PEP 8 style rule we relax is that you may
@@ -169,6 +169,11 @@ unaltered under 2 or 3.  Practices for doing so are documented in
 detail at
 
 http://www.catb.org/esr/faqs/practical-python-porting/
+
+Note that Python 3.x versions before 3.3 had sufficiently serious
+back-compatibility issues that trying to make them run is probably
+doomed.  The first 3.x version under which our Python has been
+extensively tested is 3.5.
 
 == General notes ==
 
