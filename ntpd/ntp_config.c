@@ -2787,8 +2787,8 @@ config_peers(
 	    cmdline_server_count--, cmdline_servers++) {
 		struct peer_ctl client_ctl = {
 		    .version = NTP_VERSION,
-		    .minpoll = 0,
-		    .maxpoll = 0,
+		    .minpoll = NTP_MINDPOLL,
+		    .maxpoll = NTP_MAXDPOLL,
 		    .flags = FLAG_IBURST,
 		    .ttl = 0,
 		    .peerkey = 0,
