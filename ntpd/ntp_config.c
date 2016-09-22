@@ -2841,8 +2841,12 @@ config_peers(
 			ctx->family = AF_UNSPEC;
 			ctx->host_mode = T_Server;
 			ctx->hmode = MODE_CLIENT;
+			ctx->ctl.flags   = FLAG_IBURST;
+			ctx->ctl.maxpoll = NTP_MAXDPOLL;
+			ctx->ctl.minpoll = NTP_MINDPOLL;
+			ctx->ctl.peerkey = 0;
+			ctx->ctl.ttl     = 0;
 			ctx->ctl.version = NTP_VERSION;
-			ctx->ctl.flags = FLAG_IBURST;
 
 			ZERO(hints);
 			hints.ai_family = (u_short)ctx->family;
