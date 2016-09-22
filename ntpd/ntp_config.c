@@ -715,7 +715,7 @@ create_peer_node(
 			    my_node->ctl.maxpoll = NTP_MINPOLL;
 			} else if ( option->value.i > NTP_MAXPOLL) {
 			    msyslog(LOG_INFO,
-				"maxpoll: value (%d) is too large [%s-%d])",
+				"maxpoll: value (%d) is too large [%d-%d])",
 				option->value.i, NTP_MINPOLL,
 				NTP_MAXPOLL);
 			    my_node->ctl.maxpoll = NTP_MAXPOLL;
