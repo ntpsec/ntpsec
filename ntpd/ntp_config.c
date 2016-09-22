@@ -75,9 +75,9 @@
 
 
 /* list of servers from command line for config_peers() */
-int	cmdline_server_count;
+int	cmdline_server_count = 0;
 char **	cmdline_servers;
-bool	force_synchronous_dns;
+bool	force_synchronous_dns = false;
 
 /*
  * FIXME: ugly globals, only created to avoid wiring in option-parsing cruft.
@@ -625,6 +625,8 @@ create_peer_node(
 	/* Initialize node values to default */
 
 	my_node->ctl.version = NTP_VERSION;
+	my_node->ctl.minpoll = NTP_MINDPOLL;
+	my_node->ctl.maxpoll = NTP_MAXDPOLL;
 
 	/* Now set the node to the read values */
 	my_node->host_mode = hmode;
