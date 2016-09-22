@@ -688,13 +688,18 @@ create_peer_node(
 			break;
 
 		case T_Minpoll:
-			if (option->value.i < NTP_MINPOLL ||
-			    option->value.i > UCHAR_MAX) {
+			if (option->value.i < NTP_MINPOLL ) {
 				msyslog(LOG_INFO,
-					"minpoll: provided value (%d) is out of range [%d-%d])",
+					"minpoll: provided value (%d) is too small [%d-%d])",
 					option->value.i, NTP_MINPOLL,
-					UCHAR_MAX);
+					NTP_MAXPOLL);
 				my_node->ctl.minpoll = NTP_MINPOLL;
+			} else if (option->value.i > NTP_MAXPOLL) {
+				msyslog(LOG_INFO,
+					"minpoll: provided value (%d) is too large [%d-%d])",
+					option->value.i, NTP_MINPOLL,
+					NTP_MAXPOLL);
+				my_node->ctl.minpoll = NTP_MAXPOLL;
 			} else {
 				my_node->ctl.minpoll =
 					(uint8_t)option->value.u;
@@ -702,12 +707,18 @@ create_peer_node(
 			break;
 
 		case T_Maxpoll:
-			if (option->value.i < 0 ||
-			    option->value.i > NTP_MAXPOLL) {
-				msyslog(LOG_INFO,
-					"maxpoll: provided value (%d) is out of range [0-%d])",
-					option->value.i, NTP_MAXPOLL);
-				my_node->ctl.maxpoll = NTP_MAXPOLL;
+			if (option->value.i < NTP_MINPOLL ) {
+			    msyslog(LOG_INFO,
+				"maxpoll: value (%d) is too small [%d-%d])",
+				option->value.i, NTP_MINPOLL,
+				NTP_MAXPOLL);
+			    my_node->ctl.maxpoll = NTP_MINPOLL;
+			} else if ( option->value.i > NTP_MAXPOLL) {
+			    msyslog(LOG_INFO,
+				"maxpoll: value (%d) is too large [%s-%d])",
+				option->value.i, NTP_MINPOLL,
+				NTP_MAXPOLL);
+			    my_node->ctl.maxpoll = NTP_MAXPOLL;
 			} else {
 				my_node->ctl.maxpoll =
 					(uint8_t)option->value.u;
