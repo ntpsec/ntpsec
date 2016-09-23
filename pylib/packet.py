@@ -329,7 +329,7 @@ class ntpq_session:
 
     def sendrequest(self, opcode, associd, qdata, auth=False):
         "Ship an ntpq request packet to a server."
-         # Check to make sure the data will fit in one packet
+        # Check to make sure the data will fit in one packet
         if len(qdata) > CTL_MAX_DATA_LEN:
             sys.stderr/write(stderr,
                              "***Internal error! Data too long\n",
@@ -349,11 +349,11 @@ class ntpq_session:
 
     def getresponse(self, opcode, associd, timeo):
         "Get a response expected to match a given opcode and associd."
-         # This is pretty tricky.  We may get between 1 and MAXFRAG packets
-         # back in response to the request.  We peel the data out of
-         # each packet and collect it in one long block.  When the last
-         # packet in the sequence is received we'll know how much data we
-         # should have had.  Note we use one long time out, should reconsider.
+        # This is pretty tricky.  We may get between 1 and MAXFRAG packets
+        # back in response to the request.  We peel the data out of
+        # each packet and collect it in one long block.  When the last
+        # packet in the sequence is received we'll know how much data we
+        # should have had.  Note we use one long time out, should reconsider.
         fragments = []
         self.response = ''
         seenlastfrag = False
@@ -434,7 +434,7 @@ class ntpq_session:
                          (rpkt.opcode(), opcode))
                     continue
 
-             # Check the error code.  If non-zero, return it.
+            # Check the error code.  If non-zero, return it.
             if rpkt.is_error():
                 if rpkt.more():
                     warn("Error %d received on non-final packet\n" %
