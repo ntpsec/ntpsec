@@ -29,8 +29,19 @@ def cmd_configure(ctx, config):
         opt_map = {}
         # Wipe out and override flags with those from the commandline
         for flag in ctx.env.OPT_STORE:
-                opt = flag.replace("--", "").upper() # XXX: find a better way.
-                opt_map[opt] = ctx.env.OPT_STORE[flag]
+                if flag == "--undefine":
+			for sym in ctx.env.OPT_STORE[flag]:
+				ctx.undefine(sym)
+                elif flag == "--define":
+			for symval in ctx.env.OPT_STORE[flag]:
+				(sym, val) = symval.split("=")
+				try:
+					ctx.define(sym, int(val))
+				except ValueError:
+					ctx.define(sym, val)
+                else:
+                        opt = flag.replace("--", "").upper()
+                        opt_map[opt] = ctx.env.OPT_STORE[flag]
 
         msg("--- Configuring host ---")
         ctx.setenv('host', ctx.env.derive())
