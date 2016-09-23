@@ -59,7 +59,7 @@ extern	int	authencrypt	(keyid_t, uint32_t *, int);
 extern	int	authhavekey	(keyid_t);
 extern	int	authistrusted	(keyid_t);
 extern	bool	authreadkeys	(const char *);
-extern	void	authtrust	(keyid_t, unsigned long);
+extern	void	authtrust	(keyid_t, unsigned int);
 extern	bool	authusekey	(keyid_t, int, const uint8_t *);
 
 /*
