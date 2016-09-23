@@ -23,11 +23,11 @@ struct savekey {
 	symkey *	hlink;		/* next in hash bucket */
 	DECL_DLIST_LINK(symkey, llink);	/* for overall & free lists */
 	uint8_t *	secret;		/* shared secret */
-	u_long		lifetime;	/* remaining lifetime */
+	unsigned int	lifetime;	/* remaining lifetime */
 	keyid_t		keyid;		/* key identifier */
-	u_short		type;		/* OpenSSL digest NID */
-	u_short		secretsize;	/* secret octets */
-	u_short		flags;		/* KEY_ flags that wave */
+	unsigned short	type;		/* OpenSSL digest NID */
+	unsigned short	secretsize;	/* secret octets */
+	unsigned short	flags;		/* KEY_ flags that wave */
 };
 
 /* define the payload region of symkey beyond the list pointers */
@@ -46,10 +46,10 @@ struct symkey_alloc_tag {
 symkey_alloc *	authallocs;
 #endif	/* DEBUG */
 
-static inline u_short	auth_log2(double x);
+static inline unsigned short	auth_log2(double x);
 static void		auth_resize_hashtable(void);
-static void		allocsymkey(symkey **, keyid_t,	u_short,
-				    u_short, u_long, u_short, uint8_t *);
+static void		allocsymkey(symkey **, keyid_t,	unsigned short,
+				    unsigned short, unsigned int, unsigned short, uint8_t *);
 static void		freesymkey(symkey *, symkey **);
 #ifdef DEBUG
 static void		free_auth_mem(void);
@@ -62,8 +62,8 @@ symkey key_listhead;		/* list of all in-use keys */
  */
 #define KEYHASH(keyid)	((keyid) & authhashmask)
 #define INIT_AUTHHASHSIZE 64
-u_short authhashbuckets = INIT_AUTHHASHSIZE;
-u_short authhashmask = INIT_AUTHHASHSIZE - 1;
+unsigned short authhashbuckets = INIT_AUTHHASHSIZE;
+unsigned short authhashmask = INIT_AUTHHASHSIZE - 1;
 symkey **key_hash;
 
 unsigned int authkeynotfound;		/* keys not found */
@@ -87,11 +87,11 @@ int authnumfreekeys;
 /*
  * The key cache. We cache the last key we looked at here.
  */
-keyid_t	cache_keyid;		/* key identifier */
-uint8_t *cache_secret;		/* secret */
-u_short	cache_secretsize;	/* secret length */
-int	cache_type;		/* OpenSSL digest NID */
-u_short cache_flags;		/* flags that wave */
+keyid_t	cache_keyid;			/* key identifier */
+uint8_t *cache_secret;			/* secret */
+unsigned short cache_secretsize;	/* secret length */
+int cache_type;				/* OpenSSL digest NID */
+unsigned short cache_flags;		/* flags that wave */
 
 
 /*
@@ -205,10 +205,10 @@ auth_prealloc_symkeys(
 }
 
 
-static inline u_short
+static inline unsigned short
 auth_log2(double x)
 {
-	return (u_short)(log10(x) / log10(2));
+	return (unsigned short)(log10(x) / log10(2));
 }
 
 
@@ -222,9 +222,9 @@ auth_log2(double x)
 static void
 auth_resize_hashtable(void)
 {
-	u_long		totalkeys;
-	u_short		hashbits;
-	u_short		hash;
+	unsigned int	totalkeys;
+	unsigned short	hashbits;
+	unsigned short	hash;
 	size_t		newalloc;
 	symkey *	sk;
 
@@ -258,10 +258,10 @@ static void
 allocsymkey(
 	symkey **	bucket,
 	keyid_t		id,
-	u_short		flags,
-	u_short		type,
-	u_long		lifetime,
-	u_short		secretsize,
+	unsigned short	flags,
+	unsigned short	type,
+	unsigned int	lifetime,
+	unsigned short	secretsize,
 	uint8_t *	secret
 	)
 {
@@ -419,12 +419,12 @@ authhavekey(
 void
 authtrust(
 	keyid_t		id,
-	u_long		trust
+	unsigned int		trust
 	)
 {
 	symkey **	bucket;
 	symkey *	sk;
-	u_long		lifetime;
+	unsigned int	lifetime;
 
 	/*
 	 * Search bin for key; if it does not exist and is untrusted,
@@ -530,9 +530,9 @@ MD5auth_setkey(
 	bucket = &key_hash[KEYHASH(keyno)];
 	for (sk = *bucket; sk != NULL; sk = sk->hlink) {
 		if (keyno == sk->keyid) {
-			sk->type = (u_short)keytype;
+			sk->type = (unsigned short)keytype;
 			secretsize = len;
-			sk->secretsize = (u_short)secretsize;
+			sk->secretsize = (unsigned short)secretsize;
                         free(sk->secret);
                         sk->secret = emalloc(secretsize);
 			memcpy(sk->secret, key, secretsize);
@@ -550,8 +550,8 @@ MD5auth_setkey(
 	secretsize = len;
 	secret = emalloc(secretsize);
 	memcpy(secret, key, secretsize);
-	allocsymkey(bucket, keyno, 0, (u_short)keytype, 0,
-		    (u_short)secretsize, secret);
+	allocsymkey(bucket, keyno, 0, (unsigned short)keytype, 0,
+		    (unsigned short)secretsize, secret);
 #ifdef DEBUG
 	if (debug >= 4) {
 		size_t	j;

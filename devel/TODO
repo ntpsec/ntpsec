@@ -156,8 +156,6 @@ __________
 
 == Old, sometime ancient stuff ==
 
-970711: Look Real Hard at changing the key stuff from u_long to u_int32.
-
 970711: Make sure it's safe to convert proto_config's 2nd argument from
 	u_long to u_int32.  Watch "set" in ntp_request.c:setclr_flags().
 
