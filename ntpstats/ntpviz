@@ -104,6 +104,7 @@ set xtic rotate by -45 scale 0
 set lmargin 12
 set rmargin 12
 """
+
     def __init__(self, statsdir,
                  sitename=None, period=None, starttime=None, endtime=None):
         NTPStats.__init__(self, statsdir=statsdir, sitename=sitename,
@@ -241,6 +242,7 @@ plot \
  %(one)s title "1st percentile"
 """ % locals()
         return plot_template + self.dump("loopstats")
+
     def loopstats_gnuplot(self, fld, title, legend, freq):
         "Generate GNUPLOT code of a given loopstats field"
         if not len( self.loopstats):
@@ -307,12 +309,15 @@ plot \
  %(one)s title "1st percentile"
 """ % locals()
         return plot_template + self.dump("loopstats")
+
     def local_offset_jitter_gnuplot(self):
         "Generate GNUPLOT code of local clock loop standard deviation"
         return self.loopstats_gnuplot(4, "RMS Time Jitter", "Jitter", 0)
+
     def local_offset_stability_gnuplot(self):
         "Generate GNUPLOT code graphing local clock stability"
         return self.loopstats_gnuplot(5, "RMS Frequency Jitter", "Stability", 1)
+
     def peerstats_gnuplot(self, peerlist, fld, title, type):
         "Plot a specified field from peerstats."
         sitename = self.sitename
@@ -427,10 +432,13 @@ plot \
 
         plot_template += plot_data
         return plot_template
+
     def peer_offsets_gnuplot(self, peerlist=None):
         return self.peerstats_gnuplot(peerlist, 4, "Peer Clock Offset", "offset")
+
     def peer_jitters_gnuplot(self, peerlist=None):
         return self.peerstats_gnuplot(peerlist, 7, "Peer Clock Jitter", "jitter")
+
     def local_offset_histogram_gnuplot(self):
         "Plot a histogram of clock offset values from loopstats."
         if not len( self.loopstats):
