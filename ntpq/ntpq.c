@@ -148,13 +148,11 @@ static	int	sendpkt		(void *, size_t);
 static	int	getresponse	(int, int, u_short *, int *, const char **, int);
 static	int	sendrequest	(int, associd_t, int, int, const char *);
 static	char *	tstflags	(u_long);
-#ifndef BUILD_AS_LIB
 static	void	getcmds		(void);
 static	void abortcmd	(int);
 static	void	docmd		(const char *);
 static	void	tokenize	(const char *, char **, int *);
 static	bool	getarg		(const char *, int, arg_v *);
-#endif	/* BUILD_AS_LIB */
 static	int	findcmd		(const char *, struct xcmd *,
 				 struct xcmd *, struct xcmd **);
 static	bool	decodearr	(char *, int *, l_fp *);
@@ -379,7 +377,6 @@ extern struct xcmd opcmds[];
 char *progname;
 
 #ifdef NO_MAIN_ALLOWED
-#ifndef BUILD_AS_LIB
 CALL(ntpq,"ntpq",ntpqmain);
 
 void clear_globals(void)
@@ -393,7 +390,6 @@ void clear_globals(void)
 	numcmds = 0;
 	numhosts = 0;
 }
-#endif /* !BUILD_AS_LIB */
 #endif /* NO_MAIN_ALLOWED */
 
 #define ALL_OPTIONS "46c:dhD:inOpVw"
@@ -435,7 +431,6 @@ main(
 }
 #endif
 
-#ifndef BUILD_AS_LIB
 static void ntpq_usage(void)
 {
 #define P(x)	fputs(x, stderr)
@@ -649,7 +644,6 @@ ntpqmain(
 	}
 	return 0;
 }
-#endif /* !BUILD_AS_LIB */
 
 /*
  * openhost - open a socket to a host
@@ -1460,7 +1454,6 @@ doqueryex(
 }
 
 
-#ifndef BUILD_AS_LIB
 /*
  * getcmds - read commands from the standard input and execute them
  */
@@ -1482,10 +1475,7 @@ getcmds(void)
 
 	ntp_readline_uninit();
 }
-#endif /* !BUILD_AS_LIB */
 
-
-#if !defined(BUILD_AS_LIB)
 /*
  * abortcmd - catch interrupts and abort the current command
  */
@@ -1502,10 +1492,7 @@ abortcmd(
 	(void) fflush(stderr);
 	if (jump) longjmp(interrupt_buf, 1);
 }
-#endif	/* !BUILD_AS_LIB */
 
-
-#ifndef	BUILD_AS_LIB
 /*
  * docmd - decode the command line and execute a command
  */
@@ -1765,8 +1752,6 @@ getarg(
 
 	return true;
 }
-#endif	/* !BUILD_AS_LIB */
-
 
 /*
  * findcmd - find a command in a command description table
