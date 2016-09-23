@@ -493,7 +493,7 @@ class ntpq_session:
             res = self.getresponse(opcode, associd, done)
             if res:
                 if not quiet:
-                    if type(res) == type(0):
+                    if isinstance(res, int):
                         sys.stderr.write("***Packet error %d" % res)
                     else:
                         sys.stderr.write(res.format(associd))
