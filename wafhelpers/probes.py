@@ -1,5 +1,5 @@
 """
-This module exists to contin custom probe functions so they don't clutter
+This module exists to contain custom probe functions so they don't clutter
 up the logic in the main configure.py.
 """
 
