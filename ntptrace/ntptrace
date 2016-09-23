@@ -52,7 +52,7 @@ def ntp_read_vars(peer, vars, host):
         outvars['status_line'] = {}
 
     cmd = ["ntpq", "-n", "-c", "rv %s %s" % (peer, ",".join(vars))]
-    if not host is None:
+    if host is not None:
         cmd.append(host)
 
     try:
