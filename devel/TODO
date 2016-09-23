@@ -11,8 +11,6 @@
 * Add 'snapshot' feature to dump config status into a JSON file for collecting
   build + platform information
 
-* The install production needs to warn of stale ntpdc and ntpdate binaries.
-
 * Add support for enabling all conditional checks to ensure none are broken.
 
 * Add support for disabling specific conditional tests to ensure nothing is
@@ -32,7 +30,7 @@
   without the PLL to see if it's actually a win.
 
 * Hal points out that with signaled I/O gone, we can probably cut out
-  the buffer-pool code in tha daemon.
+  the buffer-pool code in the daemon.
 
 === Testing ===
 
