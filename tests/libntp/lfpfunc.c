@@ -32,7 +32,7 @@ typedef struct  {
 
 //----------------------------------------------------------------------
 // reference comparision
-// This is implementad as a full signed MP-subtract in 3 limbs, where
+// This is implemented as a full signed MP-subtract in 3 limbs, where
 // the operands are zero or sign extended before the subtraction is
 // executed.
 //----------------------------------------------------------------------
