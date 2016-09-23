@@ -19,7 +19,7 @@ logfile data that can be helpful for identifying problems such as
 misconfigured servers.  It replaces a messy and poorly documented pile
 of ancient Perl, awk, and S scripts; those have been removed.
 
-It is now possible (and sometimes usful) to say "minpoll 0" for a
+It is now possible (and sometimes useful) to say "minpoll 0" for a
 1-second interval.
 
 == 2016-08-16: 0.9.4 ==

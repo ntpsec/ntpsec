@@ -17,7 +17,7 @@ ENABLE_KILL_ON_TRAP	# Die on seccomp trap
 MSSNTP_PATH		# Set a default path for the MSSNTP feature.
 NTP_VAR			# Path to NTP statistics directory
 
-# Formerly used on some embedded systems. Kepr around in case of re-port
+# Formerly used on some embedded systems. Keep around in case of re-port
 NO_MAIN_ALLOWED		# Used to be set by VxWorks.
 
 # System capabilities that waf should detect but does not.
