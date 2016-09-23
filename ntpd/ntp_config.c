@@ -2917,6 +2917,8 @@ config_peers(
 					 * timer, since the clock may
 					 * have requirements for this.
 					 */
+                                        /* FIXME: 0 no longer a magic value */
+                                        /* this needs to be fixed */
 					if (maxpoll == 0)
 						/* default maxpoll for
 						 * refclocks is minpoll
