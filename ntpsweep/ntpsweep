@@ -171,7 +171,7 @@ Host                             st offset(s) version     system       processor
     known_host_peers = {}
     trace = []
     for host in hostlist:
-          scan_host(host, 0)
+        scan_host(host, 0)
 
     sys.exit(0)
 
