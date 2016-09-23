@@ -176,13 +176,13 @@ extern	void	rereadkeys	(void);
  */
 
 /* authkeys.c */
-extern unsigned long	authkeynotfound;	/* keys not found */
-extern unsigned long	authkeylookups;		/* calls to lookup keys */
-extern unsigned long	authnumkeys;		/* number of active keys */
-extern unsigned long	authkeyexpired;		/* key lifetime expirations */
-extern unsigned long	authkeyuncached;	/* cache misses */
-extern unsigned long	authencryptions;	/* calls to encrypt */
-extern unsigned long	authdecryptions;	/* calls to decrypt */
+extern unsigned int	authkeynotfound;	/* keys not found */
+extern unsigned int	authkeylookups;		/* calls to lookup keys */
+extern unsigned int	authnumkeys;		/* number of active keys */
+extern unsigned int	authkeyexpired;		/* key lifetime expirations */
+extern unsigned int	authkeyuncached;	/* cache misses */
+extern unsigned int	authencryptions;	/* calls to encrypt */
+extern unsigned int	authdecryptions;	/* calls to decrypt */
 
 extern int	authnumfreekeys;
 
