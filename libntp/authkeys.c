@@ -66,14 +66,14 @@ u_short authhashbuckets = INIT_AUTHHASHSIZE;
 u_short authhashmask = INIT_AUTHHASHSIZE - 1;
 symkey **key_hash;
 
-u_long authkeynotfound;		/* keys not found */
-u_long authkeylookups;		/* calls to lookup keys */
-u_long authnumkeys;		/* number of active keys */
-u_long authkeyexpired;		/* key lifetime expirations */
-u_long authkeyuncached;		/* cache misses */
-u_long authnokey;		/* calls to encrypt with no key */
-u_long authencryptions;		/* calls to encrypt */
-u_long authdecryptions;		/* calls to decrypt */
+unsigned int authkeynotfound;		/* keys not found */
+unsigned int authkeylookups;		/* calls to lookup keys */
+unsigned int authnumkeys;		/* number of active keys */
+unsigned int authkeyexpired;		/* key lifetime expirations */
+unsigned int authkeyuncached;		/* cache misses */
+unsigned int authnokey;		/* calls to encrypt with no key */
+unsigned int authencryptions;		/* calls to encrypt */
+unsigned int authdecryptions;		/* calls to decrypt */
 
 /*
  * Storage for free symkey structures.  We malloc() such things but
@@ -609,7 +609,7 @@ auth_agekeys(void)
 			authkeyexpired++;
 		}
 	ITER_DLIST_END()
-	DPRINTF(1, ("auth_agekeys: at %lu keys %lu expired %lu\n",
+	DPRINTF(1, ("auth_agekeys: at %lu keys %u expired %u\n",
 		    current_time, authnumkeys, authkeyexpired));
 }
 
