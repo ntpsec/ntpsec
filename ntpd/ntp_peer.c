@@ -233,7 +233,7 @@ findexistingpeer_addr(
 		DPRINTF(3, ("%s %s %d %d 0x%x 0x%x ", sptoa(addr),
 			sptoa(&peer->srcadr), mode, peer->hmode,
 			(u_int)cast_flags, (u_int)peer->cast_flags));
- 		if ((-1 == mode || peer->hmode == mode ||
+		if ((-1 == mode || peer->hmode == mode ||
 		     ((MDF_BCLNT & peer->cast_flags) &&
 		      (MDF_BCLNT & cast_flags))) &&
 		    ADDR_PORT_EQ(addr, &peer->srcadr)) {
@@ -625,15 +625,15 @@ peer_refresh_interface(
 		    peer_clear(p, "XFAC", false);
 
 		/*
-	 	 * Broadcast needs the socket enabled for broadcast
-	 	 */
+		 * Broadcast needs the socket enabled for broadcast
+		 */
 		if (MDF_BCAST & p->cast_flags)
 			enable_broadcast(p->dstadr, &p->srcadr);
 
 		/*
-	 	 * Multicast needs the socket interface enabled for
+		 * Multicast needs the socket interface enabled for
 		 * multicast
-	 	 */
+		 */
 		if (MDF_MCAST & p->cast_flags)
 			enable_multicast_if(p->dstadr, &p->srcadr);
 	}
@@ -763,20 +763,12 @@ newpeer(
 		       select_peerinterface(peer, srcadr, dstadr));
 
 	/*
-	 * It is an error to set minpoll less than NTP_MINPOLL or to
-	 * set maxpoll greater than NTP_MAXPOLL. However, minpoll is
-	 * clamped not greater than NTP_MAXPOLL and maxpoll is clamped
-	 * not less than NTP_MINPOLL without complaint. Finally,
-	 * minpoll is clamped not greater than maxpoll.
+         * minpoll is clamped not greater than NTP_MAXPOLL
+         * maxpoll is clamped not less than NTP_MINPOLL
+         * minpoll is clamped not greater than maxpoll.
 	 */
-	if (minpoll == 0)
-		peer->minpoll = NTP_MINDPOLL;
-	else
-		peer->minpoll = min(minpoll, NTP_MAXPOLL);
-	if (maxpoll == 0)
-		peer->maxpoll = NTP_MAXDPOLL;
-	else
-		peer->maxpoll = max(maxpoll, NTP_MINPOLL);
+	peer->minpoll = min(minpoll, NTP_MAXPOLL);
+	peer->maxpoll = max(maxpoll, NTP_MINPOLL);
 	if (peer->minpoll > peer->maxpoll)
 		peer->minpoll = peer->maxpoll;
 
@@ -908,8 +900,8 @@ findmanycastpeer(
 	struct pkt *pkt;
 	l_fp p_org;
 
- 	/*
- 	 * This routine is called upon arrival of a server-mode response
+	/*
+	 * This routine is called upon arrival of a server-mode response
 	 * to a manycastclient multicast solicitation, or to a pool
 	 * server unicast solicitation.  Search the peer list for a
 	 * manycastclient association where the last transmit timestamp
