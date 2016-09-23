@@ -8,7 +8,6 @@ def check_seccomp(ctx):
     if not sys.platform.startswith("linux"):
         return
 
-
     ctx.check_cc(header_name="seccomp.h", mandatory=False)
     ctx.check_cc(lib="seccomp", comment="seccomp library", mandatory=False)
 

@@ -22,7 +22,6 @@ def build(ctx):
 
 			ctx.add_group() # Generate Bison files first.
 
-
 		keyword_gen_source = [
 			"keyword-gen.c",
 		]
@@ -49,11 +48,9 @@ def build(ctx):
 			target      = "ntp_keyword.h"
 		)
 
-
 		ctx.add_group() # Make sure ntp_keyword.h is created last.
 
 		return
-
 
 	libntpd_source = [
 		"ntp_control.c",
@@ -84,7 +81,6 @@ def build(ctx):
 #		use			= "libntpd_obj bison_obj",
 	)
 
-
 	use_refclock = "" #XXX: there must be a better way to do this
 	if ctx.env.REFCLOCK_ENABLE:
 
@@ -99,7 +95,6 @@ def build(ctx):
 			source		= refclock_source,
 		)
 		use_refclock += "refclock"
-
 
 		for file, define in ctx.env.REFCLOCK_SOURCE:
 			ctx(
@@ -119,14 +114,11 @@ def build(ctx):
 		ctx.bldnode.parent.find_node("host/ntpd/ntp_parser.tab.c") if not ctx.env.NTPS_RELEASE else "ntp_parser.tab.c"
 	]
 
-
-
 	# XXX: This really sucks, we need to get rid of all these refclock
 	#      defines littered everywhere and segment it to their own source files.
 	refclock_define = []
 	if ctx.env.REFCLOCK_ENABLE:
 		refclock_define = ["REFCLOCK=1"]
-
 
 	ctx(
 		target		= "ntpd",

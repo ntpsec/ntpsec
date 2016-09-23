@@ -23,9 +23,6 @@ def build(ctx):
 		"trim_info.c",
 	]
 
-
-
-
 	srcnode = ctx.srcnode.abspath()
 
 	ctx(

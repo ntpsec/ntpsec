@@ -112,7 +112,6 @@ set rmargin 12
         if self.sitename is None:
             self.sitename = os.path.basename(statsdir)
 
-
     def local_offset_gnuplot(self):
         "Generate GNUPLOT code graphing local clock loop statistics"
         if not len( self.loopstats):
@@ -174,7 +173,6 @@ plot \
             plot_data += "\n".join(tempsmap[key]) + "\ne\n"
         # remove trailing "e\n"
         plot_data = plot_data[:-2]
-
 
         plot_template = NTPViz.Common + """\
 set title "%(sitename)s: Local Temps"
@@ -928,7 +926,6 @@ dd {
 <h1 style="margin-bottom:10px;">%(title)s</h1>
 Report generated: %(start_time_str)s UTC <br>
 ''' % locals()
-
 
     # Ugh.  Not clear what to do in the multiplot case
     if len(statlist) == 1:

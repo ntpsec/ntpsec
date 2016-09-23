@@ -25,7 +25,6 @@ def build(ctx):
 			target		= [ctx.path.find_node(dir).get_bld().make_node(x.name) for x in files]
 		)
 
-
 	extra = ["asciidoc.js", "asciidoc.css"]
 
 	# Copy extra files
@@ -35,7 +34,6 @@ def build(ctx):
 		source		= extra,
 		target		= extra
 	)
-
 
 	# Install docs
 	if ctx.env.PATH_DOC:

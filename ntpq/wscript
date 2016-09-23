@@ -2,7 +2,6 @@ def build(ctx):
 	srcnode = ctx.srcnode.abspath()
 	bldnode = ctx.bldnode.abspath()
 
-
 	libntpq_source = [
 		"libntpq.c",		#XXX why
 		"libntpq_subs.c",	#XXX why
@@ -13,7 +12,6 @@ def build(ctx):
 		features	= "c bld_include src_include libisc_include",
 		source		= libntpq_source,
 	)
-
 
 	ntpq_source = [
 		"ntpq.c",

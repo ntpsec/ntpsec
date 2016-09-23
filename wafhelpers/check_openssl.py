@@ -42,7 +42,6 @@ def configure_ssl(ctx):
 		if not ctx.check_cc(lib=lib, mandatory=False):
 			OPENSSL_LIB=False
 
-
 	if OPENSSL_HEADERS and OPENSSL_LIB:
 		ctx.check_cc(
 			fragment	= OPENSSL_FRAG % "\n".join(["#include <%s>" % x for x in headers]),
