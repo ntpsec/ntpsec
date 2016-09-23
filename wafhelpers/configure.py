@@ -360,7 +360,7 @@ def cmd_configure(ctx, config):
                         ("readline/history.h", ["stdio.h","readline/readline.h"]),
                 )
         for hdr in optional_headers:
-                if type(hdr) == type(""):
+                if isinstance(hdr, str):
                         if ctx.check_cc(header_name=hdr, mandatory=False, comment="<%s> header" % hdr):
                                 continue
                 else:

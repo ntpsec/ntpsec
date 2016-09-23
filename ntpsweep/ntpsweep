@@ -52,7 +52,7 @@ def scan_host(host, level):
         sysvars = session.readvars()
 
         # got answers ? If so, go on.
-        if type(sysvars) == type({}):
+        if isinstance(sysvars, dict):
             stratum       = sysvars['stratum']
             offset        = sysvars['offset']
             daemonversion = sysvars['version']
