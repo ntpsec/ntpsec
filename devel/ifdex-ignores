@@ -17,10 +17,7 @@ ENABLE_KILL_ON_TRAP	# Die on seccomp trap
 MSSNTP_PATH		# Set a default path for the MSSNTP feature.
 NTP_VAR			# Path to NTP statistics directory
 
-# These are cruft having to do with the way libntpq is presently built.
-# They should go away and be replaced by better module factoring.
-BUILD_AS_LIB		# Set -DNO_MAIN_ALLOWED -DBUILD_AS_LIB to build libntq.a
-LIBNTPQ_C		# Involved in library build.
+# Formerly used on some embedded systems. Kepr around in case of re-port
 NO_MAIN_ALLOWED		# Used to be set by VxWorks.
 
 # System capabilities that waf should detect but does not.

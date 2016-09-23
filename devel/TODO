@@ -120,10 +120,6 @@ Neither is ideal, easy pickings for someone to code on.
 * We might be able to eliminate a lot of the Linux runtime
   droproot code by using file capabilities.
 
-* There is a mess around the symbols NO_MAIN_ALLOWED, BUILD_AS_LIB, and
-  LIBNTP_C that needs to be refactored.  ntpd should *always* be built as
-  a library linked to a main module, these guard symbols should go away.
-
 * Use the snprintb in util/ntptime for flag words like flash
   codes and use it systematically to make reports more readable.
 

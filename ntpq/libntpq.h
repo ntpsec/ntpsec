@@ -56,7 +56,6 @@ struct ntpq_varlist {
 };
 
 /* global variables used for holding snapshots of data */
-#ifndef LIBNTPQ_C
 extern char peervars[];
 extern int peervarlen;
 extern int peervar_assoc;
@@ -67,9 +66,6 @@ extern char sysvars[];
 extern int sysvarlen;
 extern char *ntpq_resultbuffer[];
 extern struct ntpq_varlist ntpq_varlist[MAXLIST];
-#endif
-
-
 
 /* 
  * Prototypes of exported libary functions
