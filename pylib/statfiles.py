@@ -14,6 +14,7 @@ class NTPStats:
     SecondsInWeek = 24*60*60
     DefaultPeriod = 7*24*60*60
     peermap = {}    # cached result of peersplit()
+
     @staticmethod
     def unixize(line, starttime, endtime):
         "Extract first two fields, MJD and seconds past midnight."
@@ -31,10 +32,12 @@ class NTPStats:
         if time < starttime or time > endtime:
             return None
         return str(time) + " " + split[2]
+
     @staticmethod
     def timestamp(line):
         "get Unix time from converted line."
         return float(line.split()[0])
+
     def __init__(self, statsdir, sitename=None,
                  period=None, starttime=None, endtime=None):
         "Grab content of logfiles, sorted by timestamp."
@@ -97,6 +100,7 @@ class NTPStats:
             # Sort by datestamp
             lines1.sort(key=lambda line: line.split()[0])
             setattr(self, stem, lines1)
+
     def clip(self, start, end):
         "Select a range of entries"
         for stem in ("clockstats", "peerstats", "loopstats", "rawstats"):
@@ -104,6 +108,7 @@ class NTPStats:
             lines = [line for line in lines
                      if float(line.split()[0]) >= start and float(line.split()[0]) <= end]
             setattr(self, stem, lines)
+
     def rangemax(self):
         "Get the latest timestamp in the files"
         m = sys.float_info.min
@@ -114,6 +119,7 @@ class NTPStats:
                 if ts > m:
                     m = ts
         return m
+
     def rangemin(self):
         "Get the earliest timestamp in the files"
         m = sys.float_info.max
@@ -124,6 +130,7 @@ class NTPStats:
                 if ts < m:
                     m = ts
         return m
+
     def percentiles(self, percents, values):
         "Return given percentiles of a given row in a given set of entries."
         "assuming values are already split and sorted"
@@ -132,6 +139,7 @@ class NTPStats:
         for perc in percents:
             ret[perc] = values[int(length * (perc/100))]
         return ret
+
     def peersplit(self):
         "Return a dictionary mapping peerstats IPs to entry subsets."
         "This is very expensive, so cache the result"
@@ -144,6 +152,7 @@ class NTPStats:
                 self.peermap[ip] = []
             self.peermap[ip].append(line)
         return self.peermap
+
     def tempssplit(self):
         "Return a dictionary mapping temperature sources to entry subsets."
         tempsmap = {}
@@ -153,9 +162,11 @@ class NTPStats:
                 tempsmap[source] = []
             tempsmap[source].append(line)
         return tempsmap
+
     def dump(self, row):
         "dump a stored list of logfile entries"
         return "\n".join(getattr(self, row)) + "\n"
+
     def ip_label(self, key):
         "Produce appropriate label for an IP address."
         # If it's a new-style NTPsep clock label, pass it through,

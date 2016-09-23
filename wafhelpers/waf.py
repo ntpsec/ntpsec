@@ -33,6 +33,7 @@ def insert_libiscpthreaddir(self):
 # Create version.c
 class version(Task):
 	vars = ['NTPS_VERSION_STRING', 'TARGET']
+
 	def run(self):
 		self.outputs[0].write("""
 const char *Version = "%s " __DATE__ " " __TIME__;

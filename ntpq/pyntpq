@@ -182,6 +182,7 @@ tstflagnames = (
 
 class ntpq_interpreter(cmd.Cmd):
     "ntpq command interpreter"
+
     def __init__(self, session):
         cmd.Cmd.__init__(self)
         self.session = session
@@ -214,6 +215,7 @@ usage: help [ command ]
         sys.stdout.write("\n")
         self.session.close()
         raise SystemExit(0)
+
     def do_timeout(self, line):
         "set the primary receive time out"
         if line:
@@ -222,19 +224,23 @@ usage: help [ command ]
             except ValueError:
                 print("What?")
         print("primary timeout %d ms" % self.session.primary_timeout)
+
     def help_timeout(self):
         sys.stdout.write("""\
 function: set the primary receive time out
 usage: timeout [ msec ]
 """)
+
     def do_delay(self, line):
         "set the delay added to encryption time stamps"
         sys.stderr.write("Authentication is not yet implemented")
+
     def help_delay(self):
         sys.stdout.write("""\
 function: set the delay added to encryption time stamps
 usage: delay [ msec ]
 """)
+
     def do_host(self, line):
         "specify the host whose NTP server we talk to"
         if not line:
@@ -256,27 +262,33 @@ usage: delay [ msec ]
                 print("current host remains %s" % self.session.name)
             else:
                 print("still no current host")
+
     def help_host(self):
         sys.stdout.write("""\
 function: specify the host whose NTP server we talk to
 usage: host [ -4|-6 ] [ hostname ]
 """)
+
     def do_poll(self, line):
         "poll an NTP server in client mode `n' times"
         print("poll not implemented yet")
+
     def help_poll(self):
         sys.stdout.write("""\
 function: poll an NTP server in client mode `n' times
 usage: poll [ n ] [ verbose ]
 """)
+
     def do_passwd(self, line):
         "specify a password to use for authenticated requests"
         sys.stderr.write("Authentication is not yet implemented")
+
     def help_passwd(self):
         sys.stdout.write("""\
 function: specify a password to use for authenticated requests
 usage: passwd [  ]
 """)
+
     def do_hostnames(self, line):
         "specify whether hostnames or net numbers are printed"
         if not line:
@@ -291,11 +303,13 @@ usage: passwd [  ]
             print("hostnames being shown")
         else:
             print("hostnames not being shown")
+
     def help_hostnames(self):
         sys.stdout.write("""\
 function: specify whether hostnames or net numbers are printed
 usage: hostnames [ yes|no ]
 """)
+
     def do_debug(self, line):
         "set/change debugging level"
         if not line:
@@ -313,26 +327,31 @@ usage: hostnames [ yes|no ]
                 print("What?")
         self.session.debug = self.debug
         print("debug level is %d" % self.debug)
+
     def help_debug(self):
         sys.stdout.write("""\
 function: set/change debugging level
 usage: debug [ no|more|less ]
 """)
+
     def do_exit(self, line):
         "exit ntpq"
         self.session.close()
         raise SystemExit(0)
+
     def help_exit(self):
         sys.stdout.write("""\
 function: exit ntpq
 usage: exit
 """)
     do_quit = do_exit
+
     def help_quit(self):
         sys.stdout.write("""\
 function: exit ntpq
 usage: quit
 """)
+
     def do_keyid(self, line):
         "set keyid to use for authenticated requests"
         if line:
@@ -344,37 +363,45 @@ usage: quit
             print("no keyid defined")
         else:
             print("keyid is %d" % self.session.keyid)
+
     def help_keyid(self):
         sys.stdout.write("""\
 function: set keyid to use for authenticated requests
 usage: keyid [ key# ]
 """)
+
     def do_version(self, line):
         "print version number"
         print(version)
+
     def help_version(self):
         sys.stdout.write("""\
 function: print version number
 usage: version
 """)
+
     def do_raw(self, line):
         "do raw mode variable output"
         self.rawmode = True
         print("Output set to raw")
+
     def help_raw(self):
         sys.stdout.write("""\
 function: do raw mode variable output
 usage: raw
 """)
+
     def do_cooked(self, line):
         "do cooked mode variable output"
         self.rawmode = False
         print("Output set to cooked")
+
     def help_cooked(self):
         sys.stdout.write("""\
 function: do cooked mode variable output
 usage: cooked
 """)
+
     def do_authenticate(self, line):
         "always authenticate requests to this server"
         if not line:
@@ -389,11 +416,13 @@ usage: cooked
             print("authenticated requests being sent")
         else:
             print("unauthenticated requests being sent")
+
     def help_authenticate(self):
         sys.stdout.write("""\
 function: always authenticate requests to this server
 usage: authenticate [ yes|no ]
 """)
+
     def do_ntpversion(self, line):
         "set the NTP version number to use for requests"
         if not line:
@@ -409,21 +438,25 @@ usage: authenticate [ yes|no ]
             except ValueError:
                 print("What?")
         print("NTP version being claimed is %d" % self.pktversion)
+
     def help_ntpversion(self):
         sys.stdout.write("""\
 function: set the NTP version number to use for requests
 usage: ntpversion [ version number ]
 """)
+
     def do_keytype(self, line):
         "set key type to use for authenticated requests"
         sys.stderr.write("Authentication is not yet implemented")
         pass
+
     def help_keytype(self):
         sys.stdout.write("""\
 function: set key type to use for authenticated requests, one of:
     DSA, DSA-SHA, MD4, MD5, MDC2, RIPEMD160, SHA, SHA1
 usage: keytype [ digest-name ]
 """)
+
     def do_exercise(self, line):
         "Exercise the protocol - low level"
         tokens = shlex.split(line)
@@ -440,6 +473,7 @@ usage: keytype [ digest-name ]
                                    polybytes(tokens[2]))
         if msg:
             print(msg)
+
     def do_associations(self, line):
         "print list of association IDs and statuses for the server's peers"
         pass

@@ -91,8 +91,10 @@ class ntp_packet:
     # The following two methods are copied from macros in includes/control.h
     @staticmethod
     def VN_MODE(v, m):          return ((((v) & 7) << 3) | ((m) & 0x7))
+
     @staticmethod
     def PKT_LI_VN_MODE(l,v,m):  return ((((l) & 3) << 6) | ntp_packet.VN_MODE((v), (m)))
+
     def __init__(self, session, version, mode):
         self.session = session  # Where to get session context
         self.li_vn_mode = 0     # leap, version, mode (uint8_t)
@@ -102,6 +104,7 @@ class ntp_packet:
         self.extension = ''     # extension data
         self.li_vn_mode = ntp_packet.PKT_LI_VN_MODE(0, version, mode)
     format = "!BBHHHHH"
+
     def send(self, payload1, payload2, payload3, payload4):
         "Send the packet and its payload in association with a session"
         self.count = len(self.extension)
@@ -111,6 +114,7 @@ class ntp_packet:
                              payload1, payload2, payload3, payload4,
                              self.count)
         self.session.sendpkt(body + self.extension)
+
     def analyze(self, rawdata):
         (self.li_vn_mode,
          self.r_m_e_op,
@@ -118,15 +122,19 @@ class ntp_packet:
          self.count) = struct.unpack(ntp_packet.format, rawdata[:12])
         self.data = rawdata[12:]
         return (payload1, payload2, payload3, payload4)
+
     def mode(self):
         return self.li_vn_mode & 0x7
+
     def end(self):
         return self.count + self.offset
+
     def version(self):
         return (self.li_vn_mode >> 3) & 0x7
 
 class control_frag(ntp_packet):
     "ntpq request/response "
+
     def __init__(self, session, opcode=0, associd=0, qdata=''):
         ntp_packet.__init__(self, session, session.pktversion, MODE_CONTROL)
         self.r_m_e_op = opcode  # ntpq operation code
@@ -135,24 +143,32 @@ class control_frag(ntp_packet):
         self.associd = associd  # association ID (uint16_t)
         self.offset = 0         # offset of this batch of data (uint16_t)
         self.extension = qdata  # Data for this packet
+
     def is_response(self):
         return self.r_m_e_op & 0x80
+
     def opcode(self):
         return self.r_m_e_op & 0x1F
+
     def is_error(self):
         return self.r_m_e_op & 0x40
+
     def errcode(self):
         return (self.status >> 8) & 0xff
+
     def more(self):
         return self.r_m_e_op & 0x20
+
     def stats(self, idx):
         "Return statistics on a fragment."
         return "%5d %5d\t%3d octets\n" % (self.offset, self.end(), self.count)
+
     def send(self):
         self.session.sequence += 1
         self.sequence = self.session.sequence
         ntp_packet.send(self,
                         self.sequence, self.status, self.associd, self.offset)
+
     def analyze(self, data):
         (self.sequence,
          self.status,
@@ -197,6 +213,7 @@ def dump_hex_printable(xdata):
 
 class ntpq_session:
     "A session to a host"
+
     def __init__(self):
         self.debug = 0
         self.ai_family = socket.AF_UNSPEC
@@ -213,13 +230,16 @@ class ntpq_session:
         self.sequence = 0
         self.response = ""
         self.rstatus = 0
+
     def close(self):
         if self.sock:
             self.sock.close()
             self.sock = None
+
     def havehost(self):
         "Is the session connected to a host?"
         return self.sock is not None
+
     def __lookuphost(self, hname, fam):
         "Try different ways to interpret an address and family"
         if hname.startswith("["):
@@ -229,6 +249,7 @@ class ntpq_session:
         # when it is needed and work around some implementations that
         # will return an "IPv4-mapped IPv6 address" address if you
         # give it an IPv4 address to lookup.
+
         def hinted_lookup(port, hints):
             return socket.getaddrinfo(hname, port, self.ai_family,
                                         socket.SOCK_DGRAM,
@@ -262,6 +283,7 @@ class ntpq_session:
         except AttributeError:
             sys.stderr.write("ntpq: API error, missing socket attributes\n")
         return None
+
     def openhost(self, hname, fam=socket.AF_UNSPEC):
         "openhost - open a socket to a host"
         res = self.__lookuphost(hname, fam)
@@ -289,6 +311,7 @@ class ntpq_session:
             sys.stderr.write(msg)
             return False
         return True
+
     def sendpkt(self, xdata):
         "Send a packet to the host."
         if self.debug >= 3:
@@ -303,6 +326,7 @@ class ntpq_session:
             sys.stdout.write("Request packet:\n")
             dump_hex_printable(xdata)
         return 0
+
     def sendrequest(self, opcode, associd, qdata, auth=False):
         "Ship an ntpq request packet to a server."
          # Check to make sure the data will fit in one packet
@@ -322,6 +346,7 @@ class ntpq_session:
         else:
             sys.stderr.write("Authenticated send is not yet implemented\n")
             return -1
+
     def getresponse(self, opcode, associd, timeo):
         "Get a response expected to match a given opcode and associd."
          # This is pretty tricky.  We may get between 1 and MAXFRAG packets
@@ -479,6 +504,7 @@ class ntpq_session:
                         sys.stdout.write("Response packet:\n")
                         dump_hex_printable(self.response)
                     return None
+
     def doquery(self, opcode, associd=0, qdata="", auth=False, quiet=False):
         "send a request and save the response"
         if not self.havehost():
@@ -503,6 +529,7 @@ class ntpq_session:
             break
         # Return None on success, otherwise an error string
         return res
+
     def readvars(self):
         "Read system vars from the host as a dict, or return an error string."
         self.doquery(opcode=CTL_OP_READVAR, quiet=True)
