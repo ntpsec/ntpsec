@@ -21,7 +21,7 @@ import ntp.util
 
 def get_info(host):
     info = ntp_read_vars(0, [], host)
-    if info is None or not 'stratum' in info:
+    if info is None or 'stratum' not in info:
         return
 
     info['offset'] = round(float(info['offset']) / 1000, 6)
