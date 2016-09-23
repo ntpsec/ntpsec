@@ -37,7 +37,7 @@ def mean(data):
 
 def _ss(data, mu=None):
     """Return sum of square deviations of sequence data."""
-    if None == mu:
+    if mu is None:
         c = mean(data)
     else:
         c = mu
