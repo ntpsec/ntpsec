@@ -468,8 +468,8 @@ class ntpq_session:
             if len(not_earlier):
                 not_earlier = earlier[0]
                 if not_earlier.offset == rpkt.offset:
-                         warn("duplicate %d octets at %d ignored, prior %d at %d\n" % (rpkt.count, rpkt.offset, not_earlier.count, not_earlier.offset))
-                         continue
+                    warn("duplicate %d octets at %d ignored, prior %d at %d\n" % (rpkt.count, rpkt.offset, not_earlier.count, not_earlier.offset))
+                    continue
 
             if len(fragments) > 0:
                 last = fragments[-1]
