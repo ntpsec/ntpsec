@@ -46,8 +46,6 @@ def cmd_configure(ctx, config):
         from wafhelpers.compiler import check_compiler
         check_compiler(ctx)
 
-
-
         if ctx.options.enable_rtems_trace:
                 ctx.find_program("rtems-tld", var="BIN_RTEMS_TLD", path_list=[ctx.options.rtems_trace_path, ctx.env.BINDIR])
                 ctx.env.RTEMS_TEST_ENABLE = True
@@ -72,7 +70,6 @@ def cmd_configure(ctx, config):
         if ctx.env.BIN_ASCIIDOC and ctx.env.BIN_XSLTPROC and ctx.env.BIN_A2X:
                 ctx.env.ENABLE_DOC = True
 
-
         if (ctx.options.enable_doc or ctx.options.enable_doc_only) and not ctx.env.ENABLE_DOC:
                 ctx.fatal("asciidoc and xsltproc are required in order to build documentation")
         elif (ctx.options.enable_doc or ctx.options.enable_doc_only):
@@ -85,7 +82,6 @@ def cmd_configure(ctx, config):
         ctx.env.A2X_FLAGS = ["--format", "manpage", "--asciidoc-opts=--conf-file=%s/docs/asciidoc.conf" % ctx.srcnode.abspath()]
         if not ctx.options.enable_a2x_xmllint:
                 ctx.env.A2X_FLAGS += ["--no-xmllint"]
-
 
         # Disable manpages within build()
         if ctx.options.disable_manpage:
@@ -112,7 +108,6 @@ def cmd_configure(ctx, config):
 
         ctx.define("NTPS_VERSION_STRING", ctx.env.NTPS_VERSION_STRING)
         ctx.end_msg(ctx.env.NTPS_VERSION_STRING)
-
 
         msg("--- Configuring main ---")
         ctx.setenv("main", ctx.env.derive())
@@ -147,7 +142,6 @@ def cmd_configure(ctx, config):
                 if ctx.env["CROSS-LDFLAGS"]:
                         ctx.env.LDFLAGS = opt_map["CROSS-LDFLAGS"]
 
-
         if ctx.options.list:
                 from wafhelpers.refclock import refclock_map
                 print("ID    Description")
@@ -162,7 +156,6 @@ def cmd_configure(ctx, config):
                 from wafhelpers.check_fortify import check_fortify
                 check_fortify(ctx)
 
-
         if ctx.options.enable_debug_gdb:
                 ctx.env.CFLAGS += ["-g"]
 
@@ -173,7 +166,6 @@ def cmd_configure(ctx, config):
         # We require some things that C99 doesn't enable, like pthreads.
         # Thus -std=gnu99 rather than -std=c99 here.
         ctx.env.CFLAGS += ["-Wall", "-Wextra", "-std=gnu99"]    # Default CFLAGS.
-
 
         # Check target platform.
         ctx.start_msg("Checking build target")
@@ -193,7 +185,6 @@ def cmd_configure(ctx, config):
         ctx.end_msg(ctx.env.PLATFORM_TARGET     )
 
         ctx.define("PLATFORM_%s" % ctx.env.PLATFORM_TARGET.upper(), 1, comment="Operating system detected by Python (%s)" % platform)
-
 
         # XXX: hack
         if ctx.env.PLATFORM_TARGET in ["freebsd", "osx", "openbsd"]:
@@ -374,7 +365,6 @@ def cmd_configure(ctx, config):
         if ctx.get_define("HAVE_TIMEPPS_H") or ctx.get_define("HAVE_SYS_TIMEPPS_H"):
                 ctx.define("HAVE_PPSAPI", 1, comment="Enable the PPS API")
 
-
         # Check for Solaris capabilities
         if ctx.get_define("HAVE_PRIV_H") and sys.platform == "Solaris":
                 ctx.define("HAVE_SOLARIS_PRIVS", 1, comment="Enable Solaris Privileges (Solaris only)")
@@ -418,7 +408,6 @@ def cmd_configure(ctx, config):
         if not ctx.options.disable_dns_retry:
                 ctx.define("ENABLE_DNS_RETRY", 1, comment="Retry DNS lookups after an initial failure")
 
-
         # There is an ENABLE_ASYMMETRIC that enables a section of the
         # protocol code having to do with handling very long asymmetric
         # delays, as in space communications. Likely this code has never
@@ -461,7 +450,6 @@ def cmd_configure(ctx, config):
         ctx.define("NTPS_CFLAGS", " ".join(ctx.env.CFLAGS).replace("\"", "\\\""), comment="CFLAGS used when compiled")
         ctx.define("NTPS_LDFLAGS", " ".join(ctx.env.LDFLAGS).replace("\"", "\\\""), comment="LDFLAGS used when compiled")
 
-
         # Check for directory separator
         if ctx.env.PLATFORM_TARGET == "win":
                 sep = "\\"
@@ -477,7 +465,6 @@ def cmd_configure(ctx, config):
 
         if ctx.get_define("HAVE_SYS_SYSCTL_H"):
                 ctx.define("HAVE_IFLIST_SYSCTL", 1, comment="Whether sysctl interface exists")
-
 
         # Header/library checks
         from wafhelpers.check_cap import check_cap
@@ -496,11 +483,9 @@ def cmd_configure(ctx, config):
                 from wafhelpers.check_mdns import check_mdns_header
                 check_mdns_header(ctx)
 
-
         # Run checks
         from wafhelpers.check_libevent2 import check_libevent2_run
         check_libevent2_run(ctx)
-
 
         if not ctx.options.disable_dns_retry:
             from wafhelpers.check_pthread import check_pthread_run
@@ -524,12 +509,10 @@ def cmd_configure(ctx, config):
         ctx.write_config_header("config.h")
         ctx.end_msg("config.h", "PINK")
 
-
         def yesno(x):
                 if x:
                         return "Yes"
                 return "No"
-
 
         msg("")
         msg("Build Options")

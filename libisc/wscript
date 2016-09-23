@@ -24,7 +24,6 @@ def build(ctx):
 
 	)
 
-
 	ctx(
 		target		= "isc",
 		features	= "c cstlib bld_include src_include",

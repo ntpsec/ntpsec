@@ -14,7 +14,6 @@ def build(ctx):
         source      = unity_source
 	)
 
-
 	# Test main.
 	common_source = [
 		"common/tests_main.c",
@@ -22,7 +21,6 @@ def build(ctx):
 		"common/sockaddrtest.c",
 		"common/file_handling.c"
 	]
-
 
 	ntpdig_source = [
 		"ntpdig/crypto.c",
@@ -33,7 +31,6 @@ def build(ctx):
 		"ntpdig/packet_processing.c",
 		"ntpdig/utilities.c",
 	] + common_source
-
 
 	# ntpdig/
 	if ctx.env.LIBEVENT2_ENABLE:
@@ -50,7 +47,6 @@ def build(ctx):
 	        source      = ntpdig_source,
 			test_args	= ["%s/tests/ntpdig/data/" % srcnode, "%s/tests/ntpdig/" % bldnode]
 		)
-
 
 	# libntp/
 	libntp_source = [
@@ -97,7 +93,6 @@ def build(ctx):
 		use			= "unity ntp isc M PTHREAD CRYPTO RT",
         source      = libntp_source,
 	)
-
 
 	ntpd_source = [
 		"ntpd/leapsec.c"

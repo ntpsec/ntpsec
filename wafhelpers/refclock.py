@@ -129,7 +129,6 @@ refclock_map = {
 }
 
 
-
 @conf
 def refclock_config(ctx):
 	from wafhelpers.refclock import refclock_map
@@ -146,7 +145,6 @@ def refclock_config(ctx):
 	# Remove duplicate IDs while preserving order.
 	unique_id = []
 	[unique_id.append(x) for x in ids if x not in unique_id]
-
 
 	refclock = False
 	for id in unique_id:

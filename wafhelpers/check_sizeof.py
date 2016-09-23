@@ -56,7 +56,6 @@ def check_sizeof_cross(ctx, header, sizeof, mandatory=True):
 	else:
 		ctx.start_msg("Checking sizeof %s" % (sizeof))
 
-
 	for size in range(2,13):
 
 		try:
