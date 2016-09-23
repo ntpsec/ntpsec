@@ -44,6 +44,8 @@ def options_cmd(ctx, config):
 	grp.add_option('--check', action='store_true', default=False, help="Run tests")
 	grp.add_option('--enable-rtems-trace', action='store_true', default=False, help="Enable RTEMS Trace.")
 	grp.add_option('--rtems-trace-path', type='string', default="", help="Path to rtems-tld.")
+	grp.add_option('--define', type='string', action="callback", callback=callback_flags, help="Force definition of symbol, wants value of form SYM=VAL.")
+	grp.add_option('--undefine', type='string', action="callback", callback=callback_flags, help="Force undefinition of symbol.")
 
 	grp = ctx.add_option_group("NTP documentation configure options")
 	grp.add_option('--enable-doc', action='store_true', default=False, help="Build NTP documentation")
