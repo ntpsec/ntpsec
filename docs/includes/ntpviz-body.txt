@@ -8,8 +8,9 @@
 {ntpviz} [-d statsdir] [-g] [-n name] [-p period]
          [-s starttime] [-e endtime]
          [--local-offset | --local-error | --local-jitter | --local-stability]
-	 [ --all-peer-jitters
+	 [   --all-peer-jitters
 	   | --all-peer-offsets
+	   | --local-gps
 	   | --local-offset-histogram
 	   | --local-offset-multiplot
 	   | --local-temps
@@ -69,6 +70,11 @@ The following plots are available:
 
 --local-jitter::
    Clock time-jitter plot from the loop statistics (field 5).
+
+--local-gps::
+   Plot GPS Time Dilution of Precision (tdop) and Number of Sats Used
+   (nSats).  This plot is only generated if there is a log file named
+   gpsd in the log file directory.
 
 --local-offset::
    Clock time and clock frequency offsets from the loop statistics
