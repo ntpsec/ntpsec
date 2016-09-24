@@ -199,11 +199,10 @@ appropriate "phone" statement among the "phone" statements.
 NTP configuration ( {ntpconf} )::
 +
 --
-refclock jjy unit X subtype (100, 101 to 180) minpoll N;;
+refclock jjy unit X subtype (100, 101 to 180) minpoll N (N >= 8);;
     The subtype 100 is specified, this driver does not issue the loopback
     command in order to measure the delay, and the delay of the
-    delay of the telephone line and the system processing is not
-    adjusted.
+    telephone line and the system processing is not  adjusted.
 +
 The subtype 101 to 180 is specified, this driver issues the loopback
 command and measures the delay of the telephone line and the system
