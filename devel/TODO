@@ -8,9 +8,6 @@
 
 * Cleanup and separate features in wafhelpers/*
 
-* Add 'snapshot' feature to dump config status into a JSON file for collecting
-  build + platform information
-
 * Add support for enabling all conditional checks to ensure none are broken.
 
 === Code ===

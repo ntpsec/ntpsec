@@ -1,4 +1,4 @@
-import sys, os
+import sys, os, platform
 from waflib.Configure import conf
 from wafhelpers.probes import *
 from wafhelpers.util import msg, msg_setting, parse_version
@@ -180,16 +180,15 @@ def cmd_configure(ctx, config):
 
         # Check target platform.
         ctx.start_msg("Checking build target")
-        from sys import platform
-        if platform == "win32":
+        if sys.platform == "win32":
                 ctx.env.PLATFORM_TARGET = "win"
-        elif platform == "darwin":
+        elif sys.platform == "darwin":
                 ctx.env.PLATFORM_TARGET = "osx"
-        elif platform.startswith("freebsd"):
+        elif sys.platform.startswith("freebsd"):
                 ctx.env.PLATFORM_TARGET = "freebsd"
-        elif platform.startswith("netbsd"):
+        elif sys.platform.startswith("netbsd"):
                 ctx.env.PLATFORM_TARGET = "netbsd"
-        elif platform.startswith("openbsd"):
+        elif sys.platform.startswith("openbsd"):
                 ctx.env.PLATFORM_TARGET = "openbsd"
         else:
                 ctx.env.PLATFORM_TARGET = "unix"
@@ -210,12 +209,12 @@ def cmd_configure(ctx, config):
         if ctx.env.PLATFORM_TARGET == "osx":
                 ctx.define("__APPLE_USE_RFC_3542", 1, comment="Needed for IPv6 support")
 
+	ctx.define("PLATFORM_FULL", platform.platform())
+
         # int32_t and uint32_t probes aren't really needed, POSIX guarantees
         # them.  But int64_t and uint64_t are not guaranteed to exist on 32-bit
-        # machines.
-        # Used by timevalops and timespecops in tests/libntp/
-        # May go away when that is cleaned up.
-        types = ["uint64_t"]
+        # machines.  The calendar and ISC code needs them.
+	types = ["uint64_t"]
 
         for inttype in sorted(types):
                 ctx.check_type(inttype, ["stdint.h", "sys/types.h"])
