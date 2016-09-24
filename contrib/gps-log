@@ -1,0 +1,59 @@
+#!/usr/bin/env python
+# coding: utf-8
+
+import os
+from gps import *
+import time
+from datetime import datetime
+import threading
+
+gpsd = None #seting the global variable
+
+class GpsPoller(threading.Thread):
+  def __init__(self):
+    threading.Thread.__init__(self)
+    global gpsd #bring it in scope
+    gpsd = gps(mode=WATCH_ENABLE) #starting the stream of info
+    self.current_value = None
+    self.running = True
+
+  def run(self):
+    global gpsd
+    while gpsp.running:
+      gpsd.next() # loop and grab each set of gpsd info
+
+if __name__ == '__main__':
+  gpsp = GpsPoller() # create the thread
+  try:
+    gpsp.start() # start it up
+    last_time = 0
+    print("# Time       Device     tdop     nSat")
+    while True:
+      #It may take a second or two to get good data
+      #print gpsd.fix.latitude,', ',gpsd.fix.longitude,'  Time: ',gpsd.utc
+
+      try:
+        if 'nan' != gpsd.fix.time and not isnan(gpsd.fix.time):
+           if last_time != gpsd.fix.time:
+               # new fix, log it.
+               print( '%s %s %f %d' % \
+                  (isotime(gpsd.fix.time),
+                   gpsd.device,
+                   gpsd.tdop,
+                   gpsd.satellites_used)
+                  )
+           last_time = gpsd.fix.time
+      except AttributeError as e:
+          print( 'parse error\n') 
+
+      sys.stdout.flush()
+      time.sleep(5) #set to whatever
+
+  except (KeyboardInterrupt, SystemExit): #when you press ctrl+c
+    print "\nKilling Thread..."
+  except Exception as e:       # any error, signal
+    print( e )
+
+  gpsp.running = False
+  gpsp.join() # wait for the thread to finish what it's doing
+  print "Done.\nExiting."

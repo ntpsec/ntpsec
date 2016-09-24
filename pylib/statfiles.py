@@ -63,7 +63,7 @@ class NTPStats:
             raise SystemExit(1)
 
         for stem in ("clockstats", "peerstats", "loopstats", "rawstats", \
-                 "temps"):
+                 "temps", "gpsd"):
             lines = []
             try:
                 for logpart in glob.glob(os.path.join(statsdir, stem) + "*"):
@@ -80,14 +80,21 @@ class NTPStats:
                 pass
 
             lines1 = []
-            if stem == "temps":
-                # temps is already in UNIX time
+            if stem == "temps" or stem == "gpsd":
+                # temps and gpsd are already in UNIX time
                 for line in lines:
                     line = line.strip(' \0\r\n\t')
                     if line is not None:
+                        if 0 == len(line):
+                            continue;
                         split = line.split(None, 2)
-                        if int(split[0]) >= starttime and \
-                           int(split[0]) <= endtime:
+                        try:
+                            t = int(float(split[0]))
+                        except:
+                            # ignore comment lines, lines with no time
+                            continue
+
+                        if starttime <= t <= endtime:
                             lines1.append( line)
             else:
                 # Morph first field into Unix time with fractional seconds
@@ -152,6 +159,16 @@ class NTPStats:
                 self.peermap[ip] = []
             self.peermap[ip].append(line)
         return self.peermap
+
+    def gpssplit(self):
+        "Return a dictionary mapping gps sources to entry subsets."
+        gpsmap = {}
+        for line in self.gpsd:
+            source = line.split()[1]
+            if source not in gpsmap:
+                gpsmap[source] = []
+            gpsmap[source].append(line)
+        return gpsmap
 
     def tempssplit(self):
         "Return a dictionary mapping temperature sources to entry subsets."

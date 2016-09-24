@@ -10,6 +10,7 @@ Usage: ntpviz [-d statsdir] [-g] [-n name] [-p days]
                 | --peer-offsets=hosts | --all-peer-offsets
                 | --peer-jitters=hosts | --all-peer-jitters
                 | --local-temps
+                | --local-gps
                 | --local-offset-multiplot]
               [-o outdir]
               [-D N]
@@ -186,6 +187,45 @@ plot \\
                  % locals()
 
         # strip the trailing ", \n"
+        plot_template = plot_template[:-4] + "\n"
+        plot_template += plot_data
+        return plot_template
+
+    def local_gps_gnuplot(self):
+        "Generate GNUPLOT code graphing local gps statistics"
+        sitename = self.sitename
+        gpsmap = self.gpssplit()
+        gpslist = list(gpsmap.keys())
+        gpslist.sort()
+
+        if not len( gpsmap) or not len( gpslist):
+            sys.stderr.write("ntpviz: WARNING: no gps data to graph\n")
+            return ''
+
+        gps_data = ()
+        plot_data = ""
+        for key in gpslist:
+            d = "\n".join(gpsmap[key])
+            plot_data += d + "\ne\n" + d + "\ne\n"
+        # remove trailing "e\n"
+        plot_data = plot_data[:-2]
+
+        plot_template = NTPViz.Common + """\
+set title "%(sitename)s: Local GPS
+set ytics format "%%1.1f tdop" nomirror textcolor rgb '#0060ad'
+set y2tics format "%%2.0f nSat"  nomirror textcolor rgb '#dd181f'
+set style line 1 lc rgb '#0060ad' lt 1 lw 1 pt 7 ps 0   # --- blue
+set style line 2 lc rgb '#dd181f' lt 1 lw 1 pt 5 ps 0   # --- red
+plot \\
+""" % locals()
+
+        for key in gpslist:
+            plot_template += """\
+'-' using 1:3 title '%(key)s tdop' with line, \\
+'-' using 1:4 title '%(key)s nSat' with line axis x1y2, \\
+""" % locals()
+
+        # strip the trailing ", \\n"
         plot_template = plot_template[:-4] + "\n"
         plot_template += plot_data
         return plot_template
@@ -622,6 +662,7 @@ if __name__ == '__main__':
             "all-peer-offsets", "peer-offsets=",
             "all-peer-jitters", "peer-jitters=",
             "local-temps",
+            "local-gps",
             "local-offset-multiplot",
         ])
     except getopt.GetoptError as err:
@@ -633,7 +674,7 @@ if __name__ == '__main__':
     generate = False
     show_local_offset = show_local_error = show_local_jitter = False
     show_local_stability = show_local_offset_histogram = show_temps = False
-    show_local_offset_multiplot = False
+    show_local_offset_multiplot = show_gps = False
     show_peer_offsets = show_peer_jitters = None
     outdir = "ntpgraphs"
     debug_level = 0
@@ -677,6 +718,8 @@ if __name__ == '__main__':
             show_peer_jitters = []
         elif switch == "--local-temps":
             show_temps = True
+        elif switch == "--local-gps":
+            show_gps = True
         elif switch == "--local-offset-multiplot":
             show_local_offset_multiplot = True
     if 0 < debug_level:
@@ -773,6 +816,17 @@ if __name__ == '__main__':
                 sys.stdout.write(plot)
             raise SystemExit(0)
 
+        if show_gps:
+            if not len( stats.gpsd):
+                sys.stderr.write("ntpviz: ERROR: missing gps data\n")
+                raise SystemExit(1)
+            plot = stats.local_gps_gnuplot()
+            if generate:
+                gnuplot(plot)
+            else:
+                sys.stdout.write(plot)
+            raise SystemExit(0)
+
     if show_local_offset_multiplot:
         plot = local_offset_multiplot(statlist)
         if generate:
@@ -834,6 +888,10 @@ the system.</p>
 frequency.  In other words, how fast it the local clock changes freqency.
 This is field 6 in the loopstats log file.</p>
 <p>Lower is better.  An ideal clock would be a horizontal line at 0ppm.</p>
+""",
+        "local-gps": """\
+<p>Local GPS.  These will be site specific.  It depends on running
+a local gpsd daemon, and logging the data using gps-log.py.</p>
 """,
         "local-jitter": """\
 <p>This shows the jitter of the local clock offset.  In other words,
@@ -1037,6 +1095,7 @@ ntpviz</a>, part of the <a href="https://www.ntpsec.org/">NTPsec project</a>
             ("local-stability", stats.local_offset_stability_gnuplot()),
             ("local-offset-histogram", stats.local_offset_histogram_gnuplot()),
             ("local-temps", stats.local_temps_gnuplot()),
+            ("local-gps", stats.local_gps_gnuplot()),
             ("peer-offsets", stats.peer_offsets_gnuplot()),
         ]
 
