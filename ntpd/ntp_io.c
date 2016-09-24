@@ -130,7 +130,9 @@ nic_rule *nic_rule_list;
 #endif
 
 /*
- * We do asynchronous input using the SIGIO facility.  A number of
+ * This code is a remnant from when ntpd did asynchronous input using
+ * the SIGIO facility.  Most of that complexity is gone now.
+ *
  * recvbuf buffers are preallocated for input.	In the signal
  * handler we poll to see which sockets are ready and read the
  * packets from them into the recvbuf's along with a time stamp and
@@ -3458,7 +3460,7 @@ io_handler(void)
 }
 
 /*
- * input_handler - receive packets asynchronously
+ * input_handler - receive packets
  */
 static void
 input_handler(

@@ -14,9 +14,9 @@
 #define RECV_TOOMANY	40	/* this is way too many buffers */
 
 /*
- * Format of a recvbuf.  Back when this code did true asynchronous
+ * Format of a recvbuf.  Back when ntpd did true asynchronous
  * I/O, these were used by the asynchronous receive routine to store
- * incoming packets and related information. Now, with faster processor
+ * incoming packets and related information. Now, with faster processors
  * and lower latency in the synchronous I/O loop, that complexity
  * has been dropped.
  */

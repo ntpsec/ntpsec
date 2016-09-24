@@ -140,6 +140,28 @@ and pool hostnames.  This is intended to avoid adding startup delay
 and jitter to the time synchronization logic due to address lookups
 of unpredictable length.
 
+Input handling used to be a lot more complex.  Due to inability to get
+arrival timestamps from the host's UDP layer, the code used to do
+asynchronous I/O with packet I/O indicated by signal, with packets
+(and their arrival timestamps) being stashed in a ring of buffers that
+was consumed by the protocol main loop.
+
+This looked partly like a performance hack, but if so it was an
+ineffective one. Because there is necessarily a synchronous bottleneck
+at protocol handling, packets arriving faster than the main loop could
+cycle would pile up in the ring buffer and latecomers would be
+dropped.
+
+The new organization stops pretending; it simply spins on a select
+across all interfaces.  If inbound traffic is more than the daemon
+can handle, packets will pile up in the UDP layer and be dropped at
+that level. The main difference is that dropped packets are no
+longer visible in the statistics the server can gather.
+
+There was internal evidence in the NTP Classic build machinery that
+asynchronous I/O on Unix machines probably hadn't actually worked for
+quite a while before NTPsec removed it.
+
 === Refclock management ===
 
 There is an illuminating comment in ntpd/ntp_refclock.c that begins
