@@ -250,68 +250,6 @@ TEST(calendar, RoundTripDate) {
 	}
 }
 
-// Roundtrip testing on calyearstart
-TEST(calendar, RoundTripYearStart) {
-	static const time_t pivot = 0;
-	u_int32_t ntp, expys, truys;
-	struct calendar date;
-
-	for (ntp = 0; ntp < 0xFFFFFFFFu - 30000000u; ntp += 30000000u) {
-		truys = calyearstart(ntp, &pivot);
-		ntpcal_ntp_to_date(&date, ntp, &pivot);
-		date.month = date.monthday = 1;
-		date.hour = date.minute = date.second = 0;
-		expys = ntpcal_date_to_ntp(&date);
-		TEST_ASSERT_EQUAL(expys, truys);
-	}
-}
-
-// Roundtrip testing on calymonthstart
-TEST(calendar, RoundTripMonthStart) {
-	static const time_t pivot = 0;
-	u_int32_t ntp, expms, trums;
-	struct calendar date;
-
-	for (ntp = 0; ntp < 0xFFFFFFFFu - 2000000u; ntp += 2000000u) {
-		trums = calmonthstart(ntp, &pivot);
-		ntpcal_ntp_to_date(&date, ntp, &pivot);
-		date.monthday = 1;
-		date.hour = date.minute = date.second = 0;
-		expms = ntpcal_date_to_ntp(&date);
-		TEST_ASSERT_EQUAL(expms, trums);
-	}
-}
-
-// Roundtrip testing on calweekstart
-TEST(calendar, RoundTripWeekStart) {
-	static const time_t pivot = 0;
-	u_int32_t ntp, expws, truws;
-	struct isodate date;
-
-	for (ntp = 0; ntp < 0xFFFFFFFFu - 600000u; ntp += 600000u) {
-		truws = calweekstart(ntp, &pivot);
-		isocal_ntp_to_date(&date, ntp, &pivot);
-		date.hour = date.minute = date.second = 0;
-		date.weekday = 1;
-		expws = isocal_date_to_ntp(&date);
-		TEST_ASSERT_EQUAL(expws, truws);
-	}
-}
-
-// Roundtrip testing on caldaystart
-TEST(calendar, RoundTripDayStart) {
-	static const time_t pivot = 0;
-	u_int32_t ntp, expds, truds;
-	struct calendar date;
-
-	for (ntp = 0; ntp < 0xFFFFFFFFu - 80000u; ntp += 80000u) {
-		truds = caldaystart(ntp, &pivot);
-		ntpcal_ntp_to_date(&date, ntp, &pivot);
-		date.hour = date.minute = date.second = 0;
-		expds = ntpcal_date_to_ntp(&date);
-		TEST_ASSERT_EQUAL(expds, truds);
-	}
-}
 
 TEST_GROUP_RUNNER(calendar) {
 	RUN_TEST_CASE(calendar, DaySplitMerge);
@@ -321,8 +259,4 @@ TEST_GROUP_RUNNER(calendar) {
 	RUN_TEST_CASE(calendar, LeapYears1);
 	RUN_TEST_CASE(calendar, LeapYears2);
 	RUN_TEST_CASE(calendar, RoundTripDate);
-	RUN_TEST_CASE(calendar, RoundTripYearStart);
-	RUN_TEST_CASE(calendar, RoundTripMonthStart);
-	RUN_TEST_CASE(calendar, RoundTripWeekStart);
-	RUN_TEST_CASE(calendar, RoundTripDayStart);
 }

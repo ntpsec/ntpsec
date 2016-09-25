@@ -7,7 +7,7 @@ def build(ctx):
 		"authkeys.c",
 		"authreadkeys.c",
 		"authusekey.c",
-		"calyearstart.c",
+#		"calyearstart.c",
 		"clocktime.c",
 		"decodenetnum.c",
 		"dofptoa.c",
