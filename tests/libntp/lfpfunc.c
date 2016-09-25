@@ -26,31 +26,9 @@ TEST_TEAR_DOWN(lfpfunc) {}
 	TEST_ASSERT_EQUAL_UINT_MESSAGE(a.l_uf, b.l_uf, "Field l_uf");	\
 }
 
-
 typedef struct  {
 	uint32_t h, l;
 } lfp_hl;
-
-
-int	l_fp_scmp(const l_fp first, const l_fp second);
-int	l_fp_ucmp(const l_fp first, l_fp second);
-l_fp	l_fp_init(int32_t i, uint32_t f);
-l_fp	l_fp_add(const l_fp first, const l_fp second);
-l_fp	l_fp_subtract(const l_fp first, const l_fp second);
-l_fp	l_fp_negate(const l_fp first);
-l_fp	l_fp_abs(const l_fp first);
-int	l_fp_signum(const l_fp first);
-double	l_fp_convert_to_double(const l_fp first);
-l_fp	l_fp_init_from_double( double rhs);
-void	l_fp_swap(l_fp * first, l_fp *second);
-bool	l_isgt(const l_fp first, const l_fp second);
-bool	l_isgtu(const l_fp first, const l_fp second);
-bool	l_ishis(const l_fp first, const l_fp second);
-bool	l_isgeq(const l_fp first, const l_fp second);
-bool	l_isequ(const l_fp first, const l_fp second);
-double	eps(double d);
-
-static int cmp_work(uint32_t a[3], uint32_t b[3]);
 
 //----------------------------------------------------------------------
 // reference comparision
@@ -59,8 +37,20 @@ static int cmp_work(uint32_t a[3], uint32_t b[3]);
 // executed.
 //----------------------------------------------------------------------
 
-int
-l_fp_scmp(const l_fp first, const l_fp second)
+// maybe rename it to lf_cmp_work
+static int cmp_work(uint32_t a[3], uint32_t b[3])
+{
+	uint32_t cy, idx, tmp;
+	for (cy = idx = 0; idx < 3; ++idx) {
+		tmp = a[idx]; cy  = (a[idx] -=   cy  ) > tmp;
+		tmp = a[idx]; cy |= (a[idx] -= b[idx]) > tmp;
+	}
+	if (a[2])
+		return -1;
+	return a[0] || a[1];
+}
+
+static int l_fp_scmp(const l_fp first, const l_fp second)
 {
 	uint32_t a[3], b[3];
 
@@ -76,8 +66,7 @@ l_fp_scmp(const l_fp first, const l_fp second)
 	return cmp_work(a,b);
 }
 
-int
-l_fp_ucmp(const l_fp first, l_fp second)
+static int l_fp_ucmp(const l_fp first, l_fp second)
 {
 	uint32_t a[3], b[3];
 	const l_fp op1 = first; 
@@ -89,28 +78,12 @@ l_fp_ucmp(const l_fp first, l_fp second)
 	return cmp_work(a,b);
 }
 
-// maybe rename it to lf_cmp_work
-int
-cmp_work(uint32_t a[3], uint32_t b[3])
-{
-	uint32_t cy, idx, tmp;
-	for (cy = idx = 0; idx < 3; ++idx) {
-		tmp = a[idx]; cy  = (a[idx] -=   cy  ) > tmp;
-		tmp = a[idx]; cy |= (a[idx] -= b[idx]) > tmp;
-	}
-	if (a[2])
-		return -1;
-	return a[0] || a[1];
-}
-
-
 //----------------------------------------------------------------------
 // imlementation of the LFP stuff
 // This should be easy enough...
 //----------------------------------------------------------------------
 
-l_fp
-l_fp_init(int32_t i, uint32_t f)
+static l_fp l_fp_init(int32_t i, uint32_t f)
 {
 	l_fp temp;
 	temp.l_i  = i;
@@ -119,8 +92,7 @@ l_fp_init(int32_t i, uint32_t f)
 	return temp;
 }
 
-l_fp
-l_fp_add(const l_fp first, const l_fp second)
+static l_fp l_fp_add(const l_fp first, const l_fp second)
 {
 	l_fp temp = first;
 	L_ADD(&temp, &second);
@@ -128,8 +100,7 @@ l_fp_add(const l_fp first, const l_fp second)
 	return temp;
 }
 
-l_fp
-l_fp_subtract(const l_fp first, const l_fp second)
+static l_fp l_fp_subtract(const l_fp first, const l_fp second)
 {
 	l_fp temp = first;
 	L_SUB(&temp, &second);
@@ -137,8 +108,7 @@ l_fp_subtract(const l_fp first, const l_fp second)
 	return temp;
 }
 
-l_fp
-l_fp_negate(const l_fp first)
+static l_fp l_fp_negate(const l_fp first)
 {
 	l_fp temp = first;
 	L_NEG(&temp);
@@ -146,8 +116,7 @@ l_fp_negate(const l_fp first)
 	return temp;
 }
 
-l_fp
-l_fp_abs(const l_fp first)
+static l_fp l_fp_abs(const l_fp first)
 {
 	l_fp temp = first;
 	if (L_ISNEG(&temp))
@@ -155,32 +124,28 @@ l_fp_abs(const l_fp first)
 	return temp;
 }
 
-int
-l_fp_signum(const l_fp first)
+static int l_fp_signum(const l_fp first)
 {
 	if (first.l_ui & 0x80000000u)
 		return -1;
 	return (first.l_ui || first.l_uf);
 }
 
-double
-l_fp_convert_to_double(const l_fp first)
+static double l_fp_convert_to_double(const l_fp first)
 {
 	double res;
 	LFPTOD(&first, res);
 	return res;
 }
 
-l_fp
-l_fp_init_from_double( double rhs)
+static l_fp l_fp_init_from_double( double rhs)
 {
 	l_fp temp;
 	DTOLFP(rhs, &temp);
 	return temp;
 }
 
-void
-l_fp_swap(l_fp * first, l_fp *second)
+static void l_fp_swap(l_fp * first, l_fp *second)
 {
 	l_fp temp = *second;
 
@@ -197,38 +162,28 @@ l_fp_swap(l_fp * first, l_fp *second)
 //----------------------------------------------------------------------
 
 
-bool
-l_isgt (const l_fp first, const l_fp second)
+static bool l_isgt (const l_fp first, const l_fp second)
 {
-
 	return L_ISGT(&first, &second);
 }
 
-bool
-l_isgtu(const l_fp first, const l_fp second)
+static bool l_isgtu(const l_fp first, const l_fp second)
 {
-
 	return L_ISGTU(&first, &second);
 }
 
-bool
-l_ishis(const l_fp first, const l_fp second)
+static bool l_ishis(const l_fp first, const l_fp second)
 {
-
 	return L_ISHIS(&first, &second);
 }
 
-bool
-l_isgeq(const l_fp first, const l_fp second)
+static bool l_isgeq(const l_fp first, const l_fp second)
 {
-
 	return L_ISGEQ(&first, &second);
 }
 
-bool
-l_isequ(const l_fp first, const l_fp second)
+static bool l_isequ(const l_fp first, const l_fp second)
 {
-
 	return L_ISEQU(&first, &second);
 }
 
