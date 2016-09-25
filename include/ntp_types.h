@@ -80,6 +80,7 @@ typedef union {
 #define setvint64s(n,v)   (n).q_s = (v)
 #define vint64u(n)        (n).Q_s
 #define setvint64u(n,v)   (n).Q_s = (v)
+#define negvint64(n)      (n).q_s *= -1
 
 typedef uint16_t	associd_t; /* association ID */
 #define ASSOCID_MAX	USHRT_MAX

@@ -102,7 +102,7 @@ strtouv64(
 	if (endp)
 		*endp = (char*)noconst(src);
 	if (sig)
-		M_NEG(vint64hiu(res), vint64lo(res));
+		negvint64(res);
 	return res;
 }
 

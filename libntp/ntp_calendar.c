@@ -68,7 +68,7 @@ time_to_vint64(
 	setvint64hiu(res, 0);
 	if (tt < 0) {
 		setvint64lo(res, (uint32_t)-tt);
-		M_NEG(vint64hiu(res), vint64lo(res));
+		negvint64(res);
 	} else {
 		setvint64lo(res, (uint32_t)tt);
 	}
