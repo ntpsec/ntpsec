@@ -1,4 +1,4 @@
-= README file for directory .libntp =
+= README file for directory libntp =
 
 This directory contains the sources for the NTP library used by most
 programs in this distribution.
