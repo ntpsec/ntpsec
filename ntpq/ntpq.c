@@ -56,7 +56,6 @@ u_long info_auth_keyid = 0;
 
 static	int	info_auth_keytype = NID_md5;	/* MD5 */
 static	size_t	info_auth_hashlen = 16;		/* MD5 */
-u_long	current_time;		/* needed by authkeys; not used */
 
 /*
  * Flag which indicates we should always send authenticated requests
