@@ -48,11 +48,11 @@ void AddTrustedKey(keyid_t keyno) {
 	 */
 	MD5auth_setkey(keyno, KEYTYPE, NULL, 0);
 
-	authtrust(keyno, 1);
+	authtrust(keyno, true);
 }
 
 void AddUntrustedKey(keyid_t keyno) {
-	authtrust(keyno, 0);
+	authtrust(keyno, false);
 }
 
 

@@ -1276,7 +1276,7 @@ sendrequest(
 		}
 		authusekey(info_auth_keyid, info_auth_keytype,
 			   (uint8_t *)pass);
-		authtrust(info_auth_keyid, 1);
+		authtrust(info_auth_keyid, true);
 	}
 
 	/*
@@ -2369,7 +2369,7 @@ passwd(
 	}
 	authusekey(info_auth_keyid, info_auth_keytype,
 		   (const uint8_t *)pass);
-	authtrust(info_auth_keyid, 1);
+	authtrust(info_auth_keyid, true);
 }
 
 

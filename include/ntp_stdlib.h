@@ -59,7 +59,7 @@ extern	int	authencrypt	(keyid_t, uint32_t *, int);
 extern	int	authhavekey	(keyid_t);
 extern	int	authistrusted	(keyid_t);
 extern	bool	authreadkeys	(const char *);
-extern	void	authtrust	(keyid_t, unsigned int);
+extern	void	authtrust	(keyid_t, bool);
 extern	bool	authusekey	(keyid_t, int, const uint8_t *);
 
 /*
@@ -168,7 +168,6 @@ extern	void	signal_no_reset (int, void (*func)(int));
 extern	void	set_ctrl_c_hook (ctrl_c_fn);
 
 extern	void	getauthkeys 	(const char *);
-extern	void	auth_agekeys	(void);
 extern	void	rereadkeys	(void);
 
 /*
@@ -179,7 +178,6 @@ extern	void	rereadkeys	(void);
 extern unsigned int	authkeynotfound;	/* keys not found */
 extern unsigned int	authkeylookups;		/* calls to lookup keys */
 extern unsigned int	authnumkeys;		/* number of active keys */
-extern unsigned int	authkeyexpired;		/* key lifetime expirations */
 extern unsigned int	authkeyuncached;	/* cache misses */
 extern unsigned int	authencryptions;	/* calls to encrypt */
 extern unsigned int	authdecryptions;	/* calls to decrypt */
