@@ -449,6 +449,7 @@ authtrust(
 		 */
 		if (trust) {
 			sk->flags |= KEY_TRUSTED;
+			return;
 		}
 
 		/* No longer trusted, return it to the free list. */
