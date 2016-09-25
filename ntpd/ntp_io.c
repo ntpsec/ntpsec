@@ -151,11 +151,11 @@ nic_rule *nic_rule_list;
 /*
  * Other statistics of possible interest
  */
-volatile u_long packets_dropped;	/* total number of packets dropped on reception */
-volatile u_long packets_ignored;	/* packets received on wild card interface */
-volatile u_long packets_received;	/* total number of packets received */
-	 u_long packets_sent;		/* total number of packets sent */
-	 u_long packets_notsent;	/* total number of packets which couldn't be sent */
+u_long packets_dropped;		/* total # of packets dropped on reception */
+u_long packets_ignored;		/* packets received on wild card interface */
+u_long packets_received;	/* total # of packets received */
+u_long packets_sent;		/* total # of packets sent */
+u_long packets_notsent;		/* total # of packets which couldn't be sent */
 
 volatile u_long handler_calls;	/* number of calls to interrupt handler */
 volatile u_long handler_pkts;	/* number of pkts received by handler */
@@ -170,7 +170,7 @@ endpt *	loopback_interface;	/* loopback ipv4 interface */
 
 bool broadcast_client_enabled;	/* is broadcast client enabled */
 u_int sys_ifnum;			/* next .ifnum to assign */
-int ninterfaces;			/* Total number of interfaces */
+int ninterfaces;			/* total # of interfaces */
 
 bool disable_dynamic_updates;	/* if true, scan interfaces once only */
 
