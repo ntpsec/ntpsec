@@ -70,6 +70,7 @@ def build(ctx):
 		"libntp/numtohost.c",
 		"libntp/prettydate.c",
 		"libntp/recvbuff.c",
+		"libntp/refidsmear.c",
 		"libntp/sfptostr.c",
 		"libntp/socktoa.c",
 		"libntp/ssl_init.c",
