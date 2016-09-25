@@ -775,7 +775,7 @@ ntpdmain(
 				ntp_optarg);
 			exit(0);
 		    } else {
-			authtrust(tkey, 1);
+			authtrust(tkey, true);
 		    }
 	        }
 		break;

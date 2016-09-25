@@ -1750,7 +1750,8 @@ ctl_putsys(
 		break;
 
 	case CS_AUTHKEXPIRED:
-		ctl_putuint(sys_var[varid].text, authkeyexpired);
+	    /* historical relic - autokey used to expire keys */
+		ctl_putuint(sys_var[varid].text, 0);
 		break;
 
 	case CS_AUTHENCRYPTS:

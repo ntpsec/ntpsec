@@ -23,7 +23,6 @@ struct savekey {
 	symkey *	hlink;		/* next in hash bucket */
 	DECL_DLIST_LINK(symkey, llink);	/* for overall & free lists */
 	uint8_t *	secret;		/* shared secret */
-	unsigned int	lifetime;	/* remaining lifetime */
 	keyid_t		keyid;		/* key identifier */
 	unsigned short	type;		/* OpenSSL digest NID */
 	unsigned short	secretsize;	/* secret octets */
@@ -49,7 +48,7 @@ symkey_alloc *	authallocs;
 static inline unsigned short	auth_log2(double x);
 static void		auth_resize_hashtable(void);
 static void		allocsymkey(symkey **, keyid_t,	unsigned short,
-				    unsigned short, unsigned int, unsigned short, uint8_t *);
+				    unsigned short, unsigned short, uint8_t *);
 static void		freesymkey(symkey *, symkey **);
 #ifdef DEBUG
 static void		free_auth_mem(void);
@@ -69,7 +68,6 @@ symkey **key_hash;
 unsigned int authkeynotfound;		/* keys not found */
 unsigned int authkeylookups;		/* calls to lookup keys */
 unsigned int authnumkeys;		/* number of active keys */
-unsigned int authkeyexpired;		/* key lifetime expirations */
 unsigned int authkeyuncached;		/* cache misses */
 unsigned int authnokey;		/* calls to encrypt with no key */
 unsigned int authencryptions;		/* calls to encrypt */
@@ -260,7 +258,6 @@ allocsymkey(
 	keyid_t		id,
 	unsigned short	flags,
 	unsigned short	type,
-	unsigned int	lifetime,
 	unsigned short	secretsize,
 	uint8_t *	secret
 	)
@@ -276,7 +273,6 @@ allocsymkey(
 	sk->type = type;
 	sk->secretsize = secretsize;
 	sk->secret = secret;
-	sk->lifetime = lifetime;
 	LINK_SLIST(*bucket, sk, hlink);
 	LINK_TAIL_DLIST(key_listhead, sk, llink);
 	authnumfreekeys--;
@@ -419,12 +415,11 @@ authhavekey(
 void
 authtrust(
 	keyid_t		id,
-	unsigned int		trust
+	bool		trust
 	)
 {
 	symkey **	bucket;
 	symkey *	sk;
-	unsigned int	lifetime;
 
 	/*
 	 * Search bin for key; if it does not exist and is untrusted,
@@ -450,16 +445,10 @@ authtrust(
 		}
 
 		/*
-		 * Key exists. If it is to be trusted, say so and
-		 * update its lifetime. 
+		 * Key exists. If it is to be trusted, say so.
 		 */
-		if (trust > 0) {
+		if (trust) {
 			sk->flags |= KEY_TRUSTED;
-			if (trust > 1)
-				sk->lifetime = current_time + trust;
-			else
-				sk->lifetime = 0;
-			return;
 		}
 
 		/* No longer trusted, return it to the free list. */
@@ -467,16 +456,7 @@ authtrust(
 		return;
 	}
 
-	/*
-	 * keyid is not present, but the is to be trusted.  We allocate
-	 * a new key, but do not specify a key type or secret.
-	 */
-	if (trust > 1) {
-		lifetime = current_time + trust;
-	} else {
-		lifetime = 0;
-	}
-	allocsymkey(bucket, id, KEY_TRUSTED, 0, lifetime, 0, NULL);
+	allocsymkey(bucket, id, KEY_TRUSTED, 0, 0, NULL);
 }
 
 
@@ -550,7 +530,7 @@ MD5auth_setkey(
 	secretsize = len;
 	secret = emalloc(secretsize);
 	memcpy(secret, key, secretsize);
-	allocsymkey(bucket, keyno, 0, (unsigned short)keytype, 0,
+	allocsymkey(bucket, keyno, 0, (unsigned short)keytype,
 		    (unsigned short)secretsize, secret);
 #ifdef DEBUG
 	if (debug >= 4) {
@@ -587,30 +567,10 @@ auth_delkeys(void)
 				sk->secret = NULL;
 			}
 			sk->secretsize = 0;
-			sk->lifetime = 0;
 		} else {
 			freesymkey(sk, &key_hash[KEYHASH(sk->keyid)]);
 		}
 	ITER_DLIST_END()
-}
-
-
-/*
- * auth_agekeys - delete keys whose lifetimes have expired
- */
-void
-auth_agekeys(void)
-{
-	symkey *	sk;
-
-	ITER_DLIST_BEGIN(key_listhead, sk, llink, symkey)
-		if (sk->lifetime > 0 && current_time > sk->lifetime) {
-			freesymkey(sk, &key_hash[KEYHASH(sk->keyid)]);
-			authkeyexpired++;
-		}
-	ITER_DLIST_END()
-	DPRINTF(1, ("auth_agekeys: at %lu keys %u expired %u\n",
-		    current_time, authnumkeys, authkeyexpired));
 }
 
 
