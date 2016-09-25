@@ -402,8 +402,6 @@ TEST(lfpfunc, Absolute) {
 }
 
 
-/* until we figure out why compilation throws a warning */
-#ifdef __UNUSED__
 //----------------------------------------------------------------------
 // fp -> double -> fp roundtrip test
 //----------------------------------------------------------------------
@@ -429,7 +427,6 @@ TEST(lfpfunc, FDF_RoundTrip) {
 
 	return;
 }
-#endif /* __UNUSED */
 
 
 //----------------------------------------------------------------------
@@ -530,6 +527,7 @@ TEST_GROUP_RUNNER(lfpfunc) {
 	RUN_TEST_CASE(lfpfunc, SubtractionRL);
 	RUN_TEST_CASE(lfpfunc, Negation);
 	RUN_TEST_CASE(lfpfunc, Absolute);
+	RUN_TEST_CASE(lfpfunc, FDF_RoundTrip);
 	RUN_TEST_CASE(lfpfunc, SignedRelOps);
 	RUN_TEST_CASE(lfpfunc, UnsignedRelOps);
 }
