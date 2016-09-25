@@ -18,9 +18,6 @@
   adjtimex(2). We need to collect statistics on builds with and
   without the PLL to see if it's actually a win.
 
-* Hal points out that with signaled I/O gone, we can probably cut out
-  the buffer-pool code in the daemon.
-
 === Testing ===
 
 * Unit testing.  "waf check" needs to run all the unit tests, not
