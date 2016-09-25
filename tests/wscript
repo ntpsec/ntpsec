@@ -53,7 +53,7 @@ def build(ctx):
 		"libntp/a_md5encrypt.c",
 		"libntp/authkeys.c",
 		"libntp/calendar.c",
-		"libntp/calyearstart.c",
+#		"libntp/calyearstart.c",
 		"libntp/clocktime.c",
 		"libntp/decodenetnum.c",
 		"libntp/hextolfp.c",
