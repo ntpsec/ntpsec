@@ -46,7 +46,7 @@ static void RunAllTests(void)
 	RUN_TEST_GROUP(decodenetnum);
 	RUN_TEST_GROUP(hextolfp);
 	RUN_TEST_GROUP(humandate);
-//	RUN_TEST_GROUP(lfp);
+	RUN_TEST_GROUP(lfpfunc);
 	RUN_TEST_GROUP(lfptostr);
 	RUN_TEST_GROUP(modetoa);
 	RUN_TEST_GROUP(msyslog);
@@ -61,7 +61,7 @@ static void RunAllTests(void)
 	RUN_TEST_GROUP(ssl_init);
 	RUN_TEST_GROUP(statestr);
 	RUN_TEST_GROUP(strtolfp);
-//	RUN_TEST_GROUP(timespec);
+//	RUN_TEST_GROUP(timespecops);
 //	RUN_TEST_GROUP(timevalops);
 	RUN_TEST_GROUP(tstotv);
 	RUN_TEST_GROUP(tvtots);
