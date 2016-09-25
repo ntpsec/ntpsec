@@ -20,8 +20,7 @@
 
 === Testing ===
 
-* Unit testing.  "waf check" needs to run all the unit tests, not
-  just the small fraction it does.
+* Three tests in tests/libntp.c need to be moves from C++ to C with Unity.
 
 * We need to live-test various refclocks.  It would be nice
   to test the full matrix of refclock x platform, but that's too
