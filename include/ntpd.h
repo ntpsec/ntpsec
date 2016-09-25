@@ -285,9 +285,9 @@ extern u_long	numasyncmsgs;		/* number of async messages we've sent */
 /*
  * Other statistics of possible interest
  */
-extern volatile u_long packets_dropped;	/* total number of packets dropped on reception */
-extern volatile u_long packets_ignored;	/* packets received on wild card interface */
-extern volatile u_long packets_received;/* total number of packets received */
+extern u_long packets_dropped;	/* total number of packets dropped on reception */
+extern u_long	packets_ignored;	/* received on wild card interface */
+extern u_long	packets_received;	/* total number of packets received */
 extern u_long	packets_sent;		/* total number of packets sent */
 extern u_long	packets_notsent; 	/* total number of packets which couldn't be sent */
 

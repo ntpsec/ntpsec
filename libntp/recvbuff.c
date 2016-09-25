@@ -10,13 +10,13 @@
 
 
 /*
- * Memory allocation
+ * Memory allocation.
  */
-static u_long volatile full_recvbufs;	/* recvbufs on full_recv_fifo */
-static u_long volatile free_recvbufs;	/* recvbufs on free_recv_list */
-static u_long volatile total_recvbufs;	/* total recvbufs currently in use */
-static u_long volatile lowater_adds;	/* number of times we have added memory */
-static u_long volatile buffer_shortfall;/* number of missed free receive buffers
+static u_long full_recvbufs;	/* recvbufs on full_recv_fifo */
+static u_long free_recvbufs;	/* recvbufs on free_recv_list */
+static u_long total_recvbufs;	/* total recvbufs currently in use */
+static u_long lowater_adds;	/* number of times we have added memory */
+static u_long buffer_shortfall;	/* number of missed free receive buffers
 					   between replenishments */
 
 static DECL_FIFO_ANCHOR(recvbuf_t) full_recv_fifo;
