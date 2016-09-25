@@ -5,7 +5,6 @@
 #include "ntp_stdlib.h"
 #include "ntp_calendar.h"
 
-u_long current_time = 4;
 time_t nowtime = 0;
 
 time_t timefunc(time_t *ptr) {
