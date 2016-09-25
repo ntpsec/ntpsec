@@ -8,10 +8,13 @@ def build(ctx):
 		"unity/unity_fixture.c",
 	]
 
+	unity_config = ["UNITY_INCLUDE_DOUBLE"]
+
 	ctx(
+		defines	    = unity_config,
 		features    = "c",
-        target      = "unity",
-        source      = unity_source
+		target      = "unity",
+		source      = unity_source
 	)
 
 	# Test main.
@@ -37,7 +40,7 @@ def build(ctx):
 		ctx.ntp_test(
 			features    = "c cprogram bld_include src_include libisc_include test",
 	        target      = "test_ntpdig",
-			defines		= ["TEST_NTPDIG=1"],
+			defines		= unity_config + ["TEST_NTPDIG=1"],
 			includes	= [
 				"%s/tests/unity/" % srcnode,
 				"%s/tests/common/" % srcnode,
@@ -82,8 +85,8 @@ def build(ctx):
 
 	ctx.ntp_test(
 		features    = "c cprogram bld_include src_include libisc_include test",
-        target      = "test_libntp",
-		defines		= ["TEST_LIBNTP=1"],
+        	target      = "test_libntp",
+		defines		= unity_config + ["TEST_LIBNTP=1"],
 		includes	= [
 			"%s/tests/unity/" % srcnode,
 			"%s/tests/libntp/" % srcnode,
@@ -101,7 +104,7 @@ def build(ctx):
 	ctx.ntp_test(
 		features    = "c cprogram bld_include src_include libisc_include test",
         target      = "test_ntpd",
-		defines		= ["TEST_NTPD=1"],
+		defines		= unity_config + ["TEST_NTPD=1"],
 		includes	= [
 			"%s/tests/unity/" % srcnode,
 			"%s/ntpd/" % srcnode,
