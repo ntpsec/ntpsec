@@ -136,7 +136,6 @@ static const struct option longoptions[] = {
     { "configfile",	    1, 0, 'c' },
     { "debug",		    0, 0, 'd' },
     { "set-debug-level",    1, 0, 'D' },
-    { "ipv4",		    0, 0, '4' },
     { "driftile",	    1, 0, 'f' },
     { "panicgate",	    0, 0, 'g' },
     { "help",	            0, 0, 'h' },
