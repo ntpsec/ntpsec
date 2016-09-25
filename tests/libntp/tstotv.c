@@ -13,8 +13,6 @@ TEST_SETUP(tstotv) {}
 
 TEST_TEAR_DOWN(tstotv) {}
 
-u_long      current_time;
-
 static bool IsEqual(const struct timeval *expected, const struct timeval *actual) {
 	if (expected->tv_sec == actual->tv_sec &&
 		expected->tv_usec == actual->tv_usec) {
