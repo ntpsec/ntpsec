@@ -626,7 +626,8 @@ create_peer_node(
 
 	my_node->ctl.version = NTP_VERSION;
 	my_node->ctl.minpoll = NTP_MINDPOLL;
-	my_node->ctl.maxpoll = NTP_MAXDPOLL;
+        /* can not set maxpoll default yet, it may be NTP_MAXDPOLL or minpoll */
+	my_node->ctl.maxpoll = NTP_MAXPOLL_UNK;
 
 	/* Now set the node to the read values */
 	my_node->host_mode = hmode;
@@ -2801,7 +2802,7 @@ config_peers(
 		struct peer_ctl client_ctl = {
 		    .version = NTP_VERSION,
 		    .minpoll = NTP_MINDPOLL,
-		    .maxpoll = NTP_MAXDPOLL,
+		    .maxpoll = NTP_MAXPOLL_UNK,
 		    .flags = FLAG_IBURST,
 		    .ttl = 0,
 		    .peerkey = 0,
@@ -2842,7 +2843,7 @@ config_peers(
 			ctx->host_mode = T_Server;
 			ctx->hmode = MODE_CLIENT;
 			ctx->ctl.flags   = FLAG_IBURST;
-			ctx->ctl.maxpoll = NTP_MAXDPOLL;
+			ctx->ctl.maxpoll = NTP_MAXPOLL_UNK;
 			ctx->ctl.minpoll = NTP_MINDPOLL;
 			ctx->ctl.peerkey = 0;
 			ctx->ctl.ttl     = 0;
@@ -2917,9 +2918,7 @@ config_peers(
 					 * timer, since the clock may
 					 * have requirements for this.
 					 */
-                                        /* FIXME: 0 no longer a magic value */
-                                        /* this needs to be fixed */
-					if (maxpoll == 0)
+					if (NTP_MAXPOLL_UNK == maxpoll)
 						/* default maxpoll for
 						 * refclocks is minpoll
 						 */

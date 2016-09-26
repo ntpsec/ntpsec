@@ -98,6 +98,7 @@ typedef unsigned int	u_int;
 #define NTP_MINDPOLL	6	/* log2 default min poll (64 s) */
 #define NTP_MAXDPOLL	10	/* log2 default max poll (~17 m) */
 #define	NTP_MAXPOLL	17	/* log2 max poll interval (~36 h) */
+#define	NTP_MAXPOLL_UNK	99	/* log2 max poll unset */
 #define	NTP_RETRY	3	/* max packet retries */
 #define	NTP_MINPKT	2	/* guard time (s) */
 
