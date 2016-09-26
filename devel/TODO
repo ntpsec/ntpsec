@@ -4,8 +4,6 @@
 
 === Build system ===
 
-* Document build files.
-
 * Cleanup and separate features in wafhelpers/*
 
 * Add support for enabling all conditional checks to ensure none are broken.
@@ -147,9 +145,6 @@ __________
 == Simple Tasks for an intern ==
 
 [quote, ESR 2015-09-30]
-
-* Write C++ required to glue the unit tests under test/ to Unity so they
-  run when 'waf check' is called. Requires basic C++ skills.
 
 * In the docs subdirectory, include/command.txt is an HTML passthrough
   in a not entirely successful attempt to emulate the look of the
