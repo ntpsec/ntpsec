@@ -10,11 +10,11 @@ ChangeLog::
 	Changes from 2001 to mid-2015.  More recently, consult the version-
 	control comment log.
 
-hacking.txt::
-	Notes to folks who want to hack on the code.
-
 dot.emacs::
 	C-mode indentation rules for code "Just the way Dave likes it".
+
+hacking.txt::
+	Notes to folks who want to hack on the code.
 
 ifdex-ignores::
 	Lists and explains a large number of internal configuration symbols.	
@@ -22,24 +22,24 @@ ifdex-ignores::
 TODO::
 	List of items the NTPsec developers are working on.
 
+testing.txt::
+	How to qualify NTPsec for production use.
+
 tour.txt:
 	A tour of the NTP internals.
 
 HISTORIC-NEWS::
 	NTP Classic news file up to 4.2.8p3 (May 2015).
 
-HISTORIC-README::
-	Dave Mills's original README; the ftp location and some other
-	things are wrong but it maintains some historical interest.
-	Long in the source tree as WHERE-TO-START.
-
-HISTORIC-VERSIONS::
-	How to read NTP Classic version numbers.
-
 y2k.txt::
 	Notes on Y2K conformance.
 
 release.nix::
 	NixOS build recipe.
+
+trace/::
+	Configuration files for the RTEMS trace utility.  These
+	are for an experimental cross-port that is not yet
+	officially supported.
 
 //end
