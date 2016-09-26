@@ -8,8 +8,6 @@
 #include "ntp_io.h"
 #include "ntp_lists.h"
 #include "ntp_stdlib.h"
-#include "ntp_random.h"
-#include "ntp_intercept.h"
 
 /*
  * Record statistics based on source address, mode and version. The
@@ -80,12 +78,11 @@ uint8_t	ntp_minpoll = NTP_MINPOLL;	/* increment (log 2 s) */
  * Initialization state.  We may be monitoring, we may not.  If
  * we aren't, we may not even have allocated any memory yet.
  */
-	u_int	mon_enabled;		/* enable switch */
-	u_int	mru_mindepth = 600;	/* preempt above this */
-	int	mru_maxage = 64;	/* for entries older than */
-	u_int	mru_maxdepth = 		/* MRU count hard limit */
-			MRU_MAXDEPTH_DEF;
-	int	mon_age = 3000;		/* preemption limit */
+u_int	mon_enabled;			/* enable switch */
+u_int	mru_mindepth = 600;		/* preempt above this */
+int	mru_maxage = 64;		/* for entries older than */
+u_int	mru_maxdepth = MRU_MAXDEPTH_DEF;	/* MRU count hard limit */
+int	mon_age = 3000;			/* preemption limit */
 
 static	void		mon_getmoremem(void);
 static	void		remove_from_hash(mon_entry *);
@@ -448,7 +445,12 @@ ntp_monitor(
 			if (NULL == mon_free)
 				mon_getmoremem();
 			UNLINK_HEAD_SLIST(mon, mon_free, hash_next);
-		/* Preempt from the MRU list if old enough. */
+		/*
+		 * Preempt from the MRU list if old enough.
+		 * Warning: this means that with monitoring enabled,
+		 * replay behavior will be nondeterministic. Alas.
+		 * Has to be this way for some unit tests to build.
+		 */
 		} else if (ntp_random() / (2.0 * FRAC) >
 			   (double)oldest_age / mon_age) {
 			return ~(RES_LIMITED | RES_KOD) & flags;
