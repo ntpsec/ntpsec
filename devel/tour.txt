@@ -284,8 +284,7 @@ a loadable Python module.  Here are a few useful generalizations:
 * The main sequence of the configuration logic, and most of the simpler
   checks, lives in configure.py.
 
-* For historical reasons, a few of the simpler checks outside
-  configure.py live in probes.py.
+* Some generic but bulky helper functions live in probes.py.
 
 * The check_*.py files isolate checks for individual capabilities;
   you can generally figure out which ones by looking at the name.
