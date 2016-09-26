@@ -218,5 +218,17 @@ operates.
      Print the version of waf used to generate the `configure'
      script, and exit.
 
+== Cross-compiling ==
+
+Set up a cross-compile environment for the target architecture.  At minimum
+it will need its own binaries for the OpenSSL and libevent2 libraries.
+
+Configure NTPSec with:
+
+  waf configure --enable-cross=/path/to/your/cross/cc
+
+There are also --cross-cflags and --cross-ldflags to supply the cross compiler 
+with appropriate values.
+                                                                  
 // end
 
