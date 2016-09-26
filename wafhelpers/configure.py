@@ -54,7 +54,7 @@ def cmd_configure(ctx, config):
         for opt in opt_map:
                 ctx.env[opt] = opt_map[opt]
 
-        from wafhelpers.compiler import check_compiler
+        from wafhelpers.check_compiler import check_compiler
         check_compiler(ctx)
 
         if ctx.options.enable_rtems_trace:
@@ -260,7 +260,8 @@ def cmd_configure(ctx, config):
         ctx.define("GETSOCKNAME_SOCKLEN_TYPE", "socklen_t", quote=False, comment="socklen type")
         ctx.define("DFLT_RLIMIT_STACK", 50, comment="Default stack size")
 
-        probe_multicast(ctx, "MCAST", "Checking for multicast capability")
+        from wafhelpers.check_multicast import check_multicast
+        check_multicast(ctx)
 
         ctx.define("TYPEOF_IP_MULTICAST_LOOP", "u_char", quote=False, comment="Multicast loop type") #XXX: check for mcast type
 
@@ -453,8 +454,8 @@ def cmd_configure(ctx, config):
         else:
                 print("Can't determine byte order!")
 
-        probe_vsprintfm(ctx, "VSNPRINTF_PERCENT_M",
-                            "Checking for %m expansion in vsnprintf(3)")
+        from wafhelpers.check_vsprintfm import check_vsprintfm
+        check_vsprintfm(ctx)
 
         # Define CFLAGS/LDCFLAGS for -vv support.
         ctx.define("NTPS_CFLAGS", " ".join(ctx.env.CFLAGS).replace("\"", "\\\""), comment="CFLAGS used when compiled")

@@ -2,12 +2,6 @@
 
 == Checklist for a quality 1.0 release ==
 
-=== Build system ===
-
-* Cleanup and separate features in wafhelpers/*
-
-* Add support for enabling all conditional checks to ensure none are broken.
-
 === Code ===
 
 * Can the KERNEL_PLL code be removed?  Hal thinks it may no longer
