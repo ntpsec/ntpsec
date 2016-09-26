@@ -5,7 +5,7 @@
 #
 # SPDX-License-Identifier: BSD-2-clause
 from __future__ import print_function, division
-import os, sys, socket, select, struct, curses.ascii
+import sys, socket, select, struct, curses.ascii
 
 CTL_MAX_DATA_LEN        = 468   # Max data in a control packet
 

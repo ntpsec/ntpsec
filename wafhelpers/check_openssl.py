@@ -1,4 +1,3 @@
-import os
 from waflib.Configure import conf
 from wafhelpers.util import msg, msg_setting
 
