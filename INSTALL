@@ -97,12 +97,12 @@ liberation::
 
 The OS X build has been tested in this environment:
 
- OS X Version            : 10.11.x (El Capitan)
- Xcode Version           : 7.1
- Xcode Comand Line Tools : 7.2-beta
+ OS X Version             : 10.11.x (El Capitan)
+ Xcode Version            : 7.1
+ Xcode Command Line Tools : 7.2-beta
 
 All you will require is the Xcode command line tools with no additions.
-There is currently no support for using Xcode's builder. The NTPsec's standard
+There is currently no support for using Xcode's builder. NTPsec's standard
 waf based build system is used.
 
 The OS X build of NTPsec requires the OS X port of the libevent2 library:
@@ -147,6 +147,11 @@ Under Unix, the simplest way to compile this package is:
 
 Under OS X you can build NTPsec using Xcode command line tools with no
 additions. There is currently no support for using Xcode's builder.
+
+== Qualification testing ==
+
+Details on how to qualify NTPsec if you've never used it before
+are at devel/testing.txt.
 
 == Bugs ==
 
