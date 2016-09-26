@@ -45,12 +45,12 @@ and restart ntpd.  The details vary by OS/distro.
 3. systemctl may barf about an out of date file and tell you
    how to fix it.  If so, follow its directions and try again.
 
-Note that underr Fedora and CentOS, "dnf update" may undo that edit
+Note that under Fedora and CentOS, "dnf update" may undo that edit
 and revert to running the system version.
 
 Older versions used /etc/rc.d/init.d/ntpd. The file /etc/sysconfig/ntpd
 gets sourced into the init script so you can put real code in there
-(systemd doesn't do that)/  You can insert this:
+(systemd doesn't do that)  You can insert this:
 
 --------------------------------------------------
     PATH="/usr/local/sbin:$PATH"
@@ -59,8 +59,8 @@ gets sourced into the init script so you can put real code in there
 === Debian, Ubuntu, Raspbian ===
 
 Many newer versions use systemd; follow those directions. The
-rest of this section the older set of conventions used with
-a traditional System V init sequence.
+rest of this section describes the older set of conventions used
+with a traditional System V init sequence.
 
 Edit /etc/init.d/ntp. Change
 
