@@ -762,6 +762,9 @@ newpeer(
 	set_peerdstadr(peer, 
 		       select_peerinterface(peer, srcadr, dstadr));
 
+        if (NTP_MAXPOLL_UNK == maxpoll)
+	    /* not set yet, set to default */
+	    peer->maxpoll = NTP_MAXDPOLL;
 	/*
          * minpoll is clamped not greater than NTP_MAXPOLL
          * maxpoll is clamped not less than NTP_MINPOLL
