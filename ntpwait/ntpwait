@@ -16,7 +16,7 @@ A spurious 'not running' message can result from queries being disabled.
 #SPDX-License-Identifier: BSD-2-Clause
 from __future__ import print_function, division
 
-import os, sys, getopt, re, time
+import sys, getopt, re, time
 from ntp.packet import *
 
 # General notes on Python 2/3 compatibility:
