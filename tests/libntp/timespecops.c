@@ -32,16 +32,6 @@ struct lfpfracdata {
 	uint32_t frac;
 };
 
-
-static bool		timespec_isValid(struct timespec V);
-static struct timespec timespec_init(time_t hi, long lo);
-static l_fp		l_fp_init(int32_t i, uint32_t f);
-static bool		AssertFpClose(const l_fp m, const l_fp n,
-				      const l_fp limit);
-static bool		AssertTimespecClose(const struct timespec m,
-					    const struct timespec n,
-					    const struct timespec limit);
-
 TEST_GROUP(timespecops);
 
 TEST_SETUP(timespecops) {init_lib();}
@@ -109,7 +99,10 @@ static bool AssertTimespecClose(const struct timespec m, const struct timespec n
 		return true;
 	else
 	{
-		printf("m_expr which is %ld.%lu \nand\nn_expr which is %ld.%lu\nare not close; diff=%ld.%lunsec\n", m.tv_sec, m.tv_nsec, n.tv_sec, n.tv_nsec, diff.tv_sec, diff.tv_nsec); 
+		printf("m_expr which is %ld.%lu \nand\nn_expr which is %ld.%lu\nare not close; diff=%ld.%lunsec\n",
+		       (long)m.tv_sec, m.tv_nsec,
+		       (long)n.tv_sec, n.tv_nsec,
+		       (long)diff.tv_sec, diff.tv_nsec); 
 		return false;
 	}
 }
