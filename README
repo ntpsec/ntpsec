@@ -13,8 +13,6 @@ directory.
 The base directory ./ contains the configuration files, source
 directories and related stuff:
 
-BUGS::		Descriptions of known bugs.
-
 INSTALL::	Generic installation instructions.
 
 NEWS::		What's new in this release.
@@ -25,7 +23,8 @@ VERSION::	The version stamp, to be used by scripts and programs.
 
 contrib/::	Directory containing contributed scripts, dragons dwell here.
 
-devel/::	Documentation aimed at developers.
+devel/::	Documentation and small tools aimed at developers.
+		Includes a hacking guide and a tour of the internals.
 
 docs/::		Directory containing a complete set of documentation on
 		building and configuring a NTP server or client. The files
