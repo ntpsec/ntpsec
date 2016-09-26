@@ -244,4 +244,54 @@ This probably means we could go synchronous-only and use the pool
 command on a system without refclocks.  That covers end nodes and
 maybe lightly loaded servers.
 
+== The build recipe ==
+
+The build recipe is, essentially, a big Python program using a set of
+specialized procedures caled 'waf'.  To learn about waf itself see
+the https://waf.io/book/[Waf Book]; this section is about the
+organization and particular quirks of NTPsec's build.
+
+If you are used to autoconf, you will find the waf reciple
+odd at first.  We replaced autoconf because with waf the
+build recipe is literally orders of magnitude less complex,
+faster, and more maintainable.
+
+The top level wscript calls wscript files in various subdirectories
+using the ctx.recurse() function. These subfiles are all relatively
+simple, consisting mainly of calls to the waf function ctx().  Each
+such call declares a build target to be composed (often using the
+compiler) from various prerequisites.
+
+The top-level wscript does not itself declare a lot of targets (the
+exceptions are a handful of installable shellscripts and man pages).
+It is mainly concerned with setting up various assumptions for the
+configure and build phases.
+
+If you are used to working with Makefiles, you may find the absence
+of object files and binaries from the source directory after a build
+surprising.  Look under the build/ directory.
+
+Most of the complexity in this build is in the configure phase, when
+the build engine is probing the environment.  The product of this
+phase is the file build/config.h, which the C programs include to
+get symbols whuich describe the environment's capabilities and
+quirks.
+
+The configuration logic consists of a largish number of Python files
+in the wafhelpers/ directory. The entire collection is structured as
+a loadable Python module.  Here are a few useful generalizations:
+
+* The main sequence of the configuration logic, and most of the simpler
+  checks, lives in configure.py.
+
+* For historical reasons, a few of the simpler checks outside
+  configure.py live in probes.py.
+
+* The check_*.py files isolate checks for individual capabilities;
+  you can generally figure out which ones by looking at the name.
+
+* If you need to add a build or configure option, look in options.py.
+  You will usually be able to model your implementation on code that
+  is already there.
+
 // end
