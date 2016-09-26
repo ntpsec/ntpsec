@@ -14,7 +14,7 @@ from wafhelpers.test import test_write_log, test_print_log
 from wafhelpers.options import options_cmd
 
 config = {
-	"NTPS_RELEASE": False,
+	"NTPSEC_RELEASE": False,
 	"out": out,
 	"OPT_STORE": {}
 }
@@ -22,7 +22,7 @@ config = {
 # Release procedure:
 #   1. waf configure
 #   2. waf build
-#   3. Edit wscript and set NTPS_RELEASE to True
+#   3. Edit wscript and set NTPSEC_RELEASE to True
 #   4. waf dist
 
 # Snapshot procedure:

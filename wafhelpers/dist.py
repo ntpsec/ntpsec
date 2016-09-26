@@ -9,11 +9,11 @@ def dist_cmd(ctx, config):
 
 		parse_version(config)
 
-		if not ctx.options.build_snapshot and not config["NTPS_RELEASE"]:
-			ctx.fatal('Please supply --build-snapshot or set config["NTPS_RELEASE"] = True')
+		if not ctx.options.build_snapshot and not config["NTPSEC_RELEASE"]:
+			ctx.fatal('Please supply --build-snapshot or set config["NTPSEC_RELEASE"] = True')
 
-		if not config["NTPS_RELEASE"]:
-			ctx.fatal('config["NTPS_RELEASE"] must be set to True')
+		if not config["NTPSEC_RELEASE"]:
+			ctx.fatal('config["NTPSEC_RELEASE"] must be set to True')
 
 		if exists("build/c4che/host_cache.py"):
 			from waflib.ConfigSet import ConfigSet
@@ -22,7 +22,7 @@ def dist_cmd(ctx, config):
 		else:
 			ctx.fatal("Please run 'waf configure' first.")
 
-		rev = cset.NTPS_REVISION[:7]
+		rev = cset.NTPSEC_REVISION[:7]
 		timestamp = time.strftime("%Y-%m-%d_%H%M%S")
 
 		# XXX: Redo to not use globs.
@@ -32,7 +32,7 @@ def dist_cmd(ctx, config):
 
 		# Need a more reliable check.
 		if not files_man:
-			ctx.fatal("You must configure and build first with NTPS_RELEASE set to false")
+			ctx.fatal("You must configure and build first with NTPSEC_RELEASE set to false")
 
 		for man in files_man:
 			src = man.abspath()
@@ -47,13 +47,13 @@ def dist_cmd(ctx, config):
 
 		for src, dst in files:
 			if not path.exists(src):
-				ctx.fatal("%s doesn't exist please configure and build first.  NTPS_RELEASE must be set to False" % src)
+				ctx.fatal("%s doesn't exist please configure and build first.  NTPSEC_RELEASE must be set to False" % src)
 			print("Copying %s -> %s" % (src, dst))
 			copyfile(src, dst)
 
-		version = "%d.%d.%d" % (config["NTPS_VERSION_MAJOR"], \
-						config["NTPS_VERSION_MINOR"], \
-						config["NTPS_VERSION_REV"])
+		version = "%d.%d.%d" % (config["NTPSEC_VERSION_MAJOR"], \
+						config["NTPSEC_VERSION_MINOR"], \
+						config["NTPSEC_VERSION_REV"])
 
 		if ctx.options.build_snapshot:
 			ctx.base_name = "ntpsec-%s-%s-%s-snap" % (timestamp, version, rev)

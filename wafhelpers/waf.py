@@ -32,13 +32,13 @@ def insert_libiscpthreaddir(self):
 
 # Create version.c
 class version(Task):
-	vars = ['NTPS_VERSION_STRING', 'TARGET']
+	vars = ['NTPSEC_VERSION_STRING', 'TARGET']
 
 	def run(self):
 		self.outputs[0].write("""
 const char *Version = "%s " __DATE__ " " __TIME__;
 const char *VVersion = "CFLAGS=%s LDFLAGS=%s";
-""" % (self.env.NTPS_VERSION_STRING, "Need-CFLAGS", "Need-LDFLAGS"))
+""" % (self.env.NTPSEC_VERSION_STRING, "Need-CFLAGS", "Need-LDFLAGS"))
 
 # Use in features= to generate a version.c for that target.
 # This uses the target name for the version string.
@@ -57,7 +57,7 @@ def manpage_subst_fun(task, text):
 @conf
 def manpage(ctx, section, source):
 
-	if ctx.env.NTPS_RELEASE:
+	if ctx.env.NTPSEC_RELEASE:
 		ctx.install_files("${PREFIX}/man/man%s/" % section, source.replace("-man.txt", ".%s" % section))
 		return
 

@@ -5,7 +5,7 @@ def build(ctx):
 
 	if ctx.variant == "host":
 
-		if not ctx.env.NTPS_RELEASE:
+		if not ctx.env.NTPSEC_RELEASE:
 			bison_source = [
 				"ntp_parser.y"
 			]
@@ -111,7 +111,7 @@ def build(ctx):
 		"ntp_signd.c",
 		"ntp_timer.c",
 		"ntpd.c",
-		ctx.bldnode.parent.find_node("host/ntpd/ntp_parser.tab.c") if not ctx.env.NTPS_RELEASE else "ntp_parser.tab.c"
+		ctx.bldnode.parent.find_node("host/ntpd/ntp_parser.tab.c") if not ctx.env.NTPSEC_RELEASE else "ntp_parser.tab.c"
 	]
 
 	# XXX: This really sucks, we need to get rid of all these refclock
