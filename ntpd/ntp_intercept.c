@@ -704,21 +704,25 @@ int intercept_select(int nfds, fd_set *readfds)
 	space = strchr(linebuf, ' ');
 	INSIST(space);
 	colon = strchr(linebuf, ':');
-	INSIST(colon);
-	*colon = '\0';
-	nfound = atoi(space + 1);
-	cursor = colon +1;
-	FD_ZERO(readfds);
-	cnt = 0;
-	while (*cursor == ' ')
+	if (colon == NULL)
+	    return 0;
+	else
 	{
-	    char *nstart = ++cursor;
-	    //INSIST(isdigit(*cursor));
-	    FD_SET((int)strtol(nstart, &cursor, 10), readfds);
-	    ++cnt;
+	    *colon = '\0';
+	    nfound = atoi(space + 1);
+	    cursor = colon +1;
+	    FD_ZERO(readfds);
+	    cnt = 0;
+	    while (*cursor == ' ')
+	    {
+		char *nstart = ++cursor;
+		//INSIST(isdigit(*cursor));
+		FD_SET((int)strtol(nstart, &cursor, 10), readfds);
+		++cnt;
+	    }
+	    INSIST(cnt == nfound);
+	    return nfound;
 	}
-	INSIST(cnt == nfound);
-	return nfound;
     } else {
 	bool flag;
 	sigset_t runMask;
@@ -737,13 +741,16 @@ int intercept_select(int nfds, fd_set *readfds)
 	{
 	    int fd;
 	    snprintf(pkt_dump, sizeof(pkt_dump),
-		     "select %d:", nfound);
-	    for (fd = 0; fd <= nfds; fd++)
-		if (FD_ISSET(fd, readfds))
-		    snprintf(pkt_dump + strlen(pkt_dump),
-			     sizeof(pkt_dump) - strlen(pkt_dump),
-			     " %d", fd);
-	    strlcat(pkt_dump, "\n", sizeof(pkt_dump));
+		     "select %d", nfound);
+	    if (nfound > 0) {
+		strlcat(pkt_dump, ":", sizeof(pkt_dump));
+		for (fd = 0; fd <= nfound; fd++)
+		    if (FD_ISSET(fd, readfds))
+			snprintf(pkt_dump + strlen(pkt_dump),
+				 sizeof(pkt_dump) - strlen(pkt_dump),
+				 " %d", fd);
+		strlcat(pkt_dump, "\n", sizeof(pkt_dump));
+	    }
 
 	    fputs(pkt_dump, stdout);
 	}
@@ -781,7 +788,7 @@ ssize_t intercept_recvfrom(int sockfd, void *buf, size_t len, int flags,
 	{
 	    char *cp;
 	    snprintf(pkt_dump, sizeof(pkt_dump),
-		     "recvfrom %d %02x %s",
+		     "recvfrom %d %02x %s ",
 		     sockfd, flags, socktoa((sockaddr_u *)src_addr));
 	    for (cp = (char *)buf; cp < (char *)buf + recvlen; cp++)
 		snprintf(pkt_dump + strlen(pkt_dump),
@@ -806,7 +813,7 @@ ssize_t intercept_recvmsg(int sockfd, struct msghdr *msg, int flags)
 	int rsockfd, rflags;
 	const char *a;
 	get_operation("recvmsg ");
-	if (sscanf(linebuf, "recvmsg %d %x %s %s",
+	if (sscanf(linebuf, "recvmsg %d %x %s %s ",
 		   &rsockfd, &rflags, raddr, pkt_dump) != 3)
 	    replay_fail("garbled event format");
 	if (sockfd != rsockfd)
