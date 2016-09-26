@@ -1,0 +1,138 @@
+= How To Test NTPsec =
+
+This assumes you have downloaded the source and built a system
+and now you want to test your new ntpd.
+
+For help on getting that far, see ../INSTALL
+
+== Preliminary one-off test ==
+
+For a one-off test:
+
+1. Do "ps ax | grep ntpd" or equivalent to find out what the command line is.
+
+2. Use whatever you do on your system to stop the normal ntpd.  This
+ is likely to be either something resembling "/etc/init.d/ntp stop" or
+ "systemctl stop timeservice".
+
+3. Run ./build/ntpd/ntpd plus the command line parameters from above. 
+
+4. It will daemonize itself and give you back your terminal.
+
+Your current /etc/ntp.conf should work correctly.
+
+Check your log files to see if there is anything strange.
+Run "ntpq -p" to see if things look normal.
+
+== Full qualification test ==
+
+For a longer test, including over reboots...
+
+Install your new code using "./waf install" (as root).
+That will install your new ntpd into /usr/local/sbin/ntpd
+
+Now you have to patch your (re)start scripts to look there
+and restart ntpd.  The details vary by OS/distro.
+
+=== Distributions using systemd ===
+
+1. Edit /usr/lib/systemd/system/ntpd.service
+
+2. Change ExecStart=/usr/sbin/ntpd -u ntp:ntp $OPTIONS
+   to   ExecStart=/usr/local/sbin/ntpd -u ntp:ntp $OPTIONS
+   then do "service ntpd restart"
+
+3. systemctl may barf about an out of date file and tell you
+   how to fix it.  If so, follow its directions and try again.
+
+Note that underr Fedora and CentOS, "dnf update" may undo that edit
+and revert to running the system version.
+
+Older versions used /etc/rc.d/init.d/ntpd. The file /etc/sysconfig/ntpd
+gets sourced into the init script so you can put real code in there
+(systemd doesn't do that)/  You can insert this:
+
+--------------------------------------------------
+    PATH="/usr/local/sbin:$PATH"
+--------------------------------------------------
+
+=== Debian, Ubuntu, Raspbian ===
+
+Many newer versions use systemd; follow those directions. The
+rest of this section the older set of conventions used with
+a traditional System V init sequence.
+
+Edit /etc/init.d/ntp. Change
+
+--------------------------------------------------
+DAEMON=/usr/sbin/ntpd
+--------------------------------------------------
+
+to
+
+--------------------------------------------------
+DAEMON=/usr/local/sbin/ntpd
+--------------------------------------------------
+
+A good safety measure in case you want to revert later is to duplicate
+the line, comment out the first one and edit the second one. That
+looks like this:
+
+--------------------------------------------------
+# DAEMON=/usr/sbin/ntpd
+DAEMON=/usr/local/sbin/ntpd
+--------------------------------------------------
+
+If you are using DHCP and your DHCP servers provide NTP servers,
+Debian makes a dummy ntp.conf using those servers and not the
+ones you put into the normal /etc/ntp.conf.  To use your ntp.conf
+rather than the one it wants you to:
+
+1. Edit /etc/init.d/ntp
+
+2. Comment out the clump of 3 lines that references dhcp:
+
+--------------------------------------------------
+# if [ -e /var/lib/ntp/ntp.conf.dhcp ]; then
+#       NTPD_OPTS="$NTPD_OPTS -c /var/lib/ntp/ntp.conf.dhcp"
+# fi
+--------------------------------------------------
+
+apt-get upgrade may undo those edits and revert to running the system version.
+
+=== FreeBSD ===
+
+Edit /etc/rc.conf It needs to contain this:
+
+--------------------------------------------------
+ntpd_enable="YES"
+ntpd_program="/usr/local/sbin/ntpd"
+--------------------------------------------------
+
+If you are running ntpd, the first line will be there
+already.  The default is NO.
+
+=== NetBSD ===
+
+Edit /etc/rc.d/ntpd. Change
+
+--------------------------------------------------
+command="/usr/sbin/${name}"
+--------------------------------------------------
+
+to
+
+--------------------------------------------------
+command="/usr/local/sbin/${name}"
+--------------------------------------------------
+
+A good safety measure in case you want to revert later is to duplicate
+the line, comment out the first one and edit the second one. That
+looks like this:
+
+--------------------------------------------------
+# command="/usr/sbin/${name}"
+command="/usr/local/sbin/${name}"
+--------------------------------------------------
+
+// end
