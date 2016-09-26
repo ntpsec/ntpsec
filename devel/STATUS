@@ -4,18 +4,18 @@ It builds on the following systems.  In general there should be no warnings,
 but as of the above date, there is one we can't easily work around.  Some
 compilers will complain about
   comparison between signed and unsigned integer expressions
-  at ntpd/ntp_io.c:4638
+  at ntpd/ntp_io.c:4399
 
 We have reports that it builds cleanly on at least:
-  Fedora 22 and 23 (i686, x86_64)
-  CentOS 5.11 (i386)
-  Debian wheezy (amd64)  and jessie (amd64, i686)
-  Ubuntu 14.04.3 LTS and 15.10 on x86_64
-  Raspbian wheezy and jessie on ARM v6 and v7 (Pi and Pi 2)
+  Fedora 23 and 24 (i686, x86_64)
+  CentOS 7.2.1511 and 6.8 (x86_64)
+  Debian jessie (amd64, i686, arm) and wheezy on amd64
+  Ubuntu 14.04.3 LTS and 16.04.1 LTS on x86_64
+  Raspbian jessie on ARM v6 and v7 (Pi, Pi 2, and Pi 3)
   Debian wheezy on BeagleBone Black ARM v7
 
-  FreeBSD 9.3 on i386 and 10.1 on amd64
-  NetBSD 6.1.5 and 7.0 on x86_64
+  FreeBSD 10.2 and 9.3 on amd64 and 10.3 on i386
+  NetBSD 7.0.1 and 6.1.5 on x86_64 and 7.0.1 on i386
     (see the comment about libevent in ../INSTALL)
 
 
