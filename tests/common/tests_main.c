@@ -72,6 +72,7 @@ static void RunAllTests(void)
 
 #ifdef TEST_NTPD
 	RUN_TEST_GROUP(leapsec);
+	RUN_TEST_GROUP(hackrestrict);
 #endif
 
 }
