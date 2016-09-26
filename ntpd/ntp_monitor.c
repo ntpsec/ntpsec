@@ -449,7 +449,7 @@ ntp_monitor(
 				mon_getmoremem();
 			UNLINK_HEAD_SLIST(mon, mon_free, hash_next);
 		/* Preempt from the MRU list if old enough. */
-		} else if (intercept_ntp_random(__func__) / (2. * FRAC) >
+		} else if (ntp_random() / (2.0 * FRAC) >
 			   (double)oldest_age / mon_age) {
 			return ~(RES_LIMITED | RES_KOD) & flags;
 		} else {

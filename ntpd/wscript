@@ -55,16 +55,9 @@ def build(ctx):
 	libntpd_source = [
 		"ntp_control.c",
 		"ntp_filegen.c",
-		"ntp_intercept.c",
 		"ntp_leapsec.c",
-		"ntp_loopfilter.c",
-		"ntp_monitor.c",
-		"ntp_peer.c",
-		"ntp_proto.c",
+		"ntp_monitor.c",	# Needed by the restrict code
 		"ntp_restrict.c",
-		"ntp_sandbox.c",
-		"ntp_signd.c",
-		"ntp_timer.c",
 		"ntp_util.c",
 	]
 
@@ -109,7 +102,14 @@ def build(ctx):
 	ntpd_source = [
 		"ntp_config.c",
 		"ntp_io.c",
+		"ntp_intercept.c",
+		"ntp_loopfilter.c",
+		"ntp_peer.c",
+		"ntp_proto.c",
+		"ntp_sandbox.c",
 		"ntp_scanner.c",
+		"ntp_signd.c",
+		"ntp_timer.c",
 		"ntpd.c",
 		ctx.bldnode.parent.find_node("host/ntpd/ntp_parser.tab.c") if not ctx.env.NTPS_RELEASE else "ntp_parser.tab.c"
 	]
