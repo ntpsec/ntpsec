@@ -420,7 +420,7 @@ main(
 		}
 		if (json)
 		    /* hack to avoid trailing comma - not semabtically needed */ 
-		    fputs("\"version\":\""  NTPS_VERSION_STRING "\"}\n", stdout);
+		    fputs("\"version\":\""  NTPSEC_VERSION_STRING "\"}\n", stdout);
 		exit(EXIT_SUCCESS);
 	}
 

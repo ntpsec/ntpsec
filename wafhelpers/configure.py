@@ -14,15 +14,15 @@ def cmd_configure(ctx, config):
         from wafhelpers.util import parse_version
         parse_version(config)
 
-        ctx.env.NTPS_RELEASE = config["NTPS_RELEASE"]
-        ctx.env.NTPS_VERSION_MAJOR = config["NTPS_VERSION_MAJOR"]
-        ctx.env.NTPS_VERSION_MINOR = config["NTPS_VERSION_MINOR"]
-        ctx.env.NTPS_VERSION_REV = config["NTPS_VERSION_REV"]
+        ctx.env.NTPSEC_RELEASE = config["NTPSEC_RELEASE"]
+        ctx.env.NTPSEC_VERSION_MAJOR = config["NTPSEC_VERSION_MAJOR"]
+        ctx.env.NTPSEC_VERSION_MINOR = config["NTPSEC_VERSION_MINOR"]
+        ctx.env.NTPSEC_VERSION_REV = config["NTPSEC_VERSION_REV"]
 
-        ctx.env.NTPS_VERSION = "%s.%s.%s" % (ctx.env.NTPS_VERSION_MAJOR, ctx.env.NTPS_VERSION_MINOR, ctx.env.NTPS_VERSION_REV)
-        ctx.define("NTPS_VERSION_MAJOR", ctx.env.NTPS_VERSION_MAJOR, comment="Major version number")
-        ctx.define("NTPS_VERSION_MINOR", ctx.env.NTPS_VERSION_MINOR, comment="Minor version number")
-        ctx.define("NTPS_VERSION_REV", ctx.env.NTPS_VERSION_REV, comment="Revision version number")
+        ctx.env.NTPSEC_VERSION = "%s.%s.%s" % (ctx.env.NTPSEC_VERSION_MAJOR, ctx.env.NTPSEC_VERSION_MINOR, ctx.env.NTPSEC_VERSION_REV)
+        ctx.define("NTPSEC_VERSION_MAJOR", ctx.env.NTPSEC_VERSION_MAJOR, comment="Major version number")
+        ctx.define("NTPSEC_VERSION_MINOR", ctx.env.NTPSEC_VERSION_MINOR, comment="Minor version number")
+        ctx.define("NTPSEC_VERSION_REV", ctx.env.NTPSEC_VERSION_REV, comment="Revision version number")
 
         ctx.env.OPT_STORE = config["OPT_STORE"]
 
@@ -48,7 +48,7 @@ def cmd_configure(ctx, config):
 
         ctx.load('compiler_c')
 
-        if not ctx.env.NTPS_RELEASE:
+        if not ctx.env.NTPSEC_RELEASE:
                 ctx.load('bison')
 
         for opt in opt_map:
@@ -104,21 +104,21 @@ def cmd_configure(ctx, config):
                 ctx.start_msg("DEVEL: Getting revision")
                 cmd = ["git", "log", "-1", "--format=%H"]
                 p = subprocess.Popen(cmd, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=None)
-                ctx.env.NTPS_REVISION, stderr = p.communicate()
-                ctx.env.NTPS_REVISION = str(ctx.env.NTPS_REVISION).replace("\n", "")
-                ctx.end_msg(ctx.env.NTPS_REVISION)
+                ctx.env.NTPSEC_REVISION, stderr = p.communicate()
+                ctx.env.NTPSEC_REVISION = str(ctx.env.NTPSEC_REVISION).replace("\n", "")
+                ctx.end_msg(ctx.env.NTPSEC_REVISION)
 
         ctx.start_msg("Building version")
-        ctx.env.NTPS_VERSION_STRING = ctx.env.NTPS_VERSION
+        ctx.env.NTPSEC_VERSION_STRING = ctx.env.NTPSEC_VERSION
 
-        if ctx.env.NTPS_REVISION:
-                ctx.env.NTPS_VERSION_STRING += "-%s" % ctx.env.NTPS_REVISION[:7]
+        if ctx.env.NTPSEC_REVISION:
+                ctx.env.NTPSEC_VERSION_STRING += "-%s" % ctx.env.NTPSEC_REVISION[:7]
 
         if ctx.options.build_version_tag:
-                ctx.env.NTPS_VERSION_STRING += "-%s" % ctx.options.build_version_tag
+                ctx.env.NTPSEC_VERSION_STRING += "-%s" % ctx.options.build_version_tag
 
-        ctx.define("NTPS_VERSION_STRING", ctx.env.NTPS_VERSION_STRING)
-        ctx.end_msg(ctx.env.NTPS_VERSION_STRING)
+        ctx.define("NTPSEC_VERSION_STRING", ctx.env.NTPSEC_VERSION_STRING)
+        ctx.end_msg(ctx.env.NTPSEC_VERSION_STRING)
 
         msg("--- Configuring main ---")
         ctx.setenv("main", ctx.env.derive())
@@ -458,8 +458,8 @@ def cmd_configure(ctx, config):
         check_vsprintfm(ctx)
 
         # Define CFLAGS/LDCFLAGS for -vv support.
-        ctx.define("NTPS_CFLAGS", " ".join(ctx.env.CFLAGS).replace("\"", "\\\""), comment="CFLAGS used when compiled")
-        ctx.define("NTPS_LDFLAGS", " ".join(ctx.env.LDFLAGS).replace("\"", "\\\""), comment="LDFLAGS used when compiled")
+        ctx.define("NTPSEC_CFLAGS", " ".join(ctx.env.CFLAGS).replace("\"", "\\\""), comment="CFLAGS used when compiled")
+        ctx.define("NTPSEC_LDFLAGS", " ".join(ctx.env.LDFLAGS).replace("\"", "\\\""), comment="LDFLAGS used when compiled")
 
         # Check for directory separator
         if ctx.env.PLATFORM_TARGET == "win":
