@@ -218,8 +218,8 @@ send_via_ntp_signd(
 				if (debug)
 					printf(
 						"transmit ntp_signd packet: at %ld %s->%s mode %d keyid %08x len %d\n",
-						current_time, ntoa(&rbufp->dstadr->sin),
-						ntoa(&rbufp->recv_srcadr), xmode, xkeyid, sendlen);
+						current_time, socktoa(&rbufp->dstadr->sin),
+						socktoa(&rbufp->recv_srcadr), xmode, xkeyid, sendlen);
 #endif
 			}
 		}
