@@ -361,7 +361,7 @@ void intercept_get_systime(const char *legend, l_fp *now)
 	normalize_time(ts, sys_fuzz > 0.0 ? ntp_random() : 0, now);
 	if (mode == capture)
 	    printf("systime %s %ld.%ld\n",
-		   legend, (long)ts.tv_sec, (long)ts.tv_nsec);
+		   legend, (long)ts.tv_sec, ts.tv_nsec);
 
     }
 }
@@ -603,7 +603,7 @@ int intercept_set_tod(struct timespec *tvs)
 {
     char newset[BUFSIZ];
     snprintf(newset, sizeof(newset),
-	     "set_tod %ld %ld\n", (long)tvs->tv_sec, (long)tvs->tv_nsec);
+	     "set_tod %ld %ld\n", (long)tvs->tv_sec, tvs->tv_nsec);
     
     if (mode == replay) {
 	get_operation("set_tod");

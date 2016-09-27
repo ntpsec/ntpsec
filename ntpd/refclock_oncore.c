@@ -1645,7 +1645,7 @@ oncore_get_timestamp(
 			oncore_log_f(instance, LOG_DEBUG,
 				     "serial/j (%lu, %lu) %ld.%09ld", i,
 				     j, (long)tsp->tv_sec,
-				     (long)tsp->tv_nsec);
+				     tsp->tv_nsec);
 		}
 #endif
 
@@ -1667,7 +1667,7 @@ oncore_get_timestamp(
 			oncore_log_f(instance, LOG_DEBUG,
 				     "serial/j (%lu, %lu) %ld.%09ld", i,
 				     j, (long)tsp->tv_sec,
-				     (long)tsp->tv_nsec);
+				     tsp->tv_nsec);
 		}
 #endif
 
