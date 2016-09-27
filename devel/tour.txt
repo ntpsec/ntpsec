@@ -251,7 +251,7 @@ specialized procedures caled 'waf'.  To learn about waf itself see
 the https://waf.io/book/[Waf Book]; this section is about the
 organization and particular quirks of NTPsec's build.
 
-If you are used to autoconf, you will find the waf reciple
+If you are used to autoconf, you will find the waf recipe
 odd at first.  We replaced autoconf because with waf the
 build recipe is literally orders of magnitude less complex,
 faster, and more maintainable.
@@ -274,7 +274,7 @@ surprising.  Look under the build/ directory.
 Most of the complexity in this build is in the configure phase, when
 the build engine is probing the environment.  The product of this
 phase is the file build/config.h, which the C programs include to
-get symbols whuich describe the environment's capabilities and
+get symbols that describe the environment's capabilities and
 quirks.
 
 The configuration logic consists of a largish number of Python files
