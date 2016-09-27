@@ -2342,7 +2342,7 @@ add_mru(
 		if (!L_ISGEQ(&add->first, &mon->first)) {
 			fprintf(stderr,
 				"add_mru duplicate %s new first ts %08x.%08x precedes prior %08x.%08x\n",
-				sptoa(&add->addr), add->last.l_ui,
+				sockporttoa(&add->addr), add->last.l_ui,
 				add->last.l_uf, mon->last.l_ui,
 				mon->last.l_uf);
 			exit(1);
@@ -2359,7 +2359,7 @@ add_mru(
 	TRACE(2, ("add_mru %08x.%08x c %d m %d v %d rest %x first %08x.%08x %s\n",
 	      add->last.l_ui, add->last.l_uf, add->count,
 	      (int)add->mode, (int)add->ver, (u_int)add->rs,
-	      add->first.l_ui, add->first.l_uf, sptoa(&add->addr)));
+	      add->first.l_ui, add->first.l_uf, sockporttoa(&add->addr)));
 	/* if we didn't update an existing entry, alloc replacement */
 	if (NULL == mon) {
 		mon = emalloc(sizeof(*mon));
@@ -2492,7 +2492,7 @@ collect_mru_list(
 				if (debug)
 					fprintf(stderr,
 						"tossing prior entry %s to resync\n",
-						sptoa(&recent->addr));
+						sockporttoa(&recent->addr));
 				UNLINK_DLIST(recent, mlink);
 				hash = NTP_HASH_ADDR(&recent->addr);
 				UNLINK_SLIST(unlinked, hash_table[hash],
@@ -2816,7 +2816,7 @@ collect_mru_list(
 
 			snprintf(buf, sizeof(buf),
 				 ", addr.%d=%s, last.%d=0x%08x.%08x",
-				 ri, sptoa(&recent->addr), ri,
+				 ri, sockporttoa(&recent->addr), ri,
 				 recent->last.l_ui, recent->last.l_uf);
 			chars = strlen(buf);
 			if (REQ_ROOM <= chars)
@@ -3241,9 +3241,9 @@ another_ifstats_field(
 		    : 'D',
 		prow->flags, prow->ttl, prow->mcast_count,
 		prow->received, prow->sent, prow->send_errors,
-		prow->peer_count, prow->uptime, sptoa(&prow->addr));
+		prow->peer_count, prow->uptime, sockporttoa(&prow->addr));
 	if (!SOCK_UNSPEC(&prow->bcast))
-		fprintf(fp, "    %s\n", sptoa(&prow->bcast));
+		fprintf(fp, "    %s\n", sockporttoa(&prow->bcast));
 	ifnum = prow->ifnum;
 	ZERO(*prow);
 	prow->ifnum = ifnum;

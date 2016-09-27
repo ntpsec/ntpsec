@@ -699,12 +699,12 @@ queue_xmt(
 			if (strcasecmp(spkt->dctx->name,
 				       match->dctx->name))
 				printf("%s %s duplicate address from %s ignored.\n",
-				       sptoa(&match->addr),
+				       sockporttoa(&match->addr),
 				       match->dctx->name,
 				       spkt->dctx->name);
 			else
 				printf("%s %s, duplicate address ignored.\n",
-				       sptoa(&match->addr),
+				       sockporttoa(&match->addr),
 				       match->dctx->name);
 			dec_pending_ntp(spkt->dctx->name, &spkt->addr);
 			free(spkt);
@@ -1037,12 +1037,12 @@ sock_cb(
 	if (NULL == spkt) {
 		msyslog(LOG_WARNING,
 			"Packet from unexpected source %s dropped",
-			sptoa(&sender));
+			sockporttoa(&sender));
 		return;
 	}
 
 	TRACE(1, ("sock_cb: %s %s\n", spkt->dctx->name,
-		  sptoa(&sender)));
+		  sockporttoa(&sender)));
 
 	rpktl = process_pkt(&r_pkt, &sender, rpktl, MODE_SERVER,
 			    &spkt->x_pkt, "sock_cb", opt_authkey != NULL);

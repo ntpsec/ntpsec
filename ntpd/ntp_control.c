@@ -1474,7 +1474,7 @@ ctl_putsys(
 
 	case CS_PEERADR:
 		if (sys_peer != NULL && sys_peer->dstadr != NULL)
-			ss = sptoa(&sys_peer->srcadr);
+			ss = sockporttoa(&sys_peer->srcadr);
 		else
 			ss = "0.0.0.0:0";
 		ctl_putunqstr(sys_var[CS_PEERADR].text, ss, strlen(ss));
@@ -3139,7 +3139,7 @@ send_mru_entry(
 
 		case 0:
 			snprintf(tag, sizeof(tag), addr_fmt, count);
-			pch = sptoa(&mon->rmtadr);
+			pch = sockporttoa(&mon->rmtadr);
 			ctl_putunqstr(tag, pch, strlen(pch));
 			break;
 
@@ -3463,7 +3463,7 @@ static void read_mru_list(
 		}
 		/* confirm the prior entry used as starting point */
 		ctl_putts("last.older", &mon->last);
-		pch = sptoa(&mon->rmtadr);
+		pch = sockporttoa(&mon->rmtadr);
 		ctl_putunqstr("addr.older", pch, strlen(pch));
 
 		/*
@@ -3577,14 +3577,14 @@ send_ifstats_entry(
 
 		case 0:
 			snprintf(tag, sizeof(tag), addr_fmtu, ifnum);
-			pch = sptoa(&la->sin);
+			pch = sockporttoa(&la->sin);
 			ctl_putunqstr(tag, pch, strlen(pch));
 			break;
 
 		case 1:
 			snprintf(tag, sizeof(tag), bcast_fmt, ifnum);
 			if (INT_BCASTOPEN & la->flags)
-				pch = sptoa(&la->bcast);
+				pch = sockporttoa(&la->bcast);
 			else
 				pch = "";
 			ctl_putunqstr(tag, pch, strlen(pch));

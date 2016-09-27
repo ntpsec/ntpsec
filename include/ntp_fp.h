@@ -363,8 +363,6 @@ extern	bool	adj_systime	(double, int (*adjtime)(const struct timeval *, struct t
 #define	lfptoms(fpv, ndec)	mfptoms((fpv)->l_ui, (fpv)->l_uf, (ndec))
 
 #define stoa(addr)		socktoa(addr)
-#define sptoa(addr)		sockporttoa(addr)
-#define stohost(addr)		socktohost(addr)
 
 #define	ufptoa(fpv, ndec)	dofptoa((fpv), false, (ndec), false)
 #define	ufptoms(fpv, ndec)	dofptoa((fpv), false, (ndec), true)

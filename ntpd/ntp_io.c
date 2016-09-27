@@ -1087,7 +1087,7 @@ log_listen_address(
 			    : "Listen normally",
 			ep->ifnum,
 			ep->name,
-			sptoa(&ep->sin));
+			sockporttoa(&ep->sin));
 }
 
 
