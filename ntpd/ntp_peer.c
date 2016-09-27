@@ -208,9 +208,9 @@ findexistingpeer_addr(
 	struct peer *peer;
 
 	DPRINTF(2, ("findexistingpeer_addr(%s, %s, %d, 0x%x)\n",
-		sptoa(addr),
+		sockporttoa(addr),
 		(start_peer)
-		    ? sptoa(&start_peer->srcadr)
+		    ? sockporttoa(&start_peer->srcadr)
 		    : "NULL",
 		mode, (u_int)cast_flags));
 
@@ -230,8 +230,8 @@ findexistingpeer_addr(
 		peer = start_peer->adr_link;
 	
 	while (peer != NULL) {
-		DPRINTF(3, ("%s %s %d %d 0x%x 0x%x ", sptoa(addr),
-			sptoa(&peer->srcadr), mode, peer->hmode,
+		DPRINTF(3, ("%s %s %d %d 0x%x 0x%x ", sockporttoa(addr),
+			sockporttoa(&peer->srcadr), mode, peer->hmode,
 			(u_int)cast_flags, (u_int)peer->cast_flags));
 		if ((-1 == mode || peer->hmode == mode ||
 		     ((MDF_BCLNT & peer->cast_flags) &&

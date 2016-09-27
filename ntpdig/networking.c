@@ -21,13 +21,13 @@ sendpkt (
 	}
 #endif
 	TRACE(1, ("ntpdig sendpkt: Sending packet to %s ...\n",
-		  sptoa(dest)));
+		  sockporttoa(dest)));
 
 	cc = sendto(rsock, (void *)pkt, len, 0, &dest->sa, 
 		    SOCKLEN(dest));
 	if (cc == SOCKET_ERROR) {
 		msyslog(LOG_ERR, "Send to %s failed, %m",
-			sptoa(dest));
+			sockporttoa(dest));
 		return false;
 	}
 	TRACE(1, ("Packet sent.\n"));
@@ -55,7 +55,7 @@ recvdata(
 		return recvc;
 #ifdef DEBUG
 	if (debug > 2) {
-		printf("Received %d bytes from %s:\n", recvc, sptoa(sender));
+		printf("Received %d bytes from %s:\n", recvc, sockporttoa(sender));
 		pkt_output((struct pkt *)rdata, recvc, stdout);
 	}
 #endif

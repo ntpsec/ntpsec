@@ -1926,7 +1926,7 @@ nntohostp(
 	char *		buf;
 
 	if (!showhostnames || SOCK_UNSPEC(netnum))
-		return sptoa(netnum);
+		return sockporttoa(netnum);
 
 	hostn = socktohost(netnum);
 	LIB_GETBUF(buf);
