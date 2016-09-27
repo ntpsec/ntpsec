@@ -125,7 +125,7 @@ ss_to_str(
 	sockaddr_u *saddr
 	)
 {
-	return estrdup(stoa(saddr));
+	return estrdup(socktoa(saddr));
 }
 
 
@@ -203,7 +203,7 @@ hostnameaddr(
 	char *		result;
 	int		cnt;
 
-	addrtxt = stoa(addr);
+	addrtxt = socktoa(addr);
 	LIB_GETBUF(result);
 	if (strcmp(hostname, addrtxt))
 		cnt = snprintf(result, LIB_BUFLENGTH, "%s %s",

@@ -193,7 +193,7 @@ process_pkt (
 		/* Yay! Things worked out! */
 		is_authentic = 1;
 		TRACE(1, ("ntpdig %s: packet from %s authenticated using key id %d.\n",
-			  func_name, stoa(sender), key_id));
+			  func_name, socktoa(sender), key_id));
 		break;
 
 	default:
@@ -262,7 +262,7 @@ process_pkt (
 	if (LEAP_NOTINSYNC == PKT_LEAP(rpkt->li_vn_mode)) {
 		msyslog(LOG_ERR,
 			"%s: %s not in sync, skipping this server",
-			func_name, stoa(sender));
+			func_name, socktoa(sender));
 		return SERVER_UNUSEABLE;
 	}
 
@@ -278,7 +278,7 @@ process_pkt (
 		NTOHL_FP(&spkt->xmt, &sent_xmt);
 		msyslog(LOG_ERR,
 			"%s response org expected to match sent xmt",
-			stoa(sender));
+			socktoa(sender));
 		msyslog(LOG_ERR, "resp org: %s", prettydate(&resp_org));
 		msyslog(LOG_ERR, "sent xmt: %s", prettydate(&sent_xmt));
 		return PACKET_UNUSEABLE;

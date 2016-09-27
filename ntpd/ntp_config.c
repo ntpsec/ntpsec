@@ -2460,14 +2460,14 @@ config_fudge(
 			err_flag = 1;
 			msyslog(LOG_ERR,
 				"unrecognized fudge reference clock address %s, line ignored",
-				stoa(&addr_sock));
+				socktoa(&addr_sock));
 		}
 
 		if (!ISREFCLOCKADR(&addr_sock)) {
 			err_flag = 1;
 			msyslog(LOG_ERR,
 				"inappropriate address %s for the fudge command, line ignored",
-				stoa(&addr_sock));
+				socktoa(&addr_sock));
 		}
 
 		/* Parse all the options to the fudge command */
@@ -2535,7 +2535,7 @@ config_fudge(
 				msyslog(LOG_ERR,
 					"Unexpected fudge flag %s (%d) for %s",
 					token_name(curr_opt->attr),
-					curr_opt->attr, stoa(&addr_sock));
+					curr_opt->attr, socktoa(&addr_sock));
 				exit(curr_opt->attr ? curr_opt->attr : 1);
 			}
 		}
@@ -2673,7 +2673,7 @@ is_sane_resolved_address(
 	if (!ISREFCLOCKADR(peeraddr) && ISBADADR(peeraddr)) {
 		msyslog(LOG_ERR,
 			"attempt to configure invalid address %s",
-			stoa(peeraddr));
+			socktoa(peeraddr));
 		return false;
 	}
 	/*
@@ -2685,13 +2685,13 @@ is_sane_resolved_address(
 	    && IS_MCAST(peeraddr)) {
 		msyslog(LOG_ERR,
 			"attempt to configure invalid address %s",
-			stoa(peeraddr));
+			socktoa(peeraddr));
 		return false;
 	}
 	if (T_Manycastclient == hmode && !IS_MCAST(peeraddr)) {
 		msyslog(LOG_ERR,
 			"attempt to configure invalid address %s",
-			stoa(peeraddr));
+			socktoa(peeraddr));
 		return false;
 	}
 
@@ -3043,7 +3043,7 @@ peer_name_resolved(
 						     : "";
 				msyslog(LOG_INFO, "DNS %s %s-> %s",
 					name, fam_spec,
-					stoa(&peeraddr));
+					socktoa(&peeraddr));
 			}
 			peer_config(
 				&peeraddr,
@@ -3102,7 +3102,7 @@ config_unpeers(
 			p = findpeerbyassoc(curr_unpeer->assocID);
 			if (p != NULL) {
 				msyslog(LOG_NOTICE, "unpeered %s",
-					stoa(&p->srcadr));
+					socktoa(&p->srcadr));
 				peer_clear(p, "GONE", true);
 				unpeer(p);
 			}
@@ -3117,11 +3117,11 @@ config_unpeers(
 		/* Do we have a numeric address? */
 		if (rc > 0) {
 			DPRINTF(1, ("unpeer: searching for %s\n",
-				    stoa(&peeraddr)));
+				    socktoa(&peeraddr)));
 			p = findexistingpeer(&peeraddr, NULL, NULL, -1, 0);
 			if (p != NULL) {
 				msyslog(LOG_NOTICE, "unpeered %s",
-					stoa(&peeraddr));
+					socktoa(&peeraddr));
 				peer_clear(p, "GONE", true);
 				unpeer(p);
 			}
@@ -3199,7 +3199,7 @@ unpeer_name_resolved(
 		INSIST(res->ai_addrlen <= sizeof(peeraddr));
 		memcpy(&peeraddr, res->ai_addr, res->ai_addrlen);
 		DPRINTF(1, ("unpeer: searching for peer %s\n",
-			    stoa(&peeraddr)));
+			    socktoa(&peeraddr)));
 		peer = findexistingpeer(&peeraddr, NULL, NULL, -1, 0);
 		if (peer != NULL) {
 			af = AF(&peeraddr);
@@ -3209,7 +3209,7 @@ unpeer_name_resolved(
 					     ? "(A) "
 					     : "";
 			msyslog(LOG_NOTICE, "unpeered %s %s-> %s", name,
-				fam_spec, stoa(&peeraddr));
+				fam_spec, socktoa(&peeraddr));
 			peer_clear(peer, "GONE", true);
 			unpeer(peer);
 		}
@@ -3343,7 +3343,7 @@ config_remotely(
 	char origin[128];
 
 	snprintf(origin, sizeof(origin), "remote config from %s",
-		 stoa(remote_addr));
+		 socktoa(remote_addr));
 	lex_init_stack(origin, NULL); /* no checking needed... */
 	init_syntax_tree(&cfgt);
 	yyparse();
@@ -3351,7 +3351,7 @@ config_remotely(
 
 	cfgt.source.attr = CONF_SOURCE_NTPQ;
 	cfgt.timestamp = time(NULL);
-	cfgt.source.value.s = estrdup(stoa(remote_addr));
+	cfgt.source.value.s = estrdup(socktoa(remote_addr));
 
 	DPRINTF(1, ("Finished Parsing!!\n"));
 
@@ -3763,7 +3763,7 @@ getnetnum(
 # endif
 	SET_PORT(addr, NTP_PORT);
 
-	DPRINTF(2, ("getnetnum given %s, got %s\n", num, stoa(addr)));
+	DPRINTF(2, ("getnetnum given %s, got %s\n", num, socktoa(addr)));
 
 	return 1;
 }

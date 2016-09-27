@@ -1306,7 +1306,7 @@ ctl_putadr(
 	if (NULL == addr)
 		cq = numtoa(addr32);
 	else
-		cq = stoa(addr);
+		cq = socktoa(addr);
 	NTP_INSIST((cp - buffer) < (int)sizeof(buffer));
 	snprintf(cp, sizeof(buffer) - (cp - buffer), "%s", cq);
 	cp += strlen(cp);
@@ -2507,7 +2507,7 @@ ctl_getitem(
 								if (quiet_until <= current_time) {
 									quiet_until = current_time + 300;
 									msyslog(LOG_WARNING,
-"Possible 'ntpdx' exploit from %s#%u (possibly spoofed)", stoa(rmt_addr), SRCPORT(rmt_addr));
+"Possible 'ntpdx' exploit from %s#%u (possibly spoofed)", socktoa(rmt_addr), SRCPORT(rmt_addr));
 								}
 							return NULL;
 						}
@@ -2898,7 +2898,7 @@ static void configure(
 		NLOG(NLOG_SYSINFO)
 			msyslog(LOG_NOTICE,
 				"runtime config from %s rejected due to nomodify restriction",
-				stoa(&rbufp->recv_srcadr));
+				socktoa(&rbufp->recv_srcadr));
 		sys_restricted++;
 		return;
 	}
@@ -2915,7 +2915,7 @@ static void configure(
 		ctl_flushpkt(0);
 		msyslog(LOG_NOTICE,
 			"runtime config from %s rejected: request too long",
-			stoa(&rbufp->recv_srcadr));
+			socktoa(&rbufp->recv_srcadr));
 		return;
 	}
 
@@ -2940,7 +2940,7 @@ static void configure(
 	DPRINTF(1, ("Got Remote Configuration Command: %s\n",
 		remote_config.buffer));
 	msyslog(LOG_NOTICE, "%s config: %s",
-		stoa(&rbufp->recv_srcadr),
+		socktoa(&rbufp->recv_srcadr),
 		remote_config.buffer);
 
 	if (replace_nl)
@@ -2969,7 +2969,7 @@ static void configure(
 	if (remote_config.no_errors > 0)
 		msyslog(LOG_NOTICE, "%d error in %s config",
 			remote_config.no_errors,
-			stoa(&rbufp->recv_srcadr));
+			socktoa(&rbufp->recv_srcadr));
 }
 
 
@@ -3330,7 +3330,7 @@ static void read_mru_list(
 		NLOG(NLOG_SYSINFO)
 			msyslog(LOG_NOTICE,
 				"mrulist from %s rejected due to nomrulist restriction",
-				stoa(&rbufp->recv_srcadr));
+				socktoa(&rbufp->recv_srcadr));
 		sys_restricted++;
 		return;
 	}
@@ -3756,13 +3756,13 @@ send_restrict_entry(
 
 		case 0:
 			snprintf(tag, sizeof(tag), addr_fmtu, idx);
-			pch = stoa(&addr);
+			pch = socktoa(&addr);
 			ctl_putunqstr(tag, pch, strlen(pch));
 			break;
 
 		case 1:
 			snprintf(tag, sizeof(tag), mask_fmtu, idx);
-			pch = stoa(&mask);
+			pch = socktoa(&mask);
 			ctl_putunqstr(tag, pch, strlen(pch));
 			break;
 
@@ -4088,7 +4088,7 @@ report_event(
 			src = refclock_name(peer);
 		else
 #endif /* REFCLOCK */ 
-		    src = stoa(&peer->srcadr);
+		    src = socktoa(&peer->srcadr);
 
 		snprintf(statstr, sizeof(statstr),
 		    "%s %04x %02x %s", src,

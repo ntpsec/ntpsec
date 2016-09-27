@@ -426,8 +426,8 @@ receive(
 #endif /* REFCLOCK */
 	    restrict_mask = restrictions(&rbufp->recv_srcadr);
 	DPRINTF(2, ("receive: at %ld %s<-%s flags %x restrict %03x\n",
-		    current_time, stoa(&rbufp->dstadr->sin),
-		    stoa(&rbufp->recv_srcadr),
+		    current_time, socktoa(&rbufp->dstadr->sin),
+		    socktoa(&rbufp->recv_srcadr),
 		    rbufp->dstadr->flags, restrict_mask));
 	pkt = &rbufp->recv_pkt;
 	hisversion = PKT_VERSION(pkt->li_vn_mode);
@@ -563,7 +563,7 @@ receive(
 		    hismode || MODE_SERVER == hismode) {
 			if (MODE_SERVER == hismode)
 				DPRINTF(1, ("Possibly self-induced rate limiting of MODE_SERVER from %s\n",
-					stoa(&rbufp->recv_srcadr)));
+					socktoa(&rbufp->recv_srcadr)));
 			return;			/* rate exceeded */
 		}
 		if (hismode == MODE_CLIENT)
@@ -594,7 +594,7 @@ receive(
 	if (peer && IS_PEER_REFCLOCK(peer) && rbufp->dstadr != 0)
 	{
 	    msyslog(LOG_ERR, "refclock srcadr on a network interface (%s)!",
-		    stoa(&peer->srcadr));
+		    socktoa(&peer->srcadr));
 	    return;
 	}
 
@@ -636,8 +636,8 @@ receive(
 		if (debug)
 			printf(
 			    "receive: at %ld %s<-%s mode %d len %zd\n",
-			    current_time, stoa(dstadr_sin),
-			    stoa(&rbufp->recv_srcadr), hismode,
+			    current_time, socktoa(dstadr_sin),
+			    socktoa(&rbufp->recv_srcadr), hismode,
 			    authlen);
 #endif
 	} else if (has_mac == 4) {
@@ -647,8 +647,8 @@ receive(
 		if (debug)
 			printf(
 			    "receive: at %ld %s<-%s mode %d keyid %08x len %zd auth %d\n",
-			    current_time, stoa(dstadr_sin),
-			    stoa(&rbufp->recv_srcadr), hismode, skeyid,
+			    current_time, socktoa(dstadr_sin),
+			    socktoa(&rbufp->recv_srcadr), hismode, skeyid,
 			    authlen + has_mac, is_authentic);
 #endif
 
@@ -687,8 +687,8 @@ receive(
 		if (debug)
 			printf(
 			    "receive: at %ld %s<-%s mode %d keyid %08x len %zd auth %d\n",
-			    current_time, stoa(dstadr_sin),
-			    stoa(&rbufp->recv_srcadr), hismode, skeyid,
+			    current_time, socktoa(dstadr_sin),
+			    socktoa(&rbufp->recv_srcadr), hismode, skeyid,
 			    authlen + has_mac, is_authentic);
 #endif
 	}
@@ -961,7 +961,7 @@ receive(
 				 printf(
 					 "receive: at %ld refusing to mobilize passive association"
 					 " with unknown peer %s mode %d keyid %08x len %zd auth %d\n",
-					 current_time, stoa(&rbufp->recv_srcadr), hismode, skeyid,
+					 current_time, socktoa(&rbufp->recv_srcadr), hismode, skeyid,
 					 authlen + has_mac, is_authentic);
 			}
 #endif
@@ -2415,7 +2415,7 @@ clock_select(void)
 	for (i = 0; i < nlist; i++) {
 		peers[i].peer->new_status = CTL_PST_SEL_SELCAND;
 		DPRINTF(2, ("select: survivor %s %f\n",
-			stoa(&peers[i].peer->srcadr), peers[i].synch));
+			socktoa(&peers[i].peer->srcadr), peers[i].synch));
 	}
 
 	/*
@@ -2779,8 +2779,8 @@ peer_xmit(
 		if (debug)
 			printf("transmit: at %ld %s->%s mode %d len %zu\n",
 		    	    current_time, peer->dstadr ?
-			    stoa(&peer->dstadr->sin) : "-",
-		            stoa(&peer->srcadr), peer->hmode, sendlen);
+			    socktoa(&peer->dstadr->sin) : "-",
+		            socktoa(&peer->srcadr), peer->hmode, sendlen);
 #endif
 		return;
 	}
@@ -2999,8 +2999,8 @@ fast_xmit(
 		if (debug)
 			printf(
 			    "transmit: at %ld %s->%s mode %d len %zd\n",
-			    current_time, stoa(&rbufp->dstadr->sin),
-			    stoa(&rbufp->recv_srcadr), xmode, sendlen);
+			    current_time, socktoa(&rbufp->dstadr->sin),
+			    socktoa(&rbufp->recv_srcadr), xmode, sendlen);
 #endif
 		return;
 	}
@@ -3107,9 +3107,9 @@ pool_xmit(
 #ifdef DEBUG
 	if (debug)
 		printf("transmit: at %ld %s->%s pool\n",
-		    current_time, latoa(lcladr), stoa(rmtadr));
+		    current_time, latoa(lcladr), socktoa(rmtadr));
 #endif
-	msyslog(LOG_INFO, "Soliciting pool server %s", stoa(rmtadr));
+	msyslog(LOG_INFO, "Soliciting pool server %s", socktoa(rmtadr));
 #endif	/* USE_WORKER */
 }
 

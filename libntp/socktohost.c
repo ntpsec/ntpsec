@@ -38,9 +38,9 @@ socktohost(
 	gni_flags = NI_DGRAM | NI_NAMEREQD;
 	if (getnameinfo(&sock->sa, SOCKLEN(sock), pbuf, LIB_BUFLENGTH,
 			NULL, 0, gni_flags))
-		return stoa(sock);	/* use address */
+		return socktoa(sock);	/* use address */
 
-	TRACE(1, ("%s reversed to %s\n", stoa(sock), pbuf));
+	TRACE(1, ("%s reversed to %s\n", socktoa(sock), pbuf));
 
 	/*
 	 * Resolve the reversed name and make sure the reversed address
@@ -100,7 +100,7 @@ socktohost(
 	TRACE(1, ("%s forward check lookup fail: %s\n", pbuf,
 		  gai_strerror(a_info)));
 	LIB_GETBUF(pliar);
-	snprintf(pliar, LIB_BUFLENGTH, "%s (%s)", stoa(sock), pbuf);
+	snprintf(pliar, LIB_BUFLENGTH, "%s (%s)", socktoa(sock), pbuf);
 
 	return pliar;
 }

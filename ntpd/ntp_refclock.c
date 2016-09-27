@@ -293,7 +293,7 @@ refclock_transmit(
 #ifdef DEBUG
 		if (debug)
 			printf("refclock_transmit: at %ld %s\n",
-			    current_time, stoa(&(peer->srcadr)));
+			    current_time, socktoa(&(peer->srcadr)));
 #endif
 
 		/*
@@ -512,7 +512,7 @@ refclock_receive(
 #ifdef DEBUG
 	if (debug)
 		printf("refclock_receive: at %lu %s\n",
-		    current_time, stoa(&peer->srcadr));
+		    current_time, socktoa(&peer->srcadr));
 #endif
 
 	/*

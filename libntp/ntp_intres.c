@@ -650,7 +650,7 @@ blocking_getnameinfo(
 	gni_resp = (void *)((char *)resp + sizeof(*resp));
 
 	TRACE(2, ("blocking_getnameinfo given addr %s flags 0x%x hostlen %lu servlen %lu\n",
-		  stoa(&gni_req->socku), gni_req->flags,
+		  socktoa(&gni_req->socku), gni_req->flags,
 		  (u_long)gni_req->hostoctets, (u_long)gni_req->servoctets));
 	
 	gni_resp->retcode = getnameinfo(&gni_req->socku.sa,
@@ -775,7 +775,7 @@ getnameinfo_sometime_complete(
 				gni_req))
 				return;
 
-			msyslog(LOG_ERR, "unable to retry reverse lookup of %s", stoa(&gni_req->socku));
+			msyslog(LOG_ERR, "unable to retry reverse lookup of %s", socktoa(&gni_req->socku));
 		}
 	}
 

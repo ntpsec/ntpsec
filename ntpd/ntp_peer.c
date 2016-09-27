@@ -341,7 +341,7 @@ findpeer(
 		set_peerdstadr(p, rbufp->dstadr);
 		if (p->dstadr == rbufp->dstadr) {
 			DPRINTF(1, ("Changed %s local address to match response\n",
-				    stoa(&p->srcadr)));
+				    socktoa(&p->srcadr)));
 			return findpeer(rbufp, pkt_mode, action);
 		}
 	}
@@ -477,7 +477,7 @@ free_peer(
 		if (NULL == unlinked) {
 			peer_hash_count[hash]++;
 			msyslog(LOG_ERR, "peer %s not in address table!",
-				stoa(&p->srcadr));
+				socktoa(&p->srcadr));
 		}
 
 		/*
@@ -492,7 +492,7 @@ free_peer(
 			assoc_hash_count[hash]++;
 			msyslog(LOG_ERR,
 				"peer %s not in association ID table!",
-				stoa(&p->srcadr));
+				socktoa(&p->srcadr));
 		}
 
 		/* Remove him from the overall list. */
@@ -500,7 +500,7 @@ free_peer(
 			     struct peer);
 		if (NULL == unlinked)
 			msyslog(LOG_ERR, "%s not in peer list!",
-				stoa(&p->srcadr));
+				socktoa(&p->srcadr));
 	}
 
 	if (p->hostname != NULL)
@@ -571,7 +571,7 @@ set_peerdstadr(
 		UNLINK_SLIST(unlinked, p->dstadr->peers, p, ilink,
 			     struct peer);
 		msyslog(LOG_INFO, "%s local addr %s -> %s",
-			stoa(&p->srcadr), latoa(p->dstadr),
+			socktoa(&p->srcadr), latoa(p->dstadr),
 			latoa(dstadr));
 	}
 	p->dstadr = dstadr;
@@ -597,7 +597,7 @@ peer_refresh_interface(
 	DPRINTF(4, (
 	    "peer_refresh_interface: %s->%s mode %d vers %d poll %d %d flags 0x%x 0x%x ttl %u key %08x: new interface: ",
 	    p->dstadr == NULL ? "<null>" :
-	    stoa(&p->dstadr->sin), stoa(&p->srcadr), p->hmode,
+	    socktoa(&p->dstadr->sin), socktoa(&p->srcadr), p->hmode,
 	    p->version, p->minpoll, p->maxpoll, p->flags, p->cast_flags,
 	    p->ttl, p->keyid));
 	if (niface != NULL) {
@@ -605,11 +605,11 @@ peer_refresh_interface(
 		    "fd=%d, bfd=%d, name=%.16s, flags=0x%x, ifindex=%u, sin=%s",
 		    niface->fd,  niface->bfd, niface->name,
 		    niface->flags, niface->ifindex,
-		    stoa(&niface->sin)));
+		    socktoa(&niface->sin)));
 		if (niface->flags & INT_BROADCAST)
 			DPRINTF(4, (", bcast=%s",
-				stoa(&niface->bcast)));
-		DPRINTF(4, (", mask=%s\n", stoa(&niface->mask)));
+				socktoa(&niface->bcast)));
+		DPRINTF(4, (", mask=%s\n", socktoa(&niface->mask)));
 	} else {
 		DPRINTF(4, ("<NONE>\n"));
 	}
@@ -729,7 +729,7 @@ newpeer(
 		DPRINTF(2, ("newpeer(%s) found existing association\n",
 			(hostname)
 			    ? hostname
-			    : stoa(srcadr)));
+			    : socktoa(srcadr)));
 		return NULL;
 	}
 
@@ -777,11 +777,11 @@ newpeer(
 
 	if (peer->dstadr != NULL)
 		DPRINTF(3, ("newpeer(%s): using fd %d and our addr %s\n",
-			stoa(srcadr), peer->dstadr->fd,
-			stoa(&peer->dstadr->sin)));
+			socktoa(srcadr), peer->dstadr->fd,
+			socktoa(&peer->dstadr->sin)));
 	else
 		DPRINTF(3, ("newpeer(%s): local interface currently not bound\n",
-			stoa(srcadr)));	
+			socktoa(srcadr)));
 
 	/*
 	 * Broadcast needs the socket enabled for broadcast
@@ -833,7 +833,7 @@ newpeer(
 	restrict_source(&peer->srcadr, false, 0);
 	mprintf_event(PEVNT_MOBIL, peer, "assoc %d", peer->associd);
 	DPRINTF(1, ("newpeer: %s->%s mode %u vers %u poll %u %u flags 0x%x 0x%x ttl %u key %08x\n",
-	    latoa(peer->dstadr), stoa(&peer->srcadr), peer->hmode,
+	    latoa(peer->dstadr), socktoa(&peer->srcadr), peer->hmode,
 	    peer->version, peer->minpoll, peer->maxpoll, peer->flags,
 	    peer->cast_flags, peer->ttl, peer->keyid));
 	return peer;

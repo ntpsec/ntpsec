@@ -349,7 +349,7 @@ record_peer_stats(
 	if (peerstats.fp != NULL) {
 		fprintf(peerstats.fp,
 		    "%lu %s %s %x %.9f %.9f %.9f %.9f\n", day,
-		    ulfptoa(&now, 3), stoa(&peer->srcadr), status, peer->offset,
+		    ulfptoa(&now, 3), socktoa(&peer->srcadr), status, peer->offset,
 		    peer->delay, peer->disp, peer->jitter);
 		fflush(peerstats.fp);
 	}
@@ -363,7 +363,7 @@ peerlabel(const struct peer *peer)
 		return refclock_name(peer);
 	else
 #endif /* defined(REFCLOCK) && !defined(ENABLE_CLASSIC_MODE)*/
-		return stoa(&peer->srcadr);
+		return socktoa(&peer->srcadr);
 }
 
 /*
@@ -507,7 +507,7 @@ record_raw_stats(
 	if (rawstats.fp != NULL) {
 		fprintf(rawstats.fp, "%lu %s %s %s %s %s %s %s %d %d %d %d %d %d %.6f %.6f %s %d\n",
 		    day, ulfptoa(&now, 3),
-		    stoa(srcadr), dstadr ?  stoa(dstadr) : "-",
+		    socktoa(srcadr), dstadr ?  socktoa(dstadr) : "-",
 		    ulfptoa(t1, 9), ulfptoa(t2, 9),
 		    ulfptoa(t3, 9), ulfptoa(t4, 9),
 		    leap, version, mode, stratum, ppoll, precision,
