@@ -45,7 +45,7 @@ libevent 2.x::
    NetBSD: As installed, libevent is broken.  It links, but doesn't run.
      Here is a workaround:
       # cd /usr/lib
-      # ln -s /usr/pkg/lib/libevent_core-2.0.so.5
+      # ln -s /usr/pkg/lib/libevent_core-2.0.so.5 .
 
 seccomp::
    Optional on Linux to support restricting syscalls
