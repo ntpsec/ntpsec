@@ -162,6 +162,7 @@
 %token	<Integer>	T_Noquery
 %token	<Integer>	T_Noselect
 %token	<Integer>	T_Noserve
+%token	<Integer>	T_Notrap
 %token	<Integer>	T_Notrust
 %token	<Integer>	T_Ntp
 %token	<Integer>	T_Ntpport
@@ -864,6 +865,7 @@ access_control_flag
 	|	T_Nopeer
 	|	T_Noquery
 	|	T_Noserve
+	|	T_Notrap
 	|	T_Notrust
 	|	T_Ntpport
 	|	T_Version

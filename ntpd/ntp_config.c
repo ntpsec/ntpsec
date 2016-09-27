@@ -1769,6 +1769,14 @@ config_access(
 				flags |= RES_DONTSERVE;
 				break;
 
+			case T_Notrap:
+			 	/*
+				 * No-op - included for backward compatibility
+				 * wuith all the world's boilerplate ntp.conf
+				 * files.
+				 */
+				break;
+
 			case T_Notrust:
 				flags |= RES_DONTTRUST;
 				break;
