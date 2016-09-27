@@ -300,9 +300,10 @@ Next, you want to look at the line for "preferred" server (marked with
 NTP's algorithms have computed from its inputs. What you want to see here
 is low jitter. The PPS feed in the second example is pretty good. The
 figures from 18.26.4.105 in the first display are not great, but
-they're not out of line for operation over a WAN.  Jitter over a
-second would indicate a serious problem, most likely due to
-asymmetric packet delays.
+they're not out of line for operation over a WAN.  Offset over a
+second is most likely due to asymmetric packet delays; large jitter
+is more likely due to bufferbloat and other sources of variable
+latency under load.
 
 
 '''''
