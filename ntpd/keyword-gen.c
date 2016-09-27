@@ -154,6 +154,7 @@ struct key_tok ntp_keywords[] = {
 { "nomrulist",		T_Nomrulist,		FOLLBY_TOKEN },
 { "nopeer",		T_Nopeer,		FOLLBY_TOKEN },
 { "noquery",		T_Noquery,		FOLLBY_TOKEN },
+{ "notrap",		T_Notrap,		FOLLBY_TOKEN },
 { "noserve",		T_Noserve,		FOLLBY_TOKEN },
 { "notrust",		T_Notrust,		FOLLBY_TOKEN },
 { "ntpport",		T_Ntpport,		FOLLBY_TOKEN },
