@@ -724,7 +724,7 @@ openhost(
 	memcpy(&addr, ai->ai_addr, octets);
 
 	if (ai->ai_canonname == NULL) {
-		strlcpy(temphost, stoa(&addr), sizeof(temphost));
+		strlcpy(temphost, socktoa(&addr), sizeof(temphost));
 		currenthostisnum = true;
 	} else {
 		strlcpy(temphost, ai->ai_canonname, sizeof(temphost));
@@ -1904,9 +1904,9 @@ nntohost_col(
 
 	if (!showhostnames || SOCK_UNSPEC(addr)) {
 		if (preserve_lowaddrbits)
-			out = trunc_left(stoa(addr), width);
+			out = trunc_left(socktoa(addr), width);
 		else
-			out = trunc_right(stoa(addr), width);
+			out = trunc_right(socktoa(addr), width);
 	} else {
 		out = trunc_right(socktohost(addr), width);
 	}
@@ -3187,13 +3187,13 @@ cookedprint(
 			} else if (fmt == HA){
 				output(fp, name, nntohost(&hval));
 			} else {
-				output(fp, name, stoa(&hval));
+				output(fp, name, socktoa(&hval));
 			}
 			break;
 
 		case RF:
 			if (decodenetnum(value, &hval)) {
-			    output(fp, name, stoa(&hval));
+			    output(fp, name, socktoa(&hval));
 			} else if (strlen(value) <= 4) {
 				output(fp, name, value);
 			} else {

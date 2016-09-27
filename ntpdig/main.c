@@ -772,7 +772,7 @@ xmt_timer_cb(
 	if (xmt_q->sched <= start_cb.tv_sec) {
 		UNLINK_HEAD_SLIST(x, xmt_q, link);
 		TRACE(2, ("xmt_timer_cb: at .%6.6u -> %s\n",
-			  (u_int)start_cb.tv_usec, stoa(&x->spkt->addr)));
+			  (u_int)start_cb.tv_usec, socktoa(&x->spkt->addr)));
 		xmt(x);
 		free(x);
 		if (NULL == xmt_q)
@@ -829,7 +829,7 @@ xmt(
 		spkt->stime = tv_xmt.tv_sec - JAN_1970;
 
 		TRACE(2, ("xmt: %lx.%6.6u %s %s\n", (u_long)tv_xmt.tv_sec,
-			  (u_int)tv_xmt.tv_usec, dctx->name, stoa(dst)));
+			  (u_int)tv_xmt.tv_usec, dctx->name, socktoa(dst)));
 	} else {
 		dec_pending_ntp(dctx->name, dst);
 	}
@@ -881,7 +881,7 @@ timeout_queries(void)
 				continue;
 			age = start_cb.tv_sec - spkt->stime;
 			TRACE(3, ("%s %s %cCST age %ld\n",
-				  stoa(&spkt->addr),
+				  socktoa(&spkt->addr),
 				  spkt->dctx->name, xcst, age));
 			if (age > response_timeout)
 				timeout_query(spkt);
@@ -1320,7 +1320,7 @@ handle_pkt(
 
 	case KOD_DEMOBILIZE:
 		/* Received a DENY or RESTR KOD packet */
-		addrtxt = stoa(host);
+		addrtxt = socktoa(host);
 		ref = (char *)&rpkt->refid;
 		add_entry(addrtxt, ref);
 		msyslog(LOG_WARNING, "KOD code %c%c%c%c from %s %s",
@@ -1338,7 +1338,7 @@ handle_pkt(
 
 	case 1:
 		TRACE(3, ("handle_pkt: %d bytes from %s %s\n",
-			  rpktl, stoa(host), hostname));
+			  rpktl, socktoa(host), hostname));
 
 		gettimeofday_cached(base, &tv_dst);
 
@@ -1405,7 +1405,7 @@ handle_pkt(
 		    printf("{\"time\":\"%s\",\"offset\":%f,\"precision\":%f,",
 		    	ts_str, offset, synch_distance);
 		    printf("\"host\":\"%s\",\"ip\":\"%s\",",
-			   hostname, stoa(host));
+			   hostname, socktoa(host));
 		    printf("\"stratum\":%d,\"leap\":\"%s\",\"adjusted\":%s}\n",
 			   stratum,
 		    	   leaptxt,

@@ -1641,7 +1641,7 @@ doprintpeers(
 				dstadr = dum_store;
 				if (pvl == opeervarlist) {
 					have_da_rid = true;
-					dstadr_refid = trunc_left(stoa(&dstadr), 15);
+					dstadr_refid = trunc_left(socktoa(&dstadr), 15);
 				}
 			}
 		} else if (!strcmp("hmode", name)) {
@@ -1661,7 +1661,7 @@ doprintpeers(
 						dstadr_refid = "0.0.0.0";
 					else
 						dstadr_refid =
-						    stoa(&refidadr);
+						    socktoa(&refidadr);
 				} else {
 					have_da_rid = false;
 				}
@@ -3454,10 +3454,10 @@ another_reslist_field(
 	prefix = sockaddr_masktoprefixlen(&prow->mask);
 	if (prefix >= 0)
 		snprintf(addrmaskstr, sizeof(addrmaskstr), "%s/%d",
-			 stoa(&prow->addr), prefix);
+			 socktoa(&prow->addr), prefix);
 	else
 		snprintf(addrmaskstr, sizeof(addrmaskstr), "%s %s",
-			 stoa(&prow->addr), stoa(&prow->mask));
+			 socktoa(&prow->addr), socktoa(&prow->mask));
 
 	/*
 	"   hits    addr/prefix or addr mask\n"

@@ -489,7 +489,7 @@ hack_restrict(
 	restrict_u **	plisthead;
 
 	DPRINTF(1, ("restrict: op %d addr %s mask %s mflags %08x flags %08x\n",
-		    op, stoa(resaddr), stoa(resmask), mflags, flags));
+		    op, socktoa(resaddr), socktoa(resmask), mflags, flags));
 
 	if (NULL == resaddr) {
 		NTP_REQUIRE(NULL == resmask);
@@ -629,7 +629,7 @@ restrict_source(
 	if (farewell) {
 		hack_restrict(RESTRICT_REMOVE, addr, &onesmask,
 			      0, 0, 0);
-		DPRINTF(1, ("restrict_source: %s removed", stoa(addr)));
+		DPRINTF(1, ("restrict_source: %s removed", socktoa(addr)));
 		return;
 	}
 
@@ -662,5 +662,5 @@ restrict_source(
 		      restrict_source_mflags, restrict_source_flags,
 		      expire);
 	DPRINTF(1, ("restrict_source: %s host restriction added\n", 
-		    stoa(addr)));
+		    socktoa(addr)));
 }
