@@ -744,13 +744,13 @@ int intercept_select(int nfds, fd_set *readfds)
 		     "select %d", nfound);
 	    if (nfound > 0) {
 		strlcat(pkt_dump, ":", sizeof(pkt_dump));
-		for (fd = 0; fd <= nfound; fd++)
+		for (fd = 0; fd <= nfds; fd++)
 		    if (FD_ISSET(fd, readfds))
 			snprintf(pkt_dump + strlen(pkt_dump),
 				 sizeof(pkt_dump) - strlen(pkt_dump),
 				 " %d", fd);
-		strlcat(pkt_dump, "\n", sizeof(pkt_dump));
 	    }
+	    strlcat(pkt_dump, "\n", sizeof(pkt_dump));
 
 	    fputs(pkt_dump, stdout);
 	}
@@ -831,7 +831,7 @@ ssize_t intercept_recvmsg(int sockfd, struct msghdr *msg, int flags)
 	if (mode == capture) {
 	    char *cp;
 	    snprintf(pkt_dump, sizeof(pkt_dump),
-		     "recvmsg %d %02x %s",
+		     "recvmsg %d %02x %s ",
 		     sockfd, msg->msg_flags,
 		     socktoa((sockaddr_u *)(&msg->msg_name)));
 	    for (cp = (char *)msg->msg_iov->iov_base;
