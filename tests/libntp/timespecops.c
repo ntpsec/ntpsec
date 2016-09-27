@@ -99,10 +99,10 @@ static bool AssertTimespecClose(const struct timespec m, const struct timespec n
 		return true;
 	else
 	{
-		printf("m_expr which is %ld.%lu \nand\nn_expr which is %ld.%lu\nare not close; diff=%ld.%lunsec\n",
+		printf("m_expr which is %ld.%ld \nand\nn_expr which is %ld.%ld\nare not close; diff=%ld.%ldnsec\n",
 		       (long)m.tv_sec, m.tv_nsec,
 		       (long)n.tv_sec, n.tv_nsec,
-		       (long)diff.tv_sec, diff.tv_nsec); 
+		       (long)diff.tv_sec, diff.tv_nsec);
 		return false;
 	}
 }

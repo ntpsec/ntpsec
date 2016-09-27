@@ -531,7 +531,7 @@ shm_timer(
 		     "%04u-%02u-%02uT%02u:%02u:%02u.%09ldZ",
 		     cd.year, cd.month, cd.monthday,
 		     cd.hour, cd.minute, cd.second,
-		     (long)shm_stat.tvt.tv_nsec);
+		     shm_stat.tvt.tv_nsec);
 	pp->lencode = (c < (int)sizeof(pp->a_lastcode)) ? c : 0;
 
 	/* check 1: age control of local time stamp */
