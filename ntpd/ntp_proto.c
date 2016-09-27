@@ -1814,7 +1814,7 @@ poll_update(
 			peer->nextdate += ntp_minpkt;
 	}
 	DPRINTF(2, ("poll_update: at %lu %s poll %d burst %d retry %d head %d early %lu next %lu\n",
-		    current_time, ntoa(&peer->srcadr), peer->hpoll,
+		    current_time, socktoa(&peer->srcadr), peer->hpoll,
 		    peer->burst, peer->retry, peer->throttle,
 		    utemp - current_time, peer->nextdate -
 		    current_time));
@@ -2454,7 +2454,7 @@ clock_select(void)
 			break;
 
 		DPRINTF(3, ("select: drop %s seljit %.6f jit %.6f\n",
-			ntoa(&peers[k].peer->srcadr), g, d));
+			socktoa(&peers[k].peer->srcadr), g, d));
 		if (nlist > sys_maxclock)
 			peers[k].peer->new_status = CTL_PST_SEL_EXCESS;
 		for (j = k + 1; j < nlist; j++)
@@ -2847,8 +2847,8 @@ peer_xmit(
 	if (debug)
 		printf("transmit: at %ld %s->%s mode %d keyid %08x len %zd\n",
 		    current_time, peer->dstadr ?
-		    ntoa(&peer->dstadr->sin) : "-",
-		    ntoa(&peer->srcadr), peer->hmode, xkeyid, sendlen);
+		    socktoa(&peer->dstadr->sin) : "-",
+		    socktoa(&peer->srcadr), peer->hmode, xkeyid, sendlen);
 #endif
 }
 
@@ -3021,8 +3021,8 @@ fast_xmit(
 	if (debug)
 		printf(
 		    "transmit: at %ld %s->%s mode %d keyid %08x len %zd\n",
-		    current_time, ntoa(&rbufp->dstadr->sin),
-		    ntoa(&rbufp->recv_srcadr), xmode, xkeyid, sendlen);
+		    current_time, socktoa(&rbufp->dstadr->sin),
+		    socktoa(&rbufp->recv_srcadr), xmode, xkeyid, sendlen);
 #endif
 }
 
