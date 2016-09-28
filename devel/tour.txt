@@ -153,16 +153,99 @@ cycle would pile up in the ring buffer and latecomers would be
 dropped.
 
 The new organization stops pretending; it simply spins on a select
-across all interfaces.  If inbound traffic is more than the daemon
-can handle, packets will pile up in the UDP layer and be dropped at
-that level. The main difference is that dropped packets are no
-longer visible in the statistics the server can gather.
+across all interfaces.  If inbound traffic is more than the daemon can
+handle, packets will pile up in the UDP layer and be dropped at that
+level. The main difference is that dropped packets are less likely to
+be visible in the statistics the server can gather. (In order to show,
+they'd have to make it out of the system IP layer to userland at a
+higher rate than ntpd can process; this is very unlikely.)
 
 There was internal evidence in the NTP Classic build machinery that
 asynchronous I/O on Unix machines probably hadn't actually worked for
 quite a while before NTPsec removed it.
 
-=== Refclock management ===
+== System call interface and the PLL ==
+
+All of ntpd's clock management is done through four system calls:
+clock_gettime(2), clock_settime(2), ntp_adjtime(2), and (on some
+systems) adjtimex().  The settimeofday(2) call from older BSD
+Unuxes (in POSIX but deprecated) is no longer used.
+
+The roles of clock_gettime(2) and clock_settime(2) are simple.
+They're used for reading and setting ("stepping", in NTP jargon) the
+system clock.  Stepping is avoided whenever possible because it
+introduces discontinuities that may confuse applications.  Stepping is
+usually done only at ntpd startup (which is typically at boot time)
+and only when the skew between system and NTP time is relatively
+large.
+
+The sync algorithm prefers slewing to stepping.  Slewing speeds up or
+slows down the clock by a very small amount that will, after a
+relatively short time, sync the clock to NTP time.  The advantage of
+this method is that it doesn't introduce discontinuities that
+applications might notice. The slewing variations in clock speed are so
+small that they're generally invisible even to soft-realtime
+applications.
+
+The calls ntp_adjtime(2) and adjtimex(2) are for clock slewing. Both
+use a kernel interface to do this. Both use a control technique called
+a PLL/FLL (phase-locked loop/frequency-locked loop) to do it. The
+difference is that adjtimex(2) adjusts a PLL/FLL implemented in the
+kernel, whereas ntp_adjtime(2) implements clock skewing for a PLL
+running in userspace (in ntpd itself). The KERNEL_PLL code can produce
+much faster convergence from a cold start.
+
+Deep-in-the weeds details about the kernel PLL from Hal Murray follow.
+If you can follow these you may be qualified to maintain this code...
+
+Deep inside the kernel, there is code that updates the time by reading the
+cycle counter, subtracting off the previous cycle count and multiplying by
+the time/cycle.  The actual implementation is complicated mostly to maintain
+accuracy.  You need ballpark of 9 digits of accuracy on the time/cycle and
+that has to get carried through the calculations.
+
+On PCs, Linux measures the time/cycle at boot time by comparing with another
+clock with a known frequency.  If you are building for a specific hardware
+platform, you could compile it in as a constant.
+You see things like this in syslog:
+
+-----------------------------------------------------------
+tsc: Refined TSC clocksource calibration: 1993.548 MHz
+-----------------------------------------------------------
+
+You can grep for "MHz" to find these.
+
+(Side note.  1993 MHz is probably 2000 MHz rounded down slightly by
+the clock fuzzing to smear the EMI over a broader band to comply with
+FCC rules.  It rounds down to make sure the CPU isn't overclocked.)
+
+There is an API call to adjust the time/cycle.  That adjustment is ntpd's
+drift.  That covers manufacturing errors and temperature changes and such.
+The manufacturing error part is typically under 50 PPM.  I have a few systems
+off by over 100.  The temperature part varies by ballpark of 1 PPM / C.
+
+There is another error source which is errors in the calibration code and/or
+time keeping code.  If your timekeeping code rounds down occasionally, you
+can correct for that by tweaking the time/cycle.
+
+There is another API that says "slew the clock by X seconds".  That is
+implemented by tweaking the time/cycle slightly, waiting until the correct
+adjustment has happened, then restoring the correct time/cycle.  The "slight"
+is 500 PPM.  It takes a long time to make major corrections.
+
+That slewing has nothing (directly) to do with a PLL.  It could be
+implemented in user code with reduced accuracy.
+
+There is a PLL kernel option to track a PPS.  It's not compiled into most
+Linux kernels.  (It doesn't work with tickless.)  There is an API to turn it
+on.  Then ntpd basically sits off to the side and watches.
+
+RFC 1589 covers the above timekeeping and slewing and kernel PLL.
+
+RFC 2783 covers the API for reading a time stamp the kernel grabs when a PPS
+happens.
+
+== Refcl ock management ==
 
 There is an illuminating comment in ntpd/ntp_refclock.c that begins
 "Reference clock support is provided here by maintaining the fiction
