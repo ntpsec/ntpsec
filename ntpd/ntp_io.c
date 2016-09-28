@@ -3426,6 +3426,8 @@ read_network_packet(
 void
 io_handler(void)
 {
+	bool flag;
+	sigset_t runMask;
 	fd_set rdfdes;
 	int nfound;
 
@@ -3434,8 +3436,17 @@ io_handler(void)
 	 * time.  select() will terminate on SIGALARM or on the
 	 * reception of input.
 	 */
-	rdfdes = activefds;
-	nfound = intercept_select(maxactivefd, &rdfdes);
+	pthread_sigmask(SIG_BLOCK, &blockMask, &runMask);
+	flag = sawALRM || sawQuit || sawHUP;
+	if (!flag) {
+	  rdfdes = activefds;
+	  nfound = intercept_pselect(maxactivefd, &rdfdes, &runMask);
+	} else {
+	  nfound = -1;
+	  errno = EINTR;
+	}
+	pthread_sigmask(SIG_SETMASK, &runMask, NULL);
+
 	if (nfound > 0) {
 		l_fp ts;
 
