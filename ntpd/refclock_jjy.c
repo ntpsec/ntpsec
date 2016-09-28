@@ -165,7 +165,7 @@ struct jjyunit {
 /* Telephone JJY auto measurement of the loopback delay */
 	bool	bLoopbackMode ;
 	short	iLoopbackCount ;
-	struct	timeval sendTime[MAX_LOOPBACK], delayTime[MAX_LOOPBACK] ;
+	struct	timespec sendTime[MAX_LOOPBACK], delayTime[MAX_LOOPBACK] ;
 	bool	bLoopbackTimeout[MAX_LOOPBACK] ;
 	short	iLoopbackValidCount ;
 /* Telephone JJY timer */
@@ -2978,17 +2978,18 @@ teljjy_setDelay ( struct peer *peer, struct jjyunit *up )
 	char	sLog [ 60 ] ;
 	int	milliSecond, microSecond ;
 
-	gettimeofday( &(up->delayTime[up->iLoopbackCount]), NULL ) ;
+	clock_gettime(CLOCK_REALTIME,
+		      &(up->delayTime[up->iLoopbackCount]));
 
 	up->delayTime[up->iLoopbackCount].tv_sec  -= up->sendTime[up->iLoopbackCount].tv_sec ;
-	up->delayTime[up->iLoopbackCount].tv_usec -= up->sendTime[up->iLoopbackCount].tv_usec ;
-	if ( up->delayTime[up->iLoopbackCount].tv_usec < 0 ) {
+	up->delayTime[up->iLoopbackCount].tv_nsec -= up->sendTime[up->iLoopbackCount].tv_nsec ;
+	if ( up->delayTime[up->iLoopbackCount].tv_nsec < 0 ) {
 		up->delayTime[up->iLoopbackCount].tv_sec -- ;
-		up->delayTime[up->iLoopbackCount].tv_usec += 1000000 ;
+		up->delayTime[up->iLoopbackCount].tv_nsec += 1000000000 ;
 	}
 
-	milliSecond  = up->delayTime[up->iLoopbackCount].tv_usec / 1000 ;
-	microSecond  = up->delayTime[up->iLoopbackCount].tv_usec - milliSecond * 1000 ;
+	milliSecond  = up->delayTime[up->iLoopbackCount].tv_nsec / 1000000 ;
+	microSecond  = (up->delayTime[up->iLoopbackCount].tv_nsec/1000) - milliSecond * 1000 ;
 	milliSecond += up->delayTime[up->iLoopbackCount].tv_sec * 1000 ;
 
 	snprintf( sLog, sizeof(sLog), JJY_CLOCKSTATS_MESSAGE_LOOPBACK_DELAY,
@@ -3010,14 +3011,14 @@ static int
 teljjy_getDelay ( struct peer *peer, struct jjyunit *up )
 {
 
-	struct	timeval maxTime, minTime, averTime ;
+	struct	timespec maxTime, minTime, averTime ;
 	int	i ;
 	int	minIndex = 0, maxIndex = 0, iAverCount = 0 ;
 	int	iThresholdSecond, iThresholdMicroSecond ;
 	int	iPercent ;
 
-	minTime.tv_sec = minTime.tv_usec = 0 ;
-	maxTime.tv_sec = maxTime.tv_usec = 0 ;
+	minTime.tv_sec = minTime.tv_nsec = 0 ;
+	maxTime.tv_sec = maxTime.tv_nsec = 0 ;
 
 	iThresholdSecond = TELJJY_LOOPBACK_DELAY_THRESHOLD / 1000 ;
 	iThresholdMicroSecond = ( TELJJY_LOOPBACK_DELAY_THRESHOLD - ( TELJJY_LOOPBACK_DELAY_THRESHOLD / 1000 ) * 1000 ) * 1000 ;
@@ -3028,26 +3029,26 @@ teljjy_getDelay ( struct peer *peer, struct jjyunit *up )
 		if ( up->bLoopbackTimeout[i]
 		  || up->delayTime[i].tv_sec  > iThresholdSecond
 		|| ( up->delayTime[i].tv_sec == iThresholdSecond
-		  && up->delayTime[i].tv_usec > iThresholdMicroSecond ) ) {
+		  && up->delayTime[i].tv_nsec/1000 > iThresholdMicroSecond ) ) {
 			continue ;
 		}
 		if ( up->iLoopbackValidCount == 0 ) {
 			minTime.tv_sec  = up->delayTime[i].tv_sec  ;
-			minTime.tv_usec = up->delayTime[i].tv_usec ;
+			minTime.tv_nsec = up->delayTime[i].tv_nsec ;
 			maxTime.tv_sec  = up->delayTime[i].tv_sec  ;
-			maxTime.tv_usec = up->delayTime[i].tv_usec ;
+			maxTime.tv_nsec = up->delayTime[i].tv_nsec ;
 			minIndex = maxIndex = i ;
 		} else if ( minTime.tv_sec  > up->delayTime[i].tv_sec
 		       || ( minTime.tv_sec == up->delayTime[i].tv_sec
-		         && minTime.tv_usec > up->delayTime[i].tv_usec ) ) {
+		         && minTime.tv_nsec > up->delayTime[i].tv_nsec ) ) {
 			minTime.tv_sec  = up->delayTime[i].tv_sec  ;
-			minTime.tv_usec = up->delayTime[i].tv_usec ;
+			minTime.tv_nsec = up->delayTime[i].tv_nsec ;
 			minIndex = i ;
 		} else if ( maxTime.tv_sec  < up->delayTime[i].tv_sec
 		       || ( maxTime.tv_sec == up->delayTime[i].tv_sec
-		         && maxTime.tv_usec < up->delayTime[i].tv_usec ) ) {
+		         && maxTime.tv_nsec < up->delayTime[i].tv_nsec ) ) {
 			maxTime.tv_sec  = up->delayTime[i].tv_sec  ;
-			maxTime.tv_usec = up->delayTime[i].tv_usec ;
+			maxTime.tv_nsec = up->delayTime[i].tv_nsec ;
 			maxIndex = i ;
 		}
 		up->iLoopbackValidCount ++ ;
@@ -3057,13 +3058,13 @@ teljjy_getDelay ( struct peer *peer, struct jjyunit *up )
 		return -1 ;
 	}
 
-	averTime.tv_usec = 0;
+	averTime.tv_nsec = 0;
 
 	for ( i = 0 ; i < MAX_LOOPBACK && i < up->iLoopbackCount ; i ++ ) {
 		if ( up->bLoopbackTimeout[i]
 		  || up->delayTime[i].tv_sec  > iThresholdSecond
 		|| ( up->delayTime[i].tv_sec == iThresholdSecond
-		  && up->delayTime[i].tv_usec > iThresholdMicroSecond ) ) {
+		  && up->delayTime[i].tv_nsec/1000 > iThresholdMicroSecond ) ) {
 			continue ;
 		}
 		if ( up->iLoopbackValidCount >= 3 && i == maxIndex ) {
@@ -3072,7 +3073,7 @@ teljjy_getDelay ( struct peer *peer, struct jjyunit *up )
 		if ( up->iLoopbackValidCount >= 4 && i == minIndex ) {
 			continue ;
 		}
-		averTime.tv_usec += up->delayTime[i].tv_usec ;
+		averTime.tv_nsec += up->delayTime[i].tv_nsec ;
 		iAverCount ++ ;
 	}
 
@@ -3089,7 +3090,7 @@ teljjy_getDelay ( struct peer *peer, struct jjyunit *up )
 
 	/* Average delay time in milli second */
 
-	return ( ( averTime.tv_usec / iAverCount ) * iPercent ) / 100000 ;
+	return ( ( (averTime.tv_nsec / 1000) / iAverCount ) * iPercent ) / 100000 ;
 
 }
 
@@ -3367,7 +3368,8 @@ teljjy_conn_send ( struct peer *peer, struct refclockproc *pp, struct jjyunit *u
 
 		if ( teljjy_command_sequence[up->iClockCommandSeq].iExpectedReplyType == TELJJY_REPLY_LOOPBACK ) {
 			/* Loopback character and timestamp */
-			gettimeofday( &(up->sendTime[up->iLoopbackCount]), NULL ) ;
+			clock_gettime(CLOCK_REALTIME,
+				      &(up->sendTime[up->iLoopbackCount]));
 			up->bLoopbackMode = true ;
 		} else {
 			/* Regular command */
