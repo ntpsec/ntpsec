@@ -434,8 +434,8 @@ def cmd_configure(ctx, config):
         # file /usr/include/sys/timex.h for the particular
         # architecture to be in place."
         #
-        if ctx.get_define("HAVE_SYS_TIMEX_H"):
-                ctx.define("HAVE_KERNEL_PLL", 1, comment="Whether phase-locked loop for timing exists")
+        if ctx.get_define("HAVE_SYS_TIMEX_H") and not ctx.options.disable_kernel_pll:
+                ctx.define("HAVE_KERNEL_PLL", 1, comment="Whether phase-locked loop for timing exists and is enabled")
 
         # SO_REUSEADDR socket option is needed to open a socket on an
         # interface when the port number is already in use on another
