@@ -658,6 +658,14 @@ init_control(void)
 	/* these may be unused with the old trap facility gone */
 	ctl_sys_last_event = EVNT_UNSPEC;
 	ctl_sys_num_events = 0;
+
+#ifdef ENABLE_CLASSIC_MODE
+	/* a relic from when there were multiple nonstandard ways to set time */
+#define PRESET	"settimeofday=\"clock_settime\""
+	set_sys_var(PRESET, sizeof(PRESET), RO);
+#undef PRESET
+#endif /* ENABLE_CLASSIC_MODE */
+
 }
 
 
