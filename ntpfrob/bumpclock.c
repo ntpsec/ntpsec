@@ -45,16 +45,16 @@ void bumpclock(int bump)
     if (rc1)
 	printf("Couldn't get time: %s\n", strerror(er1));
     else
-	printf("Was: %ld.%09ld\n", (long)was.tv_sec, (long)was.tv_nsec);
+	printf("Was: %ld.%09ld\n", (long)was.tv_sec, was.tv_nsec);
 
     if (rc2) {
 	printf("Couldn't set time: %s\n", strerror(er2));
-	printf("Try: %ld.%09ld\n", (long)set.tv_sec, (long)set.tv_nsec);
+	printf("Try: %ld.%09ld\n", (long)set.tv_sec, set.tv_nsec);
     } else
-	printf("Set: %ld.%09ld\n", (long)set.tv_sec, (long)set.tv_nsec);
+	printf("Set: %ld.%09ld\n", (long)set.tv_sec, set.tv_nsec);
  
    if (rc3)
 	printf("Couldn't set time: %s\n", strerror(er3));
     else
-	printf("Now: %ld.%09ld\n", (long)now.tv_sec, (long)now.tv_nsec);
+	printf("Now: %ld.%09ld\n", (long)now.tv_sec, now.tv_nsec);
 }
