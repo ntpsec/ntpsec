@@ -83,13 +83,11 @@ int ntp_gettime(struct ntptimeval *ntv)
 #define SET_TOD_UNDETERMINED	0
 #define SET_TOD_CLOCK_SETTIME	1
 #define SET_TOD_SETTIMEOFDAY	2
-#define SET_TOD_STIME		3
 
 const char * const set_tod_used[] = {
 	"undetermined",
 	"clock_settime",
 	"settimeofday",
-	"stime"
 };
 
 pset_tod_using	set_tod_using = NULL;
