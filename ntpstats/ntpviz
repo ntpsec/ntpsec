@@ -199,7 +199,8 @@ plot \\
         gpslist.sort()
 
         if not len( gpsmap) or not len( gpslist):
-            sys.stderr.write("ntpviz: WARNING: no gps data to graph\n")
+            if 1 <= debug_level:
+                sys.stderr.write("ntpviz: INFO: no gps data to graph\n")
             return ''
 
         gps_data = ()
