@@ -51,7 +51,7 @@ end of the day. The kernel automatically inserts one second exactly at
 the time of the leap, after which the leap bits are turned off. If the
 kernel support is not availed or disabled, the leap is implemented as a
 crude hack by setting the clock back one second using the Unix
-+settimeofday()+ system call, which effectively repeats the last second.
++clock_settime()+ system call, which effectively repeats the last second.
 Note however that in any case setting the time backwards by one second
 does not actually set the system clock backwards, but effectively stalls
 the clock for one second. These points are expanded in the white paper
