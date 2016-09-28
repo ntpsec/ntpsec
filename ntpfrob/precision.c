@@ -52,41 +52,41 @@ void precision(const iomode mode)
  * MINLOOPS > 1 ensures that even if there is a STEP between the initial call
  * and the first loop, it doesn't stop too early.
  * Making it even greater allows MINSTEP to be reduced, assuming that the
- * chance of MINSTEP-1 other processes getting in and calling gettimeofday
+ * chance of MINSTEP-1 other processes getting in and calling clock_gettime()
  * between this processes's calls.
  * Reducing MINSTEP may be necessary as this sets an upper bound for the time
- * to actually call gettimeofday.
+ * to actually call clock_gettime().
  */
 
-#define	DUSECS	1000000
+#define	DNSECS	1000000000L
 #define	HUSECS	(1024 * 1024)
-#define	MINSTEP	5	/* some systems increment uS on each call */
+#define	MINSTEP	5000	/* some systems increment uS on each call */
 /* Don't use "1" as some *other* process may read too*/
 /*We assume no system actually *ANSWERS* in this time*/
-#define MAXSTEP 20000   /* maximum clock increment (us) */
+#define MAXSTEP 20000000   /* maximum clock increment (ns) */
 #define MINLOOPS 5      /* minimum number of step samples */
 #define	MAXLOOPS HUSECS	/* Assume precision < .1s ! */
 
 int
 default_get_resolution(void)
 {
-	struct timeval tp;
-	struct timezone tzp;
+	struct timespec tp;
 	long last;
 	int i;
 	long diff;
 	long val;
 	int minsteps = MINLOOPS;	/* need at least this many steps */
 
-	gettimeofday(&tp, &tzp);
-	last = tp.tv_usec;
+	clock_gettime(CLOCK_MONOTONIC, &tp);
+	last = tp.tv_nsec;
 	for (i = - --minsteps; i< MAXLOOPS; i++) {
-		gettimeofday(&tp, &tzp);
-		diff = tp.tv_usec - last;
-		if (diff < 0) diff += DUSECS;
+		clock_gettime(CLOCK_MONOTONIC, &tp);
+		diff = tp.tv_nsec - last;
+		if (diff < 0) diff += DNSECS;
 		if (diff > MINSTEP) if (minsteps-- <= 0) break;
-		last = tp.tv_usec;
+		last = tp.tv_nsec;
 	}
+	diff /= 1000;	/* step down to milliseconds */
 
 	fprintf(stderr, "resolution = %ld usec after %d loop%s\n",
 	       diff, i, (i==1) ? "" : "s");
@@ -113,8 +113,8 @@ default_get_resolution(void)
 
 /*
  * This routine calculates the differences between successive calls to
- * gettimeofday(). If a difference is less than zero, the us field
- * has rolled over to the next second, so we add a second in us. If
+ * clock_gettime(MONOTONIC). If a difference is less than zero, the ns field
+ * has rolled over to the next second, so we add a second in ns. If
  * the difference is greater than zero and less than MINSTEP, the
  * clock has been advanced by a small amount to avoid standing still.
  * If the clock has advanced by a greater amount, then a timer interrupt
@@ -126,36 +126,36 @@ default_get_resolution(void)
 int
 default_get_precision(void)
 {
-	struct timeval tp;
-	struct timezone tzp;
+	struct timespec tp;
 	long last;
 	int i;
 	long diff;
 	long val;
-	long usec;
+	long nsec;
 
-	usec = 0;
+	nsec = 0;
 	val = MAXSTEP;
-	gettimeofday(&tp, &tzp);
-	last = tp.tv_usec;
-	for (i = 0; i < MINLOOPS && usec < HUSECS;) {
-		gettimeofday(&tp, &tzp);
-		diff = tp.tv_usec - last;
-		last = tp.tv_usec;
+	clock_gettime(CLOCK_MONOTONIC, &tp);
+	last = tp.tv_nsec;
+	for (i = 0; i < MINLOOPS && nsec < HUSECS * 1024;) {
+	    clock_gettime(CLOCK_MONOTONIC, &tp);
+		diff = tp.tv_nsec - last;
+		last = tp.tv_nsec;
 		if (diff < 0)
-		    diff += DUSECS;
-		usec += diff;
+		    diff += DNSECS;
+		nsec += diff;
 		if (diff > MINSTEP) {
 			i++;
 			if (diff < val)
 			    val = diff;
 		}
 	}
+	val /= 1000;	/* step down to milliseconds */
 	fprintf(stderr, "precision  = %ld usec after %d loop%s\n",
 	       val, i, (i == 1) ? "" : "s");
-	if (usec >= HUSECS) {
-	    fprintf(stderr, "     (Boy this machine is fast ! usec was %ld)\n",
-		       usec);
+	if (nsec >= HUSECS * 1024) {
+	    fprintf(stderr, "     (Boy this machine is fast! nsec was %ld)\n",
+		       nsec);
 		val = MINSTEP;	/* val <= MINSTEP; fast machine */
 	}
 	diff = HUSECS;
