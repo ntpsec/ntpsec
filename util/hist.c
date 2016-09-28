@@ -57,8 +57,9 @@ main(
 		w = u - t;
 		if (w <= 0) {
 /*
-			printf("error <= 0 %ld %d %d, %d %d\n", w, ts.tv_sec,
-			       ts.tv_usec, tr.tv_sec, tr.tv_usec);
+			printf("error <= 0 %ld %ld %ld, %ld %ld\n", w,
+			       (long)ts.tv_sec, (long)ts.tv_usec,
+			       (long)tr.tv_sec, (long)tr.tv_usec);
 */
 		} else if (w > NBUF - 1) {
 			ovfl[n] = w;
