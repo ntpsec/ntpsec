@@ -1,57 +1,60 @@
 /*
  * Hack to bump the system time for testing ntpd response.
  * Must be run as root.
- * Arg is microseconds, default is 100000.
+ * Arg is microseconds.
  */
 
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/time.h>
+#include <time.h>
+
+#define NANOSECONDS	100000000
 
 void bumpclock(int bump)
 {
-    struct timeval was, set, now;
+    struct timespec was, set, now;
     int rc1, rc2, rc3;
     int er1, er2, er3;
 
     printf("Bumping clock by %d microseconds.\n", bump);
 
-    rc1 = gettimeofday(&was, NULL);
+    rc1 = clock_gettime(CLOCK_REALTIME, &was);
     er1 = errno;
 
     set = was;
+    bump *= 1000;
     /* coverity[tainted_data] */
-    set.tv_usec += bump;
-    while (set.tv_usec >= 1000000 ) {
-	set.tv_usec -= 1000000;
+    set.tv_nsec += bump;
+    while (set.tv_nsec >= NANOSECONDS ) {
+	set.tv_nsec -= NANOSECONDS;
 	set.tv_sec +=1;
     }
-    while (set.tv_usec <= 0 ) {
-	set.tv_usec += 1000000;
+    while (set.tv_nsec <= 0 ) {
+	set.tv_nsec += NANOSECONDS;
 	set.tv_sec -=1;
     }
-    rc2 = settimeofday(&set, NULL);
+    rc2 = clock_settime(CLOCK_REALTIME, &set);
     er2 = errno;
 
-    rc3 = gettimeofday(&now, NULL);
+    rc3 = clock_gettime(CLOCK_REALTIME, &now);
     er3 = errno;
 
     /* Defer printing so it doesn't distort timing. */
     if (rc1)
 	printf("Couldn't get time: %s\n", strerror(er1));
     else
-	printf("Was: %ld.%06ld\n", (long)was.tv_sec, (long)was.tv_usec);
+	printf("Was: %ld.%09ld\n", (long)was.tv_sec, (long)was.tv_nsec);
 
     if (rc2) {
 	printf("Couldn't set time: %s\n", strerror(er2));
-	printf("Try: %ld.%06ld\n", (long)set.tv_sec, (long)set.tv_usec);
+	printf("Try: %ld.%09ld\n", (long)set.tv_sec, (long)set.tv_nsec);
     } else
-	printf("Set: %ld.%06ld\n", (long)set.tv_sec, (long)set.tv_usec);
+	printf("Set: %ld.%09ld\n", (long)set.tv_sec, (long)set.tv_nsec);
  
    if (rc3)
 	printf("Couldn't set time: %s\n", strerror(er3));
     else
-	printf("Now: %ld.%06ld\n", (long)now.tv_sec, (long)now.tv_usec);
+	printf("Now: %ld.%09ld\n", (long)now.tv_sec, (long)now.tv_nsec);
 }
