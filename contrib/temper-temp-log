@@ -35,5 +35,9 @@ output = subprocess.check_output(["temper-poll", "-c"], universal_newlines=True)
 
 now = int(time.time())
 
-temp = float( output )
-print( str(now) + ' TEMPER ' + str(temp))
+try:
+    temp = float( output )
+    print( str(now) + ' TEMPER ' + str(temp))
+except:
+    # bad data, ignore it
+    raise SystemExit(1)
