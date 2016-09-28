@@ -177,7 +177,7 @@ static void ntpdig_usage(void)
     P("				- prohibits the option 'logfile'\n");
     P("   -l Str logfile        Log to specified logfile\n");
     P("				- prohibits the option 'syslog'\n");
-    P("   -s no  settod         Set (step) the time with settimeofday()\n");
+    P("   -s no  settod         Set (step) the time with clock_settime()\n");
     P("				- prohibits the option 'adjtime'\n");
     P("   -j no  adjtime        Set (slew) the time with adjtime()\n");
     P("				- prohibits the option 'settod'\n");

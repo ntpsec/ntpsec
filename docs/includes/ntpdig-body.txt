@@ -157,7 +157,7 @@ _logfile_.
 +
 If the time adjustment is less than _steplimit_ milliseconds, slew the
 amount using _adjtime(2)_. Otherwise, step the correction using
-_clock_settime()_ or _settimeofday(2)_. The default value is 0, which
+_clock_settime()_ or local equivalent. The default value is 0, which
 means all adjustments will be stepped. This is a feature, as different
 situations demand different values.
 
