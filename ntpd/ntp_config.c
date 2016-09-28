@@ -1770,9 +1770,9 @@ config_access(
 				break;
 
 			case T_Notrap:
-			 	/*
+				/*
 				 * No-op - included for backward compatibility
-				 * wuith all the world's boilerplate ntp.conf
+				 * with all the world's boilerplate ntp.conf
 				 * files.
 				 */
 				break;
