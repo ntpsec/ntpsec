@@ -467,4 +467,51 @@ Setting this option adds --rebase to all your pulls.  This may cause
 minor inconvenience when you have uncommitted local changes; you
 should be able to use "git stash" to get around that.
 
+== Release Checklist ==
+
+This is the release checklist to be used by the project manager to cut each 0.9.X release.
+
+. Decide that it's time to cut a release.  This can be driven by landing
+  a significant new feature, landing a critical fix, or just that enough
+  time has passed with ongoing improvements and fixes.
+
+. Email a warning message to the devel list, and ask each of the major
+  contributors to chime in, and to each assure that the .../NEWS file
+  and the ../deve/TODO file is up to date.
+
+. Wait 4 days for the contributors to check in and for the discussion
+  to settle down.  If the discussion suggests that now is not a good
+  time to cut a release, wait until the raised issues are resolved.
+
+. Check with the buildbot reports, assure that there are no unplanned
+  regressions on the supported platforms.
+
+. Modify the .../VERSION file with the new version number.
+  Version number strings look like "0.9.1"
+
+. Modify the .../NEWS file, changing the "Repository head"
+  to the current date and the version string.
+
+. Add GPG signed git tag.  Tags look like "NTPsec_9_1".
+
+. Commit those modifications to the repository.
+  The commit message looks like "version 0.9.1"
+
+. Push the repository upstream.
+  Don't forget to use the --tags option to push the new tag as well.
+
+. Generate release tarball.
+
+. Generate GPG detached signature of the release tarball.
+
+. Generate sha256sum file for the release tarball.
+
+. GPG sign that sha256sum file.
+
+. Copy the release tarball, GPG detached signature of the release
+  tarball, and the signed sha256sum file to the ftp artifact server.
+
+. Email the release message to the devel list.  The release message
+  should include the sha256sum value, and should be GPG signed.
+
 //end
