@@ -11,7 +11,7 @@ hist.c::	This program can be used to calibrate the clock reading
 		jitter of a particular CPU and operating system. It
 		first tickles every element of an array, in order to
 		force pages into memory, then repeatedly calls
-		gettimeofday() and, finally, writes out the time
+		clock_gettime() and, finally, writes out the time
 		values for later analysis. From this you can determine
 		the jitter and if the clock ever runs backwards.
 		To compile in the util directory, run waf configure and:
