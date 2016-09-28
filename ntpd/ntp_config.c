@@ -317,7 +317,6 @@ enum gnn_type {
 	t_MSK		/* Network Mask */
 };
 
-static void ntpd_set_tod_using(const char *);
 static uint32_t get_pfxmatch(const char **, struct masks *);
 static uint32_t get_match(const char *, struct masks *);
 static uint32_t get_logmask(const char *);
@@ -3400,12 +3399,6 @@ void readconfig(const char *config_file)
 		"daemon_version=\"ntpd %s\"", Version);
 	set_sys_var(line, strlen(line) + 1, RO);
 
-	/*
-	 * Set up for the first time step to install a variable showing
-	 * which syscall is being used to step.
-	 */
-	set_tod_using = &ntpd_set_tod_using;
-
 	init_syntax_tree(&cfgt);
 	if (
 		!lex_init_stack(config_file, "r")
@@ -3473,18 +3466,6 @@ save_and_apply_config_tree(bool input_from_file)
 		     config_tree);
 	INSIST(punlinked == ptree);
 	free_config_tree(ptree);
-}
-
-
-static void
-ntpd_set_tod_using(
-	const char *which
-	)
-{
-	char line[128];
-
-	snprintf(line, sizeof(line), "settimeofday=\"%s\"", which);
-	set_sys_var(line, strlen(line) + 1, RO);
 }
 
 

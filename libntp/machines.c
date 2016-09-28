@@ -81,25 +81,11 @@ int ntp_gettime(struct ntptimeval *ntv)
 }
 #endif	/* !HAVE_NTP_GETTIME */
 
-#define SET_TOD_UNDETERMINED	0
-#define SET_TOD_CLOCK_SETTIME	1
-#define SET_TOD_SETTIMEOFDAY	2
-
-const char * const set_tod_used[] = {
-	"undetermined",
-	"clock_settime",
-	"settimeofday",
-};
-
-pset_tod_using	set_tod_using = NULL;
-
-
 int
 ntp_set_tod(
 	struct timespec *tvs
 	)
 {
-	static int	tod;
 	int		rc;
 	int		saved_errno;
 
@@ -108,47 +94,15 @@ ntp_set_tod(
 	saved_errno = 0;
 
 #ifdef HAVE_CLOCK_SETTIME
-	if (rc && (SET_TOD_CLOCK_SETTIME == tod || !tod)) {
-		errno = 0;
-		rc = clock_settime(CLOCK_REALTIME, tvs);
-		saved_errno = errno;
-		TRACE(1, ("ntp_set_tod: clock_settime: %d %m\n", rc));
-		if (!tod && !rc)
-			tod = SET_TOD_CLOCK_SETTIME;
-
-	}
+	errno = 0;
+	rc = clock_settime(CLOCK_REALTIME, tvs);
+	saved_errno = errno;
+	TRACE(1, ("ntp_set_tod: clock_settime: %d %m\n", rc));
+#else
+#error POSIX clock_gettime(2) is required
 #endif /* HAVE_CLOCK_SETTIME */
-#ifdef HAVE_SETTIMEOFDAY
-	if (rc && (SET_TOD_SETTIMEOFDAY == tod || !tod)) {
-		struct timeval adjtv;
-
-		/*
-		 * Some broken systems don't reset adjtime() when the
-		 * clock is stepped.
-		 */
-		adjtv.tv_sec = adjtv.tv_usec = 0;
-		adjtime(&adjtv, NULL);
-		errno = 0;
-
-		adjtv.tv_sec = tvs->tv_sec;
-		adjtv.tv_usec = (tvs->tv_nsec + 500) / 1000;
-		rc = settimeofday(&adjtv, NULL);
-		saved_errno = errno;
-		TRACE(1, ("ntp_set_tod: settimeofday: %d %m\n", rc));
-		if (!tod && !rc)
-			tod = SET_TOD_SETTIMEOFDAY;
-	}
-#endif /* HAVE_SETTIMEOFDAY */
 	errno = saved_errno;	/* for %m below */
-	TRACE(1, ("ntp_set_tod: Final result: %s: %d %m\n",
-		  set_tod_used[tod], rc));
-	/*
-	 * Say how we're setting the time of day
-	 */
-	if (!rc && NULL != set_tod_using) {
-		(*set_tod_using)(set_tod_used[tod]);
-		set_tod_using = NULL;
-	}
+	TRACE(1, ("ntp_set_tod: Final result: clock_settime: %d %m\n", rc));
 
 	if (rc)
 		errno = saved_errno;

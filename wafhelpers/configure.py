@@ -299,7 +299,6 @@ def cmd_configure(ctx, config):
                 ('ntp_gettime', ["sys/time.h", "sys/timex.h"]),         # BSD
                 ('res_init', ["resolv.h"]),
                 ('sched_setscheduler', ["sched.h"]),
-                ('settimeofday', ["sys/time.h"], "RT"), # BSD
                 ('strlcpy', ["string.h"]),
                 ('strlcat', ["string.h"]),
                 ('timer_create', ["time.h"])
