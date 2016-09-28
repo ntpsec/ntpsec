@@ -2,7 +2,7 @@
  * This program can be used to calibrate the clock reading jitter of a
  * particular CPU and operating system. It first tickles every element
  * of an array, in order to force pages into memory, then repeatedly calls
- * gettimeofday() and, finally, writes out the time values for later
+ * clock_gettime() and, finally, writes out the time values for later
  * analysis. From this you can determine the jitter and if the clock ever
  * runs backwards.
  */
@@ -13,10 +13,13 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
 
-#define NBUF 100001		/* size of basic histogram */
-#define NSRT 20000		/* size of overflow histogram */
-#define NCNT (600 * 1000000)	/* sample interval (us) */
+#define NANOSECONDS	1000000000L
+
+#define NBUF 100001			/* size of basic histogram */
+#define NSRT 20000			/* size of overflow histogram */
+#define NCNT (600L * NANOSECONDS)	/* sample interval (ns) */
 
 int col (const void *, const void *);
 
@@ -26,8 +29,7 @@ main(
 	char *argv[]
 	)
 {
-	struct timeval ts, tr;
-	struct timezone tzp;
+	struct timespec ts, tr;
 	int i, j, n;
 	long t, u, v, w, gtod[NBUF], ovfl[NSRT];
 
@@ -46,20 +48,20 @@ main(
 	 * Construct histogram
 	 */
 	n = 0;
-	gettimeofday(&ts, &tzp);
-	t = ts.tv_sec * 1000000 + ts.tv_usec;
+	clock_gettime(CLOCK_MONOTONIC, &ts);
+	t = ts.tv_sec * NANOSECONDS + ts.tv_nsec;
 	v = t;
 	while (1) {
-		gettimeofday(&tr, &tzp);
-		u = tr.tv_sec * 1000000 + tr.tv_usec; 
+		clock_gettime(CLOCK_MONOTONIC, &tr);
+		u = tr.tv_sec * NANOSECONDS + tr.tv_nsec; 
 		if (u - v > NCNT)
 			break;
 		w = u - t;
 		if (w <= 0) {
 /*
 			printf("error <= 0 %ld %ld %ld, %ld %ld\n", w,
-			       (long)ts.tv_sec, (long)ts.tv_usec,
-			       (long)tr.tv_sec, (long)tr.tv_usec);
+			       (long)ts.tv_sec, (long)ts.tv_nsec,
+			       (long)tr.tv_sec, (long)tr.tv_nsec);
 */
 		} else if (w > NBUF - 1) {
 			ovfl[n] = w;
