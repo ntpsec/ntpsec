@@ -682,7 +682,7 @@ void intercept_sendpkt(const char *legend,
 }
 
 
-int intercept_select(int nfds, fd_set *readfds)
+int intercept_pselect(int nfds, fd_set *readfds, const sigset_t *runMask)
 {
     char pkt_dump[BUFSIZ];
     int nfound;
@@ -724,18 +724,8 @@ int intercept_select(int nfds, fd_set *readfds)
 	    return nfound;
 	}
     } else {
-	bool flag;
-	sigset_t runMask;
 
-	pthread_sigmask(SIG_BLOCK, &blockMask, &runMask);
-	flag = sawALRM || sawQuit || sawHUP;
-	if (!flag) {
-	  nfound = pselect(nfds + 1, readfds, NULL, NULL, NULL, &runMask);
-	} else {
-	  nfound = -1;
-	  errno = EINTR;
-	}
-	pthread_sigmask(SIG_SETMASK, &runMask, NULL);
+	nfound = pselect(nfds + 1, readfds, NULL, NULL, NULL, runMask);
 
 	if (mode == capture)
 	{
