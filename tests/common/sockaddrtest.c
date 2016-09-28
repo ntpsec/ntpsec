@@ -1,13 +1,16 @@
 #ifndef GUARD_TESTS_SOCKADDRTEST_H
 #define GUARD_TESTS_SOCKADDRTEST_H
 
+#include <inttypes.h>
+
 #include "config.h"
 
 #include "ntp.h"
 
 bool IsEqualS(const sockaddr_u *expected, const sockaddr_u *actual) {
 	if (expected->sa.sa_family != actual->sa.sa_family) {
-		printf("Expected sa_family: %hhu but got: %hhu\n", expected->sa.sa_family, actual->sa.sa_family);
+		printf("Expected sa_family: %" PRIuMAX " but got: %" PRIuMAX "\n",
+		       (uintmax_t)expected->sa.sa_family, (uintmax_t)actual->sa.sa_family);
 		return false;
 	}
 
@@ -30,7 +33,7 @@ bool IsEqualS(const sockaddr_u *expected, const sockaddr_u *actual) {
 			return false;
 		}
 	} else { // Unknown family
-		printf("Unknown sa_family: %hhu\n", actual->sa.sa_family);
+		printf("Unknown sa_family: %" PRIuMAX "\n", (uintmax_t)actual->sa.sa_family);
 		return false;
 	}
 }
