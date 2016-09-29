@@ -83,7 +83,6 @@ no mismatches.
 #include <sys/stat.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
-#include <libgen.h>
 #include <sys/socket.h>
 #include <netdb.h>
 #include <inttypes.h>
@@ -432,6 +431,8 @@ bool intercept_drift_read(const char *drift_file, double *drift)
     return true;
 }
 
+extern void drift_write(char *driftfile, double drift);
+
 void intercept_drift_write(char *driftfile, double drift)
 {
     if (mode == replay) {
@@ -448,26 +449,7 @@ void intercept_drift_write(char *driftfile, double drift)
 	if (df != drift)
 	    replay_fail("expected drift %f but saw %f\n", drift, df);
     } else {
-	int fd;
-	char tmpfile[PATH_MAX], driftcopy[PATH_MAX];
-	char driftval[32];
-
-	strlcpy(driftcopy, driftfile, PATH_MAX);
-	strlcpy(tmpfile, dirname(driftcopy), sizeof(tmpfile));
-	strlcat(tmpfile, "/driftXXXXXX", sizeof(tmpfile));
-	/* coverity[secure_temp] Warning is bogus on POSIX-compliant systems*/
-	if ((fd = mkstemp(tmpfile)) < 0) {
-	    msyslog(LOG_ERR, "frequency file %s: %m", tmpfile);
-	    return;
-	}
-	snprintf(driftval, sizeof(driftval), "%.3f\n", drift);
-	IGNORE(write(fd, driftval, strlen(driftval)));
-	(void)close(fd);
-	/* atomic */
-	if (rename(tmpfile, driftfile))
-	    msyslog(LOG_WARNING,
-		    "Unable to rename temp drift file %s to %s, %m",
-		    tmpfile, driftfile);
+	drift_write(driftfile, drift);
 
 	if (mode == capture)
 	    printf("drift-write %.3f\n", drift);
