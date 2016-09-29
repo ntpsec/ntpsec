@@ -7,18 +7,6 @@ the header comments.
 calc_tickadj::	Calculates "optimal" value for tick given ntp.drift file
 		Tested: 20160226
 
-hist.c::	This program can be used to calibrate the clock reading
-		jitter of a particular CPU and operating system. It
-		first tickles every element of an array, in order to
-		force pages into memory, then repeatedly calls
-		clock_gettime() and, finally, writes out the time
-		values for later analysis. From this you can determine
-		the jitter and if the clock ever runs backwards.
-		To compile in the util directory, run waf configure and:
-		gcc -I ../include/ -I ../build/ hist.c
-		There is no documentation on how to interpret results.
-		Tested: 20160226
-
 kern.c:: 	Header comment from deep in the mists of past time says:
 		"This program simulates a first-order, type-II
 		phase-lock loop using actual code segments from
