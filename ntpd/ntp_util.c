@@ -14,6 +14,7 @@
 #include "lib_strbuf.h"
 
 #include <stdio.h>
+#include <libgen.h>
 #include <ctype.h>
 #include <sys/types.h>
 #include <unistd.h>
@@ -152,6 +153,30 @@ init_util(void)
 /*
  * hourly_stats - print some interesting stats
  */
+#define IGNORE(r) do{if(r){}}while(0)
+
+void drift_write(char *driftfile, double drift)
+{
+	int fd;
+	char tmpfile[PATH_MAX], driftcopy[PATH_MAX];
+	char driftval[32];
+	strlcpy(driftcopy, driftfile, PATH_MAX);
+	strlcpy(tmpfile, dirname(driftcopy), sizeof(tmpfile));
+	strlcat(tmpfile, "/driftXXXXXX", sizeof(tmpfile));
+	/* coverity[secure_temp] Warning is bogus on POSIX-compliant systems */
+	if ((fd = mkstemp(tmpfile)) < 0) {
+	    msyslog(LOG_ERR, "frequency file %s: %m", tmpfile);
+	    return;
+	}
+	snprintf(driftval, sizeof(driftval), "%.3f\n", drift);
+	IGNORE(write(fd, driftval, strlen(driftval)));
+	(void)close(fd);
+	/* atomic */
+	if (rename(tmpfile, driftfile))
+	    msyslog(LOG_WARNING,
+		    "Unable to rename temp drift file %s to %s, %m",
+		    tmpfile, driftfile);
+}
 void
 write_stats(void)
 {
