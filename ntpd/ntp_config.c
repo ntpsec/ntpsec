@@ -34,7 +34,6 @@
 #include "lib_strbuf.h"
 #include "ntp_assert.h"
 #include "ntp_random.h"
-#include "ntp_intercept.h"
 /*
  * [Bug 467]: Some linux headers collide with CONFIG_PHONE and CONFIG_KEYS
  * so #include these later.
@@ -1269,7 +1268,7 @@ config_auth(
 
 	/* Keys Command */
 	if (ptree->auth.keys)
-		intercept_getauthkeys(ptree->auth.keys);
+		getauthkeys(ptree->auth.keys);
 
 	/* Control Key Command */
 	if (ptree->auth.control_key)
@@ -1834,8 +1833,7 @@ config_access(
 					    : "default";
 			const char *kod_warn = "KOD does nothing without LIMITED.";
 
-			if (intercept_get_mode() == none)
-			    fprintf(stderr, "restrict %s: %s\n", kod_where, kod_warn);
+			fprintf(stderr, "restrict %s: %s\n", kod_where, kod_warn);
 			msyslog(LOG_WARNING, "restrict %s: %s", kod_where, kod_warn);
 		}
 
@@ -2114,10 +2112,6 @@ config_nic_rules(
 	int		addrbits;
 
 	curr_node = HEAD_PFIFO(ptree->nic_rules);
-
-	/* we don't want to accept packets if we're replaying a log */
-	if (intercept_get_mode() == replay)
-	    return;
 
 	if (curr_node != NULL && have_interface_option) {
 		msyslog(LOG_ERR,
@@ -2867,7 +2861,7 @@ config_peers(
 					MODE_CLIENT,
 					&client_ctl);
 		} else if (force_synchronous_dns) {
-			if (intercept_getaddrinfo(*cmdline_servers, &peeraddr)) {
+			if (getaddrinfo_now(*cmdline_servers, &peeraddr)) {
 				peer_config(
 					&peeraddr,
 					NULL,
@@ -2991,7 +2985,7 @@ config_peers(
 		 * synchronous lookup may be forced.
 		 */
 		} else if (force_synchronous_dns) {
-			if (intercept_getaddrinfo(curr_peer->addr->address, &peeraddr)) {
+			if (getaddrinfo_now(curr_peer->addr->address, &peeraddr)) {
 				peer_config(
 					&peeraddr,
 					NULL,
@@ -3361,8 +3355,7 @@ config_ntpd(
 	config_ttl(ptree);
 	config_vars(ptree);
 
-	if (intercept_get_mode() != replay)
-		io_open_sockets();
+	io_open_sockets();
 
 	config_other_modes(ptree);
 	config_peers(ptree);
@@ -3441,8 +3434,7 @@ void readconfig(const char *config_file)
 #endif /* HAVE_NETINFO_NI_H */
 		) {
 		msyslog(LOG_INFO, "getconfig: Couldn't open <%s>: %m", config_file);
-		if (intercept_get_mode() != replay)
-			io_open_sockets();
+		io_open_sockets();
 
 		return;
 	} else

@@ -10,7 +10,6 @@
 #include "ntp_io.h"
 #include "ntp_unixtime.h"
 #include "ntp_stdlib.h"
-#include "ntp_intercept.h"
 
 #include <limits.h>
 #include <stdio.h>
@@ -496,21 +495,19 @@ local_clock(
 	if (mode_ntpdate) {
 		if (  ( fp_offset > clock_max_fwd  && clock_max_fwd  > 0)
 		   || (-fp_offset > clock_max_back && clock_max_back > 0)) {
-			step_systime(fp_offset, intercept_set_tod);
+			step_systime(fp_offset, ntp_set_tod);
 			msyslog(LOG_NOTICE, "ntpd: time set %+.6f s",
 			    fp_offset);
-			if (intercept_get_mode() == none)
-				printf("ntpd: time set %+.6fs\n", fp_offset);
+			printf("ntpd: time set %+.6fs\n", fp_offset);
 		} else {
-			adj_systime(fp_offset, intercept_adjtime);
+			adj_systime(fp_offset, adjtime);
 			msyslog(LOG_NOTICE, "ntpd: time slew %+.6f s",
 			    fp_offset);
-			if (intercept_get_mode() == none)
-				printf("ntpd: time slew %+.6fs\n", fp_offset);
+			printf("ntpd: time slew %+.6fs\n", fp_offset);
 		}
 		record_loop_stats(fp_offset, drift_comp, clock_jitter,
 		    clock_stability, sys_poll);
-		intercept_exit(0);
+		exit(0);
 	}
 
 	/*
@@ -631,9 +628,8 @@ local_clock(
 			snprintf(tbuf, sizeof(tbuf), "%+.6f s",
 			    fp_offset);
 			report_event(EVNT_CLOCKRESET, NULL, tbuf);
-			step_systime(fp_offset, intercept_set_tod);
-			if (intercept_get_mode() != replay)
-			    reinit_timer();
+			step_systime(fp_offset, ntp_set_tod);
+			reinit_timer();
 			tc_counter = 0;
 			clock_jitter = LOGTOD(sys_precision);
 			rval = 2;
@@ -664,7 +660,7 @@ local_clock(
 		 * the stepout threshold.
 		 */
 		case EVNT_NSET:
-			adj_systime(fp_offset, intercept_adjtime);
+			adj_systime(fp_offset, adjtime);
 			rstclock(EVNT_FREQ, fp_offset);
 			break;
 
@@ -798,8 +794,7 @@ local_clock(
 			}
 			if (sys_leap == LEAP_ADDSECOND)
 				ntv.status |= STA_INS;
-			else if (sys_leap == LEAP_DELSECOND)
-				ntv.status |= STA_DEL;
+			else if (sys_leap == LEAP_DELSECOND) ntv.status |= STA_DEL;
 		}
 
 		/*
@@ -807,7 +802,7 @@ local_clock(
 		 * the pps. In any case, fetch the kernel offset,
 		 * frequency and jitter.
 		 */
-		ntp_adj_ret = intercept_ntp_adjtime(&ntv);
+		ntp_adj_ret = ntp_adjtime(&ntv);
 		/*
 		 * A squeal is a return status < 0, or a state change.
 		 */
@@ -842,7 +837,7 @@ local_clock(
 			loop_tai = sys_tai;
 			ntv.modes = MOD_TAI;
 			ntv.constant = sys_tai;
-			if ((ntp_adj_ret = intercept_ntp_adjtime(&ntv)) != 0) {
+			if ((ntp_adj_ret = ntp_adjtime(&ntv)) != 0) {
 			    ntp_adjtime_error_handler(__func__, &ntv, ntp_adj_ret, errno, false, true, __LINE__ - 1);
 			}
 		}
@@ -1004,7 +999,7 @@ adj_host_clock(
 	 * but does not automatically stop slewing when an offset
 	 * has decayed to zero.
 	 */
-	adj_systime(offset_adj + freq_adj, intercept_adjtime);
+	adj_systime(offset_adj + freq_adj, adjtime);
 #endif /* ENABLE_LOCKCLOCK */
 }
 
@@ -1084,7 +1079,7 @@ set_freq(
 			loop_desc = "kernel";
 			ntv.freq = DTOFREQ(drift_comp);
 		}
-		if ((ntp_adj_ret = intercept_ntp_adjtime(&ntv)) != 0) {
+		if ((ntp_adj_ret = ntp_adjtime(&ntv)) != 0) {
 		    ntp_adjtime_error_handler(__func__, &ntv, ntp_adj_ret, errno, false, false, __LINE__ - 1);
 		}
 	}
@@ -1121,7 +1116,7 @@ start_kern_loop(void)
 		pll_control = false;
 	} else {
 		if (sigsetjmp(env, 1) == 0) {
-			if ((ntp_adj_ret = intercept_ntp_adjtime(&ntv)) != 0) {
+			if ((ntp_adj_ret = ntp_adjtime(&ntv)) != 0) {
 			    ntp_adjtime_error_handler(__func__, &ntv, ntp_adj_ret, errno, false, false, __LINE__ - 1);
 			}
 		}
@@ -1132,7 +1127,7 @@ start_kern_loop(void)
 		}
 	}
 #else /* SIGSYS */
-	if ((ntp_adj_ret = intercept_ntp_adjtime(&ntv)) != 0) {
+	if ((ntp_adj_ret = ntp_adjtime(&ntv)) != 0) {
 	    ntp_adjtime_error_handler(__func__, &ntv, ntp_adj_ret, errno, false, false, __LINE__ - 1);
 	}
 #endif /* SIGSYS */
@@ -1281,7 +1276,7 @@ loop_config(
 			memset((char *)&ntv, 0, sizeof(ntv));
 			ntv.modes = MOD_STATUS;
 			ntv.status = STA_UNSYNC;
-			intercept_ntp_adjtime(&ntv);
+			ntp_adjtime(&ntv);
 			sync_status("kernel time sync disabled",
 				pll_status,
 				ntv.status);

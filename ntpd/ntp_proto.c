@@ -11,7 +11,6 @@
 #include "ntp_unixtime.h"
 #include "ntp_control.h"
 #include "ntp_leapsec.h"
-#include "ntp_intercept.h"
 #include "refidsmear.h"
 
 #include <string.h>
@@ -354,7 +353,7 @@ transmit(
 					if (!termlogit)
 						printf(
 						    "ntpd: no servers found\n");
-					intercept_exit(1);
+					exit(1);
 				}
 			}
 		}
@@ -461,7 +460,7 @@ receive(
 	 * surviving packets.
 	 */
 	if (restrict_mask & RES_FLAKE) {
-		if ((double)intercept_ntp_random(__func__) / 0x7fffffff < .1) {
+		if ((double)ntp_random() / 0x7fffffff < .1) {
 			sys_restricted++;
 			return;			/* no flakeway */
 		}
@@ -1639,7 +1638,7 @@ clock_update(
 			if (smf_maintain_instance(fmri, 0) < 0) {
 				printf("smf_maintain_instance: %s\n",
 				    scf_strerror(scf_error()));
-				intercept_exit(1);
+				exit(1);
 			}
 			/*
 			 * Sleep until SMF kills us.
@@ -1649,7 +1648,7 @@ clock_update(
 		}
 #endif /* HAVE_LIBSCF_H */
 		msyslog(LOG_ERR, "Panic: offset too big: %.3f", sys_offset);
-		intercept_exit (1);
+		exit (1);
 		/* not reached */
 
 	/*
@@ -2756,7 +2755,7 @@ peer_xmit(
 			}
 		}
 		peer->t21_bytes = sendlen;
-		intercept_sendpkt(__func__, &peer->srcadr, peer->dstadr, sys_ttl[peer->ttl],
+		sendpkt(&peer->srcadr, peer->dstadr, sys_ttl[peer->ttl],
 		    &xpkt, sendlen);
 		peer->sent++;
 		peer->outcount++;
@@ -2793,7 +2792,7 @@ peer_xmit(
 	/*
 	 * Transmit a-priori timestamps
 	 */
-	intercept_get_systime(__func__, &xmt_tx);
+	get_systime(&xmt_tx);
 	if (peer->flip == 0) {		/* basic mode */
 		peer->aorg = xmt_tx;
 		HTONL_FP(&xmt_tx, &xpkt.xmt);
@@ -2822,10 +2821,10 @@ peer_xmit(
 	sendlen += authlen;
 	if (sendlen > sizeof(xpkt)) {
 		msyslog(LOG_ERR, "proto: buffer overflow %zu", sendlen);
-		intercept_exit(1);
+		exit(1);
 	}
 	peer->t21_bytes = sendlen;
-	intercept_sendpkt(__func__, &peer->srcadr, peer->dstadr, sys_ttl[peer->ttl], &xpkt,
+	sendpkt(&peer->srcadr, peer->dstadr, sys_ttl[peer->ttl], &xpkt,
 	    sendlen);
 	peer->sent++;
 	peer->throttle += (1 << peer->minpoll) - 2;
@@ -2833,7 +2832,7 @@ peer_xmit(
 	/*
 	 * Capture a-posteriori timestamps
 	 */
-	intercept_get_systime(__func__, &xmt_ty);
+	get_systime(&xmt_ty);
 	if (peer->flip != 0) {			/* interleaved modes */
 		if (peer->flip > 0)
 			peer->aorg = xmt_ty;
@@ -2971,7 +2970,7 @@ fast_xmit(
 		HTONL_FP(&rbufp->recv_time, &xpkt.rec);
 #endif
 
-		intercept_get_systime(__func__, &xmt_tx);
+		get_systime(&xmt_tx);
 #ifdef ENABLE_LEAP_SMEAR
 		if (leap_smear.in_progress)
 			leap_smear_add_offs(&xmt_tx, &this_recv_time);
@@ -2993,7 +2992,7 @@ fast_xmit(
 	 */
 	sendlen = LEN_PKT_NOMAC;
 	if (rbufp->recv_length == sendlen) {
-		intercept_sendpkt(__func__, &rbufp->recv_srcadr, rbufp->dstadr, 0, &xpkt,
+		sendpkt(&rbufp->recv_srcadr, rbufp->dstadr, 0, &xpkt,
 		    sendlen);
 #ifdef DEBUG
 		if (debug)
@@ -3011,10 +3010,10 @@ fast_xmit(
 	 * the predefined and trusted symmetric keys to generate the
 	 * cryptosum.
 	 */
-	intercept_get_systime(__func__, &xmt_tx);
+	get_systime(&xmt_tx);
 	sendlen += authencrypt(xkeyid, (uint32_t *)&xpkt, sendlen);
-	intercept_sendpkt(__func__, &rbufp->recv_srcadr, rbufp->dstadr, 0, &xpkt, sendlen);
-	intercept_get_systime(__func__, &xmt_ty);
+	sendpkt(&rbufp->recv_srcadr, rbufp->dstadr, 0, &xpkt, sendlen);
+	get_systime(&xmt_ty);
 	L_SUB(&xmt_ty, &xmt_tx);
 	sys_authdelay = xmt_ty;
 #ifdef DEBUG
@@ -3096,12 +3095,10 @@ pool_xmit(
 	xpkt.rootdelay = HTONS_FP(DTOFP(sys_rootdelay));
 	xpkt.rootdisp = HTONS_FP(DTOUFP(sys_rootdisp));
 	HTONL_FP(&sys_reftime, &xpkt.reftime);
-	intercept_get_systime(__func__, &xmt_tx);
+	get_systime(&xmt_tx);
 	pool->aorg = xmt_tx;
 	HTONL_FP(&xmt_tx, &xpkt.xmt);
-	intercept_sendpkt(__func__,
-			  rmtadr, lcladr, sys_ttl[pool->ttl], &xpkt,
-			  LEN_PKT_NOMAC);
+	sendpkt(rmtadr, lcladr, sys_ttl[pool->ttl], &xpkt, LEN_PKT_NOMAC);
 	pool->sent++;
 	pool->throttle += (1 << pool->minpoll) - 2;
 #ifdef DEBUG
@@ -3320,7 +3317,7 @@ measure_tick_fuzz(void)
 	repeats = 0;
 	changes = 0;
 	DTOLFP(MINSTEP, &minstep);
-	intercept_get_systime(__func__, &last);
+	get_systime(&last);
 	for (i = 0; i < MAXLOOPS && changes < MINCHANGES; i++) {
 		/*
 		 * Not intercepted because it's called a variable
@@ -3342,7 +3339,7 @@ measure_tick_fuzz(void)
 	}
 	if (changes < MINCHANGES) {
 		msyslog(LOG_ERR, "Fatal error: precision could not be measured (MINSTEP too large?)");
-		intercept_exit(1);
+		exit(1);
 	}
 
 	if (0 == max_repeats) {
@@ -3414,7 +3411,7 @@ init_proto(const bool verbose)
 	L_CLR(&sys_reftime);
 	sys_jitter = 0;
 	measure_precision(verbose);
-	intercept_get_systime(__func__, &dummy);
+	get_systime(&dummy);
 	sys_survivors = 0;
 	sys_manycastserver = 0;
 	sys_bclient = 0;

@@ -27,7 +27,6 @@
 #include "ntp_stdlib.h"
 #include "ntp_worker.h"
 #include "ntp_assert.h"
-#include "ntp_intercept.h"
 #include "timevalops.h"
 #include "timespecops.h"
 
@@ -3310,7 +3309,7 @@ read_network_packet(
 			freerecvbuf(rb);
 
 		fromlen = sizeof(from);
-		buflen = intercept_recvfrom(fd, buf, sizeof(buf), 0,
+		buflen = recvfrom(fd, buf, sizeof(buf), 0,
 				  &from.sa, &fromlen);
 		DPRINTF(4, ("%s on (%lu) fd=%d from %s\n",
 			(itf->ignore_packets)
@@ -3327,7 +3326,7 @@ read_network_packet(
 	fromlen = sizeof(rb->recv_srcadr);
 
 #ifndef USE_PACKET_TIMESTAMP
-	rb->recv_length = intercept_recvfrom(fd, (char *)&rb->recv_space,
+	rb->recv_length = recvfrom(fd, (char *)&rb->recv_space,
 				   sizeof(rb->recv_space), 0,
 				   &rb->recv_srcadr.sa, &fromlen);
 #else
@@ -3340,7 +3339,7 @@ read_network_packet(
 	msghdr.msg_flags      = 0;
 	msghdr.msg_control    = (void *)&control;
 	msghdr.msg_controllen = sizeof(control);
-	rb->recv_length       = intercept_recvmsg(fd, &msghdr, 0);
+	rb->recv_length       = recvmsg(fd, &msghdr, 0);
 #endif
 
 	buflen = rb->recv_length;
@@ -3440,7 +3439,7 @@ io_handler(void)
 	flag = sawALRM || sawQuit || sawHUP;
 	if (!flag) {
 	  rdfdes = activefds;
-	  nfound = intercept_pselect(maxactivefd, &rdfdes, &runMask);
+	  nfound = pselect(maxactivefd+1, &rdfdes, NULL, NULL, NULL, &runMask);
 	} else {
 	  nfound = -1;
 	  errno = EINTR;
