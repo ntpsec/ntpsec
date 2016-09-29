@@ -259,6 +259,8 @@ static void file_replay(const char *configfile, char *delimiter, char *tempfile)
 }
 
 
+extern bool getaddrinfo_now(char *hname, sockaddr_u *peeraddrp);
+
 bool intercept_getaddrinfo(char *hname, sockaddr_u *peeraddrp)
 {
     if (mode == replay) {
@@ -278,42 +280,13 @@ bool intercept_getaddrinfo(char *hname, sockaddr_u *peeraddrp)
 	    replay_fail("invalid IP address %s\n", addr);
 	return true;
     } else {
-	int a_info;
-	size_t octets;
-	struct addrinfo		hints, *res;
-
-	ZERO(hints);
-	hints.ai_family = AF_UNSPEC;
-	hints.ai_socktype = SOCK_DGRAM;
-	hints.ai_protocol = IPPROTO_UDP;
-	a_info = getaddrinfo(hname, "ntp", &hints, &res);
-	if (a_info == EAI_NONAME
-#ifdef EAI_NODATA
-	    || a_info == EAI_NODATA
-#endif
-	    ) {
-	    hints.ai_flags = AI_CANONNAME;
-	    hints.ai_flags |= AI_ADDRCONFIG;
-	    a_info = getaddrinfo(hname, "ntp", &hints, &res);
-	}
+	bool lookup_ok = getaddrinfo_now(hname, peeraddrp);
 	if (mode == capture)
 	    printf("getaddrinfo %s %s %d\n",
 		   hname,
-		   socktoa((sockaddr_u *)res->ai_addr),
-		   a_info == 0);
-	if (a_info != 0) {
-	    msyslog(LOG_ERR,
-		    "hostname %s can not be used (%s), please use IP address.",
-		    hname, gai_strerror(a_info));
-	    return false;
-	} else {
-	    INSIST(res != NULL);
-	    memset(peeraddrp, '\0', sizeof(*peeraddrp));
-	    octets = min(sizeof(*peeraddrp), res->ai_addrlen);
-	    memcpy(peeraddrp, res->ai_addr, octets);
-	    freeaddrinfo(res);
-	    return true;
-	}
+		   socktoa((sockaddr_u *)peeraddrp),
+		   lookup_ok);
+	return lookup_ok;
     }
 }
 
