@@ -195,6 +195,10 @@ kernel, whereas ntp_adjtime(2) implements clock skewing for a PLL
 running in userspace (in ntpd itself). The KERNEL_PLL code can produce
 much faster convergence from a cold start.
 
+(Confusingly, ntp_adjtime(2) can be implemented - and often is - as
+a thin userspace wrapper around adjtimex(2).  The ntp_adjtime(2)
+implementation uses only a subset of adjtimex(2)'s capabilities.)
+
 Deep-in-the weeds details about the kernel PLL from Hal Murray follow.
 If you can follow these you may be qualified to maintain this code...
 
@@ -245,7 +249,7 @@ RFC 1589 covers the above timekeeping and slewing and kernel PLL.
 RFC 2783 covers the API for reading a time stamp the kernel grabs when a PPS
 happens.
 
-== Refcl ock management ==
+== Refclock management ==
 
 There is an illuminating comment in ntpd/ntp_refclock.c that begins
 "Reference clock support is provided here by maintaining the fiction
