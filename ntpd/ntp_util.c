@@ -213,6 +213,23 @@ write_stats(void)
 /*
  * stats_config - configure the stats operation
  */
+bool drift_read(const char *drift_file, double *drift)
+{
+	FILE *fp;
+	if ((fp = fopen(drift_file, "r")) == NULL) {
+	    return false;
+	}
+	if (fscanf(fp, "%lf", drift) != 1) {
+	    msyslog(LOG_ERR,
+		    "format error frequency file %s",
+		    drift_file);
+	    fclose(fp);
+	    return false;
+	}
+	fclose(fp);
+	return true;
+}
+
 void
 stats_config(
 	int item,
