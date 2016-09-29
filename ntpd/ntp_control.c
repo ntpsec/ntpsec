@@ -10,10 +10,6 @@
 #include <sys/stat.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
-#ifdef HAVE_STRUCT_TIMEX
-#include <sys/time.h>
-#include <sys/timex.h>
-#endif /* HAVE_STRUCT_TIMEX */
 
 #include "ntpd.h"
 #include "ntp_io.h"
