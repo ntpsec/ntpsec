@@ -366,6 +366,8 @@ long intercept_ntp_random(const char *legend)
     return roll;
 }
 
+extern bool drift_read(const char *drift_file, double *drift);
+
 bool intercept_drift_read(const char *drift_file, double *drift)
 {
     if (mode == replay) {
@@ -377,25 +379,8 @@ bool intercept_drift_read(const char *drift_file, double *drift)
 	    replay_fail("garbled event format\n");
 	*drift = df;
     } else {
-	FILE *fp;
-
-	if ((fp = fopen(drift_file, "r")) == NULL) {
-	    if (mode == capture)
-		printf("drift-read false\n");
+	if (!drift_read(drift_file, drift))
 	    return false;
-	}
-
-	if (fscanf(fp, "%lf", drift) != 1) {
-	    msyslog(LOG_ERR,
-		    "format error frequency file %s",
-		    drift_file);
-	    fclose(fp);
-	    if (mode == capture)
-		printf("drift-read false\n");
-	    return false;
-	}
-	fclose(fp);
-
 	if (mode == capture)
 	    printf("drift-read %.3f\n", *drift);
 
