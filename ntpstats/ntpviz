@@ -22,8 +22,15 @@ Python by ESR, concept and GNUPLOT code by Dan Drown.
 #SPDX-License-Identifier: BSD-2-Clause
 from __future__ import print_function, division
 
-import binascii, collections, getopt, os, socket, sys, time
+import atexit, binascii, collections, getopt, os, socket, sys, time
 from ntp.statfiles import *
+
+def print_profile():
+    # called by atexit() on normal exit to print profile data
+    # finish the profile
+    pr.disable()
+    pr.print_stats('tottime')
+    pr.print_stats('cumtime')
 
 # standard deviation functions
 # use this until we can guarantee Python 3.4 and the statistics module
@@ -732,6 +739,10 @@ if __name__ == '__main__':
             pr = cProfile.Profile()
             pr.enable()
 
+            # register to dump debug on all normal exits
+            atexit.register( print_profile )
+
+
     nice = 19       # always run nicely
     if 0 != nice:
         try:
@@ -1146,12 +1157,5 @@ ntpviz</a>, part of the <a href="https://www.ntpsec.org/">NTPsec project</a>
     with open(os.path.join(outdir, "index.html"), "w") as ifile:
         ifile.write(index_buffer)
         ifile.close()
-
-
-if 9 == debug_level:
-    # finish the profile
-    pr.disable()
-    pr.print_stats('tottime')
-    pr.print_stats('cumtime')
 
 # end
