@@ -10,6 +10,7 @@
 #include <sys/stat.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#include <sys/time.h>
 
 #include "ntpd.h"
 #include "ntp_io.h"
