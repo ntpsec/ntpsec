@@ -26,8 +26,7 @@ import atexit, binascii, collections, getopt, os, socket, sys, time
 from ntp.statfiles import *
 
 def print_profile():
-    # called by atexit() on normal exit to print profile data
-    # finish the profile
+    """called by atexit() on normal exit to print profile data"""
     pr.disable()
     pr.print_stats('tottime')
     pr.print_stats('cumtime')
