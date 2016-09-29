@@ -116,10 +116,14 @@ few will be user-visible.
   recent versions of NTP Classic, and if not broken would have been at
   high risk for bugs that would enable DoS vulnerabilities.
 
+* Interleave mode has been removed.  It didn't work correctly (there
+  was an implementation error in the timestamp handling), so no point
+  in allowing it to increase attack surface.
+
 * The code has been systematically hardened, with unsafe string
   copy and formatting functions replaced by safe (bounded) ones.
 
-* In toto, more than 60% of the NTP Classic code has been outright
+* In toto, more than 65% of the NTP Classic code has been outright
   removed, with less than 5% new code added. This is a dramatic
   reduction in attack surface.
 

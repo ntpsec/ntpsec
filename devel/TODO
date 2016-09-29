@@ -4,9 +4,7 @@
 
 === Code ===
 
-* Land TESTFRAME.
-
-* Land Daniel's protocol-machine refactoring.
+* Test broadcast and symmetric modes; either fix them or remove them.
 
 * Land Daniel's redesign of the restriction language.
 
