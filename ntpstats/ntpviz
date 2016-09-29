@@ -692,7 +692,7 @@ if __name__ == '__main__':
         elif switch == "-n":
             sitename = val
         elif switch == "-p":
-            period = int(val) * NTPStats.SecondsInWeek
+            period = int( float(val) * NTPStats.SecondsInWeek)
         elif switch == "-s":
             starttime = iso_to_posix(val)
         elif switch == "-o":
@@ -988,8 +988,8 @@ Report generated: %(start_time_str)s UTC <br>
 
     # Ugh.  Not clear what to do in the multiplot case
     if len(statlist) == 1:
-        index_header += 'Report Period: %s days <br></div> ' \
-                 % int(stats.period // NTPStats.SecondsInWeek)
+        index_header += 'Report Period: %1.1f days <br></div> ' \
+                 % (float(stats.period) / float(NTPStats.SecondsInWeek))
     index_header += '<div style="clear:both;"></div>'
 
     index_trailer = '''\

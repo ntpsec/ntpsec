@@ -43,7 +43,8 @@ yyyy-mmm-ddThh:mm:ss. Alternatively you can specify either -s or -e
 (but not both) and use -p to set the default period in days.  The
 default is for the period to be 7 days, the end time to match the last
 logfile entry, and the start time to be set so that adding the period
-just reaches the last logfile entry.
+just reaches the last logfile entry.  The arugment with -p may be a
+floating point number.
 
 The -D N set the debug level to N and outputs with more verbosity.  0
 is the default, quiet except for all ERRORs and some WARNINGs.  9 is
