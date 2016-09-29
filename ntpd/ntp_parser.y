@@ -230,7 +230,6 @@
 %token	<Integer>	T_WanderThreshold	/* Not a token */
 %token	<Integer>	T_Week
 %token	<Integer>	T_Wildcard
-%token	<Integer>	T_Xleave
 %token	<Integer>	T_Year
 %token	<Integer>	T_Flag			/* Not a token */
 %token	<Integer>	T_EOC
@@ -428,7 +427,6 @@ option_flag_keyword
 	|	T_Preempt
 	|	T_Prefer
 	|	T_True
-	|	T_Xleave
 	;
 
 option_int

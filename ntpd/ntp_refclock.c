@@ -533,7 +533,7 @@ refclock_receive(
 	}
 	peer->reach |= 1;
 	peer->reftime = pp->lastref;
-	peer->aorg = pp->lastrec;
+	peer->org = pp->lastrec;
 	peer->rootdisp = pp->disp;
 	get_systime(&peer->dst);
 	if (!refclock_sample(pp))
