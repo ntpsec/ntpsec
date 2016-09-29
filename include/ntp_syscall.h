@@ -27,4 +27,9 @@ struct ntptimeval
 int ntp_gettime(struct ntptimeval *);
 #endif	/* !HAVE_STRUCT_NTPTIMEVAL */
 
+/* MUSL port shim */
+#if !defined(HAVE_NTP_ADJTIME) && defined(HAVE_ADJTIMEX)
+#define ntp_adjtime adjtimex
+#endif
+
 #endif	/* GUARD_NTP_SYSCALL_H */

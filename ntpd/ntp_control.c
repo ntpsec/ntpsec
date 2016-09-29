@@ -23,6 +23,7 @@
 #include "ntp_leapsec.h"
 #include "ntp_md5.h"	/* provides OpenSSL digest API */
 #include "lib_strbuf.h"
+#include "ntp_syscall.h"
 
 /*
  * Structure to hold request procedure information
