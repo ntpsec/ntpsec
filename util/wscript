@@ -4,7 +4,7 @@ def build(ctx):
 	srcnode = ctx.srcnode.abspath()
 	bldnode = ctx.bldnode.abspath()
 
-	util = ['hist', 'sht']
+	util = ['sht']
 
 	for name in util:
 		ctx(
