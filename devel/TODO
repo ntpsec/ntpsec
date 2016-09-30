@@ -18,6 +18,10 @@
   on at least one platform and test the NMEA, Atom, and SHM drivers
   on most platforms.
 
+=== Packaging ===
+
+* Package metadata for Debian Ubuntu, Red Hat, and SuSe.
+
 == After 1.0 release ==
 
 * Replace ntpq with a Python wrapper around the ntp Python module.
