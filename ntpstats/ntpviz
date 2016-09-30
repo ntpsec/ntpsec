@@ -313,12 +313,12 @@ plot \
 
         exp = """\
 <p>Percentiles: 99%% = %(ninetynine)s %(unit)s, &nbsp;
- 95%% = %(ninetyfive)s  %(unit)s, &nbsp;
- 50%% = %(fifty)s  %(unit)s, &nbsp;
- 5%% = %(five)s  %(unit)s, &nbsp;
- 1%% = %(one)s  %(unit)s<br>
-Ranges: 99%% - 1%% = %(nn_m_o)s %(unit)s, &nbsp;
- 95%% - 5%% = %(nf_m_f)s %(unit)s</p>
+ 95%% = %(ninetyfive).3f  %(unit)s, &nbsp;
+ 50%% = %(fifty).3f  %(unit)s, &nbsp;
+ 5%% = %(five).3f  %(unit)s, &nbsp;
+ 1%% = %(one).3f  %(unit)s<br>
+Ranges: 99%% - 1%% = %(nn_m_o).3f %(unit)s, &nbsp;
+ 95%% - 5%% = %(nf_m_f).3f %(unit)s</p>
 <p>This shows the frequency offset of the local clock (aka drift).
 It comes from field 3 of the loopstats log file.  The graph includes
 percentile data to show how much the frequency changes over a longer
@@ -329,7 +329,7 @@ heating).</p>
 <p>Smaller changes are better.  An ideal result would be a horizontal
 line at 0ppm.</p>
 
-<p>Expected values of 99%-1% percentiles: 0.4ppm</p>
+<p>Expected values of 99%%-1%% percentiles: 0.4ppm</p>
 """ % locals()
         ret = {'html' : exp, 'percs' : percs }
         ret['title'] = "Local Clock Frequency Offset"
@@ -414,12 +414,12 @@ plot \
 
         exp = ( """\
 <p>Percentiles: 99%% = %(ninetynine)s %(unit)s, &nbsp;
- 95%% = %(ninetyfive)s  %(unit)s, &nbsp;
- 50%% = %(fifty)s  %(unit)s, &nbsp;
- 5%% = %(five)s  %(unit)s, &nbsp;
- 1%% = %(one)s  %(unit)s<br>
-Ranges: 99%% - 1%% = %(nn_m_o)s %(unit)s, &nbsp;
- 95%% - 5%% = %(nf_m_f)s %(unit)s</p>
+ 95%% = %(ninetyfive).3f  %(unit)s, &nbsp;
+ 50%% = %(fifty).3f  %(unit)s, &nbsp;
+ 5%% = %(five).3f  %(unit)s, &nbsp;
+ 1%% = %(one).3f  %(unit)s<br>
+Ranges: 99%% - 1%% = %(nn_m_o).3f %(unit)s, &nbsp;
+ 95%% - 5%% = %(nf_m_f).3f %(unit)s</p>
 """ % locals() ) +  exp
 
         ret = {'html' : exp, 'percs' : percs, 'title' : title }
@@ -503,13 +503,13 @@ Ranges: 99%% - 1%% = %(nn_m_o)s %(unit)s, &nbsp;
                            % locals()
 
             exp = """\
-<p>Percentiles: 99%% = %(ninetynine)s %(unit)s, &nbsp;
- 95%% = %(ninetyfive)s  %(unit)s, &nbsp;
- 50%% = %(fifty)s  %(unit)s, &nbsp;
- 5%% = %(five)s  %(unit)s, &nbsp;
- 1%% = %(one)s  %(unit)s<br>
-Ranges: 99%% - 1%% = %(nn_m_o)s %(unit)s, &nbsp;
- 95%% - 5%% = %(nf_m_f)s %(unit)s</p>
+<p>Percentiles: 99%% = %(ninetynine).3f %(unit)s, &nbsp;
+ 95%% = %(ninetyfive).3f  %(unit)s, &nbsp;
+ 50%% = %(fifty).3f  %(unit)s, &nbsp;
+ 5%% = %(five).3f  %(unit)s, &nbsp;
+ 1%% = %(one).3f  %(unit)s<br>
+Ranges: 99%% - 1%% = %(nn_m_o).3f %(unit)s, &nbsp;
+ 95%% - 5%% = %(nf_m_f).3f %(unit)s</p>
 """ % locals()
 
             if "offset" == type:
@@ -664,7 +664,7 @@ plot \
         values_mean = mu * multiplier
         values_mean_str = str( round( values_mean, rnd ) )
 
-        values_pstd = round( pstdev( values, mu=mu ) * multiplier, rnd)
+        values_pstd = pstdev( values, mu=mu ) * multiplier
 
         # plus/minus of one sigma range
         m1sigma = values_mean - values_pstd
@@ -707,15 +707,15 @@ plot \
         histogram_data = ["%s %s\n" % (val, cnt[val]) for val in vals]
 
         exp = """\
-<p>Percentiles: 99%% = %(ninetynine)s %(unit)s, &nbsp;
- 95%% = %(ninetyfive)s  %(unit)s, &nbsp;
- 50%% = %(fifty)s  %(unit)s, &nbsp;
- 5%% = %(five)s  %(unit)s, &nbsp;
- 1%% = %(one)s  %(unit)s<br>
-Ranges: 99%% - 1%% = %(nn_m_o)s %(unit)s, &nbsp;
- 95%% - 5%% = %(nf_m_f)s %(unit)s<br>
-Deviation: mean = %(values_mean_str)s %(unit)s,  &nbsp;
-1σ = %(values_pstd)s %(unit)s</p>
+<p>Percentiles: 99%% = %(ninetynine).3f %(unit)s, &nbsp;
+ 95%% = %(ninetyfive).3f  %(unit)s, &nbsp;
+ 50%% = %(fifty).3f  %(unit)s, &nbsp;
+ 5%% = %(five).3f  %(unit)s, &nbsp;
+ 1%% = %(one).3f  %(unit)s<br>
+Ranges: 99%% - 1%% = %(nn_m_o).3f %(unit)s, &nbsp;
+ 95%% - 5%% = %(nf_m_f).3f %(unit)s<br>
+Deviation: mean = %(values_mean).3f %(unit)s,  &nbsp;
+1σ = %(values_pstd).3f %(unit)s</p>
 <p>This shows the clock offsets of the local clock as a histogram.</p>
 """ % locals()
         ret = {'html' : exp, 'percs' : percs }
