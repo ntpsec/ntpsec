@@ -8,9 +8,9 @@
 
 #include "ntpd.h"
 #include "ntp_io.h"
-#include "ntp_unixtime.h"
 #include "ntp_stdlib.h"
 #include "ntp_syscall.h"
+#include "ntp_proto.h"
 
 #include <limits.h>
 #include <stdio.h>

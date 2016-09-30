@@ -5,7 +5,6 @@
 #include <stdio.h>
 
 #include "ntp_fp.h"
-#include "ntp_unixtime.h"	/* includes <sys/time.h> and <time.h> */
 #include "lib_strbuf.h"
 #include "ntp_stdlib.h"
 

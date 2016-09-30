@@ -4,7 +4,6 @@
  */
 #include <config.h>
 #include "ntp_fp.h"
-#include "ntp_unixtime.h"
 #include "ntp_stdlib.h"
 #include "ntp_calendar.h"
 

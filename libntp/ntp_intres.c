@@ -55,7 +55,6 @@
 #include "ntp_debug.h"
 #include "ntp_malloc.h"
 #include "ntp_syslog.h"
-#include "ntp_unixtime.h"
 #include "ntp_intres.h"
 #include "intreswork.h"
 

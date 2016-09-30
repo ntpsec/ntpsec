@@ -14,7 +14,6 @@
 
 #include <ntp_stdlib.h>
 #include <ntp_machine.h>
-#include <ntp_unixtime.h>
 #include <ntp_fp.h>
 #include <ntp.h>
 

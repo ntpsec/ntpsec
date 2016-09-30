@@ -4,7 +4,6 @@
 #include <config.h>
 
 #include "ntpd.h"
-#include "ntp_unixtime.h"
 #include "ntp_filegen.h"
 #include "ntp_stdlib.h"
 #include "ntp_assert.h"
