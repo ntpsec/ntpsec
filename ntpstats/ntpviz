@@ -520,16 +520,16 @@ Ranges: 99%% - 1%% = %(nn_m_o)s %(unit)s, &nbsp;
                     rtt = 0
                     title = "Refclock Offset " + str(peerlist[0])
                     exp += """\
-<p>This shows the offset of a local refclock in seconds.
+<p>This shows the offset of a local refclock in %(unit)s.
 This is field 5 from the loopstats log file.  This is be useful to
 see how the measured offset is changing.</p>
-"""
+""" %  locals()
                 else:
                     title = "Peer Offset " + str(peerlist[0])
                     exp += """\
 <p>This shows the offset of a peer or server in seconds.
 This is field 5 from the loopstats log file.  This is be useful to
-see hos the measured offset is changing.</p>
+see how the measured offset is changing.</p>
 <p>The chart also plots offset±rtt.  Where rtt is the round trip time
 to the remote.  NTP can not really know the offset of a remote chimer,
 NTP computes it by subtracting rtt/2 from the offset.  Plotting the
@@ -564,15 +564,15 @@ line at 0s.</p>
             if "offset" == type:
                 title = "Peer Offsets"
                 exp = """\
-<p>This shows the offset of all refclocks, peers and servers in seconds.
+<p>This shows the offset of all refclocks, peers and servers in %(unit)s.
 This is field 5 from the loopstats log file.  This can be useful to
 see if offset changes are happening in a single clock or all clocks
 together.</p>
 <p>Closer to 0s is better.  An ideal system would be a horizontal line
-at 0s. Typical 90% ranges may be: local serial GPS 200 ms; local LAN peer
-80µs; local PPS 20µs.  90% ranges for WAN servers may be 4ms and much larger.
+at 0s. Typical 90%% ranges may be: local serial GPS 200 ms; local LAN peer
+80µs; local PPS 20µs.  90%% ranges for WAN servers may be 4ms and much larger.
 </p>
-"""
+""" % locals()
             else:
                 title = "Peer Jitters"
                 exp = """\
