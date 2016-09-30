@@ -160,8 +160,20 @@ plot \
  "-" using 1:($2*%(multiplier)s) title "clock offset %(unit)s" with linespoints ls 1, \
  "-" using 1:($3*%(multiplier_f)s) title "frequency offset %(unit_f)s" with linespoints ls 2 axis x1y2
 """ % locals()
-        return plot_template + self.dump("loopstats") + "e\n" \
+
+        exp = """\
+<p>The offsets of the ntpd calculated time and the local system clock.
+Showing frequency offset (red, in parts per million, scale on right) and
+the time offset (blue, in μs, scale on left).  These are fields 4 and 3
+from the loopstats log file.  Quick changes in time offset will lead to
+larger frequency offsets.</p>
+"""
+
+        ret = {'html' : exp, 'percs' : percs }
+        ret['title'] = "Local Clock Time/Frequency Offsets"
+        ret['plot'] = plot_template + self.dump("loopstats") + "e\n" \
              + self.dump("loopstats")
+        return ret
 
     def local_temps_gnuplot(self):
         "Generate GNUPLOT code graphing local temperature statistics"
@@ -174,6 +186,7 @@ plot \
             sys.stderr.write("ntpviz: WARNING: no temps to graph\n")
             return ''
 
+        percs = ()
         temps_data = ()
         plot_data = ""
         for key in tempslist:
@@ -182,7 +195,7 @@ plot \
         plot_data = plot_data[:-2]
 
         plot_template = NTPViz.Common + """\
-set title "%(sitename)s: Local Temps"
+set title "%(sitename)s: Local Temparatures"
 set ytics format "%%1.1f °C" nomirror textcolor rgb '#0060ad'
 set style line 1 lc rgb '#0060ad' lt 1 lw 1 pt 7 ps 0   # --- blue
 plot \\
@@ -194,8 +207,17 @@ plot \\
 
         # strip the trailing ", \n"
         plot_template = plot_template[:-4] + "\n"
-        plot_template += plot_data
-        return plot_template
+        exp = """\
+<p>Local temperatures.  These will be site specific depending on what
+temperature sensors you have and collect data from.  Temperature
+changes change the local clock crystal frequency and stability.  Crystals
+oscillate faster when warmer. This the single most important
+component of frequency drift.</p>
+"""
+        ret = {'html' : exp, 'percs' : percs }
+        ret['title'] = "Local Temperatures"
+        ret['plot'] = plot_template + plot_data
+        return ret
 
     def local_gps_gnuplot(self):
         "Generate GNUPLOT code graphing local gps statistics"
@@ -209,6 +231,7 @@ plot \\
                 sys.stderr.write("ntpviz: INFO: no gps data to graph\n")
             return ''
 
+        percs = ()
         gps_data = ()
         plot_data = ""
         for key in gpslist:
@@ -234,8 +257,14 @@ plot \\
 
         # strip the trailing ", \\n"
         plot_template = plot_template[:-4] + "\n"
-        plot_template += plot_data
-        return plot_template
+        exp = """\
+<p>Local GPS.  These will be site specific.  It depends on running
+a local gpsd daemon, and logging the data using gps-log.py.</p>
+"""
+        ret = {'html' : exp, 'percs' : percs }
+        ret['title'] = "Local GPS"
+        ret['plot'] = plot_template + plot_data
+        return ret
 
     def local_error_gnuplot(self):
         "Plot the local clock frequency error."
@@ -251,7 +280,7 @@ plot \\
         unit = "ppm"
         rnd = 3
 
-        percs = self.percentiles( (99, 95, 5, 1), values)
+        percs = self.percentiles( (99, 95, 50, 5, 1), values)
 
         if 1 > percs[99] and -1 < percs[1]:
             # go to ppb
@@ -262,6 +291,7 @@ plot \\
         percs.update({k: round( v * multiplier, rnd) for k, v in list(percs.items())})
         ninetynine  = percs[99]
         ninetyfive  = percs[95]
+        fifty       = percs[50]
         five        = percs[5]
         one         = percs[1]
 
@@ -273,12 +303,6 @@ set ytics format "%%1.1f %(unit)s" nomirror
 set key bottom right box
 set style line 1 lc rgb '#0060ad' lt 1 lw 1 pt 7 ps 0   # --- blue
 set style line 2 lc rgb '#dd181f' lt 1 lw 1 pt 5 ps 0   # --- red
-set label 1 "99%% = %(ninetynine)s %(unit)s" at graph 0.01,0.3 left front
-set label 2 "95%% = %(ninetyfive)s %(unit)s" at graph 0.01,0.25 left front
-set label 3 " 5%% = %(five)s %(unit)s" at graph 0.01,0.2 left front
-set label 4 " 1%% = %(one)s %(unit)s" at graph 0.01,0.15 left front
-set label 5 "95%% - 5%% = %(nf_m_f)s %(unit)s" at graph 0.01,0.1 left front
-set label 6 "99%% - 1%% = %(nn_m_o)s %(unit)s" at graph 0.01,0.05 left front
 plot \
  "-" using 1:($3 * %(multiplier)s) title "local clock error" with linespoints ls 2, \
  %(ninetynine)s title "99th percentile", \
@@ -286,7 +310,31 @@ plot \
  %(five)s title "5th percentile", \
  %(one)s title "1st percentile"
 """ % locals()
-        return plot_template + self.dump("loopstats")
+
+        exp = """\
+<p>Percentiles: 99%% = %(ninetynine)s %(unit)s, &nbsp;
+ 95%% = %(ninetyfive)s  %(unit)s, &nbsp;
+ 50%% = %(fifty)s  %(unit)s, &nbsp;
+ 5%% = %(five)s  %(unit)s, &nbsp;
+ 1%% = %(one)s  %(unit)s<br>
+Ranges: 99%% - 1%% = %(nn_m_o)s %(unit)s, &nbsp;
+ 95%% - 5%% = %(nf_m_f)s %(unit)s</p>
+<p>This shows the frequency offset of the local clock (aka drift).
+It comes from field 3 of the loopstats log file.  The graph includes
+percentile data to show how much the frequency changes over a longer
+period of time.  The majority of this change should come from
+temperature changes (ex: HVAC, the weather, CPU usage causing local
+heating).</p>
+
+<p>Smaller changes are better.  An ideal result would be a horizontal
+line at 0ppm.</p>
+
+<p>Expected values of 99%-1% percentiles: 0.4ppm</p>
+""" % locals()
+        ret = {'html' : exp, 'percs' : percs }
+        ret['title'] = "Local Clock Frequency Offset"
+        ret['plot'] = plot_template + self.dump("loopstats")
+        return ret
 
     def loopstats_gnuplot(self, fld, title, legend, freq):
         "Generate GNUPLOT code of a given loopstats field"
@@ -298,15 +346,29 @@ plot \
         rnd = 3
         if freq:
             unit = "ppm"
+            title = "Local Stability"
+            exp = """\
+<p>This shows the frequency jitter (aka wander) of the local clock's
+frequency.  In other words, how fast it the local clock changes freqency.
+This is field 6 in the loopstats log file.</p>
+<p>Lower is better.  An ideal clock would be a horizontal line at 0ppm.</p>
+"""
         else:
             unit = "μs"
+            title = "Local Time Jitter"
+            exp = """\
+<p>This shows the jitter of the local clock offset.  In other words,
+how fast the local clock offset is changing.  This is field 5 in the
+loopstats log file</p>
+<p>Lower is better.  An ideal system would be a horizontal line at 0μs.</p>
+"""
 
         sitename   = self.sitename
         # grab and sort the values, no need for the timestamp, etc.
         values = [float(line.split()[fld - 1]) for line in self.loopstats]
         values.sort()
 
-        percs = self.percentiles( (99, 95, 5, 1), values)
+        percs = self.percentiles( (99, 95, 50, 5, 1), values)
 
         if 1e-3 <= percs[99] or -1e-3 >= percs[1]:
             # go to millisec
@@ -315,6 +377,7 @@ plot \
                 unit = "ppt"
             else:
                 unit = "ms"
+
         elif 1e-6 > percs[99] and -1e-6 < percs[1]:
             # go to nanosec, or ppb
             multiplier = 1e9
@@ -328,6 +391,7 @@ plot \
                      for k, v in list(percs.items())})
         ninetynine  = percs[99]
         ninetyfive  = percs[95]
+        fifty       = percs[50]
         five        = percs[5]
         one         = percs[1]
 
@@ -340,12 +404,6 @@ set ytics format "%%1.1f %(unit)s" nomirror
 set key top right box
 set style line 1 lc rgb '#0060ad' lt 1 lw 1 pt 7 ps 0   # --- blue
 set style line 2 lc rgb '#dd181f' lt 1 lw 1 pt 5 ps 0   # --- red
-set label 1 "99%% = %(ninetynine)s %(unit)s" at graph 0.01,0.95 left front
-set label 2 "95%% = %(ninetyfive)s %(unit)s" at graph 0.01,0.9 left front
-set label 3 " 5%% = %(five)s %(unit)s" at graph 0.01,0.85 left front
-set label 4 " 1%% = %(one)s %(unit)s" at graph 0.01,0.8 left front
-set label 5 "95%% - 5%% = %(nf_m_f)s %(unit)s" at graph 0.01,0.75 left front
-set label 6 "99%% - 1%% = %(nn_m_o)s %(unit)s" at graph 0.01,0.7 left front
 plot \
  "-" using 1:($%(fld)d*%(multiplier)s) title "%(legend)s" with linespoints ls 1, \
  %(ninetynine)s title "99th percentile", \
@@ -353,7 +411,20 @@ plot \
  %(five)s title "5th percentile", \
  %(one)s title "1st percentile"
 """ % locals()
-        return plot_template + self.dump("loopstats")
+
+        exp = ( """\
+<p>Percentiles: 99%% = %(ninetynine)s %(unit)s, &nbsp;
+ 95%% = %(ninetyfive)s  %(unit)s, &nbsp;
+ 50%% = %(fifty)s  %(unit)s, &nbsp;
+ 5%% = %(five)s  %(unit)s, &nbsp;
+ 1%% = %(one)s  %(unit)s<br>
+Ranges: 99%% - 1%% = %(nn_m_o)s %(unit)s, &nbsp;
+ 95%% - 5%% = %(nf_m_f)s %(unit)s</p>
+""" % locals() ) +  exp
+
+        ret = {'html' : exp, 'percs' : percs, 'title' : title }
+        ret['plot'] = plot_template + self.dump("loopstats")
+        return ret
 
     def local_offset_jitter_gnuplot(self):
         "Generate GNUPLOT code of local clock loop standard deviation"
@@ -375,7 +446,6 @@ plot \
         peerlist.sort() # For stability of output
         peer_data = ()
         plot_data = ""
-        labels = ""
         for key in peerlist:
             # Trickiness - we allow peerlist elements to be DNS names.
             # The socket.gethostbyname() call maps DNS names to IP addresses,
@@ -399,6 +469,7 @@ plot \
         multiplier = 1e6
         rtt = 0
         percentages = ""
+        percs = []
         if len(peerlist) == 1:
             # only one peer
             title += ": "+ peerlist[0]
@@ -431,32 +502,92 @@ plot \
             percentages = " %(fifty)s title '50th percentile', " \
                            % locals()
 
-            labels = """\
-set label 1 "99%% = %(ninetynine)s %(unit)s" at graph 0.01,0.95 left front
-set label 2 "95%% = %(ninetyfive)s %(unit)s" at graph 0.01,0.90 left front
-set label 3 "50%% = %(fifty)s %(unit)s" at graph 0.01,0.85 left front
-set label 4 "5%% = %(five)s %(unit)s" at graph 0.01,0.80 left front
-set label 5 "1%% = %(one)s %(unit)s" at graph 0.01,0.75 left front
-set label 6 "95%% - 5%% = %(nf_m_f)s %(unit)s" at graph 0.01,0.70 left front
-set label 7 "99%% - 1%% = %(nn_m_o)s %(unit)s" at graph 0.01,0.65 left front
+            exp = """\
+<p>Percentiles: 99%% = %(ninetynine)s %(unit)s, &nbsp;
+ 95%% = %(ninetyfive)s  %(unit)s, &nbsp;
+ 50%% = %(fifty)s  %(unit)s, &nbsp;
+ 5%% = %(five)s  %(unit)s, &nbsp;
+ 1%% = %(one)s  %(unit)s<br>
+Ranges: 99%% - 1%% = %(nn_m_o)s %(unit)s, &nbsp;
+ 95%% - 5%% = %(nf_m_f)s %(unit)s</p>
 """ % locals()
 
             if "offset" == type:
-
+                # doing offset, not jitter
                 rtt = 1
-                # don't do rtt for reclocks
                 if "127.127." == peerlist[0][:8]:
+                    # don't do rtt for reclocks
                     rtt = 0
+                    title = "Refclock Offset " + str(peerlist[0])
+                    exp += """\
+<p>This shows the offset of a local refclock in seconds.
+This is field 5 from the loopstats log file.  This is be useful to
+see how the measured offset is changing.</p>
+"""
+                else:
+                    title = "Peer Offset " + str(peerlist[0])
+                    exp += """\
+<p>This shows the offset of a peer or server in seconds.
+This is field 5 from the loopstats log file.  This is be useful to
+see hos the measured offset is changing.</p>
+<p>The chart also plots offset±rtt.  Where rtt is the round trip time
+to the remote.  NTP can not really know the offset of a remote chimer,
+NTP computes it by subtracting rtt/2 from the offset.  Plotting the
+offset±rtt reverses this calculation to easier see the effects of
+rtt changes.</p>
+"""
+
+            else:
+                # doing jitter, not offset
+                if "127.127." == peerlist[0][:8]:
+                    title = "Refclock Jitter " + str(peerlist[0])
+                    exp += """\
+<p>This shows the jitter of a local refclock.  Jitter is the
+current estimated dispersion; the variation in offset between samples.
+This is field 8 in the loopstats log file.</p>
+<p>Closer to 0s is better.  An ideal system would be a horizontal
+line at 0s.</p>
+"""
+                else:
+                    title = "Peer Jitter " + str(peerlist[0])
+                    exp += """\
+<p>This shows the jitter of a remote peer or server.  Jitter is the
+current estimated dispersion; the variation in offset between samples.
+This is field 8 in the loopstats log file.</p>
+<p>Closer to 0s is better.  An ideal system would be a horizontal
+line at 0s.</p>
+"""
+
         else:
             # many peers
             title += "s"
+            if "offset" == type:
+                title = "Peer Offsets"
+                exp = """\
+<p>This shows the offset of all refclocks, peers and servers in seconds.
+This is field 5 from the loopstats log file.  This can be useful to
+see if offset changes are happening in a single clock or all clocks
+together.</p>
+<p>Closer to 0s is better.  An ideal system would be a horizontal line
+at 0s. Typical 90% ranges may be: local serial GPS 200 ms; local LAN peer
+80µs; local PPS 20µs.  90% ranges for WAN servers may be 4ms and much larger.
+</p>
+"""
+            else:
+                title = "Peer Jitters"
+                exp = """\
+<p>This shows the jitter of all refclocks, peers and servers.  Jitter is the
+current estimated dispersion; the variation in offset between samples.
+This is field 8 in the loopstats log file.</p>
+<p>Closer to 0s is better.  An ideal system would be a horizontal
+line at 0s.</p>
+"""
 
         plot_template = NTPViz.Common + """\
 set title "%(sitename)s: %(title)s"
 set ylabel ""
 set ytics format "%%1.1f %(unit)s" nomirror
 set key top right box
-%(labels)s
 plot \
 """ % locals()
         plot_template += percentages
@@ -475,8 +606,9 @@ plot \
             # strip the trailing ", \n"
             plot_template = plot_template[:-4] + "\n"
 
-        plot_template += plot_data
-        return plot_template
+        ret = {'html' : exp, 'percs' : percs, 'title' : title }
+        ret['plot'] = plot_template + plot_data
+        return ret
 
     def peer_offsets_gnuplot(self, peerlist=None):
         return self.peerstats_gnuplot(peerlist, 4, "Peer Clock Offset", "offset")
@@ -497,7 +629,7 @@ plot \
         values = [float(line.split()[1]) for line in self.loopstats]
         values.sort()
 
-        percs = self.percentiles( (99, 95, 5, 1), values)
+        percs = self.percentiles( (99, 95, 50, 5, 1), values)
 
         unit = "μs"
         multiplier = 1e6
@@ -515,8 +647,12 @@ plot \
         percs.update({k: round(v*multiplier, rnd) for k, v in list(percs.items())})
         ninetynine  = percs[99]
         ninetyfive  = percs[95]
+        fifty       = percs[50]
         five        = percs[5]
         one         = percs[1]
+
+        nf_m_f     = ninetyfive - five
+        nn_m_o     = ninetynine - one
 
         cnt = collections.Counter()
         for value in values:
@@ -534,16 +670,12 @@ plot \
         m1sigma = values_mean - values_pstd
         p1sigma = values_mean + values_pstd
 
-
-# skip the mean
-#set label 3 "mean = %(values_mean_str)s μs" at graph 0.01,0.3  left front
-
         plot_template = '''\
 set terminal png size 900,600
 set grid
 set boxwidth %(boxwidth)s
 set xtic rotate by -45 scale 0
-set title "%(sitename)s: Local Clock Time Offset - Histogram"
+set title "%(sitename)s: Local Clock Time Offset Histogram"
 set xtics format "%%1.1f %(unit)s" nomirror
 set style arrow 1 nohead
 set arrow from %(m1sigma)s,graph 0 to %(m1sigma)s,graph 0.90 as 1
@@ -567,18 +699,28 @@ set label 3 "99%%" at %(ninetynine)s, graph 0.35  left front offset -1,-1
 set label 4 "95%%" at %(ninetyfive)s, graph 0.50  left front offset -1,-1
 set label 5 "1%%" at %(one)s, graph 0.35  left front offset -1,-1
 set label 6 "5%%" at %(five)s, graph 0.50  left front offset -1,-1
-set label 10 "1σ = %(values_pstd)s %(unit)s" at graph 0.99,0.95 right front
-set label 11 "99%% = %(ninetynine)s %(unit)s" at graph 0.99,0.90 right front
-set label 12 "95%% = %(ninetyfive)s %(unit)s" at graph 0.99,0.85 right front
-set label 13 "5%% = %(five)s %(unit)s" at graph 0.99,0.80 right front
-set label 14 "1%% = %(one)s %(unit)s" at graph 0.99,0.75 right front
 plot \
  "-" using ($1 * %(multiplier)s):2 title "histogram" with boxes
 ''' % locals()
         vals = list(cnt.keys())
         vals.sort()
         histogram_data = ["%s %s\n" % (val, cnt[val]) for val in vals]
-        return plot_template + "".join(histogram_data)
+
+        exp = """\
+<p>Percentiles: 99%% = %(ninetynine)s %(unit)s, &nbsp;
+ 95%% = %(ninetyfive)s  %(unit)s, &nbsp;
+ 50%% = %(fifty)s  %(unit)s, &nbsp;
+ 5%% = %(five)s  %(unit)s, &nbsp;
+ 1%% = %(one)s  %(unit)s<br>
+Ranges: 99%% - 1%% = %(nn_m_o)s %(unit)s, &nbsp;
+ 95%% - 5%% = %(nf_m_f)s %(unit)s, &nbsp;
+ 1σ = %(values_pstd)s %(unit)s</p>
+<p>This shows the clock offsets of the local clock as a histogram.</p>
+""" % locals()
+        ret = {'html' : exp, 'percs' : percs }
+        ret['title'] = "Local Clock Time Offset Histogram"
+        ret['plot'] = plot_template + "".join(histogram_data)
+        return ret
 
 # Multiplotting can't live inside NTPViz because it consumes a list
 # of such objects, not a single one.
@@ -796,9 +938,9 @@ if __name__ == '__main__':
             if show_local_offset_histogram:
                 plot = stats.local_offset_histogram_gnuplot()
             if generate:
-                gnuplot(plot)
+                gnuplot(plot['plot'])
             else:
-                sys.stdout.write(plot)
+                sys.stdout.write(plot['plot'])
             raise SystemExit(0)
 
         if show_peer_offsets is not None or show_peer_jitters is not None:
@@ -810,9 +952,9 @@ if __name__ == '__main__':
             if show_peer_jitters is not None:
                 plot = stats.peer_jitters_gnuplot(show_peer_jitters)
             if generate:
-                gnuplot(plot)
+                gnuplot(plot['plot'])
             else:
-                sys.stdout.write(plot)
+                sys.stdout.write(plot['plot'])
             raise SystemExit(0)
 
         if show_temps:
@@ -822,9 +964,9 @@ if __name__ == '__main__':
             if show_temps is not None:
                 plot = stats.local_temps_gnuplot()
             if generate:
-                gnuplot(plot)
+                gnuplot(plot['plot'])
             else:
-                sys.stdout.write(plot)
+                sys.stdout.write(plot['plot'])
             raise SystemExit(0)
 
         if show_gps:
@@ -833,9 +975,9 @@ if __name__ == '__main__':
                 raise SystemExit(1)
             plot = stats.local_gps_gnuplot()
             if generate:
-                gnuplot(plot)
+                gnuplot(plot['plot'])
             else:
-                sys.stdout.write(plot)
+                sys.stdout.write(plot['plot'])
             raise SystemExit(0)
 
     if show_local_offset_multiplot:
@@ -866,92 +1008,6 @@ if __name__ == '__main__':
     if not os.path.lexists( logo_filename ):
         with open( logo_filename, "w" ) as wp:
             wp.write(binascii.a2b_base64(ntpsec_logo))
-
-    explanations = {
-        "local-offset": """\
-<p>The offsets of the ntpd calculated time and the local system clock.
-Showing frequency offset (red, in parts per million, scale on right) and
-the time offset (blue, in μs, scale on left).  These are fields 4 and 3
-from the loopstats log file.  Quick changes in time offset will lead to
-larger frequency offsets.</p>
-""",
-
-        "local-error": """\
-<p>This shows the frequency offset of the local clock (aka drift).
-It comes from field 3 of the loopstats log file.  The graph includes
-percentile data to show how much the frequency changes over a longer
-period of time.  The majority of this change should come from
-temperature changes (ex: HVAC, the weather, CPU usage causing local
-heating).</p>
-
-<p>Smaller changes are better.  An ideal result would be a horizontal
-line at 0ppm.</p>
-
-<p>Expected values of 99%-1% percentiles: 0.4ppm</p>
-""",
-        "local-offset-histogram": """\
-<p>This shows the clock offsets of the local clock as a histogram.  It
-includes 1%, 5%, 95%, and 99% percentiles to show the performance of
-the system.</p>
-""",
-        "local-stability": """\
-<p>This shows the frequency jitter (aka wander) of the local clock's
-frequency.  In other words, how fast it the local clock changes freqency.
-This is field 6 in the loopstats log file.</p>
-<p>Lower is better.  An ideal clock would be a horizontal line at 0ppm.</p>
-""",
-        "local-gps": """\
-<p>Local GPS.  These will be site specific.  It depends on running
-a local gpsd daemon, and logging the data using gps-log.py.</p>
-""",
-        "local-jitter": """\
-<p>This shows the jitter of the local clock offset.  In other words,
-how fast the local clock offset is changing.  This is field 5 in the
-loopstats log file</p>
-<p>Lower is better.  An ideal system would be a horizontal line at 0μs.</p>
-""",
-        "local-temps": """\
-<p>Local temperatures.  These will be site specific depending on what
-temperature sensors you have and collect data from.  Temperature
-changes change the local clock crystal frequency and stability.  Crystals
-oscillate faster when warmer. This the single most important
-component of frequency drift.</p>
-""",
-        "peer-jitter": """\
-<p>This shows the jitter of a remote peer or server.  Jitter is the
-current estimated dispersion; the variation in offset between samples.
-This is field 8 in the loopstats log file.</p>
-<p>Closer to 0s is better.  An ideal system would be a horizontal
-line at 0s.</p>
-""",
-        "peer-jitters": """\
-<p>This shows the jitter of all remote peers and servers.  Jitter is the
-current estimated dispersion; the variation in offset between samples.
-This is field 8 in the loopstats log file.</p>
-<p>Closer to 0s is better.  An ideal system would be a horizontal
-line at 0s.</p>
-""",
-        "peer-offset": """\
-<p>This shows the offset of a peer or server in seconds.
-This is field 5 from the loopstats log file.  This can be useful to
-see if the measured  offset is changing.</p>
-<p>The chart also plots offset±rtt.  Where rtt is the round trip time
-to the remote.  NTP can not really know the offset of a remote chimer,
-NTP computes it by subtracting rtt/2 from the offset.  Plotting the
-offset±rtt reverses this calculation to easier see the effects of
-rtt changes.</p>
-""",
-        "peer-offsets": """\
-<p>This shows the offset of all peers and servers in seconds.
-This is field 5 from the loopstats log file.  This can be useful to
-see if offset changes are happening in a single clock or all clocks
-together.</p>
-<p>Closer to 0s is better.  An ideal system would be a horizontal line
-at 0s. Typical 90% ranges may be: local serial GPS 200 ms; local LAN peer
-80µs; local PPS 20µs.  90% ranges for WAN servers may be 4ms and much larger.
-</p>
-""",
-    }
 
     start_time = datetime.datetime.utcnow()
     start_time_str = start_time.strftime("%c")
@@ -1126,19 +1182,20 @@ ntpviz</a>, part of the <a href="https://www.ntpsec.org/">NTPsec project</a>
         for (imagename, image) in imagepairs:
             if not image:
                 continue
+            index_buffer += "<div>\n<h2>%s:</h2>\n" % image['title']
             div_name = imagename.replace('-', ' ')
-            index_buffer += "<div>\n<h2>%s:</h2>\n" % div_name
+            index_buffer += imagewrapper % \
+                             (imagename.replace(':', '%3A'), div_name)
+            if image['html']:
+                index_buffer += "<div>\n%s</div>\n" % image['html']
             if 'peer-jitter-' == imagename[:12]:
                 exp = 'peer-jitter'
             elif 'peer-offset-' == imagename[:12]:
                 exp = 'peer-offset'
             else:
                 exp = imagename
-            if exp in explanations:
-                index_buffer += "<div>\n%s</div>\n" % explanations[exp]
-            gnuplot(image, os.path.join(outdir, imagename + ".png"))
-            index_buffer += imagewrapper % \
-                             (imagename.replace(':', '%3A'), div_name)
+            index_buffer += "<br><br>\n"
+            gnuplot(image['plot'], os.path.join(outdir, imagename + ".png"))
             index_buffer += "</div>\n"
 
     # if footer file, add it to index.html
