@@ -5,6 +5,8 @@
  *
  * For a rationale look at 'timespecops.h'; we do the same here, but the
  * normalisation keeps the microseconds in [0 .. 10^6], of course.
+ * NTPsec implements fewer operations here as we are trying to do as
+ * much arithmetic as possible in nanoseconds for code-hygiene reasons.
  *
  * Copyright 2015 by the NTPsec project contributors
  * SPDX-License-Identifier: NTP
@@ -86,12 +88,6 @@
 #define timeval_isnormal(x) \
 	((x)->tv_usec >= 0 && (x)->tv_usec < MICROSECONDS)
 
-/*
- * predicate: returns true if the microseconds are out-of-bounds
- * use like: int timeval_isdenormal(const struct timeval *x)
- */
-#define timeval_isdenormal(x)	(!timeval_isnormal(x))
-
 /* make sure microseconds are in nominal range */
 static inline struct timeval
 normalize_tval(
@@ -101,7 +97,7 @@ normalize_tval(
 	long		z;
 
 	/*
-	 * If the fraction becomes excessive denormal, we use division
+	 * If the fraction becomes excessively denormal, we use division
 	 * to do first partial normalisation. The normalisation loops
 	 * following will do the remaining cleanup. Since the size of
 	 * tv_usec has a peculiar definition by the standard the range
@@ -152,21 +148,6 @@ add_tval(
 	return normalize_tval(x);
 }
 
-/* x = a + b, b is fraction only */
-static inline struct timeval
-add_tval_us(
-	struct timeval	a,
-	long		b
-	)
-{
-	struct timeval x;
-
-	x = a;
-	x.tv_usec += b;
-
-	return normalize_tval(x);
-}
-
 /* x = a - b */
 static inline struct timeval
 sub_tval(
@@ -179,35 +160,6 @@ sub_tval(
 	x = a;
 	x.tv_sec -= b.tv_sec;
 	x.tv_usec -= b.tv_usec;
-
-	return normalize_tval(x);
-}
-
-/* x = a - b, b is fraction only */
-static inline struct timeval
-sub_tval_us(
-	struct timeval	a,
-	long		b
-	)
-{
-	struct timeval x;
-
-	x = a;
-	x.tv_usec -= b;
-
-	return normalize_tval(x);
-}
-
-/* x = -a */
-static inline struct timeval
-neg_tval(
-	struct timeval	a
-	)
-{	
-	struct timeval	x;
-
-	x.tv_sec = -a.tv_sec;
-	x.tv_usec = -a.tv_usec;
 
 	return normalize_tval(x);
 }
@@ -284,27 +236,6 @@ test_tval(
 	return r;
 }
 
-/*
- * test possibly-denormal a
- * return 1 / 0 / -1 if a < / == / > 0
- */
-static inline int
-test_tval_denorm(
-	struct timeval	a
-	)
-{
-	return test_tval(normalize_tval(a));
-}
-
-/* return LIB buffer ptr to string rep */
-static inline const char *
-tvaltoa(
-	struct timeval	x
-	)
-{
-	return format_time_fraction(x.tv_sec, x.tv_usec, 6);
-}
-
 /* convert from timeval duration to l_fp duration */
 static inline l_fp
 tval_intv_to_lfp(
@@ -357,47 +288,6 @@ lfp_intv_to_tval(
 		out.tv_usec = -out.tv_usec;
 		out = normalize_tval(out);
 	}
-
-	return out;
-}
-
-static inline struct timeval
-lfp_uintv_to_tval(
-	l_fp		x
-	)
-{
-	struct timeval	out;
-	
-	TSFTOTVU(x.l_uf, out.tv_usec);
-	out.tv_sec = x.l_ui;
-
-	return out;
-}
-
-/*
- * absolute (timestamp) conversion. Input is time in NTP epoch, output
- * is in UN*X epoch. The NTP time stamp will be expanded around the
- * pivot time *p or the current time, if p is NULL.
- */
-static inline struct timeval
-lfp_stamp_to_tval(
-	l_fp		x,
-	const time_t *	p
-	)
-{
-	struct timeval	out;
-	vint64		sec;
-
-	sec = ntpcal_ntp_to_time(x.l_ui, p);
-	TSFTOTVU(x.l_uf, out.tv_usec);
-
-	/* copying a vint64 to a time_t needs some care... */
-#if SIZEOF_TIME_T <= 4
-	out.tv_sec = (time_t)vint64lo(sec);
-#else
-	out.tv_sec = (time_t)vint64s(sec);
-#endif
-	out = normalize_tval(out);
 
 	return out;
 }

@@ -314,36 +314,6 @@ TEST(timevalops, AddFullOflow1) {
 	return;
 }
 
-TEST(timevalops, AddUsecNorm) {
-	int i;
-
-	for (i = -4; i <= 4; ++i) {
-		struct timeval a = timeval_init(i, 200);
-		struct timeval E = timeval_init(i, 600);
-		struct timeval c;
-
-		c = add_tval_us(a, 600 - 200);
-		TEST_ASSERT_EQUAL_timeval(E, c);
-	}
-
-	return;
-}
-
-TEST(timevalops, AddUsecOflow1) {
-	int i;
-
-	for (i = -4; i <= 4; ++i) {
-		struct timeval a = timeval_init(i, 200);
-		struct timeval E = timeval_init(i + 1, 100);
-		struct timeval c;
-
-		c = add_tval_us(a, MICROSECONDS - 100);
-		TEST_ASSERT_EQUAL_timeval(E, c);
-	}
-
-	return;
-}
-
 //----------------------------------------------------------------------
 // test subtraction (difference)
 //----------------------------------------------------------------------
@@ -378,56 +348,6 @@ TEST(timevalops, SubFullOflow) {
 			c = sub_tval(a, b);
 			TEST_ASSERT_EQUAL_timeval(E, c);
 		}
-
-	return;
-}
-
-TEST(timevalops, SubUsecNorm) {
-	int i = -4;
-
-	for (i = -4; i <= 4; ++i) {
-		struct timeval a = timeval_init(i, 600);
-		struct timeval E = timeval_init(i, 200);
-		struct timeval c;
-
-		c = sub_tval_us(a, 600 - 200);
-		TEST_ASSERT_EQUAL_timeval(E, c);
-	}
-
-	return;
-}
-
-TEST(timevalops, SubUsecOflow) {
-	int i = -4;
-
-	for (i = -4; i <= 4; ++i) {
-		struct timeval a = timeval_init(i, 100);
-		struct timeval E = timeval_init(i - 1, 200);
-		struct timeval c;
-
-		c = sub_tval_us(a, MICROSECONDS - 100);
-		TEST_ASSERT_EQUAL_timeval(E, c);
-	}
-
-	return;
-}
-
-//----------------------------------------------------------------------
-// test negation
-//----------------------------------------------------------------------
-
-TEST(timevalops, Neg) {
-	int i = -4;
-
-	for (i = -4; i <= 4; ++i) {
-		struct timeval a = timeval_init(i, 100);
-		struct timeval b;
-		struct timeval c;
-
-		b = neg_tval(a);
-		c = add_tval(a, b);
-		TEST_ASSERT_EQUAL(0, test_tval(c));
-	}
 
 	return;
 }
@@ -650,39 +570,6 @@ TEST(timevalops, LFProundtrip) {
 	return;
 }
 
-//----------------------------------------------------------------------
-// string formatting
-//----------------------------------------------------------------------
-
-TEST(timevalops, ToString) {
-	static const struct {
-		time_t	     sec;
-		long	     usec;
-		const char * repr;
-	} data [] = {
-		{ 0, 0,	 "0.000000" },
-		{ 2, 0,	 "2.000000" },
-		{-2, 0, "-2.000000" },
-		{ 0, 1,	 "0.000001" },
-		{ 0,-1,	"-0.000001" },
-		{ 1,-1,	 "0.999999" },
-		{-1, 1, "-0.999999" },
-		{-1,-1, "-1.000001" },
-	};
-	int i;
-
-	for (i = 0; i < (int)COUNTOF(data); ++i) {
-		struct timeval a = timeval_init(data[i].sec, data[i].usec);
-		const char *  E = data[i].repr;
-		const char *  r = tvaltoa(a);
-
-		TEST_ASSERT_EQUAL_STRING(E, r);
-	}
-
-	return;
-}
-
-
 TEST_GROUP_RUNNER(timevalops) {
 	RUN_TEST_CASE(timevalops, Helpers1);
 	RUN_TEST_CASE(timevalops, Normalise);
@@ -693,13 +580,8 @@ TEST_GROUP_RUNNER(timevalops) {
 	RUN_TEST_CASE(timevalops, CmpFracLT);
 	RUN_TEST_CASE(timevalops, AddFullNorm);
 	RUN_TEST_CASE(timevalops, AddFullOflow1);
-	RUN_TEST_CASE(timevalops, AddUsecNorm);
-	RUN_TEST_CASE(timevalops, AddUsecOflow1);
 	RUN_TEST_CASE(timevalops, SubFullNorm);
 	RUN_TEST_CASE(timevalops, SubFullOflow);
-	RUN_TEST_CASE(timevalops, SubUsecNorm);
-	RUN_TEST_CASE(timevalops, SubUsecOflow);
-	RUN_TEST_CASE(timevalops, Neg);
 	RUN_TEST_CASE(timevalops, AbsNoFrac);
 	RUN_TEST_CASE(timevalops, AbsWithFrac);
 	/* RUN_TEST_CASE(timevalops, Helpers2); */
@@ -711,7 +593,6 @@ TEST_GROUP_RUNNER(timevalops) {
 	RUN_TEST_CASE(timevalops, FromLFPrelPos);
 	RUN_TEST_CASE(timevalops, FromLFPrelNeg);
 	RUN_TEST_CASE(timevalops, LFProundtrip);
-	RUN_TEST_CASE(timevalops, ToString);
 }
 
 // -*- EOF -*-
