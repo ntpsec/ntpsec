@@ -477,7 +477,7 @@ This is the release checklist to be used by the project manager to cut each 0.9.
 
 . Email a warning message to the devel list, and ask each of the major
   contributors to chime in, and to each assure that the .../NEWS file
-  and the ../deve/TODO file is up to date.
+  and the ../devel/TODO file is up to date.
 
 . Wait 4 days for the contributors to check in and for the discussion
   to settle down.  If the discussion suggests that now is not a good
