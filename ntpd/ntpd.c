@@ -1082,7 +1082,7 @@ wait_child_sync_if(
 	time_t	cur_time;
 	time_t	wait_rem;
 	fd_set	readset;
-	struct timeval wtimeout;
+	struct timespec wtimeout;
 
 	if (0 == wait_sync) 
 		return 0;
@@ -1096,11 +1096,11 @@ wait_child_sync_if(
 				? (wait_end_time - cur_time)
 				: 0;
 		wtimeout.tv_sec = wait_rem;
-		wtimeout.tv_usec = 0;
+		wtimeout.tv_nsec = 0;
 		FD_ZERO(&readset);
 		FD_SET(pipe_read_fd, &readset);
-		rc = select(pipe_read_fd + 1, &readset, NULL, NULL,
-			    &wtimeout);
+		rc = pselect(pipe_read_fd + 1, &readset, NULL, NULL,
+			     &wtimeout, NULL);
 		if (-1 == rc) {
 			if (EINTR == errno)
 				continue;
@@ -1119,9 +1119,9 @@ wait_child_sync_if(
 			FD_ZERO(&readset);
 			FD_SET(pipe_read_fd, &readset);
 			wtimeout.tv_sec = 0;
-			wtimeout.tv_usec = 0;
-			rc = select(pipe_read_fd + 1, &readset, NULL,
-				    NULL, &wtimeout);
+			wtimeout.tv_nsec = 0;
+			rc = pselect(pipe_read_fd + 1, &readset, NULL,
+				     NULL, &wtimeout, NULL);
 			if (0 == rc)	/* select() timeout */
 				break;
 			else		/* readable */
