@@ -713,8 +713,9 @@ plot \
  5%% = %(five)s  %(unit)s, &nbsp;
  1%% = %(one)s  %(unit)s<br>
 Ranges: 99%% - 1%% = %(nn_m_o)s %(unit)s, &nbsp;
- 95%% - 5%% = %(nf_m_f)s %(unit)s, &nbsp;
- 1σ = %(values_pstd)s %(unit)s</p>
+ 95%% - 5%% = %(nf_m_f)s %(unit)s<br>
+Deviation: mean = %(values_mean_str)s %(unit)s,  &nbsp;
+1σ = %(values_pstd)s %(unit)s</p>
 <p>This shows the clock offsets of the local clock as a histogram.</p>
 """ % locals()
         ret = {'html' : exp, 'percs' : percs }
