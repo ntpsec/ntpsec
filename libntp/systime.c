@@ -254,7 +254,7 @@ adj_systime(
 	bool	isneg = false;
 
 	/*
-	 * FIXME: With the legacy Windows port on, this might be removable.
+	 * FIXME: With the legacy Windows port gone, this might be removable.
 	 * See also the related FIXME comment in ntpd/ntp_loopfilter.c.
 	 *
 	 * The Windows port adj_systime() depended on being called each
