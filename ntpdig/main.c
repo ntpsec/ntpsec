@@ -46,7 +46,7 @@ struct dns_ctx {
 #define CTX_CONC	0x0004
 #define CTX_unused	0xfffd
 	int		key_id;
-	struct timeval	timeout;
+	struct timespec	timeout;
 	struct key *	key;
 };
 
@@ -68,14 +68,14 @@ struct xmt_ctx_tag {
 	sent_pkt *		spkt;
 };
 
-struct timeval	gap;
+struct timespec	gap;
 xmt_ctx *	xmt_q;
 struct key *	keys = NULL;
 float		response_timeout;
-struct timeval	response_tv;
-struct timeval	start_tv;
+struct timespec	response_tv;
+struct timespec	start_tv;
 /* check the timeout at least once per second */
-struct timeval	wakeup_tv = { 0, 888888 };
+struct timespec	wakeup_tv = { 0, 888888 };
 
 sent_pkt *	fam_listheads[2];
 #define v4_pkts_list	(fam_listheads[0])
@@ -116,7 +116,7 @@ void set_li_vn_mode(struct pkt *spkt, char leap, char version, char mode);
 int  set_time(double offset);
 void dec_pending_ntp(const char *, sockaddr_u *);
 bool libevent_version_ok(void);
-int  gettimeofday_cached(struct event_base *b, struct timeval *tv);
+int  gettimeofday_cached(struct event_base *b, struct timespec *tv);
 
 #define ALL_OPTIONS "46a:b:c:dD:g:hjK:k:l:M:o:rSst:VwW"
 static const struct option longoptions[] = {
@@ -319,8 +319,8 @@ ntpdig_main (
 		      : ""));
 	ntpver = opt_ntpversion;
 	steplimit = opt_steplimit / 1e3;
-	gap.tv_usec = max(0, opt_gap * 1000);
-	gap.tv_usec = min(gap.tv_usec, 999999);
+	gap.tv_nsec = max(0, opt_gap * 1000000);
+	gap.tv_nsec = min(gap.tv_nsec, NANOSECONDS-1);
 
 	if (opt_logfile)
 		open_logfile(opt_logfile);
@@ -342,7 +342,7 @@ ntpdig_main (
 
 	response_timeout = opt_timeout;
 	response_tv.tv_sec = (int)response_timeout;
-	response_tv.tv_usec = (response_timeout - (int)response_timeout) * MICROSECONDS;
+	response_tv.tv_nsec = (response_timeout - (int)response_timeout) * NANOSECONDS;
 
 	/* IPv6 available? */
 	if (isc_net_probeipv6_bool()) {
@@ -427,6 +427,24 @@ ntpdig_main (
 	return exitcode;
 }
 
+static struct timeval
+tspec_to_tval(struct timespec x)
+{
+    struct timeval y;
+    y.tv_sec = x.tv_sec;
+    y.tv_usec = x.tv_nsec / 1000;
+    return y;
+}
+
+static void ns_event_add(
+    struct event *event,
+    struct timespec x
+    )
+{
+    struct timeval y = tspec_to_tval(x);
+    event_add(event, &y);
+}
+
 
 /*
 ** open sockets and make them non-blocking
@@ -468,7 +486,7 @@ open_sockets(
 			msyslog(LOG_ERR,
 				"open_sockets: event_new(base, sock4) failed!");
 		} else {
-			event_add(ev_sock4, &wakeup_tv);
+			ns_event_add(ev_sock4, wakeup_tv);
 		}
 	}
 
@@ -502,7 +520,7 @@ open_sockets(
 			msyslog(LOG_ERR,
 				"open_sockets: event_new(base, sock6) failed!");
 		} else {
-			event_add(ev_sock6, &wakeup_tv);
+			ns_event_add(ev_sock6, wakeup_tv);
 		}
 	}
 	
@@ -682,8 +700,8 @@ queue_xmt(
 	sent_pkt **	pkt_listp;
 	sent_pkt *	match;
 	xmt_ctx *	xctx;
-	struct timeval	start_cb;
-	struct timeval	delay;
+	struct timespec	start_cb;
+	struct timespec	delay;
 
 	UNUSED_ARG(dctx);
 
@@ -740,9 +758,9 @@ queue_xmt(
 		ZERO(delay);
 		if (xctx->sched > start_cb.tv_sec)
 			delay.tv_sec = xctx->sched - start_cb.tv_sec;
-		event_add(ev_xmt_timer, &delay);
+		ns_event_add(ev_xmt_timer, delay);
 		TRACE(2, ("queue_xmt: xmt timer for %u usec\n",
-			  (u_int)delay.tv_usec));
+			  (u_int)delay.tv_nsec/1000));
 	}
 }
 
@@ -757,8 +775,8 @@ xmt_timer_cb(
 	void *		ctx
 	)
 {
-	struct timeval	start_cb;
-	struct timeval	delay;
+	struct timespec	start_cb;
+	struct timespec	delay;
 	xmt_ctx *	x;
 
 	UNUSED_ARG(fd);
@@ -772,23 +790,23 @@ xmt_timer_cb(
 	if (xmt_q->sched <= start_cb.tv_sec) {
 		UNLINK_HEAD_SLIST(x, xmt_q, link);
 		TRACE(2, ("xmt_timer_cb: at .%6.6u -> %s\n",
-			  (u_int)start_cb.tv_usec, socktoa(&x->spkt->addr)));
+			  (u_int)start_cb.tv_nsec/1000, socktoa(&x->spkt->addr)));
 		xmt(x);
 		free(x);
 		if (NULL == xmt_q)
 			return;
 	}
 	if (xmt_q->sched <= start_cb.tv_sec) {
-		event_add(ev_xmt_timer, &gap);
+		ns_event_add(ev_xmt_timer, gap);
 		TRACE(2, ("xmt_timer_cb: at .%6.6u gap %6.6u\n",
-			  (u_int)start_cb.tv_usec,
-			  (u_int)gap.tv_usec));
+			  (u_int)start_cb.tv_nsec/1000,
+			  (u_int)gap.tv_nsec));
 	} else {
 		delay.tv_sec = xmt_q->sched - start_cb.tv_sec;
-		delay.tv_usec = 0;
-		event_add(ev_xmt_timer, &delay);
+		delay.tv_nsec = 0;
+		ns_event_add(ev_xmt_timer, delay);
 		TRACE(2, ("xmt_timer_cb: at .%6.6u next %ld seconds\n",
-			  (u_int)start_cb.tv_usec,
+			  (u_int)start_cb.tv_nsec/1000,
 			  (long)delay.tv_sec));
 	}
 }
@@ -806,12 +824,12 @@ xmt(
 	struct dns_ctx *dctx = xctx->spkt->dctx;
 	sent_pkt *	spkt = xctx->spkt;
 	sockaddr_u *	dst = &spkt->addr;
-	struct timeval	tv_xmt;
+	struct timespec	tv_xmt;
 	struct pkt	x_pkt;
 	size_t		pkt_len;
 	int		sent;
 
-	if (0 != gettimeofday(&tv_xmt, NULL)) {
+	if (0 != clock_gettime(CLOCK_REALTIME, &tv_xmt)) {
 		msyslog(LOG_ERR,
 			"xmt: gettimeofday() failed: %m");
 		exit(1);
@@ -829,7 +847,7 @@ xmt(
 		spkt->stime = tv_xmt.tv_sec - JAN_1970;
 
 		TRACE(2, ("xmt: %lx.%6.6u %s %s\n", (u_long)tv_xmt.tv_sec,
-			  (u_int)tv_xmt.tv_usec, dctx->name, socktoa(dst)));
+			  (u_int)tv_xmt.tv_nsec/1000, dctx->name, socktoa(dst)));
 	} else {
 		dec_pending_ntp(dctx->name, dst);
 	}
@@ -844,7 +862,7 @@ xmt(
 void
 timeout_queries(void)
 {
-	struct timeval	start_cb;
+	struct timespec	start_cb;
 	u_int		idx;
 	sent_pkt *	head;
 	sent_pkt *	spkt;
@@ -1170,7 +1188,7 @@ intres_timeout_req(
 	u_int	seconds		/* 0 cancels */
 	)
 {
-	struct timeval	tv_to;
+	struct timespec	tv_to;
 
 	if (NULL == ev_worker_timeout) {
 		ev_worker_timeout = event_new(base, -1,
@@ -1183,8 +1201,8 @@ intres_timeout_req(
 	if (0 == seconds)
 		return;
 	tv_to.tv_sec = seconds;
-	tv_to.tv_usec = 0;
-	event_add(ev_worker_timeout, &tv_to);
+	tv_to.tv_nsec = 0;
+	ns_event_add(ev_worker_timeout, tv_to);
 }
 
 
@@ -1241,7 +1259,7 @@ ntpdig_libevent_log_cb(
 int
 generate_pkt (
 	struct pkt *x_pkt,
-	const struct timeval *tv_xmt,
+	const struct timespec *tv_xmt,
 	int key_id,
 	struct key *pkt_key
 	)
@@ -1252,7 +1270,7 @@ generate_pkt (
 
 	pkt_len = LEN_PKT_NOMAC;
 	ZERO(*x_pkt);
-	TVTOTS(tv_xmt, &xmt_fp);
+	xmt_fp = tspec_stamp_to_lfp(*tv_xmt);
 	HTONL_FP(&xmt_fp, &x_pkt->xmt);
 	x_pkt->stratum = STRATUM_TO_PKT(STRATUM_UNSPEC);
 	x_pkt->ppoll = 8;
@@ -1280,7 +1298,7 @@ handle_pkt(
 {
 	char		disptxt[32];
 	const char *	addrtxt;
-	struct timeval	tv_dst;
+	struct timespec	tv_dst;
 	int		cnt;
 	int		sw_case;
 	int		digits;
@@ -1441,7 +1459,7 @@ void
 offset_calculation(
 	struct pkt *rpkt,
 	int rpktl,
-	struct timeval *tv_dst,
+	struct timespec *tv_dst,
 	double *offset,
 	double *precision,
 	double *synch_distance
@@ -1471,7 +1489,7 @@ offset_calculation(
 	tmp = p_rec;
 	L_SUB(&tmp, &p_org);
 	LFPTOD(&tmp, t21);
-	TVTOTS(tv_dst, &dst);
+	dst = tspec_stamp_to_lfp(*tv_dst);
 	dst.l_ui += JAN_1970;
 	tmp = p_xmt;
 	L_SUB(&tmp, &dst);
@@ -1671,23 +1689,25 @@ libevent_version_ok(void)
 int
 gettimeofday_cached(
 	struct event_base *	b,
-	struct timeval *	caller_tv
+	struct timespec *	caller_tv
 	)
 {
 	static struct event_base *	cached_b;
-	static struct timeval		cached;
-	static struct timeval		adj_cached;
-	static struct timeval		offset;
+	static struct timespec		cached;
+	static struct timespec		adj_cached;
+	static struct timespec		offset;
 	static int			offset_ready;
-	struct timeval			latest;
-	struct timeval			systemt;
+	struct timespec			latest;
+	struct timeval			us_latest;
+	struct timespec			systemt;
 	struct timespec			ts;
-	struct timeval			mono;
-	struct timeval			diff;
+	struct timespec			mono;
+	struct timespec			diff;
 	int				cgt_rc;
 	int				gtod_rc;
 
-	event_base_gettimeofday_cached(b, &latest);
+	us_latest = tspec_to_tval(latest);
+	event_base_gettimeofday_cached(b, &us_latest);
 	if (b == cached_b &&
 	    !memcmp(&latest, &cached, sizeof(latest))) {
 		*caller_tv = adj_cached;
@@ -1697,17 +1717,17 @@ gettimeofday_cached(
 	cached_b = b;
 	if (!offset_ready) {
 		cgt_rc = clock_gettime(CLOCK_MONOTONIC, &ts);
-		gtod_rc = gettimeofday(&systemt, NULL);
+		gtod_rc = clock_gettime(CLOCK_MONOTONIC, &systemt);
 		if (0 != gtod_rc) {
 			msyslog(LOG_ERR,
-				"%s: gettimeofday() error %m",
+				"%s: clock_gettime() error %m",
 				progname);
 			exit(1);
 		}
-		diff = sub_tval(systemt, latest);
+		diff = sub_tspec(systemt, latest);
 		if (debug > 1)
 			printf("system minus cached %+ld.%06ld\n",
-			       (long)diff.tv_sec, (long)diff.tv_usec);
+			       (long)diff.tv_sec, (long)diff.tv_nsec/1000);
 		if (0 != cgt_rc || labs((long)diff.tv_sec) < 3600) {
 			/*
 			 * Either use_monotonic == 0, or this libevent
@@ -1715,23 +1735,23 @@ gettimeofday_cached(
 			 */
 		} else {
 			mono.tv_sec = ts.tv_sec;
-			mono.tv_usec = ts.tv_nsec / 1000;
-			diff = sub_tval(latest, mono);
+			mono.tv_nsec = ts.tv_nsec / 1000;
+			diff = sub_tspec(latest, mono);
 			if (debug > 1)
 				printf("cached minus monotonic %+ld.%06ld\n",
-				       (long)diff.tv_sec, (long)diff.tv_usec);
+				       (long)diff.tv_sec, (long)diff.tv_nsec/1000);
 			if (labs((long)diff.tv_sec) < 3600) {
 				/* older libevent2 using monotonic */
-				offset = sub_tval(systemt, mono);
+				offset = sub_tspec(systemt, mono);
 				TRACE(1, ("%s: Offsetting libevent CLOCK_MONOTONIC times  by %+ld.%06ld\n",
 					 "gettimeofday_cached",
 					 (long)offset.tv_sec,
-					 (long)offset.tv_usec));
+					 (long)offset.tv_nsec/1000));
 			}
 		}
 		offset_ready = true;
 	}
-	adj_cached = add_tval(cached, offset);
+	adj_cached = add_tspec(cached, offset);
 	*caller_tv = adj_cached;
 
 	return 0;
