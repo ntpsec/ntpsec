@@ -18,8 +18,7 @@
 #include <stdio.h>
 
 #include "ntp.h"
-#include "timetoa.h"
-
+#include "ntp_unixtime.h"
 
 /* microseconds per second */
 #define MICROSECONDS 1000000
@@ -80,13 +79,6 @@
 		} \
 	} while (false)
 
-
-/*
- * predicate: returns true if the microseconds are in nominal range
- * use like: int timeval_isnormal(const struct timeval *x)
- */
-#define timeval_isnormal(x) \
-	((x)->tv_usec >= 0 && (x)->tv_usec < MICROSECONDS)
 
 /* make sure microseconds are in nominal range */
 static inline struct timeval
@@ -183,57 +175,6 @@ abs_tval(
 	}
 
 	return c;
-}
-
-/*
- * compare previously-normalised a and b
- * return 1 / 0 / -1 if a < / == / > b
- */
-static inline int
-cmp_tval(
-	struct timeval a,
-	struct timeval b
-	)
-{
-	int r;
-
-	r = (a.tv_sec > b.tv_sec) - (a.tv_sec < b.tv_sec);
-	if (0 == r)
-		r = (a.tv_usec > b.tv_usec) -
-		    (a.tv_usec < b.tv_usec);
-	
-	return r;
-}
-
-/*
- * compare possibly-denormal a and b
- * return 1 / 0 / -1 if a < / == / > b
- */
-static inline int
-cmp_tval_denorm(
-	struct timeval	a,
-	struct timeval	b
-	)
-{
-	return cmp_tval(normalize_tval(a), normalize_tval(b));
-}
-
-/*
- * test previously-normalised a
- * return 1 / 0 / -1 if a < / == / > 0
- */
-static inline int
-test_tval(
-	struct timeval	a
-	)
-{
-	int		r;
-
-	r = (a.tv_sec > 0) - (a.tv_sec < 0);
-	if (r == 0)
-		r = (a.tv_usec > 0);
-	
-	return r;
 }
 
 /* convert from timeval duration to l_fp duration */
