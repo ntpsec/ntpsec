@@ -66,6 +66,26 @@ static l_fp l_fp_init(int32_t i, uint32_t f)
 	return temp;
 }
 
+/*
+ * compare previously-normalised a and b
+ * return 1 / 0 / -1 if a < / == / > b
+ */
+static inline int
+cmp_tval(
+	struct timeval a,
+	struct timeval b
+	)
+{
+	int r;
+
+	r = (a.tv_sec > b.tv_sec) - (a.tv_sec < b.tv_sec);
+	if (0 == r)
+		r = (a.tv_usec > b.tv_usec) -
+		    (a.tv_usec < b.tv_usec);
+	
+	return r;
+}
+
 static bool AssertTimevalClose(const struct timeval m, const struct timeval n,
 			const struct timeval limit)
 {
@@ -174,6 +194,24 @@ TEST(timevalops, Helpers1) {
 // test normalisation
 //----------------------------------------------------------------------
 
+/*
+ * test previously-normalised a
+ * return 1 / 0 / -1 if a < / == / > 0
+ */
+static inline int
+test_tval(
+	struct timeval	a
+	)
+{
+	int		r;
+
+	r = (a.tv_sec > 0) - (a.tv_sec < 0);
+	if (r == 0)
+		r = (a.tv_usec > 0);
+
+	return r;
+}
+
 TEST(timevalops, Normalise) {
 	long ns;
 
@@ -225,6 +263,13 @@ TEST(timevalops, SignWithFrac) {
 //----------------------------------------------------------------------
 // test compare
 //----------------------------------------------------------------------
+
+/*
+ * compare possibly-denormal a and b
+ * return 1 / 0 / -1 if a < / == / > b
+ */
+#define cmp_tval_denorm(a, b)	cmp_tval(normalize_tval(a), normalize_tval(b))
+
 TEST(timevalops, CmpFracEQ) {
 	int i, j;
 
@@ -573,8 +618,6 @@ TEST(timevalops, LFProundtrip) {
 TEST_GROUP_RUNNER(timevalops) {
 	RUN_TEST_CASE(timevalops, Helpers1);
 	RUN_TEST_CASE(timevalops, Normalise);
-	RUN_TEST_CASE(timevalops, SignNoFrac);
-	RUN_TEST_CASE(timevalops, SignWithFrac);
 	RUN_TEST_CASE(timevalops, CmpFracEQ);
 	RUN_TEST_CASE(timevalops, CmpFracGT);
 	RUN_TEST_CASE(timevalops, CmpFracLT);
