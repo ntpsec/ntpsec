@@ -1355,8 +1355,7 @@ peer_clear(
 	} else {
 	    /*
 	     * Randomizing the next poll interval used to be done with
-	     * ntp_random(); this leads to replay-mode problems and is
-	     * unnecessary, any deterministic but uniformly
+	     * ntp_random(); any deterministic but uniformly
 	     * distributed function of the peer state would be good
 	     * enough.	Furthermore, changing the function creates no
 	     * interop problems. For security reasons (to prevent
@@ -2729,10 +2728,6 @@ measure_tick_fuzz(void)
 	DTOLFP(MINSTEP, &minstep);
 	get_systime(&last);
 	for (i = 0; i < MAXLOOPS && changes < MINCHANGES; i++) {
-		/*
-		 * Not intercepted because it's called a variable
-		 * number of times, which screws up replay.
-		 */
 		get_systime(&val);
 		ldiff = val;
 		L_SUB(&ldiff, &last);

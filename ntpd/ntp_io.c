@@ -3242,10 +3242,6 @@ fetch_timestamp(
 				break;
 #endif  /* USE_SCM_TIMESTAMP */
 			}
-			/*
-			 * RNG call does not have to be recorded for replay
-			 * because the fuzzed timestamp is recorded.
-			 */
 			fuzz = ntp_random() * 2. / FRAC * sys_fuzz;
 			DTOLFP(fuzz, &lfpfuzz);
 			L_ADD(&nts, &lfpfuzz);
@@ -3621,10 +3617,8 @@ input_handler(
 #ifdef ENABLE_DEBUG_TIMING
 	get_systime(&ts_e);
 	/*
-	 * (ts_e - ts) is the amount of time we spent
-	 * processing this gob of file descriptors.  Log
-	 * it.  Because it's only used for logging, this
-	 * get_systime doesn't have to be captured/replayed.
+	 * (ts_e - ts) is the amount of time we spent processing this
+	 * gob of file descriptors.  Log it.
 	 */
 	L_SUB(&ts_e, &ts);
 	collect_timing(NULL, "input handler", 1, &ts_e);
