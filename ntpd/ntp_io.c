@@ -27,7 +27,7 @@
 #include "ntp_stdlib.h"
 #include "ntp_worker.h"
 #include "ntp_assert.h"
-#include "ntp_unixtime.h"
+#include "timevalops.h"
 #include "timespecops.h"
 
 #include <isc/mem.h>
