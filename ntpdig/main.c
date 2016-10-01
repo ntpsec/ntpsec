@@ -1700,7 +1700,6 @@ gettimeofday_cached(
 	struct timespec			latest;
 	struct timeval			us_latest;
 	struct timespec			systemt;
-	struct timespec			ts;
 	struct timespec			mono;
 	struct timespec			diff;
 	int				cgt_rc;
