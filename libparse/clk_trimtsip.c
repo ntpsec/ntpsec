@@ -11,7 +11,7 @@
 #include "ntp_syslog.h"
 #include "ntp_types.h"
 #include "ntp_fp.h"
-#include "timevalops.h"
+#include "timespecops.h"
 #include "ntp_calendar.h"
 #include "ntp_machine.h"
 #include "ntp_stdlib.h"
@@ -249,6 +249,15 @@ cvt_trimtsip(
 				    gpstime.l_uf = secs.l_uf;
 
 				    clock_time->utctime = gpstime.l_ui - JAN_1970;
+
+/*
+ * Convert a time stamp fraction to microseconds.  The time stamp
+ * fraction is assumed to be unsigned.
+ */
+#define MICROSECONDS 1000000
+#define TSFTOTVU(tsf, tvu)						\
+	 ((tvu) = (int32_t)						\
+		  (((uint64_t)(tsf) * MICROSECONDS + 0x80000000) >> 32))
 
 				    TSFTOTVU(gpstime.l_uf, clock_time->usecond);
 

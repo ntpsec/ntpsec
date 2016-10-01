@@ -10,7 +10,7 @@
 #include <config.h>
 
 #include "ntp_fp.h"
-#include "timevalops.h"
+#include "ntp_calendar.h"
 #include "ntp_syscall.h"
 #include "ntp_stdlib.h"
 
@@ -19,6 +19,26 @@
 #include <signal.h>
 #include <setjmp.h>
 #include <stdbool.h>
+
+/* microseconds per second */
+#define MICROSECONDS 1000000
+
+/*
+ * Convert usec to a time stamp fraction.
+ */
+# define TVUTOTSF(tvu, tsf)						\
+	((tsf) = (uint32_t)						\
+		 ((((uint64_t)(tvu) << 32) + MICROSECONDS / 2) /		\
+		  MICROSECONDS))
+
+/*
+ * Convert a struct timeval to a time stamp.
+ */
+#define TVTOTS(tv, ts) \
+	do { \
+		(ts)->l_ui = (u_long)(tv)->tv_sec; \
+		TVUTOTSF((tv)->tv_usec, (ts)->l_uf); \
+	} while (false)
 
 #ifdef STRUCT_NTPTIMEVAL_HAS_TIME_TV_NSEC
 #define tv_frac_sec tv_nsec

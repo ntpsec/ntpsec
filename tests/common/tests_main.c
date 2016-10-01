@@ -62,9 +62,6 @@ static void RunAllTests(void)
 	RUN_TEST_GROUP(statestr);
 	RUN_TEST_GROUP(strtolfp);
 	RUN_TEST_GROUP(timespecops);
-	RUN_TEST_GROUP(timevalops);
-	RUN_TEST_GROUP(tstotv);
-	RUN_TEST_GROUP(tvtots);
 	RUN_TEST_GROUP(vi64ops);
 	RUN_TEST_GROUP(ymd2yd);
 #endif

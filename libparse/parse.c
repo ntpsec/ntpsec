@@ -9,7 +9,7 @@
 
 #include <config.h>
 #include "ntp_fp.h"
-#include "timevalops.h"
+#include "timespecops.h"
 #include "ntp_calendar.h"
 #include "ntp_stdlib.h"
 #include "ntp_machine.h"
@@ -28,18 +28,18 @@ bool
 parse_timedout(
 	       parse_t *parseio,
 	       timestamp_t *tstamp,
-	       struct timeval *del
+	       struct timespec *del
 	       )
 {
-	struct timeval delta;
+	struct timespec delta;
 
 	l_fp delt;
 
 	delt = tstamp->fp;
 	L_SUB(&delt, &parseio->parse_lastchar.fp);
-	TSTOTV(&delt, &delta);
+	delta = lfp_stamp_to_tspec(delt, NULL);
 
-	if (timercmp(&delta, del, >))
+	if (cmp_tspec(delta, *del) == -1)
 	{
 		parseprintf(DD_PARSE, ("parse: timedout: TRUE\n"));
 		return true;
@@ -617,6 +617,17 @@ timepacket(
 	{
 		return CVT_FAIL|cvtrtc;
 	}
+
+/* microseconds per second */
+#define MICROSECONDS 1000000
+
+/*
+ * Convert usec to a time stamp fraction.
+ */
+# define TVUTOTSF(tvu, tsf)						\
+	((tsf) = (uint32_t)						\
+		 ((((uint64_t)(tvu) << 32) + MICROSECONDS / 2) /		\
+		  MICROSECONDS))
 
 	/*
 	 * time stamp
