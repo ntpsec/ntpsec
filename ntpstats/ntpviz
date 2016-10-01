@@ -62,6 +62,98 @@ def pstdev(data, mu=None):
     return pvar**0.5
 
 # end standard deviation functions
+
+# class for calced values
+class VizStats(NTPStats):
+    percs       = {}          # dictionary of percentages
+    unit        = 's'         # display units: s, ppm, etc.
+    multiplier  = 1
+    ninetynine  = 0     # 99%
+    ninetyfive  = 0     # 90%
+    fifty       = 0     # 50%
+    five        = 0     # 5%
+    one         = 0     # 1%
+
+    nf_m_f      = 0     # 95% - 5%
+    nn_m_o      = 0     # 99% - 1%
+
+    mu          = 0     # arithmetic mean
+    pstd        = 0     # population standard distribution, one sigma
+
+    stats_html  = ''
+    
+    def __init__( self, values, freq=0 ):
+
+        values.sort()
+        self.percs = self.percentiles( (100, 99, 95, 50, 5, 1, 0), values)
+
+        # find the target for autoranging
+        # keep 99% and 5% under 999 in selected units
+        # but do not let 100% and 1% go over 5000 in selected units
+        target = max(self.percs[99], -self.percs[1], self.percs[100]/5,
+                     -self.percs[0]/5)
+        if 1 <= target:
+            # go to seconds
+            self.multiplier = 1
+            if freq:
+                self.unit = "ppo"
+            else:
+                self.unit = "s"
+
+        elif 1e-3 <= target:
+            # go to millisec
+            self.multiplier = 1e3
+            if freq:
+                self.unit = "ppt"
+            else:
+                self.unit = "ms"
+
+        elif 1e-6 <= target:
+            # go to microsec, or ppm
+            self.multiplier = 1e6
+            if freq:
+                self.unit = "ppm"
+            else:
+                self.unit = "µs"
+
+        else:
+            # go to nanosec, or ppb
+            self.multiplier = 1e9
+            if freq:
+                self.unit = "ppb"
+            else:
+                self.unit = "ns"
+
+        self.percs.update({k: v * self.multiplier
+                     for k, v in list(self.percs.items())})
+
+        self.ninetynine  = self.percs[99]
+        self.ninetyfive  = self.percs[95]
+        self.fifty       = self.percs[50]
+        self.five        = self.percs[5]
+        self.one         = self.percs[1]
+
+        self.nf_m_f     = self.ninetyfive - self.five
+        self.nn_m_o     = self.ninetynine - self.one
+
+        self.mu = mean( values )
+        self.pstd = pstdev( values, mu=self.mu ) * self.multiplier
+        self.mu *= self.multiplier
+        self.stats_html =  """\
+<p>Percentiles: 99%% = %(ninetynine)s %(unit)s, &nbsp;
+ 95%% = %(ninetyfive).3f  %(unit)s, &nbsp;
+ 50%% = %(fifty).3f  %(unit)s, &nbsp;
+ 5%% = %(five).3f  %(unit)s, &nbsp;
+ 1%% = %(one).3f  %(unit)s<br>
+Ranges: 99%% - 1%% = %(nn_m_o).3f %(unit)s, &nbsp;
+ 95%% - 5%% = %(nf_m_f).3f %(unit)s<br>
+Deviation: Mean = %(mu).3f %(unit)s,  &nbsp;
+1σ = %(pstd).3f %(unit)s</p>
+""" % self.__dict__
+
+
+# end calc things now
+
 # RMS frequency jitter - Deviation from a root-mean-square linear approximation?
 # Investigate.
 
@@ -125,29 +217,18 @@ set rmargin 12
             sys.stderr.write("ntpviz: WARNING: no loopstats to graph\n")
             return ''
         sitename = self.sitename
-        unit = "μs"
-        multiplier = 1e6
+
+        # compute clock offset
         values = [float(line.split()[1]) for line in self.loopstats]
-        values.sort()
+        stats = VizStats( values )
+        unit = stats.unit
+        multiplier = stats.multiplier
 
-        percs = self.percentiles( (99, 1), values)
-
-        if 1e-6 > percs[99] and -1e-6 < percs[1]:
-            # go to nanosec
-            unit = "ns"
-            multiplier = 1e9
-
-        unit_f = "ppm"
-        multiplier_f = 1
+        # compute frequency offset
         values_f = [float(line.split()[2]) for line in self.loopstats]
-        values_f.sort()
-
-        percs_f = self.percentiles( (99, 1), values_f)
-
-        if 1 > percs_f[99] and -1 < percs_f[1]:
-            # go to nanosec
-            unit_f = "ppb"
-            multiplier_f = 1e3
+        stats = VizStats( values_f, freq=1 )
+        unit_f = stats.unit
+        multiplier_f = stats.multiplier
 
         plot_template = NTPViz.Common + """\
 set title "%(sitename)s: Local Clock Time/Frequency Offsets"
@@ -173,7 +254,7 @@ file.</p>
 
 """
 
-        ret = {'html' : exp, 'percs' : percs }
+        ret = {'html' : exp, 'percs' : stats.percs }
         ret['title'] = "Local Clock Time/Frequency Offsets"
         ret['plot'] = plot_template + self.dump("loopstats") + "e\n" \
              + self.dump("loopstats")
@@ -277,34 +358,25 @@ a local gpsd daemon, and logging the data using gps-log.py.</p>
             return ''
         sitename = self.sitename
         # grab and sort the values, no need for the timestamp, etc.
+
+        # compute freqency offset
         values = [float(line.split()[2]) for line in self.loopstats]
-        values.sort()
+        stats = VizStats( values, freq=1 )
+        unit = stats.unit
+        multiplier = stats.multiplier
+        percs = stats.percs
 
-        multiplier = 1
-        unit = "ppm"
-        rnd = 3
+        ninetynine  = stats.ninetynine
+        ninetyfive  = stats.ninetyfive
+        fifty       = stats.fifty
+        five        = stats.five
+        one         = stats.one
 
-        percs = self.percentiles( (99, 95, 50, 5, 1), values)
+        nf_m_f      = stats.nf_m_f
+        nn_m_o      = stats.nn_m_o
 
-        if 1 > percs[99] and -1 < percs[1]:
-            # go to ppb
-            multiplier = 1e3
-            unit = "ppb"
-            rnd = 0
-
-        percs.update({k: round( v * multiplier, rnd) for k, v in list(percs.items())})
-        ninetynine  = percs[99]
-        ninetyfive  = percs[95]
-        fifty       = percs[50]
-        five        = percs[5]
-        one         = percs[1]
-
-        nf_m_f     = percs[95] - percs[5]
-        nn_m_o     = percs[99] - percs[1]
-
-        mu = mean( values )
-        values_pstd = pstdev( values, mu=mu ) * multiplier
-        mu *= multiplier
+        mu          = stats.mu
+        pstd        = stats.pstd
 
         plot_template = NTPViz.Common + """\
 set title "%(sitename)s: Local Clock Frequency Offset"
@@ -321,15 +393,6 @@ plot \
 """ % locals()
 
         exp = """\
-<p>Percentiles: 99%% = %(ninetynine)s %(unit)s, &nbsp;
- 95%% = %(ninetyfive).3f  %(unit)s, &nbsp;
- 50%% = %(fifty).3f  %(unit)s, &nbsp;
- 5%% = %(five).3f  %(unit)s, &nbsp;
- 1%% = %(one).3f  %(unit)s<br>
-Ranges: 99%% - 1%% = %(nn_m_o).3f %(unit)s, &nbsp;
- 95%% - 5%% = %(nf_m_f).3f %(unit)s<br>
-Deviation: Mean = %(mu).3f %(unit)s, &nbsp;
-1σ = %(values_pstd).3f %(unit)s</p>
 <p>This shows the frequency offset of the local clock (aka drift).  The
 graph includes percentile data to show how much the frequency changes
 over a longer period of time.  The majority of this change should come
@@ -341,7 +404,7 @@ line at 0ppm.  Expected values of 99%%-1%% percentiles: 0.4ppm</p>
 
 <p>The Frequency Offset comes from field 3 of the loopstats log file.</p>
 """ % locals()
-        ret = {'html' : exp, 'percs' : percs }
+        ret = {'html' : stats.stats_html + exp, 'percs' : stats.percs }
         ret['title'] = "Local Clock Frequency Offset"
         ret['plot'] = plot_template + self.dump("loopstats")
         return ret
@@ -352,10 +415,27 @@ line at 0ppm.  Expected values of 99%%-1%% percentiles: 0.4ppm</p>
             sys.stderr.write("ntpviz: WARNING: no loopstats to graph\n")
             return ''
 
-        multiplier = 1e6
-        rnd = 3
+        sitename   = self.sitename
+        # grab and process the values
+        values = [float(line.split()[fld - 1]) for line in self.loopstats]
+        stats = VizStats( values, freq=freq )
+        unit = stats.unit
+        multiplier = stats.multiplier
+        percs = stats.percs
+
+        ninetynine  = stats.ninetynine
+        ninetyfive  = stats.ninetyfive
+        fifty       = stats.fifty
+        five        = stats.five
+        one         = stats.one
+
+        nf_m_f      = stats.nf_m_f
+        nn_m_o      = stats.nn_m_o
+
+        mu          = stats.mu
+        pstd        = stats.pstd
+
         if freq:
-            unit = "ppm"
             title = "Local Stability"
             exp = """\
 <p>This shows the RMS Frequency Jitter (aka wander) of the local
@@ -368,7 +448,6 @@ freqency.</p>
 <p> RMS Frequency Jitter is field 6 in the loopstats log file.</p>
 """
         else:
-            unit = "μs"
             title = "Local Time RMS Jitter"
             exp = """\
 <p>This shows the RMS Jitter of the local clock offset.  In other words,
@@ -379,44 +458,6 @@ how fast the local clock offset is changing.</p>
 <p>RMS jitter is field 5 in the loopstats log file.</p>
 """
 
-        sitename   = self.sitename
-        # grab and sort the values, no need for the timestamp, etc.
-        values = [float(line.split()[fld - 1]) for line in self.loopstats]
-        values.sort()
-
-        percs = self.percentiles( (99, 95, 50, 5, 1), values)
-
-        if 1e-3 <= percs[99] or -1e-3 >= percs[1]:
-            # go to millisec
-            multiplier = 1e3
-            if freq:
-                unit = "ppt"
-            else:
-                unit = "ms"
-
-        elif 1e-6 > percs[99] and -1e-6 < percs[1]:
-            # go to nanosec, or ppb
-            multiplier = 1e9
-            rnd = 0
-            if freq:
-                unit = "ppb"
-            else:
-                unit = "ns"
-
-        percs.update({k: round( v * multiplier, rnd) \
-                     for k, v in list(percs.items())})
-        ninetynine  = percs[99]
-        ninetyfive  = percs[95]
-        fifty       = percs[50]
-        five        = percs[5]
-        one         = percs[1]
-
-        nf_m_f     = ninetyfive - five
-        nn_m_o     = ninetynine - one
-
-        mu = mean( values )
-        values_pstd = pstdev( values, mu=mu ) * multiplier
-        mu *= multiplier
 
         plot_template = NTPViz.Common + """\
 set title "%(sitename)s: %(title)s"
@@ -432,19 +473,8 @@ plot \
  %(one)s title "1st percentile"
 """ % locals()
 
-        exp = ( """\
-<p>Percentiles: 99%% = %(ninetynine)s %(unit)s, &nbsp;
- 95%% = %(ninetyfive).3f  %(unit)s, &nbsp;
- 50%% = %(fifty).3f  %(unit)s, &nbsp;
- 5%% = %(five).3f  %(unit)s, &nbsp;
- 1%% = %(one).3f  %(unit)s<br>
-Ranges: 99%% - 1%% = %(nn_m_o).3f %(unit)s, &nbsp;
- 95%% - 5%% = %(nf_m_f).3f %(unit)s<br>
-Deviation: Mean = %(mu).3f %(unit)s,  &nbsp;
-1σ = %(values_pstd).3f %(unit)s</p>
-""" % locals() ) +  exp
-
-        ret = {'html' : exp, 'percs' : percs, 'title' : title }
+        ret = {'html' : stats.stats_html + exp, 'percs' : percs, 
+               'title' : title }
         ret['plot'] = plot_template + self.dump("loopstats")
         return ret
 
@@ -497,49 +527,28 @@ Deviation: Mean = %(mu).3f %(unit)s,  &nbsp;
             title += ": "+ peerlist[0]
             # grab and sort the values, no need for the timestamp, etc.
             values = [float(line.split()[fld - 1]) for line in peerdict[ip]]
-            values.sort()
 
-            percs = self.percentiles( (99, 95, 50, 5, 1), values)
+            stats = VizStats( values )
+            unit        = stats.unit
+            multiplier  = stats.multiplier
+            percs       = stats.percs
 
-            if 1e-3 <= percs[99] or -1e-3 >= percs[1]:
-                # go to millisec
-                unit = "ms"
-                multiplier = 1e3
-            elif 1e-6 > percs[99] and -1e-6 < percs[1]:
-                # go to nanosec
-                unit = "ns"
-                multiplier = 1e9
+            ninetynine  = stats.ninetynine
+            ninetyfive  = stats.ninetyfive
+            fifty       = stats.fifty
+            five        = stats.five
+            one         = stats.one
 
-            rnd = 3
-            percs.update({k: round(v*multiplier, rnd) for k, v in list(percs.items())})
-            ninetynine  = percs[99]
-            ninetyfive  = percs[95]
-            fifty       = percs[50]
-            five        = percs[5]
-            one         = percs[1]
+            nf_m_f      = stats.nf_m_f
+            nn_m_o      = stats.nn_m_o
 
-            # show percentages
-            nf_m_f     = ninetyfive - five
-            nn_m_o     = ninetynine - one
-
-            mu = mean( values )
-            values_pstd = pstdev( values, mu=mu ) * multiplier
-            mu *= multiplier
+            mu          = stats.mu
+            pstd        = stats.pstd
 
             percentages = " %(fifty)s title '50th percentile', " \
                            % locals()
 
-            exp = """\
-<p>Percentiles: 99%% = %(ninetynine).3f %(unit)s, &nbsp;
- 95%% = %(ninetyfive).3f  %(unit)s, &nbsp;
- 50%% = %(fifty).3f  %(unit)s, &nbsp;
- 5%% = %(five).3f  %(unit)s, &nbsp;
- 1%% = %(one).3f  %(unit)s<br>
-Ranges: 99%% - 1%% = %(nn_m_o).3f %(unit)s, &nbsp;
- 95%% - 5%% = %(nf_m_f).3f %(unit)s<br>
-Deviation: Mean = %(mu).3f %(unit)s,  &nbsp;
-1σ = %(values_pstd).3f %(unit)s</p>
-""" % locals()
+            exp = stats.stats_html
 
             if "offset" == type:
                 # doing offset, not jitter
@@ -669,32 +678,31 @@ plot \
 
         # grab and sort the values, no need for the timestamp, etc.
         values = [float(line.split()[1]) for line in self.loopstats]
-        values.sort()
+        stats = VizStats( values )
+        unit        = stats.unit
+        multiplier  = stats.multiplier
+        percs       = stats.percs
+
+        ninetynine  = stats.ninetynine
+        ninetyfive  = stats.ninetyfive
+        fifty       = stats.fifty
+        five        = stats.five
+        one         = stats.one
+
+        nf_m_f      = stats.nf_m_f
+        nn_m_o      = stats.nn_m_o
+
+        mu          = stats.mu
+        pstd        = stats.pstd
 
         percs = self.percentiles( (99, 95, 50, 5, 1), values)
 
-        unit = "μs"
-        multiplier = 1e6
-        rnd = 2
         rnd1 = 7        # round to 100 ns boxes
         boxwidth = 1e-7
         if 1e-6 > percs[99] and -1e-6 < percs[1]:
             # go to nanosec
-            unit = "ns"
-            multiplier = 1e9
-            rnd = 0
             rnd1 = 9        # round to 1 ns boxes
             boxwidth = 1e-9
-
-        percs.update({k: round(v*multiplier, rnd) for k, v in list(percs.items())})
-        ninetynine  = percs[99]
-        ninetyfive  = percs[95]
-        fifty       = percs[50]
-        five        = percs[5]
-        one         = percs[1]
-
-        nf_m_f     = ninetyfive - five
-        nn_m_o     = ninetynine - one
 
         cnt = collections.Counter()
         for value in values:
@@ -702,13 +710,9 @@ plot \
             # for a +/- 50 microSec range that is 1,000 buckets to plot
             cnt[ round( float(value), rnd1)] += 1
 
-        mu = mean( values )
-        values_pstd = pstdev( values, mu=mu ) * multiplier
-        mu *= multiplier
-
         # plus/minus of one sigma range
-        m1sigma = mu - values_pstd
-        p1sigma = mu + values_pstd
+        m1sigma = mu - pstd
+        p1sigma = mu + pstd
 
         plot_template = '''\
 set terminal png size 900,600
@@ -747,18 +751,9 @@ plot \
         histogram_data = ["%s %s\n" % (val, cnt[val]) for val in vals]
 
         exp = """\
-<p>Percentiles: 99%% = %(ninetynine).3f %(unit)s, &nbsp;
- 95%% = %(ninetyfive).3f  %(unit)s, &nbsp;
- 50%% = %(fifty).3f  %(unit)s, &nbsp;
- 5%% = %(five).3f  %(unit)s, &nbsp;
- 1%% = %(one).3f  %(unit)s<br>
-Ranges: 99%% - 1%% = %(nn_m_o).3f %(unit)s, &nbsp;
- 95%% - 5%% = %(nf_m_f).3f %(unit)s<br>
-Deviation: Mean = %(mu).3f %(unit)s,  &nbsp;
-1σ = %(values_pstd).3f %(unit)s</p>
 <p>This shows the clock offsets of the local clock as a histogram.</p>
 """ % locals()
-        ret = {'html' : exp, 'percs' : percs }
+        ret = {'html' : stats.stats_html + exp, 'percs' : percs}
         ret['title'] = "Local Clock Time Offset Histogram"
         ret['plot'] = plot_template + "".join(histogram_data)
         return ret
