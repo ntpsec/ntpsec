@@ -82,6 +82,21 @@ http://www.unix.org/whitepapers/reentrant.html[Thread-safety and POSIX.1]
 
 All C files should be in plain US-ASCII encoding; do not use trigraphs.
 
+=== Other interfaces to be avoided ===
+
+Don't use gettimeofday(2).  While this is nominally POSIX, it is
+deprecated and may be removed in the future.  Use clock_gettime(2)
+instead.
+
+Use pselect(2) rather that select(2), to avoid introducing struct
+timeval.
+
+In general, avoid introducing the type struct timeval into the code,
+in favor of the higher-resolution struct timespec. Early on in
+NTPsec's history we found a bug introduced by poor data management
+where these two time representations bumped into each other; we don't
+want that to happen again.
+
 === Coding style and indentation ==
 
 Dr. Dave Mills likes this code indented formatted in a consistent way.
