@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 # coding: utf-8
 
+from __future__ import print_function
+
 from gps import *
 import time
 from datetime import datetime
@@ -29,7 +31,7 @@ if __name__ == '__main__':
     print("# Time       Device     tdop     nSat")
     while True:
       #It may take a second or two to get good data
-      #print gpsd.fix.latitude,', ',gpsd.fix.longitude,'  Time: ',gpsd.utc
+      #print(gpsd.fix.latitude,', ',gpsd.fix.longitude,'  Time: ',gpsd.utc)
 
       try:
         if 'nan' != gpsd.fix.time and not isnan(gpsd.fix.time):
@@ -49,10 +51,10 @@ if __name__ == '__main__':
       time.sleep(5) #set to whatever
 
   except (KeyboardInterrupt, SystemExit): #when you press ctrl+c
-    print "\nKilling Thread..."
+    print("\nKilling Thread...")
   except Exception as e:       # any error, signal
     print( e )
 
   gpsp.running = False
   gpsp.join() # wait for the thread to finish what it's doing
-  print "Done.\nExiting."
+  print("Done.\nExiting.")
