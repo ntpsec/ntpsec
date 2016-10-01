@@ -24,46 +24,6 @@ extern unsigned short nformats;
 
 static unsigned long timepacket (parse_t *);
 
-/*
- * strings support usually not in kernel - duplicated, but what the heck
- */
-static int
-Strlen(
-	register const char *s
-	)
-{
-	register int c;
-
-	c = 0;
-	if (s)
-	{
-		while (*s++)
-		{
-			c++;
-		}
-	}
-	return c;
-}
-
-static int
-Strcmp(
-	register const char *s,
-	register const char *t
-	)
-{
-	register int c = 0;
-
-	if (!s || !t || (s == t))
-	{
-		return 0;
-	}
-
-	while (!(c = *s++ - *t++) && *s && *t)
-	    /* empty loop */;
-
-	return c;
-}
-
 bool
 parse_timedout(
 	       parse_t *parseio,
@@ -715,7 +675,7 @@ parse_setfmt(
 
 			for (i = 0; i < nformats; i++)
 			{
-				if (!Strcmp(dct->parseformat.parse_buffer, clockformats[i]->name))
+				if (!strcmp(dct->parseformat.parse_buffer, clockformats[i]->name))
 				{
 					if (parse->parse_pdata)
 						free(parse->parse_pdata);
@@ -780,9 +740,9 @@ parse_getfmt(
 	UNUSED_ARG(dct);
 	UNUSED_ARG(parse);
 	if (dct->parseformat.parse_format < nformats &&
-	    Strlen(clockformats[dct->parseformat.parse_format]->name) <= PARSE_TCMAX)
+	    strlen(clockformats[dct->parseformat.parse_format]->name) <= PARSE_TCMAX)
 	{
-		dct->parseformat.parse_count = (unsigned short) (Strlen(clockformats[dct->parseformat.parse_format]->name) + 1);
+		dct->parseformat.parse_count = (unsigned short) (strlen(clockformats[dct->parseformat.parse_format]->name) + 1);
 		memcpy(dct->parseformat.parse_buffer, clockformats[dct->parseformat.parse_format]->name, dct->parseformat.parse_count);
 		return 1;
 	}
