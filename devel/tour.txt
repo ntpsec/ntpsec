@@ -167,9 +167,40 @@ quite a while before NTPsec removed it.
 == System call interface and the PLL ==
 
 All of ntpd's clock management is done through four system calls:
-clock_gettime(2), clock_settime(2), ntp_adjtime(2), and (on some
-systems) adjtimex().  The settimeofday(2) call from older BSD
-Unuxes (in POSIX but deprecated) is no longer used.
+clock_gettime(2), clock_settime(2), and either ntp_adjtime(2) or (on
+some systems, including Linux) adjtimex(2).
+
+The clock_gettime(2) and clock_settime(2) calls are standardized in
+POSIX; ntp_adjtime(3) and adjtimex(2) are not, exhibiting some
+variability in behavior across platforms.  Where adjtimex(2) exists
+(notably under Linux), ntp_adjtime(2) is implemented as a thin
+userspace wrapper around it.
+
+There is some confusion abroad about this interface because it has
+left a trail of abandoned experiments behind it.
+
+Older BSD systems read the clock using gettimeofday(2) 
+(in POSIX but deprecated) and set it using settimeofday(2),
+which was never standardized.  There was also an adjtime(2)
+call similar to, but less powerful than, ntp_adjtime(2)/adjtimex(2).
+None of these calls are still used in NTPsec.
+
+Also, glibc (and possibly other C libraries) implement two other
+related calls, ntp_gettime(3) and ntp_gettimex(3). These are not used
+by the NTP suite itself (except that the ntptime test program attempts
+to exercise ntp_gettime(3)), but rather are intended for time-using
+applications that also want an estimate of clock error and the
+leap-second offset.  Neither has been standardized by POSIX, and they
+have not achieved wide use in applications.
+
+Both ntp_gettime(3) and ntp_gettimex(3) can be implemented as wrappers
+around ntp_adjtime(2)/adjtimex(2).  Thus, on a Linux system, the
+library ntp_gettime(3) call could conceivably go through two levels 
+of indirection, being implemented in terms of ntp_adjtime(2) which
+is in turn implemented by adjtimex(2).
+
+Unhelpfully, the non-POSIX calls in the above assortment are very
+poorly documented.
 
 The roles of clock_gettime(2) and clock_settime(2) are simple.
 They're used for reading and setting ("stepping", in NTP jargon) the
