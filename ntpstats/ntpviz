@@ -364,11 +364,9 @@ a local gpsd daemon, and logging the data using gps-log.py.</p>
         stats = VizStats( values, freq=1 )
         unit = stats.unit
         multiplier = stats.multiplier
-        percs = stats.percs
 
         ninetynine  = stats.ninetynine
         ninetyfive  = stats.ninetyfive
-        fifty       = stats.fifty
         five        = stats.five
         one         = stats.one
 
@@ -394,10 +392,10 @@ from temperature changes (ex: HVAC, the weather, CPU usage causing local
 heating).</p>
 
 <p>Smaller changes are better.  An ideal result would be a horizontal
-line at 0ppm.  Expected values of 99%%-1%% percentiles: 0.4ppm</p>
+line at 0ppm.  Expected values of 99%-1% percentiles: 0.4ppm</p>
 
 <p>The Frequency Offset comes from field 3 of the loopstats log file.</p>
-""" % locals()
+"""
         ret = {'html' : stats.stats_html + exp, 'percs' : stats.percs }
         ret['title'] = "Local Clock Frequency Offset"
         ret['plot'] = plot_template + self.dump("loopstats")
@@ -415,11 +413,9 @@ line at 0ppm.  Expected values of 99%%-1%% percentiles: 0.4ppm</p>
         stats = VizStats( values, freq=freq )
         unit = stats.unit
         multiplier = stats.multiplier
-        percs = stats.percs
 
         ninetynine  = stats.ninetynine
         ninetyfive  = stats.ninetyfive
-        fifty       = stats.fifty
         five        = stats.five
         one         = stats.one
 
@@ -461,7 +457,7 @@ plot \
  %(one)s title "1st percentile"
 """ % locals()
 
-        ret = {'html' : stats.stats_html + exp, 'percs' : percs,
+        ret = {'html' : stats.stats_html + exp, 'percs' : stats.percs,
                'title' : title }
         ret['plot'] = plot_template + self.dump("loopstats")
         return ret
@@ -519,7 +515,7 @@ plot \
             stats = VizStats( values )
             unit        = stats.unit
             multiplier  = stats.multiplier
-            percs       = stats.percs
+            persc       = stats.percs
 
             ninetynine  = stats.ninetynine
             ninetyfive  = stats.ninetyfive
@@ -663,7 +659,6 @@ plot \
         stats = VizStats( values )
         unit        = stats.unit
         multiplier  = stats.multiplier
-        percs       = stats.percs
 
         ninetynine  = stats.ninetynine
         ninetyfive  = stats.ninetyfive
@@ -671,9 +666,10 @@ plot \
         five        = stats.five
         one         = stats.one
 
+        # fixme, should piggy back on unit
         rnd1 = 7        # round to 100 ns boxes
         boxwidth = 1e-7
-        if 1e-6 > percs[99] and -1e-6 < percs[1]:
+        if 1e-6 > stats.percs[99] and -1e-6 < stats.percs[1]:
             # go to nanosec
             rnd1 = 9        # round to 1 ns boxes
             boxwidth = 1e-9
@@ -727,7 +723,7 @@ plot \
         exp = """\
 <p>This shows the clock offsets of the local clock as a histogram.</p>
 """ % locals()
-        ret = {'html' : stats.stats_html + exp, 'percs' : percs}
+        ret = {'html' : stats.stats_html + exp, 'percs' : stats.percs}
         ret['title'] = "Local Clock Time Offset Histogram"
         ret['plot'] = plot_template + "".join(histogram_data)
         return ret
