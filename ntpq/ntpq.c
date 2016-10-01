@@ -288,8 +288,8 @@ struct xcmd builtins[] = {
 /*
  * Some variables used and manipulated locally
  */
-struct timeval tvout = { DEFTIMEOUT, 0 };	/* time out for reads */
-struct timeval tvsout = { DEFSTIMEOUT, 0 };/* secondary time out */
+struct timespec tsout = { DEFTIMEOUT, 0 };	/* time out for reads */
+struct timespec tssout = { DEFSTIMEOUT, 0 };	/* secondary time out */
 l_fp delay_time;				/* delay time */
 char currenthost[NI_MAXHOST];			/* current host name */
 bool currenthostisnum;				/* is prior text from IP? */
@@ -848,7 +848,7 @@ getresponse(
 	)
 {
 	struct ntp_control rpkt;
-	struct timeval tvo;
+	struct timespec tso;
 	u_short offsets[MAXFRAGS+1];
 	u_short counts[MAXFRAGS+1];
 	u_short offset;
@@ -895,12 +895,12 @@ getresponse(
                 }
 
 		if (numfrags == 0)
-			tvo = tvout;
+			tso = tsout;
 		else
-			tvo = tvsout;
+			tso = tssout;
 
 		FD_SET(sockfd, &fds);
-		n = select(sockfd + 1, &fds, NULL, NULL, &tvo);
+		n = pselect(sockfd + 1, &fds, NULL, NULL, &tso, NULL);
 
 		if (n == -1) {
 			warning("select fails");
@@ -2174,12 +2174,12 @@ timeout(
 	int val;
 
 	if (pcmd->nargs == 0) {
-		val = (int)tvout.tv_sec * 1000 + tvout.tv_usec / 1000;
+		val = (int)tsout.tv_sec * 1000 + tsout.tv_nsec / 1000000;
 		(void) fprintf(fp, "primary timeout %d ms\n", val);
 	} else {
-		tvout.tv_sec = pcmd->argval[0].uval / 1000;
-		tvout.tv_usec = (pcmd->argval[0].uval - ((long)tvout.tv_sec * 1000))
-			* 1000;
+		tsout.tv_sec = pcmd->argval[0].uval / 1000;
+		tsout.tv_nsec = (pcmd->argval[0].uval - ((long)tsout.tv_sec * 1000))
+			* 1000000;
 	}
 }
 
