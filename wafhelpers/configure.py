@@ -30,15 +30,15 @@ def cmd_configure(ctx, config):
         # Wipe out and override flags with those from the commandline
         for flag in ctx.env.OPT_STORE:
                 if flag == "--undefine":
-			for sym in ctx.env.OPT_STORE[flag]:
-				ctx.undefine(sym)
+                        for sym in ctx.env.OPT_STORE[flag]:
+                                ctx.undefine(sym)
                 elif flag == "--define":
-			for symval in ctx.env.OPT_STORE[flag]:
-				(sym, val) = symval.split("=")
-				try:
-					ctx.define(sym, int(val))
-				except ValueError:
-					ctx.define(sym, val)
+                        for symval in ctx.env.OPT_STORE[flag]:
+                                (sym, val) = symval.split("=")
+                                try:
+                                        ctx.define(sym, int(val))
+                                except ValueError:
+                                        ctx.define(sym, val)
                 else:
                         opt = flag.replace("--", "").upper()
                         opt_map[opt] = ctx.env.OPT_STORE[flag]
@@ -209,12 +209,12 @@ def cmd_configure(ctx, config):
         if ctx.env.PLATFORM_TARGET == "osx":
                 ctx.define("__APPLE_USE_RFC_3542", 1, comment="Needed for IPv6 support")
 
-	ctx.define("PLATFORM_FULL", platform.platform())
+        ctx.define("PLATFORM_FULL", platform.platform())
 
         # int32_t and uint32_t probes aren't really needed, POSIX guarantees
         # them.  But int64_t and uint64_t are not guaranteed to exist on 32-bit
         # machines.  The calendar and ISC code needs them.
-	types = ["uint64_t"]
+        types = ["uint64_t"]
 
         for inttype in sorted(types):
                 ctx.check_type(inttype, ["stdint.h", "sys/types.h"])
@@ -291,7 +291,7 @@ def cmd_configure(ctx, config):
                 ('clock_gettime', ["time.h"], "RT"),
                 ('clock_settime', ["time.h"], "RT"),
                 ('EVP_MD_do_all_sorted', ["openssl/evp.h"], "CRYPTO"),
-		('getdtablesize', ["unistd.h"]),
+                ('getdtablesize', ["unistd.h"]),
                 ('getpassphrase', ["stdlib.h"]),                # Sun systems
                 ('getrusage', ["sys/time.h", "sys/resource.h"]),
                 ('MD5Init', ["md5.h"], "CRYPTO"),
@@ -327,8 +327,8 @@ def cmd_configure(ctx, config):
         # Some of these are cruft from ancient big-iron systems and should
         # be removed.
         optional_headers = (
-		"alloca.h",
-		"arpa/nameser.h",
+                "alloca.h",
+                "arpa/nameser.h",
                 "dns_sd.h",             # NetBSD, Apple, mDNS
                 ("ifaddrs.h", ["sys/types.h"]),
                 "libscf.h",             # Solaris
