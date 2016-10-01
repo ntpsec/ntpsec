@@ -1740,7 +1740,7 @@ gettimeofday_cached(
 				       (long)diff.tv_sec, (long)diff.tv_nsec/1000);
 			if (labs((long)diff.tv_sec) < 3600) {
 				/* older libevent2 using monotonic */
-				offset = sub_tspec(systemt, ts);
+				offset = sub_tspec(systemt, mono);
 				TRACE(1, ("%s: Offsetting libevent CLOCK_MONOTONIC times  by %+ld.%06ld\n",
 					 "gettimeofday_cached",
 					 (long)offset.tv_sec,
