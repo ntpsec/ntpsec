@@ -1894,15 +1894,12 @@ oncore_msg_any(
 	char *q;
 	char *qlim;
 	struct timespec ts;
-	struct timeval tv;
 	char	Msg[120], Msg2[10];
 
 	if (debug > 3) {
 		(void) clock_gettime(CLOCK_REALTIME, &ts);
-		tv.tv_sec = ts.tv_sec;
-		tv.tv_usec = ts.tv_nsec / 1000;
-		oncore_log(instance, LOG_DEBUG, "%ld.%06ld",
-			   (long)tv.tv_sec, (long)tv.tv_usec);
+		oncore_log(instance, LOG_DEBUG, "%ld.%09ld",
+			   (long)tv.tv_sec, (long)tv.tv_nsec);
 
 		if (!*fmt) {
 			snprintf(Msg, sizeof(Msg), ">>@@%c%c ", buf[2],
