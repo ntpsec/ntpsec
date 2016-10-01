@@ -1689,7 +1689,7 @@ libevent_version_ok(void)
 int
 gettimeofday_cached(
 	struct event_base *	b,
-	struct timespec *	caller_tv
+	struct timespec *	caller_ts
 	)
 {
 	static struct event_base *	cached_b;
@@ -1706,18 +1706,18 @@ gettimeofday_cached(
 	int				cgt_rc;
 	int				gtod_rc;
 
-	us_latest = tspec_to_tval(latest);
 	event_base_gettimeofday_cached(b, &us_latest);
+	latest = tval_to_tspec(us_latest);
 	if (b == cached_b &&
 	    !memcmp(&latest, &cached, sizeof(latest))) {
-		*caller_tv = adj_cached;
+		*caller_ts = adj_cached;
 		return 0;
 	}
 	cached = latest;
 	cached_b = b;
 	if (!offset_ready) {
-		cgt_rc = clock_gettime(CLOCK_MONOTONIC, &ts);
-		gtod_rc = clock_gettime(CLOCK_MONOTONIC, &systemt);
+		cgt_rc = clock_gettime(CLOCK_MONOTONIC, &mono);
+		gtod_rc = clock_gettime(CLOCK_REALTIME, &systemt);
 		if (0 != gtod_rc) {
 			msyslog(LOG_ERR,
 				"%s: clock_gettime() error %m",
@@ -1734,15 +1734,13 @@ gettimeofday_cached(
 			 * has been repaired.  Leave offset at zero.
 			 */
 		} else {
-			mono.tv_sec = ts.tv_sec;
-			mono.tv_nsec = ts.tv_nsec / 1000;
 			diff = sub_tspec(latest, mono);
 			if (debug > 1)
 				printf("cached minus monotonic %+ld.%06ld\n",
 				       (long)diff.tv_sec, (long)diff.tv_nsec/1000);
 			if (labs((long)diff.tv_sec) < 3600) {
 				/* older libevent2 using monotonic */
-				offset = sub_tspec(systemt, mono);
+				offset = sub_tspec(systemt, ts);
 				TRACE(1, ("%s: Offsetting libevent CLOCK_MONOTONIC times  by %+ld.%06ld\n",
 					 "gettimeofday_cached",
 					 (long)offset.tv_sec,
@@ -1752,7 +1750,7 @@ gettimeofday_cached(
 		offset_ready = true;
 	}
 	adj_cached = add_tspec(cached, offset);
-	*caller_tv = adj_cached;
+	*caller_ts = adj_cached;
 
 	return 0;
 }
