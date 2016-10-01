@@ -301,6 +301,11 @@ a local gpsd daemon, and logging the data using gps-log.py.</p>
 
         nf_m_f     = percs[95] - percs[5]
         nn_m_o     = percs[99] - percs[1]
+
+        mu = mean( values )
+        values_pstd = pstdev( values, mu=mu ) * multiplier
+        mu *= multiplier
+
         plot_template = NTPViz.Common + """\
 set title "%(sitename)s: Local Clock Frequency Offset"
 set ytics format "%%1.1f %(unit)s" nomirror
@@ -322,7 +327,9 @@ plot \
  5%% = %(five).3f  %(unit)s, &nbsp;
  1%% = %(one).3f  %(unit)s<br>
 Ranges: 99%% - 1%% = %(nn_m_o).3f %(unit)s, &nbsp;
- 95%% - 5%% = %(nf_m_f).3f %(unit)s</p>
+ 95%% - 5%% = %(nf_m_f).3f %(unit)s<br>
+Deviation: Mean = %(mu).3f %(unit)s, &nbsp;
+1σ = %(values_pstd).3f %(unit)s</p>
 <p>This shows the frequency offset of the local clock (aka drift).  The
 graph includes percentile data to show how much the frequency changes
 over a longer period of time.  The majority of this change should come
@@ -358,11 +365,11 @@ freqency.</p>
 <p>Lower is better.  An ideal clock would be a horizontal line at
 0ppm.</p>
 
-<p> RMSFrequency Jitter is field 6 in the loopstats log file.</p>
+<p> RMS Frequency Jitter is field 6 in the loopstats log file.</p>
 """
         else:
             unit = "μs"
-            title = "Local Time Jitter"
+            title = "Local Time RMS Jitter"
             exp = """\
 <p>This shows the RMS Jitter of the local clock offset.  In other words,
 how fast the local clock offset is changing.</p>
@@ -407,6 +414,10 @@ how fast the local clock offset is changing.</p>
         nf_m_f     = ninetyfive - five
         nn_m_o     = ninetynine - one
 
+        mu = mean( values )
+        values_pstd = pstdev( values, mu=mu ) * multiplier
+        mu *= multiplier
+
         plot_template = NTPViz.Common + """\
 set title "%(sitename)s: %(title)s"
 set ytics format "%%1.1f %(unit)s" nomirror
@@ -428,7 +439,9 @@ plot \
  5%% = %(five).3f  %(unit)s, &nbsp;
  1%% = %(one).3f  %(unit)s<br>
 Ranges: 99%% - 1%% = %(nn_m_o).3f %(unit)s, &nbsp;
- 95%% - 5%% = %(nf_m_f).3f %(unit)s</p>
+ 95%% - 5%% = %(nf_m_f).3f %(unit)s<br>
+Deviation: Mean = %(mu).3f %(unit)s,  &nbsp;
+1σ = %(values_pstd).3f %(unit)s</p>
 """ % locals() ) +  exp
 
         ret = {'html' : exp, 'percs' : percs, 'title' : title }
@@ -508,6 +521,11 @@ Ranges: 99%% - 1%% = %(nn_m_o).3f %(unit)s, &nbsp;
             # show percentages
             nf_m_f     = ninetyfive - five
             nn_m_o     = ninetynine - one
+
+            mu = mean( values )
+            values_pstd = pstdev( values, mu=mu ) * multiplier
+            mu *= multiplier
+
             percentages = " %(fifty)s title '50th percentile', " \
                            % locals()
 
@@ -518,7 +536,9 @@ Ranges: 99%% - 1%% = %(nn_m_o).3f %(unit)s, &nbsp;
  5%% = %(five).3f  %(unit)s, &nbsp;
  1%% = %(one).3f  %(unit)s<br>
 Ranges: 99%% - 1%% = %(nn_m_o).3f %(unit)s, &nbsp;
- 95%% - 5%% = %(nf_m_f).3f %(unit)s</p>
+ 95%% - 5%% = %(nf_m_f).3f %(unit)s<br>
+Deviation: Mean = %(mu).3f %(unit)s,  &nbsp;
+1σ = %(values_pstd).3f %(unit)s</p>
 """ % locals()
 
             if "offset" == type:
@@ -683,14 +703,12 @@ plot \
             cnt[ round( float(value), rnd1)] += 1
 
         mu = mean( values )
-        values_mean = mu * multiplier
-        values_mean_str = str( round( values_mean, rnd ) )
-
         values_pstd = pstdev( values, mu=mu ) * multiplier
+        mu *= multiplier
 
         # plus/minus of one sigma range
-        m1sigma = values_mean - values_pstd
-        p1sigma = values_mean + values_pstd
+        m1sigma = mu - values_pstd
+        p1sigma = mu + values_pstd
 
         plot_template = '''\
 set terminal png size 900,600
@@ -736,7 +754,7 @@ plot \
  1%% = %(one).3f  %(unit)s<br>
 Ranges: 99%% - 1%% = %(nn_m_o).3f %(unit)s, &nbsp;
  95%% - 5%% = %(nf_m_f).3f %(unit)s<br>
-Deviation: mean = %(values_mean).3f %(unit)s,  &nbsp;
+Deviation: Mean = %(mu).3f %(unit)s,  &nbsp;
 1σ = %(values_pstd).3f %(unit)s</p>
 <p>This shows the clock offsets of the local clock as a histogram.</p>
 """ % locals()
@@ -1095,9 +1113,16 @@ system clock frequency (usually in parts per million, ppm)</dd>
 <dt>ms, millisecond:</dt>
 <dd>One thousandth of a second = 0.001s</dd>
 
+<dt>mu, mean:</dt>
+<dd>The arithmetic mean: the sum of all the values divided by the
+number of values.</dd>
+
 <dt>ns, nanosecond:</dt>
 <dd>One billionth of a second, also one thousandth of a microsecond,
 0.000000001s.</dd>
+
+<dt>percentile:</dt>
+<dd>The value below which a given percentage of values fall.</dd>
 
 <dt>ppb, parts per billion:</dt>
 <dd>Ratio between two values. These following are all the same:
