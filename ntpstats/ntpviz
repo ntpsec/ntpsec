@@ -81,7 +81,7 @@ class VizStats(NTPStats):
     pstd        = 0     # population standard distribution, one sigma
 
     stats_html  = ''
-    
+
     def __init__( self, values, freq=0 ):
 
         values.sort()
@@ -372,12 +372,6 @@ a local gpsd daemon, and logging the data using gps-log.py.</p>
         five        = stats.five
         one         = stats.one
 
-        nf_m_f      = stats.nf_m_f
-        nn_m_o      = stats.nn_m_o
-
-        mu          = stats.mu
-        pstd        = stats.pstd
-
         plot_template = NTPViz.Common + """\
 set title "%(sitename)s: Local Clock Frequency Offset"
 set ytics format "%%1.1f %(unit)s" nomirror
@@ -429,12 +423,6 @@ line at 0ppm.  Expected values of 99%%-1%% percentiles: 0.4ppm</p>
         five        = stats.five
         one         = stats.one
 
-        nf_m_f      = stats.nf_m_f
-        nn_m_o      = stats.nn_m_o
-
-        mu          = stats.mu
-        pstd        = stats.pstd
-
         if freq:
             title = "Local Stability"
             exp = """\
@@ -473,7 +461,7 @@ plot \
  %(one)s title "1st percentile"
 """ % locals()
 
-        ret = {'html' : stats.stats_html + exp, 'percs' : percs, 
+        ret = {'html' : stats.stats_html + exp, 'percs' : percs,
                'title' : title }
         ret['plot'] = plot_template + self.dump("loopstats")
         return ret
@@ -538,12 +526,6 @@ plot \
             fifty       = stats.fifty
             five        = stats.five
             one         = stats.one
-
-            nf_m_f      = stats.nf_m_f
-            nn_m_o      = stats.nn_m_o
-
-            mu          = stats.mu
-            pstd        = stats.pstd
 
             percentages = " %(fifty)s title '50th percentile', " \
                            % locals()
@@ -689,14 +671,6 @@ plot \
         five        = stats.five
         one         = stats.one
 
-        nf_m_f      = stats.nf_m_f
-        nn_m_o      = stats.nn_m_o
-
-        mu          = stats.mu
-        pstd        = stats.pstd
-
-        percs = self.percentiles( (99, 95, 50, 5, 1), values)
-
         rnd1 = 7        # round to 100 ns boxes
         boxwidth = 1e-7
         if 1e-6 > percs[99] and -1e-6 < percs[1]:
@@ -711,8 +685,8 @@ plot \
             cnt[ round( float(value), rnd1)] += 1
 
         # plus/minus of one sigma range
-        m1sigma = mu - pstd
-        p1sigma = mu + pstd
+        m1sigma = stats.mu - stats.pstd
+        p1sigma = stats.mu + stats.pstd
 
         plot_template = '''\
 set terminal png size 900,600
