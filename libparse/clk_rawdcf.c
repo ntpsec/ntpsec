@@ -8,7 +8,7 @@
 
 #include <config.h>
 #include "ntp_fp.h"
-#include "timevalops.h"
+#include "timespecops.h"
 #include "ntp_calendar.h"
 
 #include "parse.h"
@@ -504,16 +504,16 @@ calc_usecdiff(
 	long         offset
 	)
 {
-	struct timeval delta;
+	struct timespec delta;
 	long delta_usec = 0;
 	l_fp delt;
 
 	delt = ref->fp;
 	delt.l_i -= offset;
 	L_SUB(&delt, &base->fp);
-	TSTOTV(&delt, &delta);
+	delta = lfp_stamp_to_tspec(delt, NULL);
 
-	delta_usec = 1000000 * (int32_t)delta.tv_sec + delta.tv_usec;
+	delta_usec = 1000000 * (int32_t)delta.tv_sec + delta.tv_nsec/1000;
 	return delta_usec;
 }
 
@@ -567,7 +567,7 @@ inp_rawdcf(
 	  timestamp_t  *tstamp
 	  )
 {
-	static struct timeval timeout = { 1, 500000 }; /* 1.5 secongs denote second #60 */
+	static struct timespec timeout = { 1, 500000000 }; /* 1.5 secongs denote second #60 */
 
 	parseprintf(DD_PARSE, ("inp_rawdcf(0x%lx, 0x%x, ...)\n", (long)parseio, ch));
 
