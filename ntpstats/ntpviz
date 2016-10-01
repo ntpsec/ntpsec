@@ -1126,15 +1126,16 @@ number of values.</dd>
 
 <dt>ppb, parts per billion:</dt>
 <dd>Ratio between two values. These following are all the same:
-    1 ppb, one in one billion, 1/1000000000, 0.000000001, and 0.0000001%</dd>
+    1 ppb, one in one billion, 1/1,000,000,000, 0.000,000,001, and
+    0.000,000,1%</dd>
 
 <dt>ppm, parts per million:</dt>
 <dd>Ratio between two values. These following are all the same:
-    1 ppm, one in one million, 1/1000000, 0.000001, and 0.0001%</dd>
+    1 ppm, one in one million, 1/1,000,000, 0.000,001, and 0.000,1%</dd>
 
 <dt>ppt, parts per thousand:</dt>
 <dd>Ratio between two values. These following are all the same:
-    1 ppt, one in one thousand, 1/1000, 0.001, and 0.1%</dd>
+    1 ppt, one in one thousand, 1/1,000, 0.001, and 0.1%</dd>
 
 <dt>refclock:</dt>
 <dd>Reference clock, a local GPS module or other local source of time.</dd>
@@ -1158,7 +1159,7 @@ deviation.  Three sigma is three times sigma.  Smaller is better.</dd>
 
 <dt>µs, us, microsecond:</dt>
 <dd>One millionth of a second, also one thousandth of a millisecond,
-0.000001s.</dd>
+0.000,001s.</dd>
 </dl>
 
 <br>
