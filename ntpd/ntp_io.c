@@ -28,7 +28,6 @@
 #include "ntp_worker.h"
 #include "ntp_assert.h"
 #include "ntp_intercept.h"
-#include "timevalops.h"
 #include "timespecops.h"
 
 #include <isc/mem.h>
