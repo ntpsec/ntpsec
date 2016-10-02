@@ -6,18 +6,19 @@
  */
 #include <config.h>
 
-#include "ntpd.h"
-#include "ntp_io.h"
-#include "ntp_unixtime.h"
-#include "ntp_stdlib.h"
-#include "ntp_intercept.h"
-
 #include <limits.h>
 #include <stdio.h>
 #include <ctype.h>
 
 #include <signal.h>
 #include <setjmp.h>
+
+#include "ntpd.h"
+#include "ntp_io.h"
+#include "ntp_unixtime.h"
+#include "ntp_stdlib.h"
+#include "ntp_intercept.h"
+#include "ntp_syscall.h"
 
 /*
  * This is an implementation of the clock discipline algorithm described
