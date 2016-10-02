@@ -39,10 +39,10 @@ TEST_TEAR_DOWN(packetHandling) {}
 TEST(packetHandling, GenerateUnauthenticatedPacket) {
 
 	struct pkt testpkt;
-	struct timeval xmt;
+	struct timespec xmt;
 	l_fp expected_xmt, actual_xmt;
 
-	gettimeofday(&xmt, NULL);
+	clock_gettime(CLOCK_REALTIME, &xmt);
 	xmt.tv_sec += JAN_1970;
 
 	TEST_ASSERT_EQUAL(LEN_PKT_NOMAC,
@@ -55,7 +55,7 @@ TEST(packetHandling, GenerateUnauthenticatedPacket) {
 	TEST_ASSERT_EQUAL(STRATUM_UNSPEC, PKT_TO_STRATUM(testpkt.stratum));
 	TEST_ASSERT_EQUAL(8, testpkt.ppoll);
 
-	TVTOTS(&xmt, &expected_xmt);
+	expected_xmt = tspec_stamp_to_lfp(xmt);
 	NTOHL_FP(&testpkt.xmt, &actual_xmt);
 	TEST_ASSERT_TRUE(LfpEquality(&expected_xmt, &actual_xmt));
 }
@@ -63,7 +63,7 @@ TEST(packetHandling, GenerateUnauthenticatedPacket) {
 TEST(packetHandling, GenerateAuthenticatedPacket) {
 	struct key testkey;
 	struct pkt testpkt;
-	struct timeval xmt;
+	struct timespec xmt;
 	const int EXPECTED_PKTLEN = LEN_PKT_NOMAC + MAX_MD5_LEN;
 	l_fp expected_xmt, actual_xmt;
 	char expected_mac[MAX_MD5_LEN];
@@ -74,7 +74,7 @@ TEST(packetHandling, GenerateAuthenticatedPacket) {
 	memcpy(testkey.key_seq, "123456789", testkey.key_len);
 	memcpy(testkey.type, "MD5", 3);
 
-	gettimeofday(&xmt, NULL);
+	clock_gettime(CLOCK_REALTIME, &xmt);
 	xmt.tv_sec += JAN_1970;
 
 	TEST_ASSERT_EQUAL(EXPECTED_PKTLEN,
@@ -87,7 +87,7 @@ TEST(packetHandling, GenerateAuthenticatedPacket) {
 	TEST_ASSERT_EQUAL(STRATUM_UNSPEC, PKT_TO_STRATUM(testpkt.stratum));
 	TEST_ASSERT_EQUAL(8, testpkt.ppoll);
 
-	TVTOTS(&xmt, &expected_xmt);
+	expected_xmt = tspec_stamp_to_lfp(xmt);
 	NTOHL_FP(&testpkt.xmt, &actual_xmt);
 	TEST_ASSERT_TRUE(LfpEquality(&expected_xmt, &actual_xmt));
 
@@ -102,7 +102,7 @@ TEST(packetHandling, OffsetCalculationPositiveOffset) {
 	struct pkt rpkt;
 	l_fp reftime;
 	l_fp tmp;
-	struct timeval dst;
+	struct timespec dst;
 	double offset, precision, synch_distance;
 
 	rpkt.precision = -16; // 0,000015259
@@ -130,7 +130,7 @@ TEST(packetHandling, OffsetCalculationPositiveOffset) {
 	/* T4 - Destination timestamp as standard timeval */
 	tmp.l_ui = 1000000001UL;
 	tmp.l_uf = 0UL;
-	TSTOTV(&tmp, &dst);
+	dst = lfp_stamp_to_tspec(tmp, NULL);
 	dst.tv_sec -= JAN_1970;
 
 	offset_calculation(&rpkt, LEN_PKT_NOMAC, &dst, &offset, &precision, &synch_distance);
@@ -143,7 +143,7 @@ TEST(packetHandling, OffsetCalculationPositiveOffset) {
 
 TEST(packetHandling, OffsetCalculationNegativeOffset) {
 	struct pkt rpkt;
-	struct timeval dst;
+	struct timespec dst;
 
 	rpkt.precision = -1;
 	rpkt.rootdelay = HTONS_FP(DTOUFP(0.5));
@@ -173,7 +173,7 @@ TEST(packetHandling, OffsetCalculationNegativeOffset) {
 	// T4 - Destination timestamp as standard timeval
 	tmp.l_ui = 1000000003UL;
 	tmp.l_uf = 0UL;
-	TSTOTV(&tmp, &dst);
+	dst = lfp_stamp_to_tspec(tmp, NULL);
 	dst.tv_sec -= JAN_1970;
 
 	double offset, precision, synch_distance;
