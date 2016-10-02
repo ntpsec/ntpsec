@@ -10,7 +10,6 @@
 #include "ntp_syslog.h"
 #include "ntp_stdlib.h"
 #include "ntp_random.h"
-#include "timevalops.h"
 #include "timespecops.h"
 #include "ntp_calendar.h"
 
@@ -330,8 +329,7 @@ step_systime(
 	)
 {
 	time_t pivot; /* for ntp era unfolding */
-	struct timeval timetv, tvlast, tvdiff;
-	struct timespec timets;
+	struct timespec timets, tslast, tsdiff;
 	struct calendar jd;
 	l_fp fp_ofs, fp_sys; /* offset and target system time in FP */
 
@@ -388,8 +386,8 @@ step_systime(
 	fp_sys = tspec_stamp_to_lfp(timets);
 
 	/* only used for utmp/wtmpx time-step recording */
-	tvlast.tv_sec = timets.tv_sec;
-	tvlast.tv_usec = (timets.tv_nsec + 500) / 1000;
+	tslast.tv_sec = timets.tv_sec;
+	tslast.tv_nsec = timets.tv_nsec;
 
 	/* get the target time as l_fp */
 	L_ADD(&fp_sys, &fp_ofs);
@@ -432,10 +430,8 @@ step_systime(
 	 *
 	 * This might become even uglier...
 	 */
-	timetv.tv_sec = timets.tv_sec;
-	timetv.tv_usec = timets.tv_nsec / 1000;
-	tvdiff = abs_tval(sub_tval(timetv, tvlast));
-	if (tvdiff.tv_sec > 0) {
+	tsdiff = abs_tspec(sub_tspec(timets, tslast));
+	if (tsdiff.tv_sec > 0) {
 #ifdef HAVE_UTMPX_H
 # ifdef OVERRIDE_OTIME_MSG
 #  define OTIME_MSG OVERRIDE_OTIME_MSG
@@ -459,14 +455,14 @@ step_systime(
 		/* UTMPX - this is POSIX-conformant */
 		utx.ut_type = OLD_TIME;
 		strlcpy(utx.ut_line, OTIME_MSG, sizeof(utx.ut_line));
-		utx.ut_tv.tv_sec = tvlast.tv_sec;
-		utx.ut_tv.tv_usec = tvlast.tv_usec;
+		utx.ut_tv.tv_sec = tslast.tv_sec;
+		utx.ut_tv.tv_usec = (tslast.tv_nsec + 500) / 1000;
 		setutxent();
 		pututxline(&utx);
 		utx.ut_type = NEW_TIME;
 		strlcpy(utx.ut_line, NTIME_MSG, sizeof(utx.ut_line));
-		utx.ut_tv.tv_sec = timetv.tv_sec;
-		utx.ut_tv.tv_usec = timetv.tv_usec;
+		utx.ut_tv.tv_sec = timets.tv_sec;
+		utx.ut_tv.tv_usec = (timets.tv_nsec + 500) / 1000;
 		setutxent();
 		pututxline(&utx);
 		endutxent();
