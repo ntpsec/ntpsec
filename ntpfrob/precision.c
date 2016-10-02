@@ -3,7 +3,8 @@
  * SPDX-License-Identifier: BSD-2-Clause
  */
 
-#include "ntp_unixtime.h"
+#include "ntp_types.h"
+#include "ntp_calendar.h"
 
 #include <stdio.h>
 #include <stdbool.h>

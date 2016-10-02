@@ -8,7 +8,6 @@
 
 #include "ntpd.h"
 #include "ntp_stdlib.h"
-#include "ntp_unixtime.h"
 #include "ntp_control.h"
 #include "ntp_leapsec.h"
 #include "ntp_intercept.h"

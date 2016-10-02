@@ -27,7 +27,6 @@
 #include "ntp.h"
 #include "ntpd.h"
 #include "ntp_io.h"
-#include "ntp_unixtime.h"
 #include "ntp_refclock.h"
 #include "ntp_filegen.h"
 #include "ntp_stdlib.h"

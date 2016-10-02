@@ -18,7 +18,7 @@
 #include <stdio.h>
 
 #include "ntp.h"
-#include "ntp_unixtime.h"
+#include "ntp_calendar.h"
 
 /* microseconds per second */
 #define MICROSECONDS 1000000

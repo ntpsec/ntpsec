@@ -5,7 +5,6 @@
 #include <isc/net.h>
 
 #include <ntp.h>
-#include <ntp_unixtime.h>
 #include <ntp_stdlib.h>
 #include <ntp_debug.h>
 #include <timevalops.h>
