@@ -345,7 +345,7 @@ ntpdig_main (
 	response_tv.tv_nsec = (response_timeout - (int)response_timeout) * NANOSECONDS;
 
 	/* IPv6 available? */
-	if (isc_net_probeipv6_bool()) {
+	if (!isc_net_probeipv6_bool()) {
 		ai_fam_pref = AF_INET;
 		TRACE(1, ("No ipv6 support available, forcing ipv4\n"));
 	} else {
