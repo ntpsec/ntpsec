@@ -16,7 +16,7 @@
 #include "ntpq.h"
 #include "ntp_assert.h"
 #include "ntp_stdlib.h"
-#include "ntp_unixtime.h"
+#include "ntp_calendar.h"
 #include "ntp_calendar.h"
 #include "lib_strbuf.h"
 #include "ntp_lineedit.h"

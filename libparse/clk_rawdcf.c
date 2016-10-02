@@ -9,7 +9,6 @@
 #include <config.h>
 #include "ntp_fp.h"
 #include "timevalops.h"
-#include "ntp_unixtime.h"
 #include "ntp_calendar.h"
 
 #include "parse.h"

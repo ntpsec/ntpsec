@@ -68,8 +68,8 @@
 
 #include "ntpd.h"
 #include "ntp_refclock.h"
-#include "ntp_unixtime.h"
 #include "ntp_control.h"	/* for CTL_* clocktypes */
+#include "ntp_calendar.h"
 
 #include <string.h>
 #include <stdio.h>

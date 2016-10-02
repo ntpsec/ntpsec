@@ -26,7 +26,6 @@
 
 #include "ntp_fp.h"
 #include "ntp_stdlib.h"
-#include "ntp_unixtime.h"
 
 /*
  * Given the size of time_t, guess what can be used as an unsigned value

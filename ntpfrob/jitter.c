@@ -17,10 +17,10 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
-#include "ntp_unixtime.h"
-#include "ntp_fp.h"
-
 #include "ntpfrob.h"
+
+#include "ntp_fp.h"
+#include "ntp_calendar.h"
 
 #define NBUF	800002
 #define NSAMPLES 10

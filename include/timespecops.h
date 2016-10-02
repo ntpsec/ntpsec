@@ -45,6 +45,7 @@
 #include <math.h>
 
 #include "ntp.h"
+#include "ntp_calendar.h"
 #include "timetoa.h"
 
 
