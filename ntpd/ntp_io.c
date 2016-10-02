@@ -3239,7 +3239,7 @@ fetch_timestamp(
 				}
 				DPRINTF(4, ("fetch_timestamp: system usec network time stamp: %jd.%06ld\n",
 					    (intmax_t)tvp->tv_sec, (long)tvp->tv_usec));
-				nts = tval_stamp_to_lfp(*tvp);
+				nts = tspec_stamp_to_lfp(tval_to_tspec(*tvp));
 				break;
 #endif  /* USE_SCM_TIMESTAMP */
 			}

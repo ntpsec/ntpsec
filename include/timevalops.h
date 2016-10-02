@@ -177,36 +177,6 @@ abs_tval(
 	return c;
 }
 
-/* convert from timeval duration to l_fp duration */
-static inline l_fp
-tval_intv_to_lfp(
-	struct timeval	x
-	)
-{
-	struct timeval	v;
-	l_fp		y;
-	
-	v = normalize_tval(x);
-	TVUTOTSF(v.tv_usec, y.l_uf);
-	y.l_i = (int32_t)v.tv_sec;
-
-	return y;
-}
-
-/* x must be UN*X epoch, output *y will be in NTP epoch */
-static inline l_fp
-tval_stamp_to_lfp(
-	struct timeval	x
-	)
-{
-	l_fp		y;
-
-	y = tval_intv_to_lfp(x);
-	y.l_ui += JAN_1970;
-
-	return y;
-}
-
 /* convert to l_fp type, relative signed/unsigned and absolute */
 static inline struct timeval
 lfp_intv_to_tval(

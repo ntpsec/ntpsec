@@ -469,6 +469,22 @@ TEST(timevalops, Helpers2) {
 // conversion to l_fp
 //----------------------------------------------------------------------
 
+/* convert from timeval duration to l_fp duration */
+static inline l_fp
+tval_intv_to_lfp(
+	struct timeval	x
+	)
+{
+	struct timeval	v;
+	l_fp		y;
+
+	v = normalize_tval(x);
+	TVUTOTSF(v.tv_usec, y.l_uf);
+	y.l_i = (int32_t)v.tv_sec;
+
+	return y;
+}
+
 TEST(timevalops, ToLFPbittest) {
 	l_fp lfpClose =  l_fp_init(0, 1);
 
@@ -519,22 +535,6 @@ TEST(timevalops, ToLFPrelNeg) {
 	return;
 }
 
-
-TEST(timevalops, ToLFPabs) {
-	l_fp lfpClose =  l_fp_init(0, 1);
-	int i = 0;
-
-	for (i = 0; i < (int)COUNTOF(fdata); ++i) {
-		struct timeval a = timeval_init(1, fdata[i].usec);
-		l_fp E = l_fp_init(1 + JAN_1970, fdata[i].frac);
-		l_fp    r;
-
-		r = tval_stamp_to_lfp(a);
-		TEST_ASSERT_TRUE(AssertFpClose(E, r, lfpClose));
-	}
-
-	return;
-}
 
 //----------------------------------------------------------------------
 // conversion from l_fp
@@ -631,7 +631,6 @@ TEST_GROUP_RUNNER(timevalops) {
 	RUN_TEST_CASE(timevalops, ToLFPbittest);
 	RUN_TEST_CASE(timevalops, ToLFPrelPos);
 	RUN_TEST_CASE(timevalops, ToLFPrelNeg);
-	RUN_TEST_CASE(timevalops, ToLFPabs);
 	RUN_TEST_CASE(timevalops, FromLFPbittest);
 	RUN_TEST_CASE(timevalops, FromLFPrelPos);
 	RUN_TEST_CASE(timevalops, FromLFPrelNeg);
