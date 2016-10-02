@@ -1899,7 +1899,7 @@ oncore_msg_any(
 	if (debug > 3) {
 		(void) clock_gettime(CLOCK_REALTIME, &ts);
 		oncore_log(instance, LOG_DEBUG, "%ld.%09ld",
-			   (long)tv.tv_sec, (long)tv.tv_nsec);
+			   (long)tv.tv_sec, tv.tv_nsec);
 
 		if (!*fmt) {
 			snprintf(Msg, sizeof(Msg), ">>@@%c%c ", buf[2],

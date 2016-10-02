@@ -759,8 +759,8 @@ queue_xmt(
 		if (xctx->sched > start_cb.tv_sec)
 			delay.tv_sec = xctx->sched - start_cb.tv_sec;
 		ns_event_add(ev_xmt_timer, delay);
-		TRACE(2, ("queue_xmt: xmt timer for %u usec\n",
-			  (u_int)delay.tv_nsec/1000));
+		TRACE(2, ("queue_xmt: xmt timer for %ld usec\n",
+			  delay.tv_nsec/1000));
 	}
 }
 
@@ -789,8 +789,8 @@ xmt_timer_cb(
 	gettimeofday_cached(base, &start_cb);
 	if (xmt_q->sched <= start_cb.tv_sec) {
 		UNLINK_HEAD_SLIST(x, xmt_q, link);
-		TRACE(2, ("xmt_timer_cb: at .%6.6u -> %s\n",
-			  (u_int)start_cb.tv_nsec/1000, socktoa(&x->spkt->addr)));
+		TRACE(2, ("xmt_timer_cb: at .%6.6ld -> %s\n",
+			  start_cb.tv_nsec/1000, socktoa(&x->spkt->addr)));
 		xmt(x);
 		free(x);
 		if (NULL == xmt_q)
@@ -798,15 +798,15 @@ xmt_timer_cb(
 	}
 	if (xmt_q->sched <= start_cb.tv_sec) {
 		ns_event_add(ev_xmt_timer, gap);
-		TRACE(2, ("xmt_timer_cb: at .%6.6u gap %6.6u\n",
-			  (u_int)start_cb.tv_nsec/1000,
-			  (u_int)gap.tv_nsec));
+		TRACE(2, ("xmt_timer_cb: at .%6.6ld gap %6.6ld\n",
+			  start_cb.tv_nsec/1000,
+			  gap.tv_nsec));
 	} else {
 		delay.tv_sec = xmt_q->sched - start_cb.tv_sec;
 		delay.tv_nsec = 0;
 		ns_event_add(ev_xmt_timer, delay);
-		TRACE(2, ("xmt_timer_cb: at .%6.6u next %ld seconds\n",
-			  (u_int)start_cb.tv_nsec/1000,
+		TRACE(2, ("xmt_timer_cb: at .%6.6ld next %ld seconds\n",
+			  start_cb.tv_nsec/1000,
 			  (long)delay.tv_sec));
 	}
 }
@@ -846,8 +846,8 @@ xmt(
 		       pkt_len));
 		spkt->stime = tv_xmt.tv_sec - JAN_1970;
 
-		TRACE(2, ("xmt: %lx.%6.6u %s %s\n", (u_long)tv_xmt.tv_sec,
-			  (u_int)tv_xmt.tv_nsec/1000, dctx->name, socktoa(dst)));
+		TRACE(2, ("xmt: %lx.%6.6ld %s %s\n", (u_long)tv_xmt.tv_sec,
+			  tv_xmt.tv_nsec/1000, dctx->name, socktoa(dst)));
 	} else {
 		dec_pending_ntp(dctx->name, dst);
 	}
@@ -1726,7 +1726,7 @@ gettimeofday_cached(
 		diff = sub_tspec(systemt, latest);
 		if (debug > 1)
 			printf("system minus cached %+ld.%06ld\n",
-			       (long)diff.tv_sec, (long)diff.tv_nsec/1000);
+			       (long)diff.tv_sec, diff.tv_nsec/1000);
 		if (0 != cgt_rc || labs((long)diff.tv_sec) < 3600) {
 			/*
 			 * Either use_monotonic == 0, or this libevent
@@ -1736,14 +1736,14 @@ gettimeofday_cached(
 			diff = sub_tspec(latest, mono);
 			if (debug > 1)
 				printf("cached minus monotonic %+ld.%06ld\n",
-				       (long)diff.tv_sec, (long)diff.tv_nsec/1000);
+				       (long)diff.tv_sec, diff.tv_nsec/1000);
 			if (labs((long)diff.tv_sec) < 3600) {
 				/* older libevent2 using monotonic */
 				offset = sub_tspec(systemt, mono);
 				TRACE(1, ("%s: Offsetting libevent CLOCK_MONOTONIC times  by %+ld.%06ld\n",
 					 "gettimeofday_cached",
 					 (long)offset.tv_sec,
-					 (long)offset.tv_nsec/1000));
+					 offset.tv_nsec/1000));
 			}
 		}
 		offset_ready = true;
