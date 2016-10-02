@@ -383,4 +383,15 @@ lfp_stamp_to_tspec(
 	return out;
 }
 
+static inline struct timespec
+tval_to_tspec(
+    struct timeval x
+    )
+{
+    struct timespec y;
+    y.tv_sec = x.tv_sec;
+    y.tv_nsec = x.tv_usec * 1000;
+    return y;
+}
+
 #endif	/* GUARD_TIMESPECOPS_H */
