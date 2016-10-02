@@ -68,7 +68,7 @@
 
 #include "ntpd.h"
 #include "ntp_refclock.h"
-#include "timevalops.h"		/* includes <sys/time.h> */
+#include "ntp_unixtime.h"
 #include "ntp_control.h"	/* for CTL_* clocktypes */
 
 #include <string.h>
