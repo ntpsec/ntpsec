@@ -1950,13 +1950,13 @@ gpsd_test_socket(
 		    up->logname, up->fdt));
 
 	{
-		struct timeval tout;
+		struct timespec tout;
 		fd_set         wset;
 
 		memset(&tout, 0, sizeof(tout));
 		FD_ZERO(&wset);
 		FD_SET(up->fdt, &wset);
-		rc = select(up->fdt+1, NULL, &wset, NULL, &tout);
+		rc = pselect(up->fdt+1, NULL, &wset, NULL, &tout, NULL);
 		if (0 == rc || !(FD_ISSET(up->fdt, &wset)))
 			return;
 	}
