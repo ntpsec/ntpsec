@@ -423,7 +423,7 @@ line at 0ppm.  Expected values of 99%-1% percentiles: 0.4ppm</p>
             title = "Local Stability"
             exp = """\
 <p>This shows the RMS Frequency Jitter (aka wander) of the local
-clock's frequency.  In other words, how fast it the local clock changes
+clock's frequency.  In other words, how fast the local clock changes
 freqency.</p>
 
 <p>Lower is better.  An ideal clock would be a horizontal line at
@@ -544,7 +544,7 @@ useful to see how the measured offset is behaving.</p>
                 else:
                     title = "Peer Offset " + str(peerlist[0])
                     exp += """\
-<p>This shows the offset of a peer or server in seconds.  This is be
+<p>This shows the offset of a peer or server in seconds.  This is 
 useful to see how the measured offset is behaving.</p>
 
 <p>The chart also plots offset±rtt.  Where rtt is the round trip time
