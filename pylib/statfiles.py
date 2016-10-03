@@ -57,6 +57,10 @@ class NTPStats:
         self.endtime = endtime
 
         self.sitename = sitename or os.path.basename(statsdir)
+        if 'ntpstats' == self.sitename:
+            # boring, use hostname
+            self.sitename = socket.getfqdn()
+
         if not os.path.isdir(statsdir):
             sys.stderr.write("ntpviz: ERROR: %s is not a directory\n" \
                  % statsdir)

@@ -210,8 +210,6 @@ set rmargin 12
                  sitename=None, period=None, starttime=None, endtime=None):
         NTPStats.__init__(self, statsdir=statsdir, sitename=sitename,
                           period=period, starttime=starttime, endtime=endtime)
-        if self.sitename is None:
-            self.sitename = os.path.basename(statsdir)
 
     def local_offset_gnuplot(self):
         "Generate GNUPLOT code graphing local clock loop statistics"
