@@ -93,35 +93,37 @@ class VizStats(NTPStats):
         target = max(self.percs[99], -self.percs[1], self.percs[100]/5,
                      -self.percs[0]/5)
         if 1 <= target:
-            # go to seconds
             self.multiplier = 1
             if freq:
-                self.unit = "ppo"
+                # go to ppm
+                self.unit = "ppm"
             else:
+                # go to seconds
                 self.unit = "s"
 
         elif 1e-3 <= target:
-            # go to millisec
             self.multiplier = 1e3
             if freq:
-                self.unit = "ppt"
+                # go to ppb
+                self.unit = "ppb"
             else:
+                # go to millisec
                 self.unit = "ms"
 
         elif 1e-6 <= target:
-            # go to microsec, or ppm
             self.multiplier = 1e6
             if freq:
-                self.unit = "ppm"
+                self.unit = "10e-12"
             else:
+                # go to microsec
                 self.unit = "µs"
 
         else:
-            # go to nanosec, or ppb
             self.multiplier = 1e9
             if freq:
-                self.unit = "ppb"
+                self.unit = "10e-15"
             else:
+                # go to nanosec
                 self.unit = "ns"
 
         self.percs.update({k: v * self.multiplier
