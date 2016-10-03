@@ -90,7 +90,7 @@ class NTPStats:
                     line = line.strip(' \0\r\n\t')
                     if line is not None:
                         if 0 == len(line):
-                            continue;
+                            continue
                         split = line.split(None, 2)
                         try:
                             t = int(float(split[0]))
