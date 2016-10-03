@@ -56,9 +56,9 @@ def ntp_read_vars(peer, vars, host):
         cmd.append(host)
 
     try:
-        output = subprocess.check_output(cmd).decode('utf-8').splitlines()
-    except CalledProcessError:
-        print("Could not start ntpq: %s" % CalledProcessError.output, file=sys.stderr)
+        output = subprocess.check_output(cmd, stderr=subprocess.STDOUT).decode('utf-8').splitlines()
+    except subprocess.CalledProcessError as e:
+        print("Could not start ntpq: %s" % e.output, file=sys.stderr)
         raise SystemExit(1)
 
     for line in output:
