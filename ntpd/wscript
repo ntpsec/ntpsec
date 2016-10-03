@@ -34,7 +34,7 @@ def build(ctx):
 							"%s/ntpd/" % bldnode,
 							"%s/" % ctx.bldnode.parent.abspath()
 			],
-			install_path= False
+			install_path= None,
 		)
 
 		# XXX: needs a dependency to rebuild ntp_keyword.h when keyword-gen is rebuilt

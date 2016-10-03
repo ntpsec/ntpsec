@@ -40,6 +40,7 @@ def build(ctx):
 		ctx.ntp_test(
 			features	= "c cprogram bld_include src_include libisc_include test",
 	        	target		= "test_ntpdig",
+			install_path	= None,
 			defines		= unity_config + ["TEST_NTPDIG=1"],
 			includes	= [
 						"%s/tests/unity/" % srcnode,
@@ -87,6 +88,7 @@ def build(ctx):
 	ctx.ntp_test(
 		features	= "c cprogram bld_include src_include libisc_include test",
         	target		= "test_libntp",
+		install_path	= None,
 		defines		= unity_config + ["TEST_LIBNTP=1"],
 		includes	= [
 					"%s/tests/unity/" % srcnode,
@@ -106,6 +108,7 @@ def build(ctx):
 	ctx.ntp_test(
 		features	= "c cprogram bld_include src_include libisc_include test",
         	target		= "test_ntpd",
+		install_path	= None,
 		defines		= unity_config + ["TEST_NTPD=1"],
 		includes	= [
 					"%s/tests/unity/" % srcnode,
