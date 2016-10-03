@@ -57,6 +57,7 @@ if str is bytes:  # Python 2
         return fp
 
 else:  # Python 3
+    import io
 
     def polystr(o):
         "Polymorphic string factory function"
