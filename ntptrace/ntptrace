@@ -60,6 +60,9 @@ def ntp_read_vars(peer, vars, host):
     except subprocess.CalledProcessError as e:
         print("Could not start ntpq: %s" % e.output, file=sys.stderr)
         raise SystemExit(1)
+    except OSError as e:
+        print("Could not start ntpq: %s" % e.strerror, file=sys.stderr)
+        raise SystemExit(1)
 
     for line in output:
         if re.search(r'Connection refused', line):
