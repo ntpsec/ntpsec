@@ -972,7 +972,6 @@ Python by ESR, concept and GNUPLOT code by Dan Drown.
             # register to dump debug on all normal exits
             atexit.register( print_profile )
 
-
     nice = 19       # always run nicely
     if 0 != nice:
         try:
