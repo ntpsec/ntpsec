@@ -541,6 +541,10 @@ plot \
 <p>This shows the offset of a local refclock in %(unit)s.  This is
 useful to see how the measured offset is behaving.</p>
 
+<p>Closer to 0s is better.  An ideal system would be a horizontal line
+at 0s. Typical 90% ranges may be: local serial GPS 200 ms; local PPS
+20µs</p>
+
 <p>Clock Offset is field 5 in the peerstats log file.</p>
 """ %  locals()
                 else:
@@ -554,6 +558,10 @@ to the remote.  NTP can not really know the offset of a remote chimer,
 NTP computes it by subtracting rtt/2 from the offset.  Plotting the
 offset±rtt reverses this calculation to more easily see the effects of
 rtt changes.</p>
+
+<p>Closer to 0s is better.  An ideal system would be a horizontal line
+at 0s. Typical 90% ranges may be: local LAN peer 80µs; 90% ranges for
+WAN servers may be 4ms and much larger. </p>
 
 <p>Clock Offset is field 5 in the peerstats log file.</p>
 """
@@ -587,23 +595,27 @@ at 0s.</p>
         else:
             # many peers
             title += "s"
+            # grab and sort the values, no need for the timestamp, etc.
+            values = [float(line.split()[fld - 1]) for line in self.peerstats]
+
+            stats = VizStats( values )
+            unit        = stats.unit
+            multiplier  = stats.multiplier
+            persc       = stats.percs
+
+            exp = stats.stats_html
             if "offset" == type:
                 title = "Peer Offsets"
-                exp = """\
+                exp += """\
 <p>This shows the offset of all refclocks, peers and servers in
 %(unit)s.  This can be useful to see if offset changes are happening in
 a single clock or all clocks together.</p>
-
-<p>Closer to 0s is better.  An ideal system would be a horizontal line
-at 0s. Typical 90%% ranges may be: local serial GPS 200 ms; local LAN
-peer 80µs; local PPS 20µs.  90%% ranges for WAN servers may be 4ms and
-much larger. </p>
 
 <p>Clock Offset is field 5 in the peerstats log file.</p>
 """ % locals()
             else:
                 title = "Peer Jitters"
-                exp = """\
+                exp += """\
 <p>This shows the RMS Jitter of all refclocks, peers and servers.
 Jitter is the current estimated dispersion; the variation in offset
 between samples.</p>
