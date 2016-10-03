@@ -56,6 +56,9 @@ except subprocess.CalledProcessError as e:
     sys.stderr.write( e.output )
     sys.stderr.write( "Return code: %s\n" % e.returncode )
     raise SystemExit(2)
+except OSError as e:
+    sys.stderr.write("ERROR: Could not start smartctl: %s\n" % e.strerror)
+    raise SystemExit(2)
 
 
 lines = output.split( '\n' )
