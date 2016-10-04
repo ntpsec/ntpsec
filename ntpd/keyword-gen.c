@@ -97,7 +97,6 @@ struct key_tok ntp_keywords[] = {
 { "subtype",		T_Subtype,		FOLLBY_TOKEN },
 { "ttl",		T_Ttl,			FOLLBY_TOKEN },
 { "version",		T_Version,		FOLLBY_TOKEN },
-{ "xleave",		T_Xleave,		FOLLBY_TOKEN },
 /* crypto_command */
 { "host",		T_Host,			FOLLBY_STRING },
 { "pw",			T_Pw,			FOLLBY_STRING },

@@ -443,7 +443,7 @@ static const struct ctl_var peer_var[] = {
            leaking it creates a vulnerability */
         { CP_ORG,	RO, "org" },	        /* 18 */
 	{ CP_REC,	RO, "rec" },		/* 19 */
-	{ CP_XMT,	RO, "xleave" },		/* 20 */
+	{ CP_XMT,	RO, "xmt" },		/* 20 */
 	{ CP_REACH,	RO, "reach" },		/* 21 */
 	{ CP_UNREACH,	RO, "unreach" },	/* 22 */
 	{ CP_TIMER,	RO, "timer" },		/* 23 */
@@ -2122,8 +2122,7 @@ ctl_putpeer(
 		break;
 
 	case CP_XMT:
-		if (p->xleave)
-			ctl_putdbl(peer_var[id].text, p->xleave * 1e3);
+		ctl_putts(peer_var[id].text, &p->xmt);
 		break;
 
 	case CP_BIAS:
