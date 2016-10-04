@@ -936,9 +936,9 @@ Python by ESR, concept and GNUPLOT code by Dan Drown.
     args = parser.parse_args()
 
     args.period = int( float(args.period) * NTPStats.SecondsInDay)
-    if None != args.endtime:
+    if args.endtime is not None:
         args.endtime = iso_to_posix(args.endtime)
-    if None != args.starttime:
+    if args.starttime is not None:
         args.starttime = iso_to_posix(args.starttime)
 
     args.statsdirs = [os.path.expanduser(path)
@@ -1034,13 +1034,13 @@ Python by ESR, concept and GNUPLOT code by Dan Drown.
                 sys.stdout.write(plot['plot'])
             raise SystemExit(0)
 
-        if None != args.show_peer_offsets or None != args.show_peer_jitters:
+        if args.show_peer_offsets is not None or args.show_peer_jitters is not None:
             if not len( stats.peerstats ):
                 sys.stderr.write("ntpviz: ERROR:  missing peerstats data\n")
                 raise SystemExit(1)
-            if None != args.show_peer_offsets:
+            if args.show_peer_offsets is not None:
                 plot = stats.peer_offsets_gnuplot(args.show_peer_offsets)
-            if None != show_peer_jitters:
+            if show_peer_jitters is not None:
                 plot = stats.peer_jitters_gnuplot(args.show_peer_jitters)
             if args.generate:
                 gnuplot(plot['plot'])
