@@ -1073,7 +1073,7 @@ Report generated: %(start_time_str)s UTC <br>
     # Ugh.  Not clear what to do in the multiplot case
     if len(statlist) == 1:
         index_header += 'Report Period: %1.1f days <br></div> ' \
-                 % (float(stats.period) / float(NTPStats.SecondsInWeek))
+                 % (float(stats.period) / float(NTPStats.SecondsInDay))
     index_header += '<div style="clear:both;"></div>'
 
     index_trailer = '''\
