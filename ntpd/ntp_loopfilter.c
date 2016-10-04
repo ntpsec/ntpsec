@@ -1214,7 +1214,7 @@ select_loop(
 	 * call set_freq() to switch the frequency compensation to or
 	 * from the kernel loop.
 	 */
-#ifdef HAVE_KERNEL_PLL
+#if defined(HAVE_KERNEL_PLL) && !defined(ENABLE_LOCKCLOCK)
 	if (pll_control && loop_started)
 		set_freq(drift_comp);
 #endif
