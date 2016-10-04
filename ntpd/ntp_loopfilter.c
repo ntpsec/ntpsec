@@ -119,8 +119,10 @@ double	drift_comp;		/* frequency (s/s) */
 static double init_drift_comp; /* initial frequency (PPM) */
 double	clock_stability;	/* frequency stability (wander) (s/s) */
 u_int	sys_tai;		/* TAI offset from UTC */
-#ifndef ENABLE_LOCKCLOCK
+#if !defined(ENABLE_LOCKCLOCK) || defined(HAVE_KERNEL_PLL)
 static bool loop_started;	/* true after LOOP_DRIFTINIT */
+#endif /* !ENABLE_LOCKCLOCK || HAVE_KERNEL_PLL */
+#ifndef ENABLE_LOCKCLOCK
 static void rstclock (int, double); /* transition function */
 static double direct_freq(double); /* direct set frequency */
 static void set_freq(double);	/* set frequency */
