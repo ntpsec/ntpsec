@@ -92,9 +92,6 @@ ntpwait/::	Directory containing a script that blocks until ntpd is
 		in state 4 (synchronized). Useful at boot time, to delay
 		the boot sequence until after "ntpd -g" has set the time.
 
-ports/::	Subdirectories of this contain code for non-Unix operating
-		systems.  At present there is just one, for Windows.
-
 pylib/::	Installable Python helper classes for scripts.
 
 tests/::	Self-test code.
