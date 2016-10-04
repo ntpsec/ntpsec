@@ -11,7 +11,7 @@ import calendar, datetime, glob, gzip, os, socket, subprocess, sys, time
 
 class NTPStats:
     "Gather statistics for a specified NTP site"
-    SecondsInWeek = 24*60*60
+    SecondsInDay = 24*60*60
     DefaultPeriod = 7*24*60*60
     peermap = {}    # cached result of peersplit()
 
