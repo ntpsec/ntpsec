@@ -119,12 +119,12 @@ double	drift_comp;		/* frequency (s/s) */
 static double init_drift_comp; /* initial frequency (PPM) */
 double	clock_stability;	/* frequency stability (wander) (s/s) */
 u_int	sys_tai;		/* TAI offset from UTC */
-static bool loop_started;	/* true after LOOP_DRIFTINIT */
 #ifndef ENABLE_LOCKCLOCK
+static bool loop_started;	/* true after LOOP_DRIFTINIT */
 static void rstclock (int, double); /* transition function */
 static double direct_freq(double); /* direct set frequency */
-#endif /* ENABLE_LOCKCLOCK */
 static void set_freq(double);	/* set frequency */
+#endif /* ENABLE_LOCKCLOCK */
 
 #ifdef HAVE_KERNEL_PLL
 #ifndef PATH_MAX
@@ -1072,7 +1072,7 @@ direct_freq(
 }
 #endif /* ENABLE_LOCKCLOCK */
 
-
+#ifndef ENABLE_LOCKCLOCK
 /*
  * set_freq - set clock frequency correction
  *
@@ -1111,7 +1111,7 @@ set_freq(
 	mprintf_event(EVNT_FSET, NULL, "%s %.3f PPM", loop_desc,
 	    drift_comp * 1e6);
 }
-
+#endif /* HAVE_LOCKCLOCK */
 
 #ifdef HAVE_KERNEL_PLL
 static void
