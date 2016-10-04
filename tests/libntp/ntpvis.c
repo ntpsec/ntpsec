@@ -7,15 +7,7 @@
 TEST_GROUP(ntpvis);
 
 #include "ntpd.h"
-#include "timevalops.h"
-
-/* second/usec pair to unsigned lfp */
-#define SECUSECTOTS(sec, usec, ts)		\
-	do { \
-		(ts)->l_ui = (u_long)sec; \
-		TVUTOTSF(usec, (ts)->l_uf); \
-	} while (false)
-
+#include "timespecops.h"
 
 static struct pkt ExamplePacket1 = {
     .li_vn_mode = 6,
@@ -44,8 +36,8 @@ static char *ExampleDump2 = "6:2:3:-21:0:0:47505300:1474021718.5261510001:0.0000
 
 TEST_SETUP(ntpvis) {
     /* becomes lfp 1474021718.5261510001 */
-    SECUSECTOTS(1474021718, 526151, &ExamplePacket1.reftime); 
-    SECUSECTOTS(1474021718, 526151, &ExamplePacket2.reftime); 
+    struct timespec reftime = {1474021718, 526151000};
+    ExamplePacket2.reftime = ExamplePacket1.reftime = tspec_intv_to_lfp(reftime);
 }
 
 TEST_TEAR_DOWN(ntpvis) {}
