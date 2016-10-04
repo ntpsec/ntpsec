@@ -941,7 +941,6 @@ Python by ESR, concept and GNUPLOT code by Dan Drown.
     if None != args.starttime:
         args.starttime = iso_to_posix(args.starttime)
 
-    print( args.statsdirs)
     args.statsdirs = [os.path.expanduser(path)
                      for path in args.statsdirs.split(",")]
 
