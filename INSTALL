@@ -3,14 +3,13 @@
 == Prerequisites ==
 
 This software should build on any operating system conformant to
-POSIX.1-2001 and ISO/IEC 9899:1999 (C99).  In addition, the
-operating system must have either a Linux-like adjtimex(2) call
-or a BSD-like pair of ntp_gettime(2)/ntp_adjtime(2) calls. Also,
-it must support the IPv6 API defined in RFC2493 and RFC2553. Finally,
-it must support iterating over active UDP interfaces via getifaddrs(3)
-or some equivalent facility.
+POSIX.1-2001 and ISO/IEC 9899:1999 (C99).  In addition, the operating
+system must have either a Linux-like adjtimex(2) call or a BSD-like
+ntp_adjtime(2) call. Also, it must support the IPv6 API defined in
+RFC2493 and RFC2553. Finally, it must support iterating over active
+UDP interfaces via getifaddrs(3) or some equivalent facility.
 
-There are some prerequisites.  Libraries need the library installed
+There are some prerequisites.  Libraries need the binary installed
 to run and in addition, the development headers installed to build.
 
 Python 2.x, x >= 6, or Python 3.x >= 3::

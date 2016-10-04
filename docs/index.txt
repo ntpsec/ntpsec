@@ -219,8 +219,7 @@ few will be user-visible.
 POSIX.1-2001 and ISO/IEC 9899:1999 (aka C99).  Primary platforms
 include Linux and the *BSD family; any reasonably modern proprietary
 Unix will also serve.  The OS must have either a Linux-like
-adjtimex(2) call or a BSD-like pair of ntp_gettime(2)/ntp_adjtime(2)
-calls.
+adjtimex(2) call or a BSD-like ntp_adjtime(2) call.
 
 Legacy Windows support has been removed from the {project-shortname}
 codebase. Future Windows support will be conditional on the quality
