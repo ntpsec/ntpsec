@@ -172,7 +172,7 @@ local_poll(
 	 */
 #if defined(HAVE_KERNEL_PLL) && defined(ENABLE_LOCKCLOCK)
 	memset(&ntv,  0, sizeof ntv);
-	switch (intercept_kernel_pll_adjtime(&ntv)) {
+	switch (adjtimex(&ntv)) {
 	case TIME_OK:
 		pp->leap = LEAP_NOWARNING;
 		peer->stratum = pp->stratum;
