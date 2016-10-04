@@ -110,16 +110,20 @@ uint8_t	allan_xpt = CLOCK_ALLAN; /* Allan intercept (log2 s) */
 /*
  * Program variables
  */
+#ifndef ENABLE_LOCKCLOCK
 static double clock_offset;	/* offset */
+static u_long clock_epoch;	/* last update */
+#endif /* ENABLE_LOCKCLOCK */
 double	clock_jitter;		/* offset jitter */
 double	drift_comp;		/* frequency (s/s) */
 static double init_drift_comp; /* initial frequency (PPM) */
 double	clock_stability;	/* frequency stability (wander) (s/s) */
-static u_long clock_epoch;	/* last update */
 u_int	sys_tai;		/* TAI offset from UTC */
 static bool loop_started;	/* true after LOOP_DRIFTINIT */
+#ifndef ENABLE_LOCKCLOCK
 static void rstclock (int, double); /* transition function */
 static double direct_freq(double); /* direct set frequency */
+#endif /* ENABLE_LOCKCLOCK */
 static void set_freq(double);	/* set frequency */
 
 #ifdef HAVE_KERNEL_PLL
@@ -131,9 +135,11 @@ static char *this_file = NULL;
 
 static struct timex ntv;	/* ntp_adjtime() parameters */
 int	pll_status;		/* last kernel status bits */
+#ifndef ENABLE_LOCKCLOCK
 #if defined(STA_NANO) && NTP_API == 4
 static u_int loop_tai;		/* last TAI offset */
 #endif /* STA_NANO */
+#endif /* ENABLE_LOCKCLOCK */
 static	void	start_kern_loop(void);
 static	void	stop_kern_loop(void);
 #endif /* HAVE_KERNEL_PLL */
@@ -183,6 +189,7 @@ static sigjmp_buf env;		/* environment var. for pll_trap() */
 #endif /* HAVE_KERNEL_PLL */
 
 #ifdef HAVE_KERNEL_PLL
+#ifndef ENABLE_LOCKCLOCK
 static void
 sync_status(const char *what, int ostatus, int nstatus)
 {
@@ -192,6 +199,7 @@ sync_status(const char *what, int ostatus, int nstatus)
 	snprintf(tbuf, sizeof(tbuf), "%s status: %s -> %s", what, obuf, nbuf);
 	report_event(EVNT_KERN, NULL, tbuf);
 }
+#endif /* ENABLE_LOCKCLOCK */
 
 /*
  * file_name - return pointer to non-relative portion of this C file pathname
@@ -1018,6 +1026,7 @@ adj_host_clock(
 }
 
 
+#ifndef ENABLE_LOCKCLOCK
 /*
  * Clock state machine. Enter new state and set state variables.
  */
@@ -1061,6 +1070,7 @@ direct_freq(
 
 	return drift_comp;
 }
+#endif /* ENABLE_LOCKCLOCK */
 
 
 /*
