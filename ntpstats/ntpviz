@@ -858,7 +858,7 @@ if __name__ == '__main__':
         elif switch == "-n":
             sitename = val
         elif switch == "-p":
-            period = int( float(val) * NTPStats.SecondsInWeek)
+            period = int( float(val) * NTPStats.SecondsInDay)
         elif switch == "-s":
             starttime = iso_to_posix(val)
         elif switch == "-o":
