@@ -22,7 +22,8 @@ Python by ESR, concept and GNUPLOT code by Dan Drown.
 #SPDX-License-Identifier: BSD-2-Clause
 from __future__ import print_function, division
 
-import atexit, binascii, collections, getopt, os, socket, sys, time
+import argparse
+import atexit, binascii, collections, os, socket, sys, time
 from ntp.statfiles import *
 
 def print_profile():
@@ -312,7 +313,7 @@ component of frequency drift.</p>
         gpslist.sort()
 
         if not len( gpsmap) or not len( gpslist):
-            if 1 <= debug_level:
+            if 1 <= args.debug_level:
                 sys.stderr.write("ntpviz: INFO: no gps data to graph\n")
             return ''
 
@@ -822,77 +823,147 @@ AADRxQAAxBEAAA==
 """
 
 if __name__ == '__main__':
-    try:
-        (options, arguments) = getopt.getopt(sys.argv[1:], "d:e:ghn:o:p:s:D:", [
-            "local-offset", "local-error", "local-jitter", "local-stability",
-            "local-offset-histogram",
-            "all-peer-offsets", "peer-offsets=",
-            "all-peer-jitters", "peer-jitters=",
-            "local-temps",
-            "local-gps",
-            "local-offset-multiplot",
-        ])
-    except getopt.GetoptError as err:
-        sys.stderr.write(str(err) + "\n")
-        raise SystemExit(2)
-    sitename = None
-    statsdirs = ["/var/log/ntpstats"]
-    period = endtime = starttime = None
-    generate = False
-    show_local_offset = show_local_error = show_local_jitter = False
-    show_local_stability = show_local_offset_histogram = show_temps = False
-    show_local_offset_multiplot = show_gps = False
-    show_peer_offsets = show_peer_jitters = None
-    outdir = "ntpgraphs"
-    debug_level = 0
-    for (switch, val) in options:
-        if switch == "-d":
-            statsdirs = [os.path.expanduser(path) for path in val.split(",")]
-        elif switch == "-e":
-            endtime = iso_to_posix(val)
-        elif switch == "-g":
-            generate = True
-        elif switch == "-h":
-            sys.stdout.write(__doc__)
-            raise SystemExit(0)
-        elif switch == "-n":
-            sitename = val
-        elif switch == "-p":
-            period = int( float(val) * NTPStats.SecondsInDay)
-        elif switch == "-s":
-            starttime = iso_to_posix(val)
-        elif switch == "-o":
-            outdir = val
-        elif switch == "-D":
-            debug_level = int(val)      # Debug level, 0 to 9, 9 most verbose
-        elif switch == "--local-offset":
-            show_local_offset = True
-        elif switch == "--local-error":
-            show_local_error = True
-        elif switch == "--local-jitter":
-            show_local_jitter = True
-        elif switch == "--local-stability":
-            show_local_stability = True
-        elif switch == "--local-offset-histogram":
-            show_local_offset_histogram = True
-        elif switch == "--peer-offsets":
-            show_peer_offsets = val.split(",")
-        elif switch == "--all-peer-offsets":
-            show_peer_offsets = []
-        elif switch == "--peer-jitters":
-            show_peer_jitters = val.split(",")
-        elif switch == "--all-peer-jitters":
-            show_peer_jitters = []
-        elif switch == "--local-temps":
-            show_temps = True
-        elif switch == "--local-gps":
-            show_gps = True
-        elif switch == "--local-offset-multiplot":
-            show_local_offset_multiplot = True
-    if 0 < debug_level:
+
+    parser = argparse.ArgumentParser(description="ntpd stats visualizer",
+                fromfile_prefix_chars='@',
+                epilog = """
+See the manual page for details.
+
+Python by ESR, concept and GNUPLOT code by Dan Drown.
+""")
+    parser.add_argument('-g', '--generate',
+                default=False,
+                action="store_true",
+                dest='generate',
+                help="Run plot through gnuplot to make png")
+    parser.add_argument('-e', '--endtime',
+                default=None,
+                dest='endtime',
+                help="End time in POSIX (seconds) or ISO8601",
+                type=str)
+    parser.add_argument('-s', '--starttime',
+                default=None,
+                dest='starttime',
+                help="Start time in POSIX (seconds) or ISO8601",
+                type=str)
+    parser.add_argument('-n', '--name',
+                default=socket.getfqdn(),
+                dest='sitename',
+                help="sitename (title)",
+                type=str)
+    parser.add_argument('-o', '--outdir',
+                default = "ntpgraphs",
+                dest='outdir',
+                help="output directory",
+                type=str)
+    parser.add_argument('-d', '--datadir',
+                default = "/var/log/ntpstats",
+                dest='statsdirs',
+                help="one or more logfile directories to read",
+                type=str)
+    parser.add_argument('-p', '--period',
+                default = NTPStats.DefaultPeriod,
+                dest='period',
+                help="period in days to graph (float)",
+                type=float)
+    parser.add_argument( '--all-peer-jitters',
+                default = False,
+                action="store_true",
+                dest='show_peer_jitters',
+                help="Plot all peer jitters")
+    parser.add_argument( '--peer-jitters',
+                default = '',
+                dest='peer_jitters',
+                help="Plot peer jitters.  Comma separated host list.",
+                type=str)
+    parser.add_argument( '--all-peer-offsets',
+                default = False,
+                action="store_true",
+                dest='show_peer_offsets',
+                help="Plot all peer offsets")
+    parser.add_argument( '--peer-offsets',
+                default = '',
+                dest='peer_offsets',
+                help="Plot peer offsets.  Comma separated host list.",
+                type=str)
+    parser.add_argument( '--local-error',
+                default=False,
+                action="store_true",
+                dest='show_local_error',
+                help="Plot clock time and clock frequency offsets")
+    parser.add_argument( '--local-gps',
+                default = False,
+                action="store_true",
+                dest='show_gps',
+                help="Plot gpsd tdop and nSats")
+    parser.add_argument( '--local-jitter',
+                default=False,
+                action="store_true",
+                dest='show_local_jitter',
+                help="Plot clock time jitter")
+    parser.add_argument( '--local-offset',
+                default=False,
+                action="store_true",
+                dest='show_local_offset',
+                help="Plot Clock frequency offset")
+    parser.add_argument( '--local-offset-histogram',
+                default=False,
+                action="store_true",
+                dest='show_local_offset_histogram',
+                help="Plot histogram of loopstats time offsets")
+    parser.add_argument( '--local-offset-multiplot',
+                default = False,
+                action="store_true",
+                dest='show_local_offset_multiplot',
+                help="Plot comparative local offsets for multiple directories")
+    parser.add_argument( '--local-stability',
+                default=False,
+                action="store_true",
+                dest='show_local_stability',
+                help="Plot RMS frequency-jitter")
+    parser.add_argument( '--local-temps',
+                default = False,
+                action="store_true",
+                dest='show_temps',
+                help="Plot local temperature data")
+    parser.add_argument('-D', '--debug',
+                default=0,
+                dest='debug_level',
+                help="debug level, 0 (none) to 9 (most)",
+                type=int)
+    # FIXME, missing -V and --version
+
+    args = parser.parse_args()
+
+    args.period = int( float(args.period) * NTPStats.SecondsInDay)
+    if None != args.endtime:
+        args.endtime = iso_to_posix(args.endtime)
+    if None != args.starttime:
+        args.starttime = iso_to_posix(args.starttime)
+
+    args.statsdirs = [os.path.expanduser(path
+                      for path in args.statsdirs.split(",")]
+
+    if True == args.show_peer_offsets:
+        args.show_peer_offsets = []
+    elif 0 < len(args.peer_offsets):
+        args.show_peer_offsets = args.peer_offsets.split(",")
+    else:
+        args.show_peer_offsets = None
+
+    if True == args.show_peer_jitters:
+        args.show_peer_jitters = []
+    elif 0 < len(args.peer_jitters):
+        args.show_peer_jitters = args.peer_jitters.split(",")
+    else:
+        args.show_peer_jitters = None
+
+    if 0 < args.debug_level:
         sys.stderr.write("ntpviz: INFO: now running at debug: %s\n" % \
-            debug_level)
-        if 9 == debug_level:
+            args.debug_level)
+        sys.stderr.write("ntpviz: INFO: Parsed Options %s\n" % args)
+
+        if 9 == args.debug_level:
             # crazy debug, also profile
             import cProfile, pstats
             pr = cProfile.Profile()
@@ -911,19 +982,20 @@ if __name__ == '__main__':
             p.ionice(psutil.IOPRIO_CLASS_IDLE)
 
         except ImportError:
-            if 0 < debug_level:
+            if 0 < args.debug_level:
                 sys.stderr.write("ntpviz: INFO: psutils not found\n")
             pass
 
         # set nice()
         nice = os.nice( nice )
-        if 2 < debug_level:
+        if 2 < args.debug_level:
             sys.stderr.write("ntpviz: INFO: now running at nice: %s\n" % \
                 nice)
 
-    statlist = [NTPViz(statsdir=d, sitename=sitename,
-                       period=period, starttime=starttime, endtime=endtime)
-                for d in statsdirs]
+    statlist = [NTPViz(statsdir=d, sitename=args.sitename,
+                        period=args.period, starttime=args.starttime,
+                        endtime=args.endtime)
+                for d in args.statsdirs]
 
     for fontpath in ("/usr/share/fonts/liberation",
                      "/usr/share/fonts/liberation-fonts",
@@ -938,91 +1010,92 @@ if __name__ == '__main__':
 
     if len(statlist) == 1:
         stats = statlist[0]
-        if show_local_offset or show_local_error or show_local_jitter or show_local_stability or show_local_offset_histogram:
+        if args.show_local_offset or \
+           args.show_local_error or \
+           args.show_local_jitter or \
+           args.show_local_stability or \
+           args.show_local_offset_histogram:
             if not len( stats.loopstats ):
                 sys.stderr.write("ntpviz: ERROR: missing loopstats data\n")
                 raise SystemExit(1)
-            if show_local_offset + show_local_error + show_local_jitter + show_local_stability + show_local_offset_histogram > 1:
-                sys.stderr.write("ntpviz: ERROR: clash of mode options\n")
-                raise SystemExit(1)
-            if show_local_offset:
+            if args.show_local_offset:
                 plot = stats.local_offset_gnuplot()
-            if show_local_error:
+            elif args.show_local_error:
                 plot = stats.local_error_gnuplot()
-            if show_local_jitter:
+            elif args.show_local_jitter:
                 plot = stats.local_offset_jitter_gnuplot()
-            if show_local_stability:
+            elif args.show_local_stability:
                 plot = stats.local_offset_stability_gnuplot()
-            if show_local_offset_histogram:
+            elif args.show_local_offset_histogram:
                 plot = stats.local_offset_histogram_gnuplot()
-            if generate:
+
+            if args.generate:
                 gnuplot(plot['plot'])
             else:
                 sys.stdout.write(plot['plot'])
             raise SystemExit(0)
 
-        if show_peer_offsets is not None or show_peer_jitters is not None:
+        if None != args.show_peer_offsets or None != args.show_peer_jitters:
             if not len( stats.peerstats ):
                 sys.stderr.write("ntpviz: ERROR:  missing peerstats data\n")
                 raise SystemExit(1)
-            if show_peer_offsets is not None:
-                plot = stats.peer_offsets_gnuplot(show_peer_offsets)
-            if show_peer_jitters is not None:
-                plot = stats.peer_jitters_gnuplot(show_peer_jitters)
-            if generate:
+            if None != args.show_peer_offsets:
+                plot = stats.peer_offsets_gnuplot(args.show_peer_offsets)
+            if None != show_peer_jitters:
+                plot = stats.peer_jitters_gnuplot(args.show_peer_jitters)
+            if args.generate:
                 gnuplot(plot['plot'])
             else:
                 sys.stdout.write(plot['plot'])
             raise SystemExit(0)
 
-        if show_temps:
+        if args.show_temps:
             if not len( stats.temps):
                 sys.stderr.write("ntpviz: ERROR: missing temps data\n")
                 raise SystemExit(1)
-            if show_temps is not None:
-                plot = stats.local_temps_gnuplot()
-            if generate:
+            plot = stats.local_temps_gnuplot()
+            if args.generate:
                 gnuplot(plot['plot'])
             else:
                 sys.stdout.write(plot['plot'])
             raise SystemExit(0)
 
-        if show_gps:
+        if args.show_gps:
             if not len( stats.gpsd):
                 sys.stderr.write("ntpviz: ERROR: missing gps data\n")
                 raise SystemExit(1)
             plot = stats.local_gps_gnuplot()
-            if generate:
+            if args.generate:
                 gnuplot(plot['plot'])
             else:
                 sys.stdout.write(plot['plot'])
             raise SystemExit(0)
 
-    if show_local_offset_multiplot:
+    if args.show_local_offset_multiplot:
         plot = local_offset_multiplot(statlist)
-        if generate:
+        if args.generate:
             gnuplot(plot)
         else:
             sys.stdout.write(plot)
         raise SystemExit(0)
 
     # Fall through to HTML code generation
-    if not os.path.isdir(outdir):
+    if not os.path.isdir(args.outdir):
         try:
-            os.mkdir(outdir)
+            os.mkdir(args.outdir)
         except SystemError:
             sys.stderr.write("ntpviz: ERROR: %s can't be created.\n" \
-                 % outdir)
+                 % args.outdir)
             raise SystemExit(1)
 
     # if no ntpsec favicon.ico, write one.
-    ico_filename = os.path.join(outdir, "favicon.ico")
+    ico_filename = os.path.join(args.outdir, "favicon.ico")
     if not os.path.lexists( ico_filename ):
         with open( ico_filename, "w" ) as wp:
             wp.write(binascii.a2b_base64(ntpsec_ico))
 
     # if no ntpsec logo, write one.
-    logo_filename = os.path.join(outdir, "ntpsec-logo.png")
+    logo_filename = os.path.join(args.outdir, "ntpsec-logo.png")
     if not os.path.lexists( logo_filename ):
         with open( logo_filename, "w" ) as wp:
             wp.write(binascii.a2b_base64(ntpsec_logo))
@@ -1031,7 +1104,7 @@ if __name__ == '__main__':
     start_time_str = start_time.strftime("%c")
 
     # if title file, get title from it
-    title_f = os.path.join(outdir, "title")
+    title_f = os.path.join(args.outdir, "title")
     title = 'ntpviz'
     if os.path.isfile(title_f):
         try:
@@ -1169,7 +1242,7 @@ ntpviz</a>, part of the <a href="https://www.ntpsec.org/">NTPsec project</a>
     # during the run
     index_buffer = index_header
     # if header file, add it to index.html
-    header = os.path.join(outdir, "header")
+    header = os.path.join(args.outdir, "header")
     if os.path.isfile(header):
         try:
             header_file = open( header, 'r')
@@ -1221,11 +1294,11 @@ ntpviz</a>, part of the <a href="https://www.ntpsec.org/">NTPsec project</a>
             else:
                 exp = imagename
             index_buffer += "<br><br>\n"
-            gnuplot(image['plot'], os.path.join(outdir, imagename + ".png"))
+            gnuplot(image['plot'], os.path.join(args.outdir, imagename + ".png"))
             index_buffer += "</div>\n"
 
     # if footer file, add it to index.html
-    footer = os.path.join(outdir, "footer")
+    footer = os.path.join(args.outdir, "footer")
     if os.path.isfile(footer):
         try:
             footer_file = open( footer, 'r')
@@ -1236,7 +1309,7 @@ ntpviz</a>, part of the <a href="https://www.ntpsec.org/">NTPsec project</a>
     index_buffer += index_trailer
 
     # and send the file buffer
-    with open(os.path.join(outdir, "index.html"), "w") as ifile:
+    with open(os.path.join(args.outdir, "index.html"), "w") as ifile:
         ifile.write(index_buffer)
         ifile.close()
 
