@@ -119,7 +119,7 @@ static void	assertion_failed	(const char *, int,
 					 isc_assertiontype_t,
 					 const char *)
 			__attribute__	((__noreturn__));
-static void	library_fatal_error	(const char *, int, 
+static void	library_fatal_error	(const char *, int,
 					 const char *, va_list)
 					ISC_FORMAT_PRINTF(3, 0);
 static void	library_unexpected_error(const char *, int,
@@ -160,7 +160,7 @@ static const struct option longoptions[] = {
     { "dvar",		    1, 0, 'Z' },
     { "slew",		    0, 0, 'x' },
     { "version",	    0, 0, 'V' },
-    { NULL,                 0, 0, '\0'}, 
+    { NULL,                 0, 0, '\0'},
 };
 
 static void ntpd_usage(void)
@@ -185,7 +185,7 @@ static void ntpd_usage(void)
     P("   -f Str driftfile      frequency drift file name\n");
     P("   -g no  panicgate      Allow the first adjustment to be Big\n");
     P("				- may appear multiple times\n");
-    P("   -h no  --help         Display usage summary of options and exit.\n"); 
+    P("   -h no  --help         Display usage summary of options and exit.\n");
     P("   -i Str jaildir        Jail directory\n");
     P("   -I Str interface      Listen on an interface name or address\n");
     P("				- may appear multiple times\n");
@@ -328,7 +328,7 @@ parse_cmdline_opts(
 		break;
 	    case 'q':
 		mode_ntpdate = true;
-		nofork = true; 
+		nofork = true;
 		break;
 	    case 'r':
 		{
@@ -643,7 +643,7 @@ ntpdmain(
 		}
 		
 		/*
-		 * child/daemon 
+		 * child/daemon
 		 * close all open files excepting waitsync_fd_to_close.
 		 * msyslog() unreliable until after init_logging().
 		 */
@@ -1005,7 +1005,7 @@ static void mainloop(void)
 		if (mdnsreg && (current_time - mdnsreg ) > 60 && mdnstries && sys_leap != LEAP_NOTINSYNC) {
 			mdnsreg = current_time;
 			msyslog(LOG_INFO, "Attempting to register mDNS");
-			if ( DNSServiceRegister (&mdns, 0, 0, NULL, "_ntp._udp", NULL, NULL, 
+			if ( DNSServiceRegister (&mdns, 0, 0, NULL, "_ntp._udp", NULL, NULL,
 			    htons(NTP_PORT), 0, NULL, NULL, NULL) != kDNSServiceErr_NoError ) {
 				if (!--mdnstries) {
 					msyslog(LOG_ERR, "Unable to register mDNS, giving up.");
@@ -1084,7 +1084,7 @@ wait_child_sync_if(
 	fd_set	readset;
 	struct timespec wtimeout;
 
-	if (0 == wait_sync) 
+	if (0 == wait_sync)
 		return 0;
 
 	/* waitsync_fd_to_close used solely by child */
@@ -1113,7 +1113,7 @@ wait_child_sync_if(
 			/*
 			 * select() indicated a timeout, but in case
 			 * its timeouts are affected by a step of the
-			 * system clock, select() again with a zero 
+			 * system clock, select() again with a zero
 			 * timeout to confirm.
 			 */
 			FD_ZERO(&readset);
