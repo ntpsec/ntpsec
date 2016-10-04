@@ -442,6 +442,10 @@ local_clock(
 	double	fp_offset	/* clock offset (s) */
 	)
 {
+#ifdef ENABLE_LOCKCLOCK
+	UNUSED_ARG(peer);
+	UNUSED_ARG(fp_offset);
+#else
 	int	rval;		/* return code */
 	int	osys_poll;	/* old system poll */
 #ifdef HAVE_KERNEL_PLL
@@ -451,6 +455,7 @@ local_clock(
 	double	clock_frequency; /* clock frequency */
 	double	dtemp, etemp;	/* double temps */
 	char	tbuf[80];	/* report buffer */
+#endif /* ENABLE_LOCKCLOCK */
 
 	/*
 	 * If the loop is opened or the NIST lockclock scheme is in use,
@@ -940,9 +945,11 @@ adj_host_clock(
 	void
 	)
 {
+#ifndef ENABLE_LOCKCLOCK
 	double	offset_adj;
 	double	freq_adj;
-
+#endif /* ENABLE_LOCKCLOCK */
+	
 	/*
 	 * Update the dispersion since the last update. In contrast to
 	 * NTPv3, NTPv4 does not declare unsynchronized after one day,
@@ -1235,7 +1242,6 @@ loop_config(
 	)
 {
 	int	i;
-	double	ftemp;
 
 #ifdef DEBUG
 	if (debug > 1)
@@ -1261,12 +1267,14 @@ loop_config(
 		 * Initialize frequency if given; otherwise, begin frequency
 		 * calibration phase.
 		 */
-		ftemp = init_drift_comp / 1e6;
-		if (ftemp > NTP_MAXFREQ)
-			ftemp = NTP_MAXFREQ;
-		else if (ftemp < -NTP_MAXFREQ)
-			ftemp = -NTP_MAXFREQ;
-		set_freq(ftemp);
+		{
+			double ftemp = init_drift_comp / 1e6;
+			if (ftemp > NTP_MAXFREQ)
+				ftemp = NTP_MAXFREQ;
+			else if (ftemp < -NTP_MAXFREQ)
+				ftemp = -NTP_MAXFREQ;
+			set_freq(ftemp);
+		}
 		if (freq_set)
 			rstclock(EVNT_FSET, 0);
 		else
