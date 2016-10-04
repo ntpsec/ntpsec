@@ -11,7 +11,7 @@
 #include "ntp_syslog.h"
 #include "ntp_types.h"
 #include "ntp_fp.h"
-#include "timevalops.h"
+#include "timespecops.h"
 #include "ntp_calendar.h"
 #include "ntp_machine.h"
 #include "ntp_stdlib.h"
@@ -250,7 +250,7 @@ cvt_trimtsip(
 
 				    clock_time->utctime = gpstime.l_ui - JAN_1970;
 
-				    TSFTOTVU(gpstime.l_uf, clock_time->usecond);
+				    clock_time->usecond = lfp_intv_to_tspec(gpstime).tv_nsec / 1000;
 
 				    if (t->t_leap == ADDSECOND)
 					clock_time->flags |= PARSEB_LEAPADD;
