@@ -164,6 +164,10 @@ few will be user-visible.
 
 === Other user-visible changes ===
 
+* The notorious collision between pool and nopeer in older
+  implementations has been fixed; the pool keyword is now fully
+  usable.
+
 * There is a new data-visualization tool,
   link:ntpviz.html[+{ntpviz}+], which can produce various useful and
   interesting plots from the NTP statistics logs.  These should assist in
