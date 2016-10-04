@@ -32,18 +32,6 @@ The Network Time Protocol software contained in this
 distribution is available without charge under the conditions set
 forth in the link:copyright.html[Copyright Notice].
 
-[NOTE]
-It is very important that readers understand that the NTP document
-collection began 25 years ago and remains today a work in progress. It
-has evolved as new features were invented and old features retired. It
-has been widely copied, cached and morphed to other formats, including
-man pages, with varying loss of fidelity. However, these HTML pages are
-the ONLY authoritative and definitive reference. Readers should always
-use the collection that comes with the distribution they use. A copy of
-the online collection at {project-weblink} is normally included in the most
-recent snapshot, but might not agree with an earlier snapshot or
-release version.
-
 This distribution is an implementation of RFC-5905 "Network Time
 Protocol Version 4: Protocol and Algorithms Specification".  NTP is
 widely used to synchronize a computer to Internet time servers or
@@ -62,6 +50,12 @@ in recent decades
 
 The link:ntpspeak.html[Glossary of NTP-speak] might also be a helpful
 guide for the perplexed.
+
+Use caution when employing search engines to dig up NTP material.
+There are many, many copies of the NTP documentation out there, often
+referring to very old versions and carrying stale information. It's
+best to use only the HTML and manpages that come with your
+distribution.
 
 [[differences]]
 == Differences from NTP Classic ==
