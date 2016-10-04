@@ -941,8 +941,9 @@ Python by ESR, concept and GNUPLOT code by Dan Drown.
     if None != args.starttime:
         args.starttime = iso_to_posix(args.starttime)
 
-    args.statsdirs = [os.path.expanduser(path
-                      for path in args.statsdirs.split(",")]
+    print( args.statsdirs)
+    args.statsdirs = [os.path.expanduser(path)
+                     for path in args.statsdirs.split(",")]
 
     if True == args.show_peer_offsets:
         args.show_peer_offsets = []
