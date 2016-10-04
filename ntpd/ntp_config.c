@@ -678,10 +678,6 @@ create_peer_node(
 				case T_True:
 					my_node->ctl.flags |= FLAG_TRUE;
 					break;
-
-				case T_Xleave:
-					my_node->ctl.flags |= FLAG_XLEAVE;
-					break;
 				}
 			}
 			break;
@@ -2821,7 +2817,6 @@ get_correct_host_mode(
 		return 0;
 	}
 }
-
 
 static void
 config_peers(

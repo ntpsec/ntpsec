@@ -158,14 +158,6 @@ clock offset and roundtrip delay samples:
 [verse]
 delay = (_T_~4~ - _T_~1~) - (_T_~3~ - _T_~2~).
 
-In this description the transmit timestamps _T_~1~ and _T_~3~ are
-_softstamps_ measured by the inline code. Softstamps are subject to
-various queuing and processing delays. A more accurate measurement uses
-_drivestamps_, as described on the link:xleave.html[NTP Interleaved
-Modes] page. These issues along with mathematical models are discussed
-in the white paper {millshome}time.html[NTP
-Timestamp Calculations].
-
 The offset and delay statistics for one or more peer processes are
 processed by a suite of mitigation algorithms. The algorithm described
 on the link:filter.html[Clock Filter Algorithm] page selects the offset
