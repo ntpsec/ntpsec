@@ -1,0 +1,51 @@
+= Outside Tools =
+
+[cols="10%,90%",frame="none",grid="none",style="verse"]
+|==============================
+|image:pic/kelly_pogo_earthday.jpg[]|
+{millshome}pictures.html[from 'Pogo', by Walt Kelly]
+
+
+|==============================
+
+== Related Links ==
+
+include::includes/hand.txt[]
+
+== Table of Contents ==
+
+* link:#introduction[Introduction]
+* link:#basics[Configuration Basics]
+* link:#pool[Configuring Pool Servers]
+* link:#howmany[How Many Servers?]
+* link:#gps[Configuring A Local GPS]
+* link:#dhcp[Special considerations when using DHCP]
+* link:#sanity[Sanity-Checking Your Time Service]
+
+'''''
+
+[[introduction]]
+== Introduction ==
+
+Because NTP is a widely-used an sell-established service, people 
+who write tools for system administrators not infrequently have
+features and plugins designed to help you work with it. This
+page collects some references that may be useful.
+
+== Wireshark ==
+
+The https://www.wireshark.org/[Wireshark] protocol analyzer has
+support for displaying NTP packets with the fields broken out
+and interpreted.
+
+== Nagios ==
+
+The https://www.nagios.org/[Nagios] monitoring suite has native
+support for querying NTP servers.  The 'check_ntp_peer' and
+'check_ntp_time' programs may be of particular interest.
+
+'''''
+
+include::includes/footer.txt[]
+
+// end
