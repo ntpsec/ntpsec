@@ -113,13 +113,6 @@ struct refclockbug {
 #define GMT		0	/* I hope nobody sees this */
 #define MAXDIAL		60	/* max length of modem dial strings */
 
-/*
- * It's ugly that refid is sometimes treated as a  uint32_t and sometimes
- * as a string; that should be fixed. Using this in memcpy() at least
- * contains the problem.
- */
-#define REFIDLEN	sizeof(uint32_t)
-
 struct refclockproc {
 	void *	unitptr;	/* pointer to unit structure */
 	struct refclock * conf;	/* pointer to driver method table */
