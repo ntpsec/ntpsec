@@ -27,8 +27,8 @@ include::includes/hand.txt[]
 [[introduction]]
 == Introduction ==
 
-Because NTP is a widely-used an sell-established service, people 
-who write tools for system administrators not infrequently have
+Because NTP is a widely-used an well-established service, people
+who write tools for system administrators frequently have
 features and plugins designed to help you work with it. This
 page collects some references that may be useful.
 
