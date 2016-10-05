@@ -305,7 +305,7 @@ extern void syn_simple (parse_t *, timestamp_t *, struct format *, unsigned long
 extern parse_pps_fnc_t pps_simple;
 extern parse_pps_fnc_t pps_one;
 extern parse_pps_fnc_t pps_zero;
-extern bool parse_timedout (parse_t *, timestamp_t *, struct timeval *);
+extern bool parse_timedout (parse_t *, timestamp_t *, struct timespec *);
 
 #endif
 

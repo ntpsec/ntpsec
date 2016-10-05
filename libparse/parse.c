@@ -9,7 +9,7 @@
 
 #include <config.h>
 #include "ntp_fp.h"
-#include "timevalops.h"
+#include "timespecops.h"
 #include "ntp_calendar.h"
 #include "ntp_stdlib.h"
 #include "ntp_machine.h"
@@ -28,18 +28,17 @@ bool
 parse_timedout(
 	       parse_t *parseio,
 	       timestamp_t *tstamp,
-	       struct timeval *del
+	       struct timespec *del
 	       )
 {
-	struct timeval delta;
+	struct timespec delta;
 
 	l_fp delt;
 
 	delt = tstamp->fp;
 	L_SUB(&delt, &parseio->parse_lastchar.fp);
-	TSTOTV(&delt, &delta);
-
-	if (timercmp(&delta, del, >))
+	delta = lfp_uintv_to_tspec(delt);
+	if (cmp_tspec(delta, *del) == TIMESPEC_GREATER_THAN)
 	{
 		parseprintf(DD_PARSE, ("parse: timedout: TRUE\n"));
 		return true;
@@ -621,9 +620,9 @@ timepacket(
 	/*
 	 * time stamp
 	 */
-	parseio->parse_dtime.parse_time.fp.l_ui = (uint32_t) (t + JAN_1970);
-	TVUTOTSF(clock_time.usecond, parseio->parse_dtime.parse_time.fp.l_uf);
-
+	struct timespec ts = {t, clock_time.usecond * 1000};
+	parseio->parse_dtime.parse_time.fp = tspec_stamp_to_lfp(ts);
+	
 	parseio->parse_dtime.parse_format       = format;
 
 	return updatetimeinfo(parseio, clock_time.flags);
