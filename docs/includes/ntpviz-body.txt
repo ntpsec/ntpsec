@@ -117,7 +117,7 @@ named 'ntpgraphs', but the name can be changed with the -o option.
 Warning: existing PNG files and index.html in this directory will be
 clobbered.
 
-When an index is generated, ntpviz will look for three files in the
+When an index is generated, ntpviz will look for two files in the
 output directory.  None of the files need be present, and the
 'header' and 'footer' files may contain arbitrary html.
 contain aribtrary HTML.
@@ -132,9 +132,6 @@ added almost at the bottom of the body on the generated index.
 
 It is suggested that notes on the server be included in the footer
 file: OS, versions, CPU speed, etc.  You may also put links there.
-
-The third file is named 'title' and must be a single line of text.  This
-text will be used as the HTML title of the generated index.
 
 The code includes various sanity checks and will bail out with a message to
 standard error on, for example, missing logfile data required for a plot.
