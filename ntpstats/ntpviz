@@ -744,21 +744,25 @@ plot \
 
 def local_offset_multiplot(statlist):
     "Plot comparative local offsets for a list of NTPViz objects."
+
     plot = NTPViz.Common + '''\
-set title "Local Clock Offsets"
-set ytics format "%%1.2f μs" nomirror textcolor rgb "#0060ad"
+set title "Multiplot Local Clock Offsets"
+set ytics format "%1.2f μs" nomirror textcolor rgb "#0060ad"
 set key bottom right box
 plot \\
 '''
     # FIXME: We probably need to be more flexible about computing the plot label
-    sitenames = [os.path.basename(os.path.dirname(d)) for d in statsdirs]
+    sitenames = [os.path.basename(os.path.dirname(d)) for d in args.statsdirs]
     for (i, stats) in enumerate(statlist):
         plot += '"-" using 1:($2*1000000) title "%s clock offset μs" with linespoints, \\\n' % (sitenames[i])
     plot = plot[:-4] + "\n"
     for stats in statlist:
         plot += stats.dump("loopstats") + "e\n"
-    plot = plot[:-2]
-    return plot
+
+    ret = {'html' : '', 'percs' : '' }
+    ret['title'] = "Multiplot"
+    ret['plot'] = plot
+    return ret
 
 # here is how to create the base64 from an image file:
 # with open("path/to/file.png", "rb") as f:
@@ -1039,7 +1043,7 @@ Python by ESR, concept and GNUPLOT code by Dan Drown.
                 raise SystemExit(1)
             if None != args.show_peer_offsets:
                 plot = stats.peer_offsets_gnuplot(args.show_peer_offsets)
-            if None !=show_peer_jitters:
+            if None != args.show_peer_jitters:
                 plot = stats.peer_jitters_gnuplot(args.show_peer_jitters)
 
         if args.show_temps:
@@ -1060,9 +1064,9 @@ Python by ESR, concept and GNUPLOT code by Dan Drown.
     if None != plot:
         # finish up the plot, and exit
         if args.generate:
-            gnuplot(plot)
+            gnuplot(plot['plot'])
         else:
-            sys.stdout.write(plot)
+            sys.stdout.write(plot['plot'])
         raise SystemExit(0)
 
     # Fall through to HTML code generation
