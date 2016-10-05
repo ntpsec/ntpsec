@@ -433,7 +433,13 @@ struct peer {
 #define CRYPTO_TO_ZERO(p)	((char *)&((p)->clear_to_zero))
 #define END_CRYPTO_TO_ZERO(p)	((char *)&((p)->end_clear_to_zero))
 #define LEN_CRYPTO_TO_ZERO	(END_CRYPTO_TO_ZERO((struct peer *)0) \
-				    - CRYPTO_TO_ZERO((struct peer *)0))
+
+/*
+ * It's ugly that refid is sometimes treated as a  uint32_t and sometimes
+ * as a string; that should be fixed. Using this in memcpy() at least
+ * contains the problem.
+ */
+#define REFIDLEN	sizeof(uint32_t)
 
 #define	LEN_PKT_NOMAC	48 /* min header length */
 
@@ -448,7 +454,7 @@ struct parsed_pkt {
         int8_t precision;
         uint32_t rootdelay;
         uint32_t rootdisp;
-        char refid[4];
+        char refid[REFIDLEN];
         uint64_t reftime;
         uint64_t org;
         uint64_t rec;
