@@ -130,11 +130,13 @@ class VizStats(NTPStats):
         self.percs.update({k: v * self.multiplier
                      for k, v in list(self.percs.items())})
 
+        self.max         = self.percs[100]
         self.ninetynine  = self.percs[99]
         self.ninetyfive  = self.percs[95]
         self.fifty       = self.percs[50]
         self.five        = self.percs[5]
         self.one         = self.percs[1]
+        self.min         = self.percs[0]
 
         self.nf_m_f     = self.ninetyfive - self.five
         self.nn_m_o     = self.ninetynine - self.one
@@ -143,11 +145,12 @@ class VizStats(NTPStats):
         self.pstd = pstdev( values, mu=self.mu ) * self.multiplier
         self.mu *= self.multiplier
         self.stats_html =  """\
-<p>Percentiles: 99%% = %(ninetynine)s %(unit)s, &nbsp;
- 95%% = %(ninetyfive).3f  %(unit)s, &nbsp;
- 50%% = %(fifty).3f  %(unit)s, &nbsp;
- 5%% = %(five).3f  %(unit)s, &nbsp;
- 1%% = %(one).3f  %(unit)s<br>
+<p>Percentiles: Max: %(max)s, 99%%: %(ninetynine)s,&nbsp;&nbsp;
+ 95%%: %(ninetyfive).3f,&nbsp;&nbsp;
+ 50%%: %(fifty).3f,&nbsp;&nbsp;
+ 5%%: %(five).3f,&nbsp;&nbsp;
+ 1%%: %(one).3f,&nbsp;&nbsp;
+ Min: %(one).3f  %(unit)s<br>
 Ranges: 99%% - 1%% = %(nn_m_o).3f %(unit)s, &nbsp;
  95%% - 5%% = %(nf_m_f).3f %(unit)s<br>
 Deviation: Mean = %(mu).3f %(unit)s,  &nbsp;
