@@ -829,6 +829,8 @@ See the manual page for details.
 
 Python by ESR, concept and GNUPLOT code by Dan Drown.
 """)
+    group = parser.add_mutually_exclusive_group()
+
     parser.add_argument('-g', '--generate',
                 default=False,
                 action="store_true",
@@ -864,62 +866,62 @@ Python by ESR, concept and GNUPLOT code by Dan Drown.
                 dest='period',
                 help="period in days to graph (float)",
                 type=float)
-    parser.add_argument( '--all-peer-jitters',
+    group.add_argument( '--all-peer-jitters',
                 default = False,
                 action="store_true",
                 dest='show_peer_jitters',
                 help="Plot all peer jitters")
-    parser.add_argument( '--peer-jitters',
+    group.add_argument( '--peer-jitters',
                 default = '',
                 dest='peer_jitters',
                 help="Plot peer jitters.  Comma separated host list.",
                 type=str)
-    parser.add_argument( '--all-peer-offsets',
+    group.add_argument( '--all-peer-offsets',
                 default = False,
                 action="store_true",
                 dest='show_peer_offsets',
                 help="Plot all peer offsets")
-    parser.add_argument( '--peer-offsets',
+    group.add_argument( '--peer-offsets',
                 default = '',
                 dest='peer_offsets',
                 help="Plot peer offsets.  Comma separated host list.",
                 type=str)
-    parser.add_argument( '--local-error',
+    group.add_argument( '--local-error',
                 default=False,
                 action="store_true",
                 dest='show_local_error',
                 help="Plot clock time and clock frequency offsets")
-    parser.add_argument( '--local-gps',
+    group.add_argument( '--local-gps',
                 default = False,
                 action="store_true",
                 dest='show_gps',
                 help="Plot gpsd tdop and nSats")
-    parser.add_argument( '--local-jitter',
+    group.add_argument( '--local-jitter',
                 default=False,
                 action="store_true",
                 dest='show_local_jitter',
                 help="Plot clock time jitter")
-    parser.add_argument( '--local-offset',
+    group.add_argument( '--local-offset',
                 default=False,
                 action="store_true",
                 dest='show_local_offset',
                 help="Plot Clock frequency offset")
-    parser.add_argument( '--local-offset-histogram',
+    group.add_argument( '--local-offset-histogram',
                 default=False,
                 action="store_true",
                 dest='show_local_offset_histogram',
                 help="Plot histogram of loopstats time offsets")
-    parser.add_argument( '--local-offset-multiplot',
+    group.add_argument( '--local-offset-multiplot',
                 default = False,
                 action="store_true",
                 dest='show_local_offset_multiplot',
                 help="Plot comparative local offsets for multiple directories")
-    parser.add_argument( '--local-stability',
+    group.add_argument( '--local-stability',
                 default=False,
                 action="store_true",
                 dest='show_local_stability',
                 help="Plot RMS frequency-jitter")
-    parser.add_argument( '--local-temps',
+    group.add_argument( '--local-temps',
                 default = False,
                 action="store_true",
                 dest='show_temps',
@@ -1005,8 +1007,11 @@ Python by ESR, concept and GNUPLOT code by Dan Drown.
         sys.stderr.write("ntpviz: WARNING: liberation truetype fonts not found\n")
     os.environ["GNUPLOT_DEFAULT_GDFONT"] = "LiberationSans-Regular"
 
+    plot = None
+
     if len(statlist) == 1:
         stats = statlist[0]
+
         if args.show_local_offset or \
            args.show_local_error or \
            args.show_local_jitter or \
@@ -1015,6 +1020,7 @@ Python by ESR, concept and GNUPLOT code by Dan Drown.
             if not len( stats.loopstats ):
                 sys.stderr.write("ntpviz: ERROR: missing loopstats data\n")
                 raise SystemExit(1)
+
             if args.show_local_offset:
                 plot = stats.local_offset_gnuplot()
             elif args.show_local_error:
@@ -1026,50 +1032,33 @@ Python by ESR, concept and GNUPLOT code by Dan Drown.
             elif args.show_local_offset_histogram:
                 plot = stats.local_offset_histogram_gnuplot()
 
-            if args.generate:
-                gnuplot(plot['plot'])
-            else:
-                sys.stdout.write(plot['plot'])
-            raise SystemExit(0)
-
-        if args.show_peer_offsets is not None or args.show_peer_jitters is not None:
+        if None != args.show_peer_offsets or \
+           None != args.show_peer_jitters:
             if not len( stats.peerstats ):
                 sys.stderr.write("ntpviz: ERROR:  missing peerstats data\n")
                 raise SystemExit(1)
-            if args.show_peer_offsets is not None:
+            if None != args.show_peer_offsets:
                 plot = stats.peer_offsets_gnuplot(args.show_peer_offsets)
-            if show_peer_jitters is not None:
+            if None !=show_peer_jitters:
                 plot = stats.peer_jitters_gnuplot(args.show_peer_jitters)
-            if args.generate:
-                gnuplot(plot['plot'])
-            else:
-                sys.stdout.write(plot['plot'])
-            raise SystemExit(0)
 
         if args.show_temps:
             if not len( stats.temps):
                 sys.stderr.write("ntpviz: ERROR: missing temps data\n")
                 raise SystemExit(1)
             plot = stats.local_temps_gnuplot()
-            if args.generate:
-                gnuplot(plot['plot'])
-            else:
-                sys.stdout.write(plot['plot'])
-            raise SystemExit(0)
 
         if args.show_gps:
             if not len( stats.gpsd):
                 sys.stderr.write("ntpviz: ERROR: missing gps data\n")
                 raise SystemExit(1)
             plot = stats.local_gps_gnuplot()
-            if args.generate:
-                gnuplot(plot['plot'])
-            else:
-                sys.stdout.write(plot['plot'])
-            raise SystemExit(0)
 
     if args.show_local_offset_multiplot:
         plot = local_offset_multiplot(statlist)
+
+    if None != plot:
+        # finish up the plot, and exit
         if args.generate:
             gnuplot(plot)
         else:
