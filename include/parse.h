@@ -21,16 +21,6 @@
 #define parseprintf(LEVEL, ARGS)
 #endif	/* DEBUG */
 
-#if defined(timercmp) && defined(__GNUC__)
-#undef timercmp
-#endif
-
-#if !defined(timercmp)
-#define	timercmp(tvp, uvp, cmp)	\
-	((tvp)->tv_sec cmp (uvp)->tv_sec || \
-	 ((tvp)->tv_sec == (uvp)->tv_sec && (tvp)->tv_usec cmp (uvp)->tv_usec))
-#endif
-
 /*
  * some constants useful for GPS time conversion
  */
