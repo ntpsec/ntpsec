@@ -829,6 +829,8 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="ntpd stats visualizer",
                 fromfile_prefix_chars='@',
                 epilog = """
+You can place command line options in a file, one per line.
+
 See the manual page for details.
 
 Python by ESR, concept and GNUPLOT code by Dan Drown.

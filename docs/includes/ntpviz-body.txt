@@ -7,22 +7,27 @@
 [verse]
 {ntpviz} [-d statsdir] [-g] [-n name] [-p period]
          [-s starttime] [-e endtime]
-         [--local-offset | --local-error | --local-jitter | --local-stability]
-	 [   --all-peer-jitters
-	   | --all-peer-offsets
-	   | --local-gps
-	   | --local-offset-histogram
-	   | --local-offset-multiplot
-	   | --local-temps
-           | --peer-jitters=hosts 
-           | --peer-offsets=hosts ]
-	 [-o outdir]
-	 [-D N]
+         [--local-offset |
+          --local-error |
+          --local-jitter |
+          --local-stability |
+          --all-peer-jitters |
+          --all-peer-offsets |
+          --local-gps |
+          --local-offset-histogram |
+          --local-offset-multiplot |
+          --local-temps |
+          --peer-jitters=hosts |
+          --peer-offsets=hosts |
+         ]
+         [-o outdir]
+         [-D N]
+         [@optionfile]
 
 == DESCRIPTION ==
 
 This utility analyzes files in an NTP log directory and generates
-statistical plots from them.  It can report either PNG images or the
+statistical plots from them.  It can output either PNG images or the
 GNUPLOT programs to generate them to standard output.  In its default
 mode it generates an HTML directory containing an index page and
 either (a) all plots, for a single statfiles directory, or (b) a
@@ -133,6 +138,24 @@ text will be used as the HTML title of the generated index.
 
 The code includes various sanity checks and will bail out with a message to
 standard error on, for example, missing logfile data required for a plot.
+
+=== Argument File ===
+
+All command line options can also be placed into a command file.  The
+command file name is prefixed on the command line with an ampersand (@).
+
+Each line in the command file must contain just one option.  When an
+option takes a parameter, the option and parameter must be separated by
+an equal sign (=).
+
+These two ways to invoke ntpviz are equvalent:
+
+    $ ntpviz --period 1 --outdir day
+
+    $ ntpviz @day/config
+    $ cat day/config
+    --period=1
+    --outdir=day
 
 == REQUIREMENTS ==
 
