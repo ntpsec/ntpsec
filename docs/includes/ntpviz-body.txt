@@ -148,7 +148,7 @@ Each line in the command file must contain just one option.  When an
 option takes a parameter, the option and parameter must be separated by
 an equal sign (=).
 
-These two ways to invoke ntpviz are equvalent:
+These two ways to invoke ntpviz are equivalent:
 
     $ ntpviz --period 1 --outdir day
 
