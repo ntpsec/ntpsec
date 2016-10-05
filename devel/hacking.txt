@@ -52,7 +52,8 @@ POSIX threads *are* considered part of the standardized API and may be used.
 
 Here are the non-standardized AIs that may be used:
 
-* Linux-style adjtimex() or BSD-style ntp_gettime()/ntp_adjtime().
+* Linux-style adjtimex() or BSD-style ntp_gettime(2)/ntp_adjtime(), or
+  the older BSD adjtime(2).
 
 * Berkeley sockets and the IPv6 API defined in RFC2493 and RFC2553.
 
