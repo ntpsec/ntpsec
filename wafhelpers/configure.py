@@ -417,11 +417,6 @@ def cmd_configure(ctx, config):
         if not ctx.options.disable_dns_retry:
                 ctx.define("ENABLE_DNS_RETRY", 1, comment="Retry DNS lookups after an initial failure")
 
-        # There is an ENABLE_ASYMMETRIC that enables a section of the
-        # protocol code having to do with handling very long asymmetric
-        # delays, as in space communications. Likely this code has never
-        # been enabled for production.
-
         # This is true under every Unix-like OS.
         ctx.define("HAVE_WORKING_FORK", 1, comment="Whether a working fork() exists")
 
