@@ -1365,7 +1365,7 @@ peer_clear(
 	     * association ID fits the bill.
 	     */
 	    int pseudorandom = peer->associd ^ sock_hash(&peer->srcadr);
-	    peer->nextdate += pseudorandom % peer->minpoll;
+	    peer->nextdate += pseudorandom % (1 << peer->minpoll);
 	}
 #ifdef DEBUG
 	if (debug)
