@@ -244,17 +244,20 @@ static void file_replay(const char *configfile, char *delimiter, char *tempfile)
     tfp = fopen(tempfile, "w");
     if (tfp == NULL)
 	replay_fail("can't copy %s\n", configfile);
-    for (;;) {
-	char *nextline = fgets(linebuf, sizeof(linebuf), stdin);
+    else
+    {
+	for (;;) {
+	    char *nextline = fgets(linebuf, sizeof(linebuf), stdin);
 
-	++lineno;
-	if (nextline == NULL)
-	    replay_fail("unexpected EOF\n");
-	if (strncmp(linebuf, delimiter, strlen(delimiter)) == 0)
-	    break;
-	fputs(linebuf, tfp);
+	    ++lineno;
+	    if (nextline == NULL)
+		replay_fail("unexpected EOF\n");
+	    if (strncmp(linebuf, delimiter, strlen(delimiter)) == 0)
+		break;
+	    fputs(linebuf, tfp);
+	}
+	fclose(tfp);
     }
-    fclose(tfp);
 }
 
 
