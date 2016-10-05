@@ -215,6 +215,10 @@ abs_tspec(
  * compare previously-normalised a and b
  * return 1 / 0 / -1 if a < / == / > b
  */
+#define TIMESPEC_LESS_THAN	1
+#define TIMESPEC_EQUAL		0
+#define TIMESPEC_GREATER_THAN	-1
+
 static inline int
 cmp_tspec(
 	struct timespec a,
