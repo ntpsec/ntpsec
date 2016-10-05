@@ -44,7 +44,7 @@ psutils::
 
 libevent 2.x::
    Optional. Without it, ntpdig won't build. 
-   Debian: libevent and libevent-dev
+   Debian: libevent-2.0-5 and libevent-dev
    Fedora: libevent and libevent-devel
    Gentoo package: dev-libs/libevent
 
