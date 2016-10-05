@@ -258,7 +258,7 @@ file.</p>
         ret = {'html' : exp, 'percs' : stats.percs }
         ret['title'] = "Local Clock Time/Frequency Offsets"
         ret['plot'] = plot_template + self.dump("loopstats") + "e\n" \
-             + self.dump("loopstats")
+             + self.dump("loopstats") + "e\n"
         return ret
 
     def local_temps_gnuplot(self):
@@ -277,8 +277,6 @@ file.</p>
         plot_data = ""
         for key in tempslist:
             plot_data += "\n".join(tempsmap[key]) + "\ne\n"
-        # remove trailing "e\n"
-        plot_data = plot_data[:-2]
 
         plot_template = NTPViz.Common + """\
 set title "%(sitename)s: Local Temparatures"
@@ -399,7 +397,7 @@ line at 0ppm.  Expected values of 99%-1% percentiles: 0.4ppm</p>
 """
         ret = {'html' : stats.stats_html + exp, 'percs' : stats.percs }
         ret['title'] = "Local Clock Frequency Offset"
-        ret['plot'] = plot_template + self.dump("loopstats")
+        ret['plot'] = plot_template + self.dump("loopstats") + "e\n"
         return ret
 
     def loopstats_gnuplot(self, fld, title, legend, freq):
@@ -460,7 +458,7 @@ plot \
 
         ret = {'html' : stats.stats_html + exp, 'percs' : stats.percs,
                'title' : title }
-        ret['plot'] = plot_template + self.dump("loopstats")
+        ret['plot'] = plot_template + self.dump("loopstats") + "e\n"
         return ret
 
     def local_offset_jitter_gnuplot(self):
@@ -649,7 +647,7 @@ plot \
             plot_template = plot_template[:-4] + "\n"
 
         ret = {'html' : exp, 'percs' : percs, 'title' : title }
-        ret['plot'] = plot_template + plot_data
+        ret['plot'] = plot_template + plot_data + "e\n"
         return ret
 
     def peer_offsets_gnuplot(self, peerlist=None):
@@ -738,7 +736,7 @@ plot \
 """ % locals()
         ret = {'html' : stats.stats_html + exp, 'percs' : stats.percs}
         ret['title'] = "Local Clock Time Offset Histogram"
-        ret['plot'] = plot_template + "".join(histogram_data)
+        ret['plot'] = plot_template + "".join(histogram_data) + "e\n"
         return ret
 
 # Multiplotting can't live inside NTPViz because it consumes a list
