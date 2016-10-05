@@ -1001,11 +1001,6 @@ Python by ESR, concept and GNUPLOT code by Dan Drown.
             sys.stderr.write("ntpviz: INFO: now running at nice: %s\n" % \
                 nice)
 
-    statlist = [NTPViz(statsdir=d, sitename=args.sitename,
-                        period=args.period, starttime=args.starttime,
-                        endtime=args.endtime)
-                for d in args.statsdirs]
-
     for fontpath in ("/usr/share/fonts/liberation",
                      "/usr/share/fonts/liberation-fonts",
                      "/usr/share/fonts/truetype/liberation"):
@@ -1018,6 +1013,16 @@ Python by ESR, concept and GNUPLOT code by Dan Drown.
     os.environ["GNUPLOT_DEFAULT_GDFONT"] = "LiberationSans-Regular"
 
     plot = None
+
+    if 1 == len(args.statsdirs):
+        statlist = [NTPViz(statsdir=args.statsdirs[0], sitename=args.sitename,
+                        period=args.period, starttime=args.starttime,
+                        endtime=args.endtime)]
+    else:
+        statlist = [NTPViz(statsdir=d, sitename=d,
+                        period=args.period, starttime=args.starttime,
+                        endtime=args.endtime)
+                for d in args.statsdirs]
 
     if len(statlist) == 1:
         stats = statlist[0]
@@ -1099,15 +1104,7 @@ Python by ESR, concept and GNUPLOT code by Dan Drown.
     start_time = datetime.datetime.utcnow()
     start_time_str = start_time.strftime("%c")
 
-    # if title file, get title from it
-    title_f = os.path.join(args.outdir, "title")
-    title = 'ntpviz'
-    if os.path.isfile(title_f):
-        try:
-            title_file = open( title_f, 'r')
-            title = title_file.read()
-        except IOError:
-            pass
+    title = args.sitename
 
     index_header = '''\
 <!DOCTYPE html>
