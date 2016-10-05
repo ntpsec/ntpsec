@@ -166,3 +166,12 @@ fedora-25-refclocks:
   tags:
     - fedora-25
 
+python3:
+  <<: *job_definition
+  image: python:3
+  script:
+    - apt-get update -qq && apt-get install -y -qq bison libcap-dev pps-tools
+    - python ./waf configure --refclock=all build
+  tags:
+    - gitlab-org
+
