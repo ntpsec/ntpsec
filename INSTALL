@@ -19,27 +19,33 @@ Python 2.x, x >= 6, or Python 3.x >= 3::
 
 bison::
    Required to build.
-   Fedora: bison
    Debian: bison
+   Fedora: bison
+   Gentoo package: sys-devel/bison
 
 libcap::
    Required on Linux, to support dropping root.
    Fedora: libcap and libcap-devel
    Debian: libcap2 and libcap-dev
+   Gentoo package: sys-libs/libcap
 
 gnuplot::
    Required for ntpviz.
-   Fedora: gnuplot
    Debian: gnuplot
+   Fedora: gnuplot
+   Gentoo package: sci-visualization/gnuplot
+   Ubuntu package: gnuplot5
 
 psutils::
    Optional for ntpviz.  Allows running with ionice()
-   Gentoo: dev-python/psutil
+   Gentoo package: dev-python/psutil
+   Ubuntu package: python-psutil
 
 libevent 2.x::
    Optional. Without it, ntpdig won't build. 
-   Fedora: libevent and libevent-devel
    Debian: libevent and libevent-dev
+   Fedora: libevent and libevent-devel
+   Gentoo package: dev-libs/libevent
 
    NetBSD: As installed, libevent is broken.  It links, but doesn't run.
      Here is a workaround:
@@ -48,25 +54,29 @@ libevent 2.x::
 
 seccomp::
    Optional on Linux to support restricting syscalls
-   Fedora: libseccomp-devel
    Debian: libseccomp-dev (gets libseccomp2)
+   Fedora: libseccomp-devel
+   Gentoo package: sys-libs/libseccomp
 
 OpenSSL::
    Optional, required for --enable-crypto.
    Enables encryption and authentication.
-   Fedora: openssl-libs and openssl-devel
    Debian: libssl1.0.0 and libssl-dev
+   Fedora: openssl-libs and openssl-devel
+   Gentoo package: dev-libs/openssl
 
 GNU readline::
    Optional. Enhances ntpq's interactive mode by enabling line
    editing.
-   Fedora: readline and readline-devel
    Debian: libreadline6 and libreadline-dev
+   Fedora: readline and readline-devel
+   Gentoo package: sys-libs/readline
 
 BSD libedit::
    Optional. Enhances ntpq's interactive mode by enabling line
    editing. Used as a fallback if it is installed and GNU readline
    is not.
+   Gentoo package: dev-libs/libedit
 
 sys/timepps.h::
    If you are building to supply Stratum 1 time service (that is, with
@@ -74,25 +84,29 @@ sys/timepps.h::
    file to be installed, depending on which refclocks you enable.
    This won't be necessary for pure client (Stratum 2 or higher)
    installations.
-   Fedora: pps-tools-devel (pps-tools may be useful for debugging)
    Debian: pps-tools
+   Fedora: pps-tools-devel (pps-tools may be useful for debugging)
+   Gentoo package: net-misc/pps-tools
 
 asciidoc, a2x::
    You will need asciidoc to make HTML and a2x to make manual pages from the
    documentation masters.  Only required if you configured with --enable-doc.
    Note, you need asciidoc 8.6.0 at minimum.
-   Fedora: asciidoc  (Stock CentOS/RHEL has only 8.4.5, you must upgrade)
    Debian: asciidoc
+   Fedora: asciidoc  (Stock CentOS/RHEL has only 8.4.5, you must upgrade)
+   Gentoo package: app-text/asciidoc
 
 Local copy of DocBook stylesheets:
    Optional: Prevents documentation build failures when your Internet is down
-   Fedora: docbook-xsl-stylesheets
    Debian: docbook-xsl
+   Fedora: docbook-xsl-stylesheets
+   Gentoo package: app-text/docbook-xsl-stylesheets
 
 liberation::
    Optional, improves font quality in ntpviz renderings.
-   Fedora: liberation
    Debian: liberation
+   Fedora: liberation
+   Gentoo package: media-fonts/liberation-fonts
 
 The OS X build has been tested in this environment:
 
