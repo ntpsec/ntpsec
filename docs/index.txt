@@ -264,6 +264,10 @@ link:refclock.html[Reference Clock Support]::
   servers.
 link:warp.html[How NTP Works]::
   Gives an overview of the NTP daemon architecture and how it works.
+link:outside-tools.html[Outside Tools]::
+  A variety of tools not directly maintained along with NTP can be
+  useful for adminiseting and monitoring it. This page collects some
+  references and links.
 
 [[build]]
 == Building and Installing NTP ==
