@@ -69,11 +69,14 @@ and that file system links, symbolic or otherwise, should be avoided.
 
 +includefile+ _includefile_::
   This command allows additional configuration commands to be included
-  from a separate file. Include files may be nested to a depth of five;
-  upon reaching the end of any include file, command processing resumes
-  in the previous configuration file. This option is useful for sites
-  that run {ntpdman} on multiple hosts, with (mostly) common
-  options (e.g., a restriction list).
+  from a separate file. Include files may be nested to a depth of
+  five; upon reaching the end of any include file, command processing
+  resumes in the previous configuration file. Relative pathnames are
+  evaluated not with respect to the current working directory but with
+  respect to the directory name of the last pushed file in the
+  stack. This option is useful for sites that run {ntpdman} on
+  multiple hosts, with (mostly) common options (e.g., a restriction
+  list).
 
 +interface+ [+listen+ | +ignore+ | +drop+] [+all+ | +ipv4+ | +ipv6+ | +wildcard+ | 'name' | 'address'[/'prefixlen']]::
   This command controls which network addresses +{ntpd}+ opens, and

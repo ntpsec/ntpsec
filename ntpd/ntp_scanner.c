@@ -18,6 +18,8 @@
 #include <stdlib.h>
 #include <errno.h>
 #include <string.h>
+#include <limits.h>
+#include <libgen.h>
 
 #include "ntpd.h"
 #include "ntp_config.h"
@@ -341,6 +343,11 @@ lex_flush_stack()
  * FILE_INFO that is bound to a local/disc file. Note that 'path' must
  * not be NULL, or the function will fail.
  *
+ * Relative pathnames are interpreted relative to the directory
+ * of the previous entry on the stack, not the current directory.
+ * This is so "include foo" from within /etc/conf will reliably
+ * pick up /etc/foo.
+ *
  * Returns true if a new info record was pushed onto the stack.
  */
 bool lex_push_file(
@@ -351,7 +358,19 @@ bool lex_push_file(
 	struct FILE_INFO * next = NULL;
 
 	if (NULL != path) {
-		next = lex_open(path, mode);
+		char fullpath[PATH_MAX];
+		fullpath[0] = '\0';
+		if (path[0] != DIR_SEP && lex_stack != NULL) {
+			char *end;
+			strlcpy(fullpath,
+				dirname(lex_stack->fname),sizeof(fullpath)-2);
+			end = fullpath + strlen(fullpath);
+			*end++ = DIR_SEP;
+			*end++ = '\0';
+		}
+		strlcat(fullpath, path, sizeof(fullpath));
+		fprintf(stderr, "Opening %s\n", fullpath);
+		next = lex_open(fullpath, mode);
 		if (NULL != next) {
 			next->st_next = lex_stack;
 			lex_stack = next;
