@@ -627,11 +627,17 @@ at 0s.</p>
 <p>RMS Jitter is field 8 in the peerstats log file.</p>
 """
 
+        if 6 >= len(peerlist):
+            set_key = "set key top right box"
+        else:
+            # too many keys to show
+            set_key = "set key off"
+
         plot_template = NTPViz.Common + """\
 set title "%(sitename)s: %(title)s"
 set ylabel ""
 set ytics format "%%1.1f %(unit)s" nomirror
-set key top right box
+%(set_key)s
 plot \
 """ % locals()
         plot_template += percentages
