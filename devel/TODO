@@ -39,6 +39,9 @@ Right now, after 10 mins, ntpd has 2,000 times the jitter as chronyd had
 when I turned it off.
 __________
 
+Also see https://gitlab.com/NTPsec/ntpsec/issues/68 where the dubiousness
+of the current startup logic gets discussed.
+
 == User interface ==
 
 [quote, Gary Miller]
