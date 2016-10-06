@@ -134,9 +134,6 @@ __________
 
 == Old, sometime ancient stuff ==
 
-970711: Make sure it's safe to convert proto_config's 2nd argument from
-	u_long to u_int32.  Watch "set" in ntp_request.c:setclr_flags().
-
 970318: in hourly_stats(?), squawk if the magnitude of the drift is,
 	say, >400.
 
