@@ -234,7 +234,9 @@ implementation uses only a subset of adjtimex(2)'s capabilities.)
 The older BSD adjtime(2) is used for slewing as well, but doesn't
 assume a kernel-level PLL is available.  Some platforms, like OpenBSD
 and Mac OS X, use only this call because they lack
-ntp_adjtime(2)/adjtimex(2).
+ntp_adjtime(2)/adjtimex(2).  Without the PLL calls, convergence to
+good time is observably a lot slower and tracking will accordingly be
+less reliable.
 
 Deep-in-the weeds details about the kernel PLL from Hal Murray follow.
 If you can follow these you may be qualified to maintain this code...
