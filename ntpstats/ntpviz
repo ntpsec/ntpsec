@@ -878,7 +878,7 @@ Python by ESR, concept and GNUPLOT code by Dan Drown.
                 help="one or more logfile directories to read",
                 type=str)
     parser.add_argument('-p', '--period',
-                default = NTPStats.DefaultPeriod,
+                default = 7,    # default to 7 days
                 dest='period',
                 help="period in days to graph (float)",
                 type=float)
