@@ -9,8 +9,12 @@ titles are clues to what they're useful for.  Each has an explanatory
 header comment.  The file "example conf" shows what a file made out of
 use snippets is like.
 
-The rc files are start/stop scripts for NTP. They are  intended as models
-for distribution packagers.
+The rc files are start/stop scripts for NTP under System-V-style
+init. They are intended as models for distribution packagers.
+
+The ntpd.service file is intended for use with systemd. Note that
+it assumes the waf default installation location /usr/sbin for
+ntpd; you may need to modify this for some distrbutions.
 
 Additional information can be found in the ./docs directory of the
 base directory.
