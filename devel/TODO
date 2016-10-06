@@ -23,7 +23,9 @@
 == After 1.0 release ==
 
 * Replace ntpq with a Python wrapper around the ntp Python module.
-  This work is already in progress.
+  This work is already in progress.  (Note: do not reproduce the
+  known bug that ^C of an mrulist bails without printing the partial
+  results.)
 
 * Move ntpdig to Python. Should be a wrapper around an ntp.sntp module.
 
