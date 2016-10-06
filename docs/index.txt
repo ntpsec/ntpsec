@@ -143,6 +143,13 @@ few will be user-visible.
   each refclock page.  One major feature of the new syntax is that
   refclock drivers are referred to by names, not numbers.
 
+* The includefile directive now evaluates relative pathnames not with
+  respect to the current working directory but with respect to the
+  directory name of the last pushed file in the stack.  This means
+  that you can run ntpd from any directory with "includefile foo"
+  in /etc/ntp.conf finding /etc/foo rather than looking for foo in
+  ypur current directory.
+
 * For the generic (parse) driver only: Using the new refclock syntax,
   the maximum number of units that can be set up changes from 4
   (numbers 0-3) to unlimited.  However, the old magic-address syntax
