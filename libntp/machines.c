@@ -89,9 +89,6 @@ ntp_set_tod(
 	int		saved_errno;
 
 	TRACE(1, ("In ntp_set_tod\n"));
-	rc = -1;
-	saved_errno = 0;
-
 #ifdef HAVE_CLOCK_SETTIME
 	errno = 0;
 	rc = clock_settime(CLOCK_REALTIME, tvs);

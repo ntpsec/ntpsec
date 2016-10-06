@@ -261,7 +261,6 @@ blocking_child_common(
 	while (!say_bye) {
 		req = receive_blocking_req_internal(c);
 		if (NULL == req) {
-			say_bye = true;
 			break;
 		}
 
