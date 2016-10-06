@@ -39,8 +39,9 @@ gnuplot::
 
 psutils::
    Optional for ntpviz.  Allows running with ionice()
+   Debian package: python-psutil or python3-psutil
    Gentoo package: dev-python/psutil
-   Ubuntu package: python-psutil
+   Ubuntu package: python-psutil or python3-psutil
 
 libevent 2.x::
    Optional. Without it, ntpdig won't build. 
