@@ -6,7 +6,7 @@ NTP daemon, and some example startup scripts for launching it.
 Under ntp-conf.d, The "use-" files are modular pieces of ntp.conf
 files that you can string together in any order for effect.  The file
 titles are clues to what they're useful for.  Each has an explanatory
-header comment.  The file "example conf" shows what a file made out of
+header comment.  The file "example.conf" shows what a file made out of
 use snippets is like.
 
 The rc files are start/stop scripts for NTP under System-V-style
