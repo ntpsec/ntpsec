@@ -51,7 +51,6 @@ static void RunAllTests(void)
 	RUN_TEST_GROUP(modetoa);
 	RUN_TEST_GROUP(msyslog);
 	RUN_TEST_GROUP(netof);
-	RUN_TEST_GROUP(ntpvis);
 	RUN_TEST_GROUP(numtoa);
 	RUN_TEST_GROUP(numtohost);
 	RUN_TEST_GROUP(prettydate);

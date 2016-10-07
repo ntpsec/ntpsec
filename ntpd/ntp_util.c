@@ -9,7 +9,6 @@
 #include "ntp_assert.h"
 #include "ntp_calendar.h"
 #include "ntp_leapsec.h"
-#include "ntp_intercept.h"
 #include "lib_strbuf.h"
 
 #include <stdio.h>
@@ -204,7 +203,7 @@ write_stats(void)
 		}
 		prev_drift_comp = drift_comp;
 		wander_resid = wander_threshold;
-		intercept_drift_write(stats_drift_file, drift_comp * 1e6);
+		drift_write(stats_drift_file, drift_comp * 1e6);
 	}
 }
 
@@ -260,7 +259,7 @@ stats_config(
 		 * Open drift file and read frequency. If the file is
 		 * missing or contains errors, tell the loop to reset.
 		 */
-		if (intercept_drift_read(stats_drift_file, &new_drift)) {
+		if (drift_read(stats_drift_file, &new_drift)) {
 		    loop_config(LOOP_FREQ, new_drift);
 		    prev_drift_comp = drift_comp;
 		}
@@ -302,8 +301,6 @@ stats_config(
 	 * Open pid file.
 	 */
 	case STATS_PID_FILE:
-		if (intercept_get_mode() == replay)
-		    break;
 		if ((fp = fopen(value, "w")) == NULL) {
 			msyslog(LOG_ERR, "pid file %s: %m",
 			    value);
@@ -327,7 +324,7 @@ stats_config(
 		leapfile_name = erealloc(leapfile_name, len + 1);
 		memcpy(leapfile_name, value, len + 1);
 
-		if (intercept_leapsec_load_file(
+		if (leapsec_load_file(
 			    leapfile_name, &leapfile_stat, true, true))
 		{
 			leap_signature_t lsig;
@@ -745,7 +742,7 @@ check_leap_file(
 		return;
 	
 	/* try to load leapfile, force it if no leapfile loaded yet */
-	if (intercept_leapsec_load_file(
+	if (leapsec_load_file(
 		    leapfile_name, &leapfile_stat,
 		    !have_leapfile, is_daily_check))
 		have_leapfile = true;

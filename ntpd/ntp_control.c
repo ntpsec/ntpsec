@@ -22,7 +22,6 @@
 #include "ntp_assert.h"
 #include "ntp_leapsec.h"
 #include "ntp_md5.h"	/* provides OpenSSL digest API */
-#include "ntp_intercept.h"
 #include "lib_strbuf.h"
 #include "ntp_syscall.h"
 
@@ -698,13 +697,9 @@ ctl_error(
 	if (res_authenticate && sys_authenticate) {
 		maclen = authencrypt(res_keyid, (uint32_t *)&rpkt,
 				     CTL_HEADER_LEN);
-		intercept_sendpkt(__func__,
-				  rmt_addr, lcl_inter, -2, &rpkt,
-				  CTL_HEADER_LEN + maclen);
+		sendpkt(rmt_addr, lcl_inter, -2, &rpkt,	CTL_HEADER_LEN + maclen);
 	} else
-		intercept_sendpkt(__func__,
-			      rmt_addr, lcl_inter, -3, &rpkt,
-			      CTL_HEADER_LEN);
+		sendpkt(rmt_addr, lcl_inter, -3, &rpkt, CTL_HEADER_LEN);
 }
 
 /*
@@ -980,11 +975,9 @@ ctl_flushpkt(
 		memcpy(datapt, &keyid, sizeof(keyid));
 		maclen = authencrypt(res_keyid,
 				     (uint32_t *)&rpkt, totlen);
-		intercept_sendpkt(__func__, rmt_addr, lcl_inter, -5,
-			&rpkt, totlen + maclen);
+		sendpkt(rmt_addr, lcl_inter, -5, &rpkt, totlen + maclen);
 	} else {
-		intercept_sendpkt(__func__, rmt_addr, lcl_inter, -6,
-			&rpkt, sendlen);
+		sendpkt(rmt_addr, lcl_inter, -6, &rpkt, sendlen);
 	}
 	if (more)
 		numctlfrags++;
@@ -1427,7 +1420,7 @@ ctl_putsys(
 	if (CS_KERN_FIRST <= varid && varid <= CS_KERN_LAST &&
 	    current_time != ntp_adjtime_time) {
 		ZERO(ntx);
-		if (intercept_ntp_adjtime(&ntx) < 0)
+		if (ntp_adjtime(&ntx) < 0)
 			msyslog(LOG_ERR, "ntp_adjtime() for mode 6 query failed: %m");
 		else
 			ntp_adjtime_time = current_time;
@@ -3001,10 +2994,10 @@ static uint32_t derive_nonce(
 	u_int		len;
 
 	while (!salt[0] || current_time - last_salt_update >= 3600) {
-		salt[0] = intercept_ntp_random("nonce1");
-		salt[1] = intercept_ntp_random("nonce2");
-		salt[2] = intercept_ntp_random("nonce3");
-		salt[3] = intercept_ntp_random("nonce4");
+	    salt[0] = ntp_random();
+		salt[1] = ntp_random();
+		salt[2] = ntp_random();
+		salt[3] = ntp_random();
 		last_salt_update = current_time;
 	}
 
@@ -3069,7 +3062,7 @@ static int validate_nonce(
 	ts.l_ui = (uint32_t)ts_i;
 	ts.l_uf = (uint32_t)ts_f;
 	derived = derive_nonce(&rbufp->recv_srcadr, ts.l_ui, ts.l_uf);
-	intercept_get_systime(__func__, &now_delta);
+	get_systime(&now_delta);
 	L_SUB(&now_delta, &ts);
 
 	return (supposed == derived && now_delta.l_ui < 16);
@@ -3096,7 +3089,7 @@ send_random_tag_value(
 	int	noise;
 	char	buf[32];
 
-	noise = intercept_ntp_random("send_random_tag");
+	noise = ntp_random();
 	buf[0] = 'a' + noise % 26;
 	noise >>= 5;
 	buf[1] = 'a' + noise % 26;
@@ -3136,7 +3129,7 @@ send_mru_entry(
 
 	remaining = COUNTOF(sent);
 	ZERO(sent);
-	noise = intercept_ntp_random("send_mru_entry");
+	noise = ntp_random();
 	while (remaining > 0) {
 		which = (noise & 7) % COUNTOF(sent);
 		noise >>= 3;
@@ -3488,7 +3481,7 @@ static void read_mru_list(
 	/*
 	 * send up to limit= entries in up to frags= datagrams
 	 */
-	intercept_get_systime(__func__, &now);
+	get_systime(&now);
 	generate_nonce(rbufp, buf, sizeof(buf));
 	ctl_putunqstr("nonce", buf, strlen(buf));
 	prior_mon = NULL;
@@ -3571,7 +3564,7 @@ send_ifstats_entry(
 	noisebits = 0;
 	while (remaining > 0) {
 		if (noisebits < 4) {
-			noise = intercept_ntp_random("send_ifstats_entry");
+			noise = ntp_random();
 			noisebits = 31;
 		}
 		which = (noise & 0xf) % COUNTOF(sent);
@@ -3750,7 +3743,7 @@ send_restrict_entry(
 	noisebits = 0;
 	while (remaining > 0) {
 		if (noisebits < 2) {
-			noise = intercept_ntp_random("send_restrict_entry");
+			noise = ntp_random();
 			noisebits = 31;
 		}
 		which = (noise & 0x3) % COUNTOF(sent);

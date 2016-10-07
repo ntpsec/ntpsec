@@ -13,7 +13,6 @@
 #include "ntp_config.h"
 #include "ntp_syslog.h"
 #include "ntp_assert.h"
-#include "ntp_intercept.h"
 #include "isc/error.h"
 #include "isc/formatcheck.h"
 
@@ -536,7 +535,6 @@ ntpdmain(
 	saved_argc = argc;
 	saved_argv = argv;
 	progname = argv[0];
-	intercept_argparse(&argc, &argv);
 	parse_cmdline_opts(argc, argv);
 # ifdef DEBUG
 	setvbuf(stdout, NULL, _IOLBF, 0);
@@ -550,7 +548,7 @@ ntpdmain(
 		change_logfile(logfilename, false);
 	} else {
 		if (nofork)
-		    termlogit = (intercept_get_mode() == none || debug > 0);
+		    termlogit = true;
 		if (dumpopts)
 			syslogit = false;
 	}
@@ -584,22 +582,11 @@ ntpdmain(
 	isc_error_setunexpected(library_unexpected_error);
 
 	uid = getuid();
-	if (uid && intercept_get_mode() != replay && !dumpopts) {
+	if (uid && !dumpopts) {
 		termlogit = true;
 		msyslog(LOG_ERR,
 			"must be run as root, not uid %ld", (long)uid);
 		exit(1);
-	}
-	switch (intercept_get_mode())
-	{
-	case none:
-	    break;
-	case replay:
-	    msyslog(LOG_NOTICE, "setting replay mode.");
-	    break;
-	case capture:
-	    msyslog(LOG_NOTICE, "setting capture mode.");
-	    break;
 	}
 
 # ifdef HAVE_WORKING_FORK
@@ -743,7 +730,6 @@ ntpdmain(
 		stats_config(STATS_FREQ_FILE, driftfile);
 		break;
 	    case 'I':
-		if (intercept_get_mode() != replay)
 	        {
 		    sockaddr_u	addr;
 		    add_nic_rule(
@@ -754,7 +740,7 @@ ntpdmain(
 	        }
 		break;
 	    case 'k':
-		intercept_getauthkeys(ntp_optarg);
+		getauthkeys(ntp_optarg);
 		break;
 	    case 'p':
 		stats_config(STATS_PID_FILE, pidfile);
@@ -881,7 +867,7 @@ ntpdmain(
 	 * Get the configuration.
 	 */
 	have_interface_option = (!listen_to_virtual_ips || explicit_interface);
-	intercept_getconfig(explicit_config);
+	readconfig(getconfig(explicit_config));
 	check_minsane();
 
 	loop_config(LOOP_DRIFTINIT, 0);
@@ -895,8 +881,7 @@ ntpdmain(
 	}
 #endif
 	
-	if (!intercept_replay())
-	    mainloop();
+	mainloop();
 	return 1;
 }
 
@@ -935,7 +920,7 @@ static void mainloop(void)
 			l_fp tsa, tsb;
 			int bufcount = 0;
 
-			intercept_get_systime(__func__, &pts);
+			get_systime(&pts);
 			tsa = pts;
 # endif
 			rbuf = get_full_recv_buffer();
@@ -970,7 +955,7 @@ static void mainloop(void)
 				rbuf = get_full_recv_buffer();
 			}
 # ifdef ENABLE_DEBUG_TIMING
-			intercept_get_systime(__func__, &tsb);
+			get_systime(&tsb);
 			L_SUB(&tsb, &tsa);
 			if (bufcount) {
 				collect_timing(NULL, "processing", bufcount, &tsb);
@@ -1044,7 +1029,7 @@ finish_safe(
 		DNSServiceRefDeallocate(mdns);
 # endif
 	peer_cleanup();
-	intercept_exit(0);
+	exit(0);
 }
 
 void

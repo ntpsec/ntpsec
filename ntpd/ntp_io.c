@@ -27,7 +27,6 @@
 #include "ntp_stdlib.h"
 #include "ntp_worker.h"
 #include "ntp_assert.h"
-#include "ntp_intercept.h"
 #include "timespecops.h"
 
 #include <isc/mem.h>
@@ -3242,10 +3241,6 @@ fetch_timestamp(
 				break;
 #endif  /* USE_SCM_TIMESTAMP */
 			}
-			/*
-			 * RNG call does not have to be recorded for replay
-			 * because the fuzzed timestamp is recorded.
-			 */
 			fuzz = ntp_random() * 2. / FRAC * sys_fuzz;
 			DTOLFP(fuzz, &lfpfuzz);
 			L_ADD(&nts, &lfpfuzz);
@@ -3309,7 +3304,7 @@ read_network_packet(
 			freerecvbuf(rb);
 
 		fromlen = sizeof(from);
-		buflen = intercept_recvfrom(fd, buf, sizeof(buf), 0,
+		buflen = recvfrom(fd, buf, sizeof(buf), 0,
 				  &from.sa, &fromlen);
 		DPRINTF(4, ("%s on (%lu) fd=%d from %s\n",
 			(itf->ignore_packets)
@@ -3326,7 +3321,7 @@ read_network_packet(
 	fromlen = sizeof(rb->recv_srcadr);
 
 #ifndef USE_PACKET_TIMESTAMP
-	rb->recv_length = intercept_recvfrom(fd, (char *)&rb->recv_space,
+	rb->recv_length = recvfrom(fd, (char *)&rb->recv_space,
 				   sizeof(rb->recv_space), 0,
 				   &rb->recv_srcadr.sa, &fromlen);
 #else
@@ -3339,7 +3334,7 @@ read_network_packet(
 	msghdr.msg_flags      = 0;
 	msghdr.msg_control    = (void *)&control;
 	msghdr.msg_controllen = sizeof(control);
-	rb->recv_length       = intercept_recvmsg(fd, &msghdr, 0);
+	rb->recv_length       = recvmsg(fd, &msghdr, 0);
 #endif
 
 	buflen = rb->recv_length;
@@ -3439,7 +3434,7 @@ io_handler(void)
 	flag = sawALRM || sawQuit || sawHUP;
 	if (!flag) {
 	  rdfdes = activefds;
-	  nfound = intercept_pselect(maxactivefd, &rdfdes, &runMask);
+	  nfound = pselect(maxactivefd+1, &rdfdes, NULL, NULL, NULL, &runMask);
 	} else {
 	  nfound = -1;
 	  errno = EINTR;
@@ -3621,10 +3616,8 @@ input_handler(
 #ifdef ENABLE_DEBUG_TIMING
 	get_systime(&ts_e);
 	/*
-	 * (ts_e - ts) is the amount of time we spent
-	 * processing this gob of file descriptors.  Log
-	 * it.  Because it's only used for logging, this
-	 * get_systime doesn't have to be captured/replayed.
+	 * (ts_e - ts) is the amount of time we spent processing this
+	 * gob of file descriptors.  Log it.
 	 */
 	L_SUB(&ts_e, &ts);
 	collect_timing(NULL, "input handler", 1, &ts_e);

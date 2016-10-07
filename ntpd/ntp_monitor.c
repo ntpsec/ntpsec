@@ -445,12 +445,7 @@ ntp_monitor(
 			if (NULL == mon_free)
 				mon_getmoremem();
 			UNLINK_HEAD_SLIST(mon, mon_free, hash_next);
-		/*
-		 * Preempt from the MRU list if old enough.
-		 * Warning: this means that with monitoring enabled,
-		 * replay behavior will be nondeterministic. Alas.
-		 * Has to be this way for some unit tests to build.
-		 */
+		/* preempt from the MRU list if old enough. */
 		} else if (ntp_random() / (2.0 * FRAC) >
 			   (double)oldest_age / mon_age) {
 			return ~(RES_LIMITED | RES_KOD) & flags;
