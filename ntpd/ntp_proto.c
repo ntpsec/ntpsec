@@ -81,6 +81,7 @@ l_fp	sys_authdelay;		/* authentication delay */
 double	sys_offset;	/* current local clock offset */
 double	sys_mindisp = MINDISPERSE; /* minimum distance (s) */
 double	sys_maxdist = MAXDISTANCE; /* selection threshold */
+double	sys_maxdisp = MAXDISPERSE; /* maximum dspersion */
 double	sys_jitter;		/* system jitter */
 u_long	sys_epoch;		/* last clock update time */
 static	double sys_clockhop;	/* clockhop threshold */
@@ -598,7 +599,7 @@ handle_procpkt(
 	}
 
 	if(scalbn((double)pkt->rootdelay/2.0 + (double)pkt->rootdisp, -16) >=
-	   MAXDISPERSE) {
+	   sys_maxdisp) {
 		peer->flash |= BOGON7;
 		return;
 	}
@@ -728,7 +729,7 @@ handle_manycast(
 	    PKT_TO_STRATUM(pkt->stratum) < sys_floor ||
 	    PKT_TO_STRATUM(pkt->stratum) >= sys_ceiling ||
 	    scalbn((double)pkt->rootdelay/2.0 + (double)pkt->rootdisp, -16) >=
-	    MAXDISPERSE) {
+	    sys_maxdisp) {
 		return;
 	}
 
@@ -942,7 +943,7 @@ transmit(
 			 * previously reachable raise a trap. Send a
 			 * burst if enabled.
 			 */
-			clock_filter(peer, 0., 0., MAXDISPERSE);
+			clock_filter(peer, 0., 0., sys_maxdisp);
 			if (oreach) {
 				peer_unfit(peer);
 				report_event(PEVNT_UNREACH, peer, NULL);
@@ -1315,7 +1316,7 @@ peer_clear(
 	memset(CLEAR_TO_ZERO(peer), 0, LEN_CLEAR_TO_ZERO(peer));
 	peer->ppoll = peer->maxpoll;
 	peer->hpoll = peer->minpoll;
-	peer->disp = MAXDISPERSE;
+	peer->disp = sys_maxdisp;
 	peer->flash = peer_unfit(peer);
 	peer->jitter = LOGTOD(sys_precision);
 
@@ -1326,7 +1327,7 @@ peer_clear(
 
 	for (u = 0; u < NTP_SHIFT; u++) {
 		peer->filter_order[u] = u;
-		peer->filter_disp[u] = MAXDISPERSE;
+		peer->filter_disp[u] = sys_maxdisp;
 	}
 #ifdef REFCLOCK
 	if (!(peer->flags & FLAG_REFCLOCK)) {
@@ -1426,9 +1427,9 @@ clock_filter(
 	for (i = NTP_SHIFT - 1; i >= 0; i--) {
 		if (i != 0)
 			peer->filter_disp[j] += dtemp;
-		if (peer->filter_disp[j] >= MAXDISPERSE) {
-			peer->filter_disp[j] = MAXDISPERSE;
-			dst[i] = MAXDISPERSE;
+		if (peer->filter_disp[j] >= sys_maxdisp) {
+			peer->filter_disp[j] = sys_maxdisp;
+			dst[i] = sys_maxdisp;
 		} else if (peer->update - peer->filter_epoch[j] >
 		    (u_long)ULOGTOD(allan_xpt)) {
 			dst[i] = peer->filter_delay[j] +
@@ -1470,7 +1471,7 @@ clock_filter(
 	m = 0;
 	for (i = 0; i < NTP_SHIFT; i++) {
 		peer->filter_order[i] = (uint8_t) ord[i];
-		if (dst[i] >= MAXDISPERSE || (m >= 2 && dst[i] >=
+		if (dst[i] >= sys_maxdisp || (m >= 2 && dst[i] >=
 		    sys_maxdist))
 			continue;
 		m++;
@@ -2926,6 +2927,10 @@ proto_config(
 
 	case PROTO_MAXCLOCK:	/* maximum candidates (maxclock) */
 		sys_maxclock = (int)dvalue;
+		break;
+
+	case PROTO_MAXDISP:	/* maximum dispersion (maxdisp) */
+		sys_maxdisp = dvalue;
 		break;
 
 	case PROTO_MAXDIST:	/* select threshold (maxdist) */

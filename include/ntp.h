@@ -621,7 +621,7 @@ struct pkt {
 #define PROTO_CALLDELAY		20
 #define PROTO_MINDISP		21
 #define PROTO_MAXDIST		22
-	/* available		23 */
+#define	PROTO_MAXDISP		23
 #define	PROTO_MAXHOP		24
 #define	PROTO_BEACON		25
 #define	PROTO_ORPHAN		26

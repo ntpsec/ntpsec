@@ -390,13 +390,13 @@ arb_receive(
 		break;
 
 	    case 'F':		/* clock failure */
-		pp->disp = MAXDISPERSE;
+		pp->disp = sys_maxdisp;
 		refclock_report(peer, CEVNT_FAULT);
 		IGNORE(write(pp->io.fd, COMMAND_HALT_BCAST, 2));
 		return;
 
 	    default:
-		pp->disp = MAXDISPERSE;
+		pp->disp = sys_maxdisp;
 		refclock_report(peer, CEVNT_BADREPLY);
 		IGNORE(write(pp->io.fd, COMMAND_HALT_BCAST, 2));
 		return;

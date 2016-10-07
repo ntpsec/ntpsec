@@ -403,11 +403,11 @@ spectracom_receive(
 		break;
 
 	case 'D':
-		pp->disp = MAXDISPERSE;
+		pp->disp = sys_maxdisp;
 		break;
 
 	default:
-		pp->disp = MAXDISPERSE;
+		pp->disp = sys_maxdisp;
 		refclock_report(peer, CEVNT_BADREPLY);
 		break;
 	}

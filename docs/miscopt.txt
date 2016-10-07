@@ -61,6 +61,10 @@ include::includes/misc-options.txt[]
     minimum number of packets to set the system clock and the maximum
     roundtrip delay. It can be decreased to improve reliability or
     increased to synchronize clocks on the Moon or planets.
+  +maxdisp+ 'maxdispersion';;
+    Specify the maximum dispersion used by the clock synchronization
+    algorithm. The default is 16s.  This is also the dispersion
+    assigned to missing data. See RFC5905 for discussion.
   +minclock+ 'minclock';;
     Specify the number of servers used by the clustering algorithm as
     the minimum to include on the candidate list. The default is 3. This

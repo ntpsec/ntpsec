@@ -135,6 +135,7 @@
 %token	<Integer>	T_Maxage
 %token	<Integer>	T_Maxclock
 %token	<Integer>	T_Maxdepth
+%token	<Integer>	T_Maxdisp
 %token	<Integer>	T_Maxdist
 %token	<Integer>	T_Maxmem
 %token	<Integer>	T_Maxpoll
@@ -638,6 +639,7 @@ tos_option_int_keyword
 
 tos_option_dbl_keyword
 	:	T_Mindist
+	|	T_Maxdisp
 	|	T_Maxdist
 	|	T_Minclock
 	|	T_Maxclock

@@ -303,7 +303,7 @@ refclock_transmit(
 		oreach = peer->reach & 0xfe;
 		peer->reach <<= 1;
 		if (!(peer->reach & 0x0f))
-			clock_filter(peer, 0., 0., MAXDISPERSE);
+			clock_filter(peer, 0., 0., sys_maxdisp);
 		peer->outdate = current_time;
 		if (!peer->reach) {
 			if (oreach) {
