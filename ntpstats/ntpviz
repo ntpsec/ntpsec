@@ -70,7 +70,7 @@ class VizStats(NTPStats):
     percs       = {}          # dictionary of percentages
     unit        = 's'         # display units: s, ppm, etc.
     multiplier  = 1
-    pmax        = 0     # 100%, can't use mn, reserved word
+    pmax        = 0     # 100%, can't use max, reserved word
     ninetynine  = 0     #  99%
     ninetyfive  = 0     #  90%
     fifty       = 0     #  50%
@@ -86,7 +86,7 @@ class VizStats(NTPStats):
 
     stats_html  = ''
 
-    def __init__( self, values, freq=0 ):
+    def __init__( self, values, title, freq=0 ):
 
         values.sort()
         self.percs = self.percentiles( (100, 99, 95, 50, 5, 1, 0), values)
@@ -147,8 +147,12 @@ class VizStats(NTPStats):
         self.mu = mean( values )
         self.pstd = pstdev( values, mu=self.mu ) * self.multiplier
         self.mu *= self.multiplier
-        self.stats_html =  """\
-<p>Percentiles: Max: %(pmax)s, 99%%: %(ninetynine)s,&nbsp;&nbsp;
+        self.stats_html =  ''
+        if '' != title:
+            self.stats_html =  "<h4>%(title)s</h4>\n" % locals()
+        self.stats_html +=  """\
+<p style="margin-left:20px;">Percentiles: Max: %(pmax)s, &nbsp;
+ 99%%: %(ninetynine)s,&nbsp;&nbsp;
  95%%: %(ninetyfive).3f,&nbsp;&nbsp;
  50%%: %(fifty).3f,&nbsp;&nbsp;
  5%%: %(five).3f,&nbsp;&nbsp;
@@ -233,15 +237,15 @@ set rmargin 12
 
         # compute clock offset
         values = [float(line.split()[1]) for line in self.loopstats]
-        stats = VizStats( values )
+        stats = VizStats( values, title="Local Clock Offset")
         unit = stats.unit
         multiplier = stats.multiplier
 
         # compute frequency offset
         values_f = [float(line.split()[2]) for line in self.loopstats]
-        stats = VizStats( values_f, freq=1 )
-        unit_f = stats.unit
-        multiplier_f = stats.multiplier
+        stats_f = VizStats( values_f, freq=1, title="Local Frequency Offset")
+        unit_f = stats_f.unit
+        multiplier_f = stats_f.multiplier
 
         plot_template = NTPViz.Common + """\
 set title "%(sitename)s: Local Clock Time/Frequency Offsets"
@@ -267,7 +271,9 @@ file.</p>
 
 """
 
-        ret = {'html' : exp, 'percs' : stats.percs }
+        ret = {}
+        ret['html'] = stats.stats_html + stats_f.stats_html + exp
+        ret['percs'] = stats.percs
         ret['title'] = "Local Clock Time/Frequency Offsets"
         ret['plot'] = plot_template + self.dump("loopstats") + "e\n" \
              + self.dump("loopstats") + "e\n"
@@ -373,7 +379,7 @@ a local gpsd daemon, and logging the data using gps-log.py.</p>
 
         # compute freqency offset
         values = [float(line.split()[2]) for line in self.loopstats]
-        stats = VizStats( values, freq=1 )
+        stats = VizStats( values, "Local Clock Frequency Offsets", freq=1, )
         unit = stats.unit
         multiplier = stats.multiplier
 
@@ -422,7 +428,7 @@ line at 0ppm.  Expected values of 99%-1% percentiles: 0.4ppm</p>
         sitename   = self.sitename
         # grab and process the values
         values = [float(line.split()[fld - 1]) for line in self.loopstats]
-        stats = VizStats( values, freq=freq )
+        stats = VizStats( values, title, freq=freq )
         unit = stats.unit
         multiplier = stats.multiplier
 
@@ -432,7 +438,6 @@ line at 0ppm.  Expected values of 99%-1% percentiles: 0.4ppm</p>
         one         = stats.one
 
         if freq:
-            title = "Local Stability"
             exp = """\
 <p>This shows the RMS Frequency Jitter (aka wander) of the local
 clock's frequency.  In other words, how fast the local clock changes
@@ -444,7 +449,6 @@ freqency.</p>
 <p> RMS Frequency Jitter is field 6 in the loopstats log file.</p>
 """
         else:
-            title = "Local Time RMS Jitter"
             exp = """\
 <p>This shows the RMS Jitter of the local clock offset.  In other words,
 how fast the local clock offset is changing.</p>
@@ -476,11 +480,12 @@ plot \
 
     def local_offset_jitter_gnuplot(self):
         "Generate GNUPLOT code of local clock loop standard deviation"
-        return self.loopstats_gnuplot(4, "RMS Time Jitter", "Jitter", 0)
+        return self.loopstats_gnuplot(4, "Local RMS Time Jitter", "Jitter", 0)
 
     def local_offset_stability_gnuplot(self):
         "Generate GNUPLOT code graphing local clock stability"
-        return self.loopstats_gnuplot(5, "RMS Frequency Jitter", "Stability", 1)
+        return self.loopstats_gnuplot(5, "Local RMS Frequency Jitter",
+                                      "Stability", 1)
 
     def peerstats_gnuplot(self, peerlist, fld, title, type):
         "Plot a specified field from peerstats."
@@ -524,7 +529,7 @@ plot \
             # grab and sort the values, no need for the timestamp, etc.
             values = [float(line.split()[fld - 1]) for line in peerdict[ip]]
 
-            stats = VizStats( values )
+            stats = VizStats( values, title)
             unit        = stats.unit
             multiplier  = stats.multiplier
             persc       = stats.percs
@@ -608,7 +613,7 @@ at 0s.</p>
             # grab and sort the values, no need for the timestamp, etc.
             values = [float(line.split()[fld - 1]) for line in self.peerstats]
 
-            stats = VizStats( values )
+            stats = VizStats( values, title )
             unit        = stats.unit
             multiplier  = stats.multiplier
             persc       = stats.percs
@@ -686,7 +691,7 @@ plot \
 
         # grab and sort the values, no need for the timestamp, etc.
         values = [float(line.split()[1]) for line in self.loopstats]
-        stats = VizStats( values )
+        stats = VizStats( values, 'Local Clock Offset' )
         unit        = stats.unit
         multiplier  = stats.multiplier
 
