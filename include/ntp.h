@@ -759,6 +759,7 @@ struct restrict_u_tag {
 #define	RES_MSSNTP		0x0200	/* enable MS-SNTP authentication */
 #define	RES_FLAKE		0x0400	/* flakeway - drop 10% */
 #define	RES_NOMRULIST		0x0800	/* mode 6 mrulist denied */
+#define	RES_NOTRAP		0x1000  /* no longer used */
 
 #define	RES_ALLFLAGS		(RES_FLAGS | RES_NOQUERY |	\
 				 RES_NOMODIFY | RES_KOD |	\
