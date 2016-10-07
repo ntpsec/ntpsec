@@ -307,6 +307,7 @@ temperature sensors you have and collect data from.  Temperature
 changes change the local clock crystal frequency and stability.  Crystals
 oscillate faster when warmer. This the single most important
 component of frequency drift.</p>
+<p>The Local Termperatures are from field 3 from the tempstats log file.</p>
 """
         ret = {'html' : exp, 'percs' : percs }
         ret['title'] = "Local Temperatures"
@@ -403,7 +404,7 @@ heating).</p>
 <p>Smaller changes are better.  An ideal result would be a horizontal
 line at 0ppm.  Expected values of 99%-1% percentiles: 0.4ppm</p>
 
-<p>The Frequency Offset comes from field 3 of the loopstats log file.</p>
+<p>The Frequency Offset comes from field 4 of the loopstats log file.</p>
 """
         ret = {'html' : stats.stats_html + exp, 'percs' : stats.percs }
         ret['title'] = "Local Clock Frequency Offset"
@@ -749,6 +750,8 @@ plot \
 
         exp = """\
 <p>This shows the clock offsets of the local clock as a histogram.</p>
+
+<p>The Local Clock Offset is field 3 from the loopstats log file.</p>
 """ % locals()
         ret = {'html' : stats.stats_html + exp, 'percs' : stats.percs}
         ret['title'] = "Local Clock Time Offset Histogram"
