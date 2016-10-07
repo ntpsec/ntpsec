@@ -361,8 +361,10 @@ plot \\
         # strip the trailing ", \\n"
         plot_template = plot_template[:-4] + "\n"
         exp = """\
-<p>Local GPS.  These will be site specific.  It depends on running
-a local gpsd daemon, and logging the data using gps-log.py.</p>
+<p>Local GPS.  The Time Dilution of Precision (tdop) is plotted in blue.
+The number of visible satellites (nSat) is plotted in red.</p>
+<p>tdop is field 3, and nSats is field 4, from the gpsd log file.  The
+gpsd log file is created by the gps-log.py program.</p>
 """
         ret = {'html' : exp, 'percs' : percs }
         ret['title'] = "Local GPS"
