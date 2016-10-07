@@ -1621,7 +1621,7 @@ config_access(
 #ifdef ENABLE_MSSNTP
 	    "MS-SNTP signd operations currently block ntpd degrading service to all clients.";
 #else
-	    "mssntp restrict bit ignored, this ntpd was configured without --enable-ntp-signd.";
+	    "mssntp restrict bit ignored, this ntpd was configured without --enable-mssntp.";
 #endif
 
 	/* Configure the mru options */
