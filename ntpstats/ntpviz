@@ -174,7 +174,7 @@ def gnuplot(template, outfile=None):
     else:
         out = open(outfile, "w")
     # shell=True is a security hazard
-    # would be grat to capture stderr, but the Pythin doc says
+    # would be great to capture stderr, but the Python doc says
     # that can lead to deadlock on large stderr output.  gnuplot
     # can output a lot to stderr...
     proc = subprocess.Popen("gnuplot",

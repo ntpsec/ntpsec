@@ -3,7 +3,7 @@
 # http://www.pool.ntp.org/en/
 #
 # iburst tells it to send the first few requests at 2 second intervals rather
-# than wait for the poll interval which defaults to 64 seconds.  That greatly
+# than wait for the poll interval, which defaults to 64 seconds.  That greatly
 # speeds up the time for ntpd to set the system time and start responding to
 # requests.
 #
@@ -22,8 +22,8 @@
 # and then try pinging prepending it to ".pool.ntp.org" and pinging that.
 # hostname. If you get a response, you can use it.
 #
-# Note: in theory we could use the "pool" keyboard here. There is some
-# controvery over whether it is implemented correctly.  One known problem
+# Note: in theory we could use the "pool" keyword here. There is some
+# controversy over whether it is implemented correctly.  One known problem
 # (a bug in ntpd) is that it can't be used with restrict nopeer.
 #
 server 0.us.pool.ntp.org iburst
