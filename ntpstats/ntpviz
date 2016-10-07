@@ -237,13 +237,13 @@ set rmargin 12
 
         # compute clock offset
         values = [float(line.split()[1]) for line in self.loopstats]
-        stats = VizStats( values, title="Local Clock Offset")
+        stats = VizStats( values, "Local Clock Time Offset")
         unit = stats.unit
         multiplier = stats.multiplier
 
         # compute frequency offset
         values_f = [float(line.split()[2]) for line in self.loopstats]
-        stats_f = VizStats( values_f, freq=1, title="Local Frequency Offset")
+        stats_f = VizStats(values_f, "Local Clock Frequency Offset", freq=1)
         unit_f = stats_f.unit
         multiplier_f = stats_f.multiplier
 
@@ -379,7 +379,7 @@ a local gpsd daemon, and logging the data using gps-log.py.</p>
 
         # compute freqency offset
         values = [float(line.split()[2]) for line in self.loopstats]
-        stats = VizStats( values, "Local Clock Frequency Offsets", freq=1, )
+        stats = VizStats( values, "Local Clock Frequency Offset", freq=1, )
         unit = stats.unit
         multiplier = stats.multiplier
 
@@ -1271,7 +1271,8 @@ ntpviz</a>, part of the <a href="https://www.ntpsec.org/">NTPsec project</a>
     else:
         imagepairs = [
             ("local-offset", stats.local_offset_gnuplot()),
-            ("local-error", stats.local_error_gnuplot()),
+            # skipa next one, redundant to one above
+            #("local-error", stats.local_error_gnuplot()),
             ("local-jitter", stats.local_offset_jitter_gnuplot()),
             ("local-stability", stats.local_offset_stability_gnuplot()),
             ("local-offset-histogram", stats.local_offset_histogram_gnuplot()),
