@@ -194,9 +194,6 @@ send_via_ntp_signd(
 		}
 			
 		if (recv_packet(fd, &reply, &reply_len) != 0) {
-			if (reply) {
-				free(reply);
-			}
 			close(fd);
 			return;
 		}
