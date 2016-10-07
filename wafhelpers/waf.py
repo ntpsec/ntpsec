@@ -1,7 +1,7 @@
 from waflib.Configure import conf
 from waflib.TaskGen import feature, before, after, extension, after_method, before_method
 from waflib.Task import Task
-
+import os
 
 @before_method('apply_incpaths')
 @feature('bld_include')
@@ -57,8 +57,17 @@ def manpage_subst_fun(task, text):
 @conf
 def manpage(ctx, section, source):
 
+	if ctx.env.MANDIR:
+		manprefix = ctx.env.MANDIR
+	elif os.path.isdir("/usr/man"):
+		manprefix = "/usr/man"
+	else:
+		manprefix = "/usr/share/man"
+	if not manprefix.endswith("/"):
+		manprefix += "/"
+
 	if ctx.env.NTPSEC_RELEASE:
-		ctx.install_files("${PREFIX}/man/man%s/" % section, source.replace("-man.txt", ".%s" % section))
+		ctx.install_files(manprefix + "man%s/" % section, source.replace("-man.txt", ".%s" % section))
 		return
 
 	if not ctx.env.ENABLE_DOC or ctx.env.DISABLE_MANPAGE:
