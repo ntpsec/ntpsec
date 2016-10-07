@@ -174,13 +174,19 @@ def gnuplot(template, outfile=None):
     else:
         out = open(outfile, "w")
     # shell=True is a security hazard
+    # would be grat to capture stderr, but the Pythin doc says
+    # that can lead to deadlock on large stderr output.  gnuplot
+    # can output a lot to stderr...
     proc = subprocess.Popen("gnuplot",
                             shell=False, bufsize=4096,
                             stdin=subprocess.PIPE, stdout=out)
-    # next line works in Python 3, not Python 2
-    # proc.stdin.write(template.encode('ascii','ignore'))
-    # next line works in Python 2, not Python 3
-    proc.stdin.write(template)
+    v = sys.version_info
+    if 3 <= v[0]:
+        # next line works in Python 3, not Python 2
+        proc.stdin.write(template.encode('ascii','ignore'))
+    else:
+        # next line works in Python 2, not Python 3
+        proc.stdin.write(template)
     proc.stdin.close()
     return proc.wait()
 
