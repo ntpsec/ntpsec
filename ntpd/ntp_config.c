@@ -2127,12 +2127,6 @@ config_nic_rules(
 		switch (curr_node->match_class) {
 
 		default:
-			/*
-			 * this assignment quiets a gcc "may be used
-			 * uninitialized" warning and is here for no
-			 * other reason.
-			 */
-			match_type = MATCH_ALL;
 			INSIST(false);
 			break;
 
