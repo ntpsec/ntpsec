@@ -150,6 +150,10 @@ few will be user-visible.
   in /etc/ntp.conf finding /etc/foo rather than looking for foo in
   ypur current directory.
 
+* It is now possible to set the peer maximum dispersion with "tos
+  maxdisp". See RFC5905 for discussion of this synchronization
+  parameter.
+
 * For the generic (parse) driver only: Using the new refclock syntax,
   the maximum number of units that can be set up changes from 4
   (numbers 0-3) to unlimited.  However, the old magic-address syntax

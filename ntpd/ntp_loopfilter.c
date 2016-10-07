@@ -1121,8 +1121,8 @@ start_kern_loop(void)
 	ZERO(ntv);
 	ntv.modes = MOD_BITS;
 	ntv.status = STA_PLL;
-	ntv.maxerror = MAXDISPERSE;
-	ntv.esterror = MAXDISPERSE;
+	ntv.maxerror = sys_maxdisp;
+	ntv.esterror = sys_maxdisp;
 	ntv.constant = sys_poll; /* why is it that here constant is unconditionally set to sys_poll, whereas elsewhere is is modified depending on nanosecond vs. microsecond kernel? */
 #ifdef SIGSYS
 	/*

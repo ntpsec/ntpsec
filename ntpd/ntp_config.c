@@ -1360,6 +1360,10 @@ config_tos(
 			item = PROTO_MINDISP;
 			break;
 
+		case T_Maxdisp:
+			item = PROTO_MAXDISP;
+			break;
+
 		case T_Maxdist:
 			item = PROTO_MAXDIST;
 			break;

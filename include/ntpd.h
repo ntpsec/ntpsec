@@ -180,6 +180,7 @@ extern  int     leapdif;        /* TAI difference step at next leap second*/
 extern	int	sys_orphan;
 extern	double	sys_mindisp;
 extern	double	sys_maxdist;
+extern	double	sys_maxdisp;
 
 extern	void	poll_update	(struct peer *, uint8_t);
 

@@ -135,6 +135,7 @@ struct key_tok ntp_keywords[] = {
 { "ceiling",		T_Ceiling,		FOLLBY_TOKEN },
 { "cohort",		T_Cohort,		FOLLBY_TOKEN },
 { "mindist",		T_Mindist,		FOLLBY_TOKEN },
+{ "maxdisp",		T_Maxdisp,		FOLLBY_TOKEN },
 { "maxdist",		T_Maxdist,		FOLLBY_TOKEN },
 { "beacon",		T_Beacon,		FOLLBY_TOKEN },
 { "orphan",		T_Orphan,		FOLLBY_TOKEN },
