@@ -102,7 +102,6 @@ def build(ctx):
 	ntpd_source = [
 		"ntp_config.c",
 		"ntp_io.c",
-		"ntp_intercept.c",
 		"ntp_loopfilter.c",
 		"ntp_peer.c",
 		"ntp_proto.c",
