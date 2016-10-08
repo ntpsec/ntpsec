@@ -123,7 +123,6 @@ write_kod_db(void)
 	FILE *db_s;
 	char *pch;
 	int dirmode;
-	register int a;
 
 	db_s = fopen(kod_db_file, "w");
 
@@ -157,7 +156,7 @@ write_kod_db(void)
 		return false;
 	}
 
-	for (a = 0; a < kod_db_cnt; a++) {
+	for (register int a = 0; a < kod_db_cnt; a++) {
 		fprintf(db_s, "%16.16llx %s %s\n", (unsigned long long)
 			kod_db[a]->timestamp, kod_db[a]->type,
 			kod_db[a]->hostname);
