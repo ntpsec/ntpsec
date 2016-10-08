@@ -868,7 +868,7 @@ timeout_queries(void)
 	sent_pkt *	spkt;
 	sent_pkt *	spkt_next;
 	long		age;
-	int didsomething = 0;
+	bool didsomething = false;
 
 	TRACE(3, ("timeout_queries: called to check %u items\n",
 		  (unsigned)COUNTOF(fam_listheads)));
@@ -879,7 +879,7 @@ timeout_queries(void)
 		for (spkt = head; spkt != NULL; spkt = spkt_next) {
 			char xcst;
 
-			didsomething = 1;
+			didsomething = true;
 			switch (spkt->dctx->flags & CTX_xCST) {
 			    case CTX_BCST:
 				xcst = 'B';

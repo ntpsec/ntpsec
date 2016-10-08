@@ -167,7 +167,7 @@ static	void		scheduled_sleep(time_t, time_t,
 static	void		manage_dns_retry_interval(time_t *, time_t *,
 						  int *,
 						  time_t *);
-static	int		should_retry_dns(int, int);
+static	bool		should_retry_dns(int, int);
 #ifdef HAVE_RES_INIT
 static	void		reload_resolv_conf(dnsworker_ctx *);
 #else
@@ -437,7 +437,7 @@ getaddrinfo_sometime_complete(
 	char *			service;
 	char *			canon_start;
 	time_t			time_now;
-	int			again;
+	bool			again;
 	int			af;
 	const char *		fam_spec;
 	int			i;
@@ -731,7 +731,7 @@ getnameinfo_sometime_complete(
 	char *			host;
 	char *			service;
 	time_t			time_now;
-	int			again;
+	bool			again;
 
 	UNUSED_ARG(rtype);
 	UNUSED_ARG(respsize);
@@ -986,14 +986,14 @@ manage_dns_retry_interval(
  * and getnameinfo_sometime_complete which implements ntpd's DNS retry
  * policy.
  */
-static int
+static bool
 should_retry_dns(
 	int	rescode,
 	int	res_errno
 	)
 {
-	static int	eai_again_seen;
-	int		again;
+	static bool	eai_again_seen;
+	bool		again;
 #if defined (EAI_SYSTEM) && defined(DEBUG)
 	char		msg[256];
 #endif
@@ -1004,17 +1004,17 @@ should_retry_dns(
 	 * If the resolver failed, see if the failure is
 	 * temporary. If so, return success.
 	 */
-	again = 0;
+	again = false;
 
 	switch (rescode) {
 
 	case EAI_FAIL:
-		again = 1;
+		again = true;
 		break;
 
 	case EAI_AGAIN:
-		again = 1;
-		eai_again_seen = 1;		/* [Bug 1178] */
+		again = true;
+		eai_again_seen = true;		/* [Bug 1178] */
 		break;
 
 	case EAI_NONAME:
@@ -1031,7 +1031,7 @@ should_retry_dns(
 		 * discriminating about which errno values require retrying, but
 		 * this matches existing behavior.
 		 */
-		again = 1;
+		again = true;
 # ifdef DEBUG
 		errno_to_str(res_errno, msg, sizeof(msg));
 		TRACE(1, ("intres: EAI_SYSTEM errno %d (%s) means try again, right?\n",

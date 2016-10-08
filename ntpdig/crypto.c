@@ -117,7 +117,7 @@ auth_init(
 	while (!feof(keyf)) {
 		char * octothorpe;
 		struct key *act;
-		int goodline = 0;
+		bool goodline = false;
 
 		if (NULL == fgets(kbuf, sizeof(kbuf), keyf))
 			continue;
@@ -133,19 +133,19 @@ auth_init(
 			if (len <= 20) {
 				act->key_len = len;
 				memcpy(act->key_seq, keystring, len + 1);
-				goodline = 1;
+				goodline = true;
 			} else if ((len & 1) != 0) {
-				goodline = 0; /* it's bad */
+				goodline = false; /* it's bad */
 			} else {
 				int j;
-				goodline = 1;
+				goodline = true;
 				act->key_len = len >> 1;
 				for (j = 0; j < len; j+=2) {
 					int val;
 					val = (hex_val(keystring[j]) << 4) |
 					       hex_val(keystring[j+1]);
 					if (val < 0) {
-						goodline = 0; /* it's bad */
+						goodline = false; /* it's bad */
 						break;
 					}
 					act->key_seq[j>>1] = (char)val;
