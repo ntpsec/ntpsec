@@ -1607,7 +1607,7 @@ config_access(
 	config_tree *ptree
 	)
 {
-	static int		warned_signd;
+	static bool		warned_signd;
 	attr_val *		my_opt;
 	restrict_node *		my_node;
 	int_node *		curr_flag;
@@ -1819,7 +1819,7 @@ config_access(
 		}
 
 		if ((RES_MSSNTP & flags) && !warned_signd) {
-			warned_signd = 1;
+			warned_signd = true;
 			fprintf(stderr, "%s\n", signd_warning);
 			msyslog(LOG_WARNING, "%s", signd_warning);
 		}
@@ -2482,11 +2482,11 @@ config_fudge(
 	sockaddr_u addr_sock;
 	address_node *addr_node;
 	struct refclockstat clock_stat;
-	int err_flag;
+	bool err_flag;
 
 	curr_fudge = HEAD_PFIFO(ptree->fudge);
 	for (; curr_fudge != NULL; curr_fudge = curr_fudge->link) {
-		err_flag = 0;
+		err_flag = false;
 
 		/* Get the reference clock address and
 		 * ensure that it is sane
@@ -2495,14 +2495,14 @@ config_fudge(
 		ZERO_SOCK(&addr_sock);
 		if (getnetnum(addr_node->address, &addr_sock, 1, t_REF)
 		    != 1) {
-			err_flag = 1;
+			err_flag = true;
 			msyslog(LOG_ERR,
 				"unrecognized fudge reference clock address %s, line ignored",
 				socktoa(&addr_sock));
 		}
 
 		if (!ISREFCLOCKADR(&addr_sock)) {
-			err_flag = 1;
+			err_flag = true;
 			msyslog(LOG_ERR,
 				"inappropriate address %s for the fudge command, line ignored",
 				socktoa(&addr_sock));

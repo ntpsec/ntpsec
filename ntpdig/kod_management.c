@@ -185,7 +185,7 @@ kod_init_kod_db(
 	int a, b, sepc, len;
 	unsigned long long ull;
 	char *str_ptr;
-	char error = 0;
+	bool error = false;
 
 	TRACE(2, ("Initializing KOD DB...\n"));
 
@@ -250,7 +250,7 @@ kod_init_kod_db(
 
 		str_ptr = fgets(fbuf, sizeof(fbuf), db_s);
 		if (NULL == str_ptr) {
-			error = 1;
+			error = true;
 			break;
 		}
 
@@ -267,7 +267,7 @@ kod_init_kod_db(
 
 			free(kod_db[b]);
 			kod_db[b] = NULL;
-			error = 1;
+			error = true;
 			break;
 		}
 
