@@ -81,7 +81,7 @@ l_fp	sys_authdelay;		/* authentication delay */
 double	sys_offset;	/* current local clock offset */
 double	sys_mindisp = MINDISPERSE; /* minimum distance (s) */
 double	sys_maxdist = MAXDISTANCE; /* selection threshold */
-double	sys_maxdisp = MAXDISPERSE; /* maximum dspersion */
+double	sys_maxdisp = MAXDISPERSE; /* maximum dispersion */
 double	sys_jitter;		/* system jitter */
 u_long	sys_epoch;		/* last clock update time */
 static	double sys_clockhop;	/* clockhop threshold */
@@ -1987,7 +1987,7 @@ clock_select(void)
 	}
 
 	/*
-	 * Unless there are at least sys_misane survivors, leave the
+	 * Unless there are at least sys_minsane survivors, leave the
 	 * building dark. Otherwise, do a clockhop dance. Ordinarily,
 	 * use the selected survivor speer. However, if the current
 	 * system peer is not speer, stay with the current system peer
