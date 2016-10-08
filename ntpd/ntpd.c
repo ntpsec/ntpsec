@@ -555,7 +555,6 @@ ntpdmain(
 
 	if (!dumpopts)
 	{
-		int i;
 		char buf[1024];	/* Secret knowledge of msyslog buf length */
 		char *cp = buf;
 
@@ -565,7 +564,7 @@ ntpdmain(
 		snprintf(cp, sizeof(buf), "Command line:");
 		cp += strlen(cp);
 
-		for (i = 0; i < saved_argc ; ++i) {
+		for (int i = 0; i < saved_argc ; ++i) {
 			snprintf(cp, sizeof(buf) - (cp - buf),
 				" %s", saved_argv[i]);
 			cp += strlen(cp);

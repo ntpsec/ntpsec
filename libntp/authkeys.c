@@ -315,9 +315,7 @@ auth_findkey(
 	keyid_t		id
 	)
 {
-	symkey *	sk;
-
-	for (sk = key_hash[KEYHASH(id)]; sk != NULL; sk = sk->hlink) {
+	for (symkey * sk = key_hash[KEYHASH(id)]; sk != NULL; sk = sk->hlink) {
 		if (id == sk->keyid) {
 			return sk;
 		}
@@ -335,13 +333,11 @@ auth_havekey(
 	keyid_t		id
 	)
 {
-	symkey *	sk;
-
 	if (0 == id || cache_keyid == id) {
 		return true;
 	}
 
-	for (sk = key_hash[KEYHASH(id)]; sk != NULL; sk = sk->hlink) {
+	for (symkey * sk = key_hash[KEYHASH(id)]; sk != NULL; sk = sk->hlink) {
 		if (id == sk->keyid) {
 			return true;
 		}
@@ -497,7 +493,6 @@ MD5auth_setkey(
 	size_t len
 	)
 {
-	symkey *	sk;
 	symkey **	bucket;
 	uint8_t *	secret;
 	size_t		secretsize;
@@ -509,7 +504,7 @@ MD5auth_setkey(
 	 * new value.
 	 */
 	bucket = &key_hash[KEYHASH(keyno)];
-	for (sk = *bucket; sk != NULL; sk = sk->hlink) {
+	for (symkey * sk = *bucket; sk != NULL; sk = sk->hlink) {
 		if (keyno == sk->keyid) {
 			sk->type = (unsigned short)keytype;
 			secretsize = len;
@@ -535,11 +530,9 @@ MD5auth_setkey(
 		    (unsigned short)secretsize, secret);
 #ifdef DEBUG
 	if (debug >= 4) {
-		size_t	j;
-
 		printf("auth_setkey: key %d type %d len %d ", (int)keyno,
 		    keytype, (int)secretsize);
-		for (j = 0; j < secretsize; j++)
+		for (size_t j = 0; j < secretsize; j++)
 			printf("%02x", secret[j]);
 		printf("\n");
 	}	
