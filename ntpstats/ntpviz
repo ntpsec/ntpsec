@@ -68,6 +68,7 @@ def pstdev(data, mu=None):
 # class for calced values
 class VizStats(NTPStats):
     percs       = {}          # dictionary of percentages
+    title       = ''          # title
     unit        = 's'         # display units: s, ppm, etc.
     multiplier  = 1
     pmax        = 0     # 100%, can't use max, reserved word
@@ -133,6 +134,7 @@ class VizStats(NTPStats):
         self.percs.update({k: v * self.multiplier
                      for k, v in list(self.percs.items())})
 
+        self.title       = title
         self.pmax        = self.percs[100]
         self.ninetynine  = self.percs[99]
         self.ninetyfive  = self.percs[95]
@@ -1174,7 +1176,7 @@ Report generated: %(start_time_str)s UTC <br>
 <dd>The difference between the ntpd calculated frequency and the local
 system clock frequency (usually in parts per million, ppm)</dd>
 
-<dt>jitter:</dt>
+<dt>jitter, dispersion:</dt>
 <dd>The short term change in a value</dd>
 
 <dt>ms, millisecond:</dt>
@@ -1296,9 +1298,11 @@ ntpviz</a>, part of the <a href="https://www.ntpsec.org/">NTPsec project</a>
             if len( plot ):
                 imagepairs.append(("peer-jitter-" + key, plot))
 
+        percs = []
         for (imagename, image) in imagepairs:
             if not image:
                 continue
+            percs.append( image['percs'] )
             index_buffer += "<div>\n<h2>%s:</h2>\n" % image['title']
             div_name = imagename.replace('-', ' ')
             index_buffer += imagewrapper % \
@@ -1314,6 +1318,12 @@ ntpviz</a>, part of the <a href="https://www.ntpsec.org/">NTPsec project</a>
             index_buffer += "<br><br>\n"
             gnuplot(image['plot'], os.path.join(args.outdir, imagename + ".png"))
             index_buffer += "</div>\n"
+
+    # dump percs
+    if false:
+        index_buffer += "<div>\n"
+        index_buffer += str( percs )
+        index_buffer += "</div>\n"
 
     # if footer file, add it to index.html
     footer = os.path.join(args.outdir, "footer")
