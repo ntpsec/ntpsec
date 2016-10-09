@@ -1320,7 +1320,7 @@ ntpviz</a>, part of the <a href="https://www.ntpsec.org/">NTPsec project</a>
             index_buffer += "</div>\n"
 
     # dump percs
-    if false:
+    if False:
         index_buffer += "<div>\n"
         index_buffer += str( percs )
         index_buffer += "</div>\n"
