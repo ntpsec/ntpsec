@@ -84,6 +84,38 @@ class VizStats(NTPStats):
 
     mu          = 0     # arithmetic mean
     pstd        = 0     # population standard distribution, one sigma
+    csv_head =  """\
+Name, Min, 1%, 5%, 50%, 95%, 99%, Max, 90% Range, 98% Range, StdDev, \
+Mean, Units
+"""
+
+    table_head =  """\
+<table style="text-align:right;">
+<thead>
+  <tr style="font-weight:bold;text-align:left;">
+    <td ></td>
+    <td colspan=7>  Percentiles......</td>
+    <td colspan=2>  Ranges......</td>
+    <td colspan=2></td>
+    <td ></td>
+  </tr>
+  <tr style="font-weight:bold;">
+    <td style="text-align:left;border-bottom:solid black;">Name</td>
+    <td style="border-bottom:solid black;">Min</td>
+    <td style="border-bottom:solid black;">1%</td>
+    <td style="border-bottom:solid black;">5%</td>
+    <td style="border-bottom:solid black;">50%</td>
+    <td style="border-bottom:solid black;">95%</td>
+    <td style="border-bottom:solid black;">99%</td>
+    <td style="border-bottom:solid black;">Max</td>
+    <td style="border-bottom:solid black;">90%</td>
+    <td style="border-bottom:solid black;">95%</td>
+    <td style="border-bottom:solid black;">StdDev</td>
+    <td style="border-bottom:solid black;">Mean</td>
+    <td style="border-bottom:solid black;">Units</td>
+  </tr>
+</thead>
+"""
 
     stats_html  = ''
 
@@ -153,18 +185,35 @@ class VizStats(NTPStats):
         if '' != title:
             self.stats_html =  "<h4>%(title)s</h4>\n" % locals()
         self.stats_html +=  """\
-<p style="margin-left:20px;">Percentiles: Max: %(pmax)s, &nbsp;
- 99%%: %(ninetynine)s,&nbsp;&nbsp;
- 95%%: %(ninetyfive).3f,&nbsp;&nbsp;
- 50%%: %(fifty).3f,&nbsp;&nbsp;
- 5%%: %(five).3f,&nbsp;&nbsp;
- 1%%: %(one).3f,&nbsp;&nbsp;
- Min: %(pmin).3f  %(unit)s<br>
-Ranges: 99%% - 1%% = %(nn_m_o).3f %(unit)s, &nbsp;
- 95%% - 5%% = %(nf_m_f).3f %(unit)s<br>
-Deviation: Mean = %(mu).3f %(unit)s,  &nbsp;
-1σ = %(pstd).3f %(unit)s</p>
+<p style="margin-left:20px;"><b>Percentiles</b>:
+ Min: %(pmin).3f, &nbsp;
+ 1%%: %(one).3f, &nbsp;
+ 5%%: %(five).3f, &nbsp;
+ 50%%: %(fifty).3f, &nbsp;
+ 95%%: %(ninetyfive).3f, &nbsp;
+ 99%%: %(ninetynine).3f, &nbsp;
+ Max: %(pmax).3f &nbsp;
+ %(unit)s<br>
+<b>Ranges:</b>
+ 90%% (95%% - 5%%) = %(nf_m_f).3f, &nbsp;
+ 98%% (99%% - 1%%) = %(nn_m_o).3f %(unit)s<br>
+<b>Deviation:</b>
+ 1σ = %(pstd).3f, &nbsp;
+ Mean = %(mu).3f %(unit)s</p>
 """ % self.__dict__
+
+        self.csv =  """\
+%(title)s, %(pmin).3f, %(one).3f, %(five).3f, %(fifty).3f, %(ninetyfive).3f, \
+%(ninetynine).3f, %(pmax).3f, %(nf_m_f).3f, %(nn_m_o).3f, %(pstd).3f, \
+%(mu).3f, %(unit)s
+""" % self.__dict__
+
+        self.table = '<tr style="vertical-align:top;">' + \
+                     '<td style="text-align:left;">' + \
+                            self.csv.replace( ", ", "</td><td>") + \
+                           "</td></tr>\n"
+
+        return
 
 
 # end calc things now
@@ -275,7 +324,7 @@ file.</p>
 
         ret = {}
         ret['html'] = stats.stats_html + stats_f.stats_html + exp
-        ret['percs'] = stats.percs
+        ret['stats'] = [stats, stats_f]
         ret['title'] = "Local Clock Time/Frequency Offsets"
         ret['plot'] = plot_template + self.dump("loopstats") + "e\n" \
              + self.dump("loopstats") + "e\n"
@@ -292,7 +341,7 @@ file.</p>
             sys.stderr.write("ntpviz: WARNING: no temps to graph\n")
             return ''
 
-        percs = ()
+        stats = []
         temps_data = ()
         plot_data = ""
         for key in tempslist:
@@ -319,7 +368,7 @@ oscillate faster when warmer. This the single most important
 component of frequency drift.</p>
 <p>The Local Termperatures are from field 3 from the tempstats log file.</p>
 """
-        ret = {'html' : exp, 'percs' : percs }
+        ret = {'html' : exp, 'stats' : stats }
         ret['title'] = "Local Temperatures"
         ret['plot'] = plot_template + plot_data
         return ret
@@ -336,7 +385,7 @@ component of frequency drift.</p>
                 sys.stderr.write("ntpviz: INFO: no gps data to graph\n")
             return ''
 
-        percs = ()
+        stats = []
         gps_data = ()
         plot_data = ""
         for key in gpslist:
@@ -368,7 +417,7 @@ The number of visible satellites (nSat) is plotted in red.</p>
 <p>tdop is field 3, and nSats is field 4, from the gpsd log file.  The
 gpsd log file is created by the gps-log.py program.</p>
 """
-        ret = {'html' : exp, 'percs' : percs }
+        ret = {'html' : exp, 'stats' : stats }
         ret['title'] = "Local GPS"
         ret['plot'] = plot_template + plot_data
         return ret
@@ -418,7 +467,7 @@ line at 0ppm.  Expected values of 99%-1% percentiles: 0.4ppm</p>
 
 <p>The Frequency Offset comes from field 4 of the loopstats log file.</p>
 """
-        ret = {'html' : stats.stats_html + exp, 'percs' : stats.percs }
+        ret = {'html' : stats.stats_html + exp, 'stats' : [stats] }
         ret['title'] = "Local Clock Frequency Offset"
         ret['plot'] = plot_template + self.dump("loopstats") + "e\n"
         return ret
@@ -477,7 +526,7 @@ plot \
  %(one)s title "1st percentile"
 """ % locals()
 
-        ret = {'html' : stats.stats_html + exp, 'percs' : stats.percs,
+        ret = {'html' : stats.stats_html + exp, 'stats' : [stats],
                'title' : title }
         ret['plot'] = plot_template + self.dump("loopstats") + "e\n"
         return ret
@@ -526,7 +575,7 @@ plot \
         multiplier = 1e6
         rtt = 0
         percentages = ""
-        percs = []
+        stats = []
         if len(peerlist) == 1:
             # only one peer
             title += ": "+ peerlist[0]
@@ -536,7 +585,6 @@ plot \
             stats = VizStats( values, title)
             unit        = stats.unit
             multiplier  = stats.multiplier
-            persc       = stats.percs
 
             ninetynine  = stats.ninetynine
             ninetyfive  = stats.ninetyfive
@@ -620,7 +668,6 @@ at 0s.</p>
             stats = VizStats( values, title )
             unit        = stats.unit
             multiplier  = stats.multiplier
-            persc       = stats.percs
 
             exp = stats.stats_html
             if "offset" == type:
@@ -674,7 +721,7 @@ plot \
             # strip the trailing ", \n"
             plot_template = plot_template[:-4] + "\n"
 
-        ret = {'html' : exp, 'percs' : percs, 'title' : title }
+        ret = {'html' : exp, 'stats' : [stats], 'title' : title }
         ret['plot'] = plot_template + plot_data + "e\n"
         return ret
 
@@ -764,7 +811,7 @@ plot \
 
 <p>The Local Clock Offset is field 3 from the loopstats log file.</p>
 """ % locals()
-        ret = {'html' : stats.stats_html + exp, 'percs' : stats.percs}
+        ret = {'html' : stats.stats_html + exp, 'stats' : [stats]}
         ret['title'] = "Local Clock Time Offset Histogram"
         ret['plot'] = plot_template + "".join(histogram_data) + "e\n"
         return ret
@@ -789,7 +836,7 @@ plot \\
     for stats in statlist:
         plot += stats.dump("loopstats") + "e\n"
 
-    ret = {'html' : '', 'percs' : '' }
+    ret = {'html' : '', 'stats' : [] }
     ret['title'] = "Multiplot"
     ret['plot'] = plot
     return ret
@@ -1298,11 +1345,11 @@ ntpviz</a>, part of the <a href="https://www.ntpsec.org/">NTPsec project</a>
             if len( plot ):
                 imagepairs.append(("peer-jitter-" + key, plot))
 
-        percs = []
+        stats = []
         for (imagename, image) in imagepairs:
             if not image:
                 continue
-            percs.append( image['percs'] )
+            stats.append( image['stats'] )
             index_buffer += "<div>\n<h2>%s:</h2>\n" % image['title']
             div_name = imagename.replace('-', ' ')
             index_buffer += imagewrapper % \
@@ -1319,11 +1366,28 @@ ntpviz</a>, part of the <a href="https://www.ntpsec.org/">NTPsec project</a>
             gnuplot(image['plot'], os.path.join(args.outdir, imagename + ".png"))
             index_buffer += "</div>\n"
 
-    # dump percs
-    if False:
-        index_buffer += "<div>\n"
-        index_buffer += str( percs )
-        index_buffer += "</div>\n"
+    # dump stats
+    csvs = ''
+    if True:
+        index_buffer += '<div id="Summary"><h2>Summary</h2>\n'
+        index_buffer += VizStats.table_head
+        for stat in stats:
+            if [] == stat:
+                continue;
+            for sta in stat:
+                index_buffer += str( sta.table )
+                csvs += sta.csv
+        index_buffer += """\
+</table>
+<a href="summary.csv" target="_blank">Summary as CSV file</a><br>
+</div>
+"""
+
+    # create csv file
+    csv_filename = os.path.join(args.outdir, "summary.csv")
+    with open( csv_filename, "w" ) as csv_file:
+        csv_file.write(VizStats.csv_head)
+        csv_file.write(csvs)
 
     # if footer file, add it to index.html
     footer = os.path.join(args.outdir, "footer")
