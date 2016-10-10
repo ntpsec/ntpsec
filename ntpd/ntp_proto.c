@@ -1509,7 +1509,7 @@ clock_filter(
 	peer->delay = peer->filter_delay[k];
 	if (m > 1)
 		peer->jitter /= m - 1;
-	peer->jitter = max(SQRT(peer->jitter), LOGTOD(sys_precision));
+	peer->jitter = SQRT(peer->jitter);
 
 	/*
 	 * If the new sample and the current sample are both valid
