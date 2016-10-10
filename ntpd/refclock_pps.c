@@ -73,7 +73,7 @@
  * Interface definitions
  */
 #define DEVICE		"/dev/pps%d"	/* device name and unit */
-#define	PRECISION	(-20)		/* precision assumed (about 1 us) */
+#define	PRECISION	(-30)		/* precision assumed (about 1 ns) */
 #define	REFID		"PPS\0"		/* reference ID */
 #define	NAME		"PPS"		/* shortname */
 #define	DESCRIPTION	"PPS Clock Discipline" /* WRU */
