@@ -43,7 +43,7 @@
 /*
  * SHM interface definitions
  */
-#define PRECISION       (-1)    /* precision assumed (0.5 s) */
+#define PRECISION       (-30)    /* precision assumed 1 ns */
 #define REFID           "SHM"   /* reference ID */
 #define	NAME		"SHM"	/* shortname */
 #define DESCRIPTION     "SHM/Shared memory interface"
