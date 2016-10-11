@@ -788,8 +788,8 @@ local_clock(
 			if (ntv.constant < 0)
 				ntv.constant = 0;
 
-			ntv.esterror = (uint32_t)(clock_jitter * 1e6);
-			ntv.maxerror = (uint32_t)((sys_rootdelay / 2 +
+			ntv.esterror = (long)(clock_jitter * 1e6);
+			ntv.maxerror = (long)((sys_rootdelay / 2 +
 			    sys_rootdisp) * 1e6);
 			ntv.status = STA_PLL;
 
