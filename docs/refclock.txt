@@ -169,7 +169,7 @@ parse driver.
 |link:driver_generic.html[generic]      | T | Generic Reference Driver (Parse)
 |link:driver_magnavox.html[magnavox]    | D | MX4200 and compatible GPS receivers
 |link:driver_arbiter.html[arbiter]      | - | Arbiter 1088A/B GPS Receiver
-|link:driver_acts.html[acts]            | - | NIST/USNO/PTB Modem Time Services
+|link:driver_modem.html[modem]          | - | NIST/USNO/PTB Modem Time Services
 |link:driver_nmea.html[nmea]            | T | Generic NMEA GPS Receiver
 |link:driver_pps.html[pps]              | T | PPS Clock Discipline
 |link:driver_hpgps.html[hpgps]          | T | Hewlett Packard GPS Receivers

@@ -215,6 +215,9 @@ few will be user-visible.
 * If you had a refclock on a path of the form /dev/palisadeNNN, that
   link needs to change to /dev/trimbleNNN.
 
+* If you had a refclock on a path of the form /dev/actsNNN, that
+  link needs to change to /dev/modemNNN.
+
 * The -!m, ->, and -< options of some Classic commands are not
   supported.  (The argument-parsing framework code that implemented
   them in Classic was overcomplicated and buggy and had to be removed.)

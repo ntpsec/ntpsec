@@ -53,10 +53,10 @@ extern	struct refclock	refclock_true;
 #define	refclock_true	refclock_none
 #endif
 
-#ifdef CLOCK_ACTS
-extern	struct refclock	refclock_acts;
+#ifdef CLOCK_MODEM
+extern	struct refclock	refclock_modem;
 #else
-#define refclock_acts	refclock_none
+#define refclock_modem	refclock_none
 #endif
 
 #ifdef CLOCK_NMEA
@@ -160,7 +160,7 @@ struct refclock * const refclock_conf[] = {
 	&refclock_none,		/* 15 was: OLD TrueTime GPS/TM-TMD Receiver */
 	&refclock_none,		/* 16 was: REFCLK_IRIG_BANCOMM */
 	&refclock_none,		/* 17 was: REFCLK_GPS_DATUM */
-	&refclock_acts,		/* 18 REFCLK_ACTS */
+	&refclock_modem,	/* 18 REFCLK_ACTS */
 	&refclock_none,		/* 19 was: REFCLK_WWV_HEATH */
 	&refclock_nmea,		/* 20 REFCLK_GPS_NMEA */
 	&refclock_none,		/* 21 was: REFCLK_GPS_VME */

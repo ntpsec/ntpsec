@@ -46,10 +46,10 @@ refclock_map = {
 		"file":		"arbiter"
 	},
 
-	"acts": {
+	"modem": {
 		"descr":	"NIST/USNO/PTB Modem Time Services",
-		"define":	"CLOCK_ACTS",
-		"file":		"acts"
+		"define":	"CLOCK_MODEM",
+		"file":		"modem"
 	},
 
 	"nmea": {
