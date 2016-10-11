@@ -3,10 +3,11 @@
 
 from __future__ import print_function
 
-from gps import *
 import time
 from datetime import datetime
+import sys
 import threading
+from gps import *
 
 gpsd = None #seting the global variable
 
