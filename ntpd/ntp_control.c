@@ -644,6 +644,8 @@ static	char *reqend;
 #define MIN(a, b) (((a) <= (b)) ? (a) : (b))
 #endif
 
+#define MILLISECONDS	1000	/* milliseconds per second -magic numbers suck */
+
 /*
  * init_control - initialize request data
  */
@@ -1407,13 +1409,6 @@ ctl_putsys(
 	static struct timex ntx;
 	static u_long ntp_adjtime_time;
 
-	static const double to_ms =
-# ifdef STA_NANO
-		1.0e-6; /* nsec to msec */
-# else
-		1.0e-3; /* usec to msec */
-# endif
-
 	/*
 	 * CS_K_* variables depend on up-to-date output of ntp_adjtime()
 	 */
@@ -1800,7 +1795,8 @@ ctl_putsys(
 	case CS_K_OFFSET:
 		CTL_IF_KERNLOOP(
 			ctl_putdblf,
-			(sys_var[varid].text, 0, -1, to_ms * ntx.offset)
+			(sys_var[varid].text, 0, -1,
+			 ntp_error_in_seconds(ntx.offset)*MILLISECONDS)
 		);
 		break;
 
@@ -1815,7 +1811,7 @@ ctl_putsys(
 		CTL_IF_KERNLOOP(
 			ctl_putdblf,
 			(sys_var[varid].text, 0, 6,
-			 to_ms * ntx.maxerror)
+			 ntp_error_in_seconds(ntx.maxerror)*MILLISECONDS)
 		);
 		break;
 
@@ -1823,7 +1819,7 @@ ctl_putsys(
 		CTL_IF_KERNLOOP(
 			ctl_putdblf,
 			(sys_var[varid].text, 0, 6,
-			 to_ms * ntx.esterror)
+			 ntp_error_in_seconds(ntx.esterror)*MILLISECONDS)
 		);
 		break;
 
@@ -1847,7 +1843,7 @@ ctl_putsys(
 		CTL_IF_KERNLOOP(
 			ctl_putdblf,
 			(sys_var[varid].text, 0, 6,
-			    to_ms * ntx.precision)
+			 ntp_error_in_seconds(ntx.precision)*MILLISECONDS)
 		);
 		break;
 
@@ -1875,7 +1871,8 @@ ctl_putsys(
 	case CS_K_PPS_JITTER:
 		CTL_IF_KERNPPS(
 			ctl_putdbl,
-			(sys_var[varid].text, to_ms * ntx.jitter)
+			(sys_var[varid].text,
+			 ntp_error_in_seconds(ntx.jitter)*MILLISECONDS)
 		);
 		break;
 
