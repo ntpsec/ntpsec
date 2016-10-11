@@ -61,7 +61,9 @@ int clock_gettime(clockid_t clk_id, struct timespec *tp)
 
 /*
  * ntp_adjtime at nanosecond precision.  Hiding the units difference here
- * helps prevent loss-of-precision bugs
+ * helps prevent loss-of-precision bugs.  We deliberately don't merge
+ * STA_NANO into the status flags if it's absent, however,  this way
+ * callers can tell what accuracy they're actually getting.
  *
  * Problems: the Linux manual page for adjtimex(2) says the precision member
  * is microseconds and doesn't mention STA_NANO, but the legacy ntptime code
