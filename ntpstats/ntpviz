@@ -1174,8 +1174,8 @@ Python by ESR, concept and GNUPLOT code by Dan Drown.
         with open( logo_filename, "w" ) as wp:
             wp.write(binascii.a2b_base64(ntpsec_logo))
 
-    start_time = datetime.datetime.utcnow()
-    start_time_str = start_time.strftime("%c")
+    report_time = datetime.datetime.utcnow() # the time now is...
+    report_time = report_time.strftime("%c") # format it nicely
 
     title = args.sitename
 
@@ -1202,16 +1202,23 @@ dd {
 <body>
 <div style="width:910px">
 <a href='https://www.ntpsec.org/'>
-<img src="ntpsec-logo.png" alt="NTPsec" style="float:left;margin:5px 50px;">
+<img src="ntpsec-logo.png" alt="NTPsec" style="float:left;margin:20px 70px;">
 </a>
 <div>
 <h1 style="margin-bottom:10px;">%(title)s</h1>
-Report generated: %(start_time_str)s UTC <br>
+<b>Report generated:</b> %(report_time)s UTC <br>
 ''' % locals()
 
     # Ugh.  Not clear what to do in the multiplot case
     if len(statlist) == 1:
-        index_header += 'Report Period: %1.1f days <br></div> ' \
+        start_time = datetime.datetime.fromtimestamp( stats.starttime
+                         ).strftime('%c')
+        end_time = datetime.datetime.fromtimestamp( stats.endtime
+                         ).strftime('%c')
+
+        index_header += '<b>Start Time:</b> %s<br><b>End Time:</b> %s<br>\n' \
+                 % (start_time, end_time)
+        index_header += '<b>Report Period:</b> %1.1f days <br></div>\n' \
                  % (float(stats.period) / float(NTPStats.SecondsInDay))
     index_header += '<div style="clear:both;"></div>'
 
