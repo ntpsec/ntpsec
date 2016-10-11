@@ -59,6 +59,29 @@ int clock_gettime(clockid_t clk_id, struct timespec *tp)
 }
 #endif /* HAVE_CLOCK_GETTIME */
 
+/*
+ * ntp_adjtime at nanosecond precision.  Hiding the units difference here
+ * helps prevent loss-of-precision bugs
+ *
+ * Problems: the Linux manual page for adjtimex(2) says the precision member
+ * is microseconds and doesn't mention STA_NANO, but the legacy ntptime code
+ * has a scaling expression in it that implies nanoseconds if that flash bit
+ * is on.
+ */
+int ntp_adjtime_ns(struct timex *ntx)
+{
+    int errval = ntp_adjtime(ntx);
+#ifdef STA_NANO
+    if (errval == 0 && !(ntx->status & STA_NANO)) {
+	ntx->time.tv_usec *= 1000;
+	ntx->offset *= 1000;
+	//ntx->precision *= 1000;
+	ntx->jitter *= 1000;
+    }
+#endif
+    return errval;
+}
+
 #if !defined(HAVE_NTP_GETTIME) && defined(HAVE_NTP_ADJTIME)
 int ntp_gettime(struct ntptimeval *ntv)
 {
