@@ -264,12 +264,14 @@ class NTPViz(NTPStats):
     # Python takes single quotes here. Since no % substitution
     Common = """\
 set terminal png size 900,650
-set xdata time
 set grid
+set autoscale xfixmin
+set autoscale xfixmax
+set xdata time
+set xtic rotate by -45 scale 0
 set xlabel "Time (DDMM hh:mm UTC)"
 set format x "%d%b %H:%M"
 set timefmt "%s"
-set xtic rotate by -45 scale 0
 set lmargin 12
 set rmargin 12
 """
