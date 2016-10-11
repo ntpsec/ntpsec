@@ -20,6 +20,9 @@
 #include "ntp_stdlib.h"
 #include "ntp_syscall.h"
 
+#define NANOSECONDS	1e9
+#define MICROSECONDS	1e6
+
 /*
  * This is an implementation of the clock discipline algorithm described
  * in UDel TR 97-4-3, as amended. It operates as an adaptive parameter,
@@ -776,21 +779,18 @@ local_clock(
 				dtemp = -.5;
 			else
 				dtemp = .5;
+			ntv.offset = (long)(clock_offset * NANOSECONDS + dtemp);
 #ifdef STA_NANO
-			ntv.offset = (int32_t)(clock_offset * 1e9 +
-			    dtemp);
 			ntv.constant = sys_poll;
 #else /* STA_NANO */
-			ntv.offset = (int32_t)(clock_offset * 1e6 +
-			    dtemp);
 			ntv.constant = sys_poll - 4;
 #endif /* STA_NANO */
 			if (ntv.constant < 0)
 				ntv.constant = 0;
 
-			ntv.esterror = (long)(clock_jitter * 1e6);
+			ntv.esterror = (long)(clock_jitter * MICROSECONDS);
 			ntv.maxerror = (long)((sys_rootdelay / 2 +
-			    sys_rootdisp) * 1e6);
+			    sys_rootdisp) * MICROSECONDS);
 			ntv.status = STA_PLL;
 
 			/*
@@ -819,7 +819,7 @@ local_clock(
 		 * the pps. In any case, fetch the kernel offset,
 		 * frequency and jitter.
 		 */
-		ntp_adj_ret = ntp_adjtime(&ntv);
+		ntp_adj_ret = ntp_adjtime_ns(&ntv);
 		/*
 		 * A squeal is a return status < 0, or a state change.
 		 */
@@ -828,22 +828,14 @@ local_clock(
 			ntp_adjtime_error_handler(__func__, &ntv, ntp_adj_ret, errno, hardpps_enable, false, __LINE__ - 1);
 		}
 		pll_status = ntv.status;
-#ifdef STA_NANO
-		clock_offset = ntv.offset / 1e9;
-#else /* STA_NANO */
-		clock_offset = ntv.offset / 1e6;
-#endif /* STA_NANO */
+		clock_offset = ntv.offset / NANOSECONDS;
 		clock_frequency = FREQTOD(ntv.freq);
 
 		/*
 		 * If the kernel PPS is lit, monitor its performance.
 		 */
 		if (ntv.status & STA_PPSTIME) {
-#ifdef STA_NANO
-			clock_jitter = ntv.jitter / 1e9;
-#else /* STA_NANO */
-			clock_jitter = ntv.jitter / 1e6;
-#endif /* STA_NANO */
+			clock_jitter = ntv.jitter / NANOSECONDS;
 		}
 
 #if defined(STA_NANO) && NTP_API == 4
@@ -854,7 +846,7 @@ local_clock(
 			loop_tai = sys_tai;
 			ntv.modes = MOD_TAI;
 			ntv.constant = sys_tai;
-			if ((ntp_adj_ret = ntp_adjtime(&ntv)) != 0) {
+			if ((ntp_adj_ret = ntp_adjtime_ns(&ntv)) != 0) {
 			    ntp_adjtime_error_handler(__func__, &ntv, ntp_adj_ret, errno, false, true, __LINE__ - 1);
 			}
 		}
@@ -869,7 +861,7 @@ local_clock(
 	if (fabs(clock_frequency) > NTP_MAXFREQ)
 		msyslog(LOG_NOTICE,
 		    "frequency error %.0f PPM exceeds tolerance %.0f PPM",
-		    clock_frequency * 1e6, NTP_MAXFREQ * 1e6);
+		    clock_frequency * MICROSECONDS, NTP_MAXFREQ * MICROSECONDS);
 	dtemp = SQUARE(clock_frequency - drift_comp);
 	if (clock_frequency > NTP_MAXFREQ)
 		drift_comp = NTP_MAXFREQ;
@@ -931,8 +923,8 @@ local_clock(
 	if (debug)
 		printf(
 		    "local_clock: offset %.9f jit %.9f freq %.3f stab %.3f poll %d\n",
-		    clock_offset, clock_jitter, drift_comp * 1e6,
-		    clock_stability * 1e6, sys_poll);
+		    clock_offset, clock_jitter, drift_comp * MICROSECONDS,
+		    clock_stability * MICROSECONDS, sys_poll);
 #endif /* DEBUG */
 	return (rval);
 #endif /* ENABLE_LOCKCLOCK */
@@ -1100,13 +1092,13 @@ set_freq(
 			loop_desc = "kernel";
 			ntv.freq = DTOFREQ(drift_comp);
 		}
-		if ((ntp_adj_ret = ntp_adjtime(&ntv)) != 0) {
+		if ((ntp_adj_ret = ntp_adjtime_ns(&ntv)) != 0) {
 		    ntp_adjtime_error_handler(__func__, &ntv, ntp_adj_ret, errno, false, false, __LINE__ - 1);
 		}
 	}
 #endif /* HAVE_KERNEL_PLL */
 	mprintf_event(EVNT_FSET, NULL, "%s %.3f PPM", loop_desc,
-	    drift_comp * 1e6);
+	    drift_comp * MICROSECONDS);
 }
 #endif /* HAVE_LOCKCLOCK */
 
@@ -1137,7 +1129,7 @@ start_kern_loop(void)
 		pll_control = false;
 	} else {
 		if (sigsetjmp(env, 1) == 0) {
-			if ((ntp_adj_ret = ntp_adjtime(&ntv)) != 0) {
+			if ((ntp_adj_ret = ntp_adjtime_ns(&ntv)) != 0) {
 			    ntp_adjtime_error_handler(__func__, &ntv, ntp_adj_ret, errno, false, false, __LINE__ - 1);
 			}
 		}
@@ -1148,7 +1140,7 @@ start_kern_loop(void)
 		}
 	}
 #else /* SIGSYS */
-	if ((ntp_adj_ret = ntp_adjtime(&ntv)) != 0) {
+	if ((ntp_adj_ret = ntp_adjtime_ns(&ntv)) != 0) {
 	    ntp_adjtime_error_handler(__func__, &ntv, ntp_adj_ret, errno, false, false, __LINE__ - 1);
 	}
 #endif /* SIGSYS */
@@ -1275,7 +1267,7 @@ loop_config(
 		 * calibration phase.
 		 */
 		{
-			double ftemp = init_drift_comp / 1e6;
+			double ftemp = init_drift_comp / MICROSECONDS;
 			if (ftemp > NTP_MAXFREQ)
 				ftemp = NTP_MAXFREQ;
 			else if (ftemp < -NTP_MAXFREQ)
@@ -1298,7 +1290,7 @@ loop_config(
 			memset((char *)&ntv, 0, sizeof(ntv));
 			ntv.modes = MOD_STATUS;
 			ntv.status = STA_UNSYNC;
-			ntp_adjtime(&ntv);
+			ntp_adjtime_ns(&ntv);
 			sync_status("kernel time sync disabled",
 				pll_status,
 				ntv.status);
@@ -1316,7 +1308,7 @@ loop_config(
 		break;
 
 	case LOOP_PHI:		/* dispersion threshold (dispersion) */
-		clock_phi = freq / 1e6;
+		clock_phi = freq / MICROSECONDS;
 		break;
 
 	case LOOP_FREQ:		/* initial frequency (freq) */
