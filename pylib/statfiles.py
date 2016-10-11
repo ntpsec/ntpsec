@@ -12,8 +12,12 @@ import calendar, datetime, glob, gzip, os, socket, subprocess, sys, time
 class NTPStats:
     "Gather statistics for a specified NTP site"
     SecondsInDay = 24*60*60
-    DefaultPeriod = 7*24*60*60
+    DefaultPeriod = 7*24*60*60  # default 7 days, 604800 secs
     peermap = {}    # cached result of peersplit()
+    period = None
+    starttime = None
+    endtime = None
+    sitename = ''
 
     @staticmethod
     def unixize(line, starttime, endtime):
@@ -27,8 +31,8 @@ class NTPStats:
         except:
             # unparseable  time 0 and it will be stripped later
             return None
-        # 86400 = 24 * 60 * 60
-        time = 86400*mjd + second - 3506716800 # warning: 32 bit overflows
+        # warning: 32 bit overflows
+        time = NTPStats.SecondsInDay * mjd + second - 3506716800
         if time < starttime or time > endtime:
             return None
         return str(time) + " " + split[2]
