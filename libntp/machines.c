@@ -60,10 +60,11 @@ int clock_gettime(clockid_t clk_id, struct timespec *tp)
 #endif /* HAVE_CLOCK_GETTIME */
 
 /*
- * ntp_adjtime at nanosecond precision.  Hiding the units difference here
- * helps prevent loss-of-precision bugs.  We deliberately don't merge
- * STA_NANO into the status flags if it's absent, however,  this way
- * callers can tell what accuracy they're actually getting.
+ * ntp_adjtime at nanosecond precision.  Hiding the units difference
+ * here helps prevent loss-of-precision bugs elsewhere.  We
+ * deliberately don't merge STA_NANO into the status flags if it's
+ * absent, however, this way callers can tell what accuracy they're
+ * actually getting.
  *
  * Problems: the Linux manual page for adjtimex(2) says the precision member
  * is microseconds and doesn't mention STA_NANO, but the legacy ntptime code
@@ -72,15 +73,35 @@ int clock_gettime(clockid_t clk_id, struct timespec *tp)
  */
 int ntp_adjtime_ns(struct timex *ntx)
 {
+#ifdef STA_NANO
+    static bool nanoseconds = false;
+    static int callcount = 0;
+    if (callcount++ == 0){
+	struct timex ztx;
+	memset(&ztx, '\0', sizeof(ztx));
+	ntp_adjtime(&ztx);
+	nanoseconds = (STA_NANO & ztx.status) != 0;
+    }
+#endif
+
+#ifdef STA_NANO
+    if (!nanoseconds)
+#endif
+    {
+	ntx->time.tv_usec /= 1000;
+	ntx->offset /= 1000;
+    }
     int errval = ntp_adjtime(ntx);
 #ifdef STA_NANO
-    if (errval == 0 && !(ntx->status & STA_NANO)) {
+    nanoseconds = (STA_NANO & ntx->status) != 0;
+    if (!nanoseconds)
+#endif
+    {
 	ntx->time.tv_usec *= 1000;
 	ntx->offset *= 1000;
 	//ntx->precision *= 1000;
 	ntx->jitter *= 1000;
     }
-#endif
     return errval;
 }
 
