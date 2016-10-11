@@ -25,10 +25,12 @@
  * use as backup when neither a radio clock nor connectivity to Internet
  * time servers is available.
  *
- * This driver requires a modem with a Hayes-compatible command set and
- * control over the modem data terminal ready (DTR) control line. The
- * modem setup string is hard-coded in the driver and may require
- * changes for nonstandard modems or special circumstances.
+ * This driver requires a modem with a Hayes-compatible command set
+ * and control over the modem data terminal ready (DTR) control
+ * line. The default modem setup string is hard-coded in the driver
+ * and may require changes for nonstandard modems or special
+ * circumstances.  It can be overridden by setting the extended system
+ * variable "modem_setup" via ntpq.
  *
  * When enabled, the calling program dials the first number in the
  * phones file. If that call fails, it dials the second number and
@@ -40,7 +42,7 @@
  * poll interval whether or not other synchronization sources are 
  * present. The calling program disconnects if (a) the called party
  * is busy or does not answer, (b) the called party disconnects
- * before a sufficient nuimber of timecodes have been received. 
+ * before a sufficient number of timecodes have been received. 
  *
  * The driver is transparent to each of the modem time services and
  * Spectracom receivers. It selects the parsing algorithm depending on the
