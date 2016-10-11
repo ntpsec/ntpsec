@@ -190,9 +190,9 @@ The service is provided by the National Institute of Information and
 Communications Technology in Japan.
 +
 ATTENTION; This subtype, the telephone JJY, can not be used with the
-refclock_acts driver at the same time. Because the "phone"
+refclock_0modem driver at the same time. Because the "phone"
 statement in the configuration file is not involved with the
-"server" statement, so the both the refclock_acts and this
+"server" statement, so the both the refclock_modem and this
 refclock_jjy ( subtype 100 to 180 ) can not recognize the
 appropriate "phone" statement among the "phone" statements.
 +

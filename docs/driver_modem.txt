@@ -3,9 +3,9 @@
 == Synopsis ==
 
 ["verse",subs="normal"]
-Name: acts
+Name: modem
 Reference ID: NIST | USNO | PTB | GPS
-xSerial Port: /dev/acts__u__; 9600 8N1
+xSerial Port: /dev/modem__u__; 9600 8N1
 Features: tty_clk
 Requires: a dial-out device.
 
@@ -165,7 +165,7 @@ with the Hayes connection and hang-up commands and result codes.
 == Configuration Example ==
 
 ----------------------------------------------------------------------------
-refclock acts
+refclock modem
 ----------------------------------------------------------------------------
 
 == Author ==

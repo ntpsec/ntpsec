@@ -1,5 +1,5 @@
 /*
- * refclock_acts - clock driver for the NIST/USNO/PTB/NPL Computer Time
+ * refclock_modem - clock driver for the NIST/USNO/PTB/NPL Computer Time
  *	Services
  */
 #include "config.h"
@@ -125,11 +125,11 @@
 /*
  * Interface definitions
  */
-#define	DEVICE		"/dev/acts%d" /* device name and unit */
+#define	DEVICE		"/dev/modem%d" /* device name and unit */
 #define	SPEED232	B19200	/* uart speed (19200 bps) */
 #define	PRECISION	(-10)	/* precision assumed (about 1 ms) */
 #define LOCKFILE	"/var/spool/lock/LCK..cua%d"
-#define NAME		"ACTS"	/* shortname */
+#define NAME		"MODEM"	/* shortname */
 #define DESCRIPTION	"Automated Computer Time Service" /* WRU */
 #define REFID		"NONE"	/* default reference ID */
 #define MSGCNT		20	/* max message count */
@@ -196,7 +196,7 @@ typedef enum {
 /*
  * Unit control structure
  */
-struct actsunit {
+struct modemunit {
 	int	unit;		/* unit number */
 	int	state;		/* the first one was Delaware */
 	int	timer;		/* timeout counter */
@@ -210,50 +210,50 @@ struct actsunit {
 /*
  * Function prototypes
  */
-static	bool	acts_start	(int, struct peer *);
-static	void	acts_shutdown	(int, struct peer *);
-static	void	acts_receive	(struct recvbuf *);
-static	void	acts_message	(struct peer *, const char *);
-static	void	acts_timecode	(struct peer *, const char *);
-static	void	acts_poll	(int, struct peer *);
-static	void	acts_timeout	(struct peer *, teModemState);
-static	void	acts_timer	(int, struct peer *);
-static	void	acts_close	(struct peer *);
+static	bool	modem_start	(int, struct peer *);
+static	void	modem_shutdown	(int, struct peer *);
+static	void	modem_receive	(struct recvbuf *);
+static	void	modem_message	(struct peer *, const char *);
+static	void	modem_timecode	(struct peer *, const char *);
+static	void	modem_poll	(int, struct peer *);
+static	void	modem_timeout	(struct peer *, teModemState);
+static	void	modem_timer	(int, struct peer *);
+static	void	modem_close	(struct peer *);
 
 /*
  * Transfer vector (conditional structure name)
  */
-struct refclock refclock_acts = {
+struct refclock refclock_modem = {
 	NAME,			/* basename of driver */
-	acts_start,		/* start up driver */
-	acts_shutdown,		/* shut down driver */
-	acts_poll,		/* transmit poll message */
+	modem_start,		/* start up driver */
+	modem_shutdown,		/* shut down driver */
+	modem_poll,		/* transmit poll message */
 	noentry,		/* control - not used */
 	noentry,		/* init - not used */
-	acts_timer		/* housekeeping timer */
+	modem_timer		/* housekeeping timer */
 };
 
 /*
  * Initialize data for processing
  */
 static bool
-acts_start(
+modem_start(
 	int	unit,
 	struct peer *peer
 	)
 {
-	struct actsunit *up;
+	struct modemunit *up;
 	struct refclockproc *pp;
 	const char *setup;
 
 	/*
 	 * Allocate and initialize unit structure
 	 */
-	up = emalloc_zero(sizeof(struct actsunit));
+	up = emalloc_zero(sizeof(struct modemunit));
 	up->unit = unit;
 	pp = peer->procptr;
 	pp->unitptr = up;
-	pp->io.clock_recv = acts_receive;
+	pp->io.clock_recv = modem_receive;
 	pp->io.srcclock = peer;
 	pp->io.datalen = 0;
 	pp->io.fd = -1;
@@ -278,15 +278,15 @@ acts_start(
 
 
 /*
- * acts_shutdown - shut down the clock
+ * modem_shutdown - shut down the clock
  */
 static void
-acts_shutdown(
+modem_shutdown(
 	int	unit,
 	struct peer *peer
 	)
 {
-	struct actsunit *up;
+	struct modemunit *up;
 	struct refclockproc *pp;
 
 	UNUSED_ARG(unit);
@@ -296,20 +296,20 @@ acts_shutdown(
 	 */
 	pp = peer->procptr;
 	up = pp->unitptr;
-	acts_close(peer);
+	modem_close(peer);
 	free(up);
 }
 
 
 /*
- * acts_receive - receive data from the serial interface
+ * modem_receive - receive data from the serial interface
  */
 static void
-acts_receive(
+modem_receive(
 	struct recvbuf *rbufp
 	)
 {
-	struct actsunit *up;
+	struct modemunit *up;
 	struct refclockproc *pp;
 	struct peer *peer;
 	char	tbuf[sizeof(up->buf)];
@@ -336,14 +336,14 @@ acts_receive(
 			} else {
 				*up->bufptr = '\0';
 				up->bufptr = up->buf;
-				acts_message(peer, up->buf);
+				modem_message(peer, up->buf);
 			}
 		} else if (!iscntrl((unsigned char)*tptr)) {
 			*up->bufptr++ = *tptr;
 			if (*tptr == '*' || *tptr == '#') {
 				up->tstamp = pp->lastrec;
 				if (write(pp->io.fd, tptr, 1) < 0)
-					msyslog(LOG_ERR, "acts: write echo fails %m");
+					msyslog(LOG_ERR, "modem: write echo fails %m");
 			}
 		}
 	}
@@ -351,20 +351,20 @@ acts_receive(
 
 
 /*
- * acts_message - process message
+ * modem_message - process message
  */
 void
-acts_message(
+modem_message(
 	struct peer *peer,
 	const char *msg
 	)
 {
-	struct actsunit *up;
+	struct modemunit *up;
 	struct refclockproc *pp;
 	char	tbuf[BMAX], *cp;
 	int		dtr = TIOCM_DTR;
 
-	DPRINTF(1, ("acts: %d %s\n", (int)strlen(msg), msg));
+	DPRINTF(1, ("modem: %d %s\n", (int)strlen(msg), msg));
 
 	/*
 	 * What to do depends on the state and the first token in the
@@ -405,10 +405,10 @@ acts_message(
 		mprintf_event(PEVNT_CLOCK, peer, "DIAL #%d %s",
 			      up->retry, sys_phone[up->retry]);
 		if (ioctl(pp->io.fd, TIOCMBIS, &dtr) < 0)
-			msyslog(LOG_ERR, "acts: ioctl(TIOCMBIS) failed: %m");
+			msyslog(LOG_ERR, "modem: ioctl(TIOCMBIS) failed: %m");
 		if (write(pp->io.fd, sys_phone[up->retry],
 		    strlen(sys_phone[up->retry])) < 0)
-			msyslog(LOG_ERR, "acts: write DIAL fails %m");
+			msyslog(LOG_ERR, "modem: write DIAL fails %m");
 		IGNORE(write(pp->io.fd, "\r", 1));
 		up->retry++;
 		up->state = S_CONNECT;
@@ -439,9 +439,9 @@ acts_message(
 		if (strcmp(tbuf, "NO") == 0)
 			report_event(PEVNT_CLOCK, peer, msg);
 		if (up->msgcnt < MAXCODE)
-			acts_timecode(peer, msg);
+			modem_timecode(peer, msg);
 		else
-			acts_timeout(peer, S_MSG);
+			modem_timeout(peer, S_MSG);
 		return;
 	}
 
@@ -449,20 +449,20 @@ acts_message(
 	 * Other response. Tell us about it.
 	 */
 	report_event(PEVNT_CLOCK, peer, msg);
-	acts_close(peer);
+	modem_close(peer);
 }
 
 
 /*
- * acts_timeout - called on timeout
+ * modem_timeout - called on timeout
  */
 static void
-acts_timeout(
+modem_timeout(
 	struct peer *peer,
 	teModemState	dstate
 	)
 {
-	struct actsunit *up;
+	struct modemunit *up;
 	struct refclockproc *pp;
 	int	fd;
 	int	rc;
@@ -496,13 +496,13 @@ acts_timeout(
 			fd = open(lockfile, O_WRONLY | O_CREAT | O_EXCL,
 			    0644);
 			if (fd < 0) {
-				report_event(PEVNT_CLOCK, peer, "acts: port busy");
+				report_event(PEVNT_CLOCK, peer, "modem: port busy");
 				return;
 			}
 			snprintf(pidbuf, sizeof(pidbuf), "%d\n",
 			    (u_int)getpid());
 			if (write(fd, pidbuf, strlen(pidbuf)) < 0)
-				msyslog(LOG_ERR, "acts: write lock fails %m");
+				msyslog(LOG_ERR, "modem: write lock fails %m");
 			close(fd);
 		}
 
@@ -514,12 +514,12 @@ acts_timeout(
 				   peer->baud ? peer->baud : SPEED232,
 				   LDISC_ACTS | LDISC_RAW | LDISC_REMOTE);
 		if (fd < 0) {
-			msyslog(LOG_ERR, "acts: open fails %m");
+			msyslog(LOG_ERR, "modem: open fails %m");
 			return;
 		}
 		pp->io.fd = fd;
 		if (!io_addclock(&pp->io)) {
-			msyslog(LOG_ERR, "acts: addclock fails");
+			msyslog(LOG_ERR, "modem: addclock fails");
 			close(fd);
 			pp->io.fd = -1;
 			return;
@@ -533,7 +533,7 @@ acts_timeout(
 		 */
 		if (sys_phone[up->retry] == NULL) {
 			if (write(pp->io.fd, "T", 1) < 0)
-				msyslog(LOG_ERR, "acts: write T fails %m");
+				msyslog(LOG_ERR, "modem: write T fails %m");
 			up->state = S_MSG;
 			up->timer = TIMECODE;
 			return;
@@ -547,7 +547,7 @@ acts_timeout(
 			      modem_setup);
 		rc = write(pp->io.fd, modem_setup, strlen(modem_setup));
 		if (rc < 0)
-			msyslog(LOG_ERR, "acts: write SETUP fails %m");
+			msyslog(LOG_ERR, "modem: write SETUP fails %m");
 		IGNORE(write(pp->io.fd, "\r", 1));
 		up->state = S_SETUP;
 		up->timer = SETUP;
@@ -582,23 +582,23 @@ acts_timeout(
 		}
 		break;
 	}
-	acts_close(peer);
+	modem_close(peer);
 }
 
 
 /*
- * acts_close - close and prepare for next call.
+ * modem_close - close and prepare for next call.
  *
  * In ClOSE state no further protocol actions are required
  * other than to close and release the device and prepare to
  * dial the next number if necessary.
  */
 void
-acts_close(
+modem_close(
 	struct peer *peer
 	)
 {
-	struct actsunit *up;
+	struct modemunit *up;
 	struct refclockproc *pp;
 	char	lockfile[128];
 	int	dtr;
@@ -609,7 +609,7 @@ acts_close(
 		report_event(PEVNT_CLOCK, peer, "close");
 		dtr = TIOCM_DTR;
 		if (ioctl(pp->io.fd, TIOCMBIC, &dtr) < 0)
-			msyslog(LOG_ERR, "acts: ioctl(TIOCMBIC) failed: %m");
+			msyslog(LOG_ERR, "modem: ioctl(TIOCMBIC) failed: %m");
 		io_closeclock(&pp->io);
 		pp->io.fd = -1;
 	}
@@ -631,15 +631,15 @@ acts_close(
 
 
 /*
- * acts_poll - called by the transmit routine
+ * modem_poll - called by the transmit routine
  */
 static void
-acts_poll(
+modem_poll(
 	int	unit,
 	struct peer *peer
 	)
 {
-	struct actsunit *up;
+	struct modemunit *up;
 	struct refclockproc *pp;
 
 	UNUSED_ARG(unit);
@@ -681,21 +681,21 @@ acts_poll(
 	pp->polls++;
 	if (S_IDLE == up->state) {
 		up->retry = 0;
-		acts_timeout(peer, S_IDLE);
+		modem_timeout(peer, S_IDLE);
 	}
 }
 
 
 /*
- * acts_timer - called at one-second intervals
+ * modem_timer - called at one-second intervals
  */
 static void
-acts_timer(
+modem_timer(
 	int	unit,
 	struct peer *peer
 	)
 {
-	struct actsunit *up;
+	struct modemunit *up;
 	struct refclockproc *pp;
 
 	UNUSED_ARG(unit);
@@ -711,25 +711,25 @@ acts_timer(
 	if (up->timer == 0) {
 		if (pp->sloppyclockflag & CLK_FLAG1) {
 			pp->sloppyclockflag &= ~CLK_FLAG1;
-			acts_timeout(peer, S_IDLE);
+			modem_timeout(peer, S_IDLE);
 		}
 	} else {
 		up->timer--;
 		if (up->timer == 0)
-			acts_timeout(peer, up->state);
+			modem_timeout(peer, up->state);
 	}
 }
 
 /*
- * acts_timecode - identify the service and parse the timecode message
+ * modem_timecode - identify the service and parse the timecode message
  */
 void
-acts_timecode(
+modem_timecode(
 	struct peer *	peer,	/* peer structure pointer */
 	const char *	str	/* timecode string */
 	)
 {
-	struct actsunit *up;
+	struct modemunit *up;
 	struct refclockproc *pp;
 	int	day;		/* day of the month */
 	int	month;		/* month of the year */
