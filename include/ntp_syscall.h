@@ -39,7 +39,7 @@ int ntp_gettime(struct ntptimeval *);
 #define ntp_error_in_seconds(n)	((n)/1.0e6)
 # endif
 
-
+extern int ntp_adjtime_ns(struct timex *);
 
 /* MUSL port shim */
 #if !defined(HAVE_NTP_ADJTIME) && defined(HAVE_ADJTIMEX)
