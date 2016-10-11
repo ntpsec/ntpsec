@@ -98,6 +98,9 @@ def cmd_configure(ctx, config):
         if ctx.options.disable_manpage:
                 ctx.env.DISABLE_MANPAGE = True
 
+	ctx.env.SBINDIR = ctx.options.sbindir
+	ctx.env.MANDIR = ctx.options.mandir
+
         from os.path import exists
         from waflib.Utils import subprocess
         if exists(".git") and ctx.find_program("git", var="BIN_GIT", mandatory=False):
