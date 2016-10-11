@@ -39,10 +39,10 @@
  * and delay code, if necessary. The calling program is enabled
  * when (a) option flag1 is set by ntpq, (b) at each poll interval
  * when no other synchronization sources are present, and (c) at each
- * poll interval whether or not other synchronization sources are 
+ * poll interval whether or not other synchronization sources are
  * present. The calling program disconnects if (a) the called party
  * is busy or does not answer, (b) the called party disconnects
- * before a sufficient number of timecodes have been received. 
+ * before a sufficient number of timecodes have been received.
  *
  * The driver is transparent to each of the modem time services and
  * Spectracom receivers. It selects the parsing algorithm depending on the
@@ -61,7 +61,7 @@
  * time1	offset adjustment (s)
  *
  * Ordinarily, the serial port is connected to a modem and the phones
- * list is defined. If no phones list is defined, the port can be 
+ * list is defined. If no phones list is defined, the port can be
  * connected directly to a device or another computer. In this case the
  * driver will send a single character 'T' at each poll event. If
  * option flag2 is enabled, port locking allows the modem to be shared
@@ -172,7 +172,7 @@
  * Y1	enable long-space disconnect
  */
 const char def_modem_setup[] = "ATB1&C0&D2E0L1M1Q0V1Y1";
-const char *modem_setup = def_modem_setup; 
+const char *modem_setup = def_modem_setup;
 
 /*
  * Timeouts (all in seconds)
@@ -766,7 +766,7 @@ modem_timecode(
 	 * itself. Be sure a timecode has been received.
 	 */
 	case 1:
-		if (*str == '*' && up->msgcnt > 0) 
+		if (*str == '*' && up->msgcnt > 0)
 			break;
 
 		return;
@@ -821,7 +821,7 @@ modem_timecode(
 		break;
 
 	/*
-	 * PTB/NPL format: "yyyy-mm-dd hh:mm:ss MEZ" 
+	 * PTB/NPL format: "yyyy-mm-dd hh:mm:ss MEZ"
 	 */
 	case LENPTB:
 		if (sscanf(str,
