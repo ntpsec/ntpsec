@@ -46,10 +46,6 @@ def build(ctx):
 		"ymd2yd.c",
 	]
 
-	source_libntpsim = [
-		"systime_s.c"
-	]
-
 	libntp_source_systime = [
 		"systime.c"
 	]
