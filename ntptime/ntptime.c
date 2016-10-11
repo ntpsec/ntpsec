@@ -46,6 +46,7 @@
 		TVUTOTSF((tv)->tv_usec, (ts)->l_uf); \
 	} while (false)
 
+#define NS_PER_MS_FLOAT	1000.0
 
 /* MUSL port shim */
 #ifndef HAVE_NTP_GETTIME
@@ -367,7 +368,7 @@ main(
 		printf(json ? jfmt6 : ofmt6);
 #endif /* NTP_API */
 	}
-	status = ntp_adjtime(&ntx);
+	status = ntp_adjtime_ns(&ntx);
 	if (status < 0) {
 		perror((errno == EPERM) ? 
 		   "Must be root to set kernel values\nntp_adjtime() call fails" :
@@ -399,11 +400,7 @@ main(
 		printf(json ? jfmt7 : ofmt7, status, timex_state(status));
 		printf(json ? jfmt8 : ofmt8,
 		       snprintb(sizeof(binbuf), binbuf, ntx.modes, TIMEX_MOD_BITS));
-		ftemp = (double)ntx.offset;
-#ifdef STA_NANO
-		if (flash & STA_NANO)
-			ftemp /= 1000.0;
-#endif
+		ftemp = (double)ntx.offset/NS_PER_MS_FLOAT;
 		printf(json ? jfmt9 : ofmt9, ftemp);
 		ftemp = (double)ntx.freq / SCALE_FREQ;
 		printf(json ? jfmt10 : ofmt10, ftemp, 1 << ntx.shift);
@@ -413,21 +410,20 @@ main(
 		       snprintb(sizeof(binbuf), binbuf,
 			       (u_int)ntx.status, TIMEX_STA_BITS));
 		ftemp = (double)ntx.tolerance / SCALE_FREQ;
+		/*
+		 * Before the introduction of ntp_adjtime_ns() the
+		 * ntptime code divided this by 1000 when the STA_NANO
+		 * flash bit was on.  This doesn't match the Linux
+		 * documentation; might have been an error, or
+		 * possibly some other systems behave differently.
+		 */
 		gtemp = (double)ntx.precision;
-#ifdef STA_NANO
-		if (flash & STA_NANO)
-			gtemp /= 1000.0;
-#endif
 		printf(json ? jfmt13 : ofmt13,
 			(u_long)ntx.constant, gtemp, ftemp);
 		if (ntx.shift != 0) {
 			ftemp = (double)ntx.ppsfreq / SCALE_FREQ;
 			gtemp = (double)ntx.stabil / SCALE_FREQ;
-			htemp = (double)ntx.jitter;
-#ifdef STA_NANO
-			if (flash & STA_NANO)
-				htemp /= 1000.0;
-#endif
+			htemp = (double)ntx.jitter/NS_PER_MS_FLOAT;
 			printf(json ? jfmt14 : ofmt14,
 			    ftemp, gtemp, htemp);
 			printf(json ? jfmt15 : ofmt15,
