@@ -50,9 +50,9 @@ You can view POSIX-1.2001, with 2004 Corrigendum, online for free here:
 
 POSIX threads *are* considered part of the standardized API and may be used.
 
-Here are the non-standardized AIs that may be used:
+Here are the non-standardized APIs that may be used:
 
-* Eother ntp_adjtime() or the older BSD adjtime(2).
+* Either ntp_adjtime() or the older BSD adjtime(2).
 
 * Berkeley sockets and the IPv6 API defined in RFC2493 and RFC2553.
 
