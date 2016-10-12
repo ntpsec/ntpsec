@@ -14,6 +14,7 @@
 #ifdef HAVE_SYS_TIMEX_H
 # include <sys/time.h>	/* prerequisite on NetBSD */
 # include <sys/timex.h>
+extern int ntp_adjtime_ns(struct timex *);
 #endif
 
 #ifndef HAVE_STRUCT_NTPTIMEVAL
@@ -38,8 +39,6 @@ int ntp_gettime(struct ntptimeval *);
 # else
 #define ntp_error_in_seconds(n)	((n)/1.0e6)
 # endif
-
-extern int ntp_adjtime_ns(struct timex *);
 
 /* MUSL port shim */
 #if !defined(HAVE_NTP_ADJTIME) && defined(HAVE_ADJTIMEX)
