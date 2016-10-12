@@ -59,6 +59,7 @@ int clock_gettime(clockid_t clk_id, struct timespec *tp)
 }
 #endif /* HAVE_CLOCK_GETTIME */
 
+#ifdef HAVE_SYS_TIMEX_H
 /*
  * ntp_adjtime at nanosecond precision.  Hiding the units difference
  * here helps prevent loss-of-precision bugs elsewhere.  We
@@ -104,6 +105,7 @@ int ntp_adjtime_ns(struct timex *ntx)
     }
     return errval;
 }
+#endif /* HAVE_SYS_TIMEX_H */
 
 #if !defined(HAVE_NTP_GETTIME) && defined(HAVE_NTP_ADJTIME)
 int ntp_gettime(struct ntptimeval *ntv)
