@@ -12,6 +12,7 @@
 #include <config.h>
 
 #include "ntp_types.h"
+#include "ntp_syscall.h"
 
 #include <stdio.h>
 #include <unistd.h>
