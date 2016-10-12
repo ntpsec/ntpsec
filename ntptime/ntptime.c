@@ -299,7 +299,7 @@ main(
 #ifdef SIGSYS
 	if (sigsetjmp(env, 1) == 0) {
 #endif
-		status = ntp_adjtime(&_ntx);
+		status = ntp_adjtime_ns(&_ntx);
 		if ((status < 0) && (errno == ENOSYS))
 			--pll_control;
 		flash = _ntx.status;

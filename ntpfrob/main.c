@@ -21,20 +21,10 @@ main(int argc, char **argv)
 	while ((ch = getopt(argc, argv, "a:Ab:cejp:r")) != EOF) {
 		switch (ch) {
 		case 'A':
-#ifdef HAVE_ADJTIMEX
 		    tickadj(mode==json, 0);
-#else
-		    fputs("ntpfrob: no adjtimex(2) call.\n", stderr);
-		    exit(0);
-#endif
 		    break;
 		case 'a':
-#ifdef HAVE_ADJTIMEX
 		    tickadj(mode, atoi(optarg));
-#else
-		    fputs("ntpfrob: no adjtimex(2) call.\n", stderr);
-		    exit(0);
-#endif
 		    break;
 		case 'b':
 		    bumpclock(atoi(optarg));

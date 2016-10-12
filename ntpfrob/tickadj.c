@@ -1,6 +1,6 @@
 /*
  * tickadj - read, and possibly modify, the kernel `tick' and
- *	     `tickadj' variables', using adjtimex(2).  This is
+ *	     `tickadj' variables', using ntp_adjtime(2).  This is
  *	     included only for compatibility with old scripts.
  *	     Its former support for unsafe /dev/kmem operations
  *	     has been removed.
@@ -45,19 +45,19 @@ void tickadj(const bool json, const int newtick)
 			fprintf(stderr, "ntpfrob: silly value for tick: %d\n", newtick);
 			exit(1);
 		}
-#ifdef ADJ_TIMETICK
-		txc.modes = ADJ_TIMETICK;
+#ifdef MOD_TIMETICK
+		txc.modes = MOD_TIMETICK;
 #else
 #ifdef STRUCT_TIMEX_HAS_MODES
 		txc.modes = ADJ_TICK;
 #else
 		txc.mode = ADJ_TICK;
 #endif /* STRUCT_TIMEX_HAS_MODES */
-#endif /* ADJ_TIMETICK */
+#endif /* MOD_TIMETICK */
 	}
 	else
 	{
-#ifdef ADJ_TIMETICK
+#ifdef MOD_TIMETICK
 		txc.modes = 0;
 #else
 #ifdef STRUCT_TIMEX_HAS_MODES
@@ -65,12 +65,12 @@ void tickadj(const bool json, const int newtick)
 #else
 		txc.mode = 0;
 #endif /* STRUCT_TIMEX_HAS_MODES */
-#endif /* ADJ_TIMETICK */
+#endif /* MOD_TIMETICK */
 	}
 
-	if (adjtimex(&txc) < 0)
+	if (ntp_adjtime(&txc) < 0)
 	{
-		perror("adjtimex");
+		perror("ntp_adjtime");
 	}
 	else
 	{
