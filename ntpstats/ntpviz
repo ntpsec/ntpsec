@@ -5,6 +5,7 @@ ntpviz - logfile visualizer for NTP log files
 
 Usage: ntpviz [-d statsdir] [-g] [-n name] [-p days]
               [-s starttime]  [-e endtime]
+              [ -c | --clip ]
               [--local-offset | --local-error | --local-jitter
                 | --local-stability | --local-offset-histogram
                 | --peer-offsets=hosts | --all-peer-offsets
@@ -300,10 +301,22 @@ set rmargin 12
         unit_f = stats_f.unit
         multiplier_f = stats_f.multiplier
 
+        if args.clip:
+            min_y = stats.one
+            max_y = stats.ninetynine
+            min_y2 = stats_f.one
+            max_y2 = stats_f.ninetynine
+            clipped = " (clipped)"
+        else:
+            min_y = max_y = min_y2 = max_y2 = '*'
+            clipped = ""
+
         plot_template = NTPViz.Common + """\
-set title "%(sitename)s: Local Clock Time/Frequency Offsets"
+set title "%(sitename)s: Local Clock Time/Frequency Offsets%(clipped)s"
 set ytics format "%%1.1f %(unit)s" nomirror textcolor rgb '#0060ad'
+set yrange [%(min_y)s:%(max_y)s]
 set y2tics format "%%2.1f %(unit_f)s" nomirror textcolor rgb '#dd181f'
+set y2range [%(min_y2)s:%(max_y2)s]
 set key bottom right box
 set style line 1 lc rgb '#0060ad' lt 1 lw 1 pt 7 ps 0   # --- blue
 set style line 2 lc rgb '#dd181f' lt 1 lw 1 pt 5 ps 0   # --- red
@@ -443,9 +456,18 @@ gpsd log file is created by the gps-log.py program.</p>
         five        = stats.five
         one         = stats.one
 
+        if args.clip:
+            min_y = stats.one
+            max_y = stats.ninetynine
+            clipped = " (clipped)"
+        else:
+            min_y = max_y = '*'
+            clipped = ""
+
         plot_template = NTPViz.Common + """\
-set title "%(sitename)s: Local Clock Frequency Offset"
+set title "%(sitename)s: Local Clock Frequency Offset%(clipped)s"
 set ytics format "%%1.1f %(unit)s" nomirror
+set yrange [%(min_y)s:%(max_y)s]
 set key bottom right box
 set style line 1 lc rgb '#0060ad' lt 1 lw 1 pt 7 ps 0   # --- blue
 set style line 2 lc rgb '#dd181f' lt 1 lw 1 pt 5 ps 0   # --- red
@@ -492,6 +514,14 @@ line at 0ppm.  Expected values of 99%-1% percentiles: 0.4ppm</p>
         five        = stats.five
         one         = stats.one
 
+        min_y = '0'
+        if args.clip:
+            max_y = stats.ninetynine
+            clipped = " (clipped)"
+        else:
+            max_y = '*'
+            clipped = ""
+
         if freq:
             exp = """\
 <p>This shows the RMS Frequency Jitter (aka wander) of the local
@@ -513,10 +543,10 @@ how fast the local clock offset is changing.</p>
 <p>RMS jitter is field 5 in the loopstats log file.</p>
 """
 
-
         plot_template = NTPViz.Common + """\
-set title "%(sitename)s: %(title)s"
+set title "%(sitename)s: %(title)s%(clipped)s"
 set ytics format "%%1.1f %(unit)s" nomirror
+set yrange [%(min_y)s:%(max_y)s]
 set key top right box
 set style line 1 lc rgb '#0060ad' lt 1 lw 1 pt 7 ps 0   # --- blue
 set style line 2 lc rgb '#dd181f' lt 1 lw 1 pt 5 ps 0   # --- red
@@ -700,10 +730,19 @@ at 0s.</p>
             # too many keys to show
             set_key = "set key off"
 
+        if args.clip:
+            min_y = stats.one
+            max_y = stats.ninetynine
+            clipped = " (clipped)"
+        else:
+            min_y = max_y = '*'
+            clipped = ""
+
         plot_template = NTPViz.Common + """\
-set title "%(sitename)s: %(title)s"
+set title "%(sitename)s: %(title)s%(clipped)s"
 set ylabel ""
 set ytics format "%%1.1f %(unit)s" nomirror
+set yrange [%(min_y)s:%(max_y)s]
 %(set_key)s
 plot \
 """ % locals()
@@ -772,13 +811,22 @@ plot \
         m1sigma = stats.mu - stats.pstd
         p1sigma = stats.mu + stats.pstd
 
+        if args.clip:
+            min_x = stats.one
+            max_x = stats.ninetynine
+            clipped = " (clipped)"
+        else:
+            min_x = max_y = '*'
+            clipped = ""
+
         plot_template = '''\
 set terminal png size 900,600
 set grid
 set boxwidth %(boxwidth)s
 set xtic rotate by -45 scale 0
-set title "%(sitename)s: Local Clock Time Offset Histogram"
+set title "%(sitename)s: Local Clock Time Offset Histogram%(clipped)s"
 set xtics format "%%1.1f %(unit)s" nomirror
+set xrange [%(min_x)s:%(max_x)s]
 set style arrow 1 nohead
 set arrow from %(m1sigma)s,graph 0 to %(m1sigma)s,graph 0.90 as 1
 set style arrow 2 nohead
@@ -916,21 +964,26 @@ Python by ESR, concept and GNUPLOT code by Dan Drown.
 """)
     group = parser.add_mutually_exclusive_group()
 
-    parser.add_argument('-g', '--generate',
-                default=False,
+    parser.add_argument('-c', '--clip',
                 action="store_true",
-                dest='generate',
-                help="Run plot through gnuplot to make png")
+                default = None,
+                dest='clip',
+                help="Clip plots at 1% and 99%")
+    parser.add_argument('-d', '--datadir',
+                default = "/var/log/ntpstats",
+                dest='statsdirs',
+                help="one or more logfile directories to read",
+                type=str)
     parser.add_argument('-e', '--endtime',
                 default=None,
                 dest='endtime',
                 help="End time in POSIX (seconds) or ISO8601",
                 type=str)
-    parser.add_argument('-s', '--starttime',
-                default=None,
-                dest='starttime',
-                help="Start time in POSIX (seconds) or ISO8601",
-                type=str)
+    parser.add_argument('-g', '--generate',
+                action="store_true",
+                default=False,
+                dest='generate',
+                help="Run plot through gnuplot to make png")
     parser.add_argument('-n', '--name',
                 default=socket.getfqdn(),
                 dest='sitename',
@@ -941,16 +994,16 @@ Python by ESR, concept and GNUPLOT code by Dan Drown.
                 dest='outdir',
                 help="output directory",
                 type=str)
-    parser.add_argument('-d', '--datadir',
-                default = "/var/log/ntpstats",
-                dest='statsdirs',
-                help="one or more logfile directories to read",
-                type=str)
     parser.add_argument('-p', '--period',
                 default = 7,    # default to 7 days
                 dest='period',
                 help="period in days to graph (float)",
                 type=float)
+    parser.add_argument('-s', '--starttime',
+                default=None,
+                dest='starttime',
+                help="Start time in POSIX (seconds) or ISO8601",
+                type=str)
     group.add_argument( '--all-peer-jitters',
                 default = False,
                 action="store_true",
@@ -1221,9 +1274,15 @@ dd {
         index_header += '<b>Start Time:</b> %s UTC<br>\n' \
                         '<b>End Time:</b> %s UTC<br>\n' \
                  % (start_time, end_time)
-        index_header += '<b>Report Period:</b> %1.1f days <br></div>\n' \
+        index_header += '<b>Report Period:</b> %1.1f days <br>\n' \
                  % (float(stats.period) / float(NTPStats.SecondsInDay))
-    index_header += '<div style="clear:both;"></div>'
+
+    if args.clip:
+        index_header += """\
+<span style="color:red;font-weight:bold;">Warning: plots clipped</span><br>
+"""
+
+    index_header += '</div>\n<div style="clear:both;"></div>'
 
     index_trailer = '''\
 <h2>Glossary:</h2>
@@ -1360,7 +1419,13 @@ ntpviz</a>, part of the <a href="https://www.ntpsec.org/">NTPsec project</a>
             if not image:
                 continue
             stats.append( image['stats'] )
-            index_buffer += "<div>\n<h2>%s:</h2>\n" % image['title']
+            # give each H2 an unique ID.
+            id = image['title'].lower()
+            id = id.replace(' ', '_').replace(':', '_')
+            index_buffer += """\
+<div>\n<h2 id="%s">%s:</h2>
+""" % (id, image['title'])
+
             div_name = imagename.replace('-', ' ')
             index_buffer += imagewrapper % \
                              (imagename.replace(':', '%3A'), div_name)

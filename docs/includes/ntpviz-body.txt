@@ -7,6 +7,7 @@
 [verse]
 {ntpviz} [-d statsdir] [-g] [-n name] [-p period]
          [-s starttime] [-e endtime]
+         [ -c | --clip ]
          [--local-offset |
           --local-error |
           --local-jitter |
@@ -33,27 +34,42 @@ mode it generates an HTML directory containing an index page and
 either (a) all plots, for a single statfiles directory, or (b) a
 subset of comparative plots for multiple directories.
 
-The most basic option is -d, which specifies one or more logfile
-directories to examine; the default is a single directory,
-/var/log/ntpstats.
+=== Basic Options ===
 
-The -n option allows you to set the sitename shown in the plot title,
-and is effective only for the single-directory case. The default is
-the basename of the log directory.
+-d DIRECTORY or --datadir DIRECTORY::
+    Specifies one or more logfile directories to examine; the default is
+    the single directory /var/log/ntpstats.
 
-The -s, -e and -p options allow you to set the time window to be
-reported on. With -s and -e you set the start and end times as either
-numeric POSIX time or ISO8601-style timestamps, -
-yyyy-mmm-ddThh:mm:ss. Alternatively you can specify either -s or -e
-(but not both) and use -p to set the default period in days.  The
-default is for the period to be 7 days, the end time to match the last
-logfile entry, and the start time to be set so that adding the period
-just reaches the last logfile entry.  The argument with -p may be a
-floating point number.
+-n STR or --name STR::
+    Set the sitename shown in the plot title, and is effective only for the
+    single-directory case. The default is the basename of the log directory.
 
-The -D N set the debug level to N and outputs with more verbosity.  0
-is the default, quiet except for all ERRORs and some WARNINGs.  9 is
-painfully verbose.
+-p DAYS or --period DAYS::
+-s TIME or --starttime TIME::
+-e TIME or --endtime TIME::
+    With -s and -e you set the start and end times.  TIME is either numeric
+    POSIX time (sconds since the start of the epoch) or ISO8601-style
+    timestamps (yyyy-mmm-ddThh:mm:ss).
+
+    Alternatively you can specify either -s or -e (but not both) and use
+    -p to set the plot period in days.  DAYS can be a floating point
+    number, so "-p 0.5" plots 12 hours.
+
+    The default DAYS is for the period of 7 days, and the end time to match
+    the last logfile entry.  The start time is computed as end TIME minus
+    DAYS.
+
+-c or --clip::
+    Normally all the data is plotted.  This option limits the range of
+    the plots to the data between 1% and 99%.  This is useful for
+    ignoring a few spikes in the data.
+
+-D N or --debug N::
+    set the debug level to N and output with more verbosity.  0
+    is the default, quiet except for all ERRORs and some WARNINGs.  9 is
+    painfully verbose. 9 also includes profile data.
+
+=== Individual Plots ===
 
 The plot options choose what graph is generated; invoke only one.  By
 default, the GNUPLOT for the graph is reported; with -g you get the
