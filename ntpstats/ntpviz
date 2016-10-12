@@ -816,7 +816,7 @@ plot \
             max_x = stats.ninetynine
             clipped = " (clipped)"
         else:
-            min_x = max_y = '*'
+            min_x = max_x = '*'
             clipped = ""
 
         plot_template = '''\
