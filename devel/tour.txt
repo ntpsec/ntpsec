@@ -172,7 +172,7 @@ some systems, including Linux) adjtimex(2), or the older BSD
 adjtime(2) call.
 
 The clock_gettime(2) and clock_settime(2) calls are standardized in
-POSIX; ntp_adjtime(3) and adjtimex(2) are not, exhibiting some
+POSIX; ntp_adjtime(2) and adjtimex(2) are not, exhibiting some
 variability in behavior across platforms.  Where adjtimex(2) exists
 (notably under Linux), ntp_adjtime(2) is implemented as a thin
 userspace wrapper around it.
@@ -219,24 +219,17 @@ applications might notice. The slewing variations in clock speed are so
 small that they're generally invisible even to soft-realtime
 applications.
 
-The calls ntp_adjtime(2) and adjtimex(2) are for clock slewing. Both
-use a kernel interface to do this. Both use a control technique called
-a PLL/FLL (phase-locked loop/frequency-locked loop) to do it. The
-difference is that adjtimex(2) adjusts a PLL/FLL implemented in the
-kernel, whereas ntp_adjtime(2) implements clock skewing for a PLL
-running in userspace (in ntpd itself). The KERNEL_PLL code can produce
-much faster convergence from a cold start.
+The call ntp_adjtime(2) is for clock slewing; NTPsec never calls
+adjtimex(2) directly, but it may be used to implement
+ntp_adjtime(2). ntp_adjtime(2)/adjtimex(2) uses a kernel interface to
+do its work, using a control technique called a PLL/FLL (phase-locked
+loop/frequency-locked loop) to do it.
 
-(Confusingly, ntp_adjtime(2) can be implemented - and often is - as
-a thin userspace wrapper around adjtimex(2).  The ntp_adjtime(2)
-implementation uses only a subset of adjtimex(2)'s capabilities.)
-
-The older BSD adjtime(2) is used for slewing as well, but doesn't
+The older BSD adjtime(2) can be used for slewing as well, but doesn't
 assume a kernel-level PLL is available.  Some platforms, like OpenBSD
-and Mac OS X, use only this call because they lack
-ntp_adjtime(2)/adjtimex(2).  Without the PLL calls, convergence to
-good time is observably a lot slower and tracking will accordingly be
-less reliable.
+and Mac OS X, use only this call because they lack ntp_adjtime(2).
+Without the PLL calls, convergence to good time is observably a lot
+slower and tracking will accordingly be less reliable.
 
 Deep-in-the weeds details about the kernel PLL from Hal Murray follow.
 If you can follow these you may be qualified to maintain this code...

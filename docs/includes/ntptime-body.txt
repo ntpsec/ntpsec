@@ -19,10 +19,9 @@ distribution for further details.
 A similar display can be obtained using the +{ntpq}+ program
 and +kerninfo+ command.
 
-//FIXME: Is this all modern Unix kernels?  Probably.
-This program is useful only with special kernels described in the
-link:kern.html[A Kernel Model for Precision Timekeeping]
-page, featuring the adjtimex(2) system call or local equivalent. 
+This program is useful only with kernels featuring the ntp_adjtime(2)
+system call or local equivalent, as described in the link:kern.html[A
+Kernel Model for Precision Timekeeping] page,
 
 == Options ==
 
