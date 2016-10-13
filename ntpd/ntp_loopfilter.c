@@ -667,10 +667,8 @@ local_clock(
 		 * differences.
 		 */
 		etemp = SQUARE(clock_jitter);
-		dtemp = SQUARE(max(fabs(fp_offset - last_offset),
-		    LOGTOD(sys_precision)));
-		clock_jitter = SQRT(etemp + (dtemp - etemp) /
-		    CLOCK_AVG);
+		dtemp = SQUARE(fp_offset - last_offset);
+		clock_jitter = SQRT(etemp + (dtemp - etemp) / CLOCK_AVG);
 		switch (state) {
 
 		/*
