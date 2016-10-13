@@ -811,10 +811,22 @@ plot \
         m1sigma = stats.mu - stats.pstd
         p1sigma = stats.mu + stats.pstd
 
+        sigma = """\
+set style arrow 1 nohead
+set arrow from %(m1sigma)s,graph 0 to %(m1sigma)s,graph 0.90 as 1
+set style arrow 2 nohead
+set arrow from %(p1sigma)s,graph 0 to %(p1sigma)s,graph 0.90 as 2
+set label 1 "-1σ" at %(m1sigma)s, graph 0.96  left front offset -1,-1
+set label 2 "+1σ" at %(p1sigma)s, graph 0.96  left front offset -1,-1
+""" % locals()
+
         if args.clip:
             min_x = stats.one
             max_x = stats.ninetynine
             clipped = " (clipped)"
+            if p1sigma > ninetynine or m1sigma < one:
+                # sigma out of range, do not plot
+                sigma = ''
         else:
             min_x = max_x = '*'
             clipped = ""
@@ -827,10 +839,6 @@ set xtic rotate by -45 scale 0
 set title "%(sitename)s: Local Clock Time Offset Histogram%(clipped)s"
 set xtics format "%%1.1f %(unit)s" nomirror
 set xrange [%(min_x)s:%(max_x)s]
-set style arrow 1 nohead
-set arrow from %(m1sigma)s,graph 0 to %(m1sigma)s,graph 0.90 as 1
-set style arrow 2 nohead
-set arrow from %(p1sigma)s,graph 0 to %(p1sigma)s,graph 0.90 as 2
 set style arrow 3 nohead
 set arrow from %(ninetynine)s,graph 0 to %(ninetynine)s,graph 0.30 as 3
 set style arrow 4 nohead
@@ -843,12 +851,11 @@ set key off
 set lmargin 12
 set rmargin 12
 set style fill solid 0.5
-set label 1 "-1σ" at %(m1sigma)s, graph 0.96  left front offset -1,-1
-set label 2 "+1σ" at %(p1sigma)s, graph 0.96  left front offset -1,-1
 set label 3 "99%%" at %(ninetynine)s, graph 0.35  left front offset -1,-1
 set label 4 "95%%" at %(ninetyfive)s, graph 0.50  left front offset -1,-1
 set label 5 "1%%" at %(one)s, graph 0.35  left front offset -1,-1
 set label 6 "5%%" at %(five)s, graph 0.50  left front offset -1,-1
+%(sigma)s
 plot \
  "-" using ($1 * %(multiplier)s):2 title "histogram" with boxes
 ''' % locals()
