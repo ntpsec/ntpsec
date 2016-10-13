@@ -126,10 +126,16 @@ Mean, Units
         self.percs = self.percentiles( (100, 99, 95, 50, 5, 1, 0), values)
 
         # find the target for autoranging
-        # keep 99% and 5% under 999 in selected units
-        # but do not let 100% and 1% go over 5000 in selected units
-        target = max(self.percs[99], -self.percs[1], self.percs[100]/5,
-                     -self.percs[0]/5)
+        if args.clip:
+            # keep 99% and 1% under 999 in selected units
+            # clip to 1% and 99%
+            target = max(self.percs[99], -self.percs[1])
+        else:
+            # keep 99% and 1% under 999 in selected units
+            # but do not let 100% and 1% go over 5000 in selected units
+            target = max(self.percs[99], -self.percs[1], self.percs[100]/5,
+                         -self.percs[0]/5)
+
         if 1 <= target:
             self.multiplier = 1
             if freq:
