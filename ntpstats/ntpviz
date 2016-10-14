@@ -72,21 +72,9 @@ class VizStats(NTPStats):
     title       = ''          # title
     unit        = 's'         # display units: s, ppm, etc.
     multiplier  = 1
-    pmax        = 0     # 100%, can't use max, reserved word
-    ninetynine  = 0     #  99%
-    ninetyfive  = 0     #  90%
-    fifty       = 0     #  50%
-    five        = 0     #  5%
-    one         = 0     #  1%
-    pmin        = 0     #  0%, can't use min, reserved word
 
-    nf_m_f      = 0     # 95% - 5%
-    nn_m_o      = 0     # 99% - 1%
-
-    mu          = 0     # arithmetic mean
-    pstd        = 0     # population standard distribution, one sigma
     csv_head =  """\
-Name, Min, 1%, 5%, 50%, 95%, 99%, Max, 90% Range, 98% Range, StdDev, \
+Name, Min, 1%, 5%, 50%, 95%, 99%, Max,, 90% Range, 98% Range, StdDev,, \
 Mean, Units
 """
 
@@ -95,25 +83,17 @@ Mean, Units
 <thead>
   <tr style="font-weight:bold;text-align:left;">
     <td ></td>
-    <td colspan=7>  Percentiles......</td>
-    <td colspan=2>  Ranges......</td>
+    <td colspan=8> Percentiles......</td>
+    <td colspan=3> Ranges......</td>
     <td colspan=2></td>
     <td ></td>
   </tr>
-  <tr style="font-weight:bold;">
-    <td style="text-align:left;border-bottom:solid black;">Name</td>
-    <td style="border-bottom:solid black;">Min</td>
-    <td style="border-bottom:solid black;">1%</td>
-    <td style="border-bottom:solid black;">5%</td>
-    <td style="border-bottom:solid black;">50%</td>
-    <td style="border-bottom:solid black;">95%</td>
-    <td style="border-bottom:solid black;">99%</td>
-    <td style="border-bottom:solid black;">Max</td>
-    <td style="border-bottom:solid black;">90%</td>
-    <td style="border-bottom:solid black;">95%</td>
-    <td style="border-bottom:solid black;">StdDev</td>
-    <td style="border-bottom:solid black;">Mean</td>
-    <td style="border-bottom:solid black;">Units</td>
+  <tr style="font-weight:bold;text-align:right;">
+    <td style="text-align:left;">Name</td>
+    <td>Min</td><td>1%</td><td>5%</td><td>50%</td><td>95%</td>
+    <td>99%</td><td>Max</td> <td style="width:10px;">&nbsp;</td>
+    <td>90%</td><td>95%</td><td>StdDev</td>
+    <td style="width:10px;">&nbsp;</td><td>Mean</td><td>Units</td>
   </tr>
 </thead>
 """
@@ -129,12 +109,12 @@ Mean, Units
         if args.clip:
             # keep 99% and 1% under 999 in selected units
             # clip to 1% and 99%
-            target = max(self.percs[99], -self.percs[1])
+            target = max(self.percs["p99"], -self.percs["p1"])
         else:
             # keep 99% and 1% under 999 in selected units
             # but do not let 100% and 1% go over 5000 in selected units
-            target = max(self.percs[99], -self.percs[1], self.percs[100]/5,
-                         -self.percs[0]/5)
+            target = max(self.percs["p99"], -self.percs["p1"],
+                         self.percs["p100"]/5, -self.percs["p0"]/5)
 
         if 1 <= target:
             self.multiplier = 1
@@ -170,54 +150,83 @@ Mean, Units
                 # go to nanosec
                 self.unit = "ns"
 
+        self.percs["mu"]      = mean( values )
+        self.percs["pstd"]    = pstdev( values, mu=self.percs["mu"] )
+
+        # range the data
         self.percs.update({k: v * self.multiplier
                      for k, v in list(self.percs.items())})
 
         self.title       = title
-        self.pmax        = self.percs[100]
-        self.ninetynine  = self.percs[99]
-        self.ninetyfive  = self.percs[95]
-        self.fifty       = self.percs[50]
-        self.five        = self.percs[5]
-        self.one         = self.percs[1]
-        self.pmin        = self.percs[0]
 
-        self.nf_m_f     = self.ninetyfive - self.five
-        self.nn_m_o     = self.ninetynine - self.one
+        # calculate ranges
+        self.percs["r90"] = self.percs["p95"] - self.percs["p5"]
+        self.percs["r98"] = self.percs["p99"] - self.percs["p1"]
 
-        self.mu = mean( values )
-        self.pstd = pstdev( values, mu=self.mu ) * self.multiplier
-        self.mu *= self.multiplier
+        # calculate mean +/- std dev
+        self.percs["m1sigma"] = self.percs["mu"] - self.percs["pstd"]
+        self.percs["p1sigma"] = self.percs["mu"] + self.percs["pstd"]
+
+        # pretty print the values
+        self.percs_f = {}
+        for k, v in self.percs.items():
+            self.percs[k]   = round(v,3)
+            self.percs_f[k] = format(v,",.3f")
+
+        # Python is stupid about nested objects, so add in some other stuff
+        self.percs_f["multiplier"] = self.percs["multiplier"] = self.multiplier
+        self.percs_f["title"]      = self.percs["title"]      = self.title
+        self.percs_f["unit"]       = self.percs["unit"]       = self.unit
+
+        if args.clip:
+            self.percs["min_y"] = self.percs["p1"]
+            self.percs["max_y"] = self.percs["p99"]
+            self.percs["clipped"] = " (clipped)"
+        else:
+            self.percs["min_y"] = self.percs["max_y"] = '*'
+            self.percs["clipped"] = ""
+
         self.stats_html =  ''
         if '' != title:
             self.stats_html =  "<h4>%(title)s</h4>\n" % locals()
-        self.stats_html +=  """\
-<p style="margin-left:20px;"><b>Percentiles</b>:
- Min: %(pmin).3f, &nbsp;
- 1%%: %(one).3f, &nbsp;
- 5%%: %(five).3f, &nbsp;
- 50%%: %(fifty).3f, &nbsp;
- 95%%: %(ninetyfive).3f, &nbsp;
- 99%%: %(ninetynine).3f, &nbsp;
- Max: %(pmax).3f &nbsp;
- %(unit)s<br>
-<b>Ranges:</b>
- 90%% (95%% - 5%%) = %(nf_m_f).3f, &nbsp;
- 98%% (99%% - 1%%) = %(nn_m_o).3f %(unit)s<br>
-<b>Deviation:</b>
- 1σ = %(pstd).3f, &nbsp;
- Mean = %(mu).3f %(unit)s</p>
-""" % self.__dict__
 
-        self.csv =  """\
-%(title)s, %(pmin).3f, %(one).3f, %(five).3f, %(fifty).3f, %(ninetyfive).3f, \
-%(ninetynine).3f, %(pmax).3f, %(nf_m_f).3f, %(nn_m_o).3f, %(pstd).3f, \
-%(mu).3f, %(unit)s
-""" % self.__dict__
+        self.stats_html +=  """\
+<table style="margin-left:20px;border-spacing: 10px 0;">
+  <tr style="text-align:left;font-weight:bold;">
+    <td colspan=8> Percentiles......</td>
+    <td colspan=3> Ranges......</td>
+    <td colspan=2></td>
+    <td ></td>
+  </tr>
+  <tr style="font-weight:bold;font-weight:bold;text-align:right;">
+    <td style="min-width:55px;">Min</td><td style="min-width:55px;">1%%</td>
+    <td style="min-width:55px;">5%%</td><td style="min-width:55px;">50%%</td>
+    <td style="min-width:55px;">95%%</td><td style="min-width:55px;">99%%</td>
+    <td style="min-width:55px;">Max</td><td>&nbsp;</td>
+    <td style="min-width:55px;">90%%</td><td style="min-width:55px;">95%%</td>
+    <td style="min-width:55px;">StdDev</td>
+    <td>&nbsp;</td><td style="min-width:55px;">Mean</td><td>Units</td>
+  </tr>
+  <tr style="text-align:right;">
+    <td>%(p0)s</td><td>%(p1)s</td><td>%(p5)s</td><td>%(p50)s</td>
+    <td>%(p95)s</td><td>%(p95)s</td><td>%(p100)s</td><td>&nbsp;</td>
+    <td>%(r90)s</td><td>%(r98)s</td><td>%(pstd)s</td><td>&nbsp;</td>
+    <td>%(mu)s</td><td>%(unit)s</td>
+  </tr>
+</table>
+""" % self.percs_f
+
+        s =  """\
+%(title)s, %(p0)s, %(p1)s, %(p5)s, %(p50)s, %(p95)s, %(p99)s, %(p100)s, , \
+ %(r90)s, %(r98)s, %(pstd)s, , %(mu)s, %(unit)s
+"""
+
+        self.csv   =  s % self.percs    # no commas in the csv
+        self.table =  s % self.percs_f
 
         self.table = '<tr style="vertical-align:top;">' + \
                      '<td style="text-align:left;">' + \
-                            self.csv.replace( ", ", "</td><td>") + \
+                            self.table.replace( ", ", "</td><td>") + \
                            "</td></tr>\n"
 
         return
@@ -293,29 +302,21 @@ set rmargin 12
         if not len( self.loopstats):
             sys.stderr.write("ntpviz: WARNING: no loopstats to graph\n")
             return ''
-        sitename = self.sitename
 
         # compute clock offset
         values = [float(line.split()[1]) for line in self.loopstats]
         stats = VizStats( values, "Local Clock Time Offset")
-        unit = stats.unit
-        multiplier = stats.multiplier
 
         # compute frequency offset
         values_f = [float(line.split()[2]) for line in self.loopstats]
         stats_f = VizStats(values_f, "Local Clock Frequency Offset", freq=1)
-        unit_f = stats_f.unit
-        multiplier_f = stats_f.multiplier
 
-        if args.clip:
-            min_y = stats.one
-            max_y = stats.ninetynine
-            min_y2 = stats_f.one
-            max_y2 = stats_f.ninetynine
-            clipped = " (clipped)"
-        else:
-            min_y = max_y = min_y2 = max_y2 = '*'
-            clipped = ""
+        out = stats.percs
+        out["min_y2"] = stats_f.percs["min_y"]
+        out["max_y2"] = stats_f.percs["max_y"]
+        out["unit_f"] = stats_f.percs["unit"]
+        out["multiplier_f"] = stats_f.percs["multiplier"]
+        out["sitename"] = self.sitename
 
         plot_template = NTPViz.Common + """\
 set title "%(sitename)s: Local Clock Time/Frequency Offsets%(clipped)s"
@@ -329,7 +330,7 @@ set style line 2 lc rgb '#dd181f' lt 1 lw 1 pt 5 ps 0   # --- red
 plot \
  "-" using 1:($2*%(multiplier)s) title "clock offset %(unit)s" with linespoints ls 1, \
  "-" using 1:($3*%(multiplier_f)s) title "frequency offset %(unit_f)s" with linespoints ls 2 axis x1y2
-""" % locals()
+""" % out
 
         exp = """\
 <p>The time and frequency offsets between the ntpd calculated time
@@ -417,7 +418,7 @@ component of frequency drift.</p>
 
         plot_template = NTPViz.Common + """\
 set title "%(sitename)s: Local GPS
-set ytics format "%%1.3f tdop" nomirror textcolor rgb '#0060ad'
+set ytics format "%%1.1f tdop" nomirror textcolor rgb '#0060ad'
 set y2tics format "%%2.0f nSat"  nomirror textcolor rgb '#dd181f'
 set style line 1 lc rgb '#0060ad' lt 1 lw 1 pt 7 ps 0   # --- blue
 set style line 2 lc rgb '#dd181f' lt 1 lw 1 pt 5 ps 0   # --- red
@@ -426,8 +427,8 @@ plot \\
 
         for key in gpslist:
             plot_template += """\
-'-' using 1:3 title '%(key)s tdop' with line, \\
-'-' using 1:4 title '%(key)s nSat' with line axis x1y2, \\
+'-' using 1:3 title '%(key)s tdop' with line ls 1, \\
+'-' using 1:4 title '%(key)s nSat' with line ls 2 axis x1y2, \\
 """ % locals()
 
         # strip the trailing ", \\n"
@@ -448,27 +449,17 @@ gpsd log file is created by the gps-log.py program.</p>
         if not len( self.loopstats):
             sys.stderr.write("ntpviz: WARNING: no loopstats to graph\n")
             return ''
-        sitename = self.sitename
+
         # grab and sort the values, no need for the timestamp, etc.
 
         # compute freqency offset
         values = [float(line.split()[2]) for line in self.loopstats]
         stats = VizStats( values, "Local Clock Frequency Offset", freq=1, )
-        unit = stats.unit
-        multiplier = stats.multiplier
 
-        ninetynine  = stats.ninetynine
-        ninetyfive  = stats.ninetyfive
-        five        = stats.five
-        one         = stats.one
-
-        if args.clip:
-            min_y = stats.one
-            max_y = stats.ninetynine
-            clipped = " (clipped)"
-        else:
-            min_y = max_y = '*'
-            clipped = ""
+        # build the output dictionary, because Python can not format
+        # complex objects.
+        out = stats.percs
+        out["sitename"] = self.sitename
 
         plot_template = NTPViz.Common + """\
 set title "%(sitename)s: Local Clock Frequency Offset%(clipped)s"
@@ -479,11 +470,11 @@ set style line 1 lc rgb '#0060ad' lt 1 lw 1 pt 7 ps 0   # --- blue
 set style line 2 lc rgb '#dd181f' lt 1 lw 1 pt 5 ps 0   # --- red
 plot \
  "-" using 1:($3 * %(multiplier)s) title "local clock error" with linespoints ls 2, \
- %(ninetynine)s title "99th percentile", \
- %(ninetyfive)s title "95th percentile", \
- %(five)s title "5th percentile", \
- %(one)s title "1st percentile"
-""" % locals()
+ %(p99)s title "99th percentile", \
+ %(p95)s title "95th percentile", \
+ %(p5)s title "5th percentile", \
+ %(p1)s title "1st percentile"
+""" % out
 
         exp = """\
 <p>This shows the frequency offset of the local clock (aka drift).  The
@@ -508,25 +499,18 @@ line at 0ppm.  Expected values of 99%-1% percentiles: 0.4ppm</p>
             sys.stderr.write("ntpviz: WARNING: no loopstats to graph\n")
             return ''
 
-        sitename   = self.sitename
         # grab and process the values
         values = [float(line.split()[fld - 1]) for line in self.loopstats]
         stats = VizStats( values, title, freq=freq )
-        unit = stats.unit
-        multiplier = stats.multiplier
 
-        ninetynine  = stats.ninetynine
-        ninetyfive  = stats.ninetyfive
-        five        = stats.five
-        one         = stats.one
+        # build the output dictionary, because Python can not format
+        # complex objects.
+        out = stats.percs
+        out["sitename"] = self.sitename
+        out["fld"]      = fld
+        out["legend"]   = legend
 
-        min_y = '0'
-        if args.clip:
-            max_y = stats.ninetynine
-            clipped = " (clipped)"
-        else:
-            max_y = '*'
-            clipped = ""
+        out["min_y"] = '0'
 
         if freq:
             exp = """\
@@ -558,11 +542,11 @@ set style line 1 lc rgb '#0060ad' lt 1 lw 1 pt 7 ps 0   # --- blue
 set style line 2 lc rgb '#dd181f' lt 1 lw 1 pt 5 ps 0   # --- red
 plot \
  "-" using 1:($%(fld)d*%(multiplier)s) title "%(legend)s" with linespoints ls 1, \
- %(ninetynine)s title "99th percentile", \
- %(ninetyfive)s title "95th percentile", \
- %(five)s title "5th percentile", \
- %(one)s title "1st percentile"
-""" % locals()
+ %(p99)s title "99th percentile", \
+ %(p95)s title "95th percentile", \
+ %(p5)s title "5th percentile", \
+ %(p1)s title "1st percentile"
+""" % out
 
         ret = {'html' : stats.stats_html + exp, 'stats' : [stats],
                'title' : title }
@@ -580,7 +564,7 @@ plot \
 
     def peerstats_gnuplot(self, peerlist, fld, title, type):
         "Plot a specified field from peerstats."
-        sitename = self.sitename
+
         peerdict = self.peersplit()
         if not peerlist:
             peerlist = list(peerdict.keys())
@@ -609,8 +593,6 @@ plot \
         # remove trailing "e\n"
         plot_data = plot_data[:-2]
 
-        unit = "μs"
-        multiplier = 1e6
         rtt = 0
         percentages = ""
         stats = []
@@ -621,17 +603,9 @@ plot \
             values = [float(line.split()[fld - 1]) for line in peerdict[ip]]
 
             stats = VizStats( values, title)
-            unit        = stats.unit
-            multiplier  = stats.multiplier
 
-            ninetynine  = stats.ninetynine
-            ninetyfive  = stats.ninetyfive
-            fifty       = stats.fifty
-            five        = stats.five
-            one         = stats.one
-
-            percentages = " %(fifty)s title '50th percentile', " \
-                           % locals()
+            percentages = " %(p50)s title '50th percentile', " \
+                           % stats.percs
 
             exp = stats.stats_html
 
@@ -651,7 +625,7 @@ at 0s. Typical 90%% ranges may be: local serial GPS 200 ms; local PPS
 20µs</p>
 
 <p>Clock Offset is field 5 in the peerstats log file.</p>
-""" %  locals()
+""" % stats.percs
                 else:
                     title = "Peer Offset " + str(peerlist[0])
                     exp += """\
@@ -704,8 +678,6 @@ at 0s.</p>
             values = [float(line.split()[fld - 1]) for line in self.peerstats]
 
             stats = VizStats( values, title )
-            unit        = stats.unit
-            multiplier  = stats.multiplier
 
             exp = stats.stats_html
             if "offset" == type:
@@ -716,7 +688,7 @@ at 0s.</p>
 a single clock or all clocks together.</p>
 
 <p>Clock Offset is field 5 in the peerstats log file.</p>
-""" % locals()
+""" % stats.percs
             else:
                 title = "Peer Jitters"
                 exp += """\
@@ -730,19 +702,14 @@ at 0s.</p>
 <p>RMS Jitter is field 8 in the peerstats log file.</p>
 """
 
+        out = stats.percs
+        out['sitename'] = self.sitename
+
         if 6 >= len(peerlist):
-            set_key = "set key top right box"
+            out['set_key'] = "set key top right box"
         else:
             # too many keys to show
-            set_key = "set key off"
-
-        if args.clip:
-            min_y = stats.one
-            max_y = stats.ninetynine
-            clipped = " (clipped)"
-        else:
-            min_y = max_y = '*'
-            clipped = ""
+            out['set_key'] = "set key off"
 
         plot_template = NTPViz.Common + """\
 set title "%(sitename)s: %(title)s%(clipped)s"
@@ -751,18 +718,20 @@ set ytics format "%%1.1f %(unit)s" nomirror
 set yrange [%(min_y)s:%(max_y)s]
 %(set_key)s
 plot \
-""" % locals()
+""" % out
+
         plot_template += percentages
+        out['fld'] = fld
         for key in peerlist:
-            label = self.ip_label(key)
+            out['label'] = self.ip_label(key)
             plot_template += "'-' using 1:($%(fld)s*%(multiplier)s) title '%(label)s' with line, \\\n" \
-                 % locals()
+                 % out
 
         if 1 == rtt:
             plot_template += """\
 '-' using 1:(($4+$5/2)*%(multiplier)s) title 'offset+rtt/2' with line, \\
 '-' using 1:(($4-$5/2)*%(multiplier)s) title 'offset-rtt/2' with line
-""" % locals()
+""" % stats.percs
             plot_template += plot_data + "\ne\n" + plot_data + "\ne\n"
         else:
             # strip the trailing ", \n"
@@ -783,29 +752,26 @@ plot \
         if not len( self.loopstats):
             sys.stderr.write("ntpviz: WARNING: no loopstats to graph\n")
             return ''
-        sitename = self.sitename
 
-        # TODO normalize to 0 to 100
+        # TODO normalize to 0 to 100?
 
         # grab and sort the values, no need for the timestamp, etc.
         values = [float(line.split()[1]) for line in self.loopstats]
         stats = VizStats( values, 'Local Clock Offset' )
-        unit        = stats.unit
-        multiplier  = stats.multiplier
-
-        ninetynine  = stats.ninetynine
-        ninetyfive  = stats.ninetyfive
-        fifty       = stats.fifty
-        five        = stats.five
-        one         = stats.one
+        out = stats.percs
+        out['sitename'] = self.sitename
+        # flip the axis
+        out['min_x']    = out['min_y']
+        out['max_x']    = out['max_y']
 
         # fixme, should piggy back on unit
         rnd1 = 7        # round to 100 ns boxes
-        boxwidth = 1e-7
-        if 1e-6 > stats.percs[99] and -1e-6 < stats.percs[1]:
+        out['boxwidth'] = 1e-7
+
+        if 1e-6 > stats.percs["p99"] and -1e-6 < stats.percs["p1"]:
             # go to nanosec
             rnd1 = 9        # round to 1 ns boxes
-            boxwidth = 1e-9
+            out['boxwidth'] = 1e-9
 
         cnt = collections.Counter()
         for value in values:
@@ -813,29 +779,25 @@ plot \
             # for a +/- 50 microSec range that is 1,000 buckets to plot
             cnt[ round( float(value), rnd1)] += 1
 
-        # plus/minus of one sigma range
-        m1sigma = stats.mu - stats.pstd
-        p1sigma = stats.mu + stats.pstd
+        sigma = True
+        if args.clip:
+            if stats.percs['p1sigma'] > stats.percs['p99'] or \
+               stats.percs['m1sigma'] < stats.percs['p1']:
+                # sigma out of range, do not plot
+                sigma = ''
 
-        sigma = """\
+        out['sigma'] = ''
+        if sigma:
+            # plus/minus of one sigma range
+            out['sigma'] = """\
 set style arrow 1 nohead
 set arrow from %(m1sigma)s,graph 0 to %(m1sigma)s,graph 0.90 as 1
 set style arrow 2 nohead
 set arrow from %(p1sigma)s,graph 0 to %(p1sigma)s,graph 0.90 as 2
 set label 1 "-1σ" at %(m1sigma)s, graph 0.96  left front offset -1,-1
 set label 2 "+1σ" at %(p1sigma)s, graph 0.96  left front offset -1,-1
-""" % locals()
+""" % out
 
-        if args.clip:
-            min_x = stats.one
-            max_x = stats.ninetynine
-            clipped = " (clipped)"
-            if p1sigma > ninetynine or m1sigma < one:
-                # sigma out of range, do not plot
-                sigma = ''
-        else:
-            min_x = max_x = '*'
-            clipped = ""
 
         plot_template = '''\
 set terminal png size 900,600
@@ -846,25 +808,26 @@ set title "%(sitename)s: Local Clock Time Offset Histogram%(clipped)s"
 set xtics format "%%1.1f %(unit)s" nomirror
 set xrange [%(min_x)s:%(max_x)s]
 set style arrow 3 nohead
-set arrow from %(ninetynine)s,graph 0 to %(ninetynine)s,graph 0.30 as 3
+set arrow from %(p99)s,graph 0 to %(p99)s,graph 0.30 as 3
 set style arrow 4 nohead
-set arrow from %(ninetyfive)s,graph 0 to %(ninetyfive)s,graph 0.45 as 4
+set arrow from %(p95)s,graph 0 to %(p95)s,graph 0.45 as 4
 set style arrow 5 nohead
-set arrow from %(five)s,graph 0 to %(five)s,graph 0.45 as 5
+set arrow from %(p5)s,graph 0 to %(p5)s,graph 0.45 as 5
 set style arrow 6 nohead
-set arrow from %(one)s,graph 0 to %(one)s,graph 0.30 as 6
+set arrow from %(p1)s,graph 0 to %(p1)s,graph 0.30 as 6
 set key off
 set lmargin 12
 set rmargin 12
 set style fill solid 0.5
-set label 3 "99%%" at %(ninetynine)s, graph 0.35  left front offset -1,-1
-set label 4 "95%%" at %(ninetyfive)s, graph 0.50  left front offset -1,-1
-set label 5 "1%%" at %(one)s, graph 0.35  left front offset -1,-1
-set label 6 "5%%" at %(five)s, graph 0.50  left front offset -1,-1
+set label 3 "99%%" at %(p99)s, graph 0.35  left front offset -1,-1
+set label 4 "95%%" at %(p95)s, graph 0.50  left front offset -1,-1
+set label 5 "1%%" at %(p1)s, graph 0.35  left front offset -1,-1
+set label 6 "5%%" at %(p5)s, graph 0.50  left front offset -1,-1
 %(sigma)s
 plot \
  "-" using ($1 * %(multiplier)s):2 title "histogram" with boxes
-''' % locals()
+''' % out
+
         vals = list(cnt.keys())
         vals.sort()
         histogram_data = ["%s %s\n" % (val, cnt[val]) for val in vals]
@@ -873,8 +836,9 @@ plot \
 <p>This shows the clock offsets of the local clock as a histogram.</p>
 
 <p>The Local Clock Offset is field 3 from the loopstats log file.</p>
-""" % locals()
-        ret = {'html' : stats.stats_html + exp, 'stats' : [stats]}
+"""
+        # don't return stats, it's just a dupe
+        ret = {'html' : stats.stats_html + exp, 'stats' : []}
         ret['title'] = "Local Clock Time Offset Histogram"
         ret['plot'] = plot_template + "".join(histogram_data) + "e\n"
         return ret

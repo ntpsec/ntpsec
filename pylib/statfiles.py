@@ -153,9 +153,9 @@ class NTPStats:
         length = len(values)
         for perc in percents:
             if perc == 100:
-                ret[100] = values[length - 1]
+                ret["p100"] = values[length - 1]
             else:
-                ret[perc] = values[int(length * (perc/100))]
+                ret[ "p" + str(perc)] = values[int(length * (perc/100))]
         return ret
 
     def peersplit(self):
