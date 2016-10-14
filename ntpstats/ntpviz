@@ -590,8 +590,6 @@ plot \
             else:
                 sys.stderr.write("ntpviz: ERROR: No such peer as %s" % key)
                 raise SystemExit(1)
-        # remove trailing "e\n"
-        plot_data = plot_data[:-2]
 
         rtt = 0
         percentages = ""
@@ -732,13 +730,13 @@ plot \
 '-' using 1:(($4+$5/2)*%(multiplier)s) title 'offset+rtt/2' with line, \\
 '-' using 1:(($4-$5/2)*%(multiplier)s) title 'offset-rtt/2' with line
 """ % stats.percs
-            plot_template += plot_data + "\ne\n" + plot_data + "\ne\n"
+            plot_template += plot_data + plot_data
         else:
             # strip the trailing ", \n"
             plot_template = plot_template[:-4] + "\n"
 
         ret = {'html' : exp, 'stats' : [stats], 'title' : title }
-        ret['plot'] = plot_template + plot_data + "e\n"
+        ret['plot'] = plot_template + plot_data
         return ret
 
     def peer_offsets_gnuplot(self, peerlist=None):
