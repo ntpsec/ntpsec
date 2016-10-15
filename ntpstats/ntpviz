@@ -186,11 +186,8 @@ Mean, Units
             self.percs["min_y"] = self.percs["max_y"] = '*'
             self.percs["clipped"] = ""
 
-        self.stats_html =  ''
-        if '' != title:
-            self.stats_html =  "<h4>%(title)s</h4>\n" % locals()
-
-        self.stats_html +=  """\
+        self.stats_html =  """\
+<br>
 <table style="margin-left:20px;border-spacing: 10px 0;">
   <tr style="text-align:left;font-weight:bold;">
     <td colspan=8> Percentiles......</td>
@@ -574,6 +571,7 @@ plot \
         peerlist.sort() # For stability of output
         peer_data = ()
         plot_data = ""
+        namelist = []   # peer names
         for key in peerlist:
             # Trickiness - we allow peerlist elements to be DNS names.
             # The socket.gethostbyname() call maps DNS names to IP addresses,
@@ -581,9 +579,12 @@ plot \
             # it barfs on either literal IPv6 addresses or refclock names.
             try:
                 ip = socket.gethostbyname(key)
+                namelist.append(key)
             except:
                 # ignore it
                 ip = key
+                # socket.getfqdn() is also flakey...
+                namelist.append(socket.getfqdn(key))
 
             if ip in peerdict:
                 plot_data += "\n".join(peerdict[ip]) + "\ne\n"
@@ -596,17 +597,6 @@ plot \
         stats = []
         if len(peerlist) == 1:
             # only one peer
-            title += ": "+ peerlist[0]
-            # grab and sort the values, no need for the timestamp, etc.
-            values = [float(line.split()[fld - 1]) for line in peerdict[ip]]
-
-            stats = VizStats( values, title)
-
-            percentages = " %(p50)s title '50th percentile', " \
-                           % stats.percs
-
-            exp = stats.stats_html
-
             if "offset" == type:
                 # doing offset, not jitter
                 rtt = 1
@@ -614,8 +604,8 @@ plot \
                     # don't do rtt for reclocks
                     rtt = 0
                     title = "Refclock Offset " + str(peerlist[0])
-                    exp += """\
-<p>This shows the offset of a local refclock in %(unit)s.  This is
+                    exp = """\
+<p>This shows the offset of a local refclock in seconds.  This is
 useful to see how the measured offset is behaving.</p>
 
 <p>Closer to 0s is better.  An ideal system would be a horizontal line
@@ -623,10 +613,10 @@ at 0s. Typical 90%% ranges may be: local serial GPS 200 ms; local PPS
 20µs</p>
 
 <p>Clock Offset is field 5 in the peerstats log file.</p>
-""" % stats.percs
+"""
                 else:
                     title = "Peer Offset " + str(peerlist[0])
-                    exp += """\
+                    exp = """\
 <p>This shows the offset of a peer or server in seconds.  This is
 useful to see how the measured offset is behaving.</p>
 
@@ -647,7 +637,7 @@ WAN servers may be 4ms and much larger. </p>
                 # doing jitter, not offset
                 if "127.127." == peerlist[0][:8]:
                     title = "Refclock RMS Jitter " + str(peerlist[0])
-                    exp += """\
+                    exp = """\
 <p>This shows the RMS Jitter of a local refclock.  Jitter is the
 current estimated dispersion; the variation in offset between samples.</p>
 
@@ -658,7 +648,7 @@ line at 0s.</p>
 """
                 else:
                     title = "Peer Jitter " + str(peerlist[0])
-                    exp += """\
+                    exp = """\
 <p>This shows the RMS Jitter of a remote peer or server.  Jitter is
 the current estimated dispersion; the variation in offset between
 samples.</p>
@@ -668,6 +658,23 @@ at 0s.</p>
 
 <p>RMS Jitter is field 8 in the peerstats log file.</p>
 """
+
+            # grab and sort the values, no need for the timestamp, etc.
+            values = [float(line.split()[fld - 1]) for line in peerdict[ip]]
+
+            stats = VizStats( values, title)
+
+            if len(namelist[0]) and peerlist[0] != namelist[0]:
+                # append hostname, if we have it
+                # after stats to keep summary short
+                title += " (%s)" % namelist[0]
+
+
+            percentages = " %(p50)s title '50th percentile', " \
+                           % stats.percs
+
+            exp = stats.stats_html + exp
+
 
         else:
             # many peers
@@ -702,6 +709,7 @@ at 0s.</p>
 
         out = stats.percs
         out['sitename'] = self.sitename
+        out['title'] = title
 
         if 6 >= len(peerlist):
             out['set_key'] = "set key top right box"
