@@ -24,8 +24,27 @@ Python by ESR, concept and GNUPLOT code by Dan Drown.
 from __future__ import print_function, division
 
 import argparse
+import re
 import atexit, binascii, collections, os, socket, sys, time
 from ntp.statfiles import *
+
+# overload ArgumentParser
+class MyArgumentParser(argparse.ArgumentParser):
+
+    def convert_arg_line_to_args(self, arg_line):
+        '''Make options file more tolerant'''
+        # strip out trailing comments
+        arg_line = re.sub('\s+#.*$', '', arg_line)
+
+        # ignore blank lines
+        if 0 == len(arg_line):
+            return []
+        # ignore comment lines
+        if '#' == arg_line[0]:
+            return []
+
+        return arg_line.split()
+
 
 def print_profile():
     """called by atexit() on normal exit to print profile data"""
@@ -936,7 +955,7 @@ AADRxQAAxBEAAA==
 
 if __name__ == '__main__':
 
-    parser = argparse.ArgumentParser(description="ntpd stats visualizer",
+    parser = MyArgumentParser(description="ntpd stats visualizer",
                 fromfile_prefix_chars='@',
                 epilog = """
 You can place command line options in a file, one per line.

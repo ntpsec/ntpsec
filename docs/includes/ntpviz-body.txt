@@ -5,8 +5,9 @@
 [[synop]]
 == SYNOPSIS ==
 [verse]
-{ntpviz} [-d statsdir] [-g] [-n name] [-p period]
+{ntpviz} [-d LOGDIR] [-g] [-n name] [-p DAYS]
          [-s starttime] [-e endtime]
+         [-o OUTDIR]
          [ -c | --clip ]
          [--local-offset |
           --local-error |
@@ -21,9 +22,8 @@
           --peer-jitters=hosts |
           --peer-offsets=hosts |
          ]
-         [-o outdir]
          [-D N]
-         [@optionfile]
+         [@OPTIONFILE]
 
 == DESCRIPTION ==
 
@@ -36,9 +36,15 @@ subset of comparative plots for multiple directories.
 
 === Basic Options ===
 
--d DIRECTORY or --datadir DIRECTORY::
+-d LOGDIR or --datadir LOGDIR::
     Specifies one or more logfile directories to examine; the default is
     the single directory /var/log/ntpstats.
+
+-o OUTDIR or --outdir OUTDIR::
+    Set the directory for all output to be OUTDIR.  If OUTDIR does
+    not exist it is created.  The default OUTDIR is 'ntpgraphs'.
+    Warning: existing PNG files and index.html in the output directory
+    will be clobbered.
 
 -n STR or --name STR::
     Set the sitename shown in the plot title, and is effective only for the
@@ -128,10 +134,7 @@ The following plots are available:
    is a fatal error for any of these names not to appear in peerstats.
 
 If no individual plot is specified, all plots and an index HTML page
-are generated into a new output directory.  Normally this directory is
-named 'ntpgraphs', but the name can be changed with the -o option.
-Warning: existing PNG files and index.html in this directory will be
-clobbered.
+are generated into a the output directory.
 
 When an index is generated, ntpviz will look for two files in the
 output directory.  None of the files need be present, and the
@@ -154,21 +157,26 @@ standard error on, for example, missing logfile data required for a plot.
 
 === Argument File ===
 
-All command line options can also be placed into a command file.  The
-command file name is prefixed on the command line with an ampersand (@).
+Any command line options can also be placed into a command file.  The
+command file name (OPTIONFILE) is prefixed on the command line with an
+ampersand (@).
 
-Each line in the command file must contain just one option.  When an
-option takes a parameter, the option and parameter must be separated by
-an equal sign (=).
+Each line in the command file should contain just one option.  Multiple
+options per line are allowed, but discouraged.  Blank lines are allowed.
+
+Comments can be added, and start with an octothorpe (#).
+
+When an option takes a parameter, the option and parameter must be
+separated by an equal sign (=) or a space.
 
 These two ways to invoke ntpviz are equivalent:
 
     $ ntpviz --period 1 --outdir day
 
-    $ ntpviz @day/config
     $ cat day/config
     --period=1
     --outdir=day
+    $ ntpviz @day/config
 
 == REQUIREMENTS ==
 
