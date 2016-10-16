@@ -92,9 +92,10 @@ class VizStats(NTPStats):
     unit        = 's'         # display units: s, ppm, etc.
     multiplier  = 1
 
+    # observe RFC 4180, end lines with CRLF
     csv_head =  """\
-Name, Min, 1%, 5%, 50%, 95%, 99%, Max,, 90% Range, 98% Range, StdDev,, \
-Mean, Units
+Name, Min, 1%, 5%, 50%, 95%, 99%, Max,, 90% Range, 98% Range, StdDev, , \
+Mean, Units\r
 """
 
     table_head =  """\
@@ -234,11 +235,11 @@ Mean, Units
 
         s =  """\
 %(title)s, %(p0)s, %(p1)s, %(p5)s, %(p50)s, %(p95)s, %(p99)s, %(p100)s, , \
- %(r90)s, %(r98)s, %(pstd)s, , %(mu)s, %(unit)s
+ %(r90)s, %(r98)s, %(pstd)s, , %(mu)s, %(unit)s\
 """
 
-        self.csv   =  s % self.percs    # no commas in the csv
-        self.table =  s % self.percs_f
+        self.csv   =  s % self.percs + '\r\n'    # RFC4180 says CRLF
+        self.table =  s % self.percs_f + '\n'
 
         self.table = '<tr style="vertical-align:top;">' + \
                      '<td style="text-align:left;">' + \
