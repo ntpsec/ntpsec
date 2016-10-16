@@ -113,7 +113,7 @@ else:  # Python 3
 
 # NTP-specific parts resume here
 
-# Flags for forming descriptors. (FIXME: may not be needed in Python)
+# Flags for forming descriptors.
 OPT		= 0x80	# this argument is optional, or'd with type */
 NO		= 0x0
 NTP_STR		= 0x1	# string argument
@@ -181,6 +181,10 @@ tstflagnames = (
 	"peer_unreach"		# BOGON13
 )
 
+def collect_display(associd, variables, decodestatus):
+    "Query and display a collection of variables from the system."
+    pass
+
 class ntpq_interpreter(cmd.Cmd):
     "ntpq command interpreter"
 
@@ -200,6 +204,7 @@ class ntpq_interpreter(cmd.Cmd):
         self.ccmds = []			# Queued commands
         self.chosts = []		# Command-line hosts
         self.debug = 0
+        self.pktversion = NTP_VERSION
 
     def emptyline(self):
         "Called when an empty line is entered in response to the prompt."
@@ -715,7 +720,24 @@ usage: cv [ assocID ] [ name=value[,...] ]
 
     def do_pstats(self, line):
         "show statistics for a peer"
-        pass
+        pstats = (
+            ("src",		"remote host:         ", NTP_ADD),
+            ("dst",		"local address:       ", NTP_ADD),
+            ("timerec",		"time last received:  ", NTP_STR),
+            ("timer",		"time until next send:", NTP_STR),
+            ("timereach",	"reachability change: ", NTP_STR),
+            ("sent",		"packets sent:        ", NTP_STR),
+            ("received",	"packets received:    ", NTP_STR),
+            ("badauth",		"bad authentication:  ", NTP_STR),
+            ("bogusorg",	"bogus origin:        ", NTP_STR),
+            ("oldpkt",		"duplicate:           ", NTP_STR),
+            ("seldisp",		"bad dispersion:      ", NTP_STR),
+            ("selbroken",	"bad reference time:  ", NTP_STR),
+            ("candidate",	"candidate order:     ", NTP_STR),
+        )
+        associd=int(line)
+        # FIXME: validate the association ID.
+	collect_display_vdc(associd=associd,variables=pstats,decodestatus=True);
 
     def help_pstats(self):
         sys.stdout.write("""\
@@ -823,9 +845,25 @@ function: show ntpd access control list
 usage: reslist
 """)
 
-    def do_sysinfo(self, line):
+    def do_sysinfo(self, _line):
         "display system summary"
-        pass
+        sysinfo = (
+            ("peeradr",		"system peer:      ", NTP_ADP),
+            ("peermode",	"system peer mode: ", NTP_MODE),
+            ("leap",		"leap indicator:   ", NTP_2BIT),
+            ("stratum",		"stratum:          ", NTP_STR),
+            ("precision",	"log2 precision:   ", NTP_STR),
+            ("rootdelay",	"root delay:       ", NTP_STR),
+            ("rootdisp",	"root dispersion:  ", NTP_STR),
+            ("refid",		"reference ID:     ", NTP_STR),
+            ("reftime",		"reference time:   ", NTP_LFP),
+            ("sys_jitter",	"system jitter:    ", NTP_STR),
+            ("clk_jitter",	"clock jitter:     ", NTP_STR),
+            ("clk_wander",	"clock wander:     ", NTP_STR),
+            ("bcastdelay",	"broadcast delay:  ", NTP_STR),
+            ("authdelay",	"symm. auth. delay:", NTP_STR),
+        )
+        collect_display(associd=0, variables=sysinfo, decodestatus=True)
 
     def help_sysinfo(self):
         sys.stdout.write("""\
@@ -833,9 +871,27 @@ function: display system summary
 usage: sysinfo
 """)
 
-    def do_kerninfo(self, line):
+    def do_kerninfo(self, _line):
         "display kernel loop and PPS statistics"
-        pass
+        kerninfo = (
+            ("koffset",		"pll offset:          ", NTP_STR),
+            ("kfreq",		"pll frequency:       ", NTP_STR),
+            ("kmaxerr",		"maximum error:       ", NTP_STR),
+            ("kesterr",		"estimated error:     ", NTP_STR),
+            ("kstflags",	"kernel status:       ", NTP_STR),
+            ("ktimeconst",	"pll time constant:   ", NTP_STR),
+            ("kprecis",		"precision:           ", NTP_STR),
+            ("kfreqtol",	"frequency tolerance: ", NTP_STR),
+            ("kppsfreq",	"pps frequency:       ", NTP_STR),
+            ("kppsstab",	"pps stability:       ", NTP_STR),
+            ("kppsjitter",	"pps jitter:          ", NTP_STR),
+            ("kppscalibdur",	"calibration interval ", NTP_STR),
+            ("kppscalibs",	"calibration cycles:  ", NTP_STR),
+            ("kppsjitexc",	"jitter exceeded:     ", NTP_STR),
+            ("kppsstbexc",	"stability exceeded:  ", NTP_STR),
+            ("kppscaliberrs",	"calibration errors:  ", NTP_STR),
+        )
+        collect_display(associd=0, variables=kerninfo, decodestatus=True)
 
     def help_kerninfo(self):
         sys.stdout.write("""\
@@ -843,9 +899,23 @@ function: display kernel loop and PPS statistics
 usage: kerninfo
 """)
 
-    def do_sysstats(self, line):
+    def do_sysstats(self, _line):
         "display system uptime and packet counts"
-        pass
+        sysstats = (
+            ("ss_uptime",	"uptime:               ", NTP_STR),
+            ("ss_reset",	"sysstats reset:       ", NTP_STR),
+            ("ss_received",	"packets received:     ", NTP_STR),
+            ("ss_thisver",	"current version:      ", NTP_STR),
+            ("ss_oldver",	"older version:        ", NTP_STR),
+            ("ss_badformat",	"bad length or format: ", NTP_STR),
+            ("ss_badauth",	"authentication failed:", NTP_STR),
+            ("ss_declined",	"declined:             ", NTP_STR),
+            ("ss_restricted",	"restricted:           ", NTP_STR),
+            ("ss_limited",	"rate limited:         ", NTP_STR),
+            ("ss_kodsent",	"KoD responses:        ", NTP_STR),
+            ("ss_processed",	"processed for time:   ", NTP_STR),
+        )
+        collect_display(associd=0, variables=sysstats, decodestatus=False)
 
     def help_sysstats(self):
         sys.stdout.write("""\
@@ -853,9 +923,19 @@ function: display system uptime and packet counts
 usage: sysstats
 """)
 
-    def do_monstats(self, line):
+    def do_monstats(self, _line):
         "display monitor (mrulist) counters and limits"
-        pass
+        monstats = (
+            ("mru_enabled",	"enabled:            ", NTP_STR),
+            ("mru_depth",	"addresses:          ", NTP_STR),
+            ("mru_deepest",	"peak addresses:     ", NTP_STR),
+            ("mru_maxdepth",	"maximum addresses:  ", NTP_STR),
+            ("mru_mindepth",	"reclaim above count:", NTP_STR),
+            ("mru_maxage",	"reclaim older than: ", NTP_STR),
+            ("mru_mem",		"kilobytes:          ", NTP_STR),
+            ("mru_maxmem",	"maximum kilobytes:  ", NTP_STR),
+        )
+	collect_display(associd=0, variables=monstats, decodestatus=False)
 
     def help_monstats(self):
         sys.stdout.write("""\
@@ -863,9 +943,20 @@ function: display monitor (mrulist) counters and limits
 usage: monstats
 """)
 
-    def do_authinfo(self, line):
+    def do_authinfo(self, _line):
         "display symmetric authentication counters"
-        pass
+        authinfo = (
+            ("authreset",	"time since reset:", NTP_STR),
+            ("authkeys",	"stored keys:     ", NTP_STR),
+            ("authfreek",	"free keys:       ", NTP_STR),
+            ("authklookups",	"key lookups:     ", NTP_STR),
+            ("authknotfound",	"keys not found:  ", NTP_STR),
+            ("authkuncached",	"uncached keys:   ", NTP_STR),
+            ("authkexpired",	"expired keys:    ", NTP_STR),
+            ("authencrypts",	"encryptions:     ", NTP_STR),
+            ("authdecrypts",	"decryptions:     ", NTP_STR),
+        )
+        collect_display(associd=0, variables=authinfo, decodestatus=False)
 
     def help_authinfo(self):
         sys.stdout.write("""\
@@ -873,9 +964,23 @@ function: display symmetric authentication counters
 usage: authinfo
 """)
 
-    def do_iostats(self, line):
+    def do_iostats(self, _line):
         "display network input and output counters"
-        pass
+        iostats = (
+            ("iostats_reset",	"time since reset:     ", NTP_STR),
+            ("total_rbuf",	"receive buffers:      ", NTP_STR),
+            ("free_rbuf",	"free receive buffers: ", NTP_STR),
+            ("used_rbuf",	"used receive buffers: ", NTP_STR),
+            ("rbuf_lowater",	"low water refills:    ", NTP_STR),
+            ("io_dropped",	"dropped packets:      ", NTP_STR),
+            ("io_ignored",	"ignored packets:      ", NTP_STR),
+            ("io_received",	"received packets:     ", NTP_STR),
+            ("io_sent",		"packets sent:         ", NTP_STR),
+            ("io_sendfailed",	"packet send failures: ", NTP_STR),
+            ("io_wakeups",	"input wakeups:        ", NTP_STR),
+            ("io_goodwakeups",	"useful input wakeups: ", NTP_STR),
+        )
+	collect_display(associd=0, variables=iostats, decodestatus=False)
 
     def help_iostats(self):
         sys.stdout.write("""\
@@ -885,7 +990,12 @@ usage: iostats
 
     def do_timerstats(self, line):
         "display interval timer counters"
-        pass
+        timerstats = (
+            ("timerstats_reset",	"time since reset:  ", NTP_STR),
+            ("timer_overruns",		"timer overruns:    ", NTP_STR),
+            ("timer_xmts",		"calls to transmit: ", NTP_STR),
+        )
+        collect_display(associd=0, variables=timerstats, decodestatus=False)
 
     def help_timerstats(self):
         sys.stdout.write("""\
