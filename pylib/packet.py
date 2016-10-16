@@ -314,6 +314,8 @@ class ntpq_session:
 
     def sendpkt(self, xdata):
         "Send a packet to the host."
+        while len(xdata) % 4:
+            xdata += b"\x00"
         if self.debug >= 3:
                 print("Sending %d octets\n" % len(xdata))
         try:
@@ -530,9 +532,13 @@ class ntpq_session:
         # Return None on success, otherwise an error string
         return res
 
-    def readvars(self):
+    def readvars(self, varlist=None):
         "Read system vars from the host as a dict, or return an error string."
-        self.doquery(opcode=CTL_OP_READVAR, quiet=True)
+        if varlist == None:
+            qdata = ""
+        else:
+            qdata = ",".join(varlist)
+        self.doquery(opcode=CTL_OP_READVAR, qdata=qdata, quiet=True)
         if self.response.startswith("*"):
             return self.response
         else:
@@ -542,18 +548,19 @@ class ntpq_session:
                 response = response[:-1]
             response = response.rstrip()
             items = []
-            for pair in response.split(","):
-                (var, val) = pair.split("=")
-                var = var.strip()
-                val = val.strip()
-                try:
-                    val = int(val)
-                except ValueError:
+            if response:
+                for pair in response.split(","):
+                    (var, val) = pair.split("=")
+                    var = var.strip()
+                    val = val.strip()
                     try:
-                        val = float(val)
+                        val = int(val)
                     except ValueError:
-                        if val[0] == '"' and val[-1] == '"':
-                            val = val[1:-1]
-                items.append((var, val))
+                        try:
+                            val = float(val)
+                        except ValueError:
+                            if val[0] == '"' and val[-1] == '"':
+                                val = val[1:-1]
+                    items.append((var, val))
             return dict(items)
 # end

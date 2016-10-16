@@ -181,10 +181,6 @@ tstflagnames = (
 	"peer_unreach"		# BOGON13
 )
 
-def collect_display(associd, variables, decodestatus):
-    "Query and display a collection of variables from the system."
-    pass
-
 class ntpq_interpreter(cmd.Cmd):
     "ntpq command interpreter"
 
@@ -236,6 +232,18 @@ usage: help [ command ]
 function: set the primary receive time out
 usage: timeout [ msec ]
 """)
+
+    def collect_display(self, associd, variables, decodestatus):
+        "Query and display a collection of variables from the system."
+        msg = self.session.readvars([v[0] for v in variables])
+        if type(msg) == str:
+            print(msg)
+            return
+        for (name, legend, fmt) in variables:
+            if fmt == NTP_STR:
+                sys.stdout.write("%s '%s'\n" % (legend, msg[name]))
+            else:
+                sys.stderr.write("Unknown data type code %s for %s\n" % (fmt, name))
 
     def do_delay(self, line):
         "set the delay added to encryption time stamps"
@@ -737,7 +745,7 @@ usage: cv [ assocID ] [ name=value[,...] ]
         )
         associd=int(line)
         # FIXME: validate the association ID.
-	collect_display_vdc(associd=associd,variables=pstats,decodestatus=True);
+	self.collect_display(associd=associd,variables=pstats,decodestatus=True);
 
     def help_pstats(self):
         sys.stdout.write("""\
@@ -863,7 +871,7 @@ usage: reslist
             ("bcastdelay",	"broadcast delay:  ", NTP_STR),
             ("authdelay",	"symm. auth. delay:", NTP_STR),
         )
-        collect_display(associd=0, variables=sysinfo, decodestatus=True)
+        self.collect_display(associd=0, variables=sysinfo, decodestatus=True)
 
     def help_sysinfo(self):
         sys.stdout.write("""\
@@ -891,7 +899,7 @@ usage: sysinfo
             ("kppsstbexc",	"stability exceeded:  ", NTP_STR),
             ("kppscaliberrs",	"calibration errors:  ", NTP_STR),
         )
-        collect_display(associd=0, variables=kerninfo, decodestatus=True)
+        self.collect_display(associd=0, variables=kerninfo, decodestatus=True)
 
     def help_kerninfo(self):
         sys.stdout.write("""\
@@ -915,7 +923,7 @@ usage: kerninfo
             ("ss_kodsent",	"KoD responses:        ", NTP_STR),
             ("ss_processed",	"processed for time:   ", NTP_STR),
         )
-        collect_display(associd=0, variables=sysstats, decodestatus=False)
+        self.collect_display(associd=0, variables=sysstats, decodestatus=False)
 
     def help_sysstats(self):
         sys.stdout.write("""\
@@ -935,7 +943,7 @@ usage: sysstats
             ("mru_mem",		"kilobytes:          ", NTP_STR),
             ("mru_maxmem",	"maximum kilobytes:  ", NTP_STR),
         )
-	collect_display(associd=0, variables=monstats, decodestatus=False)
+	self.collect_display(associd=0, variables=monstats, decodestatus=False)
 
     def help_monstats(self):
         sys.stdout.write("""\
@@ -956,7 +964,7 @@ usage: monstats
             ("authencrypts",	"encryptions:     ", NTP_STR),
             ("authdecrypts",	"decryptions:     ", NTP_STR),
         )
-        collect_display(associd=0, variables=authinfo, decodestatus=False)
+        self.collect_display(associd=0, variables=authinfo, decodestatus=False)
 
     def help_authinfo(self):
         sys.stdout.write("""\
@@ -980,7 +988,7 @@ usage: authinfo
             ("io_wakeups",	"input wakeups:        ", NTP_STR),
             ("io_goodwakeups",	"useful input wakeups: ", NTP_STR),
         )
-	collect_display(associd=0, variables=iostats, decodestatus=False)
+	self.collect_display(associd=0, variables=iostats, decodestatus=False)
 
     def help_iostats(self):
         sys.stdout.write("""\
@@ -995,7 +1003,7 @@ usage: iostats
             ("timer_overruns",		"timer overruns:    ", NTP_STR),
             ("timer_xmts",		"calls to transmit: ", NTP_STR),
         )
-        collect_display(associd=0, variables=timerstats, decodestatus=False)
+        self.collect_display(associd=0, variables=timerstats, decodestatus=False)
 
     def help_timerstats(self):
         sys.stdout.write("""\
@@ -1086,8 +1094,9 @@ if __name__ == '__main__':
             interpreter.ccmds.append(val)
         elif switch in ("-d", "--debug"):
             interpreter.debug += 1
+            session.debug += 1
         elif switch in ("-D", "--set-debug-level"):
-            interpreter.debug = int(val)
+            session.debug = interpreter.debug = int(val)
         elif switch in ("-h", "--help"):
             print(usage)
             raise SystemExit(0)
