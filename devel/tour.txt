@@ -167,15 +167,21 @@ quite a while before NTPsec removed it.
 == System call interface and the PLL ==
 
 All of ntpd's clock management is done through four system calls:
-clock_gettime(2), clock_settime(2), and either ntp_adjtime(2) or (on
-some systems, including Linux) adjtimex(2), or the older BSD
-adjtime(2) call.
+clock_gettime(2), clock_settime(2), and either ntp_adjtime(2) or the
+older BSD adjtime(2) call.  For ntp_adjtime(), ntpd actually uses a
+thin wrapper that hides the difference between systems with
+nanosecond-precision and those with only microsecond precision;
+internally, ntpd does all its calculations with nanosecond precision.
 
 The clock_gettime(2) and clock_settime(2) calls are standardized in
-POSIX; ntp_adjtime(2) and adjtimex(2) are not, exhibiting some
-variability in behavior across platforms.  Where adjtimex(2) exists
-(notably under Linux), ntp_adjtime(2) is implemented as a thin
-userspace wrapper around it.
+POSIX; ntp_adjtime(2) is not not, exhibiting some variability in
+behavior across platforms (in particular as to whether it supports
+nanosecond or microsecond precision).
+
+Where adjtimex(2) exists (notably under Linux), both ntp_adjtime()
+and adjtime() are implemented as library wrappers around it.  The
+need to implement adjtime() is why the Linux version of struct timex
+has a (non-portable) 'time' member;
 
 There is some confusion abroad about this interface because it has
 left a trail of abandoned experiments behind it.
