@@ -95,7 +95,9 @@ In general, avoid introducing the type struct timeval into the code,
 in favor of the higher-resolution struct timespec. Early on in
 NTPsec's history we found a bug introduced by poor data management
 where these two time representations bumped into each other; we don't
-want that to happen again.
+want that to happen again. Thus, if you must refer to struct timeval due to
+an external interface, move the data to/from a struct timespec as
+close to that callsite as possible.
 
 === Coding style and indentation ==
 

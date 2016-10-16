@@ -37,7 +37,7 @@ that ignoring time cycles in l_fp is exactly how NTP gets around the
 Y2K38 problem. As long as the average clock skew between machines
 is much less than the length of a calendar cycle (which it generally
 will be, by a factor of at least five million) we can map all incoming
-timestamps from whatever cycle into the nearest time im modular
+timestamps from whatever cycle into the nearest time in modular
 arithmetic relative to the cycle length.
 
 === vint64 ===
@@ -78,7 +78,7 @@ one locally attached.
 The driver structure for reference clocks has a refid field that is
 (by default) copied into samples issued from that clock. It is
 not necessarily unique to a driver type; notably, all GPS driver
-types ship the ID "GPS". It is possible to fudge this ID to
+types ship the refid "GPS". It is possible to fudge this ID to
 something more informative in the ntpd configuration command
 for the driver.
 
@@ -101,12 +101,17 @@ the millennium.  The struct timespec is newer and associated with
 ANSI/POSIX standardization.
 
 The NTP code was written well before calls like clock_gettime(2) that
-use it were standardized.  Thus, when you see a struct timeval in the
-code, it can mean one of two things. Either it's related to a system
-call dating from the BSD era (usually select(2) or ntp_gettime(2)), or
-it's very old time-computation code that has never been updated to
-use nanosecond precision. As NTP is cleaned up, instances of the
-second kind will become less common.
+use it were standardized, but as part of of its general cleanup NTPsec
+has been updated to do all its internal computations at nanosecond
+precision or better.  
+
+Thus, when you see a struct timeval in the NTPsec code, it's due to
+a precision limit imposed by an external interface.  One such is in
+the code for using the old BSD adjtime(2) call; another is in getting
+packet timestamps from the IP layer.  Our practice is to convert from
+or to nanosecond precision as close to these callsites as possible;
+this doesn't pull additional accuracy out of thin air, but it does 
+avoid loss-of-precision bugs due to mixing these structures.
 
 === struct peer ===
 
