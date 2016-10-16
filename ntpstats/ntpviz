@@ -1455,9 +1455,12 @@ ntpviz</a>, part of the <a href="https://www.ntpsec.org/">NTPsec project</a>
             for sta in stat:
                 index_buffer += str( sta.table )
                 csvs += sta.csv
+        # RFC4180 specifies the mime-type of a csv
+        # your webserver should be programmed the same
         index_buffer += """\
 </table>
-<a href="summary.csv" target="_blank">Summary as CSV file</a><br>
+<a href="summary.csv" target="_blank" 
+  type="text/csv; charset=UTF-8; header=present;">Summary as CSV file</a><br>
 </div>
 """
 
