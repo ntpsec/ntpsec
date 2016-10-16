@@ -67,10 +67,18 @@ int clock_gettime(clockid_t clk_id, struct timespec *tp)
  * absent, however, this way callers can tell what accuracy they're
  * actually getting.
  *
- * Problems: the Linux manual page for adjtimex(2) says the precision member
- * is microseconds and doesn't mention STA_NANO, but the legacy ntptime code
- * has a scaling expression in it that implies nanoseconds if that flash bit
- * is on.
+ * Some versions of ntp_adtime(2), notably the Linux one which is
+ * implemented in terms of a local, unstandardized adjtimex(2), have a
+ * time member that can be used to retrieve and increment
+ * (ADJ_SETOFFSET) system time.  If this were portable there would be
+ * scaling of ntx->time.tv_usec in here for non-STA_NANO systems.  It
+ * isn't; NetBSD and FreeBSD don't have that time member.
+ *
+ * Problem: the Linux manual page for adjtimex(2) says the precision
+ * member is microseconds and doesn't mention STA_NANO, but the legacy
+ * ntptime code has a scaling expression in it that implies
+ * nanoseconds if that flash bit is on. It is unknown under what
+ * circumstances, if any, this was ever correct.
  */
 int ntp_adjtime_ns(struct timex *ntx)
 {
@@ -88,17 +96,13 @@ int ntp_adjtime_ns(struct timex *ntx)
 #ifdef STA_NANO
     if (!nanoseconds)
 #endif
-    {
-	ntx->time.tv_usec /= 1000;
 	ntx->offset /= 1000;
-    }
     int errval = ntp_adjtime(ntx);
 #ifdef STA_NANO
     nanoseconds = (STA_NANO & ntx->status) != 0;
     if (!nanoseconds)
 #endif
     {
-	ntx->time.tv_usec *= 1000;
 	ntx->offset *= 1000;
 	//ntx->precision *= 1000;
 	ntx->jitter *= 1000;
