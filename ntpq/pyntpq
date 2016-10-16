@@ -181,6 +181,14 @@ tstflagnames = (
 	"peer_unreach"		# BOGON13
 )
 
+def statustoa(_is_sys, n):
+    # FIXME: see libntp/statestr.c
+    return n
+
+def prettydate(d):
+    # FIXME: we need to unpack this date.
+    return d[2:]
+
 class ntpq_interpreter(cmd.Cmd):
     "ntpq command interpreter"
 
@@ -239,11 +247,21 @@ usage: timeout [ msec ]
         if type(msg) == str:
             print(msg)
             return
+        if decodestatus:
+            sys.stdout.write("associd=%u status=%04x %s,\n" %
+                             (associd,
+                              self.session.rstatus,
+                              statustoa(associd == 0, self.session.rstatus)))
         for (name, legend, fmt) in variables:
-            if fmt == NTP_STR:
-                sys.stdout.write("%s '%s'\n" % (legend, msg[name]))
+            value = msg[name]
+            if fmt in (NTP_STR, NTP_UINT, NTP_INT, NTP_ADD, NTP_ADP):
+                sys.stdout.write("%s %s\n" % (legend, value))
+            elif fmt == NTP_LFP:
+                sys.stdout.write("%s %s\n" % (legend, prettydate(value)))
+            elif fmt in (NTP_2BIT, NTP_MODE):
+                sys.stdout.write("%s %s\n" % (legend, bin(value)[2:]))
             else:
-                sys.stderr.write("Unknown data type code %s for %s\n" % (fmt, name))
+                sys.stderr.write("unxpected vc type %s for %s, value %s\n" % (fmt, name, value))
 
     def do_delay(self, line):
         "set the delay added to encryption time stamps"
