@@ -532,13 +532,27 @@ class ntpq_session:
         # Return None on success, otherwise an error string
         return res
 
-    def readvars(self, varlist=None):
+    def readstat(self, associd=0):
+        "Read peer status."
+        self.doquery(opcode=CTL_OP_READSTAT, associd=associd, quiet=True)
+        if self.response.startswith("*"):
+            return self.response
+        idlist = []
+        if associd == 0:
+            print("I see %d chars" % len(self.response))
+            for i in range(len(self.response)//4):
+                data = self.response[4*i:4*i+4]
+                print("Foo! %d %d %s" % (i, len(data), data))
+                idlist.append(struct.unpack("!HH", data))
+        return idlist
+
+    def readvar(self, associd=0, varlist=None):
         "Read system vars from the host as a dict, or return an error string."
         if varlist == None:
             qdata = ""
         else:
             qdata = ",".join(varlist)
-        self.doquery(opcode=CTL_OP_READVAR, qdata=qdata, quiet=True)
+        self.doquery(opcode=CTL_OP_READVAR, associd=associd, qdata=qdata, quiet=True)
         if self.response.startswith("*"):
             return self.response
         else:
