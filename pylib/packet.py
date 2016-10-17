@@ -539,10 +539,8 @@ class ntpq_session:
             return self.response
         idlist = []
         if associd == 0:
-            print("I see %d chars" % len(self.response))
             for i in range(len(self.response)//4):
                 data = self.response[4*i:4*i+4]
-                print("Foo! %d %d %s" % (i, len(data), data))
                 idlist.append(struct.unpack("!HH", data))
         return idlist
 
