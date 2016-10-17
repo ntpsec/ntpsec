@@ -79,7 +79,7 @@ struct ntp_control {
 #define	CTL_SYS_MAXEVENTS	15
 
 #define	CTL_SYS_STATUS(li, source, nevnt, evnt) \
-		(((((unsigned short)(li))<< 14)&0xc000) | \
+		(((((li) & 0xffff) << 14)&0xc000) |			\
 		(((source)<<8)&0x3f00) | \
 		(((nevnt)<<4)&0x00f0) | \
 		((evnt)&0x000f))
