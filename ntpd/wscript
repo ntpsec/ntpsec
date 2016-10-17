@@ -2,7 +2,6 @@
 def build(ctx):
 	srcnode = ctx.srcnode.abspath()
 	bldnode = ctx.bldnode.abspath()
-	ntpdnode = ctx.bldnode.make_node('ntpd')
 
 	if ctx.variant == "host":
 
@@ -16,8 +15,8 @@ def build(ctx):
 				features	= "c src_include bld_include libisc_include",
 				source		= bison_source,
 				includes    = [
-						"%s/ntpd/" % srcnode,
-						"%s/" % ctx.bldnode.parent.abspath()
+								"%s/ntpd/" % srcnode,
+								"%s/" % ctx.bldnode.parent.abspath()
 				]
 			)
 
@@ -32,19 +31,20 @@ def build(ctx):
 			features    = "c cprogram bld_include src_include libisc_include",
 			source      = keyword_gen_source,
 			includes    = [
-					ntpdnode,
-					"%s/" % ctx.bldnode.parent.abspath()
+							"%s/ntpd/" % bldnode,
+							"%s/" % ctx.bldnode.parent.abspath()
 			],
 			install_path= None,
 		)
 
+		# XXX: needs a dependency to rebuild ntp_keyword.h when keyword-gen is rebuilt
+
 		ctx.add_group() # Make sure keyword-gen is created next.
 
 		ctx(
-			rule        = "keyword-gen ${SRC} > ${TGT}",
-			cwd         = ntpdnode,
+			rule        = "%s/ntpd/keyword-gen ${SRC} > ${TGT}" % bldnode,
 			features    = "c bld_include src_include",
-			source      = ["keyword-gen", "ntp_parser.tab.h"],
+			source      = "ntp_parser.tab.h",
 			target      = "ntp_keyword.h"
 		)
 
