@@ -5,5 +5,5 @@ def configure(conf):
     conf.load('python')
     conf.check_python_version((2,6,0))
 
-def build(bld):
-    bld(features='py', source=bld.path.ant_glob('*.py'), install_from='.',install_path='${PYTHONDIR}/ntp')
+def build(ctx):
+    ctx(features='py', source=ctx.path.ant_glob('*.py'), install_from='.',install_path='${PYTHONDIR}/ntp')
