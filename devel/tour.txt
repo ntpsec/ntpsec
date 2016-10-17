@@ -179,7 +179,7 @@ nanosecond-precision and those with only microsecond precision;
 internally, ntpd does all its calculations with nanosecond precision.
 
 The clock_gettime(2) and clock_settime(2) calls are standardized in
-POSIX; ntp_adjtime(2) is not not, exhibiting some variability in
+POSIX; ntp_adjtime(2) is not, exhibiting some variability in
 behavior across platforms (in particular as to whether it supports
 nanosecond or microsecond precision).
 
@@ -195,7 +195,7 @@ Older BSD systems read the clock using gettimeofday(2)
 (in POSIX but deprecated) and set it using settimeofday(2),
 which was never standardized. Neither of these calls are still
 used in NTPsec, though the equally ancient BSD adjtime(2) call
-is on systems without kernel PLL support.
+is, on systems without kernel PLL support.
 
 Also, glibc (and possibly other C libraries) implement two other
 related calls, ntp_gettime(3) and ntp_gettimex(3). These are not used
