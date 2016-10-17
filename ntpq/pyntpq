@@ -616,7 +616,7 @@ usage: readlist [ assocID ]
 
     def do_rl(self, line):
         "read the system or peer variables included in the variable list"
-        pass
+        self.do_readlist(line)
 
     def help_rl(self):
         sys.stdout.write("""\
@@ -676,7 +676,7 @@ usage: mreadlist assocIDlow assocIDhigh
 
     def do_mrl(self, line):
         "read the peer variables in the variable list for multiple peers"
-        pass
+        self.do_mreadlist(line)
 
     def help_mrl(self):
         sys.stdout.write("""\
@@ -696,7 +696,7 @@ usage: mreadvar assocIDlow assocIDhigh [ name=value[,...] ]
 
     def do_mrv(self, line):
         "read peer variables from multiple peers"
-        pass
+        self.do_mreadvar(line)
 
     def help_mrv(self):
         sys.stdout.write("""\
@@ -716,7 +716,7 @@ usage: clocklist [ assocID ]
 
     def do_cl(self, line):
         "read the clock variables included in the variable list"
-        pass
+        self.do_clocklist(line)
 
     def help_cl(self):
         sys.stdout.write("""\
@@ -736,7 +736,7 @@ usage: clockvar [ assocID ] [ name=value[,...] ]
 
     def do_cv(self, line):
         "read clock variables"
-        pass
+        self.do_clockvar(line)
 
     def help_cv(self):
         sys.stdout.write("""\
