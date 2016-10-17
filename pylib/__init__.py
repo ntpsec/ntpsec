@@ -4,5 +4,7 @@
 # Preserve this property!
 from __future__ import absolute_import  # Ensure Python2 behaves like Python 3
 
+from .ntp_control import *
+
 api_major_version = 1   # bumped on incompatible changes
 api_minor_version = 0   # bumped on compatible changes
