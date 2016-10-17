@@ -7,7 +7,7 @@ Skips #include lines, struct and union declarations, single-line typedefs
 and externs.  Transforms comments. Does not yet handle multiline externs
 or variable declarations.
 
-Yes, SWIG can do something like this.  But it's heavyweight and introduces
+Yes, SWIG can do something like this.  But it's heavyweight and would introduce
 another dependency.
 """
 
@@ -58,7 +58,7 @@ def pythonize(rfp, wfp):
         # Hack remaining content
         for (regexp, replacement) in patterns:
             line = regexp.sub(replacement, line)
-        # Omit some expression elents Python cannot evaluate
+        # Omit some expression elements Python cannot evaluate
         for word in impossibles:
             if word in line:
                 line = "# " + line
@@ -74,3 +74,5 @@ if __name__ == '__main__':
             with open(path) as rfp:
                 sys.stdout.write("#\n# Definitions from %s begin\n#\n" % path)
                 pythonize(rfp, sys.stdout)
+
+# end
