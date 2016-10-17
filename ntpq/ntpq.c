@@ -1213,6 +1213,25 @@ sendrequest(
 		return 1;
 	}
 
+	if (debug >= 3) {
+	    static const char *opnames[] = {
+		"CTL_OP_UNSPEC",
+		"CTL_OP_READSTAT",
+		"CTL_OP_READVAR",
+		"CTL_OP_WRITEVAR",
+		"CTL_OP_READCLOCK",
+		"CTL_OP_WRITECLOCK",
+		"CTL_OP_SETTRAP",
+		"CTL_OP_ASYNCMSG",
+		"CTL_OP_CONFIGURE",
+		"CTL_OP_READ_MRU",
+		"CTL_OP_READ_ORDLIST_A",
+		"CTL_OP_REQ_NONCE",
+	    };
+	    int oi = (opcode >= (int)(sizeof(opnames)/sizeof(opnames[0])) ? 0 : opcode);
+	    printf("Sending %s operation for associd %d\n",
+		   opnames[oi], associd);
+	}
 	/*
 	 * Fill in the packet
 	 */
