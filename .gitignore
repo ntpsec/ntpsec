@@ -1,3 +1,4 @@
+pylib/ntp_control.py
 .lock-waf*
 .waf*
 *.pyc

@@ -6,4 +6,15 @@ def configure(conf):
     conf.check_python_version((2,6,0))
 
 def build(ctx):
+    srcnode = ctx.srcnode.make_node('pylib')
+    target = ctx.srcnode.make_node('pylib/ntp_control.py')
+
+    ctx(
+	before      = ['pyc', 'pyo'],
+	cwd         = srcnode,
+	rule        = '../wafhelpers/pythonize-header ${SRC} >${TGT}',
+	source      = "../include/ntp_control.h",
+	target      = target,
+	)
+
     ctx(features='py', source=ctx.path.ant_glob('*.py'), install_from='.',install_path='${PYTHONDIR}/ntp')
