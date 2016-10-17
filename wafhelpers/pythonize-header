@@ -3,8 +3,12 @@
 Generate a Python module from a C file of macro definitions.
 
 Uses simple regexp transformations, so weird headers are likely to confuse it.
-Skips #include lines, struct and union declarations. simgle-line typedefs
-and externs.  Transforms comments. Does not yet handle multiline externs.
+Skips #include lines, struct and union declarations, single-line typedefs
+and externs.  Transforms comments. Does not yet handle multiline externs
+or variable declarations.
+
+Yes, SWIG can do something like this.  But it's heavyweight and introduces
+another dependency.
 """
 
 import sys, re
