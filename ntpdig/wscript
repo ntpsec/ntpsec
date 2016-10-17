@@ -1,6 +1,5 @@
 def build(ctx):
-	srcnode = ctx.srcnode.abspath()
-	bldnode = ctx.bldnode.abspath()
+	bldnode = ctx.bldnode.make_node('ntpdig')
 
 	ntpdig_obj_source = [
 		"crypto.c",
@@ -14,11 +13,12 @@ def build(ctx):
 	ctx(
 		target		= "ntpdig_obj",
 		features	= "c bld_include src_include libisc_include",
-		use			= "ntp isc opts M PTHREAD LIBEVENT_CORE LIBEVENT_PTHREADS RT CRYPTO",
+		use		= "ntp isc opts M PTHREAD LIBEVENT_CORE LIBEVENT_PTHREADS RT CRYPTO",
 		source		= ntpdig_obj_source,
+		cwd             = bldnode,
 		includes	= [
-						"%s/ntpdig/" % bldnode
-					] + ctx.env.PLATFORM_INCLUDES, # XXX: Hack needs to use libevent_inc or something else.
+					bldnode,
+				] + ctx.env.PLATFORM_INCLUDES, # XXX: Hack needs to use libevent_inc or something else.
 	)
 
 	ntpdig_source = [
@@ -28,11 +28,12 @@ def build(ctx):
 	ctx(
 		target		= "ntpdig",
 		features	= "c cprogram bld_include src_include libisc_include ntp_version",
-		use			= "ntp isc opts ntpdig_obj M PTHREAD ntpdig_obj LIBEVENT_CORE LIBEVENT_PTHREADS RT CRYPTO",
+		use		= "ntp isc opts ntpdig_obj M PTHREAD ntpdig_obj LIBEVENT_CORE LIBEVENT_PTHREADS RT CRYPTO",
 		source		= ntpdig_source,
+		cwd             = bldnode,
 		includes	= [
-						"%s/ntpdig/" % bldnode
-					] + ctx.env.PLATFORM_INCLUDES, # XXX: Hack needs to use libevent_inc or something else.
+					bldnode
+				] + ctx.env.PLATFORM_INCLUDES, # XXX: Hack needs to use libevent_inc or something else.
 		install_path= "${PREFIX}/bin/",
 	)
 

@@ -1,7 +1,6 @@
 from waflib import Utils
 
 def build(ctx):
-	srcnode = ctx.srcnode.abspath()
 	bldnode = ctx.bldnode.abspath()
 
 	util = ['sht']
