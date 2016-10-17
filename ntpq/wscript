@@ -1,6 +1,6 @@
 def build(ctx):
 	srcnode = ctx.srcnode.abspath()
-	bldnode = ctx.bldnode.abspath()
+	bldnode = ctx.bldnode.make_node('ntpq')
 
 	ntpq_source = [
 		"ntpq.c",
@@ -11,11 +11,9 @@ def build(ctx):
 		target		= "ntpq",
 		features	= "c cprogram bld_include src_include libisc_include ntp_version",
 		source		= ntpq_source,
-		use			= "ntp opts isc M RT READLINE EDIT PTHREAD CRYPTO CURSES NCURSES READLINE",
-		includes	= [
-						"%s/ntpq/" % bldnode
-		],
-		install_path= "${PREFIX}/bin/",
+		use		= "ntp opts isc M RT READLINE EDIT PTHREAD CRYPTO CURSES NCURSES READLINE",
+		includes	= [bldnode],
+		install_path    = "${PREFIX}/bin/",
 	)
 
 	ctx.manpage(1, "ntpq-man.txt")
