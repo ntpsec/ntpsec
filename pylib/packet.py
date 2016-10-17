@@ -7,12 +7,25 @@
 from __future__ import print_function, division
 import sys, socket, select, struct, curses.ascii
 
-CTL_MAX_DATA_LEN        = 468   # Max data in a control packet
+# If you don't keep this file in sync with ntp.h, libntpq.h, and ntp_control.h
+# havoc will ensue.
 
-# Modes from ntp.h
+# Things from ntp.h
+
+LEAP_NOWARNING  = 0x0   # leap_none: normal, no leap second warning
+LEAP_ADDSECOND  = 0x1   # leap_add_sec: last minute of day has 61 seconds
+LEAP_DELSECOND  = 0x2   # leap_del_sec: last minute of day has 59 seconds
+LEAP_NOTINSYNC  = 0x3   # leap_alarm: overload, clock is free running
+
+NTP_OLDVERSION  = 1     # C code said "oldest credible version"
+NTP_VERSION     = 4     # Current version
+
 MODE_CONTROL = 6
 
-# Opcodes from ntp_control.c
+# Things from ntp_control.h.
+
+CTL_MAX_DATA_LEN        = 468   # Max data in a control packet
+
 CTL_OP_UNSPEC           = 0     # unspecified
 CTL_OP_READSTAT         = 1     # read status
 CTL_OP_READVAR          = 2     # read variables
@@ -26,6 +39,74 @@ CTL_OP_READ_MRU         = 10    # retrieve MRU (mrulist)
 CTL_OP_READ_ORDLIST_A   = 11    # ordered list req. auth.
 CTL_OP_REQ_NONCE        = 12    # request a client nonce
 CTL_OP_UNSETTRAP        = 31    # unset trap (obsolete, unused)
+
+# {En,De}coding of the system status word
+
+CTL_SST_TS_UNSPEC	= 0	# unspec
+CTL_SST_TS_ATOM		= 1	# pps
+CTL_SST_TS_LF		= 2	# lf radio
+CTL_SST_TS_HF		= 3	# hf radio
+CTL_SST_TS_UHF		= 4	# uhf radio
+CTL_SST_TS_LOCAL	= 5	# local
+CTL_SST_TS_NTP		= 6	# ntp
+CTL_SST_TS_UDPTIME	= 7	# other
+CTL_SST_TS_WRSTWTCH	= 8	# wristwatch
+CTL_SST_TS_TELEPHONE	= 9	# telephone
+
+CTL_SYS_MAXEVENTS	= 15
+
+def CTL_SYS_STATUS(li, source, nevnt, evnt): return \
+		(((((li))<< 14)&0xc000) | \
+		(((source)<<8)&0x3f00) | \
+		(((nevnt)<<4)&0x00f0) | \
+		((evnt)&0x000f))
+
+def CTL_SYS_LI(status):		return (((status)>>14) & 0x3)
+def CTL_SYS_SOURCE(status):	return (((status)>>8) & 0x3f)
+def CTL_SYS_NEVNT(status):	return (((status)>>4) & 0xf)
+def CTL_SYS_EVENT(status):	return ((status) & 0xf)
+
+# {En,De}coding of the peer status word
+CTL_PST_CONFIG		= 0x80
+CTL_PST_AUTHENABLE	= 0x40
+CTL_PST_AUTHENTIC	= 0x20
+CTL_PST_REACH		= 0x10
+CTL_PST_BCAST		= 0x08
+
+CTL_PST_SEL_REJECT	= 0	#   reject
+CTL_PST_SEL_SANE	= 1	# x falsetick
+CTL_PST_SEL_CORRECT	= 2	# . excess
+CTL_PST_SEL_SELCAND	= 3	# - outlier
+CTL_PST_SEL_SYNCCAND	= 4	# + candidate
+CTL_PST_SEL_EXCESS	= 5	# # backup
+CTL_PST_SEL_SYSPEER	= 6	# * sys.peer
+CTL_PST_SEL_PPS		= 7	# o pps.peer
+
+CTL_PEER_MAXEVENTS	= 15
+
+def CTL_PEER_STATUS(status, nevnt, evnt): return \
+		((((status)<<8) & 0xff00) | \
+		(((nevnt)<<4) & 0x00f0) | \
+		((evnt) & 0x000f))
+
+def CTL_PEER_STATVAL(status):	return (((status)>>8) & 0xff)
+def CTL_PEER_NEVNT(status):	return (((status)>>4) & 0xf)
+def CTL_PEER_EVENT(status):	return ((status) & 0xf)
+
+# {En,De}coding of the clock status word
+CTL_CLK_OKAY		= 0
+CTL_CLK_NOREPLY		= 1
+CTL_CLK_BADFORMAT	= 2
+CTL_CLK_FAULT		= 3
+CTL_CLK_PROPAGATION	= 4
+CTL_CLK_BADDATE		= 5
+CTL_CLK_BADTIME		= 6
+
+def CTL_CLK_STATUS(status, event): return \
+		((((status)<<8) & 0xff00) | \
+		((event) & 0x00ff))
+
+# Things from libntpq.h
 
 # NTP Status codes
 NTP_STATUS_INVALID      = 0
@@ -44,28 +125,11 @@ NTP_CLOCKTYPE_LOCAL     = 'l'
 NTP_CLOCKTYPE_UNICAST   = 'u'
 NTP_CLOCKTYPE_MULTICAST = 'm'
 
-NERR_UNSPEC     = 0
-NERR_PERMISSION = 1
-NERR_BADFMT     = 2
-NERR_BADOP      = 3
-NERR_BADASSOC   = 4
-NERR_UNKNOWNVAR = 5
-NERR_BADVALUE   = 6
-NERR_RESTRICT   = 7
-
-NERR_NORESOURCE = NERR_PERMISSION       # wish there was a different code
-
 # Variable Sets
 PEERVARS  = CTL_OP_READVAR
 #CLOCKVARS = CTL_OP_CLOCKVAR
 
-LEAP_NOWARNING  = 0x0   # leap_none: normal, no leap second warning
-LEAP_ADDSECOND  = 0x1   # leap_add_sec: last minute of day has 61 seconds
-LEAP_DELSECOND  = 0x2   # leap_del_sec: last minute of day has 59 seconds
-LEAP_NOTINSYNC  = 0x3   # leap_alarm: overload, clock is free running
-
-NTP_OLDVERSION  = 1     # C code said "oldest credible version"
-NTP_VERSION     = 4     # Current version
+# From ntpq.h:
 
 # Limit on packets in a single response.  Increasing this value to
 # 96 will marginally speed "mrulist" operation on lossless networks
@@ -85,6 +149,19 @@ NTP_VERSION     = 4     # Current version
 # needs.  In contrast, the "mrulist" command is implemented as a series
 # of requests and multipacket responses to each.
 MAXFRAGS        = 32
+
+# These things are ours.  They shadow the CERR_* definitions in ntp_control.h
+
+NERR_UNSPEC     = 0
+NERR_PERMISSION = 1
+NERR_BADFMT     = 2
+NERR_BADOP      = 3
+NERR_BADASSOC   = 4
+NERR_UNKNOWNVAR = 5
+NERR_BADVALUE   = 6
+NERR_RESTRICT   = 7
+
+NERR_NORESOURCE = NERR_PERMISSION       # wish there was a different code
 
 class ntp_packet:
     "Encapsulate an NTP fragment"
