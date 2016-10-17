@@ -243,7 +243,7 @@ usage: timeout [ msec ]
 
     def collect_display(self, associd, variables, decodestatus):
         "Query and display a collection of variables from the system."
-        msg = self.session.readvars([v[0] for v in variables])
+        msg = self.session.readvar(associd, [v[0] for v in variables])
         if type(msg) == str:
             print(msg)
             return
@@ -646,7 +646,7 @@ usage: readvar [ assocID ] [ varname1 ] [ varname2 ] [ varname3 ]
 
     def do_rv(self, line):
         "read system or peer variables"
-        pass
+        self.do_readvar(line)
 
     def help_rv(self):
         sys.stdout.write("""\
@@ -773,7 +773,7 @@ usage: pstats assocID
 
     def do_peers(self, line):
         "obtain and print a list of the server's peers [IP version]"
-        pass
+        print(self.session.readstat())
 
     def help_peers(self):
         sys.stdout.write("""\
