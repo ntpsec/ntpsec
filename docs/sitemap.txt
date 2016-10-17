@@ -23,4 +23,4 @@ include::includes/external.txt[]
 
 image:pic/tribeb.gif[]
 
- include::includes/footer.txt[]
+include::includes/footer.txt[]
