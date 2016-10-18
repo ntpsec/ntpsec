@@ -376,7 +376,7 @@ usage: delay [ msec ]
             elif tokens[0] == '-6':
                 session.ai_family = socket.AF_INET6
                 tokens.pop(0)
-            if tokens and self.session.openhost(tokens[0],session.ai_family):
+            if tokens and self.session.openhost(tokens[0], session.ai_family):
                 print("current host set to %s" % self.session.name)
             elif self.session.havehost():
                 print("current host remains %s" % self.session.name)
@@ -853,7 +853,7 @@ usage: cv [ assocID ] [ name=value[,...] ]
         if associd not in [peer.associd for peer in self.peers]:
             sys.stderr.write("Unknown associd.\n")
             return
-	self.collect_display(associd=associd,variables=pstats,decodestatus=True)
+	self.collect_display(associd=associd, variables=pstats, decodestatus=True)
 
     def help_pstats(self):
         sys.stdout.write("""\
@@ -1180,10 +1180,10 @@ if __name__ == '__main__':
     try:
         (options, arguments) = getopt.getopt(sys.argv[1:],
                                              "46c:dD:hinOpVw",
-                                             ["ipv4","ipv6","command",
-                                              "debug","set-debug-level",
+                                             ["ipv4", "ipv6", "command",
+                                              "debug", "set-debug-level",
                                               "help", "interactive", "numeric",
-                                              "old-rv","peers","version",
+                                              "old-rv", "peers", "version",
                                               "wide"])
     except getopt.GetoptError as e:
         print(e)

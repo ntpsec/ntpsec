@@ -64,7 +64,7 @@ class Packet:
     def VN_MODE(v, m):          return ((((v) & 7) << 3) | ((m) & 0x7))
 
     @staticmethod
-    def PKT_LI_VN_MODE(l,v,m):  return ((((l) & 3) << 6) | Packet.VN_MODE((v), (m)))
+    def PKT_LI_VN_MODE(l, v, m):  return ((((l) & 3) << 6) | Packet.VN_MODE((v), (m)))
 
     def __init__(self, session, version, mode):
         self.session = session  # Where to get session context
@@ -509,7 +509,7 @@ class Mode6Session:
             try:
                 res = self.getresponse(opcode, associd, not retry)
             except Mode6Exception as e:
-                if retry and e.message in (SERR_TIMEOUT,SERR_INCOMPLETE):
+                if retry and e.message in (SERR_TIMEOUT, SERR_INCOMPLETE):
                     retry = False
                     continue
                 else:
