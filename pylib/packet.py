@@ -509,11 +509,6 @@ class Mode6Session:
             try:
                 res = self.getresponse(opcode, associd, not retry)
             except Mode6Exception as e:
-                if not quiet:
-                    if isinstance(res, int):
-                        sys.stderr.write("***Packet error %d" % res)
-                    else:
-                        sys.stderr.write(res.format(associd))
                 if retry and e.message in (SERR_TIMEOUT,SERR_INCOMPLETE):
                     retry = False
                     continue
