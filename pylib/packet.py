@@ -104,7 +104,7 @@ class Packet:
         return (self.li_vn_mode >> 3) & 0x7
 
 class Mode6Packet(Packet):
-    "ntpq request/response "
+    "Mode 6 request/response "
 
     def __init__(self, session, opcode=0, associd=0, qdata=''):
         Packet.__init__(self, session, session.pktversion, MODE_CONTROL)
@@ -134,6 +134,9 @@ class Mode6Packet(Packet):
         "Return statistics on a fragment."
         return "%5d %5d\t%3d octets\n" % (self.offset, self.end(), self.count)
 
+    def endpoint(self):
+        return self.offset + len(self.extension)
+
     def send(self):
         self.session.sequence += 1
         self.sequence = self.session.sequence
@@ -156,7 +159,7 @@ class Peer:
     def readvars(self):
         self.variables = self.session.readvars()
     def __str__(self):
-        return "<Peer: associd=%s status=%s>" % (self.associd, self.status)
+        return "<Peer: associd=%s status=%0x>" % (self.associd, self.status)
     __repr__ = __str__
 
 SERR_BADFMT = "***Server reports a bad format request packet\n"
@@ -171,6 +174,7 @@ SERR_INCOMPLETE = "***Response from server was incomplete\n"
 SERR_TOOMUCH = "***Buffer size exceeded for returned data\n"
 SERR_SELECT = "***Select call failed\n"
 SERR_NOHOST = "***No host open, use `host' command\n"
+SERR_BADLENGTH = "***Response length shuld have been a multiple of 4"
 
 def dump_hex_printable(xdata):
     "Dump a packet in hex, in a familiar hex format"
@@ -479,7 +483,7 @@ class Mode6Session:
             # Record status info out of the last packet.
             if not rpkt.more():
                 seenlastfrag = True
-                self.rstatus = rpkt.status
+                self.rstatus = socket.ntohs(rpkt.status)
 
             # If we've seen the last fragment, look for holes in the sequence.
             # If there aren't any, we're done.
@@ -519,11 +523,10 @@ class Mode6Session:
         return res
 
     def readstat(self, associd=0):
-        "Read peer status."
-        try:
-            self.doquery(opcode=CTL_OP_READSTAT, associd=associd)
-        except Mode6Exception as e:
-            return e.message
+        "Read peer status, or throw an exception."
+        self.doquery(opcode=CTL_OP_READSTAT, associd=associd)
+        if len(self.response) % 4:
+            raise Mode6Exception(SERR_BADLENGTH)
         idlist = []
         if associd == 0:
             for i in range(len(self.response)//4):
