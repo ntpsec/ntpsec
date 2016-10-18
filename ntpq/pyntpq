@@ -284,18 +284,18 @@ usage: help [ command ]
     def __dopeers(showall, af, varlist, dstaddr):
         af = socket.AF_INET6 if "-6" in af else socket.AF_INET
         if not dogetassoc():
-            return;
+            return
         maxhostlen = 0
 	#for host in self.chosts:
         #    if (getnetnum(chosts[u].name, &netnum, fullname, af))
-        #        name_or_num = nntohost(&netnum);
-        #        sl = strlen(name_or_num);
-        #        maxhostlen = max(maxhostlen, sl);
+        #        name_or_num = nntohost(&netnum)
+        #        sl = strlen(name_or_num)
+        #        maxhostlen = max(maxhostlen, sl)
 	if len(self.chosts) > 1:
             sys.stdout.write("%-*.*s " % (maxhostlen, maxhostlen,
                                           "server (local)"))
 	sys.stout.write(varlist[0])
-	sys.stdout.write(("=" * (maxhostlen + 78)) + "\n");
+	sys.stdout.write(("=" * (maxhostlen + 78)) + "\n")
         for peer in self.peers:
             if not showall and \
 		    not (CTL_PEER_STATVAL(peer.status)
@@ -304,7 +304,7 @@ usage: help [ command ]
                     sys.stderr.write(stderr, "eliding [%d]\n" % peer.associd)
                     continue
                 if not self.dogetpeers(varlist[1:], peer.associd, af):
-                    return;
+                    return
 
     # Unexposed helper tables and functions end here
 
@@ -853,7 +853,7 @@ usage: cv [ assocID ] [ name=value[,...] ]
         if associd not in [peer.associd for peer in self.peers]:
             sys.stderr.write("Unknown associd.\n")
             return
-	self.collect_display(associd=associd,variables=pstats,decodestatus=True);
+	self.collect_display(associd=associd,variables=pstats,decodestatus=True)
 
     def help_pstats(self):
         sys.stdout.write("""\
