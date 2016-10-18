@@ -315,7 +315,7 @@ set rmargin 12
         for row in self.loopstats:
             rs = row.split()
             # Python slice is too dumb to do this the easy way
-            # fields: time, fld, and rtt
+            # fields: time, time offset, and freq offset
             rc = rs[0] + ' ' + rs[1] + ' ' + rs[2] + '\n'
             plot_data += rc
         plot_data += "\ne\n"
