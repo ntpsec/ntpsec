@@ -269,8 +269,8 @@ def gnuplot(template, outfile=None):
     # would be great to capture stderr, but the Python doc says
     # that can lead to deadlock on large stderr output.  gnuplot
     # can output a lot to stderr...
-    proc = subprocess.Popen("gnuplot",
-                            shell=False, bufsize=4096,
+    # bigger buffers make it slower, use the default
+    proc = subprocess.Popen("gnuplot", shell=False,
                             stdin=subprocess.PIPE, stdout=out)
     v = sys.version_info
     if 3 <= v[0]:
@@ -1477,7 +1477,7 @@ ntpviz</a>, part of the <a href="https://www.ntpsec.org/">NTPsec project</a>
         # your webserver should be programmed the same
         index_buffer += """\
 </table>
-<a href="summary.csv" target="_blank" 
+<a href="summary.csv" target="_blank"
   type="text/csv;charset=UTF-8;header=present;">Summary as CSV file</a><br>
 </div>
 """
