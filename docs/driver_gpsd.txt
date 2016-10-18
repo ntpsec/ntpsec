@@ -4,7 +4,7 @@
 == Synopsis ==
 
 ["verse",subs="normal"]
-Bame: gpsd
+Name: gpsd
 Reference ID: GPSD
 Serial Port: /dev/gps__u__ 
 
@@ -122,11 +122,11 @@ use IBT alone over not getting synchronised at all.
 This driver can create a lot of syslog messages when things go wrong,
 and cluttering the log files is frowned upon. So we attempt to log
 persistent or recurring errors only once per hour. On the other hand,
-when tracking a problem the syslog flood throttle can get into the way.
+when tracking a problem, the syslog flood throttle can get in the way.
 
 Therefore, option _flag3_ can be used to _disable_ the flood throttle at
 any time; the throttle is engaged by default. Running with the syslog
-flood throttle disabled for lengthy time is not recommended unless the
+flood throttle disabled for extended periods is not recommended unless the
 log files are closely monitored.
 
 
@@ -154,7 +154,7 @@ signal^link:#fn2[2]^. [[fn2bl]] The PPS flag gets cleared if no PPS
 records can be acquired for some time. The unit also flushes the
 sample buffer at this point to avoid the use of stale PPS data.
 
-*Attention:* This unit uses its own PPS fudge value which must be set
+*Attention:* This unit uses its own PPS fudge value, which must be set
 as fudge +time1+. Only the fudge values +time1+ and the +flag1+ option
 have an impact on secondary units.
 
