@@ -195,6 +195,10 @@ def dump_hex_printable(xdata):
         sys.stdout.write("\n")
         llen -= rowlen
 
+class Mode6Exception(BaseException):
+    def __init__(self, message):
+        self.message = message
+
 class Mode6Session:
     "A session to a host"
 
@@ -355,7 +359,7 @@ class Mode6Session:
             bail += 1
             if bail >= (2*MAXFRAGS):
                 warn("too many packets in response; bailing out\n")
-                return SERR_TOOMUCH
+                raise Mode6Exception(SERR_TOOMUCH)
 
             if len(fragments) == 0:
                 tvo = self.primary_timeout / 1000
@@ -366,14 +370,14 @@ class Mode6Session:
                 (rd, _, _) = select.select([self.sock], [], [], tvo)
             except select.error as msg:
                 warn("select failed: %s\n" % msg[1])
-                return SERR_SELECT
+                raise Mode6Exception(SERR_SELECT)
 
             if not rd:
                 # Timed out.  Return what we have
                 if len(fragments) == 0:
                     if timeo:
                         warn("%s: timed out, nothing received\n" % self.name)
-                        return SERR_TIMEOUT
+                        raise Mode6Exception(SERR_TIMEOUT)
                 if timeo:
                     warn("%s: timed out with incomplete data\n" % self.name)
                     if self.debug:
@@ -382,7 +386,7 @@ class Mode6Session:
                             sys.stderr.write("%d: %s" % (i+1, frag.stats()))
                         sys.stderr.write("last fragment %sreceived\n",
                                     ("not " "", )[seenlastfrag])
-                    return SERR_INCOMPLETE
+                    raise Mode6Exception(SERR_INCOMPLETE)
 
             rawdata = self.sock.recv(4096)
             if self.debug:
@@ -392,7 +396,7 @@ class Mode6Session:
                 rpkt.analyze(rawdata)
             except struct.error as reason:
                 warn("packet analysis failed: %s\n" % reason)
-                return SERR_UNSPEC
+                raise Mode6Exception(SERR_UNSPEC)
 
             if rpkt.version() > NTP_VERSION or rpkt.version() < NTP_OLDVERSION:
                 if self.debug:
@@ -491,36 +495,40 @@ class Mode6Session:
                         dump_hex_printable(self.response)
                     return None
 
-    def doquery(self, opcode, associd=0, qdata="", auth=False, quiet=False):
+    def doquery(self, opcode, associd=0, qdata="", auth=False):
         "send a request and save the response"
         if not self.havehost():
-            return SERR_NOHOST
-        done = False
+            raise Mode6Exception(SERR_NOHOST)
+        retry = True
         while True:
             # Ship the request
             res = self.sendrequest(opcode, associd, qdata, auth)
             if res is not None:
                 return res
             # Get the response.
-            res = self.getresponse(opcode, associd, done)
-            if res:
+            try:
+                res = self.getresponse(opcode, associd, not retry)
+            except Mode6Exception as e:
                 if not quiet:
                     if isinstance(res, int):
                         sys.stderr.write("***Packet error %d" % res)
                     else:
                         sys.stderr.write(res.format(associd))
-                if not done and res in (SERR_TIMEOUT,SERR_INCOMPLETE):
-                    done = True
+                if retry and e.message in (SERR_TIMEOUT,SERR_INCOMPLETE):
+                    retry = False
                     continue
+                else:
+                    raise e
             break
-        # Return None on success, otherwise an error string
+        # Return data on success
         return res
 
     def readstat(self, associd=0):
         "Read peer status."
-        self.doquery(opcode=CTL_OP_READSTAT, associd=associd, quiet=True)
-        if self.response.startswith("*"):
-            return self.response
+        try:
+            self.doquery(opcode=CTL_OP_READSTAT, associd=associd)
+        except Mode6Exception as e:
+            return e.message
         idlist = []
         if associd == 0:
             for i in range(len(self.response)//4):
@@ -535,29 +543,29 @@ class Mode6Session:
             qdata = ""
         else:
             qdata = ",".join(varlist)
-        self.doquery(opcode=CTL_OP_READVAR, associd=associd, qdata=qdata, quiet=True)
-        if self.response.startswith("*"):
-            return self.response
-        else:
-            response = self.response
-            # Trim trailing NULs from the text
-            while response.endswith("\x00"):
-                response = response[:-1]
-            response = response.rstrip()
-            items = []
-            if response:
-                for pair in response.split(","):
-                    (var, val) = pair.split("=")
-                    var = var.strip()
-                    val = val.strip()
+        try:
+            self.doquery(opcode=CTL_OP_READVAR, associd=associd, qdata=qdata)
+        except Mode6Exception as e:
+            return e.message
+        response = self.response
+        # Trim trailing NULs from the text
+        while response.endswith("\x00"):
+            response = response[:-1]
+        response = response.rstrip()
+        items = []
+        if response:
+            for pair in response.split(","):
+                (var, val) = pair.split("=")
+                var = var.strip()
+                val = val.strip()
+                try:
+                    val = int(val)
+                except ValueError:
                     try:
-                        val = int(val)
+                        val = float(val)
                     except ValueError:
-                        try:
-                            val = float(val)
-                        except ValueError:
-                            if val[0] == '"' and val[-1] == '"':
-                                val = val[1:-1]
-                    items.append((var, val))
-            return dict(items)
+                        if val[0] == '"' and val[-1] == '"':
+                            val = val[1:-1]
+                items.append((var, val))
+        return dict(items)
 # end
