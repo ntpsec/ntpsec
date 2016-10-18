@@ -9,7 +9,7 @@ def probe_header_with_prerequisites(ctx, header, prerequisites, use=None):
         for hdr in prerequisites + [header]:
                 src += "#include <%s>\n" % hdr
         src += "int main() { return 0; }\n"
-        have_name = "HAVE_%s" % header.replace(".","_").replace("/","_").upper()
+        have_name = "HAVE_%s" % header.replace(".", "_").replace("/", "_").upper()
         ctx.check_cc(
                 fragment=src,
                 define_name=have_name,

@@ -340,10 +340,10 @@ def cmd_configure(ctx, config):
                 "linux/serial.h",
                 ("md5.h", ["sys/types.h"]),
                 "net/if6.h",
-                ("net/route.h", ["sys/types.h","sys/socket.h","net/if.h"]),
+                ("net/route.h", ["sys/types.h", "sys/socket.h", "net/if.h"]),
                 "netinfo/ni.h",         # Apple
                 "priv.h",               # Solaris
-                ("resolv.h", ["sys/types.h","netinet/in.h","arpa/nameser.h"]),
+                ("resolv.h", ["sys/types.h", "netinet/in.h", "arpa/nameser.h"]),
                 "semaphore.h",
                 "stdatomic.h",
                 "sys/clockctl.h",       # NetBSD
@@ -359,8 +359,8 @@ def cmd_configure(ctx, config):
         if not ctx.options.disable_lineeditlibs:
                 optional_headers += (
                         "histedit.h",   # Apple
-                        ("readline/readline.h",["stdio.h"]),
-                        ("readline/history.h", ["stdio.h","readline/readline.h"]),
+                        ("readline/readline.h", ["stdio.h"]),
+                        ("readline/history.h", ["stdio.h", "readline/readline.h"]),
                 )
         for hdr in optional_headers:
                 if isinstance(hdr, str):
