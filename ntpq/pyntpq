@@ -763,7 +763,7 @@ usage: cv [ assocID ] [ name=value[,...] ]
         )
         associd=int(line)
         # FIXME: validate the association ID.
-	self.collect_display(associd=associd,variables=pstats,decodestatus=True);
+	self.collect_display(associd=associd,variables=pstats,decodestatus=True)
 
     def help_pstats(self):
         sys.stdout.write("""\
