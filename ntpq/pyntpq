@@ -290,14 +290,18 @@ usage: help [ command ]
 
         if len(self.peers) == 0:
             if self.chosts:
-                sys.stdout.write("server=%s ", self.session.name);
-            sys.stdout.write("No association IDs returned\n");
-            return False;
+                sys.stdout.write("server=%s ", self.session.name)
+            sys.stdout.write("No association IDs returned\n")
+            return False
 
         if self.debug:
-            sys.stderr.write("\n%d associations total\n" % len(self.peers));
-	#sortassoc();
-	return True;
+            sys.stderr.write("\n%d associations total\n" % len(self.peers))
+	#sortassoc()
+	return True
+
+    def __doprintpeers(self, variables, varlist, associd, af):
+        print(variables)
+        return True
 
     def __dogetpeers(self, varlist, associd, af):
         try:
@@ -305,24 +309,29 @@ usage: help [ command ]
         except Mode6Exception as e:
             print(e.message)
             return False
-        print(variables)
-        return True
+        if not variables:
+            if len(self.chosts) > 1:
+                sys.stderr.write("server=%s ", self.session.name)
+            sys.stderr.write("***No information returned for association %d\n" \
+                             % associd)
+            return False;
+	return self.__doprintpeers(variables, varlist, associd, af);
 
     def __dopeers(self, showall, af, varlist):
         af = socket.AF_INET6 if "-6" in af else socket.AF_INET
         if not self.__dogetassoc():
-            return;
+            return
         maxhostlen = 0
 	#for host in self.chosts:
         #    if getnetnum(chosts[u].name, &netnum, fullname, af):
-        #        name_or_num = nntohost(&netnum);
-        #        sl = len(name_or_num);
-        #        maxhostlen = max(maxhostlen, sl);
+        #        name_or_num = nntohost(&netnum)
+        #        sl = len(name_or_num)
+        #        maxhostlen = max(maxhostlen, sl)
 	if len(self.chosts) > 1:
-            sys.stdout.write("%-*.*s " % (maxhostlen, maxhostlen,
-                                          "server (local)"))
+            sys.stdout.write("%-*.*s " % \
+                             (maxhostlen, maxhostlen, "server (local)"))
 	sys.stdout.write(varlist[0])
-	sys.stdout.write(("=" * (maxhostlen + 78)) + "\n");
+	sys.stdout.write(("=" * (maxhostlen + 78)) + "\n")
         for peer in self.peers:
             if not showall and \
 		    not (CTL_PEER_STATVAL(peer.status)
@@ -331,7 +340,7 @@ usage: help [ command ]
                     sys.stderr.write(stderr, "eliding [%d]\n" % peer.associd)
                 continue
             if not self.__dogetpeers(varlist[1:], peer.associd, af):
-                return;
+                return
 
     # Unexposed helper tables and functions end here
 
@@ -882,7 +891,7 @@ usage: cv [ assocID ] [ name=value[,...] ]
             sys.stderr.write("Unknown associd.\n")
             return
 	self.collect_display(associd=associd,
-                             variables=pstats, decodestatus=True);
+                             variables=pstats, decodestatus=True)
 
     def help_pstats(self):
         sys.stdout.write("""\

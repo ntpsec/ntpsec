@@ -171,7 +171,7 @@ SERR_INCOMPLETE = "***Response from server was incomplete\n"
 SERR_TOOMUCH = "***Buffer size exceeded for returned data\n"
 SERR_SELECT = "***Select call failed\n"
 SERR_NOHOST = "***No host open, use `host' command\n"
-SERR_BADLENGTH = "***Response length shuld have been a multiple of 4"
+SERR_BADLENGTH = "***Response length should have been a multiple of 4"
 
 def dump_hex_printable(xdata):
     "Dump a packet in hex, in a familiar hex format"
