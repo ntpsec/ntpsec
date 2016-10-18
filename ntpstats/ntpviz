@@ -1469,7 +1469,7 @@ ntpviz</a>, part of the <a href="https://www.ntpsec.org/">NTPsec project</a>
         index_buffer += VizStats.table_head
         for stat in stats:
             if [] == stat:
-                continue;
+                continue
             for sta in stat:
                 index_buffer += str( sta.table )
                 csvs.append(sta.csv)
