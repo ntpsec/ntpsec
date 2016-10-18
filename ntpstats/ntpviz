@@ -310,6 +310,16 @@ set rmargin 12
             sys.stderr.write("ntpviz: WARNING: no loopstats to graph\n")
             return ''
 
+        # speedup by only sending gnuplot the data it will actually use
+        plot_data = ''
+        for row in self.loopstats:
+            rs = row.split()
+            # Python slice is too dumb to do this the easy way
+            # fields: time, fld, and rtt
+            rc = rs[0] + ' ' + rs[1] + ' ' + rs[2] + '\n'
+            plot_data += rc
+        plot_data += "\ne\n"
+
         # compute clock offset
         values = [float(line.split()[1]) for line in self.loopstats]
         stats = VizStats( values, "Local Clock Time Offset")
@@ -355,8 +365,7 @@ file.</p>
         ret['html'] = stats.stats_html + stats_f.stats_html + exp
         ret['stats'] = [stats, stats_f]
         ret['title'] = "Local Clock Time/Frequency Offsets"
-        ret['plot'] = plot_template + self.dump("loopstats") + "e\n" \
-             + self.dump("loopstats") + "e\n"
+        ret['plot'] = plot_template + plot_data + plot_data
         return ret
 
     def local_temps_gnuplot(self):
@@ -506,6 +515,16 @@ line at 0ppm.  Expected values of 99%-1% percentiles: 0.4ppm</p>
             sys.stderr.write("ntpviz: WARNING: no loopstats to graph\n")
             return ''
 
+        # speedup by only sending gnuplot the data it will actually use
+        plot_data = ''
+        for row in self.loopstats:
+            rs = row.split()
+            # Python slice is too dumb to do this the easy way
+            # fields: time, fld, and rtt
+            rc = rs[0] + ' ' + rs[fld - 1] + '\n'
+            plot_data += rc
+        plot_data += "\ne\n"
+
         # grab and process the values
         values = [float(line.split()[fld - 1]) for line in self.loopstats]
         stats = VizStats( values, title, freq=freq )
@@ -548,7 +567,7 @@ set key top right box
 set style line 1 lc rgb '#0060ad' lt 1 lw 1 pt 7 ps 0   # --- blue
 set style line 2 lc rgb '#dd181f' lt 1 lw 1 pt 5 ps 0   # --- red
 plot \
- "-" using 1:($%(fld)d*%(multiplier)s) title "%(legend)s" with linespoints ls 1, \
+ "-" using 1:($2*%(multiplier)s) title "%(legend)s" with linespoints ls 1, \
  %(p99)s title "99th percentile", \
  %(p95)s title "95th percentile", \
  %(p5)s title "5th percentile", \
@@ -557,7 +576,7 @@ plot \
 
         ret = {'html' : stats.stats_html + exp, 'stats' : [stats],
                'title' : title }
-        ret['plot'] = plot_template + self.dump("loopstats") + "e\n"
+        ret['plot'] = plot_template + plot_data
         return ret
 
     def local_offset_jitter_gnuplot(self):
@@ -597,7 +616,15 @@ plot \
                 namelist.append(socket.getfqdn(key))
 
             if ip in peerdict:
-                plot_data += "\n".join(peerdict[ip]) + "\ne\n"
+                # 20% speedup by only sending gnuplot the data it will
+                # actually use
+                for row in peerdict[ip]:
+                    rs = row.split()
+                    # Python slice is too dumb to do this the easy way
+                    # fields: time, fld, and rtt
+                    rc = rs[0] + ' ' + rs[fld - 1] + ' ' + rs[4] + '\n'
+                    plot_data += rc
+                plot_data += "\ne\n"
             else:
                 sys.stderr.write("ntpviz: ERROR: No such peer as %s" % key)
                 raise SystemExit(1)
@@ -622,7 +649,8 @@ useful to see how the measured offset is behaving.</p>
 at 0s. Typical 90%% ranges may be: local serial GPS 200 ms; local PPS
 20µs</p>
 
-<p>Clock Offset is field 5 in the peerstats log file.</p>
+<p>Clock Offset is field 5 in the peerstats log file.  The Round Trip
+Time (rtt) is field 6 in the peerstats file.</p>
 """
                 else:
                     title = "Peer Offset " + str(peerlist[0])
@@ -737,7 +765,7 @@ plot \
 """ % out
 
         plot_template += percentages
-        out['fld'] = fld
+        out['fld'] = 2
         for key in peerlist:
             out['label'] = self.ip_label(key)
             plot_template += "'-' using 1:($%(fld)s*%(multiplier)s) title '%(label)s' with line, \\\n" \
@@ -745,8 +773,8 @@ plot \
 
         if 1 == rtt:
             plot_template += """\
-'-' using 1:(($4+$5/2)*%(multiplier)s) title 'offset+rtt/2' with line, \\
-'-' using 1:(($4-$5/2)*%(multiplier)s) title 'offset-rtt/2' with line
+'-' using 1:(($2+$3/2)*%(multiplier)s) title 'offset+rtt/2' with line, \\
+'-' using 1:(($2-$3/2)*%(multiplier)s) title 'offset-rtt/2' with line
 """ % stats.percs
             plot_template += plot_data + plot_data
         else:
