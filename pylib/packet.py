@@ -134,9 +134,6 @@ class Mode6Packet(Packet):
         "Return statistics on a fragment."
         return "%5d %5d\t%3d octets\n" % (self.offset, self.end(), self.count)
 
-    def endpoint(self):
-        return self.offset + len(self.extension)
-
     def send(self):
         self.session.sequence += 1
         self.sequence = self.session.sequence
@@ -489,7 +486,7 @@ class Mode6Session:
             # If there aren't any, we're done.
             if seenlastfrag and fragments[0].offset == 0:
                 for f in range(1, len(fragments)):
-                    if fragments[f-1].endpoint() != fragments[f].offset:
+                    if fragments[f-1].end() != fragments[f].offset:
                         break
                 else:
                     #warn("%d packets reassembled\n" % len(fragments))
@@ -498,6 +495,7 @@ class Mode6Session:
                         sys.stdout.write("Response packet:\n")
                         dump_hex_printable(self.response)
                     return None
+                break
 
     def doquery(self, opcode, associd=0, qdata="", auth=False):
         "send a request and save the response"
