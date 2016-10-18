@@ -108,7 +108,7 @@ class NTPStats:
                 # Morph first field into Unix time with fractional seconds
                 for line in lines:
                     line = line.strip(' \0\r\n\t')
-                    line = NTPStats.unixize(line,starttime, endtime)
+                    line = NTPStats.unixize(line, starttime, endtime)
                     if line is not None:
                         lines1.append( line)
 

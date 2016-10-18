@@ -14,7 +14,7 @@ int main () {
 
 @conf
 def check_structfield(ctx, fld, type, hdrs, mandatory=False):
-        name = "STRUCT_%s_HAS_%s" % (type.upper(), fld.upper().replace('.','_'))
+        name = "STRUCT_%s_HAS_%s" % (type.upper(), fld.upper().replace('.', '_'))
         src = ""
         for hdr in hdrs:
                 src += "#include <%s>\n" % hdr
