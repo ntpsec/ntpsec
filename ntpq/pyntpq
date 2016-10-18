@@ -189,7 +189,7 @@ def prettydate(d):
     # FIXME: we need to unpack this date.
     return d[2:]
 
-class ntpq_interpreter(cmd.Cmd):
+class Ntpq(cmd.Cmd):
     "ntpq command interpreter"
 
     def __init__(self, session):
@@ -207,9 +207,9 @@ class ntpq_interpreter(cmd.Cmd):
         self.wideremote = False		# show wide remote names?
         self.ccmds = []			# Queued commands
         self.chosts = []		# Command-line hosts
+        self.peers = []			# Data from NTP peers.
         self.debug = 0
         self.pktversion = NTP_VERSION
-        self.peers = []
 
     def emptyline(self):
         "Called when an empty line is entered in response to the prompt."
@@ -281,20 +281,43 @@ usage: help [ command ]
 	"srchost",	# 15
         )
 
-    def __dopeers(showall, af, varlist, dstaddr):
+    def __dogetassoc(self):
+        try:
+            self.peers = self.session.readstat()
+        except Mode6Exception as e:
+            print(e.message)
+            return False
+
+        if len(self.peers) == 0:
+            if self.chosts:
+                sys.stdout.write("server=%s ", self.session.name);
+            sys.stdout.write("No association IDs returned\n");
+            return False;
+
+        if self.debug:
+            sys.stderr.write("\n%d associations total\n" % len(self.peers));
+	#sortassoc();
+	return True;
+
+    def __dogetpeers(self, varlist, associd, af):
+        variables = self.session.readvar(associd)
+        print(variables)
+        return True
+
+    def __dopeers(self, showall, af, varlist):
         af = socket.AF_INET6 if "-6" in af else socket.AF_INET
-        if not dogetassoc():
+        if not self.__dogetassoc():
             return;
         maxhostlen = 0
 	#for host in self.chosts:
-        #    if (getnetnum(chosts[u].name, &netnum, fullname, af))
+        #    if getnetnum(chosts[u].name, &netnum, fullname, af):
         #        name_or_num = nntohost(&netnum);
-        #        sl = strlen(name_or_num);
+        #        sl = len(name_or_num);
         #        maxhostlen = max(maxhostlen, sl);
 	if len(self.chosts) > 1:
             sys.stdout.write("%-*.*s " % (maxhostlen, maxhostlen,
                                           "server (local)"))
-	sys.stout.write(varlist[0])
+	sys.stdout.write(varlist[0])
 	sys.stdout.write(("=" * (maxhostlen + 78)) + "\n");
         for peer in self.peers:
             if not showall and \
@@ -302,9 +325,9 @@ usage: help [ command ]
 		      & (CTL_PST_CONFIG|CTL_PST_REACH)):
                 if self.debug:
                     sys.stderr.write(stderr, "eliding [%d]\n" % peer.associd)
-                    continue
-                if not self.dogetpeers(varlist[1:], peer.associd, af):
-                    return;
+                continue
+            if not self.__dogetpeers(varlist[1:], peer.associd, af):
+                return;
 
     # Unexposed helper tables and functions end here
 
@@ -376,7 +399,7 @@ usage: delay [ msec ]
             elif tokens[0] == '-6':
                 session.ai_family = socket.AF_INET6
                 tokens.pop(0)
-            if tokens and self.session.openhost(tokens[0],session.ai_family):
+            if tokens and self.session.openhost(tokens[0], session.ai_family):
                 print("current host set to %s" % self.session.name)
             elif self.session.havehost():
                 print("current host remains %s" % self.session.name)
@@ -853,7 +876,8 @@ usage: cv [ assocID ] [ name=value[,...] ]
         if associd not in [peer.associd for peer in self.peers]:
             sys.stderr.write("Unknown associd.\n")
             return
-	self.collect_display(associd=associd,variables=pstats,decodestatus=True);
+	self.collect_display(associd=associd,
+                             variables=pstats, decodestatus=True);
 
     def help_pstats(self):
         sys.stdout.write("""\
@@ -863,7 +887,7 @@ usage: pstats assocID
 
     def do_peers(self, line):
         "obtain and print a list of the server's peers [IP version]"
-        self.__dopeers(showall=False, af=line, varlist=__peervarlist)
+        self.__dopeers(showall=False, af=line, varlist=Ntpq.__peervarlist)
 
     def help_peers(self):
         sys.stdout.write("""\
@@ -873,7 +897,7 @@ usage: peers [ -4|-6 ]
 
     def do_apeers(self, line):
         "obtain and print a list of the server's peers and their assocIDs [IP version]"
-        self.__dopeers(showall=False, af=line, varlist=__apeervarlist)
+        self.__dopeers(showall=False, af=line, varlist=Ntpq.__apeervarlist)
 
     def help_apeers(self):
         sys.stdout.write("""\
@@ -883,7 +907,7 @@ usage: apeers [ -4|-6 ]
 
     def do_lpeers(self, line):
         "obtain and print a list of all peers and clients [IP version]"
-        self.__dopeers(showall=True, af=line, varlist=__peervarlist)
+        self.__dopeers(showall=True, af=line, varlist=Ntpq.__peervarlist)
 
     def help_lpeers(self):
         sys.stdout.write("""\
@@ -893,7 +917,7 @@ usage: lpeers [ -4|-6 ]
 
     def do_opeers(self, line):
         "print peer list the old way, with dstadr shown rather than refid [IP version]"
-        self.__dopeers(showall=False, af=line, varlist=__opeervarlist)
+        self.__dopeers(showall=False, af=line, varlist=Ntpq.__opeervarlist)
 
     def help_opeers(self):
         sys.stdout.write("""\
@@ -903,7 +927,7 @@ usage: opeers [ -4|-6 ]
 
     def do_lopeers(self, line):
         "obtain and print a list of all peers and clients showing dstadr [IP version]"
-        self.__dopeers(showall=True, af=line, varlist=__opeervarlist)
+        self.__dopeers(showall=True, af=line, varlist=Ntpq.__opeervarlist)
 
     def help_lopeers(self):
         sys.stdout.write("""\
@@ -1180,10 +1204,10 @@ if __name__ == '__main__':
     try:
         (options, arguments) = getopt.getopt(sys.argv[1:],
                                              "46c:dD:hinOpVw",
-                                             ["ipv4","ipv6","command",
-                                              "debug","set-debug-level",
+                                             ["ipv4","ipv6", "command",
+                                              "debug", "set-debug-level",
                                               "help", "interactive", "numeric",
-                                              "old-rv","peers","version",
+                                              "old-rv", "peers", "version",
                                               "wide"])
     except getopt.GetoptError as e:
         print(e)
@@ -1191,7 +1215,7 @@ if __name__ == '__main__':
     progname = sys.argv[0]
 
     session = Mode6Session()
-    interpreter = ntpq_interpreter(session)
+    interpreter = Ntpq(session)
 
     for (switch, val) in options:
         if switch in ("-4", "--ipv4"):
