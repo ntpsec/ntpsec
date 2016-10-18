@@ -16,4 +16,3 @@ int main() {
                 msg = "Checking for multicast capability",
                 mandatory = False,
                 comment = "IP multicast capability")
-

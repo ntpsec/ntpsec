@@ -40,5 +40,3 @@ def probe_function_with_prerequisites(ctx, function, prerequisites, use=None):
         return ctx.get_define(have_name)
 
 # end
-
-
