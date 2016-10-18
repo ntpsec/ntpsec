@@ -146,6 +146,19 @@ class Mode6Packet(Packet):
          self.associd,
          self.offset) = Packet.analyze(self, data)
 
+class Peer:
+    "The information we have about an NTP peer."
+    def __init__(self, session, associd, status):
+        self.session = session
+        self.associd = associd
+        self.status = status
+        self.variables = {}
+    def readvars(self):
+        self.variables = self.session.readvars()
+    def __str__(self):
+        return "<Peer: associd=%s status=%s>" % (self.associd, self.status)
+    __repr__ = __str__
+
 SERR_BADFMT = "***Server reports a bad format request packet\n"
 SERR_PERMISSION = "***Server disallowed request (authentication?)\n"
 SERR_BADOP = "***Server reports a bad opcode in request\n"
@@ -512,7 +525,8 @@ class Mode6Session:
         if associd == 0:
             for i in range(len(self.response)//4):
                 data = self.response[4*i:4*i+4]
-                idlist.append(struct.unpack("!HH", data))
+                (associd, status) = struct.unpack("!HH", data)
+                idlist.append(Peer(self, associd, status))
         return idlist
 
     def readvar(self, associd=0, varlist=None):
