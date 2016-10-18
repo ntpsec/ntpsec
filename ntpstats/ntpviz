@@ -190,8 +190,8 @@ class VizStats(NTPStats):
         # pretty print the values
         self.percs_f = {}
         for k, v in self.percs.items():
-            self.percs[k]   = round(v,3)
-            self.percs_f[k] = format(v,",.3f")
+            self.percs[k]   = round(v, 3)
+            self.percs_f[k] = format(v, ",.3f")
 
         # Python is stupid about nested objects, so add in some other stuff
         self.percs_f["multiplier"] = self.percs["multiplier"] = self.multiplier
@@ -275,7 +275,7 @@ def gnuplot(template, outfile=None):
     v = sys.version_info
     if 3 <= v[0]:
         # next line works in Python 3, not Python 2
-        proc.stdin.write(template.encode('ascii','ignore'))
+        proc.stdin.write(template.encode('ascii', 'ignore'))
     else:
         # next line works in Python 2, not Python 3
         proc.stdin.write(template)
