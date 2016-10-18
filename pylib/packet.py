@@ -23,6 +23,43 @@ NTP_VERSION     = 4     # Current version
 
 MODE_CONTROL = 6
 
+# Event codes. Used for reporting errors/events to the control module
+PEER_EVENT	= 0x080	# this is a peer event */
+CRPT_EVENT	= 0x100	# this is a crypto event */
+
+# System event codes
+EVNT_UNSPEC	= 0	# unspecified
+EVNT_NSET	= 1	# freq not set
+EVNT_FSET	= 2	# freq set
+EVNT_SPIK	= 3	# spike detect
+EVNT_FREQ	= 4	# freq mode
+EVNT_SYNC	= 5	# clock sync
+EVNT_SYSRESTART	= 6	# restart
+EVNT_SYSFAULT	= 7	# panic stop
+EVNT_NOPEER	= 8	# no sys peer
+EVNT_ARMED	= 9	# leap armed
+EVNT_DISARMED	= 10	# leap disarmed
+EVNT_LEAP	= 11	# leap event
+EVNT_CLOCKRESET	= 12	# clock step
+EVNT_KERN	= 13	# kernel event
+EVNT_TAI	= 14	# TAI
+EVNT_LEAPVAL	= 15	# stale leapsecond values
+
+# Peer event codes
+PEVNT_MOBIL	= (1 | PEER_EVENT) # mobilize
+PEVNT_DEMOBIL	= (2 | PEER_EVENT) # demobilize
+PEVNT_UNREACH	= (3 | PEER_EVENT) # unreachable
+PEVNT_REACH	= (4 | PEER_EVENT) # reachable
+PEVNT_RESTART	= (5 | PEER_EVENT) # restart
+PEVNT_REPLY	= (6 | PEER_EVENT) # no reply
+PEVNT_RATE	= (7 | PEER_EVENT) # rate exceeded
+PEVNT_DENY	= (8 | PEER_EVENT) # access denied
+PEVNT_ARMED	= (9 | PEER_EVENT) # leap armed
+PEVNT_NEWPEER	= (10 | PEER_EVENT) # sys peer
+PEVNT_CLOCK	= (11 | PEER_EVENT) # clock event
+PEVNT_AUTH	= (12 | PEER_EVENT) # bad auth
+PEVNT_POPCORN	= (13 | PEER_EVENT) # popcorn
+
 # From ntpq.h:
 
 # Limit on packets in a single response.  Increasing this value to

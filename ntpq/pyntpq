@@ -284,6 +284,7 @@ usage: help [ command ]
     def __dogetassoc(self):
         try:
             self.peers = self.session.readstat()
+            self.peers.sort(key=lambda a: a.associd)
         except Mode6Exception as e:
             print(e.message)
             return False
@@ -298,6 +299,86 @@ usage: help [ command ]
             sys.stderr.write("\n%d associations total\n" % len(self.peers))
 	#sortassoc()
 	return True
+
+    def __printassoc(self, showall):
+	condition = "";
+        if not self.peers:
+            sys.stdout.write("No association ID's in list\n");
+            return;
+	sys.stdout.write("\nind assid status  conf reach auth condition  last_event cnt\n");
+        sys.stdout.write("===========================================================\n");
+        for (i, peer) in enumerate(self.peers):
+            statval = CTL_PEER_STATVAL(peer.status)
+            if not showall and (statval & (CTL_PST_CONFIG|CTL_PST_REACH)) == 0:
+                continue
+            event = CTL_PEER_EVENT(peer.status)
+            event_count = CTL_PEER_NEVNT(peer.status)
+            if statval & CTL_PST_CONFIG:
+                conf = "yes"
+            else:
+                conf = "no"
+            if statval & CTL_PST_BCAST:
+                    reach = "none"
+                    if statval & CTL_PST_AUTHENABLE:
+                            auth = "yes"
+                    else:
+                            auth = "none"
+            elif statval & CTL_PST_REACH:
+                reach = "yes"
+            else:
+                reach = "no"
+            if (statval & CTL_PST_AUTHENABLE) == 0:
+                auth = "none"
+            elif statval & CTL_PST_AUTHENTIC:
+                auth = "ok "
+            else:
+                auth = "bad"
+            if self.pktversion > NTP_OLDVERSION:
+                seldict = {
+                    CTL_PST_SEL_REJECT: "reject",
+                    CTL_PST_SEL_SANE: "falsetick",
+                    CTL_PST_SEL_CORRECT: "excess",
+                    CTL_PST_SEL_SELCAND: "outlier",
+                    CTL_PST_SEL_SYNCCAND: "candidate",
+                    CTL_PST_SEL_EXCESS: "backup",
+                    CTL_PST_SEL_SYSPEER: "sys.peer",
+                    CTL_PST_SEL_PPS: "pps.peer",
+                    }
+                condition = seldict[statval & 0x7] 
+            else:
+                if (statval & 0x3) == OLD_CTL_PST_SEL_REJECT:
+                    if (statval & OLD_CTL_PST_SANE) == 0:
+                        condition = "insane"
+                    elif (statval & OLD_CTL_PST_DISP) == 0:
+                        condition = "hi_disp"
+                    else:
+                        condition = ""
+                elif (statval & 0x3) ==  OLD_CTL_PST_SEL_SELCAND:
+                        condition = "sel_cand"
+                elif (statval & 0x3) ==  OLD_CTL_PST_SEL_SYNCCAND:
+                    condition = "sync_cand"
+                elif (statval & 0x3) ==  OLD_CTL_PST_SEL_SYSPEER:
+                    condition = "sys_peer"
+            event_dict = {
+                PEVNT_MOBIL: "mobilize",
+                PEVNT_DEMOBIL: "demobilize",
+                PEVNT_REACH: "reachable",
+                PEVNT_UNREACH: "unreachable",
+                PEVNT_RESTART: "restart",
+                PEVNT_REPLY: "no_reply",
+                PEVNT_RATE: "rate_exceeded",
+                PEVNT_DENY: "access_denied",
+                PEVNT_ARMED: "leap_armed",
+                PEVNT_NEWPEER: "sys_peer",
+                PEVNT_CLOCK: "clock_alarm",
+                }
+            last_event = event_dict.get(PEER_EVENT|event, "")
+            display = \
+                     "%-3s %5u  %04x   %3.3s  %4s  %4.4s %9.9s %11s %2lu" % \
+                     (i + 1, peer.associd,
+                     peer.status, conf, reach, auth,
+                     condition, last_event, event_count)
+            sys.stdout.write(display.strip() + "\n")
 
     def __doprintpeers(self, variables, varlist, associd, af):
         print(variables)
@@ -633,7 +714,8 @@ usage: keytype [ digest-name ]
 
     def do_associations(self, line):
         "print list of association IDs and statuses for the server's peers"
-        pass
+        if self.__dogetassoc():
+            self.__printassoc(showall=False)
 
     def help_associations(self):
         sys.stdout.write("""\
@@ -643,7 +725,7 @@ usage: associations
 
     def do_passociations(self, line):
         "print list of associations returned by last associations command"
-        pass
+        self.__printassoc(showall=False)
 
     def help_passociations(self):
         sys.stdout.write("""\
@@ -653,7 +735,8 @@ usage: passociations
 
     def do_lassociations(self, line):
         "print list of associations including all client information"
-        pass
+        if self.__dogetassoc():
+            self.__printassoc(showall=True)
 
     def help_lassociations(self):
         sys.stdout.write("""\
@@ -663,7 +746,7 @@ usage: lassociations
 
     def do_lpassociations(self, line):
         "print last obtained list of associations, including client information"
-        pass
+        self.__printassoc(showall=True)
 
     def help_lpassociations(self):
         sys.stdout.write("""\
