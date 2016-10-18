@@ -282,18 +282,6 @@ def gnuplot(template, outfile=None):
     proc.stdin.close()
     return proc.wait()
 
-def plotwrap(imagename, image, outfile):
-    "Generate an image and index section for a GNUPLOT section."
-    gnuplot(image, os.path.join(outdir, imagename + ".png"))
-    div_name = imagename.replace('-', ' ')
-    div = '''\
-<div>
-  <h3>%s</h3>
-  <img src='%s.png' alt='%s plot'>
-</div>
-''' % (div_name, imagename.replace(':', '%3A'), div_name)
-    outfile.write(div)
-
 class NTPViz(NTPStats):
     "Class for visualizing statistics from a single server."
     # Python takes single quotes here. Since no % substitution
@@ -1495,7 +1483,7 @@ ntpviz</a>, part of the <a href="https://www.ntpsec.org/">NTPsec project</a>
     os.remove(csv_filename)
     os.rename( csv_filename + ".tmp", csv_filename)
 
-    ow.remove( index_filename)
+    os.remove( index_filename)
     os.rename( index_filename + ".tmp", index_filename)
 
 
