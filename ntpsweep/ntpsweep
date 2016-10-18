@@ -47,7 +47,7 @@ def scan_host(host, level):
     if host in known_host_info:
         known_host = True
     else:
-	session = ntp.packet.ntpq_session()
+	session = ntp.packet.Mode6session()
         session.openhost(host)
         sysvars = session.readvars()
 

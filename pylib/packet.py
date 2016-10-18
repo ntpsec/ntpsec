@@ -57,14 +57,14 @@ NERR_RESTRICT   = 7
 
 NERR_NORESOURCE = NERR_PERMISSION       # wish there was a different code
 
-class ntp_packet:
+class Packet:
     "Encapsulate an NTP fragment"
     # The following two methods are copied from macros in includes/control.h
     @staticmethod
     def VN_MODE(v, m):          return ((((v) & 7) << 3) | ((m) & 0x7))
 
     @staticmethod
-    def PKT_LI_VN_MODE(l,v,m):  return ((((l) & 3) << 6) | ntp_packet.VN_MODE((v), (m)))
+    def PKT_LI_VN_MODE(l,v,m):  return ((((l) & 3) << 6) | Packet.VN_MODE((v), (m)))
 
     def __init__(self, session, version, mode):
         self.session = session  # Where to get session context
@@ -73,13 +73,13 @@ class ntp_packet:
         # Subclasses have four uint16_t fields here
         self.count = 0          # octet count of extension data
         self.extension = ''     # extension data
-        self.li_vn_mode = ntp_packet.PKT_LI_VN_MODE(0, version, mode)
+        self.li_vn_mode = Packet.PKT_LI_VN_MODE(0, version, mode)
     format = "!BBHHHHH"
 
     def send(self, payload1, payload2, payload3, payload4):
         "Send the packet and its payload in association with a session"
         self.count = len(self.extension)
-        body = struct.pack(ntp_packet.format,
+        body = struct.pack(Packet.format,
                              self.li_vn_mode,
                              self.r_m_e_op,
                              payload1, payload2, payload3, payload4,
@@ -90,7 +90,7 @@ class ntp_packet:
         (self.li_vn_mode,
          self.r_m_e_op,
          payload1, payload2, payload3, payload4,
-         self.count) = struct.unpack(ntp_packet.format, rawdata[:12])
+         self.count) = struct.unpack(Packet.format, rawdata[:12])
         self.data = rawdata[12:]
         return (payload1, payload2, payload3, payload4)
 
@@ -103,11 +103,11 @@ class ntp_packet:
     def version(self):
         return (self.li_vn_mode >> 3) & 0x7
 
-class control_frag(ntp_packet):
+class Mode6Packet(Packet):
     "ntpq request/response "
 
     def __init__(self, session, opcode=0, associd=0, qdata=''):
-        ntp_packet.__init__(self, session, session.pktversion, MODE_CONTROL)
+        Packet.__init__(self, session, session.pktversion, MODE_CONTROL)
         self.r_m_e_op = opcode  # ntpq operation code
         self.sequence = 0       # sequence number of request (uint16_t)
         self.status = 0         # status word for association (uint16_t)
@@ -137,14 +137,14 @@ class control_frag(ntp_packet):
     def send(self):
         self.session.sequence += 1
         self.sequence = self.session.sequence
-        ntp_packet.send(self,
+        Packet.send(self,
                         self.sequence, self.status, self.associd, self.offset)
 
     def analyze(self, data):
         (self.sequence,
          self.status,
          self.associd,
-         self.offset) = ntp_packet.analyze(self, data)
+         self.offset) = Packet.analyze(self, data)
 
 SERR_BADFMT = "***Server reports a bad format request packet\n"
 SERR_PERMISSION = "***Server disallowed request (authentication?)\n"
@@ -182,7 +182,7 @@ def dump_hex_printable(xdata):
         sys.stdout.write("\n")
         llen -= rowlen
 
-class ntpq_session:
+class Mode6Session:
     "A session to a host"
 
     def __init__(self):
@@ -310,7 +310,7 @@ class ntpq_session:
             return -1
 
         # Assemble the packet
-        pkt = control_frag(self, opcode, associd, qdata)
+        pkt = Mode6Packet(self, opcode, associd, qdata)
 
         # If it isn't authenticated we can just send it.  Otherwise
         # we're going to have to think about it a little.
@@ -374,7 +374,7 @@ class ntpq_session:
             rawdata = self.sock.recv(4096)
             if self.debug:
                 warn("Received %d octets\n" % len(rawdata))
-            rpkt = control_frag(self)
+            rpkt = Mode6Packet(self)
             try:
                 rpkt.analyze(rawdata)
             except struct.error as reason:
