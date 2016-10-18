@@ -209,6 +209,7 @@ class ntpq_interpreter(cmd.Cmd):
         self.chosts = []		# Command-line hosts
         self.debug = 0
         self.pktversion = NTP_VERSION
+        self.peers = []
 
     def emptyline(self):
         "Called when an empty line is entered in response to the prompt."
@@ -219,6 +220,93 @@ class ntpq_interpreter(cmd.Cmd):
 function: tell the use and syntax of commands
 usage: help [ command ]
 """)
+
+    # Unexposed helper tables and functions begin here
+
+    # Each of these tuples defines a display mode.  The first member
+    # is the table header for the mode; the remainder are the peer
+    # variables to be listed beneath.
+    __opeervarlist = (
+        "     remote           local      st t when poll reach   delay   offset    disp\n",
+	"srcadr",	# 0
+	"dstadr",	# 1
+	"stratum",	# 2
+	"hpoll",	# 3
+	"ppoll",	# 4
+	"reach",	# 5
+	"delay",	# 6
+	"offset",	# 7
+	"jitter",	# 8
+	"dispersion",	# 9
+	"rec",  	# 10
+	"reftime",	# 11
+	"srcport",	# 12
+	"hmode",	# 13
+        )
+    __peervarlist = (
+        "     remote           refid      st t when poll reach   delay   offset  jitter\n",
+	"srcadr",	# 0
+	"refid",	# 1
+	"stratum",	# 2
+	"hpoll",	# 3
+	"ppoll",	# 4
+	"reach",	# 5
+	"delay",	# 6
+	"offset",	# 7
+	"jitter",	# 8
+	"dispersion",	# 9
+	"rec",  	# 10
+	"reftime",	# 11
+	"srcport",	# 12
+	"hmode",	# 13
+	"srchost",	# 14
+        )
+    __apeervarlist = (
+        "     remote       refid   assid  st t when poll reach   delay   offset  jitter\n",
+	"srcadr",	# 0
+	"refid",	# 1
+	"assid",	# 2
+	"stratum",	# 3
+	"hpoll",	# 4
+	"ppoll",	# 5
+	"reach",	# 6
+	"delay",	# 7
+	"offset",	# 8
+	"jitter",	# 9
+	"dispersion",	# 10
+	"rec",  	# 11
+	"reftime",	# 12
+	"srcport",	# 13
+	"hmode",	# 14
+	"srchost",	# 15
+        )
+
+    def __dopeers(showall, af, varlist, dstaddr):
+        af = socket.AF_INET6 if "-6" in af else socket.AF_INET
+        if not dogetassoc():
+            return;
+        maxhostlen = 0
+	#for host in self.chosts:
+        #    if (getnetnum(chosts[u].name, &netnum, fullname, af))
+        #        name_or_num = nntohost(&netnum);
+        #        sl = strlen(name_or_num);
+        #        maxhostlen = max(maxhostlen, sl);
+	if len(self.chosts) > 1:
+            sys.stdout.write("%-*.*s " % (maxhostlen, maxhostlen,
+                                          "server (local)"))
+	sys.stout.write(varlist[0])
+	sys.stdout.write(("=" * (maxhostlen + 78)) + "\n");
+        for peer in self.peers:
+            if not showall and \
+		    not (CTL_PEER_STATVAL(peer.status)
+		      & (CTL_PST_CONFIG|CTL_PST_REACH)):
+                if self.debug:
+                    sys.stderr.write(stderr, "eliding [%d]\n" % peer.associd)
+                    continue
+                if not self.dogetpeers(varlist[1:], peer.associd, af):
+                    return;
+
+    # Unexposed helper tables and functions end here
 
     def do_EOF(self, _unused):
         "exit ntpq"
@@ -762,7 +850,9 @@ usage: cv [ assocID ] [ name=value[,...] ]
             ("candidate",	"candidate order:     ", NTP_STR),
         )
         associd=int(line)
-        # FIXME: validate the association ID.
+        if associd not in [peer.associd for peer in self.peers]:
+            sys.stderr.write("Unknown associd.\n")
+            return
 	self.collect_display(associd=associd,variables=pstats,decodestatus=True);
 
     def help_pstats(self):
@@ -773,7 +863,7 @@ usage: pstats assocID
 
     def do_peers(self, line):
         "obtain and print a list of the server's peers [IP version]"
-        print(self.session.readstat())
+        self.__dopeers(showall=False, af=line, varlist=__peervarlist)
 
     def help_peers(self):
         sys.stdout.write("""\
@@ -783,7 +873,7 @@ usage: peers [ -4|-6 ]
 
     def do_apeers(self, line):
         "obtain and print a list of the server's peers and their assocIDs [IP version]"
-        pass
+        self.__dopeers(showall=False, af=line, varlist=__apeervarlist)
 
     def help_apeers(self):
         sys.stdout.write("""\
@@ -793,7 +883,7 @@ usage: apeers [ -4|-6 ]
 
     def do_lpeers(self, line):
         "obtain and print a list of all peers and clients [IP version]"
-        pass
+        self.__dopeers(showall=True, af=line, varlist=__peervarlist)
 
     def help_lpeers(self):
         sys.stdout.write("""\
@@ -803,7 +893,7 @@ usage: lpeers [ -4|-6 ]
 
     def do_opeers(self, line):
         "print peer list the old way, with dstadr shown rather than refid [IP version]"
-        pass
+        self.__dopeers(showall=False, af=line, varlist=__opeervarlist)
 
     def help_opeers(self):
         sys.stdout.write("""\
@@ -813,7 +903,7 @@ usage: opeers [ -4|-6 ]
 
     def do_lopeers(self, line):
         "obtain and print a list of all peers and clients showing dstadr [IP version]"
-        pass
+        self.__dopeers(showall=True, af=line, varlist=__opeervarlist)
 
     def help_lopeers(self):
         sys.stdout.write("""\
