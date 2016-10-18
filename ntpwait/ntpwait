@@ -145,7 +145,7 @@ if __name__ == "__main__":
         sys.stdout.write("Waiting for ntpd to synchronize...  ")
 
     for i in range(1, tries):
-        session = ntpq_session()
+        session = Mode6Session()
         #session.debug = 4
         if not session.openhost("localhost"):
             if verbose:

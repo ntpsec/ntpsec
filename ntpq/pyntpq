@@ -1100,7 +1100,7 @@ if __name__ == '__main__':
         raise SystemExit(1)
     progname = sys.argv[0]
 
-    session = ntpq_session()
+    session = Mode6Session()
     interpreter = ntpq_interpreter(session)
 
     for (switch, val) in options:
