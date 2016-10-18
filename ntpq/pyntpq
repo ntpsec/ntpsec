@@ -300,7 +300,11 @@ usage: help [ command ]
 	return True;
 
     def __dogetpeers(self, varlist, associd, af):
-        variables = self.session.readvar(associd)
+        try:
+            variables = self.session.readvar(associd)
+        except Mode6Exception as e:
+            print(e.message)
+            return False
         print(variables)
         return True
 
@@ -354,9 +358,10 @@ usage: timeout [ msec ]
 
     def collect_display(self, associd, variables, decodestatus):
         "Query and display a collection of variables from the system."
-        msg = self.session.readvar(associd, [v[0] for v in variables])
-        if type(msg) == str:
-            print(msg)
+        try:
+            msg = self.session.readvar(associd, [v[0] for v in variables])
+        except Mode6Exception:
+            print(e.message)
             return
         if decodestatus:
             sys.stdout.write("associd=%u status=%04x %s,\n" %

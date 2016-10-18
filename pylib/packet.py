@@ -534,15 +534,12 @@ class Mode6Session:
         return idlist
 
     def readvar(self, associd=0, varlist=None):
-        "Read system vars from the host as a dict, or return an error string."
+        "Read system vars from the host as a dict, or throw an exception."
         if varlist == None:
             qdata = ""
         else:
             qdata = ",".join(varlist)
-        try:
-            self.doquery(opcode=CTL_OP_READVAR, associd=associd, qdata=qdata)
-        except Mode6Exception as e:
-            return e.message
+        self.doquery(opcode=CTL_OP_READVAR, associd=associd, qdata=qdata)
         response = self.response
         # Trim trailing NULs from the text
         while response.endswith("\x00"):
