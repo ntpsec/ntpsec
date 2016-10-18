@@ -24,6 +24,7 @@ Python by ESR, concept and GNUPLOT code by Dan Drown.
 from __future__ import print_function, division
 
 import argparse
+import csv
 import re
 import atexit, binascii, collections, os, socket, sys, time
 from ntp.statfiles import *
@@ -93,10 +94,9 @@ class VizStats(NTPStats):
     multiplier  = 1
 
     # observe RFC 4180, end lines with CRLF
-    csv_head =  """\
-Name, Min, 1%, 5%, 50%, 95%, 99%, Max,, 90% Range, 98% Range, StdDev, , \
-Mean, Units\r
-"""
+    csv_head =  [
+            "Name", "Min", "1%", "5%", "50%", "95%", "99%", "Max", "",
+            "90% Range", "98% Range", "StdDev", "", "Mean", "Units"]
 
     table_head =  """\
 <table style="text-align:right;">
@@ -233,18 +233,20 @@ Mean, Units\r
 </table>
 """ % self.percs_f
 
-        s =  """\
-%(title)s, %(p0)s, %(p1)s, %(p5)s, %(p50)s, %(p95)s, %(p99)s, %(p100)s, , \
- %(r90)s, %(r98)s, %(pstd)s, , %(mu)s, %(unit)s\
-"""
+        s =  ["%(title)s", "%(p0)s", "%(p1)s", "%(p5)s", "%(p50)s", "%(p95)s",
+              " %(p99)s", "%(p100)s", "", "%(r90)s", "%(r98)s", "%(pstd)s",
+              "", "%(mu)s", "%(unit)s"]
 
-        self.csv   =  s % self.percs + '\r\n'    # RFC4180 says CRLF
-        self.table =  s % self.percs_f + '\n'
+        # csv is raw, html table is autoranged
+        self.csv   =  [ x % self.percs for x in s]
+        self.table =  [ x % self.percs_f for x in s]
+        self.table = "</td><td>".join(self.table)
 
-        self.table = '<tr style="vertical-align:top;">' + \
-                     '<td style="text-align:left;">' + \
-                            self.table.replace( ", ", "</td><td>") + \
-                           "</td></tr>\n"
+        self.table = '''\
+<tr style="vertical-align:top;">
+ <td style="text-align:left;">%s</td>
+</tr>
+''' % self.table
 
         return
 
@@ -1445,7 +1447,7 @@ ntpviz</a>, part of the <a href="https://www.ntpsec.org/">NTPsec project</a>
             index_buffer += "</div>\n"
 
     # dump stats
-    csvs = ''
+    csvs = []
     if True:
         index_buffer += '<div id="Summary"><h2>Summary</h2>\n'
         index_buffer += VizStats.table_head
@@ -1454,13 +1456,13 @@ ntpviz</a>, part of the <a href="https://www.ntpsec.org/">NTPsec project</a>
                 continue;
             for sta in stat:
                 index_buffer += str( sta.table )
-                csvs += sta.csv
+                csvs.append(sta.csv)
         # RFC4180 specifies the mime-type of a csv
         # your webserver should be programmed the same
         index_buffer += """\
 </table>
 <a href="summary.csv" target="_blank" 
-  type="text/csv; charset=UTF-8; header=present;">Summary as CSV file</a><br>
+  type="text/csv;charset=UTF-8;header=present;">Summary as CSV file</a><br>
 </div>
 """
 
@@ -1476,14 +1478,21 @@ ntpviz</a>, part of the <a href="https://www.ntpsec.org/">NTPsec project</a>
     index_buffer += index_trailer
 
     # and send the file buffer
-    with open(os.path.join(args.outdir, "index.html"), "w") as ifile:
+    index_filename = os.path.join(args.outdir, "index.html")
+    with open(index_filename + ".tmp", "wb") as ifile:
         ifile.write(index_buffer)
 
-    # create csv file
+    # create csv file, as a tmp file
     csv_filename = os.path.join(args.outdir, "summary.csv")
-    with open( csv_filename, "w" ) as csv_file:
-        csv_file.write(VizStats.csv_head)
-        csv_file.write(csvs)
+    with open( csv_filename + ".tmp", "wb" ) as csv_file:
+        csv_ob = csv.writer(csv_file)
+        csv_ob.writerow(VizStats.csv_head)
+        for row in csvs:
+            csv_ob.writerow(row)
+
+    # move new index and summary into place
+    os.rename( csv_filename + ".tmp", csv_filename)
+    os.rename( index_filename + ".tmp", index_filename)
 
 
 # end
