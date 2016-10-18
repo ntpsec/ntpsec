@@ -1508,10 +1508,13 @@ ntpviz</a>, part of the <a href="https://www.ntpsec.org/">NTPsec project</a>
 
     # move new index and summary into place
     # windows python 2.7, 3.6 has no working rename, so delete and move
-    os.remove(csv_filename)
-    os.rename( csv_filename + ".tmp", csv_filename)
+    try:
+        os.remove(csv_filename)
+        os.remove( index_filename)
+    except:
+        pass
 
-    os.remove( index_filename)
+    os.rename( csv_filename + ".tmp", csv_filename)
     os.rename( index_filename + ".tmp", index_filename)
 
 
