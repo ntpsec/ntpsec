@@ -173,7 +173,7 @@ typedef union {
 #define SOCK_UNSPEC_S(psau)					\
 	(SOCK_UNSPEC(psau) && !SCOPE(psau))
 
-/* choose a default net interface (struct interface) for v4 or v6 */
+/* choose a default net interface (endpt) for v4 or v6 */
 #define ANY_INTERFACE_BYFAM(family)				\
 	((AF_INET == family)					\
 	     ? any_interface					\

@@ -46,6 +46,11 @@
   int yyparse (void);
 #endif
 
+/* NetInfo configuration locations */
+#ifdef HAVE_NETINFO_NI_H
+#define NETINFO_CONFIG_DIR "/config/ntp"
+#endif
+
 /*
  * In the past, we told reference clocks from network peers by giving
  * the reference clocks magic address of a particular special form

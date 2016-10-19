@@ -146,7 +146,7 @@ open_socket(
 void
 sendpkt(
 	sockaddr_u *		dest,
-	struct interface *	ep,
+	endpt *			ep,
 	int			ttl,
 	struct pkt *		pkt,
 	int			len
@@ -158,7 +158,7 @@ read_refclock_packet(SOCKET fd, struct refclockio *rp, l_fp ts)
 static inline int
 read_network_packet(
 	SOCKET			fd,
-	struct interface *	itf,
+	endpt *			itf,
 	l_fp			ts
 	)
 
