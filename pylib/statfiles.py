@@ -119,36 +119,6 @@ class NTPStats:
             lines1.sort(key=lambda line: line[0])
             setattr(self, stem, lines1)
 
-    def clip(self, start, end):
-        "Select a range of entries"
-        for stem in ("clockstats", "peerstats", "loopstats", "rawstats"):
-            lines = getattr(self, stem)
-            lines = [line for line in lines
-                     if float(line.split()[0]) >= start and float(line.split()[0]) <= end]
-            setattr(self, stem, lines)
-
-    def rangemax(self):
-        "Get the latest timestamp in the files"
-        m = sys.float_info.min
-        for field in  ("clockstats", "peerstats", "loopstats", "rawstats"):
-            row = getattr(self, field)
-            if row:
-                ts = NTPStats.timestamp(row[-1])
-                if ts > m:
-                    m = ts
-        return m
-
-    def rangemin(self):
-        "Get the earliest timestamp in the files"
-        m = sys.float_info.max
-        for field in  ("clockstats", "peerstats", "loopstats", "rawstats"):
-            row = getattr(self, field)
-            if row:
-                ts = NTPStats.timestamp(row[0])
-                if ts < m:
-                    m = ts
-        return m
-
     def percentiles(self, percents, values):
         "Return given percentiles of a given row in a given set of entries."
         "assuming values are already split and sorted"
