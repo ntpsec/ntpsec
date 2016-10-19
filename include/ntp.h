@@ -1,5 +1,7 @@
 /*
  * ntp.h - NTP definitions for the masses
+ *
+ * pythonize-header: start ignoring
  */
 #ifndef GUARD_NTP_H
 #define GUARD_NTP_H
@@ -83,12 +85,16 @@ typedef unsigned int	u_int;
  *		year += 1900;
  */
 
+/* pythonize-header: stop ignoring */
+
 /*
  * NTP protocol parameters.  See section 3.2.6 of the specification.
  */
 #define	NTP_VERSION	((uint8_t)4) /* current version number */
 #define	NTP_OLDVERSION	((uint8_t)1) /* oldest credible version */
 #define	NTP_PORT	123	/* included for non-unix machines */
+
+/* pythonize-header: start ignoring */
 
 /*
  * Poll interval parameters
@@ -384,6 +390,9 @@ struct peer {
 #define	MODE_CLIENT	3	/* client mode */
 #define	MODE_SERVER	4	/* server mode */
 #define	MODE_BROADCAST	5	/* broadcast mode */
+
+/* pythonize-header: stop ignoring */
+
 /*
  * These can appear in packets
  */
@@ -393,6 +402,8 @@ struct peer {
  * This is a madeup mode for broadcast client.
  */
 #define	MODE_BCLIENT	6	/* broadcast client mode */
+
+/* pythonize-header: start ignoring */
 
 /*
  * Values for peer.stratum, sys_stratum
@@ -495,6 +506,8 @@ struct pkt {
 	uint32_t	exten[(MAX_MAC_LEN) / sizeof(uint32_t)];
 };
 
+/* pythonize-header: stop ignoring */
+
 /*
  * Stuff for extracting things from li_vn_mode
  */
@@ -574,6 +587,8 @@ struct pkt {
 #define	CEVNT_BADDATE	5	/* bad date */
 #define	CEVNT_BADTIME	6	/* bad time */
 #define CEVNT_MAX	CEVNT_BADTIME
+
+/* pythonize-header: start ignoring */
 
 /*
  * To speed lookups, peers are hashed by the low order bits of the
