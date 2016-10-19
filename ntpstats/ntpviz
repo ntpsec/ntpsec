@@ -1433,6 +1433,7 @@ ntpviz</a>, part of the <a href="https://www.ntpsec.org/">NTPsec project</a>
     if len(statlist) > 1:
         index_buffer += local_offset_multiplot(statlist)
     else:
+        # imagepairs in the order of the heml entries
         imagepairs = [
             ("local-offset", stats.local_offset_gnuplot()),
             # skipa next one, redundant to one above
@@ -1451,12 +1452,12 @@ ntpviz</a>, part of the <a href="https://www.ntpsec.org/">NTPsec project</a>
         for key in peerlist:
             imagepairs.append(("peer-offset-" + key,
                            stats.peer_offsets_gnuplot([key])))
+
         imagepairs.append(("peer-jitters",
                            stats.peer_jitters_gnuplot()))
         for key in peerlist:
-            plot = stats.peer_jitters_gnuplot([key])
-            if len( plot ):
-                imagepairs.append(("peer-jitter-" + key, plot))
+            imagepairs.append(("peer-jitter-" + key,
+                           stats.peer_jitters_gnuplot([key])))
 
         stats = []
         for (imagename, image) in imagepairs:
@@ -1477,12 +1478,6 @@ ntpviz</a>, part of the <a href="https://www.ntpsec.org/">NTPsec project</a>
                              (imagename.replace(':', '%3A'), div_name)
             if image['html']:
                 index_buffer += "<div>\n%s</div>\n" % image['html']
-            if 'peer-jitter-' == imagename[:12]:
-                exp = 'peer-jitter'
-            elif 'peer-offset-' == imagename[:12]:
-                exp = 'peer-offset'
-            else:
-                exp = imagename
             index_buffer += "<br><br>\n"
             gnuplot(image['plot'], os.path.join(args.outdir, imagename + ".png"))
             index_buffer += "</div>\n"
