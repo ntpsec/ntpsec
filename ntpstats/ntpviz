@@ -26,7 +26,9 @@ from __future__ import print_function, division
 import argparse
 import csv
 import re
-import atexit, binascii, collections, os, socket, sys, time
+import atexit, binascii, collections, os, socket, sys
+import time
+import tempfile
 from ntp.statfiles import *
 
 # overload ArgumentParser
@@ -265,22 +267,28 @@ def gnuplot(template, outfile=None):
         out = None
     else:
         out = open(outfile, "w")
-    # shell=True is a security hazard
-    # would be great to capture stderr, but the Python doc says
-    # that can lead to deadlock on large stderr output.  gnuplot
-    # can output a lot to stderr...
-    # bigger buffers make it slower, use the default
-    proc = subprocess.Popen("gnuplot", shell=False,
-                            stdin=subprocess.PIPE, stdout=out)
-    v = sys.version_info
-    if 3 <= v[0]:
-        # next line works in Python 3, not Python 2
-        proc.stdin.write(template.encode('ascii', 'ignore'))
+    ##
+
+    # can be 30% faster to write to a tmp file than to pipe to gnuplot
+    # bonus, we can keep the plot file for debug.
+    tmp_file, tmp_filename = tempfile.mkstemp( suffix='.plt')
+    # note that tmp_file is a file handle, it is not a file object
+    os.write( tmp_file, template)
+    os.close(tmp_file)
+
+    # shell=True is a security hazard, do not use
+    rcode = subprocess.call( ['gnuplot', tmp_filename], stdout=out)
+
+    if 0 != rcode:
+        sys.stderr.write("ntpviz: WARNING: plot returned %s\n" % rcode)
+        sys.stderr.write("ntpviz: WARNING: plot file %s\n" % tmp_filename)
+    elif 2 <= args.debug_level:
+        sys.stderr.write("ntpviz: INFO: plot file %s\n" % tmp_filename)
     else:
-        # next line works in Python 2, not Python 3
-        proc.stdin.write(template)
-    proc.stdin.close()
-    return proc.wait()
+        # remove tmp file
+        os.remove(tmp_filename)
+        
+    return rcode
 
 class NTPViz(NTPStats):
     "Class for visualizing statistics from a single server."
