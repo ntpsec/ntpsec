@@ -1004,7 +1004,7 @@ Python by ESR, concept and GNUPLOT code by Dan Drown.
                 action="store_true",
                 default = None,
                 dest='clip',
-                help="Clip plots at 1% and 99%")
+                help="Clip plots at 1%% and 99%%")
     parser.add_argument('-d', '--datadir',
                 default = "/var/log/ntpstats",
                 dest='statsdirs',
@@ -1439,7 +1439,7 @@ ntpviz</a>, part of the <a href="https://www.ntpsec.org/">NTPsec project</a>
 
         peerlist = list(stats.peersplit().keys())
         # sort for output order stability
-        peerlist = sorted( peerlist )
+        peerlist.sort()
         for key in peerlist:
             imagepairs.append(("peer-offset-" + key,
                            stats.peer_offsets_gnuplot([key])))
