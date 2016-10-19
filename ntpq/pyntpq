@@ -695,23 +695,6 @@ function: set key type to use for authenticated requests, one of:
 usage: keytype [ digest-name ]
 """)
 
-    def do_exercise(self, line):
-        "Exercise the protocol - low level"
-        tokens = shlex.split(line)
-        if len(tokens) == 0:
-            print("Requires an opcode, followed by optional associd and payload string")
-            return
-        elif len(tokens) == 1:
-            tokens.append(0)
-            tokens.append("")
-        elif len(tokens) == 2:
-            tokens.append("")
-        msg = self.session.doquery(int(tokens[0]),
-                                   int(tokens[1]),
-                                   polybytes(tokens[2]))
-        if msg:
-            print(msg)
-
     def do_associations(self, line):
         "print list of association IDs and statuses for the server's peers"
         if self.__dogetassoc():
