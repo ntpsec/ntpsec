@@ -7,14 +7,23 @@ def configure(conf):
 
 def build(ctx):
     srcnode = ctx.srcnode.make_node('pylib')
-    target = ctx.srcnode.make_node('pylib/ntp_control.py')
+    target1 = ctx.srcnode.make_node('pylib/ntp_control.py')
+    target2 = ctx.srcnode.make_node('pylib/ntp_magic.py')
 
     ctx(
 	before      = ['pyc', 'pyo'],
 	cwd         = srcnode,
 	rule        = '../wafhelpers/pythonize-header ${SRC} >${TGT}',
 	source      = "../include/ntp_control.h",
-	target      = target,
+	target      = target1,
+	)
+
+    ctx(
+	before      = ['pyc', 'pyo'],
+	cwd         = srcnode,
+	rule        = '../wafhelpers/pythonize-header ${SRC} >${TGT}',
+	source      = "../include/ntp.h",
+	target      = target2,
 	)
 
     ctx(features='py', source=ctx.path.ant_glob('*.py'), install_from='.', install_path='${PYTHONDIR}/ntp')
