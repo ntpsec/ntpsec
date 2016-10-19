@@ -626,7 +626,7 @@ static int	datalinelen;
 static bool	datasent;	/* flag to avoid initial ", " */
 static bool	datanotbinflag;
 static sockaddr_u *rmt_addr;
-static struct interface *lcl_inter;
+static endpt *lcl_inter;
 
 static bool	res_authenticate;
 static bool	res_authokay;
@@ -3303,7 +3303,7 @@ static void read_mru_list(
 	int			mincount;
 	u_int			maxlstint;
 	sockaddr_u		laddr;
-	struct interface *	lcladr;
+	endpt *			lcladr;
 	u_int			count;
 	u_int			ui;
 	u_int			uf;

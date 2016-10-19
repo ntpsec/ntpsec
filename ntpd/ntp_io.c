@@ -268,9 +268,9 @@ static  bool	addr_samesubnet	(const sockaddr_u *, const sockaddr_u *,
 				 const sockaddr_u *, const sockaddr_u *);
 static	int	create_sockets	(u_short);
 static	void	set_reuseaddr	(int);
-static	bool	socket_broadcast_enable	 (struct interface *, SOCKET, sockaddr_u *);
+static	bool	socket_broadcast_enable	 (endpt *, SOCKET, sockaddr_u *);
 #ifdef  OS_MISSES_SPECIFIC_ROUTE_UPDATES
-static	bool	socket_broadcast_disable (struct interface *, sockaddr_u *);
+static	bool	socket_broadcast_disable (endpt *, sockaddr_u *);
 #endif
 
 typedef struct remaddr remaddr_t;
@@ -316,7 +316,7 @@ static int		cmp_addr_distance(const sockaddr_u *,
 /*
  * Routines to read the ntp packets
  */
-static inline int	read_network_packet	(SOCKET, struct interface *, l_fp);
+static inline int	read_network_packet	(SOCKET, endpt *, l_fp);
 static void ntpd_addremove_io_fd (int, int, int);
 static void input_handler (fd_set *, l_fp *);
 #ifdef REFCLOCK
@@ -804,12 +804,12 @@ init_interface(
  * template structure or via standard initialization
  * function
  */
-static struct interface *
+static endpt *
 new_interface(
-	struct interface *interface
+	endpt *interface
 	)
 {
-	struct interface *	iface;
+	endpt *	iface;
 
 	iface = emalloc(sizeof(*iface));
 
@@ -1098,7 +1098,7 @@ create_wildcards(
 	bool			v6wild;
 	sockaddr_u		wildaddr;
 	nic_rule_action		action;
-	struct interface *	wildif;
+	endpt *	wildif;
 
 	/*
 	 * silence "potentially uninitialized" warnings from VC9
@@ -1500,7 +1500,7 @@ convert_isc_if(
  */
 static bool
 refresh_interface(
-	struct interface * interface
+	endpt * interface
 	)
 {
 #ifdef  OS_MISSES_SPECIFIC_ROUTE_UPDATES
@@ -1607,7 +1607,7 @@ set_wildcard_reuse(
 	int	on
 	)
 {
-	struct interface *any;
+	endpt *any;
 	SOCKET fd = INVALID_SOCKET;
 
 	any = ANY_INTERFACE_BYFAM(family);
@@ -2061,10 +2061,10 @@ create_sockets(
  * create_interface - create a new interface for a given prototype
  *		      binding the socket.
  */
-static struct interface *
+static endpt *
 create_interface(
 	u_short			port,
-	struct interface *	protot
+	endpt *	protot
 	)
 {
 	sockaddr_u	resmask;
@@ -2189,7 +2189,7 @@ set_reuseaddr(
  */
 void
 enable_broadcast(
-	struct interface *	iface,
+	endpt *	iface,
 	sockaddr_u *		baddr
 	)
 {
@@ -2206,7 +2206,7 @@ enable_broadcast(
  */
 static bool
 socket_broadcast_enable(
-	struct interface *	iface,
+	endpt *	iface,
 	SOCKET			fd,
 	sockaddr_u *		baddr
 	)
@@ -2240,7 +2240,7 @@ socket_broadcast_enable(
  */
 static bool
 socket_broadcast_disable(
-	struct interface *	iface,
+	endpt *	iface,
 	sockaddr_u *		baddr
 	)
 {
@@ -2305,7 +2305,7 @@ addr_ismulticast(
  */
 void
 enable_multicast_if(
-	struct interface *	iface,
+	endpt *	iface,
 	sockaddr_u *		maddr
 	)
 {
@@ -2456,7 +2456,7 @@ socket_multicast_enable(
 #ifdef MCAST
 static bool
 socket_multicast_disable(
-	struct interface *	iface,
+	endpt *	iface,
 	sockaddr_u *		maddr
 	)
 {
@@ -2536,7 +2536,7 @@ void
 io_setbclient(void)
 {
 #ifdef OPEN_BCAST_SOCKET
-	struct interface *	interf;
+	endpt *	interf;
 	int			nif;
 
 	nif = 0;
@@ -2984,7 +2984,7 @@ open_socket(
 void
 sendpkt(
 	sockaddr_u *		dest,
-	struct interface *	ep,
+	endpt *	ep,
 	int			ttl,
 	void *			pkt,
 	int			len
@@ -3275,7 +3275,7 @@ fetch_timestamp(
 static inline int
 read_network_packet(
 	SOCKET			fd,
-	struct interface *	itf,
+	endpt *	itf,
 	l_fp			ts
 	)
 {
@@ -4288,7 +4288,7 @@ delete_interface_from_list(
 }
 
 
-static struct interface *
+static endpt *
 find_addr_in_list(
 	sockaddr_u *addr
 	)

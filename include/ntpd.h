@@ -118,7 +118,7 @@ extern	void	io_setbclient	(void);
 extern	void	io_unsetbclient	(void);
 extern	void	io_multicast_add(sockaddr_u *);
 extern	void	io_multicast_del(sockaddr_u *);
-extern	void	sendpkt 	(sockaddr_u *, struct interface *, int, void *, int);
+extern	void	sendpkt 	(sockaddr_u *, endpt *, int, void *, int);
 #ifdef DEBUG
 extern	void	collect_timing  (struct recvbuf *, const char *, int, l_fp *);
 #endif

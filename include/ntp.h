@@ -158,17 +158,13 @@ typedef unsigned int	u_int;
 
 
 /*
- * The interface structure is used to hold the addresses and socket
+ * The endpt structure is used to hold the addresses and socket
  * numbers of each of the local network addresses we are using.
- * Because "interface" is a reserved word in C++ and has so many
- * varied meanings, a change to "endpt" (via typedef) is under way.
- * Eventually the struct tag will change from interface to endpt_tag.
  * endpt is unrelated to the select algorithm's struct endpoint.
  */
-typedef struct interface endpt;
-struct interface {
-	endpt *		elink;		/* endpt list link */
-	endpt *		mclink;		/* per-AF_* multicast list */
+typedef struct __endpt {
+	struct __endpt *elink;		/* endpt list link */
+	struct __endpt *mclink;		/* per-AF_* multicast list */
 	SOCKET		fd;		/* socket descriptor */
 	SOCKET		bfd;		/* for receiving broadcasts */
 	uint32_t	ifnum;		/* endpt instance count */
@@ -190,7 +186,7 @@ struct interface {
 	bool	ignore_packets; /* listen-read-drop this? */
 	struct peer *	peers;		/* list of peers using endpt */
 	u_int		peercnt;	/* count of same */
-};
+} endpt;
 
 /*
  * Flags for interfaces
@@ -668,7 +664,7 @@ typedef struct mon_data	mon_entry;
 struct mon_data {
 	mon_entry *	hash_next;	/* next structure in hash list */
 	DECL_DLIST_LINK(mon_entry, mru);/* MRU list link pointers */
-	struct interface * lcladr;	/* address on which this arrived */
+	endpt *		lcladr;		/* address on which this arrived */
 	l_fp		first;		/* first time seen */
 	l_fp		last;		/* last time seen */
 	int		leak;		/* leaky bucket accumulator */
@@ -802,13 +798,9 @@ struct endpoint {
 #define AM_NEWBCL	6		/* new broadcast */
 #define AM_POSSBCL	7		/* discard broadcast */
 
-/* NetInfo configuration locations */
-#ifdef HAVE_NETINFO_NI_H
-#define NETINFO_CONFIG_DIR "/config/ntp"
-#endif
-
 /* ntpq -c mrulist rows per request limit in ntpd */
 #define MRU_ROW_LIMIT	256
 /* similar datagrams per response limit for ntpd */
 #define MRU_FRAGS_LIMIT	128
+
 #endif /* GUARD_NTP_H */

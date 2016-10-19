@@ -2447,7 +2447,7 @@ pool_xmit(
 	struct pkt		xpkt;	/* transmit packet structure */
 	struct addrinfo		hints;
 	int			rc;
-	struct interface *	lcladr;
+	endpt *			lcladr;
 	sockaddr_u *		rmtadr;
 	int			restrict_mask;
 	struct peer *		p;
