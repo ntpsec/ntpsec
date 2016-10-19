@@ -5,7 +5,7 @@
 #
 # SPDX-License-Identifier: BSD-2-clause
 from __future__ import print_function, division
-import sys, socket, select, struct, curses.ascii
+import sys, socket, select, struct, curses.ascii, collections
 
 from ntp_control import *
 
@@ -568,6 +568,7 @@ class Mode6Session:
                 data = self.response[4*i:4*i+4]
                 (associd, status) = struct.unpack("!HH", data)
                 idlist.append(Peer(self, associd, status))
+        idlist.sort(key=lambda a: a.associd)
         return idlist
 
     def readvar(self, associd=0, varlist=None):
@@ -597,5 +598,5 @@ class Mode6Session:
                         if val[0] == '"' and val[-1] == '"':
                             val = val[1:-1]
                 items.append((var, val))
-        return dict(items)
+        return collections.OrderedDict(items)
 # end
