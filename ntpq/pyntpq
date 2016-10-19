@@ -284,7 +284,6 @@ usage: help [ command ]
     def __dogetassoc(self):
         try:
             self.peers = self.session.readstat()
-            self.peers.sort(key=lambda a: a.associd)
         except Mode6Exception as e:
             print(e.message)
             return False
@@ -303,7 +302,7 @@ usage: help [ command ]
     def __printassoc(self, showall):
 	condition = "";
         if not self.peers:
-            sys.stdout.write("No association ID's in list\n");
+            sys.stdout.write("No association IDs in list\n");
             return;
 	sys.stdout.write("\nind assid status  conf reach auth condition  last_event cnt\n");
         sys.stdout.write("===========================================================\n");
@@ -467,7 +466,7 @@ usage: timeout [ msec ]
             elif fmt in (NTP_2BIT, NTP_MODE):
                 sys.stdout.write("%s %s\n" % (legend, bin(value)[2:]))
             else:
-                sys.stderr.write("unxpected vc type %s for %s, value %s\n" % (fmt, name, value))
+                sys.stderr.write("unexpected vc type %s for %s, value %s\n" % (fmt, name, value))
 
     def do_delay(self, line):
         "set the delay added to encryption time stamps"
@@ -686,7 +685,6 @@ usage: ntpversion [ version number ]
     def do_keytype(self, line):
         "set key type to use for authenticated requests"
         sys.stderr.write("Authentication is not yet implemented")
-        pass
 
     def help_keytype(self):
         sys.stdout.write("""\
@@ -702,7 +700,7 @@ usage: keytype [ digest-name ]
 
     def help_associations(self):
         sys.stdout.write("""\
-function: print list of association ID's and statuses for the server's peers
+function: print list of association IDs and statuses for the server's peers
 usage: associations
 """)
 
