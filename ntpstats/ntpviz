@@ -324,7 +324,7 @@ set rmargin 12
             # Python slice is too dumb to do this the easy way
             # fields: time, time offset, and freq offset
             plot_data += row[0] + ' ' + row[1] + ' ' + row[2] + '\n'
-        plot_data += "\ne\n"
+        plot_data += "e\n"
 
         # compute clock offset
         values = [float(line[1]) for line in self.loopstats]
@@ -394,7 +394,7 @@ file.</p>
                 # Python slice is too dumb to do this the easy way
                 # fields: time, temp
                 plot_data += row[0] + ' ' + row[2] + '\n'
-            plot_data += "\ne\n"
+            plot_data += "e\n"
 
         plot_template = NTPViz.Common + """\
 set title "%(sitename)s: Local Temparatures"
@@ -442,7 +442,7 @@ component of frequency drift.</p>
                 # Python slice is too dumb to do this the easy way
                 # fields: time, tdop, nSats
                 plot_data += row[0] + ' ' + row[2] + ' ' + row[3] + '\n'
-            plot_data += "\ne\n"
+            plot_data += "e\n"
 
         plot_template = NTPViz.Common + """\
 set title "%(sitename)s: Local GPS
@@ -481,13 +481,21 @@ gpsd log file is created by the gps-log.py program.</p>
         # grab and sort the values, no need for the timestamp, etc.
 
         # compute freqency offset
-        values = [float(line.split()[2]) for line in self.loopstats]
+        values = [float(line[2]) for line in self.loopstats]
         stats = VizStats( values, "Local Clock Frequency Offset", freq=1, )
 
         # build the output dictionary, because Python can not format
         # complex objects.
         out = stats.percs
         out["sitename"] = self.sitename
+
+        # speed up by only sending gnuplot the data it will actually use
+        plot_data = ''
+        for row in self.loopstats:
+            # Python slice is too dumb to do this the easy way
+            # fields: time, freq error
+            plot_data += row[0] + ' ' + row[2] + '\n'
+        plot_data += "e\n"
 
         plot_template = NTPViz.Common + """\
 set title "%(sitename)s: Local Clock Frequency Offset%(clipped)s"
@@ -497,7 +505,7 @@ set key bottom right box
 set style line 1 lc rgb '#0060ad' lt 1 lw 1 pt 7 ps 0   # --- blue
 set style line 2 lc rgb '#dd181f' lt 1 lw 1 pt 5 ps 0   # --- red
 plot \
- "-" using 1:($3 * %(multiplier)s) title "local clock error" with linespoints ls 2, \
+ "-" using 1:($2 * %(multiplier)s) title "local clock error" with linespoints ls 2, \
  %(p99)s title "99th percentile", \
  %(p95)s title "95th percentile", \
  %(p5)s title "5th percentile", \
@@ -518,7 +526,7 @@ line at 0ppm.  Expected values of 99%-1% percentiles: 0.4ppm</p>
 """
         ret = {'html' : stats.stats_html + exp, 'stats' : [stats] }
         ret['title'] = "Local Clock Frequency Offset"
-        ret['plot'] = plot_template + self.dump("loopstats") + "e\n"
+        ret['plot'] = plot_template + plot_data
         return ret
 
     def loopstats_gnuplot(self, fld, title, legend, freq):
@@ -533,7 +541,7 @@ line at 0ppm.  Expected values of 99%-1% percentiles: 0.4ppm</p>
             # Python slice is too dumb to do this the easy way
             # fields: time, fld, and rtt
             plot_data += row[0] + ' ' + row[fld - 1] + '\n'
-        plot_data += "\ne\n"
+        plot_data += "e\n"
 
         # grab and process the values
         values = [float(line[fld - 1]) for line in self.loopstats]
@@ -633,7 +641,7 @@ plot \
                     # Python slice is too dumb to do this the easy way
                     # fields: time, fld, and rtt
                     plot_data += row[0] + ' ' + row[fld - 1] + ' ' + row[4] + '\n'
-                plot_data += "\ne\n"
+                plot_data += "e\n"
             else:
                 sys.stderr.write("ntpviz: ERROR: No such peer as %s" % key)
                 raise SystemExit(1)
@@ -1064,7 +1072,7 @@ Python by ESR, concept and GNUPLOT code by Dan Drown.
                 default=False,
                 action="store_true",
                 dest='show_local_error',
-                help="Plot clock time and clock frequency offsets")
+                help="Plot local clock frequency offsets")
     group.add_argument( '--local-gps',
                 default = False,
                 action="store_true",
