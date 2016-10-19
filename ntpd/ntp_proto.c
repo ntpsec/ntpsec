@@ -541,26 +541,6 @@ handle_procpkt(
 			peer->bogusorg++;
 			return;
 		}
-	} else if(PKT_MODE(pkt->li_vn_mode) == MODE_ACTIVE ||
-		  PKT_MODE(pkt->li_vn_mode) == MODE_PASSIVE) {
-		/* In symmetric modes, even if the origin timestamp is
-		   bogus we still need to be willing to update the xmt
-		   peer variable. Otherwise, a single droppped packet
-		   will result in permanent DoS as the peers continually
-		   reject each other as bogus. Also, to be tolerant of
-		   restarts, we can't enforce outcount-checking.
-		*/
-		if(pkt->org == 0) {
-			uint64_to_lfp(&peer->xmt, pkt->xmt);
-			peer->flash |= BOGON3;
-			peer->bogusorg++;
-			return;
-		} else if(pkt->org != lfp_to_uint64(&peer->org)) {
-			uint64_to_lfp(&peer->xmt, pkt->xmt);
-			peer->flash |= BOGON2;
-			peer->bogusorg++;
-			return;
-		}
 	} else {
 		/* This case should be unreachable. */
 		sys_declined++;
