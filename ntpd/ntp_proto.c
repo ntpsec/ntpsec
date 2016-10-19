@@ -501,7 +501,9 @@ handle_fastxmit(
 		xkeyid = 0;
 	}
 
-	fast_xmit(rbufp, MODE_SERVER, xkeyid, restrict_mask);
+        int xmode =
+            PKT_MODE(pkt->li_vn_mode) == MODE_ACTIVE ? MODE_PASSIVE : MODE_SERVER;
+	fast_xmit(rbufp, xmode, xkeyid, restrict_mask);
 }
 
 static void
@@ -816,6 +818,7 @@ receive(
 
 	switch(match) {
 	    case AM_FXMIT:
+            case AM_NEWPASS:
 		handle_fastxmit(rbufp, restrict_mask, pkt, peer, authenticated);
 		break;
 	    case AM_PROCPKT:
