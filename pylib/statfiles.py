@@ -25,17 +25,20 @@ class NTPStats:
         "convert timestamp (MJD & seconds past midnight) to Unix time"
         "Replace MJD+second with Unix time."
         try:
-            split = line.split(None, 2)
+            split = line.split()
             mjd = int(split[0])
             second = float(split[1])
         except:
-            # unparseable  time 0 and it will be stripped later
+            # unparseable, skip this line
             return None
         # warning: 32 bit overflows
         time = NTPStats.SecondsInDay * mjd + second - 3506716800
-        if time < starttime or time > endtime:
-            return None
-        return str(time) + " " + split[2]
+        if starttime  <= time <= endtime:
+            del split[0]
+            split[0] = str(time)
+            return split
+        # else
+        return None
 
     @staticmethod
     def timestamp(line):
@@ -95,7 +98,7 @@ class NTPStats:
                     if line is not None:
                         if 0 == len(line):
                             continue
-                        split = line.split(None, 2)
+                        split = line.split()
                         try:
                             t = int(float(split[0]))
                         except:
@@ -103,7 +106,7 @@ class NTPStats:
                             continue
 
                         if starttime <= t <= endtime:
-                            lines1.append( line)
+                            lines1.append( split)
             else:
                 # Morph first field into Unix time with fractional seconds
                 for line in lines:
@@ -113,7 +116,7 @@ class NTPStats:
                         lines1.append( line)
 
             # Sort by datestamp
-            lines1.sort(key=lambda line: line.split()[0])
+            lines1.sort(key=lambda line: line[0])
             setattr(self, stem, lines1)
 
     def clip(self, start, end):
@@ -165,7 +168,7 @@ class NTPStats:
             return self.peermap
 
         for line in self.peerstats:
-            ip = line.split()[1]
+            ip = line[1]
             if ip not in self.peermap:
                 self.peermap[ip] = []
             self.peermap[ip].append(line)
@@ -175,7 +178,7 @@ class NTPStats:
         "Return a dictionary mapping gps sources to entry subsets."
         gpsmap = {}
         for line in self.gpsd:
-            source = line.split()[1]
+            source = line[1]
             if source not in gpsmap:
                 gpsmap[source] = []
             gpsmap[source].append(line)
@@ -185,7 +188,7 @@ class NTPStats:
         "Return a dictionary mapping temperature sources to entry subsets."
         tempsmap = {}
         for line in self.temps:
-            source = line.split()[1]
+            source = line[1]
             if source not in tempsmap:
                 tempsmap[source] = []
             tempsmap[source].append(line)

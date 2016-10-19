@@ -310,22 +310,20 @@ set rmargin 12
             sys.stderr.write("ntpviz: WARNING: no loopstats to graph\n")
             return ''
 
-        # speedup by only sending gnuplot the data it will actually use
+        # speed up by only sending gnuplot the data it will actually use
         plot_data = ''
         for row in self.loopstats:
-            rs = row.split()
             # Python slice is too dumb to do this the easy way
             # fields: time, time offset, and freq offset
-            rc = rs[0] + ' ' + rs[1] + ' ' + rs[2] + '\n'
-            plot_data += rc
+            plot_data += row[0] + ' ' + row[1] + ' ' + row[2] + '\n'
         plot_data += "\ne\n"
 
         # compute clock offset
-        values = [float(line.split()[1]) for line in self.loopstats]
+        values = [float(line[1]) for line in self.loopstats]
         stats = VizStats( values, "Local Clock Time Offset")
 
         # compute frequency offset
-        values_f = [float(line.split()[2]) for line in self.loopstats]
+        values_f = [float(line[2]) for line in self.loopstats]
         stats_f = VizStats(values_f, "Local Clock Frequency Offset", freq=1)
 
         out = stats.percs
@@ -381,9 +379,14 @@ file.</p>
 
         stats = []
         temps_data = ()
-        plot_data = ""
+        plot_data = ''
         for key in tempslist:
-            plot_data += "\n".join(tempsmap[key]) + "\ne\n"
+            # speed up by only sending gnuplot the data it will actually use
+            for row in tempsmap[key]:
+                # Python slice is too dumb to do this the easy way
+                # fields: time, temp
+                plot_data += row[0] + ' ' + row[2] + '\n'
+            plot_data += "\ne\n"
 
         plot_template = NTPViz.Common + """\
 set title "%(sitename)s: Local Temparatures"
@@ -393,7 +396,7 @@ plot \\
 """ % locals()
 
         for key in tempslist:
-            plot_template += "'-' using 1:3 title '%(key)s' with line, \\\n" \
+            plot_template += "'-' using 1:2 title '%(key)s' with line, \\\n" \
                  % locals()
 
         # strip the trailing ", \n"
@@ -427,10 +430,11 @@ component of frequency drift.</p>
         gps_data = ()
         plot_data = ""
         for key in gpslist:
-            d = "\n".join(gpsmap[key])
-            plot_data += d + "\ne\n" + d + "\ne\n"
-        # remove trailing "e\n"
-        plot_data = plot_data[:-2]
+            for row in gpsmap[key]:
+                # Python slice is too dumb to do this the easy way
+                # fields: time, tdop, nSats
+                plot_data += row[0] + ' ' + row[2] + ' ' + row[3] + '\n'
+            plot_data += "\ne\n"
 
         plot_template = NTPViz.Common + """\
 set title "%(sitename)s: Local GPS
@@ -443,8 +447,8 @@ plot \\
 
         for key in gpslist:
             plot_template += """\
-'-' using 1:3 title '%(key)s tdop' with line ls 1, \\
-'-' using 1:4 title '%(key)s nSat' with line ls 2 axis x1y2, \\
+'-' using 1:2 title '%(key)s tdop' with line ls 1, \\
+'-' using 1:3 title '%(key)s nSat' with line ls 2 axis x1y2, \\
 """ % locals()
 
         # strip the trailing ", \\n"
@@ -457,7 +461,7 @@ gpsd log file is created by the gps-log.py program.</p>
 """
         ret = {'html' : exp, 'stats' : stats }
         ret['title'] = "Local GPS"
-        ret['plot'] = plot_template + plot_data
+        ret['plot'] = plot_template + plot_data + plot_data
         return ret
 
     def local_error_gnuplot(self):
@@ -515,18 +519,16 @@ line at 0ppm.  Expected values of 99%-1% percentiles: 0.4ppm</p>
             sys.stderr.write("ntpviz: WARNING: no loopstats to graph\n")
             return ''
 
-        # speedup by only sending gnuplot the data it will actually use
+        # speed up by only sending gnuplot the data it will actually use
         plot_data = ''
         for row in self.loopstats:
-            rs = row.split()
             # Python slice is too dumb to do this the easy way
             # fields: time, fld, and rtt
-            rc = rs[0] + ' ' + rs[fld - 1] + '\n'
-            plot_data += rc
+            plot_data += row[0] + ' ' + row[fld - 1] + '\n'
         plot_data += "\ne\n"
 
         # grab and process the values
-        values = [float(line.split()[fld - 1]) for line in self.loopstats]
+        values = [float(line[fld - 1]) for line in self.loopstats]
         stats = VizStats( values, title, freq=freq )
 
         # build the output dictionary, because Python can not format
@@ -601,6 +603,7 @@ plot \
         peer_data = ()
         plot_data = ""
         namelist = []   # peer names
+
         for key in peerlist:
             # Trickiness - we allow peerlist elements to be DNS names.
             # The socket.gethostbyname() call maps DNS names to IP addresses,
@@ -616,14 +619,12 @@ plot \
                 namelist.append(socket.getfqdn(key))
 
             if ip in peerdict:
-                # 20% speedup by only sending gnuplot the data it will
+                # 20% speed up by only sending gnuplot the data it will
                 # actually use
                 for row in peerdict[ip]:
-                    rs = row.split()
                     # Python slice is too dumb to do this the easy way
                     # fields: time, fld, and rtt
-                    rc = rs[0] + ' ' + rs[fld - 1] + ' ' + rs[4] + '\n'
-                    plot_data += rc
+                    plot_data += row[0] + ' ' + row[fld - 1] + ' ' + row[4] + '\n'
                 plot_data += "\ne\n"
             else:
                 sys.stderr.write("ntpviz: ERROR: No such peer as %s" % key)
@@ -649,8 +650,7 @@ useful to see how the measured offset is behaving.</p>
 at 0s. Typical 90%% ranges may be: local serial GPS 200 ms; local PPS
 20µs</p>
 
-<p>Clock Offset is field 5 in the peerstats log file.  The Round Trip
-Time (rtt) is field 6 in the peerstats file.</p>
+<p>Clock Offset is field 5 in the peerstats log file.</p>
 """
                 else:
                     title = "Peer Offset " + str(peerlist[0])
@@ -668,7 +668,8 @@ rtt changes.</p>
 at 0s. Typical 90% ranges may be: local LAN peer 80µs; 90% ranges for
 WAN servers may be 4ms and much larger. </p>
 
-<p>Clock Offset is field 5 in the peerstats log file.</p>
+<p>Clock Offset is field 5 in the peerstats log file.  The Round Trip
+Time (rtt) is field 6 in the peerstats file.</p>
 """
 
             else:
@@ -698,7 +699,7 @@ at 0s.</p>
 """
 
             # grab and sort the values, no need for the timestamp, etc.
-            values = [float(line.split()[fld - 1]) for line in peerdict[ip]]
+            values = [float(line[fld - 1]) for line in peerdict[ip]]
 
             stats = VizStats( values, title)
 
@@ -718,7 +719,7 @@ at 0s.</p>
             # many peers
             title += "s"
             # grab and sort the values, no need for the timestamp, etc.
-            values = [float(line.split()[fld - 1]) for line in self.peerstats]
+            values = [float(line[fld - 1]) for line in self.peerstats]
 
             stats = VizStats( values, title )
 
@@ -800,7 +801,7 @@ plot \
         # TODO normalize to 0 to 100?
 
         # grab and sort the values, no need for the timestamp, etc.
-        values = [float(line.split()[1]) for line in self.loopstats]
+        values = [float(line[1]) for line in self.loopstats]
         stats = VizStats( values, 'Local Clock Offset' )
         out = stats.percs
         out['sitename'] = self.sitename
@@ -904,8 +905,14 @@ plot \\
     for (i, stats) in enumerate(statlist):
         plot += '"-" using 1:($2*1000000) title "%s clock offset μs" with linespoints, \\\n' % (sitenames[i])
     plot = plot[:-4] + "\n"
+
     for stats in statlist:
-        plot += stats.dump("loopstats") + "e\n"
+        # speed up by only sending gnuplot the data it will actually use
+        for row in stats.loopstats:
+            # Python slice is too dumb to do this the easy way
+            # fields: time, temp
+            plot += row[0] + ' ' + row[1] + '\n'
+        plot += "\ne\n"
 
     ret = {'html' : '', 'stats' : [] }
     ret['title'] = "Multiplot"
@@ -1439,6 +1446,8 @@ ntpviz</a>, part of the <a href="https://www.ntpsec.org/">NTPsec project</a>
         for (imagename, image) in imagepairs:
             if not image:
                 continue
+            if 1 <= args.debug_level:
+                sys.stderr.write("ntpviz: plotting %s\n" % image['title'])
             stats.append( image['stats'] )
             # give each H2 an unique ID.
             id = image['title'].lower()
