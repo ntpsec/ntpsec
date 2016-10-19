@@ -90,8 +90,8 @@ typedef unsigned int	u_int;
 /*
  * NTP protocol parameters.  See section 3.2.6 of the specification.
  */
-#define	NTP_VERSION	((uint8_t)4) /* current version number */
-#define	NTP_OLDVERSION	((uint8_t)1) /* oldest credible version */
+#define	NTP_VERSION	4	/* current version number */
+#define	NTP_OLDVERSION	1 	/* oldest credible version */
 #define	NTP_PORT	123	/* included for non-unix machines */
 
 /* pythonize-header: start ignoring */
@@ -523,6 +523,7 @@ struct pkt {
 #define	PKT_LI_VN_MODE(l, v, m) ((((l) & 3) << 6) | VN_MODE((v), (m)))
 
 
+/* pythonize-header: start ignoring */
 /*
  * Dealing with stratum.  0 gets mapped to 16 incoming, and back to 0
  * on output.
@@ -533,6 +534,7 @@ struct pkt {
 #define	STRATUM_TO_PKT(s)	((uint8_t)(((s) == (STRATUM_UNSPEC)) ?\
 				(STRATUM_PKT_UNSPEC) : (s)))
 
+/* pythonize-header: stop ignoring */
 /*
  * Event codes. Used for reporting errors/events to the control module
  */
