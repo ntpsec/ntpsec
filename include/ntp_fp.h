@@ -363,7 +363,6 @@ extern	char *	rfc3339date	(l_fp *);
 extern  void	mfp_mul		(int32_t *, uint32_t *, int32_t, uint32_t, int32_t, uint32_t);
 
 extern	void	set_sys_fuzz	(double);
-extern	void	init_systime	(void);
 extern  void	get_ostime	(struct timespec *tsp);
 extern	void	normalize_time	(struct timespec, long, l_fp *);
 extern	void	get_systime	(l_fp *);

@@ -1275,8 +1275,6 @@ USAGE: ntpq [-46dphinOV] [-c str] [-D lvl] [ host ...]
 if __name__ == '__main__':
     #delay_time.l_ui = 0
     #delay_time.l_uf = DEFDELAY
-
-    #init_lib()	# sets up ipv4_works, ipv6_works
     #init_auth()
 
     try:

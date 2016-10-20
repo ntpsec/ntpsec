@@ -89,8 +89,6 @@ main(
 
 	progname = argv[0];
 
-	init_lib();
-
 #ifdef HAVE_OPENSSL
 	ssl_check_version();
 #endif	/* HAVE_OPENSSL */

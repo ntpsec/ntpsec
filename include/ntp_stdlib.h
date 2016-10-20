@@ -76,7 +76,6 @@ extern	uint32_t	caldaystart	(uint32_t ntptime, const time_t *pivot);
 extern	const char *clockname	(int);
 extern	int	clocktime	(int, int, int, int, int, uint32_t, uint32_t *, uint32_t *);
 extern	void	init_auth	(void);
-extern	void	init_lib	(void);
 extern	void	init_network	(void);
 extern	struct savekey *auth_findkey (keyid_t);
 extern	void	auth_moremem	(int);
