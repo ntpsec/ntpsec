@@ -222,7 +222,7 @@ class VizStats(NTPStats):
     <td style="min-width:55px;">5%%</td><td style="min-width:55px;">50%%</td>
     <td style="min-width:55px;">95%%</td><td style="min-width:55px;">99%%</td>
     <td style="min-width:55px;">Max</td><td>&nbsp;</td>
-    <td style="min-width:55px;">90%%</td><td style="min-width:55px;">95%%</td>
+    <td style="min-width:55px;">90%%</td><td style="min-width:55px;">98%%</td>
     <td style="min-width:55px;">StdDev</td>
     <td>&nbsp;</td><td style="min-width:55px;">Mean</td><td>Units</td>
   </tr>
