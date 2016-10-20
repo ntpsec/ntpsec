@@ -16,7 +16,6 @@ def build(ctx):
 		"dolfptoa.c",
 		"emalloc.c",
 		"getopt.c",
-		"hextolfp.c",
 		"humandate.c",
 		"initnetwork.c",
 		"lib_strbuf.c",
@@ -25,7 +24,6 @@ def build(ctx):
 		"mstolfp.c",
 		"msyslog.c",
 		"netof.c",
-		"ntp_calendar.c",
 		"ntp_endian.c",
 		"ntp_intres.c",
 		"ntp_lineedit.c",
@@ -33,7 +31,6 @@ def build(ctx):
 		"ntp_worker.c",
 		"numtoa.c",
 		"numtohost.c",
-		"prettydate.c",
 		"recvbuff.c",
 		"refidsmear.c",
 		"socket.c",
@@ -49,7 +46,10 @@ def build(ctx):
 	]
 
 	libntp_source_sharable = [
+		"hextolfp.c",
 		"lib_strbuf.c",
+		"ntp_calendar.c",
+		"prettydate.c",
 		"statestr.c",
 	]
 
