@@ -16,8 +16,10 @@ due to multiple languages, we hold the set of allowed languages
 to a minimum.
 
 Time-critical code must be written in C. Use Python for any code that
-is not time-critical, as this reduces line count and complexity
-(thus, also, expected defect rates).
+is not time-critical, as this reduces line count and complexity (thus,
+also, expected defect rates). If you need a NTP-specific C function
+not available in Python, try to improve the libntpc extension to
+expose it.
 
 The only scripting language allowed and supported other than Python is
 POSIX sh (this is more restricted than bash!).  Python is preferred, as
@@ -101,8 +103,10 @@ close to that callsite as possible.
 
 === Coding style and indentation ==
 
-Dr. Dave Mills likes this code indented formatted in a consistent way.
-The file "dot.emacs" has the emacs C-mode indentation style that Dave likes.
+Dr. Dave Mills liked this code indented formatted in a consistent way.
+The file "dot.emacs" has the emacs C-mode indentation style that Dave
+likes. It's a bit archaic, but we've stuck with it to preserve
+continuity; you should, too.
 
 === Conventions for #ifdef guard names ===
 
