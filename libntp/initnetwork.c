@@ -5,17 +5,11 @@
 
 #include <isc/net.h>
 
-#include "ntp_fp.h"
-#include "ntp_stdlib.h"
-#include "lib_strbuf.h"
-
-
 /*
  * Storage declarations
  */
 bool		ipv4_works;
 bool		ipv6_works;
-
 
 /*
  * initialization routine.  Might be needed if the code is ROMized.
