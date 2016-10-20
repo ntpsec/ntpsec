@@ -539,7 +539,7 @@ line at 0ppm.  Expected values of 99%-1% percentiles: 0.4ppm</p>
         plot_data = ''
         for row in self.loopstats:
             # Python slice is too dumb to do this the easy way
-            # fields: time, fld, and rtt
+            # fields: time, and fld
             plot_data += row[0] + ' ' + row[fld - 1] + '\n'
         plot_data += "e\n"
 
@@ -616,10 +616,10 @@ plot \
             sys.stderr.write("ntpviz: WARNING: no peer data to graph\n")
             return ''
         peerlist.sort() # For stability of output
-        peer_data = ()
         plot_data = ""
         namelist = []   # peer names
 
+        ip_todo = []
         for key in peerlist:
             # Trickiness - we allow peerlist elements to be DNS names.
             # The socket.gethostbyname() call maps DNS names to IP addresses,
@@ -635,14 +635,9 @@ plot \
                 namelist.append(socket.getfqdn(key))
 
             if ip in peerdict:
-                # 20% speed up by only sending gnuplot the data it will
-                # actually use
-                for row in peerdict[ip]:
-                    # Python slice is too dumb to do this the easy way
-                    # fields: time, fld, and rtt
-                    plot_data += row[0] + ' ' + row[fld - 1] + ' ' + row[4] + '\n'
-                plot_data += "e\n"
+                ip_todo.append(ip)
             else:
+                # can this ever happen?
                 sys.stderr.write("ntpviz: ERROR: No such peer as %s" % key)
                 raise SystemExit(1)
 
@@ -762,6 +757,20 @@ at 0s.</p>
 <p>RMS Jitter is field 8 in the peerstats log file.</p>
 """
 
+        for ip in ip_todo:
+            # 20% speed up by only sending gnuplot the data it will
+            # actually use
+            # Python slice is too dumb to do this the easy way
+            if rtt:
+                for row in peerdict[ip]:
+                    # fields: time, fld, and rtt
+                    plot_data += row[0] + ' ' + row[fld-1] + ' ' + row[4] + '\n'
+            else:
+                for row in peerdict[ip]:
+                    # fields: time, fld
+                    plot_data += row[0] + ' ' + row[fld - 1] + '\n'
+            plot_data += "e\n"
+
         out = stats.percs
         out['sitename'] = self.sitename
         out['title'] = title
@@ -782,10 +791,9 @@ plot \
 """ % out
 
         plot_template += percentages
-        out['fld'] = 2
         for key in peerlist:
             out['label'] = self.ip_label(key)
-            plot_template += "'-' using 1:($%(fld)s*%(multiplier)s) title '%(label)s' with line, \\\n" \
+            plot_template += "'-' using 1:($2*%(multiplier)s) title '%(label)s' with line, \\\n" \
                  % out
 
         if 1 == rtt:
@@ -793,6 +801,7 @@ plot \
 '-' using 1:(($2+$3/2)*%(multiplier)s) title 'offset+rtt/2' with line, \\
 '-' using 1:(($2-$3/2)*%(multiplier)s) title 'offset-rtt/2' with line
 """ % stats.percs
+            # sadly, gnuplot needs 3 identical copies of the data.
             plot_template += plot_data + plot_data
         else:
             # strip the trailing ", \n"
