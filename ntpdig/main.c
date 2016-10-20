@@ -216,6 +216,7 @@ ntpdig_main (
 
 	init_lib();
 	init_auth();
+	init_network();
 
 	while ((op = ntp_getopt_long(argc, argv,
 				     ALL_OPTIONS, longoptions, NULL)) != -1) {
@@ -310,7 +311,7 @@ ntpdig_main (
 	argc -= optct;
 	argv += optct;
 
-	TRACE(2, ("init_lib() done, %s%s\n",
+	TRACE(2, ("init_network() done, %s%s\n",
 		  (ipv4_works)
 		      ? "ipv4_works "
 		      : "",

@@ -13,21 +13,16 @@
 /*
  * Storage declarations
  */
-int		debug;
-libbufstr	lib_stringbuf[LIB_NUMBUF];
-int		lib_nextbuf;
+bool		ipv4_works;
+bool		ipv6_works;
 
 
 /*
  * initialization routine.  Might be needed if the code is ROMized.
  */
 void
-init_lib(void)
+init_network(void)
 {
-	static bool		lib_inited;
-
-	if (lib_inited)
-		return;
-	init_systime();
-	lib_inited = true;
+	ipv4_works = isc_net_probeipv4_bool();
+	ipv6_works = isc_net_probeipv6_bool();
 }

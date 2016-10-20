@@ -78,6 +78,7 @@ int main(int argc, const char * argv[]) {
 
 	init_lib();
 	init_auth();
+	init_network();
 
 	args_argc = argc;
 	args_argv = argv;
