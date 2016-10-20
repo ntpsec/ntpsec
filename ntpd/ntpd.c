@@ -608,7 +608,6 @@ ntpdmain(
 	}
 # endif	/* HAVE_WORKING_FORK */
 
-	init_lib();
 	init_network();
 	/*
 	 * Detach us from the terminal.  May need an #ifndef GIZMO.

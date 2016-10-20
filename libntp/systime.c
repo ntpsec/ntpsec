@@ -73,13 +73,6 @@ time_stepped_callback	step_callback;
  */
 static bool lamport_violated;	/* clock was stepped back */
 
-#ifdef DEBUG
-static bool systime_init_done;
-# define DONE_SYSTIME_INIT()	systime_init_done = true
-#else
-# define DONE_SYSTIME_INIT()	do {} while (false)
-#endif
-
 void
 set_sys_fuzz(
 	double	fuzz_val
@@ -89,13 +82,6 @@ set_sys_fuzz(
 	INSIST(sys_fuzz >= 0);
 	INSIST(sys_fuzz <= 1.0);
 	sys_fuzz_nsec = (long)(sys_fuzz * 1e9 + 0.5);
-}
-
-
-void
-init_systime(void)
-{
-	DONE_SYSTIME_INIT();
 }
 
 
@@ -155,8 +141,6 @@ normalize_time(
 	l_fp	result;
 	l_fp	lfpfuzz;
 	l_fp	lfpdelta;
-
-	DEBUG_REQUIRE(systime_init_done);
 
         /* First check if here was a Lamport violation, that is, two
          * successive calls to 'get_ostime()' resulted in negative
