@@ -1,3 +1,5 @@
+import sys
+
 def build(ctx):
 	srcnode = ctx.srcnode.abspath()
 
@@ -38,7 +40,6 @@ def build(ctx):
 		"socktoa.c",
 		"socktohost.c",
 		"ssl_init.c",
-		"statestr.c",
 		"strl_obsd.c",
 		"syssignal.c",
 		"timetoa.c",
@@ -47,18 +48,36 @@ def build(ctx):
 		"ymd2yd.c",
 	]
 
+	libntp_source_sharable = [
+		"lib_strbuf.c",
+		"statestr.c",
+	]
+
 	libntp_source_systime = [
 		"systime.c"
 	]
 
+	includes = [
+		"%s/libisc/include/" % srcnode,
+		"%s/libisc/unix/include/" % srcnode, # XXX: platform: requires unix/win32 switch.
+		"%s/libsodium/include/" % srcnode,
+	]
+
+	# C library
 	ctx(
 		target		= "ntp",
 		features	= "c cstlib bld_include src_include",
 		use		= "sodium",
-		source		= libntp_source + libntp_source_systime,
-		includes	= [
-			"%s/libisc/include/" % srcnode,
-			"%s/libisc/unix/include/" % srcnode, # XXX: platform: requires unix/win32 switch.
-			"%s/libsodium/include/" % srcnode
-		],
+		source		= libntp_source + libntp_source_sharable + libntp_source_systime,
+		includes	= includes,
+	)
+
+	pyversion = ".".join([str(x) for x in sys.version_info[:2]])
+
+	# Loadable Python extension
+	ctx(
+		target		= "ntpc",
+		features	= "c cshlib bld_include src_include",
+		source		= ["pymodule.c"] + libntp_source_sharable,
+		includes	= includes + ["/usr/include/python" + pyversion],
 	)
