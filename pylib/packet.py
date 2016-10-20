@@ -467,7 +467,7 @@ class Mode6Session:
             # Record status info out of the last packet.
             if not rpkt.more():
                 seenlastfrag = True
-                self.rstatus = socket.ntohs(rpkt.status)
+                self.rstatus = rpkt.status
 
             # If we've seen the last fragment, look for holes in the sequence.
             # If there aren't any, we're done.
