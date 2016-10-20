@@ -1,6 +1,6 @@
 /*
- * This file is Copyright (c) 2010 by the GPSD project
- * BSD terms apply: see the file COPYING in the distribution root for details.
+ * This file is Copyright (c) 2016 by the NTPsec project
+ * SPDX-License-Identifier: BSD-2-clause
  *
  * Python binding for selected libntp library functions
  */
@@ -11,6 +11,7 @@
 #include "ntp_machine.h"
 #include "ntpd.h"
 #include "ntp_io.h"
+#include "ntp_fp.h"
 #include "ntp_stdlib.h"
 #include "ntp_random.h"
 
@@ -40,10 +41,29 @@ libntpc_statustoa(PyObject *self, PyObject *args)
     return Py_BuildValue("s", gs);
 }
 
+static PyObject *
+libntpc_prettydate(PyObject *self, PyObject *args)
+{
+    char *s;
+    l_fp ts;
+
+    UNUSED_ARG(self);
+    if (!PyArg_ParseTuple(args, "s", &s))
+	return NULL;
+    if (hextolfp(s+2, &ts))
+	return Py_BuildValue("s", prettydate(&ts));
+    else {
+	PyErr_SetString(PyExc_ValueError, "ill-formed hex date");
+	return NULL;
+    }
+}
+
 /* List of functions defined in the module */
 
 static PyMethodDef libntpc_methods[] = {
     {"statustoa",      	libntpc_statustoa,  	METH_VARARGS,
+     PyDoc_STR("Status string display from peer status word.")},
+    {"prettydate",     	libntpc_prettydate,  	METH_VARARGS,
      PyDoc_STR("Status string display from peer status word.")},
     {NULL,		NULL, 0, NULL}		/* sentinel */
 };
