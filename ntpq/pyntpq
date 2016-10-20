@@ -15,6 +15,7 @@ import os, sys, getopt, cmd, errno, curses, curses.ascii
 import socket, select, struct, shlex
 
 from ntp.packet import *
+from ntp.libntpc import *
 
 # This import only works on Unixes.  The intention is to enable
 # Ctrl-P, Ctrl-N, and friends in Cmd.
@@ -180,10 +181,6 @@ tstflagnames = (
 	"peer_loop",		# BOGON12
 	"peer_unreach"		# BOGON13
 )
-
-def statustoa(_is_sys, n):
-    # FIXME: see libntp/statestr.c
-    return n
 
 def prettydate(d):
     # FIXME: we need to unpack this date.
@@ -453,10 +450,14 @@ usage: timeout [ msec ]
             print(e.message)
             return
         if decodestatus:
+            if associd == 0:
+                statype = TYPE_SYS
+            else:
+                statype = TYPE_PEER
             sys.stdout.write("associd=%u status=%04x %s,\n" %
                              (associd,
                               self.session.rstatus,
-                              statustoa(associd == 0, self.session.rstatus)))
+                              statustoa(statype, self.session.rstatus)))
         for (name, legend, fmt) in variables:
             value = msg[name]
             if fmt in (NTP_STR, NTP_UINT, NTP_INT, NTP_ADD, NTP_ADP):
