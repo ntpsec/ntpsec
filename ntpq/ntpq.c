@@ -475,6 +475,7 @@ ntpqmain(
 
 	init_lib();	/* sets up ipv4_works, ipv6_works */
 	init_auth();
+	init_network();
 
 	/* Check to see if we have IPv6. Otherwise default to IPv4 */
 	if (!ipv6_works)

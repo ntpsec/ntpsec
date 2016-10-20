@@ -16,6 +16,7 @@ def build(ctx):
 		"getopt.c",
 		"hextolfp.c",
 		"humandate.c",
+		"initnetwork.c",
 		"lib_strbuf.c",
 		"machines.c",
 		"modetoa.c",
