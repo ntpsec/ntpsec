@@ -7,6 +7,88 @@
 from __future__ import print_function, division
 import sys, socket, select, struct, curses.ascii, collections
 
+# General notes on Python 2/3 compatibility:
+#
+# This code uses the following strategy to allow it to run on both Python 2
+# and Python 3:
+#
+# - Use binary I/O to read/write data from/to files and subprocesses;
+#   where the exact bytes are important (such as in checking for
+#   modified files), use the binary data directly
+#
+# - Use latin-1 encoding to transform binary data to/from Unicode when
+#   necessary for operations where Python 3 expects Unicode; the
+#   polystr and polybytes functions are used to do this so that
+#   when running on Python 2, the byte string data is used unchanged;
+#   also, the make_wrapper function constructs a text stream that can
+#   wrap a file opened in binary mode for cases where a file object
+#   that can be passed around from function to function is needed
+#
+# - Construct custom stdin, stdout, and stderr streams when running
+#   on Python 3 that force latin-1 encoding, and wrap them around the
+#   underlying binary buffers (in Python 2, the streams are binary
+#   and are used unchanged); this ensures that the same transformation
+#   is done on data from/to the standard streams, as is done on binary
+#   data from/to files and subprocesses; the make_std_wrapper function
+#   does this
+
+master_encoding = 'latin-1'
+
+if str is bytes:  # Python 2
+    polystr = str
+    polybytes = bytes
+
+    def string_escape(s):
+        return s.decode('string_escape')
+
+    def make_wrapper(fp):
+        return fp
+
+else:  # Python 3
+    import io
+
+    def polystr(o):
+        "Polymorphic string factory function"
+        if isinstance(o, str):
+            return o
+        if not isinstance(o, bytes):
+            return str(o)
+        return str(o, encoding=master_encoding)
+
+    def polybytes(s):
+        "Polymorphic string encoding function"
+        if isinstance(s, bytes):
+            return s
+        if not isinstance(s, str):
+            return bytes(s)
+        return bytes(s, encoding=master_encoding)
+
+    def string_escape(s):
+        "Polymorphic string_escape/unicode_escape"
+        # This hack is necessary because Unicode strings in Python 3 don't
+        # have a decode method, so there's no simple way to ask it for the
+        # equivalent of decode('string_escape') in Python 2. This function
+        # assumes that it will be called with a Python 3 'str' instance
+        return s.encode(master_encoding).decode('unicode_escape')
+
+    def make_wrapper(fp):
+        "Wrapper factory function to enforce master encoding"
+        # This can be used to wrap normally binary streams for API
+        # compatibility with functions that need a text stream in
+        # Python 3; it ensures that the binary bytes are decoded using
+        # the master encoding we use to turn bytes to Unicode in
+        # polystr above
+        # newline="\n" ensures that Python 3 won't mangle line breaks
+        return io.TextIOWrapper(fp, encoding=master_encoding, newline="\n")
+
+    def make_std_wrapper(stream):
+        "Standard input/output wrapper factory function"
+        # This ensures that the encoding of standard output and standard
+        # error on Python 3 matches the master encoding we use to turn
+        # bytes to Unicode in polystr above
+        # line_buffering=True ensures that interactive command sessions work as expected
+        return io.TextIOWrapper(stream.buffer, encoding=master_encoding, newline="\n", line_buffering=True)
+
 from ntp_magic import *
 from ntp_control import *
 
@@ -295,7 +377,7 @@ class Mode6Session:
         if self.debug >= 3:
                 print("Sending %d octets\n" % len(xdata))
         try:
-            self.sock.sendall(xdata)
+            self.sock.sendall(polybytes(xdata))
         except socket.error:
             # On failure, we don't know how much data was actually received
             sys.stderr.write("Write to %s failed\n" % self.name)
@@ -376,7 +458,7 @@ class Mode6Session:
                                     ("not " "", )[seenlastfrag])
                     raise Mode6Exception(SERR_INCOMPLETE)
 
-            rawdata = self.sock.recv(4096)
+            rawdata = polystr(self.sock.recv(4096))
             if self.debug:
                 warn("Received %d octets\n" % len(rawdata))
             rpkt = Mode6Packet(self)
