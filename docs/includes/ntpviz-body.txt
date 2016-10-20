@@ -22,7 +22,7 @@
           --peer-jitters=hosts |
           --peer-offsets=hosts |
          ]
-         [-D N]
+         [-D DLVL | --debug DLVL]
          [@OPTIONFILE]
 
 == DESCRIPTION ==
@@ -51,29 +51,33 @@ subset of comparative plots for multiple directories.
     single-directory case. The default is the basename of the log directory.
 
 -p DAYS or --period DAYS::
--s TIME or --starttime TIME::
+    The default DAYS is for the period of 7 days.  DAYS can be a
+    floating point number, so "-p 0.5" plots 12 hours.  DAYS is ignored
+    if -s and -e are given.
+
 -e TIME or --endtime TIME::
     With -s and -e you set the start and end times.  TIME is either numeric
     POSIX time (sconds since the start of the epoch) or ISO8601-style
-    timestamps (yyyy-mmm-ddThh:mm:ss).
-
+    timestamps (yyyy-mmm-ddThh:mm:ss). +
+    The default end time is the last logfile entry timestamp.   +
+    The default start time is computed as the end time minus DAYS. +
     Alternatively you can specify either -s or -e (but not both) and use
-    -p to set the plot period in days.  DAYS can be a floating point
-    number, so "-p 0.5" plots 12 hours.
+    -p to set the plot period in days.
 
-    The default DAYS is for the period of 7 days, and the end time to match
-    the last logfile entry.  The start time is computed as end TIME minus
-    DAYS.
+-s TIME or --starttime TIME::
+    See -e and -p.
 
 -c or --clip::
     Normally all the data is plotted.  This option limits the range of
     the plots to the data between 1% and 99%.  This is useful for
     ignoring a few spikes in the data.
 
--D N or --debug N::
-    set the debug level to N and output with more verbosity.  0
-    is the default, quiet except for all ERRORs and some WARNINGs.  9 is
-    painfully verbose. 9 also includes profile data.
+-D DLVL or --debug DLVL::
+    Set the debug level to DLVL.  Lsrger DLVL leads to more verbosity. +
+    0 is the default, quiet except for all ERRORs and some WARNINGs. +
+    1 shows some environment info and basic program progress. +
+    2 leaves the plot file in the system temp directory. +
+    9 is painfully verbose. 9 also includes profile data.
 
 === Individual Plots ===
 
