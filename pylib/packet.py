@@ -622,7 +622,7 @@ class Mode6Session:
                 var = var.strip()
                 val = val.strip()
                 try:
-                    val = int(val)
+                    val = int(val, 0)
                 except ValueError:
                     try:
                         val = float(val)
