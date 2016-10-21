@@ -15,6 +15,7 @@ import os, sys, getopt, cmd, errno, curses, curses.ascii
 import socket, select, struct, shlex
 
 from ntp.packet import *
+from ntp.util import *
 from ntp.libntpc import *
 
 # This import only works on Unixes.  The intention is to enable
@@ -414,6 +415,37 @@ usage: help [ command ]
                 continue
             if not self.__dogetpeers(varlist[1:], peer.associd, af):
                 return
+
+    def assoc_valid(self, line, required=False):
+        "Process a numeric associd or index."
+        if not line:
+            if required:
+                sys.stderr.write("An associd argument is required.\n")
+                return -1
+            else:
+                return 0
+        elif associd.startswith("&"):
+            try:
+                idx = int(line[1:])
+            except:
+                sys.stderr.write("Invalid index literal.\n")
+                return -1
+            if idx not in range(1, len(self.peers)+1):
+                sys.stderr.write("No such index.\n")
+                return -1
+            else:
+                return self.peers[idx - 1].associd
+        else:
+            try:
+                associd = int(line)
+            except:
+                sys.stderr.write("Invalid associd literal.\n")
+                return -1
+            if associd not in [peer.associd for peer in self.peers]:
+                sys.stderr.write("Unknown associd.\n")
+                return -1
+            else:
+                return associd
 
     # Unexposed helper tables and functions end here
 
@@ -947,12 +979,10 @@ usage: cv [ assocID ] [ name=value[,...] ]
             ("selbroken",	"bad reference time:  ", NTP_STR),
             ("candidate",	"candidate order:     ", NTP_STR),
         )
-        associd=int(line)
-        if associd not in [peer.associd for peer in self.peers]:
-            sys.stderr.write("Unknown associd.\n")
-            return
-	self.collect_display(associd=associd,
-                             variables=pstats, decodestatus=True)
+        associd = self.assoc_valid(line)
+        if associd >= 0:
+            self.collect_display(associd=associd,
+                                 variables=pstats, decodestatus=True)
 
     def help_pstats(self):
         sys.stdout.write("""\
