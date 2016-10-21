@@ -13,7 +13,7 @@ def build(ctx):
 						"%s/ntptime/" % bldnode,
 						"%s/ntptime/" % srcnode,
 					  ],
-			use		= "ntp isc M RT PTHREAD",
+			use		= "ntp isc M",
 			install_path = "${PREFIX}/bin/"
 		)
 

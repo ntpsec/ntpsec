@@ -17,7 +17,7 @@ def build(ctx):
 			"%s/libsodium/include/" % srcnode
 		],
 		# clock_gettime needs -lrt for glibc versions before 2.17
-		use		= "ntp isc sodium M RT PTHREAD CRYPTO",
+		use		= "ntp isc sodium M CRYPTO",
 		install_path= "${PREFIX}/bin/"
 	)
 
