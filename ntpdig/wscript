@@ -13,7 +13,7 @@ def build(ctx):
 	ctx(
 		target		= "ntpdig_obj",
 		features	= "c bld_include src_include libisc_include",
-		use		= "ntp isc opts M PTHREAD LIBEVENT_CORE LIBEVENT_PTHREADS RT CRYPTO",
+		use		= "ntp isc M PTHREAD LIBEVENT_CORE LIBEVENT_PTHREADS RT CRYPTO",
 		source		= ntpdig_obj_source,
 		cwd             = bldnode,
 		includes	= [
@@ -28,7 +28,7 @@ def build(ctx):
 	ctx(
 		target		= "ntpdig",
 		features	= "c cprogram bld_include src_include libisc_include ntp_version",
-		use		= "ntp isc opts ntpdig_obj M PTHREAD ntpdig_obj LIBEVENT_CORE LIBEVENT_PTHREADS RT CRYPTO",
+		use		= "ntp isc ntpdig_obj M PTHREAD ntpdig_obj LIBEVENT_CORE LIBEVENT_PTHREADS RT CRYPTO",
 		source		= ntpdig_source,
 		cwd             = bldnode,
 		includes	= [
