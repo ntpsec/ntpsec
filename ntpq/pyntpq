@@ -217,63 +217,10 @@ usage: help [ command ]
 
     # Unexposed helper tables and functions begin here
 
-    # Each of these tuples defines a display mode.  The first member
-    # is the table header for the mode; the remainder are the peer
-    # variables to be listed beneath.
-    __opeervarlist = (
-        "     remote           local      st t when poll reach   delay   offset    disp\n",
-	"srcadr",	# 0
-	"dstadr",	# 1
-	"stratum",	# 2
-	"hpoll",	# 3
-	"ppoll",	# 4
-	"reach",	# 5
-	"delay",	# 6
-	"offset",	# 7
-	"jitter",	# 8
-	"dispersion",	# 9
-	"rec",  	# 10
-	"reftime",	# 11
-	"srcport",	# 12
-	"hmode",	# 13
-        )
-    __peervarlist = (
-        "     remote           refid      st t when poll reach   delay   offset  jitter\n",
-	"srcadr",	# 0
-	"refid",	# 1
-	"stratum",	# 2
-	"hpoll",	# 3
-	"ppoll",	# 4
-	"reach",	# 5
-	"delay",	# 6
-	"offset",	# 7
-	"jitter",	# 8
-	"dispersion",	# 9
-	"rec",  	# 10
-	"reftime",	# 11
-	"srcport",	# 12
-	"hmode",	# 13
-	"srchost",	# 14
-        )
-    __apeervarlist = (
-        "     remote       refid   assid  st t when poll reach   delay   offset  jitter\n",
-	"srcadr",	# 0
-	"refid",	# 1
-	"assid",	# 2
-	"stratum",	# 3
-	"hpoll",	# 4
-	"ppoll",	# 5
-	"reach",	# 6
-	"delay",	# 7
-	"offset",	# 8
-	"jitter",	# 9
-	"dispersion",	# 10
-	"rec",  	# 11
-	"reftime",	# 12
-	"srcport",	# 13
-	"hmode",	# 14
-	"srchost",	# 15
-        )
+    __commonheader = "st t when poll reach   delay   offset    disp\n"
+    __opeerheader = "     remote           local      " + __commonheader
+    __peerheader  = "     remote           refid      " + __commonheader
+    __apeerheader = "     remote       refid   assid  " + __commonheader
 
     def __dogetassoc(self):
         try:
@@ -389,7 +336,7 @@ usage: help [ command ]
 	diff = (diff + 11) / 24
         return "%dd" % diff
 
-    def __doprintpeers(self, variables, varlist, associd, af):
+    def __doprintpeers(self, variables, header, associd, af):
         hmode = 0
         srcport = 0
         srcaddr = None
@@ -411,14 +358,14 @@ usage: help [ command ]
             if name in ("srcadr", "peeradr"):
                 srcaddr = value
             elif name == "srchost":
-                if varlist == Ntpq.__peervarlist or varlist == Ntpq.__apeervarlist:
+                if header == Ntpq.__peerheader or header == Ntpq.__apeerheader:
                     clockname = value
                     have_srchost = True
             elif name == "dstadr":
                 have_dstadr = True
                 # The C code tried to get a fallback pytpe from this in case
                 # the hmode field was not included
-                if varlist == Ntpq.__opeervarlist:
+                if header == Ntpq.__opeerheader:
                     have_da_rid = True
                     dstadr_refid = value[15:]
             elif name == "hmode":
@@ -427,7 +374,7 @@ usage: help [ command ]
                 # The C code for this looked crazily overelaborate.  Best
                 # guess is that it was designed to deal with formats that
                 # no longer occur in this field.
-                if varlist == Ntpq.__peervarlist or varlist == Ntpq.__apeervarlist:
+                if header == Ntpq.__peerheader or header == Ntpq.__apeerheader:
                     have_da_rid = True
                     dstaddr_refid = value
             elif name == "hpoll":
@@ -446,7 +393,7 @@ usage: help [ command ]
             elif name == "offset":
                 estoffset = value
             elif name == "jitter":
-                if varlist == Ntpq.__peervarlist or varlist == Ntpq.__apeervarlist:
+                if header == Ntpq.__peerheader or header == Ntpq.__apeerheader:
                     estjitter = value
                     have_jitter = True
             elif name == "rootdisp" or name == "dispersion":
@@ -491,7 +438,7 @@ usage: help [ command ]
         else:
             c = " .+*"[CTL_PEER_STATVAL(self.session.rstatus) & 0x3]
         #if len(self.chosts) > 1:
-        #    if (varlist == peervarlist or varlist == apeervarlist) and have_dstadr:
+        #    if (header == peerheader or header == apeerheader) and have_dstadr:
         #        serverlocal = nntohost_col(dstadr, True)
         #    else:
         #        if currenthostisnum:
@@ -517,7 +464,7 @@ usage: help [ command ]
             else:
                 drlen = len(dstadr_refid)
                 sys.stdout.write(repr(dstaddr_refid)[:drlen])
-            if varlist == Ntpq.__apeervarlist:
+            if header == Ntpq.__apeerheader:
                 sys.stdout.write(" " * (namewidth - drlen - 6))
                 sys.stdout.write("%-6d" % (associd))
             else:
@@ -537,7 +484,7 @@ usage: help [ command ]
             return True
 
 
-    def __dogetpeers(self, varlist, associd, af):
+    def __dogetpeers(self, header, associd, af):
         try:
             variables = self.session.readvar(associd)
         except Mode6Exception as e:
@@ -549,9 +496,9 @@ usage: help [ command ]
             sys.stderr.write("***No information returned for association %d\n" \
                              % associd)
             return False;
-	return self.__doprintpeers(variables, varlist, associd, af);
+	return self.__doprintpeers(variables, header, associd, af);
 
-    def __dopeers(self, showall, af, varlist):
+    def __dopeers(self, showall, af, header):
         af = socket.AF_INET6 if "-6" in af else socket.AF_INET
         if not self.__dogetassoc():
             return
@@ -564,7 +511,7 @@ usage: help [ command ]
 	if len(self.chosts) > 1:
             sys.stdout.write("%-*.*s " % \
                              (maxhostlen, maxhostlen, "server (local)"))
-	sys.stdout.write(varlist[0])
+	sys.stdout.write(header[0])
 	sys.stdout.write(("=" * (maxhostlen + 78)) + "\n")
         for peer in self.peers:
             if not showall and \
@@ -573,7 +520,7 @@ usage: help [ command ]
                 if self.debug:
                     sys.stderr.write(stderr, "eliding [%d]\n" % peer.associd)
                 continue
-            if not self.__dogetpeers(varlist[1:], peer.associd, af):
+            if not self.__dogetpeers(header[1:], peer.associd, af):
                 return
 
     def assoc_valid(self, line, required=False):
@@ -1152,7 +1099,7 @@ usage: pstats assocID
 
     def do_peers(self, line):
         "obtain and print a list of the server's peers [IP version]"
-        self.__dopeers(showall=False, af=line, varlist=Ntpq.__peervarlist)
+        self.__dopeers(showall=False, af=line, header=Ntpq.__peerheader)
 
     def help_peers(self):
         sys.stdout.write("""\
@@ -1162,7 +1109,7 @@ usage: peers [ -4|-6 ]
 
     def do_apeers(self, line):
         "obtain and print a list of the server's peers and their assocIDs [IP version]"
-        self.__dopeers(showall=False, af=line, varlist=Ntpq.__apeervarlist)
+        self.__dopeers(showall=False, af=line, header=Ntpq.__apeerheader)
 
     def help_apeers(self):
         sys.stdout.write("""\
@@ -1172,7 +1119,7 @@ usage: apeers [ -4|-6 ]
 
     def do_lpeers(self, line):
         "obtain and print a list of all peers and clients [IP version]"
-        self.__dopeers(showall=True, af=line, varlist=Ntpq.__peervarlist)
+        self.__dopeers(showall=True, af=line, header=Ntpq.__peerheader)
 
     def help_lpeers(self):
         sys.stdout.write("""\
@@ -1182,7 +1129,7 @@ usage: lpeers [ -4|-6 ]
 
     def do_opeers(self, line):
         "print peer list the old way, with dstadr shown rather than refid [IP version]"
-        self.__dopeers(showall=False, af=line, varlist=Ntpq.__opeervarlist)
+        self.__dopeers(showall=False, af=line, header=Ntpq.__opeerheader)
 
     def help_opeers(self):
         sys.stdout.write("""\
@@ -1192,7 +1139,7 @@ usage: opeers [ -4|-6 ]
 
     def do_lopeers(self, line):
         "obtain and print a list of all peers and clients showing dstadr [IP version]"
-        self.__dopeers(showall=True, af=line, varlist=Ntpq.__opeervarlist)
+        self.__dopeers(showall=True, af=line, header=Ntpq.__opeerheader)
 
     def help_lopeers(self):
         sys.stdout.write("""\
