@@ -378,20 +378,20 @@ struct peer {
 #define	LEAP_DELSECOND	0x2	/* last minute of day has 59 seconds */
 #define	LEAP_NOTINSYNC	0x3	/* overload, clock is free running */
 
+/* pythonize-header: stop ignoring */
+
 /*
  * Values for peer mode and packet mode. Only the modes through
  * MODE_BROADCAST and MODE_BCLIENT appear in the transition
  * function. MODE_CONTROL and MODE_PRIVATE can appear in packets,
  * but those never survive to the translation function.
-/ */
+ */
 #define	MODE_UNSPEC	0	/* unspecified (old version) */
 #define	MODE_ACTIVE	1	/* symmetric active mode */
 #define	MODE_PASSIVE	2	/* symmetric passive mode */
 #define	MODE_CLIENT	3	/* client mode */
 #define	MODE_SERVER	4	/* server mode */
 #define	MODE_BROADCAST	5	/* broadcast mode */
-
-/* pythonize-header: stop ignoring */
 
 /*
  * These can appear in packets
