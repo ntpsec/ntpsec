@@ -341,14 +341,12 @@ usage: help [ command ]
         srchost = None
         srcport = 0
         srcaddr = None
-        dstaddr_refid = ""
-        dstadr_refid = "0.0.0.0"
+        dstadr_refid = ""
         ppoll = 0
         hpoll = 0
         reach = 0
         ptype = '?'
         displayname = None
-        have_dstadr = False
         have_jitter = False
         clock_name = ''
 
@@ -360,10 +358,9 @@ usage: help [ command ]
             elif name == "srchost":
                 srchost = value
             elif name == "dstadr":
-                have_dstadr = True
                 # The C code tried to get a fallback pytpe from this in case
                 # the hmode field was not included
-                if header == Ntpq.__opeerheader:
+                if "local" in header:
                     dstadr_refid = value
             elif name == "hmode":
                 hmode = value
@@ -372,7 +369,7 @@ usage: help [ command ]
                 # guess is that it was designed to deal with formats that
                 # no longer occur in this field.
                 if "refid" in header:
-                    dstaddr_refid = value
+                    dstadr_refid = value
             elif name == "hpoll":
                 hpoll = value
                 if hpoll < 0:
@@ -414,7 +411,7 @@ usage: help [ command ]
         elif hmode == MODE_CLIENT:
             if displayname != None:
                 ptype = 'l'	# local refclock
-            elif dstaddr_refid == "POOL":
+            elif dstadr_refid == "POOL":
                 ptype = 'p'	# pool
             elif srcaddr.startswith("224."):
                 ptype = 'a'	# manycastclient
@@ -461,9 +458,9 @@ usage: help [ command ]
                                  (c, clock_name[:namewidth]))
             # Destination address, assoc ID or refid.
             assocwidth = 9 if "assoc" in header else 0
-            if "." not in dstaddr_refid:
-                dstaddr_refid = "." + dstaddr_refid + "."
-            visible = dstaddr_refid[:addrwidth - assocwidth]
+            if "." not in dstadr_refid:
+                dstadr_refid = "." + dstadr_refid + "."
+            visible = dstadr_refid[:addrwidth - assocwidth]
             sys.stdout.write(visible)
             if "assoc" in header:
                 sys.stdout.write(" " * (addwidth - len(visible) - assocwidth))
@@ -473,7 +470,7 @@ usage: help [ command ]
             # The rest of the story
             #prettyinterval(when(&ts, &rec, &reftime)),
             sys.stdout.write(
-                " %2ld %c %4.4s %4.4s  %3lo  %7.3f %7.3f %7.3f\n" % \
+                " %2ld %c %4.4s %4.4s  %3lo  %7.3f %8.3f %7.3f\n" % \
                 (variables.get("stratum", 0),
                  ptype,
                  Ntpq.prettyinterval(0),
