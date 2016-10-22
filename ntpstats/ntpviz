@@ -320,7 +320,13 @@ set rmargin 12
 
         # speed up by only sending gnuplot the data it will actually use
         plot_data = ''
+        last_time = 0
         for row in self.loopstats:
+            delay = float( row[0] ) - last_time
+            if 1024 < delay:
+                # data loss, add a break in the plot line
+                plot_data += '\n'
+            last_time = float(row[0] )
             # Python slice is too dumb to do this the easy way
             # fields: time, time offset, and freq offset
             plot_data += row[0] + ' ' + row[1] + ' ' + row[2] + '\n'
@@ -390,7 +396,13 @@ file.</p>
         plot_data = ''
         for key in tempslist:
             # speed up by only sending gnuplot the data it will actually use
+            last_time = 0
             for row in tempsmap[key]:
+                delay = float( row[0] ) - last_time
+                if 1024 < delay:
+                    # data loss, add a break in the plot line
+                    plot_data += '\n'
+                last_time = float(row[0] )
                 # Python slice is too dumb to do this the easy way
                 # fields: time, temp
                 plot_data += row[0] + ' ' + row[2] + '\n'
@@ -438,7 +450,13 @@ component of frequency drift.</p>
         gps_data = ()
         plot_data = ""
         for key in gpslist:
+            last_time = 0
             for row in gpsmap[key]:
+                delay = float( row[0] ) - last_time
+                if 1024 < delay:
+                    # data loss, add a break in the plot line
+                    plot_data += '\n'
+                last_time = float(row[0] )
                 # Python slice is too dumb to do this the easy way
                 # fields: time, tdop, nSats
                 plot_data += row[0] + ' ' + row[2] + ' ' + row[3] + '\n'
@@ -491,7 +509,13 @@ gpsd log file is created by the gps-log.py program.</p>
 
         # speed up by only sending gnuplot the data it will actually use
         plot_data = ''
+        last_time = 0
         for row in self.loopstats:
+            delay = float( row[0] ) - last_time
+            if 1024 < delay:
+                # data loss, add a break in the plot line
+                plot_data += '\n'
+            last_time = float(row[0] )
             # Python slice is too dumb to do this the easy way
             # fields: time, freq error
             plot_data += row[0] + ' ' + row[2] + '\n'
@@ -537,7 +561,13 @@ line at 0ppm.  Expected values of 99%-1% percentiles: 0.4ppm</p>
 
         # speed up by only sending gnuplot the data it will actually use
         plot_data = ''
+        last_time = 0
         for row in self.loopstats:
+            delay = float( row[0] ) - last_time
+            if 1024 < delay:
+                # data loss, add a break in the plot line
+                plot_data += '\n'
+            last_time = float(row[0] )
             # Python slice is too dumb to do this the easy way
             # fields: time, and fld
             plot_data += row[0] + ' ' + row[fld - 1] + '\n'
@@ -761,12 +791,23 @@ at 0s.</p>
             # 20% speed up by only sending gnuplot the data it will
             # actually use
             # Python slice is too dumb to do this the easy way
+            last_time = 0
             if rtt:
                 for row in peerdict[ip]:
+                    delay = float( row[0] ) - last_time
+                    if 1024 < delay:
+                        # data loss, add a break in the plot line
+                        plot_data += '\n'
+                    last_time = float(row[0] )
                     # fields: time, fld, and rtt
                     plot_data += row[0] + ' ' + row[fld-1] + ' ' + row[4] + '\n'
             else:
                 for row in peerdict[ip]:
+                    delay = float( row[0] ) - last_time
+                    if 1024 < delay:
+                        # data loss, add a break in the plot line
+                        plot_data += '\n'
+                    last_time = float(row[0] )
                     # fields: time, fld
                     plot_data += row[0] + ' ' + row[fld - 1] + '\n'
             plot_data += "e\n"
