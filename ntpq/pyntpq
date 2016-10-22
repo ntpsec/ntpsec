@@ -525,7 +525,7 @@ usage: help [ command ]
             # The rest of the story
             #prettyinterval(when(&ts, &rec, &reftime)),
             sys.stdout.write(
-                " %2ld %c %4.4s %4.4s  %3lo  %7.7s %8.7s %7.7s\n" % \
+                " %2ld %c %4.4s %4.4s  %3lo  %7.3f %7.3f %7.3f\n" % \
                 (variables.get("stratum", 0),
                  ptype,
                  Ntpq.prettyinterval(0),
