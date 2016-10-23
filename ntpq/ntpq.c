@@ -473,6 +473,7 @@ ntpqmain(
 	delay_time.l_ui = 0;
 	delay_time.l_uf = DEFDELAY;
 
+	init_lib();	/* sets up ipv4_works, ipv6_works */
 	init_auth();
 	init_network();
 

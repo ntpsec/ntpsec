@@ -76,6 +76,7 @@ static void RunAllTests(void)
 
 int main(int argc, const char * argv[]) {
 
+	init_lib();
 	init_auth();
 	init_network();
 

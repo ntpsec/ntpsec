@@ -11,7 +11,7 @@
 
 TEST_GROUP(refidsmear);
 
-TEST_SETUP(refidsmear) {}
+TEST_SETUP(refidsmear) {init_lib();}
 
 TEST_TEAR_DOWN(refidsmear) {}
 

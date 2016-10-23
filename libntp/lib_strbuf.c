@@ -17,3 +17,14 @@ int		debug;
 libbufstr	lib_stringbuf[LIB_NUMBUF];
 int		lib_nextbuf;
 
+
+/*
+ * This stub is required to pacify the Mac OS X linker, which will
+ * refuse to consider a module a candidate to be linked unless it
+ * has an executable entry point called from somewhere else that
+ * is linked.
+ */
+void
+init_lib(void)
+{
+}

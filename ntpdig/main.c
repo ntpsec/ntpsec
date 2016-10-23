@@ -214,6 +214,7 @@ ntpdig_main (
 	if (!libevent_version_ok())
 		exit(2);
 
+	init_lib();
 	init_auth();
 	init_network();
 
