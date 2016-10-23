@@ -235,15 +235,15 @@ usage: help [ command ]
 
         if self.debug:
             sys.stderr.write("\n%d associations total\n" % len(self.peers))
-	#sortassoc()
-	return True
+        #sortassoc()
+        return True
 
     def __printassoc(self, showall):
-	condition = "";
+        condition = "";
         if not self.peers:
             sys.stdout.write("No association IDs in list\n");
             return;
-	sys.stdout.write("\nind assid status  conf reach auth condition  last_event cnt\n");
+        sys.stdout.write("\nind assid status  conf reach auth condition  last_event cnt\n");
         sys.stdout.write("===========================================================\n");
         for (i, peer) in enumerate(self.peers):
             statval = CTL_PEER_STATVAL(peer.status)
@@ -325,13 +325,13 @@ usage: help [ command ]
             return "-"
         if diff <= 2048:
             return str(diff)
-	diff = (diff + 29) / 60
+        diff = (diff + 29) / 60
         if diff <= 300:
             return "%dm" % diff
-	diff = (diff + 29) / 60
+        diff = (diff + 29) / 60
         if diff <= 96:
             return "%dh" % diff
-	diff = (diff + 11) / 24
+        diff = (diff + 11) / 24
         return "%dd" % diff
 
     def __doprintpeers(self, variables, header, associd, af):
@@ -491,19 +491,19 @@ usage: help [ command ]
             sys.stderr.write("***No information returned for association %d\n" \
                              % associd)
             return False;
-	return self.__doprintpeers(variables, header, associd, af);
+        return self.__doprintpeers(variables, header, associd, af);
 
     def __dopeers(self, showall, af, header):
         af = socket.AF_INET6 if "-6" in af else socket.AF_INET
         if not self.__dogetassoc():
             return
         maxhostlen = 0
-	if len(self.chosts) > 1:
+        if len(self.chosts) > 1:
             maxhostlen = max([len(host) for (host, _af) in self.chosts])
             sys.stdout.write("%-*.*s " % \
                              (maxhostlen, maxhostlen, "server"))
-	sys.stdout.write(header)
-	sys.stdout.write(("=" * (maxhostlen + 78)) + "\n")
+        sys.stdout.write(header)
+        sys.stdout.write(("=" * (maxhostlen + 78)) + "\n")
         for peer in self.peers:
             if not showall and \
 		    not (CTL_PEER_STATVAL(peer.status)
@@ -1283,7 +1283,7 @@ usage: sysstats
             ("mru_mem",		"kilobytes:          ", NTP_STR),
             ("mru_maxmem",	"maximum kilobytes:  ", NTP_STR),
         )
-	self.collect_display(associd=0, variables=monstats, decodestatus=False)
+        self.collect_display(associd=0, variables=monstats, decodestatus=False)
 
     def help_monstats(self):
         sys.stdout.write("""\
@@ -1328,7 +1328,7 @@ usage: authinfo
             ("io_wakeups",	"input wakeups:        ", NTP_STR),
             ("io_goodwakeups",	"useful input wakeups: ", NTP_STR),
         )
-	self.collect_display(associd=0, variables=iostats, decodestatus=False)
+        self.collect_display(associd=0, variables=iostats, decodestatus=False)
 
     def help_iostats(self):
         sys.stdout.write("""\
