@@ -468,12 +468,12 @@ usage: help [ command ]
             else:
                 sys.stdout.write(" " * (addrwidth - len(visible)))
             # The rest of the story
-            #prettyinterval(when(&ts, &rec, &reftime)),
+            last_sync = variables.get("rec") or variables.get("reftime")
             sys.stdout.write(
                 " %2ld %c %4.4s %4.4s  %3lo  %7.3f %8.3f %7.3f\n" % \
                 (variables.get("stratum", 0),
                  ptype,
-                 Ntpq.prettyinterval(0),
+                 Ntpq.prettyinterval(now if last_sync is None else int(now - lfptofloat(last_sync))),
                  Ntpq.prettyinterval(poll_sec),
                  reach, estdelay, estoffset,
                  estjitter if have_jitter else estdisp))
