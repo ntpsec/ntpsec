@@ -14,6 +14,7 @@
 #include "ntp_fp.h"
 #include "ntp_stdlib.h"
 #include "ntp_random.h"
+#include "timespecops.h"
 
 #include "ntp_config.h"
 #include "ntp_assert.h"
@@ -58,6 +59,24 @@ libntpc_prettydate(PyObject *self, PyObject *args)
     }
 }
 
+static PyObject *
+libntpc_lfptofloat(PyObject *self, PyObject *args)
+{
+    char *s;
+    l_fp ts;
+    struct timespec tt;
+ 
+    UNUSED_ARG(self);
+    if (!PyArg_ParseTuple(args, "s", &s))
+	return NULL;
+    if (!hextolfp(s+2, &ts)) {
+	PyErr_SetString(PyExc_ValueError, "ill-formed hex date");
+	return NULL;
+    }
+    tt = lfp_stamp_to_tspec(ts, NULL);
+    return Py_BuildValue("d", tt.tv_sec + tt.tv_nsec * 1e-9);
+}
+
 /* List of functions defined in the module */
 
 static PyMethodDef libntpc_methods[] = {
@@ -65,6 +84,8 @@ static PyMethodDef libntpc_methods[] = {
      PyDoc_STR("Status string display from peer status word.")},
     {"prettydate",     	libntpc_prettydate,  	METH_VARARGS,
      PyDoc_STR("Status string display from peer status word.")},
+    {"lfptofloat",     	libntpc_lfptofloat,  	METH_VARARGS,
+     PyDoc_STR("NTP l_fp to Python-style float time.")},
     {NULL,		NULL, 0, NULL}		/* sentinel */
 };
 
