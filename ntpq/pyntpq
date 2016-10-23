@@ -217,8 +217,8 @@ usage: help [ command ]
 
     # Unexposed helper tables and functions begin here
 
-    __common = "st t when poll reach   delay   offset    "
-    __opeerheader = "     remote           local      " + __common + "disp\n"
+    __common = "st t when poll reach   delay   offset  "
+    __opeerheader = "     remote           local      " + __common + "  disp\n"
     __peerheader  = "     remote           refid      " + __common + "jitter\n"
     __apeerheader = "     remote       refid   assid  " + __common + "jitter\n"
 
@@ -469,14 +469,16 @@ usage: help [ command ]
                 sys.stdout.write(" " * (addrwidth - len(visible)))
             # The rest of the story
             last_sync = variables.get("rec") or variables.get("reftime")
+            jd = estjitter if have_jitter else estdisp
+            jd = "      -" if jd >= 999 else ("%7.3f" % jd)
             sys.stdout.write(
-                " %2ld %c %4.4s %4.4s  %3lo  %7.3f %8.3f %7.3f\n" % \
+                " %2ld %c %4.4s %4.4s  %3lo  %7.3f %8.3f %s\n" % \
                 (variables.get("stratum", 0),
                  ptype,
                  Ntpq.prettyinterval(now if last_sync is None else int(now - lfptofloat(last_sync))),
                  Ntpq.prettyinterval(poll_sec),
                  reach, estdelay, estoffset,
-                 estjitter if have_jitter else estdisp))
+                 jd))
             return True
         else:
             return True
