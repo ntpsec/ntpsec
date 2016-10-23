@@ -281,7 +281,7 @@ class Mode6Session:
         self.always_auth       = False  # Always send authenticated requests
         self.keyid = None
         self.password = None
-        self.name = None
+        self.hostname = None
         self.isnum = False
         self.sock = None
         self.port = 0
@@ -350,13 +350,13 @@ class Mode6Session:
         # C implementation didn't use multiple responses, so we don't either
         (family, socktype, protocol, canonname, sockaddr) = res[0]
         if canonname is None:
-            self.name = sockaddr.inet_ntop(sockaddr[0], family)
+            self.hostname = sockaddr.inet_ntop(sockaddr[0], family)
             self.isnum = True
         else:
-            self.name = canonname or hname
+            self.hostname = canonname or hname
             self.isnum = False
         if self.debug > 2:
-            sys.stdout.write("Opening host %s\n" % self.name)
+            sys.stdout.write("Opening host %s\n" % self.hostname)
         self.port = sockaddr[1]
         try:
             self.sock = socket.socket(family, socktype, protocol)
@@ -380,7 +380,7 @@ class Mode6Session:
             self.sock.sendall(polybytes(xdata))
         except socket.error:
             # On failure, we don't know how much data was actually received
-            sys.stderr.write("Write to %s failed\n" % self.name)
+            sys.stderr.write("Write to %s failed\n" % self.hostname)
             return -1
         if self.debug >= 4:
             sys.stdout.write("Request packet:\n")
@@ -446,10 +446,10 @@ class Mode6Session:
                 # Timed out.  Return what we have
                 if len(fragments) == 0:
                     if timeo:
-                        warn("%s: timed out, nothing received\n" % self.name)
+                        warn("%s: timed out, nothing received\n" % self.hostname)
                         raise Mode6Exception(SERR_TIMEOUT)
                 if timeo:
-                    warn("%s: timed out with incomplete data\n" % self.name)
+                    warn("%s: timed out with incomplete data\n" % self.hostname)
                     if self.debug:
                         sys.stderr.write("ERR_INCOMPLETE: Received fragments:\n")
                         for (i, frag) in enumerate(fragments):

@@ -231,7 +231,7 @@ usage: help [ command ]
 
         if len(self.peers) == 0:
             if self.chosts:
-                sys.stdout.write("server=%s ", self.session.name)
+                sys.stdout.write("server=%s ", self.session.hostname)
             sys.stdout.write("No association IDs returned\n")
             return False
 
@@ -495,7 +495,7 @@ usage: help [ command ]
             return False
         if not variables:
             if len(self.chosts) > 1:
-                sys.stderr.write("server=%s ", self.session.name)
+                sys.stderr.write("server=%s ", self.session.hostname)
             sys.stderr.write("***No information returned for association %d\n" \
                              % associd)
             return False;
@@ -507,7 +507,7 @@ usage: help [ command ]
             return
         maxhostlen = 0
 	#for host in self.chosts:
-        #    if getnetnum(chosts[u].name, &netnum, fullname, af):
+        #    if getnetnum(chosts[u].hostname, &netnum, fullname, af):
         #        name_or_num = nntohost(&netnum)
         #        sl = len(name_or_num)
         #        maxhostlen = max(maxhostlen, sl)
@@ -621,7 +621,7 @@ usage: delay [ msec ]
         "specify the host whose NTP server we talk to"
         if not line:
             if self.session.havehost():
-                print("current host is %s" % self.session.name)
+                print("current host is %s" % self.session.hostname)
             else:
                 print("no current host")
         else:
@@ -633,9 +633,9 @@ usage: delay [ msec ]
                 session.ai_family = socket.AF_INET6
                 tokens.pop(0)
             if tokens and self.session.openhost(tokens[0], session.ai_family):
-                print("current host set to %s" % self.session.name)
+                print("current host set to %s" % self.session.hostname)
             elif self.session.havehost():
-                print("current host remains %s" % self.session.name)
+                print("current host remains %s" % self.session.hostname)
             else:
                 print("still no current host")
 
