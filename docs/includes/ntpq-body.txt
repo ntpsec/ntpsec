@@ -118,14 +118,12 @@ following.
   +clearlist+ command removes all variables from the list.
 
 +authenticate+ [yes | no]::
-  Normally +{ntpq}+ does not authenticate requests unless they are write
-  requests. The command +authenticate yes+ causes +{ntpq}+ to send
-  authentication with all requests it makes. Authenticated requests
-  causes some servers to handle requests slightly differently, and can
-  occasionally melt the CPU in fuzzballs if you turn authentication on
-  before doing a _peer_ display. The command +authenticate+ causes
-  +{ntpq}+ to display whether or not +{ntpq}+ is currently autheinticating
-  requests.
+  Normally +{ntpq}+ does not authenticate requests unless they are
+  write requests. The command +authenticate yes+ causes +{ntpq}+ to
+  send authentication with all requests it makes. Authenticated
+  requests causes some servers to handle requests slightly
+  differently. The command +authenticate+ causes +{ntpq}+ to display
+  whether or not +{ntpq}+ is currently autheinticating requests.
 
 +cooked+::
   Display server messages in prettyprint format.
