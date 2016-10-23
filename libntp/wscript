@@ -72,12 +72,10 @@ def build(ctx):
 		includes	= includes,
 	)
 
-	pyversion = ".".join([str(x) for x in sys.version_info[:2]])
-
 	# Loadable Python extension
 	ctx(
 		target		= "ntpc",
-		features	= "c cshlib bld_include src_include",
+		features	= "c cshlib bld_include src_include pyext",
 		source		= ["pymodule.c"] + libntp_source_sharable,
-		includes	= includes + ["/usr/include/python" + pyversion],
+		includes	= includes,
 	)
