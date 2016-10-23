@@ -430,21 +430,15 @@ usage: help [ command ]
             c = " x.-+#*o"[CTL_PEER_STATVAL(self.session.rstatus) & 0x7]
         else:
             c = " .+*"[CTL_PEER_STATVAL(self.session.rstatus) & 0x3]
-        #if len(self.chosts) > 1:
-        #    if (header == peerheader or header == apeerheader) and have_dstadr:
-        #        serverlocal = nntohost_col(dstadr, True)
-        #    else:
-        #        if currenthostisnum:
-        #            serverlocal = currenthost[:maxhostlen]
-        #        else:
-        #            serverlocal = currenthost
-        #    sys.stdout.write("%-*s " % (maxhostlen, serverlocal))
+        if len(self.chosts) > 1:
+            maxhostlen = max([len(host) for (host, _af) in self.chosts])
+            sys.stdout.write("%-*s " % (maxhostlen, self.session.hostname))
         def is_ipv6(addr): return ":" in addr and "." not in addr
         if socket.AF_UNSPEC == af or af == (socket.AF_INET6 if is_ipv6(srcaddr) else socket.AF_INET):
             # Source host or clockname
             namewidth = 15
             addrwidth = 15
-            if displayname != None and showhostnames:
+            if displayname != None and self.showhostnames:
                 clock_name = displayname
             elif srchost != None:
                 clock_name = srchost
@@ -506,14 +500,10 @@ usage: help [ command ]
         if not self.__dogetassoc():
             return
         maxhostlen = 0
-	#for host in self.chosts:
-        #    if getnetnum(chosts[u].hostname, &netnum, fullname, af):
-        #        name_or_num = nntohost(&netnum)
-        #        sl = len(name_or_num)
-        #        maxhostlen = max(maxhostlen, sl)
 	if len(self.chosts) > 1:
+            maxhostlen = max([len(host) for (host, _af) in self.chosts])
             sys.stdout.write("%-*.*s " % \
-                             (maxhostlen, maxhostlen, "server (local)"))
+                             (maxhostlen, maxhostlen, "server"))
 	sys.stdout.write(header)
 	sys.stdout.write(("=" * (maxhostlen + 78)) + "\n")
         for peer in self.peers:
@@ -1486,6 +1476,9 @@ if __name__ == '__main__':
 
     try:
         if len(interpreter.ccmds) == 0:
+            if len(interpreter.chosts) > 1:
+                sys.stderr.write("ntpq can only work interactively on one host.")
+                interpreter.chosts = interpreter.chosts[:1]
             session.openhost(*interpreter.chosts[0])
             interpreter.cmdloop()
         else:
