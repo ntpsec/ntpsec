@@ -30,7 +30,7 @@
  */
 
 static PyObject *
-libntpc_statustoa(PyObject *self, PyObject *args)
+ntpc_statustoa(PyObject *self, PyObject *args)
 {
     int status1, status2;
     char *gs;
@@ -43,7 +43,7 @@ libntpc_statustoa(PyObject *self, PyObject *args)
 }
 
 static PyObject *
-libntpc_prettydate(PyObject *self, PyObject *args)
+ntpc_prettydate(PyObject *self, PyObject *args)
 {
     char *s;
     l_fp ts;
@@ -60,7 +60,7 @@ libntpc_prettydate(PyObject *self, PyObject *args)
 }
 
 static PyObject *
-libntpc_lfptofloat(PyObject *self, PyObject *args)
+ntpc_lfptofloat(PyObject *self, PyObject *args)
 {
     char *s;
     l_fp ts;
@@ -79,12 +79,12 @@ libntpc_lfptofloat(PyObject *self, PyObject *args)
 
 /* List of functions defined in the module */
 
-static PyMethodDef libntpc_methods[] = {
-    {"statustoa",      	libntpc_statustoa,  	METH_VARARGS,
+static PyMethodDef ntpc_methods[] = {
+    {"statustoa",      	ntpc_statustoa,  	METH_VARARGS,
      PyDoc_STR("Status string display from peer status word.")},
-    {"prettydate",     	libntpc_prettydate,  	METH_VARARGS,
+    {"prettydate",     	ntpc_prettydate,  	METH_VARARGS,
      PyDoc_STR("Status string display from peer status word.")},
-    {"lfptofloat",     	libntpc_lfptofloat,  	METH_VARARGS,
+    {"lfptofloat",     	ntpc_lfptofloat,  	METH_VARARGS,
      PyDoc_STR("NTP l_fp to Python-style float time.")},
     {NULL,		NULL, 0, NULL}		/* sentinel */
 };
@@ -94,15 +94,15 @@ PyDoc_STRVAR(module_doc,
 ");
 
 /* banishes a pointless compiler warning */
-extern PyMODINIT_FUNC initlibntpc(void);
+extern PyMODINIT_FUNC initntpc(void);
 
 // cppcheck-suppress unusedFunction
-NTPSEC_PY_MODULE_INIT(libntpc)
+NTPSEC_PY_MODULE_INIT(ntpc)
 {
     PyObject *m;
 
     /* Create the module and add the functions */
-    NTPSEC_PY_MODULE_DEF(m, "libntpc", module_doc, libntpc_methods)
+    NTPSEC_PY_MODULE_DEF(m, "ntpc", module_doc, ntpc_methods)
 
     /* for statustoa() */ 
     PyModule_AddIntConstant(m, "TYPE_SYS", TYPE_SYS);

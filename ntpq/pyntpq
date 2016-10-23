@@ -16,7 +16,7 @@ import socket, select, struct, shlex, time
 
 from ntp.packet import *
 from ntp.util import *
-from ntp.libntpc import *
+from ntp.ntpc import *
 
 # This import only works on Unixes.  The intention is to enable
 # Ctrl-P, Ctrl-N, and friends in Cmd.
