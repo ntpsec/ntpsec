@@ -83,7 +83,7 @@ static PyMethodDef ntpc_methods[] = {
     {"statustoa",      	ntpc_statustoa,  	METH_VARARGS,
      PyDoc_STR("Status string display from peer status word.")},
     {"prettydate",     	ntpc_prettydate,  	METH_VARARGS,
-     PyDoc_STR("Status string display from peer status word.")},
+     PyDoc_STR("Convert a time stamp to something readable.")},
     {"lfptofloat",     	ntpc_lfptofloat,  	METH_VARARGS,
      PyDoc_STR("NTP l_fp to Python-style float time.")},
     {NULL,		NULL, 0, NULL}		/* sentinel */
