@@ -24,6 +24,8 @@ bool ssl_init_done;
 void
 ssl_init(void)
 {
+	init_lib();
+
 	if (ssl_init_done)
 		return;
 
