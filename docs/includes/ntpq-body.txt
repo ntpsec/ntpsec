@@ -122,8 +122,9 @@ following.
   write requests. The command +authenticate yes+ causes +{ntpq}+ to
   send authentication with all requests it makes. Authenticated
   requests causes some servers to handle requests slightly
-  differently. The command +authenticate+ causes +{ntpq}+ to display
-  whether or not +{ntpq}+ is currently autheinticating requests.
+  differently. The command +authenticate+ witout arguments causes
+  +{ntpq}+ to display whether or not +{ntpq}+ is currently
+  authenticating requests.
 
 +cooked+::
   Display server messages in prettyprint format.
