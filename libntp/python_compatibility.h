@@ -19,7 +19,7 @@
 
 #define NTPSEC_PY_MODULE_DEF(mod, name, doc, methods) \
     static struct PyModuleDef moduledef = { \
-        PyModuleDef_HEAD_INIT, name, doc, -1, methods, }; \
+        PyModuleDef_HEAD_INIT, name, doc, -1, methods, NULL, NULL, NULL, NULL}; \
     mod = PyModule_Create(&moduledef);
 
 #define NTPSEC_PY_MODULE_ERROR_VAL NULL
