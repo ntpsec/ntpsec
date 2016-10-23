@@ -457,13 +457,16 @@ usage: help [ command ]
                 sys.stdout.write("%c%-15.15s " % \
                                  (c, clock_name[:namewidth]))
             # Destination address, assoc ID or refid.
-            assocwidth = 9 if "assoc" in header else 0
+            assocwidth = 7 if "assid" in header else 0
             if "." not in dstadr_refid:
                 dstadr_refid = "." + dstadr_refid + "."
-            visible = dstadr_refid[:addrwidth - assocwidth]
+            if assocwidth and len(dstadr_refid) >= addrwidth - assocwidth:
+                visible = "..."
+            else:
+                visible = dstadr_refid
             sys.stdout.write(visible)
-            if "assoc" in header:
-                sys.stdout.write(" " * (addwidth - len(visible) - assocwidth))
+            if "assid" in header:
+                sys.stdout.write(" " * (addrwidth - len(visible) - assocwidth + 1))
                 sys.stdout.write("%-6d" % (associd))
             else:
                 sys.stdout.write(" " * (addrwidth - len(visible)))
