@@ -514,7 +514,7 @@ usage: help [ command ]
             if not self.__dogetpeers(header, peer.associd, af):
                 return
 
-    def assoc_valid(self, line, required=False):
+    def __assoc_valid(self, line, required=False):
         "Process a numeric associd or index."
         if not line:
             if required:
@@ -522,9 +522,9 @@ usage: help [ command ]
                 return -1
             else:
                 return 0
-        elif associd.startswith("&"):
+        elif line.startswith("&"):
             try:
-                idx = int(line[1:])
+                idx = int(line[1:].split()[0])
             except:
                 sys.stderr.write("Invalid index literal.\n")
                 return -1
@@ -535,7 +535,7 @@ usage: help [ command ]
                 return self.peers[idx - 1].associd
         else:
             try:
-                associd = int(line)
+                associd = int(line.split()[0])
             except:
                 sys.stderr.write("Invalid associd literal.\n")
                 return -1
@@ -544,6 +544,21 @@ usage: help [ command ]
                 return -1
             else:
                 return associd
+
+    def __assoc_range_valid(self, line):
+        "Try to gert a range of assoc IDs."
+        tokens = line.split()
+        if len(tokens) < 2:
+            return ()
+        lo = self.__assoc_valid(tokens[0])
+        hi = self.__assoc_valid(tokens[1])
+        if (hi < lo):
+            return ()
+        return (lo, hi)
+
+    def __dolist(self, varlist, associd, op, type):
+        "List variables associated with a specified peer."
+        pass
 
     # Unexposed helper tables and functions end here
 
@@ -571,8 +586,8 @@ usage: timeout [ msec ]
     def collect_display(self, associd, variables, decodestatus):
         "Query and display a collection of variables from the system."
         try:
-            msg = self.session.readvar(associd, [v[0] for v in variables])
-        except Mode6Exception:
+            queried = self.session.readvar(associd, [v[0] for v in variables])
+        except Mode6Exception as e:
             print(e.message)
             return
         if decodestatus:
@@ -585,7 +600,7 @@ usage: timeout [ msec ]
                               self.session.rstatus,
                               statustoa(statype, self.session.rstatus)))
         for (name, legend, fmt) in variables:
-            value = msg[name]
+            value = queried[name]
             if fmt in (NTP_STR, NTP_UINT, NTP_INT, NTP_ADD, NTP_ADP):
                 sys.stdout.write("%s %s\n" % (legend, value))
             elif fmt == NTP_LFP:
@@ -927,7 +942,9 @@ usage: showvars
 
     def do_readlist(self, line):
         "read the system or peer variables included in the variable list"
-        pass
+        associd = self.__assoc_valid(line)
+        qtype = TYPE_SYS if associd == 0 else TYPE_PEER
+        self.__dolist(self.uservars.keys(), associd, CTL_OP_READVAR, qtype)
 
     def help_readlist(self):
         sys.stdout.write("""\
@@ -957,7 +974,9 @@ usage: writelist [ assocID ]
 
     def do_readvar(self, line):
         "read system or peer variables"
-        pass
+        associd = self.__assoc_valid(line)
+        qtype = TYPE_SYS if associd == 0 else TYPE_PEER
+        self.__dolist(line.split()[1:], associd, CTL_OP_READVAR, qtype)
 
     def help_readvar(self):
         sys.stdout.write("""\
@@ -987,7 +1006,16 @@ usage: writevar assocID name=value,[...]
 
     def do_mreadlist(self, line):
         "read the peer variables in the variable list for multiple peers"
-        pass
+        idrange = self.__assoc_range_valid()
+        if not idrange:
+            return
+        varlist = line.split()[2:]
+        for associd in idrange:
+            if (associd != idrange[0]):
+                sys.stdout.write("\n")
+            if not self__dolist(self.uservars,
+                                associd, CTL_OP_READVAR, TYPE_PEER):
+                return
 
     def help_mreadlist(self):
         sys.stdout.write("""\
@@ -1007,7 +1035,15 @@ usage: mrl assocIDlow assocIDhigh
 
     def do_mreadvar(self, line):
         "read peer variables from multiple peers"
-        pass
+        idrange = self.__assoc_range_valid()
+        if not idrange:
+            return
+        varlist = line.split()[2:]
+        for associd in idrange:
+            if (associd != idrange[0]):
+                sys.stdout.write("\n")
+            if not self__dolist(varlist, associd, CTL_OP_READVAR, TYPE_PEER):
+                return
 
     def help_mreadvar(self):
         sys.stdout.write("""\
@@ -1027,7 +1063,8 @@ usage: mrv assocIDlow assocIDhigh [ name=value[,...] ]
 
     def do_clocklist(self, line):
         "read the clock variables included in the variable list"
-        pass
+        self.__dolist(self.uservars.keys(),
+                      self.__assoc_valid(line), CTL_OP_READVAR, CLOCK_TYPE)
 
     def help_clocklist(self):
         sys.stdout.write("""\
@@ -1047,7 +1084,8 @@ usage: cl [ assocID ]
 
     def do_clockvar(self, line):
         "read clock variables"
-        pass
+        self.__dolist(line.split()[1:], self.__assoc_valid(line),
+                      CTL_OP_CLOCKVAR, CLOCK_TYPE)
 
     def help_clockvar(self):
         sys.stdout.write("""\
@@ -1068,8 +1106,8 @@ usage: cv [ assocID ] [ name=value[,...] ]
     def do_pstats(self, line):
         "show statistics for a peer"
         pstats = (
-            ("src",		"remote host:         ", NTP_ADD),
-            ("dst",		"local address:       ", NTP_ADD),
+            ("srcadr",		"remote host:         ", NTP_ADD),
+            ("dstadr",		"local address:       ", NTP_ADD),
             ("timerec",		"time last received:  ", NTP_STR),
             ("timer",		"time until next send:", NTP_STR),
             ("timereach",	"reachability change: ", NTP_STR),
@@ -1082,7 +1120,7 @@ usage: cv [ assocID ] [ name=value[,...] ]
             ("selbroken",	"bad reference time:  ", NTP_STR),
             ("candidate",	"candidate order:     ", NTP_STR),
         )
-        associd = self.assoc_valid(line)
+        associd = self.__assoc_valid(line)
         if associd >= 0:
             self.collect_display(associd=associd,
                                  variables=pstats, decodestatus=True)
