@@ -600,6 +600,8 @@ usage: timeout [ msec ]
                               self.session.rstatus,
                               statustoa(statype, self.session.rstatus)))
         for (name, legend, fmt) in variables:
+            if name not in queried:
+                continue
             value = queried[name]
             if fmt in (NTP_STR, NTP_UINT, NTP_INT, NTP_ADD, NTP_ADP):
                 sys.stdout.write("%s %s\n" % (legend, value))
