@@ -618,17 +618,20 @@ class Mode6Session:
         items = []
         if response:
             for pair in response.split(","):
-                eq = pair.index("=")
-                var = pair[:eq].strip()
-                val = pair[eq+1:].strip()
                 try:
-                    val = int(val, 0)
-                except ValueError:
+                    eq = pair.index("=")
+                    var = pair[:eq].strip()
+                    val = pair[eq+1:].strip()
                     try:
-                        val = float(val)
+                        val = int(val, 0)
                     except ValueError:
-                        if val[0] == '"' and val[-1] == '"':
-                            val = val[1:-1]
-                items.append((var, val))
+                        try:
+                            val = float(val)
+                        except ValueError:
+                            if val[0] == '"' and val[-1] == '"':
+                                val = val[1:-1]
+                    items.append((var, val))
+                except:
+                    sys.stderr.write("ill-formed item %s in response" % repr(pair))
         return collections.OrderedDict(items)
 # end
