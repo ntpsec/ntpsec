@@ -618,9 +618,9 @@ class Mode6Session:
         items = []
         if response:
             for pair in response.split(","):
-                (var, val) = pair.split("=")
-                var = var.strip()
-                val = val.strip()
+                eq = pair.index("=")
+                var = pair[:eq].strip()
+                val = pair[eq+1:].strip()
                 try:
                     val = int(val, 0)
                 except ValueError:
