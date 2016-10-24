@@ -603,13 +603,13 @@ class Mode6Session:
         idlist.sort(key=lambda a: a.associd)
         return idlist
 
-    def readvar(self, associd=0, varlist=None):
+    def readvar(self, associd=0, varlist=None, opcode=CTL_OP_READVAR):
         "Read system vars from the host as a dict, or throw an exception."
         if varlist == None:
             qdata = ""
         else:
             qdata = ",".join(varlist)
-        self.doquery(opcode=CTL_OP_READVAR, associd=associd, qdata=qdata)
+        self.doquery(opcode, associd=associd, qdata=qdata)
         response = self.response
         # Trim trailing NULs from the text
         while response.endswith("\x00"):
