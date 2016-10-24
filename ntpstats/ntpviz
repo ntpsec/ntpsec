@@ -312,6 +312,33 @@ set rmargin 12
         NTPStats.__init__(self, statsdir=statsdir, sitename=sitename,
                           period=period, starttime=starttime, endtime=endtime)
 
+    def plot_slice( self, rows, item1, item2=None):
+        "slice 0,item1, maybe item2, from rows, ready for gnuplot"
+        # speed up by only sending gnuplot the data it will actually use
+        # WARNING: this is hot code, only modify if you profile
+        plot_data = ''
+        last_time = 0
+        if item2:
+            for row in rows:
+                delay = float( row[0] ) - last_time
+                if 1024 < delay:
+                    # data loss, add a break in the plot line
+                    plot_data += '\n'
+                last_time = float(row[0] )
+                # fields: time, fld, and rtt
+                plot_data += row[0] + ' ' + row[item1] + ' ' + row[item2] + '\n'
+        else:
+            for row in rows:
+                delay = float( row[0] ) - last_time
+                if 1024 < delay:
+                    # data loss, add a break in the plot line
+                    plot_data += '\n'
+                last_time = float(row[0] )
+                # fields: time, fld
+                plot_data += row[0] + ' ' + row[item1] + '\n'
+        plot_data += "e\n"
+        return plot_data
+
     def local_offset_gnuplot(self):
         "Generate GNUPLOT code graphing local clock loop statistics"
         if not len( self.loopstats):
@@ -319,18 +346,8 @@ set rmargin 12
             return ''
 
         # speed up by only sending gnuplot the data it will actually use
-        plot_data = ''
-        last_time = 0
-        for row in self.loopstats:
-            delay = float( row[0] ) - last_time
-            if 1024 < delay:
-                # data loss, add a break in the plot line
-                plot_data += '\n'
-            last_time = float(row[0] )
-            # Python slice is too dumb to do this the easy way
-            # fields: time, time offset, and freq offset
-            plot_data += row[0] + ' ' + row[1] + ' ' + row[2] + '\n'
-        plot_data += "e\n"
+        # fields: time, time offset, freq offset
+        plot_data = self.plot_slice( self.loopstats, 1, 2)
 
         # compute clock offset
         values = [float(line[1]) for line in self.loopstats]
@@ -396,17 +413,8 @@ file.</p>
         plot_data = ''
         for key in tempslist:
             # speed up by only sending gnuplot the data it will actually use
-            last_time = 0
-            for row in tempsmap[key]:
-                delay = float( row[0] ) - last_time
-                if 1024 < delay:
-                    # data loss, add a break in the plot line
-                    plot_data += '\n'
-                last_time = float(row[0] )
-                # Python slice is too dumb to do this the easy way
-                # fields: time, temp
-                plot_data += row[0] + ' ' + row[2] + '\n'
-            plot_data += "e\n"
+            # fields: time, temp
+            plot_data += self.plot_slice( tempsmap[key], 2)
 
         plot_template = NTPViz.Common + """\
 set title "%(sitename)s: Local Temparatures"
@@ -450,17 +458,8 @@ component of frequency drift.</p>
         gps_data = ()
         plot_data = ""
         for key in gpslist:
-            last_time = 0
-            for row in gpsmap[key]:
-                delay = float( row[0] ) - last_time
-                if 1024 < delay:
-                    # data loss, add a break in the plot line
-                    plot_data += '\n'
-                last_time = float(row[0] )
-                # Python slice is too dumb to do this the easy way
-                # fields: time, tdop, nSats
-                plot_data += row[0] + ' ' + row[2] + ' ' + row[3] + '\n'
-            plot_data += "e\n"
+            # fields: time, tdop, nSats
+            plot_data += self.plot_slice( gpsmap[key], 2, 3)
 
         plot_template = NTPViz.Common + """\
 set title "%(sitename)s: Local GPS
@@ -508,18 +507,8 @@ gpsd log file is created by the gps-log.py program.</p>
         out["sitename"] = self.sitename
 
         # speed up by only sending gnuplot the data it will actually use
-        plot_data = ''
-        last_time = 0
-        for row in self.loopstats:
-            delay = float( row[0] ) - last_time
-            if 1024 < delay:
-                # data loss, add a break in the plot line
-                plot_data += '\n'
-            last_time = float(row[0] )
-            # Python slice is too dumb to do this the easy way
-            # fields: time, freq error
-            plot_data += row[0] + ' ' + row[2] + '\n'
-        plot_data += "e\n"
+        # fields: time, freq error
+        plot_data = self.plot_slice( self.loopstats, 2)
 
         plot_template = NTPViz.Common + """\
 set title "%(sitename)s: Local Clock Frequency Offset%(clipped)s"
@@ -560,18 +549,8 @@ line at 0ppm.  Expected values of 99%-1% percentiles: 0.4ppm</p>
             return ''
 
         # speed up by only sending gnuplot the data it will actually use
-        plot_data = ''
-        last_time = 0
-        for row in self.loopstats:
-            delay = float( row[0] ) - last_time
-            if 1024 < delay:
-                # data loss, add a break in the plot line
-                plot_data += '\n'
-            last_time = float(row[0] )
-            # Python slice is too dumb to do this the easy way
-            # fields: time, and fld
-            plot_data += row[0] + ' ' + row[fld - 1] + '\n'
-        plot_data += "e\n"
+        # fields: time, fld
+        plot_data = self.plot_slice( self.loopstats, fld - 1)
 
         # grab and process the values
         values = [float(line[fld - 1]) for line in self.loopstats]
@@ -646,7 +625,6 @@ plot \
             sys.stderr.write("ntpviz: WARNING: no peer data to graph\n")
             return ''
         peerlist.sort() # For stability of output
-        plot_data = ""
         namelist = []   # peer names
 
         ip_todo = []
@@ -787,30 +765,16 @@ at 0s.</p>
 <p>RMS Jitter is field 8 in the peerstats log file.</p>
 """
 
+        plot_data = ""
         for ip in ip_todo:
             # 20% speed up by only sending gnuplot the data it will
             # actually use
-            # Python slice is too dumb to do this the easy way
-            last_time = 0
             if rtt:
-                for row in peerdict[ip]:
-                    delay = float( row[0] ) - last_time
-                    if 1024 < delay:
-                        # data loss, add a break in the plot line
-                        plot_data += '\n'
-                    last_time = float(row[0] )
-                    # fields: time, fld, and rtt
-                    plot_data += row[0] + ' ' + row[fld-1] + ' ' + row[4] + '\n'
+                # fields: time, fld, and rtt
+                plot_data += self.plot_slice( peerdict[ip], fld-1, 4)
             else:
-                for row in peerdict[ip]:
-                    delay = float( row[0] ) - last_time
-                    if 1024 < delay:
-                        # data loss, add a break in the plot line
-                        plot_data += '\n'
-                    last_time = float(row[0] )
-                    # fields: time, fld
-                    plot_data += row[0] + ' ' + row[fld - 1] + '\n'
-            plot_data += "e\n"
+                # fields: time, fld
+                plot_data += self.plot_slice( peerdict[ip], fld-1)
 
         out = stats.percs
         out['sitename'] = self.sitename
@@ -972,17 +936,15 @@ plot \\
         plot += '"-" using 1:($2*1000000) title "%s clock offset μs" with linespoints, \\\n' % (sitenames[i])
     plot = plot[:-4] + "\n"
 
+    plot_data = ''
     for stats in statlist:
         # speed up by only sending gnuplot the data it will actually use
-        for row in stats.loopstats:
-            # Python slice is too dumb to do this the easy way
-            # fields: time, temp
-            plot += row[0] + ' ' + row[1] + '\n'
-        plot += "\ne\n"
+        # fields: time, offset
+        plot_data += self.plot_slice( stats.loopstats, 1)
 
     ret = {'html' : '', 'stats' : [] }
     ret['title'] = "Multiplot"
-    ret['plot'] = plot
+    ret['plot'] = plot + plot_data
     return ret
 
 # here is how to create the base64 from an image file:
