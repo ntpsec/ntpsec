@@ -1058,6 +1058,9 @@ ctl_putdata(
  *
  *		len is the data length excluding the NUL terminator,
  *		as in ctl_putstr("var", "value", strlen("value"));
+ *
+ * ESR, 2016: Whoever wrote this should be *hurt*.  If the string value is 
+ * empty, no "=" and no value literal is written, just the bare tag.  
  */
 static void
 ctl_putstr(
