@@ -207,8 +207,14 @@ class Ntpq(cmd.Cmd):
         "Called when an empty line is entered in response to the prompt."
         pass
 
+    def say(self, msg):
+        sys.stdout.write(msg)
+
+    def warn(self, msg):
+        sys.stderr.write(msg)
+
     def help_help(self):
-        sys.stdout.write("""\
+        self.say("""\
 function: tell the use and syntax of commands
 usage: help [ command ]
 """)
@@ -229,22 +235,22 @@ usage: help [ command ]
 
         if len(self.peers) == 0:
             if self.chosts:
-                sys.stdout.write("server=%s ", self.session.hostname)
-            sys.stdout.write("No association IDs returned\n")
+                self.say("server=%s ", self.session.hostname)
+            self.say("No association IDs returned\n")
             return False
 
         if self.debug:
-            sys.stderr.write("\n%d associations total\n" % len(self.peers))
+            self.warn("\n%d associations total\n" % len(self.peers))
         #sortassoc()
         return True
 
     def __printassoc(self, showall):
         condition = "";
         if not self.peers:
-            sys.stdout.write("No association IDs in list\n");
+            self.say("No association IDs in list\n");
             return;
-        sys.stdout.write("\nind assid status  conf reach auth condition  last_event cnt\n");
-        sys.stdout.write("===========================================================\n");
+        self.say("\nind assid status  conf reach auth condition  last_event cnt\n");
+        self.say("===========================================================\n");
         for (i, peer) in enumerate(self.peers):
             statval = CTL_PEER_STATVAL(peer.status)
             if not showall and (statval & (CTL_PST_CONFIG|CTL_PST_REACH)) == 0:
@@ -316,7 +322,7 @@ usage: help [ command ]
                      (i + 1, peer.associd,
                      peer.status, conf, reach, auth,
                      condition, last_event, event_count)
-            sys.stdout.write(display.strip() + "\n")
+            self.say(display.strip() + "\n")
 
     @staticmethod
     def prettyinterval(diff):
@@ -430,7 +436,7 @@ usage: help [ command ]
             c = " .+*"[CTL_PEER_STATVAL(self.session.rstatus) & 0x3]
         if len(self.chosts) > 1:
             maxhostlen = max([len(host) for (host, _af) in self.chosts])
-            sys.stdout.write("%-*s " % (maxhostlen, self.session.hostname))
+            self.say("%-*s " % (maxhostlen, self.session.hostname))
         def is_ipv6(addr): return ":" in addr and "." not in addr
         if socket.AF_UNSPEC == af or af == (socket.AF_INET6 if is_ipv6(srcaddr) else socket.AF_INET):
             # Source host or clockname
@@ -443,10 +449,10 @@ usage: help [ command ]
             else:
                 clock_name = canonicalize_dns(srcaddr)
             if interpreter.wideremote and len(clock_name) > namewidth:
-                sys.stdout.write("%c%s\n" % (c, clock_name))
+                self.say("%c%s\n" % (c, clock_name))
                 sys.stdout(" " * (namewidth + 2))
             else:
-                sys.stdout.write("%c%-15.15s " % \
+                self.say("%c%-15.15s " % \
                                  (c, clock_name[:namewidth]))
             # Destination address, assoc ID or refid.
             assocwidth = 7 if "assid" in header else 0
@@ -456,17 +462,17 @@ usage: help [ command ]
                 visible = "..."
             else:
                 visible = dstadr_refid
-            sys.stdout.write(visible)
+            self.say(visible)
             if "assid" in header:
-                sys.stdout.write(" " * (addrwidth - len(visible) - assocwidth + 1))
-                sys.stdout.write("%-6d" % (associd))
+                self.say(" " * (addrwidth - len(visible) - assocwidth + 1))
+                self.say("%-6d" % (associd))
             else:
-                sys.stdout.write(" " * (addrwidth - len(visible)))
+                self.say(" " * (addrwidth - len(visible)))
             # The rest of the story
             last_sync = variables.get("rec") or variables.get("reftime")
             jd = estjitter if have_jitter else estdisp
             jd = "      -" if jd >= 999 else ("%7.3f" % jd)
-            sys.stdout.write(
+            self.say(
                 " %2ld %c %4.4s %4.4s  %3lo  %7.3f %8.3f %s\n" % \
                 (variables.get("stratum", 0),
                  ptype,
@@ -487,8 +493,8 @@ usage: help [ command ]
             return False
         if not variables:
             if len(self.chosts) > 1:
-                sys.stderr.write("server=%s ", self.session.hostname)
-            sys.stderr.write("***No information returned for association %d\n" \
+                self.warn("server=%s ", self.session.hostname)
+            self.warn("***No information returned for association %d\n" \
                              % associd)
             return False;
         return self.__doprintpeers(variables, header, associd, af);
@@ -500,16 +506,16 @@ usage: help [ command ]
         maxhostlen = 0
         if len(self.chosts) > 1:
             maxhostlen = max([len(host) for (host, _af) in self.chosts])
-            sys.stdout.write("%-*.*s " % \
+            self.say("%-*.*s " % \
                              (maxhostlen, maxhostlen, "server"))
-        sys.stdout.write(header)
-        sys.stdout.write(("=" * (maxhostlen + 78)) + "\n")
+        self.say(header)
+        self.say(("=" * (maxhostlen + 78)) + "\n")
         for peer in self.peers:
             if not showall and \
 		    not (CTL_PEER_STATVAL(peer.status)
 		      & (CTL_PST_CONFIG|CTL_PST_REACH)):
                 if self.debug:
-                    sys.stderr.write(stderr, "eliding [%d]\n" % peer.associd)
+                    self.warn(stderr, "eliding [%d]\n" % peer.associd)
                 continue
             if not self.__dogetpeers(header, peer.associd, af):
                 return
@@ -518,7 +524,7 @@ usage: help [ command ]
         "Process a numeric associd or index."
         if not line:
             if required:
-                sys.stderr.write("An associd argument is required.\n")
+                self.warn("An associd argument is required.\n")
                 return -1
             else:
                 return 0
@@ -526,10 +532,10 @@ usage: help [ command ]
             try:
                 idx = int(line[1:].split()[0])
             except:
-                sys.stderr.write("Invalid index literal.\n")
+                self.warn("Invalid index literal.\n")
                 return -1
             if idx not in range(1, len(self.peers)+1):
-                sys.stderr.write("No such index.\n")
+                self.warn("No such index.\n")
                 return -1
             else:
                 return self.peers[idx - 1].associd
@@ -537,10 +543,10 @@ usage: help [ command ]
             try:
                 associd = int(line.split()[0])
             except:
-                sys.stderr.write("Invalid associd literal.\n")
+                self.warn("Invalid associd literal.\n")
                 return -1
             if associd not in [peer.associd for peer in self.peers]:
-                sys.stderr.write("Unknown associd.\n")
+                self.warn("Unknown associd.\n")
                 return -1
             else:
                 return associd
@@ -571,18 +577,18 @@ usage: help [ command ]
             print(e.message)
             return False
 	if self.chosts > 1:
-            sys.stdout.write("server=%s " % currenthost)
+            self.say("server=%s " % currenthost)
 	if not variables:
             if associd == 0:
-                sys.stdout.write("No system%s variables returned\n",
+                self.say("No system%s variables returned\n",
 				" clock" if (type == TYPE_CLOCK) else "")
             else:
-                sys.stdout.write("No information returned for%s association %d\n",
+                self.say("No information returned for%s association %d\n",
 				" clock" if (type == TYPE_CLOCK) else "",
 				associd)
 		return True
 	if not quiet:
-            sys.stdout.write("associd=%d " % associd);
+            self.say("associd=%d " % associd);
 	self.__printvars(type, quiet)
 	return True;
 
@@ -590,7 +596,7 @@ usage: help [ command ]
 
     def do_EOF(self, _unused):
         "exit ntpq"
-        sys.stdout.write("\n")
+        self.say("\n")
         self.session.close()
         raise SystemExit(0)
 
@@ -604,7 +610,7 @@ usage: help [ command ]
         print("primary timeout %d ms" % self.session.primary_timeout)
 
     def help_timeout(self):
-        sys.stdout.write("""\
+        self.say("""\
 function: set the primary receive time out
 usage: timeout [ msec ]
 """)
@@ -621,7 +627,7 @@ usage: timeout [ msec ]
                 statype = TYPE_SYS
             else:
                 statype = TYPE_PEER
-            sys.stdout.write("associd=%u status=%04x %s,\n" %
+            self.say("associd=%u status=%04x %s,\n" %
                              (associd,
                               self.session.rstatus,
                               statustoa(statype, self.session.rstatus)))
@@ -630,20 +636,20 @@ usage: timeout [ msec ]
                 continue
             value = queried[name]
             if fmt in (NTP_STR, NTP_UINT, NTP_INT, NTP_ADD, NTP_ADP):
-                sys.stdout.write("%s %s\n" % (legend, value))
+                self.say("%s %s\n" % (legend, value))
             elif fmt == NTP_LFP:
-                sys.stdout.write("%s %s\n" % (legend, prettydate(value)))
+                self.say("%s %s\n" % (legend, prettydate(value)))
             elif fmt in (NTP_2BIT, NTP_MODE):
-                sys.stdout.write("%s %s\n" % (legend, bin(value)[2:]))
+                self.say("%s %s\n" % (legend, bin(value)[2:]))
             else:
-                sys.stderr.write("unexpected vc type %s for %s, value %s\n" % (fmt, name, value))
+                self.warn("unexpected vc type %s for %s, value %s\n" % (fmt, name, value))
 
     def do_delay(self, line):
         "set the delay added to encryption time stamps"
-        sys.stderr.write("Authentication is not yet implemented")
+        self.warn("Authentication is not yet implemented")
 
     def help_delay(self):
-        sys.stdout.write("""\
+        self.say("""\
 function: set the delay added to encryption time stamps
 usage: delay [ msec ]
 """)
@@ -671,7 +677,7 @@ usage: delay [ msec ]
                 print("still no current host")
 
     def help_host(self):
-        sys.stdout.write("""\
+        self.say("""\
 function: specify the host whose NTP server we talk to
 usage: host [ -4|-6 ] [ hostname ]
 """)
@@ -681,17 +687,17 @@ usage: host [ -4|-6 ] [ hostname ]
         print("poll not implemented yet")
 
     def help_poll(self):
-        sys.stdout.write("""\
+        self.say("""\
 function: poll an NTP server in client mode `n' times
 usage: poll [ n ] [ verbose ]
 """)
 
     def do_passwd(self, line):
         "specify a password to use for authenticated requests"
-        sys.stderr.write("Authentication is not yet implemented")
+        self.warn("Authentication is not yet implemented")
 
     def help_passwd(self):
-        sys.stdout.write("""\
+        self.say("""\
 function: specify a password to use for authenticated requests
 usage: passwd [  ]
 """)
@@ -712,7 +718,7 @@ usage: passwd [  ]
             print("hostnames not being shown")
 
     def help_hostnames(self):
-        sys.stdout.write("""\
+        self.say("""\
 function: specify whether hostnames or net numbers are printed
 usage: hostnames [ yes|no ]
 """)
@@ -736,7 +742,7 @@ usage: hostnames [ yes|no ]
         print("debug level is %d" % self.debug)
 
     def help_debug(self):
-        sys.stdout.write("""\
+        self.say("""\
 function: set/change debugging level
 usage: debug [ no|more|less ]
 """)
@@ -747,14 +753,14 @@ usage: debug [ no|more|less ]
         raise SystemExit(0)
 
     def help_exit(self):
-        sys.stdout.write("""\
+        self.say("""\
 function: exit ntpq
 usage: exit
 """)
     do_quit = do_exit
 
     def help_quit(self):
-        sys.stdout.write("""\
+        self.say("""\
 function: exit ntpq
 usage: quit
 """)
@@ -772,7 +778,7 @@ usage: quit
             print("keyid is %d" % self.session.keyid)
 
     def help_keyid(self):
-        sys.stdout.write("""\
+        self.say("""\
 function: set keyid to use for authenticated requests
 usage: keyid [ key# ]
 """)
@@ -782,7 +788,7 @@ usage: keyid [ key# ]
         print(version)
 
     def help_version(self):
-        sys.stdout.write("""\
+        self.say("""\
 function: print version number
 usage: version
 """)
@@ -793,7 +799,7 @@ usage: version
         print("Output set to raw")
 
     def help_raw(self):
-        sys.stdout.write("""\
+        self.say("""\
 function: do raw mode variable output
 usage: raw
 """)
@@ -804,7 +810,7 @@ usage: raw
         print("Output set to cooked")
 
     def help_cooked(self):
-        sys.stdout.write("""\
+        self.say("""\
 function: do cooked mode variable output
 usage: cooked
 """)
@@ -825,7 +831,7 @@ usage: cooked
             print("unauthenticated requests being sent")
 
     def help_authenticate(self):
-        sys.stdout.write("""\
+        self.say("""\
 function: always authenticate requests to this server
 usage: authenticate [ yes|no ]
 """)
@@ -847,17 +853,17 @@ usage: authenticate [ yes|no ]
         print("NTP version being claimed is %d" % self.pktversion)
 
     def help_ntpversion(self):
-        sys.stdout.write("""\
+        self.say("""\
 function: set the NTP version number to use for requests
 usage: ntpversion [ version number ]
 """)
 
     def do_keytype(self, line):
         "set key type to use for authenticated requests"
-        sys.stderr.write("Authentication is not yet implemented")
+        self.warn("Authentication is not yet implemented")
 
     def help_keytype(self):
-        sys.stdout.write("""\
+        self.say("""\
 function: set key type to use for authenticated requests, one of:
     DSA, DSA-SHA, MD4, MD5, MDC2, RIPEMD160, SHA, SHA1
 usage: keytype [ digest-name ]
@@ -869,7 +875,7 @@ usage: keytype [ digest-name ]
             self.__printassoc(showall=False)
 
     def help_associations(self):
-        sys.stdout.write("""\
+        self.say("""\
 function: print list of association IDs and statuses for the server's peers
 usage: associations
 """)
@@ -879,7 +885,7 @@ usage: associations
         self.__printassoc(showall=False)
 
     def help_passociations(self):
-        sys.stdout.write("""\
+        self.say("""\
 function: print list of associations returned by last associations command
 usage: passociations
 """)
@@ -890,7 +896,7 @@ usage: passociations
             self.__printassoc(showall=True)
 
     def help_lassociations(self):
-        sys.stdout.write("""\
+        self.say("""\
 function: print list of associations including all client information
 usage: lassociations
 """)
@@ -900,7 +906,7 @@ usage: lassociations
         self.__printassoc(showall=True)
 
     def help_lpassociations(self):
-        sys.stdout.write("""\
+        self.say("""\
 function: print last obtained list of associations, including client information
 usage: lpassociations
 """)
@@ -919,7 +925,7 @@ usage: lpassociations
             self.uservars[name.strip()] = val.strip()
 
     def help_addvars(self):
-        sys.stdout.write("""\
+        self.say("""\
 function: add variables to the variable list or change their values
 usage: addvars name[=value][,...]
 """)
@@ -937,7 +943,7 @@ usage: addvars name[=value][,...]
                 del self.uservars[rm_var]
 
     def help_rmvars(self):
-        sys.stdout.write("""\
+        self.say("""\
 function: remove variables from the variable list
 usage: rmvars name[,...]
 """)
@@ -947,7 +953,7 @@ usage: rmvars name[,...]
         self.uservars.clear()
 
     def help_clearvars(self):
-        sys.stdout.write("""\
+        self.say("""\
 function: remove all variables from the variable list
 usage: clearvars
 """)
@@ -963,7 +969,7 @@ usage: clearvars
                 print(name)
 
     def help_showvars(self):
-        sys.stdout.write("""\
+        self.say("""\
 function: print variables on the variable list
 usage: showvars
 """)
@@ -975,7 +981,7 @@ usage: showvars
         self.__dolist(self.uservars.keys(), associd, CTL_OP_READVAR, qtype)
 
     def help_readlist(self):
-        sys.stdout.write("""\
+        self.say("""\
 function: read the system or peer variables included in the variable list
 usage: readlist [ assocID ]
 """)
@@ -985,7 +991,7 @@ usage: readlist [ assocID ]
         self.do_readlist(line)
 
     def help_rl(self):
-        sys.stdout.write("""\
+        self.say("""\
 function: read the system or peer variables included in the variable list
 usage: rl [ assocID ]
 """)
@@ -995,7 +1001,7 @@ usage: rl [ assocID ]
         pass
 
     def help_writelist(self):
-        sys.stdout.write("""\
+        self.say("""\
 function: write the system or peer variables included in the variable list
 usage: writelist [ assocID ]
 """)
@@ -1007,7 +1013,7 @@ usage: writelist [ assocID ]
         self.__dolist(line.split()[1:], associd, CTL_OP_READVAR, qtype)
 
     def help_readvar(self):
-        sys.stdout.write("""\
+        self.say("""\
 function: read system or peer variables
 usage: readvar [ assocID ] [ varname1 ] [ varname2 ] [ varname3 ]
 """)
@@ -1017,7 +1023,7 @@ usage: readvar [ assocID ] [ varname1 ] [ varname2 ] [ varname3 ]
         self.do_readvar(line)
 
     def help_rv(self):
-        sys.stdout.write("""\
+        self.say("""\
 function: read system or peer variables
 usage: rv [ assocID ] [ varname1 ] [ varname2 ] [ varname3 ]
 """)
@@ -1027,7 +1033,7 @@ usage: rv [ assocID ] [ varname1 ] [ varname2 ] [ varname3 ]
         pass
 
     def help_writevar(self):
-        sys.stdout.write("""\
+        self.say("""\
 function: write system or peer variables
 usage: writevar assocID name=value,[...]
 """)
@@ -1040,13 +1046,13 @@ usage: writevar assocID name=value,[...]
         varlist = line.split()[2:]
         for associd in idrange:
             if (associd != idrange[0]):
-                sys.stdout.write("\n")
+                self.say("\n")
             if not self__dolist(self.uservars,
                                 associd, CTL_OP_READVAR, TYPE_PEER):
                 return
 
     def help_mreadlist(self):
-        sys.stdout.write("""\
+        self.say("""\
 function: read the peer variables in the variable list for multiple peers
 usage: mreadlist assocIDlow assocIDhigh
 """)
@@ -1056,7 +1062,7 @@ usage: mreadlist assocIDlow assocIDhigh
         self.do_mreadlist(line)
 
     def help_mrl(self):
-        sys.stdout.write("""\
+        self.say("""\
 function: read the peer variables in the variable list for multiple peers
 usage: mrl assocIDlow assocIDhigh
 """)
@@ -1069,12 +1075,12 @@ usage: mrl assocIDlow assocIDhigh
         varlist = line.split()[2:]
         for associd in idrange:
             if (associd != idrange[0]):
-                sys.stdout.write("\n")
+                self.say("\n")
             if not self__dolist(varlist, associd, CTL_OP_READVAR, TYPE_PEER):
                 return
 
     def help_mreadvar(self):
-        sys.stdout.write("""\
+        self.say("""\
 function: read peer variables from multiple peers
 usage: mreadvar assocIDlow assocIDhigh [ name=value[,...] ]
 """)
@@ -1084,7 +1090,7 @@ usage: mreadvar assocIDlow assocIDhigh [ name=value[,...] ]
         self.do_mreadvar(line)
 
     def help_mrv(self):
-        sys.stdout.write("""\
+        self.say("""\
 function: read peer variables from multiple peers
 usage: mrv assocIDlow assocIDhigh [ name=value[,...] ]
 """)
@@ -1095,7 +1101,7 @@ usage: mrv assocIDlow assocIDhigh [ name=value[,...] ]
                       self.__assoc_valid(line), CTL_OP_READVAR, CLOCK_TYPE)
 
     def help_clocklist(self):
-        sys.stdout.write("""\
+        self.say("""\
 function: read the clock variables included in the variable list
 usage: clocklist [ assocID ]
 """)
@@ -1105,7 +1111,7 @@ usage: clocklist [ assocID ]
         self.do_clocklist(line)
 
     def help_cl(self):
-        sys.stdout.write("""\
+        self.say("""\
 function: read the clock variables included in the variable list
 usage: cl [ assocID ]
 """)
@@ -1116,7 +1122,7 @@ usage: cl [ assocID ]
                       CTL_OP_CLOCKVAR, CLOCK_TYPE)
 
     def help_clockvar(self):
-        sys.stdout.write("""\
+        self.say("""\
 function: read clock variables
 usage: clockvar [ assocID ] [ name=value[,...] ]
 """)
@@ -1126,7 +1132,7 @@ usage: clockvar [ assocID ] [ name=value[,...] ]
         self.do_clockvar(line)
 
     def help_cv(self):
-        sys.stdout.write("""\
+        self.say("""\
 function: read clock variables
 usage: cv [ assocID ] [ name=value[,...] ]
 """)
@@ -1154,7 +1160,7 @@ usage: cv [ assocID ] [ name=value[,...] ]
                                  variables=pstats, decodestatus=True)
 
     def help_pstats(self):
-        sys.stdout.write("""\
+        self.say("""\
 function: show statistics for a peer
 usage: pstats assocID
 """)
@@ -1164,7 +1170,7 @@ usage: pstats assocID
         self.__dopeers(showall=False, af=line, header=Ntpq.__peerheader)
 
     def help_peers(self):
-        sys.stdout.write("""\
+        self.say("""\
 function: obtain and print a list of the server's peers [IP version]
 usage: peers [ -4|-6 ]
 """)
@@ -1174,7 +1180,7 @@ usage: peers [ -4|-6 ]
         self.__dopeers(showall=False, af=line, header=Ntpq.__apeerheader)
 
     def help_apeers(self):
-        sys.stdout.write("""\
+        self.say("""\
 function: obtain and print a list of the server's peers and their assocIDs [IP version]
 usage: apeers [ -4|-6 ]
 """)
@@ -1184,7 +1190,7 @@ usage: apeers [ -4|-6 ]
         self.__dopeers(showall=True, af=line, header=Ntpq.__peerheader)
 
     def help_lpeers(self):
-        sys.stdout.write("""\
+        self.say("""\
 function: obtain and print a list of all peers and clients [IP version]
 usage: lpeers [ -4|-6 ]
 """)
@@ -1194,7 +1200,7 @@ usage: lpeers [ -4|-6 ]
         self.__dopeers(showall=False, af=line, header=Ntpq.__opeerheader)
 
     def help_opeers(self):
-        sys.stdout.write("""\
+        self.say("""\
 function: print peer list the old way, with dstadr shown rather than refid [IP version]
 usage: opeers [ -4|-6 ]
 """)
@@ -1204,7 +1210,7 @@ usage: opeers [ -4|-6 ]
         self.__dopeers(showall=True, af=line, header=Ntpq.__opeerheader)
 
     def help_lopeers(self):
-        sys.stdout.write("""\
+        self.say("""\
 function: obtain and print a list of all peers and clients showing dstadr [IP version]
 usage: lopeers [ -4|-6 ]
 """)
@@ -1214,7 +1220,7 @@ usage: lopeers [ -4|-6 ]
         pass
 
     def help_config(self):
-        sys.stdout.write("""\
+        self.say("""\
 function: send a remote configuration command to ntpd
 usage: config <configuration command line>
 """)
@@ -1224,7 +1230,7 @@ usage: config <configuration command line>
         pass
 
     def help_config_from_file(self):
-        sys.stdout.write("""\
+        self.say("""\
 function: configure ntpd using the configuration filename
 usage: config_from_file <configuration filename>
 """)
@@ -1234,7 +1240,7 @@ usage: config_from_file <configuration filename>
         pass
 
     def help_mrulist(self):
-        sys.stdout.write("""\
+        self.say("""\
 function: display the list of most recently seen source addresses, tags mincount=... resall=0x... resany=0x...
 usage: mrulist [ tag=value ] [ tag=value ] [ tag=value ] [ tag=value ]
 """)
@@ -1244,7 +1250,7 @@ usage: mrulist [ tag=value ] [ tag=value ] [ tag=value ] [ tag=value ]
         pass
 
     def help_ifstats(self):
-        sys.stdout.write("""\
+        self.say("""\
 function: show statistics for each local address ntpd is using
 usage: ifstats
 """)
@@ -1254,7 +1260,7 @@ usage: ifstats
         pass
 
     def help_reslist(self):
-        sys.stdout.write("""\
+        self.say("""\
 function: show ntpd access control list
 usage: reslist
 """)
@@ -1280,7 +1286,7 @@ usage: reslist
         self.collect_display(associd=0, variables=sysinfo, decodestatus=True)
 
     def help_sysinfo(self):
-        sys.stdout.write("""\
+        self.say("""\
 function: display system summary
 usage: sysinfo
 """)
@@ -1308,7 +1314,7 @@ usage: sysinfo
         self.collect_display(associd=0, variables=kerninfo, decodestatus=True)
 
     def help_kerninfo(self):
-        sys.stdout.write("""\
+        self.say("""\
 function: display kernel loop and PPS statistics
 usage: kerninfo
 """)
@@ -1332,7 +1338,7 @@ usage: kerninfo
         self.collect_display(associd=0, variables=sysstats, decodestatus=False)
 
     def help_sysstats(self):
-        sys.stdout.write("""\
+        self.say("""\
 function: display system uptime and packet counts
 usage: sysstats
 """)
@@ -1352,7 +1358,7 @@ usage: sysstats
         self.collect_display(associd=0, variables=monstats, decodestatus=False)
 
     def help_monstats(self):
-        sys.stdout.write("""\
+        self.say("""\
 function: display monitor (mrulist) counters and limits
 usage: monstats
 """)
@@ -1373,7 +1379,7 @@ usage: monstats
         self.collect_display(associd=0, variables=authinfo, decodestatus=False)
 
     def help_authinfo(self):
-        sys.stdout.write("""\
+        self.say("""\
 function: display symmetric authentication counters
 usage: authinfo
 """)
@@ -1397,7 +1403,7 @@ usage: authinfo
         self.collect_display(associd=0, variables=iostats, decodestatus=False)
 
     def help_iostats(self):
-        sys.stdout.write("""\
+        self.say("""\
 function: display network input and output counters
 usage: iostats
 """)
@@ -1412,7 +1418,7 @@ usage: iostats
         self.collect_display(associd=0, variables=timerstats, decodestatus=False)
 
     def help_timerstats(self):
-        sys.stdout.write("""\
+        self.say("""\
 function: display interval timer counters
 usage: timerstats
 """)
@@ -1520,12 +1526,12 @@ if __name__ == '__main__':
         elif switch in ("-w", "--wide"):
             interpreter.wideremote = True
         else:
-            sys.stderr.write("Unknown command line switch or missing argument.\n")
-            sys.stderr.write(usage)
+            self.warn("Unknown command line switch or missing argument.\n")
+            self.warn(usage)
             raise SystemExit(1)
 
     if interpreter.interactive and len(interpreter.ccmds) > 0:
-        sys.stderr.write("%s: invalid option combination.\n" % progname)
+        self.warn("%s: invalid option combination.\n" % progname)
         raise SystemExit(1)
 
     if len(arguments) == 0:
@@ -1546,7 +1552,7 @@ if __name__ == '__main__':
     try:
         if len(interpreter.ccmds) == 0:
             if len(interpreter.chosts) > 1:
-                sys.stderr.write("ntpq can only work interactively on one host.")
+                self.warn("ntpq can only work interactively on one host.")
                 interpreter.chosts = interpreter.chosts[:1]
             session.openhost(*interpreter.chosts[0])
             interpreter.cmdloop()
@@ -1558,5 +1564,5 @@ if __name__ == '__main__':
                     session.close()
         raise SystemExit(0)
     except KeyboardInterrupt:
-        sys.stdout.write("\n")
+        self.say("\n")
 # end
