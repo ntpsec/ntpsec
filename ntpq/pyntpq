@@ -558,7 +558,33 @@ usage: help [ command ]
 
     def __dolist(self, varlist, associd, op, type):
         "List variables associated with a specified peer."
-        pass
+	 # if we're asking for specific variables don't include the
+	 # status header line in the output.
+	if self.old_rv:
+            quiet = False;
+	else:
+            quiet = (varlist is not None)
+
+        try:
+            variables = self.session.readvar(associd, varlist, op)
+        except Mode6Exception as e:
+            print(e.message)
+            return False
+	if self.chosts > 1:
+            sys.stdout.write("server=%s " % currenthost)
+	if not variables:
+            if associd == 0:
+                sys.stdout.write("No system%s variables returned\n",
+				" clock" if (type == TYPE_CLOCK) else "")
+            else:
+                sys.stdout.write("No information returned for%s association %d\n",
+				" clock" if (type == TYPE_CLOCK) else "",
+				associd)
+		return True
+	if not quiet:
+            sys.stdout.write("associd=%d " % associd);
+	self.__printvars(type, quiet)
+	return True;
 
     # Unexposed helper tables and functions end here
 
