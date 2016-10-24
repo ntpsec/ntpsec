@@ -552,7 +552,7 @@ usage: help [ command ]
                 return associd
 
     def __assoc_range_valid(self, line):
-        "Try to gert a range of assoc IDs."
+        "Try to get a range of assoc IDs."
         tokens = line.split()
         if len(tokens) < 2:
             return ()
@@ -561,6 +561,19 @@ usage: help [ command ]
         if (hi < lo):
             return ()
         return (lo, hi)
+
+    def __printvars(self, variables, type, quiet):
+        if self.rawmode:
+            if not quiet:
+                self.say("status=0x%04x,\n" % self.session.rstatus)
+            # C ntpq not only suppressed \r but tried to visibilize
+            # high-half characters.  We won't do that unless somebody
+            # files a bug, Mode 6 never seems to generate those in
+            # variable fetches.
+            raw = session.response.replace(",\r\n",",\n")
+            self.say(raw)
+        else:
+            pass
 
     def __dolist(self, varlist, associd, op, type):
         "List variables associated with a specified peer."
@@ -576,8 +589,8 @@ usage: help [ command ]
         except Mode6Exception as e:
             print(e.message)
             return False
-	if self.chosts > 1:
-            self.say("server=%s " % currenthost)
+	if len(self.chosts) > 1:
+            self.say("server=%s " % self.session.hostname)
 	if not variables:
             if associd == 0:
                 self.say("No system%s variables returned\n",
@@ -586,10 +599,10 @@ usage: help [ command ]
                 self.say("No information returned for%s association %d\n",
 				" clock" if (type == TYPE_CLOCK) else "",
 				associd)
-		return True
+            return True
 	if not quiet:
             self.say("associd=%d " % associd);
-	self.__printvars(type, quiet)
+	self.__printvars(variables, type, quiet)
 	return True;
 
     # Unexposed helper tables and functions end here
@@ -1119,7 +1132,7 @@ usage: cl [ assocID ]
     def do_clockvar(self, line):
         "read clock variables"
         self.__dolist(line.split()[1:], self.__assoc_valid(line),
-                      CTL_OP_CLOCKVAR, CLOCK_TYPE)
+                      CTL_OP_READCLOCK, TYPE_CLOCK)
 
     def help_clockvar(self):
         self.say("""\
