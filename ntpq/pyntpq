@@ -163,9 +163,6 @@ cookedvars = {
     "filterror":	AR,	# compat with others
 }
 
-uservars = {
-}
-
 # flasher bits
 tstflagnames = (
 	"pkt_dup",		# BOGON1
@@ -204,6 +201,7 @@ class Ntpq(cmd.Cmd):
         self.peers = []			# Data from NTP peers.
         self.debug = 0
         self.pktversion = NTP_VERSION
+        self.uservars = collections.OrderedDict()
 
     def emptyline(self):
         "Called when an empty line is entered in response to the prompt."
@@ -869,10 +867,13 @@ usage: lpassociations
         if line == "":
             print("usage addvars name[=value][,...]")
             return
-
         vars_to_add = line.split(',')
         for add_var in vars_to_add:
-            uservars[add_var.split("=")[0].strip()] = add_var.split("=")[1].strip()
+            try:
+                (name, val) = add_var.split("=")
+            except ValueError:
+                (name, val) = (add_var, "")
+            self.uservars[name.strip()] = val.strip()
 
     def help_addvars(self):
         sys.stdout.write("""\
@@ -885,13 +886,12 @@ usage: addvars name[=value][,...]
         if line == "":
             print("usage rmvars name[,...]")
             return
-
         vars_to_rm = line.split(',')
         for rm_var in vars_to_rm:
-            if rm_var not in uservars:
+            if rm_var not in self.uservars:
                 print("%s is not in the variable list" % rm_var)
             else:
-                del uservars[rm_var]
+                del self.uservars[rm_var]
 
     def help_rmvars(self):
         sys.stdout.write("""\
@@ -901,7 +901,7 @@ usage: rmvars name[,...]
 
     def do_clearvars(self, line):
         "remove all variables from the variable list"
-        uservars.clear()
+        self.uservars.clear()
 
     def help_clearvars(self):
         sys.stdout.write("""\
@@ -911,10 +911,13 @@ usage: clearvars
 
     def do_showvars(self, line):
         "print variables on the variable list"
-        if len(uservars) == 0:
+        if len(self.uservars) == 0:
             print("No variables on list.")
-        for name in uservars:
-            print("%s=%s" % (name, uservars[name]))
+        for (name, value) in self.uservars.items():
+            if value:
+                print("%s=%s" % (name, value))
+            else:
+                print(name)
 
     def help_showvars(self):
         sys.stdout.write("""\
