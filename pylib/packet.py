@@ -632,6 +632,8 @@ class Mode6Session:
                                 val = val[1:-1]
                     items.append((var, val))
                 except:
-                    sys.stderr.write("ill-formed item %s in response" % repr(pair))
+                    # Yes, ntpd really does emit bare tags for empty
+                    # string-valued variables.
+                    items.append((var, ""))
         return collections.OrderedDict(items)
 # end
