@@ -318,11 +318,11 @@ usage: help [ command ]
                 }
             last_event = event_dict.get(PEER_EVENT|event, "")
             display = \
-                     "%-3s %5u  %04x   %3.3s  %4s  %4.4s %9.9s %11s %2lu" % \
+                     "%3d %5u  %04x   %3.3s  %4s  %4.4s %9.9s %11s %2lu" % \
                      (i + 1, peer.associd,
                      peer.status, conf, reach, auth,
                      condition, last_event, event_count)
-            self.say(display.strip() + "\n")
+            self.say(display + "\n")
 
     @staticmethod
     def prettyinterval(diff):
