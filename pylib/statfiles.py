@@ -117,8 +117,9 @@ class NTPStats:
                 lines1 = NTPStats.unixize(lines, starttime, endtime)
 
             # Sort by datestamp
-            # by default, a tuple sorts on the 1st item, which is a nice
-            # integer of milli seconds
+            # by default, a tuple sort()s on the 1st item, which is a nice
+            # integer of milli seconds.  This is faster than using
+            # cmp= or key=
             lines1.sort()
             setattr(self, stem, lines1)
 
