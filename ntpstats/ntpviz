@@ -336,6 +336,7 @@ set rmargin 12
                 plot_data += row[1] + ' ' + row[item1] + '\n'
         # I know you want to replace the plot_data string concat with
         # or more join()s, do not do it, it is slower
+        # next you'll want to try %-subsitution.  it too is slower
         plot_data += "e\n"
         return plot_data
 
