@@ -20,25 +20,31 @@ class NTPStats:
     sitename = ''
 
     @staticmethod
-    def unixize(line, starttime, endtime):
+    def unixize(lines, starttime, endtime):
         "Extract first two fields, MJD and seconds past midnight."
         "convert timestamp (MJD & seconds past midnight) to Unix time"
         "Replace MJD+second with Unix time."
-        try:
-            split = line.split()
-            mjd = int(split[0])
-            second = float(split[1])
-        except:
-            # unparseable, skip this line
-            return None
-        # warning: 32 bit overflows
-        time = NTPStats.SecondsInDay * mjd + second - 3506716800
-        if starttime  <= time <= endtime:
-            split[0] = int(time * 1000)  # time as integer number milli seconds
-            split[1] = str(time)         # time as string
-            return split
-        # else
-        return None
+        # HOT LOOP!  Do not change w/o profiling before and after
+        lines1 = []
+        for line in lines:
+            try:
+                split = line.split()
+                mjd = int(split[0])
+                second = float(split[1])
+            except:
+                # unparseable, skip this line
+                continue
+
+            # warning: 32 bit overflows
+            time = NTPStats.SecondsInDay * mjd + second - 3506716800
+            if starttime  <= time <= endtime:
+                # time as integer number milli seconds
+                split[0] = int(time * 1000)
+                # time as string
+                split[1] = str(time)
+                lines1.append(split)
+
+        return lines1
 
     @staticmethod
     def timestamp(line):
@@ -94,12 +100,9 @@ class NTPStats:
             if stem == "temps" or stem == "gpsd":
                 # temps and gpsd are already in UNIX time
                 for line in lines:
-                    line = line.strip(' \0\r\n\t')
                     if line is not None:
-                        if 0 == len(line):
-                            continue
-                        split = line.split()
                         try:
+                            split = line.split()
                             t = float(split[0])
                         except:
                             # ignore comment lines, lines with no time
@@ -110,12 +113,9 @@ class NTPStats:
                             split.insert(0, int(t * 1000))
                             lines1.append( split)
             else:
-                # Morph first field into Unix time with fractional seconds
-                for line in lines:
-                    line = line.strip(' \0\r\n\t')
-                    line = NTPStats.unixize(line, starttime, endtime)
-                    if line is not None:
-                        lines1.append( line)
+                # Morph first fields into Unix time with fractional seconds
+                # ut into nice dictionary of dictionary rows
+                lines1 = NTPStats.unixize(lines, starttime, endtime)
 
             # Sort by datestamp
             lines1.sort(key=lambda line: line[0])
