@@ -43,7 +43,6 @@ class NTPStats:
                 # time as string
                 split[1] = str(time)
                 lines1.append(split)
-
         return lines1
 
     @staticmethod
@@ -118,7 +117,9 @@ class NTPStats:
                 lines1 = NTPStats.unixize(lines, starttime, endtime)
 
             # Sort by datestamp
-            lines1.sort(key=lambda line: line[0])
+            # by default, a tuple sorts on the 1st item, which is a nice
+            # integer of milli seconds
+            lines1.sort()
             setattr(self, stem, lines1)
 
     def percentiles(self, percents, values):
