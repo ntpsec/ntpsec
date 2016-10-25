@@ -287,7 +287,7 @@ def gnuplot(template, outfile=None):
     else:
         # remove tmp file
         os.remove(tmp_filename)
-        
+
     return rcode
 
 class NTPViz(NTPStats):
@@ -318,24 +318,26 @@ set rmargin 12
         # WARNING: this is hot code, only modify if you profile
         plot_data = ''
         last_time = 0
+        item1 += 1
         if item2:
+            item2 += 1
             for row in rows:
-                delay = float( row[0] ) - last_time
-                if 1024 < delay:
+                if 1024000 < row[0] - last_time:
                     # data loss, add a break in the plot line
                     plot_data += '\n'
-                last_time = float(row[0] )
+                last_time = row[0]
                 # fields: time, fld, and rtt
-                plot_data += row[0] + ' ' + row[item1] + ' ' + row[item2] + '\n'
+                plot_data += row[1] + ' ' + row[item1] + ' ' + row[item2] + '\n'
         else:
             for row in rows:
-                delay = float( row[0] ) - last_time
-                if 1024 < delay:
+                if 1024000 < row[0] - last_time:
                     # data loss, add a break in the plot line
                     plot_data += '\n'
-                last_time = float(row[0] )
+                last_time = row[0]
                 # fields: time, fld
-                plot_data += row[0] + ' ' + row[item1] + '\n'
+                plot_data += row[1] + ' ' + row[item1] + '\n'
+        # I know you want to replace the plot_data string concat with
+        # or more join()s, do not do it, it is slower
         plot_data += "e\n"
         return plot_data
 
@@ -350,11 +352,11 @@ set rmargin 12
         plot_data = self.plot_slice( self.loopstats, 1, 2)
 
         # compute clock offset
-        values = [float(line[1]) for line in self.loopstats]
+        values = [float(line[2]) for line in self.loopstats]
         stats = VizStats( values, "Local Clock Time Offset")
 
         # compute frequency offset
-        values_f = [float(line[2]) for line in self.loopstats]
+        values_f = [float(line[3]) for line in self.loopstats]
         stats_f = VizStats(values_f, "Local Clock Frequency Offset", freq=1)
 
         out = stats.percs
@@ -553,7 +555,7 @@ line at 0ppm.  Expected values of 99%-1% percentiles: 0.4ppm</p>
         plot_data = self.plot_slice( self.loopstats, fld - 1)
 
         # grab and process the values
-        values = [float(line[fld - 1]) for line in self.loopstats]
+        values = [float(line[fld]) for line in self.loopstats]
         stats = VizStats( values, title, freq=freq )
 
         # build the output dictionary, because Python can not format
@@ -718,7 +720,7 @@ at 0s.</p>
 """
 
             # grab and sort the values, no need for the timestamp, etc.
-            values = [float(line[fld - 1]) for line in peerdict[ip]]
+            values = [float(line[fld]) for line in peerdict[ip]]
 
             stats = VizStats( values, title)
 
@@ -738,7 +740,7 @@ at 0s.</p>
             # many peers
             title += "s"
             # grab and sort the values, no need for the timestamp, etc.
-            values = [float(line[fld - 1]) for line in self.peerstats]
+            values = [float(line[fld]) for line in self.peerstats]
 
             stats = VizStats( values, title )
 
@@ -831,7 +833,7 @@ plot \
         # TODO normalize to 0 to 100?
 
         # grab and sort the values, no need for the timestamp, etc.
-        values = [float(line[1]) for line in self.loopstats]
+        values = [float(row[2]) for row in self.loopstats]
         stats = VizStats( values, 'Local Clock Offset' )
         out = stats.percs
         out['sitename'] = self.sitename
