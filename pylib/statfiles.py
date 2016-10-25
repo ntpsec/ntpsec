@@ -34,8 +34,8 @@ class NTPStats:
         # warning: 32 bit overflows
         time = NTPStats.SecondsInDay * mjd + second - 3506716800
         if starttime  <= time <= endtime:
-            del split[0]
-            split[0] = str(time)
+            split[0] = int(time * 1000)  # time as integer number milli seconds
+            split[1] = str(time)         # time as string
             return split
         # else
         return None
@@ -100,12 +100,14 @@ class NTPStats:
                             continue
                         split = line.split()
                         try:
-                            t = int(float(split[0]))
+                            t = float(split[0])
                         except:
                             # ignore comment lines, lines with no time
                             continue
 
                         if starttime <= t <= endtime:
+                            # prefix with int milli sec.
+                            split.insert(0, int(t * 1000))
                             lines1.append( split)
             else:
                 # Morph first field into Unix time with fractional seconds
@@ -137,31 +139,31 @@ class NTPStats:
         if len( self.peermap):
             return self.peermap
 
-        for line in self.peerstats:
-            ip = line[1]
+        for row in self.peerstats:
+            ip = row[2]     # peerstats field 2, refclock id
             if ip not in self.peermap:
                 self.peermap[ip] = []
-            self.peermap[ip].append(line)
+            self.peermap[ip].append(row)
         return self.peermap
 
     def gpssplit(self):
         "Return a dictionary mapping gps sources to entry subsets."
         gpsmap = {}
-        for line in self.gpsd:
-            source = line[1]
+        for row in self.gpsd:
+            source = row[2]
             if source not in gpsmap:
                 gpsmap[source] = []
-            gpsmap[source].append(line)
+            gpsmap[source].append(row)
         return gpsmap
 
     def tempssplit(self):
         "Return a dictionary mapping temperature sources to entry subsets."
         tempsmap = {}
-        for line in self.temps:
-            source = line[1]
+        for row in self.temps:
+            source = row[2]
             if source not in tempsmap:
                 tempsmap[source] = []
-            tempsmap[source].append(line)
+            tempsmap[source].append(row)
         return tempsmap
 
     def dump(self, row):
