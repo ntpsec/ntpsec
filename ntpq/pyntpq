@@ -582,7 +582,7 @@ usage: help [ command ]
 	if self.old_rv:
             quiet = False;
 	else:
-            quiet = (varlist is not None)
+            quiet = not (not varlist)	# nonempty?
 
         try:
             variables = self.session.readvar(associd, varlist, op)
