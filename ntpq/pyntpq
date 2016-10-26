@@ -606,12 +606,12 @@ usage: help [ command ]
             self.say("server=%s " % self.session.hostname)
 	if not variables:
             if associd == 0:
-                self.say("No system%s variables returned\n",
+                self.say("No system%s variables returned\n"%
 				" clock" if (type == TYPE_CLOCK) else "")
             else:
-                self.say("No information returned for%s association %d\n",
-				" clock" if (type == TYPE_CLOCK) else "",
-				associd)
+                self.say("No information returned for%s association %d\n"%
+				(" clock" if (type == TYPE_CLOCK) else "",
+				associd))
             return True
 	if not quiet:
             self.say("associd=%d " % associd);
