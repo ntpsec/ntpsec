@@ -99,18 +99,17 @@ class NTPStats:
             if stem == "temps" or stem == "gpsd":
                 # temps and gpsd are already in UNIX time
                 for line in lines:
-                    if line is not None:
-                        try:
-                            split = line.split()
-                            t = float(split[0])
-                        except:
-                            # ignore comment lines, lines with no time
-                            continue
+                    split = line.split()
+                    try:
+                        t = float(split[0])
+                    except:
+                        # ignore comment lines, lines with no time
+                        continue
 
-                        if starttime <= t <= endtime:
-                            # prefix with int milli sec.
-                            split.insert(0, int(t * 1000))
-                            lines1.append( split)
+                    if starttime <= t <= endtime:
+                        # prefix with int milli sec.
+                        split.insert(0, int(t * 1000))
+                        lines1.append( split)
             else:
                 # Morph first fields into Unix time with fractional seconds
                 # ut into nice dictionary of dictionary rows
