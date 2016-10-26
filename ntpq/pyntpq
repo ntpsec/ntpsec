@@ -441,7 +441,6 @@ usage: help [ command ]
         else:
             return True
 
-
     def __dogetpeers(self, header, associd, af):
         try:
             variables = self.session.readvar(associd)
@@ -534,9 +533,7 @@ usage: help [ command ]
                          (self.session.rstatus,
                           statustoa(dtype, self.session.rstatus)))
 
-            out_chars = 0
             text = ""
-            print(variables)
             for (name, value) in variables.items():
                 item = "%s=" % name
                 if name in ("reftime", "clock", "org", "rec", "xmt"):
@@ -581,12 +578,10 @@ usage: help [ command ]
                         item = item[:-1]
                 else:
                     item += repr(value)
-                item += ","
-                if len(text + item) > 78:
-                    text += "\n"
-                else:
-                    text += " "
+                item += ", "
+                text += item
             text = text[:-2] + "\n"
+        text = text.replace("'", '"')
         self.say(text)
 
     def __dolist(self, varlist, associd, op, type):
