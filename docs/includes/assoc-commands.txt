@@ -31,13 +31,8 @@ link-local IPV6 address with an interface specified in
   clock. This command should _not_ be used for broadcast or multicast addresses.
 
 +peer+::
-  For server addresses (only), this command mobilizes a persistent
-  symmetric-active mode association with the specified remote peer. In
-  this mode the local clock can be synchronized to the remote peer or
-  the remote peer can be synchronized to the local clock. This is useful
-  in a network of servers where, depending on various failure scenarios,
-  either the local or remote peer may be the better source of time. This
-  command should NOT be used for broadcast, multicast, or refclock addresses.
+  NTP peer mode has been removed for security reasons.  peer is now just
+  an alias for the server keyword.  See above.
 
 +broadcast+::
   For broadcast and multicast addresses (only), this command mobilizes a persistent

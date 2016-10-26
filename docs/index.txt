@@ -90,6 +90,9 @@ few will be user-visible.
 * As noted above, Autokey is not supported; that code has been
   removed, as it was chronically prone to security vulnerabilties.
 
+* peer mode has been removed.  The keyword peer in ntp.conf is now
+  just an alias for keyword server.  Incoming peer packets are ignored.
+
 * The deprecated and vulnerability-prone ntpdate program has been
   replaced with a shell wrapper around {ntpdig}.  Its -e and -p
   options are not implemented. It is no longer documented, but can be
