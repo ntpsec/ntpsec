@@ -6,7 +6,6 @@ def build(ctx):
 		"backtrace-emptytbl.c",
 		"backtrace.c",
 		"error.c",
-		"md5.c",
 		"netaddr.c",
 		"sha1.c",
 		"errno2result.c",
