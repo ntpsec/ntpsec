@@ -142,7 +142,7 @@ class Ntpq(cmd.Cmd):
         #self.auth_hashlen = 16		# MD5
         self.rawmode           = False	# Flag which indicates raw mode output.
         self.showhostnames     = True	# If false, display numeric IPs
-        #self.l_fp delay_time		# delay time
+        self.auth_delay			# delay time
         self.wideremote = False		# show wide remote names?
         self.ccmds = []			# Queued commands
         self.chosts = []		# Command-line hosts
@@ -696,7 +696,15 @@ usage: timeout [ msec ]
 
     def do_delay(self, line):
         "set the delay added to encryption time stamps"
-        self.warn("Authentication is not yet implemented")
+        if not line:
+            self.say("delay %dms" % self.auth_delay)
+        else:
+            try:
+                self.auth_delay = int(line)
+                if self.auth_delay < 0:
+                    raise ValueError
+            except ValueError:
+                self.say("Huh?")
 
     def help_delay(self):
         self.say("""\
@@ -734,6 +742,7 @@ usage: host [ -4|-6 ] [ hostname ]
 
     def do_poll(self, line):
         "poll an NTP server in client mode `n' times"
+        # And it's not in the C version, so we're off the hook here
         print("poll not implemented yet")
 
     def help_poll(self):
@@ -1148,7 +1157,7 @@ usage: mrv assocIDlow assocIDhigh [ name=value[,...] ]
     def do_clocklist(self, line):
         "read the clock variables included in the variable list"
         self.__dolist(self.uservars.keys(),
-                      self.__assoc_valid(line), CTL_OP_READVAR, CLOCK_TYPE)
+                      self.__assoc_valid(line), CTL_OP_READVAR, TYPE_CLOCK)
 
     def help_clocklist(self):
         self.say("""\
