@@ -649,40 +649,34 @@ create_peer_node(
 		switch (option->attr) {
 
 		case T_Flag:
-		    if (hmode == T_Peer && option->attr == T_Flag && (option->value.i == T_Iburst || option->value.i == T_Burst)) {
-				msyslog(LOG_INFO,
-					"peer: ignoring burst or iburst option");
-			} else {
-				switch (option->value.i) {
+			switch (option->value.i) {
+			default:
+				INSIST(0);
+				break;
 
-				default:
-					INSIST(0);
-					break;
+			case T_Burst:
+				my_node->ctl.flags |= FLAG_BURST;
+				break;
 
-				case T_Burst:
-					my_node->ctl.flags |= FLAG_BURST;
-					break;
+			case T_Iburst:
+				my_node->ctl.flags |= FLAG_IBURST;
+				break;
 
-				case T_Iburst:
-					my_node->ctl.flags |= FLAG_IBURST;
-					break;
+			case T_Noselect:
+				my_node->ctl.flags |= FLAG_NOSELECT;
+				break;
 
-				case T_Noselect:
-					my_node->ctl.flags |= FLAG_NOSELECT;
-					break;
+			case T_Preempt:
+				my_node->ctl.flags |= FLAG_PREEMPT;
+				break;
 
-				case T_Preempt:
-					my_node->ctl.flags |= FLAG_PREEMPT;
-					break;
+			case T_Prefer:
+				my_node->ctl.flags |= FLAG_PREFER;
+				break;
 
-				case T_Prefer:
-					my_node->ctl.flags |= FLAG_PREFER;
-					break;
-
-				case T_True:
-					my_node->ctl.flags |= FLAG_TRUE;
-					break;
-				}
+			case T_True:
+				my_node->ctl.flags |= FLAG_TRUE;
+				break;
 			}
 			break;
 
@@ -2813,10 +2807,8 @@ get_correct_host_mode(
 	case T_Server:
 	case T_Pool:
 	case T_Manycastclient:
-		return MODE_CLIENT;
-
 	case T_Peer:
-		return MODE_ACTIVE;
+		return MODE_CLIENT;
 
 	case T_Broadcast:
 		return MODE_BROADCAST;
