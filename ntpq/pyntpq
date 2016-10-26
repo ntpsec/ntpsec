@@ -177,7 +177,7 @@ usage: help [ command ]
     @staticmethod
     def high_truncate(hostname, maxlen):
         "Truncate on the left using leading _ to indicate 'more'."
-        # Used for local IPv6 addresses, best distinguashed by low bits
+        # Used for local IPv6 addresses, best distinguished by low bits
         if len(hostname) <= maxlen:
             return hostname
         else:
