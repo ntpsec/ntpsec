@@ -226,6 +226,15 @@ usage: help [ command ]
     __peerheader  = "     remote           refid      " + __common + "jitter\n"
     __apeerheader = "     remote       refid   assid  " + __common + "jitter\n"
 
+    @staticmethod
+    def high_truncate(hostname, maxlen):
+        "Truncate on the left using leading _ to indicate 'more'."
+        # Used for local IPv6 addresses, best distinguashed by low bits
+        if len(hostname) <= maxlen:
+            return hostname
+        else:
+            return '-' + hostname[-maxlen+1:]
+
     def __dogetassoc(self):
         try:
             self.peers = self.session.readstat()
@@ -436,7 +445,7 @@ usage: help [ command ]
             c = " .+*"[CTL_PEER_STATVAL(self.session.rstatus) & 0x3]
         if len(self.chosts) > 1:
             maxhostlen = max([len(host) for (host, _af) in self.chosts])
-            self.say("%-*s " % (maxhostlen, self.session.hostname))
+            self.say(Ntpq.high_truncate(self.session.hostname, maxhostlen)+ " ")
         def is_ipv6(addr): return ":" in addr and "." not in addr
         if socket.AF_UNSPEC == af or af == (socket.AF_INET6 if is_ipv6(srcaddr) else socket.AF_INET):
             # Source host or clockname
@@ -507,7 +516,7 @@ usage: help [ command ]
         if len(self.chosts) > 1:
             maxhostlen = max([len(host) for (host, _af) in self.chosts])
             self.say("%-*.*s " % \
-                             (maxhostlen, maxhostlen, "server"))
+                             (maxhostlen, maxhostlen+1, "server"))
         self.say(header)
         self.say(("=" * (maxhostlen + 78)) + "\n")
         for peer in self.peers:
@@ -583,7 +592,6 @@ usage: help [ command ]
             quiet = False;
 	else:
             quiet = not (not varlist)	# nonempty?
-
         try:
             variables = self.session.readvar(associd, varlist, op)
         except Mode6Exception as e:
