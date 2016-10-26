@@ -79,9 +79,9 @@ The following individuals have contributed significantly to
   ANSIfication, testing, ntpviz
 * mailto:dfranke@dfranke.us[Daniel Fox Franke <dfranke@dfranke.us>]
   CVE fixes, protocol machine refactoring.
-* hmurray@megapathdsl.net[Hal Murray <hmurray@megapathdsl.net>]
+* mailto:hmurray@megapathdsl.net[Hal Murray <hmurray@megapathdsl.net>]
   Code cleanups, bug hunting, sage advice.
-* verm@darkbeer.org[Amar Takhar <verm@darkbeer.org>] waf build recipe.
+* mailto:verm@darkbeer.org[Amar Takhar <verm@darkbeer.org>] waf build recipe.
 * mailto:matthew.selsky@twosigma.com[Matt Selsky
   <matthew.selsky@twosigma.com>] Documentation corrections,
   compiler warning and port cleanup.
