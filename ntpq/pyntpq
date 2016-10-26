@@ -311,7 +311,7 @@ usage: help [ command ]
         diff = (diff + 11) / 24
         return "%dd" % diff
 
-    def __doprintpeers(self, variables, header, associd, af):
+    def __doprintpeers(self, variables, header, associd):
         hmode = 0
         srchost = None
         srcport = 0
@@ -408,52 +408,48 @@ usage: help [ command ]
         if len(self.chosts) > 1:
             maxhostlen = max([len(host) for (host, _af) in self.chosts])
             self.say(Ntpq.high_truncate(self.session.hostname, maxhostlen)+ " ")
-        def is_ipv6(addr): return ":" in addr and "." not in addr
-        if socket.AF_UNSPEC == af or af == (socket.AF_INET6 if is_ipv6(srcaddr) else socket.AF_INET):
-            # Source host or clockname
-            if displayname != None and self.showhostnames:
-                clock_name = displayname
-            elif srchost != None:
-                clock_name = srchost
-            else:
-                clock_name = canonicalize_dns(srcaddr)
-            if interpreter.wideremote and len(clock_name) > self.namewidth:
-                self.say("%c%s\n" % (c, clock_name))
-                sys.stdout(" " * (self.namewidth + 2))
-            else:
-                self.say("%c%-*.*s " % \
-                                 (c, self.namewidth, self.namewidth, clock_name[:self.namewidth]))
-            # Destination address, assoc ID or refid.
-            assocwidth = 7 if "assid" in header else 0
-            if "." not in dstadr_refid:
-                dstadr_refid = "." + dstadr_refid + "."
-            if assocwidth and len(dstadr_refid) >= self.refidwidth - assocwidth:
-                visible = "..."
-            else:
-                visible = dstadr_refid
-            self.say(visible)
-            if "assid" in header:
-                self.say(" " * (self.refidwidth - len(visible) - assocwidth + 1))
-                self.say("%-6d" % (associd))
-            else:
-                self.say(" " * (self.refidwidth - len(visible)))
-            # The rest of the story
-            last_sync = variables.get("rec") or variables.get("reftime")
-            jd = estjitter if have_jitter else estdisp
-            jd = "      -" if jd >= 999 else ("%7.3f" % jd)
-            self.say(
-                " %2ld %c %4.4s %4.4s  %3lo  %7.3f %8.3f %s\n" % \
-                (variables.get("stratum", 0),
-                 ptype,
-                 Ntpq.prettyinterval(now if last_sync is None else int(now - lfptofloat(last_sync))),
-                 Ntpq.prettyinterval(poll_sec),
-                 reach, estdelay, estoffset,
-                 jd))
-            return True
+        # Source host or clockname
+        if displayname != None and self.showhostnames:
+            clock_name = displayname
+        elif srchost != None:
+            clock_name = srchost
         else:
-            return True
+            clock_name = canonicalize_dns(srcaddr)
+        if interpreter.wideremote and len(clock_name) > self.namewidth:
+            self.say("%c%s\n" % (c, clock_name))
+            sys.stdout(" " * (self.namewidth + 2))
+        else:
+            self.say("%c%-*.*s " % \
+                             (c, self.namewidth, self.namewidth, clock_name[:self.namewidth]))
+        # Destination address, assoc ID or refid.
+        assocwidth = 7 if "assid" in header else 0
+        if "." not in dstadr_refid:
+            dstadr_refid = "." + dstadr_refid + "."
+        if assocwidth and len(dstadr_refid) >= self.refidwidth - assocwidth:
+            visible = "..."
+        else:
+            visible = dstadr_refid
+        self.say(visible)
+        if "assid" in header:
+            self.say(" " * (self.refidwidth - len(visible) - assocwidth + 1))
+            self.say("%-6d" % (associd))
+        else:
+            self.say(" " * (self.refidwidth - len(visible)))
+        # The rest of the story
+        last_sync = variables.get("rec") or variables.get("reftime")
+        jd = estjitter if have_jitter else estdisp
+        jd = "      -" if jd >= 999 else ("%7.3f" % jd)
+        self.say(
+            " %2ld %c %4.4s %4.4s  %3lo  %7.3f %8.3f %s\n" % \
+            (variables.get("stratum", 0),
+             ptype,
+             Ntpq.prettyinterval(now if last_sync is None else int(now - lfptofloat(last_sync))),
+             Ntpq.prettyinterval(poll_sec),
+             reach, estdelay, estoffset,
+             jd))
+        return True
 
-    def __dogetpeers(self, header, associd, af):
+    def __dogetpeers(self, header, associd):
         try:
             variables = self.session.readvar(associd)
         except Mode6Exception as e:
@@ -465,10 +461,9 @@ usage: help [ command ]
             self.warn("***No information returned for association %d\n" \
                              % associd)
             return False;
-        return self.__doprintpeers(variables, header, associd, af);
+        return self.__doprintpeers(variables, header, associd);
 
-    def __dopeers(self, showall, af, header):
-        af = socket.AF_INET6 if "-6" in af else socket.AF_INET
+    def __dopeers(self, showall, header):
         if not self.__dogetassoc():
             return
         maxhostlen = 0
@@ -485,7 +480,7 @@ usage: help [ command ]
                 if self.debug:
                     self.warn(stderr, "eliding [%d]\n" % peer.associd)
                 continue
-            if not self.__dogetpeers(header, peer.associd, af):
+            if not self.__dogetpeers(header, peer.associd):
                 return
 
     def __assoc_valid(self, line, required=False):
@@ -1226,52 +1221,52 @@ usage: pstats assocID
 
     def do_peers(self, line):
         "obtain and print a list of the server's peers [IP version]"
-        self.__dopeers(showall=False, af=line, header=self.__peerheader)
+        self.__dopeers(showall=False, header=self.__peerheader)
 
     def help_peers(self):
         self.say("""\
 function: obtain and print a list of the server's peers [IP version]
-usage: peers [ -4|-6 ]
+usage: peers
 """)
 
     def do_apeers(self, line):
         "obtain and print a list of the server's peers and their assocIDs [IP version]"
-        self.__dopeers(showall=False, af=line, header=self.__apeerheader)
+        self.__dopeers(showall=False, header=self.__apeerheader)
 
     def help_apeers(self):
         self.say("""\
 function: obtain and print a list of the server's peers and their assocIDs [IP version]
-usage: apeers [ -4|-6 ]
+usage: apeers
 """)
 
     def do_lpeers(self, line):
         "obtain and print a list of all peers and clients [IP version]"
-        self.__dopeers(showall=True, af=line, header=self.__peerheader)
+        self.__dopeers(showall=True, header=self.__peerheader)
 
     def help_lpeers(self):
         self.say("""\
 function: obtain and print a list of all peers and clients [IP version]
-usage: lpeers [ -4|-6 ]
+usage: lpeers
 """)
 
     def do_opeers(self, line):
         "print peer list the old way, with dstadr shown rather than refid [IP version]"
-        self.__dopeers(showall=False, af=line, header=self.__opeerheader)
+        self.__dopeers(showall=False, header=self.__opeerheader)
 
     def help_opeers(self):
         self.say("""\
 function: print peer list the old way, with dstadr shown rather than refid [IP version]
-usage: opeers [ -4|-6 ]
+usage: opeers
 """)
 
     def do_lopeers(self, line):
         "obtain and print a list of all peers and clients showing dstadr [IP version]"
-        self.__dopeers(showall=True, af=line, header=self.__opeerheader)
+        self.__dopeers(showall=True, header=self.__opeerheader)
 
     def help_lopeers(self):
         self.say("""\
 function: obtain and print a list of all peers and clients showing dstadr [IP version]
-usage: lopeers [ -4|-6 ]
+usage: lopeers
 """)
 
     def do_config(self, line):

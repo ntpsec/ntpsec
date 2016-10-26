@@ -319,7 +319,7 @@ which could not be verified in parentheses.
   of association IDs. This range is determined from the association list
   cached by the most recent +associations+ command.
 
-+opeers+ [+-4+ | +-6+]::
++opeers+::
   Obtain and print the old-style list of all peers and clients showing
   _dstadr_ (associated with any given IP version), rather than the
   _refid_.
