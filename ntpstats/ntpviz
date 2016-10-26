@@ -840,7 +840,6 @@ plot \
         out['min_x']    = out['min_y']
         out['max_x']    = out['max_y']
 
-        # fixme, should piggy back on unit
         rnd1 = 7        # round to 100 ns boxes
         out['boxwidth'] = 1e-7
 
@@ -853,7 +852,7 @@ plot \
         for value in values:
             # put into buckets
             # for a +/- 50 microSec range that is 1,000 buckets to plot
-            cnt[ round( float(value), rnd1)] += 1
+            cnt[ round( value, rnd1)] += 1
 
         sigma = True
         if args.clip:
@@ -904,9 +903,7 @@ plot \
  "-" using ($1 * %(multiplier)s):2 title "histogram" with boxes
 ''' % out
 
-        vals = list(cnt.keys())
-        vals.sort()
-        histogram_data = ["%s %s\n" % (val, cnt[val]) for val in vals]
+        histogram_data = ["%s %s\n" % (k, v) for k,v in cnt.items() ]
 
         exp = """\
 <p>This shows the clock offsets of the local clock as a histogram.</p>
