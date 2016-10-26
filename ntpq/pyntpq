@@ -579,6 +579,14 @@ usage: help [ command ]
                 else:
                     item += repr(value)
                 item += ", "
+                lastcount = 0
+                for c in text:
+                    if c == '\n':
+                        lastcount = 0
+                    else:
+                        lastcount += 1
+                if lastcount + len(item) > 78:
+                    text = text[:-1] + "\n"
                 text += item
             text = text[:-2] + "\n"
         text = text.replace("'", '"')
