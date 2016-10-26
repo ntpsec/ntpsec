@@ -636,4 +636,10 @@ class Mode6Session:
                     # string-valued variables.
                     items.append((pair, ""))
         return collections.OrderedDict(items)
+
+    def config(self, configtext):
+        "Send configuration text to the daemon."
+        self.doquery(opcode=CTL_OP_CONFIGURE, qdata=configtext, auth=True)
+        return self.response
+
 # end
