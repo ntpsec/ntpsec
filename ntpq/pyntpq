@@ -148,7 +148,7 @@ class Ntpq(cmd.Cmd):
         self.chosts = []		# Command-line hosts
         self.peers = []			# Data from NTP peers.
         self.debug = 0
-        self.pktversion = NTP_VERSION
+        self.pktversion = NTP_OLDVERSION + 1
         self.uservars = collections.OrderedDict()
 
     def emptyline(self):
