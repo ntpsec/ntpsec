@@ -631,9 +631,9 @@ class Mode6Session:
                             if val[0] == '"' and val[-1] == '"':
                                 val = val[1:-1]
                     items.append((var, val))
-                except:
+                except ValueError:
                     # Yes, ntpd really does emit bare tags for empty
                     # string-valued variables.
-                    items.append((var, ""))
+                    items.append((pair, ""))
         return collections.OrderedDict(items)
 # end
