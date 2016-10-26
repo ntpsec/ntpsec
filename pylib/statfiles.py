@@ -168,10 +168,6 @@ class NTPStats:
             tempsmap[source].append(row)
         return tempsmap
 
-    def dump(self, row):
-        "dump a stored list of logfile entries"
-        return "\n".join(getattr(self, row)) + "\n"
-
     def ip_label(self, key):
         "Produce appropriate label for an IP address."
         # If it's a new-style NTPsep clock label, pass it through,
