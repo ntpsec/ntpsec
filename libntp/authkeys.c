@@ -267,7 +267,7 @@ allocsymkey(
 	if (authnumfreekeys < 1)
 		auth_moremem(-1);
 	UNLINK_HEAD_SLIST(sk, authfreekeys, llink.f);
-	DEBUG_ENSURE(sk != NULL);
+	//DEBUG_ENSURE(sk != NULL);
 	sk->keyid = id;
 	sk->flags = flags;
 	sk->type = type;
@@ -297,7 +297,7 @@ freesymkey(
                 sk->secret = NULL;
 	}
 	UNLINK_SLIST(unlinked, *bucket, sk, hlink, symkey);
-	DEBUG_ENSURE(sk == unlinked);
+	//DEBUG_ENSURE(sk == unlinked);
 	UNLINK_DLIST(sk, llink);
 	memset((char *)sk + offsetof(symkey, symkey_payload), '\0',
 	       sizeof(*sk) - offsetof(symkey, symkey_payload));
@@ -497,8 +497,8 @@ MD5auth_setkey(
 	uint8_t *	secret;
 	size_t		secretsize;
 	
-	DEBUG_ENSURE(keytype <= USHRT_MAX);
-	DEBUG_ENSURE(len < 4 * 1024);
+	//DEBUG_ENSURE(keytype <= USHRT_MAX);
+	//DEBUG_ENSURE(len < 4 * 1024);
 	/*
 	 * See if we already have the key.  If so just stick in the
 	 * new value.

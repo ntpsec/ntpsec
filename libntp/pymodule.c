@@ -25,9 +25,22 @@
 
 #include "python_compatibility.h"
 
+char *progname = "libntpc";
+
 /*
  * Client utility functions
  */
+
+static PyObject *
+ntpc_setprogname(PyObject *self, PyObject *args)
+{
+    char *s;
+    UNUSED_ARG(self);
+    if (!PyArg_ParseTuple(args, "s", &s))
+	return NULL;
+    progname = strdup(s);
+    Py_RETURN_NONE;
+}
 
 static PyObject *
 ntpc_statustoa(PyObject *self, PyObject *args)
@@ -80,6 +93,8 @@ ntpc_lfptofloat(PyObject *self, PyObject *args)
 /* List of functions defined in the module */
 
 static PyMethodDef ntpc_methods[] = {
+    {"setprogname",    ntpc_setprogname,  	METH_VARARGS,
+     PyDoc_STR("Set program name for logging purposes.")},
     {"statustoa",      	ntpc_statustoa,  	METH_VARARGS,
      PyDoc_STR("Status string display from peer status word.")},
     {"prettydate",     	ntpc_prettydate,  	METH_VARARGS,

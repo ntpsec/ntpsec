@@ -403,7 +403,7 @@ change_logfile(
 	size_t		cd_octets;
 	size_t		octets;
 
-	NTP_REQUIRE(fname != NULL);
+	//NTP_REQUIRE(fname != NULL);
 	log_fname = fname;
 
 	/*

@@ -256,7 +256,7 @@ size_t packet_undump(char *, int len, char *);
  */
 
 /* ntp_config.c */
-extern char const *	progname;
+extern char *	progname;
 extern char	*sys_phone[];		/* ACTS phone numbers */
 extern char *ntp_signd_socket;
 extern struct config_tree_tag *cfg_tree_history;
