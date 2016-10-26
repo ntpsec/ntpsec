@@ -649,11 +649,11 @@ usage: timeout [ msec ]
                 continue
             value = queried[name]
             if fmt in (NTP_STR, NTP_UINT, NTP_INT, NTP_ADD, NTP_ADP):
-                self.say("%s %s\n" % (legend, value))
+                self.say("%s  %s\n" % (legend, value))
             elif fmt == NTP_LFP:
-                self.say("%s %s\n" % (legend, prettydate(value)))
+                self.say("%s  %s\n" % (legend, prettydate(value)))
             elif fmt in (NTP_2BIT, NTP_MODE):
-                self.say("%s %s\n" % (legend, bin(value)[2:]))
+                self.say("%s  %s\n" % (legend, bin(value)[2:]))
             else:
                 self.warn("unexpected vc type %s for %s, value %s\n" % (fmt, name, value))
 
