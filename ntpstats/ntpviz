@@ -292,19 +292,22 @@ def gnuplot(template, outfile=None):
 
 class NTPViz(NTPStats):
     "Class for visualizing statistics from a single server."
+
+    # in 2016, 25% of screens are 1024x768, 42% are 1388x768
+    # but leave some room for the browser frame
     # Python takes single quotes here. Since no % substitution
     Common = """\
-set terminal png size 900,650
+set terminal png size 1000,650
 set grid
 set autoscale xfixmin
 set autoscale xfixmax
 set xdata time
-set xtic rotate by -45 scale 0
+set xtic rotate by -35 scale 0
 set xlabel "Time (DDMM hh:mm UTC)"
 set format x "%d%b %H:%M"
 set timefmt "%s"
-set lmargin 12
-set rmargin 12
+set lmargin 10
+set rmargin 10
 """
 
     def __init__(self, statsdir,
@@ -874,11 +877,13 @@ set label 2 "+1σ" at %(p1sigma)s, graph 0.96  left front offset -1,-1
 """ % out
 
 
+        # in 2016, 25% of screens are 1024x768, 42% are 1388x768
+        # but leave some room for the browser frame
         plot_template = '''\
-set terminal png size 900,600
+set terminal png size 1000,650
 set grid
 set boxwidth %(boxwidth)s
-set xtic rotate by -45 scale 0
+set xtic rotate by -35 scale 0
 set title "%(sitename)s: Local Clock Time Offset Histogram%(clipped)s"
 set xtics format "%%1.1f %(unit)s" nomirror
 set xrange [%(min_x)s:%(max_x)s]
@@ -891,8 +896,8 @@ set arrow from %(p5)s,graph 0 to %(p5)s,graph 0.45 as 5
 set style arrow 6 nohead
 set arrow from %(p1)s,graph 0 to %(p1)s,graph 0.30 as 6
 set key off
-set lmargin 12
-set rmargin 12
+set lmargin 10
+set rmargin 10
 set style fill solid 0.5
 set label 3 "99%%" at %(p99)s, graph 0.35  left front offset -1,-1
 set label 4 "95%%" at %(p95)s, graph 0.50  left front offset -1,-1
