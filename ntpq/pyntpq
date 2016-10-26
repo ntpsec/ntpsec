@@ -128,58 +128,6 @@ NTP_LFP		= 0x7	# NTP timestamp
 NTP_MODE	= 0x8	# peer mode
 NTP_2BIT	= 0x9	# leap bits
 
-# Format values
-PADDING	= 0
-HA	= 1	# host address
-NA	= 2	# network address
-LP	= 3	# leap (print in binary)
-RF	= 4	# refid (sometimes string, sometimes not)
-AR	= 5	# array of times
-FX	= 6	# test flags
-TS	= 7	# l_fp timestamp in hex
-OC	= 8	# integer, print in octal
-EOV	= 255	# end of table
-
-# For the most part ntpq simply displays what ntpd provides in the
-# mostly plain-text mode 6 responses.  A few variable names are by
-# default "cooked" to provide more human-friendly output.  This is
-# a dictionary of cooked variables.
-cookedvars = {
-    "leap":		LP,
-    "reach":		OC,
-    "refid":		RF,
-    "reftime":		TS,
-    "clock":		TS,
-    "org":		TS,
-    "rec":		TS,
-    "xmt":		TS,
-    "flash":		FX,
-    "srcadr":		HA,
-    "peeradr":		HA,	# compat with others
-    "dstadr":		NA,
-    "filtdelay":	AR,
-    "filtoffset":	AR,
-    "filtdisp":		AR,
-    "filterror":	AR,	# compat with others
-}
-
-# flasher bits
-tstflagnames = (
-	"pkt_dup",		# BOGON1
-	"pkt_bogus",		# BOGON2
-	"pkt_unsync",		# BOGON3
-	"pkt_denied",		# BOGON4
-	"pkt_auth",		# BOGON5
-	"pkt_stratum",		# BOGON6
-	"pkt_header",		# BOGON7
-	"pkt_autokey",		# BOGON8
-	"pkt_crypto",		# BOGON9
-	"peer_stratum",		# BOGON10
-	"peer_dist",		# BOGON11
-	"peer_loop",		# BOGON12
-	"peer_unreach"		# BOGON13
-)
-
 class Ntpq(cmd.Cmd):
     "ntpq command interpreter"
 
@@ -571,7 +519,7 @@ usage: help [ command ]
             return ()
         return (lo, hi)
 
-    def __printvars(self, variables, type, quiet):
+    def __printvars(self, variables, dtype, quiet):
         if self.rawmode:
             if not quiet:
                 self.say("status=0x%04x,\n" % self.session.rstatus)
@@ -579,10 +527,67 @@ usage: help [ command ]
             # high-half characters.  We won't do that unless somebody
             # files a bug, Mode 6 never seems to generate those in
             # variable fetches.
-            raw = session.response.replace(",\r\n",",\n")
-            self.say(raw)
+            text = session.response.replace(",\r\n",",\n")
         else:
-            pass
+            if not quiet:
+                self.say("status=%04x %s,\n" % \
+                         (self.session.rstatus,
+                          statustoa(dtype, self.session.rstatus)))
+
+            out_chars = 0
+            text = ""
+            print(variables)
+            for (name, value) in variables.items():
+                item = "%s=" % name
+                if name in ("reftime", "clock", "org", "rec", "xmt"):
+                    item += prettydate(value)
+                elif name in ("srcadr", "peeradr", "dstadr", "refid"):
+                    # C ntpq cooked these in obscure ways.  Since they
+                    # came up from the daemon as human-readable
+                    # strings this was probably a bad idea, but we'll
+                    # leave this case separated in case somebody thinks
+                    # re-cooking them is a good idea.
+                    item += value
+                elif name == "leap":
+                    item += ("00", "01", "10", "11")[value]
+                elif name == "reach":
+                    item += "%03lo" % value
+                elif name in("filtdelay", "filtoffset", "filtdisp", "filterror"):
+                    item += "\t".join(value.split())
+                elif name == "flash":
+                    item += "%02x" % value
+                    if value == 0:
+                        item += " ok"
+                    else:
+                        # flasher bits
+                        tstflagnames = (
+                            "pkt_dup",		# BOGON1
+                            "pkt_bogus",	# BOGON2
+                            "pkt_unsync",	# BOGON3
+                            "pkt_denied",	# BOGON4
+                            "pkt_auth",		# BOGON5
+                            "pkt_stratum",	# BOGON6
+                            "pkt_header",	# BOGON7
+                            "pkt_autokey",	# BOGON8
+                            "pkt_crypto",	# BOGON9
+                            "peer_stratum",	# BOGON10
+                            "peer_dist",	# BOGON11
+                            "peer_loop",	# BOGON12
+                            "peer_unreach"	# BOGON13
+                        )
+                        for (i, n) in enumerate(tstflagnames):
+                            if (1 << i) & value:
+                                item += tstflagnames + " "
+                        item = item[:-1]
+                else:
+                    item += repr(value)
+                item += ","
+                if len(text + item) > 78:
+                    text += "\n"
+                else:
+                    text += " "
+            text = text[:-2] + "\n"
+        self.say(text)
 
     def __dolist(self, varlist, associd, op, type):
         "List variables associated with a specified peer."
@@ -661,7 +666,7 @@ usage: timeout [ msec ]
             elif fmt == NTP_LFP:
                 self.say("%s  %s\n" % (legend, prettydate(value)))
             elif fmt in (NTP_2BIT, NTP_MODE):
-                self.say("%s  %s\n" % (legend, bin(value)[2:]))
+                self.say("%s %s\n" % (legend, ("00", "01", "10", "11")[value]))
             else:
                 self.warn("unexpected vc type %s for %s, value %s\n" % (fmt, name, value))
 
