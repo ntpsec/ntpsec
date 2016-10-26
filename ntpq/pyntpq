@@ -665,8 +665,17 @@ usage: timeout [ msec ]
                 self.say("%s  %s\n" % (legend, value))
             elif fmt == NTP_LFP:
                 self.say("%s  %s\n" % (legend, prettydate(value)))
-            elif fmt in (NTP_2BIT, NTP_MODE):
+            elif fmt == NTP_2BIT:
                 self.say("%s %s\n" % (legend, ("00", "01", "10", "11")[value]))
+            elif fmt == NTP_MODE:
+                modes = (
+                    "unspec", "sym_active", "sym_passive", "client", "server",
+                    "broadcast", "control", "private", "bclient"
+                )
+                try:
+                    self.say("%s  %s\n" % (legend, modes[value]))
+                except IndexError:
+                    self.say("%s  %s%d\n" % (legend, "mode#", value))
             else:
                 self.warn("unexpected vc type %s for %s, value %s\n" % (fmt, name, value))
 
