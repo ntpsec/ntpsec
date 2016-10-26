@@ -666,7 +666,7 @@ usage: timeout [ msec ]
             elif fmt == NTP_LFP:
                 self.say("%s  %s\n" % (legend, prettydate(value)))
             elif fmt == NTP_2BIT:
-                self.say("%s %s\n" % (legend, ("00", "01", "10", "11")[value]))
+                self.say("%s  %s\n" % (legend, ("00", "01", "10", "11")[value]))
             elif fmt == NTP_MODE:
                 modes = (
                     "unspec", "sym_active", "sym_passive", "client", "server",
