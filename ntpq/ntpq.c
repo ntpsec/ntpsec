@@ -810,7 +810,6 @@ dump_hex_printable(
 }
 
 
-/* XXX ELIMINATE sendpkt similar in ntpq.c, ntp_io.c, ntptrace.c */
 /*
  * sendpkt - send a packet to the remote host
  */
