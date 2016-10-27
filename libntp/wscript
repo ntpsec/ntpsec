@@ -29,7 +29,6 @@ def build(ctx):
 		"socket.c",
 		"socktoa.c",
 		"socktohost.c",
-		"ssl_init.c",
 		"strl_obsd.c",
 		"syssignal.c",
 		"timetoa.c",
@@ -51,6 +50,7 @@ def build(ctx):
 		"msyslog.c",
 		"ntp_calendar.c",
 		"prettydate.c",
+		"ssl_init.c",
 		"statestr.c",
 	]
 
