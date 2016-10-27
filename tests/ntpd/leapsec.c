@@ -261,7 +261,7 @@ setup_load_table(
 }
 
 static bool
-setup_clear_table()
+setup_clear_table(void)
 {
 	bool            rc;
 	leap_table_t * pt = leapsec_get_table(0);

@@ -2556,7 +2556,7 @@ static	int 	teljjy_bye_ignore	( struct peer *peer, struct refclockproc *, struct
 static	int 	teljjy_bye_disc 	( struct peer *peer, struct refclockproc *, struct jjyunit * ) ;
 static	int 	teljjy_bye_modem	( struct peer *peer, struct refclockproc *, struct jjyunit * ) ;
 
-static int ( *pTeljjyHandler [ ] [ 5 ] ) ( ) =
+static int ( *pTeljjyHandler [ ] [ 5 ] ) (struct peer *, struct refclockproc *, struct jjyunit *) =
 {               	/*STATE_IDLE           STATE_DAILOUT       STATE_LOGIN           STATE_CONNECT       STATE_BYE        */
 /* NULL       */	{ teljjy_idle_ignore , teljjy_dial_ignore, teljjy_login_ignore, teljjy_conn_ignore, teljjy_bye_ignore },
 /* START      */	{ teljjy_idle_dialout, teljjy_dial_ignore, teljjy_login_ignore, teljjy_conn_ignore, teljjy_bye_ignore },
@@ -3702,7 +3702,7 @@ static	int 	modem_esc_data  	( struct peer *, struct refclockproc *, struct jjyu
 static	int 	modem_esc_silent	( struct peer *, struct refclockproc *, struct jjyunit * ) ;
 static	int 	modem_esc_disc  	( struct peer *, struct refclockproc *, struct jjyunit * ) ;
 
-static int ( *pModemHandler [ ] [ 5 ] ) ( ) =
+static int ( *pModemHandler [ ] [ 5 ] ) (struct peer *, struct refclockproc *, struct jjyunit * ) =
 {                         	/*STATE_DISCONNECT   STATE_INITIALIZE   STATE_DAILING       STATE_CONNECT      STATE_ESCAPE     */
 /* NULL                 */	{ modem_disc_ignore, modem_init_ignore, modem_dial_ignore , modem_conn_ignore, modem_esc_ignore },
 /* INITIALIZE           */	{ modem_disc_init  , modem_init_start , modem_dial_ignore , modem_conn_ignore, modem_esc_ignore },

@@ -179,7 +179,8 @@ def cmd_configure(ctx, config):
 
         # We require some things that C99 doesn't enable, like pthreads.
         # Thus -std=gnu99 rather than -std=c99 here.
-        ctx.env.CFLAGS += ["-Wall", "-Wextra", "-std=gnu99"]    # Default CFLAGS.
+        ctx.env.CFLAGS += ["-Wall", "-Wextra", "-std=gnu99",
+			   "-Wstrict-prototypes"]
 
         # Check target platform.
         ctx.start_msg("Checking build target")

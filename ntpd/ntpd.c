@@ -52,7 +52,7 @@ DNSServiceRef mdns;
 
 #include <sodium.h>
 
-static void check_minsane();
+static void check_minsane(void);
 
 static bool need_priority = false;
 static bool config_priority_override = false;
