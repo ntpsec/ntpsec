@@ -63,7 +63,7 @@ time_to_vint64(
 
 	tt = *ptt;
 
-#if SIZEOF_TIME_T <= 4
+#if NTP_SIZEOF_TIME_T <= 4
 	setvint64hiu(res, 0);
 	if (tt < 0) {
 		setvint64lo(res, (uint32_t)-tt);
@@ -87,7 +87,7 @@ vint64_to_time(
 {
 	time_t res;
 
-#if SIZEOF_TIME_T <= 4
+#if NTP_SIZEOF_TIME_T <= 4
 	res = (time_t)vint64lo(*tv);
 
 #else
