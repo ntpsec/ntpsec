@@ -322,7 +322,7 @@ step_systime(
 	 * very often, we can afford to do the whole calculation from
 	 * scratch. And we're not in the time-critical path yet.
 	 */
-#if SIZEOF_TIME_T > 4
+#if NTP_SIZEOF_TIME_T > 4
 	/*
 	 * This code makes sure the resulting time stamp for the new
 	 * system time is in the 2^32 seconds starting at 1970-01-01,

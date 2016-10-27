@@ -1312,7 +1312,7 @@ handle_pkt(
 	double		synch_distance;
 	char *		p_NTPDIG_PRETEND_TIME;
 	time_t		pretend_time;
-#if SIZEOF_TIME_T == 8
+#if NTP_SIZEOF_TIME_T == 8
 	long long	ll;
 #else
 	long		l;
@@ -1364,14 +1364,14 @@ handle_pkt(
 		p_NTPDIG_PRETEND_TIME = getenv("NTPDIG_PRETEND_TIME");
 		if (p_NTPDIG_PRETEND_TIME) {
 			pretend_time = 0;
-#if SIZEOF_TIME_T == 4
+#if NTP_SIZEOF_TIME_T == 4
 			if (1 == sscanf(p_NTPDIG_PRETEND_TIME, "%ld", &l))
 				pretend_time = (time_t)l;
-#elif SIZEOF_TIME_T == 8
+#elif NTP_SIZEOF_TIME_T == 8
 			if (1 == sscanf(p_NTPDIG_PRETEND_TIME, "%lld", &ll))
 				pretend_time = (time_t)ll;
 #else
-# include "GRONK: unexpected value for SIZEOF_TIME_T"
+# include "GRONK: unexpected value for NTP_SIZEOF_TIME_T"
 #endif
 			if (0 != pretend_time)
 				tv_dst.tv_sec = pretend_time;

@@ -76,7 +76,7 @@ normalize_tspec(
 	struct timespec x
 	)
 {
-#if SIZEOF_LONG > 4
+#if NTP_SIZEOF_LONG > 4
 	long	z;
 
 	/* 
@@ -378,7 +378,7 @@ lfp_stamp_to_tspec(
 	out.tv_nsec = FTOTVN(x.l_uf);
 
 	/* copying a vint64 to a time_t needs some care... */
-#if SIZEOF_TIME_T <= 4
+#if NTP_SIZEOF_TIME_T <= 4
 	out.tv_sec = (time_t)vint64lo(sec);
 #else
 	out.tv_sec = (time_t)vint64s(sec);

@@ -10,7 +10,7 @@
 #include "ntp_stdlib.h"
 #include "ntp_calendar.h"
 
-#if SIZEOF_TIME_T < 4
+#if NTP_SIZEOF_TIME_T < 4
 # error sizeof(time_t) < 4 -- this will not work!
 #endif
 
