@@ -141,30 +141,42 @@ class NTPStats:
             return self.peermap
 
         for row in self.peerstats:
-            ip = row[2]     # peerstats field 2, refclock id
-            if ip not in self.peermap:
-                self.peermap[ip] = []
-            self.peermap[ip].append(row)
+            try:
+                ip = row[2]     # peerstats field 2, refclock id
+                if ip not in self.peermap:
+                    self.peermap[ip] = []
+                self.peermap[ip].append(row)
+            except IndexError:
+                # ignore corrupted rows
+                pass
         return self.peermap
 
     def gpssplit(self):
         "Return a dictionary mapping gps sources to entry subsets."
         gpsmap = {}
         for row in self.gpsd:
-            source = row[2]
-            if source not in gpsmap:
-                gpsmap[source] = []
-            gpsmap[source].append(row)
+            try:
+                source = row[2]
+                if source not in gpsmap:
+                    gpsmap[source] = []
+                gpsmap[source].append(row)
+            except IndexError:
+                # ignore corrupted rows
+                pass
         return gpsmap
 
     def tempssplit(self):
         "Return a dictionary mapping temperature sources to entry subsets."
         tempsmap = {}
         for row in self.temps:
-            source = row[2]
-            if source not in tempsmap:
-                tempsmap[source] = []
-            tempsmap[source].append(row)
+            try:
+                source = row[2]
+                if source not in tempsmap:
+                    tempsmap[source] = []
+                tempsmap[source].append(row)
+            except IndexError:
+                # ignore corrupted rows
+                pass
         return tempsmap
 
     def ip_label(self, key):
