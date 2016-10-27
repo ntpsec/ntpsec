@@ -315,7 +315,7 @@ usage: help [ command ]
         hmode = 0
         srchost = None
         srcport = 0
-        srcaddr = None
+        srcadr = None
         dstadr_refid = ""
         ppoll = 0
         hpoll = 0
@@ -328,7 +328,7 @@ usage: help [ command ]
 
         for (name, value) in variables.items():
             if name in ("srcadr", "peeradr"):
-                srcaddr = value
+                srcadr = value
             elif name == "srchost":
                 srchost = value
             elif name == "dstadr":
@@ -376,7 +376,7 @@ usage: help [ command ]
             ptype = 'b'
         elif hmode == MODE_BROADCAST:
             # broadcast or multicast server
-            if srcaddr.startswith("224."):	# IANA multicast address prefix
+            if srcadr.startswith("224."):	# IANA multicast address prefix
                 ptype = 'M'
             else:
                 ptype = 'B'
@@ -385,7 +385,7 @@ usage: help [ command ]
                 ptype = 'l'	# local refclock
             elif dstadr_refid == "POOL":
                 ptype = 'p'	# pool
-            elif srcaddr.startswith("224."):
+            elif srcadr.startswith("224."):
                 ptype = 'a'	# manycastclient
             else:
                 ptype = 'u'	# unicast
@@ -408,8 +408,10 @@ usage: help [ command ]
         # Source host or clockname
         if srchost != None:
             clock_name = srchost
+        else if self.showhostnames:
+            clock_name = canonicalize_dns(srcadr)
         else:
-            clock_name = canonicalize_dns(srcaddr)
+            clock_name = srcadr
         if interpreter.wideremote and len(clock_name) > self.namewidth:
             self.say("%c%s\n" % (c, clock_name))
             sys.stdout(" " * (self.namewidth + 2))
