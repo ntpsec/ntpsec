@@ -89,8 +89,8 @@ normalize_tspec(
 	 * here: it has implementation-defined behaviour when applied
 	 * to LONG_MIN.
 	 */
-	if (x.tv_nsec < -3l * NANOSECONDS ||
-	    x.tv_nsec > 3l * NANOSECONDS) {
+	if (x.tv_nsec < NANOSECONDS ||
+	    x.tv_nsec > NANOSECONDS) {
 		z = x.tv_nsec / NANOSECONDS;
 		x.tv_nsec -= z * NANOSECONDS;
 		x.tv_sec += z;
