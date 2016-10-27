@@ -7,17 +7,28 @@ import sys
 import subprocess
 
 def canonicalize_dns(hostname):
+    portsuffix = ""
+    if hostname.count(":") == 1:		# IPv4 with appended port
+        (hostname, portsuffix) = hostname.split(":")
+        portsuffix = ":" + portsuffix
+    elif ']' in hostname:			# IPv6
+        rbrak = hostname.rindex("]")
+        if ":" in hostname[rbrak:]:
+            portsep =  hostname.rindex(":")
+            portsuffix = hostname[portsep:]
+            hostname = hostname[:portsep]
+            hostname = hostname[1:-1]	# Strip brackets
     try:
         ai = socket.getaddrinfo(hostname, None, 0, 0, 0, socket.AI_CANONNAME)
-    except socket.gaierror as e:
-        print('getaddrinfo failed: %s' % e.strerr, file=sys.stderr)
+    except socket.gaierror as (s, _e):
+        print('getaddrinfo failed: %s' % s, file=sys.stderr)
         raise SystemExit(1)
     (family, socktype, proto, canonname, sockaddr) = ai[0]
     try:
         name = socket.getnameinfo(sockaddr, socket.NI_NAMEREQD)
     except socket.gaierror:
-        return canonname.lower()
-    return name[0].lower()
+        return canonname.lower() + portsuffix
+    return name[0].lower() + portsuffix
 
 def termsize():
     "Return the current terminal size."

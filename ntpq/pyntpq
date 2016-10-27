@@ -321,7 +321,6 @@ usage: help [ command ]
         hpoll = 0
         reach = 0
         ptype = '?'
-        displayname = None
         have_jitter = False
         clock_name = ''
 
@@ -372,8 +371,6 @@ usage: help [ command ]
                 srcport = value
             elif name == "reftime":
                 reftime = value	# l_fp timestamp
-            elif name == "displayname":
-                displayname = value
         if hmode == MODE_BCLIENT:
             # broadcastclient or multicastclient
             ptype = 'b'
@@ -384,7 +381,7 @@ usage: help [ command ]
             else:
                 ptype = 'B'
         elif hmode == MODE_CLIENT:
-            if displayname != None:
+            if srchost and '(' in srchost:
                 ptype = 'l'	# local refclock
             elif dstadr_refid == "POOL":
                 ptype = 'p'	# pool
@@ -409,9 +406,7 @@ usage: help [ command ]
             maxhostlen = max([len(host) for (host, _af) in self.chosts])
             self.say(Ntpq.high_truncate(self.session.hostname, maxhostlen)+ " ")
         # Source host or clockname
-        if displayname != None and self.showhostnames:
-            clock_name = displayname
-        elif srchost != None:
+        if srchost != None:
             clock_name = srchost
         else:
             clock_name = canonicalize_dns(srcaddr)
@@ -671,7 +666,11 @@ usage: timeout [ msec ]
             if name not in queried:
                 continue
             value = queried[name]
-            if fmt in (NTP_STR, NTP_UINT, NTP_INT, NTP_ADD, NTP_ADP):
+            if fmt in (NTP_ADD, NTP_ADP):
+                if self.showhostnames:
+                    value = canonicalize_dns(value)
+                self.say("%s  %s\n" % (legend, value))
+            elif fmt in (NTP_STR, NTP_UINT, NTP_INT):
                 self.say("%s  %s\n" % (legend, value))
             elif fmt == NTP_LFP:
                 self.say("%s  %s\n" % (legend, prettydate(value)))
