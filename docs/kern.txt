@@ -14,7 +14,7 @@ include::includes/misc.txt[]
 The technical report [2], which is a revision and update of an earlier
 report [3], describes an engineering model for a precision clock
 discipline function for a generic operating system. The model is the
-same hybrid phase/frequecy-lock feedback loop used by +{ntpd}+, but
+same hybrid phase/frequecy-lock feedback loop used by +ntpd+, but
 implemented in the kernel. The code described in [2] is included in
 Solaris and Digital/Compaq/HP Tru64. It provides two system calls
 +ntp_gettime()+ and +ntp_adjtime()+ and can discipline the system clock
@@ -29,7 +29,7 @@ distribution
 
 Ordinarily, the kernel clock discipline function is used with the NTP
 daemon, but could be used for other purposes. The
-link:ntptime.html[{ntptime}] utility program can be used to control it
+link:ntptime.html[ntptime] utility program can be used to control it
 manually.
 
 The kernel model also provides support for an external precision timing

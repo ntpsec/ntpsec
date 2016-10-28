@@ -5,7 +5,7 @@
 [[synop]]
 == Synopsis ==
 [verse]
-+{ntpkeygen}+ [ +-M+ ]
++ntpkeygen+ [ +-M+ ]
 
 [[descrip]]
 == Description ==
@@ -21,7 +21,7 @@ and other message digest algorithms. The message digest keys file must
 be distributed and stored using secure means beyond the scope of NTP
 itself. Besides the keys used for ordinary NTP associations,
 additional keys can be defined as passwords for the
-link:ntpq.html[+{ntpq}+] utility program.
+link:ntpq.html[+ntpq+] utility program.
 
 Historical note: 
 
@@ -35,7 +35,7 @@ Historical note:
 [[run]]
 == Running the program ==
 
-The safest way to run the +{ntpkeygen}+ program is logged in directly as
+The safest way to run the +ntpkeygen+ program is logged in directly as
 root. The recommended procedure is change to the keys directory, usually
 +/usr/local/etc+, then run the program.
 
@@ -86,7 +86,7 @@ All cryptographically sound key generation schemes must have means to
 randomize the entropy seed used to initialize the internal pseudo-random
 number generator used by the library routines. The OpenSSL library uses
 a designated random seed file for this purpose. The file must be
-available when starting the NTP daemon and +{ntpkeygen}+ program. If a
+available when starting the NTP daemon and +ntpkeygen+ program. If a
 site supports OpenSSL or its companion OpenSSH, it is very likely that
 means to do this are already available.
 
@@ -99,10 +99,10 @@ software documentation, but are outside the scope of this page.
 
 The entropy seed used by the OpenSSL library is contained in a file,
 usually called +.rnd+, which must be available when starting the NTP
-daemon or the +{ntpkeygen}+ program. The NTP daemon will first look for
+daemon or the +ntpkeygen+ program. The NTP daemon will first look for
 the file using the path specified by the _randfile_ subcommand of the
 _crypto_ configuration command. If not specified in this way, or when
-starting the +{ntpkeygen}+ program, the OpenSSL library will look for the
+starting the +ntpkeygen+ program, the OpenSSL library will look for the
 file using the path specified by the RANDFILE environment variable in
 the user home directory, whether root or some other user. If the
 RANDFILE environment variable is not present, the library will look for
@@ -113,11 +113,11 @@ and the program exits with a suitable error message.
 [[crypto]]
 == Cryptographic Data Files ==
 
-The +{ntpkeygen}+ program generates a MD5 symmetric keys file
+The +ntpkeygen+ program generates a MD5 symmetric keys file
 _ntpkey_MD5key_hostname.filestamp_. Since the file contains private
 shared keys, it should be visible only to root and distributed by secure
-means to other subnet hosts. The NTP daemon loads the file _{ntpkeys}_,
-so +{ntpkeygen}+ installs a soft link from this name to the generated
+means to other subnet hosts. The NTP daemon loads the file _ntp.keys_,
+so +ntpkeygen+ installs a soft link from this name to the generated
 file. Subsequently, similar soft links must be installed by manual or
 automated means on the other subnet hosts. This file is needed to
 authenticate some remote configuration commands used by the {ntpqman}

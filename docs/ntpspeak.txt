@@ -39,10 +39,10 @@ drift::
   in an NTP host that causes the system time to slowly drift.  It is
   usually  expressed in a parts-per-million (PPM) offset from its
   nominal frequency. It changes, slowly, in response to environmental
-  factors (mainly ambient temperature). {ntpd} measures drift by
+  factors (mainly ambient temperature). ntpd measures drift by
   sampling the clock and performing clock recovery against a
   phase-locked loop.  The drift measurement is occasionally stored
-  locally to a drift file so that when {ntpd} is stopped and restarted
+  locally to a drift file so that when ntpd is stopped and restarted
   it doesn't have to go through the entire resampling and resynchronization
   process before providing reliable time.
 

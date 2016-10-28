@@ -79,13 +79,13 @@ and that file system links, symbolic or otherwise, should be avoided.
   list).
 
 +interface+ [+listen+ | +ignore+ | +drop+] [+all+ | +ipv4+ | +ipv6+ | +wildcard+ | 'name' | 'address'[/'prefixlen']]::
-  This command controls which network addresses +{ntpd}+ opens, and
+  This command controls which network addresses +ntpd+ opens, and
   whether input is dropped without processing. The first parameter
   determines the action for addresses which match the second parameter.
   That parameter specifies a class of addresses, or a specific interface
   name, or an address. In the address case, _prefixlen_ determines how
   many bits must match for this rule to apply. +ignore+ prevents opening
-  matching addresses, +drop+ causes +{ntpd}+ to open the address and drop
+  matching addresses, +drop+ causes +ntpd+ to open the address and drop
   all received packets without examination. Multiple +interface+
   commands can be used. The last rule which matches a particular address
   determines the action for it. +interface+ commands are disabled if any
@@ -100,12 +100,12 @@ and that file system links, symbolic or otherwise, should be avoided.
   TAI offset. The file can be obtained directly from NIST national time
   servers using +ftp+ as the ASCII file +pub/leap-seconds+.
 +
-The _leapfile_ is scanned when +{ntpd}+ processes the +leapfile+
-directive or when +{ntpd}+ detects that _leapfile_ has changed. +{ntpd}+
+The _leapfile_ is scanned when +ntpd+ processes the +leapfile+
+directive or when +ntpd+ detects that _leapfile_ has changed. +ntpd+
 checks once a day to see if the _leapfile_ has changed.
 
 +leapsmearinterval+ 'interval'::
-  This *experimental* option is only available if {ntpd} was built
+  This *experimental* option is only available if ntpd was built
   with the +--enable-leap-smear+ option, It specifies the interval
   over which a leap second correction will be applied.  Recommended
   values for this option are between 7200 (2 hours) and 86400 (24
@@ -200,8 +200,8 @@ and so on is suppressed.
   modem control codes as well.
 
 +reset [allpeers] [auth] [ctl] [io] [mem] [sys] [timer]+::
-  Reset one or more groups of counters maintained by {ntpd} and exposed by
-  +{ntpq}+.
+  Reset one or more groups of counters maintained by ntpd and exposed by
+  +ntpq+.
 
 +setvar+ _variable_ [_default_]::
   This command adds an additional system variable. These variables can
@@ -282,7 +282,7 @@ The variables operate as follows:
     Specifies the maximum size of the process stack on systems with the
     mlockall()_function. Defaults to 50 4k pages.
   +filenum+ _filedescriptors_;;
-    Specifies the maximum number of file descriptors {ntpd} may have open
+    Specifies the maximum number of file descriptors ntpd may have open
     at once. Defaults to the system default.
 
 +hop+ +...+::

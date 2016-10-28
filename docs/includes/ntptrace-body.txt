@@ -12,7 +12,7 @@
 
 == DESCRIPTION ==
 
-+ntptrace+ is a python script that uses the {ntpq} utility program to
++ntptrace+ is a python script that uses the ntpq utility program to
 follow the chain of NTP servers from a given host back to the primary
 time source.
 

@@ -135,7 +135,7 @@ ntpd/refclock_generic.c.
 * Find out the exact tty settings for your clock (baud rate, parity,
 stop bits, character size, ...) and note them in terms of termio*.h
 c_cflag macros.
-* in {ntpd}/refclock_generic.c fill out a new the struct clockinfo element
+* in ntpd/refclock_generic.c fill out a new the struct clockinfo element
 (that allocates a new "IP" address - see comments) (see all the other
 clocks for example)
 +

@@ -24,7 +24,7 @@ include::includes/monopt.txt[]
 [[intro]]
 == Naming Conventions ==
 
-The +{ntpd}+ daemon includes a comprehensive monitoring facility which
+The +ntpd+ daemon includes a comprehensive monitoring facility which
 collects statistical data of various types and writes the data to
 files associated with each type at defined events or intervals. The
 files associated with a particular type are collectively called the
@@ -45,7 +45,7 @@ _suffix_::
 
 For more details on the format of statistics files, see
 link:statfiles.html[Statistics file formats].  There is a
-visualization tool, linkLntpviz.html[{ntpviz}], which assists
+visualization tool, linkLntpviz.html[ntpviz], which assists
 in making sense of these.
 
 [[cmd]]

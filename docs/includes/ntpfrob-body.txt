@@ -5,12 +5,12 @@
 [[synop]]
 == Synopsis ==
 
-+{ntpfrob}+ [ +-A+] [+-b+ 'bump'] [ +-a+ 'tick' ] [ +-p+ 'ppsdev' ] [+-c+] [+-e+] [+-r+]
++ntpfrob+ [ +-A+] [+-b+ 'bump'] [ +-a+ 'tick' ] [ +-p+ 'ppsdev' ] [+-c+] [+-e+] [+-r+]
 
 [[descr]]
 == Description ==
 
-The {ntpfrob} program frobs the local clock hardware.  It collects
+The ntpfrob program frobs the local clock hardware.  It collects
 several small diagnostic functions into a set that will differ
 depending on your platform and underlying system calls.  Portions of
 it formerly traveled as +tickadj+ and some undocumented small
@@ -41,11 +41,10 @@ utilities.
 == Usage ==
 
 Documentation for some of these functions is scanty; this is a problem
-inherited from ancient days along with their code. If you suspect
-you may need to use them, reading the source code may be wise. If
-you believe you understand the code in more detail than any of
-these descriptions, please explain it to the {project-shortname}
-maintainers.
+inherited from ancient days along with their code. If you suspect you
+may need to use them, reading the source code may be wise. If you
+believe you understand the code in more detail than any of these
+descriptions, please explain it to the NTPsec maintainers.
 
 Normally this tool reports in an eyeball-friendly unstructured text
 format. With the -j option (where applicable) it reports JSON records.
@@ -70,7 +69,7 @@ enough to have a fully POSIX.1-2001-conformant Unix.
 === Clock bump ===
 
 Sometimes it is diagnostically interesting to perturb your clock in
-order to watch how {ntpd} responds and makes corrections. This
+order to watch how ntpd responds and makes corrections. This
 option does that.
 
 === Clock jitter measurement ===

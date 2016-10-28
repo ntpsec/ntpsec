@@ -5,7 +5,7 @@
 [[synop]]
 == SYNOPSIS ==
 [verse]
-{ntpviz} [-d LOGDIR] [-g] [-n name] [-p DAYS]
+ntpviz [-d LOGDIR] [-g] [-n name] [-p DAYS]
          [-s starttime] [-e endtime]
          [-o OUTDIR]
          [ -c | --clip ]

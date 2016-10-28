@@ -14,7 +14,7 @@
     equal, this host will be chosen for synchronization among a set of
     correctly operating hosts and clocks. See the "Mitigation Rules
     and the prefer Keyword" page (available as part of the HTML
-    documentation provided in +/usr/share/doc/{ntp}+) for further
+    documentation provided in +/usr/share/doc/ntp+) for further
     information.
   +subtype+ _int_;;
     Some drivers (notably the generic and jjy drivers) support

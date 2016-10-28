@@ -173,7 +173,7 @@ values are as received and before processing by the various data
 smoothing and mitigation algorithms.
 
   +sysstats+;;
-    Enables recording of {ntpd} statistics counters on a periodic basis.
+    Enables recording of ntpd statistics counters on a periodic basis.
     Each hour a line of the following form is appended to the file
     generation set named _sysstats_:
 +
@@ -205,7 +205,7 @@ show the statistics counter values accumulated since the last
 generated line.
 
   +usestats+;;
-    Enables recording of {ntpd} resource usage statistics.
+    Enables recording of ntpd resource usage statistics.
     Each hour a line of the following form is appended to the file
     generation set named _usestats_:
 +
@@ -273,7 +273,7 @@ The remaining fields show the values used since the last report.
     when and how data will be directed to a new element of the set. This
     way, information stored in elements of a file set that are currently
     unused are available for administrative operations without the
-    risk of disturbing the operation of {ntpd}. (Most important: they can
+    risk of disturbing the operation of ntpd. (Most important: they can
     be removed to free space for new data produced.)
 +
 Note that this command can be sent from the
@@ -311,7 +311,7 @@ Note that this command can be sent from the
       +none+;;
         The file set is actually a single plain file.
       +pid+;;
-        One element of file set is used per incarnation of a {ntpd}
+        One element of file set is used per incarnation of a ntpd
         server. This type does not perform any changes to file set
         members during runtime, however it provides an easy way of
         separating files belonging to different {ntpdman} server
@@ -356,7 +356,7 @@ Note that this command can be sent from the
       specified, a hard link from the current file set element to a file
       without suffix is created. When there is already a file with this
       name and the number of links of this file is one, it is renamed
-      appending a dot, the letter _C_, and the pid of the {ntpd} server
+      appending a dot, the letter _C_, and the pid of the ntpd server
       process. When the number of links is greater than one, the file is
       unlinked. This allows the current file to be accessed by a
       constant name.

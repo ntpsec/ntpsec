@@ -48,7 +48,7 @@ checked:
 
 If set, the values in the record (clockTimeStampSec, clockTimeStampUSec,
 receiveTimeStampSec, receiveTimeStampUSec, leap, precision) are passed
-to +{ntpd}+, and +valid+ is cleared and +count+ is bumped.
+to +ntpd+, and +valid+ is cleared and +count+ is bumped.
 
 If not set, +count+ is bumped.
 
@@ -60,10 +60,10 @@ If set, the +count+ field of the record is remembered, and the values in
 the record (clockTimeStampSec, clockTimeStampUSec, receiveTimeStampSec,
 receiveTimeStampUSec, leap, precision) are read. Then, the remembered
 +count+ is compared to current value of +count+ now in the record. If
-both are equal, the values read from the record are passed to _{ntpd}_. If
+both are equal, the values read from the record are passed to _ntpd_. If
 they differ, another process has modified the record while it was read
 out (was not able to produce this case), and failure is reported to
-_{ntpd}_. The +valid+ flag is cleared and +count+ is bumped.
+_ntpd_. The +valid+ flag is cleared and +count+ is bumped.
 
 If not set, +count+ is bumped
 
@@ -82,7 +82,7 @@ discarded. This check is disabled when _flag1_ is set to 1.
 == GPSD ==
 
 http://www.catb.org/gpsd/[_GPSD_] knows how to talk to many GPS devices.
-It can work with _{ntpd}_ through the SHM driver.
+It can work with _ntpd_ through the SHM driver.
 
 The _GPSD_ man page suggests setting minpoll and maxpoll to 4. That was
 an attempt to reduce jitter. The SHM driver was fixed (ntp-4.2.5p138) to
@@ -91,11 +91,11 @@ suggestion is no longer reasonable.
 
 *Note:* The _GPSD_ client driver uses the _GPSD_ client
 protocol to connect and talk to _GPSD_, but using the SHM driver is the
-ancient way to have _GPSD_ talk to _{ntpd}_. There are some tricky points
+ancient way to have _GPSD_ talk to _ntpd_. There are some tricky points
 when using the SHM interface to interface with _GPSD_, because _GPSD_
 will use two SHM clocks, one for the serial data stream and one for the
 PPS information when available. Receivers with a loose/sloppy timing
-between PPS and serial data can easily cause trouble here because _{ntpd}_
+between PPS and serial data can easily cause trouble here because _ntpd_
 has no way to join the two data streams and correlate the serial data
 with the PPS events.
 
@@ -107,9 +107,9 @@ common to all clockstats records.
 
 The 4th field is the number of second ticks since the last poll. The 5th
 field is the number of good data samples found. The last 64 will be used
-by _{ntpd}_. The 6th field is the number of sample that didn't have valid
+by _ntpd_. The 6th field is the number of sample that didn't have valid
 data ready. The 7th field is the number of bad samples. The 8th field is
-the number of times the mode 1 info was update while _{ntpd}_ was
+the number of times the mode 1 info was update while _ntpd_ was
 trying to grab a sample.
 
 Here is a sample showing the GPS reception fading out:
@@ -131,7 +131,7 @@ Here is a sample showing the GPS reception fading out:
 ------------------------------------------------
 
 The clock identification is normally the driver type and unit, but if
-your {ntpd} was built in strict Classic compatibility mode it will
+your ntpd was built in strict Classic compatibility mode it will
 be a magic clock address expressing the same information in a more
 opaque way.
 
@@ -209,14 +209,14 @@ with funny characters for units > 9.)
 Public access means a permission set of 0666, while private access
 creates the mapping with a permission set of 0600.
 
-{ntpd} is started as root on most POSIX-like operating systems and uses
+ntpd is started as root on most POSIX-like operating systems and uses
 the setuid/setgid system API to run under reduced rights once the
 initial setup of the process is done. One consequence out of this is
 that the allocation of SHM segments must be done early during the clock
 setup. The actual polling of the clock is done as the run-time user;
 deferring the creation of the SHM segment to this point will create a
 SHM segment owned by the runtime-user account. The internal structure of
-{ntpd} does not permit the use of a refclock option if this is to be avoided;
+ntpd does not permit the use of a refclock option if this is to be avoided;
 this is the reason why a mode bit is used for the configuration of a
 public segment.
 

@@ -60,7 +60,7 @@ distribution.
 [[differences]]
 == Differences from NTP Classic ==
 
-The design objectives of this distribution, {project-fullname}, are in
+The design objectives of this distribution, NTPsec, are in
 many ways a break with NTP's past.  We have deliberately jettisoned
 support for ancient legacy hardware and operating systems in order to
 ship code that is security-hardened, simpler, drastically less bulky
@@ -85,7 +85,7 @@ few will be user-visible.
 
 * The deprecated ntpdc utility, long a chronic locus of security
   vulnerabilities, has been removed.  Its function has been merged
-  into +{ntpq}+.
+  into +ntpq+.
 
 * As noted above, Autokey is not supported; that code has been
   removed, as it was chronically prone to security vulnerabilties.
@@ -94,7 +94,7 @@ few will be user-visible.
   just an alias for keyword server.  Incoming peer packets are ignored.
 
 * The deprecated and vulnerability-prone ntpdate program has been
-  replaced with a shell wrapper around {ntpdig}.  Its -e and -p
+  replaced with a shell wrapper around ntpdig.  Its -e and -p
   options are not implemented. It is no longer documented, but can be
   found in the util/ directory of the source distribution.
 
@@ -164,12 +164,12 @@ few will be user-visible.
   generic-driver refclocks.  If the software was compiled with the
   --enable-classic-mode switch, the foregoing is reversed.
 
-* The +sntp+ program has been renamed +{ntpdig}+ in order to make
+* The +sntp+ program has been renamed +ntpdig+ in order to make
   NTP installables have a uniform name prefix and take up less
-  namespace. Also, +ntp-keygen+ is now +{ntpkeygen}+, +ntp-wait+
-  is {ntpwait}, and +update-leap+ is now +{ntpleapfetch}+.
+  namespace. Also, +ntp-keygen+ is now +ntpkeygen+, +ntp-wait+
+  is ntpwait, and +update-leap+ is now +ntpleapfetch+.
 
-* A new utility, +{ntpfrob}+, collects several small diagnostic functions
+* A new utility, +ntpfrob+, collects several small diagnostic functions
   for reading and tweaking the local clock hardware, including reading
   the clock tick rate, precision, and jitter. Part of it formerly
   traveled as +tickadj+.
@@ -181,13 +181,13 @@ few will be user-visible.
   usable.
 
 * There is a new data-visualization tool,
-  link:ntpviz.html[+{ntpviz}+], which can produce various useful and
+  link:ntpviz.html[+ntpviz+], which can produce various useful and
   interesting plots from the NTP statistics logs.  These should assist in
   monitoring a time-server's performance, fixing configuration
   problems, and identifying noise sources in network weather and
   elsewhere.
 
-* Because +{ntpviz}+ exists, a number of ancient and poorly-documented
+* Because +ntpviz+ exists, a number of ancient and poorly-documented
   scripts in awk, Perl, and S, formerly used for making statistical
   summaries, have been removed from the distribution in order to
   reduce overall maintainance burden and complexity. If you miss any
@@ -227,22 +227,22 @@ few will be user-visible.
 
 * The shortname of --help options is now -h, not -?
 
-* An instance of +{ntpq}+ built from the {project-shortname} code
+* An instance of +ntpq+ built from the NTPsec code
   querying a legacy NTP daemon will not automatically display
   peers with 127.127.127.t.u addresses as refclocks; that assumption
-  has been removed from the {project-shortname} code as part of
+  has been removed from the NTPsec code as part of
   getting it fully IPv6-ready.
 
 [[platforms]]
 == Supported platforms ==
 
-{project-shortname} supports all operating systems conforming to
+NTPsec supports all operating systems conforming to
 POSIX.1-2001 and ISO/IEC 9899:1999 (aka C99).  Primary platforms
 include Linux and the *BSD family; any reasonably modern proprietary
 Unix will also serve.  The OS must have either a Linux-like
 adjtimex(2) call or a BSD-like ntp_adjtime(2) call.
 
-Legacy Windows support has been removed from the {project-shortname}
+Legacy Windows support has been removed from the NTPsec
 codebase. Future Windows support will be conditional on the quality
 of POSIX/C99 emulation environments such as Cygwin and/or the support
 for Linux binary execution in Windows 10 and later.
@@ -303,7 +303,7 @@ distribution root.
 Like other things in modern Internet life, NTP problems can be
 devilishly intricate. This distribution includes a number of utilities
 designed to identify and repair problems using an integrated management
-protocol supported by the link:ntpq.html[+{ntpq}+] utility program.
+protocol supported by the link:ntpq.html[+ntpq+] utility program.
 
 The link:debug.html[NTP Debugging Techniques] and link:hints.html[Hints
 and Kinks] pages contain useful information for identifying problems and
@@ -333,7 +333,7 @@ Computer Network Time Synchronization] page. Background information,
 bibliography and briefing slides suitable for presentations are on the
 {millshome}ntp.html[Network Time
 Synchronization Research Project] page. Additional information is at
-the {project-shortname} web site {project-weblink}.
+the NTPsec web site {project-weblink}.
 
 '''''
 
