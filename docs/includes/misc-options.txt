@@ -42,8 +42,8 @@ and that file system links, symbolic or otherwise, should be avoided.
 
   +auth+;;
     Enables the server to synchronize with unconfigured peers only if
-    the peer has been correctly authenticated using either public key or
-    private key cryptography. The default for this flag is +enable+.
+    the peer has been correctly authenticated. The default for this
+    flag is +enable+.
   +bclient+;;
     Enables the server to listen for a message from a broadcast or
     multicast server, as in the +multicastclient+ command with default

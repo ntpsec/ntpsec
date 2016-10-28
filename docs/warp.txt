@@ -39,9 +39,7 @@ Research Project] web site.
 NTP time synchronization services are widely available in the public
 Internet. The public NTP subnet currently includes several thousand
 servers in most countries and on every continent of the globe, including
-Antarctica, and sometimes in space and on the sea floor. These servers
-support, directly or indirectly, a total population estimated at over 25
-million computers in the global Internet.
+Antarctica, and sometimes in space and on the sea floor.
 
 The NTP subnet operates with a hierarchy of levels, where each level is
 assigned a number called the stratum. Stratum 1 (primary) servers at the
@@ -97,22 +95,24 @@ link:leap.html[Leap Second Processing] page.
 
 image:pic/time1.gif[]
 
-Figure 1. NTP Data Formats
+Figure 1. NTP Timestamp format
 
-Figure 1 shows two NTP time formats, a 64-bit _timestamp_ format and a
-128-bit _datestamp_ format. The datestamp format is used internally,
-while the timestamp format is used in packet headers exchanged between
-clients and servers. The timestamp format spans 136 years, called an
-_era_. The current era began on 1 January 1900, while the next one
-begins in 2036. Details on these formats and conversions between them
-are in the white paper {millshome}y2k.html[The NTP
-Era and Era Numbering]. However, the NTP protocol will synchronize
-correctly, regardless of era, as long as the system clock is set
-initially within 68 years of the correct time. Further discussion on
-this issue is in the white paper
-{millshome}time.html[NTP Timestamp Calculations].
-Ordinarily, these formats are not seen by application programs, which
-convert these NTP formats to native formats.
+Figure 1 shows the timestamp format used in packet headers exchanged
+between clients and servers.  Ordinarily, this timestamp format is not
+seen by application programs, which converts it to native formats such
+as ISO8601 or RFC822-style Gregorian-calendar dates.
+
+The timestamp format spans 136 years, called an _era_. Conceptually,
+it is helpful to think of an absolute dates as being a tuple of one of
+these timestamps and an era number. The current era, era 0, began on 1
+January 1900, while the next one begins in 2036.
+
+Details on converting between era-timestamp pairs and timestamps are
+in the white paper {millshome}y2k.html[The NTP Era and Era
+Numbering]. The NTP protocol will synchronize correctly, regardless of
+era, as long as the system clock is set initially within 68 years (a
+half-era) of the correct time. Further discussion on this issue is in
+the white paper {millshome}time.html[NTP Timestamp Calculations].
 
 [[arch]]
 == 3. Architecture and Algorithms ==
@@ -132,7 +132,7 @@ server using the _on-wire protocol_ described in the white paper
 the NTP On-Wire Protocols]. The protocol is resistant to lost, replayed
 or spoofed packets.
 
-The poll process sends NTP packets at intervals ranging from 8 s to 36
+The poll process sends NTP packets at intervals ranging from 1 s to 36
 hr. The intervals are managed as described on the link:poll.html[Poll
 Process] page to maximize accuracy while minimizing network load. The
 peer process receives NTP packets and performs the packet sanity tests
