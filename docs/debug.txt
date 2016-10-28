@@ -17,15 +17,15 @@ include::includes/install.txt[]
 
 == Initial Startup ==
 
-This page discusses +{ntpd}+ program monitoring and debugging techniques
-using the link:ntpq.html[+{ntpq}+ - standard NTP query program], either
-on the local server or from a remote machine. The +{ntpq}+ program
+This page discusses +ntpd+ program monitoring and debugging techniques
+using the link:ntpq.html[+ntpq+ - standard NTP query program], either
+on the local server or from a remote machine. The +ntpq+ program
 implements the management functions specified in the NTP specification
 https://tools.ietf.org/html/rfc5905[RFC-5905].  In addition, the
 program can be used to send remote configuration commands to the
 server.
 
-The +{ntpd}+ daemon can operate in two modes, depending on the presence
+The +ntpd+ daemon can operate in two modes, depending on the presence
 of the +-n+ command-line option. Without the option the daemon
 detaches from the controlling terminal and proceeds autonomously. With
 one or more +-d+ options the daemon generates special trace output
@@ -47,7 +47,7 @@ precision value. Event messages at startup and during regular operation
 are sent to the optional +protostats+ monitor file, as described on the
 link:decode.html[Event Messages and Status Words] page. These and other
 error messages are sent to the system log, as described on the
-link:msyslog.html[+{ntpd}+ System Log Messages] page. In real emergencies
+link:msyslog.html[+ntpd+ System Log Messages] page. In real emergencies
 the daemon will sent a terminal error message to the system log and then
 cease operation.
 
@@ -74,7 +74,7 @@ takes 900 sec during which the time is not disciplined. When calibration
 is complete, the daemon creates the frequency file and enters normal
 mode to amortize whatever residual offset remains.
 
-The +{ntpq}+ commands +pe+, +as+ and +rv+ are normally sufficient to
+The +ntpq+ commands +pe+, +as+ and +rv+ are normally sufficient to
 verify correct operation and assess nominal performance. The
 link:ntpq.html#pe[+pe+] command displays a list showing the DNS name or
 IP address for each association along with selected status and
@@ -133,7 +133,7 @@ select threshold, the server is considered invalid.
 
 Sometimes the time distribution of errors can be revealing. It's a
 good idea to look occasionally at the plots produced by
-link:ntpviz.html[{ntpviz}].
+link:ntpviz.html[ntpviz].
 
 == Large Frequency Errors ==
 
@@ -141,10 +141,10 @@ The frequency tolerance of computer clock oscillators varies widely,
 sometimes above 500 PPM. While the daemon can handle frequency errors up
 to 500 PPM, or 43 seconds per day, values much above 100 PPM reduce the
 headroom, especially at the lowest poll intervals. To determine the
-particular oscillator frequency, start +{ntpd}+ using the +noselect+
+particular oscillator frequency, start +ntpd+ using the +noselect+
 option with the +server+ configuration command.
 
-Record the time of day and offset displayed by the +{ntpq}+
+Record the time of day and offset displayed by the +ntpq+
 link:ntpq.html#pe[+pe+] command. Wait for an hour or so and record the
 time of day and offset. Calculate the frequency as the offset difference
 divided by the time difference. If the frequency is much above 100 PPM,
@@ -155,7 +155,7 @@ file.
 
 == Access Controls ==
 
-Provisions are included in +{ntpd}+ for access controls which deflect
+Provisions are included in +ntpd+ for access controls which deflect
 unwanted traffic from selected hosts or networks. The controls described
 on the link:accopt.html[Access Control Options] include detailed packet
 filter operations based on source address and address mask. Normally,
@@ -181,20 +181,20 @@ network delays during some period of the day and moderate to high delays
 during other periods. Often the delay on one direction of transmission
 dominates, which can result in large time offset errors, sometimes in
 the range up to a few seconds. It is not usually convenient to run
-+{ntpd}+ throughout the day in such scenarios, since this could result in
++ntpd+ throughout the day in such scenarios, since this could result in
 several time steps, especially if the condition persists for greater
 than the stepout threshold.
 
-Specific provisions have been built into +{ntpd}+ to cope with these
+Specific provisions have been built into +ntpd+ to cope with these
 problems. The scheme is called "huff-'n-puff and is described on the
 link:miscopt.html[Miscellaneous Options] page. An alternative approach
 in such scenarios is first to calibrate the local clock frequency error
-by running +{ntpd}+ in continuous mode during the quiet interval and let
-it write the frequency to the +ntp.drift+ file. Then, run +{ntpd} -q+ from
+by running +ntpd+ in continuous mode during the quiet interval and let
+it write the frequency to the +ntp.drift+ file. Then, run +ntpd -q+ from
 a cron job each day at some time in the quiet interval. In systems with
 the nanokernel or microkernel performance enhancements, including
 Solaris, Tru64, Linux and FreeBSD, the kernel continuously disciplines
-the frequency so that the residual correction produced by +{ntpd}+ is
+the frequency so that the residual correction produced by +ntpd+ is
 usually less than a few milliseconds.
 
 == Cryptographic Authentication ==
@@ -205,12 +205,12 @@ cryptography servers and clients share session keys contained in a
 secret key file In public key cryptography, which requires the OpenSSL
 software library, the server has a private key, never shared, and a
 public key with unrestricted distribution. The cryptographic media
-required are produced by the link:ntpkeygen.html[+{ntpkeygen}+] program.
+required are produced by the link:ntpkeygen.html[+ntpkeygen+] program.
 
 Problems with symmetric key authentication are usually due to mismatched
 keys or improper use of the +trustedkey+ command. A simple way to check
 for problems is to use the trace facility, which is enabled using the
-+{ntpd} -d+ command line. As each packet is received a trace line is
++ntpd -d+ command line. As each packet is received a trace line is
 displayed which shows the authentication status in the +auth+ field. A
 status of 1 indicates the packet was successful authenticated; otherwise
 it has failed.
@@ -227,25 +227,29 @@ easily strike up an association and inject false time values.
 
 == Debugging Checklist ==
 
-If the +{ntpq}+ or program does not show that messages are being
+If the +ntpq+ or program does not show that messages are being
 received by the daemon or that received messages do not result in
 correct synchronization, verify the following:
 
 1.  Verify the +/etc/services+ file host machine is configured to accept
 UDP packets on the NTP port 123. NTP is specifically designed to use UDP
 and does not respond to TCP.
-2.  Check the system log for +{ntpd}+ messages about configuration errors,
+
+2.  Check the system log for +ntpd+ messages about configuration errors,
 name-lookup failures or initialization problems. Common system log
-messages are summarized on the link:msyslog.html[+{ntpd}+ System Log
-Messages] page. Check to be sure that only one copy of +{ntpd}+ is
+messages are summarized on the link:msyslog.html[+ntpd+ System Log
+Messages] page. Check to be sure that only one copy of +ntpd+ is
 running.
+
 3.  Verify using +ping+ or other utility that packets actually do make
 the round trip between the client and server. Verify using +nslookup+ or
 other utility that the DNS server names do exist and resolve to valid
 Internet addresses.
+
 4.  Check that the remote NTP server is up and running. The usual
 evidence that it is not is a +Connection refused+ message.
-5.  Using the +{ntpq}+ program, verify that the packets received and
+
+5.  Using the +ntpq+ program, verify that the packets received and
 packets sent counters are incrementing. If the sent counter does not
 increment and the configuration file includes configured servers,
 something may be wrong in the host network or interface configuration.
@@ -253,25 +257,28 @@ If this counter does increment, but the received counter does not
 increment, something may be wrong in the network or the server NTP
 daemon may not be running or the server itself may be down or not
 responding.
+
 6.  If both the sent and received counters do increment, but the +reach+
-values in the +pe+ billboard with +{ntpq}+ continues to show zero,
+values in the +pe+ billboard with +ntpq+ continues to show zero,
 received packets are probably being discarded for some reason. If this
 is the case, the cause should be evident from the +flash+ variable as
-discussed above and on the +{ntpq}+ page. It could be that the server has
+discussed above and on the +ntpq+ page. It could be that the server has
 disabled access for the client address, in which case the +refid+ field
-in the +{ntpq} pe+ billboard will show a kiss code. See earlier on this
+in the +ntpq pe+ billboard will show a kiss code. See earlier on this
 page for a list of kiss codes and their meaning.
+
 7.  If the +reach+ values in the +pe+ billboard show the servers are
 alive and responding, note the tattletale symbols at the left margin,
 which indicate the status of each server resulting from the various
 grooming and mitigation algorithms. The interpretation of these symbols
-is discussed on the +{ntpq}+ page. After a few minutes of operation, one
+is discussed on the +ntpq+ page. After a few minutes of operation, one
 or another of the reachable server candidates should show a * tattletale
 symbol. If this doesn't happen, the intersection algorithm, which
 classifies the servers as truechimers or falsetickers, may be unable to
 find a majority of truechimers among the server population.
+
 8.  If all else fails, see the FAQ and/or the discussion and briefings
-at the {project-page}.
+at the project website.
 
 '''''
 

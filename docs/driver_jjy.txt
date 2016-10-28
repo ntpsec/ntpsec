@@ -343,7 +343,7 @@ clock, and the modem into the +clockstats+ file.
 
 [subs="normal"]
 ----------------------------------------------------------------
-statsdir /var/log/{ntpd}/
+statsdir /var/log/ntpd/
 filegen clockstats file clockstats type day enable
 ----------------------------------------------------------------
 

@@ -44,7 +44,7 @@ The PPS source can be connected via a serial or parallel port, depending
 on the hardware and operating system. A serial port can be dedicated to
 the PPS source or shared with another device; however, if dedicated the
 data leads should not be connected, as noise or unexpected signals can
-cause +{ntpd}+ to exit.
+cause +ntpd+ to exit.
 
 A radio clock is usually connected via a serial port and the PPS source
 connected via a level converter to the data carrier detect (DCD) pin
@@ -161,7 +161,7 @@ If clockstats is enabled, the driver will log a few counters.  Examples:
 |=============================================================================
 
 The clock identification is normally the driver type and unit, but if
-your {ntpd} was built in strict Classic compatibility mode it will
+your ntpd was built in strict Classic compatibility mode it will
 be a magic clock address expressing the same information in a more
 opaque way.
 

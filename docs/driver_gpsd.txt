@@ -212,7 +212,7 @@ since the last poll.
   using automatic mode (mode 2).
 +flag3 {0 | 1}+::
   _[Primary Unit]_ If set, [underline]#disables# the log throttle. Useful when
-  tracking problems in the interaction between _GPSD_ and _{ntpd}_, since
+  tracking problems in the interaction between _GPSD_ and _ntpd_, since
   now all error events are logged. Persistent/recurrent errors can
   easily fill up the log, so this should only be enabled during bug
   hunts.

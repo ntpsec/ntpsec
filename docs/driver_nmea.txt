@@ -131,7 +131,7 @@ and
   filters.
 
 The driver uses 9600 bits per second by default, unless
-{project-shortname} was built in Classic strict-compatiblity in which
+NTPsec was built in Classic strict-compatibility mode, in which
 case the old default of 4800bps is used. Faster bitrates can be
 selected using the +baud+ option.
 
@@ -147,7 +147,7 @@ jitter by reducing variation in transmission times.
 == Monitor Data ==
 
 The last GPS sentence that is accepted or rejected is written to the
-clockstats file and available with +{ntpq} -c clockvar+. (Logging the
+clockstats file and available with +ntpq -c clockvar+. (Logging the
 rejected sentences lets you see/debug why they were rejected.) Filtered
 sentences are not logged.
 
@@ -178,7 +178,7 @@ example:
 |=============================================================================
 
 The clock identification in field 3 is normally the driver type and
-unit, but if your {ntpd} was built in strict Classic compatibility
+unit, but if your ntpd was built in strict Classic compatibility
 mode it will be a magic clock address expressing the same information
 in a more opaque way.
 
@@ -236,7 +236,7 @@ switched on by sending the following string.
   If PPS signal processing is enabled, capture the pulse on the rising
   edge if 0 (default); capture on the falling edge if 1.
 +flag3 {0 | 1}+::
-  If PPS signal processing is enabled, use the +{ntpd}+ clock discipline
+  If PPS signal processing is enabled, use the +ntpd+ clock discipline
   if 0 (default); use the kernel discipline if 1.
 +flag4 {0 | 1}+::
   Obscures location in timecode: 0 for disable (default), 1 for enable.

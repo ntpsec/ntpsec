@@ -16,12 +16,12 @@ include::includes/install.txt[]
 
 '''''
 
-The link:ntpq.html[+{ntpq}+] utility program
+The link:ntpq.html[+ntpq+] utility program
 can be used to debug reference clocks, either on the server itself or
 from another machine elsewhere in the network. The server is compiled,
 installed and started using the configuration file described in the
-link:ntpd.html[+{ntpd}+] page and its dependencies. If the clock appears
-in the +{ntpq}+ utility and +pe+ command, no errors have occurred and the
+link:ntpd.html[+ntpd+] page and its dependencies. If the clock appears
+in the +ntpq+ utility and +pe+ command, no errors have occurred and the
 daemon has started, opened the devices specified and waiting for peers
 and radios to come up. If not, the first thing to look for are error
 messages on the system log. These are usually due to improper
@@ -39,7 +39,7 @@ occurring during installation are due to problems such as miswired
 connectors or improperly configured device links at this stage.
 
 If RS232 messages are getting to and from the clock, the variables of
-interest can be inspected using the +{ntpq}+ program and various commands
+interest can be inspected using the +ntpq+ program and various commands
 described on the documentation page. First, use the +pe+ and +as+
 commands to display billboards showing the peer configuration and
 association IDs for all peers, including the radio clock. The assigned
@@ -62,12 +62,12 @@ timecode to be sure it matches what the driver expects. This may require
 consulting the clock hardware reference manual, which is probably pretty
 dusty at this stage.
 
-The +{ntpq}+ utility program can be used for detailed inspection of the
+The +ntpq+ utility program can be used for detailed inspection of the
 clock driver status. The most useful are the +clockstat+ and +clkbug+
 commands described in the document page. While these commands permit
 getting quite personal with the particular driver involved, their use is
 seldom necessary, unless an implementation bug shows up. If all else
-fails, turn on the debugging trace using two +-d+ flags in the +{ntpd}+
+fails, turn on the debugging trace using two +-d+ flags in the +ntpd+
 startup command line. Most drivers will dump status at every received
 message in this case. While the displayed trace can be intimidating,
 this provides the most detailed and revealing indicator of how the
@@ -77,7 +77,7 @@ Most drivers write a message to the +clockstats+ file as each timecode
 or surrogate is received from the radio clock. By convention, this is
 the last ASCII timecode (or ASCII gloss of a binary-coded one) received
 from the radio clock. This file is managed by the +filegen+ facility
-described in the +{ntpd}+ page and requires specific commands in the
+described in the +ntpd+ page and requires specific commands in the
 configuration file. This forms a highly useful record to discover
 anomalies during regular operation of the clock. The scripts included in
 the +./scripts/stats+ directory can be run from a +cron+ job to collect

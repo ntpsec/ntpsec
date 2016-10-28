@@ -14,9 +14,9 @@ As of 2015 Rockwell Jupiter chips are no longer generally available
 and have not been manufactured for many years; they will be found only
 in remaindered and legacy equipment.
 
-This refclock is deprecated and obsolete. The {project-shortname}
-maintainers plan to remove it in a future release.  If you have a
-requirement for it, please make this known to us.
+This refclock is deprecated and obsolete. The NTPsec maintainers plan
+to remove it in a future release.  If you have a requirement for it,
+please make this known to us.
 
 == Description ==
 

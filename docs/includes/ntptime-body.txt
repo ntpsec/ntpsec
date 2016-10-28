@@ -4,7 +4,7 @@
 
 == Synopsis ==
 [verse]
-{ntptime} [ +-chr+ ] [ +-e+ 'est_error' ] [ +-f+ 'frequency' ] [-j]
+ntptime [ +-chr+ ] [ +-e+ 'est_error' ] [ +-f+ 'frequency' ] [-j]
         [ +-m+ 'max_error' ] [ +-o+ 'offset' ] [ +-s+ 'status' ]
 	[ +-t+ 'time_constant']
 
@@ -16,7 +16,7 @@ timekeeping data are displayed.  If not, a disappointment is
 displayed.  See the kernel page file in the HTML documentation in
 distribution for further details.
 
-A similar display can be obtained using the +{ntpq}+ program
+A similar display can be obtained using the +ntpq+ program
 and +kerninfo+ command.
 
 This program is useful only with kernels featuring the ntp_adjtime(2)
@@ -26,7 +26,7 @@ Kernel Model for Precision Timekeeping] page,
 == Options ==
 
 +-c+::
-  Display the execution time of +{ntptime}+ itself.
+  Display the execution time of +ntptime+ itself.
 +-e+ 'est_error'::
   Specify estimated error, in microseconds.
 +-f+ 'frequency'::

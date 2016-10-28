@@ -46,8 +46,8 @@ For cron-friendly behavior, define CRONJOB=1 in the crontab.
   appear in combination with any of the following options: +-4+.
 
 +-c+::
-  Command to restart {ntpd} after installing a new file. Without such a
-  command. {ntpd} checks the file daily.
+  Command to restart ntpd after installing a new file. Without such a
+  command. ntpd checks the file daily.
 
 +-e+ 'expiry'::
   Refresh the leapfile this long before it expires.

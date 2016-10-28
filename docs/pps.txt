@@ -33,19 +33,18 @@ from GPSes have a similar limit.  Some are worse; the SiRF line of
 consumer-grade GPSes, for example, has a long-period wander of over
 100 ms.
 
-Using carefully crafted averaging techniques, the {project-shortname}
-algorithms can whittle this down to a few tens of
-microseconds. However, some time sources produce a pulse-per-second
-(PPS) signal which can be used to improve the accuracy to a few
-microseconds. This page describes the hardware and software necessary
-for {ntpd} to use the PPS signal.
+Using carefully crafted averaging techniques, the NTP algorithms can
+whittle this down to a few tens of microseconds. However, some time
+sources produce a pulse-per-second (PPS) signal which can be used to
+improve the accuracy to a few microseconds. This page describes the
+hardware and software necessary for ntpd to use the PPS signal.
 
 The simplest way to collect a PPS signal is from a GPS over a serial
 handshake pin, typically DCD; Linux supports this.  On FreeBSD systems
 (with the PPS_SYNC and pps kernel options) it can be connected
 directly to the ACK pin of a parallel port. Clock radios are more
 complicated; their PPS signal levels are usually incompatible with
-serial port interface signals.  Note that {project-shortname} no
+serial port interface signals.  Note that NTPsec no
 longer supports connection via the RD pin of a serial port.
 
 [[opsys]]

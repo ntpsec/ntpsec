@@ -25,13 +25,13 @@ include::includes/misc.txt[]
 == When Not to Write a Driver ==
 
 If the device you are trying to support is an exotic GPS, you should
-probably not write an +{ntpd}+ driver for it.  Instead, check to see
-if it is already supported by {GPSD}, a project with which
-{project-shortname} cooperates closely.  The GPSD people are
-specialists in managing GPSes and better at it than we are,
-supporting a much broader range of devices, and GPSD is designed
-to feed clock samples to +{ntpd}+ from any of them.  If you need
-to write a driver for a GPS, they'll take it and should have it.
+probably not write an +ntpd+ driver for it.  Instead, check to see if
+it is already supported by {GPSD}, a project with which NTPsec
+cooperates closely.  The GPSD people are specialists in managing GPSes
+and better at it than we are, supporting a much broader range of
+devices, and GPSD is designed to feed clock samples to +ntpd+ from any
+of them.  If you need to write a driver for a GPS, they'll take it and
+should have it.
 
 If you have a non-GPS time source (like a time radio or GPSDO) that
 you want to support, consider link:generic_howto.html[writing a mode
@@ -114,7 +114,7 @@ is used to distinguish multiple instances of clocks of the same type.
 These addresses used to be exposed as part of the refclock
 configuration syntax, but are no longer.  Nothing in ntpd now actually
 requires this form of address for clocks, but it is still generated
-so as not to hand surprises to legacy +{ntpq}+ instances that still make
+so as not to hand surprises to legacy +ntpq+ instances that still make
 the assumption.
 
 Most clocks require a serial or parallel port or special bus peripheral.
@@ -159,12 +159,12 @@ decidedly beyond the scope of this page.
   The +./libntp/clktype+ array is used by certain display functions. A
   unique short-form name of the driver should be entered together with
   its assigned identification code.
-+./{ntpd}/ntp_control.c+::
++./ntpd/ntp_control.c+::
   The +clocktypes+ array is used for certain control message displays
   functions. It should be initialized with the reference clock class
   assigned to the driver, as per the NTP specification RFC-1305. See the
   +./include/ntp_control.h+ header file for the assigned classes.
-+./{ntpd}/refclock_conf.c+::
++./ntpd/refclock_conf.c+::
   This file contains a list of external structure definitions which are
   conditionally defined. A new set of entries should be installed
   similar to those already in the table. The +refclock_conf+ array is a

@@ -11,9 +11,9 @@ Features: tty_clk
 
 == Deprecation warning ==
 
-This refclock is deprecated and obsolete. The {project-shortname}
-maintainers plan to remove it in a future release.  If you have a
-requirement for it, please make this known to us.
+This refclock is deprecated and obsolete. The NTPsec maintainers plan
+to remove it in a future release.  If you have a requirement for it,
+please make this known to us.
 
 == Description ==
 

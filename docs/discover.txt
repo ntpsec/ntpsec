@@ -310,7 +310,7 @@ Some administrators prefer to avoid running {ntpdman} continuously and
 run {ntpdman} +-q+ as a cron job. In either case the servers must be
 configured in advance and the program fails if none are available when
 the cron job runs. A really slick application of manycast is with
-{ntpd} +-q+. The program wakes up, scans the local landscape looking
+ntpd +-q+. The program wakes up, scans the local landscape looking
 for the usual suspects, selects the best from among the rascals, sets
 the clock and then departs. Servers do not have to be configured in
 advance and all clients throughout the network can have the same
@@ -350,7 +350,7 @@ principle, it is possible to use a configuration file containing a
 single line +pool   pool.ntp.org+. The
 http://www.pool.ntp.org/en/use.html[NTP Pool Project] offers
 instructions on using the pool with the +server+ command, which is
-suboptimal but works with older versions of +{ntpd}+ predating the +pool+
+suboptimal but works with older versions of +ntpd+ predating the +pool+
 command. Consider replacing the multiple +server+
 commands in their example with a single +pool+ command.
 

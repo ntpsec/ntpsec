@@ -70,7 +70,7 @@ Burnicki is:
 -----------------------------------------------------------------------
 
 The following individuals have contributed significantly to
-{project-shortname}:
+NTPsec:
 
 * mailto:esr@thyrsus.com[Eric S. Raymond <esr@thyrsus.com>] Massive
   code reduction/refactoring/hardening, documentation cleanup and update,
