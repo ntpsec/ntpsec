@@ -145,7 +145,7 @@ particular oscillator frequency, start +ntpd+ using the +noselect+
 option with the +server+ configuration command.
 
 Record the time of day and offset displayed by the +ntpq+
-link:ntpq.html#pe[+pe+] command. Wait for an hour or so and record the
+link:ntpq.html#peer[+peer+] command. Wait for an hour or so and record the
 time of day and offset. Calculate the frequency as the offset difference
 divided by the time difference. If the frequency is much above 100 PPM,
 the link:ntptickadj.html[{ntptickadj}] program might be useful to adjust the
@@ -164,7 +164,7 @@ tally counters. However, the server can be configured to send a
 "kiss-o'-death" (KoD) packet to the client either when explicitly
 configured or when cryptographic authentication fails for some reason.
 The client association is permanently disabled, the access denied bit
-(TEST4) is set in the flash variable and a message is sent to the system
+(BOGON4) is set in the flash variable and a message is sent to the system
 log.
 
 The access control provisions include a limit on the packet rate from a
@@ -242,9 +242,9 @@ Messages] page. Check to be sure that only one copy of +ntpd+ is
 running.
 
 3.  Verify using +ping+ or other utility that packets actually do make
-the round trip between the client and server. Verify using +nslookup+ or
-other utility that the DNS server names do exist and resolve to valid
-Internet addresses.
+the round trip between the client and server. Verify using +dig+,
++nslookup+ or other utility that the DNS server names do exist and
+resolve to valid Internet addresses.
 
 4.  Check that the remote NTP server is up and running. The usual
 evidence that it is not is a +Connection refused+ message.
@@ -259,15 +259,15 @@ daemon may not be running or the server itself may be down or not
 responding.
 
 6.  If both the sent and received counters do increment, but the +reach+
-values in the +pe+ billboard with +ntpq+ continues to show zero,
+values in the peers billboard with +ntpq+ continues to show zero,
 received packets are probably being discarded for some reason. If this
 is the case, the cause should be evident from the +flash+ variable as
 discussed above and on the +ntpq+ page. It could be that the server has
 disabled access for the client address, in which case the +refid+ field
-in the +ntpq pe+ billboard will show a kiss code. See earlier on this
+in the +ntpq+ peers billboard will show a kiss code. See earlier on this
 page for a list of kiss codes and their meaning.
 
-7.  If the +reach+ values in the +pe+ billboard show the servers are
+7.  If the +reach+ values in the peers billboard show the servers are
 alive and responding, note the tattletale symbols at the left margin,
 which indicate the status of each server resulting from the various
 grooming and mitigation algorithms. The interpretation of these symbols
