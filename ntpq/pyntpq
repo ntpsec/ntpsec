@@ -1061,6 +1061,7 @@ usage: pstats assocID
     def do_peers(self, line):
         "obtain and print a list of the server's peers [IP version]"
         self.__dopeers(showall=False, mode="peers")
+    do_pe = do_peers	# Old documentation hints this alias was common
 
     def help_peers(self):
         self.say("""\
@@ -1100,7 +1101,7 @@ usage: opeers
 
     def do_lopeers(self, line):
         "obtain and print a list of all peers and clients showing dstadr [IP version]"
-        self.__dopeers(showall=True, header=self.__opeerheader)
+        self.__dopeers(showall=True, mode="opeers")
 
     def help_lopeers(self):
         self.say("""\
