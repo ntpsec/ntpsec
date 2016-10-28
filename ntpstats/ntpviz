@@ -323,20 +323,26 @@ set rmargin 10
         last_time = 0
         if item2:
             for row in rows:
-                if 1024000 < row[0] - last_time:
-                    # data loss, add a break in the plot line
-                    plot_data += '\n'
-                last_time = row[0]
-                # fields: time, fld, and rtt
-                plot_data += row[1] + ' ' + row[item1] + ' ' + row[item2] + '\n'
+                try:
+                    if 1024000 < row[0] - last_time:
+                        # data loss, add a break in the plot line
+                        plot_data += '\n'
+                    # fields: time, fld, and rtt
+                    plot_data += row[1] + ' ' + row[item1] + ' ' + row[item2] + '\n'
+                    last_time = row[0]
+                except IndexError:
+                    pass
         else:
             for row in rows:
-                if 1024000 < row[0] - last_time:
-                    # data loss, add a break in the plot line
-                    plot_data += '\n'
-                last_time = row[0]
-                # fields: time, fld
-                plot_data += row[1] + ' ' + row[item1] + '\n'
+                try:
+                    if 1024000 < row[0] - last_time:
+                        # data loss, add a break in the plot line
+                        plot_data += '\n'
+                    # fields: time, fld
+                    plot_data += row[1] + ' ' + row[item1] + '\n'
+                    last_time = row[0]
+                except IndexError:
+                    pass
         # I know you want to replace the plot_data string concat with
         # or more join()s, do not do it, it is slower
         # next you'll want to try %-substitution.  it too is slower
