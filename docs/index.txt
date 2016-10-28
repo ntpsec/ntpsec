@@ -275,8 +275,7 @@ link:access.html[Access Control Support]::
   Describes the access control mechanisms that can be used to limit
   client access to various time and management functions.
 link:authentic.html[Authentication Support]::
-  Describes the authentication mechanisms for symmetric-key and
-  public-key cryptography.
+  Describes the cryptographic authentication mechanisms.
 link:rate.html[Rate Management]::
   Describes the principles of rate management to minimize network load
   and defend against DoS attacks.

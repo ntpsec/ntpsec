@@ -59,32 +59,30 @@ discarded.
 The +auth+ flag controls whether new associations or remote
 configuration commands require cryptographic authentication. This flag
 can be set or reset by the +enable+ and +disable+ commands and also by
-remote configuration commands sent by a {ntpqman} program
-running in another machine. If this flag is enabled, which is the
-default case, new broadcast client and symmetric passive associations
-and remote configuration commands must be cryptographically
-authenticated using either symmetric key or public key cryptography. If
+remote configuration commands sent by a {ntpqman} program running in
+another machine. If this flag is enabled, which is the default case,
+new broadcast client and symmetric passive associations and remote
+configuration commands must be cryptographically authenticated. If
 this flag is disabled, these operations are effective even if not
-cryptographic authenticated. It should be understood that operating with
-the +auth+ flag disabled invites a significant vulnerability where a rogue
-hacker can masquerade as a falseticker and seriously disrupt system
-timekeeping. It is important to note that this flag has no purpose other
-than to allow or disallow a new association in response to new broadcast
-and symmetric active messages and remote configuration commands and, in
-particular, the flag has no effect on the authentication process
-itself.
+cryptographic authenticated. It should be understood that operating
+with the +auth+ flag disabled invites a significant vulnerability
+where a cracker can masquerade as a falseticker and seriously disrupt
+system timekeeping. It is important to note that this flag has no
+purpose other than to allow or disallow a new association in response
+to new broadcast and symmetric active messages and remote
+configuration commands and, in particular, the flag has no effect on
+the authentication process itself.
 
 An attractive alternative where multicast support is available is
 manycast mode, in which clients periodically troll for servers as
 described in the 'Automatic NTP Configuration Options' page of the Web
-documentation.  Either symmetric key or public key cryptographic
-authentication can be used in this mode. The principle advantage of
-manycast mode is that potential servers need not be configured in
-advance, since the client finds them during regular operation, and the
-configuration files for all clients can be identical.
+documentation.  Authentication can be used in this mode. The principle
+advantage of manycast mode is that potential servers need not be
+configured in advance, since the client finds them during regular
+operation, and the configuration files for all clients can be
+identical.
 
 The security model and protocol schemes for symmetric key
-//and public key cryptography
 are summarized below; further details are in the
 briefings, papers and reports at the {project-fullname} page linked from
 {project-website}.
@@ -292,9 +290,6 @@ for the +{ntpq}+ utility.
 //another process that could potentially block, denying services to other
 //users. Therefore, this flag should be used only for a dedicated server
 //with no clients other than MS-SNTP.
-
-[[pub]]
-== Public Key Cryptography ==
 
 '''''
 
