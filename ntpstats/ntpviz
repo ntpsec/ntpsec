@@ -278,7 +278,16 @@ def gnuplot(template, outfile=None):
     os.close(tmp_file)
 
     # shell=True is a security hazard, do not use
-    rcode = subprocess.call( ['gnuplot', tmp_filename], stdout=out)
+    try:
+        rcode = subprocess.call( ['gnuplot', tmp_filename], stdout=out)
+    except OSError as e:
+        if e.errno == os.errno.ENOENT:
+            # gnuplot not found
+            sys.stderr.write("ntpviz: ERROR: gnuplot not found in path\n")
+        else:
+            # Something else went wrong while trying to run gnuplot
+            sys.stderr.write("ntpviz: ERROR: gnuplot failed\n")
+        raise SystemExit(1)
 
     if 0 != rcode:
         sys.stderr.write("ntpviz: WARNING: plot returned %s\n" % rcode)
