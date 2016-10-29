@@ -14,6 +14,7 @@ Usage: ntpviz [-d statsdir] [-g] [-n name] [-p days]
                 | --local-gps
                 | --local-offset-multiplot]
               [-o outdir]
+              [-w SIZE | --width SIZE]
               [-D N]
 
 See the manual page for details.
@@ -293,11 +294,8 @@ def gnuplot(template, outfile=None):
 class NTPViz(NTPStats):
     "Class for visualizing statistics from a single server."
 
-    # in 2016, 25% of screens are 1024x768, 42% are 1388x768
-    # but leave some room for the browser frame
     # Python takes single quotes here. Since no % substitution
     Common = """\
-set terminal png size 1000,650
 set grid
 set autoscale xfixmin
 set autoscale xfixmax
@@ -373,8 +371,10 @@ set rmargin 10
         out["unit_f"] = stats_f.percs["unit"]
         out["multiplier_f"] = stats_f.percs["multiplier"]
         out["sitename"] = self.sitename
+        out['size'] = args.png_size
 
         plot_template = NTPViz.Common + """\
+set terminal png size %(size)s
 set title "%(sitename)s: Local Clock Time/Frequency Offsets%(clipped)s"
 set ytics format "%%1.1f %(unit)s" nomirror textcolor rgb '#0060ad'
 set yrange [%(min_y)s:%(max_y)s]
@@ -426,7 +426,10 @@ file.</p>
             # fields: time, temp
             plot_data += self.plot_slice( tempsmap[key], 3)
 
+        size = args.png_size
+
         plot_template = NTPViz.Common + """\
+set terminal png size %(size)s
 set title "%(sitename)s: Local Temparatures"
 set ytics format "%%1.1f °C" nomirror textcolor rgb '#0060ad'
 set style line 1 lc rgb '#0060ad' lt 1 lw 1 pt 7 ps 0   # --- blue
@@ -471,7 +474,10 @@ component of frequency drift.</p>
             # fields: time, tdop, nSats
             plot_data += self.plot_slice( gpsmap[key], 3, 4)
 
+        size = args.png_size
+
         plot_template = NTPViz.Common + """\
+set terminal png size %(size)s
 set title "%(sitename)s: Local GPS
 set ytics format "%%1.1f tdop" nomirror textcolor rgb '#0060ad'
 set y2tics format "%%2.0f nSat"  nomirror textcolor rgb '#dd181f'
@@ -515,12 +521,14 @@ gpsd log file is created by the gps-log.py program.</p>
         # complex objects.
         out = stats.percs
         out["sitename"] = self.sitename
+        out['size'] = args.png_size
 
         # speed up by only sending gnuplot the data it will actually use
         # fields: time, freq error
         plot_data = self.plot_slice( self.loopstats, 3)
 
         plot_template = NTPViz.Common + """\
+set terminal png size %(size)s
 set title "%(sitename)s: Local Clock Frequency Offset%(clipped)s"
 set ytics format "%%1.1f %(unit)s" nomirror
 set yrange [%(min_y)s:%(max_y)s]
@@ -572,8 +580,8 @@ line at 0ppm.  Expected values of 99%-1% percentiles: 0.4ppm</p>
         out["sitename"] = self.sitename
         out["fld"]      = fld
         out["legend"]   = legend
-
         out["min_y"] = '0'
+        out['size'] = args.png_size
 
         if freq:
             exp = """\
@@ -597,6 +605,7 @@ how fast the local clock offset is changing.</p>
 """
 
         plot_template = NTPViz.Common + """\
+set terminal png size %(size)s
 set title "%(sitename)s: %(title)s%(clipped)s"
 set ytics format "%%1.1f %(unit)s" nomirror
 set yrange [%(min_y)s:%(max_y)s]
@@ -789,6 +798,7 @@ at 0s.</p>
         out = stats.percs
         out['sitename'] = self.sitename
         out['title'] = title
+        out['size'] = args.png_size
 
         if 6 >= len(peerlist):
             out['set_key'] = "set key top right box"
@@ -797,6 +807,7 @@ at 0s.</p>
             out['set_key'] = "set key off"
 
         plot_template = NTPViz.Common + """\
+set terminal png size %(size)s
 set title "%(sitename)s: %(title)s%(clipped)s"
 set ylabel ""
 set ytics format "%%1.1f %(unit)s" nomirror
@@ -882,11 +893,12 @@ set label 1 "-1σ" at %(m1sigma)s, graph 0.96  left front offset -1,-1
 set label 2 "+1σ" at %(p1sigma)s, graph 0.96  left front offset -1,-1
 """ % out
 
+        out['size'] = args.png_size
 
         # in 2016, 25% of screens are 1024x768, 42% are 1388x768
         # but leave some room for the browser frame
         plot_template = '''\
-set terminal png size 1000,650
+set terminal png size %(size)s
 set grid
 set boxwidth %(boxwidth)s
 set xtic rotate by -35 scale 0
@@ -933,12 +945,16 @@ plot \
 def local_offset_multiplot(statlist):
     "Plot comparative local offsets for a list of NTPViz objects."
 
+    out = []
+    out['size'] = args.png_size
+
     plot = NTPViz.Common + '''\
+set terminal png size %(size)s
 set title "Multiplot Local Clock Offsets"
 set ytics format "%1.2f μs" nomirror textcolor rgb "#0060ad"
 set key bottom right box
 plot \\
-'''
+''' % out
     # FIXME: We probably need to be more flexible about computing the plot label
     sitenames = [os.path.basename(os.path.dirname(d)) for d in args.statsdirs]
     for (i, stats) in enumerate(statlist):
@@ -1069,6 +1085,12 @@ Python by ESR, concept and GNUPLOT code by Dan Drown.
                 dest='starttime',
                 help="Start time in POSIX (seconds) or ISO8601",
                 type=str)
+    parser.add_argument('-w', '--width',
+                choices=['s', 'm', 'w'],
+                default='m',
+                dest='width',
+                help="PNG width: s, m, or w",
+                type=str)
     group.add_argument( '--all-peer-jitters',
                 default = False,
                 action="store_true",
@@ -1137,6 +1159,18 @@ Python by ESR, concept and GNUPLOT code by Dan Drown.
     # FIXME, missing -V and --version
 
     args = parser.parse_args()
+
+    if 's' == args.width:
+        # fit in 1024x768 browser
+        # in 2016 this is 22% of all browsers
+        args.png_size = '1000,720'
+    elif 'w' == args.width:
+        # fit in 1920x1080 browser
+        args.png_size = '1850,1000'
+    else:
+        # fit in 1388x768 browser
+        # in 2016 this is 42% of all browsers
+        args.png_size = '1340,720'
 
     args.period = int( float(args.period) * NTPStats.SecondsInDay)
     if args.endtime is not None:
