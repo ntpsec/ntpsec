@@ -531,7 +531,7 @@ usage: timeout [ msec ]
     def do_delay(self, line):
         "set the delay added to encryption time stamps"
         if not line:
-            self.say("delay %dms" % self.auth_delay)
+            self.say("delay %d ms\n" % self.auth_delay)
         else:
             try:
                 self.auth_delay = int(line)
@@ -933,6 +933,9 @@ usage: writevar assocID name=value,[...]
 
     def do_mreadlist(self, line):
         "read the peer variables in the variable list for multiple peers"
+        if not line:
+                self.warn("usage: mreadlist assocIDlow assocIDhigh\n")
+                return
         idrange = self.__assoc_range_valid()
         if not idrange:
             return
@@ -952,6 +955,9 @@ usage: mreadlist assocIDlow assocIDhigh
 
     def do_mrl(self, line):
         "read the peer variables in the variable list for multiple peers"
+        if not line:
+                self.warn("usage: mrl assocIDlow assocIDhigh\n")
+                return
         self.do_mreadlist(line)
 
     def help_mrl(self):
@@ -962,6 +968,9 @@ usage: mrl assocIDlow assocIDhigh
 
     def do_mreadvar(self, line):
         "read peer variables from multiple peers"
+        if not line:
+                self.warn("usage: mreadvar assocIDlow assocIDhigh [ name=value[,...] ]\n")
+                return
         idrange = self.__assoc_range_valid()
         if not idrange:
             return
@@ -980,6 +989,9 @@ usage: mreadvar assocIDlow assocIDhigh [ name=value[,...] ]
 
     def do_mrv(self, line):
         "read peer variables from multiple peers"
+        if not line:
+                self.warn("usage: mrv assocIDlow assocIDhigh [ name=value[,...] ]\n")
+                return
         self.do_mreadvar(line)
 
     def help_mrv(self):
