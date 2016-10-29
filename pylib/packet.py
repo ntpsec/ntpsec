@@ -144,6 +144,7 @@ class Packet:
         self.extension = ''     # extension data
         self.li_vn_mode = Packet.PKT_LI_VN_MODE(0, version, mode)
     format = "!BBHHHHH"
+    HEADER_LEN = 12
 
     def send(self, payload1, payload2, payload3, payload4):
         "Send the packet and its payload in association with a session"
@@ -159,8 +160,8 @@ class Packet:
         (self.li_vn_mode,
          self.r_m_e_op,
          payload1, payload2, payload3, payload4,
-         self.count) = struct.unpack(Packet.format, rawdata[:12])
-        self.data = rawdata[12:]
+         self.count) = struct.unpack(Packet.format, rawdata[:Packet.HEADER_LEN])
+        self.data = rawdata[Packet.HEADER_LEN:]
         return (payload1, payload2, payload3, payload4)
 
     def mode(self):
@@ -241,6 +242,9 @@ SERR_TOOMUCH = "***Buffer size exceeded for returned data\n"
 SERR_SELECT = "***Select call failed\n"
 SERR_NOHOST = "***No host open, use `host' command\n"
 SERR_BADLENGTH = "***Response length should have been a multiple of 4"
+SERR_BADKEY = "***Invalid key identifier"
+SERR_INVPASS = "***Invalid password"
+SERR_NOKEY = "***Key not found"
 
 def dump_hex_printable(xdata):
     "Dump a packet in hex, in a familiar hex format"
@@ -403,9 +407,37 @@ class Mode6Session:
         # we're going to have to think about it a little.
         if not auth and not self.always_auth:
             return pkt.send()
+
+        # Following code is a non-working prototype
+
+	# Pad out packet to a multiple of 8 octets to be sure
+	# receiver can handle it.
+        while ((Packet.HEADER_LEN + len(pkt.extension)) % 8):
+            pkt.extension.append(u"\x0000")
+
+	# Get the keyid and the password if we don't have one.
+        if self.keyid is None:
+            key_id = getkeyid("Keyid: ");
+            if key_id == 0 or key_id > NTP_MAXKEY:
+                raise Mode6Exception(SERR_BADKEY)
+            self.keyid = key_id
+
+	if not authistrusted(self.keyid):
+            passwd = getpass_keytype(self.keytype);
+            if passwd is None:
+                raise Mode6Exception(SERR_INVPASS)
+            self.passwd = passwd
+            authusekey(self.keyid, self.keytype, self.passwd)
+            authtrust(self.keyid, True)
+
+        # Do the encryption.
+	mac = authencrypt(self.keyid, pkt);
+        if len(mac) == 0:
+            raise Mode6Exception(SERR_NOKEY)
         else:
-            sys.stderr.write("Authenticated send is not yet implemented\n")
-            return -1
+            pkt.extension += mac
+
+	return pkt.send()
 
     def getresponse(self, opcode, associd, timeo):
         "Get a response expected to match a given opcode and associd."
