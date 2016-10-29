@@ -807,7 +807,7 @@ usage: lpassociations
     def do_addvars(self, line):
         "add variables to the variable list or change their values"
         if line == "":
-            print("usage addvars name[=value][,...]")
+            self.warn("usage: addvars name[=value][,...]")
             return
         vars_to_add = line.split(',')
         for add_var in vars_to_add:
@@ -826,7 +826,7 @@ usage: addvars name[=value][,...]
     def do_rmvars(self, line):
         "remove variables from the variable list"
         if line == "":
-            print("usage rmvars name[,...]")
+            self.warn("usage: rmvars name[,...]")
             return
         vars_to_rm = line.split(',')
         for rm_var in vars_to_rm:
