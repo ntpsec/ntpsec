@@ -9,6 +9,7 @@ ntpviz [-d LOGDIR] [-g] [-n name] [-p DAYS]
          [-s starttime] [-e endtime]
          [-o OUTDIR]
          [ -c | --clip ]
+         [ -w SIZE | --width SIZE]
          [--local-offset |
           --local-error |
           --local-jitter |
@@ -71,6 +72,11 @@ subset of comparative plots for multiple directories.
     Normally all the data is plotted.  This option limits the range of
     the plots to the data between 1% and 99%.  This is useful for
     ignoring a few spikes in the data.
+
+-w SIZE or --width SIZE::
+    Set the size of the output plots.  SIZE can be one of 's', 'm', or 'w'.
+    's' is for browser on small screens (1024x768).  'm' for medium screens
+    (1388x768).  'w' for wide screens (1920x1080).  'm' is the default.
 
 -D DLVL or --debug DLVL::
     Set the debug level to DLVL.  Lsrger DLVL leads to more verbosity. +
