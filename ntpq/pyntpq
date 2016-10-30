@@ -5,9 +5,6 @@
 # This is a direct translation of the ntpq C code, initially written to work as
 # much like it as possible. Eventually it will replace the C version.
 #
-# Due to a limitation of the Python Cmd class, the ":config" and
-# "config-from-file" commands lose their colons/hyphens.
-#
 # SPDX-License-Identifier: BSD-2-clause
 from __future__ import print_function, division
 
@@ -153,6 +150,13 @@ class Ntpq(cmd.Cmd):
     def emptyline(self):
         "Called when an empty line is entered in response to the prompt."
         pass
+
+    def precmd(self, line):
+        if line.startswith(":config"):
+            line = line[1:]
+        elif line.startswith("config-from-file"):
+            line = line.replace("config-from-file ", "config_from_file")
+        return line
 
     def say(self, msg):
         sys.stdout.write(msg)
@@ -1127,7 +1131,7 @@ usage: lopeers
 
     def do_config(self, line):
         "send a remote configuration command to ntpd"
-        pass
+        self.say(self.session.config(line) + "\n")
 
     def help_config(self):
         self.say("""\
@@ -1137,7 +1141,11 @@ usage: config <configuration command line>
 
     def do_config_from_file(self, line):
         "configure ntpd using the configuration filename"
-        pass
+        try:
+            with open(line) as rfp:
+                self.say(self.session.config(rfp.read()))
+        except IOError:
+            self.warn("Could not read %s\n" % line)
 
     def help_config_from_file(self):
         self.say("""\
