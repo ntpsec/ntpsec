@@ -806,8 +806,8 @@ usage: lpassociations
 
     def do_addvars(self, line):
         "add variables to the variable list or change their values"
-        if line == "":
-            self.warn("usage: addvars name[=value][,...]")
+        if not line:
+            self.warn("usage: addvars name[=value][,...]\n")
             return
         vars_to_add = line.split(',')
         for add_var in vars_to_add:
@@ -825,8 +825,8 @@ usage: addvars name[=value][,...]
 
     def do_rmvars(self, line):
         "remove variables from the variable list"
-        if line == "":
-            self.warn("usage: rmvars name[,...]")
+        if not line:
+            self.warn("usage: rmvars name[,...]\n")
             return
         vars_to_rm = line.split(',')
         for rm_var in vars_to_rm:
@@ -1059,6 +1059,9 @@ usage: cv [ assocID ] [ name=value[,...] ]
             ("selbroken",	"bad reference time:  ", NTP_STR),
             ("candidate",	"candidate order:     ", NTP_STR),
         )
+        if not line:
+                self.warn("usage: pstats assocID\n")
+                return
         associd = self.__assoc_valid(line)
         if associd >= 0:
             self.collect_display(associd=associd,
