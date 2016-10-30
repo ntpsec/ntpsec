@@ -126,7 +126,7 @@ request requires authentication from the client.
 |CTL_OP_READVAR		| 2	| No    | read system or peer variables
 |CTL_OP_WRITEVAR	| 3	| Yes   | write variables
 |CTL_OP_READCLOCK	| 4	| No    | read clock variables
-|CTL_OP_WRITECLOCK	| 5	| Yes   | write clock variables
+|CTL_OP_WRITECLOCK	| 5	| -     | write clock variables
 |CTL_OP_SETTRAP		| 6	| -     | set trap address (obsolete, unused)
 |CTL_OP_ASYNCMSG	| 7	| -     | asynchronous message (unused)
 |CTL_OP_CONFIGURE	| 8	| Yes   | runtime configuration
@@ -138,8 +138,9 @@ request requires authentication from the client.
 
 The CTRL_OP_TRAP and CTL_OP_UNSETTRAP opcodes relate to an obsolete
 notification facility supported in some older versions of the
-software. CTL_OP_ASYNCMSG is reserved for expansion. The remaining
-opcodes are as follows:
+software. CTL_OP_WRITECLOCK is unimplemented and will throw a
+permission error. CTL_OP_ASYNCMSG is reserved for expansion. The
+remaining opcodes are as follows:
 
 === CTL_OP_READSTAT ===
 
@@ -171,8 +172,55 @@ The request payload may be empty or a textual variable list of
 variables to be reported in the response. An empty request payload
 calls for a report on all known variables.
 
-The response payload is a textual varlist. 
+The response payload is a textual varlist.
+
+=== CTL_OP_WRITEVAR ===
+
+Some system variable are defined as being settable from a mode 6
+client. This request provides a general way to do that. It requires
+authentication.
+
+The request payload is a textual list of variable settings.  Any
+variable name that is unknown or not settable immediately terminates
+processing of the payload. This request is only valid with an
+association ID of 0. There is no response payload.
+
+No system variables are currently settable.  This may change in a
+future release.
+
+=== CTL_OP_READCLOCK ===
+
+This requests ntpd to ship up a list of peer variable settings for a
+reference clock association specified by ID. It does not require
+authentication.
+
+The request payload may be empty or a textual variable list of
+variables to be reported in the response. An empty request payload
+calls for a report on all known variables.
+
+The response payload is a textual varlist.
 
 '''''
+
+=== CTL_OP_CONFIGURE ===
+
+This request is used to change the configuration on ntpd without
+restarting the daemon.  It requires authentication.
+
+The request payload should be a line of text in the syntax of the
+ntp.conf configuration file.  The response payload will be either
+an error message or the string "Config Succeeded".
+
+=== CTL_OP_READ_MRU ===
+
+To be documented.
+
+=== CTL_OP_READ_ORDLIST_A ===
+
+To be documented.
+
+=== CTL_OP_REQ_NONCE ===
+
+To be documented.
 
 include::includes/footer.txt[]
