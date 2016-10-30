@@ -170,7 +170,7 @@ program, including symmetric key and leapseconds files.
 == Algorithms ==
 
 The NTP standards include symmetric (private-key) authentication using
-the RSA Message Digest 5 (MD5) algorithm commonly ,called
+the RSA Message Digest 5 (MD5) algorithm, commonly called
 keyed-MD5. This algorithm computes a message digest or one-way hash
 which can be used to verify the client has the same message digest as
 the server. The MD5 message digest algorithm is included in the
@@ -274,18 +274,18 @@ batches of keys and then activating a key remotely using +ntpq+.
 The +controlkey+ command selects the key ID used as the password
 for the +ntpq+ utility.
 
-//[[windows]]
-//== Microsoft Windows Authentication ==
-//
-//In addition to the above means, +ntpd+ supports Microsoft Windows
-//MS-SNTP authentication using Active Directory services. This support was
-//contributed by the Samba Team and is still in development. It is enabled
-//using the +mssntp+ flag of the +restrict+ command described on the
-//link:accopt.html#restrict[Access Control Options] page. [red]#Note: Potential
-//users should be aware that these services involve a TCP connection to
-//another process that could potentially block, denying services to other
-//users. Therefore, this flag should be used only for a dedicated server
-//with no clients other than MS-SNTP.
+[[windows]]
+== Microsoft Windows Authentication ==
+
+In addition to the above means, +ntpd+ supports Microsoft Windows
+MS-SNTP authentication using Active Directory services. This support was
+contributed by the Samba Team and is still in development. It is enabled
+using the +mssntp+ flag of the +restrict+ command described on the
+link:accopt.html#restrict[Access Control Options] page. [red]#Note: Potential
+users should be aware that these services involve a TCP connection to
+another process that could potentially block, denying services to other
+users. Therefore, this flag should be used only for a dedicated server
+with no clients other than MS-SNTP.
 
 '''''
 
