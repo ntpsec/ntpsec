@@ -28,6 +28,11 @@ association::
   for discovering association partners, creating and maintaining
   associations, and preventing attackers from forming associations.
 
+[[association ID]]
+association ID::
+  A numeric identifier designating an association, normally internal
+  to ntpd but exposed in <<mode 6>> packets.
+
 [[atom]]
 atom::
   Old name for the PPS driver.  Origin lost in the mists of history,
@@ -145,6 +150,13 @@ Mills-speak::
    close-to-definitive reference is
    http://lists.ntp.org/pipermail/questions/2007-December/016592.html[The
    NTP dictionary], though not all those terms are still in use.
+
+[[mode 6]]
+mode 6::
+   Mode 6 is a control protocol used to get various kinds of
+   status information from a running ntpd and configure it on
+   the fly.  So called from the value 6 (0110) in the packet mode
+   field.  It is described in detail mode6.html[here].
 
 [[NIST]]
 NIST::

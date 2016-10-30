@@ -1,0 +1,178 @@
+= Mode 6 Protocol =
+
+[cols="10%,90%",frame="none",grid="none",style="verse"]
+|==============================
+|image:pic/which-way-is.up.jpg[]|
+http://www.eecis.udel.edu/%7emills/pictures.html[from 'Pogo', Walt Kelly]
+
+Keeping control of the situation.
+
+|==============================
+
+== Related Links ==
+
+include::includes/hand.txt[]
+
+== Table of Contents ==
+
+* link:#intro[Introduction]
+* link:#packet[Mode 6 packet structure]
+* link:#varlists[Variable-Value Lists]
+* link:#opcodes[Mode 6 Opcodes]
+
+'''''
+
+[[intro]]
+== Introduction ==
+
+This page describes the Mode 6 protocol used to get status information
+from a running ntpd and configure some of its behaviors on the fly.
+The protocol is normally used by the 'ntpq' program distributed with
+the suite.
+
+[[packet]]
+== Mode 6 packet structure ==
+
+The protocol uses UDP packets transmitted and received over port 123.
+They use the same structure (header, plus extension, plus optional
+MAC) as time synchronization messages, but the semantics of the header
+fields are different.  They are distinguished from time
+synchronization packets by their Mode field, which has the value 6
+(0110).
+
+.Mode 6 packet structure
+-------------------------------------------------------------------------
+       0                   1                   2                   3
+       0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+      +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+      |LI | VN  |Mode |R|E|M| Opcode  |         Sequence              |
+      +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+      |             Status            |      Association ID           |
+      +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+      |             Offset            |          Count                |
+      +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+      |                                                               |
+      .                                                               .
+      .                  Payload (variable length)                    .
+      .                                                               .
+      |                                                               |
+      +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+      |                          Key Identifier                       |
+      +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+      |                                                               |
+      |                            dgst (128)                         |
+      |                                                               |
+      +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+-------------------------------------------------------------------------
+
+In mode 6 packets, the leap indicator (LI) is ignored and normally
+zero.  The version (VN) is the protocol major version.  Mode is 6.
+The following field interpretations are specific to mode 6:
+
+|=====================================================================
+| Response bit   | 1 in a response, 0 in a request
+| Error bit      | 1 in an error response, 0 otherwise
+| More           | Payload is continued in next packet
+| Sequence       | Sequence number for multi-packet reassembly
+| Status         | System status word
+| Association ID | Association ID of peer, or 0 for the ntpd host
+| Offset         | Byte offset of this fragment in the response
+| Count          | Byte count of payload
+|=====================================================================
+
+Requests to ntpd are single UDP packets; ntpd expects them to be
+padded to a 4-octet boundary.  Responses may be multiple UDP packets;
+they may arrive out of order, and the client is responsible for
+reassembling the payloads.
+
+Some requests require authentication.  This is accomplished by
+shipping a trailer consisting of a key index and an MD5 digest
+generated with that index.
+
+[[varlists]]
+== Variable-Value Lists ==
+
+Several requests and responses use a common textual payload format
+consisting of a comma-separated list of items.  An item may be
+textual (ASCII) variable name, or a textual variable name followed by
+an equals sign followed by a textual value. Following any comma
+the format may insert a newline; these are not significant to the
+meaning of the payload, but are placed so that if the payload is
+dumped to an 80-character terminal window the lines will be folded
+in a way conveniwnt for visibility.
+
+Values may be decimal numeric literals, hex numeric literals led with
+"0x", binary literals consisting of the digits 0 and 1, or string
+literals enclosed in double quotes. String literals never contain
+newlines or other control characters. One quirk of the format is that
+a bare variable name without a following "=" may be interpreted in
+context as an instruction to set a string-valued variable to the
+empty string.
+
+Textual responses may end with padding NULs; clients should ignore
+these.
+
+[[opcodes]]
+== Mode 6 Opcodes ==
+
+Request-response types are distinguished by operation codes.  The
+table below lists them all. The "Auth?" column tells whether a
+request requires authentication from the client.
+
+[options="header"]
+|=====================================================================
+|Name                   |Value  | Auth? | Use
+|CTL_OP_READSTAT	| 1	| No    | read system or peer status
+|CTL_OP_READVAR		| 2	| No    | read system or peer variables
+|CTL_OP_WRITEVAR	| 3	| Yes   | write variables
+|CTL_OP_READCLOCK	| 4	| No    | read clock variables
+|CTL_OP_WRITECLOCK	| 5	| Yes   | write clock variables
+|CTL_OP_SETTRAP		| 6	| -     | set trap address (obsolete, unused)
+|CTL_OP_ASYNCMSG	| 7	| -     | asynchronous message (unused)
+|CTL_OP_CONFIGURE	| 8	| Yes   | runtime configuration
+|CTL_OP_READ_MRU	| 10	| Yes   | retrieve MRU (mrulist)
+|CTL_OP_READ_ORDLIST_A	| 11	| Yes   | ordered list req. auth.
+|CTL_OP_REQ_NONCE	| 12	| Yes   | request a client nonce
+|CTL_OP_UNSETTRAP	| 31	| -     | unset trap (obsolete, unused)
+|=====================================================================
+
+The CTRL_OP_TRAP and CTL_OP_UNSETTRAP opcodes relate to an obsolete
+notification facility supported in some older versions of the
+software. CTL_OP_ASYNCMSG is reserved for expansion. The remaining
+opcodes are as follows:
+
+=== CTL_OP_READSTAT ===
+
+This requests ntpd to ship up a list of association IDs and status
+words for all peers currently associated with the ntpd instance. It
+does not require authentication.
+
+The normal use case for this request is to discover the current list
+of associations preparatory to querying peer variables for each
+association.
+
+There is no request payload.  The response payload is not textual.  It
+consists of a sequence of pairs, each consisting of 16-bit association
+ID followed by 16-bit status word, both unsigned in network
+(big-endian) byte order.  There is no padding in the response. The
+number of IDs is implicitly given by the payload length in octets,
+divided by 4.
+
+Interpretation of the peer status word is described
+link:decode.html#peer[here].
+
+=== CTL_OP_READVAR ===
+
+This requests ntpd to ship up a list of peer variable settings for an
+association specified by ID, or system variables if the ID is zero. It
+does not require authentication.
+
+The request payload may be empty or a textual variable list of
+variables to be reported in the response. An empty request payload
+calls for a report on all known variables.
+
+The response payload is a textual varlist. 
+
+'''''
+
+include::includes/footer.txt[]
