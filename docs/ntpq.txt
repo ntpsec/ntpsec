@@ -17,6 +17,11 @@ include::includes/manual.txt[]
 
 include::includes/ntpq-body.txt[]
 
+== Mode 6 Protocol ==
+
+The Mode 6 protocol used by ntpq to communicate with ntpd
+is described link:mode6.html[here].
+
 '''''
 
 include::includes/footer.txt[]

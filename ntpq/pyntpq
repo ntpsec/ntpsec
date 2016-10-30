@@ -766,6 +766,7 @@ usage: keytype [ digest-name ]
         "print list of association IDs and statuses for the server's peers"
         if self.__dogetassoc():
             self.__printassoc(showall=False)
+    do_as = do_associations	# Documentation mentions this alias
 
     def help_associations(self):
         self.say("""\
