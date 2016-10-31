@@ -410,6 +410,15 @@ class Mode6Session:
         # Assemble the packet
         pkt = Mode6Packet(self, opcode, associd, qdata)
 
+        # If we have data, pad it out to a 32-bit boundary.
+        if pkt.extension:
+            pkt.extension = polybytes(pkt.extension)
+            while ((Packet.HEADER_LEN + len(pkt.extension)) & 3):
+                print("Adding pad byte")
+                pkt.extension += b"\x00"
+            pkt.extension = polystr(pkt.extension)
+        print("Length after early padding: %d" % (Packet.HEADER_LEN + len(pkt.extension)))
+
         # If it isn't authenticated we can just send it.  Otherwise
         # we're going to have to think about it a little.
         if not auth and not self.always_auth:
@@ -417,7 +426,7 @@ class Mode6Session:
 
 	# Pad out packet to a multiple of 8 octets to be sure
 	# receiver can handle it. Note: these pad bytes should
-        # *not* be counted in the extension length.
+        # *not* be counted in the header count field.
         pkt.extension = polybytes(pkt.extension)
         while ((Packet.HEADER_LEN + len(pkt.extension)) & 7):
             pkt.extension += b"\x00"
@@ -445,7 +454,7 @@ class Mode6Session:
         if hasher.digest_size == 0:
             raise Mode6Exception(SERR_NOKEY)
         else:
-            prefix = polystr(struct.pack("!H", self.keyid))
+            prefix = polystr(struct.pack("!I", self.keyid))
             mac = polystr(hasher.digest())
             pkt.extension += prefix
             pkt.extension += mac
