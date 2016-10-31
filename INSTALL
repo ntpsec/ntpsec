@@ -135,16 +135,6 @@ The OS X build of NTPsec requires the OS X port of the libevent2 library:
 You can use 3rd party packages such as Macports or HomeBrew for
 this library if you wish and they have it available.
 
-== Conflicts ==
-
-The work-in-progress Python translation of ntpq uses a Python extension
-module that has conflicts with the following packages:
-
-Ubuntu: libssl-dev
-CentOS: openssl-devel
-
-We hope to work around this in a future release.
-
 == Basic Installation ==
 
 These are generic Unix installation instructions.
