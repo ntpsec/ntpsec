@@ -73,7 +73,7 @@ mode 6:
 |=====================================================================
 | Response bit   | 1 in a response, 0 in a request
 | Error bit      | 1 in an error response, 0 otherwise
-| More           | Payload is continued in next packet
+| More           | 1 if payload is continued in next packet, 0 otherwise
 | Sequence       | Sequence number for multi-packet reassembly
 | Status         | System status word
 | Association ID | Association ID of peer, or 0 for the ntpd host
@@ -87,8 +87,8 @@ they may arrive out of order, and the client is responsible for
 reassembling the payloads.
 
 Some requests require authentication.  This is accomplished by
-shipping a trailer consisting of a key index and an MD5 digest of
-the header and payload generated with that index.
+shipping a trailer consisting of a key dentifier and an MD5 digest of
+the header and payload generated with that identifier.
 
 [[varlists]]
 == Variable-Value Lists ==
@@ -100,18 +100,32 @@ an equals sign followed by a textual value. Following any comma
 the format may insert a newline; these are not significant to the
 meaning of the payload, but are placed so that if the payload is
 dumped to an 80-character terminal window the lines will be folded
-in a way conveniwnt for visibility.
+in a way convenient for visibility.
 
-Values may be decimal numeric literals, hex numeric literals led with
-"0x", binary literals consisting of the digits 0 and 1, or string
-literals enclosed in double quotes. String literals never contain
-newlines or other control characters. One quirk of the format is that
-a bare variable name without a following "=" may be interpreted in
-context as an instruction to set a string-valued variable to the
-empty string.
+Values may be decimal numeric literals, decimal float literals, hex
+numeric literals led with "0x", binary literals consisting of exactly
+two of digits 0 and 1, or string literals enclosed in double
+quotes. String literals never contain newlines or other control
+characters. One quirk of the format is that a bare variable name
+without a following "=" may be interpreted in context as an
+instruction to set a string-valued variable to the empty string.
 
 Textual responses may end with padding NULs; clients should ignore
 these.
+
+In RFC5234 ABNF:
+
+-----------------------------------------------------------
+varlist = item [itemtail] LF *%x00
+
+itemtail = "," [1LF] item [itemtail]
+
+item = name / name "=" value
+
+value = 1*DIGIT / 1*DIGIT "." 1*DIGIT  / "0x" 1*HEXDIG / 2BIT / quoted-string
+
+quoted-string = %x22 *(%21 | %x23-7E) %x22
+-----------------------------------------------------------
 
 [[requests]]
 == Mode 6 Requests ==
