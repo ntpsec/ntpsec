@@ -138,7 +138,7 @@ class Packet:
     def __init__(self, session, version, mode):
         self.session = session  # Where to get session context
         self.li_vn_mode = 0     # leap, version, mode (uint8_t)
-        self.r_m_e_op = 0       # response, more, error, opcode (uint8_t)
+        self.r_e_m_op = 0       # response, error, more, opcode (uint8_t)
         # Subclasses have four uint16_t fields here
         self.count = 0          # octet count of extension data
         self.extension = ''     # extension data
@@ -151,14 +151,14 @@ class Packet:
         self.count = len(self.extension)
         body = struct.pack(Packet.format,
                              self.li_vn_mode,
-                             self.r_m_e_op,
+                             self.r_e_m_op,
                              payload1, payload2, payload3, payload4,
                              self.count)
         self.session.sendpkt(body + self.extension)
 
     def analyze(self, rawdata):
         (self.li_vn_mode,
-         self.r_m_e_op,
+         self.r_e_m_op,
          payload1, payload2, payload3, payload4,
          self.count) = struct.unpack(Packet.format, rawdata[:Packet.HEADER_LEN])
         self.data = rawdata[Packet.HEADER_LEN:]
@@ -178,7 +178,7 @@ class Mode6Packet(Packet):
 
     def __init__(self, session, opcode=0, associd=0, qdata=''):
         Packet.__init__(self, session, session.pktversion, MODE_CONTROL)
-        self.r_m_e_op = opcode  # ntpq operation code
+        self.r_e_m_op = opcode  # ntpq operation code
         self.sequence = 0       # sequence number of request (uint16_t)
         self.status = 0         # status word for association (uint16_t)
         self.associd = associd  # association ID (uint16_t)
@@ -186,19 +186,19 @@ class Mode6Packet(Packet):
         self.extension = qdata  # Data for this packet
 
     def is_response(self):
-        return self.r_m_e_op & 0x80
-
-    def opcode(self):
-        return self.r_m_e_op & 0x1F
+        return self.r_e_m_op & 0x80
 
     def is_error(self):
-        return self.r_m_e_op & 0x40
+        return self.r_e_m_op & 0x40
+
+    def more(self):
+        return self.r_e_m_op & 0x20
+
+    def opcode(self):
+        return self.r_e_m_op & 0x1F
 
     def errcode(self):
         return (self.status >> 8) & 0xff
-
-    def more(self):
-        return self.r_m_e_op & 0x20
 
     def stats(self, idx):
         "Return statistics on a fragment."
