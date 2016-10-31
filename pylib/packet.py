@@ -146,15 +146,15 @@ class Packet:
     format = "!BBHHHHH"
     HEADER_LEN = 12
 
-    def send(self, payload1, payload2, payload3, payload4):
-        "Send the packet and its payload in association with a session"
+    def flatten(self, payload1, payload2, payload3, payload4):
+        "Flatten the packet into an octet sequence."
         self.count = len(self.extension)
         body = struct.pack(Packet.format,
                              self.li_vn_mode,
                              self.r_e_m_op,
                              payload1, payload2, payload3, payload4,
                              self.count)
-        self.session.sendpkt(body + self.extension)
+        return polybytes(body + self.extension)
 
     def analyze(self, rawdata):
         (self.li_vn_mode,
@@ -204,11 +204,17 @@ class Mode6Packet(Packet):
         "Return statistics on a fragment."
         return "%5d %5d\t%3d octets\n" % (self.offset, self.end(), self.count)
 
+    def flatten(self):
+        return Packet.flatten(self,
+                              self.sequence,
+                              self.status,
+                              self.associd,
+                              self.offset)
+
     def send(self):
         self.session.sequence += 1
         self.sequence = self.session.sequence
-        Packet.send(self,
-                        self.sequence, self.status, self.associd, self.offset)
+        self.session.sendpkt(self.flatten())
 
     def analyze(self, data):
         (self.sequence,
@@ -408,8 +414,6 @@ class Mode6Session:
         # we're going to have to think about it a little.
         if not auth and not self.always_auth:
             return pkt.send()
-
-	# Following code is a non-working prototype
 
 	# Pad out packet to a multiple of 8 octets to be sure
 	# receiver can handle it.
