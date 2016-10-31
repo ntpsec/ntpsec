@@ -39,7 +39,10 @@ def termsize():
     # Should work under Linux and Solaris at least.
     # Alternatives at http://stackoverflow.com/questions/566746/how-to-get-console-window-width-in-python
     import shlex, subprocess, re
-    output = subprocess.check_output(shlex.split('/bin/stty -a'))
+    try:
+        output = subprocess.check_output(shlex.split('/bin/stty -a'))
+    except OSError:
+        return (24, 80)
     m = re.search('rows\D+(\d+); columns\D+(\d+);', output)
     if m:
         return int(m.group(1)), int(m.group(2))
