@@ -148,7 +148,6 @@ class Packet:
 
     def flatten(self, payload1, payload2, payload3, payload4):
         "Flatten the packet into an octet sequence."
-        self.count = len(self.extension)
         body = struct.pack(Packet.format,
                              self.li_vn_mode,
                              self.r_e_m_op,
@@ -184,6 +183,7 @@ class Mode6Packet(Packet):
         self.associd = associd  # association ID (uint16_t)
         self.offset = 0         # offset of this batch of data (uint16_t)
         self.extension = qdata  # Data for this packet
+        self.count = len(qdata)	# length of data
 
     def is_response(self):
         return self.r_e_m_op & 0x80
@@ -289,7 +289,7 @@ class Mode6Session:
         self.secondary_timeout = 3000   # Timeout for later selects
         self.pktversion = NTP_OLDVERSION + 1    # Packet version number we use
         self.always_auth       = False  # Always send authenticated requests
-        self.keytype = "md5"
+        self.keytype = "MD5"
         self.keyid = None
         self.password = None
         self.hostname = None
@@ -416,9 +416,12 @@ class Mode6Session:
             return pkt.send()
 
 	# Pad out packet to a multiple of 8 octets to be sure
-	# receiver can handle it.
-        while ((Packet.HEADER_LEN + len(pkt.extension)) % 8):
-            pkt.extension += u"\x0000"
+	# receiver can handle it. Note: these pad bytes should
+        # *not* be counted in the extension length.
+        pkt.extension = polybytes(pkt.extension)
+        while ((Packet.HEADER_LEN + len(pkt.extension)) & 7):
+            pkt.extension += b"\x00"
+        pkt.extension = polystr(pkt.extension)
 
 	# Get the keyid and the password if we don't have one.
         if self.keyid is None:
@@ -431,17 +434,21 @@ class Mode6Session:
                 raise Mode6Exception(SERR_BADKEY)
             self.keyid = key_id
 
-            passwd = getpass.getpass("%s Password: " % session.keytype.upper())
+            passwd = getpass.getpass("%s Password: " % self.keytype)
             if passwd is None:
                 raise Mode6Exception(SERR_INVPASS)
             self.passwd = passwd
 
         # Do the encryption.
-	mac = hashlib.new(session.keytype).digest(pkt.flatten());
-        if len(mac) == 0:
+        hasher = hashlib.new(self.keytype)
+	hasher.update(pkt.flatten());
+        if hasher.digest_size == 0:
             raise Mode6Exception(SERR_NOKEY)
         else:
-            pkt.extension += struct.pack("!H", self.keyid) + mac
+            prefix = polystr(struct.pack("!H", self.keyid))
+            mac = polystr(hasher.digest())
+            pkt.extension += prefix
+            pkt.extension += mac
 
 	return pkt.send()
 
