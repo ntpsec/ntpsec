@@ -18,7 +18,7 @@ include::includes/hand.txt[]
 * link:#intro[Introduction]
 * link:#packet[Mode 6 packet structure]
 * link:#varlists[Variable-Value Lists]
-* link:#opcodes[Mode 6 Opcodes]
+* link:#requests[Mode 6 Requests]
 
 '''''
 
@@ -66,8 +66,9 @@ synchronization packets by their Mode field, which has the value 6
 -------------------------------------------------------------------------
 
 In mode 6 packets, the leap indicator (LI) is ignored and normally
-zero.  The version (VN) is the protocol major version.  Mode is 6.
-The following field interpretations are specific to mode 6:
+zero.  The version (VN) is the NTP protocol major version, currently
+4.  Mode is 6.  The following field interpretations are specific to
+mode 6:
 
 |=====================================================================
 | Response bit   | 1 in a response, 0 in a request
@@ -76,8 +77,8 @@ The following field interpretations are specific to mode 6:
 | Sequence       | Sequence number for multi-packet reassembly
 | Status         | System status word
 | Association ID | Association ID of peer, or 0 for the ntpd host
-| Offset         | Byte offset of this fragment in the response
-| Count          | Byte count of payload
+| Offset         | Octet offset of this fragment in the response
+| Count          | Octet count of fragment payload
 |=====================================================================
 
 Requests to ntpd are single UDP packets; ntpd expects them to be
@@ -86,8 +87,8 @@ they may arrive out of order, and the client is responsible for
 reassembling the payloads.
 
 Some requests require authentication.  This is accomplished by
-shipping a trailer consisting of a key index and an MD5 digest
-generated with that index.
+shipping a trailer consisting of a key index and an MD5 digest of
+the header and payload generated with that index.
 
 [[varlists]]
 == Variable-Value Lists ==
@@ -112,8 +113,8 @@ empty string.
 Textual responses may end with padding NULs; clients should ignore
 these.
 
-[[opcodes]]
-== Mode 6 Opcodes ==
+[[requests]]
+== Mode 6 Requests ==
 
 Request-response types are distinguished by operation codes.  The
 table below lists them all. The "Auth?" column tells whether a
@@ -130,9 +131,9 @@ request requires authentication from the client.
 |CTL_OP_SETTRAP		| 6	| -     | set trap address (obsolete, unused)
 |CTL_OP_ASYNCMSG	| 7	| -     | asynchronous message (unused)
 |CTL_OP_CONFIGURE	| 8	| Yes   | runtime configuration
-|CTL_OP_READ_MRU	| 10	| Yes   | retrieve MRU (mrulist)
+|CTL_OP_READ_MRU	| 10	| No    | retrieve MRU (mrulist)
 |CTL_OP_READ_ORDLIST_A	| 11	| Yes   | ordered list req. auth.
-|CTL_OP_REQ_NONCE	| 12	| Yes   | request a client nonce
+|CTL_OP_REQ_NONCE	| 12	| No    | request a client nonce
 |CTL_OP_UNSETTRAP	| 31	| -     | unset trap (obsolete, unused)
 |=====================================================================
 
@@ -200,11 +201,9 @@ calls for a report on all known variables.
 
 The response payload is a textual varlist.
 
-'''''
-
 === CTL_OP_CONFIGURE ===
 
-This request is used to change the configuration on ntpd without
+This request is used to change the configuration of ntpd without
 restarting the daemon.  It requires authentication.
 
 The request payload should be a line of text in the syntax of the
@@ -213,14 +212,160 @@ an error message or the string "Config Succeeded".
 
 === CTL_OP_READ_MRU ===
 
-To be documented.
+This request is used to retrieve information about recent traffic
+between ntpd and its peers; in NTP-speak this traffic summary is
+called the "MRU list", where MRU stands for "most recently used".  It does
+not require authentication.
+
+//Keep this in sync with the big comment in ntpd/ntp_control.c,
+//from which it is derived.
+
+A finite and variable number of entries are retrieved per request, to
+avoid having responses with such large numbers of packets that socket
+buffers are overflowed and packets lost.  The entries are retrieved
+oldest-first, taking into account that the MRU list will be changing
+between each request.  We can expect to see duplicate entries for
+addresses updated in the MRU list during the fetch operation.  In the
+end, the client can assemble a close approximation of the MRU list at
+the point in time the last response was sent by ntpd.  The only
+difference is it may be longer, containing some number of oldest
+entries which have since been reclaimed.  If necessary, the protocol
+could be extended to zap those from the client snapshot at the end,
+but so far that doesn't seem useful.
+
+To accomodate the changing MRU list, the starting point for requests
+after the first request is supplied as a series of last seen
+timestamps and associated addresses, the newest ones the client has
+received.  As long as at least one of those entries hasn't been
+bumped to the head of the MRU list, ntpd can pick up at that point.
+Otherwise, the request is failed and it is up to ntpq to back up and
+provide the next newest entry's timestamps and addresses, conceivably
+backing up all the way to the starting point.
+
+The request payload is a textual varlist that must include
+some of the following variables and may include others:
+
+nonce::		Regurgitated nonce retrieved by the client
+		previously using CTL_OP_REQ_NONCE, demonstrating
+		ability to receive traffic sent to its address.
+
+frags::		Limit on datagrams (fragments) in response.  Used
+		by newer ntpq versions instead of limit= when
+		retrieving multiple entries.
+
+limit::		Limit on MRU entries returned.  One of frags= or limit=
+		must be provided.  limit=1 is a special case: Instead of
+		fetching beginning with the supplied starting point's
+		newer neighbor, fetch the supplied entry, and in that
+		case the #.last timestamp can be zero.  This enables
+		fetching a single entry by IP address.  When limit is
+		not one and frags= is provided, the fragment limit
+		controls.
+
+mincount::	(decimal) Return entries with packet count >= mincount.
+
+laddr::		Return entries associated with the server's IP
+		address given.  No port specification is needed,
+		and any supplied is ignored.
+
+resall::	0x-prefixed hex restrict bits which must all be
+		lit for an MRU entry to be included.
+		Has precedence over any resany=.
+
+resany::	0x-prefixed hex restrict bits, at least one of
+		which must be list for an MRU entry to be
+		included.
+
+last.0::	0x-prefixed hex l_fp timestamp of newest entry
+		which client previously received.
+
+addr.0::	text of newest entry's IP address and port,
+		IPv6 addresses in bracketed form: [::]:123
+
+last.1::	timestamp of 2nd newest entry client has.
+
+addr.1::	address of 2nd newest entry.
+
+More entries may follow; ntpq provides as many last/addr pairs as will
+fit in a single request packet, except for the first request in a MRU
+fetch operation.
+
+The response begins with a new nonce value to be used for any
+followup request.  Following the nonce is the next newer entry than
+referred to by last.0 and addr.0, if the "0" entry has not been
+bumped to the front.  If it has, the first entry returned will be the
+next entry newer than referred to by last.1 and addr.1, and so on.
+If none of the referenced entries remain unchanged, the request fails
+and ntpq backs up to the next earlier set of entries to resync.
+
+Except for the first response, the response begins with confirmation
+of the entry that precedes the first additional entry provided:
+
+last.older::	hex l_fp timestamp matching one of the input
+		.last timestamps, which entry now precedes the
+		response 0. entry in the MRU list.
+
+addr.older::	text of address corresponding to older.last.
+
+And in any case, a successful response contains sets of values
+comprising entries, with the oldest numbered 0 and incrementing from
+there:
+
+addr.#::	text of IPv4 or IPv6 address and port
+
+last.#::	hex l_fp timestamp of last receipt
+
+first.#::	hex l_fp timestamp of first receipt
+
+ct.#::		count of packets received
+
+mv.#::		mode and version
+
+rs.#::		restriction mask (RES_* bits)
+
+The client should accept the values in any order, and ignore .#
+values which it does not understand, to allow a smooth path to
+future changes without requiring a new opcode.  Clients can rely
+on all *.0 values preceding any *.1 values, that is all values for
+a given index number are together in the response.
+
+The end of the response list is noted with one or two tag=value
+pairs.  Unconditionally:
+
+now::		0x-prefixed l_fp timestamp at the server marking
+		the end of the operation.
+
+If any entries were returned, now= is followed by:
+
+last.newest::	hex l_fp identical to last.# of the prior entry.
 
 === CTL_OP_READ_ORDLIST_A ===
 
-To be documented.
+This request is used for two purposes: to retrieve restriction lists
+and to retrieve interface statistics.  For the former use, the request
+payload should be the string "addr_restrictions"; for the latter case,
+the request payload should be empty.  Both uses require authentication.
+The response payload is, in both cases, a textual varlist.
+
+THIS SECTION IS NOT YET COMPLETE.
 
 === CTL_OP_REQ_NONCE ===
 
-To be documented.
+This request is used to initialize an MRU-list conversation.  It
+informs ntpd that the Mode 6 client is ready to receive.  It does
+not require authentication.
+
+The request retrieves a nonce specific to this client, which will be
+played back to ntpd tp demonstrate that the client is capable of
+receiving responses at the source IP address that requested the nonce,
+is and thereby unlikely to be forging the source ddress.  This check
+prevents CTL_OP_READ_MRU from being used for flooding attacks.
+
+The request has no payload.  The response will be a textual varlist
+containing one string-valued variable, "nonce". The value need not by
+interpreted by the client, only replayed as part of a following MRU-list
+request.
+
+'''''
 
 include::includes/footer.txt[]
