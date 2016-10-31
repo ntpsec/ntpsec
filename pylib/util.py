@@ -43,11 +43,11 @@ def termsize():
         output = subprocess.check_output(shlex.split('/bin/stty -a'))
     except OSError:
         return (24, 80)
-    m = re.search('rows\D+(\d+); columns\D+(\d+);', output)
-    if m:
-        return int(m.group(1)), int(m.group(2))
-    else:
-        return (24, 80)
+    for pattern in ('rows\D+(\d+); columns\D+(\d+);', '\s+(\d+)\D+rows;\s+(\d+)\D+columns;'):
+        m = re.search(pattern, output)
+        if m:
+            return int(m.group(1)), int(m.group(2))
+    return (24, 80)
 
 class PeerSummary:
     "Reusable report generator for peer statistics"
