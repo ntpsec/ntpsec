@@ -9,7 +9,7 @@
 from __future__ import print_function, division
 
 import os, sys, getopt, cmd, errno, curses, curses.ascii
-import socket, select, struct, shlex, time
+import socket, select, struct, shlex, time, hashlib
 
 from ntp.packet import *
 from ntp.util import *
@@ -184,7 +184,7 @@ usage: help [ command ]
 
         if len(self.peers) == 0:
             if self.chosts:
-                self.say("server=%s ", self.session.hostname)
+                self.say("server=%s " % self.session.hostname)
             self.say("No association IDs returned\n")
             return False
 
@@ -757,7 +757,14 @@ usage: ntpversion [ version number ]
 
     def do_keytype(self, line):
         "set key type to use for authenticated requests"
-        self.warn("Authentication is not yet implemented")
+        if not line:
+            self.say("Keytype: %s\n" % self.session.keytype)
+        elif not line in "DSA, DSA-SHA, MD4, MD5, MDC2, RIPEMD160, SHA, SHA1":
+            self.warn("Keytype %s is not supported by ntpd.")
+        elif line not in hashlib.algorithms_available:
+            self.warn("Keytype %s is not supported by ntpq.")
+        else:
+            self.session.keytype = line
 
     def help_keytype(self):
         self.say("""\

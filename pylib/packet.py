@@ -5,7 +5,7 @@
 #
 # SPDX-License-Identifier: BSD-2-clause
 from __future__ import print_function, division
-import sys, socket, select, struct, curses.ascii, collections
+import sys, socket, select, struct, curses.ascii, collections, getpass, hashlib
 
 # General notes on Python 2/3 compatibility:
 #
@@ -283,6 +283,7 @@ class Mode6Session:
         self.secondary_timeout = 3000   # Timeout for later selects
         self.pktversion = NTP_OLDVERSION + 1    # Packet version number we use
         self.always_auth       = False  # Always send authenticated requests
+        self.keytype = "md5"
         self.keyid = None
         self.password = None
         self.hostname = None
@@ -408,34 +409,35 @@ class Mode6Session:
         if not auth and not self.always_auth:
             return pkt.send()
 
-        # Following code is a non-working prototype
+	# Following code is a non-working prototype
 
 	# Pad out packet to a multiple of 8 octets to be sure
 	# receiver can handle it.
         while ((Packet.HEADER_LEN + len(pkt.extension)) % 8):
-            pkt.extension.append(u"\x0000")
+            pkt.extension += u"\x0000"
 
 	# Get the keyid and the password if we don't have one.
         if self.keyid is None:
-            key_id = getkeyid("Keyid: ");
-            if key_id == 0 or key_id > NTP_MAXKEY:
+            try:
+                key_id = int(input("Keyid: "))
+                # FIXME: Magic number, yuck
+                if key_id == 0 or key_id > 65535:
+                    raise Mode6Exception(SERR_BADKEY)
+            except ValueError:
                 raise Mode6Exception(SERR_BADKEY)
             self.keyid = key_id
 
-	if not authistrusted(self.keyid):
-            passwd = getpass_keytype(self.keytype);
+            passwd = getpass.getpass("%s Password: " % session.keytype.upper())
             if passwd is None:
                 raise Mode6Exception(SERR_INVPASS)
             self.passwd = passwd
-            authusekey(self.keyid, self.keytype, self.passwd)
-            authtrust(self.keyid, True)
 
         # Do the encryption.
-	mac = authencrypt(self.keyid, pkt);
+	mac = hashlib.new(session.keytype).digest(pkt.flatten());
         if len(mac) == 0:
             raise Mode6Exception(SERR_NOKEY)
         else:
-            pkt.extension += mac
+            pkt.extension += struct.pack("!H", self.keyid) + mac
 
 	return pkt.send()
 

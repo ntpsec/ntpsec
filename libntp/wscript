@@ -4,18 +4,25 @@ def build(ctx):
 	srcnode = ctx.srcnode.abspath()
 
 	libntp_source = [
+		"a_md5encrypt.c",
 		"atolfp.c",
+		"authkeys.c",
+		"authreadkeys.c",
+		"authusekey.c",
 #		"calyearstart.c",
 		"clocktime.c",
 		"decodenetnum.c",
+		"emalloc.c",
 		"dofptoa.c",
 		"dolfptoa.c",
 		"getopt.c",
 		"initnetwork.c",
 		"lib_strbuf.c",
 		"machines.c",
+		"md5.c",
 		"modetoa.c",
 		"mstolfp.c",
+		"msyslog.c",
 		"netof.c",
 		"ntp_endian.c",
 		"ntp_intres.c",
@@ -29,6 +36,7 @@ def build(ctx):
 		"socket.c",
 		"socktoa.c",
 		"socktohost.c",
+		"ssl_init.c",
 		"strl_obsd.c",
 		"syssignal.c",
 		"timetoa.c",
@@ -38,19 +46,11 @@ def build(ctx):
 	]
 
 	libntp_source_sharable = [
-		"a_md5encrypt.c",
-		"authkeys.c",
-		"authreadkeys.c",
-		"authusekey.c",
-		"emalloc.c",
 		"hextolfp.c",
 		"humandate.c",
 		"lib_strbuf.c",
-		"md5.c",
-		"msyslog.c",
 		"ntp_calendar.c",
 		"prettydate.c",
-		"ssl_init.c",
 		"statestr.c",
 	]
 
