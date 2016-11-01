@@ -251,6 +251,7 @@ SERR_BADLENGTH = "***Response length should have been a multiple of 4"
 SERR_BADKEY = "***Invalid key identifier"
 SERR_INVPASS = "***Invalid password"
 SERR_NOKEY = "***Key not found"
+SERR_AUTH = "***Server disallowed request (authentication?)"
 
 def dump_hex_printable(xdata):
     "Dump a packet in hex, in a familiar hex format"
@@ -665,7 +666,7 @@ class Mode6Session:
         self.doquery(opcode, associd=associd, qdata=qdata)
         response = self.response
         # Trim trailing NULs from the text
-        while response.endswith("\x00"):
+        while response.endswith(b"\x00"):
             response = response[:-1]
         response = response.rstrip()
         items = []
@@ -693,6 +694,12 @@ class Mode6Session:
     def config(self, configtext):
         "Send configuration text to the daemon."
         self.doquery(opcode=CTL_OP_CONFIGURE, qdata=configtext, auth=True)
-        return self.response
+        # Copes with an implementation error - ntpd uses putdata without
+        # setting the size correctly.
+        if not self.response:
+            raise Mode6Exception(SERR_AUTH)
+        elif b"\x00" in self.response:
+            self.response = self.response[:self.response.index(b"\x00")]
+        return self.response.rstrip()
 
 # end
