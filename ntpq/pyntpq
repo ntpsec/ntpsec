@@ -1141,8 +1141,8 @@ usage: lopeers
         if self.debug > 2:
             self.warn("In Config\nKeyword = :config\nCommand = %s\n" % line)
         try:
-            response = self.session.config(line)
-            m = re.match("column ([0-9]+) syntax error", response)
+            self.session.config(line)
+            m = re.match("column ([0-9]+) syntax error", self.session.response)
             if m:
                 col = int(m.group(1))
                 if col >= 0 and col <= len(line):
@@ -1152,7 +1152,7 @@ usage: lopeers
                         self.say(line + "\n")
                     self.say("_" * (col- 1))
                 self.say("^\n")
-            self.say(response + "\n")
+            self.say(self.session.response + "\n")
         except Mode6Exception as e:
             print(e.message)
 
