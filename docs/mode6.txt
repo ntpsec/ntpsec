@@ -19,6 +19,7 @@ include::includes/hand.txt[]
 * link:#packet[Mode 6 packet structure]
 * link:#varlists[Variable-Value Lists]
 * link:#requests[Mode 6 Requests]
+* link:#authentication[Authentication]
 
 '''''
 
@@ -85,10 +86,6 @@ Requests to ntpd are single UDP packets; ntpd expects them to be
 padded to a 4-octet boundary.  Responses may be multiple UDP packets;
 they may arrive out of order, and the client is responsible for
 reassembling the payloads.
-
-Some requests require authentication.  This is accomplished by
-shipping a trailer consisting of a key dentifier and an MD5 digest of
-the header and payload generated with that identifier.
 
 [[varlists]]
 == Variable-Value Lists ==
@@ -383,6 +380,26 @@ The request has no payload.  The response will be a textual varlist
 containing one string-valued variable, "nonce". The value need not by
 interpreted by the client, only replayed as part of a following MRU-list
 request.
+
+[[auth]]
+== Authentication ==
+
+Authenticated requests require a MAC (message authentication code)
+trailer following the payload data, if any. Such requests must be
+padded to an 8-octet boundary, with those bytes not included in the
+header count field.
+
+The contents of the MAC trailer consists of:
+
+1. The 32-bit identifier of the signing key in network byte order.
+
+2. A cryptographic hash of the following octet spans, in order.
+First, the password entered to use the signing key, then the request
+header fields, then the payload.
+
+The cryptographic hash is normally MD5, but if ntpd is built with
+OpenSSL support it is possible to select any of the hash types supported
+by that library on a per-key basis.
 
 '''''
 
