@@ -692,7 +692,7 @@ class Mode6Session:
         return collections.OrderedDict(items)
 
     def config(self, configtext):
-        "Send configuration text to the daemon."
+        "Send configuration text to the daemon. Return True if accepted."
         self.doquery(opcode=CTL_OP_CONFIGURE, qdata=configtext, auth=True)
         # Copes with an implementation error - ntpd uses putdata without
         # setting the size correctly.
@@ -700,6 +700,7 @@ class Mode6Session:
             raise Mode6Exception(SERR_AUTH)
         elif b"\x00" in self.response:
             self.response = self.response[:self.response.index(b"\x00")]
-        return self.response.rstrip()
+        self.response = self.response.rstrip()
+        return self.response == "Config Succeeded"
 
 # end
