@@ -178,7 +178,7 @@ class Mode6Packet(Packet):
     def __init__(self, session, opcode=0, associd=0, qdata=''):
         Packet.__init__(self, session, session.pktversion, MODE_CONTROL)
         self.r_e_m_op = opcode  # ntpq operation code
-        self.sequence = 0       # sequence number of request (uint16_t)
+        self.sequence = 1       # sequence number of request (uint16_t)
         self.status = 0         # status word for association (uint16_t)
         self.associd = associd  # association ID (uint16_t)
         self.offset = 0         # offset of this batch of data (uint16_t)
@@ -414,10 +414,8 @@ class Mode6Session:
         if pkt.extension:
             pkt.extension = polybytes(pkt.extension)
             while ((Packet.HEADER_LEN + len(pkt.extension)) & 3):
-                print("Adding pad byte")
                 pkt.extension += b"\x00"
             pkt.extension = polystr(pkt.extension)
-        print("Length after early padding: %d" % (Packet.HEADER_LEN + len(pkt.extension)))
 
         # If it isn't authenticated we can just send it.  Otherwise
         # we're going to have to think about it a little.
@@ -450,6 +448,7 @@ class Mode6Session:
 
         # Do the encryption.
         hasher = hashlib.new(self.keytype)
+        hasher.update(self.passwd)
 	hasher.update(pkt.flatten());
         if hasher.digest_size == 0:
             raise Mode6Exception(SERR_NOKEY)
