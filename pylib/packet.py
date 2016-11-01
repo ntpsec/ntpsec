@@ -244,6 +244,8 @@ SERR_NOKEY = "***Key not found"
 SERR_BADNONCE = "***Unexpected nonce response format"
 SERR_BADPARM = "***Unknown parameter %s"
 SERR_NOCRED = "***No credentials"
+SERR_SERVER = "***Server error code"
+SERR_STALL = "***No response, probably high-traffic server with low MRU limit"
 
 def dump_hex_printable(xdata):
     "Dump a packet in hex, in a familiar hex format"
@@ -269,8 +271,9 @@ def dump_hex_printable(xdata):
         llen -= rowlen
 
 class Mode6Exception(BaseException):
-    def __init__(self, message):
+    def __init__(self, message, errorcode=0):
         self.message = message
+        self.errorcode = errorcode
 
 class Mode6Session:
     "A session to a host"
@@ -483,7 +486,6 @@ class Mode6Session:
             #  on how long we're willing to spend here.
             bail += 1
             if bail >= (2*MAXFRAGS):
-                warn("too many packets in response; bailing out\n")
                 raise Mode6Exception(SERR_TOOMUCH)
 
             if len(fragments) == 0:
@@ -494,17 +496,14 @@ class Mode6Session:
             try:
                 (rd, _, _) = select.select([self.sock], [], [], tvo)
             except select.error as msg:
-                warn("select failed: %s\n" % msg[1])
                 raise Mode6Exception(SERR_SELECT)
 
             if not rd:
                 # Timed out.  Return what we have
                 if len(fragments) == 0:
                     if timeo:
-                        warn("%s: timed out, nothing received\n" % self.hostname)
                         raise Mode6Exception(SERR_TIMEOUT)
                 if timeo:
-                    warn("%s: timed out with incomplete data\n" % self.hostname)
                     if self.debug:
                         sys.stderr.write("ERR_INCOMPLETE: Received fragments:\n")
                         for (i, frag) in enumerate(fragments):
@@ -520,7 +519,6 @@ class Mode6Session:
             try:
                 rpkt.analyze(rawdata)
             except struct.error as reason:
-                warn("packet analysis failed: %s\n" % reason)
                 raise Mode6Exception(SERR_UNSPEC)
 
             if rpkt.version() > NTP_VERSION or rpkt.version() < NTP_OLDVERSION:
@@ -554,7 +552,7 @@ class Mode6Session:
                 if rpkt.more():
                     warn("Error %d received on non-final packet\n" %
                          rpkt.errcode())
-                return rpkt.errcode()
+                raise Mode6Exception(SERR_SERVER, rpkt.errcode())
 
             # Check the association ID to make sure it matches what we expect
             if rpkt.associd != associd:
@@ -628,9 +626,7 @@ class Mode6Session:
         retry = True
         while True:
             # Ship the request
-            res = self.sendrequest(opcode, associd, qdata, auth)
-            if res is not None:
-                return res
+            self.sendrequest(opcode, associd, qdata, auth)
             # Get the response.
             try:
                 res = self.getresponse(opcode, associd, not retry)
@@ -658,15 +654,10 @@ class Mode6Session:
         idlist.sort(key=lambda a: a.associd)
         return idlist
 
-    def readvar(self, associd=0, varlist=None, opcode=CTL_OP_READVAR):
-        "Read system vars from the host as a dict, or throw an exception."
-        if varlist == None:
-            qdata = ""
-        else:
-            qdata = ",".join(varlist)
-        self.doquery(opcode, associd=associd, qdata=qdata)
-        response = self.response
+    def __parse_varlist(self):
+        "Parse a response as a textual varlist."
         # Trim trailing NULs from the text
+        response = self.response
         while response.endswith(b"\x00"):
             response = response[:-1]
         response = response.rstrip()
@@ -692,6 +683,15 @@ class Mode6Session:
                     items.append((pair, ""))
         return collections.OrderedDict(items)
 
+    def readvar(self, associd=0, varlist=None, opcode=CTL_OP_READVAR):
+        "Read system vars from the host as a dict, or throw an exception."
+        if varlist == None:
+            qdata = ""
+        else:
+            qdata = ",".join(varlist)
+        self.doquery(opcode, associd=associd, qdata=qdata)
+        return self.__parse_varlist()
+
     def config(self, configtext):
         "Send configuration text to the daemon. Return True if accepted."
         self.doquery(opcode=CTL_OP_CONFIGURE, qdata=configtext, auth=True)
@@ -704,7 +704,7 @@ class Mode6Session:
         self.response = self.response.rstrip()
         return self.response == "Config Succeeded"
 
-    def mrulist(self, variables):
+    def mrulist(self, variables, rawhook=None):
         "Retrieve MRU list data"
         self.doquery(opcode=CTL_OP_REQ_NONCE)
         if not self.response.startswith("nonce="):
@@ -718,7 +718,6 @@ class Mode6Session:
 	have_now = False
 	cap_frags = True
 	got = 0
-	ri = 0
 
         for k in list(variables.keys()):
             if k in ("mincount","resall","resany","maxlstint","laddr","sort"):
@@ -734,7 +733,67 @@ class Mode6Session:
             if varlist:
                 req_buf += ", " + ",".join([("%s=%s" % it) for it in list(variables.items())])
             while True:
-                self.doquery(opcode=CTL_OP_REQ_NONCE, qdata=req_buf)
+                # Request additions to the MRU list
+                try:
+                    self.doquery(opcode=CTL_OP_READ_MRU, qdata=req_buf)
+                except Mode6Exception as e:
+                    if e.errorcode is None:
+                        raise e
+                    elif e.errorcode == CERR_UNKNOWNVAR:
+                        # None of the supplied prior entries match, so
+                        # toss them from our list and try again.
+                        if debug:
+                            warn("no overlap between %d prior entries and server MRU list\n" % len(self.mrustats))
+                        self.mrustats = []
+                        restarted_count += 1
+                        if restarted_count > 8:
+                            raise Mode6Exception(SERR_STALL)
+                        if debug:
+                            warn("--->   Restarting from the beginning, retry #%u\n" % restarted_count)
+                    elif e.errorcode == CERR_UNKNOWNVAR:
+                        e.message = "CERR_UNKNOWNVAR from ntpd but no priors given."
+                        raise e
+                    elif e.errorcode == CERR_BADVALUE:
+                        if cap_frags:
+                            cap_frags = False;
+                            if debug:
+                                warn("Reverted to row limit from fragments limit.\n");
+			else:
+                            # ntpd has lower cap on row limit
+                            self.ntpd_row_limit -= 1
+                            limit = min(limit, ntpd_row_limit)
+                            if debug:
+                                warn("Row limit reduced to %d following CERR_BADVALUE.\n" % limit)
+                    elif e.errorcode in (ERR_INCOMPLETE, ERR_TIMEOUT):
+			 # Reduce the number of rows/frags requested by
+			 # half to recover from lost response fragments.
+			if cap_frags:
+                            frags = max(2, frags / 2)
+                            if debug:
+                                warn("Frag limit reduced to %d following incomplete response.\n"% frags)
+			else:
+                            limit = max(2, limit / 2);
+                            if debug:
+                                warn("Row limit reduced to %d following incomplete response.\n" % limit)
+                    elif e.errorcode:
+                        raise e
+
+		# This is a cheap cop-out implementation of rawmode
+		# output for mrulist.  A better approach would be to
+		# dump similar output after the list is collected by
+		# ntpq with a continuous sequence of indexes.  This
+		# cheap approach has indexes resetting to zero for
+		# each query/response, and duplicates are not
+		# coalesced.
+                if rawhook:
+                    rawhook(self.response)
+                    continue
+
+		ci = 0;
+		have_addr_older = false;
+		have_last_older = false;
+                self.__parse_varlist()
+                # To be completed...
         except KeyboardInterrupt:
             mrulist_interrupted = True
 

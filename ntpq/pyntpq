@@ -1187,7 +1187,14 @@ usage: config_from_file <configuration filename>
     def do_mrulist(self, line):
         "display the list of most recently seen source addresses, tags mincount=... resall=0x... resany=0x..."
 	self.say("Ctrl-C will stop MRU retrieval and display partial results.\n")
-        self.session.mrulist()
+        try:
+            self.session.mrulist()
+        except Mode6Exception as e:
+            # Giving up after 8 restarts from the beginning.
+            # With high-traffic NTP servers, this can occur if the
+            # MRU list is limited to less than about 16 seconds' of
+            # entries.  See the 'mru' ntp.conf entry.
+            self.warn(e.message + "\n")
 
     def help_mrulist(self):
         self.say("""\
