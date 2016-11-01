@@ -220,9 +220,13 @@ The response payload is a textual varlist.
 This request is used to change the configuration of ntpd without
 restarting the daemon.  It requires authentication.
 
-The request payload should be a line of text in the syntax of the
-ntp.conf configuration file.  The response payload will be either
-an error message or the string "Config Succeeded".
+The request payload should be a line line of text in the syntax of the
+ntp.conf configuration file.  The response payload will begin with either
+an error message or the string "Config Succeeded", followed by a NUL.
+
+Note: Due to an implementation error, the response packet may and
+typically will contain trailing garbage. Implementations should
+expect this and truncate it at the first NUL.
 
 === CTL_OP_READ_MRU ===
 

@@ -8,7 +8,7 @@
 # SPDX-License-Identifier: BSD-2-clause
 from __future__ import print_function, division
 
-import os, sys, getopt, cmd, errno, curses, curses.ascii
+import os, sys, getopt, cmd, errno, curses, curses.ascii, re
 import socket, select, struct, shlex, time, hashlib
 
 from ntp.packet import *
@@ -1138,7 +1138,23 @@ usage: lopeers
 
     def do_config(self, line):
         "send a remote configuration command to ntpd"
-        self.say(self.session.config(line) + "\n")
+        if self.debug > 2:
+            self.warn("In Config\nKeyword = :config\nCommand = %s\n" % line)
+        try:
+            response = self.session.config(line)
+            m = re.match("column ([0-9]+) syntax error", response)
+            if m:
+                col = int(m.group(1))
+                if col >= 0 and col <= len(line):
+                    if self.interactive:
+                        self.say("_" * (len(self.prompt) + 2 + col))
+                    else:
+                        self.say(line + "\n")
+                    self.say("_" * (col- 1))
+                self.say("^\n")
+            self.say(response + "\n")
+        except Mode6Exception as e:
+            print(e.message)
 
     def help_config(self):
         self.say("""\
