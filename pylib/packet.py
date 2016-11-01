@@ -5,7 +5,8 @@
 #
 # SPDX-License-Identifier: BSD-2-clause
 from __future__ import print_function, division
-import sys, socket, select, struct, curses.ascii, collections, getpass, hashlib
+import sys, socket, select, struct, curses.ascii, collections
+import getpass, hashlib, time
 
 # General notes on Python 2/3 compatibility:
 #
@@ -113,18 +114,7 @@ from ntp_control import *
 # of requests and multipacket responses to each.
 MAXFRAGS        = 32
 
-# These things are ours.  They shadow the CERR_* definitions in ntp_control.h
-
-NERR_UNSPEC     = 0
-NERR_PERMISSION = 1
-NERR_BADFMT     = 2
-NERR_BADOP      = 3
-NERR_BADASSOC   = 4
-NERR_UNKNOWNVAR = 5
-NERR_BADVALUE   = 6
-NERR_RESTRICT   = 7
-
-NERR_NORESOURCE = NERR_PERMISSION       # wish there was a different code
+MRU_REPORT_SECS	= 5
 
 class Packet:
     "Encapsulate an NTP fragment"
@@ -251,7 +241,9 @@ SERR_BADLENGTH = "***Response length should have been a multiple of 4"
 SERR_BADKEY = "***Invalid key identifier"
 SERR_INVPASS = "***Invalid password"
 SERR_NOKEY = "***Key not found"
-SERR_AUTH = "***Server disallowed request (authentication?)"
+SERR_BADNONCE = "***Unexpected nonce response format"
+SERR_BADPARM = "***Unknown parameter %s"
+SERR_NOCRED = "***No credentials"
 
 def dump_hex_printable(xdata):
     "Dump a packet in hex, in a familiar hex format"
@@ -282,6 +274,7 @@ class Mode6Exception(BaseException):
 
 class Mode6Session:
     "A session to a host"
+    MRU_ROW_LIMIT	= 256
 
     def __init__(self):
         self.debug = 0
@@ -292,7 +285,7 @@ class Mode6Session:
         self.always_auth       = False  # Always send authenticated requests
         self.keytype = "MD5"
         self.keyid = None
-        self.password = None
+        self.passwd = None
         self.hostname = None
         self.isnum = False
         self.sock = None
@@ -300,6 +293,8 @@ class Mode6Session:
         self.sequence = 0
         self.response = ""
         self.rstatus = 0
+        self.mrustats = []
+        self.ntpd_row_limit = Mode6Session.MRU_ROW_LIMIT
 
     def close(self):
         if self.sock:
@@ -382,6 +377,24 @@ class Mode6Session:
             return False
         return True
 
+    def password(self):
+	"Get a keyid and the password if we don't have one."
+        if self.keyid is None:
+            try:
+                key_id = int(input("Keyid: "))
+                # FIXME: Magic number, yuck
+                if key_id == 0 or key_id > 65535:
+                    raise Mode6Exception(SERR_BADKEY)
+            except ValueError:
+                raise Mode6Exception(SERR_BADKEY)
+            self.keyid = key_id
+
+        if self.passwd is None:
+            passwd = getpass.getpass("%s Password: " % self.keytype)
+            if passwd is None:
+                raise Mode6Exception(SERR_INVPASS)
+            self.passwd = passwd
+
     def sendpkt(self, xdata):
         "Send a packet to the host."
         while len(xdata) % 4:
@@ -412,6 +425,7 @@ class Mode6Session:
         pkt = Mode6Packet(self, opcode, associd, qdata)
 
         # If we have data, pad it out to a 32-bit boundary.
+        # Do not include these in the payload count.
         if pkt.extension:
             pkt.extension = polybytes(pkt.extension)
             while ((Packet.HEADER_LEN + len(pkt.extension)) & 3):
@@ -423,6 +437,9 @@ class Mode6Session:
         if not auth and not self.always_auth:
             return pkt.send()
 
+        if self.keyid is None or self.passwd is None:
+            raise Mode6Exception(SERR_NOCRED)
+
 	# Pad out packet to a multiple of 8 octets to be sure
 	# receiver can handle it. Note: these pad bytes should
         # *not* be counted in the header count field.
@@ -430,22 +447,6 @@ class Mode6Session:
         while ((Packet.HEADER_LEN + len(pkt.extension)) & 7):
             pkt.extension += b"\x00"
         pkt.extension = polystr(pkt.extension)
-
-	# Get the keyid and the password if we don't have one.
-        if self.keyid is None:
-            try:
-                key_id = int(input("Keyid: "))
-                # FIXME: Magic number, yuck
-                if key_id == 0 or key_id > 65535:
-                    raise Mode6Exception(SERR_BADKEY)
-            except ValueError:
-                raise Mode6Exception(SERR_BADKEY)
-            self.keyid = key_id
-
-            passwd = getpass.getpass("%s Password: " % self.keytype)
-            if passwd is None:
-                raise Mode6Exception(SERR_INVPASS)
-            self.passwd = passwd
 
         # Do the encryption.
         hasher = hashlib.new(self.keytype)
@@ -697,10 +698,44 @@ class Mode6Session:
         # Copes with an implementation error - ntpd uses putdata without
         # setting the size correctly.
         if not self.response:
-            raise Mode6Exception(SERR_AUTH)
+            raise Mode6Exception(SERR_PERMISSION)
         elif b"\x00" in self.response:
             self.response = self.response[:self.response.index(b"\x00")]
         self.response = self.response.rstrip()
         return self.response == "Config Succeeded"
+
+    def mrulist(self, variables):
+        "Retrieve MRU list data"
+        self.doquery(opcode=CTL_OP_REQ_NONCE)
+        if not self.response.startswith("nonce="):
+            raise Mode6Exception(SERR_BADNONCE)
+        nonce = self.response
+	nonce_uses = 0
+	restarted_count = 0
+	mru_count = 0
+	c_mru_l_rc = False
+	list_complete = False
+	have_now = False
+	cap_frags = True
+	got = 0
+	ri = 0
+
+        for k in list(variables.keys()):
+            if k in ("mincount","resall","resany","maxlstint","laddr","sort"):
+                continue
+            else:
+                raise Mode6Exception(SERR_BADPARAM % k)
+	mrulist_interrupted = False
+        try:
+            next_report = time.time() + MRU_REPORT_SECS
+            limit = min(3 * MAXFRAGS, self.ntpd_row_limit)
+            frags = MAXFRAGS;
+            req_buf = "nonce=%s, frags=%d" % (nonce, frags)
+            if varlist:
+                req_buf += ", " + ",".join([("%s=%s" % it) for it in list(variables.items())])
+            while True:
+                self.doquery(opcode=CTL_OP_REQ_NONCE, qdata=req_buf)
+        except KeyboardInterrupt:
+            mrulist_interrupted = True
 
 # end
