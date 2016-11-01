@@ -591,7 +591,10 @@ usage: poll [ n ] [ verbose ]
 
     def do_passwd(self, line):
         "specify a password to use for authenticated requests"
-        self.warn("Authentication is not yet implemented\n")
+        try:
+            self.session.password()
+        except Mode6Exception as e:
+            print(e.message)
 
     def help_passwd(self):
         self.say("""\
@@ -1138,6 +1141,11 @@ usage: lopeers
 
     def do_config(self, line):
         "send a remote configuration command to ntpd"
+        try:
+            self.session.password()
+        except Mode6Exception as e:
+            print(e.message)
+            return
         if self.debug > 2:
             self.warn("In Config\nKeyword = :config\nCommand = %s\n" % line)
         try:
@@ -1178,7 +1186,8 @@ usage: config_from_file <configuration filename>
 
     def do_mrulist(self, line):
         "display the list of most recently seen source addresses, tags mincount=... resall=0x... resany=0x..."
-        pass
+	self.say("Ctrl-C will stop MRU retrieval and display partial results.\n")
+        self.session.mrulist()
 
     def help_mrulist(self):
         self.say("""\
@@ -1188,6 +1197,11 @@ usage: mrulist [ tag=value ] [ tag=value ] [ tag=value ] [ tag=value ]
 
     def do_ifstats(self, line):
         "show statistics for each local address ntpd is using"
+        try:
+            self.session.password()
+        except Mode6Exception as e:
+            print(e.message)
+            return
         pass
 
     def help_ifstats(self):
@@ -1198,6 +1212,11 @@ usage: ifstats
 
     def do_reslist(self, line):
         "show ntpd access control list"
+        try:
+            self.session.password()
+        except Mode6Exception as e:
+            print(e.message)
+            return
         pass
 
     def help_reslist(self):
