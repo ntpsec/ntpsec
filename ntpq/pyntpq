@@ -1502,5 +1502,5 @@ if __name__ == '__main__':
                     session.close()
         raise SystemExit(0)
     except KeyboardInterrupt:
-        interpeter.say("\n")
+        interpreter.say("\n")
 # end
