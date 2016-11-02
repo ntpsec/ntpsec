@@ -511,9 +511,9 @@ struct pkt {
 /*
  * Stuff for extracting things from li_vn_mode
  */
-#define	PKT_MODE(li_vn_mode)	((uint8_t)((li_vn_mode) & 0x7))
-#define	PKT_VERSION(li_vn_mode)	((uint8_t)(((li_vn_mode) >> 3) & 0x7))
-#define	PKT_LEAP(li_vn_mode)	((uint8_t)(((li_vn_mode) >> 6) & 0x3))
+#define	PKT_MODE(li_vn_mode)	((li_vn_mode) & 0x7)
+#define	PKT_VERSION(li_vn_mode)	(((li_vn_mode) >> 3) & 0x7)
+#define	PKT_LEAP(li_vn_mode)	(((li_vn_mode) >> 6) & 0x3)
 
 /*
  * Stuff for putting things back into li_vn_mode in packets and vn_mode
@@ -752,6 +752,8 @@ struct restrict_u_tag {
 #define	V6_SIZEOF_RESTRICT_U	(offsetof(restrict_u, u)	\
 				 + sizeof(res_addr6))
 
+/* pythonize-header: stop ignoring */
+
 /*
  * Access flags
  */
@@ -778,6 +780,8 @@ struct restrict_u_tag {
 				 RES_NOMODIFY | RES_KOD |	\
 				 RES_MSSNTP | RES_FLAKE |	\
 				 RES_NOMRULIST)
+
+/* pythonize-header: start ignoring */
 
 /*
  * Match flags

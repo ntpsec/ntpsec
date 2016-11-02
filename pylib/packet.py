@@ -948,9 +948,6 @@ class Mode6Session:
         if sorter:
             span.entries.sort(key=sorter)
 
-        # FIXME: The following enables an eyeball check of the parse
-        print(repr(span))
-
         return span
 
 # end
