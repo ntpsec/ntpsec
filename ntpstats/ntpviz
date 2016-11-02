@@ -1100,10 +1100,10 @@ Python by ESR, concept and GNUPLOT code by Dan Drown.
                 help="Start time in POSIX (seconds) or ISO8601",
                 type=str)
     parser.add_argument('-w', '--width',
-                choices=['s', 'm', 'w'],
+                choices=['s', 'm', 'l'],
                 default='m',
                 dest='width',
-                help="PNG width: s, m, or w",
+                help="PNG width: s, m, or l",
                 type=str)
     group.add_argument( '--all-peer-jitters',
                 default = False,

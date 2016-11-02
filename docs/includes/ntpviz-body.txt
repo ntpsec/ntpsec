@@ -74,9 +74,9 @@ subset of comparative plots for multiple directories.
     ignoring a few spikes in the data.
 
 -w SIZE or --width SIZE::
-    Set the size of the output plots.  SIZE can be one of 's', 'm', or 'w'.
+    Set the size of the output plots.  SIZE can be one of 's', 'm', or 'l'.
     's' is for browser on small screens (1024x768).  'm' for medium screens
-    (1388x768).  'w' for wide screens (1920x1080).  'm' is the default.
+    (1388x768).  'l' for large screens (1920x1080).  'm' is the default.
 
 -D DLVL or --debug DLVL::
     Set the debug level to DLVL.  Lsrger DLVL leads to more verbosity. +
