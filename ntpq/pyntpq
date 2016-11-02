@@ -1198,7 +1198,13 @@ usage: config_from_file <configuration filename>
         else:
             mruhook = None
         try:
-            self.session.mrulist(mruhook)
+            span = self.session.mrulist(mruhook)
+            if not self.rawmode:
+                oracle = MRUSummary(interpreter.showhostnames)
+                self.say(MRUSummary.header + "\n")
+                self.say(("=" * MRUSummary.width) + "\n")
+                for entry in span.entries:
+                    self.say(oracle.summary(entry) + "\n")
         except Mode6Exception as e:
             # Giving up after 8 restarts from the beginning.
             # With high-traffic NTP servers, this can occur if the

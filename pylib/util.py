@@ -10,7 +10,7 @@ import ntp.ntpc
 
 from ntp.packet import *
 
-def canonicalize_dns(hostname):
+def portsplit(hostname):
     portsuffix = ""
     if hostname.count(":") == 1:		# IPv4 with appended port
         (hostname, portsuffix) = hostname.split(":")
@@ -22,6 +22,10 @@ def canonicalize_dns(hostname):
             portsuffix = hostname[portsep:]
             hostname = hostname[:portsep]
             hostname = hostname[1:-1]	# Strip brackets
+    return (hostname, portsuffix)
+
+def canonicalize_dns(hostname):
+    (hostname, portsuffix) = portsplit(hostname)
     try:
         ai = socket.getaddrinfo(hostname, None, 0, 0, 0, socket.AI_CANONNAME)
     except socket.gaierror as (s, _e):
@@ -246,5 +250,39 @@ class PeerSummary:
              reach, estdelay, estoffset,
              jd))
         return line
+
+class MRUSummary:
+    "Reusable class for MRU entry summary generation."
+    def __init__(self, showhostnames):
+        self.showhostnames = showhostnames	# If false, display numeric IPs
+        self.now = time.time()
+
+    header = "lstint avgint rstr r m v  count rport remote address"
+
+    width = 78
+
+    def summary(self, entry):
+        lstint = int(self.now - entry.last + 0.5)
+        active = int(entry.last - entry.first + 0.5)
+        favgint = active / entry.ct
+        avgint = int(favgint + 0.5)
+        stats = "%6d" % lstint
+        if 5 < avgint or 1 == entry.count:
+            stats += " %6d" % avgint
+        else:
+            stats += " %6.2f" % favgint
+        if entry.rs & RES_KOD:
+            rscode = 'K'
+        elif entry.rs & RES_LIMITED:
+            rscode = 'L'
+        else:
+            rscode = '.'
+        (dns, port) = portsplit(entry.addr)
+        if self.showhostnames:
+            dns = canonicalize_dns(dns)
+        stats += " %4hx %c %d %d %6d %5s %s" % \
+                 (entry.rs, rscode, PKT_MODE(entry.mv), PKT_VERSION(entry.mv),
+                  entry.ct, port[1:], dns)
+        return stats
 
 # end
