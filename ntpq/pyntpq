@@ -1,9 +1,12 @@
 #!/usr/bin/env python
 #
-# pyntpq - query an NTP server using mode 6 commands
+# ntpq - query an NTP server using mode 6 commands
 #
-# This is a direct translation of the ntpq C code, initially written to work as
-# much like it as possible. Eventually it will replace the C version.
+# Freely translated from the old C ntpq code by ESR.  The idea was to
+# cleanly separate ntpq-that-was into a thin front-end layer handling
+# mainly command interpretation and a back-end that presents the take
+# from ntpd as objects that can be re-used by other front
+# ends. Reusable pieces live in pylib.
 #
 # SPDX-License-Identifier: BSD-2-clause
 from __future__ import print_function, division
@@ -176,7 +179,7 @@ usage: help [ command ]
         try:
             self.peers = self.session.readstat()
         except Mode6Exception as e:
-            print(e.message)
+            self.warn(e.message + "\n")
             return False
         except IOError as e:
             print(e.strerror)
@@ -300,7 +303,7 @@ usage: help [ command ]
             try:
                 variables = self.session.readvar(peer.associd)
             except Mode6Exception as e:
-                print(e.message)
+                self.warn(e.message + "\n")
                 return
             except IOError as e:
                 print(e.strerror)
@@ -358,7 +361,8 @@ usage: help [ command ]
             return ()
         return (lo, hi)
 
-    def __printvars(self, variables, dtype, quiet):
+    def printvars(self, variables, dtype, quiet):
+        "Dump variables in raw (actually, semi-cooked) mode."
         if self.rawmode:
             if not quiet:
                 self.say("status=0x%04x,\n" % self.session.rstatus)
@@ -443,7 +447,7 @@ usage: help [ command ]
         try:
             variables = self.session.readvar(associd, varlist, op)
         except Mode6Exception as e:
-            print(e.message)
+            self.warn(e.message + "\n")
             return False
         except IOError as e:
             print(e.strerror)
@@ -461,7 +465,7 @@ usage: help [ command ]
             return True
 	if not quiet:
             self.say("associd=%d " % associd);
-	self.__printvars(variables, type, quiet)
+	self.printvars(variables, type, quiet)
 	return True;
 
     # Unexposed helper tables and functions end here
@@ -492,7 +496,7 @@ usage: timeout [ msec ]
         try:
             queried = self.session.readvar(associd, [v[0] for v in variables])
         except Mode6Exception as e:
-            print(e.message)
+            self.warn(e.message + "\n")
             return
         except IOError as e:
             print(e.strerror)
@@ -594,7 +598,7 @@ usage: poll [ n ] [ verbose ]
         try:
             self.session.password()
         except Mode6Exception as e:
-            print(e.message)
+            self.warn(e.message + "\n")
 
     def help_passwd(self):
         self.say("""\
@@ -1144,7 +1148,7 @@ usage: lopeers
         try:
             self.session.password()
         except Mode6Exception as e:
-            print(e.message)
+            self.warn(e.message + "\n")
             return
         if self.debug > 2:
             self.warn("In Config\nKeyword = :config\nCommand = %s\n" % line)
@@ -1162,7 +1166,7 @@ usage: lopeers
                 self.say("^\n")
             self.say(self.session.response + "\n")
         except Mode6Exception as e:
-            print(e.message)
+            self.warn(e.message + "\n")
 
     def help_config(self):
         self.say("""\
@@ -1187,8 +1191,14 @@ usage: config_from_file <configuration filename>
     def do_mrulist(self, line):
         "display the list of most recently seen source addresses, tags mincount=... resall=0x... resany=0x..."
 	self.say("Ctrl-C will stop MRU retrieval and display partial results.\n")
+        if self.rawmode:
+            mruhook = lambda v: self.printvars(variables=v,
+                                               dtype=TYPE_SYS,
+                                               quiet=True)
+        else:
+            mruhook = None
         try:
-            self.session.mrulist()
+            self.session.mrulist(mruhook)
         except Mode6Exception as e:
             # Giving up after 8 restarts from the beginning.
             # With high-traffic NTP servers, this can occur if the
@@ -1207,7 +1217,7 @@ usage: mrulist [ tag=value ] [ tag=value ] [ tag=value ] [ tag=value ]
         try:
             self.session.password()
         except Mode6Exception as e:
-            print(e.message)
+            self.warn(e.message + "\n")
             return
         pass
 
@@ -1222,7 +1232,7 @@ usage: ifstats
         try:
             self.session.password()
         except Mode6Exception as e:
-            print(e.message)
+            self.warn(e.message + "\n")
             return
         pass
 

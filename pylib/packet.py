@@ -1,6 +1,12 @@
 #
 # packet.py - definitions and classes for Python querying of NTP
 #
+# Freely translated from the old C ntpq code by ESR, with comments
+# preserved.  The idea was to cleanly separate ntpq-that-was into a
+# thin front-end layer handling mainly command interpretation and a
+# back-end that presents the take from ntpd as objects that can be
+# re-used by other front ends. Other reusable pieces live in util.py.
+#
 # This code should be Python2-vs-Python-3 agnostic.  Keep it that way!
 #
 # SPDX-License-Identifier: BSD-2-clause
@@ -246,6 +252,7 @@ SERR_BADPARM = "***Unknown parameter %s"
 SERR_NOCRED = "***No credentials"
 SERR_SERVER = "***Server error code"
 SERR_STALL = "***No response, probably high-traffic server with low MRU limit"
+SERR_BADTAG = "***Bad MRU tag %s"
 
 def dump_hex_printable(xdata):
     "Dump a packet in hex, in a familiar hex format"
@@ -269,6 +276,38 @@ def dump_hex_printable(xdata):
             i += 1
         sys.stdout.write("\n")
         llen -= rowlen
+
+class MRUEntry:
+    "A traffic entry for an MRU list."
+    def __init__(self):
+        self.addr = None	# text of IPv4 or IPv6 address and port
+        self.last = None	# timestamp of last receipt
+        self.first = None	# timestamp of first receipt
+        self.ct = 0		# count of packets received
+        self.mv = None		# mode and version
+        self.rs = None		# restriction mask (RES_* bits)
+    def matches(self, other):
+        return self.last == other.last and self.addr == other.addr
+    def __repr__(self):
+        return "<MRUentry: " + repr(self.__dict__) + ">"
+
+class MRUSpan:
+    "A sequence of address-timespan pairs returned by ntpd in one response."
+    def __init__(self):
+        self.older = MRUEntry()	# If not None, an MRUEntry object
+        self.entries = []	# A list of MRUEntry objects
+        self.now = None		# server timestamp marking end of operation
+        self.last_newest = None	# timestamp same as last.# of final entry
+    def breadcrumb(self, i):
+        e = self.entries[i]
+        return ", addr.%d=%s, last.%d=%s" % (i, e.addr, i, e.last)
+
+    def is_complete(self):
+        "Is the server done shipping entries for this span?"
+        return self.last_newest is not None
+    def __repr__(self):
+        return "<MRUSpan: older=%s entries=%s now=%s last_newest=%s>" \
+               % (self.older, self.entries, self.now, self.last_newest)
 
 class Mode6Exception(BaseException):
     def __init__(self, message, errorcode=0):
@@ -296,7 +335,7 @@ class Mode6Session:
         self.sequence = 0
         self.response = ""
         self.rstatus = 0
-        self.mrustats = []
+        self.mruspans = []
         self.ntpd_row_limit = Mode6Session.MRU_ROW_LIMIT
 
     def close(self):
@@ -704,51 +743,62 @@ class Mode6Session:
         self.response = self.response.rstrip()
         return self.response == "Config Succeeded"
 
-    def mrulist(self, variables, rawhook=None):
-        "Retrieve MRU list data"
+    def fetch_nonce(self):
         self.doquery(opcode=CTL_OP_REQ_NONCE)
         if not self.response.startswith("nonce="):
             raise Mode6Exception(SERR_BADNONCE)
-        nonce = self.response
+        return self.response.strip()
+
+    def mrulist(self, variables, rawhook=None):
+        "Retrieve MRU list data"
 	nonce_uses = 0
 	restarted_count = 0
-	mru_count = 0
-	c_mru_l_rc = False
-	list_complete = False
-	have_now = False
 	cap_frags = True
-	got = 0
+        warn = sys.stderr.write
 
-        for k in list(variables.keys()):
-            if k in ("mincount","resall","resany","maxlstint","laddr","sort"):
-                continue
-            else:
-                raise Mode6Exception(SERR_BADPARAM % k)
+        if variables:
+            for k in list(variables.keys()):
+                if k in ("mincount", "resall", "resany",
+                         "maxlstint", "laddr", "sort"):
+                    continue
+                else:
+                    raise Mode6Exception(SERR_BADPARAM % k)
+        # FIXME: Do the reslist parameter mappings from the C version
+
+        nonce = self.fetch_nonce()
+
 	mrulist_interrupted = False
         try:
-            next_report = time.time() + MRU_REPORT_SECS
+            # Form the initial request
+            #next_report = time.time() + MRU_REPORT_SECS
             limit = min(3 * MAXFRAGS, self.ntpd_row_limit)
             frags = MAXFRAGS;
-            req_buf = "nonce=%s, frags=%d" % (nonce, frags)
-            if varlist:
-                req_buf += ", " + ",".join([("%s=%s" % it) for it in list(variables.items())])
+            req_buf = "%s, frags=%d" % (nonce, frags)
+            if variables:
+                parms = ", " + ",".join([("%s=%s" % it) for it in list(variables.items())])
+            else:
+                parms = ""
+            req_buf += parms
+
             while True:
                 # Request additions to the MRU list
                 try:
                     self.doquery(opcode=CTL_OP_READ_MRU, qdata=req_buf)
+                    recoverable_read_errors = False
                 except Mode6Exception as e:
+                    recoverable_read_errors = True
                     if e.errorcode is None:
                         raise e
                     elif e.errorcode == CERR_UNKNOWNVAR:
                         # None of the supplied prior entries match, so
                         # toss them from our list and try again.
-                        if debug:
+                        if self.debug:
                             warn("no overlap between %d prior entries and server MRU list\n" % len(self.mrustats))
                         self.mrustats = []
                         restarted_count += 1
                         if restarted_count > 8:
                             raise Mode6Exception(SERR_STALL)
-                        if debug:
+                        if self.debug:
                             warn("--->   Restarting from the beginning, retry #%u\n" % restarted_count)
                     elif e.errorcode == CERR_UNKNOWNVAR:
                         e.message = "CERR_UNKNOWNVAR from ntpd but no priors given."
@@ -756,28 +806,29 @@ class Mode6Session:
                     elif e.errorcode == CERR_BADVALUE:
                         if cap_frags:
                             cap_frags = False;
-                            if debug:
+                            if self.debug:
                                 warn("Reverted to row limit from fragments limit.\n");
 			else:
                             # ntpd has lower cap on row limit
                             self.ntpd_row_limit -= 1
                             limit = min(limit, ntpd_row_limit)
-                            if debug:
+                            if self.debug:
                                 warn("Row limit reduced to %d following CERR_BADVALUE.\n" % limit)
                     elif e.errorcode in (ERR_INCOMPLETE, ERR_TIMEOUT):
 			 # Reduce the number of rows/frags requested by
 			 # half to recover from lost response fragments.
 			if cap_frags:
                             frags = max(2, frags / 2)
-                            if debug:
+                            if self.debug:
                                 warn("Frag limit reduced to %d following incomplete response.\n"% frags)
 			else:
                             limit = max(2, limit / 2);
-                            if debug:
+                            if self.debug:
                                 warn("Row limit reduced to %d following incomplete response.\n" % limit)
                     elif e.errorcode:
                         raise e
 
+                # Comment from the C code:
 		# This is a cheap cop-out implementation of rawmode
 		# output for mrulist.  A better approach would be to
 		# dump similar output after the list is collected by
@@ -785,15 +836,84 @@ class Mode6Session:
 		# cheap approach has indexes resetting to zero for
 		# each query/response, and duplicates are not
 		# coalesced.
+                variables = self.__parse_varlist()
                 if rawhook:
-                    rawhook(self.response)
+                    rawhook(variables)
                     continue
 
-		ci = 0;
-		have_addr_older = false;
-		have_last_older = false;
-                self.__parse_varlist()
-                # To be completed...
+                # Deserialize the contents of one response
+                span = MRUSpan()
+                for (tag, val) in variables.items():
+                    if tag =="addr.older":
+                        if span.older.last is None:
+                            if self.debug:
+                                warn("addr.older %s before last.older\n" % val)
+                            return False
+                        span.older.addr = val
+                        continue
+                    elif tag =="last.older":
+                        span.older.addr = val
+                        continue
+                    elif tag =="now":
+                        span.now = val
+                        continue
+                    elif tag =="last.newest":
+                        span.last_newest = val
+                        continue
+                    for prefix in ("addr", "last", "ct", "mv", "rs"):
+                        if tag.startswith(prefix + "."):
+                            (member, idx) = tag.split(".")
+                            try:
+                                idx = int(idx)
+                            except ValueError:
+                                raise Mode6Exception(SERR_BADTAG % tag)
+                            if idx >= len(span.entries):
+                                span.entries.append(MRUEntry())
+                            setattr(span.entries[-1], prefix, val)
+
+                # Now try to glue it to the history
+                # FIXME: The following enables an eyeball check of the parse
+                print(repr(span))
+
+                # If we've seen the end sentinel on the span, break out
+                if span.is_complete():
+                    break
+
+		# Snooze for a bit between queries to let ntpd catch
+		# up with other duties.
+                time.sleep(0.05)
+
+		# If there were no errors, increase the number of rows
+		# to a maximum of 3 * MAXFRAGS (the most packets ntpq
+		# can handle in one response), on the assumption that
+		# no less than 3 rows fit in each packet, capped at 
+		# our best guess at the server's row limit.
+                if not recoverable_read_errors:
+                    if cap_frags:
+                        frags = min(MAXFRAGS, frags + 1)
+                    else:
+                        limit = min(3 * MAXFRAGS,
+                                    ntpd_row_limit,
+                                    max(limit + 1,
+                                        limit * 33 / 32))
+
+		# prepare next query with as many address and last-seen
+		# timestamps as will fit in a single packet.
+		req_buf = "%s, %s=%d%s" % \
+                          (nonce,
+                           "frags" if cap_frags else "limit",
+                           frags if cap_frags else limit,
+                           parms)
+		nonce_uses += 1
+                if nonce_uses >= 4:
+                    nonce = fetch_nonce()
+                nonce_uses = 0
+                for i in range(len(span.entries)):
+                    incr = span.breadcrumb(i)
+                    if len(req_buf) + len(incr) >= CTL_MAX_DATA_LEN:
+                        break
+                    else:
+                        req_buf += incr
         except KeyboardInterrupt:
             mrulist_interrupted = True
 
