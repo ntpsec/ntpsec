@@ -13,6 +13,7 @@
 from __future__ import print_function, division
 import sys, socket, select, struct, curses.ascii, collections
 import getpass, hashlib, time
+from ntpc import lfptofloat
 
 # General notes on Python 2/3 compatibility:
 #
@@ -253,6 +254,7 @@ SERR_NOCRED = "***No credentials"
 SERR_SERVER = "***Server error code"
 SERR_STALL = "***No response, probably high-traffic server with low MRU limit"
 SERR_BADTAG = "***Bad MRU tag %s"
+SERR_BADSORT = "***Sort order %s is not implemented"
 
 def dump_hex_printable(xdata):
     "Dump a packet in hex, in a familiar hex format"
@@ -286,6 +288,8 @@ class MRUEntry:
         self.ct = 0		# count of packets received
         self.mv = None		# mode and version
         self.rs = None		# restriction mask (RES_* bits)
+    def avgint(self):
+        return (e.last - e.first) / e.ct
     def __repr__(self):
         return "<MRUentry: " + repr(self.__dict__)[1:-1] + ">"
 
@@ -746,14 +750,36 @@ class Mode6Session:
 	restarted_count = 0
 	cap_frags = True
         warn = sys.stderr.write
+        sorter = None
 
         if variables:
+            if "sort" in variables:
+                sorter = variables["sort"]
+                del variables["sort"]
+                # FIXME: implement sorting by address, in case anyone cares
+                sortdict = {
+                "lstint" : lambda e: e.last,		# lstint ascending
+                "-lstint" : lambda e: -e.last,		# lstint descending
+                "avgint" : lambda e: e.avgint(),	# avgint ascending
+                "-avgint" : lambda e: -e.avgint(),	# avgint descending
+                "addr" : None,			# IPv4 asc. then IPv6 asc.
+                "-addr" : None,			# IPv6 desc. then IPv4 desc.
+                "count" : lambda e: e.ct,	# hit count ascending
+                "-count": lambda e: -e.ct,	# hit count descending
+                }
+                if sorter == "listint":
+                    sorter = None
+                if sorter is not None:
+                    sorter = sortdict.getkey(key)
+                    if sorter == None:
+                        raise Mode6Exception(BAD_SORT % key)
             for k in list(variables.keys()):
                 if k in ("mincount", "resall", "resany",
                          "maxlstint", "laddr", "sort"):
                     continue
                 else:
                     raise Mode6Exception(SERR_BADPARAM % k)
+
         # FIXME: Do the reslist parameter mappings from the C version
 
         nonce = self.fetch_nonce()
@@ -839,7 +865,7 @@ class Mode6Session:
                 highwater = len(span.entries)
                 for (tag, val) in variables.items():
                     if tag =="now":
-                        span.now = val
+                        span.now = lfptofloat(val)
                         continue
                     elif tag == "last.newest":
                         continue
@@ -852,6 +878,8 @@ class Mode6Session:
                                 raise Mode6Exception(SERR_BADTAG % tag)
                             if idx >= len(span.entries):
                                 span.entries.append(MRUEntry())
+                            if type(val) != type(0) and val.startswith("0x"):
+                                val = lfptofloat(val)
                             setattr(span.entries[-1], prefix, val)
 
                 # If we've seen the end sentinel on the span, break out
@@ -915,6 +943,10 @@ class Mode6Session:
         deletia.sort(reverse=True)
         for i in deletia:
             span.entries.pop(i)
+
+        # Sort for presentation
+        if sorter:
+            span.entries.sort(key=sorter)
 
         # FIXME: The following enables an eyeball check of the parse
         print(repr(span))
