@@ -267,7 +267,7 @@ class MRUSummary:
         favgint = active / entry.ct
         avgint = int(favgint + 0.5)
         stats = "%6d" % lstint
-        if 5 < avgint or 1 == entry.count:
+        if 5 < avgint or 1 == entry.ct:
             stats += " %6d" % avgint
         else:
             stats += " %6.2f" % favgint

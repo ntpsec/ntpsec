@@ -357,7 +357,7 @@ usage: help [ command ]
             return ()
         lo = self.__assoc_valid(tokens[0])
         hi = self.__assoc_valid(tokens[1])
-        if (hi < lo):
+        if (lo >= 0 and hi >= 0 and hi < lo):
             return ()
         return (lo, hi)
 
@@ -889,8 +889,9 @@ usage: showvars
     def do_readlist(self, line):
         "read the system or peer variables included in the variable list"
         associd = self.__assoc_valid(line)
-        qtype = TYPE_SYS if associd == 0 else TYPE_PEER
-        self.__dolist(self.uservars.keys(), associd, CTL_OP_READVAR, qtype)
+        if associd >= 0:
+            qtype = TYPE_SYS if associd == 0 else TYPE_PEER
+            self.__dolist(self.uservars.keys(), associd, CTL_OP_READVAR, qtype)
 
     def help_readlist(self):
         self.say("""\
@@ -921,8 +922,9 @@ usage: writelist [ assocID ]
     def do_readvar(self, line):
         "read system or peer variables"
         associd = self.__assoc_valid(line)
-        qtype = TYPE_SYS if associd == 0 else TYPE_PEER
-        self.__dolist(line.split()[1:], associd, CTL_OP_READVAR, qtype)
+        if associd >= 0:
+            qtype = TYPE_SYS if associd == 0 else TYPE_PEER
+            self.__dolist(line.split()[1:], associd, CTL_OP_READVAR, qtype)
 
     def help_readvar(self):
         self.say("""\
@@ -1021,8 +1023,10 @@ usage: mrv assocIDlow assocIDhigh [ name=value[,...] ]
 
     def do_clocklist(self, line):
         "read the clock variables included in the variable list"
-        self.__dolist(self.uservars.keys(),
-                      self.__assoc_valid(line), CTL_OP_READVAR, TYPE_CLOCK)
+        assoc = self.__assoc_valid(line)
+        if assoc >= 0:
+            self.__dolist(self.uservars.keys(),
+                          assoc, CTL_OP_READVAR, TYPE_CLOCK)
 
     def help_clocklist(self):
         self.say("""\
@@ -1042,8 +1046,9 @@ usage: cl [ assocID ]
 
     def do_clockvar(self, line):
         "read clock variables"
-        self.__dolist(line.split()[1:], self.__assoc_valid(line),
-                      CTL_OP_READCLOCK, TYPE_CLOCK)
+        assoc = self.__assoc_valid(line)
+        if assoc >= 0:
+            self.__dolist(line.split()[1:], assoc, CTL_OP_READCLOCK, TYPE_CLOCK)
 
     def help_clockvar(self):
         self.say("""\
