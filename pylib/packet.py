@@ -109,7 +109,7 @@ from ntp_control import *
 # ensure forward progress is made and loss isn't triggered too quickly
 # afterward.  While the lossless case gains only marginally with
 # MAXFRAGS == 96, the lossy case is a lot slower due to the repeated
-# timeouts.  Empirally, MAXFRAGS == 32 avoids most of the routine loss
+# timeouts.  Empirically, MAXFRAGS == 32 avoids most of the routine loss
 # on both the WiFi and UDP v6 tunnel tests and seems a good compromise.
 # This suggests some device in the path has a limit of 32 ~512 byte UDP
 # packets in queue.
@@ -286,28 +286,19 @@ class MRUEntry:
         self.ct = 0		# count of packets received
         self.mv = None		# mode and version
         self.rs = None		# restriction mask (RES_* bits)
-    def matches(self, other):
-        return self.last == other.last and self.addr == other.addr
     def __repr__(self):
-        return "<MRUentry: " + repr(self.__dict__) + ">"
+        return "<MRUentry: " + repr(self.__dict__)[1:-1] + ">"
 
-class MRUSpan:
+class MRUList:
     "A sequence of address-timespan pairs returned by ntpd in one response."
     def __init__(self):
-        self.older = MRUEntry()	# If not None, an MRUEntry object
         self.entries = []	# A list of MRUEntry objects
         self.now = None		# server timestamp marking end of operation
-        self.last_newest = None	# timestamp same as last.# of final entry
-    def breadcrumb(self, i):
-        e = self.entries[i]
-        return ", addr.%d=%s, last.%d=%s" % (i, e.addr, i, e.last)
-
     def is_complete(self):
         "Is the server done shipping entries for this span?"
-        return self.last_newest is not None
+        return self.now is not None
     def __repr__(self):
-        return "<MRUSpan: older=%s entries=%s now=%s last_newest=%s>" \
-               % (self.older, self.entries, self.now, self.last_newest)
+        return "<MRUList: entries=%s now=%s>" % (self.entries, self.now)
 
 class Mode6Exception(BaseException):
     def __init__(self, message, errorcode=0):
@@ -767,7 +758,7 @@ class Mode6Session:
 
         nonce = self.fetch_nonce()
 
-	mrulist_interrupted = False
+        span = MRUList()
         try:
             # Form the initial request
             #next_report = time.time() + MRU_REPORT_SECS
@@ -828,6 +819,9 @@ class Mode6Session:
                     elif e.errorcode:
                         raise e
 
+                # Parse the response
+                variables = self.__parse_varlist()
+
                 # Comment from the C code:
 		# This is a cheap cop-out implementation of rawmode
 		# output for mrulist.  A better approach would be to
@@ -836,31 +830,20 @@ class Mode6Session:
 		# cheap approach has indexes resetting to zero for
 		# each query/response, and duplicates are not
 		# coalesced.
-                variables = self.__parse_varlist()
                 if rawhook:
                     rawhook(variables)
-                    continue
 
-                # Deserialize the contents of one response
-                span = MRUSpan()
+                # Analyze the contents of this response into a span structure
+                last_older = None
+                addr_older = None
+                highwater = len(span.entries)
                 for (tag, val) in variables.items():
-                    if tag =="addr.older":
-                        if span.older.last is None:
-                            if self.debug:
-                                warn("addr.older %s before last.older\n" % val)
-                            return False
-                        span.older.addr = val
-                        continue
-                    elif tag =="last.older":
-                        span.older.addr = val
-                        continue
-                    elif tag =="now":
+                    if tag =="now":
                         span.now = val
                         continue
-                    elif tag =="last.newest":
-                        span.last_newest = val
+                    elif tag == "last.newest":
                         continue
-                    for prefix in ("addr", "last", "ct", "mv", "rs"):
+                    for prefix in ("addr", "last", "first", "ct", "mv", "rs"):
                         if tag.startswith(prefix + "."):
                             (member, idx) = tag.split(".")
                             try:
@@ -870,10 +853,6 @@ class Mode6Session:
                             if idx >= len(span.entries):
                                 span.entries.append(MRUEntry())
                             setattr(span.entries[-1], prefix, val)
-
-                # Now try to glue it to the history
-                # FIXME: The following enables an eyeball check of the parse
-                print(repr(span))
 
                 # If we've seen the end sentinel on the span, break out
                 if span.is_complete():
@@ -907,14 +886,39 @@ class Mode6Session:
 		nonce_uses += 1
                 if nonce_uses >= 4:
                     nonce = fetch_nonce()
-                nonce_uses = 0
+                    nonce_uses = 0
                 for i in range(len(span.entries)):
-                    incr = span.breadcrumb(i)
+                    e = self.entries[len(span.entries) - i - 1]
+                    incr += ", addr.%d=%s, last.%d=%s" % (i, e.addr, i, e.last)
                     if len(req_buf) + len(incr) >= CTL_MAX_DATA_LEN:
                         break
                     else:
                         req_buf += incr
         except KeyboardInterrupt:
-            mrulist_interrupted = True
+            pass	# We can test for interruption with is_complete()
+
+        # C ntpq's code for stitching together spans was absurdly
+        # overelaborate - all that dancing with last.older and
+        # addr.older was, as far as I can tell, just pointless.
+        # Much simpler to just run through the final list throwing
+        # out every entry with an IP address that is duplicated
+        # with a later most-recent-transmission time.
+        addrdict = {}
+        deletia = []
+        for (i, entry) in enumerate(span.entries):
+            if entry.addr not in addrdict:
+                addrdict[entry.addr] = []
+            addrdict[entry.addr].append((i, entry.last))
+        for addr in addrdict:
+            deletia += sorted(addrdict[addr], key=lambda x: x[1])[:-1]
+        deletia = [x[0] for x in deletia]
+        deletia.sort(reverse=True)
+        for i in deletia:
+            span.entries.pop(i)
+
+        # FIXME: The following enables an eyeball check of the parse
+        print(repr(span))
+
+        return span
 
 # end
