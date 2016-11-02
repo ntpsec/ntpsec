@@ -35,7 +35,10 @@ def canonicalize_dns(hostname):
     try:
         name = socket.getnameinfo(sockaddr, socket.NI_NAMEREQD)
     except socket.gaierror:
-        return canonname.lower() + portsuffix
+        # On OS X, canonname is empty for hosts without rDNS.
+        # Fall back to the hostname.
+        canonicalized = canonname or hostname
+        return canonicalized.lower() + portsuffix
     return name[0].lower() + portsuffix
 
 def termsize():
