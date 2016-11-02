@@ -690,15 +690,13 @@ class Mode6Session:
 
     def __parse_varlist(self):
         "Parse a response as a textual varlist."
-        # Trim trailing NULs from the text
-        response = self.response
-        while response.endswith(b"\x00"):
-            response = response[:-1]
         response = response.rstrip()
         items = []
         if response:
             for pair in response.split(","):
                 try:
+                    while pair.endswith(b"\x00"):
+                        pair = pair[:-1]
                     eq = pair.index("=")
                     var = pair[:eq].strip()
                     val = pair[eq+1:].strip()
