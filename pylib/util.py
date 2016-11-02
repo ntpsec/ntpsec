@@ -31,7 +31,7 @@ def canonicalize_dns(hostname):
     try:
         name = socket.getnameinfo(sockaddr, socket.NI_NAMEREQD)
     except socket.gaierror:
-        return canonname.lower() + portsuffix
+        return hostname.lower() + portsuffix
     return name[0].lower() + portsuffix
 
 def termsize():
