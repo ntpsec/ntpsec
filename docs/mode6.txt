@@ -61,7 +61,7 @@ synchronization packets by their Mode field, which has the value 6
       |                          Key Identifier                       |
       +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
       |                                                               |
-      |                            dgst (128)                         |
+      |                            MAC (128)                          |
       |                                                               |
       +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 -------------------------------------------------------------------------
@@ -313,7 +313,7 @@ next entry newer than referred to by last.1 and addr.1, and so on.
 If none of the referenced entries remain unchanged, the request fails
 and ntpq backs up to the next earlier set of entries to resync.
 
-Except for the first response, the response begins with confirmation
+Except for the first response, each response begins with confirmation
 of the entry that precedes the first additional entry provided:
 
 last.older::	hex l_fp timestamp matching one of the input
@@ -340,9 +340,11 @@ rs.#::		restriction mask (RES_* bits)
 
 The client should accept the values in any order, and ignore .#
 values which it does not understand, to allow a smooth path to
-future changes without requiring a new opcode.  Clients can rely
-on all *.0 values preceding any *.1 values, that is all values for
-a given index number are together in the response.
+future changes without requiring a new opcode.  To ensure this,
+ntpd occasionally issues a randomly-generated tag=value pair.
+
+Clients can rely on all *.0 values preceding any *.1 values, that is
+all values for a given index number are together in the response.
 
 The end of the response list is noted with one or two tag=value
 pairs.  Unconditionally:
@@ -354,15 +356,96 @@ If any entries were returned, now= is followed by:
 
 last.newest::	hex l_fp identical to last.# of the prior entry.
 
+Portions of the response side of the protocol (specifically the
+last.older, addr.older, and last.newest attributes) can be ignored by a
+client that is willing to accumulate an entire set of MRU list
+fragments and then perform stale-record elimination of its own before
+displaying or passing on the report (that is, as opposed to
+incremental display with an attempt to suppress stale records on the
+fly).  
+
 === CTL_OP_READ_ORDLIST_A ===
 
 This request is used for two purposes: to retrieve restriction lists
 and to retrieve interface statistics.  For the former use, the request
 payload should be the string "addr_restrictions"; for the latter case,
-the request payload should be empty.  Both uses require authentication.
-The response payload is, in both cases, a textual varlist.
+the request payload should be be "ifstats" of empty.  Both uses
+require authentication.  The response payload is, in both cases, a
+textual varlist.
 
-THIS SECTION IS NOT YET COMPLETE.
+A response payload consists of a list of attribute stanzas. Each
+stanza consists of the attributes with tags of the form "name.#', with
+# being replaced by a zero-origin integer literal that is the index of
+the stanza.
+
+Attributes within each stanza are deliberately issued in a random
+order, and ntpd occasionally issues an attribute with a
+randomly-generated name and value. This is an attempt to prevent Mode
+6 clients from making brittle assumptioons about the inventory of
+attrbutes and their transmission order.
+
+Clients can rely on all *.0 values preceding any *.1 values, that is
+all values for a given index number are together in the response.
+
+In a reslist stanza, elicited by "addr_restrictions", the elements are
+as follows:
+
+addr.#:: Address to which the restriction applies. May be IPV4 or
+	 IPV6.  Has no port suffix
+
+flags.#:: Space-separated list of flag names applying to the address.
+	  These flag names are the same as those used in the
+	  "restrict" directive of the configuration syntax.
+
+hits.#:: Packet count for the address
+
+mask.#:: Subnet mask qualifying the address to express a range.
+
+In an ifstats stanza, elicited by "ifstats" or an empty string,
+attributes are as follows:
+
+addr.#:: Address of the interface. May be IPV4 or
+	 IPV6. Has a port suffix.  May be a wildcard; extreme cases
+	 are 0.0.0.0 and [::].
+
+bcast.#:: Either a broadcast address associated with the interface or empty.
+
+en.#:: Integer literal. 1 if packets on this interface are processed, 0
+       if they are to be ignored.
+
+flags.#:: A hex literal that is a mask of flag bits on.
+          Flag mask values are described in a following table.
+
+mc.#:: Count of multicast transmissions.
+
+name.#:: The interface name, such as would occur in an ifconfig listing.
+
+pc.#:: Count of peers using this interface.
+
+rx.#:: Packet reception count.
+
+tl.#:: Last time-to-live specified on a send.
+
+tx.#:: Packet transmission count.
+
+txerr.#:: Packet transmission error count.
+
+up.#:: Uptime in seconds.
+
+.Interface flag bits in the flags.# attribute
+|==========================================================================
+|INT_UP		| 0x001	| Interface is up
+|INT_PPP	| 0x002	| Point-to-point interface
+|INT_LOOPBACK	| 0x004	| the loopback interface
+|INT_BROADCAST	| 0x008	| can broadcast out this interface
+|INT_MULTICAST	| 0x010	| can multicast out this interface
+|INT_BCASTOPEN	| 0x020	| broadcast receive socket is open
+|INT_MCASTOPEN	| 0x040	| multicasting enabled
+|INT_WILDCARD	| 0x080	| wildcard interface - usually skipped
+|INT_MCASTIF	| 0x100	| bound directly to MCAST address
+|INT_PRIVACY	| 0x200	| RFC 4941 IPv6 privacy address
+|INT_BCASTXMIT	| 0x400 | socket setup to allow broadcasts
+|==========================================================================
 
 === CTL_OP_REQ_NONCE ===
 
@@ -398,8 +481,7 @@ First, the password entered to use the signing key, then the request
 header fields, then the payload.
 
 The cryptographic hash is normally MD5, but if ntpd is built with
-OpenSSL support it is possible to select any of the hash types supported
-by that library on a per-key basis.
+OpenSSL support it is possible to use and generare SHA1 keys as well.
 
 '''''
 
