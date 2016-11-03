@@ -975,6 +975,6 @@ class Mode6Session:
 
     def ifstats(self):
         "Retrieve ifstats data."
-        print(self.__ordlist("ifstats"))
+        return self.__ordlist("ifstats")
 
 # end

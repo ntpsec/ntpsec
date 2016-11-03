@@ -339,7 +339,37 @@ class ReslistSummary:
         # want to make ntpd stop generating garbage
         for c in s:
             if not c.isalnum() and not c in "/.: \n":
-                print("Failed on %s" % repr(c))
+                return ''
+        return s
+
+class IfstatsSummary:
+    "Reusable class for ifstats entry summary generation."
+    header = """\
+    interface name                                        send
+ #  address/broadcast     drop flag ttl mc received sent failed peers   uptime
+ """
+    width = 72
+    def summary(self, i, variables):
+        try:
+            s = "%3u %-24.24s %c %4x %3d %2d %6d %6d %6d %5d %8d\n    %s\n" % \
+               (i, variables['name'],
+	       '.' if variables['en'] else 'D',
+		variables.get('flags', '?'),
+                variables.get('tl', '?'),
+                variables.get('mc', '?'),
+		variables.get('rx', '?'),
+                variables.get('tx', '?'),
+                variables.get('txerr', '?'),
+		variables.get('pc', '?'),
+                variables.get('up', '?'),
+                variables.get('addr', '?'))
+            if variables.get("bcast"):
+                s += "    %s\n" % variables['bcast']
+        except TypeError:
+            # Can happen when ntpd ships a corrupted response
+            return ''
+        for c in s:
+            if not c.isalnum() and not c in "/.:[] \n":
                 return ''
         return s
 
