@@ -954,9 +954,17 @@ class Mode6Session:
 
         return span
 
+    def __ordlist(self, listtype):
+        "Retrieve ordered-list data."
+        self.doquery(opcode=CTL_OP_READ_ORDLIST_A, qdata=listtype, auth=True)
+        return self.response
+
     def reslist(self):
         "Retrieve reslist data."
-        self.doquery(opcode=CTL_OP_READ_ORDLIST_A,
-                     qdata="addr_restrictions", auth=True)
-        print(self.response)
+        print(self.ordlist("addr_restrictions"))
+
+    def ifstats(self):
+        "Retrieve ifstats data."
+        print(self.ordlist("ifstats"))
+
 # end
