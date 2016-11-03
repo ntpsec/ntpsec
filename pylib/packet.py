@@ -249,7 +249,7 @@ SERR_BADKEY = "***Invalid key identifier"
 SERR_INVPASS = "***Invalid password"
 SERR_NOKEY = "***Key not found"
 SERR_BADNONCE = "***Unexpected nonce response format"
-SERR_BADPARM = "***Unknown parameter %s"
+SERR_BADPARAM = "***Unknown parameter '%s'"
 SERR_NOCRED = "***No credentials"
 SERR_SERVER = "***Server error code %d"
 SERR_STALL = "***No response, probably high-traffic server with low MRU limit"
@@ -749,13 +749,15 @@ class Mode6Session:
             raise Mode6Exception(SERR_BADNONCE)
         return self.response.strip()
 
-    def mrulist(self, variables, rawhook=None):
+    def mrulist(self, variables=None, rawhook=None):
         "Retrieve MRU list data"
 	nonce_uses = 0
 	restarted_count = 0
 	cap_frags = True
         warn = sys.stderr.write
         sorter = None
+        if variables is None:
+            variables = {}
 
         if variables:
             if "sort" in variables:
@@ -784,8 +786,12 @@ class Mode6Session:
                     continue
                 else:
                     raise Mode6Exception(SERR_BADPARAM % k)
-
-        # FIXME: Do the reslist parameter mappings from the C version
+            if 'kod' in variables:
+                variables['resany'] = variables.get('resany', 0) | RES_KOD
+                del variables['kod']
+            if 'limited' in variables:
+                variables['resany'] = variables.get('resany', 0) | RES_LIMITED
+                del variables['limited']
 
         nonce = self.fetch_nonce()
 

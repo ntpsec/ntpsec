@@ -1195,6 +1195,27 @@ usage: config_from_file <configuration filename>
 
     def do_mrulist(self, line):
         "display the list of most recently seen source addresses, tags mincount=... resall=0x... resany=0x..."
+        cmdvars = {}
+        for item in line.split(" "):
+            if not item:
+                continue
+            print("Frobble: %s" % repr(item))
+            if '=' not in item:
+                cmdvars[item] = True
+            else:
+                eq = item.index("=")
+                var = item[:eq].strip()
+                val = item[eq+1:].strip()
+                try:
+                    val = int(val, 0)
+                except ValueError:
+                    try:
+                        val = float(val)
+                    except ValueError:
+                        if val[0] == '"' and val[-1] == '"':
+                            val = val[1:-1]
+                cmdvars[var] = val
+
 	self.say("Ctrl-C will stop MRU retrieval and display partial results.\n")
         if self.rawmode:
             mruhook = lambda v: self.printvars(variables=v,
@@ -1203,8 +1224,11 @@ usage: config_from_file <configuration filename>
         else:
             mruhook = None
         try:
-            span = self.session.mrulist(mruhook)
+            span = self.session.mrulist(variables=cmdvars, rawhook=mruhook)
             if not self.rawmode:
+                if not span.is_complete():
+                    self.say("mrulist retrieval interrupted by operator.\n"
+                             "Displaying partial client list.\n")
                 formatter = MRUSummary(interpreter.showhostnames)
                 self.say(MRUSummary.header + "\n")
                 self.say(("=" * MRUSummary.width) + "\n")
