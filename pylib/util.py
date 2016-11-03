@@ -7,6 +7,7 @@ import sys
 import subprocess
 import time
 import ntp.ntpc
+import re
 
 from ntp.packet import *
 
@@ -25,6 +26,11 @@ def portsplit(hostname):
     return (hostname, portsuffix)
 
 def canonicalize_dns(hostname):
+    "Canonicalize a hostname or numeric IP address."
+    # Catch garbaged hostnames in corrupted Mode 6 responses
+    m = re.match("([:.[\]]|\w)*", hostname)
+    if not m:
+        raise TypeError
     (hostname, portsuffix) = portsplit(hostname)
     try:
         ai = socket.getaddrinfo(hostname, None, 0, 0, 0, socket.AI_CANONNAME)
@@ -217,7 +223,10 @@ class PeerSummary:
         if srchost != None:
             clock_name = srchost
         elif self.showhostnames:
-            clock_name = canonicalize_dns(srcadr)
+            try:
+                clock_name = canonicalize_dns(srcadr)
+            except TypeError:
+                return ''
         else:
             clock_name = srcadr
         if self.wideremote and len(clock_name) > self.namewidth:
@@ -244,15 +253,19 @@ class PeerSummary:
         last_sync = variables.get("rec") or variables.get("reftime")
         jd = estjitter if have_jitter else estdisp
         jd = "      -" if jd >= 999 else ("%7.3f" % jd)
-        line += (
-            " %2ld %c %4.4s %4.4s  %3lo  %7.3f %8.3f %s\n" % \
-            (variables.get("stratum", 0),
-             ptype,
-             PeerSummary.prettyinterval(now if last_sync is None else int(now - ntp.ntpc.lfptofloat(last_sync))),
-             PeerSummary.prettyinterval(poll_sec),
-             reach, estdelay, estoffset,
-             jd))
-        return line
+        try:
+            line += (
+                " %2ld %c %4.4s %4.4s  %3lo  %7.3f %8.3f %s\n" % \
+                (variables.get("stratum", 0),
+                 ptype,
+                 PeerSummary.prettyinterval(now if last_sync is None else int(now - ntp.ntpc.lfptofloat(last_sync))),
+                 PeerSummary.prettyinterval(poll_sec),
+                 reach, estdelay, estoffset,
+                 jd))
+            return line
+        except TypeError:
+            # This can happen when ntpd ships a corrupt varlist
+            return ''
 
 class MRUSummary:
     "Reusable class for MRU entry summary generation."
@@ -281,11 +294,53 @@ class MRUSummary:
         else:
             rscode = '.'
         (dns, port) = portsplit(entry.addr)
-        if self.showhostnames:
-            dns = canonicalize_dns(dns)
-        stats += " %4hx %c %d %d %6d %5s %s" % \
-                 (entry.rs, rscode, PKT_MODE(entry.mv), PKT_VERSION(entry.mv),
-                  entry.ct, port[1:], dns)
-        return stats
+        try:
+            if self.showhostnames:
+                dns = canonicalize_dns(dns)
+            stats += " %4hx %c %d %d %6d %5s %s" % \
+                     (entry.rs, rscode,
+                      PKT_MODE(entry.mv), PKT_VERSION(entry.mv),
+                      entry.ct, port[1:], dns)
+            return stats
+        except TypeError:
+            # This can happen when ntpd ships a corrupt varlist
+            return ''
+
+class ReslistSummary:
+    "Reusable class for reslist entry summary generation."
+    header = """\
+   hits    addr/prefix or addr mask
+           restrictions
+"""
+    width = 72
+    @staticmethod
+    def __getPrefix(mask):
+        if not mask:
+            prefix = ''
+        if ':' in mask:
+            sep = ':'
+            base = 16
+        else:
+            sep = '.'
+            base = 10
+        prefix = sum([bin(int(x, base)).count('1') for x in mask.split(sep) if x])
+        return '/' + str(prefix)
+    def summary(self, variables):
+        hits = variables.get("hits", "?")
+        address = variables.get("addr", "?")
+        mask = variables.get("mask", "?")
+        if address == '?' or mask == '?':
+            return ''
+        address += ReslistSummary.__getPrefix(mask)
+        flags = variables.get("flags", "?")
+        # reslist reponses are often corrupted
+        s = "%10s %s\n           %s\n" % (hits, address, flags)
+        # Throw away corrupted entries.  This is a shim - we really
+        # want to make ntpd stop generating garbage
+        for c in s:
+            if not c.isalnum() and not c in "/.: \n":
+                print("Failed on %s" % repr(c))
+                return ''
+        return s
 
 # end

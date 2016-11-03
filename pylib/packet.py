@@ -690,18 +690,19 @@ class Mode6Session:
 
     def __parse_varlist(self):
         "Parse a response as a textual varlist."
-        # Trim trailing NULs from the text
-        response = self.response
-        while response.endswith(b"\x00"):
-            response = response[:-1]
+        # Strip out NULs and binary garbage from text;
+        # ntpd seems prone to generate these, especially
+        # in reslist responses.
+        response = ""
+        for c in self.response:
+            if ord(c) > 0 and ord(c) < 127:
+                response += c
         response = response.rstrip()
         items = []
         if response:
             for pair in response.split(","):
                 try:
-                    # Yes, some servers seem to ship embedded NULs.
-                    while pair.endswith(b"\x00"):
-                        pair = pair[:-1]
+                    pair = pair.strip()
                     eq = pair.index("=")
                     var = pair[:eq].strip()
                     val = pair[eq+1:].strip()
@@ -957,14 +958,23 @@ class Mode6Session:
     def __ordlist(self, listtype):
         "Retrieve ordered-list data."
         self.doquery(opcode=CTL_OP_READ_ORDLIST_A, qdata=listtype, auth=True)
-        return self.response
+        stanzas = []
+        for (key, value) in self.__parse_varlist().items():
+            if key[-1].isdigit() and key[-2] == '.':
+                (stem, stanza) = key.split(".")
+                stanza = int(stanza)
+                if stanza > len(stanzas) - 1:
+                    for i in range(len(stanzas), stanza + 1):
+                        stanzas.append(collections.OrderedDict())
+                stanzas[stanza][stem] = value
+        return stanzas
 
     def reslist(self):
         "Retrieve reslist data."
-        print(self.ordlist("addr_restrictions"))
+        return self.__ordlist("addr_restrictions")
 
     def ifstats(self):
         "Retrieve ifstats data."
-        print(self.ordlist("ifstats"))
+        print(self.__ordlist("ifstats"))
 
 # end
