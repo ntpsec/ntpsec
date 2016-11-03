@@ -28,9 +28,10 @@ a binary version of ntpviz with cython, you can do something like
 this:
 
 ------------------------------------------------------------------
-cc  -I/usr/include/python2.7 -I/usr/include/x86_64-linux-gnu/python2.7 -c ntpviz.c -o ntpviz.o
-cc   ntpviz.o -lpython2.7 -o ntpviz
-rm ntpviz.c
+cython --embed ntpviz -o cyntpviz.c
+cc  -I/usr/include/python2.7 -I/usr/include/x86_64-linux-gnu/python2.7 -c cyntpviz.c -o cyntpviz.o
+cc   cyntpviz.o -lpython2.7 -o cyntpviz
+rm cyntpviz.c
 ------------------------------------------------------------------
 
 Binaries built in this way are normal executables with no run-time
