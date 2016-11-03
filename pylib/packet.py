@@ -251,7 +251,7 @@ SERR_NOKEY = "***Key not found"
 SERR_BADNONCE = "***Unexpected nonce response format"
 SERR_BADPARM = "***Unknown parameter %s"
 SERR_NOCRED = "***No credentials"
-SERR_SERVER = "***Server error code"
+SERR_SERVER = "***Server error code %d"
 SERR_STALL = "***No response, probably high-traffic server with low MRU limit"
 SERR_BADTAG = "***Bad MRU tag %s"
 SERR_BADSORT = "***Sort order %s is not implemented"
@@ -586,7 +586,7 @@ class Mode6Session:
                 if rpkt.more():
                     warn("Error %d received on non-final packet\n" %
                          rpkt.errcode())
-                raise Mode6Exception(SERR_SERVER, rpkt.errcode())
+                raise Mode6Exception(SERR_SERVER % rpkt.errcode(), rpkt.errcode())
 
             # Check the association ID to make sure it matches what we expect
             if rpkt.associd != associd:
@@ -742,6 +742,7 @@ class Mode6Session:
         return self.response == "Config Succeeded"
 
     def fetch_nonce(self):
+        "Receive a nonce that can be replayed - combats source address spoofing"
         self.doquery(opcode=CTL_OP_REQ_NONCE)
         if not self.response.startswith("nonce="):
             raise Mode6Exception(SERR_BADNONCE)
@@ -953,4 +954,9 @@ class Mode6Session:
 
         return span
 
+    def reslist(self):
+        "Retrieve reslist data."
+        self.doquery(opcode=CTL_OP_READ_ORDLIST_A,
+                     qdata="addr_restrictions", auth=True)
+        print(self.response)
 # end
