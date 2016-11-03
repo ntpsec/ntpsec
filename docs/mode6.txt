@@ -481,7 +481,7 @@ First, the password entered to use the signing key, then the request
 header fields, then the payload.
 
 The cryptographic hash is normally MD5, but if ntpd is built with
-OpenSSL support it is possible to use and generare SHA1 keys as well.
+OpenSSL support it is possible to use and generate SHA1 keys as well.
 
 '''''
 
