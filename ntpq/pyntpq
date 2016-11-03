@@ -1199,7 +1199,6 @@ usage: config_from_file <configuration filename>
         for item in line.split(" "):
             if not item:
                 continue
-            print("Frobble: %s" % repr(item))
             if '=' not in item:
                 cmdvars[item] = True
             else:
