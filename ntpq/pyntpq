@@ -344,7 +344,7 @@ usage: help [ command ]
             except:
                 self.warn("Invalid associd literal.\n")
                 return -1
-            if associd not in [peer.associd for peer in self.peers]:
+            if associd != 0 and associd not in [peer.associd for peer in self.peers]:
                 self.warn("Unknown associd.\n")
                 return -1
             else:
