@@ -29,7 +29,8 @@ include::includes/hand.txt[]
 This page describes the Mode 6 protocol used to get status information
 from a running ntpd and configure some of its behaviors on the fly.
 The protocol is normally used by the 'ntpq' program distributed with
-the suite.
+the suite. It is fully documented here so that other clients can be
+written.
 
 [[packet]]
 == Mode 6 packet structure ==
@@ -369,7 +370,7 @@ fly).
 This request is used for two purposes: to retrieve restriction lists
 and to retrieve interface statistics.  For the former use, the request
 payload should be the string "addr_restrictions"; for the latter case,
-the request payload should be be "ifstats" of empty.  Both uses
+the request payload should be be "ifstats" or empty.  Both uses
 require authentication.  The response payload is, in both cases, a
 textual varlist.
 
@@ -482,6 +483,18 @@ header fields, then the payload.
 
 The cryptographic hash is normally MD5, but if ntpd is built with
 OpenSSL support it is possible to use and generate SHA1 keys as well.
+
+== Known bugs ==
+
+The quality of legacy ntpd implementations of this protocol is poor.
+Clients should be prepared for the following quirks:
+
+* In textual varlists, value literals may have spurious trailing NULs
+  which must be stripped.
+
+* In the reslist response, tag names and values may be corrupted by
+  inserted binary garbage.  Any octet with the 0x80 bit set should
+  be discarded.
 
 '''''
 

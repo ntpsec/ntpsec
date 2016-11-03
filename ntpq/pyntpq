@@ -1253,7 +1253,7 @@ usage: ifstats
             self.say(ReslistSummary.header)
             self.say(("=" * ReslistSummary.width) + "\n")
             for entry in entries:
-                self.say(formatter.summary(entry) + "\n")
+                self.say(formatter.summary(entry))
         except Mode6Exception as e:
             self.warn(e.message + "\n")
             return
