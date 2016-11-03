@@ -19,6 +19,9 @@ hacking.txt::
 ifdex-ignores::
 	Lists and explains a large number of internal configuration symbols.	
 
+packaging.txt::
+	Guidance for binary package builders.
+
 TODO::
 	List of items the NTPsec developers are working on.
 

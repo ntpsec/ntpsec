@@ -1,0 +1,38 @@
+= Guidance for package builders =
+
+== Package parts ==
+
+Some useful components for package bulding can be found in the etc/
+subdirectory, including init boot time scripts, systemd unit files,
+and boilerplate for default ntpd configuration.
+
+== Platforms without Python ==
+
+Many tools (actually, almost everything except the core daemon itself)
+have either been moved from C to Python or are in the process of
+translation.  This is an important step for improving maintainability
+and reducing attack surface.  However, we know that some platforms
+cannot support Python or choose not to include it in their core
+configuration.
+
+For these platorms, we recommend using freeze or cython to render the
+Python to C which can be compiled and packaged as a normal executable.
+You will need the Python dev tools and headers installed on the build
+host to do this.
+
+The freeze utility is shipped with the Python
+distribution. Directions are https://wiki.python.org/moin/Freeze[here]
+
+The cython compiler can also be used for this.  For example, to build
+a binary version of ntpviz with cython, you can do something like
+this:
+
+------------------------------------------------------------------
+cc  -I/usr/include/python2.7 -I/usr/include/x86_64-linux-gnu/python2.7 -c ntpviz.c -o ntpviz.o
+cc   ntpviz.o -lpython2.7 -o ntpviz
+rm ntpviz.c
+------------------------------------------------------------------
+
+Binaries built in this way are normal executables with no run-time
+dependency on Python.
+
