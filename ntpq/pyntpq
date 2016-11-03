@@ -1242,10 +1242,10 @@ usage: ifstats
         "show ntpd access control list"
         try:
             self.session.password()
+            self.session.reslist()
         except Mode6Exception as e:
             self.warn(e.message + "\n")
             return
-        pass
 
     def help_reslist(self):
         self.say("""\
