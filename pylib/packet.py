@@ -422,7 +422,7 @@ class Mode6Session:
                 # FIXME: Magic number, yuck
                 if key_id == 0 or key_id > 65535:
                     raise Mode6Exception(SERR_BADKEY)
-            except ValueError:
+            except (SyntaxError, ValueError):
                 raise Mode6Exception(SERR_BADKEY)
             self.keyid = key_id
 
