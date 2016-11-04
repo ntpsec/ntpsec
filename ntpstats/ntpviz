@@ -1192,7 +1192,7 @@ Python by ESR, concept and GNUPLOT code by Dan Drown.
         # fit in 1024x768 browser
         # in 2016 this is 22% of all browsers
         args.png_size = '1000,720'
-    elif 'w' == args.width:
+    elif 'l' == args.width:
         # fit in 1920x1080 browser
         args.png_size = '1850,1000'
     else:
