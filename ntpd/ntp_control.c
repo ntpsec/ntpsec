@@ -618,7 +618,6 @@ static associd_t res_associd;
 static u_short	res_frags;	/* datagrams in this response */
 static int	res_offset;	/* offset of payload in response */
 static uint8_t * datapt;
-static uint8_t * dataend;
 static int	datalinelen;
 static bool	datasent;	/* flag to avoid initial ", " */
 static bool	datanotbinflag;
@@ -777,7 +776,6 @@ process_control(
 	datalinelen = 0;
 	datasent = false;
 	datapt = rpkt.u.data;
-	dataend = &rpkt.u.data[CTL_MAX_DATA_LEN];
 
 	if ((rbufp->recv_length & 0x3) != 0)
 		DPRINTF(3, ("Control packet length %zd unrounded\n",
@@ -1012,6 +1010,7 @@ ctl_putdata(
 {
 	int overhead;
 	unsigned int currentlen;
+	const uint8_t * dataend = &rpkt.u.data[CTL_MAX_DATA_LEN];
 
 	overhead = 0;
 	if (!bin) {
