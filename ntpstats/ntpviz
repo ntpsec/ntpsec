@@ -5,7 +5,7 @@ ntpviz - logfile visualizer for NTP log files
 
 Usage: ntpviz [-d statsdir] [-g] [-n name] [-p days]
               [-s starttime]  [-e endtime]
-              [ -c | --clip ]
+              [-c | --clip ]
               [--local-offset | --local-error | --local-jitter
                 | --local-stability | --local-offset-histogram
                 | --peer-offsets=hosts | --all-peer-offsets
@@ -15,7 +15,9 @@ Usage: ntpviz [-d statsdir] [-g] [-n name] [-p days]
                 | --local-offset-multiplot]
               [-o outdir]
               [-w SIZE | --width SIZE]
-              [-D N]
+              [-D DLVL | --debug DLVL]
+              [-V | --version ]
+              [@OPTIONFILE]
 
 See the manual page for details.
 
@@ -31,6 +33,7 @@ import atexit, binascii, collections, os, socket, sys
 import time
 import tempfile
 from ntp.statfiles import *
+import ntp.version
 
 # overload ArgumentParser
 class MyArgumentParser(argparse.ArgumentParser):
@@ -1170,9 +1173,20 @@ Python by ESR, concept and GNUPLOT code by Dan Drown.
                 dest='debug_level',
                 help="debug level, 0 (none) to 9 (most)",
                 type=int)
-    # FIXME, missing -V and --version
+    parser.add_argument('-V', '--version',
+                action="store_true",
+                default=False,
+                dest='version',
+                help="Print version and exit")
 
     args = parser.parse_args()
+
+    version = "%s %s+%s" % ( ntp.version.BASENAME, ntp.version.VERSION, \
+                            ntp.version.TICK)
+
+    if args.version:
+        print(version)
+        raise SystemExit(1)
 
     if 's' == args.width:
         # fit in 1024x768 browser
@@ -1212,6 +1226,7 @@ Python by ESR, concept and GNUPLOT code by Dan Drown.
     if 0 < args.debug_level:
         sys.stderr.write("ntpviz: INFO: now running at debug: %s\n" % \
             args.debug_level)
+        sys.stderr.write("ntpviz: INFO: Version: %s\n" % version)
         sys.stderr.write("ntpviz: INFO: Parsed Options %s\n" % args)
 
         if 9 == args.debug_level:
