@@ -593,8 +593,29 @@ class Mode6Session:
                 warn("Association ID %d doesn't match expected %d\n"
                      % (rpkt.associd, associd))
 
-            # Some debugging involving authentication checks is here in the
-            # C version, it's omitted until we support authentication.
+            # validate received payload size is padded to next 32-bit
+            # boundary and no smaller than claimed by rpkt.count
+            if len(rawdata) & 0x3:
+                warn("Response packet not padded, size = %d\n" % len(rawdata))
+                continue
+
+            shouldbesize = (Packet.HEADER_LEN + rpkt.count + 3) & ~3
+            if len(rawdata) < shouldbesize:
+                warn("Response packet claims %u octets payload, above %d received\n" % \
+                    (count, len(rawdata) - Packet.HEADER_LEN))
+                raise Mode6Exception(SERR_INCOMPLETE)
+
+            if self.debug > 1:
+                warn("Got packet, size = %d\n"% len(rawdata));
+            if rpkt.count > (len(rawdata) - Packet.HEADER_LEN):
+                    warn("Received count of %u octets, data in packet is %ld\n"\
+                                   % (count, len(rawdata) - Packet.HEADER_LEN))
+                    continue
+
+            # Someday, perhaps, check authentication here
+
+            # Clip off the MAC, if any
+            rpkt.data = rpkt.data[:rpkt.count]
 
             if rpkt.count == 0 and rpkt.more():
                 warn("Received count of 0 in non-final fragment\n")
