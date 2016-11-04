@@ -15,25 +15,10 @@ and reducing attack surface.  However, we know that some platforms
 cannot support Python or choose not to include it in their core
 configuration.
 
-For these platorms, we recommend using freeze or cython to render the
+For these platorms, we recommend using bbfreeze to render the
 Python to C which can be compiled and packaged as a normal executable.
-You will need the Python dev tools and headers installed on the build
-host to do this.
 
-The freeze utility is shipped with the Python
-distribution. Directions are https://wiki.python.org/moin/Freeze[here]
+bbfreeze instructions live https://pypi.python.org/pypi/bbfreeze/0.96.5[here].
 
-The cython compiler can also be used for this.  For example, to build
-a binary version of ntpviz with cython, you can do something like
-this:
-
-------------------------------------------------------------------
-cython --embed ntpviz -o cyntpviz.c
-cc  -I/usr/include/python2.7 -I/usr/include/x86_64-linux-gnu/python2.7 -c cyntpviz.c -o cyntpviz.o
-cc   cyntpviz.o -lpython2.7 -o cyntpviz
-rm cyntpviz.c
-------------------------------------------------------------------
-
-Binaries built in this way are normal executables with no run-time
-dependency on Python.
+You may find that you need to install the package 'patchelf'.
 
