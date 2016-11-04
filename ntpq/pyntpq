@@ -17,6 +17,7 @@ import socket, select, struct, shlex, time, hashlib
 from ntp.packet import *
 from ntp.util import *
 from ntp.ntpc import *
+import ntp.version
 
 # This import only works on Unixes.  The intention is to enable
 # Ctrl-P, Ctrl-N, and friends in Cmd.
@@ -25,7 +26,7 @@ try:
 except ImportError:
     pass
 
-version = "ntpq-py v1"
+version = ntp.version.BASENAME + " " + ntp.version.VERSION
 
 # General notes on Python 2/3 compatibility:
 #
