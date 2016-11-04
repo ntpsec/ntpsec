@@ -15,10 +15,39 @@ and reducing attack surface.  However, we know that some platforms
 cannot support Python or choose not to include it in their core
 configuration.
 
-For these platorms, we recommend using bbfreeze to render the
-Python to C which can be compiled and packaged as a normal executable.
+For these platorms, we recommend using cx_Freeze to render the NTPsec
+Python programs, and all their imported modules, into standalone files.
+These files can then be copied to a host that does not have Python
+installed and executed just as if Python was installed.
 
-bbfreeze instructions live https://pypi.python.org/pypi/bbfreeze/0.96.5[here].
+cx_Freeze documentation lives
+http://cx-freeze.readthedocs.io/en/latest/index.html[here].
 
-You may find that you need to install the package 'patchelf'.
+Your OS package manager may have a package for cx_Freeze.  If not you
+can install it with pip like this:
+
+```
+pip install cx_Freeze
+````
+
+You may find that you also need to install the package 'patchelf'.
+
+Change to the root directory of the NTPsec source distribution and
+run the following commands:
+
+```
+cxfreeze ntpq/pyntpq
+cxfreeze ntpstats/ntpviz
+cxfreeze ntpsweep/ntpsweep
+cxfreeze ntptrace/ntptrace
+```
+
+The four executables (pyntpq, ntpviz, ntpsweep, and ntptrace) will now
+be in the directory named dist along with the other files required run.
+
+You can copy the dist directory, and its contents, to a host that does
+not have Python installed and exectute the programs there.
+
+There appears to be no speed advantage, or disadvantage, to running the
+binaries created by cx_freeze.
 
