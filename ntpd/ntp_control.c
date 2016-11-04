@@ -25,6 +25,9 @@
 #include "lib_strbuf.h"
 #include "ntp_syscall.h"
 
+/* undefine to suppress random tags and get fixed emission order */
+#define RANDOMIZE_RESPONSES
+
 /*
  * Structure to hold request procedure information
  */
@@ -82,7 +85,9 @@ static	void	read_clockstatus(struct recvbuf *, int);
 static	void	write_clockstatus(struct recvbuf *, int);
 static	void	configure	(struct recvbuf *, int);
 static	void	send_mru_entry	(mon_entry *, int);
+#ifdef RANDOMIZE_RESPONSES
 static	void	send_random_tag_value(int);
+#endif /* RANDOMIZE_RESPONSES */
 static	void	read_mru_list	(struct recvbuf *, int);
 static	void	send_ifstats_entry(endpt *, u_int);
 static	void	read_ifstats	(struct recvbuf *);
@@ -3069,6 +3074,7 @@ static int validate_nonce(
 }
 
 
+#ifdef RANDOMIZE_RESPONSES
 /*
  * send_random_tag_value - send a randomly-generated three character
  *			   tag prefix, a '.', an index, a '=' and a
@@ -3100,6 +3106,7 @@ send_random_tag_value(
 	snprintf(&buf[4], sizeof(buf) - 4, "%d", indx);
 	ctl_putuint(buf, noise);
 }
+#endif /* RANDOMIZE_RESPONSE */
 
 
 /*
@@ -3123,7 +3130,7 @@ send_mru_entry(
 	char	tag[32];
 	bool	sent[6]; /* 6 tag=value pairs */
 	uint32_t noise;
-	u_int	which;
+	u_int	which = 0;
 	u_int	remaining;
 	const char * pch;
 
@@ -3131,7 +3138,9 @@ send_mru_entry(
 	ZERO(sent);
 	noise = ntp_random();
 	while (remaining > 0) {
-		which = (noise & 7) % COUNTOF(sent);
+#ifdef RANDOMIZE_RESPONSES
+	 	which = (noise & 7) % COUNTOF(sent);
+#endif /* RANDOMIZE_RESPONSES */
 		noise >>= 3;
 		while (sent[which])
 			which = (which + 1) % COUNTOF(sent);
@@ -3502,8 +3511,10 @@ static void read_mru_list(
 			continue;
 
 		send_mru_entry(mon, count);
+#ifdef RANDOMIZE_RESPONSES
 		if (!count)
 			send_random_tag_value(0);
+#endif /* RANDOMIZE_RESPONSES */
 		count++;
 		prior_mon = mon;
 	}
@@ -3513,8 +3524,10 @@ static void read_mru_list(
 	 * a now= l_fp timestamp.
 	 */
 	if (NULL == mon) {
+#ifdef RANDOMIZE_RESPONSES
 		if (count > 1)
 			send_random_tag_value(count - 1);
+#endif /* RANDOMIZE_RESPONSES */
 		ctl_putts("now", &now);
 		/* if any entries were returned confirm the last */
 		if (prior_mon != NULL)
@@ -3554,7 +3567,7 @@ send_ifstats_entry(
 	uint8_t	sent[IFSTATS_FIELDS]; /* 12 tag=value pairs */
 	int	noisebits;
 	uint32_t noise;
-	u_int	which;
+	u_int	which = 0;
 	u_int	remaining;
 	const char *pch;
 
@@ -3567,7 +3580,9 @@ send_ifstats_entry(
 			noise = ntp_random();
 			noisebits = 31;
 		}
+#ifdef RANDOMIZE_RESPONSES
 		which = (noise & 0xf) % COUNTOF(sent);
+#endif /* RANDOMIZE_RESPONSES */
 		noise >>= 4;
 		noisebits -= 4;
 
@@ -3644,7 +3659,9 @@ send_ifstats_entry(
 		sent[which] = true;
 		remaining--;
 	}
+#ifdef RANDOMIZE_RESPONSES
 	send_random_tag_value((int)ifnum);
+#endif /* RANDOMIZE_RESPONSES */
 }
 
 
@@ -3727,7 +3744,7 @@ send_restrict_entry(
 	uint8_t		sent[RESLIST_FIELDS]; /* 4 tag=value pairs */
 	int		noisebits;
 	uint32_t		noise;
-	u_int		which;
+	u_int		which = 0;
 	u_int		remaining;
 	sockaddr_u	addr;
 	sockaddr_u	mask;
@@ -3746,7 +3763,9 @@ send_restrict_entry(
 			noise = ntp_random();
 			noisebits = 31;
 		}
+#ifdef RANDOMIZE_RESPONSES
 		which = (noise & 0x3) % COUNTOF(sent);
+#endif /* RANDOMIZE_RESPONSES */
 		noise >>= 2;
 		noisebits -= 2;
 
@@ -3790,7 +3809,9 @@ send_restrict_entry(
 		sent[which] = true;
 		remaining--;
 	}
+#ifdef RANDOMIZE_RESPONSES
 	send_random_tag_value((int)idx);
+#endif /* RANDOMIZE_RESPONSES */
 }
 
 
