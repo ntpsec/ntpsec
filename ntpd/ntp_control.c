@@ -48,7 +48,7 @@ static	void	ctl_error	(uint8_t);
 static	u_short ctlclkstatus	(struct refclockstat *);
 #endif
 static	void	ctl_flushpkt	(uint8_t);
-static	void	ctl_putdata	(const char *, unsigned int, int);
+static	void	ctl_putdata	(const char *, unsigned int, bool);
 static	void	ctl_putstr	(const char *, const char *, size_t);
 static	void	ctl_putdblf	(const char *, int, int, double);
 #define	ctl_putdbl(tag, d)	ctl_putdblf(tag, 1, 3, d)
@@ -1000,7 +1000,7 @@ static void
 ctl_putdata(
 	const char *dp,
 	unsigned int dlen,
-	int bin			/* set to 1 when data is binary */
+	bool bin		/* set to true when data is binary */
 	)
 {
 	int overhead;
@@ -1084,7 +1084,7 @@ ctl_putstr(
 		cp += len;
 		*cp++ = '"';
 	}
-	ctl_putdata(buffer, (u_int)(cp - buffer), 0);
+	ctl_putdata(buffer, (u_int)(cp - buffer), false);
 }
 
 
@@ -1117,7 +1117,7 @@ ctl_putunqstr(
 		memcpy(cp, data, len);
 		cp += len;
 	}
-	ctl_putdata(buffer, (u_int)(cp - buffer), 0);
+	ctl_putdata(buffer, (u_int)(cp - buffer), false);
 }
 
 
@@ -1145,7 +1145,7 @@ ctl_putdblf(
 	snprintf(cp, sizeof(buffer) - (cp - buffer), use_f ? "%.*f" : "%.*g",
 	    precision, d);
 	cp += strlen(cp);
-	ctl_putdata(buffer, (unsigned)(cp - buffer), 0);
+	ctl_putdata(buffer, (unsigned)(cp - buffer), false);
 }
 
 /*
@@ -1170,7 +1170,7 @@ ctl_putuint(
 	NTP_INSIST((cp - buffer) < (int)sizeof(buffer));
 	snprintf(cp, sizeof(buffer) - (cp - buffer), "%lu", uval);
 	cp += strlen(cp);
-	ctl_putdata(buffer, (unsigned)( cp - buffer ), 0);
+	ctl_putdata(buffer, (unsigned)( cp - buffer ), false);
 }
 
 /*
@@ -1203,7 +1203,7 @@ ctl_putfs(
 		 "%04d%02d%02d%02d%02d", tm->tm_year + 1900,
 		 tm->tm_mon + 1, tm->tm_mday, tm->tm_hour, tm->tm_min);
 	cp += strlen(cp);
-	ctl_putdata(buffer, (unsigned)( cp - buffer ), 0);
+	ctl_putdata(buffer, (unsigned)( cp - buffer ), false);
 }
 
 
@@ -1230,7 +1230,7 @@ ctl_puthex(
 	NTP_INSIST((cp - buffer) < (int)sizeof(buffer));
 	snprintf(cp, sizeof(buffer) - (cp - buffer), "0x%lx", uval);
 	cp += strlen(cp);
-	ctl_putdata(buffer,(unsigned)( cp - buffer ), 0);
+	ctl_putdata(buffer,(unsigned)( cp - buffer ), false);
 }
 
 
@@ -1256,7 +1256,7 @@ ctl_putint(
 	NTP_INSIST((cp - buffer) < (int)sizeof(buffer));
 	snprintf(cp, sizeof(buffer) - (cp - buffer), "%ld", ival);
 	cp += strlen(cp);
-	ctl_putdata(buffer, (unsigned)( cp - buffer ), 0);
+	ctl_putdata(buffer, (unsigned)( cp - buffer ), false);
 }
 
 
@@ -1283,7 +1283,7 @@ ctl_putts(
 	snprintf(cp, sizeof(buffer) - (cp - buffer), "0x%08x.%08x",
 		 (u_int)ts->l_ui, (u_int)ts->l_uf);
 	cp += strlen(cp);
-	ctl_putdata(buffer, (unsigned)( cp - buffer ), 0);
+	ctl_putdata(buffer, (unsigned)( cp - buffer ), false);
 }
 
 
@@ -1314,7 +1314,7 @@ ctl_putadr(
 	NTP_INSIST((cp - buffer) < (int)sizeof(buffer));
 	snprintf(cp, sizeof(buffer) - (cp - buffer), "%s", cq);
 	cp += strlen(cp);
-	ctl_putdata(buffer, (unsigned)(cp - buffer), 0);
+	ctl_putdata(buffer, (unsigned)(cp - buffer), false);
 }
 
 
@@ -1387,7 +1387,7 @@ ctl_putarray(
 			 " %.2f", arr[i] * 1e3);
 		cp += strlen(cp);
 	} while (i != start);
-	ctl_putdata(buffer, (unsigned)(cp - buffer), 0);
+	ctl_putdata(buffer, (unsigned)(cp - buffer), false);
 }
 
 
@@ -1584,7 +1584,7 @@ ctl_putsys(
 		*buffp++ = '"';
 		*buffp = '\0';
 
-		ctl_putdata(buf, (unsigned)( buffp - buf ), 0);
+		ctl_putdata(buf, (unsigned)( buffp - buf ), false);
 		break;
 	}
 
@@ -2229,7 +2229,7 @@ ctl_putpeer(
 		if (s + 2 < be) {
 			*s++ = '"';
 			*s = '\0';
-			ctl_putdata(buf, (u_int)(s - buf), 0);
+			ctl_putdata(buf, (u_int)(s - buf), false);
 		}
 		break;
 
@@ -2426,7 +2426,7 @@ ctl_putclock(
 
 		*s++ = '"';
 		*s = '\0';
-		ctl_putdata(buf, (unsigned)(s - buf), 0);
+		ctl_putdata(buf, (unsigned)(s - buf), false);
 		break;
 	}
 }
@@ -2611,12 +2611,12 @@ read_status(
 		/* two entries each loop iteration, so n + 1 */
 		if (n + 1 >= COUNTOF(a_st)) {
 			ctl_putdata((void *)a_st, n * sizeof(a_st[0]),
-				    1);
+				    true);
 			n = 0;
 		}
 	}
 	if (n)
-		ctl_putdata((void *)a_st, n * sizeof(a_st[0]), 1);
+		ctl_putdata((void *)a_st, n * sizeof(a_st[0]), true);
 	ctl_flushpkt(0);
 }
 
@@ -2726,7 +2726,7 @@ read_sysvars(void)
 		for (n = 0; n + CS_MAXCODE + 1 < wants_count; n++)
 			if (wants[n + CS_MAXCODE + 1]) {
 				pch = ext_sys_var[n].text;
-				ctl_putdata(pch, strlen(pch), 0);
+				ctl_putdata(pch, strlen(pch), false);
 			}
 	} else {
 		for (cs = def_sys_var; *cs != 0; cs++)
@@ -2734,7 +2734,7 @@ read_sysvars(void)
 		for (kv = ext_sys_var; kv && !(EOV & kv->flags); kv++)
 			if (DEF & kv->flags)
 				ctl_putdata(kv->text, strlen(kv->text),
-					    0);
+					    false);
 	}
 	free(wants);
 	ctl_flushpkt(0);
@@ -2888,7 +2888,7 @@ static void configure(
 			 sizeof(remote_config.err_msg),
 			 "runtime configuration prohibited by restrict ... nomodify");
 		ctl_putdata(remote_config.err_msg,
-			    strlen(remote_config.err_msg), 0);
+			    strlen(remote_config.err_msg), false);
 		ctl_flushpkt(0);
 		NLOG(NLOG_SYSINFO)
 			msyslog(LOG_NOTICE,
@@ -2906,7 +2906,7 @@ static void configure(
 			 sizeof(remote_config.err_msg),
 			 "runtime configuration failed: request too long");
 		ctl_putdata(remote_config.err_msg,
-			    strlen(remote_config.err_msg), 0);
+			    strlen(remote_config.err_msg), false);
 		ctl_flushpkt(0);
 		msyslog(LOG_NOTICE,
 			"runtime config from %s rejected: request too long",
@@ -2956,7 +2956,7 @@ static void configure(
 			remote_config.err_pos += retval;
 	}
 
-	ctl_putdata(remote_config.err_msg, remote_config.err_pos, 0);
+	ctl_putdata(remote_config.err_msg, remote_config.err_pos, false);
 	ctl_flushpkt(0);
 
 	DPRINTF(1, ("Reply: %s\n", remote_config.err_msg));
