@@ -284,7 +284,7 @@ laddr::		Return entries associated with the server's IP
 		address given.  No port specification is needed,
 		and any supplied is ignored.
 
-resall::	0x-prefixed hex restrict bits which must all be
+resall::	0x-prefixed hex restrict bits, which must all be
 		lit for an MRU entry to be included.
 		Has precedence over any resany=.
 
@@ -383,7 +383,7 @@ Attributes within each stanza are deliberately issued in a random
 order, and ntpd occasionally issues an attribute with a
 randomly-generated name and value. This is an attempt to prevent Mode
 6 clients from making brittle assumptioons about the inventory of
-attrbutes and their transmission order.
+attributes and their transmission order.
 
 Clients can rely on all *.0 values preceding any *.1 values, that is
 all values for a given index number are together in the response.
