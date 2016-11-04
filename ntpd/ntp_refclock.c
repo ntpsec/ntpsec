@@ -482,7 +482,7 @@ refclock_sample(
 			pp->jitter += SQUARE(off[k] - off[k - 1]);
 	}
 	pp->offset /= m;
-	pp->jitter = max(SQRT(pp->jitter / m), LOGTOD(sys_precision));
+	pp->jitter = SQRT(pp->jitter / m);
 #ifdef DEBUG
 	if (debug)
 		printf(
