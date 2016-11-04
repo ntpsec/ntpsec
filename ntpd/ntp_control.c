@@ -1014,7 +1014,6 @@ ctl_putdata(
 	)
 {
 	int overhead;
-	unsigned int currentlen;
 	const uint8_t * dataend = &rpkt.u.data[CTL_MAX_DATA_LEN];
 
 	overhead = 0;
@@ -1039,18 +1038,6 @@ ctl_putdata(
 	 * Save room for trailing junk
 	 */
 	while (dlen + overhead + datapt > dataend) {
-		/*
-		 * Not enough room in this one, flush it out.
-		 */
-		currentlen = MIN(dlen, (unsigned int)(dataend - datapt));
-
-		memcpy(datapt, dp, currentlen);
-
-		datapt += currentlen;
-		dp += currentlen;
-		dlen -= currentlen;
-		datalinelen += currentlen;
-
 		ctl_flushpkt(CTL_MORE);
 	}
 
