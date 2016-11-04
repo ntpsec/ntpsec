@@ -945,10 +945,18 @@ ctl_flushpkt(
 	sendlen = dlen + CTL_HEADER_LEN;
 
 	/*
+	 * Zero-fill the unused part of the packet.  This wasn't needed
+	 * when the clients were all in C, for which the first NUL is
+	 * a string terminator.  But Python allows NULs in strings, 
+	 * which means Python mode 6 clients might actually see the trailing
+	 * garbage.
+	 */
+	memset(rpkt.u.data + sendlen, '\0', sizeof(rpkt.u.data) - sendlen);
+	
+	/*
 	 * Pad to a multiple of 32 bits
 	 */
 	while (sendlen & 0x3) {
-		*datapt++ = '\0';
 		sendlen++;
 	}
 
@@ -967,7 +975,6 @@ ctl_flushpkt(
 		 * begin on a 64 bit boundary.
 		 */
 		while (totlen & 7) {
-			*datapt++ = '\0';
 			totlen++;
 		}
 		keyid = htonl(res_keyid);
