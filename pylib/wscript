@@ -10,6 +10,7 @@ def build(ctx):
     srcnode = ctx.srcnode.make_node('pylib')
     target1 = ctx.srcnode.make_node('pylib/ntp_control.py')
     target2 = ctx.srcnode.make_node('pylib/ntp_magic.py')
+    target3 = ctx.srcnode.make_node('pylib/version.py')
 
     ctx(
 	before      = ['pyc', 'pyo'],
@@ -25,6 +26,14 @@ def build(ctx):
 	rule        = '../wafhelpers/pythonize-header ${SRC} >${TGT}',
 	source      = "../include/ntp.h",
 	target      = target2,
+	)
+
+    ctx(
+	before      = ['pyc', 'pyo'],
+	cwd         = srcnode,
+	rule        = 'VERSION=`cat ../VERSION` ../wafhelpers/autorevision.sh -t python >${TGT}',
+	source      = "../VERSION",
+	target      = target3,
 	)
 
     ctx(features='py', source=ctx.path.ant_glob('*.py'), install_from='.', install_path='${PYTHONDIR}/ntp')
