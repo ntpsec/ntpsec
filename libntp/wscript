@@ -78,5 +78,6 @@ def build(ctx):
 		target		= "ntpc",
 		features	= "c cshlib bld_include src_include pyext",
 		source		= ["pymodule.c"] + libntp_source_sharable,
+		install_path	= '${PYTHONDIR}/ntp',
 		includes	= includes,
 	)
