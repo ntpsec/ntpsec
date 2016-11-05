@@ -166,28 +166,31 @@ static void ntpdig_usage(void)
 #define P(x)	fputs(x, stderr)
     P("USAGE:  sntp [ -<flag> [<val>] | --<name>[{=| }<val>] ]...\n");
     P("		[ hostname-or-IP ...]\n");
-    P("  Flg Arg Option-Name    Description\n");
-    P("   -4 no  ipv4           Force IPv4 DNS name resolution\n");
-    P("				- prohibits the option 'ipv6'\n");
-    P("   -6 no  ipv6           Force IPv6 DNS name resolution\n");
-    P("				- prohibits the option 'ipv4'\n");
-    P("   -d no  normalverbose  Normal verbose\n");
-    P("   -K Str kod            KoD history filename\n");
-    P("   -p no  syslog         Logging with syslog\n");
-    P("				- prohibits the option 'logfile'\n");
-    P("   -l Str logfile        Log to specified logfile\n");
-    P("				- prohibits the option 'syslog'\n");
-    P("   -s no  settod         Set (step) the time with clock_settime()\n");
-    P("				- prohibits the option 'adjtime'\n");
-    P("   -j no  adjtime        Set (slew) the time with adjtime()\n");
-    P("				- prohibits the option 'settod'\n");
-    P("   -b Str broadcast      Use broadcasts to the address specified for synchronisation\n");
-    P("   -t Num timeout        Specify seconds to wait for broadcasts\n");
-    P("   -a Num authentication Enable authentication with the numbered key\n");
-    P("   -k Str keyfile        Specify a keyfile. SNTP will look in this file\n");
-    P("                         for the key specified with -a\n");
-    P("   -V no version         Output version information and exit\n");
-    P("   -h no  help           Display extended usage information and exit\n");
+    P("  Flg Arg Option-Name     Description\n");
+    P("   -4 no  ipv4            Force IPv4 DNS name resolution\n");
+    P("				 - prohibits the option 'ipv6'\n");
+    P("   -6 no  ipv6            Force IPv6 DNS name resolution\n");
+    P("				 - prohibits the option 'ipv4'\n");
+    P("   -d no  debug           Normal verbose\n");
+    P("   -D yes set-debug-level Normal verbose\n");
+    P("   -j no  json            Use JSON output format\n");
+    P("   -K Str kod             KoD history filename\n");
+    P("   -l Str logfile         Log to specified logfile\n");
+    P("				 - prohibits the option 'syslog'\n");
+    P("   -S no  settod          Set (step) the time with clock_settime()\n");
+    P("				 - prohibits the option 'adjtime'\n");
+    P("   -s no  adjtime         Set (slew) the time with adjtime()\n");
+    P("				 - prohibits the option 'settod'\n");
+    P("   -b Str broadcast       Use broadcasts to the address specified\n");
+    P("                          for synchronisation\n");
+    P("   -t Num timeout         Specify seconds to wait for broadcasts\n");
+    P("   -a Num authentication  Enable authentication with the numbered key\n");
+    P("   -w no  wait            Wait for pending replies (if not setting time)\n");
+    P("   -W no  nowait          Don't wait for pending replies (default)\n");
+    P("   -k Str keyfile         Specify a keyfile. SNTP will look in this file\n");
+    P("                          for the key specified with -a\n");
+    P("   -V no version          Output version information and exit\n");
+    P("   -h no  help            Display extended usage information and exit\n");
 #undef P
 }
 
