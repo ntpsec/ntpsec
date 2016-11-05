@@ -487,14 +487,10 @@ OpenSSL support it is possible to use and generate SHA1 keys as well.
 == Known bugs ==
 
 The quality of legacy ntpd implementations of this protocol is poor.
-Clients should be prepared for the following quirks:
+Clients should be prepared for the following quirk:
 
 * In textual varlists, value literals may have spurious trailing NULs
   which must be stripped.
-
-* In the reslist response, tag names and values may be corrupted by
-  inserted binary garbage.  Any octet with the 0x80 bit set should
-  be discarded.
 
 '''''
 
