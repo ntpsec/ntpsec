@@ -10,15 +10,16 @@ ntpviz [-d LOGDIR] [-g] [-n name] [-p DAYS]
          [-o OUTDIR]
          [ -c | --clip ]
          [ -w SIZE | --width SIZE]
-         [--local-offset |
-          --local-error |
-          --local-jitter |
-          --local-stability |
-          --all-peer-jitters |
+         [--all-peer-jitters |
           --all-peer-offsets |
+          --local-error |
+          --local-freq-temps |
           --local-gps |
+          --local-jitter |
+          --local-offset |
           --local-offset-histogram |
           --local-offset-multiplot |
+          --local-stability |
           --local-temps |
           --peer-jitters=hosts |
           --peer-offsets=hosts |
@@ -110,6 +111,11 @@ The following plots are available:
 --local-error::
    Clock frequency offset from the loop statistics (field 4)
 
+--local-freq-temps::
+   Plot local frequency offset and local temperatures.  This plot is
+   only generated if there is a log file named temps in the log file
+   directory.
+
 --local-jitter::
    Clock time-jitter plot from the loop statistics (field 5).
 
@@ -129,7 +135,7 @@ The following plots are available:
    Plot comparative local offsets for multiple directories.
 
 --local-temps::
-   Plot comparative local temperatures.  This plot is only generated if
+   Plot local temperatures.  This plot is only generated if
    there is a log file named temps in the log file directory.
 
 --local-stability::

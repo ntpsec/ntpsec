@@ -3,21 +3,28 @@
 """\
 ntpviz - logfile visualizer for NTP log files
 
-Usage: ntpviz [-d statsdir] [-g] [-n name] [-p days]
-              [-s starttime]  [-e endtime]
-              [-c | --clip ]
-              [--local-offset | --local-error | --local-jitter
-                | --local-stability | --local-offset-histogram
-                | --peer-offsets=hosts | --all-peer-offsets
-                | --peer-jitters=hosts | --all-peer-jitters
-                | --local-temps
-                | --local-gps
-                | --local-offset-multiplot]
-              [-o outdir]
-              [-w SIZE | --width SIZE]
-              [-D DLVL | --debug DLVL]
-              [-V | --version ]
-              [@OPTIONFILE]
+ntpviz [-d LOGDIR] [-g] [-n name] [-p DAYS]
+         [-s starttime] [-e endtime]
+         [-o OUTDIR]
+         [ -c | --clip ]
+         [ -w SIZE | --width SIZE]
+         [--all-peer-jitters |
+          --all-peer-offsets |
+          --local-error |
+          --local-freq-temps |
+          --local-gps |
+          --local-jitter |
+          --local-offset |
+          --local-offset-histogram |
+          --local-offset-multiplot |
+          --local-stability |
+          --local-temps |
+          --peer-jitters=hosts |
+          --peer-offsets=hosts |
+         ]
+         [-D DLVL | --debug DLVL]
+         [-V | --version]
+         [@OPTIONFILE]
 
 See the manual page for details.
 
@@ -417,6 +424,90 @@ file.</p>
         ret['stats'] = [stats, stats_f]
         ret['title'] = "Local Clock Time/Frequency Offsets"
         ret['plot'] = plot_template + plot_data + plot_data
+        return ret
+
+    def local_freq_temps_plot(self):
+        "Generate GNUPLOT code graphing local frequency and temps"
+        if not len( self.loopstats):
+            sys.stderr.write("ntpviz: WARNING: no loopstats to graph\n")
+            return ''
+
+        tempsmap = self.tempssplit()
+        tempslist = tempsmap.keys()
+        tempslist.sort()
+        if not len( tempsmap) or not len( tempslist):
+            sys.stderr.write("ntpviz: WARNING: no temps to graph\n")
+            return ''
+
+        # speed up by only sending gnuplot the data it will actually use
+        # fields: time, freq offset
+        plot_data = self.plot_slice( self.loopstats, 3)
+
+        # compute frequency offset
+        values_f = [float(line[3]) for line in self.loopstats]
+        stats_f = VizStats(values_f, "Local Clock Frequency Offset", freq=1)
+
+        stats = []
+        temps_data = ()
+        plot_data_t = ''
+        for key in tempslist:
+            # speed up by only sending gnuplot the data it will actually use
+            # fields: time, temp
+            plot_data_t += self.plot_slice( tempsmap[key], 3)
+
+        #out = stats.percs
+        out = {}
+        out["min_y2"] = stats_f.percs["min_y"]
+        out["max_y2"] = stats_f.percs["max_y"]
+        out["unit_f"] = stats_f.percs["unit"]
+        out["unit"] = 'C'
+        out["multiplier_f"] = stats_f.percs["multiplier"]
+        out["sitename"] = self.sitename
+        out['size'] = args.png_size
+        if args.clip:
+            out["clipped"] = " (clipped)"
+        else:
+            out["clipped"] = ""
+
+        # let temp autoscale
+        # set yrange [%(min_y)s:%(max_y)s]
+        plot_template = NTPViz.Common + """\
+set terminal png size %(size)s
+set title "%(sitename)s: Local Frequency Offset/Temps%(clipped)s"
+set ytics format "%%1.1f %(unit)s" nomirror textcolor rgb '#0060ad'
+set y2tics format "%%2.1f %(unit_f)s" nomirror textcolor rgb '#dd181f'
+set y2range [%(min_y2)s:%(max_y2)s]
+set key bottom right box
+set style line 1 lc rgb '#dd181f' lt 1 lw 1 pt 5 ps 0   # --- red
+plot \
+ "-" using 1:($2*%(multiplier_f)s) title "frequency offset %(unit_f)s" with linespoints ls 1 axis x1y2, \
+""" % out
+
+        for key in tempslist:
+            out['key'] = key
+            plot_template += "'-' using 1:2 title '%(key)s' with line, \\\n" \
+                 % out
+
+        # strip trailing ", \n"
+        plot_template = plot_template[:-4] + "\n"
+
+        exp = """\
+<p>The frequency offsets and temperatures.
+Showing frequency offset (red, in parts
+per million, scale on right) and the temeratures.</p>
+
+<p>These are field 4 (frequency) from the loopstats log
+file, and field 3 from the temp log .</p>
+
+"""
+
+        ret = {}
+        # ret['html'] = stats.stats_html + stats_f.stats_html + exp
+        ret['html'] = stats_f.stats_html + exp
+        ret['stats'] = [stats, stats_f]
+        ret['stats'] = [stats_f]
+        ret['title'] = "Local Frequency/Temp"
+        ret['plot'] = plot_template + plot_data + plot_data_t
         return ret
 
     def local_temps_gnuplot(self):
@@ -1133,6 +1224,11 @@ Python by ESR, concept and GNUPLOT code by Dan Drown.
                 action="store_true",
                 dest='show_local_error',
                 help="Plot local clock frequency offsets")
+    group.add_argument( '--local-freq-temps',
+                default = False,
+                action="store_true",
+                dest='show_freq_temps',
+                help="Plot local frequency vs temperature data")
     group.add_argument( '--local-gps',
                 default = False,
                 action="store_true",
@@ -1312,6 +1408,12 @@ Python by ESR, concept and GNUPLOT code by Dan Drown.
                 plot = stats.peer_offsets_gnuplot(args.show_peer_offsets)
             if None != args.show_peer_jitters:
                 plot = stats.peer_jitters_gnuplot(args.show_peer_jitters)
+
+        if args.show_freq_temps:
+            if not len( stats.temps):
+                sys.stderr.write("ntpviz: ERROR: missing temps data\n")
+                raise SystemExit(1)
+            plot = stats.local_freq_temps_plot()
 
         if args.show_temps:
             if not len( stats.temps):
@@ -1526,6 +1628,7 @@ ntpviz</a>, part of the <a href="https://www.ntpsec.org/">NTPsec project</a>
             ("local-stability", stats.local_offset_stability_gnuplot()),
             ("local-offset-histogram", stats.local_offset_histogram_gnuplot()),
             ("local-temps", stats.local_temps_gnuplot()),
+            ("local-freq-temps", stats.local_freq_temps_plot()),
             ("local-gps", stats.local_gps_gnuplot()),
             ("peer-offsets", stats.peer_offsets_gnuplot()),
         ]
