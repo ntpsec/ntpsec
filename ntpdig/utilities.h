@@ -21,7 +21,7 @@ void l_fp_output_dec(l_fp *ts, FILE *output);
 
 char *addrinfo_to_str(const struct addrinfo *addr);
 char *ss_to_str(sockaddr_u *saddr);
-char *tv_to_str(const struct timespec *ts, const bool json);
+char *tv_to_str(const struct timeval *tv, const bool json);
 const char * hostnameaddr(const char *, const sockaddr_u *);
 
 #endif	/* GUARD_UTILITIES_H */

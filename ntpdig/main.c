@@ -46,7 +46,7 @@ struct dns_ctx {
 #define CTX_CONC	0x0004
 #define CTX_unused	0xfffd
 	int		key_id;
-	struct timespec	timeout;
+	struct timeval	timeout;
 	struct key *	key;
 };
 
@@ -68,14 +68,14 @@ struct xmt_ctx_tag {
 	sent_pkt *		spkt;
 };
 
-struct timespec	gap;
+struct timeval	gap;
 xmt_ctx *	xmt_q;
 struct key *	keys = NULL;
 float		response_timeout;
-struct timespec	response_tv;
-struct timespec	start_tv;
+struct timeval	response_tv;
+struct timeval	start_tv;
 /* check the timeout at least once per second */
-struct timespec	wakeup_tv = { 0, 888888 };
+struct timeval	wakeup_tv = { 0, 888888 };
 
 sent_pkt *	fam_listheads[2];
 #define v4_pkts_list	(fam_listheads[0])
@@ -116,7 +116,7 @@ void set_li_vn_mode(struct pkt *spkt, char leap, char version, char mode);
 int  set_time(double offset);
 void dec_pending_ntp(const char *, sockaddr_u *);
 bool libevent_version_ok(void);
-int  gettimeofday_cached(struct event_base *b, struct timespec *tv);
+int  gettimeofday_cached(struct event_base *b, struct timeval *tv);
 
 #define ALL_OPTIONS "46a:b:c:dD:g:hjK:k:l:M:o:rSst:VwW"
 static const struct option longoptions[] = {
@@ -166,33 +166,28 @@ static void ntpdig_usage(void)
 #define P(x)	fputs(x, stderr)
     P("USAGE:  sntp [ -<flag> [<val>] | --<name>[{=| }<val>] ]...\n");
     P("		[ hostname-or-IP ...]\n");
-    P("  Flg Arg Option-Name     Description\n");
-    P("   -4 no  ipv4            Force IPv4 DNS name resolution\n");
-    P("				 - prohibits the option 'ipv6'\n");
-    P("   -6 no  ipv6            Force IPv6 DNS name resolution\n");
-    P("				 - prohibits the option 'ipv4'\n");
-    P("   -c yes concurrent      Hosts to be queried concurrently\n");
-    P("   -d no  debug           Normal verbose\n");
-    P("   -D yes set-debug-level Normal verbose\n");
-    P("   -g yes gap             Set gap between requests\n");
-    P("   -j no  json            Use JSON output format\n");
-    P("   -K Str kod             KoD history filename\n");
-    P("   -l Str logfile         Log to specified logfile\n");
-    P("				 - prohibits the option 'syslog'\n");
-    P("   -S no  settod          Set (step) the time with clock_settime()\n");
-    P("				 - prohibits the option 'adjtime'\n");
-    P("   -s no  adjtime         Set (slew) the time with adjtime()\n");
-    P("				 - prohibits the option 'settod'\n");
-    P("   -b Str broadcast       Use broadcasts to the address specified\n");
-    P("                          for synchronisation\n");
-    P("   -t Num timeout         Specify seconds to wait for broadcasts\n");
-    P("   -a Num authentication  Enable authentication with the numbered key\n");
-    P("   -w no  wait            Wait for pending replies (if not setting time)\n");
-    P("   -W no  nowait          Don't wait for pending replies (default)\n");
-    P("   -k Str keyfile         Specify a keyfile. SNTP will look in this file\n");
-    P("                          for the key specified with -a\n");
-    P("   -V no version          Output version information and exit\n");
-    P("   -h no  help            Display extended usage information and exit\n");
+    P("  Flg Arg Option-Name    Description\n");
+    P("   -4 no  ipv4           Force IPv4 DNS name resolution\n");
+    P("				- prohibits the option 'ipv6'\n");
+    P("   -6 no  ipv6           Force IPv6 DNS name resolution\n");
+    P("				- prohibits the option 'ipv4'\n");
+    P("   -d no  normalverbose  Normal verbose\n");
+    P("   -K Str kod            KoD history filename\n");
+    P("   -p no  syslog         Logging with syslog\n");
+    P("				- prohibits the option 'logfile'\n");
+    P("   -l Str logfile        Log to specified logfile\n");
+    P("				- prohibits the option 'syslog'\n");
+    P("   -s no  settod         Set (step) the time with clock_settime()\n");
+    P("				- prohibits the option 'adjtime'\n");
+    P("   -j no  adjtime        Set (slew) the time with adjtime()\n");
+    P("				- prohibits the option 'settod'\n");
+    P("   -b Str broadcast      Use broadcasts to the address specified for synchronisation\n");
+    P("   -t Num timeout        Specify seconds to wait for broadcasts\n");
+    P("   -a Num authentication Enable authentication with the numbered key\n");
+    P("   -k Str keyfile        Specify a keyfile. SNTP will look in this file\n");
+    P("                         for the key specified with -a\n");
+    P("   -V no version         Output version information and exit\n");
+    P("   -h no  help           Display extended usage information and exit\n");
 #undef P
 }
 
@@ -221,7 +216,6 @@ ntpdig_main (
 
 	init_lib();
 	init_auth();
-	init_network();
 
 	while ((op = ntp_getopt_long(argc, argv,
 				     ALL_OPTIONS, longoptions, NULL)) != -1) {
@@ -316,7 +310,7 @@ ntpdig_main (
 	argc -= optct;
 	argv += optct;
 
-	TRACE(2, ("init_network() done, %s%s\n",
+	TRACE(2, ("init_lib() done, %s%s\n",
 		  (ipv4_works)
 		      ? "ipv4_works "
 		      : "",
@@ -325,8 +319,8 @@ ntpdig_main (
 		      : ""));
 	ntpver = opt_ntpversion;
 	steplimit = opt_steplimit / 1e3;
-	gap.tv_nsec = max(0, opt_gap * 1000000);
-	gap.tv_nsec = min(gap.tv_nsec, NANOSECONDS-1);
+	gap.tv_usec = max(0, opt_gap * 1000);
+	gap.tv_usec = min(gap.tv_usec, 999999);
 
 	if (opt_logfile)
 		open_logfile(opt_logfile);
@@ -348,10 +342,10 @@ ntpdig_main (
 
 	response_timeout = opt_timeout;
 	response_tv.tv_sec = (int)response_timeout;
-	response_tv.tv_nsec = (response_timeout - (int)response_timeout) * NANOSECONDS;
+	response_tv.tv_usec = (response_timeout - (int)response_timeout) * MICROSECONDS;
 
 	/* IPv6 available? */
-	if (!isc_net_probeipv6_bool()) {
+	if (isc_net_probeipv6_bool()) {
 		ai_fam_pref = AF_INET;
 		TRACE(1, ("No ipv6 support available, forcing ipv4\n"));
 	} else {
@@ -433,24 +427,6 @@ ntpdig_main (
 	return exitcode;
 }
 
-static struct timeval
-tspec_to_tval(struct timespec x)
-{
-    struct timeval y;
-    y.tv_sec = x.tv_sec;
-    y.tv_usec = x.tv_nsec / 1000;
-    return y;
-}
-
-static void ns_event_add(
-    struct event *event,
-    struct timespec x
-    )
-{
-    struct timeval y = tspec_to_tval(x);
-    event_add(event, &y);
-}
-
 
 /*
 ** open sockets and make them non-blocking
@@ -492,7 +468,7 @@ open_sockets(
 			msyslog(LOG_ERR,
 				"open_sockets: event_new(base, sock4) failed!");
 		} else {
-			ns_event_add(ev_sock4, wakeup_tv);
+			event_add(ev_sock4, &wakeup_tv);
 		}
 	}
 
@@ -526,7 +502,7 @@ open_sockets(
 			msyslog(LOG_ERR,
 				"open_sockets: event_new(base, sock6) failed!");
 		} else {
-			ns_event_add(ev_sock6, wakeup_tv);
+			event_add(ev_sock6, &wakeup_tv);
 		}
 	}
 	
@@ -706,8 +682,8 @@ queue_xmt(
 	sent_pkt **	pkt_listp;
 	sent_pkt *	match;
 	xmt_ctx *	xctx;
-	struct timespec	start_cb;
-	struct timespec	delay;
+	struct timeval	start_cb;
+	struct timeval	delay;
 
 	UNUSED_ARG(dctx);
 
@@ -764,9 +740,9 @@ queue_xmt(
 		ZERO(delay);
 		if (xctx->sched > start_cb.tv_sec)
 			delay.tv_sec = xctx->sched - start_cb.tv_sec;
-		ns_event_add(ev_xmt_timer, delay);
-		TRACE(2, ("queue_xmt: xmt timer for %ld usec\n",
-			  delay.tv_nsec/1000));
+		event_add(ev_xmt_timer, &delay);
+		TRACE(2, ("queue_xmt: xmt timer for %u usec\n",
+			  (u_int)delay.tv_usec));
 	}
 }
 
@@ -781,8 +757,8 @@ xmt_timer_cb(
 	void *		ctx
 	)
 {
-	struct timespec	start_cb;
-	struct timespec	delay;
+	struct timeval	start_cb;
+	struct timeval	delay;
 	xmt_ctx *	x;
 
 	UNUSED_ARG(fd);
@@ -795,24 +771,24 @@ xmt_timer_cb(
 	gettimeofday_cached(base, &start_cb);
 	if (xmt_q->sched <= start_cb.tv_sec) {
 		UNLINK_HEAD_SLIST(x, xmt_q, link);
-		TRACE(2, ("xmt_timer_cb: at .%6.6ld -> %s\n",
-			  start_cb.tv_nsec/1000, socktoa(&x->spkt->addr)));
+		TRACE(2, ("xmt_timer_cb: at .%6.6u -> %s\n",
+			  (u_int)start_cb.tv_usec, socktoa(&x->spkt->addr)));
 		xmt(x);
 		free(x);
 		if (NULL == xmt_q)
 			return;
 	}
 	if (xmt_q->sched <= start_cb.tv_sec) {
-		ns_event_add(ev_xmt_timer, gap);
-		TRACE(2, ("xmt_timer_cb: at .%6.6ld gap %6.6ld\n",
-			  start_cb.tv_nsec/1000,
-			  gap.tv_nsec));
+		event_add(ev_xmt_timer, &gap);
+		TRACE(2, ("xmt_timer_cb: at .%6.6u gap %6.6u\n",
+			  (u_int)start_cb.tv_usec,
+			  (u_int)gap.tv_usec));
 	} else {
 		delay.tv_sec = xmt_q->sched - start_cb.tv_sec;
-		delay.tv_nsec = 0;
-		ns_event_add(ev_xmt_timer, delay);
-		TRACE(2, ("xmt_timer_cb: at .%6.6ld next %ld seconds\n",
-			  start_cb.tv_nsec/1000,
+		delay.tv_usec = 0;
+		event_add(ev_xmt_timer, &delay);
+		TRACE(2, ("xmt_timer_cb: at .%6.6u next %ld seconds\n",
+			  (u_int)start_cb.tv_usec,
 			  (long)delay.tv_sec));
 	}
 }
@@ -830,12 +806,12 @@ xmt(
 	struct dns_ctx *dctx = xctx->spkt->dctx;
 	sent_pkt *	spkt = xctx->spkt;
 	sockaddr_u *	dst = &spkt->addr;
-	struct timespec	tv_xmt;
+	struct timeval	tv_xmt;
 	struct pkt	x_pkt;
 	size_t		pkt_len;
 	int		sent;
 
-	if (0 != clock_gettime(CLOCK_REALTIME, &tv_xmt)) {
+	if (0 != gettimeofday(&tv_xmt, NULL)) {
 		msyslog(LOG_ERR,
 			"xmt: gettimeofday() failed: %m");
 		exit(1);
@@ -852,8 +828,8 @@ xmt(
 		       pkt_len));
 		spkt->stime = tv_xmt.tv_sec - JAN_1970;
 
-		TRACE(2, ("xmt: %lx.%6.6ld %s %s\n", (u_long)tv_xmt.tv_sec,
-			  tv_xmt.tv_nsec/1000, dctx->name, socktoa(dst)));
+		TRACE(2, ("xmt: %lx.%6.6u %s %s\n", (u_long)tv_xmt.tv_sec,
+			  (u_int)tv_xmt.tv_usec, dctx->name, socktoa(dst)));
 	} else {
 		dec_pending_ntp(dctx->name, dst);
 	}
@@ -868,13 +844,13 @@ xmt(
 void
 timeout_queries(void)
 {
-	struct timespec	start_cb;
+	struct timeval	start_cb;
 	u_int		idx;
 	sent_pkt *	head;
 	sent_pkt *	spkt;
 	sent_pkt *	spkt_next;
 	long		age;
-	bool didsomething = false;
+	int didsomething = 0;
 
 	TRACE(3, ("timeout_queries: called to check %u items\n",
 		  (unsigned)COUNTOF(fam_listheads)));
@@ -885,7 +861,7 @@ timeout_queries(void)
 		for (spkt = head; spkt != NULL; spkt = spkt_next) {
 			char xcst;
 
-			didsomething = true;
+			didsomething = 1;
 			switch (spkt->dctx->flags & CTX_xCST) {
 			    case CTX_BCST:
 				xcst = 'B';
@@ -1194,7 +1170,7 @@ intres_timeout_req(
 	u_int	seconds		/* 0 cancels */
 	)
 {
-	struct timespec	tv_to;
+	struct timeval	tv_to;
 
 	if (NULL == ev_worker_timeout) {
 		ev_worker_timeout = event_new(base, -1,
@@ -1207,8 +1183,8 @@ intres_timeout_req(
 	if (0 == seconds)
 		return;
 	tv_to.tv_sec = seconds;
-	tv_to.tv_nsec = 0;
-	ns_event_add(ev_worker_timeout, tv_to);
+	tv_to.tv_usec = 0;
+	event_add(ev_worker_timeout, &tv_to);
 }
 
 
@@ -1265,7 +1241,7 @@ ntpdig_libevent_log_cb(
 int
 generate_pkt (
 	struct pkt *x_pkt,
-	const struct timespec *tv_xmt,
+	const struct timeval *tv_xmt,
 	int key_id,
 	struct key *pkt_key
 	)
@@ -1276,7 +1252,7 @@ generate_pkt (
 
 	pkt_len = LEN_PKT_NOMAC;
 	ZERO(*x_pkt);
-	xmt_fp = tspec_stamp_to_lfp(*tv_xmt);
+	TVTOTS(tv_xmt, &xmt_fp);
 	HTONL_FP(&xmt_fp, &x_pkt->xmt);
 	x_pkt->stratum = STRATUM_TO_PKT(STRATUM_UNSPEC);
 	x_pkt->ppoll = 8;
@@ -1304,7 +1280,7 @@ handle_pkt(
 {
 	char		disptxt[32];
 	const char *	addrtxt;
-	struct timespec	tv_dst;
+	struct timeval	tv_dst;
 	int		cnt;
 	int		sw_case;
 	int		digits;
@@ -1376,7 +1352,7 @@ handle_pkt(
 			if (1 == sscanf(p_NTPDIG_PRETEND_TIME, "%lld", &ll))
 				pretend_time = (time_t)ll;
 #else
-# include "GRONK: unexpected value for NTP_SIZEOF_TIME_T"
+# include "GRONK: unexpected value for SIZEOF_TIME_T"
 #endif
 			if (0 != pretend_time)
 				tv_dst.tv_sec = pretend_time;
@@ -1465,7 +1441,7 @@ void
 offset_calculation(
 	struct pkt *rpkt,
 	int rpktl,
-	struct timespec *tv_dst,
+	struct timeval *tv_dst,
 	double *offset,
 	double *precision,
 	double *synch_distance
@@ -1495,7 +1471,7 @@ offset_calculation(
 	tmp = p_rec;
 	L_SUB(&tmp, &p_org);
 	LFPTOD(&tmp, t21);
-	dst = tspec_stamp_to_lfp(*tv_dst);
+	TVTOTS(tv_dst, &dst);
 	dst.l_ui += JAN_1970;
 	tmp = p_xmt;
 	L_SUB(&tmp, &dst);
@@ -1695,67 +1671,68 @@ libevent_version_ok(void)
 int
 gettimeofday_cached(
 	struct event_base *	b,
-	struct timespec *	caller_ts
+	struct timeval *	caller_tv
 	)
 {
 	static struct event_base *	cached_b;
-	static struct timespec		cached;
-	static struct timespec		adj_cached;
-	static struct timespec		offset;
+	static struct timeval		cached;
+	static struct timeval		adj_cached;
+	static struct timeval		offset;
 	static int			offset_ready;
-	struct timespec			latest;
-	struct timeval			us_latest;
-	struct timespec			systemt;
-	struct timespec			mono;
-	struct timespec			diff;
+	struct timeval			latest;
+	struct timeval			systemt;
+	struct timespec			ts;
+	struct timeval			mono;
+	struct timeval			diff;
 	int				cgt_rc;
 	int				gtod_rc;
 
-	event_base_gettimeofday_cached(b, &us_latest);
-	latest = tval_to_tspec(us_latest);
+	event_base_gettimeofday_cached(b, &latest);
 	if (b == cached_b &&
 	    !memcmp(&latest, &cached, sizeof(latest))) {
-		*caller_ts = adj_cached;
+		*caller_tv = adj_cached;
 		return 0;
 	}
 	cached = latest;
 	cached_b = b;
 	if (!offset_ready) {
-		cgt_rc = clock_gettime(CLOCK_MONOTONIC, &mono);
-		gtod_rc = clock_gettime(CLOCK_REALTIME, &systemt);
+		cgt_rc = clock_gettime(CLOCK_MONOTONIC, &ts);
+		gtod_rc = gettimeofday(&systemt, NULL);
 		if (0 != gtod_rc) {
 			msyslog(LOG_ERR,
-				"%s: clock_gettime() error %m",
+				"%s: gettimeofday() error %m",
 				progname);
 			exit(1);
 		}
-		diff = sub_tspec(systemt, latest);
+		diff = sub_tval(systemt, latest);
 		if (debug > 1)
 			printf("system minus cached %+ld.%06ld\n",
-			       (long)diff.tv_sec, diff.tv_nsec/1000);
+			       (long)diff.tv_sec, (long)diff.tv_usec);
 		if (0 != cgt_rc || labs((long)diff.tv_sec) < 3600) {
 			/*
 			 * Either use_monotonic == 0, or this libevent
 			 * has been repaired.  Leave offset at zero.
 			 */
 		} else {
-			diff = sub_tspec(latest, mono);
+			mono.tv_sec = ts.tv_sec;
+			mono.tv_usec = ts.tv_nsec / 1000;
+			diff = sub_tval(latest, mono);
 			if (debug > 1)
 				printf("cached minus monotonic %+ld.%06ld\n",
-				       (long)diff.tv_sec, diff.tv_nsec/1000);
+				       (long)diff.tv_sec, (long)diff.tv_usec);
 			if (labs((long)diff.tv_sec) < 3600) {
 				/* older libevent2 using monotonic */
-				offset = sub_tspec(systemt, mono);
+				offset = sub_tval(systemt, mono);
 				TRACE(1, ("%s: Offsetting libevent CLOCK_MONOTONIC times  by %+ld.%06ld\n",
 					 "gettimeofday_cached",
 					 (long)offset.tv_sec,
-					 offset.tv_nsec/1000));
+					 (long)offset.tv_usec));
 			}
 		}
 		offset_ready = true;
 	}
-	adj_cached = add_tspec(cached, offset);
-	*caller_ts = adj_cached;
+	adj_cached = add_tval(cached, offset);
+	*caller_tv = adj_cached;
 
 	return 0;
 }

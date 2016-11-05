@@ -134,7 +134,7 @@ ss_to_str(
  */
 char *
 tv_to_str(
-	const struct timespec *tv,
+	const struct timeval *tv,
 	const bool json
 	)
 {
@@ -143,8 +143,8 @@ tv_to_str(
 	time_t gmt_time, local_time;
 	struct tm tmbuf, tmbuf2, *p_tm_local;
 	int hh, mm, lto;
-	const char *oldstyle = "%d-%.2d-%.2d %.2d:%.2d:%.2d.%.9d (%+03d%02d)";
-	const char *jsonstyle = "%d-%.2d-%.2dT%.2d:%.2d:%.2d.%.9d%+03d%02d";
+	const char *oldstyle = "%d-%.2d-%.2d %.2d:%.2d:%.2d.%.6d (%+03d%02d)";
+	const char *jsonstyle = "%d-%.2d-%.2dT%.2d:%.2d:%.2d.%.6d%+03d%02d";
 
 	/*
 	 * convert to struct tm in UTC, then intentionally feed
@@ -177,7 +177,7 @@ tv_to_str(
 		 p_tm_local->tm_hour,
 		 p_tm_local->tm_min,
 		 p_tm_local->tm_sec,
-		 (int)tv->tv_nsec,
+		 (int)tv->tv_usec,
 		 hh,
 		 mm);
 
