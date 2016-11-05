@@ -16,7 +16,6 @@
   directory specified in the +keysdir+ command or default
   +/usr/local/etc+. Following are the subcommands:
 
-  //NAMECHANGE
   +cert+ _file_;;
     Specifies the location of the required host public certificate file.
     This overrides the link _ntpkey_cert_hostname_ in the keys
