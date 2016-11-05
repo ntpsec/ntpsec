@@ -142,7 +142,6 @@ extern	const char *	humanlogtime	(void);
 extern	const char *	humantime	(time_t);
 extern	char *	mfptoa		(uint32_t, uint32_t, short);
 extern	char *	mfptoms		(uint32_t, uint32_t, short);
-extern	const char * modetoa	(size_t);
 extern	const char * eventstr	(int);
 extern	const char * ceventstr	(int);
 extern	const char * res_match_flags(unsigned short);
@@ -221,7 +220,6 @@ extern	bool	ssl_init_done;
 #endif
 extern	int	keytype_from_text	(const char *,	size_t *);
 extern	const char *keytype_name	(int);
-extern	char *	getpass_keytype		(int);
 
 /* strl-obsd.c */
 #ifndef HAVE_STRLCPY		/* + */
