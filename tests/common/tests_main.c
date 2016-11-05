@@ -48,7 +48,6 @@ static void RunAllTests(void)
 	RUN_TEST_GROUP(humandate);
 	RUN_TEST_GROUP(lfpfunc);
 	RUN_TEST_GROUP(lfptostr);
-	RUN_TEST_GROUP(modetoa);
 	RUN_TEST_GROUP(msyslog);
 	RUN_TEST_GROUP(netof);
 	RUN_TEST_GROUP(numtoa);

@@ -134,7 +134,7 @@ class Ntpq(cmd.Cmd):
     def __init__(self, session):
         cmd.Cmd.__init__(self)
         self.session = session
-        self.prompt = "pyntpq> "
+        self.prompt = "ntpq> "
         self.interactive       = False	# set to True when we should prompt
         self.old_rv            = False	# use old readvars behavior?
         #self.auth_keyid   = 0		# Keyid used for authentication.
@@ -1504,7 +1504,7 @@ USAGE: ntpq [-46dphinOV] [-c str] [-D lvl] [ host ...]
 '''
 
 if __name__ == '__main__':
-    setprogname("pyntpq")
+    setprogname("ntpq")
     #init_auth()
 
     try:

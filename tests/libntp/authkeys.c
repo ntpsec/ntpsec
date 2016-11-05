@@ -34,7 +34,7 @@ TEST_SETUP(authkeys) {
 
 TEST_TEAR_DOWN(authkeys) {}
 
-/* This file contains test for both libntp/authkeys.c and libntp/authusekey.c */
+/* This file contains test for libntp/authkeys.c */
 
 
 
@@ -91,26 +91,9 @@ TEST(authkeys, HaveKeyIncorrect) {
 	TEST_ASSERT_FALSE(authhavekey(KEYNO));
 }
 
-TEST(authkeys, AddWithAuthUseKey) {
-	const keyid_t KEYNO = 5;
-	const char* KEY = "52a";
-
-	TEST_ASSERT_TRUE(authusekey(KEYNO, KEYTYPE, (u_char*)KEY));
-}
-
-TEST(authkeys, EmptyKey) {
-	const keyid_t KEYNO = 3;
-	const char* KEY = "";
-
-
-	TEST_ASSERT_FALSE(authusekey(KEYNO, KEYTYPE, (u_char*)KEY));
-}
-
 TEST_GROUP_RUNNER(authkeys) {
 	RUN_TEST_CASE(authkeys, AddTrustedKeys);
 	RUN_TEST_CASE(authkeys, AddUntrustedKey);
 	RUN_TEST_CASE(authkeys, HaveKeyCorrect);
 	RUN_TEST_CASE(authkeys, HaveKeyIncorrect);
-	RUN_TEST_CASE(authkeys, AddWithAuthUseKey);
-	RUN_TEST_CASE(authkeys, EmptyKey);
 }

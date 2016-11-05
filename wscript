@@ -151,7 +151,6 @@ def build(ctx):
 	ctx.recurse("libsodium")
 	ctx.recurse("ntpd")
 	ctx.recurse("ntpfrob")
-	ctx.recurse("ntpq")
 	ctx.recurse("ntpkeygen")
 	ctx.recurse("ntptime")
 	ctx.recurse("pylib")
@@ -160,6 +159,7 @@ def build(ctx):
 
 	scripts = [
 		"ntpleapfetch/ntpleapfetch",
+		"ntpq/ntpq",
 		"ntpstats/ntpviz",
 		"ntptrace/ntptrace",
 		"ntpwait/ntpwait",

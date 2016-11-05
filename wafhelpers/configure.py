@@ -275,12 +275,6 @@ def cmd_configure(ctx, config):
 
         ctx.check_cc(lib="m", comment="Math library")
         ctx.check_cc(lib="rt", mandatory=False, comment="realtime library")
-        if not ctx.options.disable_lineeditlibs:
-                ctx.check_cc(lib="edit", mandatory=False, comment="libedit library")
-                ctx.check_cc(lib="curses", mandatory=False, comment="curses library, required for readline on OpenBSD") # Required for readline on OpenBSD.
-                ctx.check_cc(lib="ncurses", mandatory=False, comment="ncurses library, required for readline on LEDE") # Required for readline on LEDE.
-                ctx.check_cc(lib="readline", use="CURSES", mandatory=False, comment="readline library")
-                ctx.check_cc(lib="readline", use="NCURSES", mandatory=False, comment="readline library")
 
         # Find OpenSSL. Must happen before function checks
         if ctx.options.enable_crypto:
@@ -357,12 +351,6 @@ def cmd_configure(ctx, config):
                 "utmpx.h",       # missing on RTEMS and OpenBSD
                 ("sys/timex.h", ["sys/time.h"]),
         )
-        if not ctx.options.disable_lineeditlibs:
-                optional_headers += (
-                        "histedit.h",   # Apple
-                        ("readline/readline.h", ["stdio.h"]),
-                        ("readline/history.h", ["stdio.h", "readline/readline.h"]),
-                )
         for hdr in optional_headers:
                 if isinstance(hdr, str):
                         if ctx.check_cc(header_name=hdr, mandatory=False, comment="<%s> header" % hdr):
@@ -531,7 +519,6 @@ def cmd_configure(ctx, config):
         msg_setting("Debug Support", yesno(not ctx.options.disable_debug))
         msg_setting("Refclocks", ", ".join(ctx.env.REFCLOCK_LIST))
         msg_setting("Build Manpages", yesno(ctx.env.ENABLE_DOC and not ctx.env.DISABLE_MANPAGE))
-        msg_setting("Line Editing Support", yesno(not ctx.options.disable_lineeditlibs))
 
         if ctx.options.enable_debug:
                 msg("")

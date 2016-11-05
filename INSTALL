@@ -69,19 +69,6 @@ OpenSSL::
    Fedora: openssl-libs and openssl-devel
    Gentoo package: dev-libs/openssl
 
-GNU readline::
-   Optional. Enhances ntpq's interactive mode by enabling line
-   editing.
-   Debian: libreadline6 and libreadline-dev
-   Fedora: readline and readline-devel
-   Gentoo package: sys-libs/readline
-
-BSD libedit::
-   Optional. Enhances ntpq's interactive mode by enabling line
-   editing. Used as a fallback if it is installed and GNU readline
-   is not.
-   Gentoo package: dev-libs/libedit
-
 sys/timepps.h::
    If you are building to supply Stratum 1 time service (that is, with
    refclocks linked in) you may find that you need the sys/timepps.h

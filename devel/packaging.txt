@@ -36,7 +36,7 @@ Change to the root directory of the NTPsec source distribution and
 run the following commands:
 
 ```
-cxfreeze ntpq/pyntpq
+cxfreeze ntpq/ntpq
 cxfreeze ntpstats/ntpviz
 cxfreeze ntpsweep/ntpsweep
 cxfreeze ntptrace/ntptrace
