@@ -171,8 +171,10 @@ static void ntpdig_usage(void)
     P("				 - prohibits the option 'ipv6'\n");
     P("   -6 no  ipv6            Force IPv6 DNS name resolution\n");
     P("				 - prohibits the option 'ipv4'\n");
+    P("   -c yes concurrent      Hosts to be queried concurrently\n");
     P("   -d no  debug           Normal verbose\n");
     P("   -D yes set-debug-level Normal verbose\n");
+    P("   -g yes gap             Set gap between requests\n");
     P("   -j no  json            Use JSON output format\n");
     P("   -K Str kod             KoD history filename\n");
     P("   -l Str logfile         Log to specified logfile\n");
