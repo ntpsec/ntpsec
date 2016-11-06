@@ -488,7 +488,7 @@ class Mode6Session:
         # Do the encryption.
         hasher = hashlib.new(self.keytype)
         hasher.update(self.passwd)
-	hasher.update(pkt.flatten());
+	hasher.update(pkt.flatten())
         if hasher.digest_size == 0:
             raise Mode6Exception(SERR_NOKEY)
         else:
@@ -606,7 +606,7 @@ class Mode6Session:
                 raise Mode6Exception(SERR_INCOMPLETE)
 
             if self.debug > 1:
-                warn("Got packet, size = %d\n"% len(rawdata));
+                warn("Got packet, size = %d\n"% len(rawdata))
             if rpkt.count > (len(rawdata) - Packet.HEADER_LEN):
                     warn("Received count of %u octets, data in packet is %ld\n"\
                                    % (count, len(rawdata) - Packet.HEADER_LEN))
@@ -821,7 +821,7 @@ class Mode6Session:
             # Form the initial request
             #next_report = time.time() + MRU_REPORT_SECS
             limit = min(3 * MAXFRAGS, self.ntpd_row_limit)
-            frags = MAXFRAGS;
+            frags = MAXFRAGS
             req_buf = "%s, frags=%d" % (nonce, frags)
             if variables:
                 parms = ", " + ",".join([("%s=%s" % it) for it in list(variables.items())])
@@ -854,9 +854,9 @@ class Mode6Session:
                         raise e
                     elif e.errorcode == CERR_BADVALUE:
                         if cap_frags:
-                            cap_frags = False;
+                            cap_frags = False
                             if self.debug:
-                                warn("Reverted to row limit from fragments limit.\n");
+                                warn("Reverted to row limit from fragments limit.\n")
 			else:
                             # ntpd has lower cap on row limit
                             self.ntpd_row_limit -= 1
@@ -871,7 +871,7 @@ class Mode6Session:
                             if self.debug:
                                 warn("Frag limit reduced to %d following incomplete response.\n"% frags)
 			else:
-                            limit = max(2, limit / 2);
+                            limit = max(2, limit / 2)
                             if self.debug:
                                 warn("Row limit reduced to %d following incomplete response.\n" % limit)
                     elif e.errorcode:
