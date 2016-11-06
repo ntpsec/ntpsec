@@ -31,7 +31,7 @@ def build(ctx):
 	cwd         = srcnode,
 	rule        = 'VERSION=`cat ${SRC}` ../wafhelpers/autorevision.sh -o ${TGT[1].abspath()} -t python >${TGT[0].name}',
 	source      = "../VERSION",
-	target      = [target3, '../wafhelpers/.autorevision-cache'],
+	target      = [target3, '../wafhelpers/.autorevision-cache', '../wafhelpers/autorevision.sh'],
 	)
 
     ctx(
