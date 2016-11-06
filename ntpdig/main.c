@@ -173,14 +173,15 @@ static void ntpdig_usage(void)
     P("				- prohibits the option 'ipv4'\n");
     P("   -d no  normalverbose  Normal verbose\n");
     P("   -K Str kod            KoD history filename\n");
+    P("   -g yes gap            Set gap between requests\n");
     P("   -p no  syslog         Logging with syslog\n");
     P("				- prohibits the option 'logfile'\n");
     P("   -l Str logfile        Log to specified logfile\n");
     P("				- prohibits the option 'syslog'\n");
     P("   -s no  settod         Set (step) the time with clock_settime()\n");
-    P("				- prohibits the option 'adjtime'\n");
+    P("				- prohibits the option 'slew'\n");
     P("   -j no  adjtime        Set (slew) the time with adjtime()\n");
-    P("				- prohibits the option 'settod'\n");
+    P("				- prohibits the option 'step'\n");
     P("   -b Str broadcast      Use broadcasts to the address specified for synchronisation\n");
     P("   -t Num timeout        Specify seconds to wait for broadcasts\n");
     P("   -a Num authentication Enable authentication with the numbered key\n");
