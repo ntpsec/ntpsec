@@ -198,12 +198,12 @@ usage: help [ command ]
         return True
 
     def __printassoc(self, showall):
-        condition = "";
+        condition = ""
         if not self.peers:
-            self.say("No association IDs in list\n");
-            return;
-        self.say("\nind assid status  conf reach auth condition  last_event cnt\n");
-        self.say("===========================================================\n");
+            self.say("No association IDs in list\n")
+            return
+        self.say("\nind assid status  conf reach auth condition  last_event cnt\n")
+        self.say("===========================================================\n")
         for (i, peer) in enumerate(self.peers):
             statval = CTL_PEER_STATVAL(peer.status)
             if not showall and (statval & (CTL_PST_CONFIG|CTL_PST_REACH)) == 0:
@@ -442,7 +442,7 @@ usage: help [ command ]
 	 # if we're asking for specific variables don't include the
 	 # status header line in the output.
 	if self.old_rv:
-            quiet = False;
+            quiet = False
 	else:
             quiet = not (not varlist)	# nonempty?
         try:
@@ -465,9 +465,9 @@ usage: help [ command ]
 				associd))
             return True
 	if not quiet:
-            self.say("associd=%d " % associd);
+            self.say("associd=%d " % associd)
 	self.printvars(variables, type, quiet)
-	return True;
+	return True
 
     # Unexposed helper tables and functions end here
 
