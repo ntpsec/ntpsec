@@ -8,6 +8,7 @@ def configure(conf):
 
 def build(ctx):
     srcnode = ctx.srcnode.make_node('pylib')
+    #bldnode = ctx.bldnode.make_node('pylib')
     target1 = ctx.srcnode.make_node('pylib/ntp_control.py')
     target2 = ctx.srcnode.make_node('pylib/ntp_magic.py')
     target3 = ctx.srcnode.make_node('pylib/version.py')
@@ -18,6 +19,7 @@ def build(ctx):
 	rule        = '../wafhelpers/pythonize-header ${SRC} >${TGT}',
 	source      = "../include/ntp_control.h",
 	target      = target1,
+	install_path ='${PYTHONDIR}/ntp'
 	)
 
     ctx(
@@ -26,6 +28,7 @@ def build(ctx):
 	rule        = '../wafhelpers/pythonize-header ${SRC} >${TGT}',
 	source      = "../include/ntp.h",
 	target      = target2,
+	install_path ='${PYTHONDIR}/ntp'
 	)
 
     ctx(
@@ -34,6 +37,13 @@ def build(ctx):
 	rule        = 'VERSION=`cat ../VERSION` ../wafhelpers/autorevision.sh -t python >${TGT}',
 	source      = "../VERSION",
 	target      = target3,
+	install_path ='${PYTHONDIR}/ntp'
 	)
 
-    ctx(features='py', source=ctx.path.ant_glob('*.py'), install_from='.', install_path='${PYTHONDIR}/ntp')
+    ctx(
+	after       = ['pyc', 'pyo'],
+	features     ='py',
+	source       = ctx.path.ant_glob('*.py'),
+	install_from = '.',
+	install_path ='${PYTHONDIR}/ntp'
+	)
