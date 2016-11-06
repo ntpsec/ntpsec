@@ -3,6 +3,7 @@ from waflib.Build import BuildContext, CleanContext, InstallContext, UninstallCo
 from waflib import Context, Errors
 from waflib import Scripting
 from waflib.Logs import pprint
+import os
 
 pprint.__doc__ = None
 
@@ -174,12 +175,23 @@ def build(ctx):
 		install_path = "${PREFIX}/bin/"
 	)
 
+	# Make magic links to support in-tree testing.
+	# The idea is that all directories where the Python tools
+	# listed above live should have an 'ntp' symlink so they
+	# can import compiled Python modules from the build directory.
+	# Also, they need to be able to see the Python extension
+	# module built in libntp.
+	bldnode = ctx.bldnode.abspath()
+	srcnode = ctx.srcnode.abspath()
+	for d in ("ntpq", "ntpstats", "ntpsweep", "ntptrace", "ntpwait"):
+		os.system("ln -sf %s/pylib %s/%s/ntp" % (bldnode, srcnode, d))
+	os.system("ln -sf %s/libntp/ntpc.so %s/pylib/ntpc.so " % (bldnode, bldnode))
+
 	ctx.manpage(8, "ntpleapfetch/ntpleapfetch-man.txt")
 	ctx.manpage(1, "ntptrace/ntptrace-man.txt")
 	ctx.manpage(1, "ntpstats/ntpviz-man.txt")
 	ctx.manpage(8, "ntpwait/ntpwait-man.txt")
 	ctx.manpage(1, "ntpsweep/ntpsweep-man.txt")
-
 
 	# Skip running unit tests on a cross compile build
 	if not ctx.env.ENABLE_CROSS:
