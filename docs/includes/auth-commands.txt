@@ -20,7 +20,7 @@
     Specifies the location of the required host public certificate file.
     This overrides the link _ntpkey_cert_hostname_ in the keys
     directory.
-  +digest+ 'digest';;
+  +digest+ _digest_;;
     Specify the message digest algorithm, with default MD5. If the
     OpenSSL library is installed, +digest+ can be be any message digest
     algorithm supported by the library. The current selections are:
