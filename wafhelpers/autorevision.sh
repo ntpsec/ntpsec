@@ -68,7 +68,7 @@ EOF
 
 # Config
 ARVERSION="&&ARVERSION&&"
-TARGETFILE="/dev/stdout"
+TARGETFILE=""
 while getopts ":t:o:s:VfU" OPTION; do
 	case "${OPTION}" in
 		t)
@@ -400,7 +400,7 @@ svnRepo() {
 # Functions to output data in different formats.
 # For bash output
 shOutput() {
-	cat > "${TARGETFILE}" << EOF
+	cat ${TARGETFILE} << EOF
 # ${GENERATED_HEADER}
 
 TYPE="${TYPE}"
@@ -425,7 +425,7 @@ EOF
 
 # For source C output
 cOutput() {
-	cat > "${TARGETFILE}" << EOF
+	cat ${TARGETFILE} << EOF
 /* ${GENERATED_HEADER} */
 
 const char *TYPE         = "${TYPE}";
@@ -450,7 +450,7 @@ EOF
 
 # For header output
 hOutput() {
-	cat > "${TARGETFILE}" << EOF
+	cat ${TARGETFILE} << EOF
 /* ${GENERATED_HEADER} */
 #ifndef AUTOREVISION_H
 #define AUTOREVISION_H
@@ -479,7 +479,7 @@ EOF
 
 # A header output for use with xcode to populate info.plist strings
 xcodeOutput() {
-	cat > "${TARGETFILE}" << EOF
+	cat ${TARGETFILE} << EOF
 /* ${GENERATED_HEADER} */
 #ifndef AUTOREVISION_H
 #define AUTOREVISION_H
@@ -535,7 +535,7 @@ swiftOutput() {
 	else
 		ACTION_STAMP="\"${ACTION_STAMP}\""
 	fi
-	cat > "${TARGETFILE}" << EOF
+	cat ${TARGETFILE} << EOF
 /* ${GENERATED_HEADER} */
 
 let TYPE			= "${TYPE}"
@@ -564,7 +564,7 @@ pyOutput() {
 		0) WC_MODIFIED="False" ;;
 		1) WC_MODIFIED="True" ;;
 	esac
-	cat > "${TARGETFILE}" << EOF
+	cat ${TARGETFILE} << EOF
 # ${GENERATED_HEADER}
 
 TYPE = "${TYPE}"
@@ -619,7 +619,7 @@ luaOutput() {
 		0) WC_MODIFIED="false" ;;
 		1) WC_MODIFIED="true" ;;
 	esac
-	cat > "${TARGETFILE}" << EOF
+	cat ${TARGETFILE} << EOF
 -- ${GENERATED_HEADER}
 
 TYPE = "${TYPE}"
@@ -648,7 +648,7 @@ phpOutput() {
 		0) WC_MODIFIED="false" ;;
 		1) WC_MODIFIED="true" ;;
 	esac
-	cat > "${TARGETFILE}" << EOF
+	cat ${TARGETFILE} << EOF
 <?php
 # ${GENERATED_HEADER}
 
@@ -679,7 +679,7 @@ iniOutput() {
 		0) WC_MODIFIED="false" ;;
 		1) WC_MODIFIED="true" ;;
 	esac
-	cat > "${TARGETFILE}" << EOF
+	cat ${TARGETFILE} << EOF
 ; ${GENERATED_HEADER}
 [VCS]
 TYPE = "${TYPE}"
@@ -705,7 +705,7 @@ jsOutput() {
 		1) WC_MODIFIED="true" ;;
 		0) WC_MODIFIED="false" ;;
 	esac
-	cat > "${TARGETFILE}" << EOF
+	cat ${TARGETFILE} << EOF
 /** ${GENERATED_HEADER} */
 
 var autorevision = {
@@ -741,7 +741,7 @@ jsonOutput() {
 		1) WC_MODIFIED="true" ;;
 		0) WC_MODIFIED="false" ;;
 	esac
-	cat > "${TARGETFILE}" << EOF
+	cat ${TARGETFILE} << EOF
 {
 	"_comment": "${GENERATED_HEADER}",
 	"TYPE": "${TYPE}",
@@ -769,7 +769,7 @@ javaOutput() {
 		1) WC_MODIFIED="true" ;;
 		0) WC_MODIFIED="false" ;;
 	esac
-	cat > "${TARGETFILE}" << EOF
+	cat ${TARGETFILE} << EOF
 /* ${GENERATED_HEADER} */
 
 public class autorevision {
@@ -798,7 +798,7 @@ javapropOutput() {
 		1) WC_MODIFIED="true" ;;
 		0) WC_MODIFIED="false" ;;
 	esac
-	cat > "${TARGETFILE}" << EOF
+	cat ${TARGETFILE} << EOF
 # ${GENERATED_HEADER}
 
 TYPE=${TYPE}
@@ -821,7 +821,7 @@ EOF
 
 # For m4 output
 m4Output() {
-	cat > "${TARGETFILE}" << EOF
+	cat ${TARGETFILE} << EOF
 dnl ${GENERATED_HEADER}
 define(\`TYPE', \`${TYPE}')dnl
 define(\`BASENAME', \`${BASENAME}')dnl
@@ -845,7 +845,7 @@ texOutput() {
 		0) WC_MODIFIED="false" ;;
 		1) WC_MODIFIED="true" ;;
 	esac
-	cat > "${TARGETFILE}" << EOF
+	cat ${TARGETFILE} << EOF
 % ${GENERATED_HEADER}
 \def \vcsType {${TYPE}}
 \def \vcsBasename {${BASENAME}}
@@ -870,7 +870,7 @@ schemeOutput() {
 		0) WC_MODIFIED="#f" ;;
 		1) WC_MODIFIED="#t" ;;
 	esac
-	cat > "${TARGETFILE}" << EOF
+	cat ${TARGETFILE} << EOF
 ;; ${GENERATED_HEADER}
 (define TYPE        "${TYPE}")
 (define BASENAME    "${BASENAME}")
@@ -897,7 +897,7 @@ clojureOutput() {
 		0) WC_MODIFIED="false" ;;
 		1) WC_MODIFIED="true" ;;
 	esac
-	cat > "${TARGETFILE}" << EOF
+	cat ${TARGETFILE} << EOF
 ;; ${GENERATED_HEADER}
 (def TYPE        "${TYPE}")
 (def BASENAME    "${BASENAME}")
@@ -920,7 +920,7 @@ EOF
 
 # For rpm spec file output
 rpmOutput() {
-	cat > "${TARGETFILE}" << EOF
+	cat ${TARGETFILE} << EOF
 # ${GENERATED_HEADER}
 $([ "${TYPE}" ] && echo "%define vcs_type		${TYPE}")
 $([ "${BASENAME}" ] && echo "%define vcs_basename		${BASENAME}")
@@ -944,7 +944,7 @@ EOF
 # shellcheck disable=SC2155,SC2039
 hppOutput() {
 	local NAMESPACE="$(echo "${BASENAME}" | sed -e 's:_::g' | tr '[:lower:]' '[:upper:]')"
-	cat > "${TARGETFILE}" << EOF
+	cat ${TARGETFILE} << EOF
 /* ${GENERATED_HEADER} */
 
 #ifndef ${NAMESPACE}_AUTOREVISION_H
@@ -982,7 +982,7 @@ matlabOutput() {
 		0) WC_MODIFIED="FALSE" ;;
 		1) WC_MODIFIED="TRUE" ;;
 	esac
-	cat > "${TARGETFILE}" << EOF
+	cat ${TARGETFILE} << EOF
 % ${GENERATED_HEADER}
 
 TYPE = '${TYPE}';
@@ -1006,7 +1006,7 @@ EOF
 }
 
 octaveOutput() {
-	cat > "${TARGETFILE}" << EOF
+	cat ${TARGETFILE} << EOF
 % ${GENERATED_HEADER}
 
 TYPE = '${TYPE}';
@@ -1230,7 +1230,7 @@ fi
 
 # If requested, make a cache file.
 if [ ! -z "${CACHEFILE}" ] && [ ! "${CACHEFORCE}" = "1" ]; then
-	TARGETFILE="${CACHEFILE}.tmp"
+	TARGETFILE=">${CACHEFILE}.tmp"
 	shOutput
 
 	# Check to see if there have been any actual changes.
