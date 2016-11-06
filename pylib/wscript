@@ -41,7 +41,6 @@ def build(ctx):
 	)
 
     ctx(
-	after       = ['pyc', 'pyo'],
 	features     ='py',
 	source       = ctx.path.ant_glob('*.py'),
 	install_from = '.',
