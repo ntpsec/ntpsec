@@ -11,8 +11,8 @@
 # SPDX-License-Identifier: BSD-2-clause
 from __future__ import print_function, division
 
-import os, sys, getopt, cmd, errno, curses, curses.ascii, re
-import socket, select, struct, shlex, time, hashlib
+import os, sys, getopt, cmd, re
+import socket, hashlib
 
 from ntp.packet import *
 from ntp.util import *
