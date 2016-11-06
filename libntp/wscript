@@ -15,7 +15,6 @@ def build(ctx):
 		"dolfptoa.c",
 		"getopt.c",
 		"initnetwork.c",
-		"lib_strbuf.c",
 		"machines.c",
 		"md5.c",
 		"mstolfp.c",
