@@ -466,9 +466,9 @@ open_sockets(
 	}
 
 	/* We may not always have IPv6... */
-	if (-1 == sock6 && ipv6_works) {
+	if (-1 == sock6 && isc_net_probeipv6_bool()) {
 		sock6 = socket(PF_INET6, SOCK_DGRAM, 0);
-		if (-1 == sock6 && ipv6_works) {
+		if (-1 == sock6 && isc_net_probeipv6_bool()) {
 			/* error getting a socket */
 			msyslog(LOG_ERR, "open_sockets: socket(PF_INET6) failed: %m");
 			exit(1);
@@ -623,7 +623,7 @@ ntpdig_name_resolved(
 				break;
 
 			case AF_INET6:
-				if (!ipv6_works)
+				if (!isc_net_probeipv6_bool())
 					continue;
 
 				sock = sock6;
