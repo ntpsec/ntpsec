@@ -310,13 +310,6 @@ ntpdig_main (
 	argc -= optct;
 	argv += optct;
 
-	TRACE(2, ("init_lib() done, %s%s\n",
-		  (ipv4_works)
-		      ? "ipv4_works "
-		      : "",
-		  (ipv6_works)
-		      ? "ipv6_works "
-		      : ""));
 	ntpver = opt_ntpversion;
 	steplimit = opt_steplimit / 1e3;
 	gap.tv_usec = max(0, opt_gap * 1000);
