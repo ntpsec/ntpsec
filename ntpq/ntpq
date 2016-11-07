@@ -443,11 +443,11 @@ usage: help [ command ]
 
     def __dolist(self, varlist, associd, op, type):
         "List variables associated with a specified peer."
-	 # if we're asking for specific variables don't include the
-	 # status header line in the output.
-	if self.old_rv:
+         # if we're asking for specific variables don't include the
+         # status header line in the output.
+        if self.old_rv:
             quiet = False
-	else:
+        else:
             quiet = not (not varlist)	# nonempty?
         try:
             variables = self.session.readvar(associd, varlist, op)
@@ -457,21 +457,21 @@ usage: help [ command ]
         except IOError as e:
             print(e.strerror)
             return False
-	if len(self.chosts) > 1:
+        if len(self.chosts) > 1:
             self.say("server=%s " % self.session.hostname)
-	if not variables:
+        if not variables:
             if associd == 0:
                 self.say("No system%s variables returned\n"%
-				" clock" if (type == TYPE_CLOCK) else "")
+                                " clock" if (type == TYPE_CLOCK) else "")
             else:
                 self.say("No information returned for%s association %d\n"%
-				(" clock" if (type == TYPE_CLOCK) else "",
-				associd))
+                                (" clock" if (type == TYPE_CLOCK) else "",
+                                associd))
             return True
-	if not quiet:
+        if not quiet:
             self.say("associd=%d " % associd)
-	self.printvars(variables, type, quiet)
-	return True
+        self.printvars(variables, type, quiet)
+        return True
 
     # Unexposed helper tables and functions end here
 
@@ -1220,7 +1220,7 @@ usage: config_from_file <configuration filename>
                             val = val[1:-1]
                 cmdvars[var] = val
 
-	self.say("Ctrl-C will stop MRU retrieval and display partial results.\n")
+        self.say("Ctrl-C will stop MRU retrieval and display partial results.\n")
         if self.rawmode:
             mruhook = lambda v: self.printvars(variables=v,
                                                dtype=TYPE_SYS,
@@ -1485,22 +1485,22 @@ usage = '''
 USAGE: ntpq [-46dphinOV] [-c str] [-D lvl] [ host ...]
   Flg Arg Option-Name    Description
    -4 no  ipv4           Force IPv4 DNS name resolution
-				- prohibits the option 'ipv6'
+                                - prohibits the option 'ipv6'
    -6 no  ipv6           Force IPv6 DNS name resolution
-				- prohibits the option 'ipv4'
+                                - prohibits the option 'ipv4'
    -c Str command        run a command and exit
-				- may appear multiple times
+                                - may appear multiple times
    -d no  debug-level    Increase output debug message level
-				- may appear multiple times
+                                - may appear multiple times
    -D Str set-debug-level Set the output debug message level
-				- may appear multiple times
+                                - may appear multiple times
    -h no  help           Print a usage message.
    -p no  peers          Print a list of the peers
-				- prohibits the option 'interactive'
+                                - prohibits the option 'interactive'
    -i no  interactive    Force ntpq to operate in interactive mode
-				- prohibits these options:
-				command
-				peers
+                                - prohibits these options:
+                                command
+                                peers
    -n no  numeric        numeric host addresses
    -O no  old-rv         Always output status line with readvar
    -V opt version        Output version information and exit
