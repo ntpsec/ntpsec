@@ -128,7 +128,7 @@ MAXFRAGS        = 32
 # Some commands involve a series of requests, such as "peers" and
 # "mrulist", so the cumulative timeouts are even longer for those.
 DEFTIMEOUT      = 5000
-DEFTSIMEOUT     = 3000
+DEFSTIMEOUT     = 3000
 
 class Packet:
     "Encapsulate an NTP fragment"
