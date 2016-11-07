@@ -168,6 +168,7 @@ class Ntpq(cmd.Cmd):
 
     def say(self, msg):
         sys.stdout.write(msg)
+        sys.stdout.flush()	# In case we're piping the output
 
     def warn(self, msg):
         sys.stderr.write(msg)
