@@ -100,8 +100,6 @@ else:  # Python 3
 from ntp_magic import *
 from ntp_control import *
 
-# From ntpq.h:
-
 # Limit on packets in a single response.  Increasing this value to
 # 96 will marginally speed "mrulist" operation on lossless networks
 # but it has been observed to cause loss on WiFi networks and with
@@ -121,7 +119,16 @@ from ntp_control import *
 # of requests and multipacket responses to each.
 MAXFRAGS        = 32
 
-MRU_REPORT_SECS	= 5
+# Requests are automatically retried once, so total timeout with no
+# response is a bit over 2 * DEFTIMEOUT, or 10 seconds.  At the other
+# extreme, a request eliciting 32 packets of responses each for some
+# reason nearly DEFSTIMEOUT seconds after the prior in that series,
+# with a single packet dropped, would take around 32 * DEFSTIMEOUT, or
+# 93 seconds to fail each of two times, or 186 seconds.
+# Some commands involve a series of requests, such as "peers" and
+# "mrulist", so the cumulative timeouts are even longer for those.
+DEFTIMEOUT      = 5000
+DEFTSIMEOUT     = 3000
 
 class Packet:
     "Encapsulate an NTP fragment"
@@ -316,8 +323,8 @@ class Mode6Session:
     def __init__(self):
         self.debug = 0
         self.ai_family = socket.AF_UNSPEC
-        self.primary_timeout = 5000     # Timeout for first select on receive
-        self.secondary_timeout = 3000   # Timeout for later selects
+        self.primary_timeout = DEFTIMEOUT       # Timeout for first select
+        self.secondary_timeout = DEFSTIMEOUT    # Timeout for later selects
         self.pktversion = NTP_OLDVERSION + 1    # Packet version number we use
         self.always_auth       = False  # Always send authenticated requests
         self.keytype = "MD5"
@@ -819,7 +826,6 @@ class Mode6Session:
         span = MRUList()
         try:
             # Form the initial request
-            #next_report = time.time() + MRU_REPORT_SECS
             limit = min(3 * MAXFRAGS, self.ntpd_row_limit)
             frags = MAXFRAGS
             req_buf = "%s, frags=%d" % (nonce, frags)
