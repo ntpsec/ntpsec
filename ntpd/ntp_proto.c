@@ -597,7 +597,7 @@ handle_procpkt(
 	    scalbn((double)(pkt->rec - lfp_to_uint64(&peer->org)), -32) :
 	    -scalbn((double)(lfp_to_uint64(&peer->org) - pkt->rec), -32);
 	const double theta = (t21 + t34) / 2.;
-	const double delta = max(fabs(t21 - t34), LOGTOD(sys_precision));
+	const double delta = fabs(t21 - t34);
 	const double epsilon = LOGTOD(sys_precision) +
 	    LOGTOD(peer->precision) +
 	    clock_phi * delta;
@@ -1894,7 +1894,6 @@ clock_select(void)
 				k = i;
 			}
 		}
-		g = max(g, LOGTOD(sys_precision));
 		if (nlist <= max(1, sys_minclock) || g <= d ||
 		    ((FLAG_TRUE | FLAG_PREFER) & peers[k].peer->flags))
 			break;
