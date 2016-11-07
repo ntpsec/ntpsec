@@ -122,7 +122,19 @@ for command, func, descr in commands:
 			execute = Scripting.autoconfigure(Context.Context.execute)
 # end borrowed code
 
-
+def linkmaker(ctx):
+    # Make magic links to support in-tree testing.
+    # The idea is that all directories where the Python tools
+    # listed above live should have an 'ntp' symlink so they
+    # can import compiled Python modules from the build directory.
+    # Also, they need to be able to see the Python extension
+    # module built in libntp.
+    print("Making in-tree links...") 
+    bldnode = ctx.bldnode.abspath()
+    srcnode = ctx.srcnode.abspath()
+    for d in ("ntpq", "ntpstats", "ntpsweep", "ntptrace", "ntpwait"):
+	    os.system("ln -sf %s/pylib %s/%s/ntp" % (bldnode, srcnode, d))
+    os.system("ln -sf %s/libntp/ntpc.so %s/pylib/ntpc.so " % (bldnode, bldnode))
 
 def build(ctx):
 	ctx.load('waf', tooldir='wafhelpers/')
@@ -175,17 +187,7 @@ def build(ctx):
 		install_path = "${PREFIX}/bin/"
 	)
 
-	# Make magic links to support in-tree testing.
-	# The idea is that all directories where the Python tools
-	# listed above live should have an 'ntp' symlink so they
-	# can import compiled Python modules from the build directory.
-	# Also, they need to be able to see the Python extension
-	# module built in libntp.
-	bldnode = ctx.bldnode.abspath()
-	srcnode = ctx.srcnode.abspath()
-	for d in ("ntpq", "ntpstats", "ntpsweep", "ntptrace", "ntpwait"):
-		os.system("ln -sf %s/pylib %s/%s/ntp" % (bldnode, srcnode, d))
-	os.system("ln -sf %s/libntp/ntpc.so %s/pylib/ntpc.so " % (bldnode, bldnode))
+	ctx.add_post_fun(linkmaker)
 
 	ctx.manpage(8, "ntpleapfetch/ntpleapfetch-man.txt")
 	ctx.manpage(1, "ntptrace/ntptrace-man.txt")
