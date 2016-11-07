@@ -143,6 +143,12 @@ def build(ctx):
 	ctx.load('asciidoc', tooldir='wafhelpers/')
 	ctx.load('rtems_trace', tooldir='wafhelpers/')
 
+	if ctx.cmd == "build":
+		# It's a waf gotcha that if there are object files (including
+		# .pyc and .pyo files) in a source directory, compilation to
+		# the build directory never happens.  This is how we foil that.
+		ctx.add_pre_fun(lambda ctx: ctx.exec_command("rm -f pylib/*.py[co]"))
+
 	if ctx.env.ENABLE_DOC_USER:
 		if ctx.variant != "main":
 			ctx.recurse("docs")
@@ -215,3 +221,9 @@ def build(ctx):
 		pprint("YELLOW", "Unit test runner skipped on a cross-compiled build.")
 		from waflib import Options
 		Options.options.no_tests = True
+
+# The following sets edit modes for GNU EMACS
+# Local Variables:
+# mode:python
+# End:
+# end
