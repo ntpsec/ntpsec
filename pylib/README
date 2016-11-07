@@ -1,10 +1,7 @@
 = pylib README =
 
 This directory contains helper classes for NTP utilities written in
-Python.  It should be installed under the name 'ntp'. It is locally
-symlinked under that name at other places in the tree so that various
-utilities can be run before the package has been installed.
-
-Do not delete the magic symlink to the build directory!  That makes
-testing the libntpc extension in place possible, rather than requiring
-it to have been installed in rootspace.
+Python.  It should be installed under the name 'ntp'. The build recipe
+locally symlinks it under that name at other places in the tree so
+that various utilities can be run before the package has been
+installed.
