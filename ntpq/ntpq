@@ -963,7 +963,7 @@ usage: writevar assocID name=value,[...]
         if not line:
                 self.warn("usage: mreadlist assocIDlow assocIDhigh\n")
                 return
-        idrange = self.__assoc_range_valid()
+        idrange = self.__assoc_range_valid(line)
         if not idrange:
             return
         varlist = line.split()[2:]
@@ -998,7 +998,7 @@ usage: mrl assocIDlow assocIDhigh
         if not line:
                 self.warn("usage: mreadvar assocIDlow assocIDhigh [ name=value[,...] ]\n")
                 return
-        idrange = self.__assoc_range_valid()
+        idrange = self.__assoc_range_valid(line)
         if not idrange:
             return
         varlist = line.split()[2:]
