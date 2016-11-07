@@ -7,7 +7,7 @@ ntpdig - simple SNTP client
 from __future__ import print_function, division
 
 # This code is somewhat stripped down from the legacy C version.  It
-# does however have one additional major feature; it can take filter
+# does however have one additional major feature; it can filter
 # out falsetickers from multiple samples, like the ntpdate of old,
 # rather than just taking the first reply it gets.
 #
@@ -126,7 +126,7 @@ def clock_select(packets):
     NTP_MAXAGE    = 86400	# one day in seconds
 
     # This first chunk of code is supposed to go through all
-    # servers we know about to find the servers which
+    # servers we know about to find the servers that
     # are most likely to succeed. We run through the list
     # doing the sanity checks and trying to insert anyone who
     # looks okay. We are at all times aware that we should
