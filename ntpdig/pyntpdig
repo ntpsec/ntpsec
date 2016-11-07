@@ -1,0 +1,331 @@
+#!/usr/bin/python
+"""
+ntpdig - simple SNTP client
+
+"""
+from __future__ import print_function, division
+
+# This code is somewhat stripped down from the legacy C version.  It
+# does however have one additional major feature; it can take filter
+# out falsetickers from multiple samples, like the ntpdate of old,
+# rather than just taking the first reply it gets.
+#
+# Listening to broadcast addresses is not implemented because that is
+# impossible to secure. KOD recording is also not implemented, as it
+# can too easily be spammed.  Thus, the options -b and -K are not
+# implemented.
+#
+# There are no version 3 NTP servers left, so the -o version for setting
+# NTP version has been omitted.
+#
+# Because ntpdig doesn't use symmetric-peer mode (it never did, and NTPsec has
+# abolished that mode because it was a security hazard), there's no need to
+# set the packet source port, so -r/--usereservedport has been dropped.
+# If this option ever needs to be reinstated, the magic is described here:
+# http://stackoverflow.com/questions/2694212/socket-set-source-port-number
+# and would be s.bind(('', 123)) right after the socket creation.
+#
+# The -w/--wait and -W/--nowait options only made sense with asynchronous
+# DNS.  Asynchronous DNS was absurd overkill for this application, we are
+# not looking up 20,000 hosts here.  It has not been implemented, so neither
+# have these options.
+#
+# The one new option in this version is -p, borrowed from ntpdate.
+
+import sys, socket, select, struct, time, getopt, datetime 
+
+class SNTPPacket:
+    @staticmethod
+    def rescale(t):
+        "Scale from NTP time to POSIX time"
+        # Note: assumes we're in the same NTP era as the transmitter...
+        UNIX_EPOCH = 2208988800L
+        return (t * 2**-32) - UNIX_EPOCH 
+    def __init__(self, data):
+        self.hostname = None
+        self.resolved = None
+        self.received = time.time()
+        self.data = data
+        (self.livnm, self.stratum, self.poll, self.precision,
+            self.root_delay, self.root_dispersion,
+            self.reference_id, self.reference_timestamp,
+            self.origin_timestamp, self.receive_timestamp,
+            self.transmit_timestamp) = struct.unpack("!BBBBIIIQQQQ", data[:48])
+        self.root_delay *= 2**-16
+        self.root_dispersion *= 2**-16
+        self.reference_timestamp = SNTPPacket.rescale(self.reference_timestamp)
+        self.origin_timestamp = SNTPPacket.rescale(self.origin_timestamp)
+        self.receive_timestamp = SNTPPacket.rescale(self.receive_timestamp)
+        self.transmit_timestamp = SNTPPacket.rescale(self.transmit_timestamp)
+        if len(data) > 192:
+            self.extension_data = data[192:-12]
+            self.auth_data = data[-12:]
+        else:
+            self.extension_data = None
+            self.auth_data = None
+    def delta(self):
+        return self.root_delay
+    def epsilon(self):
+        return self.root_dispersion
+    def synchd(self):
+        "Synchronization distance, estimates worst-case error in seconds"
+        # This is "lambda" in NTP-speak, but that's a Python keyword 
+        return abs(self.delta() - self.epsilon())
+    def adjust(self):
+        "Adjustment implied by this packet."
+        # FIXME: Clip low digits according to precision
+        return self.received - self.transmit_timestamp
+    def leap(self):
+        return ("no-leap", "add-leap", "del-leap", "unsync")[(self.livnm & 0x60) >> 6]
+
+def queryhost(server, concurrent, timeout=5, port=123):
+    "Query IP addresses associated with a specified host."
+    try:
+        iptuples = socket.getaddrinfo(server, 123,
+                                      af, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
+    except socket.gaierror as (errno, msg):
+        log("lookup of %s failed, errno %d = %s" % (server, errno, msg))
+        return []
+    sockets = []
+    packets = []
+    for (family, socktype, proto, canonname, sockaddr) in iptuples:
+        if debug:
+            log("querying %s (%s)" % (sockaddr[0], server))
+        s = socket.socket(family, socktype)
+        d = '\xe3' + '\0' * 47
+        s.sendto(d, sockaddr)
+        def read_append(s, packets):
+            d, a = s.recvfrom(1024)
+            pkt = SNTPPacket(d)
+            pkt.hostname = server
+            pkt.resolved = sockaddr[0]
+            packets.append(pkt)
+            time.sleep(gap)
+        if concurrent:
+            sockets.append(s)
+        else:
+            r, _, _ = select.select([s], [], [], timeout)
+            if not r:
+                return []
+            read_append(s, packets)
+    if concurrent:
+        while sockets:
+            r, _, _ = select.select(sockets, [], [], timeout)
+            if not r:
+                return packets
+            for s in sockets:
+                read_append(s, packets)
+                sockets.remove(s)
+    return packets
+
+def clock_select(packets):
+    "Select the pick-of-the-litter clock from the samples we've got."
+    # This is a slightly simplified version of the filter ntpdate used
+    NTP_INFIN     = 15		# max stratum, infinity a la Bellman-Ford 
+    NTP_MAXAGE    = 86400	# one day in seconds
+
+    # This first chunk of code is supposed to go through all
+    # servers we know about to find the servers which
+    # are most likely to succeed. We run through the list
+    # doing the sanity checks and trying to insert anyone who
+    # looks okay. We are at all times aware that we should
+    # only keep samples from the top two strata.
+    # 
+    nlist = 0	# none yet
+    filtered = []
+    for server in packets:
+        def drop(msg):
+            log("%s: Server dropped: %s\n" % (server.hostname, msg))
+        if server.stratum > NTP_INFIN:
+            drop("stratum too high")
+            continue
+        if server.leap() == "unsync":
+            drop("Leap not in sync")
+            continue
+        if not server.origin_timestamp < server.reference_timestamp:
+            drop("server is very broken")
+            continue
+        if server.origin_timestamp - server.reference_timestamp >= NTP_MAXAGE:
+            drop("Server has gone too long without sync")
+            continue
+        filtered.append(server)
+
+    if len(filtered) <= 1:
+        return filtered
+
+    # Sort by stratum and other figures of merit
+    filtered.sort(key=lambda s: (s.stratum, s.synchd(), s.root_delay))
+
+    # Return the best
+    return filtered[:1]
+
+def report(packet, json, adjusted):
+    "Report on the SNTP packet selected for display, and its adjustment."
+    say = sys.stdout.write
+
+    # Cheesy way to get local timezone offset
+    gmt_time = int(time.time())
+    local_time = int(time.mktime(time.gmtime(gmt_time)))
+    tmoffset = (local_time - gmt_time) // 60	# In minutes
+
+    # The server's idea of the time
+    t = time.localtime(int(packet.transmit_timestamp))
+    ms = int(packet.transmit_timestamp * 1000000) % 1000000
+
+    date = time.strftime("%Y-%m-%d", t)
+    tod = time.strftime("%T", t) + (".%d" % ms)
+    sgn = ("%+d" % tmoffset)[0]
+    tz = "%s%02d%02d" % (sgn, tmoffset // 60, tmoffset % 60)
+
+    if json:
+        say('{"time":"%sT%s%s","offset":%f,"precision":%f,"host":"%s",ip:"%s","stratum":%s,"leap":"%s","adjusted":%s}' % \
+            (date, tod, tz,
+             packet.adjust(), packet.synchd(),
+             packet.hostname, packet.resolved or packet.hostname,
+             packet.stratum, packet.leap(),
+             "true" if adjusted else "false"))
+    else:
+        say("%s %s (%s) %+f +/- %f %s" % \
+            (date, tod, tz,
+             packet.adjust(), packet.synchd(),
+             packet.hostname))
+        if packet.resolved and packet.resolved != packet.hostname:
+            say(" " + packet.resolved)
+        say(" s%d %s\n" % (packet.stratum, packet.leap()))
+
+usage = """
+USAGE:  sntp [ -<flag> [<val>] | --<name>[{=| }<val>] ]...
+		[ hostname-or-IP ...]
+  Flg Arg Option-Name     Description
+   -4 no  ipv4           Force IPv4 DNS name resolution
+				- prohibits the option 'ipv6'
+   -6 no  ipv6           Force IPv6 DNS name resolution
+				- prohibits the option 'ipv4'
+   -a Num authentication  Enable authentication with the numbered key
+   -c yes concurrent      Hosts to be queried concurrently
+   -d no  debug           Normal verbose
+   -D yes set-debug-level Normal verbose
+   -g yes gap             Set gap between requests
+   -j no  json            Use JSON output format
+   -l Str logfile         Log to specified logfile
+				 - prohibits the option 'syslog'
+   -p yes samples         Number of samples to take (default 1) 
+   -S no  step            Set (step) the time with clock_settime()
+				 - prohibits the option 'step'
+   -s no  slew            Set (slew) the time with adjtime()
+				 - prohibits the option 'slew'
+   -t Num timeout         Request timeout in seconds (default 5)
+   -k Str keyfile         Specify a keyfile. SNTP will look in this file
+                          for the key specified with -a
+   -V no version          Output version information and exit
+   -h no  help            Display extended usage information and exit
+"""
+
+if __name__ == '__main__':
+    try:
+        (options, arguments) = getopt.getopt(sys.argv[1:],
+                                             "46a:c:dD:g:hjk:l:M:o:p:Sst:wWV",
+                                             ["ipv4","ipv6",
+                                              "authentication",
+                                              "concurrent",
+                                              "gap", "help", "json",
+                                              "keyfile", "logfile",
+                                              "steplimit",
+                                              "step", "slew",
+                                              "timeout",
+                                              "debug", "set-debug-level",
+                                              "version"])
+    except getopt.GetoptError as e:
+        print(e)
+        raise SystemExit(1)
+    progname = sys.argv[0]
+
+    logfp = sys.stderr
+    log = lambda m: logfp.write("ntpdig: %s\n" % m)
+
+    af = socket.AF_UNSPEC
+    authkey = None
+    concurrent_hosts = []
+    debug = 0
+    gap = 50
+    json = False
+    keyfile = None
+    steplimit = 0	# Default is intentionally zero
+    samples = 1
+    step = False
+    slew = False
+    timeout = 5
+    try:
+        for (switch, val) in options:
+            if switch in ("-4", "--ipv4"):
+                af = socket.AF_INET
+            elif switch in ("-6", "--ipv6"):
+                af = socket.AF_INET6
+            elif switch in ("-a", "--authentication"):	# Not implemented yet
+                authkey = int(val)
+            elif switch in ("-c", "--concurrent"):
+                concurrent_hosts.append(val)
+            elif switch in ("-d", "--debug"):
+                debug += 1
+            elif switch in ("-D", "--set-debug-level"):
+                debug = int(val)
+            elif switch in ("-j", "--json"):
+                json = True
+            elif switch in ("-k", "--keyfile"):		# Not implemented yet
+                keyfile = val
+            elif switch in ("-l", "--logfile"):
+                try:
+                    logfp = open(val, "w")
+                except OSError:
+                    self.warn("logfile open of %s failed.\n" % val)
+                    raise SystemExit(1)
+            elif switch in ("-M", "--steplimit"):	# Not implemented yet
+                steplimit = int(val)
+            elif switch in ("-p", "--samples"):
+                samples = int(val)
+            elif switch in ("-S", "--step"):		# Not implemented yet
+                step = True
+            elif switch in ("-s", "--slew"):		# Not implemented yet
+                slew = True
+            elif switch in ("-t", "--timeout"):
+                timeout = int(val)
+            elif switch in ("-h", "--help"):
+                print(usage)
+                raise SystemExit(0)
+            elif switch in ("-V", "--version"):
+                print("ntpdig 0.1\n")	# FIXME: Use the version module
+                raise SystemExit(0)
+            else:
+                self.warn("Unknown command line switch or missing argument.\n")
+                self.warn(usage)
+                raise SystemExit(1)
+    except ValueError:
+        self.warn("Invalid argument.\n")
+        self.warn(usage)
+        raise SystemExit(1)
+
+    if authkey and keyfile is None:
+        self.warn("-a option requires -k.\n")
+        raise SystemExit(1)
+
+    gap /= 1000	# Scale gap to milliseconds
+
+    if not arguments:
+        arguments = ["localhost"]
+
+    returned = []
+    for server in concurrent_hosts:
+        returned += queryhost(server=server, concurrent=True, timeout=timeout)
+        if len(returned) >= samples:
+            break
+    for server in arguments:
+        returned += queryhost(server=server, concurrent=False, timeout=timeout)
+        if len(returned) >= samples:
+            break
+
+    returned = clock_select(returned)
+    if returned:
+        report(returned[0], json, False)
+    else:
+        log("no eligible servers")
+#end
