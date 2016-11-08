@@ -19,8 +19,8 @@
 # -4      -4      -q -4   Resolve DNS lookups to A records         
 # -6      -6      -q -6   Resolve DNS lookups to AAAA records      
 # -a N    -a N    -q      Authentication   
-# -b      -s      -q      step time adjustments
-# -B      -j      -q      slew time adjustments
+# -b      -S      -q      step time adjustments
+# -B      -s      -q      slew time adjustments
 # -d      -d      -d      debugging mode (implies -q)
 # -e N.N          -q      authdelay        
 # -k file -k file -k file key file         
@@ -37,7 +37,7 @@
 #         -c name         Send concurrent requests to resolved IPs for name
 #   
 #         -K file         KoD history filename     
-#         -l file         Log to file - is this really useful?     
+#         -l file         Log to file
 #         -M msec         Slew adjustments less than msec,
 #                         step adjustments larger than msec.       
 #
