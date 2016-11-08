@@ -4,9 +4,7 @@
 
 === Code ===
 
-* Test broadcast and symmetric modes; either fix them or remove them.
-
-* Land Daniel's redesign of the restriction language.
+* Clean up the documentation for the removal of broadcast and symmetric modes.
 
 === Testing ===
 
@@ -21,8 +19,6 @@
 * Package metadata for Debian, Ubuntu, Raspbian, Red Hat, Gentoo, and SuSe.
 
 == After 1.0 release ==
-
-* Move ntpdig to Python. Should be a wrapper around an ntp.sntp module.
 
 === Slow convergence ===
 
