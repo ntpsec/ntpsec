@@ -515,7 +515,7 @@ usage: timeout [ msec ]
             value = queried[name]
             if fmt in (NTP_ADD, NTP_ADP):
                 if self.showhostnames:
-                    value = canonicalize_dns(value)
+                    value = canonicalize_dns(value, family=self.ai_family)
                 self.say("%s  %s\n" % (legend, value))
             elif fmt == NTP_STR:
                 if value:

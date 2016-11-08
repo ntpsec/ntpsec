@@ -29,7 +29,7 @@ def portsplit(hostname):
             hostname = hostname[1:-1]	# Strip brackets
     return (hostname, portsuffix)
 
-def canonicalize_dns(hostname):
+def canonicalize_dns(hostname, family=socket.AF_UNSPEC):
     "Canonicalize a hostname or numeric IP address."
     # Catch garbaged hostnames in corrupted Mode 6 responses
     m = re.match("([:.[\]]|\w)*", hostname)
@@ -37,7 +37,7 @@ def canonicalize_dns(hostname):
         raise TypeError
     (hostname, portsuffix) = portsplit(hostname)
     try:
-        ai = socket.getaddrinfo(hostname, None, 0, 0, 0, socket.AI_CANONNAME)
+        ai = socket.getaddrinfo(hostname, None, family, 0, 0, socket.AI_CANONNAME)
     except socket.gaierror as (s, _e):
         print('getaddrinfo failed: %s' % s, file=sys.stderr)
         raise SystemExit(1)
