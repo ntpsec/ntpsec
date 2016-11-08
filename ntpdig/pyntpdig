@@ -35,6 +35,26 @@ from __future__ import print_function, division
 
 import sys, socket, select, struct, time, getopt, datetime 
 
+# This code can run with a large subset of its capabilities
+# even when the ntp library is not available.
+try:
+    import ntp.packet
+    import ntp.version
+    standalone = False
+except:
+    standalone = True
+
+if standalone:
+    version = "ntpsec ntpdig (running standalone)"
+else:
+    version = ntp.version.BASENAME + " " + ntp.version.VERSION
+
+def standalone_bailout(switch):
+    if standalone:
+        sys.stderr.write("ntpdig: %s is not available running standalone\n." \
+                         % switch)
+        raise SystemExit(1)
+
 class SNTPPacket:
     @staticmethod
     def rescale(t):
@@ -93,8 +113,15 @@ def queryhost(server, concurrent, timeout=5, port=123):
         if debug:
             log("querying %s (%s)" % (sockaddr[0], server))
         s = socket.socket(family, socktype)
-        d = b'\xe3' + b'\0' * 47
-        s.sendto(d, sockaddr)
+        packet = b'\xe3' + b'\0' * 47
+        if keyid and keytype and password:
+            mac = ntp.packet.Authenticator.compute_mac(d, keyid, keytype, passwd)
+            if mac is None:
+                log("MAC generation failed while querying %s" % server)
+                raise SystemExit(1)
+            else:
+                packet += mac
+        s.sendto(packet, sockaddr)
         def read_append(s, packets):
             d, a = s.recvfrom(1024)
             pkt = SNTPPacket(d)
@@ -263,6 +290,7 @@ if __name__ == '__main__':
             elif switch in ("-6", "--ipv6"):
                 af = socket.AF_INET6
             elif switch in ("-a", "--authentication"):	# Not implemented yet
+                standalone_bailout(switch)
                 authkey = int(val)
             elif switch in ("-c", "--concurrent"):
                 concurrent_hosts.append(val)
@@ -273,6 +301,7 @@ if __name__ == '__main__':
             elif switch in ("-j", "--json"):
                 json = True
             elif switch in ("-k", "--keyfile"):		# Not implemented yet
+                standalone_bailout(switch)
                 keyfile = val
             elif switch in ("-l", "--logfile"):
                 try:
@@ -281,12 +310,15 @@ if __name__ == '__main__':
                     self.warn("logfile open of %s failed.\n" % val)
                     raise SystemExit(1)
             elif switch in ("-M", "--steplimit"):	# Not implemented yet
+                standalone_bailout(switch)
                 steplimit = int(val)
             elif switch in ("-p", "--samples"):
                 samples = int(val)
             elif switch in ("-S", "--step"):		# Not implemented yet
+                standalone_bailout(switch)
                 step = True
             elif switch in ("-s", "--slew"):		# Not implemented yet
+                standalone_bailout(switch)
                 slew = True
             elif switch in ("-t", "--timeout"):
                 timeout = int(val)
@@ -294,7 +326,7 @@ if __name__ == '__main__':
                 print(usage)
                 raise SystemExit(0)
             elif switch in ("-V", "--version"):
-                print("ntpdig 0.1\n")	# FIXME: Use the version module
+                print(version)
                 raise SystemExit(0)
             else:
                 self.warn("Unknown command line switch or missing argument.\n")
@@ -305,7 +337,20 @@ if __name__ == '__main__':
         self.warn(usage)
         raise SystemExit(1)
 
-    if authkey and keyfile is None:
+    credentials = keyid = keytype = passwd = None
+    try:
+        credentials = ntp.packet.Authenticator(keyfile)
+    except (OSError, IOError):
+        pass
+    if credentials:
+        try:
+            (keyid, keytype, passwd) = self.auth.control(authkey)
+        except ValueError:
+            # There are no trusted keys.  Barf.
+            log("cannot get authentication key")
+            raise SystemExit(1)
+
+    if not credentials and authkey and keyfile is None:
         self.warn("-a option requires -k.\n")
         raise SystemExit(1)
 
