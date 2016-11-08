@@ -1040,9 +1040,11 @@ DEFAULT_KEYFILE = "/usr/local/etc/ntp.keys"
 
 class Authenticator:
     "MAC authentication manager for NTP packets."
-    def __init__(self, keyfile=DEFAULT_KEYFILE):
+    def __init__(self, keyfile=None):
         # We allow I/O and permission errors upward deliberately
         self.passwords = {}
+        if keyfile is None:
+            keyfile = DEFAULT_KEYFILE
         for line in open(keyfile):
             if '#' in line:
                 line = line[:line.index("#")]
