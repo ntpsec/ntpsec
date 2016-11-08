@@ -1032,7 +1032,7 @@ usage: mrv assocIDlow assocIDhigh [ name=value[,...] ]
         assoc = self.__assoc_valid(line)
         if assoc >= 0:
             self.__dolist(self.uservars.keys(),
-                          assoc, CTL_OP_READVAR, TYPE_CLOCK)
+                          assoc, CTL_OP_READCLOCK, TYPE_CLOCK)
 
     def help_clocklist(self):
         self.say("""\
