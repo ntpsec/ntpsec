@@ -3,8 +3,8 @@ statfiles.py - class for digesting and plotting NTP logfiles
 
 Requires GNUPLOT and liberation fonts installed.
 
-SPDX-License-Identifier: BSD-2-Clause
 """
+#SPDX-License-Identifier: BSD-2-Clause
 from __future__ import print_function, division
 
 import calendar, datetime, glob, gzip, os, socket, subprocess, sys, time

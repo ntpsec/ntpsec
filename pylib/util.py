@@ -1,4 +1,5 @@
 # Common utility functions
+# SPDX-License-Identifier: BSD-2-clause
 
 from __future__ import print_function
 

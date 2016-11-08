@@ -40,6 +40,8 @@
 #         -l file         Log to file - is this really useful?     
 #         -M msec         Slew adjustments less than msec,
 #                         step adjustments larger than msec.       
+#
+# SPDX-License-Identifier: BSD-2-Clause
 
 PASSTHROUGH=""
 TIMEOUT="-t 1"
