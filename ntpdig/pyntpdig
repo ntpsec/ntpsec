@@ -122,8 +122,14 @@ def queryhost(server, concurrent, timeout=5, port=123):
             else:
                 packet += mac
         s.sendto(packet, sockaddr)
+        if debug >= 2:
+            print("Sent to %s:" % (sockaddr[0],))
+            ntp.packet.dump_hex_printable(packet)
         def read_append(s, packets):
             d, a = s.recvfrom(1024)
+            if debug >= 2:
+                print("Received:")
+                ntp.packet.dump_hex_printable(d)
             pkt = SNTPPacket(d)
             pkt.hostname = server
             pkt.resolved = sockaddr[0]
@@ -231,8 +237,8 @@ USAGE:  sntp [ -<flag> [<val>] | --<name>[{=| }<val>] ]...
 				- prohibits the option 'ipv4'
    -a Num authentication  Enable authentication with the numbered key
    -c yes concurrent      Hosts to be queried concurrently
-   -d no  debug           Normal verbose
-   -D yes set-debug-level Normal verbose
+   -d no  debug           Increase debug verbosity
+   -D yes set-debug-level Set debug verbosity
    -g yes gap             Set gap between requests
    -j no  json            Use JSON output format
    -l Str logfile         Log to specified logfile
@@ -289,7 +295,7 @@ if __name__ == '__main__':
                 af = socket.AF_INET
             elif switch in ("-6", "--ipv6"):
                 af = socket.AF_INET6
-            elif switch in ("-a", "--authentication"):	# Not implemented yet
+            elif switch in ("-a", "--authentication"):
                 standalone_bailout(switch)
                 authkey = int(val)
             elif switch in ("-c", "--concurrent"):
@@ -300,14 +306,14 @@ if __name__ == '__main__':
                 debug = int(val)
             elif switch in ("-j", "--json"):
                 json = True
-            elif switch in ("-k", "--keyfile"):		# Not implemented yet
+            elif switch in ("-k", "--keyfile"):
                 standalone_bailout(switch)
                 keyfile = val
             elif switch in ("-l", "--logfile"):
                 try:
                     logfp = open(val, "w")
                 except OSError:
-                    self.warn("logfile open of %s failed.\n" % val)
+                    sys.stderr.write("logfile open of %s failed.\n" % val)
                     raise SystemExit(1)
             elif switch in ("-M", "--steplimit"):	# Not implemented yet
                 standalone_bailout(switch)
@@ -329,12 +335,12 @@ if __name__ == '__main__':
                 print(version)
                 raise SystemExit(0)
             else:
-                self.warn("Unknown command line switch or missing argument.\n")
-                self.warn(usage)
+                sys.stderr.write("Unknown command line switch or missing argument.\n")
+                sys.stderr.write(usage)
                 raise SystemExit(1)
     except ValueError:
-        self.warn("Invalid argument.\n")
-        self.warn(usage)
+        sys.stderr.write("Invalid argument.\n")
+        sys.stderr.write(usage)
         raise SystemExit(1)
 
     credentials = keyid = keytype = passwd = None
