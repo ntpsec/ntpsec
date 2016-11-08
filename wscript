@@ -130,12 +130,15 @@ def linkmaker(ctx):
     # Also, they need to be able to see the Python extension
     # module built in libntp.
     if ctx.cmd == "build":
-	print("Making in-tree links...") 
+	print("Making in-tree links...")
 	bldnode = ctx.bldnode.abspath()
 	srcnode = ctx.srcnode.abspath()
 	for d in ("ntpq", "ntpdig", "ntpstats", "ntpsweep", "ntptrace", "ntpwait"):
 		os.system("ln -sf %s/pylib %s/%s/ntp" % (bldnode, srcnode, d))
 	os.system("ln -sf %s/libntp/ntpc.so %s/pylib/ntpc.so " % (bldnode, bldnode))
+        if not "PYTHONPATH" in os.environ:
+            print("--- PYTHONPATH is not set, "
+                   "loading the Python ntp library may be troublesome ---")
 
 def build(ctx):
 	ctx.load('waf', tooldir='wafhelpers/')
