@@ -1007,12 +1007,13 @@ set label 2 "+1σ" at %(p1sigma)s, graph 0.96  left front offset -1,-1
         # but leave some room for the browser frame
         plot_template = '''\
 set terminal png size %(size)s
+set title "%(sitename)s: Local Clock Time Offset Histogram%(clipped)s"
 set grid
 set boxwidth %(boxwidth)s
 set xtic rotate by -35 scale 0
-set title "%(sitename)s: Local Clock Time Offset Histogram%(clipped)s"
 set xtics format "%%1.1f %(unit)s" nomirror
 set xrange [%(min_x)s:%(max_x)s]
+set yrange [0:*]
 set style arrow 3 nohead
 set arrow from %(p99)s,graph 0 to %(p99)s,graph 0.30 as 3
 set style arrow 4 nohead
