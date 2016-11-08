@@ -1057,8 +1057,13 @@ class Authenticator:
         return len(self.passwords)
     def __getitem__(self, keyid):
         return self.passwords.get(keyid)
-    def control(self):
+    def control(self, keyid=None):
         "Get a keyid/passwd pair that is trusted on localhost"
+        if keyid is not None:
+            if keyid in self.passwords:
+                return (keyid) + self.passwords[keyid]
+            else:
+                return (keyid, None, None)
         for line in open("/etc/ntp.conf"):
             if line.startswith("control"):
                 keyid = int(line.split()[1])

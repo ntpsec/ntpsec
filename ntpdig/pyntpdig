@@ -114,8 +114,11 @@ def queryhost(server, concurrent, timeout=5, port=123):
             log("querying %s (%s)" % (sockaddr[0], server))
         s = socket.socket(family, socktype)
         packet = b'\xe3' + b'\0' * 47
-        if keyid and keytype and password:
-            mac = ntp.packet.Authenticator.compute_mac(d, keyid, keytype, passwd)
+        if keyid and keytype and passwd:
+            if debug:
+                log("authenticating with %s key %d" % (keytype, keyid))
+            mac = ntp.packet.Authenticator.compute_mac(packet,
+                                                       keyid, keytype, passwd)
             if mac is None:
                 log("MAC generation failed while querying %s" % server)
                 raise SystemExit(1)
@@ -350,7 +353,7 @@ if __name__ == '__main__':
         pass
     if credentials:
         try:
-            (keyid, keytype, passwd) = self.auth.control(authkey)
+            (keyid, keytype, passwd) = credentials.control(authkey)
         except ValueError:
             # There are no trusted keys.  Barf.
             log("cannot get authentication key")
