@@ -132,6 +132,7 @@ NTP_ADP		= 0x6	# IP address and port
 NTP_LFP		= 0x7	# NTP timestamp
 NTP_MODE	= 0x8	# peer mode
 NTP_2BIT	= 0x9	# leap bits
+NTP_FLOAT	= 0xa	# Float value
 
 class Ntpq(cmd.Cmd):
     "ntpq command interpreter"
@@ -500,6 +501,9 @@ usage: timeout [ msec ]
         except IOError as e:
             print(e.strerror)
             return
+        if self.rawmode:
+            self.say(self.session.response)
+            return
         if decodestatus:
             if associd == 0:
                 statype = TYPE_SYS
@@ -520,7 +524,7 @@ usage: timeout [ msec ]
             elif fmt == NTP_STR:
                 if value:
                     self.say("%s  %s\n" % (legend, value))
-            elif fmt in (NTP_UINT, NTP_INT):
+            elif fmt in (NTP_UINT, NTP_INT, NTP_FLOAT):
                 self.say("%s  %s\n" % (legend, value))
             elif fmt == NTP_LFP:
                 self.say("%s  %s\n" % (legend, prettydate(value)))
@@ -1075,17 +1079,17 @@ usage: cv [ assocID ] [ name=value[,...] ]
         pstats = (
             ("srcadr",		"remote host:         ", NTP_ADD),
             ("dstadr",		"local address:       ", NTP_ADD),
-            ("timerec",		"time last received:  ", NTP_STR),
-            ("timer",		"time until next send:", NTP_STR),
-            ("timereach",	"reachability change: ", NTP_STR),
-            ("sent",		"packets sent:        ", NTP_STR),
-            ("received",	"packets received:    ", NTP_STR),
-            ("badauth",		"bad authentication:  ", NTP_STR),
-            ("bogusorg",	"bogus origin:        ", NTP_STR),
-            ("oldpkt",		"duplicate:           ", NTP_STR),
-            ("seldisp",		"bad dispersion:      ", NTP_STR),
-            ("selbroken",	"bad reference time:  ", NTP_STR),
-            ("candidate",	"candidate order:     ", NTP_STR),
+            ("timerec",		"time last received:  ", NTP_INT),
+            ("timer",		"time until next send:", NTP_INT),
+            ("timereach",	"reachability change: ", NTP_INT),
+            ("sent",		"packets sent:        ", NTP_INT),
+            ("received",	"packets received:    ", NTP_INT),
+            ("badauth",		"bad authentication:  ", NTP_INT),
+            ("bogusorg",	"bogus origin:        ", NTP_INT),
+            ("oldpkt",		"duplicate:           ", NTP_INT),
+            ("seldisp",		"bad dispersion:      ", NTP_INT),
+            ("selbroken",	"bad reference time:  ", NTP_INT),
+            ("candidate",	"candidate order:     ", NTP_INT),
         )
         if not line:
                 self.warn("usage: pstats assocID\n")
@@ -1303,17 +1307,17 @@ usage: reslist
             ("peeradr",		"system peer:      ", NTP_ADP),
             ("peermode",	"system peer mode: ", NTP_MODE),
             ("leap",		"leap indicator:   ", NTP_2BIT),
-            ("stratum",		"stratum:          ", NTP_STR),
-            ("precision",	"log2 precision:   ", NTP_STR),
-            ("rootdelay",	"root delay:       ", NTP_STR),
-            ("rootdisp",	"root dispersion:  ", NTP_STR),
-            ("refid",		"reference ID:     ", NTP_STR),
+            ("stratum",		"stratum:          ", NTP_INT),
+            ("precision",	"log2 precision:   ", NTP_INT),
+            ("rootdelay",	"root delay:       ", NTP_FLOAT),
+            ("rootdisp",	"root dispersion:  ", NTP_FLOAT),
+            ("refid",		"reference ID:     ", NTP_ADDR),
             ("reftime",		"reference time:   ", NTP_LFP),
-            ("sys_jitter",	"system jitter:    ", NTP_STR),
-            ("clk_jitter",	"clock jitter:     ", NTP_STR),
-            ("clk_wander",	"clock wander:     ", NTP_STR),
-            ("bcastdelay",	"broadcast delay:  ", NTP_STR),
-            ("authdelay",	"symm. auth. delay:", NTP_STR),
+            ("sys_jitter",	"system jitter:    ", NTP_FLOAT),
+            ("clk_jitter",	"clock jitter:     ", NTP_FLOAT),
+            ("clk_wander",	"clock wander:     ", NTP_FLOAT),
+            ("bcastdelay",	"broadcast delay:  ", NTP_FLOAT),
+            ("authdelay",	"symm. auth. delay:", NTP_FLOAT),
         )
         self.collect_display(associd=0, variables=sysinfo, decodestatus=True)
 
@@ -1326,22 +1330,22 @@ usage: sysinfo
     def do_kerninfo(self, _line):
         "display kernel loop and PPS statistics"
         kerninfo = (
-            ("koffset",		"pll offset:          ", NTP_STR),
-            ("kfreq",		"pll frequency:       ", NTP_STR),
-            ("kmaxerr",		"maximum error:       ", NTP_STR),
-            ("kesterr",		"estimated error:     ", NTP_STR),
+            ("koffset",		"pll offset:          ", NTP_FLOAT),
+            ("kfreq",		"pll frequency:       ", NTP_FLOAT),
+            ("kmaxerr",		"maximum error:       ", NTP_FLOAT),
+            ("kesterr",		"estimated error:     ", NTP_FLOAT),
             ("kstflags",	"kernel status:       ", NTP_STR),
-            ("ktimeconst",	"pll time constant:   ", NTP_STR),
-            ("kprecis",		"precision:           ", NTP_STR),
-            ("kfreqtol",	"frequency tolerance: ", NTP_STR),
-            ("kppsfreq",	"pps frequency:       ", NTP_STR),
-            ("kppsstab",	"pps stability:       ", NTP_STR),
-            ("kppsjitter",	"pps jitter:          ", NTP_STR),
-            ("kppscalibdur",	"calibration interval ", NTP_STR),
-            ("kppscalibs",	"calibration cycles:  ", NTP_STR),
-            ("kppsjitexc",	"jitter exceeded:     ", NTP_STR),
-            ("kppsstbexc",	"stability exceeded:  ", NTP_STR),
-            ("kppscaliberrs",	"calibration errors:  ", NTP_STR),
+            ("ktimeconst",	"pll time constant:   ", NTP_INT),
+            ("kprecis",		"precision:           ", NTP_FLOAT),
+            ("kfreqtol",	"frequency tolerance: ", NTP_INT),
+            ("kppsfreq",	"pps frequency:       ", NTP_INT),
+            ("kppsstab",	"pps stability:       ", NTP_INT),
+            ("kppsjitter",	"pps jitter:          ", NTP_INT),
+            ("kppscalibdur",	"calibration interval ", NTP_INT),
+            ("kppscalibs",	"calibration cycles:  ", NTP_INT),
+            ("kppsjitexc",	"jitter exceeded:     ", NTP_INT),
+            ("kppsstbexc",	"stability exceeded:  ", NTP_INT),
+            ("kppscaliberrs",	"calibration errors:  ", NTP_INT),
         )
         self.collect_display(associd=0, variables=kerninfo, decodestatus=True)
 
@@ -1354,18 +1358,18 @@ usage: kerninfo
     def do_sysstats(self, _line):
         "display system uptime and packet counts"
         sysstats = (
-            ("ss_uptime",	"uptime:               ", NTP_STR),
-            ("ss_reset",	"sysstats reset:       ", NTP_STR),
-            ("ss_received",	"packets received:     ", NTP_STR),
-            ("ss_thisver",	"current version:      ", NTP_STR),
-            ("ss_oldver",	"older version:        ", NTP_STR),
-            ("ss_badformat",	"bad length or format: ", NTP_STR),
-            ("ss_badauth",	"authentication failed:", NTP_STR),
-            ("ss_declined",	"declined:             ", NTP_STR),
-            ("ss_restricted",	"restricted:           ", NTP_STR),
-            ("ss_limited",	"rate limited:         ", NTP_STR),
-            ("ss_kodsent",	"KoD responses:        ", NTP_STR),
-            ("ss_processed",	"processed for time:   ", NTP_STR),
+            ("ss_uptime",	"uptime:               ", NTP_INT),
+            ("ss_reset",	"sysstats reset:       ", NTP_INT),
+            ("ss_received",	"packets received:     ", NTP_INT),
+            ("ss_thisver",	"current version:      ", NTP_INT),
+            ("ss_oldver",	"older version:        ", NTP_INT),
+            ("ss_badformat",	"bad length or format: ", NTP_INT),
+            ("ss_badauth",	"authentication failed:", NTP_INT),
+            ("ss_declined",	"declined:             ", NTP_INT),
+            ("ss_restricted",	"restricted:           ", NTP_INT),
+            ("ss_limited",	"rate limited:         ", NTP_INT),
+            ("ss_kodsent",	"KoD responses:        ", NTP_INT),
+            ("ss_processed",	"processed for time:   ", NTP_INT),
         )
         self.collect_display(associd=0, variables=sysstats, decodestatus=False)
 
@@ -1378,14 +1382,14 @@ usage: sysstats
     def do_monstats(self, _line):
         "display monitor (mrulist) counters and limits"
         monstats = (
-            ("mru_enabled",	"enabled:            ", NTP_STR),
-            ("mru_depth",	"addresses:          ", NTP_STR),
-            ("mru_deepest",	"peak addresses:     ", NTP_STR),
-            ("mru_maxdepth",	"maximum addresses:  ", NTP_STR),
-            ("mru_mindepth",	"reclaim above count:", NTP_STR),
-            ("mru_maxage",	"reclaim older than: ", NTP_STR),
-            ("mru_mem",		"kilobytes:          ", NTP_STR),
-            ("mru_maxmem",	"maximum kilobytes:  ", NTP_STR),
+            ("mru_enabled",	"enabled:            ", NTP_INT),
+            ("mru_depth",	"addresses:          ", NTP_INT),
+            ("mru_deepest",	"peak addresses:     ", NTP_INT),
+            ("mru_maxdepth",	"maximum addresses:  ", NTP_INT),
+            ("mru_mindepth",	"reclaim above count:", NTP_INT),
+            ("mru_maxage",	"reclaim older than: ", NTP_INT),
+            ("mru_mem",		"kilobytes:          ", NTP_INT),
+            ("mru_maxmem",	"maximum kilobytes:  ", NTP_INT),
         )
         self.collect_display(associd=0, variables=monstats, decodestatus=False)
 
@@ -1398,15 +1402,15 @@ usage: monstats
     def do_authinfo(self, _line):
         "display symmetric authentication counters"
         authinfo = (
-            ("authreset",	"time since reset:", NTP_STR),
-            ("authkeys",	"stored keys:     ", NTP_STR),
-            ("authfreek",	"free keys:       ", NTP_STR),
-            ("authklookups",	"key lookups:     ", NTP_STR),
-            ("authknotfound",	"keys not found:  ", NTP_STR),
-            ("authkuncached",	"uncached keys:   ", NTP_STR),
-            ("authkexpired",	"expired keys:    ", NTP_STR),
-            ("authencrypts",	"encryptions:     ", NTP_STR),
-            ("authdecrypts",	"decryptions:     ", NTP_STR),
+            ("authreset",	"time since reset:", NTP_INT),
+            ("authkeys",	"stored keys:     ", NTP_INT),
+            ("authfreek",	"free keys:       ", NTP_INT),
+            ("authklookups",	"key lookups:     ", NTP_INT),
+            ("authknotfound",	"keys not found:  ", NTP_INT),
+            ("authkuncached",	"uncached keys:   ", NTP_INT),
+            ("authkexpired",	"expired keys:    ", NTP_INT),
+            ("authencrypts",	"encryptions:     ", NTP_INT),
+            ("authdecrypts",	"decryptions:     ", NTP_INT),
         )
         self.collect_display(associd=0, variables=authinfo, decodestatus=False)
 
@@ -1419,18 +1423,18 @@ usage: authinfo
     def do_iostats(self, _line):
         "display network input and output counters"
         iostats = (
-            ("iostats_reset",	"time since reset:     ", NTP_STR),
-            ("total_rbuf",	"receive buffers:      ", NTP_STR),
-            ("free_rbuf",	"free receive buffers: ", NTP_STR),
-            ("used_rbuf",	"used receive buffers: ", NTP_STR),
-            ("rbuf_lowater",	"low water refills:    ", NTP_STR),
-            ("io_dropped",	"dropped packets:      ", NTP_STR),
-            ("io_ignored",	"ignored packets:      ", NTP_STR),
-            ("io_received",	"received packets:     ", NTP_STR),
-            ("io_sent",		"packets sent:         ", NTP_STR),
-            ("io_sendfailed",	"packet send failures: ", NTP_STR),
-            ("io_wakeups",	"input wakeups:        ", NTP_STR),
-            ("io_goodwakeups",	"useful input wakeups: ", NTP_STR),
+            ("iostats_reset",	"time since reset:     ", NTP_INT),
+            ("total_rbuf",	"receive buffers:      ", NTP_INT),
+            ("free_rbuf",	"free receive buffers: ", NTP_INT),
+            ("used_rbuf",	"used receive buffers: ", NTP_INT),
+            ("rbuf_lowater",	"low water refills:    ", NTP_INT),
+            ("io_dropped",	"dropped packets:      ", NTP_INT),
+            ("io_ignored",	"ignored packets:      ", NTP_INT),
+            ("io_received",	"received packets:     ", NTP_INT),
+            ("io_sent",		"packets sent:         ", NTP_INT),
+            ("io_sendfailed",	"packet send failures: ", NTP_INT),
+            ("io_wakeups",	"input wakeups:        ", NTP_INT),
+            ("io_goodwakeups",	"useful input wakeups: ", NTP_INT),
         )
         self.collect_display(associd=0, variables=iostats, decodestatus=False)
 
@@ -1443,9 +1447,9 @@ usage: iostats
     def do_timerstats(self, line):
         "display interval timer counters"
         timerstats = (
-            ("timerstats_reset",	"time since reset:  ", NTP_STR),
-            ("timer_overruns",		"timer overruns:    ", NTP_STR),
-            ("timer_xmts",		"calls to transmit: ", NTP_STR),
+            ("timerstats_reset",	"time since reset:  ", NTP_INT),
+            ("timer_overruns",		"timer overruns:    ", NTP_INT),
+            ("timer_xmts",		"calls to transmit: ", NTP_INT),
         )
         self.collect_display(associd=0, variables=timerstats, decodestatus=False)
 
