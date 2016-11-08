@@ -21,6 +21,10 @@ README::	This file.
 
 VERSION::	The version stamp, to be used by scripts and programs.
 
+attic/:: 	Directory containing source code that is *not* part of a
+		normal installation. Things can disappear from here at any
+		time.
+
 contrib/::	Directory containing contributed scripts, dragons dwell here.
 
 devel/::	Documentation and small tools aimed at developers.
@@ -95,12 +99,6 @@ ntpwait/::	Directory containing a script that blocks until ntpd is
 pylib/::	Installable Python helper classes for scripts.
 
 tests/::	Self-test code.
-
-util/:: 	Directory containing sources for various utility and testing
-		programs that are *not* part of a normal installation.
-		The subdirectories monitoring/ and support/ hold
-		various Python and shell scripts for visualizing
-		synchronization and daemon startup.
 
 waf::		A copy of the waf builder.  This is the engine used to configure
 		and build the codebase.

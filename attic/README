@@ -1,8 +1,8 @@
-= README file for directory util/ =
+= README file for directory attic/ =
 
-This directory contains the sources for the various utility programs.
-They are not installed by default. Not much documentation, alas.  Read
-the header comments.
+This is a dusty attic containg code we have not quite decided to
+discard.  Programs in it are not installed by default. Not much
+documentation, alas.  Read the header comments.
 
 calc_tickadj::	Calculates "optimal" value for tick given ntp.drift file
 		Tested: 20160226
