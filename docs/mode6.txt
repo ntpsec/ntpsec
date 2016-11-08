@@ -102,8 +102,16 @@ in a way convenient for visibility.
 
 Values may be decimal numeric literals, decimal float literals, hex
 numeric literals led with "0x", binary literals consisting of exactly
-two of digits 0 and 1, or string literals enclosed in double
-quotes. String literals never contain newlines or other control
+two of digits 0 and 1, NTP date stamps, or string literals enclosed in
+double quotes.
+
+NTP date stamps are represented by hexadecimal fixed-point literals
+led with "0x", distinguished from hexadecimal integers by the embedded
+radix point (".").  They represent seconds (and fractional seconds)
+since the epoch of the current NTP era.  NTP era zero began at 00:00
+of January 1st 1900.
+
+String literals never contain newlines or other control
 characters. One quirk of the format is that a bare variable name
 without a following "=" may be interpreted in context as an
 instruction to set a string-valued variable to the empty string.
