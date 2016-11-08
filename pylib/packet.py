@@ -521,18 +521,13 @@ class Mode6Session:
         while ((Packet.HEADER_LEN + len(pkt.extension)) & 7):
             pkt.extension += b"\x00"
 
-        # Do the encryption.
-        def append_mac(payload, keyid, keytype, passwd):
-            hasher = hashlib.new(keytype)
-            hasher.update(passwd)
-            hasher.update(payload)
-            if hasher.digest_size == 0:
-                raise Mode6Exception(SERR_NOKEY)
-            else:
-                return struct.pack("!I", self.keyid) + hasher.digest()
-        pkt.extension += append_mac(pkt.flatten(),
-                                    self.keyid, self.keytype, self.passwd)
-
+        # Do the MAC compuation.
+        mac = Authenticator.compute_mac(pkt.flatten(),
+                                        self.keyid, self.keytype, self.passwd)
+        if mac is None:
+            raise Mode6Exception(SERR_NOKEY)
+        else:
+            pkt.extension += mac
 	return pkt.send()
 
     def getresponse(self, opcode, associd, timeo):
@@ -1071,5 +1066,15 @@ class Authenticator:
                 return (keyid, keytype, passwd)
         else:
             raise ValueError
+    @staticmethod
+    def compute_mac(payload, keyid, keytype, passwd):
+        hasher = hashlib.new(keytype)
+        hasher.update(passwd)
+        hasher.update(payload)
+        if hasher.digest_size == 0:
+            return None
+        else:
+            return struct.pack("!I", keyid) + hasher.digest()
+
 
 # end
