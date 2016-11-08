@@ -522,16 +522,16 @@ class Mode6Session:
             pkt.extension += b"\x00"
 
         # Do the encryption.
-        hasher = hashlib.new(self.keytype)
-        hasher.update(self.passwd)
-	hasher.update(pkt.flatten())
-        if hasher.digest_size == 0:
-            raise Mode6Exception(SERR_NOKEY)
-        else:
-            prefix = struct.pack("!I", self.keyid)
-            mac = hasher.digest()
-            pkt.extension += prefix
-            pkt.extension += mac
+        def append_mac(payload, keyid, keytype, passwd):
+            hasher = hashlib.new(keytype)
+            hasher.update(passwd)
+            hasher.update(payload)
+            if hasher.digest_size == 0:
+                raise Mode6Exception(SERR_NOKEY)
+            else:
+                return struct.pack("!I", self.keyid) + hasher.digest()
+        pkt.extension += append_mac(pkt.flatten(),
+                                    self.keyid, self.keytype, self.passwd)
 
 	return pkt.send()
 
