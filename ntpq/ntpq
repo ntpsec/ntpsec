@@ -1053,7 +1053,9 @@ usage: cl [ assocID ]
     def do_clockvar(self, line):
         "read clock variables"
         assoc = self.__assoc_valid(line)
-        if assoc >= 0:
+        if assoc == 0:
+            self.warn("This command requires the association ID of a clock.\n")
+        elif assoc > 0:
             self.__dolist(line.split()[1:], assoc, CTL_OP_READCLOCK, TYPE_CLOCK)
 
     def help_clockvar(self):
