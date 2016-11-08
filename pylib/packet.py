@@ -256,7 +256,7 @@ SERR_NOKEY = "***Key not found"
 SERR_BADNONCE = "***Unexpected nonce response format"
 SERR_BADPARAM = "***Unknown parameter '%s'"
 SERR_NOCRED = "***No credentials"
-SERR_SERVER = "***Server error code %d"
+SERR_SERVER = "***Server error code %s"
 SERR_STALL = "***No response, probably high-traffic server with low MRU limit"
 SERR_BADTAG = "***Bad MRU tag %s"
 SERR_BADSORT = "***Sort order %s is not implemented"
@@ -318,6 +318,16 @@ class Mode6Exception(BaseException):
 class Mode6Session:
     "A session to a host"
     MRU_ROW_LIMIT	= 256
+    server_errors = {
+        CERR_UNSPEC: "UNSPEC",
+        CERR_PERMISSION: "PERMISSION",
+        CERR_BADFMT: "BADFMT",
+        CERR_BADOP: "BADOP",
+        CERR_BADASSOC: "BADASSOC",
+        CERR_UNKNOWNVAR: "UNKNOWNVAR",
+        CERR_BADVALUE: "BADVALUE",
+        CERR_RESTRICT: "RESTRICT",
+        }
 
     def __init__(self):
         self.debug = 0
@@ -610,7 +620,8 @@ class Mode6Session:
                     warn("Error %d received on non-final packet\n" %
                          rpkt.errcode())
                 self.keyid = self.passwd = None
-                raise Mode6Exception(SERR_SERVER % rpkt.errcode(), rpkt.errcode())
+                raise Mode6Exception(SERR_SERVER % Mode6Session.server_errors[rpkt.errcode()],
+                                     rpkt.errcode())
 
             # Check the association ID to make sure it matches what we expect
             if rpkt.associd != associd:
