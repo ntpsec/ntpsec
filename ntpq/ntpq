@@ -518,7 +518,10 @@ usage: timeout [ msec ]
                     value = canonicalize_dns(value, family=self.ai_family)
                 self.say("%s  %s\n" % (legend, value))
             elif fmt == NTP_STR:
-                if value:
+                try:
+                    if len(value):
+                        self.say("%s  %s\n" % (legend, value))
+                except TypeError:
                     self.say("%s  %s\n" % (legend, value))
             elif fmt in (NTP_UINT, NTP_INT):
                 self.say("%s  %s\n" % (legend, value))
