@@ -145,7 +145,7 @@ class Packet:
         self.r_e_m_op = 0       # response, error, more, opcode (uint8_t)
         # Subclasses have four uint16_t fields here
         self.count = 0          # octet count of extension data
-        self.extension = ''     # extension data
+        self.extension = b''     # extension data
         self.li_vn_mode = Packet.PKT_LI_VN_MODE(0, version, mode)
     format = "!BBHHHHH"
     HEADER_LEN = 12
@@ -157,7 +157,7 @@ class Packet:
                              self.r_e_m_op,
                              payload1, payload2, payload3, payload4,
                              self.count)
-        return polybytes(body + self.extension)
+        return body + self.extension
 
     def analyze(self, rawdata):
         (self.li_vn_mode,
@@ -442,7 +442,6 @@ class Mode6Session:
             if self.auth and self.hostname == "localhost":
                 try:
                     (self.keyid, self.keytype, self.passwd) = self.auth.control()
-                    print("Fooooo", self.passwd)
                     return
                 except ValueError:
                     # There are no trusted keys.  Barf.
@@ -497,10 +496,8 @@ class Mode6Session:
         # If we have data, pad it out to a 32-bit boundary.
         # Do not include these in the payload count.
         if pkt.extension:
-            pkt.extension = polybytes(pkt.extension)
             while ((Packet.HEADER_LEN + len(pkt.extension)) & 3):
                 pkt.extension += b"\x00"
-            pkt.extension = polystr(pkt.extension)
 
         # If it isn't authenticated we can just send it.  Otherwise
         # we're going to have to think about it a little.
@@ -513,10 +510,8 @@ class Mode6Session:
 	# Pad out packet to a multiple of 8 octets to be sure
 	# receiver can handle it. Note: these pad bytes should
         # *not* be counted in the header count field.
-        pkt.extension = polybytes(pkt.extension)
         while ((Packet.HEADER_LEN + len(pkt.extension)) & 7):
             pkt.extension += b"\x00"
-        pkt.extension = polystr(pkt.extension)
 
         # Do the encryption.
         hasher = hashlib.new(self.keytype)
@@ -525,8 +520,8 @@ class Mode6Session:
         if hasher.digest_size == 0:
             raise Mode6Exception(SERR_NOKEY)
         else:
-            prefix = polystr(struct.pack("!I", self.keyid))
-            mac = polystr(hasher.digest())
+            prefix = struct.pack("!I", self.keyid)
+            mac = hasher.digest()
             pkt.extension += prefix
             pkt.extension += mac
 
