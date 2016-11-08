@@ -30,7 +30,7 @@ try:
 except ImportError:
     pass
 
-version = ntp.version.BASENAME + " " + ntp.version.VERSION
+version = stdversion()
 
 # General notes on Python 2/3 compatibility:
 #

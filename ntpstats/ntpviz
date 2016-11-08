@@ -42,7 +42,7 @@ import tempfile
 
 try:
     from ntp.statfiles import *
-    import ntp.version
+    import ntp.util
 except ImportError:
     sys.stderr.write("ntpviz: can't find Python NTP library -- check PYTHONPATH.\n")
     sys.exit(1)
@@ -1283,8 +1283,7 @@ Python by ESR, concept and GNUPLOT code by Dan Drown.
 
     args = parser.parse_args()
 
-    version = "%s %s+%s" % ( ntp.version.BASENAME, ntp.version.VERSION, \
-                            ntp.version.TICK)
+    version = ntp.util.stdversion()
 
     if args.version:
         print(version)

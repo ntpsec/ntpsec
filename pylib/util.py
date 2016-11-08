@@ -10,6 +10,10 @@ import ntp.ntpc
 import re
 
 from ntp.packet import *
+from ntp.version import *
+
+def stdversion():
+    return "%s %s+%s" % (BASENAME, VERSION, ntp.version.TICK)
 
 def portsplit(hostname):
     portsuffix = ""
