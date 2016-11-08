@@ -262,6 +262,7 @@ SERR_SERVER = "***Server error code %d"
 SERR_STALL = "***No response, probably high-traffic server with low MRU limit"
 SERR_BADTAG = "***Bad MRU tag %s"
 SERR_BADSORT = "***Sort order %s is not implemented"
+SERR_NOTRUST = "***No trusted keys have been declared"
 
 def dump_hex_printable(xdata):
     "Dump a packet in hex, in a familiar hex format"
@@ -330,6 +331,7 @@ class Mode6Session:
         self.keytype = "MD5"
         self.keyid = None
         self.passwd = None
+        self.auth = None
         self.hostname = None
         self.isnum = False
         self.sock = None
@@ -424,6 +426,19 @@ class Mode6Session:
     def password(self):
 	"Get a keyid and the password if we don't have one."
         if self.keyid is None:
+            if self.auth is None:
+                try:
+                    self.auth = Authenticator()
+                except (OSError, IOError):
+                    pass
+            if self.auth and self.hostname == "localhost":
+                try:
+                    (self.keyid, self.keytype, self.passwd) = self.auth.control()
+                    print("Fooooo", self.passwd)
+                    return
+                except ValueError:
+                    # There are no trusted keys.  Barf.
+                    raise Mode6Exception(SERR_NOTRUST)
             try:
                 key_id = int(input("Keyid: "))
                 # FIXME: Magic number, yuck
@@ -438,6 +453,7 @@ class Mode6Session:
             if passwd is None:
                 raise Mode6Exception(SERR_INVPASS)
             self.passwd = passwd
+        print("It begins", repr((self.keyid, self.passwd)))
 
     def sendpkt(self, xdata):
         "Send a packet to the host."
@@ -593,6 +609,7 @@ class Mode6Session:
                 if rpkt.more():
                     warn("Error %d received on non-final packet\n" %
                          rpkt.errcode())
+                self.keyid = self.passwd = None
                 raise Mode6Exception(SERR_SERVER % rpkt.errcode(), rpkt.errcode())
 
             # Check the association ID to make sure it matches what we expect
@@ -1009,5 +1026,36 @@ class Mode6Session:
     def ifstats(self):
         "Retrieve ifstats data."
         return self.__ordlist("ifstats")
+
+DEFAULT_KEYFILE = "/usr/local/etc/ntp.keys"
+
+class Authenticator:
+    "MAC authentication manager for NTP packets."
+    def __init__(self, keyfile=DEFAULT_KEYFILE):
+        # We allow I/O and permission errors upward deliberately
+        self.passwords = {}
+        for line in open(keyfile):
+            if '#' in line:
+                line = line[:line.index("#")]
+            line = line.strip()
+            if not line:
+                continue
+            (keyid, keytype, passwd) = line.split()
+            self.passwords[int(keyid)] = (keytype, passwd)
+    def __len__(self):
+        return len(self.passwords)
+    def __getitem__(self, keyid):
+        return self.passwords.get(keyid)
+    def control(self):
+        "Get a keyid/passwd pair that is trusted on localhost"
+        for line in open("/etc/ntp.conf"):
+            if line.startswith("control"):
+                keyid = int(line.split()[1])
+                (keytype, passwd) = self.passwords[keyid]
+                if passwd is None:
+                    raise ValueError
+                return (keyid, keytype, passwd)
+        else:
+            raise ValueError
 
 # end
