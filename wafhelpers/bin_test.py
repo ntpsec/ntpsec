@@ -12,15 +12,15 @@ cmd_map = {
         ("main/ntpkeygen/ntpkeygen",    "-M"):              br'.*Generating new md5 file and link.*',
         ("main/ntpq/ntpq",              "-p"):              br'.*remote.*jitter.*',
         ("main/ntptime/ntptime",        None):              br'.*ntp_gettime\(\) returns code 0 \(OK\).*',
-        ("main/util/sht",               "2:r"):             br'.*reader.*',
+        ("main/attic/sht",               "2:r"):             br'.*reader.*',
 
 # XXX: Need to figure out how to test this.
-#       ("main/util/hist",                        ""):                                  br'',
+#       ("main/attic/hist",                        ""):                                  br'',
 
 # Perl library
 #       ("main/ntptrace/ntptrace",        ""):                                  br'',
 #       ("main/ntpwait/ntpwait",                  ""):                                  br'',
-#       ("main/util/ntpsweep/ntpsweep",   ""):                                  br'',
+#       ("main/ntpsweep/ntpsweep",   ""):                      br'',
 }
 
 

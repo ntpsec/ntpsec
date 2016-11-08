@@ -96,7 +96,7 @@ few will be user-visible.
 * The deprecated and vulnerability-prone ntpdate program has been
   replaced with a shell wrapper around ntpdig.  Its -e and -p
   options are not implemented. It is no longer documented, but can be
-  found in the util/ directory of the source distribution.
+  found in the attic/ directory of the source distribution.
 
 * A large number of obsolete refclocks have been removed in order to
   reduce attack surface, code bulk, and documentation complexity.

@@ -177,7 +177,7 @@ def build(ctx):
 	ctx.recurse("ntpkeygen")
 	ctx.recurse("ntptime")
 	ctx.recurse("pylib")
-	ctx.recurse("util")
+	ctx.recurse("attic")
 	ctx.recurse("tests")
 
 	scripts = [
