@@ -409,7 +409,7 @@ a control key declared in ntp.conf for these commands to work.
 
 If you are running as root or otherwise have read access to the
 authkey and ntp.conf file, ntpq will mine the required credentials
-for you. Otherwise you will be prompted to enter a key ID abd password.
+for you. Otherwise you will be prompted to enter a key ID and password.
 
 Credentials, once entered, are retained and used for the duration
 of your ntpq session.
