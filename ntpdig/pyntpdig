@@ -39,7 +39,7 @@ import sys, socket, select, struct, time, getopt, datetime
 # even when the ntp library is not available.
 try:
     import ntp.packet
-    import ntp.version
+    import ntp.util
     standalone = False
 except:
     standalone = True
@@ -47,7 +47,7 @@ except:
 if standalone:
     version = "ntpsec ntpdig (running standalone)"
 else:
-    version = ntp.version.BASENAME + " " + ntp.version.VERSION
+    version = ntp.util.stdversion()
 
 def standalone_bailout(switch):
     if standalone:
