@@ -22,6 +22,11 @@ of ancient Perl, awk, and S scripts; those have been removed.
 It is now possible (and sometimes useful) to say "minpoll 0" for a
 1-second interval.
 
+The ntpq tool for querying and configuring a running ntpd has been
+moved from C to Python.  About the only visible effect this has is
+that ntpq now resizes its peers display to accommodate wide
+terminal-emulator windows.
+
 == 2016-08-16: 0.9.4 ==
 
 usestats has been added to the statistics collection to record
@@ -34,7 +39,7 @@ to each driver page.
 Refclocks are now designated by name, not number. A list is available
 from "./waf configure --list".
 
-The rarely-used saveconfig feature in ntpq, and various associated
+The rarely-used saveconfig feature in ntpd, and various associated
 configuration directives, have been removed for security reasons. The
 ntpd --saveconfigquit option, undocumented in NTP Classic, has
 also been removed.
