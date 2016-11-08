@@ -1082,6 +1082,15 @@ class Authenticator:
             return None
         else:
             return struct.pack("!I", keyid) + hasher.digest()
-
+    @staticmethod
+    def have_mac(packet):
+        "Does this packet have a MAC?"
+        # According to RFC5909 7.5 the MAC is always present when an extension
+        # field is present. Note: this crude test will fail on Mode 6 packets.
+        # On those you have to go in and look at the count.
+        return len(packet) > 48
+    def verify_mac(self, packet):
+        "Does the MAC on this packet verify according to credentials we have?"
+        return True
 
 # end

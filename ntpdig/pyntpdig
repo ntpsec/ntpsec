@@ -79,7 +79,7 @@ class SNTPPacket:
         self.receive_timestamp = SNTPPacket.rescale(self.receive_timestamp)
         self.transmit_timestamp = SNTPPacket.rescale(self.transmit_timestamp)
         if len(data) > 192:
-            self.extension_data = data[192:-12]
+            self.extension_data = data[-12:192]
             self.auth_data = data[-12:]
         else:
             self.extension_data = None
@@ -124,15 +124,26 @@ def queryhost(server, concurrent, timeout=5, port=123):
                 raise SystemExit(1)
             else:
                 packet += mac
-        s.sendto(packet, sockaddr)
+        try:
+            s.sendto(packet, sockaddr)
+        except socket.error as e:
+            log("socket error on transmission: %s" % e)
+            raise SystemExit(1)
         if debug >= 2:
-            print("Sent to %s:" % (sockaddr[0],))
+            log("Sent to %s:" % (sockaddr[0],))
             ntp.packet.dump_hex_printable(packet)
         def read_append(s, packets):
             d, a = s.recvfrom(1024)
             if debug >= 2:
                 print("Received:")
                 ntp.packet.dump_hex_printable(d)
+            if credentials:
+                if not ntp.packet.Authenticator.have_mac(d):
+                    log("no MAC on reply from %s" % packet.hostname)
+                if not credentials.verify_mac(d):
+                    log("MAC verification on reply from %s failed" % sockaddr[0])
+                elif debug:
+                    log("MAC verification on reply from %s succeeded" % sockaddr[0])
             pkt = SNTPPacket(d)
             pkt.hostname = server
             pkt.resolved = sockaddr[0]
