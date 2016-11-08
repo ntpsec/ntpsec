@@ -216,8 +216,6 @@ class Mode6Packet(Packet):
                               self.offset)
 
     def send(self):
-        self.session.sequence += 1
-        self.sequence = self.session.sequence
         self.session.sendpkt(self.flatten())
 
     def analyze(self, data):
@@ -453,7 +451,6 @@ class Mode6Session:
             if passwd is None:
                 raise Mode6Exception(SERR_INVPASS)
             self.passwd = passwd
-        print("It begins", repr((self.keyid, self.passwd)))
 
     def sendpkt(self, xdata):
         "Send a packet to the host."
@@ -483,6 +480,9 @@ class Mode6Session:
 
         # Assemble the packet
         pkt = Mode6Packet(self, opcode, associd, qdata)
+
+        self.sequence += 1
+        pkt.sequence = self.sequence
 
         # If we have data, pad it out to a 32-bit boundary.
         # Do not include these in the payload count.

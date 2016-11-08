@@ -194,6 +194,14 @@ few will be user-visible.
   of this cruft, the project team will (a) be quite surprised, and (b)
   work with you on better analytics using ntpviz and modern tools.
 
+* The ntpq utility resizes its display to take advantage of wide
+  terminal windows, allowing more space for long peer addresses.
+
+* When running as root, the ntpq utility looks in /etc/ntp.conf and
+  /usr/local/etc/ntp.keys to find credentials for control requests
+  that require authentication. Thus it is not necessary to enter
+  them by hand.
+
 * The ntpsnmpd daemon, incomplete and not conformant with RFC 5907,
   has been removed.
 
