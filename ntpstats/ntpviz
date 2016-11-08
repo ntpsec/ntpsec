@@ -39,8 +39,13 @@ import re
 import atexit, binascii, collections, os, socket, sys
 import time
 import tempfile
-from ntp.statfiles import *
-import ntp.version
+
+try:
+    from ntp.statfiles import *
+    import ntp.version
+except ImportError:
+    sys.stderr.write("ntpviz: can't find Python NTP library -- check PYTHONPATH.\n")
+    sys.exit(1)
 
 # overload ArgumentParser
 class MyArgumentParser(argparse.ArgumentParser):

@@ -20,7 +20,7 @@ try:
     from ntp.ntpc import *
     import ntp.version
 except ImportError:
-    sys.stderr.write("ntpq: can't find the Python NTP library -- bailing out.\n")
+    sys.stderr.write("ntpq: can't find Python NTP library -- check PYTHONPATH.\n")
     sys.exit(1)
 
 # This import only works on Unixes.  The intention is to enable
