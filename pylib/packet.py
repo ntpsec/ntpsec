@@ -150,6 +150,14 @@ class Packet:
     format = "!BBHHHHH"
     HEADER_LEN = 12
 
+    # These decorators will allow us to assign the extension Python 3 strings
+    @property
+    def extension(self):
+        return self.__extension
+    @extension.setter
+    def extension(self, x):
+        self.__extension = polybytes(x)
+
     def flatten(self, payload1, payload2, payload3, payload4):
         "Flatten the packet into an octet sequence."
         body = struct.pack(Packet.format,
