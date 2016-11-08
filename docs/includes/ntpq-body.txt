@@ -403,6 +403,20 @@ displayed.
 +sysstats+::
   Print statistics counters maintained in the protocol module.
 
+[[auth]]
+== Authentication ==
+
+Four commands require authentication to the server: config-from-file,
+:config, ifstats, and reslist.  An authkey file must be in place and
+a control key declared in ntp.conf for these commands to work.
+
+If you are running as root or otherwise have read access to the
+authkey and ntp.conf file, ntpq will mine the required credentials
+for you. Otherwise you will be prompted to enter a key ID abd password.
+
+Credentials, once entered, are retained and used for the duration
+of your ntpq session.
+
 [[status]]
 == Status Words and Kiss Codes ==
 
@@ -538,9 +552,12 @@ some configurations.
 
 == Compatibility ==
 
-When listing refids, addresses of the form 127.127.x.x are no
-longer automatically interpreted as local refclocks as in older
-versons of +ntpq+.
+When listing refids, addresses of the form 127.127.x.x are no longer
+automatically interpreted as local refclocks as in older versions of
++ntpq+. Instead, a clock-format display is requested by the NTPsec
+daemon when appropriate (by setting the srcaddr peer variable). This
+means that when used to query legacy versions of ntpd, which do not
+know how to request this, this program will do a slightly wrong thing.
 
 In older versions, the 'type' variable associated with a
 reference clock was a numeric driver type index. It has been replaced
