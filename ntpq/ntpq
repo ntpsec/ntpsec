@@ -140,7 +140,6 @@ class Ntpq(cmd.Cmd):
         self.session = session
         self.prompt = "ntpq> "
         self.interactive       = False	# set to True when we should prompt
-        self.old_rv            = False	# use old readvars behavior?
         #self.auth_keyid   = 0		# Keyid used for authentication.
         #self.auth_keytype = "NID_md5"	# MD5 (FIXME: string value is a dummy)
         #self.auth_hashlen = 16		# MD5
@@ -444,12 +443,6 @@ usage: help [ command ]
 
     def __dolist(self, varlist, associd, op, type):
         "List variables associated with a specified peer."
-         # if we're asking for specific variables don't include the
-         # status header line in the output.
-        if self.old_rv:
-            quiet = False
-        else:
-            quiet = not (not varlist)	# nonempty?
         try:
             variables = self.session.readvar(associd, varlist, op)
         except Mode6Exception as e:
@@ -471,7 +464,7 @@ usage: help [ command ]
             return True
         if not quiet:
             self.say("associd=%d " % associd)
-        self.printvars(variables, type, quiet)
+        self.printvars(variables, type, not (not varlist))
         return True
 
     # Unexposed helper tables and functions end here
@@ -1490,7 +1483,6 @@ USAGE: ntpq [-46dphinOV] [-c str] [-D lvl] [ host ...]
                                 command
                                 peers
    -n no  numeric        numeric host addresses
-   -O no  old-rv         Always output status line with readvar
    -V opt version        Output version information and exit
    -w no  wide           enable wide display of addresses
 '''
@@ -1501,11 +1493,11 @@ if __name__ == '__main__':
 
     try:
         (options, arguments) = getopt.getopt(sys.argv[1:],
-                                             "46c:dD:hinOpVw",
+                                             "46c:dD:hinpVw",
                                              ["ipv4","ipv6", "command",
                                               "debug", "set-debug-level",
                                               "help", "interactive", "numeric",
-                                              "old-rv", "peers", "version",
+                                              "peers", "version",
                                               "wide"])
     except getopt.GetoptError as e:
         print(e)
@@ -1534,8 +1526,6 @@ if __name__ == '__main__':
             interpreter.interactive = True
         elif switch in ("-n", "--numeric"):
             interpreter.showhostnames = False
-        elif switch in ("-O", "--old-rv"):
-            interpreter.old_rv = True
         elif switch in ("-p", "--peers"):
             interpreter.ccmds.append("peers")
         elif switch in ("-V", "--version"):

@@ -74,9 +74,6 @@ attempt to read interactive format commands from the standard input.
 +-n+, +--numeric+::
   Output all host addresses in numeric format rather than
   converting to the canonical host names.
-+-O+, +--old-rv+::
-  Print an extra line when reading a single value with rv,
-  for example +ntpq -O -c "rv 0 frequency"+
 +-p+, +--peers+::
   Print a list of the peers known to the server as well as a summary of
   their state. This is equivalent to the +peers+ interactive command.
@@ -562,5 +559,7 @@ know how to request this, this program will do a slightly wrong thing.
 In older versions, the 'type' variable associated with a
 reference clock was a numeric driver type index. It has been replaced
 by 'name', a shortname for the driver type.
+
+The -O (--old-rv) option of legacy versions has been retired.
 
 // end
