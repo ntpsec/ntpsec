@@ -544,7 +544,7 @@ class Mode6Session:
         warn = sys.stderr.write
 
         if self.debug:
-            warn("Fragment collection begins %d\n")
+            warn("Fragment collection begins\n")
         # Loop until we have an error or a complete response.  Nearly all
         # code paths to loop again use continue.
         while True:
@@ -701,7 +701,8 @@ class Mode6Session:
                     if fragments[f-1].end() != fragments[f].offset:
                         break
                 else:
-                    #warn("%d packets reassembled\n" % len(fragments))
+                    if self.debug:
+                        warn("Fragment collection ends\n")
                     self.response = "".join([frag.data for frag in fragments])
                     if self.debug >= 4:
                         sys.stdout.write("Response packet:\n")
