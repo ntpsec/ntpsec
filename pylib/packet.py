@@ -543,6 +543,8 @@ class Mode6Session:
         bail = 0
         warn = sys.stderr.write
 
+        if self.debug:
+            warn("Fragment collection begins %d\n")
         # Loop until we have an error or a complete response.  Nearly all
         # code paths to loop again use continue.
         while True:
