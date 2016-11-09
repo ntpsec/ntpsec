@@ -136,7 +136,7 @@ def queryhost(server, concurrent, timeout=5, port=123):
         def read_append(s, packets):
             d, a = s.recvfrom(1024)
             if debug >= 2:
-                print("Received:")
+                print("Received: (%d bytes)" % len(d))
                 ntp.packet.dump_hex_printable(d)
             if credentials:
                 if not ntp.packet.Authenticator.have_mac(d):

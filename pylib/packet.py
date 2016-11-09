@@ -1040,6 +1040,7 @@ DEFAULT_KEYFILE = "/usr/local/etc/ntp.keys"
 
 class Authenticator:
     "MAC authentication manager for NTP packets."
+    HASHLEN = 20	# True for both MD5 and SHA1 hashes
     def __init__(self, keyfile=None):
         # We allow I/O and permission errors upward deliberately
         self.passwords = {}
@@ -1088,9 +1089,20 @@ class Authenticator:
         # According to RFC5909 7.5 the MAC is always present when an extension
         # field is present. Note: this crude test will fail on Mode 6 packets.
         # On those you have to go in and look at the count.
-        return len(packet) > 48
+        return len(packet) > LEN_PKT_NOMAC
     def verify_mac(self, packet):
         "Does the MAC on this packet verify according to credentials we have?"
-        return True
+        payload = packet[-Authenticator.HASHLEN-4:]
+        keyid = packet[-Authenticator.HASHLEN-4:-Authenticator.HASHLEN]
+        mac = packet[:-Authenticator.HASHLEN]
+        (keyid,) = struct.unpack("!I", keyid)
+        print("I see: %d" % keyid)
+        if keyid not in self.passwords:
+            return False
+        (keytype, passwd) = self.passwords[keyid]
+        hasher = hashlib.new(keytype)
+        hasher.update(passwd)
+        hasher.update(payload)
+        return hasher.digest() == mac
 
 # end

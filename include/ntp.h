@@ -404,6 +404,8 @@ struct peer {
  */
 #define	MODE_BCLIENT	6	/* broadcast client mode */
 
+#define	LEN_PKT_NOMAC	48 /* min header length */
+
 /* pythonize-header: start ignoring */
 
 /*
@@ -448,8 +450,6 @@ struct peer {
  * contains the problem.
  */
 #define REFIDLEN	sizeof(uint32_t)
-
-#define	LEN_PKT_NOMAC	48 /* min header length */
 
 /* This is the new, sane way of representing packets. All fields are
    in host byte order, and the fixed-point time fields are just integers,
