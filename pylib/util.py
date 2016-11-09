@@ -231,10 +231,10 @@ class PeerSummary:
         elif self.showhostnames:
             try:
                 if self.debug:
-                    self.say("DNS lookup begins...")
+                    sys.stderr.write("DNS lookup begins...\n")
                 clock_name = canonicalize_dns(srcadr)
                 if self.debug:
-                    self.say("DNS lookup ends.")
+                    sys.stderr.write("DNS lookup ends.\n")
             except TypeError:
                 return ''
         else:
