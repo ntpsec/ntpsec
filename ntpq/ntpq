@@ -154,6 +154,7 @@ class Ntpq(cmd.Cmd):
         self.debug = 0
         self.pktversion = NTP_OLDVERSION + 1
         self.uservars = collections.OrderedDict()
+        self.ai_family = socket.AF_UNSPEC
 
     def emptyline(self):
         "Called when an empty line is entered in response to the prompt."
@@ -442,7 +443,7 @@ usage: help [ command ]
         text = text.replace("'", '"')
         self.say(text)
 
-    def __dolist(self, varlist, associd, op, type):
+    def __dolist(self, varlist, associd, op, type, quiet):
         "List variables associated with a specified peer."
         try:
             variables = self.session.readvar(associd, varlist, op)
@@ -1311,7 +1312,7 @@ usage: reslist
             ("precision",	"log2 precision:   ", NTP_INT),
             ("rootdelay",	"root delay:       ", NTP_FLOAT),
             ("rootdisp",	"root dispersion:  ", NTP_FLOAT),
-            ("refid",		"reference ID:     ", NTP_ADDR),
+            ("refid",		"reference ID:     ", NTP_ADD),
             ("reftime",		"reference time:   ", NTP_LFP),
             ("sys_jitter",	"system jitter:    ", NTP_FLOAT),
             ("clk_jitter",	"clock jitter:     ", NTP_FLOAT),
