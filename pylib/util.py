@@ -69,11 +69,12 @@ def termsize():
 
 class PeerSummary:
     "Reusable report generator for peer statistics"
-    def __init__(self, displaymode, pktversion, showhostnames, wideremote):
+    def __init__(self, displaymode, pktversion, showhostnames, wideremote, debug=0):
         self.displaymode = displaymode		# peers/apeers.opeers
         self.pktversion = pktversion		# interpretation of flash bits
         self.showhostnames = showhostnames	# If false, display numeric IPs
         self.wideremote = wideremote		# show wide remote names?
+        self.debug = debug
         # By default, the peer spreadsheet layout is designed so lines just
         # fit in 80 characters. This tells us how much extra horizontal space
         # we have available on a wider terminal emulator
@@ -229,7 +230,11 @@ class PeerSummary:
             clock_name = srchost
         elif self.showhostnames:
             try:
+                if self.debug:
+                    self.say("DNS lookup begins...")
                 clock_name = canonicalize_dns(srcadr)
+                if self.debug:
+                    self.say("DNS lookup ends.")
             except TypeError:
                 return ''
         else:
