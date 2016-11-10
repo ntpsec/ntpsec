@@ -366,7 +366,7 @@ def dump_hex_printable(xdata):
         i = restart
         for idx in range(rowlen):
             # Do not use curses.isprint(), netbsd base doesn't install curses
-            if ord(xdata[i]) >= 32 and ord(xdata(i)) < 127:
+            if ord(xdata[i]) >= 32 and ord(xdata[i]) < 127:
                 sys.stdout.write(xdata[i])
             else:
                 sys.stdout.write('.')
