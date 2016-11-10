@@ -62,11 +62,12 @@ double	sys_tick = 0;		/* tick size or time to read (s) */
 double	sys_fuzz = 0;		/* min. time to read the clock (s) */
 long	sys_fuzz_nsec = 0;	/* min. time to read the clock (ns) */
 double	measured_tick;		/* non-overridable sys_tick (s) */
-double	sys_residual = 0;	/* adjustment residue (s) */
 bool	trunc_os_clock;		/* sys_tick > measured_tick */
 time_stepped_callback	step_callback;
 
-/* perlinger@ntp.org: As 'get_sysime()' does its own check for clock
+static double	sys_residual = 0;	/* adjustment residue (s) */
+
+/* perlinger@ntp.org: As 'get_systime()' does its own check for clock
  * backstepping, this could probably become a local variable in
  * 'get_systime()' and the cruft associated with communicating via a
  * static value could be removed after the v4.2.8 release.
