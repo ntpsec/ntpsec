@@ -365,7 +365,7 @@ def dump_hex_printable(xdata):
                 sys.stdout.write("   ")
         i = restart
         for idx in range(rowlen):
-            if curses.ascii.isprint(xdata[i]):
+            if ord(xdata[i]) >= 32 and ord(xdata(i)) < 127:
                 sys.stdout.write(xdata[i])
             else:
                 sys.stdout.write('.')

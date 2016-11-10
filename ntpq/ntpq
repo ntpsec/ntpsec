@@ -444,7 +444,7 @@ usage: help [ command ]
         text = text.replace("'", '"')
         self.say(text)
 
-    def __dolist(self, varlist, associd, op, type, quiet):
+    def __dolist(self, varlist, associd, op, type, quiet=False):
         "List variables associated with a specified peer."
         try:
             variables = self.session.readvar(associd, varlist, op)
