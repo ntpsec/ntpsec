@@ -571,8 +571,7 @@ class Mode6Session:
         "Ship an ntpq request packet to a server."
         # Check to make sure the data will fit in one packet
         if len(qdata) > CTL_MAX_DATA_LEN:
-            sys.stderr/write(stderr,
-                             "***Internal error! Data too long\n",
+            sys.stderr.write("***Internal error! Data too large (%d)\n" %
                              len(qdata))
             return -1
 
