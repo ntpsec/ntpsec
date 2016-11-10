@@ -57,15 +57,17 @@
  * input.  The remaining correction sys_residual is carried into the
  * next adjtime() and meanwhile is also factored into get_systime()
  * readings.
+ *
+ * adj_systime() and step_systime() will behave sanely with these
+ * variables not set, but the adjustments may be in larger steps.
  */
 double	sys_tick = 0;		/* tick size or time to read (s) */
 double	sys_fuzz = 0;		/* min. time to read the clock (s) */
-long	sys_fuzz_nsec = 0;	/* min. time to read the clock (ns) */
-double	measured_tick;		/* non-overridable sys_tick (s) */
 bool	trunc_os_clock;		/* sys_tick > measured_tick */
 time_stepped_callback	step_callback;
 
 static double	sys_residual = 0;	/* adjustment residue (s) */
+static long	sys_fuzz_nsec = 0;	/* min. time to read the clock (ns) */
 
 /* perlinger@ntp.org: As 'get_systime()' does its own check for clock
  * backstepping, this could probably become a local variable in

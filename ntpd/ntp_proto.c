@@ -123,6 +123,8 @@ u_long	sys_limitrejected;	/* rate exceeded */
 u_long	sys_kodsent;		/* KoD sent */
 u_long	use_stattime;		/* elapsed time since reset */
 
+double	measured_tick;		/* non-overridable sys_tick (s) */
+
 static	double	root_distance	(struct peer *);
 static	void	clock_combine	(peer_select *, int, int);
 static	void	peer_xmit	(struct peer *);

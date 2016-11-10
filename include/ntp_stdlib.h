@@ -239,9 +239,11 @@ extern	size_t	strlcpy(char *dst, const char *src, size_t siz);
 extern	size_t	strlcat(char *dst, const char *src, size_t siz);
 #endif
 
+/* ntp_proto.c */
+extern double	measured_tick;		/* non-overridable sys_tick */
+
 /* systime.c */
 extern double	sys_tick;		/* tick size or time to read */
-extern double	measured_tick;		/* non-overridable sys_tick */
 extern double	sys_fuzz;		/* min clock read latency */
 extern bool	trunc_os_clock;		/* sys_tick > measured_tick */
 
