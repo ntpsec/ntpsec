@@ -24,7 +24,6 @@ def build(ctx):
 		"ntp_random.c",
 		"ntp_worker.c",
 		"numtoa.c",
-		"numtohost.c",
 		"recvbuff.c",
 		"refidsmear.c",
 		"socket.c",
