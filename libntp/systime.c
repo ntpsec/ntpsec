@@ -79,8 +79,8 @@ set_sys_fuzz(
 	)
 {
 	sys_fuzz = fuzz_val;
-	INSIST(sys_fuzz >= 0);
-	INSIST(sys_fuzz <= 1.0);
+	//INSIST(sys_fuzz >= 0);
+	//INSIST(sys_fuzz <= 1.0);
 	sys_fuzz_nsec = (long)(sys_fuzz * 1e9 + 0.5);
 }
 

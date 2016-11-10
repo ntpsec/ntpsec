@@ -27,9 +27,7 @@ def build(ctx):
 		"socket.c",
 		"socktoa.c",
 		"ssl_init.c",
-		"strl_obsd.c",
 		"syssignal.c",
-		"timetoa.c",
 		"vint64ops.c",
 		"work_thread.c",
 		"ymd2yd.c",
@@ -45,10 +43,9 @@ def build(ctx):
 		"ntp_calendar.c",
 		"prettydate.c",
 		"statestr.c",
-	]
-
-	libntp_source_systime = [
-		"systime.c"
+		"strl_obsd.c",
+		"systime.c",
+		"timetoa.c",
 	]
 
 	includes = [
@@ -62,7 +59,7 @@ def build(ctx):
 		target		= "ntp",
 		features	= "c cstlib bld_include src_include",
 		use		= "sodium",
-		source		= libntp_source + libntp_source_sharable + libntp_source_systime,
+		source		= libntp_source + libntp_source_sharable,
 		includes	= includes,
 	)
 
