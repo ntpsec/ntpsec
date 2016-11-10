@@ -157,7 +157,6 @@ extern	const char * socktoa	(const sockaddr_u *);
 extern	const char * sockporttoa(const sockaddr_u *);
 extern	unsigned short	sock_hash	(const sockaddr_u *);
 extern	int	sockaddr_masktoprefixlen(const sockaddr_u *);
-extern	const char * socktohost	(const sockaddr_u *);
 extern	bool	octtoint	(const char *, unsigned long *);
 extern	unsigned long	ranp2		(int);
 extern	const char *refid_str	(uint32_t, int);
