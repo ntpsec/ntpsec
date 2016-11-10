@@ -101,6 +101,34 @@ ntpc_set_tod(PyObject *self, PyObject *args)
     return Py_BuildValue("d", ntp_set_tod(&ts));
 }
 
+static PyObject *
+ntpc_adj_systime(PyObject *self, PyObject *args)
+{
+    double adjustment;
+
+    UNUSED_ARG(self);
+    if (!PyArg_ParseTuple(args, "d", &adjustment))
+	return NULL;
+    return Py_BuildValue("d", adj_systime(adjustment, adjtime));
+}
+
+static PyObject *
+ntpc_step_systime(PyObject *self, PyObject *args)
+{
+    double adjustment;
+
+    UNUSED_ARG(self);
+    if (!PyArg_ParseTuple(args, "d", &adjustment))
+	return NULL;
+    return Py_BuildValue("d", step_systime(adjustment, ntp_set_tod));
+}
+
+long ntp_random(void)
+/* stub random function for get_systime() */
+{
+    return 0;
+}
+
 /* List of functions defined in the module */
 
 static PyMethodDef ntpc_methods[] = {
@@ -114,6 +142,10 @@ static PyMethodDef ntpc_methods[] = {
      PyDoc_STR("NTP l_fp to Python-style float time.")},
     {"set_tod",     	ntpc_set_tod,   	METH_VARARGS,
      PyDoc_STR("Set time to nanosecond precision.")},
+    {"adj_systime",    	ntpc_adj_systime,   	METH_VARARGS,
+     PyDoc_STR("Adjust system time by slewing.")},
+    {"step_systime",    ntpc_step_systime,   	METH_VARARGS,
+     PyDoc_STR("Adjust system time by stepping.")},
     {NULL,		NULL, 0, NULL}		/* sentinel */
 };
 
