@@ -113,7 +113,7 @@ static PyMethodDef ntpc_methods[] = {
     {"lfptofloat",     	ntpc_lfptofloat,  	METH_VARARGS,
      PyDoc_STR("NTP l_fp to Python-style float time.")},
     {"set_tod",     	ntpc_set_tod,   	METH_VARARGS,
-     PyDoc_STR("Set time to nanosecind precision.")},
+     PyDoc_STR("Set time to nanosecond precision.")},
     {NULL,		NULL, 0, NULL}		/* sentinel */
 };
 
