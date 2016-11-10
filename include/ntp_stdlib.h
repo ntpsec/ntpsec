@@ -152,7 +152,6 @@ extern	const char * k_st_flags	(uint32_t);
 extern	char *	statustoa	(int, int);
 extern	sockaddr_u * netof	(sockaddr_u *);
 extern	char *	numtoa		(uint32_t);
-extern	char *	numtohost	(uint32_t);
 extern	const char * socktoa	(const sockaddr_u *);
 extern	const char * sockporttoa(const sockaddr_u *);
 extern	unsigned short	sock_hash	(const sockaddr_u *);
