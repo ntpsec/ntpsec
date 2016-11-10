@@ -15,7 +15,6 @@ def build(ctx):
 		"dolfptoa.c",
 		"getopt.c",
 		"initnetwork.c",
-		"machines.c",
 		"md5.c",
 		"mstolfp.c",
 		"msyslog.c",
@@ -40,6 +39,7 @@ def build(ctx):
 	]
 
 	libntp_source_sharable = [
+		"clockwork.c",
 		"hextolfp.c",
 		"humandate.c",
 		"lib_strbuf.c",
