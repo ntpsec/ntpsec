@@ -976,7 +976,7 @@ usage: writevar assocID name=value,[...]
         for associd in idrange:
             if (associd != idrange[0]):
                 self.say("\n")
-            if not self__dolist(self.uservars,
+            if not self.__dolist(self.uservars,
                                 associd, CTL_OP_READVAR, TYPE_PEER):
                 return
 
@@ -1011,7 +1011,7 @@ usage: mrl assocIDlow assocIDhigh
         for associd in idrange:
             if (associd != idrange[0]):
                 self.say("\n")
-            if not self__dolist(varlist, associd, CTL_OP_READVAR, TYPE_PEER):
+            if not self.__dolist(varlist, associd, CTL_OP_READVAR, TYPE_PEER):
                 return
 
     def help_mreadvar(self):
