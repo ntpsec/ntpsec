@@ -10,7 +10,6 @@ def build(ctx):
 		"authreadkeys.c",
 		"clocktime.c",
 		"decodenetnum.c",
-		"emalloc.c",
 		"dofptoa.c",
 		"dolfptoa.c",
 		"getopt.c",
@@ -38,6 +37,7 @@ def build(ctx):
 
 	libntp_source_sharable = [
 		"clockwork.c",
+		"emalloc.c",
 		"hextolfp.c",
 		"humandate.c",
 		"lib_strbuf.c",
