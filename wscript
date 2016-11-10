@@ -225,6 +225,14 @@ def build(ctx):
 		from waflib import Options
 		Options.options.no_tests = True
 
+#
+# Miscellaneous utility productions
+#
+
+def ifdex(ctx):
+    "Get a report on configuration symbols not accounted for."
+    ctx.exec_command("ifdex -X build/config.h -X devel/ifdex-ignores .")
+
 # The following sets edit modes for GNU EMACS
 # Local Variables:
 # mode:python

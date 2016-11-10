@@ -8,8 +8,8 @@
  *     http://python3porting.com/cextensions.html
  */
 
-#ifndef _PYTHON_COMPATIBILITY_H_
-#define _PYTHON_COMPATIBILITY_H_
+#ifndef GUARD_PYTHON_COMPATIBILITY_H
+#define GUARD_PYTHON_COMPATIBILITY_H
 
 #include <Python.h>
 
@@ -41,4 +41,4 @@
 
 #endif /* !Python 3 */
 
-#endif /* _PYTHON_COMPATIBILITY_H_ */
+#endif /* GUARD_PYTHON_COMPATIBILITY_H */

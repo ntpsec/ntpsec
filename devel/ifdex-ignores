@@ -11,7 +11,6 @@
 # No output from this command means all symbols are accounted for
 
 # These are potential feature configuration symbols
-ENABLE_ASYMMETRIC	# Enable deep-space asymmetric mode in the protocol 
 ENABLE_ONCORE_SHMEM	# Should OnCore report via shmem?
 ENABLE_KILL_ON_TRAP	# Die on seccomp trap
 MSSNTP_PATH		# Set a default path for the MSSNTP feature.
@@ -49,6 +48,12 @@ DEBUG_PPS720		# Only in refclock_true.c
 # needed, so let's wait on report rather than pre-complexifying the
 # waf logic.
 ISC_PLATFORM_BRACEPTHREADONCEINIT
+
+# This is from a Python compatibility hack
+PY_MAJOR_VERSION
+
+# This is from a library header
+MOD_TIMETICK
 
 # Things WAF sets that don't get #undefs if they're not set
 ENABLE_EARLY_DROPROOT
@@ -170,6 +175,7 @@ USE_IPV6_MULTICAST_SUPPORT
 USE_LIFC_FAMILY
 USE_LIFC_FLAGS
 USE_OPENSSL_HASH
+USE_RANDOMIZE_RESPONSES
 USE_PCM_STYLE_SOUND
 USE_ROUTING_SOCKET
 YY_YY_NTP_PARSER_TAB_H_INCLUDED
