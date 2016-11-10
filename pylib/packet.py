@@ -97,7 +97,7 @@ A Mode 6 packet cannot have extension fields.
 """
 # SPDX-License-Identifier: BSD-2-clause
 from __future__ import print_function, division
-import sys, socket, select, struct, curses.ascii, collections
+import sys, socket, select, struct, qcollections
 import getpass, hashlib, time
 from ntpc import lfptofloat
 
@@ -365,6 +365,7 @@ def dump_hex_printable(xdata):
                 sys.stdout.write("   ")
         i = restart
         for idx in range(rowlen):
+            # Do not use curses.isprint(), netbsd base doesn't install curses
             if ord(xdata[i]) >= 32 and ord(xdata(i)) < 127:
                 sys.stdout.write(xdata[i])
             else:
