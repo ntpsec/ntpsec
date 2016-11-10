@@ -62,6 +62,10 @@ The fixed header is 48 bytes long.  The simplest possible case of an
 NTP packet is the minimal SNTP request, a mode 3 packet with the
 Stratum and all following fields zeroed out to byte 47.
 
+The RFC5905 diagram is slightly out of date in that the digest header assumes
+a 128-bit (16-octet) MD5 hash, but it is also possible for the field to be a
+160-bit (20-octet) SHA-1 hash.
+
 Here's what a Mode 6 packet looks like
 
        0                   1                   2                   3
@@ -186,7 +190,7 @@ else:  # Python 3
 from ntp_magic import *
 from ntp_control import *
 
-# Limit on packets in a single response.  Increasing this value to
+# Limit on packets in a single Mode 6 response.  Increasing this value to
 # 96 will marginally speed "mrulist" operation on lossless networks
 # but it has been observed to cause loss on WiFi networks and with
 # an IPv6 go6.net tunnel over UDP.  That loss causes the request
@@ -228,7 +232,6 @@ class Packet:
     def __init__(self, session, version, mode):
         self.session = session  # Where to get session context
         self.li_vn_mode = 0     # leap, version, mode (uint8_t)
-        self.r_e_m_op = 0       # response, error, more, opcode (uint8_t)
         # Subclasses have variable fields here
         self.extension = b''     # extension data
         self.li_vn_mode = Packet.PKT_LI_VN_MODE(0, version, mode)
@@ -247,8 +250,77 @@ class Packet:
     def version(self):
         return (self.li_vn_mode >> 3) & 0x7
 
+class Mode3Packet(Packet):
+    "Mode 3 request/response (actually usable for modes 1-5)"
+
+    def __init__(self, session=None):
+        Packet.__init__(self, session, session.pktversion, MODE_CONTROL)
+        self.status = 0         # status word for association (uint16_t)
+        self.stratum = 0
+        self.poll = 0
+        self.precision = 0
+        self.rootdelay = 0
+        self.rootdispersion = 0
+        self.refid = 0
+        self.reference_timestamp = 0
+        self.origin_timestamp = 0
+        self.receive_timestamp = 0
+        self.transmit_timestamp = 0
+        self.extension = ''
+    format = "!BBBBHHHLLLL"
+    HEADER_LEN = 48
+
+    def analyze(self, rawdata):
+        (self.li_vn_mode,
+         self.stratum,
+         self.poll,
+         self.precision,
+         self.rootdelay,
+         self.rootdispersion,
+         self.refid,
+         self.reference_timestamp,
+         self.origin_timestamp,
+         self.receive_timestamp,
+         self.transmit_timestamp) \
+         = struct.unpack(Mode6Packet.format, rawdata[:Mode3Packet.HEADER_LEN])
+        self.data = rawdata[Mode3Packet.HEADER_LEN:]
+
+    def flatten(self):
+        "Flatten the packet into an octet sequence."
+        body = struct.pack(Mode6Packet.format,
+                           self.li_vn_mode,
+                           self.stratum,
+                           self.poll,
+                           self.precision,
+                           self.rootdelay,
+                           self.rootdispersion,
+                           self.refid,
+                           self.reference_timestamp,
+                           self.origin_timestamp,
+                           self.receive_timestamp,
+                           self.transmit_timestamp)
+        return body + self.extension
+
+    def send(self):
+        self.session.sendpkt(self.flatten())
+
+    def refid_octets(self):
+        return ((self.refid >> 24) & 0xff,
+                (self.refid >> 16) & 0xff,
+                (self.refid >> 8) & 0xff,
+                self.refid & 0xff)
+
+    def refid_as_string(self):
+        return polystr(struct.pack("BBBB" % self.refid_octets()))
+
+    def refid_as_address(self):
+        return polystr("%d.%d.%d.%d" % self.refid_octets())
+
+    def is_crypto_nak(self):
+        len(self.extension) == 1
+
 class Mode6Packet(Packet):
-    "Mode 6 request/response "
+    "Mode 6 request/response."
 
     def __init__(self, session, opcode=0, associd=0, qdata=''):
         Packet.__init__(self, session, session.pktversion, MODE_CONTROL)
