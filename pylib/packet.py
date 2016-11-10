@@ -1,14 +1,100 @@
-#
-# packet.py - definitions and classes for Python querying of NTP
-#
-# Freely translated from the old C ntpq code by ESR, with comments
-# preserved.  The idea was to cleanly separate ntpq-that-was into a
-# thin front-end layer handling mainly command interpretation and a
-# back-end that presents the take from ntpd as objects that can be
-# re-used by other front ends. Other reusable pieces live in util.py.
-#
-# This code should be Python2-vs-Python-3 agnostic.  Keep it that way!
-#
+"""
+packet.py - definitions and classes for Python querying of NTP
+
+Freely translated from the old C ntpq code by ESR, with comments
+preserved.  The idea was to cleanly separate ntpq-that-was into a
+thin front-end layer handling mainly command interpretation and a
+back-end that presents the take from ntpd as objects that can be
+re-used by other front ends. Other reusable pieces live in util.py.
+
+This code should be Python2-vs-Python-3 agnostic.  Keep it that way!
+
+Here are some pictures to help make sense of this code. First, from RFC 5905,
+the general structure of an NTP packet (Figure 8):
+
+       0                   1                   2                   3
+       0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+      +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+      |LI | VN  |Mode |    Stratum     |     Poll      |  Precision   |
+      +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+      |                         Root Delay                            |
+      +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+      |                         Root Dispersion                       |
+      +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+      |                          Reference ID                         |
+      +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+      |                                                               |
+      +                     Reference Timestamp (64)                  +
+      |                                                               |
+      +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+      |                                                               |
+      +                      Origin Timestamp (64)                    +
+      |                                                               |
+      +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+      |                                                               |
+      +                      Receive Timestamp (64)                   +
+      |                                                               |
+      +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+      |                                                               |
+      +                      Transmit Timestamp (64)                  +
+      |                                                               |
+      +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+      |                                                               |
+      .                                                               .
+      .                    Extension Field 1 (variable)               .
+      .                                                               .
+      |                                                               |
+      +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+      |                                                               |
+      .                                                               .
+      .                    Extension Field 2 (variable)               .
+      .                                                               .
+      |                                                               |
+      +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+      |                          Key Identifier                       |
+      +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+      |                                                               |
+      |                            dgst (128)                         |
+      |                                                               |
+      +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+The fixed header is 48 bytes long.  The simplest possible case of an
+NTP packet is the minimal SNTP request, a mode 3 packet with the
+Stratum and all following fields zeroed out to byte 47.
+
+Here's what a Mode 6 packet looks like
+
+       0                   1                   2                   3
+       0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+      +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+      |LI | VN  | 6   |R|E|M|  Opcode  |          Sequence            |
+      +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+      |               Status           |       Association ID         |
+      +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+      |               Offset           |            Count             |
+      +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+      |                                                               |
+      .                                                               .
+      .                        Payload (variable)                     .
+      .                                                               .
+      |                                                               |
+      +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+      |                          Key Identifier                       |
+      +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+      |                                                               |
+      |                            dgst (128)                         |
+      |                                                               |
+      +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+In this case the fixed header is 24 bytes long.
+
+R = Response bit
+E = Error bit
+M = More bit.
+
+A Mode 6 packet cannot have extension fields.
+
+"""
 # SPDX-License-Identifier: BSD-2-clause
 from __future__ import print_function, division
 import sys, socket, select, struct, curses.ascii, collections
@@ -143,12 +229,9 @@ class Packet:
         self.session = session  # Where to get session context
         self.li_vn_mode = 0     # leap, version, mode (uint8_t)
         self.r_e_m_op = 0       # response, error, more, opcode (uint8_t)
-        # Subclasses have four uint16_t fields here
-        self.count = 0          # octet count of extension data
+        # Subclasses have variable fields here
         self.extension = b''     # extension data
         self.li_vn_mode = Packet.PKT_LI_VN_MODE(0, version, mode)
-    format = "!BBHHHHH"
-    HEADER_LEN = 12
 
     # These decorators will allow us to assign the extension Python 3 strings
     @property
@@ -158,28 +241,8 @@ class Packet:
     def extension(self, x):
         self.__extension = polybytes(x)
 
-    def flatten(self, payload1, payload2, payload3, payload4):
-        "Flatten the packet into an octet sequence."
-        body = struct.pack(Packet.format,
-                             self.li_vn_mode,
-                             self.r_e_m_op,
-                             payload1, payload2, payload3, payload4,
-                             self.count)
-        return body + self.extension
-
-    def analyze(self, rawdata):
-        (self.li_vn_mode,
-         self.r_e_m_op,
-         payload1, payload2, payload3, payload4,
-         self.count) = struct.unpack(Packet.format, rawdata[:Packet.HEADER_LEN])
-        self.data = rawdata[Packet.HEADER_LEN:]
-        return (payload1, payload2, payload3, payload4)
-
     def mode(self):
         return self.li_vn_mode & 0x7
-
-    def end(self):
-        return self.count + self.offset
 
     def version(self):
         return (self.li_vn_mode >> 3) & 0x7
@@ -194,8 +257,11 @@ class Mode6Packet(Packet):
         self.status = 0         # status word for association (uint16_t)
         self.associd = associd  # association ID (uint16_t)
         self.offset = 0         # offset of this batch of data (uint16_t)
+        self.count = 0          # octet count of extension data
         self.extension = qdata  # Data for this packet
         self.count = len(qdata)	# length of data
+    format = "!BBHHHHH"
+    HEADER_LEN = 12
 
     def is_response(self):
         return self.r_e_m_op & 0x80
@@ -212,25 +278,39 @@ class Mode6Packet(Packet):
     def errcode(self):
         return (self.status >> 8) & 0xff
 
+    def end(self):
+        return self.count + self.offset
+
     def stats(self, idx):
         "Return statistics on a fragment."
         return "%5d %5d\t%3d octets\n" % (self.offset, self.end(), self.count)
 
+    def analyze(self, rawdata):
+        (self.li_vn_mode,
+         self.r_e_m_op,
+         self.sequence,
+         self.status,
+         self.associd,
+         self.offset,
+         self.count) = struct.unpack(Mode6Packet.format,
+                                     rawdata[:Mode6Packet.HEADER_LEN])
+        self.data = rawdata[Mode6Packet.HEADER_LEN:]
+        return (self.sequence, self.status, self.associd, self.offset)
+
     def flatten(self):
-        return Packet.flatten(self,
-                              self.sequence,
-                              self.status,
-                              self.associd,
-                              self.offset)
+        "Flatten the packet into an octet sequence."
+        body = struct.pack(Mode6Packet.format,
+                           self.li_vn_mode,
+                           self.r_e_m_op,
+                           self.sequence,
+                           self.status,
+                           self.associd,
+                           self.offset,
+                           self.count)
+        return body + self.extension
 
     def send(self):
         self.session.sendpkt(self.flatten())
-
-    def analyze(self, data):
-        (self.sequence,
-         self.status,
-         self.associd,
-         self.offset) = Packet.analyze(self, data)
 
 class Peer:
     "The information we have about an NTP peer."
@@ -504,7 +584,7 @@ class Mode6Session:
         # If we have data, pad it out to a 32-bit boundary.
         # Do not include these in the payload count.
         if pkt.extension:
-            while ((Packet.HEADER_LEN + len(pkt.extension)) & 3):
+            while ((Mode6Packet.HEADER_LEN + len(pkt.extension)) & 3):
                 pkt.extension += b"\x00"
 
         # If it isn't authenticated we can just send it.  Otherwise
@@ -518,7 +598,7 @@ class Mode6Session:
 	# Pad out packet to a multiple of 8 octets to be sure
 	# receiver can handle it. Note: these pad bytes should
         # *not* be counted in the header count field.
-        while ((Packet.HEADER_LEN + len(pkt.extension)) & 7):
+        while ((Mode6Packet.HEADER_LEN + len(pkt.extension)) & 7):
             pkt.extension += b"\x00"
 
         # Do the MAC compuation.
@@ -634,17 +714,17 @@ class Mode6Session:
                 warn("Response packet not padded, size = %d\n" % len(rawdata))
                 continue
 
-            shouldbesize = (Packet.HEADER_LEN + rpkt.count + 3) & ~3
+            shouldbesize = (Mode6Packet.HEADER_LEN + rpkt.count + 3) & ~3
             if len(rawdata) < shouldbesize:
                 warn("Response packet claims %u octets payload, above %d received\n" % \
-                    (count, len(rawdata) - Packet.HEADER_LEN))
+                    (count, len(rawdata) - Mode6Packet.HEADER_LEN))
                 raise Mode6Exception(SERR_INCOMPLETE)
 
             if self.debug > 1:
                 warn("Got packet, size = %d\n"% len(rawdata))
-            if rpkt.count > (len(rawdata) - Packet.HEADER_LEN):
+            if rpkt.count > (len(rawdata) - Mode6Packet.HEADER_LEN):
                     warn("Received count of %u octets, data in packet is %ld\n"\
-                                   % (count, len(rawdata) - Packet.HEADER_LEN))
+                                   % (count, len(rawdata) - Mode6Packet.HEADER_LEN))
                     continue
 
             # Someday, perhaps, check authentication here
