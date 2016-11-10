@@ -90,6 +90,17 @@ ntpc_lfptofloat(PyObject *self, PyObject *args)
     return Py_BuildValue("d", tt.tv_sec + tt.tv_nsec * 1e-9);
 }
 
+static PyObject *
+ntpc_set_tod(PyObject *self, PyObject *args)
+{
+    struct timespec ts;
+
+    UNUSED_ARG(self);
+    if (!PyArg_ParseTuple(args, "ii", &ts.tv_sec, &ts.tv_nsec))
+	return NULL;
+    return Py_BuildValue("d", ntp_set_tod(&ts));
+}
+
 /* List of functions defined in the module */
 
 static PyMethodDef ntpc_methods[] = {
@@ -101,6 +112,8 @@ static PyMethodDef ntpc_methods[] = {
      PyDoc_STR("Convert a time stamp to something readable.")},
     {"lfptofloat",     	ntpc_lfptofloat,  	METH_VARARGS,
      PyDoc_STR("NTP l_fp to Python-style float time.")},
+    {"set_tod",     	ntpc_set_tod,   	METH_VARARGS,
+     PyDoc_STR("Set time to nanosecind precision.")},
     {NULL,		NULL, 0, NULL}		/* sentinel */
 };
 
