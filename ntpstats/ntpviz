@@ -43,8 +43,9 @@ import tempfile
 try:
     from ntp.statfiles import *
     import ntp.util
-except ImportError:
+except ImportError as e:
     sys.stderr.write("ntpviz: can't find Python NTP library -- check PYTHONPATH.\n")
+    sys.stderr.write("%s\n" % e.message)
     sys.exit(1)
 
 # overload ArgumentParser
