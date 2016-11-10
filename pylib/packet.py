@@ -97,7 +97,7 @@ A Mode 6 packet cannot have extension fields.
 """
 # SPDX-License-Identifier: BSD-2-clause
 from __future__ import print_function, division
-import sys, socket, select, struct, qcollections
+import sys, socket, select, struct, collections
 import getpass, hashlib, time
 from ntpc import lfptofloat
 
