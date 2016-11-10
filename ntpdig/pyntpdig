@@ -32,6 +32,10 @@ from __future__ import print_function, division
 # not looking up 20,000 hosts here.  It has not been implemented, so neither
 # have these options.
 #
+# Finally, logging to syslog by default was a design error, violating
+# Unix principles, that has been fixed. To get this behavior when
+# running in a script, redirect standard error to logger(1). 
+#
 # The one new option in this version is -p, borrowed from ntpdate.
 
 import sys, socket, select, struct, time, getopt, datetime 
@@ -85,6 +89,7 @@ class SNTPPacket:
         else:
             self.extension_data = None
             self.auth_data = None
+        self.trusted = True
     def delta(self):
         return self.root_delay
     def epsilon(self):
@@ -136,12 +141,13 @@ def queryhost(server, concurrent, timeout=5, port=123):
         def read_append(s, packets):
             d, a = s.recvfrom(1024)
             if debug >= 2:
-                print("Received: (%d bytes)" % len(d))
                 ntp.packet.dump_hex_printable(d)
             if credentials:
                 if not ntp.packet.Authenticator.have_mac(d):
-                    log("no MAC on reply from %s" % packet.hostname)
+                    if debug:
+                        log("no MAC on reply from %s" % packet.hostname)
                 if not credentials.verify_mac(d):
+                    packet.trusted = False
                     log("MAC verification on reply from %s failed" % sockaddr[0])
                 elif debug:
                     log("MAC verification on reply from %s succeeded" % sockaddr[0])
@@ -196,6 +202,9 @@ def clock_select(packets):
             continue
         if server.origin_timestamp - server.reference_timestamp >= NTP_MAXAGE:
             drop("Server has gone too long without sync")
+            continue
+        if not server.trusted:
+            drop("request was authenticated but server is untrusted")
             continue
         filtered.append(server)
 
