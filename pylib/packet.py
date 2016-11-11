@@ -733,7 +733,7 @@ class Mode6Session:
                             sys.stderr.write("%d: %s" % (i+1, frag.stats()))
                         sys.stderr.write("last fragment %sreceived\n" \
                              % ("not ", "")[seenlastfrag])
-                    raise Mode6Exception(SERR_INCOMPLETE)
+                raise Mode6Exception(SERR_INCOMPLETE)
 
             if self.debug:
                 warn("At %s, socket read begins\n" % time.asctime())
