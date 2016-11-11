@@ -713,13 +713,13 @@ class Mode6Session:
                 tvo = self.secondary_timeout / 1000
 
             if self.debug:
-                warn("At %s, read with timeout %d begins\n" % (time.asctime(), tvo))
+                warn("At %s, select with timeout %d begins\n" % (time.asctime(), tvo))
             try:
                 (rd, _, _) = select.select([self.sock], [], [], tvo)
             except select.error as msg:
                 raise Mode6Exception(SERR_SELECT)
             if self.debug:
-                warn("At %s, read with timeout %d ends\n" % (time.asctime(), tvo))
+                warn("At %s, select with timeout %d ends\n" % (time.asctime(), tvo))
 
             if not rd:
                 # Timed out.  Return what we have
@@ -735,6 +735,8 @@ class Mode6Session:
                              % ("not ", "")[seenlastfrag])
                     raise Mode6Exception(SERR_INCOMPLETE)
 
+            if self.debug:
+                warn("At %s, socket read begins\n" % time.asctime())
             rawdata = polystr(self.sock.recv(4096))
             if self.debug:
                 warn("Received %d octets\n" % len(rawdata))
