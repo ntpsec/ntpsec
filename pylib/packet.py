@@ -727,8 +727,8 @@ class Mode6Session:
                         sys.stderr.write("ERR_INCOMPLETE: Received fragments:\n")
                         for (i, frag) in enumerate(fragments):
                             sys.stderr.write("%d: %s" % (i+1, frag.stats()))
-                        sys.stderr.write("last fragment %sreceived\n",
-                                    ("not " "", )[seenlastfrag])
+                        sys.stderr.write("last fragment %sreceived\n" \
+                             % ("not ", "")[seenlastfrag])
                     raise Mode6Exception(SERR_INCOMPLETE)
 
             rawdata = polystr(self.sock.recv(4096))
