@@ -14,6 +14,7 @@ def build(ctx):
     target3 = ctx.srcnode.make_node('pylib/version.py')
 
     ctx(
+	before      = ['pyc', 'pyo'],
 	cwd         = srcnode,
 	rule        = '${SRC} >${TGT}',
 	source      = ["../wafhelpers/pythonize-header", "../include/ntp_control.h"],
@@ -21,6 +22,7 @@ def build(ctx):
 	)
 
     ctx(
+	before      = ['pyc', 'pyo'],
 	cwd         = srcnode,
 	rule        = '${SRC} >${TGT}',
 	source      = ["../wafhelpers/pythonize-header", "../include/ntp.h"],
@@ -28,6 +30,7 @@ def build(ctx):
 	)
 
     ctx(
+	before      = ['pyc', 'pyo'],
 	cwd         = srcnode,
 	rule        = 'VERSION=`cat ${SRC}` ../wafhelpers/autorevision.sh -o ${TGT[1].abspath()} -t python >${TGT[0].name}',
 	source      = "../VERSION",
