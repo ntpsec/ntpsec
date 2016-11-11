@@ -712,10 +712,14 @@ class Mode6Session:
             else:
                 tvo = self.secondary_timeout / 1000
 
+            if self.debug:
+                warn("At %s, read with timeout %d begins\n" % (time.asctime(), tvo))
             try:
                 (rd, _, _) = select.select([self.sock], [], [], tvo)
             except select.error as msg:
                 raise Mode6Exception(SERR_SELECT)
+            if self.debug:
+                warn("At %s, read with timeout %d ends\n" % (time.asctime(), tvo))
 
             if not rd:
                 # Timed out.  Return what we have
