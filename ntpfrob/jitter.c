@@ -25,9 +25,8 @@
 #define NBUF	800002
 #define NSAMPLES 10
 
-char progname[10];
-double sys_residual;
-double average;
+static double sys_residual;
+static double average;
 
 /*
  * get_clocktime - return system time in NTP timestamp format.
