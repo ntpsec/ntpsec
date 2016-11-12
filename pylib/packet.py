@@ -1141,7 +1141,7 @@ class Mode6Session:
                     nonce = fetch_nonce()
                     nonce_uses = 0
                 for i in range(len(span.entries)):
-                    e = self.entries[len(span.entries) - i - 1]
+                    e = span.entries[len(span.entries) - i - 1]
                     incr += ", addr.%d=%s, last.%d=%s" % (i, e.addr, i, e.last)
                     if len(req_buf) + len(incr) >= CTL_MAX_DATA_LEN:
                         break
