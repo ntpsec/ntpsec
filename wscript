@@ -129,16 +129,22 @@ def linkmaker(ctx):
     # can import compiled Python modules from the build directory.
     # Also, they need to be able to see the Python extension
     # module built in libntp.
-    if ctx.cmd == "build":
-	print("Making in-tree links...")
-	bldnode = ctx.bldnode.abspath()
-	srcnode = ctx.srcnode.abspath()
-	for d in ("ntpq", "ntpdig", "ntpstats", "ntpsweep", "ntptrace", "ntpwait"):
-		os.system("ln -sf %s/pylib %s/%s/ntp" % (bldnode, srcnode, d))
-	os.system("ln -sf %s/libntp/ntpc.so %s/pylib/ntpc.so " % (bldnode, bldnode))
-        if not "PYTHONPATH" in os.environ:
-            print("--- PYTHONPATH is not set, "
-                   "loading the Python ntp library may be troublesome ---")
+    for x in ("ntpq", "ntpdig", "ntpstats", "ntpsweep", "ntptrace", "ntpwait"):
+            path_build = ctx.bldnode.make_node("pylib")
+            path_source = ctx.srcnode.make_node(x + "/ntp")
+            relpath = "../" + path_build.path_from(ctx.srcnode)
+            if ctx.cmd in ('install', 'build'):
+                    if not path_source.exists() or os.readlink(path_source.abspath()) != relpath:
+                            try:
+                                    os.remove(path_source.abspath())
+                            except OSError:
+                                    pass
+                            os.symlink(relpath, path_source.abspath())
+            elif ctx.cmd == 'clean':
+                    #print "removing", path_source.abspath()
+                    os.remove(path_source.abspath())
+    bldnode = ctx.bldnode.abspath()
+    os.system("ln -sf %s/libntp/ntpc.so %s/pylib/ntpc.so " % (bldnode, bldnode))
 
 def build(ctx):
 	ctx.load('waf', tooldir='wafhelpers/')
@@ -197,7 +203,7 @@ def build(ctx):
 		install_path = "${PREFIX}/bin/"
 	)
 
-	ctx.add_post_fun(linkmaker)
+	linkmaker(ctx)
 
 	ctx.manpage(8, "ntpleapfetch/ntpleapfetch-man.txt")
 	ctx.manpage(1, "ntptrace/ntptrace-man.txt")
@@ -224,6 +230,11 @@ def build(ctx):
 		pprint("YELLOW", "Unit test runner skipped on a cross-compiled build.")
 		from waflib import Options
 		Options.options.no_tests = True
+
+        if ctx.cmd == "build":
+            if not "PYTHONPATH" in os.environ:
+                print("--- PYTHONPATH is not set, "
+                  "loading the Python ntp library may be troublesome ---")
 
 #
 # Miscellaneous utility productions
