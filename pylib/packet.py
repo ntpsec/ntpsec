@@ -244,11 +244,14 @@ class Packet:
     def extension(self, x):
         self.__extension = polybytes(x)
 
-    def mode(self):
-        return self.li_vn_mode & 0x7
+    def leap(self):
+        return ("no-leap", "add-leap", "del-leap", "unsync")[(self.li_vn_mode & 0x60) >> 6]
 
     def version(self):
         return (self.li_vn_mode >> 3) & 0x7
+
+    def mode(self):
+        return self.li_vn_mode & 0x7
 
 class Mode3Packet(Packet):
     "Mode 3 request/response (actually usable for modes 1-5)"
@@ -267,8 +270,9 @@ class Mode3Packet(Packet):
         self.receive_timestamp = 0
         self.transmit_timestamp = 0
         self.extension = ''
-    format = "!BBBBHHHLLLL"
+    format = "!BBBBIIIQQQQ"
     HEADER_LEN = 48
+    UNIX_EPOCH = 2208988800	# Midnight 1 Jan 1970 in secs since NTP epoch
 
     def analyze(self, rawdata):
         (self.li_vn_mode,
@@ -304,16 +308,25 @@ class Mode3Packet(Packet):
     def send(self):
         self.session.sendpkt(self.flatten())
 
+    @staticmethod
+    def ntp_to_posix(t):
+        "Scale from NTP time to POSIX time"
+        # Note: assumes we're in the same NTP era as the transmitter...
+        return (t * 2**-32) - UNIX_EPOCH 
+
     def refid_octets(self):
+        "Analyze refid into octets."
         return ((self.refid >> 24) & 0xff,
                 (self.refid >> 16) & 0xff,
                 (self.refid >> 8) & 0xff,
                 self.refid & 0xff)
 
     def refid_as_string(self):
+        "Sometimes it's a clock name or KOD type"
         return polystr(struct.pack("BBBB" % self.refid_octets()))
 
     def refid_as_address(self):
+        "Sometimes it's an IPV4 address."
         return polystr("%d.%d.%d.%d" % self.refid_octets())
 
     def is_crypto_nak(self):
@@ -1138,7 +1151,7 @@ class Mode6Session:
                            parms)
 		nonce_uses += 1
                 if nonce_uses >= 4:
-                    nonce = fetch_nonce()
+                    nonce = self.fetch_nonce()
                     nonce_uses = 0
                 for i in range(len(span.entries)):
                     e = span.entries[len(span.entries) - i - 1]
