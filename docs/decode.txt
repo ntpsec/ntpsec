@@ -202,7 +202,7 @@ The clock status word consists of four fields: Unused (0-7), Count
 | Unused | Count | Code
 |=========================
 
-The Count Field displays the number of events since the last +lockvar+
+The Count Field displays the number of events since the last +clockvar+
 command, while the Event Field displays the most recent event message
 coded as follows:
 
