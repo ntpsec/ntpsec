@@ -14,7 +14,7 @@ from ntp.packet import *
 from ntp.version import *
 
 def stdversion():
-    return "%s %s+%s" % (BASENAME, VERSION, ntp.version.TICK)
+    return "%s %s+%s %s" % (BASENAME, VERSION, TICK, DATE)
 
 def portsplit(hostname):
     portsuffix = ""
@@ -59,7 +59,7 @@ def termsize():
     import shlex, subprocess, re
     try:
         output = subprocess.check_output(shlex.split('/bin/stty -a'))
-    except OSError:
+    except (OSError, subprocess.CalledProcessError, AttributeError):
         return (24, 80)
     for pattern in ('rows\D+(\d+); columns\D+(\d+);', '\s+(\d+)\D+rows;\s+(\d+)\D+columns;'):
         m = re.search(pattern, output)
