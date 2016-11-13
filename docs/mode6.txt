@@ -37,8 +37,8 @@ written.
 
 The protocol uses UDP packets transmitted and received over port 123.
 They use the same structure (header, plus extension, plus optional
-MAC) as time synchronization messages, but the semantics of the header
-fields are different.  They are distinguished from time
+MAC) as time synchronization messages, but the layout and semantics of
+the header fields are different.  They are distinguished from time
 synchronization packets by their Mode field, which has the value 6
 (0110).
 
@@ -91,13 +91,13 @@ reassembling the payloads.
 [[varlists]]
 == Variable-Value Lists ==
 
-Several requests and responses use a common textual payload format
-consisting of a comma-separated list of items.  An item may be
-textual (ASCII) variable name, or a textual variable name followed by
-an equals sign followed by a textual value. Following any comma
-the format may insert a newline; these are not significant to the
-meaning of the payload, but are placed so that if the payload is
-dumped to an 80-character terminal window the lines will be folded
+Several requests and responses (in fact, all but one) use a common
+textual payload format consisting of a comma-separated list of items.
+An item may be textual (ASCII) variable name, or a textual variable
+name followed by an equals sign followed by a textual value. Following
+any comma the format may insert a newline; these are not significant
+to the meaning of the payload, but are placed so that if the payload
+is dumped to an 80-character terminal window the lines will be folded
 in a way convenient for visibility.
 
 Values may be decimal numeric literals, decimal float literals, hex
@@ -350,7 +350,8 @@ rs.#::		restriction mask (RES_* bits)
 The client should accept the values in any order, and ignore .#
 values which it does not understand, to allow a smooth path to
 future changes without requiring a new opcode.  To ensure this,
-ntpd occasionally issues a randomly-generated tag=value pair.
+ntpd occasionally issues a randomly-generated tag=value pair. All
+such noise tags are three letters long.
 
 Clients can rely on all *.0 values preceding any *.1 values, that is
 all values for a given index number are together in the response.
@@ -489,8 +490,9 @@ The contents of the MAC trailer consists of:
 First, the password entered to use the signing key, then the request
 header fields, then the payload.
 
-The cryptographic hash is normally MD5, but if ntpd is built with
-OpenSSL support it is possible to use and generate SHA1 keys as well.
+The cryptographic hash is normally 16 octets of MD5 hash, but if ntpd
+is built with OpenSSL support it is possible to use and generate
+20-octet-long SHA1 keys as well.
 
 == Known bugs ==
 
