@@ -8,6 +8,7 @@
 #include "ntp_refclock.h"
 #include "ntp_stdlib.h"
 #include "ntp_control.h"	/* for CTL_* clocktypes */
+#include "ntp_syscall.h"
 
 #include <stdio.h>
 #include <ctype.h>
