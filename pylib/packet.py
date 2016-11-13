@@ -245,7 +245,7 @@ class Packet:
         self.__extension = polybytes(x)
 
     def leap(self):
-        return ("no-leap", "add-leap", "del-leap", "unsync")[(self.li_vn_mode & 0x60) >> 6]
+        return ("no-leap", "add-leap", "del-leap", "unsync")[PKT_LEAP(self.li_vn_mode)]
 
     def version(self):
         return (self.li_vn_mode >> 3) & 0x7

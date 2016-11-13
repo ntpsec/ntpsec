@@ -103,7 +103,7 @@ class SNTPPacket:
         # FIXME: Clip low digits according to precision
         return self.received - self.transmit_timestamp
     def leap(self):
-        return ("no-leap", "add-leap", "del-leap", "unsync")[(self.livnm & 0x60) >> 6]
+        return ("no-leap", "add-leap", "del-leap", "unsync")[((self.livnm) >> 6) & 0x3]
 
 def queryhost(server, concurrent, timeout=5, port=123):
     "Query IP addresses associated with a specified host."
@@ -195,13 +195,13 @@ def clock_select(packets):
             drop("stratum too high")
             continue
         if server.leap() == "unsync":
-            drop("Leap not in sync")
+            drop("leap not in sync")
             continue
         if not server.origin_timestamp < server.reference_timestamp:
             drop("server is very broken")
             continue
         if server.origin_timestamp - server.reference_timestamp >= NTP_MAXAGE:
-            drop("Server has gone too long without sync")
+            drop("server has gone too long without sync")
             continue
         if not server.trusted:
             drop("request was authenticated but server is untrusted")
