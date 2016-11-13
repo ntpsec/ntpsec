@@ -34,10 +34,11 @@ possibly the peer directory site-packages) where ${VERSION} is what
 the command "python --version" gives back. This directory should be on
 your Python's sys.path, in which case all will proceed normally.
 
-If it's not, you will get the same ntpq failure to launch.  You may be
-able to patch around this by setting the environment variable
-PYTHONPATH to include the rootspace directory where waf installed the
-library; use "waf -v install" to nail down this location.
+If it's not, you will get the same ntpq failure to launch ./ntpq from
+anywhere *outside* the source tree.  You may be able to patch around
+this by setting the environment variable PYTHONPATH to include the
+rootspace directory where waf installed the library; use "waf -v
+install" to nail down this location.
 
 Be aware that if this sort of problem occurs in an NTPsec instance
 installed from a binary package, it is almost certainly not an NTPsec
