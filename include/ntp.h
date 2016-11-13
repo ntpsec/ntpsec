@@ -756,7 +756,8 @@ struct restrict_u_tag {
 /* pythonize-header: stop ignoring */
 
 /*
- * Access flags
+ * Access flags.  Do not change or garbage-collect these, they are exposed
+ * through the Mode 6 protocol.
  */
 #define	RES_IGNORE		0x0001	/* ignore packet */
 #define	RES_DONTSERVE		0x0002	/* access denied */
@@ -768,14 +769,15 @@ struct restrict_u_tag {
 				    RES_DONTTRUST | RES_VERSION |\
 				    RES_NOPEER | RES_LIMITED)
 
-#define	RES_NOQUERY		0x0040	/* mode 6/7 packet denied */
-#define	RES_NOMODIFY		0x0080	/* mode 6/7 modify denied */
+#define	RES_NOQUERY		0x0040	/* mode 6 packet denied */
+#define	RES_NOMODIFY		0x0080	/* mode 6 modify denied */
+#define	RES_NOTRAP		0x0100	/* mode 6 set trap denied (not used) */
+#define	RES_LPTRAP		0x0200	/* mode 6 low priority trap (not used) */
 
-#define	RES_KOD			0x0100	/* send kiss of death packet */
-#define	RES_MSSNTP		0x0200	/* enable MS-SNTP authentication */
-#define	RES_FLAKE		0x0400	/* flakeway - drop 10% */
-#define	RES_NOMRULIST		0x0800	/* mode 6 mrulist denied */
-#define	RES_NOTRAP		0x1000  /* no longer used */
+#define	RES_KOD			0x0400	/* send kiss of death packet */
+#define	RES_MSSNTP		0x0800	/* enable MS-SNTP authentication */
+#define	RES_FLAKE		0x1000	/* flakeway - drop 10% */
+#define	RES_NOMRULIST		0x2000	/* mode 6 mrulist denied */
 
 #define	RES_ALLFLAGS		(RES_FLAGS | RES_NOQUERY |	\
 				 RES_NOMODIFY | RES_KOD |	\
