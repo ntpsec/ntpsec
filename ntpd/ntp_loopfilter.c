@@ -121,9 +121,9 @@ double	drift_comp;		/* frequency (s/s) */
 static double init_drift_comp; /* initial frequency (PPM) */
 double	clock_stability;	/* frequency stability (wander) (s/s) */
 u_int	sys_tai;		/* TAI offset from UTC */
-#if !defined(ENABLE_LOCKCLOCK) || defined(HAVE_KERNEL_PLL)
+#if !defined(ENABLE_LOCKCLOCK) && defined(HAVE_KERNEL_PLL)
 static bool loop_started;	/* true after LOOP_DRIFTINIT */
-#endif /* !ENABLE_LOCKCLOCK || HAVE_KERNEL_PLL */
+#endif /* !ENABLE_LOCKCLOCK && HAVE_KERNEL_PLL */
 #ifndef ENABLE_LOCKCLOCK
 static void rstclock (int, double); /* transition function */
 static double direct_freq(double); /* direct set frequency */
@@ -1276,8 +1276,10 @@ loop_config(
 			rstclock(EVNT_FSET, 0);
 		else
 			rstclock(EVNT_NSET, 0);
+#ifndef HAVE_KERNEL_PLL
 		loop_started = true;
-#endif /* ENABLE_LOCKCLOCK */
+#endif /* !HAVE_KERNEL_PLL */
+#endif /* !ENABLE_LOCKCLOCK */
 		break;
 
 	case LOOP_KERN_CLEAR:
