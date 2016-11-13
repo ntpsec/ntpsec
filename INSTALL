@@ -179,6 +179,9 @@ By default, `waf install' will install the package's files in
 installation prefix other than `/usr/local' by giving waf the
 option `--prefix=PATH'.
 
+You should read the section "Path problems with the test tools" in
+devel/testing.txt before setting a non-default prefix.
+
 == Strict compatibility mode ==
 
 There have been a handful of forward-incompatible changes from NTP Classic.
