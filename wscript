@@ -184,6 +184,7 @@ def build(ctx):
 	ctx.recurse("ntptime")
 	ctx.recurse("pylib")
 	ctx.recurse("attic")
+	ctx.recurse("tests")
 
 	scripts = [
 		"ntpleapfetch/ntpleapfetch",
@@ -210,9 +211,8 @@ def build(ctx):
 	ctx.manpage(8, "ntpwait/ntpwait-man.txt")
 	ctx.manpage(1, "ntpsweep/ntpsweep-man.txt")
 
-	# Skip running unit tests on a cross compile build or if requested
-	if not ctx.env.DISABLE_UNIT_TESTS and not ctx.env.ENABLE_CROSS:
-		ctx.recurse("tests")
+	# Skip running unit tests on a cross compile build
+	if not ctx.env.ENABLE_CROSS:
 		# Force re-running of tests.  Same as 'waf --alltests'
 		if ctx.cmd == "check":
 			ctx.options.all_tests = True
@@ -227,7 +227,7 @@ def build(ctx):
 		# Print a summary at the end
 		ctx.add_post_fun(waf_unit_test.summary)
 	else:
-		pprint("YELLOW", "Unit test runner skipped.")
+		pprint("YELLOW", "Unit test runner skipped on a cross-compiled build.")
 		from waflib import Options
 		Options.options.no_tests = True
 

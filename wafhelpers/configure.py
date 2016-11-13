@@ -140,8 +140,6 @@ def cmd_configure(ctx, config):
         for opt in opt_map:
                 ctx.env[opt] = opt_map[opt]
 
-	ctx.env.DISABLE_UNIT_TESTS = ctx.options.disable_unit_tests
-
         if ctx.options.cross_compiler:
                 ctx.env.ENABLE_CROSS = True
 
