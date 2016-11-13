@@ -23,7 +23,7 @@ functions.  If you can't load that library, you can't test effectively.
 The waf build is supposed to create a symbolic link from ntpq/ntp to
 pylib in the build directory. This should enable ntpq to "import ntp"
 before you install to rootspace. If that link is not created or
-dpesn't point to pylib/ under your build directory, report
+doesn't point to pylib/ under your build directory, report
 this as a bug. If it is, but ./ntpq startup fails anyway, you may
 have a mis-configured Python and need to investigate that.
 
