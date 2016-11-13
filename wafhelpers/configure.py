@@ -394,7 +394,11 @@ def cmd_configure(ctx, config):
                 ctx.define("ENABLE_MSSNTP", 1, comment="Enable MS-SNTP extensions https://msdn.microsoft.com/en-us/library/cc212930.aspx")
 
         if ctx.options.enable_lockclock:
+            if ctx.env.REFCLOCK_LOCAL:
                 ctx.define("ENABLE_LOCKCLOCK", 1, comment="Enable NIST 'lockclock'")
+            else:
+                import waflib.Errors
+                raise waflib.Errors.WafError("NIST 'lockclock' requires refclock 'local'")
 
         if not ctx.options.disable_droproot:
                 ctx.define("ENABLE_DROPROOT", 1, comment="Drop root after initialising")
