@@ -18,7 +18,7 @@ The temps file is unique to NTPsec.
 
 A line in this file is produced at each valid update received from a
 refclock configured to append to it. The first part of each data line
-is similar for all radios,
+is similar for all radios.
 
 ----------------------------------------------------------------------------
   49234 60517.826 SPECTRACOM(1) 93 247 16:48:21.814
@@ -31,10 +31,8 @@ is similar for all radios,
 
 == loopstats ==
 
-The following data are collected in the loopstats files. The files are
-reduced to summary data using the loop.sh shell script. See the loop.awk
-script for further information. A line in the file is produced at each
-valid update of the local clock.
+The following data are collected in the loopstats files. A line in the file
+is produced at each valid update of the local clock.
 
 ----------------------------------------------------------------------------
   49236 11.897 -0.000004 -35.9384 0.000003815 0.000805 0
@@ -50,10 +48,8 @@ valid update of the local clock.
 
 == peerstats ==
 
-The following data are collected in the peerstats files. The files are
-reduced to summary data using the peer.sh shell script. See the peer.awk
-script for further information. A line in the file is produced upon
-reception of each valid update from a configured peer.
+The following data are collected in the peerstats files. A line in the file
+is produced upon reception of each valid update from a configured peer.
 
 ----------------------------------------------------------------------------
   49236 30.756 140.173.96.1 9474 0.000603 0.37532
