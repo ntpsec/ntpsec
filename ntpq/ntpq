@@ -237,7 +237,7 @@ usage: help [ command ]
                 auth = "ok "
             else:
                 auth = "bad"
-            if self.pktversion > NTP_OLDVERSION:
+            if self.pktversion > ntp.packet.NTP_OLDVERSION:
                 seldict = {
                     ntp.packet.CTL_PST_SEL_REJECT: "reject",
                     ntp.packet.CTL_PST_SEL_SANE: "falsetick",
@@ -276,7 +276,7 @@ usage: help [ command ]
                 ntp.packet.PEVNT_NEWPEER: "sys_peer",
                 ntp.packet.PEVNT_CLOCK: "clock_alarm",
                 }
-            last_event = event_dict.get(PEER_EVENT|event, "")
+            last_event = event_dict.get(ntp.packet.PEER_EVENT|event, "")
             display = \
                      "%3d %5u  %04x   %3.3s  %4s  %4.4s %9.9s %11s %2lu" % \
                      (i + 1, peer.associd,
@@ -312,7 +312,7 @@ usage: help [ command ]
 		    not (ntp.packet.CTL_PEER_STATVAL(peer.status)
 		      & (ntp.packet.CTL_PST_CONFIG|ntp.packet.CTL_PST_REACH)):
                 if self.debug:
-                    self.warn(stderr, "eliding [%d]\n" % peer.associd)
+                    self.warn("eliding [%d]\n" % peer.associd)
                 continue
             try:
                 variables = self.session.readvar(peer.associd)
@@ -766,11 +766,11 @@ usage: authenticate [ yes|no ]
         else:
             try:
                 newversion = int(line)
-                if newversion >= NTP_OLDVERSION and newversion <= NTP_VERSION:
+                if newversion >= ntp.packet.NTP_OLDVERSION and newversion <= ntp.packet.NTP_VERSION:
                     self.pktversion = newversion
                 else:
                     print("versions %d to %d, please"
-                          % (NTP_OLDVERSION, NTP_VERSION))
+                          % (ntp.packet.NTP_OLDVERSION, ntp.packet.NTP_VERSION))
             except ValueError:
                 print("What?")
         print("NTP version being claimed is %d" % self.pktversion)
@@ -1299,9 +1299,9 @@ usage: ifstats
             if self.rawmode:
                 print(self.session.response)
             else:
-                formatter = ReslistSummary()
-                self.say(ReslistSummary.header)
-                self.say(("=" * ReslistSummary.width) + "\n")
+                formatter = ntp.util.ReslistSummary()
+                self.say(ntp.util.ReslistSummary.header)
+                self.say(("=" * ntp.util.ReslistSummary.width) + "\n")
                 for entry in entries:
                     self.say(formatter.summary(entry))
         except ntp.packet.ControlException as e:
