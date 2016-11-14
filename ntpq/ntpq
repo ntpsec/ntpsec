@@ -287,10 +287,15 @@ usage: help [ command ]
     def __dopeers(self, showall, mode):
         if not self.__dogetassoc():
             return
+        if self.showhostnames:
+            termwidth = termsize()[1]
+        else:
+            termwidth = None	# Default width 
         report = PeerSummary(mode,
                              self.pktversion,
                              self.showhostnames,
                              self.wideremote,
+                             termwidth=termwidth,
                              debug=interpreter.debug)
         maxhostlen = 0
         if len(self.chosts) > 1:
