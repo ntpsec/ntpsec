@@ -68,7 +68,7 @@ def termsize():
 
 class PeerSummary:
     "Reusable report generator for peer statistics"
-    def __init__(self, displaymode, pktversion, showhostnames, wideremote, debug=0):
+    def __init__(self, displaymode, pktversion, showhostnames, wideremote, termwidth=None, debug=0):
         self.displaymode = displaymode		# peers/apeers.opeers
         self.pktversion = pktversion		# interpretation of flash bits
         self.showhostnames = showhostnames	# If false, display numeric IPs
@@ -76,8 +76,8 @@ class PeerSummary:
         self.debug = debug
         # By default, the peer spreadsheet layout is designed so lines just
         # fit in 80 characters. This tells us how much extra horizontal space
-        # we have available on a wider terminal emulator
-        self.horizontal_slack = termsize()[1] - 80
+        # we have available on a wider terminal emulator.
+        self.horizontal_slack = (termwidth or 80) - 80
         # Peer spreadsheet column widths
         self.namewidth = 15 + self.horizontal_slack
         self.refidwidth = 15
