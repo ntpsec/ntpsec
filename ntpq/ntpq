@@ -12,12 +12,12 @@
 from __future__ import print_function, division
 
 import os, sys, getopt, cmd, re
-import socket, hashlib
+import socket, hashlib, collections
 
 try:
-    from ntp.packet import *
-    from ntp.util import *
-    from ntp.ntpc import *
+    import ntp.packet
+    import ntp.util
+    import ntp.ntpc
     import ntp.version
 except ImportError as e:
     sys.stderr.write("ntpq: can't find Python NTP library -- check PYTHONPATH.\n")
@@ -31,7 +31,7 @@ try:
 except ImportError:
     pass
 
-version = stdversion()
+version = ntp.util.stdversion()
 
 # General notes on Python 2/3 compatibility:
 #
@@ -153,7 +153,7 @@ class Ntpq(cmd.Cmd):
         self.chosts = []		# Command-line hosts
         self.peers = []			# Data from NTP peers.
         self.debug = 0
-        self.pktversion = NTP_OLDVERSION + 1
+        self.pktversion = ntp.packet.NTP_OLDVERSION + 1
         self.uservars = collections.OrderedDict()
         self.ai_family = socket.AF_UNSPEC
 
@@ -186,7 +186,7 @@ usage: help [ command ]
     def __dogetassoc(self):
         try:
             self.peers = self.session.readstat()
-        except ControlException as e:
+        except ntp.packet.ControlException as e:
             self.warn(e.message + "\n")
             return False
         except IOError as e:
@@ -212,69 +212,69 @@ usage: help [ command ]
         self.say("\nind assid status  conf reach auth condition  last_event cnt\n")
         self.say("===========================================================\n")
         for (i, peer) in enumerate(self.peers):
-            statval = CTL_PEER_STATVAL(peer.status)
-            if not showall and (statval & (CTL_PST_CONFIG|CTL_PST_REACH)) == 0:
+            statval = ntp.packet.CTL_PEER_STATVAL(peer.status)
+            if not showall and (statval & (ntp.packet.CTL_PST_CONFIG|ntp.packet.CTL_PST_REACH)) == 0:
                 continue
-            event = CTL_PEER_EVENT(peer.status)
-            event_count = CTL_PEER_NEVNT(peer.status)
-            if statval & CTL_PST_CONFIG:
+            event = ntp.packet.CTL_PEER_EVENT(peer.status)
+            event_count = ntp.packet.CTL_PEER_NEVNT(peer.status)
+            if statval & ntp.packet.CTL_PST_CONFIG:
                 conf = "yes"
             else:
                 conf = "no"
-            if statval & CTL_PST_BCAST:
+            if statval & ntp.packet.CTL_PST_BCAST:
                     reach = "none"
-                    if statval & CTL_PST_AUTHENABLE:
+                    if statval & ntp.packet.CTL_PST_AUTHENABLE:
                             auth = "yes"
                     else:
                             auth = "none"
-            elif statval & CTL_PST_REACH:
+            elif statval & ntp.packet.CTL_PST_REACH:
                 reach = "yes"
             else:
                 reach = "no"
-            if (statval & CTL_PST_AUTHENABLE) == 0:
+            if (statval & ntp.packet.CTL_PST_AUTHENABLE) == 0:
                 auth = "none"
-            elif statval & CTL_PST_AUTHENTIC:
+            elif statval & ntp.packet.CTL_PST_AUTHENTIC:
                 auth = "ok "
             else:
                 auth = "bad"
             if self.pktversion > NTP_OLDVERSION:
                 seldict = {
-                    CTL_PST_SEL_REJECT: "reject",
-                    CTL_PST_SEL_SANE: "falsetick",
-                    CTL_PST_SEL_CORRECT: "excess",
-                    CTL_PST_SEL_SELCAND: "outlier",
-                    CTL_PST_SEL_SYNCCAND: "candidate",
-                    CTL_PST_SEL_EXCESS: "backup",
-                    CTL_PST_SEL_SYSPEER: "sys.peer",
-                    CTL_PST_SEL_PPS: "pps.peer",
+                    ntp.packet.CTL_PST_SEL_REJECT: "reject",
+                    ntp.packet.CTL_PST_SEL_SANE: "falsetick",
+                    ntp.packet.CTL_PST_SEL_CORRECT: "excess",
+                    ntp.packet.CTL_PST_SEL_SELCAND: "outlier",
+                    ntp.packet.CTL_PST_SEL_SYNCCAND: "candidate",
+                    ntp.packet.CTL_PST_SEL_EXCESS: "backup",
+                    ntp.packet.CTL_PST_SEL_SYSPEER: "sys.peer",
+                    ntp.packet.CTL_PST_SEL_PPS: "pps.peer",
                     }
                 condition = seldict[statval & 0x7]
             else:
-                if (statval & 0x3) == OLD_CTL_PST_SEL_REJECT:
-                    if (statval & OLD_CTL_PST_SANE) == 0:
+                if (statval & 0x3) == ntp.packet.OLD_CTL_PST_SEL_REJECT:
+                    if (statval & ntp.packet.OLD_CTL_PST_SANE) == 0:
                         condition = "insane"
-                    elif (statval & OLD_CTL_PST_DISP) == 0:
+                    elif (statval & ntp.packet.OLD_CTL_PST_DISP) == 0:
                         condition = "hi_disp"
                     else:
                         condition = ""
-                elif (statval & 0x3) ==  OLD_CTL_PST_SEL_SELCAND:
+                elif (statval & 0x3) ==  ntp.packet.OLD_CTL_PST_SEL_SELCAND:
                         condition = "sel_cand"
-                elif (statval & 0x3) ==  OLD_CTL_PST_SEL_SYNCCAND:
+                elif (statval & 0x3) ==  ntp.packet.OLD_CTL_PST_SEL_SYNCCAND:
                     condition = "sync_cand"
-                elif (statval & 0x3) ==  OLD_CTL_PST_SEL_SYSPEER:
+                elif (statval & 0x3) ==  ntp.packet.OLD_CTL_PST_SEL_SYSPEER:
                     condition = "sys_peer"
             event_dict = {
-                PEVNT_MOBIL: "mobilize",
-                PEVNT_DEMOBIL: "demobilize",
-                PEVNT_REACH: "reachable",
-                PEVNT_UNREACH: "unreachable",
-                PEVNT_RESTART: "restart",
-                PEVNT_REPLY: "no_reply",
-                PEVNT_RATE: "rate_exceeded",
-                PEVNT_DENY: "access_denied",
-                PEVNT_ARMED: "leap_armed",
-                PEVNT_NEWPEER: "sys_peer",
-                PEVNT_CLOCK: "clock_alarm",
+                ntp.packet.PEVNT_MOBIL: "mobilize",
+                ntp.packet.PEVNT_DEMOBIL: "demobilize",
+                ntp.packet.PEVNT_REACH: "reachable",
+                ntp.packet.PEVNT_UNREACH: "unreachable",
+                ntp.packet.PEVNT_RESTART: "restart",
+                ntp.packet.PEVNT_REPLY: "no_reply",
+                ntp.packet.PEVNT_RATE: "rate_exceeded",
+                ntp.packet.PEVNT_DENY: "access_denied",
+                ntp.packet.PEVNT_ARMED: "leap_armed",
+                ntp.packet.PEVNT_NEWPEER: "sys_peer",
+                ntp.packet.PEVNT_CLOCK: "clock_alarm",
                 }
             last_event = event_dict.get(PEER_EVENT|event, "")
             display = \
@@ -288,15 +288,15 @@ usage: help [ command ]
         if not self.__dogetassoc():
             return
         if self.showhostnames:
-            termwidth = termsize()[1]
+            termwidth = ntp.util.termsize()[1]
         else:
             termwidth = None	# Default width 
-        report = PeerSummary(mode,
-                             self.pktversion,
-                             self.showhostnames,
-                             self.wideremote,
-                             termwidth=termwidth,
-                             debug=interpreter.debug)
+        report = ntp.util.PeerSummary(mode,
+                                      self.pktversion,
+                                      self.showhostnames,
+                                      self.wideremote,
+                                      termwidth=termwidth,
+                                      debug=interpreter.debug)
         maxhostlen = 0
         if len(self.chosts) > 1:
             maxhostlen = max([len(host) for (host, _af) in self.chosts])
@@ -309,14 +309,14 @@ usage: help [ command ]
         self.say(("=" * report.width()) + "\n")
         for peer in self.peers:
             if not showall and \
-		    not (CTL_PEER_STATVAL(peer.status)
-		      & (CTL_PST_CONFIG|CTL_PST_REACH)):
+		    not (ntp.packet.CTL_PEER_STATVAL(peer.status)
+		      & (ntp.packet.CTL_PST_CONFIG|ntp.packet.CTL_PST_REACH)):
                 if self.debug:
                     self.warn(stderr, "eliding [%d]\n" % peer.associd)
                 continue
             try:
                 variables = self.session.readvar(peer.associd)
-            except ControlException as e:
+            except ntp.packet.ControlException as e:
                 self.warn(e.message + "\n")
                 return
             except IOError as e:
@@ -329,7 +329,7 @@ usage: help [ command ]
                                  % associd)
                 continue
             if len(self.chosts) > 1:
-                self.say(PeerSummary.high_truncate(self.session.hostname, maxhostlen)+ " ")
+                self.say(ntp.util.PeerSummary.high_truncate(self.session.hostname, maxhostlen)+ " ")
             self.say(report.summary(self.session.rstatus,
                                     variables, peer.associd))
 
@@ -389,13 +389,13 @@ usage: help [ command ]
             if not quiet:
                 self.say("status=%04x %s,\n" % \
                          (self.session.rstatus,
-                          statustoa(dtype, self.session.rstatus)))
+                          ntp.ntpc.statustoa(dtype, self.session.rstatus)))
 
             text = ""
             for (name, value) in variables.items():
                 item = "%s=" % name
                 if name in ("reftime", "clock", "org", "rec", "xmt"):
-                    item += prettydate(value)
+                    item += ntp.ntpc.prettydate(value)
                 elif name in ("srcadr", "peeradr", "dstadr", "refid"):
                     # C ntpq cooked these in obscure ways.  Since they
                     # came up from the daemon as human-readable
@@ -454,7 +454,7 @@ usage: help [ command ]
         "List variables associated with a specified peer."
         try:
             variables = self.session.readvar(associd, varlist, op)
-        except ControlException as e:
+        except ntp.packet.ControlException as e:
             self.warn(e.message + "\n")
             return False
         except IOError as e:
@@ -465,10 +465,10 @@ usage: help [ command ]
         if not variables:
             if associd == 0:
                 self.say("No system%s variables returned\n"%
-                                " clock" if (type == TYPE_CLOCK) else "")
+                                " clock" if (type == ntp.ntpc.TYPE_CLOCK) else "")
             else:
                 self.say("No information returned for%s association %d\n"%
-                                (" clock" if (type == TYPE_CLOCK) else "",
+                                (" clock" if (type == ntp.ntpc.TYPE_CLOCK) else "",
                                 associd))
             return True
         if not quiet:
@@ -503,7 +503,7 @@ usage: timeout [ msec ]
         "Query and display a collection of variables from the system."
         try:
             queried = self.session.readvar(associd, [v[0] for v in variables])
-        except ControlException as e:
+        except ntp.packet.ControlException as e:
             self.warn(e.message + "\n")
             return
         except IOError as e:
@@ -514,13 +514,13 @@ usage: timeout [ msec ]
             return
         if decodestatus:
             if associd == 0:
-                statype = TYPE_SYS
+                statype = ntp.ntpc.TYPE_SYS
             else:
-                statype = TYPE_PEER
+                statype = ntp.ntpc.TYPE_PEER
             self.say("associd=%u status=%04x %s,\n" %
                              (associd,
                               self.session.rstatus,
-                              statustoa(statype, self.session.rstatus)))
+                              ntp.ntpc.statustoa(statype, self.session.rstatus)))
         for (name, legend, fmt) in variables:
             if name not in queried:
                 continue
@@ -529,7 +529,8 @@ usage: timeout [ msec ]
                 if self.showhostnames:
                     if self.debug:
                         self.say("DNS lookup begins...")
-                    value = canonicalize_dns(value, family=self.ai_family)
+                    value = ntp.util.canonicalize_dns(value,
+                                                      family=self.ai_family)
                     if self.debug:
                         self.say("DNS lookup complete.")
                 self.say("%s  %s\n" % (legend, value))
@@ -539,7 +540,7 @@ usage: timeout [ msec ]
             elif fmt in (NTP_UINT, NTP_INT, NTP_FLOAT):
                 self.say("%s  %s\n" % (legend, value))
             elif fmt == NTP_LFP:
-                self.say("%s  %s\n" % (legend, prettydate(value)))
+                self.say("%s  %s\n" % (legend, ntp.ntpc.prettydate(value)))
             elif fmt == NTP_2BIT:
                 self.say("%s  %s\n" % (legend, ("00", "01", "10", "11")[value]))
             elif fmt == NTP_MODE:
@@ -615,7 +616,7 @@ usage: poll [ n ] [ verbose ]
         "specify a password to use for authenticated requests"
         try:
             self.session.password()
-        except ControlException as e:
+        except ntp.packet.ControlException as e:
             self.warn(e.message + "\n")
 
     def help_passwd(self):
@@ -908,8 +909,8 @@ usage: showvars
         "read the system or peer variables included in the variable list"
         associd = self.__assoc_valid(line)
         if associd >= 0:
-            qtype = TYPE_SYS if associd == 0 else TYPE_PEER
-            self.__dolist(self.uservars.keys(), associd, CTL_OP_READVAR, qtype)
+            qtype = ntp.ntpc.TYPE_SYS if associd == 0 else ntp.ntpc.TYPE_PEER
+            self.__dolist(self.uservars.keys(), associd, ntp.packet.CTL_OP_READVAR, qtype)
 
     def help_readlist(self):
         self.say("""\
@@ -941,8 +942,8 @@ usage: writelist [ assocID ]
         "read system or peer variables"
         associd = self.__assoc_valid(line)
         if associd >= 0:
-            qtype = TYPE_SYS if associd == 0 else TYPE_PEER
-            self.__dolist(line.split()[1:], associd, CTL_OP_READVAR, qtype)
+            qtype = ntp.ntpc.TYPE_SYS if associd == 0 else ntp.ntpc.TYPE_PEER
+            self.__dolist(line.split()[1:], associd, ntp.packet.CTL_OP_READVAR, qtype)
 
     def help_readvar(self):
         self.say("""\
@@ -983,7 +984,7 @@ usage: writevar assocID name=value,[...]
             if (associd != idrange[0]):
                 self.say("\n")
             if not self.__dolist(self.uservars,
-                                associd, CTL_OP_READVAR, TYPE_PEER):
+                                associd, ntp.packet.CTL_OP_READVAR, ntp.ntpc.TYPE_PEER):
                 return
 
     def help_mreadlist(self):
@@ -1017,7 +1018,7 @@ usage: mrl assocIDlow assocIDhigh
         for associd in idrange:
             if (associd != idrange[0]):
                 self.say("\n")
-            if not self.__dolist(varlist, associd, CTL_OP_READVAR, TYPE_PEER):
+            if not self.__dolist(varlist, associd, ntp.packet.CTL_OP_READVAR, ntp.ntpc.TYPE_PEER):
                 return
 
     def help_mreadvar(self):
@@ -1044,7 +1045,7 @@ usage: mrv assocIDlow assocIDhigh [ name=value[,...] ]
         assoc = self.__assoc_valid(line)
         if assoc >= 0:
             self.__dolist(self.uservars.keys(),
-                          assoc, CTL_OP_READCLOCK, TYPE_CLOCK)
+                          assoc, ntp.packet.CTL_OP_READCLOCK, ntp.ntpc.TYPE_CLOCK)
 
     def help_clocklist(self):
         self.say("""\
@@ -1068,7 +1069,7 @@ usage: cl [ assocID ]
         if assoc == 0:
             self.warn("This command requires the association ID of a clock.\n")
         elif assoc > 0:
-            self.__dolist(line.split()[1:], assoc, CTL_OP_READCLOCK, TYPE_CLOCK)
+            self.__dolist(line.split()[1:], assoc, ntp.packet.CTL_OP_READCLOCK, ntp.ntpc.TYPE_CLOCK)
 
     def help_clockvar(self):
         self.say("""\
@@ -1172,7 +1173,7 @@ usage: lopeers
         "send a remote configuration command to ntpd"
         try:
             self.session.password()
-        except ControlException as e:
+        except ntp.packet.ControlException as e:
             self.warn(e.message + "\n")
             return
         if self.debug > 2:
@@ -1190,7 +1191,7 @@ usage: lopeers
                     self.say("_" * (col- 1))
                 self.say("^\n")
             self.say(self.session.response + "\n")
-        except ControlException as e:
+        except ntp.packet.ControlException as e:
             self.warn(e.message + "\n")
 
     def help_config(self):
@@ -1238,7 +1239,7 @@ usage: config_from_file <configuration filename>
         self.say("Ctrl-C will stop MRU retrieval and display partial results.\n")
         if self.rawmode:
             mruhook = lambda v: self.printvars(variables=v,
-                                               dtype=TYPE_SYS,
+                                               dtype=ntp.ntpc.TYPE_SYS,
                                                quiet=True)
         else:
             mruhook = None
@@ -1248,12 +1249,12 @@ usage: config_from_file <configuration filename>
                 if not span.is_complete():
                     self.say("mrulist retrieval interrupted by operator.\n"
                              "Displaying partial client list.\n")
-                formatter = MRUSummary(interpreter.showhostnames)
-                self.say(MRUSummary.header + "\n")
-                self.say(("=" * MRUSummary.width) + "\n")
+                formatter = ntp.util.MRUSummary(interpreter.showhostnames)
+                self.say(ntp.util.MRUSummary.header + "\n")
+                self.say(("=" * ntp.util.MRUSummary.width) + "\n")
                 for entry in span.entries:
                     self.say(formatter.summary(entry) + "\n")
-        except ControlException as e:
+        except ntp.packet.ControlException as e:
             # Giving up after 8 restarts from the beginning.
             # With high-traffic NTP servers, this can occur if the
             # MRU list is limited to less than about 16 seconds' of
@@ -1274,12 +1275,12 @@ usage: mrulist [ tag=value ] [ tag=value ] [ tag=value ] [ tag=value ]
             if self.rawmode:
                 print(self.session.response)
             else:
-                formatter = IfstatsSummary()
-                self.say(IfstatsSummary.header)
-                self.say(("=" * IfstatsSummary.width) + "\n")
+                formatter = ntp.util.IfstatsSummary()
+                self.say(ntp.util.IfstatsSummary.header)
+                self.say(("=" * ntp.util.IfstatsSummary.width) + "\n")
                 for (i, entry) in enumerate(entries):
                     self.say(formatter.summary(i, entry))
-        except ControlException as e:
+        except ntp.packet.ControlException as e:
             self.warn(e.message + "\n")
             return
         pass
@@ -1303,7 +1304,7 @@ usage: ifstats
                 self.say(("=" * ReslistSummary.width) + "\n")
                 for entry in entries:
                     self.say(formatter.summary(entry))
-        except ControlException as e:
+        except ntp.packet.ControlException as e:
             self.warn(e.message + "\n")
             return
 
@@ -1504,7 +1505,7 @@ USAGE: ntpq [-46dphinOV] [-c str] [-D lvl] [ host ...]
 '''
 
 if __name__ == '__main__':
-    setprogname("ntpq")
+    ntp.ntpc.setprogname("ntpq")
     #init_auth()
 
     try:
@@ -1520,7 +1521,7 @@ if __name__ == '__main__':
         raise SystemExit(1)
     progname = sys.argv[0]
 
-    session = ControlSession()
+    session = ntp.packet.ControlSession()
     interpreter = Ntpq(session)
 
     for (switch, val) in options:
