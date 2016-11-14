@@ -606,7 +606,7 @@ class ControlSession:
         return True
 
     def password(self):
-	"Get a keyid and the password if we don't have one."
+        "Get a keyid and the password if we don't have one."
         if self.keyid is None:
             if self.auth is None:
                 try:
@@ -693,7 +693,7 @@ class ControlSession:
             raise ControlException(SERR_NOKEY)
         else:
             pkt.extension += mac
-	return pkt.send()
+        return pkt.send()
 
     def getresponse(self, opcode, associd, timeo):
         "Get a response expected to match a given opcode and associd."
@@ -979,9 +979,9 @@ class ControlSession:
 
     def mrulist(self, variables=None, rawhook=None):
         "Retrieve MRU list data"
-	nonce_uses = 0
-	restarted_count = 0
-	cap_frags = True
+        nonce_uses = 0
+        restarted_count = 0
+        cap_frags = True
         warn = sys.stderr.write
         sorter = None
         if variables is None:
@@ -1063,20 +1063,20 @@ class ControlSession:
                             cap_frags = False
                             if self.debug:
                                 warn("Reverted to row limit from fragments limit.\n")
-			else:
+                        else:
                             # ntpd has lower cap on row limit
                             self.ntpd_row_limit -= 1
                             limit = min(limit, ntpd_row_limit)
                             if self.debug:
                                 warn("Row limit reduced to %d following CERR_BADVALUE.\n" % limit)
                     elif e.errorcode in (ERR_INCOMPLETE, ERR_TIMEOUT):
-			 # Reduce the number of rows/frags requested by
-			 # half to recover from lost response fragments.
-			if cap_frags:
+                        # Reduce the number of rows/frags requested by
+                        # half to recover from lost response fragments.
+                        if cap_frags:
                             frags = max(2, frags / 2)
                             if self.debug:
                                 warn("Frag limit reduced to %d following incomplete response.\n"% frags)
-			else:
+                        else:
                             limit = max(2, limit / 2)
                             if self.debug:
                                 warn("Row limit reduced to %d following incomplete response.\n" % limit)
@@ -1124,15 +1124,15 @@ class ControlSession:
                 if span.is_complete():
                     break
 
-		# Snooze for a bit between queries to let ntpd catch
-		# up with other duties.
+                # Snooze for a bit between queries to let ntpd catch
+                # up with other duties.
                 time.sleep(0.05)
 
-		# If there were no errors, increase the number of rows
-		# to a maximum of 3 * MAXFRAGS (the most packets ntpq
-		# can handle in one response), on the assumption that
-		# no less than 3 rows fit in each packet, capped at 
-		# our best guess at the server's row limit.
+                # If there were no errors, increase the number of rows
+                # to a maximum of 3 * MAXFRAGS (the most packets ntpq
+                # can handle in one response), on the assumption that
+                # no less than 3 rows fit in each packet, capped at
+                # our best guess at the server's row limit.
                 if not recoverable_read_errors:
                     if cap_frags:
                         frags = min(MAXFRAGS, frags + 1)
@@ -1142,14 +1142,14 @@ class ControlSession:
                                     max(limit + 1,
                                         limit * 33 / 32))
 
-		# prepare next query with as many address and last-seen
-		# timestamps as will fit in a single packet.
-		req_buf = "%s, %s=%d%s" % \
+                # prepare next query with as many address and last-seen
+                # timestamps as will fit in a single packet.
+                req_buf = "%s, %s=%d%s" % \
                           (nonce,
                            "frags" if cap_frags else "limit",
                            frags if cap_frags else limit,
                            parms)
-		nonce_uses += 1
+                nonce_uses += 1
                 if nonce_uses >= 4:
                     nonce = self.fetch_nonce()
                     nonce_uses = 0
