@@ -1558,7 +1558,7 @@ if __name__ == '__main__':
             interpreter.wideremote = True
 
     if interpreter.interactive and len(interpreter.ccmds) > 0:
-        self.warn("%s: invalid option combination.\n" % progname)
+        interpreter.warn("%s: invalid option combination.\n" % progname)
         raise SystemExit(1)
 
     if len(arguments) == 0:
@@ -1579,7 +1579,7 @@ if __name__ == '__main__':
     try:
         if len(interpreter.ccmds) == 0:
             if len(interpreter.chosts) > 1:
-                self.warn("ntpq can only work interactively on one host.")
+                interpreter.warn("ntpq can only work interactively on one host.\n")
                 interpreter.chosts = interpreter.chosts[:1]
             session.openhost(*interpreter.chosts[0])
             interpreter.cmdloop()
