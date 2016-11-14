@@ -7,7 +7,7 @@ Requires GNUPLOT and liberation fonts installed.
 #SPDX-License-Identifier: BSD-2-Clause
 from __future__ import print_function, division
 
-import calendar, datetime, glob, gzip, os, socket, subprocess, sys, time
+import glob, gzip, os, socket, sys, time
 
 class NTPStats:
     "Gather statistics for a specified NTP site"
