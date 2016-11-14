@@ -1490,7 +1490,7 @@ USAGE: ntpq [-46dphinOV] [-c str] [-D lvl] [ host ...]
                                 - may appear multiple times
    -d no  debug-level    Increase output debug message level
                                 - may appear multiple times
-   -D Str set-debug-level Set the output debug message level
+   -D Int set-debug-level Set the output debug message level
                                 - may appear multiple times
    -h no  help           Print a usage message.
    -p no  peers          Print a list of the peers
@@ -1536,7 +1536,12 @@ if __name__ == '__main__':
             interpreter.debug += 1
             session.debug += 1
         elif switch in ("-D", "--set-debug-level"):
-            session.debug = interpreter.debug = int(val)
+            try:
+                session.debug = interpreter.debug = int(val)
+            except ValueError as e:
+                sys.stderr.write("'%s' is not a recognizable number\n" % val)
+                sys.stderr.write(usage)
+                raise SystemExit(1)
         elif switch in ("-h", "--help"):
             print(usage)
             raise SystemExit(0)
