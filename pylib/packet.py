@@ -253,8 +253,8 @@ class Packet:
     def mode(self):
         return self.li_vn_mode & 0x7
 
-class Mode3Packet(Packet):
-    "Mode 3 request/response (actually usable for modes 1-5)"
+class SyncPacket(Packet):
+    "Mode 1-5 time-synchronization packet, including SNTP."
 
     def __init__(self, session=None):
         Packet.__init__(self, session, session.pktversion, MODE_CONTROL)
@@ -286,12 +286,12 @@ class Mode3Packet(Packet):
          self.origin_timestamp,
          self.receive_timestamp,
          self.transmit_timestamp) \
-         = struct.unpack(Mode6Packet.format, rawdata[:Mode3Packet.HEADER_LEN])
-        self.data = rawdata[Mode3Packet.HEADER_LEN:]
+         = struct.unpack(ControlPacket.format, rawdata[:SyncPacket.HEADER_LEN])
+        self.data = rawdata[SyncPacket.HEADER_LEN:]
 
     def flatten(self):
         "Flatten the packet into an octet sequence."
-        body = struct.pack(Mode6Packet.format,
+        body = struct.pack(ControlPacket.format,
                            self.li_vn_mode,
                            self.stratum,
                            self.poll,
@@ -332,7 +332,7 @@ class Mode3Packet(Packet):
     def is_crypto_nak(self):
         len(self.extension) == 1
 
-class Mode6Packet(Packet):
+class ControlPacket(Packet):
     "Mode 6 request/response."
 
     def __init__(self, session, opcode=0, associd=0, qdata=''):
@@ -377,14 +377,14 @@ class Mode6Packet(Packet):
          self.status,
          self.associd,
          self.offset,
-         self.count) = struct.unpack(Mode6Packet.format,
-                                     rawdata[:Mode6Packet.HEADER_LEN])
-        self.data = rawdata[Mode6Packet.HEADER_LEN:]
+         self.count) = struct.unpack(ControlPacket.format,
+                                     rawdata[:ControlPacket.HEADER_LEN])
+        self.data = rawdata[ControlPacket.HEADER_LEN:]
         return (self.sequence, self.status, self.associd, self.offset)
 
     def flatten(self):
         "Flatten the packet into an octet sequence."
-        body = struct.pack(Mode6Packet.format,
+        body = struct.pack(ControlPacket.format,
                            self.li_vn_mode,
                            self.r_e_m_op,
                            self.sequence,
@@ -484,12 +484,12 @@ class MRUList:
     def __repr__(self):
         return "<MRUList: entries=%s now=%s>" % (self.entries, self.now)
 
-class Mode6Exception(BaseException):
+class ControlException(BaseException):
     def __init__(self, message, errorcode=0):
         self.message = message
         self.errorcode = errorcode
 
-class Mode6Session:
+class ControlSession:
     "A session to a host"
     MRU_ROW_LIMIT	= 256
     server_errors = {
@@ -522,7 +522,7 @@ class Mode6Session:
         self.response = ""
         self.rstatus = 0
         self.mruspans = []
-        self.ntpd_row_limit = Mode6Session.MRU_ROW_LIMIT
+        self.ntpd_row_limit = ControlSession.MRU_ROW_LIMIT
 
     def close(self):
         if self.sock:
@@ -619,20 +619,20 @@ class Mode6Session:
                     return
                 except ValueError:
                     # There are no trusted keys.  Barf.
-                    raise Mode6Exception(SERR_NOTRUST)
+                    raise ControlException(SERR_NOTRUST)
             try:
                 key_id = int(input("Keyid: "))
                 # FIXME: Magic number, yuck
                 if key_id == 0 or key_id > 65535:
-                    raise Mode6Exception(SERR_BADKEY)
+                    raise ControlException(SERR_BADKEY)
             except (SyntaxError, ValueError):
-                raise Mode6Exception(SERR_BADKEY)
+                raise ControlException(SERR_BADKEY)
             self.keyid = key_id
 
         if self.passwd is None:
             passwd = getpass.getpass("%s Password: " % self.keytype)
             if passwd is None:
-                raise Mode6Exception(SERR_INVPASS)
+                raise ControlException(SERR_INVPASS)
             self.passwd = passwd
 
     def sendpkt(self, xdata):
@@ -661,7 +661,7 @@ class Mode6Session:
             return -1
 
         # Assemble the packet
-        pkt = Mode6Packet(self, opcode, associd, qdata)
+        pkt = ControlPacket(self, opcode, associd, qdata)
 
         self.sequence += 1
         pkt.sequence = self.sequence
@@ -669,7 +669,7 @@ class Mode6Session:
         # If we have data, pad it out to a 32-bit boundary.
         # Do not include these in the payload count.
         if pkt.extension:
-            while ((Mode6Packet.HEADER_LEN + len(pkt.extension)) & 3):
+            while ((ControlPacket.HEADER_LEN + len(pkt.extension)) & 3):
                 pkt.extension += b"\x00"
 
         # If it isn't authenticated we can just send it.  Otherwise
@@ -678,19 +678,19 @@ class Mode6Session:
             return pkt.send()
 
         if self.keyid is None or self.passwd is None:
-            raise Mode6Exception(SERR_NOCRED)
+            raise ControlException(SERR_NOCRED)
 
 	# Pad out packet to a multiple of 8 octets to be sure
 	# receiver can handle it. Note: these pad bytes should
         # *not* be counted in the header count field.
-        while ((Mode6Packet.HEADER_LEN + len(pkt.extension)) & 7):
+        while ((ControlPacket.HEADER_LEN + len(pkt.extension)) & 7):
             pkt.extension += b"\x00"
 
         # Do the MAC compuation.
         mac = Authenticator.compute_mac(pkt.flatten(),
                                         self.keyid, self.keytype, self.passwd)
         if mac is None:
-            raise Mode6Exception(SERR_NOKEY)
+            raise ControlException(SERR_NOKEY)
         else:
             pkt.extension += mac
 	return pkt.send()
@@ -718,7 +718,7 @@ class Mode6Session:
             #  on how long we're willing to spend here.
             bail += 1
             if bail >= (2*MAXFRAGS):
-                raise Mode6Exception(SERR_TOOMUCH)
+                raise ControlException(SERR_TOOMUCH)
 
             if len(fragments) == 0:
                 tvo = self.primary_timeout / 1000
@@ -730,7 +730,7 @@ class Mode6Session:
             try:
                 (rd, _, _) = select.select([self.sock], [], [], tvo)
             except select.error as msg:
-                raise Mode6Exception(SERR_SELECT)
+                raise ControlException(SERR_SELECT)
             if self.debug:
                 warn("At %s, select with timeout %d ends\n" % (time.asctime(), tvo))
 
@@ -738,7 +738,7 @@ class Mode6Session:
                 # Timed out.  Return what we have
                 if len(fragments) == 0:
                     if timeo:
-                        raise Mode6Exception(SERR_TIMEOUT)
+                        raise ControlException(SERR_TIMEOUT)
                 if timeo:
                     if self.debug:
                         sys.stderr.write("ERR_INCOMPLETE: Received fragments:\n")
@@ -746,18 +746,18 @@ class Mode6Session:
                             sys.stderr.write("%d: %s" % (i+1, frag.stats(i)))
                         sys.stderr.write("last fragment %sreceived\n" \
                              % ("not ", "")[seenlastfrag])
-                raise Mode6Exception(SERR_INCOMPLETE)
+                raise ControlException(SERR_INCOMPLETE)
 
             if self.debug:
                 warn("At %s, socket read begins\n" % time.asctime())
             rawdata = polystr(self.sock.recv(4096))
             if self.debug:
                 warn("Received %d octets\n" % len(rawdata))
-            rpkt = Mode6Packet(self)
+            rpkt = ControlPacket(self)
             try:
                 rpkt.analyze(rawdata)
             except struct.error as reason:
-                raise Mode6Exception(SERR_UNSPEC)
+                raise ControlException(SERR_UNSPEC)
 
             if rpkt.version() > NTP_VERSION or rpkt.version() < NTP_OLDVERSION:
                 if self.debug:
@@ -791,7 +791,7 @@ class Mode6Session:
                     warn("Error %d received on non-final packet\n" %
                          rpkt.errcode())
                 self.keyid = self.passwd = None
-                raise Mode6Exception(SERR_SERVER % Mode6Session.server_errors[rpkt.errcode()],
+                raise ControlException(SERR_SERVER % ControlSession.server_errors[rpkt.errcode()],
                                      rpkt.errcode())
 
             # Check the association ID to make sure it matches what we expect
@@ -805,17 +805,17 @@ class Mode6Session:
                 warn("Response packet not padded, size = %d\n" % len(rawdata))
                 continue
 
-            shouldbesize = (Mode6Packet.HEADER_LEN + rpkt.count + 3) & ~3
+            shouldbesize = (ControlPacket.HEADER_LEN + rpkt.count + 3) & ~3
             if len(rawdata) < shouldbesize:
                 warn("Response packet claims %u octets payload, above %d received\n" % \
-                    (count, len(rawdata) - Mode6Packet.HEADER_LEN))
-                raise Mode6Exception(SERR_INCOMPLETE)
+                    (count, len(rawdata) - ControlPacket.HEADER_LEN))
+                raise ControlException(SERR_INCOMPLETE)
 
             if self.debug > 1:
                 warn("Got packet, size = %d\n"% len(rawdata))
-            if rpkt.count > (len(rawdata) - Mode6Packet.HEADER_LEN):
+            if rpkt.count > (len(rawdata) - ControlPacket.HEADER_LEN):
                     warn("Received count of %u octets, data in packet is %ld\n"\
-                                   % (count, len(rawdata) - Mode6Packet.HEADER_LEN))
+                                   % (count, len(rawdata) - ControlPacket.HEADER_LEN))
                     continue
 
             # Someday, perhaps, check authentication here
@@ -884,7 +884,7 @@ class Mode6Session:
     def doquery(self, opcode, associd=0, qdata="", auth=False):
         "send a request and save the response"
         if not self.havehost():
-            raise Mode6Exception(SERR_NOHOST)
+            raise ControlException(SERR_NOHOST)
         retry = True
         while True:
             # Ship the request
@@ -892,7 +892,7 @@ class Mode6Session:
             # Get the response.
             try:
                 res = self.getresponse(opcode, associd, not retry)
-            except Mode6Exception as e:
+            except ControlException as e:
                 if retry and e.message in (SERR_TIMEOUT, SERR_INCOMPLETE):
                     retry = False
                     continue
@@ -906,7 +906,7 @@ class Mode6Session:
         "Read peer status, or throw an exception."
         self.doquery(opcode=CTL_OP_READSTAT, associd=associd)
         if len(self.response) % 4:
-            raise Mode6Exception(SERR_BADLENGTH)
+            raise ControlException(SERR_BADLENGTH)
         idlist = []
         if associd == 0:
             for i in range(len(self.response)//4):
@@ -964,7 +964,7 @@ class Mode6Session:
         # Copes with an implementation error - ntpd uses putdata without
         # setting the size correctly.
         if not self.response:
-            raise Mode6Exception(SERR_PERMISSION)
+            raise ControlException(SERR_PERMISSION)
         elif b"\x00" in self.response:
             self.response = self.response[:self.response.index(b"\x00")]
         self.response = self.response.rstrip()
@@ -974,7 +974,7 @@ class Mode6Session:
         "Receive a nonce that can be replayed - combats source address spoofing"
         self.doquery(opcode=CTL_OP_REQ_NONCE)
         if not self.response.startswith("nonce="):
-            raise Mode6Exception(SERR_BADNONCE)
+            raise ControlException(SERR_BADNONCE)
         return self.response.strip()
 
     def mrulist(self, variables=None, rawhook=None):
@@ -1007,13 +1007,13 @@ class Mode6Session:
                 if sorter is not None:
                     sorter = sortdict.getkey(key)
                     if sorter == None:
-                        raise Mode6Exception(BAD_SORT % key)
+                        raise ControlException(BAD_SORT % key)
             for k in list(variables.keys()):
                 if k in ("mincount", "resall", "resany",
                          "maxlstint", "laddr", "sort"):
                     continue
                 else:
-                    raise Mode6Exception(SERR_BADPARAM % k)
+                    raise ControlException(SERR_BADPARAM % k)
             if 'kod' in variables:
                 variables['resany'] = variables.get('resany', 0) | RES_KOD
                 del variables['kod']
@@ -1040,7 +1040,7 @@ class Mode6Session:
                 try:
                     self.doquery(opcode=CTL_OP_READ_MRU, qdata=req_buf)
                     recoverable_read_errors = False
-                except Mode6Exception as e:
+                except ControlException as e:
                     recoverable_read_errors = True
                     if e.errorcode is None:
                         raise e
@@ -1052,7 +1052,7 @@ class Mode6Session:
                         self.mrustats = []
                         restarted_count += 1
                         if restarted_count > 8:
-                            raise Mode6Exception(SERR_STALL)
+                            raise ControlException(SERR_STALL)
                         if self.debug:
                             warn("--->   Restarting from the beginning, retry #%u\n" % restarted_count)
                     elif e.errorcode == CERR_UNKNOWNVAR:
@@ -1113,7 +1113,7 @@ class Mode6Session:
                             try:
                                 idx = int(idx)
                             except ValueError:
-                                raise Mode6Exception(SERR_BADTAG % tag)
+                                raise ControlException(SERR_BADTAG % tag)
                             if idx >= len(span.entries):
                                 span.entries.append(MRUEntry())
                             if type(val) != type(0) and val.startswith("0x"):
