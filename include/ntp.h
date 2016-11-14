@@ -371,6 +371,8 @@ struct peer {
 	u_long	selbroken;	/* KoD received */
 };
 
+/* pythonize-header: stop ignoring */
+
 /*
  * Values for peer.leap, sys_leap
  */
@@ -378,8 +380,6 @@ struct peer {
 #define	LEAP_ADDSECOND	0x1	/* last minute of day has 61 seconds */
 #define	LEAP_DELSECOND	0x2	/* last minute of day has 59 seconds */
 #define	LEAP_NOTINSYNC	0x3	/* overload, clock is free running */
-
-/* pythonize-header: stop ignoring */
 
 /*
  * Values for peer mode and packet mode. Only the modes through
