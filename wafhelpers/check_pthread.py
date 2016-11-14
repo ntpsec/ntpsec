@@ -1,4 +1,3 @@
-from waflib.Logs import pprint
 from wafhelpers.tool import check_sanity
 
 PTHREAD_FRAG = """

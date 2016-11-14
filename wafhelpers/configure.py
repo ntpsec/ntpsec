@@ -1,7 +1,7 @@
 import sys, os, platform
 from waflib.Configure import conf
 from wafhelpers.probes import *
-from wafhelpers.util import msg, msg_setting, parse_version
+from wafhelpers.util import msg, msg_setting
 
 def cmd_configure(ctx, config):
         srcnode = ctx.srcnode.abspath()

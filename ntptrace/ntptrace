@@ -14,7 +14,6 @@ from __future__ import print_function
 
 import getopt
 import re
-import socket
 import subprocess
 import sys
 import ntp.util

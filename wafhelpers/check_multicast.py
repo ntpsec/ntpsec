@@ -1,6 +1,3 @@
-import sys
-from waflib.Logs import pprint
-
 def check_multicast(ctx):
         "Probe for IP multicast capability."
         ctx.check_cc(
