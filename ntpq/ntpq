@@ -1511,8 +1511,8 @@ if __name__ == '__main__':
     try:
         (options, arguments) = getopt.getopt(sys.argv[1:],
                                              "46c:dD:hinpVw",
-                                             ["ipv4","ipv6", "command",
-                                              "debug", "set-debug-level",
+                                             ["ipv4","ipv6", "command=",
+                                              "debug", "set-debug-level=",
                                               "help", "interactive", "numeric",
                                               "peers", "version",
                                               "wide"])
