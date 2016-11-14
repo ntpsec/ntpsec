@@ -2,7 +2,7 @@ from __future__ import print_function
 
 import sys, os, platform
 from waflib.Configure import conf
-from wafhelpers.probes import *
+from wafhelpers.probes import probe_header_with_prerequisites, probe_function_with_prerequisites
 from wafhelpers.util import msg, msg_setting
 
 def cmd_configure(ctx, config):

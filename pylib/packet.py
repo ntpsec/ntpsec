@@ -182,7 +182,9 @@ A Mode 6 packet cannot have extension fields.
 from __future__ import print_function, division
 import sys, socket, select, struct, collections, string
 import getpass, hashlib, time
-from ntp.ntpc import lfptofloat
+import ntp.ntp_control
+import ntp.ntp_magic
+import ntp.ntpc
 import ntp.util
 
 # General notes on Python 2/3 compatibility:
@@ -283,9 +285,6 @@ else:  # Python 3
         # line_buffering=True ensures that interactive command sessions work as expected
         return io.TextIOWrapper(stream.buffer, encoding=master_encoding, newline="\n", line_buffering=True)
 
-from ntp.ntp_magic import *
-from ntp.ntp_control import *
-
 # Limit on packets in a single Mode 6 response.  Increasing this value to
 # 96 will marginally speed "mrulist" operation on lossless networks
 # but it has been observed to cause loss on WiFi networks and with
@@ -325,7 +324,7 @@ class Packet:
     @staticmethod
     def PKT_LI_VN_MODE(l, v, m):  return ((((l) & 3) << 6) | Packet.VN_MODE((v), (m)))
 
-    def __init__(self, mode=MODE_CLIENT, version=NTP_VERSION, session=None):
+    def __init__(self, mode=ntp.ntp_magic.MODE_CLIENT, version=ntp.ntp_magic.NTP_VERSION, session=None):
         self.session = session  # Where to get session context
         self.li_vn_mode = 0     # leap, version, mode (uint8_t)
         # Subclasses have variable fields here
@@ -341,7 +340,7 @@ class Packet:
         self.__extension = polybytes(x)
 
     def leap(self):
-        return ("no-leap", "add-leap", "del-leap", "unsync")[PKT_LEAP(self.li_vn_mode)]
+        return ("no-leap", "add-leap", "del-leap", "unsync")[ntp.ntp_magic.PKT_LEAP(self.li_vn_mode)]
 
     def version(self):
         return (self.li_vn_mode >> 3) & 0x7
@@ -531,7 +530,7 @@ class ControlPacket(Packet):
     "Mode 6 request/response."
 
     def __init__(self, session, opcode=0, associd=0, qdata=''):
-        Packet.__init__(self, mode=MODE_CONTROL,
+        Packet.__init__(self, mode=ntp.ntp_magic.MODE_CONTROL,
                         version=session.pktversion,
                         session=session)
         self.r_e_m_op = opcode  # ntpq operation code
@@ -690,14 +689,14 @@ class ControlSession:
     "A session to a host"
     MRU_ROW_LIMIT	= 256
     server_errors = {
-        CERR_UNSPEC: "UNSPEC",
-        CERR_PERMISSION: "PERMISSION",
-        CERR_BADFMT: "BADFMT",
-        CERR_BADOP: "BADOP",
-        CERR_BADASSOC: "BADASSOC",
-        CERR_UNKNOWNVAR: "UNKNOWNVAR",
-        CERR_BADVALUE: "BADVALUE",
-        CERR_RESTRICT: "RESTRICT",
+        ntp.ntp_control.CERR_UNSPEC: "UNSPEC",
+        ntp.ntp_control.CERR_PERMISSION: "PERMISSION",
+        ntp.ntp_control.CERR_BADFMT: "BADFMT",
+        ntp.ntp_control.CERR_BADOP: "BADOP",
+        ntp.ntp_control.CERR_BADASSOC: "BADASSOC",
+        ntp.ntp_control.CERR_UNKNOWNVAR: "UNKNOWNVAR",
+        ntp.ntp_control.CERR_BADVALUE: "BADVALUE",
+        ntp.ntp_control.CERR_RESTRICT: "RESTRICT",
         }
 
     def __init__(self):
@@ -705,7 +704,7 @@ class ControlSession:
         self.ai_family = socket.AF_UNSPEC
         self.primary_timeout = DEFTIMEOUT       # Timeout for first select
         self.secondary_timeout = DEFSTIMEOUT    # Timeout for later selects
-        self.pktversion = NTP_OLDVERSION + 1    # Packet version number we use
+        self.pktversion = ntp.ntp_magic.NTP_OLDVERSION + 1    # Packet version number we use
         self.always_auth       = False  # Always send authenticated requests
         self.keytype = "MD5"
         self.keyid = None
@@ -852,7 +851,7 @@ class ControlSession:
     def sendrequest(self, opcode, associd, qdata, auth=False):
         "Ship an ntpq request packet to a server."
         # Check to make sure the data will fit in one packet
-        if len(qdata) > CTL_MAX_DATA_LEN:
+        if len(qdata) > ntp.ntp_control.CTL_MAX_DATA_LEN:
             sys.stderr.write("***Internal error! Data too large (%d)\n" %
                              len(qdata))
             return -1
@@ -956,11 +955,11 @@ class ControlSession:
             except struct.error as reason:
                 raise ControlException(SERR_UNSPEC)
 
-            if rpkt.version() > NTP_VERSION or rpkt.version() < NTP_OLDVERSION:
+            if rpkt.version() > ntp.ntp_magic.NTP_VERSION or rpkt.version() < ntp.ntp_magic.NTP_OLDVERSION:
                 if self.debug:
                     warn("Packet received with version %d\n" % rpkt.version())
                 continue
-            if rpkt.mode() != MODE_CONTROL:
+            if rpkt.mode() != ntp.ntp_magic.MODE_CONTROL:
                 if self.debug:
                     warn("Packet received with mode %d\n" % rpkt.mode())
                 continue
@@ -1101,7 +1100,7 @@ class ControlSession:
 
     def readstat(self, associd=0):
         "Read peer status, or throw an exception."
-        self.doquery(opcode=CTL_OP_READSTAT, associd=associd)
+        self.doquery(opcode=ntp.ntp_control.CTL_OP_READSTAT, associd=associd)
         if len(self.response) % 4:
             raise ControlException(SERR_BADLENGTH)
         idlist = []
@@ -1152,7 +1151,7 @@ class ControlSession:
                     items.append((pair, ""))
         return collections.OrderedDict(items)
 
-    def readvar(self, associd=0, varlist=None, opcode=CTL_OP_READVAR):
+    def readvar(self, associd=0, varlist=None, opcode=ntp.ntp_control.CTL_OP_READVAR):
         "Read system vars from the host as a dict, or throw an exception."
         if varlist == None:
             qdata = ""
@@ -1163,7 +1162,7 @@ class ControlSession:
 
     def config(self, configtext):
         "Send configuration text to the daemon. Return True if accepted."
-        self.doquery(opcode=CTL_OP_CONFIGURE, qdata=configtext, auth=True)
+        self.doquery(opcode=ntp.ntp_control.CTL_OP_CONFIGURE, qdata=configtext, auth=True)
         # Copes with an implementation error - ntpd uses putdata without
         # setting the size correctly.
         if not self.response:
@@ -1175,7 +1174,7 @@ class ControlSession:
 
     def fetch_nonce(self):
         "Receive a nonce that can be replayed - combats source address spoofing"
-        self.doquery(opcode=CTL_OP_REQ_NONCE)
+        self.doquery(opcode=ntp.ntp_control.CTL_OP_REQ_NONCE)
         if not self.response.startswith(polybytes("nonce=")):
             raise ControlException(SERR_BADNONCE)
         return polystr(self.response.strip())
@@ -1218,10 +1217,10 @@ class ControlSession:
                 else:
                     raise ControlException(SERR_BADPARAM % k)
             if 'kod' in variables:
-                variables['resany'] = variables.get('resany', 0) | RES_KOD
+                variables['resany'] = variables.get('resany', 0) | ntp.ntp_magic.RES_KOD
                 del variables['kod']
             if 'limited' in variables:
-                variables['resany'] = variables.get('resany', 0) | RES_LIMITED
+                variables['resany'] = variables.get('resany', 0) | ntp.ntp_magic.RES_LIMITED
                 del variables['limited']
 
         nonce = self.fetch_nonce()
@@ -1241,13 +1240,13 @@ class ControlSession:
             while True:
                 # Request additions to the MRU list
                 try:
-                    self.doquery(opcode=CTL_OP_READ_MRU, qdata=req_buf)
+                    self.doquery(opcode=ntp.ntp_control.CTL_OP_READ_MRU, qdata=req_buf)
                     recoverable_read_errors = False
                 except ControlException as e:
                     recoverable_read_errors = True
                     if e.errorcode is None:
                         raise e
-                    elif e.errorcode == CERR_UNKNOWNVAR:
+                    elif e.errorcode == ntp.ntp_control.CERR_UNKNOWNVAR:
                         # None of the supplied prior entries match, so
                         # toss them from our list and try again.
                         if self.debug:
@@ -1258,10 +1257,10 @@ class ControlSession:
                             raise ControlException(SERR_STALL)
                         if self.debug:
                             warn("--->   Restarting from the beginning, retry #%u\n" % restarted_count)
-                    elif e.errorcode == CERR_UNKNOWNVAR:
+                    elif e.errorcode == ntp.ntp_control.CERR_UNKNOWNVAR:
                         e.message = "CERR_UNKNOWNVAR from ntpd but no priors given."
                         raise e
-                    elif e.errorcode == CERR_BADVALUE:
+                    elif e.errorcode == ntp.ntp_control.CERR_BADVALUE:
                         if cap_frags:
                             cap_frags = False
                             if self.debug:
@@ -1306,7 +1305,7 @@ class ControlSession:
                 highwater = len(span.entries)
                 for (tag, val) in variables.items():
                     if tag =="now":
-                        span.now = lfptofloat(val)
+                        span.now = ntp.ntpc.lfptoloat(val)
                         continue
                     elif tag == "last.newest":
                         continue
@@ -1320,7 +1319,7 @@ class ControlSession:
                             if idx >= len(span.entries):
                                 span.entries.append(MRUEntry())
                             if type(val) != type(0) and val.startswith("0x"):
-                                val = lfptofloat(val)
+                                val = ntp.ntpc.lfptoloat(val)
                             setattr(span.entries[-1], prefix, val)
 
                 # If we've seen the end sentinel on the span, break out
@@ -1359,7 +1358,7 @@ class ControlSession:
                 for i in range(len(span.entries)):
                     e = span.entries[len(span.entries) - i - 1]
                     incr = ", addr.%d=%s, last.%d=%s" % (i, e.addr, i, e.last)
-                    if len(req_buf) + len(incr) >= CTL_MAX_DATA_LEN:
+                    if len(req_buf) + len(incr) >= ntp.ntp_control.CTL_MAX_DATA_LEN:
                         break
                     else:
                         req_buf += incr
@@ -1393,7 +1392,7 @@ class ControlSession:
 
     def __ordlist(self, listtype):
         "Retrieve ordered-list data."
-        self.doquery(opcode=CTL_OP_READ_ORDLIST_A, qdata=listtype, auth=True)
+        self.doquery(opcode=ntp.ntp_control.CTL_OP_READ_ORDLIST_A, qdata=listtype, auth=True)
         stanzas = []
         for (key, value) in self.__parse_varlist().items():
             if key[-1].isdigit() and key[-2] == '.':
@@ -1465,7 +1464,7 @@ class Authenticator:
         # According to RFC5909 7.5 the MAC is always present when an extension
         # field is present. Note: this crude test will fail on Mode 6 packets.
         # On those you have to go in and look at the count.
-        return len(packet) > LEN_PKT_NOMAC
+        return len(packet) > ntp.ntp_magic.LEN_PKT_NOMAC
     def verify_mac(self, packet):
         "Does the MAC on this packet verify according to credentials we have?"
         # FIXME: Someday, figure out how to handle SHA1?
