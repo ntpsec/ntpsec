@@ -1517,7 +1517,8 @@ if __name__ == '__main__':
                                               "peers", "version",
                                               "wide"])
     except getopt.GetoptError as e:
-        print(e)
+        sys.stderr.write("%s\n" % e)
+        sys.stderr.write(usage)
         raise SystemExit(1)
     progname = sys.argv[0]
 
@@ -1550,10 +1551,6 @@ if __name__ == '__main__':
             raise SystemExit(0)
         elif switch in ("-w", "--wide"):
             interpreter.wideremote = True
-        else:
-            self.warn("Unknown command line switch or missing argument.\n")
-            self.warn(usage)
-            raise SystemExit(1)
 
     if interpreter.interactive and len(interpreter.ccmds) > 0:
         self.warn("%s: invalid option combination.\n" % progname)
