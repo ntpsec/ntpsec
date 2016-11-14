@@ -21,7 +21,7 @@ try:
     import ntp.version
 except ImportError as e:
     sys.stderr.write("ntpq: can't find Python NTP library -- check PYTHONPATH.\n")
-    sys.stderr.write("%s\n" % e.message)
+    sys.stderr.write("%s\n" % e)
     sys.exit(1)
 
 # This import only works on Unixes.  The intention is to enable
