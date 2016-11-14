@@ -284,14 +284,14 @@ if __name__ == '__main__':
         (options, arguments) = getopt.getopt(sys.argv[1:],
                                              "46a:c:dD:g:hjk:l:M:o:p:Sst:wWV",
                                              ["ipv4","ipv6",
-                                              "authentication",
-                                              "concurrent",
-                                              "gap", "help", "json",
-                                              "keyfile", "logfile",
-                                              "steplimit",
+                                              "authentication=",
+                                              "concurrent=",
+                                              "gap=", "help", "json",
+                                              "keyfile=", "logfile=",
+                                              "samples=", "steplimit=",
                                               "step", "slew",
-                                              "timeout",
-                                              "debug", "set-debug-level",
+                                              "timeout=",
+                                              "debug", "set-debug-level=",
                                               "version"])
     except getopt.GetoptError as e:
         print(e)
