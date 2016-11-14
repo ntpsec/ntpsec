@@ -38,8 +38,8 @@ def canonicalize_dns(hostname, family=socket.AF_UNSPEC):
     (hostname, portsuffix) = portsplit(hostname)
     try:
         ai = socket.getaddrinfo(hostname, None, family, 0, 0, socket.AI_CANONNAME)
-    except socket.gaierror as (s, _e):
-        print('getaddrinfo failed: %s' % s, file=sys.stderr)
+    except socket.gaierror as e:
+        print('getaddrinfo failed: %s' % e, file=sys.stderr)
         raise SystemExit(1)
     (family, socktype, proto, canonname, sockaddr) = ai[0]
     try:

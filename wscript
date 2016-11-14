@@ -231,10 +231,10 @@ def build(ctx):
 		from waflib import Options
 		Options.options.no_tests = True
 
-        if ctx.cmd == "build":
-            if not "PYTHONPATH" in os.environ:
-                print("--- PYTHONPATH is not set, "
-                  "loading the Python ntp library may be troublesome ---")
+	if ctx.cmd == "build":
+		if not "PYTHONPATH" in os.environ:
+			print("--- PYTHONPATH is not set, "
+				"loading the Python ntp library may be troublesome ---")
 
 #
 # Miscellaneous utility productions
