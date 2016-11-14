@@ -74,6 +74,26 @@ def cmd_configure(ctx, config):
 
         # used to make man and html pages
         ctx.find_program("asciidoc", var="BIN_ASCIIDOC", mandatory=False)
+        # make sure asciidoc is new enough. based on check_python_version() from waf
+        if ctx.env.BIN_ASCIIDOC:
+                # https://lists.ntpsec.org/pipermail/devel/2016-July/001778.html
+                asciidocminver = (8, 6, 0)
+                # Get asciidoc version string
+                cmd = ctx.env.BIN_ASCIIDOC + ['--version']
+                # example output: asciidoc 8.6.9
+                lines = ctx.cmd_and_log(cmd).split()[1].split(".")
+                assert len(lines) == 3, "found %r lines, expected 3: %r" % (len(lines), lines)
+                asciidocver_tuple = (int(lines[0]), int(lines[1]), int(lines[2]))
+
+                # Compare asciidoc version with the minimum required
+                result = (asciidocver_tuple >= asciidocminver)
+
+                asciidocver_full = '.'.join(map(str, asciidocver_tuple[:3]))
+                asciidocminver_str = '.'.join(map(str, asciidocminver))
+                ctx.msg('Checking for asciidoc version >= %s' % (asciidocminver_str,), asciidocver_full, color=result and 'GREEN' or 'YELLOW')
+
+                if not result:
+                        del ctx.env.BIN_ASCIIDOC
         ctx.find_program("a2x", var="BIN_A2X", mandatory=False)
         ctx.find_program("xsltproc", var="BIN_XSLTPROC", mandatory=False)
 
