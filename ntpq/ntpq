@@ -186,7 +186,7 @@ usage: help [ command ]
     def __dogetassoc(self):
         try:
             self.peers = self.session.readstat()
-        except Mode6Exception as e:
+        except ControlException as e:
             self.warn(e.message + "\n")
             return False
         except IOError as e:
@@ -311,7 +311,7 @@ usage: help [ command ]
                 continue
             try:
                 variables = self.session.readvar(peer.associd)
-            except Mode6Exception as e:
+            except ControlException as e:
                 self.warn(e.message + "\n")
                 return
             except IOError as e:
@@ -449,7 +449,7 @@ usage: help [ command ]
         "List variables associated with a specified peer."
         try:
             variables = self.session.readvar(associd, varlist, op)
-        except Mode6Exception as e:
+        except ControlException as e:
             self.warn(e.message + "\n")
             return False
         except IOError as e:
@@ -498,7 +498,7 @@ usage: timeout [ msec ]
         "Query and display a collection of variables from the system."
         try:
             queried = self.session.readvar(associd, [v[0] for v in variables])
-        except Mode6Exception as e:
+        except ControlException as e:
             self.warn(e.message + "\n")
             return
         except IOError as e:
@@ -610,7 +610,7 @@ usage: poll [ n ] [ verbose ]
         "specify a password to use for authenticated requests"
         try:
             self.session.password()
-        except Mode6Exception as e:
+        except ControlException as e:
             self.warn(e.message + "\n")
 
     def help_passwd(self):
@@ -1167,7 +1167,7 @@ usage: lopeers
         "send a remote configuration command to ntpd"
         try:
             self.session.password()
-        except Mode6Exception as e:
+        except ControlException as e:
             self.warn(e.message + "\n")
             return
         if self.debug > 2:
@@ -1185,7 +1185,7 @@ usage: lopeers
                     self.say("_" * (col- 1))
                 self.say("^\n")
             self.say(self.session.response + "\n")
-        except Mode6Exception as e:
+        except ControlException as e:
             self.warn(e.message + "\n")
 
     def help_config(self):
@@ -1248,7 +1248,7 @@ usage: config_from_file <configuration filename>
                 self.say(("=" * MRUSummary.width) + "\n")
                 for entry in span.entries:
                     self.say(formatter.summary(entry) + "\n")
-        except Mode6Exception as e:
+        except ControlException as e:
             # Giving up after 8 restarts from the beginning.
             # With high-traffic NTP servers, this can occur if the
             # MRU list is limited to less than about 16 seconds' of
@@ -1274,7 +1274,7 @@ usage: mrulist [ tag=value ] [ tag=value ] [ tag=value ] [ tag=value ]
                 self.say(("=" * IfstatsSummary.width) + "\n")
                 for (i, entry) in enumerate(entries):
                     self.say(formatter.summary(i, entry))
-        except Mode6Exception as e:
+        except ControlException as e:
             self.warn(e.message + "\n")
             return
         pass
@@ -1298,7 +1298,7 @@ usage: ifstats
                 self.say(("=" * ReslistSummary.width) + "\n")
                 for entry in entries:
                     self.say(formatter.summary(entry))
-        except Mode6Exception as e:
+        except ControlException as e:
             self.warn(e.message + "\n")
             return
 
@@ -1515,7 +1515,7 @@ if __name__ == '__main__':
         raise SystemExit(1)
     progname = sys.argv[0]
 
-    session = Mode6Session()
+    session = ControlSession()
     interpreter = Ntpq(session)
 
     for (switch, val) in options:
