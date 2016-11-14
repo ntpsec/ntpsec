@@ -1276,9 +1276,9 @@ loop_config(
 			rstclock(EVNT_FSET, 0);
 		else
 			rstclock(EVNT_NSET, 0);
-#ifndef HAVE_KERNEL_PLL
+#ifdef HAVE_KERNEL_PLL
 		loop_started = true;
-#endif /* !HAVE_KERNEL_PLL */
+#endif /* HAVE_KERNEL_PLL */
 #endif /* !ENABLE_LOCKCLOCK */
 		break;
 
