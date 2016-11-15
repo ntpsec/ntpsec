@@ -1,4 +1,4 @@
-== Program Manual Pages ==
+== Manual Pages ==
 * link:ntpd.html[+ntpd+ - Network Time Protocol (NTP) daemon]
 * link:ntpdig.html[+ntpdig+ - Simple Network Time Protocol (SNTP) client]
 * link:ntpq.html[+ntpq+ - standard NTP query program]
@@ -8,5 +8,4 @@
 * link:ntptime.html[+ntptime+ - read and set kernel time variables]
 * link:ntptrace.html[`ntptrace` - trace a chain of NTP servers back to the primary source]
 * link:ntpviz.html[+ntpviz+ - make offset, jitter, and other plots from logfiles]
-* link:sitemap.html[Site Map]
 

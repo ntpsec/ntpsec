@@ -20,9 +20,9 @@ Pleased to meet you.
 * link:#intro[Introduction]
 * link:#intro[Differences from NTP Classic]
 * link:#platforms[Supported Platforms]
-* link:#hand[The Handbook]
 * link:#build[Building and Installing NTP]
-* link:#man[NTP Manual Pages]
+* link:#man[Manual Pages]
+* link:#hand[The Handbook]
 * link:#prob[Resolving Problems]
 * link:#info[Further Information]
 
@@ -307,8 +307,6 @@ on a typical system.  For more details, see the INSTALL file in the
 distribution root.
 
 [[man]]
-== NTP Manual Page ==
-
 include::includes/manual.txt[]
 
 [[prob]]
