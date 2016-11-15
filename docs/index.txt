@@ -22,6 +22,7 @@ Pleased to meet you.
 * link:#platforms[Supported Platforms]
 * link:#hand[The Handbook]
 * link:#build[Building and Installing NTP]
+* link:#man[NTP Manual Pages]
 * link:#prob[Resolving Problems]
 * link:#info[Further Information]
 
@@ -137,7 +138,7 @@ few will be user-visible.
 * The documentation has been extensively updated and revised.  One
   important change is that manual pages are now generated from the
   same masters as this web documentation, so the two will no longer
-  drift out of synchronization.  
+  drift out of synchronization.
 
 * There is a new, simpler syntax for declaring refclocks.  The old
   syntax with the magic 127.127.t.u addresses and fudge command is
@@ -304,6 +305,11 @@ The link:build.html[Building and Installing the Distribution] page
 gives and overview of the procedures for building and installing
 on a typical system.  For more details, see the INSTALL file in the
 distribution root.
+
+[[man]]
+== NTP Manual Page ==
+
+include::includes/manual.txt[]
 
 [[prob]]
 == Resolving Problems ==
