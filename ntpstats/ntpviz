@@ -43,7 +43,7 @@ import time
 import tempfile
 
 try:
-    from ntp.statfiles import *
+    import ntp.statfiles
     import ntp.util
 except ImportError as e:
     sys.stderr.write("ntpviz: can't find Python NTP library -- check PYTHONPATH.\n")
@@ -108,7 +108,7 @@ def pstdev(data, mu=None):
 # end standard deviation functions
 
 # class for calced values
-class VizStats(NTPStats):
+class VizStats(ntp.statfiles.NTPStats):
     percs       = {}          # dictionary of percentages
     title       = ''          # title
     unit        = 's'         # display units: s, ppm, etc.
@@ -318,7 +318,7 @@ def gnuplot(template, outfile=None):
 
     return rcode
 
-class NTPViz(NTPStats):
+class NTPViz(ntp.statfiles.NTPStats):
     "Class for visualizing statistics from a single server."
 
     # Python takes single quotes here. Since no % substitution
@@ -337,8 +337,9 @@ set rmargin 10
 
     def __init__(self, statsdir,
                  sitename=None, period=None, starttime=None, endtime=None):
-        NTPStats.__init__(self, statsdir=statsdir, sitename=sitename,
-                          period=period, starttime=starttime, endtime=endtime)
+        ntp.statfiles.NTPStats.__init__(self, statsdir=statsdir,
+                    sitename=sitename, period=period, starttime=starttime,
+                    endtime=endtime)
 
     def plot_slice( self, rows, item1, item2=None):
         "slice 0,item1, maybe item2, from rows, ready for gnuplot"
@@ -1304,7 +1305,7 @@ Python by ESR, concept and GNUPLOT code by Dan Drown.
         # in 2016 this is 42% of all browsers
         args.png_size = '1340,720'
 
-    args.period = int( float(args.period) * NTPStats.SecondsInDay)
+    args.period = int( float(args.period) * ntp.statfiles.NTPStats.SecondsInDay)
     if args.endtime is not None:
         args.endtime = iso_to_posix(args.endtime)
     if args.starttime is not None:
@@ -1513,7 +1514,8 @@ dd {
                         '<b>End Time:</b> %s UTC<br>\n' \
                  % (start_time, end_time)
         index_header += '<b>Report Period:</b> %1.1f days <br>\n' \
-                 % (float(stats.period) / float(NTPStats.SecondsInDay))
+                 % (float(stats.period) / \
+                     float(ntp.statfiles.NTPStats.SecondsInDay))
 
     if args.clip:
         index_header += """\
