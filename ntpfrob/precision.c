@@ -31,9 +31,6 @@ void precision(const iomode mode)
 /* Find the resolution of the system clock by watching how the current time
  * changes as we read it repeatedly.
  *
- * struct timeval is only good to 1us, which may cause problems as machines
- * get faster, but until then the logic goes:
- *
  * If a machine has resolution (i.e. accurate timing info) > 1us, then it will
  * probably use the "unused" low order bits as a counter (to force time to be
  * a strictly increaing variable), incrementing it each time any process
@@ -94,15 +91,15 @@ default_get_resolution(void)
 
 	diff = (diff *3)/2;
 	if (i >= MAXLOOPS) {
-		fprintf(stderr,
-			"     (Boy this machine is fast ! %d loops without a step)\n",
-			MAXLOOPS);
-		diff = 1; /* No STEP, so FAST machine */
+	    fprintf(stderr,
+		"     (Boy this machine is fast ! %d loops without a step)\n",
+		MAXLOOPS);
+	    diff = 1; /* No STEP, so FAST machine */
 	}
 	if (i == 0) {
-		fprintf(stderr,
-			"     (The resolution is less than the time to read the clock -- Assume 1us)\n");
-		diff = 1; /* time to read clock >= resolution */
+	    fprintf(stderr,
+		"     (The resolution is less than the time to read the clock -- Assume 1us)\n");
+	    diff = 1; /* time to read clock >= resolution */
 	}
 	for (i=0, val=HUSECS; val>0; i--, val >>= 1) if (diff >= val) return i;
 	fprintf(stderr,
