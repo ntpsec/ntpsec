@@ -5,8 +5,7 @@
 [[synop]]
 == Synopsis ==
 
-+ntpfrob+ [ +-A+] [+-b+ 'bump'] [ +-a+ 'tick' ] [ +-p+ 'ppsdev' ] [+-c+]
-[+-e+] [+-r+] [+-?+] [+-h+]
++ntpfrob+ [ +-A+] [+-b+ 'bump'] [ +-a+ 'tick' ] [ +-p+ 'ppsdev' ] [+-c+] [+-e+] [+-r+] [+-?+] [+-h+]
 
 [[descr]]
 == Description ==
