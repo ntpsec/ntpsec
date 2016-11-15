@@ -141,8 +141,9 @@ def linkmaker(ctx):
                                     pass
                             os.symlink(relpath, path_source.abspath())
             elif ctx.cmd == 'clean':
-                    #print "removing", path_source.abspath()
-                    os.remove(path_source.abspath())
+                    if path_source.exists():
+                        #print "removing", path_source.abspath()
+                        os.remove(path_source.abspath())
     bldnode = ctx.bldnode.abspath()
     os.system("ln -sf %s/libntp/ntpc.so %s/pylib/ntpc.so " % (bldnode, bldnode))
 
