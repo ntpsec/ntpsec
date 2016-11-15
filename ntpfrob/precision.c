@@ -58,12 +58,12 @@ void precision(const iomode mode)
 
 #define	DNSECS	1000000000L
 #define	HUSECS	(1024 * 1024)
-#define	MINSTEP	5000	/* some systems increment uS on each call */
-/* Don't use "1" as some *other* process may read too*/
-/*We assume no system actually *ANSWERS* in this time*/
+#define	MINSTEP	200	/* assume no system returns less than 200 nansec */
+/* Don't use "1" as some *other* process may read too */
+/* We assume no system actually *ANSWERS* in this time */
 #define MAXSTEP 20000000   /* maximum clock increment (ns) */
 #define MINLOOPS 5      /* minimum number of step samples */
-#define	MAXLOOPS HUSECS	/* Assume precision < .1s ! */
+#define	MAXLOOPS (HUSECS * 1024)	/* Assume precision < .1s ! */
 
 int
 default_get_resolution(void)
