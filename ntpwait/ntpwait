@@ -17,7 +17,9 @@ A spurious 'not running' message can result from queries being disabled.
 from __future__ import print_function, division
 
 import sys, getopt, re, time
-from ntp.packet import *
+import socket
+import ntp.ntp_magic
+import ntp.packet
 
 # General notes on Python 2/3 compatibility:
 #
@@ -145,7 +147,7 @@ if __name__ == "__main__":
         sys.stdout.write("Waiting for ntpd to synchronize...  ")
 
     for i in range(1, tries):
-        session = Mode6Session()
+        session = ntp.packet.ControlSession()
         #session.debug = 4
         if not session.openhost("localhost"):
             if verbose:
@@ -175,14 +177,14 @@ if __name__ == "__main__":
             sys.stdout.write("\bLeap status not available\n")
             sys.exit(1)
 
-        if leap == LEAP_NOTINSYNC:
+        if leap == ntp.ntp_magic.LEAP_NOTINSYNC:
             if verbose:
                 sys.stdout.write("\b" + "*+:."[i % 4])
             if i < tries:
                 time.sleep(sleep)
             continue
 
-        if leap in (LEAP_NOWARNING, LEAP_ADDSECOND, LEAP_DELSECOND):
+        if leap in (ntp.ntp_magic.LEAP_NOWARNING, ntp.ntp_magic.LEAP_ADDSECOND, ntp.ntp_magic.LEAP_DELSECOND):
             # We could check "sync" here to make sure we like the source...
             if verbose:
                 sys.stdout.write("\bOK!\n")
