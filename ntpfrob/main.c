@@ -10,12 +10,33 @@
 #include "config.h"
 #include "ntpfrob.h"
 
+void usage(void)
+{
+	fputs(
+"usage:\n"
+"ntpfrob [ -A] [-b bump] [ -a tick ] [ -p ppsdev ] [-c] [-e] [-r] {-h] [-?]\n"
+"        -a tick    Set kernel tick\n"
+"        -A         Display kernel tick\n"
+"        -b bump    Bump clock by specified microseconds.\n"
+"        -c         Compute and display clock jitter.\n"
+"        -e         Measure clock precision.\n"
+"        -j         Report in self-describing JSON.\n"
+"        -p ppsdev  Look for PPS pulses on a specified device\n"
+"        -r         Raw mode. Only applies to the jitter mode.\n"
+"        -?         Print usage\n"
+"        -h         Print usage\n"
+    , stderr);
+
+}
+
 int
 main(int argc, char **argv)
 {
 	int ch;
+        bool got_one = false;
 	iomode mode = plain_text;
-	while ((ch = getopt(argc, argv, "a:Ab:cejp:r")) != EOF) {
+	while ((ch = getopt(argc, argv, "a:Ab:cejp:rh?")) != EOF) {
+                got_one = true;
 		switch (ch) {
 		case 'A':
 		    tickadj(mode==json, 0);
@@ -50,10 +71,19 @@ main(int argc, char **argv)
 		    break;
 		default:
 		    fputs("ntpfrob: no mode option specified.\n", stderr);
+                    /* fall through */
+                case 'h':
+                case '?':
+                    usage();
 		    exit(1);
 		    break;
 		}
 	}
+        if ( !got_one ) {
+	    fputs("ntpfrob: no mode option specified.\n", stderr);
+	    usage();
+	    exit(1);
+        }
 
     exit(0);
 }

@@ -5,7 +5,8 @@
 [[synop]]
 == Synopsis ==
 
-+ntpfrob+ [ +-A+] [+-b+ 'bump'] [ +-a+ 'tick' ] [ +-p+ 'ppsdev' ] [+-c+] [+-e+] [+-r+]
++ntpfrob+ [ +-A+] [+-b+ 'bump'] [ +-a+ 'tick' ] [ +-p+ 'ppsdev' ] [+-c+]
+[+-e+] [+-r+] [+-?+] [+-h+]
 
 [[descr]]
 == Description ==
@@ -36,6 +37,10 @@ utilities.
 +-r+::
   Raw mode.  Only applies to the jitter mode, and means the raw
   clock samples should be emitted to stdout for postanalysis.
++-?+::
+  Print sueage and exit.
++-h+::
+  Print sueage and exit.
 
 [[usage]]
 == Usage ==
