@@ -167,7 +167,7 @@ class Ntpq(cmd.Cmd):
         self.chosts = []		# Command-line hosts
         self.peers = []			# Data from NTP peers.
         self.debug = 0
-        self.pktversion = ntp.packet.NTP_OLDVERSION + 1
+        self.pktversion = ntp.ntp_magic.NTP_OLDVERSION + 1
         self.uservars = collections.OrderedDict()
         self.ai_family = socket.AF_UNSPEC
 
@@ -251,7 +251,7 @@ usage: help [ command ]
                 auth = "ok "
             else:
                 auth = "bad"
-            if self.pktversion > ntp.packet.NTP_OLDVERSION:
+            if self.pktversion > ntp.ntp_magic.NTP_OLDVERSION:
                 seldict = {
                     ntp.ntp_control.CTL_PST_SEL_REJECT: "reject",
                     ntp.ntp_control.CTL_PST_SEL_SANE: "falsetick",
@@ -780,11 +780,11 @@ usage: authenticate [ yes|no ]
         else:
             try:
                 newversion = int(line)
-                if newversion >= ntp.packet.NTP_OLDVERSION and newversion <= ntp.packet.NTP_VERSION:
+                if newversion >= ntp.ntp_magic.NTP_OLDVERSION and newversion <= ntp.ntp_magic.NTP_VERSION:
                     self.pktversion = newversion
                 else:
                     print("versions %d to %d, please"
-                          % (ntp.packet.NTP_OLDVERSION, ntp.packet.NTP_VERSION))
+                          % (ntp.ntp_magic.NTP_OLDVERSION, ntp.ntp_magic.NTP_VERSION))
             except ValueError:
                 print("What?")
         print("NTP version being claimed is %d" % self.pktversion)
