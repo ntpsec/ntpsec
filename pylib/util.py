@@ -13,7 +13,7 @@ from ntp.packet import *
 from ntp.version import *
 
 def stdversion():
-    return "%s %s+%s %s" % (BASENAME, VERSION, TICK, DATE)
+    return "%s-%s-%s %s" % (VERSION, TICK, BASENAME, DATE)
 
 def portsplit(hostname):
     portsuffix = ""

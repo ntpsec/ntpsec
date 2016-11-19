@@ -1552,7 +1552,7 @@ if __name__ == '__main__':
         elif switch in ("-p", "--peers"):
             interpreter.ccmds.append("peers")
         elif switch in ("-V", "--version"):
-            print("ntpq %s\n" % version)
+            print("ntpq %s" % version)
             raise SystemExit(0)
         elif switch in ("-w", "--wide"):
             interpreter.wideremote = True
