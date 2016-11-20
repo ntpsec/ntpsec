@@ -43,7 +43,7 @@ subset of comparative plots for multiple directories.
     Specifies one or more logfile directories to examine; the default is
     the single directory /var/log/ntpstats.
 
--g or --generate
+-g or --generate::
     Run plot through gnuplot to make png.  The default is to generate
     GNUPLOT programs.
 
