@@ -20,12 +20,14 @@ Python 2.x, x >= 6, or Python 3.x, x >= 3::
    intallation and Python dev tools, if your OS makes such a
    distinction.
 
+   SLES: python-devel
+
 bison::
    Required to build.
    Debian: bison
    Fedora: bison
    Gentoo package: sys-devel/bison
-   SLES: bison
+   SLES: bison . Included in pattern `basis-devel`, which includes gcc, etc.
 
 libcap::
    Required on Linux, to support dropping root.
@@ -85,6 +87,7 @@ sys/timepps.h::
    Debian: pps-tools
    Fedora: pps-tools-devel (pps-tools may be useful for debugging)
    Gentoo package: net-misc/pps-tools
+   SLES: SLES 12 and earlier do not seem to have this available.
 
 asciidoc, a2x::
    You will need asciidoc to make HTML and a2x to make manual pages from the
@@ -100,7 +103,7 @@ Local copy of DocBook stylesheets:
    Debian: docbook-xsl
    Fedora: docbook-xsl-stylesheets
    Gentoo package: app-text/docbook-xsl-stylesheets
-   SLES: docbook-xsl-stylesheets
+   SLES: docbook-xsl-stylesheets .  Pulled in by `asciidoc`
 
 liberation::
    Optional, improves font quality in ntpviz renderings.
