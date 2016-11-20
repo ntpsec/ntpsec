@@ -43,6 +43,10 @@ subset of comparative plots for multiple directories.
     Specifies one or more logfile directories to examine; the default is
     the single directory /var/log/ntpstats.
 
+-g or --generate
+    Run plot through gnuplot to make png.  The default is to generate
+    GNUPLOT programs.
+
 -o OUTDIR or --outdir OUTDIR::
     Set the directory for all output to be OUTDIR.  If OUTDIR does
     not exist it is created.  The default OUTDIR is 'ntpgraphs'.
@@ -100,7 +104,7 @@ The following plots are available:
 
 --all-peer-jitters::
    Report all peer jitters.  This is a different option name from
-   --peer-offsets only because of a limitation in the Python
+   --peer-jitters only because of a limitation in the Python
    standard library.
 
 --all-peer-offsets::
@@ -143,7 +147,7 @@ The following plots are available:
    This is deviation from a root-mean-square extrapolation of the
    moving average of past frequency readings.
 
---peer-jitter=host1[,host2...]::
+--peer-jitters=host1[,host2...]::
    Peer jitter from local clock time, from peerstats (field 7)
    A comma-separated list of peer names must follow. It is a fatal
    error for any of these names not to appear in peerstats.
@@ -183,7 +187,8 @@ ampersand (@).
 Each line in the command file should contain just one option.  Multiple
 options per line are allowed, but discouraged.  Blank lines are allowed.
 
-Comments can be added, and start with an octothorpe (#).
+Comments can be added, and start with an octothorpe (#).  Comments may
+appear on a new line, or trailing, after the # .
 
 When an option takes a parameter, the option and parameter must be
 separated by an equal sign (=) or a space.
