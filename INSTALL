@@ -218,9 +218,6 @@ Here's what it presently does:
 Other behaviors may be added in future releases.
 
 == Optional Features ==
-Other behaviors may be added in future releases.
-
-== Optional Features ==
 
 The waf builder accepts `--enable-FEATURE' options to where FEATURE
 indicates an optional part of the package.  Do `waf --help' for a list
