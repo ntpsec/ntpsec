@@ -25,12 +25,14 @@ bison::
    Debian: bison
    Fedora: bison
    Gentoo package: sys-devel/bison
+   SLES: bison
 
 libcap::
    Required on Linux, to support dropping root.
    Fedora: libcap and libcap-devel
    Debian: libcap2 and libcap-dev
    Gentoo package: sys-libs/libcap
+   SLES: libcap2 and libcap-devel
 
 gnuplot::
    Required for ntpviz.
@@ -38,18 +40,21 @@ gnuplot::
    Fedora: gnuplot
    Gentoo package: sci-visualization/gnuplot
    Ubuntu package: gnuplot5
+   SLES: gnuplot
 
 psutils::
    Optional for ntpviz.  Allows running with ionice()
    Debian package: python-psutil or python3-psutil
    Gentoo package: dev-python/psutil
    Ubuntu package: python-psutil or python3-psutil
+   SLES: python-psutil
 
 libevent 2.x::
    Optional. Without it, ntpdig won't build. 
    Debian: libevent-2.0-5 and libevent-dev
    Fedora: libevent and libevent-devel
    Gentoo package: dev-libs/libevent
+   SLES: libevent and libevent-devel
 
    NetBSD: As installed, libevent is broken.  It links, but doesn't run.
      Here is a workaround:
@@ -61,6 +66,7 @@ seccomp::
    Debian: libseccomp-dev (gets libseccomp2)
    Fedora: libseccomp-devel
    Gentoo package: sys-libs/libseccomp
+   SLES: libseccomp-devel
 
 OpenSSL::
    Optional, required for --enable-crypto.
@@ -68,6 +74,7 @@ OpenSSL::
    Debian: libssl1.0.0 and libssl-dev
    Fedora: openssl-libs and openssl-devel
    Gentoo package: dev-libs/openssl
+   SLES: openssl-libs and openssl-devel
 
 sys/timepps.h::
    If you are building to supply Stratum 1 time service (that is, with
@@ -86,18 +93,21 @@ asciidoc, a2x::
    Debian: asciidoc
    Fedora: asciidoc  (Stock CentOS/RHEL has only 8.4.5, you must upgrade)
    Gentoo package: app-text/asciidoc
+   SLES: asciidoc
 
 Local copy of DocBook stylesheets:
    Optional: Prevents documentation build failures when your Internet is down
    Debian: docbook-xsl
    Fedora: docbook-xsl-stylesheets
    Gentoo package: app-text/docbook-xsl-stylesheets
+   SLES: docbook-xsl-stylesheets
 
 liberation::
    Optional, improves font quality in ntpviz renderings.
    Debian: liberation
    Fedora: liberation
    Gentoo package: media-fonts/liberation-fonts
+   SLES: liberation-fonts
 
 The OS X build has been tested in this environment:
 
@@ -202,6 +212,9 @@ Here's what it presently does:
 
 * Restores the old (non-RFC3339) format of logfile timestamps.
 
+Other behaviors may be added in future releases.
+
+== Optional Features ==
 Other behaviors may be added in future releases.
 
 == Optional Features ==
