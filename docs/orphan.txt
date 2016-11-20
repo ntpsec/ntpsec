@@ -50,13 +50,14 @@ A orphan parent with no sources shows reference ID LOOP if operating at
 stratum 1 and 127.0.0.1 (IPv4 loopback address) otherwise. While
 ordinary NTP clients use a selection metric based on delay and
 dispersion, orphan children use a metric computed from the IP address of
-each core server. Each orphan child chooses the orphan parent as the
-core server with the smallest metric.
+each core server. Each orphan child chooses as the orphan parent as the
+core server with the smallest metric.  This guarantees that all
+orphan children choose the same orphan parent.
 
 For orphan mode to work well, each core server with available sources
 should operate at the same stratum. All core servers and orphan children
 should include the same tos command in the configuration file. Each
-orphan child should include in the configuration file all root servers.
+orphan child should include in the configuration file all core servers.
 
 image:pic/peer.gif[]
 
