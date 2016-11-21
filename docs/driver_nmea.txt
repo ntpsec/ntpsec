@@ -30,7 +30,7 @@ limited by the precision of the timecode and the latencies of the serial
 interface and operating system.
 
 If the operating system supports PPSAPI
-(http://www.ietf.org/rfc/rfc2783.txt[RFC 2783]), the +flag1 1+ option
+(https://www.ietf.org/rfc/rfc2783.txt[RFC 2783]), the +flag1 1+ option
 enables its use.
 
 If there is a /dev/gpspps__u__ it is tried first for PPS, before /dev/gps__u__.

@@ -9,7 +9,7 @@
 
 [[ACTS]]
 ACTS::
-  http://www.nist.gov/pml/div688/grp40/acts.cfm[NIST Automated
+  https://www.nist.gov/pml/div688/grp40/acts.cfm[NIST Automated
   Computer Time Service]. NIST provides a civil time reference for
   computers equipped with analog modems that can dial to its phone
   lines.  Due to variability of delays in the analog phone network
@@ -160,7 +160,7 @@ mode 6::
 
 [[NIST]]
 NIST::
-   http://www.nist.gov/[National Institute of Standards and
+   https://www.nist.gov/[National Institute of Standards and
    Technology].  The civilian national time authority of the USA;
    runs <<WWVB>>.  Responsible for keeping U.S. civil time
    coordinated with international UTC time.  NIST time tracks <<USNO>>
@@ -273,7 +273,7 @@ USNO::
 
 [[WWVB]]
 WWVB::
-  http://www.nist.gov/pml/div688/grp40/wwvb.cfm[The U.S. national time
+  https://www.nist.gov/pml/div688/grp40/wwvb.cfm[The U.S. national time
   radio station], run by <<NIST>> and broadcasting a highly accurate
   U.S. civil-time reference.  Formerly an important primary time
   source, until NIST changed its modulation at 2012-10-29T15:00:00Z
