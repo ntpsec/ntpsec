@@ -145,7 +145,8 @@ def linkmaker(ctx):
                         #print "removing", path_source.abspath()
                         os.remove(path_source.abspath())
     bldnode = ctx.bldnode.abspath()
-    os.system("ln -sf %s/libntp/ntpc.so %s/pylib/ntpc.so " % (bldnode, bldnode))
+    if ctx.cmd in ('install', 'build'):
+        os.system("ln -sf %s/libntp/ntpc.so %s/pylib/ntpc.so " % (bldnode, bldnode))
 
 def build(ctx):
 	ctx.load('waf', tooldir='wafhelpers/')
@@ -204,7 +205,7 @@ def build(ctx):
 		install_path = "${PREFIX}/bin/"
 	)
 
-	linkmaker(ctx)
+	ctx.add_post_fun(linkmaker)
 
 	ctx.manpage(8, "ntpleapfetch/ntpleapfetch-man.txt")
 	ctx.manpage(1, "ntptrace/ntptrace-man.txt")
