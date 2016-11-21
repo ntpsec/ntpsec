@@ -17,8 +17,6 @@ int ntp_optopt;
 int ntp_optind = 1;
 int ntp_opterr;
 
-static char* optcursor = NULL;
-
 /* Implemented based on [1] and [2] for optional arguments.
    ntp_optopt is handled FreeBSD-style, per [3].
    Other GNU and FreeBSD extensions are purely accidental.
@@ -31,35 +29,46 @@ int ntp_getopt(int argc, char *const argv[], const char *optstring)
 {
     int optchar = -1;
     const char* optdecl = NULL;
+    static char* optcursor = NULL;	/* might not need to be static */
 
     ntp_optarg = NULL;
     ntp_opterr = 0;
     ntp_optopt = 0;
 
     /* Unspecified, but we need it to avoid overrunning the argv bounds. */
-    if (ntp_optind >= argc)
-	goto no_more_optchars;
+    if (ntp_optind >= argc) {
+	optcursor = NULL;
+	return -1;
+    }
 
     /* If, when getopt() is called argv[ntp_optind] is a null pointer, getopt()
        shall return -1 without changing ntp_optind. */
-    if (argv[ntp_optind] == NULL)
-	goto no_more_optchars;
+    if (argv[ntp_optind] == NULL) {
+	optcursor = NULL;
+	return -1;
+    }
+
 
     /* If, when getopt() is called *argv[ntp_optind]  is not the character '-',
        getopt() shall return -1 without changing ntp_optind. */
-    if (*argv[ntp_optind] != '-')
-	goto no_more_optchars;
+    if (*argv[ntp_optind] != '-') {
+	optcursor = NULL;
+	return -1;
+    }
 
     /* If, when getopt() is called argv[ntp_optind] points to the string "-",
        getopt() shall return -1 without changing ntp_optind. */
-    if (strcmp(argv[ntp_optind], "-") == 0)
-	goto no_more_optchars;
+    if (strcmp(argv[ntp_optind], "-") == 0) {
+	optcursor = NULL;
+	return -1;
+    }
 
     /* If, when getopt() is called argv[ntp_optind] points to the string "--",
        getopt() shall return -1 after incrementing ntp_optind. */
     if (strcmp(argv[ntp_optind], "--") == 0) {
 	++ntp_optind;
-	goto no_more_optchars;
+	optcursor = NULL;
+	return -1;
     }
 
     if (optcursor == NULL || *optcursor == '\0')
@@ -127,10 +136,6 @@ int ntp_getopt(int argc, char *const argv[], const char *optstring)
 	++ntp_optind;
 
     return optchar;
-
-no_more_optchars:
-    optcursor = NULL;
-    return -1;
 }
 
 /* Implementation based on [1].
