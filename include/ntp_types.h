@@ -92,10 +92,11 @@ typedef uint32_t tstamp_t;	/* NTP seconds timestamp */
  * Cloning malloc()'s behavior of always returning pointers suitably
  * aligned for the strictest alignment requirement of any type is not
  * easy to do portably, as the maximum alignment required is not
- * exposed.  Use the size of a union of the types known to represent the
- * strictest alignment on some platform.
+ * exposed.  Use the size of a struct of the types known to represent the
+ * strictest alignment on some platform. This will force the struct to 
+ * have the strictest possible alignment.
  */
-typedef union max_alignment_tag {
+typedef struct max_alignment_tag {
 	double		d;
 } max_alignment;
 
