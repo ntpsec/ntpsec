@@ -317,11 +317,10 @@ devilishly intricate. This distribution includes a number of utilities
 designed to identify and repair problems using an integrated management
 protocol supported by the link:ntpq.html[+ntpq+] utility program.
 
-The link:debug.html[NTP Debugging Techniques] and link:hints.html[Hints
-and Kinks] pages contain useful information for identifying problems and
-devising solutions. Additional information on reference clock driver
-construction and debugging is in the link:rdebug.html[Debugging Hints
-for Reference Clock Drivers] page.
+The link:debug.html[NTP Debugging Techniques] page contains useful
+information for identifying problems and devising solutions. Additional
+information on reference clock driver construction and debugging is
+in the link:rdebug.html[Debugging Hints for Reference Clock Drivers] page.
 
 Users are invited to report bugs and offer suggestions via the
 link:bugs.html[NTP Bug Reporting Procedures] page.
