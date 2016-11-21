@@ -1155,7 +1155,7 @@ class ControlSession:
                     nonce_uses = 0
                 for i in range(len(span.entries)):
                     e = span.entries[len(span.entries) - i - 1]
-                    incr += ", addr.%d=%s, last.%d=%s" % (i, e.addr, i, e.last)
+                    incr = ", addr.%d=%s, last.%d=%s" % (i, e.addr, i, e.last)
                     if len(req_buf) + len(incr) >= CTL_MAX_DATA_LEN:
                         break
                     else:
