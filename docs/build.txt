@@ -42,8 +42,7 @@ options. Therefore, it is necessary to configure, build and install
 for each system and version. In almost all cases, these procedures are
 completely automatic, The user types +./waf configure+, +./waf build+,
 and +./waf install+ in that order and the build system does the
-rest. There are some exceptions, as noted below and on the
-link:hints.html[Hints and Kinks] pages.
+rest. There are some exceptions, as noted below.
 
 This page provides only a general introduction to building the code.
 Please consult the INSTALL file in the distribution root for the
@@ -81,9 +80,8 @@ there.
 [[prob]]
 == If You Have Problems ==
 
-If you have problems with your hardware and software environment (e.g.
-operating system-specific issues), browse the link:hints.html[Hints and
-Kinks] pages. For other problems a tutorial on debugging technique is in
+If you have problems with your hardware and software environment,
+a tutorial on debugging technique is in
 the link:debug.html[NTP Debugging Technique] page. A list of important
 system log messages is on the link:msyslog.html[+ntpd+ System Log
 Messages] page.
