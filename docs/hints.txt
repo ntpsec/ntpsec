@@ -1,6 +1,6 @@
 = Hints and Kinks =
 
-image:pic/alice35.gif[image]http://www.eecis.udel.edu/%7emills/pictures.html[from
+image:pic/alice35.gif[image]https://www.eecis.udel.edu/%7emills/pictures.html[from
 'Alice's Adventures in Wonderland', Lewis Carroll]
 
 Mother in law has all the answers.

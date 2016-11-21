@@ -13,7 +13,7 @@ Version Number:  4.0.91
 
 Download Size: 4541953 bytes
 
-Downloaded from: http://www.eecis.udel.edu/~ntp/
+Downloaded from: https://www.eecis.udel.edu/~ntp/
 
 Operating Systems Supported: many
 
