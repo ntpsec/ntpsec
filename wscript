@@ -246,6 +246,11 @@ def ifdex(ctx):
     "Get a report on configuration symbols not accounted for."
     ctx.exec_command("ifdex -X build/config.h -X devel/ifdex-ignores .")
 
+# See https://gitlab.com/esr/loccount
+def loccount(ctx):
+    "Report the SLOC count of the source tree."
+    ctx.exec_command("loccount -x=build .")
+
 # The following sets edit modes for GNU EMACS
 # Local Variables:
 # mode:python
