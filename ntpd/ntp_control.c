@@ -780,7 +780,7 @@ process_control(
 	datanotbinflag = false;
 	datalinelen = 0;
 	datasent = false;
-	datapt = rpkt.u.data;
+	datapt = rpkt.data;
 
 	if ((rbufp->recv_length & 0x3) != 0)
 		DPRINTF(3, ("Control packet length %zd unrounded\n",
@@ -828,7 +828,7 @@ process_control(
 	/*
 	 * Set up translate pointers
 	 */
-	reqpt = (char *)pkt->u.data;
+	reqpt = (char *)pkt->data;
 	reqend = reqpt + req_count;
 
 	/*
@@ -936,7 +936,7 @@ ctl_flushpkt(
 	int totlen;
 	keyid_t keyid;
 
-	dlen = datapt - rpkt.u.data;
+	dlen = datapt - rpkt.data;
 	if (!more && datanotbinflag && dlen + 2 < CTL_MAX_DATA_LEN) {
 		/*
 		 * Big hack, output a trailing \r\n
@@ -954,7 +954,7 @@ ctl_flushpkt(
 	 * which means Python mode 6 clients might actually see the trailing
 	 * garbage.
 	 */
-	memset(rpkt.u.data + sendlen, '\0', sizeof(rpkt.u.data) - sendlen);
+	memset(rpkt.data + sendlen, '\0', sizeof(rpkt.data) - sendlen);
 	
 	/*
 	 * Pad to a multiple of 32 bits
@@ -998,7 +998,7 @@ ctl_flushpkt(
 	 */
 	res_frags++;
 	res_offset += dlen;
-	datapt = rpkt.u.data;
+	datapt = rpkt.data;
 }
 
 
@@ -1014,7 +1014,7 @@ ctl_putdata(
 	)
 {
 	int overhead;
-	const uint8_t * dataend = &rpkt.u.data[CTL_MAX_DATA_LEN];
+	const uint8_t * dataend = &rpkt.data[CTL_MAX_DATA_LEN];
 
 	overhead = 0;
 	if (!bin) {
@@ -3868,12 +3868,12 @@ read_ordlist(
 	cpkt = (struct ntp_control *)&rbufp->recv_pkt;
 	qdata_octets = ntohs(cpkt->count);
 	if (0 == qdata_octets || (ifstatint8_ts == qdata_octets &&
-	    !memcmp(ifstats_s, cpkt->u.data, ifstatint8_ts))) {
+	    !memcmp(ifstats_s, cpkt->data, ifstatint8_ts))) {
 		read_ifstats(rbufp);
 		return;
 	}
 	if (a_r_chars == qdata_octets &&
-	    !memcmp(addr_rst_s, cpkt->u.data, a_r_chars)) {
+	    !memcmp(addr_rst_s, cpkt->data, a_r_chars)) {
 		read_addr_restrictions(rbufp);
 		return;
 	}
