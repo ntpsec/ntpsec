@@ -3286,15 +3286,17 @@ static void read_mru_list(
 	int restrict_mask
 	)
 {
-	const char		nonce_text[] =		"nonce";
-	const char		frags_text[] =		"frags";
-	const char		limit_text[] =		"limit";
-	const char		mincount_text[] =	"mincount";
-	const char		resall_text[] =		"resall";
-	const char		resany_text[] =		"resany";
-	const char		maxlstint_text[] =	"maxlstint";
-	const char		laddr_text[] =		"laddr";
-	const char		resaxx_fmt[] =		"0x%hx";
+	static const char	nulltxt[1] = 		{ '\0' };
+	static const char	nonce_text[] =		"nonce";
+	static const char	frags_text[] =		"frags";
+	static const char	limit_text[] =		"limit";
+	static const char	mincount_text[] =	"mincount";
+	static const char	resall_text[] =		"resall";
+	static const char	resany_text[] =		"resany";
+	static const char	maxlstint_text[] =	"maxlstint";
+	static const char	laddr_text[] =		"laddr";
+	static const char	resaxx_fmt[] =		"0x%hx";
+
 	u_int			limit;
 	u_short			frags;
 	u_short			resall;
@@ -3302,7 +3304,7 @@ static void read_mru_list(
 	int			mincount;
 	u_int			maxlstint;
 	sockaddr_u		laddr;
-	endpt *			lcladr;
+	endpt *                 lcladr;
 	u_int			count;
 	u_int			ui;
 	u_int			uf;
@@ -3311,7 +3313,7 @@ static void read_mru_list(
 	char			buf[128];
 	struct ctl_var *	in_parms;
 	const struct ctl_var *	v;
-	char *			val;
+	const char *		val;
 	const char *		pch;
 	char *			pnonce;
 	int			nonce_valid;
@@ -3363,47 +3365,68 @@ static void read_mru_list(
 	ZERO(last);
 	ZERO(addr);
 
-	while (NULL != (v = ctl_getitem(in_parms, &val)) &&
+	/* have to go through '(void*)' to drop 'const' property from pointer.
+	 * ctl_getitem()' needs some cleanup, too.... perlinger@ntp.org
+	 */
+	while (NULL != (v = ctl_getitem(in_parms, (void*)&val)) &&
 	       !(EOV & v->flags)) {
 		int si;
 
+		if (NULL == val)
+			val = nulltxt;
+
 		if (!strcmp(nonce_text, v->text)) {
-			if (NULL != pnonce)
-				free(pnonce);
-			pnonce = estrdup(val);
+			free(pnonce);
+			pnonce = (*val) ? estrdup(val) : NULL;
 		} else if (!strcmp(frags_text, v->text)) {
-			sscanf(val, "%hu", &frags);
+			if (1 != sscanf(val, "%hu", &frags))
+				goto blooper;
 		} else if (!strcmp(limit_text, v->text)) {
-			sscanf(val, "%u", &limit);
+			if (1 != sscanf(val, "%u", &limit))
+				goto blooper;
 		} else if (!strcmp(mincount_text, v->text)) {
-			if (1 != sscanf(val, "%d", &mincount) ||
-			    mincount < 0)
+			if (1 != sscanf(val, "%d", &mincount))
+				goto blooper;
+			if (mincount < 0)
 				mincount = 0;
 		} else if (!strcmp(resall_text, v->text)) {
-			sscanf(val, resaxx_fmt, &resall);
+			if (1 != sscanf(val, resaxx_fmt, &resall))
+				goto blooper;
 		} else if (!strcmp(resany_text, v->text)) {
-			sscanf(val, resaxx_fmt, &resany);
+			if (1 != sscanf(val, resaxx_fmt, &resany))
+				goto blooper;
 		} else if (!strcmp(maxlstint_text, v->text)) {
-			/* coverity[unchecked_value] */
-			sscanf(val, "%u", &maxlstint);
+			if (1 != sscanf(val, "%u", &maxlstint))
+				goto blooper;
 		} else if (!strcmp(laddr_text, v->text)) {
-			if (decodenetnum(val, &laddr))
-				lcladr = getinterface(&laddr, 0);
+			if (!decodenetnum(val, &laddr))
+				goto blooper;
+			lcladr = getinterface(&laddr, 0);
 		} else if (1 == sscanf(v->text, last_fmt, &si) &&
 			   (size_t)si < COUNTOF(last)) {
-			if (2 == sscanf(val, "0x%08x.%08x", &ui, &uf)) {
-				last[si].l_ui = ui;
-				last[si].l_uf = uf;
-				if (!SOCK_UNSPEC(&addr[si]) &&
-				    si == priors)
-					priors++;
-			}
+			if (2 != sscanf(val, "0x%08x.%08x", &ui, &uf))
+				goto blooper;
+			last[si].l_ui = ui;
+			last[si].l_uf = uf;
+			if (!SOCK_UNSPEC(&addr[si]) && si == priors)
+				priors++;
 		} else if (1 == sscanf(v->text, addr_fmt, &si) &&
 			   (size_t)si < COUNTOF(addr)) {
-			if (decodenetnum(val, &addr[si])
-			    && last[si].l_ui && last[si].l_uf &&
-			    si == priors)
+			if (!decodenetnum(val, &addr[si]))
+				goto blooper;
+			if (last[si].l_ui && last[si].l_uf && si == priors)
 				priors++;
+		} else {
+			DPRINTF(1, ("read_mru_list: invalid key item: '%s' (ignored)\n",
+				    v->text));
+			continue;
+
+		blooper:
+			DPRINTF(1, ("read_mru_list: invalid param for '%s': '%s' (bailing)\n",
+				    v->text, val));
+			free(pnonce);
+			pnonce = NULL;
+			break;
 		}
 	}
 	free_varlist(in_parms);
@@ -3522,7 +3545,6 @@ static void read_mru_list(
 	}
 	ctl_flushpkt(0);
 }
-
 
 /*
  * Send a ifstats entry in response to a "ntpq -c ifstats" request.
