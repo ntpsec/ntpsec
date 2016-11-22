@@ -31,7 +31,7 @@ typedef struct  {
 } lfp_hl;
 
 //----------------------------------------------------------------------
-// reference comparision
+// reference comparison
 // This is implemented as a full signed MP-subtract in 3 limbs, where
 // the operands are zero or sign extended before the subtraction is
 // executed.
@@ -366,7 +366,7 @@ TEST(lfpfunc, FDF_RoundTrip) {
 	// since a l_fp has 64 bits in it's mantissa and a double has
 	// only 54 bits available (including the hidden '1') we have to
 	// make a few concessions on the roundtrip precision. The 'eps()'
-	// function makes an educated guess about the avilable precision
+	// function makes an educated guess about the available precision
 	// and checks the difference in the two 'l_fp' values against
 	// that limit.
 

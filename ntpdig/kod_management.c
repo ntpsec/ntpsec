@@ -275,7 +275,7 @@ kod_init_kod_db(
 
 	if (ferror(db_s) || error) {
 		kod_db_cnt = b;
-		msyslog(LOG_WARNING, "An error occured while parsing the KoD db file %s",
+		msyslog(LOG_WARNING, "An error occurred while parsing the KoD db file %s",
 			db_file);
 		fclose(db_s);
 

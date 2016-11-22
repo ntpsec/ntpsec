@@ -350,7 +350,7 @@ class ReslistSummary:
             return ''
         address += ReslistSummary.__getPrefix(mask)
         flags = variables.get("flags", "?")
-        # reslist reponses are often corrupted
+        # reslist responses are often corrupted
         s = "%10s %s\n           %s\n" % (hits, address, flags)
         # Throw away corrupted entries.  This is a shim - we really
         # want to make ntpd stop generating garbage

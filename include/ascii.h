@@ -58,7 +58,7 @@
  * support PPSAPI, upgrade Copyright to Berkeley style
  *
  * Revision 4.1  1998/07/11 10:05:22  kardel
- * Release 4.0.73d reconcilation
+ * Release 4.0.73d reconciliation
  *
  * Revision 4.0  1998/04/10 19:50:38  kardel
  * Start 4.0 release version numbering

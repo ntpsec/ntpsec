@@ -145,7 +145,7 @@ If you have seen older versions of NTP, this list may have fewer
 entries than you expected.  Support for some very ancient drivers
 (notably, those rendered obsolete by the WWVB modulation change at
 2012-10-29T15:00:00Z) has been dropped in order to reduce our
-maintainence load. So have some other drivers (notably the Austron
+maintenance load. So have some other drivers (notably the Austron
 2200A/2201A) after having been end-of-lifed with no sign of
 aftermarket activity for more than ten years. Several others have been
 removed for relying on obsolete buses or hardware classes that no

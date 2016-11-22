@@ -496,7 +496,7 @@ get_mbg_iono(
  * support PPSAPI, upgrade Copyright to Berkeley style
  *
  * Revision 4.3  1999/02/21 12:17:42  kardel
- * 4.91f reconcilation
+ * 4.91f reconciliation
  *
  * Revision 4.2  1998/06/14 21:09:39  kardel
  * Sun acc cleanup

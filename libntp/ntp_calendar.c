@@ -807,7 +807,7 @@ ntpcal_dayjoin(
  *---------------------------------------------------------------------
  * Convert elapsed years in Era into elapsed days in Era.
  *
- * To accomodate for negative values of years, floor division would be
+ * To accommodate for negative values of years, floor division would be
  * required for all division operations. This can be eased by first
  * splitting the years into full 400-year cycles and years in the
  * cycle. Only this operation must be coded as a full floor division; as

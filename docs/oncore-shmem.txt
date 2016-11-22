@@ -77,7 +77,7 @@ a new message arrives. With the sequence number it is easy to check
 through the shared memory segment for messages that have changed.
 
 The Oncore binary messages are kept in their full length, as described
-in the Reference manual, that is everything from the @@ prefix thru the
+in the Reference manual, that is everything from the @@ prefix through the
 <checksum><CR><LF>.
 
 The data starts at location ONE of SHMEM (NOT location ZERO).
@@ -151,12 +151,12 @@ could be used to open the Shared Memory Segment:
 
         file = "/var/adm/ntpstats/ONCORE";  /* the file name on my ACCESS card */
         if ((fd=open(file, O_RDONLY)) < 0) {
-                fprintf(stderr, "Cant open %s\n", file);
+                fprintf(stderr, "Can't open %s\n", file);
                 exit(1);
         }
 
         if (stat(file, &statbuf) < 0) {
-                fprintf(stderr, "Cant stat %s\n", file);
+                fprintf(stderr, "Can't stat %s\n", file);
                 exit(1);
         }
 

@@ -37,7 +37,7 @@
 #endif /* HAVE_STDATOMIC_H */
 
 /*
- * This driver supports a reference clock attached thru shared memory
+ * This driver supports a reference clock attached through shared memory
  */
 
 /*

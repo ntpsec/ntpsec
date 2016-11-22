@@ -329,7 +329,7 @@ leapsec_query(
 	if (ucmpv64(&ts64, &pt->head.stime) < 0)
 		return fired;
 
-	/* now start to collect the remaing data */
+	/* now start to collect the remaining data */
 	due32 = vint64lo(pt->head.dtime);
 
 	qr->tai_diff  = pt->head.next_tai - pt->head.this_tai;

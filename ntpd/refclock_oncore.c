@@ -105,7 +105,7 @@
  * Reg.Clemens (Mar 2004)
  * Support for interfaces other than PPSAPI removed, for Solaris, SunOS,
  * SCO, you now need to use one of the timepps.h files in the root dir.
- * this driver will 'grab' it for you if you dont have one in /usr/include
+ * this driver will 'grab' it for you if you don't have one in /usr/include
  * --------------------------------------------------------------------------
  * This code uses the two devices
  *	/dev/oncore.serial.n
@@ -300,12 +300,12 @@ struct instance {
 	int8_t	traim;		/* do we have traim? yes UT/VP, M12+T, no BASIC, GT, M12, -1 unknown, 0 no, +1 yes */
 				/* the following 7 are all timing counters */
 	uint8_t	traim_delay;	/* seconds counter, waiting for reply */
-	uint8_t	count;		/* cycles thru Ea before starting */
-	uint8_t	count1; 	/* cycles thru Ea after SS_TESTING, waiting for SS_HW */
-	uint8_t	count2; 	/* cycles thru Ea after count, to check for @@Ea */
-	uint8_t	count3; 	/* cycles thru Ea checking for # channels */
-	uint8_t	count4; 	/* cycles thru leap after Gj to issue Bj */
-	uint8_t	count5; 	/* cycles thru get_timestamp waiting for valid UTC correction */
+	uint8_t	count;		/* cycles through Ea before starting */
+	uint8_t	count1; 	/* cycles through Ea after SS_TESTING, waiting for SS_HW */
+	uint8_t	count2; 	/* cycles through Ea after count, to check for @@Ea */
+	uint8_t	count3; 	/* cycles through Ea checking for # channels */
+	uint8_t	count4; 	/* cycles through leap after Gj to issue Bj */
+	uint8_t	count5; 	/* cycles through get_timestamp waiting for valid UTC correction */
 	uint8_t	count5_set;	/* only set count5 once */
 	uint8_t	counta; 	/* count for waiting on almanac message */
 	uint8_t	pollcnt;
@@ -483,7 +483,7 @@ static uint8_t oncore_cmd_Ag[]  = { 'A', 'g', 0 };				    /* 6/8/12	Satellite Ma
 static uint8_t oncore_cmd_Agx[] = { 'A', 'g', 0xff };				    /* 6/8/12	Satellite Mask Angle: read		*/
 static uint8_t oncore_cmd_As[]  = { 'A', 's', 0,0,0,0, 0,0,0,0, 0,0,0,0, 0 };	    /* 6/8/12	Posn Hold Parameters			*/
 static uint8_t oncore_cmd_Asx[] = { 'A', 's', 0x7f,0xff,0xff,0xff,		    /* 6/8/12	Posn Hold Readback			*/
-					     0x7f,0xff,0xff,0xff,		    /*		 on UT+ this doesnt work with 0xff	*/
+					     0x7f,0xff,0xff,0xff,		    /*		 on UT+ this doesn't work with 0xff	*/
 					     0x7f,0xff,0xff,0xff, 0xff };	    /*		 but does work with 0x7f (sigh).	*/
 static uint8_t oncore_cmd_At0[] = { 'A', 't', 0 };				    /* 6/8	Posn Hold: off				*/
 static uint8_t oncore_cmd_At1[] = { 'A', 't', 1 };				    /* 6/8	Posn Hold: on				*/
@@ -541,7 +541,7 @@ static uint8_t oncore_cmd_Ia[]  = { 'I', 'a' };					    /* 12	Self Test				*/
  *				    the GT had Au,Av, but not As,At
  * This was as of v2.0 of both firmware sets. possibly 1.3 for UT.
  * Bj in UT at v1.3
- * dont see Bd in UT/GT thru 1999
+ * don't see Bd in UT/GT through 1999
  * Gj in UT as of 3.0, 1999 , Bj as of 1.3
  */
 
@@ -629,7 +629,7 @@ oncore_start(
 	oncore_log(instance, LOG_NOTICE, "state = ONCORE_NO_IDEA");
 
 	/* Now open files.
-	 * This is a bit complicated, a we dont want to open the same file twice
+	 * This is a bit complicated, a we don't want to open the same file twice
 	 * (its a problem on some OS), and device2 may not exist for the new PPS
 	 */
 
@@ -677,7 +677,7 @@ oncore_start(
 
 	/* for LINUX the PPS device is the result of a line discipline.
 	   It seems simplest to let an external program create the appropriate
-	   /dev/pps<n> file, and only check (carefully) for its existance here
+	   /dev/pps<n> file, and only check (carefully) for its existence here
 	 */
 	if ((stat1.st_dev == stat2.st_dev) && (stat1.st_ino == stat2.st_ino))	/* same device here */
 		fd2 = fd1;
@@ -1015,10 +1015,10 @@ oncore_init_shmem(
 		}
 	}
 
-	/* we now walk thru the two buffers (shmem_old and buf, soon to become shmem)
+	/* we now walk through the two buffers (shmem_old and buf, soon to become shmem)
 	 * copying the data in shmem_old to buf.
 	 * When we are done we write it out and free both buffers.
-	 * If the structure sizes dont agree, I will not copy.
+	 * If the structure sizes don't agree, I will not copy.
 	 * This could be due to an addition/deletion or a problem with the disk file.
 	 */
 
@@ -1587,15 +1587,15 @@ oncore_get_timestamp(
 	peer = instance->peer;
 
 #if 1
-	/* If we are in SiteSurvey mode, then we are in 3D mode, and we fall thru.
-	 * If we have Finished the SiteSurvey, then we fall thru for the 14/15
+	/* If we are in SiteSurvey mode, then we are in 3D mode, and we fall through.
+	 * If we have Finished the SiteSurvey, then we fall through for the 14/15
 	 *  times we get here in 0D mode (the 1/15 is in 3D for SHMEM).
 	 * This gives good time, which gets better when the SS is done.
 	 */
 
 	if ((instance->site_survey == ONCORE_SS_DONE) && (instance->mode != MODE_0D)) {
 #else
-	/* old check, only fall thru for SS_DONE and 0D mode, 2h45m wait for ticks */
+	/* old check, only fall through for SS_DONE and 0D mode, 2h45m wait for ticks */
 
 	if ((instance->site_survey != ONCORE_SS_DONE) || (instance->mode != MODE_0D)) {
 #endif
@@ -1700,8 +1700,8 @@ oncore_get_timestamp(
 
 	/* now have timestamp in ts */
 	/* add in saw_tooth and offset, these will be ZERO if no TRAIM */
-	/* they will be IGNORED if the PPSAPI cant do PPS_OFFSET/ASSERT/CLEAR */
-	/* we just try to add them in and dont test for that here */
+	/* they will be IGNORED if the PPSAPI can't do PPS_OFFSET/ASSERT/CLEAR */
+	/* we just try to add them in and don't test for that here */
 
 	/* saw_tooth not really necessary if using TIMEVAL */
 	/* since its only precise to us, but do it anyway. */
@@ -1846,7 +1846,7 @@ oncore_get_timestamp(
 		    );
 	}
 
-	/* and some things I dont understand (magic ntp things) */
+	/* and some things I don't understand (magic ntp things) */
 
 	if (!refclock_process(instance->pp)) {
 		refclock_report(instance->peer, CEVNT_BADTIME);
@@ -3039,7 +3039,7 @@ oncore_msg_Cj_init(
 
 	if (instance->posn_set) {
 		oncore_log(instance, LOG_INFO, "Setting Posn from input data");
-		oncore_set_posn(instance);	/* this should print posn indirectly thru the As cmd */
+		oncore_set_posn(instance);	/* this should print posn indirectly through the As cmd */
 	} else	/* must issue an @@At here to check on 6/8 Position Hold, set_posn would have */
 		if (instance->chan != 12)
 			oncore_sendmsg(instance, oncore_cmd_Atx, sizeof(oncore_cmd_Atx));
@@ -3212,7 +3212,7 @@ oncore_msg_Gj(
 
 	UNUSED_ARG(len);
 
-	instance->saw_Gj = 1; /* flag, saw_Gj, dont need to try Bj in check_leap */
+	instance->saw_Gj = 1; /* flag, saw_Gj, don't need to try Bj in check_leap */
 
 	/* print the message to verify whats there */
 
@@ -3432,14 +3432,14 @@ oncore_check_leap_sec(
 	if (instance->Bj_day != instance->BEHa[5]) {	/* do this 1/day */
 		instance->Bj_day = instance->BEHa[5];
 
-		if (instance->saw_Gj < 0) {	/* -1 DONT have Gj use Bj */
+		if (instance->saw_Gj < 0) {	/* -1 DON'T have Gj use Bj */
 			if ((instance->BEHa[4] == 6) || (instance->BEHa[4] == 12))
 				oncore_sendmsg(instance, oncore_cmd_Bj, sizeof(oncore_cmd_Bj));
 			oncore_sendmsg(instance, oncore_cmd_Bl, sizeof(oncore_cmd_Bl));
 			return;
 		}
 
-		if (instance->saw_Gj == 0)	/* 0 is dont know if we have Gj */
+		if (instance->saw_Gj == 0)	/* 0 is don't know if we have Gj */
 			instance->count4 = 1;
 
 		oncore_sendmsg(instance, oncore_cmd_Gj, sizeof(oncore_cmd_Gj));
@@ -3448,13 +3448,13 @@ oncore_check_leap_sec(
 
 	/* Gj works for some 6/8 chan UT and the M12	  */
 	/* if no response from Gj in 5 sec, we try Bj	  */
-	/* which isnt implemented in all the GT/UT either */
+	/* which isn't implemented in all the GT/UT either */
 
 	if (instance->count4) { 	/* delay, waiting for Gj response */
 		if (instance->saw_Gj == 1)
 			instance->count4 = 0;
 		else if (instance->count4++ > 5) {	/* delay, waiting for Gj response */
-			instance->saw_Gj = -1;		/* didnt see it, will use Bj */
+			instance->saw_Gj = -1;		/* didn't see it, will use Bj */
 			instance->count4 = 0;
 			if ((instance->BEHa[4] == 6) || (instance->BEHa[4] == 12)) {
 				oncore_sendmsg(instance, oncore_cmd_Bj, sizeof(oncore_cmd_Bj));

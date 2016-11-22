@@ -75,7 +75,7 @@ mfp_mul(
 	unsigned long result_low, result_high;
 	int low_index = (i+j)/2;      /* formal [0..3]  - index for low long word */
 	int mid_index = 1+low_index;  /* formal [1..4]! - index for high long word
-					 will generate unecessary add of 0 to c[4]
+					 will generate unnecessary add of 0 to c[4]
 					 but save 15 'if (result_high) expressions' */
 	int high_index = 1+mid_index; /* formal [2..5]! - index for high word overflow
 					 - only assigned on overflow (limits range to 2..3) */
@@ -160,7 +160,7 @@ mfp_mul(
  * support PPSAPI, upgrade Copyright to Berkeley style
  *
  * Revision 4.3  1999/02/21 12:17:37  kardel
- * 4.91f reconcilation
+ * 4.91f reconciliation
  *
  * Revision 4.2  1998/12/20 23:45:28  kardel
  * fix types and warnings

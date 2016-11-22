@@ -16,12 +16,12 @@
  * makes use of file descriptors in the lower
  * integer range.  stdio usually will make use
  * of the file descriptors in the range of
- * [0..FOPEN_MAX)
+ * [0..FOPEN_MAX]
  * in order to keep this range clean, for socket
  * file descriptors we attempt to move them above
  * FOPEN_MAX. This is not as easy as it sounds as
  * FOPEN_MAX changes from implementation to implementation
- * and may exceed to current file decriptor limits.
+ * and may exceed the current file descriptor limits.
  * We are using following strategy:
  * - keep a current socket fd boundary initialized with
  *   max(0, min(GETDTABLESIZE() - FD_CHUNK, FOPEN_MAX))

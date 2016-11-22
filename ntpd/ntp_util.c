@@ -563,7 +563,7 @@ record_raw_stats(
  * day (MJD)
  * time (s past midnight)
  * time since reset
- * packets recieved
+ * packets received
  * packets for this host
  * current version
  * old version

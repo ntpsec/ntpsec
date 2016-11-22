@@ -170,7 +170,7 @@ parse_ioread(
 	register unsigned int updated = CVT_NONE;
 	/*
 	 * within STREAMS CSx (x < 8) chars still have the upper bits set
-	 * so we normalize the characters by masking unecessary bits off.
+	 * so we normalize the characters by masking unnecessary bits off.
 	 *
 	 * (ESR, 2015: Probably not necessary since STREAMS support has
 	 * been removed, but harmless.)
@@ -783,10 +783,10 @@ parse_setcs(
  * RECON_4_0_98F
  *
  * Revision 4.13  1999/02/28 11:50:20  kardel
- * (timepacket): removed unecessary code
+ * (timepacket): removed unnecessary code
  *
  * Revision 4.12  1999/02/21 12:17:44  kardel
- * 4.91f reconcilation
+ * 4.91f reconciliation
  *
  * Revision 4.11  1999/02/21 11:09:47  kardel
  * unified debug output

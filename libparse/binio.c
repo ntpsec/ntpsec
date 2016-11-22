@@ -112,7 +112,7 @@ put_msb_long(
 /*
  * binio.c,v
  * Revision 4.2  1999/02/21 12:17:34  kardel
- * 4.91f reconcilation
+ * 4.91f reconciliation
  *
  * Revision 4.1  1998/06/28 16:47:50  kardel
  * added {get,put}_msb_{short,long} functions

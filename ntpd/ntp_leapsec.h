@@ -49,7 +49,7 @@ extern int leapsec_validate(leapsec_reader, void*);
  * The consequence of electric mode is that we do not 'see' the leap
  * second, and no client actions are needed when crossing the leap era
  * boundary.  In manual (aka non-electric) mode the clock will simply
- * step forward untill *we* (that is, this module) tells the client app
+ * step forward until *we* (that is, this module) tells the client app
  * to step at the right time. This needs a slightly different type of
  * processing, so switching between those two modes should not be done
  * too close to a leap second. The transition might be lost in that

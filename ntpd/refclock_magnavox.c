@@ -121,7 +121,7 @@ struct mx4200unit {
 	bool   moving;			/* mobile platform? */
 	u_long sloppyclockflag;		/* driver option flags */
 	bool   known;			/* position known yet? */
-	u_long clamp_time;		/* when to stop postion averaging */
+	u_long clamp_time;		/* when to stop position averaging */
 	u_long log_time;		/* when to print receiver status */
 	pps_handle_t	pps_h;
 	pps_params_t	pps_p;
@@ -749,7 +749,7 @@ mx4200_receive(
 		 * messages and since the receiver outputs status messages by
 		 * default after being reset to factory defaults when sent the
 		 * "$PMVXG,018,C\r\n" message, any status message we get
-		 * indicates the reciever needs to be initialized; thus, it is
+		 * indicates the receiver needs to be initialized; thus, it is
 		 * not necessary to decode the status message.
 		 */
 		if ((cp = mx4200_parse_s(peer)) != NULL) {
@@ -1174,7 +1174,7 @@ mx4200_jday(
  *			*This sentence is intended for post-analysis
  *			applications.*
  *	1 float UTC measurement time (seconds into week)
- *	2 float WGS-84 Lattitude (degrees, minutes)
+ *	2 float WGS-84 Latitude (degrees, minutes)
  *	3  char N=North, S=South
  *	4 float WGS-84 Longitude (degrees, minutes)
  *	5  char E=East, W=West
@@ -1351,13 +1351,13 @@ mx4200_parse_p(
  *			acceptable navigation for the receiver.
  *	1	Constrain Altitude Mode:
  *		0 = Auto.  Constrain altitude (2-D solution) and use
- *		    manual altitude input when 3 sats avalable.  Do
+ *		    manual altitude input when 3 sats available.  Do
  *		    not constrain altitude (3-D solution) when 4 sats
  *		    available.
  *		1 = Always constrain altitude (2-D solution).
  *		2 = Never constrain altitude (3-D solution).
  *		3 = Coast.  Constrain altitude (2-D solution) and use
- *		    last GPS altitude calculation when 3 sats avalable.
+ *		    last GPS altitude calculation when 3 sats available.
  *		    Do not constrain altitude (3-D solution) when 4 sats
  *		    available.
  *	2	Altitude Reference: (always 0 for MX4200)

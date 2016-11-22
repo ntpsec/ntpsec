@@ -195,7 +195,7 @@ is_control_packet(
 	    PKT_MODE(rbufp->recv_space.X_recv_buffer[0]) == MODE_CONTROL;
 }
 
-/* Free a parsed_pkt sturcture allocated by parsed_packet(). In the
+/* Free a parsed_pkt structure allocated by parsed_packet(). In the
    event of a parse error, this function may be called from within
    parse_packet() while the structure is only partially initalized, so
    we must be careful not to dereference uninitialized pointers.  This

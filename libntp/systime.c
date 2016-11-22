@@ -145,10 +145,10 @@ normalize_time(
 	l_fp	lfpfuzz;
 	l_fp	lfpdelta;
 
-        /* First check if here was a Lamport violation, that is, two
+        /* First check if there was a Lamport violation, that is, two
          * successive calls to 'get_ostime()' resulted in negative
          * time difference. Use a few milliseconds of permissible
-         * tolerance -- being too sharp can hurt here. (This is intented
+         * tolerance -- being too sharp can hurt here. (This is intended
          * for the Win32 target, where the HPC interpolation might
          * introduce small steps backward. It should not be an issue on
          * systems where get_ostime() results in a true syscall.)

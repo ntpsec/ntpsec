@@ -388,10 +388,10 @@ cvt_trimtsip(
  * use mmemcpy instead of bcopy
  *
  * Revision 4.9  1999/02/21 12:17:42  kardel
- * 4.91f reconcilation
+ * 4.91f reconciliation
  *
  * Revision 4.8  1998/11/15 20:27:58  kardel
- * Release 4.0.73e13 reconcilation
+ * Release 4.0.73e13 reconciliation
  *
  * Revision 4.7  1998/08/16 18:49:20  kardel
  * (cvt_trimtsip): initial kernel capable version (no more floats)

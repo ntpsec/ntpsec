@@ -551,7 +551,7 @@ true_receive(
 		refclock_report(peer, CEVNT_NOMINAL);
 
 		/*
-		 * We have succedded in answering the poll.
+		 * We have succeeded in answering the poll.
 		 * Turn off the flag and return
 		 */
 		up->polled = false;

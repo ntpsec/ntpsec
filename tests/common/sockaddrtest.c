@@ -20,7 +20,7 @@ bool IsEqualS(const sockaddr_u *expected, const sockaddr_u *actual) {
 				   sizeof(in_addr_t)) == 0) {
 			return true;
 		} else {
-			printf("IPv4 comparision failed, expected: %u (%s) but was: %u (%s)\n", expected->sa4.sin_addr.s_addr, socktoa(expected), actual->sa4.sin_addr.s_addr, socktoa(actual));
+			printf("IPv4 comparison failed, expected: %u (%s) but was: %u (%s)\n", expected->sa4.sin_addr.s_addr, socktoa(expected), actual->sa4.sin_addr.s_addr, socktoa(actual));
 			return false;
 		}
 	} else if (actual->sa.sa_family == AF_INET6) { //IPv6
@@ -29,7 +29,7 @@ bool IsEqualS(const sockaddr_u *expected, const sockaddr_u *actual) {
 				   sizeof(struct in6_addr)) == 0) {
 			return true;
 		} else {
-			printf("IPv6 comparision failed\n");
+			printf("IPv6 comparison failed\n");
 			return false;
 		}
 	} else { // Unknown family

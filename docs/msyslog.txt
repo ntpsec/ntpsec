@@ -134,7 +134,7 @@ meaning should be clear from context.
 +cert_parse: invalid issuer ?+::
 +cert_parse: invalid signature ?+::
 +cert_parse: invalid subject ?+::
-  There is a problem with a certificate. Operation cannot proceed untill
+  There is a problem with a certificate. Operation cannot proceed until
   the problem is fixed. If the certificate is local, it can be
   regenerated using the ntpkeygen program. If it is held somewhere
   else, it must be fixed by the holder.
@@ -144,7 +144,7 @@ meaning should be clear from context.
 +crypto_?: missing challenge+::
 +crypto_?: scheme unavailable+::
   There is a problem with the identity scheme. Operation cannot proceed
-  untill the problem is fixed. Usually errors are due to
+  until the problem is fixed. Usually errors are due to
   misconfiguration or an orphan association. If the latter, +ntpd+ will
   usually time out and recover by itself.
 +crypto_cert: wrong PEM type ?+::

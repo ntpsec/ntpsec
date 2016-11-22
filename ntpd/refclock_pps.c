@@ -31,7 +31,7 @@
  * levels, to the computer. One is to shift to EIA levels and connect to
  * pin 8 (DCD) of a serial port. This requires a level converter and
  * may require a one-shot flipflop to lengthen the pulse. The other is
- * to connect the PPS signal directly to pin 10 (ACK) of a PC paralell
+ * to connect the PPS signal directly to pin 10 (ACK) of a PC parallel
  * port. These methods are architecture dependent.
  *
  * This driver requires the Pulse-per-Second API for Unix-like Operating
