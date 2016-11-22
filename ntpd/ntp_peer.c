@@ -288,62 +288,44 @@ findpeer(
 	findpeer_calls++;
 	srcadr = &rbufp->recv_srcadr;
 	hash = NTP_HASH_ADDR(srcadr);
-	for (p = peer_hash[hash]; p != NULL; p = p->adr_link) {
-		if (ADDR_PORT_EQ(srcadr, &p->srcadr)) {
+        for (p = peer_hash[hash]; p != NULL; p = p->adr_link) {
+                /* [Classic Bug 3072] ensure interface of peer matches */
+                if (p->dstadr != rbufp->dstadr) continue;
 
-			/*
-			 * if the association matching rules determine
-			 * that this is not a valid combination, then
-			 * look for the next valid peer association.
-			 */
-			*action = MATCH_ASSOC(p->hmode, pkt_mode);
+                /* ensure peer source address matches */
+                if (!ADDR_PORT_EQ(srcadr, &p->srcadr)) continue;
 
-			/*
-			 * A response to our manycastclient solicitation
-			 * might be misassociated with an ephemeral peer
-			 * already spun for the server.  If the packet's
-			 * org timestamp doesn't match the peer's, check
-			 * if it matches the ACST prototype peer's.  If
-			 * so it is a redundant solicitation response,
-			 * return AM_ERR to discard it.  [Bug 1762]
-			 */
-			if (MODE_SERVER == pkt_mode &&
-			    AM_PROCPKT == *action) {
-				pkt = &rbufp->recv_pkt;
-				NTOHL_FP(&pkt->org, &pkt_org);
-				if (!L_ISEQU(&p->org, &pkt_org) &&
-				    findmanycastpeer(rbufp))
-					*action = AM_ERR;
-			}
+                /* If the association matching rules determine that this
+                 * is not a valid combination, then look for the next
+                 * valid peer association.
+                 */
+                *action = MATCH_ASSOC(p->hmode, pkt_mode);
 
-			/*
-			 * if an error was returned, exit back right
-			 * here.
-			 */
-			if (*action == AM_ERR)
-				return NULL;
+                /* A response to our manycastclient solicitation might
+                 * be misassociated with an ephemeral peer already spun
+                 * for the server.  If the packet's org timestamp
+                 * doesn't match the peer's, check if it matches the
+                 * ACST prototype peer's.  If so it is a redundant
+                 * solicitation response, return AM_ERR to discard it.
+                 * [Bug 1762]
+                 */
+                if (MODE_SERVER == pkt_mode && AM_PROCPKT == *action) {
+                        pkt = &rbufp->recv_pkt;
+                        NTOHL_FP(&pkt->org, &pkt_org);
+                        if (!L_ISEQU(&p->org, &pkt_org) &&
+                            findmanycastpeer(rbufp))
+                                *action = AM_ERR;
+                }
 
-			/*
-			 * if a match is found, we stop our search.
-			 */
-			if (*action != AM_NOMATCH)
-				break;
-		}
-	}
+                /* If an error was returned, exit back right here. */
+                if (*action == AM_ERR) return NULL;
 
-	/*
-	 * If no matching association is found
-	 */
-	if (NULL == p) {
-		*action = MATCH_ASSOC(NO_PEER, pkt_mode);
-	} else if (p->dstadr != rbufp->dstadr) {
-		set_peerdstadr(p, rbufp->dstadr);
-		if (p->dstadr == rbufp->dstadr) {
-			DPRINTF(1, ("Changed %s local address to match response\n",
-				    socktoa(&p->srcadr)));
-			return findpeer(rbufp, pkt_mode, action);
-		}
-	}
+                /* If a match is found, we stop our search. */
+                if (*action != AM_NOMATCH) break;
+        }
+
+	/* If no matching association is found */
+	if (NULL == p) *action = MATCH_ASSOC(NO_PEER, pkt_mode);
 	return p;
 }
 
@@ -554,7 +536,7 @@ set_peerdstadr(
 {
 	struct peer *	unlinked;
 
-	if (p->dstadr == dstadr)
+	if (p == NULL || p->dstadr == dstadr)
 		return;
 
 	/*
