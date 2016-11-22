@@ -158,7 +158,7 @@ gitRepo() {
 		VCS_FULL_HASH="$(git rev-parse HEAD)"
 
 		# The short hash
-		VCS_SHORT_HASH="$(echo "${VCS_FULL_HASH}" | cut -b 1-7)"
+		VCS_SHORT_HASH="$(git rev-parse --short "${VCS_FULL_HASH}")"
 	else
 		# The git-svn revision number
 		VCS_FULL_HASH="$(git svn find-rev HEAD)"
