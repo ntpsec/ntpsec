@@ -1592,4 +1592,6 @@ if __name__ == '__main__':
         raise SystemExit(0)
     except KeyboardInterrupt:
         interpreter.say("\n")
+    except IOError:
+        print("Bailing out...")
 # end
