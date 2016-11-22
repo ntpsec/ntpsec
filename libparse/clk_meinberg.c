@@ -42,7 +42,7 @@
  * <D>             = 'S' if daylight saving time is active
  *                 = 'U' if time is represented in UTC
  *                 = ' ' if no special condition exists
- * <A>             = '!' during the hour preceeding an daylight saving time
+ * <A>             = '!' during the hour preceding a daylight saving time
  *                       start/end change
  *                 = 'A' leap second insert warning
  *                 = ' ' if no special condition exists
@@ -62,7 +62,7 @@
  *                   '#' if not PZF sychronisation available else ' ' for PZF 535/509
  * <F>             = '*' if time comes from internal quartz else ' '
  * <D>             = 'S' if daylight saving time is active else ' '
- * <A>             = '!' during the hour preceeding an daylight saving time
+ * <A>             = '!' during the hour preceding a daylight saving time
  *                       start/end change
  * <L>             = 'A' LEAP second announcement
  * <R>             = 'R' "call bit" used to signalize irregularities in the control facilities,
@@ -90,7 +90,7 @@
  * <S>             = '#' if never synced since powerup else ' '
  * <F>             = '*' if position is not confirmed else ' '
  * <D>             = 'S' if daylight saving time is active else ' '
- * <A>             = '!' during the hour preceeding an daylight saving time
+ * <A>             = '!' during the hour preceding a daylight saving time
  *                       start/end change
  * <L>             = 'A' LEAP second announcement
  * <R>             = 'R' "call bit" used to signalize irregularities in the control facilities,
@@ -291,7 +291,7 @@ cvt_meinberg(
 		/*
 		 * in the extended timecode format we have also the
 		 * indication that the timecode is in UTC
-		 * for compatibilty reasons we start at the USUAL
+		 * for compatibility reasons we start at the USUAL
 		 * offset (POWERUP flag) and know that the UTC indication
 		 * is the character before the powerup flag
 		 */

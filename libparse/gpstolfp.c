@@ -41,7 +41,7 @@ gpstolfp(
  * (GPSWRAP): update GPS rollover to 990 weeks
  *
  * Revision 4.2  1998/07/11 10:05:25  kardel
- * Release 4.0.73d reconcilation
+ * Release 4.0.73d reconciliation
  *
  * Revision 4.1  1998/06/28 16:47:15  kardel
  * added gpstolfp() function

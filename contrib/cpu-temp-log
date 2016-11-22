@@ -4,7 +4,7 @@
 Usage: cpu-temper-log
 
 Reads 'sensors -u' for temperature data.  Writes all temperatures found
-to stdout.  One temp per line, preceeded by the unix UTC time in seconds,
+to stdout.  One temp per line, preceded by the unix UTC time in seconds,
 and an identifier.
 
 Before you can use this utility lm_sensors must be installed and

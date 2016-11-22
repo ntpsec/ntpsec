@@ -331,7 +331,7 @@ struct parseunit
 	u_long        pollneeddata; 	/* current_time(!=0) for receive sample expected in PPS mode */
 	u_short	      lastformat;       /* last format used */
 	u_long        lastsync;		/* time (ntp) when clock was last seen fully synchronized */
-        u_long        maxunsync;        /* max time in seconds a receiver is trusted after loosing synchronisation */
+        u_long        maxunsync;        /* max time in seconds a receiver is trusted after losing synchronisation */
         double        ppsphaseadjust;   /* phase adjustment of PPS time stamp */
         u_long        lastmissed;       /* time (ntp) when poll didn't get data (powerup heuristic) */
 	u_long        ppsserial;        /* magic cookie for ppsclock serials (avoids stale ppsclock data) */
@@ -376,7 +376,7 @@ typedef struct poll_info
 
 #define DCF_ID		"DCF"	/* generic DCF */
 #define DCF_A_ID	"DCFa"	/* AM demodulation */
-#define DCF_P_ID	"DCFp"	/* psuedo random phase shift */
+#define DCF_P_ID	"DCFp"	/* pseudo random phase shift */
 #define GPS_ID		"GPS"	/* GPS receiver */
 #define MSF_ID		"MSF"	/* MSF receiver */
 
@@ -2942,7 +2942,7 @@ parse_poll(
 	    ((int)(current_time - parse->pollneeddata) > (1<<(max(min(parse->peer->hpoll, parse->peer->ppoll), parse->peer->minpoll)))))
 	{
 		/*
-		 * start worrying when exceeding a poll inteval
+		 * start worrying when exceeding a poll interval
 		 * bad news - didn't get a response last time
 		 */
 		parse->lastmissed = current_time;
@@ -3355,7 +3355,7 @@ parse_process(
 		char tmp1[200];
 		char tmp2[200];
 		/*
-		 * something happend - except for PPS events
+		 * something happened - except for PPS events
 		 */
 
 		(void) parsestate(parsetime->parse_state, tmp1, sizeof(tmp1));
@@ -5526,7 +5526,7 @@ rawdcf_init_2(
  * support PPSAPI, upgrade Copyright to Berkeley style
  *
  * Revision 4.43  2001/05/26 22:53:16  kardel
- * 20010526 reconcilation
+ * 20010526 reconciliation
  *
  * Revision 4.42  2000/05/14 15:31:51  kardel
  * PPSAPI && RAWDCF modemline support
@@ -5544,7 +5544,7 @@ rawdcf_init_2(
  * support PPSAPI
  *
  * Revision 4.37  2000/03/05 20:11:14  kardel
- * 4.0.99g reconcilation
+ * 4.0.99g reconciliation
  *
  * Revision 4.36  1999/11/28 17:18:20  kardel
  * disabled burst mode
@@ -5598,7 +5598,7 @@ rawdcf_init_2(
  * use new autoconfig symbols
  *
  * Revision 4.21  1999/02/21 12:18:13  kardel
- * 4.91f reconcilation
+ * 4.91f reconciliation
  *
  * Revision 4.20  1999/02/21 10:53:36  kardel
  * initial Linux PPSkit version
@@ -5614,7 +5614,7 @@ rawdcf_init_2(
  * is not defined
  *
  * Revision 4.16  1998/11/15 20:28:17  kardel
- * Release 4.0.73e13 reconcilation
+ * Release 4.0.73e13 reconciliation
  *
  * Revision 4.15  1998/08/22 21:56:08  kardel
  * fixed IO handling for non-STREAM IO
@@ -5632,7 +5632,7 @@ rawdcf_init_2(
  * Trimble TSIP support
  *
  * Revision 4.12  1998/07/11 10:05:34  kardel
- * Release 4.0.73d reconcilation
+ * Release 4.0.73d reconciliation
  *
  * Revision 4.11  1998/06/14 21:09:42  kardel
  * Sun acc cleanup

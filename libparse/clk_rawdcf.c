@@ -30,7 +30,7 @@
  *	time marks of a 100ms duration constitute a logical 0
  *	time marks of a 200ms duration constitute a logical 1
  * FM:
- *	see the spec. (basically a (non-)inverted psuedo random phase shift)
+ *	see the spec. (basically a (non-)inverted pseudo random phase shift)
  *
  * Encoding:
  * Second	Contents
@@ -331,7 +331,7 @@ cvt_rawdcf(
 	{
 		unsigned int ch = *s ^ 0xFF;
 		/*
-		 * these lines are left as an excercise to the reader 8-)
+		 * these lines are left as an exercise to the reader 8-)
 		 */
 		if (!((ch+1) & ch) || !*s)
 		{

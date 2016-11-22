@@ -1,4 +1,4 @@
-// Auxilary association commands - included twice 
+// Auxiliary association commands - included twice
 
 +manycastserver+ _address..._::
   This command enables reception of manycast client messages to the

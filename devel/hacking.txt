@@ -230,7 +230,7 @@ that's easy for both human eyes and programs to parse, do that.
 Besides being simple, formats like these are easily handled by either
 Python or shellscripts.
 
-Such simplicity is often difficult or impractical for heterogenous
+Such simplicity is often difficult or impractical for heterogeneous
 data that needs to be both grouped and labeled, so we have another
 convention for those cases. Here it is:
 
@@ -336,7 +336,7 @@ that appears on a man page.
 
 === Version string ===
 
-We use a varient of three part Semantic Versioning, of the form X.Y.Z.
+We use a variant of three part Semantic Versioning, of the form X.Y.Z.
 X, Y, and Z are non-negative decimal integers.
 
 X is the "major" version number.

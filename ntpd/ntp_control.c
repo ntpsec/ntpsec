@@ -2539,7 +2539,7 @@ control_unspec(
 
 	/*
 	 * What is an appropriate response to an unspecified op-code?
-	 * I return no errors and no data, unless a specified assocation
+	 * I return no errors and no data, unless a specified association
 	 * doesn't exist.
 	 */
 	if (res_associd) {
@@ -2580,7 +2580,7 @@ read_status(
 #endif
 	/*
 	 * Two choices here. If the specified association ID is
-	 * zero we return all known assocation ID's.  Otherwise
+	 * zero we return all known association ID's.  Otherwise
 	 * we return a bunch of stuff about the particular peer.
 	 */
 	if (res_associd) {
@@ -3188,7 +3188,7 @@ send_mru_entry(
  * from the client snapshot at the end, but so far that doesn't seem
  * useful.
  *
- * To accomodate the changing MRU list, the starting point for requests
+ * To accommodate the changing MRU list, the starting point for requests
  * after the first request is supplied as a series of last seen
  * timestamps and associated addresses, the newest ones the client has
  * received.  As long as at least one of those entries hasn't been

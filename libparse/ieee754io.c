@@ -556,19 +556,19 @@ int main(
  * support PPSAPI, upgrade Copyright to Berkeley style
  *
  * Revision 4.8  1999/02/21 12:17:36  kardel
- * 4.91f reconcilation
+ * 4.91f reconciliation
  *
  * Revision 4.7  1999/02/21 11:26:03  kardel
  * renamed index to fieldindex to avoid index() name clash
  *
  * Revision 4.6  1998/11/15 20:27:52  kardel
- * Release 4.0.73e13 reconcilation
+ * Release 4.0.73e13 reconciliation
  *
  * Revision 4.5  1998/08/16 19:01:51  kardel
  * debug information only compile for LIBDEBUG case
  *
  * Revision 4.4  1998/08/09 09:39:28  kardel
- * Release 4.0.73e2 reconcilation
+ * Release 4.0.73e2 reconciliation
  *
  * Revision 4.3  1998/06/13 11:56:19  kardel
  * disabled putbute() for the time being

@@ -152,7 +152,7 @@ as authors of this work.
 * mailto:shields@tembel.org[Michael Shields <shields@tembel.org>]
   USNO clock driver
 * mailto:harlan@pfcs.com[Harlan Stenn <harlan@pfcs.com>]
-  General maintainance (see the ChangeLog)
+  General maintenance (see the ChangeLog)
 * mailto:ajit@ee.udel.edu[Ajit Thyagarajan <ajit@ee.udel.edu>]IP
   multicast/anycast support
 * mailto:brian.utterback@oracle.com[Brian Utterback

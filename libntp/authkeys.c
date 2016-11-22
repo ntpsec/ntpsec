@@ -364,7 +364,7 @@ authhavekey(
 	}
 
 	/*
-	 * Seach the bin for the key. If found and the key type
+	 * Search the bin for the key. If found and the key type
 	 * is zero, somebody marked it trusted without specifying
 	 * a key or key type. In this case consider the key missing.
 	 */

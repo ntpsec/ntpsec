@@ -716,7 +716,7 @@ newpeer(
 
 	/*
 	 * Allocate a new peer structure. Some dirt here, since some of
-	 * the initialization requires knowlege of our system state.
+	 * the initialization requires knowledge of our system state.
 	 */
 	if (peer_free_count == 0)
 		getmorepeermem();

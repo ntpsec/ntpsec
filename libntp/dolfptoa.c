@@ -108,7 +108,7 @@ dolfptoa(
 				carry = false;
 		}
 
-		if (tp < cp) /* rounding from 999 to 1000 or similiar? */
+		if (tp < cp) /* rounding from 999 to 1000 or similar? */
 			cp = tp;
 	}
 

@@ -1,6 +1,6 @@
 /* Copyright 2008, Red Hat, Inc.
    Copyright 2008, Andrew Tridgell.
-   Licenced under the same terms as NTP itself. 
+   Licensed under the same terms as NTP itself.
  */
 #include <config.h>
 

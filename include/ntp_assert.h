@@ -88,7 +88,7 @@ extern void calysto_assert(unsigned char cnd); /* check whether this holds */
 
 /*
  * We initially used NTP_REQUIRE() instead of REQUIRE() etc, but that
- * is unneccesarily verbose, as libisc use of REQUIRE() etc shows.
+ * is unnecessarily verbose, as libisc use of REQUIRE() etc shows.
  */
 #define	NTP_REQUIRE(x)		REQUIRE(x)
 #define	NTP_INSIST(x)		INSIST(x)

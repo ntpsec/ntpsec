@@ -247,7 +247,7 @@ inp_hopf6021(
  * RECON_4_0_98F
  *
  * Revision 4.6  1998/11/15 20:27:57  kardel
- * Release 4.0.73e13 reconcilation
+ * Release 4.0.73e13 reconciliation
  *
  * Revision 4.5  1998/06/14 21:09:35  kardel
  * Sun acc cleanup

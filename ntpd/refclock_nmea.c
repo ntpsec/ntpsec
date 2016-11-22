@@ -58,7 +58,7 @@
  * set, kernel hardpps is enabled.
  *
  * GPS sentences other than RMC (the default) may be enabled by setting
- * the relevent bits of 'mode' in the server configuration line
+ * the relevant bits of 'mode' in the server configuration line
  * refclock u mode X
  * 
  * bit 0 - enables RMC (1)
@@ -658,7 +658,7 @@ nmea_timer(
  * move the receive time stamp to the corresponding edge. This can warp
  * into future, if a transmission delay of more than 500ms is not
  * compensated with a corresponding fudge time2 value, because then the
- * next PPS edge is nearer than the last. (Similiar to what the PPS
+ * next PPS edge is nearer than the last. (Similar to what the PPS
  * driver does, but we deal with full time stamps here, not just phase
  * shift information.) Likewise, a negative fudge time2 value must be
  * used if the reference time stamp correlates with the *following* PPS
@@ -672,7 +672,7 @@ nmea_timer(
  * close as possible.
  *
  * It should also be noted that the typical use case is matching to the
- * preceeding edge, as most units relate their sentences to the current
+ * preceding edge, as most units relate their sentences to the current
  * second.
  *
  * The function returns PPS_RELATE_NONE (0) if no PPS edge correlation
@@ -1389,7 +1389,7 @@ field_parse(
  * -------------------------------------------------------------------
  * Wipe (that is, overwrite with '_') data fields and the checksum in
  * the last timecode.  The list of field indices is given as integers
- * in a varargs list, preferrably in ascending order, in any case
+ * in a varargs list, preferably in ascending order, in any case
  * terminated by a negative field index.
  *
  * A maximum number of 8 fields can be overwritten at once to guard
@@ -1670,8 +1670,8 @@ unfold_day(
  * -------------------------------------------------------------------
  * A 2-digit year is expanded into full year spec around the year found
  * in 'jd->year'. This should be in +79/-19 years around the system time,
- * or the result will be off by 100 years.  The assymetric behaviour was
- * chosen to enable inital sync for systems that do not have a
+ * or the result will be off by 100 years.  The asymmetric behaviour was
+ * chosen to enable initial sync for systems that do not have a
  * battery-backup clock and start with a date that is typically years in
  * the past.
  *
@@ -1829,7 +1829,7 @@ eval_gps_time(
 	 * division with floor correction is overkill here; a simple
 	 * addition or subtraction step is sufficient. Using WHILE loops
 	 * gives the right result even if the offset exceeds one day,
-	 * which is NOT what it's intented for! */
+	 * which is NOT what it's intended for! */
 	while (gps_sec >= SECSPERDAY) {
 		gps_sec -= SECSPERDAY;
 		gps_day += 1;

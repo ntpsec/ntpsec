@@ -55,7 +55,7 @@
 #define JUPITER_I_ALT		1219	/* user-entered altitude input */
 #define JUPITER_I_PLAT		1220	/* application platform control */
 #define JUPITER_I_NAV		1221	/* nav configuration */
-#define JUPITER_I_TEST		1300	/* preform built-in test command */
+#define JUPITER_I_TEST		1300	/* perform built-in test command */
 #define JUPITER_I_RESTART	1303	/* restart command */
 #define JUPITER_I_PORT		1330	/* serial port com parameters */
 #define JUPITER_I_PROTO		1331	/* message protocol control */

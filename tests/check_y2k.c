@@ -21,7 +21,7 @@
 	specific directory, this check goes outside the scope of the local
 	directory.  It's not a perfect world (besides, there is a lot of
 	interdependence here, and it really needs to be tested in
-	a controled order).
+	a controlled order).
    */
 
 /* { definitions lifted from ntpd.c to allow us to complie with 
@@ -242,7 +242,7 @@ main( void )
   }
 
     puts( " include/ntp_calendar.h" );
-  {		/* I belive this is good, but just to be sure... */
+  {		/* I believe this is good, but just to be sure... */
 
 	/* we are testing this #define */
 #define is_leapyear(y) (y%4 == 0 && !(y%100 == 0 && !(y%400 == 0)))

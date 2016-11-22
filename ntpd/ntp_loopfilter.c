@@ -315,7 +315,7 @@ ntp_adjtime_error_handler(
 # warning TIME_OOP is not defined
 #endif
 #ifdef TIME_WAIT
-	    case TIME_WAIT: /* 4: leap second has occured */
+	    case TIME_WAIT: /* 4: leap second has occurred */
 		msyslog(LOG_INFO, "kernel reports leap second has occurred");
 	    break;
 #else
@@ -534,7 +534,7 @@ local_clock(
 	 * The huff-n'-puff filter finds the lowest delay in the recent
 	 * interval. This is used to correct the offset by one-half the
 	 * difference between the sample delay and minimum delay. This
-	 * is most effective if the delays are highly assymetric and
+	 * is most effective if the delays are highly asymmetric and
 	 * clockhopping is avoided and the clock frequency wander is
 	 * relatively small.
 	 */
@@ -561,7 +561,7 @@ local_clock(
 	 * system reacts to large phase and frequency excursion. There
 	 * are two main regimes: when the offset exceeds the step
 	 * threshold (128 ms) and when it does not. Under certain
-	 * conditions updates are suspended until the stepout theshold
+	 * conditions updates are suspended until the stepout threshold
 	 * (900 s) is exceeded. See the documentation on how these
 	 * thresholds interact with commands and command line options.
 	 *
