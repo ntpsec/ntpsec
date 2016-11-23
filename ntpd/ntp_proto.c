@@ -787,6 +787,7 @@ receive(
 				peer->badauth++;
 				peer->flash |= BOGON5;
 			}
+			goto done;
 		} else {
 			authenticated = true;
 		}
@@ -2228,6 +2229,7 @@ peer_xmit(
 	sendpkt(&peer->srcadr, peer->dstadr, sys_ttl[peer->ttl], &xpkt,
 	    sendlen);
 	peer->sent++;
+        peer->outcount++;
 	peer->throttle += (1 << peer->minpoll) - 2;
 #ifdef DEBUG
 	if (debug)
