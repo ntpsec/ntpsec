@@ -14,6 +14,7 @@
 #include "ntp_fp.h"
 #include "ntp_stdlib.h"
 #include "ntp_random.h"
+#include "ntp_syslog.h"
 #include "timespecops.h"
 
 #include "ntp_config.h"
@@ -39,6 +40,19 @@ ntpc_setprogname(PyObject *self, PyObject *args)
     if (!PyArg_ParseTuple(args, "s", &s))
 	return NULL;
     progname = strdup(s);
+
+    /*
+     * This function is only called from clients.  Therefore
+     * log to stderr rather than syslog, and suppress logfile
+     * impedimenta.  If we ever want finer-grained control, that
+     * will be easily implemented with additional arguments.
+     */
+    syslogit = false;	/* don't log messages to syslog */
+    termlogit = true;	/* duplicate to stdout/err */
+    hashprefix = false;	/* prefix with hash, for replay use */
+    termlogit_pid = false;
+    msyslog_include_timestamp = false;
+
     Py_RETURN_NONE;
 }
 
