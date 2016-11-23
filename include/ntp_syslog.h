@@ -12,7 +12,6 @@
 
 extern bool	syslogit;	/* log to syslogit */
 extern bool	termlogit;	/* duplicate to stdout/err */
-extern bool	hashprefix;	/* prefix with comment leader */
 extern bool	termlogit_pid;
 extern bool	msyslog_include_timestamp;
 extern FILE *	syslog_file;	/* if syslogit is false, log to

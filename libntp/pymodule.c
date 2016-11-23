@@ -49,7 +49,6 @@ ntpc_setprogname(PyObject *self, PyObject *args)
      */
     syslogit = false;	/* don't log messages to syslog */
     termlogit = true;	/* duplicate to stdout/err */
-    hashprefix = false;	/* prefix with hash, for replay use */
     termlogit_pid = false;
     msyslog_include_timestamp = false;
 
