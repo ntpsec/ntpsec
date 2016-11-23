@@ -40,59 +40,12 @@ from __future__ import print_function, division
 
 import sys, socket, select, struct, time, getopt, datetime 
 
-# This code can run with a large subset of its capabilities
-# even when the ntp library is not available.
 try:
     import ntp.packet
     import ntp.util
 except:
     sys.stderr.write("ntpdig: can't find Python NTP library -- check PYTHONPATH.\n")
     sys.exit(1)
-
-class SNTPPacket:
-    @staticmethod
-    def rescale(t):
-        "Scale from NTP time to POSIX time"
-        # Note: assumes we're in the same NTP era as the transmitter...
-        UNIX_EPOCH = 2208988800
-        return (t * 2**-32) - UNIX_EPOCH 
-    def __init__(self, data):
-        self.hostname = None
-        self.resolved = None
-        self.received = time.time()
-        self.data = data
-        (self.livnm, self.stratum, self.poll, self.precision,
-            self.root_delay, self.root_dispersion,
-            self.reference_id, self.reference_timestamp,
-            self.origin_timestamp, self.receive_timestamp,
-            self.transmit_timestamp) = struct.unpack("!BBBBIIIQQQQ", data[:48])
-        self.root_delay *= 2**-16
-        self.root_dispersion *= 2**-16
-        self.reference_timestamp = SNTPPacket.rescale(self.reference_timestamp)
-        self.origin_timestamp = SNTPPacket.rescale(self.origin_timestamp)
-        self.receive_timestamp = SNTPPacket.rescale(self.receive_timestamp)
-        self.transmit_timestamp = SNTPPacket.rescale(self.transmit_timestamp)
-        if len(data) > 192:
-            self.extension_data = data[-12:192]
-            self.auth_data = data[-12:]
-        else:
-            self.extension_data = None
-            self.auth_data = None
-        self.trusted = True
-    def delta(self):
-        return self.root_delay
-    def epsilon(self):
-        return self.root_dispersion
-    def synchd(self):
-        "Synchronization distance, estimates worst-case error in seconds"
-        # This is "lambda" in NTP-speak, but that's a Python keyword 
-        return abs(self.delta() - self.epsilon())
-    def adjust(self):
-        "Adjustment implied by this packet."
-        # FIXME: Clip low digits according to precision
-        return self.received - self.transmit_timestamp
-    def leap(self):
-        return ("no-leap", "add-leap", "del-leap", "unsync")[((self.livnm) >> 6) & 0x3]
 
 def queryhost(server, concurrent, timeout=5, port=123):
     "Query IP addresses associated with a specified host."
@@ -140,7 +93,7 @@ def queryhost(server, concurrent, timeout=5, port=123):
                     log("MAC verification on reply from %s failed" % sockaddr[0])
                 elif debug:
                     log("MAC verification on reply from %s succeeded" % sockaddr[0])
-            pkt = SNTPPacket(d)
+            pkt = ntp.packet.SyncPacket(d)
             pkt.hostname = server
             pkt.resolved = sockaddr[0]
             packets.append(pkt)

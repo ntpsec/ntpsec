@@ -229,7 +229,7 @@ class Packet:
     @staticmethod
     def PKT_LI_VN_MODE(l, v, m):  return ((((l) & 3) << 6) | Packet.VN_MODE((v), (m)))
 
-    def __init__(self, session, version, mode):
+    def __init__(self, mode=MODE_CLIENT, version=NTP_VERSION, session=None):
         self.session = session  # Where to get session context
         self.li_vn_mode = 0     # leap, version, mode (uint8_t)
         # Subclasses have variable fields here
@@ -255,9 +255,12 @@ class Packet:
 
 class SyncPacket(Packet):
     "Mode 1-5 time-synchronization packet, including SNTP."
+    format = "!BBBBIIIQQQQ"
+    HEADER_LEN = 48
+    UNIX_EPOCH = 2208988800	# Midnight 1 Jan 1970 in secs since NTP epoch
 
-    def __init__(self, session=None):
-        Packet.__init__(self, session, session.pktversion, MODE_CONTROL)
+    def __init__(self, data= None):
+        Packet.__init__(self)
         self.status = 0         # status word for association (uint16_t)
         self.stratum = 0
         self.poll = 0
@@ -270,25 +273,64 @@ class SyncPacket(Packet):
         self.receive_timestamp = 0
         self.transmit_timestamp = 0
         self.extension = ''
-    format = "!BBBBIIIQQQQ"
-    HEADER_LEN = 48
-    UNIX_EPOCH = 2208988800	# Midnight 1 Jan 1970 in secs since NTP epoch
+        self.data = data
+        if self.data is not None:
+            self.analyze(self.data)
+            self.posixize()
+        self.hostname = None
+        self.resolved = None
+        self.received = time.time()
+        if len(self.data) > 192:
+            self.extension_data = data[-12:192]
+            self.auth_data = data[-12:]
+        else:
+            self.extension_data = None
+            self.auth_data = None
+        self.trusted = True
 
     def analyze(self, rawdata):
         (self.li_vn_mode,
          self.stratum,
          self.poll,
          self.precision,
-         self.rootdelay,
-         self.rootdispersion,
+         self.root_delay,
+         self.root_dispersion,
          self.refid,
          self.reference_timestamp,
          self.origin_timestamp,
          self.receive_timestamp,
          self.transmit_timestamp) \
-         = struct.unpack(ControlPacket.format, rawdata[:SyncPacket.HEADER_LEN])
+         = struct.unpack(SyncPacket.format, rawdata[:SyncPacket.HEADER_LEN])
         self.data = rawdata[SyncPacket.HEADER_LEN:]
 
+    @staticmethod
+    def ntp_to_posix(t):
+        "Scale from NTP time to POSIX time"
+        # Note: assumes we're in the same NTP era as the transmitter...
+        return (t * 2**-32) - SyncPacket.UNIX_EPOCH 
+
+    def posixize(self):
+        self.root_delay *= 2**-16
+        self.root_dispersion *= 2**-16
+        self.reference_timestamp = SyncPacket.ntp_to_posix(self.reference_timestamp)
+        self.origin_timestamp = SyncPacket.ntp_to_posix(self.origin_timestamp)
+        self.receive_timestamp = SyncPacket.ntp_to_posix(self.receive_timestamp)
+        self.transmit_timestamp = SyncPacket.ntp_to_posix(self.transmit_timestamp)
+
+    def delta(self):
+        return self.root_delay
+    def epsilon(self):
+        return self.root_dispersion
+    def synchd(self):
+        "Synchronization distance, estimates worst-case error in seconds"
+        # This is "lambda" in NTP-speak, but that's a Python keyword 
+        return abs(self.delta() - self.epsilon())
+    def adjust(self):
+        "Adjustment implied by this packet."
+        # FIXME: Clip low digits according to precision
+        return self.received - self.transmit_timestamp
+    def leap(self):
+        return ("no-leap", "add-leap", "del-leap", "unsync")[((self.li_vn_mode) >> 6) & 0x3]
     def flatten(self):
         "Flatten the packet into an octet sequence."
         body = struct.pack(ControlPacket.format,
@@ -304,15 +346,6 @@ class SyncPacket(Packet):
                            self.receive_timestamp,
                            self.transmit_timestamp)
         return body + self.extension
-
-    def send(self):
-        self.session.sendpkt(self.flatten())
-
-    @staticmethod
-    def ntp_to_posix(t):
-        "Scale from NTP time to POSIX time"
-        # Note: assumes we're in the same NTP era as the transmitter...
-        return (t * 2**-32) - UNIX_EPOCH 
 
     def refid_octets(self):
         "Analyze refid into octets."
@@ -336,7 +369,9 @@ class ControlPacket(Packet):
     "Mode 6 request/response."
 
     def __init__(self, session, opcode=0, associd=0, qdata=''):
-        Packet.__init__(self, session, session.pktversion, MODE_CONTROL)
+        Packet.__init__(self, mode=MODE_CONTROL,
+                        version=session.pktversion,
+                        session=session)
         self.r_e_m_op = opcode  # ntpq operation code
         self.sequence = 1       # sequence number of request (uint16_t)
         self.status = 0         # status word for association (uint16_t)
