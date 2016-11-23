@@ -66,7 +66,11 @@ The RFC5905 diagram is slightly out of date in that the digest header assumes
 a 128-bit (16-octet) MD5 hash, but it is also possible for the field to be a
 160-bit (20-octet) SHA-1 hash.
 
-Here's what a Mode 6 packet looks like
+An extension field consists of a 32-bit network-order type field
+length, followed by a 32-bit network-order payload length in octets,
+followed by the payload.
+
+Here's what a Mode 6 packet looks like:
 
        0                   1                   2                   3
        0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
@@ -253,13 +257,18 @@ class Packet:
     def mode(self):
         return self.li_vn_mode & 0x7
 
+class SyncException(BaseException):
+    def __init__(self, message, errorcode=0):
+        self.message = message
+        self.errorcode = errorcode
+
 class SyncPacket(Packet):
     "Mode 1-5 time-synchronization packet, including SNTP."
     format = "!BBBBIIIQQQQ"
     HEADER_LEN = 48
     UNIX_EPOCH = 2208988800	# Midnight 1 Jan 1970 in secs since NTP epoch
 
-    def __init__(self, data= None):
+    def __init__(self, data=''):
         Packet.__init__(self)
         self.status = 0         # status word for association (uint16_t)
         self.stratum = 0
@@ -272,23 +281,20 @@ class SyncPacket(Packet):
         self.origin_timestamp = 0
         self.receive_timestamp = 0
         self.transmit_timestamp = 0
-        self.extension = ''
         self.data = data
-        if self.data is not None:
-            self.analyze(self.data)
-            self.posixize()
+        self.extension = ''
+        self.extfields = []
+        self.mac = ''
         self.hostname = None
         self.resolved = None
         self.received = time.time()
-        if len(self.data) > 192:
-            self.extension_data = data[-12:192]
-            self.auth_data = data[-12:]
-        else:
-            self.extension_data = None
-            self.auth_data = None
         self.trusted = True
+        self.analyze()
+        self.posixize()
 
-    def analyze(self, rawdata):
+    def analyze(self):
+        if len(self.data) < SyncPacket.HEADER_LEN or (len(self.data) & 3) != 0:
+            raise SyncException("impossible packet length")
         (self.li_vn_mode,
          self.stratum,
          self.poll,
@@ -300,9 +306,30 @@ class SyncPacket(Packet):
          self.origin_timestamp,
          self.receive_timestamp,
          self.transmit_timestamp) \
-         = struct.unpack(SyncPacket.format, rawdata[:SyncPacket.HEADER_LEN])
-        self.data = rawdata[SyncPacket.HEADER_LEN:]
-
+         = struct.unpack(SyncPacket.format, self.data[:SyncPacket.HEADER_LEN])
+        self.extension = self.data[SyncPacket.HEADER_LEN:]
+	# Parse the extension field if present. We figure out whether
+	# an extension field is present by measuring the MAC size. If
+	# the number of 4-octet words following the packet header is
+	# 0, no MAC is present and the packet is not authenticated. If
+	# 1, the packet is a crypto-NAK; if 3, the packet is
+	# authenticated with DES; if 5, the packet is authenticated
+	# with MD5; if 6, the packet is authenticated with SHA. If 2
+	# or 4, the packet is a runt and discarded forthwith. If
+	# greater than 6, an extension field is present, so we
+	# subtract the length of the field and go around again.
+        while len(self.extension) > 24:
+            (ftype, flen) = struct.unpack("!II", self.extension[:8])
+            self.extfields.append((ftype, self.extension[8:8+flen]))
+            self.extension = self.extension[8+flen:]
+        if len(self.extension) == 4:	# Crypto-NAK
+            self.mac = self.extension
+        if len(self.extension) == 12:	# DES
+            raise SyncException("Unsupported DES authentication")
+        elif len(self.extension) in (8, 16):
+            raise SyncException("Packet is a runt")
+        elif len(self.extension) in (20, 24):	# MD5 or SHA1
+            self.mac = self.extension
     @staticmethod
     def ntp_to_posix(t):
         "Scale from NTP time to POSIX time"
@@ -363,7 +390,13 @@ class SyncPacket(Packet):
         return polystr("%d.%d.%d.%d" % self.refid_octets())
 
     def is_crypto_nak(self):
-        len(self.extension) == 1
+        return len(self.mac) == 4
+
+    def has_MD5(self):
+        return len(self.mac) == 20
+
+    def has_SHA1(self):
+        return len(self.mac) == 24
 
 class ControlPacket(Packet):
     "Mode 6 request/response."
