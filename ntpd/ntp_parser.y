@@ -61,7 +61,6 @@
 %token	<Integer>	T_Bclient
 %token	<Integer>	T_Beacon
 %token	<Integer>	T_Broadcast
-%token	<Integer>	T_Broadcastclient
 %token	<Integer>	T_Broadcastdelay
 %token	<Integer>	T_Burst
 %token	<Integer>	T_Calibrate
@@ -152,7 +151,6 @@
 %token	<Integer>	T_Monitor
 %token	<Integer>	T_Month
 %token	<Integer>	T_Mru
-%token	<Integer>	T_Multicastclient
 %token	<Integer>	T_Nic
 %token	<Integer>	T_Nolink
 %token	<Integer>	T_Nomodify
@@ -511,17 +509,13 @@ unpeer_keyword
 	
 	
 /* Other Modes
- * (broadcastclient manycastserver multicastclient)
+ * (manycastserver)
  * ------------------------------------------------
  */
 
 other_mode_command
-	:	T_Broadcastclient
-			{ cfgt.broadcastclient = 1; }
-	|	T_Manycastserver address_list
+	:	T_Manycastserver address_list
 			{ CONCAT_G_FIFOS(cfgt.manycastserver, $2); }
-	|	T_Multicastclient address_list
-			{ CONCAT_G_FIFOS(cfgt.multicastclient, $2); }
 	|	T_Mdnstries T_Integer
 			{ cfgt.mdnstries = $2; }
 	;
