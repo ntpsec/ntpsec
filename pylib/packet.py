@@ -68,7 +68,17 @@ a 128-bit (16-octet) MD5 hash, but it is also possible for the field to be a
 
 An extension field consists of a 32-bit network-order type field
 length, followed by a 32-bit network-order payload length in octets,
-followed by the payload.
+followed by the payload (which must be padded to a 4-octet boundary).
+
+       0                   1                   2                   3
+       0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+      +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+      |         Type field             |      Payload length          |
+      +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+      |                                                               |
+      |                        Payload (variable)                     |
+      |                                                               |
+      +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
 Here's what a Mode 6 packet looks like:
 
@@ -397,6 +407,25 @@ class SyncPacket(Packet):
 
     def has_SHA1(self):
         return len(self.mac) == 24
+
+    def __repr__(self):
+        "Represent a posixized sync packet in an eyeball-friendly format."
+        r = "<NTP:%s:%d%:%d" % (self.leap(), self.version(), self.mode())
+        r += "%f:%f:" % (self.root_delay, self.root_dispersion)
+        rs = self.refid_as_string
+        if not rs.isprint():
+            rd = refid_as_address()
+        r += ":" + rs 
+        r += ":" + ntp.util.rfc3339(self.reference_timestamp)
+        r += ":" + ntp.util.rfc3339(self.origin_timestamp)
+        r += ":" + ntp.util.rfc3339(self.receive_timestamp)
+        r += ":" + ntp.util.rfc3339(self.transmit_timestamp)
+        if self.extfields:
+            r += ":" + repr(self.extfields)
+        if self.mac:
+            r += ":" + repr(self.mac)[1:-1]
+        r += ">"
+        return r
 
 class ControlPacket(Packet):
     "Mode 6 request/response."
