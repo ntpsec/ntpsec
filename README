@@ -26,6 +26,7 @@ attic/:: 	Directory containing source code that is *not* part of a
 		time.
 
 contrib/::	Directory containing contributed scripts, dragons dwell here.
+		Some of this might eventually move to being supported code.
 
 devel/::	Documentation and small tools aimed at developers.
 		Includes a hacking guide and a tour of the internals.
@@ -74,8 +75,7 @@ ntpleapfetch/::	Directory containing a script to be run from a cron job
 
 ntpq/::		Directory containing sources for a utility program to
 		query local and remote NTP peers for state variables and
-		related timekeeping information. This program conforms
-		to Appendix A of the NTP Version 3 Specification RFC 1305.
+		related timekeeping information.
 
 ntpstats/::	Statistics visualization and analysis tools built around
 		the Python ntpstats.py module. Includes ntpviz.
