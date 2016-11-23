@@ -45,20 +45,9 @@ import sys, socket, select, struct, time, getopt, datetime
 try:
     import ntp.packet
     import ntp.util
-    standalone = False
 except:
-    standalone = True
-
-if standalone:
-    version = "ntpsec ntpdig (running standalone)"
-else:
-    version = ntp.util.stdversion()
-
-def standalone_bailout(switch):
-    if standalone:
-        sys.stderr.write("ntpdig: %s is not available running standalone\n." \
-                         % switch)
-        raise SystemExit(1)
+    sys.stderr.write("ntpdig: can't find Python NTP library -- check PYTHONPATH.\n")
+    sys.exit(1)
 
 class SNTPPacket:
     @staticmethod
@@ -320,7 +309,6 @@ if __name__ == '__main__':
             elif switch in ("-6", "--ipv6"):
                 af = socket.AF_INET6
             elif switch in ("-a", "--authentication"):
-                standalone_bailout(switch)
                 authkey = int(val)
             elif switch in ("-c", "--concurrent"):
                 concurrent_hosts.append(val)
@@ -331,7 +319,6 @@ if __name__ == '__main__':
             elif switch in ("-j", "--json"):
                 json = True
             elif switch in ("-k", "--keyfile"):
-                standalone_bailout(switch)
                 keyfile = val
             elif switch in ("-l", "--logfile"):
                 try:
@@ -340,15 +327,12 @@ if __name__ == '__main__':
                     sys.stderr.write("logfile open of %s failed.\n" % val)
                     raise SystemExit(1)
             elif switch in ("-M", "--steplimit"):	# Not implemented yet
-                standalone_bailout(switch)
                 steplimit = int(val)
             elif switch in ("-p", "--samples"):
                 samples = int(val)
             elif switch in ("-S", "--step"):		# Not implemented yet
-                standalone_bailout(switch)
                 step = True
             elif switch in ("-s", "--slew"):		# Not implemented yet
-                standalone_bailout(switch)
                 slew = True
             elif switch in ("-t", "--timeout"):
                 timeout = int(val)
@@ -356,7 +340,7 @@ if __name__ == '__main__':
                 print(usage)
                 raise SystemExit(0)
             elif switch in ("-V", "--version"):
-                print(version)
+                print(ntp.util.stdversion())
                 raise SystemExit(0)
             else:
                 sys.stderr.write("Unknown command line switch or missing argument.\n")
