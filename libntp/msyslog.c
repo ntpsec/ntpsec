@@ -18,7 +18,6 @@
 
 bool	syslogit = true;	/* log messages to syslog */
 bool	termlogit = false;	/* duplicate to stdout/err */
-bool	hashprefix = false;	/* prefix with hash, for repolay use */
 bool	termlogit_pid = true;
 bool	msyslog_include_timestamp = true;
 FILE *	syslog_file;
@@ -169,8 +168,6 @@ addto_syslog(
 		term_file = (level <= LOG_ERR)
 				? stderr
 				: stdout;
-		if (hashprefix)
-			fputc('#', term_file);
 		if (msyslog_include_timestamp)
 			fprintf(term_file, "%s ", human_time);
 		if (termlogit_pid)
