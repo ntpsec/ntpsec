@@ -344,6 +344,7 @@ if __name__ == '__main__':
 	# If we can step or slew and and |offset| > steplimit, then step.
         rc = True
         offset = syncpacket.adjust()
+        ntp.ntpc.setprogname("ntpdig")
         if step and (not slew or (slew and (abs(offset) > steplimit))):
 		rc = ntp.ntpc.step_systime(offset)
 	elif slew:
