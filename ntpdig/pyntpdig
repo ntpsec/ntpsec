@@ -50,7 +50,7 @@ except:
 def queryhost(server, concurrent, timeout=5, port=123):
     "Query IP addresses associated with a specified host."
     try:
-        iptuples = socket.getaddrinfo(server, 123,
+        iptuples = socket.getaddrinfo(server, port,
                                       af, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
     except socket.gaierror as e:
         log("lookup of %s failed, errno %d = %s" % (server, e[0], e[1]))
@@ -279,13 +279,13 @@ if __name__ == '__main__':
                 except OSError:
                     sys.stderr.write("logfile open of %s failed.\n" % val)
                     raise SystemExit(1)
-            elif switch in ("-M", "--steplimit"):	# Not implemented yet
+            elif switch in ("-M", "--steplimit"):
                 steplimit = int(val)
             elif switch in ("-p", "--samples"):
                 samples = int(val)
-            elif switch in ("-S", "--step"):		# Not implemented yet
+            elif switch in ("-S", "--step"):
                 step = True
-            elif switch in ("-s", "--slew"):		# Not implemented yet
+            elif switch in ("-s", "--slew"):
                 slew = True
             elif switch in ("-t", "--timeout"):
                 timeout = int(val)
@@ -338,7 +338,22 @@ if __name__ == '__main__':
 
     returned = clock_select(returned)
     if returned:
-        report(returned[0], json, False)
+        syncpacket = returned[0]
+        report(syncpacket, json, False)
+	# If we can step but we cannot slew, then step.
+	# If we can step or slew and and |offset| > steplimit, then step.
+        rc = True
+        offset = syncpacket.adjust()
+        if step and (not slew or (slew and (abs(offset) > steplimit))):
+		rc = ntp.ntpc.step_systime(offset)
+	elif slew:
+		rc = ntp.ntpc.adj_systime(offset)
+        if rc:
+            raise SystemExit(0)
+        else:
+            raise SystemExit(1)
     else:
         log("no eligible servers")
+        raise SystemExit(1)
+
 #end
