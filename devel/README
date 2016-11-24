@@ -23,7 +23,7 @@ packaging.txt::
 	Guidance for binary package builders.
 
 release::
-	Script dfor shipping a release.
+	Script for shipping a release.
 
 TODO::
 	List of items the NTPsec developers are working on.
