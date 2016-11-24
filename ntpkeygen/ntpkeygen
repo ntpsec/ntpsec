@@ -1,0 +1,88 @@
+#!/usr/bin/env python
+#
+# ntpkeygen - program to generate cryptographic keys for ntp clients and servers
+# 
+# All file names are like "ntpkey_<type>_<hostname>.<filestamp>", where
+# <type> is the file type, <hostname> the generating host name and
+# <filestamp> the generation time in NTP seconds. The NTP programs
+# expect generic names such as "ntpkey_<type>_whimsy.udel.edu" with the
+# association maintained by soft links. Following is a list of file
+# types.
+# 
+# ntpkey_MD5key_<hostname>.<filestamp>
+# MD5 (128-bit) keys used to compute message digests in symmetric
+# key cryptography
+
+import os, sys, socket, random, time, getopt, stat
+
+#
+# Cryptodefines
+# 
+MD5KEYS	= 10	# number of keys generated of each type 
+MD5SIZE	= 20	# maximum key size 
+
+def gen_md5(id, groupname):
+    "Generate semi-random MD5 and SHA1 keys compatible with NTPv3 and NTPv4."
+    with fheader("MD5key", id, groupname) as wp:
+        for i in range(1, MD5KEYS+1):
+            md5key = ""
+            for j in range(MD5SIZE):
+                while True:
+                    r = randomizer.randint(0x21, 0x7e)
+                    if r != ord('#'):
+                        break
+                md5key += chr(r)
+            wp.write("%2d MD5 %s  # MD5 key\n" % (i,  md5key))
+        for i in range(1, MD5KEYS+1):
+            sha1key = ""
+            for j in range(MD5SIZE):
+                sha1key += "%02x" % randomizer.randint(0x00, 0xff)
+            wp.write("%2d SHA1 %s  # SHA1 key\n" % (i + MD5KEYS, sha1key))
+
+#
+# Generate file header and link
+# 
+def fheader(
+	file,	# file name id 
+	ulink,	# linkname 
+	owner	# owner name 
+        ):
+    try:
+	filename = "ntpkey_%s_%s.%u" % (file,  owner, int(time.time())) 
+        orig_umask = os.umask(stat.S_IWGRP | stat.S_IRWXO)
+        wp = open(filename, "w")
+        os.umask(orig_umask)
+
+        linkname = "ntp.keys"
+        if os.path.exists(linkname):
+            os.remove(linkname)		# The symlink() line below matters 
+	os.symlink(filename, linkname)
+
+	sys.stderr.write("Generating new %s file and link\n" % ulink)
+	sys.stderr.write("%s->%s\n" % (linkname, filename))
+	wp.write("# %s\n# %s\n" % (filename, time.ctime()))
+	return wp
+    except IOError:
+        sys.stderr.write("Key file creation or link failed.\n")
+        raise SystemExit(1)
+
+if __name__ == '__main__':
+    try:
+        (options, arguments) = getopt.getopt(sys.argv[1:], "hM:", ["help"])
+    except getopt.GetoptError as e:
+        print(e)
+        raise SystemExit(1)
+
+    for (switch, val) in options:
+        if switch == '-M':
+            # dummy MD5 option for backwards compatibility 
+            pass
+        elif switch in ("-h", "--help"):
+            print("usage: ntpkeygen [-M]")
+            raise SystemExit(0)
+
+    randomizer = random.SystemRandom(time.time() + os.getpid())
+    gen_md5("md5", socket.gethostname())
+    raise SystemExit(0)
+
+#end
