@@ -190,8 +190,18 @@ def report(packet, json, adjusted):
     t = time.localtime(int(packet.transmit_timestamp))
     ms = int(packet.transmit_timestamp * 1000000) % 1000000
 
+    digits = 0
+    precision = packet.precision
+    while True:
+        precision *= 10.0
+        if precision >= 1:
+            break
+        digits += 1
+    if digits > 6:
+        digits = 6;
+
     date = time.strftime("%Y-%m-%d", t)
-    tod = time.strftime("%T", t) + (".%d" % ms)
+    tod = time.strftime("%T", t) + (".%*d" % (digits, ms))
     sgn = ("%+d" % tmoffset)[0]
     tz = "%s%02d%02d" % (sgn, tmoffset // 60, tmoffset % 60)
 
