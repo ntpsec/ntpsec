@@ -364,7 +364,6 @@ class SyncPacket(Packet):
         return abs(self.delta() - self.epsilon())
     def adjust(self):
         "Adjustment implied by this packet."
-        # FIXME: Clip low digits according to precision
         return self.received - self.transmit_timestamp
     def leap(self):
         return ("no-leap", "add-leap", "del-leap", "unsync")[((self.li_vn_mode) >> 6) & 0x3]
