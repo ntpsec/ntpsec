@@ -943,7 +943,7 @@ usage: writelist [ assocID ]
         associd = self.__assoc_valid(line)
         if associd >= 0:
             qtype = ntp.ntpc.TYPE_SYS if associd == 0 else ntp.ntpc.TYPE_PEER
-            self.__dolist(line.split()[1:], associd, ntp.packet.CTL_OP_READVAR, qtype)
+            self.__dolist(line.split()[1:], associd, ntp.packet.CTL_OP_READVAR, qtype, quiet=True)
 
     def help_readvar(self):
         self.say("""\
