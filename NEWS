@@ -8,6 +8,10 @@ on user-visible changes.
 
 == Repository head ==
 
+ntpkeygen has been moved from C to Python.  This is not a functional
+change, just another move to improve maintainability and reduce attack
+surface by decreasing line count.
+
 == 2016-11-23: 0.9.5 ==
 
 This release includes a substantial refactoring of the core protocol
