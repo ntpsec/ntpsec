@@ -148,6 +148,15 @@ def linkmaker(ctx):
     if ctx.cmd in ('install', 'build'):
         os.system("ln -sf %s/libntp/ntpc.so %s/pylib/ntpc.so " % (bldnode, bldnode))
 
+python_scripts = [
+        "ntpq/ntpq",
+        "ntpstats/ntpviz",
+        "ntptrace/ntptrace",
+        "ntpwait/ntpwait",
+        "ntpsweep/ntpsweep",
+        "ntpkeygen/ntpkeygen",
+]
+
 def build(ctx):
 	ctx.load('waf', tooldir='wafhelpers/')
 	ctx.load('bison')
@@ -187,15 +196,7 @@ def build(ctx):
 	ctx.recurse("attic")
 	ctx.recurse("tests")
 
-	scripts = [
-		"ntpleapfetch/ntpleapfetch",
-		"ntpq/ntpq",
-		"ntpstats/ntpviz",
-		"ntptrace/ntptrace",
-		"ntpwait/ntpwait",
-		"ntpsweep/ntpsweep",
-		"ntpkeygen/ntpkeygen",
-	]
+        scripts = ["ntpleapfetch/ntpleapfetch"] + python_scripts
 
 	ctx(
 		features    = "subst",
@@ -251,6 +252,10 @@ def ifdex(ctx):
 def loccount(ctx):
     "Report the SLOC count of the source tree."
     ctx.exec_command("loccount -x=build .")
+
+def cxfreeze(ctx):
+    "Create standalone binaries from Python scripts."
+    ctx.exec_command("for prog in " + " ".join(python_scripts) + "; do cxfreeze $prog; done")
 
 # The following sets edit modes for GNU EMACS
 # Local Variables:
