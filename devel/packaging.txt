@@ -40,10 +40,12 @@ cxfreeze ntpq/ntpq
 cxfreeze ntpstats/ntpviz
 cxfreeze ntpsweep/ntpsweep
 cxfreeze ntptrace/ntptrace
+cxfreeze ntpkeygen/ntpkeygen
 ```
 
-The four executables (pyntpq, ntpviz, ntpsweep, and ntptrace) will now
-be in the directory named dist along with the other files required run.
+The four executables (pyntpq, ntpviz, ntpsweep, ntptrace, and
+ntpkeygen) will now be in the directory named dist along with the
+other files required run.
 
 You can copy the dist directory, and its contents, to a host that does
 not have Python installed and execute the programs there.

@@ -182,7 +182,6 @@ def build(ctx):
 	ctx.recurse("libsodium")
 	ctx.recurse("ntpd")
 	ctx.recurse("ntpfrob")
-	ctx.recurse("ntpkeygen")
 	ctx.recurse("ntptime")
 	ctx.recurse("pylib")
 	ctx.recurse("attic")
@@ -195,6 +194,7 @@ def build(ctx):
 		"ntptrace/ntptrace",
 		"ntpwait/ntpwait",
 		"ntpsweep/ntpsweep",
+		"ntpkeygen/ntpkeygen",
 	]
 
 	ctx(
@@ -212,6 +212,7 @@ def build(ctx):
 	ctx.manpage(1, "ntpstats/ntpviz-man.txt")
 	ctx.manpage(8, "ntpwait/ntpwait-man.txt")
 	ctx.manpage(1, "ntpsweep/ntpsweep-man.txt")
+        ctx.manpage(8, "ntpkeygen/ntpkeygen-man.txt")
 
 	# Skip running unit tests on a cross compile build
 	if not ctx.env.ENABLE_CROSS:
