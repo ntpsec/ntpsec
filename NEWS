@@ -8,6 +8,15 @@ on user-visible changes.
 
 == Repository head ==
 
+This release includes a substantial refactoring of the core protocol
+implementation. Due to unresolvable security issues, support for
+broadcast/multicast clients has been dropped; broadcast servers are
+still supported. Likewise, symmetric mode is now only partially
+supported. The `peer` directive has become a synonym for `server`.
+Servers which receive symmetric-active mode packets will immediately
+give a symmetric-passive-mode response, but will not mobilize a new
+association.
+
 All remaining Perl code in the distribution has been moved to Python.
 
 The trap feature, broken in NTP Classic at the time of the NTPSec fork,
@@ -26,6 +35,35 @@ The ntpq tool for querying and configuring a running ntpd has been
 moved from C to Python.  About the only visible effect this has is
 that ntpq now resizes its peers display to accommodate wide
 terminal-emulator windows.
+
+This release includes fixes for four low and medium-severity
+vulnerabilities:
+
+CVE-2016-7434: Null pointer dereference on malformed mrulist request
+CVE-2016-7429: Interface selection DoS
+CVE-2016-9311: Trap crash
+CVE-2016-9310: Mode 6 unauthenticated trap information disclosure and DDoS vector
+
+Note that the "fixes" for CVE-2016-9310/9311 consist of complete
+removal of the broken trap feature. This removal occurred post-0.9.4
+but prior to the discovery of these issues.
+
+Further, an additional low-severity issue impacting 0.9.0 through
+0.9.3 has come to our attention:
+
+CVE-2016-7433: Reboot sync calculation problem
+
+This issue was already addressed in 0.9.4 but not treated as a
+vulnerability.
+
+The following NTP Classic CVEs do not impact NTPsec: CVE-2016-7427,
+CVE-2016-7428, CVE-2016-9312, CVE-2016-7431. We reject CVE-2016-7426,
+as it describes known and intended behavior which is a necessary
+logical consequence of rate-limiting.
+
+For more information on these security issues, see:
+https://lists.ntpsec.org/pipermail/devel/2016-November/002589.html
+http://support.ntp.org/bin/view/Main/SecurityNotice#November_2016_ntp_4_2_8p9_NTP_Se
 
 == 2016-08-16: 0.9.4 ==
 
