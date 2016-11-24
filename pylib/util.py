@@ -15,6 +15,14 @@ from ntp.version import *
 def stdversion():
     return "%s-%s-%s %s" % (VERSION, VCS_TICK, VCS_BASENAME, VCS_DATE)
 
+def rfc3339(t):
+    "RFC3339 string from Unix time, including fractional second."
+    subsec = t - int(t)
+    t -= subsec
+    rep = time.strftime("%Y-%m-%dT%H:%M:%S", time.gmtime(t))
+    rep += ("%f" % subsec)[1:] + "Z"
+    return rep
+
 def portsplit(hostname):
     portsuffix = ""
     if hostname.count(":") == 1:		# IPv4 with appended port
