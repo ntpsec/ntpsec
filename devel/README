@@ -22,6 +22,9 @@ ifdex-ignores::
 packaging.txt::
 	Guidance for binary package builders.
 
+release::
+	Script dfor shipping a release.
+
 TODO::
 	List of items the NTPsec developers are working on.
 
