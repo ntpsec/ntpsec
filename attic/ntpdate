@@ -54,7 +54,7 @@ do
 	6) PASSTHROUGH="$PASSTHROUGH -6";;
 	a) PASSTHROUGH="$PASSTHROUGH -a $OPTARG";;
 	b) ADJUST="$ADJUST -S";;
-	B) ADJUST="$ADJUST -j";;
+	B) ADJUST="$ADJUST -s";;
 	d) PASSTHROUGH="$PASSTHROUGH -d";;
 	e) echo "ntpdate: -e is no longer supported." >&2;;
 	k) PASSTHROUGH="$PASSTHROUGH -k $OPTARG";;
