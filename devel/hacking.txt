@@ -500,7 +500,7 @@ This is the release checklist to be used by the project manager to cut each 0.9.
   contributors to chime in, and to each assure that the .../NEWS file
   and the ../devel/TODO file is up to date.
 
-. Wait 4 days for the contributors to check in and for the discussion
+. Wait for the contributors to check in and for the discussion
   to settle down.  If the discussion suggests that now is not a good
   time to cut a release, wait until the raised issues are resolved.
 
@@ -510,27 +510,42 @@ This is the release checklist to be used by the project manager to cut each 0.9.
 . Modify the .../VERSION file with the new version number.
   Version number strings look like "0.9.1"
 
-. Modify the .../NEWS file, changing the "Repository head"
+. Modify the .../NEWS file, changing the "Repository head".
   to the current date and the version string.
 
-. Add GPG signed git tag.  Tags look like "NTPsec_9_1".
+. Add GPG signed git tag.
+
+  git tag -u 477C7528 -m "version 0.9.1" NTPsec_0_9_1
 
 . Commit those modifications to the repository.
-  The commit message looks like "version 0.9.1"
+
+  git commit -Ssecurity@ntpsec.org -s -m "version 0.9.1"
 
 . Push the repository upstream.
   Don't forget to use the --tags option to push the new tag as well.
+  
+  git push --tags
 
 . Generate release tarball.
 
+  git archive --format=tar.gz -v -o ../ntpsec-0.9.1.tar.gz NTPsec_0_9_1
+
 . Generate GPG detached signature of the release tarball.
+
+  gpg -u 477C7528 --output ntpsec-0.9.1.tar.gz.sig --detach-sig ntpsec-0.9.1.tar.gz
 
 . Generate sha256sum file for the release tarball.
 
+  shasum -a 256 -p ntpsec-0.9.1.tar.gz >ntpsec-0.9.1.tar.gz.sum
+
 . GPG sign that sha256sum file.
 
+  gpg -u 477C7528 -a --output ntpsec-0.9.1.tar.gz.sum.asc ntpsec-0.9.1.tar.gz.sum
+  
 . Copy the release tarball, GPG detached signature of the release
   tarball, and the signed sha256sum file to the ftp artifact server.
+
+  scp ntpsec-0.9.1.tar* releasemanager@hostname.ntpsec.org:ftp
 
 . Email the release message to the devel list.  The release message
   should include the sha256sum value, and should be GPG signed.
