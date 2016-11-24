@@ -1,0 +1,47 @@
+#!/bin/sh
+# Cut an ntpsec release.  VERSION must contain the correct release number.
+#
+# Run with no arguments to dry-run this.
+
+# Check that we really mean it.
+if [ "$1" = "go" ]
+then
+	do=""
+else
+	do="echo"
+fi
+
+V=`cat ../VERSION`
+UV=`cat ../VERSION | tr '.' '_'`
+
+K=477C7528	# Release manager's GPG key ID
+
+do=echo
+
+# Tag the version
+$do git tag -u ${K} -m "version ${V}" NTPsec_${UV}
+
+# Commit those modifications to the repository.
+$do git commit -Ssecurity@ntpsec.org -s -m "version ${V}"
+
+# Push the repository upstream.
+$do git push  
+$do git push --tags
+
+# Generate release tarball.
+$do git archive --format=tar.gz -v -o ../ntpsec-${V}.tar.gz NTPsec_${UV}
+
+# Generate GPG detached signature of the release tarball.
+$do gpg -u ${K} --output ntpsec-${V}.tar.gz.sig --detach-sig ntpsec-${V}.tar.gz
+
+# Generate sha256sum file for the release tarball.
+$do shasum -a 256 -p ntpsec-${V}.tar.gz >ntpsec-${V}.tar.gz.sum
+
+# GPG sign that sha256sum file.
+$do gpg -u ${K} -a --output ntpsec-${V}.tar.gz.sum.asc ntpsec-${V}.tar.gz.sum
+  
+# Copy the release tarball, GPG detached signature of the release
+# tarball, and the signed sha256sum file to the ftp artifact server.
+$do scp ntpsec-${V}.tar* releasemanager@hostname.ntpsec.org:ftp
+
+# end
