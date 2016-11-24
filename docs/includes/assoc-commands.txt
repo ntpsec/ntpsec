@@ -47,9 +47,6 @@ link-local IPV6 address with an interface specified in
   assigned the multicast group address IPv4 224.0.1.1 and IPv6 ff05::101
   (site local) exclusively to NTP, but other nonconflicting addresses
   can be used to contain the messages within administrative boundaries.
-  Ordinarily, this specification applies only to the local server
-  operating as a sender; for operation as a broadcast client, see the
-  _broadcastclient_ or _multicastclient_ commands below.
 
 +manycastclient+::
   For multicast addresses (only), this command mobilizes a manycast client

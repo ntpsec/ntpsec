@@ -85,6 +85,11 @@ Options] page. See that page for applicability and defaults.
 [[bcst]]
 == Broadcast/Multicast Scheme ==
 
+The broadcast/multicast scheme is deprecated in NTPsec due to
+irreparable security flaws. Client-side support has been removed.
+Server-side support remains present but may be removed in a future
+version, and its use is strongly discouraged.
+
 A broadcast server generates messages continuously at intervals by
 default 64 s and time-to-live by default 127. These defaults can be
 overridden by the +minpoll+ and +ttl+ options, respectively. Not all
@@ -108,8 +113,7 @@ A server is configured in broadcast mode using the +broadcast+ command
 and specifying the broadcast address of a local interface. If two or
 more local interfaces are installed with different broadcast addresses,
 a +broadcast+ command is needed for each address. This provides a way to
-limit exposure in a firewall, for example. A broadcast client is
-configured using the +broadcastclient+ command.
+limit exposure in a firewall, for example.
 
 NTP multicast mode can be used to extend the scope using IPv4 multicast
 or IPv6 broadcast with defined span. The IANA has assigned IPv4
@@ -121,34 +125,20 @@ described in RFC-2365, or GLOP group addresses, as described in
 RFC-2770.
 
 A multicast server is configured using the +broadcast+ command, but
-specifying a multicast address instead of a broadcast address. A
-multicast client is configured using the +multicastclient+ command
-specifying a list of one or more multicast addresses. Note that there is
-a subtle distinction between the IPv4 and IPv6 address families. The
-IPv4 broadcast or mulitcast mode is determined by the IPv4 class. For
-IPv6 the same distinction can be made using the link-local prefix FF02
-for each interface and site-local prefix FF05 for all interfaces.
+specifying a multicast address instead of a broadcast address. Note
+that there is a subtle distinction between the IPv4 and IPv6 address
+families. The IPv4 broadcast or mulitcast mode is determined by the
+IPv4 class. For IPv6 the same distinction can be made using the
+link-local prefix FF02 for each interface and site-local prefix FF05
+for all interfaces.
 
-It is possible and frequently useful to configure a host as both
-broadcast client and broadcast server. A number of hosts configured this
-way and sharing a common broadcast address will automatically organize
-themselves in an optimum configuration based on stratum and
-synchronization distance.
-
-Since an intruder can impersonate a broadcast server and inject false
-time values, broadcast mode should always be cryptographically
-authenticated. By default, a broadcast association will not be mobilized
-unless cryptographically authenticated. If necessary, the +auth+ option
-of the +disable+ command will disable this feature. The feature can be
-selectively enabled using the +notrust+ option of the +restrict+
-command.
-
-With symmetric key cryptography each broadcast server can use the same
-or different keys. In one scenario on a broadcast LAN, a set of
-broadcast clients and servers share the same key along with another set
-that share a different key. Only the clients with matching key will
-respond to a server broadcast. Further information is on the
-link:authentic.html[Authentication Support] page.
+NTPsec permits the use of symmetric authentication with broadcast mode
+the same way as any other mode; however, it is not effective at
+providing security because the sessionless, one-way nature of the
+protocol makes detection of replayed or delayed packets
+impossible. Regardless of whether authentication is employed,
+broadcast mode must be used only on physically-secure networks where
+all systems on the subnet are fully trusted.
 
 [[mcst]]
 == Manycast Scheme ==

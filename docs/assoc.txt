@@ -107,16 +107,14 @@ message. Since an intruder can impersonate a symmetric active peer and
 cause a spurious symmetric passive association to be mobilized,
 symmetric passive mode should always be cryptographically validated.
 
-A peer is configured in symmetric active mode using the +peer+ command
-and specifying the other peer DNS name or IPv4 or IPv6 address. The
-+burst+ and +iburst+ options should not be used in symmetric modes, as
-this can upset the intended symmetry of the protocol and result in
-spurious duplicate or dropped messages.
-
-As symmetric modes are most often used as root servers for moderate to
-large subnets where rapid response is required, it is generally best to
-set the minimum and maximum poll intervals of each root server to the
-same value using the +minpoll+ and +maxpoll+ options.
+Due to unresolvable security issues with symmetric mode, NTPsec
+includes only partial support for it. The deprecated +peer+ directive
+which formerly set up a symmetric active association is now a synonym
+for +server+. Servers which receive symmetric active messages will
+immediately reply with symmetric passive responses without setting up
+any new association; essientially they treat such messages exactly
+like client-mode messages aside from putting a different mode number
+into the response.
 
 [[broad]]
 == Broadcast/Multicast Modes ==
@@ -129,15 +127,11 @@ do not extend beyond a level-3 router. Where service is intended beyond
 a level-3 router, multicast mode can be used. Additional information is
 on the link:discover.html[Automatic NTP Configuration Options] page.
 
-A server is configured to send broadcast or multicast messages using the
-+broadcast+ command and specifying the subnet address for broadcast or
-the multicast group address for multicast. A broadcast client is enabled
-using the link:confopt.html#broadcastclient[+broadcastclient+] command,
-while a multicast client is enabled using the
-link:confopt.html#multicastclient[+multicastclient+] command and
-specifying the multicast group address. Multiple commands of either type
-can be used. However, the association is not mobilized until the first
-broadcast or multicast message is actually received.
+A server is configured to send broadcast or multicast messages using
+the +broadcast+ command and specifying the subnet address for
+broadcast or the multicast group address for multicast. Due to
+unresolvable security issues, NTPsec no longer supports functioning as
+a broadcast or multicast client.
 
 [[many]]
 == Manycast and Pool Modes ==
