@@ -89,6 +89,9 @@
     UDP port (123). Both +ntpport+ and +non-ntpport+ may be specified.
     The +ntpport+ is considered more specific and is sorted later in the
     list.
+  +nomrulist+;;
+    Do not accept MRU-list requests.  These can be expensive to
+    service, and may generate a high volume of response traffic.
   +version+;;
     Deny packets that do not match the current NTP version.
 --
