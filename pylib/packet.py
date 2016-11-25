@@ -66,6 +66,54 @@ The RFC5905 diagram is slightly out of date in that the digest header assumes
 a 128-bit (16-octet) MD5 hash, but it is also possible for the field to be a
 160-bit (20-octet) SHA-1 hash.
 
+Here's how to interpret the payload fields:
+
+t_1, the origin timestamp, is the time according to the client at
+which the request was sent.
+
+t_2, the transmit timestamp, is the time according to the server at
+which the request was received.
+
+t_3, the receive timestamp, is the time according to the server at
+which the reply was sent.
+
+t_4, the destination timestamp, is the time according to the client at
+which the reply was received.
+
+Theta is the thing we want to estimate: the offset between the server
+clock and the client clock. The sign convention is that theta is
+positive iff the server is ahead of the client.
+
+Theta is estimated by [(t_2-t_1)+(t_3-t_4)]/2. The accuracy of this
+estimate is predicated upon network latency being symmetrical.
+
+Delta is the network round trip time, i.e. (t_4-t_1)-(t_3-t_2).
+(t_4-t_1) is the total time that the request was in flight, and
+(t_3-t_2) is time that the server spent processing it; when you
+subtract that out you're left with just network delays.
+
+Lambda nominally represents the maximum amount by which theta could be
+off. It's computed as delta/2 + epsilon. The delta/2 term usually
+dominates and represents the maximum amount by which network asymmetry
+could be throwing off the calculation. Epsilon is the sum of three
+other sources of error:
+
+rho_r: the (im)precision field from response packet, representing the
+server's inherent error in clock measurement.
+
+rho_s: the client's own (im)precision.  This may not be available,
+e.g in ntpdig.
+
+PHI*(t_4-t_1): The amount by which the client's clock may plausibly
+have drifted while the packet was in flight. PHI is taken to be a
+constant of 15ppm.
+
+rho_r and rho_s are estimated by making back-to-back calls to
+clock_gettime() (or similar) and taking their difference. They're
+encoded on the wire as an eight-bit two's complement integer
+representing, to the nearest integer, log_2 of the value in seconds.
+
+
 An extension field consists of a 32-bit network-order type field
 length, followed by a 32-bit network-order payload length in octets,
 followed by the payload (which must be padded to a 4-octet boundary).
@@ -267,8 +315,9 @@ class Packet:
     def mode(self):
         return self.li_vn_mode & 0x7
 
-class SyncException(BaseException):
+class SyncException(Exception):
     def __init__(self, message, errorcode=0):
+        Exception.__init__(self)
         self.message = message
         self.errorcode = errorcode
 
@@ -580,8 +629,9 @@ class MRUList:
     def __repr__(self):
         return "<MRUList: entries=%s now=%s>" % (self.entries, self.now)
 
-class ControlException(BaseException):
+class ControlException(Exception):
     def __init__(self, message, errorcode=0):
+        Exception.__init__(self)
         self.message = message
         self.errorcode = errorcode
 
