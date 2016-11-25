@@ -356,11 +356,19 @@ if __name__ == '__main__':
 
     returned = []
     for server in concurrent_hosts:
-        returned += queryhost(server=server, concurrent=True, timeout=timeout)
+        try:
+            returned += queryhost(server=server, concurrent=True, timeout=timeout)
+        except SyncException:
+            log(e.message)
+            continue
         if len(returned) >= samples:
             break
     for server in arguments:
-        returned += queryhost(server=server, concurrent=False, timeout=timeout)
+        try:
+            returned += queryhost(server=server, concurrent=False, timeout=timeout)
+        except SyncException:
+            log(e.message)
+            continue
         if len(returned) >= samples:
             break
 
