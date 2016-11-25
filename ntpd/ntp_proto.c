@@ -246,7 +246,7 @@ parse_packet(
 	pkt->precision = (int8_t)recv_buf[3];
 	pkt->rootdelay = ntp_be32dec(recv_buf + 4);
 	pkt->rootdisp = ntp_be32dec(recv_buf + 8);
-	memcpy(pkt->refid, recv_buf + 12, 4);
+	memcpy(pkt->refid, recv_buf + 12, REFIDLEN);
 	pkt->reftime = ntp_be64dec(recv_buf + 16);
 	pkt->org = ntp_be64dec(recv_buf + 24);
 	pkt->rec = ntp_be64dec(recv_buf + 32);
@@ -552,7 +552,7 @@ handle_procpkt(
 	peer->outcount = 0;
 
 	if(is_kod(pkt)) {
-		if(!memcmp(pkt->refid, "RATE", 4)) {
+		if(!memcmp(pkt->refid, "RATE", REFIDLEN)) {
 			peer->selbroken++;
 			report_event(PEVNT_RATE, peer, NULL);
 			if (peer->minpoll < 10) { peer->minpoll = 10; }
@@ -622,7 +622,7 @@ handle_procpkt(
 	peer->precision = pkt->precision;
 	peer->rootdelay = scalbn((double)pkt->rootdelay, -16);
 	peer->rootdisp = scalbn((double)pkt->rootdisp, -16);
-	memcpy(&peer->refid, pkt->refid, 4);
+	memcpy(&peer->refid, pkt->refid, REFIDLEN);
 	uint64_to_lfp(&peer->reftime, pkt->reftime);
 	uint64_to_lfp(&peer->rec, pkt->rec);
 	uint64_to_lfp(&peer->xmt, pkt->xmt);
