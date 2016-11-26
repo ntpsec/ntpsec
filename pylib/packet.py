@@ -62,23 +62,23 @@ The fixed header is 48 bytes long.  The simplest possible case of an
 NTP packet is the minimal SNTP request, a mode 3 packet with the
 Stratum and all following fields zeroed out to byte 47.
 
-The RFC5905 diagram is slightly out of date in that the digest header assumes
-a 128-bit (16-octet) MD5 hash, but it is also possible for the field to be a
-160-bit (20-octet) SHA-1 hash.
-
-Here's how to interpret the payload fields:
+How to interpret these fields:
 
 t_1, the origin timestamp, is the time according to the client at
 which the request was sent.
 
-t_2, the transmit timestamp, is the time according to the server at
+t_2, the receive timestamp, is the time according to the server at
 which the request was received.
 
-t_3, the receive timestamp, is the time according to the server at
+t_3, the transmit timestamp, is the time according to the server at
 which the reply was sent.
 
-t_4, the destination timestamp, is the time according to the client at
-which the reply was received.
+You also need t_4, the destination timestamp, is the time according to
+the client at which the reply was received.  This is not in the reply packet,
+it's the packet receipt time collected by the client.
+
+The 'Reference timestamp' is an unused historical relic.  FIXME: what does
+ntpd put in there when it transmits corrections?
 
 Theta is the thing we want to estimate: the offset between the server
 clock and the client clock. The sign convention is that theta is
@@ -87,10 +87,10 @@ positive iff the server is ahead of the client.
 Theta is estimated by [(t_2-t_1)+(t_3-t_4)]/2. The accuracy of this
 estimate is predicated upon network latency being symmetrical.
 
-Delta is the network round trip time, i.e. (t_4-t_1)-(t_3-t_2).
-(t_4-t_1) is the total time that the request was in flight, and
-(t_3-t_2) is time that the server spent processing it; when you
-subtract that out you're left with just network delays.
+Delta is the network round trip time, i.e. (t_4-t_1)-(t_3-t_2). Here's
+how the terms work: (t_4-t_1) is the total time that the request was
+in flight, and (t_3-t_2) is time that the server spent processing it;
+when you subtract that out you're left with just network delays.
 
 Lambda nominally represents the maximum amount by which theta could be
 off. It's computed as delta/2 + epsilon. The delta/2 term usually
@@ -101,8 +101,7 @@ other sources of error:
 rho_r: the (im)precision field from response packet, representing the
 server's inherent error in clock measurement.
 
-rho_s: the client's own (im)precision.  This may not be available,
-e.g in ntpdig.
+rho_s: the client's own (im)precision.
 
 PHI*(t_4-t_1): The amount by which the client's clock may plausibly
 have drifted while the packet was in flight. PHI is taken to be a
@@ -113,6 +112,22 @@ clock_gettime() (or similar) and taking their difference. They're
 encoded on the wire as an eight-bit two's complement integer
 representing, to the nearest integer, log_2 of the value in seconds.
 
+If you look at the raw data, there are 3 unknowns:
+   * transit time client to server
+   * transit time server to client
+   * clock offset
+>but there are only two equations, so you can't solve it.
+
+NTP gets a 3rd equation by assuming the transit times are equal.  That lets 
+it solve for the clock offset.
+
+If you assume that both clocks are accurate which is reasonable if you have 
+GPS at both ends, then you can easily solve for the transit times in each 
+direction.
+
+The RFC5905 diagram is slightly out of date in that the digest header assumes
+a 128-bit (16-octet) MD5 hash, but it is also possible for the field to be a
+160-bit (20-octet) SHA-1 hash.
 
 An extension field consists of a 32-bit network-order type field
 length, followed by a 32-bit network-order payload length in octets,
@@ -315,9 +330,8 @@ class Packet:
     def mode(self):
         return self.li_vn_mode & 0x7
 
-class SyncException(Exception):
+class SyncException(BaseException):
     def __init__(self, message, errorcode=0):
-        Exception.__init__(self)
         self.message = message
         self.errorcode = errorcode
 
@@ -629,9 +643,8 @@ class MRUList:
     def __repr__(self):
         return "<MRUList: entries=%s now=%s>" % (self.entries, self.now)
 
-class ControlException(Exception):
+class ControlException(BaseException):
     def __init__(self, message, errorcode=0):
-        Exception.__init__(self)
         self.message = message
         self.errorcode = errorcode
 
@@ -1137,18 +1150,16 @@ class ControlSession:
             if "sort" in variables:
                 sorter = variables["sort"]
                 del variables["sort"]
-                # Earliest elements in a span get displayed first, so these
-                # sorts are all sign-reversed from what you might expect.
                 # FIXME: implement sorting by address, in case anyone cares
                 sortdict = {
-                "lstint" : lambda e: -e.last,		# lstint ascending
-                "-lstint" : lambda e: e.last,		# lstint descending
-                "avgint" : lambda e: -e.avgint(),	# avgint ascending
-                "-avgint" : lambda e: e.avgint(),	# avgint descending
+                "lstint" : lambda e: e.last,		# lstint ascending
+                "-lstint" : lambda e: -e.last,		# lstint descending
+                "avgint" : lambda e: e.avgint(),	# avgint ascending
+                "-avgint" : lambda e: -e.avgint(),	# avgint descending
                 "addr" : None,			# IPv4 asc. then IPv6 asc.
                 "-addr" : None,			# IPv6 desc. then IPv4 desc.
-                "count" : lambda e: -e.ct,	# hit count ascending
-                "-count": lambda e: e.ct,	# hit count descending
+                "count" : lambda e: e.ct,	# hit count ascending
+                "-count": lambda e: -e.ct,	# hit count descending
                 }
                 if sorter == "listint":
                     sorter = None
