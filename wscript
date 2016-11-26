@@ -196,7 +196,7 @@ def build(ctx):
 	ctx.recurse("attic")
 	ctx.recurse("tests")
 
-        scripts = ["ntpleapfetch/ntpleapfetch"] + python_scripts
+	scripts = ["ntpleapfetch/ntpleapfetch"] + python_scripts
 
 	ctx(
 		features    = "subst",
@@ -213,7 +213,7 @@ def build(ctx):
 	ctx.manpage(1, "ntpstats/ntpviz-man.txt")
 	ctx.manpage(8, "ntpwait/ntpwait-man.txt")
 	ctx.manpage(1, "ntpsweep/ntpsweep-man.txt")
-        ctx.manpage(8, "ntpkeygen/ntpkeygen-man.txt")
+	ctx.manpage(8, "ntpkeygen/ntpkeygen-man.txt")
 
 	# Skip running unit tests on a cross compile build
 	if not ctx.env.ENABLE_CROSS:
