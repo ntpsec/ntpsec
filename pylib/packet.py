@@ -643,7 +643,7 @@ class MRUEntry:
         self.mv = None		# mode and version
         self.rs = None		# restriction mask (RES_* bits)
     def avgint(self):
-        return (e.last - e.first) / e.ct
+        return (self.last - self.first) / self.ct
     def __repr__(self):
         return "<MRUentry: " + repr(self.__dict__)[1:-1] + ">"
 
