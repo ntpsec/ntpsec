@@ -1014,7 +1014,7 @@ class ControlSession:
             not_earlier = [frag for frag in fragments \
                            if frag.offset >= rpkt.offset]
             if len(not_earlier):
-                not_earlier = earlier[0]
+                not_earlier = not_earlier[0]
                 if not_earlier.offset == rpkt.offset:
                     warn("duplicate %d octets at %d ignored, prior %d at %d\n" % (rpkt.count, rpkt.offset, not_earlier.count, not_earlier.offset))
                     continue
