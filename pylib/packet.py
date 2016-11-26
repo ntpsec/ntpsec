@@ -1169,7 +1169,7 @@ class ControlSession:
 
         if variables:
             if "sort" in variables:
-                sorter = variables["sort"]
+                sortkey = variables["sort"]
                 del variables["sort"]
                 # FIXME: implement sorting by address, in case anyone cares
                 sortdict = {
@@ -1182,12 +1182,12 @@ class ControlSession:
                 "count" : lambda e: e.ct,	# hit count ascending
                 "-count": lambda e: -e.ct,	# hit count descending
                 }
-                if sorter == "listint":
-                    sorter = None
-                if sorter is not None:
-                    sorter = sortdict.getkey(key)
+                if sortkey == "listint":
+                    sortkey = None
+                if sortkey is not None:
+                    sorter = sortdict.get(sortkey)
                     if sorter == None:
-                        raise ControlException(BAD_SORT % key)
+                        raise ControlException(SERR_BADSORT % sortkey)
             for k in list(variables.keys()):
                 if k in ("mincount", "resall", "resany",
                          "maxlstint", "laddr", "sort"):
