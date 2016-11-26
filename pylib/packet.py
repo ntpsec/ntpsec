@@ -1102,12 +1102,18 @@ class ControlSession:
         response = response.rstrip()
         items = []
         if response:
+            instring = False
+            for i in range(len(response)):
+                if response[i] == '"':
+                    instring = not instring
+                elif instring and response[i] == ',':
+                    response[i] = "\xae"
             for pair in response.split(","):
                 try:
                     pair = pair.strip()
                     eq = pair.index("=")
                     var = pair[:eq].strip()
-                    val = pair[eq+1:].strip()
+                    val = pair[eq+1:].strip().replace("\xae", ",")
                     try:
                         val = int(val, 0)
                     except ValueError:
