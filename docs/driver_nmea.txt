@@ -254,7 +254,7 @@ switched on by sending the following string.
 == Configuration Example ==
 
 ------------------------------------------------------------------------------
-refclock nmea mode baud 19200	# All sentences from /dev/gps0 at 19200 baud
+refclock nmea baud 19200	# All sentences from /dev/gps0 at 19200 baud
 refclock nmea path /dev/ttyUSB0	# All sentences from /dev/ttyUSB0 at 9600 baud
 ------------------------------------------------------------------------------
 
