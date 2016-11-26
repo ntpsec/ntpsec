@@ -982,14 +982,14 @@ class ControlSession:
             shouldbesize = (ControlPacket.HEADER_LEN + rpkt.count + 3) & ~3
             if len(rawdata) < shouldbesize:
                 warn("Response packet claims %u octets payload, above %d received\n" % \
-                    (count, len(rawdata) - ControlPacket.HEADER_LEN))
+                    (rpkt.count, len(rawdata) - ControlPacket.HEADER_LEN))
                 raise ControlException(SERR_INCOMPLETE)
 
             if self.debug > 1:
                 warn("Got packet, size = %d\n"% len(rawdata))
             if rpkt.count > (len(rawdata) - ControlPacket.HEADER_LEN):
                     warn("Received count of %u octets, data in packet is %ld\n"\
-                                   % (count, len(rawdata) - ControlPacket.HEADER_LEN))
+                                   % (rpkt.count, len(rawdata) - ControlPacket.HEADER_LEN))
                     continue
 
             # Someday, perhaps, check authentication here
