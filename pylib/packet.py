@@ -489,9 +489,9 @@ class SyncPacket(Packet):
         "Represent a posixized sync packet in an eyeball-friendly format."
         r = "<NTP:%s:%d%:%d" % (self.leap(), self.version(), self.mode())
         r += "%f:%f:" % (self.root_delay, self.root_dispersion)
-        rs = self.refid_as_string
+        rs = self.refid_as_string()
         if not rs.isprint():
-            rd = refid_as_address()
+            rd = self.refid_as_address()
         r += ":" + rs 
         r += ":" + ntp.util.rfc3339(SyncPacket.ntp_to_posix(self.reference_timestamp))
         r += ":" + ntp.util.rfc3339(SyncPacket.ntp_to_posix(self.origin_timestamp))
