@@ -163,7 +163,7 @@ def clock_select(packets):
             drop("request was authenticated but server is untrusted")
             continue
         # Bypass this test if we ever support broadcast-client mode again 
-        if response.origin_timestamp != ntp.packet.SyncPacket.ntp_to_posix(0):
+        if response.origin_timestamp != 0:
             drop("unexpected response timestamp")
             continue
         filtered.append(response)
@@ -187,7 +187,7 @@ def report(packet, json, adjusted):
     tmoffset = (local_time - gmt_time) // 60	# In minutes
 
     # The server's idea of the time
-    t = time.localtime(int(packet.transmit_timestamp))
+    t = time.localtime(int(ntp.packet.SyncPacket.ntp_to_posix(packet.transmit_timestamp)))
     ms = int(packet.transmit_timestamp * 1000000) % 1000000
 
     digits = 0
