@@ -477,12 +477,6 @@ handle_fastxmit(
 		}
 	}
 
-	restrict_mask = ntp_monitor(rbufp, restrict_mask);
-	if (restrict_mask & RES_LIMITED) {
-		sys_limitrejected++;
-		if(!(restrict_mask & RES_KOD)) { return; }
-	}
-
 	/* To prevent exposing an authentication oracle, only MAC
 	   the response if the request passed authentication.
 	*/
@@ -791,6 +785,12 @@ receive(
 		} else {
 			authenticated = true;
 		}
+	}
+
+	restrict_mask = ntp_monitor(rbufp, restrict_mask);
+	if (restrict_mask & RES_LIMITED) {
+		sys_limitrejected++;
+		if(!(restrict_mask & RES_KOD)) { goto done; }
 	}
 
 	switch(match) {
