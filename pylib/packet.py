@@ -1243,7 +1243,7 @@ class ControlSession:
                             limit = min(limit, ntpd_row_limit)
                             if self.debug:
                                 warn("Row limit reduced to %d following CERR_BADVALUE.\n" % limit)
-                    elif e.errorcode in (ERR_INCOMPLETE, ERR_TIMEOUT):
+                    elif e.errorcode in (SERR_INCOMPLETE, SERR_TIMEOUT):
                         # Reduce the number of rows/frags requested by
                         # half to recover from lost response fragments.
                         if cap_frags:
