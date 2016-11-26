@@ -629,8 +629,8 @@ oncore_start(
 	oncore_log(instance, LOG_NOTICE, "state = ONCORE_NO_IDEA");
 
 	/* Now open files.
-	 * This is a bit complicated, a we don't want to open the same file twice
-	 * (its a problem on some OS), and device2 may not exist for the new PPS
+	 * This is a bit complicated, and we don't want to open the same file twice
+	 * (it's a problem on some OS), and device2 may not exist for the new PPS
 	 */
 
 	(void)snprintf(device1, sizeof(device1), DEVICE1, unit);
