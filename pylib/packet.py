@@ -77,8 +77,10 @@ You also need t_4, the destination timestamp, is the time according to
 the client at which the reply was received.  This is not in the reply packet,
 it's the packet receipt time collected by the client.
 
-The 'Reference timestamp' is an unused historical relic.  FIXME: what does
-ntpd put in there when it transmits corrections?
+The 'Reference timestamp' is an unused historical relic.  It's supposed to be
+copied unchanged from upstream in the strutum hierarchy. Normal practice
+has been for Stratum 1 servers to fill it in with the raw timestamp from the
+most recent reference-clock.
 
 Theta is the thing we want to estimate: the offset between the server
 clock and the client clock. The sign convention is that theta is
@@ -340,6 +342,7 @@ class SyncPacket(Packet):
     format = "!BBBBIIIQQQQ"
     HEADER_LEN = 48
     UNIX_EPOCH = 2208988800	# Midnight 1 Jan 1970 in secs since NTP epoch
+    PHI = 15 * 1e-6		# 15ppm
 
     def __init__(self, data=''):
         Packet.__init__(self)
@@ -363,7 +366,7 @@ class SyncPacket(Packet):
         self.received = time.time()
         self.trusted = True
         self.analyze()
-        self.posixize()
+        #self.posixize()
 
     def analyze(self):
         if len(self.data) < SyncPacket.HEADER_LEN or (len(self.data) & 3) != 0:
@@ -417,17 +420,29 @@ class SyncPacket(Packet):
         self.receive_timestamp = SyncPacket.ntp_to_posix(self.receive_timestamp)
         self.transmit_timestamp = SyncPacket.ntp_to_posix(self.transmit_timestamp)
 
+    def __t1(self):
+        return self.origin_timestamp
+    def __t2(self):
+        return self.receive_timestamp
+    def __t3(self):
+        return self.transmit_timestamp
+    def __t4(self):
+        return self.received
     def delta(self):
-        return self.root_delay
+        "Packet flight time"
+        return (self.__t4() - self.__t1()) - (self.__t3() - self.__t2())
     def epsilon(self):
-        return self.root_dispersion
+        "Residual error due to clock imprecision."
+        # FIXME: Include client imprecision.
+        return SyncPacket.PHI * (self.__t4() - self.__t1()) + 2**self.precision
     def synchd(self):
         "Synchronization distance, estimates worst-case error in seconds"
         # This is "lambda" in NTP-speak, but that's a Python keyword 
-        return abs(self.delta() - self.epsilon())
+        return abs(self.delta()/2 + self.epsilon())
     def adjust(self):
-        "Adjustment implied by this packet."
-        return self.received - self.transmit_timestamp
+        "Adjustment implied by this packet - 'theta' in NTP-speak."
+        return ((self.__t2()-self.__t1())+(self.__t3()-self.__t4()))/2
+
     def leap(self):
         return ("no-leap", "add-leap", "del-leap", "unsync")[((self.li_vn_mode) >> 6) & 0x3]
     def flatten(self):
@@ -478,10 +493,10 @@ class SyncPacket(Packet):
         if not rs.isprint():
             rd = refid_as_address()
         r += ":" + rs 
-        r += ":" + ntp.util.rfc3339(self.reference_timestamp)
-        r += ":" + ntp.util.rfc3339(self.origin_timestamp)
-        r += ":" + ntp.util.rfc3339(self.receive_timestamp)
-        r += ":" + ntp.util.rfc3339(self.transmit_timestamp)
+        r += ":" + ntp.util.rfc3339(SyncPacket.ntp_to_posix(self.reference_timestamp))
+        r += ":" + ntp.util.rfc3339(SyncPacket.ntp_to_posix(self.origin_timestamp))
+        r += ":" + ntp.util.rfc3339(SyncPacket.ntp_to_posix(self.receive_timestamp))
+        r += ":" + ntp.util.rfc3339(SyncPacket.ntp_to_posix(self.transmit_timestamp))
         if self.extfields:
             r += ":" + repr(self.extfields)
         if self.mac:
