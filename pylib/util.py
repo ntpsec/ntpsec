@@ -248,7 +248,7 @@ class PeerSummary:
             clock_name = srcadr
         if self.wideremote and len(clock_name) > self.namewidth:
             line += ("%c%s\n" % (c, clock_name))
-            line + (" " * (self.namewidth + 2))
+            line += (" " * (self.namewidth + 2))
         else:
             line += ("%c%-*.*s " % \
                              (c, self.namewidth, self.namewidth, clock_name[:self.namewidth]))
