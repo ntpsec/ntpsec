@@ -65,7 +65,7 @@ def termsize():
     # Alternatives at http://stackoverflow.com/questions/566746/how-to-get-console-window-width-in-python
     import shlex, subprocess, re
     try:
-        output = subprocess.check_output(shlex.split('/bin/stty -a'))
+        output = subprocess.check_output(shlex.split('/bin/stty -a'), universal_newlines=True)
     except (OSError, subprocess.CalledProcessError, AttributeError):
         return (24, 80)
     for pattern in ('rows\D+(\d+); columns\D+(\d+);', '\s+(\d+)\D+rows;\s+(\d+)\D+columns;'):
