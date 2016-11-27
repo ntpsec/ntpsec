@@ -30,6 +30,8 @@ to read your system temperatures will be hardware specific.
 
 """
 
+from __future__ import print_function
+
 import time
 
 now = int(time.time())

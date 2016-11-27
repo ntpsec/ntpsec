@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 from os import path
 from shutil import copyfile
 from os.path import exists
