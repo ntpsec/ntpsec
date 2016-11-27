@@ -443,7 +443,7 @@ usage: help [ command ]
                         lastcount = 0
                     else:
                         lastcount += 1
-                if lastcount + len(item) > 78:
+                if lastcount + len(item) > self.termwidth - 2:
                     text = text[:-1] + "\n"
                 text += item
             text = text[:-2] + "\n"
