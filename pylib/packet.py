@@ -214,6 +214,7 @@ master_encoding = 'latin-1'
 if str is bytes:  # Python 2
     polystr = str
     polybytes = bytes
+    polyord = ord
 
     def string_escape(s):
         return s.decode('string_escape')
@@ -239,6 +240,13 @@ else:  # Python 3
         if not isinstance(s, str):
             return bytes(s)
         return bytes(s, encoding=master_encoding)
+
+    def polyord(c):
+        "Polymorphic ord() function"
+        if isinstance(c, str):
+            return ord(c)
+        else:
+            return c
 
     def string_escape(s):
         "Polymorphic string_escape/unicode_escape"
@@ -625,7 +633,7 @@ def dump_hex_printable(xdata):
         i = restart
         for idx in range(rowlen):
             # Do not use curses.isprint(), netbsd base doesn't install curses
-            if ord(xdata[i]) >= 32 and ord(xdata[i]) < 127:
+            if polyord(xdata[i]) >= 32 and polyord(xdata[i]) < 127:
                 sys.stdout.write(xdata[i])
             else:
                 sys.stdout.write('.')
