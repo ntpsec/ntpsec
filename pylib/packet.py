@@ -1110,7 +1110,7 @@ class ControlSession:
             if c == '"':
                 response = response + c
                 instring = not instring
-            if instring and c == ',':
+            elif instring and c == ',':
                 response = response + "\xae"
             elif polyord(c) > 0 and polyord(c) < 127:
                 response = response + c
