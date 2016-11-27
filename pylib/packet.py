@@ -924,7 +924,7 @@ class ControlSession:
 
             if self.debug:
                 warn("At %s, socket read begins\n" % time.asctime())
-            rawdata = polystr(self.sock.recv(4096))
+            rawdata = polybytes(self.sock.recv(4096))
             if self.debug:
                 warn("Received %d octets\n" % len(rawdata))
             rpkt = ControlPacket(self)
