@@ -136,6 +136,19 @@ NTP_MODE	= 0x8	# peer mode
 NTP_2BIT	= 0x9	# leap bits
 NTP_FLOAT	= 0xa	# Float value
 
+# Old CTL_PST defines for version 2.
+OLD_CTL_PST_CONFIG = 0x80
+OLD_CTL_PST_AUTHENABLE = 0x40
+OLD_CTL_PST_AUTHENTIC = 0x20
+OLD_CTL_PST_REACH = 0x10
+OLD_CTL_PST_SANE = 0x08
+OLD_CTL_PST_DISP = 0x04
+
+OLD_CTL_PST_SEL_REJECT = 0
+OLD_CTL_PST_SEL_SELCAND = 1
+OLD_CTL_PST_SEL_SYNCCAND = 2
+OLD_CTL_PST_SEL_SYSPEER = 3
+
 class Ntpq(cmd.Cmd):
     "ntpq command interpreter"
     def __init__(self, session):
@@ -251,18 +264,18 @@ usage: help [ command ]
                     }
                 condition = seldict[statval & 0x7]
             else:
-                if (statval & 0x3) == ntp.packet.OLD_CTL_PST_SEL_REJECT:
-                    if (statval & ntp.packet.OLD_CTL_PST_SANE) == 0:
+                if (statval & 0x3) == OLD_CTL_PST_SEL_REJECT:
+                    if (statval & OLD_CTL_PST_SANE) == 0:
                         condition = "insane"
-                    elif (statval & ntp.packet.OLD_CTL_PST_DISP) == 0:
+                    elif (statval & OLD_CTL_PST_DISP) == 0:
                         condition = "hi_disp"
                     else:
                         condition = ""
-                elif (statval & 0x3) ==  ntp.packet.OLD_CTL_PST_SEL_SELCAND:
+                elif (statval & 0x3) == OLD_CTL_PST_SEL_SELCAND:
                         condition = "sel_cand"
-                elif (statval & 0x3) ==  ntp.packet.OLD_CTL_PST_SEL_SYNCCAND:
+                elif (statval & 0x3) == OLD_CTL_PST_SEL_SYNCCAND:
                     condition = "sync_cand"
-                elif (statval & 0x3) ==  ntp.packet.OLD_CTL_PST_SEL_SYSPEER:
+                elif (statval & 0x3) == OLD_CTL_PST_SEL_SYSPEER:
                     condition = "sys_peer"
             event_dict = {
                 ntp.packet.PEVNT_MOBIL: "mobilize",
