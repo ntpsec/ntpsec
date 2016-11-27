@@ -182,7 +182,7 @@ A Mode 6 packet cannot have extension fields.
 from __future__ import print_function, division
 import sys, socket, select, struct, collections
 import getpass, hashlib, time
-from ntpc import lfptofloat
+from ntp.ntpc import lfptofloat
 
 # General notes on Python 2/3 compatibility:
 #
@@ -266,8 +266,8 @@ else:  # Python 3
         # line_buffering=True ensures that interactive command sessions work as expected
         return io.TextIOWrapper(stream.buffer, encoding=master_encoding, newline="\n", line_buffering=True)
 
-from ntp_magic import *
-from ntp_control import *
+from ntp.ntp_magic import *
+from ntp.ntp_control import *
 
 # Limit on packets in a single Mode 6 response.  Increasing this value to
 # 96 will marginally speed "mrulist" operation on lossless networks
