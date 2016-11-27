@@ -1048,7 +1048,7 @@ class ControlSession:
                 else:
                     if self.debug:
                         warn("Fragment collection ends\n")
-                    self.response = "".join([frag.data for frag in fragments])
+                    self.response = polybytes("".join([polystr(frag.data) for frag in fragments]))
                     if self.debug >= 4:
                         sys.stdout.write("Response packet:\n")
                         dump_hex_printable(self.response)
