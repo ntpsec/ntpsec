@@ -475,7 +475,7 @@ nmea_start(
 	/* Open serial port. Use CLK line discipline, if available. */
 	snprintf(device, sizeof(device), DEVICE, unit);
 	pp->io.fd = refclock_open(peer->path ? peer->path : device,
-				  peer->baud ? peer->baud : baudrate,
+				  baudrate,
 				  LDISC_CLK);
 	if (0 >= pp->io.fd) {
 		pp->io.fd = nmead_open(device);
