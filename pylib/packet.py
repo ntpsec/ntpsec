@@ -216,6 +216,7 @@ if str is bytes:  # Python 2
     polystr = str
     polybytes = bytes
     polyord = ord
+    polychr = str
 
     def string_escape(s):
         return s.decode('string_escape')
@@ -246,6 +247,13 @@ else:  # Python 3
         "Polymorphic ord() function"
         if isinstance(c, str):
             return ord(c)
+        else:
+            return c
+
+    def polychr(c):
+        "Polymorphic chr() function"
+        if not isinstance(c, str):
+            return chr(c)
         else:
             return c
 
@@ -635,7 +643,7 @@ def dump_hex_printable(xdata):
         for idx in range(rowlen):
             # Do not use curses.isprint(), netbsd base doesn't install curses
             if polyord(xdata[i]) >= 32 and polyord(xdata[i]) < 127:
-                sys.stdout.write(xdata[i])
+                sys.stdout.write(polychr(xdata[i]))
             else:
                 sys.stdout.write('.')
             i += 1
@@ -1113,7 +1121,7 @@ class ControlSession:
             elif instring and c == ',':
                 response = response + "\xae"
             elif polyord(c) > 0 and polyord(c) < 127:
-                response = response + c
+                response = response + polychr(c)
         response = response.rstrip()
         items = []
         if response:
