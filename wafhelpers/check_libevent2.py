@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 from waflib.Logs import pprint
 from wafhelpers.tool import check_sanity
 

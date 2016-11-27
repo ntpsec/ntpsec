@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 import sys, os, platform
 from waflib.Configure import conf
 from wafhelpers.probes import *

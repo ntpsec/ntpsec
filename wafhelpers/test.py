@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 from waflib.Logs import pprint
 
 def test_write_log(ctx):

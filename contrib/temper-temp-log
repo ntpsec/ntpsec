@@ -28,6 +28,7 @@ Sample crontab usage:
 
 """
 
+from __future__ import print_function
 
 import time, subprocess
 
