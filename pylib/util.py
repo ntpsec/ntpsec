@@ -86,8 +86,13 @@ class PeerSummary:
         # fit in 80 characters. This tells us how much extra horizontal space
         # we have available on a wider terminal emulator.
         self.horizontal_slack = (termwidth or 80) - 80
-        # Peer spreadsheet column widths
-        self.namewidth = 15 + self.horizontal_slack
+        # Peer spreadsheet column widths. The reason we cap extra
+        # width used at 24 is that on very wide displays, slamming the
+        # non-hostname fields all the way to the right produces a huge
+        # river that makes the entries difficult to read as wholes.
+        # This choice caps the peername field width at that of the longest
+        # possible IPV6 numeric address.
+        self.namewidth = 15 + min(self.horizontal_slack, 24)
         self.refidwidth = 15
         # Compute peer spreadsheet headers 
         self.__remote = "     remote    ".ljust(self.namewidth)
