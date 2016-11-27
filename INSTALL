@@ -226,6 +226,15 @@ of options.
 refclocks are enabled with `--refclock=<n1,n2,n3..> or --refclock=all'
 `waf configure --list' will print a list of available refclocks.
 
+=== --enable-early-droproot ===
+
+Drop root privileges as early as possible.  This requires the refclock
+devices to be owned by the same owner or group that ntpd will be
+running under (most likely that group will be named "ntp") so that it
+can still open the devices.  This can be accomplished by adding
+`GROUP="ntp"` or `OWNER="ntp"` to the udev rules that create the
+device symlinks for the refclocks.
+
 == Developer options ==
 
 --enable-debug-gdb::
