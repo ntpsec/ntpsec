@@ -626,7 +626,7 @@ def dump_hex_printable(xdata):
         restart = i
         for idx in range(16):
             if idx < llen:
-                sys.stdout.write("%02x " % ord(xdata[i]))
+                sys.stdout.write("%02x " % polyord(xdata[i]))
                 i += 1
             else:
                 sys.stdout.write("   ")
@@ -1105,7 +1105,7 @@ class ControlSession:
         # in reslist responses.
         response = ""
         for c in self.response:
-            if ord(c) > 0 and ord(c) < 127:
+            if polyord(c) > 0 and polyord(c) < 127:
                 response += c
         response = response.rstrip()
         items = []
