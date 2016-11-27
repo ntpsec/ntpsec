@@ -1104,19 +1104,19 @@ class ControlSession:
         # Strip out NULs and binary garbage from text;
         # ntpd seems prone to generate these, especially
         # in reslist responses.
+        instring = False
         response = ""
         for c in self.response:
-            if polyord(c) > 0 and polyord(c) < 127:
-                response += c
+            if c == '"':
+                response = response + c
+                instring = not instring
+            if instring and c == ',':
+                response = response + "\xae"
+            elif polyord(c) > 0 and polyord(c) < 127:
+                response = response + c
         response = response.rstrip()
         items = []
         if response:
-            instring = False
-            for i in range(len(response)):
-                if response[i] == '"':
-                    instring = not instring
-                elif instring and response[i] == ',':
-                    response[i] = "\xae"
             for pair in response.split(","):
                 try:
                     pair = pair.strip()
