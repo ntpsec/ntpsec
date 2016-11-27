@@ -252,7 +252,7 @@ else:  # Python 3
 
     def polychr(c):
         "Polymorphic chr() function"
-        if not isinstance(c, str):
+        if isinstance(c, int):
             return chr(c)
         else:
             return c
