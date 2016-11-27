@@ -21,8 +21,7 @@ include::includes/refclock.txt[]
 == Introduction ==
 
 NTP supports a large number of satellite, radio and telephone modem
-reference clocks plus several audio devices for instrumentation
-signals, plus a special pseudo-clock used for backup or when no other
+reference clocks, plus a special pseudo-clock used for backup or when no other
 clock source is available.
 
 A general description of the reference clock support is on this
@@ -38,7 +37,7 @@ standard/daylight adjustments are performed by the operating system
 kernel.
 
 Nowadays a reference clock will generally (though not always) be a GPS
-or GPSDO (GPS-conditioned oscillator). In former times it was often a
+or GPSDO (GPS-disciplined oscillator). In former times it was often a
 radio timecode receiver synchronized to standard time as provided by
 NIST and USNO in the US, NRC in Canada and their counterparts
 elsewhere in the world.  Precision time radios have been extinct in
