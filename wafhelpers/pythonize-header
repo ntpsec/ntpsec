@@ -18,7 +18,7 @@ patterns = (
     (re.compile(r"^/\*"), r"#"),
     (re.compile(r"^ *\*/"), r"#"),
     (re.compile(r"^ \*"), r"#"),
-    (re.compile(r"^#define\s+([A-Z0-9_]+\s+)(.*)"), r"\1= \2"), 
+    (re.compile(r"^#define\s+([A-Z0-9_]+[ \t]+)(.*)"), r"\1= \2"), 
     (re.compile(r"^#define\s+([A-Z0-9_]+)\(([a-z_, ]*)\)"),
      r"def \1(\2): return"), 
     )
