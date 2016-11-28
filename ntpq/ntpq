@@ -800,9 +800,9 @@ usage: ntpversion [ version number ]
         if not line:
             self.say("Keytype: %s\n" % self.session.keytype)
         elif not line in "DSA, DSA-SHA, MD4, MD5, MDC2, RIPEMD160, SHA, SHA1":
-            self.warn("Keytype %s is not supported by ntpd.")
+            self.warn("Keytype %s is not supported by ntpd.\n" % line)
         elif line not in hashlib.algorithms_available:
-            self.warn("Keytype %s is not supported by ntpq.")
+            self.warn("Keytype %s is not supported by ntpq.\n" % line)
         else:
             self.session.keytype = line
 
