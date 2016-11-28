@@ -183,11 +183,11 @@ class Ntpq(cmd.Cmd):
         return line
 
     def say(self, msg):
-        sys.stdout.write(msg)
+        sys.stdout.write(polystr(msg))
         sys.stdout.flush()	# In case we're piping the output
 
     def warn(self, msg):
-        sys.stderr.write(msg)
+        sys.stderr.write(polystr(msg))
 
     def help_help(self):
         self.say("""\
