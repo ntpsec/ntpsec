@@ -1170,7 +1170,7 @@ class ControlSession:
     def fetch_nonce(self):
         "Receive a nonce that can be replayed - combats source address spoofing"
         self.doquery(opcode=CTL_OP_REQ_NONCE)
-        if not self.response.startswith("nonce="):
+        if not self.response.startswith(polybytes("nonce=")):
             raise ControlException(SERR_BADNONCE)
         return self.response.strip()
 
