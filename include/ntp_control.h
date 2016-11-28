@@ -1,6 +1,8 @@
 /*
  * ntp_control.h - definitions related to NTP mode 6 control messages
  */
+#ifndef GUARD_NTP_CONTROL_H
+#define GUARD_NTP_CONTROL_H
 
 #include "ntp_types.h"
 
@@ -158,3 +160,4 @@ struct ntp_control {
 #define	IFSTATS_FIELDS	12
 #define	RESLIST_FIELDS	4
 
+#endif /* GUARD_NTP_CONTROL_H */

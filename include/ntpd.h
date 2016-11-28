@@ -15,6 +15,7 @@
 #include "ntp_syslog.h"
 #include "ntp_malloc.h"
 #include "ntp_refclock.h"
+#include "ntp_control.h"
 #include "ntp_intres.h"
 #include "recvbuff.h"
 
