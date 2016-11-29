@@ -16,30 +16,49 @@ refanchor_re = re.compile(r"link:([^.]*).html#([a-z0-9_-]*)")
 prefix = "docs/"
 
 def tabulate(path):
-    with open(path) as rp:
-        for (i, line) in enumerate(rp):
-            #path = path[len(prefix):]
-            m = boxanchor_re.search(line)
-            html = path[len(prefix):].replace(".txt", ".html") 
-            if m:
-                anchor = "link:" + html + "#" + m.group(1)
-                anchors.add(anchor)
-            m = linkanchor_re.search(line)
-            if m:
-                anchor = "link:" + html + "#" + m.group(1)
-                anchors.add(anchor)
-            m = refanchor_re.search(line)
-            if m:
-                references[m.group(0)] = (path, i+1)
-        
+    iostack.append((0, open(path)))
+    linecount = 0
+    while True:
+        line = iostack[-1][1].readline()
+        linecount += 1
+        if line == "":
+            iostack[-1][1].close()
+            (linecount, _) = iostack.pop()
+            if not iostack:
+                return
+            else:
+                continue
+        if line.startswith("include::"):
+            filestem = line.strip()[9:][:-2]
+            iostack.append((linecount, open(os.path.join(prefix, filestem))))
+            continue
+        # Ordinary processing 
+        # This is the tricky part. Because we're reference-checking the
+        # generated HTML, the file part of a stored anchor name needs to be
+        # the original path from the top of the include stack, not
+        # whatever inclusion we might be walking through now.
+        html = path[len(prefix):].replace(".txt", ".html") 
+        m = boxanchor_re.search(line)
+        if m:
+            anchor = "link:" + html + "#" + m.group(1)
+            anchors.add(anchor)
+        m = linkanchor_re.search(line)
+        if m:
+            anchor = "link:" + html + "#" + m.group(1)
+            anchors.add(anchor)
+        m = refanchor_re.search(line)
+        if m:
+            references[m.group(0)] = (iostack[-1][1].name, linecount)
 
 if __name__ == '__main__':
+    iostack = []
     references = {}
     anchors = set([])
     for dirpath, dnames, fnames in os.walk(prefix):
         for f in fnames:
-            if f.endswith(".txt"):
-                tabulate(os.path.join(dirpath, f))
+            fullpath = os.path.join(dirpath, f)
+            if fullpath.endswith(".txt") and not "includes" in fullpath:
+                tabulate(fullpath)
     #print("References: %s" % references)
     #print("Anchors: %s" % anchors)
     hanging = []
