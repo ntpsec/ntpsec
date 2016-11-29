@@ -1172,7 +1172,7 @@ class ControlSession:
         self.doquery(opcode=CTL_OP_REQ_NONCE)
         if not self.response.startswith(polybytes("nonce=")):
             raise ControlException(SERR_BADNONCE)
-        return self.response.strip()
+        return polystr(self.response.strip())
 
     def mrulist(self, variables=None, rawhook=None):
         "Retrieve MRU list data"
