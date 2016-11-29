@@ -175,12 +175,51 @@ class Ntpq(cmd.Cmd):
         "Called when an empty line is entered in response to the prompt."
         pass
 
-    def precmd(self, line):
+    def default(self, line):
+        "Called on an input line when the command prefix is not recognized."
+
         if line.startswith(":config"):
             line = line[1:]
         elif line.startswith("config-from-file"):
             line = line.replace("config-from-file ", "config_from_file")
-        return line
+
+        cmd, arg, line = self.parseline(line)
+        dotext = 'do_'+cmd
+        cmdprefixlist = [a[3:] for a in self.get_names() if a.startswith(dotext)]
+        if len(cmdprefixlist) == 1:
+            line = line.replace(cmd, cmdprefixlist[0])
+            cmd = cmdprefixlist[0]
+        elif len(cmdprefixlist) > 1:
+            self.warn("***Command `%s' ambiguous\n" % cmd)
+            return
+        elif len(cmdprefixlist) == 0:
+            self.warn("***Command `%s' unknown\n" % cmd)
+            return
+
+        if cmd == "help" and arg:
+            helptext = 'help_'+arg
+            argprefixlist = [a[5:] for a in self.get_names() if a.startswith(helptext)]
+            if len(argprefixlist) == 1:
+                line = line.replace(arg, argprefixlist.pop())
+            elif len(argprefixlist) > 1:
+                self.warn("Command `%s' is ambiguous\n" % arg)
+                return
+            elif len(argprefixlist) == 0:
+                self.warn("Command `%s' is unknown\n" % arg)
+                return
+
+        self.onecmd(line)
+
+    def do_help(self, arg):
+        if arg:
+            helptext = 'help_'+arg
+            argprefixlist = [a[5:] for a in self.get_names() if a.startswith(helptext)]
+            if len(argprefixlist) == 1:
+                arg = argprefixlist.pop()
+            elif len(argprefixlist) > 1:
+                self.warn("Command `%s' is ambiguous\n" % arg)
+                return
+        cmd.Cmd.do_help(self, arg)
 
     def say(self, msg):
         sys.stdout.write(polystr(msg))
@@ -817,7 +856,6 @@ usage: keytype [ digest-name ]
         "print list of association IDs and statuses for the server's peers"
         if self.__dogetassoc():
             self.__printassoc(showall=False)
-    do_as = do_associations	# Documentation mentions this alias
 
     def help_associations(self):
         self.say("""\
@@ -1135,7 +1173,6 @@ usage: pstats assocID
     def do_peers(self, line):
         "obtain and print a list of the server's peers [IP version]"
         self.__dopeers(showall=False, mode="peers")
-    do_pe = do_peers	# Old documentation hints this alias was common
 
     def help_peers(self):
         self.say("""\
