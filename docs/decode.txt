@@ -23,7 +23,9 @@ include::includes/install.txt[]
 * link:#clock[Clock Status Word]
 * link:#flash[Flash Status Word]
 * link:#kiss[Kiss Codes]
-* link:#crypto[Crypto Messages]
+// The crypto link goes nowhere.  TODO: locate this info and add here
+// -- Sanjeev 20161129
+// * link:#crypto[Crypto Messages]
 
 '''''
 
