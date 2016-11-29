@@ -1517,17 +1517,17 @@ offset_calculation(
 
 		printf("ntpdig offset_calculation: rpkt->reftime:\n");
 		l_fp_output(&p_ref, stdout);
-		printf("ntpdig offset_calculation: rpkt->org:\n");
+		printf("ntpdig offset_calculation: rpkt->org: ");
 		l_fp_output(&p_org, stdout);
-		printf("ntpdig offset_calculation: rpkt->rec:\n");
+		printf("ntpdig offset_calculation: rpkt->rec: ");
 		l_fp_output(&p_rec, stdout);
-		printf("ntpdig offset_calculation: rpkt->xmt:\n");
+		printf("ntpdig offset_calculation: rpkt->xmt: ");
 		l_fp_output(&p_xmt, stdout);
 	}
 #endif
 
-	TRACE(3, ("ntpdig offset_calculation:\trec - org t21: %.6f\n"
-		  "\txmt - dst t34: %.6f\tdelta: %.6f\toffset: %.6f\n",
+	TRACE(3, ("ntpdig offset_calculation:\nrec - org t21: %.6f\t"
+		  "\txmt - dst t34: %.6f\ndelta: %.6f\toffset: %.6f\n",
 		  t21, t34, delta, *offset));
 
 	return;

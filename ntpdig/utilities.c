@@ -17,6 +17,7 @@ pkt_output (
 
 	pkt = (uint8_t *)dpkg;
 
+#ifdef __UNUSED__
 	fprintf(output, HLINE);
 
 	for (a = 0; a < pkt_length; a++) {
@@ -28,6 +29,13 @@ pkt_output (
 
 	fprintf(output, "\n");
 	fprintf(output, HLINE);
+#endif /* __UNUSED__ */
+
+	for (a = 0; a < pkt_length; a++) {
+	    fprintf(output, "%02x", pkt[a]);
+	}
+	fprintf(output, "\n");
+
 }
 
 /* Output a long floating point value in hex in the style described above 
