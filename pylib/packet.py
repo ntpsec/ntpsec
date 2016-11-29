@@ -380,7 +380,7 @@ class SyncPacket(Packet):
         self.mac = ''
         self.hostname = None
         self.resolved = None
-        self.received = time.time()
+        self.received = SyncPacket.posix_to_ntp(time.time())
         self.trusted = True
         self.analyze()
         #self.posixize()
@@ -428,6 +428,11 @@ class SyncPacket(Packet):
         "Scale from NTP time to POSIX time"
         # Note: assumes we're in the same NTP era as the transmitter...
         return (t * 2**-32) - SyncPacket.UNIX_EPOCH 
+    @staticmethod
+    def posix_to_ntp(t):
+        "Scale from POSIX time to NTP time"
+        # Note: assumes we're in the same NTP era as the transmitter...
+        return (t + SyncPacket.UNIX_EPOCH) * 2**32
 
     def posixize(self):
         self.root_delay *= 2**-16
@@ -436,29 +441,30 @@ class SyncPacket(Packet):
         self.origin_timestamp = SyncPacket.ntp_to_posix(self.origin_timestamp)
         self.receive_timestamp = SyncPacket.ntp_to_posix(self.receive_timestamp)
         self.transmit_timestamp = SyncPacket.ntp_to_posix(self.transmit_timestamp)
+        self.transmit_timestamp = SyncPacket.ntp_to_posix(self.received)
 
-    def __t1(self):
+    def t1(self):
         return self.origin_timestamp
-    def __t2(self):
+    def t2(self):
         return self.receive_timestamp
-    def __t3(self):
+    def t3(self):
         return self.transmit_timestamp
-    def __t4(self):
+    def t4(self):
         return self.received
     def delta(self):
         "Packet flight time"
-        return (self.__t4() - self.__t1()) - (self.__t3() - self.__t2())
+        return (self.t4() - self.t1()) - (self.t3() - self.t2())
     def epsilon(self):
         "Residual error due to clock imprecision."
         # FIXME: Include client imprecision.
-        return SyncPacket.PHI * (self.__t4() - self.__t1()) + 2**self.precision
+        return SyncPacket.PHI * (self.t4() - self.t1()) + 2**self.precision
     def synchd(self):
         "Synchronization distance, estimates worst-case error in seconds"
         # This is "lambda" in NTP-speak, but that's a Python keyword 
         return abs(self.delta()/2 + self.epsilon())
     def adjust(self):
         "Adjustment implied by this packet - 'theta' in NTP-speak."
-        return ((self.__t2()-self.__t1())+(self.__t3()-self.__t4()))/2
+        return ((self.t2()-self.t1())+(self.t3()-self.t4()))/2
 
     def leap(self):
         return ("no-leap", "add-leap", "del-leap", "unsync")[((self.li_vn_mode) >> 6) & 0x3]

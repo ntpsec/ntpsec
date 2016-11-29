@@ -252,12 +252,13 @@ USAGE:  sntp [ -<flag> [<val>] | --<name>[{=| }<val>] ]...
 if __name__ == '__main__':
     try:
         (options, arguments) = getopt.getopt(sys.argv[1:],
-                                             "46a:c:dD:g:hjk:l:M:o:p:Sst:wWV",
+                                             "46a:c:dD:g:hjk:l:M:o:p:r:Sst:wWV",
                                              ["ipv4","ipv6",
                                               "authentication=",
                                               "concurrent=",
                                               "gap=", "help", "json",
                                               "keyfile=", "logfile=",
+                                              "replay=",
                                               "samples=", "steplimit=",
                                               "step", "slew",
                                               "timeout=",
@@ -283,6 +284,7 @@ if __name__ == '__main__':
     step = False
     slew = False
     timeout = 5
+    replay = None
     try:
         for (switch, val) in options:
             if switch in ("-4", "--ipv4"):
@@ -311,6 +313,8 @@ if __name__ == '__main__':
                 steplimit = int(val)
             elif switch in ("-p", "--samples"):
                 samples = int(val)
+            elif switch in ('-r', "--replay"):
+                replay = val
             elif switch in ("-S", "--step"):
                 step = True
             elif switch in ("-s", "--slew"):
@@ -353,6 +357,14 @@ if __name__ == '__main__':
 
     if not arguments:
         arguments = ["localhost"]
+
+    if replay:
+        pkt = ntp.packet.SyncPacket(replay.decode("hex"))
+        print(repr(pkt))
+        pkt.posixize()
+        print("xmt t3: %f dst t4: %f" % (pkt.t3(), pkt.t4()))
+        print("rec-org t21: %f  xmt-dst t34: %f" % (pkt.t2() - pkt.t1(), pkt.t3() - pkt.t4()))
+        raise SystemExit(0)
 
     returned = []
     for server in concurrent_hosts:
