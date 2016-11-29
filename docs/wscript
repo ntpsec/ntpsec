@@ -1,7 +1,7 @@
 def build(ctx):
 
 	doc_source = ctx.path.ant_glob("*.txt")
-	doc_source = filter(lambda x: "body" not in str(x), doc_source)
+	doc_source = ctx.path.ant_glob("*.txt", excl='*-body.txt')
 
 	ctx(
 		target	= "doc",
