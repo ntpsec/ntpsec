@@ -9,7 +9,7 @@ from __future__ import print_function, division
 
 import os, re
 
-boxanchor_re = re.compile(r"\[\[[a-z0-9_-]*\]\]")
+boxanchor_re = re.compile(r"\[\[([a-z0-9_-]*)\]\]")
 linkanchor_re = re.compile(r"anchor:([a-z0-9_-]*)\[\]")
 refanchor_re = re.compile(r"link:([^.]*).html#([a-z0-9_-]*)")
 
@@ -20,12 +20,14 @@ def tabulate(path):
         for (i, line) in enumerate(rp):
             #path = path[len(prefix):]
             m = boxanchor_re.search(line)
-            html = path[2:].replace(".txt", ".html") 
+            html = path[len(prefix):].replace(".txt", ".html") 
             if m:
-                anchors.add("link:" + html + "#" + m.group(0)[2:-2])
+                anchor = "link:" + html + "#" + m.group(1)
+                anchors.add(anchor)
             m = linkanchor_re.search(line)
             if m:
-                anchors.add("link:" + html + "#" + m.group(1))
+                anchor = "link:" + html + "#" + m.group(1)
+                anchors.add(anchor)
             m = refanchor_re.search(line)
             if m:
                 references[m.group(0)] = (path, i+1)
