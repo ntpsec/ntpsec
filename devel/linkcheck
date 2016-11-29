@@ -1,0 +1,55 @@
+#!/usr/bin/env python
+#
+# linkcheck - check link integrity in the document tree
+#
+# Run this script from docs/
+#
+# SPDX-License-Identifier: BSD-2-clause
+from __future__ import print_function, division
+
+import os, re
+
+boxanchor_re = re.compile(r"\[\[[a-z0-9_-]*\]\]")
+linkanchor_re = re.compile(r"anchor:([a-z0-9_-]*)\[\]")
+refanchor_re = re.compile(r"link:([^.]*).html#([a-z0-9_-]*)")
+
+prefix = "docs/"
+
+def tabulate(path):
+    with open(path) as rp:
+        for (i, line) in enumerate(rp):
+            #path = path[len(prefix):]
+            m = boxanchor_re.search(line)
+            html = path[2:].replace(".txt", ".html") 
+            if m:
+                anchors.add("link:" + html + "#" + m.group(0)[2:-2])
+            m = linkanchor_re.search(line)
+            if m:
+                anchors.add("link:" + html + "#" + m.group(1))
+            m = refanchor_re.search(line)
+            if m:
+                references[m.group(0)] = (path, i+1)
+        
+
+if __name__ == '__main__':
+    references = {}
+    anchors = set([])
+    for dirpath, dnames, fnames in os.walk(prefix):
+        for f in fnames:
+            if f.endswith(".txt"):
+                tabulate(os.path.join(dirpath, f))
+    #print("References: %s" % references)
+    #print("Anchors: %s" % anchors)
+    hanging = []
+    for ref in references:
+        if ref not in anchors:
+            hanging.append(ref)
+    print("%d anchors, %d references, %d references unsatisfied" % \
+          (len(anchors), len(references), len(hanging)))
+    unsatisfied = list(hanging)
+    unsatisfied.sort()
+    for item in unsatisfied:
+        print('"%s", line %d: %s' % \
+              (references[item][0], references[item][1], item))
+
+# end

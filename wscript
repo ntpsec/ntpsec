@@ -257,6 +257,10 @@ def cxfreeze(ctx):
     "Create standalone binaries from Python scripts."
     ctx.exec_command("for prog in " + " ".join(python_scripts) + "; do cxfreeze $prog; done")
 
+def linkcheck(ctx):
+    "Report references without anchors in the documentation."
+    ctx.exec_command("devel/linkcheck")
+
 # The following sets edit modes for GNU EMACS
 # Local Variables:
 # mode:python
