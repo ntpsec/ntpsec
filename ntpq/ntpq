@@ -1600,8 +1600,8 @@ if __name__ == '__main__':
         else:
             for ihost in interpreter.chosts:
                 if session.openhost(*ihost):
-                    for cmd in interpreter.ccmds:
-                        interpreter.onecmd(cmd)
+                    for command in interpreter.ccmds:
+                        interpreter.onecmd(command)
                     session.close()
         raise SystemExit(0)
     except KeyboardInterrupt:
