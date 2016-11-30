@@ -1305,7 +1305,7 @@ class ControlSession:
                 highwater = len(span.entries)
                 for (tag, val) in variables.items():
                     if tag =="now":
-                        span.now = ntp.ntpc.lfptoloat(val)
+                        span.now = ntp.ntpc.lfptofloat(val)
                         continue
                     elif tag == "last.newest":
                         continue
@@ -1319,7 +1319,7 @@ class ControlSession:
                             if idx >= len(span.entries):
                                 span.entries.append(MRUEntry())
                             if type(val) != type(0) and val.startswith("0x"):
-                                val = ntp.ntpc.lfptoloat(val)
+                                val = ntp.ntpc.lfptofloat(val)
                             setattr(span.entries[-1], prefix, val)
 
                 # If we've seen the end sentinel on the span, break out
