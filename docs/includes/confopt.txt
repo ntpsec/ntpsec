@@ -5,6 +5,6 @@
 * link:confopt.html#manycastclient[manycastclient - configure manycast client  association]
 * link:confopt.html#pool[pool - configure pool association]
 * link:confopt.html#unpeer[unpeer - remove association]
-* link:confopt.html#manycastserver[manycastserver - enable manycast server]
+* link:discover.html#mcst[manycastserver - enable manycast server]
 * link:comdex.html[Command Index]
 

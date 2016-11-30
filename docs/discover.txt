@@ -169,22 +169,22 @@ command but with a multicast (IPv4 class _D_ or IPv6 prefix _FF_)
 group address. The IANA has designated IPv4 address 224.1.1.1 and IPv6
 address FF05::101 (site local) for NTP.
 
-The client sends ordinary client mode messages, but to one of
-these broadcast addresses rather than a unicast address, and sends
-only if less than +maxclock+ associations remain and then only at the
-minimum feasible rate and minimum feasible time-to-live (TTL)
-hops. The polling strategy is designed to reduce as much as possible
-the volume of broadcast messages and the effects of implosion due to
-near-simultaneous arrival of manycast server messages. There can be as
-many manycast client associations as different addresses, each one
-serving as a template for future unicast client/server associations.
-
 A manycast server is configured using the +manycastserver+ command,
-which listens on the specified broadcast address for manycast client
+which listens on the specified address for manycast client
 messages.  If a manycast server is in scope of the current TTL and is
 itself synchronized to a valid source and operating at a stratum level
 equal to or lower than the manycast client, it replies with an ordinary
 unicast server message.
+
+The client sends ordinary client mode messages, but to one of
+these muticast addresses rather than a unicast address, and sends
+only if less than +maxclock+ associations remain and then only at the
+minimum feasible rate and minimum feasible time-to-live (TTL)
+hops. The polling strategy is designed to reduce as much as possible
+the volume of manycast client messages and the effects of implosion due to
+near-simultaneous arrival of manycast server messages. There can be as
+many manycast client associations as different addresses, each one
+serving as a template for future unicast client/server associations.
 
 The manycast client receiving this message mobilizes a preemptable
 client association according to the matching manycast client template.
@@ -201,9 +201,6 @@ the "best" associations according to stratum and synchronization
 distance. The surviving associations then continue in ordinary
 client/server mode.
 
-The manycast client polling strategy is designed to reduce as much as
-possible the volume of manycast client messages and the effects of
-implosion due to near-simultaneous arrival of manycast server messages.
 The strategy is determined by the _manycastclient_, _tos_ and _ttl_
 configuration commands. The manycast poll interval is normally eight
 times the system poll interval, which starts out at the _minpoll_ value
