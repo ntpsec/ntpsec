@@ -6,7 +6,9 @@ from __future__ import print_function
 import socket
 import sys
 import time
+import os
 import re
+import shutil
 
 import ntp.ntpc
 import ntp.version
@@ -63,18 +65,19 @@ def canonicalize_dns(hostname, family=socket.AF_UNSPEC):
 
 def termsize():
     "Return the current terminal size."
-    # Should work under Linux and Solaris at least.
     # Alternatives at http://stackoverflow.com/questions/566746/how-to-get-console-window-width-in-python
-    import shlex, subprocess, re
+    if not os.isatty(1):
+        return (80, 24)
     try:
-        output = subprocess.check_output(shlex.split('/bin/stty -a 2>/dev/null'), universal_newlines=True)
-    except (OSError, subprocess.CalledProcessError, AttributeError):
-        return (24, 80)
-    for pattern in ('rows\D+(\d+); columns\D+(\d+);', '\s+(\d+)\D+rows;\s+(\d+)\D+columns;'):
-        m = re.search(pattern, output)
-        if m:
-            return int(m.group(1)), int(m.group(2))
-    return (24, 80)
+        return shutil.get_terminal_size((80, 24))
+    except AttributeError:
+        pass
+    # OK, Python version < 3.3, cope
+    import fcntl, termios, struct
+    h, w, hp, wp = struct.unpack('HHHH',
+        fcntl.ioctl(2, termios.TIOCGWINSZ,
+        struct.pack('HHHH', 0, 0, 0, 0)))
+    return w, h
 
 class PeerSummary:
     "Reusable report generator for peer statistics"
