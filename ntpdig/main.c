@@ -1509,20 +1509,21 @@ offset_calculation(
 
 #ifdef DEBUG
 	if (debug > 3) {
+		double ftime;
+		pkt_output(rpkt, rpktl, stdout);
 		printf("ntpdig rootdelay: %f\n", FPTOD(p_rdly));
 		printf("ntpdig rootdisp: %f\n", FPTOD(p_rdsp));
 		printf("ntpdig syncdist: %f\n", *synch_distance);
-
-		pkt_output(rpkt, rpktl, stdout);
-
-		printf("ntpdig offset_calculation: rpkt->reftime:\n");
+		printf("ntpdig offset_calculation: reftime: ");
 		l_fp_output(&p_ref, stdout);
-		printf("ntpdig offset_calculation: rpkt->org: ");
+		printf("ntpdig offset_calculation: org: ");
 		l_fp_output(&p_org, stdout);
-		printf("ntpdig offset_calculation: rpkt->rec: ");
+		printf("ntpdig offset_calculation: rec: ");
 		l_fp_output(&p_rec, stdout);
-		printf("ntpdig offset_calculation: rpkt->xmt: ");
+		printf("ntpdig offset_calculation: xmt: ");
 		l_fp_output(&p_xmt, stdout);
+		ftime = tv_dst->tv_sec + tv_dst->tv_usec / 1000.0;
+		printf("ntpdig dst %f\n", ftime);
 	}
 #endif
 
