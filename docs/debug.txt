@@ -85,7 +85,7 @@ in the +select+ field of the link:decode.html#peer[peer status word].
 
 The link:ntpq.html#as[+as+] command displays a list of associations and
 association identifiers. Note the +condition+ column, which reflects the
-tally code. The link:ntpq.html#pe[+rv+] command displays the
+tally code. The link:ntpq.html#rv[+rv+] command displays the
 link:ntpq.html#system[system variables] billboard, including the
 link:decode.html#sys[system status word]. The
 link:ntpq.html#rv[+rv assocID+] command, where +assocID+ is the
