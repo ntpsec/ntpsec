@@ -23,6 +23,7 @@ link-local IPV6 address with an interface specified in
   local clock can synchronized to the remote server, but the remote
   server can never be synchronized to the local clock.
 
+[[server]]
 +server+::
   For server addresses, this command mobilizes a persistent client
   mode association with the specified remote server or local radio
@@ -30,10 +31,12 @@ link-local IPV6 address with an interface specified in
   server, but the remote server can never be synchronized to the local
   clock. This command should _not_ be used for broadcast or multicast addresses.
 
+[[peer]]
 +peer+::
   NTP peer mode has been removed for security reasons.  peer is now just
   an alias for the server keyword.  See above.
 
+[[broadcast]]
 +broadcast+::
   For broadcast and multicast addresses (only), this command mobilizes a persistent
   broadcast mode association. Multiple commands can be used to specify
@@ -48,6 +51,7 @@ link-local IPV6 address with an interface specified in
   (site local) exclusively to NTP, but other nonconflicting addresses
   can be used to contain the messages within administrative boundaries.
 
+[[manycastclient]]
 +manycastclient+::
   For multicast addresses (only), this command mobilizes a manycast client
   mode association for the multicast address specified. In this case a
@@ -66,6 +70,7 @@ link-local IPV6 address with an interface specified in
   _server_ command. The remaining servers are discarded as if never
   heard.
 
+[[unpeer]]
 +unpeer+::
   This command removes a previously configured association. An address
   or association ID can be used to identify the association. Either an
