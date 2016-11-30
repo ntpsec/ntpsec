@@ -278,19 +278,19 @@ usage: help [ command ]
                 elif (statval & 0x3) == OLD_CTL_PST_SEL_SYSPEER:
                     condition = "sys_peer"
             event_dict = {
-                ntp.packet.PEVNT_MOBIL: "mobilize",
-                ntp.packet.PEVNT_DEMOBIL: "demobilize",
-                ntp.packet.PEVNT_REACH: "reachable",
-                ntp.packet.PEVNT_UNREACH: "unreachable",
-                ntp.packet.PEVNT_RESTART: "restart",
-                ntp.packet.PEVNT_REPLY: "no_reply",
-                ntp.packet.PEVNT_RATE: "rate_exceeded",
-                ntp.packet.PEVNT_DENY: "access_denied",
-                ntp.packet.PEVNT_ARMED: "leap_armed",
-                ntp.packet.PEVNT_NEWPEER: "sys_peer",
-                ntp.packet.PEVNT_CLOCK: "clock_alarm",
+                ntp.ntp_magic.PEVNT_MOBIL: "mobilize",
+                ntp.ntp_magic.PEVNT_DEMOBIL: "demobilize",
+                ntp.ntp_magic.PEVNT_REACH: "reachable",
+                ntp.ntp_magic.PEVNT_UNREACH: "unreachable",
+                ntp.ntp_magic.PEVNT_RESTART: "restart",
+                ntp.ntp_magic.PEVNT_REPLY: "no_reply",
+                ntp.ntp_magic.PEVNT_RATE: "rate_exceeded",
+                ntp.ntp_magic.PEVNT_DENY: "access_denied",
+                ntp.ntp_magic.PEVNT_ARMED: "leap_armed",
+                ntp.ntp_magic.PEVNT_NEWPEER: "sys_peer",
+                ntp.ntp_magic.PEVNT_CLOCK: "clock_alarm",
                 }
-            last_event = event_dict.get(ntp.packet.PEER_EVENT|event, "")
+            last_event = event_dict.get(ntp.ntp_magic.PEER_EVENT|event, "")
             display = \
                      "%3d %5u  %04x   %3.3s  %4s  %4.4s %9.9s %11s %2lu" % \
                      (i + 1, peer.associd,
