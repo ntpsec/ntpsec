@@ -45,7 +45,7 @@ _suffix_::
 
 For more details on the format of statistics files, see
 link:statfiles.html[Statistics file formats].  There is a
-visualization tool, linkLntpviz.html[ntpviz], which assists
+visualization tool, link:ntpviz.html[ntpviz], which assists
 in making sense of these.
 
 [[cmd]]
