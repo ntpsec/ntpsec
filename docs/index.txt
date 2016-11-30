@@ -89,7 +89,7 @@ few will be user-visible.
   into +ntpq+.
 
 * As noted above, Autokey is not supported; that code has been
-  removed, as it was chronically prone to security vulnerabilties.
+  removed, as it was chronically prone to security vulnerabilities.
 
 * peer mode has been removed.  The keyword peer in ntp.conf is now
   just an alias for keyword server.  Incoming peer packets are ignored.
@@ -295,7 +295,7 @@ link:warp.html[How NTP Works]::
   Gives an overview of the NTP daemon architecture and how it works.
 link:outside-tools.html[Outside Tools]::
   A variety of tools not directly maintained along with NTP can be
-  useful for adminiseting and monitoring it. This page collects some
+  useful for administering and monitoring it. This page collects some
   references and links.
 
 [[build]]

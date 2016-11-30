@@ -85,7 +85,7 @@ subset of comparative plots for multiple directories.
     (1388x768).  'l' for large screens (1920x1080).  'm' is the default.
 
 -D DLVL or --debug DLVL::
-    Set the debug level to DLVL.  Lsrger DLVL leads to more verbosity. +
+    Set the debug level to DLVL.  Larger DLVL leads to more verbosity. +
     0 is the default, quiet except for all ERRORs and some WARNINGs. +
     1 shows some environment info and basic program progress. +
     2 leaves the plot file in the system temp directory. +

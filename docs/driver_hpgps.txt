@@ -17,7 +17,7 @@ Two-unit pairs of these are sometimes known as a KS-24361.
 These receivers are very old designs, dating from around 1990, so
 their GPS receiver stages are not very sensitive by modern
 standards. On the other hand, lots of them are available cheap,
-because they used to be standard kit on cell towers and were surplused
+because they used to be standard kit on cell towers and were surplussed
 off in the thousands.
 
 They use HP SmartClock (TM) to implement an Enhanced GPS receiver. The

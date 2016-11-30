@@ -112,7 +112,7 @@ includes only partial support for it. The deprecated +peer+ directive
 which formerly set up a symmetric active association is now a synonym
 for +server+. Servers which receive symmetric active messages will
 immediately reply with symmetric passive responses without setting up
-any new association; essientially they treat such messages exactly
+any new association; essentially they treat such messages exactly
 like client-mode messages aside from putting a different mode number
 into the response.
 

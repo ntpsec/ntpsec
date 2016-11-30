@@ -16,14 +16,14 @@ yet produced a synchronized and stable system clock._
 
 == OPTIONS ==
 
-+-n+ number, +--tries+=_number_::
++-n+ _number_, +--tries+=_number_::
   Number of times to check ntpd. This option takes an integer number as
   its argument. The default _number_ for this option is: 100.
 +
 The maximum number of times we will check _ntpd_ to see if it has been
 able to synchronize and stabilize the system clock.
 
-+-s+ secs-between-tries, +--sleep+=_secs-between-tries_::
++-s+ _secs-between-tries_, +--sleep+=_secs-between-tries_::
   How long to sleep between tries. This option takes an integer number
   as its argument. The default _secs-between-tries_ for this option
   is: 6.

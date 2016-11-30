@@ -20,7 +20,7 @@ For +ntptrace+ to work properly, each of these servers must
 implement the NTP Control and Monitoring Protocol specified in RFC 1305
 and enable NTP Mode 6 control packets.  Nowadays it is usual for
 public timeservers to disable Mode 6 queries, so this script is
-unlikely to be very useful unless you have a collectioon of
+unlikely to be very useful unless you have a collection of
 specially-configured timeservers on your LAN.
 
 If given no arguments, ntptrace starts with localhost. Here is an
