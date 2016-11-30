@@ -391,7 +391,7 @@ the stanza.
 Attributes within each stanza are deliberately issued in a random
 order, and ntpd occasionally issues an attribute with a
 randomly-generated name and value. This is an attempt to prevent Mode
-6 clients from making brittle assumptioons about the inventory of
+6 clients from making brittle assumptions about the inventory of
 attributes and their transmission order.
 
 Clients can rely on all *.0 values preceding any *.1 values, that is

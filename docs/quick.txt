@@ -162,8 +162,8 @@ analogous group of servers by pinging them.
 Ideally, one would like one's servers to use multiple different kinds
 of timesources (as opposed to, say, all being GPS-based) and be split
 across different autonomous networks as a hedge against outages and
-routing probems.  Unfortunately, the random nature of pool allocation
-makes this imposssible to guarantee. It is, however, worth keeping in mind if
+routing problems.  Unfortunately, the random nature of pool allocation
+makes this impossible to guarantee. It is, however, worth keeping in mind if
 you can set up a custom configuration with non-pool servers that you
 have permission to use.
 

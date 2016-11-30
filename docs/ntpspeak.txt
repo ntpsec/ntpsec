@@ -73,7 +73,7 @@
    Global Positioning System; also, "a GPS" is a radio receiver
    designed to get position and time fixes from the system. GPS fixes
    are derived from spherical trigonometry using the precisely known
-   positions of satellities in a geocentric coordinate system. GPS
+   positions of satellites in a geocentric coordinate system. GPS
    also provides time service; those that emit <<PPS>> are suitable
    as clock sources for Stratum 1 timeservers.
 
@@ -170,7 +170,7 @@
 
 [[popcorn spike]] popcorn spike::
   A packet from a particular peer that has a computed theta more than
-  three standard deviations from the prevous sample.  These are
+  three standard deviations from the previous sample.  These are
   normally treated as random outliers and suppressed.
 
 [[PPS]] PPS::
@@ -207,7 +207,7 @@
   with a refclock is implicitly Stratum 1.
 
 [[stratum]] stratum::
-  A "stratum" is a layer in the hieratchy of time servers.  a
+  A "stratum" is a layer in the hierarchy of time servers.  a
   <<refclock>> is considered stratum 0; a computer directly attached to
   a refclock is stratum 1; and a client served by a stratum N is
   stratum N+1. Often capitalized, especially when referring to all

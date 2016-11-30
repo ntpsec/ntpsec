@@ -94,7 +94,7 @@ never a good idea.
 +-b+, +--bcastsync+::
   Allow us to sync to broadcast servers.
 
-+-c+ string, +--configfile+=_string_::
++-c+ _string_, +--configfile+=_string_::
   configuration file name.
 +
 The name and path of the configuration file, +/etc/{ntpconf}+ by
@@ -104,11 +104,11 @@ default.
   Increase debug verbosity level. This option may appear an unlimited
   number of times.
 
-+-D+ number, +--set-debug-level+=_number_::
++-D+ _number_, +--set-debug-level+=_number_::
   Set the debug verbosity level. This option may appear an unlimited
   number of times. This option takes an integer number as its argument.
 
-+-f+ string, +--driftfile+=_string_::
++-f+ _string_, +--driftfile+=_string_::
   frequency drift file name.
 +
 The name and path of the frequency file, +/etc/ntp.drift+ by default.
@@ -141,7 +141,7 @@ cause the time to be stepped back so this option must not be used if
 applications requiring monotonic time are running. See the _tinker_
 configuration file directive for other options.
 
-+-i+ string, +--jaildir+=_string_::
++-i+ _string_, +--jaildir+=_string_::
   Jail directory.
 +
 Chroot the server to the directory _jaildir_ This option also implies
@@ -150,7 +150,7 @@ need to also specify a +-u+ option. This option is only available if
 the OS supports adjusting the clock without full root privileges. This
 option is supported under Linux, NetBSD and Solaris.
 
-+-I+ iface, +--interface+=_iface_::
++-I+ _iface_, +--interface+=_iface_::
   Listen on an interface name or address. This option may appear an
   unlimited number of times.
 +
@@ -160,14 +160,14 @@ option also implies not opening other addresses, except wildcard and
 localhost. This option is deprecated. Please consider using the
 configuration file _interface_ command, which is more versatile.
 
-+-k+ string, +--keyfile+=_string_::
++-k+ _string_, +--keyfile+=_string_::
   path to symmetric keys.
 +
 Specify the name and path of the symmetric key file. +/etc/ntp.keys+
 is the default. This is the same operation as the _keys_
 configuration file directive.
 
-+-l+ string, +--logfile+=_string_::
++-l+ _string_, +--logfile+=_string_::
   path to the log file.
 +
 Specify the name and path of the log file. The default is the system
@@ -197,14 +197,14 @@ server to be discovered via mDNS client lookup.
 To the extent permitted by the operating system, run +ntpd+ at the
 highest priority.
 
-+-p+ string, +--pidfile+=_string_::
++-p+ _string_, +--pidfile+=_string_::
   path to the PID file.
 +
 Specify the name and path of the file used to record +ntpd+'s process
 ID. This is the same operation as the _pidfile_
 configuration file directive.
 
-+-P+ number, +--priority+=_number_::
++-P+ _number_, +--priority+=_number_::
   Process priority. This option takes an integer number as its argument.
 +
 To the extent permitted by the operating system, run +ntpd+ at the
@@ -220,34 +220,34 @@ which has been replaced with a shell script. The +-g+ and +-x+ options can be
 used with this option. Note: The kernel time discipline is disabled
 with this option.
 
-+-r+ string, +--propagationdelay+=_string_::
++-r+ _string_, +--propagationdelay+=_string_::
   Broadcast/propagation delay.
 +
 Specify the default propagation delay from the broadcast/multicast
 server to this client. This is necessary only if the delay cannot be
 computed automatically by the protocol.
 
-+-s+ string, +--statsdir+=_string_::
++-s+ _string_, +--statsdir+=_string_::
   Statistics file location.
 +
 Specify the directory path for files created by the statistics
 facility. This is the same operation as the _statsdir_
 configuration file directive.
 
-+-t+ tkey, +--trustedkey+=_tkey_::
++-t+ _tkey_, +--trustedkey+=_tkey_::
   Trusted key number. This option may appear an unlimited number of
   times.
 +
 Add the specified key number to the trusted key list.
 
-+-u+ string, +--user+=_string_::
++-u+ _string_, +--user+=_string_::
   Run as userid (or userid:groupid).
 +
 Specify a user, and optionally a group, to switch to. This option is
 only available if the OS supports adjusting the clock without full
 root privileges. This option is supported under Linux, NetBSD and Solaris.
 
-+-U+ number, +--updateinterval+=_number_::
++-U+ _number_, +--updateinterval+=_number_::
   interval in seconds between scans for new or dropped interfaces. This
   option takes an integer number as its argument.
 +
@@ -257,7 +257,7 @@ performed shortly after the interface change has been detected by the
 system. Use 0 to disable scanning. 60 seconds is the minimum time
 between scans.
 
-+-w+ number, +--wait-sync+=_number_::
++-w+ _number_, +--wait-sync+=_number_::
   Seconds to wait for first clock sync. This option must not appear in
   combination with any of the following options: nofork, quit.
   This option takes an integer number as its argument.

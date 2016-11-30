@@ -56,7 +56,7 @@ Let φ~max~ be the maximum select jitter and φ~min~ be the minimum
 peer jitter over all candidates on the list. In (a), candidate 1 has the
 highest select jitter, so φ~_max_~ = φ~S~(1). Candidate 4 has the lowest
 peer jitter, so φ~min~ = φ~R~(4). Since φ~max~ > φ~min~, select
-jitter dominates peer jitter,the algorithm prunes candidate 1. In (b),
+jitter dominates peer jitter, the algorithm prunes candidate 1. In (b),
 φ~max~ = φ~S~(3) and φ~min~ =φ~R~(4). Since φ~max~ < φ~min~,
 pruning additional candidates does not reduce select jitter, the
 algorithm terminates with candidates 2, 3 and 4 as survivors.

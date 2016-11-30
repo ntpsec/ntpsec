@@ -227,7 +227,7 @@ generated line.
 |+0+        |#        |ru_inblock: file blocks in
 |+2328+     |#        |ru_oublock: file blocks out
 |+64226+    |#        |ru_nvcsw: context switches, wait
-|+1+        |#        |ru_nivcsw: context switches, prempts
+|+1+        |#        |ru_nivcsw: context switches, preempts
 |+0+        |#        |ru_nsignals: signals
 |+4308+     |#        |ru_maxrss: resident set size, kilobytes
 |==================================================

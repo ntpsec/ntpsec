@@ -37,9 +37,9 @@ utilities.
   Raw mode.  Only applies to the jitter mode, and means the raw
   clock samples should be emitted to stdout for postanalysis.
 +-?+::
-  Print sueage and exit.
+  Print usage and exit.
 +-h+::
-  Print sueage and exit.
+  Print usage and exit.
 
 [[usage]]
 == Usage ==

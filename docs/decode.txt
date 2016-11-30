@@ -47,7 +47,7 @@ In addition, there is a set of clock events for each association that
 supports a reference clock. Events are normally reported to the
 +protostats+ monitoring file and optionally to the system log.
 //The now-removed trap feature was mentioned here - we're marking
-//this spot in case sometning like it is reintroduced.
+//this spot in case something like it is reintroduced.
 
 In the following tables the Event Field is the status or event code
 assigned and the Message Field a short string used for display and event
@@ -253,7 +253,7 @@ Not all bits are in use, but have been kept for backwards compatibility.
 
 Kiss codes are used in kiss-o'-death (KoD) packets, billboard displays
 and log messages. They consist of a string of four zero-padded ASCII
-charactes. In practice they are informal and tend to change with time
+characters. In practice they are informal and tend to change with time
 and implementation. Some of these codes can appear in the reference
 identifier field in +ntpq+ billboards. Following is the current list:
 

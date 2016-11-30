@@ -127,7 +127,7 @@ RFC-2770.
 A multicast server is configured using the +broadcast+ command, but
 specifying a multicast address instead of a broadcast address. Note
 that there is a subtle distinction between the IPv4 and IPv6 address
-families. The IPv4 broadcast or mulitcast mode is determined by the
+families. The IPv4 broadcast or multicast mode is determined by the
 IPv4 class. For IPv6 the same distinction can be made using the
 link-local prefix FF02 for each interface and site-local prefix FF05
 for all interfaces.
