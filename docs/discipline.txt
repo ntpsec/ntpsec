@@ -176,7 +176,7 @@ cluster algorithms to refine and validate the initial clock offset
 estimate. Normally, this takes several updates before setting the system
 clock. As the default minimum poll interval in most configurations is
 about one minute, it can take several minutes before setting the system
-clock. The +iburst+ option of the link:confopt.html#burst[+server+]
+clock. The +iburst+ option of the link:assoc.html#burst[+server+]
 command changes the behavior at restart and is recommended for
 client/server configurations. When this option is enabled, the client
 sends a volley of six requests at intervals of two seconds. This usually
