@@ -22,6 +22,7 @@ include::includes/misc-options.txt[]
 // A subset of the tos options is described on the ntp.conf manual page.
 // If you change this, be very sure to keep that synchronized.
 
+[[tos]]
 +tos+ [+beacon+ 'beacon' | +ceiling+ 'ceiling' | +cohort+ {+0+ | +1+} | +floor+ 'floor' | +maxclock+ 'maxclock' | +maxdist+ 'maxdist' | +minclock+ 'minclock' | +mindist+ 'mindist' | +minsane+ 'minsane' | +orphan+ 'stratum' | +orphanwait+ 'delay']::
   This command alters certain system variables used by the clock
   selection and clustering algorithms. The default values of these
@@ -95,6 +96,7 @@ include::includes/misc-options.txt[]
     and selectable before using backup sources, and avoids transient use
     of the backup sources at startup.
 
+[[ttl]]
 +ttl+ 'hop ...'::
   This command specifies a list of TTL values in increasing order. up to
   8 values can be specified. In manycast mode these values are used in

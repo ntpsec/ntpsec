@@ -1,5 +1,5 @@
 === Reference Clock Commands and Options ===
+* link:clockopt.html#addrs[refclock - specify reference clock server]
 * link:clockopt.html#options[options - specify clock-driver options]
-* link:clockopt.html#server[server - specify reference clock server]
 * link:comdex.html[Command Index]
 
