@@ -19,7 +19,7 @@ int call_vsnprintf(char *dst, size_t sz, const char *fmt,...)
         return rc;
 }
 
-int main()
+int main(void)
 {
         char    sbuf[512];
         char    pbuf[512];
@@ -38,7 +38,7 @@ def check_vsprintfm(ctx):
         ctx.check_cc(
                 fragment='''
 #include <features.h>
-int main()
+int main(void)
 {
 #ifndef __GLIBC__
 # error __GLIBC__ is not defined

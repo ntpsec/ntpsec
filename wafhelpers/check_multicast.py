@@ -3,7 +3,7 @@ def check_multicast(ctx):
         ctx.check_cc(
                 fragment="""
 #include <netinet/in.h>
-int main() {
+int main(void) {
         struct ip_mreq ipmr;
         ipmr.imr_interface.s_addr = 0;
         return 0;
