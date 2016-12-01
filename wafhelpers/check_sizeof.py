@@ -4,7 +4,7 @@ from waflib import Errors
 SIZE_FRAG = """
 %s
 #include <stdio.h>
-int main () {
+int main(void) {
 	printf("%%lu", sizeof(%s));
 	return 0;
 }
@@ -38,7 +38,7 @@ def check_sizeof_host(ctx, header, sizeof, mandatory=True):
 SIZE_FRAG_CROSS = """
 %s
 #include <sys/stat.h>
-int main () {
+int main(void) {
   static int test_array [1 - 2 * !(((long int) (sizeof (%s))) <= %d)];
   test_array [0] = 0;
   return test_array[0];

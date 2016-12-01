@@ -10,7 +10,7 @@ struct sockaddr_storage n;
 SA_LEN_FRAG = """
 #include <sys/types.h>
 #include <sys/socket.h>
-int main () {
+int main(void) {
   extern struct sockaddr *ps;
   return ps->sa_len;
 }
