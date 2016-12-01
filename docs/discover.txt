@@ -177,7 +177,7 @@ equal to or lower than the manycast client, it replies with an ordinary
 unicast server message.
 
 The client sends ordinary client mode messages, but to one of
-these muticast addresses rather than a unicast address, and sends
+these multicast addresses rather than a unicast address, and sends
 only if less than +maxclock+ associations remain and then only at the
 minimum feasible rate and minimum feasible time-to-live (TTL)
 hops. The polling strategy is designed to reduce as much as possible
