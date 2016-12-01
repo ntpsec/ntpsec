@@ -1,7 +1,6 @@
 === Authentication Commands and Options ===
 * link:authopt.html#controlkey[controlkey - specify control key ID]
 * link:authopt.html#keys[keys - specify symmetric keys filename]
-* link:authopt.html#requestkey[requestkey - specify request key ID]
 * link:authopt.html#trustedkey[trustedkey - specify trusted key IDs]
 * link:comdex.html[Command Index]
 
