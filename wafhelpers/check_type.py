@@ -1,7 +1,7 @@
 from waflib.Configure import conf
 
 TYPE_FRAG = """
-int main () {
+int main(void) {
         if (sizeof (%s))
                 return 0;
         return 0;

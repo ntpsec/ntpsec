@@ -1,7 +1,7 @@
 # Versions older than 0.9.7d were deemed incompatible in NTP Classic.
 OPENSSL_FRAG = """
 %s
-int main () {
+int main(void) {
 #if OPENSSL_VERSION_NUMBER < 0x0090704fL
 #error OpenSSL is too old.
 #endif

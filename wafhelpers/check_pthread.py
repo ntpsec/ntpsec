@@ -2,7 +2,7 @@ from wafhelpers.tool import check_sanity
 
 PTHREAD_FRAG = """
 #include <pthread.h>
-int main() {
+int main(void) {
 	pthread_mutex_t mutex;
 	pthread_mutex_init(&mutex, NULL);
 	pthread_mutex_destroy(&mutex);

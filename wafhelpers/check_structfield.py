@@ -4,7 +4,7 @@ TYPE_FRAG = """
 #include <stdint.h>
 #include <sys/types.h>
 %s
-int main () {
+int main(void) {
         struct %s x;
         if (sizeof (x.%s))
                 return 0;
