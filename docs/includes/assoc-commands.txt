@@ -17,6 +17,7 @@ link-local IPV6 address with an interface specified in
   and the mode in which to operate. The _address_ can be either a DNS
   name or an IP address in dotted-quad notation.
 
+[[pool]]
 +pool+::
   For server addresses, this command mobilizes a persistent client
   mode association with a number of remote servers. In this mode the
