@@ -341,9 +341,10 @@ usage: help [ command ]
         if not self.__dogetassoc():
             return
         if self.showhostnames:
-            termwidth = ntp.util.termsize()[1]
+            termwidth = ntp.util.termsize().width
         else:
-            termwidth = None	# Default width 
+            termwidth = None	# Default width
+        print("Width: %d" % termwidth)
         report = ntp.util.PeerSummary(mode,
                                       self.pktversion,
                                       self.showhostnames,
@@ -496,7 +497,7 @@ usage: help [ command ]
                         lastcount = 0
                     else:
                         lastcount += 1
-                if lastcount + len(item) > ntp.util.termsize()[1] - 2:
+                if lastcount + len(item) > ntp.util.termsize().width - 2:
                     text = text[:-1] + "\n"
                 text += item
             text = text[:-2] + "\n"
