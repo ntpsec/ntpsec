@@ -265,6 +265,7 @@ The remaining fields show the values used since the last report.
     _filegen_ filename prefix to be modified for file generation sets,
     which is useful for handling statistics logs.
 
+[[filegen]]
   +filegen+ _name_ [+file+ _filename_] [+type+ _typename_] [+link+ | +nolink+] [+enable+ | +disable+];;
     Configures setting of generation file set name. Generation file sets
     provide a means for handling files that are continuously growing
