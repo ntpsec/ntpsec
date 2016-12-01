@@ -76,11 +76,11 @@ The UT1 timescale, upon which UTC is based, is determined by the
 rotation of the Earth about its axis. The Earth rotation is gradually
 slowing down relative to International Atomic Time (TAI). In order to
 rationalize UTC with respect to TAI, a leap second is inserted at
-intervals of about 18 months, as determined by the International Earth
-Rotation Service (IERS). Reckoning with leap seconds in the NTP
+intervals, historically averaging about 18 months, as determined by the
+https://www.iers.org/IERS/EN/Home/home_node.html [International Earth
+Rotation Service (IERS)]. Reckoning with leap seconds in the NTP
 timescale is described in the white paper
-{millshome}leap.html[The NTP Timescale and Leap
-Seconds].
+{millshome}leap.html[The NTP Timescale and Leap Seconds].
 
 The historic insertions are documented in the +leap-seconds.list+ file,
 which can be downloaded from the NIST FTP servers. This file is updated
@@ -132,11 +132,12 @@ server using the _on-wire protocol_ described in the white paper
 the NTP On-Wire Protocols]. The protocol is resistant to lost, replayed
 or spoofed packets.
 
-The poll process sends NTP packets at intervals ranging from 1 s to 36
-hr. The intervals are managed as described on the link:poll.html[Poll
-Process] page to maximize accuracy while minimizing network load. The
-peer process receives NTP packets and performs the packet sanity tests
-described on the link:decode.html[Event Messages and Status Words] page
+The poll process sends NTP packets at intervals ranging from 1 s to
+2^17 s (36.4 hr). The intervals are managed as described on the
+link:poll.html[Poll Process] page to maximize accuracy while
+minimizing network load. The peer process receives NTP packets and
+performs the packet sanity tests described on the
+link:decode.html[Event Messages and Status Words] page
 and link:decode.html#flash[flash status word]. The flash status word
 reports in addition the results of various access control and security
 checks described in the white paper
