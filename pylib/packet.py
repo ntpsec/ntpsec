@@ -373,7 +373,7 @@ class SyncPacket(Packet):
         self.origin_timestamp = 0
         self.receive_timestamp = 0
         self.transmit_timestamp = 0
-        self.data = data
+        self.data = polybyes(data)
         self.extension = ''
         self.extfields = []
         self.mac = ''
@@ -567,6 +567,7 @@ class ControlPacket(Packet):
         return "%5d %5d\t%3d octets\n" % (self.offset, self.end(), self.count)
 
     def analyze(self, rawdata):
+        rawdata = polybytes(rawdata)        
         (self.li_vn_mode,
          self.r_e_m_op,
          self.sequence,
