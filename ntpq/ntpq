@@ -344,7 +344,6 @@ usage: help [ command ]
             termwidth = ntp.util.termsize().width
         else:
             termwidth = None	# Default width
-        print("Width: %d" % termwidth)
         report = ntp.util.PeerSummary(mode,
                                       self.pktversion,
                                       self.showhostnames,
