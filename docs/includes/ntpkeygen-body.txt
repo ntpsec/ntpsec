@@ -60,8 +60,8 @@ password is the name of the host running the program. If the previous
 write password is specified as the host name, these files can be read by
 that host with no explicit password.
 
-File names begin with the prefix _ntpkey__ and end with the postfix
-__hostname.filestamp_, where _hostname_ is the owner name, usually the
+File names begin with the prefix _ntpkey_ and end with the postfix
+_hostname.filestamp_, where _hostname_ is the owner name, usually the
 string returned by the Unix gethostname() routine, and _filestamp_ is
 the NTP seconds when the file was generated, in decimal digits. This
 both guarantees uniqueness and simplifies maintenance procedures, since
