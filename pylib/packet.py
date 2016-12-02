@@ -718,7 +718,6 @@ class ControlSession:
         self.sequence = 0
         self.response = ""
         self.rstatus = 0
-        self.mruspans = []
         self.ntpd_row_limit = ControlSession.MRU_ROW_LIMIT
 
     def close(self):
@@ -958,11 +957,11 @@ class ControlSession:
 
             if rpkt.version() > ntp.ntp_magic.NTP_VERSION or rpkt.version() < ntp.ntp_magic.NTP_OLDVERSION:
                 if self.debug:
-                    warn("Packet received with version %d\n" % rpkt.version())
+                    warn("Fragment received with version %d\n" % rpkt.version())
                 continue
             if rpkt.mode() != ntp.ntp_magic.MODE_CONTROL:
                 if self.debug:
-                    warn("Packet received with mode %d\n" % rpkt.mode())
+                    warn("Fragment received with mode %d\n" % rpkt.mode())
                 continue
             if not rpkt.is_response():
                 if self.debug:
@@ -985,7 +984,7 @@ class ControlSession:
             # Check the error code.  If non-zero, return it.
             if rpkt.is_error():
                 if rpkt.more():
-                    warn("Error %d received on non-final packet\n" %
+                    warn("Error %d received on non-final fragment\n" %
                          rpkt.errcode())
                 self.keyid = self.passwd = None
                 raise ControlException(SERR_SERVER % ControlSession.server_errors[rpkt.errcode()],
@@ -999,19 +998,19 @@ class ControlSession:
             # validate received payload size is padded to next 32-bit
             # boundary and no smaller than claimed by rpkt.count
             if len(rawdata) & 0x3:
-                warn("Response packet not padded, size = %d\n" % len(rawdata))
+                warn("Response fragment not padded, size = %d\n" % len(rawdata))
                 continue
 
             shouldbesize = (ControlPacket.HEADER_LEN + rpkt.count + 3) & ~3
             if len(rawdata) < shouldbesize:
-                warn("Response packet claims %u octets payload, above %d received\n" % \
+                warn("Response fragment claims %u octets payload, above %d received\n" % \
                     (rpkt.count, len(rawdata) - ControlPacket.HEADER_LEN))
                 raise ControlException(SERR_INCOMPLETE)
 
             if self.debug > 1:
-                warn("Got packet, size = %d\n"% len(rawdata))
+                warn("Got fragment, size = %d\n"% len(rawdata))
             if rpkt.count > (len(rawdata) - ControlPacket.HEADER_LEN):
-                    warn("Received count of %u octets, data in packet is %ld\n"\
+                    warn("Received count of %u octets, data in fragment is %ld\n"\
                                    % (rpkt.count, len(rawdata) - ControlPacket.HEADER_LEN))
                     continue
 
@@ -1025,13 +1024,13 @@ class ControlSession:
                 continue
 
             if seenlastfrag and rpkt.more():
-                warn("Received second last fragment packet\n")
+                warn("Received second last fragment\n")
                 continue
 
             # So far, so good.  Record this fragment
             # overlap anything.
             if self.debug >= 2:
-                warn("Packet okay\n")
+                warn("Fragment okay\n")
 
             # Find the most recent fragment with a
             not_earlier = [frag for frag in fragments \
@@ -1251,8 +1250,7 @@ class ControlSession:
                         # None of the supplied prior entries match, so
                         # toss them from our list and try again.
                         if self.debug:
-                            warn("no overlap between %d prior entries and server MRU list\n" % len(self.mrustats))
-                        self.mrustats = []
+                            warn("no overlap between prior entries and server MRU list\n")
                         restarted_count += 1
                         if restarted_count > 8:
                             raise ControlException(SERR_STALL)
