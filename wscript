@@ -209,6 +209,7 @@ def build(ctx):
 	ctx.add_post_fun(linkmaker)
 
 	ctx.manpage(8, "ntpleapfetch/ntpleapfetch-man.txt")
+	ctx.manpage(1, "ntpq/ntpq-man.txt")
 	ctx.manpage(1, "ntptrace/ntptrace-man.txt")
 	ctx.manpage(1, "ntpstats/ntpviz-man.txt")
 	ctx.manpage(8, "ntpwait/ntpwait-man.txt")
