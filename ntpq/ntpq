@@ -198,27 +198,29 @@ class Ntpq(cmd.Cmd):
 
         if cmd == "help" and arg:
             helptext = 'help_'+arg
-            argprefixlist = [a[5:] for a in self.get_names() if a.startswith(helptext)]
-            if len(argprefixlist) == 1:
-                line = line.replace(arg, argprefixlist.pop())
-            elif len(argprefixlist) > 1:
-                self.warn("Command `%s' is ambiguous\n" % arg)
-                return
-            elif len(argprefixlist) == 0:
-                self.warn("Command `%s' is unknown\n" % arg)
-                return
+            if helptext not in self.get_names():
+                argprefixlist = [a[5:] for a in self.get_names() if a.startswith(helptext)]
+                if len(argprefixlist) == 1:
+                    line = line.replace(arg, argprefixlist.pop())
+                elif len(argprefixlist) > 1:
+                    self.warn("Command `%s' is ambiguous\n" % arg)
+                    return
+                elif len(argprefixlist) == 0:
+                    self.warn("Command `%s' is unknown\n" % arg)
+                    return
 
         self.onecmd(line)
 
     def do_help(self, arg):
         if arg:
             helptext = 'help_'+arg
-            argprefixlist = [a[5:] for a in self.get_names() if a.startswith(helptext)]
-            if len(argprefixlist) == 1:
-                arg = argprefixlist.pop()
-            elif len(argprefixlist) > 1:
-                self.warn("Command `%s' is ambiguous\n" % arg)
-                return
+            if helptext not in self.get_names():
+                argprefixlist = [a[5:] for a in self.get_names() if a.startswith(helptext)]
+                if len(argprefixlist) == 1:
+                    arg = argprefixlist.pop()
+                elif len(argprefixlist) > 1:
+                    self.warn("Command `%s' is ambiguous\n" % arg)
+                    return
         cmd.Cmd.do_help(self, arg)
 
     def say(self, msg):
