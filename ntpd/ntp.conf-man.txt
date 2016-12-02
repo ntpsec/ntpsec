@@ -27,7 +27,7 @@ times in seconds) and text strings.
 The rest of this page describes the configuration and control options.
 The "Notes on Configuring NTP and Setting up an NTP Subnet" page
 (available as part of the HTML documentation provided under
-`/usr/share/doc/ntp) contains an extended discussion of these options.
+`/usr/share/doc/ntp`) contains an extended discussion of these options.
 In addition to the discussion of general 'Configuration Options',
 there are sections describing the following supported functionality and
 the options used to control it:
