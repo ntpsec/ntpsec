@@ -794,12 +794,12 @@ class ControlSession:
             self.sock = socket.socket(family, socktype, protocol)
         except socket.error as e:
             raise ControlException("Error opening %s: %s [%d]" \
-                                   % (hname, e.msg, e.errno))
+                                   % (hname, e.strerror, e.errno))
         try:
             self.sock.connect(sockaddr)
         except socket.error as e:
             raise ControlException("Error connecting to %s: %s [%d]" \
-                                   % (hname, e.msg, e.errno))
+                                   % (hname, e.strerror, e.errno))
         return True
 
     def password(self):
