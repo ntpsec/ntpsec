@@ -792,14 +792,14 @@ class ControlSession:
         self.port = sockaddr[1]
         try:
             self.sock = socket.socket(family, socktype, protocol)
-        except socket.error as (errno, msg):
+        except socket.error as e:
             raise ControlException("Error opening %s: %s [%d]" \
-                                   % (hname, msg, errno))
+                                   % (hname, e.msg, e.errno))
         try:
             self.sock.connect(sockaddr)
-        except socket.error as (errno, msg):            
+        except socket.error as e:
             raise ControlException("Error connecting to %s: %s [%d]" \
-                                   % (hname, msg, errno))
+                                   % (hname, e.msg, e.errno))
         return True
 
     def password(self):
