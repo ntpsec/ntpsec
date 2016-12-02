@@ -202,7 +202,7 @@ class NTPStats:
         return key      # Someday, be smarter than this.
 
 def iso_to_posix(s):
-    "Accept timestamps in ISO8661 format or numeric POSIX time. UTC only."
+    "Accept timestamps in ISO 8661 format or numeric POSIX time. UTC only."
     if s.isdigit():
         return int(s)
     else:
@@ -212,7 +212,7 @@ def iso_to_posix(s):
         return  calendar.timegm(t)
 
 def posix_to_iso(t):
-    "ISO8601 string from Unix time."
+    "ISO 8601 string from Unix time."
     return time.strftime("%Y-%m-%dT%H:%M:%S", time.localtime(t))
 
 # end

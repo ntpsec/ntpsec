@@ -2030,7 +2030,7 @@ clamped_precision(
 }
 
 /* -------------------------------------------------------------------
- * Convert a GPSD timestamp (ISO8601 Format) to an l_fp
+ * Convert a GPSD timestamp (ISO 8601 Format) to an l_fp
  */
 static bool
 convert_ascii_time(
