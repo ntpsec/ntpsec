@@ -245,6 +245,10 @@ extern	char *	fstostr(time_t);	/* NTP timescale seconds */
 void packet_dump(char *, size_t, struct pkt *, size_t);
 size_t packet_undump(char *, int len, char *);
 
+/* packetstamp.c */
+extern void	enable_packetstamps(int, sockaddr_u *);
+extern l_fp	fetch_packetstamp(struct recvbuf *, struct msghdr *, l_fp);
+
 /*
  * Signals we catch for debugging.
  */

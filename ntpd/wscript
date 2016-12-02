@@ -103,6 +103,7 @@ def build(ctx):
 		"ntp_config.c",
 		"ntp_io.c",
 		"ntp_loopfilter.c",
+		"ntp_packetstamp.c",
 		"ntp_peer.c",
 		"ntp_proto.c",
 		"ntp_sandbox.c",
