@@ -33,7 +33,7 @@ TEST_TEAR_DOWN(refidsmear) {}
  */
 
 static void
-rtol(uint32_t r, char *es)
+rtol(uint32_t r, const char *es)
 {
 	l_fp l;
 	char *as;
@@ -55,7 +55,7 @@ rtol(uint32_t r, char *es)
 }
 
 static void
-rtoltor(uint32_t er, char *es)
+rtoltor(uint32_t er, const char *es)
 {
 	l_fp l;
 	char *as;
