@@ -23,8 +23,6 @@ itself. Besides the keys used for ordinary NTP associations,
 additional keys can be defined as passwords for the
 link:ntpq.html[+ntpq+] utility program.
 
-Historical note: 
-
 [[cmd]]
 == Command Line Options ==
 
