@@ -56,7 +56,7 @@ Here are the non-standardized APIs that may be used:
 
 * Either ntp_adjtime() or the older BSD adjtime(2).
 
-* Berkeley sockets and the IPv6 API defined in RFC2493 and RFC2553.
+* Berkeley sockets and the IPv6 API defined in RFC 2493 and RFC 2553.
 
 * getifaddrs(3) or an equivalent local API for iterating over the
   system's active UDP interfaces. However, the local details should be
@@ -225,7 +225,7 @@ goal to aim at, given our choice of scripting languages, is
 is to make writing script wrappers in Python easy.
 
 There is more than one way to arrange this.  If you can design a
-simple tabular output format, or something resembling an RFC2822 header
+simple tabular output format, or something resembling an RFC 2822 header
 that's easy for both human eyes and programs to parse, do that.
 Besides being simple, formats like these are easily handled by either
 Python or shellscripts.
@@ -246,7 +246,7 @@ You can read about JSON at http://www.json.org/
 Be aware that if you present a tool design with a messy output format
 and no JSON option it is quite likely to be rejected.
 
-Our preferred format for dates is RFC3339 (a version of ISO8601 for
+Our preferred format for dates is RFC 3339 (a version of ISO8601 for
 UTC with some options frozen; full year required, medial T required,
 explicit Zulu timezone). Local times should be expressed in ISO8601,
 always with full 4-digit year.

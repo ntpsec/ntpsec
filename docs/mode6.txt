@@ -119,7 +119,7 @@ instruction to set a string-valued variable to the empty string.
 Textual responses may end with padding NULs; clients should ignore
 these.
 
-In RFC5234 ABNF:
+In RFC 5234 ABNF:
 
 -----------------------------------------------------------
 varlist = item [itemtail] LF *%x00

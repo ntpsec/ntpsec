@@ -35,7 +35,7 @@
  * port. These methods are architecture dependent.
  *
  * This driver requires the Pulse-per-Second API for Unix-like Operating
- * Systems, Version 1.0, RFC-2783 (PPSAPI). Implementations are
+ * Systems, Version 1.0, RFC 2783 (PPSAPI). Implementations are
  * available for FreeBSD, Linux, SunOS, Solaris and Tru64. However, at
  * present only the Tru64 implementation provides the full generality of
  * the API with multiple PPS drivers and multiple handles per driver. If

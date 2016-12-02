@@ -33,7 +33,7 @@ The Network Time Protocol software contained in this
 distribution is available without charge under the conditions set
 forth in the link:copyright.html[Copyright Notice].
 
-This distribution is an implementation of RFC-5905 "Network Time
+This distribution is an implementation of RFC 5905 "Network Time
 Protocol Version 4: Protocol and Algorithms Specification".  NTP is
 widely used to synchronize a computer to Internet time servers or
 other sources, such as a radio or satellite receiver or telephone
@@ -70,7 +70,7 @@ two!), easier to understand, and easier to maintain.
 
 We retain, however, almost full compatibility and interoperation with
 NTP Classic.  The qualification "almost" is required mainly because we
-do not support the Autokey (RFC5906) public-key encryption scheme. It
+do not support the Autokey (RFC 5906) public-key encryption scheme. It
 had interoperability and exploitable vulnerability issues too severe
 to be patched.  We are participating in an IETF effort to develop
 better security features.
@@ -155,7 +155,7 @@ few will be user-visible.
   ypur current directory.
 
 * It is now possible to set the peer maximum dispersion with "tos
-  maxdisp". See RFC5905 for discussion of this synchronization
+  maxdisp". See RFC 5905 for discussion of this synchronization
   parameter.
 
 * For the generic (parse) driver only: Using the new refclock syntax,

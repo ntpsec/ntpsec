@@ -216,7 +216,7 @@ access to all but correctly authenticated clients..
 [[formats]]
 == Data Formats ==
 
-The NTPv4 specification (RFC-5905) allows any one of possibly 65,534
+The NTPv4 specification (RFC 5905) allows any one of possibly 65,534
 message digest keys (excluding zero), each distinguished by a 32-bit key
 ID, to authenticate an association. The servers and clients involved
 must agree on the key ID, key type and key to authenticate NTP packets.

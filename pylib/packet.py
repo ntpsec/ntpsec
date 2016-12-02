@@ -127,7 +127,7 @@ If you assume that both clocks are accurate which is reasonable if you have
 GPS at both ends, then you can easily solve for the transit times in each 
 direction.
 
-The RFC5905 diagram is slightly out of date in that the digest header assumes
+The RFC 5905 diagram is slightly out of date in that the digest header assumes
 a 128-bit (16-octet) MD5 hash, but it is also possible for the field to be a
 160-bit (20-octet) SHA-1 hash.
 
@@ -1457,7 +1457,7 @@ class Authenticator:
     @staticmethod
     def have_mac(packet):
         "Does this packet have a MAC?"
-        # According to RFC5909 7.5 the MAC is always present when an extension
+        # According to RFC 5909 7.5 the MAC is always present when an extension
         # field is present. Note: this crude test will fail on Mode 6 packets.
         # On those you have to go in and look at the count.
         return len(packet) > ntp.ntp_magic.LEN_PKT_NOMAC

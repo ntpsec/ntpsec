@@ -2,7 +2,7 @@
  * generic reference clock driver for several DCF/GPS/MSF/... receivers
  *
  * PPS notes:
- *   On systems that support PPSAPI (RFC2783) PPSAPI is the
+ *   On systems that support PPSAPI (RFC 2783) PPSAPI is the
  *   preferred interface.
  *
  * Copyright (c) 1989-2015 by Frank Kardel <kardel@ntp.org>
