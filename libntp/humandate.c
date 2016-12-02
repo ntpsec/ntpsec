@@ -36,7 +36,7 @@ humanlogtime(void)
 		 tm->tm_mday, months[tm->tm_mon],
 		 tm->tm_hour, tm->tm_min, tm->tm_sec);
 #else
-	/* ISO8601 is a better format, sort order equals time order */
+	/* ISO 8601 is a better format, sort order equals time order */
 	snprintf(bp, LIB_BUFLENGTH, "%02d-%02dT%02d:%02d:%02d",
 		 tm->tm_mon+1, tm->tm_mday,
 		 tm->tm_hour, tm->tm_min, tm->tm_sec);

@@ -1227,11 +1227,11 @@ ntpcal_weekday_lt(
  *
  * ISO week-calendar conversions
  *
- * The ISO8601 calendar defines a calendar of years, weeks and weekdays.
+ * The ISO 8601 calendar defines a calendar of years, weeks and weekdays.
  * It is related to the Gregorian calendar, and a ISO year starts at the
  * Monday closest to Jan,1st of the corresponding Gregorian year.  A ISO
  * calendar year has always 52 or 53 weeks, and like the Grogrian
- * calendar the ISO8601 calendar repeats itself every 400 years, or
+ * calendar the ISO 8601 calendar repeats itself every 400 years, or
  * 146097 days, or 20871 weeks.
  *
  * While it is possible to write ISO calendar functions based on the
