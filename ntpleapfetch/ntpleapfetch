@@ -82,7 +82,6 @@ All arguments are optional:  Default (or current value) shown:
     -P    Specify the syslog facility for logging
           $LOGFAC
     -t    Name of temporary file used in validation
-          $TMPFILE
     -q    Only report errors to stdout
     -v    Verbose output
     -z    Specify path for utilities
