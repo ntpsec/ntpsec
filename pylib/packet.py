@@ -538,20 +538,19 @@ class ControlPacket(Packet):
         self.status = 0         # status word for association (uint16_t)
         self.associd = associd  # association ID (uint16_t)
         self.offset = 0         # offset of this batch of data (uint16_t)
-        self.count = 0          # octet count of extension data
         self.extension = qdata  # Data for this packet
         self.count = len(qdata)	# length of data
     format = "!BBHHHHH"
     HEADER_LEN = 12
 
     def is_response(self):
-        return self.r_e_m_op & 0x80
+        return True if self.r_e_m_op & 0x80 else False
 
     def is_error(self):
-        return self.r_e_m_op & 0x40
+        return Trye if self.r_e_m_op & 0x40 else False
 
     def more(self):
-        return self.r_e_m_op & 0x20
+        return True if self.r_e_m_op & 0x20 else False
 
     def opcode(self):
         return self.r_e_m_op & 0x1F
@@ -921,13 +920,13 @@ class ControlSession:
             else:
                 tvo = self.secondary_timeout / 1000
 
-            if self.debug:
+            if self.debug > 4:
                 warn("At %s, select with timeout %d begins\n" % (time.asctime(), tvo))
             try:
                 (rd, _, _) = select.select([self.sock], [], [], tvo)
             except select.error as msg:
                 raise ControlException(SERR_SELECT)
-            if self.debug:
+            if self.debug > 4:
                 warn("At %s, select with timeout %d ends\n" % (time.asctime(), tvo))
 
             if not rd:
@@ -944,10 +943,10 @@ class ControlSession:
                              % ("not ", "")[seenlastfrag])
                 raise ControlException(SERR_INCOMPLETE)
 
-            if self.debug:
+            if self.debug > 4:
                 warn("At %s, socket read begins\n" % time.asctime())
             rawdata = polybytes(self.sock.recv(4096))
-            if self.debug:
+            if self.debug >= 4:
                 warn("Received %d octets\n" % len(rawdata))
             rpkt = ControlPacket(self)
             try:
@@ -1007,8 +1006,6 @@ class ControlSession:
                     (rpkt.count, len(rawdata) - ControlPacket.HEADER_LEN))
                 raise ControlException(SERR_INCOMPLETE)
 
-            if self.debug > 1:
-                warn("Got fragment, size = %d\n"% len(rawdata))
             if rpkt.count > (len(rawdata) - ControlPacket.HEADER_LEN):
                     warn("Received count of %u octets, data in fragment is %ld\n"\
                                    % (rpkt.count, len(rawdata) - ControlPacket.HEADER_LEN))
@@ -1026,11 +1023,6 @@ class ControlSession:
             if seenlastfrag and rpkt.more():
                 warn("Received second last fragment\n")
                 continue
-
-            # So far, so good.  Record this fragment
-            # overlap anything.
-            if self.debug >= 2:
-                warn("Fragment okay\n")
 
             # Find the most recent fragment with a
             not_earlier = [frag for frag in fragments \
@@ -1051,6 +1043,9 @@ class ControlSession:
                 warn("received %d octet frag at %d overlaps with frag at %d\n" % (rpkt.count, rpkt.offset, not_earlier.offset))
                 continue
 
+            if self.debug > 2:
+                warn("Recording fragment %d, size = %d offset = %d, end=%d, more=%s\n"% (len(fragments)+1, rpkt.count, rpkt.offset, rpkt.end(), rpkt.more()))
+
             # Passed all tests, insert it into the frag list.
             fragments.append(rpkt)
             fragments.sort(key=lambda frag: frag.offset)
@@ -1066,6 +1061,8 @@ class ControlSession:
             if seenlastfrag and fragments[0].offset == 0:
                 for f in range(1, len(fragments)):
                     if fragments[f-1].end() != fragments[f].offset:
+                        if self.debug:
+                            warn("Hole in fragment sequence, %d of %d\n" % (f, len(fragments)))
                         break
                 else:
                     if self.debug:
