@@ -297,6 +297,7 @@ def cmd_configure(ctx, config):
 
         ctx.check_cc(lib="m", comment="Math library")
         ctx.check_cc(lib="rt", mandatory=False, comment="realtime library")
+        ctx.check_cc(lib="sodium", mandatory=True, comment="sodium library")
 
         # Find OpenSSL. Must happen before function checks
         if ctx.options.enable_crypto:

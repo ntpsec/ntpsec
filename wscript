@@ -188,7 +188,6 @@ def build(ctx):
 	ctx.recurse("libntp")
 	if ctx.env.LIBEVENT2_ENABLE:
 		ctx.recurse("ntpdig")
-	ctx.recurse("libsodium")
 	ctx.recurse("ntpd")
 	ctx.recurse("ntpfrob")
 	ctx.recurse("ntptime")

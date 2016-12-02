@@ -49,14 +49,14 @@ def build(ctx):
 	includes = [
 		"%s/libisc/include/" % srcnode,
 		"%s/libisc/unix/include/" % srcnode, # XXX: platform: requires unix/win32 switch.
-		"%s/libsodium/include/" % srcnode,
+		"/usr/include/sodium",
 	]
 
 	# C library
 	ctx(
 		target		= "ntp",
 		features	= "c cstlib bld_include src_include",
-		use		= "sodium",
+		use		= "SODIUM",
 		source		= libntp_source + libntp_source_sharable,
 		includes	= includes,
 	)
