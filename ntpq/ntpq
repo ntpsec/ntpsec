@@ -1303,7 +1303,8 @@ usage: config_from_file <configuration filename>
                 formatter = ntp.util.MRUSummary(interpreter.showhostnames)
                 self.say(ntp.util.MRUSummary.header + "\n")
                 self.say(("=" * ntp.util.MRUSummary.width) + "\n")
-                for entry in span.entries:
+                # reversed because we want the most recent entries at the top.
+                for entry in reversed(span.entries):
                     self.say(formatter.summary(entry) + "\n")
         except ntp.packet.ControlException as e:
             # Giving up after 8 restarts from the beginning.
