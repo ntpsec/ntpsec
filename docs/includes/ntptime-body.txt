@@ -4,9 +4,9 @@
 
 == Synopsis ==
 [verse]
-ntptime [ +-chr+ ] [ +-e+ 'est_error' ] [ +-f+ 'frequency' ] [-j]
-        [ +-m+ 'max_error' ] [ +-o+ 'offset' ] [ +-s+ 'status' ]
-	[ +-t+ 'time_constant']
+ntptime [+-chr+] [+-e+ 'est_error'] [+-f+ 'frequency'] [-j]
+        [+-m+ 'max_error'] [+-o+ 'offset'] [+-s+ 'status']
+        [+-t+ 'time_constant']
 
 == Description ==
 

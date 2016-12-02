@@ -5,7 +5,7 @@
 [[synop]]
 == Synopsis ==
 [verse]
-+ntpkeygen+ [ +-M+ ]
++ntpkeygen+ [+-M+]
 
 [[descrip]]
 == Description ==
