@@ -107,7 +107,7 @@ need not be run more frequently than about once every three weeks.
 
 For cron-friendly behavior, define CRONJOB=1 in the crontab.
 
-This script depends on$REQUIREDCMDS
+This script depends on:$REQUIREDCMDS
 
 Version $VERSION
 EOF
