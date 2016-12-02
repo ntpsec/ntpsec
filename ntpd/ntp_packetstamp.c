@@ -13,10 +13,8 @@
 # include <sys/sockio.h>
 #endif
 
-#include "ntp_machine.h"
 #include "ntpd.h"
 #include "ntp_stdlib.h"
-#include "ntp_assert.h"
 #include "timespecops.h"
 
 #if defined(SO_BINTIME) && defined(SCM_BINTIME) && defined(CMSG_FIRSTHDR)
