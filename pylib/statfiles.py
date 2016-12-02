@@ -208,7 +208,7 @@ def iso_to_posix(s):
     else:
         t = time.strptime(s, "%Y-%m-%dT%H:%M:%S")
         t.m_isdst = 0
-        # don't use time.mktime() as taht is local tz
+        # don't use time.mktime() as that is local tz
         return  calendar.timegm(t)
 
 def posix_to_iso(t):
