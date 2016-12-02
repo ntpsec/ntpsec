@@ -663,7 +663,10 @@ ntpdmain(
         /*
 	 * Initialize libsodium and its RNG
 	 */
-	sodium_init();
+	if (sodium_init() < 0) {
+		msyslog(LOG_ERR, "sodium_init() failed");
+		exit(1);
+	}
 
 	/*
 	 * Set up signals we pay attention to locally.
