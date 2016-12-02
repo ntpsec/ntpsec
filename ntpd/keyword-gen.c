@@ -15,7 +15,7 @@
 
 /* Define a structure to hold a (keyword, token) pair */
 struct key_tok {
-	char *	key;		/* Keyword */
+	const char * key;	/* Keyword */
 	u_short	token;		/* Associated Token */
 	follby	followedby;	/* nonzero indicates the next token(s)
 				   forced to be string(s) */
@@ -245,7 +245,7 @@ static void	generate_preamble	(void);
 static void	generate_fsm		(void);
 static void	generate_token_text	(void);
 static u_short	create_keyword_scanner	(void);
-static u_short	create_scan_states	(char *, u_short, follby, u_short);
+static u_short	create_scan_states	(const char *, u_short, follby, u_short);
 int		compare_key_tok_id	(const void *, const void *);
 int		compare_key_tok_text	(const void *, const void *);
 void		populate_symb		(char *);
@@ -468,7 +468,7 @@ generate_fsm(void)
  */
 static u_short
 create_scan_states(
-	char *	text, 
+	const char * text,
 	u_short	token, 
 	follby	followedby,
 	u_short	prev_state
