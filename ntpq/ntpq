@@ -350,41 +350,44 @@ usage: help [ command ]
                                       self.wideremote,
                                       termwidth=termwidth,
                                       debug=interpreter.debug)
-        maxhostlen = 0
-        if len(self.chosts) > 1:
-            maxhostlen = max([len(host) for (host, _af) in self.chosts])
-            self.say("%-*.*s " % \
-                             (maxhostlen, maxhostlen+1, "server"))
-        self.say(report.header() + "\n")
-        if len(self.chosts) > 1:
-            maxhostlen = max([len(host) for (host, _af) in self.chosts])
-            self.say("=" * (maxhostlen + 1))
-        self.say(("=" * report.width()) + "\n")
-        for peer in self.peers:
-            if not showall and \
-		    not (ntp.ntp_control.CTL_PEER_STATVAL(peer.status)
-		      & (ntp.ntp_control.CTL_PST_CONFIG|ntp.ntp_control.CTL_PST_REACH)):
-                if self.debug:
-                    self.warn("eliding [%d]\n" % peer.associd)
-                continue
-            try:
-                variables = self.session.readvar(peer.associd)
-            except ntp.packet.ControlException as e:
-                self.warn(e.message + "\n")
-                return
-            except IOError as e:
-                print(e.strerror)
-                return
-            if not variables:
-                if len(self.chosts) > 1:
-                    self.warn("server=%s " % self.session.hostname)
-                self.warn("***No information returned for association %d\n" \
-                                 % associd)
-                continue
+        try:
+            maxhostlen = 0
             if len(self.chosts) > 1:
-                self.say(ntp.util.PeerSummary.high_truncate(self.session.hostname, maxhostlen)+ " ")
-            self.say(report.summary(self.session.rstatus,
-                                    variables, peer.associd))
+                maxhostlen = max([len(host) for (host, _af) in self.chosts])
+                self.say("%-*.*s " % \
+                                 (maxhostlen, maxhostlen+1, "server"))
+            self.say(report.header() + "\n")
+            if len(self.chosts) > 1:
+                maxhostlen = max([len(host) for (host, _af) in self.chosts])
+                self.say("=" * (maxhostlen + 1))
+            self.say(("=" * report.width()) + "\n")
+            for peer in self.peers:
+                if not showall and \
+                        not (ntp.ntp_control.CTL_PEER_STATVAL(peer.status)
+                          & (ntp.ntp_control.CTL_PST_CONFIG|ntp.ntp_control.CTL_PST_REACH)):
+                    if self.debug:
+                        self.warn("eliding [%d]\n" % peer.associd)
+                    continue
+                try:
+                    variables = self.session.readvar(peer.associd)
+                except ntp.packet.ControlException as e:
+                    self.warn(e.message + "\n")
+                    return
+                except IOError as e:
+                    print(e.strerror)
+                    return
+                if not variables:
+                    if len(self.chosts) > 1:
+                        self.warn("server=%s " % self.session.hostname)
+                    self.warn("***No information returned for association %d\n" \
+                                     % associd)
+                    continue
+                if len(self.chosts) > 1:
+                    self.say(ntp.util.PeerSummary.high_truncate(self.session.hostname, maxhostlen)+ " ")
+                self.say(report.summary(self.session.rstatus,
+                                        variables, peer.associd))
+        except KeyboardInterrupt:
+            pass
 
     def __assoc_valid(self, line, required=False):
         "Process a numeric associd or index."
@@ -1300,12 +1303,15 @@ usage: config_from_file <configuration filename>
                 if not span.is_complete():
                     self.say("mrulist retrieval interrupted by operator.\n"
                              "Displaying partial client list.\n")
-                formatter = ntp.util.MRUSummary(interpreter.showhostnames)
-                self.say(ntp.util.MRUSummary.header + "\n")
-                self.say(("=" * ntp.util.MRUSummary.width) + "\n")
-                # reversed because we want the most recent entries at the top.
-                for entry in reversed(span.entries):
-                    self.say(formatter.summary(entry) + "\n")
+                try:
+                    formatter = ntp.util.MRUSummary(interpreter.showhostnames)
+                    self.say(ntp.util.MRUSummary.header + "\n")
+                    self.say(("=" * ntp.util.MRUSummary.width) + "\n")
+                    # reversed to put most recent entries at the top.
+                    for entry in reversed(span.entries):
+                        self.say(formatter.summary(entry) + "\n")
+                except KeyboardInterrupt:
+                    pass
         except ntp.packet.ControlException as e:
             # Giving up after 8 restarts from the beginning.
             # With high-traffic NTP servers, this can occur if the
