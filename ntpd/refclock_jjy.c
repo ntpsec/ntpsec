@@ -126,7 +126,7 @@
  */
 
 struct jjyRawDataBreak {
-	char	*pString ;
+	const char	*pString ;
 	int 	iLength ;
 } ;
 
@@ -3223,7 +3223,7 @@ static int
 teljjy_login_login ( struct peer *peer, struct refclockproc *pp, struct jjyunit *up )
 {
 
-	char	*pCmd ;
+	const char	*pCmd ;
 	int	iCmdLen ;
 
 	UNUSED_ARG(peer);
@@ -4046,7 +4046,7 @@ static int
 modem_init_resp00 ( struct peer *peer, struct refclockproc *pp, struct jjyunit *up )
 {
 
-	char	*pCmd, cBuf [ 46 ] ;
+	const char	*pCmd, cBuf [ 46 ] ;
 	int	iCmdLen ;
 	int	iErrorCorrection, iSpeakerSwitch, iSpeakerVolume ;
 	int	iNextModemState = STAY_MODEM_STATE ;
@@ -4324,7 +4324,7 @@ modem_esc_escape ( struct peer *peer, struct refclockproc *pp, struct jjyunit *u
 {
 	UNUSED_ARG(up);
 
-	char	*pCmd ;
+	const char	*pCmd ;
 	int	iCmdLen ;
 
 	DEBUG_MODEM_PRINTF( "modem_esc_escape" ) ;
@@ -4391,7 +4391,7 @@ static int
 modem_esc_disc ( struct peer *peer, struct refclockproc *pp, struct jjyunit *up )
 {
 
-	char	*pCmd ;
+	const char	*pCmd ;
 	int	iCmdLen ;
 
 	UNUSED_ARG(up);
@@ -4426,7 +4426,7 @@ jjy_write_clockstats ( struct peer *peer, int iMark, const char *pData )
 {
 
 	char	sLog [ 100 ] ;
-	char	*pMark ;
+	const char *pMark ;
 	int 	iMarkLen, iDataLen ;
 
 	switch ( iMark ) {
