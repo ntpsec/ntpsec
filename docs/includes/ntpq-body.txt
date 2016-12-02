@@ -11,7 +11,7 @@
 The +ntpq+ utility program is used to monitor NTP daemon +ntpd+
 operations and determine performance. It uses the standard NTP mode 6
 control message formats defined in Appendix B of the NTPv3 specification
-RFC1305. The same formats are used in NTPv4, although some of the
+RFC 1305. The same formats are used in NTPv4, although some of the
 variable names have changed and new ones added. The description on this
 page is for the NTPv4 variables.
 

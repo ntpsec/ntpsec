@@ -40,7 +40,7 @@ measured by +ntptrace+; this is why it is not always zero for
 servers) the reference clock ID. All times are given in seconds. Note
 that the stratum is the server hop count to the primary source, while
 the synchronization distance is the estimated error relative to the
-primary source. These terms are precisely defined in RFC-1305.
+primary source. These terms are precisely defined in RFC 1305.
 
 == OPTIONS ==
 

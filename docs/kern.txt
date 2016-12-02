@@ -64,7 +64,7 @@ Body:
 |
 {millshome}database/reports/kern/kernb.pdf[PDF]
 3.  Mills, D.L. A kernel model for precision timekeeping. Network
-Working Group Report RFC-1589, University of Delaware, March 1994. 31
+Working Group Report RFC 1589, University of Delaware, March 1994. 31
 pp. {millshome}database/rfc/rfc1589.txt[ASCII]
 
 '''''

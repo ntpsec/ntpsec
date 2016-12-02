@@ -121,8 +121,8 @@ multicast address 224.0.1.1 and IPv6 address FF05::101 (site local) to
 NTP, but these addresses should be used only where the multicast span
 can be reliably constrained to protect neighbor networks. In general,
 administratively scoped IPv4 group addresses should be used, as
-described in RFC-2365, or GLOP group addresses, as described in
-RFC-2770.
+described in RFC 2365, or GLOP group addresses, as described in
+RFC 2770.
 
 A multicast server is configured using the +broadcast+ command, but
 specifying a multicast address instead of a broadcast address. Note
@@ -156,7 +156,7 @@ some number of the "best" of the nearby manycast servers, yet
 automatically reconfigures to sustain this number of servers should
 one or another fail.
 
-The manycast paradigm is not the anycast paradigm described in RFC-1546,
+The manycast paradigm is not the anycast paradigm described in RFC 1546,
 which is designed to find a single server from a clique of servers
 providing the same service. The manycast paradigm is designed to find a
 plurality of redundant servers satisfying defined optimality criteria.

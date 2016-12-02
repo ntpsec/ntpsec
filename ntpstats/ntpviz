@@ -1690,7 +1690,7 @@ ntpviz</a>, part of the <a href="https://www.ntpsec.org/">NTPsec project</a>
             for sta in stat:
                 index_buffer += str( sta.table )
                 csvs.append(sta.csv)
-        # RFC4180 specifies the mime-type of a csv
+        # RFC 4180 specifies the mime-type of a csv
         # your webserver should be programmed the same
         index_buffer += """\
 </table>

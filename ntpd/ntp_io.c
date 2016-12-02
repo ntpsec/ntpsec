@@ -61,7 +61,7 @@ extern int listen_to_virtual_ips;
 #ifndef IPTOS_DSCP_EF
 #define IPTOS_DSCP_EF 0xb8
 #endif
-int qos = IPTOS_DSCP_EF;	/* QoS RFC3246 */
+int qos = IPTOS_DSCP_EF;	/* QoS RFC 3246 */
 
 #ifdef ENABLE_LEAP_SMEAR
 /* TODO burnicki: This should be moved to ntp_timer.c, but if we do so

@@ -110,7 +110,7 @@ as authors of this work.
   <duwe@immd4.informatik.uni-erlangen.de>] Linux port
 * mailto:dennis@mrbill.canet.ca[Dennis Ferguson
   <dennis@mrbill.canet.ca>] foundation code for NTP Version 2 as specified
-  in RFC-1119
+  in RFC 1119
 * mailto:jhay@icomtek.csir.co.za[John Hay
   <jhay@icomtek.csir.co.za>] IPv6 support and testing
 * mailto:davehart@davehart.com[Dave Hart <davehart@davehart.com>]
@@ -138,7 +138,7 @@ as authors of this work.
 * mailto:louie@ni.umd.edu[Louis A. Mamakos <louie@ni.umd.edu>]
   MD5-based authentication
 * mailto:thorinn@diku.dk[Lars H. Mathiesen <thorinn@diku.dk>]
-  adaptation of foundation code for Version 3 as specified in RFC-1305
+  adaptation of foundation code for Version 3 as specified in RFC 1305
 * mailto:mayer@ntp.org[Danny Mayer <mayer@ntp.org>]Network I/O,
   Windows Port, Code Maintenance
 * mailto:mills@udel.edu[David L. Mills <mills@udel.edu>] Version 4

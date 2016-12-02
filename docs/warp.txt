@@ -54,7 +54,7 @@ preferred choice.
 This page presents an overview of the NTP implementation included in
 this software distribution. We refer to this implementation as the
 _reference implementation_ only because it was used to test and validate
-the NTPv4 specification RFC-5905. It is best read in conjunction with
+the NTPv4 specification RFC 5905. It is best read in conjunction with
 the briefings and white papers on the
 {millshome}ntp.html[Network Time Synchronization
 Research Project] page. An executive summary suitable for management and
@@ -100,7 +100,7 @@ Figure 1. NTP Timestamp format
 Figure 1 shows the timestamp format used in packet headers exchanged
 between clients and servers.  Ordinarily, this timestamp format is not
 seen by application programs, which converts it to native formats such
-as ISO8601 or RFC822-style Gregorian-calendar dates.
+as ISO8601 or RFC 822-style Gregorian-calendar dates.
 
 The timestamp format spans 136 years, called an _era_. Conceptually,
 it is helpful to think of an absolute dates as being a tuple of one of

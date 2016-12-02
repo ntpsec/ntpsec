@@ -162,7 +162,7 @@ decidedly beyond the scope of this page.
 +./ntpd/ntp_control.c+::
   The +clocktypes+ array is used for certain control message displays
   functions. It should be initialized with the reference clock class
-  assigned to the driver, as per the NTP specification RFC-1305. See the
+  assigned to the driver, as per the NTP specification RFC 1305. See the
   +./include/ntp_control.h+ header file for the assigned classes.
 +./ntpd/refclock_conf.c+::
   This file contains a list of external structure definitions which are
