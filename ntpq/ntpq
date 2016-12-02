@@ -584,39 +584,42 @@ usage: timeout [ msec ]
                              (associd,
                               self.session.rstatus,
                               ntp.ntpc.statustoa(statype, self.session.rstatus)))
-        for (name, legend, fmt) in variables:
-            if name not in queried:
-                continue
-            value = queried[name]
-            if fmt in (NTP_ADD, NTP_ADP):
-                if self.showhostnames:
-                    if self.debug:
-                        self.say("DNS lookup begins...")
-                    value = ntp.util.canonicalize_dns(value,
-                                                      family=self.ai_family)
-                    if self.debug:
-                        self.say("DNS lookup complete.")
-                self.say("%s  %s\n" % (legend, value))
-            elif fmt == NTP_STR:
-                if value:
+        try:
+            for (name, legend, fmt) in variables:
+                if name not in queried:
+                    continue
+                value = queried[name]
+                if fmt in (NTP_ADD, NTP_ADP):
+                    if self.showhostnames:
+                        if self.debug:
+                            self.say("DNS lookup begins...")
+                        value = ntp.util.canonicalize_dns(value,
+                                                          family=self.ai_family)
+                        if self.debug:
+                            self.say("DNS lookup complete.")
                     self.say("%s  %s\n" % (legend, value))
-            elif fmt in (NTP_UINT, NTP_INT, NTP_FLOAT):
-                self.say("%s  %s\n" % (legend, value))
-            elif fmt == NTP_LFP:
-                self.say("%s  %s\n" % (legend, ntp.ntpc.prettydate(value)))
-            elif fmt == NTP_2BIT:
-                self.say("%s  %s\n" % (legend, ("00", "01", "10", "11")[value]))
-            elif fmt == NTP_MODE:
-                modes = (
-                    "unspec", "sym_active", "sym_passive", "client", "server",
-                    "broadcast", "control", "private", "bclient"
-                )
-                try:
-                    self.say("%s  %s\n" % (legend, modes[value]))
-                except IndexError:
-                    self.say("%s  %s%d\n" % (legend, "mode#", value))
-            else:
-                self.warn("unexpected vc type %s for %s, value %s\n" % (fmt, name, value))
+                elif fmt == NTP_STR:
+                    if value:
+                        self.say("%s  %s\n" % (legend, value))
+                elif fmt in (NTP_UINT, NTP_INT, NTP_FLOAT):
+                    self.say("%s  %s\n" % (legend, value))
+                elif fmt == NTP_LFP:
+                    self.say("%s  %s\n" % (legend, ntp.ntpc.prettydate(value)))
+                elif fmt == NTP_2BIT:
+                    self.say("%s  %s\n" % (legend, ("00", "01", "10", "11")[value]))
+                elif fmt == NTP_MODE:
+                    modes = (
+                        "unspec", "sym_active", "sym_passive", "client", "server",
+                        "broadcast", "control", "private", "bclient"
+                    )
+                    try:
+                        self.say("%s  %s\n" % (legend, modes[value]))
+                    except IndexError:
+                        self.say("%s  %s%d\n" % (legend, "mode#", value))
+                else:
+                    self.warn("unexpected vc type %s for %s, value %s\n" % (fmt, name, value))
+        except KeyboardOnterrupt:
+            self.warn("display interrupted\n")
 
     def do_delay(self, line):
         "set the delay added to encryption time stamps"
@@ -651,12 +654,15 @@ usage: delay [ msec ]
             elif tokens[0] == '-6':
                 session.ai_family = socket.AF_INET6
                 tokens.pop(0)
-            if tokens and self.session.openhost(tokens[0], session.ai_family):
-                print("current host set to %s" % self.session.hostname)
-            elif self.session.havehost():
-                print("current host remains %s" % self.session.hostname)
-            else:
-                print("still no current host")
+            try:
+                if tokens and self.session.openhost(tokens[0], session.ai_family):
+                    print("current host set to %s" % self.session.hostname)
+                elif self.session.havehost():
+                    print("current host remains %s" % self.session.hostname)
+                else:
+                    print("still no current host")
+            except KeyboardInterrupted:
+                print("lookup interrupted")
 
     def help_host(self):
         self.say("""\
