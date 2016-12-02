@@ -223,6 +223,11 @@ class Ntpq(cmd.Cmd):
                     return
         cmd.Cmd.do_help(self, arg)
 
+    def do_shell(self, line):
+        "Called when a line that starts with ! is entered in response to the prompt."
+        self.warn("***Command `!%s' unknown\n" % line)
+        return
+
     def say(self, msg):
         sys.stdout.write(polystr(msg))
         sys.stdout.flush()	# In case we're piping the output
