@@ -80,7 +80,7 @@ def termsize():
             fcntl.ioctl(2, termios.TIOCGWINSZ,
             struct.pack('HHHH', 0, 0, 0, 0)))
         size = (w, h)
-    return TermSize(w, h)
+    return TermSize(*size)
 
 class PeerSummary:
     "Reusable report generator for peer statistics"
