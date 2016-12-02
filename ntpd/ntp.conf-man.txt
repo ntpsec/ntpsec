@@ -5,11 +5,11 @@
 ntp.conf - Network Time Protocol (NTP) daemon configuration file format
 
 == SYNOPSIS ==
-/etc/{ntpconf}
+/etc/ntp.conf
 
 == DESCRIPTION ==
 
-The `{ntpconf}` configuration file is read at initial startup by the
+The `ntp.conf` configuration file is read at initial startup by the
 {ntpdman} daemon in order to specify the synchronization
 sources, modes and other related information. Usually, it is installed
 in the `/etc` directory, but could be installed elsewhere (see the
