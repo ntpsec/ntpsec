@@ -835,7 +835,7 @@ class ControlSession:
         while len(xdata) % 4:
             xdata += b"\x00"
         if self.debug >= 3:
-                print("Sending %d octets\n" % len(xdata))
+                print("Sending %d octets" % len(xdata))
         try:
             self.sock.sendall(polybytes(xdata))
         except socket.error:
@@ -849,6 +849,9 @@ class ControlSession:
 
     def sendrequest(self, opcode, associd, qdata, auth=False):
         "Ship an ntpq request packet to a server."
+        if self.debug:
+            sys.stderr.write("sendrequest(opcode=%d)\n" % opcode)
+
         # Check to make sure the data will fit in one packet
         if len(qdata) > ntp.ntp_control.CTL_MAX_DATA_LEN:
             sys.stderr.write("***Internal error! Data too large (%d)\n" %
@@ -1044,7 +1047,7 @@ class ControlSession:
                 continue
 
             if self.debug > 2:
-                warn("Recording fragment %d, size = %d offset = %d, end=%d, more=%s\n"% (len(fragments)+1, rpkt.count, rpkt.offset, rpkt.end(), rpkt.more()))
+                warn("Recording fragment %d, size = %d offset = %d, end = %d, more=%s\n"% (len(fragments)+1, rpkt.count, rpkt.offset, rpkt.end(), rpkt.more()))
 
             # Passed all tests, insert it into the frag list.
             fragments.append(rpkt)
