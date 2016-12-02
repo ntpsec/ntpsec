@@ -9,7 +9,7 @@
 /* Helper functions */
 
 static sockaddr_u
-create_sockaddr_u(unsigned short sin_port, char* ip_addr)
+create_sockaddr_u(unsigned short sin_port, const char* ip_addr)
 {
 	sockaddr_u sockaddr;
 
