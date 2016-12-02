@@ -8,8 +8,8 @@
 ntpviz [-d LOGDIR] [-g] [-n name] [-p DAYS]
          [-s starttime] [-e endtime]
          [-o OUTDIR]
-         [ -c | --clip ]
-         [ -w SIZE | --width SIZE]
+         [-c | --clip]
+         [-w SIZE | --width SIZE]
          [--all-peer-jitters |
           --all-peer-offsets |
           --local-error |
@@ -22,8 +22,7 @@ ntpviz [-d LOGDIR] [-g] [-n name] [-p DAYS]
           --local-stability |
           --local-temps |
           --peer-jitters=hosts |
-          --peer-offsets=hosts |
-         ]
+          --peer-offsets=hosts]
          [-D DLVL | --debug DLVL]
          [-V | --version]
          [@OPTIONFILE]

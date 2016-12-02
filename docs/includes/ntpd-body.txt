@@ -6,11 +6,11 @@
 == SYNOPSIS ==
 [verse]
 ntpd
-    [-46aAbghLmnNqx ] [ -c 'conffile' ] [ -f 'driftfile' ] [ -i 'jaildir' ]
-    [ -k 'keyfile' ] [ -l 'logfile' ] [ -p 'pidfile' ] [ -P 'priority' ]
-    [ -r 'broadcast-delay' ]  [ -s 'statsdir' ]  [ -t  'key' ]
-    [ -u 'user'[:'group'] ] [ -U 'interface_update_interval' ]
-    [ -v 'variable' ] [ -V 'variable' ] [server...]
+    [-46aAbghLmnNqx] [-c 'conffile'] [-f 'driftfile'] [-i 'jaildir']
+    [-k 'keyfile'] [-l 'logfile'] [-p 'pidfile'] [-P 'priority']
+    [-r 'broadcast-delay']  [-s 'statsdir']  [-t  'key']
+    [-u 'user'[:'group']] [-U 'interface_update_interval']
+    [-v 'variable'] [-V 'variable'] [server...]
 
 [[descr]]
 == DESCRIPTION ==
