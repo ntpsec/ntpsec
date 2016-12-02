@@ -21,7 +21,7 @@ This page discusses +ntpd+ program monitoring and debugging techniques
 using the link:ntpq.html[+ntpq+ - standard NTP query program], either
 on the local server or from a remote machine. The +ntpq+ program
 implements the management functions specified in the NTP specification
-https://tools.ietf.org/html/rfc5905[RFC-5905].  In addition, the
+https://tools.ietf.org/html/rfc5905[RFC 5905].  In addition, the
 program can be used to send remote configuration commands to the
 server.
 

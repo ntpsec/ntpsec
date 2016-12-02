@@ -21,7 +21,7 @@ def stdversion():
                             ntp.version.VCS_BASENAME, ntp.version.VCS_DATE)
 
 def rfc3339(t):
-    "RFC3339 string from Unix time, including fractional second."
+    "RFC 3339 string from Unix time, including fractional second."
     subsec = t - int(t)
     t -= subsec
     rep = time.strftime("%Y-%m-%dT%H:%M:%S", time.gmtime(t))

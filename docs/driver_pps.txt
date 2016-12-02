@@ -173,7 +173,7 @@ link:refclock.html[Reference Clock Drivers]
 
 1.  Mogul, J., D. Mills, J. Brittenson, J. Stone and U. Windl.
 Pulse-per-second API for Unix-like operating systems, version 1. Request
-for Comments RFC-2783, Internet Engineering Task Force, March 2000, 31
+for Comments RFC 2783, Internet Engineering Task Force, March 2000, 31
 pp.
 
 == Author ==

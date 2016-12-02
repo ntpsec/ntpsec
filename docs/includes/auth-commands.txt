@@ -4,7 +4,7 @@
 +controlkey+ _key_::
   Specifies the key identifier to use with the
   {ntpqman} utility, which uses the standard protocol defined in
-  RFC-5905. The _key_ argument is the key identifier for a trusted key,
+  RFC 5905. The _key_ argument is the key identifier for a trusted key,
   where the value can be in the range 1 to 65,534, inclusive.
 
 +crypto+ [+cert+ _file_] [+leap+ _file_] [+randfile+ _file_] [+host+ _file_] [+sign+ _file_] [+gq+ _file_] [+gqpar+ _file_] [+iffpar+ _file_] [+mvpar+ _file_] [+pw+ _password_]::

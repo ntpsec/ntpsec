@@ -182,7 +182,7 @@
   the same RS-232 connector (see <<in-band time>>).
   The advantage of a PPS signal is improved accuracy.  Most OSes have
   provisions to grab a timestamp at interrupt time.  The API is described
-  in RFC-2783.
+  in RFC 2783.
 
 [[PTP]] PTP::
   https://en.wikipedia.org/wiki/Precision_Time_Protocol[Precision Time
@@ -198,7 +198,7 @@
    out service addresses at random from the pool.
 
 [[proventic]] proventic:: <<Mills-speak>> for "the transitive completion of the
-  authentication relationship", defined in RFC5906. Time is proventic
+  authentication relationship", defined in RFC 5906. Time is proventic
   if it is provided by a chain of time servers between which packets
   are authenticated and the chain reaches back to Stratum 1.
 

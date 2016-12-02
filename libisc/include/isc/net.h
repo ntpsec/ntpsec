@@ -43,7 +43,7 @@
  *
  * Standards:
  *\li	BSD Socket API
- *\li	RFC2553
+ *\li	RFC 2553
  */
 
 /***

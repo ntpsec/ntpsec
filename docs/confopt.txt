@@ -39,7 +39,7 @@ or IPv6). For multicast addresses the IANA has assigned the multicast
 group address IPv4 224.0.1.1 and IPv6 ff05::101 (site local)
 exclusively to NTP, but other nonconflicting addresses can be used.
 
-If the Basic Socket Interface Extensions for IPv6 (RFC-2553) is
+If the Basic Socket Interface Extensions for IPv6 (RFC 2553) is
 detected, support for the IPv6 address family is generated in addition
 to the default IPv4 address family. IPv6 addresses can be identified by
 the presence of colons ":" in the address field. IPv6 addresses can be
