@@ -282,7 +282,7 @@ Initial NTPsec beta release.
 * The deprecated 'ntpdate' program has been replaced with a shell
   wrapper around 'ntpdig'.
 
-* Log timestamps look a little different; they are now in ISO8601 format.
+* Log timestamps look a little different; they are now in ISO 8601 format.
 
 * Autokey is not supported in this release.
 

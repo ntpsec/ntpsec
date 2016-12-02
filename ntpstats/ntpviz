@@ -1176,7 +1176,7 @@ Python by ESR, concept and GNUPLOT code by Dan Drown.
     parser.add_argument('-e', '--endtime',
                 default=None,
                 dest='endtime',
-                help="End time in POSIX (seconds) or ISO8601",
+                help="End time in POSIX (seconds) or ISO 8601",
                 type=str)
     parser.add_argument('-g', '--generate',
                 action="store_true",
@@ -1201,7 +1201,7 @@ Python by ESR, concept and GNUPLOT code by Dan Drown.
     parser.add_argument('-s', '--starttime',
                 default=None,
                 dest='starttime',
-                help="Start time in POSIX (seconds) or ISO8601",
+                help="Start time in POSIX (seconds) or ISO 8601",
                 type=str)
     parser.add_argument('-w', '--width',
                 choices=['s', 'm', 'l'],

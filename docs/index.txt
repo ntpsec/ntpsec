@@ -206,7 +206,7 @@ few will be user-visible.
 * The ntpsnmpd daemon, incomplete and not conformant with RFC 5907,
   has been removed.
 
-* Log timestamps look a little different; they are now in ISO8601 format.
+* Log timestamps look a little different; they are now in ISO 8601 format.
   The code can be built in a strict NTP Classic compatibility mode
   that restores the old format.
 
