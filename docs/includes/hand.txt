@@ -6,5 +6,4 @@
 * link:discover.html[Automatic Server Discovery Schemes]
 * link:rate.html[Rate Management]
 * link:refclock.html[Reference Clock Support]
-* link:sitemap.html[Site Map]
 

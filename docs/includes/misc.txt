@@ -6,5 +6,4 @@
 * link:msyslog.html[+ntpd+ System Log Messages]
 * link:kernpps.html[PPSAPI Interface for Precision Time Signals]
 * link:pps.html[Pulse-per-second (PPS) Signal Interfacing]
-* link:sitemap.html[Site Map]
 

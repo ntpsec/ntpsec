@@ -4,5 +4,4 @@
 * link:quick.html[Quick Start for Client Configurations]
 * link:debug.html[NTP Debugging Techniques]
 * link:bugs.html[NTP Bug Reporting Procedures]
-* link:sitemap.html[Site Map]
 
