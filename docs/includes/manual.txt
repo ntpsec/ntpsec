@@ -1,4 +1,4 @@
-== Manual Pages ==
+=== Manual Pages ===
 * link:ntpd.html[+ntpd+ - Network Time Protocol (NTP) daemon]
 * link:ntpdig.html[+ntpdig+ - Simple Network Time Protocol (SNTP) client]
 * link:ntpq.html[+ntpq+ - standard NTP query program]
