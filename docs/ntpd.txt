@@ -1,4 +1,4 @@
-= +ntpd+ - Network Time Protocol (NTP) Daemon =
+= ntpd - Network Time Protocol (NTP) Daemon =
 
 [cols="10%,90%",frame="none",grid="none",style="verse"]
 |==============================

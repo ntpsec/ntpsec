@@ -1,4 +1,4 @@
-= Mitigation Rules and the +prefer+ Keyword =
+= Mitigation Rules and the prefer Keyword =
 
 [cols="10%,90%",frame="none",grid="none",style="verse"]
 |==============================
