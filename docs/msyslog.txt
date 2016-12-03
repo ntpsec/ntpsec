@@ -124,7 +124,7 @@ meaning should be clear from context.
 +crypto_setup: host key file ? not found or corrupt+::
 +crypto_setup: host key is not RSA key type+::
 +crypto_setup: random seed file ? not found+::
-+rypto_setup: random seed file not specified+::
++crypto_setup: random seed file not specified+::
   Fatal errors. These messages show problems during the initialization
   procedure.
 
