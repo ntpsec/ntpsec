@@ -12,7 +12,7 @@ the root dispersion plus minor error contributions not considered here.
 
 First, a number of sanity checks is performed to sift the selectable
 candidate from among the source population. The sanity checks are
-summarized as follows:.
+summarized as follows:
 
 1.  A _stratum error_ occurs if (1) the source had never been
 synchronized or (2) the stratum of the source is below the +floor+

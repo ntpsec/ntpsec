@@ -204,14 +204,14 @@ various authentication schemes.
 By default, the client sends non-authenticated packets and the server
 responds with non-authenticated packets. If the client sends
 authenticated packets, the server responds with authenticated packets if
-correct, or a crypto-NAK packet if not.. In the case of unsolicited
+correct, or a crypto-NAK packet if not. In the case of unsolicited
 packets which might consume significant resources, such as broadcast or
 symmetric mode packets, authentication is required, unless overridden
 by a +disable auth+ command. In the current climate of targeted
 broadcast or "letterbomb" attacks, defeating this requirement would be
 decidedly dangerous. In any case, the +notrust +flag, described on the
 link:authopt.html[Access Control Options] page, can be used to disable
-access to all but correctly authenticated clients..
+access to all but correctly authenticated clients.
 
 [[formats]]
 == Data Formats ==
