@@ -36,7 +36,7 @@ clocktime:
       };
 -------------------------------------------------------------------------------
 +
-Conversion is usually simple and straight forward. For the flags
+Conversion is usually simple and straightforward. For the flags
 following values can be OR'ed together:
 +
 ---------------------------------------------------------------------------------
