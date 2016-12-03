@@ -7,14 +7,14 @@ include::includes/external.txt[]
 
 == Table of Contents ==
 
-* link:#intro[1. Introduction]
-* link:#budget[2. Statistics Summary]
-* link:#quality[3. Quality of Service]
+* link:#intro[Introduction]
+* link:#budget[Statistics Summary]
+* link:#quality[Quality of Service]
 
 '''''
 
 [[intro]]
-== 1. Introduction ==
+== Introduction ==
 
 This page describes several statistics provided in the NTP specification
 and reference implementation and how they determine the accuracy and
@@ -48,7 +48,7 @@ data inherited from the system peer. These data are available to
 application programs and dependent downstream clients.
 
 [[budget]]
-== 2. Statistics Summary ==
+== Statistics Summary ==
 
 Each NTP synchronization source is characterized by the offset θ and
 delay δ samples measured by the on-wire protocol, as described on the
@@ -122,7 +122,7 @@ eight survives, the resulting sample rate is twice the Nyquist rate at
 any time constant and poll interval.
 
 [[quality]]
-== 3. Quality of Service ==
+== Quality of Service ==
 
 This section discusses how an NTP client determines the system
 performance using a peer population including reference clocks and

@@ -15,18 +15,18 @@ include::includes/misc.txt[]
 
 == Table of Contents ==
 
-* link:#intro[1. Introduction and Overview]
-* link:#combine[2. Combine Algorithm]
-* link:#clockhop[3. Anti-Clockhop Algorithm]
-* link:#peer[4. Peer Classification]
-* link:#prefer[5. 5. The +prefer+ Peer]
-* link:#miti[6. Mitigation Rules]
-* link:#mins[7. The +minsane+ Option]
+* link:#intro[Introduction and Overview]
+* link:#combine[Combine Algorithm]
+* link:#clockhop[Anti-Clockhop Algorithm]
+* link:#peer[Peer Classification]
+* link:#prefer[The +prefer+ Peer]
+* link:#miti[Mitigation Rules]
+* link:#mins[The +minsane+ Option]
 
 '''''
 
 [[intro]]
-== 1. Introduction and Overview ==
+== Introduction and Overview ==
 
 This page summarizes the criteria for choosing from among the survivors
 of the clock cluster algorithm a set of contributors to the clock
@@ -69,7 +69,7 @@ directly, as described on the link:kern.html[A Kernel Model for
 Precision Timekeeping] page.
 
 [[combine]]
-== 2. Combine Algorithm ==
+== Combine Algorithm ==
 
 The clock combine algorithm uses the survivor list to produce a weighted
 average of both offset and jitter. Absent other considerations discussed
@@ -85,7 +85,7 @@ survivors at the smallest root distance and thus the smallest maximum
 error.
 
 [[clockhop]]
-== 3. Anti-Clockhop Algorithm ==
+== Anti-Clockhop Algorithm ==
 
 The anti-clockhop algorithm is intended for cases where multiple servers
 are available on a fast LAN with modern computers. Typical offset
@@ -116,7 +116,7 @@ operation continue in this way, the candidate peer will eventually
 become the system peer.
 
 [[peer]]
-== 4. Peer Classification ==
+== Peer Classification ==
 
 The behavior of the various algorithms and mitigation rules involved
 depends on how the various synchronization sources are classified. This
@@ -157,7 +157,7 @@ backup source, should all other sources fail, or as the primary source
 if the +prefer+ option is present.
 
 [[prefer]]
-== 5. The +prefer+ Peer ==
+== The +prefer+ Peer ==
 
 The mitigation rules are designed to provide an intelligent selection of
 the system peer from among the selectable sources of different types.
@@ -191,7 +191,7 @@ becomes a falseticker, the combined backup sources continue to
 discipline the system clock.
 
 [[miti]]
-== 6. Mitigation Rules ==
+== Mitigation Rules ==
 
 As the select algorithm scans the associations for selectable
 candidates, the modem driver and local driver are segregated for later,
@@ -243,7 +243,7 @@ If none of the above is the case, the data are disregarded and the
 system variables remain as they are.
 
 [[mins]]
-== 7. The +minsane+ Option ==
+== The +minsane+ Option ==
 
 The +minsane+ option of the link:miscopt.html#tos[+tos+] command, the
 +prefer+ option of the +server+ and +peer+ commands and the +flag+
