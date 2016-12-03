@@ -13,5 +13,4 @@ On-Wire Protocols]
 * link:{millshome}/security.html[NTP Security Analysis]
 * link:{millshome}/ptp.html[IEEE 1588 Precision Time Protocol (PTP)]
 * link:{millshome}/autocfg.html[Autonomous Configuration]
-* link:sitemap.html[Site Map]
 
