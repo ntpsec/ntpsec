@@ -53,7 +53,7 @@ def options_cmd(ctx, config):
 	grp.add_option('--enable-doc-only', action='store_true', default=False, help="Only build NTP documentation")
 	grp.add_option('--enable-a2x-xmllint', action='store_true', default=False, help="Build NTP documentation with a2x XML lint")
 	grp.add_option('--disable-manpage', action='store_true', default=False, help="Disable Manpage building.")
-	grp.add_option('--path-doc', type='string', action='store', default=None, help="Force HTML installation directory.")
+	grp.add_option('--htmldir', type='string', action='store', default=None, help="Force HTML installation directory.")
 	grp.add_option('--mandir', type='string', action='store', default=None, help="Force man page installation directory.")
 
 	grp = ctx.add_option_group("Not for general use")
