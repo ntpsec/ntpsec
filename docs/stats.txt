@@ -162,7 +162,7 @@ _synchronization distance_ often shortened simply to _distance_. The
 root distance is also used in the following ways.
 
 * Root distance defines the maximum error of the clock offset estimate
-due to all causes as long as the source remains reachable..
+due to all causes as long as the source remains reachable.
 * Root distance defines the upper and lower limits of the correctness
 interval. This interval represents the maximum clock offset for each of
 possibly several sources. The clock select algorithm computes the
