@@ -72,7 +72,8 @@ def termsize():
     if not os.isatty(1):
         size = (80, 24)
     try:
-        size = shutil.get_terminal_size((80, 24))
+        (w, h) = shutil.get_terminal_size((80, 24))
+        size = (w, h)
     except AttributeError:
         # OK, Python version < 3.3, cope
         import fcntl, termios, struct
