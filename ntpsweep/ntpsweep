@@ -29,7 +29,7 @@ def ntp_peers(host):
     "Return a list of peer IP addrs for a specified host, empty list if query failed."
     try:
         with os.popen("ntpq -npw " + host) as rp:
-            hostlines = rp.readlines[2:]	# Drop display header
+            hostlines = rp.readlines()[2:]	# Drop display header
             # Strip tally mark from first field
             return [ln.split()[0][1:] for ln in hostlines if ln[0] in " x.-+#*o"]
     except OSError:
