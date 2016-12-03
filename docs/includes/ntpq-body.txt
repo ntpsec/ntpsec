@@ -565,4 +565,6 @@ by 'name', a shortname for the driver type.
 
 The -O (--old-rv) option of legacy versions has been retired.
 
+The command ":config" is no longer accepted; use "config" instead.
+
 // end
