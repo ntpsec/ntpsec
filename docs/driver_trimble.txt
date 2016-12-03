@@ -526,4 +526,3 @@ mailto:fernandoph@iar.unlp.edu.ar[*Fernando P. Hauscarriaga*]
 '''''
 
 include::includes/footer.txt[]
-*;*
