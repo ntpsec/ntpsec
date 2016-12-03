@@ -80,12 +80,10 @@ Note: Phone numbers include the entire Hayes modem command, including
 the +ATDT+ and other control codes as may be necessary. For most cases
 only the +ATDT+ may be necessary.
 
-http://www.boulder.nist.gov/timefreq[National Institute of Science and
-Technology (NIST)]
+https://www.nist.gov/pml/time-and-frequency-division/services/automated-computer-time-service-acts[National
+Institute of Science and Technology (NIST)]
 
 Phone: (303) 494-4774 (Boulder, CO); (808) 335-4721 (Hawaii)
-
-http://www.boulder.nist.gov/timefreq/service/acts.htm[Data Format]
 
 ----------------------------------------------------
 National Institute of Standards and Technology
@@ -101,9 +99,9 @@ MJD YR MO DA H M S ST S UT1 msADV <OTM>
 The +<OTM>+ on-time character "+*+" changes to "+#+" when the delay
 correction is valid.
 
-http://tycho.usno.navy.mil[US Naval Observatory (USNO)]
+http://www.usno.navy.mil/USNO/time/telephone-time[US Naval Observatory (USNO)]
 
-Phone: (202) 762-1594 (Washington, DC); (719) 567-6742 (Boulder, CO)
+Phone: (202) 762-1594 (Washington, DC); (719) 567-6742 (Colorado Springs, CO)
 
 http://tycho.usno.navy.mil/modem_time.html[Data Format] (two lines,
 repeating at one-second intervals)
