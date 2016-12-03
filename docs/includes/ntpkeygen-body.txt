@@ -89,7 +89,7 @@ is based on the Mersenne Twister, with a period of 2^19937^-1.
 [[crypto]]
 == Cryptographic Data Files ==
 
-The +ntpkeygen+ program generates a MD5 symmetric keys file
+The +ntpkeygen+ program generates a file of symmetric keys
 _ntpkey_MD5key_hostname.filestamp_. Since the file contains private
 shared keys, it should be visible only to root and distributed by secure
 means to other subnet hosts. The NTP daemon loads the file _ntp.keys_,
@@ -99,12 +99,23 @@ automated means on the other subnet hosts. This file is needed to
 authenticate some remote configuration commands used by the {ntpqman}
 utility.
 
-Following the header the keys are entered one per line in the
-format _keyno_ _type_ _key_ where _keyno_ is a positive integer in the
-range 1-65,535, _type_ is the string MD5 defining the key format and
-_key_ is the key itself, which is a printable ASCII string 16 characters
-or less in length. Each character is chosen from the 93 printable
-characters in the range 0x21 through 0x7f excluding space and the ‘#’
-character.
+Comments may appear in the file, and are preceeded with the +#+
+character.  
+
+Following any headers the keys are entered one per line in the
+format:
+
+[options="header"]
+|====================================================================
+|Field	| Meaning
+|keyno	| Positive integer in the range 1-65,535
+|type	| MD5 or SHA1 , type of key
+|key	| the actual key, printable ASCII
+|====================================================================
+
+// Recheck.  The code does not check for ' '.  -- Sanjeev 20161203
+// For type MD5, each character is chosen from the 93 printable
+// characters in the range 0x21 through 0x7f excluding space and the ‘#’
+// character.
 
 // end
