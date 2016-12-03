@@ -195,8 +195,7 @@ a special firmware version may be available.
 +
 In this subtype some additional GPS receiver status information is also
 read. However, this requires a point-to-point connection.
-link:imap://mills@mail.eecis.udel.edu:993/fetch%3EUID%3E.INBOX%3E67132?part=1.3&type=text/html&filename=driver_generic.html#subtype18[Subtype
-18] should be used if the device is accessed by a multidrop connection.
+xref:subtype18[Subtype 18] should be used if the device is accessed by a multidrop connection.
 +
 *Note:* subtype 7 must not be used with Meinberg PCI cards; use subtype 2 instead.
 
@@ -256,7 +255,7 @@ image:pic/fg6021.gif[http://www.hopf-time.com/engl/kart6021.html]
 +
 *VARITEXT Receiver (MSF)*
 
-* *refclock generic subtype 18*
+* [[subtype18]]*refclock generic subtype 18*
 +
 *http://www.meinberg.de[Meinberg] http://www.meinberg.de/english/products/timesource.htm#gps---freq_sync[GPS16x/GPS17x receivers] (GPS / <<1&mu;s)*
 +
