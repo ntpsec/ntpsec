@@ -7,9 +7,9 @@ include::includes/external.txt[]
 
 == Table of Contents ==
 
-* link:#intro[1. Introduction and Overview]
-* link:#scale[2. NTP Timescale and Data Formats]
-* link:#arch[3. Architecture and Algorithms]
+* link:#intro[Introduction and Overview]
+* link:#scale[NTP Timescale and Data Formats]
+* link:#arch[Architecture and Algorithms]
 
 '''''
 
@@ -34,7 +34,7 @@ Research Project] web site.
 
 
 [[intro]]
-== 1. Introduction and Overview ==
+== Introduction and Overview ==
 
 NTP time synchronization services are widely available in the public
 Internet. The public NTP subnet currently includes several thousand
@@ -63,7 +63,7 @@ planning purposes is in the white paper
 Network Time Synchronization].
 
 [[scale]]
-== 2. NTP Timescale and Data Formats ==
+== NTP Timescale and Data Formats ==
 
 NTP clients and servers synchronize to the Coordinated Universal Time
 (UTC) timescale used by national laboratories and disseminated by radio,
@@ -115,7 +115,7 @@ half-era) of the correct time. Further discussion on this issue is in
 the white paper {millshome}time.html[NTP Timestamp Calculations].
 
 [[arch]]
-== 3. Architecture and Algorithms ==
+== Architecture and Algorithms ==
 
 image:pic/fig_3_1.gif[]
 
