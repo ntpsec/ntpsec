@@ -72,8 +72,8 @@ later on this page.
 [[random]]
 == Random Seed File ==
 
-All key generation schemes must have means to
-randomize the entropy seed used to initialize the internal pseudo-random
+All key generation schemes must have means to randomize the 
+entropy seed used to initialize the internal pseudo-random 
 number generator used by the library routines.
 
 It is important to understand that entropy must be evolved for each
@@ -81,6 +81,10 @@ generation, for otherwise the random number sequence would be
 predictable. Various means dependent on external events, such as
 keystroke intervals, can be used to do this and some systems have
 built-in entropy sources.
+
+This implementation uses Python's PRNG, seeded with a combination
+of the system time and the current process ID.  The core of this
+is based on the Mersenne Twister, with a period of 2^19937^-1.
 
 [[crypto]]
 == Cryptographic Data Files ==
