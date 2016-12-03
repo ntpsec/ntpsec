@@ -69,18 +69,22 @@ TermSize = collections.namedtuple("TermSize", ["width", "height"])
 def termsize():
     "Return the current terminal size."
     # Alternatives at http://stackoverflow.com/questions/566746/how-to-get-console-window-width-in-python
-    if not os.isatty(1):
-        size = (80, 24)
-    try:
-        (w, h) = shutil.get_terminal_size((80, 24))
-        size = (w, h)
-    except AttributeError:
-        # OK, Python version < 3.3, cope
-        import fcntl, termios, struct
-        h, w, hp, wp = struct.unpack('HHHH',
-            fcntl.ioctl(2, termios.TIOCGWINSZ,
-            struct.pack('HHHH', 0, 0, 0, 0)))
-        size = (w, h)
+    # The way this is usedd makes it not a big deal if the default is wrong.
+    size = (80, 24)
+    if os.isatty(1):
+        try:
+            (w, h) = shutil.get_terminal_size((80, 24))
+            size = (w, h)
+        except AttributeError:
+            try:
+                # OK, Python version < 3.3, cope
+                import fcntl, termios, struct
+                h, w, hp, wp = struct.unpack('HHHH',
+                    fcntl.ioctl(2, termios.TIOCGWINSZ,
+                    struct.pack('HHHH', 0, 0, 0, 0)))
+                size = (w, h)
+            except IOError:
+                pass
     return TermSize(*size)
 
 class PeerSummary:
