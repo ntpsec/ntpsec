@@ -269,7 +269,8 @@ redistributable as open source.
 
 A good deal of tutorial and directive information is available on the
 handbook pages. These should be read in conjunction with the command and
-option information available on the pages listed on the sitemap page.
+option information available on the pages listed on the
+link:sitemap.html[Site Map] page.
 
 link:quick.html[Quick start for client configurations]::
   Basic configuration for 99% of client installations.  Introduces
