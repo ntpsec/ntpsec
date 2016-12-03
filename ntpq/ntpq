@@ -447,7 +447,7 @@ usage: help [ command ]
             # high-half characters.  We won't do that unless somebody
             # files a bug, Mode 6 never seems to generate those in
             # variable fetches.
-            text = session.response.replace(",\r\n",",\n")
+            text = polystr(session.response.replace(polybytes(",\r\n"), polybytes(",\n")))
         else:
             if not quiet:
                 self.say("status=%04x %s,\n" % \
