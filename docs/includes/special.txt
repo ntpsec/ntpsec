@@ -12,5 +12,4 @@
 * link:clock.html[Clock State Machine]
 * link:leap.html[Leap Second Processing]
 * link:leapsmear.html[Leap Smearing]
-* link:sitemap.html[Site Map]
 
