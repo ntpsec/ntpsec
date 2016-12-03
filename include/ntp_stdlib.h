@@ -206,7 +206,6 @@ extern pset_tod_using	set_tod_using;
 /* ssl_init.c */
 #ifdef HAVE_OPENSSL
 extern	void	ssl_init		(void);
-extern	void	ssl_check_version	(void);
 extern	bool	ssl_init_done;
 #define	INIT_SSL()				\
 	do {					\

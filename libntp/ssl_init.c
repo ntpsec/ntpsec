@@ -47,22 +47,6 @@ atexit_ssl_cleanup(void)
 	EVP_cleanup();
 	ERR_free_strings();
 }
-
-
-void
-ssl_check_version(void)
-{
-	if ((SSLeay() ^ OPENSSL_VERSION_NUMBER) & ~0xff0L) {
-		msyslog(LOG_WARNING,
-		    "OpenSSL version mismatch. Built against %lx, you have %lx",
-		    (u_long)OPENSSL_VERSION_NUMBER, SSLeay());
-		fprintf(stderr,
-		    "OpenSSL version mismatch. Built against %lx, you have %lx\n",
-		    (u_long)OPENSSL_VERSION_NUMBER, SSLeay());
-	}
-
-	INIT_SSL();
-}
 #endif	/* HAVE_OPENSSL */
 
 
