@@ -412,8 +412,11 @@ usage: help [ command ]
             except:
                 self.warn("Invalid index literal.\n")
                 return -1
-            if idx not in range(1, len(self.peers)+1):
-                self.warn("No such index.\n")
+            if idx < 0 or idx >= 2**16-1:
+                self.warn("%d is not a valid association number.\n" % idx)
+                return -1
+            elif idx not in range(1, len(self.peers)+1):
+                self.warn("No such association as %d.\n" % idx)
                 return -1
             else:
                 return self.peers[idx - 1].associd
@@ -436,7 +439,7 @@ usage: help [ command ]
             return ()
         lo = self.__assoc_valid(tokens[0])
         hi = self.__assoc_valid(tokens[1])
-        if (lo >= 0 and hi >= 0 and hi < lo):
+        if lo < 0 or hi < 0 or hi < 0: 
             return ()
         return (lo, hi)
 
@@ -518,6 +521,7 @@ usage: help [ command ]
     def __dolist(self, varlist, associd, op, type, quiet=False):
         "List variables associated with a specified peer."
         try:
+            print("Qerying %d" % associd)
             variables = self.session.readvar(associd, varlist, op)
         except ntp.packet.ControlException as e:
             self.warn(e.message + "\n")
