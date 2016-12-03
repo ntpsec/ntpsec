@@ -1299,9 +1299,6 @@ class ControlSession:
                     rawhook(variables)
 
                 # Analyze the contents of this response into a span structure
-                last_older = None
-                addr_older = None
-                highwater = len(span.entries)
                 for (tag, val) in variables.items():
                     if tag =="now":
                         span.now = ntp.ntpc.lfptofloat(val)
