@@ -122,28 +122,30 @@ for command, func, descr in commands:
 			execute = Scripting.autoconfigure(Context.Context.execute)
 # end borrowed code
 
-def linkmaker(ctx):
+def afterparty(ctx):
     # Make magic links to support in-tree testing.
     # The idea is that all directories where the Python tools
     # listed above live should have an 'ntp' symlink so they
     # can import compiled Python modules from the build directory.
     # Also, they need to be able to see the Python extension
     # module built in libntp.
+    if ctx.cmd == 'clean':
+        ctx.exec_command("rm -f wafhelpers/*.pyc pylib/__pycache__/*.pyc")
     for x in ("ntpq", "ntpdig", "ntpstats", "ntpsweep", "ntptrace", "ntpwait"):
             path_build = ctx.bldnode.make_node("pylib")
             path_source = ctx.srcnode.make_node(x + "/ntp")
             relpath = "../" + path_build.path_from(ctx.srcnode)
             if ctx.cmd in ('install', 'build'):
-                    if not path_source.exists() or os.readlink(path_source.abspath()) != relpath:
-                            try:
-                                    os.remove(path_source.abspath())
-                            except OSError:
-                                    pass
-                            os.symlink(relpath, path_source.abspath())
-            elif ctx.cmd == 'clean':
-                    if path_source.exists():
-                        #print "removing", path_source.abspath()
+                if not path_source.exists() or os.readlink(path_source.abspath()) != relpath:
+                    try:
                         os.remove(path_source.abspath())
+                    except OSError:
+                        pass
+                    os.symlink(relpath, path_source.abspath())
+            elif ctx.cmd == 'clean':
+                if path_source.exists():
+                    #print "removing", path_source.abspath()
+                    os.remove(path_source.abspath())
     bldnode = ctx.bldnode.abspath()
     if ctx.cmd in ('install', 'build'):
         os.system("ln -sf %s/libntp/ntpc.so %s/pylib/ntpc.so " % (bldnode, bldnode))
@@ -206,7 +208,9 @@ def build(ctx):
 		install_path = "${PREFIX}/bin/"
 	)
 
-	ctx.add_post_fun(linkmaker)
+	ctx.add_post_fun(afterparty)
+        if ctx.cmd == 'clean':
+            afterparty(ctx)
 
 	ctx.manpage(8, "ntpleapfetch/ntpleapfetch-man.txt")
 	ctx.manpage(1, "ntpq/ntpq-man.txt")
