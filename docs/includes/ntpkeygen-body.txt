@@ -15,13 +15,12 @@ key cryptography.
 
 The program produces a file containing ten pseudo-random printable
 ASCII strings suitable for the MD5 message digest algorithm included
-in the distribution. If the OpenSSL library is installed, it produces
-an additional ten hex-encoded random bit strings suitable for the SHA1
-and other message digest algorithms. The message digest keys file must
-be distributed and stored using secure means beyond the scope of NTP
-itself. Besides the keys used for ordinary NTP associations,
-additional keys can be defined as passwords for the
-link:ntpq.html[+ntpq+] utility program.
+in the distribution.  It also produces an additional ten hex-encoded
+random bit strings suitable for the SHA1 and other message digest
+algorithms. The message digest keys file must be distributed and
+stored using secure means beyond the scope of NTP itself. Besides
+the keys used for ordinary NTP associations, additional keys can be
+defined as passwords for the link:ntpq.html[+ntpq+] utility program.
 
 [[cmd]]
 == Command Line Options ==
