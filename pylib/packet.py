@@ -547,7 +547,7 @@ class ControlPacket(Packet):
         return True if self.r_e_m_op & 0x80 else False
 
     def is_error(self):
-        return Trye if self.r_e_m_op & 0x40 else False
+        return True if self.r_e_m_op & 0x40 else False
 
     def more(self):
         return True if self.r_e_m_op & 0x20 else False

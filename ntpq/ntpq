@@ -618,7 +618,7 @@ usage: timeout [ msec ]
                         self.say("%s  %s%d\n" % (legend, "mode#", value))
                 else:
                     self.warn("unexpected vc type %s for %s, value %s\n" % (fmt, name, value))
-        except KeyboardOnterrupt:
+        except KeyboardInterrupt:
             self.warn("display interrupted\n")
 
     def do_delay(self, line):
@@ -661,7 +661,7 @@ usage: delay [ msec ]
                     print("current host remains %s" % self.session.hostname)
                 else:
                     print("still no current host")
-            except KeyboardInterrupted:
+            except KeyboardInterrupt:
                 print("lookup interrupted")
 
     def help_host(self):
