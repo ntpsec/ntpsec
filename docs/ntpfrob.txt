@@ -1,4 +1,4 @@
-= `ntpfrob` - frob the local clock hardware =
+= ntpfrob - frob the local clock hardware =
 
 [cols="10%,90%",frame="none",grid="none",style="verse"]
 |==============================

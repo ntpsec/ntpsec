@@ -1,4 +1,4 @@
-= +ntpq+ - standard NTP query program =
+= ntpq - standard NTP query program =
 
 [cols="10%,90%",frame="none",grid="none",style="verse"]
 |==============================

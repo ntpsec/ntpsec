@@ -1,4 +1,4 @@
-= `ntptime` - read and set kernel time variables =
+= ntptime - read and set kernel time variables =
 
 [cols="10%,90%",frame="none",grid="none",style="verse"]
 |==============================

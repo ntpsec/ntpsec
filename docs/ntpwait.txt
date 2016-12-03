@@ -1,4 +1,4 @@
-= +ntpwait+ - wait until ntpd is in synchronized state =
+= ntpwait - wait until ntpd is in synchronized state =
 
 include::includes/ntpwait-body.txt[]
 
