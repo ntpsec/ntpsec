@@ -132,7 +132,7 @@
    connoisseurs refer to as "Mills-speak"; examples in this glossary
    include <<falseticker>>, <<proventic>>, and <<truechimer>>.  The
    close-to-definitive reference is
-   http://lists.ntp.org/pipermail/questions/2007-December/016592.html[The
+   https://lists.ntp.org/pipermail/questions/2007-December/016592.html[The
    NTP dictionary], though not all those terms are still in use.
 
 [[mode 6]] mode 6::

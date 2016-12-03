@@ -509,11 +509,11 @@ We tried to contact Trimble because there's presumably a firmware update
 that support it, but we didn't have much luck. Here is a link explaining
 the situation:*
 
-*link:http://lists.ntp.isc.org/pipermail/hackers/2006-April/002216.html[]*
+*link:https://lists.ntp.org/pipermail/hackers/2006-April/002216.html[]*
 
 == Authors ==
 
-link:http://lists.ntp.isc.org/pipermail/hackers/2006-April/002216.html[*Questions or Comments:*]
+link:https://lists.ntp.org/pipermail/hackers/2006-April/002216.html[*Questions or Comments:*]
 
 mailto:sven_dietrich@trimble.com[*Sven Dietrich*]
 
