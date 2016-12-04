@@ -249,4 +249,6 @@
   though consumer-grade "atomic clocks" unaffected by the modulation
   change are still made.
 
-// end
+'''''
+
+include::includes/footer.txt[]

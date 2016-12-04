@@ -305,9 +305,6 @@ second is most likely due to asymmetric packet delays; large jitter
 is more likely due to bufferbloat and other sources of variable
 latency under load.
 
-
 '''''
 
 include::includes/footer.txt[]
-
-// end

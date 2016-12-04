@@ -45,5 +45,3 @@ support for querying NTP servers.  The 'check_ntp_peer' and
 '''''
 
 include::includes/footer.txt[]
-
-// end
