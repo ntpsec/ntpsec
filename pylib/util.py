@@ -314,7 +314,7 @@ class MRUSummary:
 
     def summary(self, entry):
         lstint = int(self.now - entry.last + 0.5)
-        active = int(entry.last - entry.first + 0.5)
+        active = float(entry.last - entry.first)
         favgint = active / entry.ct
         avgint = int(favgint + 0.5)
         stats = "%6d" % lstint
