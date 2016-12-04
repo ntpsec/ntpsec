@@ -15,20 +15,9 @@ from wafhelpers.test import test_write_log, test_print_log
 from wafhelpers.options import options_cmd
 
 config = {
-        "NTPSEC_RELEASE": False,
         "out": out,
         "OPT_STORE": {}
 }
-
-# Release procedure:
-#   1. waf configure
-#   2. waf build
-#   3. Edit wscript and set NTPSEC_RELEASE to True
-#   4. waf dist
-
-# Snapshot procedure:
-#   Steps 1-3 as above.
-#   4. waf dist --build-snapshot
 
 def help(ctx):
     "Be helpful, give a usage"
@@ -40,10 +29,6 @@ Usage: waf <command>
     dist        Create a release
 
 ''')
-
-def dist(ctx):
-        from wafhelpers.dist import dist_cmd
-        dist_cmd(ctx, config)
 
 
 def options(ctx):
