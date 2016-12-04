@@ -375,6 +375,9 @@ int scmp_sc[] = {
         SCMP_SYS(shmat),
 #endif
 
+	SCMP_SYS(fcntl64),
+	SCMP_SYS(fstat64),
+
 #ifdef __x86_64__
 	SCMP_SYS(mmap),
 #endif
@@ -382,8 +385,6 @@ int scmp_sc[] = {
 	SCMP_SYS(_newselect),
 	SCMP_SYS(_llseek),
 	SCMP_SYS(mmap2),
-	SCMP_SYS(fcntl64),
-	SCMP_SYS(fstat64),
 	SCMP_SYS(stat64),
 #endif
 };
