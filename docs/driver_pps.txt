@@ -180,8 +180,6 @@ pp.
 
 David L. Mills <mills@udel.edu>
 
-
 '''''
 
 include::includes/footer.txt[]
-

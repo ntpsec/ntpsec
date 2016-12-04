@@ -118,3 +118,5 @@ due to the proprietary +PPSAPI+ implementation or Windows itself.
 This driver does not handle leap seconds.
 
 '''''
+
+include::includes/footer.txt[]

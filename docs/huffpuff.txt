@@ -48,3 +48,5 @@ corrections are less effective and can lead to significant errors if the
 area between the limb lines is heavily populated.
 
 '''''
+
+include::includes/footer.txt[]

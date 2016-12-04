@@ -233,3 +233,5 @@ been removed:
   documents according to the HTML DTD
 
 '''''
+
+include::includes/footer.txt[]
