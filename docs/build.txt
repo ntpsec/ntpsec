@@ -104,7 +104,6 @@ link:bugs.html[NTP Bug Reporting Procedures] page.
   Does the work of +clean+, but cleans out all directories in
   preparation for a new distribution release.
 
-
 '''''
 
 include::includes/footer.txt[]

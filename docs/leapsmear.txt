@@ -268,4 +268,6 @@ used to monitor if and how the time sent to clients is smeared.  With a
 leapsmearoffset of -.932087, the refid reported in smeared packets would be
 254.196.88.176.
 
-// end
+'''''
+
+include::includes/footer.txt[]

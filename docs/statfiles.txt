@@ -84,4 +84,6 @@ with the data source symbolic name in field 2.
   24.9                 Measured temperature in degree Celsius
 ----------------------------------------------------------------------------
 
-//end
+'''''
+
+include::includes/footer.txt[]

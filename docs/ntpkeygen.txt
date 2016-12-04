@@ -51,6 +51,7 @@ An MD5 key consists of a printable ASCII string less than or equal to 16
 characters and terminated by whitespace or a # character. An OpenSSL key
 consists of a hex-encoded ASCII string of 40 characters, which is
 truncated as necessary.
+
 '''''
 
 include::includes/footer.txt[]
