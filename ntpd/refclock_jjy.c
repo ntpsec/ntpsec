@@ -4046,7 +4046,7 @@ static int
 modem_init_resp00 ( struct peer *peer, struct refclockproc *pp, struct jjyunit *up )
 {
 
-	const char	*pCmd, cBuf [ 46 ] ;
+	char	*pCmd, cBuf [ 46 ] ;
 	int	iCmdLen ;
 	int	iErrorCorrection, iSpeakerSwitch, iSpeakerVolume ;
 	int	iNextModemState = STAY_MODEM_STATE ;
