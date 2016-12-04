@@ -17,7 +17,7 @@ examples are:
 service. Phone number: +49 5 31 51 20 38.
 +
 For more detail, see
-http://www.ptb.de/cms/index.php?id=1786&L=1[http://www.ptb.de/cms/index.php?id=1786&L=1]
+http://www.ptb.de/cms/index.php?id=1786&L=1
 
 * In the UK by National Physical Laboratory (NPL)'s Telephone Time Service.
 Phone number: 020 8943 6333

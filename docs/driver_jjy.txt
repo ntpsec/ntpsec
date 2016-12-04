@@ -21,7 +21,7 @@ sold in Japan, and the time service through a telephone line.
 |link:#subtype-5[Tristate Ltd.   TS-GPSclock-01]     |
 |=================================================
 
-* [[subtype-1]]Tristate Ltd.   TS-JJY01, TS-JJY02 link:http://www.tristate.ne.jp/[] (Japanese only)
+* [[subtype-1]]Tristate Ltd.   TS-JJY01, TS-JJY02 http://www.tristate.ne.jp/ (Japanese only)
 +
 NTP configuration ( {ntpconf} )::
 +
@@ -59,7 +59,7 @@ The date and time are requested separately. The time is requested
 before and after the date request to check uncertainty of the date
 whether it's before or after midnight.
 
-* [[subtype-2]]C-DEX Co.,Ltd. JST2000 link:http://www.c-dex.co.jp/[] (Japanese only)
+* [[subtype-2]]C-DEX Co.,Ltd. JST2000 http://www.c-dex.co.jp/ (Japanese only)
 +
 NTP configuration ( {ntpconf} )::
 +
@@ -75,7 +75,7 @@ Time code format::
 Command        -\-> Reply +
 +{ENQ}1J{ETX}+ -\-> +{STX}JYYMMDDWHHMMSSS{ETX}+
 
-* [[subtype-3]]Echo Keisokuki Co.,Ltd. LT-2000 link:http://www.clock.co.jp/[] (domain no longer registered)
+* [[subtype-3]]Echo Keisokuki Co.,Ltd. LT-2000 http://www.clock.co.jp/ (domain no longer registered)
 +
 NTP configuration ( {ntpconf} )::
 +
@@ -96,7 +96,7 @@ Time code format::
 |#                                 | -\-> | ( Subtype 1 : Request&Send )
 |===================================================================
 
-* [[subtype-4]]CITIZEN T.I.C. CO.,LTD. JJY-200 link:http://www.tic-citizen.co.jp/[] (Japanese only)
+* [[subtype-4]]CITIZEN T.I.C. CO.,LTD. JJY-200 http://www.tic-citizen.co.jp/ (Japanese only)
 +
 NTP configuration ( {ntpconf} )::
 +
@@ -115,7 +115,7 @@ Time code format::
 |(Every second)| -\-> |+'XX YY/MM/DD W HH:MM:SS{CR}+
 |======================================
 
-* [[subtype-5]]Tristate Ltd. TS-GPSclock-01 link:http://www.tristate.ne.jp/[] (Japanese only)
+* [[subtype-5]]Tristate Ltd. TS-GPSclock-01 http://www.tristate.ne.jp/ (Japanese only)
 +
 This driver supports the Tristate TS-GPSclock-01 in command/response
 subtype, though it is a GPS clock, not JJY radio clock. Using the
@@ -160,7 +160,7 @@ The date and time are requested separately. The time is requested
 before and after the date request to check uncertainty of the date
 whether it's before or after midnight.
 
-* [[subtype-6]]SEIKO TIME SYSTEMS INC. TDC-300 link:http://www.seiko-sts.co.jp/[] (English and Japanese)
+* [[subtype-6]]SEIKO TIME SYSTEMS INC. TDC-300 http://www.seiko-sts.co.jp/ (English and Japanese)
 +
 The TDC-300 must be set to the type 3 data format using the front panel
 menu display and the switches.
@@ -183,7 +183,7 @@ Time code format::
 |( 5 to 10 mSec. before second )|      |+{STX}{xE5}{ETX}+
 |============================================================================
 
-* [[subtype-100]]Telephone JJY link:http://jjy.nict.go.jp/[] (English and Japanese)
+* [[subtype-100]]Telephone JJY http://jjy.nict.go.jp/ (English and Japanese)
 +
 The telephone JJY is the time service through a public telephone line. +
 The service is provided by the National Institute of Information and
@@ -271,7 +271,7 @@ flag1 {0|1} flag2 {0|1} flag3 {0|1} flag4 {0|1};;
 |=======================================
 
 phone 042NNNNNNN;;
-   The phone number is available at link:http://jjy.nict.go.jp/[] +
+   The phone number is available at http://jjy.nict.go.jp/ +
    The number of digits of the phone number is checked. If the
    international access number and the country number are added in
    order to call from outside of Japan, the number of digits is over
