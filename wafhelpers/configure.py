@@ -16,7 +16,6 @@ def cmd_configure(ctx, config):
         from wafhelpers.util import parse_version
         parse_version(config)
 
-        ctx.env.NTPSEC_RELEASE = config["NTPSEC_RELEASE"]
         ctx.env.NTPSEC_VERSION_MAJOR = config["NTPSEC_VERSION_MAJOR"]
         ctx.env.NTPSEC_VERSION_MINOR = config["NTPSEC_VERSION_MINOR"]
         ctx.env.NTPSEC_VERSION_REV = config["NTPSEC_VERSION_REV"]
@@ -49,9 +48,7 @@ def cmd_configure(ctx, config):
         ctx.setenv('host', ctx.env.derive())
 
         ctx.load('compiler_c')
-
-        if not ctx.env.NTPSEC_RELEASE:
-                ctx.load('bison')
+        ctx.load('bison')
 
         for opt in opt_map:
                 ctx.env[opt] = opt_map[opt]

@@ -66,9 +66,7 @@ def manpage(ctx, section, source):
 	if not manprefix.endswith("/"):
 		manprefix += "/"
 
-	if ctx.env.NTPSEC_RELEASE:
-		ctx.install_files(manprefix + "man%s/" % section, source.replace("-man.txt", ".%s" % section))
-		return
+        #ctx.install_files(manprefix + "man%s/" % section, source.replace("-man.txt", ".%s" % section))
 
 	if not ctx.env.ENABLE_DOC or ctx.env.DISABLE_MANPAGE:
 		return
