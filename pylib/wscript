@@ -37,6 +37,8 @@ def build(ctx):
 	target      = [target3, '../wafhelpers/.autorevision-cache', '../wafhelpers/autorevision.sh'],
 	)
 
+    ctx.add_group() # Force early creation of generated files
+
     ctx(
 	features     ='py',
 	source       = ctx.path.ant_glob('*.py'),
