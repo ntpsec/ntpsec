@@ -373,7 +373,7 @@ class SyncPacket(Packet):
         self.origin_timestamp = 0
         self.receive_timestamp = 0
         self.transmit_timestamp = 0
-        self.data = polybyes(data)
+        self.data = polybytes(data)
         self.extension = ''
         self.extfields = []
         self.mac = ''
