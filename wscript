@@ -115,7 +115,7 @@ def afterparty(ctx):
     # Also, they need to be able to see the Python extension
     # module built in libntp.
     if ctx.cmd == 'clean':
-        ctx.exec_command("rm -f wafhelpers/*.pyc pylib/__pycache__/*.pyc")
+        ctx.exec_command("rm -f wafhelpers/*.pyc pylib/__pycache__/*.pyc wafhelpers/__pycache__/*.pyc")
     for x in ("ntpq", "ntpdig", "ntpstats", "ntpsweep", "ntptrace", "ntpwait"):
             path_build = ctx.bldnode.make_node("pylib")
             path_source = ctx.srcnode.make_node(x + "/ntp")
