@@ -39,6 +39,6 @@ $do gpg -u ${K} -a --output ntpsec-${V}.tar.gz.sum.asc ntpsec-${V}.tar.gz.sum
   
 # Copy the release tarball, GPG detached signature of the release
 # tarball, and the signed sha256sum file to the ftp artifact server.
-#$do scp ntpsec-${V}.tar* releasemanager@hostname.ntpsec.org:ftp
+$do scp ntpsec-${V}.tar* markatwood@service1.ntpsec.org:/usr/local/jail/ftp.ntpsec.org/data/ftp/pub/releases/
 
 # end
