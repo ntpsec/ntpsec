@@ -29,7 +29,7 @@ $do git push
 $do git push --tags
 
 # Generate GPG detached signature of the release tarball.
-$do gpg -u ${K} --output ntpsec-${V}.tar.gz.sig --detach-sig ntpsec-${V}.tar.gz
+$do gpg -u ${K} -a --output ntpsec-${V}.tar.gz.sum.asc --sign ntpsec-${V}.tar.gz.sum
 
 # Generate sha256sum file for the release tarball.
 $do shasum -a 256 -p ntpsec-${V}.tar.gz >ntpsec-${V}.tar.gz.sum
