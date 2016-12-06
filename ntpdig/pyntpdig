@@ -359,12 +359,18 @@ if __name__ == '__main__':
         arguments = ["localhost"]
 
     if replay:
-        pkt = ntp.packet.SyncPacket(replay.decode("hex"))
-        print(repr(pkt))
+        (packet, dst) = replay.split(":")
+        pkt = ntp.packet.SyncPacket(packet.decode("hex"))
+        pkt.received = ntp.packet.SyncPacket.posix_to_ntp(float(dst))
+        #print(repr(pkt))
+        def hexstamp(n):
+            return "%08x.%08x" % (n >> 32, n & 0x00000000ffffffff)
+        print("org t1: %s rec t2: %s" % (hexstamp(pkt.t1()), hexstamp(pkt.t2())))
+        print("xmt t3: %s dst t4: %s" % (hexstamp(pkt.t3()), hexstamp(pkt.t4())))
         pkt.posixize()
+        print("xmt t1: %f dst t2: %f" % (pkt.t1(), pkt.t2()))
         print("xmt t3: %f dst t4: %f" % (pkt.t3(), pkt.t4()))
         print("rec-org t21: %f  xmt-dst t34: %f" % (pkt.t2() - pkt.t1(), pkt.t3() - pkt.t4()))
-        raise SystemExit(0)
 
     returned = []
     for server in concurrent_hosts:

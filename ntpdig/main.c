@@ -1514,7 +1514,7 @@ offset_calculation(
 		printf("ntpdig rootdelay: %f\n", FPTOD(p_rdly));
 		printf("ntpdig rootdisp: %f\n", FPTOD(p_rdsp));
 		printf("ntpdig syncdist: %f\n", *synch_distance);
-		printf("ntpdig offset_calculation: reftime: ");
+		printf("ntpdig offset_calculation: ref: ");
 		l_fp_output(&p_ref, stdout);
 		printf("ntpdig offset_calculation: org: ");
 		l_fp_output(&p_org, stdout);
