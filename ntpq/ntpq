@@ -348,8 +348,6 @@ usage: help [ command ]
         if not self.__dogetassoc():
             return
         if self.showhostnames:
-            print("HELLO")
-            print(ntp.util.termsize())
             termwidth = ntp.util.termsize().width
         else:
             termwidth = None	# Default width
