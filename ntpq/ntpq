@@ -167,7 +167,7 @@ class Ntpq(cmd.Cmd):
         self.chosts = []		# Command-line hosts
         self.peers = []			# Data from NTP peers.
         self.debug = 0
-        self.pktversion = ntp.ntp_magic.NTP_OLDVERSION + 1
+        self.pktversion = ntp.magic.NTP_OLDVERSION + 1
         self.uservars = collections.OrderedDict()
         self.ai_family = socket.AF_UNSPEC
 
@@ -272,41 +272,41 @@ usage: help [ command ]
         self.say("\nind assid status  conf reach auth condition  last_event cnt\n")
         self.say("===========================================================\n")
         for (i, peer) in enumerate(self.peers):
-            statval = ntp.ntp_control.CTL_PEER_STATVAL(peer.status)
-            if not showall and (statval & (ntp.ntp_control.CTL_PST_CONFIG|ntp.ntp_control.CTL_PST_REACH)) == 0:
+            statval = ntp.control.CTL_PEER_STATVAL(peer.status)
+            if not showall and (statval & (ntp.control.CTL_PST_CONFIG|ntp.control.CTL_PST_REACH)) == 0:
                 continue
-            event = ntp.ntp_control.CTL_PEER_EVENT(peer.status)
-            event_count = ntp.ntp_control.CTL_PEER_NEVNT(peer.status)
-            if statval & ntp.ntp_control.CTL_PST_CONFIG:
+            event = ntp.control.CTL_PEER_EVENT(peer.status)
+            event_count = ntp.control.CTL_PEER_NEVNT(peer.status)
+            if statval & ntp.control.CTL_PST_CONFIG:
                 conf = "yes"
             else:
                 conf = "no"
-            if statval & ntp.ntp_control.CTL_PST_BCAST:
+            if statval & ntp.control.CTL_PST_BCAST:
                     reach = "none"
-                    if statval & ntp.ntp_control.CTL_PST_AUTHENABLE:
+                    if statval & ntp.control.CTL_PST_AUTHENABLE:
                             auth = "yes"
                     else:
                             auth = "none"
-            elif statval & ntp.ntp_control.CTL_PST_REACH:
+            elif statval & ntp.control.CTL_PST_REACH:
                 reach = "yes"
             else:
                 reach = "no"
-            if (statval & ntp.ntp_control.CTL_PST_AUTHENABLE) == 0:
+            if (statval & ntp.control.CTL_PST_AUTHENABLE) == 0:
                 auth = "none"
-            elif statval & ntp.ntp_control.CTL_PST_AUTHENTIC:
+            elif statval & ntp.control.CTL_PST_AUTHENTIC:
                 auth = "ok "
             else:
                 auth = "bad"
-            if self.pktversion > ntp.ntp_magic.NTP_OLDVERSION:
+            if self.pktversion > ntp.magic.NTP_OLDVERSION:
                 seldict = {
-                    ntp.ntp_control.CTL_PST_SEL_REJECT: "reject",
-                    ntp.ntp_control.CTL_PST_SEL_SANE: "falsetick",
-                    ntp.ntp_control.CTL_PST_SEL_CORRECT: "excess",
-                    ntp.ntp_control.CTL_PST_SEL_SELCAND: "outlier",
-                    ntp.ntp_control.CTL_PST_SEL_SYNCCAND: "candidate",
-                    ntp.ntp_control.CTL_PST_SEL_EXCESS: "backup",
-                    ntp.ntp_control.CTL_PST_SEL_SYSPEER: "sys.peer",
-                    ntp.ntp_control.CTL_PST_SEL_PPS: "pps.peer",
+                    ntp.control.CTL_PST_SEL_REJECT: "reject",
+                    ntp.control.CTL_PST_SEL_SANE: "falsetick",
+                    ntp.control.CTL_PST_SEL_CORRECT: "excess",
+                    ntp.control.CTL_PST_SEL_SELCAND: "outlier",
+                    ntp.control.CTL_PST_SEL_SYNCCAND: "candidate",
+                    ntp.control.CTL_PST_SEL_EXCESS: "backup",
+                    ntp.control.CTL_PST_SEL_SYSPEER: "sys.peer",
+                    ntp.control.CTL_PST_SEL_PPS: "pps.peer",
                     }
                 condition = seldict[statval & 0x7]
             else:
@@ -324,19 +324,19 @@ usage: help [ command ]
                 elif (statval & 0x3) == OLD_CTL_PST_SEL_SYSPEER:
                     condition = "sys_peer"
             event_dict = {
-                ntp.ntp_magic.PEVNT_MOBIL: "mobilize",
-                ntp.ntp_magic.PEVNT_DEMOBIL: "demobilize",
-                ntp.ntp_magic.PEVNT_REACH: "reachable",
-                ntp.ntp_magic.PEVNT_UNREACH: "unreachable",
-                ntp.ntp_magic.PEVNT_RESTART: "restart",
-                ntp.ntp_magic.PEVNT_REPLY: "no_reply",
-                ntp.ntp_magic.PEVNT_RATE: "rate_exceeded",
-                ntp.ntp_magic.PEVNT_DENY: "access_denied",
-                ntp.ntp_magic.PEVNT_ARMED: "leap_armed",
-                ntp.ntp_magic.PEVNT_NEWPEER: "sys_peer",
-                ntp.ntp_magic.PEVNT_CLOCK: "clock_alarm",
+                ntp.magic.PEVNT_MOBIL: "mobilize",
+                ntp.magic.PEVNT_DEMOBIL: "demobilize",
+                ntp.magic.PEVNT_REACH: "reachable",
+                ntp.magic.PEVNT_UNREACH: "unreachable",
+                ntp.magic.PEVNT_RESTART: "restart",
+                ntp.magic.PEVNT_REPLY: "no_reply",
+                ntp.magic.PEVNT_RATE: "rate_exceeded",
+                ntp.magic.PEVNT_DENY: "access_denied",
+                ntp.magic.PEVNT_ARMED: "leap_armed",
+                ntp.magic.PEVNT_NEWPEER: "sys_peer",
+                ntp.magic.PEVNT_CLOCK: "clock_alarm",
                 }
-            last_event = event_dict.get(ntp.ntp_magic.PEER_EVENT|event, "")
+            last_event = event_dict.get(ntp.magic.PEER_EVENT|event, "")
             display = \
                      "%3d %5u  %04x   %3.3s  %4s  %4.4s %9.9s %11s %2lu" % \
                      (i + 1, peer.associd,
@@ -372,8 +372,8 @@ usage: help [ command ]
             self.say(("=" * report.width()) + "\n")
             for peer in self.peers:
                 if not showall and \
-                        not (ntp.ntp_control.CTL_PEER_STATVAL(peer.status)
-                          & (ntp.ntp_control.CTL_PST_CONFIG|ntp.ntp_control.CTL_PST_REACH)):
+                        not (ntp.control.CTL_PEER_STATVAL(peer.status)
+                          & (ntp.control.CTL_PST_CONFIG|ntp.control.CTL_PST_REACH)):
                     if self.debug:
                         self.warn("eliding [%d]\n" % peer.associd)
                     continue
@@ -840,11 +840,11 @@ usage: authenticate [ yes|no ]
         else:
             try:
                 newversion = int(line)
-                if newversion >= ntp.ntp_magic.NTP_OLDVERSION and newversion <= ntp.ntp_magic.NTP_VERSION:
+                if newversion >= ntp.magic.NTP_OLDVERSION and newversion <= ntp.magic.NTP_VERSION:
                     self.pktversion = newversion
                 else:
                     print("versions %d to %d, please"
-                          % (ntp.ntp_magic.NTP_OLDVERSION, ntp.ntp_magic.NTP_VERSION))
+                          % (ntp.magic.NTP_OLDVERSION, ntp.magic.NTP_VERSION))
             except ValueError:
                 print("What?")
         print("NTP version being claimed is %d" % self.pktversion)
@@ -983,7 +983,7 @@ usage: showvars
         associd = self.__assoc_valid(line)
         if associd >= 0:
             qtype = ntp.ntpc.TYPE_SYS if associd == 0 else ntp.ntpc.TYPE_PEER
-            self.__dolist(self.uservars.keys(), associd, ntp.ntp_control.CTL_OP_READVAR, qtype)
+            self.__dolist(self.uservars.keys(), associd, ntp.control.CTL_OP_READVAR, qtype)
 
     def help_readlist(self):
         self.say("""\
@@ -1016,7 +1016,7 @@ usage: writelist [ assocID ]
         associd = self.__assoc_valid(line)
         if associd >= 0:
             qtype = ntp.ntpc.TYPE_SYS if associd == 0 else ntp.ntpc.TYPE_PEER
-            self.__dolist(line.split()[1:], associd, ntp.ntp_control.CTL_OP_READVAR, qtype, quiet=True)
+            self.__dolist(line.split()[1:], associd, ntp.control.CTL_OP_READVAR, qtype, quiet=True)
 
     def help_readvar(self):
         self.say("""\
@@ -1057,7 +1057,7 @@ usage: writevar assocID name=value,[...]
             if (associd != idrange[0]):
                 self.say("\n")
             if not self.__dolist(self.uservars,
-                                associd, ntp.ntp_control.CTL_OP_READVAR, ntp.ntpc.TYPE_PEER):
+                                associd, ntp.control.CTL_OP_READVAR, ntp.ntpc.TYPE_PEER):
                 return
 
     def help_mreadlist(self):
@@ -1091,7 +1091,7 @@ usage: mrl assocIDlow assocIDhigh
         for associd in idrange:
             if (associd != idrange[0]):
                 self.say("\n")
-            if not self.__dolist(varlist, associd, ntp.ntp_control.CTL_OP_READVAR, ntp.ntpc.TYPE_PEER):
+            if not self.__dolist(varlist, associd, ntp.control.CTL_OP_READVAR, ntp.ntpc.TYPE_PEER):
                 return
 
     def help_mreadvar(self):
@@ -1118,7 +1118,7 @@ usage: mrv assocIDlow assocIDhigh [ name=value[,...] ]
         assoc = self.__assoc_valid(line)
         if assoc >= 0:
             self.__dolist(self.uservars.keys(),
-                          assoc, ntp.ntp_control.CTL_OP_READCLOCK, ntp.ntpc.TYPE_CLOCK)
+                          assoc, ntp.control.CTL_OP_READCLOCK, ntp.ntpc.TYPE_CLOCK)
 
     def help_clocklist(self):
         self.say("""\
@@ -1142,7 +1142,7 @@ usage: cl [ assocID ]
         if assoc == 0:
             self.warn("This command requires the association ID of a clock.\n")
         elif assoc > 0:
-            self.__dolist(line.split()[1:], assoc, ntp.ntp_control.CTL_OP_READCLOCK, ntp.ntpc.TYPE_CLOCK)
+            self.__dolist(line.split()[1:], assoc, ntp.control.CTL_OP_READCLOCK, ntp.ntpc.TYPE_CLOCK)
 
     def help_clockvar(self):
         self.say("""\

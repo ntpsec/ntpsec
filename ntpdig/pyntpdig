@@ -43,7 +43,7 @@ import sys, socket, select, struct, time, getopt, datetime
 try:
     import ntp.packet
     import ntp.util
-    import ntp.ntp_magic
+    import ntp.magic
 except:
     sys.stderr.write("ntpdig: can't find Python NTP library -- check PYTHONPATH.\n")
     sys.exit(1)
@@ -137,13 +137,13 @@ def clock_select(packets):
         if response.stratum > NTP_INFIN:
             drop("stratum too high")
             continue
-        if response.version() < ntp.ntp_magic.NTP_OLDVERSION:
+        if response.version() < ntp.magic.NTP_OLDVERSION:
             drop("response version %d is too old" % response.version())
             continue
-        if response.mode() != ntp.ntp_magic.MODE_SERVER:
+        if response.mode() != ntp.magic.MODE_SERVER:
             drop("unexpected response mode %d" % response.mode())
             continue
-        if response.version() > ntp.ntp_magic.NTP_VERSION:
+        if response.version() > ntp.magic.NTP_VERSION:
             drop("response version %d is too new" % response.version())
             continue
         if response.stratum == 0:

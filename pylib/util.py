@@ -13,8 +13,8 @@ import collections
 
 import ntp.ntpc
 import ntp.version
-import ntp.ntp_magic
-import ntp.ntp_control
+import ntp.magic
+import ntp.control
 
 def stdversion():
     return "%s-%s-%s %s" % (ntp.version.VERSION, ntp.version.VCS_TICK,
@@ -194,11 +194,11 @@ class PeerSummary:
             elif name == "hpoll":
                 hpoll = value
                 if hpoll < 0:
-                    hpoll = ntp.ntp_magic.NTP_MINPOLL
+                    hpoll = ntp.magic.NTP_MINPOLL
             elif name == "ppoll":
                 ppoll = value
                 if ppoll < 0:
-                    ppoll = ntp.ntp_magic.NTP_MINPOLL
+                    ppoll = ntp.magic.NTP_MINPOLL
             elif name == "reach":
                 # Shipped as hex, displayed in octal
                 reach = value
@@ -218,16 +218,16 @@ class PeerSummary:
                 srcport = value
             elif name == "reftime":
                 reftime = value	# l_fp timestamp
-        if hmode == ntp.ntp_magic.MODE_BCLIENT:
+        if hmode == ntp.magic.MODE_BCLIENT:
             # broadcastclient or multicastclient
             ptype = 'b'
-        elif hmode == ntp.ntp_magic.MODE_BROADCAST:
+        elif hmode == ntp.magic.MODE_BROADCAST:
             # broadcast or multicast server
             if srcadr.startswith("224."):	# IANA multicast address prefix
                 ptype = 'M'
             else:
                 ptype = 'B'
-        elif hmode == ntp.ntp_magic.MODE_CLIENT:
+        elif hmode == ntp.magic.MODE_CLIENT:
             if srchost and '(' in srchost:
                 ptype = 'l'	# local refclock
             elif dstadr_refid == "POOL":
@@ -236,9 +236,9 @@ class PeerSummary:
                 ptype = 'a'	# manycastclient
             else:
                 ptype = 'u'	# unicast
-        elif hmode == ntp.ntp_magic.MODE_ACTIVE:
+        elif hmode == ntp.magic.MODE_ACTIVE:
             ptype = 's'		# symmetric active
-        elif hmode == ntp.ntp_magic.MODE_PASSIVE:
+        elif hmode == ntp.magic.MODE_PASSIVE:
             ptype = 'S'		# symmetric passive
 
         #
@@ -246,10 +246,10 @@ class PeerSummary:
         #
         line = ""
         poll_sec = 1 << min(ppoll, hpoll)
-        if self.pktversion > ntp.ntp_magic.NTP_OLDVERSION:
-            c = " x.-+#*o"[ntp.ntp_control.CTL_PEER_STATVAL(rstatus) & 0x7]
+        if self.pktversion > ntp.magic.NTP_OLDVERSION:
+            c = " x.-+#*o"[ntp.control.CTL_PEER_STATVAL(rstatus) & 0x7]
         else:
-            c = " .+*"[ntp.ntp_control.CTL_PEER_STATVAL(rstatus) & 0x3]
+            c = " .+*"[ntp.control.CTL_PEER_STATVAL(rstatus) & 0x3]
         # Source host or clockname
         if srchost != None:
             clock_name = srchost
@@ -322,9 +322,9 @@ class MRUSummary:
             stats += " %6d" % avgint
         else:
             stats += " %6.2f" % favgint
-        if entry.rs & ntp.ntp_magic.RES_KOD:
+        if entry.rs & ntp.magic.RES_KOD:
             rscode = 'K'
-        elif entry.rs & ntp.ntp_magic.RES_LIMITED:
+        elif entry.rs & ntp.magic.RES_LIMITED:
             rscode = 'L'
         else:
             rscode = '.'
@@ -334,8 +334,8 @@ class MRUSummary:
                 dns = canonicalize_dns(dns)
             stats += " %4hx %c %d %d %6d %5s %s" % \
                      (entry.rs, rscode,
-                      ntp.ntp_magic.PKT_MODE(entry.mv),
-                      ntp.ntp_magic.PKT_VERSION(entry.mv),
+                      ntp.magic.PKT_MODE(entry.mv),
+                      ntp.magic.PKT_VERSION(entry.mv),
                       entry.ct, port[1:], dns)
             return stats
         except TypeError:
