@@ -733,7 +733,7 @@ class ControlSession:
         if hname.startswith("["):
             hname = hname[1:-1]
         # First try to resolve it as an ip address and if that fails,
-        # do a fullblown (dns) lookup. That way we only use the dns
+        # do a fullblown (DNS) lookup. That way we only use the dns
         # when it is needed and work around some implementations that
         # will return an "IPv4-mapped IPv6 address" address if you
         # give it an IPv4 address to lookup.
@@ -750,26 +750,26 @@ class ControlSession:
                 sys.stderr.write("ntpq: numeric-mode lookup of %s failed, %s\n" % (hname, e.strerror))
         try:
             return hinted_lookup(port="ntp", hints=0)
-        except socket.gaierror as e:
-            sys.stderr.write("ntpq: standard-mode lookup of %s failed, %s\n" % (hname, e.strerror))
-        # EAI_NODATA and AI_CANONNAME should both exist - they're in the
-        # POSIX API.  If this code throws AttributeErrors there is
-        # probably a very old and broken socket layer in your Python
-        # build.  The C implementation had a second fallback mode that
-        # removed AI_ADDRCONFIG if the first fallback raised BADFLAGS.
-        fallback_hints = socket.AI_CANONNAME
-        try:
-            fallback_hints |= socket.AI_ADDRCONFIG
-        except AttributeError:
-            pass
-        try:
-            if e.errno in (socket.EAI_NONAME, socket.EAI_NODATA):
-                try:
-                    return hinted_lookup(port="ndp", hints=0)
-                except socket.gaierror as e:
-                    sys.stderr.write("ntpq: ndp lookup failed, %s\n" % e.strerror)
-        except AttributeError:
-            sys.stderr.write("ntpq: API error, missing socket attributes\n")
+        except socket.gaierror as e1:
+            sys.stderr.write("ntpq: standard-mode lookup of %s failed, %s\n" % (hname, e1.strerror))
+            # EAI_NODATA and AI_CANONNAME should both exist - they're in the
+            # POSIX API.  If this code throws AttributeErrors there is
+            # probably a very old and broken socket layer in your Python
+            # build.  The C implementation had a second fallback mode that
+            # removed AI_ADDRCONFIG if the first fallback raised BADFLAGS.
+            fallback_hints = socket.AI_CANONNAME
+            try:
+                fallback_hints |= socket.AI_ADDRCONFIG
+            except AttributeError:
+                pass
+            try:
+                if e1.errno in (socket.EAI_NONAME, socket.EAI_NODATA):
+                    try:
+                        return hinted_lookup(port="ndp", hints=0)
+                    except socket.gaierror as e2:
+                        sys.stderr.write("ntpq: ndp lookup failed, %s\n" % e2.strerror)
+            except AttributeError:
+                sys.stderr.write("ntpq: API error, missing socket attributes\n")
         return None
 
     def openhost(self, hname, fam=socket.AF_UNSPEC):
