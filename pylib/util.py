@@ -22,10 +22,13 @@ def stdversion():
 
 def rfc3339(t):
     "RFC 3339 string from Unix time, including fractional second."
-    subsec = t - int(t)
-    t -= subsec
     rep = time.strftime("%Y-%m-%dT%H:%M:%S", time.gmtime(t))
-    rep += ("%f" % subsec)[1:] + "Z"
+    t = str(t)
+    if "." in t:
+        subsec = t.split(".", 1)[1]
+        if int(subsec) > 0:
+            rep += "." + subsec
+    rep += "Z"
     return rep
 
 def portsplit(hostname):
