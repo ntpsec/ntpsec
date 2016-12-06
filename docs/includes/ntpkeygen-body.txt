@@ -99,7 +99,7 @@ automated means on the other subnet hosts. This file is needed to
 authenticate some remote configuration commands used by the {ntpqman}
 utility.
 
-Comments may appear in the file, and are preceeded with the +#+
+Comments may appear in the file, and are preceded with the +#+
 character.  
 
 Following any headers the keys are entered one per line in the
