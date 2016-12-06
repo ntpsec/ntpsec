@@ -521,7 +521,6 @@ usage: help [ command ]
     def __dolist(self, varlist, associd, op, type, quiet=False):
         "List variables associated with a specified peer."
         try:
-            print("Qerying %d" % associd)
             variables = self.session.readvar(associd, varlist, op)
         except ntp.packet.ControlException as e:
             self.warn(e.message + "\n")
