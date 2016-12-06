@@ -12,6 +12,7 @@ def build(ctx):
     target1 = ctx.srcnode.make_node('pylib/ntp_control.py')
     target2 = ctx.srcnode.make_node('pylib/ntp_magic.py')
     target3 = ctx.srcnode.make_node('pylib/version.py')
+    target4 = ctx.srcnode.make_node('wafhelpers/.autorevision-cache')
 
     ctx(
 	before      = ['pyc', 'pyo'],
@@ -32,9 +33,9 @@ def build(ctx):
     ctx(
 	before      = ['pyc', 'pyo'],
 	cwd         = srcnode,
-	rule        = 'VCS_EXTRA=`cat ${SRC}` ../wafhelpers/autorevision.sh -o ${TGT[1].abspath()} -e VERSION -t python >${TGT[0].name}',
-	source      = "../VERSION",
-	target      = [target3, '../wafhelpers/.autorevision-cache', '../wafhelpers/autorevision.sh'],
+	rule        = 'VCS_EXTRA=`cat ${SRC[0]}` ../wafhelpers/autorevision.sh -o ${TGT[1].abspath()} -e VERSION -t python >${TGT[0].name}',
+	source      = ["../VERSION", '../wafhelpers/autorevision.sh'] ,
+	target      = [target3, target4],
 	)
 
     ctx.add_group() # Force early creation of generated files
