@@ -368,7 +368,7 @@ if __name__ == '__main__':
         print("org t1: %s rec t2: %s" % (hexstamp(pkt.t1()), hexstamp(pkt.t2())))
         print("xmt t3: %s dst t4: %s" % (hexstamp(pkt.t3()), hexstamp(pkt.t4())))
         pkt.posixize()
-        print("xmt t1: %f dst t2: %f" % (pkt.t1(), pkt.t2()))
+        print("org t1: %f rec t2: %f" % (pkt.t1(), pkt.t2()))
         print("xmt t3: %f dst t4: %f" % (pkt.t3(), pkt.t4()))
         print("rec-org t21: %f  xmt-dst t34: %f" % (pkt.t2() - pkt.t1(), pkt.t3() - pkt.t4()))
 
