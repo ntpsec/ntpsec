@@ -439,7 +439,7 @@ usage: help [ command ]
             return ()
         lo = self.__assoc_valid(tokens[0])
         hi = self.__assoc_valid(tokens[1])
-        if lo < 0 or hi < 0 or hi < 0: 
+        if lo < 0 or hi < 0 or hi < lo: 
             return ()
         return (lo, hi)
 
