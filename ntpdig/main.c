@@ -14,6 +14,7 @@
 #include "log.h"
 #include "libntp.h"
 #include "ntp_intres.h"
+#include "timespecops.h"
 
 bool shutting_down;
 bool time_derived;
@@ -1510,17 +1511,26 @@ offset_calculation(
 #ifdef DEBUG
 	if (debug > 3) {
 		double ftime;
+		struct timespec ts_tmp;
 		pkt_output(rpkt, rpktl, stdout);
 		printf("ntpdig rootdelay: %f\n", FPTOD(p_rdly));
 		printf("ntpdig rootdisp: %f\n", FPTOD(p_rdsp));
 		printf("ntpdig syncdist: %f\n", *synch_distance);
-		printf("ntpdig offset_calculation: ref: ");
+		ts_tmp = lfp_stamp_to_tspec(p_ref, NULL);
+		ftime = ts_tmp.tv_sec + ts_tmp.tv_nsec / 1000000.0;
+		printf("ntpdig offset_calculation: ref: %f ", ftime);
 		l_fp_output(&p_ref, stdout);
-		printf("ntpdig offset_calculation: org: ");
+		ts_tmp = lfp_stamp_to_tspec(p_org, NULL);
+		ftime = ts_tmp.tv_sec + ts_tmp.tv_nsec / 1000000.0;
+		printf("ntpdig offset_calculation: org: %f ", ftime);
 		l_fp_output(&p_org, stdout);
-		printf("ntpdig offset_calculation: rec: ");
+		ts_tmp = lfp_stamp_to_tspec(p_rec, NULL);
+		ftime = ts_tmp.tv_sec + ts_tmp.tv_nsec / 1000000.0;
+		printf("ntpdig offset_calculation: rec: %f ", ftime);
 		l_fp_output(&p_rec, stdout);
-		printf("ntpdig offset_calculation: xmt: ");
+		ts_tmp = lfp_stamp_to_tspec(p_xmt, NULL);
+		ftime = ts_tmp.tv_sec + ts_tmp.tv_nsec / 1000000.0;
+		printf("ntpdig offset_calculation: xmt: %f ", ftime);
 		l_fp_output(&p_xmt, stdout);
 		ftime = tv_dst->tv_sec + tv_dst->tv_usec / 1000.0;
 		printf("ntpdig dst %f\n", ftime);
