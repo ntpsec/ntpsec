@@ -1,6 +1,6 @@
 pylib/version.py
-pylib/ntp_control.py
-pylib/ntp_magic.py
+pylib/control.py
+pylib/magic.py
 */ntp
 wafhelpers/.autorevision-cache
 .lock-waf*

@@ -9,8 +9,8 @@ def configure(conf):
 def build(ctx):
     srcnode = ctx.srcnode.make_node('pylib')
     #bldnode = ctx.bldnode.make_node('pylib')
-    target1 = ctx.srcnode.make_node('pylib/ntp_control.py')
-    target2 = ctx.srcnode.make_node('pylib/ntp_magic.py')
+    target1 = ctx.srcnode.make_node('pylib/control.py')
+    target2 = ctx.srcnode.make_node('pylib/magic.py')
     target3 = ctx.srcnode.make_node('pylib/version.py')
     target4 = ctx.srcnode.make_node('wafhelpers/.autorevision-cache')
 
