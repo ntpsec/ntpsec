@@ -1,5 +1,5 @@
 from waflib.Configure import conf
-from waflib.TaskGen import feature, before, after, extension, after_method, before_method
+from waflib.TaskGen import feature, before_method
 from waflib.Task import Task
 import os
 

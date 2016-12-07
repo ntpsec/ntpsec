@@ -1,5 +1,3 @@
-from waflib import Utils
-
 def build(ctx):
 	bldnode = ctx.bldnode.abspath()
 
