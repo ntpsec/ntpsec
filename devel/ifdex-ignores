@@ -181,7 +181,7 @@ USE_ROUTING_SOCKET
 YY_YY_NTP_PARSER_TAB_H_INCLUDED
 calloc			# In Unity
 close			# In Windows port config
-free			# Un Unity and ntpd/ntp_parser.tab.c
+free			# In Unity and ntpd/ntp_parser.tab.c
 malloc			# In Unity and ntpd/ntp_parser.tab.c
 in_addr6		# In Windows port config
 lifr_addrlen		# ISC interface-iterator code
