@@ -1,7 +1,6 @@
 from __future__ import print_function
 
 import sys, os, platform
-from waflib.Configure import conf
 from wafhelpers.probes import probe_header_with_prerequisites, probe_function_with_prerequisites
 from wafhelpers.util import msg, msg_setting
 
@@ -240,21 +239,21 @@ def cmd_configure(ctx, config):
         types = ["uint64_t"]
 
         for inttype in sorted(types):
-                ctx.check_type(inttype, ["stdint.h", "sys/types.h"])
+                check_type(ctx, inttype, ["stdint.h", "sys/types.h"])
 
         net_types = (
                 ("struct if_laddrconf", ["sys/types.h", "net/if6.h"]),
                 ("struct if_laddrreq", ["sys/types.h", "net/if6.h"]),
         )
         for (f, h) in net_types:
-                ctx.check_type(f, h)
+                check_type(ctx, f, h)
 
         structures = (
                 ("struct timex", ["sys/time.h", "sys/timex.h"]),
                 ("struct ntptimeval", ["sys/time.h", "sys/timex.h"]),
         )
         for (s, h) in structures:
-                ctx.check_type(s, h)
+                check_type(ctx, s, h)
 
         structure_fields = (
                 ("time_tick", "timex", ["sys/time.h", "sys/timex.h"]),
@@ -263,7 +262,7 @@ def cmd_configure(ctx, config):
                 ("tai", "ntptimeval", ["sys/time.h", "sys/timex.h"]),
         )
         for (f, s, h) in structure_fields:
-                ctx.check_structfield(f, s, h)
+                check_structfield(ctx, f, s, h)
 
         # mostly used by timetoa.h and timespecops.h
         sizeofs = [
@@ -274,7 +273,7 @@ def cmd_configure(ctx, config):
         ]
 
         for header, sizeof in sorted(sizeofs, key=lambda x: x[1:]):
-                ctx.check_sizeof(header, sizeof)
+                check_sizeof(ctx, header, sizeof)
 
         # The protocol major number
         ctx.define("NTP_API", 4, comment="Protocol major number.")
