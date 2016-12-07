@@ -25,33 +25,6 @@ def build(ctx):
 		"common/file_handling.c"
 	]
 
-	ntpdig_source = [
-		"ntpdig/crypto.c",
-		"ntpdig/key_file.c",
-		"ntpdig/kod_database.c",
-		"ntpdig/kod_file.c",
-		"ntpdig/packet_handling.c",
-		"ntpdig/packet_processing.c",
-		"ntpdig/utilities.c",
-	] + common_source
-
-	# ntpdig/
-	if ctx.env.LIBEVENT2_ENABLE:
-		ctx.ntp_test(
-			features	= "c cprogram bld_include src_include libisc_include test",
-	        	target		= "test_ntpdig",
-			install_path	= None,
-			defines		= unity_config + ["TEST_NTPDIG=1"],
-			includes	= [
-						"%s/tests/unity/" % srcnode,
-						"%s/tests/common/" % srcnode,
-						"%s/ntpdig/" % srcnode
-			],
-			use		= "unity ntpdig_obj ntp",
-	        	source		= ntpdig_source,
-			test_args	= ["%s/tests/ntpdig/data/" % srcnode, "%s/tests/ntpdig/" % bldnode]
-		)
-
 	# libntp/
 	libntp_source = [
 		"libntp/a_md5encrypt.c",

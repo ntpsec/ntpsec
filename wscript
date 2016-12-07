@@ -142,6 +142,7 @@ python_scripts = [
         "ntpwait/ntpwait",
         "ntpsweep/ntpsweep",
         "ntpkeygen/ntpkeygen",
+        "ntpdig/ntpdig",
 ]
 
 def build(ctx):
@@ -173,8 +174,6 @@ def build(ctx):
         if ctx.env.REFCLOCK_GENERIC: # Only required by the generic refclock
                 ctx.recurse("libparse")
         ctx.recurse("libntp")
-        if ctx.env.LIBEVENT2_ENABLE:
-                ctx.recurse("ntpdig")
         ctx.recurse("libsodium")
         ctx.recurse("ntpd")
         ctx.recurse("ntpfrob")
