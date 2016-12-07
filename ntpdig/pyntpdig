@@ -38,7 +38,7 @@ from __future__ import print_function, division
 #
 # The one new option in this version is -p, borrowed from ntpdate.
 
-import sys, socket, select, struct, time, getopt, datetime 
+import sys, socket, select, struct, time, getopt, datetime, math
 
 try:
     import ntp.packet
@@ -192,15 +192,8 @@ def report(packet, json):
     t = time.localtime(int(packet.transmit_timestamp))
     ms = int(packet.transmit_timestamp * 1000000) % 1000000
 
-    digits = 6
-    #precision = packet.precision
-    #while True:
-    #    precision *= 10.0
-    #    if precision >= 1:
-    #        break
-    #    digits += 1
-    #if digits > 6:
-    #    digits = 6;
+    # Number of decimal digits of precision indicated by the precision field
+    digits = min(6, -int(math.log10(2**packet.precision)))
 
     date = time.strftime("%Y-%m-%d", t)
     tod = time.strftime("%T", t) + (".%*d" % (digits, ms))
