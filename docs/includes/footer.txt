@@ -1,4 +1,4 @@
-[cols="3",grid="none",frame="none",width="40%"]
+[cols="3",grid="none",frame="none",options="autowidth"]
 |=========================================================
 |image:icons/home.gif[height=32]link:index.html[Home Page]|
 image:icons/sitemap.png[height=32]link:sitemap.html[Site Map]|
