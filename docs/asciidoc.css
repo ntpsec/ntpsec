@@ -536,7 +536,7 @@ table.tableblock.frame-sides {
   border-top-style: hidden;
   border-bottom-style: hidden;
 }
-table.tableblock.frame-none {
+table.tableblock.frame-none, table.tableblock.frame-none td {
   border-style: hidden;
 }
 
