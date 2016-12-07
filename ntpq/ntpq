@@ -439,7 +439,9 @@ usage: help [ command ]
         hi = self.__assoc_valid(tokens[1])
         if lo < 0 or hi < 0 or hi < lo: 
             return ()
-        return (lo, hi)
+        if lo == hi:
+            return(lo,)
+        return range(lo, hi+1)
 
     def printvars(self, variables, dtype, quiet):
         "Dump variables in raw (actually, semi-cooked) mode."
@@ -498,7 +500,7 @@ usage: help [ command ]
                         )
                         for (i, n) in enumerate(tstflagnames):
                             if (1 << i) & value:
-                                item += tstflagnames + " "
+                                item += tstflagnames[i] + " "
                         item = item[:-1]
                 else:
                     item += repr(value)
