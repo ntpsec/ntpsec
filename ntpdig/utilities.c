@@ -8,7 +8,8 @@
 void 
 pkt_output (
 		struct pkt *dpkg,
-		int pkt_length, 
+		int pkt_length,
+		bool longform,
 		FILE *output
 	   )
 {
@@ -17,24 +18,26 @@ pkt_output (
 
 	pkt = (uint8_t *)dpkg;
 
-#ifdef __UNUSED__
-	fprintf(output, HLINE);
+	if (longform) {
+	    fprintf(output, HLINE);
 
-	for (a = 0; a < pkt_length; a++) {
-		if (a > 0 && a % 8 == 0)
-			fprintf(output, "\n");
+	    for (a = 0; a < pkt_length; a++) {
+		    if (a > 0 && a % 8 == 0)
+		        fprintf(output, "\n");
 
-		fprintf(output, "%d: %x \t", a, pkt[a]);
+		    fprintf(output, "%d: %x \t", a, pkt[a]);
+	    }
+
+	    fprintf(output, "\n");
+	    fprintf(output, HLINE);
 	}
-
-	fprintf(output, "\n");
-	fprintf(output, HLINE);
-#endif /* __UNUSED__ */
-
-	for (a = 0; a < pkt_length; a++) {
-	    fprintf(output, "%02x", pkt[a]);
+	else
+	{
+		for (a = 0; a < pkt_length; a++) {
+		    fprintf(output, "%02x", pkt[a]);
+		}
+		fprintf(output, "\n");
 	}
-	fprintf(output, "\n");
 
 }
 

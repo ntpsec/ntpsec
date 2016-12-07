@@ -14,7 +14,7 @@
 #define STDLINE printf(HLINE);
 
 
-void pkt_output(struct pkt *dpkg, int pkt_length, FILE *output);
+void pkt_output(struct pkt *dpkg, int pkt_length, bool longform, FILE *output);
 void l_fp_output(l_fp *ts, FILE *output);
 void l_fp_output_bin(l_fp *ts, FILE *output);
 void l_fp_output_dec(l_fp *ts, FILE *output);

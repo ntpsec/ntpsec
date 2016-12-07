@@ -1512,27 +1512,27 @@ offset_calculation(
 	if (debug > 3) {
 		double ftime;
 		struct timespec ts_tmp;
-		pkt_output(rpkt, rpktl, stdout);
+		pkt_output(rpkt, rpktl, false, stdout);
 		printf("ntpdig rootdelay: %f\n", FPTOD(p_rdly));
 		printf("ntpdig rootdisp: %f\n", FPTOD(p_rdsp));
 		printf("ntpdig syncdist: %f\n", *synch_distance);
 		ts_tmp = lfp_stamp_to_tspec(p_ref, NULL);
-		ftime = ts_tmp.tv_sec + ts_tmp.tv_nsec / 1000000.0;
+		ftime = ts_tmp.tv_sec + ts_tmp.tv_nsec / 1e9;
 		printf("ntpdig offset_calculation: ref: %f ", ftime);
 		l_fp_output(&p_ref, stdout);
 		ts_tmp = lfp_stamp_to_tspec(p_org, NULL);
-		ftime = ts_tmp.tv_sec + ts_tmp.tv_nsec / 1000000.0;
+		ftime = ts_tmp.tv_sec + ts_tmp.tv_nsec / 1e9;
 		printf("ntpdig offset_calculation: org: %f ", ftime);
 		l_fp_output(&p_org, stdout);
 		ts_tmp = lfp_stamp_to_tspec(p_rec, NULL);
-		ftime = ts_tmp.tv_sec + ts_tmp.tv_nsec / 1000000.0;
+		ftime = ts_tmp.tv_sec + ts_tmp.tv_nsec / 1e9;
 		printf("ntpdig offset_calculation: rec: %f ", ftime);
 		l_fp_output(&p_rec, stdout);
 		ts_tmp = lfp_stamp_to_tspec(p_xmt, NULL);
-		ftime = ts_tmp.tv_sec + ts_tmp.tv_nsec / 1000000.0;
+		ftime = ts_tmp.tv_sec + ts_tmp.tv_nsec / 1e9;
 		printf("ntpdig offset_calculation: xmt: %f ", ftime);
 		l_fp_output(&p_xmt, stdout);
-		ftime = tv_dst->tv_sec + tv_dst->tv_usec / 1000.0;
+		ftime = tv_dst->tv_sec + tv_dst->tv_usec / 1e6;
 		printf("ntpdig dst %f\n", ftime);
 	}
 #endif

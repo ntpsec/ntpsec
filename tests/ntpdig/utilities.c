@@ -154,7 +154,7 @@ TEST(utilities, DebugPktOutput) {
 	test.l_uf = 2147483647; // Lots of ones.
 	HTONL_FP(&test, &testpkt.xmt);
 
-	pkt_output(&testpkt, LEN_PKT_NOMAC, outputFile);
+	pkt_output(&testpkt, LEN_PKT_NOMAC, true, outputFile);
 
 	FinishDebugTest(CreatePath("debug-input-pkt", INPUT_DIR), filename);
 }
