@@ -363,7 +363,7 @@ if __name__ == '__main__':
         for server in concurrent_hosts:
             try:
                 returned += queryhost(server=server, concurrent=True, timeout=timeout)
-            except SyncException:
+            except ntp.packet.SyncException as e:
                 log(e.message)
                 continue
             if len(returned) >= samples:
@@ -371,7 +371,7 @@ if __name__ == '__main__':
         for server in arguments:
             try:
                 returned += queryhost(server=server, concurrent=False, timeout=timeout)
-            except SyncException:
+            except ntp.packet.SyncException as e:
                 log(e.message)
                 continue
             if len(returned) >= samples:
