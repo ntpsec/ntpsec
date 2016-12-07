@@ -10,7 +10,7 @@
 #include <string.h>
 #include <time.h>
 
-#define NANOSECONDS	100000000
+#define NANOSECONDS	1000000000
 
 void bumpclock(int bump)
 {
