@@ -329,7 +329,7 @@ class Packet:
         self.li_vn_mode = 0     # leap, version, mode (uint8_t)
         # Subclasses have variable fields here
         self.extension = b''     # extension data
-        self.li_vn_mode = Packet.PKT_LI_VN_MODE(0, version, mode)
+        self.li_vn_mode = Packet.PKT_LI_VN_MODE(3, version, mode)
 
     # These decorators will allow us to assign the extension Python 3 strings
     @property
@@ -382,7 +382,8 @@ class SyncPacket(Packet):
         self.received = SyncPacket.posix_to_ntp(time.time())
         self.trusted = True
         self.rescaled = False
-        self.analyze()
+        if self.data:
+            self.analyze()
 
     def analyze(self):
         if len(self.data) < SyncPacket.HEADER_LEN or (len(self.data) & 3) != 0:
@@ -472,7 +473,7 @@ class SyncPacket(Packet):
         return ("no-leap", "add-leap", "del-leap", "unsync")[((self.li_vn_mode) >> 6) & 0x3]
     def flatten(self):
         "Flatten the packet into an octet sequence."
-        body = struct.pack(ControlPacket.format,
+        body = struct.pack(SyncPacket.format,
                            self.li_vn_mode,
                            self.stratum,
                            self.poll,

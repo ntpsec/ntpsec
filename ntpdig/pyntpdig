@@ -58,11 +58,13 @@ def queryhost(server, concurrent, timeout=5, port=123):
         return []
     sockets = []
     packets = []
+    request = ntp.packet.SyncPacket()
+    request.transmit_timestamp = ntp.packet.SyncPacket.posix_to_ntp(time.time())
+    packet = request.flatten()
     for (family, socktype, proto, canonname, sockaddr) in iptuples:
         if debug:
             log("querying %s (%s)" % (sockaddr[0], server))
         s = socket.socket(family, socktype)
-        packet = b'\xe3' + b'\0' * 47
         if keyid and keytype and passwd:
             if debug:
                 log("authenticating with %s key %d" % (keytype, keyid))
@@ -153,17 +155,11 @@ def clock_select(packets):
         if response.leap() == "unsync":
             drop("leap not in sync")
             continue
-        if not response.origin_timestamp < response.reference_timestamp:
-            drop("server is very broken")
-            continue
-        if response.origin_timestamp-response.reference_timestamp >= NTP_MAXAGE:
-            drop("server has gone too long without sync")
-            continue
         if not response.trusted:
             drop("request was authenticated but server is untrusted")
             continue
         # Bypass this test if we ever support broadcast-client mode again 
-        if response.origin_timestamp != 0:
+        if response.origin_timestamp == 0:
             drop("unexpected response timestamp")
             continue
         filtered.append(response)
