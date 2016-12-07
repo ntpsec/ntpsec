@@ -17,7 +17,7 @@ sendpkt (
 #ifdef DEBUG
 	if (debug > 2) {
 		printf("ntpdig sendpkt: Packet data:\n");
-		pkt_output(pkt, len, stdout);
+		pkt_output(pkt, len, true, stdout);
 	}
 #endif
 	TRACE(1, ("ntpdig sendpkt: Sending packet to %s ...\n",
@@ -56,7 +56,7 @@ recvdata(
 #ifdef DEBUG
 	if (debug > 2) {
 		printf("Received %d bytes from %s:\n", recvc, sockporttoa(sender));
-		pkt_output((struct pkt *)rdata, recvc, stdout);
+		pkt_output((struct pkt *)rdata, recvc, true, stdout);
 	}
 #endif
 	return recvc;
