@@ -354,47 +354,47 @@ if __name__ == '__main__':
         arguments = ["localhost"]
 
     if replay:
-        (packet, dst) = replay.split(":")
-        pkt = ntp.packet.SyncPacket(packet.decode("hex"))
-        pkt.received = ntp.packet.SyncPacket.posix_to_ntp(float(dst))
-        #print(repr(pkt))
-        def hexstamp(n):
-            return "%08x.%08x" % (n >> 32, n & 0x00000000ffffffff)
-        print("org t1: %s rec t2: %s" % (hexstamp(pkt.t1()), hexstamp(pkt.t2())))
-        print("xmt t3: %s dst t4: %s" % (hexstamp(pkt.t3()), hexstamp(pkt.t4())))
-        pkt.posixize()
-        print("org t1: %f rec t2: %f" % (pkt.t1(), pkt.t2()))
-        print("xmt t3: %f dst t4: %f" % (pkt.t3(), pkt.t4()))
-        print("rec-org t21: %f  xmt-dst t34: %f" % (pkt.t2() - pkt.t1(), pkt.t3() - pkt.t4()))
-        report(pkt, json)
-        raise SystemExit(0)
+        (pkt, dst) = replay.split(":")
+        packet = ntp.packet.SyncPacket(pkt.decode("hex"))
+        packet.received = ntp.packet.SyncPacket.posix_to_ntp(float(dst))
+        returned = [packet]
+    else:
+        returned = []
+        for server in concurrent_hosts:
+            try:
+                returned += queryhost(server=server, concurrent=True, timeout=timeout)
+            except SyncException:
+                log(e.message)
+                continue
+            if len(returned) >= samples:
+                break
+        for server in arguments:
+            try:
+                returned += queryhost(server=server, concurrent=False, timeout=timeout)
+            except SyncException:
+                log(e.message)
+                continue
+            if len(returned) >= samples:
+                break
+        returned = clock_select(returned)
 
-    returned = []
-    for server in concurrent_hosts:
-        try:
-            returned += queryhost(server=server, concurrent=True, timeout=timeout)
-        except SyncException:
-            log(e.message)
-            continue
-        if len(returned) >= samples:
-            break
-    for server in arguments:
-        try:
-            returned += queryhost(server=server, concurrent=False, timeout=timeout)
-        except SyncException:
-            log(e.message)
-            continue
-        if len(returned) >= samples:
-            break
-
-    returned = clock_select(returned)
     if returned:
-        syncpacket = returned[0]
-        report(syncpacket, json)
+        pkt = returned[0]
+        if debug:
+            #print(repr(pkt))
+            def hexstamp(n):
+                return "%08x.%08x" % (n >> 32, n & 0x00000000ffffffff)
+            print("org t1: %s rec t2: %s" % (hexstamp(pkt.t1()), hexstamp(pkt.t2())))
+            print("xmt t3: %s dst t4: %s" % (hexstamp(pkt.t3()), hexstamp(pkt.t4())))
+            pkt.posixize()
+            print("org t1: %f rec t2: %f" % (pkt.t1(), pkt.t2()))
+            print("xmt t3: %f dst t4: %f" % (pkt.t3(), pkt.t4()))
+            print("rec-org t21: %f  xmt-dst t34: %f" % (pkt.t2() - pkt.t1(), pkt.t3() - pkt.t4()))
+        report(pkt, json)
 	# If we can step but we cannot slew, then step.
 	# If we can step or slew and and |offset| > steplimit, then step.
         rc = True
-        offset = syncpacket.adjust()
+        offset = pkt.adjust()
         ntp.ntpc.setprogname("ntpdig")
         if step and (not slew or (slew and (abs(offset) > steplimit))):
 		rc = ntp.ntpc.step_systime(offset)
