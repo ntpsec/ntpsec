@@ -51,18 +51,6 @@ psutils::
    Ubuntu package: python-psutil or python3-psutil
    SLES: python-psutil
 
-libevent 2.x::
-   Optional. Without it, ntpdig won't build. 
-   Debian: libevent-2.0-5 and libevent-dev
-   Fedora: libevent and libevent-devel
-   Gentoo package: dev-libs/libevent
-   SLES: libevent and libevent-devel
-
-   NetBSD: As installed, libevent is broken.  It links, but doesn't run.
-     Here is a workaround:
-      # cd /usr/lib
-      # ln -s /usr/pkg/lib/libevent_core-2.0.so.5 .
-
 seccomp::
    Optional on Linux to support restricting syscalls
    Debian: libseccomp-dev (gets libseccomp2)
@@ -121,20 +109,6 @@ The OS X build has been tested in this environment:
 All you will require is the Xcode command line tools with no additions.
 There is currently no support for using Xcode's builder. NTPsec's standard
 waf based build system is used.
-
-The OS X build of NTPsec requires the OS X port of the libevent2 library:
-
-  Site    : libevent.org
-  Version : 2.0.22-stable
-  Build:
-   $ tar zxf libevent-2.0.22-stable.tar.gz
-   $ cd libevent-2.0.22-stable
-   $ ./configure --disable-openssl
-   $ make
-   $ sudo make install
-
-You can use 3rd party packages such as Macports or HomeBrew for
-this library if you wish and they have it available.
 
 == Basic Installation ==
 

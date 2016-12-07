@@ -197,7 +197,7 @@ def report(packet, json):
     tz = "%s%02d%02d" % (sgn, tmoffset // 60, tmoffset % 60)
 
     if json:
-        say('{"time":"%sT%s%s","offset":%f,"precision":%f,"host":"%s",ip:"%s","stratum":%s,"leap":"%s","adjusted":%s}' % \
+        say('{"time":"%sT%s%s","offset":%f,"precision":%f,"host":"%s",ip:"%s","stratum":%s,"leap":"%s","adjusted":%s}\n' % \
             (date, tod, tz,
              packet.adjust(), packet.synchd(),
              packet.hostname, packet.resolved or packet.hostname,
@@ -386,13 +386,14 @@ if __name__ == '__main__':
             print("org t1: %f rec t2: %f" % (pkt.t1(), pkt.t2()))
             print("xmt t3: %f dst t4: %f" % (pkt.t3(), pkt.t4()))
             print("rec-org t21: %f  xmt-dst t34: %f" % (pkt.t2() - pkt.t1(), pkt.t3() - pkt.t4()))
+        adjusted = step and (not slew or (slew and (abs(offset) > steplimit)))
         report(pkt, json)
 	# If we can step but we cannot slew, then step.
 	# If we can step or slew and and |offset| > steplimit, then step.
         rc = True
         offset = pkt.adjust()
         ntp.ntpc.setprogname("ntpdig")
-        if step and (not slew or (slew and (abs(offset) > steplimit))):
+        if adjusted:
 		rc = ntp.ntpc.step_systime(offset)
 	elif slew:
 		rc = ntp.ntpc.adj_systime(offset)

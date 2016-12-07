@@ -5,10 +5,10 @@
 == SYNOPSIS ==
 [verse]
 ntpdig
-    [--help | -?] [-4 | -6] [-a keynum] [-b bcaddress] [-B bctimeout]
-    [-c] [-d] [-D debug-level] [-g delay] [-j] [-K kodfile] [-k keyfile]
-    [-l logfile] [-M steplimit] [-o ntpver] [-r] [-S] [-s]
-    [-u uctimeout] [--wait] [--no-wait] [--version] [address...]+
+    [--help | -?] [-4 | -6] [-a keynum] [-p samples]
+    [-c] [-d] [-D debug-level] [-g delay] [-j] [-k keyfile]
+    [-l logfile] [-M steplimit] [-S] [-s]
+    [--wait] [--no-wait] [--version] [address...]+
 
 == DESCRIPTION ==
 
@@ -52,9 +52,11 @@ JSON record:
 ---------------------------------------------------------------------------------
 
 In the JSON format, time is in ISO 8601 format; precision is the synch
-distance, with an unknown synch distance is reported as 0.  Host and
+distance, with an unknown synch distance being reported as 0.  Host and
 IP are always emitted even if duplicate. The "adjusted" boolean
-reports whether ntpdig adjusted the time.
+reports whether ntpdig determined it should slewed or stepped the
+time. This may be shown as true even if time was not actually
+adjusted due to lack of clock-setting privileges.
 
 == OPTIONS ==
 
@@ -84,14 +86,6 @@ argument. The argument of this option is the _keyid_, a number
 specified in the _keyfile_ as this key's identifier. See the _keyfile_
 option (+-k+) for more details.
 
-+-b+ _broadcast-address_, +--broadcast+=_broadcast-address_::
-  Listen to the address specified for broadcast time sync. This option
-  may appear an unlimited number of times.
-+
-If specified +ntpdig+ will listen to the specified address for NTP
-broadcasts. The default maximum wait time can (and probably should) be
-modified with +-t+.
-
 +-c+ _host-name_, +--concurrent+=_host-name_::
   Concurrently query all IPs returned for host-name. This option may
   appear an unlimited number of times.
@@ -119,23 +113,13 @@ send concurrent queries.  This is appropriate when using a server pool.
   integer number as its argument. The default _milliseconds_ for this
   option is 50.
 +
-Since we're only going to use the first valid response we get and
-there is benefit to specifying a good number of servers to query,
-separate the queries we send out by the specified number of
+Separate the queries we send out by the specified number of
 milliseconds. A larger _delay_ reduces the query load on the time
 sources, at the cost of increasing the time to receive a valid
 response if the first source attempted is slow or unreachable.
 
 +-j+::
   Output to stdout in JSON, suppressing syslog messages.
-
-+-K+ _file-name_, +--kod+=_file-name_::
-  KoD history filename. The default _file-name_ for this option is:
-  +/var/db/ntp-kod+.
-+
-Specifies the filename to be used for the persistent history of KoD
-responses received from servers. If the file does not exist, a warning
-message will be displayed. The file will not be created.
 
 +-k+ _file-name_, +--keyfile+=_file-name_::
   Look in this file for the key specified with +-a+.
@@ -161,17 +145,9 @@ _clock_settime()_ or local equivalent. The default value is 0, which
 means all adjustments will be stepped. This is a feature, as different
 situations demand different values.
 
-+-o+ _number_, +--ntpversion+=_number_::
-  Send _number_ as our NTP protocol version. This option takes an integer
-  number as its argument.  Defaults to 4.  Seldom useful.
-
-+-r+, +--usereservedport+::
-  By default, +ntpdig+ uses a UDP source port number selected by the
-  operating system. When this option is used, the reserved NTP port 123
-  is used, which most often requires +ntpdig+ be invoked as the superuser
-  (commonly "root"). This can help identify connectivity failures due to
-  port-based firewalling which affect +ntpd+, which always uses source
-  port 123.
++-p+, +--samples+::
+  Number of samples to take (default 1). The best one (chosen by,
+  among other criteria, sync distance) is selected for display or use.
 
 +-S+, +--step+::
   By default, +ntpdig+ displays the clock offset but does not attempt to
@@ -210,7 +186,7 @@ If we are not setting the time, wait for all pending responses.
 +ntpdig ntpserver.somewhere+::
   is the simplest use of this program and can be run as an unprivileged
   command to check the current time and error in the local clock.
-+ntpdig -Ss -M 128 ntpserver.somewhere+::
++ntpdig -S -s -M 128 ntpserver.somewhere+::
   With suitable privilege, run as a command or from a _cron_(8) job,
   +ntpdig -Ss -M 128 ntpserver.somewhere+ will request the time from the
   server, and if that server reports that it is synchronized then if the
@@ -222,6 +198,21 @@ If we are not setting the time, wait for all pending responses.
   +ntpdig -S ntpserver.somewhere+ will set (step) the local clock from a
   synchronized specified server, like the +ntpdate+ utility from older
   NTP implementations.
+
+== COMPATIBILITY ==
+
+Not all options of the NTP classic sntp(1) utility have been retained;
+don't expect -b, -K, -o, -r, -w, or -W to work.  These have either
+been removed for security reasons or discarded as unnecessary in a modern
+environment.
+
+This version does not log to syslog.  Pipe standard output and
+standard error to logger(1) id you want this behavior.
+
+The synchronization-distance formula used in this version is slightly
+different from that found in sntp(1), tracking the newer formula used
+in {ntpdman}.  Expect offset computations to match but synch-distances
+not to.
 
 == EXIT STATUS ==
 

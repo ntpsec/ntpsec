@@ -490,19 +490,12 @@ def cmd_configure(ctx, config):
         from wafhelpers.check_seccomp import check_seccomp
         check_seccomp(ctx)
 
-        from wafhelpers.check_libevent2 import check_libevent2_header
-        check_libevent2_header(ctx)
-
         from wafhelpers.check_pthread import check_pthread_header_lib
         check_pthread_header_lib(ctx)
 
         if not ctx.options.disable_mdns_registration:
                 from wafhelpers.check_mdns import check_mdns_header
                 check_mdns_header(ctx)
-
-        # Run checks
-        from wafhelpers.check_libevent2 import check_libevent2_run
-        check_libevent2_run(ctx)
 
         if not ctx.options.disable_dns_retry:
             from wafhelpers.check_pthread import check_pthread_run
