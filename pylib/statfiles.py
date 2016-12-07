@@ -7,6 +7,7 @@ Requires GNUPLOT and liberation fonts installed.
 #SPDX-License-Identifier: BSD-2-Clause
 from __future__ import print_function, division
 
+import calendar
 import glob, gzip, os, socket, sys, time
 
 class NTPStats:
@@ -203,16 +204,15 @@ class NTPStats:
 
 def iso_to_posix(s):
     "Accept timestamps in ISO 8661 format or numeric POSIX time. UTC only."
-    if s.isdigit():
+    if str(s).isdigit():
         return int(s)
     else:
         t = time.strptime(s, "%Y-%m-%dT%H:%M:%S")
-        t.m_isdst = 0
         # don't use time.mktime() as that is local tz
-        return  calendar.timegm(t)
+        return calendar.timegm(t)
 
 def posix_to_iso(t):
-    "ISO 8601 string from Unix time."
-    return time.strftime("%Y-%m-%dT%H:%M:%S", time.localtime(t))
+    "ISO 8601 string in UTC from Unix time."
+    return time.strftime("%Y-%m-%dT%H:%M:%S", time.gmtime(t))
 
 # end
