@@ -404,7 +404,9 @@ usage: help [ command ]
                 return -1
             else:
                 return 0
-        elif line.startswith("&"):
+        if not self.peers:
+            self.__dogetassoc()
+        if line.startswith("&"):
             try:
                 idx = int(line[1:].split()[0])
             except:
