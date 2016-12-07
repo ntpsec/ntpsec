@@ -27,6 +27,6 @@ include::includes/external.txt[]
 
 '''''
 
-image:pic/tribeb.gif[]
+image::pic/tribeb.gif[align="center"]
 
 include::includes/footer.txt[]
