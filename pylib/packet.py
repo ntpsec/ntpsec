@@ -355,7 +355,7 @@ class SyncException(BaseException):
 
 class SyncPacket(Packet):
     "Mode 1-5 time-synchronization packet, including SNTP."
-    format = "!BBBBIIIQQQQ"
+    format = "!BBBbIIIQQQQ"
     HEADER_LEN = 48
     UNIX_EPOCH = 2208988800	# Midnight 1 Jan 1970 in secs since NTP epoch
     PHI = 15 * 1e-6		# 15ppm
@@ -381,8 +381,8 @@ class SyncPacket(Packet):
         self.resolved = None
         self.received = SyncPacket.posix_to_ntp(time.time())
         self.trusted = True
+        self.rescaled = False
         self.analyze()
-        #self.posixize()
 
     def analyze(self):
         if len(self.data) < SyncPacket.HEADER_LEN or (len(self.data) & 3) != 0:
@@ -434,13 +434,16 @@ class SyncPacket(Packet):
         return int((t + SyncPacket.UNIX_EPOCH) * 2**32)
 
     def posixize(self):
-        self.root_delay *= 2**-16
-        self.root_dispersion *= 2**-16
-        self.reference_timestamp = SyncPacket.ntp_to_posix(self.reference_timestamp)
-        self.origin_timestamp = SyncPacket.ntp_to_posix(self.origin_timestamp)
-        self.receive_timestamp = SyncPacket.ntp_to_posix(self.receive_timestamp)
-        self.transmit_timestamp = SyncPacket.ntp_to_posix(self.transmit_timestamp)
-        self.received = SyncPacket.ntp_to_posix(self.received)
+        "Rescale all timestamps to POSIX time."
+        if not self.rescaled:
+            self.rescaled = True
+            self.root_delay *= 2**-16
+            self.root_dispersion *= 2**-16
+            self.reference_timestamp = SyncPacket.ntp_to_posix(self.reference_timestamp)
+            self.origin_timestamp = SyncPacket.ntp_to_posix(self.origin_timestamp)
+            self.receive_timestamp = SyncPacket.ntp_to_posix(self.receive_timestamp)
+            self.transmit_timestamp = SyncPacket.ntp_to_posix(self.transmit_timestamp)
+            self.received = SyncPacket.ntp_to_posix(self.received)
 
     def t1(self):
         return self.origin_timestamp

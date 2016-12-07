@@ -177,9 +177,11 @@ def clock_select(packets):
     # Return the best
     return filtered[:1]
 
-def report(packet, json, adjusted):
+def report(packet, json):
     "Report on the SNTP packet selected for display, and its adjustment."
     say = sys.stdout.write
+
+    packet.posixize()
 
     # Cheesy way to get local timezone offset
     gmt_time = int(time.time())
@@ -187,18 +189,18 @@ def report(packet, json, adjusted):
     tmoffset = (local_time - gmt_time) // 60	# In minutes
 
     # The server's idea of the time
-    t = time.localtime(int(ntp.packet.SyncPacket.ntp_to_posix(packet.transmit_timestamp)))
+    t = time.localtime(int(packet.transmit_timestamp))
     ms = int(packet.transmit_timestamp * 1000000) % 1000000
 
-    digits = 0
-    precision = packet.precision
-    while True:
-        precision *= 10.0
-        if precision >= 1:
-            break
-        digits += 1
-    if digits > 6:
-        digits = 6;
+    digits = 6
+    #precision = packet.precision
+    #while True:
+    #    precision *= 10.0
+    #    if precision >= 1:
+    #        break
+    #    digits += 1
+    #if digits > 6:
+    #    digits = 6;
 
     date = time.strftime("%Y-%m-%d", t)
     tod = time.strftime("%T", t) + (".%*d" % (digits, ms))
@@ -371,6 +373,8 @@ if __name__ == '__main__':
         print("org t1: %f rec t2: %f" % (pkt.t1(), pkt.t2()))
         print("xmt t3: %f dst t4: %f" % (pkt.t3(), pkt.t4()))
         print("rec-org t21: %f  xmt-dst t34: %f" % (pkt.t2() - pkt.t1(), pkt.t3() - pkt.t4()))
+        report(pkt, json)
+        raise SystemExit(0)
 
     returned = []
     for server in concurrent_hosts:
@@ -393,7 +397,7 @@ if __name__ == '__main__':
     returned = clock_select(returned)
     if returned:
         syncpacket = returned[0]
-        report(syncpacket, json, False)
+        report(syncpacket, json)
 	# If we can step but we cannot slew, then step.
 	# If we can step or slew and and |offset| > steplimit, then step.
         rc = True
