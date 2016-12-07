@@ -1270,7 +1270,7 @@ class ControlSession:
                         else:
                             # ntpd has lower cap on row limit
                             self.ntpd_row_limit -= 1
-                            limit = min(limit, ntpd_row_limit)
+                            limit = min(limit, self.ntpd_row_limit)
                             if self.debug:
                                 warn("Row limit reduced to %d following CERR_BADVALUE.\n" % limit)
                     elif e.errorcode in (SERR_INCOMPLETE, SERR_TIMEOUT):
@@ -1339,7 +1339,7 @@ class ControlSession:
                         frags = min(MAXFRAGS, frags + 1)
                     else:
                         limit = min(3 * MAXFRAGS,
-                                    ntpd_row_limit,
+                                    self.ntpd_row_limit,
                                     max(limit + 1,
                                         limit * 33 / 32))
 
