@@ -54,7 +54,7 @@ JSON record:
 In the JSON format, time is in ISO 8601 format; precision is the synch
 distance, with an unknown synch distance being reported as 0.  Host and
 IP are always emitted even if duplicate. The "adjusted" boolean
-reports whether ntpdig determined it should slewed or stepped the
+reports whether ntpdig determined it should have slewed or stepped the
 time. This may be shown as true even if time was not actually
 adjusted due to lack of clock-setting privileges.
 
@@ -207,7 +207,7 @@ been removed for security reasons or discarded as unnecessary in a modern
 environment.
 
 This version does not log to syslog.  Pipe standard output and
-standard error to logger(1) id you want this behavior.
+standard error to logger(1) if you want this behavior.
 
 The synchronization-distance formula used in this version is slightly
 different from that found in sntp(1), tracking the newer formula used
