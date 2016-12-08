@@ -12,7 +12,7 @@
 from __future__ import print_function, division
 
 import os, sys, getopt, cmd, re
-import socket, hashlib, collections
+import socket, hashlib
 
 try:
     import ntp.packet
@@ -168,7 +168,7 @@ class Ntpq(cmd.Cmd):
         self.peers = []			# Data from NTP peers.
         self.debug = 0
         self.pktversion = ntp.magic.NTP_OLDVERSION + 1
-        self.uservars = collections.OrderedDict()
+        self.uservars = ntp.util.OrderedDict()
         self.ai_family = socket.AF_UNSPEC
 
     def emptyline(self):

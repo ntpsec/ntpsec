@@ -180,7 +180,7 @@ A Mode 6 packet cannot have extension fields.
 """
 # SPDX-License-Identifier: BSD-2-clause
 from __future__ import print_function, division
-import sys, socket, select, struct, collections, string
+import sys, socket, select, struct, string
 import getpass, hashlib, time
 import ntp.control
 import ntp.magic
@@ -1153,7 +1153,7 @@ class ControlSession:
                     # Yes, ntpd really does emit bare tags for empty
                     # string-valued variables.
                     items.append((pair, ""))
-        return collections.OrderedDict(items)
+        return ntp.util.OrderedDict(items)
 
     def readvar(self, associd=0, varlist=None, opcode=ntp.control.CTL_OP_READVAR):
         "Read system vars from the host as a dict, or throw an exception."
