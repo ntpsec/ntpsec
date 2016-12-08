@@ -66,7 +66,7 @@
   +path+ _filepath_;;
     Overrides the default device location for this refclock.
   +ppspath+ _filepath_;;
-    Overrides the default PPS device location (if any) for this diver.
+    Overrides the default PPS device location (if any) for this driver.
   +baud+ 'number';;
     Overrides the defaults baud rate for this driver.
   +flag1+ +{0 | 1}+; +flag2+ +{0 | 1}+; +flag3+ +{0 | 1}+; +flag4+ +{0 | 1}+;;
