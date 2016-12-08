@@ -229,7 +229,7 @@ operates.
 == Cross-compiling ==
 
 Set up a cross-compile environment for the target architecture.  At minimum
-it will need its own binaries for the OpenSSL and libevent2 libraries.
+it will need its own binaries for the OpenSSL library.
 
 Configure NTPSec with:
 

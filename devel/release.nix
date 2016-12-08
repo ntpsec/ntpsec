@@ -51,7 +51,7 @@ in with derivationOptions; rec {
       name = "ntpsec";
       src = tarball;
 
-      buildInputs = with pkgs; [ python27 bison libevent openssl asciidoc ];
+      buildInputs = with pkgs; [ python27 bison openssl asciidoc ];
 
       configurePhase = ''
         runHook preConfigure
