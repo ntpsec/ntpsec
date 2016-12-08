@@ -315,19 +315,6 @@ The process everything step sorts the contents of the FIFO, then discards
 outliers, roughly 1/3 of the samples, and then figures out the average and
 injects that into the peer buffer for the refclock.
 
-== ntpdig and libevent2 ==
-
-You may notice that ntpdig is written in a different style than the
-rest of the suite, and has a dependency on libevent2 that the rest of
-the code does not use.  This is because ntpdig, back when it was
-called sntp, was written separately from the rest of the NTP suite
-and incorporated wholesale after the fact.
-
-The libevent API provides a mechanism to execute a callback function
-when a specific event occurs on a file descriptor or after a timeout
-has been reached.  Other NTP programs, notably ntpd and ntpq, could
-use it, but would require serious rewrites to do so.
-
 == Asynchronous DNS lookup ==
 
 There are great many complications in the code that arise from wanting
