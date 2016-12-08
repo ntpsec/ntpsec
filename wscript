@@ -116,7 +116,7 @@ def afterparty(ctx):
     # module built in libntp.
     if ctx.cmd == 'clean':
         ctx.exec_command("rm -f wafhelpers/*.pyc pylib/__pycache__/*.pyc wafhelpers/__pycache__/*.pyc")
-    for x in ("ntpq", "ntpdig", "ntpstats", "ntpsweep", "ntptrace", "ntpwait"):
+    for x in ("ntpclients",):	# List used to be longer...
             path_build = ctx.bldnode.make_node("pylib")
             path_source = ctx.srcnode.make_node(x + "/ntp")
             relpath = "../" + path_build.path_from(ctx.srcnode)
@@ -136,13 +136,13 @@ def afterparty(ctx):
         os.system("ln -sf %s/libntp/ntpc.so %s/pylib/ntpc.so " % (bldnode, bldnode))
 
 python_scripts = [
-        "ntpq/ntpq",
-        "ntpstats/ntpviz",
-        "ntptrace/ntptrace",
-        "ntpwait/ntpwait",
-        "ntpsweep/ntpsweep",
-        "ntpkeygen/ntpkeygen",
-        "ntpdig/ntpdig",
+        "ntpclients/ntpdig",
+        "ntpclients/ntpkeygen",
+        "ntpclients/ntpq",
+        "ntpclients/ntpsweep",
+        "ntpclients/ntptrace",
+        "ntpclients/ntpviz",
+        "ntpclients/ntpwait",
 ]
 
 def build(ctx):
@@ -182,7 +182,7 @@ def build(ctx):
         ctx.recurse("attic")
         ctx.recurse("tests")
 
-        scripts = ["ntpleapfetch/ntpleapfetch"] + python_scripts
+        scripts = ["ntpclients/ntpleapfetch"] + python_scripts
 
         ctx(
                 features      = "subst",
@@ -196,13 +196,14 @@ def build(ctx):
         if ctx.cmd == 'clean':
             afterparty(ctx)
 
-        ctx.manpage(8, "ntpleapfetch/ntpleapfetch-man.txt")
-        ctx.manpage(1, "ntpq/ntpq-man.txt")
-        ctx.manpage(1, "ntptrace/ntptrace-man.txt")
-        ctx.manpage(1, "ntpstats/ntpviz-man.txt")
-        ctx.manpage(8, "ntpwait/ntpwait-man.txt")
-        ctx.manpage(1, "ntpsweep/ntpsweep-man.txt")
-        ctx.manpage(8, "ntpkeygen/ntpkeygen-man.txt")
+        ctx.manpage(8, "ntpclients/ntpleapfetch-man.txt")
+        ctx.manpage(1, "ntpclients/ntpdig-man.txt")
+        ctx.manpage(8, "ntpclients/ntpkeygen-man.txt")
+        ctx.manpage(1, "ntpclients/ntpq-man.txt")
+        ctx.manpage(1, "ntpclients/ntpsweep-man.txt")
+        ctx.manpage(1, "ntpclients/ntptrace-man.txt")
+        ctx.manpage(1, "ntpclients/ntpviz-man.txt")
+        ctx.manpage(8, "ntpclients/ntpwait-man.txt")
 
         # Skip running unit tests on a cross compile build
         if not ctx.env.ENABLE_CROSS:

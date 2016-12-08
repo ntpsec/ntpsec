@@ -237,6 +237,14 @@ Configure NTPSec with:
 
 There are also --cross-cflags and --cross-ldflags to supply the cross compiler 
 with appropriate values.
-                                                                  
+
+== Statistics ==
+
+If you want to generate the ntpviz graphs regularly, add these lines to
+your root crontab:
+
+53 * * * * cd /usr/local/src/NTP/ntpsec/ntpstats; ./ntpviz -p 1 -o day
+45 11,23 * * * cd /usr/local/src/NTP/ntpsec/ntpstats; ./ntpviz -p 7 -o week
+
 // end
 

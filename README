@@ -57,44 +57,21 @@ libparse/:: 	This directory contains the files making up the parser for
 		by just providing a conversion routine and the
 		appropriate NTP parameters
 
-ntpd/::		Sources for the main time-synchronization daemon.
+ntpclients/::   Directory containing sources for clients - utility programs
+		to query local and remote NTP installations for log status,
+		state variables, and other timekeeping information.  The term
+		"clients" is used quite loosely here; any tool that is not a
+		not a multi-file C program probably lives in this directory.
 
-ntpdig/::	Query an NTP or SNTP server to report or set the time.
-		(This tool was formerly sntp).
+ntpd/::		Sources for the main time-synchronization daemon.
 
 ntpfrob/::       The ntpfrob utility collects several small diagnostic
 		functions for reading and tweaking the local clock
 		hardware, including reading the clock tick rate,
 		precision, and jitter.
 
-ntpkeygen/::	Directory containing the utility program used to generate
-		NTP authentication keys.
-
-ntpleapfetch/::	Directory containing a script to be run from a cron job
-		to keep your local leap-second file properly updated.
-
-ntpq/::		Directory containing sources for a utility program to
-		query local and remote NTP peers for state variables and
-		related timekeeping information.
-
-ntpstats/::	Statistics visualization and analysis tools built around
-		the Python ntpstats.py module. Includes ntpviz.
-
-ntpsweep/::	Directory containing source for a utility program that can
-		fetch basic information about timservers, recursing through
-		peers to map the nearby topology of the time-service network.
-
 ntptime/:: 	Directory containing a utility for reading and modifying
 		kernel parameters related to the local clock.
-
-ntptrace/::	Directory containing source for a utility program that
-		can be used to reveal the chain of NTP peers from a
-		designated peer to the primary server at the root of the
-		timekeeping subnet.
-
-ntpwait/::	Directory containing a script that blocks until ntpd is
-		in state 4 (synchronized). Useful at boot time, to delay
-		the boot sequence until after "ntpd -g" has set the time.
 
 pylib/::	Installable Python helper classes for scripts.
 
