@@ -98,6 +98,7 @@ class PeerSummary:
         self.showhostnames = showhostnames	# If false, display numeric IPs
         self.wideremote = wideremote		# show wide remote names?
         self.debug = debug
+        self.termwidth = termwidth
         # By default, the peer spreadsheet layout is designed so lines just
         # fit in 80 characters. This tells us how much extra horizontal space
         # we have available on a wider terminal emulator.
