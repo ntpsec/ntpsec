@@ -1,6 +1,7 @@
 = NTPsec project news =
 
-For historic news from NTP Classic, see devel/TODO in the distribution.
+For historic news from NTP Classic, see devel/HISTORIC-NEWS in the
+distribution.
 
 Much of the traditional function of a news file is now better addressed
 by browsing the comments in the revision history.  This file will focus
