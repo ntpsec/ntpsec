@@ -84,7 +84,7 @@ if __name__ == '__main__':
                     except IOError as e:
                         raise Fatal(e.strerror)
                     except IndexError:
-                        raise Fatal("no 'hpoll' variabe in peer response")
+                        raise Fatal("no 'hpoll' variable in peer response")
                     if not variables:
                         continue
                     stdscr.addstr(peer_report.summary(session.rstatus,

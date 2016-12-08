@@ -30,7 +30,7 @@ int ntp_gettime(struct ntptimeval *);
 
 /*
  * The units of the maxerror and esterror fields vary by platform.  If
- * STA_NANO is defined, they're in nanoseconds;, otherwise in
+ * STA_NANO is defined, they're in nanoseconds; otherwise in
  * microseconds. Hide the difference by normalizing everything to
  * float seconds.
  */
