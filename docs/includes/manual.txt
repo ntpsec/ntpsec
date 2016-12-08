@@ -2,7 +2,7 @@
 * link:ntpd.html[+ntpd+ - Network Time Protocol (NTP) daemon]
 * link:ntpdig.html[+ntpdig+ - Simple Network Time Protocol (SNTP) client]
 * link:ntpq.html[+ntpq+ - standard NTP query program]
-* link:ntpmon.html[+ntpq+ - real-time NTP status monitor]
+* link:ntpmon.html[+ntpmon+ - real-time NTP status monitor]
 * link:ntpfrob.html[+ntpfrob+ - frob the local clock hardware]
 * link:ntpkeygen.html[+ntpkeygen+ - generate public and private keys]
 * link:ntpleapfetch.html[+ntpleapfetch+ fetch and manage leap-offset file]
