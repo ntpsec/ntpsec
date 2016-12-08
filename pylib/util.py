@@ -45,13 +45,18 @@ def portsplit(hostname):
             hostname = hostname[1:-1]	# Strip brackets
     return (hostname, portsuffix)
 
-def canonicalize_dns(hostname, family=socket.AF_UNSPEC):
+# A hack to avoid repleatedly hammering on DNS when ntpmon runs.
+canonicalization_cache = {}
+
+def canonicalize_dns(inhost, family=socket.AF_UNSPEC):
     "Canonicalize a hostname or numeric IP address."
+    if inhost in canonicalization_cache:
+        return canonicalization_cache[inhost]
     # Catch garbaged hostnames in corrupted Mode 6 responses
-    m = re.match("([:.[\]]|\w)*", hostname)
+    m = re.match("([:.[\]]|\w)*", inhost)
     if not m:
         raise TypeError
-    (hostname, portsuffix) = portsplit(hostname)
+    (hostname, portsuffix) = portsplit(inhost)
     try:
         ai = socket.getaddrinfo(hostname, None, family, 0, 0, socket.AI_CANONNAME)
     except socket.gaierror as e:
@@ -60,12 +65,14 @@ def canonicalize_dns(hostname, family=socket.AF_UNSPEC):
     (family, socktype, proto, canonname, sockaddr) = ai[0]
     try:
         name = socket.getnameinfo(sockaddr, socket.NI_NAMEREQD)
+        result = name[0].lower() + portsuffix
     except socket.gaierror:
         # On OS X, canonname is empty for hosts without rDNS.
         # Fall back to the hostname.
         canonicalized = canonname or hostname
-        return canonicalized.lower() + portsuffix
-    return name[0].lower() + portsuffix
+        result = canonicalized.lower() + portsuffix
+    canonicalization_cache[inhost] = result
+    return result
 
 TermSize = collections.namedtuple("TermSize", ["width", "height"])
 
