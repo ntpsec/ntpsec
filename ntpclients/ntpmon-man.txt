@@ -1,0 +1,13 @@
+= ntpmon(1) =
+:doctype: manpage
+
+== NAME ==
+ntpmon - real-time NTP status monitor
+
+include::../docs/includes/ntpmon-body.txt[]
+
+== EXIT STATUS ==
+
+Always returns 0.
+
+// end
