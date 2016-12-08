@@ -5,7 +5,7 @@
 # SPDX-License-Identifier: BSD-2-clause
 from __future__ import print_function, division
 
-import os, sys, curses, time
+import os, sys, curses, time, getopt
 
 try:
     import ntp.packet
@@ -24,31 +24,53 @@ except ImportError:
     sys.stderr.write("ntpmon: can't find Python curses library -- check PYTHONPATH.\n")
     sys.exit(1)
 
-pktversion = ntp.magic.NTP_VERSION
-showhostnames = True
-wideremote = False
-showall = False
-
 stdscr = None
+
+def statline(_peerlist, _mrulist):
+    "Generate a status line"
+    return ntp.util.stdversion()
 
 class Fatal(Exception):
     "Unrecoverable error."
     def __init__(self, msg):
         Exception.__init__(self)
         self.msg = msg
+    def __str__(self):
+        return self.msg
 
 class OutputContext:
     def __enter__(self):
         "Begin critical region."
         global stdscr
         stdscr = curses.initscr()
+        curses.curs_set(0)
     def __exit__(self, extype_unused, value_unused, traceback_unused):
         curses.endwin()
 
 if __name__ == '__main__':
+    try:
+        (options, arguments) = getopt.getopt(sys.argv[1:],
+                                             "anw", ["all", "numeric", "wide"])
+    except getopt.GetoptError as e:
+        sys.stderr.write("%s\n" % e)
+        sys.stderr.write(usage)
+        raise SystemExit(1)
+    progname = sys.argv[0]
+
+    showhostnames = True
+    wideremote = False
+    showall = False
+    for (switch, val) in options:
+        if switch in ("-a", "--all"):
+            showall = False
+        elif switch in ("-n", "--numeric"):
+            showhostnames = False
+        elif switch in ("-w", "--wide"):
+            wideremote = True
+
     poll_interval = 1
     peer_report = ntp.util.PeerSummary(displaymode="peers",
-                                       pktversion=pktversion,
+                                       pktversion=ntp.magic.NTP_VERSION,
                                        showhostnames=showhostnames,
                                        wideremote=wideremote,
                                        termwidth=80,
@@ -56,7 +78,7 @@ if __name__ == '__main__':
     mru_report = ntp.util.MRUSummary(showhostnames)
     try:
         session = ntp.packet.ControlSession()
-        session.openhost("localhost")
+        session.openhost(arguments[0] if arguments else "localhost")
         with OutputContext() as ctx:
             while True:
                 try:
@@ -70,41 +92,48 @@ if __name__ == '__main__':
                 stdscr.addstr(peer_report.header() + "\n", curses.A_BOLD)
                 if len(peers) == 0:
                     raise Fatal("no peers reported")
-                hpolls = []
-                for peer in peers:
-                    if not showall and \
-                            not (ntp.control.CTL_PEER_STATVAL(peer.status)
-                              & (ntp.control.CTL_PST_CONFIG|ntp.control.CTL_PST_REACH)):
-                        continue
-                    try:
-                        variables = session.readvar(peer.associd)
-                        hpolls.append(variables['hpoll'])
-                    except ntp.packet.ControlException as e:
-                        raise Fatal(e.message + "\n")
-                    except IOError as e:
-                        raise Fatal(e.strerror)
-                    except IndexError:
-                        raise Fatal("no 'hpoll' variable in peer response")
-                    if not variables:
-                        continue
-                    stdscr.addstr(peer_report.summary(session.rstatus,
-                                            variables, peer.associd))
-                # The status line
-                stdscr.addstr(ntp.util.stdversion() + "\n",
-                              curses.A_REVERSE|curses.A_DIM)
-                # Now the MRU report
-                span = session.mrulist()
-                if span.entries:
-                    stdscr.addstr(ntp.util.MRUSummary.header + "\n",
-                                  curses.A_BOLD)
-                    for entry in span.entries:
-                        stdscr.addstr(mru_report.summary(entry) + "\n")
+                try:
+                    hpolls = []
+                    for peer in peers:
+                        if not showall and \
+                                not (ntp.control.CTL_PEER_STATVAL(peer.status)
+                                  & (ntp.control.CTL_PST_CONFIG|ntp.control.CTL_PST_REACH)):
+                            continue
+                        try:
+                            variables = session.readvar(peer.associd)
+                            hpolls.append(variables['hpoll'])
+                        except ntp.packet.ControlException as e:
+                            raise Fatal(e.message + "\n")
+                        except IOError as e:
+                            raise Fatal(e.strerror)
+                        except IndexError:
+                            raise Fatal("no 'hpoll' variable in peer response")
+                        if not variables:
+                            continue
+                        stdscr.addstr(peer_report.summary(session.rstatus,
+                                                variables, peer.associd))
+                    # The status line
+                    sl = statline(peer_report, mru_report)
+                    stdscr.addstr(sl + ((peer_report.termwidth - len(sl)) * " ") + "\n",
+                                  curses.A_REVERSE|curses.A_DIM)
+                    # Now the MRU report
+                    span = session.mrulist()
+                    if span.entries:
+                        stdscr.addstr(ntp.util.MRUSummary.header + "\n",
+                                      curses.A_BOLD)
+                        for entry in span.entries:
+                            stdscr.addstr(mru_report.summary(entry) + "\n")
+                except curses.error:
+                    # An addstr overran the screen, no worries
+                    pass
                 # Display all
                 stdscr.refresh()
                 # Nyquist-interval sampling
                 time.sleep(min(hpolls) / 2)
     except KeyboardInterrupt:
         print("")
+    except Fatal as e:
+        print(e)
     except IOError:
         print("Bailing out...")
 
