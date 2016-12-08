@@ -38,7 +38,7 @@ from __future__ import print_function, division
 #
 # The one new option in this version is -p, borrowed from ntpdate.
 
-import sys, socket, select, struct, time, getopt, datetime, math
+import sys, socket, select, time, getopt, math
 
 try:
     import ntp.packet
