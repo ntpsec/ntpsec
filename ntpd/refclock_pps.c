@@ -22,8 +22,8 @@
  * produced by a cesium clock, timing receiver or related equipment. It
  * can be used to remove accumulated jitter over a congested link and
  * retime a server before redistributing the time to clients. It can 
- *also be used as a holdover should all other synchronization sources
- * beconme unreachable.
+ * also be used as a holdover should all other synchronization sources
+ * become unreachable.
  *
  * Before this driver becomes active, the local clock must be set to
  * within +-0.4 s by another means, such as a radio clock or NTP
@@ -49,8 +49,8 @@
  * to hundreds of PPM), it's better to used the kernel support, if
  * available.
  *
- * This deriver is subject to the mitigation rules described in the
- * "mitigation rulse and the prefer peer" page. However, there is an
+ * This driver is subject to the mitigation rules described in the
+ * "mitigation rules and the prefer peer" page. However, there is an
  * important difference. If this driver becomes the PPS driver according
  * to these rules, it is active only if (a) a prefer peer other than
  * this driver is among the survivors or (b) there are no survivors and
