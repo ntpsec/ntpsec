@@ -9,12 +9,12 @@
 == Description ==
 
 This program is a real-time status monitor for NTP.  It presents the
-same informartion as the 'peers' and 'mrulist' commands of {ntpqman},
+same information as the 'peers' and 'mrulist' commands of {ntpqman},
 but using a split-window display that also includes a status summary
 bar, and updates at intervals guaranteed to show status changes as
 soon as they occur.
 
-(Specifically, the display begins updating once per seconds and
+(Specifically, the display begins updating once per second and
 adjusts itself to poll at twice the frequency of the shortest
 polling interval reported in the last peers response.)
 
