@@ -121,7 +121,7 @@ if __name__ == '__main__':
                     if span.entries:
                         stdscr.addstr(ntp.util.MRUSummary.header + "\n",
                                       curses.A_BOLD)
-                        for entry in span.entries:
+                        for entry in reversed(span.entries):
                             stdscr.addstr(mru_report.summary(entry) + "\n")
                 except curses.error:
                     # An addstr overran the screen, no worries
