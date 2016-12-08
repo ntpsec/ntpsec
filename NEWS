@@ -12,6 +12,9 @@ ntpkeygen has been moved from C to Python.  This is not a functional
 change, just another move to improve maintainability and reduce attack
 surface by decreasing line count.
 
+A new tool for time-=service operators, ntpmon, supports real-time
+monitoring of your NTP installation's status.
+
 == 2016-11-23: 0.9.5 ==
 
 This release includes a substantial refactoring of the core protocol

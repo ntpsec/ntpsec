@@ -1,0 +1,27 @@
+= ntpmon - standard NTP query program =
+
+[cols="10%,90%",frame="none",grid="none",style="verse"]
+|==============================
+|image:pic/looking.jpg[]|
+{millshome}pictures.html[from 'Pogo', Walt Kelly]
+
+Words of wisdom.
+
+|==============================
+
+== More Help ==
+
+include::includes/manual.txt[]
+
+'''''
+
+include::includes/ntpmon-body.txt[]
+
+== Mode 6 Protocol ==
+
+The Mode 6 protocol used by ntpmon to communicate with {ntpdman}
+is described link:mode6.html[here].
+
+'''''
+
+include::includes/footer.txt[]

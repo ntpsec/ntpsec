@@ -138,6 +138,7 @@ def afterparty(ctx):
 python_scripts = [
         "ntpclients/ntpdig",
         "ntpclients/ntpkeygen",
+        "ntpclients/ntpmon",
         "ntpclients/ntpq",
         "ntpclients/ntpsweep",
         "ntpclients/ntptrace",
@@ -199,6 +200,7 @@ def build(ctx):
         ctx.manpage(8, "ntpclients/ntpleapfetch-man.txt")
         ctx.manpage(1, "ntpclients/ntpdig-man.txt")
         ctx.manpage(8, "ntpclients/ntpkeygen-man.txt")
+        ctx.manpage(1, "ntpclients/ntpmon-man.txt")
         ctx.manpage(1, "ntpclients/ntpq-man.txt")
         ctx.manpage(1, "ntpclients/ntpsweep-man.txt")
         ctx.manpage(1, "ntpclients/ntptrace-man.txt")

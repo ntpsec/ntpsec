@@ -1,0 +1,111 @@
+#!/usr/bin/env python
+#
+# ntpmon - real-time peerstats/MRU monitor
+#
+# SPDX-License-Identifier: BSD-2-clause
+from __future__ import print_function, division
+
+import os, sys, curses, time
+
+try:
+    import ntp.packet
+    import ntp.util
+    import ntp.ntpc
+    import ntp.version
+    import ntp.control
+    import ntp.magic
+except ImportError:
+    sys.stderr.write("ntpmon: can't find Python NTP library -- check PYTHONPATH.\n")
+    sys.exit(1)
+
+try:
+    import curses
+except ImportError:
+    sys.stderr.write("ntpmon: can't find Python curses library -- check PYTHONPATH.\n")
+    sys.exit(1)
+
+pktversion = ntp.magic.NTP_VERSION
+showhostnames = True
+wideremote = False
+showall = False
+
+stdscr = None
+
+class Fatal(Exception):
+    "Unrecoverable error."
+    def __init__(self, msg):
+        Exception.__init__(self)
+        self.msg = msg
+
+class OutputContext:
+    def __enter__(self):
+        "Begin critical region."
+        global stdscr
+        stdscr = curses.initscr()
+    def __exit__(self, extype_unused, value_unused, traceback_unused):
+        curses.endwin()
+
+if __name__ == '__main__':
+    poll_interval = 1
+    peer_report = ntp.util.PeerSummary(displaymode="peers",
+                                       pktversion=pktversion,
+                                       showhostnames=showhostnames,
+                                       wideremote=wideremote,
+                                       termwidth=80,
+                                       debug=0)
+    mru_report = ntp.util.MRUSummary(showhostnames)
+    try:
+        session = ntp.packet.ControlSession()
+        session.openhost("localhost")
+        with OutputContext() as ctx:
+            while True:
+                try:
+                    peers = session.readstat()
+                except ntp.packet.ControlException as e:
+                    raise Fatal(e.message)
+                except IOError as e:
+                    raise Fatal(e.strerror)
+                stdscr.clear()
+                stdscr.addstr(0, 0, "")
+                stdscr.addstr(peer_report.header() + "\n", curses.A_BOLD)
+                if len(peers) == 0:
+                    raise Fatal("no peers reported")
+                hpolls = []
+                for peer in peers:
+                    if not showall and \
+                            not (ntp.control.CTL_PEER_STATVAL(peer.status)
+                              & (ntp.control.CTL_PST_CONFIG|ntp.control.CTL_PST_REACH)):
+                        continue
+                    try:
+                        variables = session.readvar(peer.associd)
+                        hpolls.append(variables['hpoll'])
+                    except ntp.packet.ControlException as e:
+                        raise Fatal(e.message + "\n")
+                    except IOError as e:
+                        raise Fatal(e.strerror)
+                    except IndexError:
+                        raise Fatal("no 'hpoll' variabe in peer response")
+                    if not variables:
+                        continue
+                    stdscr.addstr(peer_report.summary(session.rstatus,
+                                            variables, peer.associd))
+                # The status line
+                stdscr.addstr(ntp.util.stdversion() + "\n",
+                              curses.A_REVERSE|curses.A_DIM)
+                # Now the MRU report
+                span = session.mrulist()
+                if span.entries:
+                    stdscr.addstr(ntp.util.MRUSummary.header + "\n",
+                                  curses.A_BOLD)
+                    for entry in span.entries:
+                        stdscr.addstr(mru_report.summary(entry) + "\n")
+                # Display all
+                stdscr.refresh()
+                # Nyquist-interval sampling
+                time.sleep(min(hpolls) / 2)
+    except KeyboardInterrupt:
+        print("")
+    except IOError:
+        print("Bailing out...")
+
+# end
