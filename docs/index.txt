@@ -195,6 +195,9 @@ few will be user-visible.
   of this cruft, the project team will (a) be quite surprised, and (b)
   work with you on better analytics using ntpviz and modern tools.
 
+* A new tool, +ntpmon+, performs real-time monitoring of your
+  peer and MRU status with efficient (least-cost) querying.
+
 * The ntpq utility resizes its display to take advantage of wide
   terminal windows, allowing more space for long peer addresses.
 
