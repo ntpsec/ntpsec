@@ -341,7 +341,7 @@ if __name__ == '__main__':
             raise SystemExit(1)
 
     if not credentials and authkey and keyfile is None:
-        self.warn("-a option requires -k.\n")
+        sys.stderr.write("-a option requires -k.\n")
         raise SystemExit(1)
 
     gap /= 1000	# Scale gap to milliseconds
