@@ -12,7 +12,15 @@ ntpkeygen has been moved from C to Python.  This is not a functional
 change, just another move to improve maintainability and reduce attack
 surface by decreasing line count.
 
-A new tool for time-=service operators, ntpmon, supports real-time
+ntpdig has also been moved from C to Python. Though this is also
+mostly a move to reduce line count, the new version does have some
+functional changes.  Obsolete options have been dropped, logging is
+done a bit differently, and the synchronization-distance computation has
+been brought up to date with ntpd's. Also, this version can be told to
+collect multiple samples and use whichever has the lowest combination
+of stratum and synch distance.
+
+A new tool for time-service operators, ntpmon, supports real-time
 monitoring of your NTP installation's status.
 
 == 2016-11-23: 0.9.5 ==
