@@ -46,19 +46,12 @@ link-local IPV6 address with an interface specified in
   associations cannot be secured.  Broadcast-client mode has been
   completely removed.
 +
-For broadcast and multicast addresses (only), this command mobilizes
-a persistent broadcast mode association. Multiple commands can be
-used to specify multiple local broadcast interfaces (subnets) and/or
-multiple multicast groups. Note that local broadcast messages go
-only to the interface associated with the subnet specified, but
-multicast messages go to all interfaces. In broadcast mode the local
-server sends periodic broadcast messages to a client population at
-the _address_ specified, which is usually the broadcast address on
-(one of) the local network(s) or a multicast address assigned to
-NTP. The IANA has assigned the multicast group address IPv4
-224.0.1.1 and IPv6 ff05::101 (site local) exclusively to NTP, but
-other nonconflicting addresses can be used to contain the messages
-within administrative boundaries.
+For broadcast addresses (only), this command mobilizes a persistent
+broadcast mode association. Multiple commands can be used to specify
+multiple local broadcast interfaces (subnets) In broadcast mode the
+local server sends periodic broadcast messages to a client population
+at the _address_ specified, which is usually the broadcast address on
+(one of) the local network(s).
 
 [[unpeer]]
 +unpeer+::

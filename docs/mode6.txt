@@ -426,8 +426,6 @@ en.#:: Integer literal. 1 if packets on this interface are processed, 0
 flags.#:: A hex literal that is a mask of flag bits on.
           Flag mask values are described in a following table.
 
-mc.#:: Count of multicast transmissions.
-
 name.#:: The interface name, such as would occur in an ifconfig listing.
 
 pc.#:: Count of peers using this interface.
@@ -448,9 +446,9 @@ up.#:: Uptime in seconds.
 |INT_PPP	| 0x002	| Point-to-point interface
 |INT_LOOPBACK	| 0x004	| the loopback interface
 |INT_BROADCAST	| 0x008	| can broadcast out this interface
-|INT_MULTICAST	| 0x010	| can multicast out this interface
+|INT_MULTICAST	| 0x010	| can multicast out this interface (not used)
 |INT_BCASTOPEN	| 0x020	| broadcast receive socket is open
-|INT_MCASTOPEN	| 0x040	| multicasting enabled
+|INT_MCASTOPEN	| 0x040	| multicasting enabled (not used)
 |INT_WILDCARD	| 0x080	| wildcard interface - usually skipped
 |INT_MCASTIF	| 0x100	| bound directly to MCAST address
 |INT_PRIVACY	| 0x200	| RFC 4941 IPv6 privacy address

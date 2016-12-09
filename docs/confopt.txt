@@ -33,11 +33,8 @@ various related operations.
 The various modes described on the link:assoc.html[Association
 Management] page are determined by the command keyword and the DNS
 name or IP address. Addresses are classed by type as (s) a remote
-server or peer (IPv4 class A, B and C or IPv6), (b) the IPv4 broadcast
-address of a local interface, or (m) a multicast address (IPv4 class D
-or IPv6). For multicast addresses the IANA has assigned the multicast
-group address IPv4 224.0.1.1 and IPv6 ff05::101 (site local)
-exclusively to NTP, but other nonconflicting addresses can be used.
+server or peer (IPv4 class A, B and C or IPv6), or (b) the IPv4 broadcast
+address of a local interface.
 
 If the Basic Socket Interface Extensions for IPv6 (RFC 2553) is
 detected, support for the IPv6 address family is generated in addition
@@ -70,8 +67,8 @@ include::includes/assoc-options.txt[]
 [[aux]]
 == Auxiliary Commands ==
 
-Information on authentication for broadcast, manycast, and
-multicast options can be found at link:authopt.html[Authentication Options].
+Information on authentication for broadcast options can be found at
+link:authopt.html[Authentication Options].
 
 include::includes/assoc-auxcommands.txt[]
 

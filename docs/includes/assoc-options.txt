@@ -57,8 +57,8 @@
 
 +ttl+ _ttl_::
   This option is used only with broadcast server mode. It specifies
-  the time-to-live _ttl_ to use on broadcast server and multicast
-  server and the maximum _ttl_ for the expanding ring search with
+  the time-to-live _ttl_ to use on broadcast server
+  and the maximum _ttl_ for the expanding ring search with
   manycast client packets. Selection of the proper value, which
   defaults to 127, is something of a black art and should be
   coordinated with the network administrator.

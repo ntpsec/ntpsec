@@ -1,15 +1,5 @@
 // Auxiliary association commands - included twice
 
-+manycastserver+ _address..._::
-  This command enables reception of manycast client messages to the
-  multicast group address(es) (type m) specified. At least one address
-  is required, but the NTP multicast address 224.0.1.1 assigned by the
-  IANA should NOT be used, unless specific means are taken to limit the
-  span of the reply and avoid a possibly massive implosion at the
-  original sender. Note that, in order to avoid accidental or malicious
-  disruption in this mode, both the server and client should operate
-  using authentication as described on the "Authentication Options" page.
-
 +mdnstries+ _number_::
   If we are participating in mDNS, after we have synched for the first
   time we attempt to register with the mDNS system. If that registration

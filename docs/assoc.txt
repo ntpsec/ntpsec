@@ -39,12 +39,12 @@ discovery packet. They are are demobilized by timeout or when preempted
 by a "better" server, as described on the link:discover.html[Automatic
 Server Discovery Schemes] page.
 
-There are three principal modes of operation in NTP: client/server,
-symmetric active/passive and broadcast/multicast. There are three
-automatic server discovery schemes in NTP: broadcast/multicast, manycast
-and pool described on the link:discover.html[Automatic Server Discovery
-Schemes] page. In addition, the link:#burst[burst options] and
-link:orphan.html[orphan mode] can be used in appropriate cases.
+There are two principal modes of operation in NTP: client/server and
+broadcast. There are three automatic server discovery schemes in NTP:
+broadcast and pool described on the link:discover.html[Automatic
+Server Discovery Schemes] page. In addition, the link:#burst[burst
+options] and link:orphan.html[orphan mode] can be used in appropriate
+cases.
 
 Following is a summary of the operations in each mode. Note that
 reference to option applies to the commands described on the
@@ -117,17 +117,14 @@ NTPsec.  Client-mode support has been removed; server-side support
 is retained for backward compatibility but may be removed in a
 future release.
 
-NTP broadcast and multicast modes are intended for configurations
+NTP broadcast modes are intended for configurations
 involving one or a few servers and a possibly very large client
 population. Broadcast mode can be used with Ethernet, FDDI and WiFi
 spans interconnected by hubs or switches. Ordinarily, broadcast packets
-do not extend beyond a level-3 router. Where service is intended beyond
-a level-3 router, multicast mode can be used. Additional information is
-on the link:discover.html[Automatic NTP Configuration Options] page.
+do not extend beyond a level-3 router.
 
-A server is configured to send broadcast or multicast messages using
-the +broadcast+ command and specifying the subnet address for
-broadcast or the multicast group address for multicast.
+A server is configured to send broadcast messages using the
++broadcast+ command and specifying the subnet address for broadcast.
 
 [[many]]
 == Manycast and Pool Modes ==

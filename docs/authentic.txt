@@ -56,23 +56,6 @@ message digest. If the packet has been modified in any way or replayed
 by an intruder, it will fail one or more of these checks and be
 discarded.
 
-The +auth+ flag controls whether new associations or remote
-configuration commands require cryptographic authentication. This flag
-can be set or reset by the +enable+ and +disable+ commands and also by
-remote configuration commands sent by a {ntpqman} program running in
-another machine. If this flag is enabled, which is the default case,
-new broadcast client and symmetric passive associations and remote
-configuration commands must be cryptographically authenticated. If
-this flag is disabled, these operations are effective even if not
-cryptographic authenticated. It should be understood that operating
-with the +auth+ flag disabled invites a significant vulnerability
-where a cracker can masquerade as a falseticker and seriously disrupt
-system timekeeping. It is important to note that this flag has no
-purpose other than to allow or disallow a new association in response
-to new broadcast and symmetric active messages and remote
-configuration commands and, in particular, the flag has no effect on
-the authentication process itself.
-
 The security model and protocol schemes for symmetric key
 are summarized below.
 
@@ -195,12 +178,7 @@ various authentication schemes.
 By default, the client sends non-authenticated packets and the server
 responds with non-authenticated packets. If the client sends
 authenticated packets, the server responds with authenticated packets if
-correct, or a crypto-NAK packet if not. In the case of unsolicited
-packets which might consume significant resources, such as broadcast or
-symmetric mode packets, authentication is required, unless overridden
-by a +disable auth+ command. In the current climate of targeted
-broadcast or "letterbomb" attacks, defeating this requirement would be
-decidedly dangerous. In any case, the +notrust +flag, described on the
+correct, or a crypto-NAK packet if not. The +notrust +flag, described on the
 link:authopt.html[Access Control Options] page, can be used to disable
 access to all but correctly authenticated clients.
 

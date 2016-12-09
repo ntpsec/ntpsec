@@ -26,12 +26,11 @@ include::includes/hand.txt[]
 == Introduction ==
 
 This page describes the automatic server discovery schemes provided in
-NTPv4. There are three automatic server discovery schemes:
-broadcast/multicast, manycast, and server pool, which are described on
-this page. The broadcast/multicast and many cast schemes utilize the
-ubiquitous broadcast or one-to-many paradigm native to IPv4 and IPv6.
-The server pool scheme uses DNS to resolve addresses of multiple
-volunteer servers scattered throughout the world.
+NTPv4. There are two automatic server discovery schemes: broadcast and
+server pool, which are described on this page. The broadcast scheme
+utilizes the ubiquitous broadcast or one-to-many paradigm native to
+IPv4 and IPv6.  The server pool scheme uses DNS to resolve addresses
+of multiple volunteer servers scattered throughout the world.
 
 All three schemes work in much the same way and might be described as
 _grab-n'-prune._ Through one means or another they grab a number of
@@ -63,7 +62,7 @@ on the link:authentic.html[Authentication Support] page.
 The pruning process uses a set of unreach counters, one for each
 association created by the configuration or discovery processes. At each
 poll interval, the counter is increased by one. If an acceptable packet
-arrives for a persistent (configured) or ephemeral (broadcast/multicast)
+arrives for a persistent (configured) or ephemeral (broadcast)
 association, the counter is set to zero. If an acceptable packet arrives
 for a preemptable (manycast, pool) association and survives the
 selection and clustering algorithms, the counter is set to zero. If the
@@ -87,8 +86,8 @@ Options] page. See that page for applicability and defaults.
 
 The broadcast/multicast scheme is deprecated in NTPsec due to
 irreparable security flaws. Client-side support has been removed.
-Server-side support remains present but may be removed in a future
-version, and its use is strongly discouraged.
+Server-side support for broadcast only remains present but may be
+removed in a future version, and its use is strongly discouraged.
 
 A broadcast server generates messages continuously at intervals by
 default 64 s and time-to-live by default 127. These defaults can be
@@ -114,23 +113,6 @@ and specifying the broadcast address of a local interface. If two or
 more local interfaces are installed with different broadcast addresses,
 a +broadcast+ command is needed for each address. This provides a way to
 limit exposure in a firewall, for example.
-
-NTP multicast mode can be used to extend the scope using IPv4 multicast
-or IPv6 broadcast with defined span. The IANA has assigned IPv4
-multicast address 224.0.1.1 and IPv6 address FF05::101 (site local) to
-NTP, but these addresses should be used only where the multicast span
-can be reliably constrained to protect neighbor networks. In general,
-administratively scoped IPv4 group addresses should be used, as
-described in RFC 2365, or GLOP group addresses, as described in
-RFC 2770.
-
-A multicast server is configured using the +broadcast+ command, but
-specifying a multicast address instead of a broadcast address. Note
-that there is a subtle distinction between the IPv4 and IPv6 address
-families. The IPv4 broadcast or multicast mode is determined by the
-IPv4 class. For IPv6 the same distinction can be made using the
-link-local prefix FF02 for each interface and site-local prefix FF05
-for all interfaces.
 
 NTPsec permits the use of symmetric authentication with broadcast mode
 the same way as any other mode; however, it is not effective at
