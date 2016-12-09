@@ -402,8 +402,7 @@ i_require_authentication(
         bool peer_has_key = peer != NULL && peer->keyid != 0;
         bool wants_association =
             PKT_MODE(pkt->li_vn_mode) == MODE_BROADCAST ||
-            (peer == NULL && PKT_MODE(pkt->li_vn_mode == MODE_ACTIVE)) ||
-            (peer != NULL && peer->cast_flags & MDF_ACAST);
+            (peer == NULL && PKT_MODE(pkt->li_vn_mode == MODE_ACTIVE));
         bool restrict_nopeer =
             (restrict_mask & RES_NOPEER) &&
             wants_association;
@@ -836,40 +835,10 @@ transmit(
 	 * In broadcast mode the poll interval is never changed from
 	 * minpoll.
 	 */
-	if (peer->cast_flags & (MDF_BCAST | MDF_MCAST)) {
+	if (peer->cast_flags & MDF_BCAST) {
 		peer->outdate = current_time;
 		if (sys_leap != LEAP_NOTINSYNC)
 			peer_xmit(peer);
-		poll_update(peer, hpoll);
-		return;
-	}
-
-	/*
-	 * In manycast mode we start with unity ttl. The ttl is
-	 * increased by one for each poll until either sys_maxclock
-	 * servers have been found or the maximum ttl is reached. When
-	 * sys_maxclock servers are found we stop polling until one or
-	 * more servers have timed out or until less than sys_minclock
-	 * associations turn up. In this case additional better servers
-	 * are dragged in and preempt the existing ones.  Once every
-	 * sys_beacon seconds we are to transmit unconditionally, but
-	 * this code is not quite right -- peer->unreach counts polls
-	 * and is being compared with sys_beacon, so the beacons happen
-	 * every sys_beacon polls.
-	 */
-	if (peer->cast_flags & MDF_ACAST) {
-		peer->outdate = current_time;
-		if (peer->unreach > sys_beacon) {
-			peer->unreach = 0;
-			peer->ttl = 0;
-			peer_xmit(peer);
-		} else if (sys_survivors < sys_minclock ||
-		    peer_associations < sys_maxclock) {
-			if (peer->ttl < (uint32_t)sys_ttlmax)
-				peer->ttl++;
-			peer_xmit(peer);
-		}
-		peer->unreach++;
 		poll_update(peer, hpoll);
 		return;
 	}

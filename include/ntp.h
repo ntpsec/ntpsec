@@ -696,28 +696,25 @@ struct mon_data {
 
 /*
  * Values for cast_flags in mon_entry and struct peer.  mon_entry uses
- * only the first three, MDF_UCAST, MDF_MCAST, and MDF_BCAST.
+ * only MDF_UCAST and MDF_BCAST.
  */
 #define	MDF_UCAST	0x01	/* unicast client */
-#define	MDF_MCAST	0x02	/* multicast server */
+#define	MDF_MCAST	0x02	/* multicast server (not used) */
 #define	MDF_BCAST	0x04	/* broadcast server */
 #define	MDF_POOL	0x08	/* pool client solicitor */
-#define MDF_ACAST	0x10	/* manycast client solicitor */
+#define MDF_ACAST	0x10	/* manycast client solicitor (not used) */
 #define	MDF_BCLNT	0x20	/* eph. broadcast/multicast client (not used) */
 #define MDF_UCLNT	0x40	/* preemptible manycast or pool client */
 /*
- * In the context of struct peer in ntpd, three of the cast_flags bits
+ * In the context of struct peer in ntpd, one cast_flags bit
  * represent configured associations which never receive packets, and
- * whose reach is always 0: MDF_BCAST, MDF_MCAST, and MDF_ACAST.  The
- * last can be argued as responses are received, but those responses do
- * not affect the MDF_ACAST association's reach register, rather they
- * (may) result in mobilizing ephemeral MDF_ACLNT associations.
+ * whose reach is always 0: MDF_BCAST
  */
-#define MDF_TXONLY_MASK	(MDF_BCAST | MDF_MCAST | MDF_ACAST | MDF_POOL)
+#define MDF_TXONLY_MASK	(MDF_BCAST | MDF_POOL)
 /*
  * manycastclient-like solicitor association cast_flags bits
  */
-#define MDF_SOLICIT_MASK	(MDF_ACAST | MDF_POOL)
+#define MDF_SOLICIT_MASK	MDF_POOL
 /*
  * Values used with mon_enabled to indicate reason for enabling monitoring
  */

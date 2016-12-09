@@ -2422,9 +2422,7 @@ read_network_packet(
 	 * put it on the full list and do bookkeeping.
 	 */
 	rb->dstadr = itf;
-	rb->cast_flags = (uint8_t)(((rb->dstadr->flags &
-				     INT_MCASTOPEN) && rb->fd == rb->dstadr->fd) ? MDF_MCAST
-				   : rb->fd == rb->dstadr->bfd ? MDF_BCAST : MDF_UCAST);
+	rb->cast_flags = (uint8_t)(rb->fd == rb->dstadr->bfd ? MDF_BCAST : MDF_UCAST);
 	rb->fd = fd;
 #ifdef USE_PACKET_TIMESTAMP
 	/* pick up a network time stamp if possible */
@@ -2685,8 +2683,7 @@ select_peerinterface(
 	 */
 	if (IS_PEER_REFCLOCK(peer)) {
 		ep = loopback_interface;
-	} else if (peer->cast_flags &
-		   (MDF_BCLNT | MDF_ACAST | MDF_MCAST | MDF_BCAST)) {
+	} else if (peer->cast_flags & MDF_BCAST) {
 		ep = findbcastinter(srcadr);
 		if (ep != NULL)
 			DPRINTF(4, ("Found *-cast interface %s for address %s\n",

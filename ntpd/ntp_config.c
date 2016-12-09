@@ -2664,18 +2664,12 @@ peer_config(
 	 */
 	switch (hmode) {
 	case MODE_BROADCAST:
-
-	    if (IS_MCAST(srcadr))
-			cast_flags = MDF_MCAST;
-		else
-			cast_flags = MDF_BCAST;
+		cast_flags = MDF_BCAST;
 		break;
 
 	case MODE_CLIENT:
 		if (hostname != NULL && SOCK_UNSPEC(srcadr))
 			cast_flags = MDF_POOL;
-		else if (IS_MCAST(srcadr))
-			cast_flags = MDF_ACAST;
 		else
 			cast_flags = MDF_UCAST;
 		break;
@@ -2694,7 +2688,7 @@ peer_config(
 	ctl->flags |= FLAG_CONFIG;
 	if (mode_ntpdate)
 		ctl->flags |= FLAG_IBURST;
-	if ((MDF_ACAST | MDF_POOL) & cast_flags)
+	if (MDF_POOL & cast_flags)
 		ctl->flags &= ~FLAG_PREEMPT;
 	return newpeer(srcadr, hostname, dstadr, hmode, ctl->version,
 		       ctl->minpoll, ctl->maxpoll, ctl->flags,
