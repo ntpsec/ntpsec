@@ -42,7 +42,7 @@ vulnerability analysis is in the white paper
 {millshome}security.html[NTP Security Analysis].
 
 Authentication is configured separately for each association using the +key+
-subcommand on the +peer+, +server+, +broadcast+ and +manycastclient+
+subcommand on the +peer+, +server+, and +broadcast+
 configuration commands. The authentication options described below
 specify the locations of the key files, if other than default, which
 symmetric keys are trusted and the interval between various
@@ -72,15 +72,6 @@ purpose other than to allow or disallow a new association in response
 to new broadcast and symmetric active messages and remote
 configuration commands and, in particular, the flag has no effect on
 the authentication process itself.
-
-An attractive alternative where multicast support is available is
-manycast mode, in which clients periodically troll for servers as
-described in the 'Automatic NTP Configuration Options' page of the Web
-documentation.  Authentication can be used in this mode. The principle
-advantage of manycast mode is that potential servers need not be
-configured in advance, since the client finds them during regular
-operation, and the configuration files for all clients can be
-identical.
 
 The security model and protocol schemes for symmetric key
 are summarized below.

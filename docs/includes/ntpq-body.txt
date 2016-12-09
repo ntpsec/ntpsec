@@ -345,7 +345,7 @@ of the link:decode.html#peer[peer status word]
 |+refid+         |association ID or link:decode.html#kiss[kiss code]
 |+st+            |stratum
 |+t+             |
-+u+: unicast or manycast client, +b+: broadcast or multicast client,
++u+: unicast or manycast client,
 +l+: local (reference clock), +s+: symmetric (peer), +A+: manycast
 server, +B+: broadcast server, +M+: multicast server
 |+when+          |sec/min/hr since last received packet

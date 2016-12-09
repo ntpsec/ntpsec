@@ -94,6 +94,11 @@ few will be user-visible.
 * peer mode has been removed.  The keyword peer in ntp.conf is now
   just an alias for keyword server.  Incoming peer packets are ignored.
 
+* Broadcast- and multicast client modes, which are impossible to
+  secure, has been removed. Broadcast and multicast service can still
+  be enabled, though this is a deprecated mode of operation and may be
+  removed in a future release.
+
 * The deprecated and vulnerability-prone ntpdate program has been
   replaced with a shell wrapper around ntpdig.  Its -e and -p
   options are not implemented. It is no longer documented, but can be

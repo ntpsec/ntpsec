@@ -164,7 +164,7 @@ static const struct ctl_proc control_codes[] = {
 #define	CS_SS_PROCESSED		43
 #define	CS_PEERADR		44
 #define	CS_PEERMODE		45
-#define	CS_BCASTDELAY		46
+#define	CS_BCASTDELAY		46	/* not used */
 #define	CS_AUTHDELAY		47
 #define	CS_AUTHKEYS		48
 #define	CS_AUTHFREEK		49
@@ -338,7 +338,7 @@ static const struct ctl_var sys_var[] = {
 	{ CS_SS_PROCESSED,	RO, "ss_processed" },	/* 43 */
 	{ CS_PEERADR,		RO, "peeradr" },	/* 44 */
 	{ CS_PEERMODE,		RO, "peermode" },	/* 45 */
-	{ CS_BCASTDELAY,	RO, "bcastdelay" },	/* 46 */
+	//{ CS_BCASTDELAY,	RO, "bcastdelay" },	/* 46 */
 	{ CS_AUTHDELAY,		RO, "authdelay" },	/* 47 */
 	{ CS_AUTHKEYS,		RO, "authkeys" },	/* 48 */
 	{ CS_AUTHFREEK,		RO, "authfreek" },	/* 49 */
@@ -1713,10 +1713,6 @@ ctl_putsys(
 
 	case CS_SS_PROCESSED:
 		ctl_putuint(sys_var[varid].text, sys_processed);
-		break;
-
-	case CS_BCASTDELAY:
-		ctl_putdbl(sys_var[varid].text, sys_bdelay * 1e3);
 		break;
 
 	case CS_AUTHDELAY:

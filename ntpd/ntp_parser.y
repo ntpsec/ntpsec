@@ -58,10 +58,8 @@
 %token	<Integer>	T_Auth
 %token	<Integer>	T_Average
 %token	<Integer>	T_Baud
-%token	<Integer>	T_Bclient
 %token	<Integer>	T_Beacon
 %token	<Integer>	T_Broadcast
-%token	<Integer>	T_Broadcastdelay
 %token	<Integer>	T_Burst
 %token	<Integer>	T_Calibrate
 %token	<Integer>	T_Ceiling
@@ -128,7 +126,6 @@
 %token	<Integer>	T_Logconfig
 %token	<Integer>	T_Logfile
 %token	<Integer>	T_Loopstats
-%token	<Integer>	T_Manycastclient
 %token	<Integer>	T_Manycastserver
 %token	<Integer>	T_Mask
 %token	<Integer>	T_Maxage
@@ -375,7 +372,6 @@ client_type
 	|	T_Pool
 	|	T_Peer
 	|	T_Broadcast
-	|	T_Manycastclient
 	;
 
 address
@@ -1091,7 +1087,6 @@ system_option
 
 system_option_flag_keyword
 	:	T_Auth
-	|	T_Bclient
 	|	T_Calibrate
 	|	T_Kernel
 	|	T_Monitor
@@ -1221,8 +1216,7 @@ miscellaneous_command
 	;
 
 misc_cmd_dbl_keyword
-	:	T_Broadcastdelay
-	|	T_Nonvolatile
+	:	T_Nonvolatile
 	|	T_Tick
 	;
 

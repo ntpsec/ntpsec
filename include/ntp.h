@@ -613,11 +613,11 @@ struct pkt {
 /*
  * Configuration items.  These are for the protocol module (proto_config())
  */
-#define	PROTO_BROADCLIENT	1
+#define	PROTO_BROADCLIENT	1	/* (not used) */
 #define	PROTO_PRECISION		2	/* (not used) */
 #define	PROTO_AUTHENTICATE	3
-#define	PROTO_BROADDELAY	4
-#define	PROTO_AUTHDELAY		5	/* (not used) */
+#define	PROTO_BROADDELAY	4	/* (not used) */
+#define	PROTO_AUTHDELAY		5
 #define PROTO_MULTICAST_ADD	6
 #define PROTO_MULTICAST_DEL	7
 #define PROTO_NTP		8
@@ -702,7 +702,7 @@ struct mon_data {
 #define	MDF_BCAST	0x04	/* broadcast server */
 #define	MDF_POOL	0x08	/* pool client solicitor */
 #define MDF_ACAST	0x10	/* manycast client solicitor */
-#define	MDF_BCLNT	0x20	/* eph. broadcast/multicast client */
+#define	MDF_BCLNT	0x20	/* eph. broadcast/multicast client (not used) */
 #define MDF_UCLNT	0x40	/* preemptible manycast or pool client */
 /*
  * In the context of struct peer in ntpd, three of the cast_flags bits

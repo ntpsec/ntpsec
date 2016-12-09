@@ -6,9 +6,9 @@
 == SYNOPSIS ==
 [verse]
 ntpd
-    [-46aAbghLmnNqx] [-c 'conffile'] [-f 'driftfile'] [-i 'jaildir']
+    [-46ghLmnNqx] [-c 'conffile'] [-f 'driftfile'] [-i 'jaildir']
     [-k 'keyfile'] [-l 'logfile'] [-p 'pidfile'] [-P 'priority']
-    [-r 'broadcast-delay']  [-s 'statsdir']  [-t  'key']
+    [-s 'statsdir']  [-t  'key']
     [-u 'user'[:'group']] [-U 'interface_update_interval']
     [-v 'variable'] [-V 'variable'] [server...]
 
@@ -70,24 +70,6 @@ the IPv4 namespace.
 +
 Force DNS resolution of following host names on the command line to
 the IPv6 namespace.
-
-+-a+, +--authreq+::
-  Require crypto authentication. This option must not appear in
-  combination with any of the following options: authnoreq.
-+
-Require cryptographic authentication for broadcast client, multicast
-client and symmetric passive associations. This is the default.
-
-+-A+, +--authnoreq+::
-  Do not require crypto authentication. This option must not appear in
-  combination with any of the following options: authreq.
-+
-Do not require cryptographic authentication for broadcast client,
-multicast client and symmetric passive associations. This is almost
-never a good idea.
-
-+-b+, +--bcastsync+::
-  Allow us to sync to broadcast servers.
 
 +-c+ _string_, +--configfile+=_string_::
   configuration file name.
@@ -214,13 +196,6 @@ synchronized. This behavior mimics that of the old _ntpdate_ program,
 which has been replaced with a shell script. The +-g+ and +-x+ options can be
 used with this option. Note: The kernel time discipline is disabled
 with this option.
-
-+-r+ _string_, +--propagationdelay+=_string_::
-  Broadcast/propagation delay.
-+
-Specify the default propagation delay from the broadcast/multicast
-server to this client. This is necessary only if the delay cannot be
-computed automatically by the protocol.
 
 +-s+ _string_, +--statsdir+=_string_::
   Statistics file location.
@@ -428,19 +403,11 @@ file at hourly intervals.
 
 === Operating Modes ===
 
-The +ntpd+ utility can operate in any of several modes, including
-symmetric active/passive, client/server broadcast/multicast and
-manycast, as described in the "Association Management" page (available
-as part of the HTML documentation provided in +/usr/share/doc/ntp+). It
-normally operates continuously while monitoring for small changes in
-frequency and trimming the clock for the ultimate precision. However, it
-can operate in a one-time mode where the time is set from an external
-server and frequency is set from a previously recorded frequency file. A
-broadcast/multicast or manycast client can discover remote servers,
-compute server-client propagation delay correction factors and configure
-itself automatically. This makes it possible to deploy a fleet of
-workstations without specifying configuration details specific to the
-local environment.
++ntpd+ normally operates continuously while monitoring for small
+changes in frequency and trimming the clock for the ultimate
+precision. However, it can operate in a one-time mode where the time
+is set from an external server and frequency is set from a previously
+recorded frequency file.
 
 By default, +ntpd+ runs in continuous mode where each of possibly
 several external servers is polled at intervals determined by an

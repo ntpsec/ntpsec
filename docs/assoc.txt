@@ -37,14 +37,7 @@ are mobilized by a configuration command which
 includes the +preempt+ option or upon arrival of an automatic server
 discovery packet. They are are demobilized by timeout or when preempted
 by a "better" server, as described on the link:discover.html[Automatic
-Server Discovery Schemes] page. Ephemeral associations are mobilized
-upon arrival of broadcast or multicast server packets and demobilized by
-timeout.
-
-Ordinarily, successful mobilization of ephemeral associations requires
-the server to be cryptographically authenticated to the client. This can
-be done using symmetric key cryptography,
-as described on the link:authentic.html[Authentication Support] page.
+Server Discovery Schemes] page.
 
 There are three principal modes of operation in NTP: client/server,
 symmetric active/passive and broadcast/multicast. There are three
@@ -119,6 +112,11 @@ into the response.
 [[broad]]
 == Broadcast/Multicast Modes ==
 
+These modes cannot be effectively secured and are deprecated in
+NTPsec.  Client-mode support has been removed; server-side support
+is retained for backward compatibility but may be removed in a
+future release.
+
 NTP broadcast and multicast modes are intended for configurations
 involving one or a few servers and a possibly very large client
 population. Broadcast mode can be used with Ethernet, FDDI and WiFi
@@ -129,9 +127,7 @@ on the link:discover.html[Automatic NTP Configuration Options] page.
 
 A server is configured to send broadcast or multicast messages using
 the +broadcast+ command and specifying the subnet address for
-broadcast or the multicast group address for multicast. Due to
-unresolvable security issues, NTPsec no longer supports functioning as
-a broadcast or multicast client.
+broadcast or the multicast group address for multicast.
 
 [[many]]
 == Manycast and Pool Modes ==

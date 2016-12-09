@@ -125,13 +125,11 @@ static void	library_unexpected_error(const char *, int,
 					 const char *, va_list)
 					ISC_FORMAT_PRINTF(3, 0);
 
-#define ALL_OPTIONS "46aAbc:dD:f:gGhi:I:k:l:LmnNp:Pqr:Rs:t:u:UVw:xyYzZ"
+#define ALL_OPTIONS "46c:dD:f:gGhi:I:k:l:LmnNp:PqRs:t:u:UVw:xyYzZ"
 static const struct option longoptions[] = {
     { "ipv4",		    0, 0, '4' },
     { "ipv6",		    0, 0, '6' },
-    { "authreq",	    0, 0, 'a' },
     { "noauthreq",	    0, 0, 'A' },
-    { "bcastsync",	    0, 0, 'b' },
     { "configfile",	    1, 0, 'c' },
     { "debug",		    0, 0, 'd' },
     { "set-debug-level",    1, 0, 'D' },
@@ -147,7 +145,6 @@ static const struct option longoptions[] = {
     { "nofork",		    0, 0, 'n' },
     { "nice",		    0, 0, 'N' },
     { "quit",		    0, 0, 'q' },
-    { "propagationdelay",   1, 0, 'r' },
     { "dumpopts",	    0, 0, 'R' },
     { "statsdir",	    1, 0, 's' },
     { "trustedkey",	    1, 0, 't' },
@@ -249,12 +246,6 @@ parse_cmdline_opts(
 		break;
 	    case '6':
 		opt_ipv6 = true;
-		break;
-	    case 'a':
-		/* defer */
-		break;
-	    case 'A':
-		/* defer */
 		break;
 	    case 'b':
 		break;
@@ -720,15 +711,6 @@ ntpdmain(
 	while ((op = ntp_getopt_long(argc, argv, ALL_OPTIONS,
 				     longoptions, NULL)) != -1) {
 	    switch (op) {
-	    case 'a':
-		proto_config(PROTO_AUTHENTICATE, 1, 0.0, NULL);
-		break;
-	    case 'A':
-		proto_config(PROTO_AUTHENTICATE, 0, 0.0, NULL);
-		break;
-	    case 'b':
-		proto_config(PROTO_BROADCLIENT, 1, 0.0, NULL);
-		break;
 	    case 'f':
 		stats_config(STATS_FREQ_FILE, driftfile);
 		break;
@@ -747,9 +729,6 @@ ntpdmain(
 		break;
 	    case 'p':
 		stats_config(STATS_PID_FILE, pidfile);
-		break;
-	    case 'r':
-		proto_config(PROTO_BROADDELAY, 0, atof(ntp_optarg), NULL);
 		break;
 	    case 's':
 		stats_config(STATS_STATSDIR, statsdir);

@@ -130,7 +130,6 @@ endpt *	any_interface;		/* wildcard ipv4 interface */
 endpt *	any6_interface;		/* wildcard ipv6 interface */
 endpt *	loopback_interface;	/* loopback ipv4 interface */
 
-bool broadcast_client_enabled;	/* is broadcast client enabled */
 u_int sys_ifnum;			/* next .ifnum to assign */
 int ninterfaces;			/* total # of interfaces */
 
@@ -168,17 +167,8 @@ static bool	is_wildcard_addr	(const sockaddr_u *);
 /*
  * Multicast functions
  */
-static	bool	addr_ismulticast	(sockaddr_u *);
 static	bool	is_anycast		(sockaddr_u *,
 						 const char *);
-
-/*
- * Not all platforms support multicast
- */
-#ifdef MCAST
-static	bool	socket_multicast_enable	(endpt *, sockaddr_u *);
-static	bool	socket_multicast_disable(endpt *, sockaddr_u *);
-#endif
 
 #ifdef DEBUG
 static void interface_dump	(const endpt *);
@@ -257,8 +247,6 @@ const int accept_wildcard_if_for_winnt = false;
 
 static void	add_fd_to_list		(SOCKET, enum desc_type);
 static endpt *	find_addr_in_list	(sockaddr_u *);
-static endpt *	find_flagged_addr_in_list(sockaddr_u *, uint32_t);
-static void	delete_addr_from_list	(sockaddr_u *);
 static void	delete_interface_from_list(endpt *);
 static void	close_and_delete_fd_from_list(SOCKET);
 static void	add_addr_to_list	(sockaddr_u *, endpt *);
@@ -1956,12 +1944,7 @@ update_interfaces(
 	 */
 	refresh_all_peerinterfaces();
 
-	if (broadcast_client_enabled)
-		io_setbclient();
-
-	if (sys_bclient)
-		io_setbclient();
-
+#ifdef __unused__
 	/*
 	 * Check multicast interfaces and try to join multicast groups if
          * not joined yet.
@@ -1987,7 +1970,8 @@ update_interfaces(
 			}
 		}
 	}
-
+#endif /* __unused__ */
+	
 	return new_interface_found;
 }
 
@@ -2228,41 +2212,6 @@ socket_broadcast_disable(
 #endif /* OPEN_BCAST_SOCKET */
 
 /*
- * return the broadcast client flag value
- */
-bool
-get_broadcastclient_flag(void)
-{
-	return (broadcast_client_enabled);
-}
-/*
- * Check to see if the address is a multicast address
- */
-static bool
-addr_ismulticast(
-	sockaddr_u *maddr
-	)
-{
-	bool result;
-
-#ifndef USE_IPV6_MULTICAST_SUPPORT
-	/*
-	 * If we don't have IPV6 support any IPV6 addr is not multicast
-	 */
-	if (IS_IPV6(maddr))
-		result = false;
-	else
-#endif
-		result = IS_MCAST(maddr);
-
-	if (!result)
-		DPRINTF(4, ("address %s is not multicast\n",
-			    socktoa(maddr)));
-
-	return result;
-}
-
-/*
  * Multicast servers need to set the appropriate Multicast interface
  * socket option in order for it to know which interface to use for
  * send the multicast packet.
@@ -2329,407 +2278,6 @@ enable_multicast_if(
 	return;
 #endif
 }
-
-/*
- * Add a multicast address to a given socket
- * The socket is in the ep_list all we need to do is enable
- * multicasting. It is not this function's job to select the socket
- */
-#if defined(MCAST)
-static bool
-socket_multicast_enable(
-	endpt *		iface,
-	sockaddr_u *	maddr
-	)
-{
-	struct ip_mreq		mreq;
-#ifdef USE_IPV6_MULTICAST_SUPPORT
-	struct ipv6_mreq	mreq6;
-#endif
-	switch (AF(maddr)) {
-
-	case AF_INET:
-		ZERO(mreq);
-		mreq.imr_multiaddr = SOCK_ADDR4(maddr);
-		mreq.imr_interface.s_addr = htonl(INADDR_ANY);
-		if (setsockopt(iface->fd,
-			       IPPROTO_IP,
-			       IP_ADD_MEMBERSHIP,
-			       (char *)&mreq,
-			       sizeof(mreq))) {
-#ifndef __COVERITY__
-			DPRINTF(2, (
-				"setsockopt IP_ADD_MEMBERSHIP failed: %m on socket %d, addr %s for %x / %x (%s)",
-				iface->fd, socktoa(&iface->sin),
-				mreq.imr_multiaddr.s_addr,
-				mreq.imr_interface.s_addr,
-				socktoa(maddr)));
-#endif /* __COVERTY__ */
-			return false;
-		}
-		DPRINTF(4, ("Added IPv4 multicast membership on socket %d, addr %s for %x / %x (%s)\n",
-			    iface->fd, socktoa(&iface->sin),
-			    mreq.imr_multiaddr.s_addr,
-			    mreq.imr_interface.s_addr, socktoa(maddr)));
-		break;
-
-	case AF_INET6:
-#ifdef USE_IPV6_MULTICAST_SUPPORT
-		/*
-		 * Enable reception of multicast packets.
-		 * If the address is link-local we can get the
-		 * interface index from the scope id. Don't do this
-		 * for other types of multicast addresses. For now let
-		 * the kernel figure it out.
-		 */
-		ZERO(mreq6);
-		mreq6.ipv6mr_multiaddr = SOCK_ADDR6(maddr);
-		mreq6.ipv6mr_interface = iface->ifindex;
-
-		if (setsockopt(iface->fd, IPPROTO_IPV6,
-			       IPV6_JOIN_GROUP, (char *)&mreq6,
-			       sizeof(mreq6))) {
-#ifndef __COVERITY__
-			DPRINTF(2, (
-				"setsockopt IPV6_JOIN_GROUP failed: %m on socket %d, addr %s for interface %u (%s)",
-				iface->fd, socktoa(&iface->sin),
-				mreq6.ipv6mr_interface, socktoa(maddr)));
-#endif /* __COVERITY__ */
-			return false;
-		}
-		DPRINTF(4, ("Added IPv6 multicast group on socket %d, addr %s for interface %u (%s)\n",
-			    iface->fd, socktoa(&iface->sin),
-			    mreq6.ipv6mr_interface, socktoa(maddr)));
-#else
-		return false;
-#endif	/* USE_IPV6_MULTICAST_SUPPORT */
-	}
-	iface->flags |= INT_MCASTOPEN;
-	iface->num_mcast++;
-
-	return true;
-}
-#endif	/* MCAST */
-
-
-/*
- * Remove a multicast address from a given socket
- * The socket is in the ep_list all we need to do is disable
- * multicasting. It is not this function's job to select the socket
- */
-#ifdef MCAST
-static bool
-socket_multicast_disable(
-	endpt *	iface,
-	sockaddr_u *		maddr
-	)
-{
-#ifdef USE_IPV6_MULTICAST_SUPPORT
-	struct ipv6_mreq mreq6;
-#endif
-	struct ip_mreq mreq;
-
-	ZERO(mreq);
-
-	if (find_addr_in_list(maddr) == NULL) {
-		DPRINTF(4, ("socket_multicast_disable(%s): not found\n",
-			    socktoa(maddr)));
-		return true;
-	}
-
-	switch (AF(maddr)) {
-
-	case AF_INET:
-		mreq.imr_multiaddr = SOCK_ADDR4(maddr);
-		mreq.imr_interface = SOCK_ADDR4(&iface->sin);
-		if (setsockopt(iface->fd, IPPROTO_IP,
-			       IP_DROP_MEMBERSHIP, (char *)&mreq,
-			       sizeof(mreq))) {
-
-#ifndef __COVERITY__
-			msyslog(LOG_ERR,
-				"setsockopt IP_DROP_MEMBERSHIP failed: %m on socket %d, addr %s for %x / %x (%s)",
-				iface->fd, socktoa(&iface->sin),
-				SRCADR(maddr), SRCADR(&iface->sin),
-				socktoa(maddr));
-			return false;
-#endif /* __COVERITY__ */
-		}
-		break;
-	case AF_INET6:
-#ifdef USE_IPV6_MULTICAST_SUPPORT
-		/*
-		 * Disable reception of multicast packets
-		 * If the address is link-local we can get the
-		 * interface index from the scope id.  Don't do this
-		 * for other types of multicast addresses. For now let
-		 * the kernel figure it out.
-		 */
-		mreq6.ipv6mr_multiaddr = SOCK_ADDR6(maddr);
-		mreq6.ipv6mr_interface = iface->ifindex;
-
-		if (setsockopt(iface->fd, IPPROTO_IPV6,
-			       IPV6_LEAVE_GROUP, (char *)&mreq6,
-			       sizeof(mreq6))) {
-#ifndef __COVERITY__
-			msyslog(LOG_ERR,
-				"setsockopt IPV6_LEAVE_GROUP failure: %m on socket %d, addr %s for %d (%s)",
-				iface->fd, socktoa(&iface->sin),
-				iface->ifindex, socktoa(maddr));
-#endif /* __COVERITY__ */
-			return false;
-		}
-		break;
-#else
-		return false;
-#endif	/* USE_IPV6_MULTICAST_SUPPORT */
-	}
-
-	iface->num_mcast--;
-	if (!iface->num_mcast)
-		iface->flags &= ~INT_MCASTOPEN;
-
-	return true;
-}
-#endif	/* MCAST */
-
-/*
- * io_setbclient - open the broadcast client sockets
- */
-void
-io_setbclient(void)
-{
-#ifdef OPEN_BCAST_SOCKET
-	endpt *	interf;
-	int			nif;
-
-	nif = 0;
-	set_reuseaddr(1);
-
-	for (interf = ep_list;
-	     interf != NULL;
-	     interf = interf->elink) {
-
-		if (interf->flags & (INT_WILDCARD | INT_LOOPBACK))
-			continue;
-
-		/* use only allowed addresses */
-		if (interf->ignore_packets)
-			continue;
-
-		/* Need a broadcast-capable interface */
-		if (!(interf->flags & INT_BROADCAST))
-			continue;
-
-		/* Only IPv4 addresses are valid for broadcast */
-		NTP_REQUIRE(IS_IPV4(&interf->sin));
-
-		/* Do we already have the broadcast address open? */
-		if (interf->flags & INT_BCASTOPEN) {
-			/*
-			 * account for already open interfaces to avoid
-			 * misleading warning below
-			 */
-			nif++;
-			continue;
-		}
-
-		/*
-		 * Try to open the broadcast address
-		 */
-		interf->family = AF_INET;
-		interf->bfd = open_socket(&interf->bcast, 1, 0, interf);
-
-		/*
-		 * If we succeeded then we use it otherwise enable
-		 * broadcast on the interface address
-		 */
-		if (interf->bfd != INVALID_SOCKET) {
-			nif++;
-			interf->flags |= INT_BCASTOPEN;
-			msyslog(LOG_INFO,
-				"Listen for broadcasts to %s on interface #%d %s",
-				socktoa(&interf->bcast), interf->ifnum, interf->name);
-		} else {
-			/* silently ignore EADDRINUSE as we probably opened
-			   the socket already for an address in the same network */
-			if (errno != EADDRINUSE)
-				msyslog(LOG_INFO,
-					"failed to listen for broadcasts to %s on interface #%d %s",
-					socktoa(&interf->bcast), interf->ifnum, interf->name);
-		}
-	}
-	set_reuseaddr(0);
-	if (nif > 0) {
-		broadcast_client_enabled = true;
-		DPRINTF(1, ("io_setbclient: listening to %d broadcast addresses\n", nif));
-	}
-	else if (!nif) {
-		broadcast_client_enabled = false;
-		msyslog(LOG_ERR,
-			"Unable to listen for broadcasts, no broadcast interfaces available");
-	}
-#else
-	msyslog(LOG_ERR,
-		"io_setbclient: Broadcast Client disabled by build");
-#endif	/* OPEN_BCAST_SOCKET */
-}
-
-/*
- * io_unsetbclient - close the broadcast client sockets
- */
-void
-io_unsetbclient(void)
-{
-	endpt *ep;
-
-	for (ep = ep_list; ep != NULL; ep = ep->elink) {
-		if (INT_WILDCARD & ep->flags)
-			continue;
-		if (!(INT_BCASTOPEN & ep->flags))
-			continue;
-
-		if (ep->bfd != INVALID_SOCKET) {
-			/* destroy broadcast listening socket */
-			msyslog(LOG_INFO,
-				"stop listening for broadcasts to %s on interface #%d %s",
-				socktoa(&ep->bcast), ep->ifnum, ep->name);
-			close_and_delete_fd_from_list(ep->bfd);
-			ep->bfd = INVALID_SOCKET;
-			ep->flags &= ~INT_BCASTOPEN;
-		}
-	}
-	broadcast_client_enabled = false;
-}
-
-/*
- * io_multicast_add() - add multicast group address
- */
-void
-io_multicast_add(
-	sockaddr_u *addr
-	)
-{
-#ifdef MCAST
-	endpt *	ep;
-	endpt *	one_ep;
-
-	/*
-	 * Check to see if this is a multicast address
-	 */
-	if (!addr_ismulticast(addr))
-		return;
-
-	/* If we already have it we can just return */
-	if (NULL != find_flagged_addr_in_list(addr, INT_MCASTOPEN)) {
-		msyslog(LOG_INFO,
-			"Duplicate request found for multicast address %s",
-			socktoa(addr));
-		return;
-	}
-
-	ep = new_interface(NULL);
-
-	/*
-	 * Open a new socket for the multicast address
-	 */
-	ep->sin = *addr;
-	SET_PORT(&ep->sin, NTP_PORT);
-	ep->family = AF(&ep->sin);
-	AF(&ep->mask) = ep->family;
-	SET_ONESMASK(&ep->mask);
-
-	set_reuseaddr(1);
-	ep->bfd = INVALID_SOCKET;
-	ep->fd = open_socket(&ep->sin, 0, 0, ep);
-	if (ep->fd != INVALID_SOCKET) {
-		ep->ignore_packets = false;
-		ep->flags |= INT_MCASTIF;
-
-		strlcpy(ep->name, "multicast", sizeof(ep->name));
-		DPRINT_INTERFACE(2, (ep, "multicast add ", "\n"));
-		add_interface(ep);
-		log_listen_address(ep);
-	} else {
-		/* bind failed, re-use wildcard interface */
-		delete_interface(ep);
-
-		if (IS_IPV4(addr))
-			ep = wildipv4;
-		else if (IS_IPV6(addr))
-			ep = wildipv6;
-		else
-			ep = NULL;
-
-		if (ep != NULL) {
-			/* HACK ! -- stuff in an address */
-			/* because we don't bind addr? DH */
-			ep->bcast = *addr;
-			msyslog(LOG_ERR,
-				"multicast address %s using wildcard interface #%d %s",
-				socktoa(addr), ep->ifnum, ep->name);
-		} else {
-			msyslog(LOG_ERR,
-				"No multicast socket available to use for address %s",
-				socktoa(addr));
-			return;
-		}
-	}
-	{	/* in place of the { following for in #else clause */
-		one_ep = ep;
-		if (ep->fd >= 0 && socket_multicast_enable(ep, addr))
-			msyslog(LOG_INFO,
-				"Joined %s socket to multicast group %s",
-				socktoa(&ep->sin),
-				socktoa(addr));
-	}
-
-	add_addr_to_list(addr, one_ep);
-#else	/* !MCAST  follows*/
-	msyslog(LOG_ERR,
-		"Can not add multicast address %s: no multicast support",
-		socktoa(addr));
-#endif
-	return;
-}
-
-
-/*
- * io_multicast_del() - delete multicast group address
- */
-void
-io_multicast_del(
-	sockaddr_u *	addr
-	)
-{
-#ifdef MCAST
-	endpt *iface;
-
-	/*
-	 * Check to see if this is a multicast address
-	 */
-	if (!addr_ismulticast(addr)) {
-		msyslog(LOG_ERR, "invalid multicast address %s",
-			socktoa(addr));
-		return;
-	}
-
-	/*
-	 * Disable reception of multicast packets
-	 */
-	while ((iface = find_flagged_addr_in_list(addr, INT_MCASTOPEN))
-	       != NULL)
-		socket_multicast_disable(iface, addr);
-
-	delete_addr_from_list(addr);
-
-#else /* not MCAST */
-	msyslog(LOG_ERR,
-		"Can not delete multicast address %s: no multicast support",
-		socktoa(addr));
-#endif /* not MCAST */
-}
-
 
 /*
  * open_socket - open a socket, returning the file descriptor
@@ -4056,24 +3604,6 @@ add_addr_to_list(
 
 
 static void
-delete_addr_from_list(
-	sockaddr_u *addr
-	)
-{
-	remaddr_t *unlinked;
-
-	UNLINK_EXPR_SLIST(unlinked, remoteaddr_list, SOCK_EQ(addr,
-		&(UNLINK_EXPR_SLIST_CURRENT()->addr)), link, remaddr_t);
-
-	if (unlinked != NULL) {
-		DPRINTF(4, ("Deleted addr %s from list of addresses\n",
-			socktoa(addr)));
-		free(unlinked);
-	}
-}
-
-
-static void
 delete_interface_from_list(
 	endpt *iface
 	)
@@ -4116,37 +3646,6 @@ find_addr_in_list(
 	DPRINTF(4, ("NOT FOUND\n"));
 	return NULL;
 }
-
-
-/*
- * Find the given address with the all given flags set in the list
- */
-static endpt *
-find_flagged_addr_in_list(
-	sockaddr_u *	addr,
-	uint32_t		flags
-	)
-{
-	remaddr_t *entry;
-
-	DPRINTF(4, ("Finding addr %s with flags %d in list: ",
-		    socktoa(addr), flags));
-
-	for (entry = remoteaddr_list;
-	     entry != NULL;
-	     entry = entry->link)
-
-		if (SOCK_EQ(&entry->addr, addr)
-		    && (entry->ep->flags & flags) == flags) {
-
-			DPRINTF(4, ("FOUND\n"));
-			return entry->ep;
-		}
-
-	DPRINTF(4, ("NOT FOUND\n"));
-	return NULL;
-}
-
 
 const char *
 localaddrtoa(

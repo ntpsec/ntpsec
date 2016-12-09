@@ -74,8 +74,6 @@ bool leap_sec_in_progress;
 /*
  * Nonspecified system state variables
  */
-int	sys_bclient;		/* broadcast client enable */
-double	sys_bdelay;		/* broadcast client default delay */
 bool	sys_authenticate;	/* require authentication for config */
 l_fp	sys_authdelay;		/* authentication delay */
 double	sys_offset;	/* current local clock offset */
@@ -885,9 +883,7 @@ transmit(
 	 * growth in associations if the system clock or network quality
 	 * result in survivor count dipping below sys_minclock often.
 	 * This was observed testing with pool, where sys_maxclock == 12
-	 * resulted in 60 associations without the hard limit.	A
-	 * similar hard limit on manycastclient ephemeral associations
-	 * may be appropriate.
+	 * resulted in 60 associations without the hard limit.
 	 */
 	if (peer->cast_flags & MDF_POOL) {
 		peer->outdate = current_time;
@@ -2799,8 +2795,6 @@ init_proto(const bool verbose)
 	get_systime(&dummy);
 	sys_survivors = 0;
 	sys_manycastserver = 0;
-	sys_bclient = 0;
-	sys_bdelay = 0;
 	sys_authenticate = true;
 	sys_stattime = current_time;
 	orphwait = current_time + sys_orphwait;
@@ -2841,14 +2835,6 @@ proto_config(
 		sys_authenticate = (bool)value;
 		break;
 
-	case PROTO_BROADCLIENT: /* broadcast client (bclient) */
-		sys_bclient = (int)value;
-		if (sys_bclient == 0)
-			io_unsetbclient();
-		else
-			io_setbclient();
-		break;
-
 #ifdef REFCLOCK
 	case PROTO_CAL:		/* refclock calibrate (calibrate) */
 		cal_enable = value;
@@ -2887,10 +2873,6 @@ proto_config(
 	 */
 	case PROTO_BEACON:	/* manycast beacon (beacon) */
 		sys_beacon = (int)dvalue;
-		break;
-
-	case PROTO_BROADDELAY:	/* default broadcast delay (bdelay) */
-		sys_bdelay = dvalue;
 		break;
 
 	case PROTO_CEILING:	/* stratum ceiling (ceiling) */
@@ -2942,20 +2924,6 @@ proto_config(
 		orphwait += sys_orphwait;
 		break;
 
-	/*
-	 * Miscellaneous commands
-	 */
-	case PROTO_MULTICAST_ADD: /* add group address */
-		if (svalue != NULL)
-			io_multicast_add(svalue);
-		sys_bclient = 1;
-		break;
-
-	case PROTO_MULTICAST_DEL: /* delete group address */
-		if (svalue != NULL)
-			io_multicast_del(svalue);
-		break;
-
 	default:
 		msyslog(LOG_NOTICE,
 		    "proto: unsupported option %d", item);
@@ -2986,6 +2954,4 @@ void proto_dump(FILE *fp)
 {
     /* must cover at least anything that can be set on the command line */
     fprintf(fp, "%sable auth;\n", sys_authenticate ? "en" : "dis");
-    fprintf(fp, "%sable bclient;\n", sys_bclient ? "en" : "dis");
-    fprintf(fp, "broadcastdelay %f;\n", sys_bdelay);
 }
