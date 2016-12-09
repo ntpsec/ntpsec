@@ -1400,7 +1400,7 @@ class ControlSession:
                 stanza = int(stanza)
                 if stanza > len(stanzas) - 1:
                     for i in range(len(stanzas), stanza + 1):
-                        stanzas.append(collections.OrderedDict())
+                        stanzas.append(ntp.util.OrderedDict())
                 stanzas[stanza][stem] = value
         return stanzas
 
