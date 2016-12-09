@@ -5,7 +5,7 @@
 # SPDX-License-Identifier: BSD-2-clause
 from __future__ import print_function, division
 
-import sys, curses, time, getopt
+import sys, time, getopt
 
 try:
     import ntp.packet
