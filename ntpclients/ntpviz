@@ -350,7 +350,8 @@ set rmargin 10
         if item2:
             for row in rows:
                 try:
-                    if 1024000 < row[0] - last_time:
+                    if 2200000 < row[0] - last_time:
+                        # more than 2,200 seconds between points
                         # data loss, add a break in the plot line
                         plot_data += '\n'
                     # fields: time, fld, and rtt
@@ -361,7 +362,8 @@ set rmargin 10
         else:
             for row in rows:
                 try:
-                    if 1024000 < row[0] - last_time:
+                    if 2200000 < row[0] - last_time:
+                        # more than 2,200 seconds between points
                         # data loss, add a break in the plot line
                         plot_data += '\n'
                     # fields: time, fld
