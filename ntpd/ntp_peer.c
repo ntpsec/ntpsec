@@ -604,13 +604,6 @@ peer_refresh_interface(
 		if (p->dstadr != piface && !(MDF_ACAST & p->cast_flags)
 		    && MODE_BROADCAST != p->pmode)
 		    peer_clear(p, "XFAC", false);
-
-		/*
-		 * Multicast needs the socket interface enabled for
-		 * multicast
-		 */
-		if (MDF_MCAST & p->cast_flags)
-			enable_multicast_if(p->dstadr, &p->srcadr);
 	}
 }
 
@@ -764,12 +757,6 @@ newpeer(
 	if ((MDF_BCAST & cast_flags) && peer->dstadr != NULL)
 		enable_broadcast(peer->dstadr, srcadr);
 
-	/*
-	 * Multicast needs the socket interface enabled for multicast
-	 */
-	if ((MDF_MCAST & cast_flags) && peer->dstadr != NULL)
-		enable_multicast_if(peer->dstadr, srcadr);
-
 	peer->ttl = ttl;
 	peer->keyid = key;
 	peer->precision = sys_precision;
@@ -778,8 +765,6 @@ newpeer(
 		peer_clear(peer, "ACST", initializing);
 	else if (cast_flags & MDF_POOL)
 		peer_clear(peer, "POOL", initializing);
-	else if (cast_flags & MDF_MCAST)
-		peer_clear(peer, "MCST", initializing);
 	else if (cast_flags & MDF_BCAST)
 		peer_clear(peer, "BCST", initializing);
 	else

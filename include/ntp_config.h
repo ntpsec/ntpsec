@@ -200,8 +200,6 @@ struct config_tree_tag {
 	unpeer_fifo *	unpeers;
 
 	/* Other Modes */
-	address_fifo *	manycastserver;
-
 	attr_val_fifo *	orphan_cmds;	/* s/b renamed tos_options */
 
 	/* Monitoring Configuration */

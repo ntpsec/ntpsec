@@ -41,7 +41,6 @@ struct key_tok ntp_keywords[] = {
 { "leapsmearinterval",	T_Leapsmearinterval,	FOLLBY_TOKEN },
 { "logconfig",		T_Logconfig,		FOLLBY_STRINGS_TO_EOC },
 { "logfile",		T_Logfile,		FOLLBY_STRING },
-{ "manycastserver",	T_Manycastserver,	FOLLBY_STRINGS_TO_EOC },
 { "mem",		T_Mem,			FOLLBY_TOKEN },
 { "path",		T_Path,			FOLLBY_STRING },
 { "peer",		T_Peer,			FOLLBY_STRING },

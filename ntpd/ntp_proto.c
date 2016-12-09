@@ -2816,8 +2816,7 @@ void
 proto_config(
 	int	item,
 	u_long	value,
-	double	dvalue,
-	sockaddr_u *svalue
+	double	dvalue
 	)
 {
 	/*

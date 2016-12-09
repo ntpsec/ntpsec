@@ -218,8 +218,6 @@ static void init_async_notifications (void);
 
 static	bool	addr_eqprefix	(const sockaddr_u *, const sockaddr_u *,
 				 int);
-static  bool	addr_samesubnet	(const sockaddr_u *, const sockaddr_u *,
-				 const sockaddr_u *, const sockaddr_u *);
 static	int	create_sockets	(u_short);
 static	void	set_reuseaddr	(int);
 static	bool	socket_broadcast_enable	 (endpt *, SOCKET, sockaddr_u *);
@@ -606,48 +604,6 @@ addr_eqprefix(
 }
 
 
-static bool
-addr_samesubnet(
-	const sockaddr_u *	a,
-	const sockaddr_u *	a_mask,
-	const sockaddr_u *	b,
-	const sockaddr_u *	b_mask
-	)
-{
-	const uint32_t *	pa;
-	const uint32_t *	pa_limit;
-	const uint32_t *	pb;
-	const uint32_t *	pm;
-	size_t		loops;
-
-	NTP_REQUIRE(AF(a) == AF(a_mask));
-	NTP_REQUIRE(AF(b) == AF(b_mask));
-	/*
-	 * With address and mask families verified to match, comparing
-	 * the masks also validates the address's families match.
-	 */
-	if (!SOCK_EQ(a_mask, b_mask))
-		return false;
-
-	if (IS_IPV6(a)) {
-		loops = sizeof(NSRCADR6(a)) / sizeof(*pa);
-		pa = (const void *)&NSRCADR6(a);
-		pb = (const void *)&NSRCADR6(b);
-		pm = (const void *)&NSRCADR6(a_mask);
-	} else {
-		loops = sizeof(NSRCADR(a)) / sizeof(*pa);
-		pa = (const void *)&NSRCADR(a);
-		pb = (const void *)&NSRCADR(b);
-		pm = (const void *)&NSRCADR(a_mask);
-	}
-	for (pa_limit = pa + loops; pa < pa_limit; pa++, pb++, pm++)
-		if ((*pa & *pm) != (*pb & *pm))
-			return false;
-
-	return true;
-}
-
-
 /*
  * Code to tell if we have an IP address
  * If we have then return the sockaddr structure
@@ -798,167 +754,11 @@ add_interface(
 	endpt *	ep
 	)
 {
-	endpt **	pmclisthead;
-	endpt *		scan;
-	endpt *		scan_next;
-	endpt *		unlinked;
-	sockaddr_u *	addr;
-	bool		ep_local;
-	bool		scan_local;
-	bool		same_subnet;
-	bool		ep_univ_iid;	/* iface ID from MAC address */
-	bool		scan_univ_iid;	/* see RFC 4291 */
-	bool		ep_privacy;	/* random local iface ID */
-	bool		scan_privacy;	/* see RFC 4941 */
-	int		rc;
-
 	/* Calculate the refid */
 	ep->addr_refid = addr2refid(&ep->sin);
 	/* link at tail so ntpq -c ifstats index increases each row */
 	LINK_TAIL_SLIST(ep_list, ep, elink, endpt);
 	ninterfaces++;
-#ifdef MCAST
-	/* the rest is for enabled multicast-capable addresses only */
-	if (ep->ignore_packets || !(INT_MULTICAST & ep->flags) ||
-	    INT_LOOPBACK & ep->flags)
-		return;
-# ifndef USE_IPV6_MULTICAST_SUPPORT
-	if (AF_INET6 == ep->family)
-		return;
-# endif
-	pmclisthead = (AF_INET == ep->family)
-			 ? &mc4_list
-			 : &mc6_list;
-
-	if (AF_INET6 == ep->family) {
-		ep_local =
-		    IN6_IS_ADDR_LINKLOCAL(PSOCK_ADDR6(&ep->sin)) ||
-		    IN6_IS_ADDR_SITELOCAL(PSOCK_ADDR6(&ep->sin));
-		ep_univ_iid = IS_IID_UNIV(&ep->sin);
-		ep_privacy = !!(INT_PRIVACY & ep->flags);
-	} else {
-		ep_local = false;
-		ep_univ_iid = false;
-		ep_privacy = false;
-	}
-	DPRINTF(4, ("add_interface mcast-capable %s%s%s%s\n",
-		    socktoa(&ep->sin),
-		    (ep_local) ? " link/scope-local" : "",
-		    (ep_univ_iid) ? " univ-IID" : "",
-		    (ep_privacy) ? " privacy" : ""));
-	/*
-	 * If we have multiple local addresses on the same network
-	 * interface, and some are link- or site-local, do not multicast
-	 * out from the link-/site-local addresses by default, to avoid
-	 * duplicate manycastclient associations between v6 peers using
-	 * link-local and global addresses.  link-local can still be
-	 * chosen using "nic ignore myv6globalprefix::/64".
-	 * Similarly, if we have multiple global addresses from the same
-	 * prefix on the same network interface, multicast from one,
-	 * preferring EUI-64, then static, then least RFC 4941 privacy
-	 * addresses.
-	 */
-	for (scan = *pmclisthead; scan != NULL; scan = scan_next) {
-		scan_next = scan->mclink;
-		if (ep->family != scan->family)
-			continue;
-		if (strcmp(ep->name, scan->name))
-			continue;
-		same_subnet = addr_samesubnet(&ep->sin, &ep->mask,
-					      &scan->sin, &scan->mask);
-		if (AF_INET6 == ep->family) {
-			addr = &scan->sin;
-			scan_local =
-			    IN6_IS_ADDR_LINKLOCAL(PSOCK_ADDR6(addr)) ||
-			    IN6_IS_ADDR_SITELOCAL(PSOCK_ADDR6(addr));
-			scan_univ_iid = IS_IID_UNIV(addr);
-			scan_privacy = !!(INT_PRIVACY & scan->flags);
-		} else {
-			scan_local = false;
-			scan_univ_iid = false;
-			scan_privacy = false;
-		}
-		DPRINTF(4, ("add_interface mcast-capable scan %s%s%s%s\n",
-			    socktoa(&scan->sin),
-			    (scan_local) ? " link/scope-local" : "",
-			    (scan_univ_iid) ? " univ-IID" : "",
-			    (scan_privacy) ? " privacy" : ""));
-		if ((ep_local && !scan_local) || (same_subnet &&
-		    ((ep_privacy && !scan_privacy) ||
-		     (!ep_univ_iid && scan_univ_iid)))) {
-			DPRINTF(4, ("did not add %s to %s of IPv6 multicast-capable list which already has %s\n",
-				socktoa(&ep->sin),
-				(ep_local)
-				    ? "tail"
-				    : "head",
-				socktoa(&scan->sin)));
-			return;
-		}
-		if ((scan_local && !ep_local) || (same_subnet &&
-		    ((scan_privacy && !ep_privacy) ||
-		     (!scan_univ_iid && ep_univ_iid)))) {
-			UNLINK_SLIST(unlinked, *pmclisthead,
-				     scan, mclink, endpt);
-			DPRINTF(4, ("%s %s from IPv6 multicast-capable list to add %s\n",
-				(unlinked != scan)
-				    ? "Failed to remove"
-				    : "removed",
-				socktoa(&scan->sin), socktoa(&ep->sin)));
-		}
-	}
-	/*
-	 * Add link/site local at the tail of the multicast-
-	 * capable unicast interfaces list, so that ntpd will
-	 * send from global addresses before link-/site-local
-	 * ones.
-	 */
-	if (ep_local)
-		LINK_TAIL_SLIST(*pmclisthead, ep, mclink, endpt);
-	else
-		LINK_SLIST(*pmclisthead, ep, mclink);
-	DPRINTF(4, ("added %s to %s of IPv%s multicast-capable unicast local address list\n",
-		socktoa(&ep->sin),
-		(ep_local)
-		    ? "tail"
-		    : "head",
-		(AF_INET == ep->family)
-		    ? "4"
-		    : "6"));
-
-	if (INVALID_SOCKET == ep->fd)
-		return;
-
-	/*
-	 * select the local address from which to send to multicast.
-	 */
-	switch (AF(&ep->sin)) {
-
-	case AF_INET :
-		rc = setsockopt(ep->fd, IPPROTO_IP,
-				IP_MULTICAST_IF,
-				(void *)&NSRCADR(&ep->sin),
-				sizeof(NSRCADR(&ep->sin)));
-		if (rc)
-			msyslog(LOG_ERR,
-				"setsockopt IP_MULTICAST_IF %s fails: %m",
-				socktoa(&ep->sin));
-		break;
-
-# ifdef USE_IPV6_MULTICAST_SUPPORT
-	case AF_INET6 :
-		rc = setsockopt(ep->fd, IPPROTO_IPV6,
-				 IPV6_MULTICAST_IF,
-				 (void *)&ep->ifindex,
-				 sizeof(ep->ifindex));
-		/* do not complain if bound addr scope is ifindex */
-		if (rc && ep->ifindex != SCOPE(&ep->sin))
-			msyslog(LOG_ERR,
-				"setsockopt IPV6_MULTICAST_IF %u for %s fails: %m",
-				ep->ifindex, socktoa(&ep->sin));
-		break;
-# endif
-	}
-#endif	/* MCAST */
 }
 
 
@@ -1131,14 +931,6 @@ create_wildcards(
 
 		wildif->flags = INT_BROADCAST | INT_UP | INT_WILDCARD;
 		wildif->ignore_packets = (ACTION_DROP == action);
-#if defined(MCAST)
-		/*
-		 * enable multicast reception on the broadcast socket
-		 */
-		AF(&wildif->bcast) = AF_INET;
-		SET_ADDR4N(&wildif->bcast, INADDR_ANY);
-		SET_PORT(&wildif->bcast, port);
-#endif /* MCAST */
 		wildif->fd = open_socket(&wildif->sin, 0, 1, wildif);
 
 		if (wildif->fd != INVALID_SOCKET) {
@@ -2212,74 +2004,6 @@ socket_broadcast_disable(
 #endif /* OPEN_BCAST_SOCKET */
 
 /*
- * Multicast servers need to set the appropriate Multicast interface
- * socket option in order for it to know which interface to use for
- * send the multicast packet.
- */
-void
-enable_multicast_if(
-	endpt *	iface,
-	sockaddr_u *		maddr
-	)
-{
-#ifdef MCAST
-#ifdef IP_MULTICAST_LOOP
-	TYPEOF_IP_MULTICAST_LOOP off = 0;
-#endif
-#if defined(USE_IPV6_MULTICAST_SUPPORT) && defined(IPV6_MULTICAST_LOOP)
-	u_int off6 = 0;
-#endif
-
-	NTP_REQUIRE(AF(maddr) == AF(&iface->sin));
-
-	switch (AF(&iface->sin)) {
-
-	case AF_INET:
-#ifdef IP_MULTICAST_LOOP
-		/*
-		 * Don't send back to itself, but allow failure to set
-		 */
-		if (setsockopt(iface->fd, IPPROTO_IP,
-			       IP_MULTICAST_LOOP,
-			       SETSOCKOPT_ARG_CAST &off,
-			       sizeof(off))) {
-#ifndef __COVERITY__
-			msyslog(LOG_ERR,
-				"setsockopt IP_MULTICAST_LOOP failed: %m on socket %d, addr %s for multicast address %s",
-				iface->fd, socktoa(&iface->sin),
-				socktoa(maddr));
-#endif /* __COVERITY__ */
-		}
-#endif
-		break;
-
-	case AF_INET6:
-#ifdef USE_IPV6_MULTICAST_SUPPORT
-#ifdef IPV6_MULTICAST_LOOP
-		/*
-		 * Don't send back to itself, but allow failure to set
-		 */
-		if (setsockopt(iface->fd, IPPROTO_IPV6,
-			       IPV6_MULTICAST_LOOP,
-			       (char *) &off6, sizeof(off6))) {
-#ifndef __COVERITY__
-			msyslog(LOG_ERR,
-				"setsockopt IPV6_MULTICAST_LOOP failed: %m on socket %d, addr %s for multicast address %s",
-				iface->fd, socktoa(&iface->sin),
-				socktoa(maddr));
-#endif /* __COVERITY__ */
-		}
-#endif
-		break;
-#else
-		return;
-#endif	/* USE_IPV6_MULTICAST_SUPPORT */
-	}
-	return;
-#endif
-}
-
-/*
  * open_socket - open a socket, returning the file descriptor
  */
 
@@ -2470,71 +2194,22 @@ sendpkt(
 	)
 {
 	endpt *	src;
-	int	ismcast;
 	int	cc;
-	int	rc;
-	uint8_t	cttl;
 
-	ismcast = IS_MCAST(dest);
-	if (!ismcast)
-		src = ep;
-	else
-		src = (IS_IPV4(dest))
-			  ? mc4_list
-			  : mc6_list;
-
+	src = ep;
 	if (NULL == src) {
 		/*
 		 * unbound peer - drop request and wait for better
 		 * network conditions
 		 */
-		DPRINTF(2, ("%ssendpkt(dst=%s, ttl=%d, len=%d): no interface - IGNORED\n",
-			    ismcast ? "\tMCAST\t***** " : "",
+		DPRINTF(2, ("sendpkt(dst=%s, ttl=%d, len=%d): no interface - IGNORED\n",
 			    socktoa(dest), ttl, len));
 		return;
 	}
 
 	do {
-		DPRINTF(2, ("%ssendpkt(%d, dst=%s, src=%s, ttl=%d, len=%d)\n",
-			    ismcast ? "\tMCAST\t***** " : "", src->fd,
-			    socktoa(dest), socktoa(&src->sin), ttl, len));
-#ifdef MCAST
-		/*
-		 * for the moment we use the bcast option to set multicast ttl
-		 */
-		if (ismcast && ttl > 0 && ttl != src->last_ttl) {
-			/*
-			 * set the multicast ttl for outgoing packets
-			 */
-			switch (AF(&src->sin)) {
-
-			case AF_INET :
-				cttl = (uint8_t)ttl;
-				rc = setsockopt(src->fd, IPPROTO_IP,
-						IP_MULTICAST_TTL,
-						(void *)&cttl,
-						sizeof(cttl));
-				break;
-
-			case AF_INET6 :
-				rc = setsockopt(src->fd, IPPROTO_IPV6,
-						 IPV6_MULTICAST_HOPS,
-						 (void *)&ttl,
-						 sizeof(ttl));
-				break;
-
-			default:
-				rc = 0;
-			}
-
-			if (!rc)
-				src->last_ttl = ttl;
-			else
-				msyslog(LOG_ERR,
-					"setsockopt IP_MULTICAST_TTL/IPV6_MULTICAST_HOPS fails on address %s: %m",
-					socktoa(&src->sin));
-		}
-#endif	/* MCAST */
+		DPRINTF(2, ("sendpkt(%d, dst=%s, src=%s, ttl=%d, len=%d)\n",
+			    src->fd, socktoa(dest), socktoa(&src->sin), ttl, len));
 
 		cc = sendto(src->fd, pkt, (u_int)len, 0,
 			    &dest->sa, SOCKLEN(dest));
@@ -2545,9 +2220,8 @@ sendpkt(
 			src->sent++;
 			packets_sent++;
 		}
-		if (ismcast)
-			src = src->mclink;
-	} while (ismcast && src != NULL);
+		src = src->mclink;
+	} while (src != NULL);
 }
 
 
