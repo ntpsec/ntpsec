@@ -615,11 +615,11 @@ struct pkt {
  */
 #define	PROTO_BROADCLIENT	1	/* (not used) */
 #define	PROTO_PRECISION		2	/* (not used) */
-#define	PROTO_AUTHENTICATE	3
+#define	PROTO_AUTHENTICATE	3	/* (not used) */
 #define	PROTO_BROADDELAY	4	/* (not used) */
 #define	PROTO_AUTHDELAY		5
-#define PROTO_MULTICAST_ADD	6
-#define PROTO_MULTICAST_DEL	7
+#define PROTO_MULTICAST_ADD	6	/* (not used) */
+#define PROTO_MULTICAST_DEL	7	/* (not used) */
 #define PROTO_NTP		8
 #define PROTO_KERNEL		9
 #define PROTO_MONITOR		10
@@ -672,6 +672,7 @@ struct pkt {
 
 /*
  * Default parameters.  We use these in the absence of something better.
+ * (Historical relic - muliticast mode has been removed for security reasons.)
  */
 #define INADDR_NTP	0xe0000101	/* NTP multicast address 224.0.1.1 */
 

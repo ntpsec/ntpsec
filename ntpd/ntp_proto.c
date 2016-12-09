@@ -74,7 +74,6 @@ bool leap_sec_in_progress;
 /*
  * Nonspecified system state variables
  */
-bool	sys_authenticate;	/* require authentication for config */
 l_fp	sys_authdelay;		/* authentication delay */
 double	sys_offset;	/* current local clock offset */
 double	sys_mindisp = MINDISPERSE; /* minimum distance (s) */
@@ -803,7 +802,7 @@ receive(
 		handle_manycast(rbufp, restrict_mask, pkt, peer, authenticated);
 		break;
 	    default:
-		/* Everything else is for broadcast or multicast modes,
+		/* Everything else is for broadcast modes,
 		   which are a security nightmare.  So they go to the
 		   bit bucket until this improves.
 		*/
@@ -2795,7 +2794,6 @@ init_proto(const bool verbose)
 	get_systime(&dummy);
 	sys_survivors = 0;
 	sys_manycastserver = 0;
-	sys_authenticate = true;
 	sys_stattime = current_time;
 	orphwait = current_time + sys_orphwait;
 	proto_clr_stats();
@@ -2830,10 +2828,6 @@ proto_config(
 	/*
 	 * enable and disable commands - arguments are Boolean.
 	 */
-	case PROTO_AUTHENTICATE: /* authentication (auth) */
-		sys_authenticate = (bool)value;
-		break;
-
 #ifdef REFCLOCK
 	case PROTO_CAL:		/* refclock calibrate (calibrate) */
 		cal_enable = value;
@@ -2949,8 +2943,3 @@ proto_clr_stats(void)
 	sys_kodsent = 0;
 }
 
-void proto_dump(FILE *fp)
-{
-    /* must cover at least anything that can be set on the command line */
-    fprintf(fp, "%sable auth;\n", sys_authenticate ? "en" : "dis");
-}

@@ -792,7 +792,6 @@ ntpdmain(
 
      	/* use this to test if option setting gives expected results */
 	if (dumpopts) {
-	    proto_dump(stdout);
 	    if (explicit_config)
 		fprintf(stdout, "conffile \"%s\";\n", explicit_config);
 	    fprintf(stdout, "#debug = %d\n", debug);

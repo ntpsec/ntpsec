@@ -1082,8 +1082,7 @@ system_option
 	;
 
 system_option_flag_keyword
-	:	T_Auth
-	|	T_Calibrate
+	:	T_Calibrate
 	|	T_Kernel
 	|	T_Monitor
 	|	T_Ntp
