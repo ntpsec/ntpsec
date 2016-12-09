@@ -346,8 +346,7 @@ of the link:decode.html#peer[peer status word]
 |+st+            |stratum
 |+t+             |
 +u+: unicast or manycast client,
-+l+: local (reference clock), +s+: symmetric (peer), +A+: manycast
-server, +B+: broadcast server, +M+: multicast server
++l+: local (reference clock), +s+: symmetric (peer), server, +B+: broadcast server,
 |+when+          |sec/min/hr since last received packet
 |+poll+          |poll interval (log~2~ s)
 |+reach+         |reach shift register (octal)

@@ -95,9 +95,12 @@ few will be user-visible.
   just an alias for keyword server.  Incoming peer packets are ignored.
 
 * Broadcast- and multicast client modes, which are impossible to
-  secure, has been removed. Broadcast and multicast service can still
-  be enabled, though this is a deprecated mode of operation and may be
-  removed in a future release.
+  secure, have been removed. Broadcast (but not multicast) service can still
+  be enabled, though this is a deprecated and unsupported mode of
+  operation and may be entirely removed in a future release.
+
+* The authentication requirement for remote configuration commands
+  (e.g., via +ntpq+) can no longer be disabled.
 
 * The deprecated and vulnerability-prone ntpdate program has been
   replaced with a shell wrapper around ntpdig.  Its -e and -p
@@ -287,8 +290,8 @@ link:assoc.html[Association Management]::
   Describes how to configure servers and peers and manage the various
   options. Includes automatic server discovery schemes.
 link:discover.html[Automatic Server Discovery Schemes]::
-  Describes automatic server discovery using broadcast, multicast,
-  manycast and server pool scheme.
+  Describes automatic server discovery using broadcast
+  and server pool schemes.
 link:access.html[Access Control Support]::
   Describes the access control mechanisms that can be used to limit
   client access to various time and management functions.

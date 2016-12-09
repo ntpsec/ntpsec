@@ -265,7 +265,6 @@ identifier field in +ntpq+ billboards. Following is the current list:
 | +BCST+ | broadcast server
 | +DENY+ | access denied by server
 | +INIT+ | association initialized
-| +MCST+ | multicast server
 | +RATE+ | rate exceeded
 | +TIME+ | association timeout
 | +STEP+ | step time change
