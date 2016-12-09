@@ -49,6 +49,14 @@ class OutputContext:
     def __exit__(self, extype_unused, value_unused, traceback_unused):
         curses.endwin()
 
+usage = '''
+USAGE: ntpmon [-anw] [--all] [--numeric] [--wide] [ host ]
+  Flg Arg Option-Name    Description
+   -a no  all            Show all hosts, not just reachable ones.
+   -n no  numeric        numeric host addresses
+   -w no  wide           enable wide display of addresses
+'''
+
 if __name__ == '__main__':
     try:
         (options, arguments) = getopt.getopt(sys.argv[1:],
