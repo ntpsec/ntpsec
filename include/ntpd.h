@@ -108,7 +108,6 @@ extern	endpt *	select_peerinterface	(struct peer *, sockaddr_u *,
 extern	endpt *	findinterface		(sockaddr_u *);
 extern	endpt *	findbcastinter		(sockaddr_u *);
 extern	void	enable_broadcast	(endpt *, sockaddr_u *);
-extern	void	enable_multicast_if	(endpt *, sockaddr_u *);
 extern	void	interface_update	(interface_receiver_t, void *);
 extern  void    io_handler              (void);
 extern	void	init_io 	(void);
@@ -185,7 +184,7 @@ extern	void	clear		(struct peer *);
 extern	void	clock_filter	(struct peer *, double, double, double);
 extern	void	init_proto	(const bool);
 extern	void	set_sys_tick_precision(double);
-extern	void	proto_config	(int, u_long, double, sockaddr_u *);
+extern	void	proto_config	(int, u_long, double);
 extern	void	proto_clr_stats (void);
 extern  void    proto_dump(FILE *);
 

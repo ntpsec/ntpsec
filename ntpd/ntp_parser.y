@@ -126,7 +126,6 @@
 %token	<Integer>	T_Logconfig
 %token	<Integer>	T_Logfile
 %token	<Integer>	T_Loopstats
-%token	<Integer>	T_Manycastserver
 %token	<Integer>	T_Mask
 %token	<Integer>	T_Maxage
 %token	<Integer>	T_Maxclock
@@ -235,7 +234,6 @@
 %type	<Int_fifo>	ac_flag_list
 %type	<Address_node>	address
 %type	<Integer>	address_fam
-%type	<Address_fifo>	address_list
 %type	<Integer>	boolean
 %type	<Integer>	client_type
 %type	<Integer>	counter_set_keyword
@@ -510,9 +508,7 @@ unpeer_keyword
  */
 
 other_mode_command
-	:	T_Manycastserver address_list
-			{ CONCAT_G_FIFOS(cfgt.manycastserver, $2); }
-	|	T_Mdnstries T_Integer
+	:	T_Mdnstries T_Integer
 			{ cfgt.mdnstries = $2; }
 	;
 
@@ -1438,19 +1434,6 @@ string_list
 		{
 			$$ = NULL;
 			APPEND_G_FIFO($$, create_string_node($1));
-		}
-	;
-
-address_list
-	:	address_list address
-		{
-			$$ = $1;
-			APPEND_G_FIFO($$, $2);
-		}
-	|	address
-		{
-			$$ = NULL;
-			APPEND_G_FIFO($$, $1);
 		}
 	;
 

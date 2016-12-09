@@ -213,7 +213,6 @@ static void free_config_fudge(config_tree *);
 static void free_config_logconfig(config_tree *);
 static void free_config_monitor(config_tree *);
 static void free_config_nic_rules(config_tree *);
-static void free_config_other_modes(config_tree *);
 static void free_config_peers(config_tree *);
 static void free_config_phone(config_tree *);
 static void free_config_reset_counters(config_tree *);
@@ -291,7 +290,6 @@ static void config_logfile(config_tree *);
 static void config_vars(config_tree *);
 
 static void config_ntpd(config_tree *, bool input_from_file);
-static void config_other_modes(config_tree *);
 static void config_auth(config_tree *);
 static void config_access(config_tree *);
 static void config_mdnstries(config_tree *);
@@ -387,7 +385,6 @@ free_config_tree(
 	if (ptree->source.value.s != NULL)
 		free(ptree->source.value.s);
 
-	free_config_other_modes(ptree);
 	free_config_auth(ptree);
 	free_config_tos(ptree);
 	free_config_monitor(ptree);
@@ -1141,28 +1138,6 @@ create_addr_opts_node(
  */
 
 static void
-config_other_modes(
-	config_tree *	ptree
-	)
-{
-	sockaddr_u	addr_sock;
-	address_node *	addr_node;
-
-	addr_node = HEAD_PFIFO(ptree->manycastserver);
-	while (addr_node != NULL) {
-		ZERO_SOCK(&addr_sock);
-		AF(&addr_sock) = addr_node->type;
-		if (1 == getnetnum(addr_node->address, &addr_sock, 1,
-				   t_UNK)) {
-			proto_config(PROTO_MULTICAST_ADD,
-				     0, 0., &addr_sock);
-			sys_manycastserver = 1;
-		}
-		addr_node = addr_node->link;
-	}
-}
-
-static void
 destroy_address_fifo(
 	address_fifo *	pfifo
 	)
@@ -1178,15 +1153,6 @@ destroy_address_fifo(
 		}
 		free(pfifo);
 	}
-}
-
-
-static void
-free_config_other_modes(
-	config_tree *ptree
-	)
-{
-	FREE_ADDRESS_FIFO(ptree->manycastserver);
 }
 
 
@@ -1362,7 +1328,7 @@ config_tos(
 			item = PROTO_BEACON;
 			break;
 		}
-		proto_config(item, 0, val, NULL);
+		proto_config(item, 0, val);
 	}
 }
 
@@ -2247,27 +2213,27 @@ apply_enable_disable(
 			break;
 
 		case T_Auth:
-			proto_config(PROTO_AUTHENTICATE, enable, 0., NULL);
+			proto_config(PROTO_AUTHENTICATE, enable, 0.);
 			break;
 
 		case T_Calibrate:
-			proto_config(PROTO_CAL, enable, 0., NULL);
+			proto_config(PROTO_CAL, enable, 0.);
 			break;
 
 		case T_Kernel:
-			proto_config(PROTO_KERNEL, enable, 0., NULL);
+			proto_config(PROTO_KERNEL, enable, 0.);
 			break;
 
 		case T_Monitor:
-			proto_config(PROTO_MONITOR, enable, 0., NULL);
+			proto_config(PROTO_MONITOR, enable, 0.);
 			break;
 
 		case T_Ntp:
-			proto_config(PROTO_NTP, enable, 0., NULL);
+			proto_config(PROTO_NTP, enable, 0.);
 			break;
 
 		case T_Stats:
-			proto_config(PROTO_FILEGEN, enable, 0., NULL);
+			proto_config(PROTO_FILEGEN, enable, 0.);
 			break;
 
 		}
@@ -3320,7 +3286,6 @@ config_ntpd(
 
 	io_open_sockets();
 
-	config_other_modes(ptree);
 	config_peers(ptree);
 	config_unpeers(ptree);
 	config_fudge(ptree);

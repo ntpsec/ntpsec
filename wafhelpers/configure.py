@@ -282,9 +282,6 @@ def cmd_configure(ctx, config):
         ctx.define("GETSOCKNAME_SOCKLEN_TYPE", "socklen_t", quote=False, comment="socklen type")
         ctx.define("DFLT_RLIMIT_STACK", 50, comment="Default stack size")
 
-        from wafhelpers.check_multicast import check_multicast
-        check_multicast(ctx)
-
         ctx.define("TYPEOF_IP_MULTICAST_LOOP", "u_char", quote=False, comment="Multicast loop type") #XXX: check for mcast type
 
         # These are helpful and don't break Linux or *BSD
