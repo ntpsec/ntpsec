@@ -47,7 +47,7 @@
 +preempt+::
   Specifies the association as preemptable rather than the default
   persistent. This option is ignored with the +broadcast+ command and is
-  most useful with the +manycastclient+ and +pool+ commands.
+  most useful with the +pool+ command.
 
 +prefer+::
   Marks the server as preferred. All other things being equal, this host
@@ -56,11 +56,11 @@
   for further information.
 
 +ttl+ _ttl_::
-  This option is used only with broadcast server and manycast client
-  modes. It specifies the time-to-live _ttl_ to use on broadcast server
-  and multicast server and the maximum _ttl_ for the expanding ring
-  search with manycast client packets. Selection of the proper value,
-  which defaults to 127, is something of a black art and should be
+  This option is used only with broadcast server mode. It specifies
+  the time-to-live _ttl_ to use on broadcast server and multicast
+  server and the maximum _ttl_ for the expanding ring search with
+  manycast client packets. Selection of the proper value, which
+  defaults to 127, is something of a black art and should be
   coordinated with the network administrator.
 
 +true+::

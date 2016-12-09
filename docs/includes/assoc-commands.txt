@@ -15,8 +15,6 @@ link-local IPV6 address with an interface specified in
 
 +broadcast+ _address_ [+key+ _key_] [+version+ _version_] [+prefer+] [+minpoll+ _minpoll_] [+ttl+ _ttl_]
 
-+manycastclient+ _address_ [+key+ _key_] [+version+ _version_] [+prefer+] [+minpoll+ _minpoll_] [+maxpoll+ _maxpoll_] [+ttl+ _ttl_] [+preempt+]
-
 +unpeer+ ['address' | 'associd']::
   These six commands specify the time server name or address to be used
   and the mode in which to operate. The _address_ can be either a DNS
@@ -35,7 +33,7 @@ link-local IPV6 address with an interface specified in
   mode association with the specified remote server or local radio
   clock. In this mode the local clock can synchronized to the remote
   server, but the remote server can never be synchronized to the local
-  clock. This command should _not_ be used for broadcast or multicast addresses.
+  clock.
 
 [[peer]]
 +peer+::
@@ -44,37 +42,23 @@ link-local IPV6 address with an interface specified in
 
 [[broadcast]]
 +broadcast+::
-  For broadcast and multicast addresses (only), this command mobilizes a persistent
-  broadcast mode association. Multiple commands can be used to specify
-  multiple local broadcast interfaces (subnets) and/or multiple
-  multicast groups. Note that local broadcast messages go only to the
-  interface associated with the subnet specified, but multicast messages
-  go to all interfaces. In broadcast mode the local server sends
-  periodic broadcast messages to a client population at the _address_
-  specified, which is usually the broadcast address on (one of) the
-  local network(s) or a multicast address assigned to NTP. The IANA has
-  assigned the multicast group address IPv4 224.0.1.1 and IPv6 ff05::101
-  (site local) exclusively to NTP, but other nonconflicting addresses
-  can be used to contain the messages within administrative boundaries.
-
-[[manycastclient]]
-+manycastclient+::
-  For multicast addresses (only), this command mobilizes a manycast client
-  mode association for the multicast address specified. In this case a
-  specific address must be supplied which matches the address used on
-  the _manycastserver_ command for the designated manycast servers. The
-  NTP multicast address 224.0.1.1 assigned by the IANA should NOT be
-  used, unless specific means are taken to avoid spraying large areas of
-  the Internet with these messages and causing a possibly massive
-  implosion of replies at the sender. The _manycastserver_ command
-  specifies that the local server is to operate in client mode with the
-  remote servers that are discovered as the result of
-  broadcast/multicast messages. The client broadcasts a request message
-  to the group address associated with the specified _address_ and
-  specifically enabled servers respond to these messages. The client
-  selects the servers providing the best time and continues as with the
-  _server_ command. The remaining servers are discarded as if never
-  heard.
+  Note: This mode of server operation is deprecated, as broadcast
+  associations cannot be secured.  Broadcast-client mode has been
+  completely removed.
++
+For broadcast and multicast addresses (only), this command mobilizes
+a persistent broadcast mode association. Multiple commands can be
+used to specify multiple local broadcast interfaces (subnets) and/or
+multiple multicast groups. Note that local broadcast messages go
+only to the interface associated with the subnet specified, but
+multicast messages go to all interfaces. In broadcast mode the local
+server sends periodic broadcast messages to a client population at
+the _address_ specified, which is usually the broadcast address on
+(one of) the local network(s) or a multicast address assigned to
+NTP. The IANA has assigned the multicast group address IPv4
+224.0.1.1 and IPv6 ff05::101 (site local) exclusively to NTP, but
+other nonconflicting addresses can be used to contain the messages
+within administrative boundaries.
 
 [[unpeer]]
 +unpeer+::

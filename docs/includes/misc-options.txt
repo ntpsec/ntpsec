@@ -1,17 +1,5 @@
 // Miscellaneous options.  Gets included twice.
 
-[[broadcastdelay]]
-+broadcastdelay+ _seconds_::
-  The broadcast and multicast modes require a special calibration to
-  determine the network delay between the local and remote servers.
-  Ordinarily, this is done automatically by the initial protocol
-  exchanges between the client and server. In some cases, the
-  calibration procedure may fail due to network or server access
-  controls, for example. This command specifies the default delay to be
-  used under these circumstances. Typically (for Ethernet), a number
-  between 0.003 and 0.007 seconds is appropriate. The default when this
-  command is not used is 0.004 seconds.
-
 +calldelay+ _delay_::
   This option controls the delay in seconds between the first and second
   packets sent in burst or iburst mode to allow additional time for a
@@ -38,7 +26,7 @@ have write permission for the directory the drift file is located in,
 and that file system links, symbolic or otherwise, should be avoided.
 
 [[enable]]
-+enable+ [+auth+ | +bclient+ | +calibrate+ | +kernel+ | +monitor+ | +ntp+ | +stats+]; +disable+ [+auth+ | +bclient+ | +calibrate+ | +kernel+ | +monitor+ | +ntp+ | +stats+]::
++enable+ [+auth+ | +calibrate+ | +kernel+ | +monitor+ | +ntp+ | +stats+]; +disable+ [+auth+ | +calibrate+ | +kernel+ | +monitor+ | +ntp+ | +stats+]::
   Provides a way to enable or disable various server options. Flags not
   mentioned are unaffected. Note that all of these flags can be
   controlled remotely using the {ntpqman} utility program.
@@ -47,10 +35,6 @@ and that file system links, symbolic or otherwise, should be avoided.
     Enables the server to synchronize with unconfigured peers only if
     the peer has been correctly authenticated. The default for this
     flag is +enable+.
-  +bclient+;;
-    Enables the server to listen for a message from a broadcast or
-    multicast server, as in the +multicastclient+ command with default
-    address. The default for this flag is +disable+.
   +calibrate+;;
     Enables the calibrate feature for reference clocks. The default for
     this flag is +disable+.

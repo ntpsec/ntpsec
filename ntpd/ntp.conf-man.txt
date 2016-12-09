@@ -41,8 +41,8 @@ the options used to control it:
 
 Following these is a section describing 'Miscellaneous Options'.
 While there is a rich set of options available, the only required
-option is one or more `pool`, `server`, `peer`, `broadcast` or
-`manycastclient` commands.
+option is one or more `pool`, `server`, `peer`, or `broadcast`
+commansds.
 
 == Configuration Support ==
 

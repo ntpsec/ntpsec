@@ -1,5 +1,4 @@
 == Miscellaneous Commands and Options ==
-* link:miscopt.html#broadcastdelay[broadcastdelay - specify broadcast delay]
 * link:miscopt.html#driftfile[driftfile - specify frequency file]
 * link:miscopt.html#enable[enable - enable options]
 * link:miscopt.html#enable[disable - disable options]

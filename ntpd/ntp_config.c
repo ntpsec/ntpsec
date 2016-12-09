@@ -1148,10 +1148,6 @@ config_other_modes(
 	sockaddr_u	addr_sock;
 	address_node *	addr_node;
 
-	if (ptree->broadcastclient)
-		proto_config(PROTO_BROADCLIENT, ptree->broadcastclient,
-			     0., NULL);
-
 	addr_node = HEAD_PFIFO(ptree->manycastserver);
 	while (addr_node != NULL) {
 		ZERO_SOCK(&addr_sock);
@@ -1163,22 +1159,6 @@ config_other_modes(
 			sys_manycastserver = 1;
 		}
 		addr_node = addr_node->link;
-	}
-
-	/* Configure the multicast clients */
-	addr_node = HEAD_PFIFO(ptree->multicastclient);
-	if (addr_node != NULL) {
-		do {
-			ZERO_SOCK(&addr_sock);
-			AF(&addr_sock) = addr_node->type;
-			if (1 == getnetnum(addr_node->address,
-					   &addr_sock, 1, t_UNK)) {
-				proto_config(PROTO_MULTICAST_ADD, 0, 0.,
-					     &addr_sock);
-			}
-			addr_node = addr_node->link;
-		} while (addr_node != NULL);
-		proto_config(PROTO_MULTICAST_ADD, 1, 0., NULL);
 	}
 }
 
@@ -1207,7 +1187,6 @@ free_config_other_modes(
 	)
 {
 	FREE_ADDRESS_FIFO(ptree->manycastserver);
-	FREE_ADDRESS_FIFO(ptree->multicastclient);
 }
 
 
@@ -2271,10 +2250,6 @@ apply_enable_disable(
 			proto_config(PROTO_AUTHENTICATE, enable, 0., NULL);
 			break;
 
-		case T_Bclient:
-			proto_config(PROTO_BROADCLIENT, enable, 0., NULL);
-			break;
-
 		case T_Calibrate:
 			proto_config(PROTO_CAL, enable, 0., NULL);
 			break;
@@ -2635,10 +2610,6 @@ config_vars(
 		/* Determine which variable to set and set it */
 		switch (curr_var->attr) {
 
-		case T_Broadcastdelay:
-			proto_config(PROTO_BROADDELAY, 0, curr_var->value.d, NULL);
-			break;
-
 		case T_Tick:
 			loop_config(LOOP_TICK, curr_var->value.d);
 			break;
@@ -2716,16 +2687,9 @@ is_sane_resolved_address(
 	/*
 	 * Shouldn't be able to specify multicast
 	 * address for server/peer!
-	 * and unicast address for manycastclient!
 	 */
 	if ((T_Server == hmode || T_Peer == hmode || T_Pool == hmode)
 	    && IS_MCAST(peeraddr)) {
-		msyslog(LOG_ERR,
-			"attempt to configure invalid address %s",
-			socktoa(peeraddr));
-		return false;
-	}
-	if (T_Manycastclient == hmode && !IS_MCAST(peeraddr)) {
 		msyslog(LOG_ERR,
 			"attempt to configure invalid address %s",
 			socktoa(peeraddr));
@@ -2782,7 +2746,7 @@ peer_config(
 
 	/*
 	 * Mobilize the association and initialize its variables. If
-	 * emulating ntpdate, force iburst.  For pool and manycastclient
+	 * emulating ntpdate, force iburst.  For pool,
 	 * strip FLAG_PREEMPT as the prototype associations are not
 	 * themselves preemptible, though the resulting associations
 	 * are.
@@ -2806,7 +2770,6 @@ get_correct_host_mode(
 
 	case T_Server:
 	case T_Pool:
-	case T_Manycastclient:
 	case T_Peer:
 		return MODE_CLIENT;
 

@@ -200,9 +200,7 @@ struct config_tree_tag {
 	unpeer_fifo *	unpeers;
 
 	/* Other Modes */
-	int		broadcastclient;
 	address_fifo *	manycastserver;
-	address_fifo *	multicastclient;
 
 	attr_val_fifo *	orphan_cmds;	/* s/b renamed tos_options */
 

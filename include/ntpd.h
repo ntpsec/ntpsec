@@ -115,10 +115,6 @@ extern	void	init_io 	(void);
 extern  SOCKET	open_socket	(sockaddr_u *, bool, bool, endpt *);
 extern	void	io_open_sockets	(void);
 extern	void	io_clr_stats	(void);
-extern	void	io_setbclient	(void);
-extern	void	io_unsetbclient	(void);
-extern	void	io_multicast_add(sockaddr_u *);
-extern	void	io_multicast_del(sockaddr_u *);
 extern	void	sendpkt 	(sockaddr_u *, endpt *, int, void *, int);
 #ifdef DEBUG
 extern	void	collect_timing  (struct recvbuf *, const char *, int, l_fp *);
@@ -403,8 +399,6 @@ extern int	sys_minclock;		/* minimum candidates */
 /*
  * Nonspecified system state variables.
  */
-extern int	sys_bclient;		/* we set our time to broadcasts */
-extern double	sys_bdelay; 		/* broadcast client default delay */
 extern bool	sys_authenticate;	/* requre authentication for config */
 extern l_fp	sys_authdelay;		/* authentication delay */
 extern u_long 	sys_epoch;		/* last clock update time */

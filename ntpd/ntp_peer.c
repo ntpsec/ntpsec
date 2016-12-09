@@ -307,7 +307,7 @@ findpeer(
                  * doesn't match the peer's, check if it matches the
                  * ACST prototype peer's.  If so it is a redundant
                  * solicitation response, return AM_ERR to discard it.
-                 * [Bug 1762]
+                 * [Classic Bug 1762]
                  */
                 if (MODE_SERVER == pkt_mode && AM_PROCPKT == *action) {
                         pkt = &rbufp->recv_pkt;
@@ -604,12 +604,6 @@ peer_refresh_interface(
 		if (p->dstadr != piface && !(MDF_ACAST & p->cast_flags)
 		    && MODE_BROADCAST != p->pmode)
 		    peer_clear(p, "XFAC", false);
-
-		/*
-		 * Broadcast needs the socket enabled for broadcast
-		 */
-		if (MDF_BCAST & p->cast_flags)
-			enable_broadcast(p->dstadr, &p->srcadr);
 
 		/*
 		 * Multicast needs the socket interface enabled for

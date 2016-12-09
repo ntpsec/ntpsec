@@ -215,16 +215,6 @@ displayed which shows the authentication status in the +auth+ field. A
 status of 1 indicates the packet was successful authenticated; otherwise
 it has failed.
 
-A common misconception is the implication of the +auth+ bit in the
-+enable+ and +disable+ commands. *This bit does not affect
-authentication in any way other than to enable or disable mobilization
-of a new persistent association in broadcast/multicast client, manycast
-client or symmetric passive modes.* If enabled, which is the default,
-these associations require authentication; if not, an association is
-mobilized even if not authenticated. Users are cautioned that running
-with authentication disabled is very dangerous, since an intruder can
-easily strike up an association and inject false time values.
-
 == Debugging Checklist ==
 
 If the +ntpq+ or program does not show that messages are being

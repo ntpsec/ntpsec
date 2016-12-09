@@ -25,7 +25,6 @@ struct key_tok ntp_keywords[] = {
 { "...",		T_Ellipsis,		FOLLBY_TOKEN },
 { "allpeers",		T_Allpeers,		FOLLBY_TOKEN },
 { "broadcast",		T_Broadcast,		FOLLBY_STRING },
-{ "broadcastdelay",	T_Broadcastdelay,	FOLLBY_TOKEN },
 { "baud",		T_Baud,			FOLLBY_TOKEN },
 { "ctl",		T_Ctl,			FOLLBY_TOKEN },
 { "disable",		T_Disable,		FOLLBY_TOKEN },
@@ -42,7 +41,6 @@ struct key_tok ntp_keywords[] = {
 { "leapsmearinterval",	T_Leapsmearinterval,	FOLLBY_TOKEN },
 { "logconfig",		T_Logconfig,		FOLLBY_STRINGS_TO_EOC },
 { "logfile",		T_Logfile,		FOLLBY_STRING },
-{ "manycastclient",	T_Manycastclient,	FOLLBY_STRING },
 { "manycastserver",	T_Manycastserver,	FOLLBY_STRINGS_TO_EOC },
 { "mem",		T_Mem,			FOLLBY_TOKEN },
 { "path",		T_Path,			FOLLBY_STRING },
@@ -181,7 +179,6 @@ struct key_tok ntp_keywords[] = {
 { "time2",		T_Time2,		FOLLBY_TOKEN },
 /* system_option */
 { "auth",		T_Auth,			FOLLBY_TOKEN },
-{ "bclient",		T_Bclient,		FOLLBY_TOKEN },
 { "calibrate",		T_Calibrate,		FOLLBY_TOKEN },
 { "kernel",		T_Kernel,		FOLLBY_TOKEN },
 { "ntp",		T_Ntp,			FOLLBY_TOKEN },

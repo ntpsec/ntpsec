@@ -75,7 +75,7 @@
     Deny {ntpqman} queries. Time service is not affected.
   +nopeer+;;
     Deny packets which would result in mobilizing a new association.
-    This includes broadcast and symmetric active packets when a
+    This includes symmetric active packets when a
     configured association does not exist. It also includes _pool_
     associations, so if you want to use servers from a +pool+ directive
     and also want to use +nopeer+ by default, you'll want a +restrict
