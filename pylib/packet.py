@@ -1452,7 +1452,7 @@ class Authenticator:
     @staticmethod
     def compute_mac(payload, keyid, keytype, passwd):
         hasher = hashlib.new(keytype)
-        hasher.update(passwd)
+        hasher.update(polybytes(passwd))
         hasher.update(payload)
         if hasher.digest_size == 0:
             return None
