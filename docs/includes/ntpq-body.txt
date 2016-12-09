@@ -271,15 +271,18 @@ ind assid status conf reach auth condition last_event cnt
 
 +mrulist+ [+limited+ | +kod+ | +mincount=+'count' | +laddr=+'localaddr' | +sort=+'sortorder' | +resany=+'hexmask' | +resall=+'hexmask']::
   Obtain and print traffic counts collected and maintained by the
-  monitor facility. With the exception of +sort=+'sortorder', the options
-  filter the list returned by +ntpd+. The +limited+ and +kod+ options
-  return only entries representing client addresses from which the last
-  packet received triggered either discarding or a KoD response. The
-  +mincount=+'count' option filters entries representing less than 'count'
-  packets. The +laddr=+'localaddr' option filters entries for packets
-  received on any local address other than 'localaddr'. +resany=+'hexmask'
-  and +resall=+'hexmask' filter entries containing none or less than all,
-  respectively, of the bits in 'hexmask', which must begin with +0x+.
+  monitor facility. This is useful for tracking who _uses_ your
+  server.
++
+With the exception of +sort=+'sortorder', the options
+filter the list returned by +ntpd+. The +limited+ and +kod+ options
+return only entries representing client addresses from which the last
+packet received triggered either discarding or a KoD response. The
++mincount=+'count' option filters entries representing less than 'count'
+packets. The +laddr=+'localaddr' option filters entries for packets
+received on any local address other than 'localaddr'. +resany=+'hexmask'
+and +resall=+'hexmask' filter entries containing none or less than all,
+respectively, of the bits in 'hexmask', which must begin with +0x+.
 +
 The _sortorder_ defaults to +lstint+ and may be any of +addr+,
 +count+, +avgint+, +lstint+, or any of those preceded by a minus sign

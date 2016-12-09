@@ -319,16 +319,16 @@ class MRUSummary:
         self.showhostnames = showhostnames	# If false, display numeric IPs
         self.now = time.time()
 
-    header = "lstint avgint rstr r m v  count rport remote address"
+    header = " lstint avgint rstr r m v  count rport remote address"
 
-    width = 78
+    width = 79
 
     def summary(self, entry):
         lstint = int(self.now - entry.last + 0.5)
         active = float(entry.last - entry.first)
         favgint = active / entry.ct
         avgint = int(favgint + 0.5)
-        stats = "%6d" % lstint
+        stats = "%7d" % lstint
         if 5 < avgint or 1 == entry.ct:
             stats += " %6d" % avgint
         else:
