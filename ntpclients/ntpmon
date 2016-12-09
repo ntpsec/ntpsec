@@ -72,7 +72,7 @@ if __name__ == '__main__':
     showall = False
     for (switch, val) in options:
         if switch in ("-a", "--all"):
-            showall = False
+            showall = True
         elif switch in ("-n", "--numeric"):
             showhostnames = False
         elif switch in ("-w", "--wide"):
