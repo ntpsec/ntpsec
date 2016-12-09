@@ -12,7 +12,7 @@ via getifaddrs(3) or some equivalent facility.
 There are some prerequisites.  Libraries need the binary installed
 to run and in addition, the development headers installed to build.
 
-Python 2.x.y, x.y >= 6.6, or Python 3.x, x >= 3::
+Python 2.x, x >= 6, or Python 3.x, x >= 3::
    Required to build, and for various scripts such as ntpviz (but see
    the guidance for packagers in devel/packaging.txt).  Our Python code
    has been written polyglot to also run with production versions of

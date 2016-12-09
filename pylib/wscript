@@ -3,7 +3,7 @@ def options(opt):
 
 def configure(conf):
     conf.load('python')
-    conf.check_python_version((2, 6, 6))
+    conf.check_python_version((2, 6, 0))
     conf.check_python_headers()
 
 def build(ctx):

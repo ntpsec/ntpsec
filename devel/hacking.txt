@@ -177,7 +177,7 @@ the compiler and toolchain have been modernized.
 
 == Python guidelines ==
 
-You may assume Python 2 at 2.6.6 or later, or Python 3 at 3.3 or later.
+You may assume Python 2 at 2.6 or later, or Python 3 at 3.3 or later.
 
 Please read https://www.python.org/dev/peps/pep-0008/[PEP 8] and use
 that style.  The only PEP 8 style rule we relax is that you may
