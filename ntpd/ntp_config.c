@@ -225,13 +225,6 @@ static void free_config_ttl(config_tree *);
 static void free_config_unpeers(config_tree *);
 static void free_config_vars(config_tree *);
 
-static void destroy_address_fifo(address_fifo *);
-#define FREE_ADDRESS_FIFO(pf)			\
-	do {					\
-		destroy_address_fifo(pf);	\
-		(pf) = NULL;			\
-	} while (0)
-       void free_all_config_trees(void);	/* atexit() */
 static void free_config_tree(config_tree *ptree);
 
 static void destroy_restrict_node(restrict_node *my_node);
@@ -1136,25 +1129,6 @@ create_addr_opts_node(
 /* FUNCTIONS FOR PERFORMING THE CONFIGURATION
  * ------------------------------------------
  */
-
-static void
-destroy_address_fifo(
-	address_fifo *	pfifo
-	)
-{
-	address_node *	addr_node;
-
-	if (pfifo != NULL) {
-		for (;;) {
-			UNLINK_FIFO(addr_node, *pfifo, link);
-			if (addr_node == NULL)
-				break;
-			destroy_address_node(addr_node);
-		}
-		free(pfifo);
-	}
-}
-
 
 static void
 config_auth(

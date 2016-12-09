@@ -697,7 +697,7 @@ ctl_error(
 	/*
 	 * send packet and bump counters
 	 */
-	if (res_authenticate && sys_authenticate) {
+	if (res_authenticate) {
 		maclen = authencrypt(res_keyid, (uint32_t *)&rpkt,
 				     CTL_HEADER_LEN);
 		sendpkt(rmt_addr, lcl_inter, -2, &rpkt,	CTL_HEADER_LEN + maclen);
@@ -803,8 +803,7 @@ process_control(
 	properlen = (properlen + 7) & ~7;
 	maclen = rbufp->recv_length - properlen;
 	if ((rbufp->recv_length & 3) == 0 &&
-	    maclen >= MIN_MAC_LEN && maclen <= MAX_MAC_LEN &&
-	    sys_authenticate) {
+	    maclen >= MIN_MAC_LEN && maclen <= MAX_MAC_LEN) {
 		res_authenticate = true;
 		pkid = (void *)((char *)pkt + properlen);
 		res_keyid = ntohl(*pkid);
@@ -970,7 +969,7 @@ ctl_flushpkt(
 			(res_opcode & CTL_OP_MASK);
 	rpkt.count = htons((u_short)dlen);
 	rpkt.offset = htons((u_short)res_offset);
-	if (res_authenticate && sys_authenticate) {
+	if (res_authenticate) {
 		totlen = sendlen;
 		/*
 		 * If we are going to authenticate, then there

@@ -186,7 +186,6 @@ extern	void	init_proto	(const bool);
 extern	void	set_sys_tick_precision(double);
 extern	void	proto_config	(int, u_long, double);
 extern	void	proto_clr_stats (void);
-extern  void    proto_dump(FILE *);
 
 /* ntp_refclock.c */
 #ifdef	REFCLOCK
@@ -398,7 +397,6 @@ extern int	sys_minclock;		/* minimum candidates */
 /*
  * Nonspecified system state variables.
  */
-extern bool	sys_authenticate;	/* requre authentication for config */
 extern l_fp	sys_authdelay;		/* authentication delay */
 extern u_long 	sys_epoch;		/* last clock update time */
 extern keyid_t	sys_private;		/* private value for session seed */
