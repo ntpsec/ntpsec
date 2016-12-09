@@ -45,7 +45,7 @@ def portsplit(hostname):
             hostname = hostname[1:-1]	# Strip brackets
     return (hostname, portsuffix)
 
-# A hack to avoid repleatedly hammering on DNS when ntpmon runs.
+# A hack to avoid repeatedly hammering on DNS when ntpmon runs.
 canonicalization_cache = {}
 
 def canonicalize_dns(inhost, family=socket.AF_UNSPEC):
