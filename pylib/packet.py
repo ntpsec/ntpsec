@@ -931,7 +931,7 @@ class ControlSession:
                 warn("At %s, select with timeout %d begins\n" % (time.asctime(), tvo))
             try:
                 (rd, _, _) = select.select([self.sock], [], [], tvo)
-            except select.error as msg:
+            except select.error:
                 raise ControlException(SERR_SELECT)
             if self.debug > 4:
                 warn("At %s, select with timeout %d ends\n" % (time.asctime(), tvo))
@@ -958,7 +958,7 @@ class ControlSession:
             rpkt = ControlPacket(self)
             try:
                 rpkt.analyze(rawdata)
-            except struct.error as reason:
+            except struct.error:
                 raise ControlException(SERR_UNSPEC)
 
             if rpkt.version() > ntp.magic.NTP_VERSION or rpkt.version() < ntp.magic.NTP_OLDVERSION:
