@@ -4,7 +4,7 @@
 
 == Synopsis ==
 
-+ntpmon+ [-a] [-n] [-w] [hostname]
++ntpmon+ [-a | --all] [-n | --numeric] [-w | --wide] [hostname]
 
 == Description ==
 
@@ -20,10 +20,7 @@ polling interval reported in the last peers response.)
 
 == Options ==
 
-Command line options are described following. Specifying a command line
-option other than +-i+ or +-n+ will cause the specified query (queries)
-to be sent to the indicated host(s) immediately. Otherwise, +ntpq+ will
-attempt to read interactive format commands from the standard input.
+Command line options are described following.
 
 +-a+, +--all+::
   Show all hosts, not just reachable ones.
