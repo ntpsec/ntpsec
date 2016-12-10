@@ -27,14 +27,6 @@ struct isc_netaddr {
 };
 
 bool
-isc_netaddr_equal(const isc_netaddr_t *a, const isc_netaddr_t *b);
-
-/*%<
- * Compare network addresses 'a' and 'b'.  Return #true if
- * they are equal, #false if not.
- */
-
-bool
 isc_netaddr_eqprefix(const isc_netaddr_t *a, const isc_netaddr_t *b,
 		     unsigned int prefixlen);
 /*%<
