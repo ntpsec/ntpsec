@@ -28,9 +28,18 @@ except ImportError as e:
 
 stdscr = None
 
+def iso8601(t):
+    "ISO8601 string from Unix time, including fractional second."
+    return time.strftime("%Y-%m-%dT%H:%M:%S", time.localtime(time.time()))
+
+
 def statline(_peerlist, _mrulist):
     "Generate a status line"
-    return ntp.util.stdversion()
+    # We don't use stdversion here because the presence of a date is confusing
+    leader = "NTPsec %s-%s" % (ntp.version.VERSION, ntp.version.VCS_TICK)
+    trailer = "Last update: %s" % iso8601(span.entries[0].last)
+    spacer = (peer_report.termwidth - len(leader) - len(trailer)) * " "
+    return leader + spacer + trailer
 
 class Fatal(Exception):
     "Unrecoverable error."
@@ -122,13 +131,14 @@ if __name__ == '__main__':
                             continue
                         stdscr.addstr(peer_report.summary(session.rstatus,
                                                 variables, peer.associd))
-                    # The status line
-                    sl = statline(peer_report, mru_report)
-                    stdscr.addstr(sl + ((peer_report.termwidth - len(sl)) * " ") + "\n",
-                                  curses.A_REVERSE|curses.A_DIM)
+
                     # Now the MRU report
                     span = session.mrulist()
                     mru_report.now = time.time()
+
+                    # The status line
+                    sl = statline(peer_report, mru_report)
+                    stdscr.addstr(sl + "\n", curses.A_REVERSE|curses.A_DIM)
                     if span.entries:
                         stdscr.addstr(ntp.util.MRUSummary.header + "\n",
                                       curses.A_BOLD)
