@@ -259,7 +259,7 @@ def cmd_configure(ctx, config):
                 ("time_tick", "timex", ["sys/time.h", "sys/timex.h"]),
                 ("modes", "timex", ["sys/time.h", "sys/timex.h"]),
                 ("time.tv_nsec", "ntptimeval", ["sys/time.h", "sys/timex.h"]),
-                ("tai", "ntptimeval", ["sys/time.h", "sys/timex.h"]),
+                ("tai", "ntptimeval", ["sys/time.h", "sys/timex.h"]), # first in glibc 2.12
         )
         for (f, s, h) in structure_fields:
                 check_structfield(ctx, f, s, h)
