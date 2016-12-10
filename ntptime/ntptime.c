@@ -50,11 +50,7 @@
 
 /* MUSL port shim */
 #ifndef HAVE_NTP_GETTIME
-#ifdef STRUCT_NTPTIMEVAL_HAS_TAI
 int ntp_gettime(struct ntptimeval *ntv)
-#else
-int ntp_gettime(struct timex *ntv)
-#endif
 {
 	struct timex tntx;
 	int result;
@@ -121,11 +117,7 @@ main(
 {
 	extern int ntp_optind;
 	extern char *ntp_optarg;
-#ifdef STRUCT_NTPTIMEVAL_HAS_TAI
 	struct ntptimeval ntv;
-#else
-	struct timex ntv;
-#endif
 	struct timeval tv;
 	struct timex ntx, _ntx;
 	int	times[20];
