@@ -60,11 +60,9 @@ int ntp_gettime(struct ntptimeval *ntv)
 	ntv->time = tntx.time;
 	ntv->maxerror = tntx.maxerror;
 	ntv->esterror = tntx.esterror;
-#  ifdef NTP_API
-#   if NTP_API > 3
+#if defined(STRUCT_NTPTIMEVAL_HAS_TAI)
 	ntv->tai = tntx.tai;
-#   endif
-#  endif
+#endif
 	return result;
 }
 #endif	/* !HAVE_NTP_GETTIME */
@@ -355,11 +353,11 @@ main(
 			       (int)time_frac,
 
 			       ctime_r((time_t *)&ntv.time.tv_sec, ascbuf));
-#if defined(STRUCT_NTPTIMEVAL_HAS_TAI) && NTP_API > 3
+#if defined(STRUCT_NTPTIMEVAL_HAS_TAI)
 		printf(json ? jfmt5 : ofmt5, (long)ntv.tai);
 #else
 		printf(json ? jfmt6 : ofmt6);
-#endif /* defined(STRUCT_NTPTIMEVAL_HAS_TAI) && NTP_API */
+#endif /* STRUCT_NTPTIMEVAL_HAS_TAI */
 	}
 	status = ntp_adjtime_ns(&ntx);
 	if (status < 0) {

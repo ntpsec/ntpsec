@@ -120,11 +120,9 @@ int ntp_gettime(struct ntptimeval *ntv)
 	ntv->time = tntx.time;
 	ntv->maxerror = tntx.maxerror;
 	ntv->esterror = tntx.esterror;
-#  ifdef NTP_API
-#   if NTP_API > 3
+#if defined(STRUCT_NTPTIMEVAL_HAS_TAI)
 	ntv->tai = tntx.tai;
-#   endif
-#  endif
+#endif
 	return result;
 }
 #endif	/* !HAVE_NTP_GETTIME */
