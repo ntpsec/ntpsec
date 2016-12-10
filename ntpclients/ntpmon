@@ -36,7 +36,7 @@ def iso8601(t):
 def statline(_peerlist, _mrulist):
     "Generate a status line"
     # We don't use stdversion here because the presence of a date is confusing
-    leader = "NTPsec %s-%s" % (ntp.version.VERSION, ntp.version.VCS_TICK)
+    leader = sysvars['version']
     trailer = "Last update: %s" % iso8601(span.entries[0].last)
     spacer = (peer_report.termwidth - len(leader) - len(trailer)) * " "
     return leader + spacer + trailer
@@ -98,6 +98,7 @@ if __name__ == '__main__':
     try:
         session = ntp.packet.ControlSession()
         session.openhost(arguments[0] if arguments else "localhost")
+        sysvars = session.readvar()
         with OutputContext() as ctx:
             while True:
                 try:
