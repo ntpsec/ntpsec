@@ -45,6 +45,8 @@ while a +-6+ qualifier forces DNS resolution to the IPv6 namespace.
 For examples and usage, see the link:debug.html[NTP Debugging
 Techniques] page.
 
+For a simpler near-real-time monitor, see {ntpmonman}.
+
 == Options ==
 
 Command line options are described following. Specifying a command line
