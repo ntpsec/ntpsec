@@ -356,7 +356,7 @@ main(
 #if defined(STRUCT_NTPTIMEVAL_HAS_TAI)
 		printf(json ? jfmt5 : ofmt5, (long)ntv.tai);
 #else
-		printf(json ? jfmt6 : ofmt6);
+		fputs(json ? jfmt6 : ofmt6, stdout);
 #endif /* STRUCT_NTPTIMEVAL_HAS_TAI */
 	}
 	status = ntp_adjtime_ns(&ntx);
