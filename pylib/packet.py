@@ -352,6 +352,8 @@ class SyncException(BaseException):
     def __init__(self, message, errorcode=0):
         self.message = message
         self.errorcode = errorcode
+    def __str__(self):
+        return self.message
 
 class SyncPacket(Packet):
     "Mode 1-5 time-synchronization packet, including SNTP."
@@ -688,6 +690,8 @@ class ControlException(BaseException):
     def __init__(self, message, errorcode=0):
         self.message = message
         self.errorcode = errorcode
+    def __str__(self):
+        return self.message
 
 class ControlSession:
     "A session to a host"

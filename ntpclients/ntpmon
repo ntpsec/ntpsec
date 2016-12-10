@@ -156,7 +156,7 @@ if __name__ == '__main__':
                 time.sleep(min(hpolls) / 2)
     except KeyboardInterrupt:
         print("")
-    except Fatal as e:
+    except (Fatal, ntp.packet.ControlException) as e:
         print(e)
     except IOError:
         print("Bailing out...")

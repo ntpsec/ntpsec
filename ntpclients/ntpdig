@@ -360,7 +360,7 @@ if __name__ == '__main__':
             try:
                 returned += queryhost(server=server, concurrent=True, timeout=timeout)
             except ntp.packet.SyncException as e:
-                log(e.message)
+                log(str(e))
                 continue
             if len(returned) >= samples:
                 break
@@ -368,7 +368,7 @@ if __name__ == '__main__':
             try:
                 returned += queryhost(server=server, concurrent=False, timeout=timeout)
             except ntp.packet.SyncException as e:
-                log(e.message)
+                log(str(e))
                 continue
             if len(returned) >= samples:
                 break
