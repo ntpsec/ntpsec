@@ -57,10 +57,7 @@ variables that control various related operations.
 The various modes are determined by the command keyword and the type
 of the required IP address. Addresses are classed by type as (s) a
 remote server or peer (IPv4 class A, B and C), (b) the broadcast
-address of a local interface, or (m) a multicast address (IPv4 class
-D). For type m addresses the IANA has assigned the multicast group
-address IPv4 224.0.1.1 and IPv6 ff05::101 (site local) exclusively to
-NTP, but other nonconflicting addresses can be used.
+address of a local interface.
 
 Note that only those options applicable to each command are listed
 below. Use of options not listed may not be caught as an error, but
