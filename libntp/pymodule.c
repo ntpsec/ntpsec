@@ -104,22 +104,6 @@ ntpc_lfptofloat(PyObject *self, PyObject *args)
 }
 
 static PyObject *
-ntpc_tstofloat(PyObject *self, PyObject *args)
-{
-    int64_t ti;
-    l_fp ts;
-    struct timespec tt;
- 
-    UNUSED_ARG(self);
-    if (!PyArg_ParseTuple(args, "i", &ti))
-	return NULL;
-    ts.l_ui = ti >> 32;
-    ts.l_uf = ti & 0xFFFFFFFFUL;
-    tt = lfp_stamp_to_tspec(ts, NULL);
-    return Py_BuildValue("d", tt.tv_sec + tt.tv_nsec * 1e-9);
-}
-
-static PyObject *
 ntpc_set_tod(PyObject *self, PyObject *args)
 {
     struct timespec ts;
@@ -169,8 +153,6 @@ static PyMethodDef ntpc_methods[] = {
      PyDoc_STR("Convert a time stamp to something readable.")},
     {"lfptofloat",     	ntpc_lfptofloat,  	METH_VARARGS,
      PyDoc_STR("NTP l_fp to Python-style float time.")},
-    {"tstofloat",     	ntpc_tstofloat,  	METH_VARARGS,
-     PyDoc_STR("NTP integral timestamp to Python-style float time.")},
     {"set_tod",     	ntpc_set_tod,   	METH_VARARGS,
      PyDoc_STR("Set time to nanosecond precision.")},
     {"adj_systime",    	ntpc_adj_systime,   	METH_VARARGS,

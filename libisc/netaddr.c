@@ -20,33 +20,6 @@
 #define ISC_TF(x) ((x) ? true : false)
 
 bool
-isc_netaddr_equal(const isc_netaddr_t *a, const isc_netaddr_t *b) {
-	REQUIRE(a != NULL && b != NULL);
-
-	if (a->family != b->family)
-		return (false);
-
-	if (a->zone != b->zone)
-		return (false);
-
-	switch (a->family) {
-	case AF_INET:
-		if (a->type.in.s_addr != b->type.in.s_addr)
-			return (false);
-		break;
-	case AF_INET6:
-		if (memcmp(&a->type.in6, &b->type.in6,
-			   sizeof(a->type.in6)) != 0 ||
-		    a->zone != b->zone)
-			return (false);
-		break;
-	default:
-		return (false);
-	}
-	return (true);
-}
-
-bool
 isc_netaddr_eqprefix(const isc_netaddr_t *a, const isc_netaddr_t *b,
 		     unsigned int prefixlen)
 {
