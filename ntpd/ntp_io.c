@@ -228,8 +228,6 @@ struct remaddr {
 
 remaddr_t *	remoteaddr_list;
 endpt *		ep_list;	/* complete endpt list */
-endpt *		mc4_list;	/* IPv4 mcast-capable unicast endpts */
-endpt *		mc6_list;	/* IPv6 mcast-capable unicast endpts */
 
 static endpt *	wildipv4;
 static endpt *	wildipv6;
