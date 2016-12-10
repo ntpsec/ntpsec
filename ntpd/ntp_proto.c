@@ -2239,13 +2239,8 @@ fast_xmit(
 	 * the system minimum poll (ntp_minpoll). This is for KoD rate
 	 * control and not strictly specification compliant, but doesn't
 	 * break anything.
-	 *
-	 * If the gazinta was from a multicast address, the gazoutta
-	 * must go out another way.
 	 */
 	rpkt = &rbufp->recv_pkt;
-	if (rbufp->dstadr->flags & INT_MCASTOPEN)
-		rbufp->dstadr = findinterface(&rbufp->recv_srcadr);
 
 	/*
 	 * If this is a kiss-o'-death (KoD) packet, show leap

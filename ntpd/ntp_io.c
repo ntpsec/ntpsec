@@ -352,17 +352,13 @@ collect_timing(struct recvbuf *rb, const char *tag, int count, l_fp *dts)
  *
  * special issues:
  *
- *   - mapping of multicast addresses to the interface affected is not always
- *     one to one - especially on hosts with multiple interfaces
- *     the code here currently allocates a separate interface entry for those
- *     multicast addresses
- *     iff it is able to bind to a *new* socket with the multicast address (flags |= MCASTIF)
- *     in case of failure the multicast address is bound to an existing interface.
- *   - on some systems it is perfectly legal to assign the same address to
- *     multiple interfaces. Therefore this code does not keep a list of interfaces
- *     but a list of interfaces that represent a unique address as determined by the kernel
- *     by the procedure in findlocalinterface. Thus it is perfectly legal to see only
- *     one representative of a group of real interfaces if they share the same address.
+ *   - on some systems it is perfectly legal to assign the same
+ *     address to multiple interfaces. Therefore this code does not
+ *     keep a list of interfaces but a list of interfaces that
+ *     represent a unique address as determined by the kernel by the
+ *     procedure in findlocalinterface. Thus it is perfectly legal to
+ *     see only one representative of a group of real interfaces if
+ *     they share the same address.
  *
  * Frank Kardel 20050910
  */
