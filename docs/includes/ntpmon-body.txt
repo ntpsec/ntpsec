@@ -18,6 +18,11 @@ soon as they occur.
 adjusts itself to poll at twice the frequency of the shortest
 polling interval reported in the last peers response.)
 
+The status bar includes the version steing of the server being
+watched and the (local) time at which it was last updated).
+
+^C cleanly terminates the program.
+
 == Options ==
 
 Command line options are described following.
