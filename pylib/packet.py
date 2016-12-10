@@ -866,6 +866,7 @@ class ControlSession:
         pkt = ControlPacket(self, opcode, associd, qdata)
 
         self.sequence += 1
+        self.sequence %= 65536	# Has to fit in a struct H field
         pkt.sequence = self.sequence
 
         # If we have data, pad it out to a 32-bit boundary.
