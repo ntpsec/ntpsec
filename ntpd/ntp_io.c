@@ -40,13 +40,6 @@
 #define IFS_CREATED     2       /* was just created */
 #define IFS_DELETED     3       /* was just delete */
 
-/* 
- * Set up some macros to look for IPv6 and IPv6 multicast
- */
-#if defined(IPV6_JOIN_GROUP) && defined(IPV6_LEAVE_GROUP)
-#  define USE_IPV6_MULTICAST_SUPPORT
-#endif	/* IPV6 Multicast Support */
-
 /*
  * setsockopt does not always have the same arg declaration
  * across all platforms. If it's not defined we make it empty
@@ -772,24 +765,9 @@ remove_interface(
 	)
 {
 	endpt *		unlinked;
-	endpt **	pmclisthead;
 	sockaddr_u	resmask;
 
 	UNLINK_SLIST(unlinked, ep_list, ep, elink, endpt);
-	if (!ep->ignore_packets && INT_MULTICAST & ep->flags) {
-		pmclisthead = (AF_INET == ep->family)
-				 ? &mc4_list
-				 : &mc6_list;
-		UNLINK_SLIST(unlinked, *pmclisthead, ep, mclink, endpt);
-		DPRINTF(4, ("%s %s IPv%s multicast-capable unicast local address list\n",
-			socktoa(&ep->sin),
-			(unlinked != NULL)
-			    ? "removed from"
-			    : "not found on",
-			(AF_INET == ep->family)
-			    ? "4"
-			    : "6"));
-	}
 	delete_interface_from_list(ep);
 
 	if (ep->fd != INVALID_SOCKET) {
@@ -1210,8 +1188,6 @@ convert_isc_if(
 			? INT_LOOPBACK : 0)
 		| ((INTERFACE_F_POINTTOPOINT & isc_if->flags)
 			? INT_PPP : 0)
-		| ((INTERFACE_F_MULTICAST & isc_if->flags)
-			? INT_MULTICAST : 0)
 		| ((INTERFACE_F_PRIVACY & isc_if->flags)
 			? INT_PRIVACY : 0)
 		;
@@ -1698,11 +1674,9 @@ update_interfaces(
 		 * if phase does not match sys_phase this interface was
 		 * not enumerated during the last interface scan - so it
 		 * is gone and will be deleted here unless it did not
-		 * originate from interface enumeration (INT_WILDCARD,
-		 * INT_MCASTIF).
+		 * originate from interface enumeration INT_WILDCARD,
 		 */
-		if (((INT_WILDCARD | INT_MCASTIF) & ep->flags) ||
-		    ep->phase == sys_interphase)
+		if ((INT_WILDCARD & ep->flags) || ep->phase == sys_interphase)
 			continue;
 
 		DPRINT_INTERFACE(3, (ep, "updating ",
@@ -1736,34 +1710,6 @@ update_interfaces(
 	 */
 	refresh_all_peerinterfaces();
 
-#ifdef __unused__
-	/*
-	 * Check multicast interfaces and try to join multicast groups if
-         * not joined yet.
-         */
-	for (ep = ep_list; ep != NULL; ep = ep->elink) {
-		remaddr_t *entry;
-
-		if (!(INT_MCASTIF & ep->flags) || (INT_MCASTOPEN & ep->flags))
-			continue;
-
-		/* Find remote address that was linked to this interface */
-		for (entry = remoteaddr_list;
-		     entry != NULL;
-		     entry = entry->link) {
-			if (entry->ep == ep) {
-				if (socket_multicast_enable(ep, &entry->addr)) {
-					msyslog(LOG_INFO, 
-						"Joined %s socket to multicast group %s",
-						socktoa(&ep->sin),
-						socktoa(&entry->addr));
-				}
-				break;
-			}
-		}
-	}
-#endif /* __unused__ */
-	
 	return new_interface_found;
 }
 
@@ -2145,10 +2091,9 @@ open_socket(
 #endif
 		    ) {
 			msyslog(LOG_ERR,
-				"bind(%d) AF_INET%s %s#%d%s flags 0x%x failed: %m",
+				"bind(%d) AF_INET%s %s#%d flags 0x%x failed: %m",
 				fd, IS_IPV6(addr) ? "6" : "",
 				socktoa(addr), SRCPORT(addr),
-				IS_MCAST(addr) ? " (multicast)" : "",
 				interf->flags);
 		}
 
@@ -2207,21 +2152,18 @@ sendpkt(
 		return;
 	}
 
-	do {
-		DPRINTF(2, ("sendpkt(%d, dst=%s, src=%s, ttl=%d, len=%d)\n",
-			    src->fd, socktoa(dest), socktoa(&src->sin), ttl, len));
+	DPRINTF(2, ("sendpkt(%d, dst=%s, src=%s, ttl=%d, len=%d)\n",
+		    src->fd, socktoa(dest), socktoa(&src->sin), ttl, len));
 
-		cc = sendto(src->fd, pkt, (u_int)len, 0,
-			    &dest->sa, SOCKLEN(dest));
-		if (cc == -1) {
-			src->notsent++;
-			packets_notsent++;
-		} else	{
-			src->sent++;
-			packets_sent++;
-		}
-		src = src->mclink;
-	} while (src != NULL);
+	cc = sendto(src->fd, pkt, (u_int)len, 0,
+		    &dest->sa, SOCKLEN(dest));
+	if (cc == -1) {
+		src->notsent++;
+		packets_notsent++;
+	} else	{
+		src->sent++;
+		packets_sent++;
+	}
 }
 
 
@@ -2697,10 +2639,8 @@ select_peerinterface(
 			ep = wild;
 	}
 	/*
-	 * If it is a multicast address, findbcastinter() may not find
-	 * it.  For unicast, we get to find the interface when dstadr is
-	 * given to us as the wildcard (ANY_INTERFACE_CHOOSE).  Either
-	 * way, try a little harder.
+	 * For unicast, we get to find the interface when dstadr is
+	 * given to us as the wildcard (ANY_INTERFACE_CHOOSE).
 	 */
 	if (wild == ep)
 		ep = findinterface(srcadr);
@@ -3009,7 +2949,7 @@ findbcastinter(
 
 	iface = NULL;
 #if defined(SIOCGIFCONF)
-	DPRINTF(4, ("Finding broadcast/multicast interface for addr %s in list of addresses\n",
+	DPRINTF(4, ("Finding broadcast interface for addr %s in list of addresses\n",
 		    socktoa(addr)));
 
 	iface = findlocalinterface(addr, INT_LOOPBACK | INT_WILDCARD,
@@ -3041,24 +2981,6 @@ findbcastinter(
 		/* Skip the loopback addresses */
 		if (iface->flags & INT_LOOPBACK)
 			continue;
-
-		/*
-		 * If we are looking to match a multicast address and
-		 * this interface is one...
-		 */
-		if (addr_ismulticast(addr)
-		    && (iface->flags & INT_MULTICAST)) {
-			/*
-			 * ...it is the winner unless we're looking for
-			 * an interface to use for link-local multicast
-			 * and its address is not link-local.
-			 */
-			if (IS_IPV6(addr)
-			    && IN6_IS_ADDR_MC_LINKLOCAL(PSOCK_ADDR6(addr))
-			    && !IN6_IS_ADDR_LINKLOCAL(PSOCK_ADDR6(&iface->sin)))
-				continue;
-			break;
-		}
 
 		/*
 		 * We match only those interfaces marked as
