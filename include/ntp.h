@@ -170,7 +170,6 @@ typedef unsigned int	u_int;
  */
 typedef struct __endpt {
 	struct __endpt *elink;		/* endpt list link */
-	struct __endpt *mclink;		/* per-AF_* multicast list */
 	SOCKET		fd;		/* socket descriptor */
 	SOCKET		bfd;		/* for receiving broadcasts */
 	uint32_t	ifnum;		/* endpt instance count */
