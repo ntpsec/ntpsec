@@ -88,9 +88,9 @@ class NTPStats:
                     if starttime > os.path.getmtime(logpart):
                         continue
                     if logpart.endswith("gz"):
-                        lines += gzip.open(logpart, 'rb').readlines()
+                        lines += gzip.open(logpart, 'rt').readlines()
                     else:
-                        lines += open(logpart, 'rb').readlines()
+                        lines += open(logpart, 'r').readlines()
             except IOError:
                 sys.stderr.write("ntpviz: WARNING: could not read %s\n" \
                      % logpart)
