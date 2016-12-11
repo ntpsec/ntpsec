@@ -28,7 +28,7 @@ ntpviz [-d LOGDIR] [-g] [-n name] [-p DAYS]
 
 See the manual page for details.
 
-Python by ESR, concept and GNUPLOT code by Dan Drown.
+Python by ESR, concept and gnuplot code by Dan Drown.
 """
 #SPDX-License-Identifier: BSD-2-Clause
 from __future__ import print_function, division
@@ -278,7 +278,7 @@ class VizStats(ntp.statfiles.NTPStats):
 # Investigate.
 
 def gnuplot(template, outfile=None):
-    "Run a specified GNUPLOT program."
+    "Run a specified gnuplot program."
     if not len( template ):
         # silently ignore empty plots
         return ''
@@ -378,7 +378,7 @@ set rmargin 10
         return plot_data
 
     def local_offset_gnuplot(self):
-        "Generate GNUPLOT code graphing local clock loop statistics"
+        "Generate gnuplot code graphing local clock loop statistics"
         if not len( self.loopstats):
             sys.stderr.write("ntpviz: WARNING: no loopstats to graph\n")
             return ''
@@ -438,7 +438,7 @@ file.</p>
         return ret
 
     def local_freq_temps_plot(self):
-        "Generate GNUPLOT code graphing local frequency and temps"
+        "Generate gnuplot code graphing local frequency and temps"
         if not len( self.loopstats):
             sys.stderr.write("ntpviz: WARNING: no loopstats to graph\n")
             return ''
@@ -522,7 +522,7 @@ file, and field 3 from the temp log .</p>
         return ret
 
     def local_temps_gnuplot(self):
-        "Generate GNUPLOT code graphing local temperature statistics"
+        "Generate gnuplot code graphing local temperature statistics"
         sitename = self.sitename
         tempsmap = self.tempssplit()
         tempslist = tempsmap.keys()
@@ -573,7 +573,7 @@ component of frequency drift.</p>
         return ret
 
     def local_gps_gnuplot(self):
-        "Generate GNUPLOT code graphing local gps statistics"
+        "Generate gnuplot code graphing local gps statistics"
         sitename = self.sitename
         gpsmap = self.gpssplit()
         gpslist = gpsmap.keys()
@@ -680,7 +680,7 @@ line at 0ppm.  Expected values of 99%-1% percentiles: 0.4ppm</p>
         return ret
 
     def loopstats_gnuplot(self, fld, title, legend, freq):
-        "Generate GNUPLOT code of a given loopstats field"
+        "Generate gnuplot code of a given loopstats field"
         if not len( self.loopstats):
             sys.stderr.write("ntpviz: WARNING: no loopstats to graph\n")
             return ''
@@ -745,11 +745,11 @@ plot \
         return ret
 
     def local_offset_jitter_gnuplot(self):
-        "Generate GNUPLOT code of local clock loop standard deviation"
+        "Generate gnuplot code of local clock loop standard deviation"
         return self.loopstats_gnuplot(4, "Local RMS Time Jitter", "Jitter", 0)
 
     def local_offset_stability_gnuplot(self):
-        "Generate GNUPLOT code graphing local clock stability"
+        "Generate gnuplot code graphing local clock stability"
         return self.loopstats_gnuplot(5, "Local RMS Frequency Jitter",
                                       "Stability", 1)
 
@@ -1161,7 +1161,7 @@ You can place command line options in a file, one per line.
 
 See the manual page for details.
 
-Python by ESR, concept and GNUPLOT code by Dan Drown.
+Python by ESR, concept and gnuplot code by Dan Drown.
 """)
     group = parser.add_mutually_exclusive_group()
 
