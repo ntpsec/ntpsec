@@ -72,8 +72,6 @@ typedef union {
 /* hide the structure of a vint64 */
 #define vint64lo(n)       (n).d_s.lo
 #define setvint64lo(n,v)  (n).d_s.lo = (v)
-#define vint64his(n)      (n).d_s.hi
-#define setvint64his(n,v) (n).d_s.hi = (v)
 #define vint64hiu(n)      (n).D_s.hi
 #define setvint64hiu(n,v) (n).D_s.hi = (v)
 #define vint64s(n)        (n).q_s
