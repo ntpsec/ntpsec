@@ -210,6 +210,6 @@ font package installed.
 
 Eric S. Raymond, Gary E. Miller, and Daniel Drown. The gnuplot in this
 package is largely based on templates in Daniel Drown's 'chrony-graph'
-project, https://github.com/ddrown/chrony-graph/tree/ntpd .
+project: https://github.com/ddrown/chrony-graph/tree/ntpd
 
 // end
