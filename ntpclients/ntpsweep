@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """
-ntpsweep - Print various information about given NTP servers.
+ntpsweep - print various information about given NTP servers
 USAGE: ntpsweep [-<flag> [<val>] | --<name>[{=| }<val>]]... [hostfile]
 
     -l, --host-list=str        Host to execute actions on
