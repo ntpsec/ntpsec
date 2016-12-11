@@ -157,7 +157,7 @@ to assume the code will never run on a 16-bit machine.  When in doubt,
 use the fixed-width integral types from <stdint.h>.
 
 You *may* assume that the compiler supports POSIX 64-bit integral types
-(int64_t, uint64_t and friends) even if the target hardware is 32-bit).
+(int64_t, uint64_t and friends) even if the target hardware is 32-bit.
 
 Do not assume any particular endianness. When in doubt, use
 htons()/htonl()/ntohs()/ntohl() and do your bit-bashing in network
@@ -264,7 +264,7 @@ conditions on derived works; we cannot accept such code.
 It is your responsibility to make sure you have the necessary rights
 to contribute a patch to the project.
 
-We use the SPDX convention for inclusion by reference  You can read
+We use the SPDX convention for inclusion by reference.  You can read
 about this at
 
       http://spdx.org/licenses
