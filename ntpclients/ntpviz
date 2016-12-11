@@ -573,7 +573,7 @@ component of frequency drift.</p>
         return ret
 
     def local_gps_gnuplot(self):
-        "Generate gnuplot code graphing local gps statistics"
+        "Generate gnuplot code graphing local GPS statistics"
         sitename = self.sitename
         gpsmap = self.gpssplit()
         gpslist = gpsmap.keys()
@@ -581,7 +581,7 @@ component of frequency drift.</p>
 
         if not len( gpsmap) or not len( gpslist):
             if 1 <= args.debug_level:
-                sys.stderr.write("ntpviz: INFO: no gps data to graph\n")
+                sys.stderr.write("ntpviz: INFO: no GPS data to graph\n")
             return ''
 
         stats = []
@@ -1245,7 +1245,7 @@ Python by ESR, concept and gnuplot code by Dan Drown.
                 default = False,
                 action="store_true",
                 dest='show_gps',
-                help="Plot gpsd tdop and nSats")
+                help="Plot gpsd TDOP and nSats")
     group.add_argument( '--local-jitter',
                 default=False,
                 action="store_true",
