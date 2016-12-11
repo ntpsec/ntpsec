@@ -24,7 +24,4 @@ extern vint64 subv64(const vint64 *lhs, const vint64 *rhs);
 extern vint64 subv64i32(const vint64 * lhs, int32_t rhs);
 extern vint64 subv64u32(const vint64 * lhs, uint32_t rhs);
 
-/* parsing. works like strtoul() or strtoull() */
-extern vint64 strtouv64(const char * begp, char ** endp, int base);
-
 #endif /* GUARD_VINT64OPS_H */
