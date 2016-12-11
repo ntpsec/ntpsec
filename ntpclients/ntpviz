@@ -444,7 +444,7 @@ file.</p>
             return ''
 
         tempsmap = self.tempssplit()
-        tempslist = tempsmap.keys()
+        tempslist = list(tempsmap.keys())
         tempslist.sort()
         if not len( tempsmap) or not len( tempslist):
             sys.stderr.write("ntpviz: WARNING: no temps to graph\n")
@@ -525,7 +525,7 @@ file, and field 3 from the temp log .</p>
         "Generate gnuplot code graphing local temperature statistics"
         sitename = self.sitename
         tempsmap = self.tempssplit()
-        tempslist = tempsmap.keys()
+        tempslist = list(tempsmap.keys())
         tempslist.sort()
 
         if not len( tempsmap) or not len( tempslist):
@@ -576,7 +576,7 @@ component of frequency drift.</p>
         "Generate gnuplot code graphing local GPS statistics"
         sitename = self.sitename
         gpsmap = self.gpssplit()
-        gpslist = gpsmap.keys()
+        gpslist = list(gpsmap.keys())
         gpslist.sort()
 
         if not len( gpsmap) or not len( gpslist):
@@ -758,7 +758,7 @@ plot \
 
         peerdict = self.peersplit()
         if not peerlist:
-            peerlist = peerdict.keys()
+            peerlist = list(peerdict.keys())
         if not len( peerlist):
             sys.stderr.write("ntpviz: WARNING: no peer data to graph\n")
             return ''
@@ -1645,7 +1645,7 @@ ntpviz</a>, part of the <a href="https://www.ntpsec.org/">NTPsec project</a>
             ("peer-offsets", stats.peer_offsets_gnuplot()),
         ]
 
-        peerlist = stats.peersplit().keys()
+        peerlist = list(stats.peersplit().keys())
         # sort for output order stability
         peerlist.sort()
         for key in peerlist:
