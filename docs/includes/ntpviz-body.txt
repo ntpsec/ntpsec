@@ -31,7 +31,7 @@ ntpviz [-d LOGDIR] [-g] [-n name] [-p DAYS]
 
 This utility analyzes files in an NTP log directory and generates
 statistical plots from them.  It can output either PNG images or the
-GNUPLOT programs to generate them to standard output.  In its default
+gnuplot programs to generate them to standard output.  In its default
 mode it generates an HTML directory containing an index page and
 either (a) all plots, for a single statfiles directory, or (b) a
 subset of comparative plots for multiple directories.
@@ -44,7 +44,7 @@ subset of comparative plots for multiple directories.
 
 -g or --generate::
     Run plot through gnuplot to make png.  The default is to generate
-    GNUPLOT programs.
+    gnuplot programs.
 
 -o OUTDIR or --outdir OUTDIR::
     Set the directory for all output to be OUTDIR.  If OUTDIR does
@@ -96,7 +96,7 @@ subset of comparative plots for multiple directories.
 === Individual Plots ===
 
 The plot options choose what graph is generated; invoke only one.  By
-default, the GNUPLOT for the graph is reported; with -g you get the
+default, the gnuplot for the graph is reported; with -g you get the
 rendered PNG.
 
 The following plots are available:
@@ -203,12 +203,12 @@ These two ways to invoke ntpviz are equivalent:
 
 == REQUIREMENTS ==
 
-Python and GNUPLOT.  The plots will look better with the 'liberation'
+Python and gnuplot.  The plots will look better with the 'liberation'
 font package installed.
 
 == AUTHORS ==
 
-Eric S. Raymond, Gary E. Miller, and Daniel Drown. The GNUPLOT in this
+Eric S. Raymond, Gary E. Miller, and Daniel Drown. The gnuplot in this
 package is largely based on templates in Daniel Drown's 'chrony-graph'
 project, https://github.com/ddrown/chrony-graph/tree/ntpd .
 

@@ -1,7 +1,7 @@
 """
 statfiles.py - class for digesting and plotting NTP logfiles
 
-Requires GNUPLOT and liberation fonts installed.
+Requires gnuplot and liberation fonts installed.
 
 """
 #SPDX-License-Identifier: BSD-2-Clause
