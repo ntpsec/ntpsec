@@ -213,7 +213,7 @@ def report(packet, json):
         say(" s%d %s\n" % (packet.stratum, packet.leap()))
 
 usage = """
-USAGE:  sntp [-<flag> [<val>] | --<name>[{=| }<val>]]...
+USAGE:  ntpdig [-<flag> [<val>] | --<name>[{=| }<val>]]...
 		[ hostname-or-IP ...]
   Flg Arg Option-Name     Description
    -4 no  ipv4           Force IPv4 DNS name resolution
@@ -234,7 +234,7 @@ USAGE:  sntp [-<flag> [<val>] | --<name>[{=| }<val>]]...
    -s no  slew            Set (slew) the time with adjtime()
 				 - prohibits the option 'slew'
    -t Num timeout         Request timeout in seconds (default 5)
-   -k Str keyfile         Specify a keyfile. SNTP will look in this file
+   -k Str keyfile         Specify a keyfile. ntpdig will look in this file
                           for the key specified with -a
    -V no version          Output version information and exit
    -h no  help            Display extended usage information and exit
