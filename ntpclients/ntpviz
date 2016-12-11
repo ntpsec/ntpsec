@@ -447,7 +447,6 @@ file.</p>
         tempslist = tempsmap.keys()
         tempslist.sort()
         if not len( tempsmap) or not len( tempslist):
-            sys.stderr.write("ntpviz: WARNING: no temps to graph\n")
             return ''
 
         # speed up by only sending gnuplot the data it will actually use
@@ -529,7 +528,6 @@ file, and field 3 from the temp log .</p>
         tempslist.sort()
 
         if not len( tempsmap) or not len( tempslist):
-            sys.stderr.write("ntpviz: WARNING: no temps to graph\n")
             return ''
 
         stats = []
