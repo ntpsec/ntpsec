@@ -1714,12 +1714,12 @@ ntpviz</a>, part of the <a href="https://www.ntpsec.org/">NTPsec project</a>
 
     # and send the file buffer
     index_filename = os.path.join(args.outdir, "index.html")
-    with open(index_filename + ".tmp", "wb") as ifile:
+    with open(index_filename + ".tmp", "w") as ifile:
         ifile.write(index_buffer)
 
     # create csv file, as a tmp file
     csv_filename = os.path.join(args.outdir, "summary.csv")
-    with open( csv_filename + ".tmp", "wb" ) as csv_file:
+    with open( csv_filename + ".tmp", "w" ) as csv_file:
         csv_ob = csv.writer(csv_file)
         csv_ob.writerow(VizStats.csv_head)
         for row in csvs:
