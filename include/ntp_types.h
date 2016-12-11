@@ -51,15 +51,9 @@
 typedef union {
 #   ifdef WORDS_BIGENDIAN
 	struct {
-	        int32_t hi; uint32_t lo;
-	} d_s;
-	struct {
 		uint32_t hi; uint32_t lo;
 	} D_s;
 #   else
-	struct {
-		uint32_t lo;   int32_t hi;
-	} d_s;
 	struct {
 		uint32_t lo; uint32_t hi;
 	} D_s;
@@ -70,8 +64,8 @@ typedef union {
 } vint64; /* variant int 64 */
 
 /* hide the structure of a vint64 */
-#define vint64lo(n)       (n).d_s.lo
-#define setvint64lo(n,v)  (n).d_s.lo = (v)
+#define vint64lo(n)       (n).D_s.lo
+#define setvint64lo(n,v)  (n).D_s.lo = (v)
 #define vint64hiu(n)      (n).D_s.hi
 #define setvint64hiu(n,v) (n).D_s.hi = (v)
 #define vint64s(n)        (n).q_s
