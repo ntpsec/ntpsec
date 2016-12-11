@@ -29,22 +29,6 @@ TEST(vi64ops, HiLoVUI64ul) {
 	TEST_ASSERT_EQUAL(vint64lo(exp), 0x89ABCDEF);
 }
 
-TEST(vi64ops, HiLoVUI64sh) {
-	vint64 exp;
-
-	setvint64his(exp, 0x01234567);
-	setvint64lo(exp, 0x89ABCDEF);
-	TEST_ASSERT_EQUAL(vint64his(exp), 0x01234567);
-}
-
-TEST(vi64ops, HiLoVUI64sl) {
-	vint64 exp;
-
-	setvint64his(exp, 0x01234567);
-	setvint64lo(exp, 0x89ABCDEF);
-	TEST_ASSERT_EQUAL(vint64lo(exp), 0x89ABCDEF);
-}
-
 TEST(vi64ops, SetVUI64s_pos) {
 	vint64 exp;
 
@@ -76,8 +60,6 @@ TEST(vi64ops, NegVUI64) {
 TEST_GROUP_RUNNER(vi64ops) {
 	RUN_TEST_CASE(vi64ops, HiLoVUI64uh);
 	RUN_TEST_CASE(vi64ops, HiLoVUI64ul);
-	RUN_TEST_CASE(vi64ops, HiLoVUI64sh);
-	RUN_TEST_CASE(vi64ops, HiLoVUI64sl);
 	RUN_TEST_CASE(vi64ops, SetVUI64s_pos);
 	RUN_TEST_CASE(vi64ops, SetVUI64s_neg);
 	RUN_TEST_CASE(vi64ops, SetVUI64u);
