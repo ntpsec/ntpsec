@@ -43,36 +43,44 @@
 
 /*
  * We now assume the platform supports a 64-bit scalar type (the ISC
- * library wouldn't compile otherwise).
+ * library wouldn't compile otherwise). Sadly, getting rid of vint64
+ * is not as simple as turning it into a scalar due to same strange
+ * code in the calendar calculations.
  */
 
-typedef uint64_t vint64;
-#define LAST32MASK	0x00000000ffffffffUL
-#define FIRST32MASK	0xffffffff00000000UL
-#define GET32LAST(n)	((n) & LAST32MASK)
-#define SET32LAST(n, v) (n) = (((n) & FIRST32MASK) | ((v) & LAST32MASK))
-#define GET32FIRST(n)	((n) >> 32)
-#define SET32FIRST(n,v) (n) = ((((v) & LAST32MASK) << 32) | ((n) & LAST32MASK))
-#ifdef WORDS_BIGENDIAN
-#define vint64lo(n)       ((uint32_t)GET32FIRST(n))
-#define setvint64lo(n,v)  SET32FIRST(n,v)
-#define vint64his(n)      ((int32_t)(GET32LAST(n)))
-#define setvint64his(n,v) SET32LAST(n,v)
-#define vint64hiu(n)      ((uint32_t)(GET32LAST(n)))
-#define setvint64hiu(n,v) SET32LAST(n,v)
-#else
-#define vint64lo(n)       ((uint32_t)GET32LAST(n))
-#define setvint64lo(n,v)  SET32LAST(n,v)
-#define vint64his(n)      ((int32_t)(GET32FIRST(n)))
-#define setvint64his(n,v) SET32FIRST(n,v)
-#define vint64hiu(n)      ((uint32_t)(GET32FIRST(n)))
-#define setvint64hiu(n,v) SET32FIRST(n,v)
-#endif
-#define vint64s(n)        ((int64_t)(n))
-#define setvint64s(n,v)   (n) = ((int64_t)(v))
-#define vint64u(n)        (n)
-#define setvint64u(n,v)   (n) = (v)
-#define negvint64(n)      (n = ((uint64_t)((((int64_t)(n)) * -1))))
+typedef union {
+#   ifdef WORDS_BIGENDIAN
+	struct {
+	        int32_t hi; uint32_t lo;
+	} d_s;
+	struct {
+		uint32_t hi; uint32_t lo;
+	} D_s;
+#   else
+	struct {
+		uint32_t lo;   int32_t hi;
+	} d_s;
+	struct {
+		uint32_t lo; uint32_t hi;
+	} D_s;
+#   endif
+
+	int64_t	q_s;	/*   signed quad scalar */
+	uint64_t Q_s;	/* unsigned quad scalar */
+} vint64; /* variant int 64 */
+
+/* hide the structure of a vint64 */
+#define vint64lo(n)       (n).d_s.lo
+#define setvint64lo(n,v)  (n).d_s.lo = (v)
+#define vint64his(n)      (n).d_s.hi
+#define setvint64his(n,v) (n).d_s.hi = (v)
+#define vint64hiu(n)      (n).D_s.hi
+#define setvint64hiu(n,v) (n).D_s.hi = (v)
+#define vint64s(n)        (n).q_s
+#define setvint64s(n,v)   (n).q_s = (v)
+#define vint64u(n)        (n).Q_s
+#define setvint64u(n,v)   (n).Q_s = (v)
+#define negvint64(n)      (n).q_s *= -1
 
 typedef uint16_t	associd_t; /* association ID */
 #define ASSOCID_MAX	USHRT_MAX
