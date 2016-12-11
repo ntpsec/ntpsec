@@ -1461,13 +1461,13 @@ Python by ESR, concept and gnuplot code by Dan Drown.
     # if no ntpsec favicon.ico, write one.
     ico_filename = os.path.join(args.outdir, "favicon.ico")
     if not os.path.lexists( ico_filename ):
-        with open( ico_filename, "w" ) as wp:
+        with open( ico_filename, "wb" ) as wp:
             wp.write(binascii.a2b_base64(ntpsec_ico))
 
     # if no ntpsec logo, write one.
     logo_filename = os.path.join(args.outdir, "ntpsec-logo.png")
     if not os.path.lexists( logo_filename ):
-        with open( logo_filename, "w" ) as wp:
+        with open( logo_filename, "wb" ) as wp:
             wp.write(binascii.a2b_base64(ntpsec_logo))
 
     report_time = datetime.datetime.utcnow() # the time now is...
