@@ -61,7 +61,7 @@ class OutputContext:
         curses.endwin()
 
 usage = '''
-USAGE: ntpmon [-anw] [--all] [--numeric] [--wide] [ host ]
+USAGE: ntpmon [-anw] [--all] [--numeric] [--wide] [host]
   Flg Arg Option-Name    Description
    -a no  all            Show all hosts, not just reachable ones.
    -n no  numeric        numeric host addresses

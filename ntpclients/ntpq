@@ -674,7 +674,7 @@ usage: delay [ msec ]
     def help_host(self):
         self.say("""\
 function: specify the host whose NTP server we talk to
-usage: host [ -4|-6 ] [ hostname ]
+usage: host [-4|-6] [hostname]
 """)
 
     def do_poll(self, line):
@@ -685,7 +685,7 @@ usage: host [ -4|-6 ] [ hostname ]
     def help_poll(self):
         self.say("""\
 function: poll an NTP server in client mode `n' times
-usage: poll [ n ] [ verbose ]
+usage: poll [n] [verbose]
 """)
 
     def do_passwd(self, line):
@@ -698,7 +698,7 @@ usage: poll [ n ] [ verbose ]
     def help_passwd(self):
         self.say("""\
 function: specify a password to use for authenticated requests
-usage: passwd [  ]
+usage: passwd []
 """)
 
     def do_hostnames(self, line):
@@ -719,7 +719,7 @@ usage: passwd [  ]
     def help_hostnames(self):
         self.say("""\
 function: specify whether hostnames or net numbers are printed
-usage: hostnames [ yes|no ]
+usage: hostnames [yes|no]
 """)
 
     def do_debug(self, line):
@@ -743,7 +743,7 @@ usage: hostnames [ yes|no ]
     def help_debug(self):
         self.say("""\
 function: set/change debugging level
-usage: debug [ no|more|less|n ]
+usage: debug [no|more|less|n]
 """)
 
     def do_exit(self, line):
@@ -779,7 +779,7 @@ usage: quit
     def help_keyid(self):
         self.say("""\
 function: set keyid to use for authenticated requests
-usage: keyid [ key# ]
+usage: keyid [key#]
 """)
 
     def do_version(self, line):
@@ -832,7 +832,7 @@ usage: cooked
     def help_authenticate(self):
         self.say("""\
 function: always authenticate requests to this server
-usage: authenticate [ yes|no ]
+usage: authenticate [yes|no]
 """)
 
     def do_ntpversion(self, line):
@@ -854,7 +854,7 @@ usage: authenticate [ yes|no ]
     def help_ntpversion(self):
         self.say("""\
 function: set the NTP version number to use for requests
-usage: ntpversion [ version number ]
+usage: ntpversion [version number]
 """)
 
     def do_keytype(self, line):
@@ -872,7 +872,7 @@ usage: ntpversion [ version number ]
         self.say("""\
 function: set key type to use for authenticated requests, one of:
     DSA, DSA-SHA, MD4, MD5, MDC2, RIPEMD160, SHA, SHA1
-usage: keytype [ digest-name ]
+usage: keytype [digest-name]
 """)
 
     def do_associations(self, line):
@@ -990,7 +990,7 @@ usage: showvars
     def help_readlist(self):
         self.say("""\
 function: read the system or peer variables included in the variable list
-usage: readlist [ assocID ]
+usage: readlist [assocID]
 """)
 
     def do_rl(self, line):
@@ -1000,7 +1000,7 @@ usage: readlist [ assocID ]
     def help_rl(self):
         self.say("""\
 function: read the system or peer variables included in the variable list
-usage: rl [ assocID ]
+usage: rl [assocID]
 """)
 
     def do_writelist(self, line):
@@ -1023,7 +1023,7 @@ usage: writelist [ assocID ]
     def help_readvar(self):
         self.say("""\
 function: read system or peer variables
-usage: readvar [ assocID ] [ varname1 ] [ varname2 ] [ varname3 ]
+usage: readvar [assocID] [varname1] [varname2] [varname3]
 """)
 
     def do_rv(self, line):
@@ -1033,7 +1033,7 @@ usage: readvar [ assocID ] [ varname1 ] [ varname2 ] [ varname3 ]
     def help_rv(self):
         self.say("""\
 function: read system or peer variables
-usage: rv [ assocID ] [ varname1 ] [ varname2 ] [ varname3 ]
+usage: rv [assocID] [varname1] [varname2] [varname3]
 """)
 
     def do_writevar(self, line):
@@ -1099,20 +1099,20 @@ usage: mrl assocIDlow assocIDhigh
     def help_mreadvar(self):
         self.say("""\
 function: read peer variables from multiple peers
-usage: mreadvar assocIDlow assocIDhigh [ name=value[,...] ]
+usage: mreadvar assocIDlow assocIDhigh [name=value[,...]]
 """)
 
     def do_mrv(self, line):
         "read peer variables from multiple peers"
         if not line:
-                self.warn("usage: mrv assocIDlow assocIDhigh [ name=value[,...] ]\n")
+                self.warn("usage: mrv assocIDlow assocIDhigh [name=value[,...]]\n")
                 return
         self.do_mreadvar(line)
 
     def help_mrv(self):
         self.say("""\
 function: read peer variables from multiple peers
-usage: mrv assocIDlow assocIDhigh [ name=value[,...] ]
+usage: mrv assocIDlow assocIDhigh [name=value[,...]]
 """)
 
     def do_clocklist(self, line):
@@ -1125,7 +1125,7 @@ usage: mrv assocIDlow assocIDhigh [ name=value[,...] ]
     def help_clocklist(self):
         self.say("""\
 function: read the clock variables included in the variable list
-usage: clocklist [ assocID ]
+usage: clocklist [assocID]
 """)
 
     def do_cl(self, line):
@@ -1135,7 +1135,7 @@ usage: clocklist [ assocID ]
     def help_cl(self):
         self.say("""\
 function: read the clock variables included in the variable list
-usage: cl [ assocID ]
+usage: cl [assocID]
 """)
 
     def do_clockvar(self, line):
@@ -1149,7 +1149,7 @@ usage: cl [ assocID ]
     def help_clockvar(self):
         self.say("""\
 function: read clock variables
-usage: clockvar [ assocID ] [ name=value[,...] ]
+usage: clockvar [assocID] [name=value[,...]]
 """)
 
     def do_cv(self, line):
@@ -1342,7 +1342,7 @@ usage: config_from_file <configuration filename>
     def help_mrulist(self):
         self.say("""\
 function: display the list of most recently seen source addresses, tags mincount=... resall=0x... resany=0x...
-usage: mrulist [ tag=value ] [ tag=value ] [ tag=value ] [ tag=value ]
+usage: mrulist [tag=value] [tag=value] [tag=value] [tag=value]
 """)
 
     def do_ifstats(self, line):
@@ -1558,7 +1558,7 @@ DEFHOST 	= "localhost"	# default host name
 #
 
 usage = '''
-USAGE: ntpq [-46dphinOV] [-c str] [-D lvl] [ host ...]
+USAGE: ntpq [-46dphinOV] [-c str] [-D lvl] [host ...]
   Flg Arg Option-Name    Description
    -4 no  ipv4           Force IPv4 DNS name resolution
                                 - prohibits the option 'ipv6'

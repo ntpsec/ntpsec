@@ -6,8 +6,8 @@ ntpviz - logfile visualizer for NTP log files
 ntpviz [-d LOGDIR] [-g] [-n name] [-p DAYS]
          [-s starttime] [-e endtime]
          [-o OUTDIR]
-         [ -c | --clip ]
-         [ -w SIZE | --width SIZE]
+         [-c | --clip]
+         [-w SIZE | --width SIZE]
          [--all-peer-jitters |
           --all-peer-offsets |
           --local-error |

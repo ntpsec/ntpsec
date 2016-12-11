@@ -213,7 +213,7 @@ def report(packet, json):
         say(" s%d %s\n" % (packet.stratum, packet.leap()))
 
 usage = """
-USAGE:  sntp [ -<flag> [<val>] | --<name>[{=| }<val>] ]...
+USAGE:  sntp [-<flag> [<val>] | --<name>[{=| }<val>]]...
 		[ hostname-or-IP ...]
   Flg Arg Option-Name     Description
    -4 no  ipv4           Force IPv4 DNS name resolution
