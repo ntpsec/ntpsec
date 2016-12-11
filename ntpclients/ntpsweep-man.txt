@@ -2,7 +2,7 @@
 :doctype: manpage
 
 == NAME ==
-ntpsweep - print various informations about given NTP servers
+ntpsweep - print various information about given NTP servers
 
 == SYNOPSIS ==
 +ntpsweep+ [+-l+ 'host']... [-p] [+-m+ 'number'] [+-s+ 'prefix'] [+-h+ 'string']
