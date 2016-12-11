@@ -290,14 +290,14 @@ def gnuplot(template, outfile=None):
 
     # can be 30% faster to write to a tmp file than to pipe to gnuplot
     # bonus, we can keep the plot file for debug.
-    tmp_file, tmp_filename = tempfile.mkstemp( suffix='.plt')
+    tmp_file = tempfile.NamedTemporaryFile(mode='w', suffix='.plt', delete=False)
     # note that tmp_file is a file handle, it is not a file object
-    os.write( tmp_file, template)
-    os.close(tmp_file)
+    tmp_file.write(template)
+    tmp_file.close()
 
     # shell=True is a security hazard, do not use
     try:
-        rcode = subprocess.call( ['gnuplot', tmp_filename], stdout=out)
+        rcode = subprocess.call(['gnuplot', tmp_file.name], stdout=out)
     except OSError as e:
         if e.errno == os.errno.ENOENT:
             # gnuplot not found
@@ -309,12 +309,12 @@ def gnuplot(template, outfile=None):
 
     if 0 != rcode:
         sys.stderr.write("ntpviz: WARNING: plot returned %s\n" % rcode)
-        sys.stderr.write("ntpviz: WARNING: plot file %s\n" % tmp_filename)
+        sys.stderr.write("ntpviz: WARNING: plot file %s\n" % tmp_file.name)
     elif 2 <= args.debug_level:
-        sys.stderr.write("ntpviz: INFO: plot file %s\n" % tmp_filename)
+        sys.stderr.write("ntpviz: INFO: plot file %s\n" % tmp_file.name)
     else:
         # remove tmp file
-        os.remove(tmp_filename)
+        os.remove(tmp_file.name)
 
     return rcode
 
