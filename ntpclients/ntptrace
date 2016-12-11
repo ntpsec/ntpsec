@@ -86,7 +86,7 @@ def ntp_read_vars(peer, vars, host):
     return outvars
 
 
-usage = r"""ntptrace - Trace peers of an NTP server.
+usage = r"""ntptrace - trace peers of an NTP server
 USAGE: ntptrace [-<flag> [<val>] | --<name>[{=| }<val>]]... [host]
 
     -n, --numeric                Print IP addresses instead of hostnames

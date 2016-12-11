@@ -2,7 +2,7 @@
 :doctype: manpage
 
 == NAME ==
-ntpwait - Wait for ntpd to stabilize the system clock
+ntpwait - wait for ntpd to stabilize the system clock
 
 include::../docs/includes/ntpwait-body.txt[]
 
