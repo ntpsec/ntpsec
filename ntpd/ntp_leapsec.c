@@ -34,25 +34,6 @@
 static const char * const logPrefix = "leapsecond file";
 
 /* ---------------------------------------------------------------------
- * GCC is rather sticky with its 'const' attribute. We have to do it more
- * explicit than with a cast if we want to get rid of a CONST qualifier.
- * Greetings from the PASCAL world, where casting was only possible via
- * untagged unions...
- */
-static inline void*
-noconst(
-	const void* ptr
-	)
-{
-	union {
-		const void * cp;
-		void *       vp;
-	} tmp;
-	tmp.cp = ptr;
-	return tmp.vp;
-}
-
-/* ---------------------------------------------------------------------
  * Our internal data structure
  */
 #define MAX_HIST 10	/* history of leap seconds */
@@ -93,7 +74,7 @@ static bool  _electric;
 /* Forward decls of local helpers */
 static bool   add_range(leap_table_t*, const leap_info_t*);
 static char * get_line(leapsec_reader, void*, char*, size_t);
-static char * skipws(const char*);
+static char * skipws(char*);
 static bool   parsefail(const char * cp, const char * ep);
 static void   reload_limits(leap_table_t*, const vint64*);
 static bool   betweenu32(uint32_t, uint32_t, uint32_t);
@@ -707,11 +688,11 @@ get_line(
 /* [internal] skips whitespace characters from a character buffer. */
 static char *
 skipws(
-	const char *ptr)
+	char *ptr)
 {
 	while (isspace((uint8_t)*ptr))
 		ptr++;
-	return (char*)noconst(ptr);
+	return ptr;
 }
 
 /* [internal] check if a strtoXYZ ended at EOL or whistespace and
