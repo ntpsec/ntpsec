@@ -7,6 +7,10 @@
  * This is an attempt to get the leap second handling into a dedicated
  * module to make the somewhat convoluted logic testable.
  *
+ * Note: Ths code assumes that the unsigned long long return value of
+ * strtoull(3) is large enough to parse any integer literal found in these
+ * files, and that C will promote such values to uint64_t properly.
+ *
  * Copyright 2015 by the NTPsec project contributors
  * SPDX-License-Identifier: NTP
  */
@@ -201,18 +205,18 @@ leapsec_load(
 			cp++;
 			if (*cp == '@') {
 				cp = skipws(cp+1);
-				pt->head.expire = strtouv64(cp, &ep, 10);
+				setvint64u(pt->head.expire, strtoull(cp, &ep, 10));
 				if (parsefail(cp, ep))
 					goto fail_read;
 				pt->lsig.etime = vint64lo(pt->head.expire);
 			} else if (*cp == '$') {
 				cp = skipws(cp+1);
-				pt->head.update = strtouv64(cp, &ep, 10);
+				setvint64u(pt->head.update, strtoull(cp, &ep, 10));
 				if (parsefail(cp, ep))
 					goto fail_read;
 			}		    
 		} else if (isdigit((uint8_t)*cp)) {
-			ttime = strtouv64(cp, &ep, 10);
+		    setvint64u(ttime, strtoull(cp, &ep, 10));
 			if (parsefail(cp, ep))
 				goto fail_read;
 			cp = skipws(ep);
