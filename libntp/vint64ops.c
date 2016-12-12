@@ -36,22 +36,6 @@ icmpv64(
 
 /* -------------------------------------------------------------------------*/
 
-int
-ucmpv64(
-	const vint64 * lhs,
-	const vint64 * rhs
-	)
-{
-	int res;
-	
-	res = (vint64u(*lhs) > vint64u(*rhs))
-	    - (vint64u(*lhs) < vint64u(*rhs));
-
-	return res;
-}
-
-/* -------------------------------------------------------------------------*/
-
 vint64
 addv64(
 	const vint64 *lhs,

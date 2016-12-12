@@ -13,7 +13,6 @@
 
 /* signed/unsigned compare. returns 1/0/-1 if lhs >/=/< rhs */
 extern int icmpv64(const vint64 * lhs,	const vint64 * rhs);
-extern int ucmpv64(const vint64 * lhs,	const vint64 * rhs);
 
 /* add / subtract */
 extern vint64 addv64(const vint64 *lhs, const vint64 *rhs);
