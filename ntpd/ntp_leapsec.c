@@ -76,11 +76,11 @@ static bool   add_range(leap_table_t*, const leap_info_t*);
 static char * get_line(leapsec_reader, void*, char*, size_t);
 static char * skipws(char*);
 static bool   parsefail(const char * cp, const char * ep);
-static void   reload_limits(leap_table_t*, const vint64*);
+static void   reload_limits(leap_table_t*, const vint64);
 static bool   betweenu32(uint32_t, uint32_t, uint32_t);
 static void   reset_times(leap_table_t*);
-static bool   leapsec_add(leap_table_t*, const vint64*, int);
-static bool   leapsec_raw(leap_table_t*, const vint64 *, int, int);
+static bool   leapsec_add(leap_table_t*, const vint64, int);
+static bool   leapsec_raw(leap_table_t*, const vint64, int, int);
 static char * lstostr(const vint64 * ts);
 
 /* =====================================================================
@@ -205,8 +205,8 @@ leapsec_load(
 			if (   parsefail(cp, ep)
 			    || taiof > SHRT_MAX || taiof < SHRT_MIN)
 				goto fail_read;
-			if (ucmpv64(&ttime, &limit) >= 0) {
-				if (!leapsec_raw(pt, &ttime,
+			if (ttime >= limit) {
+				if (!leapsec_raw(pt, ttime,
 						 taiof, false))
 					goto fail_insn;
 			} else {
@@ -279,13 +279,13 @@ leapsec_query(
 	pt    = leapsec_get_table(false);
 	memset(qr, 0, sizeof(leap_result_t));
 
-	if (ucmpv64(&ts64, &pt->head.ebase) < 0) {
+	if (ts64 < pt->head.ebase) {
 		/* Most likely after leap frame reset. Could also be a
 		 * backstep of the system clock. Anyway, get the new
 		 * leap era frame.
 		 */
-		reload_limits(pt, &ts64);
-	} else if (ucmpv64(&ts64, &pt->head.dtime) >= 0) {
+		reload_limits(pt, ts64);
+	} else if (ts64 >= pt->head.dtime) {
 		/* Boundary crossed in forward direction. This might
 		 * indicate a leap transition, so we prepare for that
 		 * case.
@@ -298,8 +298,8 @@ leapsec_query(
 		qr->warped = (int16_t)(vint64lo(last) -
 				       vint64lo(pt->head.dtime));
 		next = addv64i32(&ts64, qr->warped);
-		reload_limits(pt, &next);
-		fired = ucmpv64(&pt->head.ebase, &last) == 0;
+		reload_limits(pt, next);
+		fired = (pt->head.ebase == last);
 		if (fired) {
 			ts64 = next;
 			ts32 = vint64lo(next);
@@ -311,7 +311,7 @@ leapsec_query(
 	qr->tai_offs = pt->head.this_tai;
 
 	/* If before the next scheduling alert, we're done. */
-	if (ucmpv64(&ts64, &pt->head.stime) < 0)
+	if (ts64 < pt->head.stime)
 		return fired;
 
 	/* now start to collect the remaining data */
@@ -345,7 +345,7 @@ leapsec_frame(
 
         memset(qr, 0, sizeof(leap_result_t));
 	pt = leapsec_get_table(false);
-	if (ucmpv64(&pt->head.ttime, &pt->head.stime) <= 0)
+	if (pt->head.ttime <= pt->head.stime)
                 return false;
 
 	qr->tai_offs = pt->head.this_tai;
@@ -529,7 +529,7 @@ leapsec_expired(
 
 	pt = leapsec_get_table(false);
 	limit = ntpcal_ntp_to_ntp(when, tpiv);
-	return ucmpv64(&limit, &pt->head.expire) >= 0;
+	return (limit >= pt->head.expire);
 }
 
 /* ------------------------------------------------------------------ */
@@ -568,8 +568,8 @@ leapsec_add_fix(
 	tt64 = ntpcal_ntp_to_ntp(ttime, pivot);
 	pt   = leapsec_get_table(true);
 
-	if (   ucmpv64(&et64, &pt->head.expire) <= 0
-	   || !leapsec_raw(pt, &tt64, total, false) )
+	if ((et64 <= pt->head.expire)
+	   || !leapsec_raw(pt, tt64, total, false) )
 		return false;
 
 	pt->lsig.etime = etime;
@@ -593,7 +593,7 @@ leapsec_add_dyn(
 
 	pt = leapsec_get_table(true);
 	now64 = ntpcal_ntp_to_ntp(ntpnow, pivot);
-	return (   leapsec_add(pt, &now64, insert)
+	return (   leapsec_add(pt, now64, insert)
 		&& leapsec_set_table(pt));
 }
 
@@ -720,7 +720,7 @@ parsefail(
 static void
 reload_limits(
 	leap_table_t * pt,
-	const vint64 * ts)
+	const vint64 ts)
 {
 	int idx;
 
@@ -730,7 +730,7 @@ reload_limits(
 	 * table, so there is no shortcut for that case.
 	 */
 	for (idx = 0; idx != pt->head.size; idx++)
-		if (ucmpv64(ts, &pt->info[idx].ttime) >= 0)
+		if (ts >= pt->info[idx].ttime)
 			break;
 
 	/* get time limits with proper bound conditions. Note that the
@@ -781,7 +781,7 @@ reload_limits(
 static bool
 leapsec_add(
 	leap_table_t*  pt    ,
-	const vint64 * now64 ,
+	const vint64   now64 ,
 	int            insert)
 {
 	vint64		ttime, starttime;
@@ -792,13 +792,13 @@ leapsec_add(
 	 * leap entry. Do not permit inserts, only appends, and only if
 	 * the extend the table beyond the expiration!
 	 */
-	if (   ucmpv64(now64, &pt->head.expire) < 0
-	    || (pt->head.size && ucmpv64(now64, &pt->info[0].ttime) <= 0)) {
+	if ((now64 < pt->head.expire)
+	    || (pt->head.size && (now64 <= pt->info[0].ttime))) {
 		errno = ERANGE;
 		return false;
 	}
 
-	ntpcal_ntp64_to_date(&fts, now64);
+	ntpcal_ntp64_to_date(&fts, &now64);
 	/* To guard against dangling leap flags: do not accept leap
 	 * second request on the 1st hour of the 1st day of the month.
 	 */
@@ -832,7 +832,7 @@ leapsec_add(
 bool
 leapsec_raw(
 	leap_table_t * pt,
-	const vint64 * ttime,
+	const vint64   ttime,
 	int            taiof,
 	int            dynls)
 {
@@ -841,12 +841,12 @@ leapsec_raw(
 	leap_info_t	li;
 
 	/* Check that we only extend the table. Paranoia rulez! */
-	if (pt->head.size && ucmpv64(ttime, &pt->info[0].ttime) <= 0) {
+	if (pt->head.size && (ttime <= pt->info[0].ttime)) {
 		errno = ERANGE;
 		return false;
 	}
 
-	ntpcal_ntp64_to_date(&fts, ttime);
+	ntpcal_ntp64_to_date(&fts, &ttime);
 	/* If this does not match the exact month start, bail out. */
 	if (fts.monthday != 1 || fts.hour || fts.minute || fts.second) {
 		errno = EINVAL;
@@ -854,8 +854,8 @@ leapsec_raw(
 	}
 	fts.month--; /* was in range 1..12, no overflow here! */
 	starttime    = ntpcal_date_to_ntp64(&fts);
-	li.ttime = *ttime;
-	li.stime = vint64lo(*ttime) - vint64lo(starttime);
+	li.ttime = ttime;
+	li.stime = vint64lo(ttime) - vint64lo(starttime);
 	li.taiof = (int16_t)taiof;
 	li.dynls = (dynls != 0);
 	return add_range(pt, &li);
