@@ -963,11 +963,7 @@ transmit(
 	if (peer->retry > 0)
 		peer->retry--;
 
-	/*
-	 * Do not transmit if in broadcast client mode.
-	 */
-	if (peer->hmode != MODE_BCLIENT)
-		peer_xmit(peer);
+	peer_xmit(peer);
 	poll_update(peer, hpoll);
 }
 
@@ -1252,7 +1248,6 @@ peer_clear(
 	)
 {
 	uint8_t	u;
-	l_fp xmt = peer->xmt;
 
 	/*
 	 * Clear all values, including the optional crypto values above.
@@ -1263,11 +1258,6 @@ peer_clear(
 	peer->disp = sys_maxdisp;
 	peer->flash = peer_unfit(peer);
 	peer->jitter = LOGTOD(sys_precision);
-
-	/* Don't throw away our broadcast replay protection */
-	if (peer->hmode == MODE_BCLIENT) {
-		peer->xmt = xmt;
-	}
 
 	for (u = 0; u < NTP_SHIFT; u++) {
 		peer->filter_order[u] = u;
