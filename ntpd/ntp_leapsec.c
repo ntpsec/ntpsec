@@ -38,7 +38,7 @@ static const char * const logPrefix = "leapsecond file";
 #define MAX_HIST 10	/* history of leap seconds */
 
 struct leap_info {
-	vint64   ttime;	/* transition time (after the step, ntp scale) */
+	time64_t   ttime;	/* transition time (after the step, ntp scale) */
 	uint32_t stime;	/* schedule limit (a month before transition)  */
 	int16_t  taiof;	/* TAI offset on and after the transition      */
 	uint8_t  dynls; /* dynamic: inserted on peer/clock request     */
@@ -46,16 +46,16 @@ struct leap_info {
 typedef struct leap_info leap_info_t;
 
 struct leap_head {
-	vint64   update; /* time of information update                 */
-	vint64   expire; /* table expiration time                      */
+	time64_t   update; /* time of information update                 */
+	time64_t   expire; /* table expiration time                      */
 	uint16_t size;	 /* number of infos in table	               */
 	int16_t  base_tai;	/* total leaps before first entry      */
 	int16_t  this_tai;	/* current TAI offset	               */
 	int16_t  next_tai;	/* TAI offset after 'when'             */
-	vint64   dtime;	 /* due time (current era end)                 */
-	vint64   ttime;	 /* nominal transition time (next era start)   */
-	vint64   stime;	 /* schedule time (when we take notice)        */
-	vint64   ebase;	 /* base time of this leap era                 */
+	time64_t   dtime;	 /* due time (current era end)                 */
+	time64_t   ttime;	 /* nominal transition time (next era start)   */
+	time64_t   stime;	 /* schedule time (when we take notice)        */
+	time64_t   ebase;	 /* base time of this leap era                 */
 	uint8_t  dynls;	 /* next leap is dynamic (by peer request)     */
 };
 typedef struct leap_head leap_head_t;
@@ -75,12 +75,12 @@ static bool   add_range(leap_table_t*, const leap_info_t*);
 static char * get_line(leapsec_reader, void*, char*, size_t);
 static char * skipws(char*);
 static bool   parsefail(const char * cp, const char * ep);
-static void   reload_limits(leap_table_t*, const vint64);
+static void   reload_limits(leap_table_t*, const time64_t);
 static bool   betweenu32(uint32_t, uint32_t, uint32_t);
 static void   reset_times(leap_table_t*);
-static bool   leapsec_add(leap_table_t*, const vint64, int);
-static bool   leapsec_raw(leap_table_t*, const vint64, int, int);
-static char * lstostr(const vint64 * ts);
+static bool   leapsec_add(leap_table_t*, const time64_t, int);
+static bool   leapsec_raw(leap_table_t*, const time64_t, int, int);
+static char * lstostr(const time64_t * ts);
 
 /* =====================================================================
  * Get & Set the current leap table
@@ -169,7 +169,7 @@ leapsec_load(
 	int            use_build_limit)
 {
 	char   *cp, *ep, linebuf[50];
-	vint64 ttime, limit;
+	time64_t ttime, limit;
 	long   taiof;
 	struct calendar build;
 
@@ -185,18 +185,18 @@ leapsec_load(
 			cp++;
 			if (*cp == '@') {
 				cp = skipws(cp+1);
-				setvint64u(pt->head.expire, strtoull(cp, &ep, 10));
+				settime64_tu(pt->head.expire, strtoull(cp, &ep, 10));
 				if (parsefail(cp, ep))
 					goto fail_read;
-				pt->lsig.etime = vint64lo(pt->head.expire);
+				pt->lsig.etime = time64_tlo(pt->head.expire);
 			} else if (*cp == '$') {
 				cp = skipws(cp+1);
-				setvint64u(pt->head.update, strtoull(cp, &ep, 10));
+				settime64_tu(pt->head.update, strtoull(cp, &ep, 10));
 				if (parsefail(cp, ep))
 					goto fail_read;
 			}		    
 		} else if (isdigit((uint8_t)*cp)) {
-		    setvint64u(ttime, strtoull(cp, &ep, 10));
+		    settime64_tu(ttime, strtoull(cp, &ep, 10));
 			if (parsefail(cp, ep))
 				goto fail_read;
 			cp = skipws(ep);
@@ -211,7 +211,7 @@ leapsec_load(
 			} else {
 				pt->head.base_tai = (int16_t)taiof;
 			}
-			pt->lsig.ttime = vint64lo(ttime);
+			pt->lsig.ttime = time64_tlo(ttime);
 			pt->lsig.taiof = (int16_t)taiof;
 		}
 	}
@@ -235,7 +235,7 @@ leapsec_dump(
 	void *               farg)
 {
 	int             idx;
-	vint64          ts;
+	time64_t          ts;
 	struct calendar atb, ttb;
 
 	ntpcal_ntp64_to_date(&ttb, &pt->head.expire);
@@ -268,7 +268,7 @@ leapsec_query(
 	const time_t *  pivot)
 {
 	leap_table_t *   pt;
-	vint64           ts64, last, next;
+	time64_t           ts64, last, next;
 	uint32_t         due32;
 	bool             fired;
 
@@ -294,14 +294,14 @@ leapsec_query(
 		 * both modes is easier to maintain.
 		 */
 		last = pt->head.ttime;
-		qr->warped = (int16_t)(vint64lo(last) -
-				       vint64lo(pt->head.dtime));
+		qr->warped = (int16_t)(time64_tlo(last) -
+				       time64_tlo(pt->head.dtime));
 		next = ts64 + qr->warped;
 		reload_limits(pt, next);
 		fired = (pt->head.ebase == last);
 		if (fired) {
 			ts64 = next;
-			ts32 = vint64lo(next);
+			ts32 = time64_tlo(next);
 		} else {
 			qr->warped = 0;
 		}
@@ -314,7 +314,7 @@ leapsec_query(
 		return fired;
 
 	/* now start to collect the remaining data */
-	due32 = vint64lo(pt->head.dtime);
+	due32 = time64_tlo(pt->head.dtime);
 
 	qr->tai_diff  = pt->head.next_tai - pt->head.this_tai;
 	qr->ttime     = pt->head.ttime;
@@ -524,7 +524,7 @@ leapsec_expired(
 	const time_t * tpiv)
 {
 	const leap_table_t * pt;
-	vint64 limit;
+	time64_t limit;
 
 	pt = leapsec_get_table(false);
 	limit = ntpcal_ntp_to_ntp(when, tpiv);
@@ -538,7 +538,7 @@ leapsec_daystolive(
 	const time_t * tpiv)
 {
 	const leap_table_t * pt;
-	vint64 limit;
+	time64_t limit;
 
 	pt = leapsec_get_table(false);
 	limit = ntpcal_ntp_to_ntp(when, tpiv);
@@ -556,7 +556,7 @@ leapsec_add_fix(
 {
 	time_t         tpiv;
 	leap_table_t * pt;
-	vint64         tt64, et64;
+	time64_t         tt64, et64;
 
 	if (pivot == NULL) {
 		time(&tpiv);
@@ -588,7 +588,7 @@ leapsec_add_dyn(
 	const time_t * pivot )
 {
 	leap_table_t * pt;
-	vint64         now64;
+	time64_t         now64;
 
 	pt = leapsec_get_table(true);
 	now64 = ntpcal_ntp_to_ntp(ntpnow, pivot);
@@ -611,7 +611,7 @@ static void
 reset_times(
 	leap_table_t * pt)
 {
-	memset(&pt->head.ebase, 0xFF, sizeof(vint64));
+	memset(&pt->head.ebase, 0xFF, sizeof(time64_t));
 	pt->head.stime = pt->head.ebase;
 	pt->head.ttime = pt->head.ebase;
 	pt->head.dtime = pt->head.ebase;
@@ -719,7 +719,7 @@ parsefail(
 static void
 reload_limits(
 	leap_table_t * pt,
-	const vint64 ts)
+	const time64_t ts)
 {
 	int idx;
 
@@ -737,7 +737,7 @@ reload_limits(
 	 * empty -- no undefined condition must arise from this code.
 	 */
 	if (idx >= pt->head.size) {
-		memset(&pt->head.ebase, 0x00, sizeof(vint64));
+		memset(&pt->head.ebase, 0x00, sizeof(time64_t));
 		pt->head.this_tai = pt->head.base_tai;
 	} else {
 		pt->head.ebase    = pt->info[idx].ttime;
@@ -757,7 +757,7 @@ reload_limits(
 		pt->head.stime =  pt->head.ttime - pt->info[idx].stime;
 
 	} else {
-		memset(&pt->head.ttime, 0xFF, sizeof(vint64));
+		memset(&pt->head.ttime, 0xFF, sizeof(time64_t));
 		pt->head.stime    = pt->head.ttime;
 		pt->head.dtime    = pt->head.ttime;
 		pt->head.next_tai = pt->head.this_tai;
@@ -778,10 +778,10 @@ reload_limits(
 static bool
 leapsec_add(
 	leap_table_t*  pt    ,
-	const vint64   now64 ,
+	const time64_t   now64 ,
 	int            insert)
 {
-	vint64		ttime, starttime;
+	time64_t		ttime, starttime;
 	struct calendar	fts;
 	leap_info_t	li;
 
@@ -814,7 +814,7 @@ leapsec_add(
 	ttime = ntpcal_date_to_ntp64(&fts);
 
 	li.ttime = ttime;
-	li.stime = vint64lo(ttime) - vint64lo(starttime);
+	li.stime = time64_tlo(ttime) - time64_tlo(starttime);
 	li.taiof = (pt->head.size ? pt->info[0].taiof : pt->head.base_tai)
 	         + (insert ? 1 : -1);
 	li.dynls = 1;
@@ -829,11 +829,11 @@ leapsec_add(
 bool
 leapsec_raw(
 	leap_table_t * pt,
-	const vint64   ttime,
+	const time64_t   ttime,
 	int            taiof,
 	int            dynls)
 {
-	vint64		starttime;
+	time64_t		starttime;
 	struct calendar	fts;
 	leap_info_t	li;
 
@@ -852,7 +852,7 @@ leapsec_raw(
 	fts.month--; /* was in range 1..12, no overflow here! */
 	starttime    = ntpcal_date_to_ntp64(&fts);
 	li.ttime = ttime;
-	li.stime = vint64lo(ttime) - vint64lo(starttime);
+	li.stime = time64_tlo(ttime) - time64_tlo(starttime);
 	li.taiof = (int16_t)taiof;
 	li.dynls = (dynls != 0);
 	return add_range(pt, &li);
@@ -986,7 +986,7 @@ leapsec_validate(
  * lstostr - prettyprint NTP seconds
  */
 static char * lstostr(
-	const vint64 * ts)
+	const time64_t * ts)
 {
 	char *		buf;
 	struct calendar tm;

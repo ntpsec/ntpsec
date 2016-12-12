@@ -46,24 +46,24 @@
  * library wouldn't compile otherwise).
  */
 
-typedef uint64_t vint64;
+typedef uint64_t time64_t;
 #define LAST32MASK	0x00000000ffffffffUL
 #define FIRST32MASK	0xffffffff00000000UL
 #define GET32LAST(n)	((n) & LAST32MASK)
 #define SET32LAST(n, v) (n) = (((n) & FIRST32MASK) | ((v) & LAST32MASK))
 #define GET32FIRST(n)	((n) >> 32)
 #define SET32FIRST(n,v) (n) = ((((v) & LAST32MASK) << 32) | ((n) & LAST32MASK))
-#define vint64lo(n)       ((uint32_t)GET32LAST(n))
-#define setvint64lo(n,v)  SET32LAST(n,v)
-#define vint64his(n)      ((int32_t)(GET32FIRST(n)))
-#define setvint64his(n,v) SET32FIRST(n,v)
-#define vint64hiu(n)      ((uint32_t)(GET32FIRST(n)))
-#define setvint64hiu(n,v) SET32FIRST(n,v)
-#define vint64s(n)        ((int64_t)(n))
-#define setvint64s(n,v)   (n) = ((int64_t)(v))
-#define vint64u(n)        (n)
-#define setvint64u(n,v)   (n) = (v)
-#define negvint64(n)      (n = ((uint64_t)((((int64_t)(n)) * -1))))
+#define time64_tlo(n)       ((uint32_t)GET32LAST(n))
+#define settime64_tlo(n,v)  SET32LAST(n,v)
+#define time64_this(n)      ((int32_t)(GET32FIRST(n)))
+#define settime64_this(n,v) SET32FIRST(n,v)
+#define time64_thiu(n)      ((uint32_t)(GET32FIRST(n)))
+#define settime64_thiu(n,v) SET32FIRST(n,v)
+#define time64_ts(n)        ((int64_t)(n))
+#define settime64_ts(n,v)   (n) = ((int64_t)(v))
+#define time64_tu(n)        (n)
+#define settime64_tu(n,v)   (n) = (v)
+#define negtime64_t(n)      (n = ((uint64_t)((((int64_t)(n)) * -1))))
 
 typedef uint16_t	associd_t; /* association ID */
 #define ASSOCID_MAX	USHRT_MAX

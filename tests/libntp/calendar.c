@@ -122,14 +122,14 @@ static const u_short real_month_days[2][14] = {
 
 // test the day/sec join & split ops, making sure that 32bit
 // intermediate results would definitely overflow and the hi DWORD of
-// the 'vint64' is definitely needed.
+// the 'time64_t' is definitely needed.
 TEST(calendar, DaySplitMerge) {
 	int32_t day;
 	int32_t sec;
 
 	for (day = -1000000; day <= 1000000; day += 100) {
 		for (sec = -100000; sec <= 186400; sec += 10000) {
-			vint64	     merge = ntpcal_dayjoin(day, sec);
+			time64_t	     merge = ntpcal_dayjoin(day, sec);
 			ntpcal_split split = ntpcal_daysplit(&merge);
 			int32_t	     eday  = day;
 			int32_t	     esec  = sec;

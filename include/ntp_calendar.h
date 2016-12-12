@@ -94,10 +94,10 @@ extern systime_func_ptr ntpcal_set_timefunc(systime_func_ptr);
 #define	SECSPERAVGYEAR	31556952		/* mean year length over 400yrs */
 
 /*
- * Convert between 'time_t' and 'vint64'
+ * Convert between 'time_t' and 'time64_t'
  */
-extern vint64 time_to_vint64(const time_t *);
-extern time_t vint64_to_time(const vint64 *);
+extern time64_t time_to_time64_t(const time_t *);
+extern time_t time64_t_to_time(const time64_t *);
 
 /*
  * Get the build date & time. ATTENTION: The time zone is not specified!
@@ -113,7 +113,7 @@ ntpcal_get_build_date(struct calendar * /* jd */);
  * scale with proper epoch unfolding around a given pivot or the
  * current system time.
  */
-extern vint64
+extern time64_t
 ntpcal_ntp_to_time(uint32_t /* ntp */, const time_t * /* pivot */);
 
 /*
@@ -122,7 +122,7 @@ ntpcal_ntp_to_time(uint32_t /* ntp */, const time_t * /* pivot */);
  * system time.
  * Note: The pivot must be given in UN*X time scale!
  */
-extern vint64
+extern time64_t
 ntpcal_ntp_to_ntp(uint32_t /* ntp */, const time_t * /* pivot */);
 
 /*
@@ -130,13 +130,13 @@ ntpcal_ntp_to_ntp(uint32_t /* ntp */, const time_t * /* pivot */);
  * since midnight.
  */
 extern ntpcal_split
-ntpcal_daysplit(const vint64 *);
+ntpcal_daysplit(const time64_t *);
 
 /*
  * Merge a number of days and a number of seconds into seconds,
  * expressed in 64 bits to avoid overflow.
  */
-extern vint64
+extern time64_t
 ntpcal_dayjoin(int32_t /* days */, int32_t /* seconds */);
 
 /*
@@ -284,20 +284,20 @@ ntpcal_daysplit_to_tm(struct tm * /* utm */, const ntpcal_split * /* ds */,
 		      int32_t /* dof */);
 
 extern int
-ntpcal_time_to_date(struct calendar * /* jd */, const vint64 * /* ts */);
+ntpcal_time_to_date(struct calendar * /* jd */, const time64_t * /* ts */);
 
 extern int32_t
 ntpcal_periodic_extend(int32_t /* pivot */, int32_t /* value */,
 		       int32_t /* cycle */);
 
 extern int
-ntpcal_ntp64_to_date(struct calendar * /* jd */, const vint64 * /* ntp */);
+ntpcal_ntp64_to_date(struct calendar * /* jd */, const time64_t * /* ntp */);
 
 extern int
 ntpcal_ntp_to_date(struct calendar * /* jd */,	uint32_t /* ntp */,
 		   const time_t * /* pivot */);
 
-extern vint64
+extern time64_t
 ntpcal_date_to_ntp64(const struct calendar * /* jd */);
 
 extern uint32_t
@@ -316,13 +316,13 @@ extern ntpcal_split
 isocal_split_eraweeks(int32_t /* weeks */);
 
 extern int
-isocal_ntp64_to_date(struct isodate * /* id */, const vint64 * /* ntp */);
+isocal_ntp64_to_date(struct isodate * /* id */, const time64_t * /* ntp */);
 
 extern int
 isocal_ntp_to_date(struct isodate * /* id */, uint32_t /* ntp */,
 		   const time_t * /* pivot */);
 
-extern vint64
+extern time64_t
 isocal_date_to_ntp64(const struct isodate * /* id */);
 
 extern uint32_t

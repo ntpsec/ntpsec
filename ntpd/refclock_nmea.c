@@ -1640,7 +1640,7 @@ unfold_day(
 	uint32_t		  rec_ui
 	)
 {
-	vint64	     rec_qw;
+	time64_t	     rec_qw;
 	ntpcal_split rec_ds;
 
 	/*
@@ -1792,7 +1792,7 @@ eval_gps_time(
 	int32_t adj_day, weeks;   /* adjusted GPS day and week shift */
 
 	/* some temporaries to shuffle data */
-	vint64       vi64;
+	time64_t       vi64;
 	ntpcal_split rs64;
 
 	/* evaluate time stamp from receiver. */
@@ -1806,7 +1806,7 @@ eval_gps_time(
 	/* If we fully trust the GPS receiver, just combine days and
 	 * seconds and be done. */
 	if (peer->ttl & NMEA_DATETRUST_MASK) {
-		retv.l_ui = vint64lo(ntpcal_dayjoin(gps_day, gps_sec));
+		retv.l_ui = time64_tlo(ntpcal_dayjoin(gps_day, gps_sec));
 		return retv;
 	}
 
@@ -1864,7 +1864,7 @@ eval_gps_time(
 	}
 
 	/* - build result and be done */
-	retv.l_ui = vint64lo(ntpcal_dayjoin(adj_day, gps_sec));
+	retv.l_ui = time64_tlo(ntpcal_dayjoin(adj_day, gps_sec));
 	return retv;
 }
 
