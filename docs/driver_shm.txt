@@ -102,8 +102,8 @@ with the PPS events.
 == Clockstats ==
 
 If flag4 is set when the driver is polled, a clockstats record is
-written. The first 3 fields are the normal date, time, and IP address
-common to all clockstats records.
+written. The first 3 fields are the normal date, time, and source
+designator common to all clockstats records.
 
 The 4th field is the number of second ticks since the last poll. The 5th
 field is the number of good data samples found. The last 64 will be used
