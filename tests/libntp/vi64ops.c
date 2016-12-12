@@ -10,9 +10,6 @@ TEST_SETUP(vi64ops) {}
 
 TEST_TEAR_DOWN(vi64ops) {}
 
-
-#include "vint64ops.h"
-
 TEST(vi64ops, HiLoVUI64uh) {
 	vint64 exp = 0;
 

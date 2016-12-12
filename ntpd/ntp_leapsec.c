@@ -26,7 +26,6 @@
 #include "ntp_calendar.h"
 #include "ntp_leapsec.h"
 #include "ntp.h"
-#include "vint64ops.h"
 #include "lib_strbuf.h"
 
 #include "isc/sha1.h"
@@ -247,7 +246,7 @@ leapsec_dump(
 	while (idx-- != 0) {
 		ts = pt->info[idx].ttime;
 		ntpcal_ntp64_to_date(&ttb, &ts);
-		ts = subv64u32(&ts, pt->info[idx].stime);
+		ts = ts - pt->info[idx].stime;
 		ntpcal_ntp64_to_date(&atb, &ts);
 
 		(*func)(farg, "%04u-%02u-%02u [%c] (%04u-%02u-%02u) - %d\n",
@@ -297,7 +296,7 @@ leapsec_query(
 		last = pt->head.ttime;
 		qr->warped = (int16_t)(vint64lo(last) -
 				       vint64lo(pt->head.dtime));
-		next = addv64i32(&ts64, qr->warped);
+		next = ts64 + qr->warped;
 		reload_limits(pt, next);
 		fired = (pt->head.ebase == last);
 		if (fired) {
@@ -543,7 +542,7 @@ leapsec_daystolive(
 
 	pt = leapsec_get_table(false);
 	limit = ntpcal_ntp_to_ntp(when, tpiv);
-	limit = subv64(&pt->head.expire, &limit);
+	limit = pt->head.expire - limit;
 	return ntpcal_daysplit(&limit).hi;
 }
 
@@ -752,12 +751,10 @@ reload_limits(
 		if (_electric)
 			pt->head.dtime = pt->head.ttime;
                 else
-			pt->head.dtime = addv64i32(
-				&pt->head.ttime,
-				pt->head.next_tai - pt->head.this_tai);
+			pt->head.dtime = pt->head.ttime +
+				pt->head.next_tai - pt->head.this_tai;
 		
-		pt->head.stime = subv64u32(
-			&pt->head.ttime, pt->info[idx].stime);
+		pt->head.stime =  pt->head.ttime - pt->info[idx].stime;
 
 	} else {
 		memset(&pt->head.ttime, 0xFF, sizeof(vint64));
