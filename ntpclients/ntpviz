@@ -588,7 +588,7 @@ component of frequency drift.</p>
         gps_data = ()
         plot_data = ""
         for key in gpslist:
-            # fields: time, tdop, nSats
+            # fields: time, TDOP, nSats
             plot_data += self.plot_slice( gpsmap[key], 3, 4)
 
         out = {}
@@ -598,7 +598,7 @@ component of frequency drift.</p>
         plot_template = NTPViz.Common + """\
 set terminal png size %(size)s
 set title "%(sitename)s: Local GPS
-set ytics format "%%1.1f tdop" nomirror textcolor rgb '#0060ad'
+set ytics format "%%1.1f TDOP" nomirror textcolor rgb '#0060ad'
 set y2tics format "%%2.0f nSat"  nomirror textcolor rgb '#dd181f'
 set style line 1 lc rgb '#0060ad' lt 1 lw 1 pt 7 ps 0   # --- blue
 set style line 2 lc rgb '#dd181f' lt 1 lw 1 pt 5 ps 0   # --- red
@@ -607,16 +607,16 @@ plot \\
 
         for key in gpslist:
             plot_template += """\
-'-' using 1:2 title '%(key)s tdop' with line ls 1, \\
+'-' using 1:2 title '%(key)s TDOP' with line ls 1, \\
 '-' using 1:3 title '%(key)s nSat' with line ls 2 axis x1y2, \\
 """ % locals()
 
         # strip the trailing ", \\n"
         plot_template = plot_template[:-4] + "\n"
         exp = """\
-<p>Local GPS.  The Time Dilution of Precision (tdop) is plotted in blue.
+<p>Local GPS.  The Time Dilution of Precision (TDOP) is plotted in blue.
 The number of visible satellites (nSat) is plotted in red.</p>
-<p>tdop is field 3, and nSats is field 4, from the gpsd log file.  The
+<p>TDOP is field 3, and nSats is field 4, from the gpsd log file.  The
 gpsd log file is created by the gps-log.py program.</p>
 """
         ret = {'html' : exp, 'stats' : stats }
