@@ -282,10 +282,4 @@ The variables operate as follows:
     Specifies the maximum number of file descriptors ntpd may have open
     at once. Defaults to the system default.
 
-+hop+ +...+::
-  This command specifies a list of TTL values in increasing order, up to
-  8 values can be specified. In manycast mode these values are used in
-  turn in an expanding-ring search. The default is eight multiples of 32
-  starting at 31.
-
 // end
