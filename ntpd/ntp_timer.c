@@ -426,7 +426,7 @@ check_leapsec(
 		      if (lsdata.tai_diff) {
 			      if (leap_smear.interval == 0) {
 				      leap_smear.interval = leap_smear_intv;
-				      leap_smear.intv_end = vint64u(lsdata.ttime);
+				      leap_smear.intv_end = time64_tu(lsdata.ttime);
 				      leap_smear.intv_start = leap_smear.intv_end - leap_smear.interval;
 				      DPRINTF(1, ("*** leapsec_query: setting leap_smear interval %li, begin %.0f, end %.0f\n",
 					      leap_smear.interval, leap_smear.intv_start, leap_smear.intv_end));

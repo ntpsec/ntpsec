@@ -51,7 +51,7 @@ static char *common_prettydate(l_fp *, bool);
 
 static struct tm *
 get_struct_tm(
-	const	vint64 *stamp,
+	const	time64_t *stamp,
 	int	local,
 	struct	tm *tmbuf)
 {
@@ -60,7 +60,7 @@ get_struct_tm(
 	time_t	   ts;
 
 	int64_t tl;
-	ts = tl = vint64s(*stamp);
+	ts = tl = time64_ts(*stamp);
 
 	/*
 	 * If there is chance of truncation, try to fix it. Let the
@@ -127,7 +127,7 @@ common_prettydate(
 	struct tm   *tm, tmbuf;
 	u_int	     msec;
 	uint32_t	     ntps;
-	vint64	     sec;
+	time64_t	     sec;
 
 	LIB_GETBUF(bp);
 

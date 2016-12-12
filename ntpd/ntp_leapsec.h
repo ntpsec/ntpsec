@@ -85,7 +85,7 @@ extern bool leapsec_electric(electric_mode el);
  * 'dynamic' != 0 if entry was requested by clock/peer
  */ 
 struct leap_result {
-	vint64   ttime;
+	time64_t   ttime;
 	uint32_t ddist;
 	int16_t  tai_offs;
 	int16_t  tai_diff;

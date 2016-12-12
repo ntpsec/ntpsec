@@ -129,7 +129,7 @@ static int32_t
 ntp_to_year(
 	uint32_t ntp)
 {
-	vint64	     t;
+	time64_t	     t;
 	ntpcal_split s;
 
 	t = ntpcal_ntp_to_ntp(ntp, NULL);

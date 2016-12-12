@@ -50,30 +50,30 @@ now(void)
 
 /*
  *---------------------------------------------------------------------
- * Convert between 'time_t' and 'vint64'
+ * Convert between 'time_t' and 'time64_t'
  *---------------------------------------------------------------------
  */
-vint64
-time_to_vint64(
+time64_t
+time_to_time64_t(
 	const time_t * ptt
 	)
 {
-	vint64 res;
+	time64_t res;
 	time_t tt;
 
 	tt = *ptt;
 
 #if NTP_SIZEOF_TIME_T <= 4
-	setvint64hiu(res, 0);
+	settime64_thiu(res, 0);
 	if (tt < 0) {
-		setvint64lo(res, (uint32_t)-tt);
-		negvint64(res);
+		settime64_tlo(res, (uint32_t)-tt);
+		negtime64_t(res);
 	} else {
-		setvint64lo(res, (uint32_t)tt);
+		settime64_tlo(res, (uint32_t)tt);
 	}
 
 #else
-	setvint64s(res, tt);
+	settime64_ts(res, tt);
 #endif
 
 	return res;
@@ -81,17 +81,17 @@ time_to_vint64(
 
 
 time_t
-vint64_to_time(
-	const vint64 *tv
+time64_t_to_time(
+	const time64_t *tv
 	)
 {
 	time_t res;
 
 #if NTP_SIZEOF_TIME_T <= 4
-	res = (time_t)vint64lo(*tv);
+	res = (time_t)time64_tlo(*tv);
 
 #else
-	res = (time_t)vint64s(*tv);
+	res = (time_t)time64_ts(*tv);
 #endif
 
 	return res;
@@ -374,19 +374,19 @@ ntpcal_periodic_extend(
  * divisions.
  *-------------------------------------------------------------------
  */
-vint64
+time64_t
 ntpcal_ntp_to_time(
 	uint32_t	ntp,
 	const time_t *	pivot
 	)
 {
-	vint64 res;
+	time64_t res;
 
-	setvint64s(res, (pivot != NULL) ? *pivot : now());
-	setvint64u(res, vint64u(res)-0x80000000);	/* unshift of half range */
+	settime64_ts(res, (pivot != NULL) ? *pivot : now());
+	settime64_tu(res, time64_tu(res)-0x80000000);	/* unshift of half range */
 	ntp	-= (uint32_t)JAN_1970;		/* warp into UN*X domain */
-	ntp	-= vint64lo(res);		/* cycle difference	 */
-	setvint64u(res, vint64u(res)+(uint64_t)ntp);	/* get expanded time */
+	ntp	-= time64_tlo(res);		/* cycle difference	 */
+	settime64_tu(res, time64_tu(res)+(uint64_t)ntp);	/* get expanded time */
 
 	return res;
 }
@@ -404,20 +404,20 @@ ntpcal_ntp_to_time(
  * divisions.
  *-------------------------------------------------------------------
  */
-vint64
+time64_t
 ntpcal_ntp_to_ntp(
 	uint32_t      ntp,
 	const time_t *pivot
 	)
 {
-	vint64 res;
+	time64_t res;
 
-	setvint64s(res, (pivot) ? *pivot : now());
-	setvint64u(res, vint64u(res) - 0x80000000);		/* unshift of half range */
-	setvint64u(res, vint64u(res) + (uint32_t)JAN_1970);	/* warp into NTP domain	 */
+	settime64_ts(res, (pivot) ? *pivot : now());
+	settime64_tu(res, time64_tu(res) - 0x80000000);		/* unshift of half range */
+	settime64_tu(res, time64_tu(res) + (uint32_t)JAN_1970);	/* warp into NTP domain	 */
 
-	ntp	-= vint64lo(res);				/* cycle difference	 */
-	setvint64u(res, vint64u(res) + (uint64_t)ntp);	/* get expanded time	 */
+	ntp	-= time64_tlo(res);				/* cycle difference	 */
+	settime64_tu(res, time64_tu(res) + (uint64_t)ntp);	/* get expanded time	 */
 
 	return res;
 }
@@ -441,14 +441,14 @@ ntpcal_ntp_to_ntp(
  */
 ntpcal_split
 ntpcal_daysplit(
-	const vint64 *ts
+	const time64_t *ts
 	)
 {
 	ntpcal_split res;
 
 	/* manual floor division by SECSPERDAY */
-	res.hi = (int32_t)(vint64s(*ts) / SECSPERDAY);
-	res.lo = (int32_t)(vint64s(*ts) % SECSPERDAY);
+	res.hi = (int32_t)(time64_ts(*ts) / SECSPERDAY);
+	res.lo = (int32_t)(time64_ts(*ts) % SECSPERDAY);
 	if (res.lo < 0) {
 		res.hi -= 1;
 		res.lo += SECSPERDAY;
@@ -761,7 +761,7 @@ ntpcal_daysplit_to_tm(
 int
 ntpcal_time_to_date(
 	struct calendar	*jd,
-	const vint64	*ts
+	const time64_t	*ts
 	)
 {
 	ntpcal_split ds;
@@ -788,17 +788,17 @@ ntpcal_time_to_date(
  * expressed in 64 bits to avoid overflow.
  *---------------------------------------------------------------------
  */
-vint64
+time64_t
 ntpcal_dayjoin(
 	int32_t days,
 	int32_t secs
 	)
 {
-	vint64 res;
+	time64_t res;
 
-	setvint64s(res, days);
-	setvint64s(res, vint64s(res) * SECSPERDAY);
-	setvint64s(res, vint64s(res) + secs);
+	settime64_ts(res, days);
+	settime64_ts(res, time64_ts(res) * SECSPERDAY);
+	settime64_ts(res, time64_ts(res) + secs);
 
 	return res;
 }
@@ -1095,21 +1095,21 @@ ntpcal_date_to_time(
 	const struct calendar *jd
 	)
 {
-	vint64  join;
+	time64_t  join;
 	int32_t days, secs;
 
 	days = ntpcal_date_to_rd(jd) - DAY_UNIX_STARTS;
 	secs = ntpcal_date_to_daysec(jd);
 	join = ntpcal_dayjoin(days, secs);
 
-	return vint64_to_time(&join);
+	return time64_t_to_time(&join);
 }
 
 
 int
 ntpcal_ntp64_to_date(
 	struct calendar *jd,
-	const vint64    *ntp
+	const time64_t    *ntp
 	)
 {
 	ntpcal_split ds;
@@ -1127,7 +1127,7 @@ ntpcal_ntp_to_date(
 	const time_t	*piv
 	)
 {
-	vint64	ntp64;
+	time64_t	ntp64;
 
 	/*
 	 * Unfold ntp time around current time into NTP domain. Split
@@ -1139,7 +1139,7 @@ ntpcal_ntp_to_date(
 }
 
 
-vint64
+time64_t
 ntpcal_date_to_ntp64(
 	const struct calendar *jd
 	)
@@ -1160,7 +1160,7 @@ ntpcal_date_to_ntp(
 	/*
 	 * Get lower half of 64-bit NTP timestamp from date/time.
 	 */
-	return vint64lo(ntpcal_date_to_ntp64(jd));
+	return time64_tlo(ntpcal_date_to_ntp64(jd));
 }
 
 
@@ -1367,7 +1367,7 @@ isocal_split_eraweeks(
 int
 isocal_ntp64_to_date(
 	struct isodate *id,
-	const vint64   *ntp
+	const time64_t   *ntp
 	)
 {
 	ntpcal_split ds;
@@ -1409,7 +1409,7 @@ isocal_ntp_to_date(
 	const time_t   *piv
 	)
 {
-	vint64	ntp64;
+	time64_t	ntp64;
 
 	/*
 	 * Unfold ntp time around current time into NTP domain, then
@@ -1423,7 +1423,7 @@ isocal_ntp_to_date(
  * Convert a ISO date spec into a second in the NTP time scale,
  * properly truncated to 32 bit.
  */
-vint64
+time64_t
 isocal_date_to_ntp64(
 	const struct isodate *id
 	)
@@ -1447,7 +1447,7 @@ isocal_date_to_ntp(
 	/*
 	 * Get lower half of 64-bit NTP timestamp from date/time.
 	 */
-	return vint64lo(isocal_date_to_ntp64(id));
+	return time64_tlo(isocal_date_to_ntp64(id));
 }
 
 /* -*-EOF-*- */

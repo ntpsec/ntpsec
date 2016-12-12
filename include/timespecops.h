@@ -372,16 +372,16 @@ lfp_stamp_to_tspec(
 	)
 {
 	struct timespec	out;
-	vint64		sec;
+	time64_t		sec;
 
 	sec = ntpcal_ntp_to_time(x.l_ui, p);
 	out.tv_nsec = FTOTVN(x.l_uf);
 
-	/* copying a vint64 to a time_t needs some care... */
+	/* copying a time64_t to a time_t needs some care... */
 #if NTP_SIZEOF_TIME_T <= 4
-	out.tv_sec = (time_t)vint64lo(sec);
+	out.tv_sec = (time_t)time64_tlo(sec);
 #else
-	out.tv_sec = (time_t)vint64s(sec);
+	out.tv_sec = (time_t)time64_ts(sec);
 #endif
 
 	return out;
