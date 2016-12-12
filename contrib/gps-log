@@ -28,7 +28,7 @@ if __name__ == '__main__':
     try:
         gpsp.start() # start it up
         last_time = 0
-        print("# Time       Device     tdop     nSat")
+        print("# Time       Device     TDOP     nSat")
         while True:
             #It may take a second or two to get good data
             #print(gpsd.fix.latitude,', ',gpsd.fix.longitude,'  Time: ',gpsd.utc)
