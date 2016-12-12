@@ -397,11 +397,12 @@ struct peer {
  * These can appear in packets
  */
 #define	MODE_CONTROL	6	/* control mode */
-#define	MODE_PRIVATE	7	/* Dead: private mode */
+#define	MODE_PRIVATE	7	/* Dead: private mode, ntpdc */
 /*
- * This is a madeup mode for broadcast client.
+ * This is a madeup mode for broadcast client.  No longer used.
  */
-#define	MODE_BCLIENT	6	/* broadcast client mode */
+/* #define	MODE_BCLIENT	6	** broadcast client mode */
+#define	MODE_BCLIENTx	6	/* for pylib/util.py */
 
 #define	LEN_PKT_NOMAC	48 /* min header length */
 
@@ -612,13 +613,13 @@ struct pkt {
 /*
  * Configuration items.  These are for the protocol module (proto_config())
  */
-#define	PROTO_BROADCLIENT	1	/* (not used) */
-#define	PROTO_PRECISION		2	/* (not used) */
-#define	PROTO_AUTHENTICATE	3	/* (not used) */
-#define	PROTO_BROADDELAY	4	/* (not used) */
-#define	PROTO_AUTHDELAY		5
-#define PROTO_MULTICAST_ADD	6	/* (not used) */
-#define PROTO_MULTICAST_DEL	7	/* (not used) */
+/* #define	PROTO_BROADCLIENT	1 */
+/* #define	PROTO_PRECISION		2 */
+/* #define	PROTO_AUTHENTICATE	3 */
+/* #define	PROTO_BROADDELAY	4 */
+/* #define	PROTO_AUTHDELAY		5 */
+/* #define	PROTO_MULTICAST_ADD	6 */
+/* #define	PROTO_MULTICAST_DEL	7 */
 #define PROTO_NTP		8
 #define PROTO_KERNEL		9
 #define PROTO_MONITOR		10

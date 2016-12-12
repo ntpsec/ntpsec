@@ -2186,10 +2186,6 @@ apply_enable_disable(
 				option);
 			break;
 
-		case T_Auth:
-			proto_config(PROTO_AUTHENTICATE, enable, 0.);
-			break;
-
 		case T_Calibrate:
 			proto_config(PROTO_CAL, enable, 0.);
 			break;
