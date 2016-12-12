@@ -695,7 +695,7 @@ skipws(
 	return ptr;
 }
 
-/* [internal] check if a strtoXYZ ended at EOL or whistespace and
+/* [internal] check if a strtoXYZ ended at EOL or whitespace and
  * converted something at all. Return true if something went wrong.
  */
 static bool
