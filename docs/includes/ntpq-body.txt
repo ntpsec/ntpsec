@@ -273,8 +273,8 @@ ind assid status conf reach auth condition last_event cnt
 
 +mrulist+ [+limited+ | +kod+ | +mincount=+'count' | +laddr=+'localaddr' | +sort=+'sortorder' | +resany=+'hexmask' | +resall=+'hexmask']::
   Obtain and print traffic counts collected and maintained by the
-  monitor facility. This is useful for tracking who _uses_ your
-  server.
+  monitor facility. This is useful for tracking who _uses_ or
+  _abuses_ your server.
 +
 With the exception of +sort=+'sortorder', the options
 filter the list returned by +ntpd+. The +limited+ and +kod+ options
