@@ -1573,7 +1573,7 @@ or server.</dd>
 
 <dt>time offset:</dt>
 <dd>The difference between the ntpd calculated time and the local system
- clock's time.  (Also can be called phase offset)</dd>
+ clock's time.  Also called phase offset.</dd>
 
 <dt>upstream clock:</dt>
 <dd>Any remote clock or reference clock used as a source of time.</dd>
