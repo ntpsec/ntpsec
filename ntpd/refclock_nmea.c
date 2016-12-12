@@ -314,7 +314,6 @@ static bool	gpsfix_century	(struct calendar * jd, const gps_weektm * wd,
 static l_fp     eval_gps_time	(struct peer * peer, const struct calendar * gpst,
 				 const struct timespec * gpso, const l_fp * xrecv);
 
-static int	nmead_open	(const char * device);
 static void     save_ltc        (struct refclockproc * const, const char * const,
 				 size_t);
 
@@ -477,11 +476,6 @@ nmea_start(
 	pp->io.fd = refclock_open(peer->path ? peer->path : device,
 				  baudrate,
 				  LDISC_CLK);
-	if (0 >= pp->io.fd) {
-		pp->io.fd = nmead_open(device);
-		if (-1 == pp->io.fd)
-			return false;
-	}
 	LOGIF(CLOCKINFO, (LOG_NOTICE, "%s serial %s open at %s bps",
 	      refclock_name(peer), device, baudtext));
 
@@ -1874,81 +1868,4 @@ eval_gps_time(
 	return retv;
 }
 
-/*
- * ===================================================================
- *
- * NMEAD support
- *
- * original nmead support added by Jon Miner (cp_n18@yahoo.com)
- *
- * See http://home.hiwaay.net/~taylorc/gps/nmea-server/
- * for information about nmead
- *
- * To use this, you need to create a link from /dev/gpsX to
- * the server:port where nmead is running.  Something like this:
- *
- * ln -s server:port /dev/gps1
- *
- * Split into separate function by Juergen Perlinger
- * (perlinger-at-ntp-dot-org)
- *
- * ===================================================================
- */
-static int
-nmead_open(
-	const char * device
-	)
-{
-	int	fd = -1;		/* result file descriptor */
-	
-	char	host[80];		/* link target buffer	*/
-	char  * port;			/* port name or number	*/
-	int	rc;			/* result code (several)*/
-	int     sh;			/* socket handle	*/
-	struct addrinfo	 ai_hint;	/* resolution hint	*/
-	struct addrinfo	*ai_list;	/* resolution result	*/
-	struct addrinfo *ai;		/* result scan ptr	*/
-
-	fd = -1;
-	
-	/* try to read as link, make sure no overflow occurs */
-	rc = readlink(device, host, sizeof(host));
-	if ((size_t)rc >= sizeof(host))
-		return fd;	/* error / overflow / truncation */
-	host[rc] = '\0';	/* readlink does not place NUL	*/
-
-	/* get port */
-	port = strchr(host, ':');
-	if (!port)
-		return fd; /* not 'host:port' syntax ? */
-	*port++ = '\0';	/* put in separator */
-	
-	/* get address infos and try to open socket
-	 *
-	 * This getaddrinfo() is naughty in ntpd's nonblocking main
-	 * thread, but you have to go out of your wary to use this code
-	 * and typically the blocking is at startup where its impact is
-	 * reduced. The same holds for the 'connect()', as it is
-	 * blocking, too...
-	 */
-	ZERO(ai_hint);
-	ai_hint.ai_protocol = IPPROTO_TCP;
-	ai_hint.ai_socktype = SOCK_STREAM;
-	if (getaddrinfo(host, port, &ai_hint, &ai_list))
-		return fd;
-	
-	for (ai = ai_list; ai && (fd == -1); ai = ai->ai_next) {
-		sh = socket(ai->ai_family, ai->ai_socktype,
-			    ai->ai_protocol);
-		if (INVALID_SOCKET == sh)
-			continue;
-		rc = connect(sh, ai->ai_addr, ai->ai_addrlen);
-		if (-1 != rc)
-			fd = sh;
-		else
-			close(sh);
-	}
-	freeaddrinfo(ai_list);
-
-	return fd;
-}
+// end

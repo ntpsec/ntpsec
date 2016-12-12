@@ -7,7 +7,6 @@ Name: nmea
 Reference ID: GPS
 Serial Port: /dev/gps__u__; 4800-115200bps, 8N1
 Serial Port: /dev/gpspps__u__; for PPS
-Serial Port: /dev/gps__u__; symlink to server:port (for nmead)
 Features: +tty_clk+
 
 == Description ==
