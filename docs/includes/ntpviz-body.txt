@@ -123,7 +123,7 @@ The following plots are available:
    Clock time-jitter plot from the loop statistics (field 5).
 
 --local-gps::
-   Plot GPS Time Dilution of Precision (tdop) and Number of Sats Used
+   Plot GPS Time Dilution of Precision (TDOP) and Number of Sats Used
    (nSats).  This plot is only generated if there is a log file named
    gpsd in the log file directory.
 
