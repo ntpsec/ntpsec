@@ -26,7 +26,6 @@ def build(ctx):
 		"socktoa.c",
 		"ssl_init.c",
 		"syssignal.c",
-		"vint64ops.c",
 		"work_thread.c",
 		"ymd2yd.c",
 	]
