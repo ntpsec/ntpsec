@@ -459,11 +459,7 @@ shm_timer(
 	l_fp tsrcv;
 	l_fp tsref;
 	int c;
-
-	/* for formatting 'a_lastcode': */
-	struct calendar cd;
 	time_t tt;
-	vint64 ts;
 
 	enum segstat_t status;
 	struct shm_stat_t shm_stat;
@@ -516,22 +512,14 @@ shm_timer(
 	}
 
 
-	/* format the last time code in human-readable form into
-	 * 'pp->a_lastcode'. Someone claimed: "NetBSD has incompatible
-	 * tv_sec". I can't find a base for this claim, but we can work
-	 * around that potential problem. BTW, simply casting a pointer
-	 * is a receipe for disaster on some architectures.
+	/*
+	 * Add POSIX UTC seconds and fractional seconds as a timecode.
+	 * We used to unpack this to calendar time, but it is bad
+	 * practice for the driver to pretend to know calendar time;
+	 * that interpretation is best left to higher levels.
 	 */
-	tt = (time_t)shm_stat.tvt.tv_sec;
-	ts = time_to_vint64(&tt);
-	ntpcal_time_to_date(&cd, &ts);
-		
-	/* add ntpq -c cv timecode in ISO 8601 format */
 	c = snprintf(pp->a_lastcode, sizeof(pp->a_lastcode),
-		     "%04u-%02u-%02uT%02u:%02u:%02u.%09ldZ",
-		     cd.year, cd.month, cd.monthday,
-		     cd.hour, cd.minute, cd.second,
-		     shm_stat.tvt.tv_nsec);
+		     "%ld.%09ld", shm_stat.tvt.tv_sec,	shm_stat.tvt.tv_nsec);
 	pp->lencode = (c < (int)sizeof(pp->a_lastcode)) ? c : 0;
 
 	/* check 1: age control of local time stamp */
