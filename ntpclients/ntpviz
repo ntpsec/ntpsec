@@ -805,7 +805,7 @@ useful to see how the measured offset is behaving.</p>
 
 <p>Closer to 0s is better.  An ideal system would be a horizontal line
 at 0s. Typical 90%% ranges may be: local serial GPS 200 ms; local PPS
-20µs</p>
+20µs.</p>
 
 <p>Clock Offset is field 5 in the peerstats log file.</p>
 """
