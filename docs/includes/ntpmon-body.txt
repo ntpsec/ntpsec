@@ -39,4 +39,23 @@ Command line options are described following.
 
 If no hostname is specified on the command line, localhost is monitored.
 
+== Commands ==
+
+A few single-keystroke commands are available.
+
+a:: Change peer display to apeers mode, showing association IDs.
+
+n:: Toggle display of hostnames (vs. IP addresses).
+
+o:: Change peer display to opeers mode, showing destination address.
+
+p:: Change peer display to default mode, showing refid
+
+q:: Cleanly terminate the program.
+
+w:: Toggle wide mode.
+
+x:: Cleanly terminate the program.
+
+
 // end

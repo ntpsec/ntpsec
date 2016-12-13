@@ -57,6 +57,7 @@ class OutputContext:
         global stdscr
         stdscr = curses.initscr()
         curses.curs_set(0)
+        curses.cbreak()
     def __exit__(self, extype_unused, value_unused, traceback_unused):
         curses.endwin()
 
@@ -152,8 +153,26 @@ if __name__ == '__main__':
                     pass
                 # Display all
                 stdscr.refresh()
-                # Nyquist-interval sampling
-                time.sleep(min(hpolls) / 2)
+                # Nyquist-interval sampling - half the smallest poll interval
+                # seen in the last cycle, rounded up to 1 second.
+                stdscr.timeout(int((min(hpolls) / 2) + 0.5))
+                try:
+                    key = stdscr.getkey()
+                    if key == 'q' or key == 'x':
+                        raise SystemExit(0)
+                    elif key == 'a':
+                        peer_report.displaymode = 'apeers'
+                    elif key == 'o':
+                        peer_report.displaymode = 'opeers'
+                    elif key == 'p':
+                        peer_report.displaymode = 'peers'
+                    elif key == 'w':
+                        peer_report.wideremote = not peer_report.wideremote
+                    elif key == 'n':
+                        peer_report.showhostnames = not peer_report.showhostnames
+                        mru_report.showhostnames = not mru_report.showhostnames
+                except curses.error:
+                    pass
     except KeyboardInterrupt:
         print("")
     except (Fatal, ntp.packet.ControlException) as e:
