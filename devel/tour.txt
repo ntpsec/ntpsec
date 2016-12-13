@@ -42,19 +42,17 @@ arithmetic relative to the cycle length.
 
 === time64_t ===
 
-The time64_t type is a historical relic.  NTP was written well before
-the 64-bit word size became common. While compilers on 32-bit machines
-sometimes have had "long long" as an integral 64-bit type, this was not
-guaranteed before C99.
+NTP was written well before the 64-bit word size became common. While
+compilers on 32-bit machines sometimes have had "long long" as an
+integral 64-bit type, this was not guaranteed before C99.
 
-Thus, NTP carries a "variant 64-bit int" type that is actually a union
-with several different interpretations. Support is mainly in
-libntp/time64_tops.c.  If that code confuses you, don't feel slow; it
-really is ugly and hard to understand, and would have been removed
-already if it were not deeply intertwined with the calendar code.
+Thus in order to do calendar arithmetic, NTP used to carry a "vint64"
+(variant 64-bit int) type that was actually a union with several
+different interpretations. This has been replaced with a scalar
+time64_t which is used the same way but implemented as a uint64_t.
 
-Someday all operations on time64_ts will be replaced by code using
-int64_t or uint64_t scalars, and this section will go away.
+This still has some utility because NTP still runs on 32-bit machines
+with a 32-bit time_t.
 
 === refid ===
 
