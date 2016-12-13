@@ -17,9 +17,12 @@ Python 2.x, x >= 6, or Python 3.x, x >= 3::
    the guidance for packagers in devel/packaging.txt).  Our Python code
    has been written polyglot to also run with production versions of
    Python 3.  Note that you will need both the ordinary Python
-   intallation and Python dev tools, if your OS makes such a
+   installation and Python dev tools, if your OS makes such a
    distinction.
 
+   Required to build.
+   Debian: python-dev
+   Fedora: python-devel
    SLES: python-devel
 
 bison::
