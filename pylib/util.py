@@ -229,7 +229,7 @@ class PeerSummary:
                 srcport = value
             elif name == "reftime":
                 reftime = value	# l_fp timestamp
-        if hmode == ntp.magic.MODE_BCLIENT:
+        if hmode == ntp.magic.MODE_BCLIENTX:
             # broadcastclient or multicastclient
             ptype = 'b'
         elif hmode == ntp.magic.MODE_BROADCAST:
