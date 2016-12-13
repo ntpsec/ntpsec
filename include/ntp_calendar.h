@@ -96,8 +96,8 @@ extern systime_func_ptr ntpcal_set_timefunc(systime_func_ptr);
 /*
  * Convert between 'time_t' and 'time64_t'
  */
-extern time64_t time_to_time64(const time_t *);
-extern time_t time64_t_to_time(const time64_t *);
+extern time64_t time_to_time64(const time_t);
+extern time_t time64_to_time(const time64_t);
 
 /*
  * Get the build date & time. ATTENTION: The time zone is not specified!
@@ -130,7 +130,7 @@ ntpcal_ntp_to_ntp(uint32_t /* ntp */, const time_t * /* pivot */);
  * since midnight.
  */
 extern ntpcal_split
-ntpcal_daysplit(const time64_t *);
+ntpcal_daysplit(const time64_t);
 
 /*
  * Merge a number of days and a number of seconds into seconds,
@@ -284,14 +284,14 @@ ntpcal_daysplit_to_tm(struct tm * /* utm */, const ntpcal_split * /* ds */,
 		      int32_t /* dof */);
 
 extern int
-ntpcal_time_to_date(struct calendar * /* jd */, const time64_t * /* ts */);
+ntpcal_time_to_date(struct calendar * /* jd */, const time64_t /* ts */);
 
 extern int32_t
 ntpcal_periodic_extend(int32_t /* pivot */, int32_t /* value */,
 		       int32_t /* cycle */);
 
 extern int
-ntpcal_ntp64_to_date(struct calendar * /* jd */, const time64_t * /* ntp */);
+ntpcal_ntp64_to_date(struct calendar * /* jd */, const time64_t /* ntp */);
 
 extern int
 ntpcal_ntp_to_date(struct calendar * /* jd */,	uint32_t /* ntp */,
@@ -316,7 +316,7 @@ extern ntpcal_split
 isocal_split_eraweeks(int32_t /* weeks */);
 
 extern int
-isocal_ntp64_to_date(struct isodate * /* id */, const time64_t * /* ntp */);
+isocal_ntp64_to_date(struct isodate * /* id */, const time64_t /* ntp */);
 
 extern int
 isocal_ntp_to_date(struct isodate * /* id */, uint32_t /* ntp */,

@@ -130,7 +130,7 @@ TEST(calendar, DaySplitMerge) {
 	for (day = -1000000; day <= 1000000; day += 100) {
 		for (sec = -100000; sec <= 186400; sec += 10000) {
 			time64_t	     merge = ntpcal_dayjoin(day, sec);
-			ntpcal_split split = ntpcal_daysplit(&merge);
+			ntpcal_split split = ntpcal_daysplit(merge);
 			int32_t	     eday  = day;
 			int32_t	     esec  = sec;
 

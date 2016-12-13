@@ -1651,7 +1651,7 @@ unfold_day(
 	 * in split representation.
 	 */
 	rec_qw = ntpcal_ntp_to_ntp(rec_ui - SECSPERDAY/2, NULL);
-	rec_ds = ntpcal_daysplit(&rec_qw);
+	rec_ds = ntpcal_daysplit(rec_qw);
 	rec_ds.lo = ntpcal_periodic_extend(rec_ds.lo,
 					   ntpcal_date_to_daysec(jd),
 					   SECSPERDAY);
@@ -1835,7 +1835,7 @@ eval_gps_time(
 
 	/* - get unfold base: day of full recv time - 512 weeks */
 	vi64 = ntpcal_ntp_to_ntp(xrecv->l_ui, NULL);
-	rs64 = ntpcal_daysplit(&vi64);
+	rs64 = ntpcal_daysplit(vi64);
 	rcv_sec = rs64.lo;
 	rcv_day = rs64.hi - 512 * 7;
 
