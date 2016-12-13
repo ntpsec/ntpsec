@@ -60,7 +60,7 @@ get_struct_tm(
 	time_t	   ts;
 
 	int64_t tl;
-	ts = tl = time64_ts(*stamp);
+	ts = tl = time64s(*stamp);
 
 	/*
 	 * If there is chance of truncation, try to fix it. Let the

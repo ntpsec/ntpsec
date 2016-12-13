@@ -185,18 +185,18 @@ leapsec_load(
 			cp++;
 			if (*cp == '@') {
 				cp = skipws(cp+1);
-				settime64_tu(pt->head.expire, strtoull(cp, &ep, 10));
+				settime64u(pt->head.expire, strtoull(cp, &ep, 10));
 				if (parsefail(cp, ep))
 					goto fail_read;
-				pt->lsig.etime = time64_tlo(pt->head.expire);
+				pt->lsig.etime = time64lo(pt->head.expire);
 			} else if (*cp == '$') {
 				cp = skipws(cp+1);
-				settime64_tu(pt->head.update, strtoull(cp, &ep, 10));
+				settime64u(pt->head.update, strtoull(cp, &ep, 10));
 				if (parsefail(cp, ep))
 					goto fail_read;
 			}		    
 		} else if (isdigit((uint8_t)*cp)) {
-		    settime64_tu(ttime, strtoull(cp, &ep, 10));
+		    settime64u(ttime, strtoull(cp, &ep, 10));
 			if (parsefail(cp, ep))
 				goto fail_read;
 			cp = skipws(ep);
@@ -211,7 +211,7 @@ leapsec_load(
 			} else {
 				pt->head.base_tai = (int16_t)taiof;
 			}
-			pt->lsig.ttime = time64_tlo(ttime);
+			pt->lsig.ttime = time64lo(ttime);
 			pt->lsig.taiof = (int16_t)taiof;
 		}
 	}
@@ -294,14 +294,14 @@ leapsec_query(
 		 * both modes is easier to maintain.
 		 */
 		last = pt->head.ttime;
-		qr->warped = (int16_t)(time64_tlo(last) -
-				       time64_tlo(pt->head.dtime));
+		qr->warped = (int16_t)(time64lo(last) -
+				       time64lo(pt->head.dtime));
 		next = ts64 + qr->warped;
 		reload_limits(pt, next);
 		fired = (pt->head.ebase == last);
 		if (fired) {
 			ts64 = next;
-			ts32 = time64_tlo(next);
+			ts32 = time64lo(next);
 		} else {
 			qr->warped = 0;
 		}
@@ -314,7 +314,7 @@ leapsec_query(
 		return fired;
 
 	/* now start to collect the remaining data */
-	due32 = time64_tlo(pt->head.dtime);
+	due32 = time64lo(pt->head.dtime);
 
 	qr->tai_diff  = pt->head.next_tai - pt->head.this_tai;
 	qr->ttime     = pt->head.ttime;
@@ -814,7 +814,7 @@ leapsec_add(
 	ttime = ntpcal_date_to_ntp64(&fts);
 
 	li.ttime = ttime;
-	li.stime = time64_tlo(ttime) - time64_tlo(starttime);
+	li.stime = time64lo(ttime) - time64lo(starttime);
 	li.taiof = (pt->head.size ? pt->info[0].taiof : pt->head.base_tai)
 	         + (insert ? 1 : -1);
 	li.dynls = 1;
@@ -852,7 +852,7 @@ leapsec_raw(
 	fts.month--; /* was in range 1..12, no overflow here! */
 	starttime    = ntpcal_date_to_ntp64(&fts);
 	li.ttime = ttime;
-	li.stime = time64_tlo(ttime) - time64_tlo(starttime);
+	li.stime = time64lo(ttime) - time64lo(starttime);
 	li.taiof = (int16_t)taiof;
 	li.dynls = (dynls != 0);
 	return add_range(pt, &li);

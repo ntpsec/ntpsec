@@ -379,9 +379,9 @@ lfp_stamp_to_tspec(
 
 	/* copying a time64_t to a time_t needs some care... */
 #if NTP_SIZEOF_TIME_T <= 4
-	out.tv_sec = (time_t)time64_tlo(sec);
+	out.tv_sec = (time_t)time64lo(sec);
 #else
-	out.tv_sec = (time_t)time64_ts(sec);
+	out.tv_sec = (time_t)time64s(sec);
 #endif
 
 	return out;
