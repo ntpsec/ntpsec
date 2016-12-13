@@ -39,7 +39,11 @@ temperatures will be hardware specific.
 
 import sys, re, time, subprocess
 
-output = subprocess.check_output(["sensors", "-u"], universal_newlines=True)
+try:
+    output = subprocess.check_output(["sensors", "-u"], universal_newlines=True)
+except:
+    print("Unable to run 'sensors -u'")
+    exit(0)
 
 lines = output.split( '\n' )
 
