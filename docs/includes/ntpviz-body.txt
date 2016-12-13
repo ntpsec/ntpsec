@@ -63,7 +63,7 @@ subset of comparative plots for multiple directories.
 
 -e TIME or --endtime TIME::
     With -s and -e you set the start and end times.  TIME is either numeric
-    POSIX time (sconds since the start of the epoch) or ISO 8601-style
+    POSIX time (seconds since the start of the epoch) or ISO 8601-style
     timestamps (yyyy-mmm-ddThh:mm:ss). +
     The default end time is the last logfile entry timestamp.   +
     The default start time is computed as the end time minus DAYS. +
