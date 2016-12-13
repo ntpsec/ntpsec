@@ -45,5 +45,8 @@ w:: Toggle wide mode.
 
 x:: Cleanly terminate the program.
 
+<space>:: Rotate through all three peer display modes.
+
+?:: List these commands.
 
 // end
