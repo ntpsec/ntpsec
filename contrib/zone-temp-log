@@ -20,10 +20,13 @@ Field 1: unix UTC time in seconds
 Field 2: Log source (ZONE)
 Field 3: CPU Temperature
 
+ntpviz will read akll file temps* by default. Do not step on
+temps used by temper-temp-log.
+
 Sample crontab usage:
 
 # take and log cpu temp every 5 mins
-*/5 * * * * /usr/local/sbin/zone-temp-log >> /var/log/ntpstats/ztemps
+*/5 * * * * /usr/local/sbin/zone-temp-log >> /var/log/ntpstats/tempsz
 """
 
 from __future__ import print_function
