@@ -65,7 +65,7 @@ ntpclients/::   Directory containing sources for clients - utility programs
 
 ntpd/::		Sources for the main time-synchronization daemon.
 
-ntpfrob/::       The ntpfrob utility collects several small diagnostic
+ntpfrob/::      The ntpfrob utility collects several small diagnostic
 		functions for reading and tweaking the local clock
 		hardware, including reading the clock tick rate,
 		precision, and jitter.
