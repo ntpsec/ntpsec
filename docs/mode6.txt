@@ -88,6 +88,9 @@ padded to a 4-octet boundary.  Responses may be multiple UDP packets;
 they may arrive out of order, and the client is responsible for
 reassembling the payloads.
 
+All multibyte numeric fields are interpreted as big-endian
+2s-complement integers.
+
 [[varlists]]
 == Variable-Value Lists ==
 
@@ -491,14 +494,6 @@ header fields, then the payload.
 The cryptographic hash is normally 16 octets of MD5 hash, but if ntpd
 is built with OpenSSL support it is possible to use and generate
 20-octet-long SHA1 keys as well.
-
-== Known bugs ==
-
-The quality of legacy ntpd implementations of this protocol is poor.
-Clients should be prepared for the following quirk:
-
-* In textual varlists, value literals may have spurious trailing NULs
-  which must be stripped.
 
 '''''
 
