@@ -1,24 +1,28 @@
 #!/usr/bin/env python
 # SPDX-License-Identifier: BSD-2-clause
-"""
+'''\
 Keystroke commands:
 
-a: Change peer display to apeers mode, showing association IDs.
+'a': Change peer display to apeers mode, showing association IDs.
 
-n: Toggle display of hostnames (vs. IP addresses).
+'n': Toggle display of hostnames (vs. IP addresses).
 
-o: Change peer display to opeers mode, showing destination address.
+'o': Change peer display to opeers mode, showing destination address.
 
-p: Change peer display to default mode, showing refid
+'p': Change peer display to default mode, showing refid
 
-q: Cleanly terminate the program.
+'q': Cleanly terminate the program.
 
-s: Show all hosts, not just reachable ones.
+'s': Show all hosts, not just reachable ones.
 
-w: Toggle wide mode.
+'w': Toggle wide mode.
 
-x: Cleanly terminate the program.
-"""
+'x': Cleanly terminate the program.
+
+' ': Rotate through all three peer display modes. 
+
+'?': Display helpscreen
+'''
 
 from __future__ import print_function, division
 
@@ -180,6 +184,13 @@ if __name__ == '__main__':
                         showall = not showall
                     elif key == 'w':
                         peer_report.wideremote = not peer_report.wideremote
+                    elif key == " ":
+                        if peer_report.displaymode == 'peers':
+                            peer_report.displaymode = 'apeers'
+                        elif peer_report.displaymode == 'apeers':
+                            peer_report.displaymode = 'opeers'
+                        else:
+                            peer_report.displaymode = 'peers'
                     elif key == '?':
                         helpmode = True
                 except curses.error:
