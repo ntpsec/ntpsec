@@ -23,7 +23,7 @@ Field 3: CPU Temperature
 Sample crontab usage:
 
 # take and log cpu temp every 5 mins
-*/5 * * * * /usr/local/sbin/zone-temp-log >> /var/log/ntpstats/temps
+*/5 * * * * /usr/local/sbin/zone-temp-log >> /var/log/ntpstats/ztemps
 """
 
 from __future__ import print_function
