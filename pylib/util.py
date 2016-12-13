@@ -100,7 +100,7 @@ def termsize():
 class PeerSummary:
     "Reusable report generator for peer statistics"
     def __init__(self, displaymode, pktversion, showhostnames, wideremote, termwidth=None, debug=0):
-        self.displaymode = displaymode		# peers/apeers.opeers
+        self.displaymode = displaymode		# peers/apeers/opeers
         self.pktversion = pktversion		# interpretation of flash bits
         self.showhostnames = showhostnames	# If false, display numeric IPs
         self.wideremote = wideremote		# show wide remote names?
