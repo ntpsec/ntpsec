@@ -399,10 +399,10 @@ struct peer {
 #define	MODE_CONTROL	6	/* control mode */
 #define	MODE_PRIVATE	7	/* Dead: private mode, ntpdc */
 /*
- * This is a madeup mode for broadcast client.  No longer used.
+ * This is a madeup mode for broadcast client.  No longer used by ntpd.
  */
 /* #define	MODE_BCLIENT	6	** broadcast client mode */
-#define	MODE_BCLIENTx	6	/* for pylib/util.py */
+#define	MODE_BCLIENTX	6	/* for pylib/util.py */
 
 #define	LEN_PKT_NOMAC	48 /* min header length */
 
