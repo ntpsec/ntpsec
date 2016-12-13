@@ -4,7 +4,7 @@
 
 == Synopsis ==
 
-+ntpmon+ [-a | --all] [-n | --numeric] [-w | --wide] [hostname]
++ntpmon+ [hostname]
 
 == Description ==
 
@@ -23,20 +23,6 @@ watched and the (local) time at which it was last updated).
 
 ^C cleanly terminates the program.
 
-== Options ==
-
-Command line options are described following.
-
-+-a+, +--all+::
-  Show all hosts, not just reachable ones.
-+-n+, +--numeric+::
-  Output all host addresses in numeric format rather than
-  converting to the canonical host names.
-+-w+, +--wide+::
-  Wide mode: if the host name or IP Address doesn't fit, write the
-  full name/address and indent the next line so columns line up.
-  The default truncates the name or address.
-
 If no hostname is specified on the command line, localhost is monitored.
 
 == Commands ==
@@ -52,6 +38,8 @@ o:: Change peer display to opeers mode, showing destination address.
 p:: Change peer display to default mode, showing refid
 
 q:: Cleanly terminate the program.
+
+s:: Show all hosts, not just reachable ones.
 
 w:: Toggle wide mode.
 

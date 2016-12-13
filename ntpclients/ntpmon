@@ -62,34 +62,13 @@ class OutputContext:
         curses.endwin()
 
 usage = '''
-USAGE: ntpmon [-anw] [--all] [--numeric] [--wide] [host]
-  Flg Arg Option-Name    Description
-   -a no  all            Show all hosts, not just reachable ones.
-   -n no  numeric        numeric host addresses
-   -w no  wide           enable wide display of addresses
+USAGE: ntpmon [host]
 '''
 
 if __name__ == '__main__':
-    try:
-        (options, arguments) = getopt.getopt(sys.argv[1:],
-                                             "anw", ["all", "numeric", "wide"])
-    except getopt.GetoptError as e:
-        sys.stderr.write("%s\n" % e)
-        sys.stderr.write(usage)
-        raise SystemExit(1)
-    progname = sys.argv[0]
-
     showhostnames = True
     wideremote = False
     showall = False
-    for (switch, val) in options:
-        if switch in ("-a", "--all"):
-            showall = True
-        elif switch in ("-n", "--numeric"):
-            showhostnames = False
-        elif switch in ("-w", "--wide"):
-            wideremote = True
-
     poll_interval = 1
     peer_report = ntp.util.PeerSummary(displaymode="peers",
                                        pktversion=ntp.magic.NTP_VERSION,
@@ -100,7 +79,7 @@ if __name__ == '__main__':
     mru_report = ntp.util.MRUSummary(showhostnames)
     try:
         session = ntp.packet.ControlSession()
-        session.openhost(arguments[0] if arguments else "localhost")
+        session.openhost(sys.argv[1] if len(sys.argv) > 1 else "localhost")
         sysvars = session.readvar()
         with OutputContext() as ctx:
             while True:
@@ -162,15 +141,17 @@ if __name__ == '__main__':
                         raise SystemExit(0)
                     elif key == 'a':
                         peer_report.displaymode = 'apeers'
+                    elif key == 'n':
+                        peer_report.showhostnames = not peer_report.showhostnames
+                        mru_report.showhostnames = not mru_report.showhostnames
                     elif key == 'o':
                         peer_report.displaymode = 'opeers'
                     elif key == 'p':
                         peer_report.displaymode = 'peers'
+                    elif key == 's':
+                        showall = not showall
                     elif key == 'w':
                         peer_report.wideremote = not peer_report.wideremote
-                    elif key == 'n':
-                        peer_report.showhostnames = not peer_report.showhostnames
-                        mru_report.showhostnames = not mru_report.showhostnames
                 except curses.error:
                     pass
     except KeyboardInterrupt:
