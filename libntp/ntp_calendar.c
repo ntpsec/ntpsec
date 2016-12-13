@@ -64,7 +64,7 @@ time_to_time64_t(
 	tt = *ptt;
 
 #if NTP_SIZEOF_TIME_T <= 4
-	settime64_thiu(res, 0);
+	settime64_t(res, 0);
 	if (tt < 0) {
 		settime64_tlo(res, (uint32_t)-tt);
 		negtime64_t(res);
