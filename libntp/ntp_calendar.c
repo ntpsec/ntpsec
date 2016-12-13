@@ -55,13 +55,10 @@ now(void)
  */
 time64_t
 time_to_time64(
-	const time_t * ptt
+	const time_t tt
 	)
 {
 	time64_t res;
-	time_t tt;
-
-	tt = *ptt;
 
 #if NTP_SIZEOF_TIME_T <= 4
 	settime64(res, 0);
@@ -81,17 +78,17 @@ time_to_time64(
 
 
 time_t
-time64_t_to_time(
-	const time64_t *tv
+time64_to_time(
+	const time64_t tv
 	)
 {
 	time_t res;
 
 #if NTP_SIZEOF_TIME_T <= 4
-	res = (time_t)time64lo(*tv);
+	res = (time_t)time64lo(tv);
 
 #else
-	res = (time_t)time64s(*tv);
+	res = (time_t)time64s(tv);
 #endif
 
 	return res;
@@ -441,14 +438,14 @@ ntpcal_ntp_to_ntp(
  */
 ntpcal_split
 ntpcal_daysplit(
-	const time64_t *ts
+	const time64_t ts
 	)
 {
 	ntpcal_split res;
 
 	/* manual floor division by SECSPERDAY */
-	res.hi = (int32_t)(time64s(*ts) / SECSPERDAY);
-	res.lo = (int32_t)(time64s(*ts) % SECSPERDAY);
+	res.hi = (int32_t)(time64s(ts) / SECSPERDAY);
+	res.lo = (int32_t)(time64s(ts) % SECSPERDAY);
 	if (res.lo < 0) {
 		res.hi -= 1;
 		res.lo += SECSPERDAY;
@@ -761,7 +758,7 @@ ntpcal_daysplit_to_tm(
 int
 ntpcal_time_to_date(
 	struct calendar	*jd,
-	const time64_t	*ts
+	const time64_t ts
 	)
 {
 	ntpcal_split ds;
@@ -1102,14 +1099,14 @@ ntpcal_date_to_time(
 	secs = ntpcal_date_to_daysec(jd);
 	join = ntpcal_dayjoin(days, secs);
 
-	return time64_t_to_time(&join);
+	return time64_to_time(join);
 }
 
 
 int
 ntpcal_ntp64_to_date(
 	struct calendar *jd,
-	const time64_t    *ntp
+	const time64_t  ntp
 	)
 {
 	ntpcal_split ds;
@@ -1135,7 +1132,7 @@ ntpcal_ntp_to_date(
 	 * process the parts.
 	 */
 	ntp64 = ntpcal_ntp_to_ntp(ntp, piv);
-	return ntpcal_ntp64_to_date(jd, &ntp64);
+	return ntpcal_ntp64_to_date(jd, ntp64);
 }
 
 
@@ -1367,7 +1364,7 @@ isocal_split_eraweeks(
 int
 isocal_ntp64_to_date(
 	struct isodate *id,
-	const time64_t   *ntp
+	const time64_t ntp
 	)
 {
 	ntpcal_split ds;
@@ -1416,7 +1413,7 @@ isocal_ntp_to_date(
 	 * convert the full time stamp.
 	 */
 	ntp64 = ntpcal_ntp_to_ntp(ntp, piv);
-	return isocal_ntp64_to_date(id, &ntp64);
+	return isocal_ntp64_to_date(id, ntp64);
 }
 
 /*

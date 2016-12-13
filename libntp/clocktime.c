@@ -133,7 +133,7 @@ ntp_to_year(
 	ntpcal_split s;
 
 	t = ntpcal_ntp_to_ntp(ntp, NULL);
-	s = ntpcal_daysplit(&t);
+	s = ntpcal_daysplit(t);
 	s = ntpcal_split_eradays(s.hi + DAY_NTP_STARTS - 1, NULL);
 	return s.hi + 1;
 }

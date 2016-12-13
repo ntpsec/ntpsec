@@ -146,7 +146,7 @@ common_prettydate(
 		 * ntpcal_time_to_date()
 		 */
 		struct calendar jd;
-		ntpcal_time_to_date(&jd, &sec);
+		ntpcal_time_to_date(&jd, sec);
 		snprintf(bp, LIB_BUFLENGTH, pfmt,
 			 (u_long)ts->l_ui, (u_long)ts->l_uf,
 			 jd.year, jd.month, jd.monthday,

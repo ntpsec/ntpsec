@@ -80,7 +80,7 @@ static bool   betweenu32(uint32_t, uint32_t, uint32_t);
 static void   reset_times(leap_table_t*);
 static bool   leapsec_add(leap_table_t*, const time64_t, int);
 static bool   leapsec_raw(leap_table_t*, const time64_t, int, int);
-static char * lstostr(const time64_t * ts);
+static char * lstostr(const time64_t ts);
 
 /* =====================================================================
  * Get & Set the current leap table
@@ -238,16 +238,16 @@ leapsec_dump(
 	time64_t          ts;
 	struct calendar atb, ttb;
 
-	ntpcal_ntp64_to_date(&ttb, &pt->head.expire);
+	ntpcal_ntp64_to_date(&ttb, pt->head.expire);
 	(*func)(farg, "leap table (%u entries) expires at %04u-%02u-%02u:\n",
 		pt->head.size,
 		ttb.year, ttb.month, ttb.monthday);
 	idx = pt->head.size;
 	while (idx-- != 0) {
 		ts = pt->info[idx].ttime;
-		ntpcal_ntp64_to_date(&ttb, &ts);
+		ntpcal_ntp64_to_date(&ttb, ts);
 		ts = ts - pt->info[idx].stime;
-		ntpcal_ntp64_to_date(&atb, &ts);
+		ntpcal_ntp64_to_date(&atb, ts);
 
 		(*func)(farg, "%04u-%02u-%02u [%c] (%04u-%02u-%02u) - %d\n",
 			ttb.year, ttb.month, ttb.monthday,
@@ -431,12 +431,12 @@ leapsec_load_stream(
 
 	if (pt->head.size)
 		msyslog(LOG_NOTICE, "%s ('%s'): loaded, expire=%s last=%s ofs=%d",
-			logPrefix, fname, lstostr(&pt->head.expire),
-			lstostr(&pt->info[0].ttime), pt->info[0].taiof);
+			logPrefix, fname, lstostr(pt->head.expire),
+			lstostr(pt->info[0].ttime), pt->info[0].taiof);
 	else
 		msyslog(LOG_NOTICE,
 			"%s ('%s'): loaded, expire=%s ofs=%d (no entries after build date)",
-			logPrefix, fname, lstostr(&pt->head.expire),
+			logPrefix, fname, lstostr(pt->head.expire),
 			pt->head.base_tai);
 	
 	return leapsec_set_table(pt);
@@ -543,7 +543,7 @@ leapsec_daystolive(
 	pt = leapsec_get_table(false);
 	limit = ntpcal_ntp_to_ntp(when, tpiv);
 	limit = pt->head.expire - limit;
-	return ntpcal_daysplit(&limit).hi;
+	return ntpcal_daysplit(limit).hi;
 }
 
 /* ------------------------------------------------------------------ */
@@ -795,7 +795,7 @@ leapsec_add(
 		return false;
 	}
 
-	ntpcal_ntp64_to_date(&fts, &now64);
+	ntpcal_ntp64_to_date(&fts, now64);
 	/* To guard against dangling leap flags: do not accept leap
 	 * second request on the 1st hour of the 1st day of the month.
 	 */
@@ -843,7 +843,7 @@ leapsec_raw(
 		return false;
 	}
 
-	ntpcal_ntp64_to_date(&fts, &ttime);
+	ntpcal_ntp64_to_date(&fts, ttime);
 	/* If this does not match the exact month start, bail out. */
 	if (fts.monthday != 1 || fts.hour || fts.minute || fts.second) {
 		errno = EINVAL;
@@ -986,7 +986,7 @@ leapsec_validate(
  * lstostr - prettyprint NTP seconds
  */
 static char * lstostr(
-	const time64_t * ts)
+	const time64_t ts)
 {
 	char *		buf;
 	struct calendar tm;
