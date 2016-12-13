@@ -1309,9 +1309,9 @@ Python by ESR, concept and gnuplot code by Dan Drown.
 
     args.period = int( float(args.period) * ntp.statfiles.NTPStats.SecondsInDay)
     if args.endtime is not None:
-        args.endtime = iso_to_posix(args.endtime)
+        args.endtime = ntp.statfiles.iso_to_posix(args.endtime)
     if args.starttime is not None:
-        args.starttime = iso_to_posix(args.starttime)
+        args.starttime = ntp.statfiles.iso_to_posix(args.starttime)
 
     args.statsdirs = [os.path.expanduser(path)
                      for path in args.statsdirs.split(",")]
