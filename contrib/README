@@ -9,10 +9,6 @@ by 'ntpviz --local-temps'
 gps-log is a tool to log gpsd data and write the data to stdout.  Useful
 to create a log that can be used by 'ntpviz --local-gps'
 
-pi-temp-log for the Raspberry Pi.  It is a tool to read a magic /sys file
-to get the CPU temperature and write the temperatures to stdout.  Useful
-to create a log that can be used by 'ntpviz --local-temps'
-
 smartctl-temp-log for hard drives.  It is a tool to read a hard drive's
 SMART data to get the disk temperature and write the temperature
 to stdout.  Useful to create a log that can be used by 'ntpviz
@@ -22,3 +18,8 @@ temper-temp-log for TEMPer USB thermometer.  Useful for logging room
 temperature.  This reads the thermometer using the temper-python command
 line utility and writes the temperatures to stdout.  Useful to create a
 log that can be used by 'ntpviz --local-temps'
+
+zone-temp-log reads /sys/class/thermal/thermal_zone*/temp to find the CPU
+temperature.  Writes all temperatures found to stdout on one line, preceded by
+the unix UTC time in seconds.  This is useful on any Linux system that
+supports the /sys/class/thermal/thermal_zone*/temp interface.
