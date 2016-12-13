@@ -1806,7 +1806,7 @@ eval_gps_time(
 	/* If we fully trust the GPS receiver, just combine days and
 	 * seconds and be done. */
 	if (peer->ttl & NMEA_DATETRUST_MASK) {
-		retv.l_ui = time64_tlo(ntpcal_dayjoin(gps_day, gps_sec));
+		retv.l_ui = time64lo(ntpcal_dayjoin(gps_day, gps_sec));
 		return retv;
 	}
 
@@ -1864,7 +1864,7 @@ eval_gps_time(
 	}
 
 	/* - build result and be done */
-	retv.l_ui = time64_tlo(ntpcal_dayjoin(adj_day, gps_sec));
+	retv.l_ui = time64lo(ntpcal_dayjoin(adj_day, gps_sec));
 	return retv;
 }
 

@@ -96,7 +96,7 @@ extern systime_func_ptr ntpcal_set_timefunc(systime_func_ptr);
 /*
  * Convert between 'time_t' and 'time64_t'
  */
-extern time64_t time_to_time64_t(const time_t *);
+extern time64_t time_to_time64(const time_t *);
 extern time_t time64_t_to_time(const time64_t *);
 
 /*

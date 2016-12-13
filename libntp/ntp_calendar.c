@@ -54,7 +54,7 @@ now(void)
  *---------------------------------------------------------------------
  */
 time64_t
-time_to_time64_t(
+time_to_time64(
 	const time_t * ptt
 	)
 {
@@ -64,16 +64,16 @@ time_to_time64_t(
 	tt = *ptt;
 
 #if NTP_SIZEOF_TIME_T <= 4
-	settime64_t(res, 0);
+	settime64(res, 0);
 	if (tt < 0) {
-		settime64_tlo(res, (uint32_t)-tt);
-		negtime64_t(res);
+		settime64lo(res, (uint32_t)-tt);
+		negtime64(res);
 	} else {
-		settime64_tlo(res, (uint32_t)tt);
+		settime64lo(res, (uint32_t)tt);
 	}
 
 #else
-	settime64_ts(res, tt);
+	settime64s(res, tt);
 #endif
 
 	return res;
@@ -88,10 +88,10 @@ time64_t_to_time(
 	time_t res;
 
 #if NTP_SIZEOF_TIME_T <= 4
-	res = (time_t)time64_tlo(*tv);
+	res = (time_t)time64lo(*tv);
 
 #else
-	res = (time_t)time64_ts(*tv);
+	res = (time_t)time64s(*tv);
 #endif
 
 	return res;
@@ -382,11 +382,11 @@ ntpcal_ntp_to_time(
 {
 	time64_t res;
 
-	settime64_ts(res, (pivot != NULL) ? *pivot : now());
-	settime64_tu(res, time64_tu(res)-0x80000000);	/* unshift of half range */
+	settime64s(res, (pivot != NULL) ? *pivot : now());
+	settime64u(res, time64u(res)-0x80000000);	/* unshift of half range */
 	ntp	-= (uint32_t)JAN_1970;		/* warp into UN*X domain */
-	ntp	-= time64_tlo(res);		/* cycle difference	 */
-	settime64_tu(res, time64_tu(res)+(uint64_t)ntp);	/* get expanded time */
+	ntp	-= time64lo(res);		/* cycle difference	 */
+	settime64u(res, time64u(res)+(uint64_t)ntp);	/* get expanded time */
 
 	return res;
 }
@@ -412,12 +412,12 @@ ntpcal_ntp_to_ntp(
 {
 	time64_t res;
 
-	settime64_ts(res, (pivot) ? *pivot : now());
-	settime64_tu(res, time64_tu(res) - 0x80000000);		/* unshift of half range */
-	settime64_tu(res, time64_tu(res) + (uint32_t)JAN_1970);	/* warp into NTP domain	 */
+	settime64s(res, (pivot) ? *pivot : now());
+	settime64u(res, time64u(res) - 0x80000000);		/* unshift of half range */
+	settime64u(res, time64u(res) + (uint32_t)JAN_1970);	/* warp into NTP domain	 */
 
-	ntp	-= time64_tlo(res);				/* cycle difference	 */
-	settime64_tu(res, time64_tu(res) + (uint64_t)ntp);	/* get expanded time	 */
+	ntp	-= time64lo(res);				/* cycle difference	 */
+	settime64u(res, time64u(res) + (uint64_t)ntp);	/* get expanded time	 */
 
 	return res;
 }
@@ -447,8 +447,8 @@ ntpcal_daysplit(
 	ntpcal_split res;
 
 	/* manual floor division by SECSPERDAY */
-	res.hi = (int32_t)(time64_ts(*ts) / SECSPERDAY);
-	res.lo = (int32_t)(time64_ts(*ts) % SECSPERDAY);
+	res.hi = (int32_t)(time64s(*ts) / SECSPERDAY);
+	res.lo = (int32_t)(time64s(*ts) % SECSPERDAY);
 	if (res.lo < 0) {
 		res.hi -= 1;
 		res.lo += SECSPERDAY;
@@ -796,9 +796,9 @@ ntpcal_dayjoin(
 {
 	time64_t res;
 
-	settime64_ts(res, days);
-	settime64_ts(res, time64_ts(res) * SECSPERDAY);
-	settime64_ts(res, time64_ts(res) + secs);
+	settime64s(res, days);
+	settime64s(res, time64s(res) * SECSPERDAY);
+	settime64s(res, time64s(res) + secs);
 
 	return res;
 }
@@ -1160,7 +1160,7 @@ ntpcal_date_to_ntp(
 	/*
 	 * Get lower half of 64-bit NTP timestamp from date/time.
 	 */
-	return time64_tlo(ntpcal_date_to_ntp64(jd));
+	return time64lo(ntpcal_date_to_ntp64(jd));
 }
 
 
@@ -1447,7 +1447,7 @@ isocal_date_to_ntp(
 	/*
 	 * Get lower half of 64-bit NTP timestamp from date/time.
 	 */
-	return time64_tlo(isocal_date_to_ntp64(id));
+	return time64lo(isocal_date_to_ntp64(id));
 }
 
 /* -*-EOF-*- */
