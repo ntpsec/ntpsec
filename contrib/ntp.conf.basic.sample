@@ -6,12 +6,12 @@
 # http://www.pool.ntp.org/en/
 #
 # iburst tells it to send the first few requests at 2 second intervals rather
-# than wait for the poll interval which defaults to 64 seconds.  That greatly
+# than wait for the poll interval, which defaults to 64 seconds.  That greatly
 # speeds up the time for ntpd to set the system time and start responding to
 # requests.
 #
 # Notice we use the 'us' country code servers, otherwise we might get
-# pool servers from opposite sides of the planet accuracy would likely
+# pool servers from opposite sides of the planet and accuracy would likely
 # be poor.  If you are not in the USA, then it will probably work to
 # change the 'us' to your two letter country code.
 #
@@ -22,7 +22,7 @@
 #
 # https://en.wikipedia.org/wiki/ISO_3166-1
 #
-# and then try pinging prepending it to ".pool.ntp.org" and pinging that.
+# and then try prepending it to ".pool.ntp.org" and pinging that
 # hostname. If you get a response, you can use it.
 #
 pool us.pool.ntp.org iburst
