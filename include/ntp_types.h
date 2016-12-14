@@ -55,8 +55,6 @@ typedef uint64_t time64_t;
 #define SET32FIRST(n,v) (n) = ((((v) & LAST32MASK) << 32) | ((n) & LAST32MASK))
 #define time64lo(n)       ((uint32_t)GET32LAST(n))
 #define settime64lo(n,v)  SET32LAST(n,v)
-#define time64his(n)      ((int32_t)(GET32FIRST(n)))
-#define time64hiu(n)      ((uint32_t)(GET32FIRST(n)))
 #define time64s(n)        ((int64_t)(n))
 #define settime64s(n,v)   (n) = ((int64_t)(v))
 #define time64u(n)        (n)
