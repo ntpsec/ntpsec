@@ -10,22 +10,6 @@ TEST_SETUP(vi64ops) {}
 
 TEST_TEAR_DOWN(vi64ops) {}
 
-TEST(vi64ops, HiLoVUI64uh) {
-	time64_t exp = 0;
-
-	settime64hiu(exp, 0x01234567);
-	settime64lo(exp, 0x89ABCDEF);
-	TEST_ASSERT_EQUAL(time64hiu(exp), 0x01234567);
-}
-
-TEST(vi64ops, HiLoVUI64ul) {
-	time64_t exp = 0;
-
-	settime64hiu(exp, 0x01234567);
-	settime64lo(exp, 0x89ABCDEF);
-	TEST_ASSERT_EQUAL(time64lo(exp), 0x89ABCDEF);
-}
-
 TEST(vi64ops, SetVUI64s_pos) {
 	time64_t exp = 0;
 
@@ -55,8 +39,6 @@ TEST(vi64ops, NegVUI64) {
 }
 
 TEST_GROUP_RUNNER(vi64ops) {
-	RUN_TEST_CASE(vi64ops, HiLoVUI64uh);
-	RUN_TEST_CASE(vi64ops, HiLoVUI64ul);
 	RUN_TEST_CASE(vi64ops, SetVUI64s_pos);
 	RUN_TEST_CASE(vi64ops, SetVUI64s_neg);
 	RUN_TEST_CASE(vi64ops, SetVUI64u);
