@@ -39,7 +39,7 @@ def check_compiler(ctx):
 		255: ("COMPILER_GCC",	"Unknown (Defaulting to GCC)"),
 	}
 
-	ret = ctx.check_cc(
+	ctx.check_cc(
 		fragment	= COMPILER_FRAG,
 		msg			= "Checking compiler",
 		define_name = "COMPILER_INT",
