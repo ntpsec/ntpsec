@@ -1,0 +1,59 @@
+# /etc/ntp.conf, minimal configuration for ntpd
+# see ntp.conf(5) for help
+
+# NTP servers
+# Use some public chimers from the NTP public pool:
+# http://www.pool.ntp.org/en/
+#
+# iburst tells it to send the first few requests at 2 second intervals rather
+# than wait for the poll interval which defaults to 64 seconds.  That greatly
+# speeds up the time for ntpd to set the system time and start responding to
+# requests.
+#
+# Notice we use the 'us' country code servers, otherwise we might get
+# pool servers from opposite sides of the planet accuracy would likely
+# be poor.  If you are not in the USA, then it will probably work to
+# change the 'us' to your two letter country code.
+#
+# Major Internet-using countries with pools include:
+# us gb de fr ru au at ca cn jp de fi it be br cz hk
+#
+# If you don't know your country code, find it at
+#
+# https://en.wikipedia.org/wiki/ISO_3166-1
+#
+# and then try pinging prepending it to ".pool.ntp.org" and pinging that.
+# hostname. If you get a response, you can use it.
+#
+pool us.pool.ntp.org iburst
+
+# if you know of other local time servers you can add them here
+
+# By default, exchange time with everybody, but don't allow configuration.
+restrict default kod limited nomodify nopeer noquery
+restrict -6 default kod limited nomodify nopeer noquery
+
+# Local users may interrogate the NTP server more closely.
+restrict 127.0.0.1
+restrict -6 ::1
+
+# Drift file
+# the drift file allows ntpd to restart faster
+driftfile /var/lib/ntp/ntp.drift
+
+# enable basic logging
+# un-comment next two lines to enable basic logging
+#logfile /var/log/ntp.log
+#logconfig =syncall +clockall +peerall +sysall
+
+# Log detailed statistics
+# un-comment these if you will be doing performance analysis 
+#statsdir /var/log/ntpstats/
+#statistics loopstats peerstats clockstats protostats
+#filegen loopstats file loopstats type day enable
+#filegen peerstats file peerstats type day enable
+#filegen clockstats file clockstats type day enable
+#filegen protostats file protostats type day enable
+
+
+# end
