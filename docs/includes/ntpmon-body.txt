@@ -49,4 +49,11 @@ x:: Cleanly terminate the program.
 
 ?:: List these commands.
 
+== Known Bugs ==
+
++ntpmon+ will appear to hang when monitoring hosts with extremely long
+MRU lists - in particular, public pool hosts.  There is no easy fix
+for this, as the records are returned oldest first and the portion
+of interest is usually the newest.
+
 // end
