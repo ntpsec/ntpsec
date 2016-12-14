@@ -24,10 +24,6 @@ of stratum and synch distance.
 A new tool for time-service operators, ntpmon, supports real-time
 monitoring of your NTP installation's status.
 
-Broadcast-client mode, which is impossible to secure, has been
-removed. Broadcast service can still be enabled, though this is a
-deprecated mode of operation and may be removed in a future release.
-
 == 2016-11-23: 0.9.5 ==
 
 This release includes a substantial refactoring of the core protocol
@@ -168,7 +164,7 @@ vulnerability: ephemeral association attack (Credit: Matthew van Gundy
 of Cisco ASIG) as a duplicate of CVE-2015-7974 (see 0.9.1 release
 notes) and it is WONTFIX for the time being: it is
 correct-but-unfortunate behavior consequent to confusing and
-inflexible semantics of ntp.conf's acesss control language, and we
+inflexible semantics of ntp.conf's acess control language, and we
 will address it with a future redesign effort. NTP Classic has
 partially addressed this pair of issues by extending the syntax of
 ntp.keys to support IP ACLing. We are not currently aware of any
