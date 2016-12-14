@@ -6,10 +6,6 @@ security-hardened implementation of Network Time Protocol Version 4.
 The contents of the base directory are given in this file. The contents of
 subdirectories are usually given in the README files in each subdirectory.
 
-A complete explanation of the configure, compile and install process, as
-well as setting up an NTP subnet, is in the HTML pages in the ./html/
-directory.
-
 The base directory ./ contains the configuration files, source
 directories and related stuff:
 
@@ -65,7 +61,7 @@ ntpclients/::   Directory containing sources for clients - utility programs
 
 ntpd/::		Sources for the main time-synchronization daemon.
 
-ntpfrob/::       The ntpfrob utility collects several small diagnostic
+ntpfrob/::      The ntpfrob utility collects several small diagnostic
 		functions for reading and tweaking the local clock
 		hardware, including reading the clock tick rate,
 		precision, and jitter.
