@@ -773,7 +773,7 @@ class ControlSession:
             try:
                 if e1.errno in (socket.EAI_NONAME, socket.EAI_NODATA):
                     try:
-                        return hinted_lookup(port="ndp", hints=0)
+                        return hinted_lookup(port="ntp", hints=0)
                     except socket.gaierror as e2:
                         sys.stderr.write("ntpq: ndp lookup failed, %s\n" % e2.strerror)
             except AttributeError:
