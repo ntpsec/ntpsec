@@ -1207,12 +1207,12 @@ class ControlSession:
                 sortdict = {
                 "lstint" : lambda e: e.last,		# lstint ascending
                 "-lstint" : lambda e: -e.last,		# lstint descending
-                "avgint" : lambda e: e.avgint(),	# avgint ascending
-                "-avgint" : lambda e: -e.avgint(),	# avgint descending
+                "avgint" : lambda e: -e.avgint(),	# avgint ascending
+                "-avgint" : lambda e: e.avgint(),	# avgint descending
                 "addr" : None,			# IPv4 asc. then IPv6 asc.
                 "-addr" : None,			# IPv6 desc. then IPv4 desc.
-                "count" : lambda e: e.ct,	# hit count ascending
-                "-count": lambda e: -e.ct,	# hit count descending
+                "count" : lambda e: -e.ct,	# hit count ascending
+                "-count": lambda e: e.ct,	# hit count descending
                 }
                 if sortkey == "listint":
                     sortkey = None
