@@ -84,13 +84,28 @@ class OutputContext:
         curses.endwin()
 
 usage = '''
-USAGE: ntpmon [host]
+USAGE: ntpmon [-V] [host]
 '''
 
 if __name__ == '__main__':
+    try:
+        (options, arguments) = getopt.getopt(sys.argv[1:],
+                                             "V", ["version"])
+    except getopt.GetoptError as e:
+        sys.stderr.write("%s\n" % e)
+        sys.stderr.write(usage)
+        raise SystemExit(1)
+    progname = sys.argv[0]
+
     showhostnames = True
     wideremote = False
     showall = False
+
+    for (switch, val) in options:
+        if switch in ("-V", "--version"):
+            print("ntpmon %s" % ntp.util.stdversion())
+            raise SystemExit(0)
+
     poll_interval = 1
     helpmode = False
     peer_report = ntp.util.PeerSummary(displaymode="peers",
@@ -102,7 +117,7 @@ if __name__ == '__main__':
     mru_report = ntp.util.MRUSummary(showhostnames)
     try:
         session = ntp.packet.ControlSession()
-        session.openhost(sys.argv[1] if len(sys.argv) > 1 else "localhost")
+        session.openhost(arguments[0] if arguments else "localhost")
         sysvars = session.readvar()
         with OutputContext() as ctx:
             while True:
