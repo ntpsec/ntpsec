@@ -122,7 +122,7 @@ ntpc_adj_systime(PyObject *self, PyObject *args)
     UNUSED_ARG(self);
     if (!PyArg_ParseTuple(args, "d", &adjustment))
 	return NULL;
-    return Py_BuildValue("d", adj_systime(adjustment, adjtime));
+    return Py_BuildValue("d", (int)adj_systime(adjustment, adjtime));
 }
 
 static PyObject *
