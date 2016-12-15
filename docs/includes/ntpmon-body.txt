@@ -55,9 +55,9 @@ x:: Cleanly terminate the program.
 
 == Known Bugs ==
 
-+ntpmon+ will appear to hang when monitoring hosts with extremely long
-MRU lists - in particular, public pool hosts.  There is no easy fix
-for this, as the records are returned oldest first and the portion
-of interest is usually the newest.
+When querying a version of ntpd older than NTPsec 0.9.6, +ntpmon+ will
+appear to hang when monitoring hosts with extremely long MRU lists -
+in particular, public pool hosts. Correct behavior requires a Mode 6
+protocol extension not yet present in those versions.
 
 // end
