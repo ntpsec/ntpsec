@@ -1,4 +1,4 @@
-= ntpmon - read-time NTP status monitor =
+= ntpmon - real-time NTP status monitor =
 
 [cols="10%,90%",frame="none",grid="none",style="verse"]
 |==============================
