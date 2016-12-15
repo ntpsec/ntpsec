@@ -43,7 +43,6 @@ def configure_ssl(ctx):
 			fragment	= OPENSSL_FRAG % "\n".join(["#include <%s>" % x for x in headers]),
 			define_name = "HAVE_OPENSSL",
 			execute     = True,
-			define_ret  = False,
 			mandatory	= False,
 			use			= "SSL CRYPTO",
 			msg			= "Checking if OpenSSL works",
