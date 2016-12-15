@@ -52,6 +52,7 @@ uint8_t	mon_hash_bits;
  */
 mon_entry **	mon_hash;	/* MRU hash table */
 mon_entry	mon_mru_list;	/* mru listhead */
+u_int		mru_entries;	/* mru list count */
 
 /*
  * List of free structures structures, and counters of in-use and total
@@ -59,7 +60,6 @@ mon_entry	mon_mru_list;	/* mru listhead */
  */
 static  mon_entry *mon_free;		/* free list or null if none */
 	u_int mru_alloc;		/* mru list + free list count */
-	u_int mru_entries;		/* mru list count */
 	u_int mru_peakentries;		/* highest mru_entries seen */
 	u_int mru_initalloc = INIT_MONLIST;/* entries to preallocate */
 	u_int mru_incalloc = INC_MONLIST;/* allocation batch factor */

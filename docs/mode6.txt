@@ -295,6 +295,13 @@ laddr::		Return entries associated with the server's IP
 		address given.  No port specification is needed,
 		and any supplied is ignored.
 
+recent::	Set the reporting start point to retrieve roughly
+		a specified number of most recent entries
+		'Roughly' because the logic cannot anticipate
+		update volume. Use this to volume-limit the
+		response when you are monitoring something like
+		a pool server with a very long MRU list.
+
 resall::	0x-prefixed hex restrict bits, which must all be
 		lit for an MRU entry to be included.
 		Has precedence over any resany=.
@@ -494,6 +501,11 @@ header fields, then the payload.
 The cryptographic hash is normally 16 octets of MD5 hash, but if ntpd
 is built with OpenSSL support it is possible to use and generate
 20-octet-long SHA1 keys as well.
+
+== Compatibility Notes ==
+
+The "recent" parameter of CTL_OP_READ_MRU is not supported in versions
+prior to NTPsec 0.9.6.
 
 '''''
 

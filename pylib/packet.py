@@ -1189,7 +1189,7 @@ class ControlSession:
             raise ControlException(SERR_BADNONCE)
         return polystr(self.response.strip())
 
-    def mrulist(self, variables=None, rawhook=None):
+    def mrulist(self, variables=None, rawhook=None, recent=None):
         "Retrieve MRU list data"
         nonce_uses = 0
         restarted_count = 0
@@ -1222,7 +1222,7 @@ class ControlSession:
                         raise ControlException(SERR_BADSORT % sortkey)
             for k in list(variables.keys()):
                 if k in ("mincount", "resall", "resany",
-                         "maxlstint", "laddr", "sort"):
+                         "maxlstint", "laddr", "recent", "sort"):
                     continue
                 else:
                     raise ControlException(SERR_BADPARAM % k)

@@ -3212,6 +3212,12 @@ send_mru_entry(
  *	laddr=		Return entries associated with the server's IP
  *			address given.  No port specification is needed,
  *			and any supplied is ignored.
+ *      recent=		Set the reporting start point to retrieve roughly
+ *			a specified number of most recent entries
+ *			'Roughly' because the logic cannot anticipate
+ *			update volume. Use this to volume-limit the
+ *			response when you are monitoring something like
+ *			a pool server with a very long MRU list.
  *	resall=		0x-prefixed hex restrict bits which must all be
  *			lit for an MRU entry to be included.
  *			Has precedence over any resany=.
@@ -3290,6 +3296,7 @@ static void read_mru_list(
 	static const char	resany_text[] =		"resany";
 	static const char	maxlstint_text[] =	"maxlstint";
 	static const char	laddr_text[] =		"laddr";
+	static const char	recent_text[] =		"recent";
 	static const char	resaxx_fmt[] =		"0x%hx";
 
 	u_int			limit;
@@ -3298,9 +3305,10 @@ static void read_mru_list(
 	u_short			resany;
 	int			mincount;
 	u_int			maxlstint;
-	sockaddr_u		laddr;
+	sockaddr_u		laddr; u_int			recent;
 	endpt *                 lcladr;
 	u_int			count;
+	static u_int		countdown;
 	u_int			ui;
 	u_int			uf;
 	l_fp			last[16];
@@ -3340,6 +3348,7 @@ static void read_mru_list(
 	set_var(&in_parms, resany_text, sizeof(resany_text), 0);
 	set_var(&in_parms, maxlstint_text, sizeof(maxlstint_text), 0);
 	set_var(&in_parms, laddr_text, sizeof(laddr_text), 0);
+	set_var(&in_parms, recent_text, sizeof(recent_text), 0);
 	for (i = 0; i < COUNTOF(last); i++) {
 		snprintf(buf, sizeof(buf), last_fmt, (int)i);
 		set_var(&in_parms, buf, strlen(buf) + 1, 0);
@@ -3355,6 +3364,7 @@ static void read_mru_list(
 	resall = 0;
 	resany = 0;
 	maxlstint = 0;
+	recent = 0;
 	lcladr = NULL;
 	priors = 0;
 	ZERO(last);
@@ -3397,6 +3407,9 @@ static void read_mru_list(
 			if (!decodenetnum(val, &laddr))
 				goto blooper;
 			lcladr = getinterface(&laddr, 0);
+		} else if (!strcmp(recent_text, v->text)) {
+			if (1 != sscanf(val, "%u", &recent))
+				goto blooper;
 		} else if (1 == sscanf(v->text, last_fmt, &si) &&
 			   (size_t)si < COUNTOF(last)) {
 			if (2 != sscanf(val, "0x%08x.%08x", &ui, &uf))
@@ -3490,6 +3503,7 @@ static void read_mru_list(
 			mon = PREV_DLIST(mon_mru_list, mon, mru);
 	} else {	/* start with the oldest */
 		mon = TAIL_DLIST(mon_mru_list, mru);
+		countdown = mru_entries;
 	}
 
 	/*
@@ -3514,7 +3528,8 @@ static void read_mru_list(
 			continue;
 		if (lcladr != NULL && mon->lcladr != lcladr)
 			continue;
-
+		if (recent != 0 && countdown-- > recent)
+			continue;
 		send_mru_entry(mon, count);
 #ifdef USE_RANDOMIZE_RESPONSES
 		if (!count)
