@@ -47,14 +47,10 @@
  */
 
 typedef uint64_t time64_t;
-#define LAST32MASK	0x00000000ffffffffUL
-#define FIRST32MASK	0xffffffff00000000UL
-#define GET32LAST(n)	((n) & LAST32MASK)
-#define SET32LAST(n, v) (n) = (((n) & FIRST32MASK) | ((v) & LAST32MASK))
-#define GET32FIRST(n)	((n) >> 32)
-#define SET32FIRST(n,v) (n) = ((((v) & LAST32MASK) << 32) | ((n) & LAST32MASK))
-#define time64lo(n)       ((uint32_t)GET32LAST(n))
-#define settime64lo(n,v)  SET32LAST(n,v)
+#define LOW32MASK	0x00000000ffffffffUL
+#define HIGH32MASK	0xffffffff00000000UL
+#define time64lo(n)	((uint32_t)((n) & LOW32MASK))
+#define settime64lo(n, v) (n) = (((n) & HIGH32MASK) | ((v) & LOW32MASK))
 #define time64s(n)        ((int64_t)(n))
 #define settime64s(n,v)   (n) = ((int64_t)(v))
 #define time64u(n)        (n)
