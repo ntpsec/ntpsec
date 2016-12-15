@@ -3690,9 +3690,11 @@ ntp_rlimit(
 #endif
 
 	switch (rl_what) {
+#ifdef RLIMIT_MEMLOCK
 	    case RLIMIT_MEMLOCK:
 		/* ignore - for backward compatibility only */
 		break;
+#endif /* RLIMIT_MEMLOCK */
 
 #ifdef RLIMIT_NOFILE
 	    case RLIMIT_NOFILE:
