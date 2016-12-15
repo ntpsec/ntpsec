@@ -637,7 +637,7 @@ SERR_BADTAG = "***Bad MRU tag %s"
 SERR_BADSORT = "***Sort order %s is not implemented"
 SERR_NOTRUST = "***No trusted keys have been declared"
 
-def dump_hex_printable(xdata):
+def dump_hex_printable(xdata, outfp=sys.stdout):
     "Dump a packet in hex, in a familiar hex format"
     llen = len(xdata)
     i = 0
@@ -646,19 +646,19 @@ def dump_hex_printable(xdata):
         restart = i
         for idx in range(16):
             if idx < llen:
-                sys.stdout.write("%02x " % polyord(xdata[i]))
+                outfp.write("%02x " % polyord(xdata[i]))
                 i += 1
             else:
-                sys.stdout.write("   ")
+                outfp.write("   ")
         i = restart
         for idx in range(rowlen):
             # Do not use curses.isprint(), netbsd base doesn't install curses
             if polyord(xdata[i]) >= 32 and polyord(xdata[i]) < 127:
-                sys.stdout.write(polychr(xdata[i]))
+                outfp.write(polychr(xdata[i]))
             else:
-                sys.stdout.write('.')
+                outfp.write('.')
             i += 1
-        sys.stdout.write("\n")
+        outfp.write("\n")
         llen -= rowlen
 
 class MRUEntry:
@@ -726,6 +726,7 @@ class ControlSession:
         self.response = ""
         self.rstatus = 0
         self.ntpd_row_limit = ControlSession.MRU_ROW_LIMIT
+        self.logfp = sys.stdout
 
     def close(self):
         if self.sock:
@@ -755,11 +756,11 @@ class ControlSession:
             return hinted_lookup(port="ntp", hints=socket.AI_NUMERICHOST)
         except socket.gaierror as e:
             if self.debug > 2:
-                sys.stderr.write("ntpq: numeric-mode lookup of %s failed, %s\n" % (hname, e.strerror))
+                self.logfp.write("ntpq: numeric-mode lookup of %s failed, %s\n" % (hname, e.strerror))
         try:
             return hinted_lookup(port="ntp", hints=0)
         except socket.gaierror as e1:
-            sys.stderr.write("ntpq: standard-mode lookup of %s failed, %s\n" % (hname, e1.strerror))
+            self.logfp.write("ntpq: standard-mode lookup of %s failed, %s\n" % (hname, e1.strerror))
             # EAI_NODATA and AI_CANONNAME should both exist - they're in the
             # POSIX API.  If this code throws AttributeErrors there is
             # probably a very old and broken socket layer in your Python
@@ -775,9 +776,9 @@ class ControlSession:
                     try:
                         return hinted_lookup(port="ntp", hints=0)
                     except socket.gaierror as e2:
-                        sys.stderr.write("ntpq: ndp lookup failed, %s\n" % e2.strerror)
+                        self.logfp.write("ntpq: ndp lookup failed, %s\n" % e2.strerror)
             except AttributeError:
-                sys.stderr.write("ntpq: API error, missing socket attributes\n")
+                self.logfp.write("ntpq: API error, missing socket attributes\n")
         return None
 
     def openhost(self, hname, fam=socket.AF_UNSPEC):
@@ -794,7 +795,7 @@ class ControlSession:
             self.hostname = canonname or hname
             self.isnum = False
         if self.debug > 2:
-            sys.stdout.write("Opening host %s\n" % self.hostname)
+            self.logfp.write("Opening host %s\n" % self.hostname)
         self.port = sockaddr[1]
         try:
             self.sock = socket.socket(family, socktype, protocol)
@@ -848,21 +849,21 @@ class ControlSession:
             self.sock.sendall(polybytes(xdata))
         except socket.error:
             # On failure, we don't know how much data was actually received
-            sys.stderr.write("Write to %s failed\n" % self.hostname)
+            self.logfp.write("Write to %s failed\n" % self.hostname)
             return -1
         if self.debug >= 4:
-            sys.stdout.write("Request packet:\n")
+            self.logfp.write("Request packet:\n")
             dump_hex_printable(xdata)
         return 0
 
     def sendrequest(self, opcode, associd, qdata, auth=False):
         "Ship an ntpq request packet to a server."
         if self.debug:
-            sys.stderr.write("sendrequest(opcode=%d)\n" % opcode)
+            self.logfp.write("sendrequest(opcode=%d)\n" % opcode)
 
         # Check to make sure the data will fit in one packet
         if len(qdata) > ntp.control.CTL_MAX_DATA_LEN:
-            sys.stderr.write("***Internal error! Data too large (%d)\n" %
+            self.logfp.write("***Internal error! Data too large (%d)\n" %
                              len(qdata))
             return -1
 
@@ -913,7 +914,7 @@ class ControlSession:
         self.response = ''
         seenlastfrag = False
         bail = 0
-        warn = sys.stderr.write
+        warn = self.logfp.write
 
         if self.debug:
             warn("Fragment collection begins\n")
@@ -948,10 +949,10 @@ class ControlSession:
                         raise ControlException(SERR_TIMEOUT)
                 if timeo:
                     if self.debug:
-                        sys.stderr.write("ERR_INCOMPLETE: Received fragments:\n")
+                        self.logfp.write("ERR_INCOMPLETE: Received fragments:\n")
                         for (i, frag) in enumerate(fragments):
-                            sys.stderr.write("%d: %s" % (i+1, frag.stats(i)))
-                        sys.stderr.write("last fragment %sreceived\n" \
+                            self.logfp.write("%d: %s" % (i+1, frag.stats(i)))
+                        self.logfp.write("last fragment %sreceived\n" \
                              % ("not ", "")[seenlastfrag])
                 raise ControlException(SERR_INCOMPLETE)
 
@@ -1081,8 +1082,8 @@ class ControlSession:
                         warn("Fragment collection ends\n")
                     self.response = polybytes("".join([polystr(frag.data) for frag in fragments]))
                     if self.debug >= 4:
-                        sys.stdout.write("Response packet:\n")
-                        dump_hex_printable(self.response)
+                        warn("Response packet:\n")
+                        dump_hex_printable(self.response, self.logfp)
                     return None
                 break
 
@@ -1193,7 +1194,7 @@ class ControlSession:
         nonce_uses = 0
         restarted_count = 0
         cap_frags = True
-        warn = sys.stderr.write
+        warn = self.logfp.write
         sorter = None
         if variables is None:
             variables = {}
