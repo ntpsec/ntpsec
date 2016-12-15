@@ -160,7 +160,8 @@ if __name__ == '__main__':
                                                     variables, peer.associd))
 
                         # Now the MRU report
-                        span = session.mrulist()
+                        limit = stdscr.getmaxyx()[0] - len(peers)
+                        span = session.mrulist(recent=limit)
                         mru_report.now = time.time()
 
                         # The status line
