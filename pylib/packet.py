@@ -844,7 +844,7 @@ class ControlSession:
         while len(xdata) % 4:
             xdata += b"\x00"
         if self.debug >= 3:
-                print("Sending %d octets" % len(xdata))
+                self.logfp.write("Sending %d octets" % len(xdata))
         try:
             self.sock.sendall(polybytes(xdata))
         except socket.error:
@@ -853,7 +853,7 @@ class ControlSession:
             return -1
         if self.debug >= 4:
             self.logfp.write("Request packet:\n")
-            dump_hex_printable(xdata)
+            dump_hex_printable(xdata, self.logfp)
         return 0
 
     def sendrequest(self, opcode, associd, qdata, auth=False):

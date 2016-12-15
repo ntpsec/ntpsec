@@ -267,10 +267,10 @@ class PeerSummary:
         elif self.showhostnames:
             try:
                 if self.debug:
-                    sys.stderr.write("DNS lookup begins...\n")
+                    self.logfp.write("DNS lookup begins...\n")
                 clock_name = canonicalize_dns(srcadr)
                 if self.debug:
-                    sys.stderr.write("DNS lookup ends.\n")
+                    self.logfp.write("DNS lookup ends.\n")
             except TypeError:
                 return ''
         else:
@@ -318,6 +318,8 @@ class MRUSummary:
     def __init__(self, showhostnames):
         self.showhostnames = showhostnames	# If false, display numeric IPs
         self.now = time.time()
+        self.logfp = sys.stderr
+        self.debug = 0
 
     header = " lstint avgint rstr r m v  count rport remote address"
 
