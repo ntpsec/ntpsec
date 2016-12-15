@@ -49,6 +49,10 @@ x:: Cleanly terminate the program.
 
 ?:: List these commands.
 
+== Options ==
+
+-V:: Display version and exit.
+
 == Known Bugs ==
 
 +ntpmon+ will appear to hang when monitoring hosts with extremely long
