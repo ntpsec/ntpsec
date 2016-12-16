@@ -1,3 +1,5 @@
-<a href="../day/">Daily stats</a>&nbsp;&nbsp;
-<a href="../week/">Weekly stats</a>&nbsp;&nbsp;
+<!-- You may customize your top of page nav here. -->
+<a href="../index.html">Top</a>&nbsp;&nbsp;
+<a href="../day/index.html">Daily stats</a>&nbsp;&nbsp;
+<a href="../week/index.html">Weekly stats</a>&nbsp;&nbsp;
 <br><br>
