@@ -1,0 +1,6 @@
+# this is a comment
+--name=ntpvis-week # another comment
+--outdir=week
+--period=7
+# uncomment next line to clip the data
+#--clip
