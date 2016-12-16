@@ -1,0 +1,6 @@
+# this is a comment
+--name=ntpvis-day # another comment
+--outdir day --period=1
+# uncomment next line to clip the data
+#--clip
+

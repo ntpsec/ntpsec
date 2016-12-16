@@ -80,4 +80,6 @@ wafhelpers/::	A library of Python procedures used by the waf build system.
 
 wscript::	NTP-specific waf rules.
 
+www/::		Sample ntpviz files
+
 // end
