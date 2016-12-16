@@ -739,12 +739,6 @@ receive(
 		goto done;
 	}
 
-	restrict_mask = ntp_monitor(rbufp, restrict_mask);
-	if (restrict_mask & RES_LIMITED) {
-		sys_limitrejected++;
-		if(!(restrict_mask & RES_KOD)) { goto done; }
-	}
-
 	if(is_control_packet(rbufp)) {
 		process_control(rbufp, restrict_mask);
 		goto done;
@@ -787,6 +781,12 @@ receive(
 		} else {
 			authenticated = true;
 		}
+	}
+
+	restrict_mask = ntp_monitor(rbufp, restrict_mask);
+	if (restrict_mask & RES_LIMITED) {
+		sys_limitrejected++;
+		if(!(restrict_mask & RES_KOD)) { goto done; }
 	}
 
 	switch(match) {
