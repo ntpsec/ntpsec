@@ -118,7 +118,7 @@ if __name__ == '__main__':
     try:
         session = ntp.packet.ControlSession()
         if 0: # debugging hacks, UI is $EDITOR
-          session.logfp = open("ntpmon.log", "a")
+          session.logfp = open("ntpmon.log", "a", 1) # 1 => line buffered
           session.debug = 4
           peer_report.logfp = session.logfp
           peer_report.debug = session.debug
