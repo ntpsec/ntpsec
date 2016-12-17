@@ -101,6 +101,10 @@ class NTPStats:
                 # temps and gpsd are already in UNIX time
                 for line in lines:
                     split = line.split()
+                    if 3 > len(split):
+                        # skip short lines
+                        continue
+
                     try:
                         t = float(split[0])
                     except:

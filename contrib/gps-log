@@ -28,6 +28,7 @@ if __name__ == '__main__':
     try:
         gpsp.start() # start it up
         last_time = 0
+        print("")   # print blank line to prevent log corruption
         print("# Time       Device     TDOP     nSat")
         while True:
             #It may take a second or two to get good data
