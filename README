@@ -2,6 +2,9 @@
 
 This directory and its subdirectories contain NTPSec, a
 security-hardened implementation of Network Time Protocol Version 4.
+You can browse a summary of differences from legacy NTP here:
+
+https://docs.ntpsec.org/latest/ntpsec.html
 
 The contents of the base directory are given in this file. The contents of
 subdirectories are usually given in the README files in each subdirectory.

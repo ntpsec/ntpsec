@@ -9,6 +9,10 @@ call. Also, it must support the IPv6 API defined in RFC 2493 and
 RFC 2553. Finally, it must support iterating over active UDP interfaces
 via getifaddrs(3) or some equivalent facility.
 
+You can browse a summary of differences from legacy NTP here:
+
+https://docs.ntpsec.org/latest/ntpsec.html
+
 There are some prerequisites.  Libraries need the binary installed
 to run and in addition, the development headers installed to build.
 
