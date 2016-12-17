@@ -164,7 +164,68 @@ class PeerStatusWord:
             }
         self.last_event = event_dict.get(ntp.magic.PEER_EVENT|self.event, "")
     def __str__(self):
-        return "conf=%(conf)s, reach=%(reach)s, auth=%(auth)s, cond=%(condition)s, last=%(last_event)s" % self.__dict__
+        return "conf=%(conf)s, reach=%(reach)s, auth=%(auth)s, cond=%(condition)s, event=%(last_event)s ec=%(event_count)s" % self.__dict__
+
+def cook(variables):
+    "Cooked-mode variable display."
+    width = ntp.util.termsize().width - 2
+    text = ""
+    for (name, value) in variables.items():
+        item = "%s=" % name
+        if name in ("reftime", "clock", "org", "rec", "xmt"):
+            item += ntp.ntpc.prettydate(value)
+        elif name in ("srcadr", "peeradr", "dstadr", "refid"):
+            # C ntpq cooked these in obscure ways.  Since they
+            # came up from the daemon as human-readable
+            # strings this was probably a bad idea, but we'll
+            # leave this case separated in case somebody thinks
+            # re-cooking them is a good idea.
+            item += value
+        elif name == "leap":
+            item += ("00", "01", "10", "11")[value]
+        elif name == "reach":
+            item += "%03lo" % value
+        elif name in("filtdelay", "filtoffset", "filtdisp", "filterror"):
+            item += "\t".join(value.split())
+        elif name == "flash":
+            item += "%02x" % value
+            if value == 0:
+                item += " ok"
+            else:
+                # flasher bits
+                tstflagnames = (
+                    "pkt_dup",		# BOGON1
+                    "pkt_bogus",	# BOGON2
+                    "pkt_unsync",	# BOGON3
+                    "pkt_denied",	# BOGON4
+                    "pkt_auth",		# BOGON5
+                    "pkt_stratum",	# BOGON6
+                    "pkt_header",	# BOGON7
+                    "pkt_autokey",	# BOGON8
+                    "pkt_crypto",	# BOGON9
+                    "peer_stratum",	# BOGON10
+                    "peer_dist",	# BOGON11
+                    "peer_loop",	# BOGON12
+                    "peer_unreach"	# BOGON13
+                )
+                for (i, n) in enumerate(tstflagnames):
+                    if (1 << i) & value:
+                        item += tstflagnames[i] + " "
+                item = item[:-1]
+        else:
+            item += repr(value)
+        item += ", "
+        lastcount = 0
+        for c in text:
+            if c == '\n':
+                lastcount = 0
+            else:
+                lastcount += 1
+        if lastcount + len(item) > width:
+            text = text[:-1] + "\n"
+        text += item
+    text = text[:-2] + "\n"
+    return text
 
 class PeerSummary:
     "Reusable report generator for peer statistics"
