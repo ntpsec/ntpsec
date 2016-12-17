@@ -53,12 +53,13 @@ def iso8601(t):
     "ISO8601 string from Unix time, including fractional second."
     return time.strftime("%Y-%m-%dT%H:%M:%S", time.localtime(time.time()))
 
-def statline(_peerlist, _mrulist):
+def statline(_peerlist, _mrulist, nyquist):
     "Generate a status line"
     # We don't use stdversion here because the presence of a date is confusing
     leader = sysvars['version']
     if span.entries:
-        trailer = "Last update: %s" % iso8601(span.entries[0].last)
+        trailer = "Last update: %s (%s)" \
+                  % (iso8601(span.entries[0].last), ntp.util.PeerSummary.prettyinterval(nyquist))
     else:
         trailer = ""
     spacer = (peer_report.termwidth - len(leader) - len(trailer)) * " "
@@ -171,8 +172,13 @@ if __name__ == '__main__':
                         span = session.mrulist(recent=limit)
                         mru_report.now = time.time()
 
+                        # Nyquist-interval sampling - half the
+                        # smallest poll interval seen in the last
+                        # cycle, rounded up to 1 second.                        
+                        nyquist = int(min(peer_report.intervals()) / 2)
+                        nyquist = 1 if nyquist == 0 else nyquist
                         # The status line
-                        sl = statline(peer_report, mru_report)
+                        sl = statline(peer_report, mru_report, nyquist)
                         stdscr.addstr(sl + "\n", curses.A_REVERSE|curses.A_DIM)
                         if span.entries:
                             stdscr.addstr(ntp.util.MRUSummary.header + "\n",
@@ -184,9 +190,7 @@ if __name__ == '__main__':
                         pass
                     # Display all
                     stdscr.refresh()
-                    # Nyquist-interval sampling - half the smallest poll interval
-                    # seen in the last cycle, rounded up to 1 second.
-                    stdscr.timeout(max(int(min(hpolls) / 2), 1))
+                    stdscr.timeout(nyquist)
                 try:
                     helpmode = False
                     key = stdscr.getkey()

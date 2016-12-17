@@ -122,6 +122,7 @@ class PeerSummary:
         self.__remote = "     remote    ".ljust(self.namewidth)
         self.__common = "st t when poll reach   delay   offset  "
         self.__header = None
+        self.polls = []
 
     @staticmethod
     def prettyinterval(diff):
@@ -257,6 +258,7 @@ class PeerSummary:
         #
         line = ""
         poll_sec = 1 << min(ppoll, hpoll)
+        self.polls.append(poll_sec)
         if self.pktversion > ntp.magic.NTP_OLDVERSION:
             c = " x.-+#*o"[ntp.control.CTL_PEER_STATVAL(rstatus) & 0x7]
         else:
@@ -312,6 +314,12 @@ class PeerSummary:
         except TypeError:
             # This can happen when ntpd ships a corrupt varlist
             return ''
+
+    def intervals(self):
+        "Return and flush the list of actual poll intervals."
+        res = self.polls[:]
+        self.polls = []
+        return res
 
 class MRUSummary:
     "Reusable class for MRU entry summary generation."
