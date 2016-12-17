@@ -54,6 +54,11 @@ few.  Some can be reverted by building the software in strict
 compatibility mode with --enable-classic-mode (note that this is
 a build-time switch, not a run-time one).
 
+* The +sntp+ program has been renamed +ntpdig+ in order to make
+  NTP installables have a uniform name prefix and take up less
+  namespace. Also, +ntp-keygen+ is now +ntpkeygen+, +ntp-wait+
+  is ntpwait, and +update-leap+ is now +ntpleapfetch+.
+
 * Log timestamps look a little different; they are now in ISO 8601 format.
   Reverted in the --enable-classic-mode build.
 
@@ -146,10 +151,8 @@ codebase has been outright removed, with less than 5% new code added.
 [clients]
 == Client Tool Improvements ==
 
-* A new utility, +ntpfrob+, collects several small diagnostic functions
-  for reading and tweaking the local clock hardware, including reading
-  the clock tick rate, precision, and jitter. Part of it formerly
-  traveled as +tickadj+.
+* A new tool, +ntpmon+, performs real-time monitoring of your
+  peer and MRU status with efficient (least-cost) querying.
 
 * There is a new data-visualization tool,
   link:ntpviz.html[+ntpviz+], which can produce various useful and
@@ -165,9 +168,6 @@ codebase has been outright removed, with less than 5% new code added.
   of this cruft, the project team will (a) be quite surprised, and (b)
   work with you on better analytics using ntpviz and modern tools.
 
-* A new tool, +ntpmon+, performs real-time monitoring of your
-  peer and MRU status with efficient (least-cost) querying.
-
 * The ntpq utility resizes its display to take advantage of wide
   terminal windows, allowing more space for long peer addresses.
 
@@ -176,10 +176,10 @@ codebase has been outright removed, with less than 5% new code added.
   that require authentication. Thus it is not necessary to enter
   them by hand.
 
-* The +sntp+ program has been renamed +ntpdig+ in order to make
-  NTP installables have a uniform name prefix and take up less
-  namespace. Also, +ntp-keygen+ is now +ntpkeygen+, +ntp-wait+
-  is ntpwait, and +update-leap+ is now +ntpleapfetch+.
+* A new utility, +ntpfrob+, collects several small diagnostic functions
+  for reading and tweaking the local clock hardware, including reading
+  the clock tick rate, precision, and jitter. Part of it formerly
+  traveled as +tickadj+.
 
 [configuration]
 == Configuration Improvements ==
