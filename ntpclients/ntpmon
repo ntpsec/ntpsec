@@ -4,23 +4,17 @@
 Keystroke commands:
 
 'a': Change peer display to apeers mode, showing association IDs.
-
+'d': Toggle select mode (some peer will be reverse-video highlighted when on)
+'j': Select next peer (in select mode)
+'k': Select previous peer (in select mode)
 'n': Toggle display of hostnames (vs. IP addresses).
-
 'o': Change peer display to opeers mode, showing destination address.
-
 'p': Change peer display to default mode, showing refid
-
 'q': Cleanly terminate the program.
-
 's': Show all hosts, not just reachable ones.
-
 'w': Toggle wide mode.
-
 'x': Cleanly terminate the program.
-
-' ': Rotate through all three peer display modes. 
-
+' ': Rotate through display modes. 
 '?': Display helpscreen
 '''
 
@@ -81,6 +75,7 @@ class OutputContext:
         curses.curs_set(0)
         curses.cbreak()
         curses.noecho()
+        stdscr.keypad(1)
     def __exit__(self, extype_unused, value_unused, traceback_unused):
         curses.endwin()
 
@@ -108,7 +103,8 @@ if __name__ == '__main__':
             raise SystemExit(0)
 
     poll_interval = 1
-    helpmode = False
+    helpmode = selectmode = detailmode = False
+    selected = -1
     peer_report = ntp.util.PeerSummary(displaymode="peers",
                                        pktversion=ntp.magic.NTP_VERSION,
                                        showhostnames=showhostnames,
@@ -148,7 +144,7 @@ if __name__ == '__main__':
                         raise Fatal("no peers reported")
                     try:
                         hpolls = []
-                        for peer in peers:
+                        for (i, peer) in enumerate(peers):
                             if not showall and \
                                     not (ntp.control.CTL_PEER_STATVAL(peer.status)
                                       & (ntp.control.CTL_PST_CONFIG|ntp.control.CTL_PST_REACH)):
@@ -164,8 +160,13 @@ if __name__ == '__main__':
                                 raise Fatal("no 'hpoll' variable in peer response")
                             if not variables:
                                 continue
+                            if selectmode and selected == i:
+                                hilite = curses.A_REVERSE
+                            else:
+                                hilite = curses.A_NORMAL
                             stdscr.addstr(peer_report.summary(session.rstatus,
-                                                    variables, peer.associd))
+                                                    variables, peer.associd),
+                                          hilite)
 
                         # Now the MRU report
                         limit = stdscr.getmaxyx()[0] - len(peers)
@@ -180,7 +181,12 @@ if __name__ == '__main__':
                         # The status line
                         sl = statline(peer_report, mru_report, nyquist)
                         stdscr.addstr(sl + "\n", curses.A_REVERSE|curses.A_DIM)
-                        if span.entries:
+                        if detailmode:
+                            vars = session.readvar(peers[i].associd,
+                                                   [],
+                                                   ntp.control.CTL_OP_READVAR)
+                            stdscr.addstr(str(vars))
+                        elif span.entries:
                             stdscr.addstr(ntp.util.MRUSummary.header + "\n",
                                           curses.A_BOLD)
                             for entry in reversed(span.entries):
@@ -198,6 +204,10 @@ if __name__ == '__main__':
                         raise SystemExit(0)
                     elif key == 'a':
                         peer_report.displaymode = 'apeers'
+                    elif key == 'd':
+                        if not selectmode:
+                            selected = 0
+                        selectmode = not selectmode
                     elif key == '?':
                         helpmode = True
                     elif key == 'n':
@@ -212,12 +222,21 @@ if __name__ == '__main__':
                     elif key == 'w':
                         peer_report.wideremote = not peer_report.wideremote
                     elif key == " ":
-                        if peer_report.displaymode == 'peers':
-                            peer_report.displaymode = 'apeers'
-                        elif peer_report.displaymode == 'apeers':
-                            peer_report.displaymode = 'opeers'
+                        if selectmode:
+                            detailmode = not detailmode
                         else:
-                            peer_report.displaymode = 'peers'
+                            if peer_report.displaymode == 'peers':
+                                peer_report.displaymode = 'apeers'
+                            elif peer_report.displaymode == 'apeers':
+                                peer_report.displaymode = 'opeers'
+                            else:
+                                peer_report.displaymode = 'peers'
+                    elif key == 'j' or key == curses.KEY_DOWN:
+                        selected += 1
+                        selected %= len(peers)
+                    elif key == 'k' or key == curses.KEY_UP:
+                        selected += len(peers) - 1
+                        selected %= len(peers)
                     elif key == '?':
                         helpmode = True
                 except curses.error:
