@@ -143,7 +143,6 @@ if __name__ == '__main__':
                     if len(peers) == 0:
                         raise Fatal("no peers reported")
                     try:
-                        hpolls = []
                         for (i, peer) in enumerate(peers):
                             if not showall and \
                                     not (ntp.control.CTL_PEER_STATVAL(peer.status)
@@ -151,7 +150,6 @@ if __name__ == '__main__':
                                 continue
                             try:
                                 variables = session.readvar(peer.associd)
-                                hpolls.append(variables['hpoll'])
                             except ntp.packet.ControlException as e:
                                 raise Fatal(e.message + "\n")
                             except IOError as e:
@@ -161,6 +159,7 @@ if __name__ == '__main__':
                             if not variables:
                                 continue
                             if selectmode and selected == i:
+                                retained = variables
                                 hilite = curses.A_REVERSE
                             else:
                                 hilite = curses.A_NORMAL
@@ -183,12 +182,14 @@ if __name__ == '__main__':
                         stdscr.addstr(sl + "\n", curses.A_REVERSE|curses.A_DIM)
                         if detailmode:
                             sw = ntp.util.PeerStatusWord(peers[i].status)
-                            stdscr.addstr("assoc=%d, %s,\n" \
+                            stdscr.addstr("assoc=%d, %s\n" \
                                           % (peers[i].associd, sw))
-                            vars = session.readvar(peers[i].associd,
-                                                   [],
-                                                   ntp.control.CTL_OP_READVAR)
-                            stdscr.addstr(ntp.util.cook(vars))
+                            stdscr.addstr("\n" + ntp.util.cook(retained))
+                            try:
+                                clockvars = session.readvar(peer.associd, opcode=ntp.control.CTL_OP_READCLOCK)
+                                stdscr.addstr("\n" + ntp.util.cook(clockvars))
+                            except ntp.packet.ControlException:
+                                pass
                         elif span.entries:
                             stdscr.addstr(ntp.util.MRUSummary.header + "\n",
                                           curses.A_BOLD)
