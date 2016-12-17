@@ -97,6 +97,75 @@ def termsize():
                 pass
     return TermSize(*size)
 
+class PeerStatusWord:
+    "A peer status wor dissected for display"
+    def __init__(self, status, pktversion=ntp.magic.NTP_VERSION):
+        self.event = ntp.control.CTL_PEER_EVENT(status)
+        self.event_count = ntp.control.CTL_PEER_NEVNT(status)
+        statval = ntp.control.CTL_PEER_STATVAL(status)
+        if statval & ntp.control.CTL_PST_CONFIG:
+            self.conf = "yes"
+        else:
+            self.conf = "no"
+        if statval & ntp.control.CTL_PST_BCAST:
+                self.reach = "none"
+                if statval & ntp.control.CTL_PST_AUTHENABLE:
+                        self.auth = "yes"
+                else:
+                        self.auth = "none"
+        elif statval & ntp.control.CTL_PST_REACH:
+            self.reach = "yes"
+        else:
+            self.reach = "no"
+        if (statval & ntp.control.CTL_PST_AUTHENABLE) == 0:
+            self.auth = "none"
+        elif statval & ntp.control.CTL_PST_AUTHENTIC:
+            self.auth = "ok "
+        else:
+            self.auth = "bad"
+        if pktversion > ntp.magic.NTP_OLDVERSION:
+            seldict = {
+                ntp.control.CTL_PST_SEL_REJECT: "reject",
+                ntp.control.CTL_PST_SEL_SANE: "falsetick",
+                ntp.control.CTL_PST_SEL_CORRECT: "excess",
+                ntp.control.CTL_PST_SEL_SELCAND: "outlier",
+                ntp.control.CTL_PST_SEL_SYNCCAND: "candidate",
+                ntp.control.CTL_PST_SEL_EXCESS: "backup",
+                ntp.control.CTL_PST_SEL_SYSPEER: "sys.peer",
+                ntp.control.CTL_PST_SEL_PPS: "pps.peer",
+                }
+            self.condition = seldict[statval & 0x7]
+        else:
+            if (statval & 0x3) == OLD_CTL_PST_SEL_REJECT:
+                if (statval & OLD_CTL_PST_SANE) == 0:
+                    self.condition = "insane"
+                elif (statval & OLD_CTL_PST_DISP) == 0:
+                    self.condition = "hi_disp"
+                else:
+                    self.condition = ""
+            elif (statval & 0x3) == OLD_CTL_PST_SEL_SELCAND:
+                    self.condition = "sel_cand"
+            elif (statval & 0x3) == OLD_CTL_PST_SEL_SYNCCAND:
+                self.condition = "sync_cand"
+            elif (statval & 0x3) == OLD_CTL_PST_SEL_SYSPEER:
+                self.condition = "sys_peer"
+        event_dict = {
+            ntp.magic.PEVNT_MOBIL: "mobilize",
+            ntp.magic.PEVNT_DEMOBIL: "demobilize",
+            ntp.magic.PEVNT_REACH: "reachable",
+            ntp.magic.PEVNT_UNREACH: "unreachable",
+            ntp.magic.PEVNT_RESTART: "restart",
+            ntp.magic.PEVNT_REPLY: "no_reply",
+            ntp.magic.PEVNT_RATE: "rate_exceeded",
+            ntp.magic.PEVNT_DENY: "access_denied",
+            ntp.magic.PEVNT_ARMED: "leap_armed",
+            ntp.magic.PEVNT_NEWPEER: "sys_peer",
+            ntp.magic.PEVNT_CLOCK: "clock_alarm",
+            }
+        self.last_event = event_dict.get(ntp.magic.PEER_EVENT|self.event, "")
+    def __str__(self):
+        return "conf=%(conf)s, reach=%(reach)s, auth=%(auth)s, cond=%(condition)s, last=%(last_event)s" % self.__dict__
+
 class PeerSummary:
     "Reusable report generator for peer statistics"
     def __init__(self, displaymode, pktversion, showhostnames, wideremote, termwidth=None, debug=0):
