@@ -182,6 +182,8 @@ if __name__ == '__main__':
                         sl = statline(peer_report, mru_report, nyquist)
                         stdscr.addstr(sl + "\n", curses.A_REVERSE|curses.A_DIM)
                         if detailmode:
+                            sw = ntp.util.PeerStatusWord(peers[i].status)
+                            stdscr.addstr("associd: %d %s\n" % (peers[i].associd, sw))
                             vars = session.readvar(peers[i].associd,
                                                    [],
                                                    ntp.control.CTL_OP_READVAR)

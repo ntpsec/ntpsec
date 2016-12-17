@@ -275,73 +275,12 @@ usage: help [ command ]
             statval = ntp.control.CTL_PEER_STATVAL(peer.status)
             if not showall and (statval & (ntp.control.CTL_PST_CONFIG|ntp.control.CTL_PST_REACH)) == 0:
                 continue
-            event = ntp.control.CTL_PEER_EVENT(peer.status)
-            event_count = ntp.control.CTL_PEER_NEVNT(peer.status)
-            if statval & ntp.control.CTL_PST_CONFIG:
-                conf = "yes"
-            else:
-                conf = "no"
-            if statval & ntp.control.CTL_PST_BCAST:
-                    reach = "none"
-                    if statval & ntp.control.CTL_PST_AUTHENABLE:
-                            auth = "yes"
-                    else:
-                            auth = "none"
-            elif statval & ntp.control.CTL_PST_REACH:
-                reach = "yes"
-            else:
-                reach = "no"
-            if (statval & ntp.control.CTL_PST_AUTHENABLE) == 0:
-                auth = "none"
-            elif statval & ntp.control.CTL_PST_AUTHENTIC:
-                auth = "ok "
-            else:
-                auth = "bad"
-            if self.pktversion > ntp.magic.NTP_OLDVERSION:
-                seldict = {
-                    ntp.control.CTL_PST_SEL_REJECT: "reject",
-                    ntp.control.CTL_PST_SEL_SANE: "falsetick",
-                    ntp.control.CTL_PST_SEL_CORRECT: "excess",
-                    ntp.control.CTL_PST_SEL_SELCAND: "outlier",
-                    ntp.control.CTL_PST_SEL_SYNCCAND: "candidate",
-                    ntp.control.CTL_PST_SEL_EXCESS: "backup",
-                    ntp.control.CTL_PST_SEL_SYSPEER: "sys.peer",
-                    ntp.control.CTL_PST_SEL_PPS: "pps.peer",
-                    }
-                condition = seldict[statval & 0x7]
-            else:
-                if (statval & 0x3) == OLD_CTL_PST_SEL_REJECT:
-                    if (statval & OLD_CTL_PST_SANE) == 0:
-                        condition = "insane"
-                    elif (statval & OLD_CTL_PST_DISP) == 0:
-                        condition = "hi_disp"
-                    else:
-                        condition = ""
-                elif (statval & 0x3) == OLD_CTL_PST_SEL_SELCAND:
-                        condition = "sel_cand"
-                elif (statval & 0x3) == OLD_CTL_PST_SEL_SYNCCAND:
-                    condition = "sync_cand"
-                elif (statval & 0x3) == OLD_CTL_PST_SEL_SYSPEER:
-                    condition = "sys_peer"
-            event_dict = {
-                ntp.magic.PEVNT_MOBIL: "mobilize",
-                ntp.magic.PEVNT_DEMOBIL: "demobilize",
-                ntp.magic.PEVNT_REACH: "reachable",
-                ntp.magic.PEVNT_UNREACH: "unreachable",
-                ntp.magic.PEVNT_RESTART: "restart",
-                ntp.magic.PEVNT_REPLY: "no_reply",
-                ntp.magic.PEVNT_RATE: "rate_exceeded",
-                ntp.magic.PEVNT_DENY: "access_denied",
-                ntp.magic.PEVNT_ARMED: "leap_armed",
-                ntp.magic.PEVNT_NEWPEER: "sys_peer",
-                ntp.magic.PEVNT_CLOCK: "clock_alarm",
-                }
-            last_event = event_dict.get(ntp.magic.PEER_EVENT|event, "")
+            sw = ntp.util.PeerStatusWord(peer.status)
             display = \
                      "%3d %5u  %04x   %3.3s  %4s  %4.4s %9.9s %11s %2lu" % \
                      (i + 1, peer.associd,
-                     peer.status, conf, reach, auth,
-                     condition, last_event, event_count)
+                     peer.status, sw.conf, sw.reach, sw.auth,
+                     sw.condition, sw.last_event, sw.event_count)
             self.say(display + "\n")
 
     def __dopeers(self, showall, mode):
