@@ -47,8 +47,8 @@ if __name__ == '__main__':
             except AttributeError as e:
                 print( 'parse error\n')
 
-        sys.stdout.flush()
-        time.sleep(5) #set to whatever
+            sys.stdout.flush()
+            time.sleep(5) #set to whatever
 
     except (KeyboardInterrupt, SystemExit): #when you press ctrl+c
         print("\nKilling Thread...")
