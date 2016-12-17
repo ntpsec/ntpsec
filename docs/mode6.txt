@@ -40,7 +40,7 @@ They use the same structure (header, plus extension, plus optional
 MAC) as time synchronization messages, but the layout and semantics of
 the header fields are different.  They are distinguished from time
 synchronization packets by their Mode field, which has the value 6
-(0110).
+(110).
 
 .Mode 6 packet structure
 -------------------------------------------------------------------------
@@ -160,7 +160,7 @@ request requires authentication from the client.
 |CTL_OP_UNSETTRAP	| 31	| -     | unset trap (obsolete, unused)
 |=====================================================================
 
-The CTRL_OP_TRAP and CTL_OP_UNSETTRAP opcodes relate to an obsolete
+The CTL_OP_SETTRAP and CTL_OP_UNSETTRAP opcodes relate to an obsolete
 notification facility supported in some older versions of the
 software. CTL_OP_WRITECLOCK is unimplemented and will throw a
 permission error. CTL_OP_ASYNCMSG is reserved for expansion. The
@@ -229,7 +229,7 @@ The response payload is a textual varlist.
 This request is used to change the configuration of ntpd without
 restarting the daemon.  It requires authentication.
 
-The request payload should be a line line of text in the syntax of the
+The request payload should be a line of text in the syntax of the
 ntp.conf configuration file.  The response payload will begin with either
 an error message or the string "Config Succeeded", followed by a NUL.
 
@@ -240,7 +240,7 @@ expect this and truncate it at the first NUL.
 === CTL_OP_READ_MRU ===
 
 This request is used to retrieve information about recent traffic
-between ntpd and its peers; in NTP-speak this traffic summary is
+between ntpd and its clients and peers; in NTP-speak this traffic summary is
 called the "MRU list", where MRU stands for "most recently used".  It does
 not require authentication.
 
@@ -472,9 +472,9 @@ informs ntpd that the Mode 6 client is ready to receive.  It does
 not require authentication.
 
 The request retrieves a nonce specific to this client, which will be
-played back to ntpd tp demonstrate that the client is capable of
+played back to ntpd to demonstrate that the client is capable of
 receiving responses at the source IP address that requested the nonce,
-is and thereby unlikely to be forging the source ddress.  This check
+and is thereby unlikely to be forging the source ddress.  This check
 prevents CTL_OP_READ_MRU from being used for flooding attacks.
 
 The request has no payload.  The response will be a textual varlist
