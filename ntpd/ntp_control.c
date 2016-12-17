@@ -338,7 +338,7 @@ static const struct ctl_var sys_var[] = {
 	{ CS_SS_PROCESSED,	RO, "ss_processed" },	/* 43 */
 	{ CS_PEERADR,		RO, "peeradr" },	/* 44 */
 	{ CS_PEERMODE,		RO, "peermode" },	/* 45 */
-	/*{ CS_BCASTDELAY,	RO, "bcastdelay" },	** 46 */
+	{ 46,			RO, "was bcastdelay" },	/* 46 */
 	{ CS_AUTHDELAY,		RO, "authdelay" },	/* 47 */
 	{ CS_AUTHKEYS,		RO, "authkeys" },	/* 48 */
 	{ CS_AUTHFREEK,		RO, "authfreek" },	/* 49 */
