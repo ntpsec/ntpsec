@@ -190,7 +190,7 @@ if __name__ == '__main__':
                         pass
                     # Display all
                     stdscr.refresh()
-                    stdscr.timeout(nyquist)
+                    stdscr.timeout(nyquist * 1000)
                 try:
                     helpmode = False
                     key = stdscr.getkey()

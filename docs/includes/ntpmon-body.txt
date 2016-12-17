@@ -19,7 +19,8 @@ adjusts itself to poll at twice the frequency of the shortest
 polling interval reported in the last peers response.)
 
 The status bar includes the version string of the server being
-watched and the (local) time at which it was last updated).
+watched, the (local) time at which it was last updated, and the
+current query interval.
 
 ^C cleanly terminates the program.
 
