@@ -183,11 +183,12 @@ if __name__ == '__main__':
                         stdscr.addstr(sl + "\n", curses.A_REVERSE|curses.A_DIM)
                         if detailmode:
                             sw = ntp.util.PeerStatusWord(peers[i].status)
-                            stdscr.addstr("associd: %d %s\n" % (peers[i].associd, sw))
+                            stdscr.addstr("assoc=%d, %s,\n" \
+                                          % (peers[i].associd, sw))
                             vars = session.readvar(peers[i].associd,
                                                    [],
                                                    ntp.control.CTL_OP_READVAR)
-                            stdscr.addstr(str(vars))
+                            stdscr.addstr(ntp.util.cook(vars))
                         elif span.entries:
                             stdscr.addstr(ntp.util.MRUSummary.header + "\n",
                                           curses.A_BOLD)
