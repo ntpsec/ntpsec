@@ -186,7 +186,7 @@ if __name__ == '__main__':
                     stdscr.refresh()
                     # Nyquist-interval sampling - half the smallest poll interval
                     # seen in the last cycle, rounded up to 1 second.
-                    stdscr.timeout(int((min(hpolls) / 2) + 0.5))
+                    stdscr.timeout(max(int(min(hpolls) / 2), 1))
                 try:
                     helpmode = False
                     key = stdscr.getkey()
