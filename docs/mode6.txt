@@ -474,7 +474,7 @@ not require authentication.
 The request retrieves a nonce specific to this client, which will be
 played back to ntpd to demonstrate that the client is capable of
 receiving responses at the source IP address that requested the nonce,
-and is thereby unlikely to be forging the source ddress.  This check
+and is thereby unlikely to be forging the source address.  This check
 prevents CTL_OP_READ_MRU from being used for flooding attacks.
 
 The request has no payload.  The response will be a textual varlist
