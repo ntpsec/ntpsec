@@ -4,7 +4,7 @@
 Any keystroke causes a poll and update. Keystroke commands:
 
 'a': Change peer display to apeers mode, showing association IDs.
-'d': Toggle select mode (some peer will be reverse-video highlighted when on).
+'d': Toggle detail mode (some peer will be reverse-video highlighted when on).
 'j': Select next peer (in select mode); arrow down also works.
 'k': Select previous peer (in select mode); arrow up also works.
 'n': Toggle display of hostnames (vs. IP addresses).
@@ -14,12 +14,8 @@ Any keystroke causes a poll and update. Keystroke commands:
 's': Show all hosts, not just reachable ones.
 'w': Toggle wide mode.
 'x': Cleanly terminate the program.
-' ': Rotate through display modes. 
+' ': Rotate through a/n/o/p display modes. 
 '?': Display helpscreen.
-
-When no peer is selected, <space> rotates through a/n/o/p display modes
-for the whole peers list. When a peer is selected, <space> toggles
-detail-display mode.
 '''
 
 from __future__ import print_function, division
@@ -250,6 +246,7 @@ if __name__ == '__main__':
                         if not selectmode:
                             selected = 0
                         selectmode = not selectmode
+                        detailmode = not detailmode
                     elif key == '?':
                         helpmode = True
                     elif key == 'n':
@@ -264,15 +261,12 @@ if __name__ == '__main__':
                     elif key == 'w':
                         peer_report.wideremote = not peer_report.wideremote
                     elif key == " ":
-                        if selectmode:
-                            detailmode = not detailmode
+                        if peer_report.displaymode == 'peers':
+                            peer_report.displaymode = 'apeers'
+                        elif peer_report.displaymode == 'apeers':
+                            peer_report.displaymode = 'opeers'
                         else:
-                            if peer_report.displaymode == 'peers':
-                                peer_report.displaymode = 'apeers'
-                            elif peer_report.displaymode == 'apeers':
-                                peer_report.displaymode = 'opeers'
-                            else:
-                                peer_report.displaymode = 'peers'
+                            peer_report.displaymode = 'peers'
                     elif key == 'j' or key == "KEY_DOWN":
                         selected += 1
                         selected %= len(peers)
