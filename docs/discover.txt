@@ -26,13 +26,15 @@ include::includes/hand.txt[]
 == Introduction ==
 
 This page describes the automatic server discovery schemes provided in
-NTPv4. There are two automatic server discovery schemes: broadcast and
-server pool, which are described on this page. The broadcast scheme
-utilizes the ubiquitous broadcast or one-to-many paradigm native to
-IPv4 and IPv6.  The server pool scheme uses DNS to resolve addresses
-of multiple volunteer servers scattered throughout the world.
+NTPv4. There are three automatic server discovery schemes: broadcast,
+manycast, and server pool; which are described on this page. The
+broadcast scheme utilizes the ubiquitous broadcast or one-to-many
+paradigm native to IPv4 and IPv6.  The manycast scheme is similar
+to specifying to broadcast, but the servers listen on a specific
+address known to the client.  The server pool scheme uses DNS to resolve
+addresses of multiple volunteer servers scattered throughout the world.
 
-Both schemes work in much the same way and might be described as
+All three schemes work in much the same way and might be described as
 _grab-n'-prune._ Through one means or another they grab a number of
 associations either directly or indirectly from the configuration file,
 order them from best to worst according to the NTP mitigation
