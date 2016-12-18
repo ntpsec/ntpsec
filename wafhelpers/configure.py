@@ -337,10 +337,10 @@ def cmd_configure(ctx, config):
         # be removed.
         optional_headers = (
                 "alloca.h",
-                "arpa/nameser.h",
+                ("arpa/nameser.h", ["sys/types.h"]),
                 "dns_sd.h",             # NetBSD, Apple, mDNS
                 ("ifaddrs.h", ["sys/types.h"]),
-                "libscf.h",             # Solaris
+                ("libscf.h", ["sys/time.h"]),  # Solaris
                 ("linux/if_addr.h", ["sys/socket.h"]),
                 ("linux/rtnetlink.h", ["sys/socket.h"]),
                 "linux/serial.h",
