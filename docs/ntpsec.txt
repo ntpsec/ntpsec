@@ -73,10 +73,12 @@ a build-time switch, not a run-time one).
 * The shortname of --help options is now -h, not -?
 
 * If you had a refclock on a path of the form /dev/palisadeNNN, that
-  link needs to change to /dev/trimbleNNN.
+  link needs to change to /dev/trimbleNNN. Reverted in the
+  --enable-classic-mode build.
 
 * If you had a refclock on a path of the form /dev/actsNNN, that
-  link needs to change to /dev/modemNNN.
+  link needs to change to /dev/modemNNN. Reverted in the
+  -classic-mode build.
 
 * An instance of +ntpq+ built from the NTPsec code
   querying a legacy NTP daemon will not automatically display

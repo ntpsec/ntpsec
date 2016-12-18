@@ -74,7 +74,11 @@
 /*
  * I/O Definitions
  */
+#ifndef ENABLE_CLASSIC_MODE
 #define	DEVICE		"/dev/trimble%d" 	/* device name and unit */
+#else
+#define	DEVICE		"/dev/palisade%d" 	/* device name and unit */
+#endif
 #define	SPEED232	B9600		  	/* uart speed (9600 baud) */
 
 /*
