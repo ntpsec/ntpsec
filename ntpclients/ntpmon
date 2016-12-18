@@ -107,7 +107,7 @@ class OutputContext:
         curses.noecho()
         stdscr.keypad(True)
         # Design decision: The most important info is nearer the
-        # top of the display. 
+        # top of the display. Therefore, prevent scrolling.
         stdscr.scrollok(False)
     def __exit__(self, extype_unused, value_unused, traceback_unused):
         curses.endwin()

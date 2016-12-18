@@ -22,6 +22,13 @@ The status bar includes the version string of the server being
 watched, the (local) time at which it was last updated, and the
 current query interval.
 
+There is a detail-display mode that dumps full information about a
+single selected peer in a tabular format that makes it relatively easy
+to see changing values. However, note that a default-sized terminal
+emulator window (usually 25 lines) doesn't have enough room for the
+clock variables portion. The only fix for this is to resize your
+terminal.
+
 ^C cleanly terminates the program. Any keystroke will trigger a poll
 and update. A few single-keystroke commands are also interpreted as
 commands.
