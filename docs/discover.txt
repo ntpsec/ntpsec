@@ -167,7 +167,8 @@ unicast server message.
 == Server Pool Scheme ==
 
 The idea of targeting servers on a random basis to distribute and
-balance the load is not a new one; however, the NTP pool scheme puts
+balance the load is not a new one; however, the
+http://www.pool.ntp.org/en/use.html[NTP Pool Project] puts
 this on steroids. At present, several thousand operators around the
 globe have volunteered their servers for public access. In general,
 NTP is a lightweight service and servers used for other purposes don't
@@ -177,21 +178,22 @@ advantages of multiple servers using the NTP mitigation algorithms.
 
 To support this service, custom DNS software is used by pool.ntp.org
 and its subdomains to discover a random selection of participating
-servers in response to a DNS query. The client receiving this list
-mobilizes some or all of them, similar to the manycast discovery
-scheme, and prunes the excess. Cryptographic authentication is not
-required.
+(in-country) servers in response to a DNS query. The client receiving
+this list mobilizes some or all of them, similar to the manycast
+discovery scheme, and prunes the excess. Cryptographic authentication
+is not required.
 
 The pool scheme is configured using one or more +pool+ commands with DNS
 names indicating the pool from which to draw. The +pool+ command can be
 used more than once; duplicate servers are detected and discarded. In
 principle, it is possible to use a configuration file containing a
-single line +pool   pool.ntp.org+. The
-http://www.pool.ntp.org/en/use.html[NTP Pool Project] offers
+single line +pool   pool.ntp.org+. The NTP Pool Project offers
 instructions on using the pool with the +server+ command, which is
 suboptimal but works with older versions of +ntpd+ predating the +pool+
-command. Consider replacing the multiple +server+
-commands in their example with a single +pool+ command.
+command.  Use of the +server+ command does a one-time DNS lookup, and
+uses the IP address returned thereafter.  If the server becomes unavailable,
+the DNS will not be re-resolved.  The +pool+ command will
+use multiple servers that the DNS resolves to, refreshing as required.
 
 '''''
 
