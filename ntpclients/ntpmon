@@ -218,14 +218,15 @@ if __name__ == '__main__':
                                 dtype = ntp.ntpc.TYPE_CLOCK
                             else:
                                 dtype = ntp.ntpc.TYPE_PEER
-                            sw = ntp.ntpc.statustoa(dtype, peers[i].status)
+                            sw = ntp.ntpc.statustoa(dtype,
+                                                    peers[selected].status)
                             stdscr.addstr("assoc=%d: %s\n" \
-                                          % (peers[i].associd, sw))
+                                          % (peers[selected].associd, sw))
                             stdscr.addstr(peer_detail(retained))
                             try:
-                                clockvars = session.readvar(peer.associd, opcode=ntp.control.CTL_OP_READCLOCK)
+                                clockvars = session.readvar(peers[selected].associd, opcode=ntp.control.CTL_OP_READCLOCK)
                                 stdscr.addstr(ntp.util.cook(clockvars))
-                            except ntp.packet.ControlException:
+                            except ntp.packet.ControlException as e:
                                 pass
                         elif span.entries:
                             stdscr.addstr(ntp.util.MRUSummary.header + "\n",
