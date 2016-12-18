@@ -19,6 +19,8 @@ int main(void) {
 	printf("2");
 #elif __GNUC__
 	printf("3");
+#elif __SUNPRO_C
+	printf("4");
 #else
 	printf("255");
 #endif
@@ -36,6 +38,7 @@ def check_compiler(ctx):
 		1: ("COMPILER_CLANG",	"clang"),
 		2: ("COMPILER_ICC",		"ICC"),
 		3: ("COMPILER_GCC",		"GCC"),
+		4: ("COMPILER_SUNCC",	"SUNCC"),
 		255: ("COMPILER_GCC",	"Unknown (Defaulting to GCC)"),
 	}
 

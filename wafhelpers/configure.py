@@ -195,10 +195,14 @@ def cmd_configure(ctx, config):
                 ctx.define("DEBUG", 1, comment="Enable debug mode")
                 ctx.env.BISONFLAGS += ["--debug"]
 
+        ctx.env.CFLAGS += ["-Wall", "-Wextra", "-Wstrict-prototypes"]
         # We require some things that C99 doesn't enable, like pthreads.
-        # Thus -std=gnu99 rather than -std=c99 here.
-        ctx.env.CFLAGS += ["-Wall", "-Wextra", "-std=gnu99",
-			   "-Wstrict-prototypes"]
+        # Thus -std=gnu99 rather than -std=c99 here, if the compiler supports
+        # it.
+        if ctx.env.COMPILER_SUNCC:
+                ctx.env.CFLAGS += ["-std=c99"]
+        else:
+                ctx.env.CFLAGS += ["-std=gnu99"]
 
         # Check target platform.
         ctx.start_msg("Checking build target")
