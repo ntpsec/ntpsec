@@ -36,7 +36,7 @@ def stdversion():
 def rfc3339(t):
     "RFC 3339 string from Unix time, including fractional second."
     rep = time.strftime("%Y-%m-%dT%H:%M:%S", time.gmtime(t))
-    t = str(t)
+    t = "%f" % t
     if "." in t:
         subsec = t.split(".", 1)[1]
         if int(subsec) > 0:
