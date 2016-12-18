@@ -279,11 +279,11 @@ getgroup:
 
 
 	if (NULL == ctx) {
-		msyslog(LOG_ERR, "sandbox: seccomp_init  failed: %m");
+		msyslog(LOG_ERR, "sandbox: seccomp_init() failed: %m");
 		return nonroot;
 		}
 	else
-		msyslog(LOG_DEBUG, "sandbox: seccomp_init succeeded");
+		msyslog(LOG_DEBUG, "sandbox: seccomp_init() succeeded");
 
 int scmp_sc[] = {
 	SCMP_SYS(adjtimex),
