@@ -23,7 +23,7 @@ Accept no imitations.
 * link:#other[Other user-visible changes]
 
 [[intro]] 
-== Differences from NTP Classic ==
+== Introduction ==
 
 The design objectives of this distribution, NTPsec, are in
 many ways a break with NTP's past.  We have deliberately jettisoned
@@ -66,7 +66,7 @@ a build-time switch, not a run-time one).
   followed by the unit number in parentheses, rather than the magic IP
   addresses formerly used.  Reverted in the --enable-classic-mode build.
 
-* The -!m, ->, and -< options of some Classic commands are not
+* The -!m, -\>, and -< options of some Classic commands are not
   supported.  (The argument-parsing framework code that implemented
   them in Classic was overcomplicated and buggy and had to be removed.)
 
