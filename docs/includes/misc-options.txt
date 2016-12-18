@@ -138,7 +138,7 @@ and so on is suppressed.
 
 +logfile+ _logfile_::
   This command specifies the location of an alternate log file to be
-  used instead of the default system _syslog_(3)_ facility. This is the
+  used instead of the default system _syslog(3)_ facility. This is the
   same operation as the -l command line option.
 
 [[mru]]
