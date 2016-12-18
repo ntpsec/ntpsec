@@ -136,19 +136,6 @@ NTP_MODE	= 0x8	# peer mode
 NTP_2BIT	= 0x9	# leap bits
 NTP_FLOAT	= 0xa	# Float value
 
-# Old CTL_PST defines for version 2.
-OLD_CTL_PST_CONFIG = 0x80
-OLD_CTL_PST_AUTHENABLE = 0x40
-OLD_CTL_PST_AUTHENTIC = 0x20
-OLD_CTL_PST_REACH = 0x10
-OLD_CTL_PST_SANE = 0x08
-OLD_CTL_PST_DISP = 0x04
-
-OLD_CTL_PST_SEL_REJECT = 0
-OLD_CTL_PST_SEL_SELCAND = 1
-OLD_CTL_PST_SEL_SYNCCAND = 2
-OLD_CTL_PST_SEL_SYSPEER = 3
-
 class Ntpq(cmd.Cmd):
     "ntpq command interpreter"
     def __init__(self, session):

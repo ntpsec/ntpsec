@@ -16,6 +16,19 @@ import ntp.version
 import ntp.magic
 import ntp.control
 
+# Old CTL_PST defines for version 2.
+OLD_CTL_PST_CONFIG = 0x80
+OLD_CTL_PST_AUTHENABLE = 0x40
+OLD_CTL_PST_AUTHENTIC = 0x20
+OLD_CTL_PST_REACH = 0x10
+OLD_CTL_PST_SANE = 0x08
+OLD_CTL_PST_DISP = 0x04
+
+OLD_CTL_PST_SEL_REJECT = 0
+OLD_CTL_PST_SEL_SELCAND = 1
+OLD_CTL_PST_SEL_SYNCCAND = 2
+OLD_CTL_PST_SEL_SYSPEER = 3
+
 def stdversion():
     return "%s-%s-%s %s" % (ntp.version.VERSION, ntp.version.VCS_TICK,
                             ntp.version.VCS_BASENAME, ntp.version.VCS_DATE)
