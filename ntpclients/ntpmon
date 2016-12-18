@@ -63,6 +63,32 @@ def statline(_peerlist, _mrulist, nyquist):
     spacer = (peer_report.termwidth - len(leader) - len(trailer)) * " "
     return leader + spacer + trailer
 
+def peer_detail(variables):
+    "Show the things a peer summary doesn't, cooked slightly differently"
+    # All of an rv display except refid, reach, delay, offset, jitter.
+    # One of the goals here is to emit field values at fixed positions
+    # on the 2D display, so that changes in the details are easier to spot.
+    vcopy = {}
+    vcopy.update(variables)
+    vcopy["leap"] = ("no-leap", "add-leap", "del-leap", "unsync")[vcopy["leap"]]
+    vcopy['xmt'] = ntp.util.rfc3339(ntp.ntpc.lfptofloat(vcopy['xmt']))
+    vcopy['rec'] = ntp.util.rfc3339(ntp.ntpc.lfptofloat(vcopy['rec']))
+    vcopy['reftime'] = ntp.util.rfc3339(ntp.ntpc.lfptofloat(vcopy['reftime']))
+    vcopy['filtdelay'] = vcopy['filtdelay'].replace(' ', '\t')
+    vcopy['filtoffset'] = vcopy['filtoffset'].replace(' ', '\t')
+    vcopy['filtdisp'] = vcopy['filtdisp'].replace(' ', '\t')
+    peerfmt = """\
+srcadr=%(srcadr)s, srcport=%(srcport)d, dstadr=%(dstadr)s, dstport=%(dstport)s
+leap=%(leap)s\treftime=%(reftime)s\trootdelay=%(rootdelay)s
+stratum=%(stratum)2d\trec=%(rec)s\trootdisp=%(rootdisp)s
+precision=%(precision)3d\txmt=%(xmt)s\tdispersion=%(dispersion)6.6f
+unreach=%(unreach)d, hmode=%(hmode)d, pmode=%(pmode)d, hpoll=%(hpoll)d, ppoll=%(ppoll)d, headway=%(headway)s, flash=%(flash)s, keyid=%(keyid)s
+filtdelay= %(filtdelay)s
+filtoffset=%(filtoffset)s
+filtdisp=  %(filtdisp)s
+"""
+    return peerfmt % vcopy
+
 class Fatal(Exception):
     "Unrecoverable error."
     def __init__(self, msg):
@@ -190,12 +216,12 @@ if __name__ == '__main__':
                             else:
                                 dtype = ntp.ntpc.TYPE_PEER
                             sw = ntp.ntpc.statustoa(dtype, peers[i].status)
-                            stdscr.addstr("assoc=%d, %s\n" \
+                            stdscr.addstr("assoc=%d: %s\n" \
                                           % (peers[i].associd, sw))
-                            stdscr.addstr("\n" + ntp.util.cook(retained))
+                            stdscr.addstr(peer_detail(retained))
                             try:
                                 clockvars = session.readvar(peer.associd, opcode=ntp.control.CTL_OP_READCLOCK)
-                                stdscr.addstr("\n" + ntp.util.cook(clockvars))
+                                stdscr.addstr(ntp.util.cook(clockvars))
                             except ntp.packet.ControlException:
                                 pass
                         elif span.entries:
