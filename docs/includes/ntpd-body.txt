@@ -381,7 +381,7 @@ synchronized and stable.
 
 Finally, if you have processes like _dovecot_ or database servers that
 require monotonically-increasing time, run {ntpwaitman} as
-late as possible in the boot sequence (perhaps with the_+-v+_flag) and
+late as possible in the boot sequence (perhaps with the +-v+ flag) and
 after {ntpwaitman} exits successfully it is as safe as it
 will ever be to start any process that require stable time.
 
