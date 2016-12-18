@@ -2641,7 +2641,7 @@ read_peervars(void)
 	if (res_authokay)
 		peer->num_events = 0;
 	ZERO(wants);
-	gotvar = 0;
+	gotvar = false;
 	while (NULL != (v = ctl_getitem(peer_var, &valuep))) {
 		if (v->flags & EOV) {
 			ctl_error(CERR_UNKNOWNVAR);
@@ -2649,7 +2649,7 @@ read_peervars(void)
 		}
 		NTP_INSIST(v->code < COUNTOF(wants));
 		wants[v->code] = 1;
-		gotvar = 1;
+		gotvar = true;
 	}
 	if (gotvar) {
 		for (i = 1; i < COUNTOF(wants); i++)
@@ -2671,7 +2671,7 @@ read_sysvars(void)
 	const struct ctl_var *v;
 	struct ctl_var *kv;
 	u_int	n;
-	u_int	gotvar;
+	bool	gotvar;
 	const uint8_t *cs;
 	char *	valuep;
 	const char * pch;
@@ -2687,12 +2687,12 @@ read_sysvars(void)
 		ctl_sys_num_events = 0;
 	wants_count = CS_MAXCODE + 1 + count_var(ext_sys_var);
 	wants = emalloc_zero(wants_count);
-	gotvar = 0;
+	gotvar = false;
 	while (NULL != (v = ctl_getitem(sys_var, &valuep))) {
 		if (!(EOV & v->flags)) {
 			NTP_INSIST(v->code < wants_count);
 			wants[v->code] = 1;
-			gotvar = 1;
+			gotvar = true;
 		} else {
 			v = ctl_getitem(ext_sys_var, &valuep);
 			if (NULL == v) {
@@ -2709,7 +2709,7 @@ read_sysvars(void)
 			n = v->code + CS_MAXCODE + 1;
 			NTP_INSIST(n < wants_count);
 			wants[n] = 1;
-			gotvar = 1;
+			gotvar = true;
 		}
 	}
 	if (gotvar) {
@@ -3955,7 +3955,7 @@ read_clockstatus(
 	char *			valuep;
 	uint8_t *		wants;
 	size_t			wants_alloc;
-	int			gotvar;
+	bool			gotvar;
 	const uint8_t *		cc;
 	struct ctl_var *	kv;
 	struct refclockstat	cs;
