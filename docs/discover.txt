@@ -32,7 +32,7 @@ utilizes the ubiquitous broadcast or one-to-many paradigm native to
 IPv4 and IPv6.  The server pool scheme uses DNS to resolve addresses
 of multiple volunteer servers scattered throughout the world.
 
-All three schemes work in much the same way and might be described as
+Both schemes work in much the same way and might be described as
 _grab-n'-prune._ Through one means or another they grab a number of
 associations either directly or indirectly from the configuration file,
 order them from best to worst according to the NTP mitigation
