@@ -137,7 +137,8 @@ release.
 
 Manycast is an automatic server discovery and configuration paradigm.
 It is intended as a means for a client to troll the nearby network
-neighborhood to find cooperating servers, validate them using
+neighborhood (not necessarily on the same link, where broadcast
+would work), to find cooperating servers, validate them using
 cryptographic means and evaluate their time values with respect to
 other servers that might be lurking in the vicinity. It uses the
 grab-n'-drop paradigm with the additional feature that active means
