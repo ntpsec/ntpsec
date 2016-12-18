@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # SPDX-License-Identifier: BSD-2-clause
 '''\
-Keystroke commands:
+Any keystroke causes a poll and update. Keystroke commands:
 
 'a': Change peer display to apeers mode, showing association IDs.
 'd': Toggle select mode (some peer will be reverse-video highlighted when on).
@@ -17,7 +17,7 @@ Keystroke commands:
 ' ': Rotate through display modes. 
 '?': Display helpscreen.
 
-When no peer is selected, <space> rotates through a/n/o display modes
+When no peer is selected, <space> rotates through a/n/o/p display modes
 for the whole peers list. When a peer is selected, <space> toggles
 detail-display mode.
 '''

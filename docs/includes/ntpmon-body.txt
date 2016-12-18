@@ -9,10 +9,10 @@
 == Description ==
 
 This program is a real-time status monitor for NTP.  It presents the
-same information as the 'peers' and 'mrulist' commands of {ntpqman},
-but using a split-window display that also includes a status summary
-bar, and updates at intervals guaranteed to show status changes as
-soon as they occur.
+same information as the 'peers', 'mrulist', 'rv', and 'cv' commands of
+{ntpqman}, but using a split-window display that also includes a
+status summary bar, and updates at intervals guaranteed to show status
+changes almost as soon as they occur.
 
 (Specifically, the display begins updating once per second and
 adjusts itself to poll at twice the frequency of the shortest
@@ -22,13 +22,13 @@ The status bar includes the version string of the server being
 watched, the (local) time at which it was last updated, and the
 current query interval.
 
-^C cleanly terminates the program.
+^C cleanly terminates the program. Any keystroke will trigger a poll
+and update. A few single-keystroke commands are also interpreted as
+commands.
 
 If no hostname is specified on the command line, localhost is monitored.
 
 == Commands ==
-
-A few single-keystroke commands are available.
 
 a:: Change peer display to apeers mode, showing association IDs.
 
@@ -56,7 +56,7 @@ x:: Cleanly terminate the program.
 
 ?:: List these commands.
 
-When no peer is selected, <space> rotates through a/n/o display modes
+When no peer is selected, <space> rotates through a/n/o/p display modes
 for the whole peers list. When a peer is selected, <space> toggles
 detail-display mode.
 
