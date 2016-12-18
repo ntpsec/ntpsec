@@ -161,7 +161,7 @@ are generated into the output directory.
 
 When an index is generated, ntpviz will look for two files in the
 output directory.  Neither of these files need be present, and the
-'header' and 'footer' files may contain arbitrary html.
+'header' and 'footer' files may contain arbitrary HTML.
 
 The first file is named 'header'.  The contents of that file will be
 added almost at the top of the body on the generated index page.
