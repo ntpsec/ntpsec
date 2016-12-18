@@ -111,7 +111,7 @@ def termsize():
     return TermSize(*size)
 
 class PeerStatusWord:
-    "A peer status wor dissected for display"
+    "A peer status word from readstats(), dissected for display"
     def __init__(self, status, pktversion=ntp.magic.NTP_VERSION):
         self.event = ntp.control.CTL_PEER_EVENT(status)
         self.event_count = ntp.control.CTL_PEER_NEVNT(status)
@@ -292,6 +292,11 @@ class PeerSummary:
         else:
             return '-' + hostname[-maxlen+1:]
 
+    @staticmethod
+    def is_clock(variables):
+        "Does a set of variables look like it returned from a clock?"
+        return "srchost" in variables and '(' in variables["srchost"]
+
     def header(self):
         "Column headers for peer display"
         if self.displaymode == "apeers":
@@ -383,7 +388,7 @@ class PeerSummary:
             else:
                 ptype = 'B'
         elif hmode == ntp.magic.MODE_CLIENT:
-            if srchost and '(' in srchost:
+            if PeerSummary.is_clock(variables):
                 ptype = 'l'	# local refclock
             elif dstadr_refid == "POOL":
                 ptype = 'p'	# pool

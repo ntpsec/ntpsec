@@ -185,7 +185,11 @@ if __name__ == '__main__':
                         sl = statline(peer_report, mru_report, nyquist)
                         stdscr.addstr(sl + "\n", curses.A_REVERSE|curses.A_DIM)
                         if detailmode:
-                            sw = ntp.util.PeerStatusWord(peers[i].status)
+                            if ntp.util.PeerSummary.is_clock(retained):
+                                dtype = ntp.ntpc.TYPE_CLOCK
+                            else:
+                                dtype = ntp.ntpc.TYPE_PEER
+                            sw = ntp.ntpc.statustoa(dtype, peers[i].status)
                             stdscr.addstr("assoc=%d, %s\n" \
                                           % (peers[i].associd, sw))
                             stdscr.addstr("\n" + ntp.util.cook(retained))
