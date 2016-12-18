@@ -1453,9 +1453,6 @@ USAGE: ntpq [-46dphinOV] [-c str] [-D lvl] [host ...]
 '''
 
 if __name__ == '__main__':
-    ntp.ntpc.setprogname("ntpq")
-    #init_auth()
-
     try:
         (options, arguments) = getopt.getopt(sys.argv[1:],
                                              "46c:dD:hinpVw",
@@ -1468,7 +1465,8 @@ if __name__ == '__main__':
         sys.stderr.write("%s\n" % e)
         sys.stderr.write(usage)
         raise SystemExit(1)
-    progname = sys.argv[0]
+    progname = os.path.basename(sys.argv[0])
+    ntp.ntpc.setprogname(progname)
 
     session = ntp.packet.ControlSession()
     interpreter = Ntpq(session)
@@ -1509,17 +1507,23 @@ if __name__ == '__main__':
         interpreter.warn("%s: invalid option combination.\n" % progname)
         raise SystemExit(1)
 
+    for token in arguments:
+        if token.startswith("-"):
+            if '4' == token[-1]:
+                session.ai_family = socket.AF_INET
+            elif '6' == token[-1]:
+                session.ai_family = socket.AF_INET6
+            else:
+                interpreter.warn("%s: unexpected option-like thing.\n" % progname)
+                raise SystemExit(1)
+            arguments.pop(0)
+        else:
+            interpreter.chosts.append((token, session.ai_family))
+
     if len(arguments) == 0:
         interpreter.chosts.append((DEFHOST, session.ai_family))
-    else:
-        for token in arguments:
-            if token.startswith("-"):
-                if '4' == token[1]:
-                    session.ai_family = socket.AF_INET
-                elif '6' == token[1]:
-                    session.ai_family = socket.AF_INET6
-            else:
-                interpreter.chosts.append((token, session.ai_family))
+
+
 
     if len(interpreter.ccmds) == 0 and not interpreter.interactive and os.isatty(0) and os.isatty(1):
         interpreter.interactive = True
