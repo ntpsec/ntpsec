@@ -22,7 +22,7 @@ Accept no imitations.
 * link:#configuration[Configuration Improvements]
 * link:#other[Other user-visible changes]
 
-[intro] 
+[[intro]] 
 == Differences from NTP Classic ==
 
 The design objectives of this distribution, NTPsec, are in
@@ -45,7 +45,7 @@ code security and code verifiability.
 Most of the changes are under the hood, internal to the codebase.  A
 few will be user-visible.
 
-[incompatible]
+[[incompatible]]
 == Incompatible Changes ==
 
 Normally NTPsec is a drop-in replacement for legacy versions. We have
@@ -84,7 +84,7 @@ a build-time switch, not a run-time one).
   has been removed from the NTPsec code as part of
   getting it fully IPv6-ready.
 
-[security]
+[[security]]
 == Security Improvements ==
 
 We have spent more effort than anything else on reducing attack
@@ -139,7 +139,7 @@ codebase has been outright removed, with less than 5% new code added.
 * The code has been systematically hardened, with unsafe string
   copy and formatting functions replaced by safe (bounded) ones.
 
-[timesync]
+[[timesync]]
 == Time-synchronization improvements ==
 
 * Internally, there is more consistent use of nanosecond precision.
@@ -148,7 +148,7 @@ codebase has been outright removed, with less than 5% new code added.
   rather than microseconds; this might actually matter for GPSDOs
   and high-quality radio clocks.
 
-[clients]
+[[clients]]
 == Client Tool Improvements ==
 
 * A new tool, +ntpmon+, performs real-time monitoring of your
@@ -181,7 +181,7 @@ codebase has been outright removed, with less than 5% new code added.
   the clock tick rate, precision, and jitter. Part of it formerly
   traveled as +tickadj+.
 
-[configuration]
+[[configuration]]
 == Configuration Improvements ==
 
 * The notorious collision between pool and nopeer in older
@@ -222,7 +222,7 @@ codebase has been outright removed, with less than 5% new code added.
   default device path, the default PPS device path (if any) and the
   serial baud rate.
 
-[other]
+[[other]]
 == Other user-visible changes ==
 
 * The documentation has been extensively updated and revised.  One
