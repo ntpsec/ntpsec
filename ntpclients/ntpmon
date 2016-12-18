@@ -83,9 +83,9 @@ leap=%(leap)s\treftime=%(reftime)s\trootdelay=%(rootdelay)s
 stratum=%(stratum)2d\trec=%(rec)s\trootdisp=%(rootdisp)s
 precision=%(precision)3d\txmt=%(xmt)s\tdispersion=%(dispersion)6.6f
 unreach=%(unreach)d, hmode=%(hmode)d, pmode=%(pmode)d, hpoll=%(hpoll)d, ppoll=%(ppoll)d, headway=%(headway)s, flash=%(flash)s, keyid=%(keyid)s
-filtdelay= %(filtdelay)s
-filtoffset=%(filtoffset)s
-filtdisp=  %(filtdisp)s
+filtdelay  = %(filtdelay)s
+filtoffset = %(filtoffset)s
+filtdisp   = %(filtdisp)s
 """
     return peerfmt % vcopy
 
@@ -106,6 +106,9 @@ class OutputContext:
         curses.cbreak()
         curses.noecho()
         stdscr.keypad(True)
+        # Design decision: The most important info is nearer the
+        # top of the display. 
+        stdscr.scrollok(False)
     def __exit__(self, extype_unused, value_unused, traceback_unused):
         curses.endwin()
 
