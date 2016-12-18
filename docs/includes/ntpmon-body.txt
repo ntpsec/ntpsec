@@ -32,17 +32,17 @@ A few single-keystroke commands are available.
 
 a:: Change peer display to apeers mode, showing association IDs.
 
-d:: Toggle select mode (some peer will be reverse-video highlighted when on)
+d:: Toggle select mode (some peer will be reverse-video highlighted when on).
 
-j:: Select next peer (in select mode)
+j:: Select next peer (in select mode); arrow down also works.
 
-k:: Select previous peer (in select mode)
+k:: Select previous peer (in select mode); arrow up also works.
 
 n:: Toggle display of hostnames (vs. IP addresses).
 
 o:: Change peer display to opeers mode, showing destination address.
 
-p:: Change peer display to default mode, showing refid
+p:: Change peer display to default mode, showing refid.
 
 q:: Cleanly terminate the program.
 
