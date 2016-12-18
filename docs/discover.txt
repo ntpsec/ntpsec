@@ -101,12 +101,14 @@ results in a volley of six client/server exchanges at 2-s intervals
 during which both the synchronization and cryptographic protocols run
 concurrently.
 
-Following the volley, the server continues in listen-only mode and sends
-no further messages. If for some reason the broadcast server does not
+If for some reason the broadcast server does not
 respond to these messages, the client will cease transmission and
 continue in listen-only mode with a default propagation delay. The
 volley can be avoided by using the +broadcastdelay+ command with nonzero
 argument.
+
+Following the volley, the server continues in listen-only mode and sends
+no further messages for this association.
 
 A server is configured in broadcast mode using the +broadcast+ command
 and specifying the broadcast address of a local interface. If two or
