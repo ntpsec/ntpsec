@@ -39,7 +39,7 @@ If no hostname is specified on the command line, localhost is monitored.
 
 a:: Change peer display to apeers mode, showing association IDs.
 
-d:: Toggle select mode (some peer will be reverse-video highlighted when on).
+d:: Toggle detail mode (some peer will be reverse-video highlighted when on).
 
 j:: Select next peer (in select mode); arrow down also works.
 
@@ -59,13 +59,9 @@ w:: Toggle wide mode.
 
 x:: Cleanly terminate the program.
 
-<space>:: Rotate through display modes.
+<space>:: Rotate through a/n/o/p display modes.
 
 ?:: List these commands.
-
-When no peer is selected, <space> rotates through a/n/o/p display modes
-for the whole peers list. When a peer is selected, <space> toggles
-detail-display mode.
 
 == Options ==
 
