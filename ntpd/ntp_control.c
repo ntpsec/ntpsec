@@ -3051,7 +3051,7 @@ static int validate_nonce(
 	get_systime(&now_delta);
 	L_SUB(&now_delta, &ts);
 
-	return (supposed == derived && now_delta.l_ui < 16);
+	return (supposed == derived && now_delta.l_ui < NONCE_TIMEOUT);
 }
 
 

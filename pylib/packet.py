@@ -727,6 +727,7 @@ class ControlSession:
         self.rstatus = 0
         self.ntpd_row_limit = ControlSession.MRU_ROW_LIMIT
         self.logfp = sys.stdout
+        self.nonce_xmit = 0
 
     def close(self):
         if self.sock:
@@ -1191,13 +1192,13 @@ class ControlSession:
     def fetch_nonce(self):
         "Receive a nonce that can be replayed - combats source address spoofing"
         self.doquery(opcode=ntp.control.CTL_OP_REQ_NONCE)
+        self.nonce_xmit = time.time()
         if not self.response.startswith(polybytes("nonce=")):
             raise ControlException(SERR_BADNONCE)
         return polystr(self.response.strip())
 
     def mrulist(self, variables=None, rawhook=None, recent=None):
         "Retrieve MRU list data"
-        nonce_uses = 0
         restarted_count = 0
         cap_frags = True
         warn = self.logfp.write
@@ -1363,10 +1364,8 @@ class ControlSession:
                            "frags" if cap_frags else "limit",
                            frags if cap_frags else limit,
                            parms)
-                nonce_uses += 1
-                if nonce_uses >= 4:
+                if time.time() - self.nonce_xmit >= ntp.control.NONCE_TIMEOUT:
                     nonce = self.fetch_nonce()
-                    nonce_uses = 0
                 for i in range(len(span.entries)):
                     e = span.entries[len(span.entries) - i - 1]
                     incr = ", addr.%d=%s, last.%d=%s" % (i, e.addr, i, e.last)

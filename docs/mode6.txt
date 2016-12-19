@@ -482,6 +482,12 @@ containing one string-valued variable, "nonce". The value need not by
 interpreted by the client, only replayed as part of a following MRU-list
 request.
 
+Each nonce becomes invalid 16 seconds after the request for it was
+received by ntpd. While the issue time is encoded in the nonce, it
+is safer practice not to rely on the nonce format but instead to track
+the last nonce transmission time in your client and re-request based
+on that.
+
 [[auth]]
 == Authentication ==
 

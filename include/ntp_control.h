@@ -160,4 +160,13 @@ struct ntp_control {
 #define	IFSTATS_FIELDS	12
 #define	RESLIST_FIELDS	4
 
+/*
+ * To prevent replay attacks, MRU list nonces age out. Time is in seconds.
+ *
+ * Don't change this value casually.  Lengthening it might extend an
+ * attack window for DDoS amplification.  Shortening it might make your
+ * server (or client) incompatible with older versions.
+ */
+#define NONCE_TIMEOUT	16
+
 #endif /* GUARD_NTP_CONTROL_H */
