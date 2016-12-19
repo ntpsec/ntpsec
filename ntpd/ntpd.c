@@ -232,7 +232,7 @@ parse_cmdline_opts(
 	)
 {
 	static bool	parsed = false;
-	int sawV = 0;
+	bool sawV = false;
 
 	if (parsed)
 	    return;
@@ -378,6 +378,7 @@ parse_cmdline_opts(
 		}
 		break;
 	    case 'V':
+		sawV = true;
 		printf("%s\n", ntpd_version());
 		break;
 	    case 'w':
@@ -417,7 +418,7 @@ parse_cmdline_opts(
 		cmdline_servers = argv + ntp_optind;
 	}
 
-	if (sawV > 0)
+	if (sawV)
 		exit(0);
 }
 
@@ -491,7 +492,7 @@ const char *ntpd_version(void)
 {
     static char versionbuf[32];
     snprintf(versionbuf, sizeof(versionbuf),
-	     "%s-%s-%d", VCS_BASENAME, VERSION, VCS_TICK);
+	     "%s-%s-%d %s", VCS_BASENAME, VERSION, VCS_TICK, VCS_DATE);
     return versionbuf;
 }
 
