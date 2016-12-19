@@ -64,7 +64,7 @@ time_to_time64(
 	settime64u(res, 0);
 	if (tt < 0) {
 		settime64lo(res, (uint32_t)-tt);
-		negtime64(res);
+		res = negtime64(res);
 	} else {
 		settime64lo(res, (uint32_t)tt);
 	}

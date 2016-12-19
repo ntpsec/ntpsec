@@ -55,7 +55,7 @@ typedef uint64_t time64_t;
 #define settime64s(n,v)   (n) = ((int64_t)(v))
 #define time64u(n)        (n)
 #define settime64u(n,v)   (n) = (v)
-#define negtime64(n)      (n = ((uint64_t)((((int64_t)(n)) * -1))))
+#define negtime64(n)      ((uint64_t)((((int64_t)(n)) * -1)))
 
 typedef uint16_t	associd_t; /* association ID */
 #define ASSOCID_MAX	USHRT_MAX
