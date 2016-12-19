@@ -31,6 +31,8 @@
 
 #include "recvbuff.h"
 
+#include "version.h"
+
 extern bool sandbox(const bool droproot,
 		    const char *user, const char *group,
 		    const char *chrootdir,
@@ -376,18 +378,7 @@ parse_cmdline_opts(
 		}
 		break;
 	    case 'V':
-		sawV++;
-		switch (sawV) {
-		  case 1:
-			printf("ntpd %s\n", Version);
-			break;
-		  case 2:
-			printf("ntpd %s\n", VVersion);
-			break;
-		  default:
-			printf("ntpd no-more\n");
-			break;
-		}
+		printf("%s\n", ntpd_version());
 		break;
 	    case 'w':
 		wait_sync = strtod(ntp_optarg, NULL);
@@ -496,6 +487,14 @@ set_process_priority(void)
 		msyslog(LOG_ERR, "set_process_priority: No way found to improve our priority");
 }
 
+const char *ntpd_version(void)
+{
+    static char versionbuf[32];
+    snprintf(versionbuf, sizeof(versionbuf),
+	     "%s-%s-%d", VCS_BASENAME, VERSION, VCS_TICK);
+    return versionbuf;
+}
+
 /*
  * Main program.  Initialize us, disconnect us from the tty if necessary,
  * and loop waiting for I/O and/or timer expiries.
@@ -549,7 +548,7 @@ ntpdmain(
 		char buf[1024];	/* Secret knowledge of msyslog buf length */
 		char *cp = buf;
 
-		msyslog(LOG_NOTICE, "ntpd %s: Starting", Version);
+		msyslog(LOG_NOTICE, "ntpd %s: Starting", ntpd_version());
 
 		/* Note that every arg has an initial space character */
 		snprintf(cp, sizeof(buf), "Command line:");

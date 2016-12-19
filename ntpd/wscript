@@ -2,6 +2,8 @@
 def build(ctx):
 	srcnode = ctx.srcnode.abspath()
 	bldnode = ctx.bldnode.abspath()
+	target3 = ctx.srcnode.make_node('ntpd/version.h')
+	target4 = ctx.srcnode.make_node('wafhelpers/.autorevision-cache')
 
 	if ctx.variant == "host":
 		bison_source = [
@@ -18,7 +20,14 @@ def build(ctx):
 			]
 		)
 
-		ctx.add_group() # Generate Bison files first.
+		ctx(
+		    cwd         = srcnode,
+		    rule        = 'VCS_EXTRA=`cat ${SRC[0]}` wafhelpers/autorevision.sh -o ${TGT[1].abspath()} -e VERSION -t c >${TGT[0].abspath()}',
+		    source      = ["../VERSION", '../wafhelpers/autorevision.sh'] ,
+		    target      = [target3, target4],
+		)
+
+		ctx.add_group() # Generate Bison and version.h files first.
 
 		keyword_gen_source = [
 			"keyword-gen.c",
@@ -127,7 +136,7 @@ def build(ctx):
 
 	ctx(
 		target		= "ntpd",
-		features	= "c rtems_trace cprogram bld_include src_include libisc_include libisc_pthread_include ntp_version",
+		features	= "c rtems_trace cprogram bld_include src_include libisc_include libisc_pthread_include",
 		source		= ntpd_source,
 		use		= "libntpd_obj isc ntp sodium M parse RT CAP SECCOMP PTHREAD CRYPTO DNS_SD DNS_SD_INCLUDES %s" % use_refclock,
 		includes	= [

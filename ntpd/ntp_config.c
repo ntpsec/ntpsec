@@ -3313,8 +3313,7 @@ void readconfig(const char *config_file)
 	/*
 	 * install a non default variable with this daemon version
 	 */
-	snprintf(line, sizeof(line),
-		"daemon_version=\"ntpd %s\"", Version);
+	snprintf(line, sizeof(line), "daemon_version=\"%s\"", ntpd_version());
 	set_sys_var(line, strlen(line) + 1, RO);
 
 	init_syntax_tree(&cfgt);
