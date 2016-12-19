@@ -129,6 +129,7 @@ if __name__ == '__main__':
     wideremote = False
     showall = True
     showpeers = True
+    nyquist = 1
 
     for (switch, val) in options:
         if switch in ("-V", "--version"):
@@ -149,7 +150,6 @@ if __name__ == '__main__':
         session = ntp.packet.ControlSession()
         session.openhost(arguments[0] if arguments else "localhost")
         sysvars = session.readvar()
-        nyquist = 12 ##### FIXME (undefined below)
         with OutputContext() as ctx:
             while True:
                 stdscr.clear()
