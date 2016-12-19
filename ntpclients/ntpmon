@@ -152,6 +152,7 @@ if __name__ == '__main__':
           mru_report.debug = session.debug
         session.openhost(arguments[0] if arguments else "localhost")
         sysvars = session.readvar()
+        nyquist = 12 ##### FIXME (undefined below)
         with OutputContext() as ctx:
             while True:
                 stdscr.clear()
