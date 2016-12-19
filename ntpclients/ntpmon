@@ -126,7 +126,7 @@ if __name__ == '__main__':
 
     showhostnames = True
     wideremote = False
-    showall = False
+    showall = True
 
     for (switch, val) in options:
         if switch in ("-V", "--version"):

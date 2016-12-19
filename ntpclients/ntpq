@@ -750,7 +750,7 @@ usage: keytype [digest-name]
     def do_associations(self, line):
         "print list of association IDs and statuses for the server's peers"
         if self.__dogetassoc():
-            self.__printassoc(showall=False)
+            self.__printassoc(showall=True)
 
     def help_associations(self):
         self.say("""\
@@ -760,7 +760,7 @@ usage: associations
 
     def do_passociations(self, line):
         "print list of associations returned by last associations command"
-        self.__printassoc(showall=False)
+        self.__printassoc(showall=True)
 
     def help_passociations(self):
         self.say("""\
@@ -1067,7 +1067,7 @@ usage: pstats assocID
 
     def do_peers(self, line):
         "obtain and print a list of the server's peers [IP version]"
-        self.__dopeers(showall=False, mode="peers")
+        self.__dopeers(showall=True, mode="peers")
 
     def help_peers(self):
         self.say("""\
@@ -1077,7 +1077,7 @@ usage: peers
 
     def do_apeers(self, line):
         "obtain and print a list of the server's peers and their assocIDs [IP version]"
-        self.__dopeers(showall=False, mode="apeers")
+        self.__dopeers(showall=True, mode="apeers")
 
     def help_apeers(self):
         self.say("""\
@@ -1097,7 +1097,7 @@ usage: lpeers
 
     def do_opeers(self, line):
         "print peer list the old way, with dstadr shown rather than refid [IP version]"
-        self.__dopeers(showall=False, mode="opeers")
+        self.__dopeers(showall=True, mode="opeers")
 
     def help_opeers(self):
         self.say("""\
