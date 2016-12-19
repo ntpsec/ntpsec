@@ -15,6 +15,8 @@ Any keystroke causes a poll and update. Keystroke commands:
 'w': Toggle wide mode.
 'x': Cleanly terminate the program.
 ' ': Rotate through a/n/o/p display modes. 
+'+': Increase debugging level.  Output goes to ntpmon.log
+'-': Decrease debugging level.
 '?': Display helpscreen.
 '''
 
@@ -143,13 +145,6 @@ if __name__ == '__main__':
     mru_report = ntp.util.MRUSummary(showhostnames)
     try:
         session = ntp.packet.ControlSession()
-        if 0: # debugging hacks, UI is $EDITOR
-          session.logfp = open("ntpmon.log", "a", 1) # 1 => line buffered
-          session.debug = 4
-          peer_report.logfp = session.logfp
-          peer_report.debug = session.debug
-          mru_report.logfp = session.logfp
-          mru_report.debug = session.debug
         session.openhost(arguments[0] if arguments else "localhost")
         sysvars = session.readvar()
         nyquist = 12 ##### FIXME (undefined below)
@@ -207,6 +202,8 @@ if __name__ == '__main__':
                         # cycle, rounded up to 1 second.                        
                         nyquist = int(min(peer_report.intervals()) / 2)
                         nyquist = 1 if nyquist == 0 else nyquist
+                        if session.debug:
+                            session.logfp.write("nyquist is %d\n" % nyquist)
                         # The status line
                         sl = statline(peer_report, mru_report, nyquist)
                         stdscr.addstr(sl + "\n", curses.A_REVERSE|curses.A_DIM)
@@ -248,8 +245,6 @@ if __name__ == '__main__':
                             selected = 0
                         selectmode = not selectmode
                         detailmode = not detailmode
-                    elif key == '?':
-                        helpmode = True
                     elif key == 'n':
                         peer_report.showhostnames = not peer_report.showhostnames
                         mru_report.showhostnames = not mru_report.showhostnames
@@ -274,6 +269,18 @@ if __name__ == '__main__':
                     elif key == 'k' or key == "KEY_UP":
                         selected += len(peers) - 1
                         selected %= len(peers)
+                    elif key == '+':
+                        if session.debug == 0:
+                            session.logfp = open("ntpmon.log", "a", 1)
+                            peer_report.logfp = session.logfp
+                            mru_report.logfo = session.logfp
+                        session.debug += 1
+                        peer_report.debug = session.debug
+                        mru_report.debug = session.debug
+                    elif key == '-':
+                        session.debug -= 1
+                        peer_report.debug = session.debug
+                        mru_report.debug = session.debug
                     elif key == '?':
                         helpmode = True
                 except curses.error:

@@ -597,9 +597,9 @@ usage: hostnames [yes|no]
         if not line:
             pass
         elif line == "more":
-            self.debug +=1
+            self.debug += 1
         elif line == "less":
-            self.debug -= 1
+            if self.debug > 0: self.debug -= 1
         elif line == "no":
             self.debug = 0
         else:
@@ -608,6 +608,8 @@ usage: hostnames [yes|no]
             except ValueError:
                 print("What?")
         self.session.debug = self.debug
+        if self.debug > 0:
+            self.session.logfp = open("ntpq.log", "a", 1) # 1 => line buffered
         print("debug level is %d" % self.debug)
 
     def help_debug(self):
@@ -1195,6 +1197,9 @@ usage: config_from_file <configuration filename>
                              "Displaying partial client list.\n")
                 try:
                     formatter = ntp.util.MRUSummary(interpreter.showhostnames)
+                    if session.debug:
+                        formatter.logfp = session.logfp
+                        formatter.debug = session.debug
                     self.say(ntp.util.MRUSummary.header + "\n")
                     self.say(("=" * ntp.util.MRUSummary.width) + "\n")
                     # reversed to put most recent entries at the top.
@@ -1481,6 +1486,7 @@ if __name__ == '__main__':
         elif switch in ("-d", "--debug"):
             interpreter.debug += 1
             session.debug += 1
+            session.logfp = open("ntpq.log", "a", 1) # 1 => line buffered
         elif switch in ("-D", "--set-debug-level"):
             try:
                 session.debug = interpreter.debug = int(val)
