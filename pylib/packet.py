@@ -844,14 +844,14 @@ class ControlSession:
         while len(xdata) % 4:
             xdata += b"\x00"
         if self.debug >= 3:
-                self.logfp.write("Sending %d octets" % len(xdata))
+                self.logfp.write("Sending %d octets.\n" % len(xdata))
         try:
             self.sock.sendall(polybytes(xdata))
         except socket.error:
             # On failure, we don't know how much data was actually received
             self.logfp.write("Write to %s failed\n" % self.hostname)
             return -1
-        if self.debug >= 4:
+        if self.debug >= 5:
             self.logfp.write("Request packet:\n")
             dump_hex_printable(xdata, self.logfp)
         return 0
@@ -859,7 +859,10 @@ class ControlSession:
     def sendrequest(self, opcode, associd, qdata, auth=False):
         "Ship an ntpq request packet to a server."
         if self.debug:
-            self.logfp.write("sendrequest(opcode=%d)\n" % opcode)
+            if self.debug >= 3:
+                self.logfp.write("\n") # extra space to help find clumps
+            self.logfp.write("sendrequest: opcode=%d, associd=%d, qdata=%s\n" \
+                    % (opcode, associd, qdata) )
 
         # Check to make sure the data will fit in one packet
         if len(qdata) > ntp.control.CTL_MAX_DATA_LEN:
@@ -956,10 +959,10 @@ class ControlSession:
                              % ("not ", "")[seenlastfrag])
                 raise ControlException(SERR_INCOMPLETE)
 
-            if self.debug > 4:
+            if self.debug > 3:
                 warn("At %s, socket read begins\n" % time.asctime())
             rawdata = polybytes(self.sock.recv(4096))
-            if self.debug >= 4:
+            if self.debug >= 3:
                 warn("Received %d octets\n" % len(rawdata))
             rpkt = ControlPacket(self)
             try:
@@ -1081,9 +1084,12 @@ class ControlSession:
                     if self.debug:
                         warn("Fragment collection ends\n")
                     self.response = polybytes("".join([polystr(frag.data) for frag in fragments]))
-                    if self.debug >= 4:
+                    if self.debug >= 5:
                         warn("Response packet:\n")
                         dump_hex_printable(self.response, self.logfp)
+                    elif self.debug >= 3:
+                        # FIXME: Garbage when retrieving assoc list (binary)
+                        warn("Response packet:\n%s\n" % self.response)
                     return None
                 break
 
