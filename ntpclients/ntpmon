@@ -7,6 +7,7 @@ Any keystroke causes a poll and update. Keystroke commands:
 'd': Toggle detail mode (some peer will be reverse-video highlighted when on).
 'j': Select next peer (in select mode); arrow down also works.
 'k': Select previous peer (in select mode); arrow up also works.
+'m': Disable peers display, showing only MRU list
 'n': Toggle display of hostnames (vs. IP addresses).
 'o': Change peer display to opeers mode, showing destination address.
 'p': Change peer display to default mode, showing refid.
@@ -127,6 +128,7 @@ if __name__ == '__main__':
     showhostnames = True
     wideremote = False
     showall = True
+    showpeers = True
 
     for (switch, val) in options:
         if switch in ("-V", "--version"):
@@ -158,14 +160,18 @@ if __name__ == '__main__':
                     stdscr.refresh()
                     stdscr.timeout(-1)
                 else:
-                    try:
-                        peers = session.readstat()
-                    except ntp.packet.ControlException as e:
-                        raise Fatal(e.message)
-                    except IOError as e:
-                        raise Fatal(e.strerror)
-                    stdscr.addstr(peer_report.header() + "\n", curses.A_BOLD)
-                    if len(peers) == 0:
+                    if showpeers:
+                        try:
+                            peers = session.readstat()
+                        except ntp.packet.ControlException as e:
+                            raise Fatal(e.message)
+                        except IOError as e:
+                            raise Fatal(e.strerror)
+                        stdscr.addstr(peer_report.header() + "\n", curses.A_BOLD)
+                    else:
+                        peer_report.polls = [1]	# Kluge!
+                        peers = []
+                    if showpeers and len(peers) == 0:
                         raise Fatal("no peers reported")
                     try:
                         for (i, peer) in enumerate(peers):
@@ -245,6 +251,8 @@ if __name__ == '__main__':
                             selected = 0
                         selectmode = not selectmode
                         detailmode = not detailmode
+                    elif key == 'm':
+                        showpeers = not showpeers
                     elif key == 'n':
                         peer_report.showhostnames = not peer_report.showhostnames
                         mru_report.showhostnames = not mru_report.showhostnames
