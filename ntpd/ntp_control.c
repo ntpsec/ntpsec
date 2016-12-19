@@ -1514,9 +1514,8 @@ ctl_putsys(
 		break;
 
 	case CS_VERSION:
-		snprintf(str, sizeof(str), "%s %s",
-			"ntpd", Version);
-		ctl_putstr(sys_var[CS_VERSION].text, str, strlen(str));
+		ss = ntpd_version();
+		ctl_putstr(sys_var[CS_VERSION].text, ss, strlen(ss));
 		break;
 
 	case CS_STABIL:

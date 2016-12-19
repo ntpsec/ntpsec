@@ -30,8 +30,10 @@ OLD_CTL_PST_SEL_SYNCCAND = 2
 OLD_CTL_PST_SEL_SYSPEER = 3
 
 def stdversion():
-    return "%s-%s-%s %s" % (ntp.version.VERSION, ntp.version.VCS_TICK,
-                            ntp.version.VCS_BASENAME, ntp.version.VCS_DATE)
+    return "%s-%s-%s %s" % (ntp.version.VCS_BASENAME,
+                            ntp.version.VERSION,
+                            ntp.version.VCS_TICK,
+                            ntp.version.VCS_DATE)
 
 def rfc3339(t):
     "RFC 3339 string from Unix time, including fractional second."
