@@ -9,19 +9,28 @@ import sys
 import threading
 from gps import *
 
-gpsd = None #seting the global variable
-
 class GpsPoller(threading.Thread):
     def __init__(self):
         threading.Thread.__init__(self)
-        global gpsd #bring it in scope
-        gpsd = gps(mode=WATCH_ENABLE) #starting the stream of info
+        self.gpsd = gps(mode=WATCH_ENABLE) #starting the stream of info
         self.running = True
 
     def run(self):
-        global gpsd
         while gpsp.running:
-            gpsd.next() # loop and grab each set of gpsd info
+            self.gpsd.next() # loop and grab each set of gpsd info
+
+    def get_time(self):
+        "Return the gpsd time fix"
+        return self.gpsd.fix.time
+
+    def display(self):
+        "Displays the time, device, TDOP, and nSat data collected"
+        #print(gpsd.fix.latitude,', ',gpsd.fix.longitude,'  Time: ',gpsd.utc)
+        print('%s %s %f %d' % \
+                (isotime(self.get_time()),
+                self.gpsd.device,
+                self.gpsd.tdop,
+                self.gpsd.satellites_used))
 
 if __name__ == '__main__':
     gpsp = GpsPoller() # create the thread
@@ -32,19 +41,12 @@ if __name__ == '__main__':
         print("# Time       Device     TDOP     nSat")
         while True:
             #It may take a second or two to get good data
-            #print(gpsd.fix.latitude,', ',gpsd.fix.longitude,'  Time: ',gpsd.utc)
 
             try:
-                if 'nan' != gpsd.fix.time and not isnan(gpsd.fix.time):
-                    if last_time != gpsd.fix.time:
-                        # new fix, log it.
-                        print( '%s %s %f %d' % \
-                            (isotime(gpsd.fix.time),
-                             gpsd.device,
-                             gpsd.tdop,
-                             gpsd.satellites_used)
-                            )
-                    last_time = gpsd.fix.time
+                if 'nan' != gpsp.get_time() and not isnan(gpsp.get_time()):
+                    if last_time != gpsp.get_time():
+                        gpsp.display()
+                    last_time = gpsp.get_time()
             except AttributeError as e:
                 print( 'parse error\n')
 
