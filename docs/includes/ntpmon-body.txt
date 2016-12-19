@@ -45,6 +45,8 @@ j:: Select next peer (in select mode); arrow down also works.
 
 k:: Select previous peer (in select mode); arrow up also works.
 
+m:: Toggle MRUlist-only mode; suppresses peer display when on.
+
 n:: Toggle display of hostnames (vs. IP addresses).
 
 o:: Change peer display to opeers mode, showing destination address.
