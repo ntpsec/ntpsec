@@ -1082,15 +1082,20 @@ class ControlSession:
                             warn("Hole in fragment sequence, %d of %d\n" % (f, len(fragments)))
                         break
                 else:
-                    if self.debug:
-                        warn("Fragment collection ends\n")
                     self.response = polybytes("".join([polystr(frag.data) for frag in fragments]))
+                    if self.debug:
+                        warn("Fragment collection ends. %d bytes in %d fragments\n" % (len(self.response), len(fragments)))
                     if self.debug >= 5:
                         warn("Response packet:\n")
                         dump_hex_printable(self.response, self.logfp)
                     elif self.debug >= 3:
                         # FIXME: Garbage when retrieving assoc list (binary)
                         warn("Response packet:\n%s\n" % self.response)
+                    elif self.debug >= 2:
+                        # FIXME: Garbage when retrieving assoc list (binary)
+                        eol = self.response.find("\n")
+                        firstline = self.response[:eol]
+                        warn("First line:\n%s\n" % firstline)
                     return None
                 break
 
@@ -1203,6 +1208,7 @@ class ControlSession:
         cap_frags = True
         warn = self.logfp.write
         sorter = None
+        frags = MAXFRAGS
         if variables is None:
             variables = {}
 
@@ -1229,10 +1235,14 @@ class ControlSession:
                         raise ControlException(SERR_BADSORT % sortkey)
             for k in list(variables.keys()):
                 if k in ("mincount", "resall", "resany",
-                         "maxlstint", "laddr", "recent", "sort"):
+                         "maxlstint", "laddr", "recent", "sort",
+                         "frags", "limit"):
                     continue
                 else:
                     raise ControlException(SERR_BADPARAM % k)
+            if 'frags' in variables:
+                frags = int(variables.get('frags'))
+                del variables['frags']
             if 'kod' in variables:
                 variables['resany'] = variables.get('resany', 0) | ntp.magic.RES_KOD
                 del variables['kod']
@@ -1246,7 +1256,6 @@ class ControlSession:
         try:
             # Form the initial request
             limit = min(3 * MAXFRAGS, self.ntpd_row_limit)
-            frags = MAXFRAGS
             req_buf = "%s, frags=%d" % (nonce, frags)
             if variables:
                 parms = ", " + ",".join([("%s=%s" % it) for it in list(variables.items())])
