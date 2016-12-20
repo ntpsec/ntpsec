@@ -1378,15 +1378,16 @@ class ControlSession:
                                     max(limit + 1,
                                         limit * 33 / 32))
 
-                # prepare next query with as many address and last-seen
-                # timestamps as will fit in a single packet.
+                # Prepare next query with as many address and last-seen
+                # timestamps as will fit in a single packet.  A new nonce
+                # might be required.
+                if time.time() - self.nonce_xmit >= ntp.control.NONCE_TIMEOUT:
+                    nonce = self.fetch_nonce()
                 req_buf = "%s, %s=%d%s" % \
                           (nonce,
                            "frags" if cap_frags else "limit",
                            frags if cap_frags else limit,
                            parms)
-                if time.time() - self.nonce_xmit >= ntp.control.NONCE_TIMEOUT:
-                    nonce = self.fetch_nonce()
                 for i in range(len(span.entries)):
                     e = span.entries[len(span.entries) - i - 1]
                     incr = ", addr.%d=%s, last.%d=%s" % (i, e.addr, i, e.last)
