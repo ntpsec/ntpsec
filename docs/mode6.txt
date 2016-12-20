@@ -291,6 +291,9 @@ limit::		Limit on MRU entries returned.  One of frags= or limit=
 
 mincount::	(decimal) Return entries with packet count >= mincount.
 
+maxlstint::	(decimal) Return entries with lstint <= maxlstint.
+		(lstint is now-time of most recent packet)
+
 laddr::		Return entries associated with the server's IP
 		address given.  No port specification is needed,
 		and any supplied is ignored.

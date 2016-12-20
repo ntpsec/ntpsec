@@ -484,9 +484,11 @@ class MRUSummary:
     width = 79
 
     def summary(self, entry):
-        lstint = int(self.now - entry.last + 0.5)
-        active = float(entry.last - entry.first)
-        favgint = active / entry.ct
+        last = ntp.ntpc.lfptofloat(entry.last)
+        lstint = int(self.now - last + 0.5)
+        first = ntp.ntpc.lfptofloat(entry.first)
+        active = float(last - first)
+        favgint = active / entry.ct  # FIXME should be ct-1
         avgint = int(favgint + 0.5)
         stats = "%7d" % lstint
         if 5 < avgint or 1 == entry.ct:
