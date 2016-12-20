@@ -83,7 +83,10 @@ class NTPStats:
                  "temps", "gpsd"):
             lines = []
             try:
-                for logpart in glob.glob(os.path.join(statsdir, stem) + "*"):
+                pattern = os.path.join(statsdir, stem)
+                if stem != "temps" and stem != "gpsd":
+                    pattern += "."
+                for logpart in glob.glob(pattern + "*"):
                     # skip files older than starttime
                     if starttime > os.path.getmtime(logpart):
                         continue
