@@ -845,7 +845,8 @@ class ControlSession:
         while len(xdata) % 4:
             xdata += b"\x00"
         if self.debug >= 3:
-                self.logfp.write("Sending %d octets.\n" % len(xdata))
+                self.logfp.write("Sending %d octets.  seq=%d\n" % \
+                        ( len(xdata), self.sequence) )
         try:
             self.sock.sendall(polybytes(xdata))
         except socket.error:
@@ -1199,16 +1200,18 @@ class ControlSession:
         self.doquery(opcode=ntp.control.CTL_OP_REQ_NONCE)
         self.nonce_xmit = time.time()
         if not self.response.startswith(polybytes("nonce=")):
+            print("## Nonce expected: %s" % self.response)
             raise ControlException(SERR_BADNONCE)
         return polystr(self.response.strip())
 
-    def mrulist(self, variables=None, rawhook=None, recent=None):
+    def mrulist(self, variables=None, rawhook=None, direct=None):
         "Retrieve MRU list data"
         restarted_count = 0
         cap_frags = True
         warn = self.logfp.write
         sorter = None
         frags = MAXFRAGS
+        self.slots = 0
         if variables is None:
             variables = {}
 
@@ -1217,6 +1220,9 @@ class ControlSession:
                 sortkey = variables["sort"]
                 del variables["sort"]
                 # FIXME: implement sorting by address, in case anyone cares
+                # Slots are printed in reverse order so this is backwards.
+                # That avoids a sort in the normal case.
+                # Note lstint is backwards since we really sort on now-last
                 sortdict = {
                 "lstint" : lambda e: e.last,		# lstint ascending
                 "-lstint" : lambda e: -e.last,		# lstint descending
@@ -1227,7 +1233,7 @@ class ControlSession:
                 "count" : lambda e: -e.ct,	# hit count ascending
                 "-count": lambda e: e.ct,	# hit count descending
                 }
-                if sortkey == "listint":
+                if sortkey == "lstint":
                     sortkey = None
                 if sortkey is not None:
                     sorter = sortdict.get(sortkey)
@@ -1336,11 +1342,11 @@ class ControlSession:
                     elif tag == "addr.older":
                         continue
                     if tag == "now":
-                        # Don't see this in debug output, Hal, 2016-Dec-19
+                        # finished marker
                         span.now = ntp.ntpc.lfptofloat(val)
                         continue
                     elif tag == "last.newest":
-                        # Don't see this in debug output, Hal, 2016-Dec-19
+                        # more finished
                         continue
                     for prefix in ("addr", "last", "first", "ct", "mv", "rs"):
                         if tag.startswith(prefix + "."):
@@ -1354,7 +1360,10 @@ class ControlSession:
                                 curidx = idx
                                 mru = MRUEntry()
                                 span.entries.append(mru)
+                                self.slots += 1
                             setattr(mru, prefix, val)
+                if direct != None:
+                    direct(span.entries)
 
                 # If we've seen the end sentinel on the span, break out
                 if span.is_complete():
@@ -1362,7 +1371,7 @@ class ControlSession:
 
                 # Snooze for a bit between queries to let ntpd catch
                 # up with other duties.
-                time.sleep(0.05)
+                ## time.sleep(0.05)
 
                 # If there were no errors, increase the number of rows
                 # to a maximum of 3 * MAXFRAGS (the most packets ntpq
@@ -1395,6 +1404,8 @@ class ControlSession:
                         break
                     else:
                         req_buf += incr
+                if direct != None:
+                    span.entries = []
         except KeyboardInterrupt:
             pass	# We can test for interruption with is_complete()
 
