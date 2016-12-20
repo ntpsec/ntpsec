@@ -485,7 +485,14 @@ class MRUSummary:
 
     def summary(self, entry):
         last = ntp.ntpc.lfptofloat(entry.last)
-        lstint = int(self.now - last + 0.5)
+        if self.now:
+            lstint = int(self.now - last + 0.5)
+        else:
+            # direct mode doesn't have a reference time
+            # use seconds this day
+            days = int(last) / 86400
+            seconds = last - days*86400
+            lstint = int(seconds)
         first = ntp.ntpc.lfptofloat(entry.first)
         active = float(last - first)
         favgint = active / entry.ct  # FIXME should be ct-1

@@ -11,7 +11,7 @@
 # SPDX-License-Identifier: BSD-2-clause
 from __future__ import print_function, division
 
-import os, sys, getopt, cmd, re
+import os, sys, getopt, cmd, re, time
 import socket, hashlib
 
 try:
@@ -147,6 +147,7 @@ class Ntpq(cmd.Cmd):
         #self.auth_keytype = "NID_md5"	# MD5 (FIXME: string value is a dummy)
         #self.auth_hashlen = 16		# MD5
         self.rawmode           = False	# Flag which indicates raw mode output.
+        self.directmode        = False	# Flag for direct MRU output.
         self.showhostnames     = True	# If false, display numeric IPs
         self.auth_delay    = 20		# delay time (default 20msec)
         self.wideremote = False		# show wide remote names?
@@ -664,6 +665,14 @@ function: print version number
 usage: version
 """)
 
+    def do_direct(self, line):
+        "toggle direct mode output"
+        self.directmode = not self.directmode
+        if self.directmode:
+            print("Direct mode is on")
+        else:
+            print("Direct mode is off")
+
     def do_raw(self, line):
         "do raw mode variable output"
         self.rawmode = True
@@ -1160,6 +1169,10 @@ function: configure ntpd using the configuration filename
 usage: config_from_file <configuration filename>
 """)
 
+    def printdirect(self, entries):
+        for entry in reversed(entries):
+            self.say(self.formatter.summary(entry) + "\n")
+
     def do_mrulist(self, line):
         "display the list of most recently seen source addresses, tags mincount=... resall=0x... resany=0x..."
         cmdvars = {}
@@ -1190,23 +1203,36 @@ usage: config_from_file <configuration filename>
         else:
             mruhook = None
         try:
-            span = self.session.mrulist(variables=cmdvars, rawhook=mruhook)
-            if not self.rawmode:
+            formatter = ntp.util.MRUSummary(interpreter.showhostnames)
+            if self.directmode:
+                formatter.now = None
+            self.formatter = formatter
+            if session.debug:
+                formatter.logfp = session.logfp
+                formatter.debug = session.debug
+            self.session.slots = 0
+            self.session.start = time.time()
+            direct = self.printdirect if self.directmode else None
+            span = self.session.mrulist(variables=cmdvars, \
+                    rawhook=mruhook, direct=direct)
+            if not self.directmode and not self.rawmode:
                 if not span.is_complete():
                     self.say("mrulist retrieval interrupted by operator.\n"
-                             "Displaying partial client list.\n")
+                         "Displaying partial client list.\n")
                 try:
-                    formatter = ntp.util.MRUSummary(interpreter.showhostnames)
-                    if session.debug:
-                        formatter.logfp = session.logfp
-                        formatter.debug = session.debug
+                    delta1 = time.time() - self.session.start
                     self.say(ntp.util.MRUSummary.header + "\n")
                     self.say(("=" * ntp.util.MRUSummary.width) + "\n")
                     # reversed to put most recent entries at the top.
                     for entry in reversed(span.entries):
                         self.say(formatter.summary(entry) + "\n")
+                    self.say("# Collected %d slots in %.3f seconds\n" \
+                            % (self.session.slots, delta1) )
                 except KeyboardInterrupt:
                     pass
+            delta2 = time.time() - self.session.start
+            self.say("# Processed %d slots in %.3f seconds\n" \
+                    % (self.session.slots, delta2) )
         except ntp.packet.ControlException as e:
             # Giving up after 8 restarts from the beginning.
             # With high-traffic NTP servers, this can occur if the
