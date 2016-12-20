@@ -1325,11 +1325,22 @@ class ControlSession:
                     rawhook(variables)
 
                 # Analyze the contents of this response into a span structure
+                curidx = -1
                 for (tag, val) in variables.items():
-                    if tag =="now":
+                    if self.debug >= 4:
+                        warn("tag=%s, val=%s\n" % (tag, val))
+                    if tag == "nonce":
+                        nonce = "%s=%s" % (tag, val)
+                    elif tag == "last.older":
+                        continue
+                    elif tag == "addr.older":
+                        continue
+                    if tag == "now":
+                        # Don't see this in debug output, Hal, 2016-Dec-19
                         span.now = ntp.ntpc.lfptofloat(val)
                         continue
                     elif tag == "last.newest":
+                        # Don't see this in debug output, Hal, 2016-Dec-19
                         continue
                     for prefix in ("addr", "last", "first", "ct", "mv", "rs"):
                         if tag.startswith(prefix + "."):
@@ -1338,11 +1349,12 @@ class ControlSession:
                                 idx = int(idx)
                             except ValueError:
                                 raise ControlException(SERR_BADTAG % tag)
-                            if idx >= len(span.entries):
-                                span.entries.append(MRUEntry())
-                            if type(val) != type(0) and val.startswith("0x"):
-                                val = ntp.ntpc.lfptofloat(val)
-                            setattr(span.entries[-1], prefix, val)
+                            if idx != curidx:
+                                # This makes duplicates
+                                curidx = idx
+                                mru = MRUEntry()
+                                span.entries.append(mru)
+                            setattr(mru, prefix, val)
 
                 # If we've seen the end sentinel on the span, break out
                 if span.is_complete():
