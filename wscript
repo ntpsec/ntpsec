@@ -114,8 +114,8 @@ def afterparty(ctx):
     # can import compiled Python modules from the build directory.
     # Also, they need to be able to see the Python extension
     # module built in libntp.
-    if ctx.cmd == 'clean':
-        ctx.exec_command("rm -f wafhelpers/*.pyc pylib/__pycache__/*.pyc wafhelpers/__pycache__/*.pyc ntpd/version.h")
+    if ctx.cmd == 'clean' or ctx.cmd == 'distclean':
+        ctx.exec_command("rm -f wafhelpers/*.pyc pylib/__pycache__/*.pyc wafhelpers/__pycache__/*.pyc ntpd/version.h pylib/magic.py pylib/control.py")
     for x in ("ntpclients",):	# List used to be longer...
             path_build = ctx.bldnode.make_node("pylib")
             path_source = ctx.srcnode.make_node(x + "/ntp")
@@ -194,7 +194,7 @@ def build(ctx):
         )
 
         ctx.add_post_fun(afterparty)
-        if ctx.cmd == 'clean':
+        if ctx.cmd == 'clean' or ctx.cmd == 'distclean':
             afterparty(ctx)
 
         ctx.manpage(8, "ntpclients/ntpleapfetch-man.txt")
