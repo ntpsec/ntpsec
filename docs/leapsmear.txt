@@ -1,4 +1,4 @@
-= Leap Second Smearing with NTP=
+= Leap Second Smearing with NTP =
 
 By Martin Burnicki
 with some edits by Harlan Stenn
