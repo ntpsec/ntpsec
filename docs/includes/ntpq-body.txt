@@ -290,31 +290,7 @@ The _sortorder_ defaults to +lstint+ and may be any of +addr+,
 +count+, +avgint+, +lstint+, or any of those preceded by a minus sign
 (hyphen) to reverse the sort order. The output columns are:
 +
-[width="100%",cols="<20%,<80%"]
-|=======================================================================
-|Column          |Description
-|+lstint+        |
-Interval in s between the receipt of the most recent packet from this
-address and the completion of the retrieval of the MRU list by +ntpq+.
-|+avgint+        |
-Average interval in s between packets from this address.
-|+rstr+          |
-Restriction flags associated with this address. Most are copied
-unchanged from the matching +restrict+ command, however 0x400 (kod)
-and 0x20 (limited) flags are cleared unless the last packet from this
-address triggered a rate control response.
-|+r+             |
-Rate control indicator, either a period, +L+ or +K+ for no rate
-control response, rate limiting by discarding, or rate limiting with a
-KoD response, respectively.
-|+m+             |Packet mode.
-|+v+             |Packet version number.
-|+count+         |Packets received from this address.
-|+rport+         |Source port of last packet from this address.
-|+remote address+|
-DNS name, numeric address, or address followed by claimed DNS name
-which could not be verified in parentheses.
-|=======================================================================
+include::mrufmt.txt
 
 +mreadvar+ 'assocID' 'assocID' [ 'variable_name' [ = 'value'[ ... ]::
 +mrv+ 'assocID' 'assocID' [ 'variable_name' [ = 'value'[ ... ]::
@@ -335,27 +311,9 @@ which could not be verified in parentheses.
 +peers+::
   Display a list of peers in the form
 +
-+[tally]remote refid st t when pool reach delay offset jitter+
++tally remote refid st t when pool reach delay offset jitter+
 +
-[cols="<20%,<80%"]
-|=======================================================================
-|Variable        |Description
-|[+tally+]         |
-single-character code indicating current value of the +select+ field
-of the link:decode.html#peer[peer status word]
-|+remote+        |host name (or IP number) of peer
-|+refid+         |association ID or link:decode.html#kiss[kiss code]
-|+st+            |stratum
-|+t+             |
-+u+: unicast or manycast client,
-+l+: local (reference clock), +s+: symmetric (peer), server, +B+: broadcast server,
-|+when+          |sec/min/hr since last received packet
-|+poll+          |poll interval (log~2~ s)
-|+reach+         |reach shift register (octal)
-|+delay+         |roundtrip delay
-|+offset+        |offset of server relative to this host
-|+jitter+        |jitter
-|=======================================================================
+include::peerfmt.txt[]
 
 +apeers+::
   Display a list of peers in the form:

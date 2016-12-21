@@ -1,0 +1,20 @@
+// Included twice, from ntpq and ntpmon docs
+[cols="<20%,<80%"]
+|=======================================================================
+|Variable        |Description
+|+tally+         |
+single-character code indicating current value of the +select+ field
+of the link:decode.html#peer[peer status word]
+|+remote+        |host name (or IP number) of peer
+|+refid+         |association ID or link:decode.html#kiss[kiss code]
+|+st+            |stratum
+|+t+             |
++u+: unicast or manycast client,
++l+: local (reference clock), +s+: symmetric (peer), server, +B+: broadcast server,
+|+when+          |sec/min/hr since last received packet
+|+poll+          |poll interval (log~2~ s)
+|+reach+         |reach shift register (octal)
+|+delay+         |roundtrip delay
+|+offset+        |offset of server relative to this host
+|+jitter+        |jitter
+|=======================================================================

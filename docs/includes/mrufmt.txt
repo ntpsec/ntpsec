@@ -1,0 +1,26 @@
+// Included twice, from ntpq and ntpmon docs
+[width="100%",cols="<20%,<80%"]
+|=======================================================================
+|Column          |Description
+|+lstint+        |
+Interval in s between the receipt of the most recent packet from this
+address and the completion of the retrieval of the MRU list by +ntpq+.
+|+avgint+        |
+Average interval in s between packets from this address.
+|+rstr+          |
+Restriction flags associated with this address. Most are copied
+unchanged from the matching +restrict+ command, however 0x400 (kod)
+and 0x20 (limited) flags are cleared unless the last packet from this
+address triggered a rate control response.
+|+r+             |
+Rate control indicator, either a period, +L+ or +K+ for no rate
+control response, rate limiting by discarding, or rate limiting with a
+KoD response, respectively.
+|+m+             |Packet mode.
+|+v+             |Packet version number.
+|+count+         |Packets received from this address.
+|+rport+         |Source port of last packet from this address.
+|+remote address+|
+DNS name, numeric address, or address followed by claimed DNS name
+which could not be verified in parentheses.
+|=======================================================================

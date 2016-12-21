@@ -35,6 +35,14 @@ commands.
 
 If no hostname is specified on the command line, localhost is monitored.
 
+Here's a breakdown of the peers display in the top window:
+
+include::peerfmt.txt[]
+
+And the MRU list in the bottom window:
+
+include::mrufmt.txt[]
+
 == Commands ==
 
 a:: Change peer display to apeers mode, showing association IDs.
