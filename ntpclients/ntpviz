@@ -42,6 +42,20 @@ import subprocess
 import time
 import tempfile
 
+# Gack, python before 3.2 has no defined tzinfo for utc...
+# define our own
+class UTC(datetime.tzinfo):
+    """UTC"""
+
+    def utcoffset(self, dt):
+        return datetime.timedelta(0)
+
+    def tzname(self, dt):
+        return "UTC"
+
+    def dst(self, dt):
+        return datetime.timedelta(0)
+
 try:
     import ntp.statfiles
     import ntp.util
@@ -1470,8 +1484,9 @@ Python by ESR, concept and gnuplot code by Dan Drown.
         with open( logo_filename, "wb" ) as wp:
             wp.write(binascii.a2b_base64(ntpsec_logo))
 
-    report_time = datetime.datetime.utcnow() # the time now is...
-    report_time = report_time.strftime("%c") # format it nicely
+    #report_time = datetime.datetime.utcnow() # the time now is...
+    report_time = datetime.datetime.now(UTC()) # the time now is...
+    report_time = report_time.strftime("%c %Z") # format it nicely
 
     title = args.sitename
 
@@ -1502,7 +1517,7 @@ dd {
 </a>
 <div>
 <h1 style="margin-bottom:10px;">%(title)s</h1>
-<b>Report generated:</b> %(report_time)s UTC <br>
+<b>Report generated:</b> %(report_time)s <br>
 ''' % locals()
 
     # Ugh.  Not clear what to do in the multiplot case
