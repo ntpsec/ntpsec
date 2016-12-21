@@ -133,7 +133,7 @@ def afterparty(ctx):
                     os.remove(path_source.abspath())
     bldnode = ctx.bldnode.abspath()
     if ctx.cmd in ('install', 'build'):
-        os.system("ln -sf %s/libntp/ntpc.so %s/pylib/ntpc.so " % (bldnode, bldnode))
+        os.system("cd %s/pylib; ln -sf ../libntp/ntpc.so ntpc.so " % (bldnode,))
 
 python_scripts = [
         "ntpclients/ntpdig",
