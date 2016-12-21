@@ -1170,7 +1170,7 @@ usage: config_from_file <configuration filename>
 """)
 
     def printdirect(self, entries):
-        for entry in reversed(entries):
+        for entry in entries:
             self.say(self.formatter.summary(entry) + "\n")
 
     def do_mrulist(self, line):
