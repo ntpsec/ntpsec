@@ -671,7 +671,9 @@ class MRUEntry:
         self.mv = None		# mode and version
         self.rs = None		# restriction mask (RES_* bits)
     def avgint(self):
-        return (self.last - self.first) / self.ct
+        last = ntp.ntpc.lfptofloat(self.last)
+        first = ntp.ntpc.lfptofloat(self.first)
+        return (last - first) / self.ct
     def __repr__(self):
         return "<MRUentry: " + repr(self.__dict__)[1:-1] + ">"
 
