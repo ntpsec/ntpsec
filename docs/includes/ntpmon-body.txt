@@ -63,7 +63,7 @@ p:: Change peer display to default mode, showing refid.
 
 q:: Cleanly terminate the program.
 
-s:: Show all hosts, not just reachable ones.
+s:: Toggle display of only reachable hosts (default is all hosts).
 
 w:: Toggle wide mode.
 
