@@ -1355,6 +1355,7 @@ class ControlSession:
 
                 # Analyze the contents of this response into a span structure
                 curidx = -1
+                mru = None
                 for (tag, val) in variables.items():
                     if self.debug >= 4:
                         warn("tag=%s, val=%s\n" % (tag, val))
@@ -1381,10 +1382,16 @@ class ControlSession:
                             if idx != curidx:
                                 # This makes duplicates
                                 curidx = idx
+                                if mru:
+                                  # Can't have partial slots on list
+                                  # or printing crashes after ^C
+                                  # Append full slot now
+                                  span.entries.append(mru)
                                 mru = MRUEntry()
-                                span.entries.append(mru)
                                 self.slots += 1
                             setattr(mru, prefix, val)
+                if mru:
+                    span.entries.append(mru)
                 if direct != None:
                     direct(span.entries)
 
