@@ -200,7 +200,7 @@ if __name__ == '__main__':
 
                         # Now the MRU report
                         limit = stdscr.getmaxyx()[0] - len(peers)
-                        span = session.mrulist(recent=limit)
+                        span = session.mrulist(variables={'recent':limit})
                         mru_report.now = time.time()
 
                         # Nyquist-interval sampling - half the
