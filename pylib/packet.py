@@ -674,6 +674,23 @@ class MRUEntry:
         last = ntp.ntpc.lfptofloat(self.last)
         first = ntp.ntpc.lfptofloat(self.first)
         return (last - first) / self.ct
+    def sortaddr(self):
+        addr = self.addr
+        if addr[0] == '[':
+            # IPv6   [n:n:n::n:n]:sock
+            # or     [n:n:n::n:n%x]:sock
+            addr = addr[1:addr.find(']')]
+            pct = addr.find('%')
+            if pct > 0:
+                # <addr>%<n> for local IPv6 address on interface n
+                addr = addr[:pct]
+            return socket.inet_pton(socket.AF_INET6, addr)
+        else:
+            # IPv4   a.b.c.d:sock
+            addr = addr[:addr.find(':')]
+            # prefix with 0s so IPv6 sorts after IPv4
+            # Need 16 rather than 12 to catch ::1
+            return '\0'*16 + socket.inet_pton(socket.AF_INET, addr)
     def __repr__(self):
         return "<MRUentry: " + repr(self.__dict__)[1:-1] + ">"
 
@@ -1221,22 +1238,26 @@ class ControlSession:
             if "sort" in variables:
                 sortkey = variables["sort"]
                 del variables["sort"]
-                # FIXME: implement sorting by address, in case anyone cares
-                # Slots are printed in reverse order so this is backwards.
-                # That avoids a sort in the normal case.
-                # Note lstint is backwards since we really sort on now-last
+                # Slots are retrieved oldest first.
+                # Slots are printed in reverse so the normal/no-sort
+                #  case prints youngest first.
+                # That means sort functions are backwards.
+                # Note lstint is backwards again (aka normal/forward)
+                #  since we really want to sort on now-last rather than last.
                 sortdict = {
-                "lstint" : lambda e: e.last,		# lstint ascending
-                "-lstint" : lambda e: -e.last,		# lstint descending
+                "lstint" : lambda e: \
+                        ntp.ntpc.lfptofloat(e.last),	# lstint ascending
+                "-lstint" : lambda e: \
+                        -ntp.ntpc.lfptofloat(e.last),	# lstint descending
                 "avgint" : lambda e: -e.avgint(),	# avgint ascending
                 "-avgint" : lambda e: e.avgint(),	# avgint descending
-                "addr" : None,			# IPv4 asc. then IPv6 asc.
-                "-addr" : None,			# IPv6 desc. then IPv4 desc.
-                "count" : lambda e: -e.ct,	# hit count ascending
-                "-count": lambda e: e.ct,	# hit count descending
+                "addr" : lambda e: e.sortaddr(),    # IPv4 asc. then IPv6 asc.
+                "-addr" : lambda e: e.sortaddr(),   # IPv6 desc. then IPv4 desc.
+                "count" : lambda e: -e.ct,          # hit count ascending
+                "-count": lambda e: e.ct,           # hit count descending
                 }
                 if sortkey == "lstint":
-                    sortkey = None
+                    sortkey = None # normal/default case, no need to sort
                 if sortkey is not None:
                     sorter = sortdict.get(sortkey)
                     if sorter == None:
@@ -1433,6 +1454,9 @@ class ControlSession:
         # Sort for presentation
         if sorter:
             span.entries.sort(key=sorter)
+            if sortkey == "addr":
+                # I don't know how to feed a minus sign to text sort
+                span.entries.reverse()
 
         return span
 
