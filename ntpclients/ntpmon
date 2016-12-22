@@ -12,7 +12,7 @@ Any keystroke causes a poll and update. Keystroke commands:
 'o': Change peer display to opeers mode, showing destination address.
 'p': Change peer display to default mode, showing refid.
 'q': Cleanly terminate the program.
-'s': Show all hosts, not just reachable ones.
+'s': Toggle display of only reachable hosts (default is all hosts).
 'w': Toggle wide mode.
 'x': Cleanly terminate the program.
 ' ': Rotate through a/n/o/p display modes. 
