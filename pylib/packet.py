@@ -1423,6 +1423,11 @@ class ControlSession:
                                     max(limit + 1,
                                         limit * 33 / 32))
 
+
+                # Only ship 'recent' on the first request
+                if 'recent' in parms:
+                    del parms['recent']
+
                 # Prepare next query with as many address and last-seen
                 # timestamps as will fit in a single packet.  A new nonce
                 # might be required.
