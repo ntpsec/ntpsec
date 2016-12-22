@@ -272,10 +272,10 @@ ind assid status conf reach auth condition last_event cnt
   Display monitor facility statistics.
 
 +direct::
-  Normally, the mrulist command retrieves an entrie MRUreport (possibly
+  Normally, the mrulist command retrieves an entire MRUreport (possibly
   consisting of more than one MRU span), sorts it, and presents the
   result. But attempting to fetch an entire MRU report may fail on a
-  server so loaded that nome of its MRU entries age out before they
+  server so loaded that none of its MRU entries age out before they
   are shipped. With this option, each segment is reported as it arrives.
 
 +mrulist+ [+limited+ | +kod+ | +mincount=+'count' | +laddr=+'localaddr' | +sort=+'sortorder' | +resany=+'hexmask' | +resall=+'hexmask']::
