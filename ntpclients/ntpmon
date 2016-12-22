@@ -70,9 +70,11 @@ def peer_detail(variables):
     vcopy = {}
     vcopy.update(variables)
     vcopy["leap"] = ("no-leap", "add-leap", "del-leap", "unsync")[vcopy["leap"]]
-    vcopy['xmt'] = ntp.util.rfc3339(ntp.ntpc.lfptofloat(vcopy['xmt']))
-    vcopy['rec'] = ntp.util.rfc3339(ntp.ntpc.lfptofloat(vcopy['rec']))
-    vcopy['reftime'] = ntp.util.rfc3339(ntp.ntpc.lfptofloat(vcopy['reftime']))
+    for fld in ('xmt', 'rec', 'reftime'):
+        if fld not in vcopy:
+            vcopy[fld] = "***missing***"
+        else:
+            vcopy[fld] = ntp.util.rfc3339(ntp.ntpc.lfptofloat(vcopy[fld]))
     vcopy['filtdelay'] = vcopy['filtdelay'].replace(' ', '\t')
     vcopy['filtoffset'] = vcopy['filtoffset'].replace(' ', '\t')
     vcopy['filtdisp'] = vcopy['filtdisp'].replace(' ', '\t')
