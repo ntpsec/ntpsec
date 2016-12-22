@@ -11,7 +11,7 @@
 # SPDX-License-Identifier: BSD-2-clause
 from __future__ import print_function, division
 
-import os, sys, getopt, cmd, re, time
+import os, sys, getopt, cmd, re, resource, time
 import socket, hashlib
 
 try:
@@ -1240,6 +1240,9 @@ usage: config_from_file <configuration filename>
             delta2 = time.time() - self.session.start
             self.say("# Processed %d slots in %.3f seconds\n" \
                     % (self.session.slots, delta2) )
+            usage = resource.getrusage(resource.RUSAGE_SELF)
+            self.say("# Used %d megabytes of memory\n" % \
+                    (usage.ru_maxrss/1000) )
         except ntp.packet.ControlException as e:
             # Giving up after 8 restarts from the beginning.
             # With high-traffic NTP servers, this can occur if the
