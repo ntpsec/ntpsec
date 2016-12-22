@@ -88,4 +88,9 @@ appear to hang when monitoring hosts with extremely long MRU lists -
 in particular, public pool hosts. Correct behavior requires a Mode 6
 protocol extension not yet present in those versions.
 
+Even with this extension, monitoring a sufficiently high-traffic
+server sometimes fails.
+
+include::mrufail.txt[]
+
 // end

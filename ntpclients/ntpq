@@ -673,6 +673,12 @@ usage: version
         else:
             print("Direct mode is off")
 
+    def help_direct(self):
+        self.say("""\
+function: toggle direct-mode MRU output
+usage: direct
+""")
+
     def do_raw(self, line):
         "do raw mode variable output"
         self.rawmode = True

@@ -271,6 +271,13 @@ ind assid status conf reach auth condition last_event cnt
 +monstats+::
   Display monitor facility statistics.
 
++direct::
+  Normally, the mrulist command retrieves an entrie MRUreport (possibly
+  consisting of more than one MRU span), sorts it, and presents the
+  result. But attempting to fetch an entire MRU report may fail on a
+  server so loaded that nome of its MRU entries age out before they
+  are shipped. With this option, each segment is reported as it arrives.
+
 +mrulist+ [+limited+ | +kod+ | +mincount=+'count' | +laddr=+'localaddr' | +sort=+'sortorder' | +resany=+'hexmask' | +resall=+'hexmask']::
   Obtain and print traffic counts collected and maintained by the
   monitor facility. This is useful for tracking who _uses_ or
@@ -290,7 +297,7 @@ The _sortorder_ defaults to +lstint+ and may be any of +addr+,
 +count+, +avgint+, +lstint+, or any of those preceded by a minus sign
 (hyphen) to reverse the sort order. The output columns are:
 +
-include::mrufmt.txt
+include::mrufmt.txt[]
 
 +mreadvar+ 'assocID' 'assocID' [ 'variable_name' [ = 'value'[ ... ]::
 +mrv+ 'assocID' 'assocID' [ 'variable_name' [ = 'value'[ ... ]::
@@ -528,5 +535,12 @@ by 'name', a shortname for the driver type.
 The -O (--old-rv) option of legacy versions has been retired.
 
 The command ":config" is no longer accepted; use "config" instead.
+
+== Known Limitations ==
+
+include::mrufail.txt
+
+You may be able to retrieve partial data in very high-traffic
+conditions by using the 'direct' option.
 
 // end

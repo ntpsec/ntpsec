@@ -1399,8 +1399,14 @@ class ControlSession:
                 if span.is_complete():
                     break
 
-                # Snooze for a bit between queries to let ntpd catch
-                # up with other duties.
+                # The C version of ntpq used to snooze for a bit
+                # between MRU queries to let ntpd catch up with other
+                # duties.  It turns out this is a petty bad idea.  Above
+                # a certain traffic threshold, servers accumulate MRU records
+                # enough faster than this protocol loop can capture them that
+                # you never get a complete span.  The last thing you want to
+                # do when trying to keep up with a high-traffic server is stall
+                # in the read loop.
                 ## time.sleep(0.05)
 
                 # If there were no errors, increase the number of rows

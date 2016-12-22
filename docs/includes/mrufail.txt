@@ -1,0 +1,19 @@
+// Explain the MRU stall problem and why ntpq has 'direct' mode.
+
+This program will behave in apparently buggy and only semi-predictable
+ways when fetching MRU lists from _any_ server with sufficiently high
+traffic.
+
+The problem is fundamental. The Mode 6 protocol can't ship (and your
+client cannot accept) MRU records as fast as the daemon accepts
+incoming traffic. Under these circumstances, the daemon will
+repeatedly fail to ship an entire report, leading to long
+hangs as your client repeatedly re-sends the request. Eventually the
+Mode 6 client library will throw an error indicating that a maximum
+number of restarts has been exceeded.
+
+To avoid this problem, avoid monitoring over links that don't have
+enough capacity to handle the monitored server's _entire_ NTP load.
+
+
+
