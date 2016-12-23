@@ -23,7 +23,7 @@ include::includes/misc-options.txt[]
 // If you change this, be very sure to keep that synchronized.
 
 [[tos]]
-+tos+ [+beacon+ 'beacon' | +ceiling+ 'ceiling' | +cohort+ {+0+ | +1+} | +floor+ 'floor' | +maxclock+ 'maxclock' | +maxdist+ 'maxdist' | +minclock+ 'minclock' | +mindist+ 'mindist' | +minsane+ 'minsane' | +orphan+ 'stratum' | +orphanwait+ 'delay']::
++tos+ [+ceiling+ 'ceiling' | +cohort+ {+0+ | +1+} | +floor+ 'floor' | +maxclock+ 'maxclock' | +maxdist+ 'maxdist' | +minclock+ 'minclock' | +mindist+ 'mindist' | +minsane+ 'minsane' | +orphan+ 'stratum' | +orphanwait+ 'delay']::
   This command alters certain system variables used by the clock
   selection and clustering algorithms. The default values of these
   variables have been carefully optimized for a wide range of network
@@ -32,12 +32,6 @@ include::includes/misc-options.txt[]
   knobs. It can be used to select the quality and quantity of peers used
   to synchronize the system clock and is most useful in dynamic server
   discovery schemes. The options are as follows:
-  +beacon+ 'beacon';;
-    The manycast server sends packets at intervals of 64 s if less than
-    _maxclock_ servers are available. Otherwise, it sends packets at the
-    _beacon_ interval in seconds. The default is 3600 s. See the
-    link:discover.html[Automatic Server Discovery] page for further
-    details.
   +ceiling+ 'ceiling';;
     Specify the maximum stratum (exclusive) for acceptable server
     packets. The default is 16. See the link:discover.html[Automatic

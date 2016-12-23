@@ -58,7 +58,6 @@
 %token	<Integer>	T_Auth
 %token	<Integer>	T_Average
 %token	<Integer>	T_Baud
-%token	<Integer>	T_Beacon
 %token	<Integer>	T_Broadcast
 %token	<Integer>	T_Burst
 %token	<Integer>	T_Calibrate
@@ -620,7 +619,6 @@ tos_option_int_keyword
 	|	T_Orphan
 	|	T_Orphanwait
 	|	T_Minsane
-	|	T_Beacon
 	;
 
 tos_option_dbl_keyword

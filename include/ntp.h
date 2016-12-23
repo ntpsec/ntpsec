@@ -126,7 +126,6 @@ typedef unsigned int	u_int;
 #define HUFFPUFF	900	/* huff-n'-puff sample interval (s) */
 #define MAXHOP		2	/* anti-clockhop threshold */
 #define MAX_TTL		8	/* max ttl mapping vector size */
-#define	BEACON		7200	/* manycast beacon interval */
 #define NTP_MAXEXTEN	2048	/* max extension field size */
 #define	NTP_ORPHWAIT	300	/* orphan wair (s) */
 
@@ -637,7 +636,7 @@ struct pkt {
 #define PROTO_MAXDIST		22
 #define	PROTO_MAXDISP		23
 #define	PROTO_MAXHOP		24
-#define	PROTO_BEACON		25
+/* #define	PROTO_BEACON		25 */
 #define	PROTO_ORPHAN		26
 #define	PROTO_ORPHWAIT		27
 /* #define	PROTO_MODE7		28 was ntpdc */
