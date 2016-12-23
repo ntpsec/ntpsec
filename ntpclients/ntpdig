@@ -389,7 +389,7 @@ if __name__ == '__main__':
         adjusted = step and (not slew or (slew and (abs(offset) > steplimit)))
         report(pkt, json)
 	# If we can step but we cannot slew, then step.
-	# If we can step or slew and and |offset| > steplimit, then step.
+	# If we can step or slew and |offset| > steplimit, then step.
         rc = True
         offset = pkt.adjust()
         ntp.ntpc.setprogname("ntpdig")
