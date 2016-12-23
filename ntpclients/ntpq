@@ -158,6 +158,7 @@ class Ntpq(cmd.Cmd):
         self.pktversion = ntp.magic.NTP_OLDVERSION + 1
         self.uservars = ntp.util.OrderedDict()
         self.ai_family = socket.AF_UNSPEC
+        self.termwidth = ntp.util.termsize()[1]
 
     def emptyline(self):
         "Called when an empty line is entered in response to the prompt."
@@ -275,7 +276,7 @@ usage: help [ command ]
         if not self.__dogetassoc():
             return
         if self.showhostnames:
-            termwidth = ntp.util.termsize().width
+            termwidth = interpreter.termwidth
         else:
             termwidth = None	# Default width
         report = ntp.util.PeerSummary(mode,
@@ -1490,18 +1491,21 @@ USAGE: ntpq [-46dphinOV] [-c str] [-D lvl] [host ...]
                                 peers
    -n no  numeric        numeric host addresses
    -V opt version        Output version information and exit
-   -w no  wide           enable wide display of addresses
+   -w no  wide           enable wide display of addresses / hosts
+                         on a separate line
+   -W no  width          force output width to this value instead of
+                         querying the terminal size
 '''
 
 if __name__ == '__main__':
     try:
         (options, arguments) = getopt.getopt(sys.argv[1:],
-                                             "46c:dD:hinpVw",
+                                             "46c:dD:hinpVwW:",
                                              ["ipv4","ipv6", "command=",
                                               "debug", "set-debug-level=",
                                               "help", "interactive", "numeric",
                                               "peers", "version",
-                                              "wide"])
+                                              "wide", "width="])
     except getopt.GetoptError as e:
         sys.stderr.write("%s\n" % e)
         sys.stderr.write(usage)
@@ -1544,6 +1548,8 @@ if __name__ == '__main__':
             raise SystemExit(0)
         elif switch in ("-w", "--wide"):
             interpreter.wideremote = True
+        elif switch in ("-W", "--width"):
+            interpreter.termwidth = int(val)
 
     if interpreter.interactive and len(interpreter.ccmds) > 0:
         interpreter.warn("%s: invalid option combination.\n" % progname)
