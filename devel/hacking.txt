@@ -9,6 +9,9 @@ Annoying but necessary legalese:
 If you want to learn more about the code internals, find tour.txt.
 This document is about development practices and project conventions.
 
+You may also find the articles at https://blog.ntpsec.org/
+interesting.
+
 == Choice of language ===
 
 In order to reduce the complexity of maintenance and testing
