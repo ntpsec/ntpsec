@@ -4,7 +4,7 @@
 
 == Synopsis ==
 
-+ntpq+ [+-46dhinpw+] [+-c+ 'command'] ['host'] [...]
++ntpq+ [+-46dhinpwW+] [+-c+ 'command'] ['host'] [...]
 
 == Description ==
 
@@ -18,7 +18,7 @@ page is for the NTPv4 variables.
 The program can be run either in interactive mode or controlled using
 command line arguments. Requests to read and write arbitrary variables
 can be assembled, with raw and pretty-printed output options being
-available. The +ntpq+ can also obtain and print a list of peers in a
+available. It can also obtain and print a list of peers in a
 common format by sending multiple queries to the server.
 
 If one or more request options is included on the command line when
