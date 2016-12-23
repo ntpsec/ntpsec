@@ -1298,9 +1298,6 @@ config_tos(
 			item = PROTO_MINSANE;
 			break;
 
-		case T_Beacon:
-			item = PROTO_BEACON;
-			break;
 		}
 		proto_config(item, 0, val);
 	}

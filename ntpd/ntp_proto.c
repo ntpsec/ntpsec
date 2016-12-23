@@ -100,7 +100,6 @@ int	sys_maxclock = NTP_MAXCLOCK; /* maximum candidates */
 int	sys_cohort = 0;		/* cohort switch */
 int	sys_orphan = STRATUM_UNSPEC + 1; /* orphan stratum */
 int	sys_orphwait = NTP_ORPHWAIT; /* orphan wait */
-int	sys_beacon = BEACON;	/* manycast beacon interval */
 int	sys_ttlmax;		/* max ttl mapping vector index */
 uint8_t	sys_ttl[MAX_TTL];	/* ttl mapping vector */
 
@@ -2818,9 +2817,6 @@ proto_config(
 	/*
 	 * tos command - arguments are double, sometimes cast to int
 	 */
-	case PROTO_BEACON:	/* manycast beacon (beacon) */
-		sys_beacon = (int)dvalue;
-		break;
 
 	case PROTO_CEILING:	/* stratum ceiling (ceiling) */
 		sys_ceiling = (int)dvalue;
