@@ -122,7 +122,6 @@ def clock_select(packets):
     "Select the pick-of-the-litter clock from the samples we've got."
     # This is a slightly simplified version of the filter ntpdate used
     NTP_INFIN     = 15		# max stratum, infinity a la Bellman-Ford 
-    NTP_MAXAGE    = 86400	# one day in seconds
 
     # This first chunk of code is supposed to go through all
     # servers we know about to find the servers that
