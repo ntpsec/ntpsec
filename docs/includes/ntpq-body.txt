@@ -274,7 +274,7 @@ ind assid status conf reach auth condition last_event cnt
 +monstats+::
   Display monitor facility statistics.
 
-+direct::
++direct+::
   Normally, the mrulist command retrieves an entire MRUreport (possibly
   consisting of more than one MRU span), sorts it, and presents the
   result. But attempting to fetch an entire MRU report may fail on a
