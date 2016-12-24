@@ -8,9 +8,9 @@ The +ntpwait+ program blocks until ntpd is in synchronized state. This
 can be useful at boot time, to delay the boot sequence until after "ntpd
 -g" has set the time.
 
-+ntpwait+ will send at most _num-tries_ queries to {ntpdman}, sleeping
-for _secs-between_ after each status return that says {ntpdman} has not
-yet produced a synchronized and stable system clock._
++ntpwait+ will send at most _number_ queries to {ntpdman}, sleeping
+for _secs_ seconds after each status return that says {ntpdman} has not
+yet produced a synchronized and stable system clock.
 
 +ntpwait+ will do this quietly, unless the +-v+ flag is provided.
 
