@@ -862,7 +862,7 @@ nmea_receive(
 	/* Eventually output delay measurement now. */
 	if (peer->ttl & NMEA_DELAYMEAS_MASK) {
 		mprintf_clock_stats(peer, "delay %0.6f %.*s",
-			 ldexp(rd_timestamp.l_uf, -32),
+			 ldexp(lfpfrac(rd_timestamp), -32),
 			 (int)(strchr(rd_lastcode, ',') - rd_lastcode),
 			 rd_lastcode);
 	}
@@ -1844,7 +1844,7 @@ eval_gps_time(
 	 * fractional day of the receive time, we shift the base day for
 	 * the unfold by 1. */
 	if (   gps_sec  < rcv_sec
-	   || (gps_sec == rcv_sec && retv.l_uf < xrecv->l_uf))
+	       || (gps_sec == rcv_sec && lfpfrac(retv) < lfpfrac(*xrecv)))
 		rcv_day += 1;
 
 	/* - don't warp ahead of GPS invention! */

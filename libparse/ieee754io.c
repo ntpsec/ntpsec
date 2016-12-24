@@ -451,10 +451,10 @@ put_ieee754(
        * find number of significant integer bits
        */
       mask = 0x80000000;
-      if (outlfp.l_ui)
+      if (lfpuint(outlfp))
 	{
 	  msb = 63;
-	  while (mask && ((outlfp.l_ui & mask) == 0))
+	  while (mask && ((lfpuint(outlfp) & mask) == 0))
 	    {
 	      mask >>= 1;
 	      msb--;
@@ -463,7 +463,7 @@ put_ieee754(
       else
 	{
 	  msb = 31;
-	  while (mask && ((outlfp.l_uf & mask) == 0))
+	  while (mask && ((lfpfrac(outlfp) & mask) == 0))
 	    {
 	      mask >>= 1;
 	      msb--;
@@ -476,28 +476,28 @@ put_ieee754(
 	  mantissa_high = 0;
 	  if (msb >= 32)
 	    {
-	      mantissa_low  = (outlfp.l_ui & ((1 << (msb - 32)) - 1)) << (mbits - (msb - 32));
-	      mantissa_low |=  outlfp.l_uf >> (mbits - (msb - 32));
+	      mantissa_low  = (lfpuint(outlfp) & ((1 << (msb - 32)) - 1)) << (mbits - (msb - 32));
+	      mantissa_low |=  lfpfrac(outlfp) >> (mbits - (msb - 32));
 	    }
 	  else
 	    {
-	      mantissa_low  = (outlfp.l_uf << (mbits - msb)) & ((1 << mbits) - 1);
+	      mantissa_low  = (lfpfrac(outlfp) << (mbits - msb)) & ((1 << mbits) - 1);
 	    }
 	  break;
 	  
 	case IEEE_DOUBLE:
 	  if (msb >= 32)
 	    {
-	      mantissa_high  = (outlfp.l_ui << (mbits - msb)) & ((1 << (mbits - 32)) - 1);
-	      mantissa_high |=  outlfp.l_uf >> (32 - (mbits - msb));
-	      mantissa_low   = (outlfp.l_ui & ((1 << (msb - mbits)) - 1)) << (32 - (msb - mbits));
+	      mantissa_high  = (lfpuint(outlfp) << (mbits - msb)) & ((1 << (mbits - 32)) - 1);
+	      mantissa_high |=  lfpfrac(outlfp) >> (32 - (mbits - msb));
+	      mantissa_low   = (lfpuint(outlfp) & ((1 << (msb - mbits)) - 1)) << (32 - (msb - mbits));
 	      /* coverity[negative_shift] */
-	      mantissa_low  |=  outlfp.l_uf >> (msb - mbits);
+	      mantissa_low  |=  lfpfrac(outlfp) >> (msb - mbits);
 	    }
 	  else
 	    {
-	      mantissa_high  = outlfp.l_uf << (mbits - 32 - msb);
-	      mantissa_low   = outlfp.l_uf << (mbits - 32);
+	      mantissa_high  = lfpfrac(outlfp) << (mbits - 32 - msb);
+	      mantissa_low   = lfpfrac(outlfp) << (mbits - 32);
 	    }
 	}
 
@@ -537,7 +537,7 @@ int main(
   
   printf("double: %s %s\n", fmt_blong(*(unsigned long *)&f, 32), fmt_blong(*(unsigned long *)((char *)(&f)+4), 32));
   printf("fetch from %f = %d\n", f, fetch_ieee754((void *)&f_p, IEEE_DOUBLE, &fp, native_off));
-  printf("fp [%s %s] = %s\n", fmt_blong(fp.l_ui, 32), fmt_blong(fp.l_uf, 32), mfptoa(fp.l_ui, fp.l_uf, 15));
+  printf("fp [%s %s] = %s\n", fmt_blong(lfpuint(fp), 32), fmt_blong(lfpfrac(fp), 32), mfptoa(lfpuint(fp), lfpfrac(fp), 15));
   f_p = &f;
   put_ieee754((void *)&f_p, IEEE_DOUBLE, &fp, native_off);
   

@@ -643,9 +643,9 @@ jupiter_pps(struct instance *instance)
 		return true;
 	instance->ts = ts;
 
-	tstmp.l_ui = (uint32_t)ts.tv_sec + JAN_1970;
+	setlfpuint(tstmp, (uint32_t)ts.tv_sec + JAN_1970);
 	dtemp = ts.tv_nsec * FRAC / 1e9;
-	tstmp.l_uf = (uint32_t)dtemp;
+	setlfpfrac(tstmp, (uint32_t)dtemp);
 	instance->peer->procptr->lastrec = tstmp;
 	return false;
 }
@@ -840,8 +840,8 @@ jupiter_receive(struct recvbuf *rbufp)
 				break;
 
 			/* Add the new sample to a median filter */
-			tstamp.l_ui = JAN_1970 + (uint32_t)last_timecode;
-			tstamp.l_uf = 0;
+			setlfpuint(tstamp, JAN_1970 + (uint32_t)last_timecode);
+			setlfpfrac(tstamp, 0);
 
 			refclock_process_offset(pp, tstamp, pp->lastrec, pp->fudgetime1);
 

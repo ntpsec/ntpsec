@@ -1278,7 +1278,7 @@ ctl_putts(
 	*cp++ = '=';
 	NTP_INSIST((size_t)(cp - buffer) < sizeof(buffer));
 	snprintf(cp, sizeof(buffer) - (cp - buffer), "0x%08x.%08x",
-		 (u_int)ts->l_ui, (u_int)ts->l_uf);
+		 (u_int)lfpuint(*ts), (u_int)lfpfrac(*ts));
 	cp += strlen(cp);
 	ctl_putdata(buffer, (unsigned)( cp - buffer ), false);
 }
@@ -3017,10 +3017,10 @@ static void generate_nonce(
 	uint32_t derived;
 
 	derived = derive_nonce(&rbufp->recv_srcadr,
-			       rbufp->recv_time.l_ui,
-			       rbufp->recv_time.l_uf);
+			       lfpuint(rbufp->recv_time),
+			       lfpfrac(rbufp->recv_time));
 	snprintf(nonce, nonce_octets, "%08x%08x%08x",
-		 rbufp->recv_time.l_ui, rbufp->recv_time.l_uf, derived);
+		 lfpuint(rbufp->recv_time), lfpfrac(rbufp->recv_time), derived);
 }
 
 
@@ -3045,13 +3045,13 @@ static int validate_nonce(
 	if (3 != sscanf(pnonce, "%08x%08x%08x", &ts_i, &ts_f, &supposed))
 		return false;
 
-	ts.l_ui = (uint32_t)ts_i;
-	ts.l_uf = (uint32_t)ts_f;
-	derived = derive_nonce(&rbufp->recv_srcadr, ts.l_ui, ts.l_uf);
+	setlfpuint(ts, (uint32_t)ts_i);
+	setlfpfrac(ts, (uint32_t)ts_f);
+	derived = derive_nonce(&rbufp->recv_srcadr, lfpuint(ts), lfpfrac(ts));
 	get_systime(&now_delta);
 	L_SUB(&now_delta, &ts);
 
-	return (supposed == derived && now_delta.l_ui < NONCE_TIMEOUT);
+	return (supposed == derived && lfpuint(now_delta) < NONCE_TIMEOUT);
 }
 
 
@@ -3413,15 +3413,15 @@ static void read_mru_list(
 			   (size_t)si < COUNTOF(last)) {
 			if (2 != sscanf(val, "0x%08x.%08x", &ui, &uf))
 				goto blooper;
-			last[si].l_ui = ui;
-			last[si].l_uf = uf;
+			setlfpuint(last[si], ui);
+			setlfpfrac(last[si], uf);
 			if (!SOCK_UNSPEC(&addr[si]) && si == priors)
 				priors++;
 		} else if (1 == sscanf(v->text, addr_fmt, &si) &&
 			   (size_t)si < COUNTOF(addr)) {
 			if (!decodenetnum(val, &addr[si]))
 				goto blooper;
-			if (last[si].l_ui && last[si].l_uf && si == priors)
+			if (lfpuint(last[si]) && lfpfrac(last[si]) && si == priors)
 				priors++;
 		} else {
 			DPRINTF(1, ("read_mru_list: invalid key item: '%s' (ignored)\n",
@@ -3522,7 +3522,7 @@ static void read_mru_list(
 			continue;
 		if (resany && !(resany & mon->flags))
 			continue;
-		if (maxlstint > 0 && now.l_ui - mon->last.l_ui >
+		if (maxlstint > 0 && lfpuint(now) - lfpuint(mon->last) >
 		    maxlstint)
 			continue;
 		if (lcladr != NULL && mon->lcladr != lcladr)

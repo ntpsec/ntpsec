@@ -301,8 +301,8 @@ tspec_intv_to_lfp(
 	l_fp		y;
 	
 	v = normalize_tspec(x);
-	y.l_uf = TVNTOF(v.tv_nsec);
-	y.l_i = (int32_t)v.tv_sec;
+	setlfpfrac(y, TVNTOF(v.tv_nsec));
+	setlfpsint(y, (int32_t)v.tv_sec);
 
 	return y;
 }
@@ -316,7 +316,7 @@ tspec_stamp_to_lfp(
 	l_fp		y;
 
 	y = tspec_intv_to_lfp(x);
-	y.l_ui += JAN_1970;
+	lfpuint(y) += JAN_1970;
 
 	return y;
 }
@@ -336,7 +336,7 @@ lfp_intv_to_tspec(
 	if (neg) {
 		L_NEG(&absx);	
 	}
-	out.tv_nsec = FTOTVN(absx.l_uf);
+	out.tv_nsec = FTOTVN(lfpfrac(absx));
 	out.tv_sec = absx.l_i;
 	if (neg) {
 		out.tv_sec = -out.tv_sec;
@@ -354,8 +354,8 @@ lfp_uintv_to_tspec(
 {
 	struct timespec	out;
 	
-	out.tv_nsec = FTOTVN(x.l_uf);
-	out.tv_sec = x.l_ui;
+	out.tv_nsec = FTOTVN(lfpfrac(x));
+	out.tv_sec = lfpuint(x);
 
 	return out;
 }
@@ -374,8 +374,8 @@ lfp_stamp_to_tspec(
 	struct timespec	out;
 	time64_t		sec;
 
-	sec = ntpcal_ntp_to_time(x.l_ui, p);
-	out.tv_nsec = FTOTVN(x.l_uf);
+	sec = ntpcal_ntp_to_time(lfpuint(x), p);
+	out.tv_nsec = FTOTVN(lfpfrac(x));
 
 	/* copying a time64_t to a time_t needs some care... */
 #if NTP_SIZEOF_TIME_T <= 4

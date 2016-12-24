@@ -7,7 +7,7 @@ static bool IsEqual(const l_fp *expected, const l_fp *actual) {
 	if (L_ISEQU(expected, actual)) {
 		return true;
 	} else {
-		printf("Expected: %s (%d.%d) but was: %s (%d.%d)\n", lfptoa(expected, FRACTION_PREC), expected->l_ui, expected->l_uf, lfptoa(actual, FRACTION_PREC), actual->l_ui, actual->l_uf);
+		printf("Expected: %s (%d.%d) but was: %s (%d.%d)\n", lfptoa(expected, FRACTION_PREC), lfpuint(*expected), lfpfrac(*expected), lfptoa(actual, FRACTION_PREC), lfpuint(*actual), lfpfrac(*actual));
 		return false;
 	}
 }

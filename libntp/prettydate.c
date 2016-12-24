@@ -132,8 +132,8 @@ common_prettydate(
 	LIB_GETBUF(bp);
 
 	/* get & fix milliseconds */
-	ntps = ts->l_ui;
-	msec = ts->l_uf / 4294967;	/* fract / (2 ** 32 / 1000) */
+	ntps = lfpuint(*ts);
+	msec = lfpfrac(*ts) / 4294967;	/* fract / (2 ** 32 / 1000) */
 	if (msec >= 1000u) {
 		msec -= 1000u;
 		ntps++;
@@ -148,13 +148,13 @@ common_prettydate(
 		struct calendar jd;
 		ntpcal_time_to_date(&jd, sec);
 		snprintf(bp, LIB_BUFLENGTH, pfmt,
-			 (u_long)ts->l_ui, (u_long)ts->l_uf,
+			 (u_long)lfpuint(*ts), (u_long)lfpfrac(*ts),
 			 jd.year, jd.month, jd.monthday,
 			 jd.hour, jd.minute, jd.second, msec);
 		strncat(bp, "Z",  LIB_BUFLENGTH);
 	} else {
 		snprintf(bp, LIB_BUFLENGTH, pfmt,
-			 (u_long)ts->l_ui, (u_long)ts->l_uf,
+			 (u_long)lfpuint(*ts), (u_long)lfpfrac(*ts),
 			 1900 + tm->tm_year, tm->tm_mon+1, tm->tm_mday,
 			 tm->tm_hour, tm->tm_min, tm->tm_sec, msec);
 		if (!local)

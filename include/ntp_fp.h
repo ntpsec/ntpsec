@@ -38,15 +38,20 @@ typedef struct {
 #define l_ui	Ul_i.Xl_ui		/* unsigned integral part */
 #define	l_i	Ul_i.Xl_i		/* signed integral part */
 
+#define lfpfrac(n)		((n).l_uf)
+#define setlfpfrac(n, v)	(n).l_uf = (v)
+#define lfpsint(n)		(n).l_i
+#define setlfpsint(n, v)	(n).l_i = (v)
+#define lfpuint(n)		(n).l_ui
+#define setlfpuint(n, v)	(n).l_ui = (v)
+
 static inline uint64_t lfp_to_uint64(const l_fp *lfp) {
-  return
-    (uint64_t)lfp->l_ui << 32 |
-    (uint64_t)lfp->l_uf;
+    return (uint64_t)lfpuint(*lfp) << 32 | (uint64_t)lfpfrac(*lfp);
 }
 
 static inline void uint64_to_lfp(l_fp *lfp, uint64_t x) {
-  lfp->l_ui = x >> 32;
-  lfp->l_uf = x & 0xFFFFFFFFUL;
+  setlfpuint(*lfp, x >> 32);
+  setlfpfrac(*lfp, x & 0xFFFFFFFFUL);
 }
 
 /*
@@ -99,16 +104,16 @@ typedef uint32_t u_fp;
 	} while (false)
 
 #define HTONL_FP(h, n)						\
-	HTONL_MFP((h)->l_ui, (h)->l_uf, (n)->l_ui, (n)->l_uf)
+	HTONL_MFP(lfpuint(*h), lfpfrac(*h), lfpuint(*n), lfpfrac(*n))
 
 #define NTOHL_FP(n, h)						\
-	NTOHL_MFP((n)->l_ui, (n)->l_uf, (h)->l_ui, (h)->l_uf)
+	NTOHL_MFP(lfpuint(*n), lfpfrac(*n), lfpuint(*h), lfpfrac(*h))
 
 /* Convert unsigned ts fraction to net order ts */
 #define	HTONL_UF(uf, nts)					\
 	do {							\
-		(nts)->l_ui = 0;				\
-		(nts)->l_uf = htonl(uf);			\
+		setlfpuint(*nts, 0);					\
+		setlfpfrac(*nts, htonl(uf));			\
 	} while (false)
 
 /*
@@ -117,13 +122,13 @@ typedef uint32_t u_fp;
 #define	MFPTOFP(x_i, x_f)	(((x_i) >= 0x00010000) ? 0x7fffffff : \
 				(((x_i) <= -0x00010000) ? 0x80000000 : \
 				(((x_i)<<16) | (((x_f)>>16)&0xffff))))
-#define	LFPTOFP(v)		MFPTOFP((v)->l_i, (v)->l_uf)
+#define	LFPTOFP(v)		MFPTOFP(lfpsint(*v), lfprac(*v))
 
-#define UFPTOLFP(x, v) ((v)->l_ui = (u_fp)(x)>>16, (v)->l_uf = (x)<<16)
-#define FPTOLFP(x, v)  (UFPTOLFP((x), (v)), (x) < 0 ? (v)->l_ui -= 0x10000 : 0)
+#define UFPTOLFP(x, v) (setlfpuint(*v, (u_fp)(x)>>16), setlfpfrac(*v, (x)<<16))
+#define FPTOLFP(x, v)  (UFPTOLFP((x), (v)), (x) < 0 ? setlfpuint(*v, getlfpuint(*v) - 0x10000) : 0)
 
-#define MAXLFP(v) ((v)->l_ui = 0x7fffffffu, (v)->l_uf = 0xffffffffu)
-#define MINLFP(v) ((v)->l_ui = 0x80000000u, (v)->l_uf = 0u)
+#define MAXLFP(v) (setlfpuint(*v, 0x7fffffffu), setlfpfrac(*v, 0xffffffffu))
+#define MINLFP(v) (selfpuint(*v, 0x80000000u), setlfpfrac(*v, 0u))
 
 /*
  * Primitive operations on long fixed point values.  If these are
@@ -235,26 +240,27 @@ typedef uint32_t u_fp;
 
 /*
  * Operations on the long fp format
+ * FIXME: Using lfpuint(x) as rvalue, this will fail when rpresentation changes 
  */
-#define	L_ADD(r, a)	M_ADD((r)->l_ui, (r)->l_uf, (a)->l_ui, (a)->l_uf)
-#define	L_SUB(r, a)	M_SUB((r)->l_ui, (r)->l_uf, (a)->l_ui, (a)->l_uf)
-#define	L_NEG(v)	M_NEG((v)->l_ui, (v)->l_uf)
-#define L_ADDUF(r, uf)	M_ADDUF((r)->l_ui, (r)->l_uf, (uf))
-#define L_SUBUF(r, uf)	M_SUBUF((r)->l_ui, (r)->l_uf, (uf))
-#define	L_ADDF(r, f)	M_ADDF((r)->l_ui, (r)->l_uf, (f))
-#define	L_RSHIFT(v)	M_RSHIFT((v)->l_i, (v)->l_uf)
-#define	L_RSHIFTU(v)	M_RSHIFTU((v)->l_ui, (v)->l_uf)
-#define	L_LSHIFT(v)	M_LSHIFT((v)->l_ui, (v)->l_uf)
-#define	L_CLR(v)	((v)->l_ui = (v)->l_uf = 0)
+#define	L_ADD(r, a)	M_ADD(lfpuint(*r), lfpfrac(*r), lfpuint(*a), lfpfrac(*a))
+#define	L_SUB(r, a)	M_SUB(lfpuint(*r), lfpfrac(*r), lfpuint(*a), lfpfrac(*a))
+#define	L_NEG(v)	M_NEG(lfpuint(*v), lfpfrac(*v))
+#define L_ADDUF(r, uf)	M_ADDUF(lfpuint(*r), lfpfrac(*r), (uf))
+#define L_SUBUF(r, uf)	M_SUBUF(lfpuint(*r), lfpfrac(*r), (uf))
+#define	L_ADDF(r, f)	M_ADDF(lfpuint(*r), lfpfrac(*r), (f))
+#define	L_RSHIFT(v)	M_RSHIFT(lfpsint(*v), lfpfrac(*v))
+#define	L_RSHIFTU(v)	M_RSHIFTU(lfpuint(*v), lfpfrac(*v))
+#define	L_LSHIFT(v)	M_LSHIFT(lfpuint(*v), lfpfrac(*v))
 
-#define	L_ISNEG(v)	M_ISNEG((v)->l_ui)
-#define L_ISZERO(v)	(((v)->l_ui | (v)->l_uf) == 0)
-#define	L_ISGT(a, b)	M_ISGT((a)->l_i, (a)->l_uf, (b)->l_i, (b)->l_uf)
-#define	L_ISGTU(a, b)	M_ISGTU((a)->l_ui, (a)->l_uf, (b)->l_ui, (b)->l_uf)
-#define	L_ISHIS(a, b)	M_ISHIS((a)->l_ui, (a)->l_uf, (b)->l_ui, (b)->l_uf)
-#define	L_ISGEQ(a, b)	M_ISGEQ((a)->l_ui, (a)->l_uf, (b)->l_ui, (b)->l_uf)
+#define	L_CLR(v)	(setlfpuint(*v, 0), setlfpfrac(*v, 0))
+#define	L_ISNEG(v)	M_ISNEG(lfpuint(*v))
+#define L_ISZERO(v)	((lfpuint(*v) | lfpfrac(*v)) == 0)
+#define	L_ISGT(a, b)	M_ISGT(lfpsint(*a), lfpfrac(*a), lfpsint(*b), lfpfrac(*b))
+#define	L_ISGTU(a, b)	M_ISGTU(lfpuint(*a), lfpfrac(*a), lfpuint(*b), lfpfrac(*b))
+#define	L_ISHIS(a, b)	M_ISHIS(lfpuint(*a), lfpfrac(*a), lfpuint(*b), lfpfrac(*b))
+#define	L_ISGEQ(a, b)	M_ISGEQ(lfpuint(*a), lfpfrac(*a), lfpuint(*b), lfpfrac(*b))
 #define L_ISGEQU(a, b)  L_ISHIS(a, b)
-#define	L_ISEQU(a, b)	M_ISEQU((a)->l_ui, (a)->l_uf, (b)->l_ui, (b)->l_uf)
+#define	L_ISEQU(a, b)	M_ISEQU(lfpuint(*a), lfpfrac(*a), lfpuint(*b), lfpfrac(*b))
 
 /*
  * s_fp/double and u_fp/double conversions
@@ -341,8 +347,8 @@ typedef uint32_t u_fp;
 	} while (0)
 #endif
 
-#define DTOLFP(d, v) 	M_DTOLFP((d), (v)->l_ui, (v)->l_uf)
-#define LFPTOD(v, d) 	M_LFPTOD((v)->l_ui, (v)->l_uf, (d))
+#define DTOLFP(d, v) 	M_DTOLFP((d), lfpuint(*v), lfpfrac(*v))
+#define LFPTOD(v, d) 	M_LFPTOD(lfpuint(*v), lfpfrac(*v), (d))
 
 /*
  * Prototypes
@@ -369,13 +375,13 @@ extern	void	get_systime	(l_fp *);
 extern	bool	step_systime	(double, int (*settime)(struct timespec *));
 extern	bool	adj_systime	(double, int (*adjtime)(const struct timeval *, struct timeval *));
 
-#define	lfptoa(fpv, ndec)	mfptoa((fpv)->l_ui, (fpv)->l_uf, (ndec))
-#define	lfptoms(fpv, ndec)	mfptoms((fpv)->l_ui, (fpv)->l_uf, (ndec))
+#define	lfptoa(fpv, ndec)	mfptoa(lfpuint(*fpv), lfpfrac(*fpv), (ndec))
+#define	lfptoms(fpv, ndec)	mfptoms(lfpuint(*fpv), lfpfrac(*fpv), (ndec))
 
 #define	ufptoa(fpv, ndec)	dofptoa((fpv), false, (ndec), false)
 #define	ufptoms(fpv, ndec)	dofptoa((fpv), false, (ndec), true)
-#define	ulfptoa(fpv, ndec)	dolfptoa((fpv)->l_ui, (fpv)->l_uf, 0, (ndec), 0)
-#define	ulfptoms(fpv, ndec)	dolfptoa((fpv)->l_ui, (fpv)->l_uf, 0, (ndec), 1)
+#define	ulfptoa(fpv, ndec)	dolfptoa(lfpuint(*fpv), lfpfrac(*fpv), 0, (ndec), 0)
+#define	ulfptoms(fpv, ndec)	dolfptoa(lfpuint(*fpv), lfpfrac(*fpv), 0, (ndec), 1)
 #define	umfptoa(fpi, fpf, ndec) dolfptoa((fpi), (fpf), 0, (ndec), 0)
 
 /*

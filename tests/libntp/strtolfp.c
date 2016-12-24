@@ -34,8 +34,8 @@ TEST(strtolfp, NegativeInteger) {
 	const char *str_ms = "-300000";
 
 	l_fp expected;
-	expected.l_i = -300;
-	expected.l_uf = 0;
+	setlfpsint(expected, -300);
+	setlfpfrac(expected, 0);
 
 	l_fp actual, actual_ms;
 
@@ -65,8 +65,8 @@ TEST(strtolfp, NegativeFraction) {
 	const char *str_ms = "-300750";
 
 	l_fp expected;
-	expected.l_i = -301;
-	expected.l_uf = QUARTER;
+	setlfpsint(expected, -301);
+	setlfpfrac(expected, QUARTER);
 
 	l_fp actual, actual_ms;
 
@@ -96,8 +96,8 @@ TEST(strtolfp, NegativeMsFraction) {
 	const char *str_ms = "-199999.75";
 
 	l_fp expected;
-	expected.l_i = -200;
-	expected.l_uf = QUARTER_PROMILLE_APPRX;
+	setlfpsint(expected, -200);
+	setlfpfrac(expected, QUARTER_PROMILLE_APPRX);
 
 	l_fp actual, actual_ms;
 

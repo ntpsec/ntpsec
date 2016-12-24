@@ -22,8 +22,8 @@ TEST_TEAR_DOWN(lfpfunc) {}
    aren't initiated with memset (due to padding bytes).
 */
 #define TEST_ASSERT_EQUAL_l_fp(a, b) {					\
-	TEST_ASSERT_EQUAL_MESSAGE(a.l_i, b.l_i, "Field l_i");		\
-	TEST_ASSERT_EQUAL_UINT_MESSAGE(a.l_uf, b.l_uf, "Field l_uf");	\
+	TEST_ASSERT_EQUAL_MESSAGE(lfpsint(a), lfpsint(b), "Integer part");		\
+	TEST_ASSERT_EQUAL_UINT_MESSAGE(lfpfrac(a), lfpfrac(b), "Fractional part");	\
 }
 
 typedef struct  {
@@ -57,11 +57,11 @@ static int l_fp_scmp(const l_fp first, const l_fp second)
 	const l_fp op1 = first;
 	const l_fp op2 = second;
 
-	a[0] = op1.l_uf; a[1] = op1.l_ui; a[2] = 0;
-	b[0] = op2.l_uf; b[1] = op2.l_ui; b[2] = 0;
+	a[0] = lfpfrac(op1); a[1] = lfpuint(op1); a[2] = 0;
+	b[0] = lfpfrac(op2); b[1] = lfpuint(op2); b[2] = 0;
 
-	a[2] -= (op1.l_i < 0);
-	b[2] -= (op2.l_i < 0);
+	a[2] -= (lfpsint(op1) < 0);
+	b[2] -= (lfpsint(op2) < 0);
 
 	return cmp_work(a,b);
 }
@@ -72,8 +72,8 @@ static int l_fp_ucmp(const l_fp first, l_fp second)
 	const l_fp op1 = first; 
 	const l_fp op2 = second;
 
-	a[0] = op1.l_uf; a[1] = op1.l_ui; a[2] = 0;
-	b[0] = op2.l_uf; b[1] = op2.l_ui; b[2] = 0;
+	a[0] = lfpfrac(op1); a[1] = lfpuint(op1); a[2] = 0;
+	b[0] = lfpfrac(op2); b[1] = lfpuint(op2); b[2] = 0;
 
 	return cmp_work(a,b);
 }
@@ -86,8 +86,8 @@ static int l_fp_ucmp(const l_fp first, l_fp second)
 static l_fp l_fp_init(int32_t i, uint32_t f)
 {
 	l_fp temp;
-	temp.l_i  = i;
-	temp.l_uf = f;
+	setlfpsint(temp, i);
+	setlfpfrac(temp, f);
 
 	return temp;
 }
@@ -126,9 +126,9 @@ static l_fp l_fp_abs(const l_fp first)
 
 static int l_fp_signum(const l_fp first)
 {
-	if (first.l_ui & 0x80000000u)
+	if (lfpuint(first) & 0x80000000u)
 		return -1;
-	return (first.l_ui || first.l_uf);
+	return (lfpuint(first) || lfpfrac(first));
 }
 
 static double l_fp_convert_to_double(const l_fp first)
@@ -401,9 +401,9 @@ TEST(lfpfunc, SignedRelOps) {
 
 		switch (cmp) {
 		case -1:
-			//printf("op1:%d %d, op2:%d %d\n",op1.l_uf,op1.l_ui,op2.l_uf,op2.l_ui);
+			//printf("op1:%d %d, op2:%d %d\n",lfpfrac(op1),lfpuint(op1),lfpfrac(op2),lfpuint(op2));
 			l_fp_swap(&op1, &op2);
-			//printf("op1:%d %d, op2:%d %d\n",op1.l_uf,op1.l_ui,op2.l_uf,op2.l_ui);
+			//printf("op1:%d %d, op2:%d %d\n",lfpfrac(op1),lfpuint(op1),lfpfrac(op2),lfpuint(op2));
 		case 1:
 			TEST_ASSERT_TRUE (l_isgt(op1, op2));
 			TEST_ASSERT_FALSE(l_isgt(op2, op1));
@@ -443,9 +443,9 @@ TEST(lfpfunc, UnsignedRelOps) {
 
 		switch (cmp) {
 		case -1:
-			//printf("op1:%d %d, op2:%d %d\n",op1.l_uf,op1.l_ui,op2.l_uf,op2.l_ui);
+			//printf("op1:%d %d, op2:%d %d\n",lfpfrac(op1),lfpuint(op1),lfpfrac(op2),lfpuint(op2));
 			l_fp_swap(&op1, &op2);
-			//printf("op1:%d %d, op2:%d %d\n",op1.l_uf,op1.l_ui,op2.l_uf,op2.l_ui);
+			//printf("op1:%d %d, op2:%d %d\n",lfpfrac(op1),lfpuint(op1),lfpfrac(op2),lfpuint(op2));
 		case 1:
 			TEST_ASSERT_TRUE (l_isgtu(op1, op2));
 			TEST_ASSERT_FALSE(l_isgtu(op2, op1));

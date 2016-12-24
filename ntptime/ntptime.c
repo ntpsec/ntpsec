@@ -348,7 +348,7 @@ main(
 		printf(json ? jfmt3 : ofmt3,  (u_long)ntv.maxerror, (u_long)ntv.esterror);
 		if (rawtime)
 			printf(json ? jfmt4 : ofmt4,
-			       (u_int)ts.l_ui, (u_int)ts.l_uf,
+			       (u_int)lfpuint(ts), (u_int)lfpfrac(ts),
 			       (int)ntv.time.tv_sec, fdigits,
 			       (int)time_frac,
 

@@ -18,8 +18,8 @@
 
 
 #define TEST_ASSERT_EQUAL_l_fp(a, b) {					\
-    TEST_ASSERT_EQUAL_MESSAGE(a.l_i, b.l_i, "Field l_i");		\
-    TEST_ASSERT_EQUAL_UINT_MESSAGE(a.l_uf, b.l_uf, "Field l_uf");	\
+    TEST_ASSERT_EQUAL_MESSAGE(lfpsint(a), lfpsint(b), "Integral part"); \
+    TEST_ASSERT_EQUAL_UINT_MESSAGE(lfpfrac(a), lfpfrac(b), "Fractional part"); \
 }
 
 
@@ -61,8 +61,8 @@ static l_fp l_fp_init(int32_t i, uint32_t f)
 {
 	l_fp temp;
 
-	temp.l_i  = i;
-	temp.l_uf = f;
+	setlfpsint(temp, i);
+	setlfpfrac(temp, f);
 
 	return temp;
 }

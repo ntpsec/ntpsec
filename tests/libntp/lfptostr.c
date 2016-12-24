@@ -32,8 +32,8 @@ static const int HALF_PROMILLE_DOWN = 2147483; // slightly less than 0.0005
 TEST(lfptostr, PositiveInteger) {
 	l_fp test = {{200}, 0}; // exact 200.0000000000
 
-	TEST_ASSERT_EQUAL_STRING("200.0000000000", mfptoa(test.l_ui, test.l_uf, LFP_MAX_PRECISION));
-	TEST_ASSERT_EQUAL_STRING("200000.0000000", mfptoms(test.l_ui, test.l_uf, LFP_MAX_PRECISION_MS));
+	TEST_ASSERT_EQUAL_STRING("200.0000000000", mfptoa(lfpuint(test), lfpfrac(test), LFP_MAX_PRECISION));
+	TEST_ASSERT_EQUAL_STRING("200000.0000000", mfptoms(lfpuint(test), lfpfrac(test), LFP_MAX_PRECISION_MS));
 }
 
 TEST(lfptostr, NegativeInteger) {

@@ -1679,11 +1679,10 @@ oncore_get_timestamp(
 	}
 
 	/* convert timespec -> ntp l_fp */
-
 	dmy = tsp->tv_nsec;
 	dmy /= 1e9;
-	ts.l_uf = dmy * 4294967296.0;
-	ts.l_ui = tsp->tv_sec;
+	setlfpfrac(ts, dmy * 4294967296.0);
+	setlfpuint(ts, tsp->tv_sec);
 
 #if 0
      alternate code for previous 4 lines is
