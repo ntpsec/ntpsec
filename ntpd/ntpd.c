@@ -490,7 +490,7 @@ set_process_priority(void)
 
 const char *ntpd_version(void)
 {
-    static char versionbuf[32];
+    static char versionbuf[64];
     snprintf(versionbuf, sizeof(versionbuf),
 	     "%s-%s-%d %s", VCS_BASENAME, VERSION, VCS_TICK, VCS_DATE);
     return versionbuf;
