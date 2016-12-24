@@ -541,7 +541,7 @@ The command ":config" is no longer accepted; use "config" instead.
 
 == Known Limitations ==
 
-include::mrufail.txt
+include::mrufail.txt[]
 
 You may be able to retrieve partial data in very high-traffic
 conditions by using the 'direct' option.
