@@ -75,7 +75,11 @@
    are derived from spherical trigonometry using the precisely known
    positions of satellites in a geocentric coordinate system. GPS
    also provides time service; those that emit <<PPS>> are suitable
-   as clock sources for Stratum 1 timeservers.
+   as clock sources for Stratum 1 timeservers.  In timekeeping, the
+   term is used to refer not only to the US original GPS system,
+   but newer constellations that work on the same principles, such
+   as ГЛОНАСС (the Russian GLONASS), 北斗 (the Chinese BeiDou-2),
+   and the EU's Galileo.
 
 [[GPSDO]] GPSDO::
    GPS Disciplined Oscillator. A good crystal is synchronized to
