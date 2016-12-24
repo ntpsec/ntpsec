@@ -4,44 +4,7 @@
 == NAME ==
 ntpsweep - print various information about given NTP servers
 
-== SYNOPSIS ==
-+ntpsweep+ [+-l+ 'host']... [-p] [+-m+ 'number'] [+-s+ 'prefix'] [+-h+ 'string']
-
-== DESCRIPTION ==
-
-`ntpsweep` prints per host the NTP stratum level, the clock offset in
-seconds, the daemon version, the operating system and the processor.
-Optionally recursing through all peers.
-
-If no hosts are specified, `ntpsweep` reports on localhost.
-
-`ntpsweep` relies on `ntpq` and Mode 6 queries to probe servers.  This
-depends on the remote host's _restrict_ configuration allowing
-queries. Nowadays effectively all public hosts set _noquery_, so this
-script is unlikely to be useful unless you have multiple specially-
-configured timeservers on a LAN.
-
-== OPTIONS ==
-
-+-l+ string, +--host-list+=_string_::
-  Host to execute actions on. This option may appear an unlimited number
-  of times.
-+
-Use this option to specify the host on which this script operates. May
-appear multiple times.
-
-+-p+, +--peers+::
-  Recursively list all peers a host synchronizes to.
-
-+-m+ number, +--maxlevel+=_number_::
-  Traverse peers up to this level (4 is a reasonable number). This
-  option takes an integer number as its argument.
-
-+-s+ string, +--strip+=_string_::
-  Strip this string from hostnames.
-
-+-h+ string, +--host+=_string_::
-  Specify a single host.  Deprecated option for backwards compatibility.
+include::../docs/includes/ntpsweep-body.txt[]
 
 == EXIT STATUS ==
 

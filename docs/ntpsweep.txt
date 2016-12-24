@@ -1,0 +1,18 @@
+= ntpsweep - print information about NTP servers =
+
+[cols="10%,90%",frame="none",grid="none",style="verse"]
+|==============================
+|image:pic/SAppr.jpg[]        |
+from 'The Sorcerer's Apprentice', Walt Disney
+
+A new broom sweeps clean.
+
+|==============================
+
+'''''
+
+include::includes/ntpsweep-body.txt[]
+
+'''''
+
+include::includes/footer.txt[]
