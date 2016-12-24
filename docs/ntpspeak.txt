@@ -86,8 +86,9 @@
    time from a GPS receiver.  The combination gets the short term
    stability of the crystal and the long term stability of GPS.
    With appropriate firmware, the crystal can be used when the
-   GPS receiver stops working.  Most cell towers have GPSDOs.
-   You can usually spot the conical GPS antenna.
+   GPS receiver is temporarily non-operational; see <<holdover>>.
+   Most cell towers have GPSDOs. You can usually spot the conical
+   GPS antenna.
 
 [[GPSD]] GPSD::
    The http://www.catb.org/gpsd/[GPS Daemon], an open-source device
@@ -108,7 +109,7 @@
    serial link is called "in-band time" to contrast it with the
    out-of-band <<PPS>> signal.  Abbreviated IBT. Seldom useful
    by itself as it tends to have a large random wander from top
-   of second.
+   of second.  It is however, useful as a count of seconds.
 
 [[leap second]] leap second::
    Because the earth's rotation varies in irregular ways (gradually
@@ -116,8 +117,8 @@
    absolute terms rather than as a fraction of day length, keeping
    time of day synchronized with mean solar time requires occasional,
    unpredictable insertions of a standard second in the calendar. Leap
-   second notifications are issued by IERS
-   (http://www.iers.org/IERS/EN/Home/home_node.html[International
+   second notifications are issued by the
+   http://www.iers.org/IERS/EN/Home/home_node.html[International
    Earth Rotation Service] when required, and obeyed by national time
    authorities.  The current leap-second offset is automatically
    propagated through the <<GPS>> system.
