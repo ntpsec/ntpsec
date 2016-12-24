@@ -150,8 +150,8 @@
    http://www.nist.gov/[National Institute of Standards and
    Technology].  The civilian national time authority of the USA;
    runs <<WWVB>>.  Responsible for keeping U.S. civil time
-   coordinated with UTC.  NIST time tracks <<USNO>>
-   time to within a few nanoseconds.
+   coordinated with UTC.  Civil <<NIST>> and military <<USNO>>
+   time agree to within nanoseconds.
 
 [[NTP-classic]] NTP Classic::
    The original reference implementation of NTP by Dave Mills, later
@@ -211,7 +211,8 @@
 
 [[refclock]] refclock::
   Shorthand for a "reference clock", a primary time source. A computer
-  with a refclock is implicitly Stratum 1.
+  with a refclock is implicitly Stratum 1.  Examples include <<GPS>>
+  or <<time radio>> receivers, or even a master cesium clock.
 
 [[stratum]] stratum::
   A "stratum" is a layer in the hierarchy of time servers.  a
@@ -219,8 +220,10 @@
   a refclock is stratum 1; and a client served by a stratum N is
   stratum N+1. Often capitalized, especially when referring to all
   members of a stratum. While strata up to 15 are defined, it is
-  unusual to see a public timeserver with stratum > 3, and thus
-  almost all NTP clients are at Stratum 4 or lower.
+  unusual to see a public timeserver with stratum greater than 3,
+  and thus almost all NTP clients are at Stratum 4 or lower.
+  Notice that a 'lower' stratum is closer to the reference clock than
+  a 'higher'.
 
 [[time-radio]] time radio::
   A radio receiver specialized for picking up accurate time reference
@@ -237,14 +240,15 @@
 [[truechimer]] truechimer::
   <<Mills-speak>> for a timeserver that provides time believed good,
   that is with low jitter with respect to UTC.  As with a
-  link#falseticker[falseticker], this is usually less a property of
+  <<falseticker>>, this is usually less a property of
   the server itself than it is of favorable network topology.
 
 [[USNO]] USNO::
   http://www.usno.navy.mil/USNO[The United States Naval Observatory],
   one of the two U.S. national time authorities and the source of the
   U.S. military time reference, now delivered primarily by GPS
-  signals. U.S. civil and military time agree to within nanoseconds.
+  signals. U.S. civil <<NIST>> and military <<USNO>> time agree to 
+  within nanoseconds.
 
 [[WWVB]] WWVB::
   https://www.nist.gov/time-and-frequency-services/nist-radio-stations/wwvb[The
