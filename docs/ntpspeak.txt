@@ -117,7 +117,7 @@
    absolute terms rather than as a fraction of day length, keeping
    time of day synchronized with mean solar time requires occasional,
    unpredictable insertions of a standard second in the calendar. Leap
-   second notifications are issued by the
+   second notifications are issued as Bulletin C by the
    http://www.iers.org/IERS/EN/Home/home_node.html[International
    Earth Rotation Service] when required, and obeyed by national time
    authorities.  The current leap-second offset is automatically
@@ -126,7 +126,7 @@
 [[leapfile]] leapfile::
    A local file containing the current <<leap second>> offset, typically
    fetched from <<USNO>> or <<NIST>> and potentially needing updates
-   near the very beginning of each half year. Normally retrieved
+   near the end of each half year. Normally retrieved
    by a cron(1) job, but some varieties of <<refclock>> (notably
    GPSes) update the same information during normal operation.
 
@@ -150,13 +150,13 @@
    http://www.nist.gov/[National Institute of Standards and
    Technology].  The civilian national time authority of the USA;
    runs <<WWVB>>.  Responsible for keeping U.S. civil time
-   coordinated with international UTC time.  NIST time tracks <<USNO>>
+   coordinated with UTC.  NIST time tracks <<USNO>>
    time to within a few nanoseconds.
 
 [[NTP-classic]] NTP Classic::
    The original reference implementation of NTP by Dave Mills, later
-   maintained by the Network Time Foundation.  NTPsec forked from it
-   on June 6th, 2015.
+   maintained by the Network Time Foundation.  It is available at
+   http://www.ntp.org/ .  NTPsec forked from it on June 6th, 2015.
 
 [[nonce]] nonce::
   An arbitrary number that may only be used once. a random or
@@ -200,12 +200,14 @@
    In an NTP context, "the pool" is usually the
    http://www.pool.ntp.org/en/[NTP Pool Project], a collection of
    thousands of NTP servers accessible through DNS servers that hand
-   out service addresses at random from the pool.
+   out "nearby" server addresses from the pool.  These servers are
+   usually run by volunteers, and available via well-known DNS names.
 
-[[proventic]] proventic:: <<Mills-speak>> for "the transitive completion of the
-  authentication relationship", defined in RFC 5906. Time is proventic
-  if it is provided by a chain of time servers between which packets
-  are authenticated and the chain reaches back to Stratum 1.
+[[proventic]] proventic:: <<Mills-speak>> for "the transitive
+  completion of the authentication relationship", defined in RFC 5906.
+  Time is proventic if it is provided by a chain of time servers
+  between which packets are authenticated and the chain reaches
+  back to Stratum 1.
 
 [[refclock]] refclock::
   Shorthand for a "reference clock", a primary time source. A computer
