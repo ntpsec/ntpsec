@@ -239,19 +239,10 @@ include::../docs/includes/misc-options.txt[]
 
 == FILES ==
 
-//NAMECHANGE
 `/etc/ntp.conf`::
   the default name of the configuration file
 _ntp.keys_::
   private MD5 keys
-_ntpkey_::
-  RSA private key
-_ntpkey_host_::
-  RSA public key
-_ntp_dh_::
-  Diffie-Hellman agreement parameters
-
-== EXIT STATUS ==
 
 One of the following exit values will be returned:
 
@@ -273,9 +264,5 @@ David L. Mills, _Network Time Protocol (Version 4)_, RFC 5905
 
 The syntax checking is not picky; some combinations of ridiculous and
 even hilarious options and modes may not be detected.
-
-The _ntpkey_host_ files are really digital certificates. These should be
-obtained via secure directory services when they become universally
-available.
 
 // end
