@@ -32,18 +32,16 @@
 /*
  * Convert usec to a time stamp fraction.
  */
-# define TVUTOTSF(tvu, tsf)						\
-	((tsf) = (uint32_t)						\
-		 ((((uint64_t)(tvu) << 32) + MICROSECONDS / 2) /		\
-		  MICROSECONDS))
+# define TVUTOTSF(tvu)	\
+	(uint32_t)((((uint64_t)(tvu) << 32) + MICROSECONDS / 2) / MICROSECONDS)
 
 /*
  * Convert a struct timeval to a time stamp.
  */
 #define TVTOTS(tv, ts) \
 	do { \
-		(ts)->l_ui = (u_long)(tv)->tv_sec; \
-		TVUTOTSF((tv)->tv_usec, (ts)->l_uf); \
+		setlfpuint(*ts, (u_long)(tv)->tv_sec);   \
+		setlfpfrac(*ts, TVUTOTSF((tv)->tv_usec)); \
 	} while (false)
 
 #define NS_PER_MS_FLOAT	1000.0
@@ -341,9 +339,9 @@ main(
 		tv.tv_sec = ntv.time.tv_sec;
 		tv.tv_usec = ntv.time.tv_frac_sec;
 		TVTOTS(&tv, &ts);
-		ts.l_ui += JAN_1970;
-		ts.l_uf += ts_roundbit;
-		ts.l_uf &= ts_mask;
+		setlfpuint(ts, lfpuint(ts) + JAN_1970);
+		setlfpfrac(ts, lfpfrac(ts) + ts_roundbit);
+		setlfpfrac(ts, lfpfrac(ts) & ts_mask);
 		printf(json ? jfmt2 : ofmt2,  json ? rfc3339date(&ts) : prettydate(&ts), fdigits, (int)time_frac);
 		printf(json ? jfmt3 : ofmt3,  (u_long)ntv.maxerror, (u_long)ntv.esterror);
 		if (rawtime)
