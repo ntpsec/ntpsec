@@ -1,35 +1,37 @@
 = European Automated Computer Time Services =
 
-Several European countries use the following message data format:
+The National Laboratories of many European countries provide
+time information in a standardised format, an ITU-R 
+Recommendation (ITU-R TF583.4).  Information is provided
+over a dial-up modem, with one 78-char segment every second.
 
-
-0000000000111111111122222222223333333333444444444455555555556666666666777777777
-
-0123456789012345678901234567890123456789012345678901234567890123456789012345678
-
-This format is an ITU-R Recommendation (ITU-R TF583.4) and is now
-available from the primary timing centres of the following countries:
+The following countries have traditionally provided this service: 
 Austria, Belgium, Germany, Italy, The Netherlands, Poland, Portugal,
-Romania, Spain, Sweden, Switzerland, Turkey and United Kingdom. Some
-examples are:
+Romania, Spain, Sweden, Switzerland, Turkey and United Kingdom.
 
-* In Germany by Physikalisch-Technische Bundesanstalt (PTB)'s timecode
+Note that the service is usually available from outside the country
+as well, as long as you are willing to make a long-distance phone
+call.
+
+Some examples are:
+
+* In Germany, Physikalisch-Technische Bundesanstalt (PTB)'s timecode
 service. Phone number: +49 5 31 51 20 38.
 +
 For more detail, see
 http://www.ptb.de/cms/index.php?id=1786&L=1
 
-* In the UK by National Physical Laboratory (NPL)'s Telephone Time Service.
+* In the UK, National Physical Laboratory (NPL)'s Telephone Time Service.
 Phone number: 020 8943 6333
 +
 For more detail, see http://www.npl.co.uk/science-technology/time-frequency/products-and-services/time/time-synchronisation-of-computers-to-utc(npl&#41;
 
-* In Italy by L'Istituto Nazionale di Ricerca Metrologica
+* In Italy, L'Istituto Nazionale di Ricerca Metrologica
 (INRIM)'s CTD service. Phone numbers: 011 39 19 263 and 011 39 19 264
 +
 For more detail, see http://www.inrim.it/res/tf/ctd_i.shtml
 
-* In Sweden by SP Swedish National Testing and Research Institute 's
+* In Sweden, SP Swedish National Testing and Research Institute's
 timecode service. Phone number: +46 33 415783.
 +
 For more detail, see http://www.sp.se/en/index/services/time_sync/modem_time/Sidor/default.aspx
