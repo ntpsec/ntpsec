@@ -475,7 +475,7 @@ ASCIIizations of MRU records, oldest to newest.  The spans include
 sequence metadata intended to allow you to stitch them together on the
 fly in O(n) time.
 
-There is also a direct mode thsat makes the individual spans available
+There is also a direct mode that makes the individual spans available
 as they come in.  This may be useful for getting partial data from
 very heavily-loaded servers.
 
@@ -484,13 +484,13 @@ source-address spoofing.  The mrulist() code begins by requesting a
 nonce from ntpd, which it then replays between span requets to
 convince ntpd that the address it's firehosing all that MRU data at is
 the same one that asked for the nonce. To foil replay attacks, the
-nonce is timed out; you haveto re-request another every 16 seconds
+nonce is timed out; you have to re-request another every 16 seconds
 (the code does this automatically).
 
 The Python code does not replicate the old C logic for stitching
 together the MRU spans; that looked pretty fragile in the presence of
 span dropouts (we don't know that those can ever happen, but we don't
-know that they can't, either).  Instead, just brute-forces the problem
+know that they can't, either).  Instead, it just brute-forces the problem
 - accumulates all the MRU spans until either the protocol marker for
 the end of the last one or ^C interrupting the span-read loop, and
 then quicksorts the list before handing it up to the front end for

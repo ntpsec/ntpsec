@@ -78,7 +78,7 @@ a build-time switch, not a run-time one).
 
 * If you had a refclock on a path of the form /dev/actsNNN, that
   link needs to change to /dev/modemNNN. Reverted in the
-  -classic-mode build.
+  --enable-classic-mode build.
 
 * An instance of +ntpq+ built from the NTPsec code
   querying a legacy NTP daemon will not automatically display
