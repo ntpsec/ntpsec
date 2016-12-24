@@ -4,11 +4,8 @@
 
 === Code ===
 
-* Clean up the documentation for the removal of broadcast and symmetric modes.
-
 * All the code relating to iteration over interfaces can and should be removed
-  in favor of binding to wildcard addresses. This will abolish several platform
-  dependencies.
+  in favor of binding to wildcard addresses.
 
 === Testing ===
 
