@@ -749,6 +749,23 @@ receive(
 		goto done;
 	}
 
+	/*
+	 * Version check must be after the query packets, since they
+	 * intentionally use an early version.
+	 */
+	{
+	uint8_t hisversion = PKT_VERSION(rbufp->recv_pkt.li_vn_mode);
+	if (hisversion == NTP_VERSION) {
+		sys_newversion++;		/* new version */
+	} else if (!(restrict_mask & RES_VERSION) && hisversion >=
+	    NTP_OLDVERSION) {
+		sys_oldversion++;		/* previous version */
+	} else {
+		sys_badlength++;
+		goto done;			/* old version */
+	}
+	}
+
 	pkt = parse_packet(rbufp);
 	if(pkt == NULL) {
 		sys_badlength++;
