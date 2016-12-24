@@ -30,7 +30,12 @@ def tabulate(path):
                 continue
         if line.startswith("include::"):
             filestem = line.strip()[9:][:-2]
-            iostack.append((linecount, open(os.path.join(prefix, filestem))))
+            dirname = ""
+            if iostack:
+                includer = iostack[-1][1].name
+                dirname = os.path.dirname(includer[len(prefix):])
+            newpath = os.path.join(prefix, dirname, filestem)
+            iostack.append((linecount, open(newpath)))
             continue
         # Ordinary processing 
         # This is the tricky part. Because we're reference-checking the
