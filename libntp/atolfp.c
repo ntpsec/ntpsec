@@ -116,7 +116,7 @@ atolfp(
 	if (isneg)
 	    M_NEG(dec_i, dec_f);
 	
-	lfp->l_ui = dec_i;
-	lfp->l_uf = dec_f;
+	setlfpuint(*lfp, dec_i);
+	setlfpfrac(*lfp, dec_f);
 	return true;
 }

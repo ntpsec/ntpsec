@@ -1861,7 +1861,7 @@ local_input(
 								dtemp -= 1;
 								parse->parseio.parse_dtime.parse_ptime.fp.l_ui++;
 							}
-							parse->parseio.parse_dtime.parse_ptime.fp.l_uf = (uint32_t)(dtemp * FRAC);
+							setlfpfrac(parse->parseio.parse_dtime.parse_ptime.fp, (uint32_t)(dtemp * FRAC));
 
 							parse->parseio.parse_dtime.parse_state |= PARSEB_PPS|PARSEB_S_PPS;
 #ifdef DEBUG
@@ -1974,12 +1974,12 @@ local_receive(
 		   parse->peer->refclkunit,
 		   (unsigned int)parsetime.parse_status,
 		   (unsigned int)parsetime.parse_state,
-		   (unsigned long)parsetime.parse_time.fp.l_ui,
-		   (unsigned long)parsetime.parse_time.fp.l_uf,
-		   (unsigned long)parsetime.parse_stime.fp.l_ui,
-		   (unsigned long)parsetime.parse_stime.fp.l_uf,
-		   (unsigned long)parsetime.parse_ptime.fp.l_ui,
-		   (unsigned long)parsetime.parse_ptime.fp.l_uf);
+		   (unsigned long)lfpuint(parsetime.parse_time.fp),
+		   (unsigned long)lfpfrac(parsetime.parse_time.fp),
+		   (unsigned long)lfpuint(parsetime.parse_stime.fp),
+		   (unsigned long)lfpfrac(parsetime.parse_stime.fp),
+		   (unsigned long)lfpuint(parsetime.parse_ptime.fp),
+		   (unsigned long)lfpfrac(parsetime.parse_ptime.fp));
 	  }
 #endif
 
@@ -3052,7 +3052,7 @@ parse_control(
 		start = tt = add_var(&out->kv_list, 128, RO|DEF);
 		tt = ap(start, 128, tt, "refclock_time=\"");
 
-		if (parse->timedata.parse_time.fp.l_ui == 0)
+		if (lfpuint(parse->timedata.parse_time.fp) == 0)
 		{
 			ap(start, 128, tt, "<UNDEFINED>\"");
 		}
@@ -3509,8 +3509,8 @@ parse_process(
 #endif
 		if (PARSE_TIMECODE(parsetime->parse_state))
 		{
-			if (M_ISGEQ(off.l_i, off.l_uf, -1, 0x80000000) &&
-			    M_ISGEQ(0, 0x7fffffff, off.l_i, off.l_uf))
+			if (M_ISGEQ(off.l_i, lfpfrac(off), -1, 0x80000000) &&
+			    M_ISGEQ(0, 0x7fffffff, off.l_i, lfpfrac(off)))
 			{
 				fudge = ppsphaseadjust; /* pick PPS fudge factor */
 
@@ -3521,9 +3521,9 @@ parse_process(
 				if (parse->parse_type->cl_flags & PARSE_F_PPSONSECOND)
 				{
 					reftime = off = offset;
-					if (reftime.l_uf & 0x80000000)
+					if (lfpfrac(reftime) & 0x80000000)
 						reftime.l_ui++;
-					reftime.l_uf = 0;
+					setlfpfrac(reftime, 0);
 
 
 					/*
@@ -3880,9 +3880,9 @@ gps16x_message(
 
 					get_mbg_xyz(&bufp, xyz);
 					snprintf(buffer, sizeof(buffer), "gps_position(XYZ)=\"%s m, %s m, %s m\"",
-						mfptoa(xyz[XP].l_ui, xyz[XP].l_uf, 1),
-						mfptoa(xyz[YP].l_ui, xyz[YP].l_uf, 1),
-						mfptoa(xyz[ZP].l_ui, xyz[ZP].l_uf, 1));
+						 mfptoa(lfpuint(xyz[XP]), lfpfrac(xyz[XP]), 1),
+						 mfptoa(lfpuint(xyz[YP]), lfpfrac(xyz[YP]), 1),
+						 mfptoa(lfpuint(xyz[ZP]), lfpfrac(xyz[ZP]), 1));
 
 					set_var(&parse->kv, buffer, sizeof(buffer), RO|DEF);
 				}
@@ -3896,9 +3896,9 @@ gps16x_message(
 					get_mbg_lla(&bufp, lla);
 
 					snprintf(buffer, sizeof(buffer), "gps_position(LLA)=\"%s deg, %s deg, %s m\"",
-						mfptoa(lla[LAT].l_ui, lla[LAT].l_uf, 4),
-						mfptoa(lla[LON].l_ui, lla[LON].l_uf, 4),
-						mfptoa(lla[ALT].l_ui, lla[ALT].l_uf, 1));
+						 mfptoa(lfpuint(lla[LAT]), lfpfrac(lla[LAT]), 4),
+						 mfptoa(lfpuint(lla[LON]), lfpfrac(lla[LON]), 4),
+						 mfptoa(lfpuint(lla[ALT]), lfpfrac(lla[ALT]), 1));
 
 					set_var(&parse->kv, buffer, sizeof(buffer), RO|DEF);
 				}

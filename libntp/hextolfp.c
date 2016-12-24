@@ -62,7 +62,7 @@ hextolfp(
 	if (*cp != '\0' && !isspace((unsigned char)*cp))
 	    return false;
 
-	lfp->l_ui = dec_i;
-	lfp->l_uf = dec_f;
+	setlfpuint(*lfp, dec_i);
+	setlfpfrac(*lfp, dec_f);
 	return true;
 }

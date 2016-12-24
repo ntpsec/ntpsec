@@ -211,8 +211,8 @@ normalize_time(
 			LFPTOD(&lfpdelta, ddelta);
 			msyslog(LOG_ERR,
 				"prev get_systime 0x%x.%08x is %.9f later than 0x%x.%08x",
-				lfp_prev.l_ui, lfp_prev.l_uf,
-				ddelta, result.l_ui, result.l_uf);
+				lfpuint(lfp_prev), lfpfrac(lfp_prev),
+				ddelta, lfpuint(result), lfpfrac(result));
 		}
 	}
 	lfp_prev = result;

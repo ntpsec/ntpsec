@@ -246,7 +246,7 @@ cvt_trimtsip(
 				    gpstolfp((unsigned short)week, (unsigned short)0,
 					     secs.l_ui, &gpstime);
 
-				    gpstime.l_uf = secs.l_uf;
+				    setlfpfrac(gpstime, lfpfrac(secs));
 
 				    clock_time->utctime = gpstime.l_ui - JAN_1970;
 

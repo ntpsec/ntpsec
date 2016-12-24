@@ -497,12 +497,12 @@ true_receive(
 				refclock_report(peer, CEVNT_BADTIME);
 				return;
 			}
-			off.l_uf = 0;
+			setlfpfrac(off, 0);
 #endif
 
 			pp->usec = true_sample720();
 #ifdef CLOCK_PPS
-			TVUTOTSF(pp->usec, off.l_uf);
+			TVUTOTSF(pp->usec, lfpfrac(off));
 #endif
 
 			/*

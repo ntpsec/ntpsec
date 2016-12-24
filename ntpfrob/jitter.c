@@ -44,7 +44,7 @@ get_clocktime(
 	 * Convert Unix clock from seconds and nanoseconds to seconds.
 	 */
 	clock_gettime(CLOCK_REALTIME, &ts);
-	now->l_i = ts.tv_sec + JAN_1970;
+	setlfpsint(*now, ts.tv_sec + JAN_1970);
 	dtemp = ts.tv_nsec / 1e9;
 
 	/*
@@ -59,7 +59,7 @@ get_clocktime(
 		now->l_i--;
 	}
 	dtemp *= FRAC;
-	now->l_uf = (uint32_t)dtemp;
+	setlfpfrac(*now, (uint32_t)dtemp);
 }
 
 static int doublecmp(const void *a, const void *b)

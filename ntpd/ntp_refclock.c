@@ -405,7 +405,7 @@ refclock_process_f(
 		pp->lastrec.l_ui, &pp->yearstart, &offset.l_ui))
 		return false;
 
-	offset.l_uf = 0;
+	setlfpfrac(offset, 0);
 	DTOLFP(pp->nsec / 1e9, &ltemp);
 	L_ADD(&offset, &ltemp);
 	refclock_process_offset(pp, offset, pp->lastrec, fudge);
@@ -1084,9 +1084,9 @@ refclock_catcher(
 	/*
 	 * Convert to signed fraction offset and stuff in median filter.
 	 */
-	pp->lastrec.l_ui = (uint32_t)ap->ts.tv_sec + JAN_1970;
+	setlfpuint(pp->lastrec, (uint32_t)ap->ts.tv_sec + JAN_1970);
 	dtemp = ap->ts.tv_nsec / 1e9;
-	pp->lastrec.l_uf = (uint32_t)(dtemp * FRAC);
+	setlfpfrac(pp->lastrec, (uint32_t)(dtemp * FRAC));
 	if (dtemp > .5)
 		dtemp -= 1.;
 	SAMPLE(-dtemp + pp->fudgetime1);

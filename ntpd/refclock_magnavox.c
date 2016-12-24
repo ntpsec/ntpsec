@@ -1520,10 +1520,10 @@ mx4200_pps(
 	 * Return the timestamp in pp->lastrec
 	 */
 
-	pp->lastrec.l_ui = up->pps_i.assert_timestamp.tv_sec +
-			   (uint32_t) JAN_1970;
-	pp->lastrec.l_uf = ((double)(up->pps_i.assert_timestamp.tv_nsec) *
-			   4.2949672960) + 0.5;
+	setlfpuint(pp->lastrec, up->pps_i.assert_timestamp.tv_sec +
+		   (uint32_t) JAN_1970);
+	setlfpfrac(pp->lastrec, ((double)(up->pps_i.assert_timestamp.tv_nsec) *
+				 4.2949672960) + 0.5);
 
 	return false;
 }

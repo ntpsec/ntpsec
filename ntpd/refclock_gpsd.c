@@ -1649,7 +1649,7 @@ process_pps(
 	 */
 	up->pps_stamp = up->pps_recvt;
 	L_ADDUF(&up->pps_stamp, 0x80000000u);
-	up->pps_stamp.l_uf = 0;
+	setlfpfrac(up->pps_stamp, 0);
 
 	if (NULL != up->pps_peer)
 		save_ltc(up->pps_peer->procptr,

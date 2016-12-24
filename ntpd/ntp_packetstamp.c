@@ -147,15 +147,15 @@ fetch_packetstamp(
 				/*
 				 * bintime documentation is at http://phk.freebsd.dk/pubs/timecounter.pdf
 				 */
-				nts.l_i = btp->sec + JAN_1970;
-				nts.l_uf = (uint32_t)(btp->frac >> 32);
+				setlfpuint(nts, btp->sec + JAN_1970);
+				setlfpfrac(nts, (uint32_t)(btp->frac >> 32));
 				if (sys_tick > measured_tick &&
 				    sys_tick > 1e-9) {
-					ticks = (unsigned long)(nts.l_uf / (unsigned long)(sys_tick * FRAC));
-					nts.l_uf = (unsigned long)(ticks * (unsigned long)(sys_tick * FRAC));
+				    ticks = (unsigned long)(lfpfrac(nts) / (unsigned long)(sys_tick * FRAC));
+				    setlfpfrac(nts, (unsigned long)(ticks * (unsigned long)(sys_tick * FRAC)));
 				}
                                 DPRINTF(4, ("fetch_timestamp: system bintime network time stamp: %ld.%09lu\n",
-                                            (long)btp->sec, (unsigned long)((nts.l_uf / FRAC) * 1e9)));
+                                            (long)btp->sec, (unsigned long)((lfpfrac(nts) / FRAC) * 1e9)));
 				break;
 #endif  /* USE_SCM_BINTIME */
 #ifdef USE_SCM_TIMESTAMPNS
