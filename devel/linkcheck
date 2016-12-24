@@ -43,7 +43,11 @@ def tabulate(path):
                 includer = iostack[-1][1].name
                 dirname = os.path.dirname(includer[len(prefix):])
             newpath = os.path.join(prefix, dirname, filestem)
-            iostack.append((linecount, open(newpath)))
+            try:
+                iostack.append((linecount, open(newpath)))
+            except (IOError, OSError):
+                sys.stderr.write("linkcheck: Can't open %s\n" % newpath)
+                raise SystemExit(1)
             continue
         # Ordinary processing 
         # This is the tricky part. Because we're reference-checking the
