@@ -251,7 +251,7 @@ def cxfreeze(ctx):
 
 def linkcheck(ctx):
     "Report references without anchors in the documentation."
-    ctx.exec_command("devel/linkcheck")
+    ctx.exec_command("devel/linkcheck docs/")
 
 # The following sets edit modes for GNU EMACS
 # Local Variables:

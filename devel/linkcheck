@@ -1,19 +1,27 @@
 #!/usr/bin/env python
 #
-# linkcheck - check link integrity in the document tree
+# linkcheck - check link integrity in an asciidoc document tree
 #
-# Run this script from docs/
+# Output is a list of unsatisfied references in the format of GCC
+# error messages, suitable for stepping through with Emacs compilation
+# mode.
+#
+# Optional argument is the root directory of the tree, otherwise it
+# is run from the corrent directory.
 #
 # SPDX-License-Identifier: BSD-2-clause
 from __future__ import print_function, division
 
-import os, re
+import os, re, sys
 
 boxanchor_re = re.compile(r"\[\[([a-z0-9_-]*)\]\]")
 linkanchor_re = re.compile(r"anchor:([a-z0-9_-]*)\[\]")
 refanchor_re = re.compile(r"link:([^.]*).html#([a-z0-9_-]*)")
 
-prefix = "docs/"
+if len(sys.argv) > 1:
+    prefix = sys.argv[1]
+else:
+    prefix = ""
 
 def tabulate(path):
     iostack.append((0, open(path)))
