@@ -4,6 +4,8 @@ The National Laboratories of many European countries provide
 time information in a standardised format, an ITU-R 
 Recommendation (ITU-R TF583.4).  Information is provided
 over a dial-up modem, with one 78-char segment every second.
+A description of the time code is available at
+https://www.ptb.de/cms/en/ptb/fachabteilungen/abt4/fb-44/ag-442/dissemination-of-legal-time/dissemination-of-time-via-the-public-telephone-network/the-european-telephone-time-code.html
 
 The following countries have traditionally provided this service: 
 Austria, Belgium, Germany, Italy, The Netherlands, Poland, Portugal,
