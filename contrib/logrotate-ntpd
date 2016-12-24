@@ -1,0 +1,18 @@
+# Adjust for your needs and install as /etc/logrotate.d/ntpd
+# This rotates monthly and kicks ntpd to start using the new file.
+# It inherits dateext and compress from /etc/logrotate.conf
+
+# If you are using SELinux, you will have to do something like:
+#  cd /etc/logrotate.d/
+#  sudo chcon --ref syslog ntpd
+# That may not work if selinux is not active.  ????
+# ls -Z will show the results
+
+/var/log/ntpstats/ntpd.log {
+    monthly
+    rotate 9999
+    postrotate
+      /usr/bin/killall -HUP ntpd
+    endscript
+}
+
