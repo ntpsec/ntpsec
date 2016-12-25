@@ -30,7 +30,7 @@ include::includes/manual.txt[]
 
 include::includes/ntpkeygen-body.txt[]
 
-// The end of "Cryptographic Data Files" runs into this following text. 
+// The end of "Cryptographic Data Files" runs into this following text.
 
 image:pic/sx5.gif[]
 

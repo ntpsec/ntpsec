@@ -6,10 +6,10 @@
 ** link:#input_000[$PMVXG,000] Initialization/Mode Control - Part A
 ** link:#input_001[$PMVXG,001] Initialization/Mode Control - Part B
 ** link:#input_007[$PMVXG,007] Control Port Configuration
-** link:#input_023[$PMVXG,023] Time Recovery Configuration 
-** link:#input_gpq[$CDGPQ,YYY] Query From a Remote Device / Request to Output a Sentence 
+** link:#input_023[$PMVXG,023] Time Recovery Configuration
+** link:#input_gpq[$CDGPQ,YYY] Query From a Remote Device / Request to Output a Sentence
 * link:#output[Control Port Output Sentences]
-** link:#output_000[$PMVXG,000] Receiver Status 
+** link:#output_000[$PMVXG,000] Receiver Status
 ** link:#output_021[$PMVXG,021] Position, Height, Velocity
 ** link:#output_022[$PMVXG,022] DOPs
 ** link:#output_030[$PMVXG,030] Software Configuration
@@ -24,7 +24,7 @@ The Control (CDU) Port is used to initialize, monitor, and control the
 receiver. The structure of the control port sentences is based on the
 _NMEA-0183_ Standard for Interfacing Marine Electronics Navigation Devices
 (version 1.5). For more details, please refer to the _NMEA-0183_
-Specification available from the http://www.nmea.org/[National Marine
+Specification available from the https://www.nmea.org/[National Marine
 Electronics Association].
 
 Reserved characters are used to indicate the beginning and the end of
@@ -147,7 +147,7 @@ DOP limits, and satellite elevation limits.
 [width="99%",cols="<10%,<26%,<16%,<16%,<16%,<16%",options="header"]
 |=============================================================================
 | Field | Description          | Units      | Format | Default | Range
-| *1     | Constrain Altitude   |            | Int    | 1       | 0=3D Only 
+| *1     | Constrain Altitude   |            | Int    | 1       | 0=3D Only
 1=Auto
 2=2D Only
 | 2     | Not Used             |            |        |         |

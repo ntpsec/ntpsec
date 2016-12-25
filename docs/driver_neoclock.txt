@@ -15,7 +15,7 @@ The refclock_neoclock4x driver supports the NeoClock4X receiver
 available from http://www.linum.com[Linum Software GmbH]. The receiver
 is available as a http://www.dcf77.de[DCF77] or TDF receiver. Both
 receivers have the same output string. For more information about the
-NeoClock4X receiver please visit http://www.linux-funkuhr.de.  
+NeoClock4X receiver please visit http://www.linux-funkuhr.de.
 
 == Driver Options ==
 

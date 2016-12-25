@@ -6,7 +6,7 @@
 ["verse",subs="normal"]
 Name: gpsd
 Reference ID: GPSD
-Serial Port: /dev/gps__u__ 
+Serial Port: /dev/gps__u__
 
 == Description ==
 

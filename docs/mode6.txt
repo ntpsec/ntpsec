@@ -385,7 +385,7 @@ client that is willing to accumulate an entire set of MRU list
 fragments and then perform stale-record elimination of its own before
 displaying or passing on the report (that is, as opposed to
 incremental display with an attempt to suppress stale records on the
-fly).  
+fly).
 
 === CTL_OP_READ_ORDLIST_A ===
 

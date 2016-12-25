@@ -34,11 +34,11 @@ that the samples are clustered close to the upper limb line,
 representing heavy traffic in the download direction. The apparent
 offset 'y'~0~ is near zero at the minimum delay 'x'~0~, which is near
 0.1s. +
- 
+
 Thus, for a point ('x', 'y'), the true offset is::
 
   &theta; = 'y' - ('x' - 'x'~0~) / 2 for 'y' > 'y'~0~ at or near the upper limb line or
-+  
++
 &theta; = 'y' + ('x' - 'x'~0~) / 2 for 'y' < 'y'~0~ at or near the lower limb line.
 
 In either case the associated delay is &delta; = 'x'.

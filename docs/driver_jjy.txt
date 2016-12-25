@@ -31,10 +31,10 @@ refclock jjy unit X subtype 1 time1 0.NNN flag1 {0|1};;
   time from the receiver, a fixed-point decimal number in seconds. You
   may specify the time offset from several tens of milliseconds (
   0.0NN seconds ) to a hundred and several tens of milliseconds (
-  0.1NN seconds ) for this clock. + 
+  0.1NN seconds ) for this clock. +
   Flag1 has no effect for time synchronization. When flag1 is set to
   1, status commands are issued before DATE and STIM commands, and
-  write a response text into the clockstats file. 
+  write a response text into the clockstats file.
 +
 [width="100%",cols="<50%,<50%",]
 |====================================
