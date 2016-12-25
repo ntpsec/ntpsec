@@ -65,7 +65,6 @@ These are feature flags denoting items that are supported by the clock:
      PARSEB_S_ANTENNA          supports ANTENNA - might set PARSEB_ALTERNATE
      PARSEB_S_PPS              supports PPS time stamping
      PARSEB_S_POSITION         supports position information (GPS)
-   
 ----------------------------------------------------------------------------
 +
 If the utctime field is non-zero this value will be take as time code
@@ -109,7 +108,7 @@ struct clockformat
   u_long (*convert)();
   /* conversion routine - your routine - cvt_<yourclock> */
   /* routine for handling RS232 sync events (time stamps) - usually sync_simple */
-  u_long (*syncpps)(); 
+  u_long (*syncpps)();
   /* PPS input routine - usually pps_one */
   void           *data;
   /* local parameters - any parameters/data/configuration info your conversion
@@ -187,7 +186,7 @@ clocks for example)
 
     u_char  cl_type;              /* clock type (ntp control) */
          Type if clock as in clock status word (ntp control messages) - usually 0
-     
+
     u_long  cl_maxunsync;         /* time to trust oscillator after losing synch
   */
          seconds a clock can be trusted after losing synchronisation.

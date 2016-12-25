@@ -90,7 +90,7 @@ refclock magnavox
 
 == Additional Information ==
 
-link:refclock.html[Reference Clock Drivers] 
+link:refclock.html[Reference Clock Drivers]
 
 '''''
 
