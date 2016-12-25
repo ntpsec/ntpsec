@@ -26,10 +26,8 @@
  *    addition, so no storage for the 2^2n term from above is needed.
  */
 
-void
+l_fp
 mfp_mul(
-	int32_t   *o_i,
-	uint32_t *o_f,
 	int32_t    a_i,
 	uint32_t  a_f,
 	int32_t    b_i,
@@ -42,6 +40,7 @@ mfp_mul(
   unsigned long b[4];			/* operand b */
   unsigned long c[6];			/* result c - 5 items for performance - see below */
   unsigned long carry;
+  l_fp out;
   
   int neg = 0;
 
@@ -131,8 +130,8 @@ mfp_mul(
       M_NEG(i, f);
     }
 
-  *o_i = i;
-  *o_f = f;
+  setlfpsint(out, i);
+  setlfpfrac(out, f);
 
 #ifdef DEBUG
   if (debug > 6)
@@ -141,6 +140,7 @@ mfp_mul(
 	   mfptoa((unsigned long)b_i, b_f, 6),
 	   mfptoa((unsigned long)i, f, 6));
 #endif
+  return out;
 }
 
 /*

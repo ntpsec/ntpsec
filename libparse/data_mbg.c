@@ -326,7 +326,7 @@ get_mbg_lla(
       else
 	if (i != ALT)
 	  {			/* convert to degrees (* 180/PI) */
-	    mfp_mul(&lla[i].l_i, &lla[i].l_uf, lla[i].l_i, lla[i].l_uf, rad2deg_i, rad2deg_f);
+	    lla[i] = mfp_mul(lla[i].l_i, lla[i].l_uf, rad2deg_i, rad2deg_f);
 	  }
     }
 }
