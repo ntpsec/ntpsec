@@ -247,7 +247,7 @@
   http://www.usno.navy.mil/USNO[The United States Naval Observatory],
   one of the two U.S. national time authorities and the source of the
   U.S. military time reference, now delivered primarily by GPS
-  signals. U.S. civil <<NIST>> and military <<USNO>> time agree to 
+  signals. U.S. civil <<NIST>> and military <<USNO>> time agree to
   within nanoseconds.
 
 [[WWVB]] WWVB::

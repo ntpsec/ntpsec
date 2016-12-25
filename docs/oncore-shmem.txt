@@ -38,9 +38,9 @@ this interface you must include a *STATUS* or *SHMEM* line in the
 
 ----------------------------
         STATUS < file_name >
-            
+
         or
-            
+
         SHMEM < file_name >
 ----------------------------
 

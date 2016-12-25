@@ -246,7 +246,7 @@ It consists of a number of bits coded in hexadecimal as follows:
 |==============================================================================
 
 The "Tag" field is the name the source code uses for the status bit.
-Not all bits are in use, but have been kept for backwards compatibility. 
+Not all bits are in use, but have been kept for backwards compatibility.
 
 [[kiss]]
 == Kiss Codes ==
