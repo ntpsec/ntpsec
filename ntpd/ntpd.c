@@ -962,7 +962,7 @@ static void mainloop(void)
 			time_t tnow;
 			get_systime(&snow);
 			time(&tnow);
-			check_leap_file(false, snow.l_ui, &tnow);
+			check_leap_file(false, lfpuint(snow), &tnow);
 			}
 		}
 
