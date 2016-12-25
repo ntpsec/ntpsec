@@ -148,7 +148,7 @@ Record the time of day and offset displayed by the +ntpq+
 link:ntpq.html#peer[+peer+] command. Wait for an hour or so and record the
 time of day and offset. Calculate the frequency as the offset difference
 divided by the time difference. If the frequency is much above 100 PPM,
-the link:ntptickadj.html[{ntptickadj}] program might be useful to adjust the
+the link:ntpfrob.html[{ntpfrob}] program might be useful to adjust the
 kernel clock frequency below that value. For systems that do not support
 this program, this might be one using a command in the system startup
 file.
