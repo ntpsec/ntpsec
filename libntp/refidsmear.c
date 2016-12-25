@@ -23,10 +23,11 @@ convertRefIDToLFP(uint32_t r)
 
 	// printf("%03d %08x: ", (r >> 24) & 0xFF, (r & 0x00FFFFFF) );
 
-	temp.l_uf = (r << 10);	/* 22 fractional bits */
+	setlfpfrac(temp, r << 10);	/* 22 fractional bits */
 
-	temp.l_ui = (r >> 22) & 0x3;
-	temp.l_ui |= ~(temp.l_ui & 2) + 1;
+	r = (r >> 22) & 0x3;
+	r |= ~(r & 2) + 1;
+	setlfpuint(temp, r);
 
 	return temp;
 }
@@ -43,11 +44,10 @@ convertLFPToRefID(l_fp num)
 	 * TODO: check for overflows; should we clamp/saturate or just
 	 * complain?
 	 */
-	L_ADDUF(&num, 0x200);
-	num.l_ui &= 3;
+	setlfpfrac(num, lfpfrac(num) + 0x200);
 
 	/* combine integral and fractional part to 24 bits */
-	temp  = (num.l_ui << 22) | (num.l_uf >> 10);
+	temp  = ((lfpuint(num) & 3) << 22) | (lfpfrac(num) >> 10);
 
 	/* put in the leading 254.0.0.0 */
 	temp |= UINT32_C(0xFE000000);
