@@ -271,7 +271,7 @@ timer(void)
 	 * is imminent or every 8th second.
 	 */
 	if (leapsec > LSPROX_NOWARN || 0 == (current_time & 7))
-		check_leapsec(now.l_ui, &tnow,
+		check_leapsec(lfpuint(now), &tnow,
                                 (sys_leap == LEAP_NOTINSYNC));
         if (sys_leap != LEAP_NOTINSYNC) {
                 if (leapsec >= LSPROX_ANNOUNCE && leapdif) {
@@ -314,9 +314,9 @@ timer(void)
 		write_stats();
 		if (leapf_timer <= current_time) {
 			leapf_timer += SECSPERDAY;
-			check_leap_file(true, now.l_ui, &tnow);
+			check_leap_file(true, lfpuint(now), &tnow);
 		} else {
-			check_leap_file(false, now.l_ui, &tnow);
+			check_leap_file(false, lfpuint(now), &tnow);
 		}
 	}
 }

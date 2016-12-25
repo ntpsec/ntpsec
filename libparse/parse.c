@@ -481,7 +481,7 @@ updatetimeinfo(
 
 	parseprintf(DD_PARSE, ("updatetimeinfo status=0x%lx, time=%x\n",
 			       (long)parseio->parse_dtime.parse_state,
-	                       parseio->parse_dtime.parse_time.fp.l_ui));
+	                       lfpuint(parseio->parse_dtime.parse_time.fp)));
 
 	return CVT_OK;		/* everything fine and dandy... */
 }

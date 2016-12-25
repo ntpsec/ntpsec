@@ -925,7 +925,7 @@ nmea_receive(
 		rc_time	 = parse_time(&date, &tofs.tv_nsec, &rdata, 1);
 		pp->leap = parse_qual(&rdata, 2, 'A', 0);
 		rc_date	 = parse_date(&date, &rdata, 9, DATE_1_DDMMYY)
-			&& unfold_century(&date, rd_timestamp.l_ui);
+			&& unfold_century(&date, lfpuint(rd_timestamp));
 		if (CLK_FLAG4 & pp->sloppyclockflag)
 			field_wipe(&rdata, 3, 4, 5, 6, -1);
 		break;
@@ -934,7 +934,7 @@ nmea_receive(
 		/* Check quality byte, fetch time only */
 		rc_time	 = parse_time(&date, &tofs.tv_nsec, &rdata, 1);
 		pp->leap = parse_qual(&rdata, 6, '0', 1);
-		rc_date	 = unfold_day(&date, rd_timestamp.l_ui);
+		rc_date	 = unfold_day(&date, lfpuint(rd_timestamp));
 		if (CLK_FLAG4 & pp->sloppyclockflag)
 			field_wipe(&rdata, 2, 4, -1);
 		break;
@@ -943,7 +943,7 @@ nmea_receive(
 		/* Check quality byte, fetch time only */
 		rc_time	 = parse_time(&date, &tofs.tv_nsec, &rdata, 5);
 		pp->leap = parse_qual(&rdata, 6, 'A', 0);
-		rc_date	 = unfold_day(&date, rd_timestamp.l_ui);
+		rc_date	 = unfold_day(&date, lfpuint(rd_timestamp));
 		if (CLK_FLAG4 & pp->sloppyclockflag)
 			field_wipe(&rdata, 1, 3, -1);
 		break;
@@ -1806,7 +1806,7 @@ eval_gps_time(
 	/* If we fully trust the GPS receiver, just combine days and
 	 * seconds and be done. */
 	if (peer->ttl & NMEA_DATETRUST_MASK) {
-		retv.l_ui = time64lo(ntpcal_dayjoin(gps_day, gps_sec));
+		setlfpuint(retv, time64lo(ntpcal_dayjoin(gps_day, gps_sec)));
 		return retv;
 	}
 
@@ -1834,7 +1834,7 @@ eval_gps_time(
 	}
 
 	/* - get unfold base: day of full recv time - 512 weeks */
-	vi64 = ntpcal_ntp_to_ntp(xrecv->l_ui, NULL);
+	vi64 = ntpcal_ntp_to_ntp(lfpuint(*xrecv), NULL);
 	rs64 = ntpcal_daysplit(vi64);
 	rcv_sec = rs64.lo;
 	rcv_day = rs64.hi - 512 * 7;
@@ -1864,7 +1864,7 @@ eval_gps_time(
 	}
 
 	/* - build result and be done */
-	retv.l_ui = time64lo(ntpcal_dayjoin(adj_day, gps_sec));
+	setlfpuint(retv, time64lo(ntpcal_dayjoin(adj_day, gps_sec)));
 	return retv;
 }
 

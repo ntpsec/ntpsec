@@ -1136,12 +1136,12 @@ clock_update(
 			if (leap_vote_ins > leap_vote_del
 			    && leap_vote_ins > sys_survivors / 2) {
 				get_systime(&now);
-				leapsec_add_dyn(true, now.l_ui, NULL);
+				leapsec_add_dyn(true, lfpuint(now), NULL);
 			}
 			if (leap_vote_del > leap_vote_ins
 			    && leap_vote_del > sys_survivors / 2) {
 				get_systime(&now);
-				leapsec_add_dyn(false, now.l_ui, NULL);
+				leapsec_add_dyn(false, lfpuint(now), NULL);
 			}
 		}
 		break;

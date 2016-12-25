@@ -244,11 +244,11 @@ cvt_trimtsip(
 				    L_SUB(&secs, &utcoffset); /* adjust GPS time to UTC time */
 
 				    gpstolfp((unsigned short)week, (unsigned short)0,
-					     secs.l_ui, &gpstime);
+					     lfpuint(secs), &gpstime);
 
 				    setlfpfrac(gpstime, lfpfrac(secs));
 
-				    clock_time->utctime = gpstime.l_ui - JAN_1970;
+				    clock_time->utctime = lfpuint(gpstime) - JAN_1970;
 
 				    clock_time->usecond = lfp_intv_to_tspec(gpstime).tv_nsec / 1000;
 
@@ -330,7 +330,7 @@ cvt_trimtsip(
 				    if (fetch_ieee754(&lbp, IEEE_SINGLE, &t0t, trim_offsets) != IEEE_OK)
 					    return CVT_FAIL|CVT_BADFMT;
 
-				    t->t_utcknown = t0t.l_ui != 0;
+				    t->t_utcknown = lfpuint(t0t) != 0;
 
 				    if ((t->t_utcknown) && /* got UTC information */
 					(tlsf != tls)   && /* something will change */
