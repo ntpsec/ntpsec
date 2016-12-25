@@ -445,7 +445,7 @@ filegen_config(
 	 */
 	if (file_existed) {
 		get_systime(&now);
-		filegen_setup(gen, now.l_ui);
+		filegen_setup(gen, lfpuint(now));
 	}
 }
 

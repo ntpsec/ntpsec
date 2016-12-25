@@ -1694,7 +1694,7 @@ oncore_get_timestamp(
      or more simply
 	dmy = 1.0e-9*tsp->tv_nsec;	/* fractional part */
 	DTOLFP(dmy, &ts);
-	ts.l_ui = tsp->tv_sec;
+	setlfpuint(ts, tsp->tv_sec);
 #endif	/* 0 */
 
 	/* now have timestamp in ts */
@@ -1764,7 +1764,7 @@ oncore_get_timestamp(
 	/* print out information about this timestamp (long line) */
 
 	ts_tmp = ts;
-	ts_tmp.l_ui = 0;	/* zero integer part */
+	setlfpuint(ts_tmp, 0);	/* zero integer part */
 	LFPTOD(&ts_tmp, dmy);	/* convert fractional part to a double */
 	j = 1.0e9*dmy;		/* then to integer ns */
 
@@ -1796,7 +1796,7 @@ oncore_get_timestamp(
 		}
 		snprintf(Msg, sizeof(Msg),	/* MAX length 128, currently at 127 */
  "%u.%09lu %d %d %2d %2d %2d %2ld rstat   %02x dop %4.1f nsat %2d,%d traim %d,%s,%s sigma %s neg-sawtooth %s sat %d%d%d%d%d%d%d%d",
-		    ts.l_ui, j,
+		    lfpuint(ts), j,
 		    instance->pp->year, instance->pp->day,
 		    instance->pp->hour, instance->pp->minute, instance->pp->second,
 		    (long) tsp->tv_sec % 60,
@@ -1829,7 +1829,7 @@ oncore_get_timestamp(
 		}
 		snprintf(Msg, sizeof(Msg),
  "%u.%09lu %d %d %2d %2d %2d %2ld rstat %02x dop %4.1f nsat %2d,%d traim %d,%s,%s sigma %s neg-sawtooth %s sat %d%d%d%d%d%d%d%d%d%d%d%d",
-		    ts.l_ui, j,
+		    lfpuint(ts), j,
 		    instance->pp->year, instance->pp->day,
 		    instance->pp->hour, instance->pp->minute, instance->pp->second,
 		    (long) tsp->tv_sec % 60,
