@@ -1,7 +1,7 @@
 = Reference Clock Support =
 
 image:pic/stack1a.jpg[gif]Master Time Facility at the
-http://www.eecis.udel.edu/%7emills/lab.html[UDel Internet Research
+{millshome}lab.html[UDel Internet Research
 Laboratory]
 
 == Related Links ==

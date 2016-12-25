@@ -3,7 +3,7 @@
 [cols="10%,90%",frame="none",grid="none",style="verse"]
 |==============================
 |image:pic/stack1a.jpg[]|
-Master Time Facility at the http://www.eecis.udel.edu/%7emills/lab.html[UDel Internet Research Laboratory]
+Master Time Facility at the {millshome}lab.html[UDel Internet Research Laboratory]
 
 |==============================
 

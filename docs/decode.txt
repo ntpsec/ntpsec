@@ -3,7 +3,7 @@
 [cols="10%,90%",frame="none",grid="none",style="verse"]
 |==============================
 |image:pic/alice47.gif[]|
-http://www.eecis.udel.edu/%7emills/pictures.html[from 'Alice's Adventures in Wonderland', Lewis Carroll]
+{millshome}pictures.html[from 'Alice's Adventures in Wonderland', Lewis Carroll]
 
 Caterpillar knows all the error codes, which is more than most of us do.
 
