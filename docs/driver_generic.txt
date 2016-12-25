@@ -124,7 +124,7 @@ SEL-2407 in one of its development labs.
 *http://www.meinberg.de[Meinberg] https://www.meinbergglobal.com/english/archive/pzf511.htm[PZF5xx receiver family] (FM demodulation/TCXO / 50&mu;s)*
 +
 WARNING: This equipment is no longer available for commercial sale, and
-support may be removed in the future.  See: 
+support may be removed in the future.  See:
 https://www.ntpsec.org/removal-plan.html[Feature removals]
 
 * *refclock generic subtype 1*
@@ -132,7 +132,7 @@ https://www.ntpsec.org/removal-plan.html[Feature removals]
 *http://www.meinberg.de[Meinberg] https://www.meinbergglobal.com/english/archive/pzf511.htm[PZF5xx receiver family] (FM demodulation/OCXO / 50&mu;s)*
 +
 WARNING: This equipment is no longer available for commercial sale, and
-support may be removed in the future.  See: 
+support may be removed in the future.  See:
 https://www.ntpsec.org/removal-plan.html[Feature removals]
 
 image::pic/pzf511.jpg[http://www.meinberg.de/english/products/pzf-eurocard.htm]
@@ -161,7 +161,7 @@ that comes with the Meinberg driver package.
 http://www.elv.de/[ELV] *DCF7000 (sloppy AM demodulation / 50ms)*
 +
 WARNING: This equipment is no longer available for commercial sale, and
-support may be removed in the future.  See: 
+support may be removed in the future.  See:
 https://www.ntpsec.org/removal-plan.html[Feature removals]
 
 * *refclock generic subtype 4*
@@ -169,7 +169,7 @@ https://www.ntpsec.org/removal-plan.html[Feature removals]
 *Walter Schmid DCF receiver Kit (AM demodulation / 1ms)*
 +
 WARNING: This equipment is no longer available for commercial sale, and
-support may be removed in the future.  See: 
+support may be removed in the future.  See:
 https://www.ntpsec.org/removal-plan.html[Feature removals]
 
 * *refclock generic subtype 5*
@@ -210,7 +210,7 @@ image:pic/igclock.gif[http://www.igel.de/eigelmn.html]
 *http://www.trimble.com[Trimble] ftp://ftp.trimble.com/pub/sct/embedded/bin/Data%20Sheets/SveeSix2.PDF[SVeeSix GPS receiver] TAIP protocol (GPS / <<1&mu;s)*
 +
 WARNING: This equipment is no longer available for commercial sale, and
-support may be removed in the future.  See: 
+support may be removed in the future.  See:
 https://www.ntpsec.org/removal-plan.html[Feature removals]
 
 * *refclock generic subtype 10*
@@ -218,7 +218,7 @@ https://www.ntpsec.org/removal-plan.html[Feature removals]
 *http://www.trimble.com[Trimble] ftp://ftp.trimble.com/pub/sct/embedded/bin/Data%20Sheets/SveeSix2.PDF[SVeeSix GPS receiver] (GPS / <<1&mu;s) (no kernel support yet)*
 +
 WARNING: This equipment is no longer available for commercial sale, and
-support may be removed in the future.  See: 
+support may be removed in the future.  See:
 https://www.ntpsec.org/removal-plan.html[Feature removals]
 +
 image:pic/pd_om011.gif[http://www.trimble.com/cgi/omprod.cgi/pd_om011.html]
@@ -365,7 +365,7 @@ First let ntpq display the table of associations:
   ===========================================================
   1   19556  9154   yes   yes  none  falsetick reachable   5
   2   19557  9435   yes   yes  none  candidat  clock expt  3
-  3   19558  9714   yes   yes  none  pps.peer  reachable   1          
+  3   19558  9714   yes   yes  none  pps.peer  reachable   1
 -------------------------------------------------------------
 
 
@@ -375,14 +375,14 @@ several queries.
 
 ----------------------------------------
   ntpq> raw
-  Output set to raw        
+  Output set to raw
 ----------------------------------------
 
 Use the cv command to read the list of clock variables of a selected
 association:
 
 ----------------------------------------
-  ntpq> cv 19557 clock_var_list         
+  ntpq> cv 19557 clock_var_list
 ----------------------------------------
 
 The long output of the command above looks similar to:
@@ -394,14 +394,14 @@ The long output of the command above looks similar to:
   refclock_format,refclock_states,refclock_id,refclock_iomode,refclock_driver_version,
   meinberg_gps_status,gps_utc_correction,gps_message,meinberg_antenna_status,gps_tot_51,
   gps_tot_63,gps_t0a,gps_cfg[1],gps_health[1],gps_cfg[2],gps_health[2],gps_cfg[3],
-  gps_health[3],gps_cfg[4],gps_health[4],gps_cfg[5]"        
+  gps_health[3],gps_cfg[4],gps_health[4],gps_cfg[5]"
 ----------------------------------------
 
 Then use the cv command again to list selected clock variables. The
 following command must be entered as a single line:
 
 ----------------------------------------
-  ntpq> cv 19557 refclock_status,refclock_format,refclock_states,refclock_id,    refclock_iomode,refclock_driver_version,meinberg_gps_status,gps_utc_correction,    gps_message,meinberg_antenna_status,gps_tot_51,gps_tot_63,gps_t0a,gps_cfg[1],    gps_health[1],gps_cfg[2],gps_health[2],gps_cfg[3],gps_health[3],gps_cfg[4],    gps_health[4],gps_cfg[5]        
+  ntpq> cv 19557 refclock_status,refclock_format,refclock_states,refclock_id,    refclock_iomode,refclock_driver_version,meinberg_gps_status,gps_utc_correction,    gps_message,meinberg_antenna_status,gps_tot_51,gps_tot_63,gps_t0a,gps_cfg[1],    gps_health[1],gps_cfg[2],gps_health[2],gps_cfg[3],gps_health[3],gps_cfg[4],    gps_health[4],gps_cfg[5]
 ----------------------------------------
 
 The output of the command above is wrapped around depending on the
@@ -428,7 +428,7 @@ screen width and looks similar to:
   gps_cfg[2]="[0x0] BLOCK I", gps_health[2]="[0x3f] PARITY;MULTIPLE ERRS",
   gps_cfg[3]="[0x9] BLOCK II", gps_health[3]="[0x0] OK;SIGNAL OK",
   gps_cfg[4]="[0x9] BLOCK II", gps_health[6]="[0x0] OK;SIGNAL OK",
-  gps_cfg[5]="[0x9] BLOCK II"          
+  gps_cfg[5]="[0x9] BLOCK II"
 ----------------------------------------
 
 == Driver Options ==
