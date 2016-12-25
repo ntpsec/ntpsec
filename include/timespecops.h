@@ -337,7 +337,7 @@ lfp_intv_to_tspec(
 		L_NEG(&absx);	
 	}
 	out.tv_nsec = FTOTVN(lfpfrac(absx));
-	out.tv_sec = absx.l_i;
+	out.tv_sec = lfpsint(absx);
 	if (neg) {
 		out.tv_sec = -out.tv_sec;
 		out.tv_nsec = -out.tv_nsec;

@@ -1801,7 +1801,7 @@ eval_gps_time(
 
 	/* merge in fractional offset */
 	retv = tspec_intv_to_lfp(*tofs);
-	gps_sec += retv.l_i;
+	gps_sec += lfpsint(retv);
 
 	/* If we fully trust the GPS receiver, just combine days and
 	 * seconds and be done. */

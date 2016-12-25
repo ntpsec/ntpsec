@@ -337,7 +337,7 @@ ntp_monitor(
 		L_SUB(&interval_fp, &mon->last);
 		/* add one-half second to round up */
 		L_ADDUF(&interval_fp, 0x80000000);
-		interval = interval_fp.l_i;
+		interval = lfpsint(interval_fp);
 		mon->last = rbufp->recv_time;
 		NSRCPORT(&mon->rmtadr) = NSRCPORT(&rbufp->recv_srcadr);
 		mon->count++;
@@ -434,7 +434,7 @@ ntp_monitor(
 			L_SUB(&interval_fp, &oldest->last);
 			/* add one-half second to round up */
 			L_ADDUF(&interval_fp, 0x80000000);
-			oldest_age = interval_fp.l_i;
+			oldest_age = lfpsint(interval_fp);
 		}
 		/* note -1 is legal for mru_maxage (disables) */
 		if (oldest != NULL && mru_maxage < oldest_age) {

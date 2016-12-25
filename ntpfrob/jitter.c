@@ -53,10 +53,10 @@ get_clocktime(
 	dtemp += sys_residual;
 	if (dtemp >= 1) {
 		dtemp -= 1;
-		now->l_i++;
+		setlfpsint(*now, lfpsint(*now) + 1);
 	} else if (dtemp < -1) {
 		dtemp += 1;
-		now->l_i--;
+		setlfpsint(*now, lfpsint(*now) - 1);
 	}
 	dtemp *= FRAC;
 	setlfpfrac(*now, (uint32_t)dtemp);

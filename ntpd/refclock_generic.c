@@ -3233,7 +3233,7 @@ parse_process(
 	l_fp off, rectime, reftime;
 	double fudge;
 
-	/* silence warning: 'off.Ul_i.Xl_i' may be used uninitialized in this function */
+	/* silence warning: integral part may be used uninitialized in this function */
 	ZERO(off);
 
 	/*
@@ -3509,7 +3509,7 @@ parse_process(
 #endif
 		if (PARSE_TIMECODE(parsetime->parse_state))
 		{
-			if (M_ISGEQ(off.l_i, lfpfrac(off), -1, 0x80000000) &&
+			if (M_ISGEQ(lfpsint(off), lfpfrac(off), -1, 0x80000000) &&
 			    M_ISGEQ(0, 0x7fffffff, off.l_i, lfpfrac(off)))
 			{
 				fudge = ppsphaseadjust; /* pick PPS fudge factor */

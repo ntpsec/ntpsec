@@ -1773,9 +1773,9 @@ gpsd_parse(
 		l_fp diff;
 		diff = up->ibt_local;
 		L_SUB(&diff, &up->pps_local);
-		if (diff.l_i > 0)
+		if (lfpsint(diff) > 0)
 			up->fl_pps = 0; /* pps too old */
-		else if (diff.l_i < 0)
+		else if (lfpsint(diff) < 0)
 			up->fl_ibt = 0; /* serial data too old */
 	}
 
