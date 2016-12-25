@@ -76,7 +76,7 @@ filegen loopstats file loopstats type day enable
 filegen peerstats file peerstats type day enable
 filegen clockstats file clockstats type day enable
 
-logfile /var/log/ntpd.log  
+logfile /var/log/ntpd.log
 logconfig =syncall +clockall +peerall +sysall
 ------------------------------------------------------------------
 
@@ -86,9 +86,9 @@ diagnostics useful for tuning your time service.
 Your security/access section will almost always look a lot like this:
 
 ------------------------------------------------------------------
-restrict default kod limited nomodify nopeer noquery  
+restrict default kod limited nomodify nopeer noquery
 restrict -6 default kod limited nomodify nopeer noquery
-restrict 127.0.0.1  
+restrict 127.0.0.1
 restrict -6 ::1
 ------------------------------------------------------------------
 
@@ -221,7 +221,7 @@ HOWTO].
 [[dhcp]]
 == Special considerations when using DHCP ==
 
-If your machine uses DHCP to get a dynamic IP address from your ISP, 
+If your machine uses DHCP to get a dynamic IP address from your ISP,
 that handshake may provide you with a list of NTP servers.
 Suspect this if, when you look at your ntp.conf, you
 see server domain names obviously belonging to your ISP or

@@ -2,7 +2,7 @@
 
 The parse driver currently supports several clocks with different query
 mechanisms. In order for you to find a sample that might be similar to a
-clock you might want to integrate into parse. I'll sum up the major
+clock you might want to integrate into parse, I'll sum up the major
 features of the clocks (this information is distributed in the
 parse/clk_*.c and ntpd/refclock_parse.c files).
 
@@ -22,12 +22,12 @@ have a pretty common output format in the stock version. In order to
 support NTP Meinberg was so kind to produce some special versions of the
 firmware for the use with NTP. So, if you are going to use a Meinberg
 clock please ask whether there is a special Uni Erlangen version. You
-can reach http://www.meinberg.de/[Meinberg] via the Web. Information can
+can reach https://www.meinberg.de/[Meinberg] via the Web. Information can
 also be ordered via eMail from
 mailto:info@meinberg.de[]
 
 General characteristics: +
-Meinberg clocks primarily output pulse per second and a describing
+Meinberg clocks primarily output one pulse per second and a describing
 ASCII string. This string can be produced in two modes: either upon the
 reception of a question mark or every second. NTP uses the latter
 mechanism. DCF77 AM clocks have a limited accuracy of a few
@@ -48,7 +48,6 @@ The preferred tty setting for Meinberg DCF77 receivers is 9600/7E2:
         IFLAG       (IGNBRK|IGNPAR|ISTRIP)
         OFLAG       0
         LFLAG       0
-        
 --------------------------------------------------
 
 The tty setting for Meinberg GPS16x/17x receivers is 19200/8N1:
@@ -58,7 +57,6 @@ The tty setting for Meinberg GPS16x/17x receivers is 19200/8N1:
         IFLAG       (IGNBRK|IGNPAR|ISTRIP)
         OFLAG       0
         LFLAG       0
-        
 ---------------------------------------------------
 
 All clocks should be run at datagram once per second. +
@@ -106,8 +104,8 @@ Format of the Uni Erlangen time string for PZF5xx receivers:
 
     t             = 'U' if UTC time is transmitted, else ' '
     u             = '#' for older PZF5xx receivers: no correlation, not synchronized
-                           '#' for PZF511 and newer: never synced since powerup
-                           ' ' if nothing of the above applies
+                     '#' for PZF511 and newer: never synced since powerup
+                     ' ' if none of the above applies
     v             = '*' if freewheeling based on internal quartz, else ' '
     x             = 'S' if daylight saving time is active, else ' '
     y             = '!' during the hour preceding start or end of daylight saving time, else ' '
@@ -163,7 +161,7 @@ codes, fixed format
 
 direct DCF77 code input
 
-In Europe it is relatively easy/cheap the receive the german time code
+In Europe it is relatively easy/cheap to receive the German time code
 transmitter DCF77. The simplest version to process its signal is to feed
 the 100/200ms pulse of the demodulated AM signal via a level converter
 to an RS232 port at 50Baud. parse/clk_rawdcf.c holds all necessary
@@ -238,7 +236,7 @@ encoding:
 Schmid clock: needs poll, binary input, end='\xFC', sync start
 
 The Schmid clock is a DCF77 receiver that sends a binary time code at
-the reception of a flag byte. The contents if the flag byte determined
+the reception of a flag byte. The contents of the flag byte determine
 the time code format. The binary time code is delimited by the byte
 0xFC.
 
@@ -334,7 +332,7 @@ GmbH, Department: ND250 A Joint venture of Daimler-Benz Aerospace and
 Nortel.
 
 --------------------------------------
- hopf Funkuhr 6021 
+ hopf Funkuhr 6021
       used with 9600,8N1,
       UTC via serial line
       "Sekundenvorlauf" ON
@@ -343,7 +341,6 @@ Nortel.
       output time and date
       transmit with control characters
       transmit evry second
- 
 --------------------------------------
 
 Type 6021 Serial Output format
@@ -359,7 +356,7 @@ Type 6021 Serial Output format
   n = NL  (0x0A), r = CR  (0x0D)
 
   A B - Status and weekday
- 
+
   A - Status
 
       8 4 2 1
@@ -368,7 +365,7 @@ Type 6021 Serial Output format
       x x 0 x  - Wintertime
       x x 1 x  - Summertime
       0 0 x x  - Time/Date invalid
-      0 1 x x  - Internal clock used 
+      0 1 x x  - Internal clock used
       1 0 x x  - Radio clock
       1 1 x x  - Radio clock highprecision
 
@@ -392,20 +389,20 @@ The Computime receiver sends a datagram in the following format every
 minute
 
 ------------------------------------------------------------
-   
-   Timestamp    T:YY:MM:MD:WD:HH:MM:SSCRLF 
+
+   Timestamp    T:YY:MM:MD:WD:HH:MM:SSCRLF
    Pos          0123456789012345678901 2 3
-        0000000000111111111122 2 2
+                0000000000111111111122 2 2
    Parse        T:  :  :  :  :  :  :  \r\n
-   
-   T    Startcharacter "T" specifies start of the timestamp 
-   YY   Year MM Month 1-12 
-   MD   Day of the month 
-   WD   Day of week 
-   HH   Hour 
-   MM   Minute 
+
+   T    Startcharacter "T" specifies start of the timestamp
+   YY   Year MM Month 1-12
+   MD   Day of the month
+   WD   Day of week
+   HH   Hour
+   MM   Minute
    SS   Second
-   CR   Carriage return 
+   CR   Carriage return
    LF   Linefeed
 ------------------------------------------------------------
 
@@ -419,23 +416,23 @@ set up the clock to send a datagram every second. For use with this
 driver, the WHARTON 400A Series clock must be set-up as follows :
 
 --------------------------------------------
-                    Programmable    Selected
-                    Option No   Option
-    BST or CET display      3       9 or 11
-    No external controller      7       0
-    Serial Output Format 1      9       1
-    Baud rate 9600 bps      10      96
-    Bit length 8 bits       11      8
-    Parity even         12      E
+                          Programmable    Selected
+                          Option No       Option
+    BST or CET display      3             9 or 11
+    No external controller  7             0
+    Serial Output Format 1  9             1
+    Baud rate 9600 bps      10            96
+    Bit length 8 bits       11            8
+    Parity even             12            E
 --------------------------------------------
 
 WHARTON 400A Series output format 1 is as follows :
 
 --------------------------------------------------------------
    Timestamp    STXssmmhhDDMMYYSETX
-   Pos      0  12345678901234
-        0  00000000011111
-  
+   Pos          0  12345678901234
+                0  00000000011111
+
    STX  start transmission (ASCII 0x02)
    ETX  end transmission (ASCII 0x03)
    ss   Second expressed in reversed decimal (units then tens)
