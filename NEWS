@@ -119,7 +119,7 @@ or web chatter around it for a decade.
 
 The audio-path drivers (IRIG and CHU) have been removed. The class
 of hardware required to support them has gone essentially extinct due
-to cheap DSP. The complexity/maintainance overhead of this code
+to cheap DSP. The complexity/maintenance overhead of this code
 was high enough to motivate dropping them.
 
 This release contains a fix for one vulnerability inherited from
@@ -164,7 +164,7 @@ vulnerability: ephemeral association attack (Credit: Matthew van Gundy
 of Cisco ASIG) as a duplicate of CVE-2015-7974 (see 0.9.1 release
 notes) and it is WONTFIX for the time being: it is
 correct-but-unfortunate behavior consequent to confusing and
-inflexible semantics of ntp.conf's acess control language, and we
+inflexible semantics of ntp.conf's access control language, and we
 will address it with a future redesign effort. NTP Classic has
 partially addressed this pair of issues by extending the syntax of
 ntp.keys to support IP ACLing. We are not currently aware of any
