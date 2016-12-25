@@ -64,7 +64,8 @@ Palisade's external event input with 40 nanosecond resolution is
 utilized by the Trimble NTP driver for asynchronous precision time
 transfer.
 
-No user initialization of the receiver is required. This driver is compatible with the following versions of Palisade:
+No user initialization of the receiver is required. This driver is
+compatible with the following versions of Palisade:
 
 [width="50%",cols="<34%,<33%,<33%",align="center",frame="none",grid="none"]
 |======================================================
@@ -74,8 +75,10 @@ No user initialization of the receiver is required. This driver is compatible wi
 | 7.12     | Yes          | 38158-00
 |======================================================
 
-Note: When using Palisade 26664-00, you must set the +flag2+ option to 1 in
-*{ntpconf}*. See link:#Configuration[configuration].
+When using Palisade 26664-00, you must set the +flag2+ option to
+1 in {ntpconf}. 
+
+See Configuration[configuration].
 
 == GPS Installation ==
 
@@ -331,17 +334,17 @@ Bit 7: (1) Leap In Progress. Only set during the leap second.
 .*Packet 8F-0B (Comprehensive Timing Packet)*
 [width="50%",cols="<25%,<25%,<25%,<25%",frame="none",grid="none",style="verse"]
 |=========================================
-| Byte    | Item           | Type    | Meaning 
+| Byte    | Item           | Type    | Meaning
 | 0       | Sub-Packet ID  | BYTE    | Subcode 0x0B
 | 1 - 2   | Event Count    | INTEGER | External event count recorded (0 = PPS)
 | 3 - 10  | UTC / GPS TOW  | DOUBLE  | UTC / GPS time of week (seconds)
 | 11      | Date           | BYTE    | Day of Month
 | 12      | Month          | BYTE    | Month of Event
 | 13 - 14 | Year           | INT     | Year of event
-| 15      | Receiver Mode  | BYTE    | Receiver operating dimensions: 
-   0: Horizontal (2D) 
-   1: Full Position (3D) 
-   2: Single Satellite (0D) 
+| 15      | Receiver Mode  | BYTE    | Receiver operating dimensions:
+   0: Horizontal (2D)
+   1: Full Position (3D)
+   2: Single Satellite (0D)
    3: Automatic (2D / 3D)
    4: DGPS reference
    5: Clock hold (2D)
@@ -386,12 +389,12 @@ Thunderbolt can output 2 synchronous packets.
 [width="50%",frame="none",grid="none",style="verse",options="header"]
 |=================================================================================
 |Byte  | Bit | Item                 | Type     | Value    | Description
-| 0    |     | Subcode              | UINT8    |          | 0xAC 
-| 1    |     | Receiver Mode        | UINT8    | 0        | Automatic (2D/3D)      
+| 0    |     | Subcode              | UINT8    |          | 0xAC
+| 1    |     | Receiver Mode        | UINT8    | 0        | Automatic (2D/3D)
 |      |     |                      |          | 1        | Single Satellite (Time)
 |      |     |                      |          | 2        | Horizontal (2D)
-|      |     |                      |          | 3        | Full Position (3D) 
-|      |     |                      |          | 4        | DGPS Reference  
+|      |     |                      |          | 3        | Full Position (3D)
+|      |     |                      |          | 4        | DGPS Reference
 |      |     |                      |          | 5        | Clock Hold (2D)
 |      |     |                      |          | 6        | Overdetermined Clock
 | 2    |     | Disciplining Mode    | UINT8    | 0        | Normal
