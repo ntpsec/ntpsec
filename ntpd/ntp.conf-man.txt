@@ -61,8 +61,7 @@ some weird and even destructive behavior.
 In contexts where a host name is expected, a `-4`or `--ipv4`
 qualifier preceding the host name forces DNS resolution to the IPv4
 namespace, while a `-6` or `--ipv6' qualifier forces DNS resolution to
-the IPv6 namespace. See IPv6 references for the equivalent classes for
-that address family.
+the IPv6 namespace.
 
 include::../docs/includes/assoc-commands.txt[]
 
