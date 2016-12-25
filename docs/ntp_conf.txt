@@ -186,7 +186,7 @@ with the non-terminals. The types of the non-terminals are specified
 with a +%type+ declaration as shown below:
 
 -----------------------
-%type <Queue> address_list   
+%type <Queue> address_list
 %type <Integer> boolean
 -----------------------
 

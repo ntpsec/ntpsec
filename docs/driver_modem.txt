@@ -172,7 +172,7 @@ David L. Mills <mills@udel.edu>
 
 == Additional Information ==
 
-link:refclock.html[Reference Clock Drivers] 
+link:refclock.html[Reference Clock Drivers]
 
 '''''
 

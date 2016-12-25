@@ -3,7 +3,7 @@
 Every six months the International Earth Rotation Service
 (IERS) issues a bulletin announcing if there will be a leap second in
 the Universal Coordinated Time (UTC) timescale. Historically,
-only insertions have occurred, about every eighteen months. The changes 
+only insertions have occurred, about every eighteen months. The changes
 have been at the end of the last day of June or December; but, in principle,
 it could happen at the end of any month. While these bulletins are
 available on the Internet at https://www.iers.org[www.iers.org], advance
