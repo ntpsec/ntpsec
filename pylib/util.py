@@ -475,7 +475,7 @@ class MRUSummary:
     "Reusable class for MRU entry summary generation."
     def __init__(self, showhostnames):
         self.showhostnames = showhostnames	# If false, display numeric IPs
-        self.now = time.time()
+        self.now = None
         self.logfp = sys.stderr
         self.debug = 0
 
