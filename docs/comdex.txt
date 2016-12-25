@@ -3,7 +3,7 @@
 [cols="10%,90%",frame="none",grid="none",style="verse"]
 |==============================
 |image:pic/alice38.gif[]|
-http://www.eecis.udel.edu/%7emills/pictures.html[from 'Alice's Adventures in Wonderland', Lewis Carrol]
+{millshome}pictures.html[from 'Alice's Adventures in Wonderland', Lewis Carrol]
 
 The Mad Hatter says "Bring it on".
 

@@ -1,5 +1,5 @@
 === External Links ===
-* http://www.eecis.udel.edu/~mills/book.html[Computer Network Time Synchronization - The Network Time Protocol (book)]
+* {millshome}book.html[Computer Network Time Synchronization - The Network Time Protocol (book)]
 * {project-website}/index.html[NTPsec (home page)]
 * {millshome}ntp.html[NTP Research Project (home page)]
 * {millshome}exec.html[Executive Summary: Computer Network Time Synchronization]

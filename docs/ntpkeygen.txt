@@ -3,7 +3,7 @@
 [cols="10%,90%",frame="none",grid="none",style="verse"]
 |==============================
 |image:pic/alice23.gif[]|
-http://www.eecis.udel.edu/%7emills/pictures.html[from 'Alice's Adventures in Wonderland', Lewis Carroll]
+{millshome}pictures.html[from 'Alice's Adventures in Wonderland', Lewis Carroll]
 
 Alice holds the key.
 

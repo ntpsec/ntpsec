@@ -3,7 +3,7 @@
 [cols="10%,90%",frame="none",grid="none",style="verse"]
 |==============================
 |image:pic/pogo4.gif[]|
-http://www.eecis.udel.edu/%7emills/pictures.html[from 'Pogo', Walt Kelly]
+{millshome}pictures.html[from 'Pogo', Walt Kelly]
 
 You need a little magic.
 
