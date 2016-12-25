@@ -336,7 +336,7 @@ stats_config(
 				      "%d leap %s %s %s",
 				      lsig.taiof,
 				      fstostr(lsig.ttime),
-				      leapsec_expired(now.l_ui, NULL)
+				      leapsec_expired(lfpuint(now), NULL)
 					  ? "expired"
 					  : "expires",
 				      fstostr(lsig.etime));
@@ -345,7 +345,7 @@ stats_config(
 			/* force an immediate daily expiration check of
 			 * the leap seconds table
 			 */
-			check_leap_expiration(true, now.l_ui, &ttnow);
+			check_leap_expiration(true, lfpuint(now), &ttnow);
 		}
 		break;
 
@@ -381,9 +381,9 @@ record_peer_stats(
 		return;
 
 	get_systime(&now);
-	filegen_setup(&peerstats, now.l_ui);
-	day = now.l_ui / 86400 + MJD_1900;
-	now.l_ui %= 86400;
+	filegen_setup(&peerstats, lfpuint(now));
+	day = lfpuint(now) / 86400 + MJD_1900;
+	lfpuint(now) %= 86400;
 	if (peerstats.fp != NULL) {
 		fprintf(peerstats.fp,
 		    "%lu %s %s %x %.9f %.9f %.9f %.9f\n", day,
@@ -432,9 +432,9 @@ record_loop_stats(
 		return;
 
 	get_systime(&now);
-	filegen_setup(&loopstats, now.l_ui);
-	day = now.l_ui / 86400 + MJD_1900;
-	now.l_ui %= 86400;
+	filegen_setup(&loopstats, lfpuint(now));
+	day = lfpuint(now) / 86400 + MJD_1900;
+	lfpuint(now) %= 86400;
 	if (loopstats.fp != NULL) {
 		fprintf(loopstats.fp, "%lu %s %.9f %.3f %.9f %.6f %d\n",
 		    day, ulfptoa(&now, 3), offset, freq * 1e6, jitter,
@@ -466,9 +466,9 @@ record_clock_stats(
 		return;
 
 	get_systime(&now);
-	filegen_setup(&clockstats, now.l_ui);
-	day = now.l_ui / 86400 + MJD_1900;
-	now.l_ui %= 86400;
+	filegen_setup(&clockstats, lfpuint(now));
+	day = lfpuint(now) / 86400 + MJD_1900;
+	lfpuint(now) %= 86400;
 	if (clockstats.fp != NULL) {
 		fprintf(clockstats.fp, "%lu %s %s %s\n", day,
 		    ulfptoa(&now, 3), peerlabel(peer), text);
@@ -539,9 +539,9 @@ record_raw_stats(
 		return;
 
 	get_systime(&now);
-	filegen_setup(&rawstats, now.l_ui);
-	day = now.l_ui / 86400 + MJD_1900;
-	now.l_ui %= 86400;
+	filegen_setup(&rawstats, lfpuint(now));
+	day = lfpuint(now) / 86400 + MJD_1900;
+	lfpuint(now) %= 86400;
 	if (rawstats.fp != NULL) {
 		fprintf(rawstats.fp, "%lu %s %s %s %s %s %s %s %d %d %d %d %d %d %.6f %.6f %s %d\n",
 		    day, ulfptoa(&now, 3),
@@ -584,9 +584,9 @@ record_sys_stats(void)
 		return;
 
 	get_systime(&now);
-	filegen_setup(&sysstats, now.l_ui);
-	day = now.l_ui / 86400 + MJD_1900;
-	now.l_ui %= 86400;
+	filegen_setup(&sysstats, lfpuint(now));
+	day = lfpuint(now) / 86400 + MJD_1900;
+	lfpuint(now) %= 86400;
 	if (sysstats.fp != NULL) {
 		fprintf(sysstats.fp,
 		    "%lu %s %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu\n",
@@ -623,9 +623,9 @@ void record_use_stats(void)
 		return;
 
 	get_systime(&now);
-	filegen_setup(&usestats, now.l_ui);
-	day = now.l_ui / 86400 + MJD_1900;
-	now.l_ui %= 86400;
+	filegen_setup(&usestats, lfpuint(now));
+	day = lfpuint(now) / 86400 + MJD_1900;
+	lfpuint(now) %= 86400;
 	if (usestats.fp != NULL) {
 		double utime, stime;
 		getrusage(RUSAGE_SELF, &usage);
@@ -676,9 +676,9 @@ record_proto_stats(
 		return;
 
 	get_systime(&now);
-	filegen_setup(&protostats, now.l_ui);
-	day = now.l_ui / 86400 + MJD_1900;
-	now.l_ui %= 86400;
+	filegen_setup(&protostats, lfpuint(now));
+	day = lfpuint(now) / 86400 + MJD_1900;
+	lfpuint(now) %= 86400;
 	if (protostats.fp != NULL) {
 		fprintf(protostats.fp, "%lu %s %s\n", day,
 		    ulfptoa(&now, 3), str);
@@ -708,9 +708,9 @@ record_timing_stats(
 		return;
 
 	get_systime(&now);
-	filegen_setup(&timingstats, now.l_ui);
-	day = now.l_ui / 86400 + MJD_1900;
-	now.l_ui %= 86400;
+	filegen_setup(&timingstats, lfpuint(now));
+	day = lfpuint(now) / 86400 + MJD_1900;
+	lfpuint(now) %= 86400;
 	if (timingstats.fp != NULL) {
 		fprintf(timingstats.fp, "%lu %s %s\n", day, lfptoa(&now,
 		    3), text);
