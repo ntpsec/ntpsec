@@ -28,8 +28,7 @@
 
 l_fp
 mfp_mul(
-	int32_t    a_i,
-	uint32_t  a_f,
+	l_fp a_op,
 	int32_t    b_i,
 	uint32_t  b_f
 	)
@@ -40,6 +39,8 @@ mfp_mul(
   unsigned long b[4];			/* operand b */
   unsigned long c[6];			/* result c - 5 items for performance - see below */
   unsigned long carry;
+  int32_t   a_i = lfpsint(a_op);
+  uint32_t  a_f = lfpfrac(a_op);
   l_fp out;
   
   int neg = 0;
