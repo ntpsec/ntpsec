@@ -1232,6 +1232,7 @@ usage: config_from_file <configuration filename>
                     self.say(("=" * ntp.util.MRUSummary.width) + "\n")
                     # reversed puts most recent entries at the top if no sort=
                     # see sort comments in pylib/packet.py
+                    formatter.now = span.now
                     for entry in reversed(span.entries):
                         self.say(formatter.summary(entry) + "\n")
                     self.say("# Collected %d slots in %.3f seconds\n" \
