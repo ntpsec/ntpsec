@@ -392,6 +392,7 @@ refclock_process_f(
 	)
 {
 	l_fp offset, ltemp;
+	uint32_t sec;
 
 	/*
 	 * Compute the timecode timestamp from the days, hours, minutes,
@@ -402,9 +403,10 @@ refclock_process_f(
 	 * the timecode.
 	 */
 	if (!clocktime(pp->day, pp->hour, pp->minute, pp->second, GMT,
-		pp->lastrec.l_ui, &pp->yearstart, &offset.l_ui))
+		       lfpuint(pp->lastrec), &pp->yearstart, &sec))
 		return false;
 
+	setlfpuint(offset, sec);
 	setlfpfrac(offset, 0);
 	DTOLFP(pp->nsec / 1e9, &ltemp);
 	L_ADD(&offset, &ltemp);

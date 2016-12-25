@@ -487,16 +487,18 @@ true_receive(
 			l_fp   off;
 
 #ifdef CLOCK_PPS
+			uint32_t sec;
 			/*
 			 * find out what time it really is. Include
 			 * the count from the PCL720
 			 */
 			if (!clocktime(pp->day, pp->hour, pp->minute, 
-				       pp->second, GMT, pp->lastrec.l_ui, 
-				       &pp->yearstart, &off.l_ui)) {
+				       pp->second, GMT, lfpuint(pp->lastrec),
+				       &pp->yearstart, &sec)) {
 				refclock_report(peer, CEVNT_BADTIME);
 				return;
 			}
+			setlfpuint(off, sec);
 			setlfpfrac(off, 0);
 #endif
 
