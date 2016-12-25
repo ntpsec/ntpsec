@@ -1,4 +1,4 @@
-= ntprob(8) =
+= ntpfrob(8) =
 :doctype: manpage
 
 == NAME ==
