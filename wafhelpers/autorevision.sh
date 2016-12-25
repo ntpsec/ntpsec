@@ -69,7 +69,7 @@ EOF
 }
 
 # Config
-ARVERSION="1.18"
+ARVERSION="1.19"
 while getopts ":t:o:s:e:VfU" OPTION; do
 	case "${OPTION}" in
 		t)
@@ -117,9 +117,10 @@ elif [ ! -f "${CACHEFILE}" ] && [ "${CACHEFORCE}" = "1" ]; then
 	exit 1
 fi
 
-# Only use the local keyword if it is there (Solaris we are looking at
+# Only use the local keyword if it is there (ksh we are looking at
 # you).
-if command -v local > /dev/null 2>&1; then
+
+if [ "$(command -v local 2> /dev/null)" = "local" ]; then
 	LOCAL="local"
 elif command -v typeset > /dev/null 2>&1; then
 	LOCAL="typeset"
