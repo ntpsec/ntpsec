@@ -75,10 +75,10 @@ compatible with the following versions of Palisade:
 | 7.12     | Yes          | 38158-00
 |======================================================
 
-When using Palisade 26664-00, you must set the +flag2+ option to
-1 in {ntpconf}. 
+When using Palisade 26664-00, you must set the +flag2+ option
+to 1 in {ntpconf}. 
 
-See Configuration[configuration].
+See Configuration[[configuration]].
 
 == GPS Installation ==
 
