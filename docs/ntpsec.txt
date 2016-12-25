@@ -22,7 +22,7 @@ Accept no imitations.
 * link:#configuration[Configuration Improvements]
 * link:#other[Other user-visible changes]
 
-[[intro]] 
+[[intro]]
 == Introduction ==
 
 The design objectives of this distribution, NTPsec, are in
@@ -209,7 +209,7 @@ codebase has been outright removed, with less than 5% new code added.
   directory name of the last pushed file in the stack.  This means
   that you can run ntpd from any directory with "includefile foo"
   in /etc/ntp.conf finding /etc/foo rather than looking for foo in
-  ypur current directory.
+  your current directory.
 
 * It is now possible to set the peer maximum dispersion with "tos
   maxdisp". See RFC 5905 for discussion of this synchronization
