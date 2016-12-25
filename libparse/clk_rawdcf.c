@@ -509,7 +509,7 @@ calc_usecdiff(
 	l_fp delt;
 
 	delt = ref->fp;
-	delt.l_i -= offset;
+	setlfpsint(delt, lfpsint(delt) + offset);
 	L_SUB(&delt, &base->fp);
 	delta = lfp_stamp_to_tspec(delt, NULL);
 

@@ -224,7 +224,7 @@ cvt_trimtsip(
 				    if (fetch_ieee754(&bp, IEEE_SINGLE, &secs, trim_offsets) != IEEE_OK)
 					    return CVT_FAIL|CVT_BADFMT;
 
-				    if ((secs.l_i <= 0) ||
+				    if ((lfpsint(secs) <= 0) ||
 					(t->t_utcknown == 0))
 				    {
 					    clock_time->flags = PARSEB_POWERUP;
