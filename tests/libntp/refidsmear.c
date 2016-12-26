@@ -44,7 +44,7 @@ rtol(uint32_t r, const char *es)
 	snprintf(msg, 100, "rtol was called with r=%#.8x, es=%s", r, es);
 
 	l = convertRefIDToLFP(htonl(r));
-	as = lfptoa(&l, 8);
+	as = lfptoa(l, 8);
 
 	//printf("refid %#x, smear %s\n", r, as);
 
@@ -67,7 +67,7 @@ rtoltor(uint32_t er, const char *es)
 	snprintf(msg, 100, "rtoltor was called with er=%#.8x, es=%s", er, es);
 
 	l = convertRefIDToLFP(htonl(er));
-	as = lfptoa(&l, 8);
+	as = lfptoa(l, 8);
 
 	ar = convertLFPToRefID(l);
 

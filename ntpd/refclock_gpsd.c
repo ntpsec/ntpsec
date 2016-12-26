@@ -1727,7 +1727,7 @@ gpsd_parse(
 	const char * clsid;
 
         DPRINTF(2, ("%s: gpsd_parse: time %s '%.*s'\n",
-                    up->logname, ulfptoa(rtime, 6),
+                    up->logname, ulfptoa(*rtime, 6),
 		    up->buflen, up->buffer));
 
 	/* See if we can grab anything potentially useful. JSMN does not
