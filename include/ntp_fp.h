@@ -250,10 +250,6 @@ typedef uint32_t u_fp;
 #define L_ADDUF(r, uf)	M_ADDUF(lfpuint(*r), lfpfrac(*r), (uf))
 #define L_SUBUF(r, uf)	M_SUBUF(lfpuint(*r), lfpfrac(*r), (uf))
 #define	L_ADDF(r, f)	M_ADDF(lfpuint(*r), lfpfrac(*r), (f))
-#define	L_RSHIFT(v)	M_RSHIFT(lfpsint(*v), lfpfrac(*v))
-#define	L_RSHIFTU(v)	M_RSHIFTU(lfpuint(*v), lfpfrac(*v))
-#define	L_LSHIFT(v)	M_LSHIFT(lfpuint(*v), lfpfrac(*v))
-
 #define	L_CLR(v)	(setlfpuint(*v, 0), setlfpfrac(*v, 0))
 #define	L_ISNEG(v)	M_ISNEG(lfpuint(*v))
 #define L_ISZERO(v)	((lfpuint(*v) | lfpfrac(*v)) == 0)
