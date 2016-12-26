@@ -772,7 +772,7 @@ process_control(
 	rpkt.status = 0;
 	res_frags = 1;
 	res_offset = 0;
-	res_associd = htons(pkt->associd);
+	res_associd = ntohs(pkt->associd);
 	res_authenticate = false;
 	res_keyid = 0;
 	res_authokay = false;
