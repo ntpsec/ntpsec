@@ -192,20 +192,9 @@ typedef uint32_t u_fp;
 	(((uint32_t)((a_i) ^ 0x80000000) > (uint32_t)((b_i) ^ 0x80000000)) || \
 	  ((a_i) == (b_i) && ((uint32_t)(a_f)) > ((uint32_t)(b_f))))
 
-#define	M_ISGTU(a_i, a_f, b_i, b_f)	/* a > b unsigned */ \
-	(((uint32_t)(a_i)) > ((uint32_t)(b_i)) || \
-	  ((a_i) == (b_i) && ((uint32_t)(a_f)) > ((uint32_t)(b_f))))
-
-#define	M_ISHIS(a_i, a_f, b_i, b_f)	/* a >= b unsigned */ \
-	(((uint32_t)(a_i)) > ((uint32_t)(b_i)) || \
-	  ((a_i) == (b_i) && ((uint32_t)(a_f)) >= ((uint32_t)(b_f))))
-
 #define	M_ISGEQ(a_i, a_f, b_i, b_f)	/* a >= b signed */ \
 	(((uint32_t)((a_i) ^ 0x80000000) > (uint32_t)((b_i) ^ 0x80000000)) || \
 	  ((a_i) == (b_i) && (uint32_t)(a_f) >= (uint32_t)(b_f)))
-
-#define	M_ISEQU(a_i, a_f, b_i, b_f)	/* a == b unsigned */ \
-	((uint32_t)(a_i) == (uint32_t)(b_i) && (uint32_t)(a_f) == (uint32_t)(b_f))
 
 /*
  * Operations on the long fp format
@@ -221,11 +210,10 @@ typedef uint32_t u_fp;
 #define	L_ISNEG(v)	M_ISNEG(lfpuint(*v))
 #define L_ISZERO(v)	((lfpuint(*v) | lfpfrac(*v)) == 0)
 #define	L_ISGT(a, b)	M_ISGT(lfpsint(*a), lfpfrac(*a), lfpsint(*b), lfpfrac(*b))
-#define	L_ISGTU(a, b)	M_ISGTU(lfpuint(*a), lfpfrac(*a), lfpuint(*b), lfpfrac(*b))
-#define	L_ISHIS(a, b)	M_ISHIS(lfpuint(*a), lfpfrac(*a), lfpuint(*b), lfpfrac(*b))
+#define	L_ISGTU(a, b)	(lfp_to_uint64(*a) > lfp_to_uint64(*b))
 #define	L_ISGEQ(a, b)	M_ISGEQ(lfpuint(*a), lfpfrac(*a), lfpuint(*b), lfpfrac(*b))
-#define L_ISGEQU(a, b)  L_ISHIS(a, b)
-#define	L_ISEQU(a, b)	M_ISEQU(lfpuint(*a), lfpfrac(*a), lfpuint(*b), lfpfrac(*b))
+#define L_ISGEQU(a, b)  (lfp_to_uint64(*a) >= lfp_to_uint64(*b))
+#define	L_ISEQU(a, b)	(lfp_to_uint64(*a) == lfp_to_uint64(*b))
 
 /*
  * s_fp/double and u_fp/double conversions
