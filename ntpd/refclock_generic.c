@@ -3510,7 +3510,7 @@ parse_process(
 		if (PARSE_TIMECODE(parsetime->parse_state))
 		{
 			if (M_ISGEQ(lfpsint(off), lfpfrac(off), -1, 0x80000000) &&
-			    M_ISGEQ(0, 0x7fffffff, off.l_i, lfpfrac(off)))
+			    M_ISGEQ(0, 0x7fffffff, lfpsint(off), lfpfrac(off)))
 			{
 				fudge = ppsphaseadjust; /* pick PPS fudge factor */
 
