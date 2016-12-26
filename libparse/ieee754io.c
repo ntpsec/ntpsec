@@ -318,17 +318,19 @@ fetch_ieee754(
 	       */
 	      if (frac_offset > mbits)
 		{
-		  lfpp->l_ui = 0; /* only fractional number */
+		  setlfpuint(*lfpp, 0); /* only fractional number */
 		  frac_offset -= mbits + 1; /* will now contain right shift count - 1*/
 		  if (mbits > 31)
 		    {
-		      lfpp->l_uf   = mantissa_high << (63 - mbits);
-		      lfpp->l_uf  |= mantissa_low  >> (mbits - 33);
-		      lfpp->l_uf >>= frac_offset;
+		      uint32_t frac;
+		      frac   = mantissa_high << (63 - mbits);
+		      frac  |= mantissa_low  >> (mbits - 33);
+		      frac >>= frac_offset;
+		      setlfpfrac(*lfpp, frac);
 		    }
 		  else
 		    {
-		      lfpp->l_uf = mantissa_low >> frac_offset;
+		      setlfpfrac(*lfpp, mantissa_low >> frac_offset);
 		    }
 		}
 	      else
@@ -338,19 +340,17 @@ fetch_ieee754(
 		      /*
 		       * must split in high word
 		       */
-		      lfpp->l_ui  =  mantissa_high >> (frac_offset - 32);
-		      lfpp->l_uf  = (mantissa_high & ((1 << (frac_offset - 32)) - 1)) << (64 - frac_offset);
-		      lfpp->l_uf |=  mantissa_low  >> (frac_offset - 32);
+		      setlfpuint(*lfpp, mantissa_high >> (frac_offset - 32));
+		      setlfpfrac(*lfpp, ((mantissa_high & ((1 << (frac_offset - 32)) - 1)) << (64 - frac_offset)) | (mantissa_low  >> (frac_offset - 32)));
 		    }
 		  else
 		    {
 		      /*
 		       * must split in low word
 		       */
-		      lfpp->l_ui  =  mantissa_high << (32 - frac_offset);
-		      lfpp->l_ui |= (mantissa_low >> frac_offset) & ((1 << (32 - frac_offset)) - 1);
+			setlfpuint(*lfpp, (mantissa_high << (32 - frac_offset)) | (((mantissa_low >> frac_offset) & ((1 << (32 - frac_offset)) - 1))));
 		      /* coverity[large_shift] */
-		      lfpp->l_uf  = (mantissa_low & ((1 << frac_offset) - 1)) << (32 - frac_offset);
+		      setlfpfrac(*lfpp, (mantissa_low & ((1 << frac_offset) - 1)) << (32 - frac_offset));
 		    }
 		}
 	      
