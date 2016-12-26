@@ -618,9 +618,9 @@ handle_procpkt(
 	peer->rootdelay = scalbn((double)pkt->rootdelay, -16);
 	peer->rootdisp = scalbn((double)pkt->rootdisp, -16);
 	memcpy(&peer->refid, pkt->refid, REFIDLEN);
-	uint64_to_lfp(&peer->reftime, pkt->reftime);
-	uint64_to_lfp(&peer->rec, pkt->rec);
-	uint64_to_lfp(&peer->xmt, pkt->xmt);
+	peer->reftime = uint64_to_lfp(pkt->reftime);
+	peer->rec = uint64_to_lfp(pkt->rec);
+	peer->xmt = uint64_to_lfp(pkt->xmt);
 	peer->dst = rbufp->recv_time;
 
 	record_raw_stats(&peer->srcadr,
