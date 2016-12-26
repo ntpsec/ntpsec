@@ -51,9 +51,11 @@ static inline uint64_t lfp_to_uint64(const l_fp lfp) {
     return (uint64_t)lfpuint(lfp) << 32 | (uint64_t)lfpfrac(lfp);
 }
 
-static inline void uint64_to_lfp(l_fp *lfp, uint64_t x) {
-  setlfpuint(*lfp, x >> 32);
-  setlfpfrac(*lfp, x & 0xFFFFFFFFUL);
+static inline l_fp uint64_to_lfp(uint64_t x) {
+    l_fp fp;
+    setlfpuint(fp, x >> 32);
+    setlfpfrac(fp, x & 0xFFFFFFFFUL);
+    return fp;
 }
 
 /*
