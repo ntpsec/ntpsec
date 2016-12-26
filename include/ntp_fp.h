@@ -347,9 +347,9 @@ extern	bool	adj_systime	(double, int (*adjtime)(const struct timeval *, struct t
 
 #define	ufptoa(fpv, ndec)	dofptoa((fpv), false, (ndec), false)
 #define	ufptoms(fpv, ndec)	dofptoa((fpv), false, (ndec), true)
-#define	ulfptoa(fpv, ndec)	dolfptoa(fpv, 0, (ndec), 0)
-#define	ulfptoms(fpv, ndec)	dolfptoa(fpv, 0, (ndec), 1)
-#define	umfptoa(lfp, ndec)	dolfptoa((lfp), 0, (ndec), 0)
+#define	ulfptoa(fpv, ndec)	dolfptoa((fpv), false, (ndec), false)
+#define	ulfptoms(fpv, ndec)	dolfptoa((fpv), false, (ndec), true)
+#define	umfptoa(lfp, ndec)	dolfptoa((lfp), false, (ndec), false)
 
 /*
  * Optional callback from libntp step_systime() to ntpd.  Optional
