@@ -16,13 +16,14 @@
 
 char *
 dolfptoa(
-	uint32_t fpi,
-	uint32_t fpv,
+	l_fp lfp,
 	bool neg,
 	short ndec,
 	bool msec
 	)
 {
+	uint32_t fpi = lfpuint(lfp);
+	uint32_t fpv = lfpfrac(lfp);
 	uint8_t *cp, *cpend, *cpdec;
 	int dec;
 	uint8_t cbuf[24];
@@ -143,37 +144,33 @@ dolfptoa(
 
 char *
 mfptoa(
-	uint32_t	fpi,
-	uint32_t	fpf,
+	l_fp	lfp,
 	short	ndec
 	)
 {
-	bool	isneg;
+	bool	isneg = L_ISNEG(&lfp);
 
-	isneg = M_ISNEG(fpi);
 	if (isneg) {
-		M_NEG(fpi, fpf);
+		L_NEG(&lfp);
 	}
 
-	return dolfptoa(fpi, fpf, isneg, ndec, false);
+	return dolfptoa(lfp, isneg, ndec, false);
 }
 
 
 char *
 mfptoms(
-	uint32_t	fpi,
-	uint32_t	fpf,
+	l_fp	lfp,
 	short	ndec
 	)
 {
-	bool	isneg;
+	bool	isneg = L_ISNEG(&lfp);
 
-	isneg = M_ISNEG(fpi);
 	if (isneg) {
-		M_NEG(fpi, fpf);
+		L_NEG(&lfp);
 	}
 
-	return dolfptoa(fpi, fpf, isneg, ndec, true);
+	return dolfptoa(lfp, isneg, ndec, true);
 }
 
 

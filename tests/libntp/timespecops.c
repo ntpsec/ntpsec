@@ -83,7 +83,7 @@ static bool AssertFpClose(const l_fp m, const l_fp n, const l_fp limit)
 		return true;
 	}
 	else {
-		printf("m_expr which is %s \nand\nn_expr which is %s\nare not close; diff=%susec\n", lfptoa(&m, 10), lfptoa(&n, 10), lfptoa(&diff, 10)); 
+		printf("m_expr which is %s \nand\nn_expr which is %s\nare not close; diff=%susec\n", lfptoa(m, 10), lfptoa(n, 10), lfptoa(diff, 10));
 		return false;
 	}
 }

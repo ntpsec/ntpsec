@@ -1871,7 +1871,7 @@ local_input(
 								       "parse: local_receive: fd %d PPSAPI seq %ld - PPS %s\n",
 								       rbufp->fd,
 								       (long)pps_info.assert_sequence + (long)pps_info.clear_sequence,
-								       lfptoa(&parse->parseio.parse_dtime.parse_ptime.fp, 6));
+								       lfptoa(parse->parseio.parse_dtime.parse_ptime.fp, 6));
 							}
 #endif
 						}
@@ -3039,7 +3039,7 @@ parse_control(
 				off = parse->timedata.parse_stime.fp;
 				L_SUB(&off, &parse->timedata.parse_ptime.fp); /* true offset */
 				tt = add_var(&out->kv_list, 80, RO);
-				snprintf(tt, 80, "refclock_ppsskew=%s", lfptoms(&off, 6));
+				snprintf(tt, 80, "refclock_ppsskew=%s", lfptoms(off, 6));
 			}
 		}
 
@@ -3477,7 +3477,7 @@ parse_process(
 			       parse->peer->refclkunit,
 			       prettydate(&reftime),
 			       prettydate(&rectime),
-			       lfptoa(&off,6));
+			       lfptoa(off,6));
 #endif
 	}
 
@@ -3585,7 +3585,7 @@ parse_process(
 			parse->peer->refclkunit,
 			prettydate(&reftime),
 			prettydate(&rectime),
-			lfptoa(&off,6));
+			lfptoa(off,6));
 #endif
 
 
@@ -3880,9 +3880,9 @@ gps16x_message(
 
 					get_mbg_xyz(&bufp, xyz);
 					snprintf(buffer, sizeof(buffer), "gps_position(XYZ)=\"%s m, %s m, %s m\"",
-						 mfptoa(lfpuint(xyz[XP]), lfpfrac(xyz[XP]), 1),
-						 mfptoa(lfpuint(xyz[YP]), lfpfrac(xyz[YP]), 1),
-						 mfptoa(lfpuint(xyz[ZP]), lfpfrac(xyz[ZP]), 1));
+						 mfptoa(xyz[XP], 1),
+						 mfptoa(xyz[YP], 1),
+						 mfptoa(xyz[ZP], 1));
 
 					set_var(&parse->kv, buffer, sizeof(buffer), RO|DEF);
 				}
@@ -3896,9 +3896,9 @@ gps16x_message(
 					get_mbg_lla(&bufp, lla);
 
 					snprintf(buffer, sizeof(buffer), "gps_position(LLA)=\"%s deg, %s deg, %s m\"",
-						 mfptoa(lfpuint(lla[LAT]), lfpfrac(lla[LAT]), 4),
-						 mfptoa(lfpuint(lla[LON]), lfpfrac(lla[LON]), 4),
-						 mfptoa(lfpuint(lla[ALT]), lfpfrac(lla[ALT]), 1));
+						 mfptoa(lla[LAT], 4),
+						 mfptoa(lla[LON], 4),
+						 mfptoa(lla[ALT], 1));
 
 					set_var(&parse->kv, buffer, sizeof(buffer), RO|DEF);
 				}

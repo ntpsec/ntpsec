@@ -387,7 +387,7 @@ record_peer_stats(
 	if (peerstats.fp != NULL) {
 		fprintf(peerstats.fp,
 		    "%lu %s %s %x %.9f %.9f %.9f %.9f\n", day,
-		    ulfptoa(&now, 3), socktoa(&peer->srcadr), status, peer->offset,
+		    ulfptoa(now, 3), socktoa(&peer->srcadr), status, peer->offset,
 		    peer->delay, peer->disp, peer->jitter);
 		fflush(peerstats.fp);
 	}
@@ -437,7 +437,7 @@ record_loop_stats(
 	lfpuint(now) %= 86400;
 	if (loopstats.fp != NULL) {
 		fprintf(loopstats.fp, "%lu %s %.9f %.3f %.9f %.6f %d\n",
-		    day, ulfptoa(&now, 3), offset, freq * 1e6, jitter,
+		    day, ulfptoa(now, 3), offset, freq * 1e6, jitter,
 		    wander * 1e6, spoll);
 		fflush(loopstats.fp);
 	}
@@ -471,7 +471,7 @@ record_clock_stats(
 	lfpuint(now) %= 86400;
 	if (clockstats.fp != NULL) {
 		fprintf(clockstats.fp, "%lu %s %s %s\n", day,
-		    ulfptoa(&now, 3), peerlabel(peer), text);
+		    ulfptoa(now, 3), peerlabel(peer), text);
 		fflush(clockstats.fp);
 	}
 }
@@ -544,10 +544,10 @@ record_raw_stats(
 	lfpuint(now) %= 86400;
 	if (rawstats.fp != NULL) {
 		fprintf(rawstats.fp, "%lu %s %s %s %s %s %s %s %d %d %d %d %d %d %.6f %.6f %s %d\n",
-		    day, ulfptoa(&now, 3),
+		    day, ulfptoa(now, 3),
 		    socktoa(srcadr), dstadr ?  socktoa(dstadr) : "-",
-		    ulfptoa(t1, 9), ulfptoa(t2, 9),
-		    ulfptoa(t3, 9), ulfptoa(t4, 9),
+		    ulfptoa(*t1, 9), ulfptoa(*t2, 9),
+		    ulfptoa(*t3, 9), ulfptoa(*t4, 9),
 		    leap, version, mode, stratum, ppoll, precision,
 		    root_delay, root_dispersion, refid_str(refid, stratum),
 		    outcount);
@@ -590,7 +590,7 @@ record_sys_stats(void)
 	if (sysstats.fp != NULL) {
 		fprintf(sysstats.fp,
 		    "%lu %s %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu\n",
-		    day, ulfptoa(&now, 3), current_time - sys_stattime,
+		    day, ulfptoa(now, 3), current_time - sys_stattime,
 		    sys_received, sys_processed, sys_newversion,
 		    sys_oldversion, sys_restricted, sys_badlength,
 		    sys_badauth, sys_declined, sys_limitrejected,
@@ -637,7 +637,7 @@ void record_use_stats(void)
 		stime += usage.ru_stime.tv_sec -  oldusage.ru_stime.tv_sec;
 		fprintf(usestats.fp,
 		    "%lu %s %lu %.3f %.3f %lu %lu %lu %lu %lu %lu %lu %lu %lu\n",
-		    day, ulfptoa(&now, 3), current_time - use_stattime,
+		    day, ulfptoa(now, 3), current_time - use_stattime,
 		    utime, stime,
 		    usage.ru_minflt -  oldusage.ru_minflt,
 		    usage.ru_majflt -  oldusage.ru_majflt,
@@ -681,7 +681,7 @@ record_proto_stats(
 	lfpuint(now) %= 86400;
 	if (protostats.fp != NULL) {
 		fprintf(protostats.fp, "%lu %s %s\n", day,
-		    ulfptoa(&now, 3), str);
+		    ulfptoa(now, 3), str);
 		fflush(protostats.fp);
 	}
 }
@@ -712,7 +712,7 @@ record_timing_stats(
 	day = lfpuint(now) / 86400 + MJD_1900;
 	lfpuint(now) %= 86400;
 	if (timingstats.fp != NULL) {
-		fprintf(timingstats.fp, "%lu %s %s\n", day, lfptoa(&now,
+		fprintf(timingstats.fp, "%lu %s %s\n", day, lfptoa(now,
 		    3), text);
 		if (++flshcnt % 100 == 0)
 			fflush(timingstats.fp);

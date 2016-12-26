@@ -135,11 +135,13 @@ mfp_mul(
   setlfpfrac(out, f);
 
 #ifdef DEBUG
-  if (debug > 6)
+  if (debug > 6) {
+    l_fp b;
+    setlfpsint(b, b_i);
+    setlfpfrac(b, b_f);
     printf("mfp_mul: %s * %s => %s\n",
-	   mfptoa((unsigned long)a_i, a_f, 6),
-	   mfptoa((unsigned long)b_i, b_f, 6),
-	   mfptoa((unsigned long)i, f, 6));
+	   mfptoa(a_op, 6), mfptoa(b, 6), mfptoa(out, 6));
+  }
 #endif
   return out;
 }

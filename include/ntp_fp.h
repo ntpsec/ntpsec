@@ -209,7 +209,7 @@ typedef uint32_t u_fp;
 
 /*
  * Operations on the long fp format
- * FIXME: Using lfpuint(x) as rvalue, this will fail when rpresentation changes 
+ * FIXME: Using lfpuint(x) as rvalue, this will fail when representation changes.
  */
 #define	L_ADD(r, a)	M_ADD(lfpuint(*r), lfpfrac(*r), lfpuint(*a), lfpfrac(*a))
 #define	L_SUB(r, a)	M_SUB(lfpuint(*r), lfpfrac(*r), lfpuint(*a), lfpfrac(*a))
@@ -319,7 +319,9 @@ typedef uint32_t u_fp;
  * Prototypes
  */
 extern	char *	dofptoa		(u_fp, bool, short, bool);
-extern	char *	dolfptoa	(uint32_t, uint32_t, bool, short, bool);
+extern	char *	dolfptoa	(l_fp, bool, short, bool);
+extern	char *	mfptoa		(l_fp, short);
+extern	char *	mfptoms		(l_fp, short);
 
 extern	bool	atolfp		(const char *, l_fp *);
 extern	char *	fptoa		(s_fp, short);
@@ -340,14 +342,14 @@ extern	void	get_systime	(l_fp *);
 extern	bool	step_systime	(double, int (*settime)(struct timespec *));
 extern	bool	adj_systime	(double, int (*adjtime)(const struct timeval *, struct timeval *));
 
-#define	lfptoa(fpv, ndec)	mfptoa(lfpuint(*fpv), lfpfrac(*fpv), (ndec))
-#define	lfptoms(fpv, ndec)	mfptoms(lfpuint(*fpv), lfpfrac(*fpv), (ndec))
+#define	lfptoa(fpv, ndec)	mfptoa((fpv), (ndec))
+#define	lfptoms(fpv, ndec)	mfptoms((fpv), (ndec))
 
 #define	ufptoa(fpv, ndec)	dofptoa((fpv), false, (ndec), false)
 #define	ufptoms(fpv, ndec)	dofptoa((fpv), false, (ndec), true)
-#define	ulfptoa(fpv, ndec)	dolfptoa(lfpuint(*fpv), lfpfrac(*fpv), 0, (ndec), 0)
-#define	ulfptoms(fpv, ndec)	dolfptoa(lfpuint(*fpv), lfpfrac(*fpv), 0, (ndec), 1)
-#define	umfptoa(fpi, fpf, ndec) dolfptoa((fpi), (fpf), 0, (ndec), 0)
+#define	ulfptoa(fpv, ndec)	dolfptoa(fpv, 0, (ndec), 0)
+#define	ulfptoms(fpv, ndec)	dolfptoa(fpv, 0, (ndec), 1)
+#define	umfptoa(lfp, ndec)	dolfptoa((lfp), 0, (ndec), 0)
 
 /*
  * Optional callback from libntp step_systime() to ntpd.  Optional
