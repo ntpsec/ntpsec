@@ -157,20 +157,6 @@ typedef uint32_t u_fp;
 		(r_i) += (a_i) + ((uint32_t)(r_f) < add_t); \
 	} while (false)
 
-#define M_ADD3(r_o, r_i, r_f, a_o, a_i, a_f) /* r += a, three word */ \
-	do { \
-		uint32_t add_t, add_c; \
-		add_t  = (r_f); \
-		(r_f) += (a_f); \
-		add_c  = ((uint32_t)(r_f) < add_t); \
-		(r_i) += add_c; \
-		add_c  = ((uint32_t)(r_i) < add_c); \
-		add_t  = (r_i); \
-		(r_i) += (a_i); \
-		add_c |= ((uint32_t)(r_i) < add_t); \
-		(r_o) += (a_o) + add_c; \
-	} while (false)
-
 #define M_SUB(r_i, r_f, a_i, a_f)	/* r -= a */ \
 	do { \
 		uint32_t sub_t = (r_f); \
@@ -178,27 +164,8 @@ typedef uint32_t u_fp;
 		(r_i) -= (a_i) + ((uint32_t)(r_f) > sub_t); \
 	} while (false)
 
-#define	M_RSHIFTU(v_i, v_f)		/* v >>= 1, v is unsigned */ \
-	do { \
-		(v_f) = ((uint32_t)(v_f) >> 1) | ((uint32_t)(v_i) << 31);	\
-		(v_i) = ((uint32_t)(v_i) >> 1); \
-	} while (false)
-
-#define	M_RSHIFT(v_i, v_f)		/* v >>= 1, v is signed */ \
-	do { \
-		(v_f) = ((uint32_t)(v_f) >> 1) | ((uint32_t)(v_i) << 31);	\
-		(v_i) = ((uint32_t)(v_i) >> 1) | ((uint32_t)(v_i) & 0x80000000);	\
-	} while (false)
-
 #define	M_LSHIFT(v_i, v_f)		/* v <<= 1 */ \
 	do { \
-		(v_i) = ((uint32_t)(v_i) << 1) | ((uint32_t)(v_f) >> 31);	\
-		(v_f) = ((uint32_t)(v_f) << 1); \
-	} while (false)
-
-#define	M_LSHIFT3(v_o, v_i, v_f)	/* v <<= 1, with overflow */ \
-	do { \
-		(v_o) = ((uint32_t)(v_o) << 1) | ((uint32_t)(v_i) >> 31);	\
 		(v_i) = ((uint32_t)(v_i) << 1) | ((uint32_t)(v_f) >> 31);	\
 		(v_f) = ((uint32_t)(v_f) << 1); \
 	} while (false)
