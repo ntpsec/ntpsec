@@ -172,9 +172,9 @@ static bool l_isgtu(const l_fp first, const l_fp second)
 	return L_ISGTU(&first, &second);
 }
 
-static bool l_ishis(const l_fp first, const l_fp second)
+static bool l_isgequ(const l_fp first, const l_fp second)
 {
-	return L_ISHIS(&first, &second);
+	return L_ISGEQU(&first, &second);
 }
 
 static bool l_isgeq(const l_fp first, const l_fp second)
@@ -450,15 +450,15 @@ TEST(lfpfunc, UnsignedRelOps) {
 			TEST_ASSERT_TRUE (l_isgtu(op1, op2));
 			TEST_ASSERT_FALSE(l_isgtu(op2, op1));
 
-			TEST_ASSERT_TRUE (l_ishis(op1, op2));
-			TEST_ASSERT_FALSE(l_ishis(op2, op1));
+			TEST_ASSERT_TRUE (l_isgequ(op1, op2));
+			TEST_ASSERT_FALSE(l_isgequ(op2, op1));
 			break;
 		case 0:
 			TEST_ASSERT_FALSE(l_isgtu(op1, op2));
 			TEST_ASSERT_FALSE(l_isgtu(op2, op1));
 
-			TEST_ASSERT_TRUE (l_ishis(op1, op2));
-			TEST_ASSERT_TRUE (l_ishis(op2, op1));
+			TEST_ASSERT_TRUE (l_isgequ(op1, op2));
+			TEST_ASSERT_TRUE (l_isgequ(op2, op1));
 			break;
 		default:
 			TEST_FAIL_MESSAGE("unexpected UCMP result: ");
