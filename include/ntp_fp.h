@@ -159,13 +159,6 @@ typedef uint32_t u_fp;
 		(r_i) += (a_i) + ((uint32_t)(r_f) < add_t); \
 	} while (false)
 
-#define M_SUB(r_i, r_f, a_i, a_f)	/* r -= a */ \
-	do { \
-		uint32_t sub_t = (r_f); \
-		(r_f) -= (a_f); \
-		(r_i) -= (a_i) + ((uint32_t)(r_f) > sub_t); \
-	} while (false)
-
 #define	M_LSHIFT(v_i, v_f)		/* v <<= 1 */ \
 	do { \
 		(v_i) = ((uint32_t)(v_i) << 1) | ((uint32_t)(v_f) >> 31);	\
@@ -194,8 +187,8 @@ typedef uint32_t u_fp;
  * Operations on the long fp format
  * FIXME: Using lfpuint(x) as rvalue, this will fail when representation changes.
  */
-#define	L_ADD(r, a)	M_ADD(lfpuint(*r), lfpfrac(*r), lfpuint(*a), lfpfrac(*a))
-#define	L_SUB(r, a)	M_SUB(lfpuint(*r), lfpfrac(*r), lfpuint(*a), lfpfrac(*a))
+#define	L_ADD(r, a)	(*r) = uint64_to_lfp(lfp_to_uint64(*r)+lfp_to_uint64(*a))
+#define	L_SUB(r, a)	(*r) = uint64_to_lfp(lfp_to_uint64(*r)-lfp_to_uint64(*a))
 #define	L_NEG(v)	M_NEG(lfpuint(*v), lfpfrac(*v))
 #define L_ADDUF(r, uf)	M_ADDUF(lfpuint(*r), lfpfrac(*r), (uf))
 #define L_SUBUF(r, uf)	M_SUBUF(lfpuint(*r), lfpfrac(*r), (uf))
