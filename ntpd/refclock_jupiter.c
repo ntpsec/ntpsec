@@ -821,7 +821,7 @@ jupiter_receive(struct recvbuf *rbufp)
 			 */
 			L_SUB(&tstamp, &pp->lastrec);
 			if (!L_ISGEQ(&tstamp, &instance->limit))
-				++pp->lastrec.l_ui;
+				bumplfpuint(pp->lastrec, 1);
 
 			/* Parse timecode (even when there's no pps) */
 			last_timecode = instance->timecode;

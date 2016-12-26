@@ -546,7 +546,7 @@ snt_rawdcf(
 	{
 		parseio->parse_dtime.parse_stime = *ptime;
 
-		parseio->parse_dtime.parse_time.fp.l_ui++;
+		bumplfpuint(parseio->parse_dtime.parse_time.fp, 1);
 
 		parseprintf(DD_RAWDCF,("parse: snt_rawdcf: time stamp synthesized offset %d seconds\n", parseio->parse_index - 1));
 

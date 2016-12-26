@@ -42,8 +42,10 @@ typedef struct {
 #define setlfpfrac(n, v)	(n).l_uf = (v)
 #define lfpsint(n)		(n).l_i
 #define setlfpsint(n, v)	(n).l_i = (v)
+#define bumplfpsint(n, i)	(n).l_i += (i)
 #define lfpuint(n)		(n).l_ui
 #define setlfpuint(n, v)	(n).l_ui = (v)
+#define bumplfpuint(n, i)	(n).l_ui += (i)
 
 static inline uint64_t lfp_to_uint64(const l_fp *lfp) {
     return (uint64_t)lfpuint(*lfp) << 32 | (uint64_t)lfpfrac(*lfp);
