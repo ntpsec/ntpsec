@@ -510,7 +510,7 @@ handle_procpkt(
 	peer->flash &= ~PKT_BOGON_MASK;
 
 	/* Duplicate detection */
-	if(pkt->xmt == lfp_to_uint64(&peer->xmt)) {
+	if(pkt->xmt == lfp_to_uint64(peer->xmt)) {
 		peer->flash |= BOGON1;
 		peer->oldpkt++;
 		return;
@@ -527,7 +527,7 @@ handle_procpkt(
 			peer->flash |= BOGON3;
 			peer->bogusorg++;
 			return;
-		} else if(pkt->org != lfp_to_uint64(&peer->org)) {
+		} else if(pkt->org != lfp_to_uint64(peer->org)) {
 			peer->flash |= BOGON2;
 			peer->bogusorg++;
 			return;
@@ -578,15 +578,15 @@ handle_procpkt(
 	   avoid loss of precision.
 	*/
 
-	const uint64_t dst = lfp_to_uint64(&rbufp->recv_time);
+	const uint64_t dst = lfp_to_uint64(rbufp->recv_time);
 	const double t34 =
 	    (pkt->xmt >= dst) ?
 	    scalbn((double)(pkt->xmt - dst), -32) :
 	    -scalbn((double)(dst - pkt->xmt), -32);
 	const double t21 =
-	    (pkt->rec >= lfp_to_uint64(&peer->org)) ?
-	    scalbn((double)(pkt->rec - lfp_to_uint64(&peer->org)), -32) :
-	    -scalbn((double)(lfp_to_uint64(&peer->org) - pkt->rec), -32);
+	    (pkt->rec >= lfp_to_uint64(peer->org)) ?
+	    scalbn((double)(pkt->rec - lfp_to_uint64(peer->org)), -32) :
+	    -scalbn((double)(lfp_to_uint64(peer->org) - pkt->rec), -32);
 	const double theta = (t21 + t34) / 2.;
 	const double delta = fabs(t21 - t34);
 	const double epsilon = LOGTOD(sys_precision) +
