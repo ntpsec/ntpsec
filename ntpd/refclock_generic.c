@@ -1850,16 +1850,16 @@ local_input(
 							else
 							  pts = pps_info.assert_timestamp;
 
-							parse->parseio.parse_dtime.parse_ptime.fp.l_ui = (uint32_t) (pts.tv_sec + JAN_1970);
+							setlfpuint(parse->parseio.parse_dtime.parse_ptime.fp, (uint32_t) (pts.tv_sec + JAN_1970));
 
 							dtemp = (double) pts.tv_nsec / 1e9;
 							if (dtemp < 0.) {
 								dtemp += 1;
-								parse->parseio.parse_dtime.parse_ptime.fp.l_ui--;
+								bumplfpuint(parse->parseio.parse_dtime.parse_ptime.fp, -1);
 							}
 							if (dtemp > 1.) {
 								dtemp -= 1;
-								parse->parseio.parse_dtime.parse_ptime.fp.l_ui++;
+								bumplfpuint(parse->parseio.parse_dtime.parse_ptime.fp, 1);
 							}
 							setlfpfrac(parse->parseio.parse_dtime.parse_ptime.fp, (uint32_t)(dtemp * FRAC));
 
@@ -3522,15 +3522,15 @@ parse_process(
 				{
 					reftime = off = offset;
 					if (lfpfrac(reftime) & 0x80000000)
-						reftime.l_ui++;
+						bumplfpuint(reftime, 1);
 					setlfpfrac(reftime, 0);
 
 
 					/*
 					 * implied on second offset
 					 */
-					off.l_uf = ~off.l_uf; /* map [0.5..1[ -> [-0.5..0[ */
-					off.l_i = (off.l_uf & 0x80000000) ? -1 : 0; /* sign extend */
+					setlfpfrac(off, ~lfpfrac(off)); /* map [0.5..1[ -> [-0.5..0[ */
+					setlfpsint(off, (lfpfrac(off) & 0x80000000) ? -1 : 0); /* sign extend */
 				}
 				else
 				{
@@ -3555,14 +3555,14 @@ parse_process(
 			 */
 			off = offset;
 			reftime = offset;
-			if (reftime.l_uf & 0x80000000)
-				reftime.l_ui++;
-			reftime.l_uf = 0;
+			if (lfpfrac(reftime) & 0x80000000)
+				bumplfpuint(reftime, 1);
+			setlfpfrac(reftime, 0);
 			/*
 			 * implied on second offset
 			 */
-			off.l_uf = ~off.l_uf; /* map [0.5..1[ -> [-0.5..0[ */
-			off.l_i = (off.l_uf & 0x80000000) ? -1 : 0; /* sign extend */
+			setlfpfrac(off, ~lfpfrac(off)); /* map [0.5..1[ -> [-0.5..0[ */
+			setlfpsint(off, (lfpfrac(off) & 0x80000000) ? -1 : 0); /* sign extend */
 		}
 	}
 	else

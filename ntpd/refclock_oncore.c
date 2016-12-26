@@ -1758,7 +1758,7 @@ oncore_get_timestamp(
 
 	/* have time from UNIX origin, convert to NTP origin. */
 
-	ts.l_ui += JAN_1970;
+	bumplfpuint(ts, JAN_1970);
 	instance->pp->lastrec = ts;
 
 	/* print out information about this timestamp (long line) */
