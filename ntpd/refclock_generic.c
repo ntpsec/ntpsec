@@ -3509,6 +3509,9 @@ parse_process(
 #endif
 		if (PARSE_TIMECODE(parsetime->parse_state))
 		{
+#define	M_ISGEQ(a_i, a_f, b_i, b_f)	/* a >= b signed */ \
+	(((uint32_t)((a_i) ^ 0x80000000) > (uint32_t)((b_i) ^ 0x80000000)) || \
+	  ((a_i) == (b_i) && (uint32_t)(a_f) >= (uint32_t)(b_f)))
 			if (M_ISGEQ(lfpsint(off), lfpfrac(off), -1, 0x80000000) &&
 			    M_ISGEQ(0, 0x7fffffff, lfpsint(off), lfpfrac(off)))
 			{

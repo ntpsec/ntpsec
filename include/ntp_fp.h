@@ -188,14 +188,6 @@ typedef uint32_t u_fp;
 #define	M_ISNEG(v_i)			/* v < 0 */ \
 	(((v_i) & 0x80000000) != 0)
 
-#define	M_ISGT(a_i, a_f, b_i, b_f)	/* a > b signed */ \
-	(((uint32_t)((a_i) ^ 0x80000000) > (uint32_t)((b_i) ^ 0x80000000)) || \
-	  ((a_i) == (b_i) && ((uint32_t)(a_f)) > ((uint32_t)(b_f))))
-
-#define	M_ISGEQ(a_i, a_f, b_i, b_f)	/* a >= b signed */ \
-	(((uint32_t)((a_i) ^ 0x80000000) > (uint32_t)((b_i) ^ 0x80000000)) || \
-	  ((a_i) == (b_i) && (uint32_t)(a_f) >= (uint32_t)(b_f)))
-
 /*
  * Operations on the long fp format
  * FIXME: Using lfpuint(x) as rvalue, this will fail when representation changes.
@@ -209,9 +201,9 @@ typedef uint32_t u_fp;
 #define	L_CLR(v)	(setlfpuint(*v, 0), setlfpfrac(*v, 0))
 #define	L_ISNEG(v)	M_ISNEG(lfpuint(*v))
 #define L_ISZERO(v)	((lfpuint(*v) | lfpfrac(*v)) == 0)
-#define	L_ISGT(a, b)	M_ISGT(lfpsint(*a), lfpfrac(*a), lfpsint(*b), lfpfrac(*b))
+#define	L_ISGT(a, b)	((int64_t)lfp_to_uint64(*a) > (int64_t)lfp_to_uint64(*b))
 #define	L_ISGTU(a, b)	(lfp_to_uint64(*a) > lfp_to_uint64(*b))
-#define	L_ISGEQ(a, b)	M_ISGEQ(lfpuint(*a), lfpfrac(*a), lfpuint(*b), lfpfrac(*b))
+#define	L_ISGEQ(a, b)	((int64_t)lfp_to_uint64(*a) >= (int64_t)lfp_to_uint64(*b))
 #define L_ISGEQU(a, b)  (lfp_to_uint64(*a) >= lfp_to_uint64(*b))
 #define	L_ISEQU(a, b)	(lfp_to_uint64(*a) == lfp_to_uint64(*b))
 
