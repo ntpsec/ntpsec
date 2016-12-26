@@ -176,6 +176,7 @@ if __name__ == '__main__':
                     if showpeers and len(peers) == 0:
                         raise Fatal("no peers reported")
                     try:
+                        initphase = False
                         for (i, peer) in enumerate(peers):
                             if not showall and \
                                     not (ntp.control.CTL_PEER_STATVAL(peer.status)
@@ -199,19 +200,23 @@ if __name__ == '__main__':
                             stdscr.addstr(peer_report.summary(session.rstatus,
                                                     variables, peer.associd),
                                           hilite)
+                            if 'INIT' in variables['refid']:
+                                initphase = True
 
                         # Now the MRU report
                         limit = stdscr.getmaxyx()[0] - len(peers)
                         span = session.mrulist(variables={'recent':limit})
                         mru_report.now = time.time()
 
-                        # Nyquist-interval sampling - half the
-                        # smallest poll interval seen in the last
-                        # cycle, rounded up to 1 second.                        
-                        nyquist = int(min(peer_report.intervals()) / 2)
-                        nyquist = 1 if nyquist == 0 else nyquist
-                        if session.debug:
-                            session.logfp.write("nyquist is %d\n" % nyquist)
+                        # After init phase use Nyquist-interval
+                        # sampling - half the smallest poll interval
+                        # seen in the last cycle, rounded up to 1
+                        # second.
+                        if not initphase:
+                            nyquist = int(min(peer_report.intervals()) / 2)
+                            nyquist = 1 if nyquist == 0 else nyquist
+                            if session.debug:
+                                session.logfp.write("nyquist is %d\n" % nyquist)
                         # The status line
                         sl = statline(peer_report, mru_report, nyquist)
                         stdscr.addstr(sl + "\n", curses.A_REVERSE|curses.A_DIM)
