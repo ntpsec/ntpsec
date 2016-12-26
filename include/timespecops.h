@@ -316,7 +316,7 @@ tspec_stamp_to_lfp(
 	l_fp		y;
 
 	y = tspec_intv_to_lfp(x);
-	lfpuint(y) += JAN_1970;
+	bumplfpuint(y, JAN_1970);
 
 	return y;
 }
