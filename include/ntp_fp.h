@@ -165,12 +165,6 @@ typedef uint32_t u_fp;
 		(v_f) = ((uint32_t)(v_f) << 1); \
 	} while (false)
 
-#define	M_ADDUF(r_i, r_f, uf)		/* r += uf, uf is uint32_t fraction */ \
-	M_ADD((r_i), (r_f), 0, (uf))	/* let optimizer worry about it */
-
-#define	M_SUBUF(r_i, r_f, uf)		/* r -= uf, uf is uint32_t fraction */ \
-	M_SUB((r_i), (r_f), 0, (uf))	/* let optimizer worry about it */
-
 #define	M_ADDF(r_i, r_f, f)		/* r += f, f is a int32_t fraction */ \
 	do { \
 		int32_t add_f = (int32_t)(f); \
@@ -190,8 +184,8 @@ typedef uint32_t u_fp;
 #define	L_ADD(r, a)	(*r) = uint64_to_lfp(lfp_to_uint64(*r)+lfp_to_uint64(*a))
 #define	L_SUB(r, a)	(*r) = uint64_to_lfp(lfp_to_uint64(*r)-lfp_to_uint64(*a))
 #define	L_NEG(v)	M_NEG(lfpuint(*v), lfpfrac(*v))
-#define L_ADDUF(r, uf)	M_ADDUF(lfpuint(*r), lfpfrac(*r), (uf))
-#define L_SUBUF(r, uf)	M_SUBUF(lfpuint(*r), lfpfrac(*r), (uf))
+#define L_ADDUF(r, uf)	(*r) = uint64_to_lfp(lfp_to_uint64(*r) + (uf))
+#define L_SUBUF(r, uf)	(*r) = uint64_to_lfp(lfp_to_uint64(*r) - (uf))
 #define	L_ADDF(r, f)	M_ADDF(lfpuint(*r), lfpfrac(*r), (f))
 #define	L_CLR(v)	(setlfpuint(*v, 0), setlfpfrac(*v, 0))
 #define	L_ISNEG(v)	M_ISNEG(lfpuint(*v))
