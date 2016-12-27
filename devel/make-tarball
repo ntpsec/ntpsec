@@ -2,7 +2,8 @@
 #
 # Make a release tarball from current head.  If you give an argument, it
 # will override the version normally taken from ../VERSION.  Produces
-# a file named ntpsec-$V.tar.gz.
+# a file named ntpsec-$V.tar.gz.  The name of this tarball is echoed to
+# standard output as part of the success message.
 #
 # The tricky part is that it has to include the autorevision cache file,
 # which can't be checked into the repo or there'd be an infinite loop.
@@ -17,10 +18,8 @@ then
     exit 1
 fi
 
-if [ -r ../wafhelpers/.autorevision-cache ]
+if [ ! -r ../wafhelpers/.autorevision-cache ]
 then
-    echo "Autorevision cache file exists, OK"
-else
     echo "Autorevision cache file does not exist, waf build and try again"
     exit 1
 fi
@@ -34,11 +33,26 @@ else
     V=`cat ../VERSION`
 fi
 
+# Build the tarball
 rm -fr .tmp
 (cd ..; git ls-files; echo "wafhelpers/.autorevision-cache") >MANIFEST
 (cd ..; tar --transform="s:^:ntpsec-${V}/:" -T devel/MANIFEST -czf ntpsec-${V}.tar.gz)
 rm MANIFEST
 mv ../ntpsec-${V}.tar.gz .
 
+
+# Test-build from it, bailing out if we fail
+set -e
+mkdir .tmp
+cd .tmp
+tar -xzf ../ntpsec-${V}.tar.gz
+cd ntpsec-${V}
+./waf configure --refclock=all --enable-crypto --enable-doc
+./waf build
+cd ../..
+rm -fr .tmp
+
+echo ""
+echo "Success: " ntpsec-${V}.tar.gz
 # end
 
