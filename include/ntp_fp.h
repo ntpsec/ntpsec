@@ -146,12 +146,6 @@ typedef uint32_t u_fp;
 		(v_i) = ~(v_i) + ((v_f) == 0); \
 	} while (false)
 
-#define	M_NEGM(r_i, r_f, a_i, a_f)	/* r = -a */ \
-	do { \
-		(r_f) = ~(a_f) + 1u; \
-		(r_i) = ~(a_i) + ((r_f) == 0); \
-	} while (false)
-
 #define M_ADD(r_i, r_f, a_i, a_f)	/* r += a */ \
 	do { \
 		uint32_t add_t = (r_f); \
