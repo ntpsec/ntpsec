@@ -173,7 +173,7 @@ typedef uint32_t u_fp;
  */
 #define	L_ADD(r, a)	(*r) = uint64_to_lfp(lfp_to_uint64(*r)+lfp_to_uint64(*a))
 #define	L_SUB(r, a)	(*r) = uint64_to_lfp(lfp_to_uint64(*r)-lfp_to_uint64(*a))
-#define	L_NEG(v)	M_NEG(lfpuint(*v), lfpfrac(*v))
+#define	L_NEG(v)	(*v) = uint64_to_lfp(-1 * (int64_t)lfp_to_uint64(*v))
 #define L_ADDUF(r, uf)	(*r) = uint64_to_lfp(lfp_to_uint64(*r) + (uf))
 #define L_SUBUF(r, uf)	(*r) = uint64_to_lfp(lfp_to_uint64(*r) - (uf))
 #define	L_ADDF(r, f)	(*r) = uint64_to_lfp((int64_t)lfp_to_uint64(*r) + (int64_t)(uf))
