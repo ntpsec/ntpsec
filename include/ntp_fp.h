@@ -165,28 +165,18 @@ typedef uint32_t u_fp;
 		(v_f) = ((uint32_t)(v_f) << 1); \
 	} while (false)
 
-#define	M_ADDF(r_i, r_f, f)		/* r += f, f is a int32_t fraction */ \
-	do { \
-		int32_t add_f = (int32_t)(f); \
-		if (add_f >= 0) \
-			M_ADD((r_i), (r_f), 0, (uint32)( add_f)); \
-		else \
-			M_SUB((r_i), (r_f), 0, (uint32)(-add_f)); \
-	} while(0)
-
 #define	M_ISNEG(v_i)			/* v < 0 */ \
 	(((v_i) & 0x80000000) != 0)
 
 /*
  * Operations on the long fp format
- * FIXME: Using lfpuint(x) as rvalue, this will fail when representation changes.
  */
 #define	L_ADD(r, a)	(*r) = uint64_to_lfp(lfp_to_uint64(*r)+lfp_to_uint64(*a))
 #define	L_SUB(r, a)	(*r) = uint64_to_lfp(lfp_to_uint64(*r)-lfp_to_uint64(*a))
 #define	L_NEG(v)	M_NEG(lfpuint(*v), lfpfrac(*v))
 #define L_ADDUF(r, uf)	(*r) = uint64_to_lfp(lfp_to_uint64(*r) + (uf))
 #define L_SUBUF(r, uf)	(*r) = uint64_to_lfp(lfp_to_uint64(*r) - (uf))
-#define	L_ADDF(r, f)	M_ADDF(lfpuint(*r), lfpfrac(*r), (f))
+#define	L_ADDF(r, f)	(*r) = uint64_to_lfp((int64_t)lfp_to_uint64(*r) + (int64_t)(uf))
 #define	L_CLR(v)	(setlfpuint(*v, 0), setlfpfrac(*v, 0))
 #define	L_ISNEG(v)	M_ISNEG(lfpuint(*v))
 #define L_ISZERO(v)	((lfpuint(*v) | lfpfrac(*v)) == 0)
