@@ -146,19 +146,6 @@ typedef uint32_t u_fp;
 		(v_i) = ~(v_i) + ((v_f) == 0); \
 	} while (false)
 
-#define M_ADD(r_i, r_f, a_i, a_f)	/* r += a */ \
-	do { \
-		uint32_t add_t = (r_f); \
-		(r_f) += (a_f); \
-		(r_i) += (a_i) + ((uint32_t)(r_f) < add_t); \
-	} while (false)
-
-#define	M_LSHIFT(v_i, v_f)		/* v <<= 1 */ \
-	do { \
-		(v_i) = ((uint32_t)(v_i) << 1) | ((uint32_t)(v_f) >> 31);	\
-		(v_f) = ((uint32_t)(v_f) << 1); \
-	} while (false)
-
 #define	M_ISNEG(v_i)			/* v < 0 */ \
 	(((v_i) & 0x80000000) != 0)
 
