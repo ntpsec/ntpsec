@@ -349,7 +349,8 @@ extern u_int	mru_peakentries;	/* highest mru_entries */
 extern u_int	mru_initalloc;		/* entries to preallocate */
 extern u_int	mru_incalloc;		/* allocation batch factor */
 extern u_int	mru_mindepth;		/* preempt above this */
-extern int	mru_maxage;		/* for entries older than */
+extern int	mru_maxage;		/* recycle if older than this */
+extern int	mru_minage;		/* recycle if older than this & full */
 extern u_int	mru_maxdepth; 		/* MRU size hard limit */
 extern int	mon_age;		/* preemption limit */
 

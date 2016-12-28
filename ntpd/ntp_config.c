@@ -1592,6 +1592,10 @@ config_access(
 			mru_maxage = my_opt->value.i;
 			break;
 
+		case T_Minage:
+			mru_minage = my_opt->value.i;
+			break;
+
 		case T_Maxdepth:
 			if (0 <= my_opt->value.i)
 				mru_maxdepth = my_opt->value.u;

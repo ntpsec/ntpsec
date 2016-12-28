@@ -162,8 +162,9 @@ struct key_tok ntp_keywords[] = {
 { "initalloc",		T_Initalloc,		FOLLBY_TOKEN },
 { "initmem",		T_Initmem,		FOLLBY_TOKEN },
 { "mindepth",		T_Mindepth,		FOLLBY_TOKEN },
-{ "maxage",		T_Maxage,		FOLLBY_TOKEN },
 { "maxdepth",		T_Maxdepth,		FOLLBY_TOKEN },
+{ "maxage",		T_Maxage,		FOLLBY_TOKEN },
+{ "minage",		T_Minage,		FOLLBY_TOKEN },
 { "maxmem",		T_Maxmem,		FOLLBY_TOKEN },
 { "mru",		T_Mru,			FOLLBY_TOKEN },
 /* fudge_factor */
