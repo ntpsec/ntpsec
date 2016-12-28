@@ -3292,7 +3292,8 @@ process_routing_msgs(struct asyncio_reader *reader)
 	 */
 #ifdef HAVE_LINUX_RTNETLINK_H
 	for (nh = (struct nlmsghdr *)buffer;
-	     NLMSG_OK(nh, cnt);
+	     /* Avoid a sign comparison warning on some Linux distributions */
+	     NLMSG_OK(nh, (unsigned) cnt);
 	     nh = NLMSG_NEXT(nh, cnt)) {
 		msg_type = nh->nlmsg_type;
 #else
