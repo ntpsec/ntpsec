@@ -44,7 +44,6 @@ import os
 import socket
 import sys
 import subprocess
-import time
 import tempfile
 
 
@@ -487,7 +486,6 @@ file.</p>
         stats_f = VizStats(values_f, "Local Clock Frequency Offset", freq=1)
 
         stats = []
-        temps_data = ()
         plot_data_t = ''
         for key in tempslist:
             # speed up by only sending gnuplot the data it will actually use
@@ -561,7 +559,6 @@ file, and field 3 from the temp log .</p>
             return ''
 
         stats = []
-        temps_data = ()
         plot_data = ''
         for key in tempslist:
             # speed up by only sending gnuplot the data it will actually use
@@ -1369,7 +1366,6 @@ Python by ESR, concept and gnuplot code by Dan Drown.
         if 9 == args.debug_level:
             # crazy debug, also profile
             import cProfile
-            import pstats
             pr = cProfile.Profile()
             pr.enable()
 
