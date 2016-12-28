@@ -1291,6 +1291,7 @@ class ControlSession:
             else:
                 parms = ""
             req_buf += parms
+            first_time_only = "recent=%s" % variables.get("recent")
 
             while True:
                 # Request additions to the MRU list
@@ -1425,8 +1426,7 @@ class ControlSession:
 
 
                 # Only ship 'recent' on the first request
-                if 'recent' in parms:
-                    del parms['recent']
+                parms = parms.replace(first_time_only, "")
 
                 # Prepare next query with as many address and last-seen
                 # timestamps as will fit in a single packet.  A new nonce
