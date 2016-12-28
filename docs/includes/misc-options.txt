@@ -142,7 +142,7 @@ and so on is suppressed.
   same operation as the -l command line option.
 
 [[mru]]
-+mru+ [+maxdepth+ 'count' | +maxmem+ 'kilobytes' | +mindepth+ 'count' | +maxage+ 'seconds' | +initalloc+ 'count' | +initmem+ 'kilobytes' | +incalloc+ 'count' | +incmem+ 'kilobytes']::
++mru+ [+maxdepth+ 'count' | +maxmem+ 'kilobytes' | +mindepth+ 'count' | +maxage+ 'seconds' | +minage+ 'seconds' | +initalloc+ 'count' | +initmem+ 'kilobytes' | +incalloc+ 'count' | +incmem+ 'kilobytes']::
   Controls size limits of the monitoring facility Most Recently Used
   (MRU) list of client addresses, which is also
   used by the rate control facility.
@@ -159,12 +159,18 @@ and so on is suppressed.
     +mindepth+ entries, existing entries are never removed to make room
     for newer ones, regardless of their age. The default is 600 entries.
   +maxage+ 'seconds';;
-    Once the MRU list has +mindepth+ entries and an additional client
-    address is to be added to the list, if the oldest entry was updated
-    more than +maxage+ seconds ago, that entry is removed and its
-    storage reused. If the oldest entry was updated more recently, the
-    MRU list is grown, subject to +maxdepth+/+maxmem+. The default is 64
-    seconds.
+  +minage+ 'seconds';;
+    If an address is not in the list, there are several possible ways
+    to find a slot for it.
+    1. If the list has fewer than +mindepth+ entries, a slot is
+    allocated from the free list.
+    2. If the age of the oldest slot is less than +maxage+, the oldest
+    slot is recycled.
+    3. If the freelist is not empty, a slot is allocated from the
+    free list.
+    4. If the age of the oldest slot is more than +minage+, the oldest
+    slot is recycled.
+    5. Otherwise, no slot is available.
   +initalloc+ 'count';;         
   +initmem+ 'kilobytes';;
     Initial memory allocation at the time the monitoring facility is
