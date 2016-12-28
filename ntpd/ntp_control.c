@@ -147,24 +147,24 @@ static const struct ctl_proc control_codes[] = {
 #define	CS_MRU_DEEPEST		26
 #define	CS_MRU_MINDEPTH		27
 #define	CS_MRU_MAXAGE		28
-#define	CS_MRU_MAXDEPTH		29
-#define	CS_MRU_MEM		30
-#define	CS_MRU_MAXMEM		31
-#define	CS_SS_UPTIME		32
-#define	CS_SS_RESET		33
-#define	CS_SS_RECEIVED		34
-#define	CS_SS_THISVER		35
-#define	CS_SS_OLDVER		36
-#define	CS_SS_BADFORMAT		37
-#define	CS_SS_BADAUTH		38
-#define	CS_SS_DECLINED		39
-#define	CS_SS_RESTRICTED	40
-#define	CS_SS_LIMITED		41
-#define	CS_SS_KODSENT		42
-#define	CS_SS_PROCESSED		43
-#define	CS_PEERADR		44
-#define	CS_PEERMODE		45
-/* was	CS_BCASTDELAY		46 */
+#define	CS_MRU_MINAGE		29
+#define	CS_MRU_MAXDEPTH		30
+#define	CS_MRU_MEM		31
+#define	CS_MRU_MAXMEM		32
+#define	CS_SS_UPTIME		33
+#define	CS_SS_RESET		34
+#define	CS_SS_RECEIVED		35
+#define	CS_SS_THISVER		36
+#define	CS_SS_OLDVER		37
+#define	CS_SS_BADFORMAT		38
+#define	CS_SS_BADAUTH		39
+#define	CS_SS_DECLINED		40
+#define	CS_SS_RESTRICTED	41
+#define	CS_SS_LIMITED		42
+#define	CS_SS_KODSENT		43
+#define	CS_SS_PROCESSED		44
+#define	CS_PEERADR		45
+#define	CS_PEERMODE		46
 #define	CS_AUTHDELAY		47
 #define	CS_AUTHKEYS		48
 #define	CS_AUTHFREEK		49
@@ -210,8 +210,14 @@ static const struct ctl_proc control_codes[] = {
 #define	CS_TIMER_XMTS		87
 #define	CS_FUZZ			88
 #define	CS_WANDER_THRESH	89
-#define	CS_LEAPSMEARINTV	90
-#define	CS_LEAPSMEAROFFS	91
+#define CS_MRU_EXISTS		90
+#define CS_MRU_NEW		91
+#define CS_MRU_RECYCLEOLD	92
+#define CS_MRU_RECYCLEFULL	93
+#define CS_MRU_NONE		94
+#define CS_MRU_OLDEST_AGE	95
+#define	CS_LEAPSMEARINTV	96
+#define	CS_LEAPSMEAROFFS	97
 #define	CS_MAXCODE		CS_LEAPSMEAROFFS
 
 /*
@@ -321,24 +327,24 @@ static const struct ctl_var sys_var[] = {
 	{ CS_MRU_DEEPEST,	RO, "mru_deepest" },	/* 26 */
 	{ CS_MRU_MINDEPTH,	RO, "mru_mindepth" },	/* 27 */
 	{ CS_MRU_MAXAGE,	RO, "mru_maxage" },	/* 28 */
-	{ CS_MRU_MAXDEPTH,	RO, "mru_maxdepth" },	/* 29 */
-	{ CS_MRU_MEM,		RO, "mru_mem" },	/* 30 */
-	{ CS_MRU_MAXMEM,	RO, "mru_maxmem" },	/* 31 */
-	{ CS_SS_UPTIME,		RO, "ss_uptime" },	/* 32 */
-	{ CS_SS_RESET,		RO, "ss_reset" },	/* 33 */
-	{ CS_SS_RECEIVED,	RO, "ss_received" },	/* 34 */
-	{ CS_SS_THISVER,	RO, "ss_thisver" },	/* 35 */
-	{ CS_SS_OLDVER,		RO, "ss_oldver" },	/* 36 */
-	{ CS_SS_BADFORMAT,	RO, "ss_badformat" },	/* 37 */
-	{ CS_SS_BADAUTH,	RO, "ss_badauth" },	/* 38 */
-	{ CS_SS_DECLINED,	RO, "ss_declined" },	/* 39 */
-	{ CS_SS_RESTRICTED,	RO, "ss_restricted" },	/* 40 */
-	{ CS_SS_LIMITED,	RO, "ss_limited" },	/* 41 */
-	{ CS_SS_KODSENT,	RO, "ss_kodsent" },	/* 42 */
-	{ CS_SS_PROCESSED,	RO, "ss_processed" },	/* 43 */
-	{ CS_PEERADR,		RO, "peeradr" },	/* 44 */
-	{ CS_PEERMODE,		RO, "peermode" },	/* 45 */
-	{ 46,			RO, "was bcastdelay" },	/* 46 */
+	{ CS_MRU_MINAGE,	RO, "mru_minage" },     /* 29 */
+	{ CS_MRU_MAXDEPTH,	RO, "mru_maxdepth" },	/* 30 */
+	{ CS_MRU_MEM,		RO, "mru_mem" },	/* 31 */
+	{ CS_MRU_MAXMEM,	RO, "mru_maxmem" },	/* 32 */
+	{ CS_SS_UPTIME,		RO, "ss_uptime" },	/* 33 */
+	{ CS_SS_RESET,		RO, "ss_reset" },	/* 34 */
+	{ CS_SS_RECEIVED,	RO, "ss_received" },	/* 35 */
+	{ CS_SS_THISVER,	RO, "ss_thisver" },	/* 36 */
+	{ CS_SS_OLDVER,		RO, "ss_oldver" },	/* 37 */
+	{ CS_SS_BADFORMAT,	RO, "ss_badformat" },	/* 38 */
+	{ CS_SS_BADAUTH,	RO, "ss_badauth" },	/* 39 */
+	{ CS_SS_DECLINED,	RO, "ss_declined" },	/* 40 */
+	{ CS_SS_RESTRICTED,	RO, "ss_restricted" },	/* 41 */
+	{ CS_SS_LIMITED,	RO, "ss_limited" },	/* 42 */
+	{ CS_SS_KODSENT,	RO, "ss_kodsent" },	/* 43 */
+	{ CS_SS_PROCESSED,	RO, "ss_processed" },	/* 44 */
+	{ CS_PEERADR,		RO, "peeradr" },	/* 45 */
+	{ CS_PEERMODE,		RO, "peermode" },	/* 46 */
 	{ CS_AUTHDELAY,		RO, "authdelay" },	/* 47 */
 	{ CS_AUTHKEYS,		RO, "authkeys" },	/* 48 */
 	{ CS_AUTHFREEK,		RO, "authfreek" },	/* 49 */
@@ -382,9 +388,15 @@ static const struct ctl_var sys_var[] = {
 	{ CS_TIMER_XMTS,	RO, "timer_xmts" },	/* 87 */
 	{ CS_FUZZ,		RO, "fuzz" },		/* 88 */
 	{ CS_WANDER_THRESH,	RO, "clk_wander_threshold" }, /* 89 */
-	{ CS_LEAPSMEARINTV,	RO, "leapsmearinterval" },    /* 90 */
-	{ CS_LEAPSMEAROFFS,	RO, "leapsmearoffset" },      /* 91 */
-	{ 0,		EOV, "" }		/* 91 */
+	{ CS_MRU_EXISTS,	RO, "mru_exists" },	/* 90 */
+	{ CS_MRU_NEW,		RO, "mru_new" },	/* 91 */
+	{ CS_MRU_RECYCLEOLD,	RO, "mru_recycleold" },	/* 92 */
+	{ CS_MRU_RECYCLEFULL,	RO, "mru_recyclefull" },/* 93 */
+	{ CS_MRU_NONE,		RO, "mru_none" },	/* 94 */
+	{ CS_MRU_OLDEST_AGE,	RO, "mru_oldest_age" },	/* 95 */
+	{ CS_LEAPSMEARINTV,	RO, "leapsmearinterval" },    /* 96 */
+	{ CS_LEAPSMEAROFFS,	RO, "leapsmearoffset" },      /* 97 */
+	{ 0,		EOV, "" }		/* 97 */
 };
 
 static struct ctl_var *ext_sys_var = NULL;
@@ -1652,6 +1664,10 @@ ctl_putsys(
 		ctl_putint(sys_var[varid].text, mru_maxage);
 		break;
 
+	case CS_MRU_MINAGE:
+		ctl_putint(sys_var[varid].text, mru_minage);
+		break;
+
 	case CS_MRU_MAXDEPTH:
 		ctl_putuint(sys_var[varid].text, mru_maxdepth);
 		break;
@@ -1663,6 +1679,33 @@ ctl_putsys(
 			u++;
 		ctl_putuint(sys_var[varid].text, u);
 		break;
+
+	case CS_MRU_EXISTS:
+		ctl_putuint(sys_var[varid].text, mru_exists);
+		break;
+
+	case CS_MRU_NEW:
+		ctl_putuint(sys_var[varid].text, mru_new);
+		break;
+
+	case CS_MRU_RECYCLEOLD:
+		ctl_putuint(sys_var[varid].text, mru_recycleold);
+		break;
+
+	case CS_MRU_RECYCLEFULL:
+		ctl_putuint(sys_var[varid].text, mru_recyclefull);
+		break;
+
+	case CS_MRU_NONE:
+		ctl_putuint(sys_var[varid].text, mru_none);
+		break;
+
+	case CS_MRU_OLDEST_AGE: {
+		l_fp now;
+		get_systime(&now);
+		ctl_putuint(sys_var[varid].text, mon_get_oldest_age(now));
+		break;
+		}
 
 	case CS_SS_UPTIME:
 		ctl_putuint(sys_var[varid].text, current_time);

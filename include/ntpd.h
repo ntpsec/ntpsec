@@ -141,6 +141,7 @@ extern	void	mon_start	(int);
 extern	void	mon_stop	(int);
 extern	u_short	ntp_monitor	(struct recvbuf *, u_short);
 extern	void	mon_clearinterface(endpt *interface);
+extern  int	mon_get_oldest_age(l_fp);
 
 /* ntp_peer.c */
 extern	void	init_peer	(void);
@@ -352,6 +353,11 @@ extern u_int	mru_mindepth;		/* preempt above this */
 extern int	mru_maxage;		/* recycle if older than this */
 extern int	mru_minage;		/* recycle if older than this & full */
 extern u_int	mru_maxdepth; 		/* MRU size hard limit */
+extern u_long	mru_exists;		/* slot already exists */
+extern u_long	mru_new;		/* allocated new slot */
+extern u_long	mru_recycleold;		/* recycle: age > maxage */
+extern u_long	mru_recyclefull;	/* recycle: full and age > minage */
+extern u_long	mru_none;		/* couldn't allocate slot */
 extern int	mon_age;		/* preemption limit */
 
 /* ntp_peer.c */
