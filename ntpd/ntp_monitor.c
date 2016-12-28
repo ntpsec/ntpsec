@@ -81,7 +81,7 @@ uint8_t	ntp_minpoll = NTP_MINPOLL;	/* increment (log 2 s) */
 u_int	mon_enabled;		/* enable switch */
 u_int	mru_mindepth = 600;	/* preempt above this */
 int	mru_maxage = 3600;	/* recycle if older than this */
-int	mru_minage = 64;	/* recycle if older than this & full */
+int	mru_minage = 64;	/* recycle if full and older than this */
 u_int	mru_maxdepth = MRU_MAXDEPTH_DEF;	/* MRU count hard limit */
 int	mon_age = 3000;		/* preemption limit */
 
@@ -89,6 +89,13 @@ static	void		mon_getmoremem(void);
 static	void		remove_from_hash(mon_entry *);
 static	inline void	mon_free_entry(mon_entry *);
 static	inline void	mon_reclaim_entry(mon_entry *);
+
+/* MRU counters */
+u_long mru_exists = 0;		/* slot already exists */
+u_long mru_new = 0;		/* allocate a new slot (2 cases) */
+u_long mru_recycleold = 0;	/* recycle slot: age > mru_maxage */
+u_long mru_recyclefull = 0;	/* recycle slot: full and age > mru_minage */
+u_long mru_none = 0;		/* couldn't get one */
 
 
 /*
@@ -279,7 +286,17 @@ mon_clearinterface(
 	ITER_DLIST_END()
 }
 
-
+int mon_get_oldest_age(l_fp now)
+{
+    mon_entry *	oldest;
+    if (mru_entries == 0)
+	return 0;
+    oldest = TAIL_DLIST(mon_mru_list, mru);
+    L_SUB(&now, &oldest->last);
+    /* add one-half second to round up */
+    L_ADDUF(&now, 0x80000000);
+    return lfpsint(now);
+}
 /*
  * ntp_monitor - record stats about this packet
  *
@@ -334,6 +351,7 @@ ntp_monitor(
 			break;
 
 	if (mon != NULL) {
+		mru_exists++;
 		interval_fp = rbufp->recv_time;
 		L_SUB(&interval_fp, &mon->last);
 		/* add one-half second to round up */
@@ -424,33 +442,27 @@ ntp_monitor(
 	 * initmem", and for "mru incalloc" and "mru incmem".
 	 */
 	if (mru_entries < mru_mindepth) {
+		mru_new++;
 		if (NULL == mon_free)
 			mon_getmoremem();
 		UNLINK_HEAD_SLIST(mon, mon_free, hash_next);
 	} else {
 		oldest = TAIL_DLIST(mon_mru_list, mru);
-		oldest_age = 0;		/* silence uninit warning */
-		if (oldest != NULL) {
-			interval_fp = rbufp->recv_time;
-			L_SUB(&interval_fp, &oldest->last);
-			/* add one-half second to round up */
-			L_ADDUF(&interval_fp, 0x80000000);
-			oldest_age = lfpsint(interval_fp);
-		}
-		/* note -1 is legal for mru_maxage (disables) */
-		if (oldest != NULL && mru_maxage < oldest_age) {
+		oldest_age = mon_get_oldest_age(rbufp->recv_time);
+		if (mru_maxage < oldest_age) {
+			mru_recycleold++;
 			mon_reclaim_entry(oldest);
 			mon = oldest;
-		} else if (mon_free != NULL || mru_alloc <
-			   mru_maxdepth) {
+		} else if (mon_free != NULL || mru_alloc < mru_maxdepth) {
+			mru_new++;
 			if (NULL == mon_free)
 				mon_getmoremem();
 			UNLINK_HEAD_SLIST(mon, mon_free, hash_next);
-		/* preempt from the MRU list if old enough. */
-		} else if (ntp_random() / (2.0 * FRAC) >
-			   (double)oldest_age / mon_age) {
+		} else if (oldest_age < mru_minage) {
+			mru_none++;
 			return ~(RES_LIMITED | RES_KOD) & flags;
 		} else {
+			mru_recyclefull++;
 			/* coverity[var_deref_model] */
 			mon_reclaim_entry(oldest);
 			mon = oldest;

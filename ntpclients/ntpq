@@ -326,6 +326,8 @@ usage: help [ command ]
 
     def __assoc_valid(self, line, required=False):
         "Process a numeric associd or index."
+        # FIXME: This does a useless call to __dogetassoc() when associd == 0
+        # No big deal most of the time.  Just a useless packet exchange.
         if not line:
             if required:
                 self.warn("An associd argument is required.\n")
@@ -447,8 +449,10 @@ usage: timeout [ msec ]
             queried = self.session.readvar(associd, [v[0] for v in variables])
         except ntp.packet.ControlException as e:
             if ntp.control.CERR_UNKNOWNVAR == e.errorcode:
+                self.warn("Unknown variable.  Trying one at a time.\n")
+                varlist = [v[0] for v in variables]
                 items = []
-                for var in [v[0] for v in variables]:
+                for var in varlist:
                     try:
                         queried = self.session.readvar(associd, [var])
                         for (name, value) in queried.items():
@@ -1216,7 +1220,8 @@ usage: config_from_file <configuration filename>
                             val = val[1:-1]
                 cmdvars[var] = val
 
-        self.say("Ctrl-C will stop MRU retrieval and display partial results.\n")
+        if not self.directmode:
+            self.say("Ctrl-C will stop MRU retrieval and display partial results.\n")
         if self.rawmode:
             mruhook = lambda v: self.printvars(variables=v,
                                                dtype=ntp.ntpc.TYPE_SYS,
@@ -1400,14 +1405,21 @@ usage: sysstats
     def do_monstats(self, _line):
         "display monitor (mrulist) counters and limits"
         monstats = (
-            ("mru_enabled",	"enabled:            ", NTP_INT),
-            ("mru_depth",	"addresses:          ", NTP_INT),
-            ("mru_deepest",	"peak addresses:     ", NTP_INT),
-            ("mru_maxdepth",	"maximum addresses:  ", NTP_INT),
-            ("mru_mindepth",	"reclaim above count:", NTP_INT),
-            ("mru_maxage",	"reclaim older than: ", NTP_INT),
-            ("mru_mem",		"kilobytes:          ", NTP_INT),
-            ("mru_maxmem",	"maximum kilobytes:  ", NTP_INT),
+            ("mru_enabled",	"enabled:              ", NTP_INT),
+            ("mru_depth",	"addresses:            ", NTP_INT),
+            ("mru_deepest",	"peak addresses:       ", NTP_INT),
+            ("mru_maxdepth",	"maximum addresses:    ", NTP_INT),
+            ("mru_mindepth",	"reclaim above count:  ", NTP_INT),
+            ("mru_maxage",	"reclaim maxage:       ", NTP_INT),
+            ("mru_minage",	"reclaim minage:       ", NTP_INT),
+            ("mru_mem",		"kilobytes:            ", NTP_INT),
+            ("mru_maxmem",	"maximum kilobytes:    ", NTP_INT),
+            ("mru_exists", 	"alloc: exists:        ", NTP_INT),
+            ("mru_new", 	"alloc: new:           ", NTP_INT),
+            ("mru_recycleold", 	"alloc: recycle old:   ", NTP_INT),
+            ("mru_recyclefull", "alloc: recycle full:  ", NTP_INT),
+            ("mru_none", 	"alloc: none:          ", NTP_INT),
+            ("mru_oldest_age", 	"age of oldest slot:   ", NTP_INT),
         )
         self.collect_display(associd=0, variables=monstats, decodestatus=False)
 
