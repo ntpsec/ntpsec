@@ -446,8 +446,22 @@ usage: timeout [ msec ]
         try:
             queried = self.session.readvar(associd, [v[0] for v in variables])
         except ntp.packet.ControlException as e:
-            self.warn(e.message + "\n")
-            return
+            if ntp.control.CERR_UNKNOWNVAR == e.errorcode:
+                items = []
+                for var in [v[0] for v in variables]:
+                    try:
+                        queried = self.session.readvar(associd, [var])
+                        for (name, value) in queried.items():
+                            items.append((name, value))
+                    except ntp.packet.ControlException as e:
+                        if ntp.control.CERR_UNKNOWNVAR == e.errorcode:
+                            items.append((var, "???"))
+                            continue
+                        raise e
+                queried = ntp.util.OrderedDict(items)
+            else:
+                self.warn(e.message + "\n")
+                return
         except IOError as e:
             print(e.strerror)
             return
