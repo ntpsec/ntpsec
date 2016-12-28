@@ -1245,6 +1245,7 @@ usage: config_from_file <configuration filename>
                 if not span.is_complete():
                     self.say("mrulist retrieval interrupted by operator.\n"
                          "Displaying partial client list.\n")
+                    span.now = time.time()
                 try:
                     delta1 = time.time() - self.session.start
                     self.say(ntp.util.MRUSummary.header + "\n")
