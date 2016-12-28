@@ -78,11 +78,12 @@ uint8_t	ntp_minpoll = NTP_MINPOLL;	/* increment (log 2 s) */
  * Initialization state.  We may be monitoring, we may not.  If
  * we aren't, we may not even have allocated any memory yet.
  */
-u_int	mon_enabled;			/* enable switch */
-u_int	mru_mindepth = 600;		/* preempt above this */
-int	mru_maxage = 64;		/* for entries older than */
+u_int	mon_enabled;		/* enable switch */
+u_int	mru_mindepth = 600;	/* preempt above this */
+int	mru_maxage = 3600;	/* recycle if older than this */
+int	mru_minage = 64;	/* recycle if older than this & full */
 u_int	mru_maxdepth = MRU_MAXDEPTH_DEF;	/* MRU count hard limit */
-int	mon_age = 3000;			/* preemption limit */
+int	mon_age = 3000;		/* preemption limit */
 
 static	void		mon_getmoremem(void);
 static	void		remove_from_hash(mon_entry *);

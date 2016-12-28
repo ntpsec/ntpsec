@@ -136,6 +136,7 @@
 %token	<Integer>	T_Mdnstries
 %token	<Integer>	T_Mem
 %token	<Integer>	T_Memlock
+%token	<Integer>	T_Minage
 %token	<Integer>	T_Minclock
 %token	<Integer>	T_Mindepth
 %token	<Integer>	T_Mindist
@@ -903,6 +904,7 @@ mru_option_keyword
 	|	T_Initalloc
 	|	T_Initmem
 	|	T_Maxage
+	|	T_Minage
 	|	T_Maxdepth
 	|	T_Maxmem
 	|	T_Mindepth
