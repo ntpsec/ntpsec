@@ -22,7 +22,12 @@ K=477C7528	# Release manager's GPG key ID
 $do git tag -u ${K} -m "version ${V}" NTPsec_${UV}
 
 # Commit those modifications to the repository.
-$do git commit -Ssecurity@ntpsec.org -s -m "version ${V}"
+
+if [ -z $do ]; then
+    git commit -Ssecurity@ntpsec.org -s -m "version ${V}"
+else
+    echo git commit -Ssecurity@ntpsec.org -s -m \"version ${V}\"
+fi
 
 # Push the repository upstream.
 $do git push  
@@ -32,13 +37,21 @@ $do git push --tags
 $do gpg -u ${K} -a --output ntpsec-${V}.tar.gz.sum.asc --sign ntpsec-${V}.tar.gz.sum
 
 # Generate sha256sum file for the release tarball.
-$do shasum -a 256 -p ntpsec-${V}.tar.gz >ntpsec-${V}.tar.gz.sum
+if [ -z $do ]; then
+    shasum -a 256 -p ntpsec-${V}.tar.gz >ntpsec-${V}.tar.gz.sum
+else
+    echo shasum -a 256 -p ntpsec-${V}.tar.gz \>ntpsec-${V}.tar.gz.sum
+fi
 
 # GPG sign that sha256sum file.
 $do gpg -u ${K} -a --output ntpsec-${V}.tar.gz.sum.asc ntpsec-${V}.tar.gz.sum
   
 # Copy the release tarball, GPG detached signature of the release
 # tarball, and the signed sha256sum file to the ftp artifact server.
-$do scp ntpsec-${V}.tar* markatwood@service1.ntpsec.org:/usr/local/jail/ftp.ntpsec.org/data/ftp/pub/releases/
+if [ -z $do ]; then
+    scp ntpsec-${V}.tar* markatwood@service1.ntpsec.org:/usr/local/jail/ftp.ntpsec.org/data/ftp/pub/releases/
+else
+    echo scp ntpsec-${V}.tar\* markatwood@service1.ntpsec.org:/usr/local/jail/ftp.ntpsec.org/data/ftp/pub/releases/
+fi
 
 # end
