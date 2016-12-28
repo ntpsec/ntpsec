@@ -158,7 +158,7 @@ class Ntpq(cmd.Cmd):
         self.pktversion = ntp.magic.NTP_OLDVERSION + 1
         self.uservars = ntp.util.OrderedDict()
         self.ai_family = socket.AF_UNSPEC
-        self.termwidth = ntp.util.termsize()[1]
+        self.termwidth = ntp.util.termsize()[0]
 
     def emptyline(self):
         "Called when an empty line is entered in response to the prompt."
