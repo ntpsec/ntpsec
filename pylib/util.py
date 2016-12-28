@@ -487,21 +487,27 @@ class MRUSummary:
         last = ntp.ntpc.lfptofloat(entry.last)
         if self.now:
             lstint = int(self.now - last + 0.5)
+            stats = "%7d" % lstint
         else:
             # direct mode doesn't have a reference time
-            # use seconds this day
+            MJD_1970 = 40587 # MJD for 1 Jan 1970, Unix epoch
             days = int(last) / 86400
             seconds = last - days*86400
             lstint = int(seconds)
+            stats = "%5d %5d" % (days + MJD_1970, lstint)
         first = ntp.ntpc.lfptofloat(entry.first)
         active = float(last - first)
-        favgint = active / entry.ct  # FIXME should be ct-1
-        avgint = int(favgint + 0.5)
-        stats = "%7d" % lstint
-        if 5 < avgint or 1 == entry.ct:
-            stats += " %6d" % avgint
+        if entry.ct == 1:
+            favgint = 0
         else:
+            favgint = active / (entry.ct-1)
+        avgint = int(favgint + 0.5)
+        if 5.0 < favgint or 1 == entry.ct:
+            stats += " %6d" % avgint
+        elif 1.0 <= favgint:
             stats += " %6.2f" % favgint
+        else:
+            stats += " %6.3f" % favgint
         if entry.rs & ntp.magic.RES_KOD:
             rscode = 'K'
         elif entry.rs & ntp.magic.RES_LIMITED:
