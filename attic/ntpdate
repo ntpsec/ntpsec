@@ -32,11 +32,8 @@
 # -t N.N  -t N.N          request timeout
 # -u      default         unpriv port      
 # -v                      verbose (ntpd is always more verbose than ntpdate)
-#         -B secs         Broadcast timeout        
-#         -b addr         Listen on addr for broadcasts    
 #         -c name         Send concurrent requests to resolved IPs for name
 #   
-#         -K file         KoD history filename     
 #         -l file         Log to file
 #         -M msec         Slew adjustments less than msec,
 #                         step adjustments larger than msec.       
