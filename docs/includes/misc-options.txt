@@ -162,15 +162,15 @@ and so on is suppressed.
   +minage+ 'seconds';;
     If an address is not in the list, there are several possible ways
     to find a slot for it.
-    1. If the list has fewer than +mindepth+ entries, a slot is
+    . If the list has fewer than +mindepth+ entries, a slot is
     allocated from the free list.
-    2. If the age of the oldest slot is less than +maxage+, the oldest
+    . If the age of the oldest slot is less than +maxage+, the oldest
     slot is recycled.
-    3. If the freelist is not empty, a slot is allocated from the
+    . If the freelist is not empty, a slot is allocated from the
     free list.
-    4. If the age of the oldest slot is more than +minage+, the oldest
+    . If the age of the oldest slot is more than +minage+, the oldest
     slot is recycled.
-    5. Otherwise, no slot is available.
+    . Otherwise, no slot is available.
   +initalloc+ 'count';;         
   +initmem+ 'kilobytes';;
     Initial memory allocation at the time the monitoring facility is
