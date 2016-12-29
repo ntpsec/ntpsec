@@ -4,15 +4,14 @@
 from __future__ import print_function
 
 import time
-from datetime import datetime
 import sys
 import threading
-from gps import *
+import gps
 
 class GpsPoller(threading.Thread):
     def __init__(self):
         threading.Thread.__init__(self)
-        self.gpsd = gps(mode=WATCH_ENABLE) #starting the stream of info
+        self.gpsd = gps.gps(mode=gps.WATCH_ENABLE) #starting the stream of info
         self.running = True
 
     def run(self):
@@ -27,7 +26,7 @@ class GpsPoller(threading.Thread):
         "Displays the time, device, TDOP, and nSat data collected"
         #print(gpsd.fix.latitude,', ',gpsd.fix.longitude,'  Time: ',gpsd.utc)
         print('%s %s %f %d' % \
-                (isotime(self.get_time()),
+                (gps.isotime(self.get_time()),
                 self.gpsd.device,
                 self.gpsd.tdop,
                 self.gpsd.satellites_used))
@@ -43,7 +42,7 @@ if __name__ == '__main__':
             #It may take a second or two to get good data
 
             try:
-                if 'nan' != gpsp.get_time() and not isnan(gpsp.get_time()):
+                if 'nan' != gpsp.get_time() and not gps.isnan(gpsp.get_time()):
                     if last_time != gpsp.get_time():
                         gpsp.display()
                     last_time = gpsp.get_time()
