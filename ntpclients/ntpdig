@@ -44,8 +44,9 @@ try:
     import ntp.packet
     import ntp.util
     import ntp.magic
-except:
+except ImportError as e:
     sys.stderr.write("ntpdig: can't find Python NTP library -- check PYTHONPATH.\n")
+    sys.stderr.write("%s\n" % e)
     sys.exit(1)
 
 def queryhost(server, concurrent, timeout=5, port=123):
