@@ -1,6 +1,5 @@
 from waflib.Configure import conf
 from waflib.TaskGen import feature, before_method
-from waflib.Task import Task
 import os
 
 @before_method('apply_incpaths')

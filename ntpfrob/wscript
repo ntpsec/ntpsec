@@ -1,5 +1,4 @@
 def build(ctx):
-	srcnode = ctx.srcnode.abspath()
 	bldnode = ctx.bldnode.abspath()
 
 	frob_sources = ['main.c', 'bumpclock.c', 'jitter.c', 'precision.c',

@@ -5,7 +5,7 @@ from waflib.Logs import pprint
 def test_write_log(ctx):
 	file_out = "%s/test.log" % ctx.bldnode.abspath()
 
-	log = lst = getattr(ctx, 'utest_results', [])
+	log = getattr(ctx, 'utest_results', [])
 
 	if not log:
 		return

@@ -1,6 +1,5 @@
 def build(ctx):
 	srcnode = ctx.srcnode.abspath()
-	bldnode = ctx.bldnode.abspath()
 
 	# Unity source
 	unity_source = [
