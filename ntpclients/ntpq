@@ -1263,8 +1263,12 @@ usage: config_from_file <configuration filename>
             self.say("# Processed %d slots in %.3f seconds\n" \
                     % (self.session.slots, delta2) )
             usage = resource.getrusage(resource.RUSAGE_SELF)
+            rusage_denom = 1024.
+            if sys.platform == 'darwin':
+                # OSX uses bytes, while every other platform uses kilobytes
+                rusage_denom = rusage_denom * rusage_denom
             self.say("# Used %d megabytes of memory\n" % \
-                    (usage.ru_maxrss/1000) )
+                    (usage.ru_maxrss/rusage_denom) )
         except ntp.packet.ControlException as e:
             # Giving up after 8 restarts from the beginning.
             # With high-traffic NTP servers, this can occur if the
