@@ -8,7 +8,7 @@ For help on getting that far, see ../INSTALL
 == Path problems with the test tools ==
 
 The very first thing to do, even before you start up ntpd, is to change
-directory to ntpq/ and run ./ntpq there.  If you get a message that says 
+directory to ntpclients/ and run ./ntpq there. If you get a message that says
 
 ---------------------------------------------------------------------
 ntpq: can't find Python NTP library -- check PYTHONPATH.
@@ -20,7 +20,7 @@ Python in order to improve maintainability and decrease attack
 surface.  Most of these tools share a Python library of critical
 functions.  If you can't load that library, you can't test effectively.
 
-The waf build is supposed to create a symbolic link from ntpq/ntp to
+The waf build is supposed to create a symbolic link from ntpclients/ntp to
 pylib in the build directory. This should enable ntpq to "import ntp"
 before you install to rootspace. If that link is not created or
 doesn't point to pylib/ under your build directory, report
