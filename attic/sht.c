@@ -14,6 +14,7 @@
 #include <assert.h>
 
 #include "ntp_stdlib.h"
+#include "ntp_random.h"
 
 char	*progname;
 
@@ -89,8 +90,6 @@ main (
 		exit (0);
 	}
 
-	srand(time(NULL));
-		
 	unit = strtoul(argv[1], &argp, 10);
 	if (argp == argv[1])
 		unit = 2;
@@ -146,7 +145,7 @@ again:
 
 	case 'w': {
 		/* To show some life action, we read the system
-		 * clock and use a bit of fuzz from 'random()' to get a
+		 * clock and use a bit of fuzz from 'ntp_random()' to get a
 		 * bit of wobbling into the values (so we can observe a
 		 * certain jitter!)
 		 */
@@ -164,11 +163,11 @@ again:
 		else
 		{
 			time(&rcv_sec);
-			rcv_frc = (uint)random() % 1000000000u;
+			rcv_frc = (uint)ntp_random() % 1000000000u;
 		}
 		/* add a wobble of ~3.5msec to the clock time */
 		clk_sec = rcv_sec;
-		clk_frc = rcv_frc + (uint)(random()%7094713 - 3547356);
+		clk_frc = rcv_frc + (uint)(ntp_random()%7094713 - 3547356);
 		/* normalise result -- the SHM driver is picky! */
 		while ((int)clk_frc < 0) {
 			clk_frc += 1000000000;
