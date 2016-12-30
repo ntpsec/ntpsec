@@ -605,8 +605,8 @@ EOF
 # For Python output
 pyOutput() {
 	case "${VCS_WC_MODIFIED}" in
-		0) VCS_WC_MODIFIED="False" ;;
-		1) VCS_WC_MODIFIED="True" ;;
+		0) PY_VCS_WC_MODIFIED="False" ;;
+		1) PY_VCS_WC_MODIFIED="True" ;;
 	esac
 	tee << EOF
 # ${GENERATED_HEADER}
@@ -625,7 +625,7 @@ VCS_ACTION_STAMP = "${VCS_ACTION_STAMP}"
 VCS_FULL_HASH = "${VCS_FULL_HASH}"
 VCS_SHORT_HASH = "${VCS_SHORT_HASH}"
 
-VCS_WC_MODIFIED = ${VCS_WC_MODIFIED}
+VCS_WC_MODIFIED = ${PY_VCS_WC_MODIFIED}
 
 # end
 EOF
