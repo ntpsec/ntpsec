@@ -382,7 +382,7 @@ def cmd_configure(ctx, config):
                 ctx.define("HAVE_PPSAPI", 1, comment="Enable the PPS API")
 
         # Check for Solaris capabilities
-        if ctx.get_define("HAVE_PRIV_H") and sys.platform == "Solaris":
+        if ctx.get_define("HAVE_PRIV_H") and sys.platform.startswith("sunos"):
                 ctx.define("HAVE_SOLARIS_PRIVS", 1, comment="Enable Solaris Privileges (Solaris only)")
 
         from wafhelpers.check_sockaddr import check_sockaddr
