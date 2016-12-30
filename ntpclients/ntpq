@@ -25,13 +25,6 @@ except ImportError as e:
     sys.stderr.write("%s\n" % e)
     sys.exit(1)
 
-# This import only works on Unixes.  The intention is to enable
-# Ctrl-P, Ctrl-N, and friends in Cmd.
-try:
-    import readline
-except ImportError:
-    pass
-
 version = ntp.util.stdversion()
 
 # General notes on Python 2/3 compatibility:
