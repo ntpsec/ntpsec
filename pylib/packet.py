@@ -219,6 +219,7 @@ if str is bytes:  # Python 2
     polybytes = bytes
     polyord = ord
     polychr = str
+    input = raw_input
 
     def string_escape(s):
         return s.decode('string_escape')
