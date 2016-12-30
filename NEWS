@@ -7,7 +7,7 @@ Much of the traditional function of a news file is now better addressed
 by browsing the comments in the revision history.  This file will focus
 on user-visible changes.
 
-== Repository head ==
+== 2016-12-30: 0.9.6 ==
 
 ntpkeygen has been moved from C to Python.  This is not a functional
 change, just another move to improve maintainability and reduce attack
