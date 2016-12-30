@@ -151,7 +151,12 @@ additions. There is currently no support for using Xcode's builder.
 Details on how to qualify NTPsec if you've never used it before
 are at devel/testing.txt.
 
-== Bugs ==
+== Build Bugs ==
+
+You may find that after a fresh clone and first ./waf build you get a
+Python import error when trying to run ntpq or other Python tools.
+If this happens, just do ./waf build again.  This is a known bug
+which will be fixed in a future release.
 
 The configuration system occasionally acts up during builds on new
 platforms.  If you see the message "Compilation check failed but
