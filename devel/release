@@ -34,7 +34,7 @@ $do git push
 $do git push --tags
 
 # Generate GPG detached signature of the release tarball.
-$do gpg -u ${K} -a --output ntpsec-${V}.tar.gz.sum.asc --detach-sign --armor ntpsec-${V}.tar.gz.sum
+$do gpg -u ${K} -a --output ntpsec-${V}.tar.gz.asc --detach-sign ntpsec-${V}.tar.gz
 
 # Generate sha256sum file for the release tarball.
 if [ -z $do ]; then
@@ -44,7 +44,7 @@ else
 fi
 
 # GPG sign that sha256sum file.
-$do gpg -u ${K} -a --output ntpsec-${V}.tar.gz.sum.asc ntpsec-${V}.tar.gz.sum
+$do gpg -u ${K} -a --output ntpsec-${V}.tar.gz.sum.asc --detach-sign ntpsec-${V}.tar.gz.sum
   
 # Copy the release tarball, GPG detached signature of the release
 # tarball, and the signed sha256sum file to the ftp artifact server.
