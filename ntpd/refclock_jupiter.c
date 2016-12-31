@@ -714,7 +714,7 @@ jupiter_control(
 	pp = peer->procptr;
 	instance = pp->unitptr;
 
-	DTOLFP(pp->fudgetime2, &instance->limit);
+	instance->limit = dtolfp(pp->fudgetime2);
 	/* Force positive value. */
 	if (L_ISNEG(&instance->limit))
 		L_NEG(&instance->limit);

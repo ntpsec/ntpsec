@@ -772,13 +772,13 @@ gpsd_control(
 	UNUSED_ARG(out_st);
 
 	if (peer == up->pps_peer) {
-		DTOLFP(pp->fudgetime1, &up->pps_fudge2);
+		up->pps_fudge2 = dtolfp(pp->fudgetime1);
 		if ( ! (pp->sloppyclockflag & CLK_FLAG1))
 			peer->flags &= ~FLAG_PPS;
 	} else {
 		/* save preprocessed fudge times */
-		DTOLFP(pp->fudgetime1, &up->pps_fudge);
-		DTOLFP(pp->fudgetime2, &up->ibt_fudge);
+		up->pps_fudge = dtolfp(pp->fudgetime1);
+		up->ibt_fudge = dtolfp(pp->fudgetime2);
 
 		if (MODE_OP_MODE(up->mode ^ peer->ttl)) {
 			leave_opmode(peer, up->mode);

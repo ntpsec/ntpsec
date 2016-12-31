@@ -131,20 +131,6 @@ static int l_fp_signum(const l_fp first)
 	return (lfpuint(first) || lfpfrac(first));
 }
 
-static double l_fp_convert_to_double(const l_fp first)
-{
-	double res;
-	LFPTOD(&first, res);
-	return res;
-}
-
-static l_fp l_fp_init_from_double( double rhs)
-{
-	l_fp temp;
-	DTOLFP(rhs, &temp);
-	return temp;
-}
-
 static void l_fp_swap(l_fp * first, l_fp *second)
 {
 	l_fp temp = *second;
@@ -372,11 +358,11 @@ TEST(lfpfunc, FDF_RoundTrip) {
 
 	for (idx = 0; idx < addsub_cnt; ++idx) {
 		l_fp op1 = l_fp_init(addsub_tab[idx][0].h, addsub_tab[idx][0].l);
-		double op2 = l_fp_convert_to_double(op1);
-		l_fp op3 = l_fp_init_from_double(op2); 
+		double op2 = lfptod(op1);
+		l_fp op3 = dtolfp(op2);
 
 		l_fp temp = l_fp_subtract(op1, op3);
-		double d = l_fp_convert_to_double(temp);
+		double d = lfptod(temp);
 		TEST_ASSERT_DOUBLE_WITHIN(eps(op2), 0.0, fabs(d));
 	}
 

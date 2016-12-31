@@ -188,72 +188,79 @@ typedef uint32_t u_fp;
 
 #include <math.h>	/* ldexp() */
 
-#define M_DTOLFP(d, r_ui, r_uf)		/* double to l_fp */	\
-	do {							\
-		double	d_tmp;					\
-		uint64_t	q_tmp;					\
-		int	M_isneg;					\
-								\
-		d_tmp = (d);					\
-		M_isneg = (d_tmp < 0.);				\
-		if (M_isneg) {					\
-			d_tmp = -d_tmp;				\
-		}						\
-		q_tmp = (uint64_t)ldexp(d_tmp, 32);		\
-		if (M_isneg) {					\
-			q_tmp = ~q_tmp + 1;			\
-		}						\
-		(r_uf) = (uint32_t)q_tmp;			\
-		(r_ui) = (uint32_t)(q_tmp >> 32);		\
-	} while (false)
+static inline l_fp dtolfp(double d)
+/* double to l_fp */
+{
+	double	d_tmp;
+	uint64_t	q_tmp;
+	int	M_isneg;
+	l_fp	r;
 
-#define M_LFPTOD(r_ui, r_uf, d) 	/* l_fp to double */	\
-	do {							\
-		double	d_tmp;					\
-		uint64_t	q_tmp;					\
-		int	M_isneg;				\
-								\
-		q_tmp = ((uint64_t)(r_ui) << 32) + (r_uf);	\
-		M_isneg = M_ISNEG(r_ui);			\
-		if (M_isneg) {					\
-			q_tmp = ~q_tmp + 1;			\
-		}						\
-		d_tmp = ldexp((double)q_tmp, -32);		\
-		if (M_isneg) {					\
-			d_tmp = -d_tmp;				\
-		}						\
-		(d) = d_tmp;					\
-	} while (false)
+	d_tmp = (d);
+	M_isneg = (d_tmp < 0.);
+	if (M_isneg) {
+		d_tmp = -d_tmp;
+	}
+	q_tmp = (uint64_t)ldexp(d_tmp, 32);
+	if (M_isneg) {
+		q_tmp = ~q_tmp + 1;
+	}
+	setlfpfrac(r, (uint32_t)q_tmp);
+	setlfpuint(r, (uint32_t)(q_tmp >> 32));
+	return r;
+}
+
+static inline double lfptod(l_fp r)
+/* l_fp to double */
+{
+	double	d;
+	uint64_t	q_tmp;
+	int	M_isneg;
+
+	q_tmp = ((uint64_t)lfpuint(r) << 32) + lfpfrac(r);
+	M_isneg = M_ISNEG(lfpuint(r));
+	if (M_isneg) {
+		q_tmp = ~q_tmp + 1;
+	}
+	d = ldexp((double)q_tmp, -32);
+	if (M_isneg) {
+		d = -d;
+	}
+	return d;
+}
 
 #else /* use only 32 bit unsigned values */
 
-#define M_DTOLFP(d, r_ui, r_uf) 		/* double to l_fp */ \
-	do { \
-		double d_tmp; \
-		if ((d_tmp = (d)) < 0) { \
-			(r_ui) = (uint32_t)(-d_tmp); \
-			(r_uf) = (uint32_t)(-(d_tmp + (double)(r_ui)) * FRAC); \
-			M_NEG((r_ui), (r_uf)); \
-		} else { \
-			(r_ui) = (uint32_t)d_tmp; \
-			(r_uf) = (uint32_t)((d_tmp - (double)(r_ui)) * FRAC); \
-		} \
-	} while (0)
-#define M_LFPTOD(r_ui, r_uf, d) 		/* l_fp to double */ \
-	do { \
-		uint32_t l_thi, l_tlo; \
-		l_thi = (r_ui); l_tlo = (r_uf); \
-		if (M_ISNEG(l_thi)) { \
-			M_NEG(l_thi, l_tlo); \
-			(d) = -((double)l_thi + (double)l_tlo / FRAC); \
-		} else { \
-			(d) = (double)l_thi + (double)l_tlo / FRAC; \
-		} \
-	} while (0)
-#endif
+static inline l_fp dtolfp(double d)
+/* double to l_fp */
+{
+	double d_tmp;
+	l_fp r;
+	if ((d_tmp = (d)) < 0) {
+		setlfpuint(r, (uint32_t)(-d_tmp));
+		setlfpfrac(r, (uint32_t)(-(d_tmp + (double)lfpuint(r)) * FRAC));
+		M_NEG((r_ui), (r_uf));
+	} else { \
+		setlfpuint(r, (uint32_t)d_tmp);
+		setlfpfrac(r, (uint32_t)((d_tmp - (double)lfpuint(r)) * FRAC));
+	}
+	return r;
+}
 
-#define DTOLFP(d, v) 	M_DTOLFP((d), lfpuint(*v), lfpfrac(*v))
-#define LFPTOD(v, d) 	M_LFPTOD(lfpuint(*v), lfpfrac(*v), (d))
+static inline double lfptod(l_fp r)
+/* l_fp to double */
+{
+	uint32_t l_thi, l_tlo;
+	l_thi = lfpuint(r); l_tlo = lfpfrac(r);
+	if (M_ISNEG(l_thi)) {
+		M_NEG(l_thi, l_tlo);
+		(d) = -((double)l_thi + (double)l_tlo / FRAC);
+	} else {
+		(d) = (double)l_thi + (double)l_tlo / FRAC;
+	}
+	return d;
+}
+#endif
 
 /*
  * Prototypes

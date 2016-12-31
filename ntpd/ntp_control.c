@@ -1757,7 +1757,7 @@ ctl_putsys(
 		break;
 
 	case CS_AUTHDELAY:
-		LFPTOD(&sys_authdelay, dtemp);
+		dtemp = lfptod(sys_authdelay);
 		ctl_putdbl(sys_var[varid].text, dtemp * 1e3);
 		break;
 

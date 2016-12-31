@@ -84,7 +84,7 @@ void jitter(const iomode mode)
 	 */
 	for (i = 0; i < NBUF; i ++) {
 		get_clocktime(&tr);
-		LFPTOD(&tr, gtod[i]);
+		gtod[i] = lfptod(tr);
 	}
 
 	/*
