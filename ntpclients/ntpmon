@@ -103,7 +103,11 @@ class OutputContext:
         "Begin critical region."
         global stdscr
         stdscr = curses.initscr()
-        curses.curs_set(0)
+        try:
+            curses.curs_set(0)
+        except curses.error:
+            # VT100 terminal emulations can barf here.
+            pass
         curses.cbreak()
         curses.noecho()
         stdscr.keypad(True)
