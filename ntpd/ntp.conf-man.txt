@@ -103,7 +103,7 @@ the list. The list is searched in order with the last match found
 defining the restriction flags associated with the entry. Additional
 information and examples can be found in the "Notes on Configuring NTP
 and Setting up a NTP Subnet" page (available as part of the HTML
-documentation provided in `/usr/share/doc/ntp`_).
+documentation).
 
 The restriction facility was implemented in conformance with the access
 policies for the original NSFnet backbone time servers. Later the
@@ -160,8 +160,7 @@ include::../docs/includes/access-commands.txt[]
 === Manycasting ===
 
 For a detailed description of manycast operation, see the "Server
-Discovery" page (available as part of the HTML documentation provided
-in `/usr/share/doc/ntp`).
+Discovery" page (available as part of the HTML documentation).
 
 === Manycast Options ===
 
