@@ -48,7 +48,7 @@ def fheader(
 	owner	# owner name 
         ):
     try:
-	filename = "ntpkey_%s_%s.%u" % (file,  owner, int(time.time())) 
+        filename = "ntpkey_%s_%s.%u" % (file,  owner, int(time.time())) 
         orig_umask = os.umask(stat.S_IWGRP | stat.S_IRWXO)
         wp = open(filename, "w")
         os.umask(orig_umask)
@@ -56,12 +56,12 @@ def fheader(
         linkname = "ntp.keys"
         if os.path.exists(linkname):
             os.remove(linkname)		# The symlink() line below matters 
-	os.symlink(filename, linkname)
+        os.symlink(filename, linkname)
 
-	sys.stderr.write("Generating new %s file and link\n" % ulink)
-	sys.stderr.write("%s->%s\n" % (linkname, filename))
-	wp.write("# %s\n# %s\n" % (filename, time.ctime()))
-	return wp
+        sys.stderr.write("Generating new %s file and link\n" % ulink)
+        sys.stderr.write("%s->%s\n" % (linkname, filename))
+        wp.write("# %s\n# %s\n" % (filename, time.ctime()))
+        return wp
     except IOError:
         sys.stderr.write("Key file creation or link failed.\n")
         raise SystemExit(1)
