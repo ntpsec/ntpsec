@@ -721,7 +721,7 @@ refclock_ppsrelate(
 	pp_stamp = tspec_stamp_to_lfp(timeout);
 	pp_delta = *rd_stamp;
 	L_SUB(&pp_delta, &pp_stamp);
-	LFPTOD(&pp_delta, delta);
+	delta = lfptod(pp_delta);
 	delta += pp_fudge - *rd_fudge;
 	if (fabs(delta) > 1.5)
 		return PPS_RELATE_NONE; /* PPS timeout control */
@@ -744,7 +744,7 @@ refclock_ppsrelate(
 	/* check against reftime if PPS PLL can be used */
 	pp_delta = *reftime;
 	L_SUB(&pp_delta, &pp_stamp);
-	LFPTOD(&pp_delta, delta);
+	delta = lfptod(pp_delta);
 	delta += pp_fudge;
 	if (fabs(delta) > 0.45)
 		return PPS_RELATE_EDGE; /* cannot PLL with PPS code */

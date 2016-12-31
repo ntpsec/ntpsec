@@ -2670,7 +2670,7 @@ measure_tick_fuzz(void)
 	max_repeats = 0;
 	repeats = 0;
 	changes = 0;
-	DTOLFP(MINSTEP, &minstep);
+	minstep = dtolfp(MINSTEP);
 	get_systime(&last);
 	for (i = 0; i < MAXLOOPS && changes < MINCHANGES; i++) {
 		get_systime(&val);
@@ -2681,7 +2681,7 @@ measure_tick_fuzz(void)
 			max_repeats = max(repeats, max_repeats);
 			repeats = 0;
 			changes++;
-			LFPTOD(&ldiff, diff);
+			diff = lfptod(ldiff);
 			tick = min(diff, tick);
 		} else {
 			repeats++;

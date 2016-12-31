@@ -190,7 +190,7 @@ fetch_packetstamp(
 #endif  /* USE_SCM_TIMESTAMP */
 			}
 			fuzz = ntp_random() * 2. / FRAC * sys_fuzz;
-			DTOLFP(fuzz, &lfpfuzz);
+			lfpfuzz = dtolfp(fuzz);
 			L_ADD(&nts, &lfpfuzz);
 #ifdef ENABLE_DEBUG_TIMING
 			dts = ts;

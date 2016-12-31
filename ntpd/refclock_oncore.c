@@ -1765,7 +1765,7 @@ oncore_get_timestamp(
 
 	ts_tmp = ts;
 	setlfpuint(ts_tmp, 0);	/* zero integer part */
-	LFPTOD(&ts_tmp, dmy);	/* convert fractional part to a double */
+	dmy = lfptod(ts_tmp);	/* convert fractional part to a double */
 	j = 1.0e9*dmy;		/* then to integer ns */
 
 	Rsm = 0;
