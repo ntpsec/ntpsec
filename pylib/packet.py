@@ -131,8 +131,8 @@ The RFC 5905 diagram is slightly out of date in that the digest header assumes
 a 128-bit (16-octet) MD5 hash, but it is also possible for the field to be a
 160-bit (20-octet) SHA-1 hash.
 
-An extension field consists of a 32-bit network-order type field
-length, followed by a 32-bit network-order payload length in octets,
+An extension field consists of a 16-bit network-order type field
+length, followed by a 16-bit network-order payload length in octets,
 followed by the payload (which must be padded to a 4-octet boundary).
 
        0                   1                   2                   3
