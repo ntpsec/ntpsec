@@ -15,7 +15,7 @@
   are used as described above. Unless the complete path and name of the
   file are specified, the location of a file is relative to the keys
   directory specified in the +keysdir+ command or default
-  +/usr/local/etc+. Following are the subcommands:
+  +{prefixdir}/etc+. Following are the subcommands:
 
   +cert+ _file_;;
     Specifies the location of the required host public certificate file.
@@ -64,7 +64,7 @@
 
 +keysdir+ _path_::
   This command specifies the default directory path for cryptographic
-  keys, parameters and certificates. The default is +/usr/local/etc/+.
+  keys, parameters and certificates. The default is +{prefixdir}/etc/+.
 
 [[trustedkey]]
 +trustedkey+ _key..._ ::
