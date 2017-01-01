@@ -182,6 +182,10 @@ By default, `waf install' will install the package's files in
 installation prefix other than `/usr/local' by giving waf the
 option `--prefix=PATH'.
 
+If you do so, please also modify the prefixdir variable in
+asciidoc.conf , so that the documentation is built pointing
+to your new locations.
+
 You should read the section "Path problems with the test tools" in
 devel/testing.txt before setting a non-default prefix.
 
