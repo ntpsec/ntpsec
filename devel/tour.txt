@@ -330,7 +330,7 @@ as cAres. One attempt at this has been made, but abandoned because
 the async-worker interface to the rest of the code is pretty gnarly.
 
 The DNS lookups during initialization - of hostnames specified on the
-coomand line of ntp.conf - could be done synchronously.  But there are
+command line of ntp.conf - could be done synchronously.  But there are
 two cases we know of where ntpd has to do a DNS lookup after its
 main loop gets started.
 
