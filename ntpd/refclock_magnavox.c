@@ -38,11 +38,6 @@
  */
 
 /*
- * Check this every time you edit the code!
- */
-#define YEAR_LAST_MODIFIED 2000
-
-/*
  * GPS Definitions
  */
 #define	DEVICE		"/dev/gps%d"	/* device name and unit */
@@ -130,6 +125,7 @@ struct mx4200unit {
 };
 
 static char pmvxg[] = "PMVXG";
+static int year_last_modified;
 
 /*
  * Function prototypes
@@ -217,6 +213,14 @@ mx4200_start(
 	pp->clockdesc = DESCRIPTION;
 	memcpy((char *)&pp->refid, REFID, REFIDLEN);
 	peer->sstclktype = CTL_SST_TS_LF;
+	/* 
+	 * __DATE__ is in a format like "Jan 2 2017" or possibly "???
+	 * ?? ????".  Thus it is guaranteed that there will be a
+	 * rightmost space just before the date.  It's OK if atoi()
+	 * barfs on ???? because this is only used in a sanity check
+	 * where that will fail positive.
+	 */
+	year_last_modified = atoi(strrchr(__DATE__, ' ') + 1);
 
 	/* Ensure the receiver is properly configured */
 	return mx4200_config(peer);
@@ -992,7 +996,7 @@ mx4200_parse_t(
 	 * (Certainly can't be any year before this code was last altered!)
 	 */
 	if (day_of_month > 31 || month > 12 ||
-	    day_of_month <  1 || month <  1 || year < YEAR_LAST_MODIFIED) {
+	    day_of_month <  1 || month <  1 || year < year_last_modified) {
 		mx4200_debug(peer,
 		    "mx4200_parse_t: bad date (%4d-%02d-%02d)\n",
 		    year, month, day_of_month);
