@@ -2136,9 +2136,9 @@ peer_xmit(
 	xpkt.refid = sys_refid;
 	xpkt.rootdelay = HTONS_FP(DTOFP(sys_rootdelay));
 	xpkt.rootdisp =	 HTONS_FP(DTOUFP(sys_rootdisp));
-	HTONL_FP(&sys_reftime, &xpkt.reftime);
-	HTONL_FP(&peer->rec, &xpkt.org);
-	HTONL_FP(&peer->dst, &xpkt.rec);
+	xpkt.reftime = htonl_fp(sys_reftime);
+	xpkt.org = htonl_fp(peer->rec);
+	xpkt.rec = htonl_fp(peer->dst);
 
 	/*
 	 * If the received packet contains a MAC, the transmitted packet
@@ -2153,7 +2153,7 @@ peer_xmit(
 		 */
 		get_systime(&xmt_tx);
 		peer->org = xmt_tx;
-		HTONL_FP(&xmt_tx, &xpkt.xmt);
+		xpkt.xmt = htonl_fp(xmt_tx);
 		peer->t21_bytes = sendlen;
 		sendpkt(&peer->srcadr, peer->dstadr, sys_ttl[peer->ttl],
 		    &xpkt, sendlen);
@@ -2181,7 +2181,7 @@ peer_xmit(
 	 */
 	get_systime(&xmt_tx);
 	peer->org = xmt_tx;
-	HTONL_FP(&xmt_tx, &xpkt.xmt);
+	xpkt.xmt = htonl_fp(xmt_tx);
 	xkeyid = peer->keyid;
 	authlen = authencrypt(xkeyid, (uint32_t *)&xpkt, sendlen);
 	if (authlen == 0) {
@@ -2308,9 +2308,9 @@ fast_xmit(
 				lfptoa(&leap_smear.offset, 8)
 				));
 		}
-		HTONL_FP(&this_ref_time, &xpkt.reftime);
+		xpkt.reftime = htonl_fp(this_ref_time);
 #else
-		HTONL_FP(&sys_reftime, &xpkt.reftime);
+		xpkt.reftime = htonl_fp(sys_reftime);
 #endif
 
 		xpkt.org = rpkt->xmt;
@@ -2319,9 +2319,9 @@ fast_xmit(
 		this_recv_time = rbufp->recv_time;
 		if (leap_smear.in_progress)
 			leap_smear_add_offs(&this_recv_time, NULL);
-		HTONL_FP(&this_recv_time, &xpkt.rec);
+		xpkt.rec = htonl_fp(this_recv_time);
 #else
-		HTONL_FP(&rbufp->recv_time, &xpkt.rec);
+		xpkt.rec = htonl_fp(rbufp->recv_time);
 #endif
 
 		get_systime(&xmt_tx);
@@ -2329,7 +2329,7 @@ fast_xmit(
 		if (leap_smear.in_progress)
 			leap_smear_add_offs(&xmt_tx, &this_recv_time);
 #endif
-		HTONL_FP(&xmt_tx, &xpkt.xmt);
+		xpkt.xmt = htonl_fp(xmt_tx);
 	}
 
 #ifdef ENABLE_MSSNTP
@@ -2448,10 +2448,10 @@ pool_xmit(
 	xpkt.refid = sys_refid;
 	xpkt.rootdelay = HTONS_FP(DTOFP(sys_rootdelay));
 	xpkt.rootdisp = HTONS_FP(DTOUFP(sys_rootdisp));
-	HTONL_FP(&sys_reftime, &xpkt.reftime);
+	xpkt.reftime = htonl_fp(sys_reftime);
 	get_systime(&xmt_tx);
 	pool->org = xmt_tx;
-	HTONL_FP(&xmt_tx, &xpkt.xmt);
+	xpkt.xmt = htonl_fp(xmt_tx);
 	sendpkt(rmtadr, lcladr, sys_ttl[pool->ttl], &xpkt, LEN_PKT_NOMAC);
 	pool->sent++;
 	pool->throttle += (1 << pool->minpoll) - 2;
