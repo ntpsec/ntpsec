@@ -67,7 +67,7 @@ configures the build process accordingly. Use the +./waf build+ command to
 compile and link the distribution and the +./waf install+ command to install
 the executables by default in +/usr/local/bin+.
 
-NOTE: Distribution packagers: You will modify the prefix parameter to
+NOTE: Distribution packagers: If you modify the prefix parameter to
 +waf+ to install the executables, please also modify the appropriate
 defines in +asciidoc.conf+ to specify document installation.
 
