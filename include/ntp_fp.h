@@ -5,6 +5,8 @@
 #ifndef GUARD_NTP_FP_H
 #define GUARD_NTP_FP_H
 
+#include <arpa/inet.h>
+
 #include "ntp_types.h"
 
 /*
@@ -96,14 +98,12 @@ typedef uint32_t u_fp;
 #define	NTOHS_FP(x)	(ntohl(x))
 
 static inline l_fp htonl_fp(l_fp lfp) {
-    extern uint32_t htonl(uint32_t hostlong);
     setlfpuint(lfp, htonl(lfpuint(lfp)));
     setlfpfrac(lfp, htonl(lfpfrac(lfp)));
     return lfp;
 }
 
 static inline l_fp ntohl_fp(l_fp lfp) {
-    extern uint32_t ntohl(uint32_t hostlong);
     setlfpuint(lfp, ntohl(lfpuint(lfp)));
     setlfpfrac(lfp, ntohl(lfpfrac(lfp)));
     return lfp;
