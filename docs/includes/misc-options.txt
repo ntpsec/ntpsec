@@ -88,7 +88,7 @@ and that file system links, symbolic or otherwise, should be avoided.
   This command loads the NIST leapseconds file and initializes the
   leapsecond values for the next leapsecond time, expiration time and
   TAI offset. The file can be obtained directly from NIST national time
-  servers using +ftp+ as the ASCII file +pub/leap-seconds+.
+  servers using +ftp+ as the ASCII file +pub/leap-seconds.list+.
 +
 The _leapfile_ is scanned when +ntpd+ processes the +leapfile+
 directive or when +ntpd+ detects that _leapfile_ has changed. +ntpd+
