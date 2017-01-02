@@ -20,6 +20,7 @@
 #include "ntp_refclock.h"
 #include "ntp_stdlib.h"
 #include "ntp_calendar.h"
+#include "timespecops.h"
 
 #include <stdio.h>
 #include <ctype.h>
@@ -1519,11 +1520,7 @@ mx4200_pps(
 	/*
 	 * Return the timestamp in pp->lastrec
 	 */
-
-	setlfpuint(pp->lastrec, up->pps_i.assert_timestamp.tv_sec +
-		   (uint32_t) JAN_1970);
-	setlfpfrac(pp->lastrec, ((double)(up->pps_i.assert_timestamp.tv_nsec) *
-				 4.2949672960) + 0.5);
+	pp->lastrec = tspec_stamp_to_lfp(up->pps_i.assert_timestamp);
 
 	return false;
 }
