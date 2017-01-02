@@ -95,23 +95,19 @@ typedef uint32_t u_fp;
 #define	HTONS_FP(x)	(htonl(x))
 #define	NTOHS_FP(x)	(ntohl(x))
 
-#define	NTOHL_MFP(ni, nf, hi, hf)				\
-	do {							\
-		(hi) = ntohl(ni);				\
-		(hf) = ntohl(nf);				\
-	} while (false)
+static inline l_fp htonl_fp(l_fp lfp) {
+    extern uint32_t htonl(uint32_t hostlong);
+    setlfpuint(lfp, htonl(lfpuint(lfp)));
+    setlfpfrac(lfp, htonl(lfpfrac(lfp)));
+    return lfp;
+}
 
-#define	HTONL_MFP(hi, hf, ni, nf)				\
-	do {							\
-		(ni) = htonl(hi);				\
-		(nf) = htonl(hf);				\
-	} while (false)
-
-#define HTONL_FP(h, n)						\
-	HTONL_MFP(lfpuint(*h), lfpfrac(*h), lfpuint(*n), lfpfrac(*n))
-
-#define NTOHL_FP(n, h)						\
-	NTOHL_MFP(lfpuint(*n), lfpfrac(*n), lfpuint(*h), lfpfrac(*h))
+static inline l_fp ntohl_fp(l_fp lfp) {
+    extern uint32_t ntohl(uint32_t hostlong);
+    setlfpuint(lfp, ntohl(lfpuint(lfp)));
+    setlfpfrac(lfp, ntohl(lfpfrac(lfp)));
+    return lfp;
+}
 
 /* Convert unsigned ts fraction to net order ts */
 #define	HTONL_UF(uf, nts)					\
